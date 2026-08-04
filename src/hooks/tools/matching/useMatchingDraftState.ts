@@ -1,10 +1,10 @@
 import { useCallback, useState } from "react";
-import type { LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
+import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
 import type {
   MatchingAnswer,
   MatchingCategoryId,
-} from "../../../domain/questions";
-import type { MatchingFeature } from "../../../services/geo/matching";
+} from "@/domain/questions";
+import type { MatchingFeature } from "@/services/geo/matching";
 
 export function useMatchingDraftState() {
   const [matchingSeekerPoint, setMatchingSeekerPoint] =

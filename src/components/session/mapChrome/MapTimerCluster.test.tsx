@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import type { PendingQuestionRecord } from "../../../domain/session/activity/sessionChat";
-import { THERMOMETER_WALK_MAX_DURATION_MS } from "../../../domain/questions";
+import type { PendingQuestionRecord } from "@/domain/session/activity/sessionChat";
+import { THERMOMETER_WALK_MAX_DURATION_MS } from "@/domain/questions";
 import { MapTimerCluster } from "./MapTimerCluster";
 
 vi.mock("../../../state/mapStore", () => ({

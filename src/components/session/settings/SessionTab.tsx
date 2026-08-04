@@ -1,10 +1,10 @@
 import { useState } from "react";
-import type { NotificationPreferences } from "../../../domain/device/chrome/notifications";
+import type { NotificationPreferences } from "@/domain/device/chrome/notifications";
 import { ShareCode } from "../identity/ShareCode";
 import { SettingsToggleRow } from "../settings/SettingsToggleRow";
 import { NotificationPreferencesSection } from "./NotificationPreferencesSection";
 import { RolePasscodeSettings } from "./RolePasscodeSettings";
-import type { SessionRecord } from "../../../domain/map/annotations";
+import type { SessionRecord } from "@/domain/map/annotations";
 
 export interface MapSettingsSessionTabProps {
   sessionCode: string;

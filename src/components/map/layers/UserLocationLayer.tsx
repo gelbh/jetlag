@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import turfCircle from "@turf/circle";
-import type { GeolocationReading } from "../../../services/core/location/geolocation";
+import type { GeolocationReading } from "@/services/core/location/geolocation";
 import { MapLibreGeoJsonOverlay } from "../helpers/MapLibreGeoJsonOverlay";
 import {
   JL_ICON_USER_LOCATION,

@@ -1,4 +1,4 @@
-import type { PlayerLocationRecord } from "../../../domain/session/activity/sessionChat";
+import type { PlayerLocationRecord } from "@/domain/session/activity/sessionChat";
 import { LivePlayerLocationsLayer } from "./LivePlayerLocationsLayer";
 
 interface LiveHiderLocationsLayerProps {

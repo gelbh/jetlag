@@ -1,7 +1,7 @@
-import { formatPlayAreaSummary, gameAreaSquareMiles } from "../../../domain/session/size/gameSize";
-import type { LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
-import { isPointInGameArea, placeToGameArea } from "../../../domain/geometry/gameArea/geometryCore";
-import { haversineMeters } from "../../../domain/geometry/gameArea/distance";
+import { formatPlayAreaSummary, gameAreaSquareMiles } from "@/domain/session/size/gameSize";
+import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
+import { isPointInGameArea, placeToGameArea } from "@/domain/geometry/gameArea/geometryCore";
+import { haversineMeters } from "@/domain/geometry/gameArea/distance";
 import type { GeocodedPlace } from "./normalize";
 
 const SETTLEMENT_CATEGORIES = new Set([

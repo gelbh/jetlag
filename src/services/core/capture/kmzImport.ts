@@ -4,13 +4,13 @@ import JSZip from "jszip";
 import union from "@turf/union";
 import { featureCollection } from "@turf/helpers";
 import type { Feature, FeatureCollection, MultiPolygon, Polygon } from "geojson";
-import type { GameArea } from "../../../domain/map/annotations";
+import type { GameArea } from "@/domain/map/annotations";
 import {
   boundingBoxHasMinimumSpan,
   featureToGameArea,
   gameAreaToBoundingBox,
   simplifyGameArea,
-} from "../../../domain/geometry/gameArea/geometry";
+} from "@/domain/geometry/gameArea/geometry";
 
 function isPolygonFeature(
   feature: Feature,

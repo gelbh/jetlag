@@ -6,13 +6,13 @@ import {
   uploadBytes,
   type UploadMetadata,
 } from "firebase/storage";
-import type { SessionRecord } from "../../../domain/map/annotations";
+import type { SessionRecord } from "@/domain/map/annotations";
 import {
   formatPhotoStorageError,
   isStorageUnauthorized,
   photoUploadAccessError,
   photoUploadServerDiagnostics,
-} from "../../../domain/questions";
+} from "@/domain/questions";
 import { ensureHiderPhotoUploadAccess } from "../../firestore/firestoreAnnotations";
 import { ensureAnonymousUser, getFirebaseStorage } from "../firebase/firebase";
 import {

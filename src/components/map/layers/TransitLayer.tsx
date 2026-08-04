@@ -1,17 +1,17 @@
 import { memo, useCallback, useMemo, useState } from "react";
 import type { FeatureCollection, LineString } from "geojson";
-import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
+import { MAP_ANNOTATION_COLORS } from "@/domain/map/mapAnnotationColors";
 import type {
   TransitRealtimeSnapshot,
   TransitRouteMode,
   TransitStaticData,
-} from "../../../domain/map/transit";
+} from "@/domain/map/transit";
 import {
   filterTransitRoutesForViewport,
   filterTransitStopsForViewport,
   filterTransitVehiclesForViewport,
   type MapViewportBounds,
-} from "../../../domain/map/transitViewport";
+} from "@/domain/map/transitViewport";
 import { featureHitId } from "../helpers/mapFeatureHitTest";
 import { MapLibreFeaturePopup } from "../helpers/MapLibreFeaturePopup";
 import { MapLibreGeoJsonOverlay } from "../helpers/MapLibreGeoJsonOverlay";

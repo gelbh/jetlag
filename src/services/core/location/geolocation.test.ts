@@ -10,7 +10,7 @@ import { resetLocationPermissionUiForTests } from "./locationPermissionUi";
 import {
   createMockGeolocationPosition,
   mockGeolocation,
-} from "../../../test/mocks/geolocation";
+} from "@/test/mocks/geolocation";
 
 function mockPermissions(state: PermissionState | null): void {
   if (state === null) {

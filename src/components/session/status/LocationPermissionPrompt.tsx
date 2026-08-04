@@ -6,11 +6,11 @@ import {
   LOCATION_PERMISSION_REQUIRED_MESSAGE,
   queryGeolocationPermission,
   type GeolocationPermissionState,
-} from "../../../services/core/location/geolocation";
+} from "@/services/core/location/geolocation";
 import {
   getLocationPermissionUiSnapshot,
   subscribeLocationPermissionUi,
-} from "../../../services/core/location/locationPermissionUi";
+} from "@/services/core/location/locationPermissionUi";
 import { HudBanner } from "../../ui/hud/HudBanner";
 
 const EMPTY_LOCATION_PERMISSION_UI = { demand: 0, confirmEpoch: 0 };

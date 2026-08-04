@@ -1,16 +1,16 @@
-import type { LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
-import type { DistanceUnit } from "../../../domain/map/distance";
+import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
+import type { DistanceUnit } from "@/domain/map/distance";
 import {
   hasOpenPendingQuestion,
   isThermometerDistanceOptionAvailableForSession,
   LOCAL_THERMOMETER_WALK_ID,
   thermometerQuestionPrompt,
-} from "../../../domain/questions";
-import type { PendingQuestionRecord } from "../../../domain/session/activity/sessionChat";
-import type { SessionRulesInput } from "../../../domain/session/rules";
+} from "@/domain/questions";
+import type { PendingQuestionRecord } from "@/domain/session/activity/sessionChat";
+import type { SessionRulesInput } from "@/domain/session/rules";
 import type { SubmitPendingQuestionInput } from "../../sync/usePendingQuestionActions";
-import type { GeolocationReading } from "../../../services/core/location/geolocation";
-import { emitThermometerWalkStartedActivity } from "../../../services/session/emitSessionActivity";
+import type { GeolocationReading } from "@/services/core/location/geolocation";
+import { emitThermometerWalkStartedActivity } from "@/services/session/emitSessionActivity";
 import { thermometerWalkStartPlacement } from "../useThermometerWalk";
 import type { ThermometerSessionConfig } from "./types";
 

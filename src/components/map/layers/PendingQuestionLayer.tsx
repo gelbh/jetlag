@@ -1,12 +1,12 @@
 import { memo, useEffect, useMemo, useState } from "react";
-import type { GameArea } from "../../../domain/map/annotations";
-import type { MapStyle, StreetBasemap } from "../../../domain/map/mapBasemaps";
-import type { SessionRulesInput } from "../../../domain/session/rules";
+import type { GameArea } from "@/domain/map/annotations";
+import type { MapStyle, StreetBasemap } from "@/domain/map/mapBasemaps";
+import type { SessionRulesInput } from "@/domain/session/rules";
 import {
   buildPendingQuestionOverlays,
   type PendingQuestionOverlayResult,
-} from "../../../domain/questions/ui";
-import type { PendingQuestionRecord } from "../../../domain/session/activity/sessionChat";
+} from "@/domain/questions/ui";
+import type { PendingQuestionRecord } from "@/domain/session/activity/sessionChat";
 import { MapDraftLayer } from "./MapDraftLayer";
 
 interface PendingQuestionLayerProps {

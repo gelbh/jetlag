@@ -1,8 +1,8 @@
 import { useRef, useState } from "react";
-import type { AdvancedSessionSettingsValue } from "../../../domain/session/tools/advancedSessionSettings";
-import type { MatchingAdminLevel } from "../../../domain/session/catalog/sessionCustomContent";
-import { parseMatchingAreaGeoJson } from "../../../services/geo/matching/matchingAreaGeoJson";
-import type { GameArea } from "../../../domain/map/annotations";
+import type { AdvancedSessionSettingsValue } from "@/domain/session/tools/advancedSessionSettings";
+import type { MatchingAdminLevel } from "@/domain/session/catalog/sessionCustomContent";
+import { parseMatchingAreaGeoJson } from "@/services/geo/matching/matchingAreaGeoJson";
+import type { GameArea } from "@/domain/map/annotations";
 
 const ADMIN_LEVEL_LABELS: Record<MatchingAdminLevel, string> = {
   4: "1st division (admin level 4)",

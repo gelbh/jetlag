@@ -1,11 +1,11 @@
-import type { LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
-import type { DistanceUnit } from "../../../domain/map/distance";
+import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
+import type { DistanceUnit } from "@/domain/map/distance";
 import {
   isLocalThermometerWalkId,
   thermometerQuestionPrompt,
-} from "../../../domain/questions";
-import { hotterColderAnswerOptions } from "../../../components/tools/shared/answers/binaryAnswerOptions";
-import { emitThermometerWalkSeparatedActivity } from "../../../services/session/emitSessionActivity";
+} from "@/domain/questions";
+import { hotterColderAnswerOptions } from "@/components/tools/shared/answers/binaryAnswerOptions";
+import { emitThermometerWalkSeparatedActivity } from "@/services/session/emitSessionActivity";
 import type { ThermometerSessionConfig } from "./types";
 
 export interface CompleteThermometerWalkLocalInput {

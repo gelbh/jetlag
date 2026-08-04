@@ -1,8 +1,8 @@
 import { useCallback } from "react";
-import type { GameArea } from "../../../domain/map/annotations";
-import type { LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
-import { overpassErrorMessage } from "../../../services/core/overpass/overpassClient";
-import { searchPlaces, type GeocodedPlace } from "../../../services/geo/geocoding";
+import type { GameArea } from "@/domain/map/annotations";
+import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
+import { overpassErrorMessage } from "@/services/core/overpass/overpassClient";
+import { searchPlaces, type GeocodedPlace } from "@/services/geo/geocoding";
 import {
   fetchMeasuringMapTarget,
   fetchNearestMeasuringPlace,

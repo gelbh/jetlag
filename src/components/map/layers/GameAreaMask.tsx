@@ -1,12 +1,12 @@
 import { useMemo } from "react";
-import type { GameArea } from "../../../domain/map/annotations";
+import type { GameArea } from "@/domain/map/annotations";
 import {
   gameAreaExteriorStrokeRings,
   gameAreaOutsideMask,
-} from "../../../domain/geometry/gameArea/geometry";
-import type { LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
+} from "@/domain/geometry/gameArea/geometry";
+import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
 import type { FeatureCollection, LineString } from "geojson";
-import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
+import { MAP_ANNOTATION_COLORS } from "@/domain/map/mapAnnotationColors";
 import { cssPxDashToMapLibre } from "../helpers/cssPxDashToMapLibre";
 import { MapLibreGeoJsonOverlay } from "../helpers/MapLibreGeoJsonOverlay";
 import { polygonGeometryFeature } from "../helpers/polygonGeometryFeature";

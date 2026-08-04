@@ -1,5 +1,5 @@
-import type { PlayerRole } from "../../../domain/session/players/playerRole";
-import type { SessionAuthMode } from "../../../hooks/session/useSharedSessionScreen";
+import type { PlayerRole } from "@/domain/session/players/playerRole";
+import type { SessionAuthMode } from "@/hooks/session/useSharedSessionScreen";
 
 /** Map screen roles that share chrome/controller primitives. */
 export type MapScreenRole = PlayerRole;

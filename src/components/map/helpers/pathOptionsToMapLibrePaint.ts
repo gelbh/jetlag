@@ -1,4 +1,4 @@
-import type { MapPathOptions } from "../../../domain/map/mapPathOptions";
+import type { MapPathOptions } from "@/domain/map/mapPathOptions";
 import type {
   MapLibreFillPaint,
   MapLibreLinePaint,

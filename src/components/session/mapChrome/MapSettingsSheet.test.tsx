@@ -1,7 +1,7 @@
 import { fireEvent, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { MapSettingsSheet } from "./MapSettingsSheet";
-import { renderWithRouter } from "../../../test/renderWithRouter";
+import { renderWithRouter } from "@/test/renderWithRouter";
 
 const baseProps = {
   open: true,

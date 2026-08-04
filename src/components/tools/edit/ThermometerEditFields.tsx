@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
-import type { AnnotationRecord } from "../../../domain/map/annotations";
+import type { AnnotationRecord } from "@/domain/map/annotations";
 import {
   formatPresetDistance,
   type DistanceUnit,
-} from "../../../domain/map/distance";
+} from "@/domain/map/distance";
 import {
   availableThermometerDistancePresets,
   DEFAULT_THERMOMETER_DISTANCE_METERS,
@@ -12,7 +12,7 @@ import {
   thermometerHotterTowards,
   type ThermometerAnswer,
   type ThermometerDistanceOptionMiles,
-} from "../../../domain/questions";
+} from "@/domain/questions";
 import { BinaryAnswerPicker } from "../shared/answers/BinaryAnswerPicker";
 import { hotterColderAnswerOptions } from "../shared/answers/binaryAnswerOptions";
 import { OptionChip, OptionChipRow } from "../shared/controls/OptionChip";

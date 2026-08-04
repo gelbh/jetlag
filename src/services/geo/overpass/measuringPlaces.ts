@@ -1,16 +1,16 @@
-import type { GameArea } from "../../../domain/map/annotations";
-import type { RegionPackId } from "../../../domain/regions/regionPack";
+import type { GameArea } from "@/domain/map/annotations";
+import type { RegionPackId } from "@/domain/regions/regionPack";
 import {
   distanceBetweenPoints,
   isPointInGameArea,
   type LatLngTuple,
-} from "../../../domain/geometry/gameArea/geometry";
-import type { SessionCustomCategory } from "../../../domain/session/catalog/sessionCustomContent";
-import { measuringOverpassSelectorsForKind } from "../../../domain/session/catalog/sessionCustomCatalog";
+} from "@/domain/geometry/gameArea/geometry";
+import type { SessionCustomCategory } from "@/domain/session/catalog/sessionCustomContent";
+import { measuringOverpassSelectorsForKind } from "@/domain/session/catalog/sessionCustomCatalog";
 import {
   measuringLocationLabel,
   type MeasuringLocationCategory,
-} from "../../../domain/questions";
+} from "@/domain/questions";
 import { queryOverpass } from "../../core/overpass/overpassClient";
 import {
   getOrFetchCached,

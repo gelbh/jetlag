@@ -1,5 +1,5 @@
 import { useRef, type ReactNode, type RefObject } from "react";
-import type { SheetHandleProps } from "../../../hooks/motion/useSheetGesture";
+import type { SheetHandleProps } from "@/hooks/motion/useSheetGesture";
 
 interface MobileSheetProps {
   children: ReactNode;

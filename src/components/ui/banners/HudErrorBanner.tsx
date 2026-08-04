@@ -1,6 +1,6 @@
 import { HudBanner } from "../hud/HudBanner";
 import { MapFloatAlertPanel } from "./MapFloatAlert";
-import type { UserErrorDisplay } from "../../../domain/device/feedback/userErrors";
+import type { UserErrorDisplay } from "@/domain/device/feedback/userErrors";
 
 interface HudErrorBannerProps {
   error: UserErrorDisplay;

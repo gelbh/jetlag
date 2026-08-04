@@ -1,19 +1,19 @@
 import { MapView } from "../../map/chrome/MapView";
 import { FramingPreviewLayers } from "../../map/layers/FramingPreviewLayers";
 import { GameAreaMask } from "../../map/layers/GameAreaMask";
-import { useScrollLock } from "../../../hooks/layout/useScrollLock";
-import type { MapStyle } from "../../../domain/map/mapBasemaps";
+import { useScrollLock } from "@/hooks/layout/useScrollLock";
+import type { MapStyle } from "@/domain/map/mapBasemaps";
 import {
   boundingBoxHasMinimumSpan,
   gameAreaToBoundingBox,
-} from "../../../domain/geometry/gameArea/geometry";
+} from "@/domain/geometry/gameArea/geometry";
 import type {
   FramingMode,
   GameAreaFramingResult,
-} from "../../../hooks/session/useGameAreaFraming";
-import type { MapBounds, MapBoundsExpression } from "../../../domain/map/mapBounds";
-import type { LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
-import type { GameArea } from "../../../domain/map/annotations";
+} from "@/hooks/session/useGameAreaFraming";
+import type { MapBounds, MapBoundsExpression } from "@/domain/map/mapBounds";
+import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
+import type { GameArea } from "@/domain/map/annotations";
 import {
   FramingModeSegmentControl,
   GameAreaFramingPolygonActions,

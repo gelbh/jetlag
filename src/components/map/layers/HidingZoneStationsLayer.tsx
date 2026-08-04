@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from "react";
-import type { TransitStation } from "../../../domain/session/hiding/hidingZone";
-import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
+import type { TransitStation } from "@/domain/session/hiding/hidingZone";
+import { MAP_ANNOTATION_COLORS } from "@/domain/map/mapAnnotationColors";
 import { featureHitId } from "../helpers/mapFeatureHitTest";
 import { MapLibrePointMarkers } from "../helpers/MapLibrePointMarkers";
 import type { CircleMarkerProps } from "../helpers/mapMarkerFeatures";

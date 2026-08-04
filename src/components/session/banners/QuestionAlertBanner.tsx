@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
-import type { SessionRulesInput } from "../../../domain/session/rules";
+import type { SessionRulesInput } from "@/domain/session/rules";
 import {
   selectPrimaryQuestionTimer,
   type ActiveQuestionTimer,
-} from "../../../domain/questions";
+} from "@/domain/questions";
 import { HudBanner } from "../../ui/hud/HudBanner";
 import { MapFloatAlert } from "../../ui/banners/MapFloatAlert";
 
 interface QuestionAlertBannerProps {
-  pendingQuestions: readonly import("../../../domain/session/activity/sessionChat").PendingQuestionRecord[];
+  pendingQuestions: readonly import("@/domain/session/activity/sessionChat").PendingQuestionRecord[];
   sessionRules: SessionRulesInput;
 }
 

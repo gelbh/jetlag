@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { GameArea } from "../../../domain/map/annotations";
+import type { GameArea } from "@/domain/map/annotations";
 import { lineStringsFromAdminDivisionBoundaries } from "./adminDivisionLineStrings";
 
 describe("adminDivisionLineStrings", () => {

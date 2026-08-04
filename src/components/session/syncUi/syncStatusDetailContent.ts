@@ -1,5 +1,5 @@
-import type { SyncStatus } from "../../../domain/device/sync/sync";
-import type { UserErrorDisplay } from "../../../domain/device/feedback/userErrors";
+import type { SyncStatus } from "@/domain/device/sync/sync";
+import type { UserErrorDisplay } from "@/domain/device/feedback/userErrors";
 
 export type SyncTone = "error" | "warning" | "info";
 

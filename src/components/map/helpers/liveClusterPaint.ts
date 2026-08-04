@@ -1,11 +1,11 @@
-import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
+import { MAP_ANNOTATION_COLORS } from "@/domain/map/mapAnnotationColors";
 import {
   clusterTooltipLabel,
   locationClusterStableKey,
   type LocationCluster,
-} from "../../../domain/session/live/liveMapLocations";
-import { liveClusterPresentation } from "../../../domain/session/live/liveLocationFreshness";
-import type { PlayerLocationRecord } from "../../../domain/session/activity/sessionChat";
+} from "@/domain/session/live/liveMapLocations";
+import { liveClusterPresentation } from "@/domain/session/live/liveLocationFreshness";
+import type { PlayerLocationRecord } from "@/domain/session/activity/sessionChat";
 
 export interface LiveClusterPaint {
   key: string;

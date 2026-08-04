@@ -1,6 +1,6 @@
 import type {
   PlacementCameraDraftState,
-} from "../../../domain/map/placementCamera";
+} from "@/domain/map/placementCamera";
 
 type ToolDraftSlice = {
   radar: {

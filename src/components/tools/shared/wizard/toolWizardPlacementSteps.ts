@@ -1,1 +1,1 @@
-export { isWizardPlacePhaseStep as isWizardPlacementStep } from "../../../../domain/wizard/phaseToSheetSnap";
+export { isWizardPlacePhaseStep as isWizardPlacementStep } from "@/domain/wizard/phaseToSheetSnap";

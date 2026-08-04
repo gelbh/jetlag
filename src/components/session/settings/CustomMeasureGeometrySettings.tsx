@@ -1,9 +1,9 @@
 import { useId, useState } from "react";
-import type { AdvancedSessionSettingsValue } from "../../../domain/session/tools/advancedSessionSettings";
+import type { AdvancedSessionSettingsValue } from "@/domain/session/tools/advancedSessionSettings";
 import {
   createCustomMeasureGeometryId,
   type SessionCustomMeasureGeometry,
-} from "../../../domain/session/catalog/customMeasureGeometry";
+} from "@/domain/session/catalog/customMeasureGeometry";
 
 interface CustomMeasureGeometrySettingsProps {
   value: AdvancedSessionSettingsValue;

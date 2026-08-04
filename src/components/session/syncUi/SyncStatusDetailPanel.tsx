@@ -1,4 +1,4 @@
-import type { SyncStatus } from "../../../domain/device/sync/sync";
+import type { SyncStatus } from "@/domain/device/sync/sync";
 import { SyncStatusBeacon } from "./SyncStatusDot";
 import { HudDetailPanel } from "../../ui/hud/HudDetailPanel";
 

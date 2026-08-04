@@ -2,20 +2,20 @@ import type {
   AnnotationRecord,
   GameArea,
   TentaclePoi,
-} from "../../../domain/map/annotations";
-import type { LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
-import { tentacleEliminationJsonForAnswer } from "../../../domain/geometry/tentacle/tentacleGeometry";
-import type { DistanceUnit } from "../../../domain/map/distance";
-import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
+} from "@/domain/map/annotations";
+import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
+import { tentacleEliminationJsonForAnswer } from "@/domain/geometry/tentacle/tentacleGeometry";
+import type { DistanceUnit } from "@/domain/map/distance";
+import { MAP_ANNOTATION_COLORS } from "@/domain/map/mapAnnotationColors";
 import {
   TENTACLE_NOT_WITHIN_REACH_LABEL,
   isTentacleCategoryAvailableInSession,
   tentacleQuestionPrompt,
   type TentacleExtendedCategoryId,
-} from "../../../domain/questions";
-import type { SessionRulesInput } from "../../../domain/session/rules";
+} from "@/domain/questions";
+import type { SessionRulesInput } from "@/domain/session/rules";
 import type { SubmitPendingQuestionInput } from "../../sync/usePendingQuestionActions";
-import { emitQuestionAnsweredActivity } from "../../../services/session/emitSessionActivity";
+import { emitQuestionAnsweredActivity } from "@/services/session/emitSessionActivity";
 
 export interface CommitTentacleInput {
   canSubmitQuestion: boolean;

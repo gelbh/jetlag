@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Feature, Point, Polygon } from "geojson";
-import type { AnnotationRecord, GameArea } from "../../../domain/map/annotations";
+import type { AnnotationRecord, GameArea } from "@/domain/map/annotations";
 import { buildGeometryEditModel } from "./buildGeometryEditModel";
 
 const gameArea: GameArea = {

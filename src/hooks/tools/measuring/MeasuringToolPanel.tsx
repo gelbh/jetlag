@@ -1,13 +1,13 @@
 import { startTransition } from "react";
-import { MeasuringPanel } from "../../../components/tools/MeasuringPanel";
-import { QuestionPreviewSheet } from "../../../components/tools/shared/controls/QuestionPreviewSheet";
+import { MeasuringPanel } from "@/components/tools/MeasuringPanel";
+import { QuestionPreviewSheet } from "@/components/tools/shared/controls/QuestionPreviewSheet";
 import {
   measuringFromKind,
   measuringQuestionFor,
   type MeasuringAnswer,
-} from "../../../domain/questions";
-import type { DistanceUnit } from "../../../domain/map/distance";
-import type { GeocodedPlace } from "../../../services/geo/geocoding";
+} from "@/domain/questions";
+import type { DistanceUnit } from "@/domain/map/distance";
+import type { GeocodedPlace } from "@/services/geo/geocoding";
 import type { MeasuringAnchorLoaders } from "./useMeasuringAnchorLoaders";
 import type { MeasuringDraftState } from "./useMeasuringDraftState";
 

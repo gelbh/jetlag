@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { readAnalyticsConsent } from "../../../domain/device/consent/analyticsConsent";
+import { readAnalyticsConsent } from "@/domain/device/consent/analyticsConsent";
 import {
   denyAnalyticsConsent,
   grantAnalyticsConsent,
   shouldEnableAnalytics,
-} from "../../../services/core/analytics/analytics";
+} from "@/services/core/analytics/analytics";
 import { AppLink } from "../../navigation/AppLink";
 import { HudBanner } from "../hud/HudBanner";
 

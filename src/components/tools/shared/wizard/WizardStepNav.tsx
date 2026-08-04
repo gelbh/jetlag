@@ -2,7 +2,7 @@ import {
   HudCheckIcon,
   HudChevronLeftIcon,
   HudChevronRightIcon,
-} from "../../../ui/brand/HudIcons";
+} from "@/components/ui/brand/HudIcons";
 
 export interface WizardStepNavProps {
   stepIndex: number;

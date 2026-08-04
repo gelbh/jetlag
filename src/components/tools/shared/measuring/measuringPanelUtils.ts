@@ -4,7 +4,7 @@ import {
   type MeasuringFromKind,
   type MeasuringLocationCategory,
   type MeasuringSubject,
-} from "../../../../domain/questions";
+} from "@/domain/questions";
 
 export type MeasuringSearchRole = "seeker" | "target";
 

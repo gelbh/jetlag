@@ -1,10 +1,10 @@
-import type { GameArea, SessionRecord } from "../../../domain/map/annotations";
-import type { CustomMatchingAreasByLevel } from "../../../domain/session/catalog/sessionCustomContent";
+import type { GameArea, SessionRecord } from "@/domain/map/annotations";
+import type { CustomMatchingAreasByLevel } from "@/domain/session/catalog/sessionCustomContent";
 import {
   BUNDLED_REGION_PACK_GEO_REVISION,
   type RegionPackId,
-} from "../../../domain/regions/regionPack";
-import { isKnownRegionPack } from "../../../domain/regions/regionPackRegistry";
+} from "@/domain/regions/regionPack";
+import { isKnownRegionPack } from "@/domain/regions/regionPackRegistry";
 import {
   loadRegionPackMatchingAreas,
   loadRegionPackPlayArea,

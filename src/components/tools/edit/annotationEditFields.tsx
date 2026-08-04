@@ -1,11 +1,11 @@
 import type { ReactNode } from "react";
-import type { AnnotationRecord, GameArea } from "../../../domain/map/annotations";
-import type { DistanceUnit } from "../../../domain/map/distance";
+import type { AnnotationRecord, GameArea } from "@/domain/map/annotations";
+import type { DistanceUnit } from "@/domain/map/distance";
 import type {
   RadarDistanceOptionKey,
   ThermometerDistanceOptionMiles,
-} from "../../../domain/questions";
-import type { GameSize } from "../../../domain/session/size/gameSize";
+} from "@/domain/questions";
+import type { GameSize } from "@/domain/session/size/gameSize";
 import { MatchingEditFields, type MatchingAnnotation } from "./MatchingEditFields";
 import { MeasuringEditFields, type MeasuringAnnotation } from "./MeasuringEditFields";
 import { PinZoneEditFields, type PinZoneAnnotation } from "./PinZoneEditFields";

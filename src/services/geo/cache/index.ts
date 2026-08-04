@@ -1,5 +1,5 @@
-import type { GameArea } from "../../../domain/map/annotations";
-import type { ElevationSampleCell } from "../../../domain/geometry/measuring/seaLevel";
+import type { GameArea } from "@/domain/map/annotations";
+import type { ElevationSampleCell } from "@/domain/geometry/measuring/seaLevel";
 import { clearPersistedCacheForTests, readPersistedEntry, readPersistedEntryIgnoringExpiry, writePersistedEntry } from "./indexedDb";
 import {
   inFlight,

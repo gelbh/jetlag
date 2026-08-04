@@ -1,11 +1,11 @@
-import type { GameArea } from "../../../domain/map/annotations";
-import type { CustomMatchingAreasByLevel, MatchingAdminLevel } from "../../../domain/session/catalog/sessionCustomContent";
-import { adminLevelForMatchingCategory } from "../../../domain/questions";
-import type { MatchingCategoryId } from "../../../domain/questions";
-import type { MeasuringFromKind } from "../../../domain/questions";
-import { getRegionPackConfig } from "../../../domain/regions/regionPackRegistry";
+import type { GameArea } from "@/domain/map/annotations";
+import type { CustomMatchingAreasByLevel, MatchingAdminLevel } from "@/domain/session/catalog/sessionCustomContent";
+import { adminLevelForMatchingCategory } from "@/domain/questions";
+import type { MatchingCategoryId } from "@/domain/questions";
+import type { MeasuringFromKind } from "@/domain/questions";
+import { getRegionPackConfig } from "@/domain/regions/regionPackRegistry";
 import { regionPackHasBundledBoundaries } from "../matching/regionPackBoundaries";
-import type { RegionPackId } from "../../../domain/regions/regionPack";
+import type { RegionPackId } from "@/domain/regions/regionPack";
 import { fetchAdminDivisionFeaturesInArea } from "./adminDivisionBoundaries";
 
 export const MIN_ADMIN_DIVISIONS_FOR_AVAILABILITY = 2;

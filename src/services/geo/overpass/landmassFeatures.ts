@@ -2,18 +2,18 @@ import type { Feature, LineString, MultiPolygon, Polygon } from "geojson";
 import area from "@turf/area";
 import difference from "@turf/difference";
 import { lineString } from "@turf/helpers";
-import { dispatchGeodesicLineBuffer } from "../../../domain/geometry/measuring/geodesicLineBuffer";
-import { resolveClientMaskKernelMode } from "../../../domain/geometry/kernel/resolveClientMaskKernelMode";
-import { unionPolygonFeatures } from "../../../domain/geometry/masks/unionPolygonFeatures";
-import type { GameArea } from "../../../domain/map/annotations";
-import type { RegionPackId } from "../../../domain/regions/regionPack";
+import { dispatchGeodesicLineBuffer } from "@/domain/geometry/measuring/geodesicLineBuffer";
+import { resolveClientMaskKernelMode } from "@/domain/geometry/kernel/resolveClientMaskKernelMode";
+import { unionPolygonFeatures } from "@/domain/geometry/masks/unionPolygonFeatures";
+import type { GameArea } from "@/domain/map/annotations";
+import type { RegionPackId } from "@/domain/regions/regionPack";
 import {
   featureToGameArea,
   gameAreaToBoundingBox,
   gameAreaToPolygon,
   simplifyGameArea,
   type LatLngTuple,
-} from "../../../domain/geometry/gameArea/geometry";
+} from "@/domain/geometry/gameArea/geometry";
 import { queryOverpass, OverpassPayloadTooLargeError } from "../../core/overpass/overpassClient";
 import {
   getOrFetchCached,

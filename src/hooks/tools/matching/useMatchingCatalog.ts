@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import type { Feature, MultiPolygon, Polygon as GeoPolygon } from "geojson";
-import type { GameArea } from "../../../domain/map/annotations";
-import type { AnnotationRecord } from "../../../domain/map/annotations";
+import type { GameArea } from "@/domain/map/annotations";
+import type { AnnotationRecord } from "@/domain/map/annotations";
 import {
   buildMatchingEliminationRegion,
   buildSameNearestRegion,
-} from "../../../domain/geometry/measuring/matchingGeometry";
+} from "@/domain/geometry/measuring/matchingGeometry";
 import {
   getMatchingCategory,
   matchingCategoryUseCount,
@@ -13,24 +13,24 @@ import {
   questionCostBreakdown,
   type MatchingAnswer,
   type MatchingCategoryId,
-} from "../../../domain/questions";
+} from "@/domain/questions";
 import {
   resolveMatchingCategory,
   sessionCustomContentFromRules,
-} from "../../../domain/session/catalog/sessionCustomCatalog";
+} from "@/domain/session/catalog/sessionCustomCatalog";
 import {
   availableMatchingCategories,
   isPreviewQuestionBeforeSendEnabled,
-} from "../../../domain/session/catalog/sessionCatalogAvailability";
-import type { PendingQuestionRecord } from "../../../domain/session/activity/sessionChat";
-import type { SessionRulesInput } from "../../../domain/session/rules";
-import { isAdminDivisionCategoryAvailable } from "../../../services/geo/overpass/adminDivisionAvailability";
+} from "@/domain/session/catalog/sessionCatalogAvailability";
+import type { PendingQuestionRecord } from "@/domain/session/activity/sessionChat";
+import type { SessionRulesInput } from "@/domain/session/rules";
+import { isAdminDivisionCategoryAvailable } from "@/services/geo/overpass/adminDivisionAvailability";
 import type {
   MatchingFeature,
   MatchingFetchOptions,
-} from "../../../services/geo/matching";
-import { inferTransitMetroId } from "../../../services/transit/transitCatalog";
-import { usePreloadStore } from "../../../state/preloadStore";
+} from "@/services/geo/matching";
+import { inferTransitMetroId } from "@/services/transit/transitCatalog";
+import { usePreloadStore } from "@/state/preloadStore";
 
 export function useMatchingCatalog(input: {
   activeAnnotations: AnnotationRecord[];

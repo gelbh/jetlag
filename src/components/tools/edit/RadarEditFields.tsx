@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
-import type { AnnotationRecord } from "../../../domain/map/annotations";
+import type { AnnotationRecord } from "@/domain/map/annotations";
 import {
   DEFAULT_RADIUS_METERS,
   parseDistanceInput,
   type DistanceUnit,
-} from "../../../domain/map/distance";
+} from "@/domain/map/distance";
 import {
   isRadarDistanceOptionUsed,
   isRadarPresetRadius,
@@ -13,8 +13,8 @@ import {
   radarInsideFromAnswer,
   type RadarAnswer,
   type RadarDistanceOptionKey,
-} from "../../../domain/questions";
-import type { GameSize } from "../../../domain/session/size/gameSize";
+} from "@/domain/questions";
+import type { GameSize } from "@/domain/session/size/gameSize";
 import { RadarDistancePicker } from "../RadarDistancePicker";
 import { BinaryAnswerPicker } from "../shared/answers/BinaryAnswerPicker";
 import { yesNoAnswerOptions } from "../shared/answers/binaryAnswerOptions";

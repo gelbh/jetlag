@@ -1,11 +1,11 @@
-import type { AnnotationRecord } from "../../../domain/map/annotations";
-import type { LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
-import type { DistanceUnit } from "../../../domain/map/distance";
-import type { ThermometerAnswer } from "../../../domain/questions";
-import type { PendingQuestionRecord } from "../../../domain/session/activity/sessionChat";
-import type { SessionRulesInput } from "../../../domain/session/rules";
+import type { AnnotationRecord } from "@/domain/map/annotations";
+import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
+import type { DistanceUnit } from "@/domain/map/distance";
+import type { ThermometerAnswer } from "@/domain/questions";
+import type { PendingQuestionRecord } from "@/domain/session/activity/sessionChat";
+import type { SessionRulesInput } from "@/domain/session/rules";
 import type { SubmitPendingQuestionInput } from "../../sync/usePendingQuestionActions";
-import type { GeolocationReading } from "../../../services/core/location/geolocation";
+import type { GeolocationReading } from "@/services/core/location/geolocation";
 
 export type ThermometerPlacementMode = "gps" | "manual";
 

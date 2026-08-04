@@ -1,12 +1,12 @@
-import type { GameArea } from "../../../domain/map/annotations";
-import type { LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
+import type { GameArea } from "@/domain/map/annotations";
+import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
 import {
   getMatchingCategory,
   isMatchingCategoryAvailable,
   isMatchingCategoryEnabled,
   type MatchingCategoryId,
-} from "../../../domain/questions";
-import { overpassErrorMessage } from "../../../services/core/overpass/overpassClient";
+} from "@/domain/questions";
+import { overpassErrorMessage } from "@/services/core/overpass/overpassClient";
 import {
   countMatchingFeaturesInPlayArea,
   fetchMatchingFeaturesInArea,
@@ -14,7 +14,7 @@ import {
   pickMatchingFeatureForAnchor,
   type MatchingFeature,
   type MatchingFetchOptions,
-} from "../../../services/geo/matching";
+} from "@/services/geo/matching";
 
 export interface ResolveMatchingAnchorResult {
   features: MatchingFeature[];

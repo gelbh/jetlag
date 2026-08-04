@@ -43,7 +43,7 @@ export {
   matchingResolveFailureMessage,
 } from "./messages";
 
-export type { MatchingFeature } from "../../../domain/geo/types";
+export type { MatchingFeature } from "@/domain/geo/types";
 
 export {
   parseMatchingAreaGeoJson,

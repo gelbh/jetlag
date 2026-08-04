@@ -9,32 +9,32 @@ import {
   toMapBounds,
   type MapBoundsExpression,
   type MapLatLng,
-} from "../../../domain/map/mapBounds";
+} from "@/domain/map/mapBounds";
 import "maplibre-gl/dist/maplibre-gl.css";
-import "../../../styles/map-touch-gestures.css";
+import "@/styles/map-touch-gestures.css";
 import mapLibreWorkerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
 import {
   getBasemapSurface,
   getMapLibreStyle,
-} from "../../../domain/map/mapBasemaps";
+} from "@/domain/map/mapBasemaps";
 import {
   DEFAULT_MAP_CENTER,
   DEFAULT_MAP_LNGLAT,
-} from "../../../domain/map/defaultMapCenter";
-import { isUsableMapBounds } from "../../../domain/geometry/gameArea/geometry";
-import { computeFramedCenterZoomMapLibre } from "../../../domain/map/computeFramedCenterZoomMapLibre";
-import { focusBoundsToLngLatBounds } from "../../../domain/map/focusBoundsToLngLatBounds";
-import { isLargeCameraJumpMapLibre } from "../../../domain/map/isLargeCameraJumpMapLibre";
-import { shouldApplyMapFocus } from "../../../domain/map/mapFocusPolicy";
-import { mapFocusApplyDependencyKeys } from "../../../domain/map/mapFocusApplyDeps";
-import { resolveMapPitchDegrees } from "../../../domain/map/resolveMapPitchDegrees";
-import { stopMapCameraEase } from "../../../domain/map/stopMapCameraEase";
+} from "@/domain/map/defaultMapCenter";
+import { isUsableMapBounds } from "@/domain/geometry/gameArea/geometry";
+import { computeFramedCenterZoomMapLibre } from "@/domain/map/computeFramedCenterZoomMapLibre";
+import { focusBoundsToLngLatBounds } from "@/domain/map/focusBoundsToLngLatBounds";
+import { isLargeCameraJumpMapLibre } from "@/domain/map/isLargeCameraJumpMapLibre";
+import { shouldApplyMapFocus } from "@/domain/map/mapFocusPolicy";
+import { mapFocusApplyDependencyKeys } from "@/domain/map/mapFocusApplyDeps";
+import { resolveMapPitchDegrees } from "@/domain/map/resolveMapPitchDegrees";
+import { stopMapCameraEase } from "@/domain/map/stopMapCameraEase";
 import {
   MOTION_MAP_CAMERA_FLY_MS,
   MOTION_MAP_CAMERA_MS,
-} from "../../../domain/device/motion/motionTokens";
-import { mapLibreRuntimeOptions } from "../../../domain/device/perf/mapLibreRuntimeOptions";
-import { useMotionProfile } from "../../../hooks/motion/useMotionProfile";
+} from "@/domain/device/motion/motionTokens";
+import { mapLibreRuntimeOptions } from "@/domain/device/perf/mapLibreRuntimeOptions";
+import { useMotionProfile } from "@/hooks/motion/useMotionProfile";
 import { useMapLibreMap } from "../helpers/useMapLibreMap";
 import {
   MapFeatureHitTestBridge,

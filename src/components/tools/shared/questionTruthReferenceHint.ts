@@ -1,4 +1,4 @@
-import type { HiderTruthReferenceMode } from "../../../domain/questions/hiderTruth/resolveHiderTruthReference";
+import type { HiderTruthReferenceMode } from "@/domain/questions/hiderTruth/resolveHiderTruthReference";
 
 export function questionTruthReferenceHint(endGameActive: boolean): string {
   if (endGameActive) {

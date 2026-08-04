@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { GameArea } from "../../../domain/map/annotations";
-import { BUNDLED_REGION_PACK_GEO_REVISION } from "../../../domain/regions/regionPack";
-import { createTestSession } from "../../../test/fixtures/sessions";
+import type { GameArea } from "@/domain/map/annotations";
+import { BUNDLED_REGION_PACK_GEO_REVISION } from "@/domain/regions/regionPack";
+import { createTestSession } from "@/test/fixtures/sessions";
 import {
   clearResolvedMatchingAreasCacheForTests,
   isPlayAreaReadySync,

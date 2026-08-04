@@ -1,13 +1,13 @@
 import { useEffect } from "react";
-import type { GameArea, SessionRecord } from "../../../domain/map/annotations";
-import { fallbackGameArea } from "../../../domain/geometry/gameArea/geometry";
-import { isPremiumSession } from "../../../domain/map/annotations";
-import { useTransitLayer } from "../../../hooks/map/useTransitLayer";
+import type { GameArea, SessionRecord } from "@/domain/map/annotations";
+import { fallbackGameArea } from "@/domain/geometry/gameArea/geometry";
+import { isPremiumSession } from "@/domain/map/annotations";
+import { useTransitLayer } from "@/hooks/map/useTransitLayer";
 import {
   getTransitMetro,
   metroSupportsLiveVehicles,
-} from "../../../services/transit/transitCatalog";
-import { useMapStore } from "../../../state/sessionStore";
+} from "@/services/transit/transitCatalog";
+import { useMapStore } from "@/state/sessionStore";
 
 export function useMapScreenTransit(
   session: SessionRecord | null,

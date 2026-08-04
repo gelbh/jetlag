@@ -1,20 +1,20 @@
-import type { GameArea } from "../../../domain/map/annotations";
+import type { GameArea } from "@/domain/map/annotations";
 import {
   gameAreaToBoundingBox,
   type LatLngTuple,
-} from "../../../domain/geometry/gameArea/geometry";
+} from "@/domain/geometry/gameArea/geometry";
 import {
   expandBoundingBox,
   type BoundingBox,
-} from "../../../domain/geometry/gameArea/gameAreaBounds";
+} from "@/domain/geometry/gameArea/gameAreaBounds";
 import {
   adminLevelForMatchingCategory,
   getMatchingCategory,
   matchingUsesExpandedFeatureSearch,
   type MatchingCategoryId,
-} from "../../../domain/questions";
-import { resolveMatchingCategory } from "../../../domain/session/catalog/sessionCustomCatalog";
-import type { SessionCustomCategory } from "../../../domain/session/catalog/sessionCustomContent";
+} from "@/domain/questions";
+import { resolveMatchingCategory } from "@/domain/session/catalog/sessionCustomCatalog";
+import type { SessionCustomCategory } from "@/domain/session/catalog/sessionCustomContent";
 import { customMatchingAreasCacheSuffix } from "./matchingAreaGeoJson";
 import { geographicCacheKey } from "../cache";
 import {

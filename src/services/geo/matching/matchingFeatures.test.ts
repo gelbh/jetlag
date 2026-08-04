@@ -1,11 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
-import type { GameArea } from "../../../domain/map/annotations";
+import type { GameArea } from "@/domain/map/annotations";
 import * as overpassClient from "../../core/overpass/overpassClient";
 import {
   deserializeMatchingFeatures,
   pickNearestMatchingFeature,
   serializeMatchingFeatures,
-} from "../../../domain/geo/matchingAdapters";
+} from "@/domain/geo/matchingAdapters";
 import {
   fetchMatchingFeaturesInArea,
   findNearestMatchingFeature,

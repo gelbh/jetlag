@@ -1,7 +1,7 @@
 import { AnchorControls } from "../controls/AnchorControls";
 import { CoordinateCopyButton } from "../controls/CoordinateCopyButton";
 import { LoadingReadout } from "../readout/LoadingReadout";
-import { SearchField } from "../../../ui/forms/SearchField";
+import { SearchField } from "@/components/ui/forms/SearchField";
 import { ToolSection } from "../panels/ToolSection";
 
 interface MeasuringAnchorStepProps {

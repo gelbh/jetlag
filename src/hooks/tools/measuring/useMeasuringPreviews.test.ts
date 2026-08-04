@@ -1,15 +1,15 @@
 import { describe, expect, it, vi } from "vitest";
 import { renderHook } from "@testing-library/react";
 import type { Feature, Polygon } from "geojson";
-import { MEASURING_MULTI_PLACE_OVER_BUDGET_MESSAGE } from "../../../domain/geometry/measuring/measuringGeometryBudgets";
-import { previewGeometryFingerprint } from "../../../domain/geometry/measuring/previewGeometryFingerprint";
+import { MEASURING_MULTI_PLACE_OVER_BUDGET_MESSAGE } from "@/domain/geometry/measuring/measuringGeometryBudgets";
+import { previewGeometryFingerprint } from "@/domain/geometry/measuring/previewGeometryFingerprint";
 import {
   useMeasuringPreviews,
   useMeasuringPublishSignature,
   type MeasuringPreviews,
 } from "./useMeasuringPreviews";
 import type { MeasuringDraftState } from "./useMeasuringDraftState";
-import type { GameArea } from "../../../domain/map/annotations";
+import type { GameArea } from "@/domain/map/annotations";
 
 const buildMeasuringBoundaryPreview = vi.hoisted(() => vi.fn());
 const buildMeasuringEliminationPreview = vi.hoisted(() => vi.fn());

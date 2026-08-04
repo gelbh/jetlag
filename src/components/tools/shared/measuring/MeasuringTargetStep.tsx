@@ -1,9 +1,9 @@
-import type { SeaLevelEdgeCase } from "../../../../domain/geometry/measuring/seaLevel";
+import type { SeaLevelEdgeCase } from "@/domain/geometry/measuring/seaLevel";
 import {
   formatAltitudeLabel,
   formatDistance,
   type DistanceUnit,
-} from "../../../../domain/map/distance";
+} from "@/domain/map/distance";
 import {
   measuringSupportsMapTarget,
   measuringSupportsNearest,
@@ -15,12 +15,12 @@ import {
   type MeasuringLocationCategory,
   type MeasuringSubject,
   type MeasuringTargetMode,
-} from "../../../../domain/questions";
+} from "@/domain/questions";
 import { closerFurtherAnswerOptions } from "../answers/binaryAnswerOptions";
 import { BinaryAnswerPicker } from "../answers/BinaryAnswerPicker";
 import { LoadingReadout } from "../readout/LoadingReadout";
 import { ResolvedReadout } from "../readout/ResolvedReadout";
-import { SearchField } from "../../../ui/forms/SearchField";
+import { SearchField } from "@/components/ui/forms/SearchField";
 import { SegmentedControl } from "../controls/SegmentedControl";
 import { SendToHidersButton } from "../controls/SendToHidersButton";
 import { ToolSection } from "../panels/ToolSection";

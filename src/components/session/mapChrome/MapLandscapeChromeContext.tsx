@@ -4,15 +4,15 @@ import {
   useContext,
   type ReactNode,
 } from "react";
-import type { SyncStatus } from "../../../domain/device/sync/sync";
-import type { PendingQuestionRecord } from "../../../domain/session/activity/sessionChat";
-import type { SessionRulesInput } from "../../../domain/session/rules";
-import type { TimerState } from "../../../domain/session/timer/timer";
+import type { SyncStatus } from "@/domain/device/sync/sync";
+import type { PendingQuestionRecord } from "@/domain/session/activity/sessionChat";
+import type { SessionRulesInput } from "@/domain/session/rules";
+import type { TimerState } from "@/domain/session/timer/timer";
 import type { MapChromeControlInset } from "../../map/helpers/mapChromeControlInset";
 import {
   useMapLandscapeChromeReveal,
   type MapLandscapeChromeMode,
-} from "../../../hooks/chrome/useMapLandscapeChromeReveal";
+} from "@/hooks/chrome/useMapLandscapeChromeReveal";
 import { MapLandscapeChromeChip } from "./MapLandscapeChromeChip";
 
 type MapLandscapeChromeContextValue = {

@@ -1,5 +1,5 @@
 import { getToken } from "firebase/app-check";
-import { getClientEnv } from "../../../config/env";
+import { getClientEnv } from "@/config/env";
 import {
   getFirebaseAppCheck,
   isFirebaseConfigured,

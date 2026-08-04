@@ -1,5 +1,5 @@
-import { isEndGameActive } from "../../../domain/map/annotations";
-import { useSessionStore } from "../../../state/sessionStore";
+import { isEndGameActive } from "@/domain/map/annotations";
+import { useSessionStore } from "@/state/sessionStore";
 import { questionTruthReferenceHint } from "./questionTruthReferenceHint";
 
 export function QuestionTruthReferenceHint() {

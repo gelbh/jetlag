@@ -1,11 +1,11 @@
 import type { ReactNode, Ref } from "react";
-import { DesktopOpsShell } from "../../../components/map/chrome/DesktopOpsShell";
-import { useMapLandscapeChrome } from "../../../components/session/mapChrome/MapLandscapeChromeContext";
+import { DesktopOpsShell } from "@/components/map/chrome/DesktopOpsShell";
+import { useMapLandscapeChrome } from "@/components/session/mapChrome/MapLandscapeChromeContext";
 import {
   mapLandscapeChromeHeaderCollapseClass,
   mapLandscapeChromeToolbarCollapseClass,
-} from "../../../components/session/mapChrome/mapLandscapeChromeClasses";
-import { useDesktopLayout } from "../../../hooks/layout/useDesktopLayout";
+} from "@/components/session/mapChrome/mapLandscapeChromeClasses";
+import { useDesktopLayout } from "@/hooks/layout/useDesktopLayout";
 
 export type MapScreenChromeSlotsLayout = "ops-or-hud" | "fragments";
 

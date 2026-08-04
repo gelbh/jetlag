@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
-import { ChoiceButton } from "../../../ui/forms/ChoiceButton";
-import { HUD_BINARY_YES } from "../../../ui/hud/hudTokens";
+import { ChoiceButton } from "@/components/ui/forms/ChoiceButton";
+import { HUD_BINARY_YES } from "@/components/ui/hud/hudTokens";
 
 interface ListSelectRowProps {
   selected: boolean;

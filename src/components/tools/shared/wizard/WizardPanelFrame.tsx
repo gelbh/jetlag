@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { InlineError } from "../../../ui/banners/InlineError";
+import { InlineError } from "@/components/ui/banners/InlineError";
 import { WizardToolPanelLayout } from "./WizardToolPanelLayout";
 
 interface WizardPanelFrameProps {

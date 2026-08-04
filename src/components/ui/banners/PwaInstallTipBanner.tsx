@@ -1,9 +1,9 @@
-import { isAndroidDevice, isIosDevice } from "../../../domain/device/pwa/detectMobilePlatform";
-import { PWA_INSTALL_TIP_DISMISS_KEY } from "../../../domain/device/pwa/pwaInstallTipStorage";
-import { isStandalonePwa } from "../../../domain/device/pwa/isStandalonePwa";
-import { shouldOfferPwaInstallTip } from "../../../domain/device/pwa/shouldOfferPwaInstallTip";
-import { usePersistedDismiss } from "../../../hooks/forms/usePersistedDismiss";
-import { usePwaDeferredInstallPrompt } from "../../../hooks/pwa/usePwaDeferredInstallPrompt";
+import { isAndroidDevice, isIosDevice } from "@/domain/device/pwa/detectMobilePlatform";
+import { PWA_INSTALL_TIP_DISMISS_KEY } from "@/domain/device/pwa/pwaInstallTipStorage";
+import { isStandalonePwa } from "@/domain/device/pwa/isStandalonePwa";
+import { shouldOfferPwaInstallTip } from "@/domain/device/pwa/shouldOfferPwaInstallTip";
+import { usePersistedDismiss } from "@/hooks/forms/usePersistedDismiss";
+import { usePwaDeferredInstallPrompt } from "@/hooks/pwa/usePwaDeferredInstallPrompt";
 import { HudBanner } from "../hud/HudBanner";
 
 export function PwaInstallTipBanner() {

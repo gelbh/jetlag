@@ -1,11 +1,11 @@
-import type { FramingMode } from "../../../hooks/session/useGameAreaFraming";
-import type { GameArea } from "../../../domain/map/annotations";
+import type { FramingMode } from "@/hooks/session/useGameAreaFraming";
+import type { GameArea } from "@/domain/map/annotations";
 import {
   formatPlayAreaSummary,
   gameAreaSquareMiles,
   gameSizeLabel,
   recommendGameSize,
-} from "../../../domain/session/size/gameSize";
+} from "@/domain/session/size/gameSize";
 import { HudSegmentControl } from "../../ui/forms/HudSegmentControl";
 import { FRAMING_MODE_OPTIONS } from "./gameAreaFramingUi";
 

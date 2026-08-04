@@ -1,10 +1,10 @@
-import type { GameOutcome } from "../../../domain/game/foundHider";
-import type { GameResultPlayer, GameResultRecord } from "../../../domain/game/gameResult";
+import type { GameOutcome } from "@/domain/game/foundHider";
+import type { GameResultPlayer, GameResultRecord } from "@/domain/game/gameResult";
 import type {
   PendingQuestionRecord,
   PlayerLocationRecord,
   SessionMessageRecord,
-} from "../../../domain/session/activity/sessionChat";
+} from "@/domain/session/activity/sessionChat";
 import { parseFirestoreDocument } from "../zodConverter";
 import { pendingQuestionDocumentSchema } from "../schemas/firestoreDocuments";
 import { assertNoNestedArrays, stripUndefinedValues } from "./shared";

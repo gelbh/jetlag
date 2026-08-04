@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   ANALYTICS_CONSENT_KEY,
   writeAnalyticsConsent,
-} from "../../../domain/device/consent/analyticsConsent";
+} from "@/domain/device/consent/analyticsConsent";
 import {
   ANALYTICS_EVENTS,
   denyAnalyticsConsent,
@@ -16,7 +16,7 @@ import {
   trackPageView,
   trackSessionEnded,
 } from "./analytics";
-import { resetClientEnvForTests } from "../../../config/env";
+import { resetClientEnvForTests } from "@/config/env";
 
 const {
   posthogInit,
@@ -49,7 +49,7 @@ vi.mock("posthog-js", () => ({
 }));
 
 vi.mock("../../../config/env", async () => {
-  const actual = await vi.importActual<typeof import("../../../config/env")>(
+  const actual = await vi.importActual<typeof import("@/config/env")>(
     "../../../config/env",
   );
   return {

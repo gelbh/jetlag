@@ -8,17 +8,17 @@ import {
   type SettingsSegment,
 } from "../settings/SettingsSegmentControl";
 import { LayerVisibilityGrid } from "./LayerVisibilityGrid";
-import type { DistanceUnit } from "../../../domain/map/distance";
-import type { GameSize } from "../../../domain/session/size/gameSize";
-import { type AdvancedSessionSettingsValue } from "../../../domain/session/tools/advancedSessionSettings";
+import type { DistanceUnit } from "@/domain/map/distance";
+import type { GameSize } from "@/domain/session/size/gameSize";
+import { type AdvancedSessionSettingsValue } from "@/domain/session/tools/advancedSessionSettings";
 import { AdvancedSessionSettings } from "../settings/AdvancedSessionSettings";
-import type { MapStyle, StreetBasemap } from "../../../domain/map/mapBasemaps";
-import { getBasemapAttributionText } from "../../../domain/map/mapBasemaps";
-import type { SessionRecord } from "../../../domain/map/annotations";
-import type { LayerVisibility } from "../../../state/sessionStore";
-import type { NotificationPreferences } from "../../../domain/device/chrome/notifications";
-import { isNativeNotificationsSupported } from "../../../services/core/native/notifications";
-import type { TransitRouteFilter } from "../../../domain/map/transit";
+import type { MapStyle, StreetBasemap } from "@/domain/map/mapBasemaps";
+import { getBasemapAttributionText } from "@/domain/map/mapBasemaps";
+import type { SessionRecord } from "@/domain/map/annotations";
+import type { LayerVisibility } from "@/state/sessionStore";
+import type { NotificationPreferences } from "@/domain/device/chrome/notifications";
+import { isNativeNotificationsSupported } from "@/services/core/native/notifications";
+import type { TransitRouteFilter } from "@/domain/map/transit";
 import { MapSettingsGeneralTab } from "../settings/GeneralTab";
 import { MapSettingsSessionTab } from "../settings/SessionTab";
 

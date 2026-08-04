@@ -10,7 +10,7 @@ export {
   THERMOMETER_WIZARD,
   type ToolWizardDefinition,
   type ToolWizardPhaseId,
-} from "../../../../domain/wizard/toolWizardPhases";
+} from "@/domain/wizard/toolWizardPhases";
 
 export type ToolStepDefinition = { id: string; label: string };
 

@@ -1,5 +1,5 @@
 import type { ReactElement } from "react";
-import type { ToolWizardPhaseId } from "../../../../domain/wizard/toolWizardPhases";
+import type { ToolWizardPhaseId } from "@/domain/wizard/toolWizardPhases";
 import { WizardConfigureContinuum } from "./WizardConfigureContinuum";
 import { WizardPhaseRail, type WizardPhaseRailPhase } from "./WizardPhaseRail";
 import { WizardStepBackButton } from "./WizardStepNav";

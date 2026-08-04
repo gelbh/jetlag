@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
+import { MAP_ANNOTATION_COLORS } from "@/domain/map/mapAnnotationColors";
 import { MapLibreFeaturePopup } from "../helpers/MapLibreFeaturePopup";
 import { MapLibrePointMarkers } from "../helpers/MapLibrePointMarkers";
 import { useMapFeatureHitTarget } from "../helpers/MapFeatureHitTestContext";

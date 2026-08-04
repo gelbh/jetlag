@@ -1,23 +1,23 @@
 import { useCallback } from "react";
 import type { Feature, Point } from "geojson";
-import { isActive, type AnnotationRecord } from "../../../domain/map/annotations";
+import { isActive, type AnnotationRecord } from "@/domain/map/annotations";
 import {
   buildMeasuringRegions,
-} from "../../../domain/geometry/measuring/measuringRegions";
+} from "@/domain/geometry/measuring/measuringRegions";
 import {
   measuringFromKind,
   measuringFromKindUseCount,
   measuringFromKindUseCountFromPending,
   measuringQuestionFor,
-} from "../../../domain/questions";
-import { questionCostBreakdown } from "../../../domain/questions";
-import type { PendingQuestionRecord } from "../../../domain/session/activity/sessionChat";
-import { adminBorderKindAvailability } from "../../../services/geo/overpass/adminDivisionAvailability";
-import { closerFurtherAnswerOptions } from "../../../components/tools/shared/answers/binaryAnswerOptions";
+} from "@/domain/questions";
+import { questionCostBreakdown } from "@/domain/questions";
+import type { PendingQuestionRecord } from "@/domain/session/activity/sessionChat";
+import { adminBorderKindAvailability } from "@/services/geo/overpass/adminDivisionAvailability";
+import { closerFurtherAnswerOptions } from "@/components/tools/shared/answers/binaryAnswerOptions";
 import type { SubmitPendingQuestionInput } from "../../sync/usePendingQuestionActions";
-import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
-import { emitQuestionAnsweredActivity } from "../../../services/session/emitSessionActivity";
-import { assertMeasuringGeometryBudget } from "../../../domain/geometry/measuring/measuringGeometryBudgets";
+import { MAP_ANNOTATION_COLORS } from "@/domain/map/mapAnnotationColors";
+import { emitQuestionAnsweredActivity } from "@/services/session/emitSessionActivity";
+import { assertMeasuringGeometryBudget } from "@/domain/geometry/measuring/measuringGeometryBudgets";
 import { buildStoredMeasuringRegionInput } from "./helpers";
 import type { MeasuringDraftState } from "./useMeasuringDraftState";
 import type { MeasuringPreviews } from "./useMeasuringPreviews";

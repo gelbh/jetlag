@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import {
   mapToolPlacingLabel,
   type DockableMapTool,
-} from "../../../../domain/map/mapTools";
+} from "@/domain/map/mapTools";
 
 interface ToolPanelShellProps {
   toolId: DockableMapTool;

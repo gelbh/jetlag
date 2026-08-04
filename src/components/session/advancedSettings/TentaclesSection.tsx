@@ -1,7 +1,7 @@
-import { formatHidingZoneRadiusLabel } from "../../../domain/session/size/gameSize";
-import { milesToMeters } from "../../../domain/map/distance";
-import { tentacleRadiusPresetMeters } from "../../../domain/map/distancePresets";
-import { clampTentacleRadiusMeters } from "../../../domain/session/rules";
+import { formatHidingZoneRadiusLabel } from "@/domain/session/size/gameSize";
+import { milesToMeters } from "@/domain/map/distance";
+import { tentacleRadiusPresetMeters } from "@/domain/map/distancePresets";
+import { clampTentacleRadiusMeters } from "@/domain/session/rules";
 import { PresetButton, AdvancedSettingsToggle } from "./shared";
 import type { AdvancedSettingsSectionProps } from "./types";
 

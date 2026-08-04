@@ -1,5 +1,5 @@
-import type { SyncStatus } from "../../../domain/device/sync/sync";
-import type { PlayerRole } from "../../../domain/session/players/playerRole";
+import type { SyncStatus } from "@/domain/device/sync/sync";
+import type { PlayerRole } from "@/domain/session/players/playerRole";
 import { syncToneForStatus } from "../syncUi/syncStatusDetailContent";
 
 export type SyncTone = "error" | "warning" | "info";

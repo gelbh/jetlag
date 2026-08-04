@@ -1,17 +1,17 @@
-import type { PendingQuestionRecord } from "../../../domain/session/activity/sessionChat";
-import type { SessionRulesInput } from "../../../domain/session/rules";
+import type { PendingQuestionRecord } from "@/domain/session/activity/sessionChat";
+import type { SessionRulesInput } from "@/domain/session/rules";
 import {
   computeElapsedMs,
   formatElapsedTime,
   type TimerState,
-} from "../../../domain/session/timer/timer";
+} from "@/domain/session/timer/timer";
 import {
   formatHidingPeriodCountdown,
   hidingPeriodRemainingMs,
   isHidingPeriodActive,
   seekPhaseElapsedMs,
-} from "../../../domain/session/hiding/hidingPeriod";
-import { selectPrimaryQuestionTimer } from "../../../domain/questions";
+} from "@/domain/session/hiding/hidingPeriod";
+import { selectPrimaryQuestionTimer } from "@/domain/questions";
 
 export type LandscapeChipTimerLabel = {
   phase: string;

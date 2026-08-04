@@ -1,9 +1,9 @@
 import { useId, useState } from "react";
-import type { AdvancedSessionSettingsValue } from "../../../domain/session/tools/advancedSessionSettings";
-import type { DistanceUnit } from "../../../domain/map/distance";
-import type { GameSize } from "../../../domain/session/size/gameSize";
-import { sessionRulesSummary } from "../../../domain/session/rules";
-import type { GameArea } from "../../../domain/map/annotations";
+import type { AdvancedSessionSettingsValue } from "@/domain/session/tools/advancedSessionSettings";
+import type { DistanceUnit } from "@/domain/map/distance";
+import type { GameSize } from "@/domain/session/size/gameSize";
+import { sessionRulesSummary } from "@/domain/session/rules";
+import type { GameArea } from "@/domain/map/annotations";
 import { SessionCustomContentSettings } from "./SessionCustomContentSettings";
 import { CustomMeasureGeometrySettings } from "./CustomMeasureGeometrySettings";
 import { DeadlinesSection } from "../advancedSettings/DeadlinesSection";

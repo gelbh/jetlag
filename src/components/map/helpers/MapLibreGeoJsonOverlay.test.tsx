@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import type { Polygon } from "geojson";
-import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
+import { MAP_ANNOTATION_COLORS } from "@/domain/map/mapAnnotationColors";
 import { MapLibreGeoJsonOverlay } from "./MapLibreGeoJsonOverlay";
 import { polygonGeometryFeature } from "./polygonGeometryFeature";
 import { circleMarkerCollection } from "./mapMarkerFeatures";

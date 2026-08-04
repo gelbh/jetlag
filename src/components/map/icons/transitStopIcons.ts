@@ -1,5 +1,5 @@
-import type { TransitRouteMode } from "../../../domain/map/transit";
-import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
+import type { TransitRouteMode } from "@/domain/map/transit";
+import { MAP_ANNOTATION_COLORS } from "@/domain/map/mapAnnotationColors";
 
 const MODE_COLORS: Record<TransitRouteMode, string> = {
   rail: MAP_ANNOTATION_COLORS.transit.rail,

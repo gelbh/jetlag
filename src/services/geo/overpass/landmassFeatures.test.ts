@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { DUBLIN_CITY_GAME_AREA } from "../../../test/fixtures/dublinGameArea";
-import type { GameArea } from "../../../domain/map/annotations";
+import { DUBLIN_CITY_GAME_AREA } from "@/test/fixtures/dublinGameArea";
+import type { GameArea } from "@/domain/map/annotations";
 import * as overpassClient from "../../core/overpass/overpassClient";
 import {
   buildLandmassQuery,
