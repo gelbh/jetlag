@@ -143,7 +143,7 @@
     "globals": "^17.8.0",
     "husky": "^9.1.7",
     "jsdom": "~29.1.1",
-    "playwright": "^1.62.0",
+    "playwright": "^1.62.1",
     "stylelint": "^17.14.1",
     "stylelint-config-recommended": "^18.0.0",
     "tailwindcss": "~4.3.0",
@@ -170,14 +170,13 @@
     "@hono/node-server": "^2.0.5"
   },
   "allowScripts": {
-    "@firebase/util@1.15.1": true,
     "@sentry/capacitor@4.2.0": true,
     "@sentry/cli@2.58.6": true,
     "esbuild@0.28.1": true,
-    "protobufjs@7.5.8": true,
     "protobufjs@7.6.5": true,
-    "re2@1.25.1": true,
-    "sharp@0.34.5": true,
-    "workerd@1.20260708.1": true
+    "workerd@1.20260730.1": true,
+    "re2@1.26.1": true,
+    "@firebase/util@1.15.2": true,
+    "core-js@3.49.0": true
   }
 }
