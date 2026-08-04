@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { PhotoPanel } from "../../components/tools/PhotoPanel";
 import type { DistanceUnit } from "../../domain/map/distance";
 import type { GameSize } from "../../domain/session/size/gameSize";
@@ -16,8 +16,12 @@ import {
   questionCostBreakdown,
 } from "../../domain/questions";
 import type { SubmitPendingQuestionInput } from "../sync/usePendingQuestionActions";
-import { useSubmitLock } from "../forms/useSubmitLock";
 import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
+import { useToolSession } from "./framework/useToolSession";
+
+interface PhotoSessionConfig {
+  ready: true;
+}
 
 interface UsePhotoToolParams {
   active: boolean;
@@ -53,7 +57,11 @@ export function usePhotoTool({
   mapError,
   canSubmitQuestion = true,
 }: UsePhotoToolParams) {
-  const { isSubmitting, runLocked } = useSubmitLock();
+  const finishPlacementRef = useRef(finishPlacement);
+  useEffect(() => {
+    finishPlacementRef.current = finishPlacement;
+  }, [finishPlacement]);
+
   const usedCategories = useMemo(
     () => usedPhotoCategoryIds(pendingQuestions),
     [pendingQuestions],
@@ -76,70 +84,69 @@ export function usePhotoTool({
 
   const useCount = photoCategoryUseCount(pendingQuestions, categoryId);
   const hasOpenQuestion = hasOpenPendingQuestion(pendingQuestions);
-  const { label: costLabel, draw: cardDraw, keep: cardKeep } = questionCostBreakdown(
-    "D1P1",
-    useCount,
-  );
+  const { label: costLabel, draw: cardDraw, keep: cardKeep } =
+    questionCostBreakdown("D1P1", useCount);
 
   useEffect(() => {
-    if (!hasOpenQuestion && mapError === "Finish the open question before starting another.") {
+    if (
+      !hasOpenQuestion &&
+      mapError === "Finish the open question before starting another."
+    ) {
       setMapError(null);
     }
   }, [hasOpenQuestion, mapError, setMapError]);
 
-  const commit = useCallback(async () => {
-    setMapError(null);
+  const session = useToolSession<PhotoSessionConfig>({
+    toolId: "photo",
+    active: active && awaitHiderAnswer,
+    createInitialConfig: () => ({ ready: true }),
+    onSubmit: async () => {
+      setMapError(null);
 
-    if (!canSubmitQuestion) {
-      if (hasOpenQuestion) {
-        setMapError("Finish the open question before starting another.");
+      if (!canSubmitQuestion) {
+        if (hasOpenQuestion) {
+          setMapError("Finish the open question before starting another.");
+        }
+        return;
       }
-      return;
-    }
 
-    if (!awaitHiderAnswer || !submitPendingQuestion || !sessionId || !senderUid) {
-      setMapError("Photo questions require a hider in the session.");
-      return;
-    }
+      if (
+        !awaitHiderAnswer ||
+        !submitPendingQuestion ||
+        !sessionId ||
+        !senderUid
+      ) {
+        setMapError("Photo questions require a hider in the session.");
+        return;
+      }
 
-    if (usedCategories.has(categoryId)) {
-      setMapError("That photo question was already used this session.");
-      return;
-    }
+      if (usedCategories.has(categoryId)) {
+        setMapError("That photo question was already used this session.");
+        return;
+      }
 
-    await submitPendingQuestion({
-      promptText: photoQuestionPrompt(categoryId, distanceUnit),
-      replyOptions: [...PHOTO_REPLY_OPTIONS],
-      placement: {
-        geometryJson: JSON.stringify({
-          type: "FeatureCollection",
-          features: [],
-        }),
-        metadata: {
-          photoCategoryId: categoryId,
+      await submitPendingQuestion({
+        promptText: photoQuestionPrompt(categoryId, distanceUnit),
+        replyOptions: [...PHOTO_REPLY_OPTIONS],
+        placement: {
+          geometryJson: JSON.stringify({
+            type: "FeatureCollection",
+            features: [],
+          }),
+          metadata: {
+            photoCategoryId: categoryId,
+          },
         },
-      },
-      cardDraw,
-      cardKeep,
-    });
+        cardDraw,
+        cardKeep,
+      });
 
-    setMapError(null);
-    finishPlacement();
-  }, [
-    awaitHiderAnswer,
-    cardDraw,
-    cardKeep,
-    categoryId,
-    distanceUnit,
-    finishPlacement,
-    senderUid,
-    sessionId,
-    setMapError,
-    submitPendingQuestion,
-    usedCategories,
-    canSubmitQuestion,
-    hasOpenQuestion,
-  ]);
+      setMapError(null);
+      finishPlacementRef.current();
+    },
+  });
+
+  const commit = () => session.submit();
 
   const panel =
     active && awaitHiderAnswer ? (
@@ -150,9 +157,9 @@ export function usePhotoTool({
         usedCategoryIds={usedCategories}
         costLabel={costLabel}
         onCategoryChange={setSelectedCategoryId}
-        onCommit={() => void runLocked(commit)}
+        onCommit={() => void commit()}
         error={mapError}
-        isSubmitting={isSubmitting}
+        isSubmitting={session.isBusy}
         canSubmitQuestion={canSubmitQuestion}
         hasOpenQuestion={hasOpenQuestion}
       />
