@@ -1,5 +1,5 @@
-import type { GameResultRecord } from "../../../domain/game/gameResult";
-import type { PlayerRole } from "../../../domain/session/players/playerRole";
+import type { GameResultRecord } from "@/domain/game/gameResult";
+import type { PlayerRole } from "@/domain/session/players/playerRole";
 import { GameOverSheet } from "./GameOverSheet";
 
 interface GameOverChromeProps {

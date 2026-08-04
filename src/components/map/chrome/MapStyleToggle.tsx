@@ -4,8 +4,8 @@ import {
   getMapBasemap,
   type MapStyle,
   type StreetBasemap,
-} from "../../../domain/map/mapBasemaps";
-import { previewTileUrlsFromOrigin } from "../../../domain/map/mapTilePreview";
+} from "@/domain/map/mapBasemaps";
+import { previewTileUrlsFromOrigin } from "@/domain/map/mapTilePreview";
 import type { MapChromeControlInset } from "../helpers/mapChromeControlInset";
 import {
   useMapLibreInteracting,

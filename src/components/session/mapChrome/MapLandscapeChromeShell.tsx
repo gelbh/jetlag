@@ -1,8 +1,8 @@
 import type { ReactNode } from "react";
-import type { SyncStatus } from "../../../domain/device/sync/sync";
-import type { PendingQuestionRecord } from "../../../domain/session/activity/sessionChat";
-import type { SessionRulesInput } from "../../../domain/session/rules";
-import type { TimerState } from "../../../domain/session/timer/timer";
+import type { SyncStatus } from "@/domain/device/sync/sync";
+import type { PendingQuestionRecord } from "@/domain/session/activity/sessionChat";
+import type { SessionRulesInput } from "@/domain/session/rules";
+import type { TimerState } from "@/domain/session/timer/timer";
 import { MapLandscapeChromeProvider } from "./MapLandscapeChromeContext";
 import { MapLandscapeChromeShellSync } from "./MapLandscapeChromeShellSync";
 

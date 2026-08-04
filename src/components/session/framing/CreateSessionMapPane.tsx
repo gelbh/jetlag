@@ -1,17 +1,17 @@
 import { memo, useEffect, useState, type ReactNode } from "react";
-import type { MapBounds, MapBoundsExpression } from "../../../domain/map/mapBounds";
+import type { MapBounds, MapBoundsExpression } from "@/domain/map/mapBounds";
 import { MapView } from "../../map/chrome/MapView";
 import { FramingPreviewLayers } from "../../map/layers/FramingPreviewLayers";
 import { GameAreaMask } from "../../map/layers/GameAreaMask";
-import type { GameArea } from "../../../domain/map/annotations";
-import type { MapStyle } from "../../../domain/map/mapBasemaps";
-import type { FramingMode } from "../../../hooks/session/useGameAreaFraming";
-import type { LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
+import type { GameArea } from "@/domain/map/annotations";
+import type { MapStyle } from "@/domain/map/mapBasemaps";
+import type { FramingMode } from "@/hooks/session/useGameAreaFraming";
+import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
 import {
   GameAreaFramingStats,
 } from "./GameAreaFramingControls";
 import { framingModeHint } from "./gameAreaFramingUi";
-import { type GameSize } from "../../../domain/session/size/gameSize";
+import { type GameSize } from "@/domain/session/size/gameSize";
 
 /** Shared outer shell so placeholder and live map keep identical layout (CLS). */
 export const CREATE_SESSION_MAP_SHELL_CLASS =

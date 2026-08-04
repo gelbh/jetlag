@@ -1,4 +1,4 @@
-import type { MeasuringPlace } from "../../../domain/geo/types";
+import type { MeasuringPlace } from "@/domain/geo/types";
 import { describe, expect, it } from "vitest";
 import { buildStoredMeasuringRegionInput } from "./helpers";
 

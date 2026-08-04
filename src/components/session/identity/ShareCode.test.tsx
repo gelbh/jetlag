@@ -1,8 +1,8 @@
 import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ShareCode } from "./ShareCode";
-import { renderWithRouter } from "../../../test/renderWithRouter";
-import { copyToClipboard } from "../../../platform/copyToClipboard";
+import { renderWithRouter } from "@/test/renderWithRouter";
+import { copyToClipboard } from "@/platform/copyToClipboard";
 
 vi.mock("../../../platform/copyToClipboard", () => ({
   copyToClipboard: vi.fn(),

@@ -1,9 +1,9 @@
 import posthog from "posthog-js";
-import { getClientEnv } from "../../../config/env";
+import { getClientEnv } from "@/config/env";
 import {
   readAnalyticsConsent,
   writeAnalyticsConsent,
-} from "../../../domain/device/consent/analyticsConsent";
+} from "@/domain/device/consent/analyticsConsent";
 import {
   ANALYTICS_EVENTS,
   type AnalyticsEventName,

@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
-import type { AnnotationRecord } from "../../../domain/map/annotations";
+import type { AnnotationRecord } from "@/domain/map/annotations";
 import {
   measuringQuestionFor,
   type MeasuringAnswer,
-} from "../../../domain/questions";
+} from "@/domain/questions";
 import { BinaryAnswerPicker } from "../shared/answers/BinaryAnswerPicker";
 import { closerFurtherAnswerOptions } from "../shared/answers/binaryAnswerOptions";
 import { QuestionPromptBlock } from "../shared/controls/QuestionPromptBlock";

@@ -1,7 +1,7 @@
 import { useLocation } from "react-router-dom";
-import { appUpdateCopy } from "../../../domain/device/updates/appUpdateCopy";
-import { isStandalonePwa } from "../../../domain/device/pwa/isStandalonePwa";
-import { useAppUpdateState } from "../../../hooks/app/useAppUpdateState";
+import { appUpdateCopy } from "@/domain/device/updates/appUpdateCopy";
+import { isStandalonePwa } from "@/domain/device/pwa/isStandalonePwa";
+import { useAppUpdateState } from "@/hooks/app/useAppUpdateState";
 import { HudBanner } from "../hud/HudBanner";
 import { MapFloatAlertPanel } from "./MapFloatAlert";
 

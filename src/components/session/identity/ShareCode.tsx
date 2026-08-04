@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { useCopyFeedback } from "../../../hooks/forms/useCopyFeedback";
-import crawlPolicy from "../../../domain/seo/seoCrawlPolicy.json";
+import { useCopyFeedback } from "@/hooks/forms/useCopyFeedback";
+import crawlPolicy from "@/domain/seo/seoCrawlPolicy.json";
 import {
   buildSessionInviteUrl,
   resolveSessionInviteOrigin,
-} from "../../../services/session/sessionInviteUrl";
+} from "@/services/session/sessionInviteUrl";
 
 interface ShareCodeProps {
   code: string;

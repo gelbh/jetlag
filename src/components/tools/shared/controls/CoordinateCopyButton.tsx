@@ -1,4 +1,4 @@
-import { useCopyFeedback } from "../../../../hooks/forms/useCopyFeedback";
+import { useCopyFeedback } from "@/hooks/forms/useCopyFeedback";
 
 interface CoordinateCopyButtonProps {
   lat: number;

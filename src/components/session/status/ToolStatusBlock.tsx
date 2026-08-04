@@ -1,21 +1,21 @@
 import type { ReactNode } from "react";
-import type { MapTool } from "../../../state/sessionStore";
+import type { MapTool } from "@/state/sessionStore";
 import type {
   PendingQuestionRecord,
   PlayerLocationRecord,
-} from "../../../domain/session/activity/sessionChat";
-import type { SessionRulesInput } from "../../../domain/session/rules";
+} from "@/domain/session/activity/sessionChat";
+import type { SessionRulesInput } from "@/domain/session/rules";
 import {
   computeElapsedMs,
   type TimerState,
-} from "../../../domain/session/timer/timer";
+} from "@/domain/session/timer/timer";
 import {
   isHidingPeriodActive,
-} from "../../../domain/session/hiding/hidingPeriod";
+} from "@/domain/session/hiding/hidingPeriod";
 import {
   playerRoleLabel,
   type PlayerRole,
-} from "../../../domain/session/players/playerRole";
+} from "@/domain/session/players/playerRole";
 import { HudPlayIcon } from "../../ui/brand/HudIcons";
 import { MapTimerCluster } from "../mapChrome/MapTimerCluster";
 

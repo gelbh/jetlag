@@ -1,5 +1,5 @@
 import type { ReactElement, SVGProps } from "react";
-import type { DockableMapTool } from "../../../domain/map/mapTools";
+import type { DockableMapTool } from "@/domain/map/mapTools";
 import { IconBase } from "../../ui/brand/iconBase";
 
 export function HudRadarIcon(props: SVGProps<SVGSVGElement>) {

@@ -1,11 +1,11 @@
 import turfCircle from "@turf/circle";
 import type { Feature, Polygon as GeoPolygon } from "geojson";
 import { Fragment, useMemo } from "react";
-import type { LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
-import type { SessionRecord } from "../../../domain/map/annotations";
-import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
-import { resolveHiderTruthReference } from "../../../domain/questions/hiderTruth/resolveHiderTruthReference";
-import type { HidingZoneRecord } from "../../../domain/session/hiding/hidingZone";
+import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
+import type { SessionRecord } from "@/domain/map/annotations";
+import { MAP_ANNOTATION_COLORS } from "@/domain/map/mapAnnotationColors";
+import { resolveHiderTruthReference } from "@/domain/questions/hiderTruth/resolveHiderTruthReference";
+import type { HidingZoneRecord } from "@/domain/session/hiding/hidingZone";
 import { cssPxDashToMapLibre } from "../helpers/cssPxDashToMapLibre";
 import { MapLibreGeoJsonOverlay } from "../helpers/MapLibreGeoJsonOverlay";
 import { MapLibrePointMarkers } from "../helpers/MapLibrePointMarkers";

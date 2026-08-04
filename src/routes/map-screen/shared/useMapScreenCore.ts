@@ -1,44 +1,44 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { MapViewportState } from "../../../components/map/chrome/MapViewportTracker";
+import type { MapViewportState } from "@/components/map/chrome/MapViewportTracker";
 import {
   findLastRedoableAnnotation,
   findLastUndoableAnnotation,
-} from "../../../domain/map/mapTools";
+} from "@/domain/map/mapTools";
 import {
   LOCAL_SESSION_ID,
   isPremiumSession,
-} from "../../../domain/map/annotations";
+} from "@/domain/map/annotations";
 import {
   fallbackGameArea,
   gameAreaCenter,
   gameAreaToBoundsExpression,
   type LatLngTuple,
-} from "../../../domain/geometry/gameArea/geometry";
+} from "@/domain/geometry/gameArea/geometry";
 import {
   markMapResumeStart,
   markMapUsableAndMeasureReturn,
-} from "../../../domain/device/perf/playDayMarks";
-import { scheduleIdleBootWork } from "../../../domain/device/perf/scheduleAfterFirstPaint";
-import { DEFAULT_MAP_CENTER } from "../../../domain/map/defaultMapCenter";
-import { effectiveMapStyle, applyMapStylePreferenceChange } from "../../../domain/device/power/powerProfile";
-import { useWakeLock } from "../../../hooks/location/useWakeLock";
-import { useAnnotations } from "../../../hooks/map/useAnnotations";
-import { useMapOverlayState } from "../../../hooks/map/useMapOverlayState";
-import { useSessionAnnotations } from "../../../hooks/map/useSessionAnnotations";
-import { useEnsureSessionMembership } from "../../../hooks/session/useEnsureSessionMembership";
-import { useResolvedSessionRules } from "../../../hooks/session/useResolvedSessionRules";
-import { useSessionDistanceUnit } from "../../../hooks/session/useSessionDistanceUnit";
-import { useSharedSessionScreen } from "../../../hooks/session/useSharedSessionScreen";
+} from "@/domain/device/perf/playDayMarks";
+import { scheduleIdleBootWork } from "@/domain/device/perf/scheduleAfterFirstPaint";
+import { DEFAULT_MAP_CENTER } from "@/domain/map/defaultMapCenter";
+import { effectiveMapStyle, applyMapStylePreferenceChange } from "@/domain/device/power/powerProfile";
+import { useWakeLock } from "@/hooks/location/useWakeLock";
+import { useAnnotations } from "@/hooks/map/useAnnotations";
+import { useMapOverlayState } from "@/hooks/map/useMapOverlayState";
+import { useSessionAnnotations } from "@/hooks/map/useSessionAnnotations";
+import { useEnsureSessionMembership } from "@/hooks/session/useEnsureSessionMembership";
+import { useResolvedSessionRules } from "@/hooks/session/useResolvedSessionRules";
+import { useSessionDistanceUnit } from "@/hooks/session/useSessionDistanceUnit";
+import { useSharedSessionScreen } from "@/hooks/session/useSharedSessionScreen";
 import {
   preloadGameAreaCachesAsync,
   gameAreaPreloadKey,
-} from "../../../services/session/gameAreaPreload";
-import { startSeaLevelBackgroundSampling } from "../../../services/geo/elevation/seaLevelProgressive";
+} from "@/services/session/gameAreaPreload";
+import { startSeaLevelBackgroundSampling } from "@/services/geo/elevation/seaLevelProgressive";
 import {
   useAnnotationStore,
   useMapStore,
   useSessionStore,
-} from "../../../state/sessionStore";
+} from "@/state/sessionStore";
 import {
   getMapScreenRoleConfig,
   type MapScreenRole,

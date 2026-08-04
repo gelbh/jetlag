@@ -1,6 +1,6 @@
-import { formatPresetDistance } from "../../../domain/map/distance";
-import { toggleThermometerPresetInSettings } from "../../../domain/session/tools/advancedSessionSettings";
-import { thermometerPresetsMetersForGameSize } from "../../../domain/session/size/gameSizeRules";
+import { formatPresetDistance } from "@/domain/map/distance";
+import { toggleThermometerPresetInSettings } from "@/domain/session/tools/advancedSessionSettings";
+import { thermometerPresetsMetersForGameSize } from "@/domain/session/size/gameSizeRules";
 import { AdvancedSettingsToggle } from "./shared";
 import type { AdvancedSettingsSectionProps } from "./types";
 

@@ -4,9 +4,9 @@ import {
   hasChunkReloadBeenAttempted,
   isChunkLoadError,
   wasChunkReloadDeferred,
-} from "../../../domain/device/updates/chunkLoadRecovery";
-import { appUpdateCopy } from "../../../domain/device/updates/appUpdateCopy";
-import { captureException } from "../../../services/core/analytics/sentry";
+} from "@/domain/device/updates/chunkLoadRecovery";
+import { appUpdateCopy } from "@/domain/device/updates/appUpdateCopy";
+import { captureException } from "@/services/core/analytics/sentry";
 import { AppErrorPage } from "./AppErrorPage";
 import { MapFloatAlertPanel } from "../banners/MapFloatAlert";
 

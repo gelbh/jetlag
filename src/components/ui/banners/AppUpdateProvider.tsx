@@ -10,7 +10,7 @@ import { useLocation } from "react-router-dom";
 import {
   acknowledgeSoftReload,
   shouldHonorSoftReload,
-} from "../../../domain/device/updates/reloadAcknowledgements";
+} from "@/domain/device/updates/reloadAcknowledgements";
 import {
   applyServiceWorkerUpdate,
   isSafeToReloadApp,
@@ -18,18 +18,18 @@ import {
   promptIfWaiting,
   registerAppNeedRefreshHandler,
   scheduleServiceWorkerUpdateChecks,
-} from "../../../domain/device/updates/serviceWorkerRefresh";
-import { setServiceWorkerChunkReloadContext } from "../../../domain/device/updates/lazyWithChunkRetry";
-import { tryUpdateServiceWorker } from "../../../domain/device/updates/serviceWorkerUpdate";
-import { compareAppVersions } from "../../../domain/session/meta/sessionVersion";
-import { useHotfixGraceReload } from "../../../hooks/app/useHotfixGraceReload";
-import { isFirebaseConfigured } from "../../../services/core/firebase/firebase";
+} from "@/domain/device/updates/serviceWorkerRefresh";
+import { setServiceWorkerChunkReloadContext } from "@/domain/device/updates/lazyWithChunkRetry";
+import { tryUpdateServiceWorker } from "@/domain/device/updates/serviceWorkerUpdate";
+import { compareAppVersions } from "@/domain/session/meta/sessionVersion";
+import { useHotfixGraceReload } from "@/hooks/app/useHotfixGraceReload";
+import { isFirebaseConfigured } from "@/services/core/firebase/firebase";
 import {
   DEFAULT_HOTFIX_GRACE_SECONDS,
   subscribeAppConfigRuntime,
   type AppConfigRuntime,
-} from "../../../services/firestore/firestoreIncidents";
-import { useSessionStore } from "../../../state/sessionStore";
+} from "@/services/firestore/firestoreIncidents";
+import { useSessionStore } from "@/state/sessionStore";
 import {
   AppUpdateContext,
   type AppUpdateContextValue,

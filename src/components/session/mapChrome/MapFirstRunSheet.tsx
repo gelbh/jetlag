@@ -1,5 +1,5 @@
 import { MotionSheet } from "../../motion/MotionSheet";
-import { usePersistedDismiss } from "../../../hooks/forms/usePersistedDismiss";
+import { usePersistedDismiss } from "@/hooks/forms/usePersistedDismiss";
 
 const STORAGE_KEY = "jetlag.mapFirstRunDismissed";
 

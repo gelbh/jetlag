@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { useAnimatedPresence } from "../../../hooks/motion/useAnimatedPresence";
+import { useAnimatedPresence } from "@/hooks/motion/useAnimatedPresence";
 
 interface AnimatedBannerProps {
   visible: boolean;

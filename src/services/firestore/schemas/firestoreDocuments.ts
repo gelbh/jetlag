@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { SESSION_ACTIVITY_TYPES } from "../../../domain/session/activity/sessionActivityLog";
+import { SESSION_ACTIVITY_TYPES } from "@/domain/session/activity/sessionActivityLog";
 
 export const firestoreGameAreaSchema = z
   .object({

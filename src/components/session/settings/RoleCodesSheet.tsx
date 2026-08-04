@@ -1,6 +1,6 @@
 import { SheetHeader } from "../../ui/sheets/SheetHeader";
 import { SheetHost } from "../../ui/sheets/SheetHost";
-import type { SessionRecord } from "../../../domain/map/annotations";
+import type { SessionRecord } from "@/domain/map/annotations";
 import { RolePasscodeSettings } from "./RolePasscodeSettings";
 
 export interface RoleCodesSheetProps {

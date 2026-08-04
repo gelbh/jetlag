@@ -4,25 +4,25 @@ import type {
   Point,
   Polygon as GeoPolygon,
 } from "geojson";
-import type { GameArea } from "../../../domain/map/annotations";
-import type { AnnotationRecord } from "../../../domain/map/annotations";
-import type { LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
+import type { GameArea } from "@/domain/map/annotations";
+import type { AnnotationRecord } from "@/domain/map/annotations";
+import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
 import {
   buildMatchingEliminationRegion,
   buildSameNearestRegion,
-} from "../../../domain/geometry/measuring/matchingGeometry";
+} from "@/domain/geometry/measuring/matchingGeometry";
 import {
   matchingQuestionFor,
   type MatchingAnswer,
   type MatchingCategoryId,
-} from "../../../domain/questions";
-import type { SessionCustomCategory } from "../../../domain/session/catalog/sessionCustomContent";
-import { yesNoAnswerOptions } from "../../../components/tools/shared/answers/binaryAnswerOptions";
+} from "@/domain/questions";
+import type { SessionCustomCategory } from "@/domain/session/catalog/sessionCustomContent";
+import { yesNoAnswerOptions } from "@/components/tools/shared/answers/binaryAnswerOptions";
 import type { SubmitPendingQuestionInput } from "../../sync/usePendingQuestionActions";
-import { serializeMatchingFeatures } from "../../../domain/geo/matchingAdapters";
-import type { MatchingFeature } from "../../../services/geo/matching";
-import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
-import { emitQuestionAnsweredActivity } from "../../../services/session/emitSessionActivity";
+import { serializeMatchingFeatures } from "@/domain/geo/matchingAdapters";
+import type { MatchingFeature } from "@/services/geo/matching";
+import { MAP_ANNOTATION_COLORS } from "@/domain/map/mapAnnotationColors";
+import { emitQuestionAnsweredActivity } from "@/services/session/emitSessionActivity";
 
 export interface CommitMatchingInput {
   canSubmitQuestion: boolean;

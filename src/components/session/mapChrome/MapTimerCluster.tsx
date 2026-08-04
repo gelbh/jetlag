@@ -1,28 +1,28 @@
 import { useEffect, useState } from "react";
-import type { SessionRulesInput } from "../../../domain/session/rules";
-import { getPowerProfile } from "../../../domain/device/power/powerProfile";
+import type { SessionRulesInput } from "@/domain/session/rules";
+import { getPowerProfile } from "@/domain/device/power/powerProfile";
 import {
   computeElapsedMs,
   formatElapsedTime,
   isTimerRunning,
   type TimerState,
-} from "../../../domain/session/timer/timer";
+} from "@/domain/session/timer/timer";
 import {
   formatHidingPeriodCountdown,
   hidingPeriodRemainingMs,
   isHidingPeriodActive,
   seekPhaseElapsedMs,
-} from "../../../domain/session/hiding/hidingPeriod";
+} from "@/domain/session/hiding/hidingPeriod";
 import type {
   PendingQuestionRecord,
   PlayerLocationRecord,
-} from "../../../domain/session/activity/sessionChat";
+} from "@/domain/session/activity/sessionChat";
 import {
   isStaleThermometerWalk,
   selectPrimaryQuestionTimer,
-} from "../../../domain/questions";
-import { useMapStore } from "../../../state/mapStore";
-import { useStaleWalkNowMs } from "../../../hooks/sync/useStaleWalkNowMs";
+} from "@/domain/questions";
+import { useMapStore } from "@/state/mapStore";
+import { useStaleWalkNowMs } from "@/hooks/sync/useStaleWalkNowMs";
 
 interface MapTimerClusterProps {
   sessionRules: SessionRulesInput;

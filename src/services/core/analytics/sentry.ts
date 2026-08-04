@@ -1,8 +1,8 @@
 import * as Sentry from "@sentry/capacitor";
 import * as SentryReact from "@sentry/react";
-import { getClientEnv } from "../../../config/env";
-import { APP_VERSION } from "../../../domain/device/changelog";
-import type { StorageEstimateSnapshot } from "../../../domain/device/pwa/pwaStorageBudget";
+import { getClientEnv } from "@/config/env";
+import { APP_VERSION } from "@/domain/device/changelog";
+import type { StorageEstimateSnapshot } from "@/domain/device/pwa/pwaStorageBudget";
 import {
   applyClientSentryDisposition,
   CLIENT_SENTRY_IGNORE_ERRORS,

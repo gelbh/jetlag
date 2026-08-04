@@ -1,10 +1,10 @@
-import type { GameArea } from "../../../domain/map/annotations";
+import type { GameArea } from "@/domain/map/annotations";
 import {
   resolveCoarseSeaLevelDivisions,
   resolveFineSeaLevelDivisions,
   sampleGameAreaCells,
   type ElevationSampleCell,
-} from "../../../domain/geometry/measuring/seaLevel";
+} from "@/domain/geometry/measuring/seaLevel";
 import { fetchElevations, type ElevationFetchProfile } from "./index";
 import {
   readSeaLevelSamplingCache,

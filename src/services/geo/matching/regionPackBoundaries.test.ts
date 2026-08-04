@@ -5,7 +5,7 @@ import {
   clearRegionPackGeoCacheForTests,
   loadRegionPackPlayArea,
 } from "./regionPackBoundaries";
-import { gameAreaSquareMiles } from "../../../domain/session/size/gameSize";
+import { gameAreaSquareMiles } from "@/domain/session/size/gameSize";
 
 const ROOT = resolve(import.meta.dirname, "../../../..");
 

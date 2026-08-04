@@ -1,5 +1,5 @@
 import { useShallow } from "zustand/react/shallow";
-import { selectPreloadBanner, usePreloadStore } from "../../../state/preloadStore";
+import { selectPreloadBanner, usePreloadStore } from "@/state/preloadStore";
 
 /** @deprecated Use GameAreaPreloadBeacon on the map HUD instead. */
 export function GameAreaPreloadBanner() {

@@ -4,8 +4,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   createMockGeolocationPosition,
   mockGeolocation,
-} from "../../../test/mocks/geolocation";
-import { retainLocationPermissionDemand, resetLocationPermissionUiForTests } from "../../../services/core/location/locationPermissionUi";
+} from "@/test/mocks/geolocation";
+import { retainLocationPermissionDemand, resetLocationPermissionUiForTests } from "@/services/core/location/locationPermissionUi";
 import { LocationPermissionPrompt } from "./LocationPermissionPrompt";
 
 function mockPermissions(state: PermissionState): void {

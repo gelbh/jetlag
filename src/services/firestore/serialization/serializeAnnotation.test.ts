@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { AnnotationRecord } from "../../../domain/map/annotations";
+import type { AnnotationRecord } from "@/domain/map/annotations";
 import { assertNoNestedArrays } from "./shared";
 import {
   deserializeAnnotationFromFirestore,

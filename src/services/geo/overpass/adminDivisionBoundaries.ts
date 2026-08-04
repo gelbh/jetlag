@@ -4,14 +4,14 @@ import booleanIntersects from "@turf/boolean-intersects";
 import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
 import { lineString, point as turfPoint } from "@turf/helpers";
 import polygonize from "@turf/polygonize";
-import type { GameArea } from "../../../domain/map/annotations";
-import type { LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
-import type { AdminDivisionFeature } from "../../../domain/geo/types";
+import type { GameArea } from "@/domain/map/annotations";
+import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
+import type { AdminDivisionFeature } from "@/domain/geo/types";
 import {
   gameAreaToBoundingBox,
   gameAreaToPolygon,
   simplifyGameArea,
-} from "../../../domain/geometry/gameArea/geometry";
+} from "@/domain/geometry/gameArea/geometry";
 import { queryOverpass } from "../../core/overpass/overpassClient";
 import { parseMatchingAreaGeoJson } from "../matching/matchingAreaGeoJson";
 import {
@@ -21,7 +21,7 @@ import {
 
 export const MAX_ADMIN_DIVISIONS = 50;
 
-export type { AdminDivisionFeature } from "../../../domain/geo/types";
+export type { AdminDivisionFeature } from "@/domain/geo/types";
 
 type OverpassMember = {
   type: "way" | "node" | "relation";
