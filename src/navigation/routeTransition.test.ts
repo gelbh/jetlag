@@ -102,13 +102,29 @@ describe("isLazyRoute", () => {
     expect(isLazyRoute("/presets")).toBe(true);
     expect(isLazyRoute("/presets/new")).toBe(true);
     expect(isLazyRoute("/presets/foo/edit")).toBe(true);
+    expect(isLazyRoute("/admin")).toBe(true);
+    expect(isLazyRoute("/admin/incidents")).toBe(true);
+    expect(isLazyRoute("/admin/incidents/abc")).toBe(true);
+    expect(isLazyRoute("/feedback")).toBe(true);
+    expect(isLazyRoute("/privacy")).toBe(true);
+    expect(isLazyRoute("/terms")).toBe(true);
+    expect(isLazyRoute("/premium")).toBe(true);
+    expect(isLazyRoute("/stats")).toBe(true);
+    expect(isLazyRoute("/friends")).toBe(true);
+    expect(isLazyRoute("/leaderboard")).toBe(true);
   });
 
   it("marks eager routes as not lazy", () => {
     expect(isLazyRoute("/")).toBe(false);
     expect(isLazyRoute("/join")).toBe(false);
-    expect(isLazyRoute("/admin")).toBe(false);
-    expect(isLazyRoute("/premium")).toBe(false);
+  });
+
+  it("keeps nested admin paths distinct in normalizeRoutePath", () => {
+    expect(normalizeRoutePath("/admin")).toBe("/admin");
+    expect(normalizeRoutePath("/admin/incidents")).toBe("/admin/incidents");
+    expect(normalizeRoutePath("/admin/incidents/abc")).toBe(
+      "/admin/incidents/abc",
+    );
   });
 });
 
