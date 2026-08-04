@@ -24,6 +24,8 @@ describe("MapBottomChrome", () => {
     );
     expect(screen.getByRole("button", { name: "Undo" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Redo" })).toBeInTheDocument();
+    expect(screen.getByRole("group", { name: "Undo" })).toBeInTheDocument();
+    expect(screen.getByRole("group", { name: "Redo" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Radar" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Chat" })).toBeInTheDocument();
     expect(
@@ -38,6 +40,28 @@ describe("MapBottomChrome", () => {
     expect(container.querySelector('[data-island="history-start"]')).toBeNull();
     expect(container.querySelector('[data-island="history-end"]')).toBeNull();
     expect(container.querySelector('[data-island="hunt"]')).not.toBeNull();
+  });
+
+  it("renders a single bookend when only one history prop is set", () => {
+    const { container, rerender } = render(
+      <MapBottomChrome
+        layout="phone"
+        historyStart={<button type="button">Undo</button>}
+        hunt={<button type="button">Radar</button>}
+      />,
+    );
+    expect(container.querySelector('[data-island="history-start"]')).not.toBeNull();
+    expect(container.querySelector('[data-island="history-end"]')).toBeNull();
+
+    rerender(
+      <MapBottomChrome
+        layout="phone"
+        historyEnd={<button type="button">Redo</button>}
+        hunt={<button type="button">Radar</button>}
+      />,
+    );
+    expect(container.querySelector('[data-island="history-start"]')).toBeNull();
+    expect(container.querySelector('[data-island="history-end"]')).not.toBeNull();
   });
 
   it("wraps phone chrome in a fixed host", () => {

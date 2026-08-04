@@ -130,9 +130,12 @@ test.describe("mobile tool dock", () => {
     await expect(page.locator('[data-island="history-start"]')).toHaveCount(1);
     await expect(page.locator('[data-island="history-end"]')).toHaveCount(1);
     await expect(page.locator('[data-island="hunt"]')).toHaveCount(1);
-    await expect(
-      page.locator(".jl-map-chrome-bottom-band [data-island]"),
-    ).toHaveCount(3);
+    const bandOrder = await page
+      .locator(".jl-map-chrome-bottom-band [data-island]")
+      .evaluateAll((nodes) =>
+        nodes.map((node) => node.getAttribute("data-island")),
+      );
+    expect(bandOrder).toEqual(["history-start", "hunt", "history-end"]);
     await expect(page.locator('[data-island="session"]')).toHaveCount(1);
     await expect(page.locator(".jl-map-chrome-bottom-band")).toHaveCount(1);
     await expect(page.locator(".jl-map-chrome-side-stack")).toHaveCount(1);

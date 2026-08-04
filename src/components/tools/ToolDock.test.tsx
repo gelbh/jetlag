@@ -197,8 +197,19 @@ describe("ToolDock", () => {
     expect(document.querySelector('[data-island="session"]')).not.toBeNull();
   });
 
-  it("places Undo left and Redo right of Hunt in the bottom band", () => {
-    renderWithRouter(<ToolDock {...dockBase} onOpenChat={vi.fn()} />);
+  it("places Undo left and Redo right of Hunt and routes history actions", () => {
+    const onUndo = vi.fn();
+    const onRedo = vi.fn();
+    renderWithRouter(
+      <ToolDock
+        {...dockBase}
+        canUndo
+        canRedo
+        onUndo={onUndo}
+        onRedo={onRedo}
+        onOpenChat={vi.fn()}
+      />,
+    );
 
     const bottom = document.querySelector(".jl-map-chrome-bottom-band");
     expect(bottom).not.toBeNull();
@@ -207,14 +218,33 @@ describe("ToolDock", () => {
     ].map((el) => el.getAttribute("data-island"));
     expect(bandIslands).toEqual(["history-start", "hunt", "history-end"]);
 
-    expect(screen.getByRole("button", { name: "Undo last annotation" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Redo last annotation" })).toBeInTheDocument();
+    const undo = screen.getByRole("button", { name: "Undo last annotation" });
+    const redo = screen.getByRole("button", { name: "Redo last annotation" });
     expect(screen.getByRole("group", { name: "Undo" })).toBeInTheDocument();
     expect(screen.getByRole("group", { name: "Redo" })).toBeInTheDocument();
 
     const hunt = document.querySelector('[data-island="hunt"]');
     expect(hunt?.querySelector('[aria-label="Undo last annotation"]')).toBeNull();
     expect(hunt?.querySelector('[aria-label="Redo last annotation"]')).toBeNull();
+
+    fireEvent.click(undo);
+    fireEvent.click(redo);
+    expect(onUndo).toHaveBeenCalledTimes(1);
+    expect(onRedo).toHaveBeenCalledTimes(1);
+  });
+
+  it("disables unavailable and inactive history bookends", () => {
+    const { rerender } = renderWithRouter(
+      <ToolDock {...dockBase} canUndo={false} canRedo={false} />,
+    );
+    expect(screen.getByRole("button", { name: "Undo last annotation" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Redo last annotation" })).toBeDisabled();
+
+    rerender(
+      <ToolDock {...dockBase} canUndo canRedo inactive />,
+    );
+    expect(screen.getByRole("button", { name: "Undo last annotation" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Redo last annotation" })).toBeDisabled();
   });
 });
 
