@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { ReactNode, RefObject } from "react";
 import { useState } from "react";
 import type { AnnotationRecord, SessionRecord } from "../../domain/map/annotations";
 import type {
@@ -195,6 +195,8 @@ export type HiderMapScreenChromeProps = {
   };
   /** When set with desktop layout, map fills the ops shell center slot. */
   mapSlot?: ReactNode;
+  /** HUD root for pan-hide (`data-map-interacting`) — same as seeker. */
+  chromeHudRef?: RefObject<HTMLDivElement | null>;
 };
 
 export function HiderMapScreenChrome({
@@ -253,6 +255,7 @@ export function HiderMapScreenChrome({
   mapSettings,
   chat,
   mapSlot,
+  chromeHudRef,
 }: HiderMapScreenChromeProps) {
   const syncMessage = syncStatus.remoteUpdateNotice ?? syncStatus.lastSyncError;
   const {
@@ -406,6 +409,7 @@ export function HiderMapScreenChrome({
   return (
     <ContextualRailPanelProvider>
       <MapScreenChromeSlots
+        chromeHudRef={chromeHudRef}
         header={statusRail}
         toolbar={toolDock}
         mapSlot={mapSlot}
