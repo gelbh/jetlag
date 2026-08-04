@@ -211,7 +211,7 @@ export function usePanelDrag({
     const wasPanning = prevMapPanningRef.current;
     prevMapPanningRef.current = mapPanning;
 
-    if (!animate || isDragging || isSettling) {
+    if (!animate || isDragging) {
       return;
     }
 
@@ -220,6 +220,10 @@ export function usePanelDrag({
 
     if (panStarted) {
       /* eslint-disable react-hooks/set-state-in-effect -- map-pan collapse is driven by external map gesture */
+      // Interrupt an in-flight settle so a quick pan cannot lose pan-end restore.
+      pendingMinimizedRef.current = null;
+      settleShouldPersistRef.current = true;
+      setIsSettling(false);
       if (userMinimized) {
         setDisplayMinimized(true);
         setOffsetPx(collapsedPx);
@@ -231,13 +235,11 @@ export function usePanelDrag({
     } else if (panEnded && !userMinimized) {
       beginSettle(0, false);
     }
-
   }, [
     animate,
     beginSettle,
     collapsedPx,
     isDragging,
-    isSettling,
     mapPanning,
     userMinimized,
   ]);

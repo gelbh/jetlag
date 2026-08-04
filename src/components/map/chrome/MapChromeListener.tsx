@@ -3,7 +3,6 @@ import { useMapLibreMap } from "../helpers/useMapLibreMap";
 
 interface MapChromeListenerProps {
   chromeHudRef: MutableRefObject<HTMLElement | null>;
-  suppressRef?: MutableRefObject<boolean>;
 }
 
 function setHudInteracting(hud: HTMLElement | null, interacting: boolean): void {
@@ -20,7 +19,6 @@ function setHudInteracting(hud: HTMLElement | null, interacting: boolean): void 
 
 export function MapChromeListener({
   chromeHudRef,
-  suppressRef,
 }: MapChromeListenerProps) {
   const map = useMapLibreMap();
   const countRef = useRef(0);
@@ -37,10 +35,6 @@ export function MapChromeListener({
     };
 
     const start = () => {
-      if (suppressRef?.current) {
-        return;
-      }
-
       countRef.current += 1;
       if (countRef.current === 1) {
         setInteracting(true);
@@ -72,7 +66,7 @@ export function MapChromeListener({
       setInteracting(false);
       countRef.current = 0;
     };
-  }, [map, chromeHudRef, suppressRef]);
+  }, [map, chromeHudRef]);
 
   return null;
 }

@@ -64,7 +64,6 @@ function mockController() {
     authReady: true,
     timer: { timerState: { accumulatedMs: 0, runningSince: null } },
     overlay: {},
-    suppressChromeHideRef: { current: false },
     mapViewport: null,
     setMapViewport: vi.fn(),
     activeThermometerWalk: null,

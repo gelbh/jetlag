@@ -103,7 +103,6 @@ function mockController(): ObserverMapScreenController {
       openChat: vi.fn(),
       closeSheet: vi.fn(),
     },
-    suppressChromeHideRef: { current: false },
     mapViewport: null,
     setMapViewport: vi.fn(),
     activeThermometerWalk: null,

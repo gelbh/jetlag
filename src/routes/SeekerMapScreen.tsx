@@ -49,7 +49,6 @@ function SeekerMapScreenBody({
       activeTool={controller.activeTool}
       handleMapClick={controller.handleMapClick}
       chromeHudRef={controller.chromeHudRef}
-      suppressChromeHideRef={controller.suppressChromeHideRef}
       mapShellRef={controller.mapShellRef}
       exportLegendRef={controller.exportLegendRef}
       placementCrosshair={controller.placementCrosshair}

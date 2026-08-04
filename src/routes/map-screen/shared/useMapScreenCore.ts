@@ -229,7 +229,6 @@ export function useMapScreenCore(options: UseMapScreenCoreOptions = {}) {
   }, []);
   const chromeHudRef = useRef<HTMLDivElement>(null);
   const exportLegendRef = useRef<HTMLDivElement>(null);
-  const suppressChromeHideRef = useRef(false);
   useWakeLock(keepScreenAwake || (timer.running && !lowPowerMode));
   useEffect(() => {
     if (
@@ -384,7 +383,6 @@ export function useMapScreenCore(options: UseMapScreenCoreOptions = {}) {
     mapShellRef,
     chromeHudRef,
     exportLegendRef,
-    suppressChromeHideRef,
     toolGameArea,
     center,
     mapFocusBounds,

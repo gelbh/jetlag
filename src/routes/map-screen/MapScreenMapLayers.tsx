@@ -34,7 +34,6 @@ type MapScreenMapLayersProps = Pick<
   | "activeTool"
   | "handleMapClick"
   | "chromeHudRef"
-  | "suppressChromeHideRef"
   | "mapShellRef"
   | "exportLegendRef"
   | "placementCrosshair"
@@ -87,7 +86,6 @@ export function MapScreenMapLayers({
   activeTool,
   handleMapClick,
   chromeHudRef,
-  suppressChromeHideRef,
   mapShellRef,
   exportLegendRef,
   placementCrosshair,
@@ -142,7 +140,6 @@ export function MapScreenMapLayers({
         onRecenter={requestPlacementRecenter}
         onMapClick={handleMapClick}
         chromeHudRef={chromeHudRef}
-        suppressChromeHideRef={suppressChromeHideRef}
         className={
           placementCrosshair ? "map-crosshair h-full w-full" : "h-full w-full"
         }
@@ -151,7 +148,6 @@ export function MapScreenMapLayers({
           onViewportChange={handleMapViewportChange}
           onUserPanStart={handleMapPanStart}
           onUserPanEnd={handleMapPanEnd}
-          suppressPanRef={suppressChromeHideRef}
         />
         <GameAreaMask gameArea={gameArea!} />
         {transitEnabled && layerVisibility.transit ? (

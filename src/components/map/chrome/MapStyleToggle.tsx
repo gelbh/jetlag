@@ -1,4 +1,4 @@
-import { useMemo, type RefObject } from "react";
+import { useMemo } from "react";
 import { createPortal } from "react-dom";
 import {
   getMapBasemap,
@@ -19,7 +19,6 @@ interface MapStyleToggleProps {
   streetBasemap?: StreetBasemap;
   onMapStyleChange: (style: MapStyle) => void;
   inset?: MapChromeControlInset;
-  suppressRef?: RefObject<boolean>;
 }
 
 export function MapStyleToggle({
@@ -28,11 +27,10 @@ export function MapStyleToggle({
   streetBasemap = "light",
   onMapStyleChange,
   inset = "dock",
-  suppressRef,
 }: MapStyleToggleProps) {
   const map = useMapLibreMap();
   const portalTarget = useMemo(() => map.getContainer(), [map]);
-  const interacting = useMapLibreInteracting(suppressRef);
+  const interacting = useMapLibreInteracting();
   const tileOrigin = useMapLibrePreviewTileOrigin();
   const nextStyle = mapStyle === "standard" ? "satellite" : "standard";
   const previewBasemap = getMapBasemap(nextStyle, streetBasemap);

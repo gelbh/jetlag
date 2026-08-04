@@ -1,4 +1,4 @@
-import { useMemo, type MutableRefObject } from "react";
+import { useMemo } from "react";
 import { createPortal } from "react-dom";
 import { HudRefreshIcon } from "../../ui/brand/HudIcons";
 import type { MapChromeControlInset } from "../helpers/mapChromeControlInset";
@@ -12,19 +12,17 @@ export type MapRecenterControlInset = MapChromeControlInset;
 interface MapRecenterControlProps {
   enabled: boolean;
   inset?: MapChromeControlInset;
-  suppressRef?: MutableRefObject<boolean>;
   onRecenter?: () => void;
 }
 
 export function MapRecenterControl({
   enabled,
   inset = "dock",
-  suppressRef,
   onRecenter,
 }: MapRecenterControlProps) {
   const map = useMapLibreMap();
   const portalTarget = useMemo(() => map.getContainer(), [map]);
-  const interacting = useMapLibreInteracting(suppressRef);
+  const interacting = useMapLibreInteracting();
 
   if (!onRecenter || !enabled || !portalTarget) {
     return null;
