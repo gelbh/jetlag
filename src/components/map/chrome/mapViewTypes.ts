@@ -40,6 +40,8 @@ export interface MapViewMapLibreChromeProps {
   mapStyleControlInset?: MapZoomControlInset;
   showRecenterControl?: boolean;
   onRecenter?: () => void;
+  /** Overrides MapRecenterControl aria-label/title (default: question placement). */
+  recenterAriaLabel?: string;
 }
 
 export type MapViewMapLibreProps = MapViewCoreProps & MapViewMapLibreChromeProps;

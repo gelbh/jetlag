@@ -156,7 +156,7 @@ test.describe("mobile tool dock", () => {
   });
 
   test("@smoke side stack clears left zoom column", async ({ page }) => {
-    // Narrow portrait exercises --map-chrome-zoom-stack-height: 5.25rem (≤28rem).
+    // Narrow portrait: left zoom/sat/recenter stack; right session above hunt.
     await page.setViewportSize({ width: 390, height: 844 });
     await openMapWithLocalSession(page);
     await assertSideStackClearsZoom(page);
@@ -448,7 +448,7 @@ test.describe("landscape map-dominant chrome", () => {
   test("@smoke side stack clears zoom after dock reveal in landscape", async ({
     page,
   }) => {
-    // Short landscape uses --map-chrome-zoom-stack-height: 6.25rem.
+    // Short landscape: side stack still clears the left map control column.
     await page.getByRole("button", { name: /Show map controls/i }).click();
     await expect(page.locator(".jl-tool-dock")).toBeVisible();
     await assertSideStackClearsZoom(page);

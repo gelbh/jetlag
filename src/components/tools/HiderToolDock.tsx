@@ -1,4 +1,4 @@
-import { HudPlusIcon, HudRefreshIcon } from "../ui/brand/HudIcons";
+import { HudPlusIcon } from "../ui/brand/HudIcons";
 import { HudPinIcon } from "../map/icons/ToolIcons";
 import { MapBottomChrome } from "../map/chrome/MapBottomChrome";
 import { MapChromeControl } from "../map/chrome/MapChromeControl";
@@ -12,7 +12,6 @@ interface HiderToolDockProps {
   zoneDisabled?: boolean;
   showExpansion: boolean;
   onExpansion: () => void;
-  onRecenter: () => void;
   onOpenChat: () => void;
   onOpenSettings: () => void;
   onOpenCodes?: () => void;
@@ -31,7 +30,6 @@ export function HiderToolDock({
   zoneDisabled = false,
   showExpansion,
   onExpansion,
-  onRecenter,
   onOpenChat,
   onOpenSettings,
   onOpenCodes,
@@ -83,18 +81,6 @@ export function HiderToolDock({
           unreadCount={unreadCount}
           inactive={inactive}
         />
-      }
-      mapControls={
-        <div className="jl-tool-dock-group">
-          <MapChromeControl
-            variant="slot"
-            onClick={onRecenter}
-            disabled={inactive}
-            aria-label="Recenter map on play area"
-            icon={<HudRefreshIcon className="h-5 w-5 shrink-0" />}
-            label="Recenter"
-          />
-        </div>
       }
     />
   );

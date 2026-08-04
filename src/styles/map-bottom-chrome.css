@@ -2,37 +2,22 @@
 
 :root {
   /*
-   * Island clearance: bottom hunt band + right side stack.
-   * Replaces dual primary+secondary bar fold and bottom Session row.
-   * Right MapView portal is Recenter only (zoom lives left above satellite).
-   * 3.25rem clears one recenter control; ≤28rem adds ~2rem for the dock inset
-   * bump; short landscape keeps the smaller stack so Session is not pushed
-   * under the status HUD when the dock is revealed.
+   * Island clearance: bottom hunt band + right session stack.
+   * Map controls (zoom / satellite / recenter) live on the LEFT stack.
+   * Side stack sits above the bottom hunt island only — no right Recenter portal.
    */
   --dock-island-height: 3.25rem;
   --dock-island-gap: 0.5rem;
   --map-chrome-side-width: 3.25rem;
-  --map-chrome-zoom-stack-height: 3.25rem;
   --dock-content-height: var(--dock-island-height);
   --dock-secondary-height: 0px;
   --dock-row-gap: 0px;
   --dock-primary-content-height: var(--dock-island-height);
-  /* Zoom left above satellite (MapView portals) — cascade after map-chrome-controls.css */
+  /* Left map control stack (MapView portals) — cascade after map-chrome-controls.css */
   --map-left-chrome-inset: max(0.75rem, env(safe-area-inset-left));
   --map-left-chrome-gap: 0.5rem;
   --map-style-control-size: 2.75rem;
-}
-
-@media (max-width: 28rem) {
-  :root {
-    --map-chrome-zoom-stack-height: 5.25rem;
-  }
-}
-
-@media (max-height: 430px) and (orientation: landscape) {
-  :root {
-    --map-chrome-zoom-stack-height: 3.25rem;
-  }
+  --map-zoom-btn-size: 2.75rem;
 }
 
 @media (min-width: 28.01rem) {
@@ -95,11 +80,9 @@
     position: absolute;
     z-index: 3;
     right: max(0.5rem, env(safe-area-inset-right));
-    /* Sit above MapView Recenter portal (zoom is left above satellite).
-       --map-chrome-zoom-stack-height clears right-edge Recenter only. */
+    /* Sit above bottom hunt island; map controls are on the left. */
     bottom: calc(
-      var(--dock-island-height) + env(safe-area-inset-bottom) + 0.75rem +
-        var(--map-chrome-zoom-stack-height) + 0.5rem
+      var(--dock-island-height) + env(safe-area-inset-bottom) + 0.75rem
     );
     display: flex;
     flex-direction: column;
@@ -174,12 +157,12 @@
     .jl-map-chrome-side-stack {
       bottom: calc(
         var(--dock-island-height) + env(safe-area-inset-bottom) + 0.75rem +
-          var(--map-chrome-zoom-stack-height) + 1rem
+          1rem
       );
       max-height: calc(
         100dvh - env(safe-area-inset-top) - 0.5rem -
           var(--dock-island-height) - env(safe-area-inset-bottom) - 0.75rem -
-          var(--map-chrome-zoom-stack-height) - 1rem
+          1rem
       );
       overflow: hidden;
     }
@@ -270,14 +253,15 @@
     gap: 0.25rem;
   }
 
-  /* Draw lives on the RIGHT session stack — menu sits left of that stack. */
+  /* Draw lives on the RIGHT session stack — menu sits left of that stack.
+     Map controls are LEFT; no right Recenter clearance. */
   .jl-map-bottom-chrome-host .jl-tool-menu-dock {
     position: absolute;
     right: calc(
       max(0.5rem, env(safe-area-inset-right)) + var(--map-chrome-side-width, 3.25rem) + 0.5rem
     );
     bottom: calc(
-      var(--dock-island-height) + env(safe-area-inset-bottom) + 0.75rem + var(--map-chrome-zoom-stack-height) + 0.5rem
+      var(--dock-island-height) + env(safe-area-inset-bottom) + 0.75rem
     );
     z-index: calc(var(--z-panel) + 1);
     /* Host is pe-none; islands re-enable PE — overlays must too. */
@@ -359,22 +343,15 @@
   }
 }
 
-/* Zoom left above satellite layout (tokens live in :root above). */
-.map-zoom-control {
+/* LEFT map stack (bottom → top): satellite, zoom, recenter/compass. */
+.map-zoom-control,
+.map-style-control,
+.map-recenter-control {
   left: var(--map-left-chrome-inset);
   right: auto;
 }
 
-.map-style-control {
-  left: var(--map-left-chrome-inset);
-}
-
-.map-recenter-control {
-  right: max(0.75rem, env(safe-area-inset-right));
-}
-
-.map-style-control--dock,
-.map-recenter-control--dock {
+.map-style-control--dock {
   bottom: calc(
     var(--dock-total-height) + var(--chrome-gap-above-dock) +
       var(--safe-area-bottom) + 0.5rem
@@ -389,8 +366,16 @@
   );
 }
 
-.map-style-control--chrome-hidden,
-.map-recenter-control--chrome-hidden {
+.map-recenter-control--dock {
+  bottom: calc(
+    var(--dock-total-height) + var(--chrome-gap-above-dock) +
+      var(--safe-area-bottom) + 0.5rem + var(--map-style-control-size) +
+      var(--map-left-chrome-gap) + var(--map-zoom-btn-size, 2.75rem) +
+      var(--map-left-chrome-gap)
+  );
+}
+
+.map-style-control--chrome-hidden {
   bottom: calc(var(--chrome-gap-bottom) + var(--safe-area-bottom) + 0.5rem);
 }
 
@@ -401,8 +386,15 @@
   );
 }
 
-.map-style-control--safe-area,
-.map-recenter-control--safe-area {
+.map-recenter-control--chrome-hidden {
+  bottom: calc(
+    var(--chrome-gap-bottom) + var(--safe-area-bottom) + 0.5rem +
+      var(--map-style-control-size) + var(--map-left-chrome-gap) +
+      var(--map-zoom-btn-size, 2.75rem) + var(--map-left-chrome-gap)
+  );
+}
+
+.map-style-control--safe-area {
   bottom: max(0.75rem, env(safe-area-inset-bottom));
 }
 
@@ -413,19 +405,33 @@
   );
 }
 
-.map-style-control--container,
-.map-recenter-control--container {
-  bottom: 4.25rem;
+.map-recenter-control--safe-area {
+  bottom: calc(
+    max(0.75rem, env(safe-area-inset-bottom)) + var(--map-style-control-size) +
+      var(--map-left-chrome-gap) + var(--map-zoom-btn-size, 2.75rem) +
+      var(--map-left-chrome-gap)
+  );
+}
+
+.map-style-control--container {
+  bottom: var(--dock-height);
 }
 
 .map-zoom-control--container {
   bottom: calc(
-    4.25rem + var(--map-style-control-size) + var(--map-left-chrome-gap)
+    var(--dock-height) + var(--map-style-control-size) + var(--map-left-chrome-gap)
   );
 }
 
-.map-style-control--hider-actions,
-.map-recenter-control--hider-actions {
+.map-recenter-control--container {
+  bottom: calc(
+    var(--dock-height) + var(--map-style-control-size) +
+      var(--map-left-chrome-gap) + var(--map-zoom-btn-size, 2.75rem) +
+      var(--map-left-chrome-gap)
+  );
+}
+
+.map-style-control--hider-actions {
   bottom: calc(
     var(--hider-action-bar-height) + var(--chrome-gap-above-dock) + 0.5rem
   );
@@ -438,14 +444,26 @@
   );
 }
 
+.map-recenter-control--hider-actions {
+  bottom: calc(
+    var(--hider-action-bar-height) + var(--chrome-gap-above-dock) + 0.5rem +
+      var(--map-style-control-size) + var(--map-left-chrome-gap) +
+      var(--map-zoom-btn-size, 2.75rem) + var(--map-left-chrome-gap)
+  );
+}
+
 .map-style-control--admin-rail,
+.map-zoom-control--admin-rail,
 .map-recenter-control--admin-rail {
-  bottom: calc(var(--chrome-gap-bottom) + var(--safe-area-bottom) + 0.5rem);
   right: calc(
     max(0.75rem, env(safe-area-inset-right)) +
       var(--admin-map-control-inset-right, 0px)
   );
   left: auto;
+}
+
+.map-style-control--admin-rail {
+  bottom: calc(var(--chrome-gap-bottom) + var(--safe-area-bottom) + 0.5rem);
 }
 
 .map-zoom-control--admin-rail {
@@ -453,22 +471,25 @@
     var(--chrome-gap-bottom) + var(--safe-area-bottom) + 0.5rem +
       var(--map-style-control-size) + var(--map-left-chrome-gap)
   );
-  right: calc(
-    max(0.75rem, env(safe-area-inset-right)) +
-      var(--admin-map-control-inset-right, 0px)
+}
+
+.map-recenter-control--admin-rail {
+  bottom: calc(
+    var(--chrome-gap-bottom) + var(--safe-area-bottom) + 0.5rem +
+      var(--map-style-control-size) + var(--map-left-chrome-gap) +
+      var(--map-zoom-btn-size, 2.75rem) + var(--map-left-chrome-gap)
   );
-  left: auto;
 }
 
 @media (min-width: 40rem) {
   :root {
     --map-style-control-size: 3rem;
+    --map-zoom-btn-size: 3rem;
   }
 }
 
 @media (max-width: 28rem) {
-  .map-style-control--dock,
-  .map-recenter-control--dock {
+  .map-style-control--dock {
     bottom: calc(
       var(--dock-total-height) + var(--chrome-gap-above-dock) +
         var(--safe-area-bottom) + 2.5rem
@@ -479,6 +500,15 @@
     bottom: calc(
       var(--dock-total-height) + var(--chrome-gap-above-dock) +
         var(--safe-area-bottom) + 2.5rem + var(--map-style-control-size) +
+        var(--map-left-chrome-gap)
+    );
+  }
+
+  .map-recenter-control--dock {
+    bottom: calc(
+      var(--dock-total-height) + var(--chrome-gap-above-dock) +
+        var(--safe-area-bottom) + 2.5rem + var(--map-style-control-size) +
+        var(--map-left-chrome-gap) + var(--map-zoom-btn-size, 2.75rem) +
         var(--map-left-chrome-gap)
     );
   }

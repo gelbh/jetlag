@@ -124,7 +124,6 @@ export type HiderMapScreenChromeProps = {
   onOpenChat: () => void;
   onOpenSettings: () => void;
   onOpenCodes: () => void;
-  onRecenter: () => void;
   expansionPackEnabled: boolean;
   expansionMenuOpen: boolean;
   onExpansionMenuOpenChange: (open: boolean) => void;
@@ -234,7 +233,6 @@ export function HiderMapScreenChrome({
   onOpenChat,
   onOpenSettings,
   onOpenCodes,
-  onRecenter,
   expansionPackEnabled,
   expansionMenuOpen,
   onExpansionMenuOpenChange,
@@ -392,7 +390,6 @@ export function HiderMapScreenChrome({
       inactive={inactiveChrome}
       showExpansion={expansionPackEnabled}
       onExpansion={() => onExpansionMenuOpenChange(true)}
-      onRecenter={onRecenter}
       onOpenChat={onOpenChat}
       onOpenLog={onOpenLog}
       onOpenSettings={onOpenSettings}

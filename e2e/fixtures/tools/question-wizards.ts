@@ -132,7 +132,8 @@ async function placeHeavyToolAnchorAndAdvance(page: Page) {
 }
 
 export async function dismissActiveToolPanel(page: Page) {
-  const closeTool = page.getByRole("button", { name: /^Close / });
+  // Match "Close …" tool chrome and bare ChatPanel "Close".
+  const closeTool = page.getByRole("button", { name: /^Close(?:\s|$)/ });
   if (await closeTool.isVisible({ timeout: 500 }).catch(() => false)) {
     await closeTool.click({ timeout: 5_000 }).catch(() => undefined);
   }
