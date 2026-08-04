@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   DEFAULT_NOTIFICATION_PREFERENCES,
   type NotificationPreferences,
-} from "../../../domain/device/chrome/notifications";
+} from "@/domain/device/chrome/notifications";
 import { mergeNotificationPreferences } from "./notifications";
 
 describe("mergeNotificationPreferences", () => {

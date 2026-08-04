@@ -1,16 +1,16 @@
-import type { GameArea } from "../../../domain/map/annotations";
+import type { GameArea } from "@/domain/map/annotations";
 import {
   isPointInGameArea,
   type LatLngTuple,
-} from "../../../domain/geometry/gameArea/geometry";
-import type { MatchingFeature } from "../../../domain/geo/types";
+} from "@/domain/geometry/gameArea/geometry";
+import type { MatchingFeature } from "@/domain/geo/types";
 import {
   getMatchingCategory,
   matchingUsesExpandedFeatureSearch,
   type MatchingCategoryId,
-} from "../../../domain/questions";
-import { resolveMatchingCategory } from "../../../domain/session/catalog/sessionCustomCatalog";
-import type { SessionCustomCategory } from "../../../domain/session/catalog/sessionCustomContent";
+} from "@/domain/questions";
+import { resolveMatchingCategory } from "@/domain/session/catalog/sessionCustomCatalog";
+import type { SessionCustomCategory } from "@/domain/session/catalog/sessionCustomContent";
 import type { OverpassElement } from "./types";
 
 function isHonoraryConsulate(tags: Record<string, string>): boolean {

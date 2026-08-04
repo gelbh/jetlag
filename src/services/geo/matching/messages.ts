@@ -3,7 +3,7 @@ import {
   matchingCategoryLabel,
   matchingUsesExpandedFeatureSearch,
   type MatchingCategoryId,
-} from "../../../domain/questions";
+} from "@/domain/questions";
 
 export function matchingFeatureCountLabel(
   featureCount: number,

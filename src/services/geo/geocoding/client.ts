@@ -1,4 +1,4 @@
-import type { LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
+import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
 import {
   mergeRankedGeocodedPlaceCandidates,
   placeBoundsFingerprint,

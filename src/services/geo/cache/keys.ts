@@ -1,5 +1,5 @@
-import type { GameArea } from "../../../domain/map/annotations";
-import type { RegionPackId } from "../../../domain/regions/regionPack";
+import type { GameArea } from "@/domain/map/annotations";
+import type { RegionPackId } from "@/domain/regions/regionPack";
 
 function stableGameAreaKey(gameArea: GameArea): string {
   return JSON.stringify(gameArea.coordinates);

@@ -1,17 +1,17 @@
-import { distanceBetweenPoints, type LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
-import type { TentaclePoi } from "../../../domain/map/annotations";
+import { distanceBetweenPoints, type LatLngTuple } from "@/domain/geometry/gameArea/geometry";
+import type { TentaclePoi } from "@/domain/map/annotations";
 import type {
   SessionCustomCategory,
   SessionCustomLocationPin,
-} from "../../../domain/session/catalog/sessionCustomContent";
+} from "@/domain/session/catalog/sessionCustomContent";
 import {
   manualPinsWithinRadius,
   tentacleOverpassSelectorsForCategory,
-} from "../../../domain/session/catalog/sessionCustomCatalog";
+} from "@/domain/session/catalog/sessionCustomCatalog";
 import {
   tentacleCategoryOverpassSelectors,
   type TentacleExtendedCategoryId,
-} from "../../../domain/questions";
+} from "@/domain/questions";
 import { queryOverpass } from "../../core/overpass/overpassClient";
 import { buildAroundTaggedQuery, overpassQueryTemplate } from "./queryHelpers";
 import {
@@ -19,7 +19,7 @@ import {
   mergeTentaclePois,
 } from "./regionPackPoi";
 import { isEligibleBundledPoi } from "./bundledPoiHygiene";
-import type { RegionPackId } from "../../../domain/regions/regionPack";
+import type { RegionPackId } from "@/domain/regions/regionPack";
 import {
   getOrFetchCached,
   tentaclePoisCacheKey,

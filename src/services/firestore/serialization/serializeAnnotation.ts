@@ -1,5 +1,5 @@
 import type { Feature, LineString, Point, Polygon } from "geojson";
-import type { AnnotationRecord } from "../../../domain/map/annotations";
+import type { AnnotationRecord } from "@/domain/map/annotations";
 import { parseFirestoreDocument } from "../zodConverter";
 import { annotationDocumentSchema } from "../schemas/firestoreDocuments";
 import { assertNoNestedArrays, stripUndefinedValues } from "./shared";

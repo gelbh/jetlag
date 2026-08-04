@@ -1,13 +1,13 @@
 import type { Feature, LineString, Polygon } from "geojson";
-import type { GameArea } from "../../../domain/map/annotations";
-import type { LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
+import type { GameArea } from "@/domain/map/annotations";
+import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
 import {
   nearestPointToCoastlines,
   prepareMeasuringLineSegments,
-} from "../../../domain/geometry/gameArea/geometry";
-import { polygonOuterRingToLineString } from "../../../domain/geometry/measuring/ringToLineString";
-import type { SessionCustomMeasureGeometry } from "../../../domain/session/catalog/customMeasureGeometry";
-import { parseCustomMeasureGeometryFeature } from "../../../domain/session/catalog/customMeasureGeometry";
+} from "@/domain/geometry/gameArea/geometry";
+import { polygonOuterRingToLineString } from "@/domain/geometry/measuring/ringToLineString";
+import type { SessionCustomMeasureGeometry } from "@/domain/session/catalog/customMeasureGeometry";
+import { parseCustomMeasureGeometryFeature } from "@/domain/session/catalog/customMeasureGeometry";
 
 function geometryToLineSegments(
   feature: Feature<LineString | Polygon>,

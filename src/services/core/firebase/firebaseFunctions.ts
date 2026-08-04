@@ -1,5 +1,5 @@
 import type { Functions } from "firebase/functions";
-import { clientEnvUsesFirebaseEmulator } from "../../../config/env";
+import { clientEnvUsesFirebaseEmulator } from "@/config/env";
 import { getFirebaseApp, getFirebaseAppCheck } from "./firebase";
 
 let functions: Functions | null = null;

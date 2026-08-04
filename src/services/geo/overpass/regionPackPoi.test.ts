@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
-import type { LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
-import type { MeasuringPlace } from "../../../domain/geo/types";
-import type { TentaclePoi } from "../../../domain/map/annotations";
+import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
+import type { MeasuringPlace } from "@/domain/geo/types";
+import type { TentaclePoi } from "@/domain/map/annotations";
 import {
   fetchBundledTentaclePois,
   mergeMeasuringPlaces,

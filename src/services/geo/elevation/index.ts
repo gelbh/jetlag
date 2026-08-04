@@ -1,4 +1,4 @@
-import type { LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
+import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
 import { ELEVATION_BATCH_SIZE, type FetchElevationsOptions } from "./constants";
 import { fetchElevationBatchAndWrite } from "./providers";
 import {

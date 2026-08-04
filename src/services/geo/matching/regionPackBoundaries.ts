@@ -1,17 +1,17 @@
 import type { Feature, FeatureCollection, MultiPolygon, Polygon } from "geojson";
-import type { GameArea } from "../../../domain/map/annotations";
-import type { BoundingBox } from "../../../domain/geometry/gameArea/gameAreaBounds";
-import { gameAreaToBoundingBox } from "../../../domain/geometry/gameArea/gameAreaBounds";
-import { featureToGameArea } from "../../../domain/geometry/gameArea/geometry";
-import { gameAreaWithoutInteriorRings } from "../../../domain/geometry/gameArea/geometryCore";
-import { unionGameAreas } from "../../../domain/geometry/masks/unionGameAreas";
-import type { CustomMatchingAreasByLevel } from "../../../domain/session/catalog/sessionCustomContent";
-import type { MatchingAdminLevel } from "../../../domain/session/catalog/sessionCustomContent";
+import type { GameArea } from "@/domain/map/annotations";
+import type { BoundingBox } from "@/domain/geometry/gameArea/gameAreaBounds";
+import { gameAreaToBoundingBox } from "@/domain/geometry/gameArea/gameAreaBounds";
+import { featureToGameArea } from "@/domain/geometry/gameArea/geometry";
+import { gameAreaWithoutInteriorRings } from "@/domain/geometry/gameArea/geometryCore";
+import { unionGameAreas } from "@/domain/geometry/masks/unionGameAreas";
+import type { CustomMatchingAreasByLevel } from "@/domain/session/catalog/sessionCustomContent";
+import type { MatchingAdminLevel } from "@/domain/session/catalog/sessionCustomContent";
 import {
   getRegionPackConfig,
   isKnownRegionPack,
-} from "../../../domain/regions/regionPackRegistry";
-import type { RegionPackId } from "../../../domain/regions/regionPack";
+} from "@/domain/regions/regionPackRegistry";
+import type { RegionPackId } from "@/domain/regions/regionPack";
 
 const regionPackGeoCache = new Map<string, string>();
 

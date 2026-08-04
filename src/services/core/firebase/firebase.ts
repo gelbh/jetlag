@@ -30,7 +30,7 @@ import {
   getClientEnv,
   isFirebaseConfiguredFromEnv,
   readFirebaseConfigFromEnv,
-} from "../../../config/env";
+} from "@/config/env";
 import {
   captureAuthBootstrapFailure,
   captureAuthPersistenceFallback,

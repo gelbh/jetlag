@@ -1,24 +1,24 @@
-import type { GameArea } from "../../../domain/map/annotations";
-import type { LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
-import type { MatchingFeature } from "../../../domain/geo/types";
+import type { GameArea } from "@/domain/map/annotations";
+import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
+import type { MatchingFeature } from "@/domain/geo/types";
 import {
   adminLevelForMatchingCategory,
   getMatchingCategory,
   type MatchingCategoryId,
-} from "../../../domain/questions";
+} from "@/domain/questions";
 import {
   matchingOverpassSelectorsForCategory,
   resolveMatchingCategory,
-} from "../../../domain/session/catalog/sessionCustomCatalog";
-import type { CustomMatchingAreasByLevel } from "../../../domain/session/catalog/sessionCustomContent";
-import type { SessionCustomCategory } from "../../../domain/session/catalog/sessionCustomContent";
-import type { RegionPackId } from "../../../domain/regions/regionPack";
+} from "@/domain/session/catalog/sessionCustomCatalog";
+import type { CustomMatchingAreasByLevel } from "@/domain/session/catalog/sessionCustomContent";
+import type { SessionCustomCategory } from "@/domain/session/catalog/sessionCustomContent";
+import type { RegionPackId } from "@/domain/regions/regionPack";
 import {
   adminDivisionToMatchingFeature,
   matchingFeaturesToAdminDivisions,
   matchingFeaturesToBoundedRegions,
   pickNearestMatchingFeature,
-} from "../../../domain/geo/matchingAdapters";
+} from "@/domain/geo/matchingAdapters";
 import {
   classifyAdminDivisionAtPoint,
   fetchAdminDivisionFeaturesInArea,

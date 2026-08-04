@@ -1,5 +1,5 @@
 import type { FirebaseStorage } from "firebase/storage";
-import { clientEnvUsesFirebaseEmulator } from "../../../config/env";
+import { clientEnvUsesFirebaseEmulator } from "@/config/env";
 import { getFirebaseApp } from "./firebase";
 
 let storage: FirebaseStorage | null = null;
