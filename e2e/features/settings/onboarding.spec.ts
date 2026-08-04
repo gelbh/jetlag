@@ -10,6 +10,7 @@ test.describe("onboarding", () => {
   test("map first-run sheet can be dismissed", async ({ page }) => {
     await page.addInitScript(() => {
       localStorage.removeItem("jetlag.mapFirstRunDismissed");
+      localStorage.setItem("jetlag:pwa-install-tip-dismissed", "1");
       localStorage.setItem("jl.analytics.consent", "denied");
       sessionStorage.setItem("jl.appCheckProbe.skip", "1");
     });
@@ -27,6 +28,7 @@ test.describe("onboarding", () => {
   test("map tools guide reopens from settings after dismiss", async ({ page }) => {
     await page.addInitScript(() => {
       localStorage.removeItem("jetlag.mapFirstRunDismissed");
+      localStorage.setItem("jetlag:pwa-install-tip-dismissed", "1");
       localStorage.setItem("jl.analytics.consent", "denied");
       sessionStorage.setItem("jl.appCheckProbe.skip", "1");
     });

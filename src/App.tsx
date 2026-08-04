@@ -12,6 +12,7 @@ import { MapErrorBoundary } from "./components/ui/feedback/MapErrorBoundary";
 import { AppEntryBackdrop } from "./components/ui/layout/AppEntryBackdrop";
 import { AnalyticsConsentBanner } from "./components/ui/banners/AnalyticsConsentBanner";
 import { AppUpdateBanner } from "./components/ui/banners/AppUpdateBanner";
+import { PwaInstallTipBanner } from "./components/ui/banners/PwaInstallTipBanner";
 import { AppUpdateProvider } from "./components/ui/banners/AppUpdateProvider";
 import { LowBatteryPrompt } from "./components/session/banners/LowBatteryPrompt";
 import { LocationPermissionPrompt } from "./components/session/status/LocationPermissionPrompt";
@@ -189,6 +190,7 @@ export default function App() {
               <AppResumeWatchdogLazy />
             </LazyRouteQuiet>
             <AppUpdateBanner />
+            <PwaInstallTipBanner />
             <AnalyticsConsentBanner />
             <AppEntryBackdrop />
             <div className="jl-scroll app-scroll-root">
