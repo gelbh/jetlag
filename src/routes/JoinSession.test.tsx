@@ -1,7 +1,10 @@
-import { act, fireEvent, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { createMemoryRouter, RouterProvider } from "react-router-dom";
 import { JoinSession } from "./JoinSession";
 import { renderWithRouter } from "../test/renderWithRouter";
+import { RouteTransitionTestProvider } from "../test/RouteTransitionTestProvider";
+import { resetAllStores } from "../test/helpers/storeReset";
 import { createTestRemoteSession } from "../test/fixtures/sessions";
 import { clearJoinPreviewCacheForTests } from "../services/session/joinSessionPreviewCache";
 import {
@@ -88,6 +91,37 @@ const previewShapedSession = createTestRemoteSession({
   memberUids: ["host-1", "seeker-1"],
   memberRoles: { "host-1": "hider", "seeker-1": "seeker" },
 });
+
+const abcdPreviewSession = createTestRemoteSession({
+  ...gatedPreviewSession,
+  id: "sess-abcd",
+  code: "ABCD",
+});
+
+const efghPreviewSession = createTestRemoteSession({
+  ...gatedPreviewSession,
+  id: "sess-efgh",
+  code: "EFGH",
+});
+
+function renderJoinSessionAt(path: string) {
+  resetAllStores();
+  const router = createMemoryRouter(
+    [
+      {
+        path: "/join",
+        element: (
+          <RouteTransitionTestProvider>
+            <JoinSession />
+          </RouteTransitionTestProvider>
+        ),
+      },
+    ],
+    { initialEntries: [path] },
+  );
+  render(<RouterProvider router={router} />);
+  return router;
+}
 
 type JoinRequestChangeHandler = (
   request: RoleJoinRequest | null,
@@ -185,6 +219,123 @@ describe("JoinSession", () => {
       screen.getByRole("radio", { name: /observer/i }),
     ).toBeInTheDocument();
   });
+
+  it("prefills a valid code from the invite query param", () => {
+    renderWithRouter(<JoinSession />, { route: "/join?code=wxyz" });
+
+    expect(screen.getByPlaceholderText("ABCD")).toHaveValue("WXYZ");
+  });
+
+  it("ignores an invalid invite query code", () => {
+    renderWithRouter(<JoinSession />, { route: "/join?code=AB" });
+
+    expect(screen.getByPlaceholderText("ABCD")).toHaveValue("");
+  });
+
+  it("clears stale preview when the invite query changes", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    mockIsFirebaseConfigured.mockReturnValue(true);
+    vi.mocked(lookupRemoteSessionByCode).mockImplementation(async (code) => {
+      if (code === "ABCD") {
+        return { status: "found", session: abcdPreviewSession };
+      }
+      if (code === "EFGH") {
+        return { status: "found", session: efghPreviewSession };
+      }
+      return { status: "missing" };
+    });
+
+    const router = renderJoinSessionAt("/join?code=ABCD");
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(300);
+    });
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: "Request access" })).toBeInTheDocument();
+    });
+
+    await act(async () => {
+      await router.navigate("/join?code=EFGH");
+    });
+
+    await waitFor(() => {
+      expect(screen.getByPlaceholderText("ABCD")).toHaveValue("EFGH");
+    });
+    expect(
+      screen.queryByRole("button", { name: "Request access" }),
+    ).not.toBeInTheDocument();
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(300);
+    });
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: "Request access" })).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "Request access" }));
+    await waitFor(() => {
+      expect(mockRequestRoleJoin).toHaveBeenCalledWith("sess-efgh", "hider");
+    });
+  });
+
+  it("clears preview and code when the invite query becomes invalid", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    mockIsFirebaseConfigured.mockReturnValue(true);
+    vi.mocked(lookupRemoteSessionByCode).mockResolvedValue({
+      status: "found",
+      session: abcdPreviewSession,
+    });
+
+    const router = renderJoinSessionAt("/join?code=ABCD");
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(300);
+    });
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: "Request access" })).toBeInTheDocument();
+    });
+
+    await act(async () => {
+      await router.navigate("/join?code=AB");
+    });
+
+    await waitFor(() => {
+      expect(screen.getByPlaceholderText("ABCD")).toHaveValue("");
+    });
+    expect(
+      screen.queryByRole("button", { name: "Request access" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("clears stale preview when the invite query is removed", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    mockIsFirebaseConfigured.mockReturnValue(true);
+    vi.mocked(lookupRemoteSessionByCode).mockResolvedValue({
+      status: "found",
+      session: abcdPreviewSession,
+    });
+
+    const router = renderJoinSessionAt("/join?code=ABCD");
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(300);
+    });
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: "Request access" })).toBeInTheDocument();
+    });
+
+    await act(async () => {
+      await router.navigate("/join");
+    });
+
+    await waitFor(() => {
+      expect(screen.getByPlaceholderText("ABCD")).toHaveValue("ABCD");
+      expect(
+        screen.queryByRole("button", { name: "Request access" }),
+      ).not.toBeInTheDocument();
+    });
+  });
+
 
   it("clears join loading when ensureFreshAnonymousUser times out", async () => {
     vi.useFakeTimers();

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useAppNavigate } from "../hooks/navigation/useAppNavigate";
 import { useSubmitLock } from "../hooks/forms/useSubmitLock";
 import { DesktopContentColumn } from "../components/ui/layout/DesktopContentColumn";
@@ -13,6 +14,7 @@ import {
   isValidSessionCode,
   normalizeSessionCode,
 } from "../services/session/sessionCodes";
+import { parseSessionInviteCode } from "../services/session/sessionInviteUrl";
 import { useSessionStore } from "../state/sessionStore";
 import type { PlayerRole } from "../domain/session/players/playerRole";
 import { joinRequiresRolePasscode } from "../domain/session/players/roleGates";
@@ -114,10 +116,14 @@ function joinRequestStatusMessage(status: JoinRequestStatus): string {
 
 export function JoinSession() {
   const navigate = useAppNavigate();
+  const [searchParams] = useSearchParams();
   const session = useSessionStore((state) => state.session);
   const myUid = useSessionStore((state) => state.myUid);
   const setSession = useSessionStore((state) => state.setSession);
-  const [code, setCode] = useState("");
+  const codeFromQuery = searchParams.get("code");
+  const [code, setCode] = useState(
+    () => parseSessionInviteCode(codeFromQuery) ?? "",
+  );
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const { isSubmitting, runLocked } = useSubmitLock();
@@ -141,6 +147,23 @@ export function JoinSession() {
     needsRolePasscode &&
     isJoinRequestRole(playerRole);
   const formBusy = joinBusy || requestBusy || pendingRequest != null;
+
+  useEffect(() => {
+    const next = parseSessionInviteCode(codeFromQuery);
+    /* eslint-disable react-hooks/set-state-in-effect -- sync join code when invite query changes */
+    setPreviewSession(null);
+    setPreviewPremium(false);
+    setLookupLoading(false);
+
+    if (!next) {
+      if (codeFromQuery) {
+        setCode("");
+      }
+      return;
+    }
+    setCode(next);
+    /* eslint-enable react-hooks/set-state-in-effect */
+  }, [codeFromQuery]);
 
   useEffect(() => {
     if (!isFirebaseConfigured()) {
