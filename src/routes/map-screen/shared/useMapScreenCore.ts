@@ -14,10 +14,8 @@ import {
   gameAreaToBoundsExpression,
   type LatLngTuple,
 } from "../../../domain/geometry/gameArea/geometry";
-import {
-  PWA_MARK_MAP_USABLE,
-  markPlayDay,
-} from "../../../domain/device/perf/playDayMarks";
+import { markMapUsableAndMeasureReturn } from "../../../domain/device/perf/playDayMarks";
+import { scheduleIdleBootWork } from "../../../domain/device/perf/scheduleAfterFirstPaint";
 import { effectiveMapStyle, applyMapStylePreferenceChange } from "../../../domain/device/power/powerProfile";
 import { useWakeLock } from "../../../hooks/location/useWakeLock";
 import { useAnnotations } from "../../../hooks/map/useAnnotations";
@@ -243,13 +241,21 @@ export function useMapScreenCore(options: UseMapScreenCoreOptions = {}) {
       return;
     }
 
-    void preloadGameAreaCachesAsync(
-      gameArea,
-      sessionRules.customMatchingAreas,
-      session.regionPackId,
-      isPremiumSession(session) ? "premium" : "free",
-    );
-    startSeaLevelBackgroundSampling(gameArea);
+    const customMatchingAreas = sessionRules.customMatchingAreas;
+    const regionPackId = session.regionPackId;
+    const tier = isPremiumSession(session) ? "premium" : "free";
+    const area = gameArea;
+
+    // Keep map-usable chrome free of geo preload / elevation sampling work.
+    scheduleIdleBootWork(() => {
+      void preloadGameAreaCachesAsync(
+        area,
+        customMatchingAreas,
+        regionPackId,
+        tier,
+      );
+      startSeaLevelBackgroundSampling(area);
+    });
   }, [
     firebaseAuthReady,
     gameArea,
@@ -268,7 +274,7 @@ export function useMapScreenCore(options: UseMapScreenCoreOptions = {}) {
       return;
     }
 
-    markPlayDay(PWA_MARK_MAP_USABLE);
+    markMapUsableAndMeasureReturn();
   }, [playAreaReady]);
 
   useEffect(() => {

@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import * as routePreloaders from "./routePreloaders";
 import {
   isLazyRoute,
@@ -29,6 +29,19 @@ import * as regionPackBoundaries from "../services/geo/matching/regionPackBounda
 import { usePremiumEntitlementsStore } from "../state/premiumEntitlementsStore";
 import { useSessionStore } from "../state/sessionStore";
 import { createTestSession } from "../test/fixtures/sessions";
+
+beforeEach(() => {
+  // Avoid pulling MapLibre worker URL into Vitest when /map preload warms the shell.
+  vi.spyOn(routePreloaders.mapShellWarmers, "importMapViewMapLibre").mockResolvedValue(
+    {
+      default: {} as never,
+    },
+  );
+});
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
 
 describe("normalizeRoutePath", () => {
   it("strips query strings and hashes", () => {
@@ -110,17 +123,17 @@ describe("preloadRoute", () => {
 
   it("invokes the lazy loader for /map and query-bearing paths", async () => {
     const mapLoader = vi.spyOn(routePreloaders.routeImporter, "importMapScreen");
+    const mapLibreLoader = routePreloaders.mapShellWarmers.importMapViewMapLibre;
 
-    try {
-      await preloadRoute("/map");
-      expect(mapLoader).toHaveBeenCalledTimes(1);
+    await preloadRoute("/map");
+    expect(mapLoader).toHaveBeenCalledTimes(1);
+    expect(mapLibreLoader).toHaveBeenCalledTimes(1);
 
-      mapLoader.mockClear();
-      await preloadRoute("/map?session=abc");
-      expect(mapLoader).toHaveBeenCalledTimes(1);
-    } finally {
-      mapLoader.mockRestore();
-    }
+    mapLoader.mockClear();
+    vi.mocked(mapLibreLoader).mockClear();
+    await preloadRoute("/map?session=abc");
+    expect(mapLoader).toHaveBeenCalledTimes(1);
+    expect(mapLibreLoader).toHaveBeenCalledTimes(1);
   }, 20000);
 });
 
