@@ -80,7 +80,7 @@ test.describe("mobile tool dock", () => {
     await openMapWithLocalSession(page);
   });
 
-  test("exposes history in hunt, draw on session, without a More sheet", async ({
+  test("@smoke exposes history in hunt, draw on session, without a More sheet", async ({
     page,
   }) => {
     const hunt = page.locator('[data-island="hunt"]');
