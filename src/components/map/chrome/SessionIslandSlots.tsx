@@ -1,5 +1,4 @@
 import { ChatUnreadBadge } from "../../chat/ChatUnreadBadge";
-import { MotionPressable } from "../../motion/MotionPressable";
 import {
   HudChatIcon,
   HudGuideIcon,
@@ -7,6 +6,7 @@ import {
   HudSettingsIcon,
   HudStarIcon,
 } from "../../ui/brand/HudIcons";
+import { MapChromeControl } from "./MapChromeControl";
 
 export interface SessionIslandSlotsProps {
   onOpenChat?: () => void;
@@ -40,111 +40,88 @@ export function SessionIslandSlots({
   return (
     <div className="jl-tool-dock-group jl-tool-dock-group-secondary">
       {onOpenChat ? (
-        <MotionPressable
-          type="button"
+        <MapChromeControl
+          variant="slot"
           disabled={inactive}
           onClick={onOpenChat}
-          className="jl-tool-slot"
           aria-label={
             hasUnreadChat ? "Open chat, unread messages" : "Open chat"
           }
-        >
-          <span className="jl-tool-slot-icon jl-unread-badge-host">
-            <HudChatIcon className="h-5 w-5 shrink-0" />
-            {hasUnreadChat ? <ChatUnreadBadge count={unreadCount} /> : null}
-          </span>
-          <span className="jl-tool-slot-label">Chat</span>
-        </MotionPressable>
+          iconClassName="jl-unread-badge-host"
+          icon={
+            <>
+              <HudChatIcon className="h-5 w-5 shrink-0" />
+              {hasUnreadChat ? <ChatUnreadBadge count={unreadCount} /> : null}
+            </>
+          }
+          label="Chat"
+        />
       ) : null}
 
       {onOpenLog ? (
-        <MotionPressable
-          type="button"
+        <MapChromeControl
+          variant="slot"
           disabled={inactive}
           onClick={onOpenLog}
-          className="jl-tool-slot"
           aria-label="Open session log"
-        >
-          <span className="jl-tool-slot-icon">
-            <HudLeaderboardIcon className="h-5 w-5 shrink-0" />
-          </span>
-          <span className="jl-tool-slot-label">Log</span>
-        </MotionPressable>
+          icon={<HudLeaderboardIcon className="h-5 w-5 shrink-0" />}
+          label="Log"
+        />
       ) : null}
 
       {onOpenReportProblem ? (
-        <MotionPressable
-          type="button"
+        <MapChromeControl
+          variant="slot"
           disabled={inactive}
           onClick={onOpenReportProblem}
-          className="jl-tool-slot"
           aria-label="Report a problem"
-        >
-          <span className="jl-tool-slot-icon">
-            <HudGuideIcon className="h-5 w-5 shrink-0" />
-          </span>
-          <span className="jl-tool-slot-label">Report</span>
-        </MotionPressable>
+          icon={<HudGuideIcon className="h-5 w-5 shrink-0" />}
+          label="Report"
+        />
       ) : null}
 
       {onOpenCodes ? (
-        <MotionPressable
-          type="button"
+        <MapChromeControl
+          variant="slot"
           disabled={inactive}
           onClick={onOpenCodes}
-          className="jl-tool-slot"
           aria-label="Open role codes"
-        >
-          <span className="jl-tool-slot-icon">
-            <HudStarIcon className="h-5 w-5 shrink-0" />
-          </span>
-          <span className="jl-tool-slot-label">Codes</span>
-        </MotionPressable>
+          icon={<HudStarIcon className="h-5 w-5 shrink-0" />}
+          label="Codes"
+        />
       ) : null}
 
       {onOpenSettings ? (
-        <MotionPressable
-          type="button"
+        <MapChromeControl
+          variant="slot"
           disabled={inactive}
           onClick={onOpenSettings}
-          className="jl-tool-slot"
           aria-label="Open settings"
-        >
-          <span className="jl-tool-slot-icon">
-            <HudSettingsIcon className="h-5 w-5 shrink-0" />
-          </span>
-          <span className="jl-tool-slot-label">Settings</span>
-        </MotionPressable>
+          icon={<HudSettingsIcon className="h-5 w-5 shrink-0" />}
+          label="Settings"
+        />
       ) : null}
 
       {canRequestFoundHider && onRequestFoundHider ? (
-        <MotionPressable
-          type="button"
+        <MapChromeControl
+          variant="slot"
           disabled={inactive}
           onClick={onRequestFoundHider}
-          className="jl-tool-slot"
           aria-label="Declare found hider"
-        >
-          <span className="jl-tool-slot-icon" aria-hidden="true">
-            ✓
-          </span>
-          <span className="jl-tool-slot-label">Found</span>
-        </MotionPressable>
+          icon={<span aria-hidden="true">✓</span>}
+          label="Found"
+        />
       ) : null}
 
       {canStartEndGame && onStartEndGame ? (
-        <MotionPressable
-          type="button"
+        <MapChromeControl
+          variant="slot"
           disabled={inactive}
           onClick={onStartEndGame}
-          className="jl-tool-slot"
           aria-label="Declare found hiding-zone station / start end game"
-        >
-          <span className="jl-tool-slot-icon" aria-hidden="true">
-            !
-          </span>
-          <span className="jl-tool-slot-label">Station</span>
-        </MotionPressable>
+          icon={<span aria-hidden="true">!</span>}
+          label="Station"
+        />
       ) : null}
     </div>
   );

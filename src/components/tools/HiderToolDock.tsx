@@ -1,7 +1,7 @@
 import { HudPlusIcon, HudRefreshIcon } from "../ui/brand/HudIcons";
 import { HudPinIcon } from "../map/icons/ToolIcons";
 import { MapBottomChrome } from "../map/chrome/MapBottomChrome";
-import { MotionPressable } from "../motion/MotionPressable";
+import { MapChromeControl } from "../map/chrome/MapChromeControl";
 import { SessionIslandSlots } from "../map/chrome/SessionIslandSlots";
 
 import type { ToolDockLayout } from "./ToolDock";
@@ -51,32 +51,24 @@ export function HiderToolDock({
       huntDensity="sparse"
       hunt={
         <div className="jl-tool-dock-group jl-tool-dock-group-main">
-          <MotionPressable
-            type="button"
+          <MapChromeControl
+            variant="slot"
             onClick={onZoneAction}
             disabled={zoneDisabled || inactive}
-            className="jl-tool-slot"
             aria-label={zoneLabel}
-          >
-            <span className="jl-tool-slot-icon">
-              <HudPinIcon className="h-5 w-5 shrink-0" />
-            </span>
-            <span className="jl-tool-slot-label">{zoneLabel}</span>
-          </MotionPressable>
+            icon={<HudPinIcon className="h-5 w-5 shrink-0" />}
+            label={zoneLabel}
+          />
 
           {showExpansion ? (
-            <MotionPressable
-              type="button"
+            <MapChromeControl
+              variant="slot"
               onClick={onExpansion}
               disabled={inactive}
-              className="jl-tool-slot"
               aria-label="Expansion"
-            >
-              <span className="jl-tool-slot-icon">
-                <HudPlusIcon className="h-5 w-5 shrink-0" />
-              </span>
-              <span className="jl-tool-slot-label">Expansion</span>
-            </MotionPressable>
+              icon={<HudPlusIcon className="h-5 w-5 shrink-0" />}
+              label="Expansion"
+            />
           ) : null}
         </div>
       }
@@ -94,18 +86,14 @@ export function HiderToolDock({
       }
       mapControls={
         <div className="jl-tool-dock-group">
-          <MotionPressable
-            type="button"
+          <MapChromeControl
+            variant="slot"
             onClick={onRecenter}
             disabled={inactive}
-            className="jl-tool-slot"
             aria-label="Recenter map on play area"
-          >
-            <span className="jl-tool-slot-icon">
-              <HudRefreshIcon className="h-5 w-5 shrink-0" />
-            </span>
-            <span className="jl-tool-slot-label">Recenter</span>
-          </MotionPressable>
+            icon={<HudRefreshIcon className="h-5 w-5 shrink-0" />}
+            label="Recenter"
+          />
         </div>
       }
     />
