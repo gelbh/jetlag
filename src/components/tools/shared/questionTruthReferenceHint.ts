@@ -5,7 +5,7 @@ export function questionTruthReferenceHint(endGameActive: boolean): string {
     return "Hider answers are relative to each hider's frozen end-game location, not live GPS.";
   }
 
-  return "Hider answers are relative to each hider's hiding-zone center, not live GPS.";
+  return "Hider answers use the hiding place when the ask is inside the zone, otherwise the hiding-zone center.";
 }
 
 export function hiderTruthReferenceLoadingLabel(
@@ -14,6 +14,8 @@ export function hiderTruthReferenceLoadingLabel(
   switch (mode) {
     case "endGameFreeze":
       return "Checking end-game location…";
+    case "hidingPlace":
+      return "Checking hiding place…";
     case "hidingZoneCenter":
       return "Checking hiding-zone center…";
     case "unavailable":
@@ -29,6 +31,8 @@ export function hiderTruthReferenceLabel(mode: HiderTruthReferenceMode): string 
   switch (mode) {
     case "endGameFreeze":
       return "At your end-game location";
+    case "hidingPlace":
+      return "At your hiding place";
     case "hidingZoneCenter":
       return "At hiding-zone center";
     case "unavailable":
@@ -46,6 +50,8 @@ export function hiderTruthReferenceMapTooltip(
   switch (mode) {
     case "endGameFreeze":
       return "Answer reference · End-game location";
+    case "hidingPlace":
+      return "Answer reference · Hiding place";
     case "hidingZoneCenter":
       return "Answer reference · Hiding-zone center";
     case "unavailable":

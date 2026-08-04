@@ -17,13 +17,14 @@ import {
 import type { HidingZoneRecord } from "../../domain/session/hiding/hidingZone";
 import type { PlayerRole } from "../../domain/session/players/playerRole";
 import { isFirebaseConfigured } from "../../services/core/firebase/firebase";
+import { assembleEndGameStartAnchors } from "../../domain/session/hiding/endGameTruthAnchors";
 import {
   clearEndGameRequestSession,
   confirmFoundHiderSession,
-  requestEndGameSession,
   requestFoundHiderSession,
   resetEndGameSession,
   resetFoundHiderSession,
+  startEndGameSession,
   updateSessionRules,
 } from "../../services/firestore/firestoreAnnotations";
 import { emitGameEndedActivity } from "../../services/session/emitSessionActivity";
@@ -68,19 +69,18 @@ export function useMapSessionActions({
     () => hidingZones.filter((zone) => zone.status === "confirmed"),
     [hidingZones],
   );
-  const endGameBlocked = isEndGameActive(session) || isEndGamePending(session);
+  const endGameBlocked = isEndGameActive(session);
   const canStartEndGame =
     myRole !== "hider" &&
     timerHasStarted &&
     !isEndGameActive(session) &&
-    !isEndGamePending(session) &&
     !foundHiderBlocked(session) &&
     confirmedHidingZones.length > 0;
   const canRequestFoundHider =
     myRole !== "hider" &&
     timerHasStarted &&
     !foundHiderBlocked(session) &&
-    !isEndGamePending(session) &&
+    !isEndGameActive(session) &&
     confirmedHidingZones.length > 0;
 
   const handleStartEndGame = useCallback(async () => {
@@ -89,9 +89,34 @@ export function useMapSessionActions({
     }
 
     const confirmed = window.confirm(
-      "Start end game?\n\nConfirm seekers have entered the hiding zone and left transit. Map will show only the hiding zone circle; hider must stay at one spot until found.",
+      "Found station?\n\nConfirm seekers found the hiding-zone station (center) and left transit. End Game starts immediately — the hider must stay put until found. No hider accept needed.",
     );
     if (!confirmed) {
+      return;
+    }
+
+    if (confirmedHidingZones.length > 4) {
+      window.alert(
+        "Could not start End Game — at most four confirmed hiding zones can freeze anchors.",
+      );
+      return;
+    }
+
+    const frozenAt = new Date().toISOString();
+    const anchorsResult = assembleEndGameStartAnchors({
+      hiderUids: confirmedHidingZones.map((zone) => zone.hiderUid),
+      zoneCenters: confirmedHidingZones.map((zone) => ({
+        uid: zone.hiderUid,
+        lat: zone.center.lat,
+        lng: zone.center.lng,
+      })),
+      frozenAt,
+    });
+
+    if ("missing" in anchorsResult) {
+      window.alert(
+        "Could not start End Game — missing a confirmed hiding-zone center for at least one hider.",
+      );
       return;
     }
 
@@ -99,16 +124,23 @@ export function useMapSessionActions({
       setSession(
         {
           ...session,
-          endGameRequestedAt: new Date().toISOString(),
-          endGameRequestedByUid: uid,
+          endGameStartedAt: frozenAt,
+          endGameStartedByUid: uid,
+          endGameTruthAnchors: anchorsResult,
+          endGameRequestedAt: undefined,
+          endGameRequestedByUid: undefined,
         },
         uid,
       );
       return;
     }
 
-    await requestEndGameSession(session.id, uid);
-  }, [canStartEndGame, session, setSession, uid]);
+    try {
+      await startEndGameSession(session.id, uid, anchorsResult, frozenAt);
+    } catch {
+      window.alert("Could not start End Game. Check your connection and try again.");
+    }
+  }, [canStartEndGame, confirmedHidingZones, session, setSession, uid]);
 
   const handleRequestFoundHider = useCallback(async () => {
     if (!session?.id || !uid || !canRequestFoundHider) {

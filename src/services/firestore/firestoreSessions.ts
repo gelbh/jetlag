@@ -1050,40 +1050,36 @@ export async function updateSessionRules(
   );
 }
 
-export async function requestEndGameSession(
-  sessionId: string,
-  requestedByUid: string,
-): Promise<void> {
-  await updateDoc(doc(sessionsCollection(), sessionId), {
-    endGameRequestedAt: new Date().toISOString(),
-    endGameRequestedByUid: requestedByUid,
-  });
-}
-
-export async function acceptEndGameSession(
-  sessionId: string,
-  acceptedByUid: string,
-  anchors: Record<string, { lat: number; lng: number; frozenAt: string }>,
-  endGameStartedAt: string,
-): Promise<void> {
-  const batch = writeBatch(getFirestoreDb());
-  batch.update(doc(sessionsCollection(), sessionId), {
-    endGameStartedAt,
-    endGameStartedByUid: acceptedByUid,
-    // Strip any legacy session-doc anchors (coords belong in endGameTruth/anchors).
-    endGameTruthAnchors: deleteField(),
-    endGameRequestedAt: deleteField(),
-    endGameRequestedByUid: deleteField(),
-  });
-  batch.set(endGameTruthAnchorsDoc(sessionId), { anchors });
-  await batch.commit();
-}
-
+/** Seeker/host direct End Game start (no hider Accept). Clears legacy request fields. */
 export async function startEndGameSession(
   sessionId: string,
   startedByUid: string,
+  anchors: Record<string, { lat: number; lng: number; frozenAt: string }>,
+  endGameStartedAt: string = new Date().toISOString(),
 ): Promise<void> {
-  await requestEndGameSession(sessionId, startedByUid);
+  // Sequential create-then-update: session start rules require the freeze doc to
+  // already exist. Same-batch exists()+get() against large session docs has denied
+  // the write in e2e (optimistic local banner, then permission error).
+  const anchorsRef = endGameTruthAnchorsDoc(sessionId);
+  let anchorsWritten = false;
+  try {
+    await setDoc(anchorsRef, { anchors });
+    anchorsWritten = true;
+    await updateDoc(doc(sessionsCollection(), sessionId), {
+      endGameStartedAt,
+      endGameStartedByUid: startedByUid,
+      // Strip any legacy session-doc anchors (coords belong in endGameTruth/anchors).
+      endGameTruthAnchors: deleteField(),
+      endGameRequestedAt: deleteField(),
+      endGameRequestedByUid: deleteField(),
+    });
+  } catch (error) {
+    // Only roll back an anchors doc this call created — do not delete a prior freeze.
+    if (anchorsWritten) {
+      await clearEndGameTruthAnchorsDoc(sessionId);
+    }
+    throw error;
+  }
 }
 
 export async function touchSessionLastActive(sessionId: string): Promise<void> {

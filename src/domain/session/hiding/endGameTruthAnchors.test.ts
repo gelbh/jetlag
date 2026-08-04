@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  assembleEndGameAcceptAnchors,
+  assembleEndGameStartAnchors,
   buildEndGameTruthAnchors,
   missingHiderUidsForAnchors,
 } from "./endGameTruthAnchors";
@@ -58,15 +58,14 @@ describe("endGameTruthAnchors", () => {
     ]);
   });
 
-  it("assembles accept anchors with a local GPS override", () => {
-    const result = assembleEndGameAcceptAnchors({
+  it("assembles start anchors preferring hiding place over zone center", () => {
+    const result = assembleEndGameStartAnchors({
       hiderUids: ["hider-a", "hider-b"],
-      hiderLocations: [
+      hidingPlaces: [{ uid: "hider-a", lat: 52.0, lng: -1.0 }],
+      zoneCenters: [
         { uid: "hider-a", lat: 51.1, lng: -0.1 },
         { uid: "hider-b", lat: 51.2, lng: -0.2 },
       ],
-      localHiderUid: "hider-a",
-      localPoint: { lat: 52.0, lng: -1.0 },
       frozenAt: "2026-01-01T00:00:00.000Z",
     });
 
@@ -80,14 +79,17 @@ describe("endGameTruthAnchors", () => {
       lng: -1.0,
       frozenAt: "2026-01-01T00:00:00.000Z",
     });
+    expect(result["hider-b"]).toEqual({
+      lat: 51.2,
+      lng: -0.2,
+      frozenAt: "2026-01-01T00:00:00.000Z",
+    });
   });
 
-  it("only requires locations for the confirmed-zone hider uids passed in", () => {
-    const result = assembleEndGameAcceptAnchors({
+  it("assembles start anchors from zone centers alone", () => {
+    const result = assembleEndGameStartAnchors({
       hiderUids: ["hider-a"],
-      hiderLocations: [{ uid: "hider-a", lat: 51.1, lng: -0.1 }],
-      localHiderUid: null,
-      localPoint: null,
+      zoneCenters: [{ uid: "hider-a", lat: 51.1, lng: -0.1 }],
       frozenAt: "2026-01-01T00:00:00.000Z",
     });
 
@@ -97,5 +99,16 @@ describe("endGameTruthAnchors", () => {
     }
 
     expect(Object.keys(result)).toEqual(["hider-a"]);
+  });
+
+  it("reports missing when a confirmed hider has neither hiding place nor zone center", () => {
+    const result = assembleEndGameStartAnchors({
+      hiderUids: ["hider-a", "hider-b"],
+      hidingPlaces: [],
+      zoneCenters: [{ uid: "hider-a", lat: 51.1, lng: -0.1 }],
+      frozenAt: "2026-01-01T00:00:00.000Z",
+    });
+
+    expect(result).toEqual({ missing: ["hider-b"] });
   });
 });

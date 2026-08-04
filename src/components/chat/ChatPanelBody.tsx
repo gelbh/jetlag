@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { SessionRulesInput } from "../../domain/session/rules";
+import type { HiderTruthReferenceMode } from "../../domain/questions/hiderTruth/resolveHiderTruthReference";
 import type { HiderTruthResult } from "../../domain/questions/ui";
 import type {
   PendingQuestionRecord,
@@ -20,6 +21,7 @@ interface ChatPanelBodyProps {
   isHider: boolean;
   questionTruths?: ReadonlyMap<string, HiderTruthResult>;
   truthsLoading?: boolean;
+  truthReferenceModes?: ReadonlyMap<string, HiderTruthReferenceMode>;
   answerError?: string | null;
   onAnswerQuestion: (
     pendingQuestionId: string,
@@ -45,6 +47,7 @@ export function ChatPanelBody({
   isHider,
   questionTruths,
   truthsLoading = false,
+  truthReferenceModes,
   answerError = null,
   onAnswerQuestion,
   onDismissExpiredQuestion,
@@ -88,6 +91,7 @@ export function ChatPanelBody({
             senderUid={senderUid}
             questionTruths={questionTruths}
             truthsLoading={truthsLoading}
+            truthReferenceModes={truthReferenceModes}
             answerError={answerError}
             onAnswerQuestion={onAnswerQuestion}
             onDismissExpiredQuestion={onDismissExpiredQuestion}
