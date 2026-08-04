@@ -611,7 +611,6 @@ export function HiderMapScreen() {
           focusBounds={mapFocusBounds}
           fitBoundsMode="once"
           recenterToken={recenterToken}
-          showZoomControl={false}
           onMapClick={handleMapClick}
           className="h-full w-full"
         >

@@ -20,26 +20,30 @@ async function assertSideStackClearsZoom(page: Page) {
   const sideStack = page.locator(".jl-map-chrome-side-stack");
   const session = sideStack.locator("[data-island='session']");
   const zoom = page.locator(".map-zoom-control");
+  const style = page.locator(".map-style-control");
   await expect(sideStack).toHaveCount(1);
   await expect(sideStack).toBeVisible();
   await expect(session).toHaveCount(1);
   await expect(session).toBeVisible();
   await expect(zoom).toBeVisible();
+  await expect(style).toBeVisible();
   await assertInViewport(sideStack);
   await assertInViewport(session);
   await assertInViewport(zoom);
 
   const metrics = await page.evaluate(() => {
     const side = document.querySelector(".jl-map-chrome-side-stack");
-    const zoom = document.querySelector(".map-zoom-control");
+    const zoomEl = document.querySelector(".map-zoom-control");
+    const styleEl = document.querySelector(".map-style-control");
     const sessionEl = document.querySelector(
       ".jl-map-chrome-side-stack [data-island='session']",
     );
-    if (!side || !zoom || !sessionEl) {
+    if (!side || !zoomEl || !styleEl || !sessionEl) {
       return { missing: true as const };
     }
     const sideRect = side.getBoundingClientRect();
-    const zoomRect = zoom.getBoundingClientRect();
+    const zoomRect = zoomEl.getBoundingClientRect();
+    const styleRect = styleEl.getBoundingClientRect();
     const sessionRect = sessionEl.getBoundingClientRect();
     const overlapX =
       Math.min(sideRect.right, zoomRect.right) -
@@ -50,10 +54,12 @@ async function assertSideStackClearsZoom(page: Page) {
     return {
       missing: false as const,
       intersects: overlapX > 1 && overlapY > 1,
+      zoomLeft: zoomRect.left,
+      styleLeft: styleRect.left,
+      sideLeft: sideRect.left,
+      zoomBottom: zoomRect.bottom,
+      styleTop: styleRect.top,
       sessionTop: sessionRect.top,
-      sessionBottom: sessionRect.bottom,
-      zoomTop: zoomRect.top,
-      gap: zoomRect.top - sessionRect.bottom,
     };
   });
 
@@ -62,8 +68,10 @@ async function assertSideStackClearsZoom(page: Page) {
     return;
   }
   expect(metrics.intersects).toBe(false);
-  expect(metrics.sessionBottom).toBeLessThanOrEqual(metrics.zoomTop + 1);
-  expect(metrics.gap).toBeGreaterThanOrEqual(-1);
+  // Zoom sits on the left column, above the satellite toggle — not under Session.
+  expect(metrics.zoomLeft).toBeLessThan(metrics.sideLeft);
+  expect(metrics.styleLeft).toBeLessThan(metrics.sideLeft);
+  expect(metrics.zoomBottom).toBeLessThanOrEqual(metrics.styleTop + 2);
   expect(metrics.sessionTop).toBeGreaterThanOrEqual(-1);
 }
 
@@ -138,8 +146,8 @@ test.describe("mobile tool dock", () => {
     expect(metrics.overflowSlots).toBe(0);
   });
 
-  test("@smoke side stack clears MapView zoom controls", async ({ page }) => {
-    // Narrow portrait exercises --map-chrome-zoom-stack-height: 9rem (≤28rem).
+  test("@smoke side stack clears left zoom column", async ({ page }) => {
+    // Narrow portrait exercises --map-chrome-zoom-stack-height: 5.25rem (≤28rem).
     await page.setViewportSize({ width: 390, height: 844 });
     await openMapWithLocalSession(page);
     await assertSideStackClearsZoom(page);
