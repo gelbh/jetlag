@@ -1,14 +1,14 @@
 import type { RefObject } from "react";
-import { MatchingPanel } from "../../../components/tools/MatchingPanel";
-import { QuestionPreviewSheet } from "../../../components/tools/shared/controls/QuestionPreviewSheet";
-import type { LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
-import type { DistanceUnit } from "../../../domain/map/distance";
+import { MatchingPanel } from "@/components/tools/MatchingPanel";
+import { QuestionPreviewSheet } from "@/components/tools/shared/controls/QuestionPreviewSheet";
+import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
+import type { DistanceUnit } from "@/domain/map/distance";
 import type {
   MatchingAnswer,
   MatchingCategoryDefinition,
   MatchingCategoryId,
   MatchingQuestionDefinition,
-} from "../../../domain/questions";
+} from "@/domain/questions";
 
 interface MatchingToolPanelProps {
   distanceUnit: DistanceUnit;

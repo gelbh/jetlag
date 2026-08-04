@@ -1,18 +1,18 @@
 import type { Feature, LineString } from "geojson";
-import type { AnnotationRecord } from "../../../domain/map/annotations";
-import type { LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
-import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
-import type { DistanceUnit } from "../../../domain/map/distance";
+import type { AnnotationRecord } from "@/domain/map/annotations";
+import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
+import { MAP_ANNOTATION_COLORS } from "@/domain/map/mapAnnotationColors";
+import type { DistanceUnit } from "@/domain/map/distance";
 import {
   hasOpenPendingQuestion,
   thermometerHotterTowards,
   thermometerQuestionPrompt,
   type ThermometerAnswer,
-} from "../../../domain/questions";
-import type { PendingQuestionRecord } from "../../../domain/session/activity/sessionChat";
-import { hotterColderAnswerOptions } from "../../../components/tools/shared/answers/binaryAnswerOptions";
+} from "@/domain/questions";
+import type { PendingQuestionRecord } from "@/domain/session/activity/sessionChat";
+import { hotterColderAnswerOptions } from "@/components/tools/shared/answers/binaryAnswerOptions";
 import type { SubmitPendingQuestionInput } from "../../sync/usePendingQuestionActions";
-import { emitQuestionAnsweredActivity } from "../../../services/session/emitSessionActivity";
+import { emitQuestionAnsweredActivity } from "@/services/session/emitSessionActivity";
 
 export interface CommitThermometerManualInput {
   thermoA: LatLngTuple;
