@@ -15,8 +15,15 @@ vi.mock("react-map-gl/maplibre", async () => {
     }: {
       id?: string;
       children?: React.ReactNode;
-    }) =>
-      React.createElement(
+    }) => {
+      // Mirror react-map-gl: Source id must not change on a live instance.
+      const mountedId = React.useRef<string | undefined>(undefined);
+      if (mountedId.current === undefined) {
+        mountedId.current = id;
+      } else if (mountedId.current !== id) {
+        throw new Error("source id changed");
+      }
+      return React.createElement(
         "div",
         { "data-testid": "maplibre-source", "data-source-id": id },
         React.Children.map(children, (child) =>
@@ -27,7 +34,8 @@ vi.mock("react-map-gl/maplibre", async () => {
               )
             : child,
         ),
-      ),
+      );
+    },
     Layer: (props: { id?: string; source?: string; type?: string }) =>
       React.createElement("div", {
         "data-testid": "maplibre-layer",
@@ -51,6 +59,14 @@ describe("MapLibreGeoJsonOverlay", () => {
     ],
   };
 
+  const paint = {
+    fill: {
+      fillColor: MAP_ANNOTATION_COLORS.elimination,
+      fillOpacity: 0.35,
+    },
+    line: { color: MAP_ANNOTATION_COLORS.playArea, width: 2 },
+  };
+
   it("wraps a polygon geometry as a Feature", () => {
     const feature = polygonGeometryFeature(geometry);
     expect(feature.type).toBe("Feature");
@@ -62,11 +78,8 @@ describe("MapLibreGeoJsonOverlay", () => {
       <MapLibreGeoJsonOverlay
         id="game-area-outside"
         data={polygonGeometryFeature(geometry)}
-        fill={{
-          fillColor: MAP_ANNOTATION_COLORS.elimination,
-          fillOpacity: 0.35,
-        }}
-        line={{ color: MAP_ANNOTATION_COLORS.playArea, width: 2 }}
+        fill={paint.fill}
+        line={paint.line}
       />,
     );
 
@@ -125,6 +138,49 @@ describe("MapLibreGeoJsonOverlay", () => {
     );
     expect(layers.some((layer) => layer.getAttribute("data-type") === "symbol")).toBe(
       true,
+    );
+  });
+
+  it("remounts Source when overlay id changes (JETLAG-3A)", () => {
+    const data = polygonGeometryFeature(geometry);
+    const { rerender } = render(
+      <MapLibreGeoJsonOverlay id="overlay-a" data={data} {...paint} />,
+    );
+
+    expect(screen.getByTestId("maplibre-source")).toHaveAttribute(
+      "data-source-id",
+      "overlay-a-src",
+    );
+
+    expect(() => {
+      rerender(<MapLibreGeoJsonOverlay id="overlay-b" data={data} {...paint} />);
+    }).not.toThrow();
+
+    expect(screen.getByTestId("maplibre-source")).toHaveAttribute(
+      "data-source-id",
+      "overlay-b-src",
+    );
+    const layers = screen.getAllByTestId("maplibre-layer");
+    expect(layers[0]).toHaveAttribute("data-layer-id", "overlay-b-fill");
+    expect(layers[1]).toHaveAttribute("data-layer-id", "overlay-b-line");
+  });
+
+  it("unmounts Source on empty data so a later id change does not reuse it", () => {
+    const data = polygonGeometryFeature(geometry);
+    const { rerender } = render(
+      <MapLibreGeoJsonOverlay id="overlay-a" data={data} {...paint} />,
+    );
+
+    rerender(<MapLibreGeoJsonOverlay id="overlay-a" data={null} {...paint} />);
+    expect(screen.queryByTestId("maplibre-source")).toBeNull();
+
+    expect(() => {
+      rerender(<MapLibreGeoJsonOverlay id="overlay-b" data={data} {...paint} />);
+    }).not.toThrow();
+
+    expect(screen.getByTestId("maplibre-source")).toHaveAttribute(
+      "data-source-id",
+      "overlay-b-src",
     );
   });
 });
