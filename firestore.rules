@@ -105,15 +105,69 @@ service cloud.firestore {
     }
 
     // Minimal checks only — session update rules are near the 1000-expression budget.
-    // Client still requires every confirmed hider; rules require the accepter's own valid anchor.
-    // Anchors live under sessions/{id}/endGameTruth/anchors (hider/observer/admin only).
-    function validEndGameTruthAnchorsMap(sessionId, anchors) {
+    // Anchors live under sessions/{id}/endGameTruth/anchors (hider/observer/admin only for reads).
+    // Seeker/host direct start — validate every anchor value (keys() index, max 4).
+    // Prefer memberUids from the caller (resource.data on session update) to avoid sessionData()
+    // gets of large gameArea docs on the hot start path.
+    function validSeekerEndGameTruthAnchorsMapForMembers(memberUids, anchors) {
       return anchors is map
         && anchors.size() > 0
         && anchors.size() <= 4
-        && request.auth.uid in anchors
-        && validEndGameTruthAnchor(anchors[request.auth.uid])
-        && anchors.keys().hasOnly(sessionData(sessionId).memberUids);
+        && memberUids is list
+        && anchors.keys().hasOnly(memberUids)
+        && validEndGameTruthAnchor(anchors[anchors.keys()[0]])
+        && (anchors.size() < 2 || validEndGameTruthAnchor(anchors[anchors.keys()[1]]))
+        && (anchors.size() < 3 || validEndGameTruthAnchor(anchors[anchors.keys()[2]]))
+        && (anchors.size() < 4 || validEndGameTruthAnchor(anchors[anchors.keys()[3]]));
+    }
+
+    function validSeekerEndGameTruthAnchorsMap(sessionId, anchors) {
+      return validSeekerEndGameTruthAnchorsMapForMembers(
+        sessionData(sessionId).memberUids,
+        anchors
+      );
+    }
+
+    function endGameTruthAnchorsDocPath(sessionId) {
+      return /databases/$(database)/documents/sessions/$(sessionId)/endGameTruth/anchors;
+    }
+
+    // Shared by Found-hider + end-game start — define before callers.
+    function isSessionActive() {
+      return resource.data.status != 'ended'
+        && !('endedAt' in resource.data);
+    }
+
+    // Cheap key discriminator first so Found/lastActive updates never pay for
+    // exists()+get() under the 1000-expression cap (same pattern as Found-hider).
+    function isEndGameStartUpdate(sessionId) {
+      return 'endGameStartedAt' in request.resource.data
+        && request.resource.data.endGameStartedAt is string
+        && isSessionActive()
+        && (isSeekerOnSessionDoc() || isHostOnSessionDoc())
+        && (
+          !('endGameStartedAt' in resource.data)
+          || resource.data.endGameStartedAt == null
+        )
+        && request.resource.data.endGameStartedByUid == request.auth.uid
+        && exists(endGameTruthAnchorsDocPath(sessionId))
+        && validSeekerEndGameTruthAnchorsMapForMembers(
+          resource.data.memberUids,
+          get(endGameTruthAnchorsDocPath(sessionId)).data.anchors
+        )
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly([
+            'endGameStartedAt',
+            'endGameStartedByUid',
+            'endGameRequestedAt',
+            'endGameRequestedByUid',
+            // Legacy strip only — freeze coords must not live on the session doc.
+            'endGameTruthAnchors'
+          ])
+        && !('endGameTruthAnchors' in request.resource.data)
+        && !('endGameRequestedAt' in request.resource.data)
+        && !('endGameRequestedByUid' in request.resource.data)
+        && sessionIdentityUnchanged();
     }
 
     function sessionIdentityUnchanged() {
@@ -127,6 +181,8 @@ service cloud.firestore {
         && request.resource.data.memberRoles == resource.data.memberRoles;
     }
 
+    // Prefer resource.data (no get()) so end-game / Found paths stay under the
+    // 1000-expression budget (no sessionData() on these hot updates).
     function isHiderOnSessionDoc() {
       return isSignedIn()
         && resource.data.memberUids is list
@@ -135,7 +191,6 @@ service cloud.firestore {
         && resource.data.memberRoles[request.auth.uid] == 'hider';
     }
 
-    // Prefer resource.data (no get()) so end-game paths stay under the 1000-expression budget.
     function isSeekerOnSessionDoc() {
       return isSignedIn()
         && resource.data.memberUids is list
@@ -153,76 +208,6 @@ service cloud.firestore {
     function isHostOnSessionDoc() {
       return isSignedIn()
         && resource.data.hostUid == request.auth.uid;
-    }
-
-    function isEndGameDeclineUpdate() {
-      return isHiderOnSessionDoc()
-        && resource.data.endGameRequestedAt is string
-        && (
-          !('endGameStartedAt' in resource.data)
-          || resource.data.endGameStartedAt == null
-        )
-        && request.resource.data.diff(resource.data).affectedKeys()
-          .hasOnly(['endGameRequestedAt', 'endGameRequestedByUid'])
-        && !('endGameRequestedAt' in request.resource.data)
-        && !('endGameRequestedByUid' in request.resource.data)
-        && sessionIdentityUnchanged();
-    }
-
-    function isEndGameAcceptUpdate() {
-      return isHiderOnSessionDoc()
-        && resource.data.endGameRequestedAt is string
-        && (
-          !('endGameStartedAt' in resource.data)
-          || resource.data.endGameStartedAt == null
-        )
-        && request.resource.data.endGameStartedAt is string
-        && request.resource.data.endGameStartedByUid == request.auth.uid
-        && request.resource.data.diff(resource.data).affectedKeys()
-          .hasOnly([
-            'endGameStartedAt',
-            'endGameStartedByUid',
-            'endGameRequestedAt',
-            'endGameRequestedByUid',
-            // Legacy strip only — freeze coords must not live on the session doc.
-            'endGameTruthAnchors'
-          ])
-        && !('endGameTruthAnchors' in request.resource.data)
-        && !('endGameRequestedAt' in request.resource.data)
-        && !('endGameRequestedByUid' in request.resource.data)
-        && sessionIdentityUnchanged();
-    }
-
-    function isEndGameRequestUpdate() {
-      return isSeekerOnSessionDoc()
-        && (
-          !('endGameStartedAt' in resource.data)
-          || resource.data.endGameStartedAt == null
-        )
-        && (
-          !('endGameRequestedAt' in resource.data)
-          || resource.data.endGameRequestedAt == null
-        )
-        && request.resource.data.diff(resource.data).affectedKeys()
-          .hasOnly(['endGameRequestedAt', 'endGameRequestedByUid'])
-        && request.resource.data.endGameRequestedAt is string
-        && request.resource.data.endGameRequestedByUid == request.auth.uid
-        && sessionIdentityUnchanged();
-    }
-
-    function isEndGameCancelRequestUpdate() {
-      return isSeekerOnSessionDoc()
-        && resource.data.endGameRequestedAt is string
-        && resource.data.endGameRequestedByUid == request.auth.uid
-        && (
-          !('endGameStartedAt' in resource.data)
-          || resource.data.endGameStartedAt == null
-        )
-        && request.resource.data.diff(resource.data).affectedKeys()
-          .hasOnly(['endGameRequestedAt', 'endGameRequestedByUid'])
-        && !('endGameRequestedAt' in request.resource.data)
-        && !('endGameRequestedByUid' in request.resource.data)
-        && sessionIdentityUnchanged();
     }
 
     function isEndGameHostClearUpdate() {
@@ -245,14 +230,6 @@ service cloud.firestore {
         && !('endGameRequestedAt' in request.resource.data)
         && !('endGameRequestedByUid' in request.resource.data)
         && sessionIdentityUnchanged();
-    }
-
-    // Found-hider paths: cheap key discriminators first so unrelated updates
-    // (lastActiveAt / join / rules) do not burn the 1000-expression budget.
-    // Early allow-update placement keeps confirm/request under the cap.
-    function isSessionActive() {
-      return resource.data.status != 'ended'
-        && !('endedAt' in resource.data);
     }
 
     function isFoundHiderRequestUpdate() {
@@ -666,19 +643,15 @@ service cloud.firestore {
           || hasHostAccess()
         );
 
-      // High-frequency paths first (single-key discriminators) so they never
-      // pay for Found/end-game helper evaluation under the 1000-expression cap.
+      // High-frequency + Found key discriminators before End Game start (exists/get).
       allow update: if isTimerHostUpdate()
         || isLastActiveAtUpdate()
-        || isEndGameDeclineUpdate()
-        || isEndGameAcceptUpdate()
-        || isEndGameRequestUpdate()
-        || isEndGameCancelRequestUpdate()
-        || isEndGameHostClearUpdate()
         || isFoundHiderRequestUpdate()
         || isFoundHiderConfirmUpdate()
         || isFoundHiderDeclineUpdate()
         || isFoundHiderCancelUpdate()
+        || isEndGameStartUpdate(sessionId)
+        || isEndGameHostClearUpdate()
         || isSessionProgressResetUpdate()
         || isHostEndSessionUpdate()
         || validSessionRulesUpdate(sessionId)
@@ -762,14 +735,17 @@ service cloud.firestore {
         allow delete: if isSignedIn() && request.auth.uid == uid;
       }
 
-      // Frozen end-game GPS — hider/observer/admin only (never on the seeker-readable session doc).
+      // Frozen end-game GPS — hider/observer/admin only for reads (never on the seeker-readable session doc).
+      // Seekers/hosts may create (not update) validated anchors; session start requires the doc exists.
       match /endGameTruth/{docId} {
         allow get, list: if docId == 'anchors'
           && canReadEndGameTruthAnchors(sessionId);
-        allow create, update: if docId == 'anchors'
-          && isHiderMember(sessionId)
+        allow create: if docId == 'anchors'
           && request.resource.data.keys().hasOnly(['anchors'])
-          && validEndGameTruthAnchorsMap(sessionId, request.resource.data.anchors);
+          && (isSeekerMember(sessionId) || isSessionHost(sessionId))
+          && validSeekerEndGameTruthAnchorsMap(sessionId, request.resource.data.anchors);
+        // No update — freeze coords are immutable after create (host delete + restart to replace).
+        allow update: if false;
         allow delete: if docId == 'anchors'
           && (
             isHiderMember(sessionId)

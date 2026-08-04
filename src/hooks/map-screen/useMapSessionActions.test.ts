@@ -67,7 +67,7 @@ describe("useMapSessionActions", () => {
     expect(result.current.canStartEndGame).toBe(false);
   });
 
-  it("requests end game locally for host sessions", async () => {
+  it("starts end game locally for host sessions without hider accept", async () => {
     const setSession = vi.fn();
     vi.spyOn(window, "confirm").mockReturnValue(true);
 
@@ -102,10 +102,67 @@ describe("useMapSessionActions", () => {
 
     expect(setSession).toHaveBeenCalledWith(
       expect.objectContaining({
-        endGameRequestedByUid: "host-1",
+        endGameStartedByUid: "host-1",
+        endGameTruthAnchors: expect.objectContaining({
+          "hider-1": expect.objectContaining({
+            lat: 53.35,
+            lng: -6.26,
+          }),
+        }),
       }),
       "host-1",
     );
+    const next = setSession.mock.calls[0]?.[0] as SessionRecord;
+    expect(next.endGameRequestedAt).toBeUndefined();
+    expect(next.endGameRequestedByUid).toBeUndefined();
+  });
+
+  it("does not clear annotations when starting end game locally", async () => {
+    const setSession = vi.fn();
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+    const sessionWithZones = {
+      ...baseSession,
+      memberUids: ["host-1", "hider-1"],
+    };
+
+    const { result } = renderHook(() =>
+      useMapSessionActions({
+        session: sessionWithZones,
+        setSession,
+        uid: "host-1",
+        myRole: "seeker",
+        isRemote: false,
+        gameRulesEditable: true,
+        timerHasStarted: true,
+        hidingZones: [
+          {
+            hiderUid: "hider-1",
+            sessionId: LOCAL_SESSION_ID,
+            stationId: "dublin-central",
+            stationName: "Dublin Central",
+            center: { lat: 53.35, lng: -6.26 },
+            radiusMeters: 500,
+            geometryJson: "{}",
+            status: "confirmed",
+            confirmedAt: "2026-01-01T00:00:00.000Z",
+          },
+        ],
+      }),
+    );
+
+    await act(async () => {
+      await result.current.handleStartEndGame();
+    });
+
+    const next = setSession.mock.calls[0]?.[0] as SessionRecord;
+    expect(Object.keys(next).sort()).toEqual(
+      expect.arrayContaining([
+        "endGameStartedAt",
+        "endGameStartedByUid",
+        "endGameTruthAnchors",
+      ]),
+    );
+    expect(next).not.toHaveProperty("annotations");
   });
 
   it("blocks found hider until a hiding zone is confirmed", () => {
