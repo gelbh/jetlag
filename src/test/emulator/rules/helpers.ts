@@ -9,6 +9,8 @@ import { milesToMeters } from "../../../domain/map/distance";
 import { serializeGameAreaForFirestore } from "../../../services/firestore/firestoreSerialization";
 import { DUBLIN_CITY_GAME_AREA } from "../../fixtures/dublinGameArea";
 
+export { milesToMeters };
+
 export const PROJECT_ID = "demo-jetlag-rules";
 export const ADMIN_EMAIL = "gelbharttomer@gmail.com";
 

@@ -6,6 +6,7 @@ import {
 import { describe, expect, it } from "vitest";
 import {
   bindRulesTestEnv,
+  milesToMeters,
   sessionPayload,
 } from "./helpers";
 
