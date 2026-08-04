@@ -1,8 +1,7 @@
 import { MATCHING_CATEGORIES } from "../../questions/matchingQuestions";
 import {
   BASE_MEASURING_CATALOG,
-  CUSTOM_PACK_GATED_MEASURING_IDS,
-  MEASURING_CATALOG,
+  CUSTOM_PACK_GATED_MEASURING,
   isCustomPackGatedMeasuringId,
 } from "../../questions/measuringQuestions";
 import {
@@ -70,12 +69,6 @@ export function baseMeasuringCatalog(): readonly MeasuringCatalogOption[] {
   return BASE_MEASURING_CATALOG;
 }
 
-export function customPackGatedMeasuringOptions(): MeasuringCatalogOption[] {
-  return CUSTOM_PACK_GATED_MEASURING_IDS.map(
-    (id) => MEASURING_CATALOG.find((option) => option.id === id)!,
-  );
-}
-
 export function availableMatchingCategories(
   session: SessionRulesInput,
 ): MatchingCategoryDefinition[] {
@@ -98,7 +91,7 @@ export function availableMeasuringCatalog(
 ): MeasuringCatalogOption[] {
   const base = [...baseMeasuringCatalog()];
   const pack = isCustomQuestionPackEnabled(session)
-    ? [...customPackGatedMeasuringOptions(), ...CUSTOM_QUESTION_PACK_MEASURING]
+    ? [...CUSTOM_PACK_GATED_MEASURING, ...CUSTOM_QUESTION_PACK_MEASURING]
     : [];
   const hostCustom = (session.customCategories ?? []).map(
     customCategoryToMeasuringOption,

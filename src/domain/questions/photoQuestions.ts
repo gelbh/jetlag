@@ -236,67 +236,69 @@ export function photoCategoriesForGameSize(
   return PHOTO_CATEGORIES.filter((category) => category.phase <= maxPhase);
 }
 
+/** Metric edition overrides; omit a field to keep the imperial catalog string. */
+const METRIC_PHOTO_COPY: Partial<
+  Record<
+    PhotoCategoryId,
+    Partial<Pick<PhotoCategoryDefinition, "label" | "promptNoun" | "ruleSummary">>
+  >
+> = {
+  park: {
+    ruleSummary:
+      "No zoom, perpendicular to ground. Must stand 2 m from any obstruction.",
+  },
+  place_of_worship: {
+    ruleSummary:
+      "2 m × 2 m section with 3 distinct elements. The litmus test: can someone match it if they visit the spot?",
+  },
+  train_platform: {
+    ruleSummary: "2 m × 2 m section with 3 distinct elements.",
+  },
+  half_mile_streets_traced: {
+    label: "1 km of Streets Traced",
+    promptNoun: "1 km of streets traced",
+  },
+};
+
+function photoCopyForUnit(
+  categoryId: PhotoCategoryId,
+  unit: DistanceUnit,
+): PhotoCategoryDefinition {
+  const category = getPhotoCategory(categoryId);
+  if (resolveDistanceUnit(unit) !== "metric") {
+    return category;
+  }
+  const metric = METRIC_PHOTO_COPY[categoryId];
+  if (!metric) {
+    return category;
+  }
+  return {
+    ...category,
+    label: metric.label ?? category.label,
+    promptNoun: metric.promptNoun ?? category.promptNoun,
+    ruleSummary: metric.ruleSummary ?? category.ruleSummary,
+  };
+}
+
 export function photoCategoryLabelForUnit(
   categoryId: PhotoCategoryId,
   unit: DistanceUnit = "imperial",
 ): string {
-  const resolved = resolveDistanceUnit(unit);
-  if (resolved === "metric" && categoryId === "half_mile_streets_traced") {
-    return "1 km of Streets Traced";
-  }
-  return photoCategoryLabel(categoryId);
+  return photoCopyForUnit(categoryId, unit).label;
 }
 
 export function photoPromptNounForUnit(
   categoryId: PhotoCategoryId,
   unit: DistanceUnit = "imperial",
 ): string {
-  const resolved = resolveDistanceUnit(unit);
-  if (resolved === "metric" && categoryId === "half_mile_streets_traced") {
-    return "1 km of streets traced";
-  }
-  return getPhotoCategory(categoryId).promptNoun;
+  return photoCopyForUnit(categoryId, unit).promptNoun;
 }
 
 export function photoRuleSummaryForUnit(
   categoryId: PhotoCategoryId,
   unit: DistanceUnit = "imperial",
 ): string {
-  const resolved = resolveDistanceUnit(unit);
-  const category = getPhotoCategory(categoryId);
-  if (resolved !== "metric") {
-    return category.ruleSummary;
-  }
-
-  switch (categoryId) {
-    case "park":
-      return "No zoom, perpendicular to ground. Must stand 2 m from any obstruction.";
-    case "place_of_worship":
-      return "2 m × 2 m section with 3 distinct elements. The litmus test: can someone match it if they visit the spot?";
-    case "train_platform":
-      return "2 m × 2 m section with 3 distinct elements.";
-    case "half_mile_streets_traced":
-      return category.ruleSummary;
-    case "any_building_from_transit_station":
-    case "widest_street":
-    case "tree":
-    case "tallest_structure_sightline":
-    case "you":
-    case "the_sky":
-    case "tallest_building_from_transit_station":
-    case "trace_nearest_street_path":
-    case "two_buildings":
-    case "restaurant_interior":
-    case "grocery_store_aisle":
-    case "tallest_mountain_from_transit_station":
-    case "biggest_body_of_water_in_zone":
-    case "five_buildings":
-      return category.ruleSummary;
-    default: {
-      const never: never = categoryId;
-      return never;
-    }
-  }
+  return photoCopyForUnit(categoryId, unit).ruleSummary;
 }
 
 export function photoQuestionPrompt(
