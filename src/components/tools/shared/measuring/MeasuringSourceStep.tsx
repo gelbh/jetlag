@@ -1,5 +1,5 @@
 import {
-  MEASURING_CATALOG,
+  BASE_MEASURING_CATALOG,
   MEASURING_GROUPS,
   measuringQuestionFor,
   type MeasuringCatalogOption,
@@ -31,7 +31,7 @@ export function MeasuringSourceStep({
   locationCategory,
   onMeasureFromChange,
 }: MeasuringSourceStepProps) {
-  const measureCatalog = catalogOptions ?? MEASURING_CATALOG;
+  const measureCatalog = catalogOptions ?? BASE_MEASURING_CATALOG;
   const availableGroups = MEASURING_GROUPS.map((group) => ({
     id: group.id,
     label: group.label,
