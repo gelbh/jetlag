@@ -1,11 +1,11 @@
 import { useCallback } from "react";
-import type { PlayerRole } from "../../../domain/session/players/playerRole";
-import { isHidingTimerEffectivelyRunning } from "../../../domain/session/timer/timer";
-import { useQuestionDeadlineEnforcement } from "../../../hooks/session/useQuestionDeadlineEnforcement";
-import { useCancelOrphanThermometerWalks } from "../../../hooks/sync/useCancelOrphanThermometerWalks";
-import { usePendingQuestionResolver } from "../../../hooks/sync/usePendingQuestionResolver";
-import { useSeekerLocationSync } from "../../../hooks/sync/useSeekerLocationSync";
-import { captureException } from "../../../services/core/analytics/sentry";
+import type { PlayerRole } from "@/domain/session/players/playerRole";
+import { isHidingTimerEffectivelyRunning } from "@/domain/session/timer/timer";
+import { useQuestionDeadlineEnforcement } from "@/hooks/session/useQuestionDeadlineEnforcement";
+import { useCancelOrphanThermometerWalks } from "@/hooks/sync/useCancelOrphanThermometerWalks";
+import { usePendingQuestionResolver } from "@/hooks/sync/usePendingQuestionResolver";
+import { useSeekerLocationSync } from "@/hooks/sync/useSeekerLocationSync";
+import { captureException } from "@/services/core/analytics/sentry";
 import type { MapScreenCore } from "./useMapScreenCore";
 
 type SeekerEffectsInput = Pick<

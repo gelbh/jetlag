@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { MapLandscapeChromeProvider } from "../../../components/session/mapChrome/MapLandscapeChromeContext";
+import { MapLandscapeChromeProvider } from "@/components/session/mapChrome/MapLandscapeChromeContext";
 import { MapScreenChromeSlots } from "./MapScreenChromeSlots";
 
 vi.mock("../../../hooks/layout/useDesktopLayout", () => ({
