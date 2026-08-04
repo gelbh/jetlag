@@ -121,33 +121,24 @@ describe("MapBottomChrome", () => {
     expect(side?.querySelector('[data-island="session"]')).not.toBeNull();
   });
 
-  it("clears the MapView Recenter portal with width/height-scoped offset tokens", () => {
+  it("stacks map controls on the left and sits the side stack above the hunt island", () => {
+    expect(chromeCss).not.toMatch(/--map-chrome-zoom-stack-height/);
     expect(chromeCss).toMatch(
-      /:root\s*\{[^}]*--map-chrome-zoom-stack-height:\s*3\.25rem/s,
+      /\.jl-map-chrome-side-stack\s*\{[^}]*bottom:\s*calc\(\s*var\(--dock-island-height\)\s*\+\s*env\(safe-area-inset-bottom\)\s*\+\s*0\.75rem\s*\)/s,
     );
     expect(chromeCss).toMatch(
-      /@media\s*\(max-width:\s*28rem\)\s*\{[^}]*--map-chrome-zoom-stack-height:\s*5\.25rem/s,
+      /\.map-zoom-control,\s*\.map-style-control,\s*\.map-recenter-control\s*\{[^}]*left:\s*var\(--map-left-chrome-inset\)/s,
     );
-    expect(chromeCss).toMatch(
-      /@media\s*\(max-height:\s*430px\)\s*and\s*\(orientation:\s*landscape\)\s*\{[^}]*--map-chrome-zoom-stack-height:\s*3\.25rem/s,
-    );
-    expect(chromeCss).toMatch(
-      /\.jl-map-chrome-side-stack\s*\{[^}]*bottom:\s*calc\(\s*var\(--dock-island-height\)\s*\+\s*env\(safe-area-inset-bottom\)\s*\+\s*0\.75rem\s*\+\s*var\(--map-chrome-zoom-stack-height\)\s*\+\s*0\.5rem\s*\)/s,
-    );
-    // Zoom is left above satellite; do not reintroduce a silent calc fallback.
-    expect(chromeCss).not.toMatch(/map-chrome-zoom-stack-height,\s*6\.25rem/);
-    expect(chromeCss).toMatch(/\.map-zoom-control\s*\{[^}]*left:\s*var\(--map-left-chrome-inset\)/s);
     expect(chromeCss).toMatch(
       /\.map-zoom-control--dock\s*\{[^}]*--map-style-control-size/s,
     );
-
-    // Short-landscape must win when both media queries match (cascade order).
-    const narrowWidthOffset = chromeCss.indexOf("@media (max-width: 28rem)");
-    const shortLandscapeOffset = chromeCss.indexOf(
-      "@media (max-height: 430px) and (orientation: landscape)",
+    expect(chromeCss).toMatch(
+      /\.map-recenter-control--dock\s*\{[^}]*--map-zoom-btn-size/s,
     );
-    expect(narrowWidthOffset).toBeGreaterThan(-1);
-    expect(shortLandscapeOffset).toBeGreaterThan(narrowWidthOffset);
+    expect(chromeCss).toMatch(/@media\s*\(max-width:\s*28rem\)/);
+    expect(chromeCss).toMatch(
+      /@media\s*\(max-height:\s*430px\)\s*and\s*\(orientation:\s*landscape\)/,
+    );
   });
 
   it("defaults hunt density to tools and omits sparse modifiers", () => {
