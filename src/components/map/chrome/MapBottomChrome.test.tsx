@@ -182,12 +182,18 @@ describe("MapBottomChrome", () => {
     );
   });
 
-  it("anchors container-inset map controls to --dock-height token", () => {
+  it("anchors container-inset zoom/style to --dock-height; recenter stacks separately", () => {
     expect(controlsCss).toMatch(
-      /\.map-zoom-control--container,\s*\.map-style-control--container,\s*\.map-recenter-control--container\s*\{[^}]*bottom:\s*var\(--dock-height\)/s,
+      /\.map-zoom-control--container,\s*\.map-style-control--container\s*\{[^}]*bottom:\s*var\(--dock-height\)/s,
+    );
+    expect(controlsCss).not.toMatch(
+      /\.map-zoom-control--container,\s*\.map-style-control--container,\s*\.map-recenter-control--container/,
     );
     expect(controlsCss).not.toMatch(
       /\.map-zoom-control--container[^}]*bottom:\s*4\.25rem/s,
+    );
+    expect(chromeCss).toMatch(
+      /\.map-recenter-control--container\s*\{[^}]*var\(--dock-height\)/s,
     );
   });
 });

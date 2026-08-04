@@ -253,14 +253,15 @@
     gap: 0.25rem;
   }
 
-  /* Draw lives on the RIGHT session stack — menu sits left of that stack. */
+  /* Draw lives on the RIGHT session stack — menu sits left of that stack.
+     Map controls are LEFT; no right Recenter clearance. */
   .jl-map-bottom-chrome-host .jl-tool-menu-dock {
     position: absolute;
     right: calc(
       max(0.5rem, env(safe-area-inset-right)) + var(--map-chrome-side-width, 3.25rem) + 0.5rem
     );
     bottom: calc(
-      var(--dock-island-height) + env(safe-area-inset-bottom) + 0.75rem + var(--map-chrome-zoom-stack-height) + 0.5rem
+      var(--dock-island-height) + env(safe-area-inset-bottom) + 0.75rem
     );
     z-index: calc(var(--z-panel) + 1);
     /* Host is pe-none; islands re-enable PE — overlays must too. */
@@ -413,12 +414,12 @@
 }
 
 .map-style-control--container {
-  bottom: 4.25rem;
+  bottom: var(--dock-height);
 }
 
 .map-zoom-control--container {
   bottom: calc(
-    4.25rem + var(--map-style-control-size) + var(--map-left-chrome-gap)
+    var(--dock-height) + var(--map-style-control-size) + var(--map-left-chrome-gap)
   );
 }
 
