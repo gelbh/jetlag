@@ -30,6 +30,7 @@ export {
   normalizeBoundingBox,
 } from "../gameArea/gameAreaBounds";
 
+/** Null-island placeholder ring — never frame the camera on this alone. */
 const ZERO_GAME_AREA_RING: number[][] = [
   [0, 0],
   [0, 0],
@@ -38,6 +39,7 @@ const ZERO_GAME_AREA_RING: number[][] = [
   [0, 0],
 ];
 
+/** Documented zero fallback when a caller omits gameArea; detect via isPlaceholderGameArea. */
 export const ZERO_GAME_AREA: GameArea = {
   type: "Polygon",
   coordinates: [ZERO_GAME_AREA_RING],

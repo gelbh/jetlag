@@ -1,5 +1,6 @@
 import { renderHook } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
+import { DEFAULT_MAP_CENTER } from "../../domain/map/defaultMapCenter";
 import { JOIN_PREVIEW_PLACEHOLDER_AREA } from "../../domain/session/join/joinPreviewGameArea";
 import type { GameArea } from "../../domain/map/annotations";
 import { useObserverMapScreen } from "./useObserverMapScreen";
@@ -108,7 +109,7 @@ describe("useObserverMapScreen", () => {
 
     expect(result.current.mapFocusBounds).toBeNull();
     expect(result.current.playAreaReady).toBe(false);
-    expect(result.current.center).toEqual([51.505, -0.09]);
+    expect(result.current.center).toEqual(DEFAULT_MAP_CENTER);
   });
 
   it("keeps map focus bounds null for join-preview placeholder gameArea", () => {
@@ -150,6 +151,9 @@ describe("useObserverMapScreen", () => {
     expect(result.current.mapFocusBounds).not.toBeNull();
     expect(result.current.playAreaReady).toBe(true);
     expect(result.current.gameArea).toEqual(REAL_GAME_AREA);
+    expect(result.current.center).not.toEqual(DEFAULT_MAP_CENTER);
+    expect(result.current.center[0]).toBeCloseTo(53.35, 5);
+    expect(result.current.center[1]).toBeCloseTo(-6.25, 5);
     expect(result.current.mapFocusBounds).toEqual([
       [53.3, -6.3],
       [53.4, -6.2],

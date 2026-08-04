@@ -150,7 +150,8 @@
 .map-zoom-control--container,
 .map-style-control--container,
 .map-recenter-control--container {
-  bottom: 4.25rem;
+  /* Token SoT: --dock-height in base.css (do not re-hardcode 4.25rem). */
+  bottom: var(--dock-height);
 }
 
 .map-zoom-control--hider-actions,

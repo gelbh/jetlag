@@ -1,10 +1,17 @@
-const ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+/** Session-code alphabet (excludes I/O). SoT for generate + input examples. */
+export const SESSION_CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+
+/** Join input placeholder — first four alphabet chars (not a live session id). */
+export const SESSION_CODE_INPUT_PLACEHOLDER = SESSION_CODE_ALPHABET.slice(0, 4);
 
 export function generateSessionCode(): string {
   let code = "";
 
   for (let index = 0; index < 4; index += 1) {
-    code += ALPHABET[Math.floor(Math.random() * ALPHABET.length)];
+    code +=
+      SESSION_CODE_ALPHABET[
+        Math.floor(Math.random() * SESSION_CODE_ALPHABET.length)
+      ];
   }
 
   return code;

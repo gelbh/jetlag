@@ -14,10 +14,9 @@ import { useSharedSessionScreen } from "../../hooks/session/useSharedSessionScre
 import { useSessionDistanceUnit } from "../../hooks/session/useSessionDistanceUnit";
 import { useSessionAnnotations } from "../../hooks/map/useSessionAnnotations";
 import { isPlaceholderGameArea } from "../../domain/session/join/joinPreviewGameArea";
+import { DEFAULT_MAP_CENTER } from "../../domain/map/defaultMapCenter";
 import { useMapStore, useSessionStore } from "../../state/sessionStore";
 import { getMapScreenRoleConfig } from "../map-screen/shared/mapScreenRoleConfig";
-
-const DEFAULT_MAP_CENTER: LatLngTuple = [51.505, -0.09];
 
 export function useObserverMapScreen() {
   const session = useSessionStore((state) => state.session);
