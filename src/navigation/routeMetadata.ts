@@ -1,4 +1,5 @@
 const PRESET_EDIT_PATH_RE = /^\/presets\/[^/]+\/edit$/;
+const ADMIN_PATH_RE = /^\/admin(?:\/|$)/;
 
 const LAZY_ROUTE_PATHS = new Set([
   "/map",
@@ -6,6 +7,11 @@ const LAZY_ROUTE_PATHS = new Set([
   "/presets",
   "/presets/new",
   "/presets/:id/edit",
+  "/admin",
+  "/feedback",
+  "/privacy",
+  "/terms",
+  "/premium",
 ]);
 
 export function normalizeRoutePath(path: string): string {
@@ -13,6 +19,10 @@ export function normalizeRoutePath(path: string): string {
 
   if (PRESET_EDIT_PATH_RE.test(base)) {
     return "/presets/:id/edit";
+  }
+
+  if (ADMIN_PATH_RE.test(base)) {
+    return "/admin";
   }
 
   return base || "/";
@@ -26,7 +36,12 @@ export type LazyRouteLoaderKey =
   | "importMapScreen"
   | "importCreateSession"
   | "importGamePresetList"
-  | "importGamePresetEditor";
+  | "importGamePresetEditor"
+  | "importAdminOpsDesk"
+  | "importFeedback"
+  | "importPrivacy"
+  | "importPremium"
+  | "importTerms";
 
 export function lazyRouteLoaderKey(path: string): LazyRouteLoaderKey | undefined {
   const normalizedPath = normalizeRoutePath(path);
@@ -40,6 +55,16 @@ export function lazyRouteLoaderKey(path: string): LazyRouteLoaderKey | undefined
     case "/presets/new":
     case "/presets/:id/edit":
       return "importGamePresetEditor";
+    case "/admin":
+      return "importAdminOpsDesk";
+    case "/feedback":
+      return "importFeedback";
+    case "/privacy":
+      return "importPrivacy";
+    case "/premium":
+      return "importPremium";
+    case "/terms":
+      return "importTerms";
     default:
       return undefined;
   }
