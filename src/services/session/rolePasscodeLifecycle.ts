@@ -74,27 +74,39 @@ export async function leaveSessionMembership(sessionId: string): Promise<void> {
     functions,
     "leaveSessionMembership",
   );
-  await callable({ sessionId });
+  try {
+    await callable({ sessionId });
+  } finally {
+    clearRolePasscodeRevealWarm(sessionId);
+  }
 }
 
 type RevealRole = RolePasscodeActionResult["role"];
 
-const revealCache = new Map<string, RolePasscodeActionResult>();
+/** In-flight warm only — no durable secret memo (stale after remote rotate). */
 const revealInflight = new Map<string, Promise<RolePasscodeActionResult>>();
 
-function revealCacheKey(sessionId: string, role: RevealRole): string {
+function revealWarmKey(sessionId: string, role: RevealRole): string {
   return `${sessionId}:${role}`;
 }
 
-/** Test-only: drop session-scoped reveal memoization. */
-export function clearRolePasscodeRevealCache(): void {
-  revealCache.clear();
-  revealInflight.clear();
+/** Drop in-flight warm slots (tests, leave, regenerate). */
+export function clearRolePasscodeRevealWarm(sessionId?: string): void {
+  if (!sessionId) {
+    revealInflight.clear();
+    return;
+  }
+  const prefix = `${sessionId}:`;
+  for (const key of revealInflight.keys()) {
+    if (key.startsWith(prefix)) {
+      revealInflight.delete(key);
+    }
+  }
 }
 
 /**
  * Warm the reveal path without exposing the code in UI.
- * Dedupes with in-flight / cached reveals for the same session+role.
+ * Coalesces with an in-flight reveal for the same session+role.
  */
 export function prefetchRolePasscode(
   sessionId: string,
@@ -113,12 +125,7 @@ export async function revealRolePasscode(
     throw new Error("Firebase is not configured.");
   }
 
-  const key = revealCacheKey(sessionId, role);
-  const cached = revealCache.get(key);
-  if (cached) {
-    return cached;
-  }
-
+  const key = revealWarmKey(sessionId, role);
   const inflight = revealInflight.get(key);
   if (inflight) {
     return inflight;
@@ -131,7 +138,6 @@ export async function revealRolePasscode(
       RolePasscodeActionResult
     >(functions, "revealRolePasscode");
     const result = await callable({ sessionId, role });
-    revealCache.set(key, result.data);
     return result.data;
   })();
 
@@ -139,7 +145,9 @@ export async function revealRolePasscode(
   try {
     return await promise;
   } finally {
-    revealInflight.delete(key);
+    if (revealInflight.get(key) === promise) {
+      revealInflight.delete(key);
+    }
   }
 }
 
@@ -151,13 +159,15 @@ export async function regenerateRolePasscode(
     throw new Error("Firebase is not configured.");
   }
 
+  // Abandon any warm reveal so a late prefetch cannot win over the new code.
+  revealInflight.delete(revealWarmKey(sessionId, role));
+
   const functions = await getFirebaseFunctions();
   const callable = httpsCallable<
     { sessionId: string; role: RevealRole },
     RolePasscodeActionResult
   >(functions, "regenerateRolePasscode");
   const result = await callable({ sessionId, role });
-  revealCache.set(revealCacheKey(sessionId, role), result.data);
   return result.data;
 }
 

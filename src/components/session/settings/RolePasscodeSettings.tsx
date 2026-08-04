@@ -53,16 +53,21 @@ export function RolePasscodeSettings({
         isHost,
       })
     : [];
-  const rowKey = rows.join(",");
 
   useEffect(() => {
-    if (!gated || rowKey.length === 0) {
+    if (!isSessionRoleGated(session)) {
       return;
     }
-    for (const role of rowKey.split(",") as RevealRole[]) {
+    const warmRoles = visibleRoleCodeRoles({
+      roleGates: session.roleGates,
+      memberRoles: session.memberRoles,
+      myUid,
+      isHost,
+    });
+    for (const role of warmRoles) {
       prefetchRolePasscode(session.id, role);
     }
-  }, [gated, session.id, rowKey]);
+  }, [session, myUid, isHost]);
 
   if (!gated || rows.length === 0) {
     return null;

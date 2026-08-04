@@ -54,23 +54,31 @@ export async function revealRolePasscodeHandler(db, uid, sessionId, role) {
 
   // Overlap session + secrets reads — auth still gates on session before return.
   const secretsPromise = secretsRef.get();
-  const sessionSnap = await sessionRef.get();
-  if (!sessionSnap.exists) {
+  const absorbSecretsRejection = () => {
     void secretsPromise.catch(() => {});
-    throw new Error(REVEAL_SESSION_NOT_FOUND);
+  };
+
+  try {
+    const sessionSnap = await sessionRef.get();
+    if (!sessionSnap.exists) {
+      throw new Error(REVEAL_SESSION_NOT_FOUND);
+    }
+
+    const data = sessionSnap.data() ?? {};
+    assertRevealAuthorized(data, uid, role);
+
+    const secretsSnap = await secretsPromise;
+    const secret = secretsSnap.exists ? secretsSnap.data()?.[role] : null;
+    const code = typeof secret?.code === "string" ? secret.code : null;
+    if (!code) {
+      throw new HttpsError("failed-precondition", "Role passcode is not set.");
+    }
+
+    return { role, rolePasscode: code };
+  } catch (error) {
+    absorbSecretsRejection();
+    throw error;
   }
-
-  const data = sessionSnap.data() ?? {};
-  assertRevealAuthorized(data, uid, role);
-
-  const secretsSnap = await secretsPromise;
-  const secret = secretsSnap.exists ? secretsSnap.data()?.[role] : null;
-  const code = typeof secret?.code === "string" ? secret.code : null;
-  if (!code) {
-    throw new HttpsError("failed-precondition", "Role passcode is not set.");
-  }
-
-  return { role, rolePasscode: code };
 }
 
 export async function regenerateRolePasscodeHandler(db, uid, sessionId, role) {
