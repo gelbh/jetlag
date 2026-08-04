@@ -1,9 +1,10 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import {
   PWA_MARK_APP_READY,
+  PWA_MARK_MAP_RESUME,
   PWA_MARK_MAP_USABLE,
-  PWA_MARK_NAV,
   PWA_MEASURE_MAP_RETURN,
+  markMapResumeStart,
   markMapUsableAndMeasureReturn,
   markPlayDay,
   measurePlayDay,
@@ -31,12 +32,17 @@ describe("playDayMarks", () => {
     ).toBe(12.5);
   });
 
-  it("marks map-usable and measures return from nav", () => {
+  it("marks map resume start with frozen name", () => {
+    markMapResumeStart();
+    expect(performance.mark).toHaveBeenCalledWith(PWA_MARK_MAP_RESUME);
+  });
+
+  it("marks map-usable and measures return from map-resume", () => {
     expect(markMapUsableAndMeasureReturn()).toBe(12.5);
     expect(performance.mark).toHaveBeenCalledWith(PWA_MARK_MAP_USABLE);
     expect(performance.measure).toHaveBeenCalledWith(
       PWA_MEASURE_MAP_RETURN,
-      PWA_MARK_NAV,
+      PWA_MARK_MAP_RESUME,
       PWA_MARK_MAP_USABLE,
     );
   });

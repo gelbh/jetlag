@@ -14,7 +14,10 @@ import {
   gameAreaToBoundsExpression,
   type LatLngTuple,
 } from "../../../domain/geometry/gameArea/geometry";
-import { markMapUsableAndMeasureReturn } from "../../../domain/device/perf/playDayMarks";
+import {
+  markMapResumeStart,
+  markMapUsableAndMeasureReturn,
+} from "../../../domain/device/perf/playDayMarks";
 import { scheduleIdleBootWork } from "../../../domain/device/perf/scheduleAfterFirstPaint";
 import { effectiveMapStyle, applyMapStylePreferenceChange } from "../../../domain/device/power/powerProfile";
 import { useWakeLock } from "../../../hooks/location/useWakeLock";
@@ -247,7 +250,7 @@ export function useMapScreenCore(options: UseMapScreenCoreOptions = {}) {
     const area = gameArea;
 
     // Keep map-usable chrome free of geo preload / elevation sampling work.
-    scheduleIdleBootWork(() => {
+    return scheduleIdleBootWork(() => {
       void preloadGameAreaCachesAsync(
         area,
         customMatchingAreas,
@@ -268,6 +271,10 @@ export function useMapScreenCore(options: UseMapScreenCoreOptions = {}) {
   ]);
 
   useEnsureSessionMembership();
+
+  useEffect(() => {
+    markMapResumeStart();
+  }, []);
 
   useEffect(() => {
     if (!playAreaReady) {

@@ -1,22 +1,25 @@
 export type MapLibreRuntimeOptions = {
-  fadeDuration?: number;
-  maxTileCacheSize?: number;
+  fadeDuration: number;
+  maxTileCacheSize: number | null;
+};
+
+/** Default MapLibre fade; null tile cache = dynamic sizing. */
+const NORMAL_MAP_RUNTIME: MapLibreRuntimeOptions = {
+  fadeDuration: 300,
+  maxTileCacheSize: null,
+};
+
+const LOW_POWER_MAP_RUNTIME: MapLibreRuntimeOptions = {
+  fadeDuration: 0,
+  maxTileCacheSize: 50,
 };
 
 /**
- * MapLibre constructor knobs for play-day runtime.
- * Normal mode omits overrides so MapLibre keeps dynamic tile cache + default fade.
- * Low-power cuts label fade work and caps tile retention.
+ * Explicit MapLibre constructor knobs so low-power toggles always apply
+ * known values (constructor options are not live-updated by react-map-gl).
  */
 export function mapLibreRuntimeOptions(
   lowPowerMode: boolean,
 ): MapLibreRuntimeOptions {
-  if (!lowPowerMode) {
-    return {};
-  }
-
-  return {
-    fadeDuration: 0,
-    maxTileCacheSize: 50,
-  };
+  return lowPowerMode ? LOW_POWER_MAP_RUNTIME : NORMAL_MAP_RUNTIME;
 }

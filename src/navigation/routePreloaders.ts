@@ -132,12 +132,12 @@ export async function preloadRoute(path: string): Promise<void> {
   const normalizedPath = normalizeRoutePath(path);
   const loaderKey = lazyRouteLoaderKey(path);
   if (loaderKey) {
-    const warmers: Array<Promise<unknown>> = [routeImporter[loaderKey]()];
+    const routeLoad = routeImporter[loaderKey]();
     if (loaderKey === "importMapScreen") {
-      // Return-to-map: avoid serial wait on MapViewMapLibre after MapScreen.
-      warmers.push(mapShellWarmers.importMapViewMapLibre());
+      // Best-effort shell warm; must not block MapScreen warm marking.
+      void mapShellWarmers.importMapViewMapLibre().catch(() => undefined);
     }
-    await Promise.all(warmers);
+    await routeLoad;
     markRouteImportWarm(normalizedPath);
   }
 }
