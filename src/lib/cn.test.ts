@@ -3,7 +3,8 @@ import { cn } from "./cn";
 
 describe("cn", () => {
   it("joins truthy class names", () => {
-    expect(cn("a", false && "b", "c")).toBe("a c");
+    const inactive = false;
+    expect(cn("a", inactive && "b", "c")).toBe("a c");
   });
 
   it("merges conflicting Tailwind utilities", () => {
