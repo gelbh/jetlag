@@ -43,9 +43,13 @@ describe("fetchOverpassWithFailover", () => {
   });
 
   it("all endpoints AbortError → throws Overpass timed out.", async () => {
-    const targets = [];
+    const interpreterTargets = [];
     globalThis.fetch = async (url) => {
-      targets.push(String(url));
+      const u = String(url);
+      if (u.includes("/api/status")) {
+        return new Response("Slot available after: 0\n", { status: 200 });
+      }
+      interpreterTargets.push(u);
       throw abortError();
     };
 
@@ -57,14 +61,17 @@ describe("fetchOverpassWithFailover", () => {
         return true;
       },
     );
-    assert.deepEqual(targets, [...OVERPASS_ENDPOINTS]);
+    assert.deepEqual(interpreterTargets, [...OVERPASS_ENDPOINTS]);
   });
 
   it("504 then 200 → success", async () => {
-    let calls = 0;
-    globalThis.fetch = async () => {
-      calls += 1;
-      if (calls === 1) {
+    let interpreterCalls = 0;
+    globalThis.fetch = async (url) => {
+      if (String(url).includes("/api/status")) {
+        return new Response("Slot available after: 0\n", { status: 200 });
+      }
+      interpreterCalls += 1;
+      if (interpreterCalls === 1) {
         return jsonResponse(504);
       }
       return jsonResponse(200, '{"elements":[]}');
@@ -72,14 +79,17 @@ describe("fetchOverpassWithFailover", () => {
 
     const response = await fetchOverpassWithFailover("[out:json];out;");
     assert.equal(response.status, 200);
-    assert.equal(calls, 2);
+    assert.equal(interpreterCalls, 2);
   });
 
   it("500 then 200 → success", async () => {
-    let calls = 0;
-    globalThis.fetch = async () => {
-      calls += 1;
-      if (calls === 1) {
+    let interpreterCalls = 0;
+    globalThis.fetch = async (url) => {
+      if (String(url).includes("/api/status")) {
+        return new Response("Slot available after: 0\n", { status: 200 });
+      }
+      interpreterCalls += 1;
+      if (interpreterCalls === 1) {
         return jsonResponse(500);
       }
       return jsonResponse(200, '{"elements":[]}');
@@ -87,13 +97,16 @@ describe("fetchOverpassWithFailover", () => {
 
     const response = await fetchOverpassWithFailover("[out:json];out;");
     assert.equal(response.status, 200);
-    assert.equal(calls, 2);
+    assert.equal(interpreterCalls, 2);
   });
 
   it("400 on all endpoints → Overpass query failed.", async () => {
-    let calls = 0;
-    globalThis.fetch = async () => {
-      calls += 1;
+    let interpreterCalls = 0;
+    globalThis.fetch = async (url) => {
+      if (String(url).includes("/api/status")) {
+        return new Response("Slot available after: 0\n", { status: 200 });
+      }
+      interpreterCalls += 1;
       return jsonResponse(400);
     };
 
@@ -104,6 +117,39 @@ describe("fetchOverpassWithFailover", () => {
         return true;
       },
     );
-    assert.equal(calls, OVERPASS_ENDPOINTS.length);
+    assert.equal(interpreterCalls, OVERPASS_ENDPOINTS.length);
+  });
+
+  it("prefers endpoint whose /api/status reports free slots", async () => {
+    const interpreterOrder = [];
+    globalThis.fetch = async (url) => {
+      const u = String(url);
+      if (u.includes("/api/status") && u.includes("overpass-api.de")) {
+        return new Response("Connected as: 1\nSlot available after: 12\n", {
+          status: 200,
+        });
+      }
+      if (u.includes("/api/status") && u.includes("private.coffee")) {
+        return new Response("Connected as: 1\nSlot available after: 0\n", {
+          status: 200,
+        });
+      }
+      if (u.includes("/api/status")) {
+        return new Response("Slot available after: 5\n", { status: 200 });
+      }
+      if (u.includes("/interpreter")) {
+        interpreterOrder.push(u);
+        if (u.includes("private.coffee")) {
+          return jsonResponse(200, '{"elements":[]}');
+        }
+        return jsonResponse(429);
+      }
+      return jsonResponse(500);
+    };
+
+    const response = await fetchOverpassWithFailover("[out:json];out;");
+    assert.equal(response.status, 200);
+    assert.ok(interpreterOrder.length >= 1);
+    assert.match(interpreterOrder[0], /private\.coffee/);
   });
 });

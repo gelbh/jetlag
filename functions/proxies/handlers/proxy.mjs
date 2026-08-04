@@ -15,6 +15,7 @@ import {
   OVERPASS_L2_PARAMS,
   OVERPASS_L2_SECRETS,
 } from "../overpassL2Secrets.mjs";
+import { OVERPASS_PAID_SECRETS } from "../overpassPaidEnv.mjs";
 
 const sentryDsnSecret = getSentryDsnSecret();
 
@@ -32,6 +33,7 @@ export const proxy = onRequest(
       ctaBusTrackerApiKeySecret,
       ctaTrainTrackerApiKeySecret,
       ...OVERPASS_L2_SECRETS,
+      ...OVERPASS_PAID_SECRETS,
     ],
     params: OVERPASS_L2_PARAMS,
     enforceAppCheck: true,
