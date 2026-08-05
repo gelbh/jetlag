@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Map, {
   AttributionControl,
   type MapRef,
@@ -27,6 +27,7 @@ import { focusBoundsToLngLatBounds } from "@/domain/map/focusBoundsToLngLatBound
 import { isLargeCameraJumpMapLibre } from "@/domain/map/isLargeCameraJumpMapLibre";
 import { shouldApplyMapFocus } from "@/domain/map/mapFocusPolicy";
 import { mapFocusApplyDependencyKeys } from "@/domain/map/mapFocusApplyDeps";
+import { MAP_CAMERA_HOME_ORIENTATION } from "@/domain/map/mapCameraHome";
 import { resolveMapPitchDegrees } from "@/domain/map/resolveMapPitchDegrees";
 import { stopMapCameraEase } from "@/domain/map/stopMapCameraEase";
 import {
@@ -42,7 +43,7 @@ import {
 } from "../helpers/MapFeatureHitTestContext";
 import { useMapLibreMarkerImages } from "../helpers/mapLibreIconRegistry";
 import { MapChromeListener } from "./MapChromeListener";
-import { MapRecenterControl } from "./MapRecenterControl";
+import { MapCompassControl } from "./MapCompassControl";
 import { MapStyleToggle } from "./MapStyleToggle";
 import { MapZoomControl } from "./MapZoomControl";
 import type { MapViewMapLibreProps } from "./mapViewTypes";
@@ -95,6 +96,7 @@ function MapFocus({
   focusMaxZoom,
   fitBoundsMode,
   recenterToken = 0,
+  orientationResetToken = 0,
   fitBoundsPadding: fitBoundsPaddingProp,
   focusPaddingBias,
   preferFly = false,
@@ -104,6 +106,8 @@ function MapFocus({
   focusMaxZoom?: number;
   fitBoundsMode: "once" | "always";
   recenterToken: number;
+  /** Compass-only — never share with placement auto-reframe tokens. */
+  orientationResetToken?: number;
   fitBoundsPadding?: [number, number];
   focusPaddingBias?: number;
   preferFly?: boolean;
@@ -112,6 +116,7 @@ function MapFocus({
   const { prefersReducedMotion, lowPowerMode } = useMotionProfile();
   const hasFittedRef = useRef(false);
   const lastRecenterRef = useRef(recenterToken);
+  const lastOrientationRef = useRef(orientationResetToken);
   const preferFlyRef = useRef(preferFly);
   const focusBoundsRef = useRef(focusBounds);
   const focusPaddingBiasRef = useRef(focusPaddingBias);
@@ -164,9 +169,35 @@ function MapFocus({
   useEffect(() => {
     // Apply-time values always from refs (synced above). Deps differ by mode:
     // once → presence/token only; always → live bounds/bias/zoom.
+    const map = mapRef.getMap();
+    const orientationRequested =
+      orientationResetToken !== lastOrientationRef.current;
+    const homeOrientation = orientationRequested
+      ? MAP_CAMERA_HOME_ORIENTATION
+      : null;
+
+    const levelOrientationOnly = () => {
+      lastOrientationRef.current = orientationResetToken;
+      if (!homeOrientation) {
+        return undefined;
+      }
+      if (!animate) {
+        map.jumpTo({ ...homeOrientation });
+        return undefined;
+      }
+      map.easeTo({
+        ...homeOrientation,
+        duration: MOTION_MAP_CAMERA_MS,
+      });
+      return () => {
+        stopMapCameraEase(map);
+      };
+    };
+
     const bounds = focusBoundsRef.current;
     if (!bounds) {
-      return;
+      // Compass reset must level even when focus bounds are unavailable.
+      return orientationRequested ? levelOrientationOnly() : undefined;
     }
 
     const willApply = shouldApplyMapFocus({
@@ -176,11 +207,10 @@ function MapFocus({
       lastRecenterToken: lastRecenterRef.current,
     });
     if (!willApply) {
-      // No cleanup — prior apply may still be animating.
-      return;
+      // Placement auto-reframe skipped, but compass may still need leveling.
+      return orientationRequested ? levelOrientationOnly() : undefined;
     }
 
-    const map = mapRef.getMap();
     map.resize();
 
     const paddingBias = focusPaddingBiasRef.current ?? 0;
@@ -196,7 +226,7 @@ function MapFocus({
 
     const mapBounds = toMapBounds(bounds);
     if (!isUsableMapBounds(mapBounds)) {
-      return;
+      return orientationRequested ? levelOrientationOnly() : undefined;
     }
 
     const lngLatBounds = focusBoundsToLngLatBounds(mapBounds);
@@ -208,10 +238,11 @@ function MapFocus({
       maxZoom,
     );
     if (!framed) {
-      return;
+      return orientationRequested ? levelOrientationOnly() : undefined;
     }
 
     lastRecenterRef.current = recenterToken;
+    lastOrientationRef.current = orientationResetToken;
     hasFittedRef.current = true;
 
     const onMoveEnd = () => {
@@ -223,7 +254,11 @@ function MapFocus({
     const { center, zoom } = framed;
 
     if (!animate) {
-      map.jumpTo({ center, zoom });
+      map.jumpTo(
+        homeOrientation
+          ? { center, zoom, ...homeOrientation }
+          : { center, zoom },
+      );
       return () => {
         // Same as dragstart: cancel ease only — map.stop() resets active pinch/pan.
         // Survival across preferFly/bounds-identity churn comes from once-mode deps
@@ -239,12 +274,14 @@ function MapFocus({
       map.flyTo({
         center,
         zoom,
+        ...(homeOrientation ?? {}),
         duration: MOTION_MAP_CAMERA_FLY_MS,
       });
     } else {
       map.easeTo({
         center,
         zoom,
+        ...(homeOrientation ?? {}),
         duration: MOTION_MAP_CAMERA_MS,
       });
     }
@@ -254,7 +291,7 @@ function MapFocus({
       map.off("moveend", onMoveEnd);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- keys from mapFocusApplyDependencyKeys
-  }, [...applyDependencyKeys, mapRef]);
+  }, [...applyDependencyKeys, mapRef, orientationResetToken]);
 
   return null;
 }
@@ -288,13 +325,13 @@ export function MapViewMapLibre({
   onMapStyleChange,
   showMapStyleToggle,
   mapStyleControlInset,
-  showRecenterControl,
+  showCompassControl,
   onRecenter,
-  recenterAriaLabel,
 }: MapViewMapLibreProps) {
   const mapRef = useRef<MapRef>(null);
   const onBoundsChangeRef = useRef(onBoundsChange);
   const onUserViewportFramedRef = useRef(onUserViewportFramed);
+  const onRecenterRef = useRef(onRecenter);
   const style = useMemo(
     () => getMapLibreStyle(mapStyle, streetBasemap),
     [mapStyle, streetBasemap],
@@ -306,6 +343,22 @@ export function MapViewMapLibre({
     mapStyle === "satellite" ? " jl-basemap--satellite-grade" : "";
   const [longitude, latitude] = centerToLngLat(center);
   const zoomControlEnabled = showZoomControl ?? interactive;
+  // Opt-in only — admin/observer/create-session must not inherit play-map compass.
+  const compassControlEnabled = showCompassControl ?? false;
+  const [fallbackRecenterToken, setFallbackRecenterToken] = useState(0);
+  const [orientationResetToken, setOrientationResetToken] = useState(0);
+  const focusRecenterToken = onRecenter
+    ? recenterToken
+    : fallbackRecenterToken;
+  const handleCompassReset = useCallback(() => {
+    // Orientation signal is compass-only; pan/zoom home uses recenter token.
+    setOrientationResetToken((value) => value + 1);
+    if (onRecenterRef.current) {
+      onRecenterRef.current();
+      return;
+    }
+    setFallbackRecenterToken((value) => value + 1);
+  }, []);
   const mapStyleToggleEnabled =
     (showMapStyleToggle ?? Boolean(onMapStyleChange)) &&
     Boolean(onMapStyleChange);
@@ -313,12 +366,14 @@ export function MapViewMapLibre({
   const { lowPowerMode } = useMotionProfile();
   const maxPitchDegrees = resolveMapPitchDegrees(lowPowerMode);
   const pitchGesturesEnabled = interactive && maxPitchDegrees > 0;
+  const touchRotateEnabled = interactive && compassControlEnabled;
   const runtimeOptions = mapLibreRuntimeOptions(lowPowerMode);
 
   useEffect(() => {
     onBoundsChangeRef.current = onBoundsChange;
     onUserViewportFramedRef.current = onUserViewportFramed;
-  }, [onBoundsChange, onUserViewportFramed]);
+    onRecenterRef.current = onRecenter;
+  }, [onBoundsChange, onUserViewportFramed, onRecenter]);
 
   useEffect(() => {
     const map = mapRef.current?.getMap();
@@ -330,6 +385,19 @@ export function MapViewMapLibre({
       map.easeTo({ pitch: 0, duration: 0 });
     }
   }, [maxPitchDegrees]);
+
+  useEffect(() => {
+    const map = mapRef.current?.getMap();
+    if (!map || !interactive) {
+      return;
+    }
+    map.touchZoomRotate.enable();
+    if (touchRotateEnabled) {
+      map.touchZoomRotate.enableRotation();
+    } else {
+      map.touchZoomRotate.disableRotation();
+    }
+  }, [interactive, touchRotateEnabled]);
 
   const emitBounds = useCallback(() => {
     const map = mapRef.current?.getMap();
@@ -400,13 +468,17 @@ export function MapViewMapLibre({
           dragRotate={false}
           touchPitch={pitchGesturesEnabled}
           touchZoomRotate={interactive}
-          pitchWithRotate={pitchGesturesEnabled}
+          pitchWithRotate={pitchGesturesEnabled && touchRotateEnabled}
           onLoad={() => {
             const map = mapRef.current?.getMap();
-            // Re-assert after react-map-gl handler sync: pinch zoom on, rotate off.
+            // Pinch zoom always; two-finger rotate only with play-map compass.
             if (interactive) {
               map?.touchZoomRotate.enable();
-              map?.touchZoomRotate.disableRotation();
+              if (touchRotateEnabled) {
+                map?.touchZoomRotate.enableRotation();
+              } else {
+                map?.touchZoomRotate.disableRotation();
+              }
             }
             map?.setMaxPitch(maxPitchDegrees);
             if (maxPitchDegrees === 0) {
@@ -426,7 +498,8 @@ export function MapViewMapLibre({
               focusMinZoom={focusMinZoom}
               focusMaxZoom={focusMaxZoom}
               fitBoundsMode={fitBoundsMode}
-              recenterToken={recenterToken}
+              recenterToken={focusRecenterToken}
+              orientationResetToken={orientationResetToken}
               fitBoundsPadding={fitBoundsPadding}
               focusPaddingBias={focusPaddingBias}
               preferFly={focusPreferFly}
@@ -434,11 +507,10 @@ export function MapViewMapLibre({
             {chromeHudRef ? (
               <MapChromeListener chromeHudRef={chromeHudRef} />
             ) : null}
-            <MapRecenterControl
-              enabled={showRecenterControl ?? false}
+            <MapCompassControl
+              enabled={compassControlEnabled}
               inset={zoomControlInset}
-              onRecenter={onRecenter}
-              ariaLabel={recenterAriaLabel}
+              onResetCamera={handleCompassReset}
             />
             <MapZoomControl
               enabled={zoomControlEnabled}

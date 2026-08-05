@@ -121,23 +121,15 @@ describe("MapBottomChrome", () => {
     expect(side?.querySelector('[data-island="session"]')).not.toBeNull();
   });
 
-  it("stacks map controls on the left and sits the side stack above the hunt island", () => {
+  it("keeps Session above the dock with shared left-stack tokens (no right portal)", () => {
     expect(chromeCss).not.toMatch(/--map-chrome-zoom-stack-height/);
     expect(chromeCss).toMatch(
-      /\.jl-map-chrome-side-stack\s*\{[^}]*bottom:\s*calc\(\s*var\(--dock-island-height\)\s*\+\s*env\(safe-area-inset-bottom\)\s*\+\s*0\.75rem\s*\)/s,
+      /\.jl-map-chrome-side-stack\s*\{[^}]*bottom:\s*calc\(\s*var\(--dock-island-height\)\s*\+\s*env\(safe-area-inset-bottom\)\s*\+\s*0\.75rem\s*\+\s*0\.5rem\s*\)/s,
     );
+    expect(chromeCss).toMatch(/--map-left-tier-compass-bottom-dock/);
+    expect(chromeCss).toMatch(/\.map-zoom-control\s*\{[^}]*left:\s*var\(--map-left-chrome-inset\)/s);
     expect(chromeCss).toMatch(
-      /\.map-zoom-control,\s*\.map-style-control,\s*\.map-recenter-control\s*\{[^}]*left:\s*var\(--map-left-chrome-inset\)/s,
-    );
-    expect(chromeCss).toMatch(
-      /\.map-zoom-control--dock\s*\{[^}]*--map-style-control-size/s,
-    );
-    expect(chromeCss).toMatch(
-      /\.map-recenter-control--dock\s*\{[^}]*--map-zoom-btn-size/s,
-    );
-    expect(chromeCss).toMatch(/@media\s*\(max-width:\s*28rem\)/);
-    expect(chromeCss).toMatch(
-      /@media\s*\(max-height:\s*430px\)\s*and\s*\(orientation:\s*landscape\)/,
+      /\.map-zoom-control--dock\s*\{[^}]*--map-left-tier-zoom-bottom-dock/s,
     );
   });
 
@@ -182,18 +174,13 @@ describe("MapBottomChrome", () => {
     );
   });
 
-  it("anchors container-inset zoom/style to --dock-height; recenter stacks separately", () => {
+  it("anchors container-inset map controls to --dock-height token", () => {
     expect(controlsCss).toMatch(
       /\.map-zoom-control--container,\s*\.map-style-control--container\s*\{[^}]*bottom:\s*var\(--dock-height\)/s,
     );
-    expect(controlsCss).not.toMatch(
-      /\.map-zoom-control--container,\s*\.map-style-control--container,\s*\.map-recenter-control--container/,
-    );
+    expect(controlsCss).not.toMatch(/map-recenter-control/);
     expect(controlsCss).not.toMatch(
       /\.map-zoom-control--container[^}]*bottom:\s*4\.25rem/s,
-    );
-    expect(chromeCss).toMatch(
-      /\.map-recenter-control--container\s*\{[^}]*var\(--dock-height\)/s,
     );
   });
 });
