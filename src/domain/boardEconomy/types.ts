@@ -64,17 +64,25 @@ export interface ActiveCurseState {
   clearedAt?: string;
 }
 
+export type DrawKeepCycle = { draw: number; keep: number };
+
+export type PendingPickState = {
+  drawn: BoardCardInstance[];
+  keep: number;
+  cyclesRemaining: DrawKeepCycle[];
+};
+
 export interface BoardEconomyState {
   deck: BoardCardInstance[];
   hand: BoardCardInstance[];
   discard: BoardCardInstance[];
   handLimit: number;
   activeCurses: ActiveCurseState[];
+  /** In-flight answer reward pick; persisted so refresh keeps the draw. */
+  pendingPick: PendingPickState | null;
 }
 
 export const DEFAULT_HAND_LIMIT = 6;
-
-export type DrawKeepCycle = { draw: number; keep: number };
 
 export function timeBonusMinutesForGameSize(
   durations: TimeBonusDurations,

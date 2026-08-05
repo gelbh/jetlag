@@ -344,4 +344,30 @@ describe("HiderToolDock", () => {
     expect(screen.getByRole("button", { name: "Set zone" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Expansion" })).toBeInTheDocument();
   });
+
+  it("places Hand next to Set zone when hand props are provided", () => {
+    const onOpenHand = vi.fn();
+    renderWithRouter(
+      <HiderToolDock
+        zoneLabel="Set zone"
+        onZoneAction={vi.fn()}
+        handLabel="Hand 2/6"
+        onOpenHand={onOpenHand}
+        showExpansion={false}
+        onExpansion={vi.fn()}
+        onOpenChat={vi.fn()}
+        onOpenLog={vi.fn()}
+        onOpenSettings={vi.fn()}
+        onOpenReportProblem={vi.fn()}
+      />,
+    );
+
+    const hunt = document.querySelector('[data-island="hunt"]');
+    const huntLabels = [
+      ...(hunt?.querySelectorAll(".jl-tool-slot-label") ?? []),
+    ].map((node) => node.textContent?.trim() ?? "");
+    expect(huntLabels).toEqual(["Set zone", "Hand 2/6"]);
+    fireEvent.click(screen.getByRole("button", { name: "Hand 2/6" }));
+    expect(onOpenHand).toHaveBeenCalledTimes(1);
+  });
 });
