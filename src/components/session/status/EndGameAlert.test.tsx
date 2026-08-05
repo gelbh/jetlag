@@ -5,7 +5,7 @@ import { EndGameAlert } from "./EndGameAlert";
 describe("EndGameAlert", () => {
   it("is hidden when end game is inactive", () => {
     const { container } = render(
-      <EndGameAlert endGameActive={false} isHost />,
+      <EndGameAlert endGameActive={false} isHost playerRole="seeker" />,
     );
 
     expect(container).toBeEmptyDOMElement();
