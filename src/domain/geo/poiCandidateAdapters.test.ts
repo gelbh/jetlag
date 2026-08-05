@@ -29,13 +29,7 @@ describe("poiCandidateAdapters", () => {
   });
 
   it("treats legacy measuring places without confirmStatus as confirmed", () => {
-    expect(
-      isConfirmedPoiLike({
-        id: "osm:1",
-        name: "Park",
-        point: [0, 0],
-      }),
-    ).toBe(true);
+    expect(isConfirmedPoiLike({})).toBe(true);
   });
 
   it("filters provisional tentacle pois before commit", () => {
