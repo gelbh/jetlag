@@ -80,6 +80,46 @@ describe("buildMapDraftOverlays", () => {
     );
   });
 
+  it("yes (hider inside): draft eliminates outside the disk, not the center", async () => {
+    const result = await buildMapDraftOverlays({
+      ...emptySources,
+      activeTool: "radar",
+      radar: {
+        center: [53.35, -6.26],
+        radiusMeters: 1609,
+        answer: "yes",
+      },
+    });
+
+    expect(result.eliminationFeatures.length).toBeGreaterThan(0);
+    expect(
+      pointInAnyElimination([-6.26, 53.35], result.eliminationFeatures),
+    ).toBe(false);
+    expect(
+      pointInAnyElimination([-6.45, 53.27], result.eliminationFeatures),
+    ).toBe(true);
+  });
+
+  it("no (hider outside): draft eliminates the radar disk", async () => {
+    const result = await buildMapDraftOverlays({
+      ...emptySources,
+      activeTool: "radar",
+      radar: {
+        center: [53.35, -6.26],
+        radiusMeters: 1609,
+        answer: "no",
+      },
+    });
+
+    expect(result.eliminationFeatures.length).toBeGreaterThan(0);
+    expect(
+      pointInAnyElimination([-6.26, 53.35], result.eliminationFeatures),
+    ).toBe(true);
+    expect(
+      pointInAnyElimination([-6.45, 53.27], result.eliminationFeatures),
+    ).toBe(false);
+  });
+
   it("shades tentacle POI answer elimination inline with the draft overlays", async () => {
     const result = await buildMapDraftOverlays({
       ...emptySources,

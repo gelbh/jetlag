@@ -285,12 +285,21 @@ export function radarQuestionPrompt(
   return RADAR_PROMPT_TEMPLATE.replace("[DISTANCE]", distanceLabel);
 }
 
+/** Hider is within the radar circle (`yes`). Stored as `metadata.inside`. */
 export function radarInsideFromAnswer(answer: RadarAnswer): boolean {
   return answer === "yes";
 }
 
 export function radarAnswerFromInside(inside: boolean): RadarAnswer {
   return inside ? "yes" : "no";
+}
+
+/**
+ * `buildRadarShadedRegion` / WASM `shadedInside`: eliminate the disk when the
+ * hider is outside (`no`); eliminate the exterior when they are inside (`yes`).
+ */
+export function radarShadedInsideFromAnswer(answer: RadarAnswer): boolean {
+  return answer === "no";
 }
 
 export function isRadarPresetRadius(radiusMeters: number): boolean {
