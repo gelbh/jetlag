@@ -38,6 +38,8 @@ import { filterGamePresetsForSearch } from "../domain/session/presets/gamePreset
 import { resolveFavouritePresets } from "../domain/session/presets/presetFavourites";
 import { isBundledPresetId } from "../domain/regions/bundledGamePresets";
 import { PresetBrowseLayout } from "../components/presets/PresetBrowseLayout";
+import { RequestPreloadSection } from "../components/presets/RequestPreloadSection";
+import { buildPreloadPresetSnapshot } from "../domain/preloadRequest/buildPreloadPresetSnapshot";
 import { useMapStore } from "../state/sessionStore";
 import type { GeocodedPlace } from "../services/geo/geocoding";
 
@@ -143,6 +145,8 @@ export function GamePresetEditor() {
       [focusBounds.north, focusBounds.east],
     ] satisfies MapBoundsExpression;
   }, [focusBounds]);
+
+  const isUserPreset = !existing || !isBundledPresetId(existing.id);
 
   return (
     <main className="home-poster flex min-h-[100dvh] flex-col px-5 py-8">
@@ -306,6 +310,23 @@ export function GamePresetEditor() {
           value={advancedSettings}
           onChange={setAdvancedSettings}
         />
+
+        {isUserPreset ? (
+          <RequestPreloadSection
+            getSnapshot={() =>
+              buildPreloadPresetSnapshot({
+                name,
+                placeLabel,
+                gameSize,
+                distanceUnit,
+                focusBounds,
+                gameArea,
+                regionPackId: existing?.regionPackId,
+                presetId: existing?.id,
+              })
+            }
+          />
+        ) : null}
 
         {error ? <p className="text-error">{error}</p> : null}
 
