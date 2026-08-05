@@ -28,7 +28,9 @@ const ACTION_STATUSES: readonly PreloadRequestStatus[] = [
 ];
 
 export function AdminPreloadRequestInbox() {
-  const { enabled, loading: accessLoading } = useAdminAccessState();
+  const { state: accessState } = useAdminAccessState();
+  const accessLoading = accessState === "loading";
+  const enabled = accessState === "admin";
   const [requests, setRequests] = useState<PreloadRequest[]>([]);
   const [listLoading, setListLoading] = useState(false);
   const [listError, setListError] = useState<string | null>(null);
