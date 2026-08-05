@@ -163,6 +163,27 @@ describe("bundledPoiHygiene", () => {
     ).toBe(true);
   });
 
+  it("rejects zoo noise and keeps named zoos", () => {
+    expect(
+      isEligibleBundledPoi(
+        { id: "Q1", name: "Hillside Petting Zoo", lat: 40.7, lng: -74 },
+        "zoo",
+      ),
+    ).toBe(false);
+    expect(
+      isEligibleBundledPoi(
+        { id: "Q2", name: "Sunny Farm Animal Shelter", lat: 40.7, lng: -74 },
+        "zoo",
+      ),
+    ).toBe(false);
+    expect(
+      isEligibleBundledPoi(
+        { id: "Q3", name: "Bronx Zoo", lat: 40.85, lng: -73.87 },
+        "zoo",
+      ),
+    ).toBe(true);
+  });
+
   it("keeps distant rail stations that share a name", () => {
     const places = dedupeBundledPoiPlaces(
       [
