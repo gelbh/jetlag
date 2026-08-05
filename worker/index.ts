@@ -15,91 +15,17 @@ import {
   handleIncidentEmailRequest,
   INCIDENT_EMAIL_PATH,
 } from "./incidentEmail";
+import {
+  CSP_REPORT_PATH,
+  handleCspReportRequest,
+} from "./cspReport";
+import {
+  fetchAssetsFollowingRedirects,
+  homePrerenderRequest,
+  isPrerenderHomePath,
+} from "./assetFetch";
 
-export const CSP_REPORT_PATH = "/api/csp-report";
-
-const HOME_PRERENDER_PATH = "/prerender/home/";
-const MAX_ASSET_REDIRECT_HOPS = 2;
-
-const CSP_REPORT_LOG_BYTES = 8_000;
-
-function isPrerenderHomePath(pathname: string): boolean {
-  return pathname === "/prerender/home" || pathname === "/prerender/home/";
-}
-
-async function fetchAssetsFollowingRedirects(
-  env: Env,
-  request: Request,
-  maxHops = MAX_ASSET_REDIRECT_HOPS,
-): Promise<Response> {
-  let current = request;
-  let response = await env.ASSETS.fetch(current);
-  let hops = 0;
-  const origin = new URL(request.url).origin;
-
-  while (hops < maxHops && response.status >= 300 && response.status < 400) {
-    const location = response.headers.get("Location");
-    if (!location) {
-      break;
-    }
-    const nextUrl = new URL(location, current.url);
-    if (nextUrl.origin !== origin) {
-      break;
-    }
-    current = new Request(nextUrl, current);
-    response = await env.ASSETS.fetch(current);
-    hops += 1;
-  }
-
-  return response;
-}
-
-async function handleCspReportRequest(request: Request): Promise<Response> {
-  // Some browsers and intermediaries appear to probe this endpoint with non-POST
-  // methods (or preflight-like requests). Don't emit noisy 405s in the console.
-  if (request.method !== "POST") {
-    return new Response(null, { status: 204 });
-  }
-
-  const contentLengthHeader = request.headers.get("Content-Length");
-  if (contentLengthHeader) {
-    const contentLength = Number(contentLengthHeader);
-    if (Number.isFinite(contentLength) && contentLength > CSP_REPORT_LOG_BYTES) {
-      return new Response("Payload too large", { status: 413 });
-    }
-  }
-
-  let loggedBody = "";
-  const reader = request.body?.getReader();
-  if (reader) {
-    const decoder = new TextDecoder();
-    let loggedBytes = 0;
-
-    while (true) {
-      const result = await reader.read();
-      if (result.done) {
-        break;
-      }
-      if (!result.value) {
-        continue;
-      }
-
-      const remainingBytes = CSP_REPORT_LOG_BYTES - loggedBytes;
-      if (remainingBytes <= 0) {
-        break;
-      }
-
-      const chunk = result.value.subarray(0, remainingBytes);
-      loggedBody += decoder.decode(chunk, { stream: true });
-      loggedBytes += chunk.byteLength;
-    }
-  }
-
-  // Intentionally coarse: we just need the payload in Workers logs to identify the culprit.
-  console.log("[csp-report]", loggedBody);
-
-  return new Response(null, { status: 204 });
-}
+export { CSP_REPORT_PATH } from "./cspReport";
 
 export function isSpaFallbackForAssetRequest(
   request: Request,
@@ -143,9 +69,7 @@ export default {
     // Exact `/` serves prerendered home HTML; keep dist/index.html as the SPA shell
     // for nested-route fallbacks and the service worker.
     const assetRequest =
-      pathname === "/"
-        ? new Request(new URL(HOME_PRERENDER_PATH, request.url), request)
-        : request;
+      pathname === "/" ? homePrerenderRequest(request) : request;
     const assetResponse = await fetchAssetsFollowingRedirects(
       env,
       assetRequest,
