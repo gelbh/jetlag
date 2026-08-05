@@ -82,7 +82,7 @@ export function reconcileLockedMatchingNearest(
   };
 }
 
-function buildResolveMatchingAnchorResult(
+export function buildResolveMatchingAnchorResult(
   seekerPoint: LatLngTuple,
   categoryId: MatchingCategoryId,
   features: MatchingFeature[],

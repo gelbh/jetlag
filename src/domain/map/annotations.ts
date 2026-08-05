@@ -20,6 +20,10 @@ import type { ThermometerAnswer } from "../questions/thermometerQuestions";
 import { thermometerQuestionPrompt } from "../questions/thermometerQuestions";
 import type { TentacleExtendedCategoryId } from "../questions/tentacleQuestions";
 import { tentacleAnnotationSummary } from "../questions/tentacleQuestions";
+import type {
+  PoiCandidateSource,
+  PoiConfirmStatus,
+} from "../geo/poiCandidate";
 import type { MapTool } from "./mapToolTypes";
 import type { GameSize } from "../session/size/gameSize";
 import type { MemberRoles } from "../session/players/playerRole";
@@ -111,6 +115,10 @@ export interface TentaclePoi {
   lat: number;
   lng: number;
   category: TentacleExtendedCategoryId;
+  source?: PoiCandidateSource;
+  /** Absent = confirmed (legacy Overpass/bundle). */
+  confirmStatus?: PoiConfirmStatus;
+  osmId?: string;
 }
 
 export interface AnnotationRecord {

@@ -14,6 +14,7 @@ import {
 } from "@/domain/questions";
 import type { SessionRulesInput } from "@/domain/session/rules";
 import { manualPinAsMeasuringPlace } from "@/domain/session/catalog/sessionCustomCatalog";
+import { poiCandidateToMeasuringPlace } from "@/domain/geo/poiCandidateAdapters";
 import { measuringLinearNotFoundMessage } from "@/services/geo/overpass/measuringLinearFeatures";
 import { overpassErrorMessage } from "@/services/core/overpass/overpassClient";
 import {
@@ -21,6 +22,8 @@ import {
   measuringPlaceNotFoundMessage,
 } from "@/services/geo/overpass/measuringPlaces";
 import { resolveCoastlineContextFromCache } from "@/services/geo/overpass/coastline";
+import { previewBasemapPois } from "@/services/geo/maplibre/previewBasemapPois";
+import { useMapStore } from "@/state/mapStore";
 import { useDebouncedValue } from "../../forms/useDebouncedValue";
 import {
   fetchMeasuringCoastlineContext,
@@ -172,6 +175,21 @@ export function useMeasuringAnchorLoaders({
       placesApplyPhaseRef.current.delete(requestId);
       setMeasuringLoading(true);
       setMeasuringError(null);
+
+      const tilePreview = previewBasemapPois({
+        mapStyle: useMapStore.getState().mapStyle,
+        categoryIds: [category],
+        maxResults: 48,
+      }).map(poiCandidateToMeasuringPlace);
+      if (tilePreview.length > 0) {
+        applyAllPlacesResult(
+          requestId,
+          seekerPoint,
+          category,
+          tilePreview,
+          0,
+        );
+      }
 
       try {
         const customCategories = sessionRules?.customCategories ?? [];
