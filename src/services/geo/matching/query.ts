@@ -37,11 +37,7 @@ export function matchingFeaturesCacheKey(
   );
 }
 
-export function matchingSearchBoundingBox(
-  gameArea: GameArea,
-  _categoryId?: MatchingCategoryId,
-  _customCategories: readonly SessionCustomCategory[] = [],
-): BoundingBox {
+export function matchingSearchBoundingBox(gameArea: GameArea): BoundingBox {
   return gameAreaToBoundingBox(gameArea);
 }
 
@@ -53,17 +49,15 @@ export function buildMatchingFeaturesQuery(
   selectors: readonly string[],
   customCategories: readonly SessionCustomCategory[] = [],
 ): string {
-  const bbox = formatOverpassBbox(
-    matchingSearchBoundingBox(gameArea, categoryId, customCategories),
-  );
+  void categoryId;
+  void customCategories;
+  const bbox = formatOverpassBbox(matchingSearchBoundingBox(gameArea));
 
   return buildNodeWayRelationBboxQuery(bbox, selectors);
 }
 
 export function buildStreetPathQuery(gameArea: GameArea): string {
-  const bbox = formatOverpassBbox(
-    matchingSearchBoundingBox(gameArea, "street_or_path"),
-  );
+  const bbox = formatOverpassBbox(matchingSearchBoundingBox(gameArea));
 
   return overpassQueryTemplate(`
   (

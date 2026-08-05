@@ -201,7 +201,8 @@ export function adminLevelForMatchingCategory(
 
 /** Matching is play-area-only; expanded near-search is retired. */
 export function matchingUsesExpandedFeatureSearch(
-  _category: MatchingCategoryDefinition,
+  _category?: MatchingCategoryDefinition,
 ): boolean {
+  void _category;
   return false;
 }

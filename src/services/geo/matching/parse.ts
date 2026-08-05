@@ -74,8 +74,9 @@ export function parseMatchingFeatures(
   elements: OverpassElement[],
   gameArea: GameArea,
   categoryId: MatchingCategoryId,
-  _customCategories: readonly SessionCustomCategory[] = [],
+  customCategories: readonly SessionCustomCategory[] = [],
 ): MatchingFeature[] {
+  void customCategories;
   const seen = new Set<string>();
 
   return elements
