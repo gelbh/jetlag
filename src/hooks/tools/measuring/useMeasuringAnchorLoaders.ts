@@ -86,16 +86,25 @@ export function useMeasuringAnchorLoaders({
     measuringAnswerRef.current = measuringAnswer;
   }, [measuringAnswer]);
 
+  const placesApplyPhaseRef = useRef(new Map<number, number>());
+
   const applyAllPlacesResult = useCallback(
     (
       requestId: number,
       seekerPoint: LatLngTuple,
       category: MeasuringLocationCategory,
       fetchedPlaces: Awaited<ReturnType<typeof fetchMeasuringPlacesInArea>>,
+      phase: 0 | 1,
     ) => {
       if (requestId !== placesRequestIdRef.current) {
         return;
       }
+
+      const lastPhase = placesApplyPhaseRef.current.get(requestId) ?? -1;
+      if (phase < lastPhase) {
+        return;
+      }
+      placesApplyPhaseRef.current.set(requestId, phase);
 
       const pinPlaces = (sessionRules?.customLocationPins ?? []).map(
         manualPinAsMeasuringPlace,
@@ -160,6 +169,7 @@ export function useMeasuringAnchorLoaders({
       category: MeasuringLocationCategory = measuringLocationCategory,
     ) => {
       const requestId = ++placesRequestIdRef.current;
+      placesApplyPhaseRef.current.delete(requestId);
       setMeasuringLoading(true);
       setMeasuringError(null);
 
@@ -177,12 +187,13 @@ export function useMeasuringAnchorLoaders({
                 seekerPoint,
                 category,
                 enrichedPlaces,
+                1,
               );
             },
           },
         );
 
-        applyAllPlacesResult(requestId, seekerPoint, category, places);
+        applyAllPlacesResult(requestId, seekerPoint, category, places, 0);
       } catch (error) {
         if (requestId !== placesRequestIdRef.current) {
           return;

@@ -170,14 +170,23 @@ export function useTentacleTool({
 
   const { beginRequest, cancelRequests, isLatestRequest } = useLatestRequest();
 
+  const tentacleApplyPhaseRef = useRef(new Map<number, number>());
+
   const applyTentaclePoisResult = useCallback(
     (
       requestId: number,
       pois: Awaited<ReturnType<typeof fetchTentaclePois>>,
+      phase: 0 | 1,
     ) => {
       if (!isLatestRequest(requestId)) {
         return;
       }
+
+      const lastPhase = tentacleApplyPhaseRef.current.get(requestId) ?? -1;
+      if (phase < lastPhase) {
+        return;
+      }
+      tentacleApplyPhaseRef.current.set(requestId, phase);
 
       setTentaclePois(pois);
       const selectedId = selectedPoiIdRef.current;
@@ -199,6 +208,7 @@ export function useTentacleTool({
   const loadPoisForCenter = useCallback(
     async (center: LatLngTuple, categoryId: TentacleExtendedCategoryId) => {
       const requestId = beginRequest();
+      tentacleApplyPhaseRef.current.delete(requestId);
       setTentacleLoading(true);
       setTentacleError(null);
       setTentaclePois([]);
@@ -215,12 +225,12 @@ export function useTentacleTool({
             customLocationPins: sessionRules.customLocationPins,
             regionPackId: sessionRules.regionPackId,
             onEnrich: (enrichedPois) => {
-              applyTentaclePoisResult(requestId, enrichedPois);
+              applyTentaclePoisResult(requestId, enrichedPois, 1);
             },
           },
         );
 
-        applyTentaclePoisResult(requestId, pois);
+        applyTentaclePoisResult(requestId, pois, 0);
       } catch (error) {
         if (!isLatestRequest(requestId)) {
           return;
