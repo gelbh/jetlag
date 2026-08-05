@@ -103,16 +103,17 @@ export async function fetchPreparedCoastlineSegments(
 
   const bundledSegments = pack?.segments ?? [];
 
+  // Pack-first: return immediately without writing the incomplete pack into the
+  // shared coastline cache (same dual-phase shape as measuringPlaces).
   if (bundledSegments.length > 0 && options?.onEnrich) {
     const prepared = prepareMeasuringLineSegments(bundledSegments, gameArea);
-    await writeCoastlineSegmentsCache(gameArea, prepared);
     void prepareMergedCoastlineSegments(gameArea, bundledSegments)
       .then(async (merged) => {
         await writeCoastlineSegmentsCache(gameArea, merged);
         options.onEnrich?.(merged);
       })
       .catch(() => {
-        // Soft-fail Overpass enrich; keep the pack result.
+        // Soft-fail Overpass enrich; keep the pack result in the caller.
       });
     return prepared;
   }

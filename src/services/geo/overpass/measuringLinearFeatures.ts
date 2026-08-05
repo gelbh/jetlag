@@ -104,9 +104,7 @@ async function fetchMeasuringLinearSegmentsForKind(
       return customSegments;
     }
 
-    const adminLevel = adminLevelForMeasuringBorderKind(kind);
-    // Region packs ship primary/secondary (admin levels 8/9) only.
-    if (regionPackId && (adminLevel === 8 || adminLevel === 9)) {
+    if (regionPackId) {
       try {
         const packAreas = await loadRegionPackMatchingAreas(regionPackId);
         const packSegments = await fetchCustomAdminBorderLineSegments(

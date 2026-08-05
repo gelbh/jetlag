@@ -29,7 +29,12 @@ export interface SeaLevelContextFailure {
   reason: SeaLevelContextFailureReason;
 }
 
-function buildContextFromSampling(
+export interface LoadSeaLevelContextOptions {
+  regionPackId?: SeaLevelSamplingOptions["regionPackId"];
+  onEnrich?: (context: SeaLevelContext) => void;
+}
+
+export function buildSeaLevelContextFromSampling(
   seekerElevationMeters: number,
   sampling: CachedSeaLevelSampling,
   gameArea: GameArea,
@@ -62,16 +67,8 @@ function buildContextFromSampling(
 export async function loadSeaLevelContext(
   seeker: LatLngTuple,
   gameArea: GameArea,
-  options?: SeaLevelSamplingOptions,
+  options?: LoadSeaLevelContextOptions,
 ): Promise<SeaLevelContext | SeaLevelContextFailure | null> {
-  const sampling = await ensureSeaLevelSamplingComplete(gameArea, {
-    regionPackId: options?.regionPackId,
-    onEnrich: options?.onEnrich
-      ? (enriched) => {
-          options.onEnrich?.(enriched);
-        }
-      : undefined,
-  });
   const elevations = await fetchElevations([seeker], { profile: "foreground" });
   const seekerElevationMeters = elevations[0];
 
@@ -79,7 +76,24 @@ export async function loadSeaLevelContext(
     return null;
   }
 
-  return buildContextFromSampling(
+  const sampling = await ensureSeaLevelSamplingComplete(gameArea, {
+    regionPackId: options?.regionPackId,
+    onEnrich: options?.onEnrich
+      ? (enriched) => {
+          const rebuilt = buildSeaLevelContextFromSampling(
+            seekerElevationMeters,
+            enriched,
+            gameArea,
+          );
+          if ("reason" in rebuilt) {
+            return;
+          }
+          options.onEnrich?.(rebuilt);
+        }
+      : undefined,
+  });
+
+  return buildSeaLevelContextFromSampling(
     seekerElevationMeters,
     sampling,
     gameArea,

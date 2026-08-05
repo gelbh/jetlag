@@ -35,12 +35,6 @@ import {
   loadSeaLevelContext,
   type SeaLevelContext,
 } from "../../services/geo/elevation/seaLevel";
-import type { SeaLevelSamplingOptions } from "../../services/geo/elevation/seaLevelProgressive";
-import {
-  buildSeaLevelNearRegionFromSamples,
-  distanceFromSeaLevelMeters,
-} from "../../domain/geometry/measuring/seaLevel";
-import { fetchElevations } from "../../services/geo/elevation";
 
 const SEA_LEVEL_LOWEST_MESSAGE =
   'You\'re at the lowest elevation in this play area. A "closer" answer may be impossible.';
@@ -82,52 +76,14 @@ export async function fetchMeasuringSeaLevelContext(
     onEnrich?: (result: MeasuringSeaLevelOk) => void;
   },
 ): Promise<MeasuringSeaLevelResult> {
-  const samplingOptions: SeaLevelSamplingOptions | undefined = options
-    ? {
-        regionPackId: options.regionPackId,
-        onEnrich: options.onEnrich
-          ? async (sampling) => {
-              const elevations = await fetchElevations([seekerPoint], {
-                profile: "background",
-              });
-              const seekerElevationMeters = elevations[0];
-              if (!Number.isFinite(seekerElevationMeters)) {
-                return;
-              }
-              const distanceFromSeaLevel = distanceFromSeaLevelMeters(
-                seekerElevationMeters,
-              );
-              const { region: nearRegion, edgeCase } =
-                buildSeaLevelNearRegionFromSamples(
-                  sampling.cells,
-                  sampling.cellElevations,
-                  distanceFromSeaLevel,
-                  gameArea,
-                  sampling.divisions,
-                );
-              if (edgeCase === "lowest" || !nearRegion) {
-                return;
-              }
-              options.onEnrich?.(
-                toMeasuringSeaLevelResult({
-                  seekerElevationMeters,
-                  distanceFromSeaLevelMeters: distanceFromSeaLevel,
-                  nearRegion,
-                  cells: sampling.cells,
-                  cellElevations: sampling.cellElevations,
-                  edgeCase,
-                }),
-              );
-            }
-          : undefined,
-      }
-    : undefined;
-
-  const result = await loadSeaLevelContext(
-    seekerPoint,
-    gameArea,
-    samplingOptions,
-  );
+  const result = await loadSeaLevelContext(seekerPoint, gameArea, {
+    regionPackId: options?.regionPackId,
+    onEnrich: options?.onEnrich
+      ? (context) => {
+          options.onEnrich?.(toMeasuringSeaLevelResult(context));
+        }
+      : undefined,
+  });
 
   if (!result) {
     return {
