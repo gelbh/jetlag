@@ -29,13 +29,91 @@ export interface ResolveMatchingAnchorResult {
   error: string | null;
 }
 
+/** Dual-phase apply guard: ignore a late phase-0 after phase-1 enrich for the same request. */
+export function shouldApplyMatchingAnchorPhase(
+  lastAppliedPhase: number,
+  phase: 0 | 1,
+): boolean {
+  return phase >= lastAppliedPhase;
+}
+
+function buildResolveMatchingAnchorResult(
+  seekerPoint: LatLngTuple,
+  categoryId: MatchingCategoryId,
+  features: MatchingFeature[],
+): ResolveMatchingAnchorResult {
+  const featureCount = features.length;
+  const inPlayAreaFeatureCount = countMatchingFeaturesInPlayArea(features);
+
+  if (features.length === 0) {
+    return {
+      features,
+      featureCount,
+      inPlayAreaFeatureCount,
+      nearestFeatureId: null,
+      nearestFeatureName: null,
+      nearestFeaturePoint: null,
+      distanceMeters: null,
+      nearestOutsidePlayArea: false,
+      nullAnswer: true,
+      error: null,
+    };
+  }
+
+  const category = getMatchingCategory(categoryId);
+  const usesContainment =
+    category.resolver === "reverseGeocodeAdmin" ||
+    category.resolver === "landmass";
+
+  const nearest = pickMatchingFeatureForAnchor(
+    seekerPoint,
+    features,
+    categoryId,
+  );
+
+  if (!nearest) {
+    return {
+      features,
+      featureCount,
+      inPlayAreaFeatureCount,
+      nearestFeatureId: null,
+      nearestFeatureName: null,
+      nearestFeaturePoint: null,
+      distanceMeters: null,
+      nearestOutsidePlayArea: false,
+      nullAnswer: features.length === 0,
+      error: matchingResolveFailureMessage(categoryId, features.length),
+    };
+  }
+
+  return {
+    features,
+    featureCount,
+    inPlayAreaFeatureCount,
+    nearestFeatureId: nearest.id,
+    nearestFeatureName: nearest.name,
+    nearestFeaturePoint: nearest.point,
+    distanceMeters: usesContainment ? null : nearest.distanceMeters,
+    nearestOutsidePlayArea: nearest.inPlayArea === false,
+    nullAnswer: false,
+    error: null,
+  };
+}
+
 export async function resolveMatchingAnchor(input: {
   seekerPoint: LatLngTuple;
   categoryId: MatchingCategoryId;
   gameArea: GameArea;
   matchingFetchOptions: MatchingFetchOptions;
+  onEnrich?: (result: ResolveMatchingAnchorResult) => void;
 }): Promise<ResolveMatchingAnchorResult> {
-  const { seekerPoint, categoryId, gameArea, matchingFetchOptions } = input;
+  const {
+    seekerPoint,
+    categoryId,
+    gameArea,
+    matchingFetchOptions,
+    onEnrich,
+  } = input;
 
   if (
     !isMatchingCategoryEnabled(categoryId) ||
@@ -59,65 +137,27 @@ export async function resolveMatchingAnchor(input: {
     const features = await fetchMatchingFeaturesInArea(
       gameArea,
       categoryId,
-      matchingFetchOptions,
+      {
+        ...matchingFetchOptions,
+        onEnrich: onEnrich
+          ? (enrichedFeatures) => {
+              onEnrich(
+                buildResolveMatchingAnchorResult(
+                  seekerPoint,
+                  categoryId,
+                  enrichedFeatures,
+                ),
+              );
+            }
+          : undefined,
+      },
     );
 
-    const featureCount = features.length;
-    const inPlayAreaFeatureCount = countMatchingFeaturesInPlayArea(features);
-
-    if (features.length === 0) {
-      return {
-        features,
-        featureCount,
-        inPlayAreaFeatureCount,
-        nearestFeatureId: null,
-        nearestFeatureName: null,
-        nearestFeaturePoint: null,
-        distanceMeters: null,
-        nearestOutsidePlayArea: false,
-        nullAnswer: true,
-        error: null,
-      };
-    }
-
-    const category = getMatchingCategory(categoryId);
-    const usesContainment =
-      category.resolver === "reverseGeocodeAdmin" ||
-      category.resolver === "landmass";
-
-    const nearest = pickMatchingFeatureForAnchor(
+    return buildResolveMatchingAnchorResult(
       seekerPoint,
-      features,
       categoryId,
-    );
-
-    if (!nearest) {
-      return {
-        features,
-        featureCount,
-        inPlayAreaFeatureCount,
-        nearestFeatureId: null,
-        nearestFeatureName: null,
-        nearestFeaturePoint: null,
-        distanceMeters: null,
-        nearestOutsidePlayArea: false,
-        nullAnswer: features.length === 0,
-        error: matchingResolveFailureMessage(categoryId, features.length),
-      };
-    }
-
-    return {
       features,
-      featureCount,
-      inPlayAreaFeatureCount,
-      nearestFeatureId: nearest.id,
-      nearestFeatureName: nearest.name,
-      nearestFeaturePoint: nearest.point,
-      distanceMeters: usesContainment ? null : nearest.distanceMeters,
-      nearestOutsidePlayArea: nearest.inPlayArea === false,
-      nullAnswer: false,
-      error: null,
-    };
+    );
   } catch (error) {
     return {
       features: [],

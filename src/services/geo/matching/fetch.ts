@@ -1,10 +1,12 @@
 import type { GameArea } from "@/domain/map/annotations";
 import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
+import { isPointInGameArea } from "@/domain/geometry/gameArea/geometry";
 import type { MatchingFeature } from "@/domain/geo/types";
 import {
   adminLevelForMatchingCategory,
   getMatchingCategory,
   type MatchingCategoryId,
+  type MeasuringLocationCategory,
 } from "@/domain/questions";
 import {
   matchingOverpassSelectorsForCategory,
@@ -30,6 +32,12 @@ import {
 } from "../overpass/landmassFeatures";
 import { queryOverpass } from "../../core/overpass/overpassClient";
 import { getOrFetchCached } from "../cache";
+import { isEligibleBundledPoi } from "../overpass/bundledPoiHygiene";
+import type { MeasuringPlace } from "../overpass/measuringPlaces";
+import {
+  fetchBundledMeasuringPlaces,
+  mergeMeasuringPlaces,
+} from "../overpass/regionPackPoi";
 import {
   buildMatchingFeaturesQuery,
   matchingFeaturesCacheKey,
@@ -48,10 +56,84 @@ import {
 } from "./transit";
 import type { MatchingFetchOptions, OverpassElement } from "./types";
 
-async function fetchOverpassMatchingFeaturesInArea(
+const HYGIENE_MATCHING_CATEGORIES = new Set<MeasuringLocationCategory>([
+  "commercial_airport",
+  "rail_station",
+  "mountain",
+  "park",
+  "museum",
+  "hospital",
+]);
+
+const BUNDLED_MATCHING_CATEGORIES = new Set<MatchingCategoryId>([
+  "commercial_airport",
+  "mountain",
+  "park",
+  "museum",
+  "hospital",
+]);
+
+function asBundledMeasuringCategory(
+  categoryId: MatchingCategoryId,
+): MeasuringLocationCategory | null {
+  if (!BUNDLED_MATCHING_CATEGORIES.has(categoryId)) {
+    return null;
+  }
+  return categoryId as MeasuringLocationCategory;
+}
+
+function measuringPlacesToMatchingFeatures(
+  places: MeasuringPlace[],
+  gameArea: GameArea,
+): MatchingFeature[] {
+  return places.map((place) => ({
+    id: place.id,
+    name: place.name,
+    point: place.point,
+    inPlayArea: isPointInGameArea(place.point, gameArea),
+  }));
+}
+
+function matchingFeaturesToMeasuringPlaces(
+  features: MatchingFeature[],
+): MeasuringPlace[] {
+  return features.map((feature) => ({
+    id: feature.id,
+    name: feature.name,
+    point: feature.point,
+  }));
+}
+
+function filterHygieneMatchingFeatures(
+  features: MatchingFeature[],
+  categoryId: MatchingCategoryId,
+): MatchingFeature[] {
+  const measuringCategory = asBundledMeasuringCategory(categoryId);
+  if (
+    measuringCategory === null ||
+    !HYGIENE_MATCHING_CATEGORIES.has(measuringCategory)
+  ) {
+    return features;
+  }
+
+  return features.filter((feature) =>
+    isEligibleBundledPoi(
+      {
+        id: feature.id,
+        name: feature.name,
+        lat: feature.point[0],
+        lng: feature.point[1],
+      },
+      measuringCategory,
+    ),
+  );
+}
+
+async function fetchOverpassMatchingFeaturesCached(
   gameArea: GameArea,
   categoryId: MatchingCategoryId,
-  customCategories: readonly SessionCustomCategory[] = [],
+  customCategories: readonly SessionCustomCategory[],
+  options?: MatchingFetchOptions,
 ): Promise<MatchingFeature[]> {
   const selectors = matchingOverpassSelectorsForCategory(
     categoryId,
@@ -61,16 +143,85 @@ async function fetchOverpassMatchingFeaturesInArea(
     return [];
   }
 
-  const payload = await queryOverpass<{ elements: OverpassElement[] }>(
-    buildMatchingFeaturesQuery(gameArea, categoryId, selectors, customCategories),
+  return getOrFetchCached(
+    matchingFeaturesCacheKey(gameArea, categoryId, options),
+    async () => {
+      const payload = await queryOverpass<{ elements: OverpassElement[] }>(
+        buildMatchingFeaturesQuery(
+          gameArea,
+          categoryId,
+          selectors,
+          customCategories,
+        ),
+      );
+
+      return parseMatchingFeatures(
+        payload.elements,
+        gameArea,
+        categoryId,
+        customCategories,
+      );
+    },
+    { persistEmpty: false },
+  );
+}
+
+async function fetchOverpassPointMatchingFeaturesInArea(
+  gameArea: GameArea,
+  categoryId: MatchingCategoryId,
+  customCategories: readonly SessionCustomCategory[],
+  options?: MatchingFetchOptions,
+): Promise<MatchingFeature[]> {
+  const measuringCategory = asBundledMeasuringCategory(categoryId);
+  const bundledPlaces =
+    measuringCategory === null
+      ? []
+      : await fetchBundledMeasuringPlaces(
+          gameArea,
+          measuringCategory,
+          options?.regionPackId,
+        );
+  const bundledFeatures = measuringPlacesToMatchingFeatures(
+    bundledPlaces,
+    gameArea,
   );
 
-  return parseMatchingFeatures(
-    payload.elements,
-    gameArea,
-    categoryId,
-    customCategories,
-  );
+  const mergeWithOverpass = async (): Promise<MatchingFeature[]> => {
+    const overpassFeatures = filterHygieneMatchingFeatures(
+      await fetchOverpassMatchingFeaturesCached(
+        gameArea,
+        categoryId,
+        customCategories,
+        options,
+      ),
+      categoryId,
+    );
+
+    if (bundledFeatures.length === 0) {
+      return overpassFeatures;
+    }
+
+    return measuringPlacesToMatchingFeatures(
+      mergeMeasuringPlaces(
+        matchingFeaturesToMeasuringPlaces(overpassFeatures),
+        bundledPlaces,
+      ),
+      gameArea,
+    );
+  };
+
+  if (bundledFeatures.length > 0 && options?.onEnrich) {
+    void mergeWithOverpass()
+      .then((merged) => {
+        options.onEnrich?.(merged);
+      })
+      .catch(() => {
+        // Soft-fail Overpass enrich; keep the bundle result.
+      });
+    return bundledFeatures;
+  }
+
+  return mergeWithOverpass();
 }
 
 async function fetchAdminMatchingFeaturesInArea(
@@ -108,21 +259,24 @@ export async function fetchMatchingFeaturesInArea(
   options?: MatchingFetchOptions,
 ): Promise<MatchingFeature[]> {
   const customCategories = options?.customCategories ?? [];
+  const category =
+    resolveMatchingCategory(categoryId, customCategories) ??
+    getMatchingCategory(categoryId);
+
+  const resolver = category.resolver;
+  if (resolver === "overpassPoint") {
+    return fetchOverpassPointMatchingFeaturesInArea(
+      gameArea,
+      categoryId,
+      customCategories,
+      options,
+    );
+  }
 
   return getOrFetchCached(
     matchingFeaturesCacheKey(gameArea, categoryId, options),
     async () => {
-      const category =
-        resolveMatchingCategory(categoryId, customCategories) ??
-        getMatchingCategory(categoryId);
-
-      switch (category.resolver) {
-        case "overpassPoint":
-          return fetchOverpassMatchingFeaturesInArea(
-            gameArea,
-            categoryId,
-            customCategories,
-          );
+      switch (resolver) {
         case "streetPath":
           return fetchStreetPathFeaturesInArea(gameArea);
         case "stationNameLength":
@@ -155,7 +309,7 @@ export async function fetchMatchingFeaturesInArea(
         case "transitLine":
           return fetchTransitLineMatchingFeaturesInArea(gameArea);
         default: {
-          const _exhaustive: never = category.resolver;
+          const _exhaustive: never = resolver;
           return _exhaustive;
         }
       }

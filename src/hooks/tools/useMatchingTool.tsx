@@ -21,7 +21,10 @@ import {
   type CommitMatchingInput,
 } from "./matching/commitMatching";
 import { MatchingToolPanel } from "./matching/MatchingToolPanel";
-import { resolveMatchingAnchor } from "./matching/resolveMatchingAnchor";
+import {
+  resolveMatchingAnchor,
+  shouldApplyMatchingAnchorPhase,
+} from "./matching/resolveMatchingAnchor";
 import type {
   MatchingSessionConfig,
   UseMatchingToolParams,
@@ -130,21 +133,36 @@ export function useMatchingTool({
   });
 
   const { beginRequest, cancelRequests, isLatestRequest } = useLatestRequest();
+  const matchingApplyPhaseRef = useRef(new Map<number, number>());
+  const matchingAnswerRef = useRef(matchingAnswer);
+  useEffect(() => {
+    matchingAnswerRef.current = matchingAnswer;
+  }, [matchingAnswer]);
 
-  const resolveForAnchor = useCallback(
-    async (seekerPoint: LatLngTuple, categoryId: MatchingCategoryId) => {
-      const requestId = beginRequest();
-      setMatchingLoading(true);
-      setMatchingError(null);
-
-      const result = await resolveMatchingAnchor({
-        seekerPoint,
-        categoryId,
-        gameArea,
-        matchingFetchOptions: catalog.matchingFetchOptions,
-      });
-
+  const applyResolveResult = useCallback(
+    (
+      requestId: number,
+      result: Awaited<ReturnType<typeof resolveMatchingAnchor>>,
+      phase: 0 | 1,
+    ) => {
       if (!isLatestRequest(requestId)) {
+        return;
+      }
+
+      const lastPhase = matchingApplyPhaseRef.current.get(requestId) ?? -1;
+      if (!shouldApplyMatchingAnchorPhase(lastPhase, phase)) {
+        return;
+      }
+      matchingApplyPhaseRef.current.set(requestId, phase);
+
+      // Keep yes/no once chosen; enrich only refreshes the feature list.
+      if (matchingAnswerRef.current !== null && phase === 1) {
+        if (result.features.length > 0) {
+          setMatchingError(null);
+          setMatchingFeatures(result.features);
+          setMatchingFeatureCount(result.featureCount);
+          setMatchingInPlayAreaFeatureCount(result.inPlayAreaFeatureCount);
+        }
         return;
       }
 
@@ -157,14 +175,12 @@ export function useMatchingTool({
       setMatchingDistanceMeters(result.distanceMeters);
       setMatchingNearestOutsidePlayArea(result.nearestOutsidePlayArea);
       setMatchingNullAnswer(result.nullAnswer);
-      setMatchingAnswer(null);
+      if (phase === 0) {
+        setMatchingAnswer(null);
+      }
       setMatchingError(result.error);
-      setMatchingLoading(false);
     },
     [
-      beginRequest,
-      catalog.matchingFetchOptions,
-      gameArea,
       isLatestRequest,
       setMatchingAnswer,
       setMatchingDistanceMeters,
@@ -172,12 +188,44 @@ export function useMatchingTool({
       setMatchingFeatureCount,
       setMatchingFeatures,
       setMatchingInPlayAreaFeatureCount,
-      setMatchingLoading,
       setMatchingNearestFeatureId,
       setMatchingNearestFeatureName,
       setMatchingNearestFeaturePoint,
       setMatchingNearestOutsidePlayArea,
       setMatchingNullAnswer,
+    ],
+  );
+
+  const resolveForAnchor = useCallback(
+    async (seekerPoint: LatLngTuple, categoryId: MatchingCategoryId) => {
+      const requestId = beginRequest();
+      matchingApplyPhaseRef.current.delete(requestId);
+      setMatchingLoading(true);
+      setMatchingError(null);
+
+      const result = await resolveMatchingAnchor({
+        seekerPoint,
+        categoryId,
+        gameArea,
+        matchingFetchOptions: catalog.matchingFetchOptions,
+        onEnrich: (enriched) => {
+          applyResolveResult(requestId, enriched, 1);
+        },
+      });
+
+      applyResolveResult(requestId, result, 0);
+      if (isLatestRequest(requestId)) {
+        setMatchingLoading(false);
+      }
+    },
+    [
+      applyResolveResult,
+      beginRequest,
+      catalog.matchingFetchOptions,
+      gameArea,
+      isLatestRequest,
+      setMatchingError,
+      setMatchingLoading,
     ],
   );
 

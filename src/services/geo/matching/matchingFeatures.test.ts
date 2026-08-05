@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import type { GameArea } from "@/domain/map/annotations";
 import * as overpassClient from "../../core/overpass/overpassClient";
 import {
@@ -6,6 +6,9 @@ import {
   pickNearestMatchingFeature,
   serializeMatchingFeatures,
 } from "@/domain/geo/matchingAdapters";
+import { shouldApplyMatchingAnchorPhase } from "@/hooks/tools/matching/resolveMatchingAnchor";
+import { clearGeographicFeatureCacheForTests } from "../cache";
+import { clearBundledPoiCacheForTests } from "../overpass/regionPackPoi";
 import {
   fetchMatchingFeaturesInArea,
   findNearestMatchingFeature,
@@ -28,6 +31,13 @@ const sampleGameArea: GameArea = {
 };
 
 describe("matching features", () => {
+  afterEach(async () => {
+    vi.restoreAllMocks();
+    vi.unstubAllGlobals();
+    clearBundledPoiCacheForTests();
+    await clearGeographicFeatureCacheForTests();
+  });
+
   it("loads nearby museums and picks the nearest museum", async () => {
     vi.spyOn(overpassClient, "queryOverpass").mockResolvedValue({
       elements: [
@@ -68,6 +78,132 @@ describe("matching features", () => {
 
     expect(nearest?.name).toBe("Near Museum");
     expect(nearest?.distanceMeters).toBeGreaterThan(0);
+  });
+
+  it("resolves from the pack without awaiting slow Overpass when onEnrich is set", async () => {
+    let resolveOverpass: ((value: { elements: unknown[] }) => void) | undefined;
+    const overpassStarted = new Promise<void>((resolveStarted) => {
+      vi.spyOn(overpassClient, "queryOverpass").mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            resolveStarted();
+            resolveOverpass = resolve;
+          }),
+      );
+    });
+
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: RequestInfo | URL) => {
+        if (String(input) === "/geo/london/poi/museum.json") {
+          return {
+            ok: true,
+            json: async () => ({
+              category: "museum",
+              source: "wikidata",
+              places: [
+                {
+                  id: "Q6373",
+                  name: "British Museum",
+                  lat: 51.45,
+                  lng: -0.16,
+                },
+              ],
+            }),
+          };
+        }
+        throw new Error(`Unexpected fetch: ${String(input)}`);
+      }),
+    );
+
+    const enrich = vi.fn();
+    const featuresPromise = fetchMatchingFeaturesInArea(
+      sampleGameArea,
+      "museum",
+      { regionPackId: "london", onEnrich: enrich },
+    );
+
+    const features = await featuresPromise;
+    expect(features).toEqual([
+      {
+        id: "Q6373",
+        name: "British Museum",
+        point: [51.45, -0.16],
+        inPlayArea: true,
+      },
+    ]);
+    expect(enrich).not.toHaveBeenCalled();
+
+    await overpassStarted;
+    resolveOverpass?.({
+      elements: [
+        {
+          id: 99,
+          tags: { name: "Science Museum", tourism: "museum" },
+          lat: 51.44,
+          lon: -0.17,
+        },
+      ],
+    });
+
+    await vi.waitFor(() => {
+      expect(enrich).toHaveBeenCalledTimes(1);
+    });
+
+    const enriched = enrich.mock.calls[0]?.[0] ?? [];
+    expect(enriched.map((feature: { name: string }) => feature.name)).toEqual([
+      "Science Museum",
+      "British Museum",
+    ]);
+  });
+
+  it("awaits Overpass when the pack is empty or missing", async () => {
+    const queryOverpass = vi
+      .spyOn(overpassClient, "queryOverpass")
+      .mockResolvedValue({
+        elements: [
+          {
+            id: 7,
+            tags: { name: "Live Museum", tourism: "museum" },
+            lat: 51.45,
+            lon: -0.16,
+          },
+        ],
+      });
+
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => ({
+        ok: false,
+        status: 404,
+        json: async () => ({}),
+      })),
+    );
+
+    const enrich = vi.fn();
+    const features = await fetchMatchingFeaturesInArea(
+      sampleGameArea,
+      "museum",
+      { regionPackId: "london", onEnrich: enrich },
+    );
+
+    expect(queryOverpass).toHaveBeenCalled();
+    expect(enrich).not.toHaveBeenCalled();
+    expect(features).toEqual([
+      {
+        id: "7",
+        name: "Live Museum",
+        point: [51.45, -0.16],
+        inPlayArea: true,
+      },
+    ]);
+  });
+
+  it("ignores a stale enrich phase after a newer phase for the same request", () => {
+    expect(shouldApplyMatchingAnchorPhase(-1, 0)).toBe(true);
+    expect(shouldApplyMatchingAnchorPhase(0, 1)).toBe(true);
+    expect(shouldApplyMatchingAnchorPhase(1, 0)).toBe(false);
+    expect(shouldApplyMatchingAnchorPhase(1, 1)).toBe(true);
   });
 
   it("accepts english fallback names when name is missing", () => {
