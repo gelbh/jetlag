@@ -1,5 +1,6 @@
 import { Suspense, useEffect, useLayoutEffect, type ReactNode } from "react";
 import * as Sentry from "@sentry/react";
+import { QueryClientProvider } from "@tanstack/react-query";
 import {
   BrowserRouter,
   Navigate,
@@ -7,6 +8,7 @@ import {
   Routes,
   useLocation,
 } from "react-router-dom";
+import { appQueryClient } from "./lib/queryClient";
 import { trackPageView } from "./services/core/analytics/analytics";
 import { MapErrorBoundary } from "./components/ui/feedback/MapErrorBoundary";
 import { AppEntryBackdrop } from "./components/ui/layout/AppEntryBackdrop";
@@ -173,6 +175,7 @@ export default function App() {
   }, []);
 
   return (
+    <QueryClientProvider client={appQueryClient}>
     <BrowserRouter>
       <RouteTransitionProvider>
         <AppUpdateProvider>
@@ -337,5 +340,6 @@ export default function App() {
         </AppUpdateProvider>
       </RouteTransitionProvider>
     </BrowserRouter>
+    </QueryClientProvider>
   );
 }

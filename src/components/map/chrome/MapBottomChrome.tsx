@@ -1,4 +1,5 @@
 import { forwardRef, type CSSProperties, type ReactNode } from "react";
+import { cn } from "../../../lib/cn";
 
 export type MapBottomChromeLayout = "phone" | "rail";
 
@@ -43,7 +44,11 @@ function Island({
     <div
       data-island={name}
       data-hunt-density={sparseHunt ? "sparse" : undefined}
-      className={`jl-map-island jl-map-island--${name}${sparseHunt ? " jl-map-island--hunt-sparse" : ""}`}
+      className={cn(
+        "jl-map-island",
+        `jl-map-island--${name}`,
+        sparseHunt && "jl-map-island--hunt-sparse",
+      )}
       role="group"
       aria-label={ISLAND_ARIA[name]}
     >
@@ -73,11 +78,20 @@ export const MapBottomChrome = forwardRef<HTMLDivElement, MapBottomChromeProps>(
     return (
       <div
         ref={ref}
-        className={`jl-map-bottom-chrome-host${isRail ? " jl-map-bottom-chrome-host--rail" : ""}`}
+        className={cn(
+          "jl-map-bottom-chrome-host",
+          isRail && "jl-map-bottom-chrome-host--rail",
+        )}
         style={isRail ? undefined : style}
       >
         <div
-          className={`jl-map-bottom-chrome jl-tool-dock${isRail ? " jl-map-bottom-chrome--rail jl-tool-dock--rail" : ""}${inactive ? " jl-map-bottom-chrome--inactive" : ""}${sparseHunt ? " jl-map-bottom-chrome--hunt-sparse" : ""}${className ? ` ${className}` : ""}`}
+          className={cn(
+            "jl-map-bottom-chrome jl-tool-dock",
+            isRail && "jl-map-bottom-chrome--rail jl-tool-dock--rail",
+            inactive && "jl-map-bottom-chrome--inactive",
+            sparseHunt && "jl-map-bottom-chrome--hunt-sparse",
+            className,
+          )}
           data-layout={layout}
           data-hunt-density={huntDensity}
           aria-disabled={inactive || undefined}

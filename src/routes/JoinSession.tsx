@@ -10,7 +10,6 @@ import {
   ScreenHeader,
   screenHeaderOffsetClassName,
 } from "../components/ui/layout/ScreenHeader";
-import { isPremiumSession } from "../domain/map/annotations";
 import {
   SESSION_CODE_INPUT_PLACEHOLDER,
   isValidSessionCode,
@@ -31,19 +30,16 @@ import type { SessionRecord } from "../domain/map/annotations";
 import { RolePicker } from "../components/session/identity/RolePicker";
 import { copyToClipboard } from "../platform/copyToClipboard";
 import {
-  ensureAnonymousUser,
   ensureFreshAnonymousUser,
   isFirebaseConfigured,
 } from "../services/core/firebase/firebase";
 import {
   getRemoteSessionByIdFromServer,
   joinRemoteSessionByCode,
-  lookupRemoteSessionByCode,
   waitForServerHiderRole,
 } from "../services/firestore/firestoreAnnotations";
 import { APP_VERSION } from "../domain/device/changelog";
 import { sessionVersionMismatchMessage } from "../domain/session/meta/sessionVersion";
-import { resolvePlayerRole } from "../domain/session/players/playerRole";
 import { retryAsync } from "../services/core/network/retryAsync";
 import { withTimeout } from "../services/core/withTimeout";
 import { MotionPressable } from "../components/motion/MotionPressable";
@@ -54,11 +50,7 @@ import {
 import { setPremiumApiContext } from "../services/core/auth/premiumApiContext";
 import { preloadCriticalGameAreaCaches } from "../services/session/gameAreaPreload";
 import { resolveSessionMatchingAreas } from "../services/geo/matching/resolveSessionMatchingAreas";
-import {
-  getCachedJoinPreview,
-  JOIN_PREVIEW_DEBOUNCE_MS,
-  setCachedJoinPreview,
-} from "../services/session/joinSessionPreviewCache";
+import { useJoinSessionPreview } from "../hooks/session/useJoinSessionPreview";
 import {
   cancelRoleJoinRequest,
   mapJoinRequestError,
@@ -69,8 +61,6 @@ import { listenOwnJoinRequest } from "../services/session/joinRequestListen";
 const VERIFY_SESSION_TIMEOUT_MS = 15_000;
 const VERIFY_SESSION_TIMEOUT_MESSAGE =
   "Couldn't verify the session. Check your connection and try again.";
-
-type JoinPreviewResult = Awaited<ReturnType<typeof lookupRemoteSessionByCode>>;
 
 type PendingJoinRequest = {
   requestId: string;
@@ -126,19 +116,24 @@ export function JoinSession() {
   const [code, setCode] = useState(
     () => parseSessionInviteCode(codeFromQuery) ?? "",
   );
+  /** When invite query is removed, keep typed code but suppress cached preview. */
+  const [suppressPreview, setSuppressPreview] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const { isSubmitting, runLocked } = useSubmitLock();
   const joinBusy = loading || isSubmitting;
-  const [previewPremium, setPreviewPremium] = useState(false);
-  const [lookupLoading, setLookupLoading] = useState(false);
   const [playerRole, setPlayerRole] = useState<PlayerRole>("hider");
   const [rolePasscode, setRolePasscode] = useState("");
-  const [previewSession, setPreviewSession] = useState<SessionRecord | null>(null);
   const [pendingRequest, setPendingRequest] = useState<PendingJoinRequest | null>(
     null,
   );
   const [requestBusy, setRequestBusy] = useState(false);
+  const {
+    previewSession,
+    previewPremium,
+    lookupLoading,
+    existingRole,
+  } = useJoinSessionPreview(suppressPreview ? "" : code);
   const needsRolePasscode = joinRequiresRolePasscode(
     previewSession?.memberRoles,
     playerRole,
@@ -153,113 +148,28 @@ export function JoinSession() {
   useEffect(() => {
     const next = parseSessionInviteCode(codeFromQuery);
     /* eslint-disable react-hooks/set-state-in-effect -- sync join code when invite query changes */
-    setPreviewSession(null);
-    setPreviewPremium(false);
-    setLookupLoading(false);
-
     if (!next) {
       if (codeFromQuery) {
+        setSuppressPreview(false);
         setCode("");
+      } else {
+        setSuppressPreview(true);
       }
       return;
     }
+    setSuppressPreview(false);
     setCode(next);
     /* eslint-enable react-hooks/set-state-in-effect */
   }, [codeFromQuery]);
 
   useEffect(() => {
-    if (!isFirebaseConfigured()) {
+    if (!existingRole) {
       return;
     }
-
-    const normalized = normalizeSessionCode(code);
-    if (!isValidSessionCode(normalized)) {
-      /* eslint-disable react-hooks/set-state-in-effect -- clear stale preview when code changes */
-      setPreviewPremium(false);
-      setLookupLoading(false);
-      /* eslint-enable react-hooks/set-state-in-effect */
-      return;
-    }
-
-    let cancelled = false;
-
-    const applyPreview = (result: JoinPreviewResult, uid: string) => {
-      setPreviewPremium(
-        result.status === "found" && isPremiumSession(result.session),
-      );
-      if (result.status === "found") {
-        setPreviewSession(result.session);
-        const existingRole = resolvePlayerRole(
-          result.session.memberRoles,
-          uid,
-        );
-        if (result.session.memberRoles?.[uid]) {
-          setPlayerRole(existingRole);
-        }
-      } else {
-        setPreviewSession(null);
-      }
-      if (result.status === "missing") {
-        setError(null);
-      }
-    };
-
-    const cached = getCachedJoinPreview<JoinPreviewResult>(normalized);
-    if (cached) {
-      setLookupLoading(true);
-      void (async () => {
-        try {
-          const user = await ensureAnonymousUser();
-          if (cancelled) {
-            return;
-          }
-          applyPreview(cached, user.uid);
-        } catch {
-          if (!cancelled) {
-            setPreviewPremium(false);
-          }
-        } finally {
-          if (!cancelled) {
-            setLookupLoading(false);
-          }
-        }
-      })();
-      return () => {
-        cancelled = true;
-      };
-    }
-
-    setLookupLoading(true);
-    const debounceTimer = window.setTimeout(() => {
-      void (async () => {
-        try {
-          const user = await ensureAnonymousUser();
-          const result = await retryAsync(() =>
-            lookupRemoteSessionByCode(normalized),
-          );
-          if (cancelled) {
-            return;
-          }
-
-          setCachedJoinPreview(normalized, result);
-          applyPreview(result, user.uid);
-        } catch {
-          if (!cancelled) {
-            setPreviewPremium(false);
-          }
-        } finally {
-          if (!cancelled) {
-            setLookupLoading(false);
-          }
-        }
-      })();
-    }, JOIN_PREVIEW_DEBOUNCE_MS);
-
-    return () => {
-      cancelled = true;
-      window.clearTimeout(debounceTimer);
-    };
-  }, [code]);
+    /* eslint-disable react-hooks/set-state-in-effect -- adopt membership role from preview */
+    setPlayerRole(existingRole);
+    /* eslint-enable react-hooks/set-state-in-effect */
+  }, [existingRole]);
 
   useEffect(() => {
     if (!pendingRequest) {
@@ -635,9 +545,10 @@ export function JoinSession() {
                 labelClassName="field-label font-display text-xs uppercase tracking-[0.12em]"
                 inputClassName="field-input mt-2 min-h-16 border-0 bg-transparent p-0 text-center font-mono text-4xl font-bold tracking-[0.45em] focus:outline-none"
                 value={code}
-                onChange={(event) =>
-                  setCode(normalizeSessionCode(event.target.value))
-                }
+                onChange={(event) => {
+                  setSuppressPreview(false);
+                  setCode(normalizeSessionCode(event.target.value));
+                }}
                 maxLength={4}
                 placeholder={SESSION_CODE_INPUT_PLACEHOLDER}
                 autoCapitalize="characters"
