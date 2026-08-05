@@ -1,6 +1,8 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import type { GameArea } from "@/domain/map/annotations";
 import * as overpassClient from "../../core/overpass/overpassClient";
+import { clearGeographicFeatureCacheForTests } from "../cache";
+import { clearBundledPoiCacheForTests } from "./regionPackPoi";
 import {
   fetchMeasuringPlacesInArea,
   findNearestMeasuringPlace,
@@ -21,6 +23,13 @@ const sampleGameArea: GameArea = {
 };
 
 describe("measuring places", () => {
+  afterEach(async () => {
+    vi.restoreAllMocks();
+    vi.unstubAllGlobals();
+    clearBundledPoiCacheForTests();
+    await clearGeographicFeatureCacheForTests();
+  });
+
   it("filters places to the play area and finds the nearest museum", async () => {
     vi.spyOn(overpassClient, "queryOverpass").mockResolvedValue({
       elements: [
@@ -223,5 +232,126 @@ describe("measuring places", () => {
 
     expect(nearest?.name).toBe("Near Lake");
     expect(nearest?.distanceMeters).toBeGreaterThan(0);
+  });
+
+  it("resolves from the bundle without awaiting slow Overpass when onEnrich is set", async () => {
+    let resolveOverpass: ((value: { elements: unknown[] }) => void) | undefined;
+    const overpassStarted = new Promise<void>((resolveStarted) => {
+      vi.spyOn(overpassClient, "queryOverpass").mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            resolveStarted();
+            resolveOverpass = resolve;
+          }),
+      );
+    });
+
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: RequestInfo | URL) => {
+        if (String(input) === "/geo/london/poi/museum.json") {
+          return {
+            ok: true,
+            json: async () => ({
+              category: "museum",
+              source: "wikidata",
+              places: [
+                {
+                  id: "Q6373",
+                  name: "British Museum",
+                  lat: 51.45,
+                  lng: -0.16,
+                },
+              ],
+            }),
+          };
+        }
+        throw new Error(`Unexpected fetch: ${String(input)}`);
+      }),
+    );
+
+    const enrich = vi.fn();
+    const placesPromise = fetchMeasuringPlacesInArea(
+      sampleGameArea,
+      "museum",
+      [],
+      "london",
+      { onEnrich: enrich },
+    );
+
+    const places = await placesPromise;
+    expect(places).toEqual([
+      {
+        id: "Q6373",
+        name: "British Museum",
+        point: [51.45, -0.16],
+      },
+    ]);
+    expect(enrich).not.toHaveBeenCalled();
+
+    await overpassStarted;
+    resolveOverpass?.({
+      elements: [
+        {
+          id: 99,
+          tags: { name: "Science Museum", tourism: "museum" },
+          lat: 51.44,
+          lon: -0.17,
+        },
+      ],
+    });
+
+    await vi.waitFor(() => {
+      expect(enrich).toHaveBeenCalledTimes(1);
+    });
+
+    const enriched = enrich.mock.calls[0]?.[0] ?? [];
+    expect(enriched.map((place: { name: string }) => place.name)).toEqual([
+      "Science Museum",
+      "British Museum",
+    ]);
+  });
+
+  it("awaits Overpass when the bundle is empty or missing", async () => {
+    const queryOverpass = vi
+      .spyOn(overpassClient, "queryOverpass")
+      .mockResolvedValue({
+        elements: [
+          {
+            id: 7,
+            tags: { name: "Live Museum", tourism: "museum" },
+            lat: 51.45,
+            lon: -0.16,
+          },
+        ],
+      });
+
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => ({
+        ok: false,
+        status: 404,
+        json: async () => ({}),
+      })),
+    );
+
+    const enrich = vi.fn();
+    const places = await fetchMeasuringPlacesInArea(
+      sampleGameArea,
+      "museum",
+      [],
+      "london",
+      { onEnrich: enrich },
+    );
+
+    expect(queryOverpass).toHaveBeenCalled();
+    expect(enrich).not.toHaveBeenCalled();
+    expect(places).toEqual([
+      {
+        id: "7",
+        name: "Live Museum",
+        point: [51.45, -0.16],
+      },
+    ]);
   });
 });
