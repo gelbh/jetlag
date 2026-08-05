@@ -124,6 +124,10 @@ export function useTentacleTool({
   const [tentaclePois, setTentaclePois] = useState<TentaclePoi[]>([]);
   const [tentacleOutOfReach, setTentacleOutOfReach] = useState(false);
   const [selectedPoiId, setSelectedPoiId] = useState<string | null>(null);
+  const selectedPoiIdRef = useRef(selectedPoiId);
+  useEffect(() => {
+    selectedPoiIdRef.current = selectedPoiId;
+  }, [selectedPoiId]);
   const [tentacleLoading, setTentacleLoading] = useState(false);
   const [tentacleError, setTentacleError] = useState<string | null>(null);
 
@@ -166,9 +170,45 @@ export function useTentacleTool({
 
   const { beginRequest, cancelRequests, isLatestRequest } = useLatestRequest();
 
+  const tentacleApplyPhaseRef = useRef(new Map<number, number>());
+
+  const applyTentaclePoisResult = useCallback(
+    (
+      requestId: number,
+      pois: Awaited<ReturnType<typeof fetchTentaclePois>>,
+      phase: 0 | 1,
+    ) => {
+      if (!isLatestRequest(requestId)) {
+        return;
+      }
+
+      const lastPhase = tentacleApplyPhaseRef.current.get(requestId) ?? -1;
+      if (phase < lastPhase) {
+        return;
+      }
+      tentacleApplyPhaseRef.current.set(requestId, phase);
+
+      setTentaclePois(pois);
+      const selectedId = selectedPoiIdRef.current;
+      if (selectedId && !pois.some((poi) => poi.id === selectedId)) {
+        setSelectedPoiId(null);
+      }
+      if (pois.length === 0) {
+        setTentacleError(
+          `No named locations were found within ${formatDistance(searchRadiusMeters, distanceUnit)}.`,
+        );
+        return;
+      }
+
+      setTentacleError(null);
+    },
+    [distanceUnit, isLatestRequest, searchRadiusMeters],
+  );
+
   const loadPoisForCenter = useCallback(
     async (center: LatLngTuple, categoryId: TentacleExtendedCategoryId) => {
       const requestId = beginRequest();
+      tentacleApplyPhaseRef.current.delete(requestId);
       setTentacleLoading(true);
       setTentacleError(null);
       setTentaclePois([]);
@@ -184,19 +224,13 @@ export function useTentacleTool({
             customCategories: sessionRules.customCategories,
             customLocationPins: sessionRules.customLocationPins,
             regionPackId: sessionRules.regionPackId,
+            onEnrich: (enrichedPois) => {
+              applyTentaclePoisResult(requestId, enrichedPois, 1);
+            },
           },
         );
 
-        if (!isLatestRequest(requestId)) {
-          return;
-        }
-
-        setTentaclePois(pois);
-        if (pois.length === 0) {
-          setTentacleError(
-            `No named locations were found within ${formatDistance(searchRadiusMeters, distanceUnit)}.`,
-          );
-        }
+        applyTentaclePoisResult(requestId, pois, 0);
       } catch (error) {
         if (!isLatestRequest(requestId)) {
           return;
@@ -211,7 +245,13 @@ export function useTentacleTool({
         }
       }
     },
-    [beginRequest, distanceUnit, isLatestRequest, searchRadiusMeters, sessionRules],
+    [
+      applyTentaclePoisResult,
+      beginRequest,
+      isLatestRequest,
+      searchRadiusMeters,
+      sessionRules,
+    ],
   );
 
   const debouncedTentacleCenter = useDebouncedValue(tentacleCenter, 400);
@@ -285,13 +325,16 @@ export function useTentacleTool({
   };
 
   const clearAfterCommit = useCallback(() => {
+    cancelRequests();
+    setTentacleLoading(false);
     setTentacleCenter(null);
     setTentaclePois([]);
     setTentacleOutOfReach(false);
     setSelectedPoiId(null);
+    setTentacleError(null);
     setMapError(null);
     finishPlacementRef.current();
-  }, [setMapError]);
+  }, [cancelRequests, setMapError]);
 
   const session = useToolSession<TentacleSessionConfig>({
     toolId: "tentacle",

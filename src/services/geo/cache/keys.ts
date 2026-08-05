@@ -58,7 +58,8 @@ export function measuringPlacesCacheKey(
   gameArea: GameArea,
   category: string,
 ): string {
-  return geographicCacheKey(gameArea, `measuring:${category}`);
+  // v2: cache Overpass-only; callers merge bundled POI outside the cache.
+  return geographicCacheKey(gameArea, `measuring:v2:${category}`);
 }
 
 export function tentaclePoisCacheKey(

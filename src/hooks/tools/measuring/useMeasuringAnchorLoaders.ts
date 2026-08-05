@@ -56,6 +56,7 @@ export function useMeasuringAnchorLoaders({
     measureFromKind,
     measuringOptionChosen,
     measuringSeekerPoint,
+    measuringAnswer,
     customMeasureGeometries,
     customMatchingAreas,
     setMeasuringLoading,
@@ -80,61 +81,119 @@ export function useMeasuringAnchorLoaders({
     clearSubjectDerivedState,
   } = draft;
 
+  const measuringAnswerRef = useRef(measuringAnswer);
+  useEffect(() => {
+    measuringAnswerRef.current = measuringAnswer;
+  }, [measuringAnswer]);
+
+  const placesApplyPhaseRef = useRef(new Map<number, number>());
+
+  const applyAllPlacesResult = useCallback(
+    (
+      requestId: number,
+      seekerPoint: LatLngTuple,
+      category: MeasuringLocationCategory,
+      fetchedPlaces: Awaited<ReturnType<typeof fetchMeasuringPlacesInArea>>,
+      phase: 0 | 1,
+    ) => {
+      if (requestId !== placesRequestIdRef.current) {
+        return;
+      }
+
+      const lastPhase = placesApplyPhaseRef.current.get(requestId) ?? -1;
+      if (phase < lastPhase) {
+        return;
+      }
+      placesApplyPhaseRef.current.set(requestId, phase);
+
+      const pinPlaces = (sessionRules?.customLocationPins ?? []).map(
+        manualPinAsMeasuringPlace,
+      );
+      const seen = new Set(fetchedPlaces.map((place) => place.id));
+      const places = [
+        ...fetchedPlaces,
+        ...pinPlaces.filter((place) => !seen.has(place.id)),
+      ];
+
+      // Keep seeker answer + nearest target stable once chosen; enrich only refreshes the list.
+      if (measuringAnswerRef.current !== null) {
+        if (places.length > 0) {
+          setMeasuringError(null);
+          setMeasuringPlaces(places);
+        }
+        return;
+      }
+
+      if (places.length === 0) {
+        setMeasuringPlaces([]);
+        setMeasuringDistanceMeters(null);
+        setMeasuringTargetPlaceName(null);
+        setMeasuringError(measuringPlaceNotFoundMessage(category));
+        return;
+      }
+
+      let nearestDistance = Infinity;
+      let nearestPlace = places[0];
+
+      for (const place of places) {
+        const distanceMeters = distanceBetweenPoints(seekerPoint, place.point);
+        if (distanceMeters < nearestDistance) {
+          nearestDistance = distanceMeters;
+          nearestPlace = place;
+        }
+      }
+
+      setMeasuringError(null);
+      setMeasuringPlaces(places);
+      setMeasuringDistanceMeters(nearestDistance);
+      setMeasuringTargetPoint(nearestPlace.point);
+      setMeasuringTargetPlaceName(
+        measuringMultiPlaceTargetLabel(places.length, measureFromKind),
+      );
+    },
+    [
+      measureFromKind,
+      placesRequestIdRef,
+      sessionRules,
+      setMeasuringDistanceMeters,
+      setMeasuringError,
+      setMeasuringPlaces,
+      setMeasuringTargetPlaceName,
+      setMeasuringTargetPoint,
+    ],
+  );
+
   const loadAllPlacesAt = useCallback(
     async (
       seekerPoint: LatLngTuple,
       category: MeasuringLocationCategory = measuringLocationCategory,
     ) => {
       const requestId = ++placesRequestIdRef.current;
+      placesApplyPhaseRef.current.delete(requestId);
       setMeasuringLoading(true);
       setMeasuringError(null);
 
       try {
         const customCategories = sessionRules?.customCategories ?? [];
-        const overpassPlaces = await fetchMeasuringPlacesInArea(
+        const places = await fetchMeasuringPlacesInArea(
           gameArea,
           category,
           customCategories,
           sessionRules?.regionPackId,
+          {
+            onEnrich: (enrichedPlaces) => {
+              applyAllPlacesResult(
+                requestId,
+                seekerPoint,
+                category,
+                enrichedPlaces,
+                1,
+              );
+            },
+          },
         );
-        const pinPlaces = (sessionRules?.customLocationPins ?? []).map(
-          manualPinAsMeasuringPlace,
-        );
-        const seen = new Set(overpassPlaces.map((place) => place.id));
-        const places = [
-          ...overpassPlaces,
-          ...pinPlaces.filter((place) => !seen.has(place.id)),
-        ];
 
-        if (requestId !== placesRequestIdRef.current) {
-          return;
-        }
-
-        if (places.length === 0) {
-          setMeasuringPlaces([]);
-          setMeasuringDistanceMeters(null);
-          setMeasuringTargetPlaceName(null);
-          setMeasuringError(measuringPlaceNotFoundMessage(category));
-          return;
-        }
-
-        let nearestDistance = Infinity;
-        let nearestPlace = places[0];
-
-        for (const place of places) {
-          const distanceMeters = distanceBetweenPoints(seekerPoint, place.point);
-          if (distanceMeters < nearestDistance) {
-            nearestDistance = distanceMeters;
-            nearestPlace = place;
-          }
-        }
-
-        setMeasuringPlaces(places);
-        setMeasuringDistanceMeters(nearestDistance);
-        setMeasuringTargetPoint(nearestPlace.point);
-        setMeasuringTargetPlaceName(
-          measuringMultiPlaceTargetLabel(places.length, measureFromKind),
-        );
+        applyAllPlacesResult(requestId, seekerPoint, category, places, 0);
       } catch (error) {
         if (requestId !== placesRequestIdRef.current) {
           return;
@@ -153,8 +212,8 @@ export function useMeasuringAnchorLoaders({
       }
     },
     [
+      applyAllPlacesResult,
       gameArea,
-      measureFromKind,
       measuringLocationCategory,
       placesRequestIdRef,
       sessionRules,
@@ -163,7 +222,6 @@ export function useMeasuringAnchorLoaders({
       setMeasuringLoading,
       setMeasuringPlaces,
       setMeasuringTargetPlaceName,
-      setMeasuringTargetPoint,
     ],
   );
 

@@ -190,21 +190,29 @@ export function nearestTentaclePoi(
   return nearest;
 }
 
-export async function fetchTentaclePois(
+export type FetchTentaclePoisOptions = {
+  customCategories?: readonly SessionCustomCategory[];
+  customLocationPins?: readonly SessionCustomLocationPin[];
+  regionPackId?: RegionPackId;
+  onEnrich?: (pois: TentaclePoi[]) => void;
+};
+
+function withManualPins(
+  mergedOverpass: TentaclePoi[],
+  pinPois: TentaclePoi[],
+): TentaclePoi[] {
+  const seen = new Set(mergedOverpass.map((poi) => poi.id));
+  return [...mergedOverpass, ...pinPois.filter((poi) => !seen.has(poi.id))];
+}
+
+async function fetchOverpassTentaclePois(
   center: LatLngTuple,
   radiusMeters: number,
   categoryId: TentacleExtendedCategoryId,
-  options?: {
-    customCategories?: readonly SessionCustomCategory[];
-    customLocationPins?: readonly SessionCustomLocationPin[];
-    regionPackId?: RegionPackId;
-  },
+  customCategories: readonly SessionCustomCategory[],
+  cacheScope: string,
 ): Promise<TentaclePoi[]> {
-  const customCategories = options?.customCategories ?? [];
-  const cacheScope = options?.regionPackId
-    ? `${categoryId}:${options.regionPackId}`
-    : categoryId;
-  const overpassPois = await getOrFetchCached(
+  return getOrFetchCached(
     tentaclePoisCacheKey(center, radiusMeters, cacheScope),
     async () => {
       const payload = await queryOverpass<{ elements: OverpassElement[] }>(
@@ -219,6 +227,18 @@ export async function fetchTentaclePois(
       return parseTentaclePois(payload.elements, categoryId);
     },
   );
+}
+
+export async function fetchTentaclePois(
+  center: LatLngTuple,
+  radiusMeters: number,
+  categoryId: TentacleExtendedCategoryId,
+  options?: FetchTentaclePoisOptions,
+): Promise<TentaclePoi[]> {
+  const customCategories = options?.customCategories ?? [];
+  const cacheScope = options?.regionPackId
+    ? `${categoryId}:${options.regionPackId}`
+    : categoryId;
 
   const pinPois = manualPinsWithinRadius(
     options?.customLocationPins ?? [],
@@ -234,15 +254,35 @@ export async function fetchTentaclePois(
     options?.regionPackId,
   );
 
-  const mergedOverpass = mergeTentaclePois(
-    overpassPois.filter((poi) =>
-      isEligibleBundledPoi(
-        { id: poi.id, name: poi.name, lat: poi.lat, lng: poi.lng },
-        categoryId,
+  const mergeWithOverpass = async (): Promise<TentaclePoi[]> => {
+    const overpassPois = await fetchOverpassTentaclePois(
+      center,
+      radiusMeters,
+      categoryId,
+      customCategories,
+      cacheScope,
+    );
+
+    const mergedOverpass = mergeTentaclePois(
+      overpassPois.filter((poi) =>
+        isEligibleBundledPoi(
+          { id: poi.id, name: poi.name, lat: poi.lat, lng: poi.lng },
+          categoryId,
+        ),
       ),
-    ),
-    bundledPois,
-  );
-  const seen = new Set(mergedOverpass.map((poi) => poi.id));
-  return [...mergedOverpass, ...pinPois.filter((poi) => !seen.has(poi.id))];
+      bundledPois,
+    );
+    return withManualPins(mergedOverpass, pinPois);
+  };
+
+  if (bundledPois.length > 0 && options?.onEnrich) {
+    void mergeWithOverpass()
+      .then((merged) => {
+        options.onEnrich?.(merged);
+      })
+      .catch(() => {});
+    return withManualPins(bundledPois, pinPois);
+  }
+
+  return mergeWithOverpass();
 }

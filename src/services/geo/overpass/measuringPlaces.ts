@@ -72,6 +72,10 @@ type OverpassElement = {
   center?: { lat: number; lon: number };
 };
 
+export type FetchMeasuringPlacesOptions = {
+  onEnrich?: (places: MeasuringPlace[]) => void;
+};
+
 export function buildMeasuringPlacesQuery(
   gameArea: GameArea,
   selectors: readonly string[],
@@ -153,11 +157,33 @@ export function parseMeasuringPlaces(
     .filter((place): place is MeasuringPlace => place !== null);
 }
 
+async function fetchOverpassMeasuringPlaces(
+  gameArea: GameArea,
+  category: MeasuringLocationCategory,
+  selectors: readonly string[],
+  cacheScope: string,
+): Promise<MeasuringPlace[]> {
+  return getOrFetchCached(
+    measuringPlacesCacheKey(gameArea, cacheScope),
+    async () => {
+      const payload = await queryOverpass<{ elements: OverpassElement[] }>(
+        buildMeasuringPlacesQuery(gameArea, selectors),
+      );
+
+      return filterHygieneMeasuringPlaces(
+        parseMeasuringPlaces(payload.elements, gameArea, category),
+        category,
+      );
+    },
+  );
+}
+
 export async function fetchMeasuringPlacesInArea(
   gameArea: GameArea,
   category: MeasuringLocationCategory,
   customCategories: readonly SessionCustomCategory[] = [],
   regionPackId?: RegionPackId,
+  options?: FetchMeasuringPlacesOptions,
 ): Promise<MeasuringPlace[]> {
   const selectors = measuringOverpassSelectorsForKind(category, customCategories);
   if (selectors.length === 0) {
@@ -169,26 +195,34 @@ export async function fetchMeasuringPlacesInArea(
       ? `${category}:custom:${regionPackId ?? "global"}`
       : `${category}:${regionPackId ?? "global"}`;
 
-  return getOrFetchCached(
-    measuringPlacesCacheKey(gameArea, cacheScope),
-    async () => {
-      const payload = await queryOverpass<{ elements: OverpassElement[] }>(
-        buildMeasuringPlacesQuery(gameArea, selectors),
-      );
-
-      const overpassPlaces = filterHygieneMeasuringPlaces(
-        parseMeasuringPlaces(payload.elements, gameArea, category),
-        category,
-      );
-      const bundledPlaces = await fetchBundledMeasuringPlaces(
-        gameArea,
-        category,
-        regionPackId,
-      );
-
-      return mergeMeasuringPlaces(overpassPlaces, bundledPlaces);
-    },
+  const bundledPlaces = await fetchBundledMeasuringPlaces(
+    gameArea,
+    category,
+    regionPackId,
   );
+
+  const mergeWithOverpass = async (): Promise<MeasuringPlace[]> => {
+    const overpassPlaces = await fetchOverpassMeasuringPlaces(
+      gameArea,
+      category,
+      selectors,
+      cacheScope,
+    );
+    return mergeMeasuringPlaces(overpassPlaces, bundledPlaces);
+  };
+
+  if (bundledPlaces.length > 0 && options?.onEnrich) {
+    void mergeWithOverpass()
+      .then((merged) => {
+        options.onEnrich?.(merged);
+      })
+      .catch(() => {
+        // Soft-fail Overpass enrich; keep the bundle result.
+      });
+    return bundledPlaces;
+  }
+
+  return mergeWithOverpass();
 }
 
 export async function findNearestMeasuringPlace(

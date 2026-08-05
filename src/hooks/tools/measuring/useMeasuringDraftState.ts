@@ -111,6 +111,7 @@ export function useMeasuringDraftState(
   const usesAllPlacesInArea = measuringUsesAllPlacesInArea(measureFromKind);
 
   const clearSubjectDerivedState = useCallback(() => {
+    placesRequestIdRef.current += 1;
     setMeasuringTargetPoint(null);
     setMeasuringTargetPlaceName(null);
     setMeasuringDistanceMeters(null);
@@ -130,6 +131,11 @@ export function useMeasuringDraftState(
 
   const resetDraft = useCallback(
     (additionalUsedKind?: MeasuringFromKind) => {
+      placesRequestIdRef.current += 1;
+      seaLevelRequestIdRef.current += 1;
+      coastlineRequestIdRef.current += 1;
+      linearRequestIdRef.current += 1;
+
       const usedKinds = new Set(usedMeasuringFromKindsSet);
       if (additionalUsedKind) {
         usedKinds.add(additionalUsedKind);
