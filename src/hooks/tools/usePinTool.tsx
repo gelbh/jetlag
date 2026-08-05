@@ -1,9 +1,13 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { PinPanel } from "../../components/tools/PinPanel";
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import type { AnnotationRecord } from "../../domain/map/annotations";
 import { MAP_ANNOTATION_COLORS } from "../../domain/map/mapAnnotationColors";
-import { useSubmitLock } from "../forms/useSubmitLock";
+import { useToolSession } from "./framework/useToolSession";
+
+interface PinSessionConfig {
+  ready: true;
+}
 
 interface UsePinToolParams {
   active: boolean;
@@ -20,7 +24,10 @@ export function usePinTool({
 }: UsePinToolParams) {
   const [pinLabel, setPinLabel] = useState("");
   const [pinPoint, setPinPoint] = useState<LatLngTuple | null>(null);
-  const { isSubmitting, runLocked } = useSubmitLock();
+  const finishPlacementRef = useRef(finishPlacement);
+  useEffect(() => {
+    finishPlacementRef.current = finishPlacement;
+  }, [finishPlacement]);
 
   const resetDraft = useCallback(() => {
     setPinLabel("");
@@ -31,31 +38,36 @@ export function usePinTool({
     setPinPoint(point);
   }, []);
 
-  const commit = useCallback(async () => {
-    if (!pinPoint || pinLabel.trim().length === 0) {
-      return;
-    }
+  const session = useToolSession<PinSessionConfig>({
+    toolId: "pin",
+    active,
+    createInitialConfig: () => ({ ready: true }),
+    onSubmit: async () => {
+      if (!pinPoint || pinLabel.trim().length === 0) {
+        return;
+      }
 
-    await createAnnotation({
-      type: "pin",
-      geometry: {
-        type: "Feature",
-        properties: {},
+      await createAnnotation({
+        type: "pin",
         geometry: {
-          type: "Point",
-          coordinates: [pinPoint[1], pinPoint[0]],
+          type: "Feature",
+          properties: {},
+          geometry: {
+            type: "Point",
+            coordinates: [pinPoint[1], pinPoint[0]],
+          },
         },
-      },
-      metadata: {
-        createdAt: new Date().toISOString(),
-        label: pinLabel.trim(),
-        color: MAP_ANNOTATION_COLORS.pin,
-      },
-    });
+        metadata: {
+          createdAt: new Date().toISOString(),
+          label: pinLabel.trim(),
+          color: MAP_ANNOTATION_COLORS.pin,
+        },
+      });
 
-    resetDraft();
-    finishPlacement();
-  }, [createAnnotation, finishPlacement, pinLabel, pinPoint, resetDraft]);
+      resetDraft();
+      finishPlacementRef.current();
+    },
+  });
 
   const placementCrosshair = active && pinPoint === null;
 
@@ -63,9 +75,9 @@ export function usePinTool({
     <PinPanel
       label={pinLabel}
       onLabelChange={setPinLabel}
-      onCommit={() => void runLocked(commit)}
+      onCommit={() => void session.submit()}
       hasPoint={pinPoint !== null}
-      isSubmitting={isSubmitting}
+      isSubmitting={session.isBusy}
     />
   );
 
