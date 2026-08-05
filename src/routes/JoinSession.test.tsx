@@ -1,3 +1,4 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createMemoryRouter, RouterProvider } from "react-router-dom";
@@ -6,13 +7,20 @@ import { renderWithRouter } from "../test/renderWithRouter";
 import { RouteTransitionTestProvider } from "../test/RouteTransitionTestProvider";
 import { resetAllStores } from "../test/helpers/storeReset";
 import { createTestRemoteSession } from "../test/fixtures/sessions";
-import { clearJoinPreviewCacheForTests } from "../services/session/joinSessionPreviewCache";
 import {
   lookupRemoteSessionByCode,
   waitForServerHiderRole,
   getRemoteSessionByIdFromServer,
 } from "../services/firestore/firestoreAnnotations";
 import type { RoleJoinRequest } from "../domain/session/players/joinRequest";
+
+function createTestQueryClient() {
+  return new QueryClient({
+    defaultOptions: {
+      queries: { retry: false, gcTime: Infinity },
+    },
+  });
+}
 
 const {
   navigate,
@@ -106,14 +114,17 @@ const efghPreviewSession = createTestRemoteSession({
 
 function renderJoinSessionAt(path: string) {
   resetAllStores();
+  const queryClient = createTestQueryClient();
   const router = createMemoryRouter(
     [
       {
         path: "/join",
         element: (
-          <RouteTransitionTestProvider>
-            <JoinSession />
-          </RouteTransitionTestProvider>
+          <QueryClientProvider client={queryClient}>
+            <RouteTransitionTestProvider>
+              <JoinSession />
+            </RouteTransitionTestProvider>
+          </QueryClientProvider>
         ),
       },
     ],
@@ -166,7 +177,6 @@ describe("JoinSession", () => {
   beforeEach(() => {
     vi.useRealTimers();
     vi.clearAllMocks();
-    clearJoinPreviewCacheForTests();
     mockIsFirebaseConfigured.mockReturnValue(false);
     mockEnsureFreshAnonymousUser.mockResolvedValue({ uid: "user-1" });
     mockEnsureAnonymousUser.mockResolvedValue({ uid: "user-1" });

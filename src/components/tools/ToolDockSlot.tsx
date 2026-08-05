@@ -6,6 +6,7 @@ import {
   mapToolDockMenuLabel,
   mapToolDockShortLabel,
 } from "../../domain/map/mapTools";
+import { cn } from "../../lib/cn";
 import {
   HudDrawIcon,
   HudRedoIcon,
@@ -84,9 +85,10 @@ export function ToolDockMarkupMenuItem({
       role="menuitem"
       disabled={!tool.enabled}
       onClick={() => onSelect(tool.id)}
-      className={`jl-tool-menu-item disabled:opacity-40 ${
-        active ? "jl-tool-menu-item-active" : "jl-tool-menu-item-default"
-      }`}
+      className={cn(
+        "jl-tool-menu-item disabled:opacity-40",
+        active ? "jl-tool-menu-item-active" : "jl-tool-menu-item-default",
+      )}
     >
       <span className="jl-tool-menu-item-icon">{icon}</span>
       <span className="jl-tool-menu-item-body">
@@ -95,9 +97,10 @@ export function ToolDockMarkupMenuItem({
         </span>
         {hint ? (
           <span
-            className={`text-xs leading-snug ${
-              active ? "text-action-ink/80" : "text-ink-muted"
-            }`}
+            className={cn(
+              "text-xs leading-snug",
+              active ? "text-action-ink/80" : "text-ink-muted",
+            )}
           >
             {hint}
           </span>
