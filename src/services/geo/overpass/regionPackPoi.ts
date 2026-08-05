@@ -4,6 +4,12 @@ import type { MeasuringLocationCategory } from "@/domain/questions";
 import type { TentacleExtendedCategoryId } from "@/domain/questions";
 import type { TentaclePoi } from "@/domain/map/annotations";
 import type { RegionPackId } from "@/domain/regions/regionPack";
+import {
+  isPackGeoPointCategory,
+  isPackGeoTentacleCategory,
+  PACK_GEO_PACK_IDS,
+  packGeoPoiUrl,
+} from "@/domain/regions/packGeoManifest";
 import type { MeasuringPlace } from "./measuringPlaces";
 import {
   sanitizeBundledPoiPlaces,
@@ -22,39 +28,12 @@ export interface BundledPoiCategory {
   places: BundledPoiPlace[];
 }
 
-const BUNDLED_POI_CATEGORIES = new Set<MeasuringLocationCategory>([
-  "commercial_airport",
-  "rail_station",
-  "mountain",
-  "park",
-  "museum",
-  "hospital",
-]);
-
-const TENTACLE_BUNDLED_CATEGORIES = new Set<TentacleExtendedCategoryId>([
-  "museum",
-  "hospital",
-]);
-
-const BUNDLED_POI_PACKS = new Set<RegionPackId>([
-  "nyc",
-  "london",
-  "dublin",
-  "portland-maine",
-  "prince-rupert",
-]);
+const BUNDLED_POI_PACKS = new Set<RegionPackId>(PACK_GEO_PACK_IDS);
 
 const bundleCache = new Map<string, BundledPoiCategory | null>();
 
 function normalizePlaceName(name: string): string {
   return name.trim().toLowerCase();
-}
-
-function poiBundleUrl(
-  regionPackId: RegionPackId,
-  category: string,
-): string {
-  return `/geo/${regionPackId}/poi/${category}.json`;
 }
 
 async function loadBundledPoiCategory(
@@ -70,7 +49,7 @@ async function loadBundledPoiCategory(
     return bundleCache.get(cacheKey) ?? null;
   }
 
-  const url = poiBundleUrl(regionPackId, category);
+  const url = packGeoPoiUrl(regionPackId, category);
 
   try {
     const response = await fetch(url);
@@ -134,8 +113,8 @@ export async function fetchBundledTentaclePois(
 ): Promise<TentaclePoi[]> {
   if (
     !regionPackId ||
-    !TENTACLE_BUNDLED_CATEGORIES.has(categoryId) ||
-    !BUNDLED_POI_CATEGORIES.has(categoryId as MeasuringLocationCategory)
+    !isPackGeoTentacleCategory(categoryId) ||
+    !isPackGeoPointCategory(categoryId)
   ) {
     return [];
   }
@@ -149,7 +128,7 @@ export async function fetchBundledTentaclePois(
   }
 
   return bundle.places
-    .map((place) => {
+    .map((place): TentaclePoi | null => {
       const point: LatLngTuple = [place.lat, place.lng];
       const distanceMeters = distanceBetweenPoints(center, point);
       if (distanceMeters > radiusMeters) {
@@ -162,7 +141,7 @@ export async function fetchBundledTentaclePois(
         lat: place.lat,
         lng: place.lng,
         category: categoryId,
-      } satisfies TentaclePoi;
+      };
     })
     .filter((poi): poi is TentaclePoi => poi !== null);
 }
@@ -200,7 +179,7 @@ export async function fetchBundledMeasuringPlaces(
   category: MeasuringLocationCategory,
   regionPackId?: RegionPackId,
 ): Promise<MeasuringPlace[]> {
-  if (!regionPackId || !BUNDLED_POI_CATEGORIES.has(category)) {
+  if (!regionPackId || !isPackGeoPointCategory(category)) {
     return [];
   }
 

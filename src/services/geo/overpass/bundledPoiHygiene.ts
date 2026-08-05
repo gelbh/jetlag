@@ -58,6 +58,13 @@ const AIRPORT_EXCLUSIONS: readonly RegExp[] = [
   /\bairfield\b/,
 ];
 
+const ZOO_EXCLUSIONS: readonly RegExp[] = [
+  /\bpetting\b/,
+  /\bfarm\b/,
+  /\bmini\s*zoo\b/,
+  /\banimal\s+shelter\b/,
+];
+
 function collapseName(name: string): string {
   let collapsed = name.trim().toLowerCase().replace(/\s+/g, " ");
   for (const [pattern, replacement] of TYPO_FIXES) {
@@ -138,6 +145,8 @@ export function isEligibleBundledPoi(
       return isEligibleMuseum(name);
     case "commercial_airport":
       return !matchesExclusions(name, AIRPORT_EXCLUSIONS);
+    case "zoo":
+      return !matchesExclusions(name, ZOO_EXCLUSIONS);
     default:
       return true;
   }
