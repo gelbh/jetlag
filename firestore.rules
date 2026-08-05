@@ -75,8 +75,10 @@ service cloud.firestore {
     }
 
     function timerNeverStarted(data) {
-      // Missing fields ≡ never started (parity with domain timerNeverStarted).
-      return (!('timerAccumulatedMs' in data) || data.timerAccumulatedMs == 0)
+      // Missing/null fields ≡ never started (parity with domain timerNeverStarted).
+      return (!('timerAccumulatedMs' in data)
+          || data.timerAccumulatedMs == null
+          || data.timerAccumulatedMs == 0)
         && (!('timerRunningSince' in data) || data.timerRunningSince == null);
     }
 
