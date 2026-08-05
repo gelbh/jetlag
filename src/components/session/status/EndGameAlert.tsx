@@ -1,8 +1,10 @@
+import type { PlayerRole } from "@/domain/session/players/playerRole";
 import { MapFloatAlert, MapFloatAlertPanel } from "../../ui/banners/MapFloatAlert";
 
 interface EndGameAlertProps {
   endGameActive: boolean;
   isHost: boolean;
+  playerRole?: PlayerRole;
   onResetEndGame?: () => void;
 }
 
@@ -13,13 +15,14 @@ const endGamePanelClassName =
 export function EndGameAlert({
   endGameActive,
   isHost,
+  playerRole = "seeker",
   onResetEndGame,
 }: EndGameAlertProps) {
   if (!endGameActive) {
     return null;
   }
 
-  if (isHost && onResetEndGame) {
+  if (isHost && playerRole !== "hider" && onResetEndGame) {
     return (
       <MapFloatAlertPanel className={endGamePanelClassName}>
         <p className="text-sm font-semibold text-ink">End game started</p>
