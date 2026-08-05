@@ -9,10 +9,10 @@ import {
   sessionPayload,
 } from "./helpers";
 
-describe("firestore.rules — boardEconomyEnabled ops gate", () => {
+describe("firestore.rules — boardEconomyEnabled host gate", () => {
   const rules = bindRulesTestEnv();
 
-  it("rejects non-ops host enabling boardEconomyEnabled", async () => {
+  it("allows session host (non-ops) to enable boardEconomyEnabled before timer", async () => {
     const host = rules.testEnv.authenticatedContext("host-1");
     await host
       .firestore()
@@ -20,11 +20,34 @@ describe("firestore.rules — boardEconomyEnabled ops gate", () => {
       .doc("session-be-1")
       .set(sessionPayload("host-1"));
 
-    await assertFails(
+    await assertSucceeds(
       host
         .firestore()
         .collection("sessions")
         .doc("session-be-1")
+        .update({ boardEconomyEnabled: true }),
+    );
+  });
+
+  it("rejects non-host member enabling boardEconomyEnabled", async () => {
+    const host = rules.testEnv.authenticatedContext("host-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-be-nonhost")
+      .set(
+        sessionPayload("host-1", {
+          memberUids: ["host-1", "seeker-1"],
+          memberRoles: { "host-1": "seeker", "seeker-1": "seeker" },
+        }),
+      );
+
+    const seeker = rules.testEnv.authenticatedContext("seeker-1");
+    await assertFails(
+      seeker
+        .firestore()
+        .collection("sessions")
+        .doc("session-be-nonhost")
         .update({ boardEconomyEnabled: true }),
     );
   });

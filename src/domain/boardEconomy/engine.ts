@@ -76,10 +76,64 @@ export function createInitialBoardEconomyState(seed: string): BoardEconomyState 
   };
 }
 
+/** Draw `drawN` from deck top without committing keep/discard. */
+export function drawFromDeck(
+  deck: readonly BoardCardInstance[],
+  drawN: number,
+): { deck: BoardCardInstance[]; drawn: BoardCardInstance[] } {
+  const nextDeck = [...deck];
+  const drawn: BoardCardInstance[] = [];
+  for (let i = 0; i < drawN && nextDeck.length > 0; i++) {
+    drawn.push(nextDeck.shift()!);
+  }
+  return { deck: nextDeck, drawn };
+}
+
+/**
+ * Commit a keep selection from a drawn set.
+ * `keepInstanceIds` must be a subset of `drawn` with size `keepM` (or all when
+ * fewer cards were available).
+ */
+export function resolveDrawKeep(
+  deck: readonly BoardCardInstance[],
+  hand: readonly BoardCardInstance[],
+  drawn: readonly BoardCardInstance[],
+  keepInstanceIds: readonly string[],
+  keepM: number,
+): {
+  deck: BoardCardInstance[];
+  hand: BoardCardInstance[];
+  discarded: BoardCardInstance[];
+  kept: BoardCardInstance[];
+} {
+  const drawnById = new Map(drawn.map((card) => [card.instanceId, card]));
+  const uniqueKeepIds = [...new Set(keepInstanceIds)];
+  const targetKeep = Math.min(keepM, drawn.length);
+  if (
+    uniqueKeepIds.length !== targetKeep ||
+    uniqueKeepIds.some((id) => !drawnById.has(id))
+  ) {
+    return {
+      deck: [...deck],
+      hand: [...hand],
+      discarded: [],
+      kept: [],
+    };
+  }
+  const keepIdSet = new Set(uniqueKeepIds);
+  const kept = drawn.filter((card) => keepIdSet.has(card.instanceId));
+  const discarded = drawn.filter((card) => !keepIdSet.has(card.instanceId));
+  return {
+    deck: [...deck],
+    hand: [...hand, ...kept],
+    discarded,
+    kept,
+  };
+}
+
 /**
  * Draw `drawN` from deck top; keep first `keepM`.
- * v1 simplification: keep order is deck order (no interactive pick UI yet).
- * Caller may reorder `drawn` before a future choose-keep API.
+ * Prefer {@link drawFromDeck} + {@link resolveDrawKeep} for interactive picks.
  */
 export function drawKeep(
   deck: readonly BoardCardInstance[],
@@ -92,20 +146,78 @@ export function drawKeep(
   discarded: BoardCardInstance[];
   drawn: BoardCardInstance[];
 } {
-  const nextDeck = [...deck];
-  const drawn: BoardCardInstance[] = [];
-  for (let i = 0; i < drawN && nextDeck.length > 0; i++) {
-    drawn.push(nextDeck.shift()!);
-  }
+  const { deck: nextDeck, drawn } = drawFromDeck(deck, drawN);
   const keep = Math.min(keepM, drawn.length);
-  const kept = drawn.slice(0, keep);
-  const discarded = drawn.slice(keep);
+  const keepIds = drawn.slice(0, keep).map((card) => card.instanceId);
+  const resolved = resolveDrawKeep(nextDeck, hand, drawn, keepIds, keepM);
   return {
-    deck: nextDeck,
-    hand: [...hand, ...kept],
-    discarded,
+    deck: resolved.deck,
+    hand: resolved.hand,
+    discarded: resolved.discarded,
     drawn,
   };
+}
+
+export type PendingDrawPick = {
+  drawn: BoardCardInstance[];
+  keep: number;
+  cyclesRemaining: DrawKeepCycle[];
+  state: BoardEconomyState;
+};
+
+/** Start interactive reward: draw the first cycle; leave later cycles pending. */
+export function beginSequentialRewardPick(
+  state: BoardEconomyState,
+  cycles: readonly DrawKeepCycle[],
+): PendingDrawPick | null {
+  if (cycles.length === 0) {
+    return null;
+  }
+  const [first, ...rest] = cycles;
+  if (!first) {
+    return null;
+  }
+  const { deck, drawn } = drawFromDeck(state.deck, first.draw);
+  return {
+    drawn,
+    keep: Math.min(first.keep, drawn.length),
+    cyclesRemaining: rest.map((cycle) => ({ ...cycle })),
+    state: {
+      ...state,
+      deck,
+    },
+  };
+}
+
+/** Apply keep/discard for the current pick; advance to the next cycle if any. */
+export function continueSequentialRewardPick(
+  pending: PendingDrawPick,
+  keepInstanceIds: readonly string[],
+): { pending: PendingDrawPick | null; state: BoardEconomyState } {
+  const resolved = resolveDrawKeep(
+    pending.state.deck,
+    pending.state.hand,
+    pending.drawn,
+    keepInstanceIds,
+    pending.keep,
+  );
+  if (resolved.kept.length === 0 && pending.drawn.length > 0) {
+    return { pending, state: pending.state };
+  }
+  const nextState: BoardEconomyState = {
+    ...pending.state,
+    deck: resolved.deck,
+    hand: resolved.hand,
+    discard: [...pending.state.discard, ...resolved.discarded],
+  };
+  if (pending.cyclesRemaining.length === 0) {
+    return { pending: null, state: nextState };
+  }
+  const nextPending = beginSequentialRewardPick(
+    nextState,
+    pending.cyclesRemaining,
+  );
+  return { pending: nextPending, state: nextState };
 }
 
 export function enforceHandLimit(

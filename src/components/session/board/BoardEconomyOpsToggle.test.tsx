@@ -25,7 +25,7 @@ describe("BoardEconomyOpsToggle", () => {
     await waitFor(() => {
       expect(screen.getByRole("alert")).toHaveTextContent(/permission denied/i);
     });
-    expect(screen.getByRole("alert")).toHaveTextContent(/hide timer/i);
+    expect(screen.getByRole("alert")).toHaveTextContent(/session host/i);
   });
 
   it("shows timer-locked helper when disabled", () => {

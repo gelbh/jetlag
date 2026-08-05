@@ -124,6 +124,12 @@ export type HiderMapScreenChromeProps = {
   onOpenChat: () => void;
   onOpenSettings: () => void;
   onOpenCodes: () => void;
+  /** Board economy: Hand control next to Set zone. */
+  handLabel?: string;
+  onOpenHand?: () => void;
+  /** When economy is on, Move only if a Move card is in hand. */
+  boardEconomyEnabled?: boolean;
+  hasMoveCard?: boolean;
   expansionPackEnabled: boolean;
   expansionMenuOpen: boolean;
   onExpansionMenuOpenChange: (open: boolean) => void;
@@ -235,6 +241,10 @@ export function HiderMapScreenChrome({
   onOpenChat,
   onOpenSettings,
   onOpenCodes,
+  handLabel,
+  onOpenHand,
+  boardEconomyEnabled = false,
+  hasMoveCard = false,
   expansionPackEnabled,
   expansionMenuOpen,
   onExpansionMenuOpenChange,
@@ -374,22 +384,34 @@ export function HiderMapScreenChrome({
       isHost,
     }).length > 0;
 
+  const canPlayMove =
+    zoneTool.hasZone &&
+    !zoneTool.wizardOpen &&
+    (!boardEconomyEnabled || hasMoveCard);
+  const zoneLabel =
+    !zoneTool.hasZone || zoneTool.wizardOpen
+      ? hasMyZone
+        ? "Change zone"
+        : "Set zone"
+      : canPlayMove
+        ? "Play move"
+        : hasMyZone
+          ? "Change zone"
+          : "Set zone";
+  const onZoneAction = canPlayMove
+    ? () => {
+        void zoneTool.startMove();
+      }
+    : onOpenWizard;
+
   const toolDock = (
     <HiderToolDock
       layout={toolLayout}
-      zoneLabel={
-        !zoneTool.hasZone || zoneTool.wizardOpen
-          ? hasMyZone
-            ? "Change zone"
-            : "Set zone"
-          : "Play move"
-      }
-      onZoneAction={
-        !zoneTool.hasZone || zoneTool.wizardOpen
-          ? onOpenWizard
-          : () => void zoneTool.startMove()
-      }
+      zoneLabel={zoneLabel}
+      onZoneAction={onZoneAction}
       zoneDisabled={!zoneTool.writesEnabled || inactiveChrome}
+      handLabel={handLabel}
+      onOpenHand={onOpenHand}
       inactive={inactiveChrome}
       showExpansion={expansionPackEnabled}
       onExpansion={() => onExpansionMenuOpenChange(true)}

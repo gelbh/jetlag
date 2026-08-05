@@ -544,7 +544,8 @@ service cloud.firestore {
 
     function isBoardEconomyFlagUpdate(sessionId) {
       // Cheap "did boardEconomyEnabled change?" before diff/get — same expression-budget
-      // class as Found #10. Ops email admin only (session role `admin` is not enough).
+      // class as Found #10. Session host (or ops email admin) before timer; session role
+      // `admin` alone is not enough.
       return (
           (
             !('boardEconomyEnabled' in resource.data)
@@ -558,7 +559,7 @@ service cloud.firestore {
         && request.resource.data.diff(resource.data).affectedKeys()
           .hasOnly(['boardEconomyEnabled'])
         && request.resource.data.boardEconomyEnabled is bool
-        && isAdmin()
+        && (isSessionHost(sessionId) || isAdmin())
         && resource.data.memberUids is list
         && request.auth.uid in resource.data.memberUids
         && timerNeverStarted(resource.data)
@@ -670,11 +671,10 @@ service cloud.firestore {
         && !('requiredMinAppVersionSetAt' in request.resource.data)
         && !('requiredMinAppVersionGraceSeconds' in request.resource.data)
         && !('opsMitigation' in request.resource.data)
-        // Ops-admin board economy: default off; only ops admin may create with true.
+        // Board economy: default off; host create may set bool (create already host-gated).
         && (
           !('boardEconomyEnabled' in request.resource.data)
-          || request.resource.data.boardEconomyEnabled == false
-          || isAdmin()
+          || request.resource.data.boardEconomyEnabled is bool
         )
         && (
           request.resource.data.tier == 'free'

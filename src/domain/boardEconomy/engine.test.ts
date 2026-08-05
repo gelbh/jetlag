@@ -1,10 +1,14 @@
 import { describe, expect, it } from "vitest";
 import {
   applySequentialRewards,
+  beginSequentialRewardPick,
+  continueSequentialRewardPick,
   createInitialBoardEconomyState,
   createShuffledDeck,
+  drawFromDeck,
   drawKeep,
   enforceHandLimit,
+  resolveDrawKeep,
   rewardForQuestion,
 } from "./engine";
 import { HIDER_DECK_SIZE } from "./deckComposition";
@@ -58,5 +62,35 @@ describe("board economy engine", () => {
     expect(next.hand).toHaveLength(2);
     expect(discarded).toHaveLength(4);
     expect(next.deck).toHaveLength(HIDER_DECK_SIZE - 6);
+  });
+
+  it("resolveDrawKeep keeps selected ids and discards the rest", () => {
+    const deck = createShuffledDeck("pick");
+    const { deck: afterDraw, drawn } = drawFromDeck(deck, 3);
+    const keepId = drawn[2]!.instanceId;
+    const resolved = resolveDrawKeep(afterDraw, [], drawn, [keepId], 1);
+    expect(resolved.kept.map((c) => c.instanceId)).toEqual([keepId]);
+    expect(resolved.discarded).toHaveLength(2);
+    expect(resolved.hand).toHaveLength(1);
+  });
+
+  it("interactive sequential pick records keep/discard per cycle", () => {
+    const state = createInitialBoardEconomyState("interactive");
+    const first = beginSequentialRewardPick(state, [
+      { draw: 3, keep: 1 },
+      { draw: 3, keep: 1 },
+    ]);
+    expect(first).not.toBeNull();
+    expect(first!.drawn).toHaveLength(3);
+    const keepFirst = first!.drawn[1]!.instanceId;
+    const mid = continueSequentialRewardPick(first!, [keepFirst]);
+    expect(mid.pending).not.toBeNull();
+    expect(mid.state.hand.map((c) => c.instanceId)).toEqual([keepFirst]);
+    const keepSecond = mid.pending!.drawn[0]!.instanceId;
+    const done = continueSequentialRewardPick(mid.pending!, [keepSecond]);
+    expect(done.pending).toBeNull();
+    expect(done.state.hand).toHaveLength(2);
+    expect(done.state.discard).toHaveLength(4);
+    expect(done.state.deck).toHaveLength(HIDER_DECK_SIZE - 6);
   });
 });

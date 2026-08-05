@@ -33,6 +33,32 @@ export function ExpansionPackSection({
       <label className="flex min-h-11 items-center gap-3">
         <input
           type="checkbox"
+          checked={value.boardEconomyEnabled}
+          disabled={disabled}
+          onChange={(event) =>
+            onChange({
+              ...value,
+              boardEconomyEnabled: event.target.checked,
+            })
+          }
+          className="h-4 w-4"
+        />
+        <span className="text-sm text-ink-secondary">
+          Simulate hider deck (hand, rewards, power-ups)
+        </span>
+      </label>
+      {value.boardEconomyEnabled ? (
+        <div className="rounded-[var(--radius-hud-md)] border border-border bg-surface-raised px-3 py-2 text-xs text-ink-muted">
+          <p className="font-semibold text-ink-secondary">Board hand</p>
+          <p className="mt-1">
+            Host can enable before the hide timer starts. Hiders draw and manage
+            a physical-style hand after answering questions.
+          </p>
+        </div>
+      ) : null}
+      <label className="flex min-h-11 items-center gap-3">
+        <input
+          type="checkbox"
           checked={value.customQuestionPackEnabled}
           disabled={disabled}
           onChange={(event) =>

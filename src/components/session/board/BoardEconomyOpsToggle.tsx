@@ -4,21 +4,21 @@ import { updateBoardEconomyEnabled } from "../../../services/firestore/boardEcon
 
 function boardEconomyUpdateErrorMessage(error: unknown): string {
   if (error instanceof FirebaseError && error.code === "permission-denied") {
-    return "Could not update board economy (permission denied). Enable only before the hide timer starts, as ops admin, while you are a session member.";
+    return "Could not update board hand (permission denied). Enable only before the hide timer starts, as the session host.";
   }
   if (error instanceof Error && error.message.trim()) {
     return error.message;
   }
-  return "Could not update board economy flag.";
+  return "Could not update board hand flag.";
 }
 
 const TIMER_LOCKED_HINT =
-  "Hide timer already started — board economy can only be toggled before the timer runs (including a 0:00 running clock).";
+  "Hide timer already started — board hand can only be toggled before the timer runs (including a 0:00 running clock).";
 
 const DEFAULT_HINT =
-  "Default off. Only your ops admin account can enable this before the hide timer starts. Public hosts never see this control.";
+  "Default off. Host can enable this in Advanced rules before the hide timer starts.";
 
-/** Ops-admin only. Must not render unless useAdminAccessState().state === "admin". */
+/** Host-facing board-economy toggle (legacy surface; prefer Advanced rules). */
 export function BoardEconomyOpsToggle({
   sessionId,
   enabled,
@@ -42,7 +42,7 @@ export function BoardEconomyOpsToggle({
       className="space-y-2 rounded-[var(--radius-hud-md)] border border-border p-3 disabled:opacity-50"
     >
       <legend className="px-1 font-display text-xs font-semibold uppercase tracking-[0.1em] text-ink-dim">
-        Ops · board economy
+        Board hand
       </legend>
       <label className="flex min-h-11 items-center gap-3">
         <input
