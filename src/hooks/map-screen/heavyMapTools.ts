@@ -17,6 +17,8 @@ export interface MatchingToolApi {
     seekerResolving: boolean;
   };
   placementCrosshair: boolean;
+  /** Includes answer — draft JSON alone skips republish when Yes/No changes. */
+  publishSignature: string;
   handleMapClick: (point: LatLngTuple) => void;
   resetDraft: () => void;
   panel: ReactNode;
@@ -73,6 +75,7 @@ export function createIdleHeavyMapTools(): HeavyMapToolsApi {
       seekerResolving: false,
     },
     placementCrosshair: false,
+    publishSignature: "idle",
     handleMapClick: noopMapClick,
     resetDraft: () => undefined,
     panel: null,

@@ -154,5 +154,13 @@ export async function buildMatchingEliminationRegion(
     return sameNearestRegion;
   }
 
-  return safeDifference(gameFeature, sameNearestRegion);
+  // Sole in-area site: same-nearest is the whole play area, so outside-the-cell
+  // difference is empty — still a valid yes elimination (nothing to shade).
+  return (
+    safeDifference(gameFeature, sameNearestRegion) ?? {
+      type: "Feature",
+      properties: {},
+      geometry: { type: "MultiPolygon", coordinates: [] },
+    }
+  );
 }
