@@ -3,20 +3,10 @@ import { useMemo, useState } from "react";
 import { isEndGameActive, isFoundHiderPending } from "../../domain/map/annotations";
 import { QUESTION_DOCK_TOOL_IDS } from "../../domain/map/mapTools";
 import { resolveToolDockEnabled } from "../../domain/session/rules";
-import { visibleRoleCodeRoles } from "../../domain/session/players/roleGates";
 import { ChatPanel } from "../../components/chat/ChatPanel";
-import { ContextualRail } from "../../components/map/chrome/ContextualRail";
-import {
-  ContextualRailPanelProvider,
-  type ContextualRailTab,
-} from "../../components/map/chrome/ContextualRailContext";
+import { ContextualRailPanelProvider } from "../../components/map/chrome/ContextualRailContext";
 import { GameOverChrome } from "../../components/session/game-over/GameOverChrome";
 import { MapSettingsSheet } from "../../components/session/mapChrome/MapSettingsSheet";
-import { RoleCodesSheet } from "../../components/session/settings/RoleCodesSheet";
-import { AppUpdateMapChip } from "../../components/ui/banners/AppUpdateMapChip";
-import { HotfixGraceChip } from "../../components/incident/HotfixGraceChip";
-import { ReportProblemSheet } from "../../components/incident/ReportProblemSheet";
-import { FirestorePersistenceBanner } from "../../components/session/banners/FirestorePersistenceBanner";
 import { MapStatusRail } from "../../components/session/mapChrome/MapStatusRail";
 import { SessionLog } from "../../components/session/log/SessionLog";
 import { AnnotationEditSheet } from "../../components/tools/AnnotationEditSheet";
@@ -30,6 +20,11 @@ import { useAnnotationStore } from "../../state/annotationStore";
 import { SeekerChromeOverlays } from "./SeekerChromeOverlays";
 import { MapScreenChromeSlots } from "./shared/MapScreenChromeSlots";
 import { getMapScreenRoleConfig } from "./shared/mapScreenRoleConfig";
+import { MapScreenRoleCodesSheet } from "./shared/MapScreenSharedSessionSheets";
+import { useMapScreenReportProblemSheet } from "./shared/useMapScreenReportProblemSheet";
+import { renderMapScreenContextualRail } from "./shared/mapScreenContextualRail";
+import { canOpenMapScreenRoleCodes } from "./shared/canOpenMapScreenRoleCodes";
+import { MapScreenChromeBanners } from "./shared/MapScreenChromeBanners";
 
 type MapScreenChromeProps = Pick<
   MapScreenController,
@@ -284,7 +279,8 @@ export function MapScreenChrome({
   const isDesktop = useDesktopLayout();
   const toolLayout = isDesktop ? "rail" : "dock";
   const roleConfig = getMapScreenRoleConfig("seeker");
-  const [reportProblemOpen, setReportProblemOpen] = useState(false);
+  const { openReportProblem, reportProblemSheet } =
+    useMapScreenReportProblemSheet(overlay.closeSheet);
   const markAnnotationPulse = useAnnotationStore(
     (state) => state.markAnnotationPulse,
   );
@@ -306,38 +302,17 @@ export function MapScreenChrome({
     toolOrder: visibleQuestionTools,
   });
 
-  const railActiveTab: ContextualRailTab | null =
-    overlay.sheet === "none" ? null : overlay.sheet;
-
-  const handleSelectRailTab = (tab: ContextualRailTab) => {
-    switch (tab) {
-      case "settings":
-        handleOpenSettings();
-        return;
-      case "chat":
-        handleOpenChat();
-        return;
-      case "log":
-        handleOpenLog();
-        return;
-      case "codes":
-        handleOpenCodes();
-        return;
-      default: {
-        const _exhaustive: never = tab;
-        return _exhaustive;
-      }
-    }
-  };
-
-  const contextualRail = isDesktop ? (
-    <ContextualRail
-      open={overlay.sheet !== "none"}
-      activeTab={railActiveTab}
-      onClose={overlay.closeSheet}
-      onSelectTab={handleSelectRailTab}
-    />
-  ) : null;
+  const contextualRail = renderMapScreenContextualRail({
+    enabled: isDesktop,
+    sheet: overlay.sheet,
+    onClose: overlay.closeSheet,
+    actions: {
+      onOpenSettings: handleOpenSettings,
+      onOpenChat: handleOpenChat,
+      onOpenLog: handleOpenLog,
+      onOpenCodes: handleOpenCodes,
+    },
+  });
 
   const statusRail = (
     <MapStatusRail
@@ -392,14 +367,12 @@ export function MapScreenChrome({
     />
   );
 
-  const canOpenCodes =
-    Boolean(uid) &&
-    visibleRoleCodeRoles({
-      roleGates: session!.roleGates,
-      memberRoles: session!.memberRoles,
-      myUid: uid ?? undefined,
-      isHost,
-    }).length > 0;
+  const canOpenCodes = canOpenMapScreenRoleCodes({
+    roleGates: session!.roleGates,
+    memberRoles: session!.memberRoles,
+    myUid: uid,
+    isHost,
+  });
 
   const toolDock = (
     <ToolDock
@@ -416,10 +389,7 @@ export function MapScreenChrome({
       onRedo={handleRedoLastAnnotation}
       onOpenSettings={handleOpenSettings}
       onOpenCodes={canOpenCodes ? handleOpenCodes : undefined}
-      onOpenReportProblem={() => {
-        overlay.closeSheet();
-        setReportProblemOpen(true);
-      }}
+      onOpenReportProblem={openReportProblem}
       onOpenChat={handleOpenChat}
       onOpenLog={handleOpenLog}
       hasUnreadChat={hasUnreadChat}
@@ -436,9 +406,7 @@ export function MapScreenChrome({
   const header = (
     <>
       {statusRail}
-      <FirestorePersistenceBanner />
-      <AppUpdateMapChip />
-      <HotfixGraceChip />
+      <MapScreenChromeBanners />
     </>
   );
 
@@ -570,27 +538,18 @@ export function MapScreenChrome({
               setForceMapToolsGuide(true);
             },
           }}
-          onReportProblem={() => {
-            overlay.closeSheet();
-            setReportProblemOpen(true);
-          }}
+          onReportProblem={openReportProblem}
         />
 
-        {uid ? (
-          <RoleCodesSheet
-            key={overlay.isCodesOpen ? "codes-open" : "codes-closed"}
-            open={overlay.isCodesOpen}
-            onClose={overlay.closeSheet}
-            session={session!}
-            myUid={uid}
-            isHost={isHost}
-          />
-        ) : null}
-
-        <ReportProblemSheet
-          open={reportProblemOpen}
-          onClose={() => setReportProblemOpen(false)}
+        <MapScreenRoleCodesSheet
+          session={session!}
+          uid={uid}
+          isHost={isHost}
+          isCodesOpen={overlay.isCodesOpen}
+          onCloseSheet={overlay.closeSheet}
+          canOpenCodes={canOpenCodes}
         />
+        {reportProblemSheet}
 
         {selectedAnnotation ? (
           <AnnotationEditSheet
