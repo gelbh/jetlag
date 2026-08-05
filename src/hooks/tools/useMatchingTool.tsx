@@ -6,6 +6,7 @@ import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import {
   defaultMatchingCategoryId,
   firstAvailableMatchingCategoryId,
+  getMatchingCategory,
   isMatchingCategoryAvailable,
   isMatchingCategoryEnabled,
   matchingQuestionFor,
@@ -14,6 +15,9 @@ import {
   type MatchingCategoryId,
 } from "../../domain/questions";
 import { isAdminDivisionCategoryAvailable } from "../../services/geo/overpass/adminDivisionAvailability";
+import { poiCandidateToMatchingFeature } from "@/domain/geo/poiCandidateAdapters";
+import { previewBasemapPois } from "@/services/geo/maplibre/previewBasemapPois";
+import { useMapStore } from "@/state/mapStore";
 import { useToolSession } from "./framework/useToolSession";
 import { useToolSessionOptions } from "./useToolSessionOptions";
 import {
@@ -23,6 +27,7 @@ import {
 } from "./matching/commitMatching";
 import { MatchingToolPanel } from "./matching/MatchingToolPanel";
 import {
+  buildResolveMatchingAnchorResult,
   reconcileLockedMatchingNearest,
   resolveMatchingAnchor,
 } from "./matching/resolveMatchingAnchor";
@@ -57,6 +62,7 @@ export function useMatchingTool({
 }: UseMatchingToolParams) {
   const wizardStepRef = useRef("place");
   const finishPlacementRef = useRef(finishPlacement);
+  const mapStyle = useMapStore((state) => state.mapStyle);
   useEffect(() => {
     finishPlacementRef.current = finishPlacement;
   }, [finishPlacement]);
@@ -258,6 +264,26 @@ export function useMatchingTool({
       setMatchingLoading(true);
       setMatchingError(null);
 
+      const category = getMatchingCategory(categoryId);
+      if (category.resolver === "overpassPoint") {
+        const tilePreview = previewBasemapPois({
+          mapStyle: useMapStore.getState().mapStyle,
+          categoryIds: [categoryId],
+          maxResults: 48,
+        }).map(poiCandidateToMatchingFeature);
+        if (tilePreview.length > 0) {
+          applyResolveResult(
+            requestId,
+            buildResolveMatchingAnchorResult(
+              seekerPoint,
+              categoryId,
+              tilePreview,
+            ),
+            0,
+          );
+        }
+      }
+
       const result = await resolveMatchingAnchor({
         seekerPoint,
         categoryId,
@@ -320,10 +346,31 @@ export function useMatchingTool({
         return false;
       }
 
-      setMatchingSeekerAnchor(point);
+      const mapStyle = useMapStore.getState().mapStyle;
+      const categoryId = matchingCategoryChosen ? matchingCategoryId : null;
+      const resolver =
+        categoryId != null
+          ? getMatchingCategory(categoryId).resolver
+          : null;
+      const tapHit =
+        resolver === "overpassPoint" && categoryId != null
+          ? previewBasemapPois({
+              mapStyle,
+              categoryIds: [categoryId],
+              point,
+              maxResults: 1,
+            })[0]
+          : null;
+
+      setMatchingSeekerAnchor(tapHit?.point ?? point);
       return true;
     },
-    [active, setMatchingSeekerAnchor],
+    [
+      active,
+      matchingCategoryChosen,
+      matchingCategoryId,
+      setMatchingSeekerAnchor,
+    ],
   );
 
   const handleGps = async () => {
@@ -447,6 +494,13 @@ export function useMatchingTool({
       matchingNearestOutsidePlayArea={matchingNearestOutsidePlayArea}
       matchingNullAnswer={matchingNullAnswer}
       matchingLoading={matchingLoading}
+      nearestProvisional={
+        matchingLoading &&
+        matchingFeatures.some(
+          (feature) => feature.confirmStatus === "provisional",
+        )
+      }
+      satelliteBasemap={mapStyle === "satellite"}
       gpsLoading={gpsLoading}
       matchingAnswer={matchingAnswer}
       error={matchingError ?? gpsError ?? mapError}

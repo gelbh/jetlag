@@ -4,6 +4,7 @@ import {
   dispatchMapFeatureHit,
   featureHitId,
   featureHitKind,
+  queryBasemapPoiAtPoint,
   queryJlMarkerFeatures,
 } from "./mapFeatureHitTest";
 import { isJlMarkerLayerId, jlMarkerLayerId } from "./mapMarkerConstants";
@@ -107,5 +108,17 @@ describe("mapFeatureHitTest", () => {
     } as unknown as import("maplibre-gl").Map;
     expect(queryJlMarkerFeatures(map, { x: 1, y: 2 })).toBeNull();
     expect(queryRenderedFeatures).not.toHaveBeenCalled();
+  });
+
+  it("ignores basemap POI taps on satellite", () => {
+    const querySourceFeatures = vi.fn();
+    const map = {
+      getStyle: () => ({ sources: { openmaptiles: {} }, layers: [] }),
+      querySourceFeatures,
+    } as unknown as import("maplibre-gl").Map;
+    expect(
+      queryBasemapPoiAtPoint(map, "satellite", [51.5, -0.1], ["museum"]),
+    ).toBeNull();
+    expect(querySourceFeatures).not.toHaveBeenCalled();
   });
 });

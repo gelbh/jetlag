@@ -5,8 +5,10 @@ import {
   tentacleHiderAnswerClipboardText,
   type TentacleExtendedCategoryId,
 } from "@/domain/questions";
+import { isConfirmedPoiLike } from "@/domain/geo/poiCandidateAdapters";
 import { useCopyFeedback } from "@/hooks/forms/useCopyFeedback";
 import { ListSelectRow } from "../controls/ListSelectRow";
+import { ProvisionalBadge } from "../readout/ProvisionalBadge";
 import { ToolSection } from "../panels/ToolSection";
 
 interface TentacleAnswerPickerProps {
@@ -63,15 +65,21 @@ export function TentacleAnswerPicker({
         </button>
       </div>
       <div className="space-y-1" data-wizard-no-swipe>
-        {poiOptions.map((poi) => (
-          <ListSelectRow
-            key={poi.id}
-            selected={selectedPoiId === poi.id}
-            onClick={() => onSelectPoi(poi.id)}
-          >
-            {poi.name}
-          </ListSelectRow>
-        ))}
+        {poiOptions.map((poi) => {
+          const confirmed = isConfirmedPoiLike(poi);
+          return (
+            <ListSelectRow
+              key={poi.id}
+              selected={selectedPoiId === poi.id}
+              onClick={() => onSelectPoi(poi.id)}
+            >
+              <span className="inline-flex flex-wrap items-center">
+                {poi.name}
+                {confirmed ? null : <ProvisionalBadge />}
+              </span>
+            </ListSelectRow>
+          );
+        })}
         <ListSelectRow
           selected={outOfReach}
           onClick={() => onOutOfReachChange(true)}

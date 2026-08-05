@@ -42,6 +42,7 @@ import {
   MapFeatureHitTestProvider,
 } from "../helpers/MapFeatureHitTestContext";
 import { useMapLibreMarkerImages } from "../helpers/mapLibreIconRegistry";
+import { registerMapLibreMap } from "@/services/geo/maplibre/mapLibreMapRegistry";
 import { MapChromeListener } from "./MapChromeListener";
 import { MapCompassControl } from "./MapCompassControl";
 import { MapStyleToggle } from "./MapStyleToggle";
@@ -376,6 +377,12 @@ export function MapViewMapLibre({
   }, [onBoundsChange, onUserViewportFramed, onRecenter]);
 
   useEffect(() => {
+    return () => {
+      registerMapLibreMap(null);
+    };
+  }, []);
+
+  useEffect(() => {
     const map = mapRef.current?.getMap();
     if (!map) {
       return;
@@ -471,6 +478,9 @@ export function MapViewMapLibre({
           pitchWithRotate={pitchGesturesEnabled && touchRotateEnabled}
           onLoad={() => {
             const map = mapRef.current?.getMap();
+            if (map) {
+              registerMapLibreMap(map);
+            }
             // Pinch zoom always; two-finger rotate only with play-map compass.
             if (interactive) {
               map?.touchZoomRotate.enable();

@@ -210,7 +210,11 @@ export function TentaclePanel({
         <ToolSection first compact status="active">
           {loading ? (
             <LoadingReadout>
-              Loading locations within {searchRadiusLabel}…
+              {poiOptions.length > 0
+                ? `Confirming ${poiOptions.length} map preview${
+                    poiOptions.length === 1 ? "" : "s"
+                  }…`
+                : `Loading locations within ${searchRadiusLabel}…`}
             </LoadingReadout>
           ) : poiOptions.length > 0 ? (
             <ResolvedReadout>
