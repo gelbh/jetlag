@@ -1,88 +1,10 @@
-import { FirebaseError } from "firebase/app";
+import { doc, onSnapshot, type Unsubscribe } from "firebase/firestore";
+import type { SessionRecord } from "@/domain/map/annotations";
 import {
-  arrayUnion,
-  collection,
-  deleteDoc,
-  deleteField,
-  doc,
-  getDoc,
-  getDocFromServer,
-  getDocs,
-  onSnapshot,
-  serverTimestamp,
-  setDoc,
-  updateDoc,
-  writeBatch,
-  type DocumentData,
-  type DocumentReference,
-  type DocumentSnapshot,
-  type Unsubscribe,
-} from "firebase/firestore";
-import type {
-  GameArea,
-  SessionRecord,
-  SessionTier,
-} from "../../../domain/map/annotations";
-import { hidingZoneRadiusMeters, type GameSize } from "../../../domain/session/size/gameSize";
-import type { SessionRulesPatch } from "../../../domain/session/tools/advancedSessionSettings";
-import {
-  resolvePlayerRole,
-  type PlayerRole,
-} from "../../../domain/session/players/playerRole";
-import { timerStateToRemote, type TimerState } from "../../../domain/session/timer/timer";
-import {
-  sessionVersionCompatible,
-  sessionVersionMismatchMessage,
-} from "../../../domain/session/meta/sessionVersion";
-import { APP_VERSION } from "../../../domain/device/changelog";
-import { clientEnvUsesFirebaseEmulator } from "../../../config/env";
-import { getFirestoreDb } from "../../core/firebase/firebase";
-import { forceRefreshIdToken } from "../../core/auth/forceRefreshIdToken";
-import { reportJoinPermissionDenied } from "../../core/analytics/sentry";
-import {
-  buildSessionDocument,
   deserializeSessionFromFirestore,
   parseEndGameTruthAnchors,
-  sessionRulesPatchToFirestore,
 } from "../serialization/serializeSession";
-import { buildJoinPreviewSession } from "../../../domain/session/join/joinPreviewSession";
-import { photoUploadAccessError } from "../../../domain/questions";
-import { generateSessionCode } from "../../session/sessionCodes";
-import {
-  cancelOpenPendingQuestions,
-  cancelWalkingThermometersAfterIdentityHeal,
-  postGameSystemMessage,
-} from "../firestoreSessionExtras";
-import { emitGameEndedActivity } from "../../session/emitSessionActivity";
-import {
-  buildMemberUidsAfterHeal,
-  buildMembershipHealState,
-  sanitizeReturningMemberUid,
-} from "../../../domain/session/players/returningMember";
-import { isSessionRoleGated, buildRoleGatesForHost } from "../../../domain/session/players/roleGates";
-import { repairGhostHost } from "../../session/sessionLifecycle";
-import { initSessionRoleGates } from "../../session/rolePasscodeLifecycle";
-import { joinGatedRemoteSessionByCode } from "../joinGatedRemoteSession";
-
-import {
-  sessionsCollection,
-  endGameTruthAnchorsDoc,
-  clearEndGameTruthAnchorsDoc,
-  sessionCodeDoc,
-  rollbackCreatedRemoteSession,
-  annotationsCollection,
-  withJoinPermissionRetry,
-  readSessionMembershipFields,
-  membershipPatchFromHealState,
-  writeSessionMembershipPatch,
-  applyReturningMemberHealWrite,
-  isReclaimableSessionForCode,
-  isFirestorePermissionDenied,
-  JOIN_AUTH_FAILURE_MESSAGE,
-  HIDER_ROLE_POLL_MS,
-  HIDER_ROLE_POLL_MAX_MS,
-  FIRESTORE_BATCH_LIMIT,
-} from "./shared";
+import { sessionsCollection, endGameTruthAnchorsDoc } from "./shared";
 
 export function subscribeToSession(
   sessionId: string,

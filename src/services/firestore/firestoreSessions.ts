@@ -3,6 +3,7 @@ export {
   isReclaimableSessionForCode,
   isFirestorePermissionDenied,
   JOIN_AUTH_FAILURE_MESSAGE,
+  touchSessionLastActive,
 } from "./sessions/shared";
 export {
   ensureRemoteSessionMembership,
@@ -24,7 +25,6 @@ export {
   updateSessionTimer,
   updateSessionRules,
   startEndGameSession,
-  touchSessionLastActive,
   clearEndGameRequestSession,
   resetEndGameSession,
   requestFoundHiderSession,
