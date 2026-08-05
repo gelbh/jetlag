@@ -5,6 +5,7 @@
 import {
   isAppCheckSoftFailureMessage,
   isBrowserExtensionNoiseMessage,
+  isFirestoreIdbObjectStoreLookupNoiseMessage,
   isFirestoreIdbPersistenceNoiseMessage,
   isIdbConnectionClosingMessage,
   isRecaptchaOtTypeErrorMessage,
@@ -27,7 +28,7 @@ const BATTERY_ADD_EVENT_LISTENER = /addEventListener is not a function/i;
 const IDB_DATABASE_DELETED = /Database deleted by request of the user/i;
 const RECAPTCHA_ALREADY_RENDERED = /reCAPTCHA has already been rendered/i;
 const VIEW_TRANSITION_ABORTED =
-  /Transition was aborted because of invalid state/i;
+  /Transition was aborted because of invalid state|Skipping view transition because document visibility state has become hidden/i;
 const APP_CHECK_INVALID_SESSION = /Invalid session .*: Invalid input/i;
 export const JOIN_PERMISSION_DENIED_MESSAGE = "Join permission denied";
 
@@ -57,6 +58,7 @@ function isGenericClientNoiseMessage(message: string): boolean {
     IDB_DATABASE_DELETED.test(message) ||
     isIdbConnectionClosingMessage(message) ||
     isFirestoreIdbPersistenceNoiseMessage(message) ||
+    isFirestoreIdbObjectStoreLookupNoiseMessage(message) ||
     isHtml2CanvasUnsupportedColorMessage(message) ||
     RECAPTCHA_ALREADY_RENDERED.test(message) ||
     isRecaptchaTimeoutMessage(message) ||
