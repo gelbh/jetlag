@@ -159,7 +159,6 @@ export function JoinSession() {
 
   useEffect(() => {
     const next = parseSessionInviteCode(codeFromQuery);
-    /* eslint-disable react-hooks/set-state-in-effect -- sync join code when invite query changes */
     if (!next) {
       if (codeFromQuery) {
         setSuppressPreview(false);
@@ -171,16 +170,13 @@ export function JoinSession() {
     }
     setSuppressPreview(false);
     setValue("code", next);
-    /* eslint-enable react-hooks/set-state-in-effect */
   }, [codeFromQuery, setValue]);
 
   useEffect(() => {
     if (!existingRole) {
       return;
     }
-    /* eslint-disable react-hooks/set-state-in-effect -- adopt membership role from preview */
     setValue("playerRole", existingRole);
-    /* eslint-enable react-hooks/set-state-in-effect */
   }, [existingRole, setValue]);
 
   useEffect(() => {
@@ -584,7 +580,6 @@ export function JoinSession() {
                     }}
                     onBlur={field.onBlur}
                     name={field.name}
-                    ref={field.ref}
                     maxLength={4}
                     placeholder={SESSION_CODE_INPUT_PLACEHOLDER}
                     autoCapitalize="characters"
@@ -642,7 +637,6 @@ export function JoinSession() {
                         }
                         onBlur={field.onBlur}
                         name={field.name}
-                        ref={field.ref}
                         maxLength={4}
                         placeholder="Team code"
                         autoCapitalize="characters"
