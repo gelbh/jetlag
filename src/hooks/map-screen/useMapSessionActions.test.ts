@@ -182,6 +182,48 @@ describe("useMapSessionActions", () => {
     expect(result.current.canRequestFoundHider).toBe(false);
   });
 
+  it("keeps found available while end game is active", () => {
+    const confirmedZone = {
+      hiderUid: "hider-1",
+      sessionId: LOCAL_SESSION_ID,
+      stationId: "dublin-central",
+      stationName: "Dublin Central",
+      center: { lat: 53.35, lng: -6.26 },
+      radiusMeters: 500,
+      geometryJson: "{}",
+      status: "confirmed" as const,
+      confirmedAt: "2026-01-01T00:00:00.000Z",
+    };
+    const endGameSession: SessionRecord = {
+      ...baseSession,
+      endGameStartedAt: "2026-01-01T00:30:00.000Z",
+      endGameStartedByUid: "host-1",
+      endGameTruthAnchors: {
+        "hider-1": {
+          lat: 53.35,
+          lng: -6.26,
+          frozenAt: "2026-01-01T00:30:00.000Z",
+        },
+      },
+    };
+
+    const { result } = renderHook(() =>
+      useMapSessionActions({
+        session: endGameSession,
+        setSession: vi.fn(),
+        uid: "host-1",
+        myRole: "seeker",
+        isRemote: false,
+        gameRulesEditable: true,
+        timerHasStarted: true,
+        hidingZones: [confirmedZone],
+      }),
+    );
+
+    expect(result.current.canRequestFoundHider).toBe(true);
+    expect(result.current.canStartEndGame).toBe(false);
+  });
+
   it("requests found hider locally for host sessions", async () => {
     const setSession = vi.fn();
     vi.spyOn(window, "confirm").mockReturnValue(true);

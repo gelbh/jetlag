@@ -81,7 +81,6 @@ export function useMapSessionActions({
     myRole !== "hider" &&
     timerHasStarted &&
     !foundHiderBlocked(session) &&
-    !isEndGameActive(session) &&
     confirmedHidingZones.length > 0;
 
   const handleStartEndGame = useCallback(async () => {
