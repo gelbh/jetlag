@@ -57,5 +57,7 @@ export {
   updateIncidentStatus,
 } from "./handlers/incident.mjs";
 
+export { createPreloadRequest } from "./handlers/preloadRequest.mjs";
+
 export { listActiveSessions } from "./admin/listActiveSessions.mjs";
 export { adminModerateSession } from "./admin/moderateSession.mjs";

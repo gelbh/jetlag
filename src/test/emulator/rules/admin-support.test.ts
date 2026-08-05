@@ -221,6 +221,83 @@ describe("firestore.rules — admin, incidents & support", () => {
     );
   });
 
+  async function seedPreloadRequest() {
+    await rules.testEnv.withSecurityRulesDisabled(async (ctx) => {
+      await ctx
+        .firestore()
+        .collection("preloadRequests")
+        .doc("pre-1")
+        .set({
+          id: "pre-1",
+          status: "open",
+          reporterUid: "reporter-1",
+          createdAt: "2026-08-05T00:00:00.000Z",
+          updatedAt: "2026-08-05T00:00:00.000Z",
+          presetSnapshot: {
+            name: "Cork weekend",
+            gameSize: "medium",
+            distanceUnit: "metric",
+          },
+          note: null,
+          email: {},
+        });
+    });
+  }
+
+  it("allows admin to read a preload request", async () => {
+    await seedPreloadRequest();
+    const admin = adminContext(rules.testEnv);
+    await assertSucceeds(
+      admin.firestore().collection("preloadRequests").doc("pre-1").get(),
+    );
+  });
+
+  it("allows the reporter to read their own preload request", async () => {
+    await seedPreloadRequest();
+    const reporter = rules.testEnv.authenticatedContext("reporter-1");
+    await assertSucceeds(
+      reporter.firestore().collection("preloadRequests").doc("pre-1").get(),
+    );
+  });
+
+  it("denies a stranger reading a preload request", async () => {
+    await seedPreloadRequest();
+    const stranger = rules.testEnv.authenticatedContext("stranger-1");
+    await assertFails(
+      stranger.firestore().collection("preloadRequests").doc("pre-1").get(),
+    );
+  });
+
+  it("denies clients creating or updating preload requests", async () => {
+    await seedPreloadRequest();
+    const reporter = rules.testEnv.authenticatedContext("reporter-1");
+    await assertFails(
+      reporter
+        .firestore()
+        .collection("preloadRequests")
+        .doc("pre-2")
+        .set({
+          id: "pre-2",
+          status: "open",
+          reporterUid: "reporter-1",
+          createdAt: "2026-08-05T00:00:00.000Z",
+          updatedAt: "2026-08-05T00:00:00.000Z",
+          presetSnapshot: {
+            name: "Hack",
+            gameSize: "medium",
+            distanceUnit: "metric",
+          },
+        }),
+    );
+    await assertFails(
+      reporter
+        .firestore()
+        .collection("preloadRequests")
+        .doc("pre-1")
+        .update({ status: "accepted" }),
+    );
+  });
+
   async function seedHostConfirm() {
     await seedIncident();
     await rules.testEnv.withSecurityRulesDisabled(async (ctx) => {

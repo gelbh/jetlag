@@ -1010,6 +1010,17 @@ service cloud.firestore {
         );
     }
 
+    match /preloadRequests/{requestId} {
+      function isPreloadReporter() {
+        return isSignedIn() && resource.data.reporterUid == request.auth.uid;
+      }
+
+      allow get: if isAdmin() || isPreloadReporter();
+      allow list: if isAdmin();
+      // Preload requests are created and mutated by Cloud Functions only.
+      allow create, update, delete: if false;
+    }
+
     match /incidents/{incidentId} {
       function isIncidentReporter() {
         return isSignedIn() && resource.data.reporterUid == request.auth.uid;
