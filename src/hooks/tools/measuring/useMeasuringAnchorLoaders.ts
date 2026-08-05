@@ -56,6 +56,7 @@ export function useMeasuringAnchorLoaders({
     measureFromKind,
     measuringOptionChosen,
     measuringSeekerPoint,
+    measuringAnswer,
     customMeasureGeometries,
     customMatchingAreas,
     setMeasuringLoading,
@@ -79,6 +80,11 @@ export function useMeasuringAnchorLoaders({
     setMeasuringSeekerPlaceName,
     clearSubjectDerivedState,
   } = draft;
+
+  const measuringAnswerRef = useRef(measuringAnswer);
+  useEffect(() => {
+    measuringAnswerRef.current = measuringAnswer;
+  }, [measuringAnswer]);
 
   const applyAllPlacesResult = useCallback(
     (
@@ -121,6 +127,10 @@ export function useMeasuringAnchorLoaders({
 
       setMeasuringError(null);
       setMeasuringPlaces(places);
+      // Keep seeker answer + nearest target stable once chosen; enrich only refreshes the list.
+      if (measuringAnswerRef.current !== null) {
+        return;
+      }
       setMeasuringDistanceMeters(nearestDistance);
       setMeasuringTargetPoint(nearestPlace.point);
       setMeasuringTargetPlaceName(

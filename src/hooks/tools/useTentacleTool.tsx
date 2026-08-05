@@ -307,13 +307,16 @@ export function useTentacleTool({
   };
 
   const clearAfterCommit = useCallback(() => {
+    cancelRequests();
+    setTentacleLoading(false);
     setTentacleCenter(null);
     setTentaclePois([]);
     setTentacleOutOfReach(false);
     setSelectedPoiId(null);
+    setTentacleError(null);
     setMapError(null);
     finishPlacementRef.current();
-  }, [setMapError]);
+  }, [cancelRequests, setMapError]);
 
   const session = useToolSession<TentacleSessionConfig>({
     toolId: "tentacle",
