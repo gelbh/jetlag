@@ -105,6 +105,11 @@ export function resolveAskMode(
   return "ask";
 }
 
+/**
+ * @deprecated Ask Map HUD retires PhaseRail for question tools + hider zone.
+ * Prefer `activeModeCue` / `askHudDefinition` from `@/domain/ask/askHudModes`.
+ * Kept for legacy `ToolFloatingPanel` until that path is removed.
+ */
 export function phaseRailLabels(
   def: ToolWizardDefinition,
   awaitHiderAnswer: boolean,
