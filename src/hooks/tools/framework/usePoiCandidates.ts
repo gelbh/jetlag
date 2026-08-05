@@ -86,6 +86,7 @@ export function usePoiCandidates({
   }, []);
 
   useEffect(() => {
+    /* eslint-disable react-hooks/set-state-in-effect -- sync tile preview + confirm fetch to map/category */
     if (!enabled) {
       requestIdRef.current += 1;
       setProvisional([]);
@@ -101,24 +102,27 @@ export function usePoiCandidates({
 
     const tileAvailable =
       isTileAvailableRef.current(mapStyle) && map != null;
-    let preview: PoiCandidate[] = [];
-    if (tileAvailable && map) {
-      try {
-        preview = queryPoisRef.current(map, {
-          categoryIds: categoryId ? [categoryId] : undefined,
-        });
-      } catch {
-        preview = [];
-      }
-      if (requestId !== requestIdRef.current) {
-        return;
-      }
-      setProvisional(preview);
-      setStatus(preview.length > 0 ? "preview" : "confirming");
-    } else {
-      setProvisional([]);
-      setStatus("confirming");
+    const preview: PoiCandidate[] =
+      tileAvailable && map
+        ? (() => {
+            try {
+              return queryPoisRef.current(map, {
+                categoryIds: categoryId ? [categoryId] : undefined,
+              });
+            } catch {
+              return [];
+            }
+          })()
+        : [];
+
+    if (requestId !== requestIdRef.current) {
+      return;
     }
+
+    setProvisional(preview);
+    setStatus(
+      tileAvailable && preview.length > 0 ? "preview" : "confirming",
+    );
 
     let cancelled = false;
     void (async () => {
@@ -142,6 +146,7 @@ export function usePoiCandidates({
     return () => {
       cancelled = true;
     };
+    /* eslint-enable react-hooks/set-state-in-effect */
   }, [categoryId, enabled, map, mapStyle, refreshToken]);
 
   const candidates = mergePoiCandidates(provisional, confirmed);
