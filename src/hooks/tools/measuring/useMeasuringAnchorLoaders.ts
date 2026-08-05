@@ -316,7 +316,7 @@ export function useMeasuringAnchorLoaders({
     [
       gameArea,
       seaLevelRequestIdRef,
-      sessionRules?.regionPackId,
+      sessionRules,
       setMeasuringAnchorElevationMeters,
       setMeasuringDistanceMeters,
       setMeasuringError,
@@ -404,7 +404,7 @@ export function useMeasuringAnchorLoaders({
     [
       coastlineRequestIdRef,
       gameArea,
-      sessionRules?.regionPackId,
+      sessionRules,
       setCoastlineContextVersion,
       setMeasuringDistanceMeters,
       setMeasuringError,
