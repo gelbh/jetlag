@@ -95,7 +95,8 @@ export function sessionRulesPatchFromAdvancedSettings(
     patch.expansionPackEnabled = true;
   }
 
-  // boardEconomyEnabled is written only via ops-admin updateBoardEconomyEnabled.
+  // Always include so create/save can disable as well as enable.
+  patch.boardEconomyEnabled = settings.boardEconomyEnabled;
 
   if (settings.customQuestionPackEnabled) {
     patch.customQuestionPackEnabled = true;

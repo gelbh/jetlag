@@ -27,6 +27,7 @@ import {
   startEndGameSession,
   updateSessionRules,
 } from "../../services/firestore/firestoreAnnotations";
+import { updateBoardEconomyEnabled } from "../../services/firestore/boardEconomy";
 import { emitGameEndedActivity } from "../../services/session/emitSessionActivity";
 import { endGameChecklistCopy } from "../../domain/boardEconomy/checklists";
 
@@ -296,12 +297,21 @@ export function useMapSessionActions({
       session.distanceUnit ?? "imperial",
     );
     const merged = mergeSessionRulesPatch(session, patch);
+    const nextBoardEconomy = draftAdvancedSettings.boardEconomyEnabled === true;
+    const prevBoardEconomy = session.boardEconomyEnabled === true;
 
     if (session.id !== LOCAL_SESSION_ID && isRemote) {
+      // Board economy is a single-key host update (rules budget path), not
+      // validSessionRulesUpdate's hasOnly list.
+      const rulesPatch = { ...patch };
+      delete rulesPatch.boardEconomyEnabled;
       await updateSessionRules(session.id, {
-        ...patch,
+        ...rulesPatch,
         hidingZoneRadiusMeters: merged.hidingZoneRadiusMeters,
       });
+      if (nextBoardEconomy !== prevBoardEconomy) {
+        await updateBoardEconomyEnabled(session.id, nextBoardEconomy);
+      }
     }
 
     setSession(merged, uid ?? undefined);
