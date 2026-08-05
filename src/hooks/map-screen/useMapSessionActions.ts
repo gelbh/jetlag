@@ -303,7 +303,8 @@ export function useMapSessionActions({
     if (session.id !== LOCAL_SESSION_ID && isRemote) {
       // Board economy is a single-key host update (rules budget path), not
       // validSessionRulesUpdate's hasOnly list.
-      const { boardEconomyEnabled: _boardEconomy, ...rulesPatch } = patch;
+      const rulesPatch = { ...patch };
+      delete rulesPatch.boardEconomyEnabled;
       await updateSessionRules(session.id, {
         ...rulesPatch,
         hidingZoneRadiusMeters: merged.hidingZoneRadiusMeters,

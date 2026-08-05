@@ -21,11 +21,11 @@ import {
 import { timeTrapForHider } from "../domain/expansion/timeTraps";
 import { useTimeTrapsSync } from "../hooks/session/useTimeTrapsSync";
 import { useBoardEconomy } from "../hooks/session/useBoardEconomy";
+import { HiderBoardEconomySheets } from "./hider-map-screen/HiderBoardEconomySheets";
 import {
-  HiderBoardEconomySheets,
   hiderBoardEconomyDockProps,
   hiderBoardEconomyZoneOpts,
-} from "./hider-map-screen/HiderBoardEconomySheets";
+} from "./hider-map-screen/hiderBoardEconomyChrome";
 import { useTimeTrapTool } from "../hooks/session/useTimeTrapTool";
 import type { HiderTruthRevealState } from "../components/session/banners/HiderTruthRevealBanner";
 import { useDesktopLayout } from "../hooks/layout/useDesktopLayout";

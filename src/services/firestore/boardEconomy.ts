@@ -36,6 +36,54 @@ export function serializeBoardEconomyState(
   };
 }
 
+function parsePendingPick(
+  value: unknown,
+): BoardEconomyState["pendingPick"] {
+  if (!value || typeof value !== "object") {
+    return null;
+  }
+  const pick = value as {
+    drawn?: unknown;
+    keep?: unknown;
+    cyclesRemaining?: unknown;
+  };
+  if (!Array.isArray(pick.drawn) || !Array.isArray(pick.cyclesRemaining)) {
+    return null;
+  }
+  if (
+    typeof pick.keep !== "number" ||
+    !Number.isInteger(pick.keep) ||
+    pick.keep < 0 ||
+    pick.keep > pick.drawn.length
+  ) {
+    return null;
+  }
+  for (const cycle of pick.cyclesRemaining) {
+    if (
+      !cycle ||
+      typeof cycle !== "object" ||
+      typeof (cycle as { draw?: unknown }).draw !== "number" ||
+      typeof (cycle as { keep?: unknown }).keep !== "number" ||
+      (cycle as { draw: number }).draw < 0 ||
+      (cycle as { keep: number }).keep < 0
+    ) {
+      return null;
+    }
+  }
+  for (const card of pick.drawn) {
+    if (
+      !card ||
+      typeof card !== "object" ||
+      typeof (card as { instanceId?: unknown }).instanceId !== "string" ||
+      !(card as { def?: unknown }).def ||
+      typeof (card as { def: { kind?: unknown } }).def.kind !== "string"
+    ) {
+      return null;
+    }
+  }
+  return pick as BoardEconomyState["pendingPick"];
+}
+
 export function deserializeBoardEconomyState(
   data: Record<string, unknown>,
 ): BoardEconomyState | null {
@@ -48,14 +96,7 @@ export function deserializeBoardEconomyState(
   ) {
     return null;
   }
-  const pendingPick =
-    data.pendingPick &&
-    typeof data.pendingPick === "object" &&
-    Array.isArray((data.pendingPick as { drawn?: unknown }).drawn) &&
-    typeof (data.pendingPick as { keep?: unknown }).keep === "number" &&
-    Array.isArray((data.pendingPick as { cyclesRemaining?: unknown }).cyclesRemaining)
-      ? (data.pendingPick as BoardEconomyState["pendingPick"])
-      : null;
+  const pendingPick = parsePendingPick(data.pendingPick);
   return {
     deck: data.deck as BoardEconomyState["deck"],
     hand: data.hand as BoardEconomyState["hand"],

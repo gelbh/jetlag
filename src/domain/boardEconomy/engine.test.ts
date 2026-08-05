@@ -104,4 +104,30 @@ describe("board economy engine", () => {
     expect(done.hand).toHaveLength(1);
     expect(done.deck).toHaveLength(HIDER_DECK_SIZE - 1);
   });
+
+  it("resolveDrawKeep rejects invalid keep selections", () => {
+    const deck = createShuffledDeck("invalid");
+    const { deck: afterDraw, drawn } = drawFromDeck(deck, 3);
+    const hand: typeof drawn = [];
+    const unknown = resolveDrawKeep(afterDraw, hand, drawn, ["missing"], 1);
+    expect(unknown.ok).toBe(false);
+    expect(unknown.hand).toEqual([]);
+    const duplicate = resolveDrawKeep(
+      afterDraw,
+      hand,
+      drawn,
+      [drawn[0]!.instanceId, drawn[0]!.instanceId],
+      1,
+    );
+    expect(duplicate.ok).toBe(true);
+    expect(duplicate.kept).toHaveLength(1);
+    const tooMany = resolveDrawKeep(
+      afterDraw,
+      hand,
+      drawn,
+      [drawn[0]!.instanceId, drawn[1]!.instanceId],
+      1,
+    );
+    expect(tooMany.ok).toBe(false);
+  });
 });

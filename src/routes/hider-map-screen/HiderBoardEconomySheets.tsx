@@ -1,45 +1,9 @@
 import { DrawPickSheet } from "@/components/session/board/DrawPickSheet";
 import { HiderHandSheet } from "@/components/session/board/HiderHandSheet";
-import type { BoardEconomyState } from "@/domain/boardEconomy";
 import type { GameSize } from "@/domain/session/size/gameSize";
 import type { useBoardEconomy } from "@/hooks/session/useBoardEconomy";
 
 type BoardEconomyApi = ReturnType<typeof useBoardEconomy>;
-
-export function hiderBoardEconomyDockProps(state: BoardEconomyState | null): {
-  handLabel?: string;
-  hasMoveCard: boolean;
-} {
-  if (!state) {
-    return { hasMoveCard: false };
-  }
-  return {
-    handLabel: `Hand ${state.hand.length}/${state.handLimit}`,
-    hasMoveCard: state.hand.some((card) => card.def.kind === "move"),
-  };
-}
-
-export function hiderBoardEconomyZoneOpts(
-  enabled: boolean,
-  state: BoardEconomyState | null,
-  runMove: (instanceId: string) => Promise<void>,
-): {
-  hasMoveCard?: () => boolean;
-  consumeMoveCard?: () => Promise<void>;
-} {
-  if (!enabled) {
-    return {};
-  }
-  return {
-    hasMoveCard: () => hiderBoardEconomyDockProps(state).hasMoveCard,
-    consumeMoveCard: async () => {
-      const move = state?.hand.find((card) => card.def.kind === "move");
-      if (move) {
-        await runMove(move.instanceId);
-      }
-    },
-  };
-}
 
 type HiderBoardEconomySheetsProps = {
   economy: BoardEconomyApi;
@@ -78,11 +42,16 @@ export function HiderBoardEconomySheets({
         pending={economy.pendingDraw}
         gameSize={gameSize}
         onConfirm={(ids) => {
-          void economy.confirmDrawPick(ids).then((stillPending) => {
-            if (!stillPending) {
-              onHandSheetOpenChange(true);
-            }
-          });
+          void economy
+            .confirmDrawPick(ids)
+            .then((stillPending) => {
+              if (!stillPending) {
+                onHandSheetOpenChange(true);
+              }
+            })
+            .catch(() => {
+              // Persist failed; pendingPick remains in Firestore/subscription for retry.
+            });
         }}
       />
     </>
