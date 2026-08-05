@@ -10,6 +10,7 @@ import {
   isMatchingCategoryEnabled,
   matchingQuestionFor,
   usedMatchingCategoryIds,
+  type MatchingAnswer,
   type MatchingCategoryId,
 } from "../../domain/questions";
 import { isAdminDivisionCategoryAvailable } from "../../services/geo/overpass/adminDivisionAvailability";
@@ -21,7 +22,10 @@ import {
   type CommitMatchingInput,
 } from "./matching/commitMatching";
 import { MatchingToolPanel } from "./matching/MatchingToolPanel";
-import { resolveMatchingAnchor } from "./matching/resolveMatchingAnchor";
+import {
+  reconcileLockedMatchingNearest,
+  resolveMatchingAnchor,
+} from "./matching/resolveMatchingAnchor";
 import type {
   MatchingSessionConfig,
   UseMatchingToolParams,
@@ -130,24 +134,97 @@ export function useMatchingTool({
   });
 
   const { beginRequest, cancelRequests, isLatestRequest } = useLatestRequest();
+  const matchingApplyPhaseRef = useRef(new Map<number, number>());
+  const matchingAnswerRef = useRef(matchingAnswer);
+  const matchingNearestFeatureIdRef = useRef(matchingNearestFeatureId);
+  const matchingNearestFeatureNameRef = useRef(matchingNearestFeatureName);
 
-  const resolveForAnchor = useCallback(
-    async (seekerPoint: LatLngTuple, categoryId: MatchingCategoryId) => {
-      const requestId = beginRequest();
-      setMatchingLoading(true);
-      setMatchingError(null);
+  useEffect(() => {
+    matchingAnswerRef.current = matchingAnswer;
+  }, [matchingAnswer]);
 
-      const result = await resolveMatchingAnchor({
-        seekerPoint,
-        categoryId,
-        gameArea,
-        matchingFetchOptions: catalog.matchingFetchOptions,
-      });
+  const setMatchingAnswerSynced = useCallback(
+    (answer: MatchingAnswer | null) => {
+      matchingAnswerRef.current = answer;
+      setMatchingAnswer(answer);
+    },
+    [setMatchingAnswer],
+  );
 
+  const publishSignature = useMemo(
+    () =>
+      [
+        matchingSeekerPoint?.[0],
+        matchingSeekerPoint?.[1],
+        matchingNearestFeatureId,
+        matchingNearestFeatureName,
+        matchingAnswer,
+        matchingNullAnswer,
+        matchingLoading,
+        matchingError,
+        matchingFeatureCount,
+        catalog.matchingBoundaryPreview ? "b" : "",
+        catalog.matchingEliminationPreview ? "e" : "",
+      ].join("|"),
+    [
+      catalog.matchingBoundaryPreview,
+      catalog.matchingEliminationPreview,
+      matchingAnswer,
+      matchingError,
+      matchingFeatureCount,
+      matchingLoading,
+      matchingNearestFeatureId,
+      matchingNearestFeatureName,
+      matchingNullAnswer,
+      matchingSeekerPoint,
+    ],
+  );
+
+  const applyResolveResult = useCallback(
+    (
+      requestId: number,
+      result: Awaited<ReturnType<typeof resolveMatchingAnchor>>,
+      phase: 0 | 1,
+    ) => {
       if (!isLatestRequest(requestId)) {
         return;
       }
 
+      const lastPhase = matchingApplyPhaseRef.current.get(requestId) ?? -1;
+      if (phase < lastPhase) {
+        return;
+      }
+      matchingApplyPhaseRef.current.set(requestId, phase);
+
+      // Keep yes/no once chosen; enrich only refreshes the list (remap nearest id).
+      if (matchingAnswerRef.current !== null) {
+        if (result.features.length === 0) {
+          return;
+        }
+
+        const reconciled = reconcileLockedMatchingNearest(
+          result.features,
+          matchingNearestFeatureIdRef.current,
+          matchingNearestFeatureNameRef.current,
+        );
+        if (!reconciled) {
+          return;
+        }
+
+        matchingNearestFeatureIdRef.current = reconciled.nearestFeatureId;
+        matchingNearestFeatureNameRef.current = reconciled.nearestFeatureName;
+        setMatchingError(null);
+        setMatchingFeatures(result.features);
+        setMatchingFeatureCount(result.featureCount);
+        setMatchingInPlayAreaFeatureCount(result.inPlayAreaFeatureCount);
+        setMatchingNearestFeatureId(reconciled.nearestFeatureId);
+        setMatchingNearestFeatureName(reconciled.nearestFeatureName);
+        setMatchingNearestFeaturePoint(reconciled.nearestFeaturePoint);
+        return;
+      }
+
+      matchingNearestFeatureIdRef.current = result.nearestFeatureId;
+      matchingNearestFeatureNameRef.current = result.nearestFeatureName;
       setMatchingFeatures(result.features);
       setMatchingFeatureCount(result.featureCount);
       setMatchingInPlayAreaFeatureCount(result.inPlayAreaFeatureCount);
@@ -157,27 +234,53 @@ export function useMatchingTool({
       setMatchingDistanceMeters(result.distanceMeters);
       setMatchingNearestOutsidePlayArea(result.nearestOutsidePlayArea);
       setMatchingNullAnswer(result.nullAnswer);
-      setMatchingAnswer(null);
       setMatchingError(result.error);
-      setMatchingLoading(false);
     },
     [
-      beginRequest,
-      catalog.matchingFetchOptions,
-      gameArea,
       isLatestRequest,
-      setMatchingAnswer,
       setMatchingDistanceMeters,
       setMatchingError,
       setMatchingFeatureCount,
       setMatchingFeatures,
       setMatchingInPlayAreaFeatureCount,
-      setMatchingLoading,
       setMatchingNearestFeatureId,
       setMatchingNearestFeatureName,
       setMatchingNearestFeaturePoint,
       setMatchingNearestOutsidePlayArea,
       setMatchingNullAnswer,
+    ],
+  );
+
+  const resolveForAnchor = useCallback(
+    async (seekerPoint: LatLngTuple, categoryId: MatchingCategoryId) => {
+      const requestId = beginRequest();
+      matchingApplyPhaseRef.current.set(requestId, -1);
+      setMatchingLoading(true);
+      setMatchingError(null);
+
+      const result = await resolveMatchingAnchor({
+        seekerPoint,
+        categoryId,
+        gameArea,
+        matchingFetchOptions: catalog.matchingFetchOptions,
+        onEnrich: (enriched) => {
+          applyResolveResult(requestId, enriched, 1);
+        },
+      });
+
+      applyResolveResult(requestId, result, 0);
+      if (isLatestRequest(requestId)) {
+        setMatchingLoading(false);
+      }
+    },
+    [
+      applyResolveResult,
+      beginRequest,
+      catalog.matchingFetchOptions,
+      gameArea,
+      isLatestRequest,
+      setMatchingError,
+      setMatchingLoading,
     ],
   );
 
@@ -355,7 +458,7 @@ export function useMatchingTool({
       wizardStepRef={wizardStepRef}
       onCategoryChange={handleCategoryChange}
       onUseGps={() => void handleGps()}
-      onAnswerChange={setMatchingAnswer}
+      onAnswerChange={setMatchingAnswerSynced}
       onCommit={() => void commit()}
       onRetry={
         matchingSeekerPoint && matchingCategoryId
@@ -380,6 +483,7 @@ export function useMatchingTool({
       seekerResolving: matchingLoading && matchingSeekerPoint !== null,
     },
     placementCrosshair: active && matchingSeekerPoint === null,
+    publishSignature,
     handleMapClick,
     resetDraft,
     commit,
