@@ -199,13 +199,10 @@ export function adminLevelForMatchingCategory(
   }
 }
 
+/** Matching is play-area-only; expanded near-search is retired. */
 export function matchingUsesExpandedFeatureSearch(
-  category: MatchingCategoryDefinition,
+  _category?: MatchingCategoryDefinition,
 ): boolean {
-  return (
-    category.resolver === "overpassPoint" ||
-    category.resolver === "streetPath" ||
-    category.resolver === "stationNameLength" ||
-    category.resolver === "transitLine"
-  );
+  void _category;
+  return false;
 }

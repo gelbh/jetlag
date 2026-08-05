@@ -1,5 +1,4 @@
 export {
-  MATCHING_NEAR_FEATURE_SEARCH_BUFFER_METERS,
   type MatchingFetchOptions,
 } from "./types";
 

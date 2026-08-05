@@ -3,17 +3,11 @@ import {
   gameAreaToBoundingBox,
   type LatLngTuple,
 } from "@/domain/geometry/gameArea/geometry";
-import {
-  expandBoundingBox,
-  type BoundingBox,
-} from "@/domain/geometry/gameArea/gameAreaBounds";
+import type { BoundingBox } from "@/domain/geometry/gameArea/gameAreaBounds";
 import {
   adminLevelForMatchingCategory,
-  getMatchingCategory,
-  matchingUsesExpandedFeatureSearch,
   type MatchingCategoryId,
 } from "@/domain/questions";
-import { resolveMatchingCategory } from "@/domain/session/catalog/sessionCustomCatalog";
 import type { SessionCustomCategory } from "@/domain/session/catalog/sessionCustomContent";
 import { customMatchingAreasCacheSuffix } from "./matchingAreaGeoJson";
 import { geographicCacheKey } from "../cache";
@@ -22,17 +16,13 @@ import {
   formatOverpassBbox,
   overpassQueryTemplate,
 } from "../overpass/queryHelpers";
-import { MATCHING_NEAR_FEATURE_SEARCH_BUFFER_METERS, type MatchingFetchOptions } from "./types";
+import type { MatchingFetchOptions } from "./types";
 
 export function matchingFeaturesCacheKey(
   gameArea: GameArea,
   categoryId: MatchingCategoryId,
   options?: MatchingFetchOptions,
 ): string {
-  const category =
-    resolveMatchingCategory(categoryId, options?.customCategories ?? []) ??
-    getMatchingCategory(categoryId);
-  const scope = matchingUsesExpandedFeatureSearch(category) ? "near" : "in";
   const adminLevel = adminLevelForMatchingCategory(categoryId);
   const customSuffix =
     adminLevel !== null
@@ -43,25 +33,12 @@ export function matchingFeaturesCacheKey(
       : "";
   return geographicCacheKey(
     gameArea,
-    `matching:${scope}:${categoryId}${customSuffix}`,
+    `matching:in:${categoryId}${customSuffix}`,
   );
 }
 
-export function matchingSearchBoundingBox(
-  gameArea: GameArea,
-  categoryId: MatchingCategoryId,
-  customCategories: readonly SessionCustomCategory[] = [],
-): BoundingBox {
-  const bbox = gameAreaToBoundingBox(gameArea);
-  const category =
-    resolveMatchingCategory(categoryId, customCategories) ??
-    getMatchingCategory(categoryId);
-
-  if (!matchingUsesExpandedFeatureSearch(category)) {
-    return bbox;
-  }
-
-  return expandBoundingBox(bbox, MATCHING_NEAR_FEATURE_SEARCH_BUFFER_METERS);
+export function matchingSearchBoundingBox(gameArea: GameArea): BoundingBox {
+  return gameAreaToBoundingBox(gameArea);
 }
 
 export { formatOverpassBbox } from "../overpass/queryHelpers";
@@ -72,17 +49,15 @@ export function buildMatchingFeaturesQuery(
   selectors: readonly string[],
   customCategories: readonly SessionCustomCategory[] = [],
 ): string {
-  const bbox = formatOverpassBbox(
-    matchingSearchBoundingBox(gameArea, categoryId, customCategories),
-  );
+  void categoryId;
+  void customCategories;
+  const bbox = formatOverpassBbox(matchingSearchBoundingBox(gameArea));
 
   return buildNodeWayRelationBboxQuery(bbox, selectors);
 }
 
 export function buildStreetPathQuery(gameArea: GameArea): string {
-  const bbox = formatOverpassBbox(
-    matchingSearchBoundingBox(gameArea, "street_or_path"),
-  );
+  const bbox = formatOverpassBbox(matchingSearchBoundingBox(gameArea));
 
   return overpassQueryTemplate(`
   (
