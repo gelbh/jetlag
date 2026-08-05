@@ -11,10 +11,29 @@ describe("openMapTilesPoiClassMap", () => {
     ]);
   });
 
-  it("maps hospital class but not clinic", () => {
+  it("maps hospital class but not clinic / nursing_home", () => {
     expect(mapOpenMapTilesPoiToCategoryIds({ class: "hospital" })).toEqual([
       "hospital",
     ]);
+    expect(
+      mapOpenMapTilesPoiToCategoryIds({
+        class: "hospital",
+        subclass: "hospital",
+      }),
+    ).toEqual(["hospital"]);
+    // OMT stores clinics under class=hospital + subclass=clinic
+    expect(
+      mapOpenMapTilesPoiToCategoryIds({
+        class: "hospital",
+        subclass: "clinic",
+      }),
+    ).toEqual([]);
+    expect(
+      mapOpenMapTilesPoiToCategoryIds({
+        class: "hospital",
+        subclass: "nursing_home",
+      }),
+    ).toEqual([]);
     expect(mapOpenMapTilesPoiToCategoryIds({ class: "clinic" })).toEqual([]);
   });
 

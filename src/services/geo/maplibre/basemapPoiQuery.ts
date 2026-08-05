@@ -142,7 +142,7 @@ function featureToPoiCandidate(
     return null;
   }
 
-  const osmId = osmIdFromProps(props);
+  const osmId = osmIdFromFeature(feature, props);
   const categoryId = categoryIds[0];
   const id =
     osmId != null
@@ -178,9 +178,21 @@ function geometryToLatLng(
   return [lat, lng];
 }
 
-function osmIdFromProps(props: OpenMapTilesPoiProperties): string | null {
-  const raw =
-    props.osm_id ?? props.osmId ?? props.id ?? props["@id"] ?? null;
+function osmIdFromFeature(
+  feature: MapGeoJSONFeature,
+  props: OpenMapTilesPoiProperties,
+): string | null {
+  // OpenMapTiles poi: key_field osm_id with key_field_as_attribute: no → feature.id
+  const fromFeatureId = coerceOsmId(feature.id);
+  if (fromFeatureId) {
+    return fromFeatureId;
+  }
+  return coerceOsmId(
+    props.osm_id ?? props.osmId ?? props.id ?? props["@id"] ?? null,
+  );
+}
+
+function coerceOsmId(raw: unknown): string | null {
   if (typeof raw === "number" && Number.isFinite(raw)) {
     return String(raw);
   }

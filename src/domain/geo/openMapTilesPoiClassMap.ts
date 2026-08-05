@@ -40,12 +40,28 @@ const SUBCLASS_TO_CATEGORY_IDS: Readonly<Record<string, readonly string[]>> = {
   bus_stop: ["rail_station"],
 };
 
+/**
+ * OpenMapTiles puts clinics/nursing homes under class=hospital with subclass.
+ * Deny before the hospital class allowlist so provisional lists stay hospitals-only.
+ */
+const DENIED_SUBCLASSES = new Set(["clinic", "nursing_home"]);
+
 function asTrimmedString(value: unknown): string | null {
   if (typeof value !== "string") {
     return null;
   }
   const trimmed = value.trim();
   return trimmed.length > 0 ? trimmed : null;
+}
+
+function categoryIdsForKey(
+  map: Readonly<Record<string, readonly string[]>>,
+  key: string,
+): string[] | null {
+  if (!Object.hasOwn(map, key)) {
+    return null;
+  }
+  return [...map[key]];
 }
 
 /**
@@ -60,13 +76,22 @@ export function mapOpenMapTilesPoiToCategoryIds(
   }
 
   const subclass = asTrimmedString(props.subclass)?.toLowerCase() ?? null;
-  if (subclass && subclass in SUBCLASS_TO_CATEGORY_IDS) {
-    return [...SUBCLASS_TO_CATEGORY_IDS[subclass]];
+  if (subclass && DENIED_SUBCLASSES.has(subclass)) {
+    return [];
+  }
+  if (subclass) {
+    const fromSubclass = categoryIdsForKey(SUBCLASS_TO_CATEGORY_IDS, subclass);
+    if (fromSubclass) {
+      return fromSubclass;
+    }
   }
 
   const poiClass = asTrimmedString(props.class)?.toLowerCase() ?? null;
-  if (poiClass && poiClass in CLASS_TO_CATEGORY_IDS) {
-    return [...CLASS_TO_CATEGORY_IDS[poiClass]];
+  if (poiClass) {
+    const fromClass = categoryIdsForKey(CLASS_TO_CATEGORY_IDS, poiClass);
+    if (fromClass) {
+      return fromClass;
+    }
   }
 
   return [];

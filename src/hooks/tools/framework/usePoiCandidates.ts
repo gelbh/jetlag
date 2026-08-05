@@ -138,6 +138,7 @@ export function usePoiCandidates({
           return;
         }
         setConfirmed([]);
+        setProvisional([]);
         setStatus("error");
         setError(err instanceof Error ? err.message : String(err));
       }

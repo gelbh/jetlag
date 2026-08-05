@@ -38,15 +38,21 @@ function poiFeature(overrides: {
   lat: number;
   lng: number;
   osmId?: number;
+  featureId?: number | string;
+  omitPropertyOsmId?: boolean;
 }) {
+  const properties: Record<string, unknown> = {
+    name: overrides.name,
+    class: overrides.class,
+    subclass: overrides.subclass,
+  };
+  if (!overrides.omitPropertyOsmId && overrides.osmId != null) {
+    properties.osm_id = overrides.osmId;
+  }
   return {
     type: "Feature",
-    properties: {
-      name: overrides.name,
-      class: overrides.class,
-      subclass: overrides.subclass,
-      osm_id: overrides.osmId,
-    },
+    id: overrides.featureId,
+    properties,
     geometry: {
       type: "Point",
       coordinates: [overrides.lng, overrides.lat],
@@ -136,5 +142,50 @@ describe("basemapPoiQuery", () => {
     const results = queryBasemapPois(map, { categoryIds: ["hospital"] });
     expect(results).toHaveLength(1);
     expect(results[0].name).toBe("Hospital");
+  });
+
+  it("reads osm id from feature.id when not in properties (OMT key_field)", () => {
+    const map = mockMap({
+      sourceFeatures: [
+        poiFeature({
+          name: "Louvre",
+          class: "museum",
+          lat: 48.8606,
+          lng: 2.3376,
+          featureId: 98765,
+          omitPropertyOsmId: true,
+        }),
+      ],
+    });
+
+    const results = queryBasemapPois(map, { categoryIds: ["museum"] });
+    expect(results).toHaveLength(1);
+    expect(results[0].osmId).toBe("98765");
+    expect(results[0].id).toBe("tile:98765");
+  });
+
+  it("excludes hospital-class clinic subclass from hospital filter", () => {
+    const map = mockMap({
+      sourceFeatures: [
+        poiFeature({
+          name: "Real Hospital",
+          class: "hospital",
+          subclass: "hospital",
+          lat: 51.5,
+          lng: -0.1,
+        }),
+        poiFeature({
+          name: "Walk-in Clinic",
+          class: "hospital",
+          subclass: "clinic",
+          lat: 51.501,
+          lng: -0.101,
+        }),
+      ],
+    });
+
+    const results = queryBasemapPois(map, { categoryIds: ["hospital"] });
+    expect(results).toHaveLength(1);
+    expect(results[0].name).toBe("Real Hospital");
   });
 });

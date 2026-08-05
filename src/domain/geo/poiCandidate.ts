@@ -24,7 +24,8 @@ const SOURCE_RANK: Record<PoiCandidateSource, number> = {
 };
 
 export function normalizePoiName(name: string): string {
-  return name.trim().toLowerCase().replace(/\s+/g, " ");
+  // Match regionPackPoi normalizePlaceName so tile↔confirm merge agrees.
+  return name.trim().toLowerCase();
 }
 
 export function poiCandidatesMatch(
