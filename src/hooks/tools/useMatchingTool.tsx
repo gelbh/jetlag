@@ -139,12 +139,45 @@ export function useMatchingTool({
   const matchingNearestFeatureIdRef = useRef(matchingNearestFeatureId);
   const matchingNearestFeatureNameRef = useRef(matchingNearestFeatureName);
 
+  useEffect(() => {
+    matchingAnswerRef.current = matchingAnswer;
+  }, [matchingAnswer]);
+
   const setMatchingAnswerSynced = useCallback(
     (answer: MatchingAnswer | null) => {
       matchingAnswerRef.current = answer;
       setMatchingAnswer(answer);
     },
     [setMatchingAnswer],
+  );
+
+  const publishSignature = useMemo(
+    () =>
+      [
+        matchingSeekerPoint?.[0],
+        matchingSeekerPoint?.[1],
+        matchingNearestFeatureId,
+        matchingNearestFeatureName,
+        matchingAnswer,
+        matchingNullAnswer,
+        matchingLoading,
+        matchingError,
+        matchingFeatureCount,
+        catalog.matchingBoundaryPreview ? "b" : "",
+        catalog.matchingEliminationPreview ? "e" : "",
+      ].join("|"),
+    [
+      catalog.matchingBoundaryPreview,
+      catalog.matchingEliminationPreview,
+      matchingAnswer,
+      matchingError,
+      matchingFeatureCount,
+      matchingLoading,
+      matchingNearestFeatureId,
+      matchingNearestFeatureName,
+      matchingNullAnswer,
+      matchingSeekerPoint,
+    ],
   );
 
   const applyResolveResult = useCallback(
@@ -450,6 +483,7 @@ export function useMatchingTool({
       seekerResolving: matchingLoading && matchingSeekerPoint !== null,
     },
     placementCrosshair: active && matchingSeekerPoint === null,
+    publishSignature,
     handleMapClick,
     resetDraft,
     commit,
