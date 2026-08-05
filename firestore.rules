@@ -538,20 +538,26 @@ service cloud.firestore {
     }
 
     function isBoardEconomyFlagUpdate(sessionId) {
-      // Ops email admin only — session role `admin` is not sufficient (isAdmin()).
-      return isAdmin()
-        && isSessionMember(sessionId)
-        && timerNeverStarted(resource.data)
+      // Cheap "did boardEconomyEnabled change?" before diff/get — same expression-budget
+      // class as Found #10. Ops email admin only (session role `admin` is not enough).
+      return (
+          (
+            !('boardEconomyEnabled' in resource.data)
+            && 'boardEconomyEnabled' in request.resource.data
+          )
+          || (
+            'boardEconomyEnabled' in resource.data
+            && request.resource.data.boardEconomyEnabled != resource.data.boardEconomyEnabled
+          )
+        )
         && request.resource.data.diff(resource.data).affectedKeys()
           .hasOnly(['boardEconomyEnabled'])
         && request.resource.data.boardEconomyEnabled is bool
-        && request.resource.data.code == resource.data.code
-        && request.resource.data.gameArea == resource.data.gameArea
-        && request.resource.data.hostUid == resource.data.hostUid
-        && request.resource.data.memberUids == resource.data.memberUids
-        && request.resource.data.tier == resource.data.tier
-        && request.resource.data.gameSize == resource.data.gameSize
-        && request.resource.data.memberRoles == resource.data.memberRoles;
+        && isAdmin()
+        && resource.data.memberUids is list
+        && request.auth.uid in resource.data.memberUids
+        && timerNeverStarted(resource.data)
+        && sessionIdentityUnchanged();
     }
 
     function boardEconomyEnabledOnSession(sessionId) {
@@ -671,7 +677,9 @@ service cloud.firestore {
         );
 
       // High-frequency + Found key discriminators before End Game start (exists/get).
-      allow update: if isTimerHostUpdate()
+      // Board-economy flag early: host+large gameArea otherwise burns budget on prior diffs.
+      allow update: if isBoardEconomyFlagUpdate(sessionId)
+        || isTimerHostUpdate()
         || isLastActiveAtUpdate()
         || isFoundHiderRequestUpdate()
         || isFoundHiderConfirmUpdate()
@@ -681,7 +689,6 @@ service cloud.firestore {
         || isEndGameHostClearUpdate()
         || isSessionProgressResetUpdate()
         || isHostEndSessionUpdate()
-        || isBoardEconomyFlagUpdate(sessionId)
         || validSessionRulesUpdate(sessionId)
         || isLegacyMembershipJoinUpdate();
 

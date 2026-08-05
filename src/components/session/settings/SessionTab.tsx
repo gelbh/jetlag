@@ -8,6 +8,7 @@ import {
   LOCAL_SESSION_ID,
   type SessionRecord,
 } from "@/domain/map/annotations";
+import { timerNeverStarted } from "@/domain/session/rules/core";
 import { useAdminAccessState } from "@/hooks/admin/useAdminAccessState";
 import { BoardEconomyOpsToggle } from "../board/BoardEconomyOpsToggle";
 
@@ -74,6 +75,9 @@ export function MapSettingsSessionTab({
     Boolean(session?.id) &&
     session?.id !== LOCAL_SESSION_ID &&
     remoteSession;
+  const boardEconomyTimerLocked = session
+    ? !timerNeverStarted(session)
+    : false;
 
   return (
     <div className="space-y-4">
@@ -87,7 +91,12 @@ export function MapSettingsSessionTab({
         <BoardEconomyOpsToggle
           sessionId={session.id}
           enabled={session.boardEconomyEnabled === true}
-          disabled={false}
+          disabled={boardEconomyTimerLocked}
+          disabledReason={
+            boardEconomyTimerLocked
+              ? "Hide timer already started — board economy can only be toggled before the timer runs (including a 0:00 running clock)."
+              : null
+          }
         />
       ) : null}
 
