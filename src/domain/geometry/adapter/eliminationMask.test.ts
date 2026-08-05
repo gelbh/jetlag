@@ -1,7 +1,11 @@
+import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
+import { point as turfPoint } from "@turf/helpers";
 import { describe, expect, it } from "vitest";
 import type { AnnotationRecord, GameArea } from "../../map/annotations";
+import { MAP_ANNOTATION_COLORS } from "../../map/mapAnnotationColors";
 import {
   computeEliminationUnionInput,
+  computeEliminationUnionInputTs,
   eliminationFeatureForAnnotationTs,
 } from "./eliminationMask";
 
@@ -42,7 +46,7 @@ function matchingAnnotation(id: string, west: number): AnnotationRecord {
     },
     metadata: {
       createdAt: "2026-01-01T00:00:00.000Z",
-      color: "#ef4444",
+      color: MAP_ANNOTATION_COLORS.eliminationSoft,
       matchingCategory: "commercial_airport",
       matchingAnswer: "no",
       matchingAnchor: { lat: 51.45, lng: west + 0.015 },
@@ -79,6 +83,31 @@ describe("adapter/eliminationMask", () => {
     expect(
       eliminationFeatureForAnnotationTs(radarAnnotation(undefined), gameArea),
     ).toBeNull();
+  });
+
+  it("yes (hider inside): eliminates outside the radar disk, not the disk", () => {
+    const input = computeEliminationUnionInputTs(
+      [radarAnnotation(true)],
+      gameArea,
+    );
+    expect(input.disks).toEqual([]);
+    expect(input.polygons).toHaveLength(1);
+    const shade = input.polygons[0]!;
+    // Center of radar must remain possible (not eliminated).
+    expect(booleanPointInPolygon(turfPoint([-0.15, 51.45]), shade)).toBe(false);
+    // Far corner of the play area is eliminated.
+    expect(booleanPointInPolygon(turfPoint([-0.19, 51.49]), shade)).toBe(true);
+  });
+
+  it("no (hider outside): eliminates the radar disk", () => {
+    const input = computeEliminationUnionInputTs(
+      [radarAnnotation(false)],
+      gameArea,
+    );
+    expect(input.polygons).toEqual([]);
+    expect(input.disks).toEqual([
+      { center: [51.45, -0.15], radiusMeters: 800 },
+    ]);
   });
 
   it("maps matching annotations to polygon union input", async () => {

@@ -9,6 +9,7 @@ import {
   radarDistanceOptionLabel,
   radarInsideFromAnswer,
   radarQuestionPrompt,
+  radarShadedInsideFromAnswer,
   usedRadarDistanceOptions,
 } from "./radarQuestions";
 import { milesToMeters } from "../map/distance";
@@ -42,11 +43,14 @@ describe("radarQuestions", () => {
     expect(radarDistanceOptionLabel(1, "metric")).toBe("1.6 km");
   });
 
-  it("maps yes/no answers to inside shading", () => {
+  it("maps yes/no to hider-inside metadata and shade polarity", () => {
     expect(radarInsideFromAnswer("yes")).toBe(true);
     expect(radarInsideFromAnswer("no")).toBe(false);
     expect(radarAnswerFromInside(true)).toBe("yes");
     expect(radarAnswerFromInside(false)).toBe("no");
+    // shadedInside = eliminate disk (no); exterior when yes
+    expect(radarShadedInsideFromAnswer("yes")).toBe(false);
+    expect(radarShadedInsideFromAnswer("no")).toBe(true);
   });
 
   it("summarizes answered and legacy radar annotations", () => {
