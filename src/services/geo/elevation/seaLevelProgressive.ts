@@ -5,6 +5,7 @@ import {
   sampleGameAreaCells,
   type ElevationSampleCell,
 } from "@/domain/geometry/measuring/seaLevel";
+import type { RegionPackId } from "@/domain/regions/regionPack";
 import { fetchElevations, type ElevationFetchProfile } from "./index";
 import {
   readSeaLevelSamplingCache,
@@ -13,6 +14,15 @@ import {
   type CachedSeaLevelSampling,
 } from "../cache";
 import { gameAreaPreloadKey } from "../../session/gameAreaPreload";
+import {
+  loadBundledSeaLevelSeed,
+  remapBundledSeaLevelSeedToGameArea,
+} from "./regionPackSeaLevelSeed";
+
+export interface SeaLevelSamplingOptions {
+  regionPackId?: RegionPackId;
+  onEnrich?: (sampling: CachedSeaLevelSampling) => void;
+}
 
 const SAMPLING_BATCH_SIZE = 50;
 const BACKGROUND_BATCH_GAP_MS = 400;
@@ -176,6 +186,33 @@ async function runProgressiveSampling(gameArea: GameArea): Promise<void> {
   setSamplerPhase(gameAreaKey, "complete");
 }
 
+async function hydratePackSeaLevelSeed(
+  gameArea: GameArea,
+  regionPackId?: RegionPackId,
+): Promise<CachedSeaLevelSampling | null> {
+  if (!regionPackId) {
+    return null;
+  }
+
+  const existing = readSeaLevelSamplingCache(gameArea);
+  if (existing && countFiniteElevations(existing.cellElevations) > 0) {
+    return existing;
+  }
+
+  const seed = await loadBundledSeaLevelSeed(regionPackId);
+  if (!seed) {
+    return null;
+  }
+
+  const sampling = remapBundledSeaLevelSeedToGameArea(seed, gameArea);
+  if (!sampling) {
+    return null;
+  }
+
+  await writeSeaLevelSamplingCache(gameArea, sampling);
+  return sampling;
+}
+
 export function startSeaLevelBackgroundSampling(gameArea: GameArea): void {
   const gameAreaKey = gameAreaPreloadKey(gameArea);
   const cached = readSeaLevelSamplingCache(gameArea);
@@ -199,8 +236,40 @@ export function startSeaLevelBackgroundSampling(gameArea: GameArea): void {
 
 export async function ensureSeaLevelSamplingComplete(
   gameArea: GameArea,
+  options?: SeaLevelSamplingOptions,
 ): Promise<CachedSeaLevelSampling> {
+  const seeded = await hydratePackSeaLevelSeed(
+    gameArea,
+    options?.regionPackId,
+  );
+
   startSeaLevelBackgroundSampling(gameArea);
+
+  if (
+    seeded &&
+    options?.onEnrich &&
+    countFiniteElevations(seeded.cellElevations) > 0
+  ) {
+    const gameAreaKey = gameAreaPreloadKey(gameArea);
+    const activeJob = activeSamplers.get(gameAreaKey);
+    if (activeJob) {
+      void activeJob
+        .then(async () => {
+          const fine = await readSeaLevelSamplingCacheAsync(gameArea);
+          if (
+            fine &&
+            fine.complete === true &&
+            countFiniteElevations(fine.cellElevations) === fine.cells.length
+          ) {
+            options.onEnrich?.(fine);
+          }
+        })
+        .catch(() => {
+          // Soft-fail progressive enrich; keep the seed result.
+        });
+    }
+    return seeded;
+  }
 
   const gameAreaKey = gameAreaPreloadKey(gameArea);
   const activeJob = activeSamplers.get(gameAreaKey);
