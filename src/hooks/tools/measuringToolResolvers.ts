@@ -5,7 +5,10 @@ import type {
   MultiPolygon,
 } from "geojson";
 import type { GameArea } from "../../domain/map/annotations";
-import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
+import {
+  nearestPointToCoastlines,
+  type LatLngTuple,
+} from "../../domain/geometry/gameArea/geometry";
 import type { SeaLevelEdgeCase } from "../../domain/geometry/measuring/seaLevel";
 import {
   isMeasuringLinearLocation,
@@ -28,7 +31,16 @@ import { isCustomMeasureGeometryId } from "../../domain/session/catalog/customMe
 import type { SessionCustomMeasureGeometry } from "../../domain/session/catalog/customMeasureGeometry";
 import type { CustomMatchingAreasByLevel } from "../../domain/session/catalog/sessionCustomContent";
 import type { RegionPackId } from "../../domain/regions/regionPack";
-import { loadSeaLevelContext } from "../../services/geo/elevation/seaLevel";
+import {
+  loadSeaLevelContext,
+  type SeaLevelContext,
+} from "../../services/geo/elevation/seaLevel";
+import type { SeaLevelSamplingOptions } from "../../services/geo/elevation/seaLevelProgressive";
+import {
+  buildSeaLevelNearRegionFromSamples,
+  distanceFromSeaLevelMeters,
+} from "../../domain/geometry/measuring/seaLevel";
+import { fetchElevations } from "../../services/geo/elevation";
 
 const SEA_LEVEL_LOWEST_MESSAGE =
   'You\'re at the lowest elevation in this play area. A "closer" answer may be impossible.';
@@ -36,15 +48,90 @@ const SEA_LEVEL_LOWEST_MESSAGE =
 const SEA_LEVEL_HIGHEST_NOTE =
   'You\'re at the highest elevation in this play area. A "further" answer may be impossible.';
 
+export type MeasuringSeaLevelOk = {
+  ok: true;
+  seekerElevationMeters: number;
+  distanceFromSeaLevelMeters: number;
+  nearRegion: SeaLevelContext["nearRegion"];
+  edgeCase: SeaLevelEdgeCase | null;
+  note: string | null;
+};
+
+export type MeasuringSeaLevelResult =
+  | MeasuringSeaLevelOk
+  | { ok: false; message: string };
+
+function toMeasuringSeaLevelResult(
+  result: SeaLevelContext,
+): MeasuringSeaLevelOk {
+  return {
+    ok: true,
+    seekerElevationMeters: result.seekerElevationMeters,
+    distanceFromSeaLevelMeters: result.distanceFromSeaLevelMeters,
+    nearRegion: result.nearRegion,
+    edgeCase: result.edgeCase,
+    note: result.edgeCase === "highest" ? SEA_LEVEL_HIGHEST_NOTE : null,
+  };
+}
+
 export async function fetchMeasuringSeaLevelContext(
   seekerPoint: LatLngTuple,
   gameArea: GameArea,
-) {
-  const result = await loadSeaLevelContext(seekerPoint, gameArea);
+  options?: {
+    regionPackId?: RegionPackId;
+    onEnrich?: (result: MeasuringSeaLevelOk) => void;
+  },
+): Promise<MeasuringSeaLevelResult> {
+  const samplingOptions: SeaLevelSamplingOptions | undefined = options
+    ? {
+        regionPackId: options.regionPackId,
+        onEnrich: options.onEnrich
+          ? async (sampling) => {
+              const elevations = await fetchElevations([seekerPoint], {
+                profile: "background",
+              });
+              const seekerElevationMeters = elevations[0];
+              if (!Number.isFinite(seekerElevationMeters)) {
+                return;
+              }
+              const distanceFromSeaLevel = distanceFromSeaLevelMeters(
+                seekerElevationMeters,
+              );
+              const { region: nearRegion, edgeCase } =
+                buildSeaLevelNearRegionFromSamples(
+                  sampling.cells,
+                  sampling.cellElevations,
+                  distanceFromSeaLevel,
+                  gameArea,
+                  sampling.divisions,
+                );
+              if (edgeCase === "lowest" || !nearRegion) {
+                return;
+              }
+              options.onEnrich?.(
+                toMeasuringSeaLevelResult({
+                  seekerElevationMeters,
+                  distanceFromSeaLevelMeters: distanceFromSeaLevel,
+                  nearRegion,
+                  cells: sampling.cells,
+                  cellElevations: sampling.cellElevations,
+                  edgeCase,
+                }),
+              );
+            }
+          : undefined,
+      }
+    : undefined;
+
+  const result = await loadSeaLevelContext(
+    seekerPoint,
+    gameArea,
+    samplingOptions,
+  );
 
   if (!result) {
     return {
-      ok: false as const,
+      ok: false,
       message:
         "Couldn't read elevation at your anchor. Try a nearby point or retry.",
     };
@@ -52,7 +139,7 @@ export async function fetchMeasuringSeaLevelContext(
 
   if ("reason" in result) {
     return {
-      ok: false as const,
+      ok: false,
       message:
         result.reason === "lowest"
           ? SEA_LEVEL_LOWEST_MESSAGE
@@ -60,15 +147,7 @@ export async function fetchMeasuringSeaLevelContext(
     };
   }
 
-  return {
-    ok: true as const,
-    seekerElevationMeters: result.seekerElevationMeters,
-    distanceFromSeaLevelMeters: result.distanceFromSeaLevelMeters,
-    nearRegion: result.nearRegion,
-    edgeCase: result.edgeCase,
-    note:
-      result.edgeCase === "highest" ? SEA_LEVEL_HIGHEST_NOTE : null,
-  };
+  return toMeasuringSeaLevelResult(result);
 }
 
 export type MeasuringSeaLevelEdgeCase = SeaLevelEdgeCase;
@@ -76,8 +155,34 @@ export type MeasuringSeaLevelEdgeCase = SeaLevelEdgeCase;
 export async function fetchMeasuringCoastlineContext(
   seekerPoint: LatLngTuple,
   gameArea: GameArea,
+  options?: {
+    regionPackId?: RegionPackId;
+    onEnrich?: (result: {
+      coastPoint: LatLngTuple;
+      distanceMeters: number;
+    }) => void;
+  },
 ) {
-  const result = await loadCoastlineContext(seekerPoint, gameArea);
+  const result = await loadCoastlineContext(seekerPoint, gameArea, {
+    regionPackId: options?.regionPackId,
+    onEnrich: options?.onEnrich
+      ? (prepared) => {
+          const nearest = nearestPointToCoastlines(
+            seekerPoint,
+            prepared.segments,
+            prepared,
+          );
+          if (!nearest) {
+            return;
+          }
+          options.onEnrich?.({
+            coastPoint: nearest.point,
+            distanceMeters: nearest.distanceMeters,
+          });
+        }
+      : undefined,
+  });
+
   if (!result) {
     return {
       ok: false as const,

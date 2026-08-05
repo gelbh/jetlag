@@ -250,7 +250,34 @@ export function useMeasuringAnchorLoaders({
       setMeasuringError(null);
 
       try {
-        const result = await fetchMeasuringSeaLevelContext(seekerPoint, gameArea);
+        const applySeaLevelOk = (
+          result: Extract<
+            Awaited<ReturnType<typeof fetchMeasuringSeaLevelContext>>,
+            { ok: true }
+          >,
+        ) => {
+          if (requestId !== seaLevelRequestIdRef.current) {
+            return;
+          }
+          setMeasuringAnchorElevationMeters(result.seekerElevationMeters);
+          setMeasuringDistanceMeters(result.distanceFromSeaLevelMeters);
+          setMeasuringSeaLevelEdgeCase(result.edgeCase);
+          setMeasuringSeaLevelNote(result.note);
+          startTransition(() => {
+            setMeasuringSeaLevelNearRegion(result.nearRegion);
+          });
+        };
+
+        const result = await fetchMeasuringSeaLevelContext(
+          seekerPoint,
+          gameArea,
+          {
+            regionPackId: sessionRules?.regionPackId,
+            onEnrich: (enriched) => {
+              applySeaLevelOk(enriched);
+            },
+          },
+        );
 
         if (requestId !== seaLevelRequestIdRef.current) {
           return;
@@ -266,13 +293,7 @@ export function useMeasuringAnchorLoaders({
           return;
         }
 
-        setMeasuringAnchorElevationMeters(result.seekerElevationMeters);
-        setMeasuringDistanceMeters(result.distanceFromSeaLevelMeters);
-        setMeasuringSeaLevelEdgeCase(result.edgeCase);
-        setMeasuringSeaLevelNote(result.note);
-        startTransition(() => {
-          setMeasuringSeaLevelNearRegion(result.nearRegion);
-        });
+        applySeaLevelOk(result);
       } catch (error) {
         if (requestId !== seaLevelRequestIdRef.current) {
           return;
@@ -295,6 +316,7 @@ export function useMeasuringAnchorLoaders({
     [
       gameArea,
       seaLevelRequestIdRef,
+      sessionRules?.regionPackId,
       setMeasuringAnchorElevationMeters,
       setMeasuringDistanceMeters,
       setMeasuringError,
@@ -326,9 +348,29 @@ export function useMeasuringAnchorLoaders({
       }
 
       try {
+        const applyCoastlineOk = (result: {
+          coastPoint: LatLngTuple;
+          distanceMeters: number;
+        }) => {
+          if (requestId !== coastlineRequestIdRef.current) {
+            return;
+          }
+          startTransition(() => {
+            setMeasuringTargetPoint(result.coastPoint);
+            setMeasuringDistanceMeters(result.distanceMeters);
+            setCoastlineContextVersion((version) => version + 1);
+          });
+        };
+
         const result = await fetchMeasuringCoastlineContext(
           seekerPoint,
           gameArea,
+          {
+            regionPackId: sessionRules?.regionPackId,
+            onEnrich: (enriched) => {
+              applyCoastlineOk(enriched);
+            },
+          },
         );
 
         if (requestId !== coastlineRequestIdRef.current) {
@@ -342,11 +384,7 @@ export function useMeasuringAnchorLoaders({
           return;
         }
 
-        startTransition(() => {
-          setMeasuringTargetPoint(result.coastPoint);
-          setMeasuringDistanceMeters(result.distanceMeters);
-          setCoastlineContextVersion((version) => version + 1);
-        });
+        applyCoastlineOk(result);
       } catch (error) {
         if (requestId !== coastlineRequestIdRef.current) {
           return;
@@ -366,6 +404,7 @@ export function useMeasuringAnchorLoaders({
     [
       coastlineRequestIdRef,
       gameArea,
+      sessionRules?.regionPackId,
       setCoastlineContextVersion,
       setMeasuringDistanceMeters,
       setMeasuringError,

@@ -27,6 +27,7 @@ import {
   allowsOverpassAdminBorderFallthrough,
   isMeasuringAdminBorderKind,
 } from "./adminDivisionAvailability";
+import { loadRegionPackMatchingAreas } from "../matching/regionPackBoundaries";
 import { fetchCustomAdminBorderLineSegments } from "./adminDivisionLineStrings";
 
 type OverpassWay = {
@@ -101,6 +102,24 @@ async function fetchMeasuringLinearSegmentsForKind(
     );
     if (customSegments.length > 0) {
       return customSegments;
+    }
+
+    const adminLevel = adminLevelForMeasuringBorderKind(kind);
+    // Region packs ship primary/secondary (admin levels 8/9) only.
+    if (regionPackId && (adminLevel === 8 || adminLevel === 9)) {
+      try {
+        const packAreas = await loadRegionPackMatchingAreas(regionPackId);
+        const packSegments = await fetchCustomAdminBorderLineSegments(
+          gameArea,
+          kind,
+          packAreas,
+        );
+        if (packSegments.length > 0) {
+          return packSegments;
+        }
+      } catch {
+        // Pack assets unavailable — fall through to Overpass gate.
+      }
     }
 
     if (!allowsOverpassAdminBorderFallthrough(regionPackId)) {

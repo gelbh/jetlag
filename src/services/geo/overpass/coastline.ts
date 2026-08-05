@@ -1,5 +1,6 @@
 import type { Feature, LineString } from "geojson";
 import type { GameArea } from "@/domain/map/annotations";
+import type { RegionPackId } from "@/domain/regions/regionPack";
 import {
   nearestPointToCoastlines,
   prepareMeasuringLineSegments,
@@ -10,12 +11,22 @@ import {
   coastlineSegmentsCacheKey,
   getOrFetchCached,
   readCachedMemoryEntry,
+  writeCoastlineSegmentsCache,
 } from "../cache";
 import { queryOverpass } from "../../core/overpass/overpassClient";
 import {
   formatOverpassBboxFromGameArea,
   overpassQueryTemplate,
 } from "./query";
+import {
+  loadBundledCoastlinePack,
+  mergeCoastlineSegments,
+} from "./regionPackCoastline";
+
+export interface FetchCoastlineOptions {
+  regionPackId?: RegionPackId;
+  onEnrich?: (prepared: PreparedLinearSegments) => void;
+}
 
 export function buildCoastlineQuery(gameArea: GameArea): string {
   const bbox = formatOverpassBboxFromGameArea(gameArea);
@@ -59,20 +70,56 @@ async function fetchCoastlineSegmentsFromOverpass(
     .filter((segment): segment is Feature<LineString> => segment !== null);
 }
 
+async function prepareMergedCoastlineSegments(
+  gameArea: GameArea,
+  bundledSegments: Feature<LineString>[],
+): Promise<PreparedLinearSegments> {
+  const overpassSegments = await fetchCoastlineSegmentsFromOverpass(gameArea);
+  const segments = mergeCoastlineSegments(overpassSegments, bundledSegments);
+  return prepareMeasuringLineSegments(segments, gameArea);
+}
+
 export async function fetchCoastlineSegments(
   gameArea: GameArea,
+  options?: FetchCoastlineOptions,
 ): Promise<Feature<LineString>[]> {
-  const prepared = await fetchPreparedCoastlineSegments(gameArea);
+  const prepared = await fetchPreparedCoastlineSegments(gameArea, options);
   return prepared.segments;
 }
 
 export async function fetchPreparedCoastlineSegments(
   gameArea: GameArea,
+  options?: FetchCoastlineOptions,
 ): Promise<PreparedLinearSegments> {
-  return getOrFetchCached(coastlineSegmentsCacheKey(gameArea), async () => {
-    const segments = await fetchCoastlineSegmentsFromOverpass(gameArea);
-    return prepareMeasuringLineSegments(segments, gameArea);
-  });
+  const pack = options?.regionPackId
+    ? await loadBundledCoastlinePack(options.regionPackId)
+    : null;
+
+  if (pack?.source === "none") {
+    const empty = prepareMeasuringLineSegments([], gameArea);
+    await writeCoastlineSegmentsCache(gameArea, empty);
+    return empty;
+  }
+
+  const bundledSegments = pack?.segments ?? [];
+
+  if (bundledSegments.length > 0 && options?.onEnrich) {
+    const prepared = prepareMeasuringLineSegments(bundledSegments, gameArea);
+    await writeCoastlineSegmentsCache(gameArea, prepared);
+    void prepareMergedCoastlineSegments(gameArea, bundledSegments)
+      .then(async (merged) => {
+        await writeCoastlineSegmentsCache(gameArea, merged);
+        options.onEnrich?.(merged);
+      })
+      .catch(() => {
+        // Soft-fail Overpass enrich; keep the pack result.
+      });
+    return prepared;
+  }
+
+  return getOrFetchCached(coastlineSegmentsCacheKey(gameArea), () =>
+    prepareMergedCoastlineSegments(gameArea, bundledSegments),
+  );
 }
 
 export function getCachedPreparedCoastlineSegments(
@@ -111,6 +158,7 @@ export function resolveCoastlineContextFromCache(
 export async function loadCoastlineContext(
   seeker: LatLngTuple,
   gameArea: GameArea,
+  options?: FetchCoastlineOptions,
 ): Promise<{
   coastPoint: LatLngTuple;
   distanceMeters: number;
@@ -121,7 +169,7 @@ export async function loadCoastlineContext(
     return cached;
   }
 
-  const prepared = await fetchPreparedCoastlineSegments(gameArea);
+  const prepared = await fetchPreparedCoastlineSegments(gameArea, options);
   const nearest = nearestPointToCoastlines(seeker, prepared.segments, prepared);
 
   if (!nearest) {
@@ -138,12 +186,13 @@ export async function loadCoastlineContext(
 export async function findNearestCoastPoint(
   seeker: LatLngTuple,
   gameArea: GameArea,
+  options?: FetchCoastlineOptions,
 ): Promise<{
   coastPoint: LatLngTuple;
   distanceMeters: number;
   segmentCount: number;
 } | null> {
-  const context = await loadCoastlineContext(seeker, gameArea);
+  const context = await loadCoastlineContext(seeker, gameArea, options);
   if (!context) {
     return null;
   }
