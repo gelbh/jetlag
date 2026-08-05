@@ -1,4 +1,8 @@
 import type { MapGeoJSONFeature, Map as MapLibreMap } from "maplibre-gl";
+import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
+import type { MapStyle } from "@/domain/map/mapBasemaps";
+import type { PoiCandidate } from "@/domain/geo/poiCandidate";
+import { previewBasemapPois } from "@/services/geo/maplibre/previewBasemapPois";
 import { isJlMarkerLayerId } from "./mapMarkerConstants";
 
 export interface MapFeatureHitResult {
@@ -83,4 +87,27 @@ export function featureHitKind(feature: MapGeoJSONFeature): string | null {
   }
   const hitKind = props.hitKind;
   return typeof hitKind === "string" ? hitKind : null;
+}
+
+/**
+ * Street-only basemap POI under a map tap. Satellite → null (no tile pick).
+ */
+export function queryBasemapPoiAtPoint(
+  map: MapLibreMap | null,
+  mapStyle: MapStyle,
+  point: LatLngTuple,
+  categoryIds?: readonly string[],
+): PoiCandidate | null {
+  if (!map) {
+    return null;
+  }
+  return (
+    previewBasemapPois({
+      map,
+      mapStyle,
+      point,
+      categoryIds,
+      maxResults: 1,
+    })[0] ?? null
+  );
 }

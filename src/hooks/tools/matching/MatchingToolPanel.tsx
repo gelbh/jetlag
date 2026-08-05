@@ -25,6 +25,8 @@ interface MatchingToolPanelProps {
   matchingNearestOutsidePlayArea: boolean;
   matchingNullAnswer: boolean;
   matchingLoading: boolean;
+  nearestProvisional?: boolean;
+  satelliteBasemap?: boolean;
   gpsLoading: boolean;
   matchingAnswer: MatchingAnswer | null;
   error: string | null;
@@ -58,6 +60,8 @@ export function MatchingToolPanel({
   matchingNearestOutsidePlayArea,
   matchingNullAnswer,
   matchingLoading,
+  nearestProvisional = false,
+  satelliteBasemap = false,
   gpsLoading,
   matchingAnswer,
   error,
@@ -94,6 +98,8 @@ export function MatchingToolPanel({
         nearestOutsidePlayArea={matchingNearestOutsidePlayArea}
         nullAnswer={matchingNullAnswer}
         loading={matchingLoading}
+        nearestProvisional={nearestProvisional}
+        satelliteBasemap={satelliteBasemap}
         gpsLoading={gpsLoading}
         answer={matchingAnswer}
         error={error}
