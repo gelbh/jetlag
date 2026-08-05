@@ -28,6 +28,7 @@ export const APP_ROUTE_PATHS = [
   "/admin",
   "/admin/incidents",
   "/admin/incidents/:incidentId",
+  "/admin/preload-requests",
   "/presets",
   "/presets/new",
   "/presets/:id/edit",
@@ -184,6 +185,12 @@ const ROUTE_SEO_BY_PATH: Record<string, RouteSeoSource> = {
     title: titleFor("Incident"),
     description: `Incident detail for ${LEGAL_APP_NAME}.`,
     canonicalPath: "/admin/incidents/:incidentId",
+    ogImagePath: DEFAULT_OG_IMAGE_PATH,
+  },
+  "/admin/preload-requests": {
+    title: titleFor("Preload requests"),
+    description: `Custom preset preload request inbox for ${LEGAL_APP_NAME}.`,
+    canonicalPath: "/admin/preload-requests",
     ogImagePath: DEFAULT_OG_IMAGE_PATH,
   },
   "/presets": {
