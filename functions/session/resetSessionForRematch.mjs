@@ -22,40 +22,82 @@ function swapSeekerHiderRoles(memberRoles) {
   return swapped;
 }
 
+/** Move role-gate leaders with the people who held them (secrets stay role-keyed). */
+export function swapRoleGateLeaders(roleGates) {
+  if (
+    !roleGates ||
+    roleGates.version !== 1 ||
+    !roleGates.leaders ||
+    typeof roleGates.leaders !== "object"
+  ) {
+    return roleGates ?? null;
+  }
+
+  const leaders = roleGates.leaders;
+  const seekerLeader =
+    typeof leaders.seeker === "string" ? leaders.seeker : undefined;
+  const hiderLeader =
+    typeof leaders.hider === "string" ? leaders.hider : undefined;
+  const nextLeaders = {};
+
+  if (hiderLeader) {
+    nextLeaders.seeker = hiderLeader;
+  }
+  if (seekerLeader) {
+    nextLeaders.hider = seekerLeader;
+  }
+
+  return { version: 1, leaders: nextLeaders };
+}
+
 export async function resetSessionForRematchHandler(db, uid, sessionId) {
   const sessionRef = db.collection("sessions").doc(sessionId);
+  const anchorsRef = sessionRef.collection("endGameTruth").doc("anchors");
 
   await db.runTransaction(async (transaction) => {
+    // All reads before any writes (Admin SDK READ_AFTER_WRITE).
     const sessionSnap = await transaction.get(sessionRef);
     if (!sessionSnap.exists) {
       throw new Error(REMATCH_SESSION_NOT_FOUND);
     }
 
     const session = sessionSnap.data() ?? {};
+    // memberUids is membership SoT (same as verifyProxyAccess / rules).
     if (!isSessionMember(session, uid)) {
       throw new Error(REMATCH_NOT_MEMBER);
     }
+
     const roundNumber =
       typeof session.roundNumber === "number" ? session.roundNumber : 0;
     const gameResultId =
       typeof session.gameResultId === "string" ? session.gameResultId : null;
+    const gameResultRef = gameResultId
+      ? sessionRef.collection("gameResult").doc(gameResultId)
+      : null;
+    const gameResultSnap = gameResultRef
+      ? await transaction.get(gameResultRef)
+      : null;
+    const anchorsSnap = await transaction.get(anchorsRef);
 
-    if (gameResultId) {
-      const gameResultRef = sessionRef.collection("gameResult").doc(gameResultId);
-      const gameResultSnap = await transaction.get(gameResultRef);
-      if (gameResultSnap.exists) {
-        const archiveRef = sessionRef.collection("rounds").doc(String(roundNumber));
-        transaction.set(archiveRef, {
-          ...gameResultSnap.data(),
-          archivedAt: new Date().toISOString(),
-          archivedByUid: uid,
-        });
-        transaction.delete(gameResultRef);
-      }
+    const swappedRoles = swapSeekerHiderRoles(session.memberRoles ?? {});
+    const swappedRoleGates = swapRoleGateLeaders(session.roleGates);
+
+    if (gameResultRef && gameResultSnap?.exists) {
+      const archiveRef = sessionRef.collection("rounds").doc(String(roundNumber));
+      transaction.set(archiveRef, {
+        ...gameResultSnap.data(),
+        archivedAt: new Date().toISOString(),
+        archivedByUid: uid,
+      });
+      transaction.delete(gameResultRef);
     }
 
-    transaction.update(sessionRef, {
-      memberRoles: swapSeekerHiderRoles(session.memberRoles ?? {}),
+    if (anchorsSnap.exists) {
+      transaction.delete(anchorsRef);
+    }
+
+    const update = {
+      memberRoles: swappedRoles,
       roundNumber: roundNumber + 1,
       sessionResetAt: new Date().toISOString(),
       timerAccumulatedMs: 0,
@@ -64,12 +106,19 @@ export async function resetSessionForRematchHandler(db, uid, sessionId) {
       endGameStartedByUid: FieldValue.delete(),
       endGameRequestedAt: FieldValue.delete(),
       endGameRequestedByUid: FieldValue.delete(),
+      endGameTruthAnchors: FieldValue.delete(),
       foundRequestedAt: FieldValue.delete(),
       foundRequestedByUid: FieldValue.delete(),
       foundConfirmedAt: FieldValue.delete(),
       foundConfirmedByUid: FieldValue.delete(),
       gameOutcome: FieldValue.delete(),
       gameResultId: FieldValue.delete(),
-    });
+    };
+
+    if (swappedRoleGates != null) {
+      update.roleGates = swappedRoleGates;
+    }
+
+    transaction.update(sessionRef, update);
   });
 }
