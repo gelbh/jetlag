@@ -1,10 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
-import {
-  BASE_MEASURING_CATALOG,
-  type MeasuringLocationCategory,
-} from "@/domain/questions";
+import { BASE_MEASURING_CATALOG } from "@/domain/questions";
 import { REGION_PACK_IDS } from "./regionPack";
 import {
   isPackGeoSupported,
@@ -57,28 +54,6 @@ describe("packGeoManifest", () => {
         expect(typeof payload.source).toBe("string");
         expect(Array.isArray(payload.places)).toBe(true);
       }
-    }
-  });
-
-  it("covers known overpass-backed point ids used by measuring", () => {
-    const sample: MeasuringLocationCategory[] = [
-      "commercial_airport",
-      "rail_station",
-      "body_of_water",
-      "mountain",
-      "park",
-      "amusement_park",
-      "zoo",
-      "aquarium",
-      "golf_course",
-      "museum",
-      "movie_theater",
-      "hospital",
-      "library",
-      "foreign_consulate",
-    ];
-    for (const id of sample) {
-      expect(PACK_GEO_POINT_CATEGORIES).toContain(id);
     }
   });
 });

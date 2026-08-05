@@ -1,5 +1,6 @@
 import {
   BASE_MEASURING_CATALOG,
+  TENTACLE_LOCATION_CATEGORY_IDS,
   type MeasuringLocationCategory,
   type TentacleExtendedCategoryId,
 } from "@/domain/questions";
@@ -11,6 +12,7 @@ export type PackGeoAssetKind = "poi" | "coastline" | "sea_level_seed";
 /**
  * Measuring point categories with Overpass selectors (excludes custom_place and
  * non-point kinds). Every listed id should have a pack POI JSON path.
+ * Runtime may fetch empty `source:"none"` stubs until Wikidata fills them.
  */
 export const PACK_GEO_POINT_CATEGORIES = BASE_MEASURING_CATALOG.filter(
   (option) =>
@@ -21,10 +23,7 @@ const PACK_GEO_POINT_CATEGORY_SET = new Set<string>(PACK_GEO_POINT_CATEGORIES);
 
 /** Tentacle categories that reuse measuring point POI bundles. */
 export const PACK_GEO_TENTACLE_CATEGORIES = [
-  "museum",
-  "library",
-  "movie_theater",
-  "hospital",
+  ...TENTACLE_LOCATION_CATEGORY_IDS,
   "zoo",
   "aquarium",
   "amusement_park",
