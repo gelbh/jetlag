@@ -344,6 +344,32 @@ describe("firestore.rules — end game", () => {
     );
   });
 
+  it("denies a host-hider clearing active end game fields", async () => {
+    const hostHider = rules.testEnv.authenticatedContext("host-1");
+    await hostHider
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .set({
+        ...sessionPayload("host-1", {
+          memberUids: ["host-1", "seeker-1"],
+          memberRoles: { "host-1": "hider", "seeker-1": "seeker" },
+          endGameStartedAt: "2026-01-01T00:01:00.000Z",
+          endGameStartedByUid: "seeker-1",
+        }),
+      });
+
+    await assertFails(
+      hostHider.firestore().collection("sessions").doc("session-1").update({
+        endGameStartedAt: deleteField(),
+        endGameStartedByUid: deleteField(),
+        endGameTruthAnchors: deleteField(),
+        endGameRequestedAt: deleteField(),
+        endGameRequestedByUid: deleteField(),
+      }),
+    );
+  });
+
   it("denies writing freeze coords onto the shared session document", async () => {
     const host = rules.testEnv.authenticatedContext("host-1");
     await host
