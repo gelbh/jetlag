@@ -222,8 +222,6 @@ export function useMatchingTool({
     async (seekerPoint: LatLngTuple, categoryId: MatchingCategoryId) => {
       const requestId = beginRequest();
       matchingApplyPhaseRef.current.set(requestId, -1);
-      matchingAnswerRef.current = null;
-      setMatchingAnswerSynced(null);
       setMatchingLoading(true);
       setMatchingError(null);
 
@@ -248,7 +246,6 @@ export function useMatchingTool({
       catalog.matchingFetchOptions,
       gameArea,
       isLatestRequest,
-      setMatchingAnswerSynced,
       setMatchingError,
       setMatchingLoading,
     ],
