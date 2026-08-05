@@ -99,6 +99,14 @@ describe("classifyClientSentryEvent", () => {
         ),
       ),
     ).toBe("drop");
+    expect(
+      classifyClientSentryEvent({ message: "Database is closing/hidden" }),
+    ).toBe("drop");
+    expect(
+      classifyClientSentryEvent({
+        message: "Error looking up record in object store by key range",
+      }),
+    ).toBe("drop");
   });
 
   it("drops view-transition abort and visibility-hidden skips", () => {
@@ -117,6 +125,12 @@ describe("classifyClientSentryEvent", () => {
           "Skipping view transition because document visibility state has become hidden.",
         ),
       ),
+    ).toBe("drop");
+    expect(
+      classifyClientSentryEvent({
+        message:
+          "Skipping view transition because document visibility state has become hidden.",
+      }),
     ).toBe("drop");
   });
 
