@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { Feature, Point } from "geojson";
 import { RadarPanel } from "../../components/tools/RadarPanel";
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import { isActive, type AnnotationRecord } from "../../domain/map/annotations";
@@ -9,23 +8,22 @@ import {
 } from "../../domain/map/distance";
 import { defaultRadarPresetMeters } from "../../domain/map/distancePresets";
 import {
-  isRadarDistanceOptionUsed,
-  isRadarRadiusAllowedForGameSize,
   radarDistanceUseCount,
   radarDistanceUseCountFromPending,
-  radarInsideFromAnswer,
-  radarQuestionPrompt,
-  usedRadarDistanceOptions,
   type RadarAnswer,
+  usedRadarDistanceOptions,
 } from "../../domain/questions";
 import { questionCostBreakdown } from "../../domain/questions";
 import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
-import { yesNoAnswerOptions } from "../../components/tools/shared/answers/binaryAnswerOptions";
 import type { SubmitPendingQuestionInput } from "../../hooks/sync/usePendingQuestionActions";
-import { useSubmitLock } from "../forms/useSubmitLock";
-import { MAP_ANNOTATION_COLORS } from "../../domain/map/mapAnnotationColors";
 import type { GameSize } from "../../domain/session/size/gameSize";
-import { emitQuestionAnsweredActivity } from "../../services/session/emitSessionActivity";
+import { useToolSession } from "./framework/useToolSession";
+import { commitRadar } from "./radar/commitRadar";
+
+interface RadarSessionConfig {
+  /** Marker config — draft state stays in local React state for this adapter. */
+  ready: true;
+}
 
 interface UseRadarToolParams {
   active: boolean;
@@ -82,8 +80,12 @@ export function useRadarTool({
   armPlacement,
   canSubmitQuestion = true,
 }: UseRadarToolParams) {
-  const { isSubmitting, runLocked } = useSubmitLock();
   const wizardStepRef = useRef("place");
+  const finishPlacementRef = useRef(finishPlacement);
+  useEffect(() => {
+    finishPlacementRef.current = finishPlacement;
+  }, [finishPlacement]);
+
   const activeAnnotations = useMemo(
     () => annotations.filter(isActive),
     [annotations],
@@ -100,7 +102,9 @@ export function useRadarTool({
   const [radarCenter, setRadarCenter] = useState<LatLngTuple | null>(null);
 
   const resolvedRadarRadius = radarChooseCustom
-    ? (parseDistanceInput(radarCustomRadius, distanceUnit) ?? radarRadius ?? defaultRadius)
+    ? (parseDistanceInput(radarCustomRadius, distanceUnit) ??
+      radarRadius ??
+      defaultRadius)
     : (radarRadius ?? defaultRadius);
 
   const radarUseCount = Math.max(
@@ -120,20 +124,6 @@ export function useRadarTool({
   const { label: costLabel, draw: cardDraw, keep: cardKeep } =
     questionCostBreakdown("D2P1", radarUseCount);
 
-  useEffect(() => {
-    /* eslint-disable react-hooks/set-state-in-effect -- reset draft when tool closes */
-    if (active) {
-      return;
-    }
-
-    setRadarRadius(null);
-    setRadarCustomRadius("");
-    setRadarChooseCustom(false);
-    setRadarAnswer(null);
-    setRadarCenter(null);
-    /* eslint-enable react-hooks/set-state-in-effect */
-  }, [active]);
-
   const resetDraft = useCallback(() => {
     setRadarRadius(null);
     setRadarCustomRadius("");
@@ -141,6 +131,16 @@ export function useRadarTool({
     setRadarAnswer(null);
     setRadarCenter(null);
   }, []);
+
+  useEffect(() => {
+    /* eslint-disable react-hooks/set-state-in-effect -- reset draft when tool closes */
+    if (active) {
+      return;
+    }
+
+    resetDraft();
+    /* eslint-enable react-hooks/set-state-in-effect */
+  }, [active, resetDraft]);
 
   const handleMapClick = useCallback(
     (point: LatLngTuple) => {
@@ -178,128 +178,44 @@ export function useRadarTool({
     }
   };
 
-  const commit = async () => {
-    if (!canSubmitQuestion) {
-      setMapError("Finish the open question before starting another.");
-      return;
-    }
+  const clearAfterCommit = useCallback(() => {
+    setRadarCenter(null);
+    setRadarAnswer(null);
+    setRadarChooseCustom(false);
+    setRadarCustomRadius("");
+    setMapError(null);
+    finishPlacementRef.current();
+  }, [setMapError]);
 
-    if (!radarCenter) {
-      setMapError("Choose a center with GPS or a map tap.");
-      return;
-    }
-
-    if (radarRadius === null && !radarChooseCustom) {
-      setMapError("Choose a radar distance.");
-      return;
-    }
-
-    if (
-      !isRadarRadiusAllowedForGameSize(
+  const session = useToolSession<RadarSessionConfig>({
+    toolId: "radar",
+    active,
+    createInitialConfig: () => ({ ready: true }),
+    onSubmit: async () => {
+      await commitRadar({
+        canSubmitQuestion,
+        radarCenter,
+        radarRadius,
+        radarChooseCustom,
+        resolvedRadarRadius,
+        radarAnswer,
         gameSize,
-        resolvedRadarRadius,
         distanceUnit,
-        radarChooseCustom,
-      )
-    ) {
-      setMapError("That radar distance exceeds the limit for this game size.");
-      return;
-    }
-
-    if (
-      isRadarDistanceOptionUsed(
         usedRadarOptions,
-        radarChooseCustom,
-        resolvedRadarRadius,
-        distanceUnit,
-      )
-    ) {
-      setMapError("That radar distance was already used this session.");
-      return;
-    }
-
-    const geometry: Feature<Point> = {
-      type: "Feature",
-      properties: {},
-      geometry: {
-        type: "Point",
-        coordinates: [radarCenter[1], radarCenter[0]],
-      },
-    };
-
-    try {
-      if (awaitHiderAnswer && submitPendingQuestion && sessionId && senderUid) {
-        await submitPendingQuestion({
-          promptText: radarQuestionPrompt(resolvedRadarRadius, distanceUnit),
-          replyOptions: yesNoAnswerOptions.map((option) => ({
-            id: option.value,
-            label: option.label,
-          })),
-          placement: {
-            geometryJson: JSON.stringify(geometry),
-            metadata: {
-              radiusMeters: resolvedRadarRadius,
-              radarChooseCustom,
-            },
-          },
-          cardDraw,
-          cardKeep,
-        });
-
-        setRadarCenter(null);
-        setRadarAnswer(null);
-        setRadarChooseCustom(false);
-        setRadarCustomRadius("");
-        setMapError(null);
-        finishPlacement();
-        return;
-      }
-
-      if (!radarAnswer) {
-        setMapError("Record the answer before adding the radar question.");
-        return;
-      }
-
-      const created = await createAnnotation({
-        type: "radar",
-        geometry,
-        metadata: {
-          createdAt: new Date().toISOString(),
-          radiusMeters: resolvedRadarRadius,
-          radarChooseCustom,
-          inside: radarInsideFromAnswer(radarAnswer),
-          color: MAP_ANNOTATION_COLORS.radar,
-        },
+        awaitHiderAnswer,
+        submitPendingQuestion,
+        sessionId,
+        senderUid,
+        cardDraw,
+        cardKeep,
+        createAnnotation,
+        setMapError,
+        onSuccess: clearAfterCommit,
       });
+    },
+  });
 
-      if (sessionId) {
-        const answerOption = yesNoAnswerOptions.find(
-          (option) => option.value === radarAnswer,
-        );
-        emitQuestionAnsweredActivity({
-          sessionId,
-          toolType: "radar",
-          promptText: radarQuestionPrompt(resolvedRadarRadius, distanceUnit),
-          annotationId: created.id,
-          answerSummary: answerOption?.label ?? String(radarAnswer),
-          createdByUid: senderUid ?? undefined,
-        });
-      }
-
-      setRadarCenter(null);
-      setRadarAnswer(null);
-      setRadarChooseCustom(false);
-      setRadarCustomRadius("");
-      setMapError(null);
-      finishPlacement();
-    } catch (error) {
-      setMapError(
-        error instanceof Error && error.message.trim()
-          ? error.message
-          : "Could not save the radar question.",
-      );
-    }
-  };
+  const commit = () => session.submit();
 
   const placementCrosshair =
     active && (awaitingPlacement || radarCenter === null);
@@ -325,12 +241,12 @@ export function useRadarTool({
       onPlaceAtMapTap={armPlacement}
       awaitingPlacement={awaitingPlacement}
       hasCenter={radarCenter !== null}
-      onCommit={() => void runLocked(commit)}
+      onCommit={() => void commit()}
       gpsLoading={gpsLoading}
       error={mapError ?? gpsError}
       awaitHiderAnswer={awaitHiderAnswer}
       costLabel={costLabel}
-      isSubmitting={isSubmitting}
+      isSubmitting={session.isBusy}
       viewOnly={!canSubmitQuestion}
       wizardStepRef={wizardStepRef}
     />
