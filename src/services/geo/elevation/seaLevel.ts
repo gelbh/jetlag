@@ -31,7 +31,7 @@ export interface SeaLevelContextFailure {
 
 export interface LoadSeaLevelContextOptions {
   regionPackId?: SeaLevelSamplingOptions["regionPackId"];
-  onEnrich?: (context: SeaLevelContext) => void;
+  onEnrich?: (result: SeaLevelContext | SeaLevelContextFailure) => void;
 }
 
 export function buildSeaLevelContextFromSampling(
@@ -80,15 +80,13 @@ export async function loadSeaLevelContext(
     regionPackId: options?.regionPackId,
     onEnrich: options?.onEnrich
       ? (enriched) => {
-          const rebuilt = buildSeaLevelContextFromSampling(
-            seekerElevationMeters,
-            enriched,
-            gameArea,
+          options.onEnrich?.(
+            buildSeaLevelContextFromSampling(
+              seekerElevationMeters,
+              enriched,
+              gameArea,
+            ),
           );
-          if ("reason" in rebuilt) {
-            return;
-          }
-          options.onEnrich?.(rebuilt);
         }
       : undefined,
   });

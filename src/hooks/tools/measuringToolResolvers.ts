@@ -68,18 +68,34 @@ function toMeasuringSeaLevelResult(
   };
 }
 
+function toMeasuringSeaLevelFailure(
+  reason: "lowest" | "build_failed",
+): MeasuringSeaLevelResult {
+  return {
+    ok: false,
+    message:
+      reason === "lowest"
+        ? SEA_LEVEL_LOWEST_MESSAGE
+        : "Couldn't build a sea level region for this play area.",
+  };
+}
+
 export async function fetchMeasuringSeaLevelContext(
   seekerPoint: LatLngTuple,
   gameArea: GameArea,
   options?: {
     regionPackId?: RegionPackId;
-    onEnrich?: (result: MeasuringSeaLevelOk) => void;
+    onEnrich?: (result: MeasuringSeaLevelResult) => void;
   },
 ): Promise<MeasuringSeaLevelResult> {
   const result = await loadSeaLevelContext(seekerPoint, gameArea, {
     regionPackId: options?.regionPackId,
     onEnrich: options?.onEnrich
       ? (context) => {
+          if ("reason" in context) {
+            options.onEnrich?.(toMeasuringSeaLevelFailure(context.reason));
+            return;
+          }
           options.onEnrich?.(toMeasuringSeaLevelResult(context));
         }
       : undefined,
@@ -94,13 +110,7 @@ export async function fetchMeasuringSeaLevelContext(
   }
 
   if ("reason" in result) {
-    return {
-      ok: false,
-      message:
-        result.reason === "lowest"
-          ? SEA_LEVEL_LOWEST_MESSAGE
-          : "Couldn't build a sea level region for this play area.",
-    };
+    return toMeasuringSeaLevelFailure(result.reason);
   }
 
   return toMeasuringSeaLevelResult(result);

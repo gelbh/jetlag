@@ -1,10 +1,18 @@
-import type { ElevationSampleCell } from "@/domain/geometry/measuring/seaLevel";
+import type { GameArea } from "@/domain/map/annotations";
+import {
+  sampleGameAreaCells,
+  type ElevationSampleCell,
+} from "@/domain/geometry/measuring/seaLevel";
+import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
 import {
   isPackGeoSupported,
   packGeoSeaLevelSeedUrl,
 } from "@/domain/regions/packGeoManifest";
 import type { RegionPackId } from "@/domain/regions/regionPack";
 import type { CachedSeaLevelSampling } from "../cache";
+
+/** Require most session cells to resolve from the pack seed before dual-phase. */
+const MIN_SEED_COVERAGE_RATIO = 0.5;
 
 export interface BundledSeaLevelSeed {
   source: string;
@@ -122,22 +130,63 @@ export async function loadBundledSeaLevelSeed(
   }
 }
 
-export function bundledSeaLevelSeedToSampling(
+function lookupSeedElevation(
   seed: BundledSeaLevelSeed,
+  point: LatLngTuple,
+): number {
+  // Containment only — nearest-fill would invent pack elevations outside the
+  // seed footprint and green-wash sparse/stub seeds.
+  for (let index = 0; index < seed.cells.length; index += 1) {
+    const cell = seed.cells[index];
+    if (
+      point[0] >= cell.south &&
+      point[0] <= cell.north &&
+      point[1] >= cell.west &&
+      point[1] <= cell.east
+    ) {
+      return seed.cellElevations[index] ?? Number.NaN;
+    }
+  }
+  return Number.NaN;
+}
+
+/**
+ * Remap pack-bbox seed elevations onto the session gameArea sampling grid.
+ * Near-region build places cells by row/col on the session bbox — never return
+ * pack-native cells for a different play area.
+ */
+export function remapBundledSeaLevelSeedToGameArea(
+  seed: BundledSeaLevelSeed,
+  gameArea: GameArea,
 ): CachedSeaLevelSampling | null {
-  if (seed.cells.length === 0) {
+  if (seed.cells.length === 0 || seed.divisions < 1) {
     return null;
   }
-  const finite = seed.cellElevations.filter((value) => Number.isFinite(value));
-  if (finite.length === 0) {
+
+  const sessionCells = sampleGameAreaCells(gameArea, seed.divisions);
+  if (sessionCells.length === 0) {
+    return null;
+  }
+
+  const cellElevations = sessionCells.map((cell) =>
+    lookupSeedElevation(seed, cell.point),
+  );
+  const finiteCount = cellElevations.filter((value) =>
+    Number.isFinite(value),
+  ).length;
+  const minCoverage = Math.max(
+    1,
+    Math.ceil(sessionCells.length * MIN_SEED_COVERAGE_RATIO),
+  );
+  if (finiteCount < minCoverage) {
     return null;
   }
 
   return {
-    cells: seed.cells,
-    cellElevations: seed.cellElevations,
+    cells: sessionCells,
+    cellElevations,
     divisions: seed.divisions,
-    complete: seed.complete === true,
+    complete: false,
   };
 }
 

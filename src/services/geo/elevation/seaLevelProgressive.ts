@@ -15,8 +15,8 @@ import {
 } from "../cache";
 import { gameAreaPreloadKey } from "../../session/gameAreaPreload";
 import {
-  bundledSeaLevelSeedToSampling,
   loadBundledSeaLevelSeed,
+  remapBundledSeaLevelSeedToGameArea,
 } from "./regionPackSeaLevelSeed";
 
 export interface SeaLevelSamplingOptions {
@@ -204,7 +204,7 @@ async function hydratePackSeaLevelSeed(
     return null;
   }
 
-  const sampling = bundledSeaLevelSeedToSampling(seed);
+  const sampling = remapBundledSeaLevelSeedToGameArea(seed, gameArea);
   if (!sampling) {
     return null;
   }

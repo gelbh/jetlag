@@ -250,15 +250,22 @@ export function useMeasuringAnchorLoaders({
       setMeasuringError(null);
 
       try {
-        const applySeaLevelOk = (
-          result: Extract<
-            Awaited<ReturnType<typeof fetchMeasuringSeaLevelContext>>,
-            { ok: true }
-          >,
+        const applySeaLevelResult = (
+          result: Awaited<ReturnType<typeof fetchMeasuringSeaLevelContext>>,
         ) => {
           if (requestId !== seaLevelRequestIdRef.current) {
             return;
           }
+          if (!result.ok) {
+            setMeasuringSeaLevelNearRegion(null);
+            setMeasuringAnchorElevationMeters(null);
+            setMeasuringDistanceMeters(null);
+            setMeasuringSeaLevelEdgeCase(null);
+            setMeasuringSeaLevelNote(null);
+            setMeasuringError(result.message);
+            return;
+          }
+          setMeasuringError(null);
           setMeasuringAnchorElevationMeters(result.seekerElevationMeters);
           setMeasuringDistanceMeters(result.distanceFromSeaLevelMeters);
           setMeasuringSeaLevelEdgeCase(result.edgeCase);
@@ -274,7 +281,7 @@ export function useMeasuringAnchorLoaders({
           {
             regionPackId: sessionRules?.regionPackId,
             onEnrich: (enriched) => {
-              applySeaLevelOk(enriched);
+              applySeaLevelResult(enriched);
             },
           },
         );
@@ -283,17 +290,7 @@ export function useMeasuringAnchorLoaders({
           return;
         }
 
-        if (!result.ok) {
-          setMeasuringSeaLevelNearRegion(null);
-          setMeasuringAnchorElevationMeters(null);
-          setMeasuringDistanceMeters(null);
-          setMeasuringSeaLevelEdgeCase(null);
-          setMeasuringSeaLevelNote(null);
-          setMeasuringError(result.message);
-          return;
-        }
-
-        applySeaLevelOk(result);
+        applySeaLevelResult(result);
       } catch (error) {
         if (requestId !== seaLevelRequestIdRef.current) {
           return;
