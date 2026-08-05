@@ -335,15 +335,17 @@ describe("measuring places", () => {
       })),
     );
 
+    const enrich = vi.fn();
     const places = await fetchMeasuringPlacesInArea(
       sampleGameArea,
       "museum",
       [],
       "london",
-      { onEnrich: vi.fn() },
+      { onEnrich: enrich },
     );
 
     expect(queryOverpass).toHaveBeenCalled();
+    expect(enrich).not.toHaveBeenCalled();
     expect(places).toEqual([
       {
         id: "7",

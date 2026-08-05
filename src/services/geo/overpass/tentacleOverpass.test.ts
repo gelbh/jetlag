@@ -252,12 +252,14 @@ describe("tentacle overpass", () => {
       })),
     );
 
+    const enrich = vi.fn();
     const pois = await fetchTentaclePois([51.5, -0.12], 1609.344, "hospital", {
       regionPackId: "london",
-      onEnrich: vi.fn(),
+      onEnrich: enrich,
     });
 
     expect(queryOverpass).toHaveBeenCalled();
+    expect(enrich).not.toHaveBeenCalled();
     expect(pois).toEqual([
       {
         id: "8",
