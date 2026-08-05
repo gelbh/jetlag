@@ -1,5 +1,7 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import * as overpassClient from "../../core/overpass/overpassClient";
+import { clearGeographicFeatureCacheForTests } from "../cache";
+import { clearBundledPoiCacheForTests } from "./regionPackPoi";
 import {
   buildTentacleOverpassQuery,
   fetchTentaclePois,
@@ -9,6 +11,13 @@ import {
 } from "./tentacleOverpass";
 
 describe("tentacle overpass", () => {
+  afterEach(async () => {
+    vi.restoreAllMocks();
+    vi.unstubAllGlobals();
+    clearBundledPoiCacheForTests();
+    await clearGeographicFeatureCacheForTests();
+  });
+
   it("builds a query for the selected category only", () => {
     const query = buildTentacleOverpassQuery([51.5, -0.12], 1609.344, "museum");
 
@@ -142,5 +151,121 @@ describe("tentacle overpass", () => {
         "museum",
       ),
     ).toBe("museum");
+  });
+
+  it("resolves from the bundle without awaiting slow Overpass when onEnrich is set", async () => {
+    let resolveOverpass: ((value: { elements: unknown[] }) => void) | undefined;
+    const overpassStarted = new Promise<void>((resolveStarted) => {
+      vi.spyOn(overpassClient, "queryOverpass").mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            resolveStarted();
+            resolveOverpass = resolve;
+          }),
+      );
+    });
+
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: RequestInfo | URL) => {
+        if (String(input) === "/geo/london/poi/museum.json") {
+          return {
+            ok: true,
+            json: async () => ({
+              category: "museum",
+              source: "wikidata",
+              places: [
+                {
+                  id: "Q6373",
+                  name: "British Museum",
+                  lat: 51.5,
+                  lng: -0.12,
+                },
+              ],
+            }),
+          };
+        }
+        throw new Error(`Unexpected fetch: ${String(input)}`);
+      }),
+    );
+
+    const enrich = vi.fn();
+    const pois = await fetchTentaclePois([51.5, -0.12], 1609.344, "museum", {
+      regionPackId: "london",
+      onEnrich: enrich,
+    });
+
+    expect(pois).toEqual([
+      {
+        id: "Q6373",
+        name: "British Museum",
+        lat: 51.5,
+        lng: -0.12,
+        category: "museum",
+      },
+    ]);
+    expect(enrich).not.toHaveBeenCalled();
+
+    await overpassStarted;
+    resolveOverpass?.({
+      elements: [
+        {
+          id: 42,
+          tags: { tourism: "museum", name: "Science Museum" },
+          lat: 51.501,
+          lon: -0.121,
+        },
+      ],
+    });
+
+    await vi.waitFor(() => {
+      expect(enrich).toHaveBeenCalledTimes(1);
+    });
+
+    const enriched = enrich.mock.calls[0]?.[0] ?? [];
+    expect(enriched.map((poi: { name: string }) => poi.name)).toEqual([
+      "Science Museum",
+      "British Museum",
+    ]);
+  });
+
+  it("awaits Overpass when the tentacle bundle is empty", async () => {
+    const queryOverpass = vi
+      .spyOn(overpassClient, "queryOverpass")
+      .mockResolvedValue({
+        elements: [
+          {
+            id: 8,
+            tags: { amenity: "hospital", name: "Live Hospital" },
+            lat: 51.5,
+            lon: -0.12,
+          },
+        ],
+      });
+
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => ({
+        ok: false,
+        status: 404,
+        json: async () => ({}),
+      })),
+    );
+
+    const pois = await fetchTentaclePois([51.5, -0.12], 1609.344, "hospital", {
+      regionPackId: "london",
+      onEnrich: vi.fn(),
+    });
+
+    expect(queryOverpass).toHaveBeenCalled();
+    expect(pois).toEqual([
+      {
+        id: "8",
+        name: "Live Hospital",
+        lat: 51.5,
+        lng: -0.12,
+        category: "hospital",
+      },
+    ]);
   });
 });

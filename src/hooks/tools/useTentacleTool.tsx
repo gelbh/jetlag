@@ -166,6 +166,28 @@ export function useTentacleTool({
 
   const { beginRequest, cancelRequests, isLatestRequest } = useLatestRequest();
 
+  const applyTentaclePoisResult = useCallback(
+    (
+      requestId: number,
+      pois: Awaited<ReturnType<typeof fetchTentaclePois>>,
+    ) => {
+      if (!isLatestRequest(requestId)) {
+        return;
+      }
+
+      setTentaclePois(pois);
+      if (pois.length === 0) {
+        setTentacleError(
+          `No named locations were found within ${formatDistance(searchRadiusMeters, distanceUnit)}.`,
+        );
+        return;
+      }
+
+      setTentacleError(null);
+    },
+    [distanceUnit, isLatestRequest, searchRadiusMeters],
+  );
+
   const loadPoisForCenter = useCallback(
     async (center: LatLngTuple, categoryId: TentacleExtendedCategoryId) => {
       const requestId = beginRequest();
@@ -184,19 +206,13 @@ export function useTentacleTool({
             customCategories: sessionRules.customCategories,
             customLocationPins: sessionRules.customLocationPins,
             regionPackId: sessionRules.regionPackId,
+            onEnrich: (enrichedPois) => {
+              applyTentaclePoisResult(requestId, enrichedPois);
+            },
           },
         );
 
-        if (!isLatestRequest(requestId)) {
-          return;
-        }
-
-        setTentaclePois(pois);
-        if (pois.length === 0) {
-          setTentacleError(
-            `No named locations were found within ${formatDistance(searchRadiusMeters, distanceUnit)}.`,
-          );
-        }
+        applyTentaclePoisResult(requestId, pois);
       } catch (error) {
         if (!isLatestRequest(requestId)) {
           return;
@@ -211,7 +227,13 @@ export function useTentacleTool({
         }
       }
     },
-    [beginRequest, distanceUnit, isLatestRequest, searchRadiusMeters, sessionRules],
+    [
+      applyTentaclePoisResult,
+      beginRequest,
+      isLatestRequest,
+      searchRadiusMeters,
+      sessionRules,
+    ],
   );
 
   const debouncedTentacleCenter = useDebouncedValue(tentacleCenter, 400);

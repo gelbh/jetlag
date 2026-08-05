@@ -80,6 +80,65 @@ export function useMeasuringAnchorLoaders({
     clearSubjectDerivedState,
   } = draft;
 
+  const applyAllPlacesResult = useCallback(
+    (
+      requestId: number,
+      seekerPoint: LatLngTuple,
+      category: MeasuringLocationCategory,
+      fetchedPlaces: Awaited<ReturnType<typeof fetchMeasuringPlacesInArea>>,
+    ) => {
+      if (requestId !== placesRequestIdRef.current) {
+        return;
+      }
+
+      const pinPlaces = (sessionRules?.customLocationPins ?? []).map(
+        manualPinAsMeasuringPlace,
+      );
+      const seen = new Set(fetchedPlaces.map((place) => place.id));
+      const places = [
+        ...fetchedPlaces,
+        ...pinPlaces.filter((place) => !seen.has(place.id)),
+      ];
+
+      if (places.length === 0) {
+        setMeasuringPlaces([]);
+        setMeasuringDistanceMeters(null);
+        setMeasuringTargetPlaceName(null);
+        setMeasuringError(measuringPlaceNotFoundMessage(category));
+        return;
+      }
+
+      let nearestDistance = Infinity;
+      let nearestPlace = places[0];
+
+      for (const place of places) {
+        const distanceMeters = distanceBetweenPoints(seekerPoint, place.point);
+        if (distanceMeters < nearestDistance) {
+          nearestDistance = distanceMeters;
+          nearestPlace = place;
+        }
+      }
+
+      setMeasuringError(null);
+      setMeasuringPlaces(places);
+      setMeasuringDistanceMeters(nearestDistance);
+      setMeasuringTargetPoint(nearestPlace.point);
+      setMeasuringTargetPlaceName(
+        measuringMultiPlaceTargetLabel(places.length, measureFromKind),
+      );
+    },
+    [
+      measureFromKind,
+      placesRequestIdRef,
+      sessionRules,
+      setMeasuringDistanceMeters,
+      setMeasuringError,
+      setMeasuringPlaces,
+      setMeasuringTargetPlaceName,
+      setMeasuringTargetPoint,
+    ],
+  );
+
   const loadAllPlacesAt = useCallback(
     async (
       seekerPoint: LatLngTuple,
@@ -91,50 +150,24 @@ export function useMeasuringAnchorLoaders({
 
       try {
         const customCategories = sessionRules?.customCategories ?? [];
-        const overpassPlaces = await fetchMeasuringPlacesInArea(
+        const places = await fetchMeasuringPlacesInArea(
           gameArea,
           category,
           customCategories,
           sessionRules?.regionPackId,
+          {
+            onEnrich: (enrichedPlaces) => {
+              applyAllPlacesResult(
+                requestId,
+                seekerPoint,
+                category,
+                enrichedPlaces,
+              );
+            },
+          },
         );
-        const pinPlaces = (sessionRules?.customLocationPins ?? []).map(
-          manualPinAsMeasuringPlace,
-        );
-        const seen = new Set(overpassPlaces.map((place) => place.id));
-        const places = [
-          ...overpassPlaces,
-          ...pinPlaces.filter((place) => !seen.has(place.id)),
-        ];
 
-        if (requestId !== placesRequestIdRef.current) {
-          return;
-        }
-
-        if (places.length === 0) {
-          setMeasuringPlaces([]);
-          setMeasuringDistanceMeters(null);
-          setMeasuringTargetPlaceName(null);
-          setMeasuringError(measuringPlaceNotFoundMessage(category));
-          return;
-        }
-
-        let nearestDistance = Infinity;
-        let nearestPlace = places[0];
-
-        for (const place of places) {
-          const distanceMeters = distanceBetweenPoints(seekerPoint, place.point);
-          if (distanceMeters < nearestDistance) {
-            nearestDistance = distanceMeters;
-            nearestPlace = place;
-          }
-        }
-
-        setMeasuringPlaces(places);
-        setMeasuringDistanceMeters(nearestDistance);
-        setMeasuringTargetPoint(nearestPlace.point);
-        setMeasuringTargetPlaceName(
-          measuringMultiPlaceTargetLabel(places.length, measureFromKind),
-        );
+        applyAllPlacesResult(requestId, seekerPoint, category, places);
       } catch (error) {
         if (requestId !== placesRequestIdRef.current) {
           return;
@@ -153,8 +186,8 @@ export function useMeasuringAnchorLoaders({
       }
     },
     [
+      applyAllPlacesResult,
       gameArea,
-      measureFromKind,
       measuringLocationCategory,
       placesRequestIdRef,
       sessionRules,
@@ -163,7 +196,6 @@ export function useMeasuringAnchorLoaders({
       setMeasuringLoading,
       setMeasuringPlaces,
       setMeasuringTargetPlaceName,
-      setMeasuringTargetPoint,
     ],
   );
 
