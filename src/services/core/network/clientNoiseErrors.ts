@@ -1,6 +1,6 @@
 /** Chrome IDB "connection is closing" + Firebase Auth iOS "Database is closing/hidden". */
 const IDB_CONNECTION_CLOSING =
-  /database(?: connection)? is closing(?:\/hidden)?/i;
+  /database connection is closing|database is closing\/hidden/i;
 const WEBKIT_LOAD_FAILED = /^Load failed(?:\s*\([^)]*\))?$/i;
 const RECAPTCHA_OT_TYPEERROR =
   /(?:reading ['"]oT['"]|evaluating ['"][^'"]*\.oT['"])/i;
