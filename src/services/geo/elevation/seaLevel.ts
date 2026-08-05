@@ -9,7 +9,10 @@ import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
 import type { Feature, MultiPolygon, Polygon } from "geojson";
 import { fetchElevations } from "./index";
 import type { CachedSeaLevelSampling } from "../cache";
-import { ensureSeaLevelSamplingComplete } from "./seaLevelProgressive";
+import {
+  ensureSeaLevelSamplingComplete,
+  type SeaLevelSamplingOptions,
+} from "./seaLevelProgressive";
 
 export interface SeaLevelContext {
   seekerElevationMeters: number;
@@ -26,18 +29,16 @@ export interface SeaLevelContextFailure {
   reason: SeaLevelContextFailureReason;
 }
 
-export async function loadSeaLevelContext(
-  seeker: LatLngTuple,
+export interface LoadSeaLevelContextOptions {
+  regionPackId?: SeaLevelSamplingOptions["regionPackId"];
+  onEnrich?: (result: SeaLevelContext | SeaLevelContextFailure) => void;
+}
+
+export function buildSeaLevelContextFromSampling(
+  seekerElevationMeters: number,
+  sampling: CachedSeaLevelSampling,
   gameArea: GameArea,
-): Promise<SeaLevelContext | SeaLevelContextFailure | null> {
-  const sampling = await ensureSeaLevelSamplingComplete(gameArea);
-  const elevations = await fetchElevations([seeker], { profile: "foreground" });
-  const seekerElevationMeters = elevations[0];
-
-  if (!Number.isFinite(seekerElevationMeters)) {
-    return null;
-  }
-
+): SeaLevelContext | SeaLevelContextFailure {
   const distanceFromSeaLevel = distanceFromSeaLevelMeters(
     seekerElevationMeters,
   );
@@ -61,6 +62,40 @@ export async function loadSeaLevelContext(
     cellElevations: sampling.cellElevations,
     edgeCase,
   };
+}
+
+export async function loadSeaLevelContext(
+  seeker: LatLngTuple,
+  gameArea: GameArea,
+  options?: LoadSeaLevelContextOptions,
+): Promise<SeaLevelContext | SeaLevelContextFailure | null> {
+  const elevations = await fetchElevations([seeker], { profile: "foreground" });
+  const seekerElevationMeters = elevations[0];
+
+  if (!Number.isFinite(seekerElevationMeters)) {
+    return null;
+  }
+
+  const sampling = await ensureSeaLevelSamplingComplete(gameArea, {
+    regionPackId: options?.regionPackId,
+    onEnrich: options?.onEnrich
+      ? (enriched) => {
+          options.onEnrich?.(
+            buildSeaLevelContextFromSampling(
+              seekerElevationMeters,
+              enriched,
+              gameArea,
+            ),
+          );
+        }
+      : undefined,
+  });
+
+  return buildSeaLevelContextFromSampling(
+    seekerElevationMeters,
+    sampling,
+    gameArea,
+  );
 }
 
 export type { CachedSeaLevelSampling };

@@ -5,7 +5,10 @@ import type {
   MultiPolygon,
 } from "geojson";
 import type { GameArea } from "../../domain/map/annotations";
-import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
+import {
+  nearestPointToCoastlines,
+  type LatLngTuple,
+} from "../../domain/geometry/gameArea/geometry";
 import type { SeaLevelEdgeCase } from "../../domain/geometry/measuring/seaLevel";
 import {
   isMeasuringLinearLocation,
@@ -28,7 +31,10 @@ import { isCustomMeasureGeometryId } from "../../domain/session/catalog/customMe
 import type { SessionCustomMeasureGeometry } from "../../domain/session/catalog/customMeasureGeometry";
 import type { CustomMatchingAreasByLevel } from "../../domain/session/catalog/sessionCustomContent";
 import type { RegionPackId } from "../../domain/regions/regionPack";
-import { loadSeaLevelContext } from "../../services/geo/elevation/seaLevel";
+import {
+  loadSeaLevelContext,
+  type SeaLevelContext,
+} from "../../services/geo/elevation/seaLevel";
 
 const SEA_LEVEL_LOWEST_MESSAGE =
   'You\'re at the lowest elevation in this play area. A "closer" answer may be impossible.';
@@ -36,39 +42,78 @@ const SEA_LEVEL_LOWEST_MESSAGE =
 const SEA_LEVEL_HIGHEST_NOTE =
   'You\'re at the highest elevation in this play area. A "further" answer may be impossible.';
 
+export type MeasuringSeaLevelOk = {
+  ok: true;
+  seekerElevationMeters: number;
+  distanceFromSeaLevelMeters: number;
+  nearRegion: SeaLevelContext["nearRegion"];
+  edgeCase: SeaLevelEdgeCase | null;
+  note: string | null;
+};
+
+export type MeasuringSeaLevelResult =
+  | MeasuringSeaLevelOk
+  | { ok: false; message: string };
+
+function toMeasuringSeaLevelResult(
+  result: SeaLevelContext,
+): MeasuringSeaLevelOk {
+  return {
+    ok: true,
+    seekerElevationMeters: result.seekerElevationMeters,
+    distanceFromSeaLevelMeters: result.distanceFromSeaLevelMeters,
+    nearRegion: result.nearRegion,
+    edgeCase: result.edgeCase,
+    note: result.edgeCase === "highest" ? SEA_LEVEL_HIGHEST_NOTE : null,
+  };
+}
+
+function toMeasuringSeaLevelFailure(
+  reason: "lowest" | "build_failed",
+): MeasuringSeaLevelResult {
+  return {
+    ok: false,
+    message:
+      reason === "lowest"
+        ? SEA_LEVEL_LOWEST_MESSAGE
+        : "Couldn't build a sea level region for this play area.",
+  };
+}
+
 export async function fetchMeasuringSeaLevelContext(
   seekerPoint: LatLngTuple,
   gameArea: GameArea,
-) {
-  const result = await loadSeaLevelContext(seekerPoint, gameArea);
+  options?: {
+    regionPackId?: RegionPackId;
+    onEnrich?: (result: MeasuringSeaLevelResult) => void;
+  },
+): Promise<MeasuringSeaLevelResult> {
+  const result = await loadSeaLevelContext(seekerPoint, gameArea, {
+    regionPackId: options?.regionPackId,
+    onEnrich: options?.onEnrich
+      ? (context) => {
+          if ("reason" in context) {
+            options.onEnrich?.(toMeasuringSeaLevelFailure(context.reason));
+            return;
+          }
+          options.onEnrich?.(toMeasuringSeaLevelResult(context));
+        }
+      : undefined,
+  });
 
   if (!result) {
     return {
-      ok: false as const,
+      ok: false,
       message:
         "Couldn't read elevation at your anchor. Try a nearby point or retry.",
     };
   }
 
   if ("reason" in result) {
-    return {
-      ok: false as const,
-      message:
-        result.reason === "lowest"
-          ? SEA_LEVEL_LOWEST_MESSAGE
-          : "Couldn't build a sea level region for this play area.",
-    };
+    return toMeasuringSeaLevelFailure(result.reason);
   }
 
-  return {
-    ok: true as const,
-    seekerElevationMeters: result.seekerElevationMeters,
-    distanceFromSeaLevelMeters: result.distanceFromSeaLevelMeters,
-    nearRegion: result.nearRegion,
-    edgeCase: result.edgeCase,
-    note:
-      result.edgeCase === "highest" ? SEA_LEVEL_HIGHEST_NOTE : null,
-  };
+  return toMeasuringSeaLevelResult(result);
 }
 
 export type MeasuringSeaLevelEdgeCase = SeaLevelEdgeCase;
@@ -76,8 +121,34 @@ export type MeasuringSeaLevelEdgeCase = SeaLevelEdgeCase;
 export async function fetchMeasuringCoastlineContext(
   seekerPoint: LatLngTuple,
   gameArea: GameArea,
+  options?: {
+    regionPackId?: RegionPackId;
+    onEnrich?: (result: {
+      coastPoint: LatLngTuple;
+      distanceMeters: number;
+    }) => void;
+  },
 ) {
-  const result = await loadCoastlineContext(seekerPoint, gameArea);
+  const result = await loadCoastlineContext(seekerPoint, gameArea, {
+    regionPackId: options?.regionPackId,
+    onEnrich: options?.onEnrich
+      ? (prepared) => {
+          const nearest = nearestPointToCoastlines(
+            seekerPoint,
+            prepared.segments,
+            prepared,
+          );
+          if (!nearest) {
+            return;
+          }
+          options.onEnrich?.({
+            coastPoint: nearest.point,
+            distanceMeters: nearest.distanceMeters,
+          });
+        }
+      : undefined,
+  });
+
   if (!result) {
     return {
       ok: false as const,

@@ -98,3 +98,11 @@ export function packGeoPoiPublicPath(
 ): string {
   return `geo/${packId}/poi/${category}.json`;
 }
+
+export function packGeoCoastlinePublicPath(packId: RegionPackId): string {
+  return `geo/${packId}/coastline.json`;
+}
+
+export function packGeoSeaLevelSeedPublicPath(packId: RegionPackId): string {
+  return `geo/${packId}/sea_level_seed.json`;
+}
