@@ -85,6 +85,41 @@ describe("classifyClientSentryEvent", () => {
     ).toBe("drop");
   });
 
+  it("drops IDB closing/hidden and Safari object-store lookup noise", () => {
+    expect(
+      classifyClientSentryEvent(
+        exc("InvalidStateError", "Database is closing/hidden"),
+      ),
+    ).toBe("drop");
+    expect(
+      classifyClientSentryEvent(
+        exc(
+          "UnknownError",
+          "Error looking up record in object store by key range",
+        ),
+      ),
+    ).toBe("drop");
+  });
+
+  it("drops view-transition abort and visibility-hidden skips", () => {
+    expect(
+      classifyClientSentryEvent(
+        exc(
+          "InvalidStateError",
+          "Transition was aborted because of invalid state",
+        ),
+      ),
+    ).toBe("drop");
+    expect(
+      classifyClientSentryEvent(
+        exc(
+          "InvalidStateError",
+          "Skipping view transition because document visibility state has become hidden.",
+        ),
+      ),
+    ).toBe("drop");
+  });
+
   it("drops Firestore permission-denied", () => {
     expect(
       classifyClientSentryEvent(

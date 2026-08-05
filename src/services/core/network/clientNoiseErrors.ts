@@ -1,9 +1,14 @@
-const IDB_CONNECTION_CLOSING = /database connection is closing/i;
+/** Chrome IDB "connection is closing" + Firebase Auth iOS "Database is closing/hidden". */
+const IDB_CONNECTION_CLOSING =
+  /database(?: connection)? is closing(?:\/hidden)?/i;
 const WEBKIT_LOAD_FAILED = /^Load failed(?:\s*\([^)]*\))?$/i;
 const RECAPTCHA_OT_TYPEERROR =
   /(?:reading ['"]oT['"]|evaluating ['"][^'"]*\.oT['"])/i;
 const FIRESTORE_IDB_PERSISTENCE =
   /INTERNAL ASSERTION FAILED:[\s\S]*\bID:\s*b815\b|Error storing new key generator value in database/i;
+/** Safari Firestore IDB: UnknownError looking up object-store records by key range. */
+const FIRESTORE_IDB_OBJECT_STORE_LOOKUP =
+  /looking up record in object store by key range/i;
 const RECAPTCHA_TIMEOUT = /^reCAPTCHA Timeout\s*\(/i;
 const BROWSER_EXTENSION_NOISE =
   /Invalid call to runtime\.sendMessage\(\)|Object Not Found Matching Id:/i;
@@ -31,6 +36,13 @@ export function isRecaptchaOtTypeErrorMessage(message: string): boolean {
 /** Firestore IndexedDB persistence races (Safari pagehide / key-generator). */
 export function isFirestoreIdbPersistenceNoiseMessage(message: string): boolean {
   return FIRESTORE_IDB_PERSISTENCE.test(message);
+}
+
+/** Safari Firestore IndexedDB object-store key-range lookup failures. */
+export function isFirestoreIdbObjectStoreLookupNoiseMessage(
+  message: string,
+): boolean {
+  return FIRESTORE_IDB_OBJECT_STORE_LOOKUP.test(message);
 }
 
 /** Google reCAPTCHA script timeout string. */
