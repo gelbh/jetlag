@@ -267,7 +267,7 @@ describe("ToolDock", () => {
 });
 
 describe("HiderToolDock", () => {
-  it("keeps hider tools in the bottom-middle hunt island and session on the side", () => {
+  it("keeps session tools on the session island without a bottom Recenter chip", () => {
     const onOpenReportProblem = vi.fn();
     renderWithRouter(
       <HiderToolDock
@@ -292,11 +292,10 @@ describe("HiderToolDock", () => {
     expect(huntLabels).not.toContain("Settings");
     expect(huntLabels).not.toContain("Recenter");
 
-    // Map controls (Recenter) live on the left MapView stack — not in bottom chrome.
-    expect(document.querySelector('[data-island="map-controls"]')).toBeNull();
     expect(
       screen.queryByRole("button", { name: "Recenter map on play area" }),
     ).toBeNull();
+    expect(document.querySelector('[data-island="map-controls"]')).toBeNull();
 
     const sessionTools = screen.getByLabelText("Session tools");
     expect(

@@ -44,9 +44,7 @@ function SeekerMapScreenBody({
       placementFocusMinZoom={controller.placementFocusMinZoom}
       placementFocusMaxZoom={controller.placementFocusMaxZoom}
       placementFocusPreferFly={controller.placementFocusPreferFly}
-      showPlacementRecenter={controller.showPlacementRecenter}
       requestPlacementRecenter={controller.requestPlacementRecenter}
-      activeTool={controller.activeTool}
       handleMapClick={controller.handleMapClick}
       chromeHudRef={controller.chromeHudRef}
       mapShellRef={controller.mapShellRef}

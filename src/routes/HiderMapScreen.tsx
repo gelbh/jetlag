@@ -645,8 +645,7 @@ export function HiderMapScreen() {
           focusBounds={mapFocusBounds}
           fitBoundsMode="once"
           recenterToken={recenterToken}
-          showRecenterControl
-          recenterAriaLabel="Recenter map on play area"
+          showCompassControl
           onRecenter={() => setRecenterToken((value) => value + 1)}
           onMapClick={handleMapClick}
           className="h-full w-full"

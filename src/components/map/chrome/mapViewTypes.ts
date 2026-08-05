@@ -38,10 +38,10 @@ export interface MapViewMapLibreChromeProps {
   onMapStyleChange?: (style: MapStyle) => void;
   showMapStyleToggle?: boolean;
   mapStyleControlInset?: MapZoomControlInset;
-  showRecenterControl?: boolean;
+  /** Left-stack compass — opt-in (`false` when omitted). Play maps pass true. */
+  showCompassControl?: boolean;
+  /** Bump recenterToken / play-area home after compass tap. */
   onRecenter?: () => void;
-  /** Overrides MapRecenterControl aria-label/title (default: question placement). */
-  recenterAriaLabel?: string;
 }
 
 export type MapViewMapLibreProps = MapViewCoreProps & MapViewMapLibreChromeProps;

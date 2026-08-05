@@ -11,6 +11,7 @@
 @import "./styles/map-wizard-attention.css";
 @import "./styles/home-entry.css";
 @import "./styles/map-chrome-controls.css";
+@import "./styles/map-compass-control.css";
 /* After map-chrome-controls so left zoom stack + side clearance tokens win. */
 @import "./styles/map-bottom-chrome.css";
 @import "./styles/map-attribution.css";

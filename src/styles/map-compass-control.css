@@ -1,0 +1,67 @@
+/* Compass button + needle. Left-stack bottoms live in map-bottom-chrome.css. */
+.map-compass-control {
+  position: absolute;
+  z-index: var(--z-dock);
+  display: flex;
+  left: var(--map-left-chrome-inset, max(0.75rem, env(safe-area-inset-left)));
+  right: auto;
+  pointer-events: auto;
+}
+
+.map-compass-control__btn {
+  height: var(--map-compass-control-size, var(--map-zoom-btn-size, 2.75rem));
+  width: var(--map-compass-control-size, var(--map-zoom-btn-size, 2.75rem));
+  min-height: var(--map-compass-control-size, var(--map-zoom-btn-size, 2.75rem));
+  min-width: var(--map-compass-control-size, var(--map-zoom-btn-size, 2.75rem));
+  padding: 0;
+  box-shadow: none;
+}
+
+.map-compass-control__needle {
+  display: block;
+  transform-origin: center center;
+  transition: transform var(--motion-fast, 120ms) var(--ease-out-quint, ease-out);
+}
+
+.map-compass-control--dock {
+  bottom: var(--map-left-tier-compass-bottom-dock);
+}
+
+.map-compass-control--chrome-hidden {
+  bottom: var(--map-left-tier-compass-bottom-chrome-hidden);
+}
+
+.map-compass-control--safe-area {
+  bottom: var(--map-left-tier-compass-bottom-safe-area);
+}
+
+.map-compass-control--container {
+  bottom: var(--map-left-tier-compass-bottom-container);
+}
+
+.map-compass-control--hider-actions {
+  bottom: var(--map-left-tier-compass-bottom-hider-actions);
+}
+
+.map-compass-control--admin-rail {
+  bottom: var(--map-left-tier-compass-bottom-admin-rail);
+  right: calc(
+    max(0.75rem, env(safe-area-inset-right)) +
+      var(--admin-map-control-inset-right, 0px)
+  );
+  left: auto;
+}
+
+html:not([data-motion="reduced"]):not([data-motion="static"]) .map-compass-control {
+  transition: opacity var(--motion-base) var(--ease-out-quint);
+}
+
+html:is([data-motion="static"], [data-motion="reduced"]) .map-compass-control__needle {
+  transition: none;
+}
+
+.map-compass-control[data-map-interacting="true"] {
+  opacity: 0;
+  pointer-events: none;
+  transition: none;
+}

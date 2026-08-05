@@ -483,7 +483,6 @@ export function useMapScreenController() {
     placementFocusMaxZoom,
     placementFocusPreferFly,
     requestPlacementRecenter,
-    showPlacementRecenter: activeTool !== "none",
     mapChromeControlInset,
     placementCrosshair: tools.placementCrosshair,
     mapAttentionActive,

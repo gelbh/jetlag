@@ -40,9 +40,8 @@ function pickMapLibreProps(props: MapViewProps): MapViewMapLibreProps {
     onMapStyleChange: props.onMapStyleChange,
     showMapStyleToggle: props.showMapStyleToggle,
     mapStyleControlInset: props.mapStyleControlInset,
-    showRecenterControl: props.showRecenterControl,
+    showCompassControl: props.showCompassControl,
     onRecenter: props.onRecenter,
-    recenterAriaLabel: props.recenterAriaLabel,
   };
 }
 
