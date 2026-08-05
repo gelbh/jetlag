@@ -3,6 +3,7 @@ import {
   classifyAppCheckProbeFailure,
   isAppCheckSoftFailureMessage,
   isBrowserExtensionNoiseMessage,
+  isFirestoreIdbObjectStoreLookupNoiseMessage,
   isFirestoreIdbPersistenceNoiseMessage,
   isIdbConnectionClosingMessage,
   isRecaptchaOtTypeErrorMessage,
@@ -16,6 +17,12 @@ describe("isIdbConnectionClosingMessage", () => {
       isIdbConnectionClosingMessage(
         "Failed to execute 'transaction' on 'IDBDatabase': The database connection is closing.",
       ),
+    ).toBe(true);
+  });
+
+  it("matches Chrome iOS Firebase Auth Database is closing/hidden", () => {
+    expect(
+      isIdbConnectionClosingMessage("Database is closing/hidden"),
     ).toBe(true);
   });
 
@@ -83,6 +90,29 @@ describe("isFirestoreIdbPersistenceNoiseMessage", () => {
   it("ignores unrelated Firestore errors", () => {
     expect(
       isFirestoreIdbPersistenceNoiseMessage("Missing or insufficient permissions."),
+    ).toBe(false);
+  });
+});
+
+describe("isFirestoreIdbObjectStoreLookupNoiseMessage", () => {
+  it("matches Safari UnknownError object-store key-range lookup", () => {
+    expect(
+      isFirestoreIdbObjectStoreLookupNoiseMessage(
+        "UnknownError: Error looking up record in object store by key range",
+      ),
+    ).toBe(true);
+    expect(
+      isFirestoreIdbObjectStoreLookupNoiseMessage(
+        "Error looking up record in object store by key range",
+      ),
+    ).toBe(true);
+  });
+
+  it("ignores unrelated object-store messages", () => {
+    expect(
+      isFirestoreIdbObjectStoreLookupNoiseMessage(
+        "Failed to delete record from object store",
+      ),
     ).toBe(false);
   });
 });
