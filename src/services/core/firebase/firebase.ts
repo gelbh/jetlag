@@ -14,7 +14,7 @@ import {
 } from "firebase/auth";
 import {
   initializeAppCheck,
-  ReCaptchaV3Provider,
+  ReCaptchaEnterpriseProvider,
   type AppCheck,
 } from "firebase/app-check";
 import {
@@ -145,8 +145,10 @@ function initializeAppCheckIfConfigured(firebaseApp: FirebaseApp): void {
 
   appCheckInitializing = true;
   try {
+    // Site key is reCAPTCHA Enterprise (GCP key + App Check enterpriseConfig).
+    // Classic ReCaptchaV3Provider → exchangeRecaptchaV3Token 403 attestation failed.
     appCheck = initializeAppCheck(firebaseApp, {
-      provider: new ReCaptchaV3Provider(siteKey),
+      provider: new ReCaptchaEnterpriseProvider(siteKey),
       isTokenAutoRefreshEnabled: true,
     });
   } catch (error) {
