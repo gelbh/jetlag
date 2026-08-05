@@ -16,6 +16,8 @@ const EXPECTED_HTTPS_ERROR_KEYS = new Set([
   "invalid-argument:Access code required.",
   "resource-exhausted:Too many attempts. Try again later.",
   "permission-denied:Invalid access code.",
+  "resource-exhausted:Too many recovery attempts. Try again tomorrow.",
+  "invalid-argument:Role code is required.",
 ]);
 
 let initialized = false;
