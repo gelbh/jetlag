@@ -41,7 +41,7 @@ describe("matching features", () => {
     await clearGeographicFeatureCacheForTests();
   });
 
-  it("loads nearby museums and picks the nearest museum", async () => {
+  it("loads museums inside the play area and picks the nearest", async () => {
     vi.spyOn(overpassClient, "queryOverpass").mockResolvedValue({
       elements: [
         {
@@ -70,8 +70,8 @@ describe("matching features", () => {
       "museum",
     );
 
-    expect(features).toHaveLength(3);
-    expect(features.filter((feature) => feature.inPlayArea)).toHaveLength(2);
+    expect(features).toHaveLength(2);
+    expect(features.every((feature) => feature.inPlayArea)).toBe(true);
 
     const nearest = await findNearestMatchingFeature(
       [51.46, -0.15],
@@ -277,7 +277,7 @@ describe("matching features", () => {
     ]);
   });
 
-  it("includes commercial airports outside the play area", async () => {
+  it("excludes commercial airports outside the play area", async () => {
     vi.spyOn(overpassClient, "queryOverpass").mockResolvedValue({
       elements: [
         {
@@ -307,8 +307,7 @@ describe("matching features", () => {
       "commercial_airport",
     );
 
-    expect(features).toHaveLength(1);
-    expect(features[0]?.inPlayArea).toBe(false);
+    expect(features).toEqual([]);
 
     const nearest = await findNearestMatchingFeature(
       [53.35, -6.26],
@@ -316,13 +315,16 @@ describe("matching features", () => {
       "commercial_airport",
     );
 
-    expect(nearest?.name).toBe("Dublin Airport");
+    expect(nearest).toBeNull();
   });
 
-  it("builds feature count labels for nearby features", () => {
+  it("builds feature count labels for play-area features", () => {
     expect(
       matchingFeatureCountLabel(3, 1, false, false),
     ).toBe("3 features (1 in play area, 2 nearby)");
+    expect(
+      matchingFeatureCountLabel(2, 2, false, false),
+    ).toBe("2 features in play area");
   });
 
   it("describes null answers with category-specific guidance", () => {

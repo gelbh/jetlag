@@ -23,7 +23,7 @@ import type { OverpassElement } from "./types";
 
 function buildStationQuery(gameArea: GameArea): string {
   return buildTransitStopOverpassQuery(
-    matchingSearchBoundingBox(gameArea, "station_name_length"),
+    matchingSearchBoundingBox(gameArea),
   );
 }
 

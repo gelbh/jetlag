@@ -1,7 +1,6 @@
 import {
   getMatchingCategory,
   matchingCategoryLabel,
-  matchingUsesExpandedFeatureSearch,
   type MatchingCategoryId,
 } from "@/domain/questions";
 
@@ -38,12 +37,6 @@ export function matchingFeatureNotFoundMessage(
   categoryId: MatchingCategoryId,
 ): string {
   const label = matchingCategoryLabel(categoryId).toLowerCase();
-  const category = getMatchingCategory(categoryId);
-
-  if (matchingUsesExpandedFeatureSearch(category)) {
-    return `No named ${label} found near this play area.`;
-  }
-
   return `No named ${label} found in this play area.`;
 }
 
@@ -63,10 +56,10 @@ export function matchingNullAnswerMessage(
   }
 
   if (categoryId === "commercial_airport") {
-    return `No commercial airport with a flight code was found near this play area.${nullSuffix}`;
+    return `No commercial airport with a flight code was found in this play area.${nullSuffix}`;
   }
 
-  return `No named ${label} found near this play area.${nullSuffix}`;
+  return `No named ${label} found in this play area.${nullSuffix}`;
 }
 
 export function matchingResolveFailureMessage(

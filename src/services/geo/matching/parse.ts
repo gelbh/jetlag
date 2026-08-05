@@ -4,12 +4,7 @@ import {
   type LatLngTuple,
 } from "@/domain/geometry/gameArea/geometry";
 import type { MatchingFeature } from "@/domain/geo/types";
-import {
-  getMatchingCategory,
-  matchingUsesExpandedFeatureSearch,
-  type MatchingCategoryId,
-} from "@/domain/questions";
-import { resolveMatchingCategory } from "@/domain/session/catalog/sessionCustomCatalog";
+import type { MatchingCategoryId } from "@/domain/questions";
 import type { SessionCustomCategory } from "@/domain/session/catalog/sessionCustomContent";
 import type { OverpassElement } from "./types";
 
@@ -81,10 +76,7 @@ export function parseMatchingFeatures(
   categoryId: MatchingCategoryId,
   customCategories: readonly SessionCustomCategory[] = [],
 ): MatchingFeature[] {
-  const category =
-    resolveMatchingCategory(categoryId, customCategories) ??
-    getMatchingCategory(categoryId);
-  const includeOutsidePlayArea = matchingUsesExpandedFeatureSearch(category);
+  void customCategories;
   const seen = new Set<string>();
 
   return elements
@@ -102,7 +94,7 @@ export function parseMatchingFeatures(
 
       const point: LatLngTuple = [lat, lng];
       const inPlayArea = isPointInGameArea(point, gameArea);
-      if (!includeOutsidePlayArea && !inPlayArea) {
+      if (!inPlayArea) {
         return null;
       }
 
