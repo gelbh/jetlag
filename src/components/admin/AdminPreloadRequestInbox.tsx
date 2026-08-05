@@ -18,6 +18,7 @@ import { InlineError } from "../ui/banners/InlineError";
 import "./AdminIncidentDesk.css";
 
 const CLOSED = new Set<PreloadRequestStatus>(["declined", "shipped"]);
+const EMPTY_REQUESTS: PreloadRequest[] = [];
 
 const ACTION_STATUSES: readonly PreloadRequestStatus[] = [
   "accepted",
@@ -29,22 +30,27 @@ const ACTION_STATUSES: readonly PreloadRequestStatus[] = [
 export function AdminPreloadRequestInbox() {
   const { enabled, loading: accessLoading } = useAdminAccessState();
   const [requests, setRequests] = useState<PreloadRequest[]>([]);
-  const [listLoading, setListLoading] = useState(enabled);
+  const [listLoading, setListLoading] = useState(false);
   const [listError, setListError] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [showClosed, setShowClosed] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [enabledState, setEnabledState] = useState(enabled);
+
+  if (enabled !== enabledState) {
+    setEnabledState(enabled);
+    if (enabled) {
+      setListLoading(true);
+      setListError(null);
+    }
+  }
 
   useEffect(() => {
     if (!enabled) {
-      setRequests([]);
-      setListLoading(false);
       return;
     }
 
-    setListLoading(true);
-    setListError(null);
     return subscribePreloadRequestList(
       (next) => {
         setRequests(next);
@@ -57,18 +63,19 @@ export function AdminPreloadRequestInbox() {
     );
   }, [enabled]);
 
-  const openCount = countOpenPreloadRequests(requests);
+  const visibleRequests = enabled ? requests : EMPTY_REQUESTS;
+  const openCount = countOpenPreloadRequests(visibleRequests);
   const visible = useMemo(
     () =>
       showClosed
-        ? requests
-        : requests.filter((request) => !CLOSED.has(request.status)),
-    [requests, showClosed],
+        ? visibleRequests
+        : visibleRequests.filter((request) => !CLOSED.has(request.status)),
+    [visibleRequests, showClosed],
   );
 
   const selected =
     visible.find((row) => row.id === selectedId) ??
-    requests.find((row) => row.id === selectedId) ??
+    visibleRequests.find((row) => row.id === selectedId) ??
     null;
 
   const onStatus = async (requestId: string, status: PreloadRequestStatus) => {
@@ -138,8 +145,8 @@ export function AdminPreloadRequestInbox() {
             Show closed
           </label>
 
-          {listError ? <InlineError>{listError}</InlineError> : null}
-          {listLoading ? (
+          {listError && enabled ? <InlineError>{listError}</InlineError> : null}
+          {enabled && listLoading ? (
             <p className="jl-incident-empty">Loading…</p>
           ) : visible.length === 0 ? (
             <p className="jl-incident-empty">No preload requests.</p>
