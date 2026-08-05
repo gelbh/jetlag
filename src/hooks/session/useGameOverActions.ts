@@ -2,6 +2,7 @@ import { useCallback, useState } from "react";
 import { LOCAL_SESSION_ID, type SessionRecord } from "../../domain/map/annotations";
 import { useSessionExit } from "../session/useSessionExit";
 import { resetSessionForRematch } from "../../services/session/sessionRematch";
+import { mapRematchError } from "../../services/session/sessionRematchErrors";
 import { clearLiveLocationOnLeave } from "../../services/session/clearLiveLocationOnLeave";
 import {
   allowPlayerLocationPublishes,
@@ -34,8 +35,8 @@ export function useGameOverActions(
     setRematchPending(true);
     try {
       await resetSessionForRematch(rematchSessionId);
-    } catch {
-      setRematchError("Could not start rematch. Try again.");
+    } catch (error) {
+      setRematchError(mapRematchError(error));
     } finally {
       setRematchPending(false);
     }
