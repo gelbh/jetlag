@@ -21,8 +21,11 @@ import {
 import { timeTrapForHider } from "../domain/expansion/timeTraps";
 import { useTimeTrapsSync } from "../hooks/session/useTimeTrapsSync";
 import { useBoardEconomy } from "../hooks/session/useBoardEconomy";
-import { DrawPickSheet } from "../components/session/board/DrawPickSheet";
-import { HiderHandSheet } from "../components/session/board/HiderHandSheet";
+import {
+  HiderBoardEconomySheets,
+  hiderBoardEconomyDockProps,
+  hiderBoardEconomyZoneOpts,
+} from "./hider-map-screen/HiderBoardEconomySheets";
 import { useTimeTrapTool } from "../hooks/session/useTimeTrapTool";
 import type { HiderTruthRevealState } from "../components/session/banners/HiderTruthRevealBanner";
 import { useDesktopLayout } from "../hooks/layout/useDesktopLayout";
@@ -470,17 +473,11 @@ export function HiderMapScreen() {
     ensureWriteAccess: ensureHiderWriteAccess,
     writesEnabled: authReady && Boolean(uid),
     mapPickEnabled,
-    hasMoveCard: boardEconomyEnabled
-      ? () => Boolean(boardEconomy.state?.hand.some((c) => c.def.kind === "move"))
-      : undefined,
-    consumeMoveCard: boardEconomyEnabled
-      ? async () => {
-          const move = boardEconomy.state?.hand.find((c) => c.def.kind === "move");
-          if (move) {
-            await boardEconomy.runMove(move.instanceId);
-          }
-        }
-      : undefined,
+    ...hiderBoardEconomyZoneOpts(
+      boardEconomyEnabled,
+      boardEconomy.state,
+      boardEconomy.runMove,
+    ),
   });
 
   const searchViewportBounds = useCallback((): MapViewportBounds => {
@@ -825,20 +822,15 @@ export function HiderMapScreen() {
         onOpenChat={openChatExclusive}
         onOpenSettings={openSettingsExclusive}
         onOpenCodes={openCodesExclusive}
-        handLabel={
-          boardEconomyEnabled && boardEconomy.state
-            ? `Hand ${boardEconomy.state.hand.length}/${boardEconomy.state.handLimit}`
-            : undefined
-        }
-        onOpenHand={
-          boardEconomyEnabled && boardEconomy.state
-            ? () => setHandSheetOpen(true)
-            : undefined
-        }
-        boardEconomyEnabled={boardEconomyEnabled}
-        hasMoveCard={Boolean(
-          boardEconomy.state?.hand.some((card) => card.def.kind === "move"),
-        )}
+        {...(boardEconomyEnabled
+          ? {
+              ...hiderBoardEconomyDockProps(boardEconomy.state),
+              onOpenHand: boardEconomy.state
+                ? () => setHandSheetOpen(true)
+                : undefined,
+              boardEconomyEnabled: true,
+            }
+          : {})}
         expansionPackEnabled={expansionPackEnabled}
         expansionMenuOpen={expansionMenuOpen}
         onExpansionMenuOpenChange={setExpansionMenuOpen}
@@ -939,11 +931,14 @@ export function HiderMapScreen() {
               );
 
               if (!deadlineExpired && boardEconomyEnabled) {
-                await boardEconomy.applyAnswerReward(
+                const reward = await boardEconomy.applyAnswerReward(
                   pending.toolType,
                   pending.cardDraw,
                   pending.cardKeep,
                 );
+                if (reward && !reward.needsPick) {
+                  setHandSheetOpen(true);
+                }
               }
 
               const answerTruthReference = truthContext
@@ -982,36 +977,12 @@ export function HiderMapScreen() {
           },
         }}
       />
-      {boardEconomyEnabled && boardEconomy.state ? (
-        <HiderHandSheet
-          open={handSheetOpen && !boardEconomy.pendingDraw}
-          onClose={() => setHandSheetOpen(false)}
-          state={boardEconomy.state}
-          gameSize={session?.gameSize ?? "medium"}
-          mustDiscard={boardEconomy.mustDiscard}
-          onDiscard={(id) => void boardEconomy.discardCards([id])}
-          onPlayExpand={(id, power) =>
-            void boardEconomy.runExpandHand(id, power)
-          }
-          onPlayDiscardDraw={(powerId, discardIds, drawN) =>
-            void boardEconomy.runDiscardDraw(powerId, discardIds, drawN)
-          }
-          onPlayCurse={(id) => void boardEconomy.runPlayCurse(id)}
-          onClearCurse={(id) => void boardEconomy.runClearCurse(id)}
-          onPlayMove={(id) => void boardEconomy.runMove(id)}
-        />
-      ) : null}
       {boardEconomyEnabled ? (
-        <DrawPickSheet
-          pending={boardEconomy.pendingDraw}
+        <HiderBoardEconomySheets
+          economy={boardEconomy}
           gameSize={session?.gameSize ?? "medium"}
-          onConfirm={(ids) => {
-            void boardEconomy.confirmDrawPick(ids).then((stillPending) => {
-              if (!stillPending) {
-                setHandSheetOpen(true);
-              }
-            });
-          }}
+          handSheetOpen={handSheetOpen}
+          onHandSheetOpenChange={setHandSheetOpen}
         />
       ) : null}
     </div>

@@ -31,6 +31,7 @@ export function serializeBoardEconomyState(
     discard: state.discard,
     handLimit: state.handLimit,
     activeCurses: state.activeCurses,
+    pendingPick: state.pendingPick,
     updatedAt: new Date().toISOString(),
   };
 }
@@ -47,12 +48,21 @@ export function deserializeBoardEconomyState(
   ) {
     return null;
   }
+  const pendingPick =
+    data.pendingPick &&
+    typeof data.pendingPick === "object" &&
+    Array.isArray((data.pendingPick as { drawn?: unknown }).drawn) &&
+    typeof (data.pendingPick as { keep?: unknown }).keep === "number" &&
+    Array.isArray((data.pendingPick as { cyclesRemaining?: unknown }).cyclesRemaining)
+      ? (data.pendingPick as BoardEconomyState["pendingPick"])
+      : null;
   return {
     deck: data.deck as BoardEconomyState["deck"],
     hand: data.hand as BoardEconomyState["hand"],
     discard: data.discard as BoardEconomyState["discard"],
     handLimit: data.handLimit,
     activeCurses: data.activeCurses as BoardEconomyState["activeCurses"],
+    pendingPick,
   };
 }
 

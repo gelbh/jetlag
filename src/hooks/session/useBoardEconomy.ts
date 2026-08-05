@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import {
+  advanceUntilInteractivePick,
   beginSequentialRewardPick,
   continueSequentialRewardPick,
   enforceHandLimit,
@@ -11,7 +12,6 @@ import {
   discardFromHand,
   rewardCyclesFromPendingCost,
   type BoardEconomyState,
-  type PendingDrawPick,
 } from "../../domain/boardEconomy";
 import type { PendingQuestionToolType } from "../../domain/session/activity/sessionChat";
 import {
@@ -28,14 +28,12 @@ export function useBoardEconomy(params: {
   const { sessionId, enabled, seed } = params;
   const [state, setState] = useState<BoardEconomyState | null>(null);
   const [ready, setReady] = useState(false);
-  const [pendingDraw, setPendingDraw] = useState<PendingDrawPick | null>(null);
 
   useEffect(() => {
     /* eslint-disable react-hooks/set-state-in-effect -- clear subscription state when disabled */
     if (!enabled || !sessionId || !seed) {
       setState(null);
       setReady(false);
-      setPendingDraw(null);
       return;
     }
     /* eslint-enable react-hooks/set-state-in-effect */
@@ -74,38 +72,6 @@ export function useBoardEconomy(params: {
     [enabled, sessionId],
   );
 
-  const autoResolveTrivialPicks = useCallback(
-    async (
-      start: PendingDrawPick | null,
-    ): Promise<{
-      pending: PendingDrawPick | null;
-      state: BoardEconomyState | null;
-    }> => {
-      let current = start;
-      let lastState: BoardEconomyState | null = start?.state ?? null;
-      while (
-        current &&
-        (current.keep === 0 ||
-          current.drawn.length === 0 ||
-          current.keep >= current.drawn.length)
-      ) {
-        const keepIds = current.drawn
-          .slice(0, current.keep)
-          .map((card) => card.instanceId);
-        const advanced = continueSequentialRewardPick(current, keepIds);
-        lastState = advanced.state;
-        if (advanced.pending === null) {
-          await persist(advanced.state);
-          return { pending: null, state: advanced.state };
-        }
-        current = advanced.pending;
-        setState(advanced.state);
-      }
-      return { pending: current, state: current?.state ?? lastState };
-    },
-    [persist],
-  );
-
   const applyAnswerReward = useCallback(
     async (
       toolType: PendingQuestionToolType,
@@ -115,54 +81,47 @@ export function useBoardEconomy(params: {
       if (!enabled || !sessionId || !seed) {
         return null;
       }
+      const current = await ensureBoardEconomyState(sessionId, seed);
+      if (current.pendingPick) {
+        return {
+          mustDiscard: enforceHandLimit(current.hand, current.handLimit)
+            .mustDiscard,
+          needsPick: true,
+        };
+      }
       const cycles = rewardCyclesFromPendingCost(toolType, cardDraw, cardKeep);
       if (!cycles) {
         return null;
       }
-      const current = await ensureBoardEconomyState(sessionId, seed);
       const started = beginSequentialRewardPick(current, cycles);
-      const resolved = await autoResolveTrivialPicks(started);
-      setPendingDraw(resolved.pending);
-      if (resolved.state) {
-        setState(resolved.state);
-      }
-      const hand = resolved.state?.hand ?? current.hand;
-      const handLimit = resolved.state?.handLimit ?? current.handLimit;
+      const advanced = advanceUntilInteractivePick(started);
+      await persist(advanced);
       return {
-        mustDiscard: enforceHandLimit(hand, handLimit).mustDiscard,
-        needsPick: resolved.pending !== null,
+        mustDiscard: enforceHandLimit(advanced.hand, advanced.handLimit)
+          .mustDiscard,
+        needsPick: advanced.pendingPick !== null,
       };
     },
-    [autoResolveTrivialPicks, enabled, seed, sessionId],
+    [enabled, persist, seed, sessionId],
   );
 
   const confirmDrawPick = useCallback(
     async (keepInstanceIds: readonly string[]): Promise<boolean> => {
-      if (!pendingDraw) {
+      if (!state?.pendingPick) {
         return false;
       }
-      const advanced = continueSequentialRewardPick(
-        pendingDraw,
-        keepInstanceIds,
+      const advanced = advanceUntilInteractivePick(
+        continueSequentialRewardPick(state, keepInstanceIds),
       );
-      if (advanced.pending === null) {
-        setPendingDraw(null);
-        await persist(advanced.state);
-        return false;
-      }
-      const resolved = await autoResolveTrivialPicks(advanced.pending);
-      setPendingDraw(resolved.pending);
-      if (resolved.state) {
-        setState(resolved.state);
-      }
-      return resolved.pending !== null;
+      await persist(advanced);
+      return advanced.pendingPick !== null;
     },
-    [autoResolveTrivialPicks, pendingDraw, persist],
+    [persist, state],
   );
 
   const discardCards = useCallback(
     async (instanceIds: readonly string[]) => {
-      if (!state) {
+      if (!state || state.pendingPick) {
         return;
       }
       await persist(discardFromHand(state, instanceIds));
@@ -175,7 +134,7 @@ export function useBoardEconomy(params: {
       instanceId: string,
       powerUpId: "expandHand1" | "expandHand2",
     ) => {
-      if (!state) {
+      if (!state || state.pendingPick) {
         return;
       }
       await persist(playExpandHand(state, instanceId, powerUpId));
@@ -189,7 +148,7 @@ export function useBoardEconomy(params: {
       discardInstanceIds: readonly string[],
       drawN: number,
     ) => {
-      if (!state) {
+      if (!state || state.pendingPick) {
         return;
       }
       await persist(
@@ -206,7 +165,7 @@ export function useBoardEconomy(params: {
 
   const runMove = useCallback(
     async (moveInstanceId: string) => {
-      if (!state) {
+      if (!state || state.pendingPick) {
         return;
       }
       await persist(playMoveCard(state, moveInstanceId));
@@ -216,7 +175,7 @@ export function useBoardEconomy(params: {
 
   const runPlayCurse = useCallback(
     async (curseInstanceId: string) => {
-      if (!state) {
+      if (!state || state.pendingPick) {
         return;
       }
       await persist(
@@ -228,7 +187,7 @@ export function useBoardEconomy(params: {
 
   const runClearCurse = useCallback(
     async (curseInstanceId: string) => {
-      if (!state) {
+      if (!state || state.pendingPick) {
         return;
       }
       await persist(
@@ -241,7 +200,7 @@ export function useBoardEconomy(params: {
   return {
     state,
     ready,
-    pendingDraw,
+    pendingDraw: state?.pendingPick ?? null,
     mustDiscard: state
       ? enforceHandLimit(state.hand, state.handLimit).mustDiscard
       : 0,

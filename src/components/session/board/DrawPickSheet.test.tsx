@@ -8,15 +8,15 @@ import {
 
 describe("DrawPickSheet", () => {
   it("requires keep count and records keep/discard selection", () => {
-    const pending = beginSequentialRewardPick(
+    const started = beginSequentialRewardPick(
       createInitialBoardEconomyState("draw-ui"),
       [{ draw: 3, keep: 1 }],
     );
-    expect(pending).not.toBeNull();
+    expect(started.pendingPick).not.toBeNull();
     const onConfirm = vi.fn();
     render(
       <DrawPickSheet
-        pending={pending}
+        pending={started.pendingPick}
         gameSize="medium"
         onConfirm={onConfirm}
       />,
@@ -31,6 +31,8 @@ describe("DrawPickSheet", () => {
     fireEvent.click(options[0]!);
     fireEvent.click(screen.getByRole("button", { name: /Confirm keep/i }));
     expect(onConfirm).toHaveBeenCalledTimes(1);
-    expect(onConfirm.mock.calls[0]![0]).toEqual([pending!.drawn[0]!.instanceId]);
+    expect(onConfirm.mock.calls[0]![0]).toEqual([
+      started.pendingPick!.drawn[0]!.instanceId,
+    ]);
   });
 });

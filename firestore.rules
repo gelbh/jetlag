@@ -559,7 +559,14 @@ service cloud.firestore {
         && request.resource.data.diff(resource.data).affectedKeys()
           .hasOnly(['boardEconomyEnabled'])
         && request.resource.data.boardEconomyEnabled is bool
-        && (isSessionHost(sessionId) || isAdmin())
+        // Prefer resource.hostUid (no sessionData get) for expression budget on large gameArea.
+        && (
+          (
+            resource.data.hostUid is string
+            && request.auth.uid == resource.data.hostUid
+          )
+          || isAdmin()
+        )
         && resource.data.memberUids is list
         && request.auth.uid in resource.data.memberUids
         && timerNeverStarted(resource.data)

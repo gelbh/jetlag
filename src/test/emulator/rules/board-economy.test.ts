@@ -75,6 +75,42 @@ describe("firestore.rules — boardEconomyEnabled host gate", () => {
     );
   });
 
+  it("allows non-ops host to enable on large gameArea geometry (budget)", async () => {
+    const ring: [number, number][] = [];
+    for (let i = 0; i < 80; i += 1) {
+      const t = (i / 80) * Math.PI * 2;
+      ring.push([-6.26 + Math.cos(t) * 0.2, 53.35 + Math.sin(t) * 0.2]);
+    }
+    ring.push(ring[0]!);
+    const host = rules.testEnv.authenticatedContext("host-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-be-large-host")
+      .set(
+        sessionPayload("host-1", {
+          gameArea: {
+            south: 53.1,
+            west: -6.5,
+            north: 53.6,
+            east: -6.0,
+            geometryJson: JSON.stringify({
+              type: "Polygon",
+              coordinates: [ring],
+            }),
+          },
+        }),
+      );
+
+    await assertSucceeds(
+      host
+        .firestore()
+        .collection("sessions")
+        .doc("session-be-large-host")
+        .update({ boardEconomyEnabled: true }),
+    );
+  });
+
   it("allows ops admin host to enable on large gameArea geometry (budget)", async () => {
     const ring: [number, number][] = [];
     for (let i = 0; i < 80; i += 1) {
