@@ -54,6 +54,22 @@ describe("matching geometry", () => {
     ).toBe(true);
   });
 
+  it("returns empty yes-elimination when a sole feature covers the play area", async () => {
+    const yesRegion = await buildMatchingEliminationRegion(
+      [features[0]],
+      "west",
+      sampleGameArea,
+      "yes",
+    );
+
+    expect(yesRegion?.geometry.type).toBe("MultiPolygon");
+    expect(
+      yesRegion?.geometry.type === "MultiPolygon"
+        ? yesRegion.geometry.coordinates
+        : null,
+    ).toEqual([]);
+  });
+
   it("keeps the seeker anchor inside the same-nearest region", async () => {
     const anchor: LatLngTuple = [51.45, -0.16];
     const nearest = pickNearestMatchingFeature(anchor, features);
