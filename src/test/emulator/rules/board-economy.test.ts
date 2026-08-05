@@ -89,6 +89,30 @@ describe("firestore.rules — boardEconomyEnabled ops gate", () => {
     );
   });
 
+  it("allows ops admin when timer fields are missing (legacy never-started)", async () => {
+    const host = rules.testEnv.authenticatedContext("host-1");
+    const payload = sessionPayload("host-1", {
+      memberUids: ["host-1", "admin-1"],
+      memberRoles: { "host-1": "seeker", "admin-1": "observer" },
+    });
+    delete payload.timerAccumulatedMs;
+    delete payload.timerRunningSince;
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-be-legacy-timer")
+      .set(payload);
+
+    const admin = adminContext(rules.testEnv);
+    await assertSucceeds(
+      admin
+        .firestore()
+        .collection("sessions")
+        .doc("session-be-legacy-timer")
+        .update({ boardEconomyEnabled: true }),
+    );
+  });
+
   it("rejects ops admin when timerRunningSince is set even if accumulated is 0", async () => {
     const host = rules.testEnv.authenticatedContext("host-1");
     await host

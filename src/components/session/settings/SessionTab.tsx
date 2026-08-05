@@ -92,11 +92,6 @@ export function MapSettingsSessionTab({
           sessionId={session.id}
           enabled={session.boardEconomyEnabled === true}
           disabled={boardEconomyTimerLocked}
-          disabledReason={
-            boardEconomyTimerLocked
-              ? "Hide timer already started — board economy can only be toggled before the timer runs (including a 0:00 running clock)."
-              : null
-          }
         />
       ) : null}
 

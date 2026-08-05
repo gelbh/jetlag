@@ -28,17 +28,12 @@ describe("BoardEconomyOpsToggle", () => {
     expect(screen.getByRole("alert")).toHaveTextContent(/hide timer/i);
   });
 
-  it("shows disabledReason when timer-locked", () => {
+  it("shows timer-locked helper when disabled", () => {
     render(
-      <BoardEconomyOpsToggle
-        sessionId="s1"
-        enabled={false}
-        disabled
-        disabledReason="Hide timer already started — locked."
-      />,
+      <BoardEconomyOpsToggle sessionId="s1" enabled={false} disabled />,
     );
     expect(
-      screen.getByText(/Hide timer already started — locked/i),
+      screen.getByText(/Hide timer already started/i),
     ).toBeInTheDocument();
     expect(
       screen.getByRole("checkbox", { name: /Simulate hider deck/i }),

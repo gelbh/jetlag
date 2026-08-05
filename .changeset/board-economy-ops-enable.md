@@ -2,4 +2,4 @@
 "@jetlag/app": patch
 ---
 
-Ops board-economy toggle: clearer errors when the hide timer already started, and Firestore rules that no longer deny the enable write on large map areas.
+Ops board-economy toggle: enable works on large map areas; the control locks and explains when the hide timer has already started.

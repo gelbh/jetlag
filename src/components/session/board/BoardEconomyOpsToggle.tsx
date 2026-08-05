@@ -12,19 +12,22 @@ function boardEconomyUpdateErrorMessage(error: unknown): string {
   return "Could not update board economy flag.";
 }
 
+const TIMER_LOCKED_HINT =
+  "Hide timer already started — board economy can only be toggled before the timer runs (including a 0:00 running clock).";
+
+const DEFAULT_HINT =
+  "Default off. Only your ops admin account can enable this before the hide timer starts. Public hosts never see this control.";
+
 /** Ops-admin only. Must not render unless useAdminAccessState().state === "admin". */
 export function BoardEconomyOpsToggle({
   sessionId,
   enabled,
   disabled,
-  disabledReason,
   onChanged,
 }: {
   sessionId: string;
   enabled: boolean;
   disabled?: boolean;
-  /** When set, shown instead of the default helper (e.g. timer already started). */
-  disabledReason?: string | null;
   onChanged?: (next: boolean) => void;
 }) {
   const [pending, setPending] = useState(false);
@@ -32,7 +35,6 @@ export function BoardEconomyOpsToggle({
   const errorId = useId();
   const hintId = useId();
   const locked = Boolean(disabled) || pending;
-  const hint = disabledReason?.trim() || null;
 
   return (
     <fieldset
@@ -48,9 +50,7 @@ export function BoardEconomyOpsToggle({
           checked={enabled}
           disabled={locked}
           aria-describedby={
-            [error ? errorId : null, hint ? hintId : null]
-              .filter(Boolean)
-              .join(" ") || undefined
+            [error ? errorId : null, hintId].filter(Boolean).join(" ")
           }
           onChange={(event) => {
             const next = event.target.checked;
@@ -69,9 +69,8 @@ export function BoardEconomyOpsToggle({
           Simulate hider deck (hand, rewards, power-ups)
         </span>
       </label>
-      <p id={hint ? hintId : undefined} className="text-xs text-ink-muted">
-        {hint ??
-          "Default off. Only your ops admin account can enable this before the hide timer starts. Public hosts never see this control."}
+      <p id={hintId} className="text-xs text-ink-muted">
+        {disabled ? TIMER_LOCKED_HINT : DEFAULT_HINT}
       </p>
       {error ? (
         <p id={errorId} role="alert" className="text-xs text-status-error">
