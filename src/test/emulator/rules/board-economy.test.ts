@@ -9,10 +9,10 @@ import {
   sessionPayload,
 } from "./helpers";
 
-describe("firestore.rules — boardEconomyEnabled ops gate", () => {
+describe("firestore.rules — boardEconomyEnabled host gate", () => {
   const rules = bindRulesTestEnv();
 
-  it("rejects non-ops host enabling boardEconomyEnabled", async () => {
+  it("allows session host (non-ops) to enable boardEconomyEnabled before timer", async () => {
     const host = rules.testEnv.authenticatedContext("host-1");
     await host
       .firestore()
@@ -20,11 +20,34 @@ describe("firestore.rules — boardEconomyEnabled ops gate", () => {
       .doc("session-be-1")
       .set(sessionPayload("host-1"));
 
-    await assertFails(
+    await assertSucceeds(
       host
         .firestore()
         .collection("sessions")
         .doc("session-be-1")
+        .update({ boardEconomyEnabled: true }),
+    );
+  });
+
+  it("rejects non-host member enabling boardEconomyEnabled", async () => {
+    const host = rules.testEnv.authenticatedContext("host-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-be-nonhost")
+      .set(
+        sessionPayload("host-1", {
+          memberUids: ["host-1", "seeker-1"],
+          memberRoles: { "host-1": "seeker", "seeker-1": "seeker" },
+        }),
+      );
+
+    const seeker = rules.testEnv.authenticatedContext("seeker-1");
+    await assertFails(
+      seeker
+        .firestore()
+        .collection("sessions")
+        .doc("session-be-nonhost")
         .update({ boardEconomyEnabled: true }),
     );
   });
@@ -48,6 +71,42 @@ describe("firestore.rules — boardEconomyEnabled ops gate", () => {
         .firestore()
         .collection("sessions")
         .doc("session-be-2")
+        .update({ boardEconomyEnabled: true }),
+    );
+  });
+
+  it("allows non-ops host to enable on large gameArea geometry (budget)", async () => {
+    const ring: [number, number][] = [];
+    for (let i = 0; i < 80; i += 1) {
+      const t = (i / 80) * Math.PI * 2;
+      ring.push([-6.26 + Math.cos(t) * 0.2, 53.35 + Math.sin(t) * 0.2]);
+    }
+    ring.push(ring[0]!);
+    const host = rules.testEnv.authenticatedContext("host-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-be-large-host")
+      .set(
+        sessionPayload("host-1", {
+          gameArea: {
+            south: 53.1,
+            west: -6.5,
+            north: 53.6,
+            east: -6.0,
+            geometryJson: JSON.stringify({
+              type: "Polygon",
+              coordinates: [ring],
+            }),
+          },
+        }),
+      );
+
+    await assertSucceeds(
+      host
+        .firestore()
+        .collection("sessions")
+        .doc("session-be-large-host")
         .update({ boardEconomyEnabled: true }),
     );
   });

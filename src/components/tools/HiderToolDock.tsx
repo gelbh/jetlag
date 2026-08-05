@@ -1,4 +1,4 @@
-import { HudPlusIcon } from "../ui/brand/HudIcons";
+import { HudLayersIcon, HudPlusIcon } from "../ui/brand/HudIcons";
 import { HudPinIcon } from "../map/icons/ToolIcons";
 import { MapBottomChrome } from "../map/chrome/MapBottomChrome";
 import { MapChromeControl } from "../map/chrome/MapChromeControl";
@@ -10,6 +10,10 @@ interface HiderToolDockProps {
   zoneLabel: string;
   onZoneAction: () => void;
   zoneDisabled?: boolean;
+  /** Board hand control placed next to Set zone when economy is on. */
+  handLabel?: string;
+  onOpenHand?: () => void;
+  handDisabled?: boolean;
   showExpansion: boolean;
   onExpansion: () => void;
   onOpenChat: () => void;
@@ -28,6 +32,9 @@ export function HiderToolDock({
   zoneLabel,
   onZoneAction,
   zoneDisabled = false,
+  handLabel,
+  onOpenHand,
+  handDisabled = false,
   showExpansion,
   onExpansion,
   onOpenChat,
@@ -57,6 +64,17 @@ export function HiderToolDock({
             icon={<HudPinIcon className="h-5 w-5 shrink-0" />}
             label={zoneLabel}
           />
+
+          {handLabel && onOpenHand ? (
+            <MapChromeControl
+              variant="slot"
+              onClick={onOpenHand}
+              disabled={handDisabled || inactive}
+              aria-label={handLabel}
+              icon={<HudLayersIcon className="h-5 w-5 shrink-0" />}
+              label={handLabel}
+            />
+          ) : null}
 
           {showExpansion ? (
             <MapChromeControl

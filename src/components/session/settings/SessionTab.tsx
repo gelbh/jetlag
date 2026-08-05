@@ -4,13 +4,7 @@ import { ShareCode } from "../identity/ShareCode";
 import { SettingsToggleRow } from "../settings/SettingsToggleRow";
 import { NotificationPreferencesSection } from "./NotificationPreferencesSection";
 import { RolePasscodeSettings } from "./RolePasscodeSettings";
-import {
-  LOCAL_SESSION_ID,
-  type SessionRecord,
-} from "@/domain/map/annotations";
-import { timerNeverStarted } from "@/domain/session/rules/core";
-import { useAdminAccessState } from "@/hooks/admin/useAdminAccessState";
-import { BoardEconomyOpsToggle } from "../board/BoardEconomyOpsToggle";
+import { type SessionRecord } from "@/domain/map/annotations";
 
 export interface MapSettingsSessionTabProps {
   sessionCode: string;
@@ -69,15 +63,6 @@ export function MapSettingsSessionTab({
 }: MapSettingsSessionTabProps) {
   const [deviceSectionOpen, setDeviceSectionOpen] = useState(false);
   const [resetMenuOpen, setResetMenuOpen] = useState(false);
-  const { state: adminAccessState } = useAdminAccessState();
-  const showBoardEconomyOps =
-    adminAccessState === "admin" &&
-    Boolean(session?.id) &&
-    session?.id !== LOCAL_SESSION_ID &&
-    remoteSession;
-  const boardEconomyTimerLocked = session
-    ? !timerNeverStarted(session)
-    : false;
 
   return (
     <div className="space-y-4">
@@ -85,14 +70,6 @@ export function MapSettingsSessionTab({
 
       {session && myUid ? (
         <RolePasscodeSettings session={session} myUid={myUid} isHost={isHost} />
-      ) : null}
-
-      {showBoardEconomyOps && session ? (
-        <BoardEconomyOpsToggle
-          sessionId={session.id}
-          enabled={session.boardEconomyEnabled === true}
-          disabled={boardEconomyTimerLocked}
-        />
       ) : null}
 
       <div className="space-y-2 border-t-2 border-border pt-4">
