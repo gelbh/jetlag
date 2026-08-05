@@ -3,6 +3,8 @@ import type { GameArea } from "@/domain/map/annotations";
 import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
 import { overpassErrorMessage } from "@/services/core/overpass/overpassClient";
 import { searchPlaces, type GeocodedPlace } from "@/services/geo/geocoding";
+import { previewBasemapPois } from "@/services/geo/maplibre/previewBasemapPois";
+import { useMapStore } from "@/state/mapStore";
 import {
   fetchMeasuringMapTarget,
   fetchNearestMeasuringPlace,
@@ -204,6 +206,16 @@ export function useMeasuringInteractions({
       }
 
       const wizardStep = wizardStepRef.current;
+      const mapStyle = useMapStore.getState().mapStyle;
+      const tapHit = previewBasemapPois({
+        mapStyle,
+        categoryIds: measuringLocationCategory
+          ? [measuringLocationCategory]
+          : undefined,
+        point,
+        maxResults: 1,
+      })[0];
+      const snapPoint = tapHit?.point ?? point;
 
       if (
         measuringSubject === "location" &&
@@ -213,7 +225,7 @@ export function useMeasuringInteractions({
         !measuringTargetPoint &&
         wizardStep === "target"
       ) {
-        void resolveMeasuringMapTarget(point);
+        void resolveMeasuringMapTarget(snapPoint);
         return true;
       }
 
@@ -221,11 +233,12 @@ export function useMeasuringInteractions({
         return false;
       }
 
-      setMeasuringSeekerAnchorAndResolve(point);
+      setMeasuringSeekerAnchorAndResolve(snapPoint);
       return true;
     },
     [
       active,
+      measuringLocationCategory,
       measuringSeekerPoint,
       measuringSubject,
       measuringTargetMode,

@@ -19,9 +19,11 @@ import { AnchorControls } from "./shared/controls/AnchorControls";
 import { CoordinateCopyButton } from "./shared/controls/CoordinateCopyButton";
 import { ErrorWithRetry } from "./shared/readout/ErrorWithRetry";
 import { LoadingReadout } from "./shared/readout/LoadingReadout";
+import { ProvisionalBadge } from "./shared/readout/ProvisionalBadge";
 import { CatalogExhaustedMessage } from "./shared/readout/CatalogExhaustedMessage";
 import { QuestionPromptBlock } from "./shared/controls/QuestionPromptBlock";
 import { ResolvedReadout } from "./shared/readout/ResolvedReadout";
+import { satelliteBasemapPoiUnavailableMessage } from "@/services/geo/maplibre/previewBasemapPois";
 import { ToolPanelShell } from "./shared/panels/ToolPanelShell";
 import { ToolSection } from "./shared/panels/ToolSection";
 import { SendToHidersButton } from "./shared/controls/SendToHidersButton";
@@ -52,6 +54,10 @@ interface MatchingPanelProps {
   nearestOutsidePlayArea: boolean;
   nullAnswer: boolean;
   loading: boolean;
+  /** Tile preview nearest while Overpass/bundle confirm runs. */
+  nearestProvisional?: boolean;
+  /** Street tile pick unavailable (satellite basemap). */
+  satelliteBasemap?: boolean;
   gpsLoading: boolean;
   answer: MatchingAnswer | null;
   error?: string | null;
@@ -83,6 +89,8 @@ export function MatchingPanel({
   nearestOutsidePlayArea,
   nullAnswer,
   loading,
+  nearestProvisional = false,
+  satelliteBasemap = false,
   gpsLoading,
   answer,
   error,
@@ -167,12 +175,21 @@ export function MatchingPanel({
       ? usesLandmassMatching
         ? "Finding landmass at your anchor…"
         : "Finding division at your anchor…"
-      : "Finding nearest feature…"
+      : nearestProvisional && nearestFeatureName
+        ? "Confirming nearest feature…"
+        : "Finding nearest feature…"
     : null;
 
   const loadingIndicator =
     loadingMessage !== null ? (
       <LoadingReadout>{loadingMessage}</LoadingReadout>
+    ) : null;
+
+  const satelliteHint =
+    satelliteBasemap && !usesContainmentMatching ? (
+      <p className="text-xs text-ink-dim">
+        {satelliteBasemapPoiUnavailableMessage()}
+      </p>
     ) : null;
 
   const featureCountLabel =
@@ -187,7 +204,7 @@ export function MatchingPanel({
 
   const nearestFeatureSummary = nearestFeatureName
     ? `${nearestFeatureName}${
-        !usesContainmentMatching && distanceMeters !== null
+        !usesContainmentMatching && distanceMeters !== null && !nearestProvisional
           ? ` · ${formatDistance(distanceMeters, distanceUnit)} from you`
           : ""
       }${nearestOutsidePlayArea ? " · outside play area" : ""}`
@@ -288,6 +305,7 @@ export function MatchingPanel({
           typeof anchorLng === "number" ? (
             <CoordinateCopyButton lat={anchorLat} lng={anchorLng} className="w-full" />
           ) : null}
+          {satelliteHint}
           {loading && hasSeekerPoint ? loadingIndicator : null}
         </ToolSection>
       ) : null}
@@ -301,7 +319,10 @@ export function MatchingPanel({
             </ResolvedReadout>
           ) : nearestFeatureSummary ? (
             <ResolvedReadout caption={featureCountLabel}>
-              {nearestFeatureSummary}
+              <span className="inline-flex flex-wrap items-center">
+                {nearestFeatureSummary}
+                {nearestProvisional ? <ProvisionalBadge /> : null}
+              </span>
             </ResolvedReadout>
           ) : !loading ? (
             <ResolvedReadout variant="dim">
