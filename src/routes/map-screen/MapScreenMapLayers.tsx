@@ -28,9 +28,7 @@ type MapScreenMapLayersProps = Pick<
   | "placementFocusMinZoom"
   | "placementFocusMaxZoom"
   | "placementFocusPreferFly"
-  | "showPlacementRecenter"
   | "requestPlacementRecenter"
-  | "activeTool"
   | "handleMapClick"
   | "chromeHudRef"
   | "mapShellRef"
@@ -80,9 +78,7 @@ export function MapScreenMapLayers({
   placementFocusMinZoom,
   placementFocusMaxZoom,
   placementFocusPreferFly,
-  showPlacementRecenter,
   requestPlacementRecenter,
-  activeTool,
   handleMapClick,
   chromeHudRef,
   mapShellRef,
@@ -135,7 +131,7 @@ export function MapScreenMapLayers({
         recenterToken={placementRecenterToken}
         focusPaddingBias={placementFocusPaddingBias}
         focusPreferFly={placementFocusPreferFly}
-        showRecenterControl={showPlacementRecenter && activeTool !== "none"}
+        showCompassControl
         onRecenter={requestPlacementRecenter}
         onMapClick={handleMapClick}
         chromeHudRef={chromeHudRef}
