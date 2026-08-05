@@ -1,6 +1,7 @@
 import { createPortal } from "react-dom";
-import type { ReactNode } from "react";
+import { useRef, type ReactNode } from "react";
 import { MotionSheet } from "../../motion/MotionSheet";
+import { useDialogFocus } from "@/hooks/a11y/useDialogFocus";
 import { useDesktopLayout } from "@/hooks/layout/useDesktopLayout";
 import {
   type ContextualRailTab,
@@ -18,6 +19,40 @@ export interface SheetHostProps {
   dismissible?: boolean;
   sheetClassName?: string;
   maxHeightClassName?: string;
+}
+
+function DesktopRailDialog({
+  open,
+  ariaLabel,
+  railTab,
+  pinned,
+  children,
+  panelEl,
+}: {
+  open: boolean;
+  ariaLabel?: string;
+  railTab: ContextualRailTab;
+  pinned?: ReactNode;
+  children: ReactNode;
+  panelEl: HTMLElement;
+}) {
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useDialogFocus(dialogRef, open);
+
+  return createPortal(
+    <div
+      ref={dialogRef}
+      role="dialog"
+      aria-modal="true"
+      aria-label={ariaLabel}
+      data-rail-tab={railTab}
+      className="contextual-rail__dialog"
+    >
+      {pinned}
+      {children}
+    </div>,
+    panelEl,
+  );
 }
 
 export function SheetHost({
@@ -39,17 +74,16 @@ export function SheetHost({
       return null;
     }
 
-    return createPortal(
-      <div
-        role="dialog"
-        aria-label={ariaLabel}
-        data-rail-tab={railTab}
-        className="contextual-rail__dialog"
+    return (
+      <DesktopRailDialog
+        open={open}
+        ariaLabel={ariaLabel}
+        railTab={railTab}
+        pinned={pinned}
+        panelEl={railPanel.panelEl}
       >
-        {pinned}
         {children}
-      </div>,
-      railPanel.panelEl,
+      </DesktopRailDialog>
     );
   }
 
