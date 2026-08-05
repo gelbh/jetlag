@@ -7,8 +7,12 @@ import {
   isPackGeoSupported,
   PACK_GEO_PACK_IDS,
   PACK_GEO_POINT_CATEGORIES,
+  packGeoCoastlinePublicPath,
+  packGeoCoastlineUrl,
   packGeoPoiPublicPath,
   packGeoPoiUrl,
+  packGeoSeaLevelSeedPublicPath,
+  packGeoSeaLevelSeedUrl,
 } from "./packGeoManifest";
 
 const publicRoot = resolve(import.meta.dirname, "../../../public");
@@ -54,6 +58,45 @@ describe("packGeoManifest", () => {
         expect(typeof payload.source).toBe("string");
         expect(Array.isArray(payload.places)).toBe(true);
       }
+    }
+  });
+
+  it("builds coastline and sea-level seed urls", () => {
+    expect(packGeoCoastlineUrl("dublin")).toBe("/geo/dublin/coastline.json");
+    expect(packGeoSeaLevelSeedUrl("tokyo")).toBe(
+      "/geo/tokyo/sea_level_seed.json",
+    );
+  });
+
+  it("has on-disk coastline and sea_level_seed json for every pack", () => {
+    for (const packId of PACK_GEO_PACK_IDS) {
+      const coastlinePath = resolve(
+        publicRoot,
+        packGeoCoastlinePublicPath(packId),
+      );
+      const seaLevelPath = resolve(
+        publicRoot,
+        packGeoSeaLevelSeedPublicPath(packId),
+      );
+      expect(existsSync(coastlinePath), coastlinePath).toBe(true);
+      expect(existsSync(seaLevelPath), seaLevelPath).toBe(true);
+
+      const coastline = JSON.parse(readFileSync(coastlinePath, "utf8")) as {
+        source: string;
+        segments: unknown[];
+      };
+      const seaLevel = JSON.parse(readFileSync(seaLevelPath, "utf8")) as {
+        source: string;
+        divisions: number;
+        cells: unknown[];
+        cellElevations: unknown[];
+      };
+      expect(typeof coastline.source).toBe("string");
+      expect(Array.isArray(coastline.segments)).toBe(true);
+      expect(typeof seaLevel.source).toBe("string");
+      expect(typeof seaLevel.divisions).toBe("number");
+      expect(Array.isArray(seaLevel.cells)).toBe(true);
+      expect(Array.isArray(seaLevel.cellElevations)).toBe(true);
     }
   });
 });

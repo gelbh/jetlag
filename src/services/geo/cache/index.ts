@@ -1,4 +1,5 @@
 import type { GameArea } from "@/domain/map/annotations";
+import type { PreparedLinearSegments } from "@/domain/geometry/gameArea/geometry";
 import type { ElevationSampleCell } from "@/domain/geometry/measuring/seaLevel";
 import { clearPersistedCacheForTests, readPersistedEntry, readPersistedEntryIgnoringExpiry, writePersistedEntry } from "./indexedDb";
 import {
@@ -8,7 +9,10 @@ import {
   staleServedKeys,
   writeMemoryEntry,
 } from "./memory";
-import { seaLevelSamplingCacheKey } from "./keys";
+import {
+  coastlineSegmentsCacheKey,
+  seaLevelSamplingCacheKey,
+} from "./keys";
 
 export {
   adminDivisionCacheKey,
@@ -128,6 +132,13 @@ export async function writeSeaLevelSamplingCache(
   value: CachedSeaLevelSampling,
 ): Promise<void> {
   await writeCachedValue(seaLevelSamplingCacheKey(gameArea), value);
+}
+
+export async function writeCoastlineSegmentsCache(
+  gameArea: GameArea,
+  value: PreparedLinearSegments,
+): Promise<void> {
+  await writeCachedValue(coastlineSegmentsCacheKey(gameArea), value);
 }
 
 export async function clearGeographicFeatureCacheForTests(): Promise<void> {
