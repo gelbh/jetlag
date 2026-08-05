@@ -5,6 +5,7 @@ import {
   type RefCallback,
   type RefObject,
 } from "react";
+import { useDialogFocus } from "@/hooks/a11y/useDialogFocus";
 import { useAnimatedPresence } from "@/hooks/motion/useAnimatedPresence";
 import { useScrollLock } from "@/hooks/layout/useScrollLock";
 import { useSheetGesture } from "@/hooks/motion/useSheetGesture";
@@ -57,6 +58,7 @@ export function AnimatedOverlay({
 }: AnimatedOverlayProps) {
   const { decorativeAnimate } = useMotionProfile();
   const scrollRef = useRef<HTMLDivElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
 
   const {
     mounted,
@@ -81,6 +83,10 @@ export function AnimatedOverlay({
   });
 
   useScrollLock(mounted);
+  useDialogFocus(
+    dialogRef,
+    mounted && (phase === "open" || phase === "entering"),
+  );
 
   useEffect(() => {
     if (!mounted) {
@@ -134,6 +140,7 @@ export function AnimatedOverlay({
           handleProps={dismissible ? gesture.handleProps : undefined}
         >
           <div
+            ref={dialogRef}
             role="dialog"
             aria-modal="true"
             aria-label={ariaLabel}
