@@ -94,6 +94,27 @@ test("isExpectedFunctionsError matches grantAccess expected HttpsErrors", () => 
   );
 });
 
+test("isExpectedFunctionsError matches billing recovery rate-limit HttpsError", () => {
+  assert.equal(
+    isExpectedFunctionsError(
+      new HttpsError(
+        "resource-exhausted",
+        "Too many recovery attempts. Try again tomorrow.",
+      ),
+    ),
+    true,
+  );
+});
+
+test("isExpectedFunctionsError matches role-code required HttpsError", () => {
+  assert.equal(
+    isExpectedFunctionsError(
+      new HttpsError("invalid-argument", "Role code is required."),
+    ),
+    true,
+  );
+});
+
 test("isExpectedFunctionsError ignores unrelated HttpsErrors and plain Errors", () => {
   assert.equal(
     isExpectedFunctionsError(
