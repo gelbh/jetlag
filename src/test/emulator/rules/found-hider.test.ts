@@ -34,6 +34,37 @@ describe("firestore.rules — found hider", () => {
     );
   });
 
+  it("allows a seeker to request found while end game is active", async () => {
+    const host = rules.testEnv.authenticatedContext("host-1");
+    await host
+      .firestore()
+      .collection("sessions")
+      .doc("session-1")
+      .set(
+        sessionPayload("host-1", {
+          memberUids: ["host-1", "hider-1"],
+          memberRoles: { "host-1": "seeker", "hider-1": "hider" },
+          endGameStartedAt: "2026-01-01T00:30:00.000Z",
+          endGameStartedByUid: "host-1",
+          endGameTruthAnchors: {
+            "hider-1": {
+              lat: 53.35,
+              lng: -6.26,
+              frozenAt: "2026-01-01T00:30:00.000Z",
+            },
+          },
+        }),
+      );
+
+    const seeker = rules.testEnv.authenticatedContext("host-1");
+    await assertSucceeds(
+      seeker.firestore().collection("sessions").doc("session-1").update({
+        foundRequestedAt: "2026-01-01T01:00:00.000Z",
+        foundRequestedByUid: "host-1",
+      }),
+    );
+  });
+
   it("denies found request from a hider", async () => {
     const host = rules.testEnv.authenticatedContext("host-1");
     await host
