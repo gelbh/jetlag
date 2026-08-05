@@ -62,7 +62,8 @@ function answeredRadarAnnotation(): AnnotationRecord {
     metadata: {
       createdAt: "2026-01-01T00:00:00.000Z",
       radiusMeters: milesToMeters(1),
-      inside: false,
+      // yes → exterior elimination polygon (not the disk path)
+      inside: true,
     },
   };
 }

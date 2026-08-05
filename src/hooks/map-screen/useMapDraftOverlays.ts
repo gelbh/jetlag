@@ -13,7 +13,7 @@ import {
 import { resolveClientMaskKernelMode } from "../../domain/geometry/kernel/resolveClientMaskKernelMode";
 import { buildTentaclePoiAnswerEliminationRegion } from "../../domain/geometry/tentacle/tentacleGeometry";
 import {
-  radarInsideFromAnswer,
+  radarShadedInsideFromAnswer,
   type RadarAnswer,
 } from "../../domain/questions";
 import {
@@ -138,7 +138,7 @@ export async function buildMapDraftOverlays(
           center,
           radiusMeters,
           gameArea,
-          radarInsideFromAnswer(answer),
+          radarShadedInsideFromAnswer(answer),
           mode,
         ),
       );

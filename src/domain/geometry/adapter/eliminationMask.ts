@@ -53,7 +53,9 @@ export function eliminationDiskForAnnotation(
       return null;
     }
 
-    if (annotation.metadata.inside !== true) {
+    // metadata.inside = hider within circle (yes). Eliminate where they are not:
+    // no → disk; yes → exterior (kernel path below).
+    if (annotation.metadata.inside !== false) {
       return null;
     }
 
@@ -165,13 +167,13 @@ function eliminationFeatureKernelTs(
 
     const center: LatLngTuple = [geometry.coordinates[1], geometry.coordinates[0]];
     const radiusMeters = annotation.metadata.radiusMeters ?? DEFAULT_RADIUS_METERS;
-    const shadedInside = annotation.metadata.inside;
 
-    if (shadedInside) {
+    // yes (inside): eliminate exterior. no: disk path in eliminationDiskForAnnotation.
+    if (!annotation.metadata.inside) {
       return null;
     }
 
-    return buildRadarShadedRegion(center, radiusMeters, gameArea, shadedInside);
+    return buildRadarShadedRegion(center, radiusMeters, gameArea, false);
   }
 
   return null;
@@ -236,9 +238,9 @@ export async function eliminationFeatureForAnnotation(
 
     const center: LatLngTuple = [geometry.coordinates[1], geometry.coordinates[0]];
     const radiusMeters = annotation.metadata.radiusMeters ?? DEFAULT_RADIUS_METERS;
-    const shadedInside = annotation.metadata.inside;
 
-    if (shadedInside) {
+    // yes (inside): eliminate exterior. no: disk path in eliminationDiskForAnnotation.
+    if (!annotation.metadata.inside) {
       return null;
     }
 
@@ -246,7 +248,7 @@ export async function eliminationFeatureForAnnotation(
       center,
       radiusMeters,
       gameArea,
-      shadedInside,
+      false,
       mode,
     );
   }

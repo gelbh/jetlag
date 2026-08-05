@@ -76,11 +76,12 @@ export function isPointInGameArea(
   );
 }
 
+/** Eliminate the disk when `shadedInside`; otherwise game area minus disk. */
 export function buildRadarShadedRegion(
   center: LatLngTuple,
   radiusMeters: number,
   gameArea: GameAreaGeometry,
-  inside: boolean,
+  shadedInside: boolean,
 ): Feature<Polygon | MultiPolygon> | null {
   const radarCircle = turfCircle(
     turfPoint([center[1], center[0]]),
@@ -88,7 +89,7 @@ export function buildRadarShadedRegion(
     { steps: 64, units: "kilometers" },
   );
 
-  if (inside) {
+  if (shadedInside) {
     return radarCircle as Feature<Polygon>;
   }
 
