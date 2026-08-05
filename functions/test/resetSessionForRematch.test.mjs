@@ -130,7 +130,7 @@ test("member rematch swaps roles, roleGates leaders, clears end-game truth ancho
   assert.equal(sets.length, 1);
 });
 
-test("memberRoles-only drift is healed into memberUids on rematch", async () => {
+test("stale memberRoles without memberUids cannot rematch", async () => {
   const updates = [];
   const deletes = [];
   const sets = [];
@@ -144,10 +144,11 @@ test("memberRoles-only drift is healed into memberUids on rematch", async () => 
   };
   const db = mockRematchDb({ sessionData, updates, deletes, sets });
 
-  await resetSessionForRematchHandler(db, "guest", "sess-1");
-
-  assert.deepEqual(updates[0].memberUids, ["host", "guest"]);
-  assert.deepEqual(updates[0].memberRoles, { host: "hider", guest: "seeker" });
+  await assert.rejects(
+    () => resetSessionForRematchHandler(db, "guest", "sess-1"),
+    (error) => error instanceof Error && error.message === REMATCH_NOT_MEMBER,
+  );
+  assert.equal(updates.length, 0);
 });
 
 test("non-member rematch is denied", async () => {

@@ -51,6 +51,19 @@ describe("resetSessionForRematch", () => {
     await resetSessionForRematch("session-42");
 
     expect(getToken).not.toHaveBeenCalled();
+    expect(httpsCallable).toHaveBeenCalledWith({}, "resetSessionForRematch");
+    expect(callable).toHaveBeenCalledWith({ sessionId: "session-42" });
+  });
+
+  it("continues when App Check token retrieval fails", async () => {
+    const error = new Error("App Check unavailable");
+    getToken.mockRejectedValueOnce(error);
+
+    await resetSessionForRematch("session-42");
+
+    expect(captureAppCheckTokenFailure).toHaveBeenCalledWith(error, {
+      source: "resetSessionForRematch",
+    });
     expect(callable).toHaveBeenCalledWith({ sessionId: "session-42" });
   });
 

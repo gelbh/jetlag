@@ -50,30 +50,6 @@ export function swapRoleGateLeaders(roleGates) {
   return { version: 1, leaders: nextLeaders };
 }
 
-function canRematchSession(session, uid) {
-  if (isSessionMember(session, uid)) {
-    return true;
-  }
-  if (typeof session.hostUid === "string" && session.hostUid === uid) {
-    return true;
-  }
-  return (
-    session.memberRoles != null &&
-    typeof session.memberRoles === "object" &&
-    Object.prototype.hasOwnProperty.call(session.memberRoles, uid)
-  );
-}
-
-function healMemberUids(session, uid) {
-  const existing = Array.isArray(session.memberUids)
-    ? session.memberUids.filter((memberUid) => typeof memberUid === "string")
-    : [];
-  if (existing.includes(uid)) {
-    return existing;
-  }
-  return [...existing, uid];
-}
-
 export async function resetSessionForRematchHandler(db, uid, sessionId) {
   const sessionRef = db.collection("sessions").doc(sessionId);
   const anchorsRef = sessionRef.collection("endGameTruth").doc("anchors");
@@ -86,7 +62,8 @@ export async function resetSessionForRematchHandler(db, uid, sessionId) {
     }
 
     const session = sessionSnap.data() ?? {};
-    if (!canRematchSession(session, uid)) {
+    // memberUids is membership SoT (same as verifyProxyAccess / rules).
+    if (!isSessionMember(session, uid)) {
       throw new Error(REMATCH_NOT_MEMBER);
     }
 
@@ -102,7 +79,6 @@ export async function resetSessionForRematchHandler(db, uid, sessionId) {
       : null;
     const anchorsSnap = await transaction.get(anchorsRef);
 
-    const memberUids = healMemberUids(session, uid);
     const swappedRoles = swapSeekerHiderRoles(session.memberRoles ?? {});
     const swappedRoleGates = swapRoleGateLeaders(session.roleGates);
 
@@ -121,7 +97,6 @@ export async function resetSessionForRematchHandler(db, uid, sessionId) {
     }
 
     const update = {
-      memberUids,
       memberRoles: swappedRoles,
       roundNumber: roundNumber + 1,
       sessionResetAt: new Date().toISOString(),
