@@ -213,8 +213,10 @@ service cloud.firestore {
         && resource.data.hostUid == request.auth.uid;
     }
 
+    // Hosts may cancel active/pending end game; host-hiders cannot (UI + ACL).
     function isEndGameHostClearUpdate() {
       return isHostOnSessionDoc()
+        && !isHiderOnSessionDoc()
         && (
           resource.data.endGameStartedAt is string
           || resource.data.endGameRequestedAt is string

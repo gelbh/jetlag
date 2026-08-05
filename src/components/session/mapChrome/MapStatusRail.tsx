@@ -291,6 +291,7 @@ export function MapStatusRail({
         <EndGameAlert
           endGameActive={endGameActive}
           isHost={isHost}
+          playerRole={playerRole}
           onResetEndGame={onResetEndGame}
         />
 
