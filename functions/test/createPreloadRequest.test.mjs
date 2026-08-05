@@ -4,6 +4,7 @@ import {
   createPreloadRequestHandler,
   PRELOAD_INVALID_SNAPSHOT,
   PRELOAD_PAYLOAD_TOO_LARGE,
+  PRELOAD_PERMANENT_AUTH_REQUIRED,
   PRELOAD_RATE_LIMITED,
   PRELOAD_UNAUTHENTICATED,
 } from "../preloadRequest/createPreloadRequest.mjs";
@@ -139,6 +140,19 @@ test("createPreloadRequestHandler rejects missing auth", async () => {
     createPreloadRequestHandler(db, baseInput({ uid: null }), baseDeps()),
     (error) => error.message === PRELOAD_UNAUTHENTICATED,
   );
+});
+
+test("createPreloadRequestHandler rejects anonymous auth", async () => {
+  const db = mockDb();
+  await assert.rejects(
+    createPreloadRequestHandler(
+      db,
+      baseInput({ signInProvider: "anonymous" }),
+      baseDeps(),
+    ),
+    (error) => error.message === PRELOAD_PERMANENT_AUTH_REQUIRED,
+  );
+  assert.equal(db._docs.size, 0);
 });
 
 test("createPreloadRequestHandler rejects invalid snapshot", async () => {

@@ -39,9 +39,9 @@ import { resolveFavouritePresets } from "../domain/session/presets/presetFavouri
 import { isBundledPresetId } from "../domain/regions/bundledGamePresets";
 import { PresetBrowseLayout } from "../components/presets/PresetBrowseLayout";
 import { RequestPreloadSection } from "../components/presets/RequestPreloadSection";
+import { buildPreloadPresetSnapshot } from "../domain/preloadRequest/buildPreloadPresetSnapshot";
 import { useMapStore } from "../state/sessionStore";
 import type { GeocodedPlace } from "../services/geo/geocoding";
-import type { PreloadPresetSnapshot } from "../domain/preloadRequest/preloadRequestTypes";
 
 export function GamePresetEditor() {
   const navigate = useAppNavigate();
@@ -147,35 +147,6 @@ export function GamePresetEditor() {
   }, [focusBounds]);
 
   const isUserPreset = !existing || !isBundledPresetId(existing.id);
-
-  const preloadSnapshot = useMemo((): PreloadPresetSnapshot | null => {
-    const trimmed = name.trim();
-    if (!trimmed || !isUserPreset) {
-      return null;
-    }
-    return {
-      name: trimmed,
-      placeLabel: placeLabel || undefined,
-      gameSize,
-      distanceUnit,
-      focusBounds: focusBounds ?? undefined,
-      gameAreaBytes: gameArea
-        ? new TextEncoder().encode(JSON.stringify(gameArea)).length
-        : undefined,
-      regionPackId: existing?.regionPackId,
-      presetId: existing?.id,
-    };
-  }, [
-    name,
-    isUserPreset,
-    placeLabel,
-    gameSize,
-    distanceUnit,
-    focusBounds,
-    gameArea,
-    existing?.regionPackId,
-    existing?.id,
-  ]);
 
   return (
     <main className="home-poster flex min-h-[100dvh] flex-col px-5 py-8">
@@ -340,8 +311,21 @@ export function GamePresetEditor() {
           onChange={setAdvancedSettings}
         />
 
-        {preloadSnapshot ? (
-          <RequestPreloadSection snapshot={preloadSnapshot} />
+        {isUserPreset ? (
+          <RequestPreloadSection
+            getSnapshot={() =>
+              buildPreloadPresetSnapshot({
+                name,
+                placeLabel,
+                gameSize,
+                distanceUnit,
+                focusBounds,
+                gameArea,
+                regionPackId: existing?.regionPackId,
+                presetId: existing?.id,
+              })
+            }
+          />
         ) : null}
 
         {error ? <p className="text-error">{error}</p> : null}

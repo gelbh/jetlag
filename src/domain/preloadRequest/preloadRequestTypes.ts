@@ -10,13 +10,6 @@ export type PreloadRequestStatus =
   | "declined"
   | "shipped";
 
-export const PRELOAD_REQUEST_STATUSES: readonly PreloadRequestStatus[] = [
-  "open",
-  "accepted",
-  "declined",
-  "shipped",
-] as const;
-
 export const PRELOAD_NOTE_MAX_LENGTH = 140;
 
 export interface PreloadPresetSnapshot {

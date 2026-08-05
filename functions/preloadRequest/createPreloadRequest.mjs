@@ -11,20 +11,10 @@ export const PRELOAD_INVALID_SNAPSHOT = "PRELOAD_INVALID_SNAPSHOT";
 export const PRELOAD_PAYLOAD_TOO_LARGE = "PRELOAD_PAYLOAD_TOO_LARGE";
 export const PRELOAD_RATE_LIMITED = "PRELOAD_RATE_LIMITED";
 export const PRELOAD_UNAUTHENTICATED = "PRELOAD_UNAUTHENTICATED";
+export const PRELOAD_PERMANENT_AUTH_REQUIRED = "PRELOAD_PERMANENT_AUTH_REQUIRED";
 
 /** Client-visible email failure code (details stay server-side in logs). */
 export const PRELOAD_EMAIL_FAILED_CODE = "email_failed";
-
-const SNAPSHOT_ALLOWED_KEYS = [
-  "name",
-  "placeLabel",
-  "gameSize",
-  "distanceUnit",
-  "focusBounds",
-  "gameAreaBytes",
-  "regionPackId",
-  "presetId",
-];
 
 const GAME_SIZES = new Set(["small", "medium", "large"]);
 const DISTANCE_UNITS = new Set(["imperial", "metric"]);
@@ -57,7 +47,7 @@ function sanitizeFocusBounds(value) {
   return { south, west, north, east };
 }
 
-function assertValidSnapshot(snapshot) {
+function assertValidSnapshotShape(snapshot) {
   if (
     typeof snapshot !== "object" ||
     snapshot === null ||
@@ -74,6 +64,7 @@ function assertValidSnapshot(snapshot) {
   if (!DISTANCE_UNITS.has(snapshot.distanceUnit)) {
     throw new Error(PRELOAD_INVALID_SNAPSHOT);
   }
+  // Abuse size check on the raw payload (before sanitize drops junk keys).
   const serialized = JSON.stringify(snapshot);
   if (Buffer.byteLength(serialized, "utf8") > PRELOAD_SNAPSHOT_MAX_BYTES) {
     throw new Error(PRELOAD_PAYLOAD_TOO_LARGE);
@@ -112,14 +103,7 @@ function sanitizeSnapshot(snapshot) {
     out.presetId = snapshot.presetId.slice(0, 128);
   }
 
-  // Drop any unexpected keys by reconstructing from allowlist only.
-  const allowed = {};
-  for (const key of SNAPSHOT_ALLOWED_KEYS) {
-    if (Object.prototype.hasOwnProperty.call(out, key)) {
-      allowed[key] = out[key];
-    }
-  }
-  return allowed;
+  return out;
 }
 
 function buildEmailText({ requestId, status, note, presetSnapshot, requestUrl }) {
@@ -158,7 +142,7 @@ function buildEmailText({ requestId, status, note, presetSnapshot, requestUrl })
  * Email failures are recorded but never fail creation.
  *
  * @param db Firestore instance (admin SDK or a compatible mock).
- * @param input { uid, note, presetSnapshot }
+ * @param input { uid, note, presetSnapshot, signInProvider? }
  * @param deps { rateLimit, sendEmail, now, generateId, requestUrlBase }
  */
 export async function createPreloadRequestHandler(db, input, deps) {
@@ -166,8 +150,11 @@ export async function createPreloadRequestHandler(db, input, deps) {
   if (!uid) {
     throw new Error(PRELOAD_UNAUTHENTICATED);
   }
+  if (input.signInProvider === "anonymous") {
+    throw new Error(PRELOAD_PERMANENT_AUTH_REQUIRED);
+  }
 
-  assertValidSnapshot(input.presetSnapshot);
+  assertValidSnapshotShape(input.presetSnapshot);
   const presetSnapshot = sanitizeSnapshot(input.presetSnapshot);
 
   const rateLimit = deps.rateLimit;

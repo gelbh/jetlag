@@ -9,6 +9,7 @@ import {
   createPreloadRequestHandler,
   PRELOAD_INVALID_SNAPSHOT,
   PRELOAD_PAYLOAD_TOO_LARGE,
+  PRELOAD_PERMANENT_AUTH_REQUIRED,
   PRELOAD_RATE_LIMITED,
   PRELOAD_UNAUTHENTICATED,
 } from "../preloadRequest/createPreloadRequest.mjs";
@@ -25,6 +26,11 @@ function mapPreloadError(error) {
   switch (error.message) {
     case PRELOAD_UNAUTHENTICATED:
       throw new HttpsError("unauthenticated", "Sign in required.");
+    case PRELOAD_PERMANENT_AUTH_REQUIRED:
+      throw new HttpsError(
+        "failed-precondition",
+        "Sign in with Google or email to submit a preload request.",
+      );
     case PRELOAD_INVALID_SNAPSHOT:
       throw new HttpsError("invalid-argument", "Invalid preset snapshot.");
     case PRELOAD_PAYLOAD_TOO_LARGE:
@@ -59,6 +65,7 @@ export const createPreloadRequest = onCall(
         db,
         {
           uid: request.auth.uid,
+          signInProvider: request.auth.token?.firebase?.sign_in_provider,
           note: request.data?.note ?? null,
           presetSnapshot: request.data?.presetSnapshot,
         },

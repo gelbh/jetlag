@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   PRELOAD_NOTE_MAX_LENGTH,
   type PreloadPresetSnapshot,
@@ -10,7 +10,8 @@ import {
 } from "../../services/preloadRequest/preloadRequestApi";
 
 export interface RequestPreloadSectionProps {
-  snapshot: PreloadPresetSnapshot;
+  /** Built at submit time so the editor does not stringify gameArea on every render. */
+  getSnapshot: () => PreloadPresetSnapshot | null;
   /** Injected for tests; production uses {@link createPreloadRequest}. */
   createPreloadRequestFn?: (
     input: {
@@ -21,7 +22,7 @@ export interface RequestPreloadSectionProps {
 }
 
 export function RequestPreloadSection({
-  snapshot,
+  getSnapshot,
   createPreloadRequestFn = createPreloadRequest,
 }: RequestPreloadSectionProps) {
   const { isPermanent, authReady } = usePermanentAuthUser();
@@ -29,26 +30,27 @@ export function RequestPreloadSection({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successId, setSuccessId] = useState<string | null>(null);
+  const inFlightRef = useRef(false);
 
   const canSubmit =
-    authReady &&
-    isPermanent &&
-    snapshot.name.trim().length > 0 &&
-    !submitting &&
-    successId == null;
+    authReady && isPermanent && !submitting && successId == null;
 
   async function handleSubmit() {
-    if (!canSubmit) {
+    if (!canSubmit || inFlightRef.current) {
       return;
     }
+    const snapshot = getSnapshot();
+    if (!snapshot) {
+      setError("Enter a preset name before requesting a preload.");
+      return;
+    }
+
+    inFlightRef.current = true;
     setError(null);
     setSubmitting(true);
     try {
       const result = await createPreloadRequestFn({
-        presetSnapshot: {
-          ...snapshot,
-          name: snapshot.name.trim(),
-        },
+        presetSnapshot: snapshot,
         note: note.trim() || null,
       });
       setSuccessId(result.requestId);
@@ -59,6 +61,7 @@ export function RequestPreloadSection({
           : "Could not submit the preload request.";
       setError(message);
     } finally {
+      inFlightRef.current = false;
       setSubmitting(false);
     }
   }
@@ -122,7 +125,7 @@ export function RequestPreloadSection({
             type="button"
             onClick={() => void handleSubmit()}
             disabled={!canSubmit}
-            className="btn-secondary w-full disabled:opacity-50"
+            className="btn-secondary min-h-11 w-full disabled:opacity-50"
           >
             {submitting ? "Submitting…" : "Request preload"}
           </button>

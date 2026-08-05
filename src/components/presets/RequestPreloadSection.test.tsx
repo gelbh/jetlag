@@ -33,10 +33,11 @@ describe("RequestPreloadSection", () => {
       requestId: "req-1",
       status: "open",
     });
+    const getSnapshot = vi.fn(() => baseSnapshot);
 
     render(
       <RequestPreloadSection
-        snapshot={baseSnapshot}
+        getSnapshot={getSnapshot}
         createPreloadRequestFn={createPreloadRequestFn}
       />,
     );
@@ -48,6 +49,7 @@ describe("RequestPreloadSection", () => {
     fireEvent.click(screen.getByRole("button", { name: "Request preload" }));
 
     await waitFor(() => {
+      expect(getSnapshot).toHaveBeenCalled();
       expect(createPreloadRequestFn).toHaveBeenCalledWith({
         presetSnapshot: baseSnapshot,
         note: "Coastal play",
@@ -64,7 +66,7 @@ describe("RequestPreloadSection", () => {
 
     render(
       <RequestPreloadSection
-        snapshot={baseSnapshot}
+        getSnapshot={() => baseSnapshot}
         createPreloadRequestFn={vi.fn()}
       />,
     );
@@ -82,7 +84,7 @@ describe("RequestPreloadSection", () => {
   it("mentions manual review in the helper copy", () => {
     render(
       <RequestPreloadSection
-        snapshot={baseSnapshot}
+        getSnapshot={() => baseSnapshot}
         createPreloadRequestFn={vi.fn()}
       />,
     );
