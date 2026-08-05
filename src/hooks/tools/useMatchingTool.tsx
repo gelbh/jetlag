@@ -10,6 +10,7 @@ import {
   isMatchingCategoryEnabled,
   matchingQuestionFor,
   usedMatchingCategoryIds,
+  type MatchingAnswer,
   type MatchingCategoryId,
 } from "../../domain/questions";
 import { isAdminDivisionCategoryAvailable } from "../../services/geo/overpass/adminDivisionAvailability";
@@ -22,8 +23,8 @@ import {
 } from "./matching/commitMatching";
 import { MatchingToolPanel } from "./matching/MatchingToolPanel";
 import {
+  reconcileLockedMatchingNearest,
   resolveMatchingAnchor,
-  shouldApplyMatchingAnchorPhase,
 } from "./matching/resolveMatchingAnchor";
 import type {
   MatchingSessionConfig,
@@ -135,9 +136,16 @@ export function useMatchingTool({
   const { beginRequest, cancelRequests, isLatestRequest } = useLatestRequest();
   const matchingApplyPhaseRef = useRef(new Map<number, number>());
   const matchingAnswerRef = useRef(matchingAnswer);
-  useEffect(() => {
-    matchingAnswerRef.current = matchingAnswer;
-  }, [matchingAnswer]);
+  const matchingNearestFeatureIdRef = useRef(matchingNearestFeatureId);
+  const matchingNearestFeatureNameRef = useRef(matchingNearestFeatureName);
+
+  const setMatchingAnswerSynced = useCallback(
+    (answer: MatchingAnswer | null) => {
+      matchingAnswerRef.current = answer;
+      setMatchingAnswer(answer);
+    },
+    [setMatchingAnswer],
+  );
 
   const applyResolveResult = useCallback(
     (
@@ -150,22 +158,40 @@ export function useMatchingTool({
       }
 
       const lastPhase = matchingApplyPhaseRef.current.get(requestId) ?? -1;
-      if (!shouldApplyMatchingAnchorPhase(lastPhase, phase)) {
+      if (phase < lastPhase) {
         return;
       }
       matchingApplyPhaseRef.current.set(requestId, phase);
 
-      // Keep yes/no once chosen; enrich only refreshes the feature list.
-      if (matchingAnswerRef.current !== null && phase === 1) {
-        if (result.features.length > 0) {
-          setMatchingError(null);
-          setMatchingFeatures(result.features);
-          setMatchingFeatureCount(result.featureCount);
-          setMatchingInPlayAreaFeatureCount(result.inPlayAreaFeatureCount);
+      // Keep yes/no once chosen; enrich only refreshes the list (remap nearest id).
+      if (matchingAnswerRef.current !== null) {
+        if (result.features.length === 0) {
+          return;
         }
+
+        const reconciled = reconcileLockedMatchingNearest(
+          result.features,
+          matchingNearestFeatureIdRef.current,
+          matchingNearestFeatureNameRef.current,
+        );
+        if (!reconciled) {
+          return;
+        }
+
+        matchingNearestFeatureIdRef.current = reconciled.nearestFeatureId;
+        matchingNearestFeatureNameRef.current = reconciled.nearestFeatureName;
+        setMatchingError(null);
+        setMatchingFeatures(result.features);
+        setMatchingFeatureCount(result.featureCount);
+        setMatchingInPlayAreaFeatureCount(result.inPlayAreaFeatureCount);
+        setMatchingNearestFeatureId(reconciled.nearestFeatureId);
+        setMatchingNearestFeatureName(reconciled.nearestFeatureName);
+        setMatchingNearestFeaturePoint(reconciled.nearestFeaturePoint);
         return;
       }
 
+      matchingNearestFeatureIdRef.current = result.nearestFeatureId;
+      matchingNearestFeatureNameRef.current = result.nearestFeatureName;
       setMatchingFeatures(result.features);
       setMatchingFeatureCount(result.featureCount);
       setMatchingInPlayAreaFeatureCount(result.inPlayAreaFeatureCount);
@@ -175,14 +201,10 @@ export function useMatchingTool({
       setMatchingDistanceMeters(result.distanceMeters);
       setMatchingNearestOutsidePlayArea(result.nearestOutsidePlayArea);
       setMatchingNullAnswer(result.nullAnswer);
-      if (phase === 0) {
-        setMatchingAnswer(null);
-      }
       setMatchingError(result.error);
     },
     [
       isLatestRequest,
-      setMatchingAnswer,
       setMatchingDistanceMeters,
       setMatchingError,
       setMatchingFeatureCount,
@@ -199,7 +221,9 @@ export function useMatchingTool({
   const resolveForAnchor = useCallback(
     async (seekerPoint: LatLngTuple, categoryId: MatchingCategoryId) => {
       const requestId = beginRequest();
-      matchingApplyPhaseRef.current.delete(requestId);
+      matchingApplyPhaseRef.current.set(requestId, -1);
+      matchingAnswerRef.current = null;
+      setMatchingAnswerSynced(null);
       setMatchingLoading(true);
       setMatchingError(null);
 
@@ -224,6 +248,7 @@ export function useMatchingTool({
       catalog.matchingFetchOptions,
       gameArea,
       isLatestRequest,
+      setMatchingAnswerSynced,
       setMatchingError,
       setMatchingLoading,
     ],
@@ -403,7 +428,7 @@ export function useMatchingTool({
       wizardStepRef={wizardStepRef}
       onCategoryChange={handleCategoryChange}
       onUseGps={() => void handleGps()}
-      onAnswerChange={setMatchingAnswer}
+      onAnswerChange={setMatchingAnswerSynced}
       onCommit={() => void commit()}
       onRetry={
         matchingSeekerPoint && matchingCategoryId

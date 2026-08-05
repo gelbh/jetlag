@@ -6,7 +6,10 @@ import {
   pickNearestMatchingFeature,
   serializeMatchingFeatures,
 } from "@/domain/geo/matchingAdapters";
-import { shouldApplyMatchingAnchorPhase } from "@/hooks/tools/matching/resolveMatchingAnchor";
+import {
+  reconcileLockedMatchingNearest,
+  shouldApplyMatchingAnchorPhase,
+} from "@/hooks/tools/matching/resolveMatchingAnchor";
 import { clearGeographicFeatureCacheForTests } from "../cache";
 import { clearBundledPoiCacheForTests } from "../overpass/regionPackPoi";
 import {
@@ -204,6 +207,50 @@ describe("matching features", () => {
     expect(shouldApplyMatchingAnchorPhase(0, 1)).toBe(true);
     expect(shouldApplyMatchingAnchorPhase(1, 0)).toBe(false);
     expect(shouldApplyMatchingAnchorPhase(1, 1)).toBe(true);
+  });
+
+  it("remaps locked nearest pack id to Overpass id after name-dedupe enrich", () => {
+    const reconciled = reconcileLockedMatchingNearest(
+      [
+        {
+          id: "99",
+          name: "British Museum",
+          point: [51.45, -0.16],
+          inPlayArea: true,
+        },
+        {
+          id: "100",
+          name: "Science Museum",
+          point: [51.44, -0.17],
+          inPlayArea: true,
+        },
+      ],
+      "Q6373",
+      "British Museum",
+    );
+
+    expect(reconciled).toEqual({
+      nearestFeatureId: "99",
+      nearestFeatureName: "British Museum",
+      nearestFeaturePoint: [51.45, -0.16],
+    });
+  });
+
+  it("keeps locked nearest when enrich cannot remap the venue", () => {
+    expect(
+      reconcileLockedMatchingNearest(
+        [
+          {
+            id: "100",
+            name: "Science Museum",
+            point: [51.44, -0.17],
+            inPlayArea: true,
+          },
+        ],
+        "Q6373",
+        "British Museum",
+      ),
+    ).toBeNull();
   });
 
   it("accepts english fallback names when name is missing", () => {

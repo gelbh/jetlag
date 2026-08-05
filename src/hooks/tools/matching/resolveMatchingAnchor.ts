@@ -37,6 +37,51 @@ export function shouldApplyMatchingAnchorPhase(
   return phase >= lastAppliedPhase;
 }
 
+/**
+ * After Overpass enrich, pack Wikidata ids may be replaced by OSM ids for the
+ * same venue name. Keep commit/Voronoi keyed to a live feature id.
+ */
+export function reconcileLockedMatchingNearest(
+  features: MatchingFeature[],
+  lockedId: string | null,
+  lockedName: string | null,
+): {
+  nearestFeatureId: string;
+  nearestFeatureName: string;
+  nearestFeaturePoint: LatLngTuple;
+} | null {
+  if (!lockedId) {
+    return null;
+  }
+
+  const stillPresent = features.find((feature) => feature.id === lockedId);
+  if (stillPresent) {
+    return {
+      nearestFeatureId: stillPresent.id,
+      nearestFeatureName: stillPresent.name,
+      nearestFeaturePoint: stillPresent.point,
+    };
+  }
+
+  const normalized = lockedName?.trim().toLowerCase() ?? "";
+  if (!normalized) {
+    return null;
+  }
+
+  const byName = features.find(
+    (feature) => feature.name.trim().toLowerCase() === normalized,
+  );
+  if (!byName) {
+    return null;
+  }
+
+  return {
+    nearestFeatureId: byName.id,
+    nearestFeatureName: byName.name,
+    nearestFeaturePoint: byName.point,
+  };
+}
+
 function buildResolveMatchingAnchorResult(
   seekerPoint: LatLngTuple,
   categoryId: MatchingCategoryId,

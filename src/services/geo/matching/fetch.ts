@@ -58,7 +58,6 @@ import type { MatchingFetchOptions, OverpassElement } from "./types";
 
 const HYGIENE_MATCHING_CATEGORIES = new Set<MeasuringLocationCategory>([
   "commercial_airport",
-  "rail_station",
   "mountain",
   "park",
   "museum",
