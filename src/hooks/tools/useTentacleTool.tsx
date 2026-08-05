@@ -124,6 +124,10 @@ export function useTentacleTool({
   const [tentaclePois, setTentaclePois] = useState<TentaclePoi[]>([]);
   const [tentacleOutOfReach, setTentacleOutOfReach] = useState(false);
   const [selectedPoiId, setSelectedPoiId] = useState<string | null>(null);
+  const selectedPoiIdRef = useRef(selectedPoiId);
+  useEffect(() => {
+    selectedPoiIdRef.current = selectedPoiId;
+  }, [selectedPoiId]);
   const [tentacleLoading, setTentacleLoading] = useState(false);
   const [tentacleError, setTentacleError] = useState<string | null>(null);
 
@@ -176,6 +180,10 @@ export function useTentacleTool({
       }
 
       setTentaclePois(pois);
+      const selectedId = selectedPoiIdRef.current;
+      if (selectedId && !pois.some((poi) => poi.id === selectedId)) {
+        setSelectedPoiId(null);
+      }
       if (pois.length === 0) {
         setTentacleError(
           `No named locations were found within ${formatDistance(searchRadiusMeters, distanceUnit)}.`,

@@ -106,6 +106,15 @@ export function useMeasuringAnchorLoaders({
         ...pinPlaces.filter((place) => !seen.has(place.id)),
       ];
 
+      // Keep seeker answer + nearest target stable once chosen; enrich only refreshes the list.
+      if (measuringAnswerRef.current !== null) {
+        if (places.length > 0) {
+          setMeasuringError(null);
+          setMeasuringPlaces(places);
+        }
+        return;
+      }
+
       if (places.length === 0) {
         setMeasuringPlaces([]);
         setMeasuringDistanceMeters(null);
@@ -127,10 +136,6 @@ export function useMeasuringAnchorLoaders({
 
       setMeasuringError(null);
       setMeasuringPlaces(places);
-      // Keep seeker answer + nearest target stable once chosen; enrich only refreshes the list.
-      if (measuringAnswerRef.current !== null) {
-        return;
-      }
       setMeasuringDistanceMeters(nearestDistance);
       setMeasuringTargetPoint(nearestPlace.point);
       setMeasuringTargetPlaceName(
