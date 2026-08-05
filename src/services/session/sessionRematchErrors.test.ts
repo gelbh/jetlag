@@ -14,6 +14,14 @@ describe("mapRematchError", () => {
     ).toBe("Session membership required.");
   });
 
+  it("maps bare PERMISSION_DENIED to rejoin copy", () => {
+    expect(
+      mapRematchError(
+        new FirebaseError("functions/permission-denied", "PERMISSION_DENIED"),
+      ),
+    ).toMatch(/rejoin/i);
+  });
+
   it("maps App Check failed-precondition to blocker guidance", () => {
     expect(
       mapRematchError(
@@ -25,15 +33,37 @@ describe("mapRematchError", () => {
     ).toMatch(/content blockers/i);
   });
 
+  it("maps App Check unauthenticated to blocker guidance", () => {
+    expect(
+      mapRematchError(
+        new FirebaseError(
+          "functions/unauthenticated",
+          "App Check token is invalid.",
+        ),
+      ),
+    ).toMatch(/content blockers/i);
+  });
+
   it("maps network unavailability", () => {
     expect(
       mapRematchError(new FirebaseError("functions/unavailable", "UNAVAILABLE")),
     ).toMatch(/network/i);
   });
 
-  it("falls back for opaque internal errors", () => {
+  it("does not leak internal or bare Error messages", () => {
     expect(
       mapRematchError(new FirebaseError("functions/internal", "INTERNAL")),
     ).toBe("Could not start rematch. Try again.");
+    expect(
+      mapRematchError(
+        new FirebaseError(
+          "functions/failed-precondition",
+          "Firestore transactions require all reads to be executed before all writes.",
+        ),
+      ),
+    ).toBe("Could not start rematch. Try again.");
+    expect(mapRematchError(new Error("READ_AFTER_WRITE_ERROR_MSG"))).toBe(
+      "Could not start rematch. Try again.",
+    );
   });
 });

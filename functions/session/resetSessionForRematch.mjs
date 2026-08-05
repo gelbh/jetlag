@@ -22,11 +22,7 @@ function swapSeekerHiderRoles(memberRoles) {
   return swapped;
 }
 
-/**
- * After seeker↔hider rematch, move role-gate leaders with the people who held them.
- * Role secrets stay role-keyed; leaders must follow the swap or reveal/join callables
- * permission-deny the new role holders.
- */
+/** Move role-gate leaders with the people who held them (secrets stay role-keyed). */
 export function swapRoleGateLeaders(roleGates) {
   if (
     !roleGates ||
@@ -83,6 +79,7 @@ export async function resetSessionForRematchHandler(db, uid, sessionId) {
   const anchorsRef = sessionRef.collection("endGameTruth").doc("anchors");
 
   await db.runTransaction(async (transaction) => {
+    // All reads before any writes (Admin SDK READ_AFTER_WRITE).
     const sessionSnap = await transaction.get(sessionRef);
     if (!sessionSnap.exists) {
       throw new Error(REMATCH_SESSION_NOT_FOUND);
@@ -92,29 +89,33 @@ export async function resetSessionForRematchHandler(db, uid, sessionId) {
     if (!canRematchSession(session, uid)) {
       throw new Error(REMATCH_NOT_MEMBER);
     }
+
     const roundNumber =
       typeof session.roundNumber === "number" ? session.roundNumber : 0;
     const gameResultId =
       typeof session.gameResultId === "string" ? session.gameResultId : null;
+    const gameResultRef = gameResultId
+      ? sessionRef.collection("gameResult").doc(gameResultId)
+      : null;
+    const gameResultSnap = gameResultRef
+      ? await transaction.get(gameResultRef)
+      : null;
+    const anchorsSnap = await transaction.get(anchorsRef);
+
     const memberUids = healMemberUids(session, uid);
     const swappedRoles = swapSeekerHiderRoles(session.memberRoles ?? {});
     const swappedRoleGates = swapRoleGateLeaders(session.roleGates);
 
-    if (gameResultId) {
-      const gameResultRef = sessionRef.collection("gameResult").doc(gameResultId);
-      const gameResultSnap = await transaction.get(gameResultRef);
-      if (gameResultSnap.exists) {
-        const archiveRef = sessionRef.collection("rounds").doc(String(roundNumber));
-        transaction.set(archiveRef, {
-          ...gameResultSnap.data(),
-          archivedAt: new Date().toISOString(),
-          archivedByUid: uid,
-        });
-        transaction.delete(gameResultRef);
-      }
+    if (gameResultRef && gameResultSnap?.exists) {
+      const archiveRef = sessionRef.collection("rounds").doc(String(roundNumber));
+      transaction.set(archiveRef, {
+        ...gameResultSnap.data(),
+        archivedAt: new Date().toISOString(),
+        archivedByUid: uid,
+      });
+      transaction.delete(gameResultRef);
     }
 
-    const anchorsSnap = await transaction.get(anchorsRef);
     if (anchorsSnap.exists) {
       transaction.delete(anchorsRef);
     }

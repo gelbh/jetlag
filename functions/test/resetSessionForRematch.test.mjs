@@ -7,11 +7,19 @@ import {
   resetSessionForRematchHandler,
 } from "../session/resetSessionForRematch.mjs";
 
-function mockRematchDb({ sessionData, sessionExists = true, updates, deletes, sets }) {
+function mockRematchDb({
+  sessionData,
+  sessionExists = true,
+  anchorsExists = true,
+  updates,
+  deletes,
+  sets,
+}) {
   const sessionRef = { id: "sess-1", path: "sessions/sess-1" };
   const gameResultRef = { id: "result-1", path: "sessions/sess-1/gameResult/result-1" };
   const archiveRef = { id: "0", path: "sessions/sess-1/rounds/0" };
   const anchorsRef = { id: "anchors", path: "sessions/sess-1/endGameTruth/anchors" };
+  let wrote = false;
 
   return {
     collection: (name) => {
@@ -39,6 +47,9 @@ function mockRematchDb({ sessionData, sessionExists = true, updates, deletes, se
     runTransaction: async (fn) => {
       const tx = {
         get: async (ref) => {
+          if (wrote) {
+            throw new Error("Firestore transactions require all reads before writes");
+          }
           if (ref === gameResultRef) {
             return {
               exists: Boolean(sessionData.gameResultId),
@@ -48,18 +59,27 @@ function mockRematchDb({ sessionData, sessionExists = true, updates, deletes, se
               }),
             };
           }
+          if (ref === anchorsRef) {
+            return {
+              exists: anchorsExists,
+              data: () => (anchorsExists ? { anchors: { host: { lat: 1, lng: 2 } } } : {}),
+            };
+          }
           return {
             exists: sessionExists,
             data: () => sessionData,
           };
         },
         update: async (_ref, payload) => {
+          wrote = true;
           updates.push(payload);
         },
         set: async (_ref, payload) => {
+          wrote = true;
           sets.push(payload);
         },
         delete: async (ref) => {
+          wrote = true;
           deletes.push(ref.path ?? ref.id);
         },
       };
