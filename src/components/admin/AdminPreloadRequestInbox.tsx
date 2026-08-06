@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { PreloadRequest } from "../../domain/preloadRequest/preloadRequestTypes";
 import type { PreloadRequestStatus } from "../../domain/preloadRequest/preloadRequestTypes";
 import {
@@ -37,6 +37,7 @@ export function AdminPreloadRequestInbox() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [showClosed, setShowClosed] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const busyRef = useRef(false);
   const [actionError, setActionError] = useState<string | null>(null);
   const [enabledState, setEnabledState] = useState(enabled);
 
@@ -81,6 +82,10 @@ export function AdminPreloadRequestInbox() {
     null;
 
   const onStatus = async (requestId: string, status: PreloadRequestStatus) => {
+    if (busyRef.current) {
+      return;
+    }
+    busyRef.current = true;
     setBusyId(requestId);
     setActionError(null);
     try {
@@ -90,6 +95,7 @@ export function AdminPreloadRequestInbox() {
         err instanceof Error ? err.message : "Could not update status.",
       );
     } finally {
+      busyRef.current = false;
       setBusyId(null);
     }
   };
@@ -277,7 +283,7 @@ export function AdminPreloadRequestInbox() {
                     key={status}
                     type="button"
                     className="jl-ops-preset-chip"
-                    disabled={busyId === selected.id}
+                    disabled={busyId !== null}
                     onClick={() => void onStatus(selected.id, status)}
                   >
                     Mark {status}

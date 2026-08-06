@@ -31,7 +31,11 @@ export async function updatePreloadRequestStatusHandler(db, input, deps = {}) {
   if (!PRELOAD_STATUS_TARGETS.has(status)) {
     throw new Error(PRELOAD_INVALID_STATUS);
   }
-  if (typeof requestId !== "string" || requestId.length === 0) {
+  if (
+    typeof requestId !== "string" ||
+    requestId.length === 0 ||
+    requestId.includes("/")
+  ) {
     throw new Error(PRELOAD_REQUEST_NOT_FOUND);
   }
 
