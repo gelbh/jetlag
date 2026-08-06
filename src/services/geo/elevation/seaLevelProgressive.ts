@@ -243,6 +243,18 @@ export async function ensureSeaLevelSamplingComplete(
     options?.regionPackId,
   );
 
+  // Sufficient dense pack seed: skip blocking fine fetch / background crawl.
+  if (
+    seeded?.complete === true &&
+    countFiniteElevations(seeded.cellElevations) === seeded.cells.length
+  ) {
+    const fineDivisions = resolveFineSeaLevelDivisions(gameArea);
+    if (seeded.divisions >= fineDivisions) {
+      setSamplerPhase(gameAreaPreloadKey(gameArea), "complete");
+      return seeded;
+    }
+  }
+
   startSeaLevelBackgroundSampling(gameArea);
 
   if (

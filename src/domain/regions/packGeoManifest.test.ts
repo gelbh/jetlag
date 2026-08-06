@@ -90,6 +90,7 @@ describe("packGeoManifest", () => {
         divisions: number;
         cells: unknown[];
         cellElevations: unknown[];
+        complete?: boolean;
       };
       expect(typeof coastline.source).toBe("string");
       expect(Array.isArray(coastline.segments)).toBe(true);
@@ -97,6 +98,27 @@ describe("packGeoManifest", () => {
       expect(typeof seaLevel.divisions).toBe("number");
       expect(Array.isArray(seaLevel.cells)).toBe(true);
       expect(Array.isArray(seaLevel.cellElevations)).toBe(true);
+    }
+  });
+
+  it("ships dense complete sea_level_seed for london and tokyo", () => {
+    for (const packId of ["london", "tokyo"] as const) {
+      const seaLevelPath = resolve(
+        publicRoot,
+        packGeoSeaLevelSeedPublicPath(packId),
+      );
+      const seaLevel = JSON.parse(readFileSync(seaLevelPath, "utf8")) as {
+        source: string;
+        divisions: number;
+        cells: unknown[];
+        cellElevations: unknown[];
+        complete?: boolean;
+      };
+      expect(seaLevel.source).toBe("open-meteo");
+      expect(seaLevel.divisions).toBeGreaterThanOrEqual(20);
+      expect(seaLevel.complete).toBe(true);
+      expect(seaLevel.cells.length).toBeGreaterThan(0);
+      expect(seaLevel.cellElevations.length).toBe(seaLevel.cells.length);
     }
   });
 });
