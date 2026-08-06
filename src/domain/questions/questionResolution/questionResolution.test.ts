@@ -283,7 +283,7 @@ describe("resolveMeasuringPendingQuestion", () => {
 
     expect(resolved?.type).toBe("measuring");
     expect(resolved?.metadata.measuringAnswer).toBe("further");
-    expect(resolved?.metadata.measuringBoundaryJson).toBeTruthy();
+    expect(resolved?.metadata.measuringBoundaryJson).toBeUndefined();
   });
 
   it("builds measuring elim when region JSON omits gameArea", async () => {
@@ -317,7 +317,7 @@ describe("resolveMeasuringPendingQuestion", () => {
     );
 
     expect(resolved?.type).toBe("measuring");
-    expect(resolved?.metadata.measuringBoundaryJson).toBeTruthy();
+    expect(resolved?.metadata.measuringBoundaryJson).toBeUndefined();
   });
 
   it("hydrates all-places measuring from measuringPlacesJson", async () => {
@@ -355,7 +355,7 @@ describe("resolveMeasuringPendingQuestion", () => {
     );
 
     expect(resolved?.type).toBe("measuring");
-    expect(resolved?.metadata.measuringBoundaryJson).toBeTruthy();
+    expect(resolved?.metadata.measuringBoundaryJson).toBeUndefined();
   });
 });
 

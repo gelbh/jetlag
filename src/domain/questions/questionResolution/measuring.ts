@@ -64,7 +64,6 @@ export async function resolveMeasuringPendingQuestion(
       ...metadata,
       createdAt: new Date().toISOString(),
       measuringAnswer: answer,
-      measuringBoundaryJson: JSON.stringify(regions.near),
       color: MAP_ANNOTATION_COLORS.elimination,
     },
   };

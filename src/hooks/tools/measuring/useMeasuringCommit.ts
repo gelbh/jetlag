@@ -210,7 +210,7 @@ export function useMeasuringCommit({
       return;
     }
 
-    const { near: nearRegion, elimination } = regions;
+    const { elimination } = regions;
 
     const metadata: AnnotationRecord["metadata"] = {
       createdAt: new Date().toISOString(),
@@ -243,7 +243,6 @@ export function useMeasuringCommit({
         measuringSubject === "sea_level"
           ? "Sea level"
           : (measuringTargetPlaceName ?? undefined),
-      measuringBoundaryJson: JSON.stringify(nearRegion),
       color: MAP_ANNOTATION_COLORS.elimination,
     };
 
