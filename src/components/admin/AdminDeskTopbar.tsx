@@ -84,6 +84,9 @@ export function AdminDeskTopbar({
             <dd>{formatUtcClock(now)}</dd>
           </div>
         </dl>
+        <AppLink to="/admin/preload-requests" className="jl-ops-preset-chip">
+          Preload requests
+        </AppLink>
         {onRefreshSessions ? (
           <button
             type="button"

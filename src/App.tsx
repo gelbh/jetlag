@@ -50,6 +50,7 @@ import { AppGlobalActivity } from "./navigation/AppGlobalActivity";
 import { RouteTransitionProvider } from "./navigation/RouteTransitionContext";
 import {
   AdminOpsDeskLazy,
+  AdminPreloadRequestInboxLazy,
   AppResumeWatchdogLazy,
   CreateSessionLazy,
   FeedbackLazy,
@@ -287,6 +288,14 @@ export default function App() {
                   element={
                     <LazyRoute>
                       <AdminOpsDeskLazy />
+                    </LazyRoute>
+                  }
+                />
+                <Route
+                  path="/admin/preload-requests"
+                  element={
+                    <LazyRoute>
+                      <AdminPreloadRequestInboxLazy />
                     </LazyRoute>
                   }
                 />
