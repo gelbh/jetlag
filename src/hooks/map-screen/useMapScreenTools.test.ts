@@ -77,6 +77,22 @@ vi.mock("./useHeavyMapToolsState", () => ({
       handleMapClick: vi.fn(),
       resetDraft: vi.fn(),
       panel: null,
+      hud: {
+        readiness: {
+          surface: "measuring" as const,
+          placementReady: false,
+          configureReady: false,
+          resolveReady: false,
+          answerReady: true,
+          awaitHiderAnswer: true,
+          isSubmitting: false,
+        },
+        costLabel: "D3P1",
+        error: null,
+        onCommit: vi.fn(),
+        modeBody: null,
+        sheets: null,
+      },
     },
     tentacleTool: {
       draft: {},

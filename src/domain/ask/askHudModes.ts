@@ -222,3 +222,84 @@ export function cueExcludesCostTokens(cue: string): boolean {
   // DnPm patterns: D2P1, D3·P1, etc. Also bare "· D" cost chips.
   return !/\bD\d+\s*[P·.]?\s*P?\d*\b/i.test(cue) && !/·\s*D\d/i.test(cue);
 }
+
+/** Short muted-strip hint derived from the current GlanceVerb. */
+export function notReadyCommitHint(cue: string): string {
+  switch (cue) {
+    case "TAP MAP TO SET CENTER":
+      return "SET CENTER FIRST";
+    case "PICK A DISTANCE":
+      return "PICK A DISTANCE";
+    case "SET YOUR ANCHOR":
+      return "SET ANCHOR FIRST";
+    case "SET YOUR TARGET":
+      return "SET TARGET FIRST";
+    case "PICK CATEGORY":
+      return "PICK CATEGORY";
+    case "RESOLVE ON MAP":
+      return "RESOLVE ON MAP";
+    case "PICK TYPES":
+      return "PICK TYPES";
+    case "SET CENTER ON MAP":
+      return "SET CENTER FIRST";
+    case "PICK LOCATIONS":
+      return "PICK LOCATIONS";
+    case "PICK A PHOTO ASK":
+      return "PICK A PHOTO ASK";
+    case "PLACE YOUR ZONE":
+      return "PLACE ZONE FIRST";
+    case "CHOOSE A METHOD":
+      return "CHOOSE A METHOD";
+    case "TAP NEW STATION":
+      return "TAP NEW STATION";
+    case "READY TO SEND":
+    case "READY TO CONFIRM":
+      return "NOT READY";
+    case "":
+      return "NOT READY";
+    default:
+      return "NOT READY";
+  }
+}
+
+/**
+ * PrimedCommitStrip label — DnPm only when armed; muted strip uses a short hint.
+ */
+export function primedCommitLabel(input: {
+  kind: AskHudCommitKind;
+  costLabel: string | null | undefined;
+  primed: boolean;
+  cue: string;
+}): string {
+  const verb = (() => {
+    switch (input.kind) {
+      case "send":
+        return "SEND";
+      case "ask":
+        return "ASK";
+      case "confirm":
+        return "CONFIRM";
+      case "endWalk":
+        return "END WALK";
+      default: {
+        const _exhaustive: never = input.kind;
+        return _exhaustive;
+      }
+    }
+  })();
+
+  if (input.primed) {
+    return input.costLabel ? `${verb} · ${input.costLabel}` : verb;
+  }
+
+  return `${verb} — ${notReadyCommitHint(input.cue)}`;
+}
+
+/** Question tools that own AskHudHost (no ToolFloatingPanel). */
+export const ASK_HUD_OWNED_TOOLS = ["radar", "measuring"] as const;
+
+export type AskHudOwnedTool = (typeof ASK_HUD_OWNED_TOOLS)[number];
+
+export function isAskHudOwnedTool(tool: string): tool is AskHudOwnedTool {
+  return (ASK_HUD_OWNED_TOOLS as readonly string[]).includes(tool);
+}

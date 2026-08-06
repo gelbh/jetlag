@@ -6,6 +6,8 @@ import {
   canCommit,
   commitKind,
   cueExcludesCostTokens,
+  isAskHudOwnedTool,
+  primedCommitLabel,
   type AskHudReadiness,
   type AskHudSurface,
 } from "./askHudModes";
@@ -240,5 +242,26 @@ describe("askHudModes", () => {
         }),
       ),
     ).toBe(false);
+  });
+
+  it("primedCommitLabel includes DnPm only when armed", () => {
+    expect(
+      primedCommitLabel({
+        kind: "send",
+        costLabel: "D2P1",
+        primed: true,
+        cue: "READY TO SEND",
+      }),
+    ).toBe("SEND · D2P1");
+    expect(
+      primedCommitLabel({
+        kind: "send",
+        costLabel: "D2P1",
+        primed: false,
+        cue: "TAP MAP TO SET CENTER",
+      }),
+    ).toBe("SEND — SET CENTER FIRST");
+    expect(isAskHudOwnedTool("radar")).toBe(true);
+    expect(isAskHudOwnedTool("matching")).toBe(false);
   });
 });
