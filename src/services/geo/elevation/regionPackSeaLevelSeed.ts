@@ -1,5 +1,6 @@
 import type { GameArea } from "@/domain/map/annotations";
 import {
+  resolveFineSeaLevelDivisions,
   sampleGameAreaCells,
   type ElevationSampleCell,
 } from "@/domain/geometry/measuring/seaLevel";
@@ -182,11 +183,17 @@ export function remapBundledSeaLevelSeedToGameArea(
     return null;
   }
 
+  const fineDivisions = resolveFineSeaLevelDivisions(gameArea);
+  const complete =
+    seed.complete === true &&
+    seed.divisions >= fineDivisions &&
+    finiteCount === sessionCells.length;
+
   return {
     cells: sessionCells,
     cellElevations,
     divisions: seed.divisions,
-    complete: false,
+    complete,
   };
 }
 
