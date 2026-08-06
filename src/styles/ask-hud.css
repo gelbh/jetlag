@@ -120,4 +120,43 @@
     justify-content: center;
     padding: 0.25rem;
   }
+
+  .ask-walk-banner {
+    display: flex;
+    max-width: 28rem;
+    margin-inline: auto;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-hud-md);
+    border: 1px solid oklch(from var(--color-border) l c h / 0.7);
+    background: oklch(from var(--color-surface-deep) l c h / 0.92);
+    box-shadow: var(--shadow-hud-float);
+  }
+
+  .ask-walk-banner__label {
+    margin: 0;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-highlight);
+  }
+
+  .ask-walk-banner__progress {
+    margin: 0;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    line-height: 1.15;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-ink-primary);
+  }
+
+  .ask-walk-banner__sep {
+    color: var(--color-ink-muted);
+    font-weight: 500;
+  }
+
+  .ask-walk-banner__hint {
+    margin: 0.25rem 0 0;
+  }
 }

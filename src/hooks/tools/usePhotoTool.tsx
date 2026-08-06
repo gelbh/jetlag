@@ -1,5 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { PhotoHudBody } from "../../components/tools/ask/PhotoHudBody";
 import { PhotoPanel } from "../../components/tools/PhotoPanel";
+import type { AskHudReadiness } from "../../domain/ask/askHudModes";
+import type { AskToolHudBundle } from "../map-screen/heavyMapTools";
 import type { DistanceUnit } from "../../domain/map/distance";
 import type { GameSize } from "../../domain/session/size/gameSize";
 import {
@@ -148,6 +151,42 @@ export function usePhotoTool({
 
   const commit = () => session.submit();
 
+  const categoryReady =
+    !usedCategories.has(categoryId) &&
+    isPhotoCategoryAvailableForGameSize(gameSize, categoryId);
+
+  const readiness: AskHudReadiness = {
+    surface: "photo",
+    placementReady: true,
+    configureReady: categoryReady,
+    resolveReady: true,
+    answerReady: true,
+    awaitHiderAnswer,
+    isSubmitting: session.isBusy,
+    viewOnly: !canSubmitQuestion,
+  };
+
+  const hud: AskToolHudBundle | null =
+    active && awaitHiderAnswer
+      ? {
+          readiness,
+          costLabel,
+          error: mapError,
+          onCommit: () => void commit(),
+          modeBody: (
+            <PhotoHudBody
+              gameSize={gameSize}
+              distanceUnit={distanceUnit}
+              categoryId={categoryId}
+              usedCategoryIds={usedCategories}
+              onCategoryChange={setSelectedCategoryId}
+              hasOpenQuestion={hasOpenQuestion}
+            />
+          ),
+          sheets: null as ReactNode,
+        }
+      : null;
+
   const panel =
     active && awaitHiderAnswer ? (
       <PhotoPanel
@@ -167,6 +206,7 @@ export function usePhotoTool({
 
   return {
     panel,
+    hud,
     handleMapClick: () => false,
   };
 }

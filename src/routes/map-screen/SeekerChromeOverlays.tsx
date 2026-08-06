@@ -87,7 +87,9 @@ function askHudFromTools(
     case "tentacle":
       return tools.tentacleTool.hud;
     case "thermometer":
+      return tools.thermometerTool.hud;
     case "photo":
+      return tools.photoTool.hud;
     case "hiding-zone-create":
     case "hiding-zone-move":
       return null;
@@ -138,10 +140,11 @@ export function SeekerChromeOverlays({
     : "";
   const askCanCommit = toolHud ? canCommit(toolHud.readiness) : false;
   const askCommitKind = toolHud
-    ? commitKind(
+    ? (toolHud.commitKind ??
+      commitKind(
         toolHud.readiness.surface,
         toolHud.readiness.awaitHiderAnswer,
-      )
+      ))
     : "send";
   const askCommitLabel = toolHud
     ? primedCommitLabel({
