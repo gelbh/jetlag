@@ -59,3 +59,27 @@ export async function createPreloadRequest(
     throw mapCallableError(error, "Could not submit the preload request.");
   }
 }
+
+export interface UpdatePreloadRequestStatusResult {
+  status: PreloadRequestStatus;
+}
+
+export async function updatePreloadRequestStatus(
+  requestId: string,
+  status: PreloadRequestStatus,
+): Promise<UpdatePreloadRequestStatusResult> {
+  requireFirebase();
+
+  const functions = await getFirebaseFunctions();
+  const callable = httpsCallable<
+    { requestId: string; status: PreloadRequestStatus },
+    UpdatePreloadRequestStatusResult
+  >(functions, "updatePreloadRequestStatus");
+
+  try {
+    const result = await callable({ requestId, status });
+    return result.data;
+  } catch (error) {
+    throw mapCallableError(error, "Could not update the preload request.");
+  }
+}
