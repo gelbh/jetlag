@@ -8,7 +8,7 @@ import {
 } from "../preloadRequest/updatePreloadRequestStatus.mjs";
 
 function mockDb(docs) {
-  return {
+  const db = {
     collection(name) {
       assert.equal(name, "preloadRequests");
       return {
@@ -28,7 +28,19 @@ function mockDb(docs) {
         },
       };
     },
+    async runTransaction(fn) {
+      const transaction = {
+        async get(ref) {
+          return ref.get();
+        },
+        update(ref, patch) {
+          return ref.update(patch);
+        },
+      };
+      return fn(transaction);
+    },
   };
+  return db;
 }
 
 const fixedNow = () => new Date("2026-08-05T12:00:00.000Z");

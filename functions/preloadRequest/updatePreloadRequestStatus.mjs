@@ -37,21 +37,24 @@ export async function updatePreloadRequestStatusHandler(db, input, deps = {}) {
 
   const now = deps.now ?? (() => new Date());
   const requestRef = db.collection("preloadRequests").doc(requestId);
-  const snapshot = await requestRef.get();
-  if (!snapshot.exists) {
-    throw new Error(PRELOAD_REQUEST_NOT_FOUND);
-  }
-
-  const current = snapshot.data()?.status;
-  const allowed = ALLOWED[current];
-  if (!allowed || !allowed.has(status)) {
-    throw new Error(PRELOAD_INVALID_TRANSITION);
-  }
-
   const nowIso = now().toISOString();
-  await requestRef.update({
-    status,
-    updatedAt: nowIso,
+
+  await db.runTransaction(async (transaction) => {
+    const snapshot = await transaction.get(requestRef);
+    if (!snapshot.exists) {
+      throw new Error(PRELOAD_REQUEST_NOT_FOUND);
+    }
+
+    const current = snapshot.data()?.status;
+    const allowed = ALLOWED[current];
+    if (!allowed || !allowed.has(status)) {
+      throw new Error(PRELOAD_INVALID_TRANSITION);
+    }
+
+    transaction.update(requestRef, {
+      status,
+      updatedAt: nowIso,
+    });
   });
 
   return { status };

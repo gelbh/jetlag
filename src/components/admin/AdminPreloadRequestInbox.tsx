@@ -161,6 +161,7 @@ export function AdminPreloadRequestInbox() {
                   <li key={request.id}>
                     <button
                       type="button"
+                      aria-current={selectedRow ? "true" : undefined}
                       className={
                         selectedRow
                           ? "jl-incident-queue-row is-selected"

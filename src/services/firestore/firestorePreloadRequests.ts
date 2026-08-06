@@ -61,6 +61,9 @@ export function subscribePreloadRequestList(
               }
             })
             .catch((refreshError) => {
+              if (unsubscribed) {
+                return;
+              }
               onError(
                 refreshError instanceof Error
                   ? refreshError

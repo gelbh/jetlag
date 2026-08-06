@@ -129,7 +129,11 @@ function parseSnapshot(value: unknown): PreloadPresetSnapshot | null {
   if (typeof record.placeLabel === "string") {
     snapshot.placeLabel = record.placeLabel;
   }
-  if (typeof record.gameAreaBytes === "number") {
+  if (
+    typeof record.gameAreaBytes === "number" &&
+    Number.isSafeInteger(record.gameAreaBytes) &&
+    record.gameAreaBytes >= 0
+  ) {
     snapshot.gameAreaBytes = record.gameAreaBytes;
   }
   const packId = parseRegionPackId(record.regionPackId);
@@ -148,9 +152,13 @@ function parseSnapshot(value: unknown): PreloadPresetSnapshot | null {
     const { south, west, north, east } = bounds;
     if (
       typeof south === "number" &&
+      Number.isFinite(south) &&
       typeof west === "number" &&
+      Number.isFinite(west) &&
       typeof north === "number" &&
-      typeof east === "number"
+      Number.isFinite(north) &&
+      typeof east === "number" &&
+      Number.isFinite(east)
     ) {
       snapshot.focusBounds = { south, west, north, east };
     }
