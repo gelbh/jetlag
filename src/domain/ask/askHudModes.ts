@@ -301,6 +301,8 @@ export const ASK_HUD_OWNED_TOOLS = [
   "matching",
   "measuring",
   "tentacle",
+  "thermometer",
+  "photo",
 ] as const;
 
 export type AskHudOwnedTool = (typeof ASK_HUD_OWNED_TOOLS)[number];

@@ -264,6 +264,7 @@ describe("askHudModes", () => {
     expect(isAskHudOwnedTool("radar")).toBe(true);
     expect(isAskHudOwnedTool("matching")).toBe(true);
     expect(isAskHudOwnedTool("tentacle")).toBe(true);
-    expect(isAskHudOwnedTool("thermometer")).toBe(false);
+    expect(isAskHudOwnedTool("thermometer")).toBe(true);
+    expect(isAskHudOwnedTool("photo")).toBe(true);
   });
 });

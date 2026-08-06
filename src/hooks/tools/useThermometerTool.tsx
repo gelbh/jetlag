@@ -1,11 +1,15 @@
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, type ReactNode } from "react";
+import { ThermometerHudBody } from "../../components/tools/ask/ThermometerHudBody";
 import { ThermometerPanel } from "../../components/tools/ThermometerPanel";
+import type { AskHudReadiness } from "../../domain/ask/askHudModes";
+import type { AskToolHudBundle } from "../map-screen/heavyMapTools";
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import { distanceBetweenPoints } from "../../domain/geometry/gameArea/geometry";
 import { isActive } from "../../domain/map/annotations";
 import {
   DEFAULT_THERMOMETER_DISTANCE_METERS,
   availableThermometerDistancePresetsForSession,
+  isThermometerDistanceOptionAvailableForSession,
   isThermometerWalkActive,
   parseThermometerStartPoint,
   questionCostBreakdown,
@@ -349,6 +353,99 @@ export function useThermometerTool({
     });
   };
 
+  const walkingActive = thermoStep === "walking";
+  const pinsReady = thermoStep === "ready";
+  const distanceAvailable = isThermometerDistanceOptionAvailableForSession(
+    sessionRules,
+    activeDistanceMeters,
+  );
+  const travelTooShort =
+    (walkTracker.distanceTraveledMeters ?? thermoTravelMeters) !== null &&
+    (walkTracker.distanceTraveledMeters ?? thermoTravelMeters)! + 1 <
+      activeDistanceMeters;
+
+  // Drive map-click routing without mounting ThermometerPanel wizard.
+  useEffect(() => {
+    if (walkingActive) {
+      wizardStepRef.current = "place";
+      return;
+    }
+    if (!thermoA || (config.placementMode === "manual" && !config.thermoB)) {
+      wizardStepRef.current = "place";
+      return;
+    }
+    wizardStepRef.current = "ask";
+  }, [
+    config.placementMode,
+    config.thermoB,
+    thermoA,
+    walkingActive,
+  ]);
+
+  const readiness: AskHudReadiness = {
+    surface: "thermometer",
+    placementReady:
+      walkingActive ||
+      (config.placementMode === "manual" ? pinsReady : true),
+    configureReady: distanceAvailable && !travelTooShort,
+    resolveReady: walkingActive || pinsReady,
+    answerReady:
+      walkingActive || awaitHiderAnswer || config.answer !== null,
+    awaitHiderAnswer,
+    isSubmitting: session.isBusy,
+    viewOnly: !canSubmitQuestion,
+  };
+
+  const onHudCommit = () => {
+    if (walkingActive) {
+      walkTracker.endWalk();
+      return;
+    }
+    void commit();
+  };
+
+  const hud: AskToolHudBundle = {
+    readiness,
+    costLabel,
+    error:
+      config.panelError ?? session.error ?? gpsError ?? walkTracker.gpsError,
+    onCommit: onHudCommit,
+    commitKind: walkingActive
+      ? "endWalk"
+      : awaitHiderAnswer
+        ? "send"
+        : "ask",
+    modeBody: (
+      <ThermometerHudBody
+        distanceUnit={distanceUnit}
+        sessionRules={sessionRules}
+        distanceMeters={activeDistanceMeters}
+        travelMeters={walkTracker.distanceTraveledMeters ?? thermoTravelMeters}
+        answer={config.answer}
+        step={thermoStep === "walking" ? "b" : thermoStep}
+        placementMode={config.placementMode}
+        walkingActive={walkingActive}
+        presetUseCount={presetUseCount}
+        costLabel={costLabel}
+        gpsLoading={gpsLoading}
+        canSubmitQuestion={canSubmitQuestion}
+        isSubmitting={session.isBusy}
+        error={
+          config.panelError ?? session.error ?? gpsError ?? walkTracker.gpsError
+        }
+        onPlacementModeChange={(placementMode) =>
+          patchConfig({ placementMode })
+        }
+        onDistanceChange={(distanceMeters) => patchConfig({ distanceMeters })}
+        onAnswerChange={(answer) => patchConfig({ answer })}
+        onReset={resetDraft}
+        onStartWalk={startWalkLocked}
+        awaitHiderAnswer={awaitHiderAnswer}
+      />
+    ),
+    sheets: null as ReactNode,
+  };
+
   return {
     draft: {
       thermoA,
@@ -392,6 +489,7 @@ export function useThermometerTool({
         wizardStepRef={wizardStepRef}
       />
     ),
+    hud,
     walkCurrentPoint: walkTracker.currentPoint,
   };
 }

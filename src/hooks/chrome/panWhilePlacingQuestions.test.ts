@@ -65,8 +65,9 @@ describe("pan while placing questions", () => {
     expect(thermo.result.current.draft.thermoA).toEqual([53.35, -6.26]);
     expect(thermo.result.current.draft.thermoB).toEqual([53.36, -6.25]);
     expect(mocks.finishPlacement).not.toHaveBeenCalled();
+    // HUD: both pins → ask chord (map taps no longer place).
     expect(thermo.result.current.panel.props.wizardStepRef.current).toBe(
-      "place",
+      "ask",
     );
   });
 

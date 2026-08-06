@@ -127,11 +127,20 @@ export function useThermometerWalk({
     setCurrentPoint(null);
   }, []);
 
+  const endWalk = useCallback(() => {
+    if (!active || !startPoint) {
+      return;
+    }
+    const point = currentPointRef.current ?? startPoint;
+    void finishWalk(point);
+  }, [active, finishWalk, startPoint]);
+
   return {
     currentPoint: active ? currentPoint : null,
     distanceTraveledMeters,
     gpsError: error,
     cancelWalk,
+    endWalk,
   };
 }
 

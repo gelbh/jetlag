@@ -12,14 +12,20 @@ function stubOverlay() {
 }
 
 function emptyHud(
-  surface: "radar" | "measuring" | "matching" | "tentacle",
+  surface:
+    | "radar"
+    | "measuring"
+    | "matching"
+    | "tentacle"
+    | "thermometer"
+    | "photo",
   overrides?: Partial<AskHudReadiness>,
 ) {
   const readiness: AskHudReadiness = {
     surface,
     placementReady: false,
     configureReady: false,
-    resolveReady: surface === "radar",
+    resolveReady: surface === "radar" || surface === "photo",
     answerReady: true,
     awaitHiderAnswer: true,
     isSubmitting: false,
@@ -32,24 +38,37 @@ function emptyHud(
         ? "measuring-hud-body"
         : surface === "matching"
           ? "matching-hud-body"
-          : "tentacle-hud-body";
+          : surface === "tentacle"
+            ? "tentacle-hud-body"
+            : surface === "thermometer"
+              ? "thermometer-hud-body"
+              : "photo-hud-body";
   return {
     readiness,
     costLabel:
-      surface === "radar"
+      surface === "radar" || surface === "thermometer"
         ? "D2P1"
-        : surface === "tentacle"
-          ? "D4P2"
-          : "D3P1",
+        : surface === "photo"
+          ? "D1P1"
+          : surface === "tentacle"
+            ? "D4P2"
+            : "D3P1",
     error: null,
     onCommit: vi.fn(),
     modeBody: <div data-testid={bodyId} />,
     sheets: null,
+    ...(surface === "thermometer" ? { commitKind: "endWalk" as const } : {}),
   };
 }
 
 function stubTools(
-  active: "radar" | "measuring" | "matching" | "tentacle" | "thermometer",
+  active:
+    | "radar"
+    | "measuring"
+    | "matching"
+    | "tentacle"
+    | "thermometer"
+    | "photo",
 ) {
   return {
     radarTool: {
@@ -64,8 +83,14 @@ function stubTools(
       panel: <div data-testid="matching-float-panel" />,
       hud: emptyHud("matching"),
     },
-    photoTool: { panel: <div /> },
-    thermometerTool: { panel: <div data-testid="thermometer-float-panel" /> },
+    photoTool: {
+      panel: <div data-testid="photo-float-panel" />,
+      hud: emptyHud("photo"),
+    },
+    thermometerTool: {
+      panel: <div data-testid="thermometer-float-panel" />,
+      hud: emptyHud("thermometer"),
+    },
     pinTool: { panel: <div /> },
     zoneTool: { panel: <div /> },
     tentacleTool: {
@@ -202,7 +227,7 @@ describe("SeekerChromeOverlays Ask HUD wiring", () => {
     expect(screen.queryByTestId("tentacle-float-panel")).toBeNull();
   });
 
-  it("keeps ToolFloatingPanel for non-migrated thermometer", () => {
+  it("mounts AskHudHost for thermometer and skips ToolFloatingPanel", () => {
     const tools = stubTools("thermometer");
     render(
       <SeekerChromeOverlays
@@ -226,7 +251,40 @@ describe("SeekerChromeOverlays Ask HUD wiring", () => {
       />,
     );
 
-    expect(screen.queryByTestId("ask-hud-host")).toBeNull();
-    expect(screen.getByTestId("thermometer-float-panel")).toBeInTheDocument();
+    expect(screen.getByTestId("ask-hud-host")).toBeInTheDocument();
+    expect(screen.getByTestId("thermometer-hud-body")).toBeInTheDocument();
+    expect(screen.queryByTestId("thermometer-float-panel")).toBeNull();
+  });
+
+  it("mounts AskHudHost for photo and skips ToolFloatingPanel", () => {
+    const tools = stubTools("photo");
+    render(
+      <SeekerChromeOverlays
+        timer={stubTimer() as never}
+        activeTool="photo"
+        overlay={stubOverlay() as never}
+        firstRunDismissed
+        setFirstRunDismissed={vi.fn()}
+        forceMapToolsGuide={false}
+        setForceMapToolsGuide={vi.fn()}
+        selectedAnnotation={null}
+        geometryEditAnnotation={null}
+        geometryDraft={null}
+        mapPanning={false}
+        userMinimized={false}
+        setUserMinimized={vi.fn()}
+        handleSelectTool={vi.fn()}
+        cancelGeometryEdit={vi.fn()}
+        saveGeometryEdit={vi.fn()}
+        tools={tools as never}
+      />,
+    );
+
+    expect(screen.getByTestId("ask-hud-host")).toBeInTheDocument();
+    expect(screen.getByTestId("photo-hud-body")).toBeInTheDocument();
+    expect(screen.getByTestId("ask-mode-cue-ticker")).toHaveTextContent(
+      "PICK A PHOTO ASK",
+    );
+    expect(screen.queryByTestId("photo-float-panel")).toBeNull();
   });
 });

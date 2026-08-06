@@ -1,6 +1,9 @@
 import type { ReactNode } from "react";
 import type { Feature, MultiPolygon, Polygon } from "geojson";
-import type { AskHudReadiness } from "../../domain/ask/askHudModes";
+import type {
+  AskHudCommitKind,
+  AskHudReadiness,
+} from "../../domain/ask/askHudModes";
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import type { MeasuringPlace } from "../../services/geo/overpass/measuringPlaces";
 import {
@@ -17,6 +20,8 @@ export type AskToolHudBundle = {
   onCommit: () => void;
   modeBody: ReactNode;
   sheets: ReactNode;
+  /** Override strip verb (e.g. thermometer END WALK while walking). */
+  commitKind?: AskHudCommitKind;
 };
 
 export interface MatchingToolApi {
