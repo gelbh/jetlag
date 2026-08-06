@@ -4,14 +4,13 @@ import { AskHudHost } from "../../components/tools/ask/AskHudHost";
 import { ToolFloatingPanel } from "../../components/tools/ToolFloatingPanel";
 import {
   activeModeCue,
+  canCommit,
   commitKind,
-  type AskHudCommitKind,
+  isAskHudOwnedTool,
+  primedCommitLabel,
   type AskHudSurface,
 } from "../../domain/ask/askHudModes";
-import {
-  isQuestionDockTool,
-  MAP_TOOL_DOCK_ENTRIES,
-} from "../../domain/map/mapTools";
+import { MAP_TOOL_DOCK_ENTRIES } from "../../domain/map/mapTools";
 import type { MapScreenController } from "./useMapScreenController";
 
 type SeekerChromeOverlaysProps = {
@@ -44,23 +43,6 @@ type SeekerChromeOverlaysProps = {
   >;
 };
 
-function stubCommitLabel(kind: AskHudCommitKind): string {
-  switch (kind) {
-    case "send":
-      return "SEND — SET CENTER FIRST";
-    case "ask":
-      return "ASK — NOT READY";
-    case "confirm":
-      return "CONFIRM — NOT READY";
-    case "endWalk":
-      return "END WALK — NOT READY";
-    default: {
-      const _exhaustive: never = kind;
-      return _exhaustive;
-    }
-  }
-}
-
 function renderToolPanel(
   activeTool: MapScreenController["activeTool"],
   tools: SeekerChromeOverlaysProps["tools"],
@@ -91,6 +73,29 @@ function renderToolPanel(
   }
 }
 
+function askHudFromTools(
+  activeTool: AskHudSurface,
+  tools: SeekerChromeOverlaysProps["tools"],
+) {
+  switch (activeTool) {
+    case "radar":
+      return tools.radarTool.hud;
+    case "measuring":
+      return tools.measuringTool.hud;
+    case "matching":
+    case "thermometer":
+    case "tentacle":
+    case "photo":
+    case "hiding-zone-create":
+    case "hiding-zone-move":
+      return null;
+    default: {
+      const _exhaustive: never = activeTool;
+      return _exhaustive;
+    }
+  }
+}
+
 export function SeekerChromeOverlays({
   timer,
   activeTool,
@@ -110,26 +115,45 @@ export function SeekerChromeOverlays({
   saveGeometryEdit,
   tools,
 }: SeekerChromeOverlaysProps) {
-  const askHudActive =
+  const askHudOwned =
     activeTool !== "none" &&
-    isQuestionDockTool(activeTool) &&
+    isAskHudOwnedTool(activeTool) &&
     !selectedAnnotation;
 
-  const askSurface: AskHudSurface | null = askHudActive ? activeTool : null;
-  const dockEntry = askHudActive
+  const askSurface: AskHudSurface | null = askHudOwned ? activeTool : null;
+  const dockEntry = askHudOwned
     ? MAP_TOOL_DOCK_ENTRIES.find((entry) => entry.id === activeTool)
     : undefined;
-  const askCue = askSurface
+  const toolHud = askSurface ? askHudFromTools(askSurface, tools) : null;
+
+  const askCue = toolHud
     ? activeModeCue({
-        surface: askSurface,
-        placementReady: false,
-        configureReady: false,
-        resolveReady: false,
+        surface: toolHud.readiness.surface,
+        placementReady: toolHud.readiness.placementReady,
+        configureReady: toolHud.readiness.configureReady,
+        resolveReady: toolHud.readiness.resolveReady,
       })
     : "";
-  const askCommitKind = askSurface
-    ? commitKind(askSurface, true)
+  const askCanCommit = toolHud ? canCommit(toolHud.readiness) : false;
+  const askCommitKind = toolHud
+    ? commitKind(
+        toolHud.readiness.surface,
+        toolHud.readiness.awaitHiderAnswer,
+      )
     : "send";
+  const askCommitLabel = toolHud
+    ? primedCommitLabel({
+        kind: askCommitKind,
+        costLabel: toolHud.costLabel,
+        primed: askCanCommit,
+        cue: askCue,
+      })
+    : "";
+
+  const showFloatingPanel =
+    activeTool !== "none" &&
+    !selectedAnnotation &&
+    !isAskHudOwnedTool(activeTool);
 
   return (
     <>
@@ -181,21 +205,24 @@ export function SeekerChromeOverlays({
         }}
       />
 
-      {askHudActive && askSurface ? (
-        <AskHudHost
-          cue={askCue}
-          toolLabel={dockEntry?.name ?? activeTool}
-          costLabel={dockEntry?.cost ?? null}
-          canCommit={false}
-          commitLabel={stubCommitLabel(askCommitKind)}
-          onCommit={() => {
-            /* Task 2 scaffold — tool panels still own commit. */
-          }}
-          modeBody={null}
-        />
+      {askHudOwned && askSurface && toolHud ? (
+        <>
+          <AskHudHost
+            cue={askCue}
+            toolLabel={dockEntry?.name ?? activeTool}
+            costLabel={toolHud.costLabel}
+            canCommit={askCanCommit}
+            commitLabel={askCommitLabel}
+            onCommit={toolHud.onCommit}
+            isSubmitting={toolHud.readiness.isSubmitting}
+            error={toolHud.error}
+            modeBody={toolHud.modeBody}
+          />
+          {toolHud.sheets}
+        </>
       ) : null}
 
-      {activeTool !== "none" && !selectedAnnotation ? (
+      {showFloatingPanel ? (
         <ToolFloatingPanel
           key={activeTool}
           toolId={activeTool}
