@@ -1,6 +1,17 @@
 import { MapFirstRunSheet } from "../../components/session/mapChrome/MapFirstRunSheet";
 import { MapToolsHintBanner } from "../../components/session/mapChrome/MapToolsHintBanner";
+import { AskHudHost } from "../../components/tools/ask/AskHudHost";
 import { ToolFloatingPanel } from "../../components/tools/ToolFloatingPanel";
+import {
+  activeModeCue,
+  commitKind,
+  type AskHudCommitKind,
+  type AskHudSurface,
+} from "../../domain/ask/askHudModes";
+import {
+  isQuestionDockTool,
+  MAP_TOOL_DOCK_ENTRIES,
+} from "../../domain/map/mapTools";
 import type { MapScreenController } from "./useMapScreenController";
 
 type SeekerChromeOverlaysProps = {
@@ -32,6 +43,23 @@ type SeekerChromeOverlaysProps = {
     | "tentacleTool"
   >;
 };
+
+function stubCommitLabel(kind: AskHudCommitKind): string {
+  switch (kind) {
+    case "send":
+      return "SEND — SET CENTER FIRST";
+    case "ask":
+      return "ASK — NOT READY";
+    case "confirm":
+      return "CONFIRM — NOT READY";
+    case "endWalk":
+      return "END WALK — NOT READY";
+    default: {
+      const _exhaustive: never = kind;
+      return _exhaustive;
+    }
+  }
+}
 
 function renderToolPanel(
   activeTool: MapScreenController["activeTool"],
@@ -82,6 +110,27 @@ export function SeekerChromeOverlays({
   saveGeometryEdit,
   tools,
 }: SeekerChromeOverlaysProps) {
+  const askHudActive =
+    activeTool !== "none" &&
+    isQuestionDockTool(activeTool) &&
+    !selectedAnnotation;
+
+  const askSurface: AskHudSurface | null = askHudActive ? activeTool : null;
+  const dockEntry = askHudActive
+    ? MAP_TOOL_DOCK_ENTRIES.find((entry) => entry.id === activeTool)
+    : undefined;
+  const askCue = askSurface
+    ? activeModeCue({
+        surface: askSurface,
+        placementReady: false,
+        configureReady: false,
+        resolveReady: false,
+      })
+    : "";
+  const askCommitKind = askSurface
+    ? commitKind(askSurface, true)
+    : "send";
+
   return (
     <>
       <MapToolsHintBanner
@@ -131,6 +180,20 @@ export function SeekerChromeOverlays({
           setForceMapToolsGuide(false);
         }}
       />
+
+      {askHudActive && askSurface ? (
+        <AskHudHost
+          cue={askCue}
+          toolLabel={dockEntry?.name ?? activeTool}
+          costLabel={dockEntry?.cost ?? null}
+          canCommit={false}
+          commitLabel={stubCommitLabel(askCommitKind)}
+          onCommit={() => {
+            /* Task 2 scaffold — tool panels still own commit. */
+          }}
+          modeBody={null}
+        />
+      ) : null}
 
       {activeTool !== "none" && !selectedAnnotation ? (
         <ToolFloatingPanel
