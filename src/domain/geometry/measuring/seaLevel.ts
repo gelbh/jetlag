@@ -269,24 +269,23 @@ interface SeaLevelNearRect {
   east: number;
 }
 
-function buildNearRegionFromRects(
-  rects: SeaLevelNearRect[],
+function seaLevelNearEdgeCase(
+  finiteCount: number,
+  nearCount: number,
+): SeaLevelEdgeCase | null {
+  if (nearCount === 0) {
+    return "lowest";
+  }
+  if (finiteCount > 0 && nearCount === finiteCount) {
+    return "highest";
+  }
+  return null;
+}
+
+function clipNearMultiPolygon(
+  coordinates: Position[][][],
   gameArea: GameArea,
 ): Feature<Polygon | MultiPolygon> | null {
-  if (rects.length === 0) {
-    return null;
-  }
-
-  const coordinates = rects.map((rect) => [
-    [
-      [rect.west, rect.south],
-      [rect.east, rect.south],
-      [rect.east, rect.north],
-      [rect.west, rect.north],
-      [rect.west, rect.south],
-    ],
-  ]);
-
   const nearRegion: Feature<MultiPolygon> = {
     type: "Feature",
     properties: {},
@@ -312,6 +311,27 @@ function buildNearRegionFromRects(
   return clipped as Feature<Polygon | MultiPolygon>;
 }
 
+function buildNearRegionFromRects(
+  rects: SeaLevelNearRect[],
+  gameArea: GameArea,
+): Feature<Polygon | MultiPolygon> | null {
+  if (rects.length === 0) {
+    return null;
+  }
+
+  const coordinates = rects.map((rect) => [
+    [
+      [rect.west, rect.south],
+      [rect.east, rect.south],
+      [rect.east, rect.north],
+      [rect.west, rect.north],
+      [rect.west, rect.south],
+    ],
+  ]);
+
+  return clipNearMultiPolygon(coordinates, gameArea);
+}
+
 /**
  * Build near-sea-level region, replacing ambiguous coarse cells with refined
  * subcell classifications when provided (freehand local refine).
@@ -321,8 +341,9 @@ export function buildSeaLevelNearRegionWithLocalRefine(args: {
   elevations: number[];
   seekerDistanceFromSeaLevelMeters: number;
   gameArea: GameArea;
-  divisions: number;
   refineCells?: ElevationSampleCell[];
+  /** Parallel to refineCells — `${parent.row}:${parent.col}` from the subdivider. */
+  refineParentKeys?: string[];
   refineElevations?: number[];
 }): SeaLevelNearRegionBuildResult {
   const {
@@ -331,6 +352,7 @@ export function buildSeaLevelNearRegionWithLocalRefine(args: {
     seekerDistanceFromSeaLevelMeters,
     gameArea,
     refineCells = [],
+    refineParentKeys = [],
     refineElevations = [],
   } = args;
 
@@ -338,7 +360,8 @@ export function buildSeaLevelNearRegionWithLocalRefine(args: {
     cells.length === 0 ||
     elevations.length !== cells.length ||
     seekerDistanceFromSeaLevelMeters < 0 ||
-    refineElevations.length !== refineCells.length
+    refineElevations.length !== refineCells.length ||
+    refineParentKeys.length !== refineCells.length
   ) {
     return { region: null, edgeCase: null };
   }
@@ -347,24 +370,13 @@ export function buildSeaLevelNearRegionWithLocalRefine(args: {
   const refineByParent = new Map<string, RefinedChild[]>();
 
   for (let index = 0; index < refineCells.length; index += 1) {
-    const child = refineCells[index];
     const elevation = refineElevations[index];
     if (!Number.isFinite(elevation)) {
       continue;
     }
-    const parent = cells.find(
-      (cell) =>
-        child.point[0] >= cell.south &&
-        child.point[0] <= cell.north &&
-        child.point[1] >= cell.west &&
-        child.point[1] <= cell.east,
-    );
-    if (!parent) {
-      continue;
-    }
-    const key = `${parent.row}:${parent.col}`;
+    const key = refineParentKeys[index];
     const bucket = refineByParent.get(key) ?? [];
-    bucket.push({ cell: child, elevation });
+    bucket.push({ cell: refineCells[index], elevation });
     refineByParent.set(key, bucket);
   }
 
@@ -413,14 +425,14 @@ export function buildSeaLevelNearRegionWithLocalRefine(args: {
     }
   }
 
-  if (nearCount === 0) {
-    return { region: null, edgeCase: "lowest" };
+  const edgeCase = seaLevelNearEdgeCase(finiteCount, nearCount);
+  if (edgeCase === "lowest") {
+    return { region: null, edgeCase };
   }
-
-  const edgeCase =
-    finiteCount > 0 && nearCount === finiteCount ? "highest" : null;
-  const region = buildNearRegionFromRects(nearRects, gameArea);
-  return { region, edgeCase };
+  return {
+    region: buildNearRegionFromRects(nearRects, gameArea),
+    edgeCase,
+  };
 }
 
 function cellRing(
@@ -528,29 +540,7 @@ function buildNearRegionFromGrid(
     cellRing(rect, south, west, latStep, lngStep),
   ]);
 
-  const nearRegion: Feature<MultiPolygon> = {
-    type: "Feature",
-    properties: {},
-    geometry: {
-      type: "MultiPolygon",
-      coordinates,
-    },
-  };
-
-  const clipped = intersect({
-    type: "FeatureCollection",
-    features: [gameAreaToPolygon(gameArea), nearRegion],
-  });
-
-  if (
-    !clipped ||
-    (clipped.geometry.type !== "Polygon" &&
-      clipped.geometry.type !== "MultiPolygon")
-  ) {
-    return null;
-  }
-
-  return clipped as Feature<Polygon | MultiPolygon>;
+  return clipNearMultiPolygon(coordinates, gameArea);
 }
 
 export function buildSeaLevelNearRegionFromSamples(
@@ -584,10 +574,9 @@ export function buildSeaLevelNearRegionFromSamples(
     }
 
     finiteCount += 1;
-    const isNear =
-      distanceFromSeaLevelMeters(elevation) <= seekerDistanceFromSeaLevelMeters;
-
-    if (isNear) {
+    if (
+      isSeaLevelNearElevation(elevation, seekerDistanceFromSeaLevelMeters)
+    ) {
       nearCount += 1;
       grid[cell.row][cell.col] = "near";
     } else {
@@ -595,15 +584,15 @@ export function buildSeaLevelNearRegionFromSamples(
     }
   }
 
-  if (nearCount === 0) {
-    return { region: null, edgeCase: "lowest" };
+  const edgeCase = seaLevelNearEdgeCase(finiteCount, nearCount);
+  if (edgeCase === "lowest") {
+    return { region: null, edgeCase };
   }
 
-  const edgeCase =
-    finiteCount > 0 && nearCount === finiteCount ? "highest" : null;
-  const region = buildNearRegionFromGrid(grid, gameArea, divisions);
-
-  return { region, edgeCase };
+  return {
+    region: buildNearRegionFromGrid(grid, gameArea, divisions),
+    edgeCase,
+  };
 }
 
 export function buildSeaLevelEliminationRegion(

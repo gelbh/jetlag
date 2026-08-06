@@ -91,11 +91,16 @@ async function refineSeaLevelContextLocally(
     );
   }
 
-  const refineCells = ambiguous
-    .flatMap((cell) =>
-      subdivideElevationSampleCell(cell, SEA_LEVEL_REFINE_SUBDIVISIONS),
-    )
-    .slice(0, MAX_SEA_LEVEL_REFINE_SAMPLES);
+  const refineEntries = ambiguous.flatMap((parent) => {
+    const parentKey = `${parent.row}:${parent.col}`;
+    return subdivideElevationSampleCell(
+      parent,
+      SEA_LEVEL_REFINE_SUBDIVISIONS,
+    ).map((cell) => ({ cell, parentKey }));
+  });
+  const capped = refineEntries.slice(0, MAX_SEA_LEVEL_REFINE_SAMPLES);
+  const refineCells = capped.map((entry) => entry.cell);
+  const refineParentKeys = capped.map((entry) => entry.parentKey);
 
   const refineElevations = await fetchElevations(
     refineCells.map((cell) => cell.point),
@@ -108,8 +113,8 @@ async function refineSeaLevelContextLocally(
       elevations: sampling.cellElevations,
       seekerDistanceFromSeaLevelMeters: distanceFromSeaLevel,
       gameArea,
-      divisions: sampling.divisions,
       refineCells,
+      refineParentKeys,
       refineElevations,
     });
 
