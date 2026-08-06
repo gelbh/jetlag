@@ -66,7 +66,8 @@ describe("measuring elimination polarity", () => {
     expect(cells.length).toBeGreaterThan(4);
 
     // Seeker distance from sea level = 100m. Near cells ≤ 100m; far > 100m.
-    const elevations = cells.map((_, index) => (index === 0 ? 40 : 180));
+    // Hider cell at the inclusive boundary (100m), not a loose interior near value.
+    const elevations = cells.map((_, index) => (index === 0 ? 100 : 180));
     const { region: nearRegion } = buildSeaLevelNearRegionFromSamples(
       cells,
       elevations,
@@ -115,6 +116,16 @@ describe("measuring elimination polarity", () => {
       sampleGameArea,
       "closer",
     );
-    expect(viaShared?.geometry.type).toBe(viaLocation?.geometry.type);
+    expect(viaShared).not.toBeNull();
+    expect(viaLocation).not.toBeNull();
+
+    const nearPoint = turfPoint([-0.151, 51.451]);
+    const farPoint = turfPoint([-0.195, 51.405]);
+    expect(booleanPointInPolygon(nearPoint, viaShared!)).toBe(
+      booleanPointInPolygon(nearPoint, viaLocation!),
+    );
+    expect(booleanPointInPolygon(farPoint, viaShared!)).toBe(
+      booleanPointInPolygon(farPoint, viaLocation!),
+    );
   });
 });
