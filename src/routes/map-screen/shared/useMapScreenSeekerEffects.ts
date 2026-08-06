@@ -99,6 +99,11 @@ export function useMapScreenSeekerEffects({
     createAnnotation,
     gameArea: toolGameArea,
     sessionResetAt: session?.sessionResetAt,
+    knownAnnotationIdsKey: annotations
+      .map((annotation) => annotation.id)
+      .slice()
+      .sort()
+      .join("\0"),
     knownAnnotationIds: new Set(annotations.map((annotation) => annotation.id)),
   });
 

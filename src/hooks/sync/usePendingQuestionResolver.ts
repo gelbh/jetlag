@@ -26,7 +26,12 @@ interface UsePendingQuestionResolverParams {
   ) => Promise<AnnotationRecord>;
   gameArea: GameArea;
   sessionResetAt?: string;
-  /** Session annotation ids (incl. soft-deleted) — presence short-circuits re-resolve. */
+  /**
+   * Session annotation ids (incl. soft-deleted). Content-stable key for effect
+   * deps — join sorted ids; do not pass a fresh Set identity each render.
+   */
+  knownAnnotationIdsKey?: string;
+  /** Latest known ids; read via ref after awaits so reload hydration is visible. */
   knownAnnotationIds?: ReadonlySet<string>;
 }
 
@@ -51,9 +56,12 @@ export function usePendingQuestionResolver({
   createAnnotation,
   gameArea,
   sessionResetAt,
+  knownAnnotationIdsKey = "",
   knownAnnotationIds,
 }: UsePendingQuestionResolverParams) {
   const resolvingRef = useRef(new Set<string>());
+  const knownAnnotationIdsRef = useRef(knownAnnotationIds);
+  knownAnnotationIdsRef.current = knownAnnotationIds;
 
   useEffect(() => {
     resolvingRef.current = new Set();
@@ -77,6 +85,7 @@ export function usePendingQuestionResolver({
 
       void (async () => {
         let annotationCreated = false;
+        let annotationAlreadyKnown = false;
         try {
           if (isStaleAfterReset(pending.createdAt, sessionResetAt)) {
             return;
@@ -90,9 +99,10 @@ export function usePendingQuestionResolver({
             return;
           }
 
-          // Annotation already written (reload / prior attempt) — complete without
-          // rebuilding geometry (RLBT OOM thrash).
-          if (knownAnnotationIds?.has(pending.id)) {
+          // Read ref after await so annotation baseline hydration is visible
+          // (reload wipe → empty set must not lock us into a rebuild).
+          if (knownAnnotationIdsRef.current?.has(pending.id)) {
+            annotationAlreadyKnown = true;
             await updatePendingQuestion(sessionId, pending.id, {
               status: "resolved",
               resolvedAnnotationId: pending.id,
@@ -101,6 +111,17 @@ export function usePendingQuestionResolver({
           }
 
           const annotation = await resolvePendingQuestion(pending, gameArea);
+
+          // Hydration may have landed during geometry work — complete without write.
+          if (knownAnnotationIdsRef.current?.has(pending.id)) {
+            annotationAlreadyKnown = true;
+            await updatePendingQuestion(sessionId, pending.id, {
+              status: "resolved",
+              resolvedAnnotationId: pending.id,
+            });
+            return;
+          }
+
           if (!annotation) {
             if (pending.toolType === "photo") {
               await updatePendingQuestion(sessionId, pending.id, {
@@ -154,8 +175,13 @@ export function usePendingQuestionResolver({
           // Soft-fail: cancel once and keep the in-flight guard so reload/effect
           // loops cannot re-enter resolve (tentacle/measuring OOM thrash). On reconnect,
           // resolvingRef clears when sessionId changes, allowing one bounded retry.
-          // After annotation write, complete to resolved (not cancel) to avoid orphan shade.
-          if (annotationCreated) {
+          // After annotation write OR known existing annotation, complete to resolved
+          // (not cancel) to avoid orphan shade + cancelled Q.
+          const shouldComplete =
+            annotationCreated ||
+            annotationAlreadyKnown ||
+            Boolean(knownAnnotationIdsRef.current?.has(pending.id));
+          if (shouldComplete) {
             try {
               await updatePendingQuestion(sessionId, pending.id, {
                 status: "resolved",
@@ -171,12 +197,8 @@ export function usePendingQuestionResolver({
               });
             } catch {
               // Cancel write failed — still keep the guard for this session mount.
-              // The guard will be cleared when sessionId changes, allowing
-              // one retry on reconnect. This prevents transient failures from becoming permanent.
-              // Failure reporting continues below to ensure all errors are captured.
             }
           }
-          // Report failure regardless of annotation state to ensure error visibility
           capturePendingResolveFailure(error, {
             toolType: pending.toolType,
             pendingQuestionId: pending.id,
@@ -188,7 +210,7 @@ export function usePendingQuestionResolver({
     createAnnotation,
     enabled,
     gameArea,
-    knownAnnotationIds,
+    knownAnnotationIdsKey,
     pendingQuestions,
     sessionId,
     sessionResetAt,
