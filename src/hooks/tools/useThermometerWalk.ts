@@ -127,11 +127,27 @@ export function useThermometerWalk({
     setCurrentPoint(null);
   }, []);
 
+  const endWalk = useCallback(() => {
+    if (!active || !startPoint) {
+      return;
+    }
+    // Refuse start=end publishes — wait for a GPS sample past minDistance.
+    const point = currentPointRef.current;
+    if (!point) {
+      onErrorRef.current?.(
+        "Keep walking until GPS updates, then end the walk.",
+      );
+      return;
+    }
+    void finishWalk(point);
+  }, [active, finishWalk, startPoint]);
+
   return {
     currentPoint: active ? currentPoint : null,
     distanceTraveledMeters,
     gpsError: error,
     cancelWalk,
+    endWalk,
   };
 }
 

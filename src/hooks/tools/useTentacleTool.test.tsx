@@ -34,6 +34,10 @@ describe("useTentacleTool", () => {
     );
 
     act(() => {
+      result.current.panel.props.onCategoryChange("museum");
+    });
+
+    act(() => {
       result.current.handleMapClick([53.35, -6.26]);
     });
 
@@ -76,6 +80,10 @@ describe("useTentacleTool", () => {
         armPlacement: mocks.armPlacement,
       }),
     );
+
+    act(() => {
+      result.current.panel.props.onCategoryChange("museum");
+    });
 
     act(() => {
       result.current.handleMapClick([53.35, -6.26]);

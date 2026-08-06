@@ -458,7 +458,8 @@ export function HiderMapScreen() {
   const [hidingZoneStepId, setHidingZoneStepId] =
     useState<HidingZoneStepId>("method");
   const [wizardPeeked, setWizardPeeked] = useState(false);
-  const mapPickEnabled = hidingZoneStepId === "location";
+  const mapPickEnabled =
+    hidingZoneStepId === "location" || hidingZoneStepId === "confirm";
 
   const zoneTool = useHiderZoneTool({
     sessionId: sessionId ?? "",

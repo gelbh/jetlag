@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef } from "react";
+import { MatchingHudBody } from "@/components/tools/ask/MatchingHudBody";
+import { QuestionPreviewSheet } from "@/components/tools/shared/controls/QuestionPreviewSheet";
 import { useLatestRequest } from "../forms/useLatestRequest";
 import { useDebouncedValue } from "../forms/useDebouncedValue";
+import type { AskHudReadiness } from "@/domain/ask/askHudModes";
 import { isActive } from "../../domain/map/annotations";
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import {
@@ -478,6 +481,12 @@ export function useMatchingTool({
       ? matchingQuestionFor(matchingCategoryId, catalog.customCategories)
       : null;
 
+  const nearestProvisional =
+    matchingLoading &&
+    matchingFeatures.some(
+      (feature) => feature.confirmStatus === "provisional",
+    );
+
   const panel = (
     <MatchingToolPanel
       distanceUnit={distanceUnit}
@@ -494,12 +503,7 @@ export function useMatchingTool({
       matchingNearestOutsidePlayArea={matchingNearestOutsidePlayArea}
       matchingNullAnswer={matchingNullAnswer}
       matchingLoading={matchingLoading}
-      nearestProvisional={
-        matchingLoading &&
-        matchingFeatures.some(
-          (feature) => feature.confirmStatus === "provisional",
-        )
-      }
+      nearestProvisional={nearestProvisional}
       satelliteBasemap={mapStyle === "satellite"}
       gpsLoading={gpsLoading}
       matchingAnswer={matchingAnswer}
@@ -528,6 +532,94 @@ export function useMatchingTool({
     />
   );
 
+  // Drive map-click routing without mounting MatchingPanel wizard.
+  useEffect(() => {
+    if (!matchingCategoryChosen) {
+      wizardStepRef.current = "category";
+      return;
+    }
+    const resolved =
+      matchingNullAnswer || matchingNearestFeatureName !== null;
+    if (!matchingSeekerPoint || matchingLoading || !resolved) {
+      wizardStepRef.current = "place";
+      return;
+    }
+    wizardStepRef.current = "ask";
+  }, [
+    matchingCategoryChosen,
+    matchingLoading,
+    matchingNearestFeatureName,
+    matchingNullAnswer,
+    matchingSeekerPoint,
+  ]);
+
+  const categoryAvailable =
+    matchingCategoryId !== null &&
+    isMatchingCategoryAvailable(matchingCategoryId);
+  const resolveComplete =
+    matchingNullAnswer || matchingNearestFeatureName !== null;
+
+  const readiness: AskHudReadiness = {
+    surface: "matching",
+    placementReady: matchingSeekerPoint !== null,
+    configureReady: matchingCategoryChosen && categoryAvailable,
+    resolveReady: resolveComplete && !matchingLoading,
+    answerReady: awaitHiderAnswer || matchingAnswer !== null,
+    awaitHiderAnswer,
+    isSubmitting: session.isBusy,
+    viewOnly: !canSubmitQuestion,
+  };
+
+  const hud = {
+    readiness,
+    costLabel: catalog.costLabel,
+    error: matchingError ?? gpsError ?? mapError ?? null,
+    onCommit: () => void commit(),
+    modeBody: (
+      <MatchingHudBody
+        distanceUnit={distanceUnit}
+        categoryId={matchingCategoryId}
+        categoryChosen={matchingCategoryChosen}
+        usedCategoryIds={usedMatchingCategories}
+        catalogCategories={catalog.matchingCatalog}
+        hasSeekerPoint={matchingSeekerPoint !== null}
+        usesContainmentMatching={catalog.matchingUsesContainment}
+        nearestFeatureName={matchingNearestFeatureName}
+        distanceMeters={matchingDistanceMeters}
+        featureCount={matchingFeatureCount}
+        inPlayAreaFeatureCount={matchingInPlayAreaFeatureCount}
+        nearestOutsidePlayArea={matchingNearestOutsidePlayArea}
+        nullAnswer={matchingNullAnswer}
+        loading={matchingLoading}
+        nearestProvisional={nearestProvisional}
+        gpsLoading={gpsLoading}
+        answer={matchingAnswer}
+        error={matchingError ?? gpsError ?? mapError}
+        onCategoryChange={handleCategoryChange}
+        onUseGps={() => void handleGps()}
+        onAnswerChange={setMatchingAnswerSynced}
+        awaitHiderAnswer={awaitHiderAnswer}
+      />
+    ),
+    sheets: (
+      <QuestionPreviewSheet
+        open={previewOpen}
+        prompt={previewQuestion?.prompt ?? ""}
+        ruleSummary={previewQuestion?.ruleSummary}
+        anchorLat={matchingSeekerPoint?.[0] ?? null}
+        anchorLng={matchingSeekerPoint?.[1] ?? null}
+        costLabel={catalog.costLabel}
+        onConfirm={() =>
+          void session.runAction(async () => {
+            await performMatchingCommit(buildCommitInput());
+          })
+        }
+        onCancel={() => setPreviewOpen(false)}
+        isSubmitting={session.isBusy}
+      />
+    ),
+  };
+
   return {
     draft: {
       matchingSeekerPoint,
@@ -542,5 +634,6 @@ export function useMatchingTool({
     resetDraft,
     commit,
     panel,
+    hud,
   };
 }

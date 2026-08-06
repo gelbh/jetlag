@@ -58,11 +58,27 @@ function heavyToolPublishKey(
   toolName: "matching" | "measuring" | "tentacle",
   tool: MatchingToolApi | MeasuringToolApi | TentacleToolApi,
 ): string {
-  if ("publishSignature" in tool) {
-    return `${toolName}:${tool.publishSignature}:${tool.placementCrosshair}`;
+  const base =
+    "publishSignature" in tool
+      ? `${toolName}:${tool.publishSignature}:${tool.placementCrosshair}`
+      : `${toolName}:${JSON.stringify(tool.draft)}:${tool.placementCrosshair}`;
+
+  if ("hud" in tool && tool.hud) {
+    const r = tool.hud.readiness;
+    return [
+      base,
+      r.placementReady,
+      r.configureReady,
+      r.resolveReady,
+      r.answerReady,
+      r.isSubmitting,
+      r.awaitHiderAnswer,
+      tool.hud.costLabel,
+      tool.hud.error ?? "",
+    ].join(":");
   }
 
-  return `${toolName}:${JSON.stringify(tool.draft)}:${tool.placementCrosshair}`;
+  return base;
 }
 
 function usePublishHeavyTool(
