@@ -105,6 +105,18 @@ test("updatePreloadRequestStatusHandler rejects missing request", async () => {
   );
 });
 
+test("updatePreloadRequestStatusHandler rejects slash in requestId", async () => {
+  await assert.rejects(
+    () =>
+      updatePreloadRequestStatusHandler(
+        mockDb({}),
+        { requestId: "pre-1/nested", status: "accepted", uid: "admin" },
+        { now: fixedNow },
+      ),
+    (error) => error.message === PRELOAD_REQUEST_NOT_FOUND,
+  );
+});
+
 test("updatePreloadRequestStatusHandler covers full transition matrix", async () => {
   const allowed = [
     ["open", "accepted"],
