@@ -83,8 +83,10 @@ function askHudFromTools(
     case "measuring":
       return tools.measuringTool.hud;
     case "matching":
-    case "thermometer":
+      return tools.matchingTool.hud;
     case "tentacle":
+      return tools.tentacleTool.hud;
+    case "thermometer":
     case "photo":
     case "hiding-zone-create":
     case "hiding-zone-move":

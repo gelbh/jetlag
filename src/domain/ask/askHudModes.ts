@@ -296,7 +296,12 @@ export function primedCommitLabel(input: {
 }
 
 /** Question tools that own AskHudHost (no ToolFloatingPanel). */
-export const ASK_HUD_OWNED_TOOLS = ["radar", "measuring"] as const;
+export const ASK_HUD_OWNED_TOOLS = [
+  "radar",
+  "matching",
+  "measuring",
+  "tentacle",
+] as const;
 
 export type AskHudOwnedTool = (typeof ASK_HUD_OWNED_TOOLS)[number];
 

@@ -63,8 +63,8 @@ function heavyToolPublishKey(
       ? `${toolName}:${tool.publishSignature}:${tool.placementCrosshair}`
       : `${toolName}:${JSON.stringify(tool.draft)}:${tool.placementCrosshair}`;
 
-  if (toolName === "measuring" && "hud" in tool) {
-    const r = (tool as MeasuringToolApi).hud.readiness;
+  if ("hud" in tool && tool.hud) {
+    const r = tool.hud.readiness;
     return [
       base,
       r.placementReady,
