@@ -73,6 +73,8 @@ function heavyToolPublishKey(
       r.answerReady,
       r.isSubmitting,
       r.awaitHiderAnswer,
+      tool.hud.costLabel,
+      tool.hud.error ?? "",
     ].join(":");
   }
 

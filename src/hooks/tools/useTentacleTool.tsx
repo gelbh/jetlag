@@ -336,6 +336,11 @@ export function useTentacleTool({
             })[0];
       const nextCenter = tapHit?.point ?? point;
 
+      cancelRequests();
+      setTentacleLoading(false);
+      setTentaclePois([]);
+      setTentacleOutOfReach(false);
+      setSelectedPoiId(null);
       setTentacleCenter(nextCenter);
       setAwaitingPlacement(false);
       setMapError(null);
@@ -344,6 +349,7 @@ export function useTentacleTool({
     },
     [
       active,
+      cancelRequests,
       setAwaitingPlacement,
       setMapError,
       tentacleCategoryChosen,
@@ -359,6 +365,11 @@ export function useTentacleTool({
         return;
       }
 
+      cancelRequests();
+      setTentacleLoading(false);
+      setTentaclePois([]);
+      setTentacleOutOfReach(false);
+      setSelectedPoiId(null);
       setTentacleCenter(point);
       setAwaitingPlacement(false);
       setMapError(null);
@@ -435,6 +446,8 @@ export function useTentacleTool({
     active && (awaitingPlacement || tentacleCenter === null);
 
   const handleCategoryChange = (nextCategory: TentacleExtendedCategoryId) => {
+    cancelRequests();
+    setTentacleLoading(false);
     setTentacleCategoryId(nextCategory);
     setTentacleCategoryChosen(true);
     setTentaclePois([]);

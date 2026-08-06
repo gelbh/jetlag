@@ -4,7 +4,7 @@
  * `--dock-content-height` / `jl-panel-above-dock`.
  * Spec: ask-surface-kit-design rev 2026-08-05b.
  */
-import type { CSSProperties, ReactNode } from "react";
+import type { ReactNode } from "react";
 import { AskCommitStrip } from "./AskCommitStrip";
 import { AskCostChip } from "./AskCostChip";
 import { AskModeCueTicker } from "./AskModeCueTicker";
@@ -24,11 +24,6 @@ export type AskHudHostProps = {
   showCostChip?: boolean;
 };
 
-const HOST_CAMERA_PADDING_STYLE = {
-  "--ask-hud-camera-padding-bottom":
-    "calc(var(--ask-hud-strip-height, 3rem) + var(--chrome-gap-above-dock))",
-} as CSSProperties;
-
 export function AskHudHost({
   cue,
   toolLabel,
@@ -46,7 +41,6 @@ export function AskHudHost({
     <div
       data-testid="ask-hud-host"
       className="ask-hud-host pointer-events-none absolute inset-0 z-[var(--z-panel)]"
-      style={HOST_CAMERA_PADDING_STYLE}
     >
       <div className="ask-hud-host__top pointer-events-none absolute inset-x-0 top-[var(--map-banner-top)] z-[1] flex flex-col items-stretch gap-2 px-3">
         <AskModeCueTicker cue={cue} />
