@@ -298,5 +298,8 @@ describe("askHudModes", () => {
     expect(askHudCameraPaddingPx("tentacle")).toBe(
       ASK_HUD_CAMERA_PADDING_RAIL_PX,
     );
+    expect(askHudCameraPaddingPx("measuring")).toBe(
+      ASK_HUD_CAMERA_PADDING_RAIL_PX,
+    );
   });
 });

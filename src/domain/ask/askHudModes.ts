@@ -323,7 +323,7 @@ export const ASK_HUD_CAMERA_PADDING_PX = 168;
 export const ASK_HUD_CAMERA_PADDING_RAIL_PX = 280;
 
 export function askHudCameraPaddingPx(tool: string): number {
-  return tool === "matching" || tool === "tentacle"
+  return tool === "matching" || tool === "tentacle" || tool === "measuring"
     ? ASK_HUD_CAMERA_PADDING_RAIL_PX
     : ASK_HUD_CAMERA_PADDING_PX;
 }
