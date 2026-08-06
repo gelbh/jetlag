@@ -61,7 +61,10 @@ export function usePendingQuestionResolver({
 }: UsePendingQuestionResolverParams) {
   const resolvingRef = useRef(new Set<string>());
   const knownAnnotationIdsRef = useRef(knownAnnotationIds);
-  knownAnnotationIdsRef.current = knownAnnotationIds;
+
+  useEffect(() => {
+    knownAnnotationIdsRef.current = knownAnnotationIds;
+  }, [knownAnnotationIds]);
 
   useEffect(() => {
     resolvingRef.current = new Set();
