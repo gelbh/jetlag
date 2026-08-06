@@ -15,7 +15,6 @@ import {
   packGeoSeaLevelSeedPublicPath,
   packGeoSeaLevelSeedUrl,
   REGION_PACK_REFERENCE_BBOXES,
-  regionPackReferenceBoundingBox,
 } from "./packGeoManifest";
 
 const publicRoot = resolve(import.meta.dirname, "../../../public");
@@ -129,7 +128,6 @@ describe("packGeoManifest", () => {
     for (const packId of REGION_PACK_IDS) {
       const box = REGION_PACK_REFERENCE_BBOXES[packId];
       expect(box).toBeDefined();
-      expect(regionPackReferenceBoundingBox(packId)).toEqual(box);
       expect(box.south).toBeLessThan(box.north);
       expect(box.west).toBeLessThan(box.east);
     }

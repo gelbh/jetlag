@@ -41,12 +41,6 @@ export const REGION_PACK_REFERENCE_BBOXES: Record<RegionPackId, BoundingBox> = {
   },
 };
 
-export function regionPackReferenceBoundingBox(
-  packId: RegionPackId,
-): BoundingBox {
-  return REGION_PACK_REFERENCE_BBOXES[packId];
-}
-
 /**
  * Measuring point categories with Overpass selectors (excludes custom_place and
  * non-point kinds). Every listed id should have a pack POI JSON path.
