@@ -22,6 +22,7 @@ type SeekerEffectsInput = Pick<
   | "timer"
   | "toolGameArea"
   | "createAnnotation"
+  | "annotations"
 > & {
   awaitHiderAnswer: boolean;
   postSystemMessage: (
@@ -53,6 +54,7 @@ export function useMapScreenSeekerEffects({
   timer,
   toolGameArea,
   createAnnotation,
+  annotations,
   awaitHiderAnswer,
   postSystemMessage,
   cancelThermometerWalk,
@@ -97,6 +99,12 @@ export function useMapScreenSeekerEffects({
     createAnnotation,
     gameArea: toolGameArea,
     sessionResetAt: session?.sessionResetAt,
+    knownAnnotationIdsKey: annotations
+      .map((annotation) => annotation.id)
+      .slice()
+      .sort()
+      .join("\0"),
+    knownAnnotationIds: new Set(annotations.map((annotation) => annotation.id)),
   });
 
   useCancelOrphanThermometerWalks({
