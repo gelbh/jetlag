@@ -310,3 +310,9 @@ export type AskHudOwnedTool = (typeof ASK_HUD_OWNED_TOOLS)[number];
 export function isAskHudOwnedTool(tool: string): tool is AskHudOwnedTool {
   return (ASK_HUD_OWNED_TOOLS as readonly string[]).includes(tool);
 }
+
+/**
+ * Bottom camera padding when AskHudHost is open (cue + mode body + primed strip
+ * above dock). Keeps placement geometry in the visible map band (Maps pattern).
+ */
+export const ASK_HUD_CAMERA_PADDING_PX = 168;

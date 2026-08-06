@@ -22,7 +22,14 @@ import {
   ContextualRailPanelProvider,
   type ContextualRailTab,
 } from "../../components/map/chrome/ContextualRailContext";
-import { HidingZonePanel } from "../../components/hider/HidingZonePanel";
+import { HidingZoneHudBody } from "../../components/tools/ask/HidingZoneHudBody";
+import { AskHudHost } from "../../components/tools/ask/AskHudHost";
+import {
+  activeModeCue,
+  canCommit,
+  primedCommitLabel,
+  type AskHudReadiness,
+} from "../../domain/ask/askHudModes";
 import { MapScreenChromeSlots } from "../map-screen/shared/MapScreenChromeSlots";
 import { getMapScreenRoleConfig } from "../map-screen/shared/mapScreenRoleConfig";
 import { TimeTrapPanel } from "../../components/hider/TimeTrapPanel";
@@ -235,8 +242,8 @@ export function HiderMapScreenChrome({
   onHidingZoneStepChange,
   onSearchThisArea,
   sheetBlocksWizard,
-  wizardPeeked,
-  onWizardPeekedChange,
+  wizardPeeked: _wizardPeeked,
+  onWizardPeekedChange: _onWizardPeekedChange,
   onOpenWizard,
   onOpenChat,
   onOpenSettings,
@@ -404,6 +411,27 @@ export function HiderMapScreenChrome({
       }
     : onOpenWizard;
 
+  const hidingZoneSurface = zoneTool.moveMode
+    ? ("hiding-zone-move" as const)
+    : ("hiding-zone-create" as const);
+  const hidingZoneReadiness: AskHudReadiness = {
+    surface: hidingZoneSurface,
+    placementReady: hidingZonePanelTool.hasPlacement,
+    configureReady: zoneTool.moveMode || hidingZonePanelTool.methodChosen,
+    resolveReady: true,
+    answerReady: true,
+    awaitHiderAnswer: true,
+    isSubmitting: hidingZonePanelTool.saving,
+    viewOnly: !zoneTool.writesEnabled,
+  };
+  const hidingZoneCue = activeModeCue({
+    surface: hidingZoneSurface,
+    placementReady: hidingZoneReadiness.placementReady,
+    configureReady: hidingZoneReadiness.configureReady,
+    resolveReady: true,
+  });
+  const hidingZoneCanCommit = canCommit(hidingZoneReadiness);
+
   const toolDock = (
     <HiderToolDock
       layout={toolLayout}
@@ -444,31 +472,38 @@ export function HiderMapScreenChrome({
           actions={gameOverActions}
         />
 
-        <HiderZoneWizardShell
-          open={zoneTool.wizardOpen && !sheetBlocksWizard}
-          peeked={wizardPeeked}
-          onPeekedChange={onWizardPeekedChange}
-          peekLabel={
-            zoneTool.moveMode
-              ? "Move zone"
-              : zoneTool.hasZone
-                ? "Change zone"
-                : "Set zone"
-          }
-          onClose={zoneTool.moveMode ? undefined : zoneTool.closeWizard}
-          closeLabel="Close hiding zone"
-          contentKey={zoneTool.moveMode ? "move" : "set"}
-        >
-          <HidingZonePanel
-            wizardOpen={zoneTool.wizardOpen}
-            moveMode={zoneTool.moveMode}
-            radiusLabel={hidingZoneRadiusLabel}
-            confirmDisabled={!zoneTool.writesEnabled}
-            zoneTool={hidingZonePanelTool}
-            onStepChange={onHidingZoneStepChange}
-            onSearchThisArea={onSearchThisArea}
+        {zoneTool.wizardOpen && !sheetBlocksWizard ? (
+          <AskHudHost
+            cue={hidingZoneCue}
+            toolLabel={zoneTool.moveMode ? "Move zone" : "Hiding zone"}
+            costLabel={null}
+            showCostChip={false}
+            canCommit={hidingZoneCanCommit}
+            commitLabel={primedCommitLabel({
+              kind: "confirm",
+              costLabel: null,
+              primed: hidingZoneCanCommit,
+              cue: hidingZoneCue,
+            })}
+            onCommit={() => {
+              void hidingZonePanelTool.confirmZone();
+            }}
+            isSubmitting={hidingZonePanelTool.saving}
+            error={hidingZonePanelTool.error}
+            modeBody={
+              <HidingZoneHudBody
+                moveMode={zoneTool.moveMode}
+                radiusLabel={hidingZoneRadiusLabel}
+                zoneTool={hidingZonePanelTool}
+                onStepChange={onHidingZoneStepChange}
+                onSearchThisArea={onSearchThisArea}
+                onDismiss={
+                  zoneTool.moveMode ? undefined : zoneTool.closeWizard
+                }
+              />
+            }
           />
-        </HiderZoneWizardShell>
+        ) : null}
 
         <ChatPanel
           open={overlay.isChatOpen}
