@@ -37,6 +37,11 @@ export const importAdminOpsDesk = () =>
     default: m.AdminOpsDesk,
   }));
 
+export const importAdminPreloadRequestInbox = () =>
+  import("../components/admin/AdminPreloadRequestInbox").then((m) => ({
+    default: m.AdminPreloadRequestInbox,
+  }));
+
 export const importFeedback = () =>
   import("../routes/Feedback").then((m) => ({ default: m.Feedback }));
 
@@ -66,6 +71,7 @@ export const routeImporter = {
   importFriends,
   importLeaderboard,
   importAdminOpsDesk,
+  importAdminPreloadRequestInbox,
   importFeedback,
   importPrivacy,
   importPremium,
@@ -81,6 +87,9 @@ export const StatsLazy = lazyWithChunkRetry(importStats);
 export const FriendsLazy = lazyWithChunkRetry(importFriends);
 export const LeaderboardLazy = lazyWithChunkRetry(importLeaderboard);
 export const AdminOpsDeskLazy = lazyWithChunkRetry(importAdminOpsDesk);
+export const AdminPreloadRequestInboxLazy = lazyWithChunkRetry(
+  importAdminPreloadRequestInbox,
+);
 export const FeedbackLazy = lazyWithChunkRetry(importFeedback);
 export const PrivacyLazy = lazyWithChunkRetry(importPrivacy);
 export const PremiumLazy = lazyWithChunkRetry(importPremium);
