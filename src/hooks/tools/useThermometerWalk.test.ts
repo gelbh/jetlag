@@ -93,8 +93,9 @@ describe("useThermometerWalk", () => {
     const onAutoStop = vi.fn(async () => undefined);
     const startPoint: [number, number] = [53.35, -6.26];
 
+    type Reading = { lat: number; lng: number; accuracy: number } | null;
     const { result, rerender } = renderHook(
-      ({ reading }: { reading: { lat: number; lng: number; accuracy: number } | null }) => {
+      ({ reading }: { reading: Reading }) => {
         useLiveLocationMock.mockReturnValue({ reading, error: null });
         return useThermometerWalk({
           active: true,
@@ -104,7 +105,7 @@ describe("useThermometerWalk", () => {
           maxDurationMs: 60_000,
         });
       },
-      { initialProps: { reading: null } },
+      { initialProps: { reading: null as Reading } },
     );
 
     act(() => {

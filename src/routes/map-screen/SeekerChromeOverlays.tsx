@@ -10,6 +10,7 @@ import {
   primedCommitLabel,
   type AskHudSurface,
 } from "../../domain/ask/askHudModes";
+import type { AskToolHudBundle } from "../../hooks/map-screen/heavyMapTools";
 import { MAP_TOOL_DOCK_ENTRIES } from "../../domain/map/mapTools";
 import type { MapScreenController } from "./useMapScreenController";
 
@@ -76,7 +77,7 @@ function renderToolPanel(
 function askHudFromTools(
   activeTool: AskHudSurface,
   tools: SeekerChromeOverlaysProps["tools"],
-) {
+): AskToolHudBundle | null {
   switch (activeTool) {
     case "radar":
       return tools.radarTool.hud;
