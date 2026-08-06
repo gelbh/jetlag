@@ -18,6 +18,7 @@ export function AskCommitStrip({
   error = null,
 }: AskCommitStripProps) {
   const armed = canCommit && !isSubmitting;
+  const errorId = "ask-commit-strip-error";
 
   return (
     <div
@@ -29,6 +30,7 @@ export function AskCommitStrip({
         data-armed={armed ? "true" : "false"}
         disabled={!armed}
         aria-busy={isSubmitting || undefined}
+        aria-describedby={error ? errorId : undefined}
         onClick={onCommit}
         className={
           armed
@@ -39,7 +41,13 @@ export function AskCommitStrip({
         {isSubmitting ? "Sending…" : label}
       </button>
       {error ? (
-        <p className="ask-commit-strip__error text-sm">{error}</p>
+        <p
+          id={errorId}
+          role="alert"
+          className="ask-commit-strip__error text-sm"
+        >
+          {error}
+        </p>
       ) : null}
     </div>
   );

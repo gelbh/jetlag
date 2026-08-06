@@ -134,6 +134,9 @@ export function useThermometerWalk({
     // Refuse start=end publishes — wait for a GPS sample past minDistance.
     const point = currentPointRef.current;
     if (!point) {
+      onErrorRef.current?.(
+        "Keep walking until GPS updates, then end the walk.",
+      );
       return;
     }
     void finishWalk(point);
