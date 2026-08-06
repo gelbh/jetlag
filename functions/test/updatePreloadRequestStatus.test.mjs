@@ -105,14 +105,57 @@ test("updatePreloadRequestStatusHandler rejects missing request", async () => {
   );
 });
 
-test("updatePreloadRequestStatusHandler rejects slash in requestId", async () => {
+test("updatePreloadRequestStatusHandler covers full transition matrix", async () => {
+  const allowed = [
+    ["open", "accepted"],
+    ["open", "declined"],
+    ["open", "shipped"],
+    ["accepted", "shipped"],
+    ["accepted", "declined"],
+    ["accepted", "open"],
+    ["declined", "open"],
+    ["declined", "accepted"],
+    ["shipped", "open"],
+  ];
+  for (const [from, to] of allowed) {
+    const docs = { "pre-1": { status: from } };
+    const result = await updatePreloadRequestStatusHandler(
+      mockDb(docs),
+      { requestId: "pre-1", status: to, uid: "admin" },
+      { now: fixedNow },
+    );
+    assert.equal(result.status, to);
+    assert.equal(docs["pre-1"].status, to);
+  }
+
+  const disallowed = [
+    ["shipped", "accepted"],
+    ["shipped", "declined"],
+    ["open", "open"],
+    ["declined", "shipped"],
+    ["accepted", "accepted"],
+  ];
+  for (const [from, to] of disallowed) {
+    await assert.rejects(
+      () =>
+        updatePreloadRequestStatusHandler(
+          mockDb({ "pre-1": { status: from } }),
+          { requestId: "pre-1", status: to, uid: "admin" },
+          { now: fixedNow },
+        ),
+      (error) => error.message === PRELOAD_INVALID_TRANSITION,
+    );
+  }
+});
+
+test("updatePreloadRequestStatusHandler rejects malformed stored status", async () => {
   await assert.rejects(
     () =>
       updatePreloadRequestStatusHandler(
-        mockDb({}),
-        { requestId: "pre-1/nested", status: "accepted", uid: "admin" },
+        mockDb({ "pre-1": { status: "__proto__" } }),
+        { requestId: "pre-1", status: "accepted", uid: "admin" },
         { now: fixedNow },
       ),
-    (error) => error.message === PRELOAD_REQUEST_NOT_FOUND,
+    (error) => error.message === PRELOAD_INVALID_TRANSITION,
   );
 });

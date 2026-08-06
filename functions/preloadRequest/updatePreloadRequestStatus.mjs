@@ -51,7 +51,7 @@ export async function updatePreloadRequestStatusHandler(db, input, deps = {}) {
 
     const current = snapshot.data()?.status;
     const allowed = ALLOWED[current];
-    if (!allowed || !allowed.has(status)) {
+    if (!(allowed instanceof Set) || !allowed.has(status)) {
       throw new Error(PRELOAD_INVALID_TRANSITION);
     }
 
