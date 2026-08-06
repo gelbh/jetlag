@@ -199,7 +199,7 @@ export function ThermometerHudBody({
                 !distanceAvailable || !canSubmitQuestion || isSubmitting
               }
               aria-busy={gpsLoading || isSubmitting}
-              className="btn-primary w-full disabled:opacity-40"
+              className="btn-secondary w-full disabled:opacity-40"
             >
               {gpsLoading ? "Getting GPS…" : "Start track"}
             </button>

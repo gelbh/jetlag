@@ -67,6 +67,14 @@ describe("ThermometerHudBody", () => {
     };
     expect(canCommit(readiness)).toBe(true);
 
+    // Null travel while walking must not arm (configureReady false).
+    expect(
+      canCommit({
+        ...readiness,
+        configureReady: false,
+      }),
+    ).toBe(false);
+
     const onCommit = vi.fn();
     render(
       <AskHudHost

@@ -181,6 +181,7 @@ export function usePhotoTool({
               usedCategoryIds={usedCategories}
               onCategoryChange={setSelectedCategoryId}
               hasOpenQuestion={hasOpenQuestion}
+              awaitHiderAnswer={awaitHiderAnswer}
             />
           ),
           sheets: null as ReactNode,

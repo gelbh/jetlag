@@ -28,15 +28,15 @@ export function AskCatalogRail({
     <div
       data-testid="ask-catalog-rail"
       className="ask-catalog-rail pointer-events-auto hud-panel"
-      role="listbox"
+      role="group"
       aria-label={ariaLabel}
     >
       {hint ? (
         <p className="ask-catalog-rail__hint text-xs text-ink-muted">{hint}</p>
       ) : null}
-      <div className="ask-catalog-rail__list jl-scroll">
+      <div className="ask-catalog-rail__list jl-scroll" role="list">
         {rows.map((row) => (
-          <div key={row.id} role="option" aria-selected={selectedId === row.id}>
+          <div key={row.id} role="listitem">
             <ListSelectRow
               selected={selectedId === row.id}
               onClick={() => onSelect(row.id)}

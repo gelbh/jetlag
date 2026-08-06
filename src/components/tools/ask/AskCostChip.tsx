@@ -17,7 +17,8 @@ export function AskCostChip({ toolLabel, costLabel }: AskCostChipProps) {
     <div
       data-testid="ask-cost-chip"
       className="ask-cost-chip pointer-events-none font-display"
-      aria-hidden="true"
+      role="status"
+      aria-label={text}
     >
       {text}
     </div>

@@ -1,8 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
   activeModeCue,
+  askHudCameraPaddingPx,
   askHudDefinition,
   askHudSurfaces,
+  ASK_HUD_CAMERA_PADDING_PX,
+  ASK_HUD_CAMERA_PADDING_RAIL_PX,
   canCommit,
   commitKind,
   cueExcludesCostTokens,
@@ -266,5 +269,34 @@ describe("askHudModes", () => {
     expect(isAskHudOwnedTool("tentacle")).toBe(true);
     expect(isAskHudOwnedTool("thermometer")).toBe(true);
     expect(isAskHudOwnedTool("photo")).toBe(true);
+  });
+
+  it("measuring cue waits for source pick before target", () => {
+    expect(
+      activeModeCue({
+        surface: "measuring",
+        placementReady: true,
+        configureReady: false,
+        resolveReady: false,
+      }),
+    ).toBe("PICK A SOURCE");
+    expect(
+      activeModeCue({
+        surface: "measuring",
+        placementReady: true,
+        configureReady: true,
+        resolveReady: false,
+      }),
+    ).toBe("SET YOUR TARGET");
+  });
+
+  it("catalog-rail tools get taller camera padding", () => {
+    expect(askHudCameraPaddingPx("radar")).toBe(ASK_HUD_CAMERA_PADDING_PX);
+    expect(askHudCameraPaddingPx("matching")).toBe(
+      ASK_HUD_CAMERA_PADDING_RAIL_PX,
+    );
+    expect(askHudCameraPaddingPx("tentacle")).toBe(
+      ASK_HUD_CAMERA_PADDING_RAIL_PX,
+    );
   });
 });

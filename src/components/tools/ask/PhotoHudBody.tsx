@@ -28,6 +28,7 @@ export type PhotoHudBodyProps = {
   usedCategoryIds: ReadonlySet<PhotoCategoryId>;
   onCategoryChange: (categoryId: PhotoCategoryId) => void;
   hasOpenQuestion?: boolean;
+  awaitHiderAnswer?: boolean;
 };
 
 export function PhotoHudBody({
@@ -37,6 +38,7 @@ export function PhotoHudBody({
   usedCategoryIds,
   onCategoryChange,
   hasOpenQuestion = false,
+  awaitHiderAnswer = false,
 }: PhotoHudBodyProps) {
   const availableCategories = photoCategoriesForGameSize(gameSize).filter(
     (category) => !usedCategoryIds.has(category.id),
@@ -54,7 +56,7 @@ export function PhotoHudBody({
       data-testid="photo-hud-body"
       className="ask-hud-mode-body mx-auto flex max-w-xl flex-col gap-2"
     >
-      <QuestionTruthReferenceHint />
+      {awaitHiderAnswer ? <QuestionTruthReferenceHint /> : null}
       {availableCategories.length === 0 ? (
         <div className="pointer-events-auto hud-panel p-3">
           <CatalogExhaustedMessage message="Every photo question has already been used this session." />

@@ -24,7 +24,7 @@ import { useToolPanelChrome } from "../../hooks/chrome/useToolPanelChrome";
 import { useWizardSheetSnap } from "../../hooks/wizard/useWizardSheetSnap";
 import { isQuestionDockTool } from "../../domain/map/mapTools";
 import {
-  ASK_HUD_CAMERA_PADDING_PX,
+  askHudCameraPaddingPx,
   isAskHudOwnedTool,
 } from "../../domain/ask/askHudModes";
 import type { MapTool } from "../../state/sessionStore";
@@ -349,7 +349,7 @@ export function useMapScreenController() {
   );
 
   const panelPeekHeightPx = isAskHudOwnedTool(activeTool)
-    ? ASK_HUD_CAMERA_PADDING_PX
+    ? askHudCameraPaddingPx(activeTool)
     : panelMinimized
       ? PANEL_PEEK_HEIGHT_PX
       : DEFAULT_PANEL_HEIGHT_PX;
@@ -385,7 +385,7 @@ export function useMapScreenController() {
     enabled: true,
     panelMinimized,
     hudBottomPaddingPx: isAskHudOwnedTool(activeTool)
-      ? ASK_HUD_CAMERA_PADDING_PX
+      ? askHudCameraPaddingPx(activeTool)
       : null,
     selectedPoiId: deferredTentacleSelectedPoiId,
     walkActive: thermometerTool.draft.walkingQuestionId !== null,
