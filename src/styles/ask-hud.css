@@ -1,0 +1,123 @@
+/* ask-hud.css — Ask Map HUD kit (GlanceVerb, cost chip, primed strip, rail) */
+@layer components {
+  :root {
+    --ask-hud-strip-height: 3rem; /* ≥44px touch */
+    --ask-hud-rail-max-height: 40dvh;
+    --ask-hud-camera-padding-bottom: 0px;
+  }
+
+  .ask-mode-cue-ticker {
+    display: flex;
+    width: 100%;
+    max-width: 28rem;
+    margin-inline: auto;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.25rem;
+    padding: 0.375rem 0.75rem;
+    border-radius: var(--radius-hud-md);
+    border: 1px solid oklch(from var(--color-border) l c h / 0.7);
+    background: oklch(from var(--color-surface-deep) l c h / 0.92);
+    box-shadow: var(--shadow-hud-float);
+  }
+
+  .ask-mode-cue-ticker__text {
+    margin: 0;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    line-height: 1.2;
+    text-transform: uppercase;
+    text-align: center;
+    color: var(--color-highlight);
+  }
+
+  .ask-cost-chip {
+    display: inline-flex;
+    align-items: center;
+    max-width: 100%;
+    min-height: 1.75rem;
+    padding: 0.25rem 0.625rem;
+    border-radius: var(--radius-hud-xl);
+    border: 1px solid oklch(from var(--color-border) l c h / 0.55);
+    background: oklch(from var(--color-surface-panel) l c h / 0.85);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    line-height: 1;
+    text-transform: uppercase;
+    color: var(--color-ink-muted);
+  }
+
+  .ask-commit-strip {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+  }
+
+  .ask-commit-strip__btn {
+    min-height: var(--ask-hud-strip-height);
+  }
+
+  .ask-commit-strip__btn--muted {
+    display: flex;
+    min-height: var(--ask-hud-strip-height);
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-hud-md);
+    border: 2px solid oklch(from var(--color-border) l c h / 0.65);
+    background: var(--color-surface-raised);
+    padding-inline: 1rem;
+    font-family: var(--font-display);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-ink-muted);
+    opacity: 0.72;
+    cursor: not-allowed;
+  }
+
+  .ask-commit-strip__error {
+    margin: 0;
+    text-align: center;
+    color: var(--color-status-error);
+  }
+
+  .ask-catalog-rail {
+    display: flex;
+    max-height: var(--ask-hud-rail-max-height);
+    max-width: 28rem;
+    margin-inline: auto;
+    flex-direction: column;
+    gap: 0.5rem;
+    overflow: hidden;
+    padding: 0.75rem;
+  }
+
+  .ask-catalog-rail__hint {
+    margin: 0;
+    flex-shrink: 0;
+  }
+
+  .ask-catalog-rail__list {
+    display: flex;
+    min-height: 0;
+    flex: 1;
+    flex-direction: column;
+    gap: 0.5rem;
+    overflow-y: auto;
+  }
+
+  .ask-chip-island {
+    display: flex;
+    max-width: 28rem;
+    margin-inline: auto;
+    justify-content: center;
+    padding: 0.25rem;
+  }
+}
