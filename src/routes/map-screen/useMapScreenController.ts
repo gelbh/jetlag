@@ -161,6 +161,7 @@ export function useMapScreenController() {
     timer,
     toolGameArea,
     createAnnotation,
+    annotations,
     awaitHiderAnswer,
     postSystemMessage,
     cancelThermometerWalk,

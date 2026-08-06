@@ -26,6 +26,8 @@ interface UsePendingQuestionResolverParams {
   ) => Promise<AnnotationRecord>;
   gameArea: GameArea;
   sessionResetAt?: string;
+  /** Session annotation ids (incl. soft-deleted) — presence short-circuits re-resolve. */
+  knownAnnotationIds?: ReadonlySet<string>;
 }
 
 async function resolvePendingQuestion(
@@ -49,6 +51,7 @@ export function usePendingQuestionResolver({
   createAnnotation,
   gameArea,
   sessionResetAt,
+  knownAnnotationIds,
 }: UsePendingQuestionResolverParams) {
   const resolvingRef = useRef(new Set<string>());
 
@@ -84,6 +87,16 @@ export function usePendingQuestionResolver({
             pending.id,
           );
           if (latestStatus !== "answered") {
+            return;
+          }
+
+          // Annotation already written (reload / prior attempt) — complete without
+          // rebuilding geometry (RLBT OOM thrash).
+          if (knownAnnotationIds?.has(pending.id)) {
+            await updatePendingQuestion(sessionId, pending.id, {
+              status: "resolved",
+              resolvedAnnotationId: pending.id,
+            });
             return;
           }
 
@@ -141,14 +154,24 @@ export function usePendingQuestionResolver({
           // Soft-fail: cancel once and keep the in-flight guard so reload/effect
           // loops cannot re-enter resolve (tentacle/measuring OOM thrash). On reconnect,
           // resolvingRef clears when sessionId changes, allowing one bounded retry.
-          if (!annotationCreated) {
+          // After annotation write, complete to resolved (not cancel) to avoid orphan shade.
+          if (annotationCreated) {
+            try {
+              await updatePendingQuestion(sessionId, pending.id, {
+                status: "resolved",
+                resolvedAnnotationId: pending.id,
+              });
+            } catch {
+              // Best-effort complete failed — keep guard for this mount.
+            }
+          } else {
             try {
               await updatePendingQuestion(sessionId, pending.id, {
                 status: "cancelled",
               });
             } catch {
               // Cancel write failed — still keep the guard for this session mount.
-              // The guard will be cleared when sessionId changes (at line 127), allowing
+              // The guard will be cleared when sessionId changes, allowing
               // one retry on reconnect. This prevents transient failures from becoming permanent.
               // Failure reporting continues below to ensure all errors are captured.
             }
@@ -161,5 +184,13 @@ export function usePendingQuestionResolver({
         }
       })();
     }
-  }, [createAnnotation, enabled, gameArea, pendingQuestions, sessionId, sessionResetAt]);
+  }, [
+    createAnnotation,
+    enabled,
+    gameArea,
+    knownAnnotationIds,
+    pendingQuestions,
+    sessionId,
+    sessionResetAt,
+  ]);
 }

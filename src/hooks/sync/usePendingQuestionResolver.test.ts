@@ -245,4 +245,111 @@ describe("usePendingQuestionResolver", () => {
       ),
     ).toHaveLength(1);
   });
+
+  it("completes to resolved when annotation id already known", async () => {
+    const radarPending: PendingQuestionRecord = {
+      id: "pq-radar-known",
+      sessionId: "session-1",
+      toolType: "radar",
+      createdByUid: "seeker-1",
+      createdAt: "2026-01-01T00:00:00.000Z",
+      status: "answered",
+      placement: {
+        geometryJson: JSON.stringify({
+          type: "Feature",
+          properties: {},
+          geometry: { type: "Point", coordinates: [-0.15, 51.45] },
+        }),
+        metadata: { radiusKm: 1 },
+      },
+      replyOptions: [
+        { id: "yes", label: "Yes" },
+        { id: "no", label: "No" },
+      ],
+      promptText: "Radar?",
+      answer: "yes",
+    };
+
+    updatePendingQuestion.mockResolvedValue(undefined);
+
+    renderHook(() =>
+      usePendingQuestionResolver({
+        sessionId: "session-1",
+        enabled: true,
+        pendingQuestions: [radarPending],
+        createAnnotation,
+        gameArea,
+        knownAnnotationIds: new Set(["pq-radar-known"]),
+      }),
+    );
+
+    await waitFor(() => {
+      expect(updatePendingQuestion).toHaveBeenCalledWith(
+        "session-1",
+        "pq-radar-known",
+        { status: "resolved", resolvedAnnotationId: "pq-radar-known" },
+      );
+    });
+
+    expect(createAnnotation).not.toHaveBeenCalled();
+  });
+
+  it("completes to resolved when status update fails after annotation create", async () => {
+    const radarPending: PendingQuestionRecord = {
+      id: "pq-radar-postwrite",
+      sessionId: "session-1",
+      toolType: "radar",
+      createdByUid: "seeker-1",
+      createdAt: "2026-01-01T00:00:00.000Z",
+      status: "answered",
+      placement: {
+        geometryJson: JSON.stringify({
+          type: "Feature",
+          properties: {},
+          geometry: { type: "Point", coordinates: [-0.15, 51.45] },
+        }),
+        metadata: { radiusKm: 1 },
+      },
+      replyOptions: [
+        { id: "yes", label: "Yes" },
+        { id: "no", label: "No" },
+      ],
+      promptText: "Radar?",
+      answer: "yes",
+    };
+
+    createAnnotation.mockResolvedValue({
+      id: "pq-radar-postwrite",
+    } as AnnotationRecord);
+    updatePendingQuestion
+      .mockRejectedValueOnce(new Error("status boom"))
+      .mockResolvedValue(undefined);
+
+    renderHook(() =>
+      usePendingQuestionResolver({
+        sessionId: "session-1",
+        enabled: true,
+        pendingQuestions: [radarPending],
+        createAnnotation,
+        gameArea,
+      }),
+    );
+
+    await waitFor(() => {
+      expect(updatePendingQuestion).toHaveBeenCalledWith(
+        "session-1",
+        "pq-radar-postwrite",
+        { status: "resolved", resolvedAnnotationId: "pq-radar-postwrite" },
+      );
+    });
+
+    expect(createAnnotation).toHaveBeenCalledTimes(1);
+    expect(
+      updatePendingQuestion.mock.calls.filter(
+        (call) => call[2]?.status === "cancelled",
+      ),
+    ).toHaveLength(0);
+    // First call: happy-path resolve (rejected); second: catch complete-to-resolved
+    expect(updatePendingQuestion).toHaveBeenCalledTimes(2);
+  });
 });
