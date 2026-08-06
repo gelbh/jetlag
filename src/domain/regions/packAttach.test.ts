@@ -1,11 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { GameArea } from "@/domain/map/annotations";
 import { DUBLIN_CITY_GAME_AREA } from "@/test/fixtures/dublinGameArea";
-import {
-  PACK_ATTACH_MIN_INTERSECTION_KM2,
-  PACK_ATTACH_MIN_INTERSECTION_RATIO,
-  suggestRegionPackForGameArea,
-} from "./packAttach";
+import { suggestRegionPackForGameArea } from "./packAttach";
 import { REGION_PACK_REFERENCE_BBOXES } from "./packGeoManifest";
 
 /** Axis-aligned polygon from south/west/north/east (lng, lat rings). */
@@ -85,17 +81,13 @@ describe("suggestRegionPackForGameArea", () => {
   it("returns null when intersection is below max(α×packArea, β km²)", () => {
     const nyc = REGION_PACK_REFERENCE_BBOXES.nyc;
     // Tiny sliver along the southern edge — well below default α and β.
+    // Uses unexpanded AABB so min-span normalize cannot inflate the score.
     const tiny = boxPolygon(
       nyc.south - 0.002,
       nyc.west,
       nyc.south + 0.00005,
       nyc.west + 0.00005,
     );
-    expect(
-      suggestRegionPackForGameArea(tiny, {
-        minIntersectionRatio: PACK_ATTACH_MIN_INTERSECTION_RATIO,
-        minIntersectionKm2: PACK_ATTACH_MIN_INTERSECTION_KM2,
-      }),
-    ).toBeNull();
+    expect(suggestRegionPackForGameArea(tiny)).toBeNull();
   });
 });

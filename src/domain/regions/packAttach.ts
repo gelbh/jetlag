@@ -1,9 +1,10 @@
 import {
-  gameAreaToBoundingBox,
-  type BoundingBox,
+  boundingBoxAreaKm2,
+  gameAreaToBoundingBoxRaw,
+  intersectBoundingBoxesRaw,
 } from "@/domain/geometry/gameArea/gameAreaBounds";
 import type { GameArea } from "@/domain/map/annotations";
-import { regionPackReferenceBoundingBox } from "./packGeoManifest";
+import { REGION_PACK_REFERENCE_BBOXES } from "./packGeoManifest";
 import { REGION_PACK_IDS, type RegionPackId } from "./regionPack";
 
 /**
@@ -18,12 +19,10 @@ export const PACK_ATTACH_MIN_INTERSECTION_RATIO = 0.05;
  */
 export const PACK_ATTACH_MIN_INTERSECTION_KM2 = 25;
 
-/** Equirectangular km per degree of latitude (same family as 111_320 m elsewhere). */
-const KM_PER_DEG_LAT = 111.32;
-
-export type PackAttachSuggestion =
-  | { packId: RegionPackId; score: number }
-  | null;
+export type PackAttachSuggestion = {
+  packId: RegionPackId;
+  score: number;
+};
 
 export type SuggestRegionPackOptions = {
   minIntersectionRatio?: number;
@@ -31,38 +30,10 @@ export type SuggestRegionPackOptions = {
 };
 
 /**
- * Raw axis-aligned bbox intersection without {@link normalizeBoundingBox}.
- * Tiny intersections must stay tiny for attach scoring thresholds.
- */
-export function intersectBoundingBoxesRaw(
-  a: BoundingBox,
-  b: BoundingBox,
-): BoundingBox | null {
-  const south = Math.max(a.south, b.south);
-  const west = Math.max(a.west, b.west);
-  const north = Math.min(a.north, b.north);
-  const east = Math.min(a.east, b.east);
-
-  if (south >= north || west >= east) {
-    return null;
-  }
-
-  return { south, west, north, east };
-}
-
-/**
- * Approximate bbox area in km² via mid-latitude equirectangular projection.
- */
-export function boundingBoxAreaKm2(box: BoundingBox): number {
-  const midLat = (box.north + box.south) / 2;
-  const latKm = (box.north - box.south) * KM_PER_DEG_LAT;
-  const lngKm =
-    (box.east - box.west) * KM_PER_DEG_LAT * Math.cos((midLat * Math.PI) / 180);
-  return Math.max(latKm * lngKm, 0);
-}
-
-/**
  * Suggest the best region pack for a game area by bbox overlap.
+ *
+ * Uses unexpanded game-area AABB (no min-span inflate) and raw rect intersect
+ * so α/β thresholds are not coupled to play-area UX expand constants.
  *
  * Score = intersection area / pack reference bbox area (both km²).
  * A pack qualifies when intersection area ≥ max(α × packArea, β km²).
@@ -71,18 +42,18 @@ export function boundingBoxAreaKm2(box: BoundingBox): number {
 export function suggestRegionPackForGameArea(
   gameArea: GameArea,
   options?: SuggestRegionPackOptions,
-): PackAttachSuggestion {
+): PackAttachSuggestion | null {
   const minRatio =
     options?.minIntersectionRatio ?? PACK_ATTACH_MIN_INTERSECTION_RATIO;
   const minKm2 =
     options?.minIntersectionKm2 ?? PACK_ATTACH_MIN_INTERSECTION_KM2;
 
-  const gameBox = gameAreaToBoundingBox(gameArea);
+  const gameBox = gameAreaToBoundingBoxRaw(gameArea);
 
-  let best: { packId: RegionPackId; score: number } | null = null;
+  let best: PackAttachSuggestion | null = null;
 
   for (const packId of REGION_PACK_IDS) {
-    const packBox = regionPackReferenceBoundingBox(packId);
+    const packBox = REGION_PACK_REFERENCE_BBOXES[packId];
     const intersection = intersectBoundingBoxesRaw(gameBox, packBox);
     if (!intersection) {
       continue;
