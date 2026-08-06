@@ -139,6 +139,7 @@ export function activeModeCue(input: {
       return "READY TO SEND";
     case "measuring":
       if (!input.placementReady) return "SET YOUR ANCHOR";
+      if (!input.configureReady) return "PICK A SOURCE";
       if (!input.resolveReady) return "SET YOUR TARGET";
       return "READY TO SEND";
     case "thermometer":
@@ -232,6 +233,8 @@ export function notReadyCommitHint(cue: string): string {
       return "PICK A DISTANCE";
     case "SET YOUR ANCHOR":
       return "SET ANCHOR FIRST";
+    case "PICK A SOURCE":
+      return "PICK A SOURCE";
     case "SET YOUR TARGET":
       return "SET TARGET FIRST";
     case "PICK CATEGORY":
@@ -314,5 +317,13 @@ export function isAskHudOwnedTool(tool: string): tool is AskHudOwnedTool {
 /**
  * Bottom camera padding when AskHudHost is open (cue + mode body + primed strip
  * above dock). Keeps placement geometry in the visible map band (Maps pattern).
+ * Catalog-rail tools need extra room for ≤40dvh rail + strip.
  */
 export const ASK_HUD_CAMERA_PADDING_PX = 168;
+export const ASK_HUD_CAMERA_PADDING_RAIL_PX = 280;
+
+export function askHudCameraPaddingPx(tool: string): number {
+  return tool === "matching" || tool === "tentacle"
+    ? ASK_HUD_CAMERA_PADDING_RAIL_PX
+    : ASK_HUD_CAMERA_PADDING_PX;
+}

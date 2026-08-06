@@ -359,10 +359,15 @@ export function useThermometerTool({
     sessionRules,
     activeDistanceMeters,
   );
+  const liveTravelMeters =
+    walkTracker.distanceTraveledMeters ?? thermoTravelMeters;
   const travelTooShort =
-    (walkTracker.distanceTraveledMeters ?? thermoTravelMeters) !== null &&
-    (walkTracker.distanceTraveledMeters ?? thermoTravelMeters)! + 1 <
-      activeDistanceMeters;
+    liveTravelMeters !== null && liveTravelMeters + 1 < activeDistanceMeters;
+  // While walking, END WALK arms only after a GPS sample (non-null travel).
+  // Before walk / after walk, keep distance + short-travel gates.
+  const configureReady = walkingActive
+    ? distanceAvailable && liveTravelMeters !== null
+    : distanceAvailable && !travelTooShort;
 
   // Drive map-click routing without mounting ThermometerPanel wizard.
   useEffect(() => {
@@ -387,7 +392,7 @@ export function useThermometerTool({
     placementReady:
       walkingActive ||
       (config.placementMode === "manual" ? pinsReady : true),
-    configureReady: distanceAvailable && !travelTooShort,
+    configureReady,
     resolveReady: walkingActive || pinsReady,
     answerReady:
       walkingActive || awaitHiderAnswer || config.answer !== null,
