@@ -9,7 +9,7 @@ import {
 } from "../../domain/questions";
 import type { TentaclePoi } from "../../domain/map/annotations";
 
-/** Ask Map HUD bundle returned by migrated question tools (radar / measuring). */
+/** Ask Map HUD bundle returned by migrated question tools. */
 export type AskToolHudBundle = {
   readiness: AskHudReadiness;
   costLabel: string;
@@ -33,6 +33,7 @@ export interface MatchingToolApi {
   handleMapClick: (point: LatLngTuple) => void;
   resetDraft: () => void;
   panel: ReactNode;
+  hud: AskToolHudBundle;
 }
 
 export interface MeasuringToolApi {
@@ -67,6 +68,7 @@ export interface TentacleToolApi {
   handleMapClick: (point: LatLngTuple) => void;
   resetDraft: () => void;
   panel: ReactNode;
+  hud: AskToolHudBundle;
 }
 
 export interface HeavyMapToolsApi {
@@ -76,6 +78,23 @@ export interface HeavyMapToolsApi {
 }
 
 function noopMapClick(): void {}
+
+const idleMatchingHud: AskToolHudBundle = {
+  readiness: {
+    surface: "matching",
+    placementReady: false,
+    configureReady: false,
+    resolveReady: false,
+    answerReady: true,
+    awaitHiderAnswer: true,
+    isSubmitting: false,
+  },
+  costLabel: "D3P1",
+  error: null,
+  onCommit: () => undefined,
+  modeBody: null,
+  sheets: null,
+};
 
 const idleMeasuringHud: AskToolHudBundle = {
   readiness: {
@@ -88,6 +107,23 @@ const idleMeasuringHud: AskToolHudBundle = {
     isSubmitting: false,
   },
   costLabel: "D3P1",
+  error: null,
+  onCommit: () => undefined,
+  modeBody: null,
+  sheets: null,
+};
+
+const idleTentacleHud: AskToolHudBundle = {
+  readiness: {
+    surface: "tentacle",
+    placementReady: false,
+    configureReady: false,
+    resolveReady: false,
+    answerReady: true,
+    awaitHiderAnswer: true,
+    isSubmitting: false,
+  },
+  costLabel: "D4P2",
   error: null,
   onCommit: () => undefined,
   modeBody: null,
@@ -108,6 +144,7 @@ export function createIdleHeavyMapTools(): HeavyMapToolsApi {
     handleMapClick: noopMapClick,
     resetDraft: () => undefined,
     panel: null,
+    hud: idleMatchingHud,
   };
 
   const idleMeasuringTool: MeasuringToolApi = {
@@ -142,6 +179,7 @@ export function createIdleHeavyMapTools(): HeavyMapToolsApi {
     handleMapClick: noopMapClick,
     resetDraft: () => undefined,
     panel: null,
+    hud: idleTentacleHud,
   };
 
   return {

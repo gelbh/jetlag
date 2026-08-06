@@ -141,6 +141,10 @@ describe("pan while placing questions", () => {
     });
 
     act(() => {
+      matching.result.current.panel.props.onCategoryChange("commercial_airport");
+    });
+
+    act(() => {
       handlers.onDragStart();
       handlers.onDragEnd();
     });

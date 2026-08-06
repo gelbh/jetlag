@@ -262,6 +262,8 @@ describe("askHudModes", () => {
       }),
     ).toBe("SEND — SET CENTER FIRST");
     expect(isAskHudOwnedTool("radar")).toBe(true);
-    expect(isAskHudOwnedTool("matching")).toBe(false);
+    expect(isAskHudOwnedTool("matching")).toBe(true);
+    expect(isAskHudOwnedTool("tentacle")).toBe(true);
+    expect(isAskHudOwnedTool("thermometer")).toBe(false);
   });
 });
