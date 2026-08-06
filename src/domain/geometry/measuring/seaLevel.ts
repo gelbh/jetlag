@@ -27,9 +27,16 @@ export interface ElevationSampleCell {
 
 const MAX_SEA_LEVEL_SAMPLE_CELLS = 600;
 export const COARSE_SEA_LEVEL_DIVISIONS = 8;
+/** Bundled pack seed density target (preload cost; not cold-path). */
+export const PACK_SEA_LEVEL_SEED_DIVISIONS = 20;
+/** Cap Open-Meteo samples for freehand local refine. */
+export const MAX_SEA_LEVEL_REFINE_SAMPLES = 48;
+export const SEA_LEVEL_REFINE_SUBDIVISIONS = 2;
 const DEFAULT_SEA_LEVEL_DIVISIONS = 10;
 const MAX_SMALL_AREA_DIVISIONS = 45;
 const MIN_GAME_AREA_DIVISIONS = 8;
+/** Elevations within this band of the seeker threshold are ambiguous. */
+const DEFAULT_SEA_LEVEL_AMBIGUITY_MARGIN_METERS = 15;
 
 type CellClass = "near" | "far" | "skip";
 
@@ -174,6 +181,246 @@ export function sampleGameAreaCells(
 
 export function distanceFromSeaLevelMeters(elevationMeters: number): number {
   return Math.abs(elevationMeters);
+}
+
+export function isSeaLevelNearElevation(
+  elevationMeters: number,
+  seekerDistanceFromSeaLevelMeters: number,
+): boolean {
+  return (
+    distanceFromSeaLevelMeters(elevationMeters) <=
+    seekerDistanceFromSeaLevelMeters
+  );
+}
+
+export function isAmbiguousSeaLevelElevation(
+  elevationMeters: number,
+  seekerDistanceFromSeaLevelMeters: number,
+  marginMeters: number = DEFAULT_SEA_LEVEL_AMBIGUITY_MARGIN_METERS,
+): boolean {
+  if (!Number.isFinite(elevationMeters)) {
+    return true;
+  }
+  const distance = distanceFromSeaLevelMeters(elevationMeters);
+  return Math.abs(distance - seekerDistanceFromSeaLevelMeters) <= marginMeters;
+}
+
+export function subdivideElevationSampleCell(
+  cell: ElevationSampleCell,
+  subdivisions: number = SEA_LEVEL_REFINE_SUBDIVISIONS,
+): ElevationSampleCell[] {
+  if (subdivisions < 2) {
+    return [cell];
+  }
+
+  const latStep = (cell.north - cell.south) / subdivisions;
+  const lngStep = (cell.east - cell.west) / subdivisions;
+  const children: ElevationSampleCell[] = [];
+
+  for (let row = 0; row < subdivisions; row += 1) {
+    for (let col = 0; col < subdivisions; col += 1) {
+      const south = cell.south + row * latStep;
+      const north = cell.south + (row + 1) * latStep;
+      const west = cell.west + col * lngStep;
+      const east = cell.west + (col + 1) * lngStep;
+      children.push({
+        point: [(south + north) / 2, (west + east) / 2],
+        south,
+        west,
+        north,
+        east,
+        row: cell.row * subdivisions + row,
+        col: cell.col * subdivisions + col,
+      });
+    }
+  }
+
+  return children;
+}
+
+export function selectAmbiguousSeaLevelCells(
+  cells: ElevationSampleCell[],
+  elevations: number[],
+  seekerDistanceFromSeaLevelMeters: number,
+  marginMeters: number = DEFAULT_SEA_LEVEL_AMBIGUITY_MARGIN_METERS,
+  maxCells: number = Math.floor(
+    MAX_SEA_LEVEL_REFINE_SAMPLES / (SEA_LEVEL_REFINE_SUBDIVISIONS ** 2),
+  ),
+): ElevationSampleCell[] {
+  const ambiguous: ElevationSampleCell[] = [];
+  for (let index = 0; index < cells.length; index += 1) {
+    if (
+      isAmbiguousSeaLevelElevation(
+        elevations[index],
+        seekerDistanceFromSeaLevelMeters,
+        marginMeters,
+      )
+    ) {
+      ambiguous.push(cells[index]);
+    }
+  }
+  return ambiguous.slice(0, Math.max(0, maxCells));
+}
+
+interface SeaLevelNearRect {
+  south: number;
+  west: number;
+  north: number;
+  east: number;
+}
+
+function buildNearRegionFromRects(
+  rects: SeaLevelNearRect[],
+  gameArea: GameArea,
+): Feature<Polygon | MultiPolygon> | null {
+  if (rects.length === 0) {
+    return null;
+  }
+
+  const coordinates = rects.map((rect) => [
+    [
+      [rect.west, rect.south],
+      [rect.east, rect.south],
+      [rect.east, rect.north],
+      [rect.west, rect.north],
+      [rect.west, rect.south],
+    ],
+  ]);
+
+  const nearRegion: Feature<MultiPolygon> = {
+    type: "Feature",
+    properties: {},
+    geometry: {
+      type: "MultiPolygon",
+      coordinates,
+    },
+  };
+
+  const clipped = intersect({
+    type: "FeatureCollection",
+    features: [gameAreaToPolygon(gameArea), nearRegion],
+  });
+
+  if (
+    !clipped ||
+    (clipped.geometry.type !== "Polygon" &&
+      clipped.geometry.type !== "MultiPolygon")
+  ) {
+    return null;
+  }
+
+  return clipped as Feature<Polygon | MultiPolygon>;
+}
+
+/**
+ * Build near-sea-level region, replacing ambiguous coarse cells with refined
+ * subcell classifications when provided (freehand local refine).
+ */
+export function buildSeaLevelNearRegionWithLocalRefine(args: {
+  cells: ElevationSampleCell[];
+  elevations: number[];
+  seekerDistanceFromSeaLevelMeters: number;
+  gameArea: GameArea;
+  divisions: number;
+  refineCells?: ElevationSampleCell[];
+  refineElevations?: number[];
+}): SeaLevelNearRegionBuildResult {
+  const {
+    cells,
+    elevations,
+    seekerDistanceFromSeaLevelMeters,
+    gameArea,
+    refineCells = [],
+    refineElevations = [],
+  } = args;
+
+  if (
+    cells.length === 0 ||
+    elevations.length !== cells.length ||
+    seekerDistanceFromSeaLevelMeters < 0 ||
+    refineElevations.length !== refineCells.length
+  ) {
+    return { region: null, edgeCase: null };
+  }
+
+  type RefinedChild = { cell: ElevationSampleCell; elevation: number };
+  const refineByParent = new Map<string, RefinedChild[]>();
+
+  for (let index = 0; index < refineCells.length; index += 1) {
+    const child = refineCells[index];
+    const elevation = refineElevations[index];
+    if (!Number.isFinite(elevation)) {
+      continue;
+    }
+    const parent = cells.find(
+      (cell) =>
+        child.point[0] >= cell.south &&
+        child.point[0] <= cell.north &&
+        child.point[1] >= cell.west &&
+        child.point[1] <= cell.east,
+    );
+    if (!parent) {
+      continue;
+    }
+    const key = `${parent.row}:${parent.col}`;
+    const bucket = refineByParent.get(key) ?? [];
+    bucket.push({ cell: child, elevation });
+    refineByParent.set(key, bucket);
+  }
+
+  const nearRects: SeaLevelNearRect[] = [];
+  let finiteCount = 0;
+  let nearCount = 0;
+
+  for (let index = 0; index < cells.length; index += 1) {
+    const cell = cells[index];
+    const elevation = elevations[index];
+    const children = refineByParent.get(`${cell.row}:${cell.col}`);
+
+    if (children && children.length > 0) {
+      for (const child of children) {
+        finiteCount += 1;
+        if (
+          isSeaLevelNearElevation(
+            child.elevation,
+            seekerDistanceFromSeaLevelMeters,
+          )
+        ) {
+          nearCount += 1;
+          nearRects.push({
+            south: child.cell.south,
+            west: child.cell.west,
+            north: child.cell.north,
+            east: child.cell.east,
+          });
+        }
+      }
+      continue;
+    }
+
+    if (!Number.isFinite(elevation)) {
+      continue;
+    }
+    finiteCount += 1;
+    if (isSeaLevelNearElevation(elevation, seekerDistanceFromSeaLevelMeters)) {
+      nearCount += 1;
+      nearRects.push({
+        south: cell.south,
+        west: cell.west,
+        north: cell.north,
+        east: cell.east,
+      });
+    }
+  }
+
+  if (nearCount === 0) {
+    return { region: null, edgeCase: "lowest" };
+  }
+
+  const edgeCase =
+    finiteCount > 0 && nearCount === finiteCount ? "highest" : null;
+  const region = buildNearRegionFromRects(nearRects, gameArea);
+  return { region, edgeCase };
 }
 
 function cellRing(

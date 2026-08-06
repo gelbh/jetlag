@@ -1,7 +1,12 @@
 import type { GameArea } from "@/domain/map/annotations";
 import {
   buildSeaLevelNearRegionFromSamples,
+  buildSeaLevelNearRegionWithLocalRefine,
   distanceFromSeaLevelMeters,
+  MAX_SEA_LEVEL_REFINE_SAMPLES,
+  SEA_LEVEL_REFINE_SUBDIVISIONS,
+  selectAmbiguousSeaLevelCells,
+  subdivideElevationSampleCell,
   type ElevationSampleCell,
   type SeaLevelEdgeCase,
 } from "@/domain/geometry/measuring/seaLevel";
@@ -64,6 +69,64 @@ export function buildSeaLevelContextFromSampling(
   };
 }
 
+async function refineSeaLevelContextLocally(
+  seekerElevationMeters: number,
+  sampling: CachedSeaLevelSampling,
+  gameArea: GameArea,
+): Promise<SeaLevelContext | SeaLevelContextFailure> {
+  const distanceFromSeaLevel = distanceFromSeaLevelMeters(
+    seekerElevationMeters,
+  );
+  const ambiguous = selectAmbiguousSeaLevelCells(
+    sampling.cells,
+    sampling.cellElevations,
+    distanceFromSeaLevel,
+  );
+
+  if (ambiguous.length === 0) {
+    return buildSeaLevelContextFromSampling(
+      seekerElevationMeters,
+      sampling,
+      gameArea,
+    );
+  }
+
+  const refineCells = ambiguous
+    .flatMap((cell) =>
+      subdivideElevationSampleCell(cell, SEA_LEVEL_REFINE_SUBDIVISIONS),
+    )
+    .slice(0, MAX_SEA_LEVEL_REFINE_SAMPLES);
+
+  const refineElevations = await fetchElevations(
+    refineCells.map((cell) => cell.point),
+    { profile: "foreground" },
+  );
+
+  const { region: nearRegion, edgeCase } =
+    buildSeaLevelNearRegionWithLocalRefine({
+      cells: sampling.cells,
+      elevations: sampling.cellElevations,
+      seekerDistanceFromSeaLevelMeters: distanceFromSeaLevel,
+      gameArea,
+      divisions: sampling.divisions,
+      refineCells,
+      refineElevations,
+    });
+
+  if (edgeCase === "lowest" || !nearRegion) {
+    return { reason: "lowest" };
+  }
+
+  return {
+    seekerElevationMeters,
+    distanceFromSeaLevelMeters: distanceFromSeaLevel,
+    nearRegion,
+    cells: sampling.cells,
+    cellElevations: sampling.cellElevations,
+    edgeCase,
+  };
+}
+
 export async function loadSeaLevelContext(
   seeker: LatLngTuple,
   gameArea: GameArea,
@@ -91,7 +154,16 @@ export async function loadSeaLevelContext(
       : undefined,
   });
 
-  return buildSeaLevelContextFromSampling(
+  // Dense complete pack seed: trust the grid. Freehand / incomplete: local refine.
+  if (sampling.complete === true && options?.regionPackId) {
+    return buildSeaLevelContextFromSampling(
+      seekerElevationMeters,
+      sampling,
+      gameArea,
+    );
+  }
+
+  return refineSeaLevelContextLocally(
     seekerElevationMeters,
     sampling,
     gameArea,
