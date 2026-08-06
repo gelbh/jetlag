@@ -23,6 +23,10 @@ import { useActiveThermometerWalk } from "../../hooks/location/useActiveThermome
 import { useToolPanelChrome } from "../../hooks/chrome/useToolPanelChrome";
 import { useWizardSheetSnap } from "../../hooks/wizard/useWizardSheetSnap";
 import { isQuestionDockTool } from "../../domain/map/mapTools";
+import {
+  ASK_HUD_CAMERA_PADDING_PX,
+  isAskHudOwnedTool,
+} from "../../domain/ask/askHudModes";
 import type { MapTool } from "../../state/sessionStore";
 import { ANALYTICS_EVENTS, track } from "../../services/core/analytics/analytics";
 import { buildPlacementCameraDraft } from "./shared/placementCameraDraft";
@@ -344,9 +348,11 @@ export function useMapScreenController() {
     ],
   );
 
-  const panelPeekHeightPx = panelMinimized
-    ? PANEL_PEEK_HEIGHT_PX
-    : DEFAULT_PANEL_HEIGHT_PX;
+  const panelPeekHeightPx = isAskHudOwnedTool(activeTool)
+    ? ASK_HUD_CAMERA_PADDING_PX
+    : panelMinimized
+      ? PANEL_PEEK_HEIGHT_PX
+      : DEFAULT_PANEL_HEIGHT_PX;
 
   const placementViewportFrame = useMemo((): PlacementViewportFrame | null => {
     if (!mapViewport || mapShellSize.width <= 0 || mapShellSize.height <= 0) {
@@ -378,6 +384,9 @@ export function useMapScreenController() {
     defaultFocusBounds: mapFocusBounds,
     enabled: true,
     panelMinimized,
+    hudBottomPaddingPx: isAskHudOwnedTool(activeTool)
+      ? ASK_HUD_CAMERA_PADDING_PX
+      : null,
     selectedPoiId: deferredTentacleSelectedPoiId,
     walkActive: thermometerTool.draft.walkingQuestionId !== null,
     viewportFrame: placementViewportFrame,

@@ -181,6 +181,25 @@ describe("usePlacementMapFocus", () => {
     expect(result.current.effectiveFocusBounds).not.toEqual(defaultBounds);
   });
 
+  it("uses hudBottomPaddingPx instead of floating-panel height when Ask HUD is open", () => {
+    const { result } = renderHook(() =>
+      usePlacementMapFocus({
+        activeTool: "pin",
+        draft: pinDraft,
+        overlays: pinOverlays,
+        eliminationFeatures: [],
+        gameArea: DUBLIN_CITY_GAME_AREA,
+        defaultFocusBounds: defaultBounds,
+        enabled: true,
+        panelMinimized: false,
+        hudBottomPaddingPx: 168,
+      }),
+    );
+
+    // 168 + PANEL_PADDING_EXTRA_PX(24) = 192 — below DEFAULT_PANEL_HEIGHT 320+24
+    expect(result.current.focusPaddingBias).toBe(192);
+  });
+
   it("does not bump token when fingerprint is unchanged", () => {
     const { result, rerender } = renderHook(
       ({ nextOverlays }: { nextOverlays: MapDraftOverlay[] }) =>
