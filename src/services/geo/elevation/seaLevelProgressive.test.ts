@@ -140,4 +140,73 @@ describe("seaLevelProgressive", () => {
     // Session-local cells (not pack-native extents).
     expect(sampling.cells[0]?.south).toBeGreaterThanOrEqual(53.27 - 1e-9);
   });
+
+  it("returns complete dense pack seed without awaiting elevation fetch", async () => {
+    const { fetchElevations } = await import("./index");
+    const fetchMock = vi.mocked(fetchElevations);
+    fetchMock.mockClear();
+    fetchMock.mockImplementation(() => new Promise(() => undefined));
+
+    const bbox = {
+      south: 53.24,
+      west: -6.45,
+      north: 53.43,
+      east: -6.07,
+    };
+    const divisions = 20;
+    const latStep = (bbox.north - bbox.south) / divisions;
+    const lngStep = (bbox.east - bbox.west) / divisions;
+    const cells: Array<{
+      point: [number, number];
+      south: number;
+      west: number;
+      north: number;
+      east: number;
+      row: number;
+      col: number;
+    }> = [];
+    const cellElevations: number[] = [];
+    for (let row = 0; row < divisions; row += 1) {
+      for (let col = 0; col < divisions; col += 1) {
+        const south = bbox.south + row * latStep;
+        const north = bbox.south + (row + 1) * latStep;
+        const west = bbox.west + col * lngStep;
+        const east = bbox.west + (col + 1) * lngStep;
+        cells.push({
+          point: [(south + north) / 2, (west + east) / 2],
+          south,
+          west,
+          north,
+          east,
+          row,
+          col,
+        });
+        cellElevations.push(14);
+      }
+    }
+
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => ({
+        ok: true,
+        json: async () => ({
+          source: "open-meteo",
+          divisions,
+          bbox,
+          cells,
+          cellElevations,
+          complete: true,
+        }),
+      })),
+    );
+
+    const sampling = await ensureSeaLevelSamplingComplete(
+      DUBLIN_CITY_GAME_AREA,
+      { regionPackId: "dublin" },
+    );
+
+    expect(sampling.complete).toBe(true);
+    expect(sampling.divisions).toBe(20);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
 });
