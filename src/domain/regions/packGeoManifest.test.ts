@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import type { BoundingBox } from "@/domain/geometry/gameArea/gameAreaBounds";
 import { BASE_MEASURING_CATALOG } from "@/domain/questions";
+import { PACK_SEA_LEVEL_SEED_DIVISIONS } from "@/domain/geometry/measuring/seaLevel";
 import { REGION_PACK_IDS, type RegionPackId } from "./regionPack";
 import {
   isPackGeoSupported,
@@ -179,7 +180,9 @@ describe("packGeoManifest", () => {
         complete?: boolean;
       };
       expect(seaLevel.source).toBe("open-meteo");
-      expect(seaLevel.divisions).toBeGreaterThanOrEqual(20);
+      expect(seaLevel.divisions).toBeGreaterThanOrEqual(
+        PACK_SEA_LEVEL_SEED_DIVISIONS,
+      );
       expect(seaLevel.complete).toBe(true);
       expect(seaLevel.cells.length).toBeGreaterThan(0);
       expect(seaLevel.cellElevations.length).toBe(seaLevel.cells.length);
