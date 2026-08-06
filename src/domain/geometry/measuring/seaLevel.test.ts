@@ -1,10 +1,16 @@
 import { describe, expect, it } from "vitest";
+import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
+import { point as turfPoint } from "@turf/helpers";
 import type { GameArea } from "../../map/annotations";
 import {
+  buildSeaLevelEliminationRegion,
   buildSeaLevelNearRegionFromSamples,
+  buildSeaLevelNearRegionWithLocalRefine,
   distanceFromSeaLevelMeters,
   resolveGameAreaCellDivisions,
   sampleGameAreaCells,
+  subdivideElevationSampleCell,
+  type ElevationSampleCell,
 } from "./seaLevel";
 
 const sampleGameArea: GameArea = {
@@ -109,5 +115,69 @@ describe("sea level measuring", () => {
       region?.geometry.type === "Polygon" ||
         region?.geometry.type === "MultiPolygon",
     ).toBe(true);
+  });
+
+  it("local refine restores a truthful hider that coarse center misclassifies", () => {
+    const divisions = 2;
+    const cells = sampleGameAreaCells(sampleGameArea, divisions);
+    expect(cells.length).toBeGreaterThan(0);
+
+    // Coarse centers all "far" (> seeker 100m) — near region empty / lowest.
+    const coarseElevations = cells.map(() => 180);
+    const coarse = buildSeaLevelNearRegionFromSamples(
+      cells,
+      coarseElevations,
+      100,
+      sampleGameArea,
+      divisions,
+    );
+    expect(coarse.region).toBeNull();
+
+    // Pick a border cell and refine: three subcells near sea level, one far.
+    const borderCell = cells[0]!;
+    const refineCells = subdivideElevationSampleCell(borderCell, 2);
+    const refineElevations = [40, 40, 40, 180];
+    const hiderPoint: [number, number] = [
+      refineCells[0]!.point[0],
+      refineCells[0]!.point[1],
+    ];
+
+    const refined = buildSeaLevelNearRegionWithLocalRefine({
+      cells,
+      elevations: coarseElevations,
+      seekerDistanceFromSeaLevelMeters: 100,
+      gameArea: sampleGameArea,
+      divisions,
+      refineCells,
+      refineElevations,
+    });
+    expect(refined.region).not.toBeNull();
+
+    const elimination = buildSeaLevelEliminationRegion(
+      refined.region!,
+      sampleGameArea,
+      "closer",
+    );
+    expect(elimination).not.toBeNull();
+
+    const hiderPt = turfPoint([hiderPoint[1], hiderPoint[0]]);
+    // closer → shade complement of near; truthful near hider stays unshaded
+    expect(booleanPointInPolygon(hiderPt, elimination!)).toBe(false);
+  });
+
+  it("subdivideElevationSampleCell returns a 2×2 grid", () => {
+    const cell: ElevationSampleCell = {
+      point: [51.45, -0.15],
+      south: 51.4,
+      west: -0.2,
+      north: 51.5,
+      east: -0.1,
+      row: 0,
+      col: 0,
+    };
+    const children = subdivideElevationSampleCell(cell, 2);
+    expect(children).toHaveLength(4);
+    expect(children[0]?.south).toBe(51.4);
+    expect(children[3]?.north).toBe(51.5);
   });
 });
