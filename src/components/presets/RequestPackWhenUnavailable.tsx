@@ -32,12 +32,12 @@ export function RequestPackWhenUnavailable({
         <button
           type="button"
           onClick={() => setDismissed(true)}
-          className="shrink-0 font-display text-xs font-semibold uppercase tracking-wide text-ink-dim"
+          className="min-h-11 shrink-0 font-display text-xs font-semibold uppercase tracking-wide text-ink-dim"
         >
           Dismiss
         </button>
       </div>
-      <RequestPreloadSection {...sectionProps} variant="no-pack-match" />
+      <RequestPreloadSection {...sectionProps} />
     </div>
   );
 }

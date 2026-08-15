@@ -1,11 +1,12 @@
 import { useId, useState } from "react";
+import type { PackAttachSource } from "@/domain/regions/packAttach";
 import { regionPackDisplayLabel } from "@/domain/regions/regionPackDisplayLabel";
 import {
   REGION_PACK_IDS,
   type RegionPackId,
 } from "@/domain/regions/regionPack";
 
-export type PackAttachSource = "auto" | "manual" | "bundled";
+export type { PackAttachSource };
 
 export interface PackAttachChipProps {
   packId: RegionPackId;
@@ -71,8 +72,6 @@ export function PackAttachChip({
                 onChangePack(event.target.value as RegionPackId);
                 setChanging(false);
               }}
-              onBlur={() => setChanging(false)}
-              autoFocus
             >
               {packOptions.map((option) => (
                 <option key={option} value={option}>
@@ -85,7 +84,7 @@ export function PackAttachChip({
           <button
             type="button"
             onClick={() => setChanging(true)}
-            className="font-display text-xs font-semibold uppercase tracking-wide text-brand-blue"
+            className="min-h-11 font-display text-xs font-semibold uppercase tracking-wide text-brand-blue"
           >
             Change
           </button>
@@ -93,7 +92,7 @@ export function PackAttachChip({
         <button
           type="button"
           onClick={onClear}
-          className="font-display text-xs font-semibold uppercase tracking-wide text-error"
+          className="min-h-11 font-display text-xs font-semibold uppercase tracking-wide text-error"
         >
           Clear
         </button>
