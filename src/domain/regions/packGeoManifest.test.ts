@@ -1,8 +1,9 @@
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
+import type { BoundingBox } from "@/domain/geometry/gameArea/gameAreaBounds";
 import { BASE_MEASURING_CATALOG } from "@/domain/questions";
-import { REGION_PACK_IDS } from "./regionPack";
+import { REGION_PACK_IDS, type RegionPackId } from "./regionPack";
 import {
   isPackGeoSupported,
   PACK_GEO_PACK_IDS,
@@ -13,9 +14,32 @@ import {
   packGeoPoiUrl,
   packGeoSeaLevelSeedPublicPath,
   packGeoSeaLevelSeedUrl,
+  REGION_PACK_REFERENCE_BBOXES,
 } from "./packGeoManifest";
 
 const publicRoot = resolve(import.meta.dirname, "../../../public");
+
+function bboxContains(outer: BoundingBox, inner: BoundingBox): boolean {
+  return (
+    outer.south <= inner.south &&
+    outer.west <= inner.west &&
+    outer.north >= inner.north &&
+    outer.east >= inner.east
+  );
+}
+
+function isPoiBbox(value: unknown): value is BoundingBox {
+  if (value === null || typeof value !== "object") {
+    return false;
+  }
+  const box = value as Record<string, unknown>;
+  return (
+    typeof box.south === "number" &&
+    typeof box.west === "number" &&
+    typeof box.north === "number" &&
+    typeof box.east === "number"
+  );
+}
 
 describe("packGeoManifest", () => {
   it("lists every RegionPackId", () => {
@@ -97,6 +121,46 @@ describe("packGeoManifest", () => {
       expect(typeof seaLevel.divisions).toBe("number");
       expect(Array.isArray(seaLevel.cells)).toBe(true);
       expect(Array.isArray(seaLevel.cellElevations)).toBe(true);
+    }
+  });
+
+  it("has a reference bbox for every RegionPackId", () => {
+    for (const packId of REGION_PACK_IDS) {
+      const box = REGION_PACK_REFERENCE_BBOXES[packId];
+      expect(box).toBeDefined();
+      expect(box.south).toBeLessThan(box.north);
+      expect(box.west).toBeLessThan(box.east);
+    }
+    expect(Object.keys(REGION_PACK_REFERENCE_BBOXES).sort()).toEqual(
+      [...REGION_PACK_IDS].sort(),
+    );
+  });
+
+  it("reference bbox contains each POI file bbox when present", () => {
+    for (const packId of REGION_PACK_IDS) {
+      const poiDir = resolve(publicRoot, `geo/${packId}/poi`);
+      if (!existsSync(poiDir)) {
+        continue;
+      }
+
+      const ref = REGION_PACK_REFERENCE_BBOXES[packId as RegionPackId];
+
+      for (const fileName of readdirSync(poiDir)) {
+        if (!fileName.endsWith(".json")) {
+          continue;
+        }
+        const payload = JSON.parse(
+          readFileSync(resolve(poiDir, fileName), "utf8"),
+        ) as { bbox?: unknown };
+        // Skip files without bbox (tokyo/osaka/zurich/lucerne stubs).
+        if (!isPoiBbox(payload.bbox)) {
+          continue;
+        }
+        expect(
+          bboxContains(ref, payload.bbox),
+          `${packId}/${fileName} POI bbox not contained by reference`,
+        ).toBe(true);
+      }
     }
   });
 });
