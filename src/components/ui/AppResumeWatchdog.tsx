@@ -193,10 +193,18 @@ export function AppResumeWatchdog() {
         hiddenAtRef.current = Date.now();
         return;
       }
+      // Cold open / never-hidden tabs are not resumes (JETLAG-2A false positives).
+      if (hiddenAtRef.current === null) {
+        return;
+      }
       runResumeRecovery();
     };
 
-    const onPageShow = () => {
+    const onPageShow = (event: PageTransitionEvent) => {
+      // Only bfcache restores — skip initial load and normal navigations.
+      if (!event.persisted) {
+        return;
+      }
       runResumeRecovery();
     };
 

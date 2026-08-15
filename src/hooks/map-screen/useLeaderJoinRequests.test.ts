@@ -18,11 +18,20 @@ const mockResolveRoleJoinRequest = vi.mocked(
   ),
 );
 
+const mockMapLeaderJoinResolveError = vi.mocked(
+  await import("../../services/session/rolePasscodeLifecycle").then(
+    (m) => m.mapLeaderJoinResolveError,
+  ),
+);
+
 describe("useLeaderJoinRequests", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockListenLeaderJoinRequests.mockReturnValue(() => undefined);
     mockResolveRoleJoinRequest.mockResolvedValue(undefined);
+    mockMapLeaderJoinResolveError.mockImplementation((error: unknown) =>
+      error instanceof Error ? error.message : "Couldn't resolve join request.",
+    );
   });
 
   it("returns empty when no sessionId", () => {
@@ -190,5 +199,51 @@ describe("useLeaderJoinRequests", () => {
       "req-1",
       "decline",
     );
+  });
+
+  it("surfaces accept failure when requester is below client min", async () => {
+    let setRequests: ((reqs: RoleJoinRequest[]) => void) | null = null;
+    mockListenLeaderJoinRequests.mockImplementation(
+      (_sessionId, _roles, onRequests) => {
+        setRequests = onRequests;
+        return () => undefined;
+      },
+    );
+    mockResolveRoleJoinRequest.mockRejectedValue(
+      new Error("failed-precondition Client update required."),
+    );
+    mockMapLeaderJoinResolveError.mockReturnValue(
+      "That player needs to update the app before they can join.",
+    );
+
+    const { result } = renderHook(() =>
+      useLeaderJoinRequests({
+        sessionId: "sess-1",
+        roleGates: { version: 1, leaders: { seeker: "leader-1" } },
+        myUid: "leader-1",
+        isHost: false,
+      }),
+    );
+
+    act(() => {
+      setRequests?.([
+        {
+          id: "req-1",
+          sessionId: "sess-1",
+          requesterUid: "guest",
+          role: "seeker",
+          status: "pending",
+          identityLabel: "ada",
+          createdAt: "2026-08-03T12:00:00.000Z",
+          expiresAt: "2099-01-01T00:00:00.000Z",
+        },
+      ]);
+    });
+
+    await act(async () => {
+      result.current.handleAcceptJoinRequest();
+    });
+
+    expect(result.current.joinRequestError).toContain("update the app");
   });
 });

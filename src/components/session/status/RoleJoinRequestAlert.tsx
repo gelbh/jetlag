@@ -7,6 +7,7 @@ interface RoleJoinRequestAlertProps {
   onAccept: () => void;
   onDecline: () => void;
   busy?: boolean;
+  error?: string | null;
 }
 
 const joinRequestPanelClassName =
@@ -17,6 +18,7 @@ export function RoleJoinRequestAlert({
   onAccept,
   onDecline,
   busy = false,
+  error = null,
 }: RoleJoinRequestAlertProps) {
   if (!request) {
     return null;
@@ -27,6 +29,7 @@ export function RoleJoinRequestAlert({
       <p className="text-sm font-semibold text-ink">
         {request.identityLabel} wants to join as {playerRoleLabel(request.role)}
       </p>
+      {error ? <p className="text-sm text-status-error">{error}</p> : null}
       <div className="flex shrink-0 gap-2">
         <button
           type="button"
