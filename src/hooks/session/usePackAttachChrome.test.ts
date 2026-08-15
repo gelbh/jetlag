@@ -56,6 +56,29 @@ describe("usePackAttachChrome", () => {
 
     rerender({ gameArea: MID_ATLANTIC });
     expect(result.current.packId).toBeUndefined();
+    expect(result.current.source).toBe("auto");
     expect(result.current.showRequestCta).toBe(true);
+  });
+
+  it("clears seeded pack when initialPackId becomes undefined", () => {
+    const { result, rerender } = renderHook(
+      ({ initialPackId }) =>
+        usePackAttachChrome({
+          gameArea: DUBLIN_CITY_GAME_AREA,
+          initialPackId,
+        }),
+      {
+        initialProps: {
+          initialPackId: "dublin" as import("@/domain/regions/regionPack").RegionPackId | undefined,
+        },
+      },
+    );
+
+    expect(result.current.packId).toBe("dublin");
+    expect(result.current.source).toBe("bundled");
+
+    rerender({ initialPackId: undefined });
+    expect(result.current.packId).toBe("dublin");
+    expect(result.current.source).toBe("auto");
   });
 });

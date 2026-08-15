@@ -41,13 +41,14 @@ export function usePackAttachChrome({
   const seededRef = useRef(initialPackId);
 
   useEffect(() => {
-    if (initialPackId && initialPackId !== seededRef.current) {
-      seededRef.current = initialPackId;
-      /* eslint-disable react-hooks/set-state-in-effect -- re-seed when preset loads */
-      setSeededPackId(initialPackId);
-      setManual(null);
-      /* eslint-enable react-hooks/set-state-in-effect */
+    if (initialPackId === seededRef.current) {
+      return;
     }
+    seededRef.current = initialPackId;
+    /* eslint-disable react-hooks/set-state-in-effect -- re-seed when preset pack changes */
+    setSeededPackId(initialPackId);
+    setManual(null);
+    /* eslint-enable react-hooks/set-state-in-effect */
   }, [initialPackId]);
 
   const fingerprint = useMemo(
