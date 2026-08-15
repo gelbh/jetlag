@@ -197,17 +197,19 @@ test("EXPECTED_SESSION_UX_HTTPS_ERROR_KEYS are all allowlisted", () => {
   }
 });
 
-test("readAppVersion matches root package.json (not 0.0.0)", async () => {
+test("readAppVersion matches functions package.json (not 0.0.0)", async () => {
   const { readFileSync } = await import("node:fs");
   const { resolve, dirname } = await import("node:path");
   const { fileURLToPath } = await import("node:url");
-  const rootPackage = JSON.parse(
-    readFileSync(
-      resolve(dirname(fileURLToPath(import.meta.url)), "../../package.json"),
-      "utf8",
-    ),
+  const testDir = dirname(fileURLToPath(import.meta.url));
+  const functionsPackage = JSON.parse(
+    readFileSync(resolve(testDir, "../package.json"), "utf8"),
   );
-  assert.equal(readAppVersion(), rootPackage.version);
+  const rootPackage = JSON.parse(
+    readFileSync(resolve(testDir, "../../package.json"), "utf8"),
+  );
+  assert.equal(readAppVersion(), functionsPackage.version);
+  assert.equal(functionsPackage.version, rootPackage.version);
   assert.notEqual(readAppVersion(), "0.0.0");
 });
 

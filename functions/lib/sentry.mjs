@@ -110,9 +110,9 @@ export function isAbortErrorEvent(event) {
 export function readAppVersion() {
   const functionsDir = dirname(fileURLToPath(import.meta.url));
   try {
-    // Root app version (functions/package.json has no version field).
+    // functions/package.json is in the Firebase deploy bundle (root is not).
     const packageJson = JSON.parse(
-      readFileSync(resolve(functionsDir, "../../package.json"), "utf8"),
+      readFileSync(resolve(functionsDir, "../package.json"), "utf8"),
     );
     return packageJson.version ?? "0.0.0";
   } catch {
