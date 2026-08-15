@@ -1,7 +1,9 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useLatestRequest } from "../forms/useLatestRequest";
 import { useDebouncedValue } from "../forms/useDebouncedValue";
+import { TentacleHudBody } from "../../components/tools/ask/TentacleHudBody";
 import { TentaclePanel } from "../../components/tools/TentaclePanel";
+import type { AskHudReadiness } from "@/domain/ask/askHudModes";
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import {
   isActive,
@@ -334,6 +336,11 @@ export function useTentacleTool({
             })[0];
       const nextCenter = tapHit?.point ?? point;
 
+      cancelRequests();
+      setTentacleLoading(false);
+      setTentaclePois([]);
+      setTentacleOutOfReach(false);
+      setSelectedPoiId(null);
       setTentacleCenter(nextCenter);
       setAwaitingPlacement(false);
       setMapError(null);
@@ -342,6 +349,7 @@ export function useTentacleTool({
     },
     [
       active,
+      cancelRequests,
       setAwaitingPlacement,
       setMapError,
       tentacleCategoryChosen,
@@ -357,6 +365,11 @@ export function useTentacleTool({
         return;
       }
 
+      cancelRequests();
+      setTentacleLoading(false);
+      setTentaclePois([]);
+      setTentacleOutOfReach(false);
+      setSelectedPoiId(null);
       setTentacleCenter(point);
       setAwaitingPlacement(false);
       setMapError(null);
@@ -432,6 +445,30 @@ export function useTentacleTool({
   const placementCrosshair =
     active && (awaitingPlacement || tentacleCenter === null);
 
+  const handleCategoryChange = (nextCategory: TentacleExtendedCategoryId) => {
+    cancelRequests();
+    setTentacleLoading(false);
+    setTentacleCategoryId(nextCategory);
+    setTentacleCategoryChosen(true);
+    setTentaclePois([]);
+    setTentacleOutOfReach(false);
+    setSelectedPoiId(null);
+    setTentacleError(null);
+  };
+
+  const handleSelectPoi = (poiId: string) => {
+    const poi = tentaclePois.find((entry) => entry.id === poiId);
+    if (poi && !isConfirmedPoiLike(poi)) {
+      setTentacleError(
+        "Preview only — wait until places confirm before selecting.",
+      );
+      return;
+    }
+    setTentacleOutOfReach(false);
+    setTentacleError(null);
+    setSelectedPoiId(poiId);
+  };
+
   const panel = (
     <TentaclePanel
       gameSize={sessionGameSize(sessionRules)}
@@ -448,28 +485,10 @@ export function useTentacleTool({
       hasCenter={tentacleCenter !== null}
       gpsLoading={gpsLoading}
       error={tentacleError ?? mapError ?? gpsError}
-      onCategoryChange={(nextCategory) => {
-        setTentacleCategoryId(nextCategory);
-        setTentacleCategoryChosen(true);
-        setTentaclePois([]);
-        setTentacleOutOfReach(false);
-        setSelectedPoiId(null);
-        setTentacleError(null);
-      }}
+      onCategoryChange={handleCategoryChange}
       onUseGps={() => void handleUseGps()}
       onPlaceAtMapTap={armPlacement}
-      onSelectPoi={(poiId) => {
-        const poi = tentaclePois.find((entry) => entry.id === poiId);
-        if (poi && !isConfirmedPoiLike(poi)) {
-          setTentacleError(
-            "Preview only — wait until places confirm before selecting.",
-          );
-          return;
-        }
-        setTentacleOutOfReach(false);
-        setTentacleError(null);
-        setSelectedPoiId(poiId);
-      }}
+      onSelectPoi={handleSelectPoi}
       onOutOfReachChange={(nextOutOfReach) => {
         setTentacleOutOfReach(nextOutOfReach);
         if (nextOutOfReach) {
@@ -489,6 +508,73 @@ export function useTentacleTool({
     />
   );
 
+  // Drive map-click routing without mounting TentaclePanel wizard.
+  useEffect(() => {
+    if (!tentacleCategoryChosen) {
+      wizardStepRef.current = "category";
+      return;
+    }
+    if (!tentacleCenter || tentacleLoading) {
+      wizardStepRef.current = "place";
+      return;
+    }
+    wizardStepRef.current = "ask";
+  }, [tentacleCategoryChosen, tentacleCenter, tentacleLoading]);
+
+  const gameSize = sessionGameSize(sessionRules);
+  const categorySelectionAvailable =
+    tentacleCategoryId !== null &&
+    isTentacleCategoryAvailableInSession(sessionRules, tentacleCategoryId);
+  const hasRecordedAnswer = tentacleOutOfReach || selectedPoiId !== null;
+
+  const readiness: AskHudReadiness = {
+    surface: "tentacle",
+    placementReady: tentacleCenter !== null,
+    configureReady: tentacleCategoryChosen && categorySelectionAvailable,
+    resolveReady: tentaclePois.length > 0 && !tentacleLoading,
+    answerReady: awaitHiderAnswer || hasRecordedAnswer,
+    awaitHiderAnswer,
+    isSubmitting: session.isBusy,
+    viewOnly: !canSubmitQuestion,
+  };
+
+  const hud = {
+    readiness,
+    costLabel,
+    error: tentacleError ?? mapError ?? gpsError ?? null,
+    onCommit: () => void commit(),
+    modeBody: (
+      <TentacleHudBody
+        gameSize={gameSize}
+        categoryId={tentacleCategoryId}
+        categoryChosen={tentacleCategoryChosen}
+        searchRadiusMeters={searchRadiusMeters}
+        usedCategoryIds={usedTentacleCategories}
+        distanceUnit={distanceUnit}
+        poiOptions={tentaclePois}
+        selectedPoiId={selectedPoiId}
+        outOfReach={tentacleOutOfReach}
+        loading={tentacleLoading}
+        awaitingPlacement={awaitingPlacement}
+        hasCenter={tentacleCenter !== null}
+        gpsLoading={gpsLoading}
+        error={tentacleError ?? mapError ?? gpsError}
+        onCategoryChange={handleCategoryChange}
+        onUseGps={() => void handleUseGps()}
+        onPlaceAtMapTap={armPlacement}
+        onSelectPoi={handleSelectPoi}
+        onOutOfReachChange={(nextOutOfReach) => {
+          setTentacleOutOfReach(nextOutOfReach);
+          if (nextOutOfReach) {
+            setSelectedPoiId(null);
+          }
+        }}
+        awaitHiderAnswer={awaitHiderAnswer}
+      />
+    ),
+    sheets: null as ReactNode,
+  };
+
   return {
     draft: {
       tentacleCenter,
@@ -504,5 +590,6 @@ export function useTentacleTool({
     resetDraft,
     commit,
     panel,
+    hud,
   };
 }

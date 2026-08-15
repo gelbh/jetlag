@@ -22,6 +22,10 @@ describe("useMatchingTool", () => {
     );
 
     act(() => {
+      result.current.panel.props.onCategoryChange("commercial_airport");
+    });
+
+    act(() => {
       result.current.handleMapClick([53.35, -6.26]);
     });
 

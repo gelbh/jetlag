@@ -32,7 +32,7 @@ describe("useThermometerTool", () => {
     expect(result.current.draft.thermoB).toEqual([53.36, -6.25]);
   });
 
-  it("ignores manual map taps outside the place wizard step", () => {
+  it("ignores manual map taps after both pins are set (ask chord)", () => {
     const mocks = createToolHookMocks();
     const { result } = renderHook(() =>
       useThermometerTool({
@@ -48,14 +48,20 @@ describe("useThermometerTool", () => {
 
     act(() => {
       result.current.panel.props.onPlacementModeChange("manual");
-      result.current.panel.props.wizardStepRef.current = "configure";
     });
     act(() => {
-      expect(result.current.handleMapClick([53.35, -6.26])).toBe(false);
+      expect(result.current.handleMapClick([53.35, -6.26])).toBe(true);
+    });
+    act(() => {
+      expect(result.current.handleMapClick([53.36, -6.25])).toBe(true);
+    });
+    act(() => {
+      expect(result.current.handleMapClick([53.37, -6.24])).toBe(false);
     });
 
-    expect(result.current.draft.thermoA).toBeNull();
-    expect(result.current.draft.thermoB).toBeNull();
+    expect(result.current.draft.thermoA).toEqual([53.35, -6.26]);
+    expect(result.current.draft.thermoB).toEqual([53.36, -6.25]);
+    expect(result.current.panel.props.wizardStepRef.current).toBe("ask");
   });
 
   it("commits a thermometer annotation when answer is set", async () => {

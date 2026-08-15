@@ -19,6 +19,7 @@ export async function openChat(page: Page) {
   const dockChat = page.getByRole("button", { name: "Open chat" });
   if (await dockChat.isVisible().catch(() => false)) {
     await dockChat.click({ force: true });
+    await expect(page.getByLabel("Chat tabs")).toBeVisible({ timeout: 15_000 });
     return;
   }
 
@@ -27,12 +28,14 @@ export async function openChat(page: Page) {
   });
   if (await unreadChat.isVisible().catch(() => false)) {
     await unreadChat.click({ force: true });
+    await expect(page.getByLabel("Chat tabs")).toBeVisible({ timeout: 15_000 });
     return;
   }
 
   const chatTab = page.getByRole("button", { name: "Chat", exact: true });
   if (await chatTab.isVisible().catch(() => false)) {
     await chatTab.click();
+    await expect(page.getByLabel("Chat tabs")).toBeVisible({ timeout: 15_000 });
     return;
   }
 

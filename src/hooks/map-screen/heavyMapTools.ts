@@ -1,5 +1,9 @@
 import type { ReactNode } from "react";
 import type { Feature, MultiPolygon, Polygon } from "geojson";
+import type {
+  AskHudCommitKind,
+  AskHudReadiness,
+} from "../../domain/ask/askHudModes";
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import type { MeasuringPlace } from "../../services/geo/overpass/measuringPlaces";
 import {
@@ -7,6 +11,18 @@ import {
   TENTACLE_SEARCH_RADIUS_METERS,
 } from "../../domain/questions";
 import type { TentaclePoi } from "../../domain/map/annotations";
+
+/** Ask Map HUD bundle returned by migrated question tools. */
+export type AskToolHudBundle = {
+  readiness: AskHudReadiness;
+  costLabel: string;
+  error: string | null;
+  onCommit: () => void;
+  modeBody: ReactNode;
+  sheets: ReactNode;
+  /** Override strip verb (e.g. thermometer END WALK while walking). */
+  commitKind?: AskHudCommitKind;
+};
 
 export interface MatchingToolApi {
   draft: {
@@ -22,6 +38,7 @@ export interface MatchingToolApi {
   handleMapClick: (point: LatLngTuple) => void;
   resetDraft: () => void;
   panel: ReactNode;
+  hud: AskToolHudBundle;
 }
 
 export interface MeasuringToolApi {
@@ -39,6 +56,7 @@ export interface MeasuringToolApi {
   handleMapClick: (point: LatLngTuple) => void;
   resetDraft: () => void;
   panel: ReactNode;
+  hud: AskToolHudBundle;
 }
 
 export interface TentacleToolApi {
@@ -55,6 +73,7 @@ export interface TentacleToolApi {
   handleMapClick: (point: LatLngTuple) => void;
   resetDraft: () => void;
   panel: ReactNode;
+  hud: AskToolHudBundle;
 }
 
 export interface HeavyMapToolsApi {
@@ -64,6 +83,57 @@ export interface HeavyMapToolsApi {
 }
 
 function noopMapClick(): void {}
+
+const idleMatchingHud: AskToolHudBundle = {
+  readiness: {
+    surface: "matching",
+    placementReady: false,
+    configureReady: false,
+    resolveReady: false,
+    answerReady: true,
+    awaitHiderAnswer: true,
+    isSubmitting: false,
+  },
+  costLabel: "D3P1",
+  error: null,
+  onCommit: () => undefined,
+  modeBody: null,
+  sheets: null,
+};
+
+const idleMeasuringHud: AskToolHudBundle = {
+  readiness: {
+    surface: "measuring",
+    placementReady: false,
+    configureReady: false,
+    resolveReady: false,
+    answerReady: true,
+    awaitHiderAnswer: true,
+    isSubmitting: false,
+  },
+  costLabel: "D3P1",
+  error: null,
+  onCommit: () => undefined,
+  modeBody: null,
+  sheets: null,
+};
+
+const idleTentacleHud: AskToolHudBundle = {
+  readiness: {
+    surface: "tentacle",
+    placementReady: false,
+    configureReady: false,
+    resolveReady: false,
+    answerReady: true,
+    awaitHiderAnswer: true,
+    isSubmitting: false,
+  },
+  costLabel: "D4P2",
+  error: null,
+  onCommit: () => undefined,
+  modeBody: null,
+  sheets: null,
+};
 
 export function createIdleHeavyMapTools(): HeavyMapToolsApi {
   const idleMatchingTool: MatchingToolApi = {
@@ -79,6 +149,7 @@ export function createIdleHeavyMapTools(): HeavyMapToolsApi {
     handleMapClick: noopMapClick,
     resetDraft: () => undefined,
     panel: null,
+    hud: idleMatchingHud,
   };
 
   const idleMeasuringTool: MeasuringToolApi = {
@@ -96,6 +167,7 @@ export function createIdleHeavyMapTools(): HeavyMapToolsApi {
     handleMapClick: noopMapClick,
     resetDraft: () => undefined,
     panel: null,
+    hud: idleMeasuringHud,
   };
 
   const idleTentacleTool: TentacleToolApi = {
@@ -112,6 +184,7 @@ export function createIdleHeavyMapTools(): HeavyMapToolsApi {
     handleMapClick: noopMapClick,
     resetDraft: () => undefined,
     panel: null,
+    hud: idleTentacleHud,
   };
 
   return {

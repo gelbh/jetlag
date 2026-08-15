@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
 import { haversineMeters } from "../../domain/geometry/gameArea/distance";
 import {
+  getCurrentPosition,
   queryGeolocationPermission,
   requestLocationAccess,
   unknownGeolocationErrorMessage,
@@ -18,6 +19,14 @@ interface UseLiveLocationOptions {
   highAccuracy?: boolean;
   minIntervalMs?: number;
   minDistanceMeters?: number;
+  /** Pass `0` for walk tracking so samples are not served from cache. */
+  maximumAge?: number;
+  /**
+   * Optional getCurrentPosition poll while enabled. Helps when the browser
+   * geolocation override updates but `watchPosition` stays quiet (e2e / some
+   * mobile WebViews).
+   */
+  pollIntervalMs?: number;
 }
 
 export function useLiveLocation(
@@ -28,6 +37,8 @@ export function useLiveLocation(
     highAccuracy = false,
     minIntervalMs = 1500,
     minDistanceMeters = 5,
+    maximumAge,
+    pollIntervalMs,
   } = options;
   const [reading, setReading] = useState<GeolocationReading | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -70,6 +81,7 @@ export function useLiveLocation(
 
     let cancelled = false;
     let stopWatch: (() => void) | undefined;
+    let pollTimer: number | undefined;
 
     const publishReading = (next: GeolocationReading, force = false) => {
       const now = Date.now();
@@ -111,8 +123,25 @@ export function useLiveLocation(
             setNeedsPermissionPrompt(false);
           }
         },
-        { highAccuracy },
+        { highAccuracy, maximumAge },
       );
+
+      if (pollIntervalMs && pollIntervalMs > 0) {
+        pollTimer = window.setInterval(() => {
+          if (cancelled) {
+            return;
+          }
+          void getCurrentPosition({ highAccuracy, maximumAge })
+            .then((next) => {
+              if (!cancelled) {
+                publishReading(next);
+              }
+            })
+            .catch(() => {
+              // Watch errors surface via watchPosition; poll is best-effort.
+            });
+        }, pollIntervalMs);
+      }
     };
 
     const start = async () => {
@@ -149,7 +178,7 @@ export function useLiveLocation(
       setNeedsPermissionPrompt(false);
 
       try {
-        const initial = await requestLocationAccess({ highAccuracy });
+        const initial = await requestLocationAccess({ highAccuracy, maximumAge });
         if (cancelled) {
           return;
         }
@@ -176,9 +205,20 @@ export function useLiveLocation(
     return () => {
       cancelled = true;
       stopWatch?.();
+      if (pollTimer !== undefined) {
+        window.clearInterval(pollTimer);
+      }
       lastPublishRef.current = null;
     };
-  }, [confirmEpoch, highAccuracy, minDistanceMeters, minIntervalMs]);
+  }, [
+    confirmEpoch,
+    enabled,
+    highAccuracy,
+    maximumAge,
+    minDistanceMeters,
+    minIntervalMs,
+    pollIntervalMs,
+  ]);
 
   return {
     reading: enabled ? reading : null,

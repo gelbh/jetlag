@@ -90,8 +90,12 @@ export async function queryGeolocationPermission(): Promise<GeolocationPermissio
 
 export function getCurrentPosition(options?: {
   highAccuracy?: boolean;
+  /** Cached reading age; `0` forces a fresh sample (walk / e2e). */
+  maximumAge?: number;
 }): Promise<GeolocationReading> {
   const highAccuracy = options?.highAccuracy ?? true;
+  const maximumAge =
+    options?.maximumAge ?? (highAccuracy ? 10_000 : 30_000);
 
   return new Promise((resolve, reject) => {
     if (!("geolocation" in navigator)) {
@@ -109,7 +113,7 @@ export function getCurrentPosition(options?: {
       {
         enableHighAccuracy: highAccuracy,
         timeout: 15_000,
-        maximumAge: highAccuracy ? 10_000 : 30_000,
+        maximumAge,
       },
     );
   });
@@ -117,6 +121,7 @@ export function getCurrentPosition(options?: {
 
 export async function requestLocationAccess(options?: {
   highAccuracy?: boolean;
+  maximumAge?: number;
   /** Required when permission state is `prompt` — call only from a user gesture. */
   userGesture?: boolean;
 }): Promise<GeolocationReading> {
@@ -157,9 +162,12 @@ export function watchPosition(
   onError: (error: Error) => void,
   options?: {
     highAccuracy?: boolean;
+    maximumAge?: number;
   },
 ): () => void {
   const highAccuracy = options?.highAccuracy ?? true;
+  const maximumAge =
+    options?.maximumAge ?? (highAccuracy ? 5_000 : 20_000);
   if (!("geolocation" in navigator)) {
     onError(new Error("Geolocation is not available on this device."));
     return () => {};
@@ -174,7 +182,7 @@ export function watchPosition(
     },
     {
       enableHighAccuracy: highAccuracy,
-      maximumAge: highAccuracy ? 5_000 : 20_000,
+      maximumAge,
     },
   );
 

@@ -28,14 +28,16 @@ export async function clickMapAt(
   xRatio: number,
   yRatio: number,
 ) {
-  const map = page.locator(MAP_CONTAINER_SELECTOR).first();
-  await map.waitFor();
-  const box = await map.boundingBox();
+  // Prefer the WebGL canvas — MapLibre listens there; parent .maplibregl-map
+  // clicks can miss the handler under Ask HUD stacking.
+  const canvas = page.locator(`${MAP_CONTAINER_SELECTOR} canvas`).first();
+  await canvas.waitFor({ state: "visible", timeout: 15_000 });
+  const box = await canvas.boundingBox();
   if (!box) {
-    throw new Error("Map container is not visible.");
+    throw new Error("Map canvas is not visible.");
   }
 
-  await map.click({
+  await canvas.click({
     position: {
       x: Math.floor(box.width * xRatio),
       y: Math.floor(box.height * yRatio),
@@ -129,6 +131,8 @@ export async function clickToolDockButton(page: Page, name: string) {
     .getByLabel("Question tools")
     .getByRole("button", { name, exact: true });
   await expect(button).toBeVisible();
+  const isPreviewOnly =
+    (await button.getAttribute("title"))?.includes("Preview only") ?? false;
   // DOM click — avoids hit-target misses when Draw shares the hunt strip.
   await button.evaluate((el) => {
     if (el instanceof HTMLElement) {
@@ -136,12 +140,21 @@ export async function clickToolDockButton(page: Page, name: string) {
     }
   });
   // Tool becomes active: for normal selection, aria-pressed="true".
-  // For preview-only mode (blocked by open question): tool activates and panel
-  // renders with ViewOnlyQuestionBanner, but aria-pressed stays false.
-  const isPreviewOnly = (await button.getAttribute("title"))?.includes("Preview only") ?? false;
+  // Preview-only (open question): aria-pressed stays false — wait for HUD.
+  // If the tool was already open, the click toggled it off; open again.
   if (!isPreviewOnly) {
     await expect(button).toHaveAttribute("aria-pressed", "true");
+    return;
   }
+  const hud = page.getByTestId("ask-hud-host");
+  if (!(await hud.isVisible().catch(() => false))) {
+    await button.evaluate((el) => {
+      if (el instanceof HTMLElement) {
+        el.click();
+      }
+    });
+  }
+  await expect(hud).toBeVisible({ timeout: 15_000 });
 }
 
 export async function selectDrawTool(page: Page, toolName: "Pin" | "Zone") {

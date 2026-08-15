@@ -1,5 +1,7 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { RadarHudBody } from "../../components/tools/ask/RadarHudBody";
 import { RadarPanel } from "../../components/tools/RadarPanel";
+import type { AskHudReadiness } from "../../domain/ask/askHudModes";
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import { isActive, type AnnotationRecord } from "../../domain/map/annotations";
 import {
@@ -8,6 +10,7 @@ import {
 } from "../../domain/map/distance";
 import { defaultRadarPresetMeters } from "../../domain/map/distancePresets";
 import {
+  isRadarRadiusAllowedForGameSize,
   radarDistanceUseCount,
   radarDistanceUseCountFromPending,
   type RadarAnswer,
@@ -220,6 +223,25 @@ export function useRadarTool({
   const placementCrosshair =
     active && (awaitingPlacement || radarCenter === null);
 
+  const hasCenter = radarCenter !== null;
+  const resolvedForReady = radarChooseCustom
+    ? (parseDistanceInput(radarCustomRadius, distanceUnit) ?? radarRadius)
+    : radarRadius;
+  const distanceSelectionAvailable =
+    resolvedForReady !== null &&
+    isRadarRadiusAllowedForGameSize(
+      gameSize,
+      resolvedForReady,
+      distanceUnit,
+      radarChooseCustom,
+    );
+
+  const onPresetSelect = (radiusMeters: number) => {
+    setRadarChooseCustom(false);
+    setRadarCustomRadius("");
+    setRadarRadius(radiusMeters);
+  };
+
   const panel = (
     <RadarPanel
       radiusMeters={radarRadius}
@@ -229,18 +251,14 @@ export function useRadarTool({
       gameSize={gameSize}
       usedDistanceOptions={usedRadarOptions}
       answer={radarAnswer}
-      onPresetSelect={(radiusMeters) => {
-        setRadarChooseCustom(false);
-        setRadarCustomRadius("");
-        setRadarRadius(radiusMeters);
-      }}
+      onPresetSelect={onPresetSelect}
       onChooseSelect={() => setRadarChooseCustom(true)}
       onCustomRadiusChange={setRadarCustomRadius}
       onAnswerChange={setRadarAnswer}
       onUseGps={() => void handleUseGps()}
       onPlaceAtMapTap={armPlacement}
       awaitingPlacement={awaitingPlacement}
-      hasCenter={radarCenter !== null}
+      hasCenter={hasCenter}
       onCommit={() => void commit()}
       gpsLoading={gpsLoading}
       error={mapError ?? gpsError}
@@ -251,6 +269,47 @@ export function useRadarTool({
       wizardStepRef={wizardStepRef}
     />
   );
+
+  const readiness: AskHudReadiness = {
+    surface: "radar",
+    placementReady: hasCenter,
+    configureReady: distanceSelectionAvailable,
+    resolveReady: true,
+    answerReady: awaitHiderAnswer || radarAnswer !== null,
+    awaitHiderAnswer,
+    isSubmitting: session.isBusy,
+    viewOnly: !canSubmitQuestion,
+  };
+
+  const hud = {
+    readiness,
+    costLabel,
+    error: mapError ?? gpsError ?? null,
+    onCommit: () => void commit(),
+    modeBody: (
+      <RadarHudBody
+        radiusMeters={radarRadius}
+        chooseCustom={radarChooseCustom}
+        customRadius={radarCustomRadius}
+        distanceUnit={distanceUnit}
+        gameSize={gameSize}
+        usedDistanceOptions={usedRadarOptions}
+        answer={radarAnswer}
+        onPresetSelect={onPresetSelect}
+        onChooseSelect={() => setRadarChooseCustom(true)}
+        onCustomRadiusChange={setRadarCustomRadius}
+        onAnswerChange={setRadarAnswer}
+        onUseGps={() => void handleUseGps()}
+        onPlaceAtMapTap={armPlacement}
+        awaitingPlacement={awaitingPlacement}
+        hasCenter={hasCenter}
+        gpsLoading={gpsLoading}
+        awaitHiderAnswer={awaitHiderAnswer}
+        viewOnly={!canSubmitQuestion}
+      />
+    ),
+    sheets: null as ReactNode,
+  };
 
   return {
     draft: {
@@ -264,5 +323,6 @@ export function useRadarTool({
     resetDraft,
     commit,
     panel,
+    hud,
   };
 }

@@ -13,10 +13,9 @@ import {
   sendTentacleToHiders,
   sendThermometerToHiders,
   clickToolDockButton,
-  clickMapCenter,
-  advanceWizard,
-  waitForWizardNext,
+  expectAskHud,
   expectSendToHidersInViewport,
+  placeAskAnchor,
   selectFirstRadarDistance,
 } from "../../fixtures";
 
@@ -29,12 +28,9 @@ test.describe("multiplayer question tools", () => {
     const { hostPage } = hostHider;
 
     await clickToolDockButton(hostPage, "Radar");
-    await clickMapCenter(hostPage);
-    await waitForWizardNext(hostPage);
-    await advanceWizard(hostPage);
+    await expectAskHud(hostPage);
+    await placeAskAnchor(hostPage);
     await selectFirstRadarDistance(hostPage);
-    await waitForWizardNext(hostPage);
-    await advanceWizard(hostPage);
     await expectSendToHidersInViewport(hostPage);
   });
 

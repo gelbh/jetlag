@@ -29,6 +29,8 @@ export interface UsePlacementMapFocusOptions {
   defaultFocusBounds: MapBoundsExpression | null;
   enabled: boolean;
   panelMinimized: boolean;
+  /** When set (Ask HUD), overrides floating-panel peek height for padding. */
+  hudBottomPaddingPx?: number | null;
   selectedPoiId?: string | null;
   walkActive?: boolean;
   viewportFrame?: PlacementViewportFrame | null;
@@ -84,6 +86,7 @@ export function usePlacementMapFocus({
   defaultFocusBounds,
   enabled,
   panelMinimized,
+  hudBottomPaddingPx = null,
   selectedPoiId = null,
   walkActive = false,
   viewportFrame = null,
@@ -94,7 +97,10 @@ export function usePlacementMapFocus({
   const lastWalkReframeAtRef = useRef(0);
   const previousPoiIdRef = useRef<string | null>(selectedPoiId);
 
-  const panelPeekHeightPx = resolvePanelPeekHeightPx(panelMinimized);
+  const panelPeekHeightPx =
+    hudBottomPaddingPx != null && hudBottomPaddingPx > 0
+      ? hudBottomPaddingPx
+      : resolvePanelPeekHeightPx(panelMinimized);
   const phase = resolvePlacementPhase(activeTool, draft);
   const placementActive = enabled && activeTool !== "none";
 

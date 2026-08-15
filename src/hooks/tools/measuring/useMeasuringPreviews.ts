@@ -193,6 +193,7 @@ export function useMeasuringPublishSignature(
     measuringTargetMode,
     measuringTargetPlaceName,
     measuringTargetPoint,
+    measuringOptionChosen,
   } = draft;
 
   const { measuringBoundaryPreview, measuringEliminationPreview } = previews;
@@ -210,6 +211,7 @@ export function useMeasuringPublishSignature(
         measuringAnswer,
         measuringSubject,
         measuringLocationCategory,
+        measuringOptionChosen,
         measuringTargetMode,
         measuringSearchQuery,
         measuringSearchLoading,
@@ -241,6 +243,7 @@ export function useMeasuringPublishSignature(
       measuringError,
       measuringLoading,
       measuringLocationCategory,
+      measuringOptionChosen,
       measuringPlaces.length,
       measuringSearchLoading,
       measuringSearchQuery,

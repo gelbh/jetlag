@@ -1,6 +1,17 @@
 import { MapFirstRunSheet } from "../../components/session/mapChrome/MapFirstRunSheet";
 import { MapToolsHintBanner } from "../../components/session/mapChrome/MapToolsHintBanner";
+import { AskHudHost } from "../../components/tools/ask/AskHudHost";
 import { ToolFloatingPanel } from "../../components/tools/ToolFloatingPanel";
+import {
+  activeModeCue,
+  canCommit,
+  commitKind,
+  isAskHudOwnedTool,
+  primedCommitLabel,
+  type AskHudSurface,
+} from "../../domain/ask/askHudModes";
+import type { AskToolHudBundle } from "../../hooks/map-screen/heavyMapTools";
+import { MAP_TOOL_DOCK_ENTRIES } from "../../domain/map/mapTools";
 import type { MapScreenController } from "./useMapScreenController";
 
 type SeekerChromeOverlaysProps = {
@@ -63,6 +74,33 @@ function renderToolPanel(
   }
 }
 
+function askHudFromTools(
+  activeTool: AskHudSurface,
+  tools: SeekerChromeOverlaysProps["tools"],
+): AskToolHudBundle | null {
+  switch (activeTool) {
+    case "radar":
+      return tools.radarTool.hud;
+    case "measuring":
+      return tools.measuringTool.hud;
+    case "matching":
+      return tools.matchingTool.hud;
+    case "tentacle":
+      return tools.tentacleTool.hud;
+    case "thermometer":
+      return tools.thermometerTool.hud;
+    case "photo":
+      return tools.photoTool.hud;
+    case "hiding-zone-create":
+    case "hiding-zone-move":
+      return null;
+    default: {
+      const _exhaustive: never = activeTool;
+      return _exhaustive;
+    }
+  }
+}
+
 export function SeekerChromeOverlays({
   timer,
   activeTool,
@@ -82,6 +120,47 @@ export function SeekerChromeOverlays({
   saveGeometryEdit,
   tools,
 }: SeekerChromeOverlaysProps) {
+  const askHudOwned =
+    activeTool !== "none" &&
+    isAskHudOwnedTool(activeTool) &&
+    !selectedAnnotation;
+
+  const askSurface: AskHudSurface | null = askHudOwned ? activeTool : null;
+  const dockEntry = askHudOwned
+    ? MAP_TOOL_DOCK_ENTRIES.find((entry) => entry.id === activeTool)
+    : undefined;
+  const toolHud = askSurface ? askHudFromTools(askSurface, tools) : null;
+
+  const askCue = toolHud
+    ? activeModeCue({
+        surface: toolHud.readiness.surface,
+        placementReady: toolHud.readiness.placementReady,
+        configureReady: toolHud.readiness.configureReady,
+        resolveReady: toolHud.readiness.resolveReady,
+      })
+    : "";
+  const askCanCommit = toolHud ? canCommit(toolHud.readiness) : false;
+  const askCommitKind = toolHud
+    ? (toolHud.commitKind ??
+      commitKind(
+        toolHud.readiness.surface,
+        toolHud.readiness.awaitHiderAnswer,
+      ))
+    : "send";
+  const askCommitLabel = toolHud
+    ? primedCommitLabel({
+        kind: askCommitKind,
+        costLabel: toolHud.costLabel,
+        primed: askCanCommit,
+        cue: askCue,
+      })
+    : "";
+
+  const showFloatingPanel =
+    activeTool !== "none" &&
+    !selectedAnnotation &&
+    !isAskHudOwnedTool(activeTool);
+
   return (
     <>
       <MapToolsHintBanner
@@ -132,7 +211,24 @@ export function SeekerChromeOverlays({
         }}
       />
 
-      {activeTool !== "none" && !selectedAnnotation ? (
+      {askHudOwned && askSurface && toolHud ? (
+        <>
+          <AskHudHost
+            cue={askCue}
+            toolLabel={dockEntry?.name ?? activeTool}
+            costLabel={toolHud.costLabel}
+            canCommit={askCanCommit}
+            commitLabel={askCommitLabel}
+            onCommit={toolHud.onCommit}
+            isSubmitting={toolHud.readiness.isSubmitting}
+            error={toolHud.error}
+            modeBody={toolHud.modeBody}
+          />
+          {toolHud.sheets}
+        </>
+      ) : null}
+
+      {showFloatingPanel ? (
         <ToolFloatingPanel
           key={activeTool}
           toolId={activeTool}
