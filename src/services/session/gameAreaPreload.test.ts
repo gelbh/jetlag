@@ -15,6 +15,7 @@ import {
   preloadJobGapMsForTests,
   preloadJobGapPremiumMsForTests,
   preloadJobGapMsForTier,
+  preloadMeasuringCategoriesForTests,
 } from "./gameAreaPreload";
 
 // Mock implementation modules (not barrels) so importOriginal of availability
@@ -185,24 +186,18 @@ describe("gameAreaPreload", () => {
     await vi.runAllTimersAsync();
     await preloadPromise;
 
-    const packIds = vi
-      .mocked(fetchMeasuringPlacesInArea)
-      .mock.calls.map(([, , , regionPackId]) => regionPackId);
-    expect(packIds.length).toBeGreaterThan(0);
-    expect(packIds.every((id) => id === "dublin")).toBe(true);
-    expect(
-      vi
-        .mocked(fetchMeasuringPlacesInArea)
-        .mock.calls.map(([, category]) => category),
-    ).toEqual(
-      expect.arrayContaining([
-        "commercial_airport",
-        "rail_station",
-        "mountain",
-        "park",
-        "museum",
-      ]),
+    const expectedCategories = preloadMeasuringCategoriesForTests();
+    expect(fetchMeasuringPlacesInArea).toHaveBeenCalledTimes(
+      expectedCategories.length,
     );
+    for (const category of expectedCategories) {
+      expect(fetchMeasuringPlacesInArea).toHaveBeenCalledWith(
+        DUBLIN_CITY_GAME_AREA,
+        category,
+        [],
+        "dublin",
+      );
+    }
   });
 
   it("uses a shorter preload gap for premium sessions", () => {

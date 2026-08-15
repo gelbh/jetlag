@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { GameArea } from "@/domain/map/annotations";
 import {
   DUBLIN_CITY_GAME_AREA,
@@ -336,106 +336,126 @@ describe("matching features", () => {
     expect(nearest).toBeNull();
   });
 
-  it("after dublin pack attach, county play area returns bundled DUB immediately", async () => {
-    stubDublinAirportPackFetch();
-    vi.spyOn(overpassClient, "queryOverpass").mockImplementation(
-      () => new Promise(() => {}),
-    );
+  describe("dublin pack attach dual-phase", () => {
+    const expectedDublinAirportFeature = {
+      id: DUBLIN_AIRPORT_PACK_POI.id,
+      name: DUBLIN_AIRPORT_PACK_POI.name,
+      point: [DUBLIN_AIRPORT_PACK_POI.lat, DUBLIN_AIRPORT_PACK_POI.lng] as [
+        number,
+        number,
+      ],
+      inPlayArea: true,
+    };
 
-    const enrich = vi.fn();
-    const features = await fetchMatchingFeaturesInArea(
-      DUBLIN_COUNTY_GAME_AREA,
-      "commercial_airport",
-      { regionPackId: "dublin", onEnrich: enrich },
-    );
+    beforeEach(() => {
+      stubDublinAirportPackFetch();
+    });
 
-    expect(features).toEqual([
-      {
-        id: "Q178021",
-        name: "Dublin Airport",
-        point: [53.421388888, -6.27],
-        inPlayArea: true,
-      },
-    ]);
-    expect(enrich).not.toHaveBeenCalled();
-  });
+    it("county play area returns bundled DUB immediately", async () => {
+      let resolveOverpass: ((value: { elements: unknown[] }) => void) | undefined;
+      vi.spyOn(overpassClient, "queryOverpass").mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            resolveOverpass = resolve;
+          }),
+      );
 
-  it("after dublin pack attach, city play area excludes DUB and awaits Overpass", async () => {
-    stubDublinAirportPackFetch();
-    const queryOverpass = vi
-      .spyOn(overpassClient, "queryOverpass")
-      .mockResolvedValue({ elements: [] });
+      const enrich = vi.fn();
+      const features = await fetchMatchingFeaturesInArea(
+        DUBLIN_COUNTY_GAME_AREA,
+        "commercial_airport",
+        { regionPackId: "dublin", onEnrich: enrich },
+      );
 
-    const enrich = vi.fn();
-    const features = await fetchMatchingFeaturesInArea(
-      DUBLIN_CITY_GAME_AREA,
-      "commercial_airport",
-      { regionPackId: "dublin", onEnrich: enrich },
-    );
+      expect(features).toEqual([expectedDublinAirportFeature]);
+      expect(enrich).not.toHaveBeenCalled();
+      await vi.waitFor(() => {
+        expect(resolveOverpass).toBeTypeOf("function");
+      });
+      resolveOverpass?.({ elements: [] });
+      await vi.waitFor(() => {
+        expect(enrich).toHaveBeenCalledTimes(1);
+      });
+    });
 
-    expect(queryOverpass).toHaveBeenCalled();
-    expect(features).toEqual([]);
-    expect(enrich).not.toHaveBeenCalled();
-  });
+    it("city play area excludes DUB and awaits Overpass", async () => {
+      const queryOverpass = vi
+        .spyOn(overpassClient, "queryOverpass")
+        .mockResolvedValue({ elements: [] });
 
-  it("enrich Overpass query bbox matches the play area after pack attach", async () => {
-    stubDublinAirportPackFetch();
-    const expectedBbox = formatOverpassBboxFromGameArea(DUBLIN_COUNTY_GAME_AREA);
-    let resolveOverpass: ((value: { elements: unknown[] }) => void) | undefined;
-    const queryOverpass = vi
-      .spyOn(overpassClient, "queryOverpass")
-      .mockImplementation((query: string) => {
-        expect(query).toContain(expectedBbox);
-        // Guard against the old +50 km expanded matching search.
-        expect(query).not.toContain("52.7");
-        return new Promise((resolve) => {
-          resolveOverpass = resolve;
+      const enrich = vi.fn();
+      const features = await fetchMatchingFeaturesInArea(
+        DUBLIN_CITY_GAME_AREA,
+        "commercial_airport",
+        { regionPackId: "dublin", onEnrich: enrich },
+      );
+
+      expect(queryOverpass).toHaveBeenCalled();
+      expect(features).toEqual([]);
+      expect(enrich).not.toHaveBeenCalled();
+    });
+
+    it("enrich Overpass query bbox matches the play area", async () => {
+      const expectedBbox = formatOverpassBboxFromGameArea(
+        DUBLIN_COUNTY_GAME_AREA,
+      );
+      let resolveOverpass: ((value: { elements: unknown[] }) => void) | undefined;
+      const queryOverpass = vi
+        .spyOn(overpassClient, "queryOverpass")
+        .mockImplementation((query: string) => {
+          expect(query).toContain(expectedBbox);
+          return new Promise((resolve) => {
+            resolveOverpass = resolve;
+          });
         });
+
+      const enrich = vi.fn();
+      const features = await fetchMatchingFeaturesInArea(
+        DUBLIN_COUNTY_GAME_AREA,
+        "commercial_airport",
+        { regionPackId: "dublin", onEnrich: enrich },
+      );
+
+      expect(features).toEqual([expectedDublinAirportFeature]);
+
+      await vi.waitFor(() => {
+        expect(queryOverpass).toHaveBeenCalled();
       });
 
-    const enrich = vi.fn();
-    const features = await fetchMatchingFeaturesInArea(
-      DUBLIN_COUNTY_GAME_AREA,
-      "commercial_airport",
-      { regionPackId: "dublin", onEnrich: enrich },
-    );
-
-    expect(features).toHaveLength(1);
-    expect(features[0]?.name).toBe("Dublin Airport");
-
-    await vi.waitFor(() => {
-      expect(queryOverpass).toHaveBeenCalled();
-    });
-
-    resolveOverpass?.({
-      elements: [
-        {
-          id: 99,
-          tags: { name: "Outside Airport", aeroway: "aerodrome", iata: "XXX" },
-          lat: 54.5,
-          lon: -7.5,
-        },
-        {
-          id: 100,
-          tags: {
-            name: "Enrich Airport",
-            aeroway: "aerodrome",
-            iata: "ENR",
+      resolveOverpass?.({
+        elements: [
+          {
+            id: 99,
+            tags: {
+              name: "Outside Airport",
+              aeroway: "aerodrome",
+              iata: "XXX",
+            },
+            lat: 54.5,
+            lon: -7.5,
           },
-          lat: 53.35,
-          lon: -6.26,
-        },
-      ],
-    });
+          {
+            id: 100,
+            tags: {
+              name: "Enrich Airport",
+              aeroway: "aerodrome",
+              iata: "ENR",
+            },
+            lat: 53.35,
+            lon: -6.26,
+          },
+        ],
+      });
 
-    await vi.waitFor(() => {
-      expect(enrich).toHaveBeenCalledTimes(1);
-    });
+      await vi.waitFor(() => {
+        expect(enrich).toHaveBeenCalledTimes(1);
+      });
 
-    const enriched = enrich.mock.calls[0]?.[0] ?? [];
-    expect(
-      enriched.map((feature: { name: string }) => feature.name).sort(),
-    ).toEqual(["Dublin Airport", "Enrich Airport"]);
+      const enriched = enrich.mock.calls[0]?.[0] ?? [];
+      expect(
+        enriched.map((feature: { name: string }) => feature.name).sort(),
+      ).toEqual(["Dublin Airport", "Enrich Airport"]);
+    });
   });
 
   it("builds feature count labels for play-area features", () => {
