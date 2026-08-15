@@ -76,12 +76,12 @@ export function RequestPreloadSection({
           id="request-preload-heading"
           className="font-display text-xs font-semibold uppercase tracking-[0.1em] text-ink-dim"
         >
-          Request location preload
+          Request a custom location pack
         </p>
         <p className="text-xs leading-snug text-ink-muted">
-          Ask us to review this custom preset for the same pack-style place
-          data recommended cities get. Requests are reviewed manually and are
-          not instant.
+          This play area does not overlap a supported city pack. You can request
+          a custom pack review — requests are reviewed manually and are not
+          instant.
         </p>
       </div>
 
