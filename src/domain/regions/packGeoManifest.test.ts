@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import type { BoundingBox } from "@/domain/geometry/gameArea/gameAreaBounds";
 import { BASE_MEASURING_CATALOG } from "@/domain/questions";
+import { PACK_SEA_LEVEL_SEED_DIVISIONS } from "@/domain/geometry/measuring/seaLevel";
 import { REGION_PACK_IDS, type RegionPackId } from "./regionPack";
 import {
   isPackGeoSupported,
@@ -114,6 +115,7 @@ describe("packGeoManifest", () => {
         divisions: number;
         cells: unknown[];
         cellElevations: unknown[];
+        complete?: boolean;
       };
       expect(typeof coastline.source).toBe("string");
       expect(Array.isArray(coastline.segments)).toBe(true);
@@ -161,6 +163,29 @@ describe("packGeoManifest", () => {
           `${packId}/${fileName} POI bbox not contained by reference`,
         ).toBe(true);
       }
+    }
+  });
+
+  it("ships dense complete sea_level_seed for london and tokyo", () => {
+    for (const packId of ["london", "tokyo"] as const) {
+      const seaLevelPath = resolve(
+        publicRoot,
+        packGeoSeaLevelSeedPublicPath(packId),
+      );
+      const seaLevel = JSON.parse(readFileSync(seaLevelPath, "utf8")) as {
+        source: string;
+        divisions: number;
+        cells: unknown[];
+        cellElevations: unknown[];
+        complete?: boolean;
+      };
+      expect(seaLevel.source).toBe("open-meteo");
+      expect(seaLevel.divisions).toBeGreaterThanOrEqual(
+        PACK_SEA_LEVEL_SEED_DIVISIONS,
+      );
+      expect(seaLevel.complete).toBe(true);
+      expect(seaLevel.cells.length).toBeGreaterThan(0);
+      expect(seaLevel.cellElevations.length).toBe(seaLevel.cells.length);
     }
   });
 });
