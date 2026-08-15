@@ -1,5 +1,6 @@
 import { FieldValue } from "firebase-admin/firestore";
 import { isSessionMember } from "../proxies/verifyProxyAccess.mjs";
+import { resetSessionRoundExtras } from "./resetSessionRoundExtras.mjs";
 
 export const REMATCH_SESSION_NOT_FOUND = "REMATCH_SESSION_NOT_FOUND";
 export const REMATCH_NOT_MEMBER = "REMATCH_NOT_MEMBER";
@@ -78,6 +79,11 @@ export function swapRoleGateLeaders(roleGates) {
 
 export async function resetSessionForRematchHandler(db, uid, sessionId) {
   await runRematchSessionTransaction(db, uid, sessionId);
+  try {
+    await resetSessionRoundExtras(db, sessionId);
+  } catch (error) {
+    console.error("resetSessionRoundExtras failed", sessionId, error);
+  }
 }
 
 async function runRematchSessionTransaction(db, uid, sessionId) {

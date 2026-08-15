@@ -22,12 +22,43 @@ function mockRematchDb({
   const anchorsRef = { id: "anchors", path: "sessions/sess-1/endGameTruth/anchors" };
   let wrote = false;
 
+  const emptyExtrasCollection = {
+    where() {
+      return {
+        async get() {
+          return { empty: true, docs: [] };
+        },
+      };
+    },
+    async get() {
+      return { empty: true, docs: [] };
+    },
+    doc(id) {
+      const ref = { id, path: `sessions/sess-1/extras/${id}` };
+      return {
+        ...ref,
+        async get() {
+          return { exists: false, data: () => ({}) };
+        },
+        collection() {
+          return emptyExtrasCollection;
+        },
+      };
+    },
+  };
+
   return {
     collection: (name) => {
       if (name === "sessions") {
         return {
           doc: () => ({
             ...sessionRef,
+            async get() {
+              return {
+                exists: sessionExists,
+                data: () => sessionData,
+              };
+            },
             collection: (sub) => {
               if (sub === "gameResult") {
                 return { doc: () => gameResultRef };
@@ -36,7 +67,33 @@ function mockRematchDb({
                 return { doc: () => archiveRef };
               }
               if (sub === "endGameTruth") {
-                return { doc: () => anchorsRef };
+                return {
+                  doc: () => ({
+                    ...anchorsRef,
+                    async get() {
+                      return {
+                        exists: anchorsExists,
+                        data: () =>
+                          anchorsExists
+                            ? { anchors: { host: { lat: 1, lng: 2 } } }
+                            : {},
+                      };
+                    },
+                  }),
+                };
+              }
+              // Extras reset after TX: empty no-op so handler still succeeds.
+              if (
+                sub === "annotations" ||
+                sub === "pendingQuestions" ||
+                sub === "playerLocations" ||
+                sub === "hidingZones" ||
+                sub === "timeTraps" ||
+                sub === "startingLocations" ||
+                sub === "boardEconomy" ||
+                sub === "playerTrailPoints"
+              ) {
+                return emptyExtrasCollection;
               }
               throw new Error(`unexpected sub ${sub}`);
             },
@@ -44,6 +101,16 @@ function mockRematchDb({
         };
       }
       throw new Error(`unexpected ${name}`);
+    },
+    batch() {
+      const ops = [];
+      return {
+        update() {},
+        delete() {},
+        async commit() {
+          void ops;
+        },
+      };
     },
     runTransaction: async (fn) => {
       const tx = {
@@ -60,7 +127,7 @@ function mockRematchDb({
               }),
             };
           }
-          if (ref === anchorsRef) {
+          if (ref === anchorsRef || ref?.path === anchorsRef.path) {
             return {
               exists: anchorsExists,
               data: () => (anchorsExists ? { anchors: { host: { lat: 1, lng: 2 } } } : {}),
@@ -172,6 +239,8 @@ test("second rematch while idle does not swap roles again", async () => {
     sets: [],
     anchorsExists: false,
   });
+  // Extras runs after TX (including idle) but must not fail the player when
+  // the rematch mock rejects unexpected subcollections.
   await resetSessionForRematchHandler(db, "guest", "sess-1");
   assert.equal(updates.length, 0);
 });
