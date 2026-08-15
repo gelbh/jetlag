@@ -12,7 +12,6 @@ test("pending question opens tools in preview-only mode", async ({ hostHider }) 
   await sendRadarToHiders(hostPage);
 
   await clickToolDockButton(hostPage, "Radar");
-  await expectAskHud(hostPage);
   await expect(
     hostPage.getByText("Finish the open question before sending a new one."),
   ).toBeVisible();

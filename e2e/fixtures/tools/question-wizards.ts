@@ -148,9 +148,15 @@ export const PENDING_QUESTION_TEXT =
   /Are you within|closer to or further|hotter or colder|nearest to|same as my nearest/i;
 
 export async function selectFirstRadarDistance(page: Page) {
-  const preset = page.getByRole("button", { name: /Mile|km|0\.5|1 /i }).first();
+  const hud = page.getByTestId("ask-hud-host");
+  // Prefer a mid-row preset — top chips can sit under AskCommitStrip on mobile.
+  const preset = hud.getByRole("button", { name: /^1 Mile$|^1\.6 km$/i });
   await expect(preset).toBeVisible({ timeout: 15_000 });
+  await preset.scrollIntoViewIfNeeded();
   await preset.click();
+  await expect(preset).toHaveAttribute("aria-pressed", "true", {
+    timeout: 10_000,
+  });
 }
 
 export async function completeRadarSolo(page: Page) {
@@ -172,6 +178,9 @@ export async function sendRadarToHiders(page: Page) {
   await waitForSendToHiders(page);
   await page.getByRole("button", { name: SEND_TO_HIDERS_BUTTON }).click();
   await dismissActiveToolPanel(page);
+  await expect(page.getByTestId("ask-hud-host")).toBeHidden({
+    timeout: 15_000,
+  });
 }
 
 async function pickCatalogRow(page: Page, label: RegExp | string) {
@@ -202,6 +211,9 @@ export async function sendMatchingToHiders(page: Page) {
   await waitForSendToHiders(page);
   await page.getByRole("button", { name: SEND_TO_HIDERS_BUTTON }).click();
   await dismissActiveToolPanel(page);
+  await expect(page.getByTestId("ask-hud-host")).toBeHidden({
+    timeout: 15_000,
+  });
 }
 
 export async function completeMeasuringSolo(page: Page) {
@@ -228,6 +240,9 @@ export async function sendMeasuringToHiders(page: Page) {
   await waitForSendToHiders(page);
   await page.getByRole("button", { name: SEND_TO_HIDERS_BUTTON }).click();
   await dismissActiveToolPanel(page);
+  await expect(page.getByTestId("ask-hud-host")).toBeHidden({
+    timeout: 15_000,
+  });
 }
 
 async function placeThermometerManualPins(page: Page) {
@@ -265,6 +280,9 @@ export async function sendThermometerToHiders(page: Page) {
   await expect(sendButton).toBeEnabled({ timeout: 15_000 });
   await sendButton.click();
   await dismissActiveToolPanel(page);
+  await expect(page.getByTestId("ask-hud-host")).toBeHidden({
+    timeout: 15_000,
+  });
 }
 
 export async function completeTentacleSolo(page: Page) {
@@ -289,6 +307,9 @@ export async function sendTentacleToHiders(page: Page) {
   await waitForSendToHiders(page);
   await page.getByRole("button", { name: SEND_TO_HIDERS_BUTTON }).click();
   await dismissActiveToolPanel(page);
+  await expect(page.getByTestId("ask-hud-host")).toBeHidden({
+    timeout: 15_000,
+  });
 }
 
 export async function sendPhotoToHiders(page: Page) {
@@ -297,4 +318,7 @@ export async function sendPhotoToHiders(page: Page) {
   await waitForSendToHiders(page);
   await page.getByRole("button", { name: SEND_TO_HIDERS_BUTTON }).click();
   await dismissActiveToolPanel(page);
+  await expect(page.getByTestId("ask-hud-host")).toBeHidden({
+    timeout: 15_000,
+  });
 }

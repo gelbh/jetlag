@@ -127,4 +127,36 @@ describe("HidingZoneHudBody", () => {
     );
     expect(onSearchThisArea).toHaveBeenCalledTimes(1);
   });
+
+  it("lets confirm-step clear station to pick another", () => {
+    const clearStationSelection = vi.fn();
+    render(
+      <HidingZoneHudBody
+        moveMode
+        radiusLabel="200 m"
+        zoneTool={baseZoneTool({
+          methodChosen: true,
+          manualMode: false,
+          hasPlacement: true,
+          selectedStation: {
+            id: "dublin-central",
+            name: "Dublin Central",
+            lat: 53.35,
+            lng: -6.26,
+          },
+          clearStationSelection,
+          error: "Move requires a different location.",
+        })}
+        onStepChange={vi.fn()}
+        onSearchThisArea={vi.fn()}
+      />,
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", { name: /Choose different station/i }),
+    );
+    expect(clearStationSelection).toHaveBeenCalledTimes(1);
+    // Strip owns the confirm-step error — no duplicate InlineError alert.
+    expect(screen.queryByRole("alert")).toBeNull();
+  });
 });

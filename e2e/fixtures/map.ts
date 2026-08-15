@@ -129,6 +129,8 @@ export async function clickToolDockButton(page: Page, name: string) {
     .getByLabel("Question tools")
     .getByRole("button", { name, exact: true });
   await expect(button).toBeVisible();
+  const isPreviewOnly =
+    (await button.getAttribute("title"))?.includes("Preview only") ?? false;
   // DOM click — avoids hit-target misses when Draw shares the hunt strip.
   await button.evaluate((el) => {
     if (el instanceof HTMLElement) {
@@ -136,12 +138,21 @@ export async function clickToolDockButton(page: Page, name: string) {
     }
   });
   // Tool becomes active: for normal selection, aria-pressed="true".
-  // For preview-only mode (blocked by open question): tool activates and panel
-  // renders with ViewOnlyQuestionBanner, but aria-pressed stays false.
-  const isPreviewOnly = (await button.getAttribute("title"))?.includes("Preview only") ?? false;
+  // Preview-only (open question): aria-pressed stays false — wait for HUD.
+  // If the tool was already open, the click toggled it off; open again.
   if (!isPreviewOnly) {
     await expect(button).toHaveAttribute("aria-pressed", "true");
+    return;
   }
+  const hud = page.getByTestId("ask-hud-host");
+  if (!(await hud.isVisible().catch(() => false))) {
+    await button.evaluate((el) => {
+      if (el instanceof HTMLElement) {
+        el.click();
+      }
+    });
+  }
+  await expect(hud).toBeVisible({ timeout: 15_000 });
 }
 
 export async function selectDrawTool(page: Page, toolName: "Pin" | "Zone") {

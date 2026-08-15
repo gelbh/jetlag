@@ -130,7 +130,15 @@ export function HidingZoneHudBody({
             <p className="text-xs text-ink-muted">
               Tap the map to adjust the center.
             </p>
-          ) : null}
+          ) : (
+            <button
+              type="button"
+              className="btn-secondary w-full"
+              onClick={zoneTool.clearStationSelection}
+            >
+              Choose different station
+            </button>
+          )}
           {moveMode ? (
             <p className="text-xs text-status-warning">
               Move must be at least 50 m from your previous zone.
@@ -139,7 +147,10 @@ export function HidingZoneHudBody({
         </div>
       ) : null}
 
-      {zoneTool.error ? <InlineError>{zoneTool.error}</InlineError> : null}
+      {/* Commit-strip alert owns the error; avoid a second strict-mode duplicate. */}
+      {zoneTool.error && step !== "confirm" ? (
+        <InlineError>{zoneTool.error}</InlineError>
+      ) : null}
 
       {onDismiss && !moveMode ? (
         <button
