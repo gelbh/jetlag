@@ -41,12 +41,16 @@ vi.mock("../session/useSessionExit", () => ({
   useSessionExit: () => exitSession,
 }));
 
-vi.mock("./useGameOver", () => ({
-  useGameOver: () => ({
+const useGameOverMock = vi.hoisted(() =>
+  vi.fn(() => ({
     result: null,
     loading: false,
     roundComplete: true,
-  }),
+  })),
+);
+
+vi.mock("./useGameOver", () => ({
+  useGameOver: () => useGameOverMock(),
 }));
 
 describe("useGameOverActions", () => {
@@ -54,6 +58,11 @@ describe("useGameOverActions", () => {
     resetAllStores();
     vi.clearAllMocks();
     resetSessionForRematch.mockResolvedValue(undefined);
+    useGameOverMock.mockReturnValue({
+      result: null,
+      loading: false,
+      roundComplete: true,
+    });
     useTimerStore.setState({
       bySessionId: {
         "remote-session-1": {
@@ -85,5 +94,29 @@ describe("useGameOverActions", () => {
     expect(clearTimer).toHaveBeenCalledWith("remote-session-1");
     expect(blockPlayerLocationPublishes).not.toHaveBeenCalled();
     expect(result.current.rematchError).toBeNull();
+    expect(result.current.rematchPending).toBe(true);
+  });
+
+  it("keeps rematch pending until the round is no longer complete", async () => {
+    const session = createTestRemoteSession({
+      foundConfirmedAt: "2026-01-01T01:00:00.000Z",
+      gameOutcome: "found",
+    });
+    const { result, rerender } = renderHook(() =>
+      useGameOverActions(session, { closeSheet: vi.fn() }),
+    );
+
+    await act(async () => {
+      await result.current.handleRematch();
+    });
+    expect(result.current.rematchPending).toBe(true);
+
+    useGameOverMock.mockReturnValue({
+      result: null,
+      loading: false,
+      roundComplete: false,
+    });
+    rerender();
+    expect(result.current.rematchPending).toBe(false);
   });
 });

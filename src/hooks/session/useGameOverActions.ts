@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { LOCAL_SESSION_ID, type SessionRecord } from "../../domain/map/annotations";
 import { useSessionExit } from "../session/useSessionExit";
 import { resetSessionForRematch } from "../../services/session/sessionRematch";
@@ -28,6 +28,13 @@ export function useGameOverActions(
 
   const rematchSessionId = session?.id;
 
+  useEffect(() => {
+    if (!gameOver.roundComplete) {
+      setRematchPending(false);
+      setRematchError(null);
+    }
+  }, [gameOver.roundComplete]);
+
   const handleRematch = useCallback(async () => {
     if (!rematchSessionId || rematchSessionId === LOCAL_SESSION_ID) {
       return;
@@ -41,7 +48,6 @@ export function useGameOverActions(
       useTimerStore.getState().clearTimer(rematchSessionId);
     } catch (error) {
       setRematchError(mapRematchError(error));
-    } finally {
       setRematchPending(false);
     }
   }, [rematchSessionId]);
