@@ -30,6 +30,11 @@ const PRELOAD_MEASURING_CATEGORIES = [
   "museum",
 ] as const satisfies readonly MeasuringLocationCategory[];
 
+/** Test hook — keep assertions aligned with background measuring preload jobs. */
+export function preloadMeasuringCategoriesForTests(): readonly MeasuringLocationCategory[] {
+  return PRELOAD_MEASURING_CATEGORIES;
+}
+
 export function gameAreaPreloadKey(gameArea: GameArea): string {
   return JSON.stringify(gameArea.coordinates);
 }

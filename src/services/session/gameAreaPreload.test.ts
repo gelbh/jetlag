@@ -7,6 +7,7 @@ import { fetchAdminDivisionFeaturesInArea } from "../geo/overpass/adminDivisionB
 import { fetchPreparedCoastlineSegments } from "../geo/overpass/coastline";
 import { fetchLandmassFeaturesInArea } from "../geo/overpass/landmassFeatures";
 import { fetchPreparedMeasuringLinearSegments } from "../geo/overpass/measuringLinearFeatures";
+import { fetchMeasuringPlacesInArea } from "../geo/overpass/measuringPlaces";
 import {
   gameAreaPreloadKey,
   preloadCriticalGameAreaCaches,
@@ -14,6 +15,7 @@ import {
   preloadJobGapMsForTests,
   preloadJobGapPremiumMsForTests,
   preloadJobGapMsForTier,
+  preloadMeasuringCategoriesForTests,
 } from "./gameAreaPreload";
 
 // Mock implementation modules (not barrels) so importOriginal of availability
@@ -171,6 +173,31 @@ describe("gameAreaPreload", () => {
       .mock.calls.map(([, kind]) => kind);
     expect(fetchedLinearKinds).not.toContain("admin2_border");
     expect(fetchedLinearKinds).toHaveLength(0);
+  });
+
+  it("preloads measuring categories with auto-attached region pack id", async () => {
+    vi.useFakeTimers();
+
+    const preloadPromise = preloadGameAreaCachesAsync(
+      DUBLIN_CITY_GAME_AREA,
+      undefined,
+      "dublin",
+    );
+    await vi.runAllTimersAsync();
+    await preloadPromise;
+
+    const expectedCategories = preloadMeasuringCategoriesForTests();
+    expect(fetchMeasuringPlacesInArea).toHaveBeenCalledTimes(
+      expectedCategories.length,
+    );
+    for (const category of expectedCategories) {
+      expect(fetchMeasuringPlacesInArea).toHaveBeenCalledWith(
+        DUBLIN_CITY_GAME_AREA,
+        category,
+        [],
+        "dublin",
+      );
+    }
   });
 
   it("uses a shorter preload gap for premium sessions", () => {
