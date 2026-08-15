@@ -9,6 +9,8 @@ import {
   type CreatePreloadRequestResult,
 } from "../../services/preloadRequest/preloadRequestApi";
 
+export type RequestPreloadSectionVariant = "default" | "no-pack-match";
+
 export interface RequestPreloadSectionProps {
   /** Built at submit time so the editor does not stringify gameArea on every render. */
   getSnapshot: () => PreloadPresetSnapshot | null;
@@ -19,11 +21,28 @@ export interface RequestPreloadSectionProps {
       note?: string | null;
     },
   ) => Promise<CreatePreloadRequestResult>;
+  /** `no-pack-match` copy when auto-attach found no qualifying city pack. */
+  variant?: RequestPreloadSectionVariant;
 }
+
+const COPY: Record<
+  RequestPreloadSectionVariant,
+  { heading: string; body: string }
+> = {
+  default: {
+    heading: "Request location preload",
+    body: "Ask us to review this custom preset for the same pack-style place data recommended cities get. Requests are reviewed manually and are not instant.",
+  },
+  "no-pack-match": {
+    heading: "Request a custom location pack",
+    body: "This play area does not overlap a supported city pack. You can request a custom pack review — requests are reviewed manually and are not instant.",
+  },
+};
 
 export function RequestPreloadSection({
   getSnapshot,
   createPreloadRequestFn = createPreloadRequest,
+  variant = "default",
 }: RequestPreloadSectionProps) {
   const { isPermanent, authReady } = usePermanentAuthUser();
   const [note, setNote] = useState("");
@@ -31,6 +50,7 @@ export function RequestPreloadSection({
   const [error, setError] = useState<string | null>(null);
   const [successId, setSuccessId] = useState<string | null>(null);
   const inFlightRef = useRef(false);
+  const copy = COPY[variant];
 
   const canSubmit =
     authReady && isPermanent && !submitting && successId == null;
@@ -76,13 +96,9 @@ export function RequestPreloadSection({
           id="request-preload-heading"
           className="font-display text-xs font-semibold uppercase tracking-[0.1em] text-ink-dim"
         >
-          Request location preload
+          {copy.heading}
         </p>
-        <p className="text-xs leading-snug text-ink-muted">
-          Ask us to review this custom preset for the same pack-style place
-          data recommended cities get. Requests are reviewed manually and are
-          not instant.
-        </p>
+        <p className="text-xs leading-snug text-ink-muted">{copy.body}</p>
       </div>
 
       {!authReady ? (
