@@ -3,12 +3,14 @@ import { LOCAL_SESSION_ID, type SessionRecord } from "../../domain/map/annotatio
 import { useSessionExit } from "../session/useSessionExit";
 import { resetSessionForRematch } from "../../services/session/sessionRematch";
 import { mapRematchError } from "../../services/session/sessionRematchErrors";
+import { teardownSessionUiState } from "../../services/session/sessionCleanup";
 import { clearLiveLocationOnLeave } from "../../services/session/clearLiveLocationOnLeave";
 import {
   allowPlayerLocationPublishes,
   blockPlayerLocationPublishes,
 } from "../../services/session/playerLocationPublishGate";
 import { ensureAnonymousUser } from "../../services/core/firebase/firebase";
+import { useTimerStore } from "../../state/timerStore";
 import { useGameOver } from "./useGameOver";
 
 interface GameOverOverlay {
@@ -35,6 +37,8 @@ export function useGameOverActions(
     setRematchPending(true);
     try {
       await resetSessionForRematch(rematchSessionId);
+      teardownSessionUiState();
+      useTimerStore.getState().clearTimer(rematchSessionId);
     } catch (error) {
       setRematchError(mapRematchError(error));
     } finally {

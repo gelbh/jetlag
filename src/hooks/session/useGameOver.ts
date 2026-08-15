@@ -54,6 +54,12 @@ export function useGameOver(session: SessionRecord | null | undefined) {
     subscriptionKey != null && failedSubscriptionKey === subscriptionKey;
 
   useEffect(() => {
+    if (!subscribed) {
+      setRemoteResult(null);
+    }
+  }, [subscribed]);
+
+  useEffect(() => {
     if (!subscribed || !sessionId || !gameResultId) {
       return;
     }

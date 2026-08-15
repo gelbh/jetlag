@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { LOCAL_SESSION_ID, migrateAnnotations } from "../../domain/map/annotations";
 import { getPowerProfile } from "../../domain/device/power/powerProfile";
+import { filterAnnotationsAfterReset } from "../../domain/session/meta/sessionReset";
 import { useAnnotationStore, useMapStore, useSessionStore } from "../../state/sessionStore";
 import {
   getFirestoreDb,
@@ -164,6 +165,12 @@ export function useSessionSync({ syncEnabled = true }: UseSessionSyncOptions = {
     const unsubscribe = subscribeToRemoteAnnotations(
       sessionId,
       (annotations) => {
+        const sessionResetAt =
+          useSessionStore.getState().session?.sessionResetAt;
+        const filtered = filterAnnotationsAfterReset(
+          annotations,
+          sessionResetAt,
+        );
         const previous = useAnnotationStore.getState().annotations;
         const previousById = new Map(
           previous.map((annotation) => [annotation.id, annotation]),
@@ -171,11 +178,11 @@ export function useSessionSync({ syncEnabled = true }: UseSessionSyncOptions = {
 
         if (!hasBaseline) {
           hasBaseline = true;
-          replaceAnnotations(migrateAnnotations(annotations));
+          replaceAnnotations(migrateAnnotations(filtered));
           return;
         }
 
-        for (const annotation of annotations) {
+        for (const annotation of filtered) {
           const prior = previousById.get(annotation.id);
           if (
             prior &&
@@ -193,9 +200,9 @@ export function useSessionSync({ syncEnabled = true }: UseSessionSyncOptions = {
           previous.map((annotation) => annotation.id),
         );
 
-        replaceAnnotations(migrateAnnotations(annotations));
+        replaceAnnotations(migrateAnnotations(filtered));
 
-        annotations.forEach((annotation) => {
+        filtered.forEach((annotation) => {
           if (
             !previousIds.has(annotation.id) &&
             annotation.status === "active"
