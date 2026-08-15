@@ -56,7 +56,9 @@ test.describe("hider flows", () => {
     });
     await selectTransitStation(guestPage, "Dublin Central");
     await confirmHidingZone(guestPage);
-    await expect(guestPage.getByText(/different location/i)).toBeVisible();
+    await expect(
+      guestPage.getByTestId("ask-commit-strip").getByText(/different location/i),
+    ).toBeVisible();
 
     await selectTransitStation(guestPage, "North Station");
     await confirmHidingZone(guestPage);

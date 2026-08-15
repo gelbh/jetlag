@@ -1,7 +1,6 @@
 import { type Page, expect } from "@playwright/test";
 import {
   clickMapAt,
-  clickMapCenter,
   clickToolDockButton,
   expectEliminationMaskVisible,
   expectMapHasAnnotations,
@@ -61,7 +60,9 @@ export async function retreatWizard(page: Page) {
 
 /** Clicks an answer option and verifies the tap registered (aria-pressed). */
 export async function chooseAnswer(page: Page, name: string) {
-  const option = page.getByRole("button", { name, exact: true });
+  const option = page
+    .getByTestId("ask-hud-host")
+    .getByRole("button", { name, exact: true });
   await expect(option).toBeEnabled({ timeout: 15_000 });
   await option.click();
   await expect(option).toHaveAttribute("aria-pressed", "true");
@@ -71,6 +72,44 @@ export async function waitForMapPlacementCrosshair(page: Page) {
   await expect(page.locator(".map-crosshair")).toBeVisible({
     timeout: 15_000,
   });
+}
+
+/**
+ * Ask HUD covers the lower map on mobile; geometric center clicks often miss.
+ * Prefer mocked GPS ("Use my location") when AnchorControls / PlacementActions
+ * is shown. Measuring/tentacle advance the chord after place (GPS control
+ * unmounts); radar/matching keep "Location locked" in-panel.
+ */
+export async function placeAskAnchor(page: Page) {
+  const hud = page.getByTestId("ask-hud-host");
+  await expect(hud).toBeVisible({ timeout: 15_000 });
+  const gps = hud.getByRole("button", { name: /Use my location/i });
+  await expect(gps).toBeVisible({ timeout: 15_000 });
+  await gps.click();
+  await expect
+    .poll(
+      async () => {
+        const locked =
+          (await hud
+            .getByText(
+              /Location locked|pinned on the map|Anchor set|Anchor ·/i,
+            )
+            .count()) > 0;
+        if (locked) return true;
+        // Chord advanced past placement (GPS control gone).
+        return (
+          (await hud.getByRole("button", { name: /Use my location/i }).count()) ===
+          0
+        );
+      },
+      { timeout: 15_000 },
+    )
+    .toBe(true);
+}
+
+/** Map tap in the upper visible band above Ask HUD chrome (fallback / second pin). */
+export async function clickMapAboveAskHud(page: Page, xRatio = 0.5) {
+  await clickMapAt(page, xRatio, 0.22);
 }
 
 export async function waitForGeoLoadingIdle(page: Page) {
@@ -117,8 +156,7 @@ export async function selectFirstRadarDistance(page: Page) {
 export async function completeRadarSolo(page: Page) {
   await clickToolDockButton(page, "Radar");
   await expectAskHud(page);
-  await waitForMapPlacementCrosshair(page);
-  await clickMapCenter(page);
+  await placeAskAnchor(page);
   await selectFirstRadarDistance(page);
   await chooseAnswer(page, "Yes");
   await clickPrimedAsk(page);
@@ -129,7 +167,7 @@ export async function completeRadarSolo(page: Page) {
 export async function sendRadarToHiders(page: Page) {
   await clickToolDockButton(page, "Radar");
   await expectAskHud(page);
-  await clickMapCenter(page);
+  await placeAskAnchor(page);
   await selectFirstRadarDistance(page);
   await waitForSendToHiders(page);
   await page.getByRole("button", { name: SEND_TO_HIDERS_BUTTON }).click();
@@ -146,8 +184,7 @@ export async function completeMatchingSolo(page: Page) {
   await clickToolDockButton(page, "Matching");
   await expectAskHud(page);
   await pickCatalogRow(page, /Museum/i);
-  await waitForMapPlacementCrosshair(page);
-  await clickMapCenter(page);
+  await placeAskAnchor(page);
   await waitForGeoLoadingIdle(page);
   await chooseAnswer(page, "Yes");
   await clickPrimedAsk(page);
@@ -160,8 +197,7 @@ export async function sendMatchingToHiders(page: Page) {
   await clickToolDockButton(page, "Matching");
   await expectAskHud(page);
   await pickCatalogRow(page, /Museum/i);
-  await waitForMapPlacementCrosshair(page);
-  await clickMapCenter(page);
+  await placeAskAnchor(page);
   await waitForGeoLoadingIdle(page);
   await waitForSendToHiders(page);
   await page.getByRole("button", { name: SEND_TO_HIDERS_BUTTON }).click();
@@ -171,10 +207,9 @@ export async function sendMatchingToHiders(page: Page) {
 export async function completeMeasuringSolo(page: Page) {
   await clickToolDockButton(page, "Measuring");
   await expectAskHud(page);
-  await waitForMapPlacementCrosshair(page);
-  await clickMapCenter(page);
+  await placeAskAnchor(page);
   await pickCatalogRow(page, /Museum|Transit|Park/i);
-  await clickMapAt(page, 0.6, 0.4);
+  await clickMapAboveAskHud(page, 0.65);
   await waitForGeoLoadingIdle(page);
   await chooseAnswer(page, "Closer");
   await clickPrimedAsk(page);
@@ -185,11 +220,10 @@ export async function completeMeasuringSolo(page: Page) {
 export async function sendMeasuringToHiders(page: Page) {
   await clickToolDockButton(page, "Measuring");
   await expectAskHud(page);
-  await waitForMapPlacementCrosshair(page);
-  await clickMapCenter(page);
+  await placeAskAnchor(page);
   await pickCatalogRow(page, /Museum|Transit|Park/i);
   await waitForGeoLoadingIdle(page);
-  await clickMapAt(page, 0.6, 0.4);
+  await clickMapAboveAskHud(page, 0.65);
   await waitForGeoLoadingIdle(page);
   await waitForSendToHiders(page);
   await page.getByRole("button", { name: SEND_TO_HIDERS_BUTTON }).click();
@@ -209,8 +243,8 @@ async function placeThermometerManualPins(page: Page) {
     btn.click();
   });
   await waitForMapPlacementCrosshair(page);
-  await clickMapAt(page, 0.2, 0.5);
-  await clickMapAt(page, 0.8, 0.5);
+  await clickMapAboveAskHud(page, 0.25);
+  await clickMapAboveAskHud(page, 0.75);
   await expect(
     page.getByText("Movement is shorter than the selected distance."),
   ).toHaveCount(0);
@@ -237,8 +271,7 @@ export async function completeTentacleSolo(page: Page) {
   await clickToolDockButton(page, "Tentacles");
   await expectAskHud(page);
   await pickCatalogRow(page, /Museum|Transit|Park/i);
-  await waitForMapPlacementCrosshair(page);
-  await clickMapCenter(page);
+  await placeAskAnchor(page);
   await waitForGeoLoadingIdle(page);
   await chooseAnswer(page, "City Museum");
   await clickPrimedAsk(page);
@@ -251,8 +284,7 @@ export async function sendTentacleToHiders(page: Page) {
   await clickToolDockButton(page, "Tentacles");
   await expectAskHud(page);
   await pickCatalogRow(page, /Museum|Transit|Park/i);
-  await waitForMapPlacementCrosshair(page);
-  await clickMapCenter(page);
+  await placeAskAnchor(page);
   await waitForGeoLoadingIdle(page);
   await waitForSendToHiders(page);
   await page.getByRole("button", { name: SEND_TO_HIDERS_BUTTON }).click();
