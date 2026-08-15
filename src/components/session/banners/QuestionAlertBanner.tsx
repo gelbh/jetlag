@@ -67,12 +67,12 @@ export function QuestionAlertBanner({
   return (
     <HudBanner
       visible={visible}
-      className="pointer-events-auto mx-3 mt-1.5"
+      className="pointer-events-auto absolute inset-x-3 top-[var(--map-banner-top)] z-[var(--z-banner)]"
     >
       {target && visible ? (
         <div
           data-testid="question-alert-banner"
-          className="max-h-[40vh] overflow-y-auto rounded-xl border-2 border-highlight bg-surface-deep px-3 py-3 text-left shadow-lg"
+          className="jl-scroll max-h-[40vh] overflow-y-auto rounded-xl border-2 border-highlight bg-surface-deep px-3 py-3 text-left shadow-lg"
           role="region"
           aria-label="Open question"
         >

@@ -22,8 +22,6 @@ export interface HiderPendingQuestionAnswerProps {
   truth: HiderTruthResult | null;
   truthsLoading: boolean;
   truthReferenceMode: HiderTruthReferenceMode;
-  answerError?: string | null;
-  showAnswerError?: boolean;
   nowMs: number;
   onAnswerQuestion: (
     pendingQuestionId: string,
@@ -121,15 +119,19 @@ export function HiderPendingQuestionAnswer({
           truth={truth}
           loading={truthsLoading}
           truthReferenceMode={truthReferenceMode}
-          onSelect={(option) =>
+          onSelect={(option) => {
+            const pendingQuestionId = message.pendingQuestionId;
+            if (!pendingQuestionId) {
+              return;
+            }
             void onAnswerQuestion(
-              message.pendingQuestionId!,
+              pendingQuestionId,
               message.id,
               option.id === "null" ? null : option.id,
               option.id,
               expired,
-            )
-          }
+            );
+          }}
         />
       ) : null}
     </>

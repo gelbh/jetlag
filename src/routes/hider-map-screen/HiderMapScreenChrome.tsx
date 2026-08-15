@@ -334,17 +334,6 @@ export function HiderMapScreenChrome({
         reveal={truthReveal}
         onDismiss={onDismissTruthReveal}
       />
-      <QuestionAlertBanner
-        pendingQuestions={pendingQuestions}
-        messages={messages}
-        sessionRules={session}
-        sessionId={chat.sessionId || session.id}
-        questionTruths={chat.questionTruths}
-        truthsLoading={chat.truthsLoading}
-        truthReferenceModes={chat.truthReferenceModes}
-        answerError={chat.answerError}
-        onAnswerQuestion={chat.onAnswerQuestion}
-      />
       <MapStatusRail
         sessionCode={session.code}
         sessionId={session.id}
@@ -478,6 +467,18 @@ export function HiderMapScreenChrome({
           playerRole={roleConfig.statusPlayerRole}
           myUid={uid ?? undefined}
           actions={gameOverActions}
+        />
+
+        <QuestionAlertBanner
+          pendingQuestions={pendingQuestions}
+          messages={messages}
+          sessionRules={session}
+          sessionId={chat.sessionId || session.id}
+          questionTruths={chat.questionTruths}
+          truthsLoading={chat.truthsLoading}
+          truthReferenceModes={chat.truthReferenceModes}
+          answerError={chat.answerError}
+          onAnswerQuestion={chat.onAnswerQuestion}
         />
 
         {zoneTool.wizardOpen && !sheetBlocksWizard ? (

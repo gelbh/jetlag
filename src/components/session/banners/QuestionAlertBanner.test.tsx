@@ -88,6 +88,20 @@ describe("QuestionAlertBanner", () => {
     expect(screen.queryByRole("button", { name: /dismiss/i })).toBeNull();
   });
 
+  it("anchors below the status rail with map-banner-top", () => {
+    const { container } = render(
+      <QuestionAlertBanner
+        pendingQuestions={[radarPending]}
+        messages={[radarMessage]}
+        sessionRules={{ gameSize: "medium" }}
+        sessionId="s1"
+        onAnswerQuestion={vi.fn()}
+      />,
+    );
+
+    expect(container.innerHTML).toContain("--map-banner-top");
+  });
+
   it("shows walking status without answer buttons", () => {
     render(
       <QuestionAlertBanner
