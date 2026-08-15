@@ -31,7 +31,7 @@ export const MEASURING_LINEAR_OVER_BUDGET_MESSAGE =
   "Those borders are too detailed for this play area. Try a smaller area or another category.";
 
 export const MEASURING_OUTPUT_OVER_BUDGET_MESSAGE =
-  "This measure region is too complex for the map. Try a shorter distance or fewer places.";
+  "This measure is too complex for this play area. Try a shorter distance or a smaller area.";
 
 /** Escalating Turf simplify tolerances — soften toward the output cap, then gate. */
 const OUTPUT_SIMPLIFY_TOLERANCES = [0.000012, 0.00005, 0.0002, 0.001] as const;

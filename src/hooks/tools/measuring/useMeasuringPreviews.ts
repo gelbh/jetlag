@@ -129,6 +129,8 @@ export function useMeasuringPreviews(
         return;
       }
 
+      // Soften display copies only — elim must rebuild from raw near (commit/resolve parity).
+      let displayNear = near;
       if (near) {
         const softenedNear = softenMeasuringOutputToBudget(near);
         if (!softenedNear.ok) {
@@ -137,11 +139,11 @@ export function useMeasuringPreviews(
           setMeasuringError(softenedNear.message);
           return;
         }
-        near = softenedNear.feature;
+        displayNear = softenedNear.feature;
       }
 
       // Clear stale elimination while the matching elim rebuild runs.
-      setMeasuringNearRegion(near);
+      setMeasuringNearRegion(displayNear);
       setMeasuringEliminationPreview(null);
 
       try {
@@ -154,6 +156,7 @@ export function useMeasuringPreviews(
         }
         if (!elimination) {
           setMeasuringEliminationPreview(null);
+          setMeasuringError(null);
           return;
         }
         const softenedElim = softenMeasuringOutputToBudget(elimination);
@@ -164,6 +167,7 @@ export function useMeasuringPreviews(
           return;
         }
         setMeasuringEliminationPreview(softenedElim.feature);
+        setMeasuringError(null);
       } catch {
         if (generation === generationRef.current) {
           setMeasuringEliminationPreview(null);
