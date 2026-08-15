@@ -3,6 +3,32 @@ import { isSessionMember } from "../proxies/verifyProxyAccess.mjs";
 
 export const REMATCH_SESSION_NOT_FOUND = "REMATCH_SESSION_NOT_FOUND";
 export const REMATCH_NOT_MEMBER = "REMATCH_NOT_MEMBER";
+export const REMATCH_NOT_OVER = "REMATCH_NOT_OVER";
+
+export function isRematchRoundComplete(session) {
+  return (
+    typeof session?.foundConfirmedAt === "string" ||
+    session?.gameOutcome === "found" ||
+    session?.gameOutcome === "ended_early" ||
+    session?.gameOutcome === "abandoned"
+  );
+}
+
+export function isRematchIdle(session) {
+  const timerStopped =
+    session?.timerRunningSince == null ||
+    session?.timerRunningSince === undefined;
+  const accumulated =
+    typeof session?.timerAccumulatedMs === "number"
+      ? session.timerAccumulatedMs
+      : 0;
+  return (
+    !isRematchRoundComplete(session) &&
+    typeof session?.sessionResetAt === "string" &&
+    timerStopped &&
+    accumulated === 0
+  );
+}
 
 function swapSeekerHiderRoles(memberRoles) {
   if (!memberRoles || typeof memberRoles !== "object") {
@@ -51,10 +77,14 @@ export function swapRoleGateLeaders(roleGates) {
 }
 
 export async function resetSessionForRematchHandler(db, uid, sessionId) {
+  await runRematchSessionTransaction(db, uid, sessionId);
+}
+
+async function runRematchSessionTransaction(db, uid, sessionId) {
   const sessionRef = db.collection("sessions").doc(sessionId);
   const anchorsRef = sessionRef.collection("endGameTruth").doc("anchors");
 
-  await db.runTransaction(async (transaction) => {
+  return db.runTransaction(async (transaction) => {
     // All reads before any writes (Admin SDK READ_AFTER_WRITE).
     const sessionSnap = await transaction.get(sessionRef);
     if (!sessionSnap.exists) {
@@ -65,6 +95,13 @@ export async function resetSessionForRematchHandler(db, uid, sessionId) {
     // memberUids is membership SoT (same as verifyProxyAccess / rules).
     if (!isSessionMember(session, uid)) {
       throw new Error(REMATCH_NOT_MEMBER);
+    }
+
+    if (!isRematchRoundComplete(session)) {
+      if (isRematchIdle(session)) {
+        return "idle";
+      }
+      throw new Error(REMATCH_NOT_OVER);
     }
 
     const roundNumber =
@@ -120,5 +157,6 @@ export async function resetSessionForRematchHandler(db, uid, sessionId) {
     }
 
     transaction.update(sessionRef, update);
+    return "swapped";
   });
 }

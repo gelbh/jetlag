@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { FieldValue } from "firebase-admin/firestore";
 import {
   REMATCH_NOT_MEMBER,
+  REMATCH_NOT_OVER,
   REMATCH_SESSION_NOT_FOUND,
   resetSessionForRematchHandler,
 } from "../session/resetSessionForRematch.mjs";
@@ -128,6 +129,51 @@ test("member rematch swaps roles, roleGates leaders, clears end-game truth ancho
   assert.equal(patch.gameResultId, FieldValue.delete());
   assert.ok(deletes.includes("sessions/sess-1/endGameTruth/anchors"));
   assert.equal(sets.length, 1);
+});
+
+test("mid-round rematch is denied", async () => {
+  const updates = [];
+  const db = mockRematchDb({
+    sessionData: {
+      status: "active",
+      hostUid: "host",
+      memberUids: ["host", "guest"],
+      memberRoles: { host: "seeker", guest: "hider" },
+      timerAccumulatedMs: 12_000,
+      timerRunningSince: "2026-08-15T12:00:00.000Z",
+    },
+    updates,
+    deletes: [],
+    sets: [],
+  });
+  await assert.rejects(
+    () => resetSessionForRematchHandler(db, "host", "sess-1"),
+    (error) => error instanceof Error && error.message === REMATCH_NOT_OVER,
+  );
+  assert.equal(updates.length, 0);
+});
+
+test("second rematch while idle does not swap roles again", async () => {
+  const updates = [];
+  const sessionData = {
+    status: "active",
+    hostUid: "host",
+    memberUids: ["host", "guest"],
+    memberRoles: { host: "hider", guest: "seeker" },
+    roleGates: { version: 1, leaders: { seeker: "guest", hider: "host" } },
+    roundNumber: 1,
+    sessionResetAt: "2026-08-15T12:01:00.000Z",
+    timerAccumulatedMs: 0,
+  };
+  const db = mockRematchDb({
+    sessionData,
+    updates,
+    deletes: [],
+    sets: [],
+    anchorsExists: false,
+  });
+  await resetSessionForRematchHandler(db, "guest", "sess-1");
+  assert.equal(updates.length, 0);
 });
 
 test("stale memberRoles without memberUids cannot rematch", async () => {
