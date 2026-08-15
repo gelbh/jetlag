@@ -56,6 +56,10 @@ export function useThermometerWalk({
     highAccuracy: true,
     minIntervalMs: 750,
     minDistanceMeters: 3,
+    maximumAge: 0,
+    // Playwright/CDP geolocation overrides often leave watchPosition quiet;
+    // poll fresh samples so walk distance advances in e2e and sticky WebViews.
+    pollIntervalMs: 500,
   });
 
   const distanceTraveledMeters = useMemo(() => {

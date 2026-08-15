@@ -1,5 +1,9 @@
 import { type Page, expect } from "@playwright/test";
 import {
+  installE2eGeolocationDriver,
+  stepE2eGeolocation,
+} from "../geolocation";
+import {
   clickMapAt,
   clickToolDockButton,
   expectEliminationMaskVisible,
@@ -109,7 +113,8 @@ export async function placeAskAnchor(page: Page) {
 
 /** Map tap in the upper visible band above Ask HUD chrome (fallback / second pin). */
 export async function clickMapAboveAskHud(page: Page, xRatio = 0.5) {
-  await clickMapAt(page, xRatio, 0.22);
+  // Stay in the upper-mid band — very top hits chrome; mid-map clears the HUD.
+  await clickMapAt(page, xRatio, 0.32);
 }
 
 export async function waitForGeoLoadingIdle(page: Page) {
@@ -135,8 +140,11 @@ async function waitForSendToHiders(page: Page) {
 
 async function clickPrimedAsk(page: Page) {
   await waitForPrimedCommit(page);
-  const ask = page.getByRole("button", { name: /^ASK(?: ·|$)/ });
+  const ask = page.getByTestId("ask-commit-strip").getByRole("button");
   await ask.click();
+  await expect(page.getByTestId("ask-hud-host")).toBeHidden({
+    timeout: 30_000,
+  });
 }
 
 export async function dismissActiveToolPanel(page: Page) {
@@ -220,9 +228,12 @@ export async function completeMeasuringSolo(page: Page) {
   await clickToolDockButton(page, "Measuring");
   await expectAskHud(page);
   await placeAskAnchor(page);
-  await pickCatalogRow(page, /Museum|Transit|Park/i);
-  await clickMapAboveAskHud(page, 0.65);
+  await pickCatalogRow(page, /Museum/i);
+  await clickMapAboveAskHud(page, 0.72);
   await waitForGeoLoadingIdle(page);
+  await expect(
+    page.getByTestId("ask-hud-host").getByText(/\d+(\.\d+)?\s*(mi|km|m)\b/i),
+  ).toBeVisible({ timeout: 30_000 });
   await chooseAnswer(page, "Closer");
   await clickPrimedAsk(page);
   await expectMapHasAnnotations(page);
@@ -245,28 +256,47 @@ export async function sendMeasuringToHiders(page: Page) {
   });
 }
 
-async function placeThermometerManualPins(page: Page) {
+/**
+ * Thermometer placement via GPS walk — Ask HUD blocks reliable MapLibre pin taps
+ * under the chrome stack. In-page geolocation driver notifies watchers (CDP
+ * override alone often leaves watchPosition quiet).
+ */
+async function placeThermometerGpsWalk(page: Page) {
+  await installE2eGeolocationDriver(page);
   await clickToolDockButton(page, "Thermometer");
   await expectAskHud(page);
-  await page.evaluate(() => {
-    const btn = [...document.querySelectorAll("button")].find(
-      (el) => el.textContent?.trim() === "Manual pins",
-    );
-    if (!(btn instanceof HTMLButtonElement)) {
-      throw new Error("Manual pins control not found");
-    }
-    btn.click();
+  const hud = page.getByTestId("ask-hud-host");
+  const gpsChip = hud.getByRole("button", { name: /^GPS track$/i });
+  if ((await gpsChip.getAttribute("aria-pressed")) !== "true") {
+    await gpsChip.click();
+  }
+  await hud.getByRole("button", { name: /^Start track$/i }).click();
+  await expect(page.getByTestId("ask-walk-banner")).toBeVisible({
+    timeout: 20_000,
   });
-  await waitForMapPlacementCrosshair(page);
-  await clickMapAboveAskHud(page, 0.25);
-  await clickMapAboveAskHud(page, 0.75);
-  await expect(
-    page.getByText("Movement is shorter than the selected distance."),
-  ).toHaveCount(0);
+
+  // Step north past the default ½ mi thermometer distance (≈804 m).
+  // Poll/throttle windows in useThermometerWalk are ~500–750ms.
+  for (const lat of [53.355, 53.36, 53.365, 53.37]) {
+    await stepE2eGeolocation(page, { latitude: lat, longitude: -6.26 });
+    await page.waitForTimeout(1_100);
+  }
+
+  const endWalk = page
+    .getByTestId("ask-commit-strip")
+    .getByRole("button", { name: /^END WALK/i });
+  // Auto-stop may already have finished the walk once travel ≥ target.
+  if (await endWalk.isVisible().catch(() => false)) {
+    await expect(endWalk).toBeEnabled({ timeout: 20_000 });
+    await endWalk.click();
+  }
+  await expect(page.getByTestId("ask-walk-banner")).toBeHidden({
+    timeout: 30_000,
+  });
 }
 
 export async function completeThermometerSolo(page: Page) {
-  await placeThermometerManualPins(page);
+  await placeThermometerGpsWalk(page);
   await chooseAnswer(page, "Hotter");
   await clickPrimedAsk(page);
   await expectMapHasAnnotations(page);
@@ -274,14 +304,11 @@ export async function completeThermometerSolo(page: Page) {
 }
 
 export async function sendThermometerToHiders(page: Page) {
-  await placeThermometerManualPins(page);
-  const sendButton = page.getByRole("button", { name: SEND_TO_HIDERS_BUTTON });
-  await expect(sendButton).toHaveCount(1);
-  await expect(sendButton).toBeEnabled({ timeout: 15_000 });
-  await sendButton.click();
-  await dismissActiveToolPanel(page);
+  // GPS walk start submits the pending question; walk end publishes reply options.
+  // There is no separate SEND · DnPm strip after a multiplayer thermometer walk.
+  await placeThermometerGpsWalk(page);
   await expect(page.getByTestId("ask-hud-host")).toBeHidden({
-    timeout: 15_000,
+    timeout: 30_000,
   });
 }
 

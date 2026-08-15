@@ -28,14 +28,16 @@ export async function clickMapAt(
   xRatio: number,
   yRatio: number,
 ) {
-  const map = page.locator(MAP_CONTAINER_SELECTOR).first();
-  await map.waitFor();
-  const box = await map.boundingBox();
+  // Prefer the WebGL canvas — MapLibre listens there; parent .maplibregl-map
+  // clicks can miss the handler under Ask HUD stacking.
+  const canvas = page.locator(`${MAP_CONTAINER_SELECTOR} canvas`).first();
+  await canvas.waitFor({ state: "visible", timeout: 15_000 });
+  const box = await canvas.boundingBox();
   if (!box) {
-    throw new Error("Map container is not visible.");
+    throw new Error("Map canvas is not visible.");
   }
 
-  await map.click({
+  await canvas.click({
     position: {
       x: Math.floor(box.width * xRatio),
       y: Math.floor(box.height * yRatio),
