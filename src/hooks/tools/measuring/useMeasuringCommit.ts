@@ -17,7 +17,10 @@ import { closerFurtherAnswerOptions } from "@/components/tools/shared/answers/bi
 import type { SubmitPendingQuestionInput } from "../../sync/usePendingQuestionActions";
 import { MAP_ANNOTATION_COLORS } from "@/domain/map/mapAnnotationColors";
 import { emitQuestionAnsweredActivity } from "@/services/session/emitSessionActivity";
-import { assertMeasuringGeometryBudget } from "@/domain/geometry/measuring/measuringGeometryBudgets";
+import {
+  assertMeasuringGeometryBudget,
+  softenMeasuringOutputToBudget,
+} from "@/domain/geometry/measuring/measuringGeometryBudgets";
 import { buildStoredMeasuringRegionInput } from "./helpers";
 import type { MeasuringDraftState } from "./useMeasuringDraftState";
 import type { MeasuringPreviews } from "./useMeasuringPreviews";
@@ -210,7 +213,12 @@ export function useMeasuringCommit({
       return;
     }
 
-    const { elimination } = regions;
+    const softenedElim = softenMeasuringOutputToBudget(regions.elimination);
+    if (!softenedElim.ok) {
+      setMeasuringError(softenedElim.message);
+      return;
+    }
+    const elimination = softenedElim.feature;
 
     const metadata: AnnotationRecord["metadata"] = {
       createdAt: new Date().toISOString(),
