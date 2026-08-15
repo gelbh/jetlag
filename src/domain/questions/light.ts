@@ -7,7 +7,9 @@ export * from "./photoQuestions";
 export * from "./photoUploadAccess";
 export * from "./questionRules";
 export * from "./questionTimerDisplay";
+export * from "./selectPrimaryHiderAnswerTarget";
 export * from "./radarQuestions";
+
 export * from "./tentacleQuestions";
 export * from "./thermometerQuestions";
 export * from "./thermometerWalk";
