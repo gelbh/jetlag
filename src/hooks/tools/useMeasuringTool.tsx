@@ -1,14 +1,18 @@
-import { useEffect, useMemo, useRef } from "react";
+import { startTransition, useEffect, useMemo, useRef } from "react";
+import { MeasuringHudBody } from "@/components/tools/ask/MeasuringHudBody";
+import { QuestionPreviewSheet } from "@/components/tools/shared/controls/QuestionPreviewSheet";
+import type { AskHudReadiness } from "@/domain/ask/askHudModes";
 import { isActive } from "../../domain/map/annotations";
 import {
   measuringFromKind,
   measuringFromKindUseCount,
   measuringFromKindUseCountFromPending,
+  measuringQuestionFor,
+  type MeasuringFromKind,
 } from "../../domain/questions";
 import { questionCostBreakdown } from "../../domain/questions";
-import { adminBorderKindAvailability } from "../../services/geo/overpass/adminDivisionAvailability";
 import { firstUnusedCatalogOption } from "../../domain/session/tools/toolSessionOptions";
-import type { MeasuringFromKind } from "../../domain/questions";
+import { adminBorderKindAvailability } from "../../services/geo/overpass/adminDivisionAvailability";
 import { useToolSession } from "./framework/useToolSession";
 import { useToolSessionOptions } from "./useToolSessionOptions";
 import { MeasuringToolPanel } from "./measuring/MeasuringToolPanel";
@@ -138,6 +142,32 @@ export function useMeasuringTool({
     placementCrosshair,
   );
 
+  const measuringSeekerPoint = draft.measuringSeekerPoint;
+  const measuringOptionChosen = draft.measuringOptionChosen;
+  const setWizardStep = draft.setWizardStep;
+
+  // Drive map-click routing without mounting MeasuringPanel wizard.
+  useEffect(() => {
+    if (!measuringSeekerPoint) {
+      setWizardStep("place");
+      return;
+    }
+    if (!measuringOptionChosen) {
+      setWizardStep("source");
+      return;
+    }
+    if (!hasMeasuringTarget) {
+      setWizardStep("target");
+      return;
+    }
+    setWizardStep("ask");
+  }, [
+    hasMeasuringTarget,
+    measuringOptionChosen,
+    measuringSeekerPoint,
+    setWizardStep,
+  ]);
+
   const questionCost = useMemo(() => {
     const useCount = Math.max(
       measuringFromKindUseCount(activeAnnotations, draft.measureFromKind),
@@ -176,6 +206,115 @@ export function useMeasuringTool({
     />
   );
 
+  const readiness: AskHudReadiness = {
+    surface: "measuring",
+    placementReady: draft.measuringSeekerPoint !== null,
+    configureReady: draft.measuringOptionChosen,
+    resolveReady: hasMeasuringTarget,
+    answerReady: awaitHiderAnswer || draft.measuringAnswer !== null,
+    awaitHiderAnswer,
+    isSubmitting: session.isBusy,
+    viewOnly: !canSubmitQuestion,
+  };
+
+  const hud = {
+    readiness,
+    costLabel: questionCost.label,
+    error: draft.measuringError ?? gpsError ?? mapError ?? null,
+    onCommit: () => void commit(),
+    modeBody: (
+      <MeasuringHudBody
+        distanceUnit={distanceUnit}
+        optionChosen={draft.measuringOptionChosen}
+        usedMeasuringFromKinds={draft.usedMeasuringFromKindsSet}
+        catalogOptions={draft.measuringCatalog}
+        anchorLat={draft.measuringSeekerPoint?.[0] ?? null}
+        anchorLng={draft.measuringSeekerPoint?.[1] ?? null}
+        measureFrom={measuringFromKind(
+          draft.measuringSubject,
+          draft.measuringLocationCategory,
+        )}
+        subject={draft.measuringSubject}
+        targetMode={draft.measuringTargetMode}
+        usesAllPlacesInArea={draft.usesAllPlacesInArea}
+        hasSeekerPoint={draft.measuringSeekerPoint !== null}
+        hasTargetPoint={hasMeasuringTarget}
+        anchorAltitudeMeters={draft.measuringAnchorElevationMeters}
+        seekerPlaceName={draft.measuringSeekerPlaceName}
+        targetPlaceName={draft.measuringTargetPlaceName}
+        distanceMeters={draft.measuringDistanceMeters}
+        loading={draft.measuringLoading}
+        gpsLoading={gpsLoading}
+        searchQuery={draft.measuringSearchQuery}
+        searchResults={draft.measuringSearchResults}
+        searchLoading={draft.measuringSearchLoading}
+        searchRole={draft.measuringSearchRole}
+        answer={draft.measuringAnswer}
+        seaLevelEdgeCase={draft.measuringSeaLevelEdgeCase}
+        error={draft.measuringError ?? gpsError ?? mapError}
+        onMeasureFromChange={loaders.handleMeasureFromChange}
+        onTargetModeChange={loaders.handleTargetModeChange}
+        onSearchQueryChange={draft.setMeasuringSearchQuery}
+        onSearchSubmit={(role) => void interactions.handleSearch(role)}
+        onSearchResultSelect={interactions.applySearchResult}
+        onUseGps={() => void interactions.handleGps()}
+        onFindCoastline={() => {
+          if (draft.measuringSeekerPoint) {
+            void loaders.loadMeasuringCoastlineAt(draft.measuringSeekerPoint);
+          }
+        }}
+        onRetrySeaLevel={() => {
+          if (draft.measuringSeekerPoint) {
+            void loaders.loadSeaLevelContextAt(draft.measuringSeekerPoint);
+          }
+        }}
+        onFindLinearFeature={() => {
+          if (draft.measuringSeekerPoint) {
+            void loaders.loadMeasuringLinearAt(draft.measuringSeekerPoint);
+          }
+        }}
+        onFindNearest={() => void interactions.loadNearest()}
+        onAnswerChange={(answer) => {
+          startTransition(() => draft.setMeasuringAnswer(answer));
+        }}
+        awaitHiderAnswer={awaitHiderAnswer}
+        costLabel={questionCost.label}
+        isSubmitting={session.isBusy}
+      />
+    ),
+    sheets: (
+      <QuestionPreviewSheet
+        open={draft.previewOpen}
+        prompt={
+          measuringQuestionFor(
+            draft.measuringSubject,
+            draft.measuringSubject === "location"
+              ? draft.measuringLocationCategory
+              : undefined,
+          ).prompt
+        }
+        ruleSummary={
+          measuringQuestionFor(
+            draft.measuringSubject,
+            draft.measuringSubject === "location"
+              ? draft.measuringLocationCategory
+              : undefined,
+          ).ruleSummary
+        }
+        anchorLat={draft.measuringSeekerPoint?.[0] ?? null}
+        anchorLng={draft.measuringSeekerPoint?.[1] ?? null}
+        costLabel={questionCost.label}
+        onConfirm={() =>
+          void session.runAction(async () => {
+            await performCommitRef.current();
+          })
+        }
+        onCancel={() => draft.setPreviewOpen(false)}
+        isSubmitting={session.isBusy}
+      />
+    ),
+  };
+
   return {
     draft: {
       measuringSeekerPoint: draft.measuringSeekerPoint,
@@ -193,5 +332,6 @@ export function useMeasuringTool({
     resetDraft: draft.resetDraft,
     commit,
     panel,
+    hud,
   };
 }
