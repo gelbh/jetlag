@@ -1,14 +1,16 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { LOCAL_SESSION_ID, type SessionRecord } from "../../domain/map/annotations";
 import { useSessionExit } from "../session/useSessionExit";
 import { resetSessionForRematch } from "../../services/session/sessionRematch";
 import { mapRematchError } from "../../services/session/sessionRematchErrors";
+import { teardownSessionUiState } from "../../services/session/sessionCleanup";
 import { clearLiveLocationOnLeave } from "../../services/session/clearLiveLocationOnLeave";
 import {
   allowPlayerLocationPublishes,
   blockPlayerLocationPublishes,
 } from "../../services/session/playerLocationPublishGate";
 import { ensureAnonymousUser } from "../../services/core/firebase/firebase";
+import { useTimerStore } from "../../state/timerStore";
 import { useGameOver } from "./useGameOver";
 
 interface GameOverOverlay {
@@ -26,6 +28,15 @@ export function useGameOverActions(
 
   const rematchSessionId = session?.id;
 
+  useEffect(() => {
+    /* eslint-disable react-hooks/set-state-in-effect -- hold rematch CTA until the game-over sheet unmounts */
+    if (!gameOver.roundComplete) {
+      setRematchPending(false);
+      setRematchError(null);
+    }
+    /* eslint-enable react-hooks/set-state-in-effect */
+  }, [gameOver.roundComplete]);
+
   const handleRematch = useCallback(async () => {
     if (!rematchSessionId || rematchSessionId === LOCAL_SESSION_ID) {
       return;
@@ -35,9 +46,10 @@ export function useGameOverActions(
     setRematchPending(true);
     try {
       await resetSessionForRematch(rematchSessionId);
+      teardownSessionUiState();
+      useTimerStore.getState().clearTimer(rematchSessionId);
     } catch (error) {
       setRematchError(mapRematchError(error));
-    } finally {
       setRematchPending(false);
     }
   }, [rematchSessionId]);

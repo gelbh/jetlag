@@ -54,6 +54,14 @@ export function useGameOver(session: SessionRecord | null | undefined) {
     subscriptionKey != null && failedSubscriptionKey === subscriptionKey;
 
   useEffect(() => {
+    /* eslint-disable react-hooks/set-state-in-effect -- drop stale game-over result when the round is no longer complete */
+    if (!subscribed) {
+      setRemoteResult(null);
+    }
+    /* eslint-enable react-hooks/set-state-in-effect */
+  }, [subscribed]);
+
+  useEffect(() => {
     if (!subscribed || !sessionId || !gameResultId) {
       return;
     }

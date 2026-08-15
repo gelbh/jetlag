@@ -33,6 +33,14 @@ describe("mapRematchError", () => {
     ).toMatch(/content blockers/i);
   });
 
+  it("maps round-not-over failed-precondition", () => {
+    expect(
+      mapRematchError(
+        new FirebaseError("functions/failed-precondition", "Round is not over."),
+      ),
+    ).toBe("Finish this round before rematching.");
+  });
+
   it("maps App Check unauthenticated to blocker guidance", () => {
     expect(
       mapRematchError(

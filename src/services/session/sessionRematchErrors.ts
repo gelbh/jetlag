@@ -40,6 +40,9 @@ export function mapRematchError(error: unknown): string {
         if (isAppCheckMessage(message)) {
           return APP_CHECK_MESSAGE;
         }
+        if (/round is not over/i.test(message)) {
+          return "Finish this round before rematching.";
+        }
         return FALLBACK;
       case "not-found":
         return "Session not found. It may have ended.";

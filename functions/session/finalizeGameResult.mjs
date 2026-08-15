@@ -139,6 +139,19 @@ export async function finalizeGameResultForSession(db, sessionId, session) {
   const sessionRef = db.collection("sessions").doc(sessionId);
 
   await db.runTransaction(async (transaction) => {
+    const liveSnap = await transaction.get(sessionRef);
+    const live = liveSnap.data() ?? {};
+    if (typeof live.gameResultId === "string" && live.gameResultId.length > 0) {
+      return;
+    }
+    const complete =
+      typeof live.foundConfirmedAt === "string" ||
+      live.gameOutcome === "found" ||
+      live.gameOutcome === "ended_early" ||
+      live.gameOutcome === "abandoned";
+    if (!complete) {
+      return;
+    }
     const gameResultRef = sessionRef.collection("gameResult").doc(gameResultId);
     transaction.set(gameResultRef, gameResult);
     transaction.update(sessionRef, { gameResultId });
