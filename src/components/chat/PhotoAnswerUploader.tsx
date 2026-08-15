@@ -17,6 +17,7 @@ interface PhotoAnswerUploaderProps {
   messageId: string;
   distanceUnit?: DistanceUnit;
   deadlineExpired?: boolean;
+  disabled?: boolean;
   onAnswerQuestion: (
     pendingQuestionId: string,
     messageId: string,
@@ -31,6 +32,7 @@ export function PhotoAnswerUploader({
   messageId,
   distanceUnit = "imperial",
   deadlineExpired = false,
+  disabled = false,
   onAnswerQuestion,
 }: PhotoAnswerUploaderProps) {
   const [submitting, setSubmitting] = useState(false);
@@ -40,8 +42,10 @@ export function PhotoAnswerUploader({
     ? photoRuleSummaryForUnit(categoryId, distanceUnit)
     : null;
 
+  const busy = submitting || disabled;
+
   const submitAnswer = async (answer: PhotoAnswer) => {
-    if (submitting) {
+    if (busy) {
       return;
     }
     setSubmitting(true);
@@ -75,7 +79,7 @@ export function PhotoAnswerUploader({
       ) : null}
       <button
         type="button"
-        disabled={submitting}
+        disabled={busy}
         onClick={() => void submitAnswer({ kind: "sent_externally" })}
         className="btn-primary min-h-11 w-full disabled:opacity-50"
       >
@@ -83,7 +87,7 @@ export function PhotoAnswerUploader({
       </button>
       <button
         type="button"
-        disabled={submitting}
+        disabled={busy}
         onClick={() => void submitAnswer({ kind: "cannot_answer" })}
         className="btn-secondary min-h-11 w-full disabled:opacity-50"
       >
