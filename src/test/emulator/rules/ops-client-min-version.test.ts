@@ -48,4 +48,42 @@ describe("firestore.rules — ops/clientMinVersion", () => {
       unauth.firestore().collection("ops").doc("clientMinVersion").get(),
     );
   });
+
+  it("allows admin create/update/delete; denies player and unauth writes", async () => {
+    const admin = rules.testEnv.authenticatedContext("admin-1", {
+      email: "gelbharttomer@gmail.com",
+      email_verified: true,
+    });
+    const player = rules.testEnv.authenticatedContext("player-1");
+    const unauth = rules.testEnv.unauthenticatedContext();
+    const payload = {
+      minVersion: "0.11.0",
+      updatedAt: "2026-08-15T12:00:00.000Z",
+    };
+
+    await assertSucceeds(
+      admin.firestore().collection("ops").doc("clientMinVersion").set(payload),
+    );
+    await assertSucceeds(
+      admin.firestore().collection("ops").doc("clientMinVersion").set({
+        ...payload,
+        minVersion: "0.12.0",
+      }),
+    );
+    await assertFails(
+      player.firestore().collection("ops").doc("clientMinVersion").set(payload),
+    );
+    await assertFails(
+      unauth.firestore().collection("ops").doc("clientMinVersion").set(payload),
+    );
+    await assertFails(
+      player.firestore().collection("ops").doc("clientMinVersion").delete(),
+    );
+    await assertSucceeds(
+      admin.firestore().collection("ops").doc("clientMinVersion").delete(),
+    );
+    await assertFails(
+      unauth.firestore().collection("ops").doc("clientMinVersion").delete(),
+    );
+  });
 });

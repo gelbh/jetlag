@@ -121,9 +121,10 @@ describe("mapLibreIconRegistry", () => {
         "Cannot read properties of undefined (reading 'getImage')",
       );
     });
+    const addImage = vi.fn();
     const map = {
       hasImage,
-      addImage: vi.fn(),
+      addImage,
       isStyleLoaded: () => true,
       style: {},
       _removed: true,
@@ -131,6 +132,7 @@ describe("mapLibreIconRegistry", () => {
 
     await expect(registerMapLibreMarkerImages(map)).resolves.toBeUndefined();
     expect(hasImage).not.toHaveBeenCalled();
+    expect(addImage).not.toHaveBeenCalled();
   });
 
   it("skips addImage when style tears down during SVG decode", async () => {

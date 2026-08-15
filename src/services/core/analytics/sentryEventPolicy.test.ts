@@ -184,6 +184,11 @@ describe("classifyClientSentryEvent", () => {
         "drop",
       );
       expect(classifyClientSentryEvent({ message })).toBe("drop");
+      expect(
+        classifyClientSentryEvent({
+          message: `failed-precondition ${message}`,
+        }),
+      ).toBe("drop");
     }
   });
 

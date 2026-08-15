@@ -31,8 +31,11 @@ vi.mock("@/hooks/app/useAppUpdateState", () => ({
 }));
 
 vi.mock("@/services/firestore/clientMinVersion", () => ({
-  subscribeClientMinVersion: (onChange: (min: string | null) => void) => {
-    subscribeMock(onChange);
+  subscribeClientMinVersion: (
+    onChange: (min: string | null) => void,
+    onError: (error: Error) => void,
+  ) => {
+    subscribeMock(onChange, onError);
     return () => {};
   },
 }));
@@ -75,6 +78,25 @@ describe("ClientMinVersionGate", () => {
     subscribeMock.mockImplementation((onChange: (min: string | null) => void) => {
       onChange(null);
     });
+
+    render(
+      <ClientMinVersionGate>
+        <div>app-content</div>
+      </ClientMinVersionGate>,
+    );
+
+    expect(screen.getByText("app-content")).toBeInTheDocument();
+  });
+
+  it("fail-opens when the min-version listener errors", () => {
+    subscribeMock.mockImplementation(
+      (
+        _onChange: (min: string | null) => void,
+        onError: (error: Error) => void,
+      ) => {
+        onError(new Error("unavailable"));
+      },
+    );
 
     render(
       <ClientMinVersionGate>

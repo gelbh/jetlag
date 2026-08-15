@@ -55,8 +55,18 @@ export const EXPECTED_JOIN_UX_MESSAGES = [
 
 const EXPECTED_JOIN_UX_MESSAGE_SET = new Set<string>(EXPECTED_JOIN_UX_MESSAGES);
 
+const CALLABLE_CODE_PREFIX =
+  /^(?:failed-precondition|permission-denied|invalid-argument|unauthenticated|not-found|resource-exhausted|internal)[:\s]+/i;
+
+function normalizeCallableMessage(message: string): string {
+  return message.replace(CALLABLE_CODE_PREFIX, "").trim();
+}
+
 function isExpectedJoinUxMessage(message: string): boolean {
-  return EXPECTED_JOIN_UX_MESSAGE_SET.has(message);
+  return (
+    EXPECTED_JOIN_UX_MESSAGE_SET.has(message) ||
+    EXPECTED_JOIN_UX_MESSAGE_SET.has(normalizeCallableMessage(message))
+  );
 }
 
 /** Belt-and-suspenders for Sentry.init ignoreErrors — high-volume drop subset only (not the full classify matrix; not canaries). */
