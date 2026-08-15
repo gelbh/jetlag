@@ -52,6 +52,7 @@ import {
 } from "../domain/geometry/gameArea/geometry";
 import type { MapViewportBounds } from "../domain/map/transitViewport";
 import { effectiveMapStyle, applyMapStylePreferenceChange } from "../domain/device/power/powerProfile";
+import { messageFingerprint } from "../domain/device/chrome/chatUnread";
 import { computeHiderTruthReplyAsync } from "../domain/questions/ui";
 import { resolvePendingQuestionTruthReference } from "../domain/questions/hiderTruth/resolveHiderTruthReference";
 import { MAP_ANNOTATION_COLORS } from "../domain/map/mapAnnotationColors";
@@ -151,6 +152,7 @@ export function HiderMapScreen() {
     syncStatus,
     hasUnreadChat,
     unreadCount,
+    acknowledgeFingerprints,
     authReady,
     isRemote,
     enableNotifications,
@@ -324,6 +326,117 @@ export function HiderMapScreen() {
   });
   useWakeLock(keepScreenAwake || (timer.running && !lowPowerMode));
   const { answerPendingQuestion, postSystemMessage } = usePendingQuestionActions();
+
+  const submitHiderAnswer = useCallback(
+    async (
+      pendingQuestionId: string,
+      messageId: string,
+      answer: unknown,
+      selectedReply: string,
+      deadlineExpired?: boolean,
+    ) => {
+      if (!sessionId) {
+        return;
+      }
+
+      setChatAnswerError(null);
+
+      const pending = pendingQuestions.find(
+        (question) => question.id === pendingQuestionId,
+      );
+      if (!pending) {
+        setChatAnswerError("Could not find that question. Try again.");
+        return;
+      }
+
+      const messageBeforeAnswer = messages.find(
+        (entry) => entry.id === messageId,
+      );
+
+      try {
+        setOptimisticAnswers((previous) => {
+          const next = new Map(previous);
+          next.set(pendingQuestionId, selectedReply);
+          return next;
+        });
+
+        const user = await ensureAnonymousUser();
+        await answerPendingQuestion(
+          sessionId,
+          pendingQuestionId,
+          messageId,
+          answer,
+          selectedReply,
+          deadlineExpired
+            ? {
+                deadlineExpired: true,
+                senderUid: user.uid,
+                senderRole: "hider",
+              }
+            : undefined,
+        );
+
+        if (messageBeforeAnswer) {
+          acknowledgeFingerprints([messageFingerprint(messageBeforeAnswer)]);
+        }
+
+        if (!deadlineExpired && boardEconomyEnabled) {
+          const reward = await boardEconomy.applyAnswerReward(
+            pending.toolType,
+            pending.cardDraw,
+            pending.cardKeep,
+          );
+          if (reward && !reward.needsPick) {
+            setHandSheetOpen(true);
+          }
+        }
+
+        const answerTruthReference = truthContext
+          ? resolvePendingQuestionTruthReference(pending, truthContext)
+          : { point: null as LatLngTuple | null };
+        const truth = await computeHiderTruthReplyAsync(
+          pending,
+          answerTruthReference.point,
+          gameArea ?? undefined,
+        );
+        if (
+          truth &&
+          !truth.unavailable &&
+          truth.replyId.length > 0 &&
+          selectedReply !== truth.replyId
+        ) {
+          const selectedLabel =
+            pending.replyOptions.find((option) => option.id === selectedReply)
+              ?.label ?? selectedReply;
+          setTruthReveal({ truth, selectedReply, selectedLabel });
+        }
+      } catch (error) {
+        setOptimisticAnswers((previous) => {
+          const next = new Map(previous);
+          if (next.get(pendingQuestionId) === selectedReply) {
+            next.delete(pendingQuestionId);
+          }
+          return next;
+        });
+        setChatAnswerError(
+          error instanceof Error
+            ? error.message
+            : "Could not save your answer. Try again.",
+        );
+      }
+    },
+    [
+      acknowledgeFingerprints,
+      answerPendingQuestion,
+      boardEconomy,
+      boardEconomyEnabled,
+      gameArea,
+      messages,
+      pendingQuestions,
+      sessionId,
+      truthContext,
+    ],
+  );
 
   const postGameSystem = useCallback(
     async (text: string) => {
@@ -870,95 +983,7 @@ export function HiderMapScreen() {
           truthsLoading,
           truthReferenceModes,
           answerError: chatAnswerError,
-          onAnswerQuestion: async (
-            pendingQuestionId,
-            messageId,
-            answer,
-            selectedReply,
-            deadlineExpired,
-          ) => {
-            if (!sessionId) {
-              return;
-            }
-
-            setChatAnswerError(null);
-
-            const pending = pendingQuestions.find(
-              (question) => question.id === pendingQuestionId,
-            );
-            if (!pending) {
-              setChatAnswerError("Could not find that question. Try again.");
-              return;
-            }
-
-            try {
-              setOptimisticAnswers((previous) => {
-                const next = new Map(previous);
-                next.set(pendingQuestionId, selectedReply);
-                return next;
-              });
-
-              const user = await ensureAnonymousUser();
-              await answerPendingQuestion(
-                sessionId,
-                pendingQuestionId,
-                messageId,
-                answer,
-                selectedReply,
-                deadlineExpired
-                  ? {
-                      deadlineExpired: true,
-                      senderUid: user.uid,
-                      senderRole: "hider",
-                    }
-                  : undefined,
-              );
-
-              if (!deadlineExpired && boardEconomyEnabled) {
-                const reward = await boardEconomy.applyAnswerReward(
-                  pending.toolType,
-                  pending.cardDraw,
-                  pending.cardKeep,
-                );
-                if (reward && !reward.needsPick) {
-                  setHandSheetOpen(true);
-                }
-              }
-
-              const answerTruthReference = truthContext
-                ? resolvePendingQuestionTruthReference(pending, truthContext)
-                : { point: null as LatLngTuple | null };
-              const truth = await computeHiderTruthReplyAsync(
-                pending,
-                answerTruthReference.point,
-                gameArea,
-              );
-              if (
-                truth &&
-                !truth.unavailable &&
-                truth.replyId.length > 0 &&
-                selectedReply !== truth.replyId
-              ) {
-                const selectedLabel =
-                  pending.replyOptions.find((option) => option.id === selectedReply)
-                    ?.label ?? selectedReply;
-                setTruthReveal({ truth, selectedReply, selectedLabel });
-              }
-            } catch (error) {
-              setOptimisticAnswers((previous) => {
-                const next = new Map(previous);
-                if (next.get(pendingQuestionId) === selectedReply) {
-                  next.delete(pendingQuestionId);
-                }
-                return next;
-              });
-              setChatAnswerError(
-                error instanceof Error
-                  ? error.message
-                  : "Could not save your answer. Try again.",
-              );
-            }
-          },
+          onAnswerQuestion: submitHiderAnswer,
         }}
       />
       {boardEconomyEnabled ? (

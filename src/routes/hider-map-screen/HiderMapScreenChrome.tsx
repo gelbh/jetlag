@@ -47,6 +47,7 @@ import { RoleCodesSheet } from "../../components/session/settings/RoleCodesSheet
 import {
   HiderTruthRevealBanner,
 } from "../../components/session/banners/HiderTruthRevealBanner";
+import { QuestionAlertBanner } from "../../components/session/banners/QuestionAlertBanner";
 import { useDesktopLayout } from "../../hooks/layout/useDesktopLayout";
 import { useMapTerminalSessionChrome } from "../../hooks/session/useMapTerminalSessionChrome";
 import { HiderToolDock } from "../../components/tools/HiderToolDock";
@@ -332,6 +333,17 @@ export function HiderMapScreenChrome({
       <HiderTruthRevealBanner
         reveal={truthReveal}
         onDismiss={onDismissTruthReveal}
+      />
+      <QuestionAlertBanner
+        pendingQuestions={pendingQuestions}
+        messages={messages}
+        sessionRules={session}
+        sessionId={chat.sessionId || session.id}
+        questionTruths={chat.questionTruths}
+        truthsLoading={chat.truthsLoading}
+        truthReferenceModes={chat.truthReferenceModes}
+        answerError={chat.answerError}
+        onAnswerQuestion={chat.onAnswerQuestion}
       />
       <MapStatusRail
         sessionCode={session.code}
