@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import type { SessionRulesInput } from "../../domain/session/rules";
 import {
   formatExpiredAnswerCountdown,
-  formatPendingDrawPickSummary,
   questionAnswerDeadlineMs,
 } from "../../domain/questions";
 import type { HiderTruthReferenceMode } from "../../domain/questions/hiderTruth/resolveHiderTruthReference";
@@ -10,10 +9,9 @@ import type { HiderTruthResult } from "../../domain/questions/ui";
 import { mapToolDockShortLabel, isQuestionDockTool } from "../../domain/map/mapTools";
 import type { SessionMessageRecord } from "../../domain/session/activity/sessionChat";
 import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
-import { HiderAnswerPicker } from "./HiderAnswerPicker";
+import { HiderPendingQuestionAnswer } from "./HiderPendingQuestionAnswer";
 import { InlineError } from "../ui/banners/InlineError";
 import { PhotoAnswerPreview } from "./PhotoAnswerPreview";
-import { PhotoAnswerUploader } from "./PhotoAnswerUploader";
 
 interface GameChatTabProps {
   messages: readonly SessionMessageRecord[];
@@ -26,6 +24,8 @@ interface GameChatTabProps {
   truthsLoading?: boolean;
   truthReferenceModes?: ReadonlyMap<string, HiderTruthReferenceMode>;
   answerError?: string | null;
+  answerSubmitting?: boolean;
+  answeredPendingIds?: ReadonlySet<string>;
   onAnswerQuestion: (
     pendingQuestionId: string,
     messageId: string,
@@ -62,6 +62,8 @@ export function GameChatTab({
   truthsLoading = false,
   truthReferenceModes,
   answerError = null,
+  answerSubmitting = false,
+  answeredPendingIds,
   onAnswerQuestion,
   onDismissExpiredQuestion,
   readOnly = false,
@@ -146,83 +148,71 @@ export function GameChatTab({
             Boolean(onDismissExpiredQuestion) &&
             Boolean(message.pendingQuestionId);
 
+          const showHiderAnswer =
+            isHider &&
+            !readOnly &&
+            !closed &&
+            !(
+              message.pendingQuestionId != null &&
+              answeredPendingIds?.has(message.pendingQuestionId)
+            );
+
           return (
             <div
               key={message.id}
               className="rounded-xl border border-border bg-surface-deep px-3 py-3"
             >
-              <p className="text-xs font-semibold uppercase tracking-wide text-brand-blue">
-                {toolLabel}
-              </p>
-              <p className="mt-1 text-sm text-ink">{message.promptText}</p>
-              {isHider &&
-              pending?.cardDraw != null &&
-              pending?.cardKeep != null ? (
-                <p className="mt-1 text-xs text-ink-dim">
-                  {formatPendingDrawPickSummary(
-                    pending.toolType,
-                    pending.cardDraw,
-                    pending.cardKeep,
-                  )}
-                </p>
-              ) : null}
-              {walking ? (
-                <p className="mt-2 text-xs text-brand-gold">
-                  Seeker is walking. Answer when the full question arrives.
-                </p>
-              ) : null}
-              {countdown ? (
-                <p
-                  className={`mt-1 text-xs tabular-nums ${expired ? "text-status-warning" : "text-ink-dim"}`}
-                >
-                  {countdown}
-                </p>
-              ) : null}
-              {pending?.answeredLate ? (
-                <p className="mt-1 text-xs text-status-warning">
-                  Answered late. Card draw forfeited.
-                </p>
-              ) : null}
-              {isHider && !readOnly && !closed && !walking && isPhotoQuestion && pending ? (
-                <PhotoAnswerUploader
+              {showHiderAnswer ? (
+                <HiderPendingQuestionAnswer
+                  message={message}
+                  pending={pending}
+                  sessionRules={sessionRules}
                   sessionId={sessionId}
-                  pendingQuestion={pending}
-                  messageId={message.id}
-                  distanceUnit={sessionRules.distanceUnit}
-                  deadlineExpired={expired}
-                  onAnswerQuestion={onAnswerQuestion}
-                />
-              ) : null}
-              {isHider &&
-              !readOnly &&
-              !closed &&
-              !walking &&
-              !isPhotoQuestion &&
-              message.replyOptions ? (
-                <HiderAnswerPicker
-                  replyOptions={message.replyOptions}
                   truth={
                     message.pendingQuestionId
                       ? (questionTruths?.get(message.pendingQuestionId) ?? null)
                       : null
                   }
-                  loading={truthsLoading}
+                  truthsLoading={truthsLoading}
                   truthReferenceMode={
                     (message.pendingQuestionId
                       ? truthReferenceModes?.get(message.pendingQuestionId)
                       : undefined) ?? "hidingZoneCenter"
                   }
-                  onSelect={(option) =>
-                    void onAnswerQuestion(
-                      message.pendingQuestionId!,
-                      message.id,
-                      option.id === "null" ? null : option.id,
-                      option.id,
-                      expired,
-                    )
+                  nowMs={nowMs}
+                  disabled={
+                    answerSubmitting ||
+                    (message.pendingQuestionId != null &&
+                      answeredPendingIds?.has(message.pendingQuestionId) ===
+                        true)
                   }
+                  onAnswerQuestion={onAnswerQuestion}
                 />
-              ) : null}
+              ) : (
+                <>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-brand-blue">
+                    {toolLabel}
+                  </p>
+                  <p className="mt-1 text-sm text-ink">{message.promptText}</p>
+                  {walking ? (
+                    <p className="mt-2 text-xs text-brand-gold">
+                      Seeker is walking. Answer when the full question arrives.
+                    </p>
+                  ) : null}
+                  {countdown ? (
+                    <p
+                      className={`mt-1 text-xs tabular-nums ${expired ? "text-status-warning" : "text-ink-dim"}`}
+                    >
+                      {countdown}
+                    </p>
+                  ) : null}
+                  {pending?.answeredLate ? (
+                    <p className="mt-1 text-xs text-status-warning">
+                      Answered late. Card draw forfeited.
+                    </p>
+                  ) : null}
+                </>
+              )}
               {answered && isPhotoQuestion ? (
                 <PhotoAnswerPreview answer={pending?.answer} />
               ) : answered ? (

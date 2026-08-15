@@ -16,24 +16,28 @@ function firestoreChange(before, after) {
   };
 }
 
-function createFinalizeMockDb() {
+function createFinalizeMockDb({ liveSession } = {}) {
   const state = {
     gameResults: new Map(),
     sessionUpdate: null,
+    liveSession:
+      liveSession ??
+      ({
+        foundConfirmedAt: "2026-01-01T01:00:00.000Z",
+        gameOutcome: "found",
+      }),
   };
 
-  function createSessionRef() {
-    return {
-      collection(subName) {
-        assert.equal(subName, "gameResult");
-        return {
-          doc(gameResultId) {
-            return { gameResultId };
-          },
-        };
-      },
-    };
-  }
+  const sessionRef = {
+    collection(subName) {
+      assert.equal(subName, "gameResult");
+      return {
+        doc(gameResultId) {
+          return { gameResultId };
+        },
+      };
+    },
+  };
 
   return {
     get gameResults() {
@@ -46,17 +50,24 @@ function createFinalizeMockDb() {
       assert.equal(name, "sessions");
       return {
         doc() {
-          return createSessionRef();
+          return sessionRef;
         },
       };
     },
     async runTransaction(callback) {
-      const sessionRef = createSessionRef();
       await callback({
+        async get(ref) {
+          assert.equal(ref, sessionRef);
+          return {
+            exists: true,
+            data: () => state.liveSession,
+          };
+        },
         set(ref, payload) {
           state.gameResults.set(ref.gameResultId, payload);
         },
-        update(_ref, payload) {
+        update(ref, payload) {
+          assert.equal(ref, sessionRef);
           state.sessionUpdate = payload;
         },
       });
@@ -188,6 +199,23 @@ test("finalizeGameResultForSession writes gameResult and session gameResultId", 
   assert.equal(gameResult.outcome, "found");
   assert.deepEqual(db.sessionUpdate, { gameResultId });
   assert.ok(db.gameResults.has(gameResultId));
+});
+
+test("finalizeGameResultForSession aborts after rematch cleared the round", async () => {
+  const db = createFinalizeMockDb({
+    liveSession: {
+      roundNumber: 1,
+      sessionResetAt: "2026-08-15T12:01:00.000Z",
+      timerAccumulatedMs: 0,
+    },
+  });
+  await finalizeGameResultForSession(db, "sess-1", {
+    foundConfirmedAt: "2026-08-15T12:00:00.000Z",
+    gameOutcome: "found",
+    memberRoles: { host: "seeker" },
+  });
+  assert.equal(db.sessionUpdate, null);
+  assert.equal(db.gameResults.size, 0);
 });
 
 test("handleFinalizeGameResultWrite ignores unrelated session updates", async () => {

@@ -1,3 +1,5 @@
+import type { AnnotationRecord } from "../../map/annotations";
+
 export function isStaleAfterReset(
   recordAt: string | undefined,
   sessionResetAt: string | undefined,
@@ -24,5 +26,16 @@ export function filterExtrasAfterReset<T>(
 
   return items.filter(
     (item) => !isStaleAfterReset(pickTimestamp(item), sessionResetAt),
+  );
+}
+
+export function filterAnnotationsAfterReset(
+  annotations: readonly AnnotationRecord[],
+  sessionResetAt: string | undefined,
+): AnnotationRecord[] {
+  return filterExtrasAfterReset(
+    annotations,
+    sessionResetAt,
+    (annotation) => annotation.metadata?.createdAt,
   );
 }

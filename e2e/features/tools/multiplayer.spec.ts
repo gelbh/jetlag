@@ -4,8 +4,7 @@ import {
   createHostSession,
   createMultiplayerContexts,
   completeRadarSolo,
-  openChat,
-  PENDING_QUESTION_TEXT,
+  expectPendingQuestionText,
   runHiderAnswerFlow,
   sendMatchingToHiders,
   sendMeasuringToHiders,
@@ -56,8 +55,7 @@ test.describe("multiplayer question tools", () => {
     await sendTentacleToHiders(hostPage);
 
     await expect(async () => {
-      await openChat(guestPage);
-      await expect(guestPage.getByText(PENDING_QUESTION_TEXT).first()).toBeVisible();
+      await expectPendingQuestionText(guestPage);
     }).toPass({ timeout: 30_000 });
   });
 });
