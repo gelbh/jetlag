@@ -1,3 +1,4 @@
+import { useAppUpdateState } from "@/hooks/app/useAppUpdateState";
 import { AppErrorPage } from "./AppErrorPage";
 
 export function ClientUpdateRequiredPage({
@@ -5,6 +6,8 @@ export function ClientUpdateRequiredPage({
 }: {
   minVersion: string;
 }) {
+  const { applyUpdate } = useAppUpdateState();
+
   return (
     <AppErrorPage
       title="Update required"
@@ -12,7 +15,8 @@ export function ClientUpdateRequiredPage({
       assertive
       primaryAction={{
         label: "Refresh",
-        onClick: () => window.location.reload(),
+        // SKIP_WAITING + vite registerSW(true), with reload fallback — not soft reload alone.
+        onClick: applyUpdate,
       }}
     />
   );

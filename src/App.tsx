@@ -183,6 +183,8 @@ export default function App() {
         <AppUpdateProvider>
           <Sentry.ErrorBoundary fallback={<AppErrorFallback />}>
             <AppCheckProbeGate>
+              {/* Outside min-version gate so waiting SW chip stays visible when blocked. */}
+              <AppUpdateBanner />
               <ClientMinVersionGate>
               <MotionDatasetEffect />
             <RouteProgressChrome />
@@ -195,7 +197,6 @@ export default function App() {
             <LazyRouteQuiet>
               <AppResumeWatchdogLazy />
             </LazyRouteQuiet>
-            <AppUpdateBanner />
             <PwaInstallTipBanner />
             <AnalyticsConsentBanner />
             <AppEntryBackdrop />
