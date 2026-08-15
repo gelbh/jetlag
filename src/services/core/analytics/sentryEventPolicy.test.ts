@@ -134,7 +134,7 @@ describe("classifyClientSentryEvent", () => {
     ).toBe("drop");
   });
 
-  it("drops Firestore permission-denied", () => {
+  it("sends Firestore missing-or-insufficient-permissions (reopened)", () => {
     expect(
       classifyClientSentryEvent(
         exc(
@@ -142,7 +142,18 @@ describe("classifyClientSentryEvent", () => {
           "Missing or insufficient permissions.",
         ),
       ),
-    ).toBe("drop");
+    ).toBe("send");
+  });
+
+  it("sends storage/unauthorized (reopened)", () => {
+    expect(
+      classifyClientSentryEvent(
+        exc(
+          "FirebaseError",
+          "Firebase Storage: User does not have permission to access 'sessions/x/photo.jpg'. (storage/unauthorized)",
+        ),
+      ),
+    ).toBe("send");
   });
 
   it("drops expected join permission-denied captureMessage", () => {
@@ -152,6 +163,33 @@ describe("classifyClientSentryEvent", () => {
         level: "warning",
       }),
     ).toBe("drop");
+  });
+
+  it("drops Task 1 expected join UX messages (client denylist belt)", () => {
+    // Production fixtures — mirror functions/session/expectedSessionUxHttpsErrors.mjs.
+    const fixtures = [
+      "Wrong role code.",
+      "Role code is required.",
+      "App version incompatible.",
+      "Client update required.",
+      "Join without a request — this side is empty.",
+      "Join request is not pending.",
+      "Join request expired.",
+      "Invalid join request.",
+      "Not allowed for this join request.",
+      "Session uses legacy join.",
+    ];
+    for (const message of fixtures) {
+      expect(classifyClientSentryEvent(exc("FirebaseError", message))).toBe(
+        "drop",
+      );
+      expect(classifyClientSentryEvent({ message })).toBe("drop");
+      expect(
+        classifyClientSentryEvent({
+          message: `failed-precondition ${message}`,
+        }),
+      ).toBe("drop");
+    }
   });
 
   it("keeps module script import failure and WebKit Load failed", () => {
@@ -166,6 +204,32 @@ describe("classifyClientSentryEvent", () => {
     expect(
       classifyClientSentryEvent(
         exc("TypeError", "Load failed (jetlag.gelbhart.dev)"),
+      ),
+    ).toBe("send");
+  });
+
+  it("does not denylist isCorePipeline, getImage, deadline-exceeded, or dynamic import failures", () => {
+    expect(
+      classifyClientSentryEvent(
+        exc("TypeError", "Cannot read properties of null (reading 'isCorePipeline')"),
+      ),
+    ).toBe("send");
+    expect(
+      classifyClientSentryEvent(
+        exc(
+          "TypeError",
+          "Cannot read properties of undefined (reading 'getImage')",
+        ),
+      ),
+    ).toBe("send");
+    expect(
+      classifyClientSentryEvent(
+        exc("FirebaseError", "deadline-exceeded"),
+      ),
+    ).toBe("send");
+    expect(
+      classifyClientSentryEvent(
+        exc("TypeError", "Failed to fetch dynamically imported module"),
       ),
     ).toBe("send");
   });

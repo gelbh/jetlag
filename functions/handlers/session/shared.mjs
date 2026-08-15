@@ -8,6 +8,20 @@ import {
   JOIN_SESSION_NOT_FOUND,
   JOIN_WRONG_PASSCODE,
 } from "../../session/joinSessionWithRole.mjs";
+import { CLIENT_UPDATE_REQUIRED } from "../../session/clientMinVersion.mjs";
+import {
+  EXPECTED_SESSION_UX_HTTPS_ERROR_KEYS,
+  HTTPS_MSG_APP_VERSION_INCOMPATIBLE,
+  HTTPS_MSG_CLIENT_UPDATE_REQUIRED,
+  HTTPS_MSG_INVALID_JOIN_REQUEST,
+  HTTPS_MSG_JOIN_EXPIRED,
+  HTTPS_MSG_JOIN_NOT_ALLOWED,
+  HTTPS_MSG_JOIN_NOT_PENDING,
+  HTTPS_MSG_JOIN_SIDE_EMPTY,
+  HTTPS_MSG_LEGACY_JOIN,
+  HTTPS_MSG_ROLE_CODE_REQUIRED,
+  HTTPS_MSG_WRONG_ROLE_CODE,
+} from "../../session/expectedSessionUxHttpsErrors.mjs";
 import {
   LEAVE_MEMBERSHIP_NOT_MEMBER,
   LEAVE_NOT_GATED,
@@ -42,6 +56,29 @@ import {
 } from "../../session/controlSessionTimerForMove.mjs";
 
 export const sentryDsnSecret = getSentryDsnSecret();
+
+export {
+  EXPECTED_SESSION_UX_HTTPS_ERROR_KEYS,
+  HTTPS_MSG_APP_VERSION_INCOMPATIBLE,
+  HTTPS_MSG_CLIENT_UPDATE_REQUIRED,
+  HTTPS_MSG_INVALID_JOIN_REQUEST,
+  HTTPS_MSG_JOIN_EXPIRED,
+  HTTPS_MSG_JOIN_NOT_ALLOWED,
+  HTTPS_MSG_JOIN_NOT_PENDING,
+  HTTPS_MSG_JOIN_SIDE_EMPTY,
+  HTTPS_MSG_LEGACY_JOIN,
+  HTTPS_MSG_ROLE_CODE_REQUIRED,
+  HTTPS_MSG_WRONG_ROLE_CODE,
+};
+
+function throwIfClientUpdateRequired(error) {
+  if (error.message === CLIENT_UPDATE_REQUIRED) {
+    throw new HttpsError(
+      "failed-precondition",
+      HTTPS_MSG_CLIENT_UPDATE_REQUIRED,
+    );
+  }
+}
 
 export function requireAuthSessionId(request) {
   if (!request.auth) {
@@ -93,17 +130,21 @@ export function mapJoinSessionWithRoleError(error) {
     throw new HttpsError("failed-precondition", "Session already ended.");
   }
   if (error.message === JOIN_NOT_GATED) {
-    throw new HttpsError("failed-precondition", "Session uses legacy join.");
+    throw new HttpsError("failed-precondition", HTTPS_MSG_LEGACY_JOIN);
   }
   if (error.message === JOIN_WRONG_PASSCODE) {
-    throw new HttpsError("permission-denied", "Wrong role code.");
+    throw new HttpsError("permission-denied", HTTPS_MSG_WRONG_ROLE_CODE);
   }
   if (error.message === JOIN_PASSCODE_REQUIRED) {
-    throw new HttpsError("invalid-argument", "Role code is required.");
+    throw new HttpsError("invalid-argument", HTTPS_MSG_ROLE_CODE_REQUIRED);
   }
   if (error.message === JOIN_INCOMPATIBLE_VERSION) {
-    throw new HttpsError("failed-precondition", "App version incompatible.");
+    throw new HttpsError(
+      "failed-precondition",
+      HTTPS_MSG_APP_VERSION_INCOMPATIBLE,
+    );
   }
+  throwIfClientUpdateRequired(error);
   throw error;
 }
 
@@ -159,29 +200,27 @@ export function mapJoinRequestError(error) {
     throw new HttpsError("failed-precondition", "Session already ended.");
   }
   if (error.message === JOIN_REQ_NOT_GATED) {
-    throw new HttpsError("failed-precondition", "Session uses legacy join.");
+    throw new HttpsError("failed-precondition", HTTPS_MSG_LEGACY_JOIN);
   }
   if (error.message === JOIN_REQ_SIDE_EMPTY) {
-    throw new HttpsError(
-      "failed-precondition",
-      "Join without a request — this side is empty.",
-    );
+    throw new HttpsError("failed-precondition", HTTPS_MSG_JOIN_SIDE_EMPTY);
   }
   if (error.message === JOIN_REQ_INVALID_ROLE || error.message === JOIN_REQ_INVALID_DECISION) {
-    throw new HttpsError("invalid-argument", "Invalid join request.");
+    throw new HttpsError("invalid-argument", HTTPS_MSG_INVALID_JOIN_REQUEST);
   }
   if (
     error.message === JOIN_REQ_NOT_AUTHORIZED ||
     error.message === JOIN_REQ_NOT_REQUESTER
   ) {
-    throw new HttpsError("permission-denied", "Not allowed for this join request.");
+    throw new HttpsError("permission-denied", HTTPS_MSG_JOIN_NOT_ALLOWED);
   }
   if (error.message === JOIN_REQ_NOT_PENDING) {
-    throw new HttpsError("failed-precondition", "Join request is not pending.");
+    throw new HttpsError("failed-precondition", HTTPS_MSG_JOIN_NOT_PENDING);
   }
   if (error.message === JOIN_REQ_EXPIRED) {
-    throw new HttpsError("failed-precondition", "Join request expired.");
+    throw new HttpsError("failed-precondition", HTTPS_MSG_JOIN_EXPIRED);
   }
+  throwIfClientUpdateRequired(error);
   throw error;
 }
 

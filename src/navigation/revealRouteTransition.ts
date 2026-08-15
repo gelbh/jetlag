@@ -67,6 +67,12 @@ export function revealRouteTransition(
     return Promise.resolve();
   }
 
+  // Hidden documents reject VT; skip to avoid uncaught InvalidStateError noise.
+  if (document.visibilityState === "hidden") {
+    commit();
+    return Promise.resolve();
+  }
+
   if (typeof document.startViewTransition !== "function") {
     commit();
     return runFallbackAnimation(direction);

@@ -160,4 +160,66 @@ describe("revealRouteTransition", () => {
     expect(startViewTransition).not.toHaveBeenCalled();
     expect(document.documentElement.dataset.navDirection).toBe("neutral");
   });
+
+  it("commits without startViewTransition when document is hidden", async () => {
+    const visibilityDescriptor = Object.getOwnPropertyDescriptor(
+      Document.prototype,
+      "visibilityState",
+    );
+    Object.defineProperty(document, "visibilityState", {
+      configurable: true,
+      get: () => "hidden",
+    });
+
+    try {
+      const startViewTransition = vi.fn();
+      document.startViewTransition = startViewTransition;
+      const commit = vi.fn();
+
+      await revealRouteTransition("forward", true, commit);
+
+      expect(commit).toHaveBeenCalledTimes(1);
+      expect(startViewTransition).not.toHaveBeenCalled();
+      expect(document.documentElement.dataset.navDirection).toBe("forward");
+    } finally {
+      if (visibilityDescriptor) {
+        Object.defineProperty(
+          document,
+          "visibilityState",
+          visibilityDescriptor,
+        );
+      } else {
+        Reflect.deleteProperty(document, "visibilityState");
+      }
+    }
+  });
+
+  it("swallows finished rejection so it never surfaces uncaught", async () => {
+    const unhandled: unknown[] = [];
+    const onUnhandled = (reason: unknown) => {
+      unhandled.push(reason);
+    };
+    process.on("unhandledRejection", onUnhandled);
+
+    try {
+      const transition = createFakeViewTransition();
+      document.startViewTransition = vi.fn((callback: () => void) => {
+        callback();
+        return transition;
+      });
+
+      const pending = revealRouteTransition("forward", true, vi.fn());
+      transition.rejectFinished(
+        new DOMException(
+          "Skipping view transition because document visibility state has become hidden.",
+          "InvalidStateError",
+        ),
+      );
+      await expect(pending).resolves.toBeUndefined();
+      await Promise.resolve();
+      expect(unhandled).toEqual([]);
+    } finally {
+      process.off("unhandledRejection", onUnhandled);
+    }
+  });
 });
