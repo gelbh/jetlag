@@ -12,6 +12,9 @@ export interface BoundingBox {
   east: number;
 }
 
+/** Meters per degree of latitude (equirectangular; same family as expand). */
+export const METERS_PER_DEGREE_LAT = 111_320;
+
 export function normalizeBoundingBox(box: BoundingBox): BoundingBox {
   let { south, west, north, east } = box;
   const latSpan = north - south;
@@ -32,7 +35,11 @@ export function normalizeBoundingBox(box: BoundingBox): BoundingBox {
   return { south, west, north, east };
 }
 
-export function intersectBoundingBoxes(
+/**
+ * Raw axis-aligned bbox intersection without {@link normalizeBoundingBox}.
+ * Tiny intersections stay tiny (attach scoring, threshold tests).
+ */
+export function intersectBoundingBoxesRaw(
   a: BoundingBox,
   b: BoundingBox,
 ): BoundingBox | null {
@@ -45,7 +52,29 @@ export function intersectBoundingBoxes(
     return null;
   }
 
-  return normalizeBoundingBox({ south, west, north, east });
+  return { south, west, north, east };
+}
+
+export function intersectBoundingBoxes(
+  a: BoundingBox,
+  b: BoundingBox,
+): BoundingBox | null {
+  const intersection = intersectBoundingBoxesRaw(a, b);
+  return intersection ? normalizeBoundingBox(intersection) : null;
+}
+
+/**
+ * Approximate bbox area in km² via mid-latitude equirectangular projection
+ * using {@link METERS_PER_DEGREE_LAT}.
+ */
+export function boundingBoxAreaKm2(box: BoundingBox): number {
+  const midLat = (box.north + box.south) / 2;
+  const latMeters = (box.north - box.south) * METERS_PER_DEGREE_LAT;
+  const lngMeters =
+    (box.east - box.west) *
+    METERS_PER_DEGREE_LAT *
+    Math.cos((midLat * Math.PI) / 180);
+  return Math.max((latMeters * lngMeters) / 1_000_000, 0);
 }
 
 function collectPositions(gameArea: GameAreaGeometry): Position[] {
@@ -75,7 +104,10 @@ export function boundingBoxToGameArea(box: BoundingBox): GameAreaGeometry {
   };
 }
 
-export function gameAreaToBoundingBox(gameArea: GameAreaGeometry): BoundingBox {
+/** Unexpanded AABB from game-area coordinates (no min-span inflate). */
+export function gameAreaToBoundingBoxRaw(
+  gameArea: GameAreaGeometry,
+): BoundingBox {
   const positions = collectPositions(gameArea);
   let south = Infinity;
   let west = Infinity;
@@ -89,7 +121,11 @@ export function gameAreaToBoundingBox(gameArea: GameAreaGeometry): BoundingBox {
     if (lng > east) east = lng;
   }
 
-  return normalizeBoundingBox({ south, west, north, east });
+  return { south, west, north, east };
+}
+
+export function gameAreaToBoundingBox(gameArea: GameAreaGeometry): BoundingBox {
+  return normalizeBoundingBox(gameAreaToBoundingBoxRaw(gameArea));
 }
 
 export function expandBoundingBox(
@@ -101,9 +137,10 @@ export function expandBoundingBox(
   }
 
   const centerLat = (box.north + box.south) / 2;
-  const latDelta = bufferMeters / 111_320;
+  const latDelta = bufferMeters / METERS_PER_DEGREE_LAT;
   const lngDelta =
-    bufferMeters / (111_320 * Math.cos((centerLat * Math.PI) / 180));
+    bufferMeters /
+    (METERS_PER_DEGREE_LAT * Math.cos((centerLat * Math.PI) / 180));
 
   return normalizeBoundingBox({
     south: box.south - latDelta,

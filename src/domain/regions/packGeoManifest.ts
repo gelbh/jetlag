@@ -1,3 +1,4 @@
+import type { BoundingBox } from "@/domain/geometry/gameArea/gameAreaBounds";
 import {
   BASE_MEASURING_CATALOG,
   TENTACLE_LOCATION_CATEGORY_IDS,
@@ -8,6 +9,37 @@ import { REGION_PACK_IDS, type RegionPackId } from "./regionPack";
 
 /** Static asset kinds under `/geo/{packId}/`. */
 export type PackGeoAssetKind = "poi" | "coastline" | "sea_level_seed";
+
+/**
+ * Per-pack reference bounding boxes for attach scoring (v1 embed).
+ * Primary extents from `public/geo/{packId}/` GeoJSON; expanded slightly where
+ * POI `bbox` fields (2-decimal / airport padding) extend outside the primary
+ * boundary so attach validation stays consistent with on-disk POI metadata.
+ */
+export const REGION_PACK_REFERENCE_BBOXES: Record<RegionPackId, BoundingBox> = {
+  dublin: { south: 53.1782, west: -6.5469, north: 53.6347, east: -5.9945 },
+  // Union with POI file bboxes (2-decimal rounding of borough extent).
+  nyc: { south: 40.49, west: -74.26, north: 40.92, east: -73.7 },
+  // Union with POI file bboxes (2-decimal rounding of borough extent).
+  london: { south: 51.28, west: -0.51, north: 51.7, east: 0.3357 },
+  tokyo: { south: 35.5282, west: 139.5628, north: 35.8175, east: 139.9189 },
+  osaka: { south: 34.5865, west: 135.3435, north: 34.7688, east: 135.5993 },
+  zurich: { south: 47.1637, west: 8.3589, north: 47.699, east: 8.986 },
+  lucerne: { south: 46.775, west: 7.839, north: 47.2903, east: 8.5213 },
+  "portland-maine": {
+    south: 43.4669,
+    west: -70.492,
+    north: 43.8488,
+    east: -69.9759,
+  },
+  // Union with POI bboxes (airport west of city.geojson extent).
+  "prince-rupert": {
+    south: 54.2016,
+    west: -130.45,
+    north: 54.4,
+    east: -130.2,
+  },
+};
 
 /**
  * Measuring point categories with Overpass selectors (excludes custom_place and
