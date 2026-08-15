@@ -1,4 +1,3 @@
-import { defineString } from "firebase-functions/params";
 import { createMemoryCache } from "../lib/memoryCache.mjs";
 import { compareAppVersions } from "./sessionVersion.mjs";
 
@@ -11,10 +10,6 @@ export const CLIENT_MIN_VERSION_DOC_ID = "clientMinVersion";
 export const CLIENT_MIN_VERSION_CACHE_TTL_MS = 60_000;
 
 const CACHE_KEY = "clientMinVersion";
-
-export const clientMinVersionParam = defineString("CLIENT_MIN_VERSION", {
-  default: "",
-});
 
 const minVersionCache = createMemoryCache(CLIENT_MIN_VERSION_CACHE_TTL_MS);
 
@@ -48,7 +43,7 @@ function normalizeEnvFallback(envFallback) {
 
 /**
  * Resolve global floor: Firestore `ops/clientMinVersion` first, then
- * `CLIENT_MIN_VERSION` env/param. Null only when both are empty (gate off).
+ * `CLIENT_MIN_VERSION` env. Null only when both are empty (gate off).
  *
  * @param {FirebaseFirestore.Firestore} db
  * @param {{ envFallback?: string }} [options]
@@ -76,11 +71,7 @@ export async function resolveClientMinVersion(db, options = {}) {
   if (options.envFallback !== undefined) {
     envFallback = normalizeEnvFallback(options.envFallback);
   } else {
-    try {
-      envFallback = normalizeEnvFallback(clientMinVersionParam.value());
-    } catch {
-      envFallback = null;
-    }
+    envFallback = normalizeEnvFallback(process.env.CLIENT_MIN_VERSION);
   }
 
   const resolved = fromDoc ?? envFallback;
