@@ -31,10 +31,7 @@ vi.mock("@/hooks/app/useAppUpdateState", () => ({
 }));
 
 vi.mock("@/services/firestore/clientMinVersion", () => ({
-  subscribeClientMinVersion: (
-    onChange: (min: string | null) => void,
-    _onError: (error: Error) => void,
-  ) => {
+  subscribeClientMinVersion: (onChange: (min: string | null) => void) => {
     subscribeMock(onChange);
     return () => {};
   },

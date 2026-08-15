@@ -2,7 +2,6 @@ import { HttpsError } from "firebase-functions/v2/https";
 import {
   assertClientMeetsConfiguredMin,
   assertClientMeetsGlobalMin,
-  CLIENT_UPDATE_REQUIRED,
   resolveClientMinVersion,
 } from "./clientMinVersion.mjs";
 import {
@@ -26,7 +25,6 @@ export const JOIN_REQ_EXPIRED = "JOIN_REQ_EXPIRED";
 export const JOIN_REQ_NOT_REQUESTER = "JOIN_REQ_NOT_REQUESTER";
 export const JOIN_REQ_NOT_AUTHORIZED = "JOIN_REQ_NOT_AUTHORIZED";
 export const JOIN_REQ_INVALID_DECISION = "JOIN_REQ_INVALID_DECISION";
-export { CLIENT_UPDATE_REQUIRED };
 
 const VALID_JOIN_REQUEST_ROLES = new Set(["seeker", "hider", "observer"]);
 

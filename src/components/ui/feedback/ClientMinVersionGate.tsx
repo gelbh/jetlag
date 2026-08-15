@@ -13,13 +13,13 @@ import { ClientUpdateRequiredPage } from "./ClientUpdateRequiredPage";
  */
 export function ClientMinVersionGate({ children }: { children: ReactNode }) {
   const authReady = useAuthBootstrapReady();
+  const firebaseReady = isFirebaseConfigured();
   const [minVersion, setMinVersion] = useState<string | null | undefined>(
     undefined,
   );
 
   useEffect(() => {
-    if (!authReady || !isFirebaseConfigured()) {
-      setMinVersion(null);
+    if (!authReady || !firebaseReady) {
       return;
     }
 
@@ -42,9 +42,11 @@ export function ClientMinVersionGate({ children }: { children: ReactNode }) {
       cancelled = true;
       unsubscribe();
     };
-  }, [authReady]);
+  }, [authReady, firebaseReady]);
 
   if (
+    authReady &&
+    firebaseReady &&
     typeof minVersion === "string" &&
     isBelowClientMinVersion(APP_VERSION, minVersion)
   ) {

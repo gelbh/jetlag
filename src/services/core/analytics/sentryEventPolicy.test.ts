@@ -166,7 +166,7 @@ describe("classifyClientSentryEvent", () => {
   });
 
   it("drops Task 1 expected join UX messages (client denylist belt)", () => {
-    // Production fixtures — mirror functions/handlers/session/shared.mjs HTTPS_MSG_*.
+    // Production fixtures — mirror functions/session/expectedSessionUxHttpsErrors.mjs.
     const fixtures = [
       "Wrong role code.",
       "Role code is required.",

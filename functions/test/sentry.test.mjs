@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { HttpsError } from "firebase-functions/v2/https";
-import { EXPECTED_SESSION_UX_HTTPS_ERROR_KEYS } from "../handlers/session/shared.mjs";
+import { readFileSync } from "node:fs";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+import { EXPECTED_SESSION_UX_HTTPS_ERROR_KEYS } from "../session/expectedSessionUxHttpsErrors.mjs";
 import {
   isAbortErrorEvent,
   isAbortErrorNoise,
@@ -202,6 +205,24 @@ test("EXPECTED_SESSION_UX_HTTPS_ERROR_KEYS are all allowlisted", () => {
       isExpectedFunctionsError(new HttpsError(code, message)),
       true,
       `missing allowlist entry: ${key}`,
+    );
+  }
+});
+
+test("client EXPECTED_JOIN_UX_MESSAGES lists every session UX SoT message", () => {
+  const testDir = dirname(fileURLToPath(import.meta.url));
+  const clientPolicy = readFileSync(
+    resolve(
+      testDir,
+      "../../src/services/core/analytics/sentryEventPolicy.ts",
+    ),
+    "utf8",
+  );
+  for (const key of EXPECTED_SESSION_UX_HTTPS_ERROR_KEYS) {
+    const message = key.slice(key.indexOf(":") + 1);
+    assert.ok(
+      clientPolicy.includes(`"${message}"`),
+      `client denylist missing: ${message}`,
     );
   }
 });

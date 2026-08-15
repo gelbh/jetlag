@@ -98,13 +98,13 @@ function cancelResponseBody(response) {
 export async function fetchOverpassWithFailover(query, options = {}) {
   let lastError = null;
   const now = options.now ?? Date.now;
+  const endpoints = await orderOverpassEndpointsByStatus(
+    buildOverpassEndpointList(process.env),
+  );
   const deadlineMs =
     typeof options.deadlineMs === "number"
       ? options.deadlineMs
       : now() + OVERPASS_FAILOVER_BUDGET_MS;
-  const endpoints = await orderOverpassEndpointsByStatus(
-    buildOverpassEndpointList(process.env),
-  );
   let attempts = 0;
 
   for (const endpoint of endpoints) {
@@ -186,10 +186,9 @@ export async function fetchCachedOverpassQuery(query, tier = "free") {
     return l2.text;
   }
 
-  const deadlineMs = Date.now() + OVERPASS_FAILOVER_BUDGET_MS;
   try {
     const response = await enqueueOverpassFetch(tier, () =>
-      fetchOverpassWithFailover(query, { deadlineMs }),
+      fetchOverpassWithFailover(query),
     );
     const text = await response.text();
     if (!response.ok) {

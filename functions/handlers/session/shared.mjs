@@ -10,6 +10,19 @@ import {
 } from "../../session/joinSessionWithRole.mjs";
 import { CLIENT_UPDATE_REQUIRED } from "../../session/clientMinVersion.mjs";
 import {
+  EXPECTED_SESSION_UX_HTTPS_ERROR_KEYS,
+  HTTPS_MSG_APP_VERSION_INCOMPATIBLE,
+  HTTPS_MSG_CLIENT_UPDATE_REQUIRED,
+  HTTPS_MSG_INVALID_JOIN_REQUEST,
+  HTTPS_MSG_JOIN_EXPIRED,
+  HTTPS_MSG_JOIN_NOT_ALLOWED,
+  HTTPS_MSG_JOIN_NOT_PENDING,
+  HTTPS_MSG_JOIN_SIDE_EMPTY,
+  HTTPS_MSG_LEGACY_JOIN,
+  HTTPS_MSG_ROLE_CODE_REQUIRED,
+  HTTPS_MSG_WRONG_ROLE_CODE,
+} from "../../session/expectedSessionUxHttpsErrors.mjs";
+import {
   LEAVE_MEMBERSHIP_NOT_MEMBER,
   LEAVE_NOT_GATED,
 } from "../../session/leaveSessionMembership.mjs";
@@ -44,36 +57,28 @@ import {
 
 export const sentryDsnSecret = getSentryDsnSecret();
 
-/** Human-facing HttpsError messages for expected join/role UX (Sentry allowlist SoT). */
-export const HTTPS_MSG_WRONG_ROLE_CODE = "Wrong role code.";
-export const HTTPS_MSG_ROLE_CODE_REQUIRED = "Role code is required.";
-export const HTTPS_MSG_APP_VERSION_INCOMPATIBLE = "App version incompatible.";
-export const HTTPS_MSG_CLIENT_UPDATE_REQUIRED = "Client update required.";
-export const HTTPS_MSG_JOIN_SIDE_EMPTY =
-  "Join without a request — this side is empty.";
-export const HTTPS_MSG_JOIN_NOT_PENDING = "Join request is not pending.";
-export const HTTPS_MSG_JOIN_EXPIRED = "Join request expired.";
-export const HTTPS_MSG_INVALID_JOIN_REQUEST = "Invalid join request.";
-export const HTTPS_MSG_JOIN_NOT_ALLOWED =
-  "Not allowed for this join request.";
-export const HTTPS_MSG_LEGACY_JOIN = "Session uses legacy join.";
+export {
+  EXPECTED_SESSION_UX_HTTPS_ERROR_KEYS,
+  HTTPS_MSG_APP_VERSION_INCOMPATIBLE,
+  HTTPS_MSG_CLIENT_UPDATE_REQUIRED,
+  HTTPS_MSG_INVALID_JOIN_REQUEST,
+  HTTPS_MSG_JOIN_EXPIRED,
+  HTTPS_MSG_JOIN_NOT_ALLOWED,
+  HTTPS_MSG_JOIN_NOT_PENDING,
+  HTTPS_MSG_JOIN_SIDE_EMPTY,
+  HTTPS_MSG_LEGACY_JOIN,
+  HTTPS_MSG_ROLE_CODE_REQUIRED,
+  HTTPS_MSG_WRONG_ROLE_CODE,
+};
 
-/**
- * Expected session join/role UX HttpsError keys (`code:message`) for Sentry.
- * Keep in sync with mapJoinSessionWithRoleError / mapJoinRequestError throws.
- */
-export const EXPECTED_SESSION_UX_HTTPS_ERROR_KEYS = [
-  `permission-denied:${HTTPS_MSG_WRONG_ROLE_CODE}`,
-  `invalid-argument:${HTTPS_MSG_ROLE_CODE_REQUIRED}`,
-  `failed-precondition:${HTTPS_MSG_APP_VERSION_INCOMPATIBLE}`,
-  `failed-precondition:${HTTPS_MSG_CLIENT_UPDATE_REQUIRED}`,
-  `failed-precondition:${HTTPS_MSG_JOIN_SIDE_EMPTY}`,
-  `failed-precondition:${HTTPS_MSG_JOIN_NOT_PENDING}`,
-  `failed-precondition:${HTTPS_MSG_JOIN_EXPIRED}`,
-  `invalid-argument:${HTTPS_MSG_INVALID_JOIN_REQUEST}`,
-  `permission-denied:${HTTPS_MSG_JOIN_NOT_ALLOWED}`,
-  `failed-precondition:${HTTPS_MSG_LEGACY_JOIN}`,
-];
+function throwIfClientUpdateRequired(error) {
+  if (error.message === CLIENT_UPDATE_REQUIRED) {
+    throw new HttpsError(
+      "failed-precondition",
+      HTTPS_MSG_CLIENT_UPDATE_REQUIRED,
+    );
+  }
+}
 
 export function requireAuthSessionId(request) {
   if (!request.auth) {
@@ -139,12 +144,7 @@ export function mapJoinSessionWithRoleError(error) {
       HTTPS_MSG_APP_VERSION_INCOMPATIBLE,
     );
   }
-  if (error.message === CLIENT_UPDATE_REQUIRED) {
-    throw new HttpsError(
-      "failed-precondition",
-      HTTPS_MSG_CLIENT_UPDATE_REQUIRED,
-    );
-  }
+  throwIfClientUpdateRequired(error);
   throw error;
 }
 
@@ -220,12 +220,7 @@ export function mapJoinRequestError(error) {
   if (error.message === JOIN_REQ_EXPIRED) {
     throw new HttpsError("failed-precondition", HTTPS_MSG_JOIN_EXPIRED);
   }
-  if (error.message === CLIENT_UPDATE_REQUIRED) {
-    throw new HttpsError(
-      "failed-precondition",
-      HTTPS_MSG_CLIENT_UPDATE_REQUIRED,
-    );
-  }
+  throwIfClientUpdateRequired(error);
   throw error;
 }
 

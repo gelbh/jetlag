@@ -119,16 +119,7 @@ export const postSupportAgentTurn = onCall(
         },
       );
     } catch (error) {
-      if (error instanceof HttpsError) {
-        throw error;
-      }
-      // LLM/config sentinels → expected unavailable; other Errors still mapped
-      // or rethrown by mapIncidentError.
-      mapIncidentError(
-        error instanceof Error
-          ? error
-          : new Error(SUPPORT_AGENT_LLM_FAILED),
-      );
+      mapIncidentError(error);
     }
   }),
 );

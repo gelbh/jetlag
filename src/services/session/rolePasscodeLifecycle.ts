@@ -229,6 +229,13 @@ export async function resolveRoleJoinRequest(
   await callable({ sessionId, requestId, decision });
 }
 
+const CLIENT_UPDATE_REQUIRED_COPY =
+  "Update the app to continue. Refresh to load the latest build.";
+
+function isClientUpdateRequiredMessage(message: string): boolean {
+  return message.includes("Client update required.");
+}
+
 export function mapRolePasscodeJoinError(error: unknown): string {
   if (!(error instanceof Error)) {
     return "Couldn't join the session.";
@@ -244,11 +251,22 @@ export function mapRolePasscodeJoinError(error: unknown): string {
   if (message.includes("App version incompatible")) {
     return "Update the app to join this session.";
   }
-  if (message.includes("Client update required")) {
-    return "Update the app to continue. Refresh to load the latest build.";
+  if (isClientUpdateRequiredMessage(message)) {
+    return CLIENT_UPDATE_REQUIRED_COPY;
   }
 
   return message || "Couldn't join the session.";
+}
+
+/** Leader-facing copy when accept/decline of a pending request fails. */
+export function mapLeaderJoinResolveError(error: unknown): string {
+  if (
+    error instanceof Error &&
+    isClientUpdateRequiredMessage(error.message)
+  ) {
+    return "That player needs to update the app before they can join.";
+  }
+  return mapJoinRequestError(error);
 }
 
 export function mapJoinRequestError(error: unknown): string {
@@ -269,8 +287,8 @@ export function mapJoinRequestError(error: unknown): string {
   if (message.includes("legacy join")) {
     return "This session doesn't support join requests.";
   }
-  if (message.includes("Client update required")) {
-    return "Update the app to continue. Refresh to load the latest build.";
+  if (isClientUpdateRequiredMessage(message)) {
+    return CLIENT_UPDATE_REQUIRED_COPY;
   }
 
   return message || "Couldn't send join request.";

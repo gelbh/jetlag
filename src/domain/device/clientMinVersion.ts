@@ -4,9 +4,6 @@ import { compareAppVersions } from "../session/meta/sessionVersion";
 export const CLIENT_MIN_VERSION_COLLECTION = "ops";
 export const CLIENT_MIN_VERSION_DOC_ID = "clientMinVersion";
 
-/** Initial production floor when seeding the gate. */
-export const INITIAL_CLIENT_MIN_VERSION = "0.11.0";
-
 export function meetsClientMinVersion(
   clientVersion: string,
   minVersion: string,

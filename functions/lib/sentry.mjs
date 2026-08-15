@@ -4,13 +4,13 @@ import { fileURLToPath } from "node:url";
 import * as Sentry from "@sentry/node";
 import { defineSecret } from "firebase-functions/params";
 import { HttpsError } from "firebase-functions/v2/https";
+import { EXPECTED_SESSION_UX_HTTPS_ERROR_KEYS } from "../session/expectedSessionUxHttpsErrors.mjs";
 
 const sentryDsnSecret = defineSecret("SENTRY_DSN");
 
 /**
  * Expected callable HttpsError outcomes — not product bugs.
- * Session join/role keys must match EXPECTED_SESSION_UX_HTTPS_ERROR_KEYS
- * in handlers/session/shared.mjs (enforced by sentry.test.mjs).
+ * Session join/role keys come from expectedSessionUxHttpsErrors.mjs.
  */
 const EXPECTED_HTTPS_ERROR_KEYS = new Set([
   "permission-denied:Only the host can do that.",
@@ -21,17 +21,7 @@ const EXPECTED_HTTPS_ERROR_KEYS = new Set([
   "resource-exhausted:Too many attempts. Try again later.",
   "permission-denied:Invalid access code.",
   "resource-exhausted:Too many recovery attempts. Try again tomorrow.",
-  // Session join/role UX (shared.mjs EXPECTED_SESSION_UX_HTTPS_ERROR_KEYS)
-  "permission-denied:Wrong role code.",
-  "invalid-argument:Role code is required.",
-  "failed-precondition:App version incompatible.",
-  "failed-precondition:Client update required.",
-  "failed-precondition:Join without a request — this side is empty.",
-  "failed-precondition:Join request is not pending.",
-  "failed-precondition:Join request expired.",
-  "invalid-argument:Invalid join request.",
-  "permission-denied:Not allowed for this join request.",
-  "failed-precondition:Session uses legacy join.",
+  ...EXPECTED_SESSION_UX_HTTPS_ERROR_KEYS,
 ]);
 
 let initialized = false;

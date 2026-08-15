@@ -51,7 +51,7 @@ function normalizeEnvFallback(envFallback) {
  * `CLIENT_MIN_VERSION` env/param. Null only when both are empty (gate off).
  *
  * @param {FirebaseFirestore.Firestore} db
- * @param {{ envFallback?: string, nowMs?: number }} [options]
+ * @param {{ envFallback?: string }} [options]
  */
 export async function resolveClientMinVersion(db, options = {}) {
   const cached = minVersionCache.get(CACHE_KEY);

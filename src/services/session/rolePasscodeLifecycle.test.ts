@@ -6,6 +6,7 @@ import {
   joinSessionWithRole,
   leaveSessionMembership,
   mapJoinRequestError,
+  mapLeaderJoinResolveError,
   mapRolePasscodeJoinError,
   regenerateRolePasscode,
   requestRoleJoin,
@@ -211,6 +212,16 @@ describe("rolePasscodeLifecycle", () => {
         new Error("failed-precondition Client update required."),
       ),
     ).toContain("Refresh");
+    expect(
+      mapJoinRequestError(
+        new Error("failed-precondition Client update required."),
+      ),
+    ).toContain("Refresh");
+    expect(
+      mapLeaderJoinResolveError(
+        new Error("failed-precondition Client update required."),
+      ),
+    ).toContain("That player needs to update");
   });
 
   it("maps empty-side join request errors to player copy", () => {

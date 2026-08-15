@@ -37,7 +37,7 @@ export const JOIN_PERMISSION_DENIED_MESSAGE = "Join permission denied";
 
 /**
  * Production fixtures — mirror `HTTPS_MSG_*` in
- * `functions/handlers/session/shared.mjs` (Task 1 expected join UX).
+ * `functions/session/expectedSessionUxHttpsErrors.mjs`.
  * Client denylist belt for residual capture from old clients.
  */
 export const EXPECTED_JOIN_UX_MESSAGES = [

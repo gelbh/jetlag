@@ -17,6 +17,7 @@ vi.mock("../../../hooks/map-screen/useLeaderJoinRequests", () => ({
   useLeaderJoinRequests: () => ({
     pendingJoinRequest: null,
     joinRequestBusy: false,
+    joinRequestError: null,
     handleAcceptJoinRequest: vi.fn(),
     handleDeclineJoinRequest: vi.fn(),
   }),
