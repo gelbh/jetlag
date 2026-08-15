@@ -7,7 +7,11 @@ import { HttpsError } from "firebase-functions/v2/https";
 
 const sentryDsnSecret = defineSecret("SENTRY_DSN");
 
-/** Expected callable HttpsError outcomes — not product bugs. */
+/**
+ * Expected callable HttpsError outcomes — not product bugs.
+ * Session join/role keys must match EXPECTED_SESSION_UX_HTTPS_ERROR_KEYS
+ * in handlers/session/shared.mjs (enforced by sentry.test.mjs).
+ */
 const EXPECTED_HTTPS_ERROR_KEYS = new Set([
   "permission-denied:Only the host can do that.",
   "failed-precondition:Session already ended.",
@@ -17,7 +21,16 @@ const EXPECTED_HTTPS_ERROR_KEYS = new Set([
   "resource-exhausted:Too many attempts. Try again later.",
   "permission-denied:Invalid access code.",
   "resource-exhausted:Too many recovery attempts. Try again tomorrow.",
+  // Session join/role UX (shared.mjs EXPECTED_SESSION_UX_HTTPS_ERROR_KEYS)
+  "permission-denied:Wrong role code.",
   "invalid-argument:Role code is required.",
+  "failed-precondition:App version incompatible.",
+  "failed-precondition:Join without a request — this side is empty.",
+  "failed-precondition:Join request is not pending.",
+  "failed-precondition:Join request expired.",
+  "invalid-argument:Invalid join request.",
+  "permission-denied:Not allowed for this join request.",
+  "failed-precondition:Session uses legacy join.",
 ]);
 
 let initialized = false;
@@ -94,11 +107,12 @@ export function isAbortErrorEvent(event) {
   return false;
 }
 
-function readAppVersion() {
+export function readAppVersion() {
   const functionsDir = dirname(fileURLToPath(import.meta.url));
   try {
+    // Root app version (functions/package.json has no version field).
     const packageJson = JSON.parse(
-      readFileSync(resolve(functionsDir, "../package.json"), "utf8"),
+      readFileSync(resolve(functionsDir, "../../package.json"), "utf8"),
     );
     return packageJson.version ?? "0.0.0";
   } catch {

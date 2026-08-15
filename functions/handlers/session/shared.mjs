@@ -43,6 +43,35 @@ import {
 
 export const sentryDsnSecret = getSentryDsnSecret();
 
+/** Human-facing HttpsError messages for expected join/role UX (Sentry allowlist SoT). */
+export const HTTPS_MSG_WRONG_ROLE_CODE = "Wrong role code.";
+export const HTTPS_MSG_ROLE_CODE_REQUIRED = "Role code is required.";
+export const HTTPS_MSG_APP_VERSION_INCOMPATIBLE = "App version incompatible.";
+export const HTTPS_MSG_JOIN_SIDE_EMPTY =
+  "Join without a request — this side is empty.";
+export const HTTPS_MSG_JOIN_NOT_PENDING = "Join request is not pending.";
+export const HTTPS_MSG_JOIN_EXPIRED = "Join request expired.";
+export const HTTPS_MSG_INVALID_JOIN_REQUEST = "Invalid join request.";
+export const HTTPS_MSG_JOIN_NOT_ALLOWED =
+  "Not allowed for this join request.";
+export const HTTPS_MSG_LEGACY_JOIN = "Session uses legacy join.";
+
+/**
+ * Expected session join/role UX HttpsError keys (`code:message`) for Sentry.
+ * Keep in sync with mapJoinSessionWithRoleError / mapJoinRequestError throws.
+ */
+export const EXPECTED_SESSION_UX_HTTPS_ERROR_KEYS = [
+  `permission-denied:${HTTPS_MSG_WRONG_ROLE_CODE}`,
+  `invalid-argument:${HTTPS_MSG_ROLE_CODE_REQUIRED}`,
+  `failed-precondition:${HTTPS_MSG_APP_VERSION_INCOMPATIBLE}`,
+  `failed-precondition:${HTTPS_MSG_JOIN_SIDE_EMPTY}`,
+  `failed-precondition:${HTTPS_MSG_JOIN_NOT_PENDING}`,
+  `failed-precondition:${HTTPS_MSG_JOIN_EXPIRED}`,
+  `invalid-argument:${HTTPS_MSG_INVALID_JOIN_REQUEST}`,
+  `permission-denied:${HTTPS_MSG_JOIN_NOT_ALLOWED}`,
+  `failed-precondition:${HTTPS_MSG_LEGACY_JOIN}`,
+];
+
 export function requireAuthSessionId(request) {
   if (!request.auth) {
     throw new HttpsError("unauthenticated", "Sign in required.");
@@ -93,16 +122,19 @@ export function mapJoinSessionWithRoleError(error) {
     throw new HttpsError("failed-precondition", "Session already ended.");
   }
   if (error.message === JOIN_NOT_GATED) {
-    throw new HttpsError("failed-precondition", "Session uses legacy join.");
+    throw new HttpsError("failed-precondition", HTTPS_MSG_LEGACY_JOIN);
   }
   if (error.message === JOIN_WRONG_PASSCODE) {
-    throw new HttpsError("permission-denied", "Wrong role code.");
+    throw new HttpsError("permission-denied", HTTPS_MSG_WRONG_ROLE_CODE);
   }
   if (error.message === JOIN_PASSCODE_REQUIRED) {
-    throw new HttpsError("invalid-argument", "Role code is required.");
+    throw new HttpsError("invalid-argument", HTTPS_MSG_ROLE_CODE_REQUIRED);
   }
   if (error.message === JOIN_INCOMPATIBLE_VERSION) {
-    throw new HttpsError("failed-precondition", "App version incompatible.");
+    throw new HttpsError(
+      "failed-precondition",
+      HTTPS_MSG_APP_VERSION_INCOMPATIBLE,
+    );
   }
   throw error;
 }
@@ -159,28 +191,25 @@ export function mapJoinRequestError(error) {
     throw new HttpsError("failed-precondition", "Session already ended.");
   }
   if (error.message === JOIN_REQ_NOT_GATED) {
-    throw new HttpsError("failed-precondition", "Session uses legacy join.");
+    throw new HttpsError("failed-precondition", HTTPS_MSG_LEGACY_JOIN);
   }
   if (error.message === JOIN_REQ_SIDE_EMPTY) {
-    throw new HttpsError(
-      "failed-precondition",
-      "Join without a request — this side is empty.",
-    );
+    throw new HttpsError("failed-precondition", HTTPS_MSG_JOIN_SIDE_EMPTY);
   }
   if (error.message === JOIN_REQ_INVALID_ROLE || error.message === JOIN_REQ_INVALID_DECISION) {
-    throw new HttpsError("invalid-argument", "Invalid join request.");
+    throw new HttpsError("invalid-argument", HTTPS_MSG_INVALID_JOIN_REQUEST);
   }
   if (
     error.message === JOIN_REQ_NOT_AUTHORIZED ||
     error.message === JOIN_REQ_NOT_REQUESTER
   ) {
-    throw new HttpsError("permission-denied", "Not allowed for this join request.");
+    throw new HttpsError("permission-denied", HTTPS_MSG_JOIN_NOT_ALLOWED);
   }
   if (error.message === JOIN_REQ_NOT_PENDING) {
-    throw new HttpsError("failed-precondition", "Join request is not pending.");
+    throw new HttpsError("failed-precondition", HTTPS_MSG_JOIN_NOT_PENDING);
   }
   if (error.message === JOIN_REQ_EXPIRED) {
-    throw new HttpsError("failed-precondition", "Join request expired.");
+    throw new HttpsError("failed-precondition", HTTPS_MSG_JOIN_EXPIRED);
   }
   throw error;
 }
