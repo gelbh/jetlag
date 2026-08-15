@@ -52,7 +52,7 @@ export async function selectTransitStation(page: Page, name: string | RegExp) {
   await station.click();
 }
 
-export async function confirmHidingZone(page: Page, _moveMode = false) {
+export async function confirmHidingZone(page: Page) {
   const confirm = page.getByTestId("ask-commit-strip").getByRole("button");
   await expect(confirm).toBeEnabled({ timeout: 10_000 });
   await expect(confirm).toHaveAttribute("data-armed", "true");

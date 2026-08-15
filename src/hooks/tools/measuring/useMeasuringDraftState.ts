@@ -28,6 +28,9 @@ export function useMeasuringDraftState(
   sessionRules?: SessionRulesInput,
 ) {
   const wizardStepRef = useRef("place");
+  const setWizardStep = useCallback((step: string) => {
+    wizardStepRef.current = step;
+  }, []);
   const seaLevelRequestIdRef = useRef(0);
   const coastlineRequestIdRef = useRef(0);
   const linearRequestIdRef = useRef(0);
@@ -173,6 +176,7 @@ export function useMeasuringDraftState(
 
   return {
     wizardStepRef,
+    setWizardStep,
     seaLevelRequestIdRef,
     coastlineRequestIdRef,
     linearRequestIdRef,

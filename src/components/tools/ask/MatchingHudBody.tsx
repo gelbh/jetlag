@@ -101,19 +101,11 @@ export function MatchingHudBody({
   const usesLandmassMatching = category?.resolver === "landmass";
   const resolveComplete = nullAnswer || nearestFeatureName !== null;
 
-  let chord: "category" | "resolve" | "answer" = "category";
-  if (!categoryChosen) {
-    chord = "category";
-  } else if (
-    !awaitHiderAnswer &&
-    resolveComplete &&
-    hasSeekerPoint &&
-    !loading
-  ) {
-    chord = "answer";
-  } else {
-    chord = "resolve";
-  }
+  const chord: "category" | "resolve" | "answer" = !categoryChosen
+    ? "category"
+    : !awaitHiderAnswer && resolveComplete && hasSeekerPoint && !loading
+      ? "answer"
+      : "resolve";
 
   const loadingMessage = loading
     ? usesContainmentMatching

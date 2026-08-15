@@ -142,26 +142,30 @@ export function useMeasuringTool({
     placementCrosshair,
   );
 
+  const measuringSeekerPoint = draft.measuringSeekerPoint;
+  const measuringOptionChosen = draft.measuringOptionChosen;
+  const setWizardStep = draft.setWizardStep;
+
   // Drive map-click routing without mounting MeasuringPanel wizard.
   useEffect(() => {
-    if (!draft.measuringSeekerPoint) {
-      draft.wizardStepRef.current = "place";
+    if (!measuringSeekerPoint) {
+      setWizardStep("place");
       return;
     }
-    if (!draft.measuringOptionChosen) {
-      draft.wizardStepRef.current = "source";
+    if (!measuringOptionChosen) {
+      setWizardStep("source");
       return;
     }
     if (!hasMeasuringTarget) {
-      draft.wizardStepRef.current = "target";
+      setWizardStep("target");
       return;
     }
-    draft.wizardStepRef.current = "ask";
+    setWizardStep("ask");
   }, [
-    draft.measuringOptionChosen,
-    draft.measuringSeekerPoint,
-    draft.wizardStepRef,
     hasMeasuringTarget,
+    measuringOptionChosen,
+    measuringSeekerPoint,
+    setWizardStep,
   ]);
 
   const questionCost = useMemo(() => {

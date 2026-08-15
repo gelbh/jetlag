@@ -16,7 +16,6 @@ import {
 import type { HidingZoneStepId } from "../components/hider/hidingZoneSteps";
 import {
   isWizardPlacePhaseStep,
-  sheetSnapFromStepId,
 } from "../domain/wizard/phaseToSheetSnap";
 import { timeTrapForHider } from "../domain/expansion/timeTraps";
 import { useTimeTrapsSync } from "../hooks/session/useTimeTrapsSync";
@@ -457,7 +456,6 @@ export function HiderMapScreen() {
 
   const [hidingZoneStepId, setHidingZoneStepId] =
     useState<HidingZoneStepId>("method");
-  const [wizardPeeked, setWizardPeeked] = useState(false);
   const mapPickEnabled =
     hidingZoneStepId === "location" || hidingZoneStepId === "confirm";
 
@@ -487,7 +485,6 @@ export function HiderMapScreen() {
 
   const handleHidingZoneStepChange = useCallback((stepId: HidingZoneStepId) => {
     setHidingZoneStepId(stepId);
-    setWizardPeeked(sheetSnapFromStepId(stepId) === "peek");
   }, []);
 
   const mapAttentionActive =
@@ -571,16 +568,6 @@ export function HiderMapScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- moveMode gates sheet openers during Play Move
   }, [overlay.openCodes, zoneTool.closeWizard, zoneTool.moveMode]);
 
-  const handleMapPanStart = useCallback(() => {
-    if (zoneTool.wizardOpen) {
-      setWizardPeeked(true);
-    }
-  }, [zoneTool.wizardOpen, setWizardPeeked]);
-
-  const handleMapPanEnd = useCallback(() => {
-    setWizardPeeked(false);
-  }, [setWizardPeeked]);
-
   const openLogExclusive = useCallback(() => {
     if (zoneTool.moveMode) {
       return;
@@ -651,8 +638,6 @@ export function HiderMapScreen() {
         >
           <MapViewportTracker
             onViewportChange={handleMapViewportChange}
-            onUserPanStart={handleMapPanStart}
-            onUserPanEnd={handleMapPanEnd}
           />
           <GameAreaMask gameArea={gameArea} />
           <AnnotationLayer
@@ -817,8 +802,6 @@ export function HiderMapScreen() {
         onHidingZoneStepChange={handleHidingZoneStepChange}
         onSearchThisArea={handleSearchThisArea}
         sheetBlocksWizard={sheetBlocksWizard}
-        wizardPeeked={wizardPeeked}
-        onWizardPeekedChange={setWizardPeeked}
         onOpenWizard={openWizardExclusive}
         onOpenChat={openChatExclusive}
         onOpenSettings={openSettingsExclusive}

@@ -9,9 +9,11 @@ import {
 
 /** @deprecated Peek expand — Ask HUD has no floating peek panel. */
 export async function expandToolPanelIfPeeked(
-  _page: Page,
-  _opts?: { timeoutMs?: number },
+  page?: Page,
+  opts?: { timeoutMs?: number },
 ) {
+  void page;
+  void opts;
   // no-op — AskHudHost is always map-visible
 }
 
@@ -46,12 +48,14 @@ export async function waitForWizardNext(page: Page) {
 }
 
 /** @deprecated No CONTINUE — no-op when HUD advances via map/chips/rows. */
-export async function advanceWizard(_page: Page) {
+export async function advanceWizard(page: Page) {
+  void page;
   // Ask HUD mid-steps advance via map place, chip, or catalog row — not CONTINUE.
 }
 
 /** @deprecated Phase retreat retired for Ask HUD. */
-export async function retreatWizard(_page: Page) {
+export async function retreatWizard(page: Page) {
+  void page;
   // no-op
 }
 

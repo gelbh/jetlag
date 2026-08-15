@@ -11,7 +11,6 @@ import {
 } from "@/components/tools/shared/measuring/MeasuringTargetStep";
 import {
   anchorResolveLoadingMessage,
-  measuringUsesDebouncedSeekerResolve,
   type MeasuringSearchRole,
 } from "@/components/tools/shared/measuring/measuringPanelUtils";
 import { SearchResultsList } from "@/components/tools/shared/controls/SearchResultsList";
@@ -134,10 +133,6 @@ export function MeasuringHudBody({
     ),
   );
 
-  const needsAutoResolve = measuringUsesDebouncedSeekerResolve(
-    subject,
-    measureFrom,
-  );
   const anchorLoadingMessage = anchorResolveLoadingMessage(
     subject,
     measureFrom,
@@ -163,18 +158,13 @@ export function MeasuringHudBody({
     distanceMeters !== null &&
     optionChosen;
 
-  let chord: "anchor" | "source" | "target" | "answer" = "anchor";
-  if (!hasSeekerPoint) {
-    chord = "anchor";
-  } else if (!optionChosen) {
-    chord = "source";
-  } else if (!hasTargetPoint || (needsAutoResolve && loading && !hasTargetPoint)) {
-    chord = "target";
-  } else if (showAnswer) {
-    chord = "answer";
-  } else {
-    chord = "target";
-  }
+  const chord: "anchor" | "source" | "target" | "answer" = !hasSeekerPoint
+    ? "anchor"
+    : !optionChosen
+      ? "source"
+      : showAnswer
+        ? "answer"
+        : "target";
 
   return (
     <div

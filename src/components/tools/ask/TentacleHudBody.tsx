@@ -77,14 +77,11 @@ export function TentacleHudBody({
       ? formatPresetDistance(searchRadiusMeters, distanceUnit)
       : null;
 
-  let chord: "types" | "place" | "locations" = "types";
-  if (!categoryChosen) {
-    chord = "types";
-  } else if (!hasCenter) {
-    chord = "place";
-  } else {
-    chord = "locations";
-  }
+  const chord: "types" | "place" | "locations" = !categoryChosen
+    ? "types"
+    : !hasCenter
+      ? "place"
+      : "locations";
 
   return (
     <div

@@ -125,8 +125,6 @@ export type HiderMapScreenChromeProps = {
   onHidingZoneStepChange: (stepId: HidingZoneStepId) => void;
   onSearchThisArea: () => void;
   sheetBlocksWizard: boolean;
-  wizardPeeked: boolean;
-  onWizardPeekedChange: (peeked: boolean) => void;
   onOpenWizard: () => void;
   onOpenChat: () => void;
   onOpenSettings: () => void;
@@ -242,8 +240,6 @@ export function HiderMapScreenChrome({
   onHidingZoneStepChange,
   onSearchThisArea,
   sheetBlocksWizard,
-  wizardPeeked: _wizardPeeked,
-  onWizardPeekedChange: _onWizardPeekedChange,
   onOpenWizard,
   onOpenChat,
   onOpenSettings,
