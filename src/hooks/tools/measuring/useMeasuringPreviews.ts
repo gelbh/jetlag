@@ -1,7 +1,10 @@
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import type { Feature, MultiPolygon, Polygon as GeoPolygon } from "geojson";
 import type { GameArea } from "@/domain/map/annotations";
-import { assertMeasuringGeometryBudget } from "@/domain/geometry/measuring/measuringGeometryBudgets";
+import {
+  assertMeasuringGeometryBudget,
+  softenMeasuringOutputToBudget,
+} from "@/domain/geometry/measuring/measuringGeometryBudgets";
 import {
   buildMeasuringBoundaryPreview,
   buildMeasuringEliminationPreview,
@@ -125,6 +128,18 @@ export function useMeasuringPreviews(
       if (generation !== generationRef.current) {
         return;
       }
+
+      if (near) {
+        const softenedNear = softenMeasuringOutputToBudget(near);
+        if (!softenedNear.ok) {
+          setMeasuringNearRegion(null);
+          setMeasuringEliminationPreview(null);
+          setMeasuringError(softenedNear.message);
+          return;
+        }
+        near = softenedNear.feature;
+      }
+
       // Clear stale elimination while the matching elim rebuild runs.
       setMeasuringNearRegion(near);
       setMeasuringEliminationPreview(null);
@@ -134,9 +149,21 @@ export function useMeasuringPreviews(
           ...previewRegionInput,
           precomputedNearRegion: near,
         });
-        if (generation === generationRef.current) {
-          setMeasuringEliminationPreview(elimination);
+        if (generation !== generationRef.current) {
+          return;
         }
+        if (!elimination) {
+          setMeasuringEliminationPreview(null);
+          return;
+        }
+        const softenedElim = softenMeasuringOutputToBudget(elimination);
+        if (!softenedElim.ok) {
+          setMeasuringNearRegion(null);
+          setMeasuringEliminationPreview(null);
+          setMeasuringError(softenedElim.message);
+          return;
+        }
+        setMeasuringEliminationPreview(softenedElim.feature);
       } catch {
         if (generation === generationRef.current) {
           setMeasuringEliminationPreview(null);
