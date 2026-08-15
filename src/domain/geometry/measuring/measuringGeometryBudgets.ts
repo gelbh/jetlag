@@ -194,23 +194,28 @@ export function softenMeasuringOutputToBudget(
     return { ok: true, feature: current };
   }
 
-  for (const tolerance of OUTPUT_SIMPLIFY_TOLERANCES) {
-    try {
-      const simplified = simplify(current, {
-        tolerance,
-        highQuality: false,
-      }) as Feature<Polygon | MultiPolygon>;
-      if (
-        simplified.geometry.type === "Polygon" ||
-        simplified.geometry.type === "MultiPolygon"
-      ) {
-        current = simplified;
+  // Turf simplify thrash/stack-overflows on multi-k dense rings (CI 5s timeout);
+  // skip straight to stride decimate above 1.25× the vertex cap.
+  const initialVerts = countPolygonVertices(current);
+  if (initialVerts <= MEASURING_OUTPUT_MAX_VERTICES * 1.25) {
+    for (const tolerance of OUTPUT_SIMPLIFY_TOLERANCES) {
+      try {
+        const simplified = simplify(current, {
+          tolerance,
+          highQuality: false,
+        }) as Feature<Polygon | MultiPolygon>;
+        if (
+          simplified.geometry.type === "Polygon" ||
+          simplified.geometry.type === "MultiPolygon"
+        ) {
+          current = simplified;
+        }
+      } catch {
+        // Keep last successful geometry and try the next tolerance / decimate.
       }
-    } catch {
-      // Keep last successful geometry and try the next tolerance / decimate.
-    }
-    if (assertMeasuringOutputComplexityBudget(current).ok) {
-      return { ok: true, feature: current };
+      if (assertMeasuringOutputComplexityBudget(current).ok) {
+        return { ok: true, feature: current };
+      }
     }
   }
 
