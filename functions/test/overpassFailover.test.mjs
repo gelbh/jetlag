@@ -152,4 +152,32 @@ describe("fetchOverpassWithFailover", () => {
     assert.ok(interpreterOrder.length >= 1);
     assert.match(interpreterOrder[0], /private\.coffee/);
   });
+
+  it("stops peer attempts when failover budget is exhausted", async () => {
+    let interpreterCalls = 0;
+    let clock = 1_000_000;
+    globalThis.fetch = async (url) => {
+      if (String(url).includes("/api/status")) {
+        return new Response("Slot available after: 0\n", { status: 200 });
+      }
+      interpreterCalls += 1;
+      // Consume almost the whole remaining budget so the next peer is skipped.
+      clock += 24_000;
+      return jsonResponse(504);
+    };
+
+    await assert.rejects(
+      () =>
+        fetchOverpassWithFailover("[out:json];out;", {
+          deadlineMs: clock + 25_000,
+          now: () => clock,
+        }),
+      (error) => {
+        assert.equal(error.message, "Overpass timed out.");
+        return true;
+      },
+    );
+    assert.equal(interpreterCalls, 1);
+    assert.ok(interpreterCalls < OVERPASS_ENDPOINTS.length);
+  });
 });

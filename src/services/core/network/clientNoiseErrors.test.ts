@@ -26,6 +26,14 @@ describe("isIdbConnectionClosingMessage", () => {
     ).toBe(true);
   });
 
+  it("matches Firefox/WebKit closed-database InvalidStateError", () => {
+    expect(
+      isIdbConnectionClosingMessage(
+        "Can't start a transaction on a closed database",
+      ),
+    ).toBe(true);
+  });
+
   it("ignores unrelated messages", () => {
     expect(
       isIdbConnectionClosingMessage("Database deleted by request of the user"),
