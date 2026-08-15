@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { GameArea } from "../../map/annotations";
 import { MAP_ANNOTATION_COLORS } from "../../map/mapAnnotationColors";
 import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
@@ -12,6 +12,8 @@ import {
   measuringAnswerFromReplyId,
   resolveMeasuringPendingQuestion,
 } from "./measuring";
+import * as measuringGeometryBudgets from "../../geometry/measuring/measuringGeometryBudgets";
+import { MEASURING_OUTPUT_OVER_BUDGET_MESSAGE } from "../../geometry/measuring/measuringGeometryBudgets";
 import {
   isPhotoPendingQuestion,
   photoPendingQuestionAnswered,
@@ -356,6 +358,44 @@ describe("resolveMeasuringPendingQuestion", () => {
 
     expect(resolved?.type).toBe("measuring");
     expect(resolved?.metadata.measuringBoundaryJson).toBeUndefined();
+  });
+
+  it("returns null when elim stays over output complexity budget", async () => {
+    const softenSpy = vi
+      .spyOn(measuringGeometryBudgets, "softenMeasuringOutputToBudget")
+      .mockReturnValue({
+        ok: false,
+        message: MEASURING_OUTPUT_OVER_BUDGET_MESSAGE,
+      });
+
+    const pending = basePending({
+      toolType: "measuring",
+      placement: {
+        geometryJson: JSON.stringify({
+          type: "Feature",
+          properties: {},
+          geometry: { type: "Point", coordinates: [-0.15, 51.45] },
+        }),
+        metadata: {
+          measuringRegionInputJson: JSON.stringify({
+            measuringSubject: "location",
+            measuringLocationCategory: "museum",
+            measuringDistanceMeters: 1000,
+            measuringTargetPoint: [51.44, -0.14],
+            measuringPlaces: [],
+            measuringCoastSegments: [],
+            measuringSeaLevelNearRegion: null,
+            usesAllPlacesInArea: false,
+          }),
+        },
+      },
+    });
+
+    await expect(
+      resolveMeasuringPendingQuestion(pending, "further", gameArea),
+    ).resolves.toBeNull();
+
+    softenSpy.mockRestore();
   });
 });
 

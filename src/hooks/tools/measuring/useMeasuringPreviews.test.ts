@@ -1,7 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
-import { renderHook } from "@testing-library/react";
+import { renderHook, waitFor } from "@testing-library/react";
 import type { Feature, Polygon } from "geojson";
-import { MEASURING_MULTI_PLACE_OVER_BUDGET_MESSAGE } from "@/domain/geometry/measuring/measuringGeometryBudgets";
+import {
+  MEASURING_MULTI_PLACE_OVER_BUDGET_MESSAGE,
+  MEASURING_OUTPUT_OVER_BUDGET_MESSAGE,
+} from "@/domain/geometry/measuring/measuringGeometryBudgets";
+import * as measuringGeometryBudgets from "@/domain/geometry/measuring/measuringGeometryBudgets";
 import { previewGeometryFingerprint } from "@/domain/geometry/measuring/previewGeometryFingerprint";
 import {
   useMeasuringPreviews,
@@ -118,5 +122,55 @@ describe("useMeasuringPreviews budget gate", () => {
     );
     expect(result.current.measuringNearRegion).toBeNull();
     expect(result.current.measuringEliminationPreview).toBeNull();
+  });
+
+  it("refuses oversized elim after soften and clears previews", async () => {
+    const setMeasuringError = vi.fn();
+    const near = samplePreview();
+    const elim = samplePreview();
+    buildMeasuringBoundaryPreview.mockResolvedValue(near);
+    buildMeasuringEliminationPreview.mockResolvedValue(elim);
+
+    const softenSpy = vi
+      .spyOn(measuringGeometryBudgets, "softenMeasuringOutputToBudget")
+      .mockImplementationOnce((feature) => ({ ok: true, feature }))
+      .mockImplementationOnce(() => ({
+        ok: false,
+        message: MEASURING_OUTPUT_OVER_BUDGET_MESSAGE,
+      }));
+
+    const gameArea: GameArea = {
+      type: "Polygon",
+      coordinates: [
+        [
+          [0, 0],
+          [1, 0],
+          [1, 1],
+          [0, 1],
+          [0, 0],
+        ],
+      ],
+    };
+    const draft = {
+      ...baseDraft,
+      usesAllPlacesInArea: false,
+      measuringAnswer: "further",
+      measuringTargetPoint: [51.45, -0.15] as [number, number],
+      measuringPlaces: [],
+      measuringCoastSegments: [],
+      measuringSeaLevelNearRegion: null,
+      setMeasuringError,
+    } as unknown as MeasuringDraftState;
+
+    const { result } = renderHook(() => useMeasuringPreviews(gameArea, draft));
+
+    await waitFor(() => {
+      expect(setMeasuringError).toHaveBeenCalledWith(
+        MEASURING_OUTPUT_OVER_BUDGET_MESSAGE,
+      );
+    });
+    expect(result.current.measuringNearRegion).toBeNull();
+    expect(result.current.measuringEliminationPreview).toBeNull();
+    softenSpy.mockRestore();
   });
 });
