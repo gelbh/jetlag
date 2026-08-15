@@ -116,8 +116,12 @@ export function assertMeasuringOutputComplexityBudget(
     return { ok: true };
   }
 
-  const vertexCount = input.vertexCount;
-  const jsonChars = input.jsonChars;
+  const metrics = input as {
+    vertexCount?: number;
+    jsonChars?: number;
+  };
+  const vertexCount = metrics.vertexCount;
+  const jsonChars = metrics.jsonChars;
   if (
     (typeof vertexCount === "number" &&
       vertexCount > MEASURING_OUTPUT_MAX_VERTICES) ||
