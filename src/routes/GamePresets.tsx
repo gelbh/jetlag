@@ -38,8 +38,10 @@ import { filterGamePresetsForSearch } from "../domain/session/presets/gamePreset
 import { resolveFavouritePresets } from "../domain/session/presets/presetFavourites";
 import { isBundledPresetId } from "../domain/regions/bundledGamePresets";
 import { PresetBrowseLayout } from "../components/presets/PresetBrowseLayout";
-import { RequestPreloadSection } from "../components/presets/RequestPreloadSection";
+import { PackAttachChip } from "../components/presets/PackAttachChip";
+import { RequestPackWhenUnavailable } from "../components/presets/RequestPackWhenUnavailable";
 import { buildPreloadPresetSnapshot } from "../domain/preloadRequest/buildPreloadPresetSnapshot";
+import { usePackAttachChrome } from "../hooks/session/usePackAttachChrome";
 import { useMapStore } from "../state/sessionStore";
 import type { GeocodedPlace } from "../services/geo/geocoding";
 
@@ -102,6 +104,10 @@ export function GamePresetEditor() {
         defaultAdvancedSessionSettings("medium", "imperial"),
     );
   const [error, setError] = useState<string | null>(null);
+  const packAttach = usePackAttachChrome({
+    gameArea,
+    initialPackId: existing?.regionPackId,
+  });
 
   const handleSave = () => {
     const trimmed = name.trim();
@@ -117,6 +123,7 @@ export function GamePresetEditor() {
       gameArea,
       placeLabel: placeLabel || undefined,
       focusBounds,
+      regionPackId: packAttach.packId,
     };
 
     const preset = createSessionDraftToGamePreset(
@@ -249,6 +256,14 @@ export function GamePresetEditor() {
                   Clear
                 </button>
               </div>
+              {packAttach.packId ? (
+                <PackAttachChip
+                  packId={packAttach.packId}
+                  source={packAttach.source}
+                  onClear={packAttach.clearPack}
+                  onChangePack={packAttach.changePack}
+                />
+              ) : null}
             </div>
           ) : null}
         </div>
@@ -311,8 +326,8 @@ export function GamePresetEditor() {
           onChange={setAdvancedSettings}
         />
 
-        {isUserPreset ? (
-          <RequestPreloadSection
+        {isUserPreset && packAttach.showRequestCta ? (
+          <RequestPackWhenUnavailable
             getSnapshot={() =>
               buildPreloadPresetSnapshot({
                 name,
@@ -321,7 +336,7 @@ export function GamePresetEditor() {
                 distanceUnit,
                 focusBounds,
                 gameArea,
-                regionPackId: existing?.regionPackId,
+                regionPackId: packAttach.packId,
                 presetId: existing?.id,
               })
             }
