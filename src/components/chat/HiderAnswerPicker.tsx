@@ -12,6 +12,7 @@ interface HiderAnswerPickerProps {
   truth: HiderTruthResult | null;
   loading: boolean;
   truthReferenceMode: HiderTruthReferenceMode;
+  disabled?: boolean;
   onSelect: (option: GameReplyOption) => void;
 }
 
@@ -24,6 +25,7 @@ export function HiderAnswerPicker({
   truth,
   loading,
   truthReferenceMode,
+  disabled = false,
   onSelect,
 }: HiderAnswerPickerProps) {
   const truthAvailable =
@@ -59,6 +61,7 @@ export function HiderAnswerPicker({
             <button
               key={option.id}
               type="button"
+              disabled={disabled}
               onClick={() => onSelect(option)}
               aria-label={
                 isRecommended
@@ -67,8 +70,8 @@ export function HiderAnswerPicker({
               }
               className={
                 isRecommended
-                  ? "btn-primary min-h-11"
-                  : "btn-secondary min-h-11"
+                  ? "btn-primary min-h-11 disabled:opacity-50"
+                  : "btn-secondary min-h-11 disabled:opacity-50"
               }
             >
               {buttonLabel}
