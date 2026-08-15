@@ -28,6 +28,7 @@ interface ChatPanelProps {
   truthReferenceModes?: ReadonlyMap<string, HiderTruthReferenceMode>;
   answerError?: string | null;
   answerSubmitting?: boolean;
+  answeredPendingIds?: ReadonlySet<string>;
   onAnswerQuestion: (
     pendingQuestionId: string,
     messageId: string,
@@ -58,6 +59,7 @@ export function ChatPanel({
   truthReferenceModes,
   answerError = null,
   answerSubmitting = false,
+  answeredPendingIds,
   onAnswerQuestion,
   onDismissExpiredQuestion,
   readOnly = false,
@@ -86,6 +88,7 @@ export function ChatPanel({
       truthReferenceModes={truthReferenceModes}
       answerError={answerError}
       answerSubmitting={answerSubmitting}
+      answeredPendingIds={answeredPendingIds}
       onAnswerQuestion={onAnswerQuestion}
       onDismissExpiredQuestion={onDismissExpiredQuestion}
       readOnly={readOnly}

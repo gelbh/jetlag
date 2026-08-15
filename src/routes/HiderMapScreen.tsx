@@ -1,4 +1,4 @@
-import { Suspense, useCallback, useMemo, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AppNavigate } from "../navigation/AppNavigate";
 import { MapLibreGeoJsonOverlay } from "../components/map/helpers/MapLibreGeoJsonOverlay";
 import { cssPxDashToMapLibre } from "../components/map/helpers/cssPxDashToMapLibre";
@@ -184,6 +184,10 @@ export function HiderMapScreen() {
   const [optimisticAnswers, setOptimisticAnswers] = useState<
     ReadonlyMap<string, string>
   >(() => new Map());
+  const answeredPendingIds = useMemo(
+    () => new Set(optimisticAnswers.keys()),
+    [optimisticAnswers],
+  );
   const [mapViewport, setMapViewport] = useState<MapViewportState | null>(
     null,
   );
@@ -329,6 +333,34 @@ export function HiderMapScreen() {
   useWakeLock(keepScreenAwake || (timer.running && !lowPowerMode));
   const { answerPendingQuestion, postSystemMessage } = usePendingQuestionActions();
 
+  useEffect(() => {
+    /* eslint-disable react-hooks/set-state-in-effect -- prune optimistic answers once remote status catches up */
+    setOptimisticAnswers((previous) => {
+      if (previous.size === 0) {
+        return previous;
+      }
+
+      let changed = false;
+      const next = new Map(previous);
+      for (const pendingQuestionId of previous.keys()) {
+        const pending = pendingQuestions.find(
+          (question) => question.id === pendingQuestionId,
+        );
+        if (
+          !pending ||
+          pending.status === "answered" ||
+          pending.status === "resolved" ||
+          pending.status === "cancelled"
+        ) {
+          next.delete(pendingQuestionId);
+          changed = true;
+        }
+      }
+      return changed ? next : previous;
+    });
+    /* eslint-enable react-hooks/set-state-in-effect */
+  }, [pendingQuestions]);
+
   const submitHiderAnswer = useCallback(
     async (
       pendingQuestionId: string,
@@ -337,7 +369,11 @@ export function HiderMapScreen() {
       selectedReply: string,
       deadlineExpired?: boolean,
     ) => {
-      if (!sessionId || answerInFlightRef.current) {
+      if (
+        !sessionId ||
+        answerInFlightRef.current ||
+        optimisticAnswers.has(pendingQuestionId)
+      ) {
         return;
       }
 
@@ -455,6 +491,7 @@ export function HiderMapScreen() {
       boardEconomyEnabled,
       gameArea,
       messages,
+      optimisticAnswers,
       pendingQuestions,
       sessionId,
       truthContext,
@@ -1007,6 +1044,7 @@ export function HiderMapScreen() {
           truthReferenceModes,
           answerError: chatAnswerError,
           answerSubmitting,
+          answeredPendingIds,
           onAnswerQuestion: submitHiderAnswer,
         }}
       />

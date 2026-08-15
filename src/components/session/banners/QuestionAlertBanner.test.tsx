@@ -102,6 +102,22 @@ describe("QuestionAlertBanner", () => {
     expect(container.innerHTML).toContain("--map-banner-top");
   });
 
+  it("hides when the question was answered optimistically", () => {
+    render(
+      <QuestionAlertBanner
+        pendingQuestions={[radarPending]}
+        messages={[radarMessage]}
+        sessionRules={{ gameSize: "medium" }}
+        sessionId="s1"
+        answeredPendingIds={new Set([radarPending.id])}
+        onAnswerQuestion={vi.fn()}
+      />,
+    );
+
+    expect(screen.queryByText(radarPending.promptText)).toBeNull();
+    expect(screen.queryByRole("button", { name: /Send answer/i })).toBeNull();
+  });
+
   it("shows walking status without answer buttons", () => {
     render(
       <QuestionAlertBanner
