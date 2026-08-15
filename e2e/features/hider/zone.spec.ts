@@ -48,21 +48,23 @@ test.describe("hider flows", () => {
     guestPage.once("dialog", (dialog) => dialog.accept());
     await guestPage.getByRole("button", { name: "Play move" }).click();
     await waitForHidingZoneWizard(guestPage);
-    await expect(guestPage.getByText(/Pick new location/i)).toBeVisible({
-      timeout: 15_000,
-    });
+    await expect(
+      guestPage.getByTestId("ask-mode-cue-ticker"),
+    ).toBeVisible({ timeout: 15_000 });
     await expect(guestPage.getByPlaceholder("Search stations…")).toBeVisible({
       timeout: 15_000,
     });
     await selectTransitStation(guestPage, "Dublin Central");
-    await guestPage.getByRole("button", { name: "Continue" }).click();
-    await confirmHidingZone(guestPage, true);
-    await expect(guestPage.getByText(/different location/i)).toBeVisible();
+    await confirmHidingZone(guestPage);
+    await expect(
+      guestPage.getByTestId("ask-commit-strip").getByRole("alert"),
+    ).toContainText(/different location/i);
 
-    await guestPage.getByRole("button", { name: "Previous step" }).click();
+    await guestPage
+      .getByRole("button", { name: /Choose different station/i })
+      .click();
     await selectTransitStation(guestPage, "North Station");
-    await guestPage.getByRole("button", { name: "Continue" }).click();
-    await confirmHidingZone(guestPage, true);
+    await confirmHidingZone(guestPage);
 
     await openChat(hostPage);
     await expect(
