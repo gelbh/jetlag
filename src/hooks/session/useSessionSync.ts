@@ -232,6 +232,15 @@ export function useSessionSync({ syncEnabled = true }: UseSessionSyncOptions = {
   ]);
 
   useEffect(() => {
+    const sessionResetAt = session?.sessionResetAt;
+    if (!sessionResetAt) {
+      return;
+    }
+    const current = useAnnotationStore.getState().annotations;
+    replaceAnnotations(filterAnnotationsAfterReset(current, sessionResetAt));
+  }, [session?.sessionResetAt, replaceAnnotations]);
+
+  useEffect(() => {
     if (
       !syncEnabled ||
       !session ||

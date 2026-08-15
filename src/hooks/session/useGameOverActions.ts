@@ -29,10 +29,12 @@ export function useGameOverActions(
   const rematchSessionId = session?.id;
 
   useEffect(() => {
+    /* eslint-disable react-hooks/set-state-in-effect -- hold rematch CTA until the game-over sheet unmounts */
     if (!gameOver.roundComplete) {
       setRematchPending(false);
       setRematchError(null);
     }
+    /* eslint-enable react-hooks/set-state-in-effect */
   }, [gameOver.roundComplete]);
 
   const handleRematch = useCallback(async () => {
