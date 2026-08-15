@@ -23,6 +23,7 @@ export interface HiderPendingQuestionAnswerProps {
   truthsLoading: boolean;
   truthReferenceMode: HiderTruthReferenceMode;
   nowMs: number;
+  disabled?: boolean;
   onAnswerQuestion: (
     pendingQuestionId: string,
     messageId: string,
@@ -41,6 +42,7 @@ export function HiderPendingQuestionAnswer({
   truthsLoading,
   truthReferenceMode,
   nowMs,
+  disabled = false,
   onAnswerQuestion,
 }: HiderPendingQuestionAnswerProps) {
   const walking = pending?.status === "walking";
@@ -110,6 +112,7 @@ export function HiderPendingQuestionAnswer({
           messageId={message.id}
           distanceUnit={sessionRules.distanceUnit}
           deadlineExpired={expired}
+          disabled={disabled}
           onAnswerQuestion={onAnswerQuestion}
         />
       ) : null}
@@ -119,9 +122,10 @@ export function HiderPendingQuestionAnswer({
           truth={truth}
           loading={truthsLoading}
           truthReferenceMode={truthReferenceMode}
+          disabled={disabled}
           onSelect={(option) => {
             const pendingQuestionId = message.pendingQuestionId;
-            if (!pendingQuestionId) {
+            if (!pendingQuestionId || disabled) {
               return;
             }
             void onAnswerQuestion(

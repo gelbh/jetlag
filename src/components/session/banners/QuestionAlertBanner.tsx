@@ -25,6 +25,7 @@ interface QuestionAlertBannerProps {
   truthsLoading?: boolean;
   truthReferenceModes?: ReadonlyMap<string, HiderTruthReferenceMode>;
   answerError?: string | null;
+  answerSubmitting?: boolean;
   onAnswerQuestion: HiderPendingQuestionAnswerProps["onAnswerQuestion"];
 }
 
@@ -37,6 +38,7 @@ export function QuestionAlertBanner({
   truthsLoading = false,
   truthReferenceModes,
   answerError = null,
+  answerSubmitting = false,
   onAnswerQuestion,
 }: QuestionAlertBannerProps) {
   const [nowMs, setNowMs] = useState(() => Date.now());
@@ -94,6 +96,7 @@ export function QuestionAlertBanner({
               truthReferenceModes?.get(target.pending.id) ?? "hidingZoneCenter"
             }
             nowMs={nowMs}
+            disabled={answerSubmitting}
             onAnswerQuestion={onAnswerQuestion}
           />
         </div>

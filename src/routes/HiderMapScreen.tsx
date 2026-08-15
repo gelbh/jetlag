@@ -179,6 +179,8 @@ export function HiderMapScreen() {
     null,
   );
   const [chatAnswerError, setChatAnswerError] = useState<string | null>(null);
+  const [answerSubmitting, setAnswerSubmitting] = useState(false);
+  const answerInFlightRef = useRef(false);
   const [optimisticAnswers, setOptimisticAnswers] = useState<
     ReadonlyMap<string, string>
   >(() => new Map());
@@ -335,10 +337,12 @@ export function HiderMapScreen() {
       selectedReply: string,
       deadlineExpired?: boolean,
     ) => {
-      if (!sessionId) {
+      if (!sessionId || answerInFlightRef.current) {
         return;
       }
 
+      answerInFlightRef.current = true;
+      setAnswerSubmitting(true);
       setChatAnswerError(null);
 
       const pending = pendingQuestions.find(
@@ -346,6 +350,8 @@ export function HiderMapScreen() {
       );
       if (!pending) {
         setChatAnswerError("Could not find that question. Try again.");
+        answerInFlightRef.current = false;
+        setAnswerSubmitting(false);
         return;
       }
 
@@ -376,39 +382,53 @@ export function HiderMapScreen() {
             : undefined,
         );
 
-        if (messageBeforeAnswer) {
-          acknowledgeFingerprints([messageFingerprint(messageBeforeAnswer)]);
-        }
+        acknowledgeFingerprints([
+          messageFingerprint(
+            messageBeforeAnswer ?? {
+              id: messageId,
+              sessionId,
+              channel: "game",
+              senderUid: "",
+              senderRole: "seeker",
+              createdAt: "",
+              status: "pending",
+            },
+          ),
+        ]);
 
-        if (!deadlineExpired && boardEconomyEnabled) {
-          const reward = await boardEconomy.applyAnswerReward(
-            pending.toolType,
-            pending.cardDraw,
-            pending.cardKeep,
-          );
-          if (reward && !reward.needsPick) {
-            setHandSheetOpen(true);
+        try {
+          if (!deadlineExpired && boardEconomyEnabled) {
+            const reward = await boardEconomy.applyAnswerReward(
+              pending.toolType,
+              pending.cardDraw,
+              pending.cardKeep,
+            );
+            if (reward && !reward.needsPick) {
+              setHandSheetOpen(true);
+            }
           }
-        }
 
-        const answerTruthReference = truthContext
-          ? resolvePendingQuestionTruthReference(pending, truthContext)
-          : { point: null as LatLngTuple | null };
-        const truth = await computeHiderTruthReplyAsync(
-          pending,
-          answerTruthReference.point,
-          gameArea ?? undefined,
-        );
-        if (
-          truth &&
-          !truth.unavailable &&
-          truth.replyId.length > 0 &&
-          selectedReply !== truth.replyId
-        ) {
-          const selectedLabel =
-            pending.replyOptions.find((option) => option.id === selectedReply)
-              ?.label ?? selectedReply;
-          setTruthReveal({ truth, selectedReply, selectedLabel });
+          const answerTruthReference = truthContext
+            ? resolvePendingQuestionTruthReference(pending, truthContext)
+            : { point: null as LatLngTuple | null };
+          const truth = await computeHiderTruthReplyAsync(
+            pending,
+            answerTruthReference.point,
+            gameArea ?? undefined,
+          );
+          if (
+            truth &&
+            !truth.unavailable &&
+            truth.replyId.length > 0 &&
+            selectedReply !== truth.replyId
+          ) {
+            const selectedLabel =
+              pending.replyOptions.find((option) => option.id === selectedReply)
+                ?.label ?? selectedReply;
+            setTruthReveal({ truth, selectedReply, selectedLabel });
+          }
+        } catch {
+          // Answer already saved; board/truth side effects are best-effort.
         }
       } catch (error) {
         setOptimisticAnswers((previous) => {
@@ -423,6 +443,9 @@ export function HiderMapScreen() {
             ? error.message
             : "Could not save your answer. Try again.",
         );
+      } finally {
+        answerInFlightRef.current = false;
+        setAnswerSubmitting(false);
       }
     },
     [
@@ -983,6 +1006,7 @@ export function HiderMapScreen() {
           truthsLoading,
           truthReferenceModes,
           answerError: chatAnswerError,
+          answerSubmitting,
           onAnswerQuestion: submitHiderAnswer,
         }}
       />

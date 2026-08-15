@@ -24,6 +24,7 @@ interface GameChatTabProps {
   truthsLoading?: boolean;
   truthReferenceModes?: ReadonlyMap<string, HiderTruthReferenceMode>;
   answerError?: string | null;
+  answerSubmitting?: boolean;
   onAnswerQuestion: (
     pendingQuestionId: string,
     messageId: string,
@@ -60,6 +61,7 @@ export function GameChatTab({
   truthsLoading = false,
   truthReferenceModes,
   answerError = null,
+  answerSubmitting = false,
   onAnswerQuestion,
   onDismissExpiredQuestion,
   readOnly = false,
@@ -169,6 +171,7 @@ export function GameChatTab({
                       : undefined) ?? "hidingZoneCenter"
                   }
                   nowMs={nowMs}
+                  disabled={answerSubmitting}
                   onAnswerQuestion={onAnswerQuestion}
                 />
               ) : (

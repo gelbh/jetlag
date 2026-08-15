@@ -197,6 +197,7 @@ export type HiderMapScreenChromeProps = {
     truthsLoading: boolean;
     truthReferenceModes?: ReadonlyMap<string, HiderTruthReferenceMode>;
     answerError: string | null;
+    answerSubmitting?: boolean;
     onAnswerQuestion: (
       pendingQuestionId: string,
       messageId: string,
@@ -478,6 +479,7 @@ export function HiderMapScreenChrome({
           truthsLoading={chat.truthsLoading}
           truthReferenceModes={chat.truthReferenceModes}
           answerError={chat.answerError}
+          answerSubmitting={chat.answerSubmitting}
           onAnswerQuestion={chat.onAnswerQuestion}
         />
 
@@ -529,6 +531,7 @@ export function HiderMapScreenChrome({
           truthsLoading={chat.truthsLoading}
           truthReferenceModes={chat.truthReferenceModes}
           answerError={chat.answerError}
+          answerSubmitting={chat.answerSubmitting}
           onAnswerQuestion={chat.onAnswerQuestion}
         />
 
