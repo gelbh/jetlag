@@ -3,9 +3,7 @@ import {
   expect,
   openMapWithLocalSession,
   clickToolDockButton,
-  clickMapCenter,
-  waitForMapPlacementCrosshair,
-  waitForWizardNext,
+  expectAskHud,
 } from "../../fixtures";
 
 test.describe("matching tool panel screenshots", () => {
@@ -15,17 +13,13 @@ test.describe("matching tool panel screenshots", () => {
 
   test("matches category step baseline before geo lookup", async ({ page }) => {
     await clickToolDockButton(page, "Matching");
-    await waitForMapPlacementCrosshair(page);
-    await clickMapCenter(page);
-    await waitForWizardNext(page);
-    await page.getByRole("button", { name: "Continue" }).click();
-    await page.locator("select.field-input").selectOption("museum");
-    await waitForWizardNext(page);
+    await expectAskHud(page);
+    await expect(
+      page.getByRole("button", { name: /Museum/i }).first(),
+    ).toBeVisible({ timeout: 15_000 });
 
-    const panel = page.locator(".tool-panel-compact").filter({
-      has: page.getByRole("heading", { name: "Matching" }),
-    });
-    await expect(panel).toHaveScreenshot("matching-panel-category.png", {
+    const hud = page.getByTestId("ask-hud-host");
+    await expect(hud).toHaveScreenshot("matching-panel-category.png", {
       maxDiffPixelRatio: 0.02,
     });
   });

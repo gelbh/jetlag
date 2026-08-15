@@ -51,6 +51,32 @@ describe("useLiveLocation", () => {
     expect(result.current.needsPermissionPrompt).toBe(false);
   });
 
+  it("starts watching when enabled flips from false to true", async () => {
+    mockGeolocation(createMockGeolocationPosition(53.35, -6.26));
+    mockPermissions("granted");
+    const watchPosition = vi.mocked(navigator.geolocation.watchPosition);
+
+    const { result, rerender } = renderHook(
+      ({ enabled }) => useLiveLocation(enabled),
+      { initialProps: { enabled: false } },
+    );
+
+    expect(result.current.reading).toBeNull();
+    expect(watchPosition).not.toHaveBeenCalled();
+
+    rerender({ enabled: true });
+
+    await waitFor(() => {
+      expect(result.current.reading).toEqual({
+        lat: 53.35,
+        lng: -6.26,
+        accuracy: 5,
+        heading: null,
+      });
+    });
+    expect(watchPosition).toHaveBeenCalled();
+  });
+
   it("does not call geolocation while permission is prompt until confirm", async () => {
     mockGeolocation(createMockGeolocationPosition(53.35, -6.26));
     mockPermissions("prompt");

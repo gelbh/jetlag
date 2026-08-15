@@ -88,4 +88,43 @@ describe("useThermometerWalk", () => {
     expect(onAutoStop).toHaveBeenCalledTimes(1);
     expect(onAutoStop).toHaveBeenCalledWith([53.3503, -6.2603]);
   });
+
+  it("endWalk no-ops until a GPS sample exists (no start=end publish)", async () => {
+    const onAutoStop = vi.fn(async () => undefined);
+    const startPoint: [number, number] = [53.35, -6.26];
+
+    type Reading = { lat: number; lng: number; accuracy: number } | null;
+    const { result, rerender } = renderHook(
+      ({ reading }: { reading: Reading }) => {
+        useLiveLocationMock.mockReturnValue({ reading, error: null });
+        return useThermometerWalk({
+          active: true,
+          startPoint,
+          targetDistanceMeters: 50_000,
+          onAutoStop,
+          maxDurationMs: 60_000,
+        });
+      },
+      { initialProps: { reading: null as Reading } },
+    );
+
+    act(() => {
+      result.current.endWalk();
+    });
+    expect(onAutoStop).not.toHaveBeenCalled();
+
+    act(() => {
+      rerender({
+        reading: { lat: 53.351, lng: -6.261, accuracy: 8 },
+      });
+    });
+
+    await act(async () => {
+      result.current.endWalk();
+      await Promise.resolve();
+    });
+
+    expect(onAutoStop).toHaveBeenCalledTimes(1);
+    expect(onAutoStop).toHaveBeenCalledWith([53.351, -6.261]);
+  });
 });

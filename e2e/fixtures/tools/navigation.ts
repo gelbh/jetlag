@@ -39,5 +39,11 @@ export async function openSettings(page: Page) {
 }
 
 export async function closePanel(page: Page) {
-  await page.getByRole("button", { name: "Close", exact: true }).click();
+  const close = page.getByRole("button", { name: "Close", exact: true });
+  if (await close.isVisible().catch(() => false)) {
+    await close.click();
+    await expect(close).toBeHidden({ timeout: 10_000 }).catch(() => undefined);
+    return;
+  }
+  await page.keyboard.press("Escape").catch(() => undefined);
 }

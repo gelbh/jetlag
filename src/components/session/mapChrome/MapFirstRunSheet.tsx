@@ -37,16 +37,16 @@ export function MapFirstRunSheet({
         <div className="space-y-1">
           <h2 className="text-lg font-semibold text-ink">Map tools</h2>
           <p className="text-pretty text-sm text-ink-muted">
-            Mark the live search map for your team. Question tools sit on
-            the bottom bar; zone and pin live under Draw (or More on narrow
-            phones).
+            Question controls live on the map — cue at the top, chips or catalog
+            in the thumb zone, and a send strip when you are ready. Zone and pin
+            live under Draw (or More on narrow phones).
           </p>
         </div>
 
         <ul className="space-y-2 text-sm text-ink-secondary">
           <li>
-            <span className="font-medium text-ink">Match, Measure, Thermo, Radar, Tent</span>{" "}
-            The five game questions, always on the dock.
+            <span className="font-medium text-ink">Match, Measure, Thermo, Radar, Tent, Photo</span>{" "}
+            Ask tools on the Hunt dock — place on the map, then commit from the primed strip.
           </li>
           <li>
             <span className="font-medium text-ink">Draw.</span> Zone and pin

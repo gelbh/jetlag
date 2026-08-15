@@ -36,11 +36,8 @@ export function MapToolsHintBanner({ hidden = false }: MapToolsHintBannerProps) 
     >
       <div className="pointer-events-auto hud-panel mx-auto flex max-w-md items-start gap-3 px-3 py-2.5">
         <p className="flex-1 text-pretty text-sm leading-snug text-ink-muted">
-          Question tools are on the{" "}
-          <span className="font-display font-semibold uppercase tracking-wide text-ink">
-            bottom bar
-          </span>
-          . Zone and pin live under{" "}
+          Question asks open as map HUD chrome (cue · chips/catalog · primed
+          send). Zone and pin live under{" "}
           <span className="font-display font-semibold uppercase tracking-wide text-ink">
             Draw
           </span>
