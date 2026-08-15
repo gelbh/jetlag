@@ -1,5 +1,11 @@
 import { HttpsError } from "firebase-functions/v2/https";
 import {
+  assertClientMeetsConfiguredMin,
+  assertClientMeetsGlobalMin,
+  CLIENT_UPDATE_REQUIRED,
+  resolveClientMinVersion,
+} from "./clientMinVersion.mjs";
+import {
   buildMembershipHealState,
   countMembersWithRole,
   isRoleGatedSession,
@@ -20,6 +26,7 @@ export const JOIN_REQ_EXPIRED = "JOIN_REQ_EXPIRED";
 export const JOIN_REQ_NOT_REQUESTER = "JOIN_REQ_NOT_REQUESTER";
 export const JOIN_REQ_NOT_AUTHORIZED = "JOIN_REQ_NOT_AUTHORIZED";
 export const JOIN_REQ_INVALID_DECISION = "JOIN_REQ_INVALID_DECISION";
+export { CLIENT_UPDATE_REQUIRED };
 
 const VALID_JOIN_REQUEST_ROLES = new Set(["seeker", "hider", "observer"]);
 
@@ -168,6 +175,8 @@ export async function requestRoleJoinHandler(
   const clientVersion =
     typeof rawInput?.clientVersion === "string" ? rawInput.clientVersion : "";
 
+  await assertClientMeetsConfiguredMin(db, clientVersion);
+
   const sessionRef = db.collection("sessions").doc(sessionId);
   const sessionSnap = await sessionRef.get();
   if (!sessionSnap.exists) {
@@ -276,6 +285,8 @@ export async function resolveRoleJoinRequestHandler(
   const sessionRef = db.collection("sessions").doc(sessionId);
   const secretsRef = db.collection("sessionRoleSecrets").doc(sessionId);
   const requestRef = sessionRef.collection("joinRequests").doc(requestId);
+  const globalMinVersion =
+    decision === "accept" ? await resolveClientMinVersion(db) : null;
 
   let hasExpired = false;
   await db.runTransaction(async (tx) => {
@@ -334,6 +345,8 @@ export async function resolveRoleJoinRequestHandler(
     const requesterUid = request.requesterUid;
     const clientVersion =
       typeof request.clientVersion === "string" ? request.clientVersion : "";
+
+    assertClientMeetsGlobalMin(clientVersion, globalMinVersion);
 
     const secretsSnap = await tx.get(secretsRef);
     const secrets = secretsSnap.exists ? { ...secretsSnap.data() } : {};

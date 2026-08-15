@@ -156,6 +156,15 @@ test("isExpectedFunctionsError matches app-version-incompatible HttpsError", () 
   );
 });
 
+test("isExpectedFunctionsError matches client-update-required HttpsError", () => {
+  assert.equal(
+    isExpectedFunctionsError(
+      new HttpsError("failed-precondition", "Client update required."),
+    ),
+    true,
+  );
+});
+
 test("isExpectedFunctionsError matches join-request-expired HttpsError", () => {
   assert.equal(
     isExpectedFunctionsError(

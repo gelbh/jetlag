@@ -8,6 +8,7 @@ import {
   JOIN_SESSION_NOT_FOUND,
   JOIN_WRONG_PASSCODE,
 } from "../../session/joinSessionWithRole.mjs";
+import { CLIENT_UPDATE_REQUIRED } from "../../session/clientMinVersion.mjs";
 import {
   LEAVE_MEMBERSHIP_NOT_MEMBER,
   LEAVE_NOT_GATED,
@@ -47,6 +48,7 @@ export const sentryDsnSecret = getSentryDsnSecret();
 export const HTTPS_MSG_WRONG_ROLE_CODE = "Wrong role code.";
 export const HTTPS_MSG_ROLE_CODE_REQUIRED = "Role code is required.";
 export const HTTPS_MSG_APP_VERSION_INCOMPATIBLE = "App version incompatible.";
+export const HTTPS_MSG_CLIENT_UPDATE_REQUIRED = "Client update required.";
 export const HTTPS_MSG_JOIN_SIDE_EMPTY =
   "Join without a request — this side is empty.";
 export const HTTPS_MSG_JOIN_NOT_PENDING = "Join request is not pending.";
@@ -64,6 +66,7 @@ export const EXPECTED_SESSION_UX_HTTPS_ERROR_KEYS = [
   `permission-denied:${HTTPS_MSG_WRONG_ROLE_CODE}`,
   `invalid-argument:${HTTPS_MSG_ROLE_CODE_REQUIRED}`,
   `failed-precondition:${HTTPS_MSG_APP_VERSION_INCOMPATIBLE}`,
+  `failed-precondition:${HTTPS_MSG_CLIENT_UPDATE_REQUIRED}`,
   `failed-precondition:${HTTPS_MSG_JOIN_SIDE_EMPTY}`,
   `failed-precondition:${HTTPS_MSG_JOIN_NOT_PENDING}`,
   `failed-precondition:${HTTPS_MSG_JOIN_EXPIRED}`,
@@ -134,6 +137,12 @@ export function mapJoinSessionWithRoleError(error) {
     throw new HttpsError(
       "failed-precondition",
       HTTPS_MSG_APP_VERSION_INCOMPATIBLE,
+    );
+  }
+  if (error.message === CLIENT_UPDATE_REQUIRED) {
+    throw new HttpsError(
+      "failed-precondition",
+      HTTPS_MSG_CLIENT_UPDATE_REQUIRED,
     );
   }
   throw error;
@@ -210,6 +219,12 @@ export function mapJoinRequestError(error) {
   }
   if (error.message === JOIN_REQ_EXPIRED) {
     throw new HttpsError("failed-precondition", HTTPS_MSG_JOIN_EXPIRED);
+  }
+  if (error.message === CLIENT_UPDATE_REQUIRED) {
+    throw new HttpsError(
+      "failed-precondition",
+      HTTPS_MSG_CLIENT_UPDATE_REQUIRED,
+    );
   }
   throw error;
 }

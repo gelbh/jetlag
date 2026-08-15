@@ -205,6 +205,14 @@ describe("rolePasscodeLifecycle", () => {
     ).toContain("Wrong role code");
   });
 
+  it("maps global client update required to refresh copy", () => {
+    expect(
+      mapRolePasscodeJoinError(
+        new Error("failed-precondition Client update required."),
+      ),
+    ).toContain("Refresh");
+  });
+
   it("maps empty-side join request errors to player copy", () => {
     expect(
       mapJoinRequestError(

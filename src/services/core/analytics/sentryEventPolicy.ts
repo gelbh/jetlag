@@ -44,6 +44,7 @@ export const EXPECTED_JOIN_UX_MESSAGES = [
   "Wrong role code.",
   "Role code is required.",
   "App version incompatible.",
+  "Client update required.",
   "Join without a request — this side is empty.",
   "Join request is not pending.",
   "Join request expired.",

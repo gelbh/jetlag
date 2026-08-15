@@ -244,6 +244,9 @@ export function mapRolePasscodeJoinError(error: unknown): string {
   if (message.includes("App version incompatible")) {
     return "Update the app to join this session.";
   }
+  if (message.includes("Client update required")) {
+    return "Update the app to continue. Refresh to load the latest build.";
+  }
 
   return message || "Couldn't join the session.";
 }
@@ -265,6 +268,9 @@ export function mapJoinRequestError(error: unknown): string {
   }
   if (message.includes("legacy join")) {
     return "This session doesn't support join requests.";
+  }
+  if (message.includes("Client update required")) {
+    return "Update the app to continue. Refresh to load the latest build.";
   }
 
   return message || "Couldn't send join request.";

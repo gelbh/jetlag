@@ -20,6 +20,7 @@ import { LowBatteryPrompt } from "./components/session/banners/LowBatteryPrompt"
 import { LocationPermissionPrompt } from "./components/session/status/LocationPermissionPrompt";
 import { MotionDatasetEffect } from "./components/motion/MotionDatasetEffect";
 import { AppCheckProbeGate } from "./components/ui/feedback/AppCheckProbeGate";
+import { ClientMinVersionGate } from "./components/ui/feedback/ClientMinVersionGate";
 import { AppErrorPage } from "./components/ui/feedback/AppErrorPage";
 import { Home } from "./routes/Home";
 import { JoinSession } from "./routes/JoinSession";
@@ -182,6 +183,7 @@ export default function App() {
         <AppUpdateProvider>
           <Sentry.ErrorBoundary fallback={<AppErrorFallback />}>
             <AppCheckProbeGate>
+              <ClientMinVersionGate>
               <MotionDatasetEffect />
             <RouteProgressChrome />
             <AppGlobalActivity />
@@ -344,6 +346,7 @@ export default function App() {
                 />
               </Routes>
             </div>
+              </ClientMinVersionGate>
             </AppCheckProbeGate>
           </Sentry.ErrorBoundary>
         </AppUpdateProvider>

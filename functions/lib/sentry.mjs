@@ -25,6 +25,7 @@ const EXPECTED_HTTPS_ERROR_KEYS = new Set([
   "permission-denied:Wrong role code.",
   "invalid-argument:Role code is required.",
   "failed-precondition:App version incompatible.",
+  "failed-precondition:Client update required.",
   "failed-precondition:Join without a request — this side is empty.",
   "failed-precondition:Join request is not pending.",
   "failed-precondition:Join request expired.",

@@ -12,6 +12,10 @@ import {
   normalizeRolePasscode,
   verifyRolePasscode,
 } from "./rolePasscodes.mjs";
+import {
+  assertClientMeetsConfiguredMin,
+  CLIENT_UPDATE_REQUIRED,
+} from "./clientMinVersion.mjs";
 import { sessionVersionCompatible } from "./sessionVersion.mjs";
 
 export const JOIN_SESSION_NOT_FOUND = "JOIN_SESSION_NOT_FOUND";
@@ -20,6 +24,7 @@ export const JOIN_NOT_GATED = "JOIN_NOT_GATED";
 export const JOIN_WRONG_PASSCODE = "JOIN_WRONG_PASSCODE";
 export const JOIN_PASSCODE_REQUIRED = "JOIN_PASSCODE_REQUIRED";
 export const JOIN_INCOMPATIBLE_VERSION = "JOIN_INCOMPATIBLE_VERSION";
+export { CLIENT_UPDATE_REQUIRED };
 
 const VALID_JOIN_ROLES = new Set(["seeker", "hider", "observer", "admin"]);
 
@@ -151,6 +156,8 @@ export async function joinSessionWithRoleHandler(db, auth, rawInput) {
   if (role === "admin" && !isAdminAuth(auth)) {
     throw new HttpsError("permission-denied", "Admin access required.");
   }
+
+  await assertClientMeetsConfiguredMin(db, clientVersion);
 
   const codeSnap = await db.collection("sessionCodes").doc(code).get();
   if (!codeSnap.exists) {
