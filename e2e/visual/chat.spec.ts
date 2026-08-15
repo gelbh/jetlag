@@ -2,6 +2,7 @@ import {
   test,
   expect,
   confirmInitialHidingZoneAtStation,
+  gameChatScroll,
   openChat,
   sendRadarToHiders,
 } from "../fixtures";
@@ -15,7 +16,9 @@ test.describe("game chat screenshots", () => {
     await confirmInitialHidingZoneAtStation(guestPage, "Dublin Central");
     await sendRadarToHiders(hostPage);
     await openChat(hostPage);
-    await expect(hostPage.getByText(/Are you within/i)).toBeVisible({
+    await expect(
+      gameChatScroll(hostPage).getByText(/Are you within/i),
+    ).toBeVisible({
       timeout: 15_000,
     });
 
