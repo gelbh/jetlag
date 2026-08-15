@@ -98,5 +98,6 @@ test("resolveClientMinVersion reads process.env when options omit envFallback", 
     } else {
       process.env.CLIENT_MIN_VERSION = previous;
     }
+    clearClientMinVersionCache();
   }
 });
