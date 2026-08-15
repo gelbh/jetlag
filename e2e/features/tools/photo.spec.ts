@@ -4,6 +4,8 @@ import {
   answerPhotoCannotInChat,
   answerPhotoSentExternallyInChat,
   expectChatAnswer,
+  expectPendingQuestionText,
+  gameChatScroll,
   openChat,
   sendPhotoToHiders,
 } from "../../fixtures";
@@ -22,10 +24,7 @@ test("@smoke photo question syncs cannot-answer replies through chat", async ({
   await sendPhotoToHiders(hostPage);
 
   await expect(async () => {
-    await openChat(guestPage);
-    await expect(
-      guestPage.getByText(/Send me a photo of/i).first(),
-    ).toBeVisible();
+    await expectPendingQuestionText(guestPage, /Send me a photo of/i);
   }).toPass({ timeout: 30_000 });
 
   await answerPhotoCannotInChat(guestPage);
@@ -41,17 +40,17 @@ test("photo question accepts mark-sent external answer", async ({ hostHider }) =
   await sendPhotoToHiders(hostPage);
 
   await expect(async () => {
-    await openChat(guestPage);
-    await expect(guestPage.getByRole("button", { name: "Mark sent" })).toBeVisible();
+    await expectPendingQuestionText(guestPage, /Send me a photo of/i);
   }).toPass({ timeout: 30_000 });
 
   await answerPhotoSentExternallyInChat(guestPage);
+  await openChat(guestPage);
   await expect(
-    guestPage.getByText(/Photo sent outside the app/i),
+    gameChatScroll(guestPage).getByText(/Photo sent outside the app/i),
   ).toBeVisible({ timeout: 30_000 });
 
   await openChat(hostPage);
   await expect(
-    hostPage.getByText(/Photo sent outside the app/i),
+    gameChatScroll(hostPage).getByText(/Photo sent outside the app/i),
   ).toBeVisible({ timeout: 30_000 });
 });

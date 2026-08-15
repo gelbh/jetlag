@@ -4,8 +4,12 @@ import {
   createMultiplayerContexts,
   joinAsRole,
 } from "./session";
-import { answerInChat, expectChatAnswer, openChat } from "./tools/chat";
-import { PENDING_QUESTION_TEXT } from "./tools/question-wizards";
+import {
+  answerInChat,
+  expectChatAnswer,
+  expectPendingQuestionText,
+  openChat,
+} from "./tools/chat";
 
 export async function runHiderAnswerFlow(
   browser: Browser,
@@ -25,10 +29,7 @@ export async function runHiderAnswerFlow(
   await sendQuestion(hostPage);
 
   await expect(async () => {
-    await openChat(guestPage);
-    await expect(
-      guestPage.getByText(PENDING_QUESTION_TEXT).first(),
-    ).toBeVisible();
+    await expectPendingQuestionText(guestPage);
   }).toPass({ timeout: 30_000 });
 
   await answerInChat(guestPage, answerLabel);

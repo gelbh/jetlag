@@ -47,6 +47,7 @@ import { RoleCodesSheet } from "../../components/session/settings/RoleCodesSheet
 import {
   HiderTruthRevealBanner,
 } from "../../components/session/banners/HiderTruthRevealBanner";
+import { QuestionAlertBanner } from "../../components/session/banners/QuestionAlertBanner";
 import { useDesktopLayout } from "../../hooks/layout/useDesktopLayout";
 import { useMapTerminalSessionChrome } from "../../hooks/session/useMapTerminalSessionChrome";
 import { HiderToolDock } from "../../components/tools/HiderToolDock";
@@ -196,6 +197,8 @@ export type HiderMapScreenChromeProps = {
     truthsLoading: boolean;
     truthReferenceModes?: ReadonlyMap<string, HiderTruthReferenceMode>;
     answerError: string | null;
+    answerSubmitting?: boolean;
+    answeredPendingIds?: ReadonlySet<string>;
     onAnswerQuestion: (
       pendingQuestionId: string,
       messageId: string,
@@ -468,6 +471,20 @@ export function HiderMapScreenChrome({
           actions={gameOverActions}
         />
 
+        <QuestionAlertBanner
+          pendingQuestions={pendingQuestions}
+          messages={messages}
+          sessionRules={session}
+          sessionId={chat.sessionId || session.id}
+          questionTruths={chat.questionTruths}
+          truthsLoading={chat.truthsLoading}
+          truthReferenceModes={chat.truthReferenceModes}
+          answerError={chat.answerError}
+          answerSubmitting={chat.answerSubmitting}
+          answeredPendingIds={chat.answeredPendingIds}
+          onAnswerQuestion={chat.onAnswerQuestion}
+        />
+
         {zoneTool.wizardOpen && !sheetBlocksWizard ? (
           <AskHudHost
             cue={hidingZoneCue}
@@ -516,6 +533,8 @@ export function HiderMapScreenChrome({
           truthsLoading={chat.truthsLoading}
           truthReferenceModes={chat.truthReferenceModes}
           answerError={chat.answerError}
+          answerSubmitting={chat.answerSubmitting}
+          answeredPendingIds={chat.answeredPendingIds}
           onAnswerQuestion={chat.onAnswerQuestion}
         />
 

@@ -6,6 +6,8 @@ import {
   createHostSession,
   createMultiplayerContexts,
   expectChatAnswer,
+  expectPendingQuestionText,
+  gameChatScroll,
   joinAsRole,
   openChat,
   sendRadarToHiders,
@@ -25,23 +27,23 @@ test("@smoke seeker asks via radar and hider answers in game chat", async ({
   await sendRadarToHiders(hostPage);
 
   await openChat(hostPage);
-  await expect(hostPage.getByText(/Are you within/i)).toBeVisible({
+  await expect(
+    gameChatScroll(hostPage).getByText(/Are you within/i),
+  ).toBeVisible({
     timeout: 15_000,
   });
   await closePanel(hostPage);
 
-  await openChat(guestPage);
-  await expect(guestPage.getByText(/Are you within/i)).toBeVisible({
-    timeout: 20_000,
-  });
+  await expectPendingQuestionText(guestPage, /Are you within/i);
   await answerInChat(guestPage, "Yes");
 
-  await expect(guestPage.getByRole("button", { name: "Close", exact: true })).toBeVisible({
+  await openChat(guestPage);
+  await expect(
+    guestPage.getByRole("button", { name: "Close", exact: true }),
+  ).toBeVisible({
     timeout: 10_000,
   });
-  await expect(guestPage.getByText(/Answered: yes/i)).toBeVisible({
-    timeout: 10_000,
-  });
+  await expectChatAnswer(guestPage, "yes");
   await expect(guestPage.getByTestId("hider-truth-reveal-banner")).toBeHidden({
     timeout: 5_000,
   });

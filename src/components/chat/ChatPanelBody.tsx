@@ -23,6 +23,8 @@ interface ChatPanelBodyProps {
   truthsLoading?: boolean;
   truthReferenceModes?: ReadonlyMap<string, HiderTruthReferenceMode>;
   answerError?: string | null;
+  answerSubmitting?: boolean;
+  answeredPendingIds?: ReadonlySet<string>;
   onAnswerQuestion: (
     pendingQuestionId: string,
     messageId: string,
@@ -49,6 +51,8 @@ export function ChatPanelBody({
   truthsLoading = false,
   truthReferenceModes,
   answerError = null,
+  answerSubmitting = false,
+  answeredPendingIds,
   onAnswerQuestion,
   onDismissExpiredQuestion,
   readOnly = false,
@@ -93,6 +97,8 @@ export function ChatPanelBody({
             truthsLoading={truthsLoading}
             truthReferenceModes={truthReferenceModes}
             answerError={answerError}
+            answerSubmitting={answerSubmitting}
+            answeredPendingIds={answeredPendingIds}
             onAnswerQuestion={onAnswerQuestion}
             onDismissExpiredQuestion={onDismissExpiredQuestion}
             readOnly={readOnly}

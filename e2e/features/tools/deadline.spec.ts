@@ -2,6 +2,7 @@ import {
   test,
   expect,
   answerInChat,
+  expectChatAnswer,
   listPendingQuestionIds,
   openChat,
   patchPendingQuestionAnswerableAt,
@@ -38,9 +39,6 @@ test("@smoke enforces answer deadlines with a system message and timer pause", a
     timeout: 30_000,
   });
 
-  await openChat(guestPage);
   await answerInChat(guestPage, "Yes");
-  await expect(guestPage.getByText(/Answered: yes/i)).toBeVisible({
-    timeout: 20_000,
-  });
+  await expectChatAnswer(guestPage, "yes");
 });

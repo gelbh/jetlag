@@ -45,7 +45,11 @@ vi.mock("./useSessionSync", () => ({
   },
 }));
 vi.mock("./useChatUnread", () => ({
-  useChatUnread: vi.fn(() => ({ hasUnreadChat: false, unreadCount: 0 })),
+  useChatUnread: vi.fn(() => ({
+    hasUnreadChat: false,
+    unreadCount: 0,
+    acknowledgeFingerprints: vi.fn(),
+  })),
 }));
 vi.mock("./useSessionExtrasSync", () => ({
   usePendingQuestionsSync: vi.fn(() => []),

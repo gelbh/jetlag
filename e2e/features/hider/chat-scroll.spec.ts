@@ -2,6 +2,7 @@ import {
   test,
   expect,
   answerInChat,
+  gameChatScroll,
   openChat,
   sendMatchingToHiders,
   sendRadarToHiders,
@@ -25,14 +26,14 @@ test.describe("hider chat scroll", () => {
     await sendMatchingToHiders(hostPage);
     await openChat(guestPage);
 
-    const secondAnswerButton = guestPage
-      .getByRole("button", { name: "Send answer: Yes" })
-      .last();
+    const scrollRegion = gameChatScroll(guestPage);
+    const secondAnswerButton = scrollRegion.getByRole("button", {
+      name: "Send answer: Yes",
+    });
     await expect
       .poll(async () => secondAnswerButton.isVisible(), { timeout: 30_000 })
       .toBe(true);
 
-    const scrollRegion = guestPage.locator(".jl-game-chat-scroll");
     await expect(scrollRegion).toBeVisible();
 
     const scrollMetrics = await scrollRegion.evaluate((element) => ({

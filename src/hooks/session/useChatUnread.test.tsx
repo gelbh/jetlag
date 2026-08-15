@@ -72,3 +72,64 @@ describe("useChatUnread sessionStorage soft-fail", () => {
     });
   });
 });
+
+describe("useChatUnread acknowledgeFingerprints", () => {
+  beforeEach(() => {
+    sessionStorage.clear();
+  });
+
+  afterEach(() => {
+    sessionStorage.clear();
+  });
+
+  it("acknowledgeFingerprints clears only matching unread", async () => {
+    const question = {
+      id: "q1",
+      sessionId: "s1",
+      channel: "game" as const,
+      kind: "question" as const,
+      senderUid: "seeker",
+      senderRole: "seeker" as const,
+      createdAt: "2026-01-01T00:00:00.000Z",
+      status: "pending" as const,
+      promptText: "Near?",
+      pendingQuestionId: "pq1",
+      toolType: "radar" as const,
+    };
+    const social = {
+      id: "s1msg",
+      sessionId: "s1",
+      channel: "social" as const,
+      senderUid: "seeker",
+      senderRole: "seeker" as const,
+      createdAt: "2026-01-01T00:00:01.000Z",
+      text: "hi",
+    };
+
+    const { result } = renderHook(() =>
+      useChatUnread({
+        sessionId: "s1",
+        viewerUid: "hider",
+        messages: [question, social],
+        isChatOpen: false,
+      }),
+    );
+
+    await waitFor(() => {
+      expect(result.current.unreadCount).toBe(2);
+    });
+
+    const { messageFingerprint } = await import(
+      "../../domain/device/chrome/chatUnread"
+    );
+
+    act(() => {
+      result.current.acknowledgeFingerprints([messageFingerprint(question)]);
+    });
+
+    await waitFor(() => {
+      expect(result.current.unreadCount).toBe(1);
+      expect(result.current.hasUnreadChat).toBe(true);
+    });
+  });
+});
