@@ -99,7 +99,7 @@ export function GameOverSheet({
   const footer = (
     <div className="space-y-2 border-t border-border bg-surface-panel px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3">
       {rematchError ? (
-        <p className="text-center text-sm text-status-danger" role="alert">
+        <p className="text-center text-sm text-status-error" role="alert">
           {rematchError}
         </p>
       ) : null}
