@@ -84,3 +84,19 @@ test("resolveClientMinVersion returns null when both missing (gate off)", async 
   });
   assert.equal(resolved, null);
 });
+
+test("resolveClientMinVersion reads process.env when options omit envFallback", async () => {
+  clearClientMinVersionCache();
+  const previous = process.env.CLIENT_MIN_VERSION;
+  process.env.CLIENT_MIN_VERSION = "0.11.0";
+  try {
+    const resolved = await resolveClientMinVersion(buildOpsDb(undefined));
+    assert.equal(resolved, "0.11.0");
+  } finally {
+    if (previous === undefined) {
+      delete process.env.CLIENT_MIN_VERSION;
+    } else {
+      process.env.CLIENT_MIN_VERSION = previous;
+    }
+  }
+});
