@@ -7,7 +7,7 @@ import {
   approveHostConfirmHandler,
   denyHostConfirmHandler,
 } from "../../incident/hostConfirm.mjs";
-import { supportAgentTurnHandler } from "../../incident/supportAgentTurn.mjs";
+import { supportAgentTurnHandler, SUPPORT_AGENT_LLM_FAILED } from "../../incident/supportAgentTurn.mjs";
 import { sendSessionNotification } from "../../session/sessionNotificationTriggers.mjs";
 import {
   buildSessionOpsExecuteDeps,
@@ -17,6 +17,22 @@ import {
   sessionOpsLlmBaseUrl,
   sessionOpsLlmModel,
 } from "./shared.mjs";
+
+/**
+ * Read LLM secrets/params; map missing/misconfigured secrets to the expected
+ * support-agent unavailable sentinel (avoids raw uncaught 500s).
+ */
+function readSupportAgentLlmConfig() {
+  try {
+    return {
+      apiKey: sessionOpsLlmApiKey.value(),
+      llmBaseUrl: sessionOpsLlmBaseUrl.value(),
+      llmModel: sessionOpsLlmModel.value(),
+    };
+  } catch {
+    throw new Error(SUPPORT_AGENT_LLM_FAILED);
+  }
+}
 
 /** Host approves a pending destructive session-ops confirm and executes once. */
 export const approveHostConfirm = onCall(
@@ -83,6 +99,7 @@ export const postSupportAgentTurn = onCall(
 
     const db = getFirestore();
     try {
+      const llm = readSupportAgentLlmConfig();
       return await supportAgentTurnHandler(
         db,
         {
@@ -93,16 +110,25 @@ export const postSupportAgentTurn = onCall(
           summonId: request.data?.summonId ?? null,
         },
         {
-          apiKey: sessionOpsLlmApiKey.value(),
-          llmBaseUrl: sessionOpsLlmBaseUrl.value(),
-          llmModel: sessionOpsLlmModel.value(),
+          apiKey: llm.apiKey,
+          llmBaseUrl: llm.llmBaseUrl,
+          llmModel: llm.llmModel,
           rateLimit: (options) => consumeRateLimit(db, options),
           notifyHostConfirm: (payload) => sendSessionNotification(db, payload),
           executeDeps: buildSessionOpsExecuteDeps(db),
         },
       );
     } catch (error) {
-      mapIncidentError(error);
+      if (error instanceof HttpsError) {
+        throw error;
+      }
+      // LLM/config sentinels → expected unavailable; other Errors still mapped
+      // or rethrown by mapIncidentError.
+      mapIncidentError(
+        error instanceof Error
+          ? error
+          : new Error(SUPPORT_AGENT_LLM_FAILED),
+      );
     }
   }),
 );

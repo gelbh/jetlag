@@ -16,7 +16,22 @@ import {
 import { tryPostpassForOverpassQuery } from "./postpassFailover.mjs";
 
 export const OVERPASS_FETCH_TIMEOUT_MS = 25_000;
+/**
+ * Wall-clock budget for Overpass peer failover (not including Postpass/L2).
+ * Kept under the `proxy` Cloud Run timeout so we can return JSON 504 instead
+ * of a naked platform kill. Do not raise without revisiting
+ * {@link PROXY_TIMEOUT_SECONDS_CEILING}.
+ */
+export const OVERPASS_FAILOVER_BUDGET_MS = 50_000;
+/**
+ * Documented ceiling for `proxy` `timeoutSeconds` (Jevons). Prefer cache /
+ * Postpass failover over raising further; 90s leaves headroom after the
+ * Overpass budget for Postpass + stale L2 + response write.
+ */
+export const PROXY_TIMEOUT_SECONDS_CEILING = 90;
 export const OVERPASS_CACHE_TTL_MS = 60 * 60 * 1000;
+/** Minimum remaining ms before attempting another Overpass peer. */
+const OVERPASS_MIN_ATTEMPT_MS = 1_500;
 
 export const overpassResponseCache = createMemoryCache(OVERPASS_CACHE_TTL_MS);
 
@@ -61,6 +76,10 @@ function logFailover(fields) {
   console.log(JSON.stringify({ type: "overpass_failover", ...fields }));
 }
 
+function logTimeout(fields) {
+  console.log(JSON.stringify({ type: "overpass_timeout", ...fields }));
+}
+
 function cancelResponseBody(response) {
   try {
     const canceled = response.body?.cancel();
@@ -72,14 +91,37 @@ function cancelResponseBody(response) {
   }
 }
 
-export async function fetchOverpassWithFailover(query) {
+/**
+ * @param {string} query
+ * @param {{ deadlineMs?: number, now?: () => number }} [options]
+ */
+export async function fetchOverpassWithFailover(query, options = {}) {
   let lastError = null;
+  const now = options.now ?? Date.now;
+  const deadlineMs =
+    typeof options.deadlineMs === "number"
+      ? options.deadlineMs
+      : now() + OVERPASS_FAILOVER_BUDGET_MS;
   const endpoints = await orderOverpassEndpointsByStatus(
     buildOverpassEndpointList(process.env),
   );
+  let attempts = 0;
 
   for (const endpoint of endpoints) {
+    const remainingMs = deadlineMs - now();
+    if (remainingMs < OVERPASS_MIN_ATTEMPT_MS) {
+      logTimeout({
+        reason: "budget_exhausted",
+        attempts,
+        remainingMs: Math.max(0, remainingMs),
+        budgetMs: OVERPASS_FAILOVER_BUDGET_MS,
+      });
+      throw lastError ?? new Error("Overpass timed out.");
+    }
+
     const host = overpassEndpointHost(endpoint);
+    const attemptTimeoutMs = Math.min(OVERPASS_FETCH_TIMEOUT_MS, remainingMs);
+    attempts += 1;
     try {
       const response = await fetchWithTimeout(
         endpoint,
@@ -91,7 +133,7 @@ export async function fetchOverpassWithFailover(query) {
           },
           body: `data=${encodeURIComponent(query)}`,
         },
-        OVERPASS_FETCH_TIMEOUT_MS,
+        attemptTimeoutMs,
       );
 
       if (response.ok) {
@@ -107,13 +149,20 @@ export async function fetchOverpassWithFailover(query) {
       );
       continue;
     } catch (error) {
+      const timeoutLike = isAbortOrTimeoutError(error);
       logFailover({
         backend: "overpass",
         endpoint: host,
-        error: isAbortOrTimeoutError(error)
-          ? "abort"
-          : String(error?.name ?? error),
+        error: timeoutLike ? "abort" : String(error?.name ?? error),
       });
+      if (timeoutLike) {
+        logTimeout({
+          reason: "endpoint_timeout",
+          endpoint: host,
+          timeoutMs: attemptTimeoutMs,
+          attempts,
+        });
+      }
       lastError = toOverpassUpstreamError(error);
     }
   }
@@ -137,9 +186,10 @@ export async function fetchCachedOverpassQuery(query, tier = "free") {
     return l2.text;
   }
 
+  const deadlineMs = Date.now() + OVERPASS_FAILOVER_BUDGET_MS;
   try {
     const response = await enqueueOverpassFetch(tier, () =>
-      fetchOverpassWithFailover(query),
+      fetchOverpassWithFailover(query, { deadlineMs }),
     );
     const text = await response.text();
     if (!response.ok) {
@@ -171,6 +221,12 @@ export async function fetchCachedOverpassQuery(query, tier = "free") {
       overpassResponseCache.set(l1Key, stale.text);
       logCache("stale", tier);
       return stale.text;
+    }
+    if (
+      error instanceof Error &&
+      error.message === "Overpass timed out."
+    ) {
+      logTimeout({ reason: "upstream_exhausted", tier });
     }
     logCache("upstream_error", tier);
     throw error;

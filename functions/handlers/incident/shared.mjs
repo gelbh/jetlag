@@ -83,6 +83,9 @@ export const cursorHotfixStartingRef = defineString("CURSOR_HOTFIX_STARTING_REF"
 });
 
 export function mapIncidentError(error) {
+  if (error instanceof HttpsError) {
+    throw error;
+  }
   if (!(error instanceof Error)) {
     throw error;
   }
