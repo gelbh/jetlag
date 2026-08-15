@@ -6,6 +6,7 @@ import {
   joinSessionWithRole,
   leaveSessionMembership,
   mapJoinRequestError,
+  mapLeaderJoinResolveError,
   mapRolePasscodeJoinError,
   regenerateRolePasscode,
   requestRoleJoin,
@@ -203,6 +204,24 @@ describe("rolePasscodeLifecycle", () => {
     expect(
       mapRolePasscodeJoinError(new Error("permission-denied Wrong role code.")),
     ).toContain("Wrong role code");
+  });
+
+  it("maps global client update required to refresh copy", () => {
+    expect(
+      mapRolePasscodeJoinError(
+        new Error("failed-precondition Client update required."),
+      ),
+    ).toContain("Refresh");
+    expect(
+      mapJoinRequestError(
+        new Error("failed-precondition Client update required."),
+      ),
+    ).toContain("Refresh");
+    expect(
+      mapLeaderJoinResolveError(
+        new Error("failed-precondition Client update required."),
+      ),
+    ).toContain("That player needs to update");
   });
 
   it("maps empty-side join request errors to player copy", () => {

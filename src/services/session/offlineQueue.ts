@@ -1,6 +1,6 @@
 import type { AnnotationRecord } from "../../domain/map/annotations";
 import { addIdbDeleteFailureBreadcrumb } from "../core/analytics/sentry";
-import { isDatabaseDeletedError } from "./indexedDbErrors";
+import { isRetriableDatabaseError } from "./indexedDbErrors";
 
 const DB_NAME = "jetlag-offline-queue";
 const STORE_NAME = "writes";
@@ -38,7 +38,7 @@ async function withDatabaseRetry<T>(
   try {
     return await operation(database);
   } catch (error) {
-    if (!isDatabaseDeletedError(error)) {
+    if (!isRetriableDatabaseError(error)) {
       throw error;
     }
 

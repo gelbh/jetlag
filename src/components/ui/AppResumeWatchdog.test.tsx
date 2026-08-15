@@ -54,13 +54,38 @@ function renderWatchdog(initialPath = "/") {
   );
 }
 
+function triggerHidden() {
+  Object.defineProperty(document, "visibilityState", {
+    configurable: true,
+    get: () => "hidden",
+  });
+  act(() => {
+    document.dispatchEvent(new Event("visibilitychange"));
+  });
+}
+
 function triggerVisibleResume() {
+  triggerHidden();
   Object.defineProperty(document, "visibilityState", {
     configurable: true,
     get: () => "visible",
   });
   act(() => {
     document.dispatchEvent(new Event("visibilitychange"));
+  });
+}
+
+function triggerColdPageShow() {
+  act(() => {
+    window.dispatchEvent(new Event("pageshow"));
+  });
+}
+
+function triggerBfcachePageShow() {
+  act(() => {
+    const event = new Event("pageshow") as PageTransitionEvent;
+    Object.defineProperty(event, "persisted", { value: true });
+    window.dispatchEvent(event);
   });
 }
 
@@ -117,13 +142,51 @@ describe("AppResumeWatchdog", () => {
     expect(sessionStorage.getItem(RESUME_WATCHDOG_RELOAD_KEY)).toBe("1");
     expect(captureResumeShellUnresponsiveMock).toHaveBeenCalledTimes(1);
 
-    act(() => {
-      document.dispatchEvent(new Event("visibilitychange"));
-    });
+    triggerVisibleResume();
     await act(async () => {
       await vi.advanceTimersByTimeAsync(350);
     });
     expect(reload).toHaveBeenCalledTimes(1);
+  });
+
+  it("ignores cold pageshow and visibility without a prior hide", async () => {
+    const root = document.createElement("div");
+    root.id = "root";
+    document.body.appendChild(root);
+
+    renderWatchdog();
+    triggerColdPageShow();
+    Object.defineProperty(document, "visibilityState", {
+      configurable: true,
+      get: () => "visible",
+    });
+    act(() => {
+      document.dispatchEvent(new Event("visibilitychange"));
+    });
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(350);
+    });
+
+    expect(reload).not.toHaveBeenCalled();
+    expect(captureResumeShellUnresponsiveMock).not.toHaveBeenCalled();
+    expect(addAppResumeBreadcrumbMock).not.toHaveBeenCalled();
+  });
+
+  it("runs recovery on bfcache pageshow when shell stays empty", async () => {
+    const root = document.createElement("div");
+    root.id = "root";
+    document.body.appendChild(root);
+
+    renderWatchdog();
+    triggerBfcachePageShow();
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(350);
+    });
+
+    expect(reload).toHaveBeenCalledTimes(1);
+    expect(captureResumeShellUnresponsiveMock).toHaveBeenCalledTimes(1);
   });
 
   it("on /admin, delayed data-resume-ready succeeds within admin budget", async () => {

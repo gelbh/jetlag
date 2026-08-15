@@ -5,9 +5,21 @@ import {
   JOIN_WRONG_PASSCODE,
   joinSessionWithRoleHandler,
 } from "../session/joinSessionWithRole.mjs";
+import { CLIENT_UPDATE_REQUIRED } from "../session/clientMinVersion.mjs";
+import { clearClientMinVersionCache } from "../session/clientMinVersion.mjs";
 import { newRoleSecret } from "../session/rolePasscodes.mjs";
 
-function buildMockDb({ sessionData, secrets = {}, writes, codeSessionId = "sess-1" }) {
+test.beforeEach(() => {
+  clearClientMinVersionCache();
+});
+
+function buildMockDb({
+  sessionData,
+  secrets = {},
+  writes,
+  codeSessionId = "sess-1",
+  clientMinVersion,
+}) {
   const sessionRef = { id: codeSessionId };
   const secretsRef = { id: codeSessionId };
 
@@ -31,6 +43,21 @@ function buildMockDb({ sessionData, secrets = {}, writes, codeSessionId = "sess-
       if (name === "sessionRoleSecrets") {
         return {
           doc: () => secretsRef,
+        };
+      }
+      if (name === "ops") {
+        return {
+          doc: (id) => ({
+            get: async () => {
+              if (id !== "clientMinVersion" || clientMinVersion === undefined) {
+                return { exists: false, data: () => undefined };
+              }
+              return {
+                exists: true,
+                data: () => ({ minVersion: clientMinVersion }),
+              };
+            },
+          }),
         };
       }
       throw new Error(`unexpected collection ${name}`);
@@ -225,4 +252,52 @@ test("returning member same-role heal skips passcode and remaps leader", async (
   assert.equal(sessionData.roleGates.leaders.seeker, "new-seeker");
   assert.ok(!sessionData.memberUids.includes("old-seeker"));
   assert.ok(sessionData.memberUids.includes("new-seeker"));
+});
+
+test("global client min rejects 0.10.8 and allows 0.11.0", async () => {
+  const baseSession = {
+    status: "active",
+    hostUid: "host",
+    hostAppVersion: "0.11.0",
+    memberUids: ["host"],
+    memberRoles: { host: "hider" },
+    roleGates: { version: 1, leaders: { hider: "host" } },
+  };
+
+  await assert.rejects(
+    () =>
+      joinSessionWithRoleHandler(
+        buildMockDb({
+          sessionData: { ...baseSession },
+          writes: [],
+          clientMinVersion: "0.11.0",
+        }),
+        { uid: "seeker-old" },
+        {
+          code: "ABCD",
+          role: "seeker",
+          clientVersion: "0.10.8",
+        },
+      ),
+    (error) =>
+      error instanceof Error && error.message === CLIENT_UPDATE_REQUIRED,
+  );
+
+  const writes = [];
+  const sessionData = { ...baseSession, memberUids: ["host"], memberRoles: { host: "hider" } };
+  const result = await joinSessionWithRoleHandler(
+    buildMockDb({
+      sessionData,
+      writes,
+      clientMinVersion: "0.11.0",
+    }),
+    { uid: "seeker-ok" },
+    {
+      code: "ABCD",
+      role: "seeker",
+      clientVersion: "0.11.0",
+    },
+  );
+  assert.equal(result.sessionId, "sess-1");
+  assert.equal(sessionData.memberRoles["seeker-ok"], "seeker");
 });

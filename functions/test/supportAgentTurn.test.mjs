@@ -349,3 +349,33 @@ test("happy path NL-only response persists without tool execution", async () => 
     true,
   );
 });
+
+test("LLM failure throws SUPPORT_AGENT_LLM_FAILED sentinel for mapIncidentError", async () => {
+  const db = createInMemoryFirestore();
+  seedIncidentDb(db);
+  let id = 0;
+
+  await assert.rejects(
+    () =>
+      supportAgentTurnHandler(
+        db,
+        {
+          incidentId: "inc-1",
+          uid: "reporter-1",
+          text: "hello",
+        },
+        {
+          apiKey: "test-key",
+          now: () => new Date("2026-07-26T00:00:00.000Z"),
+          generateId: () => `id-${(id += 1)}`,
+          resolveCaps: () => getSessionOpsCaps("free"),
+          fetch: async () => ({
+            ok: false,
+            status: 503,
+            json: async () => ({ error: "unavailable" }),
+          }),
+        },
+      ),
+    (error) => error.message === "SESSION_OPS_LLM_FAILED",
+  );
+});

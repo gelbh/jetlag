@@ -9,6 +9,14 @@ import {
   requestRoleJoinHandler,
   resolveRoleJoinRequestHandler,
 } from "../session/joinRequest.mjs";
+import {
+  CLIENT_UPDATE_REQUIRED,
+  clearClientMinVersionCache,
+} from "../session/clientMinVersion.mjs";
+
+test.beforeEach(() => {
+  clearClientMinVersionCache();
+});
 
 function createDocRef(id) {
   return { id, path: id };
@@ -19,6 +27,7 @@ function buildMockDb({
   secrets = {},
   profiles = {},
   requests = {},
+  clientMinVersion,
 }) {
   const sessionRef = createDocRef("sess-1");
   const secretsRef = createDocRef("sess-1-secrets");
@@ -84,6 +93,21 @@ function buildMockDb({
                     data: () => profiles[uid],
                   }),
                 }),
+              };
+            },
+          }),
+        };
+      }
+      if (name === "ops") {
+        return {
+          doc: (id) => ({
+            get: async () => {
+              if (id !== "clientMinVersion" || clientMinVersion === undefined) {
+                return { exists: false, data: () => undefined };
+              }
+              return {
+                exists: true,
+                data: () => ({ minVersion: clientMinVersion }),
               };
             },
           }),
@@ -362,4 +386,34 @@ test("cancelRoleJoinRequest expired commits status before rejecting", async () =
 
   assert.equal(db._store["req-1"].status, "expired");
   assert.ok(db._store["req-1"].resolvedAt);
+});
+
+test("requestRoleJoin rejects clients below global min 0.11.0", async () => {
+  const sessionData = occupiedSeekerSession();
+  const db = buildMockDb({
+    sessionData,
+    profiles: { guest: { username: "ada" } },
+    clientMinVersion: "0.11.0",
+  });
+  const authAdmin = { getUser: async () => ({ email: "ignored@x.com" }) };
+
+  await assert.rejects(
+    () =>
+      requestRoleJoinHandler(
+        db,
+        { uid: "guest" },
+        authAdmin,
+        { sessionId: "sess-1", role: "seeker", clientVersion: "0.10.8" },
+      ),
+    (error) =>
+      error instanceof Error && error.message === CLIENT_UPDATE_REQUIRED,
+  );
+
+  const ok = await requestRoleJoinHandler(
+    db,
+    { uid: "guest" },
+    authAdmin,
+    { sessionId: "sess-1", role: "seeker", clientVersion: "0.11.0" },
+  );
+  assert.ok(ok.requestId);
 });

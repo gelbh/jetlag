@@ -13,6 +13,9 @@ type MockMap = {
   images: Set<string>;
   addImageCalls: string[];
   duplicateAddAttempts: number;
+  style: object | undefined;
+  isStyleLoaded: () => boolean;
+  _removed: boolean;
 };
 
 function createMockMap(): MockMap {
@@ -36,6 +39,9 @@ function createMockMap(): MockMap {
       images.add(id);
       addImageCalls.push(id);
     },
+    style: {},
+    isStyleLoaded: () => true,
+    _removed: false,
   };
 }
 
@@ -87,5 +93,83 @@ describe("mapLibreIconRegistry", () => {
     // be MapLibre console noise (error event), not a throw.
     expect(mock.duplicateAddAttempts).toBe(0);
     expect(new Set(mock.addImageCalls).size).toBe(mock.addImageCalls.length);
+  });
+
+  it("skips register when map style is undefined without calling hasImage", async () => {
+    const hasImage = vi.fn(() => {
+      throw new TypeError(
+        "Cannot read properties of undefined (reading 'getImage')",
+      );
+    });
+    const addImage = vi.fn();
+    const map = {
+      hasImage,
+      addImage,
+      isStyleLoaded: () => false,
+      style: undefined,
+      _removed: false,
+    } as unknown as MapLibreMap;
+
+    await expect(registerMapLibreMarkerImages(map)).resolves.toBeUndefined();
+    expect(hasImage).not.toHaveBeenCalled();
+    expect(addImage).not.toHaveBeenCalled();
+  });
+
+  it("skips register when map was removed", async () => {
+    const hasImage = vi.fn(() => {
+      throw new TypeError(
+        "Cannot read properties of undefined (reading 'getImage')",
+      );
+    });
+    const addImage = vi.fn();
+    const map = {
+      hasImage,
+      addImage,
+      isStyleLoaded: () => true,
+      style: {},
+      _removed: true,
+    } as unknown as MapLibreMap;
+
+    await expect(registerMapLibreMarkerImages(map)).resolves.toBeUndefined();
+    expect(hasImage).not.toHaveBeenCalled();
+    expect(addImage).not.toHaveBeenCalled();
+  });
+
+  it("skips addImage when style tears down during SVG decode", async () => {
+    const images = new Set<string>();
+    let styleAvailable = true;
+    const hasImage = vi.fn((id: string) => {
+      if (!styleAvailable) {
+        throw new TypeError(
+          "Cannot read properties of undefined (reading 'getImage')",
+        );
+      }
+      return images.has(id);
+    });
+    const addImage = vi.fn((id: string) => {
+      if (!styleAvailable) {
+        throw new TypeError(
+          "Cannot read properties of undefined (reading 'addImage')",
+        );
+      }
+      images.add(id);
+    });
+    const map = {
+      hasImage,
+      addImage,
+      isStyleLoaded: () => styleAvailable,
+      get style() {
+        return styleAvailable ? {} : undefined;
+      },
+      _removed: false,
+    } as unknown as MapLibreMap;
+
+    await withDelayedMockImage(async () => {
+      const pending = registerMapLibreMarkerImages(map);
+      styleAvailable = false;
+      await expect(pending).resolves.toBeUndefined();
+    });
+
+    expect(addImage).not.toHaveBeenCalled();
   });
 });

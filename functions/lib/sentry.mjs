@@ -4,10 +4,14 @@ import { fileURLToPath } from "node:url";
 import * as Sentry from "@sentry/node";
 import { defineSecret } from "firebase-functions/params";
 import { HttpsError } from "firebase-functions/v2/https";
+import { EXPECTED_SESSION_UX_HTTPS_ERROR_KEYS } from "../session/expectedSessionUxHttpsErrors.mjs";
 
 const sentryDsnSecret = defineSecret("SENTRY_DSN");
 
-/** Expected callable HttpsError outcomes — not product bugs. */
+/**
+ * Expected callable HttpsError outcomes — not product bugs.
+ * Session join/role keys come from expectedSessionUxHttpsErrors.mjs.
+ */
 const EXPECTED_HTTPS_ERROR_KEYS = new Set([
   "permission-denied:Only the host can do that.",
   "failed-precondition:Session already ended.",
@@ -17,7 +21,7 @@ const EXPECTED_HTTPS_ERROR_KEYS = new Set([
   "resource-exhausted:Too many attempts. Try again later.",
   "permission-denied:Invalid access code.",
   "resource-exhausted:Too many recovery attempts. Try again tomorrow.",
-  "invalid-argument:Role code is required.",
+  ...EXPECTED_SESSION_UX_HTTPS_ERROR_KEYS,
 ]);
 
 let initialized = false;
@@ -94,9 +98,10 @@ export function isAbortErrorEvent(event) {
   return false;
 }
 
-function readAppVersion() {
+export function readAppVersion() {
   const functionsDir = dirname(fileURLToPath(import.meta.url));
   try {
+    // functions/package.json is in the Firebase deploy bundle (root is not).
     const packageJson = JSON.parse(
       readFileSync(resolve(functionsDir, "../package.json"), "utf8"),
     );

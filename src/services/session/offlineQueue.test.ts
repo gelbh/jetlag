@@ -126,4 +126,34 @@ describe("offlineQueue", () => {
 
     deleteSpy.mockRestore();
   });
+
+  it("resets and retries when the database connection is closed", async () => {
+    await enqueueOfflineWrite("session-1", annotation);
+
+    let transactionCalls = 0;
+    const originalTransaction = IDBDatabase.prototype.transaction;
+    const transactionSpy = vi
+      .spyOn(IDBDatabase.prototype, "transaction")
+      .mockImplementation(function (this: IDBDatabase, ...args) {
+        transactionCalls += 1;
+        if (transactionCalls === 1) {
+          throw new DOMException(
+            "Can't start a transaction on a closed database",
+            "InvalidStateError",
+          );
+        }
+        return originalTransaction.apply(this, args as [string | string[], IDBTransactionMode?]);
+      });
+
+    try {
+      await expect(readOfflineQueue()).resolves.toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ id: "ann-offline" }),
+        ]),
+      );
+      expect(transactionCalls).toBeGreaterThanOrEqual(2);
+    } finally {
+      transactionSpy.mockRestore();
+    }
+  });
 });

@@ -8,7 +8,10 @@ import {
   type RoleGates,
 } from "../../domain/session/players/roleGates";
 import { listenLeaderJoinRequests } from "../../services/session/joinRequestListen";
-import { resolveRoleJoinRequest } from "../../services/session/rolePasscodeLifecycle";
+import {
+  mapLeaderJoinResolveError,
+  resolveRoleJoinRequest,
+} from "../../services/session/rolePasscodeLifecycle";
 
 /** Mirrors domain/map/annotations LOCAL_SESSION_ID without the annotations barrel. */
 const LOCAL_SESSION_ID = "local";
@@ -28,6 +31,7 @@ export function useLeaderJoinRequests({
 }: UseLeaderJoinRequestsParams) {
   const [requests, setRequests] = useState<RoleJoinRequest[]>([]);
   const [busy, setBusy] = useState(false);
+  const [resolveError, setResolveError] = useState<string | null>(null);
   const [nowMs, setNowMs] = useState(() => Date.now());
 
   const roles = useMemo(
@@ -83,10 +87,11 @@ export function useLeaderJoinRequests({
       }
 
       setBusy(true);
+      setResolveError(null);
       try {
         await resolveRoleJoinRequest(sessionId, pendingRequest.id, decision);
-      } catch {
-        // Leave the alert visible so the leader can retry.
+      } catch (error) {
+        setResolveError(mapLeaderJoinResolveError(error));
       } finally {
         setBusy(false);
       }
@@ -105,6 +110,7 @@ export function useLeaderJoinRequests({
   return {
     pendingJoinRequest: pendingRequest,
     joinRequestBusy: busy,
+    joinRequestError: resolveError,
     handleAcceptJoinRequest,
     handleDeclineJoinRequest,
   };

@@ -69,4 +69,19 @@ describe("RoleJoinRequestAlert", () => {
     expect(screen.getByRole("button", { name: "Accept" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Decline" })).toBeDisabled();
   });
+
+  it("shows resolve error for the leader", () => {
+    render(
+      <RoleJoinRequestAlert
+        request={pendingRequest()}
+        onAccept={vi.fn()}
+        onDecline={vi.fn()}
+        error="That player needs to update the app before they can join."
+      />,
+    );
+
+    expect(
+      screen.getByText("That player needs to update the app before they can join."),
+    ).toBeInTheDocument();
+  });
 });
