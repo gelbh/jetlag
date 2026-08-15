@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 import type { GameArea } from "@/domain/map/annotations";
 import { DUBLIN_CITY_GAME_AREA } from "@/test/fixtures/dublinGameArea";
-import { suggestRegionPackForGameArea } from "./packAttach";
+import {
+  playAreaAttachFingerprint,
+  resolvePackAttachChrome,
+  suggestRegionPackForGameArea,
+} from "./packAttach";
 import { REGION_PACK_REFERENCE_BBOXES } from "./packGeoManifest";
 
 /** Axis-aligned polygon from south/west/north/east (lng, lat rings). */
@@ -89,5 +93,35 @@ describe("suggestRegionPackForGameArea", () => {
       nyc.west + 0.00005,
     );
     expect(suggestRegionPackForGameArea(tiny)).toBeNull();
+  });
+});
+
+describe("resolvePackAttachChrome", () => {
+  it("keeps manual clear sticky for the same fingerprint", () => {
+    const suggestion = suggestRegionPackForGameArea(DUBLIN_CITY_GAME_AREA);
+    const fingerprint = playAreaAttachFingerprint(DUBLIN_CITY_GAME_AREA);
+    const resolved = resolvePackAttachChrome({
+      gameArea: DUBLIN_CITY_GAME_AREA,
+      fingerprint,
+      suggestion,
+      manual: { fingerprint, packId: undefined },
+    });
+    expect(resolved.packId).toBeUndefined();
+    expect(resolved.source).toBe("manual");
+    expect(resolved.showRequestCta).toBe(true);
+  });
+
+  it("marks seeded matching suggestion as bundled", () => {
+    const suggestion = suggestRegionPackForGameArea(DUBLIN_CITY_GAME_AREA);
+    const fingerprint = playAreaAttachFingerprint(DUBLIN_CITY_GAME_AREA);
+    const resolved = resolvePackAttachChrome({
+      gameArea: DUBLIN_CITY_GAME_AREA,
+      fingerprint,
+      suggestion,
+      manual: null,
+      seededPackId: "dublin",
+    });
+    expect(resolved.packId).toBe("dublin");
+    expect(resolved.source).toBe("bundled");
   });
 });

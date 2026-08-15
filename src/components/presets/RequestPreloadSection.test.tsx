@@ -92,5 +92,8 @@ describe("RequestPreloadSection", () => {
     expect(
       screen.getByText(/reviewed manually and are not instant/i),
     ).toBeInTheDocument();
+    expect(
+      screen.getByText("Request a custom location pack"),
+    ).toBeInTheDocument();
   });
 });

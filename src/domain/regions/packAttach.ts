@@ -24,10 +24,74 @@ export type PackAttachSuggestion = {
   score: number;
 };
 
+/** How the current region pack was chosen for a draft play area. */
+export type PackAttachSource = "auto" | "manual" | "bundled";
+
+/** Sticky clear/change until the play-area AABB fingerprint changes. */
+export type PackAttachManualOverride = {
+  fingerprint: string | null;
+  packId: RegionPackId | undefined;
+};
+
+export type PackAttachResolved = {
+  packId: RegionPackId | undefined;
+  source: PackAttachSource;
+  showRequestCta: boolean;
+};
+
 export type SuggestRegionPackOptions = {
   minIntersectionRatio?: number;
   minIntersectionKm2?: number;
 };
+
+/** AABB fingerprint for sticky manual pack override (not full-geometry hash). */
+export function playAreaAttachFingerprint(
+  gameArea: GameArea | null,
+): string | null {
+  if (!gameArea) {
+    return null;
+  }
+  const box = gameAreaToBoundingBoxRaw(gameArea);
+  return `${box.south}:${box.west}:${box.north}:${box.east}`;
+}
+
+/**
+ * Resolve quiet pack-attach chrome from suggestion + optional sticky manual override.
+ */
+export function resolvePackAttachChrome(input: {
+  gameArea: GameArea | null;
+  fingerprint: string | null;
+  suggestion: PackAttachSuggestion | null;
+  manual: PackAttachManualOverride | null;
+  seededPackId?: RegionPackId;
+}): PackAttachResolved {
+  const { gameArea, fingerprint, suggestion, manual, seededPackId } = input;
+
+  if (manual && manual.fingerprint === fingerprint) {
+    return {
+      packId: manual.packId,
+      source: "manual",
+      showRequestCta: Boolean(gameArea) && manual.packId == null,
+    };
+  }
+
+  if (suggestion) {
+    return {
+      packId: suggestion.packId,
+      source:
+        seededPackId !== undefined && seededPackId === suggestion.packId
+          ? "bundled"
+          : "auto",
+      showRequestCta: false,
+    };
+  }
+
+  return {
+    packId: undefined,
+    source: "auto",
+    showRequestCta: Boolean(gameArea),
+  };
+}
 
 /**
  * Suggest the best region pack for a game area by bbox overlap.
