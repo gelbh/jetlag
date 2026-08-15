@@ -42,6 +42,25 @@ export function transitVehicleIconId(mode: TransitRouteMode): string {
   return `jl-icon-transit-vehicle-${mode}`;
 }
 
+/**
+ * Guard before hasImage/addImage — MapLibre throws when `style` is undefined
+ * (teardown / mid-setStyle) or the map was removed.
+ */
+function canMutateMapImages(map: MapLibreMap): boolean {
+  if (map._removed) {
+    return false;
+  }
+  try {
+    // `style` is public on MapLibre Map; undefined during style swap/teardown.
+    if (!map.style) {
+      return false;
+    }
+    return map.isStyleLoaded() === true;
+  } catch {
+    return false;
+  }
+}
+
 async function loadSvgImage(
   map: MapLibreMap,
   imageId: string,
@@ -49,6 +68,9 @@ async function loadSvgImage(
   width: number,
   height: number,
 ): Promise<boolean> {
+  if (!canMutateMapImages(map)) {
+    return false;
+  }
   if (map.hasImage(imageId)) {
     return true;
   }
@@ -63,6 +85,10 @@ async function loadSvgImage(
         img.onerror = () => reject(new Error(`Failed to decode ${imageId}`));
         img.src = url;
       });
+      // Style may tear down during decode — never call hasImage/addImage then.
+      if (!canMutateMapImages(map)) {
+        return false;
+      }
       // Skip addImage when another register won the race (MapLibre no-ops +
       // error-events on duplicates; it does not throw).
       if (map.hasImage(imageId)) {
@@ -92,6 +118,10 @@ function userLocationFallbackSvg(): string {
 async function registerMapLibreMarkerImagesOnce(
   map: MapLibreMap,
 ): Promise<void> {
+  if (!canMutateMapImages(map)) {
+    return;
+  }
+
   const userLoads = await Promise.all([
     loadSvgImage(
       map,
