@@ -161,8 +161,14 @@
   [data-player-ux-world="survey"] .hud-sheet {
     border-top: 2px solid var(--color-flag);
     background: var(--color-canvas);
-    box-shadow: 0 -8px 28px oklch(0.22 0.02 265 / 0.18);
+    box-shadow: 0 -8px 28px oklch(from var(--color-field-ink) l c h / 0.18);
     color: var(--color-field-ink);
+  }
+
+  [data-player-ux-world="survey"] .contextual-rail__dialog {
+    background: var(--color-canvas);
+    color: var(--color-field-ink);
+    border-inline-start: 2px solid var(--color-flag);
   }
 
   [data-player-ux-world="survey"] .hud-scrim,
