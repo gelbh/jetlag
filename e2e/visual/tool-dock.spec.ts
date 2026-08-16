@@ -90,10 +90,14 @@ test.describe("landscape survey chrome distill", () => {
       await chip.click();
     }
     await expect(chip).toHaveAttribute("aria-expanded", "true");
+    await expect(
+      page.locator('[data-player-ux-world="survey"][data-landscape-chrome="revealed"]'),
+    ).toBeVisible();
     await expect(page.locator('[data-island="map-controls"]')).toBeHidden();
     await expect(
       page.getByRole("button", { name: "Report a problem" }),
     ).toBeHidden();
+    // Settings stays primary in landscape distill.
     await expect(
       page.getByRole("button", { name: "Open settings" }),
     ).toBeVisible();

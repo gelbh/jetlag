@@ -98,41 +98,39 @@ export function SessionIslandSlots({
       ) : null}
 
       {onOpenReportProblem ? (
-        <span data-survey-priority="secondary" className="contents">
-          <MapChromeControl
-            variant="slot"
-            disabled={inactive}
-            onClick={onOpenReportProblem}
-            aria-label="Report a problem"
-            icon={
-              survey ? (
-                <JlIcon icon={WarningCircle} size={20} weight="regular" />
-              ) : (
-                <HudGuideIcon className="h-5 w-5 shrink-0" />
-              )
-            }
-            label="Report"
-          />
-        </span>
+        <MapChromeControl
+          variant="slot"
+          disabled={inactive}
+          onClick={onOpenReportProblem}
+          aria-label="Report a problem"
+          data-survey-priority="secondary"
+          icon={
+            survey ? (
+              <JlIcon icon={WarningCircle} size={20} weight="regular" />
+            ) : (
+              <HudGuideIcon className="h-5 w-5 shrink-0" />
+            )
+          }
+          label="Report"
+        />
       ) : null}
 
       {onOpenCodes ? (
-        <span data-survey-priority="secondary" className="contents">
-          <MapChromeControl
-            variant="slot"
-            disabled={inactive}
-            onClick={onOpenCodes}
-            aria-label="Open role codes"
-            icon={
-              survey ? (
-                <JlIcon icon={Star} size={20} weight="regular" />
-              ) : (
-                <HudStarIcon className="h-5 w-5 shrink-0" />
-              )
-            }
-            label="Codes"
-          />
-        </span>
+        <MapChromeControl
+          variant="slot"
+          disabled={inactive}
+          onClick={onOpenCodes}
+          aria-label="Open role codes"
+          data-survey-priority="secondary"
+          icon={
+            survey ? (
+              <JlIcon icon={Star} size={20} weight="regular" />
+            ) : (
+              <HudStarIcon className="h-5 w-5 shrink-0" />
+            )
+          }
+          label="Codes"
+        />
       ) : null}
 
       {onOpenSettings ? (
@@ -153,41 +151,39 @@ export function SessionIslandSlots({
       ) : null}
 
       {canRequestFoundHider && onRequestFoundHider ? (
-        <span data-survey-priority="secondary" className="contents">
-          <MapChromeControl
-            variant="slot"
-            disabled={inactive}
-            onClick={onRequestFoundHider}
-            aria-label="Declare found hider"
-            icon={
-              survey ? (
-                <JlIcon icon={CheckFat} size={20} weight="bold" />
-              ) : (
-                <span aria-hidden="true">✓</span>
-              )
-            }
-            label="Found"
-          />
-        </span>
+        <MapChromeControl
+          variant="slot"
+          disabled={inactive}
+          onClick={onRequestFoundHider}
+          aria-label="Declare found hider"
+          data-survey-priority="secondary"
+          icon={
+            survey ? (
+              <JlIcon icon={CheckFat} size={20} weight="bold" />
+            ) : (
+              <span aria-hidden="true">✓</span>
+            )
+          }
+          label="Found"
+        />
       ) : null}
 
       {canStartEndGame && onStartEndGame ? (
-        <span data-survey-priority="secondary" className="contents">
-          <MapChromeControl
-            variant="slot"
-            disabled={inactive}
-            onClick={onStartEndGame}
-            aria-label="Declare found hiding-zone station / start end game"
-            icon={
-              survey ? (
-                <JlIcon icon={SealWarning} size={20} weight="bold" />
-              ) : (
-                <span aria-hidden="true">!</span>
-              )
-            }
-            label="Station"
-          />
-        </span>
+        <MapChromeControl
+          variant="slot"
+          disabled={inactive}
+          onClick={onStartEndGame}
+          aria-label="Declare found hiding-zone station / start end game"
+          data-survey-priority="secondary"
+          icon={
+            survey ? (
+              <JlIcon icon={SealWarning} size={20} weight="bold" />
+            ) : (
+              <span aria-hidden="true">!</span>
+            )
+          }
+          label="Station"
+        />
       ) : null}
     </div>
   );
