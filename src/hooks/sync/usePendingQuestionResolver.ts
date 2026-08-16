@@ -25,6 +25,8 @@ interface UsePendingQuestionResolverParams {
       id?: string;
     },
   ) => Promise<AnnotationRecord>;
+  /** Soft-delete orphan when cancel wins after create (race). */
+  deleteAnnotation?: (id: string) => Promise<void>;
   gameArea: GameArea;
   sessionResetAt?: string;
   /**
@@ -105,6 +107,7 @@ export function usePendingQuestionResolver({
   enabled,
   pendingQuestions,
   createAnnotation,
+  deleteAnnotation,
   gameArea,
   sessionResetAt,
   knownAnnotationIdsKey = "",
@@ -231,6 +234,16 @@ export function usePendingQuestionResolver({
             },
           );
 
+          if (outcome === "already-cancelled") {
+            // Host/other tab cancelled while we created — drop orphan shade.
+            try {
+              await deleteAnnotation?.(created.id);
+            } catch {
+              // Best-effort cleanup; keep in-flight guard.
+            }
+            return;
+          }
+
           if (
             isAnnotationQuestionTool(pending.toolType) &&
             shouldEmitAnsweredActivity(outcome)
@@ -288,6 +301,7 @@ export function usePendingQuestionResolver({
     }
   }, [
     createAnnotation,
+    deleteAnnotation,
     enabled,
     gameArea,
     knownAnnotationIdsKey,

@@ -562,4 +562,58 @@ describe("usePendingQuestionResolver", () => {
     // First call: happy-path resolve (rejected); second: catch complete-to-resolved
     expect(updatePendingQuestion).toHaveBeenCalledTimes(2);
   });
+
+  it("soft-deletes annotation when resolve write loses to cancel after create", async () => {
+    const { FirebaseError } = await import("firebase/app");
+    const deleteAnnotation = vi.fn().mockResolvedValue(undefined);
+    const radarPending: PendingQuestionRecord = {
+      id: "pq-radar-cancel-race",
+      sessionId: "session-1",
+      toolType: "radar",
+      createdByUid: "seeker-1",
+      createdAt: "2026-01-01T00:00:00.000Z",
+      status: "answered",
+      placement: {
+        geometryJson: JSON.stringify({
+          type: "Feature",
+          properties: {},
+          geometry: { type: "Point", coordinates: [-0.15, 51.45] },
+        }),
+        metadata: { radiusKm: 1 },
+      },
+      replyOptions: [
+        { id: "yes", label: "Yes" },
+        { id: "no", label: "No" },
+      ],
+      promptText: "Radar?",
+      answer: "yes",
+    };
+
+    createAnnotation.mockResolvedValue({
+      id: "pq-radar-cancel-race",
+    } as AnnotationRecord);
+    updatePendingQuestion.mockRejectedValue(
+      new FirebaseError("permission-denied", "Missing or insufficient permissions."),
+    );
+    getPendingQuestionStatus
+      .mockResolvedValueOnce("answered")
+      .mockResolvedValueOnce("cancelled");
+
+    renderHook(() =>
+      usePendingQuestionResolver({
+        sessionId: "session-1",
+        enabled: true,
+        pendingQuestions: [radarPending],
+        createAnnotation,
+        deleteAnnotation,
+        gameArea,
+      }),
+    );
+
+    await waitFor(() => {
+      expect(deleteAnnotation).toHaveBeenCalledWith("pq-radar-cancel-race");
+    });
+
+    expect(emitQuestionAnsweredActivity).not.toHaveBeenCalled();
+  });
 });
