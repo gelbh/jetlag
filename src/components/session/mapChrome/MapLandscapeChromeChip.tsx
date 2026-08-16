@@ -46,7 +46,9 @@ export function MapLandscapeChromeChip({
     : syncDisplay.inline?.visible
       ? syncDisplay.inline.label
       : null;
-  const syncTone = syncDisplay.inline?.tone;
+  const syncTone =
+    syncDisplay.inline?.tone ??
+    (survey ? syncDisplay.banner?.tone : undefined);
 
   return (
     <button
