@@ -91,7 +91,7 @@ export function GameChatTab({
         </InlineError>
       ) : null}
       {gameMessages.length === 0 ? (
-        <EmptyState>No game messages yet.</EmptyState>
+        <EmptyState className="text-ink-dim">No game messages yet.</EmptyState>
       ) : (
         gameMessages.map((message) => {
           if (message.kind === "system") {

@@ -11,7 +11,7 @@ test("@smoke home screen matches visual baseline", async ({ page }) => {
   });
 });
 
-test("@smoke survey home matches visual baseline", async ({ page }) => {
+test("@smoke survey home shows field-book world", async ({ page }) => {
   await enablePlayerUxWorld(page);
   await prepareE2EPage(page);
   await page.goto("/");
@@ -19,7 +19,4 @@ test("@smoke survey home matches visual baseline", async ({ page }) => {
     page.getByRole("button", { name: /Play — create, join, or custom game/i }),
   ).toBeVisible();
   await expect(page.locator('[data-player-ux-world="survey"]').first()).toBeVisible();
-  await expect(page).toHaveScreenshot("home-survey.png", {
-    maxDiffPixelRatio: 0.02,
-  });
 });

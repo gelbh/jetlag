@@ -28,6 +28,8 @@
     --color-status-success: var(--color-trail);
     --color-status-info: var(--color-signal);
     --color-status-info-surface: var(--color-signal-soft);
+    --color-status-warning: var(--color-flag);
+    --color-status-warning-surface: var(--color-flag-soft);
     color-scheme: light;
   }
 
@@ -51,7 +53,7 @@
         transparent 60%
       );
     background-size:
-      100% 1.5rem,
+      100% 24px,
       auto,
       auto;
   }

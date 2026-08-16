@@ -4,7 +4,6 @@ import { useParams } from "react-router-dom";
 import { useAppNavigate } from "../hooks/navigation/useAppNavigate";
 import type { MapBoundsExpression } from "../domain/map/mapBounds";
 import { DesktopContentColumn } from "../components/ui/layout/DesktopContentColumn";
-import { EntryScreenLayout } from "../components/ui/layout/EntryScreenLayout";
 import {
   ScreenHeader,
   screenHeaderOffsetClassName,
@@ -44,6 +43,7 @@ import { RequestPackWhenUnavailable } from "../components/presets/RequestPackWhe
 import { buildPreloadPresetSnapshot } from "../domain/preloadRequest/buildPreloadPresetSnapshot";
 import { usePackAttachChrome } from "../hooks/session/usePackAttachChrome";
 import { useMapStore } from "../state/sessionStore";
+import { usePlayerUxWorld } from "@/hooks/feature/usePlayerUxWorld";
 import type { GeocodedPlace } from "../services/geo/geocoding";
 
 export function GamePresetEditor() {
@@ -155,9 +155,13 @@ export function GamePresetEditor() {
   }, [focusBounds]);
 
   const isUserPreset = !existing || !isBundledPresetId(existing.id);
+  const survey = usePlayerUxWorld();
 
   return (
-    <EntryScreenLayout justify="start">
+    <main
+      className="home-poster flex min-h-[100dvh] flex-col px-5 py-8"
+      data-player-ux-world={survey ? "survey" : undefined}
+    >
       <GameAreaFramingModal
         open={framingModalOpen}
         mapStyle={mapStyle}
@@ -373,7 +377,7 @@ export function GamePresetEditor() {
         </div>
       </div>
       </DesktopContentColumn>
-    </EntryScreenLayout>
+    </main>
   );
 }
 

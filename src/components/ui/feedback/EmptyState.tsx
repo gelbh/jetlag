@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 export type EmptyStateProps = {
   children: ReactNode;
   className?: string;
-  /** Default status for live regions; use note for static list placeholders. */
+  /** Static placeholders default to note; pass status for live updating empties. */
   role?: "status" | "note";
 };
 
@@ -14,7 +14,7 @@ export type EmptyStateProps = {
 export function EmptyState({
   children,
   className,
-  role = "status",
+  role = "note",
 }: EmptyStateProps) {
   return (
     <p

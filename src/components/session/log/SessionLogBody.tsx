@@ -77,7 +77,7 @@ export function SessionLogBody({
   return (
     <div className="min-h-0 space-y-1.5">
       {sorted.length === 0 ? (
-        <EmptyState>No activity yet.</EmptyState>
+        <EmptyState className="text-ink-dim">No activity yet.</EmptyState>
       ) : (
         sorted.map((event) => {
           const linkedId = activityAnnotationId(event);

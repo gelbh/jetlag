@@ -1,6 +1,5 @@
 import { AppLink } from "../navigation/AppLink";
 import { DesktopContentColumn } from "../ui/layout/DesktopContentColumn";
-import { EntryScreenLayout } from "../ui/layout/EntryScreenLayout";
 import {
   ScreenHeader,
   screenHeaderOffsetClassName,
@@ -10,6 +9,7 @@ import { BundledPresetTree } from "./BundledPresetTree";
 import { PresetSearchResults } from "./PresetSearchResults";
 import { PresetDetailPanel } from "./PresetDetailPanel";
 import { migrateGamePreset } from "../../domain/session/presets/gamePreset";
+import { usePlayerUxWorld } from "@/hooks/feature/usePlayerUxWorld";
 
 export function PresetBrowseLayout({
   searchId,
@@ -32,8 +32,12 @@ export function PresetBrowseLayout({
   userPresets: ReturnType<typeof migrateGamePreset>[];
   onDelete: (id: string) => void;
 }) {
+  const survey = usePlayerUxWorld();
   return (
-    <EntryScreenLayout justify="start">
+    <main
+      className="home-poster flex min-h-[100dvh] flex-col px-5 py-8"
+      data-player-ux-world={survey ? "survey" : undefined}
+    >
       <ScreenHeader backTo="/" backLabel="Back" />
       <DesktopContentColumn maxWidth="social">
         <div
@@ -130,6 +134,6 @@ export function PresetBrowseLayout({
           )}
         </div>
       </DesktopContentColumn>
-    </EntryScreenLayout>
+    </main>
   );
 }
