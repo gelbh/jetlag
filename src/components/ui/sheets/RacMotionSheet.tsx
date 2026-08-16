@@ -1,4 +1,4 @@
-import { useCallback, useRef, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, type ReactNode } from "react";
 import { Dialog, Modal, ModalOverlay } from "react-aria-components";
 import {
   motion,
@@ -14,6 +14,7 @@ import {
   SHEET_VELOCITY_DISMISS_PX_MS,
 } from "@/domain/device/motion/motionTokens";
 import { MobileSheet } from "./MobileSheet";
+import type { SheetHandleProps } from "@/hooks/motion/useSheetGesture";
 
 export interface RacMotionSheetProps {
   open: boolean;
@@ -52,6 +53,12 @@ export function RacMotionSheet({
 
   useScrollLock(open);
 
+  useEffect(() => {
+    if (!open) {
+      y.set(0);
+    }
+  }, [open, y]);
+
   const requestClose = useCallback(() => {
     onClose();
   }, [onClose]);
@@ -88,6 +95,22 @@ export function RacMotionSheet({
   const canStartHandleDrag = useCallback(() => {
     return (scrollRef.current?.scrollTop ?? 0) <= 0;
   }, []);
+
+  const handleProps: SheetHandleProps | undefined =
+    dismissible && !reduceMotion
+      ? {
+          onPointerDown: (event) => {
+            if (!canStartHandleDrag()) {
+              return;
+            }
+            measureHeight();
+            dragControls.start(event);
+          },
+          onPointerMove: () => undefined,
+          onPointerUp: () => undefined,
+          onPointerCancel: () => undefined,
+        }
+      : undefined;
 
   return (
     <ModalOverlay
@@ -136,22 +159,7 @@ export function RacMotionSheet({
               maxHeightClassName={maxHeightClassName}
               pinned={pinned}
               scrollRef={scrollRef}
-              handleProps={
-                dismissible && !reduceMotion
-                  ? {
-                      onPointerDown: (event) => {
-                        if (!canStartHandleDrag()) {
-                          return;
-                        }
-                        measureHeight();
-                        dragControls.start(event);
-                      },
-                      onPointerMove: () => undefined,
-                      onPointerUp: () => undefined,
-                      onPointerCancel: () => undefined,
-                    }
-                  : undefined
-              }
+              handleProps={handleProps}
             >
               {children}
             </MobileSheet>
