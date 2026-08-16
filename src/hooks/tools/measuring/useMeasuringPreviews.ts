@@ -1,10 +1,12 @@
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import type { Feature, MultiPolygon, Polygon as GeoPolygon } from "geojson";
 import type { GameArea } from "@/domain/map/annotations";
+import { assertMeasuringGeometryBudget } from "@/domain/geometry/measuring/measuringGeometryBudgets";
 import {
-  assertMeasuringGeometryBudget,
-  softenMeasuringOutputToBudget,
-} from "@/domain/geometry/measuring/measuringGeometryBudgets";
+  buildMeasuringCoarseFeature,
+  refineMeasuringFeatureStep,
+  type MeasuringLodPhase,
+} from "@/domain/geometry/measuring/measuringLod";
 import {
   buildMeasuringBoundaryPreview,
   buildMeasuringEliminationPreview,
@@ -12,6 +14,58 @@ import {
 import { previewGeometryFingerprint } from "@/domain/geometry/measuring/previewGeometryFingerprint";
 import { getCachedPreparedCoastlineSegments } from "@/services/geo/overpass/coastline";
 import type { MeasuringDraftState } from "./useMeasuringDraftState";
+
+function scheduleIdle(callback: () => void): () => void {
+  if (typeof requestIdleCallback === "function") {
+    const id = requestIdleCallback(() => {
+      callback();
+    });
+    return () => cancelIdleCallback(id);
+  }
+  const id = setTimeout(callback, 0);
+  return () => clearTimeout(id);
+}
+
+function paintLodFeature(
+  full: Feature<GeoPolygon | MultiPolygon>,
+  generation: number,
+  generationRef: { current: number },
+  setFeature: (
+    feature: Feature<GeoPolygon | MultiPolygon> | null,
+  ) => void,
+  setPhase: (phase: MeasuringLodPhase) => void,
+  cancelRef: { current: (() => void) | null },
+): void {
+  const coarse = buildMeasuringCoarseFeature(full);
+  setFeature(coarse);
+
+  if (previewGeometryFingerprint(coarse) === previewGeometryFingerprint(full)) {
+    setPhase("complete");
+    return;
+  }
+
+  setPhase("refining");
+  let stepIndex = 0;
+  let current = coarse;
+
+  const runStep = () => {
+    if (generation !== generationRef.current) {
+      return;
+    }
+    const next = refineMeasuringFeatureStep(full, current, stepIndex);
+    current = next.feature;
+    setFeature(current);
+    stepIndex += 1;
+    if (next.done) {
+      setPhase("complete");
+      cancelRef.current = null;
+      return;
+    }
+    cancelRef.current = scheduleIdle(runStep);
+  };
+
+  cancelRef.current = scheduleIdle(runStep);
+}
 
 export function useMeasuringPreviews(
   gameArea: GameArea,
@@ -90,11 +144,19 @@ export function useMeasuringPreviews(
   > | null>(null);
   const [measuringEliminationPreview, setMeasuringEliminationPreview] =
     useState<Feature<GeoPolygon | MultiPolygon> | null>(null);
+  const [measuringLodPhase, setMeasuringLodPhase] =
+    useState<MeasuringLodPhase>("complete");
   const generationRef = useRef(0);
+  const nearLodCancelRef = useRef<(() => void) | null>(null);
+  const elimLodCancelRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     const generation = generationRef.current + 1;
     generationRef.current = generation;
+    nearLodCancelRef.current?.();
+    nearLodCancelRef.current = null;
+    elimLodCancelRef.current?.();
+    elimLodCancelRef.current = null;
 
     const budget = assertMeasuringGeometryBudget({
       measuringSubject: previewRegionInput.measuringSubject,
@@ -107,9 +169,9 @@ export function useMeasuringPreviews(
     void (async () => {
       if (!budget.ok) {
         if (generation === generationRef.current) {
-          // Budget gate triggered: clear previews and set error message
           setMeasuringNearRegion(null);
           setMeasuringEliminationPreview(null);
+          setMeasuringLodPhase("complete");
           setMeasuringError(budget.message);
         }
         return;
@@ -122,6 +184,7 @@ export function useMeasuringPreviews(
         if (generation === generationRef.current) {
           setMeasuringNearRegion(null);
           setMeasuringEliminationPreview(null);
+          setMeasuringLodPhase("complete");
         }
         return;
       }
@@ -129,22 +192,24 @@ export function useMeasuringPreviews(
         return;
       }
 
-      // Soften display copies only — elim must rebuild from raw near (commit/resolve parity).
-      let displayNear = near;
-      if (near) {
-        const softenedNear = softenMeasuringOutputToBudget(near);
-        if (!softenedNear.ok) {
-          setMeasuringNearRegion(null);
-          setMeasuringEliminationPreview(null);
-          setMeasuringError(softenedNear.message);
-          return;
-        }
-        displayNear = softenedNear.feature;
-      }
-
       // Clear stale elimination while the matching elim rebuild runs.
-      setMeasuringNearRegion(displayNear);
       setMeasuringEliminationPreview(null);
+      setMeasuringError(null);
+
+      if (near) {
+        setMeasuringLodPhase("coarse");
+        paintLodFeature(
+          near,
+          generation,
+          generationRef,
+          setMeasuringNearRegion,
+          setMeasuringLodPhase,
+          nearLodCancelRef,
+        );
+      } else {
+        setMeasuringNearRegion(null);
+        setMeasuringLodPhase("complete");
+      }
 
       try {
         const elimination = await buildMeasuringEliminationPreview({
@@ -159,14 +224,21 @@ export function useMeasuringPreviews(
           setMeasuringError(null);
           return;
         }
-        const softenedElim = softenMeasuringOutputToBudget(elimination);
-        if (!softenedElim.ok) {
-          setMeasuringNearRegion(null);
-          setMeasuringEliminationPreview(null);
-          setMeasuringError(softenedElim.message);
-          return;
-        }
-        setMeasuringEliminationPreview(softenedElim.feature);
+        // Keep refining phase if near still refining; elim uses its own cancel slot.
+        paintLodFeature(
+          elimination,
+          generation,
+          generationRef,
+          setMeasuringEliminationPreview,
+          (phase) => {
+            if (phase === "refining" || phase === "coarse") {
+              setMeasuringLodPhase(phase);
+            } else if (nearLodCancelRef.current === null) {
+              setMeasuringLodPhase("complete");
+            }
+          },
+          elimLodCancelRef,
+        );
         setMeasuringError(null);
       } catch {
         if (generation === generationRef.current) {
@@ -174,6 +246,13 @@ export function useMeasuringPreviews(
         }
       }
     })();
+
+    return () => {
+      nearLodCancelRef.current?.();
+      nearLodCancelRef.current = null;
+      elimLodCancelRef.current?.();
+      elimLodCancelRef.current = null;
+    };
   }, [previewRegionInput, setMeasuringError]);
 
   const measuringBoundaryPreview = useMemo(() => {
@@ -193,6 +272,7 @@ export function useMeasuringPreviews(
     measuringNearRegion,
     measuringBoundaryPreview,
     measuringEliminationPreview,
+    measuringLodPhase,
   };
 }
 
