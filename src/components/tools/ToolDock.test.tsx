@@ -27,8 +27,8 @@ describe("ToolDock", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Draw on map" }));
 
-    expect(screen.getByRole("menuitem", { name: /Pin/i })).toBeInTheDocument();
-    expect(screen.getByRole("menuitem", { name: /Zone/i })).toBeInTheDocument();
+    expect(screen.getByRole("menuitemradio", { name: /Pin/i })).toBeInTheDocument();
+    expect(screen.getByRole("menuitemradio", { name: /Zone/i })).toBeInTheDocument();
   });
 
   it("renders session island tools including Log", () => {
