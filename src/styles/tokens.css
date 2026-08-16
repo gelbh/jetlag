@@ -79,7 +79,7 @@
   --color-trail-soft: oklch(0.72 0.12 145 / 0.22);
   --color-halt: oklch(0.74 0.15 25);
   --color-halt-soft: oklch(0.74 0.15 25 / 0.22);
-  --color-rule: oklch(0.45 0.02 250);
+  --color-rule: oklch(0.52 0.02 250);
   /* deprecated: Broadcast HUD float shadow */
   --shadow-hud-float: 0 8px 24px 0 oklch(0.1 0.04 265 / 0.55);
   /* deprecated: Broadcast HUD menu shadow */

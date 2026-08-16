@@ -62,8 +62,8 @@
     },
     "rule": {
       "$type": "color",
-      "$value": "oklch(0.45 0.02 250)",
-      "$description": "Survey field book — hairline edge (direction role: rule) visible on dark plates for status/island borders."
+      "$value": "oklch(0.52 0.02 250)",
+      "$description": "Survey field book — hairline edge (direction role: rule) visible on dark plates for status/island borders (≥3:1 non-text)."
     }
   }
 }
