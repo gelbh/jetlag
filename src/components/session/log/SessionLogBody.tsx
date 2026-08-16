@@ -8,6 +8,7 @@ import {
   type SessionActivityEvent,
   type SessionActivityType,
 } from "@/domain/session/activity/sessionActivityLog";
+import { EmptyState } from "@/components/ui/feedback/EmptyState";
 
 interface SessionLogBodyProps {
   events: readonly SessionActivityEvent[];
@@ -69,12 +70,14 @@ export function SessionLogBody({
   const sorted = useMemo(() => sortActivityEventsDesc(events), [events]);
 
   const rowPad = compact ? "px-2.5 py-2" : "px-3 py-2.5";
-  const actionPad = compact ? "min-h-9 px-2.5 text-xs" : "min-h-10 px-3 text-sm";
+  const actionPad = compact
+    ? "min-h-9 px-2.5 text-[0.8125rem]"
+    : "min-h-10 px-3 text-sm";
 
   return (
     <div className="min-h-0 space-y-1.5">
       {sorted.length === 0 ? (
-        <p className="text-sm text-ink-dim">No activity yet.</p>
+        <EmptyState>No activity yet.</EmptyState>
       ) : (
         sorted.map((event) => {
           const linkedId = activityAnnotationId(event);
@@ -101,19 +104,19 @@ export function SessionLogBody({
                 }}
               >
                 <p
-                  className={`font-display text-[10px] font-semibold uppercase tracking-[0.12em] ${typeLabelClass(event.type)}`}
+                  className={`font-display text-[0.8125rem] font-semibold uppercase tracking-[0.12em] ${typeLabelClass(event.type)}`}
                 >
                   {sessionActivityTypeLabel(event.type)}
                 </p>
                 <p className="truncate text-sm font-medium text-ink" title={summary}>
                   {summary}
                 </p>
-                <p className="flex flex-wrap items-center gap-x-2 text-xs text-ink-dim">
+                <p className="flex flex-wrap items-center gap-x-2 text-[0.8125rem] text-ink-dim">
                   <span>
                     {new Date(event.createdAt).toLocaleTimeString()}
                   </span>
                   {late ? (
-                    <span className="font-display text-[10px] font-semibold uppercase tracking-[0.1em] text-status-error">
+                    <span className="font-display text-[0.8125rem] font-semibold uppercase tracking-[0.1em] text-status-error">
                       Late
                     </span>
                   ) : null}

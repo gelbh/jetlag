@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 import { useAppNavigate } from "../hooks/navigation/useAppNavigate";
 import type { MapBoundsExpression } from "../domain/map/mapBounds";
 import { DesktopContentColumn } from "../components/ui/layout/DesktopContentColumn";
+import { EntryScreenLayout } from "../components/ui/layout/EntryScreenLayout";
 import {
   ScreenHeader,
   screenHeaderOffsetClassName,
@@ -156,7 +157,7 @@ export function GamePresetEditor() {
   const isUserPreset = !existing || !isBundledPresetId(existing.id);
 
   return (
-    <main className="home-poster flex min-h-[100dvh] flex-col px-5 py-8">
+    <EntryScreenLayout justify="start">
       <GameAreaFramingModal
         open={framingModalOpen}
         mapStyle={mapStyle}
@@ -372,7 +373,7 @@ export function GamePresetEditor() {
         </div>
       </div>
       </DesktopContentColumn>
-    </main>
+    </EntryScreenLayout>
   );
 }
 

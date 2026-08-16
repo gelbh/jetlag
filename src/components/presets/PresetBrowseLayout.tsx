@@ -1,9 +1,11 @@
 import { AppLink } from "../navigation/AppLink";
 import { DesktopContentColumn } from "../ui/layout/DesktopContentColumn";
+import { EntryScreenLayout } from "../ui/layout/EntryScreenLayout";
 import {
   ScreenHeader,
   screenHeaderOffsetClassName,
 } from "../ui/layout/ScreenHeader";
+import { EmptyState } from "../ui/feedback/EmptyState";
 import { BundledPresetTree } from "./BundledPresetTree";
 import { PresetSearchResults } from "./PresetSearchResults";
 import { PresetDetailPanel } from "./PresetDetailPanel";
@@ -31,7 +33,7 @@ export function PresetBrowseLayout({
   onDelete: (id: string) => void;
 }) {
   return (
-    <main className="home-poster flex min-h-[100dvh] flex-col px-5 py-8">
+    <EntryScreenLayout justify="start">
       <ScreenHeader backTo="/" backLabel="Back" />
       <DesktopContentColumn maxWidth="social">
         <div
@@ -104,9 +106,7 @@ export function PresetBrowseLayout({
 
               {userPresets.length === 0 ? (
                 bundledPresets.length === 0 ? (
-                  <p className="text-sm text-ink-dim">
-                    No presets saved on this device.
-                  </p>
+                  <EmptyState>No presets saved on this device.</EmptyState>
                 ) : null
               ) : (
                 <section className="space-y-2">
@@ -130,6 +130,6 @@ export function PresetBrowseLayout({
           )}
         </div>
       </DesktopContentColumn>
-    </main>
+    </EntryScreenLayout>
   );
 }

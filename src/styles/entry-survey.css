@@ -1,0 +1,155 @@
+/* Survey field-book entry + secondary surfaces — [data-player-ux-world="survey"].
+ * Flag-off keeps Broadcast HUD dual path in home-entry / primitives. */
+
+@layer components {
+  /* Remap HUD roles → field-book on entry roots so Tailwind utilities inherit. */
+  [data-player-ux-world="survey"].home-poster,
+  [data-player-ux-world="survey"].jl-create-session,
+  .app-entry-backdrop[data-player-ux-world="survey"] {
+    --color-surface-deep: var(--color-canvas);
+    --color-surface-base: var(--color-canvas);
+    --color-surface-raised: oklch(from var(--color-canvas) calc(l - 0.03) c h);
+    --color-surface-panel: oklch(from var(--color-canvas) calc(l - 0.02) c h);
+    --color-border: var(--color-rule);
+    --color-border-muted: oklch(from var(--color-rule) calc(l + 0.08) c h);
+    --color-ink: var(--color-field-ink);
+    --color-ink-secondary: var(--color-field-ink);
+    --color-ink-muted: var(--color-field-ink-muted);
+    --color-ink-dim: var(--color-field-ink-muted);
+    --color-action: var(--color-flag);
+    --color-action-ink: var(--color-flag-ink);
+    --color-action-soft: var(--color-flag-soft);
+    --color-brand-blue: var(--color-signal);
+    --color-brand-blue-soft: var(--color-signal-soft);
+    --color-highlight: var(--color-flag);
+    --color-highlight-soft: var(--color-flag-soft);
+    --color-status-error: var(--color-halt);
+    --color-status-error-surface: var(--color-halt-soft);
+    --color-status-success: var(--color-trail);
+    --color-status-info: var(--color-signal);
+    --color-status-info-surface: var(--color-signal-soft);
+    color-scheme: light;
+  }
+
+  .app-entry-backdrop[data-player-ux-world="survey"] {
+    background-color: var(--color-canvas);
+    background-image:
+      linear-gradient(
+        to bottom,
+        oklch(from var(--color-rule) l c h / 0.12) 0,
+        oklch(from var(--color-rule) l c h / 0.12) 1px,
+        transparent 1px
+      ),
+      radial-gradient(
+        ellipse 70% 45% at 100% 0%,
+        oklch(from var(--color-flag) l c h / 0.1),
+        transparent 55%
+      ),
+      radial-gradient(
+        ellipse 60% 50% at 0% 100%,
+        oklch(from var(--color-signal) l c h / 0.08),
+        transparent 60%
+      );
+    background-size:
+      100% 1.5rem,
+      auto,
+      auto;
+  }
+
+  [data-player-ux-world="survey"].home-poster {
+    background-color: transparent;
+  }
+
+  [data-player-ux-world="survey"] .home-card-btn {
+    border-radius: 0.25rem;
+    border-width: 1px;
+    min-height: 2.75rem;
+  }
+
+  [data-player-ux-world="survey"] .home-card-btn-primary {
+    border-color: var(--color-flag);
+    background: var(--color-flag);
+    color: var(--color-flag-ink);
+  }
+
+  [data-player-ux-world="survey"] .home-card-btn-primary .home-card-btn-hint {
+    color: var(--color-flag-ink);
+  }
+
+  [data-player-ux-world="survey"] .home-card-btn-secondary {
+    background: var(--color-canvas);
+    border-color: var(--color-rule);
+    color: var(--color-field-ink);
+  }
+
+  [data-player-ux-world="survey"] .home-card-btn-secondary:hover {
+    border-color: var(--color-flag);
+    background: var(--color-flag-soft);
+  }
+
+  [data-player-ux-world="survey"] .home-card-btn-premium,
+  [data-player-ux-world="survey"] .home-card-btn-premium-sessions {
+    border-color: var(--color-flag);
+    border-top-width: 2px;
+    background: var(--color-flag-soft);
+    color: var(--color-flag-ink);
+  }
+
+  [data-player-ux-world="survey"] .home-card-btn-premium .home-card-btn-hint,
+  [data-player-ux-world="survey"]
+    .home-card-btn-premium-sessions
+    .home-card-btn-hint {
+    color: var(--color-field-ink-muted);
+  }
+
+  [data-player-ux-world="survey"] .hud-chrome {
+    border: 1px solid var(--color-rule);
+    background: var(--color-canvas);
+    color: var(--color-field-ink);
+    box-shadow: none;
+  }
+
+  [data-player-ux-world="survey"] .hud-chrome:hover:not(:disabled) {
+    background: var(--color-flag-soft);
+  }
+
+  [data-player-ux-world="survey"] .btn-primary {
+    border-color: var(--color-flag);
+    background: var(--color-flag);
+    color: var(--color-flag-ink);
+    min-height: 2.75rem;
+  }
+
+  [data-player-ux-world="survey"] .btn-primary:focus-visible {
+    outline-color: var(--color-flag);
+  }
+
+  [data-player-ux-world="survey"] .btn-secondary {
+    border-color: var(--color-rule);
+    background: var(--color-canvas);
+    color: var(--color-field-ink);
+    min-height: 2.75rem;
+  }
+
+  [data-player-ux-world="survey"] .home-feedback-link {
+    color: var(--color-signal);
+  }
+
+  [data-player-ux-world="survey"] .home-terminal-accent::after {
+    background: var(--color-flag);
+  }
+
+  [data-player-ux-world="survey"] .jl-empty-state {
+    border-top: 1px solid var(--color-rule);
+    padding-top: 0.75rem;
+    color: var(--color-field-ink-muted);
+  }
+
+  [data-player-ux-world="survey"].jl-create-session {
+    background: var(--color-canvas);
+  }
+
+  [data-player-ux-world="survey"].jl-create-session .btn-primary {
+    min-height: 2.75rem;
+  }
+}

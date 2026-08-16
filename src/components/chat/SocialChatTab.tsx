@@ -3,6 +3,7 @@ import type { SessionMessageRecord } from "../../domain/session/activity/session
 import { createMessageId } from "../../domain/session/activity/sessionChat";
 import type { PlayerRole } from "../../domain/session/players/playerRole";
 import { postSocialMessage } from "../../services/firestore/firestoreSessionExtras";
+import { EmptyState } from "../ui/feedback/EmptyState";
 
 interface SocialChatTabProps {
   messages: readonly SessionMessageRecord[];
@@ -51,7 +52,7 @@ export function SocialChatTab({
     <div className="flex h-full min-h-0 flex-col gap-3">
       <div className="jl-scroll min-h-0 flex-1 space-y-2 overflow-y-auto overscroll-contain">
         {socialMessages.length === 0 ? (
-          <p className="text-sm text-ink-dim">No messages yet.</p>
+          <EmptyState>No messages yet.</EmptyState>
         ) : (
           socialMessages.map((message) => (
             <div
@@ -62,7 +63,7 @@ export function SocialChatTab({
                   : "mr-8 bg-surface-raised text-ink-secondary"
               }`}
             >
-              <p className="text-xs font-medium uppercase tracking-wide text-ink-dim">
+              <p className="text-[0.8125rem] font-medium uppercase tracking-wide text-ink-dim">
                 {message.senderRole}
               </p>
               <p>{message.text}</p>
