@@ -23,7 +23,7 @@
     "flag-ink": {
       "$type": "color",
       "$value": "oklch(0.18 0.04 48)",
-      "$description": "Ink on flag fills for AAA play chrome."
+      "$description": "Ink on solid flag fills for AAA play chrome. Do not pair with flag-soft on dark canvas — use field-ink on soft washes."
     },
     "flag-soft": {
       "$type": "color",
