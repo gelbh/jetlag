@@ -7,6 +7,7 @@ import { SyncStatusDetailPanel } from "../syncUi/SyncStatusDetailPanel";
 import { syncDetailContent } from "../syncUi/syncStatusDetailContent";
 import {
   SYNC_TONE_CLASSES,
+  type SyncTone,
   syncBeaconAriaLabel,
   syncRailDisplay,
 } from "./syncRailDisplay";
@@ -18,6 +19,24 @@ interface SyncBlockProps {
   menuOpen: boolean;
   onMenuOpenChange: (open: boolean) => void;
   onSyncErrorAction?: () => void;
+}
+
+function surveyShortLabelTone(status: SyncStatus): SyncTone | null {
+  switch (status) {
+    case "error":
+      return "error";
+    case "offline":
+    case "degraded":
+      return "warning";
+    case "saving":
+      return "info";
+    case "synced":
+      return null;
+    default: {
+      const exhaustive: never = status;
+      return exhaustive;
+    }
+  }
 }
 
 export function SyncBlock({
@@ -37,14 +56,7 @@ export function SyncBlock({
       ? syncDisplay.inline.label
       : null;
   const shortLabelTone = survey
-    ? syncDisplay.inline?.tone ??
-      (syncStatus === "error"
-        ? "error"
-        : syncStatus === "offline" || syncStatus === "degraded"
-          ? "warning"
-          : syncStatus === "saving"
-            ? "info"
-            : null)
+    ? surveyShortLabelTone(syncStatus)
     : syncDisplay.inline?.tone;
   const syncDetail = syncDetailContent(
     syncStatus,
