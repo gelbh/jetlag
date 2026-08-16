@@ -1,10 +1,10 @@
 import type { Feature, LineString, MultiPolygon, Polygon } from "geojson";
-import simplify from "@turf/simplify";
 import {
   isMeasuringLinearLocation,
   type MeasuringLocationCategory,
   type MeasuringSubject,
 } from "../../questions/measuringQuestions";
+import { persistSlimPolygonFeature } from "../progressive/persistSlim";
 
 /** Max places when measuring every site in the play area (HADK parks = 107). */
 export const MEASURING_MULTI_PLACE_MAX = 128;
@@ -13,7 +13,7 @@ export const MEASURING_MULTI_PLACE_MAX = 128;
 export const MEASURING_LINEAR_MAX_VERTICES = 12_000;
 
 /**
- * Max vertices on measuring near/elim after persist-slim (Firestore ceiling).
+ * Max vertices on any elim GeoJSON write after persist-slim (Firestore ceiling).
  * Locked between museum-scale (~1.3k OK) and RLBT golf closer (~8k fatal).
  */
 export const MEASURING_OUTPUT_MAX_VERTICES = 4_000;
@@ -21,6 +21,7 @@ export const MEASURING_OUTPUT_MAX_VERTICES = 4_000;
 /**
  * Max UTF-16 length of JSON.stringify(geometry) after persist-slim.
  * Locked between museum-scale (~50 KB OK) and RLBT golf closer (~320 KB fatal).
+ * Applies to any elim GeoJSON write, not measuring-only.
  */
 export const MEASURING_OUTPUT_MAX_JSON_CHARS = 120_000;
 
@@ -37,9 +38,6 @@ export const MEASURING_OUTPUT_OVER_BUDGET_MESSAGE =
 /** Persist soft-fail — storage ceiling, not play-area complexity. */
 export const MEASURING_PERSIST_OVER_BUDGET_MESSAGE =
   "Couldn't save this measure — geometry is too large to store. Try a shorter distance.";
-
-/** Escalating Turf simplify tolerances — slim toward the persist cap, then gate. */
-const PERSIST_SIMPLIFY_TOLERANCES = [0.000012, 0.00005, 0.0002, 0.001] as const;
 
 export type MeasuringBudgetResult =
   | { ok: true }
@@ -137,99 +135,13 @@ export function assertMeasuringOutputComplexityBudget(
   return { ok: true };
 }
 
-function decimateRing(ring: number[][], stride: number): number[][] {
-  if (ring.length <= 4 || stride <= 1) {
-    return ring;
-  }
-  const kept: number[][] = [];
-  for (let i = 0; i < ring.length - 1; i += stride) {
-    kept.push(ring[i]!);
-  }
-  const first = kept[0]!;
-  const last = kept[kept.length - 1]!;
-  if (last[0] !== first[0] || last[1] !== first[1]) {
-    kept.push([...first]);
-  }
-  if (kept.length < 4) {
-    return ring;
-  }
-  return kept;
-}
-
-/** Last-resort vertex stride when Turf simplify cannot shrink (or throws). */
-function decimatePolygonFeature(
-  feature: Feature<Polygon | MultiPolygon>,
-  maxVertices: number,
-): Feature<Polygon | MultiPolygon> {
-  const current = countPolygonVertices(feature);
-  if (current <= maxVertices) {
-    return feature;
-  }
-  const stride = Math.max(2, Math.ceil(current / maxVertices));
-  if (feature.geometry.type === "Polygon") {
-    return {
-      ...feature,
-      geometry: {
-        type: "Polygon",
-        coordinates: feature.geometry.coordinates.map((ring) =>
-          decimateRing(ring, stride),
-        ),
-      },
-    };
-  }
-  return {
-    ...feature,
-    geometry: {
-      type: "MultiPolygon",
-      coordinates: feature.geometry.coordinates.map((polygon) =>
-        polygon.map((ring) => decimateRing(ring, stride)),
-      ),
-    },
-  };
-}
-
 /**
  * Persist path — slim toward Firestore ceiling; storage-oriented fail copy only.
  */
 export function persistSlimMeasuringGeometry(
   feature: Feature<Polygon | MultiPolygon>,
 ): MeasuringOutputSoftenResult {
-  let current = feature;
-  if (assertMeasuringOutputComplexityBudget(current).ok) {
-    return { ok: true, feature: current };
-  }
-
-  // Turf simplify thrash/stack-overflows on multi-k dense rings (CI 5s timeout);
-  // skip straight to stride decimate above 1.25× the vertex cap.
-  const initialVerts = countPolygonVertices(current);
-  if (initialVerts <= MEASURING_OUTPUT_MAX_VERTICES * 1.25) {
-    for (const tolerance of PERSIST_SIMPLIFY_TOLERANCES) {
-      try {
-        const simplified = simplify(current, {
-          tolerance,
-          highQuality: false,
-        }) as Feature<Polygon | MultiPolygon>;
-        if (
-          simplified.geometry.type === "Polygon" ||
-          simplified.geometry.type === "MultiPolygon"
-        ) {
-          current = simplified;
-        }
-      } catch {
-        // Keep last successful geometry and try the next tolerance / decimate.
-      }
-      if (assertMeasuringOutputComplexityBudget(current).ok) {
-        return { ok: true, feature: current };
-      }
-    }
-  }
-
-  current = decimatePolygonFeature(current, MEASURING_OUTPUT_MAX_VERTICES);
-  if (assertMeasuringOutputComplexityBudget(current).ok) {
-    return { ok: true, feature: current };
-  }
-
-  return { ok: false, message: MEASURING_PERSIST_OVER_BUDGET_MESSAGE };
+  return persistSlimPolygonFeature(feature);
 }
 
 /**
