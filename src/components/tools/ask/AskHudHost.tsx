@@ -5,6 +5,7 @@
  * Spec: ask-surface-kit-design rev 2026-08-05b.
  */
 import type { ReactNode } from "react";
+import { usePlayerUxWorld } from "@/hooks/feature/usePlayerUxWorld";
 import { AskCommitStrip } from "./AskCommitStrip";
 import { AskCostChip } from "./AskCostChip";
 import { AskModeCueTicker } from "./AskModeCueTicker";
@@ -37,9 +38,12 @@ export function AskHudHost({
   showCommitStrip = true,
   showCostChip = true,
 }: AskHudHostProps) {
+  const survey = usePlayerUxWorld();
+
   return (
     <div
       data-testid="ask-hud-host"
+      data-survey={survey ? "true" : undefined}
       className="ask-hud-host pointer-events-none absolute inset-0 z-[var(--z-panel)]"
     >
       <div className="ask-hud-host__top pointer-events-none absolute inset-x-0 top-[var(--map-banner-top)] z-[1] flex flex-col items-stretch gap-2 px-3">
