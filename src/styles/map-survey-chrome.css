@@ -82,7 +82,8 @@
 
   [data-player-ux-world="survey"] .jl-map-island .jl-tool-slot-active {
     background: var(--color-flag-soft);
-    color: var(--color-flag-ink);
+    /* Soft wash on dark canvas — use field-ink; flag-ink is for solid flag fills only. */
+    color: var(--color-field-ink);
     box-shadow: inset 0 0 0 1px var(--color-flag);
   }
 

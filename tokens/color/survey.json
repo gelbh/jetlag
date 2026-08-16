@@ -2,68 +2,68 @@
   "color": {
     "canvas": {
       "$type": "color",
-      "$value": "oklch(0.965 0.01 250)",
-      "$description": "Survey field book — light cool map paper (direction role: canvas). Target AAA chrome on this ground."
+      "$value": "oklch(0.20 0.015 250)",
+      "$description": "Survey field book — dark cool technical plate (direction role: canvas). Target AAA chrome on this ground. Not Broadcast surface-deep."
     },
     "field-ink": {
       "$type": "color",
-      "$value": "oklch(0.22 0.02 265)",
-      "$description": "Survey field book — graphite near-black (direction role: ink). Named field-ink so HUD --color-ink stays light while legacy HUD aliases remain."
+      "$value": "oklch(0.92 0.01 265)",
+      "$description": "Survey field book — near-white graphite (direction role: ink). Named field-ink so HUD --color-ink stays light during dual-token period. ≥7:1 on canvas for play labels."
     },
     "field-ink-muted": {
       "$type": "color",
-      "$value": "oklch(0.42 0.02 250)",
-      "$description": "Survey field book — secondary copy (direction role: ink-muted). Keep ≥4.5:1 on panels; play chrome prefers field-ink."
+      "$value": "oklch(0.72 0.015 250)",
+      "$description": "Survey field book — secondary copy (direction role: ink-muted). Keep ≥4.5:1 on canvas; play chrome prefers field-ink."
     },
     "flag": {
       "$type": "color",
-      "$value": "oklch(0.68 0.19 48)",
-      "$description": "Survey field book — fluoro survey orange (direction role: flag). Primary CTA / active tool / stake chips only (~≤15%)."
+      "$value": "oklch(0.75 0.18 48)",
+      "$description": "Survey field book — fluoro survey orange (direction role: flag). Primary CTA / active tool / stake chips only (~≤15%). L retuned for dark plates + AAA with flag-ink."
     },
     "flag-ink": {
       "$type": "color",
-      "$value": "oklch(0.18 0.03 48)",
-      "$description": "Ink on flag fills for AAA play chrome."
+      "$value": "oklch(0.18 0.04 48)",
+      "$description": "Ink on solid flag fills for AAA play chrome. Do not pair with flag-soft on dark canvas — use field-ink on soft washes."
     },
     "flag-soft": {
       "$type": "color",
-      "$value": "oklch(0.68 0.19 48 / 0.18)",
-      "$description": "Soft flag wash for chips / selected chrome."
+      "$value": "oklch(0.75 0.18 48 / 0.22)",
+      "$description": "Soft flag wash for chips / selected chrome on dark plates."
     },
     "signal": {
       "$type": "color",
-      "$value": "oklch(0.52 0.12 250)",
+      "$value": "oklch(0.72 0.10 250)",
       "$description": "Survey field book — cool blue (direction role: signal). Info / sync OK — always pair with label/icon."
     },
     "signal-soft": {
       "$type": "color",
-      "$value": "oklch(0.52 0.12 250 / 0.16)",
-      "$description": "Soft signal wash."
+      "$value": "oklch(0.72 0.10 250 / 0.22)",
+      "$description": "Soft signal wash on dark plates."
     },
     "trail": {
       "$type": "color",
-      "$value": "oklch(0.52 0.14 145)",
+      "$value": "oklch(0.72 0.12 145)",
       "$description": "Survey field book — green (direction role: trail). Success / in-zone — always pair with label/icon."
     },
     "trail-soft": {
       "$type": "color",
-      "$value": "oklch(0.52 0.14 145 / 0.16)",
-      "$description": "Soft trail wash."
+      "$value": "oklch(0.72 0.12 145 / 0.22)",
+      "$description": "Soft trail wash on dark plates."
     },
     "halt": {
       "$type": "color",
-      "$value": "oklch(0.52 0.18 25)",
+      "$value": "oklch(0.74 0.15 25)",
       "$description": "Survey field book — red (direction role: halt). Error / dead session — always pair with label/icon."
     },
     "halt-soft": {
       "$type": "color",
-      "$value": "oklch(0.52 0.18 25 / 0.16)",
-      "$description": "Soft halt wash."
+      "$value": "oklch(0.74 0.15 25 / 0.22)",
+      "$description": "Soft halt wash on dark plates."
     },
     "rule": {
       "$type": "color",
-      "$value": "oklch(0.55 0.02 250)",
-      "$description": "Survey field book — hairline graphite (direction role: rule) for status/island edges."
+      "$value": "oklch(0.52 0.02 250)",
+      "$description": "Survey field book — hairline edge (direction role: rule) visible on dark plates for status/island borders (≥3:1 non-text)."
     }
   }
 }

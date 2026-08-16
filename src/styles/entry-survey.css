@@ -8,8 +8,8 @@
   .app-entry-backdrop[data-player-ux-world="survey"] {
     --color-surface-deep: var(--color-canvas);
     --color-surface-base: var(--color-canvas);
-    --color-surface-raised: oklch(from var(--color-canvas) calc(l - 0.03) c h);
-    --color-surface-panel: oklch(from var(--color-canvas) calc(l - 0.02) c h);
+    --color-surface-raised: oklch(from var(--color-canvas) calc(l + 0.04) c h);
+    --color-surface-panel: oklch(from var(--color-canvas) calc(l + 0.03) c h);
     --color-border: var(--color-rule);
     --color-border-muted: oklch(from var(--color-rule) calc(l + 0.08) c h);
     --color-ink: var(--color-field-ink);
@@ -31,7 +31,7 @@
     --color-status-warning: var(--color-flag);
     --color-status-warning-surface: var(--color-flag-soft);
 
-    color-scheme: light;
+    color-scheme: dark;
   }
 
   .app-entry-backdrop[data-player-ux-world="survey"] {
@@ -96,14 +96,17 @@
     border-color: var(--color-flag);
     border-top-width: 2px;
     background: var(--color-flag-soft);
-    color: var(--color-flag-ink);
+    /* Soft wash on dark canvas — field-ink; flag-ink reserved for solid flag fills. */
+    color: var(--color-field-ink);
   }
 
   [data-player-ux-world="survey"] .home-card-btn-premium .home-card-btn-hint,
   [data-player-ux-world="survey"]
     .home-card-btn-premium-sessions
     .home-card-btn-hint {
-    color: var(--color-field-ink-muted);
+    /* Soft wash — muted fails AA on flag-soft; use field-ink. */
+    color: var(--color-field-ink);
+    opacity: 0.85;
   }
 
   [data-player-ux-world="survey"] .hud-chrome {
