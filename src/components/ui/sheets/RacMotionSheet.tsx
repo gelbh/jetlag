@@ -135,6 +135,7 @@ export function RacMotionSheet({
         >
           <motion.div
             ref={sheetMeasureRef}
+            className="w-full"
             data-player-ux-world="survey"
             initial={reduceMotion ? false : { y: "100%" }}
             animate={{ y: 0 }}
@@ -152,6 +153,7 @@ export function RacMotionSheet({
             onDragEnd={reduceMotion ? undefined : handleDragEnd}
           >
             <MobileSheet
+              variant="nested"
               className={sheetClassName}
               layout={pinned ? "split" : "scroll"}
               maxHeightClassName={maxHeightClassName}
