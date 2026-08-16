@@ -124,6 +124,11 @@ export function activeModeCue(input: {
   placementReady: boolean;
   configureReady: boolean;
   resolveReady: boolean;
+  /** Tentacle: Overpass / provisional confirm in flight. */
+  resolving?: boolean;
+  /** Tentacle: solo answer recorded (or multiplayer send). Optional for other surfaces. */
+  answerReady?: boolean;
+  awaitHiderAnswer?: boolean;
 }): string {
   const def = DEFINITIONS[input.surface];
   switch (input.surface) {
@@ -148,7 +153,11 @@ export function activeModeCue(input: {
     case "tentacle":
       if (!input.configureReady) return "PICK TYPES";
       if (!input.placementReady) return "SET CENTER ON MAP";
-      if (!input.resolveReady) return "PICK LOCATIONS";
+      if (input.resolving) return "CONFIRMING PLACES";
+      if (!input.resolveReady) return "NO PLACES";
+      if (input.awaitHiderAnswer === false && input.answerReady === false) {
+        return "TAP A PLACE";
+      }
       return "READY TO SEND";
     case "photo":
       return input.configureReady ? "READY TO SEND" : def.defaultCue;
@@ -245,6 +254,12 @@ export function notReadyCommitHint(cue: string): string {
       return "PICK TYPES";
     case "SET CENTER ON MAP":
       return "SET CENTER FIRST";
+    case "CONFIRMING PLACES":
+      return "CONFIRMING PLACES";
+    case "TAP A PLACE":
+      return "TAP A PLACE";
+    case "NO PLACES":
+      return "NO PLACES";
     case "PICK LOCATIONS":
       return "PICK LOCATIONS";
     case "PICK A PHOTO ASK":
