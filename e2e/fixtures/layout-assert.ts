@@ -68,3 +68,16 @@ export async function assertSurveyMapChromeAxe(page: Page) {
   );
   expect(blocking, JSON.stringify(blocking, null, 2)).toEqual([]);
 }
+
+/** Axe Survey entry/secondary roots with color-contrast (Wave 5). */
+export async function assertSurveyEntryAxe(page: Page) {
+  const builder = new AxeBuilder({ page })
+    .include('[data-player-ux-world="survey"]')
+    .withTags(["wcag2a", "wcag2aa"]);
+  const results = await builder.analyze();
+  const blocking = results.violations.filter(
+    (v) => v.impact === "serious" || v.impact === "critical",
+  );
+  expect(blocking, JSON.stringify(blocking, null, 2)).toEqual([]);
+}
+

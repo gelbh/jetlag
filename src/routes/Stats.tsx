@@ -2,6 +2,7 @@ import { useState } from "react";
 import { RequireUsername } from "../components/auth/RequireUsername";
 import { DesktopContentColumn } from "../components/ui/layout/DesktopContentColumn";
 import { EntryScreenLayout } from "../components/ui/layout/EntryScreenLayout";
+import { EmptyState } from "../components/ui/feedback/EmptyState";
 import { SegmentControl } from "../components/ui/forms/SegmentControl";
 import {
   ScreenHeader,
@@ -46,14 +47,14 @@ export function Stats() {
                 aria-label={`${playerRoleLabel(roleTab)} stats`}
                 className="space-y-3 border-t-2 border-border pt-4"
               >
-                <p className="font-display text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-dim">
+                <p className="font-display text-[0.8125rem] font-semibold uppercase tracking-[0.12em] text-ink-dim">
                   {playerRoleLabel(roleTab)} · All sizes
                 </p>
-                <p className="text-sm leading-relaxed text-ink-muted">
+                <EmptyState>
                   No completed rounds yet. Finish a synced session as{" "}
                   {playerRoleLabel(roleTab).toLowerCase()} to see distance, phase
                   time, and question stats here.
-                </p>
+                </EmptyState>
               </div>
             </>
           </RequireUsername>

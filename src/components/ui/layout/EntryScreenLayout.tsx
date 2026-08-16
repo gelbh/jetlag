@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { usePlayerUxWorld } from "@/hooks/feature/usePlayerUxWorld";
 
 interface EntryScreenLayoutProps {
   children: ReactNode;
@@ -15,6 +16,7 @@ export function EntryScreenLayout({
   viewport = false,
   viewportLayout = "start",
 }: EntryScreenLayoutProps) {
+  const survey = usePlayerUxWorld();
   const justifyClass =
     justify === "center"
       ? "jl-scroll justify-center gap-8 overflow-y-auto"
@@ -36,6 +38,7 @@ export function EntryScreenLayout({
 
   return (
     <main
+      data-player-ux-world={survey ? "survey" : undefined}
       className={`home-poster home-terminal-accent flex ${minHeightClass} flex-col ${viewport ? viewportClass : justifyClass} px-5 ${paddingClass} pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(1.25rem,calc(env(safe-area-inset-top,0px)+0.75rem))]`}
     >
       {children}
