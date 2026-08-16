@@ -360,9 +360,9 @@ describe("resolveMeasuringPendingQuestion", () => {
     expect(resolved?.metadata.measuringBoundaryJson).toBeUndefined();
   });
 
-  it("returns null when elim stays over output complexity budget", async () => {
+  it("returns null when elim stays over persist slim ceiling", async () => {
     const softenSpy = vi
-      .spyOn(measuringGeometryBudgets, "softenMeasuringOutputToBudget")
+      .spyOn(measuringGeometryBudgets, "persistSlimMeasuringGeometry")
       .mockReturnValue({
         ok: false,
         message: MEASURING_OUTPUT_OVER_BUDGET_MESSAGE,

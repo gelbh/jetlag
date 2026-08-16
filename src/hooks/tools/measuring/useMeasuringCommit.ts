@@ -19,7 +19,7 @@ import { MAP_ANNOTATION_COLORS } from "@/domain/map/mapAnnotationColors";
 import { emitQuestionAnsweredActivity } from "@/services/session/emitSessionActivity";
 import {
   assertMeasuringGeometryBudget,
-  softenMeasuringOutputToBudget,
+  persistSlimMeasuringGeometry,
 } from "@/domain/geometry/measuring/measuringGeometryBudgets";
 import { buildStoredMeasuringRegionInput } from "./helpers";
 import type { MeasuringDraftState } from "./useMeasuringDraftState";
@@ -213,12 +213,12 @@ export function useMeasuringCommit({
       return;
     }
 
-    const softenedElim = softenMeasuringOutputToBudget(regions.elimination);
-    if (!softenedElim.ok) {
-      setMeasuringError(softenedElim.message);
+    const slimmedElim = persistSlimMeasuringGeometry(regions.elimination);
+    if (!slimmedElim.ok) {
+      setMeasuringError(slimmedElim.message);
       return;
     }
-    const elimination = softenedElim.feature;
+    const elimination = slimmedElim.feature;
 
     const metadata: AnnotationRecord["metadata"] = {
       createdAt: new Date().toISOString(),
