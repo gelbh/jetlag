@@ -1,5 +1,5 @@
-/* Survey field-book map chrome — active when [data-player-ux-world="survey"].
- * Flag-off keeps Broadcast HUD dual path in map-shell / map-bottom-chrome.
+/* Survey field-book map chrome — sole player path (`data-player-ux-world="survey"`).
+ * Attribute kept as the skin root so entry/map share one selector; CSS flatten deferred.
  * Type steps from DESIGN.md: label 0.8125rem, body 1rem, mono-code 1.125rem. */
 
 @layer components {

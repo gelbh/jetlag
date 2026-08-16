@@ -5,11 +5,7 @@ import type {
   PlayerLocationRecord,
 } from "@/domain/session/activity/sessionChat";
 import type { SessionRulesInput } from "@/domain/session/rules";
-import {
-  computeElapsedMs,
-  type TimerState,
-} from "@/domain/session/timer/timer";
-import { isHidingPeriodActive } from "@/domain/session/hiding/hidingPeriod";
+import { type TimerState } from "@/domain/session/timer/timer";
 import {
   playerRoleLabel,
   type PlayerRole,
@@ -45,22 +41,6 @@ interface ToolStatusBlockProps {
   headerLeading?: ReactNode;
 }
 
-function hudPhaseLabel(
-  timerHasStarted: boolean,
-  sessionRules: SessionRulesInput,
-  timerState: TimerState,
-  moveInProgress: boolean,
-): string {
-  if (!timerHasStarted) {
-    return "—";
-  }
-  if (moveInProgress) {
-    return "MOVE";
-  }
-  const elapsed = computeElapsedMs(timerState);
-  return isHidingPeriodActive(sessionRules, elapsed) ? "HIDE" : "SEEK";
-}
-
 export function ToolStatusBlock({
   sessionCode,
   playerRole,
@@ -92,10 +72,7 @@ export function ToolStatusBlock({
     moveInProgress,
   );
   const phaseClass =
-    phase === "HIDE" ||
-    phase === "MOVE" ||
-    phase === "Hiding" ||
-    phase === "Moving"
+    phase === "Hiding" || phase === "Moving"
       ? "jl-status-header-value jl-status-header-value--action"
       : "jl-status-header-value";
 
@@ -120,17 +97,7 @@ export function ToolStatusBlock({
 
       <div className="jl-status-header-col">
         <span className="jl-status-header-label">Phase</span>
-        <span
-          className={phaseClass}
-          title={hudPhaseLabel(
-            timerHasStarted,
-            sessionRules,
-            timerState,
-            moveInProgress,
-          )}
-        >
-          {phase}
-        </span>
+        <span className={phaseClass}>{phase}</span>
       </div>
 
       <div className="jl-status-header-col jl-status-header-col--timer">
