@@ -60,7 +60,8 @@
   }
 
   [data-player-ux-world="survey"].home-poster {
-    background-color: transparent;
+    /* Opaque paper so axe/contrast does not sample dark body through transparent poster. */
+    background-color: var(--color-canvas);
   }
 
   [data-player-ux-world="survey"] .home-card-btn {
@@ -135,7 +136,13 @@
   }
 
   [data-player-ux-world="survey"] .home-feedback-link {
-    color: var(--color-signal);
+    color: var(--color-field-ink);
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+  }
+
+  [data-player-ux-world="survey"] .home-feedback-link:hover {
+    color: var(--color-flag);
   }
 
   [data-player-ux-world="survey"] .home-terminal-accent::after {
