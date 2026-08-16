@@ -5,6 +5,7 @@ import {
 } from "../../domain/regions/bundledGamePresets";
 import { formatBundledPresetLocation } from "../../domain/regions/bundledPresetHierarchy";
 import { migrateGamePreset } from "../../domain/session/presets/gamePreset";
+import { EmptyState } from "../ui/feedback/EmptyState";
 import { PresetCard } from "./PresetCard";
 import { PresetFavouriteButton } from "./PresetFavouriteButton";
 
@@ -105,9 +106,7 @@ export function PresetSearchResults({
   onDelete: (id: string) => void;
 }) {
   if (presets.length === 0) {
-    return (
-      <p className="text-sm text-ink-muted">No presets match your search.</p>
-    );
+    return <EmptyState>No presets match your search.</EmptyState>;
   }
 
   return (
