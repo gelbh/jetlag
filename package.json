@@ -175,7 +175,10 @@
     "uuid": "^11.1.1",
     "@opentelemetry/core": "^2.8.0",
     "tmp": "^0.2.6",
-    "@hono/node-server": "^2.0.5"
+    "@hono/node-server": "^2.0.5",
+    "js-yaml@3": "3.15.1",
+    "js-yaml@4": "4.3.1",
+    "undici@7": "7.29.0"
   },
   "allowScripts": {
     "@sentry/capacitor@4.2.0": true,
