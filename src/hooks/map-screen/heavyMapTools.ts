@@ -11,6 +11,7 @@ import {
   TENTACLE_SEARCH_RADIUS_METERS,
 } from "../../domain/questions";
 import type { TentaclePoi } from "../../domain/map/annotations";
+import type { MeasuringLodPhase } from "../../domain/geometry/measuring/measuringLod";
 
 /** Ask Map HUD bundle returned by migrated question tools. */
 export type AskToolHudBundle = {
@@ -49,8 +50,10 @@ export interface MeasuringToolApi {
     measuringDistanceMeters: number | null;
     measuringBoundaryPreview: Feature<Polygon | MultiPolygon> | null;
     measuringEliminationPreview: Feature<Polygon | MultiPolygon> | null;
+    measuringLodPhase?: MeasuringLodPhase;
     seekerResolving: boolean;
   };
+  measuringLodPhase: MeasuringLodPhase;
   placementCrosshair: boolean;
   publishSignature: string;
   handleMapClick: (point: LatLngTuple) => void;
@@ -160,8 +163,10 @@ export function createIdleHeavyMapTools(): HeavyMapToolsApi {
       measuringDistanceMeters: null,
       measuringBoundaryPreview: null,
       measuringEliminationPreview: null,
+      measuringLodPhase: "complete",
       seekerResolving: false,
     },
+    measuringLodPhase: "complete",
     placementCrosshair: false,
     publishSignature: "idle",
     handleMapClick: noopMapClick,

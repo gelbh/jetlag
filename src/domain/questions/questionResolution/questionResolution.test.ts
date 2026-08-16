@@ -13,7 +13,7 @@ import {
   resolveMeasuringPendingQuestion,
 } from "./measuring";
 import * as measuringGeometryBudgets from "../../geometry/measuring/measuringGeometryBudgets";
-import { MEASURING_OUTPUT_OVER_BUDGET_MESSAGE } from "../../geometry/measuring/measuringGeometryBudgets";
+import { MEASURING_PERSIST_OVER_BUDGET_MESSAGE } from "../../geometry/measuring/measuringGeometryBudgets";
 import {
   isPhotoPendingQuestion,
   photoPendingQuestionAnswered,
@@ -365,7 +365,7 @@ describe("resolveMeasuringPendingQuestion", () => {
       .spyOn(measuringGeometryBudgets, "persistSlimMeasuringGeometry")
       .mockReturnValue({
         ok: false,
-        message: MEASURING_OUTPUT_OVER_BUDGET_MESSAGE,
+        message: MEASURING_PERSIST_OVER_BUDGET_MESSAGE,
       });
 
     const pending = basePending({

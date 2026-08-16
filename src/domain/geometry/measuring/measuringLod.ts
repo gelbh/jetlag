@@ -1,19 +1,14 @@
 import type { Feature, MultiPolygon, Polygon } from "geojson";
 import simplify from "@turf/simplify";
-import {
-  countPolygonVertices,
-  persistSlimMeasuringGeometry,
-  type MeasuringOutputSoftenResult,
-} from "./measuringGeometryBudgets";
+import { countPolygonVertices } from "./measuringGeometryBudgets";
 
 export type MeasuringLodPhase = "coarse" | "refining" | "complete";
 
 export {
   MEASURING_PERSIST_OVER_BUDGET_MESSAGE,
   persistSlimMeasuringGeometry,
+  type MeasuringOutputSoftenResult as PersistSlimMeasuringResult,
 } from "./measuringGeometryBudgets";
-
-export type PersistSlimMeasuringResult = MeasuringOutputSoftenResult;
 
 /** Coarse → fine Turf tolerances (first = preview coarse). */
 const LOD_TOLERANCES = [0.002, 0.0005, 0.0001, 0.00002] as const;
