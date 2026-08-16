@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { MapScreenChromeBanners, selectMapRefineChip } from "./MapScreenChromeBanners";
+import { MapScreenChromeBanners } from "./MapScreenChromeBanners";
+import { selectMapRefineChip } from "./selectMapRefineChip";
 
 vi.mock("../../../components/session/banners/FirestorePersistenceBanner", () => ({
   FirestorePersistenceBanner: () => <div>persistence-banner</div>,

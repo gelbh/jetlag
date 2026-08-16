@@ -24,7 +24,11 @@ import { MapScreenRoleCodesSheet } from "./shared/MapScreenSharedSessionSheets";
 import { useMapScreenReportProblemSheet } from "./shared/useMapScreenReportProblemSheet";
 import { renderMapScreenContextualRail } from "./shared/mapScreenContextualRail";
 import { canOpenMapScreenRoleCodes } from "./shared/canOpenMapScreenRoleCodes";
-import { MapScreenChromeBanners, selectMapRefineChip, type MapRefineChipCopy } from "./shared/MapScreenChromeBanners";
+import { MapScreenChromeBanners } from "./shared/MapScreenChromeBanners";
+import {
+  selectMapRefineChip,
+  type MapRefineChipCopy,
+} from "./shared/selectMapRefineChip";
 
 type MapScreenChromeProps = Pick<
   MapScreenController,

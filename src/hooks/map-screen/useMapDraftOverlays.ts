@@ -419,12 +419,13 @@ export function useMapDraftOverlays(
     generationRef.current = generation;
     tentacleLodCancelRef.current?.();
     tentacleLodCancelRef.current = null;
-    setTentacleDisplayElim(null);
-    setTentacleLodPhase("complete");
     queueMicrotask(() => {
-      if (generation === generationRef.current) {
-        setBuilt(EMPTY_DRAFT_RESULT);
+      if (generation !== generationRef.current) {
+        return;
       }
+      setBuilt(EMPTY_DRAFT_RESULT);
+      setTentacleDisplayElim(null);
+      setTentacleLodPhase("complete");
     });
 
     void buildMapDraftOverlays(sources)

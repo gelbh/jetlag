@@ -223,7 +223,12 @@ export function useMatchingCatalog(input: {
     elimGenerationRef.current = generation;
     elimLodCancelRef.current?.();
     elimLodCancelRef.current = null;
-    setMatchingLodPhase("coarse");
+    queueMicrotask(() => {
+      if (generation !== elimGenerationRef.current) {
+        return;
+      }
+      setMatchingLodPhase("coarse");
+    });
 
     const prefixFeatures = matchingCoarseCatalogPrefix(
       matchingFeatures,

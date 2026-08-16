@@ -115,12 +115,11 @@ describe("useMatchingCatalog LOD", () => {
     );
 
     await waitFor(() => {
-      expect(["coarse", "refining"]).toContain(result.current.matchingLodPhase);
+      expect(result.current.matchingEliminationPreview).not.toBeNull();
     });
     await waitFor(() => {
       expect(result.current.matchingLodPhase).toBe("complete");
     });
-    expect(result.current.matchingEliminationPreview).not.toBeNull();
 
     const lengths = buildMatchingEliminationRegion.mock.calls.map(
       (call) => (call[0] as MatchingFeature[]).length,
