@@ -12,6 +12,8 @@ import {
 } from "../../domain/geometry/gameArea/geometry";
 import { resolveClientMaskKernelMode } from "../../domain/geometry/kernel/resolveClientMaskKernelMode";
 import { buildTentaclePoiAnswerEliminationRegion } from "../../domain/geometry/tentacle/tentacleGeometry";
+import { countPolygonVertices } from "../../domain/geometry/measuring/measuringGeometryBudgets";
+import { buildCoarsePolygonFeature } from "../../domain/geometry/progressive/polygonLod";
 import {
   radarShadedInsideFromAnswer,
   type RadarAnswer,
@@ -223,15 +225,20 @@ export async function buildMapDraftOverlays(
       }
 
       if (hasPoiAnswer && selectedPoiId) {
-        pushElimination(
-          await buildTentaclePoiAnswerEliminationRegion(
-            center,
-            searchRadiusMeters,
-            pois,
-            selectedPoiId,
-            gameArea,
-          ),
+        const region = await buildTentaclePoiAnswerEliminationRegion(
+          center,
+          searchRadiusMeters,
+          pois,
+          selectedPoiId,
+          gameArea,
         );
+        if (region) {
+          pushElimination(
+            countPolygonVertices(region) > 64
+              ? buildCoarsePolygonFeature(region)
+              : region,
+          );
+        }
       }
     }
   }

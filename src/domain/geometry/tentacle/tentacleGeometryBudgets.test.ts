@@ -16,13 +16,8 @@ describe("tentacleGeometryBudgets", () => {
     ).not.toThrow();
   });
 
-  it("throws when POI count exceeds the hard cap", () => {
-    expect(() => assertTentaclePoiBudget(TENTACLE_POI_MAX + 1)).toThrow(
-      TentacleGeometryBudgetError,
-    );
-    expect(() => assertTentaclePoiBudget(TENTACLE_POI_MAX + 1)).toThrow(
-      TENTACLE_POI_OVER_BUDGET_MESSAGE,
-    );
+  it("no longer throws when POI count exceeds the former cap", () => {
+    expect(() => assertTentaclePoiBudget(TENTACLE_POI_MAX + 1)).not.toThrow();
   });
 
   it("TentacleGeometryBudgetError carries a stable code", () => {
