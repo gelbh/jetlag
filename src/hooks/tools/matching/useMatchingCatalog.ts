@@ -9,10 +9,9 @@ import {
 } from "@/domain/geometry/measuring/matchingGeometry";
 import {
   buildCoarsePolygonFeature,
-  refinePolygonFeatureStep,
   type PolygonLodPhase,
 } from "@/domain/geometry/progressive/polygonLod";
-import { previewGeometryFingerprint } from "@/domain/geometry/measuring/previewGeometryFingerprint";
+import { paintPolygonLod } from "@/hooks/tools/framework/paintPolygonLod";
 import {
   getMatchingCategory,
   matchingCategoryUseCount,
@@ -71,59 +70,6 @@ export function matchingCoarseCatalogPrefix(
     .sort((a, b) => matchingFeatureArea(b) - matchingFeatureArea(a))
     .slice(0, MATCHING_CATALOG_COARSE_PREFIX - (nearest ? 1 : 0));
   return nearest ? [nearest, ...rest] : rest;
-}
-
-function scheduleIdle(callback: () => void): () => void {
-  if (typeof requestIdleCallback === "function") {
-    const id = requestIdleCallback(() => {
-      callback();
-    });
-    return () => cancelIdleCallback(id);
-  }
-  const id = setTimeout(callback, 0);
-  return () => clearTimeout(id);
-}
-
-function paintLodFeature(
-  full: Feature<GeoPolygon | MultiPolygon>,
-  generation: number,
-  generationRef: { current: number },
-  setFeature: (feature: Feature<GeoPolygon | MultiPolygon> | null) => void,
-  setPhase: (phase: PolygonLodPhase) => void,
-  cancelRef: { current: (() => void) | null },
-): void {
-  const coarse = buildCoarsePolygonFeature(full);
-  setFeature(coarse);
-
-  if (previewGeometryFingerprint(coarse) === previewGeometryFingerprint(full)) {
-    cancelRef.current = null;
-    setFeature(full);
-    setPhase("complete");
-    return;
-  }
-
-  setPhase("refining");
-  let stepIndex = 0;
-  let current = coarse;
-
-  const runStep = () => {
-    if (generation !== generationRef.current) {
-      return;
-    }
-    const next = refinePolygonFeatureStep(full, current, stepIndex);
-    current = next.feature;
-    setFeature(current);
-    stepIndex += 1;
-    if (next.done) {
-      cancelRef.current = null;
-      setFeature(full);
-      setPhase("complete");
-      return;
-    }
-    cancelRef.current = scheduleIdle(runStep);
-  };
-
-  cancelRef.current = scheduleIdle(runStep);
 }
 
 export function useMatchingCatalog(input: {
@@ -295,8 +241,10 @@ export function useMatchingCatalog(input: {
         if (generation !== elimGenerationRef.current) {
           return;
         }
-        if (prefixRegion) {
-          paintLodFeature(
+        const prefixIsFull =
+          prefixFeatures.length === matchingFeatures.length;
+        if (prefixRegion && prefixIsFull) {
+          paintPolygonLod(
             prefixRegion,
             generation,
             elimGenerationRef,
@@ -304,12 +252,19 @@ export function useMatchingCatalog(input: {
             setMatchingLodPhase,
             elimLodCancelRef,
           );
+          return;
+        }
+        if (prefixRegion) {
+          setMatchingEliminationPreview(buildCoarsePolygonFeature(prefixRegion));
+          setMatchingLodPhase("coarse");
         } else {
           setMatchingEliminationPreview(null);
-          setMatchingLodPhase("complete");
         }
 
-        if (prefixFeatures.length === matchingFeatures.length) {
+        if (prefixIsFull) {
+          if (!prefixRegion) {
+            setMatchingLodPhase("complete");
+          }
           return;
         }
 
@@ -323,11 +278,12 @@ export function useMatchingCatalog(input: {
           return;
         }
         if (!fullRegion) {
+          setMatchingLodPhase("complete");
           return;
         }
         elimLodCancelRef.current?.();
         elimLodCancelRef.current = null;
-        paintLodFeature(
+        paintPolygonLod(
           fullRegion,
           generation,
           elimGenerationRef,
@@ -375,6 +331,5 @@ export function useMatchingCatalog(input: {
       ? matchingEliminationPreview
       : null,
     matchingLodPhase: eliminationEligible ? matchingLodPhase : "complete",
-    matchingCatalogComplete: true,
   };
 }

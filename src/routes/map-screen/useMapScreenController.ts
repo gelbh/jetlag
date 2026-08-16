@@ -266,7 +266,11 @@ export function useMapScreenController() {
     tentacleTool.draft.tentacleSelectedPoiId,
   );
 
-  const { overlays: mapDraftOverlays, eliminationFeatures: draftEliminationFeatures } =
+  const {
+    overlays: mapDraftOverlays,
+    eliminationFeatures: draftEliminationFeatures,
+    tentacleLodPhase,
+  } =
     useMapDraftOverlays({
         activeTool,
         gameArea: toolGameArea,
@@ -560,6 +564,7 @@ export function useMapScreenController() {
     pinTool,
     zoneTool,
     tentacleTool,
+    tentacleLodPhase,
     chatMessages,
     hasUnreadChat,
     unreadCount,

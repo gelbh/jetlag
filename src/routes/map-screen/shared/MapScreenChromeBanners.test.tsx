@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { MapScreenChromeBanners } from "./MapScreenChromeBanners";
+import { MapScreenChromeBanners, selectMapRefineChip } from "./MapScreenChromeBanners";
 
 vi.mock("../../../components/session/banners/FirestorePersistenceBanner", () => ({
   FirestorePersistenceBanner: () => <div>persistence-banner</div>,
@@ -50,5 +50,27 @@ describe("MapScreenChromeBanners", () => {
       />,
     );
     expect(screen.getByText("Loading places")).toBeTruthy();
+  });
+});
+
+describe("selectMapRefineChip", () => {
+  it("prefers catalog hydrate copy over shade refine", () => {
+    const chip = selectMapRefineChip({
+      catalogHydrating: true,
+      measuringActiveAndRefining: true,
+      shadeRefining: true,
+    });
+    expect(chip.visible).toBe(true);
+    expect(chip.title).toBe("Loading places");
+  });
+
+  it("uses refining-shade copy for tentacle LOD", () => {
+    const chip = selectMapRefineChip({
+      catalogHydrating: false,
+      measuringActiveAndRefining: false,
+      shadeRefining: true,
+    });
+    expect(chip.visible).toBe(true);
+    expect(chip.title).toBe("Refining shade");
   });
 });

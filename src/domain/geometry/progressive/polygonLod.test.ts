@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Feature, Polygon } from "geojson";
-import { countPolygonVertices } from "../measuring/measuringGeometryBudgets";
+import { countPolygonVertices } from "./polygonMetrics";
 import {
   POLYGON_LOD_TURF_VERTEX_CEILING,
   buildCoarsePolygonFeature,

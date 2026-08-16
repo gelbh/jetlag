@@ -67,6 +67,10 @@ export async function resolveMatchingPendingQuestion(
     return null;
   }
 
+  const slimmedBoundary = persistSlimPolygonFeature(boundaryRegion);
+  if (!slimmedBoundary.ok) {
+    return null;
+  }
   const slimmedElim = persistSlimPolygonFeature(eliminationRegion);
   if (!slimmedElim.ok) {
     return null;
@@ -79,7 +83,7 @@ export async function resolveMatchingPendingQuestion(
       ...metadata,
       createdAt: new Date().toISOString(),
       matchingAnswer: answer,
-      matchingBoundaryJson: JSON.stringify(boundaryRegion),
+      matchingBoundaryJson: JSON.stringify(slimmedBoundary.feature),
       color: MAP_ANNOTATION_COLORS.elimination,
     },
   };

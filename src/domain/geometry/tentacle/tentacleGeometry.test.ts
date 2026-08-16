@@ -327,31 +327,31 @@ describe("tentacleGeometry", () => {
         message: MEASURING_PERSIST_OVER_BUDGET_MESSAGE,
       });
 
-    const json = await tentacleEliminationJsonForAnswer({
-      anchor: [51.45, -0.15],
-      radiusMeters: oneMileMeters,
-      pois: [
-        {
-          id: "poi-0",
-          name: "POI 0",
-          lat: 51.45,
-          lng: -0.15,
-          category: "museum",
-        },
-        {
-          id: "poi-1",
-          name: "POI 1",
-          lat: 51.46,
-          lng: -0.14,
-          category: "museum",
-        },
-      ],
-      answeredPoiId: "poi-0",
-      outOfReach: false,
-      gameArea: sampleGameArea,
-    });
-
-    expect(json).toBeUndefined();
+    await expect(
+      tentacleEliminationJsonForAnswer({
+        anchor: [51.45, -0.15],
+        radiusMeters: oneMileMeters,
+        pois: [
+          {
+            id: "poi-0",
+            name: "POI 0",
+            lat: 51.45,
+            lng: -0.15,
+            category: "museum",
+          },
+          {
+            id: "poi-1",
+            name: "POI 1",
+            lat: 51.46,
+            lng: -0.14,
+            category: "museum",
+          },
+        ],
+        answeredPoiId: "poi-0",
+        outOfReach: false,
+        gameArea: sampleGameArea,
+      }),
+    ).rejects.toThrow(MEASURING_PERSIST_OVER_BUDGET_MESSAGE);
     expect(slimSpy).toHaveBeenCalled();
     expect(MEASURING_PERSIST_OVER_BUDGET_MESSAGE).not.toBe(
       TENTACLE_POI_OVER_BUDGET_MESSAGE,

@@ -34,14 +34,19 @@ export async function resolveTentaclePendingQuestion(
     ? undefined
     : pois.find((poi) => poi.id === answerReplyId);
   const radiusMeters = tentacleRadiusFromMetadata(metadata, DEFAULT_RADIUS_METERS);
-  const eliminationJson = await tentacleEliminationJsonForAnswer({
-    anchor,
-    radiusMeters,
-    pois,
-    answeredPoiId: answerPoi?.id,
-    outOfReach,
-    gameArea,
-  });
+  let eliminationJson: string | undefined;
+  try {
+    eliminationJson = await tentacleEliminationJsonForAnswer({
+      anchor,
+      radiusMeters,
+      pois,
+      answeredPoiId: answerPoi?.id,
+      outOfReach,
+      gameArea,
+    });
+  } catch {
+    return null;
+  }
 
   const resolvedMetadata: AnnotationRecord["metadata"] = {
     ...metadata,

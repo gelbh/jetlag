@@ -19,8 +19,8 @@ import type { GameArea } from "@/domain/map/annotations";
 
 const buildMeasuringBoundaryPreview = vi.hoisted(() => vi.fn());
 const buildMeasuringEliminationPreview = vi.hoisted(() => vi.fn());
-const buildMeasuringCoarseFeature = vi.hoisted(() => vi.fn());
-const refineMeasuringFeatureStep = vi.hoisted(() => vi.fn());
+const buildCoarsePolygonFeature = vi.hoisted(() => vi.fn());
+const refinePolygonFeatureStep = vi.hoisted(() => vi.fn());
 
 vi.mock("@/domain/geometry/measuring/measuringRegions", () => ({
   buildMeasuringBoundaryPreview: (...args: unknown[]) =>
@@ -29,16 +29,16 @@ vi.mock("@/domain/geometry/measuring/measuringRegions", () => ({
     buildMeasuringEliminationPreview(...args),
 }));
 
-vi.mock("@/domain/geometry/measuring/measuringLod", async () => {
+vi.mock("@/domain/geometry/progressive/polygonLod", async () => {
   const actual = await vi.importActual<
-    typeof import("@/domain/geometry/measuring/measuringLod")
-  >("@/domain/geometry/measuring/measuringLod");
+    typeof import("@/domain/geometry/progressive/polygonLod")
+  >("@/domain/geometry/progressive/polygonLod");
   return {
     ...actual,
-    buildMeasuringCoarseFeature: (...args: unknown[]) =>
-      buildMeasuringCoarseFeature(...args),
-    refineMeasuringFeatureStep: (...args: unknown[]) =>
-      refineMeasuringFeatureStep(...args),
+    buildCoarsePolygonFeature: (...args: unknown[]) =>
+      buildCoarsePolygonFeature(...args),
+    refinePolygonFeatureStep: (...args: unknown[]) =>
+      refinePolygonFeatureStep(...args),
   };
 });
 
@@ -138,8 +138,8 @@ describe("useMeasuringPreviews budget gate", () => {
   beforeEach(() => {
     buildMeasuringBoundaryPreview.mockReset();
     buildMeasuringEliminationPreview.mockReset();
-    buildMeasuringCoarseFeature.mockReset();
-    refineMeasuringFeatureStep.mockReset();
+    buildCoarsePolygonFeature.mockReset();
+    refinePolygonFeatureStep.mockReset();
   });
 
   it("paints coarse LOD when all-places count exceeds the former 128 cap", async () => {
@@ -149,8 +149,8 @@ describe("useMeasuringPreviews budget gate", () => {
     const coarse = coarsePreview();
     buildMeasuringBoundaryPreview.mockResolvedValue(near);
     buildMeasuringEliminationPreview.mockResolvedValue(elim);
-    buildMeasuringCoarseFeature.mockReturnValue(coarse);
-    refineMeasuringFeatureStep.mockReturnValue({ feature: near, done: true });
+    buildCoarsePolygonFeature.mockReturnValue(coarse);
+    refinePolygonFeatureStep.mockReturnValue({ feature: near, done: true });
 
     const draft = {
       ...baseDraft,
@@ -190,8 +190,8 @@ describe("useMeasuringPreviews budget gate", () => {
     const near = samplePreview();
     buildMeasuringBoundaryPreview.mockResolvedValue(near);
     buildMeasuringEliminationPreview.mockResolvedValue(null);
-    buildMeasuringCoarseFeature.mockReturnValue(near);
-    refineMeasuringFeatureStep.mockReturnValue({ feature: near, done: true });
+    buildCoarsePolygonFeature.mockReturnValue(near);
+    refinePolygonFeatureStep.mockReturnValue({ feature: near, done: true });
 
     const draft = {
       ...baseDraft,
@@ -222,8 +222,8 @@ describe("useMeasuringPreviews budget gate", () => {
     const coarse = coarsePreview();
     buildMeasuringBoundaryPreview.mockResolvedValue(near);
     buildMeasuringEliminationPreview.mockResolvedValue(null);
-    buildMeasuringCoarseFeature.mockReturnValue(coarse);
-    refineMeasuringFeatureStep.mockReturnValue({ feature: near, done: true });
+    buildCoarsePolygonFeature.mockReturnValue(coarse);
+    refinePolygonFeatureStep.mockReturnValue({ feature: near, done: true });
 
     const draft = {
       ...baseDraft,
@@ -271,8 +271,8 @@ describe("useMeasuringPreviews budget gate", () => {
     const coarse = coarsePreview();
     buildMeasuringBoundaryPreview.mockResolvedValue(near);
     buildMeasuringEliminationPreview.mockResolvedValue(elim);
-    buildMeasuringCoarseFeature.mockReturnValue(coarse);
-    refineMeasuringFeatureStep.mockReturnValue({ feature: near, done: true });
+    buildCoarsePolygonFeature.mockReturnValue(coarse);
+    refinePolygonFeatureStep.mockReturnValue({ feature: near, done: true });
 
     const gameArea: GameArea = {
       type: "Polygon",
@@ -311,7 +311,7 @@ describe("useMeasuringPreviews budget gate", () => {
         (call) => call[0] !== MEASURING_OUTPUT_OVER_BUDGET_MESSAGE,
       ),
     ).toBe(true);
-    expect(buildMeasuringCoarseFeature).toHaveBeenCalledWith(near);
+    expect(buildCoarsePolygonFeature).toHaveBeenCalledWith(near);
     expect(result.current.measuringNearRegion).toBeTruthy();
   });
 });

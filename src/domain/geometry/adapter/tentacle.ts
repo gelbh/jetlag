@@ -137,7 +137,7 @@ export async function tentacleEliminationJsonForAnswer(params: {
 
   const slimmed = persistSlimPolygonFeature(region);
   if (!slimmed.ok) {
-    return undefined;
+    throw new Error(slimmed.message);
   }
 
   return JSON.stringify(slimmed.feature);

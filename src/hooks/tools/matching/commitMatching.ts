@@ -218,6 +218,16 @@ export async function performMatchingCommit(
     return;
   }
 
+  let storedBoundary = boundaryRegion;
+  if (storedBoundary) {
+    const slimmedBoundary = persistSlimPolygonFeature(storedBoundary);
+    if (!slimmedBoundary.ok) {
+      setMatchingError(slimmedBoundary.message);
+      return;
+    }
+    storedBoundary = slimmedBoundary.feature;
+  }
+
   let storedElim = eliminationRegion;
   if (storedElim) {
     const slimmed = persistSlimPolygonFeature(storedElim);
@@ -261,8 +271,8 @@ export async function performMatchingCommit(
         matchingDistanceMeters: matchingDistanceMeters ?? undefined,
         matchingFeatureCount: matchingFeatureCount ?? undefined,
         matchingNullAnswer,
-        matchingBoundaryJson: boundaryRegion
-          ? JSON.stringify(boundaryRegion)
+        matchingBoundaryJson: storedBoundary
+          ? JSON.stringify(storedBoundary)
           : undefined,
         matchingFeaturesJson: serializeMatchingFeatures(matchingFeatures),
         ...(matchingTransitMetroId

@@ -3,7 +3,7 @@ import type { Feature, Polygon } from "geojson";
 import type { GameArea } from "@/domain/map/annotations";
 import type { MatchingFeature } from "@/domain/geo/types";
 import * as persistSlim from "@/domain/geometry/progressive/persistSlim";
-import { MEASURING_PERSIST_OVER_BUDGET_MESSAGE } from "@/domain/geometry/measuring/measuringGeometryBudgets";
+import { POLYGON_PERSIST_OVER_BUDGET_MESSAGE } from "@/domain/geometry/progressive/persistSlim";
 import { performMatchingCommit, type CommitMatchingInput } from "./commitMatching";
 
 const buildMatchingEliminationRegion = vi.hoisted(() => vi.fn());
@@ -104,7 +104,7 @@ describe("performMatchingCommit persist-slim", () => {
 
     await performMatchingCommit(baseInput({ createAnnotation }));
 
-    expect(slimSpy).toHaveBeenCalled();
+    expect(slimSpy).toHaveBeenCalledTimes(2);
     expect(createAnnotation).toHaveBeenCalled();
     slimSpy.mockRestore();
   });
@@ -116,7 +116,7 @@ describe("performMatchingCommit persist-slim", () => {
       .spyOn(persistSlim, "persistSlimPolygonFeature")
       .mockReturnValue({
         ok: false,
-        message: MEASURING_PERSIST_OVER_BUDGET_MESSAGE,
+        message: POLYGON_PERSIST_OVER_BUDGET_MESSAGE,
       });
     const createAnnotation = vi.fn();
     const setMatchingError = vi.fn();
@@ -126,7 +126,7 @@ describe("performMatchingCommit persist-slim", () => {
     );
 
     expect(setMatchingError).toHaveBeenCalledWith(
-      MEASURING_PERSIST_OVER_BUDGET_MESSAGE,
+      POLYGON_PERSIST_OVER_BUDGET_MESSAGE,
     );
     expect(createAnnotation).not.toHaveBeenCalled();
     slimSpy.mockRestore();

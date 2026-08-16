@@ -5,6 +5,12 @@ import {
   type MeasuringSubject,
 } from "../../questions/measuringQuestions";
 import { persistSlimPolygonFeature } from "../progressive/persistSlim";
+import {
+  POLYGON_PERSIST_MAX_JSON_CHARS,
+  POLYGON_PERSIST_MAX_VERTICES,
+  countPolygonVertices as countProgressivePolygonVertices,
+  polygonGeometryJsonChars,
+} from "../progressive/polygonMetrics";
 
 /** Max places when measuring every site in the play area (HADK parks = 107). */
 export const MEASURING_MULTI_PLACE_MAX = 128;
@@ -16,14 +22,14 @@ export const MEASURING_LINEAR_MAX_VERTICES = 12_000;
  * Max vertices on any elim GeoJSON write after persist-slim (Firestore ceiling).
  * Locked between museum-scale (~1.3k OK) and RLBT golf closer (~8k fatal).
  */
-export const MEASURING_OUTPUT_MAX_VERTICES = 4_000;
+export const MEASURING_OUTPUT_MAX_VERTICES = POLYGON_PERSIST_MAX_VERTICES;
 
 /**
  * Max UTF-16 length of JSON.stringify(geometry) after persist-slim.
  * Locked between museum-scale (~50 KB OK) and RLBT golf closer (~320 KB fatal).
  * Applies to any elim GeoJSON write, not measuring-only.
  */
-export const MEASURING_OUTPUT_MAX_JSON_CHARS = 120_000;
+export const MEASURING_OUTPUT_MAX_JSON_CHARS = POLYGON_PERSIST_MAX_JSON_CHARS;
 
 export const MEASURING_MULTI_PLACE_OVER_BUDGET_MESSAGE =
   "Too many places in this play area to measure safely. Pick one place or use a smaller play area.";
@@ -75,30 +81,12 @@ export function countLineStringVertices(
   return total;
 }
 
-/** Count ring vertices on a Polygon / MultiPolygon (no spread — Dublin-scale safe). */
-export function countPolygonVertices(
-  feature: Feature<Polygon | MultiPolygon>,
-): number {
-  let total = 0;
-  const { geometry } = feature;
-  if (geometry.type === "Polygon") {
-    for (const ring of geometry.coordinates) {
-      total += ring.length;
-    }
-    return total;
-  }
-  for (const polygon of geometry.coordinates) {
-    for (const ring of polygon) {
-      total += ring.length;
-    }
-  }
-  return total;
-}
+export const countPolygonVertices = countProgressivePolygonVertices;
 
 export function measuringGeometryJsonChars(
   feature: Feature<Polygon | MultiPolygon>,
 ): number {
-  return JSON.stringify(feature.geometry).length;
+  return polygonGeometryJsonChars(feature);
 }
 
 export function assertMeasuringOutputComplexityBudget(
@@ -141,7 +129,11 @@ export function assertMeasuringOutputComplexityBudget(
 export function persistSlimMeasuringGeometry(
   feature: Feature<Polygon | MultiPolygon>,
 ): MeasuringOutputSoftenResult {
-  return persistSlimPolygonFeature(feature);
+  const result = persistSlimPolygonFeature(feature);
+  if (!result.ok) {
+    return { ok: false, message: MEASURING_PERSIST_OVER_BUDGET_MESSAGE };
+  }
+  return result;
 }
 
 /**

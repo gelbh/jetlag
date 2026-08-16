@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import type { Feature, Polygon } from "geojson";
-import { countPolygonVertices } from "../measuring/measuringGeometryBudgets";
+import { countPolygonVertices } from "./polygonMetrics";
 import {
   POLYGON_UNION_SLICE_BATCH,
   unionPolygonFeaturesInSlices,

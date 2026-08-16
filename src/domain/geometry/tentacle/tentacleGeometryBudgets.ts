@@ -18,8 +18,3 @@ export class TentacleGeometryBudgetError extends Error {
     this.poiCount = count;
   }
 }
-
-/** Historical: former 64-POI refuse. Play path no longer throws. */
-export function assertTentaclePoiBudget(_count: number): void {
-  // Intentionally empty — shade always proceeds; persist-slim gates storage.
-}

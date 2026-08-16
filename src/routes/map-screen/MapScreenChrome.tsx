@@ -24,7 +24,7 @@ import { MapScreenRoleCodesSheet } from "./shared/MapScreenSharedSessionSheets";
 import { useMapScreenReportProblemSheet } from "./shared/useMapScreenReportProblemSheet";
 import { renderMapScreenContextualRail } from "./shared/mapScreenContextualRail";
 import { canOpenMapScreenRoleCodes } from "./shared/canOpenMapScreenRoleCodes";
-import { MapScreenChromeBanners, type MapRefineChipCopy } from "./shared/MapScreenChromeBanners";
+import { MapScreenChromeBanners, selectMapRefineChip, type MapRefineChipCopy } from "./shared/MapScreenChromeBanners";
 
 type MapScreenChromeProps = Pick<
   MapScreenController,
@@ -100,6 +100,7 @@ type MapScreenChromeProps = Pick<
   | "pinTool"
   | "zoneTool"
   | "tentacleTool"
+  | "tentacleLodPhase"
   | "chatMessages"
   | "hasUnreadChat"
   | "unreadCount"
@@ -217,6 +218,7 @@ export function MapScreenChrome({
   pinTool,
   zoneTool,
   tentacleTool,
+  tentacleLodPhase = "complete",
   chatMessages,
   hasUnreadChat,
   unreadCount,
@@ -409,32 +411,17 @@ export function MapScreenChrome({
   const matchingLodRefining =
     matchingTool.matchingLodPhase === "coarse" ||
     matchingTool.matchingLodPhase === "refining";
+  const tentacleLodRefining =
+    tentacleLodPhase === "coarse" || tentacleLodPhase === "refining";
   const catalogHydrating =
     activeTool === "matching" && !matchingTool.matchingCatalogComplete;
 
-  const refineChip: MapRefineChipCopy = catalogHydrating
-    ? {
-        visible: true,
-        title: "Loading places",
-        body: "Adding remaining areas to the map…",
-      }
-    : measuringLodRefining && activeTool === "measuring"
-      ? {
-          visible: true,
-          title: "Refining measure",
-          body: "Adding detail to the shaded area…",
-        }
-      : matchingLodRefining || measuringLodRefining
-        ? {
-            visible: true,
-            title: "Refining shade",
-            body: "Adding detail to the shaded area…",
-          }
-        : {
-            visible: false,
-            title: "Refining measure",
-            body: "Adding detail to the shaded area…",
-          };
+  const refineChip: MapRefineChipCopy = selectMapRefineChip({
+    catalogHydrating,
+    measuringActiveAndRefining: measuringLodRefining && activeTool === "measuring",
+    shadeRefining:
+      matchingLodRefining || measuringLodRefining || tentacleLodRefining,
+  });
 
   const header = (
     <>
