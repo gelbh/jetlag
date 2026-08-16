@@ -166,6 +166,7 @@ export function useMapScreenController() {
     timer,
     toolGameArea,
     createAnnotation,
+    deleteAnnotation,
     annotations,
     awaitHiderAnswer,
     postSystemMessage,
