@@ -11,7 +11,6 @@ import {
   createSessionDraftToGamePreset,
 } from "../../domain/session/presets/gamePreset";
 import { useGamePresetStore } from "../../state/gamePresetStore";
-import { usePlayerUxWorld } from "@/hooks/feature/usePlayerUxWorld";
 import { ConfirmFooter } from "./ConfirmFooter";
 import { GameAreaSection } from "./GameAreaSection";
 import { PremiumGateSection } from "./PremiumGateSection";
@@ -19,7 +18,6 @@ import { SessionSettingsSection } from "./SessionSettingsSection";
 import { useCreateSession } from "./useCreateSession";
 
 export function CreateSession() {
-  const survey = usePlayerUxWorld();
   const savePreset = useGamePresetStore((state) => state.savePreset);
   const session = useCreateSession();
 
@@ -58,7 +56,7 @@ export function CreateSession() {
   return (
     <div
       className="jl-create-session flex h-full min-h-[100dvh] flex-col bg-surface-deep"
-      data-player-ux-world={survey ? "survey" : undefined}
+      data-player-ux-world="survey"
     >
       <div className={`${screenHeaderShellClassName} px-4`}>
         <ScreenHeader backTo="/" backLabel="Back" placement="inline" />

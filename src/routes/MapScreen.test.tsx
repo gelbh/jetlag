@@ -104,6 +104,13 @@ vi.mock("../services/core/firebase/firebase", () => ({
 }));
 
 describe("MapScreen", () => {
+  function dismissMapToolsGuide() {
+    const dismiss = screen.queryByRole("button", { name: "Dismiss" });
+    if (dismiss) {
+      fireEvent.click(dismiss);
+    }
+  }
+
   it("redirects to create when no session game area exists", async () => {
     useSessionStore.getState().setSession(
       createTestSession({ gameArea: undefined }),
@@ -126,6 +133,7 @@ describe("MapScreen", () => {
     useSessionStore.getState().setSession(createTestSession());
 
     renderWithRouter(<MapScreen />, { route: "/map", resetStores: false });
+    dismissMapToolsGuide();
 
     expect(screen.getByRole("button", { name: "Matching" })).toBeInTheDocument();
     expect(screen.getByTestId("map-screen-view")).toBeInTheDocument();
@@ -135,6 +143,7 @@ describe("MapScreen", () => {
     useSessionStore.getState().setSession(createTestSession());
 
     renderWithRouter(<MapScreen />, { route: "/map", resetStores: false });
+    dismissMapToolsGuide();
     fireEvent.click(screen.getByRole("button", { name: "Open settings" }));
 
     expect(screen.getByRole("heading", { name: "Settings" })).toBeInTheDocument();

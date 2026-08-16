@@ -53,6 +53,16 @@ describe("MapBottomChrome", () => {
     expect(
       container.querySelector(".jl-map-bottom-chrome-host--rail"),
     ).toBeNull();
+    expect(container.querySelector(".jl-tool-dock")).not.toBeNull();
+  });
+
+  it("keeps jl-tool-dock--rail on desktop rail chrome", () => {
+    const { container } = render(
+      <MapBottomChrome layout="rail" hunt={<button type="button">Radar</button>} />,
+    );
+    expect(
+      container.querySelector(".jl-tool-dock.jl-tool-dock--rail"),
+    ).not.toBeNull();
   });
 
   it("marks chrome inactive without leaving islands clickable via CSS class", () => {

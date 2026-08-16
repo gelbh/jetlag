@@ -8,15 +8,7 @@ import {
   Star,
   WarningCircle,
 } from "@phosphor-icons/react";
-import { usePlayerUxWorld } from "@/hooks/feature/usePlayerUxWorld";
 import { ChatUnreadBadge } from "../../chat/ChatUnreadBadge";
-import {
-  HudChatIcon,
-  HudGuideIcon,
-  HudLeaderboardIcon,
-  HudSettingsIcon,
-  HudStarIcon,
-} from "../../ui/brand/HudIcons";
 import { JlIcon } from "../../ui/brand/JlIcon";
 import { MapChromeControl } from "./MapChromeControl";
 
@@ -52,8 +44,6 @@ export function SessionIslandSlots({
   canRequestFoundHider = false,
   onRequestFoundHider,
 }: SessionIslandSlotsProps) {
-  const survey = usePlayerUxWorld();
-
   return (
     <div className="jl-tool-dock-group jl-tool-dock-group-secondary">
       {drawSlot}
@@ -68,11 +58,7 @@ export function SessionIslandSlots({
           iconClassName="jl-unread-badge-host"
           icon={
             <>
-              {survey ? (
-                <JlIcon icon={ChatCircle} size={20} weight="regular" />
-              ) : (
-                <HudChatIcon className="h-5 w-5 shrink-0" />
-              )}
+              <JlIcon icon={ChatCircle} size={20} weight="regular" />
               {hasUnreadChat ? <ChatUnreadBadge count={unreadCount} /> : null}
             </>
           }
@@ -86,13 +72,7 @@ export function SessionIslandSlots({
           disabled={inactive}
           onClick={onOpenLog}
           aria-label="Open session log"
-          icon={
-            survey ? (
-              <JlIcon icon={Notebook} size={20} weight="regular" />
-            ) : (
-              <HudLeaderboardIcon className="h-5 w-5 shrink-0" />
-            )
-          }
+          icon={<JlIcon icon={Notebook} size={20} weight="regular" />}
           label="Log"
         />
       ) : null}
@@ -104,13 +84,7 @@ export function SessionIslandSlots({
           onClick={onOpenReportProblem}
           aria-label="Report a problem"
           data-survey-priority="secondary"
-          icon={
-            survey ? (
-              <JlIcon icon={WarningCircle} size={20} weight="regular" />
-            ) : (
-              <HudGuideIcon className="h-5 w-5 shrink-0" />
-            )
-          }
+          icon={<JlIcon icon={WarningCircle} size={20} weight="regular" />}
           label="Report"
         />
       ) : null}
@@ -122,13 +96,7 @@ export function SessionIslandSlots({
           onClick={onOpenCodes}
           aria-label="Open role codes"
           data-survey-priority="secondary"
-          icon={
-            survey ? (
-              <JlIcon icon={Star} size={20} weight="regular" />
-            ) : (
-              <HudStarIcon className="h-5 w-5 shrink-0" />
-            )
-          }
+          icon={<JlIcon icon={Star} size={20} weight="regular" />}
           label="Codes"
         />
       ) : null}
@@ -139,13 +107,7 @@ export function SessionIslandSlots({
           disabled={inactive}
           onClick={onOpenSettings}
           aria-label="Open settings"
-          icon={
-            survey ? (
-              <JlIcon icon={GearSix} size={20} weight="regular" />
-            ) : (
-              <HudSettingsIcon className="h-5 w-5 shrink-0" />
-            )
-          }
+          icon={<JlIcon icon={GearSix} size={20} weight="regular" />}
           label="Settings"
         />
       ) : null}
@@ -157,13 +119,7 @@ export function SessionIslandSlots({
           onClick={onRequestFoundHider}
           aria-label="Declare found hider"
           data-survey-priority="secondary"
-          icon={
-            survey ? (
-              <JlIcon icon={CheckFat} size={20} weight="bold" />
-            ) : (
-              <span aria-hidden="true">✓</span>
-            )
-          }
+          icon={<JlIcon icon={CheckFat} size={20} weight="bold" />}
           label="Found"
         />
       ) : null}
@@ -175,13 +131,7 @@ export function SessionIslandSlots({
           onClick={onStartEndGame}
           aria-label="Declare found hiding-zone station / start end game"
           data-survey-priority="secondary"
-          icon={
-            survey ? (
-              <JlIcon icon={SealWarning} size={20} weight="bold" />
-            ) : (
-              <span aria-hidden="true">!</span>
-            )
-          }
+          icon={<JlIcon icon={SealWarning} size={20} weight="bold" />}
           label="Station"
         />
       ) : null}

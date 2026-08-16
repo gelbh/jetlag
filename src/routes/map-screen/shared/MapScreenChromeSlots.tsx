@@ -6,7 +6,6 @@ import {
   mapLandscapeChromeToolbarCollapseClass,
 } from "@/components/session/mapChrome/mapLandscapeChromeClasses";
 import { useDesktopLayout } from "@/hooks/layout/useDesktopLayout";
-import { usePlayerUxWorld } from "@/hooks/feature/usePlayerUxWorld";
 
 export type MapScreenChromeSlotsLayout = "ops-or-hud" | "fragments";
 
@@ -41,16 +40,13 @@ export function MapScreenChromeSlots({
   children,
 }: MapScreenChromeSlotsProps) {
   const isDesktop = useDesktopLayout();
-  const survey = usePlayerUxWorld();
   const { mode: landscapeChromeMode, chip: landscapeChip } =
     useMapLandscapeChrome();
-  const playerUxWorldAttr = survey ? "survey" : undefined;
-
   if (layout === "fragments") {
     return (
       <div
         className="map-chrome-hud map-chrome-hud--fragments group/map-chrome pointer-events-none fixed inset-0 z-[var(--z-dock)] overflow-visible"
-        data-player-ux-world={playerUxWorldAttr}
+        data-player-ux-world="survey"
         data-landscape-chrome={
           landscapeChromeMode === "portrait" ? undefined : landscapeChromeMode
         }
@@ -84,7 +80,7 @@ export function MapScreenChromeSlots({
         ref={chromeHudRef}
         id="map-chrome-hud-controls"
         className="map-chrome-hud group/map-chrome pointer-events-none fixed inset-0 z-[var(--z-dock)] overflow-visible"
-        data-player-ux-world={playerUxWorldAttr}
+        data-player-ux-world="survey"
         data-landscape-chrome={
           landscapeChromeMode === "portrait" ? undefined : landscapeChromeMode
         }

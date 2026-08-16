@@ -43,7 +43,6 @@ import { RequestPackWhenUnavailable } from "../components/presets/RequestPackWhe
 import { buildPreloadPresetSnapshot } from "../domain/preloadRequest/buildPreloadPresetSnapshot";
 import { usePackAttachChrome } from "../hooks/session/usePackAttachChrome";
 import { useMapStore } from "../state/sessionStore";
-import { usePlayerUxWorld } from "@/hooks/feature/usePlayerUxWorld";
 import type { GeocodedPlace } from "../services/geo/geocoding";
 
 export function GamePresetEditor() {
@@ -155,12 +154,11 @@ export function GamePresetEditor() {
   }, [focusBounds]);
 
   const isUserPreset = !existing || !isBundledPresetId(existing.id);
-  const survey = usePlayerUxWorld();
 
   return (
     <main
       className="home-poster flex min-h-[100dvh] flex-col px-5 py-8"
-      data-player-ux-world={survey ? "survey" : undefined}
+      data-player-ux-world="survey"
     >
       <GameAreaFramingModal
         open={framingModalOpen}

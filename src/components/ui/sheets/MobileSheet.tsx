@@ -51,26 +51,21 @@ export function MobileSheet({
 
   const scrollClassName = scrollIdle ? "hud-sheet-scroll--idle" : "";
 
-  if (variant === "nested" && layout === "split") {
-    return (
-      <div className={`${positionClass} hud-sheet ${className}`}>
-        <div
-          className={`mx-auto flex w-full max-w-xl flex-col ${maxHeightClassName}`}
-        >
-          {children}
-        </div>
-      </div>
-    );
-  }
-
-  if (variant === "overlay" && layout === "split") {
+  if (layout === "split") {
+    // nested (RAC modal) must stay in-flow so the dialog has a non-zero box;
+    // overlay keeps fixed bottom sheet chassis for MotionSheet.
+    const splitHandle =
+      handle ??
+      (variant === "nested" ? (
+        <div className="jl-sheet-handle" aria-hidden="true" />
+      ) : null);
     return (
       <div className={`${positionClass} hud-sheet ${className}`}>
         <div
           className={`mx-auto flex w-full max-w-xl flex-col ${maxHeightClassName}`}
         >
           <div className="shrink-0 bg-surface-panel px-4 pt-3">
-            {handle}
+            {splitHandle}
             {pinned}
           </div>
           <div

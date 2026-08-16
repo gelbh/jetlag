@@ -26,7 +26,7 @@ test("@smoke shows hiding countdown then seek phase after the period ends", asyn
   await expect(
     page
       .locator(".jl-status-header-col")
-      .filter({ has: page.getByText("PHASE", { exact: true }) })
-      .getByText("SEEK", { exact: true }),
+      .filter({ has: page.getByText("Phase", { exact: true }) })
+      .getByText("Seeking", { exact: true }),
   ).toBeVisible({ timeout: 10_000 });
 });

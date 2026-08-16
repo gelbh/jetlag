@@ -1,5 +1,5 @@
-/* Survey field-book entry + secondary surfaces — [data-player-ux-world="survey"].
- * Flag-off keeps Broadcast HUD dual path in home-entry / primitives. */
+/* Survey field-book entry + secondary surfaces — sole player path (`data-player-ux-world="survey"`).
+ * Attribute kept as the skin root; CSS flatten deferred. */
 
 @layer components {
   /* Remap HUD roles → field-book on entry roots so Tailwind utilities inherit. */

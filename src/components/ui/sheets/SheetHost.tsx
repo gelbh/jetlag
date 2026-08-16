@@ -1,10 +1,8 @@
 import { createPortal } from "react-dom";
 import { useRef, type ReactNode } from "react";
-import { MotionSheet } from "../../motion/MotionSheet";
 import { RacMotionSheet } from "./RacMotionSheet";
 import { useDialogFocus } from "@/hooks/a11y/useDialogFocus";
 import { useDesktopLayout } from "@/hooks/layout/useDesktopLayout";
-import { usePlayerUxWorld } from "@/hooks/feature/usePlayerUxWorld";
 import {
   type ContextualRailTab,
 } from "../../map/chrome/ContextualRailContext";
@@ -60,7 +58,8 @@ function DesktopRailDialog({
 /**
  * Stable sheet host API for map chrome.
  * Desktop + railTab → ContextualRail portal.
- * Otherwise (mobile, or desktop without rail) → MotionSheet / RacMotionSheet by flag.
+ * Otherwise → RacMotionSheet (Survey field-book sole path).
+ * PostHog player-ux-world-v2 retired — archive the flag in PostHog UI when convenient.
  */
 export function SheetHost({
   open,
@@ -75,7 +74,6 @@ export function SheetHost({
 }: SheetHostProps) {
   const isDesktop = useDesktopLayout();
   const railPanel = useContextualRailPanel();
-  const playerUxWorld = usePlayerUxWorld();
 
   // Desktop ContextualRail when a rail tab is requested (wait for panel mount).
   if (isDesktop && railTab) {
@@ -96,25 +94,8 @@ export function SheetHost({
     );
   }
 
-  // Mobile, or desktop sheets without a rail tab → overlay path.
-  if (playerUxWorld) {
-    return (
-      <RacMotionSheet
-        open={open}
-        onClose={onClose}
-        ariaLabel={ariaLabel}
-        pinned={pinned}
-        dismissible={dismissible}
-        sheetClassName={sheetClassName}
-        maxHeightClassName={maxHeightClassName}
-      >
-        {children}
-      </RacMotionSheet>
-    );
-  }
-
   return (
-    <MotionSheet
+    <RacMotionSheet
       open={open}
       onClose={onClose}
       ariaLabel={ariaLabel}
@@ -124,6 +105,6 @@ export function SheetHost({
       maxHeightClassName={maxHeightClassName}
     >
       {children}
-    </MotionSheet>
+    </RacMotionSheet>
   );
 }

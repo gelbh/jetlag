@@ -90,7 +90,7 @@ describe("RadarHudBody", () => {
     expect(screen.getByTestId("ask-mode-cue-ticker")).toHaveTextContent(
       "PICK A DISTANCE",
     );
-    expect(screen.getByTestId("ask-cost-chip")).toHaveTextContent(/RADAR/);
+    expect(screen.getByTestId("ask-cost-chip")).toHaveTextContent(/Radar/);
     expect(screen.getByTestId("radar-hud-body")).toBeInTheDocument();
     expect(screen.getByText("Distance")).toBeInTheDocument();
     const strip = screen.getByTestId("ask-commit-strip").querySelector("button");

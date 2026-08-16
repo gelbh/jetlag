@@ -6,7 +6,6 @@ import {
   Warning,
   WarningCircle,
 } from "@phosphor-icons/react";
-import { usePlayerUxWorld } from "@/hooks/feature/usePlayerUxWorld";
 import { JlIcon, type PhosphorIcon } from "../../ui/brand/JlIcon";
 
 interface SyncStatusBeaconProps {
@@ -28,32 +27,20 @@ const SURVEY_ICON: Record<SyncStatus, PhosphorIcon> = {
   error: WarningCircle,
 };
 
-/** Broadcast link-lamp sync indicator for the map HUD. */
+/** Survey field-book sync indicator for the map chrome. */
 export function SyncStatusBeacon({
   status,
   size = "md",
   className = "",
 }: SyncStatusBeaconProps) {
-  const survey = usePlayerUxWorld();
   const iconPx = size === "sm" ? 14 : 18;
-
-  if (survey) {
-    return (
-      <span
-        className={`jl-sync-beacon jl-sync-beacon--survey jl-sync-beacon--${status} ${SIZE_CLASS[size]} ${className}`.trim()}
-        aria-hidden="true"
-      >
-        <JlIcon icon={SURVEY_ICON[status]} size={iconPx} weight="bold" />
-      </span>
-    );
-  }
 
   return (
     <span
-      className={`jl-sync-beacon jl-sync-beacon--${status} ${SIZE_CLASS[size]} ${className}`.trim()}
+      className={`jl-sync-beacon jl-sync-beacon--survey jl-sync-beacon--${status} ${SIZE_CLASS[size]} ${className}`.trim()}
       aria-hidden="true"
     >
-      <span className="jl-sync-beacon__lamp" />
+      <JlIcon icon={SURVEY_ICON[status]} size={iconPx} weight="bold" />
     </span>
   );
 }

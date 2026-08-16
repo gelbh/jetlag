@@ -8,7 +8,7 @@
     "field-ink": {
       "$type": "color",
       "$value": "oklch(0.22 0.02 265)",
-      "$description": "Survey field book — graphite near-black (direction role: ink). Named field-ink so HUD --color-ink stays light during dual-token period."
+      "$description": "Survey field book — graphite near-black (direction role: ink). Named field-ink so HUD --color-ink stays light while legacy HUD aliases remain."
     },
     "field-ink-muted": {
       "$type": "color",
