@@ -98,7 +98,7 @@ export function GameChatTab({
             return (
               <p
                 key={message.id}
-                className="rounded-lg bg-surface-raised px-3 py-2 text-center text-[0.8125rem] text-ink-muted"
+                className="rounded-lg bg-surface-raised px-3 py-2 text-center text-xs text-ink-muted"
               >
                 {message.text}
               </p>
@@ -191,24 +191,24 @@ export function GameChatTab({
                 />
               ) : (
                 <>
-                  <p className="text-[0.8125rem] font-semibold uppercase tracking-wide text-brand-blue">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-brand-blue">
                     {toolLabel}
                   </p>
                   <p className="mt-1 text-sm text-ink">{message.promptText}</p>
                   {walking ? (
-                    <p className="mt-2 text-[0.8125rem] text-brand-gold">
+                    <p className="mt-2 text-xs text-brand-gold">
                       Seeker is walking. Answer when the full question arrives.
                     </p>
                   ) : null}
                   {countdown ? (
                     <p
-                      className={`mt-1 text-[0.8125rem] tabular-nums ${expired ? "text-status-warning" : "text-ink-dim"}`}
+                      className={`mt-1 text-xs tabular-nums ${expired ? "text-status-warning" : "text-ink-dim"}`}
                     >
                       {countdown}
                     </p>
                   ) : null}
                   {pending?.answeredLate ? (
-                    <p className="mt-1 text-[0.8125rem] text-status-warning">
+                    <p className="mt-1 text-xs text-status-warning">
                       Answered late. Card draw forfeited.
                     </p>
                   ) : null}
@@ -217,18 +217,18 @@ export function GameChatTab({
               {answered && isPhotoQuestion ? (
                 <PhotoAnswerPreview answer={pending?.answer} />
               ) : answered ? (
-                <p className="mt-2 text-[0.8125rem] text-ink-dim">
+                <p className="mt-2 text-xs text-ink-dim">
                   Answered: {message.selectedReply ?? "-"}
                 </p>
               ) : cancelled ? (
-                <p className="mt-2 text-[0.8125rem] text-ink-dim">Question dismissed.</p>
+                <p className="mt-2 text-xs text-ink-dim">Question dismissed.</p>
               ) : !isHider && !walking ? (
-                <p className="mt-2 text-[0.8125rem] text-ink-dim">Waiting for hider…</p>
+                <p className="mt-2 text-xs text-ink-dim">Waiting for hider…</p>
               ) : null}
               {canDismissExpired ? (
                 <button
                   type="button"
-                  className="mt-2 text-[0.8125rem] text-ink-muted underline"
+                  className="mt-2 text-xs text-ink-muted underline"
                   onClick={() =>
                     void onDismissExpiredQuestion?.(
                       message.pendingQuestionId!,

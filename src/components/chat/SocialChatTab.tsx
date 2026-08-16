@@ -63,7 +63,7 @@ export function SocialChatTab({
                   : "mr-8 bg-surface-raised text-ink-secondary"
               }`}
             >
-              <p className="text-[0.8125rem] font-medium uppercase tracking-wide text-ink-dim">
+              <p className="text-xs font-medium uppercase tracking-wide text-ink-dim">
                 {message.senderRole}
               </p>
               <p>{message.text}</p>
