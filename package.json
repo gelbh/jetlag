@@ -49,6 +49,7 @@
     "cap:android": "npm run cap:sync && npx cap open android",
     "cap:ios": "npm run cap:sync && npx cap open ios",
     "prepare": "husky",
+    "tokens:build": "node scripts/build-tokens.mjs",
     "lint:css": "stylelint \"src/**/*.css\" \"public/**/*.css\"",
     "test:lighthouse": "lhci autorun --config=lighthouserc.cjs; m=$?; lhci autorun --config=lighthouserc.desktop.cjs; d=$?; exit $((m || d))",
     "test:e2e:gate-smoke": "E2E_GATE_SMOKE=1 playwright test"
@@ -156,6 +157,7 @@
     "husky": "^9.1.7",
     "jsdom": "~29.1.1",
     "playwright": "^1.62.1",
+    "style-dictionary": "^5.5.1",
     "stylelint": "^17.14.1",
     "stylelint-config-recommended": "^18.0.0",
     "tailwindcss": "~4.3.0",

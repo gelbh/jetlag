@@ -1,0 +1,149 @@
+{
+  "color": {
+    "surface-deep": {
+      "$type": "color",
+      "$value": "oklch(0.16 0.045 265)",
+      "$deprecated": "Broadcast HUD — dual-token period; prefer Survey field-book roles (canvas/field-ink/flag/…) under player-ux-world-v2"
+    },
+    "surface-base": {
+      "$type": "color",
+      "$value": "oklch(0.19 0.038 258)",
+      "$deprecated": "Broadcast HUD — dual-token period"
+    },
+    "surface-raised": {
+      "$type": "color",
+      "$value": "oklch(0.24 0.032 250)",
+      "$deprecated": "Broadcast HUD — dual-token period"
+    },
+    "surface-panel": {
+      "$type": "color",
+      "$value": "oklch(0.18 0.042 262)",
+      "$deprecated": "Broadcast HUD — dual-token period"
+    },
+    "border": {
+      "$type": "color",
+      "$value": "oklch(0.35 0.04 255)",
+      "$deprecated": "Broadcast HUD — dual-token period; prefer rule for field-book edges"
+    },
+    "border-muted": {
+      "$type": "color",
+      "$value": "oklch(0.42 0.035 250)",
+      "$deprecated": "Broadcast HUD — dual-token period"
+    },
+    "ink": {
+      "$type": "color",
+      "$value": "oklch(0.97 0.005 250)",
+      "$deprecated": "Broadcast HUD light ink — dual-token period; field-book graphite is color.field-ink"
+    },
+    "ink-secondary": {
+      "$type": "color",
+      "$value": "oklch(0.92 0.008 250)",
+      "$deprecated": "Broadcast HUD — dual-token period"
+    },
+    "ink-muted": {
+      "$type": "color",
+      "$value": "oklch(0.76 0.015 250)",
+      "$deprecated": "Broadcast HUD — dual-token period; field-book muted is color.field-ink-muted"
+    },
+    "ink-dim": {
+      "$type": "color",
+      "$value": "oklch(0.72 0.02 250)",
+      "$deprecated": "Broadcast HUD — dual-token period"
+    },
+    "action": {
+      "$type": "color",
+      "$value": "oklch(0.58 0.14 35)",
+      "$deprecated": "Broadcast HUD terracotta — dual-token period; prefer flag (fluoro survey)"
+    },
+    "action-ink": {
+      "$type": "color",
+      "$value": "oklch(0.99 0.005 250)",
+      "$deprecated": "Broadcast HUD — dual-token period"
+    },
+    "action-soft": {
+      "$type": "color",
+      "$value": "oklch(0.58 0.14 35 / 0.2)",
+      "$deprecated": "Broadcast HUD — dual-token period"
+    },
+    "brand-blue": {
+      "$type": "color",
+      "$value": "oklch(0.72 0.12 250)",
+      "$deprecated": "Broadcast HUD — dual-token period; prefer signal for info/sync"
+    },
+    "brand-blue-soft": {
+      "$type": "color",
+      "$value": "oklch(0.72 0.12 250 / 0.18)",
+      "$deprecated": "Broadcast HUD — dual-token period"
+    },
+    "highlight": {
+      "$type": "color",
+      "$value": "oklch(0.78 0.12 85)",
+      "$deprecated": "Broadcast HUD — dual-token period"
+    },
+    "highlight-soft": {
+      "$type": "color",
+      "$value": "oklch(0.78 0.12 85 / 0.2)",
+      "$deprecated": "Broadcast HUD — dual-token period"
+    },
+    "status-error": {
+      "$type": "color",
+      "$value": "oklch(0.65 0.18 25)",
+      "$deprecated": "Broadcast HUD — dual-token period; prefer halt"
+    },
+    "status-error-surface": {
+      "$type": "color",
+      "$value": "oklch(0.65 0.18 25 / 0.16)",
+      "$deprecated": "Broadcast HUD — dual-token period"
+    },
+    "status-warning": {
+      "$type": "color",
+      "$value": "oklch(0.78 0.12 85)",
+      "$deprecated": "Broadcast HUD — dual-token period"
+    },
+    "status-warning-surface": {
+      "$type": "color",
+      "$value": "oklch(0.78 0.12 85 / 0.16)",
+      "$deprecated": "Broadcast HUD — dual-token period"
+    },
+    "status-info": {
+      "$type": "color",
+      "$value": "oklch(0.55 0.12 250)",
+      "$deprecated": "Broadcast HUD — dual-token period; prefer signal"
+    },
+    "status-info-surface": {
+      "$type": "color",
+      "$value": "oklch(0.55 0.12 250 / 0.16)",
+      "$deprecated": "Broadcast HUD — dual-token period"
+    },
+    "status-success": {
+      "$type": "color",
+      "$value": "oklch(0.68 0.16 145)",
+      "$deprecated": "Broadcast HUD — dual-token period; prefer trail"
+    },
+    "status-negative": {
+      "$type": "color",
+      "$value": "oklch(0.58 0.16 30)",
+      "$deprecated": "Broadcast HUD — dual-token period; prefer halt"
+    },
+    "map-canvas": {
+      "$type": "color",
+      "$value": "oklch(0.88 0.015 250)",
+      "$deprecated": "Broadcast HUD map fill — dual-token period; prefer canvas for field-book paper"
+    },
+    "scrollbar-track": {
+      "$type": "color",
+      "$value": "{color.surface-deep}",
+      "$deprecated": "Broadcast HUD — dual-token period"
+    },
+    "scrollbar-thumb": {
+      "$type": "color",
+      "$value": "{color.border-muted}",
+      "$deprecated": "Broadcast HUD — dual-token period"
+    },
+    "scrollbar-thumb-hover": {
+      "$type": "color",
+      "$value": "oklch(0.50 0.04 250)",
+      "$deprecated": "Broadcast HUD — dual-token period"
+    }
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "shadow": {
+    "hud-float": {
+      "$type": "shadow",
+      "$value": {
+        "offsetX": "0",
+        "offsetY": "8px",
+        "blur": "24px",
+        "spread": "0",
+        "color": "oklch(0.1 0.04 265 / 0.55)"
+      },
+      "$deprecated": "Broadcast HUD float shadow — dual-token period"
+    },
+    "hud-menu": {
+      "$type": "shadow",
+      "$value": {
+        "offsetX": "0",
+        "offsetY": "16px",
+        "blur": "36px",
+        "spread": "0",
+        "color": "oklch(0.08 0.04 265 / 0.65)"
+      },
+      "$deprecated": "Broadcast HUD menu shadow — dual-token period"
+    }
+  }
+}

@@ -1,0 +1,69 @@
+{
+  "color": {
+    "canvas": {
+      "$type": "color",
+      "$value": "oklch(0.965 0.01 250)",
+      "$description": "Survey field book — light cool map paper (direction role: canvas). Target AAA chrome on this ground."
+    },
+    "field-ink": {
+      "$type": "color",
+      "$value": "oklch(0.22 0.02 265)",
+      "$description": "Survey field book — graphite near-black (direction role: ink). Named field-ink so HUD --color-ink stays light during dual-token period."
+    },
+    "field-ink-muted": {
+      "$type": "color",
+      "$value": "oklch(0.42 0.02 250)",
+      "$description": "Survey field book — secondary copy (direction role: ink-muted). Keep ≥4.5:1 on panels; play chrome prefers field-ink."
+    },
+    "flag": {
+      "$type": "color",
+      "$value": "oklch(0.68 0.19 48)",
+      "$description": "Survey field book — fluoro survey orange (direction role: flag). Primary CTA / active tool / stake chips only (~≤15%)."
+    },
+    "flag-ink": {
+      "$type": "color",
+      "$value": "oklch(0.18 0.03 48)",
+      "$description": "Ink on flag fills for AAA play chrome."
+    },
+    "flag-soft": {
+      "$type": "color",
+      "$value": "oklch(0.68 0.19 48 / 0.18)",
+      "$description": "Soft flag wash for chips / selected chrome."
+    },
+    "signal": {
+      "$type": "color",
+      "$value": "oklch(0.52 0.12 250)",
+      "$description": "Survey field book — cool blue (direction role: signal). Info / sync OK — always pair with label/icon."
+    },
+    "signal-soft": {
+      "$type": "color",
+      "$value": "oklch(0.52 0.12 250 / 0.16)",
+      "$description": "Soft signal wash."
+    },
+    "trail": {
+      "$type": "color",
+      "$value": "oklch(0.52 0.14 145)",
+      "$description": "Survey field book — green (direction role: trail). Success / in-zone — always pair with label/icon."
+    },
+    "trail-soft": {
+      "$type": "color",
+      "$value": "oklch(0.52 0.14 145 / 0.16)",
+      "$description": "Soft trail wash."
+    },
+    "halt": {
+      "$type": "color",
+      "$value": "oklch(0.52 0.18 25)",
+      "$description": "Survey field book — red (direction role: halt). Error / dead session — always pair with label/icon."
+    },
+    "halt-soft": {
+      "$type": "color",
+      "$value": "oklch(0.52 0.18 25 / 0.16)",
+      "$description": "Soft halt wash."
+    },
+    "rule": {
+      "$type": "color",
+      "$value": "oklch(0.55 0.02 250)",
+      "$description": "Survey field book — hairline graphite (direction role: rule) for status/island edges."
+    }
+  }
+}
