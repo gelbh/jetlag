@@ -2,7 +2,6 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { RacMotionSheet } from "./RacMotionSheet";
 import { SHEET_VELOCITY_DISMISS_PX_MS } from "@/domain/device/motion/motionTokens";
-import { setPlayerUxWorldFlagForTests } from "@/services/core/analytics/playerUxWorldFlag";
 
 const useMotionProfile = vi.fn(() => ({
   animate: true,
@@ -18,13 +17,6 @@ vi.mock("@/hooks/motion/useMotionProfile", () => ({
 
 vi.mock("@/hooks/layout/useScrollLock", () => ({
   useScrollLock: () => undefined,
-}));
-
-vi.mock("posthog-js", () => ({
-  default: {
-    isFeatureEnabled: () => undefined,
-    onFeatureFlags: () => () => {},
-  },
 }));
 
 const MOTION_DOM_SKIP = new Set([
@@ -80,7 +72,6 @@ vi.mock("motion/react", async () => {
 describe("RacMotionSheet", () => {
   beforeEach(() => {
     latestOnDragEnd = undefined;
-    setPlayerUxWorldFlagForTests(null);
     useMotionProfile.mockReturnValue({
       animate: true,
       decorativeAnimate: true,
@@ -114,8 +105,7 @@ describe("RacMotionSheet", () => {
     expect(await screen.findByRole("dialog", { name: "Sheet" })).toBeInTheDocument();
   });
 
-  it("marks survey world on the overlay when flag is on", async () => {
-    setPlayerUxWorldFlagForTests(true);
+  it("marks survey world on the overlay", async () => {
     render(
       <RacMotionSheet open onClose={() => {}} ariaLabel="Survey sheet">
         <p>body</p>

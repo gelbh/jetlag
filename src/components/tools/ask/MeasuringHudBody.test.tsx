@@ -127,7 +127,7 @@ describe("MeasuringHudBody", () => {
     expect(screen.getByTestId("ask-mode-cue-ticker")).toHaveTextContent(
       "SET YOUR TARGET",
     );
-    expect(screen.getByTestId("ask-cost-chip")).toHaveTextContent(/MEASURING/);
+    expect(screen.getByTestId("ask-cost-chip")).toHaveTextContent(/Measuring/);
     expect(
       screen.getByRole("button", { name: "SEND — SET TARGET FIRST" }),
     ).toBeDisabled();

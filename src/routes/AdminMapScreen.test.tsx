@@ -157,10 +157,15 @@ describe("AdminMapScreen", () => {
 
     renderWithRouter(<AdminMapScreen />, { route: "/map" });
 
-    fireEvent.click(screen.getByRole("button", { name: "Open session log" }));
+    // RacMotionSheet ModalOverlay inert-hides the dock while a sheet is open.
+    fireEvent.click(
+      screen.getByRole("button", { name: "Open session log", hidden: true }),
+    );
     expect(controller.overlay.closeSheet).toHaveBeenCalled();
 
-    fireEvent.click(screen.getByRole("button", { name: "Open chat" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Open chat", hidden: true }),
+    );
     expect(controller.overlay.closeSheet).toHaveBeenCalledTimes(2);
   });
 });
