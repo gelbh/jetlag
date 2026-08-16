@@ -129,8 +129,8 @@ export function RacMotionSheet({
       }
     >
       <Modal className="pointer-events-none fixed inset-0 flex items-end justify-center outline-none">
-        <Dialog
-          aria-label={ariaLabel}
+          <Dialog
+          aria-label={ariaLabel ?? "Sheet"}
           className="pointer-events-auto w-full max-w-none outline-none"
         >
           <motion.div

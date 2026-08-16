@@ -43,7 +43,8 @@ export function ToolDockDrawMenu({
           <button
             key={tool.id}
             type="button"
-            role="menuitem"
+            role="menuitemradio"
+            aria-checked={active}
             aria-disabled={!tool.enabled}
             onClick={() => {
               if (!tool.enabled) {

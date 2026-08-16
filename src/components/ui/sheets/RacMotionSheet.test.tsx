@@ -32,15 +32,25 @@ const MOTION_DOM_SKIP = new Set([
   "dragListener",
   "dragConstraints",
   "dragElastic",
-  "onDragEnd",
 ]);
+
+type DragEndHandler = (
+  event: unknown,
+  info: { offset: { y: number }; velocity: { y: number } },
+) => void;
+
+let latestOnDragEnd: DragEndHandler | undefined;
 
 vi.mock("motion/react", async () => {
   const React = await import("react");
   const Passthrough = React.forwardRef<
     HTMLDivElement,
-    React.HTMLAttributes<HTMLDivElement> & { children?: React.ReactNode }
-  >(function MotionDiv({ children, ...rest }, ref) {
+    React.HTMLAttributes<HTMLDivElement> & {
+      children?: React.ReactNode;
+      onDragEnd?: DragEndHandler;
+    }
+  >(function MotionDiv({ children, onDragEnd, ...rest }, ref) {
+    latestOnDragEnd = onDragEnd;
     const dom: Record<string, unknown> = {};
     for (const [key, value] of Object.entries(rest as Record<string, unknown>)) {
       if (!MOTION_DOM_SKIP.has(key)) {
@@ -62,24 +72,9 @@ vi.mock("motion/react", async () => {
   };
 });
 
-describe("RacMotionSheet dismiss thresholds", () => {
-  it("matches legacy fraction and Motion px/s velocity", () => {
-    const shouldDismiss = (
-      offsetY: number,
-      sheetHeight: number,
-      velocityYPxPerSec: number,
-    ) =>
-      offsetY > sheetHeight * SHEET_DISMISS_FRACTION ||
-      velocityYPxPerSec > SHEET_VELOCITY_DISMISS_PX_MS * 1000;
-
-    expect(shouldDismiss(100, 300, 0)).toBe(true);
-    expect(shouldDismiss(10, 300, 0)).toBe(false);
-    expect(shouldDismiss(10, 300, 500)).toBe(true);
-  });
-});
-
 describe("RacMotionSheet", () => {
   beforeEach(() => {
+    latestOnDragEnd = undefined;
     useMotionProfile.mockReturnValue({
       animate: true,
       decorativeAnimate: true,
@@ -102,6 +97,41 @@ describe("RacMotionSheet", () => {
 
     fireEvent.keyDown(dialog, { key: "Escape" });
     expect(onClose).toHaveBeenCalled();
+  });
+
+  it("defaults dialog name when ariaLabel is omitted", async () => {
+    render(
+      <RacMotionSheet open onClose={() => {}}>
+        <p>unnamed</p>
+      </RacMotionSheet>,
+    );
+    expect(await screen.findByRole("dialog", { name: "Sheet" })).toBeInTheDocument();
+  });
+
+  it("dismisses via drag-end past fraction or velocity", async () => {
+    const onClose = vi.fn();
+    render(
+      <RacMotionSheet open onClose={onClose} ariaLabel="Drag">
+        <p>body</p>
+      </RacMotionSheet>,
+    );
+    await screen.findByRole("dialog", { name: "Drag" });
+    expect(latestOnDragEnd).toBeTypeOf("function");
+
+    const height = 300;
+    const justBelow = height * SHEET_DISMISS_FRACTION;
+    latestOnDragEnd?.({}, { offset: { y: justBelow }, velocity: { y: 0 } });
+    expect(onClose).not.toHaveBeenCalled();
+
+    latestOnDragEnd?.({}, { offset: { y: justBelow + 1 }, velocity: { y: 0 } });
+    expect(onClose).toHaveBeenCalledTimes(1);
+
+    onClose.mockClear();
+    latestOnDragEnd?.({}, {
+      offset: { y: 1 },
+      velocity: { y: SHEET_VELOCITY_DISMISS_PX_MS * 1000 + 1 },
+    });
+    expect(onClose).toHaveBeenCalledTimes(1);
   });
 
   it("skips drag handle when reduced-motion / low-power profile", async () => {
