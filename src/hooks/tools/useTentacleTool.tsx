@@ -536,6 +536,7 @@ export function useTentacleTool({
     awaitHiderAnswer,
     isSubmitting: session.isBusy,
     viewOnly: !canSubmitQuestion,
+    resolving: tentacleLoading && tentacleCenter !== null,
   };
 
   const hud = {

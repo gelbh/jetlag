@@ -13,6 +13,7 @@ import { ErrorWithRetry } from "./shared/readout/ErrorWithRetry";
 import { LoadingReadout } from "./shared/readout/LoadingReadout";
 import { QuestionPromptBlock } from "./shared/controls/QuestionPromptBlock";
 import { ResolvedReadout } from "./shared/readout/ResolvedReadout";
+import { TentacleLocationsChord } from "./ask/TentacleLocationsChord";
 import { TentacleAnswerPicker } from "./shared/answers/TentacleAnswerPicker";
 import { ToolPanelShell } from "./shared/panels/ToolPanelShell";
 import { ToolSection } from "./shared/panels/ToolSection";
@@ -230,23 +231,18 @@ export function TentaclePanel({
       ) : null}
 
       {phaseId === "ask" && !awaitHiderAnswer && categoryId ? (
-        <div
-          data-testid="tentacle-locations-chord"
-          className="ask-scroll-chord"
-        >
-          <div className="ask-scroll-chord__list jl-scroll">
-            <TentacleAnswerPicker
-              categoryId={categoryId}
-              distanceUnit={distanceUnit}
-              searchRadiusMeters={searchRadiusMeters}
-              poiOptions={poiOptions}
-              selectedPoiId={selectedPoiId}
-              outOfReach={outOfReach}
-              onSelectPoi={onSelectPoi}
-              onOutOfReachChange={onOutOfReachChange}
-            />
-          </div>
-        </div>
+        <TentacleLocationsChord className="ask-scroll-chord">
+          <TentacleAnswerPicker
+            categoryId={categoryId}
+            distanceUnit={distanceUnit}
+            searchRadiusMeters={searchRadiusMeters}
+            poiOptions={poiOptions}
+            selectedPoiId={selectedPoiId}
+            outOfReach={outOfReach}
+            onSelectPoi={onSelectPoi}
+            onOutOfReachChange={onOutOfReachChange}
+          />
+        </TentacleLocationsChord>
       ) : null}
     </>
   );

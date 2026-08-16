@@ -55,6 +55,8 @@ export type AskHudReadiness = {
   awaitHiderAnswer: boolean;
   isSubmitting: boolean;
   viewOnly?: boolean;
+  /** Tentacle (and similar): provisional confirm / load in flight. */
+  resolving?: boolean;
 };
 
 const DEFINITIONS: Record<AskHudSurface, AskHudDefinition> = {
@@ -119,17 +121,15 @@ export function askHudSurfaces(): readonly AskHudSurface[] {
 /**
  * Verb-only GlanceVerb ticker. Must never include DnPm / cost tokens.
  */
-export function activeModeCue(input: {
-  surface: AskHudSurface;
-  placementReady: boolean;
-  configureReady: boolean;
-  resolveReady: boolean;
-  /** Tentacle: Overpass / provisional confirm in flight. */
-  resolving?: boolean;
-  /** Tentacle: solo answer recorded (or multiplayer send). Optional for other surfaces. */
-  answerReady?: boolean;
-  awaitHiderAnswer?: boolean;
-}): string {
+export function activeModeCue(
+  input: Pick<
+    AskHudReadiness,
+    "surface" | "placementReady" | "configureReady" | "resolveReady"
+  > &
+    Partial<
+      Pick<AskHudReadiness, "resolving" | "answerReady" | "awaitHiderAnswer">
+    >,
+): string {
   const def = DEFINITIONS[input.surface];
   switch (input.surface) {
     case "radar":
@@ -155,6 +155,7 @@ export function activeModeCue(input: {
       if (!input.placementReady) return "SET CENTER ON MAP";
       if (input.resolving) return "CONFIRMING PLACES";
       if (!input.resolveReady) return "NO PLACES";
+      // Live chrome always passes these; omitted → ready path (legacy tests).
       if (input.awaitHiderAnswer === false && input.answerReady === false) {
         return "TAP A PLACE";
       }
@@ -260,8 +261,6 @@ export function notReadyCommitHint(cue: string): string {
       return "TAP A PLACE";
     case "NO PLACES":
       return "NO PLACES";
-    case "PICK LOCATIONS":
-      return "PICK LOCATIONS";
     case "PICK A PHOTO ASK":
       return "PICK A PHOTO ASK";
     case "PLACE YOUR ZONE":
