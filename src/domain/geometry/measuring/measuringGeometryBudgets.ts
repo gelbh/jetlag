@@ -13,13 +13,13 @@ export const MEASURING_MULTI_PLACE_MAX = 128;
 export const MEASURING_LINEAR_MAX_VERTICES = 12_000;
 
 /**
- * Max vertices on measuring near/elim after soften.
+ * Max vertices on measuring near/elim after persist-slim (Firestore ceiling).
  * Locked between museum-scale (~1.3k OK) and RLBT golf closer (~8k fatal).
  */
 export const MEASURING_OUTPUT_MAX_VERTICES = 4_000;
 
 /**
- * Max UTF-16 length of JSON.stringify(geometry) after soften.
+ * Max UTF-16 length of JSON.stringify(geometry) after persist-slim.
  * Locked between museum-scale (~50 KB OK) and RLBT golf closer (~320 KB fatal).
  */
 export const MEASURING_OUTPUT_MAX_JSON_CHARS = 120_000;
@@ -30,11 +30,16 @@ export const MEASURING_MULTI_PLACE_OVER_BUDGET_MESSAGE =
 export const MEASURING_LINEAR_OVER_BUDGET_MESSAGE =
   "Those borders are too detailed for this play area. Try a smaller area or another category.";
 
+/** @deprecated Preview no longer refuses; persist uses MEASURING_PERSIST_OVER_BUDGET_MESSAGE. */
 export const MEASURING_OUTPUT_OVER_BUDGET_MESSAGE =
   "This measure is too complex for this play area. Try a shorter distance or a smaller area.";
 
-/** Escalating Turf simplify tolerances — soften toward the output cap, then gate. */
-const OUTPUT_SIMPLIFY_TOLERANCES = [0.000012, 0.00005, 0.0002, 0.001] as const;
+/** Persist soft-fail — storage ceiling, not play-area complexity. */
+export const MEASURING_PERSIST_OVER_BUDGET_MESSAGE =
+  "Couldn't save this measure — geometry is too large to store. Try a shorter distance.";
+
+/** Escalating Turf simplify tolerances — slim toward the persist cap, then gate. */
+const PERSIST_SIMPLIFY_TOLERANCES = [0.000012, 0.00005, 0.0002, 0.001] as const;
 
 export type MeasuringBudgetResult =
   | { ok: true }
@@ -184,9 +189,9 @@ function decimatePolygonFeature(
 }
 
 /**
- * Soften-then-gate: simplify toward the output cap; refuse with locked copy if still over.
+ * Persist path — slim toward Firestore ceiling; storage-oriented fail copy only.
  */
-export function softenMeasuringOutputToBudget(
+export function persistSlimMeasuringGeometry(
   feature: Feature<Polygon | MultiPolygon>,
 ): MeasuringOutputSoftenResult {
   let current = feature;
@@ -198,7 +203,7 @@ export function softenMeasuringOutputToBudget(
   // skip straight to stride decimate above 1.25× the vertex cap.
   const initialVerts = countPolygonVertices(current);
   if (initialVerts <= MEASURING_OUTPUT_MAX_VERTICES * 1.25) {
-    for (const tolerance of OUTPUT_SIMPLIFY_TOLERANCES) {
+    for (const tolerance of PERSIST_SIMPLIFY_TOLERANCES) {
       try {
         const simplified = simplify(current, {
           tolerance,
@@ -224,7 +229,16 @@ export function softenMeasuringOutputToBudget(
     return { ok: true, feature: current };
   }
 
-  return { ok: false, message: MEASURING_OUTPUT_OVER_BUDGET_MESSAGE };
+  return { ok: false, message: MEASURING_PERSIST_OVER_BUDGET_MESSAGE };
+}
+
+/**
+ * Persist-slim wrapper (legacy name). Prefer `persistSlimMeasuringGeometry`.
+ */
+export function softenMeasuringOutputToBudget(
+  feature: Feature<Polygon | MultiPolygon>,
+): MeasuringOutputSoftenResult {
+  return persistSlimMeasuringGeometry(feature);
 }
 
 /** Preview/commit/resolve gate for multi-place and linear measuring. */
