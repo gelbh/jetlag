@@ -21,7 +21,7 @@ export function setPlayerUxWorldFlagForTests(value: boolean | null): void {
 export function readPlayerUxWorldFlag(
   isFeatureEnabled: (key: string) => boolean | undefined,
 ): boolean {
-  if (testOverride !== null) {
+  if (import.meta.env.DEV && testOverride !== null) {
     return testOverride;
   }
   return isFeatureEnabled(PLAYER_UX_WORLD_FLAG_KEY) === true;

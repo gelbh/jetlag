@@ -72,10 +72,7 @@ export function RacMotionSheet({
 
   const handleDragEnd = useCallback(
     (_: unknown, info: { offset: { y: number }; velocity: { y: number } }) => {
-      if (!dismissible) {
-        void motionAnimate(y, 0, { type: "spring", stiffness: 420, damping: 36 });
-        return;
-      }
+      // Only wired when dismissible + motion enabled (drag/handleProps gated above).
       measureHeight();
       const height = sheetHeightRef.current;
       const shouldDismiss =
@@ -89,7 +86,7 @@ export function RacMotionSheet({
       }
       void motionAnimate(y, 0, { type: "spring", stiffness: 420, damping: 36 });
     },
-    [dismissible, measureHeight, requestClose, y],
+    [measureHeight, requestClose, y],
   );
 
   const canStartHandleDrag = useCallback(() => {

@@ -44,10 +44,15 @@ export function ToolDockDrawMenu({
             key={tool.id}
             type="button"
             role="menuitem"
-            disabled={!tool.enabled}
-            onClick={() => onSelect(tool.id)}
+            aria-disabled={!tool.enabled}
+            onClick={() => {
+              if (!tool.enabled) {
+                return;
+              }
+              onSelect(tool.id);
+            }}
             className={cn(
-              "jl-tool-menu-item disabled:opacity-40",
+              "jl-tool-menu-item aria-disabled:opacity-40",
               active ? "jl-tool-menu-item-active" : "jl-tool-menu-item-default",
             )}
           >
