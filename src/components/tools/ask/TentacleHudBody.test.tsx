@@ -182,4 +182,63 @@ describe("TentacleHudBody", () => {
     fireEvent.click(strip);
     expect(onCommit).toHaveBeenCalledTimes(1);
   });
+
+  it("locations chord respects ask rail max-height shell", () => {
+    const pois: TentaclePoi[] = [
+      {
+        id: "poi-1",
+        name: "National Museum",
+        lat: 53.35,
+        lng: -6.26,
+        category: "museum",
+      },
+      {
+        id: "poi-2",
+        name: "City Museum",
+        lat: 53.36,
+        lng: -6.25,
+        category: "museum",
+      },
+    ];
+    render(
+      <TentacleHudBody
+        {...baseProps}
+        awaitHiderAnswer={false}
+        categoryChosen
+        categoryId="museum"
+        hasCenter
+        awaitingPlacement={false}
+        poiOptions={pois}
+      />,
+    );
+
+    const chord = screen.getByTestId("tentacle-locations-chord");
+    expect(chord.className).toMatch(/ask-scroll-chord/);
+  });
+
+  it("solo locations chord still lists places and not-within-reach", () => {
+    const pois: TentaclePoi[] = [
+      {
+        id: "poi-1",
+        name: "National Museum",
+        lat: 53.35,
+        lng: -6.26,
+        category: "museum",
+      },
+    ];
+    render(
+      <TentacleHudBody
+        {...baseProps}
+        awaitHiderAnswer={false}
+        categoryChosen
+        categoryId="museum"
+        hasCenter
+        awaitingPlacement={false}
+        poiOptions={pois}
+      />,
+    );
+
+    expect(screen.getByText("National Museum")).toBeInTheDocument();
+    expect(screen.getByText("Not within reach")).toBeInTheDocument();
+  });
 });

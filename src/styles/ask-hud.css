@@ -88,7 +88,8 @@
     color: var(--color-status-error);
   }
 
-  .ask-catalog-rail {
+  .ask-catalog-rail,
+  .ask-scroll-chord {
     display: flex;
     max-height: var(--ask-hud-rail-max-height);
     max-width: 28rem;
@@ -99,12 +100,14 @@
     padding: 0.75rem;
   }
 
-  .ask-catalog-rail__hint {
+  .ask-catalog-rail__hint,
+  .ask-scroll-chord__header {
     margin: 0;
     flex-shrink: 0;
   }
 
-  .ask-catalog-rail__list {
+  .ask-catalog-rail__list,
+  .ask-scroll-chord__list {
     display: flex;
     min-height: 0;
     flex: 1;
