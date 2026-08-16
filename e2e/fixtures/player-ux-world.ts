@@ -5,9 +5,9 @@ import type { Page } from "@playwright/test";
  * Kept as no-ops so older visual specs that called enable/disable still compile.
  */
 export async function enablePlayerUxWorld(_page: Page) {
-  /* no-op — Survey is always on */
+  void _page;
 }
 
 export async function disablePlayerUxWorld(_page: Page) {
-  /* no-op — Broadcast HUD dual path removed; Survey cannot be disabled in-app */
+  void _page;
 }
