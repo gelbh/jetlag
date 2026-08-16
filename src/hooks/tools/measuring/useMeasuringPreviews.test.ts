@@ -5,7 +5,6 @@ import {
   MEASURING_MULTI_PLACE_OVER_BUDGET_MESSAGE,
   MEASURING_OUTPUT_OVER_BUDGET_MESSAGE,
 } from "@/domain/geometry/measuring/measuringGeometryBudgets";
-import * as measuringGeometryBudgets from "@/domain/geometry/measuring/measuringGeometryBudgets";
 import { previewGeometryFingerprint } from "@/domain/geometry/measuring/previewGeometryFingerprint";
 import {
   useMeasuringPreviews,
@@ -17,13 +16,28 @@ import type { GameArea } from "@/domain/map/annotations";
 
 const buildMeasuringBoundaryPreview = vi.hoisted(() => vi.fn());
 const buildMeasuringEliminationPreview = vi.hoisted(() => vi.fn());
+const buildMeasuringCoarseFeature = vi.hoisted(() => vi.fn());
+const refineMeasuringFeatureStep = vi.hoisted(() => vi.fn());
 
-vi.mock("../../../domain/geometry/measuring/measuringRegions", () => ({
+vi.mock("@/domain/geometry/measuring/measuringRegions", () => ({
   buildMeasuringBoundaryPreview: (...args: unknown[]) =>
     buildMeasuringBoundaryPreview(...args),
   buildMeasuringEliminationPreview: (...args: unknown[]) =>
     buildMeasuringEliminationPreview(...args),
 }));
+
+vi.mock("@/domain/geometry/measuring/measuringLod", async () => {
+  const actual = await vi.importActual<
+    typeof import("@/domain/geometry/measuring/measuringLod")
+  >("@/domain/geometry/measuring/measuringLod");
+  return {
+    ...actual,
+    buildMeasuringCoarseFeature: (...args: unknown[]) =>
+      buildMeasuringCoarseFeature(...args),
+    refineMeasuringFeatureStep: (...args: unknown[]) =>
+      refineMeasuringFeatureStep(...args),
+  };
+});
 
 function samplePreview(): Feature<Polygon> {
   return {
@@ -37,6 +51,25 @@ function samplePreview(): Feature<Polygon> {
           [-0.1, 51.4],
           [-0.1, 51.5],
           [-0.2, 51.5],
+          [-0.2, 51.4],
+        ],
+      ],
+    },
+  };
+}
+
+function coarsePreview(): Feature<Polygon> {
+  return {
+    type: "Feature",
+    properties: { lod: "coarse" },
+    geometry: {
+      type: "Polygon",
+      coordinates: [
+        [
+          [-0.2, 51.4],
+          [-0.05, 51.4],
+          [-0.05, 51.55],
+          [-0.2, 51.55],
           [-0.2, 51.4],
         ],
       ],
@@ -124,20 +157,15 @@ describe("useMeasuringPreviews budget gate", () => {
     expect(result.current.measuringEliminationPreview).toBeNull();
   });
 
-  it("refuses oversized elim after soften and clears previews", async () => {
+  it("paints coarse LOD instead of refusing oversized geometry on preview", async () => {
     const setMeasuringError = vi.fn();
     const near = samplePreview();
     const elim = samplePreview();
+    const coarse = coarsePreview();
     buildMeasuringBoundaryPreview.mockResolvedValue(near);
     buildMeasuringEliminationPreview.mockResolvedValue(elim);
-
-    const softenSpy = vi
-      .spyOn(measuringGeometryBudgets, "softenMeasuringOutputToBudget")
-      .mockImplementationOnce((feature) => ({ ok: true, feature }))
-      .mockImplementationOnce(() => ({
-        ok: false,
-        message: MEASURING_OUTPUT_OVER_BUDGET_MESSAGE,
-      }));
+    buildMeasuringCoarseFeature.mockReturnValue(coarse);
+    refineMeasuringFeatureStep.mockReturnValue({ feature: near, done: true });
 
     const gameArea: GameArea = {
       type: "Polygon",
@@ -165,12 +193,18 @@ describe("useMeasuringPreviews budget gate", () => {
     const { result } = renderHook(() => useMeasuringPreviews(gameArea, draft));
 
     await waitFor(() => {
-      expect(setMeasuringError).toHaveBeenCalledWith(
-        MEASURING_OUTPUT_OVER_BUDGET_MESSAGE,
-      );
+      expect(result.current.measuringNearRegion).not.toBeNull();
     });
-    expect(result.current.measuringNearRegion).toBeNull();
-    expect(result.current.measuringEliminationPreview).toBeNull();
-    softenSpy.mockRestore();
+
+    expect(setMeasuringError).not.toHaveBeenCalledWith(
+      MEASURING_OUTPUT_OVER_BUDGET_MESSAGE,
+    );
+    expect(
+      setMeasuringError.mock.calls.every(
+        (call) => call[0] !== MEASURING_OUTPUT_OVER_BUDGET_MESSAGE,
+      ),
+    ).toBe(true);
+    expect(buildMeasuringCoarseFeature).toHaveBeenCalledWith(near);
+    expect(result.current.measuringNearRegion).toBeTruthy();
   });
 });

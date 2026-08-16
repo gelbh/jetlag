@@ -2,7 +2,7 @@ import type { AnnotationRecord, GameArea } from "../../map/annotations";
 import { MAP_ANNOTATION_COLORS } from "../../map/mapAnnotationColors";
 import {
   assertMeasuringMultiPlaceBudget,
-  softenMeasuringOutputToBudget,
+  persistSlimMeasuringGeometry,
 } from "../../geometry/measuring/measuringGeometryBudgets";
 import { buildMeasuringRegions, type MeasuringRegionInput } from "../../geometry/measuring/measuringRegions";
 import type { MeasuringAnswer } from "../measuringQuestions";
@@ -60,15 +60,15 @@ export async function resolveMeasuringPendingQuestion(
     return null;
   }
 
-  const softenedElim = softenMeasuringOutputToBudget(regions.elimination);
-  if (!softenedElim.ok) {
+  const slimmedElim = persistSlimMeasuringGeometry(regions.elimination);
+  if (!slimmedElim.ok) {
     // Soft-fail → resolver cancels once (no reload thrash after RLBT harden).
     return null;
   }
 
   return {
     type: "measuring",
-    geometry: softenedElim.feature,
+    geometry: slimmedElim.feature,
     metadata: {
       ...metadata,
       createdAt: new Date().toISOString(),

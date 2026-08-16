@@ -323,9 +323,11 @@ export function useMeasuringTool({
       measuringDistanceMeters: draft.measuringDistanceMeters,
       measuringBoundaryPreview: previews.measuringBoundaryPreview,
       measuringEliminationPreview: previews.measuringEliminationPreview,
+      measuringLodPhase: previews.measuringLodPhase,
       seekerResolving:
         draft.measuringLoading && draft.measuringSeekerPoint !== null,
     },
+    measuringLodPhase: previews.measuringLodPhase,
     placementCrosshair,
     publishSignature,
     handleMapClick: interactions.handleMapClick,
