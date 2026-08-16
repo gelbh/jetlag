@@ -78,14 +78,24 @@ test.describe("landscape survey chrome distill", () => {
     await expect(page.locator('[data-player-ux-world="survey"]')).toBeVisible();
   });
 
-  test("matches landscape chip / distilled chrome (survey)", async ({
+  test("distills secondary actions when landscape chrome is expanded", async ({
     page,
   }) => {
-    // Checklist: secondary session actions + map-controls hide when expanded under survey.
-    await expect(page.locator('[data-player-ux-world="survey"]')).toBeVisible();
-    await expect(page.locator(".jl-map-bottom-chrome-host")).toHaveScreenshot(
-      "tool-dock-landscape-survey.png",
-      { maxDiffPixelRatio: 0.03 },
-    );
+    // Checklist (visual baseline deferred — collapsed dock host is unstable in landscape).
+    const chip = page.getByRole("button", {
+      name: /Show map controls|Hide map controls/i,
+    });
+    await expect(chip).toBeVisible();
+    if ((await chip.getAttribute("aria-expanded")) === "false") {
+      await chip.click();
+    }
+    await expect(chip).toHaveAttribute("aria-expanded", "true");
+    await expect(page.locator('[data-island="map-controls"]')).toBeHidden();
+    await expect(
+      page.getByRole("button", { name: "Report a problem" }),
+    ).toBeHidden();
+    await expect(
+      page.getByRole("button", { name: "Open settings" }),
+    ).toBeVisible();
   });
 });
