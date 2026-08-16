@@ -146,13 +146,13 @@
     color: var(--color-field-ink-muted);
   }
 
-  /* Landscape distill: fewer equal-weight actions when chrome is expanded. */
-  [data-player-ux-world="survey"][data-landscape-chrome="expanded"]
+  /* Landscape distill: fewer equal-weight actions when chrome is revealed. */
+  [data-player-ux-world="survey"][data-landscape-chrome="revealed"]
     [data-island="map-controls"] {
     display: none;
   }
 
-  [data-player-ux-world="survey"][data-landscape-chrome="expanded"]
+  [data-player-ux-world="survey"][data-landscape-chrome="revealed"]
     [data-survey-priority="secondary"] {
     display: none;
   }
