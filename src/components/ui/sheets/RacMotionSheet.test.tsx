@@ -38,7 +38,6 @@ const MOTION_DOM_SKIP = new Set([
   "dragConstraints",
   "dragElastic",
 ]);
-// data-player-ux-world must reach the DOM for survey sheet skin
 
 type DragEndHandler = (
   event: unknown,

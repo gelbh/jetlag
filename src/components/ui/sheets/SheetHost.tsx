@@ -77,8 +77,9 @@ export function SheetHost({
   const railPanel = useContextualRailPanel();
   const playerUxWorld = usePlayerUxWorld();
 
-  if (isDesktop && railTab && railPanel?.panelEl) {
-    if (!open) {
+  // Desktop ContextualRail when a rail tab is requested (wait for panel mount).
+  if (isDesktop && railTab) {
+    if (!open || !railPanel?.panelEl) {
       return null;
     }
 
@@ -95,6 +96,7 @@ export function SheetHost({
     );
   }
 
+  // Mobile, or desktop sheets without a rail tab → overlay path.
   if (playerUxWorld) {
     return (
       <RacMotionSheet

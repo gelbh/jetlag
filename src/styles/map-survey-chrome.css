@@ -213,7 +213,7 @@
     border-radius: 0.35rem;
     border-color: var(--color-rule);
     background: var(--color-canvas);
-    font-family: var(--font-sans, inherit);
+    font-family: inherit;
     letter-spacing: 0.02em;
     text-transform: none;
     color: var(--color-field-ink-muted);

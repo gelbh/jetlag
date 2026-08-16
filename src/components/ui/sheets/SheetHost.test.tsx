@@ -190,6 +190,20 @@ describe("SheetHost", () => {
     expect(screen.getByText("first-run")).toBeInTheDocument();
   });
 
+  it("waits for rail panel on desktop when railTab is set", () => {
+    useDesktopLayout.mockReturnValue(true);
+    setPlayerUxWorldFlagForTests(true);
+    render(
+      <ContextualRailPanelProvider>
+        <SheetHost open onClose={() => {}} ariaLabel="Settings" railTab="settings">
+          <p>pending rail</p>
+        </SheetHost>
+      </ContextualRailPanelProvider>,
+    );
+    expect(screen.queryByText("pending rail")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("rac-motion-sheet")).not.toBeInTheDocument();
+  });
+
   it("uses legacy overlay on desktop without rail when flag is off", () => {
     useDesktopLayout.mockReturnValue(true);
     setPlayerUxWorldFlagForTests(false);
