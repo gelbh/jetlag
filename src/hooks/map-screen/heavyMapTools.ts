@@ -82,6 +82,7 @@ export interface TentacleToolApi {
   /** Select a draft POI (map marker or list); provisional gate unchanged. */
   selectDraftPoi: (poiId: string) => void;
   resetDraft: () => void;
+  tentacleLodPhase: PolygonLodPhase;
   panel: ReactNode;
   hud: AskToolHudBundle;
 }
@@ -200,6 +201,7 @@ export function createIdleHeavyMapTools(): HeavyMapToolsApi {
     handleMapClick: noopMapClick,
     selectDraftPoi: () => undefined,
     resetDraft: () => undefined,
+    tentacleLodPhase: "complete",
     panel: null,
     hud: idleTentacleHud,
   };

@@ -563,8 +563,10 @@ export function useMapScreenController() {
     measuringTool,
     pinTool,
     zoneTool,
-    tentacleTool,
-    tentacleLodPhase,
+    tentacleTool: {
+      ...tentacleTool,
+      tentacleLodPhase,
+    },
     chatMessages,
     hasUnreadChat,
     unreadCount,

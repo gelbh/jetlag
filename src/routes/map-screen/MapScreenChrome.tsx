@@ -100,7 +100,6 @@ type MapScreenChromeProps = Pick<
   | "pinTool"
   | "zoneTool"
   | "tentacleTool"
-  | "tentacleLodPhase"
   | "chatMessages"
   | "hasUnreadChat"
   | "unreadCount"
@@ -218,7 +217,6 @@ export function MapScreenChrome({
   pinTool,
   zoneTool,
   tentacleTool,
-  tentacleLodPhase = "complete",
   chatMessages,
   hasUnreadChat,
   unreadCount,
@@ -412,7 +410,8 @@ export function MapScreenChrome({
     matchingTool.matchingLodPhase === "coarse" ||
     matchingTool.matchingLodPhase === "refining";
   const tentacleLodRefining =
-    tentacleLodPhase === "coarse" || tentacleLodPhase === "refining";
+    tentacleTool.tentacleLodPhase === "coarse" ||
+    tentacleTool.tentacleLodPhase === "refining";
   const catalogHydrating =
     activeTool === "matching" && !matchingTool.matchingCatalogComplete;
 
