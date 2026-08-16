@@ -137,6 +137,9 @@ export function SeekerChromeOverlays({
         placementReady: toolHud.readiness.placementReady,
         configureReady: toolHud.readiness.configureReady,
         resolveReady: toolHud.readiness.resolveReady,
+        resolving: toolHud.readiness.resolving,
+        answerReady: toolHud.readiness.answerReady,
+        awaitHiderAnswer: toolHud.readiness.awaitHiderAnswer,
       })
     : "";
   const askCanCommit = toolHud ? canCommit(toolHud.readiness) : false;

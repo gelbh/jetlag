@@ -14,6 +14,12 @@ import { useMapFeatureHitTest } from "../helpers/MapFeatureHitTestContext";
 
 interface MapDraftLayerProps {
   overlays: readonly MapDraftOverlay[];
+  /**
+   * Optional draft-marker activate. Return true when the hit is consumed
+   * (e.g. tentacle POI select). Popup toggle still runs when the overlay has
+   * a popup name.
+   */
+  onMarkerActivate?: (overlayId: string) => boolean;
 }
 
 const DRAFT_HIT_PREFIX = jlMarkerLayerId("draft");
@@ -33,6 +39,7 @@ function draftPolylineFeature(
 
 export const MapDraftLayer = memo(function MapDraftLayer({
   overlays,
+  onMarkerActivate,
 }: MapDraftLayerProps) {
   const c = MAP_ANNOTATION_COLORS;
   const [openPopupId, setOpenPopupId] = useState<string | null>(null);
@@ -71,18 +78,25 @@ export const MapDraftLayer = memo(function MapDraftLayer({
 
   useMapFeatureHitTest(
     DRAFT_HIT_PREFIX,
-    useCallback((result) => {
-      const hitId = featureHitId(result.feature);
-      if (!hitId) {
-        return false;
-      }
-      const overlay = markerOverlays.find((item) => item.id === hitId);
-      if (!overlay?.popup) {
-        return false;
-      }
-      setOpenPopupId((current) => (current === hitId ? null : hitId));
-      return true;
-    }, [markerOverlays]),
+    useCallback(
+      (result) => {
+        const hitId = featureHitId(result.feature);
+        if (!hitId) {
+          return false;
+        }
+        const overlay = markerOverlays.find((item) => item.id === hitId);
+        if (!overlay) {
+          return false;
+        }
+        const activated = onMarkerActivate?.(hitId) === true;
+        if (overlay.popup) {
+          setOpenPopupId((current) => (current === hitId ? null : hitId));
+          return true;
+        }
+        return activated;
+      },
+      [markerOverlays, onMarkerActivate],
+    ),
   );
 
   return (
