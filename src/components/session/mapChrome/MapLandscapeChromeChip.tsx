@@ -2,6 +2,10 @@ import type { SyncStatus } from "@/domain/device/sync/sync";
 import type { PendingQuestionRecord } from "@/domain/session/activity/sessionChat";
 import type { SessionRulesInput } from "@/domain/session/rules";
 import type { TimerState } from "@/domain/session/timer/timer";
+import { CaretDown, CaretUp } from "@phosphor-icons/react";
+import { surveySyncShortLabel } from "@/domain/device/surveyStatusCopy";
+import { usePlayerUxWorld } from "@/hooks/feature/usePlayerUxWorld";
+import { JlIcon } from "../../ui/brand/JlIcon";
 import { SyncStatusBeacon } from "../syncUi/SyncStatusDot";
 import { SYNC_TONE_CLASSES, syncRailDisplay } from "../status/syncRailDisplay";
 import { mapLandscapeChipTimerLabel } from "./mapLandscapeChipTimerLabel";
@@ -29,6 +33,7 @@ export function MapLandscapeChromeChip({
   queuedWrites,
   syncMessage,
 }: MapLandscapeChromeChipProps) {
+  const survey = usePlayerUxWorld();
   const timer = mapLandscapeChipTimerLabel({
     sessionRules,
     timerState,
@@ -36,13 +41,23 @@ export function MapLandscapeChromeChip({
     pendingQuestions,
   });
   const syncDisplay = syncRailDisplay(syncStatus, queuedWrites, syncMessage);
-  const syncLabel = syncDisplay.inline?.visible ? syncDisplay.inline.label : null;
-  const syncTone = syncDisplay.inline?.tone;
+  const syncLabel = survey
+    ? surveySyncShortLabel(syncStatus, queuedWrites)
+    : syncDisplay.inline?.visible
+      ? syncDisplay.inline.label
+      : null;
+  const syncTone =
+    syncDisplay.inline?.tone ??
+    (survey ? syncDisplay.banner?.tone : undefined);
 
   return (
     <button
       type="button"
-      className="pointer-events-auto fixed inset-x-3 bottom-[max(0.5rem,env(safe-area-inset-bottom))] z-[calc(var(--z-dock)+2)] mx-auto flex min-h-11 w-fit max-w-[calc(100%-1.5rem)] items-center justify-center gap-2.5 rounded-[var(--radius-hud-xl)] border-2 border-highlight/65 bg-surface-deep/95 px-3 py-1.5 font-display text-ink shadow-hud-float motion-safe:transition-[opacity,transform] motion-safe:duration-200 motion-reduce:transition-none"
+      className={
+        survey
+          ? "jl-landscape-chrome-chip pointer-events-auto fixed inset-x-3 bottom-[max(0.5rem,env(safe-area-inset-bottom))] z-[calc(var(--z-dock)+2)] mx-auto flex min-h-11 w-fit max-w-[calc(100%-1.5rem)] items-center justify-center gap-2.5 px-3 py-1.5 font-display motion-safe:transition-[opacity,transform] motion-safe:duration-200 motion-reduce:transition-none"
+          : "pointer-events-auto fixed inset-x-3 bottom-[max(0.5rem,env(safe-area-inset-bottom))] z-[calc(var(--z-dock)+2)] mx-auto flex min-h-11 w-fit max-w-[calc(100%-1.5rem)] items-center justify-center gap-2.5 rounded-[var(--radius-hud-xl)] border-2 border-highlight/65 bg-surface-deep/95 px-3 py-1.5 font-display text-ink shadow-hud-float motion-safe:transition-[opacity,transform] motion-safe:duration-200 motion-reduce:transition-none"
+      }
       onClick={onToggle}
       aria-expanded={!collapsed}
       aria-controls="map-chrome-hud-controls"
@@ -55,7 +70,13 @@ export function MapLandscapeChromeChip({
       }
     >
       <span className="inline-flex min-w-0 items-baseline gap-1.5 font-mono text-sm font-bold tabular-nums">
-        <span className="font-display text-xs font-bold tracking-wider text-ink-muted uppercase">
+        <span
+          className={
+            survey
+              ? "jl-landscape-chrome-chip__phase font-display font-bold tracking-wider"
+              : "font-display text-xs font-bold tracking-wider text-ink-muted uppercase"
+          }
+        >
           {timer.phase}
         </span>
         <span className="tracking-wide">{timer.value}</span>
@@ -70,9 +91,18 @@ export function MapLandscapeChromeChip({
           <span className="truncate">{syncLabel}</span>
         </span>
       ) : null}
-      <span className="shrink-0 text-xs leading-none text-highlight" aria-hidden>
-        {collapsed ? "▲" : "▼"}
-      </span>
+      {survey ? (
+        <JlIcon
+          icon={collapsed ? CaretUp : CaretDown}
+          size={14}
+          weight="bold"
+          className="shrink-0 text-[var(--color-flag)]"
+        />
+      ) : (
+        <span className="shrink-0 text-xs leading-none text-highlight" aria-hidden>
+          {collapsed ? "▲" : "▼"}
+        </span>
+      )}
     </button>
   );
 }
