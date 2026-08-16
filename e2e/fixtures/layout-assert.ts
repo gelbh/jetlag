@@ -37,16 +37,31 @@ export async function assertMinTapTargets(locator: Locator, minPx = 44) {
 
 export async function assertNoSeriousAxeViolations(
   page: Page,
-  options?: { exclude?: string[] },
+  options?: { exclude?: string[]; includeColorContrast?: boolean },
 ) {
-  let builder = new AxeBuilder({ page })
-    .withTags(["wcag2a", "wcag2aa"])
-    // Brand token contrast debt is serious across entry surfaces; layout smoke
-    // gates overflow/structure. Contrast tracked via design tokens separately.
-    .disableRules(["color-contrast"]);
+  let builder = new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa"]);
+  // Brand token contrast debt is serious across entry surfaces; layout smoke
+  // gates overflow/structure. Contrast tracked via design tokens separately —
+  // except scoped survey chrome which re-enables color-contrast.
+  if (!options?.includeColorContrast) {
+    builder = builder.disableRules(["color-contrast"]);
+  }
   for (const selector of options?.exclude ?? []) {
     builder = builder.exclude(selector);
   }
+  const results = await builder.analyze();
+  const blocking = results.violations.filter(
+    (v) => v.impact === "serious" || v.impact === "critical",
+  );
+  expect(blocking, JSON.stringify(blocking, null, 2)).toEqual([]);
+}
+
+/** Axe map Survey field-book chrome with color-contrast re-enabled (Wave 3). */
+export async function assertSurveyMapChromeAxe(page: Page) {
+  const builder = new AxeBuilder({ page })
+    .include('[data-player-ux-world="survey"]')
+    .withTags(["wcag2a", "wcag2aa"])
+    .exclude(".maplibregl-map");
   const results = await builder.analyze();
   const blocking = results.violations.filter(
     (v) => v.impact === "serious" || v.impact === "critical",

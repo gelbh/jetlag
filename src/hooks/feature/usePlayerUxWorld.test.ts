@@ -20,6 +20,7 @@ vi.mock("posthog-js", () => ({
 describe("readPlayerUxWorldFlag", () => {
   afterEach(() => {
     setPlayerUxWorldFlagForTests(null);
+    localStorage.removeItem("jl.playerUxWorld");
   });
 
   it("defaults to false when PostHog returns undefined", () => {
@@ -32,6 +33,14 @@ describe("readPlayerUxWorldFlag", () => {
 
   it("is true only when PostHog returns true", () => {
     expect(readPlayerUxWorldFlag(() => true)).toBe(true);
+  });
+
+  it("honors localStorage on/off over PostHog", () => {
+    localStorage.setItem("jl.playerUxWorld", "on");
+    expect(readPlayerUxWorldFlag(() => false)).toBe(true);
+    localStorage.setItem("jl.playerUxWorld", "off");
+    expect(readPlayerUxWorldFlag(() => true)).toBe(false);
+    localStorage.removeItem("jl.playerUxWorld");
   });
 });
 
