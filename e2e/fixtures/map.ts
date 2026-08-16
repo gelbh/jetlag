@@ -166,5 +166,5 @@ export async function selectDrawTool(page: Page, toolName: "Pin" | "Zone") {
       el.click();
     }
   });
-  await page.getByRole("menuitem", { name: toolName }).click();
+  await page.getByRole("menuitemradio", { name: toolName }).click();
 }
