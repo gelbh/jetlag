@@ -140,6 +140,49 @@ export function initFunctionsSentry() {
   initialized = true;
 }
 
+/**
+ * Prefer an explicit name; else Cloud Run / Functions env (gen2 sets K_SERVICE).
+ * Lets deadline-exceeded / unhandled errors attribute to a callable without
+ * rewriting every onCall wrapper (JETLAG-3M).
+ *
+ * @param {string | { name?: string } | undefined} [explicitOrOptions]
+ * @returns {string | null}
+ */
+export function resolveDeployedFunctionName(explicitOrOptions) {
+  let explicit;
+  if (typeof explicitOrOptions === "string") {
+    explicit = explicitOrOptions;
+  } else if (
+    explicitOrOptions &&
+    typeof explicitOrOptions === "object" &&
+    typeof explicitOrOptions.name === "string"
+  ) {
+    explicit = explicitOrOptions.name;
+  }
+  if (typeof explicit === "string" && explicit.trim()) {
+    return explicit.trim();
+  }
+  for (const key of ["K_SERVICE", "FUNCTION_TARGET", "FUNCTION_NAME"]) {
+    const value = process.env[key];
+    if (typeof value === "string" && value.trim()) {
+      return value.trim();
+    }
+  }
+  return null;
+}
+
+/**
+ * @param {import("@sentry/node").Scope} scope
+ * @param {string | null} name
+ */
+function applyFunctionNameTags(scope, name) {
+  if (!name) {
+    return;
+  }
+  scope.setTag("function_name", name);
+  scope.setTag("callable", name);
+}
+
 export function captureFunctionsException(error) {
   if (!initialized) {
     return;
@@ -155,35 +198,45 @@ export function captureFunctionsException(error) {
 /**
  * @template {(...args: never[]) => unknown} T
  * @param {T} handler
+ * @param {string | { name?: string }} [nameOrOptions]
  * @returns {T}
  */
-export function withSentryHttpHandler(handler) {
+export function withSentryHttpHandler(handler, nameOrOptions) {
   return async (...args) => {
     initFunctionsSentry();
-    try {
-      return await handler(...args);
-    } catch (error) {
-      captureFunctionsException(error);
-      await Sentry.flush(2000);
-      throw error;
-    }
+    const name = resolveDeployedFunctionName(nameOrOptions);
+    return await Sentry.withScope(async (scope) => {
+      applyFunctionNameTags(scope, name);
+      try {
+        return await handler(...args);
+      } catch (error) {
+        captureFunctionsException(error);
+        await Sentry.flush(2000);
+        throw error;
+      }
+    });
   };
 }
 
 /**
  * @template {(...args: never[]) => unknown} T
  * @param {T} handler
+ * @param {string | { name?: string }} [nameOrOptions]
  * @returns {T}
  */
-export function withSentryEventHandler(handler) {
+export function withSentryEventHandler(handler, nameOrOptions) {
   return async (...args) => {
     initFunctionsSentry();
-    try {
-      return await handler(...args);
-    } catch (error) {
-      captureFunctionsException(error);
-      await Sentry.flush(2000);
-      throw error;
-    }
+    const name = resolveDeployedFunctionName(nameOrOptions);
+    return await Sentry.withScope(async (scope) => {
+      applyFunctionNameTags(scope, name);
+      try {
+        return await handler(...args);
+      } catch (error) {
+        captureFunctionsException(error);
+        await Sentry.flush(2000);
+        throw error;
+      }
+    });
   };
 }

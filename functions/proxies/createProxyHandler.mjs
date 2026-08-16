@@ -1,5 +1,9 @@
+import * as Sentry from "@sentry/node";
 import { setCors } from "../lib/cors.mjs";
-import { captureFunctionsException } from "../lib/sentry.mjs";
+import {
+  captureFunctionsException,
+  resolveDeployedFunctionName,
+} from "../lib/sentry.mjs";
 import {
   enforceRateLimit,
   requireOverpassProxyAccess,
@@ -46,7 +50,13 @@ export function createProxyHandler({
     try {
       await handler(req, res, authResult);
     } catch (error) {
-      captureFunctionsException(error);
+      const name = resolveDeployedFunctionName() ?? "proxy";
+      Sentry.withScope((scope) => {
+        scope.setTag("function_name", name);
+        scope.setTag("callable", name);
+        scope.setTag("proxy_route", routeName);
+        captureFunctionsException(error);
+      });
       res.status(502).json({
         error: defaultErrorMessage ?? `${routeName} proxy failed.`,
       });

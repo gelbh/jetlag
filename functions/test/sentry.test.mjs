@@ -10,6 +10,7 @@ import {
   isAbortErrorNoise,
   isExpectedFunctionsError,
   readAppVersion,
+  resolveDeployedFunctionName,
 } from "../lib/sentry.mjs";
 
 test("isAbortErrorNoise matches AbortError Error and DOMException", () => {
@@ -241,6 +242,46 @@ test("readAppVersion matches functions package.json (not 0.0.0)", async () => {
   assert.equal(readAppVersion(), functionsPackage.version);
   assert.equal(functionsPackage.version, rootPackage.version);
   assert.notEqual(readAppVersion(), "0.0.0");
+});
+
+test("resolveDeployedFunctionName prefers explicit name over env", () => {
+  const previous = process.env.K_SERVICE;
+  process.env.K_SERVICE = "from-env";
+  try {
+    assert.equal(resolveDeployedFunctionName("joinSessionWithRole"), "joinSessionWithRole");
+    assert.equal(
+      resolveDeployedFunctionName({ name: "createPremiumSession" }),
+      "createPremiumSession",
+    );
+    assert.equal(resolveDeployedFunctionName(), "from-env");
+  } finally {
+    if (previous === undefined) {
+      delete process.env.K_SERVICE;
+    } else {
+      process.env.K_SERVICE = previous;
+    }
+  }
+});
+
+test("resolveDeployedFunctionName falls back to FUNCTION_TARGET", () => {
+  const prevK = process.env.K_SERVICE;
+  const prevT = process.env.FUNCTION_TARGET;
+  delete process.env.K_SERVICE;
+  process.env.FUNCTION_TARGET = "proxy";
+  try {
+    assert.equal(resolveDeployedFunctionName(), "proxy");
+  } finally {
+    if (prevK === undefined) {
+      delete process.env.K_SERVICE;
+    } else {
+      process.env.K_SERVICE = prevK;
+    }
+    if (prevT === undefined) {
+      delete process.env.FUNCTION_TARGET;
+    } else {
+      process.env.FUNCTION_TARGET = prevT;
+    }
+  }
 });
 
 test("isExpectedFunctionsError ignores unrelated HttpsErrors and plain Errors", () => {
