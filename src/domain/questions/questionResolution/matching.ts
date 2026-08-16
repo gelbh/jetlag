@@ -5,6 +5,7 @@ import {
   buildMatchingEliminationRegion,
   buildSameNearestRegion,
 } from "../../geometry/measuring/matchingGeometry";
+import { persistSlimPolygonFeature } from "../../geometry/progressive/persistSlim";
 import { deserializeMatchingFeatures } from "@/domain/geo/matchingAdapters";
 import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
 
@@ -66,9 +67,14 @@ export async function resolveMatchingPendingQuestion(
     return null;
   }
 
+  const slimmedElim = persistSlimPolygonFeature(eliminationRegion);
+  if (!slimmedElim.ok) {
+    return null;
+  }
+
   return {
     type: "matching",
-    geometry: eliminationRegion,
+    geometry: slimmedElim.feature,
     metadata: {
       ...metadata,
       createdAt: new Date().toISOString(),

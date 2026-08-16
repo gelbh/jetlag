@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import area from "@turf/area";
 import type { Feature, MultiPolygon, Polygon as GeoPolygon } from "geojson";
 import type { GameArea } from "@/domain/map/annotations";
 import type { AnnotationRecord } from "@/domain/map/annotations";
@@ -6,6 +7,12 @@ import {
   buildMatchingEliminationRegion,
   buildSameNearestRegion,
 } from "@/domain/geometry/measuring/matchingGeometry";
+import {
+  buildCoarsePolygonFeature,
+  refinePolygonFeatureStep,
+  type PolygonLodPhase,
+} from "@/domain/geometry/progressive/polygonLod";
+import { previewGeometryFingerprint } from "@/domain/geometry/measuring/previewGeometryFingerprint";
 import {
   getMatchingCategory,
   matchingCategoryUseCount,
@@ -31,6 +38,93 @@ import type {
 } from "@/services/geo/matching";
 import { inferTransitMetroId } from "@/services/transit/transitCatalog";
 import { usePreloadStore } from "@/state/preloadStore";
+
+/** Temporary Voronoi/elim prefix — LOD step, not a catalog cap. */
+export const MATCHING_CATALOG_COARSE_PREFIX = 16;
+
+function matchingFeatureArea(feature: MatchingFeature): number {
+  if (!feature.boundary) {
+    return 0;
+  }
+  try {
+    return area({
+      type: "Feature",
+      properties: {},
+      geometry: feature.boundary,
+    });
+  } catch {
+    return 0;
+  }
+}
+
+/** Largest-first prefix; always includes the answered site. */
+export function matchingCoarseCatalogPrefix(
+  features: readonly MatchingFeature[],
+  nearestFeatureId: string,
+): MatchingFeature[] {
+  if (features.length <= MATCHING_CATALOG_COARSE_PREFIX) {
+    return [...features];
+  }
+  const nearest = features.find((item) => item.id === nearestFeatureId);
+  const rest = features
+    .filter((item) => item.id !== nearestFeatureId)
+    .sort((a, b) => matchingFeatureArea(b) - matchingFeatureArea(a))
+    .slice(0, MATCHING_CATALOG_COARSE_PREFIX - (nearest ? 1 : 0));
+  return nearest ? [nearest, ...rest] : rest;
+}
+
+function scheduleIdle(callback: () => void): () => void {
+  if (typeof requestIdleCallback === "function") {
+    const id = requestIdleCallback(() => {
+      callback();
+    });
+    return () => cancelIdleCallback(id);
+  }
+  const id = setTimeout(callback, 0);
+  return () => clearTimeout(id);
+}
+
+function paintLodFeature(
+  full: Feature<GeoPolygon | MultiPolygon>,
+  generation: number,
+  generationRef: { current: number },
+  setFeature: (feature: Feature<GeoPolygon | MultiPolygon> | null) => void,
+  setPhase: (phase: PolygonLodPhase) => void,
+  cancelRef: { current: (() => void) | null },
+): void {
+  const coarse = buildCoarsePolygonFeature(full);
+  setFeature(coarse);
+
+  if (previewGeometryFingerprint(coarse) === previewGeometryFingerprint(full)) {
+    cancelRef.current = null;
+    setFeature(full);
+    setPhase("complete");
+    return;
+  }
+
+  setPhase("refining");
+  let stepIndex = 0;
+  let current = coarse;
+
+  const runStep = () => {
+    if (generation !== generationRef.current) {
+      return;
+    }
+    const next = refinePolygonFeatureStep(full, current, stepIndex);
+    current = next.feature;
+    setFeature(current);
+    stepIndex += 1;
+    if (next.done) {
+      cancelRef.current = null;
+      setFeature(full);
+      setPhase("complete");
+      return;
+    }
+    cancelRef.current = scheduleIdle(runStep);
+  };
+
+  cancelRef.current = scheduleIdle(runStep);
+}
 
 export function useMatchingCatalog(input: {
   activeAnnotations: AnnotationRecord[];
@@ -125,6 +219,10 @@ export function useMatchingCatalog(input: {
   const [matchingEliminationPreview, setMatchingEliminationPreview] = useState<
     Feature<GeoPolygon | MultiPolygon> | null
   >(null);
+  const [matchingLodPhase, setMatchingLodPhase] =
+    useState<PolygonLodPhase>("complete");
+  const elimGenerationRef = useRef(0);
+  const elimLodCancelRef = useRef<(() => void) | null>(null);
 
   const boundaryEligible =
     !matchingNullAnswer &&
@@ -170,28 +268,85 @@ export function useMatchingCatalog(input: {
       !matchingNearestFeatureId ||
       matchingAnswer === null
     ) {
+      elimLodCancelRef.current?.();
+      elimLodCancelRef.current = null;
       return;
     }
-    let cancelled = false;
-    void buildMatchingEliminationRegion(
+
+    const generation = elimGenerationRef.current + 1;
+    elimGenerationRef.current = generation;
+    elimLodCancelRef.current?.();
+    elimLodCancelRef.current = null;
+    setMatchingLodPhase("coarse");
+
+    const prefixFeatures = matchingCoarseCatalogPrefix(
       matchingFeatures,
       matchingNearestFeatureId,
-      gameArea,
-      matchingAnswer,
-    )
-      .then((region) => {
-        if (!cancelled) {
-          setMatchingEliminationPreview(region);
+    );
+
+    void (async () => {
+      try {
+        const prefixRegion = await buildMatchingEliminationRegion(
+          prefixFeatures,
+          matchingNearestFeatureId,
+          gameArea,
+          matchingAnswer,
+        );
+        if (generation !== elimGenerationRef.current) {
+          return;
         }
-      })
-      .catch(() => {
-        if (!cancelled) {
+        if (prefixRegion) {
+          paintLodFeature(
+            prefixRegion,
+            generation,
+            elimGenerationRef,
+            setMatchingEliminationPreview,
+            setMatchingLodPhase,
+            elimLodCancelRef,
+          );
+        } else {
           setMatchingEliminationPreview(null);
+          setMatchingLodPhase("complete");
         }
-      });
+
+        if (prefixFeatures.length === matchingFeatures.length) {
+          return;
+        }
+
+        const fullRegion = await buildMatchingEliminationRegion(
+          matchingFeatures,
+          matchingNearestFeatureId,
+          gameArea,
+          matchingAnswer,
+        );
+        if (generation !== elimGenerationRef.current) {
+          return;
+        }
+        if (!fullRegion) {
+          return;
+        }
+        elimLodCancelRef.current?.();
+        elimLodCancelRef.current = null;
+        paintLodFeature(
+          fullRegion,
+          generation,
+          elimGenerationRef,
+          setMatchingEliminationPreview,
+          setMatchingLodPhase,
+          elimLodCancelRef,
+        );
+      } catch {
+        if (generation === elimGenerationRef.current) {
+          setMatchingEliminationPreview(null);
+          setMatchingLodPhase("complete");
+        }
+      }
+    })();
 
     return () => {
-      cancelled = true;
+      elimGenerationRef.current += 1;
+      elimLodCancelRef.current?.();
+      elimLodCancelRef.current = null;
     };
   }, [
     eliminationEligible,
@@ -219,5 +374,7 @@ export function useMatchingCatalog(input: {
     matchingEliminationPreview: eliminationEligible
       ? matchingEliminationPreview
       : null,
+    matchingLodPhase: eliminationEligible ? matchingLodPhase : "complete",
+    matchingCatalogComplete: true,
   };
 }

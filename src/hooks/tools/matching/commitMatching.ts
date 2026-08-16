@@ -22,6 +22,7 @@ import type { SubmitPendingQuestionInput } from "../../sync/usePendingQuestionAc
 import { serializeMatchingFeatures } from "@/domain/geo/matchingAdapters";
 import type { MatchingFeature } from "@/services/geo/matching";
 import { MAP_ANNOTATION_COLORS } from "@/domain/map/mapAnnotationColors";
+import { persistSlimPolygonFeature } from "@/domain/geometry/progressive/persistSlim";
 import { emitQuestionAnsweredActivity } from "@/services/session/emitSessionActivity";
 
 export interface CommitMatchingInput {
@@ -217,8 +218,18 @@ export async function performMatchingCommit(
     return;
   }
 
+  let storedElim = eliminationRegion;
+  if (storedElim) {
+    const slimmed = persistSlimPolygonFeature(storedElim);
+    if (!slimmed.ok) {
+      setMatchingError(slimmed.message);
+      return;
+    }
+    storedElim = slimmed.feature;
+  }
+
   const geometry: Feature<Point | GeoPolygon | MultiPolygon> =
-    eliminationRegion ?? {
+    storedElim ?? {
       type: "Feature",
       properties: {},
       geometry: {
