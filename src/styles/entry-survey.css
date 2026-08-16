@@ -104,7 +104,9 @@
   [data-player-ux-world="survey"]
     .home-card-btn-premium-sessions
     .home-card-btn-hint {
-    color: var(--color-field-ink-muted);
+    /* Soft wash — muted fails AA on flag-soft; use field-ink. */
+    color: var(--color-field-ink);
+    opacity: 0.85;
   }
 
   [data-player-ux-world="survey"] .hud-chrome {
