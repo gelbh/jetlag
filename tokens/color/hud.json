@@ -3,147 +3,147 @@
     "surface-deep": {
       "$type": "color",
       "$value": "oklch(0.16 0.045 265)",
-      "$deprecated": "Broadcast HUD — dual-token period; prefer Survey field-book roles (canvas/field-ink/flag/…) under player-ux-world-v2"
+      "$deprecated": "Legacy Broadcast HUD alias — prefer Survey field-book roles (canvas/field-ink/flag/…)"
     },
     "surface-base": {
       "$type": "color",
       "$value": "oklch(0.19 0.038 258)",
-      "$deprecated": "Broadcast HUD — dual-token period"
+      "$deprecated": "Legacy Broadcast HUD alias"
     },
     "surface-raised": {
       "$type": "color",
       "$value": "oklch(0.24 0.032 250)",
-      "$deprecated": "Broadcast HUD — dual-token period"
+      "$deprecated": "Legacy Broadcast HUD alias"
     },
     "surface-panel": {
       "$type": "color",
       "$value": "oklch(0.18 0.042 262)",
-      "$deprecated": "Broadcast HUD — dual-token period"
+      "$deprecated": "Legacy Broadcast HUD alias"
     },
     "border": {
       "$type": "color",
       "$value": "oklch(0.35 0.04 255)",
-      "$deprecated": "Broadcast HUD — dual-token period; prefer rule for field-book edges"
+      "$deprecated": "Legacy Broadcast HUD alias; prefer rule for field-book edges"
     },
     "border-muted": {
       "$type": "color",
       "$value": "oklch(0.42 0.035 250)",
-      "$deprecated": "Broadcast HUD — dual-token period"
+      "$deprecated": "Legacy Broadcast HUD alias"
     },
     "ink": {
       "$type": "color",
       "$value": "oklch(0.97 0.005 250)",
-      "$deprecated": "Broadcast HUD light ink — dual-token period; field-book graphite is color.field-ink"
+      "$deprecated": "Legacy Broadcast HUD light ink — field-book graphite is color.field-ink"
     },
     "ink-secondary": {
       "$type": "color",
       "$value": "oklch(0.92 0.008 250)",
-      "$deprecated": "Broadcast HUD — dual-token period"
+      "$deprecated": "Legacy Broadcast HUD alias"
     },
     "ink-muted": {
       "$type": "color",
       "$value": "oklch(0.76 0.015 250)",
-      "$deprecated": "Broadcast HUD — dual-token period; field-book muted is color.field-ink-muted"
+      "$deprecated": "Legacy Broadcast HUD alias; field-book muted is color.field-ink-muted"
     },
     "ink-dim": {
       "$type": "color",
       "$value": "oklch(0.72 0.02 250)",
-      "$deprecated": "Broadcast HUD — dual-token period"
+      "$deprecated": "Legacy Broadcast HUD alias"
     },
     "action": {
       "$type": "color",
       "$value": "oklch(0.58 0.14 35)",
-      "$deprecated": "Broadcast HUD terracotta — dual-token period; prefer flag (fluoro survey)"
+      "$deprecated": "Legacy Broadcast HUD terracotta — prefer flag (fluoro survey)"
     },
     "action-ink": {
       "$type": "color",
       "$value": "oklch(0.99 0.005 250)",
-      "$deprecated": "Broadcast HUD — dual-token period"
+      "$deprecated": "Legacy Broadcast HUD alias"
     },
     "action-soft": {
       "$type": "color",
       "$value": "oklch(0.58 0.14 35 / 0.2)",
-      "$deprecated": "Broadcast HUD — dual-token period"
+      "$deprecated": "Legacy Broadcast HUD alias"
     },
     "brand-blue": {
       "$type": "color",
       "$value": "oklch(0.72 0.12 250)",
-      "$deprecated": "Broadcast HUD — dual-token period; prefer signal for info/sync"
+      "$deprecated": "Legacy Broadcast HUD alias; prefer signal for info/sync"
     },
     "brand-blue-soft": {
       "$type": "color",
       "$value": "oklch(0.72 0.12 250 / 0.18)",
-      "$deprecated": "Broadcast HUD — dual-token period"
+      "$deprecated": "Legacy Broadcast HUD alias"
     },
     "highlight": {
       "$type": "color",
       "$value": "oklch(0.78 0.12 85)",
-      "$deprecated": "Broadcast HUD — dual-token period"
+      "$deprecated": "Legacy Broadcast HUD alias"
     },
     "highlight-soft": {
       "$type": "color",
       "$value": "oklch(0.78 0.12 85 / 0.2)",
-      "$deprecated": "Broadcast HUD — dual-token period"
+      "$deprecated": "Legacy Broadcast HUD alias"
     },
     "status-error": {
       "$type": "color",
       "$value": "oklch(0.65 0.18 25)",
-      "$deprecated": "Broadcast HUD — dual-token period; prefer halt"
+      "$deprecated": "Legacy Broadcast HUD alias; prefer halt"
     },
     "status-error-surface": {
       "$type": "color",
       "$value": "oklch(0.65 0.18 25 / 0.16)",
-      "$deprecated": "Broadcast HUD — dual-token period"
+      "$deprecated": "Legacy Broadcast HUD alias"
     },
     "status-warning": {
       "$type": "color",
       "$value": "oklch(0.78 0.12 85)",
-      "$deprecated": "Broadcast HUD — dual-token period"
+      "$deprecated": "Legacy Broadcast HUD alias"
     },
     "status-warning-surface": {
       "$type": "color",
       "$value": "oklch(0.78 0.12 85 / 0.16)",
-      "$deprecated": "Broadcast HUD — dual-token period"
+      "$deprecated": "Legacy Broadcast HUD alias"
     },
     "status-info": {
       "$type": "color",
       "$value": "oklch(0.55 0.12 250)",
-      "$deprecated": "Broadcast HUD — dual-token period; prefer signal"
+      "$deprecated": "Legacy Broadcast HUD alias; prefer signal"
     },
     "status-info-surface": {
       "$type": "color",
       "$value": "oklch(0.55 0.12 250 / 0.16)",
-      "$deprecated": "Broadcast HUD — dual-token period"
+      "$deprecated": "Legacy Broadcast HUD alias"
     },
     "status-success": {
       "$type": "color",
       "$value": "oklch(0.68 0.16 145)",
-      "$deprecated": "Broadcast HUD — dual-token period; prefer trail"
+      "$deprecated": "Legacy Broadcast HUD alias; prefer trail"
     },
     "status-negative": {
       "$type": "color",
       "$value": "oklch(0.58 0.16 30)",
-      "$deprecated": "Broadcast HUD — dual-token period; prefer halt"
+      "$deprecated": "Legacy Broadcast HUD alias; prefer halt"
     },
     "map-canvas": {
       "$type": "color",
       "$value": "oklch(0.88 0.015 250)",
-      "$deprecated": "Broadcast HUD map fill — dual-token period; prefer canvas for field-book paper"
+      "$deprecated": "Legacy Broadcast HUD map fill — prefer canvas for field-book paper"
     },
     "scrollbar-track": {
       "$type": "color",
       "$value": "{color.surface-deep}",
-      "$deprecated": "Broadcast HUD — dual-token period"
+      "$deprecated": "Legacy Broadcast HUD alias"
     },
     "scrollbar-thumb": {
       "$type": "color",
       "$value": "{color.border-muted}",
-      "$deprecated": "Broadcast HUD — dual-token period"
+      "$deprecated": "Legacy Broadcast HUD alias"
     },
     "scrollbar-thumb-hover": {
       "$type": "color",
       "$value": "oklch(0.50 0.04 250)",
-      "$deprecated": "Broadcast HUD — dual-token period"
+      "$deprecated": "Legacy Broadcast HUD alias"
     }
   }
 }

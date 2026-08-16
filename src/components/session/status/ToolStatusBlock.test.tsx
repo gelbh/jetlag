@@ -13,7 +13,7 @@ const timerState = {
 };
 
 describe("ToolStatusBlock", () => {
-  it("shows JETLAG brand and role subtitle without LIVE OPS", () => {
+  it("shows Jetlag brand and role subtitle without LIVE OPS", () => {
     render(
       <ToolStatusBlock
         sessionCode="ABCD"
@@ -32,7 +32,7 @@ describe("ToolStatusBlock", () => {
       />,
     );
 
-    expect(screen.getByText("JETLAG")).toBeInTheDocument();
+    expect(screen.getByText("Jetlag")).toBeInTheDocument();
     expect(screen.getByText("Seeker")).toBeInTheDocument();
     expect(screen.queryByText(/LIVE OPS/i)).not.toBeInTheDocument();
   });
@@ -66,7 +66,7 @@ describe("ToolStatusBlock", () => {
     expect(home.closest(".jl-status-header-brand")).toBeTruthy();
   });
 
-  it("shows CODE session code and PHASE dash before start", () => {
+  it("shows Session code and Phase dash before start", () => {
     render(
       <ToolStatusBlock
         sessionCode="WXYZ"
@@ -85,15 +85,15 @@ describe("ToolStatusBlock", () => {
       />,
     );
 
-    expect(screen.getByText("CODE")).toBeInTheDocument();
+    expect(screen.getByText("Session")).toBeInTheDocument();
     expect(screen.getByText("WXYZ")).toBeInTheDocument();
     expect(screen.getByText("WXYZ").closest(".jl-stamp-code")).toBeTruthy();
-    expect(screen.getByText("PHASE")).toBeInTheDocument();
+    expect(screen.getByText("Phase")).toBeInTheDocument();
     expect(screen.getByText("—")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /start/i })).toBeInTheDocument();
   });
 
-  it("shows WAITING when guests cannot start", () => {
+  it("shows Waiting when guests cannot start", () => {
     render(
       <ToolStatusBlock
         sessionCode="ABCD"
@@ -112,7 +112,7 @@ describe("ToolStatusBlock", () => {
       />,
     );
 
-    expect(screen.getByText("WAITING")).toBeInTheDocument();
+    expect(screen.getByText("Waiting")).toBeInTheDocument();
   });
 
   it("keeps Start at a 44px touch target class without LIVE OPS fantasy", () => {
@@ -140,7 +140,7 @@ describe("ToolStatusBlock", () => {
     expect(screen.queryByText(/LIVE OPS/i)).not.toBeInTheDocument();
   });
 
-  it("shows HIDE phase and keeps stamp-code on the session code while running", () => {
+  it("shows Hiding phase and keeps stamp-code on the session code while running", () => {
     render(
       <ToolStatusBlock
         sessionCode="WXYZ"
@@ -159,13 +159,13 @@ describe("ToolStatusBlock", () => {
       />,
     );
 
-    const phase = screen.getByText("HIDE");
+    const phase = screen.getByText("Hiding");
     expect(phase.classList.contains("jl-status-header-value--action")).toBe(true);
-    expect(screen.getByText("CODE")).toBeInTheDocument();
+    expect(screen.getByText("Session")).toBeInTheDocument();
     expect(screen.getByText("WXYZ").closest(".jl-stamp-code")).toBeTruthy();
   });
 
-  it("shows MOVE phase while a hider relocation is in progress", () => {
+  it("shows Moving phase while a hider relocation is in progress", () => {
     render(
       <ToolStatusBlock
         sessionCode="ABCD"
@@ -185,13 +185,13 @@ describe("ToolStatusBlock", () => {
       />,
     );
 
-    const phase = screen.getByText("MOVE");
+    const phase = screen.getByText("Moving");
     expect(phase.classList.contains("jl-status-header-value--action")).toBe(true);
-    expect(screen.queryByText("HIDE")).not.toBeInTheDocument();
-    expect(screen.queryByText("SEEK")).not.toBeInTheDocument();
+    expect(screen.queryByText("Hiding")).not.toBeInTheDocument();
+    expect(screen.queryByText("Seeking")).not.toBeInTheDocument();
   });
 
-  it("reverts PHASE to HIDE when moveInProgress clears during hiding", () => {
+  it("reverts Phase to Hiding when moveInProgress clears during hiding", () => {
     const { rerender } = render(
       <ToolStatusBlock
         sessionCode="ABCD"
@@ -211,7 +211,7 @@ describe("ToolStatusBlock", () => {
       />,
     );
 
-    expect(screen.getByText("MOVE")).toBeInTheDocument();
+    expect(screen.getByText("Moving")).toBeInTheDocument();
 
     rerender(
       <ToolStatusBlock
@@ -232,7 +232,7 @@ describe("ToolStatusBlock", () => {
       />,
     );
 
-    expect(screen.getByText("HIDE")).toBeInTheDocument();
-    expect(screen.queryByText("MOVE")).not.toBeInTheDocument();
+    expect(screen.getByText("Hiding")).toBeInTheDocument();
+    expect(screen.queryByText("Moving")).not.toBeInTheDocument();
   });
 });

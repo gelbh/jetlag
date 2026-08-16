@@ -15,7 +15,6 @@ import {
 } from "@/domain/device/motion/motionTokens";
 import { MobileSheet } from "./MobileSheet";
 import type { SheetHandleProps } from "@/hooks/motion/useSheetGesture";
-import { usePlayerUxWorld } from "@/hooks/feature/usePlayerUxWorld";
 
 export interface RacMotionSheetProps {
   open: boolean;
@@ -29,9 +28,8 @@ export interface RacMotionSheetProps {
 }
 
 /**
- * Flag-on sheet path: React Aria dialog semantics + Motion drag/spring.
+ * Survey sheet path: React Aria dialog semantics + Motion drag/spring.
  * Desktop ContextualRail stays on SheetHost; this is mobile/overlay only.
- * Legacy path keeps `AnimatedOverlay` + `useSheetGesture` when the flag is off.
  */
 export function RacMotionSheet({
   open,
@@ -43,7 +41,6 @@ export function RacMotionSheet({
   sheetClassName = "",
   maxHeightClassName,
 }: RacMotionSheetProps) {
-  const survey = usePlayerUxWorld();
   const { decorativeAnimate } = useMotionProfile();
   const systemReducedMotion = useReducedMotion();
   const reduceMotion = Boolean(systemReducedMotion) || !decorativeAnimate;
@@ -123,7 +120,7 @@ export function RacMotionSheet({
       className={({ isEntering, isExiting }) =>
         [
           "pointer-events-auto fixed inset-0 z-[var(--z-modal)] overscroll-contain hud-scrim",
-          survey ? "jl-survey-world" : "",
+          "jl-survey-world",
           !reduceMotion && isEntering ? "hud-scrim-enter" : "",
           !reduceMotion && isExiting ? "hud-scrim-exit" : "",
         ]
@@ -138,7 +135,7 @@ export function RacMotionSheet({
         >
           <motion.div
             ref={sheetMeasureRef}
-            data-player-ux-world={survey ? "survey" : undefined}
+            data-player-ux-world="survey"
             initial={reduceMotion ? false : { y: "100%" }}
             animate={{ y: 0 }}
             transition={

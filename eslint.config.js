@@ -57,7 +57,6 @@ export default defineConfig([
       "src/components/ui/brand/JlIcon.tsx",
       "src/components/tools/ToolDockOverflowMenu.tsx",
       "src/hooks/feature/**/*.{ts,tsx}",
-      "src/services/core/analytics/playerUxWorldFlag.ts",
     ],
     extends: [jsxA11y.flatConfigs.recommended],
   },

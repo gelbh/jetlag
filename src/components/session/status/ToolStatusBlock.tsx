@@ -16,8 +16,6 @@ import {
 } from "@/domain/session/players/playerRole";
 import { Play } from "@phosphor-icons/react";
 import { surveyPhaseLabel } from "@/domain/device/surveyStatusCopy";
-import { usePlayerUxWorld } from "@/hooks/feature/usePlayerUxWorld";
-import { HudPlayIcon } from "../../ui/brand/HudIcons";
 import { JlIcon } from "../../ui/brand/JlIcon";
 import { MapTimerCluster } from "../mapChrome/MapTimerCluster";
 
@@ -87,20 +85,12 @@ export function ToolStatusBlock({
 }: ToolStatusBlockProps) {
   void _activeTool;
   void expanded;
-  const survey = usePlayerUxWorld();
-  const phase = survey
-    ? surveyPhaseLabel(
-        timerHasStarted,
-        sessionRules,
-        timerState,
-        moveInProgress,
-      )
-    : hudPhaseLabel(
-        timerHasStarted,
-        sessionRules,
-        timerState,
-        moveInProgress,
-      );
+  const phase = surveyPhaseLabel(
+    timerHasStarted,
+    sessionRules,
+    timerState,
+    moveInProgress,
+  );
   const phaseClass =
     phase === "HIDE" ||
     phase === "MOVE" ||
@@ -114,9 +104,7 @@ export function ToolStatusBlock({
       <div className="jl-status-header-brand">
         {headerLeading}
         <div className="jl-status-header-brand-text">
-          <span className="jl-status-header-brand-name">
-            {survey ? "Jetlag" : "JETLAG"}
-          </span>
+          <span className="jl-status-header-brand-name">Jetlag</span>
           <span className="jl-status-header-brand-role">
             {playerRoleLabel(playerRole)}
           </span>
@@ -124,39 +112,29 @@ export function ToolStatusBlock({
       </div>
 
       <div className="jl-status-header-col">
-        <span className="jl-status-header-label">
-          {survey ? "Session" : "CODE"}
-        </span>
+        <span className="jl-status-header-label">Session</span>
         <span className="jl-status-header-value jl-stamp-code jl-view-transition-session-code">
           {sessionCode}
         </span>
       </div>
 
       <div className="jl-status-header-col">
-        <span className="jl-status-header-label">
-          {survey ? "Phase" : "PHASE"}
-        </span>
+        <span className="jl-status-header-label">Phase</span>
         <span
           className={phaseClass}
-          title={
-            survey
-              ? hudPhaseLabel(
-                  timerHasStarted,
-                  sessionRules,
-                  timerState,
-                  moveInProgress,
-                )
-              : undefined
-          }
+          title={hudPhaseLabel(
+            timerHasStarted,
+            sessionRules,
+            timerState,
+            moveInProgress,
+          )}
         >
           {phase}
         </span>
       </div>
 
       <div className="jl-status-header-col jl-status-header-col--timer">
-        <span className="jl-status-header-label">
-          {survey ? "Time left" : "TIME LEFT"}
-        </span>
+        <span className="jl-status-header-label">Time left</span>
         {!timerHasStarted ? (
           timerSyncing ? (
             <p className="jl-status-header-waiting">Syncing…</p>
@@ -166,17 +144,11 @@ export function ToolStatusBlock({
               onClick={onStartGame}
               className="btn-primary jl-status-header-start min-h-11 shrink-0 px-3 text-xs sm:text-sm"
             >
-              {survey ? (
-                <JlIcon icon={Play} size={16} weight="bold" />
-              ) : (
-                <HudPlayIcon className="h-4 w-4 shrink-0" />
-              )}
+              <JlIcon icon={Play} size={16} weight="bold" />
               Start
             </button>
           ) : (
-            <p className="jl-status-header-waiting">
-              {survey ? "Waiting" : "WAITING"}
-            </p>
+            <p className="jl-status-header-waiting">Waiting</p>
           )
         ) : (
           <MapTimerCluster

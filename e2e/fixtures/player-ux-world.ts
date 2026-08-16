@@ -1,21 +1,13 @@
 import type { Page } from "@playwright/test";
 
-/** Matches PLAYER_UX_WORLD_STORAGE_KEY in playerUxWorldFlag.ts */
-const PLAYER_UX_WORLD_STORAGE_KEY = "jl.playerUxWorld";
-
 /**
- * Force Survey field-book chrome via localStorage override (before navigation).
- * Init-script only — requires reload / navigation to take effect (storage events
- * do not fire in the same document). Prefer setPlayerUxWorldStorageOverride in-app.
+ * Survey is the sole player UX world (Wave 6 flag kill).
+ * Kept as no-ops so older visual specs that called enable/disable still compile.
  */
-export async function enablePlayerUxWorld(page: Page) {
-  await page.addInitScript((key) => {
-    localStorage.setItem(key, "on");
-  }, PLAYER_UX_WORLD_STORAGE_KEY);
+export async function enablePlayerUxWorld(_page: Page) {
+  /* no-op — Survey is always on */
 }
 
-export async function disablePlayerUxWorld(page: Page) {
-  await page.addInitScript((key) => {
-    localStorage.setItem(key, "off");
-  }, PLAYER_UX_WORLD_STORAGE_KEY);
+export async function disablePlayerUxWorld(_page: Page) {
+  /* no-op — Broadcast HUD dual path removed; Survey cannot be disabled in-app */
 }

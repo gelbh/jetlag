@@ -6,41 +6,11 @@ import {
   ContextualRailPanelProvider,
 } from "../../map/chrome/ContextualRailContext";
 import { useContextualRailPanel } from "../../map/helpers/useContextualRailPanel";
-import { setPlayerUxWorldFlagForTests } from "@/services/core/analytics/playerUxWorldFlag";
 
 const useDesktopLayout = vi.fn();
 vi.mock("../../../hooks/layout/useDesktopLayout", () => ({
   DESKTOP_LAYOUT_MIN_WIDTH_PX: 1024,
   useDesktopLayout: () => useDesktopLayout(),
-}));
-
-vi.mock("posthog-js", () => ({
-  default: {
-    isFeatureEnabled: () => undefined,
-    onFeatureFlags: () => () => {},
-  },
-}));
-
-vi.mock("../../motion/MotionSheet", () => ({
-  MotionSheet: ({
-    open,
-    children,
-    ariaLabel,
-    onClose,
-  }: {
-    open: boolean;
-    children: ReactNode;
-    ariaLabel?: string;
-    onClose: () => void;
-  }) =>
-    open ? (
-      <div role="dialog" aria-label={ariaLabel} data-testid="motion-sheet">
-        <button type="button" onClick={onClose}>
-          close-legacy
-        </button>
-        {children}
-      </div>
-    ) : null,
 }));
 
 vi.mock("./RacMotionSheet", () => ({
@@ -87,37 +57,21 @@ function RailPanelMount({ children }: { children: ReactNode }) {
 describe("SheetHost", () => {
   beforeEach(() => {
     useDesktopLayout.mockReset();
-    setPlayerUxWorldFlagForTests(null);
   });
 
-  it("uses legacy MotionSheet under 1024 when flag is off", () => {
+  it("uses RacMotionSheet under 1024", () => {
     useDesktopLayout.mockReturnValue(false);
-    setPlayerUxWorldFlagForTests(false);
     render(
       <SheetHost open onClose={() => {}} ariaLabel="Settings" railTab="settings">
         <p>body</p>
       </SheetHost>,
     );
-    expect(screen.getByTestId("motion-sheet")).toBeInTheDocument();
-    expect(screen.queryByTestId("rac-motion-sheet")).not.toBeInTheDocument();
+    expect(screen.getByTestId("rac-motion-sheet")).toBeInTheDocument();
     expect(screen.getByText("body")).toBeInTheDocument();
   });
 
-  it("uses RacMotionSheet under 1024 when flag is on", () => {
-    useDesktopLayout.mockReturnValue(false);
-    setPlayerUxWorldFlagForTests(true);
-    render(
-      <SheetHost open onClose={() => {}} ariaLabel="Settings" railTab="settings">
-        <p>flag body</p>
-      </SheetHost>,
-    );
-    expect(screen.getByTestId("rac-motion-sheet")).toBeInTheDocument();
-    expect(screen.queryByTestId("motion-sheet")).not.toBeInTheDocument();
-  });
-
-  it("portals into contextual rail on desktop regardless of flag", async () => {
+  it("portals into contextual rail on desktop", async () => {
     useDesktopLayout.mockReturnValue(true);
-    setPlayerUxWorldFlagForTests(true);
     render(
       <ContextualRailPanelProvider>
         <RailPanelMount>
@@ -135,7 +89,6 @@ describe("SheetHost", () => {
     await waitFor(() => {
       expect(screen.getByRole("dialog", { name: "Settings" })).toBeInTheDocument();
     });
-    expect(screen.queryByTestId("motion-sheet")).not.toBeInTheDocument();
     expect(screen.queryByTestId("rac-motion-sheet")).not.toBeInTheDocument();
     expect(screen.getByText("rail body")).toBeInTheDocument();
     expect(
@@ -165,9 +118,8 @@ describe("SheetHost", () => {
     expect(screen.queryByText("hidden")).not.toBeInTheDocument();
   });
 
-  it("closes via control when flag-on sheet requests close", () => {
+  it("closes via control when sheet requests close", () => {
     useDesktopLayout.mockReturnValue(false);
-    setPlayerUxWorldFlagForTests(true);
     const onClose = vi.fn();
     render(
       <SheetHost open onClose={onClose} ariaLabel="Settings" railTab="settings">
@@ -180,7 +132,6 @@ describe("SheetHost", () => {
 
   it("uses overlay path on desktop when railTab is omitted", () => {
     useDesktopLayout.mockReturnValue(true);
-    setPlayerUxWorldFlagForTests(true);
     render(
       <SheetHost open onClose={() => {}} ariaLabel="Map tools guide">
         <p>first-run</p>
@@ -192,7 +143,6 @@ describe("SheetHost", () => {
 
   it("waits for rail panel on desktop when railTab is set", () => {
     useDesktopLayout.mockReturnValue(true);
-    setPlayerUxWorldFlagForTests(true);
     render(
       <ContextualRailPanelProvider>
         <SheetHost open onClose={() => {}} ariaLabel="Settings" railTab="settings">
@@ -201,18 +151,6 @@ describe("SheetHost", () => {
       </ContextualRailPanelProvider>,
     );
     expect(screen.queryByText("pending rail")).not.toBeInTheDocument();
-    expect(screen.queryByTestId("rac-motion-sheet")).not.toBeInTheDocument();
-  });
-
-  it("uses legacy overlay on desktop without rail when flag is off", () => {
-    useDesktopLayout.mockReturnValue(true);
-    setPlayerUxWorldFlagForTests(false);
-    render(
-      <SheetHost open onClose={() => {}} ariaLabel="Map tools guide">
-        <p>legacy first-run</p>
-      </SheetHost>,
-    );
-    expect(screen.getByTestId("motion-sheet")).toBeInTheDocument();
     expect(screen.queryByTestId("rac-motion-sheet")).not.toBeInTheDocument();
   });
 });
