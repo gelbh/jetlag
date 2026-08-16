@@ -1,4 +1,4 @@
-import { MotionSheet } from "../motion/MotionSheet";
+import { SheetHost } from "../ui/sheets/SheetHost";
 import { SheetHeader } from "../ui/sheets/SheetHeader";
 
 interface ExpansionHiderMenuProps {
@@ -19,7 +19,7 @@ export function ExpansionHiderMenu({
   onOpenCurseReference,
 }: ExpansionHiderMenuProps) {
   return (
-    <MotionSheet
+    <SheetHost
       open={open}
       onClose={onClose}
       ariaLabel="Expansion Pack options"
@@ -54,6 +54,6 @@ export function ExpansionHiderMenu({
           Curse reference
         </button>
       </div>
-    </MotionSheet>
+    </SheetHost>
   );
 }

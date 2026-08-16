@@ -1,5 +1,5 @@
-import { MotionSheet } from "../../motion/MotionSheet";
 import { usePersistedDismiss } from "@/hooks/forms/usePersistedDismiss";
+import { SheetHost } from "../../ui/sheets/SheetHost";
 
 const STORAGE_KEY = "jetlag.mapFirstRunDismissed";
 
@@ -27,7 +27,7 @@ export function MapFirstRunSheet({
   };
 
   return (
-    <MotionSheet
+    <SheetHost
       open={open}
       onClose={dismiss}
       ariaLabel="Map tools guide"
@@ -66,6 +66,6 @@ export function MapFirstRunSheet({
           Got it
         </button>
       </div>
-    </MotionSheet>
+    </SheetHost>
   );
 }
