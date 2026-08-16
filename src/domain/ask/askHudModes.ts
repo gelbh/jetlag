@@ -55,6 +55,8 @@ export type AskHudReadiness = {
   awaitHiderAnswer: boolean;
   isSubmitting: boolean;
   viewOnly?: boolean;
+  /** Tentacle (and similar): provisional confirm / load in flight. */
+  resolving?: boolean;
 };
 
 const DEFINITIONS: Record<AskHudSurface, AskHudDefinition> = {
@@ -119,12 +121,15 @@ export function askHudSurfaces(): readonly AskHudSurface[] {
 /**
  * Verb-only GlanceVerb ticker. Must never include DnPm / cost tokens.
  */
-export function activeModeCue(input: {
-  surface: AskHudSurface;
-  placementReady: boolean;
-  configureReady: boolean;
-  resolveReady: boolean;
-}): string {
+export function activeModeCue(
+  input: Pick<
+    AskHudReadiness,
+    "surface" | "placementReady" | "configureReady" | "resolveReady"
+  > &
+    Partial<
+      Pick<AskHudReadiness, "resolving" | "answerReady" | "awaitHiderAnswer">
+    >,
+): string {
   const def = DEFINITIONS[input.surface];
   switch (input.surface) {
     case "radar":
@@ -148,7 +153,12 @@ export function activeModeCue(input: {
     case "tentacle":
       if (!input.configureReady) return "PICK TYPES";
       if (!input.placementReady) return "SET CENTER ON MAP";
-      if (!input.resolveReady) return "PICK LOCATIONS";
+      if (input.resolving) return "CONFIRMING PLACES";
+      if (!input.resolveReady) return "NO PLACES";
+      // Live chrome always passes these; omitted → ready path (legacy tests).
+      if (input.awaitHiderAnswer === false && input.answerReady === false) {
+        return "TAP A PLACE";
+      }
       return "READY TO SEND";
     case "photo":
       return input.configureReady ? "READY TO SEND" : def.defaultCue;
@@ -245,8 +255,12 @@ export function notReadyCommitHint(cue: string): string {
       return "PICK TYPES";
     case "SET CENTER ON MAP":
       return "SET CENTER FIRST";
-    case "PICK LOCATIONS":
-      return "PICK LOCATIONS";
+    case "CONFIRMING PLACES":
+      return "CONFIRMING PLACES";
+    case "TAP A PLACE":
+      return "TAP A PLACE";
+    case "NO PLACES":
+      return "NO PLACES";
     case "PICK A PHOTO ASK":
       return "PICK A PHOTO ASK";
     case "PLACE YOUR ZONE":

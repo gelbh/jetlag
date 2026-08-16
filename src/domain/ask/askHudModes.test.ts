@@ -10,6 +10,7 @@ import {
   commitKind,
   cueExcludesCostTokens,
   isAskHudOwnedTool,
+  notReadyCommitHint,
   primedCommitLabel,
   type AskHudReadiness,
   type AskHudSurface,
@@ -288,6 +289,49 @@ describe("askHudModes", () => {
         resolveReady: false,
       }),
     ).toBe("SET YOUR TARGET");
+  });
+
+  it("tentacle cue uses confirming / tap / empty ladder", () => {
+    expect(
+      activeModeCue({
+        surface: "tentacle",
+        placementReady: true,
+        configureReady: true,
+        resolveReady: false,
+        resolving: true,
+      }),
+    ).toBe("CONFIRMING PLACES");
+    expect(
+      activeModeCue({
+        surface: "tentacle",
+        placementReady: true,
+        configureReady: true,
+        resolveReady: false,
+      }),
+    ).toBe("NO PLACES");
+    expect(
+      activeModeCue({
+        surface: "tentacle",
+        placementReady: true,
+        configureReady: true,
+        resolveReady: true,
+        awaitHiderAnswer: false,
+        answerReady: false,
+      }),
+    ).toBe("TAP A PLACE");
+    expect(
+      activeModeCue({
+        surface: "tentacle",
+        placementReady: true,
+        configureReady: true,
+        resolveReady: true,
+        awaitHiderAnswer: true,
+        answerReady: false,
+      }),
+    ).toBe("READY TO SEND");
+    expect(notReadyCommitHint("CONFIRMING PLACES")).toBe("CONFIRMING PLACES");
+    expect(notReadyCommitHint("TAP A PLACE")).toBe("TAP A PLACE");
+    expect(notReadyCommitHint("NO PLACES")).toBe("NO PLACES");
   });
 
   it("catalog-rail tools get taller camera padding", () => {

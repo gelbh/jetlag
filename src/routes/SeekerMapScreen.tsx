@@ -46,6 +46,7 @@ function SeekerMapScreenBody({
       placementFocusPreferFly={controller.placementFocusPreferFly}
       requestPlacementRecenter={controller.requestPlacementRecenter}
       handleMapClick={controller.handleMapClick}
+      handleDraftMarkerActivate={controller.handleDraftMarkerActivate}
       chromeHudRef={controller.chromeHudRef}
       mapShellRef={controller.mapShellRef}
       exportLegendRef={controller.exportLegendRef}

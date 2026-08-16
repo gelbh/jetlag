@@ -114,6 +114,7 @@ vi.mock("./useHeavyMapToolsState", () => ({
       draft: {},
       placementCrosshair: false,
       handleMapClick: vi.fn(),
+      selectDraftPoi: vi.fn(),
       resetDraft: vi.fn(),
       panel: null,
       hud: {

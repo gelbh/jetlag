@@ -24,6 +24,7 @@ import { buildThermometerDraftOverlays } from "../../domain/questions/overlays/t
 import { MAP_ANNOTATION_COLORS } from "../../domain/map/mapAnnotationColors";
 import { getBoundaryPreviewStyle } from "../../domain/map/mapBoundaryOverlayStyle";
 import type { MapStyle, StreetBasemap } from "../../domain/map/mapBasemaps";
+import { tentacleDraftOverlayId } from "../../domain/map/tentacleDraftOverlay";
 import { EMPTY_GEOJSON_FEATURES } from "../../domain/geometry/masks/emptyFeatures";
 
 export interface MapDraftOverlaySources {
@@ -209,7 +210,7 @@ export async function buildMapDraftOverlays(
         const selected = selectedPoiId === poi.id;
         overlays.push({
           kind: "marker",
-          id: `tentacle-draft-poi-${poi.id}`,
+          id: tentacleDraftOverlayId(poi.id),
           point: [poi.lat, poi.lng],
           popup: poi.name,
           style: {

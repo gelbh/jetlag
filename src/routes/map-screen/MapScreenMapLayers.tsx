@@ -30,6 +30,7 @@ type MapScreenMapLayersProps = Pick<
   | "placementFocusPreferFly"
   | "requestPlacementRecenter"
   | "handleMapClick"
+  | "handleDraftMarkerActivate"
   | "chromeHudRef"
   | "mapShellRef"
   | "exportLegendRef"
@@ -80,6 +81,7 @@ export function MapScreenMapLayers({
   placementFocusPreferFly,
   requestPlacementRecenter,
   handleMapClick,
+  handleDraftMarkerActivate,
   chromeHudRef,
   mapShellRef,
   exportLegendRef,
@@ -186,7 +188,10 @@ export function MapScreenMapLayers({
             gameArea={toolGameArea}
           />
         ) : null}
-        <MapDraftLayer overlays={mapDraftOverlays} />
+        <MapDraftLayer
+          overlays={mapDraftOverlays}
+          onMarkerActivate={handleDraftMarkerActivate}
+        />
         {showAdminBoundaries && !adminBoundaryLoading ? (
           <Suspense fallback={null}>
             <AdminBoundariesLayer

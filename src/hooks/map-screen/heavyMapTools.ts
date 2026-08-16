@@ -71,6 +71,8 @@ export interface TentacleToolApi {
   };
   placementCrosshair: boolean;
   handleMapClick: (point: LatLngTuple) => void;
+  /** Select a draft POI (map marker or list); provisional gate unchanged. */
+  selectDraftPoi: (poiId: string) => void;
   resetDraft: () => void;
   panel: ReactNode;
   hud: AskToolHudBundle;
@@ -182,6 +184,7 @@ export function createIdleHeavyMapTools(): HeavyMapToolsApi {
     },
     placementCrosshair: false,
     handleMapClick: noopMapClick,
+    selectDraftPoi: () => undefined,
     resetDraft: () => undefined,
     panel: null,
     hud: idleTentacleHud,
