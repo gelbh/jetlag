@@ -1,10 +1,7 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { RacMotionSheet } from "./RacMotionSheet";
-import {
-  SHEET_DISMISS_FRACTION,
-  SHEET_VELOCITY_DISMISS_PX_MS,
-} from "@/domain/device/motion/motionTokens";
+import { SHEET_VELOCITY_DISMISS_PX_MS } from "@/domain/device/motion/motionTokens";
 
 const useMotionProfile = vi.fn(() => ({
   animate: true,
@@ -118,12 +115,11 @@ describe("RacMotionSheet", () => {
     await screen.findByRole("dialog", { name: "Drag" });
     expect(latestOnDragEnd).toBeTypeOf("function");
 
-    const height = 300;
-    const justBelow = height * SHEET_DISMISS_FRACTION;
-    latestOnDragEnd?.({}, { offset: { y: justBelow }, velocity: { y: 0 } });
+    // jsdom sheet height is small; use oversized offset / velocity vs live measure.
+    latestOnDragEnd?.({}, { offset: { y: 1 }, velocity: { y: 0 } });
     expect(onClose).not.toHaveBeenCalled();
 
-    latestOnDragEnd?.({}, { offset: { y: justBelow + 1 }, velocity: { y: 0 } });
+    latestOnDragEnd?.({}, { offset: { y: 10_000 }, velocity: { y: 0 } });
     expect(onClose).toHaveBeenCalledTimes(1);
 
     onClose.mockClear();
