@@ -24,7 +24,7 @@ import { MapScreenRoleCodesSheet } from "./shared/MapScreenSharedSessionSheets";
 import { useMapScreenReportProblemSheet } from "./shared/useMapScreenReportProblemSheet";
 import { renderMapScreenContextualRail } from "./shared/mapScreenContextualRail";
 import { canOpenMapScreenRoleCodes } from "./shared/canOpenMapScreenRoleCodes";
-import { MapScreenChromeBanners } from "./shared/MapScreenChromeBanners";
+import { MapScreenChromeBanners, type MapRefineChipCopy } from "./shared/MapScreenChromeBanners";
 
 type MapScreenChromeProps = Pick<
   MapScreenController,
@@ -406,11 +406,40 @@ export function MapScreenChrome({
   const measuringLodRefining =
     measuringTool.measuringLodPhase === "coarse" ||
     measuringTool.measuringLodPhase === "refining";
+  const matchingLodRefining =
+    matchingTool.matchingLodPhase === "coarse" ||
+    matchingTool.matchingLodPhase === "refining";
+  const catalogHydrating =
+    activeTool === "matching" && !matchingTool.matchingCatalogComplete;
+
+  const refineChip: MapRefineChipCopy = catalogHydrating
+    ? {
+        visible: true,
+        title: "Loading places",
+        body: "Adding remaining areas to the map…",
+      }
+    : measuringLodRefining && activeTool === "measuring"
+      ? {
+          visible: true,
+          title: "Refining measure",
+          body: "Adding detail to the shaded area…",
+        }
+      : matchingLodRefining || measuringLodRefining
+        ? {
+            visible: true,
+            title: "Refining shade",
+            body: "Adding detail to the shaded area…",
+          }
+        : {
+            visible: false,
+            title: "Refining measure",
+            body: "Adding detail to the shaded area…",
+          };
 
   const header = (
     <>
       {statusRail}
-      <MapScreenChromeBanners measuringLodRefining={measuringLodRefining} />
+      <MapScreenChromeBanners refineChip={refineChip} />
     </>
   );
 
