@@ -86,4 +86,25 @@ describe("MapDraftLayer", () => {
     expect(hitHandler!(fakeHit("tentacle-draft-poi-poi-2"))).toBe(true);
     expect(onMarkerActivate).toHaveBeenCalledWith("tentacle-draft-poi-poi-2");
   });
+
+  it("returns false when activate declines a no-popup marker", () => {
+    const onMarkerActivate = vi.fn(() => false);
+    hitHandler = null;
+
+    render(
+      <MapDraftLayer
+        overlays={[
+          {
+            kind: "marker",
+            id: "draft-pin-1",
+            point: [53.35, -6.26],
+          },
+        ]}
+        onMarkerActivate={onMarkerActivate}
+      />,
+    );
+
+    expect(hitHandler!(fakeHit("draft-pin-1"))).toBe(false);
+    expect(onMarkerActivate).toHaveBeenCalledWith("draft-pin-1");
+  });
 });
