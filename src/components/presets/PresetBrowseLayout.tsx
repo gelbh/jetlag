@@ -4,10 +4,12 @@ import {
   ScreenHeader,
   screenHeaderOffsetClassName,
 } from "../ui/layout/ScreenHeader";
+import { EmptyState } from "../ui/feedback/EmptyState";
 import { BundledPresetTree } from "./BundledPresetTree";
 import { PresetSearchResults } from "./PresetSearchResults";
 import { PresetDetailPanel } from "./PresetDetailPanel";
 import { migrateGamePreset } from "../../domain/session/presets/gamePreset";
+import { usePlayerUxWorld } from "@/hooks/feature/usePlayerUxWorld";
 
 export function PresetBrowseLayout({
   searchId,
@@ -30,8 +32,12 @@ export function PresetBrowseLayout({
   userPresets: ReturnType<typeof migrateGamePreset>[];
   onDelete: (id: string) => void;
 }) {
+  const survey = usePlayerUxWorld();
   return (
-    <main className="home-poster flex min-h-[100dvh] flex-col px-5 py-8">
+    <main
+      className="home-poster flex min-h-[100dvh] flex-col px-5 py-8"
+      data-player-ux-world={survey ? "survey" : undefined}
+    >
       <ScreenHeader backTo="/" backLabel="Back" />
       <DesktopContentColumn maxWidth="social">
         <div
@@ -104,9 +110,7 @@ export function PresetBrowseLayout({
 
               {userPresets.length === 0 ? (
                 bundledPresets.length === 0 ? (
-                  <p className="text-sm text-ink-dim">
-                    No presets saved on this device.
-                  </p>
+                  <EmptyState>No presets saved on this device.</EmptyState>
                 ) : null
               ) : (
                 <section className="space-y-2">

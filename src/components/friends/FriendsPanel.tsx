@@ -11,6 +11,7 @@ import {
   type FriendListEntry,
 } from "../../services/profile/profileFriends";
 import { InlineError } from "../ui/banners/InlineError";
+import { EmptyState } from "../ui/feedback/EmptyState";
 import { SearchField } from "../ui/forms/SearchField";
 
 type FriendRelation = "incoming" | "outgoing" | "friend";
@@ -159,7 +160,7 @@ export function FriendsPanel() {
 
   const addFriendsSection = (
     <div className="space-y-2">
-      <p className="font-display text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-dim">
+      <p className="font-display text-[0.8125rem] font-semibold uppercase tracking-[0.12em] text-ink-dim">
         Add friends
       </p>
       <SearchField
@@ -283,13 +284,13 @@ export function FriendsPanel() {
       {error ? <InlineError>{error}</InlineError> : null}
 
       <section className="space-y-2">
-        <p className="font-display text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-dim">
+        <p className="font-display text-[0.8125rem] font-semibold uppercase tracking-[0.12em] text-ink-dim">
           Incoming requests
         </p>
         {loadingList ? (
           <p className="text-sm text-ink-muted">Loading…</p>
         ) : incoming.length === 0 ? (
-          <p className="text-sm text-ink-muted">No pending requests.</p>
+          <EmptyState>No pending requests.</EmptyState>
         ) : (
           <ul className="m-0 list-none space-y-2 p-0">
             {incoming.map((entry) => (
@@ -333,11 +334,11 @@ export function FriendsPanel() {
       </section>
 
       <section className="space-y-2">
-        <p className="font-display text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-dim">
+        <p className="font-display text-[0.8125rem] font-semibold uppercase tracking-[0.12em] text-ink-dim">
           Outgoing
         </p>
         {loadingList ? null : outgoing.length === 0 ? (
-          <p className="text-sm text-ink-muted">No outgoing requests.</p>
+          <EmptyState>No outgoing requests.</EmptyState>
         ) : (
           <ul className="m-0 list-none space-y-2 p-0">
             {outgoing.map((entry) => (
@@ -367,13 +368,13 @@ export function FriendsPanel() {
       </section>
 
       <section className="space-y-2">
-        <p className="font-display text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-dim">
+        <p className="font-display text-[0.8125rem] font-semibold uppercase tracking-[0.12em] text-ink-dim">
           Your friends
         </p>
         {loadingList ? null : friends.length === 0 ? (
-          <p className="text-sm leading-relaxed text-ink-muted">
+          <EmptyState>
             No friends yet. Search for a username above to send a request.
-          </p>
+          </EmptyState>
         ) : (
           <ul className="m-0 list-none space-y-2 p-0">
             {friends.map((entry) => (
@@ -416,13 +417,13 @@ function DesktopListSection({
 
   return (
     <section className="space-y-2">
-      <p className="font-display text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-dim">
+      <p className="font-display text-[0.8125rem] font-semibold uppercase tracking-[0.12em] text-ink-dim">
         {title}
       </p>
       {loading ? (
         <p className="text-sm text-ink-muted">Loading…</p>
       ) : entries.length === 0 ? (
-        <p className="text-sm text-ink-muted">{empty}</p>
+        <EmptyState>{empty}</EmptyState>
       ) : (
         <ul className="m-0 list-none space-y-1 p-0">
           {entries.map((entry) => {
@@ -468,7 +469,7 @@ function FriendDetail({
   return (
     <div className="space-y-3">
       <div className="space-y-1">
-        <p className="font-display text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-dim">
+        <p className="font-display text-[0.8125rem] font-semibold uppercase tracking-[0.12em] text-ink-dim">
           {relationLabel(entry.relation)}
         </p>
         <h2 className="font-display text-xl font-bold uppercase tracking-tight text-ink">

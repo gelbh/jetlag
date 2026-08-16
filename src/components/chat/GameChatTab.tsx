@@ -11,6 +11,7 @@ import type { SessionMessageRecord } from "../../domain/session/activity/session
 import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
 import { HiderPendingQuestionAnswer } from "./HiderPendingQuestionAnswer";
 import { InlineError } from "../ui/banners/InlineError";
+import { EmptyState } from "../ui/feedback/EmptyState";
 import { PhotoAnswerPreview } from "./PhotoAnswerPreview";
 
 interface GameChatTabProps {
@@ -90,7 +91,7 @@ export function GameChatTab({
         </InlineError>
       ) : null}
       {gameMessages.length === 0 ? (
-        <p className="text-sm text-ink-dim">No game messages yet.</p>
+        <EmptyState className="text-ink-dim">No game messages yet.</EmptyState>
       ) : (
         gameMessages.map((message) => {
           if (message.kind === "system") {

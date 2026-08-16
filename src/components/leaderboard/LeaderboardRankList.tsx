@@ -7,6 +7,7 @@ import type {
   LeaderboardEntry,
   LeaderboardMetric,
 } from "../../domain/game/leaderboard";
+import { EmptyState } from "../ui/feedback/EmptyState";
 import { leaderboardRankColorClass } from "./leaderboardRankStyle";
 
 interface LeaderboardRankListProps {
@@ -47,9 +48,7 @@ export function LeaderboardRankList({
   }
 
   if (entries.length === 0) {
-    return (
-      <p className="text-sm leading-relaxed text-ink-muted">{emptyMessage}</p>
-    );
+    return <EmptyState>{emptyMessage}</EmptyState>;
   }
 
   return (
@@ -77,7 +76,7 @@ export function LeaderboardRankList({
             >
               {leaderboardEntryLabel(entry)}
               {isYou ? (
-                <span className="ml-2 font-sans text-[10px] font-semibold tracking-[0.12em] text-brand-blue">
+                <span className="ml-2 font-sans text-[0.8125rem] font-semibold tracking-[0.12em] text-brand-blue">
                   YOU
                 </span>
               ) : null}
