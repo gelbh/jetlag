@@ -1,86 +1,15 @@
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import type { Feature, MultiPolygon, Polygon as GeoPolygon } from "geojson";
 import type { GameArea } from "@/domain/map/annotations";
-import {
-  assertMeasuringGeometryBudget,
-  persistSlimMeasuringGeometry,
-} from "@/domain/geometry/measuring/measuringGeometryBudgets";
-import {
-  buildMeasuringCoarseFeature,
-  refineMeasuringFeatureStep,
-  type MeasuringLodPhase,
-} from "@/domain/geometry/measuring/measuringLod";
+import type { MeasuringLodPhase } from "@/domain/geometry/measuring/measuringLod";
 import {
   buildMeasuringBoundaryPreview,
   buildMeasuringEliminationPreview,
 } from "@/domain/geometry/measuring/measuringRegions";
 import { previewGeometryFingerprint } from "@/domain/geometry/measuring/previewGeometryFingerprint";
+import { paintPolygonLod } from "@/hooks/tools/framework/paintPolygonLod";
 import { getCachedPreparedCoastlineSegments } from "@/services/geo/overpass/coastline";
 import type { MeasuringDraftState } from "./useMeasuringDraftState";
-
-function scheduleIdle(callback: () => void): () => void {
-  if (typeof requestIdleCallback === "function") {
-    const id = requestIdleCallback(() => {
-      callback();
-    });
-    return () => cancelIdleCallback(id);
-  }
-  const id = setTimeout(callback, 0);
-  return () => clearTimeout(id);
-}
-
-function displayFeatureForComplete(
-  full: Feature<GeoPolygon | MultiPolygon>,
-  fallback: Feature<GeoPolygon | MultiPolygon>,
-): Feature<GeoPolygon | MultiPolygon> {
-  const slimmed = persistSlimMeasuringGeometry(full);
-  return slimmed.ok ? slimmed.feature : fallback;
-}
-
-function paintLodFeature(
-  full: Feature<GeoPolygon | MultiPolygon>,
-  generation: number,
-  generationRef: { current: number },
-  setFeature: (
-    feature: Feature<GeoPolygon | MultiPolygon> | null,
-  ) => void,
-  setPhase: (phase: MeasuringLodPhase) => void,
-  cancelRef: { current: (() => void) | null },
-): void {
-  const coarse = buildMeasuringCoarseFeature(full);
-  setFeature(coarse);
-
-  if (previewGeometryFingerprint(coarse) === previewGeometryFingerprint(full)) {
-    cancelRef.current = null;
-    setFeature(displayFeatureForComplete(full, coarse));
-    setPhase("complete");
-    return;
-  }
-
-  setPhase("refining");
-  let stepIndex = 0;
-  let current = coarse;
-
-  const runStep = () => {
-    if (generation !== generationRef.current) {
-      return;
-    }
-    const next = refineMeasuringFeatureStep(full, current, stepIndex);
-    const previous = current;
-    current = next.feature;
-    setFeature(current);
-    stepIndex += 1;
-    if (next.done) {
-      cancelRef.current = null;
-      setFeature(displayFeatureForComplete(full, previous));
-      setPhase("complete");
-      return;
-    }
-    cancelRef.current = scheduleIdle(runStep);
-  };
-
-  cancelRef.current = scheduleIdle(runStep);
-}
 
 export function useMeasuringPreviews(
   gameArea: GameArea,
@@ -188,25 +117,7 @@ export function useMeasuringPreviews(
       setMeasuringLodPhase("refining");
     };
 
-    const budget = assertMeasuringGeometryBudget({
-      measuringSubject: previewRegionInput.measuringSubject,
-      measuringLocationCategory: previewRegionInput.measuringLocationCategory,
-      usesAllPlacesInArea: previewRegionInput.usesAllPlacesInArea,
-      placeCount: previewRegionInput.measuringPlaces.length,
-      linearSegments: previewRegionInput.measuringCoastSegments,
-    });
-
     void (async () => {
-      if (!budget.ok) {
-        if (generation === generationRef.current) {
-          setMeasuringNearRegion(null);
-          setMeasuringEliminationPreview(null);
-          setMeasuringLodPhase("complete");
-          setMeasuringError(budget.message);
-        }
-        return;
-      }
-
       let near: Feature<GeoPolygon | MultiPolygon> | null;
       try {
         near = await buildMeasuringBoundaryPreview(previewRegionInput);
@@ -228,7 +139,7 @@ export function useMeasuringPreviews(
 
       if (near) {
         setMeasuringLodPhase("coarse");
-        paintLodFeature(
+        paintPolygonLod(
           near,
           generation,
           generationRef,
@@ -255,7 +166,7 @@ export function useMeasuringPreviews(
           setSharedLodPhase("complete");
           return;
         }
-        paintLodFeature(
+        paintPolygonLod(
           elimination,
           generation,
           generationRef,

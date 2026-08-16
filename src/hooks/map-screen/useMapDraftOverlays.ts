@@ -12,6 +12,8 @@ import {
 } from "../../domain/geometry/gameArea/geometry";
 import { resolveClientMaskKernelMode } from "../../domain/geometry/kernel/resolveClientMaskKernelMode";
 import { buildTentaclePoiAnswerEliminationRegion } from "../../domain/geometry/tentacle/tentacleGeometry";
+import type { PolygonLodPhase } from "../../domain/geometry/progressive/polygonLod";
+import { paintPolygonLod } from "../tools/framework/paintPolygonLod";
 import {
   radarShadedInsideFromAnswer,
   type RadarAnswer,
@@ -77,6 +79,7 @@ export interface MapDraftOverlaySources {
 export interface MapDraftOverlayResult {
   overlays: MapDraftOverlay[];
   eliminationFeatures: Feature<GeoPolygon | MultiPolygon>[];
+  tentacleLodPhase: PolygonLodPhase;
 }
 
 export async function buildMapDraftOverlays(
@@ -223,15 +226,16 @@ export async function buildMapDraftOverlays(
       }
 
       if (hasPoiAnswer && selectedPoiId) {
-        pushElimination(
-          await buildTentaclePoiAnswerEliminationRegion(
-            center,
-            searchRadiusMeters,
-            pois,
-            selectedPoiId,
-            gameArea,
-          ),
+        const region = await buildTentaclePoiAnswerEliminationRegion(
+          center,
+          searchRadiusMeters,
+          pois,
+          selectedPoiId,
+          gameArea,
         );
+        if (region) {
+          pushElimination(region);
+        }
       }
     }
   }
@@ -374,12 +378,13 @@ export async function buildMapDraftOverlays(
     }
   }
 
-  return { overlays, eliminationFeatures };
+  return { overlays, eliminationFeatures, tentacleLodPhase: "complete" };
 }
 
 const EMPTY_DRAFT_RESULT: MapDraftOverlayResult = {
   overlays: [],
   eliminationFeatures: [],
+  tentacleLodPhase: "complete",
 };
 
 export function useMapDraftOverlays(
@@ -401,28 +406,60 @@ export function useMapDraftOverlays(
   } = sources;
 
   const [built, setBuilt] = useState<MapDraftOverlayResult>(EMPTY_DRAFT_RESULT);
+  const [tentacleDisplayElim, setTentacleDisplayElim] = useState<
+    Feature<GeoPolygon | MultiPolygon> | null
+  >(null);
+  const [tentacleLodPhase, setTentacleLodPhase] =
+    useState<PolygonLodPhase>("complete");
   const generationRef = useRef(0);
+  const tentacleLodCancelRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     const generation = generationRef.current + 1;
     generationRef.current = generation;
+    tentacleLodCancelRef.current?.();
+    tentacleLodCancelRef.current = null;
     queueMicrotask(() => {
-      if (generation === generationRef.current) {
-        setBuilt(EMPTY_DRAFT_RESULT);
+      if (generation !== generationRef.current) {
+        return;
       }
+      setBuilt(EMPTY_DRAFT_RESULT);
+      setTentacleDisplayElim(null);
+      setTentacleLodPhase("complete");
     });
 
     void buildMapDraftOverlays(sources)
       .then((result) => {
-        if (generation === generationRef.current) {
-          setBuilt(result);
+        if (generation !== generationRef.current) {
+          return;
         }
+        setBuilt(result);
+        const tentacleFull =
+          sources.activeTool === "tentacle"
+            ? (result.eliminationFeatures.at(-1) ?? null)
+            : null;
+        if (!tentacleFull) {
+          return;
+        }
+        paintPolygonLod(
+          tentacleFull,
+          generation,
+          generationRef,
+          setTentacleDisplayElim,
+          setTentacleLodPhase,
+          tentacleLodCancelRef,
+        );
       })
       .catch(() => {
         if (generation === generationRef.current) {
           setBuilt(EMPTY_DRAFT_RESULT);
         }
       });
+
+    return () => {
+      tentacleLodCancelRef.current?.();
+      tentacleLodCancelRef.current = null;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- field deps cover `sources` inputs
   }, [
     activeTool,
@@ -461,14 +498,24 @@ export function useMapDraftOverlays(
     zone.vertices,
   ]);
 
-  return useMemo(
-    () => ({
+  return useMemo(() => {
+    const tentacleElms =
+      tentacleDisplayElim && built.eliminationFeatures.length > 0
+        ? [
+            ...built.eliminationFeatures.slice(0, -1),
+            tentacleDisplayElim,
+          ]
+        : built.eliminationFeatures;
+    return {
       overlays: built.overlays,
-      eliminationFeatures: [
-        ...built.eliminationFeatures,
-        ...extraEliminationFeatures,
-      ],
-    }),
-    [built.eliminationFeatures, built.overlays, extraEliminationFeatures],
-  );
+      eliminationFeatures: [...tentacleElms, ...extraEliminationFeatures],
+      tentacleLodPhase,
+    };
+  }, [
+    built.eliminationFeatures,
+    built.overlays,
+    extraEliminationFeatures,
+    tentacleDisplayElim,
+    tentacleLodPhase,
+  ]);
 }

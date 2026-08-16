@@ -1,10 +1,13 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { renderHook, waitFor } from "@testing-library/react";
 import type { Feature, Polygon } from "geojson";
 import {
+  MEASURING_LINEAR_MAX_VERTICES,
+  MEASURING_LINEAR_OVER_BUDGET_MESSAGE,
   MEASURING_MULTI_PLACE_OVER_BUDGET_MESSAGE,
   MEASURING_OUTPUT_OVER_BUDGET_MESSAGE,
 } from "@/domain/geometry/measuring/measuringGeometryBudgets";
+import * as measuringGeometryBudgets from "@/domain/geometry/measuring/measuringGeometryBudgets";
 import { previewGeometryFingerprint } from "@/domain/geometry/measuring/previewGeometryFingerprint";
 import {
   useMeasuringPreviews,
@@ -16,8 +19,8 @@ import type { GameArea } from "@/domain/map/annotations";
 
 const buildMeasuringBoundaryPreview = vi.hoisted(() => vi.fn());
 const buildMeasuringEliminationPreview = vi.hoisted(() => vi.fn());
-const buildMeasuringCoarseFeature = vi.hoisted(() => vi.fn());
-const refineMeasuringFeatureStep = vi.hoisted(() => vi.fn());
+const buildCoarsePolygonFeature = vi.hoisted(() => vi.fn());
+const refinePolygonFeatureStep = vi.hoisted(() => vi.fn());
 
 vi.mock("@/domain/geometry/measuring/measuringRegions", () => ({
   buildMeasuringBoundaryPreview: (...args: unknown[]) =>
@@ -26,16 +29,16 @@ vi.mock("@/domain/geometry/measuring/measuringRegions", () => ({
     buildMeasuringEliminationPreview(...args),
 }));
 
-vi.mock("@/domain/geometry/measuring/measuringLod", async () => {
+vi.mock("@/domain/geometry/progressive/polygonLod", async () => {
   const actual = await vi.importActual<
-    typeof import("@/domain/geometry/measuring/measuringLod")
-  >("@/domain/geometry/measuring/measuringLod");
+    typeof import("@/domain/geometry/progressive/polygonLod")
+  >("@/domain/geometry/progressive/polygonLod");
   return {
     ...actual,
-    buildMeasuringCoarseFeature: (...args: unknown[]) =>
-      buildMeasuringCoarseFeature(...args),
-    refineMeasuringFeatureStep: (...args: unknown[]) =>
-      refineMeasuringFeatureStep(...args),
+    buildCoarsePolygonFeature: (...args: unknown[]) =>
+      buildCoarsePolygonFeature(...args),
+    refinePolygonFeatureStep: (...args: unknown[]) =>
+      refinePolygonFeatureStep(...args),
   };
 });
 
@@ -118,21 +121,37 @@ describe("useMeasuringPublishSignature", () => {
   });
 });
 
+const sampleGameArea: GameArea = {
+  type: "Polygon",
+  coordinates: [
+    [
+      [0, 0],
+      [1, 0],
+      [1, 1],
+      [0, 1],
+      [0, 0],
+    ],
+  ],
+};
+
 describe("useMeasuringPreviews budget gate", () => {
-  it("skips near/elim builds when multi-place count is over budget", () => {
+  beforeEach(() => {
+    buildMeasuringBoundaryPreview.mockReset();
+    buildMeasuringEliminationPreview.mockReset();
+    buildCoarsePolygonFeature.mockReset();
+    refinePolygonFeatureStep.mockReset();
+  });
+
+  it("paints coarse LOD when all-places count exceeds the former 128 cap", async () => {
     const setMeasuringError = vi.fn();
-    const gameArea: GameArea = {
-      type: "Polygon",
-      coordinates: [
-        [
-          [0, 0],
-          [1, 0],
-          [1, 1],
-          [0, 1],
-          [0, 0],
-        ],
-      ],
-    };
+    const near = samplePreview();
+    const elim = samplePreview();
+    const coarse = coarsePreview();
+    buildMeasuringBoundaryPreview.mockResolvedValue(near);
+    buildMeasuringEliminationPreview.mockResolvedValue(elim);
+    buildCoarsePolygonFeature.mockReturnValue(coarse);
+    refinePolygonFeatureStep.mockReturnValue({ feature: near, done: true });
+
     const draft = {
       ...baseDraft,
       usesAllPlacesInArea: true,
@@ -146,15 +165,103 @@ describe("useMeasuringPreviews budget gate", () => {
       setMeasuringError,
     } as unknown as MeasuringDraftState;
 
-    const { result } = renderHook(() => useMeasuringPreviews(gameArea, draft));
+    const { result } = renderHook(() =>
+      useMeasuringPreviews(sampleGameArea, draft),
+    );
 
-    expect(buildMeasuringBoundaryPreview).not.toHaveBeenCalled();
-    expect(buildMeasuringEliminationPreview).not.toHaveBeenCalled();
-    expect(setMeasuringError).toHaveBeenCalledWith(
+    await waitFor(() => {
+      expect(buildMeasuringBoundaryPreview).toHaveBeenCalled();
+    });
+    await waitFor(() => {
+      expect(result.current.measuringNearRegion).not.toBeNull();
+    });
+
+    expect(setMeasuringError).not.toHaveBeenCalledWith(
       MEASURING_MULTI_PLACE_OVER_BUDGET_MESSAGE,
     );
-    expect(result.current.measuringNearRegion).toBeNull();
-    expect(result.current.measuringEliminationPreview).toBeNull();
+  });
+
+  it("completed preview uses full geometry, not persist-slim", async () => {
+    const persistSlim = vi.spyOn(
+      measuringGeometryBudgets,
+      "persistSlimMeasuringGeometry",
+    );
+    const setMeasuringError = vi.fn();
+    const near = samplePreview();
+    buildMeasuringBoundaryPreview.mockResolvedValue(near);
+    buildMeasuringEliminationPreview.mockResolvedValue(null);
+    buildCoarsePolygonFeature.mockReturnValue(near);
+    refinePolygonFeatureStep.mockReturnValue({ feature: near, done: true });
+
+    const draft = {
+      ...baseDraft,
+      usesAllPlacesInArea: false,
+      measuringAnswer: "further",
+      measuringTargetPoint: [51.45, -0.15] as [number, number],
+      measuringPlaces: [],
+      measuringCoastSegments: [],
+      measuringSeaLevelNearRegion: null,
+      setMeasuringError,
+    } as unknown as MeasuringDraftState;
+
+    const { result } = renderHook(() =>
+      useMeasuringPreviews(sampleGameArea, draft),
+    );
+
+    await waitFor(() => {
+      expect(result.current.measuringLodPhase).toBe("complete");
+    });
+
+    expect(persistSlim).not.toHaveBeenCalled();
+    persistSlim.mockRestore();
+  });
+
+  it("paints linear measures above the former vertex cap", async () => {
+    const setMeasuringError = vi.fn();
+    const near = samplePreview();
+    const coarse = coarsePreview();
+    buildMeasuringBoundaryPreview.mockResolvedValue(near);
+    buildMeasuringEliminationPreview.mockResolvedValue(null);
+    buildCoarsePolygonFeature.mockReturnValue(coarse);
+    refinePolygonFeatureStep.mockReturnValue({ feature: near, done: true });
+
+    const draft = {
+      ...baseDraft,
+      measuringSubject: "location",
+      measuringLocationCategory: "high_speed_rail_line",
+      usesAllPlacesInArea: false,
+      measuringPlaces: [],
+      measuringCoastSegments: [
+        {
+          type: "Feature" as const,
+          properties: {},
+          geometry: {
+            type: "LineString" as const,
+            coordinates: Array.from(
+              { length: MEASURING_LINEAR_MAX_VERTICES + 1 },
+              (_, i) => [i * 0.0001, 0] as [number, number],
+            ),
+          },
+        },
+      ],
+      measuringSeaLevelNearRegion: null,
+      setMeasuringError,
+    } as unknown as MeasuringDraftState;
+
+    const { result } = renderHook(() =>
+      useMeasuringPreviews(sampleGameArea, draft),
+    );
+
+    await waitFor(() => {
+      expect(buildMeasuringBoundaryPreview).toHaveBeenCalled();
+    });
+    await waitFor(() => {
+      expect(result.current.measuringNearRegion).not.toBeNull();
+    });
+
+    expect(setMeasuringError).not.toHaveBeenCalledWith(
+      MEASURING_LINEAR_OVER_BUDGET_MESSAGE,
+    );
   });
 
   it("paints coarse LOD instead of refusing oversized geometry on preview", async () => {
@@ -164,8 +271,8 @@ describe("useMeasuringPreviews budget gate", () => {
     const coarse = coarsePreview();
     buildMeasuringBoundaryPreview.mockResolvedValue(near);
     buildMeasuringEliminationPreview.mockResolvedValue(elim);
-    buildMeasuringCoarseFeature.mockReturnValue(coarse);
-    refineMeasuringFeatureStep.mockReturnValue({ feature: near, done: true });
+    buildCoarsePolygonFeature.mockReturnValue(coarse);
+    refinePolygonFeatureStep.mockReturnValue({ feature: near, done: true });
 
     const gameArea: GameArea = {
       type: "Polygon",
@@ -204,7 +311,7 @@ describe("useMeasuringPreviews budget gate", () => {
         (call) => call[0] !== MEASURING_OUTPUT_OVER_BUDGET_MESSAGE,
       ),
     ).toBe(true);
-    expect(buildMeasuringCoarseFeature).toHaveBeenCalledWith(near);
+    expect(buildCoarsePolygonFeature).toHaveBeenCalledWith(near);
     expect(result.current.measuringNearRegion).toBeTruthy();
   });
 });

@@ -25,6 +25,10 @@ import { useMapScreenReportProblemSheet } from "./shared/useMapScreenReportProbl
 import { renderMapScreenContextualRail } from "./shared/mapScreenContextualRail";
 import { canOpenMapScreenRoleCodes } from "./shared/canOpenMapScreenRoleCodes";
 import { MapScreenChromeBanners } from "./shared/MapScreenChromeBanners";
+import {
+  selectMapRefineChip,
+  type MapRefineChipCopy,
+} from "./shared/selectMapRefineChip";
 
 type MapScreenChromeProps = Pick<
   MapScreenController,
@@ -406,11 +410,26 @@ export function MapScreenChrome({
   const measuringLodRefining =
     measuringTool.measuringLodPhase === "coarse" ||
     measuringTool.measuringLodPhase === "refining";
+  const matchingLodRefining =
+    matchingTool.matchingLodPhase === "coarse" ||
+    matchingTool.matchingLodPhase === "refining";
+  const tentacleLodRefining =
+    tentacleTool.tentacleLodPhase === "coarse" ||
+    tentacleTool.tentacleLodPhase === "refining";
+  const catalogHydrating =
+    activeTool === "matching" && !matchingTool.matchingCatalogComplete;
+
+  const refineChip: MapRefineChipCopy = selectMapRefineChip({
+    catalogHydrating,
+    measuringActiveAndRefining: measuringLodRefining && activeTool === "measuring",
+    shadeRefining:
+      matchingLodRefining || measuringLodRefining || tentacleLodRefining,
+  });
 
   const header = (
     <>
       {statusRail}
-      <MapScreenChromeBanners measuringLodRefining={measuringLodRefining} />
+      <MapScreenChromeBanners refineChip={refineChip} />
     </>
   );
 
