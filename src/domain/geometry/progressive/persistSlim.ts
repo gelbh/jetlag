@@ -1,18 +1,16 @@
 import type { Feature, MultiPolygon, Polygon } from "geojson";
 import simplify from "@turf/simplify";
 import {
-  MEASURING_OUTPUT_MAX_JSON_CHARS,
-  MEASURING_OUTPUT_MAX_VERTICES,
   MEASURING_PERSIST_OVER_BUDGET_MESSAGE,
   assertMeasuringOutputComplexityBudget,
   countPolygonVertices,
 } from "../measuring/measuringGeometryBudgets";
 
 /** Any elim GeoJSON write — Firestore vertex ceiling. */
-export const POLYGON_PERSIST_MAX_VERTICES = MEASURING_OUTPUT_MAX_VERTICES;
+export const POLYGON_PERSIST_MAX_VERTICES = 4_000;
 
 /** Any elim GeoJSON write — JSON.stringify(geometry) UTF-16 ceiling. */
-export const POLYGON_PERSIST_MAX_JSON_CHARS = MEASURING_OUTPUT_MAX_JSON_CHARS;
+export const POLYGON_PERSIST_MAX_JSON_CHARS = 120_000;
 
 export type PersistSlimPolygonResult =
   | { ok: true; feature: Feature<Polygon | MultiPolygon> }
