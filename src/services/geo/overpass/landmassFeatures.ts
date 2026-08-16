@@ -14,7 +14,7 @@ import {
   simplifyGameArea,
   type LatLngTuple,
 } from "@/domain/geometry/gameArea/geometry";
-import { queryOverpass, OverpassPayloadTooLargeError } from "../../core/overpass/overpassClient";
+import { queryOverpass } from "../../core/overpass/overpassClient";
 import {
   getOrFetchCached,
   landmassCacheKey,
@@ -24,8 +24,14 @@ import {
   type AdminDivisionFeature,
 } from "./adminDivisionBoundaries";
 import { isBundledAdminRegionPack } from "./adminDivisionAvailability";
+import {
+  mergeOverpassElementPayloads,
+  queryOverpassWithBboxSplit,
+  type OverpassBbox,
+} from "./overpassBboxSplit";
 
-export const MAX_LANDMASSES = 50;
+export type LandmassFeature = AdminDivisionFeature;
+
 const WATERWAY_BUFFER_METERS = 2;
 
 type OverpassGeometryNode = {
@@ -48,8 +54,6 @@ type OverpassElement = {
     maxlon: number;
   };
 };
-
-export type LandmassFeature = AdminDivisionFeature;
 
 function wayGeometryToLineString(
   geometry: OverpassGeometryNode[] | undefined,
@@ -286,8 +290,7 @@ export async function computeLandmassFeatures(
       (left, right) =>
         area(gameAreaToPolygon(right.boundary)) -
         area(gameAreaToPolygon(left.boundary)),
-    )
-    .slice(0, MAX_LANDMASSES);
+    );
 
   return polygons.map(({ boundary }, index) => ({
     id: `landmass:${index + 1}`,
@@ -298,9 +301,8 @@ export async function computeLandmassFeatures(
   }));
 }
 
-export function buildLandmassQuery(gameArea: GameArea): string {
-  const { south, west, north, east } = gameAreaToBoundingBox(gameArea);
-  const bbox = `${south},${west},${north},${east}`;
+export function buildLandmassQueryForBbox(bbox: OverpassBbox): string {
+  const bboxStr = `${bbox.south},${bbox.west},${bbox.north},${bbox.east}`;
 
   // Use explicit bbox filters + `out geom` so tagged ways keep coordinates.
   // `area.searchArea` was never populated (empty result). `out center` then
@@ -311,12 +313,16 @@ export function buildLandmassQuery(gameArea: GameArea): string {
   return `
     [out:json][timeout:25];
     (
-      way["natural"="water"](${bbox});
-      way["waterway"~"^(river|canal|dock)$"](${bbox});
-      relation["place"~"^(island|islet)$"]["name"](${bbox});
+      way["natural"="water"](${bboxStr});
+      way["waterway"~"^(river|canal|dock)$"](${bboxStr});
+      relation["place"~"^(island|islet)$"]["name"](${bboxStr});
     );
     out geom;
   `;
+}
+
+export function buildLandmassQuery(gameArea: GameArea): string {
+  return buildLandmassQueryForBbox(gameAreaToBoundingBox(gameArea));
 }
 
 export async function fetchLandmassFeaturesInArea(
@@ -330,19 +336,14 @@ export async function fetchLandmassFeaturesInArea(
   }
 
   return getOrFetchCached(landmassCacheKey(gameArea, regionPackId), async () => {
-    try {
-      const payload = await queryOverpass<{ elements: OverpassElement[] }>(
-        buildLandmassQuery(gameArea),
-      );
+    const payload = await queryOverpassWithBboxSplit(
+      buildLandmassQueryForBbox,
+      gameAreaToBoundingBox(gameArea),
+      (ql) => queryOverpass<{ elements: OverpassElement[] }>(ql),
+      mergeOverpassElementPayloads,
+    );
 
-      return computeLandmassFeatures(gameArea, payload.elements);
-    } catch (error) {
-      if (error instanceof OverpassPayloadTooLargeError) {
-        return computeLandmassFeatures(gameArea, []);
-      }
-
-      throw error;
-    }
+    return computeLandmassFeatures(gameArea, payload.elements);
   });
 }
 

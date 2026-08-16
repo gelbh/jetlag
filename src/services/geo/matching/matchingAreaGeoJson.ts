@@ -10,7 +10,6 @@ import {
   type LatLngTuple,
 } from "@/domain/geometry/gameArea/geometry";
 import type { AdminDivisionFeature } from "../overpass/adminDivisionBoundaries";
-import { MAX_ADMIN_DIVISIONS } from "../overpass/adminDivisionBoundaries";
 
 function representativePointFromBoundary(boundary: GameArea): LatLngTuple {
   const box = gameAreaToBoundingBox(boundary);
@@ -107,12 +106,6 @@ export function parseMatchingAreaGeoJson(
 
   if (divisions.length === 0) {
     throw new Error("No named polygon features intersect the play area.");
-  }
-
-  if (divisions.length > MAX_ADMIN_DIVISIONS) {
-    return divisions
-      .sort((left, right) => area(gameAreaToPolygon(left.boundary)) - area(gameAreaToPolygon(right.boundary)))
-      .slice(0, MAX_ADMIN_DIVISIONS);
   }
 
   return divisions.sort((left, right) => left.name.localeCompare(right.name));

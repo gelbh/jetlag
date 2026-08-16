@@ -169,4 +169,41 @@ describe("admin division boundaries", () => {
     const classified = classifyAdminDivisionAtPoint([51.46, -0.15], divisions);
     expect(classified?.name).toBe("Inner Borough");
   });
+
+  it("keeps 51 named divisions instead of slicing to 50", () => {
+    const elements = Array.from({ length: 51 }, (_, i) => {
+      const west = -0.2 + (i % 10) * 0.008;
+      const south = 51.4 + Math.floor(i / 10) * 0.008;
+      const east = west + 0.006;
+      const north = south + 0.006;
+      const wayId = 100 + i;
+      const relationId = 1000 + i;
+      return [
+        {
+          type: "relation" as const,
+          id: relationId,
+          tags: {
+            boundary: "administrative",
+            admin_level: "6",
+            name: `Division ${i}`,
+          },
+          members: [{ type: "way" as const, ref: wayId, role: "outer" }],
+        },
+        {
+          type: "way" as const,
+          id: wayId,
+          geometry: [
+            { lat: south, lon: west },
+            { lat: north, lon: west },
+            { lat: north, lon: east },
+            { lat: south, lon: east },
+            { lat: south, lon: west },
+          ],
+        },
+      ];
+    }).flat();
+
+    const divisions = parseAdminDivisionFeatures(elements, sampleGameArea, 6);
+    expect(divisions).toHaveLength(51);
+  });
 });

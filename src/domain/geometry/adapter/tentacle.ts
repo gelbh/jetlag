@@ -13,7 +13,7 @@ import {
   getCachedVoronoiCellsAsync,
   tentacleSitesFingerprint,
 } from "../voronoi/voronoiCellCache";
-import { assertTentaclePoiBudget } from "../tentacle/tentacleGeometryBudgets";
+import { persistSlimPolygonFeature } from "../progressive/persistSlim";
 
 const POI_ANSWER_ELIMINATION_CACHE_MAX = 16;
 
@@ -124,9 +124,6 @@ export async function tentacleEliminationJsonForAnswer(params: {
     return undefined;
   }
 
-  // Refuse heavy Voronoi/elim work — soft-fail cancel keeps the seeker tab alive.
-  assertTentaclePoiBudget(params.pois.length);
-
   const region = await buildTentaclePoiAnswerEliminationRegion(
     params.anchor,
     params.radiusMeters,
@@ -134,8 +131,16 @@ export async function tentacleEliminationJsonForAnswer(params: {
     params.answeredPoiId,
     params.gameArea,
   );
+  if (!region) {
+    return undefined;
+  }
 
-  return region ? JSON.stringify(region) : undefined;
+  const slimmed = persistSlimPolygonFeature(region);
+  if (!slimmed.ok) {
+    throw new Error(slimmed.message);
+  }
+
+  return JSON.stringify(slimmed.feature);
 }
 
 export type { TentacleSite };
