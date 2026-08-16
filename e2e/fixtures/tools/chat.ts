@@ -1,6 +1,18 @@
-import { type Page, expect } from "@playwright/test";
+import { type Locator, type Page, expect } from "@playwright/test";
 import { dismissMapOnboarding } from "../page-init";
-import { dismissActiveToolPanel } from "./question-wizards";
+import {
+  dismissActiveToolPanel,
+  PENDING_QUESTION_TEXT,
+} from "./question-wizards";
+
+export function questionAlertBanner(page: Page): Locator {
+  return page.getByTestId("question-alert-banner");
+}
+
+/** Game-chat message list — excludes the sticky map answer banner. */
+export function gameChatScroll(page: Page): Locator {
+  return page.locator(".jl-game-chat-scroll");
+}
 
 export async function openChat(page: Page) {
   if (await page.getByLabel("Chat tabs").isVisible().catch(() => false)) {
@@ -19,6 +31,7 @@ export async function openChat(page: Page) {
   const dockChat = page.getByRole("button", { name: "Open chat" });
   if (await dockChat.isVisible().catch(() => false)) {
     await dockChat.click({ force: true });
+    await expect(page.getByLabel("Chat tabs")).toBeVisible({ timeout: 15_000 });
     return;
   }
 
@@ -27,44 +40,64 @@ export async function openChat(page: Page) {
   });
   if (await unreadChat.isVisible().catch(() => false)) {
     await unreadChat.click({ force: true });
+    await expect(page.getByLabel("Chat tabs")).toBeVisible({ timeout: 15_000 });
     return;
   }
 
   const chatTab = page.getByRole("button", { name: "Chat", exact: true });
   if (await chatTab.isVisible().catch(() => false)) {
     await chatTab.click();
+    await expect(page.getByLabel("Chat tabs")).toBeVisible({ timeout: 15_000 });
     return;
   }
 
   throw new Error("Chat control not found on map chrome");
 }
 
-export async function answerInChat(page: Page, label: string) {
-  const answerButton = page.getByRole("button", { name: `Send answer: ${label}` });
-  if (!(await answerButton.isVisible().catch(() => false))) {
+async function resolveAnswerButton(
+  page: Page,
+  name: string | RegExp,
+): Promise<Locator> {
+  let resolved: Locator | undefined;
+  await expect(async () => {
+    const bannerButton = questionAlertBanner(page).getByRole("button", {
+      name,
+    });
+    if (await bannerButton.isVisible().catch(() => false)) {
+      resolved = bannerButton;
+      return;
+    }
+
     await openChat(page);
+    const chatButton = gameChatScroll(page).getByRole("button", { name });
+    await expect(chatButton).toBeVisible({ timeout: 2_000 });
+    resolved = chatButton;
+  }).toPass({ timeout: 20_000 });
+
+  if (!resolved) {
+    throw new Error(`Answer control not found: ${String(name)}`);
   }
-  await expect(answerButton).toBeVisible({ timeout: 20_000 });
+  return resolved;
+}
+
+export async function answerInChat(page: Page, label: string) {
+  const answerButton = await resolveAnswerButton(
+    page,
+    `Send answer: ${label}`,
+  );
   await answerButton.click();
 }
 
 export async function answerPhotoCannotInChat(page: Page) {
-  const answerButton = page.getByRole("button", {
-    name: "I cannot answer the question",
-  });
-  if (!(await answerButton.isVisible().catch(() => false))) {
-    await openChat(page);
-  }
-  await expect(answerButton).toBeVisible({ timeout: 20_000 });
+  const answerButton = await resolveAnswerButton(
+    page,
+    "I cannot answer the question",
+  );
   await answerButton.click();
 }
 
 export async function answerPhotoSentExternallyInChat(page: Page) {
-  const answerButton = page.getByRole("button", { name: "Mark sent" });
-  if (!(await answerButton.isVisible().catch(() => false))) {
-    await openChat(page);
-  }
-  await expect(answerButton).toBeVisible({ timeout: 20_000 });
+  const answerButton = await resolveAnswerButton(page, "Mark sent");
   await answerButton.click();
 }
 
@@ -72,12 +105,27 @@ export async function answerYesInChat(page: Page) {
   await answerInChat(page, "Yes");
 }
 
-export async function expectChatAnswer(page: Page, answer: string) {
-  const answered = page.getByText(new RegExp(`Answered: ${answer}`, "i"));
-  if (!(await answered.isVisible().catch(() => false))) {
-    await openChat(page);
+export async function expectPendingQuestionText(
+  page: Page,
+  pattern: RegExp = PENDING_QUESTION_TEXT,
+) {
+  const banner = questionAlertBanner(page);
+  if (await banner.isVisible().catch(() => false)) {
+    await expect(banner.getByText(pattern)).toBeVisible({ timeout: 20_000 });
+    return;
   }
-  await expect(answered).toBeVisible({
+
+  await openChat(page);
+  await expect(gameChatScroll(page).getByText(pattern)).toBeVisible({
+    timeout: 20_000,
+  });
+}
+
+export async function expectChatAnswer(page: Page, answer: string) {
+  await openChat(page);
+  await expect(
+    gameChatScroll(page).getByText(new RegExp(`Answered: ${answer}`, "i")),
+  ).toBeVisible({
     timeout: 20_000,
   });
 }

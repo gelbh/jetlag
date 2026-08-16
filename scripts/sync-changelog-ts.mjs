@@ -151,3 +151,14 @@ if (entries[0].version !== packageVersion) {
 
 writeFileSync(changelogTsPath, formatChangelogTs(entries));
 console.info(`Synced ${entries.length} changelog entries to ${changelogTsPath}`);
+
+const functionsPackagePath = resolve(projectRoot, "functions/package.json");
+const functionsPackage = JSON.parse(readFileSync(functionsPackagePath, "utf8"));
+if (functionsPackage.version !== packageVersion) {
+  functionsPackage.version = packageVersion;
+  writeFileSync(
+    functionsPackagePath,
+    `${JSON.stringify(functionsPackage, null, 2)}\n`,
+  );
+  console.info(`Synced functions/package.json version to ${packageVersion}`);
+}

@@ -19,6 +19,7 @@ import {
   subscribeBoardEconomyState,
   writeBoardEconomyState,
 } from "../../services/firestore/boardEconomy";
+import { useSessionStore } from "../../state/sessionStore";
 
 export function useBoardEconomy(params: {
   sessionId: string | null;
@@ -26,12 +27,14 @@ export function useBoardEconomy(params: {
   seed: string | null;
 }) {
   const { sessionId, enabled, seed } = params;
+  const roundNumber = useSessionStore((state) => state.session?.roundNumber ?? 0);
+  const roundSeed = seed ? `${seed}:${roundNumber}` : null;
   const [state, setState] = useState<BoardEconomyState | null>(null);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
     /* eslint-disable react-hooks/set-state-in-effect -- clear subscription state when disabled */
-    if (!enabled || !sessionId || !seed) {
+    if (!enabled || !sessionId || !roundSeed) {
       setState(null);
       setReady(false);
       return;
@@ -41,7 +44,7 @@ export function useBoardEconomy(params: {
     let cancelled = false;
     void (async () => {
       try {
-        await ensureBoardEconomyState(sessionId, seed);
+        await ensureBoardEconomyState(sessionId, roundSeed);
         if (cancelled) {
           return;
         }
@@ -59,7 +62,7 @@ export function useBoardEconomy(params: {
       cancelled = true;
       unsub?.();
     };
-  }, [enabled, sessionId, seed]);
+  }, [enabled, sessionId, roundSeed]);
 
   const persist = useCallback(
     async (next: BoardEconomyState) => {
@@ -78,10 +81,10 @@ export function useBoardEconomy(params: {
       cardDraw?: number,
       cardKeep?: number,
     ): Promise<{ mustDiscard: number; needsPick: boolean } | null> => {
-      if (!enabled || !sessionId || !seed) {
+      if (!enabled || !sessionId || !roundSeed) {
         return null;
       }
-      const current = await ensureBoardEconomyState(sessionId, seed);
+      const current = await ensureBoardEconomyState(sessionId, roundSeed);
       if (current.pendingPick) {
         return {
           mustDiscard: enforceHandLimit(current.hand, current.handLimit)
@@ -102,7 +105,7 @@ export function useBoardEconomy(params: {
         needsPick: advanced.pendingPick !== null,
       };
     },
-    [enabled, persist, seed, sessionId],
+    [enabled, persist, roundSeed, sessionId],
   );
 
   const confirmDrawPick = useCallback(

@@ -4,8 +4,7 @@ import {
   createHostSession,
   createMultiplayerContexts,
   completeRadarSolo,
-  openChat,
-  PENDING_QUESTION_TEXT,
+  expectPendingQuestionText,
   runHiderAnswerFlow,
   sendMatchingToHiders,
   sendMeasuringToHiders,
@@ -13,10 +12,9 @@ import {
   sendTentacleToHiders,
   sendThermometerToHiders,
   clickToolDockButton,
-  clickMapCenter,
-  advanceWizard,
-  waitForWizardNext,
+  expectAskHud,
   expectSendToHidersInViewport,
+  placeAskAnchor,
   selectFirstRadarDistance,
 } from "../../fixtures";
 
@@ -29,12 +27,9 @@ test.describe("multiplayer question tools", () => {
     const { hostPage } = hostHider;
 
     await clickToolDockButton(hostPage, "Radar");
-    await clickMapCenter(hostPage);
-    await waitForWizardNext(hostPage);
-    await advanceWizard(hostPage);
+    await expectAskHud(hostPage);
+    await placeAskAnchor(hostPage);
     await selectFirstRadarDistance(hostPage);
-    await waitForWizardNext(hostPage);
-    await advanceWizard(hostPage);
     await expectSendToHidersInViewport(hostPage);
   });
 
@@ -60,8 +55,7 @@ test.describe("multiplayer question tools", () => {
     await sendTentacleToHiders(hostPage);
 
     await expect(async () => {
-      await openChat(guestPage);
-      await expect(guestPage.getByText(PENDING_QUESTION_TEXT).first()).toBeVisible();
+      await expectPendingQuestionText(guestPage);
     }).toPass({ timeout: 30_000 });
   });
 });

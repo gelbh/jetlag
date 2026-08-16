@@ -1100,6 +1100,24 @@ service cloud.firestore {
       allow list, create, update, delete: if false;
     }
 
+    // Global client min version floor (hybrid kill-switch). Distinct from peer
+    // session hostAppVersion / appConfig hotfix grace.
+    match /ops/{docId} {
+      allow get: if isSignedIn() && docId == 'clientMinVersion';
+      allow list: if false;
+      allow create, update: if isAdmin()
+        && docId == 'clientMinVersion'
+        && request.resource.data.keys().hasOnly(['minVersion', 'updatedAt'])
+        && request.resource.data.minVersion is string
+        && request.resource.data.minVersion.size() > 0
+        && request.resource.data.minVersion.size() <= 32
+        && (
+          !('updatedAt' in request.resource.data)
+          || request.resource.data.updatedAt is string
+        );
+      allow delete: if isAdmin() && docId == 'clientMinVersion';
+    }
+
     match /_rateLimits/{docId} {
       allow read, write: if false;
     }

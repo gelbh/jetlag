@@ -71,6 +71,30 @@ describe("remapBundledSeaLevelSeedToGameArea", () => {
     expect(
       sampling!.cellElevations.every((value) => value === 18),
     ).toBe(true);
+    expect(sampling!.complete).toBe(false);
+  });
+
+  it("marks complete when seed is dense enough for the session fine target", () => {
+    const packBbox = {
+      south: 53.24,
+      west: -6.45,
+      north: 53.43,
+      east: -6.07,
+    };
+    const seed = buildUniformSeed(packBbox, 20, 22);
+    seed.complete = true;
+
+    const sampling = remapBundledSeaLevelSeedToGameArea(
+      seed,
+      DUBLIN_CITY_GAME_AREA,
+    );
+
+    expect(sampling).not.toBeNull();
+    expect(sampling!.divisions).toBe(20);
+    expect(sampling!.complete).toBe(true);
+    expect(
+      sampling!.cellElevations.every((value) => Number.isFinite(value)),
+    ).toBe(true);
   });
 
   it("rejects sparse seeds that cannot cover the session grid", () => {

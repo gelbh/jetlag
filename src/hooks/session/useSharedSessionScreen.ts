@@ -178,7 +178,7 @@ export function useSharedSessionScreen({
   const chatMessages = useSessionMessagesSync(sessionId);
   const syncStatus = useSyncStatus();
 
-  const { hasUnreadChat, unreadCount } = useChatUnread({
+  const { hasUnreadChat, unreadCount, acknowledgeFingerprints } = useChatUnread({
     sessionId,
     viewerUid: uid ?? undefined,
     messages: chatMessages,
@@ -226,6 +226,7 @@ export function useSharedSessionScreen({
     syncStatus,
     hasUnreadChat,
     unreadCount,
+    acknowledgeFingerprints,
     liveNotificationPreferences,
     enableNotifications,
     updateNotificationPreferences,

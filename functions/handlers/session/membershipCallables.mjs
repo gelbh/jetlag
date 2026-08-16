@@ -15,6 +15,7 @@ import {
 } from "../../session/hostLeave.mjs";
 import {
   REMATCH_NOT_MEMBER,
+  REMATCH_NOT_OVER,
   REMATCH_SESSION_NOT_FOUND,
   resetSessionForRematchHandler,
 } from "../../session/resetSessionForRematch.mjs";
@@ -46,6 +47,9 @@ export const resetSessionForRematch = onCall(
       }
       if (error instanceof Error && error.message === REMATCH_NOT_MEMBER) {
         throw new HttpsError("permission-denied", "Session membership required.");
+      }
+      if (error instanceof Error && error.message === REMATCH_NOT_OVER) {
+        throw new HttpsError("failed-precondition", "Round is not over.");
       }
       throw error;
     }

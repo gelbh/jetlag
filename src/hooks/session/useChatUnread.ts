@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   allMessageFingerprints,
   baselineAcknowledgedFingerprints,
@@ -12,6 +12,12 @@ interface UseChatUnreadParams {
   viewerUid: string | undefined;
   messages: readonly SessionMessageRecord[];
   isChatOpen: boolean;
+}
+
+export interface UseChatUnreadResult {
+  hasUnreadChat: boolean;
+  unreadCount: number;
+  acknowledgeFingerprints: (fingerprints: readonly string[]) => void;
 }
 
 function loadAcknowledgedFingerprints(storageKey: string): Set<string> {
@@ -56,7 +62,7 @@ export function useChatUnread({
   viewerUid,
   messages,
   isChatOpen,
-}: UseChatUnreadParams): { hasUnreadChat: boolean; unreadCount: number } {
+}: UseChatUnreadParams): UseChatUnreadResult {
   const storageKey =
     sessionId && viewerUid
       ? chatReadStorageKey(sessionId, viewerUid)
@@ -120,5 +126,25 @@ export function useChatUnread({
 
   const hasUnreadChat = unreadCount > 0;
 
-  return { hasUnreadChat, unreadCount };
+  const acknowledgeFingerprints = useCallback(
+    (fingerprints: readonly string[]) => {
+      if (fingerprints.length === 0) {
+        return;
+      }
+
+      setAcknowledged((previous) => {
+        const next = new Set(previous);
+        for (const fingerprint of fingerprints) {
+          next.add(fingerprint);
+        }
+        if (storageKey) {
+          saveAcknowledgedFingerprints(storageKey, next);
+        }
+        return next;
+      });
+    },
+    [storageKey],
+  );
+
+  return { hasUnreadChat, unreadCount, acknowledgeFingerprints };
 }

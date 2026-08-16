@@ -1,4 +1,4 @@
-import { Suspense, useCallback, useMemo, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AppNavigate } from "../navigation/AppNavigate";
 import { MapLibreGeoJsonOverlay } from "../components/map/helpers/MapLibreGeoJsonOverlay";
 import { cssPxDashToMapLibre } from "../components/map/helpers/cssPxDashToMapLibre";
@@ -16,7 +16,6 @@ import {
 import type { HidingZoneStepId } from "../components/hider/hidingZoneSteps";
 import {
   isWizardPlacePhaseStep,
-  sheetSnapFromStepId,
 } from "../domain/wizard/phaseToSheetSnap";
 import { timeTrapForHider } from "../domain/expansion/timeTraps";
 import { useTimeTrapsSync } from "../hooks/session/useTimeTrapsSync";
@@ -53,6 +52,7 @@ import {
 } from "../domain/geometry/gameArea/geometry";
 import type { MapViewportBounds } from "../domain/map/transitViewport";
 import { effectiveMapStyle, applyMapStylePreferenceChange } from "../domain/device/power/powerProfile";
+import { messageFingerprint } from "../domain/device/chrome/chatUnread";
 import { computeHiderTruthReplyAsync } from "../domain/questions/ui";
 import { resolvePendingQuestionTruthReference } from "../domain/questions/hiderTruth/resolveHiderTruthReference";
 import { MAP_ANNOTATION_COLORS } from "../domain/map/mapAnnotationColors";
@@ -152,6 +152,7 @@ export function HiderMapScreen() {
     syncStatus,
     hasUnreadChat,
     unreadCount,
+    acknowledgeFingerprints,
     authReady,
     isRemote,
     enableNotifications,
@@ -178,9 +179,15 @@ export function HiderMapScreen() {
     null,
   );
   const [chatAnswerError, setChatAnswerError] = useState<string | null>(null);
+  const [answerSubmitting, setAnswerSubmitting] = useState(false);
+  const answerInFlightRef = useRef(false);
   const [optimisticAnswers, setOptimisticAnswers] = useState<
     ReadonlyMap<string, string>
   >(() => new Map());
+  const answeredPendingIds = useMemo(
+    () => new Set(optimisticAnswers.keys()),
+    [optimisticAnswers],
+  );
   const [mapViewport, setMapViewport] = useState<MapViewportState | null>(
     null,
   );
@@ -326,6 +333,171 @@ export function HiderMapScreen() {
   useWakeLock(keepScreenAwake || (timer.running && !lowPowerMode));
   const { answerPendingQuestion, postSystemMessage } = usePendingQuestionActions();
 
+  useEffect(() => {
+    /* eslint-disable react-hooks/set-state-in-effect -- prune optimistic answers once remote status catches up */
+    setOptimisticAnswers((previous) => {
+      if (previous.size === 0) {
+        return previous;
+      }
+
+      let changed = false;
+      const next = new Map(previous);
+      for (const pendingQuestionId of previous.keys()) {
+        const pending = pendingQuestions.find(
+          (question) => question.id === pendingQuestionId,
+        );
+        if (
+          !pending ||
+          pending.status === "answered" ||
+          pending.status === "resolved" ||
+          pending.status === "cancelled"
+        ) {
+          next.delete(pendingQuestionId);
+          changed = true;
+        }
+      }
+      return changed ? next : previous;
+    });
+    /* eslint-enable react-hooks/set-state-in-effect */
+  }, [pendingQuestions]);
+
+  const submitHiderAnswer = useCallback(
+    async (
+      pendingQuestionId: string,
+      messageId: string,
+      answer: unknown,
+      selectedReply: string,
+      deadlineExpired?: boolean,
+    ) => {
+      if (
+        !sessionId ||
+        answerInFlightRef.current ||
+        optimisticAnswers.has(pendingQuestionId)
+      ) {
+        return;
+      }
+
+      answerInFlightRef.current = true;
+      setAnswerSubmitting(true);
+      setChatAnswerError(null);
+
+      const pending = pendingQuestions.find(
+        (question) => question.id === pendingQuestionId,
+      );
+      if (!pending) {
+        setChatAnswerError("Could not find that question. Try again.");
+        answerInFlightRef.current = false;
+        setAnswerSubmitting(false);
+        return;
+      }
+
+      const messageBeforeAnswer = messages.find(
+        (entry) => entry.id === messageId,
+      );
+
+      try {
+        setOptimisticAnswers((previous) => {
+          const next = new Map(previous);
+          next.set(pendingQuestionId, selectedReply);
+          return next;
+        });
+
+        const user = await ensureAnonymousUser();
+        await answerPendingQuestion(
+          sessionId,
+          pendingQuestionId,
+          messageId,
+          answer,
+          selectedReply,
+          deadlineExpired
+            ? {
+                deadlineExpired: true,
+                senderUid: user.uid,
+                senderRole: "hider",
+              }
+            : undefined,
+        );
+
+        acknowledgeFingerprints([
+          messageFingerprint(
+            messageBeforeAnswer ?? {
+              id: messageId,
+              sessionId,
+              channel: "game",
+              senderUid: "",
+              senderRole: "seeker",
+              createdAt: "",
+              status: "pending",
+            },
+          ),
+        ]);
+
+        try {
+          if (!deadlineExpired && boardEconomyEnabled) {
+            const reward = await boardEconomy.applyAnswerReward(
+              pending.toolType,
+              pending.cardDraw,
+              pending.cardKeep,
+            );
+            if (reward && !reward.needsPick) {
+              setHandSheetOpen(true);
+            }
+          }
+
+          const answerTruthReference = truthContext
+            ? resolvePendingQuestionTruthReference(pending, truthContext)
+            : { point: null as LatLngTuple | null };
+          const truth = await computeHiderTruthReplyAsync(
+            pending,
+            answerTruthReference.point,
+            gameArea ?? undefined,
+          );
+          if (
+            truth &&
+            !truth.unavailable &&
+            truth.replyId.length > 0 &&
+            selectedReply !== truth.replyId
+          ) {
+            const selectedLabel =
+              pending.replyOptions.find((option) => option.id === selectedReply)
+                ?.label ?? selectedReply;
+            setTruthReveal({ truth, selectedReply, selectedLabel });
+          }
+        } catch {
+          // Answer already saved; board/truth side effects are best-effort.
+        }
+      } catch (error) {
+        setOptimisticAnswers((previous) => {
+          const next = new Map(previous);
+          if (next.get(pendingQuestionId) === selectedReply) {
+            next.delete(pendingQuestionId);
+          }
+          return next;
+        });
+        setChatAnswerError(
+          error instanceof Error
+            ? error.message
+            : "Could not save your answer. Try again.",
+        );
+      } finally {
+        answerInFlightRef.current = false;
+        setAnswerSubmitting(false);
+      }
+    },
+    [
+      acknowledgeFingerprints,
+      answerPendingQuestion,
+      boardEconomy,
+      boardEconomyEnabled,
+      gameArea,
+      messages,
+      optimisticAnswers,
+      pendingQuestions,
+      sessionId,
+      truthContext,
+    ],
+  );
+
   const postGameSystem = useCallback(
     async (text: string) => {
       if (!sessionId || !uid) {
@@ -457,8 +629,8 @@ export function HiderMapScreen() {
 
   const [hidingZoneStepId, setHidingZoneStepId] =
     useState<HidingZoneStepId>("method");
-  const [wizardPeeked, setWizardPeeked] = useState(false);
-  const mapPickEnabled = hidingZoneStepId === "location";
+  const mapPickEnabled =
+    hidingZoneStepId === "location" || hidingZoneStepId === "confirm";
 
   const zoneTool = useHiderZoneTool({
     sessionId: sessionId ?? "",
@@ -486,7 +658,6 @@ export function HiderMapScreen() {
 
   const handleHidingZoneStepChange = useCallback((stepId: HidingZoneStepId) => {
     setHidingZoneStepId(stepId);
-    setWizardPeeked(sheetSnapFromStepId(stepId) === "peek");
   }, []);
 
   const mapAttentionActive =
@@ -570,16 +741,6 @@ export function HiderMapScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- moveMode gates sheet openers during Play Move
   }, [overlay.openCodes, zoneTool.closeWizard, zoneTool.moveMode]);
 
-  const handleMapPanStart = useCallback(() => {
-    if (zoneTool.wizardOpen) {
-      setWizardPeeked(true);
-    }
-  }, [zoneTool.wizardOpen, setWizardPeeked]);
-
-  const handleMapPanEnd = useCallback(() => {
-    setWizardPeeked(false);
-  }, [setWizardPeeked]);
-
   const openLogExclusive = useCallback(() => {
     if (zoneTool.moveMode) {
       return;
@@ -650,8 +811,6 @@ export function HiderMapScreen() {
         >
           <MapViewportTracker
             onViewportChange={handleMapViewportChange}
-            onUserPanStart={handleMapPanStart}
-            onUserPanEnd={handleMapPanEnd}
           />
           <GameAreaMask gameArea={gameArea} />
           <AnnotationLayer
@@ -816,8 +975,6 @@ export function HiderMapScreen() {
         onHidingZoneStepChange={handleHidingZoneStepChange}
         onSearchThisArea={handleSearchThisArea}
         sheetBlocksWizard={sheetBlocksWizard}
-        wizardPeeked={wizardPeeked}
-        onWizardPeekedChange={setWizardPeeked}
         onOpenWizard={openWizardExclusive}
         onOpenChat={openChatExclusive}
         onOpenSettings={openSettingsExclusive}
@@ -886,95 +1043,9 @@ export function HiderMapScreen() {
           truthsLoading,
           truthReferenceModes,
           answerError: chatAnswerError,
-          onAnswerQuestion: async (
-            pendingQuestionId,
-            messageId,
-            answer,
-            selectedReply,
-            deadlineExpired,
-          ) => {
-            if (!sessionId) {
-              return;
-            }
-
-            setChatAnswerError(null);
-
-            const pending = pendingQuestions.find(
-              (question) => question.id === pendingQuestionId,
-            );
-            if (!pending) {
-              setChatAnswerError("Could not find that question. Try again.");
-              return;
-            }
-
-            try {
-              setOptimisticAnswers((previous) => {
-                const next = new Map(previous);
-                next.set(pendingQuestionId, selectedReply);
-                return next;
-              });
-
-              const user = await ensureAnonymousUser();
-              await answerPendingQuestion(
-                sessionId,
-                pendingQuestionId,
-                messageId,
-                answer,
-                selectedReply,
-                deadlineExpired
-                  ? {
-                      deadlineExpired: true,
-                      senderUid: user.uid,
-                      senderRole: "hider",
-                    }
-                  : undefined,
-              );
-
-              if (!deadlineExpired && boardEconomyEnabled) {
-                const reward = await boardEconomy.applyAnswerReward(
-                  pending.toolType,
-                  pending.cardDraw,
-                  pending.cardKeep,
-                );
-                if (reward && !reward.needsPick) {
-                  setHandSheetOpen(true);
-                }
-              }
-
-              const answerTruthReference = truthContext
-                ? resolvePendingQuestionTruthReference(pending, truthContext)
-                : { point: null as LatLngTuple | null };
-              const truth = await computeHiderTruthReplyAsync(
-                pending,
-                answerTruthReference.point,
-                gameArea,
-              );
-              if (
-                truth &&
-                !truth.unavailable &&
-                truth.replyId.length > 0 &&
-                selectedReply !== truth.replyId
-              ) {
-                const selectedLabel =
-                  pending.replyOptions.find((option) => option.id === selectedReply)
-                    ?.label ?? selectedReply;
-                setTruthReveal({ truth, selectedReply, selectedLabel });
-              }
-            } catch (error) {
-              setOptimisticAnswers((previous) => {
-                const next = new Map(previous);
-                if (next.get(pendingQuestionId) === selectedReply) {
-                  next.delete(pendingQuestionId);
-                }
-                return next;
-              });
-              setChatAnswerError(
-                error instanceof Error
-                  ? error.message
-                  : "Could not save your answer. Try again.",
-              );
-            }
-          },
+          answerSubmitting,
+          answeredPendingIds,
+          onAnswerQuestion: submitHiderAnswer,
         }}
       />
       {boardEconomyEnabled ? (

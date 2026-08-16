@@ -21,16 +21,53 @@ const STORAGE_QUOTA_EXCEEDED = /exceeded the quota|quota has been exceeded/i;
 const FIRESTORE_PERMISSION_DENIED =
   /missing or insufficient permissions/i;
 const AUTH_NETWORK_FAILED = /auth\/network-request-failed/i;
-const STORAGE_UNAUTHORIZED = /storage\/unauthorized/i;
 const LEAFLET_POS_ERROR = /_leaflet_pos/i;
 const LEAFLET_CLASSLIST_ERROR = /evaluating 'e\.classList'/i;
 const BATTERY_ADD_EVENT_LISTENER = /addEventListener is not a function/i;
 const IDB_DATABASE_DELETED = /Database deleted by request of the user/i;
 const RECAPTCHA_ALREADY_RENDERED = /reCAPTCHA has already been rendered/i;
+/**
+ * Proven VT abort noise. Includes residual browser wording after revealRouteTransition
+ * skips when `document.visibilityState === "hidden"`.
+ */
 const VIEW_TRANSITION_ABORTED =
-  /Transition was aborted because of invalid state|Skipping view transition because document visibility state has become hidden/i;
+  /Transition was aborted because of invalid state|Skipping view transition because document visibility state has become hidden|Skipped ViewTransition due to document being hidden/i;
 const APP_CHECK_INVALID_SESSION = /Invalid session .*: Invalid input/i;
 export const JOIN_PERMISSION_DENIED_MESSAGE = "Join permission denied";
+
+/**
+ * Production fixtures — mirror `HTTPS_MSG_*` in
+ * `functions/session/expectedSessionUxHttpsErrors.mjs`.
+ * Client denylist belt for residual capture from old clients.
+ */
+export const EXPECTED_JOIN_UX_MESSAGES = [
+  "Wrong role code.",
+  "Role code is required.",
+  "App version incompatible.",
+  "Client update required.",
+  "Join without a request — this side is empty.",
+  "Join request is not pending.",
+  "Join request expired.",
+  "Invalid join request.",
+  "Not allowed for this join request.",
+  "Session uses legacy join.",
+] as const;
+
+const EXPECTED_JOIN_UX_MESSAGE_SET = new Set<string>(EXPECTED_JOIN_UX_MESSAGES);
+
+const CALLABLE_CODE_PREFIX =
+  /^(?:failed-precondition|permission-denied|invalid-argument|unauthenticated|not-found|resource-exhausted|internal)[:\s]+/i;
+
+function normalizeCallableMessage(message: string): string {
+  return message.replace(CALLABLE_CODE_PREFIX, "").trim();
+}
+
+function isExpectedJoinUxMessage(message: string): boolean {
+  return (
+    EXPECTED_JOIN_UX_MESSAGE_SET.has(message) ||
+    EXPECTED_JOIN_UX_MESSAGE_SET.has(normalizeCallableMessage(message))
+  );
+}
 
 /** Belt-and-suspenders for Sentry.init ignoreErrors — high-volume drop subset only (not the full classify matrix; not canaries). */
 export const CLIENT_SENTRY_IGNORE_ERRORS: Array<string | RegExp> = [
@@ -40,6 +77,7 @@ export const CLIENT_SENTRY_IGNORE_ERRORS: Array<string | RegExp> = [
   "Session already ended.",
   "Only the host can do that.",
   JOIN_PERMISSION_DENIED_MESSAGE,
+  ...EXPECTED_JOIN_UX_MESSAGES,
 ];
 
 export type SentryEventLike = {
@@ -64,6 +102,7 @@ function isGenericClientNoiseMessage(message: string): boolean {
     isRecaptchaTimeoutMessage(message) ||
     VIEW_TRANSITION_ABORTED.test(message) ||
     isExpectedSessionLeaveMessage(message) ||
+    isExpectedJoinUxMessage(message) ||
     isBrowserExtensionNoiseMessage(message) ||
     isAppCheckSoftFailureMessage(message)
   );
@@ -114,16 +153,12 @@ export function classifyClientSentryEvent(
       return "meter_quota";
     }
 
-    if (
-      exception.type === "FirebaseError" &&
-      FIRESTORE_PERMISSION_DENIED.test(value)
-    ) {
-      return "drop";
-    }
+    // Firestore permissions + storage/unauthorized: reopened (send) — not expected-only UX.
+    // Narrow expected join UX messages are dropped via isExpectedJoinUxMessage below.
 
     if (
       exception.type === "FirebaseError" &&
-      (AUTH_NETWORK_FAILED.test(value) || STORAGE_UNAUTHORIZED.test(value))
+      AUTH_NETWORK_FAILED.test(value)
     ) {
       return "drop";
     }

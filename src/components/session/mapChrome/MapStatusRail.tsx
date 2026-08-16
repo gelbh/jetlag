@@ -123,6 +123,7 @@ export function MapStatusRail({
   const {
     pendingJoinRequest,
     joinRequestBusy,
+    joinRequestError,
     handleAcceptJoinRequest,
     handleDeclineJoinRequest,
   } = useLeaderJoinRequests({
@@ -308,6 +309,7 @@ export function MapStatusRail({
         <RoleJoinRequestAlert
           request={pendingJoinRequest}
           busy={joinRequestBusy}
+          error={joinRequestError}
           onAccept={handleAcceptJoinRequest}
           onDecline={handleDeclineJoinRequest}
         />
