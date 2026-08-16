@@ -403,10 +403,14 @@ export function MapScreenChrome({
     />
   );
 
+  const measuringLodRefining =
+    measuringTool.measuringLodPhase === "coarse" ||
+    measuringTool.measuringLodPhase === "refining";
+
   const header = (
     <>
       {statusRail}
-      <MapScreenChromeBanners />
+      <MapScreenChromeBanners measuringLodRefining={measuringLodRefining} />
     </>
   );
 

@@ -6,6 +6,7 @@ import {
   MEASURING_OUTPUT_MAX_JSON_CHARS,
   MEASURING_OUTPUT_MAX_VERTICES,
   MEASURING_OUTPUT_OVER_BUDGET_MESSAGE,
+  MEASURING_PERSIST_OVER_BUDGET_MESSAGE,
   assertMeasuringGeometryBudget,
   assertMeasuringLinearVertexBudget,
   assertMeasuringMultiPlaceBudget,
@@ -13,6 +14,7 @@ import {
   countLineStringVertices,
   countPolygonVertices,
   measuringGeometryJsonChars,
+  persistSlimMeasuringGeometry,
   softenMeasuringOutputToBudget,
 } from "./measuringGeometryBudgets";
 
@@ -205,8 +207,8 @@ describe("measuring output complexity budget", () => {
     }
   });
 
-  it("refuses RLBT-class golf closer fixtures that stay over after soften", () => {
-    // 1600 squares × 5 verts = 8000 — mirrors golf closer scale; squares resist soften.
+  it("persist-slim fails RLBT-class fixtures with storage copy only", () => {
+    // 1600 squares × 5 verts = 8000 — mirrors golf closer scale; squares resist slim.
     const golf = separateSquaresMultiPolygon(1_600);
     expect(countPolygonVertices(golf)).toBe(8_000);
     expect(measuringGeometryJsonChars(golf)).toBeGreaterThan(50_000);
@@ -217,11 +219,13 @@ describe("measuring output complexity budget", () => {
       expect(asserted.message).toBe(MEASURING_OUTPUT_OVER_BUDGET_MESSAGE);
     }
 
-    const softened = softenMeasuringOutputToBudget(golf);
-    expect(softened.ok).toBe(false);
-    if (!softened.ok) {
-      expect(softened.message).toBe(MEASURING_OUTPUT_OVER_BUDGET_MESSAGE);
+    const slimmed = persistSlimMeasuringGeometry(golf);
+    expect(slimmed.ok).toBe(false);
+    if (!slimmed.ok) {
+      expect(slimmed.message).toBe(MEASURING_PERSIST_OVER_BUDGET_MESSAGE);
+      expect(slimmed.message).not.toBe(MEASURING_OUTPUT_OVER_BUDGET_MESSAGE);
     }
+    expect(softenMeasuringOutputToBudget(golf).ok).toBe(false);
   });
 
   it("asserts by vertexCount / jsonChars without a Feature", () => {
