@@ -5,6 +5,7 @@ import type {
 } from "@/domain/map/annotations";
 import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
 import { tentacleEliminationJsonForAnswer } from "@/domain/geometry/tentacle/tentacleGeometry";
+import { MEASURING_PERSIST_OVER_BUDGET_MESSAGE } from "@/domain/geometry/measuring/measuringGeometryBudgets";
 import type { DistanceUnit } from "@/domain/map/distance";
 import { MAP_ANNOTATION_COLORS } from "@/domain/map/mapAnnotationColors";
 import {
@@ -148,14 +149,24 @@ export async function commitTentacle(input: CommitTentacleInput): Promise<void> 
   }
 
   const selectedPoi = tentaclePois.find((poi) => poi.id === selectedPoiId);
-  const eliminationJson = await tentacleEliminationJsonForAnswer({
-    anchor: tentacleCenter,
-    radiusMeters: searchRadiusMeters,
-    pois: tentaclePois,
-    answeredPoiId: selectedPoi?.id,
-    outOfReach: tentacleOutOfReach,
-    gameArea,
-  });
+  let eliminationJson: string | undefined;
+  try {
+    eliminationJson = await tentacleEliminationJsonForAnswer({
+      anchor: tentacleCenter,
+      radiusMeters: searchRadiusMeters,
+      pois: tentaclePois,
+      answeredPoiId: selectedPoi?.id,
+      outOfReach: tentacleOutOfReach,
+      gameArea,
+    });
+  } catch (error) {
+    setMapError(
+      error instanceof Error
+        ? error.message
+        : MEASURING_PERSIST_OVER_BUDGET_MESSAGE,
+    );
+    return;
+  }
 
   const metadata: AnnotationRecord["metadata"] = {
     createdAt: new Date().toISOString(),

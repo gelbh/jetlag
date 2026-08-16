@@ -590,6 +590,7 @@ export function useTentacleTool({
     handleMapClick,
     selectDraftPoi: handleSelectPoi,
     resetDraft,
+    tentacleLodPhase: "complete" as const,
     commit,
     panel,
     hud,

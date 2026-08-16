@@ -12,6 +12,7 @@ import {
 } from "../../domain/questions";
 import type { TentaclePoi } from "../../domain/map/annotations";
 import type { MeasuringLodPhase } from "../../domain/geometry/measuring/measuringLod";
+import type { PolygonLodPhase } from "../../domain/geometry/progressive/polygonLod";
 
 /** Ask Map HUD bundle returned by migrated question tools. */
 export type AskToolHudBundle = {
@@ -31,8 +32,12 @@ export interface MatchingToolApi {
     matchingNearestFeaturePoint: LatLngTuple | null;
     matchingBoundaryPreview: Feature<Polygon | MultiPolygon> | null;
     matchingEliminationPreview: Feature<Polygon | MultiPolygon> | null;
+    matchingLodPhase?: PolygonLodPhase;
+    matchingCatalogComplete?: boolean;
     seekerResolving: boolean;
   };
+  matchingLodPhase: PolygonLodPhase;
+  matchingCatalogComplete: boolean;
   placementCrosshair: boolean;
   /** Includes answer — draft JSON alone skips republish when Yes/No changes. */
   publishSignature: string;
@@ -77,6 +82,7 @@ export interface TentacleToolApi {
   /** Select a draft POI (map marker or list); provisional gate unchanged. */
   selectDraftPoi: (poiId: string) => void;
   resetDraft: () => void;
+  tentacleLodPhase: PolygonLodPhase;
   panel: ReactNode;
   hud: AskToolHudBundle;
 }
@@ -147,8 +153,12 @@ export function createIdleHeavyMapTools(): HeavyMapToolsApi {
       matchingNearestFeaturePoint: null,
       matchingBoundaryPreview: null,
       matchingEliminationPreview: null,
+      matchingLodPhase: "complete",
+      matchingCatalogComplete: true,
       seekerResolving: false,
     },
+    matchingLodPhase: "complete",
+    matchingCatalogComplete: true,
     placementCrosshair: false,
     publishSignature: "idle",
     handleMapClick: noopMapClick,
@@ -191,6 +201,7 @@ export function createIdleHeavyMapTools(): HeavyMapToolsApi {
     handleMapClick: noopMapClick,
     selectDraftPoi: () => undefined,
     resetDraft: () => undefined,
+    tentacleLodPhase: "complete",
     panel: null,
     hud: idleTentacleHud,
   };

@@ -4,6 +4,7 @@ import {
   buildMatchingEliminationRegion,
   buildSameNearestRegion,
 } from "@/domain/geometry/measuring/matchingGeometry";
+import { persistSlimPolygonFeature } from "@/domain/geometry/progressive/persistSlim";
 import {
   deserializeMatchingFeatures,
   serializeMatchingFeatures,
@@ -61,15 +62,21 @@ export function MatchingEditFields({
         return { type: "close" as const };
       }
 
+      const slimmedBoundary = persistSlimPolygonFeature(boundaryRegion);
+      const slimmedElim = persistSlimPolygonFeature(eliminationRegion);
+      if (!slimmedBoundary.ok || !slimmedElim.ok) {
+        return { type: "close" as const };
+      }
+
       return {
         type: "save" as const,
         annotation: {
           ...annotation,
-          geometry: eliminationRegion,
+          geometry: slimmedElim.feature,
           metadata: {
             ...annotation.metadata,
             matchingAnswer,
-            matchingBoundaryJson: JSON.stringify(boundaryRegion),
+            matchingBoundaryJson: JSON.stringify(slimmedBoundary.feature),
             matchingFeaturesJson: serializeMatchingFeatures(features),
           },
         },

@@ -1,9 +1,17 @@
 import { HudBanner } from "../hud/HudBanner";
 
-const REFINE_TITLE = "Refining measure";
-const REFINE_BODY = "Adding detail to the shaded area…";
+const DEFAULT_TITLE = "Refining measure";
+const DEFAULT_BODY = "Adding detail to the shaded area…";
 
-export function MeasuringRefineMapChip({ visible }: { visible: boolean }) {
+export function MeasuringRefineMapChip({
+  visible,
+  title = DEFAULT_TITLE,
+  body = DEFAULT_BODY,
+}: {
+  visible: boolean;
+  title?: string;
+  body?: string;
+}) {
   return (
     <HudBanner
       visible={visible}
@@ -15,9 +23,9 @@ export function MeasuringRefineMapChip({ visible }: { visible: boolean }) {
         aria-live="polite"
       >
         <p className="font-display text-xs font-semibold uppercase tracking-[0.08em] text-highlight">
-          {REFINE_TITLE}
+          {title}
         </p>
-        <p className="text-sm text-ink">{REFINE_BODY}</p>
+        <p className="text-sm text-ink">{body}</p>
       </div>
     </HudBanner>
   );

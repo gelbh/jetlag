@@ -18,8 +18,11 @@ import {
   adminDivisionCacheKey,
   getOrFetchCached,
 } from "../cache";
-
-export const MAX_ADMIN_DIVISIONS = 50;
+import {
+  mergeOverpassElementPayloads,
+  queryOverpassWithBboxSplit,
+  type OverpassBbox,
+} from "./overpassBboxSplit";
 
 export type { AdminDivisionFeature } from "@/domain/geo/types";
 
@@ -250,30 +253,36 @@ export function parseAdminDivisionFeatures(
     });
   }
 
-  return divisions
-    .sort((left, right) => left.id.localeCompare(right.id))
-    .slice(0, MAX_ADMIN_DIVISIONS);
+  return divisions.sort((left, right) => left.id.localeCompare(right.id));
 }
 
-export function buildAdminDivisionQuery(
-  gameArea: GameArea,
+export function buildAdminDivisionQueryForBbox(
+  bbox: OverpassBbox,
   adminLevel: number,
 ): string {
-  const { south, west, north, east } = gameAreaToBoundingBox(gameArea);
-
-  const bbox = `${south},${west},${north},${east}`;
+  const bboxStr = `${bbox.south},${bbox.west},${bbox.north},${bbox.east}`;
 
   // Explicit bbox — `area.searchArea` was never populated, so admin queries
   // returned zero relations in production.
   return `
     [out:json][timeout:25];
     (
-      relation["boundary"="administrative"]["admin_level"="${adminLevel}"]["name"](${bbox});
+      relation["boundary"="administrative"]["admin_level"="${adminLevel}"]["name"](${bboxStr});
     );
     out center;
     >;
     out geom qt;
   `;
+}
+
+export function buildAdminDivisionQuery(
+  gameArea: GameArea,
+  adminLevel: number,
+): string {
+  return buildAdminDivisionQueryForBbox(
+    gameAreaToBoundingBox(gameArea),
+    adminLevel,
+  );
 }
 
 export async function fetchAdminDivisionFeaturesInArea(
@@ -288,8 +297,11 @@ export async function fetchAdminDivisionFeaturesInArea(
   return getOrFetchCached(
     adminDivisionCacheKey(gameArea, adminLevel),
     async () => {
-      const payload = await queryOverpass<{ elements: OverpassElement[] }>(
-        buildAdminDivisionQuery(gameArea, adminLevel),
+      const payload = await queryOverpassWithBboxSplit(
+        (bbox) => buildAdminDivisionQueryForBbox(bbox, adminLevel),
+        gameAreaToBoundingBox(gameArea),
+        (ql) => queryOverpass<{ elements: OverpassElement[] }>(ql),
+        mergeOverpassElementPayloads,
       );
 
       return parseAdminDivisionFeatures(payload.elements, gameArea, adminLevel);

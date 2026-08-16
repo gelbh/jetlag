@@ -1,6 +1,6 @@
 /**
- * Hard POI cap for tentacle Voronoi / elim shade work.
- * EXYS Dublin hospitals = 24 sites — must stay under budget and resolve with shade.
+ * Historical POI count (former refuse cap). Play path no longer refuses shade.
+ * EXYS Dublin hospitals = 24 sites.
  */
 export const TENTACLE_POI_MAX = 64;
 
@@ -16,12 +16,5 @@ export class TentacleGeometryBudgetError extends Error {
     super(TENTACLE_POI_OVER_BUDGET_MESSAGE);
     this.name = "TentacleGeometryBudgetError";
     this.poiCount = count;
-  }
-}
-
-/** Throws when POI count exceeds the hard elim budget. */
-export function assertTentaclePoiBudget(count: number): void {
-  if (count > TENTACLE_POI_MAX) {
-    throw new TentacleGeometryBudgetError(count);
   }
 }

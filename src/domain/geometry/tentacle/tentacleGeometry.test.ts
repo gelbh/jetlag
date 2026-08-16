@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
 import { point as turfPoint } from "@turf/helpers";
 import type { Feature, MultiPolygon, Polygon } from "geojson";
@@ -17,11 +17,11 @@ import {
   tentacleEliminationJsonForAnswer,
 } from "./tentacleGeometry";
 import { resolveVoronoiCellPoiId } from "../voronoi/voronoiCellSiteId";
+import * as persistSlim from "../progressive/persistSlim";
+import { MEASURING_PERSIST_OVER_BUDGET_MESSAGE } from "../measuring/measuringGeometryBudgets";
+import { TENTACLE_POI_OVER_BUDGET_MESSAGE } from "./tentacleGeometryBudgets";
 import exysHospitalTentacle from "./fixtures/exysHospitalTentacle.json";
-import {
-  TentacleGeometryBudgetError,
-  TENTACLE_POI_MAX,
-} from "./tentacleGeometryBudgets";
+import { TENTACLE_POI_MAX } from "./tentacleGeometryBudgets";
 
 const oneMileMeters = milesToMeters(1);
 const POLYGON_OR_MULTIPOLYGON = /Polygon|MultiPolygon/;
@@ -295,7 +295,7 @@ describe("tentacleGeometry", () => {
     expect(booleanPointInPolygon(answeredPoint, region)).toBe(false);
   });
 
-  it("refuses elim JSON when POI count exceeds the hard budget", async () => {
+  it("returns elim JSON for POI lists above the former 64 cap", async () => {
     const overBudget: TentaclePoi[] = Array.from(
       { length: TENTACLE_POI_MAX + 1 },
       (_, index) => ({
@@ -316,7 +316,47 @@ describe("tentacleGeometry", () => {
         outOfReach: false,
         gameArea: sampleGameArea,
       }),
-    ).rejects.toBeInstanceOf(TentacleGeometryBudgetError);
+    ).resolves.not.toBeUndefined();
+  });
+
+  it("persist-slim failure does not use the POI refuse copy", async () => {
+    const slimSpy = vi
+      .spyOn(persistSlim, "persistSlimPolygonFeature")
+      .mockReturnValue({
+        ok: false,
+        message: MEASURING_PERSIST_OVER_BUDGET_MESSAGE,
+      });
+
+    await expect(
+      tentacleEliminationJsonForAnswer({
+        anchor: [51.45, -0.15],
+        radiusMeters: oneMileMeters,
+        pois: [
+          {
+            id: "poi-0",
+            name: "POI 0",
+            lat: 51.45,
+            lng: -0.15,
+            category: "museum",
+          },
+          {
+            id: "poi-1",
+            name: "POI 1",
+            lat: 51.46,
+            lng: -0.14,
+            category: "museum",
+          },
+        ],
+        answeredPoiId: "poi-0",
+        outOfReach: false,
+        gameArea: sampleGameArea,
+      }),
+    ).rejects.toThrow(MEASURING_PERSIST_OVER_BUDGET_MESSAGE);
+    expect(slimSpy).toHaveBeenCalled();
+    expect(MEASURING_PERSIST_OVER_BUDGET_MESSAGE).not.toBe(
+      TENTACLE_POI_OVER_BUDGET_MESSAGE,
+    );
+    slimSpy.mockRestore();
   });
 
   it("Dublin-like 8-POI grid: answered site stays clear, every other site is shaded", async () => {

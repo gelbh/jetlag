@@ -22,6 +22,7 @@ import type { SubmitPendingQuestionInput } from "../../sync/usePendingQuestionAc
 import { serializeMatchingFeatures } from "@/domain/geo/matchingAdapters";
 import type { MatchingFeature } from "@/services/geo/matching";
 import { MAP_ANNOTATION_COLORS } from "@/domain/map/mapAnnotationColors";
+import { persistSlimPolygonFeature } from "@/domain/geometry/progressive/persistSlim";
 import { emitQuestionAnsweredActivity } from "@/services/session/emitSessionActivity";
 
 export interface CommitMatchingInput {
@@ -217,8 +218,28 @@ export async function performMatchingCommit(
     return;
   }
 
+  let storedBoundary = boundaryRegion;
+  if (storedBoundary) {
+    const slimmedBoundary = persistSlimPolygonFeature(storedBoundary);
+    if (!slimmedBoundary.ok) {
+      setMatchingError(slimmedBoundary.message);
+      return;
+    }
+    storedBoundary = slimmedBoundary.feature;
+  }
+
+  let storedElim = eliminationRegion;
+  if (storedElim) {
+    const slimmed = persistSlimPolygonFeature(storedElim);
+    if (!slimmed.ok) {
+      setMatchingError(slimmed.message);
+      return;
+    }
+    storedElim = slimmed.feature;
+  }
+
   const geometry: Feature<Point | GeoPolygon | MultiPolygon> =
-    eliminationRegion ?? {
+    storedElim ?? {
       type: "Feature",
       properties: {},
       geometry: {
@@ -250,8 +271,8 @@ export async function performMatchingCommit(
         matchingDistanceMeters: matchingDistanceMeters ?? undefined,
         matchingFeatureCount: matchingFeatureCount ?? undefined,
         matchingNullAnswer,
-        matchingBoundaryJson: boundaryRegion
-          ? JSON.stringify(boundaryRegion)
+        matchingBoundaryJson: storedBoundary
+          ? JSON.stringify(storedBoundary)
           : undefined,
         matchingFeaturesJson: serializeMatchingFeatures(matchingFeatures),
         ...(matchingTransitMetroId

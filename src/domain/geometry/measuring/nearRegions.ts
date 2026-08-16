@@ -13,6 +13,7 @@ import {
   unionDiskSpecs,
   unionPolygonFeatures,
 } from "../masks/unionPolygonFeatures";
+import { unionPolygonFeaturesInSlices } from "../progressive/unionSlices";
 import type { GameArea } from "../../map/annotations";
 import { dispatchGeodesicLineBuffer } from "./geodesicLineBuffer";
 import { featureToGameAreaGeometry } from "../kernel/featureConvert";
@@ -297,11 +298,36 @@ function unionBufferedFeatures(
   }
 
   if (features.length === 1) {
-    return features[0];
+    return features[0] ?? null;
   }
 
   try {
     const united = unionPolygonFeatures(features);
+    if (united) {
+      return united;
+    }
+  } catch {
+    // Fall back to a MultiPolygon shell; point-in-region semantics match union.
+  }
+
+  return combinePolygonFeatures(features);
+}
+
+async function unionBufferedFeaturesInSlices(
+  features: Feature<Polygon | MultiPolygon>[],
+): Promise<Feature<Polygon | MultiPolygon> | null> {
+  if (features.length === 0) {
+    return null;
+  }
+
+  if (features.length === 1) {
+    return features[0] ?? null;
+  }
+
+  try {
+    const united = await unionPolygonFeaturesInSlices(features, {
+      yieldFn: () => Promise.resolve(),
+    });
     if (united) {
       return united;
     }
@@ -416,7 +442,7 @@ async function buildCoastlineNearRegionWithBuffer(
       return null;
     }
 
-    const nearCoast = unionBufferedFeatures(bufferedFeatures);
+    const nearCoast = await unionBufferedFeaturesInSlices(bufferedFeatures);
     if (!nearCoast) {
       return null;
     }

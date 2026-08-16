@@ -31,10 +31,7 @@ import {
   thermometerAnswerFromReplyId,
 } from "./thermometer";
 import exysHospitalTentacle from "../../geometry/tentacle/fixtures/exysHospitalTentacle.json";
-import {
-  TentacleGeometryBudgetError,
-  TENTACLE_POI_MAX,
-} from "../../geometry/tentacle/tentacleGeometryBudgets";
+import { TENTACLE_POI_MAX } from "../../geometry/tentacle/tentacleGeometryBudgets";
 import type { TentaclePoi } from "../../map/annotations";
 
 const gameArea: GameArea = {
@@ -581,7 +578,7 @@ describe("resolveTentaclePendingQuestion", () => {
     });
   });
 
-  it("throws TentacleGeometryBudgetError for over-budget POI lists", async () => {
+  it("returns elim JSON for POI lists above the former 64 cap", async () => {
     const overBudget: TentaclePoi[] = Array.from(
       { length: TENTACLE_POI_MAX + 1 },
       (_, index) => ({
@@ -609,7 +606,7 @@ describe("resolveTentaclePendingQuestion", () => {
 
     await expect(
       resolveTentaclePendingQuestion(pending, "poi-0", gameArea),
-    ).rejects.toBeInstanceOf(TentacleGeometryBudgetError);
+    ).resolves.not.toBeNull();
   });
 });
 

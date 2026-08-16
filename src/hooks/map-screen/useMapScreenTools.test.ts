@@ -116,6 +116,7 @@ vi.mock("./useHeavyMapToolsState", () => ({
       handleMapClick: vi.fn(),
       selectDraftPoi: vi.fn(),
       resetDraft: vi.fn(),
+      tentacleLodPhase: "complete" as const,
       panel: null,
       hud: {
         readiness: {
