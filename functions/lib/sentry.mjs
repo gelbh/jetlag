@@ -145,20 +145,10 @@ export function initFunctionsSentry() {
  * Lets deadline-exceeded / unhandled errors attribute to a callable without
  * rewriting every onCall wrapper (JETLAG-3M).
  *
- * @param {string | { name?: string } | undefined} [explicitOrOptions]
+ * @param {string | undefined} [explicit]
  * @returns {string | null}
  */
-export function resolveDeployedFunctionName(explicitOrOptions) {
-  let explicit;
-  if (typeof explicitOrOptions === "string") {
-    explicit = explicitOrOptions;
-  } else if (
-    explicitOrOptions &&
-    typeof explicitOrOptions === "object" &&
-    typeof explicitOrOptions.name === "string"
-  ) {
-    explicit = explicitOrOptions.name;
-  }
+export function resolveDeployedFunctionName(explicit) {
   if (typeof explicit === "string" && explicit.trim()) {
     return explicit.trim();
   }
@@ -196,15 +186,50 @@ export function captureFunctionsException(error) {
 }
 
 /**
+ * Capture with function_name/callable (+ optional extra tags) in one place so
+ * proxy / callable catch paths cannot drift.
+ *
+ * @param {unknown} error
+ * @param {{ name?: string | null, extraTags?: Record<string, string> }} [options]
+ */
+export function captureFunctionsExceptionWithTags(error, options = {}) {
+  if (!initialized) {
+    return;
+  }
+
+  if (isExpectedFunctionsError(error)) {
+    return;
+  }
+
+  const name =
+    typeof options.name === "string" && options.name.trim()
+      ? options.name.trim()
+      : resolveDeployedFunctionName();
+
+  Sentry.withScope((scope) => {
+    applyFunctionNameTags(scope, name);
+    const extraTags = options.extraTags;
+    if (extraTags) {
+      for (const [key, value] of Object.entries(extraTags)) {
+        if (typeof value === "string") {
+          scope.setTag(key, value);
+        }
+      }
+    }
+    Sentry.captureException(error);
+  });
+}
+
+/**
  * @template {(...args: never[]) => unknown} T
  * @param {T} handler
- * @param {string | { name?: string }} [nameOrOptions]
+ * @param {string | undefined} [explicitName]
  * @returns {T}
  */
-export function withSentryHttpHandler(handler, nameOrOptions) {
+export function withSentryHttpHandler(handler, explicitName) {
   return async (...args) => {
     initFunctionsSentry();
-    const name = resolveDeployedFunctionName(nameOrOptions);
+    const name = resolveDeployedFunctionName(explicitName);
     return await Sentry.withScope(async (scope) => {
       applyFunctionNameTags(scope, name);
       try {
@@ -218,25 +243,5 @@ export function withSentryHttpHandler(handler, nameOrOptions) {
   };
 }
 
-/**
- * @template {(...args: never[]) => unknown} T
- * @param {T} handler
- * @param {string | { name?: string }} [nameOrOptions]
- * @returns {T}
- */
-export function withSentryEventHandler(handler, nameOrOptions) {
-  return async (...args) => {
-    initFunctionsSentry();
-    const name = resolveDeployedFunctionName(nameOrOptions);
-    return await Sentry.withScope(async (scope) => {
-      applyFunctionNameTags(scope, name);
-      try {
-        return await handler(...args);
-      } catch (error) {
-        captureFunctionsException(error);
-        await Sentry.flush(2000);
-        throw error;
-      }
-    });
-  };
-}
+/** Same wrapper as HTTP — callables/triggers share tagging + flush. */
+export const withSentryEventHandler = withSentryHttpHandler;

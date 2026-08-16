@@ -249,10 +249,6 @@ test("resolveDeployedFunctionName prefers explicit name over env", () => {
   process.env.K_SERVICE = "from-env";
   try {
     assert.equal(resolveDeployedFunctionName("joinSessionWithRole"), "joinSessionWithRole");
-    assert.equal(
-      resolveDeployedFunctionName({ name: "createPremiumSession" }),
-      "createPremiumSession",
-    );
     assert.equal(resolveDeployedFunctionName(), "from-env");
   } finally {
     if (previous === undefined) {

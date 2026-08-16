@@ -1,7 +1,6 @@
-import * as Sentry from "@sentry/node";
 import { setCors } from "../lib/cors.mjs";
 import {
-  captureFunctionsException,
+  captureFunctionsExceptionWithTags,
   resolveDeployedFunctionName,
 } from "../lib/sentry.mjs";
 import {
@@ -50,12 +49,9 @@ export function createProxyHandler({
     try {
       await handler(req, res, authResult);
     } catch (error) {
-      const name = resolveDeployedFunctionName() ?? "proxy";
-      Sentry.withScope((scope) => {
-        scope.setTag("function_name", name);
-        scope.setTag("callable", name);
-        scope.setTag("proxy_route", routeName);
-        captureFunctionsException(error);
+      captureFunctionsExceptionWithTags(error, {
+        name: resolveDeployedFunctionName() ?? "proxy",
+        extraTags: { proxy_route: routeName },
       });
       res.status(502).json({
         error: defaultErrorMessage ?? `${routeName} proxy failed.`,

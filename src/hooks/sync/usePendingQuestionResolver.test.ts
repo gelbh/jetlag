@@ -7,12 +7,27 @@ import { usePendingQuestionResolver } from "./usePendingQuestionResolver";
 const updatePendingQuestion = vi.fn();
 const getPendingQuestionStatus = vi.fn();
 const createAnnotation = vi.fn();
+const emitPhotoAnsweredActivity = vi.fn();
+const emitQuestionAnsweredActivity = vi.fn();
 
 vi.mock("../../services/firestore/firestoreSessionExtras", () => ({
   updatePendingQuestion: (...args: unknown[]) => updatePendingQuestion(...args),
   getPendingQuestionStatus: (...args: unknown[]) =>
     getPendingQuestionStatus(...args),
 }));
+
+vi.mock("../../services/session/emitSessionActivity", async () => {
+  const actual = await vi.importActual<
+    typeof import("../../services/session/emitSessionActivity")
+  >("../../services/session/emitSessionActivity");
+  return {
+    ...actual,
+    emitPhotoAnsweredActivity: (...args: unknown[]) =>
+      emitPhotoAnsweredActivity(...args),
+    emitQuestionAnsweredActivity: (...args: unknown[]) =>
+      emitQuestionAnsweredActivity(...args),
+  };
+});
 
 const gameArea: GameArea = {
   type: "Polygon",
@@ -51,6 +66,8 @@ describe("usePendingQuestionResolver", () => {
     updatePendingQuestion.mockReset();
     getPendingQuestionStatus.mockReset();
     createAnnotation.mockReset();
+    emitPhotoAnsweredActivity.mockReset();
+    emitQuestionAnsweredActivity.mockReset();
     getPendingQuestionStatus.mockResolvedValue("answered");
   });
 
@@ -77,6 +94,9 @@ describe("usePendingQuestionResolver", () => {
     });
 
     expect(createAnnotation).not.toHaveBeenCalled();
+    await waitFor(() => {
+      expect(emitPhotoAnsweredActivity).toHaveBeenCalledTimes(1);
+    });
   });
 
   it("treats permission-denied as success when photo already resolved (JETLAG-2)", async () => {
@@ -107,6 +127,36 @@ describe("usePendingQuestionResolver", () => {
     });
 
     expect(createAnnotation).not.toHaveBeenCalled();
+    await waitFor(() => {
+      expect(emitPhotoAnsweredActivity).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  it("does not emit photo answered when permission-denied race lost to cancel", async () => {
+    const { FirebaseError } = await import("firebase/app");
+    updatePendingQuestion.mockRejectedValue(
+      new FirebaseError("permission-denied", "Missing or insufficient permissions."),
+    );
+    getPendingQuestionStatus
+      .mockResolvedValueOnce("answered")
+      .mockResolvedValueOnce("cancelled");
+
+    renderHook(() =>
+      usePendingQuestionResolver({
+        sessionId: "session-1",
+        enabled: true,
+        pendingQuestions: [photoPending],
+        createAnnotation,
+        gameArea,
+      }),
+    );
+
+    await waitFor(() => {
+      expect(getPendingQuestionStatus).toHaveBeenCalledTimes(2);
+    });
+
+    expect(createAnnotation).not.toHaveBeenCalled();
+    expect(emitPhotoAnsweredActivity).not.toHaveBeenCalled();
   });
 
   it("skips answered questions created before session reset", async () => {
