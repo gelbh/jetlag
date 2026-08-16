@@ -28,6 +28,7 @@ import {
   isAskHudOwnedTool,
 } from "../../domain/ask/askHudModes";
 import type { MapTool } from "../../state/sessionStore";
+import { tentacleDraftPoiIdFromOverlayId } from "../../domain/map/tentacleDraftOverlay";
 import { ANALYTICS_EVENTS, track } from "../../services/core/analytics/analytics";
 import { buildPlacementCameraDraft } from "./shared/placementCameraDraft";
 import { useMapScreenCore } from "./shared/useMapScreenCore";
@@ -220,6 +221,18 @@ export function useMapScreenController() {
     pinTool,
     zoneTool,
   });
+
+  const handleDraftMarkerActivate = useCallback(
+    (overlayId: string): boolean => {
+      const poiId = tentacleDraftPoiIdFromOverlayId(overlayId);
+      if (!poiId) {
+        return false;
+      }
+      tentacleTool.selectDraftPoi(poiId);
+      return true;
+    },
+    [tentacleTool.selectDraftPoi],
+  );
 
   const sessionActions = useMapSessionActions({
     session,
@@ -498,6 +511,7 @@ export function useMapScreenController() {
     placementCrosshair: tools.placementCrosshair,
     mapAttentionActive,
     handleMapClick,
+    handleDraftMarkerActivate,
     handleMapViewportChange,
     handleMapPanStart,
     handleMapPanEnd,
