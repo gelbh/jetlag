@@ -1,5 +1,5 @@
 import { useId, useState } from "react";
-import { MotionSheet } from "../../motion/MotionSheet";
+import { SheetHost } from "../../ui/sheets/SheetHost";
 import { SheetHeader } from "../../ui/sheets/SheetHeader";
 import type { PendingPickState } from "../../../domain/boardEconomy";
 import type { GameSize } from "../../../domain/session/size/gameSize";
@@ -60,7 +60,7 @@ function DrawPickSheetOpen({
   };
 
   return (
-    <MotionSheet
+    <SheetHost
       open
       dismissible={false}
       onClose={() => undefined}
@@ -131,6 +131,6 @@ function DrawPickSheetOpen({
           Confirm keep ({selectedIds.length}/{need})
         </button>
       </div>
-    </MotionSheet>
+    </SheetHost>
   );
 }

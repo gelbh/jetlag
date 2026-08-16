@@ -1,4 +1,4 @@
-import { MotionSheet } from "@/components/motion/MotionSheet";
+import { SheetHost } from "@/components/ui/sheets/SheetHost";
 import { SheetHeader } from "@/components/ui/sheets/SheetHeader";
 import { QuestionPromptBlock } from "./QuestionPromptBlock";
 import { CoordinateCopyButton } from "./CoordinateCopyButton";
@@ -27,7 +27,7 @@ export function QuestionPreviewSheet({
   isSubmitting = false,
 }: QuestionPreviewSheetProps) {
   return (
-    <MotionSheet
+    <SheetHost
       open={open}
       onClose={onCancel}
       ariaLabel="Preview question before send"
@@ -53,6 +53,6 @@ export function QuestionPreviewSheet({
           {isSubmitting ? "Sending…" : "Send question"}
         </button>
       </div>
-    </MotionSheet>
+    </SheetHost>
   );
 }
