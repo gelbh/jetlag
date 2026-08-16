@@ -1,4 +1,9 @@
-import { test, expect, openMapWithLocalSession } from "../fixtures";
+import {
+  test,
+  expect,
+  openMapWithLocalSession,
+  enablePlayerUxWorld,
+} from "../fixtures";
 
 test.describe("mobile tool dock screenshots", () => {
   test.beforeEach(async ({ page }) => {
@@ -15,6 +20,20 @@ test.describe("mobile tool dock screenshots", () => {
     await page.getByRole("button", { name: "Draw on map" }).click();
     await expect(page.getByRole("menu", { name: "Draw on map" })).toHaveScreenshot(
       "tool-draw-menu-open.png",
+    );
+  });
+});
+
+test.describe("mobile tool dock screenshots — survey world", () => {
+  test.beforeEach(async ({ page }) => {
+    await enablePlayerUxWorld(page);
+    await openMapWithLocalSession(page);
+    await expect(page.locator('[data-player-ux-world="survey"]')).toBeVisible();
+  });
+
+  test("@smoke matches compact closed dock (survey)", async ({ page }) => {
+    await expect(page.locator(".jl-map-bottom-chrome-host")).toHaveScreenshot(
+      "tool-dock-compact-closed-survey.png",
     );
   });
 });
@@ -48,5 +67,41 @@ test.describe("iPhone 13 PWA safe area screenshots", () => {
     await expect(page.locator(".jl-map-bottom-chrome-host")).toHaveScreenshot(
       "tool-dock-compact-iphone13-safe-area.png",
     );
+  });
+});
+
+test.describe("landscape survey chrome distill", () => {
+  test.beforeEach(async ({ page }) => {
+    await enablePlayerUxWorld(page);
+    await page.setViewportSize({ width: 844, height: 390 });
+    await openMapWithLocalSession(page);
+    await expect(page.locator('[data-player-ux-world="survey"]')).toBeVisible();
+  });
+
+  test("distills secondary actions when landscape chrome is expanded", async ({
+    page,
+  }) => {
+    // Checklist (visual baseline deferred — collapsed dock host is unstable in landscape).
+    const chip = page.getByRole("button", {
+      name: /Show map controls|Hide map controls/i,
+    });
+    await expect(chip).toBeVisible();
+    if ((await chip.getAttribute("aria-expanded")) === "false") {
+      await chip.click();
+    }
+    await expect(chip).toHaveAttribute("aria-expanded", "true");
+    await expect(
+      page.locator('[data-player-ux-world="survey"][data-landscape-chrome="revealed"]'),
+    ).toBeVisible();
+    await expect(page.locator('[data-island="map-controls"]')).toBeHidden();
+    await expect(
+      page.locator(
+        '[data-survey-priority="secondary"][aria-label="Report a problem"]',
+      ),
+    ).toBeHidden();
+    // Settings stays primary in landscape distill.
+    await expect(
+      page.getByRole("button", { name: "Open settings" }),
+    ).toBeVisible();
   });
 });

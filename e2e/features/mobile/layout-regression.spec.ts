@@ -13,6 +13,8 @@ import {
   assertInViewport,
   assertMinTapTargets,
   assertNoSeriousAxeViolations,
+  assertSurveyMapChromeAxe,
+  enablePlayerUxWorld,
   expectCreatePageMapPreviewLoaded,
 } from "../../fixtures";
 
@@ -116,6 +118,16 @@ test.describe("layout regression @ default mobile", () => {
     );
     // Leaflet markers trip aria-command-name; layout smoke is chrome-only
     await assertLayoutSmoke(page, { exclude: [".maplibregl-map"] });
+  });
+
+  test("@smoke survey map chrome axe includes color-contrast", async ({
+    page,
+  }) => {
+    await enablePlayerUxWorld(page);
+    await openMapWithLocalSession(page);
+    await expect(page.locator('[data-player-ux-world="survey"]')).toBeVisible();
+    await assertNoHorizontalOverflow(page);
+    await assertSurveyMapChromeAxe(page);
   });
 
   for (const path of SOCIAL_LAYOUT_PATHS) {

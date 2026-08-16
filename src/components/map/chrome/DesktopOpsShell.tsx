@@ -1,4 +1,5 @@
 import type { ReactNode, Ref } from "react";
+import { usePlayerUxWorld } from "@/hooks/feature/usePlayerUxWorld";
 
 export interface DesktopOpsShellProps {
   status: ReactNode;
@@ -21,11 +22,13 @@ export function DesktopOpsShell({
   className = "",
 }: DesktopOpsShellProps) {
   const mapSlot = map ?? children;
+  const survey = usePlayerUxWorld();
 
   return (
     <div
       ref={chromeHudRef}
       className={`desktop-ops-shell map-chrome-hud ${className}`.trim()}
+      data-player-ux-world={survey ? "survey" : undefined}
     >
       <div
         className="desktop-ops-shell__status"

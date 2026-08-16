@@ -1,10 +1,13 @@
 import type { SyncStatus } from "@/domain/device/sync/sync";
 import { userErrorFromSyncMessage } from "@/domain/device/feedback/userErrors";
+import { surveySyncShortLabel } from "@/domain/device/surveyStatusCopy";
+import { usePlayerUxWorld } from "@/hooks/feature/usePlayerUxWorld";
 import { SyncStatusBeacon } from "../syncUi/SyncStatusDot";
 import { SyncStatusDetailPanel } from "../syncUi/SyncStatusDetailPanel";
 import { syncDetailContent } from "../syncUi/syncStatusDetailContent";
 import {
   SYNC_TONE_CLASSES,
+  type SyncTone,
   syncBeaconAriaLabel,
   syncRailDisplay,
 } from "./syncRailDisplay";
@@ -18,6 +21,24 @@ interface SyncBlockProps {
   onSyncErrorAction?: () => void;
 }
 
+function surveyShortLabelTone(status: SyncStatus): SyncTone | null {
+  switch (status) {
+    case "error":
+      return "error";
+    case "offline":
+    case "degraded":
+      return "warning";
+    case "saving":
+      return "info";
+    case "synced":
+      return null;
+    default: {
+      const exhaustive: never = status;
+      return exhaustive;
+    }
+  }
+}
+
 export function SyncBlock({
   syncStatus,
   queuedWrites,
@@ -26,12 +47,17 @@ export function SyncBlock({
   onMenuOpenChange,
   onSyncErrorAction,
 }: SyncBlockProps) {
+  const survey = usePlayerUxWorld();
   const syncErrorDisplay = userErrorFromSyncMessage(message);
   const syncDisplay = syncRailDisplay(syncStatus, queuedWrites, message);
-  const shortLabel = syncDisplay.inline?.visible
-    ? syncDisplay.inline.label
-    : null;
-  const shortLabelTone = syncDisplay.inline?.tone;
+  const shortLabel = survey
+    ? surveySyncShortLabel(syncStatus, queuedWrites)
+    : syncDisplay.inline?.visible
+      ? syncDisplay.inline.label
+      : null;
+  const shortLabelTone = survey
+    ? surveyShortLabelTone(syncStatus)
+    : syncDisplay.inline?.tone;
   const syncDetail = syncDetailContent(
     syncStatus,
     queuedWrites,
@@ -47,6 +73,7 @@ export function SyncBlock({
       : null);
 
   const showSyncDot =
+    survey ||
     syncStatus === "synced" ||
     syncStatus === "error" ||
     syncStatus === "offline" ||
