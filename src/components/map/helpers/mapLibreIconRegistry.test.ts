@@ -172,4 +172,26 @@ describe("mapLibreIconRegistry", () => {
 
     expect(addImage).not.toHaveBeenCalled();
   });
+
+  it("swallows hasImage getImage throw when style races mid-register (JETLAG-3H)", async () => {
+    const hasImage = vi.fn(() => {
+      throw new TypeError(
+        "Cannot read properties of undefined (reading 'getImage')",
+      );
+    });
+    const addImage = vi.fn();
+    const map = {
+      hasImage,
+      addImage,
+      isStyleLoaded: () => true,
+      style: {},
+      _removed: false,
+    } as unknown as MapLibreMap;
+
+    await withDelayedMockImage(async () => {
+      await expect(registerMapLibreMarkerImages(map)).resolves.toBeUndefined();
+    });
+    expect(hasImage).toHaveBeenCalled();
+    expect(addImage).not.toHaveBeenCalled();
+  });
 });

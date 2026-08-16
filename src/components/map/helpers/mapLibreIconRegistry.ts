@@ -61,6 +61,41 @@ function canMutateMapImages(map: MapLibreMap): boolean {
   }
 }
 
+/** hasImage → style.getImage; style can go null between canMutate and hasImage (JETLAG-3H). */
+function safeHasImage(map: MapLibreMap, imageId: string): boolean {
+  if (!canMutateMapImages(map)) {
+    return false;
+  }
+  try {
+    return map.hasImage(imageId);
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Add only when style images API is still live. Do not call addImage after a
+ * swallowed hasImage failure — that race is what threw in production.
+ */
+function safeAddImage(
+  map: MapLibreMap,
+  imageId: string,
+  image: HTMLImageElement,
+): boolean {
+  if (!canMutateMapImages(map)) {
+    return false;
+  }
+  try {
+    if (map.hasImage(imageId)) {
+      return true;
+    }
+    map.addImage(imageId, image, { pixelRatio: 2 });
+    return map.hasImage(imageId);
+  } catch {
+    return false;
+  }
+}
+
 async function loadSvgImage(
   map: MapLibreMap,
   imageId: string,
@@ -68,10 +103,7 @@ async function loadSvgImage(
   width: number,
   height: number,
 ): Promise<boolean> {
-  if (!canMutateMapImages(map)) {
-    return false;
-  }
-  if (map.hasImage(imageId)) {
+  if (safeHasImage(map, imageId)) {
     return true;
   }
 
@@ -86,16 +118,7 @@ async function loadSvgImage(
         img.src = url;
       });
       // Style may tear down during decode — never call hasImage/addImage then.
-      if (!canMutateMapImages(map)) {
-        return false;
-      }
-      // Skip addImage when another register won the race (MapLibre no-ops +
-      // error-events on duplicates; it does not throw).
-      if (map.hasImage(imageId)) {
-        return true;
-      }
-      map.addImage(imageId, image, { pixelRatio: 2 });
-      return map.hasImage(imageId);
+      return safeAddImage(map, imageId, image);
     } finally {
       URL.revokeObjectURL(url);
     }

@@ -22,6 +22,7 @@ type SeekerEffectsInput = Pick<
   | "timer"
   | "toolGameArea"
   | "createAnnotation"
+  | "deleteAnnotation"
   | "annotations"
 > & {
   awaitHiderAnswer: boolean;
@@ -54,6 +55,7 @@ export function useMapScreenSeekerEffects({
   timer,
   toolGameArea,
   createAnnotation,
+  deleteAnnotation,
   annotations,
   awaitHiderAnswer,
   postSystemMessage,
@@ -97,6 +99,7 @@ export function useMapScreenSeekerEffects({
     enabled: myRole !== "hider" && awaitHiderAnswer,
     pendingQuestions,
     createAnnotation,
+    deleteAnnotation,
     gameArea: toolGameArea,
     sessionResetAt: session?.sessionResetAt,
     knownAnnotationIdsKey: annotations

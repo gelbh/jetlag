@@ -7,6 +7,7 @@ import {
   getPendingQuestionStatus,
   updatePendingQuestion,
 } from "../../services/firestore/firestoreSessionExtras";
+import { isFirestorePermissionDenied } from "../../services/firestore/sessions/shared";
 import { capturePendingResolveFailure } from "../../services/core/analytics/sentry";
 import {
   answerSummaryFromPendingReply,
@@ -24,6 +25,8 @@ interface UsePendingQuestionResolverParams {
       id?: string;
     },
   ) => Promise<AnnotationRecord>;
+  /** Soft-delete orphan when cancel wins after create (race). */
+  deleteAnnotation?: (id: string) => Promise<void>;
   gameArea: GameArea;
   sessionResetAt?: string;
   /**
@@ -33,6 +36,15 @@ interface UsePendingQuestionResolverParams {
   knownAnnotationIdsKey?: string;
   /** Latest known ids; read via ref after awaits so reload hydration is visible. */
   knownAnnotationIds?: ReadonlySet<string>;
+}
+
+type TerminalWriteOutcome =
+  | "committed"
+  | "already-resolved"
+  | "already-cancelled";
+
+function shouldEmitAnsweredActivity(outcome: TerminalWriteOutcome): boolean {
+  return outcome === "committed" || outcome === "already-resolved";
 }
 
 async function resolvePendingQuestion(
@@ -49,11 +61,53 @@ async function resolvePendingQuestion(
   return resolvePendingAnnotationFromReply(pending, replyId, gameArea);
 }
 
+/**
+ * Seeker resolve is often concurrent (multi-tab). Losing the race yields
+ * permission-denied once status is already resolved/cancelled — treat as done
+ * (JETLAG-2 photo). Callers must not emit "answered" activity on already-cancelled.
+ */
+async function writePendingTerminalStatus(
+  sessionId: string,
+  pendingId: string,
+  patch: {
+    status: "resolved" | "cancelled";
+    resolvedAnnotationId?: string;
+  },
+): Promise<TerminalWriteOutcome> {
+  try {
+    await updatePendingQuestion(sessionId, pendingId, patch);
+    return "committed";
+  } catch (error) {
+    if (!isFirestorePermissionDenied(error)) {
+      throw error;
+    }
+    const latest = await getPendingQuestionStatus(sessionId, pendingId);
+    if (latest === "resolved") {
+      return "already-resolved";
+    }
+    if (latest === "cancelled") {
+      return "already-cancelled";
+    }
+    throw error;
+  }
+}
+
+function isKnownAnnotationForPending(
+  pending: PendingQuestionRecord,
+  knownIds: ReadonlySet<string> | undefined,
+): boolean {
+  return (
+    isAnnotationQuestionTool(pending.toolType) &&
+    Boolean(knownIds?.has(pending.id))
+  );
+}
+
 export function usePendingQuestionResolver({
   sessionId,
   enabled,
   pendingQuestions,
   createAnnotation,
+  deleteAnnotation,
   gameArea,
   sessionResetAt,
   knownAnnotationIdsKey = "",
@@ -102,11 +156,18 @@ export function usePendingQuestionResolver({
             return;
           }
 
+          // Photo never materializes an annotation — do not treat a coincidental
+          // id match as "already known".
           // Read ref after await so annotation baseline hydration is visible
           // (reload wipe → empty set must not lock us into a rebuild).
-          if (knownAnnotationIdsRef.current?.has(pending.id)) {
+          if (
+            isKnownAnnotationForPending(
+              pending,
+              knownAnnotationIdsRef.current,
+            )
+          ) {
             annotationAlreadyKnown = true;
-            await updatePendingQuestion(sessionId, pending.id, {
+            await writePendingTerminalStatus(sessionId, pending.id, {
               status: "resolved",
               resolvedAnnotationId: pending.id,
             });
@@ -116,9 +177,14 @@ export function usePendingQuestionResolver({
           const annotation = await resolvePendingQuestion(pending, gameArea);
 
           // Hydration may have landed during geometry work — complete without write.
-          if (knownAnnotationIdsRef.current?.has(pending.id)) {
+          if (
+            isKnownAnnotationForPending(
+              pending,
+              knownAnnotationIdsRef.current,
+            )
+          ) {
             annotationAlreadyKnown = true;
-            await updatePendingQuestion(sessionId, pending.id, {
+            await writePendingTerminalStatus(sessionId, pending.id, {
               status: "resolved",
               resolvedAnnotationId: pending.id,
             });
@@ -127,22 +193,26 @@ export function usePendingQuestionResolver({
 
           if (!annotation) {
             if (pending.toolType === "photo") {
-              await updatePendingQuestion(sessionId, pending.id, {
-                status: "resolved",
-              });
-              emitPhotoAnsweredActivity({
+              const outcome = await writePendingTerminalStatus(
                 sessionId,
-                pendingQuestionId: pending.id,
-                promptText: pending.promptText,
-                answerSummary: answerSummaryFromPendingReply(
-                  pending.answer,
-                  pending.replyOptions,
-                ),
-              });
+                pending.id,
+                { status: "resolved" },
+              );
+              if (shouldEmitAnsweredActivity(outcome)) {
+                emitPhotoAnsweredActivity({
+                  sessionId,
+                  pendingQuestionId: pending.id,
+                  promptText: pending.promptText,
+                  answerSummary: answerSummaryFromPendingReply(
+                    pending.answer,
+                    pending.replyOptions,
+                  ),
+                });
+              }
               return;
             }
 
-            await updatePendingQuestion(sessionId, pending.id, {
+            await writePendingTerminalStatus(sessionId, pending.id, {
               status: "cancelled",
             });
             return;
@@ -155,12 +225,29 @@ export function usePendingQuestionResolver({
           });
           annotationCreated = true;
 
-          await updatePendingQuestion(sessionId, pending.id, {
-            status: "resolved",
-            resolvedAnnotationId: created.id,
-          });
+          const outcome = await writePendingTerminalStatus(
+            sessionId,
+            pending.id,
+            {
+              status: "resolved",
+              resolvedAnnotationId: created.id,
+            },
+          );
 
-          if (isAnnotationQuestionTool(pending.toolType)) {
+          if (outcome === "already-cancelled") {
+            // Host/other tab cancelled while we created — drop orphan shade.
+            try {
+              await deleteAnnotation?.(created.id);
+            } catch {
+              // Best-effort cleanup; keep in-flight guard.
+            }
+            return;
+          }
+
+          if (
+            isAnnotationQuestionTool(pending.toolType) &&
+            shouldEmitAnsweredActivity(outcome)
+          ) {
             emitQuestionAnsweredActivity({
               sessionId,
               toolType: pending.toolType,
@@ -183,10 +270,13 @@ export function usePendingQuestionResolver({
           const shouldComplete =
             annotationCreated ||
             annotationAlreadyKnown ||
-            Boolean(knownAnnotationIdsRef.current?.has(pending.id));
+            isKnownAnnotationForPending(
+              pending,
+              knownAnnotationIdsRef.current,
+            );
           if (shouldComplete) {
             try {
-              await updatePendingQuestion(sessionId, pending.id, {
+              await writePendingTerminalStatus(sessionId, pending.id, {
                 status: "resolved",
                 resolvedAnnotationId: pending.id,
               });
@@ -195,7 +285,7 @@ export function usePendingQuestionResolver({
             }
           } else {
             try {
-              await updatePendingQuestion(sessionId, pending.id, {
+              await writePendingTerminalStatus(sessionId, pending.id, {
                 status: "cancelled",
               });
             } catch {
@@ -211,6 +301,7 @@ export function usePendingQuestionResolver({
     }
   }, [
     createAnnotation,
+    deleteAnnotation,
     enabled,
     gameArea,
     knownAnnotationIdsKey,
