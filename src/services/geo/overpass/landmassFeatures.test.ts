@@ -169,7 +169,9 @@ describe("landmass features", () => {
       .mockResolvedValueOnce({ elements: [{ id: 4 }] });
 
     const landmasses = await fetchLandmassFeaturesInArea(sampleGameArea);
-    expect(overpassClient.queryOverpass.mock.calls.length).toBeGreaterThan(1);
+    expect(vi.mocked(overpassClient.queryOverpass).mock.calls.length).toBeGreaterThan(
+      1,
+    );
     expect(landmasses.length).toBeGreaterThan(0);
   });
 

@@ -8,8 +8,9 @@ import {
 
 describe("queryOverpassWithBboxSplit", () => {
   it("retries 413 with four child bboxes and merges elements", async () => {
+    type Payload = { elements: { id: number }[] };
     const query = vi
-      .fn()
+      .fn<(ql: string) => Promise<Payload>>()
       .mockRejectedValueOnce(new OverpassPayloadTooLargeError())
       .mockResolvedValueOnce({ elements: [{ id: 1 }] })
       .mockResolvedValueOnce({ elements: [{ id: 2 }] })
@@ -28,7 +29,10 @@ describe("queryOverpassWithBboxSplit", () => {
   });
 
   it("rethrows 413 when bbox is already at minimum span", async () => {
-    const query = vi.fn().mockRejectedValue(new OverpassPayloadTooLargeError());
+    type Payload = { elements: { id: number }[] };
+    const query = vi
+      .fn<(ql: string) => Promise<Payload>>()
+      .mockRejectedValue(new OverpassPayloadTooLargeError());
     await expect(
       queryOverpassWithBboxSplit(
         () => "q",
