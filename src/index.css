@@ -10,13 +10,13 @@
 @import "./styles/map-tool-dock-compact-labels.css";
 @import "./styles/map-wizard-attention.css";
 @import "./styles/home-entry.css";
-/* Survey entry/secondary under [data-player-ux-world="survey"] (flag dual path). */
+/* Survey entry/secondary under [data-player-ux-world="survey"]. */
 @import "./styles/entry-survey.css";
 @import "./styles/map-chrome-controls.css";
 @import "./styles/map-compass-control.css";
 /* After map-chrome-controls so left zoom stack + side clearance tokens win. */
 @import "./styles/map-bottom-chrome.css";
-/* Survey field-book skin under [data-player-ux-world="survey"] (flag dual path). */
+/* Survey field-book skin under [data-player-ux-world="survey"]. */
 @import "./styles/map-survey-chrome.css";
 @import "./styles/ask-hud.css";
 @import "./styles/map-attribution.css";

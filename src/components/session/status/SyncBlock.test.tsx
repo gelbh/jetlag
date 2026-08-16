@@ -30,16 +30,14 @@ describe("SyncBlock unhealthy sync text", () => {
     expect(screen.getByText("Offline · 2 queued")).toBeVisible();
   });
 
-  it("keeps beacon-only control when synced", () => {
+  it("keeps Synced label on the control when healthy", () => {
     render(<SyncBlock {...baseProps} syncStatus="synced" />);
 
     expect(screen.queryByText(/Offline|Sync issue|Unstable/i)).toBeNull();
+    expect(screen.getByText("Synced")).toBeVisible();
     expect(
       screen.getByRole("button", { name: /Synced\. Show sync details/i }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: /Synced/i }),
-    ).not.toHaveClass("jl-sync-map-indicator__btn--labeled");
+    ).toHaveClass("jl-sync-map-indicator__btn--labeled");
   });
 
   it("uses labeled hit target class when unhealthy", () => {
