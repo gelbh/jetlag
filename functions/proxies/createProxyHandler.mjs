@@ -1,5 +1,8 @@
 import { setCors } from "../lib/cors.mjs";
-import { captureFunctionsException } from "../lib/sentry.mjs";
+import {
+  captureFunctionsExceptionWithTags,
+  resolveDeployedFunctionName,
+} from "../lib/sentry.mjs";
 import {
   enforceRateLimit,
   requireOverpassProxyAccess,
@@ -46,7 +49,10 @@ export function createProxyHandler({
     try {
       await handler(req, res, authResult);
     } catch (error) {
-      captureFunctionsException(error);
+      captureFunctionsExceptionWithTags(error, {
+        name: resolveDeployedFunctionName() ?? "proxy",
+        extraTags: { proxy_route: routeName },
+      });
       res.status(502).json({
         error: defaultErrorMessage ?? `${routeName} proxy failed.`,
       });
