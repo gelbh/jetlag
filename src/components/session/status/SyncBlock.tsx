@@ -1,5 +1,7 @@
 import type { SyncStatus } from "@/domain/device/sync/sync";
 import { userErrorFromSyncMessage } from "@/domain/device/feedback/userErrors";
+import { surveySyncShortLabel } from "@/domain/device/surveyStatusCopy";
+import { usePlayerUxWorld } from "@/hooks/feature/usePlayerUxWorld";
 import { SyncStatusBeacon } from "../syncUi/SyncStatusDot";
 import { SyncStatusDetailPanel } from "../syncUi/SyncStatusDetailPanel";
 import { syncDetailContent } from "../syncUi/syncStatusDetailContent";
@@ -26,12 +28,24 @@ export function SyncBlock({
   onMenuOpenChange,
   onSyncErrorAction,
 }: SyncBlockProps) {
+  const survey = usePlayerUxWorld();
   const syncErrorDisplay = userErrorFromSyncMessage(message);
   const syncDisplay = syncRailDisplay(syncStatus, queuedWrites, message);
-  const shortLabel = syncDisplay.inline?.visible
-    ? syncDisplay.inline.label
-    : null;
-  const shortLabelTone = syncDisplay.inline?.tone;
+  const shortLabel = survey
+    ? surveySyncShortLabel(syncStatus, queuedWrites)
+    : syncDisplay.inline?.visible
+      ? syncDisplay.inline.label
+      : null;
+  const shortLabelTone = survey
+    ? syncDisplay.inline?.tone ??
+      (syncStatus === "error"
+        ? "error"
+        : syncStatus === "offline" || syncStatus === "degraded"
+          ? "warning"
+          : syncStatus === "saving"
+            ? "info"
+            : null)
+    : syncDisplay.inline?.tone;
   const syncDetail = syncDetailContent(
     syncStatus,
     queuedWrites,
@@ -47,6 +61,7 @@ export function SyncBlock({
       : null);
 
   const showSyncDot =
+    survey ||
     syncStatus === "synced" ||
     syncStatus === "error" ||
     syncStatus === "offline" ||

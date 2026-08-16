@@ -14,6 +14,8 @@
 @import "./styles/map-compass-control.css";
 /* After map-chrome-controls so left zoom stack + side clearance tokens win. */
 @import "./styles/map-bottom-chrome.css";
+/* Survey field-book skin under [data-player-ux-world="survey"] (flag dual path). */
+@import "./styles/map-survey-chrome.css";
 @import "./styles/ask-hud.css";
 @import "./styles/map-attribution.css";
 @import "./styles/motion.css";

@@ -1,4 +1,5 @@
 import { forwardRef, type CSSProperties, type ReactNode } from "react";
+import { usePlayerUxWorld } from "@/hooks/feature/usePlayerUxWorld";
 import { cn } from "../../../lib/cn";
 
 export type MapBottomChromeLayout = "phone" | "rail";
@@ -74,6 +75,7 @@ export const MapBottomChrome = forwardRef<HTMLDivElement, MapBottomChromeProps>(
   ) {
     const isRail = layout === "rail";
     const sparseHunt = huntDensity === "sparse";
+    const survey = usePlayerUxWorld();
 
     return (
       <div
@@ -86,8 +88,11 @@ export const MapBottomChrome = forwardRef<HTMLDivElement, MapBottomChromeProps>(
       >
         <div
           className={cn(
-            "jl-map-bottom-chrome jl-tool-dock",
-            isRail && "jl-map-bottom-chrome--rail jl-tool-dock--rail",
+            "jl-map-bottom-chrome",
+            /* Survey collapses dual-dock chassis debt; HUD keeps legacy jl-tool-dock. */
+            !survey && "jl-tool-dock",
+            isRail && "jl-map-bottom-chrome--rail",
+            isRail && !survey && "jl-tool-dock--rail",
             inactive && "jl-map-bottom-chrome--inactive",
             sparseHunt && "jl-map-bottom-chrome--hunt-sparse",
             className,
