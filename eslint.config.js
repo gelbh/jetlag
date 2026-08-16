@@ -38,7 +38,6 @@ export default defineConfig([
       tseslint.configs.recommended,
       reactHooks.configs.flat.recommended,
       reactRefresh.configs.vite,
-      jsxA11y.flatConfigs.recommended,
     ],
     languageOptions: {
       globals: globals.browser,
@@ -46,6 +45,21 @@ export default defineConfig([
         tsconfigRootDir: import.meta.dirname,
       },
     },
+  },
+  // Wave 1: enable jsx-a11y recommended on kernel/flag surfaces only.
+  // Expand this glob as later UX waves migrate chrome (avoid repo-wide debt gate).
+  {
+    files: [
+      "src/components/ui/sheets/RacMotionSheet.tsx",
+      "src/components/ui/sheets/RacMotionSheet.test.tsx",
+      "src/components/ui/sheets/SheetHost.tsx",
+      "src/components/ui/sheets/SheetHost.test.tsx",
+      "src/components/ui/brand/JlIcon.tsx",
+      "src/components/tools/ToolDockOverflowMenu.tsx",
+      "src/hooks/feature/**/*.{ts,tsx}",
+      "src/services/core/analytics/playerUxWorldFlag.ts",
+    ],
+    extends: [jsxA11y.flatConfigs.recommended],
   },
   {
     files: ["worker/**/*.ts"],
