@@ -102,8 +102,8 @@ test.describe("mobile tool dock", () => {
     await clickViaEvaluate(drawButton);
     const drawMenu = page.getByRole("menu", { name: "Draw on map" });
     await expect(drawMenu).toBeVisible();
-    await expect(drawMenu.getByRole("menuitem", { name: /Pin/i })).toBeVisible();
-    await expect(drawMenu.getByRole("menuitem", { name: /Zone/i })).toBeVisible();
+    await expect(drawMenu.getByRole("menuitemradio", { name: /Pin/i })).toBeVisible();
+    await expect(drawMenu.getByRole("menuitemradio", { name: /Zone/i })).toBeVisible();
 
     await page.keyboard.press("Escape");
     await expect(drawMenu).toBeHidden();
