@@ -39,8 +39,10 @@ test.describe("map first-run — survey world", () => {
     await page.goto("/map");
     await page.getByRole("button", { name: "Radar" }).waitFor();
 
-    const dialog = page.getByRole("dialog", { name: "Map tools guide" });
-    await expect(dialog).toBeVisible();
-    await expect(page.locator('[data-player-ux-world="survey"]')).toBeVisible();
+    // RAC Dialog can report Playwright "hidden" while content is interactive.
+    await expect(page.getByRole("button", { name: "Got it" })).toBeVisible();
+    await expect(
+      page.locator('[data-player-ux-world="survey"]').first(),
+    ).toBeAttached();
   });
 });
