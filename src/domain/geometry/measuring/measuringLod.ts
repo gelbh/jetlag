@@ -10,8 +10,14 @@ export {
   type MeasuringOutputSoftenResult as PersistSlimMeasuringResult,
 } from "./measuringGeometryBudgets";
 
+/** Above this, skip Turf simplify for preview LOD (stride decimate only). */
+export const MEASURING_LOD_TURF_VERTEX_CEILING = 5_000;
+
 /** Coarse → fine Turf tolerances (first = preview coarse). */
 const LOD_TOLERANCES = [0.002, 0.0005, 0.0001, 0.00002] as const;
+
+/** Decimate targets as fractions of full verts (coarse → fine) when Turf is skipped. */
+const LOD_DECIMATE_FRACTIONS = [0.25, 0.4, 0.6, 0.85] as const;
 
 function simplifyAtTolerance(
   feature: Feature<Polygon | MultiPolygon>,
@@ -84,6 +90,10 @@ function decimatePolygonFeature(
   };
 }
 
+function shouldSkipTurfLod(feature: Feature<Polygon | MultiPolygon>): boolean {
+  return countPolygonVertices(feature) > MEASURING_LOD_TURF_VERTEX_CEILING;
+}
+
 /** Aggressive outline for first paint — fewer verts than full when dense. */
 export function buildMeasuringCoarseFeature(
   feature: Feature<Polygon | MultiPolygon>,
@@ -92,12 +102,13 @@ export function buildMeasuringCoarseFeature(
   if (fullVerts <= 64) {
     return feature;
   }
+  const target = Math.max(64, Math.floor(fullVerts * LOD_DECIMATE_FRACTIONS[0]));
+  if (shouldSkipTurfLod(feature)) {
+    return decimatePolygonFeature(feature, target);
+  }
   let coarse = simplifyAtTolerance(feature, LOD_TOLERANCES[0]);
   if (countPolygonVertices(coarse) >= fullVerts) {
-    coarse = decimatePolygonFeature(
-      feature,
-      Math.max(64, Math.floor(fullVerts / 4)),
-    );
+    coarse = decimatePolygonFeature(feature, target);
   }
   return coarse;
 }
@@ -111,13 +122,27 @@ export function refineMeasuringFeatureStep(
   _current: Feature<Polygon | MultiPolygon>,
   stepIndex: number,
 ): { feature: Feature<Polygon | MultiPolygon>; done: boolean } {
-  const nextToleranceIndex = stepIndex + 1;
-  if (nextToleranceIndex >= LOD_TOLERANCES.length) {
+  const nextIndex = stepIndex + 1;
+  if (shouldSkipTurfLod(full)) {
+    if (nextIndex >= LOD_DECIMATE_FRACTIONS.length) {
+      return { feature: full, done: true };
+    }
+    const fullVerts = countPolygonVertices(full);
+    const fraction = LOD_DECIMATE_FRACTIONS[nextIndex]!;
+    const target = Math.max(64, Math.floor(fullVerts * fraction));
+    const done = nextIndex >= LOD_DECIMATE_FRACTIONS.length - 1;
+    return {
+      feature: done ? full : decimatePolygonFeature(full, target),
+      done,
+    };
+  }
+
+  if (nextIndex >= LOD_TOLERANCES.length) {
     return { feature: full, done: true };
   }
-  const tolerance = LOD_TOLERANCES[nextToleranceIndex]!;
+  const tolerance = LOD_TOLERANCES[nextIndex]!;
   const feature = simplifyAtTolerance(full, tolerance);
-  const done = nextToleranceIndex >= LOD_TOLERANCES.length - 1;
+  const done = nextIndex >= LOD_TOLERANCES.length - 1;
   return {
     feature: done ? full : feature,
     done,

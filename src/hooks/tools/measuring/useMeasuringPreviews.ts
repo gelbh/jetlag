@@ -31,9 +31,10 @@ function scheduleIdle(callback: () => void): () => void {
 
 function displayFeatureForComplete(
   full: Feature<GeoPolygon | MultiPolygon>,
+  fallback: Feature<GeoPolygon | MultiPolygon>,
 ): Feature<GeoPolygon | MultiPolygon> {
   const slimmed = persistSlimMeasuringGeometry(full);
-  return slimmed.ok ? slimmed.feature : full;
+  return slimmed.ok ? slimmed.feature : fallback;
 }
 
 function paintLodFeature(
@@ -51,7 +52,7 @@ function paintLodFeature(
 
   if (previewGeometryFingerprint(coarse) === previewGeometryFingerprint(full)) {
     cancelRef.current = null;
-    setFeature(displayFeatureForComplete(full));
+    setFeature(displayFeatureForComplete(full, coarse));
     setPhase("complete");
     return;
   }
@@ -65,12 +66,13 @@ function paintLodFeature(
       return;
     }
     const next = refineMeasuringFeatureStep(full, current, stepIndex);
+    const previous = current;
     current = next.feature;
     setFeature(current);
     stepIndex += 1;
     if (next.done) {
       cancelRef.current = null;
-      setFeature(displayFeatureForComplete(full));
+      setFeature(displayFeatureForComplete(full, previous));
       setPhase("complete");
       return;
     }
