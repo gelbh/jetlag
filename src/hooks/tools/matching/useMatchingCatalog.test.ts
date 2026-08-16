@@ -167,6 +167,39 @@ describe("useMatchingCatalog LOD", () => {
     });
   });
 
+  it("keeps prefix shade when the full-catalog union throws", async () => {
+    buildMatchingEliminationRegion.mockImplementation(async (features) => {
+      if ((features as MatchingFeature[]).length === 20) {
+        throw new Error("union failed");
+      }
+      return samplePolygon();
+    });
+
+    const features = Array.from({ length: 20 }, (_, i) =>
+      featureWithArea(i, 20 - i),
+    );
+    const { result } = renderHook(() =>
+      useMatchingCatalog({
+        activeAnnotations: [],
+        pendingQuestions: [],
+        matchingCategoryId: "commercial_airport",
+        matchingFeatures: features,
+        matchingNearestFeatureId: "f-0",
+        matchingNullAnswer: false,
+        matchingAnswer: "yes",
+        gameArea,
+      }),
+    );
+
+    await waitFor(() => {
+      expect(result.current.matchingEliminationPreview).not.toBeNull();
+    });
+    await waitFor(() => {
+      expect(result.current.matchingLodPhase).toBe("complete");
+    });
+    expect(result.current.matchingEliminationPreview).not.toBeNull();
+  });
+
   it("uses the 16 largest features as the coarse prefix", async () => {
     const features = Array.from({ length: 20 }, (_, i) =>
       featureWithArea(i, i + 1),

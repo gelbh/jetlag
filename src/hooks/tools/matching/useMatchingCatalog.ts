@@ -298,7 +298,6 @@ export function useMatchingCatalog(input: {
         );
       } catch {
         if (generation === elimGenerationRef.current) {
-          setMatchingEliminationPreview(null);
           setMatchingLodPhase("complete");
         }
       }
