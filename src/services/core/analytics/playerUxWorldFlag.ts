@@ -27,6 +27,25 @@ export function setPlayerUxWorldFlagForTests(value: boolean | null): void {
   notifyPlayerUxWorldFlagListeners();
 }
 
+/** Same-tab localStorage override (e2e helpers / manual craft). Notifies subscribers. */
+export function setPlayerUxWorldStorageOverride(
+  value: "on" | "off" | null,
+): void {
+  try {
+    if (typeof localStorage === "undefined") {
+      return;
+    }
+    if (value === null) {
+      localStorage.removeItem(PLAYER_UX_WORLD_STORAGE_KEY);
+    } else {
+      localStorage.setItem(PLAYER_UX_WORLD_STORAGE_KEY, value);
+    }
+  } catch {
+    // private mode / blocked storage
+  }
+  notifyPlayerUxWorldFlagListeners();
+}
+
 export function notifyPlayerUxWorldFlagListeners(): void {
   for (const listener of listeners) {
     listener();

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { resolveHidingPeriodMs } from "@/domain/session/rules";
 import {
   surveyPhaseLabel,
   surveySyncShortLabel,
@@ -9,6 +10,7 @@ const timer = {
   accumulatedMs: 0,
   runningSince: null as number | null,
 };
+const hidingPeriodMs = resolveHidingPeriodMs(rules);
 
 describe("surveyPhaseLabel", () => {
   it("returns dash before the game starts", () => {
@@ -36,6 +38,25 @@ describe("surveyPhaseLabel", () => {
         true,
         rules,
         { accumulatedMs: 3_600_000, runningSince: null },
+        false,
+      ),
+    ).toBe("Seeking");
+  });
+
+  it("flips from Hiding to Seeking at the hiding-period boundary", () => {
+    expect(
+      surveyPhaseLabel(
+        true,
+        rules,
+        { accumulatedMs: hidingPeriodMs - 1, runningSince: null },
+        false,
+      ),
+    ).toBe("Hiding");
+    expect(
+      surveyPhaseLabel(
+        true,
+        rules,
+        { accumulatedMs: hidingPeriodMs, runningSince: null },
         false,
       ),
     ).toBe("Seeking");
