@@ -113,6 +113,31 @@
     overflow-y: auto;
   }
 
+  /* Shared Ask HUD scroll chord — same rail max-height token as catalog. */
+  .ask-scroll-chord {
+    display: flex;
+    max-height: var(--ask-hud-rail-max-height);
+    max-width: 28rem;
+    margin-inline: auto;
+    flex-direction: column;
+    gap: 0.5rem;
+    overflow: hidden;
+    padding: 0.75rem;
+  }
+
+  .ask-scroll-chord__header {
+    flex-shrink: 0;
+  }
+
+  .ask-scroll-chord__list {
+    display: flex;
+    min-height: 0;
+    flex: 1;
+    flex-direction: column;
+    gap: 0.5rem;
+    overflow-y: auto;
+  }
+
   .ask-chip-island {
     display: flex;
     max-width: 28rem;

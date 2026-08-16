@@ -230,16 +230,23 @@ export function TentaclePanel({
       ) : null}
 
       {phaseId === "ask" && !awaitHiderAnswer && categoryId ? (
-        <TentacleAnswerPicker
-          categoryId={categoryId}
-          distanceUnit={distanceUnit}
-          searchRadiusMeters={searchRadiusMeters}
-          poiOptions={poiOptions}
-          selectedPoiId={selectedPoiId}
-          outOfReach={outOfReach}
-          onSelectPoi={onSelectPoi}
-          onOutOfReachChange={onOutOfReachChange}
-        />
+        <div
+          data-testid="tentacle-locations-chord"
+          className="ask-scroll-chord"
+        >
+          <div className="ask-scroll-chord__list jl-scroll">
+            <TentacleAnswerPicker
+              categoryId={categoryId}
+              distanceUnit={distanceUnit}
+              searchRadiusMeters={searchRadiusMeters}
+              poiOptions={poiOptions}
+              selectedPoiId={selectedPoiId}
+              outOfReach={outOfReach}
+              onSelectPoi={onSelectPoi}
+              onOutOfReachChange={onOutOfReachChange}
+            />
+          </div>
+        </div>
       ) : null}
     </>
   );

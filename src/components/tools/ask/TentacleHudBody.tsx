@@ -123,48 +123,55 @@ export function TentacleHudBody({
       ) : null}
 
       {chord === "locations" ? (
-        <div className="pointer-events-auto hud-panel space-y-2 p-3">
-          <AnchorControls
-            awaitingPlacement={awaitingPlacement}
-            hasAnchor={hasCenter}
-            gpsLoading={gpsLoading}
-            onUseGps={onUseGps}
-            onPlaceAtMapTap={onPlaceAtMapTap}
-            anchorHint="Anchor pinned on the map. Tap again to move it."
-            gpsLoadingLabel="Locating…"
-          />
-          {loading ? (
-            <LoadingReadout>
-              {poiOptions.length > 0
-                ? `Confirming ${poiOptions.length} map preview${
-                    poiOptions.length === 1 ? "" : "s"
-                  }…`
-                : `Loading locations within ${searchRadiusLabel}…`}
-            </LoadingReadout>
-          ) : poiOptions.length > 0 ? (
-            <ResolvedReadout>
-              {poiOptions.length} location{poiOptions.length === 1 ? "" : "s"}{" "}
-              found within {searchRadiusLabel}.
-            </ResolvedReadout>
-          ) : (
-            <ResolvedReadout variant="warning">
-              No named locations were found within {searchRadiusLabel}.
-            </ResolvedReadout>
-          )}
-          {!awaitHiderAnswer && categoryId && poiOptions.length > 0 ? (
-            <TentacleAnswerPicker
-              categoryId={categoryId}
-              distanceUnit={distanceUnit}
-              searchRadiusMeters={searchRadiusMeters}
-              poiOptions={poiOptions}
-              selectedPoiId={selectedPoiId}
-              outOfReach={outOfReach}
-              onSelectPoi={onSelectPoi}
-              onOutOfReachChange={onOutOfReachChange}
+        <div
+          data-testid="tentacle-locations-chord"
+          className="ask-scroll-chord pointer-events-auto hud-panel"
+        >
+          <div className="ask-scroll-chord__header space-y-2">
+            <AnchorControls
+              awaitingPlacement={awaitingPlacement}
+              hasAnchor={hasCenter}
+              gpsLoading={gpsLoading}
+              onUseGps={onUseGps}
+              onPlaceAtMapTap={onPlaceAtMapTap}
+              anchorHint="Anchor pinned on the map. Tap again to move it."
+              gpsLoadingLabel="Locating…"
             />
-          ) : null}
-          {error ? (
-            <p className="text-sm text-danger">{error}</p>
+            {loading ? (
+              <LoadingReadout>
+                {poiOptions.length > 0
+                  ? `Confirming ${poiOptions.length} map preview${
+                      poiOptions.length === 1 ? "" : "s"
+                    }…`
+                  : `Loading locations within ${searchRadiusLabel}…`}
+              </LoadingReadout>
+            ) : poiOptions.length > 0 ? (
+              <ResolvedReadout>
+                {poiOptions.length} location{poiOptions.length === 1 ? "" : "s"}{" "}
+                found within {searchRadiusLabel}.
+              </ResolvedReadout>
+            ) : (
+              <ResolvedReadout variant="warning">
+                No named locations were found within {searchRadiusLabel}.
+              </ResolvedReadout>
+            )}
+            {error ? (
+              <p className="text-sm text-danger">{error}</p>
+            ) : null}
+          </div>
+          {!awaitHiderAnswer && categoryId && poiOptions.length > 0 ? (
+            <div className="ask-scroll-chord__list jl-scroll">
+              <TentacleAnswerPicker
+                categoryId={categoryId}
+                distanceUnit={distanceUnit}
+                searchRadiusMeters={searchRadiusMeters}
+                poiOptions={poiOptions}
+                selectedPoiId={selectedPoiId}
+                outOfReach={outOfReach}
+                onSelectPoi={onSelectPoi}
+                onOutOfReachChange={onOutOfReachChange}
+              />
+            </div>
           ) : null}
         </div>
       ) : null}
