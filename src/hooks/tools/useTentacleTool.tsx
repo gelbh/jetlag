@@ -456,7 +456,7 @@ export function useTentacleTool({
     setTentacleError(null);
   };
 
-  const handleSelectPoi = (poiId: string) => {
+  const handleSelectPoi = useCallback((poiId: string) => {
     const poi = tentaclePois.find((entry) => entry.id === poiId);
     if (poi && !isConfirmedPoiLike(poi)) {
       setTentacleError(
@@ -467,7 +467,7 @@ export function useTentacleTool({
     setTentacleOutOfReach(false);
     setTentacleError(null);
     setSelectedPoiId(poiId);
-  };
+  }, [tentaclePois]);
 
   const panel = (
     <TentaclePanel
@@ -587,6 +587,7 @@ export function useTentacleTool({
     },
     placementCrosshair,
     handleMapClick,
+    selectDraftPoi: handleSelectPoi,
     resetDraft,
     commit,
     panel,
