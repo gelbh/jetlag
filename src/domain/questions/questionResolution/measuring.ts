@@ -1,9 +1,6 @@
 import type { AnnotationRecord, GameArea } from "../../map/annotations";
 import { MAP_ANNOTATION_COLORS } from "../../map/mapAnnotationColors";
-import {
-  assertMeasuringMultiPlaceBudget,
-  persistSlimMeasuringGeometry,
-} from "../../geometry/measuring/measuringGeometryBudgets";
+import { persistSlimMeasuringGeometry } from "../../geometry/measuring/measuringGeometryBudgets";
 import { buildMeasuringRegions, type MeasuringRegionInput } from "../../geometry/measuring/measuringRegions";
 import type { MeasuringAnswer } from "../measuringQuestions";
 import { measuringPlacesFromMetadata } from "../measuringPlacesFromMetadata";
@@ -40,13 +37,6 @@ export async function resolveMeasuringPendingQuestion(
     metadata,
     regionInput.measuringPlaces,
   );
-
-  if (regionInput.usesAllPlacesInArea) {
-    const budget = assertMeasuringMultiPlaceBudget(measuringPlaces.length);
-    if (!budget.ok) {
-      return null;
-    }
-  }
 
   const regions = await buildMeasuringRegions({
     ...regionInput,

@@ -2,10 +2,6 @@ import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import type { Feature, MultiPolygon, Polygon as GeoPolygon } from "geojson";
 import type { GameArea } from "@/domain/map/annotations";
 import {
-  assertMeasuringGeometryBudget,
-  persistSlimMeasuringGeometry,
-} from "@/domain/geometry/measuring/measuringGeometryBudgets";
-import {
   buildMeasuringCoarseFeature,
   refineMeasuringFeatureStep,
   type MeasuringLodPhase,
@@ -31,10 +27,9 @@ function scheduleIdle(callback: () => void): () => void {
 
 function displayFeatureForComplete(
   full: Feature<GeoPolygon | MultiPolygon>,
-  fallback: Feature<GeoPolygon | MultiPolygon>,
+  _fallback: Feature<GeoPolygon | MultiPolygon>,
 ): Feature<GeoPolygon | MultiPolygon> {
-  const slimmed = persistSlimMeasuringGeometry(full);
-  return slimmed.ok ? slimmed.feature : fallback;
+  return full;
 }
 
 function paintLodFeature(
@@ -188,25 +183,7 @@ export function useMeasuringPreviews(
       setMeasuringLodPhase("refining");
     };
 
-    const budget = assertMeasuringGeometryBudget({
-      measuringSubject: previewRegionInput.measuringSubject,
-      measuringLocationCategory: previewRegionInput.measuringLocationCategory,
-      usesAllPlacesInArea: previewRegionInput.usesAllPlacesInArea,
-      placeCount: previewRegionInput.measuringPlaces.length,
-      linearSegments: previewRegionInput.measuringCoastSegments,
-    });
-
     void (async () => {
-      if (!budget.ok) {
-        if (generation === generationRef.current) {
-          setMeasuringNearRegion(null);
-          setMeasuringEliminationPreview(null);
-          setMeasuringLodPhase("complete");
-          setMeasuringError(budget.message);
-        }
-        return;
-      }
-
       let near: Feature<GeoPolygon | MultiPolygon> | null;
       try {
         near = await buildMeasuringBoundaryPreview(previewRegionInput);

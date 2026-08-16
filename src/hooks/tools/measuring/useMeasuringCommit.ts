@@ -17,10 +17,7 @@ import { closerFurtherAnswerOptions } from "@/components/tools/shared/answers/bi
 import type { SubmitPendingQuestionInput } from "../../sync/usePendingQuestionActions";
 import { MAP_ANNOTATION_COLORS } from "@/domain/map/mapAnnotationColors";
 import { emitQuestionAnsweredActivity } from "@/services/session/emitSessionActivity";
-import {
-  assertMeasuringGeometryBudget,
-  persistSlimMeasuringGeometry,
-} from "@/domain/geometry/measuring/measuringGeometryBudgets";
+import { persistSlimMeasuringGeometry } from "@/domain/geometry/measuring/measuringGeometryBudgets";
 import { buildStoredMeasuringRegionInput } from "./helpers";
 import type { MeasuringDraftState } from "./useMeasuringDraftState";
 import type { MeasuringPreviews } from "./useMeasuringPreviews";
@@ -85,18 +82,6 @@ export function useMeasuringCommit({
 
   const performCommit = useCallback(async () => {
     if (!measuringSeekerPoint || measuringDistanceMeters === null) {
-      return;
-    }
-
-    const budget = assertMeasuringGeometryBudget({
-      measuringSubject,
-      measuringLocationCategory,
-      usesAllPlacesInArea,
-      placeCount: measuringPlaces.length,
-      linearSegments: resolvedCoastSegments,
-    });
-    if (!budget.ok) {
-      setMeasuringError(budget.message);
       return;
     }
 
@@ -349,18 +334,6 @@ export function useMeasuringCommit({
         measuringSeaLevelNote ??
           "Sea level region isn't ready yet. Wait for elevation sampling or tap Retry.",
       );
-      return;
-    }
-
-    const budget = assertMeasuringGeometryBudget({
-      measuringSubject,
-      measuringLocationCategory,
-      usesAllPlacesInArea,
-      placeCount: measuringPlaces.length,
-      linearSegments: resolvedCoastSegments,
-    });
-    if (!budget.ok) {
-      setMeasuringError(budget.message);
       return;
     }
 
