@@ -30,6 +30,7 @@
     --color-status-info-surface: var(--color-signal-soft);
     --color-status-warning: var(--color-flag);
     --color-status-warning-surface: var(--color-flag-soft);
+
     color-scheme: light;
   }
 
