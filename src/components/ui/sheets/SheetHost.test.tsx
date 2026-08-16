@@ -177,4 +177,28 @@ describe("SheetHost", () => {
     fireEvent.click(screen.getByRole("button", { name: "close-rac" }));
     expect(onClose).toHaveBeenCalledTimes(1);
   });
+
+  it("uses overlay path on desktop when railTab is omitted", () => {
+    useDesktopLayout.mockReturnValue(true);
+    setPlayerUxWorldFlagForTests(true);
+    render(
+      <SheetHost open onClose={() => {}} ariaLabel="Map tools guide">
+        <p>first-run</p>
+      </SheetHost>,
+    );
+    expect(screen.getByTestId("rac-motion-sheet")).toBeInTheDocument();
+    expect(screen.getByText("first-run")).toBeInTheDocument();
+  });
+
+  it("uses legacy overlay on desktop without rail when flag is off", () => {
+    useDesktopLayout.mockReturnValue(true);
+    setPlayerUxWorldFlagForTests(false);
+    render(
+      <SheetHost open onClose={() => {}} ariaLabel="Map tools guide">
+        <p>legacy first-run</p>
+      </SheetHost>,
+    );
+    expect(screen.getByTestId("motion-sheet")).toBeInTheDocument();
+    expect(screen.queryByTestId("rac-motion-sheet")).not.toBeInTheDocument();
+  });
 });

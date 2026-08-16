@@ -1,5 +1,5 @@
 import { useId, useState } from "react";
-import { MotionSheet } from "../../motion/MotionSheet";
+import { SheetHost } from "../../ui/sheets/SheetHost";
 import { SheetHeader } from "../../ui/sheets/SheetHeader";
 import type {
   BoardEconomyState,
@@ -85,7 +85,7 @@ function HiderHandSheetOpen({
   };
 
   return (
-    <MotionSheet
+    <SheetHost
       open
       onClose={onClose}
       ariaLabel="Hider hand"
@@ -275,6 +275,6 @@ function HiderHandSheetOpen({
           </div>
         ) : null}
       </div>
-    </MotionSheet>
+    </SheetHost>
   );
 }

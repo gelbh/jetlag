@@ -156,4 +156,91 @@
     [data-survey-priority="secondary"] {
     display: none;
   }
+
+  /* —— Sheets (RAC+Motion portal + rail dialogs under survey) —— */
+  [data-player-ux-world="survey"] .hud-sheet {
+    border-top: 2px solid var(--color-flag);
+    background: var(--color-canvas);
+    box-shadow: 0 -8px 28px oklch(0.22 0.02 265 / 0.18);
+    color: var(--color-field-ink);
+  }
+
+  [data-player-ux-world="survey"] .hud-scrim,
+  .jl-survey-world.hud-scrim {
+    background: oklch(from var(--color-field-ink) l c h / 0.42);
+  }
+
+  [data-player-ux-world="survey"] .jl-sheet-handle {
+    background: var(--color-rule);
+  }
+
+  [data-player-ux-world="survey"] .btn-primary {
+    border-color: var(--color-flag);
+    background: var(--color-flag);
+    color: var(--color-flag-ink);
+  }
+
+  [data-player-ux-world="survey"] .btn-primary:focus-visible {
+    outline-color: var(--color-flag);
+  }
+
+  /* —— Ask HUD field-book skin —— */
+  [data-player-ux-world="survey"] .ask-mode-cue-ticker {
+    border-radius: 0.25rem;
+    border: 1px solid var(--color-rule);
+    background: oklch(from var(--color-canvas) l c h / 0.94);
+    box-shadow: none;
+  }
+
+  [data-player-ux-world="survey"] .ask-mode-cue-ticker__text {
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    text-transform: none;
+    color: var(--color-field-ink);
+  }
+
+  [data-player-ux-world="survey"] .ask-cost-chip {
+    border-radius: 0.25rem;
+    border: 1px solid var(--color-rule);
+    background: var(--color-canvas);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: none;
+    color: var(--color-field-ink-muted);
+  }
+
+  [data-player-ux-world="survey"] .ask-commit-strip__btn--muted {
+    border-radius: 0.35rem;
+    border-color: var(--color-rule);
+    background: var(--color-canvas);
+    font-family: var(--font-sans, inherit);
+    letter-spacing: 0.02em;
+    text-transform: none;
+    color: var(--color-field-ink-muted);
+  }
+
+  [data-player-ux-world="survey"] .ask-catalog-rail,
+  [data-player-ux-world="survey"] .ask-scroll-chord {
+    border-radius: 0.35rem;
+    border: 1px solid var(--color-rule);
+    background: var(--color-canvas);
+    box-shadow: none;
+  }
+
+  [data-player-ux-world="survey"] .ask-walk-banner {
+    border-radius: 0.35rem;
+    border: 1px solid var(--color-rule);
+    background: oklch(from var(--color-canvas) l c h / 0.94);
+    box-shadow: none;
+  }
+
+  [data-player-ux-world="survey"] .ask-walk-banner__label {
+    letter-spacing: 0.02em;
+    text-transform: none;
+    color: var(--color-flag);
+  }
+
+  [data-player-ux-world="survey"] .ask-walk-banner__progress {
+    color: var(--color-field-ink);
+  }
 }

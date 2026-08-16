@@ -59,8 +59,8 @@ function DesktopRailDialog({
 
 /**
  * Stable sheet host API for map chrome.
- * Desktop → ContextualRail portal (unchanged).
- * Mobile → legacy MotionSheet when flag off; RacMotionSheet when `player-ux-world-v2` on.
+ * Desktop + railTab → ContextualRail portal.
+ * Otherwise (mobile, or desktop without rail) → MotionSheet / RacMotionSheet by flag.
  */
 export function SheetHost({
   open,
@@ -77,8 +77,8 @@ export function SheetHost({
   const railPanel = useContextualRailPanel();
   const playerUxWorld = usePlayerUxWorld();
 
-  if (isDesktop) {
-    if (!open || !railPanel?.panelEl || !railTab) {
+  if (isDesktop && railTab && railPanel?.panelEl) {
+    if (!open) {
       return null;
     }
 

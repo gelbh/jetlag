@@ -2,6 +2,7 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { RacMotionSheet } from "./RacMotionSheet";
 import { SHEET_VELOCITY_DISMISS_PX_MS } from "@/domain/device/motion/motionTokens";
+import { setPlayerUxWorldFlagForTests } from "@/services/core/analytics/playerUxWorldFlag";
 
 const useMotionProfile = vi.fn(() => ({
   animate: true,
@@ -19,6 +20,13 @@ vi.mock("@/hooks/layout/useScrollLock", () => ({
   useScrollLock: () => undefined,
 }));
 
+vi.mock("posthog-js", () => ({
+  default: {
+    isFeatureEnabled: () => undefined,
+    onFeatureFlags: () => () => {},
+  },
+}));
+
 const MOTION_DOM_SKIP = new Set([
   "initial",
   "animate",
@@ -30,6 +38,7 @@ const MOTION_DOM_SKIP = new Set([
   "dragConstraints",
   "dragElastic",
 ]);
+// data-player-ux-world must reach the DOM for survey sheet skin
 
 type DragEndHandler = (
   event: unknown,
@@ -72,6 +81,7 @@ vi.mock("motion/react", async () => {
 describe("RacMotionSheet", () => {
   beforeEach(() => {
     latestOnDragEnd = undefined;
+    setPlayerUxWorldFlagForTests(null);
     useMotionProfile.mockReturnValue({
       animate: true,
       decorativeAnimate: true,
@@ -103,6 +113,20 @@ describe("RacMotionSheet", () => {
       </RacMotionSheet>,
     );
     expect(await screen.findByRole("dialog", { name: "Sheet" })).toBeInTheDocument();
+  });
+
+  it("marks survey world on the overlay when flag is on", async () => {
+    setPlayerUxWorldFlagForTests(true);
+    render(
+      <RacMotionSheet open onClose={() => {}} ariaLabel="Survey sheet">
+        <p>body</p>
+      </RacMotionSheet>,
+    );
+    await screen.findByRole("dialog", { name: "Survey sheet" });
+    expect(
+      document.querySelector('[data-player-ux-world="survey"]'),
+    ).not.toBeNull();
+    expect(document.querySelector(".jl-survey-world")).not.toBeNull();
   });
 
   it("dismisses via drag-end past fraction or velocity", async () => {
