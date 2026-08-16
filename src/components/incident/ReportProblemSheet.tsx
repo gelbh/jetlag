@@ -14,7 +14,7 @@ import {
 } from "../../services/incident/incidentApi";
 import { getFirebaseAuth, isFirebaseConfigured } from "../../services/core/firebase/firebase";
 import { useSessionStore } from "../../state/sessionStore";
-import { MotionSheet } from "../motion/MotionSheet";
+import { SheetHost } from "../ui/sheets/SheetHost";
 import { SheetHeader } from "../ui/sheets/SheetHeader";
 import { IncidentChatPanel } from "./IncidentChatPanel";
 import { SupportAgentChat } from "./SupportAgentChat";
@@ -91,7 +91,7 @@ export function ReportProblemSheet({
   };
 
   return (
-    <MotionSheet
+    <SheetHost
       open={open}
       onClose={handleClose}
       ariaLabel="Report problem"
@@ -106,7 +106,7 @@ export function ReportProblemSheet({
           onClose={handleClose}
         />
       ) : null}
-    </MotionSheet>
+    </SheetHost>
   );
 }
 
