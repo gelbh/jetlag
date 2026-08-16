@@ -159,9 +159,7 @@ export function ToolStatusBlock({
         </span>
         {!timerHasStarted ? (
           timerSyncing ? (
-            <p className="jl-status-header-waiting">
-              {survey ? "Syncing…" : "Syncing…"}
-            </p>
+            <p className="jl-status-header-waiting">Syncing…</p>
           ) : canStartGame ? (
             <button
               type="button"

@@ -89,10 +89,9 @@ export const MapBottomChrome = forwardRef<HTMLDivElement, MapBottomChromeProps>(
         <div
           className={cn(
             "jl-map-bottom-chrome",
-            /* Survey collapses dual-dock chassis debt; HUD keeps legacy jl-tool-dock. */
+            /* Survey drops legacy jl-tool-dock chassis; keep --rail for desktop-ops. */
             !survey && "jl-tool-dock",
-            isRail && "jl-map-bottom-chrome--rail",
-            isRail && !survey && "jl-tool-dock--rail",
+            isRail && "jl-map-bottom-chrome--rail jl-tool-dock--rail",
             inactive && "jl-map-bottom-chrome--inactive",
             sparseHunt && "jl-map-bottom-chrome--hunt-sparse",
             className,
