@@ -1,4 +1,4 @@
-export const APP_VERSION = "0.12.0";
+export const APP_VERSION = "0.13.0";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,33 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "0.13.0",
+    date: "2026-08-16",
+    sections: [
+      {
+        title: "Fixes",
+        items: [
+          "Map: prevent marker-icon errors while map styles load or change",
+          "Session: prevent errors when a photo question has already finished",
+          "Measuring: large place lists and detailed borders still shade the map instead of stopping with a complexity error",
+          "Tentacle: long place lists still shade; saving may fail if the mask is too large to store",
+        ],
+      },
+      {
+        title: "Improvements",
+        items: [
+          "Survey field-book is now the default player look on web and PWA. The old Broadcast HUD dual path and PostHog world flag are gone.",
+          "Live map: clearer status strip and stake-plate tool islands outdoors (plain labels, sync text with icon, simpler landscape controls)",
+          "Live map: question ask HUD and map sheets use the Survey field-book look (plain labels, stake-plate sheets)",
+          "Home and secondary screens use the Survey field-book look, with a shared empty state for lists and recovery copy",
+          "Measuring: shows a quick outline of the shaded area, then adds detail, and no longer blocks with \"too complex\" on preview",
+          "Matching: every island and admin area in the play area can be used, not a hidden 50-area cut",
+          "Tentacle locations: keep the place list within the map rail so previews stay visible, and tap a confirmed place on the map to select it",
+        ],
+      }
+    ],
+  },
   {
     version: "0.12.0",
     date: "2026-08-16",
