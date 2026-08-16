@@ -22,7 +22,8 @@ function run(command, args) {
     shell: process.platform === "win32",
   });
   if (result.error) throw result.error;
-  if (result.status) process.exit(result.status);
+  // status is null when the child exits via signal — treat as failure
+  if (result.status !== 0) process.exit(result.status ?? 1);
 }
 
 run("npm", ["run", "wasm:build"]);
