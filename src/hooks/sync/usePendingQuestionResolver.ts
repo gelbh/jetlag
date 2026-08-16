@@ -7,6 +7,7 @@ import {
   getPendingQuestionStatus,
   updatePendingQuestion,
 } from "../../services/firestore/firestoreSessionExtras";
+import { isFirestorePermissionDenied } from "../../services/firestore/sessions/shared";
 import { capturePendingResolveFailure } from "../../services/core/analytics/sentry";
 import {
   answerSummaryFromPendingReply,
@@ -47,6 +48,33 @@ async function resolvePendingQuestion(
   }
 
   return resolvePendingAnnotationFromReply(pending, replyId, gameArea);
+}
+
+/**
+ * Seeker resolve is often concurrent (multi-tab). Losing the race yields
+ * permission-denied once status is already resolved/cancelled — treat as done
+ * (JETLAG-2 photo).
+ */
+async function writePendingTerminalStatus(
+  sessionId: string,
+  pendingId: string,
+  patch: {
+    status: "resolved" | "cancelled";
+    resolvedAnnotationId?: string;
+  },
+): Promise<void> {
+  try {
+    await updatePendingQuestion(sessionId, pendingId, patch);
+  } catch (error) {
+    if (!isFirestorePermissionDenied(error)) {
+      throw error;
+    }
+    const latest = await getPendingQuestionStatus(sessionId, pendingId);
+    if (latest === "resolved" || latest === "cancelled") {
+      return;
+    }
+    throw error;
+  }
 }
 
 export function usePendingQuestionResolver({
@@ -102,11 +130,18 @@ export function usePendingQuestionResolver({
             return;
           }
 
+          // Photo never materializes an annotation — do not treat a coincidental
+          // id match as "already known".
+          const annotationTool = isAnnotationQuestionTool(pending.toolType);
+
           // Read ref after await so annotation baseline hydration is visible
           // (reload wipe → empty set must not lock us into a rebuild).
-          if (knownAnnotationIdsRef.current?.has(pending.id)) {
+          if (
+            annotationTool &&
+            knownAnnotationIdsRef.current?.has(pending.id)
+          ) {
             annotationAlreadyKnown = true;
-            await updatePendingQuestion(sessionId, pending.id, {
+            await writePendingTerminalStatus(sessionId, pending.id, {
               status: "resolved",
               resolvedAnnotationId: pending.id,
             });
@@ -116,9 +151,12 @@ export function usePendingQuestionResolver({
           const annotation = await resolvePendingQuestion(pending, gameArea);
 
           // Hydration may have landed during geometry work — complete without write.
-          if (knownAnnotationIdsRef.current?.has(pending.id)) {
+          if (
+            annotationTool &&
+            knownAnnotationIdsRef.current?.has(pending.id)
+          ) {
             annotationAlreadyKnown = true;
-            await updatePendingQuestion(sessionId, pending.id, {
+            await writePendingTerminalStatus(sessionId, pending.id, {
               status: "resolved",
               resolvedAnnotationId: pending.id,
             });
@@ -127,7 +165,7 @@ export function usePendingQuestionResolver({
 
           if (!annotation) {
             if (pending.toolType === "photo") {
-              await updatePendingQuestion(sessionId, pending.id, {
+              await writePendingTerminalStatus(sessionId, pending.id, {
                 status: "resolved",
               });
               emitPhotoAnsweredActivity({
@@ -142,7 +180,7 @@ export function usePendingQuestionResolver({
               return;
             }
 
-            await updatePendingQuestion(sessionId, pending.id, {
+            await writePendingTerminalStatus(sessionId, pending.id, {
               status: "cancelled",
             });
             return;
@@ -155,7 +193,7 @@ export function usePendingQuestionResolver({
           });
           annotationCreated = true;
 
-          await updatePendingQuestion(sessionId, pending.id, {
+          await writePendingTerminalStatus(sessionId, pending.id, {
             status: "resolved",
             resolvedAnnotationId: created.id,
           });
@@ -186,7 +224,7 @@ export function usePendingQuestionResolver({
             Boolean(knownAnnotationIdsRef.current?.has(pending.id));
           if (shouldComplete) {
             try {
-              await updatePendingQuestion(sessionId, pending.id, {
+              await writePendingTerminalStatus(sessionId, pending.id, {
                 status: "resolved",
                 resolvedAnnotationId: pending.id,
               });
@@ -195,7 +233,7 @@ export function usePendingQuestionResolver({
             }
           } else {
             try {
-              await updatePendingQuestion(sessionId, pending.id, {
+              await writePendingTerminalStatus(sessionId, pending.id, {
                 status: "cancelled",
               });
             } catch {

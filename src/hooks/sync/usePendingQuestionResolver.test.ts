@@ -79,6 +79,36 @@ describe("usePendingQuestionResolver", () => {
     expect(createAnnotation).not.toHaveBeenCalled();
   });
 
+  it("treats permission-denied as success when photo already resolved (JETLAG-2)", async () => {
+    const { FirebaseError } = await import("firebase/app");
+    updatePendingQuestion.mockRejectedValue(
+      new FirebaseError("permission-denied", "Missing or insufficient permissions."),
+    );
+    getPendingQuestionStatus
+      .mockResolvedValueOnce("answered")
+      .mockResolvedValueOnce("resolved");
+
+    renderHook(() =>
+      usePendingQuestionResolver({
+        sessionId: "session-1",
+        enabled: true,
+        pendingQuestions: [photoPending],
+        createAnnotation,
+        gameArea,
+      }),
+    );
+
+    await waitFor(() => {
+      expect(updatePendingQuestion).toHaveBeenCalled();
+    });
+
+    await waitFor(() => {
+      expect(getPendingQuestionStatus).toHaveBeenCalledTimes(2);
+    });
+
+    expect(createAnnotation).not.toHaveBeenCalled();
+  });
+
   it("skips answered questions created before session reset", async () => {
     updatePendingQuestion.mockResolvedValue(undefined);
     createAnnotation.mockResolvedValue({ id: "ann-1" } as AnnotationRecord);
