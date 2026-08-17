@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, type ReactNode } from "react";
-import { Dialog, Modal, ModalOverlay } from "react-aria-components";
+import * as Dialog from "@radix-ui/react-dialog";
 import {
   motion,
   useDragControls,
@@ -16,7 +16,7 @@ import {
 import { MobileSheet } from "./MobileSheet";
 import type { SheetHandleProps } from "@/hooks/motion/useSheetGesture";
 
-export interface RacMotionSheetProps {
+export interface RadixMotionSheetProps {
   open: boolean;
   onClose: () => void;
   children: ReactNode;
@@ -28,10 +28,10 @@ export interface RacMotionSheetProps {
 }
 
 /**
- * Survey sheet path: React Aria dialog semantics + Motion drag/spring.
+ * Survey sheet path: Radix dialog semantics + Motion drag/spring.
  * Desktop ContextualRail stays on SheetHost; this is mobile/overlay only.
  */
-export function RacMotionSheet({
+export function RadixMotionSheet({
   open,
   onClose,
   children,
@@ -40,7 +40,7 @@ export function RacMotionSheet({
   ariaLabel,
   sheetClassName = "",
   maxHeightClassName,
-}: RacMotionSheetProps) {
+}: RadixMotionSheetProps) {
   const { decorativeAnimate } = useMotionProfile();
   const systemReducedMotion = useReducedMotion();
   const reduceMotion = Boolean(systemReducedMotion) || !decorativeAnimate;
@@ -108,34 +108,46 @@ export function RacMotionSheet({
         }
       : undefined;
 
+  const preventDismiss = useCallback(
+    (event: { preventDefault: () => void }) => {
+      if (!dismissible) {
+        event.preventDefault();
+      }
+    },
+    [dismissible],
+  );
+
   return (
-    <ModalOverlay
-      isOpen={open}
-      isDismissable={dismissible}
+    <Dialog.Root
+      open={open}
       onOpenChange={(nextOpen) => {
         if (!nextOpen && dismissible) {
           requestClose();
         }
       }}
-      className={({ isEntering, isExiting }) =>
-        [
-          "pointer-events-auto fixed inset-0 z-[var(--z-modal)] overscroll-contain hud-scrim",
-          "jl-survey-world",
-          !reduceMotion && isEntering ? "hud-scrim-enter" : "",
-          !reduceMotion && isExiting ? "hud-scrim-exit" : "",
-        ]
-          .filter(Boolean)
-          .join(" ")
-      }
     >
-      <Modal className="pointer-events-none fixed inset-0 flex items-end justify-center outline-none">
-          <Dialog
+      <Dialog.Portal>
+        <Dialog.Overlay
+          className={[
+            "pointer-events-auto fixed inset-0 z-[var(--z-modal)] overscroll-contain hud-scrim",
+            "jl-survey-world",
+            !reduceMotion ? "hud-scrim-enter data-[state=closed]:hud-scrim-exit" : "",
+          ]
+            .filter(Boolean)
+            .join(" ")}
+        />
+        <Dialog.Content
           aria-label={ariaLabel ?? "Sheet"}
-          className="pointer-events-auto w-full max-w-none outline-none"
+          className="pointer-events-none fixed inset-0 z-[var(--z-modal)] flex items-end justify-center outline-none"
+          onEscapeKeyDown={preventDismiss}
+          onPointerDownOutside={preventDismiss}
+          onInteractOutside={preventDismiss}
         >
+          {/* Radix requires a Title for a11y; visible name comes from aria-label. */}
+          <Dialog.Title className="sr-only">{ariaLabel ?? "Sheet"}</Dialog.Title>
           <motion.div
             ref={sheetMeasureRef}
-            className="w-full"
+            className="pointer-events-auto w-full max-w-none outline-none"
             data-player-ux-world="survey"
             initial={reduceMotion ? false : { y: "100%" }}
             animate={{ y: 0 }}
@@ -164,8 +176,8 @@ export function RacMotionSheet({
               {children}
             </MobileSheet>
           </motion.div>
-        </Dialog>
-      </Modal>
-    </ModalOverlay>
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
   );
 }

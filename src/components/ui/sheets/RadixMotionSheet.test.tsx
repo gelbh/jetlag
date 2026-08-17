@@ -1,6 +1,6 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { RacMotionSheet } from "./RacMotionSheet";
+import { RadixMotionSheet } from "./RadixMotionSheet";
 import { SHEET_VELOCITY_DISMISS_PX_MS } from "@/domain/device/motion/motionTokens";
 
 const useMotionProfile = vi.fn(() => ({
@@ -69,7 +69,7 @@ vi.mock("motion/react", async () => {
   };
 });
 
-describe("RacMotionSheet", () => {
+describe("RadixMotionSheet", () => {
   beforeEach(() => {
     latestOnDragEnd = undefined;
     useMotionProfile.mockReturnValue({
@@ -83,9 +83,9 @@ describe("RacMotionSheet", () => {
   it("exposes a dialog and closes on Escape when dismissible", async () => {
     const onClose = vi.fn();
     render(
-      <RacMotionSheet open onClose={onClose} ariaLabel="Tools">
+      <RadixMotionSheet open onClose={onClose} ariaLabel="Tools">
         <button type="button">inside</button>
-      </RacMotionSheet>,
+      </RadixMotionSheet>,
     );
 
     const dialog = await screen.findByRole("dialog", { name: "Tools" });
@@ -98,18 +98,18 @@ describe("RacMotionSheet", () => {
 
   it("defaults dialog name when ariaLabel is omitted", async () => {
     render(
-      <RacMotionSheet open onClose={() => {}}>
+      <RadixMotionSheet open onClose={() => {}}>
         <p>unnamed</p>
-      </RacMotionSheet>,
+      </RadixMotionSheet>,
     );
     expect(await screen.findByRole("dialog", { name: "Sheet" })).toBeInTheDocument();
   });
 
   it("marks survey world on the overlay", async () => {
     render(
-      <RacMotionSheet open onClose={() => {}} ariaLabel="Survey sheet">
+      <RadixMotionSheet open onClose={() => {}} ariaLabel="Survey sheet">
         <p>body</p>
-      </RacMotionSheet>,
+      </RadixMotionSheet>,
     );
     await screen.findByRole("dialog", { name: "Survey sheet" });
     expect(
@@ -121,9 +121,9 @@ describe("RacMotionSheet", () => {
   it("dismisses via drag-end past fraction or velocity", async () => {
     const onClose = vi.fn();
     render(
-      <RacMotionSheet open onClose={onClose} ariaLabel="Drag">
+      <RadixMotionSheet open onClose={onClose} ariaLabel="Drag">
         <p>body</p>
-      </RacMotionSheet>,
+      </RadixMotionSheet>,
     );
     await screen.findByRole("dialog", { name: "Drag" });
     expect(latestOnDragEnd).toBeTypeOf("function");
@@ -151,9 +151,9 @@ describe("RacMotionSheet", () => {
       prefersReducedMotion: true,
     });
     render(
-      <RacMotionSheet open onClose={() => {}} ariaLabel="Quiet">
+      <RadixMotionSheet open onClose={() => {}} ariaLabel="Quiet">
         <p>still</p>
-      </RacMotionSheet>,
+      </RadixMotionSheet>,
     );
     await screen.findByRole("dialog", { name: "Quiet" });
     expect(
@@ -163,9 +163,9 @@ describe("RacMotionSheet", () => {
 
   it("renders nothing meaningful when closed", () => {
     const { container } = render(
-      <RacMotionSheet open={false} onClose={() => {}} ariaLabel="Closed">
+      <RadixMotionSheet open={false} onClose={() => {}} ariaLabel="Closed">
         <p>hidden</p>
-      </RacMotionSheet>,
+      </RadixMotionSheet>,
     );
     expect(screen.queryByText("hidden")).not.toBeInTheDocument();
     expect(container.querySelector("[role='dialog']")).toBeNull();
