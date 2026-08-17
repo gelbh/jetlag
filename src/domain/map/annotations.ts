@@ -94,6 +94,8 @@ export interface AnnotationMetadata {
   measuringTargetName?: string;
   measuringDistanceMeters?: number;
   measuringBoundaryJson?: string;
+  /** Region input JSON so clients can rebuild shade when persist-slim cannot store the polygon. */
+  measuringRegionInputJson?: string;
   matchingCategory?: MatchingCategoryId;
   matchingAnswer?: MatchingAnswer;
   matchingAnchor?: { lat: number; lng: number };
