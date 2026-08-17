@@ -5,6 +5,7 @@ import { isActive } from "../../map/annotationActive";
 import { DEFAULT_RADIUS_METERS } from "../../map/distance";
 import { MAP_ANNOTATION_COLORS } from "../../map/mapAnnotationColors";
 import { thermometerShadedSide } from "../../questions/thermometerQuestions";
+import { measuringPlacesFromMetadata } from "../../questions/measuringPlacesFromMetadata";
 import type { HidingZoneRecord } from "../../session/hiding/hidingZone";
 import {
   buildHalfPlanePolygon,
@@ -13,6 +14,10 @@ import {
   dispatchRadarShadedRegion,
 } from "../core/radarHalfPlane";
 import { resolveClientMaskKernelMode } from "../kernel/resolveClientMaskKernelMode";
+import {
+  buildMeasuringEliminationPreviewTs,
+  type MeasuringRegionInput,
+} from "../measuring/measuringRegions";
 import type {
   DiskSpec,
   EliminationUnionInput,
@@ -69,8 +74,47 @@ export function eliminationDiskForAnnotation(
   return null;
 }
 
+function measuringEliminationFromStoredMetadata(
+  annotation: AnnotationRecord,
+  gameArea: GameArea,
+): PolygonFeature | null {
+  const answer = annotation.metadata.measuringAnswer;
+  const regionInputJson = annotation.metadata.measuringRegionInputJson;
+  if (!answer || typeof regionInputJson !== "string") {
+    return null;
+  }
+
+  try {
+    const regionInput = JSON.parse(regionInputJson) as Omit<
+      MeasuringRegionInput,
+      "measuringAnswer" | "gameArea"
+    >;
+    const feature = buildMeasuringEliminationPreviewTs({
+      ...regionInput,
+      measuringPlaces: measuringPlacesFromMetadata(
+        annotation.metadata,
+        regionInput.measuringPlaces,
+      ),
+      measuringAnswer: answer,
+      gameArea,
+    });
+    if (
+      feature &&
+      (feature.geometry.type === "Polygon" ||
+        feature.geometry.type === "MultiPolygon")
+    ) {
+      return feature as PolygonFeature;
+    }
+  } catch {
+    return null;
+  }
+
+  return null;
+}
+
 function eliminationFeatureFromNonKernel(
   annotation: AnnotationRecord,
+  gameArea: GameArea,
 ): PolygonFeature | null {
   if (!isActive(annotation)) {
     return null;
@@ -98,7 +142,7 @@ function eliminationFeatureFromNonKernel(
     if (geometry.type === "Polygon" || geometry.type === "MultiPolygon") {
       return annotation.geometry as PolygonFeature;
     }
-    return null;
+    return measuringEliminationFromStoredMetadata(annotation, gameArea);
   }
 
   if (annotation.type === "tentacle") {
@@ -184,7 +228,7 @@ export function eliminationFeatureForAnnotationTs(
   gameArea: GameArea,
 ): PolygonFeature | null {
   return (
-    eliminationFeatureFromNonKernel(annotation) ??
+    eliminationFeatureFromNonKernel(annotation, gameArea) ??
     eliminationFeatureKernelTs(annotation, gameArea)
   );
 }
@@ -193,7 +237,7 @@ export async function eliminationFeatureForAnnotation(
   annotation: AnnotationRecord,
   gameArea: GameArea,
 ): Promise<PolygonFeature | null> {
-  const nonKernel = eliminationFeatureFromNonKernel(annotation);
+  const nonKernel = eliminationFeatureFromNonKernel(annotation, gameArea);
   if (nonKernel) {
     return nonKernel;
   }
