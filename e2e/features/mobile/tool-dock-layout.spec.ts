@@ -13,6 +13,7 @@ import {
   SIMULATED_SAFE_AREA_TOP_PX,
   clickViaEvaluate,
   assertInViewport,
+  enablePlayerUxWorld,
 } from "../../fixtures";
 import type { Page } from "@playwright/test";
 
@@ -452,6 +453,35 @@ test.describe("landscape map-dominant chrome", () => {
     await page.getByRole("button", { name: /Show map controls/i }).click();
     await expect(page.locator(".jl-tool-dock")).toBeVisible();
     await assertSideStackClearsZoom(page);
+  });
+
+  test("distills secondary actions when landscape chrome is expanded", async ({
+    page,
+  }) => {
+    await enablePlayerUxWorld(page);
+    await expect(page.locator('[data-player-ux-world="survey"]')).toBeVisible();
+    const chip = page.getByRole("button", {
+      name: /Show map controls|Hide map controls/i,
+    });
+    await expect(chip).toBeVisible();
+    if ((await chip.getAttribute("aria-expanded")) === "false") {
+      await chip.click();
+    }
+    await expect(chip).toHaveAttribute("aria-expanded", "true");
+    await expect(
+      page.locator(
+        '[data-player-ux-world="survey"][data-landscape-chrome="revealed"]',
+      ),
+    ).toBeVisible();
+    await expect(page.locator('[data-island="map-controls"]')).toBeHidden();
+    await expect(
+      page.locator(
+        '[data-survey-priority="secondary"][aria-label="Report a problem"]',
+      ),
+    ).toBeHidden();
+    await expect(
+      page.getByRole("button", { name: "Open settings" }),
+    ).toBeVisible();
   });
 });
 
