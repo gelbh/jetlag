@@ -46,6 +46,7 @@ describe("ToolDeck", () => {
     expect(group.className).toMatch(/justify-evenly/);
     expect(group.className).toMatch(/\[&_\.jl-tool-slot\]:flex-1/);
     expect(group.className).toMatch(/\[&_\.jl-tool-slot\]:min-h-11/);
+    expect(group.className).toMatch(/\[&_\.jl-tool-slot\]:min-w-11/);
     expect(group.className).toMatch(/\[&_\.jl-tool-slot\]:basis-0/);
     expect(container.querySelectorAll(".jl-tool-slot")).toHaveLength(3);
   });
@@ -53,7 +54,7 @@ describe("ToolDeck", () => {
   it("keeps sparse hunt content-sized instead of forced full bleed", () => {
     render(
       <ToolDeck density="sparse">
-        <ToolDeckGroup>
+        <ToolDeckGroup density="sparse">
           <button type="button" className="jl-tool-slot">
             Set zone
           </button>
@@ -64,5 +65,10 @@ describe("ToolDeck", () => {
     expect(deck.getAttribute("data-hunt-density")).toBe("sparse");
     expect(deck.className).toMatch(/w-max/);
     expect(deck.className).not.toMatch(/(?:^|\s)w-full(?:\s|$)/);
+    const group = screen.getByRole("group", {
+      name: "History and question tools",
+    });
+    expect(group.className).toMatch(/flex-none/);
+    expect(group.className).toMatch(/\[&_\.jl-tool-slot\]:min-w-11/);
   });
 });

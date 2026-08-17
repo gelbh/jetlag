@@ -70,7 +70,7 @@ export const ToolDeckGroup = forwardRef<HTMLDivElement, ToolDeckGroupProps>(
           "jl-tool-dock-group jl-tool-dock-group-main relative z-[1] flex min-w-0 items-stretch gap-0.5",
           sparse
             ? "flex-none justify-start [&_.jl-tool-slot]:min-h-11 [&_.jl-tool-slot]:min-w-11 [&_.jl-tool-slot]:flex-none"
-            : "flex-1 justify-evenly [&_.jl-tool-slot]:min-h-11 [&_.jl-tool-slot]:min-w-10 [&_.jl-tool-slot]:flex-1 [&_.jl-tool-slot]:basis-0",
+            : "flex-1 justify-evenly [&_.jl-tool-slot]:min-h-11 [&_.jl-tool-slot]:min-w-11 [&_.jl-tool-slot]:flex-1 [&_.jl-tool-slot]:basis-0",
           className,
         )}
         role="group"
