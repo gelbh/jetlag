@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import type { GameSize } from "../../domain/session/size/gameSize";
 import { useVisualViewportBottomInset } from "../../hooks/layout/useVisualViewportBottomInset";
 import type { SessionRulesInput } from "../../domain/session/rules";
@@ -88,6 +88,12 @@ export function ToolDock({
 
   const drawMenuVisible =
     drawMenuOpen && !dismissOverflowMenus && !inactive;
+
+  useEffect(() => {
+    if (inactive) {
+      closeMenus();
+    }
+  }, [inactive, closeMenus]);
   const markupActive = MARKUP_DOCK_TOOL_IDS.some((toolId) => activeTool === toolId);
   const rulesInput = sessionRules ?? { gameSize };
   const visibleQuestionTools = QUESTION_DOCK_TOOL_IDS.filter((toolId) =>

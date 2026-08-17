@@ -104,6 +104,7 @@ export const MapBottomChrome = forwardRef<HTMLDivElement, MapBottomChromeProps>(
             className,
           )}
           aria-disabled={inactive || undefined}
+          inert={inactive || undefined}
         >
           <div
             className={cn(
