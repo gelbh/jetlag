@@ -86,7 +86,8 @@ export function ToolDock({
   const { drawMenuOpen, setDrawMenuOpen, closeMenus } =
     useToolDockMenus(dockRef);
 
-  const drawMenuVisible = drawMenuOpen && !dismissOverflowMenus;
+  const drawMenuVisible =
+    drawMenuOpen && !dismissOverflowMenus && !inactive;
   const markupActive = MARKUP_DOCK_TOOL_IDS.some((toolId) => activeTool === toolId);
   const rulesInput = sessionRules ?? { gameSize };
   const visibleQuestionTools = QUESTION_DOCK_TOOL_IDS.filter((toolId) =>

@@ -100,21 +100,21 @@
    */
   [data-chrome-side-stack="phone"] {
     bottom: calc(
-      var(--dock-island-height) + var(--chrome-side-stack-gap)
-        + var(--chrome-side-stack-lift)
+      var(--dock-island-height) + var(--chrome-side-stack-gap) +
+        var(--chrome-side-stack-lift)
     );
   }
 
   @media (max-height: 430px) and (orientation: landscape) {
     [data-chrome-side-stack="phone"] {
       bottom: calc(
-        var(--dock-island-height) + var(--chrome-side-stack-gap)
-          + var(--chrome-side-stack-lift-landscape)
+        var(--dock-island-height) + var(--chrome-side-stack-gap) +
+          var(--chrome-side-stack-lift-landscape)
       );
       max-height: calc(
-        100dvh - env(safe-area-inset-top) - var(--chrome-side-stack-lift)
-          - var(--dock-island-height) - var(--chrome-side-stack-gap)
-          - var(--chrome-side-stack-lift-landscape)
+        100dvh - env(safe-area-inset-top) - var(--chrome-side-stack-lift) -
+          var(--dock-island-height) - var(--chrome-side-stack-gap) -
+          var(--chrome-side-stack-lift-landscape)
       );
       overflow: hidden;
     }
@@ -132,8 +132,8 @@
     position: absolute;
     right: calc(var(--map-chrome-side-width, 3.25rem) + 0.5rem);
     bottom: calc(
-      var(--dock-island-height) + env(safe-area-inset-bottom)
-        + var(--chrome-side-stack-gap) + var(--chrome-side-stack-lift)
+      var(--dock-island-height) + env(safe-area-inset-bottom) +
+        var(--chrome-side-stack-gap) + var(--chrome-side-stack-lift)
     );
     z-index: calc(var(--z-panel) + 1);
     pointer-events: auto;
