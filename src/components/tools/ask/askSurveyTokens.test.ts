@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
 const FORBIDDEN =
-  /(?:--|bg-|text-|border-|from-|to-|via-)?color-surface-(?:deep|panel|raised)\b|bg-surface-(?:deep|panel|raised|base)\b|text-surface-(?:deep|panel|raised|base)\b|(?<!ask-)hud-panel\b/;
+  /(?:--|bg-|text-|border-|from-|to-|via-)?color-surface-(?:deep|panel|raised)\b|bg-surface-(?:deep|panel|raised|base)\b|text-surface-(?:deep|panel|raised|base)\b|(?<!ask-)hud-panel\b|\btext-ink(?:-muted|-secondary|-dim|-primary)?\b|\bbg-action\b|\bbtn-primary\b/;
 
 const ASK_DIR = dirname(fileURLToPath(import.meta.url));
 const ASK_HUD_CSS = join(ASK_DIR, "../../../styles/ask-hud.css");

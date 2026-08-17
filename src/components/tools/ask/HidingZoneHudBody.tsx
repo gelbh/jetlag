@@ -122,7 +122,7 @@ export function HidingZoneHudBody({
           <p className="text-xs font-medium uppercase tracking-wide text-field-ink-muted">
             Zone center
           </p>
-          <p className="text-sm font-medium text-ink">
+          <p className="text-sm font-medium text-field-ink">
             {placementSummary(zoneTool)}
           </p>
           <p className="text-xs text-field-ink-muted">Radius: {radiusLabel}</p>
