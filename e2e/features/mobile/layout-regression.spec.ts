@@ -143,6 +143,14 @@ test.describe("layout regression @ default mobile", () => {
     await assertSurveyEntryAxe(page);
   });
 
+  test("@smoke leaderboard board sheet opens", async ({ page }) => {
+    await openSocialRoute(page, "/leaderboard");
+    await page.getByRole("button", { name: /Choose board/i }).click();
+    await expect(
+      page.getByRole("dialog", { name: "Choose board" }),
+    ).toBeVisible();
+  });
+
   for (const path of SOCIAL_LAYOUT_PATHS) {
     test(`@smoke ${path.slice(1)} has no overflow and chrome stays in viewport`, async ({
       page,
