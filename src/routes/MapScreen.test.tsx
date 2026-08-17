@@ -148,6 +148,6 @@ describe("MapScreen", () => {
     dismissMapToolsGuide();
     fireEvent.click(screen.getByRole("button", { name: "Open settings" }));
 
-    expect(screen.getByRole("heading", { name: "Settings" })).toBeInTheDocument();
+    expect(screen.getByRole("dialog", { name: "Settings" })).toBeInTheDocument();
   });
 });

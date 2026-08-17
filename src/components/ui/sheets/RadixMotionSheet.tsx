@@ -144,7 +144,6 @@ export function RadixMotionSheet({
             .join(" ")}
         />
         <Dialog.Content
-          aria-label={label}
           aria-describedby={undefined}
           className="fixed inset-x-0 bottom-0 z-[var(--z-modal)] w-full max-w-none outline-none"
           onEscapeKeyDown={preventDismiss}
@@ -161,10 +160,7 @@ export function RadixMotionSheet({
             restoreFocusRef.current?.focus({ preventScroll: true });
           }}
         >
-          {/* Present for Radix; aria-hidden so sheet-owned headings stay the only name. */}
-          <Dialog.Title aria-hidden="true" className="sr-only">
-            {label}
-          </Dialog.Title>
+          <Dialog.Title className="sr-only">{label}</Dialog.Title>
           <motion.div
             ref={sheetMeasureRef}
             className="w-full outline-none"
