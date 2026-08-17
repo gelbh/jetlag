@@ -10,6 +10,7 @@ import {
 import type { MapTool } from "../../state/sessionStore";
 import { MapBottomChrome } from "../map/chrome/MapBottomChrome";
 import { SessionIslandSlots } from "../map/chrome/SessionIslandSlots";
+import { ToolDeckGroup, ToolDeckInner } from "./ToolDeck";
 import {
   ToolDockDrawControl,
   ToolDockHistorySlot,
@@ -117,7 +118,7 @@ export function ToolDock({
           : undefined
       }
       hunt={
-        <div className="jl-map-island-hunt-inner">
+        <ToolDeckInner>
           {dockHighlight ? (
             <div
               aria-hidden={true}
@@ -129,11 +130,7 @@ export function ToolDock({
               }}
             />
           ) : null}
-          <div
-            ref={mainGroupRef}
-            className="jl-tool-dock-group jl-tool-dock-group-main"
-            aria-label="History and question tools"
-          >
+          <ToolDeckGroup ref={mainGroupRef}>
             <ToolDockHistorySlot
               kind="undo"
               canAct={canUndo}
@@ -155,8 +152,8 @@ export function ToolDock({
                 onSelect={selectTool}
               />
             ))}
-          </div>
-        </div>
+          </ToolDeckGroup>
+        </ToolDeckInner>
       }
       session={
         <SessionIslandSlots

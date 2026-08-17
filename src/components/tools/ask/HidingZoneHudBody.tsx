@@ -70,7 +70,7 @@ export function HidingZoneHudBody({
   return (
     <div
       data-testid="hiding-zone-hud-body"
-      className="ask-hud-mode-body mx-auto flex max-w-xl flex-col gap-2"
+      className="ask-hud-mode-body flex w-full flex-col gap-2"
     >
       {!moveMode ? (
         <AskChipIsland

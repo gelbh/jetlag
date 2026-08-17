@@ -2,9 +2,12 @@
  * Ask Map HUD host — map overlay chrome (no scrim, no floating panel).
  * Pointer-events none except HUD interactive nodes; clears dock via
  * `--dock-content-height` / `jl-panel-above-dock`.
+ * Content width matches OverlayHost / ToolDeck (shared safe-area pad).
  * Spec: ask-surface-kit-design rev 2026-08-05b.
  */
 import type { ReactNode } from "react";
+import { OVERLAY_SAFE_PAD_X } from "@/components/map/chrome/OverlayHost";
+import { cn } from "@/lib/cn";
 import { AskCommitStrip } from "./AskCommitStrip";
 import { AskCostChip } from "./AskCostChip";
 import { AskModeCueTicker } from "./AskModeCueTicker";
@@ -43,7 +46,12 @@ export function AskHudHost({
       data-survey="true"
       className="ask-hud-host pointer-events-none absolute inset-0 z-[var(--z-panel)]"
     >
-      <div className="ask-hud-host__top pointer-events-none absolute inset-x-0 top-[var(--map-banner-top)] z-[1] flex flex-col items-stretch gap-2 px-3">
+      <div
+        className={cn(
+          "ask-hud-host__top pointer-events-none absolute inset-x-0 top-[var(--map-banner-top)] z-[1] flex flex-col items-stretch gap-2",
+          OVERLAY_SAFE_PAD_X,
+        )}
+      >
         <AskModeCueTicker cue={cue} />
         {showCostChip ? (
           <div className="flex justify-start">
@@ -53,14 +61,24 @@ export function AskHudHost({
       </div>
 
       {modeBody ? (
-        <div className="ask-hud-host__body pointer-events-none absolute inset-x-0 bottom-[calc(var(--map-panel-bottom)+var(--ask-hud-strip-height,3rem)+0.5rem)] z-[1] px-3">
+        <div
+          className={cn(
+            "ask-hud-host__body pointer-events-none absolute inset-x-0 bottom-[calc(var(--map-panel-bottom)+var(--ask-hud-strip-height,3rem)+0.5rem)] z-[1]",
+            OVERLAY_SAFE_PAD_X,
+          )}
+        >
           {modeBody}
         </div>
       ) : null}
 
       {showCommitStrip ? (
-        <div className="ask-hud-host__strip pointer-events-none absolute inset-x-0 jl-panel-above-dock z-[2] px-3">
-          <div className="mx-auto max-w-xl">
+        <div
+          className={cn(
+            "ask-hud-host__strip pointer-events-none absolute inset-x-0 jl-panel-above-dock z-[2]",
+            OVERLAY_SAFE_PAD_X,
+          )}
+        >
+          <div className="w-full">
             <AskCommitStrip
               canCommit={canCommit}
               label={commitLabel}

@@ -169,7 +169,7 @@ export function MeasuringHudBody({
   return (
     <div
       data-testid="measuring-hud-body"
-      className="ask-hud-mode-body mx-auto flex max-w-xl flex-col gap-2"
+      className="ask-hud-mode-body flex w-full flex-col gap-2"
     >
       {chord === "anchor" ? (
         <div className="pointer-events-auto hud-panel p-3">
