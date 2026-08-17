@@ -1,3 +1,6 @@
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/cn";
+
 export interface WizardStepPrimaryButtonProps {
   label: string;
   onClick: () => void;
@@ -10,17 +13,18 @@ export function WizardStepPrimaryButton({
   disabled = false,
 }: WizardStepPrimaryButtonProps) {
   return (
-    <button
+    <Button
       type="button"
+      variant={disabled ? "default" : "ghost"}
       onClick={onClick}
       disabled={disabled}
-      className={`inline-flex min-h-9 min-w-[5.5rem] shrink-0 items-center justify-center rounded-[var(--radius-hud-md)] border border-border/85 bg-surface-panel px-3 font-display text-xs font-semibold uppercase tracking-[0.06em] text-ink-muted motion-safe:transition-[background,border-color,color] motion-reduce:transition-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-action disabled:pointer-events-none disabled:opacity-35 ${
-        disabled
-          ? ""
-          : "border-highlight/55 text-highlight hover:border-highlight/45 hover:bg-surface-raised"
-      }`}
+      className={cn(
+        "min-h-9 min-w-[5.5rem] shrink-0 font-display text-xs font-semibold uppercase tracking-[0.06em]",
+        !disabled &&
+          "border-flag/55 text-flag hover:border-flag/45 hover:bg-flag-soft",
+      )}
     >
       {label}
-    </button>
+    </Button>
   );
 }

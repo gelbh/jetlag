@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 export function TentacleLocationsChord({
   header,
   children,
-  className = "ask-scroll-chord pointer-events-auto hud-panel",
+  className = "ask-scroll-chord pointer-events-auto ask-hud-panel",
 }: {
   header?: ReactNode;
   children?: ReactNode;
