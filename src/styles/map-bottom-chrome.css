@@ -111,9 +111,13 @@
     pointer-events: none;
   }
 
-  /* Hunt slots: keep ≥44px height; width may shrink on narrow phones. */
+  /* Hunt slots: equal flex + ≥44px height (width may shrink on narrow phones). */
   .jl-map-island .jl-tool-dock-group-main .jl-tool-slot {
+    flex: 1 1 0;
+    width: auto;
+    min-width: 2.5rem;
     min-height: 2.75rem;
+    max-width: none;
   }
 
   .jl-map-chrome-side-stack .jl-map-island--session,
@@ -127,14 +131,6 @@
   .jl-map-chrome-side-stack .jl-map-island .jl-tool-dock-group-secondary {
     flex-grow: 0 !important;
     flex-shrink: 0 !important;
-  }
-
-  /* Undo, Redo, and question tools share equal flex in the bottom-middle group. */
-  .jl-map-island .jl-tool-dock-group-main .jl-tool-slot {
-    flex: 1 1 0;
-    width: auto;
-    min-width: 2.5rem;
-    max-width: none;
   }
 
   .jl-map-chrome-side-stack .jl-tool-slot {
