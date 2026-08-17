@@ -208,40 +208,80 @@ describe("resolvePendingQuestionTruthReference", () => {
     ).toEqual({ point: zoneCenter, mode: "hidingZoneCenter" });
   });
 
-  it("uses zone center for tentacle when the pin is in-zone but the seeker is not", () => {
-    const context = {
-      hiderUid: "hider-1",
-      zoneCenter,
-      hidingPlace: liveGps,
-      zoneRadiusMeters,
-      session: null,
-      seekerPlacesByUid: { "seeker-1": outsideAsk },
-    };
+  it.each(["tentacle", "matching", "measuring", "thermometer"] as const)(
+    "uses zone center for %s when the pin is in-zone but the seeker is not",
+    (toolType) => {
+      const context = {
+        hiderUid: "hider-1",
+        zoneCenter,
+        hidingPlace: liveGps,
+        zoneRadiusMeters,
+        session: null,
+        seekerPlacesByUid: { "seeker-1": outsideAsk },
+      };
 
+      expect(
+        resolvePendingQuestionTruthReference(
+          pendingAt(insideAsk, { toolType }),
+          context,
+        ),
+      ).toEqual({ point: zoneCenter, mode: "hidingZoneCenter" });
+    },
+  );
+
+  it.each(["tentacle", "matching", "measuring", "thermometer"] as const)(
+    "uses hiding place for %s when the seeker is inside the zone",
+    (toolType) => {
+      const context = {
+        hiderUid: "hider-1",
+        zoneCenter,
+        hidingPlace: liveGps,
+        zoneRadiusMeters,
+        session: null,
+        seekerPlacesByUid: { "seeker-1": insideAsk },
+      };
+
+      expect(
+        resolvePendingQuestionTruthReference(
+          pendingAt(outsideAsk, { toolType }),
+          context,
+        ),
+      ).toEqual({ point: liveGps, mode: "hidingPlace" });
+    },
+  );
+
+  it("uses zone center for tentacle when seeker GPS is missing", () => {
     expect(
       resolvePendingQuestionTruthReference(
         pendingAt(insideAsk, { toolType: "tentacle" }),
-        context,
+        {
+          hiderUid: "hider-1",
+          zoneCenter,
+          hidingPlace: liveGps,
+          zoneRadiusMeters,
+          session: null,
+        },
       ),
     ).toEqual({ point: zoneCenter, mode: "hidingZoneCenter" });
   });
 
-  it("uses hiding place for tentacle when the seeker is inside the zone", () => {
-    const context = {
-      hiderUid: "hider-1",
-      zoneCenter,
-      hidingPlace: liveGps,
-      zoneRadiusMeters,
-      session: null,
-      seekerPlacesByUid: { "seeker-1": insideAsk },
-    };
-
+  it("uses zone center for tentacle when createdByUid has no live place", () => {
     expect(
       resolvePendingQuestionTruthReference(
-        pendingAt(outsideAsk, { toolType: "tentacle" }),
-        context,
+        pendingAt(insideAsk, {
+          toolType: "tentacle",
+          createdByUid: "other-seeker",
+        }),
+        {
+          hiderUid: "hider-1",
+          zoneCenter,
+          hidingPlace: liveGps,
+          zoneRadiusMeters,
+          session: null,
+          seekerPlacesByUid: { "seeker-1": insideAsk },
+        },
       ),
-    ).toEqual({ point: liveGps, mode: "hidingPlace" });
+    ).toEqual({ point: zoneCenter, mode: "hidingZoneCenter" });
   });
 
   it("still uses radar placement as the in-zone origin", () => {

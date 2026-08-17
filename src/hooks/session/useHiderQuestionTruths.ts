@@ -9,6 +9,7 @@ import {
   type HiderTruthReferenceMode,
 } from "../../domain/questions/hiderTruth/resolveHiderTruthReference";
 import type { GameArea } from "../../domain/map/annotations";
+import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
 import { useLatestRequest } from "../forms/useLatestRequest";
 
@@ -16,7 +17,7 @@ const EMPTY_TRUTHS = new Map<string, HiderTruthResult>();
 const EMPTY_MODES = new Map<string, HiderTruthReferenceMode>();
 
 function seekerPlacesKey(
-  places: Readonly<Record<string, readonly [number, number]>> | null | undefined,
+  places: Readonly<Record<string, LatLngTuple>> | null | undefined,
 ): string {
   if (!places) {
     return "none";

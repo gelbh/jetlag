@@ -6,6 +6,7 @@ import { parseGeometryJson } from "../../geometry/gameArea/geometryParsing";
 import { buildMeasuringRegions, type MeasuringRegionInput } from "../../geometry/measuring/measuringRegions";
 import type { MeasuringAnswer } from "../measuringQuestions";
 import { measuringPlacesFromMetadata } from "../measuringPlacesFromMetadata";
+import { seekerAnchorFromMetadata } from "../hiderTruth/shared";
 import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
 
 function deferredMeasuringPointGeometry(
@@ -16,13 +17,8 @@ function deferredMeasuringPointGeometry(
     return parsed as Feature<Point>;
   }
 
-  const anchor = pending.placement.metadata.measuringAnchor;
-  if (
-    !anchor ||
-    typeof anchor !== "object" ||
-    typeof (anchor as { lat?: unknown }).lat !== "number" ||
-    typeof (anchor as { lng?: unknown }).lng !== "number"
-  ) {
+  const anchor = seekerAnchorFromMetadata(pending.placement.metadata);
+  if (!anchor) {
     return null;
   }
 
@@ -31,10 +27,7 @@ function deferredMeasuringPointGeometry(
     properties: {},
     geometry: {
       type: "Point",
-      coordinates: [
-        (anchor as { lng: number }).lng,
-        (anchor as { lat: number }).lat,
-      ],
+      coordinates: [anchor[1], anchor[0]],
     },
   };
 }
