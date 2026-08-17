@@ -41,6 +41,7 @@ export function Chip({
   variant,
   size,
   asChild = false,
+  type = "button",
   ...props
 }: ChipProps) {
   const Comp = asChild ? Slot : "button";
@@ -48,6 +49,7 @@ export function Chip({
     <Comp
       data-slot="chip"
       className={cn(chipVariants({ variant, size, className }))}
+      type={asChild ? undefined : type}
       {...props}
     />
   );

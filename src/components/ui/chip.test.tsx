@@ -22,6 +22,7 @@ describe("Chip", () => {
     );
     const node = screen.getByRole("button", { name: "Train" });
     expect(node).toHaveAttribute("data-slot", "chip");
+    expect(node).toHaveAttribute("type", "button");
     expect(node.className).toContain("bg-flag");
     expect(node.className).toContain("h-6");
   });

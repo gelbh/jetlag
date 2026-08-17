@@ -41,6 +41,7 @@ export function Button({
   variant,
   size,
   asChild = false,
+  type = "button",
   ...props
 }: ButtonProps) {
   const Comp = asChild ? Slot : "button";
@@ -48,6 +49,7 @@ export function Button({
     <Comp
       data-slot="button"
       className={cn(buttonVariants({ variant, size, className }))}
+      type={asChild ? undefined : type}
       {...props}
     />
   );

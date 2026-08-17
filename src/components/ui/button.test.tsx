@@ -24,6 +24,7 @@ describe("Button", () => {
     );
     const node = screen.getByRole("button", { name: "Ask" });
     expect(node).toHaveAttribute("data-slot", "button");
+    expect(node).toHaveAttribute("type", "button");
     expect(node.className).toContain("bg-flag");
     expect(node.className).toContain("h-8");
   });
