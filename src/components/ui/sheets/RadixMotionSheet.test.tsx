@@ -198,7 +198,9 @@ describe("RadixMotionSheet", () => {
     await screen.findByRole("dialog", { name: "Scrim" });
     const overlay = document.querySelector(".hud-scrim");
     expect(overlay).not.toBeNull();
+    // Radix outside-dismiss listens for pointerdown then click; both needed in jsdom.
     fireEvent.pointerDown(overlay!);
-    expect(onClose).toHaveBeenCalled();
+    fireEvent.click(overlay!);
+    expect(onClose).toHaveBeenCalledTimes(1);
   });
 });

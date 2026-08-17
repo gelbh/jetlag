@@ -142,17 +142,6 @@ export function RadixMotionSheet({
           ]
             .filter(Boolean)
             .join(" ")}
-          onPointerDown={
-            dismissible
-              ? (event) => {
-                  // Bottom-anchored Content means Overlay is outside — but jsdom
-                  // + Radix outside detection is flaky; explicit scrim dismiss.
-                  if (event.target === event.currentTarget) {
-                    requestClose();
-                  }
-                }
-              : undefined
-          }
         />
         <Dialog.Content
           aria-describedby={undefined}
