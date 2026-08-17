@@ -122,7 +122,8 @@ export function ToolDock({
           {dockHighlight ? (
             <div
               aria-hidden={true}
-              className="jl-tool-dock-highlight"
+              data-tool-highlight=""
+              className="jl-tool-dock-highlight pointer-events-none absolute z-0 rounded-[var(--radius-hud-md)] border-2 border-highlight/55 bg-highlight-soft will-change-[transform,width,height] motion-safe:transition-[transform,width,height,opacity] motion-safe:duration-[var(--motion-base)] motion-safe:ease-[var(--ease-spring-subtle)]"
               style={{
                 transform: `translate(${dockHighlight.x}px, ${dockHighlight.y}px)`,
                 width: dockHighlight.width,
