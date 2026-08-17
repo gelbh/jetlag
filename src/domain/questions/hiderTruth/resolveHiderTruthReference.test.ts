@@ -151,10 +151,14 @@ describe("isAskOriginInsideHidingZone", () => {
 });
 
 describe("resolvePendingQuestionTruthReference", () => {
-  function pendingAt(origin: [number, number]): PendingQuestionRecord {
+  function pendingAt(
+    origin: [number, number],
+    extras: Partial<PendingQuestionRecord> = {},
+  ): PendingQuestionRecord {
     return {
       id: "q-1",
       status: "pending",
+      createdByUid: "seeker-1",
       placement: {
         geometryJson: JSON.stringify({
           type: "Feature",
@@ -165,6 +169,7 @@ describe("resolvePendingQuestionTruthReference", () => {
           },
         }),
       },
+      ...extras,
     } as PendingQuestionRecord;
   }
 
@@ -201,5 +206,59 @@ describe("resolvePendingQuestionTruthReference", () => {
         session: null,
       }),
     ).toEqual({ point: zoneCenter, mode: "hidingZoneCenter" });
+  });
+
+  it("uses zone center for tentacle when the pin is in-zone but the seeker is not", () => {
+    const context = {
+      hiderUid: "hider-1",
+      zoneCenter,
+      hidingPlace: liveGps,
+      zoneRadiusMeters,
+      session: null,
+      seekerPlacesByUid: { "seeker-1": outsideAsk },
+    };
+
+    expect(
+      resolvePendingQuestionTruthReference(
+        pendingAt(insideAsk, { toolType: "tentacle" }),
+        context,
+      ),
+    ).toEqual({ point: zoneCenter, mode: "hidingZoneCenter" });
+  });
+
+  it("uses hiding place for tentacle when the seeker is inside the zone", () => {
+    const context = {
+      hiderUid: "hider-1",
+      zoneCenter,
+      hidingPlace: liveGps,
+      zoneRadiusMeters,
+      session: null,
+      seekerPlacesByUid: { "seeker-1": insideAsk },
+    };
+
+    expect(
+      resolvePendingQuestionTruthReference(
+        pendingAt(outsideAsk, { toolType: "tentacle" }),
+        context,
+      ),
+    ).toEqual({ point: liveGps, mode: "hidingPlace" });
+  });
+
+  it("still uses radar placement as the in-zone origin", () => {
+    const context = {
+      hiderUid: "hider-1",
+      zoneCenter,
+      hidingPlace: liveGps,
+      zoneRadiusMeters,
+      session: null,
+      seekerPlacesByUid: { "seeker-1": outsideAsk },
+    };
+
+    expect(
+      resolvePendingQuestionTruthReference(
+        pendingAt(insideAsk, { toolType: "radar" }),
+        context,
+      ),
+    ).toEqual({ point: liveGps, mode: "hidingPlace" });
   });
 });

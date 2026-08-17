@@ -15,6 +15,18 @@ import { useLatestRequest } from "../forms/useLatestRequest";
 const EMPTY_TRUTHS = new Map<string, HiderTruthResult>();
 const EMPTY_MODES = new Map<string, HiderTruthReferenceMode>();
 
+function seekerPlacesKey(
+  places: Readonly<Record<string, readonly [number, number]>> | null | undefined,
+): string {
+  if (!places) {
+    return "none";
+  }
+  return Object.keys(places)
+    .sort()
+    .map((uid) => `${uid}:${places[uid]?.join(",") ?? ""}`)
+    .join(";");
+}
+
 function openPendingQuestions(
   pendingQuestions: readonly PendingQuestionRecord[],
 ): PendingQuestionRecord[] {
@@ -54,6 +66,7 @@ export function useHiderQuestionTruths(
         truthContext.hidingPlace?.join(",") ?? "none",
         String(truthContext.zoneRadiusMeters ?? "none"),
         truthContext.session?.endGameStartedAt ?? "none",
+        seekerPlacesKey(truthContext.seekerPlacesByUid),
       ].join("|")
     : "none";
 

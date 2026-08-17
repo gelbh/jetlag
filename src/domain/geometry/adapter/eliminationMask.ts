@@ -92,7 +92,7 @@ function measuringEliminationFromStoredMetadata(
     const feature = buildMeasuringEliminationPreviewTs({
       ...regionInput,
       measuringPlaces: measuringPlacesFromMetadata(
-        annotation.metadata,
+        { measuringPlacesJson: annotation.metadata.measuringPlacesJson },
         regionInput.measuringPlaces,
       ),
       measuringAnswer: answer,
