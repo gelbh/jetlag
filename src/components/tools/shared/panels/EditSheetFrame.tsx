@@ -18,7 +18,7 @@ export function EditSheetFrame({
 }: EditSheetFrameProps) {
   return (
     <div className="pointer-events-auto absolute inset-x-0 jl-panel-above-dock jl-panel-enter z-[var(--z-panel)] px-3">
-      <div className="hud-panel mx-auto flex max-h-[min(42dvh,420px)] max-w-xl flex-col overflow-hidden">
+      <div className="mx-auto flex max-h-[min(42dvh,420px)] max-w-xl flex-col overflow-hidden rounded-none border border-rule border-t-flag bg-canvas text-field-ink shadow-none [border-top-width:2px]">
         <div className="shrink-0 p-4 pb-0">
           <SheetHeader
             title={title}

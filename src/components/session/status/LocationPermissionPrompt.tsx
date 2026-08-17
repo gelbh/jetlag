@@ -107,25 +107,25 @@ export function LocationPermissionPrompt() {
     <HudBanner
       visible
       animated={false}
-      className="jl-map-banner-top pointer-events-auto fixed inset-x-3 z-[var(--z-panel)]"
+      className="pointer-events-auto fixed inset-x-3 top-[var(--map-banner-top)] z-[var(--z-panel)]"
     >
       <div
         ref={dialogRef}
         tabIndex={-1}
-        className="map-float-alert mx-auto max-w-xl border-2 border-highlight/40 bg-surface-deep px-3 py-3 outline-none"
+        className="map-float-alert mx-auto max-w-xl border border-flag/40 bg-canvas px-3 py-3 text-field-ink outline-none"
         role="dialog"
         aria-labelledby="location-permission-prompt-title"
         aria-describedby="location-permission-prompt-body"
       >
         <p
           id="location-permission-prompt-title"
-          className="font-display text-xs font-semibold uppercase tracking-wide text-ink"
+          className="font-display text-xs font-semibold tracking-wide text-field-ink"
         >
           {title}
         </p>
         <p
           id="location-permission-prompt-body"
-          className="mt-1 text-pretty text-sm leading-snug text-ink-secondary"
+          className="mt-1 text-pretty text-sm leading-snug text-field-ink-muted"
         >
           {body}
         </p>
