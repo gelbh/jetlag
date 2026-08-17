@@ -117,7 +117,7 @@ function LeaderboardBoard() {
   return (
     <>
       <div
-        className={`sticky top-0 z-[var(--z-banner)] -mx-5 flex items-center gap-2 border-b-2 border-border bg-surface-deep px-5 pb-3 ${screenHeaderInsetTopClassName}`}
+        className={`sticky top-0 z-[var(--z-banner)] -mx-5 flex items-center gap-2 border-b-2 border-rule bg-canvas px-5 pb-3 ${screenHeaderInsetTopClassName}`}
         data-testid="leaderboard-filters"
       >
         <div className="shrink-0">
@@ -147,13 +147,13 @@ function LeaderboardBoard() {
 
       <div className={`space-y-3 pt-4 ${footerVisible ? "pb-16" : ""}`}>
         {!profileReady ? (
-          <p className="text-sm text-ink-muted">Loading profile…</p>
+          <p className="text-sm text-field-ink-muted">Loading profile…</p>
         ) : profileError ? (
           <InlineError>
             Could not load profile for leaderboard opt-in status.
           </InlineError>
         ) : needsOptIn ? (
-          <p className="text-sm leading-relaxed text-ink-muted">
+          <p className="text-sm leading-relaxed text-field-ink-muted">
             Leaderboard opt-in is off for your username. You can browse boards;
             turn opt-in on to appear on global ranks.
           </p>
@@ -206,10 +206,10 @@ export function Leaderboard() {
       <DesktopContentColumn maxWidth="social">
         <div className={screenHeaderOffsetClassName}>
           <div className="space-y-1 pb-4">
-            <h1 className="font-display text-balance text-3xl font-bold uppercase leading-[0.92] tracking-tight text-ink sm:text-[2rem]">
+            <h1 className="font-display text-balance text-3xl font-bold uppercase leading-[0.92] tracking-tight text-field-ink sm:text-[2rem]">
               Leaderboard
             </h1>
-            <p className="max-w-sm text-pretty text-base leading-relaxed text-ink-muted">
+            <p className="max-w-sm text-pretty text-base leading-relaxed text-field-ink-muted">
               Opt-in ranked boards by game size and role. Username only — no
               account details.
             </p>

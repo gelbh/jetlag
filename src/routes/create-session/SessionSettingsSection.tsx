@@ -67,7 +67,7 @@ export function SessionSettingsSection({
     <>
       {isFirebaseConfigured() ? (
         <div className="space-y-2">
-          <p className="font-display text-xs font-semibold uppercase tracking-[0.1em] text-ink-dim">
+          <p className="font-display text-xs font-semibold uppercase tracking-[0.1em] text-field-ink-muted">
             Session tier
           </p>
           <div
@@ -91,18 +91,18 @@ export function SessionSettingsSection({
                   onClick={() => onSessionTierChange(option.value)}
                   className={`min-h-12 w-full border-2 px-3 py-2 text-left disabled:opacity-50 ${
                     resolvedSessionTier === option.value
-                      ? "border-highlight bg-highlight-soft text-highlight"
-                      : "border-border bg-surface-deep text-ink hover:border-brand-blue"
+                      ? "border-flag bg-flag-soft text-flag"
+                      : "border-rule bg-canvas text-field-ink hover:border-signal"
                   }`}
                 >
                   <span className="font-display text-sm font-semibold uppercase tracking-wide">
                     {option.label}
                   </span>
-                  <span className="mt-0.5 block text-xs text-ink-muted">
+                  <span className="mt-0.5 block text-xs text-field-ink-muted">
                     {option.summary}
                   </span>
                   {tierHint ? (
-                    <span className="mt-1 block text-xs font-semibold text-highlight">
+                    <span className="mt-1 block text-xs font-semibold text-flag">
                       {tierHint}
                     </span>
                   ) : null}
@@ -114,7 +114,7 @@ export function SessionSettingsSection({
       ) : null}
 
       {packPremiumFlow && packCreditsLabel ? (
-        <p className="text-sm font-semibold text-highlight">{packCreditsLabel}</p>
+        <p className="text-sm font-semibold text-flag">{packCreditsLabel}</p>
       ) : null}
 
       <RolePicker
@@ -124,7 +124,7 @@ export function SessionSettingsSection({
       />
 
       <div className="space-y-2">
-        <p className="font-display text-xs font-semibold uppercase tracking-[0.1em] text-ink-dim">
+        <p className="font-display text-xs font-semibold uppercase tracking-[0.1em] text-field-ink-muted">
           Distance edition
         </p>
         <div className="grid grid-cols-2 gap-2">
@@ -136,8 +136,8 @@ export function SessionSettingsSection({
               onClick={() => onDistanceUnitChange(unit)}
               className={`min-h-11 border-2 px-3 py-2 text-sm font-semibold disabled:opacity-50 ${
                 distanceUnit === unit
-                  ? "border-highlight bg-highlight-soft text-highlight"
-                  : "border-border bg-surface-deep text-ink"
+                  ? "border-flag bg-flag-soft text-flag"
+                  : "border-rule bg-canvas text-field-ink"
               }`}
             >
               {unit === "metric" ? "Metric (km)" : "Imperial (mi)"}

@@ -1,8 +1,10 @@
 /* Survey field-book entry + secondary surfaces — sole player path (`data-player-ux-world="survey"`).
- * Attribute kept as the skin root; CSS flatten deferred. */
+ * Attribute kept as the skin root; CSS flatten deferred to D7 purge.
+ * home-entry.css already uses Survey roles; this layer remaps residual Broadcast
+ * Tailwind aliases under survey roots and tightens entry control geometry. */
 
 @layer components {
-  /* Remap HUD roles → field-book on entry roots so Tailwind utilities inherit. */
+  /* Remap residual HUD aliases → field-book on entry roots so leftover utilities inherit. */
   [data-player-ux-world="survey"].home-poster,
   [data-player-ux-world="survey"].jl-create-session,
   .app-entry-backdrop[data-player-ux-world="survey"] {
@@ -34,33 +36,8 @@
     color-scheme: dark;
   }
 
-  .app-entry-backdrop[data-player-ux-world="survey"] {
-    background-color: var(--color-canvas);
-    background-image:
-      linear-gradient(
-        to bottom,
-        oklch(from var(--color-rule) l c h / 0.12) 0,
-        oklch(from var(--color-rule) l c h / 0.12) 1px,
-        transparent 1px
-      ),
-      radial-gradient(
-        ellipse 70% 45% at 100% 0%,
-        oklch(from var(--color-flag) l c h / 0.1),
-        transparent 55%
-      ),
-      radial-gradient(
-        ellipse 60% 50% at 0% 100%,
-        oklch(from var(--color-signal) l c h / 0.08),
-        transparent 60%
-      );
-    background-size:
-      100% 24px,
-      auto,
-      auto;
-  }
-
   [data-player-ux-world="survey"].home-poster {
-    /* Opaque paper so axe/contrast does not sample dark body through transparent poster. */
+    /* Opaque canvas so axe/contrast does not sample dark body through transparent poster. */
     background-color: var(--color-canvas);
   }
 

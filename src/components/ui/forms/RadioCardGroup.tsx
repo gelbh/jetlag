@@ -28,7 +28,7 @@ export function RadioCardGroup<Value extends string>({
   return (
     <div className="space-y-2">
       {label ? (
-        <p className="font-display text-xs font-semibold uppercase tracking-[0.1em] text-ink-dim">
+        <p className="font-display text-xs font-semibold uppercase tracking-[0.1em] text-field-ink-muted">
           {label}
         </p>
       ) : null}
@@ -46,8 +46,8 @@ export function RadioCardGroup<Value extends string>({
               onClick={() => onChange(option.value)}
               className={`min-h-12 w-full border-2 px-3 py-2 text-left disabled:opacity-50 ${
                 selected
-                  ? "border-highlight bg-highlight-soft text-highlight"
-                  : "border-border bg-surface-deep text-ink hover:border-brand-blue"
+                  ? "border-flag bg-flag-soft text-flag"
+                  : "border-rule bg-canvas text-field-ink hover:border-signal"
               }`}
             >
               <span className="flex items-center gap-2">
@@ -57,12 +57,12 @@ export function RadioCardGroup<Value extends string>({
                 {option.badge}
               </span>
               {option.description ? (
-                <span className="mt-0.5 block text-xs text-ink-muted">
+                <span className="mt-0.5 block text-xs text-field-ink-muted">
                   {option.description}
                 </span>
               ) : null}
               {option.footer ? (
-                <span className="mt-0.5 block text-xs text-ink-dim">
+                <span className="mt-0.5 block text-xs text-field-ink-muted">
                   {option.footer}
                 </span>
               ) : null}

@@ -14,10 +14,10 @@ function ChangelogEntrySections({ entry }: { entry: ChangelogEntry }) {
     <>
       {entry.sections.map((section) => (
         <div key={section.title} className="space-y-1">
-          <p className="text-xs font-semibold uppercase tracking-wide text-ink-muted">
+          <p className="text-xs font-semibold uppercase tracking-wide text-field-ink-muted">
             {section.title}
           </p>
-          <ul className="list-disc space-y-1 pl-5 text-sm text-ink-secondary">
+          <ul className="list-disc space-y-1 pl-5 text-sm text-field-ink">
             {section.items.map((item) => (
               <li key={item}>{item}</li>
             ))}
@@ -39,8 +39,8 @@ function ChangelogVersionHeader({
 }) {
   return (
     <>
-      <span className={highlight ? "text-highlight" : "text-ink"}>v{label}</span>
-      <span className="ml-2 font-normal normal-case tracking-normal text-ink-dim">
+      <span className={highlight ? "text-flag" : "text-field-ink"}>v{label}</span>
+      <span className="ml-2 font-normal normal-case tracking-normal text-field-ink-muted">
         {date}
       </span>
     </>
@@ -81,7 +81,7 @@ function CollapsibleChangelogEntry({
         aria-expanded={open}
         aria-controls={panelId}
         onClick={() => setOpen((current) => !current)}
-        className="flex min-h-11 w-full items-center justify-between gap-3 border-2 border-border bg-surface-deep px-3 py-2 text-left"
+        className="flex min-h-11 w-full items-center justify-between gap-3 border-2 border-rule bg-canvas px-3 py-2 text-left"
       >
         <span className="font-display text-sm font-semibold uppercase tracking-wide">
           <ChangelogVersionHeader
@@ -90,7 +90,7 @@ function CollapsibleChangelogEntry({
             highlight={false}
           />
         </span>
-        <span className="shrink-0 font-display text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-muted">
+        <span className="shrink-0 font-display text-[10px] font-semibold uppercase tracking-[0.12em] text-field-ink-muted">
           {open ? "Hide" : "Show"}
         </span>
       </button>
@@ -109,7 +109,7 @@ function ChangelogGroupSummary({ summary }: { summary: readonly string[] }) {
   }
 
   return (
-    <ul className="list-disc space-y-1 pl-5 text-sm text-ink-secondary">
+    <ul className="list-disc space-y-1 pl-5 text-sm text-field-ink">
       {summary.map((item) => (
         <li key={item}>{item}</li>
       ))}
@@ -134,7 +134,7 @@ function CollapsibleMinorGroup({
         aria-expanded={open}
         aria-controls={panelId}
         onClick={() => setOpen((current) => !current)}
-        className="flex min-h-11 w-full items-center justify-between gap-3 border-2 border-border bg-surface-deep px-3 py-2 text-left"
+        className="flex min-h-11 w-full items-center justify-between gap-3 border-2 border-rule bg-canvas px-3 py-2 text-left"
       >
         <span className="font-display text-sm font-semibold uppercase tracking-wide">
           <ChangelogVersionHeader
@@ -143,7 +143,7 @@ function CollapsibleMinorGroup({
             highlight={false}
           />
         </span>
-        <span className="shrink-0 font-display text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-muted">
+        <span className="shrink-0 font-display text-[10px] font-semibold uppercase tracking-[0.12em] text-field-ink-muted">
           {open ? "Hide" : "Show"}
         </span>
       </button>
@@ -177,7 +177,7 @@ function CollapsibleMajorGroup({ group }: { group: MajorGroupNode }) {
         aria-expanded={open}
         aria-controls={panelId}
         onClick={() => setOpen((current) => !current)}
-        className="flex min-h-11 w-full items-center justify-between gap-3 border-2 border-border bg-surface-deep px-3 py-2 text-left"
+        className="flex min-h-11 w-full items-center justify-between gap-3 border-2 border-rule bg-canvas px-3 py-2 text-left"
       >
         <span className="font-display text-sm font-semibold uppercase tracking-wide">
           <ChangelogVersionHeader
@@ -186,7 +186,7 @@ function CollapsibleMajorGroup({ group }: { group: MajorGroupNode }) {
             highlight={false}
           />
         </span>
-        <span className="shrink-0 font-display text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-muted">
+        <span className="shrink-0 font-display text-[10px] font-semibold uppercase tracking-[0.12em] text-field-ink-muted">
           {open ? "Hide" : "Show"}
         </span>
       </button>

@@ -64,13 +64,13 @@ export function MobileSheet({
         <div
           className={`mx-auto flex w-full max-w-xl flex-col ${maxHeightClassName}`}
         >
-          <div className="shrink-0 bg-surface-panel px-4 pt-3">
+          <div className="shrink-0 bg-canvas px-4 pt-3">
             {splitHandle}
             {pinned}
           </div>
           <div
             ref={scrollRef}
-            className={`jl-scroll min-h-0 flex-1 overflow-y-auto overscroll-contain scroll-pb-4 bg-surface-panel px-4 pb-[max(1rem,env(safe-area-inset-bottom))] ${scrollClassName}`.trim()}
+            className={`jl-scroll min-h-0 flex-1 overflow-y-auto overscroll-contain scroll-pb-4 bg-canvas px-4 pb-[max(1rem,env(safe-area-inset-bottom))] ${scrollClassName}`.trim()}
           >
             {children}
           </div>

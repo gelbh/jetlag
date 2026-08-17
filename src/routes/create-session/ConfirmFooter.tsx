@@ -1,3 +1,5 @@
+import { Button } from "../../components/ui/button";
+
 export interface ConfirmFooterProps {
   confirmLabel: string;
   loading: boolean;
@@ -16,16 +18,17 @@ export function ConfirmFooter({
   onConfirm,
 }: ConfirmFooterProps) {
   return (
-    <div className="sticky bottom-0 shrink-0 border-t border-border bg-surface-deep px-4 pt-3 pb-[max(0.25rem,env(safe-area-inset-bottom))]">
-      <button
+    <div className="sticky bottom-0 shrink-0 border-t border-rule bg-canvas px-4 pt-3 pb-[max(0.25rem,env(safe-area-inset-bottom))]">
+      <Button
         type="button"
+        variant="flag"
         onClick={onConfirm}
         disabled={loading || verifyingAccess || requiresPremiumSignIn}
-        className="btn-primary w-full disabled:opacity-50"
+        className="home-entry-action min-h-14 w-full"
       >
         {confirmLabel}
-      </button>
-      {error ? <p className="text-error mt-2">{error}</p> : null}
+      </Button>
+      {error ? <p className="mt-2 text-halt">{error}</p> : null}
     </div>
   );
 }
