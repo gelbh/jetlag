@@ -154,10 +154,7 @@
   @media (max-height: 430px) and (orientation: landscape) {
     .jl-map-chrome-side-stack--phone {
       bottom: calc(var(--dock-island-height) + 0.75rem + 1rem);
-      max-height: calc(
-        100dvh - env(safe-area-inset-top) - 0.5rem - var(--dock-island-height) -
-          0.75rem - 1rem
-      );
+      max-height: calc(100dvh - env(safe-area-inset-top) - 0.5rem - var(--dock-island-height) - 0.75rem - 1rem);
       overflow: hidden;
     }
 
