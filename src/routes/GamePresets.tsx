@@ -3,6 +3,7 @@ import { AppLink } from "../components/navigation/AppLink";
 import { useParams } from "react-router-dom";
 import { useAppNavigate } from "../hooks/navigation/useAppNavigate";
 import type { MapBoundsExpression } from "../domain/map/mapBounds";
+import { Button } from "../components/ui/button";
 import { DesktopContentColumn } from "../components/ui/layout/DesktopContentColumn";
 import {
   ScreenHeader,
@@ -186,7 +187,7 @@ export function GamePresetEditor() {
 
       <DesktopContentColumn maxWidth="social">
       <div className={`space-y-4 ${screenHeaderOffsetClassName}`}>
-        <h1 className="font-display text-2xl font-bold uppercase tracking-tight text-ink">
+        <h1 className="font-display text-2xl font-bold uppercase tracking-tight text-field-ink">
           {existing ? "Edit preset" : "New preset"}
         </h1>
 
@@ -202,10 +203,10 @@ export function GamePresetEditor() {
 
         <div className="jl-field-frame space-y-3">
           <div className="space-y-1">
-            <p className="font-display text-xs font-semibold uppercase tracking-[0.1em] text-ink-dim">
+            <p className="font-display text-xs font-semibold uppercase tracking-[0.1em] text-field-ink-muted">
               Play boundary
             </p>
-            <p className="text-xs leading-snug text-ink-muted">
+            <p className="text-xs leading-snug text-field-ink-muted">
               Optional. Search for a place or draw the play area on the map.
             </p>
           </div>
@@ -225,23 +226,24 @@ export function GamePresetEditor() {
             <p className="text-sm text-error">{placeSearch.searchError}</p>
           ) : null}
 
-          <button
+          <Button
             type="button"
+            variant="flag"
             onClick={() => setFramingModalOpen(true)}
             disabled={placeSearch.searchLoading}
-            className="btn-primary w-full disabled:opacity-50"
+            className="w-full"
           >
             Open fullscreen map
-          </button>
+          </Button>
 
           {gameArea ? (
-            <div className="space-y-2 border-t border-border pt-3">
+            <div className="space-y-2 border-t border-rule pt-3">
               <GameAreaFramingStats gameArea={gameArea} compact />
               <div className="flex gap-3">
                 <button
                   type="button"
                   onClick={() => setFramingModalOpen(true)}
-                  className="font-display text-xs font-semibold uppercase tracking-wide text-brand-blue"
+                  className="font-display text-xs font-semibold uppercase tracking-wide text-signal"
                 >
                   Reframe
                 </button>
@@ -284,7 +286,7 @@ export function GamePresetEditor() {
         </label>
 
         <div className="space-y-2">
-          <p className="font-display text-xs font-semibold uppercase tracking-[0.1em] text-ink-dim">
+          <p className="font-display text-xs font-semibold uppercase tracking-[0.1em] text-field-ink-muted">
             Distance edition
           </p>
           <div className="grid grid-cols-2 gap-2">
@@ -298,8 +300,8 @@ export function GamePresetEditor() {
                 }}
                 className={`min-h-11 border-2 px-3 py-2 text-sm font-semibold ${
                   distanceUnit === unit
-                    ? "border-highlight bg-highlight-soft text-highlight"
-                    : "border-border bg-surface-deep text-ink"
+                    ? "border-flag bg-flag-soft text-flag"
+                    : "border-rule bg-canvas text-field-ink"
                 }`}
               >
                 {unit === "metric" ? "Metric (km)" : "Imperial (mi)"}
@@ -349,29 +351,29 @@ export function GamePresetEditor() {
         {error ? <p className="text-error">{error}</p> : null}
 
         <div className="flex flex-wrap gap-2">
-          <button type="button" onClick={handleSave} className="btn-primary">
+          <Button type="button" variant="flag" onClick={handleSave}>
             Save preset
-          </button>
+          </Button>
           {existing && !needsMigrationReview ? (
-            <AppLink to={`/create?preset=${existing.id}`} className="btn-secondary">
-              Host
-            </AppLink>
+            <Button asChild variant="default">
+              <AppLink to={`/create?preset=${existing.id}`}>Host</AppLink>
+            </Button>
           ) : null}
           {existing ? (
-            <button
+            <Button
               type="button"
+              variant="default"
               onClick={() => {
                 deletePreset(existing.id);
                 navigate("/presets");
               }}
-              className="btn-secondary"
             >
               Delete
-            </button>
+            </Button>
           ) : null}
-          <AppLink to="/presets" className="btn-secondary">
-            Cancel
-          </AppLink>
+          <Button asChild variant="default">
+            <AppLink to="/presets">Cancel</AppLink>
+          </Button>
         </div>
       </div>
       </DesktopContentColumn>

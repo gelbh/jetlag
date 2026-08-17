@@ -1,4 +1,5 @@
 import type { ReactNode, RefObject } from "react";
+import { Button } from "../../components/ui/button";
 import {
   FramingModeSegmentControl,
   GameAreaFramingPolygonActions,
@@ -83,18 +84,18 @@ export function GameAreaSection({
 }: GameAreaSectionProps) {
   return (
     <>
-      <p className="mt-4 font-display text-xs font-semibold uppercase tracking-[0.14em] text-brand-blue">
+      <p className="mt-4 font-display text-xs font-semibold uppercase tracking-[0.14em] text-signal">
         New game
       </p>
-      <h1 className="mt-1 font-display text-2xl font-bold uppercase leading-tight tracking-tight text-ink">
+      <h1 className="mt-1 font-display text-2xl font-bold uppercase leading-tight tracking-tight text-field-ink">
         Frame the game area
       </h1>
-      <p className="mt-2 text-pretty text-sm leading-relaxed text-ink-secondary">
+      <p className="mt-2 text-pretty text-sm leading-relaxed text-field-ink">
         Search or import a boundary, or draw the play area on the map below.
       </p>
 
       <div className="mt-4 space-y-2">
-        <p className="font-display text-xs font-semibold uppercase tracking-[0.1em] text-ink-dim">
+        <p className="font-display text-xs font-semibold uppercase tracking-[0.1em] text-field-ink-muted">
           Game preset
         </p>
         <div className="flex flex-wrap gap-2">
@@ -140,7 +141,7 @@ export function GameAreaSection({
             type="button"
             disabled={loading || verifyingAccess}
             onClick={onSavePreset}
-            className="rounded-full border border-border px-3 py-2 text-xs font-semibold text-brand-blue disabled:opacity-50"
+            className="rounded-full border border-rule px-3 py-2 text-xs font-semibold text-signal disabled:opacity-50"
           >
             Save as preset
           </button>
@@ -149,10 +150,10 @@ export function GameAreaSection({
 
       <div className="jl-field-frame mt-4 space-y-3">
         <div className="space-y-1">
-          <p className="font-display text-xs font-semibold uppercase tracking-[0.1em] text-ink-dim">
+          <p className="font-display text-xs font-semibold uppercase tracking-[0.1em] text-field-ink-muted">
             Draw on map
           </p>
-          <p className="text-xs leading-snug text-ink-muted">
+          <p className="text-xs leading-snug text-field-ink-muted">
             {framingModeHint(framing.framingMode)}
           </p>
         </div>
@@ -163,14 +164,15 @@ export function GameAreaSection({
           onChange={onFramingModeChange}
         />
 
-        <button
+        <Button
           type="button"
+          variant="flag"
           onClick={onOpenFramingModal}
           disabled={searchLoading || importLoading}
-          className="btn-primary w-full disabled:opacity-50"
+          className="w-full"
         >
           Open fullscreen map
-        </button>
+        </Button>
 
         {framing.framingMode === "polygon" && manualFramingActive ? (
           <GameAreaFramingPolygonActions
@@ -189,7 +191,7 @@ export function GameAreaSection({
               key={`${index}-${area.type}`}
               type="button"
               onClick={() => onRemoveSelectedArea(index)}
-              className="rounded-full border border-border bg-surface-raised px-3 py-1.5 text-xs font-semibold text-ink"
+              className="rounded-full border border-rule bg-canvas px-3 py-1.5 text-xs font-semibold text-field-ink"
             >
               Area {index + 1} · Remove
             </button>
@@ -219,32 +221,35 @@ export function GameAreaSection({
           />
         </label>
 
-        <button
+        <Button
           type="button"
+          variant="default"
           onClick={onSearch}
           disabled={searchLoading || importLoading}
-          className="btn-secondary w-full disabled:opacity-50"
+          className="w-full"
         >
           {searchLoading ? "Searching…" : "Find place"}
-        </button>
+        </Button>
 
-        <button
+        <Button
           type="button"
+          variant="default"
           onClick={onRequestLocationBias}
           disabled={searchLoading || importLoading}
-          className="btn-secondary w-full disabled:opacity-50"
+          className="w-full"
         >
           Use my location
-        </button>
+        </Button>
 
-        <button
+        <Button
           type="button"
+          variant="default"
           onClick={onAddCurrentArea}
           disabled={!previewGameArea || searchLoading || importLoading}
-          className="btn-secondary w-full disabled:opacity-50"
+          className="w-full"
         >
           Add another area
-        </button>
+        </Button>
 
         <input
           ref={importFileInputRef}
@@ -254,17 +259,18 @@ export function GameAreaSection({
           onChange={onBoundaryImport}
         />
 
-        <button
+        <Button
           type="button"
+          variant="default"
           onClick={() => importFileInputRef.current?.click()}
           disabled={searchLoading || importLoading}
-          className="btn-secondary w-full disabled:opacity-50"
+          className="w-full"
         >
           {importLoading ? "Importing…" : "Import KML/KMZ"}
-        </button>
+        </Button>
 
         {searchResults.length > 0 ? (
-          <div className="jl-scroll max-h-40 space-y-1 overflow-y-auto border-2 border-border bg-surface-deep p-1.5">
+          <div className="jl-scroll max-h-40 space-y-1 overflow-y-auto border-2 border-rule bg-canvas p-1.5">
             {searchResults.map((place) => (
               <button
                 key={place.id}
@@ -272,12 +278,12 @@ export function GameAreaSection({
                 onClick={() => onApplyPlace(place)}
                 className={`min-h-11 w-full px-3 py-2 text-left text-sm ${
                   selectedPlaceId === place.id
-                    ? "bg-highlight-soft font-display font-semibold uppercase tracking-wide text-highlight"
-                    : "bg-transparent text-ink hover:bg-surface-raised"
+                    ? "bg-flag-soft font-display font-semibold uppercase tracking-wide text-flag"
+                    : "bg-transparent text-field-ink hover:bg-canvas"
                 }`}
               >
                 <span className="block">{place.displayName}</span>
-                <span className="mt-0.5 block text-xs font-normal normal-case tracking-normal text-ink-dim">
+                <span className="mt-0.5 block text-xs font-normal normal-case tracking-normal text-field-ink-muted">
                   {formatPlaceSearchSubtitle(place)}
                 </span>
               </button>
@@ -286,7 +292,7 @@ export function GameAreaSection({
         ) : null}
 
         {selectedPlace && searchResults.length === 0 ? (
-          <p className="text-xs text-ink-dim">
+          <p className="text-xs text-field-ink-muted">
             {formatPlaceSearchSubtitle(selectedPlace)}
           </p>
         ) : null}
