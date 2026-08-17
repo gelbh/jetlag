@@ -2,4 +2,4 @@
 "jetlag": patch
 ---
 
-Ask HUD and question wizard: Survey field-book tokens and ui kit (no Broadcast surface panels).
+Ask map HUD and question wizard: dark Survey chrome with flag accents instead of Broadcast navy panels.
