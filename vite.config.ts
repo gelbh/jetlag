@@ -33,7 +33,7 @@ export default defineConfig(({ mode }) => ({
     port: 5173,
     strictPort: false,
     // Worktrees under `.worktrees/` often resolve fonts from the primary
-    // checkout's node_modules; allow that path so visual e2e matches CI.
+    // checkout's node_modules; allow that path so e2e matches CI.
     fs: {
       allow: [
         __dirname,
