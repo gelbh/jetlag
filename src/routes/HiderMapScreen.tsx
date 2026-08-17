@@ -285,6 +285,18 @@ export function HiderMapScreen() {
     }
     return [liveLocationReading.lat, liveLocationReading.lng];
   }, [liveLocationReading]);
+  const seekerPlacesByUid = useMemo(() => {
+    const places: Record<string, LatLngTuple> = {};
+    for (const location of seekerLocations) {
+      if (
+        Number.isFinite(location.lat) &&
+        Number.isFinite(location.lng)
+      ) {
+        places[location.uid] = [location.lat, location.lng];
+      }
+    }
+    return places;
+  }, [seekerLocations]);
   const truthContext = useMemo(() => {
     if (!uid) {
       return null;
@@ -294,9 +306,17 @@ export function HiderMapScreen() {
       zoneCenter: stationCenter,
       hidingPlace,
       zoneRadiusMeters: myZone?.radiusMeters ?? null,
+      seekerPlacesByUid,
       session,
     };
-  }, [hidingPlace, myZone?.radiusMeters, session, stationCenter, uid]);
+  }, [
+    hidingPlace,
+    myZone?.radiusMeters,
+    seekerPlacesByUid,
+    session,
+    stationCenter,
+    uid,
+  ]);
   useHidingZoneUidHeal(sessionId, uid, hidingZones, persistedMyUid);
   const truthReferenceReady = authReady && uid !== null;
   const {

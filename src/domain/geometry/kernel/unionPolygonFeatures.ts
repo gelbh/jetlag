@@ -112,6 +112,29 @@ function unionPair(
   return unionPairMartinez(left, right);
 }
 
+/** Keep both polygons when clip engines fail so confirmed shade is not dropped. */
+function concatPolygonFeatures(
+  left: PolygonFeature,
+  right: PolygonFeature,
+): PolygonFeature {
+  const leftParts =
+    left.geometry.type === "Polygon"
+      ? [left.geometry.coordinates]
+      : left.geometry.coordinates;
+  const rightParts =
+    right.geometry.type === "Polygon"
+      ? [right.geometry.coordinates]
+      : right.geometry.coordinates;
+  return {
+    type: "Feature",
+    properties: {},
+    geometry: {
+      type: "MultiPolygon",
+      coordinates: [...leftParts, ...rightParts],
+    },
+  };
+}
+
 interface FeatureBboxItem {
   minX: number;
   minY: number;
@@ -206,7 +229,7 @@ function divideAndConquerUnion(
       }
 
       const merged = unionPair(left, right, engine);
-      next.push(merged ?? left);
+      next.push(merged ?? concatPolygonFeatures(left, right));
     }
 
     layer = next;
@@ -269,7 +292,7 @@ function mergeUnionResults(
     return left;
   }
 
-  return unionPair(left, right, engine) ?? left;
+  return unionPair(left, right, engine) ?? concatPolygonFeatures(left, right);
 }
 
 /** Unions polygon features using martinez with turf fallback. */

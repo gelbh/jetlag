@@ -28,6 +28,12 @@ export interface ResolveHiderTruthReferenceInput {
   /** Precomputed; when omitted, derived from askOrigin + zone when radius known. */
   originInsideZone?: boolean;
   zoneRadiusMeters?: number | null;
+  /**
+   * Live seeker GPS by uid. Map-pin questions (tentacle/matching/measuring/
+   * thermometer) use this as in-zone origin so a pin dropped on the hide does
+   * not switch truth to hider GPS (LMTS).
+   */
+  seekerPlacesByUid?: Readonly<Record<string, LatLngTuple>> | null;
   session:
     | Pick<SessionRecord, "endGameStartedAt" | "endGameTruthAnchors">
     | null
@@ -70,9 +76,24 @@ export function isAskOriginInsideHidingZone(
   return haversineMeters(askOrigin, zoneCenter) <= zoneRadiusMeters;
 }
 
+const MAP_PIN_TRUTH_TOOLS = new Set([
+  "tentacle",
+  "matching",
+  "measuring",
+  "thermometer",
+]);
+
 export function askOriginFromPendingQuestion(
   question: PendingQuestionRecord,
+  seekerPlacesByUid?: Readonly<Record<string, LatLngTuple>> | null,
 ): LatLngTuple | null {
+  if (MAP_PIN_TRUTH_TOOLS.has(question.toolType)) {
+    const seekerPlace = question.createdByUid
+      ? seekerPlacesByUid?.[question.createdByUid]
+      : undefined;
+    return isUsablePoint(seekerPlace) ? seekerPlace : null;
+  }
+
   // Photo pending questions use geometryJson "{}" — parse must return null, not throw.
   const feature = parseGeometryJson(question.placement.geometryJson);
   return feature ? pointFromGeometryFeature(feature) : null;
@@ -90,7 +111,10 @@ export function resolvePendingQuestionTruthReference(
 ): HiderTruthReference {
   return resolveHiderTruthReference({
     ...context,
-    askOrigin: askOriginFromPendingQuestion(question),
+    askOrigin: askOriginFromPendingQuestion(
+      question,
+      context.seekerPlacesByUid,
+    ),
   });
 }
 
