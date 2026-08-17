@@ -87,16 +87,16 @@ export function HidingZoneHudBody({
       ) : null}
 
       {step === "location" && zoneTool.manualMode ? (
-        <div className="pointer-events-auto hud-panel space-y-2 p-3">
-          <p className="text-sm text-ink-secondary">
+        <div className="pointer-events-auto ask-hud-panel space-y-2 p-3">
+          <p className="text-sm text-field-ink">
             Tap the map inside the play area to set your zone center.
           </p>
-          <p className="text-xs text-ink-dim">Radius: {radiusLabel}</p>
+          <p className="text-xs text-field-ink-muted">Radius: {radiusLabel}</p>
         </div>
       ) : null}
 
       {step === "location" && !zoneTool.manualMode ? (
-        <div className="pointer-events-auto hud-panel max-h-[min(40dvh,18rem)] overflow-hidden p-3">
+        <div className="pointer-events-auto ask-hud-panel max-h-[min(40dvh,18rem)] overflow-hidden p-3">
           <div className="jl-scroll max-h-full">
             <TransitStationPicker
               layout="flex"
@@ -113,21 +113,21 @@ export function HidingZoneHudBody({
               searchDisabled={zoneTool.stationsLoading}
             />
           </div>
-          <p className="mt-2 text-xs text-ink-dim">Radius: {radiusLabel}</p>
+          <p className="mt-2 text-xs text-field-ink-muted">Radius: {radiusLabel}</p>
         </div>
       ) : null}
 
       {step === "confirm" ? (
-        <div className="pointer-events-auto hud-panel space-y-2 p-3">
-          <p className="text-xs font-medium uppercase tracking-wide text-ink-dim">
+        <div className="pointer-events-auto ask-hud-panel space-y-2 p-3">
+          <p className="text-xs font-medium uppercase tracking-wide text-field-ink-muted">
             Zone center
           </p>
           <p className="text-sm font-medium text-ink">
             {placementSummary(zoneTool)}
           </p>
-          <p className="text-xs text-ink-dim">Radius: {radiusLabel}</p>
+          <p className="text-xs text-field-ink-muted">Radius: {radiusLabel}</p>
           {zoneTool.manualMode ? (
-            <p className="text-xs text-ink-muted">
+            <p className="text-xs text-field-ink-muted">
               Tap the map to adjust the center.
             </p>
           ) : (

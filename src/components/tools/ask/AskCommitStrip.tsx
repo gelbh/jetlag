@@ -1,7 +1,9 @@
 /**
- * PrimedCommitStrip — muted until canCommit; terracotta btn-primary only when armed.
+ * PrimedCommitStrip — muted until canCommit; Survey flag Button when armed.
  * Spec: ask-surface-kit-design rev 2026-08-05b.
  */
+import { Button } from "@/components/ui/button";
+
 type AskCommitStripProps = {
   canCommit: boolean;
   label: string;
@@ -25,21 +27,18 @@ export function AskCommitStrip({
       data-testid="ask-commit-strip"
       className="ask-commit-strip pointer-events-auto"
     >
-      <button
+      <Button
         type="button"
+        variant={armed ? "flag" : "default"}
         data-armed={armed ? "true" : "false"}
         disabled={!armed}
         aria-busy={isSubmitting || undefined}
         aria-describedby={error ? errorId : undefined}
         onClick={onCommit}
-        className={
-          armed
-            ? "btn-primary ask-commit-strip__btn w-full"
-            : "ask-commit-strip__btn ask-commit-strip__btn--muted w-full"
-        }
+        className="ask-commit-strip__btn w-full min-h-12 font-display text-xs font-semibold uppercase tracking-[0.06em]"
       >
         {isSubmitting ? "Sending…" : label}
-      </button>
+      </Button>
       {error ? (
         <p
           id={errorId}
