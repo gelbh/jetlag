@@ -2,6 +2,8 @@ import { describe, expect, it, vi } from "vitest";
 import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
 import { point as turfPoint } from "@turf/helpers";
 import type { Feature, Polygon as GeoPolygon } from "geojson";
+import { clipMaskToGameArea } from "../kernel/clipMask";
+import type { GameAreaGeometry } from "../kernel/types";
 import { unionPolygonFeatures } from "./unionPolygonFeatures";
 
 vi.mock("martinez-polygon-clipping", () => ({
@@ -46,6 +48,27 @@ describe("unionPolygonFeatures clip failure", () => {
     ).toBe(true);
     expect(
       booleanPointInPolygon(turfPoint([-0.105, 51.45]), combined!),
+    ).toBe(true);
+
+    const gameArea: GameAreaGeometry = {
+      type: "Polygon",
+      coordinates: [
+        [
+          [-0.25, 51.4],
+          [0, 51.4],
+          [0, 51.5],
+          [-0.25, 51.5],
+          [-0.25, 51.4],
+        ],
+      ],
+    };
+    const clipped = clipMaskToGameArea(combined!, gameArea);
+    expect(clipped).not.toBeNull();
+    expect(
+      booleanPointInPolygon(turfPoint([-0.175, 51.45]), clipped!),
+    ).toBe(true);
+    expect(
+      booleanPointInPolygon(turfPoint([-0.105, 51.45]), clipped!),
     ).toBe(true);
   });
 });
