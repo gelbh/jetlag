@@ -48,6 +48,8 @@ import { sessionVersionMismatchMessage } from "../domain/session/meta/sessionVer
 import { retryAsync } from "../services/core/network/retryAsync";
 import { withTimeout } from "../services/core/withTimeout";
 import { MotionPressable } from "../components/motion/MotionPressable";
+import { buttonVariants } from "../components/ui/button";
+import { cn } from "../lib/cn";
 import {
   ANALYTICS_EVENTS,
   track,
@@ -528,13 +530,13 @@ export function JoinSession() {
       <ScreenHeader backTo="/" backLabel="Back" />
       <DesktopContentColumn maxWidth="entry" className="flex flex-col gap-8">
         <div className={screenHeaderOffsetClassName}>
-          <p className="mt-3 font-display text-sm font-semibold uppercase tracking-[0.2em] text-brand-blue">
+          <p className="mt-3 font-display text-sm font-semibold uppercase tracking-[0.2em] text-signal">
             Join game
           </p>
-          <h1 className="mt-2 font-display text-4xl font-bold uppercase leading-none tracking-tight text-ink">
+          <h1 className="mt-2 font-display text-4xl font-bold uppercase leading-none tracking-tight text-field-ink">
             Session code
           </h1>
-          <p className="mt-3 max-w-sm text-sm leading-relaxed text-ink-muted">
+          <p className="mt-3 max-w-sm text-sm leading-relaxed text-field-ink-muted">
             Enter the four letters your host shared. Everyone in the session sees
             the same live map.
           </p>
@@ -543,10 +545,10 @@ export function JoinSession() {
         <div className="desktop-entry-actions jl-field-frame space-y-4">
           {pendingRequest ? (
             <>
-              <p className="font-display text-sm font-semibold uppercase tracking-[0.12em] text-ink">
+              <p className="font-display text-sm font-semibold uppercase tracking-[0.12em] text-field-ink">
                 {waitingLeaderCopy(pendingRequest.role)}
               </p>
-              <p className="text-sm leading-relaxed text-ink-muted">
+              <p className="text-sm leading-relaxed text-field-ink-muted">
                 Stay on this screen. You&apos;ll join automatically when the
                 leader accepts.
               </p>
@@ -554,7 +556,10 @@ export function JoinSession() {
                 type="button"
                 onClick={() => void handleCancelRequest()}
                 disabled={requestBusy || loading}
-                className="btn-secondary home-entry-action min-h-14 w-full disabled:opacity-50"
+                className={cn(
+                  buttonVariants({ variant: "default" }),
+                  "home-entry-action min-h-14 w-full",
+                )}
               >
                 {requestBusy ? "Cancelling…" : "Cancel request"}
               </MotionPressable>
@@ -590,12 +595,12 @@ export function JoinSession() {
               />
 
               {previewPremium ? (
-                <p className="font-display text-xs font-semibold uppercase tracking-wide text-status-info">
+                <p className="font-display text-xs font-semibold uppercase tracking-wide text-signal">
                   Premium · live transit
                 </p>
               ) : null}
               {lookupLoading ? (
-                <p className="text-sm text-ink-dim">Checking session…</p>
+                <p className="text-sm text-field-ink-muted">Checking session…</p>
               ) : null}
 
               <Controller
@@ -645,7 +650,7 @@ export function JoinSession() {
                       />
                     )}
                   />
-                  <span className="mt-2 block text-xs normal-case tracking-normal text-ink-muted">
+                  <span className="mt-2 block text-xs normal-case tracking-normal text-field-ink-muted">
                     {playerRole === "observer"
                       ? "Ask the host for the observer code."
                       : "Leave blank if you're first on that side; otherwise ask a teammate for the role code."}
@@ -657,7 +662,10 @@ export function JoinSession() {
                 type="button"
                 onClick={() => void handleJoin()}
                 disabled={formBusy}
-                className="btn-primary home-entry-action min-h-14 w-full disabled:opacity-50"
+                className={cn(
+                  buttonVariants({ variant: "flag" }),
+                  "home-entry-action min-h-14 w-full",
+                )}
               >
                 {joinBusy ? "Joining…" : "Join session"}
               </MotionPressable>
@@ -667,7 +675,10 @@ export function JoinSession() {
                   type="button"
                   onClick={() => void handleRequestAccess()}
                   disabled={formBusy}
-                  className="btn-secondary home-entry-action min-h-14 w-full disabled:opacity-50"
+                  className={cn(
+                    buttonVariants({ variant: "default" }),
+                    "home-entry-action min-h-14 w-full",
+                  )}
                 >
                   {requestBusy ? "Requesting…" : "Request access"}
                 </MotionPressable>

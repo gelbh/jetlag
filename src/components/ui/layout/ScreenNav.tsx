@@ -39,17 +39,17 @@ export function ScreenNav({
       case "inline":
         return `pointer-events-auto ${className}`;
       case "sticky":
-        return `pointer-events-auto sticky top-0 z-[var(--z-banner)] -mx-4 mb-2 border-b-2 border-border bg-surface-deep px-4 pb-2 ${screenHeaderInsetTopClassName} ${className}`;
+        return `pointer-events-auto sticky top-0 z-[var(--z-banner)] -mx-4 mb-2 border-b-2 border-rule bg-canvas px-4 pb-2 ${screenHeaderInsetTopClassName} ${className}`;
       case "fixed":
       default:
-        return `pointer-events-auto fixed inset-x-0 top-0 z-[var(--z-banner)] border-b-2 border-border bg-surface-deep px-[max(0.625rem,env(safe-area-inset-left))] pb-2 ${screenHeaderInsetTopClassName} ${className}`;
+        return `pointer-events-auto fixed inset-x-0 top-0 z-[var(--z-banner)] border-b-2 border-rule bg-canvas px-[max(0.625rem,env(safe-area-inset-left))] pb-2 ${screenHeaderInsetTopClassName} ${className}`;
     }
   })();
 
   const homeLinkClassName =
     placement === "inline"
-      ? "hud-chrome map-hud-home inline-flex min-h-11 min-w-11 items-center justify-center text-ink"
-      : "hud-chrome map-hud-home inline-flex h-full min-w-11 items-center justify-center text-ink";
+      ? "hud-chrome map-hud-home inline-flex min-h-11 min-w-11 items-center justify-center text-field-ink"
+      : "hud-chrome map-hud-home inline-flex h-full min-w-11 items-center justify-center text-field-ink";
 
   return (
     <nav className={shellClassName} aria-label="Screen navigation">

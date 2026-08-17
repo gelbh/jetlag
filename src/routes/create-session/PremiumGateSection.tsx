@@ -41,19 +41,19 @@ export function PremiumGateSection({
         ) : null}
         {showPremiumUnlockPanel ? (
           <div className="space-y-2">
-            <p className="text-sm leading-relaxed text-ink-muted">
+            <p className="text-sm leading-relaxed text-field-ink-muted">
               Buy a session pack or subscription to host premium games.
             </p>
             <AppLink
               to="/premium"
-              className="inline-flex min-h-11 items-center text-sm font-semibold text-brand-blue"
+              className="inline-flex min-h-11 items-center text-sm font-semibold text-signal"
             >
               View premium options
             </AppLink>
             <button
               type="button"
               onClick={() => onAccessCodeExpandedChange(!accessCodeExpanded)}
-              className="block text-sm font-semibold text-ink-dim"
+              className="block text-sm font-semibold text-field-ink-muted"
             >
               {accessCodeExpanded
                 ? "Hide access code"
@@ -83,7 +83,7 @@ export function PremiumGateSection({
             className="field-input"
           />
         </label>
-        <p className="mt-1 text-xs text-ink-dim">
+        <p className="mt-1 text-xs text-field-ink-muted">
           Enter once. Friends join with the game code only.
         </p>
         {accessCodeError ? (

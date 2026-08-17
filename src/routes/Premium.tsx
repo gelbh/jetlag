@@ -153,7 +153,7 @@ export function Premium() {
         <ScreenHeader backTo="/" backLabel="Back" />
         <DesktopContentColumn maxWidth="entry" className="flex flex-col gap-4">
           <PremiumFeatureList entitlementSummary={null} checkoutNotice={null} />
-          <p className="max-w-sm text-sm text-ink-muted">
+          <p className="max-w-sm text-sm text-field-ink-muted">
             Premium billing needs an online connection. Use a synced session to
             unlock live transit.
           </p>

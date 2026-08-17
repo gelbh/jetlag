@@ -55,7 +55,7 @@ export function CreateSession() {
 
   return (
     <div
-      className="jl-create-session flex h-full min-h-[100dvh] flex-col bg-surface-deep"
+      className="jl-create-session flex h-full min-h-[100dvh] flex-col bg-canvas"
       data-player-ux-world="survey"
     >
       <div className={`${screenHeaderShellClassName} px-4`}>

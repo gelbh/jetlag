@@ -1,3 +1,5 @@
+import { Button } from "../button";
+
 interface SheetCloseButtonProps {
   onClick: () => void;
   label?: string;
@@ -33,18 +35,14 @@ export function SheetCloseButton({
     );
   }
 
-  const buttonClassName =
-    variant === "raised"
-      ? "min-h-12 rounded-xl bg-surface-raised px-4 text-sm font-medium"
-      : "btn-secondary min-h-10 px-4 text-xs";
-
   return (
-    <button
+    <Button
       type="button"
+      variant={variant === "raised" ? "default" : "ghost"}
       onClick={onClick}
-      className={`${buttonClassName} ${className}`.trim()}
+      className={`min-h-11 ${className}`.trim()}
     >
       {label}
-    </button>
+    </Button>
   );
 }

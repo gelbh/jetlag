@@ -14,10 +14,10 @@ export function Friends() {
       <DesktopContentColumn maxWidth="social">
         <div className={`space-y-4 ${screenHeaderOffsetClassName}`}>
           <div className="space-y-1">
-            <h1 className="font-display text-balance text-[clamp(2rem,10vw,3rem)] font-bold uppercase leading-[0.92] tracking-tight text-ink">
+            <h1 className="font-display text-balance text-[clamp(2rem,10vw,3rem)] font-bold uppercase leading-[0.92] tracking-tight text-field-ink">
               Friends
             </h1>
-            <p className="max-w-sm text-pretty text-base leading-relaxed text-ink-muted">
+            <p className="max-w-sm text-pretty text-base leading-relaxed text-field-ink-muted">
               Search by username, send requests, and keep your crew together.
             </p>
           </div>
