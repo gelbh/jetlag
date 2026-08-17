@@ -39,9 +39,8 @@ export function SheetCloseButton({
     <Button
       type="button"
       variant={variant === "raised" ? "default" : "ghost"}
-      size={variant === "raised" ? "default" : "densify"}
       onClick={onClick}
-      className={className}
+      className={`min-h-11 ${className}`.trim()}
     >
       {label}
     </Button>

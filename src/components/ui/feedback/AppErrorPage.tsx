@@ -52,14 +52,14 @@ export function AppErrorPage({
             <Button
               type="button"
               variant="flag"
-              className="px-4 py-2 text-sm"
+              className="min-h-11 px-4 py-2 text-sm"
               onClick={primaryAction.onClick}
             >
               {primaryAction.label}
             </Button>
           ) : null}
           {secondaryAction ? (
-            <Button asChild variant="default" className="px-4 py-2 text-sm">
+            <Button asChild variant="default" className="min-h-11 px-4 py-2 text-sm">
               <AppLink to={secondaryAction.to}>{secondaryAction.label}</AppLink>
             </Button>
           ) : null}

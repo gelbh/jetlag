@@ -231,7 +231,7 @@ export function GamePresetEditor() {
             variant="flag"
             onClick={() => setFramingModalOpen(true)}
             disabled={placeSearch.searchLoading}
-            className="w-full"
+            className="min-h-11 w-full"
           >
             Open fullscreen map
           </Button>
@@ -351,11 +351,11 @@ export function GamePresetEditor() {
         {error ? <p className="text-error">{error}</p> : null}
 
         <div className="flex flex-wrap gap-2">
-          <Button type="button" variant="flag" onClick={handleSave}>
+          <Button type="button" variant="flag" className="min-h-11" onClick={handleSave}>
             Save preset
           </Button>
           {existing && !needsMigrationReview ? (
-            <Button asChild variant="default">
+            <Button asChild variant="default" className="min-h-11">
               <AppLink to={`/create?preset=${existing.id}`}>Host</AppLink>
             </Button>
           ) : null}
@@ -363,6 +363,7 @@ export function GamePresetEditor() {
             <Button
               type="button"
               variant="default"
+              className="min-h-11"
               onClick={() => {
                 deletePreset(existing.id);
                 navigate("/presets");
@@ -371,7 +372,7 @@ export function GamePresetEditor() {
               Delete
             </Button>
           ) : null}
-          <Button asChild variant="default">
+          <Button asChild variant="default" className="min-h-11">
             <AppLink to="/presets">Cancel</AppLink>
           </Button>
         </div>

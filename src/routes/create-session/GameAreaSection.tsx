@@ -169,7 +169,7 @@ export function GameAreaSection({
           variant="flag"
           onClick={onOpenFramingModal}
           disabled={searchLoading || importLoading}
-          className="w-full"
+          className="min-h-11 w-full"
         >
           Open fullscreen map
         </Button>
@@ -226,7 +226,7 @@ export function GameAreaSection({
           variant="default"
           onClick={onSearch}
           disabled={searchLoading || importLoading}
-          className="w-full"
+          className="min-h-11 w-full"
         >
           {searchLoading ? "Searching…" : "Find place"}
         </Button>
@@ -236,7 +236,7 @@ export function GameAreaSection({
           variant="default"
           onClick={onRequestLocationBias}
           disabled={searchLoading || importLoading}
-          className="w-full"
+          className="min-h-11 w-full"
         >
           Use my location
         </Button>
@@ -246,7 +246,7 @@ export function GameAreaSection({
           variant="default"
           onClick={onAddCurrentArea}
           disabled={!previewGameArea || searchLoading || importLoading}
-          className="w-full"
+          className="min-h-11 w-full"
         >
           Add another area
         </Button>
@@ -264,7 +264,7 @@ export function GameAreaSection({
           variant="default"
           onClick={() => importFileInputRef.current?.click()}
           disabled={searchLoading || importLoading}
-          className="w-full"
+          className="min-h-11 w-full"
         >
           {importLoading ? "Importing…" : "Import KML/KMZ"}
         </Button>
