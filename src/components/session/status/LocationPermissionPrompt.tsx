@@ -107,7 +107,7 @@ export function LocationPermissionPrompt() {
     <HudBanner
       visible
       animated={false}
-      className="jl-map-banner-top pointer-events-auto fixed inset-x-3 z-[var(--z-panel)]"
+      className="pointer-events-auto fixed inset-x-3 top-[var(--map-banner-top)] z-[var(--z-panel)]"
     >
       <div
         ref={dialogRef}
