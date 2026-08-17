@@ -26,4 +26,16 @@ describe("Island", () => {
     expect(node.className).toContain("min-h-9");
     expect(node).toHaveTextContent("Tools");
   });
+
+  it("forwards asChild onto a section", () => {
+    render(
+      <Island asChild variant="flag" size="densify">
+        <section aria-label="Hunt island">Tools</section>
+      </Island>,
+    );
+    const node = screen.getByRole("region", { name: "Hunt island" });
+    expect(node).toHaveAttribute("data-slot", "island");
+    expect(node.className).toContain("bg-flag-soft");
+    expect(node.className).toContain("min-h-9");
+  });
 });

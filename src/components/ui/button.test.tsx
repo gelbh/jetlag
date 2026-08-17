@@ -28,4 +28,16 @@ describe("Button", () => {
     expect(node.className).toContain("bg-flag");
     expect(node.className).toContain("h-8");
   });
+
+  it("forwards asChild onto an anchor", () => {
+    render(
+      <Button asChild variant="flag">
+        <a href="/ask">Ask link</a>
+      </Button>,
+    );
+    const node = screen.getByRole("link", { name: "Ask link" });
+    expect(node).toHaveAttribute("href", "/ask");
+    expect(node).toHaveAttribute("data-slot", "button");
+    expect(node.className).toContain("bg-flag");
+  });
 });

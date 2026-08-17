@@ -26,4 +26,16 @@ describe("Chip", () => {
     expect(node.className).toContain("bg-flag");
     expect(node.className).toContain("h-6");
   });
+
+  it("forwards asChild onto an anchor", () => {
+    render(
+      <Chip asChild variant="flag">
+        <a href="/train">Train link</a>
+      </Chip>,
+    );
+    const node = screen.getByRole("link", { name: "Train link" });
+    expect(node).toHaveAttribute("href", "/train");
+    expect(node).toHaveAttribute("data-slot", "chip");
+    expect(node.className).toContain("bg-flag");
+  });
 });
