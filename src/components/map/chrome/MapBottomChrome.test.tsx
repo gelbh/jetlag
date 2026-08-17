@@ -45,15 +45,19 @@ describe("MapBottomChrome", () => {
     expect(container.querySelector('[data-island="hunt"]')).not.toBeNull();
   });
 
-  it("wraps phone chrome in a fixed host", () => {
+  it("wraps phone chrome in OverlayHost with safe-area pad", () => {
     const { container } = render(
       <MapBottomChrome layout="phone" hunt={<button type="button">Radar</button>} />,
     );
-    expect(container.querySelector(".jl-map-bottom-chrome-host")).not.toBeNull();
+    const host = container.querySelector("[data-overlay-host]");
+    expect(host).not.toBeNull();
+    expect(host?.classList.contains("jl-map-bottom-chrome-host")).toBe(true);
+    expect(host?.className).toMatch(/safe-area-inset-left/);
     expect(
       container.querySelector(".jl-map-bottom-chrome-host--rail"),
     ).toBeNull();
     expect(container.querySelector(".jl-tool-dock")).not.toBeNull();
+    expect(container.querySelector("[data-tool-deck]")).not.toBeNull();
   });
 
   it("keeps jl-tool-dock--rail on desktop rail chrome", () => {
@@ -133,9 +137,6 @@ describe("MapBottomChrome", () => {
 
   it("keeps Session above the dock with shared left-stack tokens (no right portal)", () => {
     expect(chromeCss).not.toMatch(/--map-chrome-zoom-stack-height/);
-    expect(chromeCss).toMatch(
-      /\.jl-map-chrome-side-stack\s*\{[^}]*bottom:\s*calc\(\s*var\(--dock-island-height\)\s*\+\s*env\(safe-area-inset-bottom\)\s*\+\s*0\.75rem\s*\+\s*0\.5rem\s*\)/s,
-    );
     expect(chromeCss).toMatch(/--map-left-tier-compass-bottom-dock/);
     expect(chromeCss).toMatch(/\.map-zoom-control\s*\{[^}]*left:\s*var\(--map-left-chrome-inset\)/s);
     expect(chromeCss).toMatch(
@@ -173,14 +174,40 @@ describe("MapBottomChrome", () => {
     expect(hunt?.classList.contains("jl-map-island--hunt-sparse")).toBe(true);
   });
 
+  it("uses full-bleed hunt band without permanently reserving side-stack flex (choice a)", () => {
+    const { container } = render(
+      <MapBottomChrome
+        layout="phone"
+        hunt={<button type="button">Radar</button>}
+        session={<button type="button">Chat</button>}
+      />,
+    );
+    const band = container.querySelector(".jl-map-chrome-bottom-band");
+    expect(band?.className).toMatch(/w-full/);
+    expect(band?.className).not.toMatch(/pr-\[/);
+    expect(chromeCss).not.toMatch(
+      /\.jl-map-chrome-bottom-band\s*\{[^}]*padding-right:\s*calc\(\s*var\(--map-chrome-side-width/s,
+    );
+    const side = container.querySelector(".jl-map-chrome-side-stack");
+    expect(side?.className).toMatch(/absolute/);
+    expect(side?.className).toMatch(/jl-map-chrome-side-stack--phone/);
+    expect(side?.className).toMatch(/right-0/);
+    expect(chromeCss).toMatch(
+      /\.jl-map-chrome-side-stack--phone\s*\{[^}]*bottom:\s*calc\(\s*var\(--dock-island-height\)/s,
+    );
+    expect(chromeCss).not.toMatch(
+      /\.jl-map-chrome-side-stack--phone\s*\{[^}]*safe-area-inset-bottom/s,
+    );
+    const hunt = container.querySelector("[data-tool-deck]");
+    expect(hunt?.className).toMatch(/w-full/);
+    expect(hunt?.className).toMatch(/min-h-11/);
+  });
+
   it("sizes hunt chips as equal flex without edge history islands", () => {
     expect(chromeCss).not.toMatch(/\.jl-map-island--history-start/);
     expect(chromeCss).not.toMatch(/\.jl-map-island--history-end/);
     expect(chromeCss).toMatch(
       /\.jl-map-island\s+\.jl-tool-dock-group-main\s+\.jl-tool-slot\s*\{[^}]*flex:\s*1\s+1\s+0/s,
-    );
-    expect(chromeCss).toMatch(
-      /\.jl-map-chrome-bottom-band\s*\{[^}]*justify-content:\s*center/s,
     );
   });
 

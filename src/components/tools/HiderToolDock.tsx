@@ -3,6 +3,7 @@ import { HudPinIcon } from "../map/icons/ToolIcons";
 import { MapBottomChrome } from "../map/chrome/MapBottomChrome";
 import { MapChromeControl } from "../map/chrome/MapChromeControl";
 import { SessionIslandSlots } from "../map/chrome/SessionIslandSlots";
+import { ToolDeckGroup } from "./ToolDeck";
 
 import type { ToolDockLayout } from "./ToolDock";
 
@@ -55,7 +56,7 @@ export function HiderToolDock({
       inactive={inactive}
       huntDensity="sparse"
       hunt={
-        <div className="jl-tool-dock-group jl-tool-dock-group-main">
+        <ToolDeckGroup density="sparse" aria-label="Hider map actions">
           <MapChromeControl
             variant="slot"
             onClick={onZoneAction}
@@ -86,7 +87,7 @@ export function HiderToolDock({
               label="Expansion"
             />
           ) : null}
-        </div>
+        </ToolDeckGroup>
       }
       session={
         <SessionIslandSlots
