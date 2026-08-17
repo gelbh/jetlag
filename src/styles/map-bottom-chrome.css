@@ -143,15 +143,20 @@
     max-width: 2.75rem;
   }
 
+  /*
+   * Phone side stack: OverlayHost owns safe-area pb — do not re-add
+   * env(safe-area-inset-bottom) here (avoids double home-indicator inset).
+   */
+  .jl-map-chrome-side-stack--phone {
+    bottom: calc(var(--dock-island-height) + 0.75rem + 0.5rem);
+  }
+
   @media (max-height: 430px) and (orientation: landscape) {
-    .jl-map-chrome-side-stack {
-      bottom: calc(
-        var(--dock-island-height) + env(safe-area-inset-bottom) + 0.75rem + 1rem
-      );
+    .jl-map-chrome-side-stack--phone {
+      bottom: calc(var(--dock-island-height) + 0.75rem + 1rem);
       max-height: calc(
         100dvh - env(safe-area-inset-top) - 0.5rem -
-          var(--dock-island-height) - env(safe-area-inset-bottom) - 0.75rem -
-          1rem
+          var(--dock-island-height) - 0.75rem - 1rem
       );
       overflow: hidden;
     }
@@ -246,9 +251,8 @@
   .jl-map-bottom-chrome-host .jl-tool-menu-dock {
     position: absolute;
     right: calc(var(--map-chrome-side-width, 3.25rem) + 0.5rem);
-    bottom: calc(
-      var(--dock-island-height) + env(safe-area-inset-bottom) + 0.75rem + 0.5rem
-    );
+    /* Host pb owns safe-area — do not re-add env(safe-area-inset-bottom). */
+    bottom: calc(var(--dock-island-height) + 0.75rem + 0.5rem);
     z-index: calc(var(--z-panel) + 1);
     /* Host is pe-none; islands re-enable PE — overlays must too. */
     pointer-events: auto;

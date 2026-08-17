@@ -190,7 +190,14 @@ describe("MapBottomChrome", () => {
     );
     const side = container.querySelector(".jl-map-chrome-side-stack");
     expect(side?.className).toMatch(/absolute/);
+    expect(side?.className).toMatch(/jl-map-chrome-side-stack--phone/);
     expect(side?.className).toMatch(/right-0/);
+    expect(chromeCss).toMatch(
+      /\.jl-map-chrome-side-stack--phone\s*\{[^}]*bottom:\s*calc\(\s*var\(--dock-island-height\)/s,
+    );
+    expect(chromeCss).not.toMatch(
+      /\.jl-map-chrome-side-stack--phone\s*\{[^}]*safe-area-inset-bottom/s,
+    );
     const hunt = container.querySelector("[data-tool-deck]");
     expect(hunt?.className).toMatch(/w-full/);
     expect(hunt?.className).toMatch(/min-h-11/);

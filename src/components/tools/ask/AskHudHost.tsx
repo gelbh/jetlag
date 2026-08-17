@@ -6,7 +6,8 @@
  * Spec: ask-surface-kit-design rev 2026-08-05b.
  */
 import type { ReactNode } from "react";
-import { OVERLAY_SAFE_PAD_X } from "../../map/chrome/OverlayHost";
+import { OVERLAY_SAFE_PAD_X } from "@/components/map/chrome/OverlayHost";
+import { cn } from "@/lib/cn";
 import { AskCommitStrip } from "./AskCommitStrip";
 import { AskCostChip } from "./AskCostChip";
 import { AskModeCueTicker } from "./AskModeCueTicker";
@@ -46,7 +47,10 @@ export function AskHudHost({
       className="ask-hud-host pointer-events-none absolute inset-0 z-[var(--z-panel)]"
     >
       <div
-        className={`ask-hud-host__top pointer-events-none absolute inset-x-0 top-[var(--map-banner-top)] z-[1] flex flex-col items-stretch gap-2 ${OVERLAY_SAFE_PAD_X}`}
+        className={cn(
+          "ask-hud-host__top pointer-events-none absolute inset-x-0 top-[var(--map-banner-top)] z-[1] flex flex-col items-stretch gap-2",
+          OVERLAY_SAFE_PAD_X,
+        )}
       >
         <AskModeCueTicker cue={cue} />
         {showCostChip ? (
@@ -58,7 +62,10 @@ export function AskHudHost({
 
       {modeBody ? (
         <div
-          className={`ask-hud-host__body pointer-events-none absolute inset-x-0 bottom-[calc(var(--map-panel-bottom)+var(--ask-hud-strip-height,3rem)+0.5rem)] z-[1] ${OVERLAY_SAFE_PAD_X}`}
+          className={cn(
+            "ask-hud-host__body pointer-events-none absolute inset-x-0 bottom-[calc(var(--map-panel-bottom)+var(--ask-hud-strip-height,3rem)+0.5rem)] z-[1]",
+            OVERLAY_SAFE_PAD_X,
+          )}
         >
           {modeBody}
         </div>
@@ -66,7 +73,10 @@ export function AskHudHost({
 
       {showCommitStrip ? (
         <div
-          className={`ask-hud-host__strip pointer-events-none absolute inset-x-0 jl-panel-above-dock z-[2] ${OVERLAY_SAFE_PAD_X}`}
+          className={cn(
+            "ask-hud-host__strip pointer-events-none absolute inset-x-0 jl-panel-above-dock z-[2]",
+            OVERLAY_SAFE_PAD_X,
+          )}
         >
           <div className="w-full">
             <AskCommitStrip

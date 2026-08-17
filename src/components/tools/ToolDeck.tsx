@@ -73,6 +73,7 @@ export const ToolDeckGroup = forwardRef<HTMLDivElement, ToolDeckGroupProps>(
             : "flex-1 justify-evenly [&_.jl-tool-slot]:min-h-11 [&_.jl-tool-slot]:min-w-10 [&_.jl-tool-slot]:flex-1 [&_.jl-tool-slot]:basis-0",
           className,
         )}
+        role="group"
         aria-label={ariaLabel}
       >
         {children}

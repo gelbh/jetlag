@@ -83,8 +83,7 @@ export const MapBottomChrome = forwardRef<HTMLDivElement, MapBottomChromeProps>(
         <div
           className={cn(
             "jl-map-bottom-chrome jl-tool-dock relative block w-full pointer-events-none bg-transparent",
-            !isRail &&
-              "min-h-[calc(var(--dock-island-height)+0.75rem+env(safe-area-inset-bottom))]",
+            !isRail && "min-h-[calc(var(--dock-island-height)+0.75rem)]",
             isRail &&
               "jl-map-bottom-chrome--rail jl-tool-dock--rail relative flex h-full min-h-0 flex-col items-stretch justify-start gap-2 p-2",
             inactive && "jl-map-bottom-chrome--inactive opacity-55 saturate-50",
@@ -109,7 +108,8 @@ export const MapBottomChrome = forwardRef<HTMLDivElement, MapBottomChromeProps>(
               "jl-map-chrome-side-stack pointer-events-none z-[3] flex flex-col items-stretch gap-2",
               isRail
                 ? "contents"
-                : "absolute right-0 bottom-[calc(var(--dock-island-height)+env(safe-area-inset-bottom)+0.75rem+0.5rem)]",
+                : /* bottom owned by CSS so landscape media can adjust without Tailwind override */
+                  "jl-map-chrome-side-stack--phone absolute right-0",
             )}
           >
             {session ? <SideIsland name="session">{session}</SideIsland> : null}
