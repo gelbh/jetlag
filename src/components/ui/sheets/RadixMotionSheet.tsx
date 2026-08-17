@@ -30,6 +30,11 @@ export interface RadixMotionSheetProps {
 /**
  * Survey sheet path: Radix dialog semantics + Motion drag/spring.
  * Desktop ContextualRail stays on SheetHost; this is mobile/overlay only.
+ *
+ * Content is bottom-anchored (not full-viewport) so Overlay clicks count as
+ * outside and restore RAC-era scrim dismiss. Radix modal onCloseAutoFocus
+ * always preventDefaults + focuses Trigger — without Trigger that dumps focus
+ * to body, so we snapshot the opener on open and restore it ourselves.
  */
 export function RadixMotionSheet({
   open,
@@ -47,8 +52,10 @@ export function RadixMotionSheet({
   const scrollRef = useRef<HTMLDivElement>(null);
   const sheetMeasureRef = useRef<HTMLDivElement>(null);
   const sheetHeightRef = useRef(320);
+  const restoreFocusRef = useRef<HTMLElement | null>(null);
   const y = useMotionValue(0);
   const dragControls = useDragControls();
+  const label = ariaLabel ?? "Sheet";
 
   useScrollLock(open);
 
@@ -131,23 +138,43 @@ export function RadixMotionSheet({
           className={[
             "pointer-events-auto fixed inset-0 z-[var(--z-modal)] overscroll-contain hud-scrim",
             "jl-survey-world",
-            !reduceMotion ? "hud-scrim-enter data-[state=closed]:hud-scrim-exit" : "",
+            !reduceMotion ? "hud-scrim-enter" : "",
           ]
             .filter(Boolean)
             .join(" ")}
+          onPointerDown={
+            dismissible
+              ? (event) => {
+                  // Bottom-anchored Content means Overlay is outside — but jsdom
+                  // + Radix outside detection is flaky; explicit scrim dismiss.
+                  if (event.target === event.currentTarget) {
+                    requestClose();
+                  }
+                }
+              : undefined
+          }
         />
         <Dialog.Content
-          aria-label={ariaLabel ?? "Sheet"}
-          className="pointer-events-none fixed inset-0 z-[var(--z-modal)] flex items-end justify-center outline-none"
+          aria-describedby={undefined}
+          className="fixed inset-x-0 bottom-0 z-[var(--z-modal)] w-full max-w-none outline-none"
           onEscapeKeyDown={preventDismiss}
           onPointerDownOutside={preventDismiss}
           onInteractOutside={preventDismiss}
+          onOpenAutoFocus={() => {
+            const active = document.activeElement;
+            restoreFocusRef.current =
+              active instanceof HTMLElement ? active : null;
+          }}
+          onCloseAutoFocus={(event) => {
+            // Block Radix modal default (focus missing Trigger → body).
+            event.preventDefault();
+            restoreFocusRef.current?.focus({ preventScroll: true });
+          }}
         >
-          {/* Radix requires a Title for a11y; visible name comes from aria-label. */}
-          <Dialog.Title className="sr-only">{ariaLabel ?? "Sheet"}</Dialog.Title>
+          <Dialog.Title className="sr-only">{label}</Dialog.Title>
           <motion.div
             ref={sheetMeasureRef}
-            className="pointer-events-auto w-full max-w-none outline-none"
+            className="w-full outline-none"
             data-player-ux-world="survey"
             initial={reduceMotion ? false : { y: "100%" }}
             animate={{ y: 0 }}

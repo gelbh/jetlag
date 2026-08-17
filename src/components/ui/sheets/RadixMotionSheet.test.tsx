@@ -170,4 +170,35 @@ describe("RadixMotionSheet", () => {
     expect(screen.queryByText("hidden")).not.toBeInTheDocument();
     expect(container.querySelector("[role='dialog']")).toBeNull();
   });
+
+  it("does not close on Escape when not dismissible", async () => {
+    const onClose = vi.fn();
+    render(
+      <RadixMotionSheet
+        open
+        onClose={onClose}
+        dismissible={false}
+        ariaLabel="Locked"
+      >
+        <button type="button">inside</button>
+      </RadixMotionSheet>,
+    );
+    const dialog = await screen.findByRole("dialog", { name: "Locked" });
+    fireEvent.keyDown(dialog, { key: "Escape" });
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it("closes when the scrim (overlay) is clicked", async () => {
+    const onClose = vi.fn();
+    render(
+      <RadixMotionSheet open onClose={onClose} ariaLabel="Scrim">
+        <p>body</p>
+      </RadixMotionSheet>,
+    );
+    await screen.findByRole("dialog", { name: "Scrim" });
+    const overlay = document.querySelector(".hud-scrim");
+    expect(overlay).not.toBeNull();
+    fireEvent.pointerDown(overlay!);
+    expect(onClose).toHaveBeenCalled();
+  });
 });

@@ -50,8 +50,8 @@ export default defineConfig([
   // Expand this glob as later UX waves migrate chrome (avoid repo-wide debt gate).
   {
     files: [
-      "src/components/ui/sheets/RacMotionSheet.tsx",
-      "src/components/ui/sheets/RacMotionSheet.test.tsx",
+      "src/components/ui/sheets/RadixMotionSheet.tsx",
+      "src/components/ui/sheets/RadixMotionSheet.test.tsx",
       "src/components/ui/sheets/SheetHost.tsx",
       "src/components/ui/sheets/SheetHost.test.tsx",
       "src/components/ui/brand/JlIcon.tsx",
