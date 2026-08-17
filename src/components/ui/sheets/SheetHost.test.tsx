@@ -13,8 +13,8 @@ vi.mock("../../../hooks/layout/useDesktopLayout", () => ({
   useDesktopLayout: () => useDesktopLayout(),
 }));
 
-vi.mock("./RacMotionSheet", () => ({
-  RacMotionSheet: ({
+vi.mock("./RadixMotionSheet", () => ({
+  RadixMotionSheet: ({
     open,
     children,
     ariaLabel,
@@ -26,9 +26,9 @@ vi.mock("./RacMotionSheet", () => ({
     onClose: () => void;
   }) =>
     open ? (
-      <div role="dialog" aria-label={ariaLabel} data-testid="rac-motion-sheet">
+      <div role="dialog" aria-label={ariaLabel} data-testid="radix-motion-sheet">
         <button type="button" onClick={onClose}>
-          close-rac
+          close-radix
         </button>
         {children}
       </div>
@@ -59,14 +59,14 @@ describe("SheetHost", () => {
     useDesktopLayout.mockReset();
   });
 
-  it("uses RacMotionSheet under 1024", () => {
+  it("uses RadixMotionSheet under 1024", () => {
     useDesktopLayout.mockReturnValue(false);
     render(
       <SheetHost open onClose={() => {}} ariaLabel="Settings" railTab="settings">
         <p>body</p>
       </SheetHost>,
     );
-    expect(screen.getByTestId("rac-motion-sheet")).toBeInTheDocument();
+    expect(screen.getByTestId("radix-motion-sheet")).toBeInTheDocument();
     expect(screen.getByText("body")).toBeInTheDocument();
   });
 
@@ -89,7 +89,7 @@ describe("SheetHost", () => {
     await waitFor(() => {
       expect(screen.getByRole("dialog", { name: "Settings" })).toBeInTheDocument();
     });
-    expect(screen.queryByTestId("rac-motion-sheet")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("radix-motion-sheet")).not.toBeInTheDocument();
     expect(screen.getByText("rail body")).toBeInTheDocument();
     expect(
       screen.getByTestId("rail-panel").contains(screen.getByText("rail body")),
@@ -126,7 +126,7 @@ describe("SheetHost", () => {
         <p>body</p>
       </SheetHost>,
     );
-    fireEvent.click(screen.getByRole("button", { name: "close-rac" }));
+    fireEvent.click(screen.getByRole("button", { name: "close-radix" }));
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
@@ -137,7 +137,7 @@ describe("SheetHost", () => {
         <p>first-run</p>
       </SheetHost>,
     );
-    expect(screen.getByTestId("rac-motion-sheet")).toBeInTheDocument();
+    expect(screen.getByTestId("radix-motion-sheet")).toBeInTheDocument();
     expect(screen.getByText("first-run")).toBeInTheDocument();
   });
 
@@ -151,6 +151,6 @@ describe("SheetHost", () => {
       </ContextualRailPanelProvider>,
     );
     expect(screen.queryByText("pending rail")).not.toBeInTheDocument();
-    expect(screen.queryByTestId("rac-motion-sheet")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("radix-motion-sheet")).not.toBeInTheDocument();
   });
 });
