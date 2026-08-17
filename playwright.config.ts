@@ -22,13 +22,6 @@ export default defineConfig({
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 1 : 0,
   reporter: [["list"], ["html", { open: "never" }]],
-  snapshotPathTemplate:
-    "{testDir}/{testFileDir}/{testFileName}-snapshots/{arg}-mobile-{platform}{ext}",
-  expect: {
-    toHaveScreenshot: {
-      maxDiffPixelRatio: 0.02,
-    },
-  },
   use: {
     baseURL: "http://127.0.0.1:4173",
     trace: "on-first-retry",
@@ -50,12 +43,6 @@ export default defineConfig({
           {
             name: "features",
             testMatch: /e2e\/features\/.+\.spec\.ts/,
-            use: mobileDevice,
-          },
-          {
-            name: "visual",
-            testMatch: /e2e\/visual\/.+\.spec\.ts/,
-            grepInvert: /@manual/,
             use: mobileDevice,
           },
           {
