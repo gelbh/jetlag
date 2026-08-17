@@ -1,6 +1,6 @@
 import { createPortal } from "react-dom";
 import { useRef, type ReactNode } from "react";
-import { RacMotionSheet } from "./RacMotionSheet";
+import { RadixMotionSheet } from "./RadixMotionSheet";
 import { useDialogFocus } from "@/hooks/a11y/useDialogFocus";
 import { useDesktopLayout } from "@/hooks/layout/useDesktopLayout";
 import {
@@ -58,7 +58,7 @@ function DesktopRailDialog({
 /**
  * Stable sheet host API for map chrome.
  * Desktop + railTab → ContextualRail portal.
- * Otherwise → RacMotionSheet (Survey field-book sole path).
+ * Otherwise → RadixMotionSheet (Survey field-book sole path).
  * PostHog player-ux-world-v2 retired — archive the flag in PostHog UI when convenient.
  */
 export function SheetHost({
@@ -95,7 +95,7 @@ export function SheetHost({
   }
 
   return (
-    <RacMotionSheet
+    <RadixMotionSheet
       open={open}
       onClose={onClose}
       ariaLabel={ariaLabel}
@@ -105,6 +105,6 @@ export function SheetHost({
       maxHeightClassName={maxHeightClassName}
     >
       {children}
-    </RacMotionSheet>
+    </RadixMotionSheet>
   );
 }

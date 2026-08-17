@@ -105,7 +105,9 @@ vi.mock("../services/core/firebase/firebase", () => ({
 
 describe("MapScreen", () => {
   function dismissMapToolsGuide() {
-    const dismiss = screen.queryByRole("button", { name: "Dismiss" });
+    const dismiss =
+      screen.queryByRole("button", { name: "Got it" }) ??
+      screen.queryByRole("button", { name: "Dismiss" });
     if (dismiss) {
       fireEvent.click(dismiss);
     }
@@ -146,6 +148,6 @@ describe("MapScreen", () => {
     dismissMapToolsGuide();
     fireEvent.click(screen.getByRole("button", { name: "Open settings" }));
 
-    expect(screen.getByRole("heading", { name: "Settings" })).toBeInTheDocument();
+    expect(screen.getByRole("dialog", { name: "Settings" })).toBeInTheDocument();
   });
 });

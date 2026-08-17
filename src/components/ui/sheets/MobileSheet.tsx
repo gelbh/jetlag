@@ -52,7 +52,7 @@ export function MobileSheet({
   const scrollClassName = scrollIdle ? "hud-sheet-scroll--idle" : "";
 
   if (layout === "split") {
-    // nested (RAC modal) must stay in-flow so the dialog has a non-zero box;
+    // nested (Radix modal) must stay in-flow so the dialog has a non-zero box;
     // overlay keeps fixed bottom sheet chassis for MotionSheet.
     const splitHandle =
       handle ??

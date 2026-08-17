@@ -157,7 +157,7 @@ describe("AdminMapScreen", () => {
 
     renderWithRouter(<AdminMapScreen />, { route: "/map" });
 
-    // RacMotionSheet ModalOverlay inert-hides the dock while a sheet is open.
+    // RadixMotionSheet overlay inert-hides the dock while a sheet is open.
     fireEvent.click(
       screen.getByRole("button", { name: "Open session log", hidden: true }),
     );

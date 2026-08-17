@@ -16,11 +16,12 @@ test.describe("map first-run screenshots", () => {
     await blockExternalAssets(page);
     await seedLocalSession(page);
     await page.goto("/map");
-    await page.getByRole("button", { name: "Radar" }).waitFor();
 
-    await expect(page.getByRole("dialog", { name: "Map tools guide" })).toHaveScreenshot(
-      "map-first-run.png",
-    );
+    // Radix modal hideOthers aria-hides the dock while the sheet is open —
+    // wait for the guide, not Hunt tools.
+    const guide = page.getByRole("dialog", { name: "Map tools guide" });
+    await expect(guide).toBeVisible();
+    await expect(guide).toHaveScreenshot("map-first-run.png");
   });
 });
 
@@ -37,9 +38,7 @@ test.describe("map first-run — survey world", () => {
     await blockExternalAssets(page);
     await seedLocalSession(page);
     await page.goto("/map");
-    await page.getByRole("button", { name: "Radar" }).waitFor();
 
-    // RAC Dialog can report Playwright "hidden" while content is interactive.
     await expect(page.getByRole("button", { name: "Got it" })).toBeVisible();
     await expect(
       page.locator('[data-player-ux-world="survey"]').first(),
