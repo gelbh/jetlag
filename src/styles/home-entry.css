@@ -194,9 +194,16 @@
     font-family: var(--font-display);
     text-align: center;
     color: var(--color-field-ink);
+  }
+
+  html:not([data-motion="reduced"]):not([data-motion="static"]) .premium-pack-cell {
     transition:
       background var(--motion-fast) var(--ease-out-quint),
       border-color var(--motion-fast) var(--ease-out-quint);
+  }
+
+  html:is([data-motion="static"], [data-motion="reduced"]) .premium-pack-cell {
+    transition: none;
   }
 
   .premium-pack-cell:hover:not(:disabled) {
@@ -236,9 +243,16 @@
     padding: 0.5rem 0.75rem;
     text-align: left;
     color: var(--color-field-ink);
+  }
+
+  html:not([data-motion="reduced"]):not([data-motion="static"]) .premium-offer-row {
     transition:
       background var(--motion-fast) var(--ease-out-quint),
       border-color var(--motion-fast) var(--ease-out-quint);
+  }
+
+  html:is([data-motion="static"], [data-motion="reduced"]) .premium-offer-row {
+    transition: none;
   }
 
   .premium-offer-row:hover:not(:disabled) {
@@ -366,9 +380,16 @@
     font-size: 0.8125rem;
     letter-spacing: 0.04em;
     color: var(--color-field-ink);
+  }
+
+  html:not([data-motion="reduced"]):not([data-motion="static"]) .jl-choice-btn {
     transition:
       background var(--motion-fast) ease-out,
       border-color var(--motion-fast) ease-out;
+  }
+
+  html:is([data-motion="static"], [data-motion="reduced"]) .jl-choice-btn {
+    transition: none;
   }
 
   .jl-choice-btn-selected {
@@ -429,10 +450,17 @@
     font-size: 0.8125rem;
     letter-spacing: 0.06em;
     color: var(--color-field-ink-muted);
+  }
+
+  html:not([data-motion="reduced"]):not([data-motion="static"]) .jl-segment-btn {
     transition:
       background var(--motion-fast) ease-out,
       border-color var(--motion-fast) ease-out,
       color var(--motion-fast) ease-out;
+  }
+
+  html:is([data-motion="static"], [data-motion="reduced"]) .jl-segment-btn {
+    transition: none;
   }
 
   .jl-segment-btn-selected {

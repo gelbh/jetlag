@@ -2,4 +2,4 @@
 "jetlag": patch
 ---
 
-Dark Survey entry and remaining player routes (home, join, create, empties) use field-book tokens and ui Button — no Broadcast terracotta/surface-deep classes on those surfaces.
+Home and secondary player screens use the Survey field-book look, with a shared empty state for lists and recovery copy.
