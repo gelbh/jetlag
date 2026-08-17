@@ -76,7 +76,7 @@ export function RadarHudBody({
     >
       {viewOnly ? <ViewOnlyQuestionBanner /> : null}
 
-      <div className="pointer-events-auto hud-panel space-y-2 p-3">
+      <div className="pointer-events-auto ask-hud-panel space-y-2 p-3">
         <PlacementActions
           awaitingPlacement={awaitingPlacement}
           hasCenter={hasCenter}

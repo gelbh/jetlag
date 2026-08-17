@@ -58,7 +58,7 @@ export function PhotoHudBody({
     >
       {awaitHiderAnswer ? <QuestionTruthReferenceHint /> : null}
       {availableCategories.length === 0 ? (
-        <div className="pointer-events-auto hud-panel p-3">
+        <div className="pointer-events-auto ask-hud-panel p-3">
           <CatalogExhaustedMessage message="Every photo question has already been used this session." />
         </div>
       ) : useRail ? (
@@ -86,13 +86,13 @@ export function PhotoHudBody({
         </div>
       )}
       {categoryReady ? (
-        <div className="pointer-events-auto hud-panel space-y-2 p-3">
+        <div className="pointer-events-auto ask-hud-panel space-y-2 p-3">
           <QuestionPromptBlock
             prompt={question.prompt}
             ruleSummary={question.ruleSummary}
           />
           {hasOpenQuestion ? (
-            <p className="text-sm text-danger">
+            <p className="text-sm text-halt">
               Finish the open question before starting another.
             </p>
           ) : null}

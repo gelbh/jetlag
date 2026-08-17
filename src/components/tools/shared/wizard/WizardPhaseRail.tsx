@@ -30,11 +30,11 @@ function segmentState(
 function segmentClassName(state: PhaseSegmentState): string {
   switch (state) {
     case "current":
-      return "border-action/65 bg-action text-surface-base";
+      return "border-flag/65 bg-flag text-flag-ink";
     case "complete":
-      return "border-action/45 bg-action/60 text-surface-base";
+      return "border-flag/45 bg-flag/60 text-flag-ink";
     case "upcoming":
-      return "border-border/85 bg-surface-panel text-ink-muted";
+      return "border-rule/85 bg-canvas text-field-ink-muted";
     default: {
       const _exhaustive: never = state;
       return _exhaustive;
@@ -43,7 +43,7 @@ function segmentClassName(state: PhaseSegmentState): string {
 }
 
 function connectorClassName(state: PhaseSegmentState): string {
-  return state === "upcoming" ? "bg-border/40" : "bg-action/60";
+  return state === "upcoming" ? "bg-rule/40" : "bg-flag/60";
 }
 
 export function WizardPhaseRail({

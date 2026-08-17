@@ -105,7 +105,7 @@ export function TentacleHudBody({
       ) : null}
 
       {chord === "place" ? (
-        <div className="pointer-events-auto hud-panel space-y-2 p-3">
+        <div className="pointer-events-auto ask-hud-panel space-y-2 p-3">
           <AnchorControls
             awaitingPlacement={awaitingPlacement}
             hasAnchor={hasCenter}
@@ -156,7 +156,7 @@ export function TentacleHudBody({
                 </ResolvedReadout>
               )}
               {error ? (
-                <p className="text-sm text-danger">{error}</p>
+                <p className="text-sm text-halt">{error}</p>
               ) : null}
             </>
           }

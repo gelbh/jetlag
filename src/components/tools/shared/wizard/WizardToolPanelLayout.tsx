@@ -23,7 +23,7 @@ export function WizardToolPanelLayout({
         {children}
       </div>
       {stickyFooter ? (
-        <div className="wizard-tool-sticky-footer shrink-0 border-t border-border/50 pt-2">
+        <div className="wizard-tool-sticky-footer shrink-0 border-t border-rule/50 pt-2">
           {stickyFooter}
         </div>
       ) : null}

@@ -172,7 +172,7 @@ export function MeasuringHudBody({
       className="ask-hud-mode-body flex w-full flex-col gap-2"
     >
       {chord === "anchor" ? (
-        <div className="pointer-events-auto hud-panel p-3">
+        <div className="pointer-events-auto ask-hud-panel p-3">
           <MeasuringAnchorStep
             hasSeekerPoint={hasSeekerPoint}
             gpsLoading={gpsLoading}
@@ -195,7 +195,7 @@ export function MeasuringHudBody({
         <div className="space-y-2">
           {awaitHiderAnswer ? <QuestionTruthReferenceHint /> : null}
           {!hasAvailableMeasureOptions ? (
-            <p className="pointer-events-auto hud-panel p-3 text-sm text-ink-muted">
+            <p className="pointer-events-auto ask-hud-panel p-3 text-sm text-field-ink-muted">
               Every measure category has already been added to this session.
             </p>
           ) : (
@@ -211,7 +211,7 @@ export function MeasuringHudBody({
       ) : null}
 
       {chord === "target" ? (
-        <div className="pointer-events-auto hud-panel space-y-2 p-3">
+        <div className="pointer-events-auto ask-hud-panel space-y-2 p-3">
           <MeasuringTargetSection
             subject={subject}
             measureFrom={measureFrom}
@@ -241,7 +241,7 @@ export function MeasuringHudBody({
       ) : null}
 
       {chord === "answer" ? (
-        <div className="pointer-events-auto hud-panel p-3">
+        <div className="pointer-events-auto ask-hud-panel p-3">
           <MeasuringAnswerSection
             step="ask"
             part="all"
@@ -268,7 +268,7 @@ export function MeasuringHudBody({
       ) : null}
 
       {allowsSearch && searchResults.length > 0 && chord !== "answer" ? (
-        <div className="pointer-events-auto hud-panel jl-scroll max-h-40 p-2">
+        <div className="pointer-events-auto ask-hud-panel jl-scroll max-h-40 p-2">
           <SearchResultsList
             results={searchResults}
             onSelect={(place) => onSearchResultSelect(place, searchRole)}
