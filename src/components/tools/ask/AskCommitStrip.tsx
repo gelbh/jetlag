@@ -1,5 +1,5 @@
 /**
- * PrimedCommitStrip — muted until canCommit; Survey flag Button when armed.
+ * AskCommitStrip — muted until canCommit; Survey flag Button when armed.
  * Spec: ask-surface-kit-design rev 2026-08-05b.
  */
 import { Button } from "@/components/ui/button";

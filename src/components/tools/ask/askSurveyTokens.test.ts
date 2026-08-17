@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
 const FORBIDDEN =
-  /(?:--|bg-|text-|border-|from-|to-|via-)?color-surface-(?:deep|panel|raised)\b|bg-surface-(?:deep|panel|raised|base)\b|text-surface-(?:deep|panel|raised|base)\b|(?<!ask-)hud-panel\b|\btext-ink(?:-muted|-secondary|-dim|-primary)?\b|\bbg-action\b|\bbtn-primary\b/;
+  /(?:--|bg-|text-|border-|from-|to-|via-)?color-surface-(?:deep|panel|raised|base)\b|bg-surface-(?:deep|panel|raised|base)\b|text-surface-(?:deep|panel|raised|base)\b|(?<!ask-)hud-panel\b|\btext-ink(?:-muted|-secondary|-dim|-primary)?\b|\bbg-action\b|\bbtn-primary\b/;
 
 const ASK_DIR = dirname(fileURLToPath(import.meta.url));
 const ASK_HUD_CSS = join(ASK_DIR, "../../../styles/ask-hud.css");
@@ -26,7 +26,9 @@ function listAskSourceFiles(): string[] {
 describe("ask Survey token purge", () => {
   it("ask-hud.css has no Broadcast surface-* roles", () => {
     const css = readFileSync(ASK_HUD_CSS, "utf8");
-    expect(css).not.toMatch(/surface-deep|surface-panel|surface-raised/);
+    expect(css).not.toMatch(
+      /surface-deep|surface-panel|surface-raised|surface-base/,
+    );
     expect(css).toMatch(/--color-canvas/);
     expect(css).toMatch(/--color-field-ink/);
     expect(css).toMatch(/--color-flag/);
