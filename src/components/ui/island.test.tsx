@@ -38,4 +38,16 @@ describe("Island", () => {
     expect(node.className).toContain("bg-flag-soft");
     expect(node.className).toContain("min-h-9");
   });
+
+  it("keeps data-slot stable when callers pass a conflicting value", () => {
+    render(
+      <Island data-slot="override" data-testid="slot-guard">
+        Tools
+      </Island>,
+    );
+    expect(screen.getByTestId("slot-guard")).toHaveAttribute(
+      "data-slot",
+      "island",
+    );
+  });
 });

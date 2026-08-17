@@ -10,7 +10,7 @@ import { cn } from "@/lib/cn";
  * Prefer Survey roles (flag / field-ink / canvas); do not introduce new jl-* CSS.
  */
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-flag focus-visible:ring-offset-2 focus-visible:ring-offset-canvas disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-flag focus-visible:ring-offset-2 focus-visible:ring-offset-canvas disabled:opacity-50 aria-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
@@ -37,22 +37,60 @@ export type ButtonProps = React.ComponentPropsWithoutRef<"button"> &
     asChild?: boolean;
   };
 
+function blockDisabledActivation(
+  event: React.SyntheticEvent,
+): void {
+  event.preventDefault();
+  event.stopPropagation();
+}
+
 export function Button({
   className,
   variant,
   size,
   asChild = false,
   type = "button",
+  disabled = false,
+  onClick,
+  tabIndex,
+  children,
   ...props
 }: ButtonProps) {
+  const classes = cn(buttonVariants({ variant, size, className }));
+
+  // Slot composes the child handler first; clone so disabled cannot activate.
+  if (asChild && disabled) {
+    const child = React.Children.only(children) as React.ReactElement<
+      Record<string, unknown>
+    >;
+    return React.cloneElement(child, {
+      ...props,
+      className: cn(classes, child.props.className as string | undefined),
+      "data-slot": "button",
+      "aria-disabled": true,
+      tabIndex: -1,
+      onClick: blockDisabledActivation,
+      onKeyDown: (event: React.KeyboardEvent) => {
+        if (event.key === "Enter" || event.key === " ") {
+          blockDisabledActivation(event);
+        }
+      },
+    });
+  }
+
   const Comp = asChild ? Slot : "button";
   return (
     <Comp
-      data-slot="button"
-      className={cn(buttonVariants({ variant, size, className }))}
-      type={asChild ? undefined : type}
       {...props}
-    />
+      data-slot="button"
+      className={classes}
+      type={asChild ? undefined : type}
+      disabled={disabled}
+      tabIndex={tabIndex}
+      onClick={onClick}
+    >
+      {children}
+    </Comp>
   );
 }
 

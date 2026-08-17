@@ -45,9 +45,9 @@ export function Island({
   const Comp = asChild ? Slot : "div";
   return (
     <Comp
+      {...props}
       data-slot="island"
       className={cn(islandVariants({ variant, size, className }))}
-      {...props}
     />
   );
 }

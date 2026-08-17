@@ -1,5 +1,5 @@
-import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { fireEvent, render, screen } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
 import { Chip, chipVariants } from "./chip";
 
 describe("Chip", () => {
@@ -37,5 +37,36 @@ describe("Chip", () => {
     expect(node).toHaveAttribute("href", "/train");
     expect(node).toHaveAttribute("data-slot", "chip");
     expect(node.className).toContain("bg-flag");
+  });
+
+  it("preserves an explicit submit type", () => {
+    render(<Chip type="submit">Save filter</Chip>);
+    expect(
+      screen.getByRole("button", { name: "Save filter" }),
+    ).toHaveAttribute("type", "submit");
+  });
+
+  it("disables slotted anchors without native disabled", () => {
+    const parentClick = vi.fn();
+    const childClick = vi.fn();
+    render(
+      <Chip asChild disabled onClick={parentClick}>
+        <a href="/train" tabIndex={0} onClick={childClick}>
+          Locked
+        </a>
+      </Chip>,
+    );
+    const node = screen.getByRole("link", { name: "Locked" });
+    expect(node).toHaveAttribute("aria-disabled", "true");
+    expect(node).toHaveAttribute("tabindex", "-1");
+    expect(node).not.toHaveAttribute("disabled");
+    fireEvent.click(node);
+    expect(parentClick).not.toHaveBeenCalled();
+    expect(childClick).not.toHaveBeenCalled();
+    for (const key of ["Enter", " "] as const) {
+      fireEvent.keyDown(node, { key });
+      expect(parentClick).not.toHaveBeenCalled();
+      expect(childClick).not.toHaveBeenCalled();
+    }
   });
 });

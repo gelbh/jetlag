@@ -1,5 +1,5 @@
-import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { fireEvent, render, screen } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
 import { Button, buttonVariants } from "./button";
 
 describe("Button", () => {
@@ -39,5 +39,37 @@ describe("Button", () => {
     expect(node).toHaveAttribute("href", "/ask");
     expect(node).toHaveAttribute("data-slot", "button");
     expect(node.className).toContain("bg-flag");
+  });
+
+  it("preserves an explicit submit type", () => {
+    render(<Button type="submit">Save</Button>);
+    expect(screen.getByRole("button", { name: "Save" })).toHaveAttribute(
+      "type",
+      "submit",
+    );
+  });
+
+  it("disables slotted anchors without native disabled", () => {
+    const parentClick = vi.fn();
+    const childClick = vi.fn();
+    render(
+      <Button asChild disabled onClick={parentClick}>
+        <a href="/ask" tabIndex={0} onClick={childClick}>
+          Locked
+        </a>
+      </Button>,
+    );
+    const node = screen.getByRole("link", { name: "Locked" });
+    expect(node).toHaveAttribute("aria-disabled", "true");
+    expect(node).toHaveAttribute("tabindex", "-1");
+    expect(node).not.toHaveAttribute("disabled");
+    fireEvent.click(node);
+    expect(parentClick).not.toHaveBeenCalled();
+    expect(childClick).not.toHaveBeenCalled();
+    for (const key of ["Enter", " "] as const) {
+      fireEvent.keyDown(node, { key });
+      expect(parentClick).not.toHaveBeenCalled();
+      expect(childClick).not.toHaveBeenCalled();
+    }
   });
 });

@@ -10,7 +10,7 @@ import { cn } from "@/lib/cn";
  * Variants mirror Button Survey roles; densify targets map chrome density.
  */
 const chipVariants = cva(
-  "inline-flex items-center justify-center gap-1 whitespace-nowrap rounded-full text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-flag focus-visible:ring-offset-2 focus-visible:ring-offset-canvas disabled:pointer-events-none disabled:opacity-50",
+  "inline-flex items-center justify-center gap-1 whitespace-nowrap rounded-full text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-flag focus-visible:ring-offset-2 focus-visible:ring-offset-canvas disabled:opacity-50 aria-disabled:opacity-50",
   {
     variants: {
       variant: {
@@ -37,22 +37,60 @@ export type ChipProps = React.ComponentPropsWithoutRef<"button"> &
     asChild?: boolean;
   };
 
+function blockDisabledActivation(
+  event: React.SyntheticEvent,
+): void {
+  event.preventDefault();
+  event.stopPropagation();
+}
+
 export function Chip({
   className,
   variant,
   size,
   asChild = false,
   type = "button",
+  disabled = false,
+  onClick,
+  tabIndex,
+  children,
   ...props
 }: ChipProps) {
+  const classes = cn(chipVariants({ variant, size, className }));
+
+  // Slot composes the child handler first; clone so disabled cannot activate.
+  if (asChild && disabled) {
+    const child = React.Children.only(children) as React.ReactElement<
+      Record<string, unknown>
+    >;
+    return React.cloneElement(child, {
+      ...props,
+      className: cn(classes, child.props.className as string | undefined),
+      "data-slot": "chip",
+      "aria-disabled": true,
+      tabIndex: -1,
+      onClick: blockDisabledActivation,
+      onKeyDown: (event: React.KeyboardEvent) => {
+        if (event.key === "Enter" || event.key === " ") {
+          blockDisabledActivation(event);
+        }
+      },
+    });
+  }
+
   const Comp = asChild ? Slot : "button";
   return (
     <Comp
-      data-slot="chip"
-      className={cn(chipVariants({ variant, size, className }))}
-      type={asChild ? undefined : type}
       {...props}
-    />
+      data-slot="chip"
+      className={classes}
+      type={asChild ? undefined : type}
+      disabled={disabled}
+      tabIndex={tabIndex}
+      onClick={onClick}
+    >
+      {children}
+    </Comp>
   );
 }
 
