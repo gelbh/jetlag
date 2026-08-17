@@ -160,7 +160,9 @@ export function RadixMotionSheet({
             restoreFocusRef.current?.focus({ preventScroll: true });
           }}
         >
-          <Dialog.Title className="sr-only">{label}</Dialog.Title>
+          <Dialog.Title asChild>
+            <span className="sr-only">{label}</span>
+          </Dialog.Title>
           <motion.div
             ref={sheetMeasureRef}
             className="w-full outline-none"
