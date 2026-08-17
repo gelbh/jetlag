@@ -244,8 +244,13 @@
   .jl-map-bottom-chrome-host .jl-tool-menu-dock {
     position: absolute;
     right: calc(var(--map-chrome-side-width, 3.25rem) + 0.5rem);
-    /* Host pb owns safe-area — do not re-add env(safe-area-inset-bottom). */
-    bottom: calc(var(--dock-island-height) + 0.75rem + 0.5rem);
+    /*
+     * Menu is a direct child of OverlayHost (fixed). Host padding does not
+     * inset abspos children — re-add safe-area here only.
+     */
+    bottom: calc(
+      var(--dock-island-height) + env(safe-area-inset-bottom) + 0.75rem + 0.5rem
+    );
     z-index: calc(var(--z-panel) + 1);
     /* Host is pe-none; islands re-enable PE — overlays must too. */
     pointer-events: auto;
