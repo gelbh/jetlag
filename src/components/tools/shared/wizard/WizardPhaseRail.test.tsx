@@ -19,13 +19,13 @@ describe("WizardPhaseRail", () => {
     );
 
     expect(screen.getByRole("listitem", { name: "Place" })).toHaveClass(
-      "bg-action/60",
+      "bg-flag/60",
     );
     expect(screen.getByRole("listitem", { name: "Configure" })).toHaveClass(
-      "bg-action",
+      "bg-flag",
     );
     expect(screen.getByRole("listitem", { name: "Ask" })).toHaveClass(
-      "bg-surface-panel",
+      "bg-canvas",
     );
   });
 });

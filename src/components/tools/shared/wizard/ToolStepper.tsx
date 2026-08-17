@@ -26,7 +26,7 @@ function ProgressDots({ steps }: { steps: readonly ToolStep[] }) {
           {index > 0 ? (
             <div
               className={`h-px flex-1 motion-safe:transition-colors motion-reduce:transition-none ${
-                step.state === "upcoming" ? "bg-border/40" : "bg-action/60"
+                step.state === "upcoming" ? "bg-rule/40" : "bg-flag/60"
               }`}
               aria-hidden
             />
@@ -34,17 +34,17 @@ function ProgressDots({ steps }: { steps: readonly ToolStep[] }) {
           <span
             className={`mx-0.5 size-2 shrink-0 rounded-full motion-safe:transition-colors motion-reduce:transition-none ${
               step.state === "complete"
-                ? "bg-action"
+                ? "bg-flag"
                 : step.state === "current"
-                  ? "bg-action ring-2 ring-action/35"
-                  : "bg-border"
+                  ? "bg-flag ring-2 ring-flag/35"
+                  : "bg-rule"
             }`}
             aria-hidden
           />
           {index < steps.length - 1 ? (
             <div
               className={`h-px flex-1 motion-safe:transition-colors motion-reduce:transition-none ${
-                step.state === "complete" ? "bg-action/60" : "bg-border/40"
+                step.state === "complete" ? "bg-flag/60" : "bg-rule/40"
               }`}
               aria-hidden
             />
@@ -90,9 +90,9 @@ export function ToolStepper({
   const stepTitle = currentStep ? (
     <p
       key={currentStep.id}
-      className={`jl-step-enter min-w-0 text-center text-xs leading-snug text-ink-muted motion-reduce:animate-none ${labelClassName}`}
+      className={`jl-step-enter min-w-0 text-center text-xs leading-snug text-field-ink-muted motion-reduce:animate-none ${labelClassName}`}
     >
-      <span className="font-medium text-ink">{currentStep.label}</span>
+      <span className="font-medium text-field-ink">{currentStep.label}</span>
       <span aria-hidden="true"> · </span>
       <span className="tabular-nums">
         {currentIndex + 1} of {steps.length}

@@ -12,9 +12,9 @@ function dotClassName(state: "complete" | "current" | "upcoming"): string {
   switch (state) {
     case "complete":
     case "current":
-      return "bg-action";
+      return "bg-flag";
     case "upcoming":
-      return "bg-border";
+      return "bg-rule";
     default: {
       const _exhaustive: never = state;
       return _exhaustive;
@@ -38,8 +38,8 @@ export function WizardConfigureContinuum({
       aria-label="Configure steps"
       className="wizard-configure-continuum space-y-1"
     >
-      <p className="min-w-0 text-center text-xs leading-snug text-ink-muted">
-        <span className="font-medium text-ink">{currentStep?.label}</span>
+      <p className="min-w-0 text-center text-xs leading-snug text-field-ink-muted">
+        <span className="font-medium text-field-ink">{currentStep?.label}</span>
         <span aria-hidden="true"> · </span>
         <span className="tabular-nums">
           {index + 1} of {steps.length}
@@ -62,21 +62,21 @@ export function WizardConfigureContinuum({
               {stepIndex > 0 ? (
                 <div
                   className={`h-px flex-1 motion-safe:transition-colors motion-reduce:transition-none ${
-                    state === "upcoming" ? "bg-border/40" : "bg-action/60"
+                    state === "upcoming" ? "bg-rule/40" : "bg-flag/60"
                   }`}
                   aria-hidden
                 />
               ) : null}
               <span
                 className={`mx-0.5 size-2 shrink-0 rounded-full motion-safe:transition-colors motion-reduce:transition-none ${dotClassName(state)} ${
-                  state === "current" ? "ring-2 ring-action/35" : ""
+                  state === "current" ? "ring-2 ring-flag/35" : ""
                 }`}
                 aria-hidden
               />
               {stepIndex < steps.length - 1 ? (
                 <div
                   className={`h-px flex-1 motion-safe:transition-colors motion-reduce:transition-none ${
-                    state === "complete" ? "bg-action/60" : "bg-border/40"
+                    state === "complete" ? "bg-flag/60" : "bg-rule/40"
                   }`}
                   aria-hidden
                 />

@@ -146,7 +146,7 @@ export function MatchingHudBody({
         <div className="space-y-2">
           {awaitHiderAnswer ? <QuestionTruthReferenceHint /> : null}
           {availableCategories.length === 0 ? (
-            <div className="pointer-events-auto hud-panel p-3">
+            <div className="pointer-events-auto ask-hud-panel p-3">
               <CatalogExhaustedMessage message="Every match category has already been used on this map." />
             </div>
           ) : (
@@ -167,7 +167,7 @@ export function MatchingHudBody({
       ) : null}
 
       {chord === "resolve" ? (
-        <div className="pointer-events-auto hud-panel space-y-2 p-3">
+        <div className="pointer-events-auto ask-hud-panel space-y-2 p-3">
           <AnchorControls
             gpsLoading={gpsLoading}
             hasAnchor={hasSeekerPoint}
@@ -197,13 +197,13 @@ export function MatchingHudBody({
             </ResolvedReadout>
           ) : null}
           {error ? (
-            <p className="text-sm text-danger">{error}</p>
+            <p className="text-sm text-halt">{error}</p>
           ) : null}
         </div>
       ) : null}
 
       {chord === "answer" ? (
-        <div className="pointer-events-auto hud-panel space-y-2 p-3">
+        <div className="pointer-events-auto ask-hud-panel space-y-2 p-3">
           {nearestFeatureSummary ? (
             <ResolvedReadout caption={featureCountLabel}>
               {nearestFeatureSummary}

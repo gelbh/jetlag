@@ -126,17 +126,17 @@ export function ThermometerHudBody({
             <span className="ask-walk-banner__sep"> / </span>
             {targetLabel}
           </p>
-          <p className="ask-walk-banner__hint text-xs text-ink-muted">
+          <p className="ask-walk-banner__hint text-xs text-field-ink-muted">
             Line updates live for hiders. End walk on the strip when ready.
           </p>
         </div>
       ) : null}
 
       {chord === "setup" ? (
-        <div className="pointer-events-auto hud-panel space-y-3 p-3">
+        <div className="pointer-events-auto ask-hud-panel space-y-3 p-3">
           {awaitHiderAnswer ? <QuestionTruthReferenceHint /> : null}
           <div>
-            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-muted">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-field-ink-muted">
               Movement mode
             </p>
             <OptionChipRow>
@@ -159,7 +159,7 @@ export function ThermometerHudBody({
             prompt={thermometerQuestionPrompt(distanceMeters, distanceUnit)}
           />
           <div>
-            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-muted">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-field-ink-muted">
               Distance
             </p>
             <AskChipIsland
@@ -214,7 +214,7 @@ export function ThermometerHudBody({
       ) : null}
 
       {chord === "answer" ? (
-        <div className="pointer-events-auto hud-panel space-y-2 p-3">
+        <div className="pointer-events-auto ask-hud-panel space-y-2 p-3">
           {travelMeters !== null ? (
             <ResolvedReadout>
               Movement: {formatPresetDistance(travelMeters, distanceUnit)}

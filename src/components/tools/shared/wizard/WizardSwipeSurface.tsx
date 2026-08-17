@@ -68,7 +68,7 @@ export function WizardSwipeSurface({
   return (
     <div
       ref={containerRef}
-      className={`wizard-swipe-surface flex min-h-0 flex-1 flex-col overflow-hidden ${className}`.trim()}
+      className={`wizard-swipe-surface flex min-h-0 flex-1 flex-col overflow-hidden bg-transparent text-field-ink ${className}`.trim()}
       {...(swipeEnabled ? surfaceProps : undefined)}
     >
       <div
