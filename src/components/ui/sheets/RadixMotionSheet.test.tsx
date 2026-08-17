@@ -1,7 +1,10 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { RadixMotionSheet } from "./RadixMotionSheet";
-import { SHEET_VELOCITY_DISMISS_PX_MS } from "@/domain/device/motion/motionTokens";
+import {
+  SHEET_DISMISS_FRACTION,
+  SHEET_VELOCITY_DISMISS_PX_MS,
+} from "@/domain/device/motion/motionTokens";
 
 const useMotionProfile = vi.fn(() => ({
   animate: true,
@@ -128,17 +131,31 @@ describe("RadixMotionSheet", () => {
     await screen.findByRole("dialog", { name: "Drag" });
     expect(latestOnDragEnd).toBeTypeOf("function");
 
-    // jsdom sheet height is small; use oversized offset / velocity vs live measure.
-    latestOnDragEnd?.({}, { offset: { y: 1 }, velocity: { y: 0 } });
+    // Default measure fallback is 320px → fraction threshold is strict >
+    // SHEET_DISMISS_FRACTION * 320.
+    const height = 320;
+    const fractionPx = height * SHEET_DISMISS_FRACTION;
+    const velocityThreshold = SHEET_VELOCITY_DISMISS_PX_MS * 1000;
+
+    latestOnDragEnd?.({}, { offset: { y: fractionPx }, velocity: { y: 0 } });
     expect(onClose).not.toHaveBeenCalled();
 
-    latestOnDragEnd?.({}, { offset: { y: 10_000 }, velocity: { y: 0 } });
+    latestOnDragEnd?.({}, {
+      offset: { y: fractionPx + 1 },
+      velocity: { y: 0 },
+    });
     expect(onClose).toHaveBeenCalledTimes(1);
 
     onClose.mockClear();
     latestOnDragEnd?.({}, {
       offset: { y: 1 },
-      velocity: { y: SHEET_VELOCITY_DISMISS_PX_MS * 1000 + 1 },
+      velocity: { y: velocityThreshold },
+    });
+    expect(onClose).not.toHaveBeenCalled();
+
+    latestOnDragEnd?.({}, {
+      offset: { y: 1 },
+      velocity: { y: velocityThreshold + 1 },
     });
     expect(onClose).toHaveBeenCalledTimes(1);
   });
