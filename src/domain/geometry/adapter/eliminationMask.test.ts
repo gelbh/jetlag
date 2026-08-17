@@ -144,4 +144,38 @@ describe("adapter/eliminationMask", () => {
     ]);
     expect(input.disks).toEqual([]);
   });
+
+  it("rebuilds measuring shade from stored region input when geometry is a point", () => {
+    const annotation: AnnotationRecord = {
+      id: "measuring-deferred",
+      sessionId: "session",
+      status: "active",
+      type: "measuring",
+      geometry: {
+        type: "Feature",
+        properties: {},
+        geometry: { type: "Point", coordinates: [-0.15, 51.45] },
+      },
+      metadata: {
+        createdAt: "2026-01-01T00:00:00.000Z",
+        measuringAnswer: "further",
+        measuringRegionInputJson: JSON.stringify({
+          measuringSubject: "location",
+          measuringLocationCategory: "museum",
+          measuringDistanceMeters: 1000,
+          measuringTargetPoint: [51.44, -0.14],
+          measuringPlaces: [],
+          measuringCoastSegments: [],
+          measuringSeaLevelNearRegion: null,
+          usesAllPlacesInArea: false,
+        }),
+      },
+    };
+
+    const shade = eliminationFeatureForAnnotationTs(annotation, gameArea);
+    expect(shade?.geometry.type).toMatch(/Polygon/);
+    expect(
+      booleanPointInPolygon(turfPoint([-0.14, 51.44]), shade!),
+    ).toBe(true);
+  });
 });
