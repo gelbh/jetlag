@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { MapBottomChrome } from "./MapBottomChrome";
+import { ToolDeckGroup } from "@/components/tools/ToolDeck";
 
 const chromeCss = readFileSync(
   resolve(dirname(fileURLToPath(import.meta.url)), "../../../styles/map-bottom-chrome.css"),
@@ -212,14 +213,14 @@ describe("MapBottomChrome", () => {
       <MapBottomChrome
         layout="phone"
         hunt={
-          <div className="jl-tool-dock-group jl-tool-dock-group-main flex flex-1 justify-evenly [&_.jl-tool-slot]:min-h-11 [&_.jl-tool-slot]:min-w-11 [&_.jl-tool-slot]:flex-1 [&_.jl-tool-slot]:basis-0">
+          <ToolDeckGroup>
             <button type="button" className="jl-tool-slot">
               A
             </button>
             <button type="button" className="jl-tool-slot">
               B
             </button>
-          </div>
+          </ToolDeckGroup>
         }
       />,
     );

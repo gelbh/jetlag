@@ -9,6 +9,9 @@
    */
   --dock-island-height: 3.25rem;
   --dock-island-gap: 0.5rem;
+  --chrome-side-stack-gap: 0.75rem;
+  --chrome-side-stack-lift: 0.5rem;
+  --chrome-side-stack-lift-landscape: 1rem;
   --map-chrome-side-width: 3.25rem;
   --dock-content-height: var(--dock-island-height);
   --dock-secondary-height: 0px;
@@ -96,15 +99,22 @@
    * OverlayHost owns safe-area pb — side stack must not re-add home-indicator inset.
    */
   [data-chrome-side-stack="phone"] {
-    bottom: calc(var(--dock-island-height) + 0.75rem + 0.5rem);
+    bottom: calc(
+      var(--dock-island-height) + var(--chrome-side-stack-gap)
+        + var(--chrome-side-stack-lift)
+    );
   }
 
   @media (max-height: 430px) and (orientation: landscape) {
     [data-chrome-side-stack="phone"] {
-      bottom: calc(var(--dock-island-height) + 0.75rem + 1rem);
+      bottom: calc(
+        var(--dock-island-height) + var(--chrome-side-stack-gap)
+          + var(--chrome-side-stack-lift-landscape)
+      );
       max-height: calc(
-        100dvh - env(safe-area-inset-top) - 0.5rem - var(--dock-island-height) -
-          0.75rem - 1rem
+        100dvh - env(safe-area-inset-top) - var(--chrome-side-stack-lift)
+          - var(--dock-island-height) - var(--chrome-side-stack-gap)
+          - var(--chrome-side-stack-lift-landscape)
       );
       overflow: hidden;
     }
@@ -122,7 +132,8 @@
     position: absolute;
     right: calc(var(--map-chrome-side-width, 3.25rem) + 0.5rem);
     bottom: calc(
-      var(--dock-island-height) + env(safe-area-inset-bottom) + 0.75rem + 0.5rem
+      var(--dock-island-height) + env(safe-area-inset-bottom)
+        + var(--chrome-side-stack-gap) + var(--chrome-side-stack-lift)
     );
     z-index: calc(var(--z-panel) + 1);
     pointer-events: auto;
