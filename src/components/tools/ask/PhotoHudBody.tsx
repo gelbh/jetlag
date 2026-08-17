@@ -54,7 +54,7 @@ export function PhotoHudBody({
   return (
     <div
       data-testid="photo-hud-body"
-      className="ask-hud-mode-body mx-auto flex max-w-xl flex-col gap-2"
+      className="ask-hud-mode-body flex w-full flex-col gap-2"
     >
       {awaitHiderAnswer ? <QuestionTruthReferenceHint /> : null}
       {availableCategories.length === 0 ? (
