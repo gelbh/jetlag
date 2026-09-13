@@ -1,17 +1,21 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { upsertUserDevice, deleteUserDevice, isNativePlatform, getPlatform } =
-  vi.hoisted(() => ({
-    upsertUserDevice: vi.fn(async () => undefined),
-    deleteUserDevice: vi.fn(async () => undefined),
-    isNativePlatform: vi.fn(() => true),
-    getPlatform: vi.fn(() => "ios"),
-  }));
+const {
+  upsertUserDevice,
+  deleteUserDevice,
+  isNativePlatform,
+  getPlatform,
+} = vi.hoisted(() => ({
+  upsertUserDevice: vi.fn(async () => undefined),
+  deleteUserDevice: vi.fn(async () => undefined),
+  isNativePlatform: vi.fn(() => true),
+  getPlatform: vi.fn(() => "ios"),
+}));
 
 vi.mock("@capacitor/core", () => ({
   Capacitor: {
-    isNativePlatform: (...args: unknown[]) => isNativePlatform(...args),
-    getPlatform: (...args: unknown[]) => getPlatform(...args),
+    isNativePlatform,
+    getPlatform,
   },
 }));
 
@@ -32,8 +36,8 @@ vi.mock("@capacitor/push-notifications", () => ({
 
 vi.mock("../../firestore/firestoreDevices", () => ({
   upsertSessionDevice: vi.fn(async () => undefined),
-  upsertUserDevice: (...args: unknown[]) => upsertUserDevice(...args),
-  deleteUserDevice: (...args: unknown[]) => deleteUserDevice(...args),
+  upsertUserDevice,
+  deleteUserDevice,
 }));
 
 vi.mock("./liveActivity", () => ({
