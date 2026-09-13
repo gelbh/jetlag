@@ -1,3 +1,4 @@
+import { getAuth } from "firebase-admin/auth";
 import { getFirestore } from "firebase-admin/firestore";
 import { HttpsError, onCall } from "firebase-functions/v2/https";
 import { withSentryEventHandler } from "../../lib/sentry.mjs";
@@ -16,6 +17,10 @@ import { sendIncidentEmail } from "../../incident/sendIncidentEmail.mjs";
 import { postIncidentMessageHandler } from "../../incident/postIncidentMessage.mjs";
 import { applyIncidentMitigationHandler } from "../../incident/applyIncidentMitigation.mjs";
 import { updateIncidentStatusHandler } from "../../incident/updateIncidentStatus.mjs";
+import {
+  notifyReporterResolved,
+  sendReporterResolvedPush,
+} from "../../incident/notifyReporterResolved.mjs";
 import { publishIncidentHotfixHandler } from "../../incident/publishIncidentHotfix.mjs";
 import { launchCursorHotfixForIncident } from "../../incident/launchCursorHotfix.mjs";
 import { launchIncidentCursorAgentHandler } from "../../incident/launchIncidentCursorAgent.mjs";
@@ -135,17 +140,53 @@ export const applyIncidentMitigation = onCall(
 );
 
 export const updateIncidentStatus = onCall(
-  { secrets: [sentryDsnSecret], enforceAppCheck: true },
+  {
+    secrets: [sentryDsnSecret, incidentEmailSecret],
+    enforceAppCheck: true,
+  },
   withSentryEventHandler(async (request) => {
     requireAdminAuth(request.auth);
 
     const db = getFirestore();
+    const workerBaseUrl = incidentWorkerBaseUrl.value();
+    const secret = incidentEmailSecret.value();
+    const homeUrl =
+      (typeof workerBaseUrl === "string" && workerBaseUrl.length > 0
+        ? `${workerBaseUrl.replace(/\/+$/, "")}/`
+        : null) || "https://jetlag.gelbhart.dev/";
     try {
-      return await updateIncidentStatusHandler(db, {
-        incidentId: request.data?.incidentId,
-        status: request.data?.status,
-        uid: request.auth.uid,
-      });
+      return await updateIncidentStatusHandler(
+        db,
+        {
+          incidentId: request.data?.incidentId,
+          status: request.data?.status,
+          uid: request.auth.uid,
+        },
+        {
+          notifyReporterResolved: (args) =>
+            notifyReporterResolved(db, args, {
+              getUserEmail: async (uid) => {
+                try {
+                  const user = await getAuth().getUser(uid);
+                  return user.email || null;
+                } catch {
+                  return null;
+                }
+              },
+              sendEmail: ({ subject, text, audience, to }) =>
+                sendIncidentEmail({
+                  workerBaseUrl,
+                  secret,
+                  subject,
+                  text,
+                  audience,
+                  to,
+                }),
+              sendPush: (payload) => sendReporterResolvedPush(db, payload),
+              homeUrl,
+            }),
+        },
+      );
     } catch (error) {
       mapIncidentError(error);
     }
