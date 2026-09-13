@@ -18,6 +18,7 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "lint:css": "stylelint \"src/**/*.css\" \"public/**/*.css\"",
+    "lint:pr-title": "bash scripts/lint-pr-title.sh",
     "typecheck": "tsc -b --noEmit",
     "tokens:build": "node scripts/build-tokens.mjs",
     "test": "vitest run",

@@ -1,3 +1,18 @@
+#!/usr/bin/env bash
+# Husky invokes hooks with `sh`; re-exec under bash for pipefail / local.
+if [ -z "${BASH_VERSION:-}" ]; then
+  exec bash "$0" "$@"
+fi
+set -euo pipefail
+
+# Conventional Commits for open PR title (skip if no gh / no open PR).
+if command -v gh >/dev/null 2>&1; then
+  pr_title="$(gh pr view --json title --jq .title 2>/dev/null || true)"
+  if [ -n "${pr_title:-}" ]; then
+    npm run lint:pr-title -- "$pr_title"
+  fi
+fi
+
 npm run lint
 npm run lint:css
 npm run typecheck
