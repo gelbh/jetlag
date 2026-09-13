@@ -1,8 +1,10 @@
 import { createPortal } from "react-dom";
 import { useRef, type ReactNode } from "react";
 import { RadixMotionSheet } from "./RadixMotionSheet";
+import { MantineDrawerSheet } from "./MantineDrawerSheet";
 import { useDialogFocus } from "@/hooks/a11y/useDialogFocus";
 import { useDesktopLayout } from "@/hooks/layout/useDesktopLayout";
+import { usePlayerUiMantine } from "@/hooks/feature/usePlayerUiMantine";
 import {
   type ContextualRailTab,
 } from "../../map/chrome/ContextualRailContext";
@@ -57,9 +59,9 @@ function DesktopRailDialog({
 
 /**
  * Stable sheet host API for map chrome.
- * Desktop + railTab → ContextualRail portal.
- * Otherwise → RadixMotionSheet (Survey field-book sole path).
- * PostHog player-ux-world-v2 retired — archive the flag in PostHog UI when convenient.
+ * Desktop + railTab → ContextualRail portal (unchanged under flag).
+ * Flag off (non-rail) → RadixMotionSheet.
+ * Flag on (non-rail) → Mantine Drawer.
  */
 export function SheetHost({
   open,
@@ -74,6 +76,7 @@ export function SheetHost({
 }: SheetHostProps) {
   const isDesktop = useDesktopLayout();
   const railPanel = useContextualRailPanel();
+  const mantinePlayerUi = usePlayerUiMantine();
 
   // Desktop ContextualRail when a rail tab is requested (wait for panel mount).
   if (isDesktop && railTab) {
@@ -91,6 +94,22 @@ export function SheetHost({
       >
         {children}
       </DesktopRailDialog>
+    );
+  }
+
+  if (mantinePlayerUi) {
+    return (
+      <MantineDrawerSheet
+        open={open}
+        onClose={onClose}
+        ariaLabel={ariaLabel}
+        pinned={pinned}
+        dismissible={dismissible}
+        sheetClassName={sheetClassName}
+        maxHeightClassName={maxHeightClassName}
+      >
+        {children}
+      </MantineDrawerSheet>
     );
   }
 
