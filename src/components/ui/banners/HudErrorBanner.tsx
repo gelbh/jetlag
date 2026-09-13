@@ -1,5 +1,8 @@
+import { useEffect } from "react";
 import { HudBanner } from "../hud/HudBanner";
 import { MapFloatAlertPanel } from "./MapFloatAlert";
+import { showEphemeralPlayerNotification } from "../notifications/showEphemeralPlayerNotification";
+import { usePlayerUiMantine } from "@/hooks/feature/usePlayerUiMantine";
 import type { UserErrorDisplay } from "@/domain/device/feedback/userErrors";
 
 interface HudErrorBannerProps {
@@ -13,12 +16,25 @@ export function HudErrorBanner({
   onAction,
   onSecondaryAction,
 }: HudErrorBannerProps) {
+  const mantineUi = usePlayerUiMantine();
   const showPrimaryAction = Boolean(error.action && onAction && error.actionLabel);
   const showSecondaryAction = Boolean(
     error.secondaryAction &&
       onSecondaryAction &&
       error.secondaryActionLabel,
   );
+  const hasActions = showPrimaryAction || showSecondaryAction;
+  const useNotification = mantineUi && !hasActions;
+
+  useEffect(() => {
+    if (!useNotification) return;
+    showEphemeralPlayerNotification({
+      title: error.title,
+      message: error.message,
+    });
+  }, [useNotification, error.title, error.message]);
+
+  if (useNotification) return null;
 
   return (
     <HudBanner
@@ -31,7 +47,7 @@ export function HudErrorBanner({
           <p className="text-sm font-semibold text-status-error">{error.title}</p>
           <p className="text-xs text-ink">{error.message}</p>
         </div>
-        {showPrimaryAction || showSecondaryAction ? (
+        {hasActions ? (
           <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
             {showPrimaryAction ? (
               <button
