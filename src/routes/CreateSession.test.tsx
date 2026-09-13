@@ -1,7 +1,7 @@
 import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { useEffect, useRef } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { CreateSession } from "./CreateSession";
+import { CreateLegacy } from "./create-session/CreateLegacy";
 import { renderWithRouter } from "../test/renderWithRouter";
 import type { GeocodedPlace } from "../services/geo/geocoding";
 
@@ -135,9 +135,9 @@ async function waitForCreateMap() {
   expect(await screen.findByTestId("create-map")).toBeInTheDocument();
 }
 
-describe("CreateSession", () => {
+describe("CreateLegacy", () => {
   it("renders shape picker and fullscreen framing entry point", () => {
-    renderWithRouter(<CreateSession />);
+    renderWithRouter(<CreateLegacy />);
 
     expect(screen.getByRole("tab", { name: "Square" })).toBeInTheDocument();
     expect(screen.getByRole("tab", { name: "Circle" })).toBeInTheDocument();
@@ -146,7 +146,7 @@ describe("CreateSession", () => {
   });
 
   it("creates a local session and navigates to the map", async () => {
-    renderWithRouter(<CreateSession />);
+    renderWithRouter(<CreateLegacy />);
 
     await waitForCreateMap();
     await waitFor(() => {
@@ -163,7 +163,7 @@ describe("CreateSession", () => {
       () => new Promise(() => undefined),
     );
 
-    renderWithRouter(<CreateSession />);
+    renderWithRouter(<CreateLegacy />);
 
     await waitForCreateMap();
     await waitFor(() => {
@@ -173,7 +173,7 @@ describe("CreateSession", () => {
   });
 
   it("keeps place-based preview after user map pan", async () => {
-    renderWithRouter(<CreateSession />);
+    renderWithRouter(<CreateLegacy />);
     await waitForCreateMap();
 
     fireEvent.change(screen.getByPlaceholderText("Dublin, Ireland"), {
@@ -194,7 +194,7 @@ describe("CreateSession", () => {
   });
 
   it("keeps place-based preview after changing session settings", async () => {
-    renderWithRouter(<CreateSession />);
+    renderWithRouter(<CreateLegacy />);
 
     fireEvent.change(screen.getByPlaceholderText("Dublin, Ireland"), {
       target: { value: "Dublin" },
@@ -229,7 +229,7 @@ describe("CreateSession", () => {
 
     vi.mocked(searchPlaces).mockResolvedValueOnce([cityPlace, countyPlace]);
 
-    renderWithRouter(<CreateSession />);
+    renderWithRouter(<CreateLegacy />);
 
     fireEvent.change(screen.getByPlaceholderText("Dublin, Ireland"), {
       target: { value: "Dublin" },
@@ -247,7 +247,7 @@ describe("CreateSession", () => {
       "../services/core/location/geolocation"
     );
 
-    renderWithRouter(<CreateSession />);
+    renderWithRouter(<CreateLegacy />);
 
     await waitFor(() => {
       expect(screen.getByRole("button", { name: "Use my location" })).toBeInTheDocument();
@@ -261,7 +261,7 @@ describe("CreateSession", () => {
       "../services/core/location/geolocation"
     );
 
-    renderWithRouter(<CreateSession />);
+    renderWithRouter(<CreateLegacy />);
 
     fireEvent.click(screen.getByRole("button", { name: "Use my location" }));
 
