@@ -12,7 +12,7 @@ describe("MobileSheet split footer", () => {
         footer={<div data-testid="footer">footer</div>}
       >
         <div data-testid="body">body</div>
-      </MobileSheet>,
+      </MobileSheet>
     );
 
     const body = screen.getByTestId("body");
@@ -34,7 +34,7 @@ describe("MobileSheet split footer", () => {
         maxHeightClassName="max-h-[200px]"
       >
         <div data-testid="body">body</div>
-      </MobileSheet>,
+      </MobileSheet>
     );
 
     const body = screen.getByTestId("body");

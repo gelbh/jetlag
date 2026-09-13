@@ -11,7 +11,10 @@ interface MobileSheetProps {
   layout?: "scroll" | "split";
   /** Fixed header block rendered above the scroll body (split layout only). */
   pinned?: ReactNode;
-  /** Fixed footer block rendered below the scroll body (split layout only). */
+  /**
+   * Fixed footer below the scroll body (split layout only).
+   * Wrapper has no horizontal padding; callers must pad footer content.
+   */
   footer?: ReactNode;
   scrollRef?: RefObject<HTMLDivElement | null>;
   handleProps?: SheetHandleProps;
@@ -73,13 +76,13 @@ export function MobileSheet({
           </div>
           <div
             ref={scrollRef}
-            className={`jl-scroll min-h-0 flex-1 overflow-y-auto overscroll-contain scroll-pb-4 bg-canvas px-4 pb-[max(1rem,env(safe-area-inset-bottom))] ${scrollClassName}`.trim()}
+            className={`jl-scroll min-h-0 flex-1 overflow-y-auto overscroll-contain scroll-pb-4 bg-canvas px-4 ${
+              footer ? "pb-4" : "pb-[max(1rem,env(safe-area-inset-bottom))]"
+            } ${scrollClassName}`.trim()}
           >
             {children}
           </div>
-          {footer ? (
-            <div className="shrink-0 bg-canvas">{footer}</div>
-          ) : null}
+          {footer ? <div className="shrink-0 bg-canvas">{footer}</div> : null}
         </div>
       </div>
     );

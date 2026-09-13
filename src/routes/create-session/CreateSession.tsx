@@ -25,7 +25,7 @@ export function CreateSession() {
     (presetId: string) => {
       session.navigate(`/create?preset=${presetId}`);
     },
-    [session],
+    [session]
   );
 
   const handleSavePreset = useCallback(() => {
@@ -48,8 +48,8 @@ export function CreateSession() {
           subregionId: session.regionPackSubregionId,
           transitMetroId: session.transitMetroId || undefined,
         }),
-        name.trim(),
-      ),
+        name.trim()
+      )
     );
   }, [savePreset, session]);
 

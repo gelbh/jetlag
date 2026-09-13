@@ -26,10 +26,7 @@ async function settleHome(page: Page) {
   await expect(page.getByRole("link", { name: "Join session" })).toBeVisible();
 }
 
-async function assertLayoutSmoke(
-  page: Page,
-  options?: { exclude?: string[] },
-) {
+async function assertLayoutSmoke(page: Page, options?: { exclude?: string[] }) {
   await assertNoHorizontalOverflow(page);
   await assertNoSeriousAxeViolations(page, options);
 }
@@ -47,7 +44,7 @@ async function assertSocialLayoutSmoke(page: Page, path: SocialLayoutPath) {
     // Scope tabs + Choose board chip (metric controls live in the board sheet).
     await assertMinTapTargets(viewportTarget.getByRole("tab"));
     await assertMinTapTargets(
-      viewportTarget.getByRole("button", { name: /Choose board/i }),
+      viewportTarget.getByRole("button", { name: /Choose board/i })
     );
   }
   await assertNoSeriousAxeViolations(page);
@@ -59,7 +56,7 @@ test.describe("layout regression @ default mobile", () => {
   }) => {
     await settleHome(page);
     await assertMinTapTargets(
-      page.getByRole("link", { name: /Join session|Create session/i }),
+      page.getByRole("link", { name: /Join session|Create session/i })
     );
     await assertLayoutSmoke(page);
   });
@@ -68,7 +65,7 @@ test.describe("layout regression @ default mobile", () => {
     await prepareE2EPage(page);
     await page.goto("/join");
     await expect(
-      page.getByRole("heading", { name: "Session code" }),
+      page.getByRole("heading", { name: "Session code" })
     ).toBeVisible();
     await assertLayoutSmoke(page);
   });
@@ -104,16 +101,19 @@ test.describe("layout regression @ default mobile", () => {
       const root = document.querySelector(".jl-create-session");
       const scroll = root?.querySelector(".hud-sheet .jl-scroll");
       const button = Array.from(root?.querySelectorAll("button") ?? []).find(
-        (el) => el.textContent?.trim() === "Confirm game area",
+        (el) => el.textContent?.trim() === "Confirm game area"
       );
-      if (!(scroll instanceof HTMLElement) || !(button instanceof HTMLElement)) {
+      if (
+        !(scroll instanceof HTMLElement) ||
+        !(button instanceof HTMLElement)
+      ) {
         return { ok: false as const, reason: "missing nodes" };
       }
 
       // Single scroll owner: form content's nearest overflow-y-auto ancestor
       // must be the sheet scroller (fails if a nested overflow-y-auto returns).
       const formMarker = Array.from(root.querySelectorAll("p")).find(
-        (el) => el.textContent?.trim() === "New game",
+        (el) => el.textContent?.trim() === "New game"
       );
       if (!(formMarker instanceof HTMLElement)) {
         return { ok: false as const, reason: "missing form marker" };
@@ -177,10 +177,10 @@ test.describe("layout regression @ default mobile", () => {
     await expect(page.locator('[data-island="history-start"]')).toHaveCount(0);
     await expect(page.locator('[data-island="history-end"]')).toHaveCount(0);
     await expect(
-      hunt.getByRole("button", { name: "Undo last annotation" }),
+      hunt.getByRole("button", { name: "Undo last annotation" })
     ).toBeVisible();
     await expect(
-      session.getByRole("button", { name: "Draw on map" }),
+      session.getByRole("button", { name: "Draw on map" })
     ).toBeVisible();
     // All islands and their tool slots stay in viewport on mobile layouts.
     await assertInViewport(host);
@@ -190,13 +190,13 @@ test.describe("layout regression @ default mobile", () => {
     await expect(page.locator(".jl-map-chrome-bottom-band")).toHaveCount(1);
     await expect(page.locator(".jl-map-chrome-side-stack")).toHaveCount(1);
     await expect(
-      page.locator(".jl-map-chrome-side-stack [data-island='session']"),
+      page.locator(".jl-map-chrome-side-stack [data-island='session']")
     ).toHaveCount(1);
     // Verify tap targets on session controls (side-stack slots: 2.75rem = 44px,
     // borders may measure slightly under, so allow 40px minimum).
     await assertMinTapTargets(
       session.getByRole("button", { name: "Open settings" }),
-      40,
+      40
     );
     // Leaflet markers trip aria-command-name; layout smoke is chrome-only
     await assertLayoutSmoke(page, { exclude: [".maplibregl-map"] });
@@ -217,9 +217,11 @@ test.describe("layout regression @ default mobile", () => {
     await prepareE2EPage(page);
     await page.goto("/");
     await expect(
-      page.getByRole("button", { name: /Play — create, join, or custom game/i }),
+      page.getByRole("button", { name: /Play — create, join, or custom game/i })
     ).toBeVisible();
-    await expect(page.locator('[data-player-ux-world="survey"]').first()).toBeVisible();
+    await expect(
+      page.locator('[data-player-ux-world="survey"]').first()
+    ).toBeVisible();
     await assertNoHorizontalOverflow(page);
     await assertSurveyEntryAxe(page);
   });
@@ -228,14 +230,14 @@ test.describe("layout regression @ default mobile", () => {
     await openSocialRoute(page, "/leaderboard");
     await page.getByRole("button", { name: /Choose board/i }).click();
     await expect(
-      page.getByRole("dialog", { name: "Choose board" }),
+      page.getByRole("dialog", { name: "Choose board" })
     ).toBeVisible();
   });
 
   for (const path of SOCIAL_LAYOUT_PATHS) {
-    test(`@smoke ${path.slice(1)} has no overflow and chrome stays in viewport`, async ({
-      page,
-    }) => {
+    test(`@smoke ${path.slice(
+      1
+    )} has no overflow and chrome stays in viewport`, async ({ page }) => {
       await assertSocialLayoutSmoke(page, path);
     });
   }
@@ -253,7 +255,7 @@ test.describe("layout regression @ 320px", () => {
     await prepareE2EPage(page);
     await page.goto("/join");
     await expect(
-      page.getByRole("heading", { name: "Session code" }),
+      page.getByRole("heading", { name: "Session code" })
     ).toBeVisible();
     await assertLayoutSmoke(page);
   });
@@ -263,9 +265,9 @@ test.describe("layout regression social @ 320px", () => {
   test.use({ viewport: { width: 320, height: 568 } });
 
   for (const path of SOCIAL_LAYOUT_PATHS) {
-    test(`@layout-deep ${path.slice(1)} reflows at 320 without overflow`, async ({
-      page,
-    }) => {
+    test(`@layout-deep ${path.slice(
+      1
+    )} reflows at 320 without overflow`, async ({ page }) => {
       await assertSocialLayoutSmoke(page, path);
     });
   }
