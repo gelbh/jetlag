@@ -30,9 +30,9 @@ export function useToolDockMenus(dockRef: RefObject<HTMLDivElement | null>) {
     };
   }, [drawMenuOpen, dockRef]);
 
-  const closeMenus = () => {
+  const closeMenus = useCallback(() => {
     setDrawMenuOpen(false);
-  };
+  }, []);
 
   return {
     drawMenuOpen,

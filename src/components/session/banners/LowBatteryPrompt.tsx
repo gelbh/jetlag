@@ -50,7 +50,7 @@ export function LowBatteryPrompt() {
     <HudBanner
       visible
       animated={false}
-      className="jl-map-banner-top pointer-events-auto fixed inset-x-3 z-[var(--z-panel)]"
+      className="pointer-events-auto fixed inset-x-3 top-[var(--map-banner-top)] z-[var(--z-panel)]"
     >
       <div
         className="map-float-alert mx-auto max-w-xl border-2 border-status-warning/40 bg-status-warning-surface px-3 py-3"

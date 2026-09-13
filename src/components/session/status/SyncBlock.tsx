@@ -66,7 +66,7 @@ export function SyncBlock({
     <div className="jl-sync-map-indicator">
       <button
         type="button"
-        className={`jl-sync-map-indicator__btn inline-flex min-h-11 min-w-11 items-center justify-center${menuOpen ? " jl-sync-map-indicator__btn--open" : ""}${shortLabel ? " jl-sync-map-indicator__btn--labeled gap-1.5 border-2 border-border bg-surface-deep px-2.5 shadow-hud-float" : ""}`}
+        className={`jl-sync-map-indicator__btn inline-flex min-h-11 min-w-11 items-center justify-center border border-rule bg-canvas text-field-ink shadow-none${menuOpen ? " jl-sync-map-indicator__btn--open" : ""}${shortLabel ? " jl-sync-map-indicator__btn--labeled gap-1.5 px-2.5" : ""}`}
         onClick={() => onMenuOpenChange(!menuOpen)}
         aria-expanded={menuOpen}
         aria-haspopup="dialog"
