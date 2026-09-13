@@ -65,6 +65,7 @@ test("writes notice and emails reporter", async () => {
       },
       homeUrl: "https://jetlag.gelbhart.dev/",
       now: () => new Date("2026-09-13T12:00:00.000Z"),
+      waitForChannels: true,
     },
   );
 
@@ -98,6 +99,7 @@ test("skips email when getUserEmail returns null; still writes notice", async ()
         return { messageId: "m1" };
       },
       now: () => new Date("2026-09-13T12:00:00.000Z"),
+      waitForChannels: true,
     },
   );
 
@@ -125,6 +127,7 @@ test("calls sendPush with reporter payload when present", async () => {
         return { sent: 1 };
       },
       now: () => new Date("2026-09-13T12:00:00.000Z"),
+      waitForChannels: true,
     },
   );
 
@@ -147,6 +150,7 @@ test("swallows email and push errors", async () => {
           throw new Error("push boom");
         },
         now: () => new Date("2026-09-13T12:00:00.000Z"),
+        waitForChannels: true,
       },
     ),
   );

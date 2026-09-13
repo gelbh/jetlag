@@ -12,13 +12,16 @@ import {
 import { syncUserDeviceRegistration } from "../../services/core/native/notifications";
 import { useMapStore } from "../../state/mapStore";
 
-function pickLatestNotice(notices: IncidentNotice[]): IncidentNotice | null {
-  if (notices.length === 0) {
-    return null;
+export function pickLatestNotice(
+  notices: IncidentNotice[]
+): IncidentNotice | null {
+  let latest: IncidentNotice | null = null;
+  for (const notice of notices) {
+    if (!latest || notice.resolvedAt.localeCompare(latest.resolvedAt) > 0) {
+      latest = notice;
+    }
   }
-  return [...notices].sort((a, b) =>
-    b.resolvedAt.localeCompare(a.resolvedAt),
-  )[0];
+  return latest;
 }
 
 export function useIncidentResolvedBanner(): {
@@ -26,24 +29,27 @@ export function useIncidentResolvedBanner(): {
   dismiss: (incidentId: string) => Promise<void>;
 } {
   const [uid, setUid] = useState<string | null>(() =>
-    isFirebaseConfigured() ? (getFirebaseAuth().currentUser?.uid ?? null) : null,
+    isFirebaseConfigured() ? getFirebaseAuth().currentUser?.uid ?? null : null
   );
   const [notice, setNotice] = useState<IncidentNotice | null>(null);
   const preferences = useMapStore((state) => state.notificationPreferences);
 
   useEffect(() => {
     if (!isFirebaseConfigured()) {
-      setUid(null);
       return;
     }
 
     return onAuthStateChanged(getFirebaseAuth(), (user) => {
-      setUid(user?.uid ?? null);
+      const nextUid = user?.uid ?? null;
+      setUid(nextUid);
+      if (!nextUid) {
+        setNotice(null);
+      }
     });
   }, []);
 
   useEffect(() => {
-    if (!uid || !preferences.enabled) {
+    if (!uid) {
       return;
     }
 
@@ -54,7 +60,6 @@ export function useIncidentResolvedBanner(): {
 
   useEffect(() => {
     if (!uid || !isFirebaseConfigured()) {
-      setNotice(null);
       return;
     }
 
@@ -68,9 +73,13 @@ export function useIncidentResolvedBanner(): {
       if (!uid) {
         return;
       }
-      await dismissIncidentNotice(uid, incidentId);
+      try {
+        await dismissIncidentNotice(uid, incidentId);
+      } catch {
+        // Soft-fail: dismiss write must not surface as an unhandled rejection.
+      }
     },
-    [uid],
+    [uid]
   );
 
   return { notice, dismiss };

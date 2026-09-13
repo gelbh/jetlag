@@ -1,7 +1,4 @@
-import {
-  assertFails,
-  assertSucceeds,
-} from "@firebase/rules-unit-testing";
+import { assertFails, assertSucceeds } from "@firebase/rules-unit-testing";
 import { describe, it } from "vitest";
 import { bindRulesTestEnv } from "./helpers";
 
@@ -31,7 +28,7 @@ describe("firestore.rules — incident notices & user devices", () => {
   async function seedNotice(
     uid = "owner-1",
     incidentId = "inc-1",
-    overrides: Record<string, unknown> = {},
+    overrides: Record<string, unknown> = {}
   ) {
     await rules.testEnv.withSecurityRulesDisabled(async (ctx) => {
       await ctx
@@ -59,7 +56,7 @@ describe("firestore.rules — incident notices & user devices", () => {
         .doc("owner-1")
         .collection("incidentNotices")
         .where("bannerDismissedAt", "==", null)
-        .get(),
+        .get()
     );
   });
 
@@ -74,7 +71,7 @@ describe("firestore.rules — incident notices & user devices", () => {
         .doc("owner-1")
         .collection("incidentNotices")
         .doc("inc-1")
-        .get(),
+        .get()
     );
     await assertFails(
       other
@@ -82,7 +79,7 @@ describe("firestore.rules — incident notices & user devices", () => {
         .collection("users")
         .doc("owner-1")
         .collection("incidentNotices")
-        .get(),
+        .get()
     );
   });
 
@@ -97,7 +94,7 @@ describe("firestore.rules — incident notices & user devices", () => {
         .doc("owner-1")
         .collection("incidentNotices")
         .doc("inc-1")
-        .update({ bannerDismissedAt: "2026-01-02T00:00:00.000Z" }),
+        .update({ bannerDismissedAt: "2026-01-02T00:00:00.000Z" })
     );
   });
 
@@ -112,7 +109,7 @@ describe("firestore.rules — incident notices & user devices", () => {
         .doc("owner-1")
         .collection("incidentNotices")
         .doc("inc-1")
-        .update({ resolvedAt: "2026-01-99T00:00:00.000Z" }),
+        .update({ resolvedAt: "2026-01-99T00:00:00.000Z" })
     );
   });
 
@@ -127,7 +124,7 @@ describe("firestore.rules — incident notices & user devices", () => {
         .doc("owner-1")
         .collection("devices")
         .doc("ios")
-        .set(payload),
+        .set(payload)
     );
 
     await assertSucceeds(
@@ -141,8 +138,8 @@ describe("firestore.rules — incident notices & user devices", () => {
           devicePayload({
             token: "fcm-token-2",
             updatedAt: "2026-01-02T00:00:00.000Z",
-          }),
-        ),
+          })
+        )
     );
   });
 
@@ -155,7 +152,46 @@ describe("firestore.rules — incident notices & user devices", () => {
         .doc("owner-1")
         .collection("devices")
         .doc("ios")
-        .set(devicePayload()),
+        .set(devicePayload())
+    );
+  });
+
+  it("rejects device doc id that does not match platform", async () => {
+    const owner = rules.testEnv.authenticatedContext("owner-1");
+    await assertFails(
+      owner
+        .firestore()
+        .collection("users")
+        .doc("owner-1")
+        .collection("devices")
+        .doc("android")
+        .set(devicePayload({ platform: "ios" }))
+    );
+  });
+
+  it("rejects empty device token", async () => {
+    const owner = rules.testEnv.authenticatedContext("owner-1");
+    await assertFails(
+      owner
+        .firestore()
+        .collection("users")
+        .doc("owner-1")
+        .collection("devices")
+        .doc("ios")
+        .set(devicePayload({ token: "" }))
+    );
+  });
+
+  it("rejects device write with extra keys", async () => {
+    const owner = rules.testEnv.authenticatedContext("owner-1");
+    await assertFails(
+      owner
+        .firestore()
+        .collection("users")
+        .doc("owner-1")
+        .collection("devices")
+        .doc("ios")
+        .set(devicePayload({ evil: true }))
     );
   });
 });

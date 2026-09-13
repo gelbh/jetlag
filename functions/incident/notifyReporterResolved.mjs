@@ -73,33 +73,7 @@ export async function sendReporterResolvedPush(db, payload, deps = {}) {
   return { sent: response.successCount ?? 0 };
 }
 
-/**
- * Write incident notice + best-effort email/push for a resolved incident.
- * Never throws to the caller when email/push fail (those are swallowed).
- * Notice write failures propagate so the status handler can catch them.
- */
-export async function notifyReporterResolved(db, input, deps = {}) {
-  const reporterUid = input?.reporterUid;
-  const incidentId = input?.incidentId;
-  if (!reporterUid || !incidentId) return { skipped: true };
-
-  const nowIso = (deps.now ?? (() => new Date()))().toISOString();
-  const noticeRef = db
-    .collection("users")
-    .doc(reporterUid)
-    .collection("incidentNotices")
-    .doc(incidentId);
-
-  await noticeRef.set(
-    {
-      incidentId,
-      status: "resolved",
-      resolvedAt: nowIso,
-      bannerDismissedAt: null,
-    },
-    { merge: true },
-  );
-
+async function sendReporterEmail(reporterUid, deps) {
   try {
     const email =
       typeof deps.getUserEmail === "function"
@@ -118,7 +92,9 @@ export async function notifyReporterResolved(db, input, deps = {}) {
     const detail = error instanceof Error ? error.message : String(error);
     console.warn("[notifyReporterResolved] email failed:", detail);
   }
+}
 
+async function sendReporterPush(reporterUid, incidentId, deps) {
   try {
     if (typeof deps.sendPush === "function") {
       await deps.sendPush({ reporterUid, incidentId });
@@ -126,6 +102,51 @@ export async function notifyReporterResolved(db, input, deps = {}) {
   } catch (error) {
     const detail = error instanceof Error ? error.message : String(error);
     console.warn("[notifyReporterResolved] push failed:", detail);
+  }
+}
+
+/**
+ * Write incident notice + best-effort email/push for a resolved incident.
+ * Notice write is awaited. Email/push are fire-and-forget unless
+ * deps.waitForChannels is true (tests).
+ */
+export async function notifyReporterResolved(db, input, deps = {}) {
+  const reporterUid = input?.reporterUid;
+  const incidentId = input?.incidentId;
+  if (!reporterUid || !incidentId) return { skipped: true };
+
+  const nowIso = (deps.now ?? (() => new Date()))().toISOString();
+  const noticeRef = db
+    .collection("users")
+    .doc(reporterUid)
+    .collection("incidentNotices")
+    .doc(incidentId);
+
+  try {
+    await noticeRef.set(
+      {
+        incidentId,
+        status: "resolved",
+        resolvedAt: nowIso,
+        bannerDismissedAt: null,
+      },
+      { merge: true },
+    );
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : String(error);
+    console.warn("[notifyReporterResolved] notice write failed:", detail);
+    throw error;
+  }
+
+  const channels = Promise.all([
+    sendReporterEmail(reporterUid, deps),
+    sendReporterPush(reporterUid, incidentId, deps),
+  ]);
+
+  if (deps.waitForChannels === true) {
+    await channels;
+  } else {
+    void channels;
   }
 
   return { ok: true };

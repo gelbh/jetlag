@@ -30,7 +30,7 @@ const STATUS_LABELS = {
  *
  * @param db Firestore admin instance or compatible mock
  * @param input { incidentId, status, uid }
- * @param deps { now, generateId }
+ * @param deps { now, generateId, notifyReporterResolved? }
  */
 export async function updateIncidentStatusHandler(db, input, deps = {}) {
   const { incidentId, status, uid } = input;

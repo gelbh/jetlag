@@ -36,6 +36,17 @@ export interface IncidentEmailRequestBody {
   incidentUrl?: string;
 }
 
+/** Strict single-address check for reporter audience (not a full RFC parser). */
+export function isValidReporterEmail(value: string): boolean {
+  if (value.length === 0 || value.length > 254) {
+    return false;
+  }
+  if (/\s/.test(value)) {
+    return false;
+  }
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+}
+
 function jsonResponse(status: number, body: Record<string, unknown>): Response {
   return new Response(JSON.stringify(body), {
     status,
@@ -75,7 +86,7 @@ function parseBody(value: unknown): IncidentEmailRequestBody | null {
 export async function handleIncidentEmailRequest(
   request: Request,
   env: Env,
-  fetchImpl: typeof fetch = fetch,
+  fetchImpl: typeof fetch = fetch
 ): Promise<Response> {
   if (request.method !== "POST") {
     return jsonResponse(405, { error: "Method not allowed" });
@@ -108,7 +119,12 @@ export async function handleIncidentEmailRequest(
   let to: string;
   if (body.audience === "reporter") {
     if (!body.to) {
-      return jsonResponse(400, { error: "to is required for reporter audience" });
+      return jsonResponse(400, {
+        error: "to is required for reporter audience",
+      });
+    }
+    if (!isValidReporterEmail(body.to)) {
+      return jsonResponse(400, { error: "invalid reporter email" });
     }
     to = body.to;
   } else {
@@ -148,9 +164,7 @@ export async function handleIncidentEmailRequest(
         message?: string;
         name?: string;
       };
-      const detail = [errBody.name, errBody.message]
-        .filter(Boolean)
-        .join(": ");
+      const detail = [errBody.name, errBody.message].filter(Boolean).join(": ");
       if (detail) {
         providerDetail = detail;
       }
@@ -160,7 +174,7 @@ export async function handleIncidentEmailRequest(
     console.warn(
       "incident email Resend rejected",
       upstream.status,
-      providerDetail,
+      providerDetail
     );
     return jsonResponse(502, { error: "Email provider rejected the request" });
   }

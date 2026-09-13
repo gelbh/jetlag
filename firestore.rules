@@ -1159,7 +1159,11 @@ service cloud.firestore {
         allow get, list: if isSignedIn() && request.auth.uid == uid;
         allow create, update: if isSignedIn()
           && request.auth.uid == uid
+          && deviceId == request.resource.data.platform
+          && request.resource.data.keys().hasOnly(['token', 'platform', 'updatedAt', 'preferences'])
           && request.resource.data.token is string
+          && request.resource.data.token.size() > 0
+          && request.resource.data.token.size() <= 4096
           && request.resource.data.platform in ['ios', 'android', 'web']
           && request.resource.data.updatedAt is string
           && request.resource.data.preferences is map

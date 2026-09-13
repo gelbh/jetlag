@@ -15,7 +15,7 @@ describe("IncidentResolvedBanner", () => {
           bannerDismissedAt: null,
         }}
         onDismiss={dismissFn}
-      />,
+      />
     );
 
     expect(screen.getByText(/issue has been fixed/i)).toBeInTheDocument();
