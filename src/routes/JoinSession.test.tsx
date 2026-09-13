@@ -2,7 +2,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createMemoryRouter, RouterProvider } from "react-router-dom";
-import { JoinSession } from "./JoinSession";
+import { JoinLegacy } from "./JoinLegacy";
 import { renderWithRouter } from "../test/renderWithRouter";
 import { RouteTransitionTestProvider } from "../test/RouteTransitionTestProvider";
 import { resetAllStores } from "../test/helpers/storeReset";
@@ -122,7 +122,7 @@ function renderJoinSessionAt(path: string) {
         element: (
           <QueryClientProvider client={queryClient}>
             <RouteTransitionTestProvider>
-              <JoinSession />
+              <JoinLegacy />
             </RouteTransitionTestProvider>
           </QueryClientProvider>
         ),
@@ -173,7 +173,7 @@ async function waitForJoinRequestListener(): Promise<JoinRequestChangeHandler> {
   return call![2];
 }
 
-describe("JoinSession", () => {
+describe("JoinLegacy", () => {
   beforeEach(() => {
     vi.useRealTimers();
     vi.clearAllMocks();
@@ -197,7 +197,7 @@ describe("JoinSession", () => {
   });
 
   it("shows firebase configuration error when remote join is unavailable", async () => {
-    renderWithRouter(<JoinSession />);
+    renderWithRouter(<JoinLegacy />);
 
     fireEvent.change(screen.getByPlaceholderText("ABCD"), {
       target: { value: "ABCD" },
@@ -214,7 +214,7 @@ describe("JoinSession", () => {
   });
 
   it("validates session code length", async () => {
-    renderWithRouter(<JoinSession />);
+    renderWithRouter(<JoinLegacy />);
     fireEvent.click(screen.getByRole("button", { name: "Join session" }));
 
     await waitFor(() => {
@@ -223,7 +223,7 @@ describe("JoinSession", () => {
   });
 
   it("offers observer as a join role", () => {
-    renderWithRouter(<JoinSession />);
+    renderWithRouter(<JoinLegacy />);
 
     expect(
       screen.getByRole("radio", { name: /observer/i }),
@@ -231,13 +231,13 @@ describe("JoinSession", () => {
   });
 
   it("prefills a valid code from the invite query param", () => {
-    renderWithRouter(<JoinSession />, { route: "/join?code=wxyz" });
+    renderWithRouter(<JoinLegacy />, { route: "/join?code=wxyz" });
 
     expect(screen.getByPlaceholderText("ABCD")).toHaveValue("WXYZ");
   });
 
   it("ignores an invalid invite query code", () => {
-    renderWithRouter(<JoinSession />, { route: "/join?code=AB" });
+    renderWithRouter(<JoinLegacy />, { route: "/join?code=AB" });
 
     expect(screen.getByPlaceholderText("ABCD")).toHaveValue("");
   });
@@ -354,7 +354,7 @@ describe("JoinSession", () => {
       () => new Promise(() => undefined),
     );
 
-    renderWithRouter(<JoinSession />);
+    renderWithRouter(<JoinLegacy />);
     fireEvent.change(screen.getByPlaceholderText("ABCD"), {
       target: { value: "ABCD" },
     });
@@ -377,7 +377,7 @@ describe("JoinSession", () => {
     vi.useFakeTimers({ shouldAdvanceTime: true });
     mockIsFirebaseConfigured.mockReturnValue(true);
 
-    renderWithRouter(<JoinSession />);
+    renderWithRouter(<JoinLegacy />);
     await enterCodeAndWaitForPreview();
 
     fireEvent.click(screen.getByRole("button", { name: "Request access" }));
@@ -409,7 +409,7 @@ describe("JoinSession", () => {
     vi.useFakeTimers({ shouldAdvanceTime: true });
     mockIsFirebaseConfigured.mockReturnValue(true);
 
-    renderWithRouter(<JoinSession />);
+    renderWithRouter(<JoinLegacy />);
     await enterCodeAndWaitForPreview();
 
     fireEvent.click(screen.getByRole("button", { name: "Request access" }));
@@ -458,7 +458,7 @@ describe("JoinSession", () => {
     vi.mocked(getRemoteSessionByIdFromServer).mockResolvedValue(joinedSession);
     vi.mocked(waitForServerHiderRole).mockResolvedValue(joinedSession);
 
-    renderWithRouter(<JoinSession />);
+    renderWithRouter(<JoinLegacy />);
     await enterCodeAndWaitForPreview();
 
     fireEvent.click(screen.getByRole("button", { name: "Request access" }));
@@ -500,7 +500,7 @@ describe("JoinSession", () => {
       session: previewShapedSession,
     });
 
-    renderWithRouter(<JoinSession />);
+    renderWithRouter(<JoinLegacy />);
     fireEvent.change(screen.getByPlaceholderText("ABCD"), {
       target: { value: "EFGH" },
     });
