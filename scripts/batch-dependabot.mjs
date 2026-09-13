@@ -70,7 +70,11 @@ function classify(pr) {
 function packageNamesFromBody(body) {
   const names = new Set();
   if (!body) return names;
-  // Markdown table rows: | `pkg` | or | pkg |
+  // Markdown links in tables: | [pkg](url) |
+  for (const m of body.matchAll(/\|\s*\[(@?[\w./-]+)\]\([^)]+\)\s*\|/g)) {
+    names.add(m[1]);
+  }
+  // Plain / backtick table cells
   for (const m of body.matchAll(/\|\s*`?(@?[\w./-]+)`?\s*\|/g)) {
     const name = m[1];
     if (name === "Package" || name === "---") continue;
@@ -78,7 +82,8 @@ function packageNamesFromBody(body) {
     names.add(name);
   }
   // "Bumps X from" / "Updates `X`"
-  for (const m of body.matchAll(/(?:Bumps|Updates)\s+`?(@?[\w./-]+)`?/g)) {
+  for (const m of body.matchAll(/(?:Bumps|Updates)\s+(?:the\s+)?`?(@?[\w./-]+)`?/g)) {
+    if (m[1] === "the") continue;
     names.add(m[1]);
   }
   return names;
