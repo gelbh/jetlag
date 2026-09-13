@@ -41,9 +41,10 @@ jobs:
             steps.metadata.outputs.update-type == 'version-update:semver-patch' ||
             steps.metadata.outputs.update-type == 'version-update:semver-minor'
           )
-        run: gh pr merge --auto --squash --match-head-commit "$HEAD_SHA" "$PR_URL"
+        run: gh pr merge --repo "$GH_REPO" --auto --squash --match-head-commit "$HEAD_SHA" "$PR_URL"
         env:
           GH_TOKEN: ${{ secrets.DEPENDABOT_AUTOMERGE_TOKEN }}
+          GH_REPO: ${{ github.repository }}
           PR_URL: ${{ github.event.pull_request.html_url }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
 
@@ -56,20 +57,23 @@ jobs:
           )
         env:
           GH_TOKEN: ${{ secrets.DEPENDABOT_AUTOMERGE_TOKEN }}
+          GH_REPO: ${{ github.repository }}
           GROUP_PR: ${{ github.event.pull_request.number }}
           GROUP_TITLE: ${{ github.event.pull_request.title }}
         run: |
           set -euo pipefail
+          # No checkout in this job: always pass --repo so gh does not need .git
           # Close green singleton Dependabot PRs whose package appears in this group body.
-          # Leave majors and any PR with failing checks alone.
-          BODY=$(gh pr view "$GROUP_PR" --json body -q .body)
-          mapfile -t SINGLES < <(gh pr list --author "app/dependabot" --state open --json number,title --jq '.[] | select(.number != '"$GROUP_PR"') | select(.title | test("group"; "i") | not) | "\(.number)\t\(.title)"')
+          # Leave majors and any PR with failing required checks alone.
+          BODY=$(gh pr view --repo "$GH_REPO" "$GROUP_PR" --json body -q .body)
+          mapfile -t SINGLES < <(gh pr list --repo "$GH_REPO" --author "app/dependabot" --state open --json number,title --jq '.[] | select(.number != '"$GROUP_PR"') | select(.title | test("group"; "i") | not) | "\(.number)\t\(.title)"')
           for row in "${SINGLES[@]:-}"; do
             [ -z "$row" ] && continue
             num=${row%%$'\t'*}
             title=${row#*$'\t'}
-            if [[ "$title" =~ from\ ([0-9]+)\.[0-9.]+\ to\ ([0-9]+)\.[0-9.]+ ]]; then
-              if [[ "${BASH_REMATCH[1]}" != "${BASH_REMATCH[2]}" ]]; then
+            # Majors: "from 1.2.3 to 2.0.0" or unscoped "from 4 to 7"
+            if [[ "$title" =~ from\ ([0-9]+)(\.[0-9.]+)?\ to\ ([0-9]+)(\.[0-9.]+)? ]]; then
+              if [[ "${BASH_REMATCH[1]}" != "${BASH_REMATCH[3]}" ]]; then
                 echo "Skip major #$num"
                 continue
               fi
@@ -79,9 +83,9 @@ jobs:
             if ! echo "$BODY" | grep -Fq "$pkg"; then
               continue
             fi
-            if gh pr checks "$num" 2>/dev/null | grep -q $'\tfail\t'; then
+            if gh pr checks --repo "$GH_REPO" "$num" 2>/dev/null | awk -F'\t' '$2=="fail" && $1!="enable-automerge"{found=1} END{exit !found}'; then
               echo "Skip red #$num"
               continue
             fi
-            gh pr close "$num" --comment "Superseded by grouped Dependabot PR #$GROUP_PR ($GROUP_TITLE). Safe patch/minor batching policy."
+            gh pr close --repo "$GH_REPO" "$num" --comment "Superseded by grouped Dependabot PR #$GROUP_PR ($GROUP_TITLE). Safe patch/minor batching policy."
           done

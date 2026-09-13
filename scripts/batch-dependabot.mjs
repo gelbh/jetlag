@@ -35,7 +35,8 @@ function ghJson(args) {
 }
 
 function isMajorTitle(title) {
-  const m = title.match(/from (\d+)\.[\d.]+ to (\d+)\.[\d.]+/i);
+  // "from 1.2.3 to 2.0.0" or Actions-style "from 4 to 7"
+  const m = title.match(/from (\d+)(?:\.[\d.]+)? to (\d+)(?:\.[\d.]+)?/i);
   if (!m) return false;
   return m[1] !== m[2];
 }
@@ -49,8 +50,12 @@ function hasFailingChecks(prNumber) {
     encoding: "utf8",
   });
   const out = `${r.stdout || ""}\n${r.stderr || ""}`;
+  const ignore = new Set(["enable-automerge", "CodeRabbit"]);
   // gh prints tab-separated: name\tfail\t...
-  return out.split("\n").some((line) => /\tfail\t/.test(line));
+  return out.split("\n").some((line) => {
+    const [name, status] = line.split("\t");
+    return status === "fail" && name && !ignore.has(name);
+  });
 }
 
 function classify(pr) {
