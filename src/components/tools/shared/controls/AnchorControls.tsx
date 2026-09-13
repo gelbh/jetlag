@@ -54,13 +54,13 @@ export function AnchorControls({
       </button>
 
       {passiveMap ? (
-        <p className="text-center text-xs text-ink-dim">
+        <p className="text-center text-xs text-field-ink-muted">
           {hasAnchor ? (
             <>
               {anchorPlaceName ? (
                 <>
                   Anchor ·{" "}
-                  <span className="font-medium text-ink">{anchorPlaceName}</span>
+                  <span className="font-medium text-field-ink">{anchorPlaceName}</span>
                 </>
               ) : (
                 "Anchor set on the map"
@@ -78,16 +78,16 @@ export function AnchorControls({
           <button
             type="button"
             onClick={onPlaceAtMapTap}
-            className={`min-h-11 w-full rounded-[var(--radius-hud-md)] border-2 px-3 text-sm font-medium ${
+            className={`min-h-11 w-full rounded-md border px-3 text-sm font-medium ${
               awaitingPlacement
-                ? "border-highlight bg-highlight/15 text-highlight"
-                : "border-border bg-surface-raised text-ink-secondary"
+                ? "border-flag bg-flag-soft text-flag"
+                : "border-rule bg-canvas text-field-ink-muted"
             }`}
           >
             {awaitingPlacement ? "Tap the map" : "Place at map tap"}
           </button>
           {hasAnchor ? (
-            <p className="text-xs text-ink-dim">{anchorHint}</p>
+            <p className="text-xs text-field-ink-muted">{anchorHint}</p>
           ) : null}
         </>
       )}
