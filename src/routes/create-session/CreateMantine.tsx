@@ -1,6 +1,7 @@
 import { useCallback } from "react";
-import { Box, Button, Group, Paper, Stack } from "@mantine/core";
-import { Link } from "react-router-dom";
+import { Box, Button, Stack, Text } from "@mantine/core";
+import { IosEntryHeader } from "@/components/ui/apple/IosEntryHeader";
+import { iosFilledStyles } from "@/components/ui/apple/iosEntryChrome";
 import { CreateSessionMapPane } from "../../components/session/framing/CreateSessionMapPane";
 import { GameAreaFramingModal } from "../../components/session/framing/GameAreaFramingModal";
 import { MobileSheet } from "../../components/ui/sheets/MobileSheet";
@@ -9,7 +10,6 @@ import {
   createSessionDraftToGamePreset,
 } from "../../domain/session/presets/gamePreset";
 import { useGamePresetStore } from "../../state/gamePresetStore";
-import { ConfirmFooter } from "./ConfirmFooter";
 import { GameAreaSection } from "./GameAreaSection";
 import { PremiumGateSection } from "./PremiumGateSection";
 import { SessionSettingsSection } from "./SessionSettingsSection";
@@ -51,24 +51,16 @@ export function CreateMantine() {
     );
   }, [savePreset, session]);
 
+  const confirmBusy = session.loading || session.verifyingAccess;
+
   return (
     <Box
-      className="jl-create-session flex h-full min-h-[100dvh] flex-col"
+      className="jl-create-session flex h-full min-h-0 max-h-full flex-col overflow-hidden"
       data-player-ux-world="survey"
     >
-      <Paper
-        radius={0}
-        withBorder={false}
-        className="shrink-0 border-b border-[var(--mantine-color-default-border)] px-4 pt-[max(2.75rem,calc(env(safe-area-inset-top,0px)+0.625rem))] pb-2"
-      >
-        <Group justify="flex-start">
-          <Button component={Link} to="/" variant="subtle" size="compact-md">
-            Back
-          </Button>
-        </Group>
-      </Paper>
+      <IosEntryHeader title="Create" />
 
-      <Stack gap={0} className="flex min-h-0 flex-1 flex-col">
+      <Stack gap={0} className="flex min-h-0 flex-1 flex-col overflow-hidden">
         <CreateSessionMapPane
           mapStyle={session.mapStyle}
           onMapStyleChange={session.setMapStyle}
@@ -112,19 +104,36 @@ export function CreateMantine() {
           maxHeightClassName="max-h-[min(58dvh,640px)]"
           className="flex min-h-0 flex-1 flex-col"
           footer={
-            <Paper radius={0} withBorder={false}>
-              <ConfirmFooter
-                confirmLabel={session.confirmLabel}
-                loading={session.loading}
-                verifyingAccess={session.verifyingAccess}
-                requiresPremiumSignIn={session.requiresPremiumSignIn}
-                error={session.error}
-                onConfirm={() => void session.handleConfirm()}
-              />
-            </Paper>
+            <Box
+              className="shrink-0 px-4 pt-3 pb-[max(0.25rem,env(safe-area-inset-bottom))]"
+              style={{
+                backgroundColor: "oklch(from var(--color-canvas) l c h / 0.88)",
+                borderTop:
+                  "0.33px solid oklch(from var(--color-field-ink) l c h / 0.12)",
+                backdropFilter: "blur(20px) saturate(1.4)",
+                WebkitBackdropFilter: "blur(20px) saturate(1.4)",
+              }}
+            >
+              <Button
+                type="button"
+                fullWidth
+                styles={iosFilledStyles}
+                onClick={() => void session.handleConfirm()}
+                disabled={confirmBusy || session.requiresPremiumSignIn}
+                loading={confirmBusy}
+              >
+                {session.confirmLabel}
+              </Button>
+              {session.error ? (
+                <Text c="var(--color-halt)" size="sm" mt={8}>
+                  {session.error}
+                </Text>
+              ) : null}
+            </Box>
           }
         >
           <GameAreaSection
+            chrome="ios"
             bundledPresetSelectGroups={session.bundledPresetSelectGroups}
             favouritePresetSelectOptions={session.favouritePresetSelectOptions}
             userPresets={session.userPresets}

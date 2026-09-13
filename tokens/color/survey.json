@@ -2,48 +2,48 @@
   "color": {
     "canvas": {
       "$type": "color",
-      "$value": "oklch(0.20 0.015 250)",
-      "$description": "Survey field book — dark cool technical plate (direction role: canvas). Target AAA chrome on this ground. Not Broadcast surface-deep."
+      "$value": "oklch(0.285 0.036 255)",
+      "$description": "Jetlag logo navy plate (sampled #1e2b3c). Player ground / dark mode canvas."
     },
     "field-ink": {
       "$type": "color",
-      "$value": "oklch(0.92 0.01 265)",
-      "$description": "Survey field book — near-white graphite (direction role: ink). Named field-ink so HUD --color-ink stays light during dual-token period. ≥7:1 on canvas for play labels."
+      "$value": "oklch(0.925 0.000 90)",
+      "$description": "Logo off-white disc (#e6e6e6). Primary text on navy canvas."
     },
     "field-ink-muted": {
       "$type": "color",
-      "$value": "oklch(0.72 0.015 250)",
-      "$description": "Survey field book — secondary copy (direction role: ink-muted). Keep ≥4.5:1 on canvas; play chrome prefers field-ink."
+      "$value": "oklch(0.684 0.034 256)",
+      "$description": "Muted steel on navy (#8c9baf). Secondary copy ≥4.5:1 on canvas."
     },
     "flag": {
       "$type": "color",
-      "$value": "oklch(0.75 0.18 48)",
-      "$description": "Survey field book — fluoro survey orange (direction role: flag). Primary CTA / active tool / stake chips only (~≤15%). L retuned for dark plates + AAA with flag-ink."
+      "$value": "oklch(0.688 0.155 47)",
+      "$description": "Logo trail orange (#e6783c). Primary CTA / tint (~≤15%)."
     },
     "flag-ink": {
       "$type": "color",
-      "$value": "oklch(0.18 0.04 48)",
-      "$description": "Ink on solid flag fills for AAA play chrome. Do not pair with flag-soft on dark canvas — use field-ink on soft washes."
+      "$value": "oklch(0.925 0.000 90)",
+      "$description": "Off-white on solid flag fills (Apple filled-button label)."
     },
     "flag-soft": {
       "$type": "color",
-      "$value": "oklch(0.75 0.18 48 / 0.22)",
-      "$description": "Soft flag wash for chips / selected chrome on dark plates."
+      "$value": "oklch(0.688 0.155 47 / 0.22)",
+      "$description": "Soft orange wash on navy plates."
     },
     "signal": {
       "$type": "color",
-      "$value": "oklch(0.72 0.10 250)",
-      "$description": "Survey field book — cool blue (direction role: signal). Info / sync OK — always pair with label/icon."
+      "$value": "oklch(0.806 0.147 81)",
+      "$description": "Logo trail gold (#f0b43c). Info / emphasis accent."
     },
     "signal-soft": {
       "$type": "color",
-      "$value": "oklch(0.72 0.10 250 / 0.22)",
-      "$description": "Soft signal wash on dark plates."
+      "$value": "oklch(0.806 0.147 81 / 0.22)",
+      "$description": "Soft gold wash on navy plates."
     },
     "trail": {
       "$type": "color",
       "$value": "oklch(0.72 0.12 145)",
-      "$description": "Survey field book — green (direction role: trail). Success / in-zone — always pair with label/icon."
+      "$description": "Success / in-zone green — retain semantic trail (not in logo; keep for status)."
     },
     "trail-soft": {
       "$type": "color",
@@ -52,18 +52,18 @@
     },
     "halt": {
       "$type": "color",
-      "$value": "oklch(0.74 0.15 25)",
-      "$description": "Survey field book — red (direction role: halt). Error / dead session — always pair with label/icon."
+      "$value": "oklch(0.587 0.206 26)",
+      "$description": "Logo trail coral (#dc3232). Error / danger."
     },
     "halt-soft": {
       "$type": "color",
-      "$value": "oklch(0.74 0.15 25 / 0.22)",
+      "$value": "oklch(0.587 0.206 26 / 0.22)",
       "$description": "Soft halt wash on dark plates."
     },
     "rule": {
       "$type": "color",
-      "$value": "oklch(0.52 0.02 250)",
-      "$description": "Survey field book — hairline edge (direction role: rule) visible on dark plates for status/island borders (≥3:1 non-text)."
+      "$value": "oklch(0.445 0.038 256)",
+      "$description": "Navy edge (#465569) for hairlines on canvas."
     }
   }
 }
