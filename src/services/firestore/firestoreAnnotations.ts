@@ -13,6 +13,7 @@ import {
   buildAnnotationDocument,
   deserializeAnnotationFromFirestore,
 } from "./serialization/serializeAnnotation";
+import { handleFirestoreListenError } from "./sessions/listenError";
 
 export {
   isReclaimableSessionForCode,
@@ -102,6 +103,6 @@ export function subscribeToRemoteAnnotations(
 
       onChange(annotations);
     },
-    (error) => onError(error),
+    (error) => handleFirestoreListenError(error, onError),
   );
 }

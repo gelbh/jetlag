@@ -14,6 +14,7 @@ import { sortActivityEventsDesc } from "../../domain/session/activity/sessionAct
 import { getFirestoreDb } from "../core/firebase/firebase";
 import { captureException } from "../core/analytics/sentry";
 import { isFirestorePermissionDenied } from "./firestoreAnnotations";
+import { handleFirestoreListenError } from "./sessions/listenError";
 import {
   buildActivityLogDocument,
   deserializeActivityLogFromFirestore,
@@ -86,6 +87,6 @@ export function subscribeActivityLog(
       }
       onChange(sortActivityEventsDesc(events));
     },
-    (error) => onError(error),
+    (error) => handleFirestoreListenError(error, onError),
   );
 }

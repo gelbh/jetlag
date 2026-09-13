@@ -36,3 +36,4 @@ export {
   subscribeToSession,
   subscribeToEndGameTruthAnchors,
 } from "./sessions/subscribe";
+export { handleFirestoreListenError } from "./sessions/listenError";

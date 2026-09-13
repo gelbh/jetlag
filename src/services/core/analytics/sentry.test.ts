@@ -26,7 +26,7 @@ vi.mock("../../../config/env", () => ({
   getClientEnv: vi.fn(() => ({})),
 }));
 
-import { reportJoinPermissionDenied } from "./sentry";
+import { reportJoinPermissionDenied, reportFirestoreListenPermissionDenied } from "./sentry";
 
 describe("reportJoinPermissionDenied", () => {
   afterEach(() => {
@@ -66,5 +66,33 @@ describe("reportJoinPermissionDenied", () => {
 
     expect(addBreadcrumb).not.toHaveBeenCalled();
     expect(captureMessage).not.toHaveBeenCalled();
+  });
+});
+
+describe("reportFirestoreListenPermissionDenied", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    addBreadcrumb.mockClear();
+  });
+
+  it("adds listen breadcrumb without captureMessage", () => {
+    vi.stubEnv("MODE", "production");
+
+    reportFirestoreListenPermissionDenied();
+
+    expect(addBreadcrumb).toHaveBeenCalledExactlyOnceWith({
+      category: "firestore",
+      message: "Listen permission denied",
+      level: "warning",
+      data: { op: "listen", code: "permission-denied" },
+    });
+  });
+
+  it("no-ops in test mode", () => {
+    vi.stubEnv("MODE", "test");
+
+    reportFirestoreListenPermissionDenied();
+
+    expect(addBreadcrumb).not.toHaveBeenCalled();
   });
 });

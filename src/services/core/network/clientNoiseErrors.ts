@@ -9,6 +9,14 @@ const FIRESTORE_IDB_PERSISTENCE =
 /** Safari Firestore IDB: UnknownError looking up object-store records by key range. */
 const FIRESTORE_IDB_OBJECT_STORE_LOOKUP =
   /looking up record in object store by key range/i;
+/** Chrome/WebKit IDB resume: index cursor without an open transaction. */
+const IDB_INDEX_WITHOUT_TRANSACTION =
+  /Attempt to get all index records from database without an in-progress transaction/i;
+/**
+ * Firefox Firestore IDB removeItem / zombie-client shutdown (combined message form).
+ * Prefer pairing with type `NS_ERROR_FAILURE` in classifyClientSentryEvent.
+ */
+const FIREFOX_NS_ERROR_FAILURE = /NS_ERROR_FAILURE:\s*No error message/i;
 const RECAPTCHA_TIMEOUT = /^reCAPTCHA Timeout\s*\(/i;
 const BROWSER_EXTENSION_NOISE =
   /Invalid call to runtime\.sendMessage\(\)|Object Not Found Matching Id:/i;
@@ -43,6 +51,16 @@ export function isFirestoreIdbObjectStoreLookupNoiseMessage(
   message: string,
 ): boolean {
   return FIRESTORE_IDB_OBJECT_STORE_LOOKUP.test(message);
+}
+
+/** IDB index reads after the transaction already closed (background/resume). */
+export function isIdbIndexWithoutTransactionMessage(message: string): boolean {
+  return IDB_INDEX_WITHOUT_TRANSACTION.test(message);
+}
+
+/** Firefox NS_ERROR_FAILURE from Firestore IDB persistence teardown. */
+export function isFirefoxNsErrorFailureNoiseMessage(message: string): boolean {
+  return FIREFOX_NS_ERROR_FAILURE.test(message);
 }
 
 /** Google reCAPTCHA script timeout string. */

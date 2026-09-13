@@ -9,9 +9,17 @@ import {
   isAbortErrorEvent,
   isAbortErrorNoise,
   isExpectedFunctionsError,
+  isOverpassTransportNoise,
+  isOverpassTransportNoiseEvent,
   readAppVersion,
   resolveDeployedFunctionName,
 } from "../lib/sentry.mjs";
+
+function fetchFailedWithCause(cause) {
+  const error = new TypeError("fetch failed");
+  error.cause = cause;
+  return error;
+}
 
 test("isAbortErrorNoise matches AbortError Error and DOMException", () => {
   const named = new Error("This operation was aborted");
@@ -38,6 +46,81 @@ test("isExpectedFunctionsError treats AbortError as expected noise", () => {
   const named = new Error("This operation was aborted");
   named.name = "AbortError";
   assert.equal(isExpectedFunctionsError(named), true);
+});
+
+test("isOverpassTransportNoise matches ConnectTimeout under fetch failed (JETLAG-3X)", () => {
+  const cause = new Error("Connect Timeout Error");
+  cause.name = "ConnectTimeoutError";
+  cause.code = "UND_ERR_CONNECT_TIMEOUT";
+  assert.equal(isOverpassTransportNoise(fetchFailedWithCause(cause)), true);
+});
+
+test("isOverpassTransportNoise matches EPIPE under fetch failed (JETLAG-3T)", () => {
+  const cause = new Error("connect EPIPE 203.0.113.10:443");
+  cause.code = "EPIPE";
+  assert.equal(isOverpassTransportNoise(fetchFailedWithCause(cause)), true);
+});
+
+test("isOverpassTransportNoise does not drop unrelated fetch failed", () => {
+  const cause = new Error("getaddrinfo ENOTFOUND overpass.example");
+  cause.code = "ENOTFOUND";
+  assert.equal(isOverpassTransportNoise(fetchFailedWithCause(cause)), false);
+  assert.equal(isOverpassTransportNoise(new TypeError("fetch failed")), false);
+  assert.equal(isOverpassTransportNoise(new Error("Overpass query failed.")), false);
+  assert.equal(isOverpassTransportNoise(null), false);
+});
+
+test("isOverpassTransportNoiseEvent matches ConnectTimeout / EPIPE chains", () => {
+  assert.equal(
+    isOverpassTransportNoiseEvent({
+      exception: {
+        values: [
+          { type: "TypeError", value: "fetch failed" },
+          {
+            type: "ConnectTimeoutError",
+            value: "Connect Timeout Error (UND_ERR_CONNECT_TIMEOUT)",
+          },
+        ],
+      },
+    }),
+    true,
+  );
+  assert.equal(
+    isOverpassTransportNoiseEvent({
+      exception: {
+        values: [
+          { type: "TypeError", value: "fetch failed" },
+          { type: "Error", value: "connect EPIPE 203.0.113.10:443" },
+        ],
+      },
+    }),
+    true,
+  );
+  assert.equal(
+    isOverpassTransportNoiseEvent({
+      exception: {
+        values: [
+          { type: "TypeError", value: "fetch failed" },
+          { type: "Error", value: "getaddrinfo ENOTFOUND overpass.example" },
+        ],
+      },
+    }),
+    false,
+  );
+});
+
+// Abort-parity: transport fetch-failed is not an expectedFunctionsError (final
+// path remaps via toOverpassUpstreamError → 504 "Overpass timed out." without
+// capture, same as Abort). Residual superseded envelopes drop in beforeSend.
+test("isExpectedFunctionsError does not treat overpass transport fetch-failed as expected", () => {
+  const cause = new Error("Connect Timeout Error");
+  cause.name = "ConnectTimeoutError";
+  cause.code = "UND_ERR_CONNECT_TIMEOUT";
+  assert.equal(isExpectedFunctionsError(fetchFailedWithCause(cause)), false);
+
+  const epipe = new Error("connect EPIPE 203.0.113.10:443");
+  epipe.code = "EPIPE";
+  assert.equal(isExpectedFunctionsError(fetchFailedWithCause(epipe)), false);
 });
 
 test("isExpectedFunctionsError matches host-only leave HttpsError", () => {
@@ -106,6 +189,30 @@ test("isExpectedFunctionsError matches billing recovery rate-limit HttpsError", 
       new HttpsError(
         "resource-exhausted",
         "Too many recovery attempts. Try again tomorrow.",
+      ),
+    ),
+    true,
+  );
+});
+
+test("isExpectedFunctionsError matches incident no-linked-session HttpsError", () => {
+  assert.equal(
+    isExpectedFunctionsError(
+      new HttpsError(
+        "failed-precondition",
+        "Incident has no linked session.",
+      ),
+    ),
+    true,
+  );
+});
+
+test("isExpectedFunctionsError matches invalid premium session payload HttpsError", () => {
+  assert.equal(
+    isExpectedFunctionsError(
+      new HttpsError(
+        "invalid-argument",
+        "Invalid premium session payload.",
       ),
     ),
     true,
