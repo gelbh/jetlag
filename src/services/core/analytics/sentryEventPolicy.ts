@@ -5,9 +5,11 @@
 import {
   isAppCheckSoftFailureMessage,
   isBrowserExtensionNoiseMessage,
+  isFirefoxNsErrorFailureNoiseMessage,
   isFirestoreIdbObjectStoreLookupNoiseMessage,
   isFirestoreIdbPersistenceNoiseMessage,
   isIdbConnectionClosingMessage,
+  isIdbIndexWithoutTransactionMessage,
   isRecaptchaOtTypeErrorMessage,
   isRecaptchaTimeoutMessage,
 } from "../network/clientNoiseErrors";
@@ -31,7 +33,7 @@ const RECAPTCHA_ALREADY_RENDERED = /reCAPTCHA has already been rendered/i;
  * skips when `document.visibilityState === "hidden"`.
  */
 const VIEW_TRANSITION_ABORTED =
-  /Transition was aborted because of invalid state|Skipping view transition because document visibility state has become hidden|Skipped ViewTransition due to document being hidden/i;
+  /Transition was aborted because of invalid state|Transition was skipped|Skipping view transition because document visibility state has become hidden|Skipped ViewTransition due to document being hidden/i;
 const APP_CHECK_INVALID_SESSION = /Invalid session .*: Invalid input/i;
 export const JOIN_PERMISSION_DENIED_MESSAGE = "Join permission denied";
 
@@ -95,8 +97,10 @@ function isGenericClientNoiseMessage(message: string): boolean {
   return (
     IDB_DATABASE_DELETED.test(message) ||
     isIdbConnectionClosingMessage(message) ||
+    isIdbIndexWithoutTransactionMessage(message) ||
     isFirestoreIdbPersistenceNoiseMessage(message) ||
     isFirestoreIdbObjectStoreLookupNoiseMessage(message) ||
+    isFirefoxNsErrorFailureNoiseMessage(message) ||
     isHtml2CanvasUnsupportedColorMessage(message) ||
     RECAPTCHA_ALREADY_RENDERED.test(message) ||
     isRecaptchaTimeoutMessage(message) ||
@@ -187,6 +191,14 @@ export function classifyClientSentryEvent(
     if (
       exception.type === "Error" &&
       APP_CHECK_INVALID_SESSION.test(value)
+    ) {
+      return "drop";
+    }
+
+    // Firefox IDB: type NS_ERROR_FAILURE, value "No error message" (JETLAG-3Z).
+    if (
+      exception.type === "NS_ERROR_FAILURE" &&
+      /^No error message$/i.test(value)
     ) {
       return "drop";
     }
