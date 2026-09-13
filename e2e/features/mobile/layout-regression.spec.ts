@@ -85,6 +85,50 @@ test.describe("layout regression @ default mobile", () => {
     await assertLayoutSmoke(page);
   });
 
+  test("@smoke create setup sheet scrolls with pinned confirm", async ({
+    page,
+  }) => {
+    await prepareE2EPage(page);
+    await page.goto("/create");
+    await page.getByPlaceholder("Dublin, Ireland").fill("Dublin");
+    await page.getByRole("button", { name: "Find place" }).click();
+    await expect(page.getByText(/sq mi play area/i).first()).toBeVisible({
+      timeout: 10_000,
+    });
+    await expectCreatePageMapPreviewLoaded(page);
+
+    const confirm = page.getByRole("button", { name: "Confirm game area" });
+    await expect(confirm).toBeVisible();
+
+    const relation = await page.evaluate(() => {
+      const root = document.querySelector(".jl-create-session");
+      const scroll = root?.querySelector(".hud-sheet .jl-scroll");
+      const button = Array.from(root?.querySelectorAll("button") ?? []).find(
+        (el) => el.textContent?.trim() === "Confirm game area",
+      );
+      if (!(scroll instanceof HTMLElement) || !(button instanceof HTMLElement)) {
+        return { ok: false as const, reason: "missing nodes" };
+      }
+      const spacer = document.createElement("div");
+      spacer.style.height = "800px";
+      scroll.appendChild(spacer);
+      const before = scroll.scrollTop;
+      scroll.scrollTop = before + 160;
+      const moved = scroll.scrollTop > before;
+      const footerOutside = !scroll.contains(button);
+      spacer.remove();
+      return { ok: true as const, footerOutside, moved };
+    });
+
+    expect(relation.ok).toBe(true);
+    if (relation.ok) {
+      expect(relation.footerOutside).toBe(true);
+      expect(relation.moved).toBe(true);
+    }
+
+    await assertLayoutSmoke(page);
+  });
+
   test("@smoke map dock chrome stays in viewport", async ({ page }) => {
     await openMapWithLocalSession(page);
     const host = page.locator(".jl-map-bottom-chrome-host");
