@@ -7,7 +7,9 @@ import { jetlagMantineTheme } from "@/theme/mantineTheme";
 import { renderWithRouter } from "../test/renderWithRouter";
 import { RouteTransitionTestProvider } from "../test/RouteTransitionTestProvider";
 
-const mockUsePlayerUiMantine = vi.fn(() => false);
+const { mockUsePlayerUiMantine } = vi.hoisted(() => ({
+  mockUsePlayerUiMantine: vi.fn(() => false),
+}));
 
 vi.mock("@/hooks/feature/usePlayerUiMantine", () => ({
   usePlayerUiMantine: () => mockUsePlayerUiMantine(),
