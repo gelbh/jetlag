@@ -93,6 +93,13 @@ function selectBatch(classified) {
   const included = [];
   const skipped = [];
   const covered = new Set();
+  const redGroupPackages = new Set();
+
+  for (const pr of classified) {
+    if (pr.skip === "red-ci" && pr.group) {
+      for (const name of packageNamesFromBody(pr.body)) redGroupPackages.add(name);
+    }
+  }
 
   for (const pr of classified) {
     if (pr.skip) {
@@ -110,6 +117,10 @@ function selectBatch(classified) {
     const pkg = singletonPackage(pr.title);
     if (pkg && covered.has(pkg)) {
       skipped.push({ ...pr, skip: "superseded-by-group" });
+      continue;
+    }
+    if (pkg && redGroupPackages.has(pkg)) {
+      skipped.push({ ...pr, skip: "in-red-group" });
       continue;
     }
     included.push(pr);
@@ -140,34 +151,64 @@ function mergeHeads(included, batchBranch) {
   }
   sh("git", ["checkout", "-B", batchBranch, "origin/main"]);
 
+  let needsInstall = false;
   for (const pr of included) {
     const localRef = `refs/deps-batch/pr-${pr.number}`;
     console.log(`Merging #${pr.number} (${pr.title})`);
     const r = spawnSync(
       "git",
-      ["merge", "--no-edit", "-m", `chore(deps): merge dependabot #${pr.number}`, localRef],
+      [
+        "merge",
+        "--no-edit",
+        "-X",
+        "theirs",
+        "-m",
+        `chore(deps): merge dependabot #${pr.number}`,
+        localRef,
+      ],
       { encoding: "utf8" },
     );
     if (r.status !== 0) {
-      console.warn(`Merge conflict on #${pr.number}; regenerating locks`);
-      spawnSync("git", ["checkout", "--theirs", "package-lock.json", "functions/package-lock.json"], {
-        encoding: "utf8",
-      });
-      spawnSync("git", ["add", "-A"], { encoding: "utf8" });
-      // Prefer resolving via npm install from merged package.json
-      const installRoot = spawnSync("npm", ["install", "--package-lock-only", "--ignore-scripts"], {
-        encoding: "utf8",
-      });
-      if (installRoot.status !== 0) {
-        console.error(installRoot.stderr || installRoot.stdout);
-        spawnSync("git", ["merge", "--abort"], { encoding: "utf8" });
-        throw new Error(`Failed to resolve merge for #${pr.number}`);
+      console.warn(`Merge still conflicted on #${pr.number}; taking theirs on unmerged files`);
+      const unmerged = sh("git", ["diff", "--name-only", "--diff-filter=U"])
+        .split("\n")
+        .filter(Boolean);
+      for (const f of unmerged) {
+        spawnSync("git", ["checkout", "--theirs", "--", f], { encoding: "utf8" });
+        spawnSync("git", ["add", "--", f], { encoding: "utf8" });
       }
-      spawnSync("npm", ["install", "--prefix", "functions", "--package-lock-only", "--ignore-scripts"], {
+      const cont = spawnSync("git", ["-c", "core.editor=true", "merge", "--continue"], {
         encoding: "utf8",
       });
-      sh("git", ["add", "-A"]);
-      sh("git", ["-c", "core.editor=true", "merge", "--continue"]);
+      if (cont.status !== 0) {
+        sh("git", ["commit", "--no-edit", "-m", `chore(deps): merge dependabot #${pr.number}`]);
+      }
+      needsInstall = true;
+    }
+  }
+
+  if (needsInstall) {
+    console.log("Regenerating package locks...");
+    const root = spawnSync("npm", ["install", "--package-lock-only", "--ignore-scripts"], {
+      encoding: "utf8",
+    });
+    if (root.status !== 0) {
+      console.error(root.stderr || root.stdout);
+      throw new Error("npm install failed at root");
+    }
+    const fn = spawnSync(
+      "npm",
+      ["install", "--prefix", "functions", "--package-lock-only", "--ignore-scripts"],
+      { encoding: "utf8" },
+    );
+    if (fn.status !== 0) {
+      console.error(fn.stderr || fn.stdout);
+      throw new Error("npm install failed in functions");
+    }
+    const dirty = sh("git", ["status", "--porcelain"]);
+    if (dirty) {
+      sh("git", ["add", "package-lock.json", "functions/package-lock.json"]);
+      sh("git", ["commit", "-m", "chore(deps): regenerate locks after batch merge"]);
     }
   }
 }
