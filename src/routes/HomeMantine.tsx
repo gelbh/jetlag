@@ -1,4 +1,12 @@
-import { Button, Container, Group, Paper, Stack, Text, Title } from "@mantine/core";
+import {
+  Button,
+  Container,
+  Group,
+  Paper,
+  Stack,
+  Text,
+  Title,
+} from "@mantine/core";
 import { Link } from "react-router-dom";
 import { AppLogo } from "@/components/ui/brand/AppLogo";
 import { LEGAL_APP_NAME } from "@/domain/legal/legalContact";

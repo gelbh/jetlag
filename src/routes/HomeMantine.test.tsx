@@ -25,7 +25,7 @@ describe("HomeMantine", () => {
         <MemoryRouter>
           <HomeMantine />
         </MemoryRouter>
-      </MantineProvider>,
+      </MantineProvider>
     );
     const join = screen.getByRole("link", { name: /join/i });
     expect(join).toBeInTheDocument();
