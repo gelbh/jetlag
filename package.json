@@ -121,11 +121,25 @@
     "zustand": "^5.0.13"
   },
   "devDependencies": {
+<<<<<<< HEAD
     "@axe-core/playwright": "^4.13.0",
     "@capacitor/cli": "^8.5.1",
     "@changesets/cli": "^2.31.1",
     "@cloudflare/workers-types": "^5.20260910.1",
     "@commitlint/cli": "~21.2.2",
+||||||| b3e30d10
+    "@axe-core/playwright": "^4.12.1",
+    "@capacitor/cli": "^8.5.0",
+    "@changesets/cli": "^2.31.1",
+    "@cloudflare/workers-types": "^5.20260801.1",
+    "@commitlint/cli": "~21.2.1",
+=======
+    "@axe-core/playwright": "^4.12.1",
+    "@capacitor/cli": "^8.5.0",
+    "@changesets/cli": "^3.0.0",
+    "@cloudflare/workers-types": "^5.20260801.1",
+    "@commitlint/cli": "~21.2.1",
+>>>>>>> origin/main
     "@commitlint/config-conventional": "~21.2.0",
     "@dreamsicle.io/stylelint-config-tailwindcss": "^1.2.2",
     "@eslint/js": "~10.0.1",
