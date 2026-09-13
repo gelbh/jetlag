@@ -45,12 +45,15 @@ import { useAuthBootstrapReady } from "../hooks/app/useAuthBootstrapReady";
 import { LEGAL_APP_NAME } from "../domain/legal/legalContact";
 import { useAdminAccessState } from "../hooks/admin/useAdminAccessState";
 import { useUserProfile } from "../hooks/profile/useUserProfile";
+import { usePlayerUiMantine } from "@/hooks/feature/usePlayerUiMantine";
+import { HomeMantine } from "./HomeMantine";
 
 const VERIFY_SESSION_TIMEOUT_MS = 15_000;
 const VERIFY_SESSION_TIMEOUT_MESSAGE =
   "Couldn't verify the session. Check your connection and try again.";
 
 export function Home() {
+  const mantineUi = usePlayerUiMantine();
   const navigate = useAppNavigate();
   const exitSession = useSessionExit();
   const session = useSessionStore((state) => state.session);
@@ -91,6 +94,10 @@ export function Home() {
     routeTransitionPhase === "idle"
   ) {
     return <BootSplash label="Starting…" />;
+  }
+
+  if (mantineUi) {
+    return <HomeMantine />;
   }
 
   const handleContinue = async () => {
