@@ -111,6 +111,42 @@ describe("handleIncidentEmailRequest", () => {
     expect(sent.to).toEqual(["admin@example.com"]);
   });
 
+  it("sends to body.to when audience is reporter", async () => {
+    const fetchImpl = vi.fn(async () =>
+      new Response(JSON.stringify({ id: "email-r" }), { status: 200 }),
+    );
+    const response = await handleIncidentEmailRequest(
+      emailRequest({
+        subject: "Fixed",
+        text: "Your issue has been fixed",
+        audience: "reporter",
+        to: "player@example.com",
+      }),
+      env,
+      fetchImpl,
+    );
+    expect(response.status).toBe(200);
+    const sent = JSON.parse(
+      (fetchImpl.mock.calls[0][1] as RequestInit).body as string,
+    );
+    expect(sent.to).toEqual(["player@example.com"]);
+  });
+
+  it("rejects reporter audience without to", async () => {
+    const fetchImpl = vi.fn();
+    const response = await handleIncidentEmailRequest(
+      emailRequest({
+        subject: "Fixed",
+        text: "x",
+        audience: "reporter",
+      }),
+      env,
+      fetchImpl,
+    );
+    expect(response.status).toBe(400);
+    expect(fetchImpl).not.toHaveBeenCalled();
+  });
+
   it("returns 502 when Resend rejects the request", async () => {
     const fetchImpl = vi.fn(async () =>
       new Response("bad", { status: 422 }),

@@ -25,8 +25,11 @@ const DEFAULT_INCIDENT_ADMIN_EMAIL = "gelbharttomer@gmail.com";
 const DEFAULT_INCIDENT_EMAIL_FROM =
   "Jet Lag Incidents <incidents@gelbhart.dev>";
 
+export type IncidentEmailAudience = "admin" | "reporter";
+
 export interface IncidentEmailRequestBody {
   to?: string;
+  audience?: IncidentEmailAudience;
   subject: string;
   text: string;
   html?: string;
@@ -54,7 +57,12 @@ function parseBody(value: unknown): IncidentEmailRequestBody | null {
     return null;
   }
   const parsed: IncidentEmailRequestBody = { subject, text };
-  // Ignore client-supplied `to` — recipient is always env/default (see below).
+  const audience = record.audience;
+  parsed.audience =
+    audience === "reporter" || audience === "admin" ? audience : "admin";
+  if (typeof record.to === "string" && record.to.length > 0) {
+    parsed.to = record.to;
+  }
   if (typeof record.html === "string" && record.html.length > 0) {
     parsed.html = record.html;
   }
@@ -97,8 +105,16 @@ export async function handleIncidentEmailRequest(
     return jsonResponse(400, { error: "subject and text are required" });
   }
 
-  // Never honor body.to — forged/misconfigured callers must not redirect mail.
-  const to = env.INCIDENT_ADMIN_EMAIL ?? DEFAULT_INCIDENT_ADMIN_EMAIL;
+  let to: string;
+  if (body.audience === "reporter") {
+    if (!body.to) {
+      return jsonResponse(400, { error: "to is required for reporter audience" });
+    }
+    to = body.to;
+  } else {
+    // Admin/default: never honor body.to — forged callers must not redirect mail.
+    to = env.INCIDENT_ADMIN_EMAIL ?? DEFAULT_INCIDENT_ADMIN_EMAIL;
+  }
   const from = env.INCIDENT_EMAIL_FROM ?? DEFAULT_INCIDENT_EMAIL_FROM;
 
   const payload: Record<string, unknown> = {
