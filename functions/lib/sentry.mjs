@@ -21,6 +21,8 @@ const EXPECTED_HTTPS_ERROR_KEYS = new Set([
   "resource-exhausted:Too many attempts. Try again later.",
   "permission-denied:Invalid access code.",
   "resource-exhausted:Too many recovery attempts. Try again tomorrow.",
+  "failed-precondition:Incident has no linked session.",
+  "invalid-argument:Invalid premium session payload.",
   ...EXPECTED_SESSION_UX_HTTPS_ERROR_KEYS,
 ]);
 

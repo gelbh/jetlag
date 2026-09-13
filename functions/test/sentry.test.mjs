@@ -112,6 +112,30 @@ test("isExpectedFunctionsError matches billing recovery rate-limit HttpsError", 
   );
 });
 
+test("isExpectedFunctionsError matches incident no-linked-session HttpsError", () => {
+  assert.equal(
+    isExpectedFunctionsError(
+      new HttpsError(
+        "failed-precondition",
+        "Incident has no linked session.",
+      ),
+    ),
+    true,
+  );
+});
+
+test("isExpectedFunctionsError matches invalid premium session payload HttpsError", () => {
+  assert.equal(
+    isExpectedFunctionsError(
+      new HttpsError(
+        "invalid-argument",
+        "Invalid premium session payload.",
+      ),
+    ),
+    true,
+  );
+});
+
 test("isExpectedFunctionsError matches role-code required HttpsError", () => {
   assert.equal(
     isExpectedFunctionsError(
