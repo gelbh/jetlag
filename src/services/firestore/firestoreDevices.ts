@@ -35,3 +35,24 @@ export async function upsertSessionDevice(
     { merge: true },
   );
 }
+
+export async function upsertUserDevice(
+  uid: string,
+  input: {
+    token: string;
+    platform: NotificationPlatform;
+    preferences: NotificationPreferences;
+  },
+): Promise<void> {
+  const deviceId = input.platform;
+  await setDoc(
+    doc(getFirestoreDb(), "users", uid, "devices", deviceId),
+    {
+      token: input.token,
+      platform: input.platform,
+      updatedAt: new Date().toISOString(),
+      preferences: input.preferences,
+    },
+    { merge: true },
+  );
+}

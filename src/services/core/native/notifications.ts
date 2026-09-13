@@ -11,7 +11,10 @@ import {
   type NotificationPreferences,
 } from "@/domain/device/chrome/notifications";
 import type { PlayerRole } from "@/domain/session/players/playerRole";
-import { upsertSessionDevice } from "../../firestore/firestoreDevices";
+import {
+  upsertSessionDevice,
+  upsertUserDevice,
+} from "../../firestore/firestoreDevices";
 import { JetlagLiveActivity } from "./liveActivity";
 
 /** Re-export for existing callers; prefer `./liveActivity` for new code. */
@@ -136,12 +139,46 @@ export async function syncSessionDeviceRegistration(input: {
     return;
   }
 
+  const platform = resolvePlatform();
+
   await upsertSessionDevice(input.sessionId, input.uid, {
     token: currentPushToken,
-    platform: resolvePlatform(),
+    platform,
     role: input.role,
     preferences: input.preferences,
     activityPushToken: activityPushToken ?? undefined,
+  });
+
+  await upsertUserDevice(input.uid, {
+    token: currentPushToken,
+    platform,
+    preferences: input.preferences,
+  });
+}
+
+export async function syncUserDeviceRegistration(input: {
+  uid: string;
+  preferences: NotificationPreferences;
+}): Promise<void> {
+  if (!Capacitor.isNativePlatform() || !input.preferences.enabled) {
+    return;
+  }
+
+  await initializeNativeNotifications();
+
+  if (!currentPushToken) {
+    await PushNotifications.register();
+    await waitForPushToken(4_000);
+  }
+
+  if (!currentPushToken) {
+    return;
+  }
+
+  await upsertUserDevice(input.uid, {
+    token: currentPushToken,
+    platform: resolvePlatform(),
+    preferences: input.preferences,
   });
 }
 
