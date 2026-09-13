@@ -336,6 +336,7 @@
     text-transform: uppercase;
     color: var(--color-field-ink-muted);
     text-decoration: none;
+    background-color: transparent;
   }
 
   .home-feedback-link:hover {

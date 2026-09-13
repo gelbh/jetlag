@@ -37,3 +37,13 @@
     border: 0 solid;
   }
 }
+
+/*
+ * Transparent bare buttons inside @layer mantine (not base): same-layer specificity
+ * lets classed Mantine Buttons keep fills; Survey link-buttons lose UA buttonface gray.
+ */
+@layer mantine {
+  button {
+    background-color: transparent;
+  }
+}
