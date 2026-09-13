@@ -153,7 +153,7 @@
     "firebase-tools": "^15.29.0",
     "globals": "^17.12.0",
     "husky": "^9.1.7",
-    "jsdom": "~29.1.1",
+    "jsdom": "~30.0.1",
     "playwright": "^1.62.1",
     "style-dictionary": "^5.5.2",
     "stylelint": "^17.14.1",
