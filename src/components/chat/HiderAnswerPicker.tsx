@@ -4,7 +4,7 @@ import type { GameReplyOption } from "../../domain/session/activity/sessionChat"
 import {
   hiderTruthReferenceLabel,
   hiderTruthReferenceLoadingLabel,
-} from "../tools/shared/questionTruthReferenceHint";
+} from "../tools/shared/hiderTruthReferenceCopy";
 import { LoadingReadout } from "../tools/shared/readout/LoadingReadout";
 
 interface HiderAnswerPickerProps {
