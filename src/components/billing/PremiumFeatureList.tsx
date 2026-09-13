@@ -3,12 +3,17 @@ import { screenHeaderOffsetClassName } from "../ui/layout/ScreenHeader";
 export function PremiumFeatureList({
   entitlementSummary,
   checkoutNotice,
+  headerOffset = true,
 }: {
   entitlementSummary: string | null;
   checkoutNotice: string | null;
+  /** When false, skip fixed ScreenHeader offset (Mantine shells). */
+  headerOffset?: boolean;
 }) {
   return (
-    <div className={`space-y-2 ${screenHeaderOffsetClassName}`}>
+    <div
+      className={`space-y-2 ${headerOffset ? screenHeaderOffsetClassName : ""}`}
+    >
       <h1 className="font-display text-2xl font-bold uppercase leading-none tracking-tight text-ink">
         Premium
       </h1>
