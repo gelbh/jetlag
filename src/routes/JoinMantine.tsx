@@ -489,11 +489,16 @@ export function JoinMantine() {
         }
       }),
     (fieldErrors) => {
-      setError(
-        fieldErrors.code ??
-          fieldErrors.rolePasscode ??
-          "Check the join form and try again.",
-      );
+      let message = "Check the join form and try again.";
+      if (typeof fieldErrors.code === "string" && fieldErrors.code) {
+        message = fieldErrors.code;
+      } else if (
+        typeof fieldErrors.rolePasscode === "string" &&
+        fieldErrors.rolePasscode
+      ) {
+        message = fieldErrors.rolePasscode;
+      }
+      setError(message);
     },
   );
 
