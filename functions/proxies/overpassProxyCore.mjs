@@ -54,8 +54,61 @@ function isAbortOrTimeoutError(error) {
   );
 }
 
+/**
+ * ConnectTimeout / EPIPE transport failures (incl. undici TypeError: fetch failed).
+ * Map to the same timeout message as Abort so total outage returns 504, not a
+ * silenced raw fetch-failed capture.
+ * @param {unknown} error
+ * @returns {boolean}
+ */
+function isOverpassTransportTimeoutError(error) {
+  if (!error || typeof error !== "object") {
+    return false;
+  }
+
+  if (isOverpassTransportTimeoutCause(error)) {
+    return true;
+  }
+
+  const name = "name" in error ? error.name : undefined;
+  const message =
+    "message" in error && error.message != null ? String(error.message) : "";
+  if (name !== "TypeError" || !/fetch failed/i.test(message)) {
+    return false;
+  }
+
+  return isOverpassTransportTimeoutCause(
+    "cause" in error ? error.cause : undefined,
+  );
+}
+
+/**
+ * @param {unknown} cause
+ * @returns {boolean}
+ */
+function isOverpassTransportTimeoutCause(cause) {
+  if (!cause || typeof cause !== "object") {
+    return false;
+  }
+
+  const name = "name" in cause ? cause.name : undefined;
+  const code = "code" in cause ? cause.code : undefined;
+  const message =
+    "message" in cause && cause.message != null ? String(cause.message) : "";
+
+  if (name === "ConnectTimeoutError" || code === "UND_ERR_CONNECT_TIMEOUT") {
+    return true;
+  }
+
+  if (code === "EPIPE" || /\bEPIPE\b/.test(message)) {
+    return true;
+  }
+
+  return false;
+}
+
 export function toOverpassUpstreamError(error) {
-  if (isAbortOrTimeoutError(error)) {
+  if (isAbortOrTimeoutError(error) || isOverpassTransportTimeoutError(error)) {
     return new Error("Overpass timed out.");
   }
   return error instanceof Error ? error : new Error(String(error));

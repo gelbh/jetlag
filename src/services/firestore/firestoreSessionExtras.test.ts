@@ -61,6 +61,7 @@ vi.mock("../core/firebase/firebase", () => ({
 
 vi.mock("../core/analytics/sentry", () => ({
   captureException: mockCaptureException,
+  reportFirestoreListenPermissionDenied: vi.fn(),
 }));
 
 import {
