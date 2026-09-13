@@ -10,17 +10,7 @@ import { PresetSearchResults } from "./PresetSearchResults";
 import { PresetDetailPanel } from "./PresetDetailPanel";
 import { migrateGamePreset } from "../../domain/session/presets/gamePreset";
 
-export function PresetBrowseLayout({
-  searchId,
-  query,
-  onQueryChange,
-  searching,
-  searchResults,
-  favouritePresets,
-  bundledPresets,
-  userPresets,
-  onDelete,
-}: {
+export type PresetBrowseBodyProps = {
   searchId: string;
   query: string;
   onQueryChange: (value: string) => void;
@@ -30,7 +20,107 @@ export function PresetBrowseLayout({
   bundledPresets: ReturnType<typeof migrateGamePreset>[];
   userPresets: ReturnType<typeof migrateGamePreset>[];
   onDelete: (id: string) => void;
-}) {
+};
+
+export function PresetBrowseBody({
+  searchId,
+  query,
+  onQueryChange,
+  searching,
+  searchResults,
+  favouritePresets,
+  bundledPresets,
+  userPresets,
+  onDelete,
+}: PresetBrowseBodyProps) {
+  return (
+    <>
+      <label htmlFor={searchId} className="field-label block">
+        Search presets
+        <input
+          id={searchId}
+          value={query}
+          onChange={(event) => onQueryChange(event.target.value)}
+          className="field-input min-h-11 w-full"
+          placeholder="Name or place…"
+          autoComplete="off"
+          autoCorrect="off"
+          spellCheck={false}
+          enterKeyHint="search"
+          inputMode="search"
+        />
+      </label>
+
+      <AppLink
+        to="/presets/new"
+        className="home-card-btn home-card-btn-primary"
+      >
+        <span>New preset</span>
+      </AppLink>
+
+      {searching ? (
+        <PresetSearchResults presets={searchResults} onDelete={onDelete} />
+      ) : (
+        <>
+          {favouritePresets.length > 0 ? (
+            <section className="space-y-2">
+              <p className="font-display text-xs font-semibold uppercase tracking-[0.1em] text-ink-dim">
+                Favourites
+              </p>
+              <ul className="space-y-3">
+                {favouritePresets.map((preset) => (
+                  <PresetDetailPanel
+                    key={preset.id}
+                    preset={preset}
+                    onDelete={onDelete}
+                  />
+                ))}
+              </ul>
+            </section>
+          ) : null}
+
+          {bundledPresets.length > 0 ? (
+            <section className="space-y-2">
+              <p className="font-display text-xs font-semibold uppercase tracking-[0.1em] text-ink-dim">
+                Recommended
+              </p>
+              <p className="text-xs leading-snug text-ink-muted">
+                Browse by continent, country, and region. More areas ship over
+                time.
+              </p>
+              <BundledPresetTree presets={bundledPresets} />
+            </section>
+          ) : null}
+
+          {userPresets.length === 0 ? (
+            bundledPresets.length === 0 ? (
+              <EmptyState>No presets saved on this device.</EmptyState>
+            ) : null
+          ) : (
+            <section className="space-y-2">
+              {bundledPresets.length > 0 ? (
+                <p className="font-display text-xs font-semibold uppercase tracking-[0.1em] text-ink-dim">
+                  Your presets
+                </p>
+              ) : null}
+              <ul className="space-y-3">
+                {userPresets.map((preset) => (
+                  <PresetDetailPanel
+                    key={preset.id}
+                    preset={preset}
+                    onDelete={onDelete}
+                  />
+                ))}
+              </ul>
+            </section>
+          )}
+        </>
+      )}
+    </>
+  );
+}
+
+export function PresetBrowseLayout(props: PresetBrowseBodyProps) {
   return (
     <main
       className="home-poster flex min-h-[100dvh] flex-col px-5 py-8"
@@ -49,87 +139,7 @@ export function PresetBrowseLayout({
             hosting.
           </p>
 
-          <label htmlFor={searchId} className="field-label block">
-            Search presets
-            <input
-              id={searchId}
-              value={query}
-              onChange={(event) => onQueryChange(event.target.value)}
-              className="field-input min-h-11 w-full"
-              placeholder="Name or place…"
-              autoComplete="off"
-              autoCorrect="off"
-              spellCheck={false}
-              enterKeyHint="search"
-              inputMode="search"
-            />
-          </label>
-
-          <AppLink
-            to="/presets/new"
-            className="home-card-btn home-card-btn-primary"
-          >
-            <span>New preset</span>
-          </AppLink>
-
-          {searching ? (
-            <PresetSearchResults presets={searchResults} onDelete={onDelete} />
-          ) : (
-            <>
-              {favouritePresets.length > 0 ? (
-                <section className="space-y-2">
-                  <p className="font-display text-xs font-semibold uppercase tracking-[0.1em] text-ink-dim">
-                    Favourites
-                  </p>
-                  <ul className="space-y-3">
-                    {favouritePresets.map((preset) => (
-                      <PresetDetailPanel
-                        key={preset.id}
-                        preset={preset}
-                        onDelete={onDelete}
-                      />
-                    ))}
-                  </ul>
-                </section>
-              ) : null}
-
-              {bundledPresets.length > 0 ? (
-                <section className="space-y-2">
-                  <p className="font-display text-xs font-semibold uppercase tracking-[0.1em] text-ink-dim">
-                    Recommended
-                  </p>
-                  <p className="text-xs leading-snug text-ink-muted">
-                    Browse by continent, country, and region. More areas ship
-                    over time.
-                  </p>
-                  <BundledPresetTree presets={bundledPresets} />
-                </section>
-              ) : null}
-
-              {userPresets.length === 0 ? (
-                bundledPresets.length === 0 ? (
-                  <EmptyState>No presets saved on this device.</EmptyState>
-                ) : null
-              ) : (
-                <section className="space-y-2">
-                  {bundledPresets.length > 0 ? (
-                    <p className="font-display text-xs font-semibold uppercase tracking-[0.1em] text-ink-dim">
-                      Your presets
-                    </p>
-                  ) : null}
-                  <ul className="space-y-3">
-                    {userPresets.map((preset) => (
-                      <PresetDetailPanel
-                        key={preset.id}
-                        preset={preset}
-                        onDelete={onDelete}
-                      />
-                    ))}
-                  </ul>
-                </section>
-              )}
-            </>
-          )}
+          <PresetBrowseBody {...props} />
         </div>
       </DesktopContentColumn>
     </main>
