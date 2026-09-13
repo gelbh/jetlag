@@ -11,7 +11,11 @@ import {
   type NotificationPreferences,
 } from "@/domain/device/chrome/notifications";
 import type { PlayerRole } from "@/domain/session/players/playerRole";
-import { upsertSessionDevice } from "../../firestore/firestoreDevices";
+import {
+  deleteUserDevice,
+  upsertSessionDevice,
+  upsertUserDevice,
+} from "../../firestore/firestoreDevices";
 import { JetlagLiveActivity } from "./liveActivity";
 
 /** Re-export for existing callers; prefer `./liveActivity` for new code. */
@@ -87,7 +91,7 @@ export async function initializeNativeNotifications(): Promise<void> {
           ],
         });
       }
-    },
+    }
   );
 
   await JetlagLiveActivity.addListener("activityPushToken", (event) => {
@@ -115,13 +119,38 @@ export async function requestNotificationPermission(): Promise<boolean> {
   return granted;
 }
 
+async function persistUserDeviceDisabled(
+  uid: string,
+  preferences: NotificationPreferences
+): Promise<void> {
+  const platform = resolvePlatform();
+  if (currentPushToken) {
+    await upsertUserDevice(uid, {
+      token: currentPushToken,
+      platform,
+      preferences,
+    });
+    return;
+  }
+  try {
+    await deleteUserDevice(uid, platform);
+  } catch {
+    // Soft-fail: missing doc or offline must not block disable.
+  }
+}
+
 export async function syncSessionDeviceRegistration(input: {
   sessionId: string;
   uid: string;
   role: PlayerRole;
   preferences: NotificationPreferences;
 }): Promise<void> {
-  if (!Capacitor.isNativePlatform() || !input.preferences.enabled) {
+  if (!Capacitor.isNativePlatform()) {
+    return;
+  }
+
+  if (!input.preferences.enabled) {
+    await persistUserDeviceDisabled(input.uid, input.preferences);
     return;
   }
 
@@ -136,12 +165,52 @@ export async function syncSessionDeviceRegistration(input: {
     return;
   }
 
+  const platform = resolvePlatform();
+
+  // User device first so resolve-push readiness is not skipped when session write succeeds alone.
+  await upsertUserDevice(input.uid, {
+    token: currentPushToken,
+    platform,
+    preferences: input.preferences,
+  });
+
   await upsertSessionDevice(input.sessionId, input.uid, {
     token: currentPushToken,
-    platform: resolvePlatform(),
+    platform,
     role: input.role,
     preferences: input.preferences,
     activityPushToken: activityPushToken ?? undefined,
+  });
+}
+
+export async function syncUserDeviceRegistration(input: {
+  uid: string;
+  preferences: NotificationPreferences;
+}): Promise<void> {
+  if (!Capacitor.isNativePlatform()) {
+    return;
+  }
+
+  if (!input.preferences.enabled) {
+    await persistUserDeviceDisabled(input.uid, input.preferences);
+    return;
+  }
+
+  await initializeNativeNotifications();
+
+  if (!currentPushToken) {
+    await PushNotifications.register();
+    await waitForPushToken(4_000);
+  }
+
+  if (!currentPushToken) {
+    return;
+  }
+
+  await upsertUserDevice(input.uid, {
+    token: currentPushToken,
+    platform: resolvePlatform(),
+    preferences: input.preferences,
   });
 }
 
@@ -154,7 +223,7 @@ async function waitForPushToken(timeoutMs: number): Promise<void> {
 }
 
 export function mergeNotificationPreferences(
-  partial: Partial<NotificationPreferences> | undefined,
+  partial: Partial<NotificationPreferences> | undefined
 ): NotificationPreferences {
   return {
     ...DEFAULT_NOTIFICATION_PREFERENCES,
@@ -172,9 +241,17 @@ export async function refreshActivityPushToken(input: {
     return;
   }
 
+  const platform = resolvePlatform();
+
+  await upsertUserDevice(input.uid, {
+    token: currentPushToken,
+    platform,
+    preferences: input.preferences,
+  });
+
   await upsertSessionDevice(input.sessionId, input.uid, {
     token: currentPushToken,
-    platform: resolvePlatform(),
+    platform,
     role: input.role,
     preferences: input.preferences,
     activityPushToken,
