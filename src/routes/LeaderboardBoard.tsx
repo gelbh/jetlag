@@ -32,7 +32,12 @@ import { subscribeLeaderboardBoard } from "../services/firestore/firestoreLeader
 const EMPTY_BOARD_MESSAGE =
   "No ranked entries yet. Finish synced rounds with leaderboard opt-in to populate this board.";
 
-export function LeaderboardBoard() {
+export function LeaderboardBoard({
+  filterLayout = "entry",
+}: {
+  /** `entry` = Survey EntryScreenLayout -mx-5 contract; `mantine` = flush sticky bar. */
+  filterLayout?: "entry" | "mantine";
+}) {
   const { user, isPermanent } = usePermanentAuthUser();
   const [selection, setSelection] = useState(loadLeaderboardBoardPrefs);
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -107,10 +112,15 @@ export function LeaderboardBoard() {
     setSelection(next);
   }
 
+  const filterBarClassName =
+    filterLayout === "mantine"
+      ? "sticky top-0 z-[var(--z-banner)] flex items-center gap-2 border-b-2 border-rule bg-canvas pb-3 pt-[max(0.5rem,env(safe-area-inset-top))]"
+      : `sticky top-0 z-[var(--z-banner)] -mx-5 flex items-center gap-2 border-b-2 border-rule bg-canvas px-5 pb-3 ${screenHeaderInsetTopClassName}`;
+
   return (
     <>
       <div
-        className={`sticky top-0 z-[var(--z-banner)] -mx-5 flex items-center gap-2 border-b-2 border-rule bg-canvas px-5 pb-3 ${screenHeaderInsetTopClassName}`}
+        className={filterBarClassName}
         data-testid="leaderboard-filters"
       >
         <div className="shrink-0">

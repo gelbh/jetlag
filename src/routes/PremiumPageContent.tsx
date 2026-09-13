@@ -25,7 +25,11 @@ import {
 } from "../services/billing/premiumBilling";
 import { usePremiumEntitlements } from "../hooks/billing/usePremiumEntitlements";
 
-export function PremiumPageContent() {
+export function PremiumPageContent({
+  headerOffset = true,
+}: {
+  headerOffset?: boolean;
+} = {}) {
   const navigate = useAppNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const checkoutState = searchParams.get("checkout");
@@ -147,7 +151,11 @@ export function PremiumPageContent() {
   if (!isFirebaseConfigured()) {
     return (
       <>
-        <PremiumFeatureList entitlementSummary={null} checkoutNotice={null} />
+        <PremiumFeatureList
+          entitlementSummary={null}
+          checkoutNotice={null}
+          headerOffset={headerOffset}
+        />
         <p className="max-w-sm text-sm text-field-ink-muted">
           Premium billing needs an online connection. Use a synced session to
           unlock live transit.
@@ -161,6 +169,7 @@ export function PremiumPageContent() {
       <PremiumFeatureList
         entitlementSummary={entitlementSummary}
         checkoutNotice={checkoutNotice}
+        headerOffset={headerOffset}
       />
 
       <PremiumSignInGate onSignedIn={() => void refreshEntitlementsWithError()}>

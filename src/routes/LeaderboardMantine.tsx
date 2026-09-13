@@ -21,7 +21,7 @@ export function LeaderboardMantine() {
           signInDescription="Sign in with a username to opt into leaderboards and view rankings."
         >
           <div data-player-ux-world="survey">
-            <LeaderboardBoard />
+            <LeaderboardBoard filterLayout="mantine" />
           </div>
         </RequireUsername>
       </Stack>
