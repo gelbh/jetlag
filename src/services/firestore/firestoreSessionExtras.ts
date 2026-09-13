@@ -32,6 +32,7 @@ import { getFirestoreDb } from "../core/firebase/firebase";
 import { arePlayerLocationPublishesBlocked } from "../session/playerLocationPublishGate";
 import { captureException } from "../core/analytics/sentry";
 import { emitQuestionCancelledActivity } from "../session/emitSessionActivity";
+import { handleFirestoreListenError } from "./sessions/listenError";
 import {
   buildHidingZoneDocument,
   buildTimeTrapDocument,
@@ -189,7 +190,7 @@ export function subscribeToStartingLocations(
       });
       onChange(locations);
     },
-    (error) => onError(error),
+    (error) => handleFirestoreListenError(error, onError),
   );
 }
 
@@ -210,7 +211,7 @@ export function subscribeToPlayerLocations(
       );
       onChange(locations);
     },
-    (error) => onError(error),
+    (error) => handleFirestoreListenError(error, onError),
   );
 }
 
@@ -235,7 +236,7 @@ export function subscribeToSeekerPlayerLocations(
   return onSnapshot(
     query(playerLocationsCollection(sessionId), where("role", "==", "seeker")),
     (snapshot) => onChange(mapPlayerLocationSnapshot(sessionId, snapshot)),
-    (error) => onError(error),
+    (error) => handleFirestoreListenError(error, onError),
   );
 }
 
@@ -247,7 +248,7 @@ export function subscribeToHiderPlayerLocations(
   return onSnapshot(
     query(playerLocationsCollection(sessionId), where("role", "==", "hider")),
     (snapshot) => onChange(mapPlayerLocationSnapshot(sessionId, snapshot)),
-    (error) => onError(error),
+    (error) => handleFirestoreListenError(error, onError),
   );
 }
 
@@ -278,7 +279,7 @@ export function subscribeToSessionMessages(
       );
       onChange(messages);
     },
-    (error) => onError(error),
+    (error) => handleFirestoreListenError(error, onError),
   );
 }
 
@@ -482,7 +483,7 @@ export function subscribeToPendingQuestions(
       );
       onChange(questions);
     },
-    (error) => onError(error),
+    (error) => handleFirestoreListenError(error, onError),
   );
 }
 
@@ -513,7 +514,7 @@ export function subscribeToHidingZones(
       );
       onChange(zones);
     },
-    (error) => onError(error),
+    (error) => handleFirestoreListenError(error, onError),
   );
 }
 
@@ -544,7 +545,7 @@ export function subscribeToTimeTraps(
       );
       onChange(traps);
     },
-    (error) => onError(error),
+    (error) => handleFirestoreListenError(error, onError),
   );
 }
 

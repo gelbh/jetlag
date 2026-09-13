@@ -2,6 +2,7 @@ import { doc, onSnapshot, type Unsubscribe } from "firebase/firestore";
 import type { GameResultRecord } from "../../domain/game/gameResult";
 import { getFirestoreDb } from "../core/firebase/firebase";
 import { deserializeGameResultFromFirestore } from "./serialization/serializePlayer";
+import { handleFirestoreListenError } from "./sessions/listenError";
 
 function gameResultDoc(sessionId: string, gameResultId: string) {
   return doc(
@@ -34,6 +35,6 @@ export function subscribeToGameResult(
         ),
       );
     },
-    (error) => onError(error),
+    (error) => handleFirestoreListenError(error, onError),
   );
 }

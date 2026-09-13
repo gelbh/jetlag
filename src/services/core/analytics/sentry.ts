@@ -280,6 +280,20 @@ export function reportJoinPermissionDenied(phase: "initial" | "retry"): void {
   });
 }
 
+/** Expected mid-session listen permission loss — breadcrumb only (no Sentry issue). */
+export function reportFirestoreListenPermissionDenied(): void {
+  if (import.meta.env.MODE === "test") {
+    return;
+  }
+
+  Sentry.addBreadcrumb({
+    category: "firestore",
+    message: "Listen permission denied",
+    level: "warning",
+    data: { op: "listen", code: "permission-denied" },
+  });
+}
+
 export function capturePhotoUploadFailure(
   error: unknown,
   stage: "compress" | "storage" | "firestore",
