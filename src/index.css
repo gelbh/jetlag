@@ -24,3 +24,16 @@
 @import "./styles/motion.css";
 @import "./styles/route-transition.css";
 @import "./styles/motion-utilities.css";
+
+/*
+ * Border-only preflight: Tailwind width utilities (border-2, border-t-2, …)
+ * need border-style: solid. Full preflight is skipped so Mantine buttons stay opaque.
+ * Kept after @import so stylelint no-invalid-position-at-import-rule stays clean.
+ */
+@layer base {
+  *,
+  *::before,
+  *::after {
+    border: 0 solid;
+  }
+}
