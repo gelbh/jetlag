@@ -2,8 +2,8 @@
   "color": {
     "surface-deep": {
       "$type": "color",
-      "$value": "oklch(0.16 0.045 265)",
-      "$deprecated": "Legacy Broadcast HUD alias — prefer Survey field-book roles (canvas/field-ink/flag/…)"
+      "$value": "oklch(0.259 0.034 260)",
+      "$deprecated": "Legacy Broadcast HUD alias — aligned to logo navy deep (#1a2434); prefer Survey canvas"
     },
     "surface-base": {
       "$type": "color",

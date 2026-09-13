@@ -87,6 +87,11 @@ export function joinRequiresRolePasscode(
   memberRoles: Record<string, PlayerRole | string> | undefined,
   role: PlayerRole,
   uid: string | undefined,
+  /**
+   * False for permission-denied join previews (empty stub roles).
+   * When unknown, keep collecting seeker/hider codes.
+   */
+  occupancyKnown = true,
 ): boolean {
   if (role === "observer") {
     return true;
@@ -101,9 +106,11 @@ export function joinRequiresRolePasscode(
     return false;
   }
 
-  // Always collect — join preview often lacks memberRoles for non-members.
-  // Empty side: leave blank; occupied side: server rejects missing/wrong codes.
-  return true;
+  if (!occupancyKnown) {
+    return true;
+  }
+
+  return countMembersWithRole(memberRoles, role) > 0;
 }
 
 export function buildRoleGatesForHost(

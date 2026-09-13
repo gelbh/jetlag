@@ -54,9 +54,10 @@ describe("JoinMantine", () => {
       </MantineProvider>,
     );
 
-    expect(screen.getByLabelText(/^code$/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/session code/i)).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: /join session/i }),
     ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /^join$/i })).toBeInTheDocument();
   });
 });

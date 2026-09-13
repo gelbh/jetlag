@@ -41,7 +41,7 @@ beforeEach(() => {
 });
 
 describe("HomeMantine", () => {
-  it("renders primary CTAs with opaque Mantine button styles", () => {
+  it("renders inset play group with Join Create and Presets links", () => {
     render(
       <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
         <MemoryRouter>
@@ -49,16 +49,13 @@ describe("HomeMantine", () => {
         </MemoryRouter>
       </MantineProvider>
     );
-    const join = screen.getByRole("link", { name: /join/i });
-    expect(join).toBeInTheDocument();
-    const bg = getComputedStyle(join).backgroundColor;
-    // jsdom often leaves Mantine CSS vars unresolved; opaque bg is a manual Vite check.
-    if (!bg || bg === "rgba(0, 0, 0, 0)" || bg === "transparent") {
-      expect(join.className).toContain("mantine-Button-root");
-      return;
-    }
-    expect(bg).not.toBe("rgba(0, 0, 0, 0)");
-    expect(bg).not.toBe("transparent");
+    expect(screen.getByRole("link", { name: /Join session/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /Create session/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /Browse presets/i }),
+    ).toBeInTheDocument();
   });
 
   it("shows continue card with session code when session is active", () => {
@@ -72,6 +69,8 @@ describe("HomeMantine", () => {
     expect(
       screen.getByRole("button", { name: /Return to map for session ABCD/i })
     ).toBeInTheDocument();
-    expect(screen.getByText(/ABCD/)).toBeInTheDocument();
+    expect(screen.getByText("ABCD")).toBeInTheDocument();
+    expect(screen.getByText(/^Continue$/i)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Join session/i })).toBeInTheDocument();
   });
 });

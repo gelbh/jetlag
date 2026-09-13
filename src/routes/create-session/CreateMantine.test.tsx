@@ -59,7 +59,7 @@ beforeEach(() => {
 });
 
 describe("CreateMantine", () => {
-  it("renders Mantine Back control and Survey confirm footer", () => {
+  it("renders Apple Back control, Create title, and confirm footer", () => {
     render(
       <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
         <MemoryRouter>
@@ -69,6 +69,12 @@ describe("CreateMantine", () => {
     );
 
     expect(screen.getByRole("link", { name: /^back$/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: /^create$/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: /frame the game area/i }),
+    ).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: /confirm game area/i }),
     ).toBeInTheDocument();

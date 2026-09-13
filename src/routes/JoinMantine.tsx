@@ -1,17 +1,25 @@
 import {
-  Alert,
+  Box,
   Button,
   Container,
-  Paper,
   SegmentedControl,
   Stack,
   Text,
   TextInput,
-  Title,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useEffect, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
+import { IosEntryHeader } from "@/components/ui/apple/IosEntryHeader";
+import {
+  IosErrorCallout,
+  IosFieldError,
+  IosInsetGroup,
+  IosSectionLabel,
+  iosFilledStyles,
+  iosGrayStyles,
+} from "@/components/ui/apple/iosEntryChrome";
+import { EntryScreenLayout } from "@/components/ui/layout/EntryScreenLayout";
 import { useAppNavigate } from "@/hooks/navigation/useAppNavigate";
 import { useSubmitLock } from "@/hooks/forms/useSubmitLock";
 import {
@@ -27,6 +35,7 @@ import { useSessionStore } from "@/state/sessionStore";
 import type { PlayerRole } from "@/domain/session/players/playerRole";
 import { playerRoleLabel } from "@/domain/session/players/playerRole";
 import { joinRequiresRolePasscode } from "@/domain/session/players/roleGates";
+import { isPlaceholderGameArea } from "@/domain/session/join/joinPreviewGameArea";
 import {
   isJoinRequestExpired,
   type JoinRequestRole,
@@ -187,10 +196,14 @@ export function JoinMantine() {
     lookupLoading,
     existingRole,
   } = useJoinSessionPreview(suppressPreview ? "" : code);
-  const needsRolePasscode = joinRequiresRolePasscode(
-    previewSession?.memberRoles,
-    playerRole,
-    myUid ?? undefined,
+  const needsRolePasscode = Boolean(
+    previewSession &&
+      joinRequiresRolePasscode(
+        previewSession.memberRoles,
+        playerRole,
+        myUid ?? undefined,
+        !isPlaceholderGameArea(previewSession.gameArea),
+      ),
   );
   const canRequestAccess =
     Boolean(previewSession) &&
@@ -489,17 +502,8 @@ export function JoinMantine() {
           setLoading(false);
         }
       }),
-    (fieldErrors) => {
-      let message = "Check the join form and try again.";
-      if (typeof fieldErrors.code === "string" && fieldErrors.code) {
-        message = fieldErrors.code;
-      } else if (
-        typeof fieldErrors.rolePasscode === "string" &&
-        fieldErrors.rolePasscode
-      ) {
-        message = fieldErrors.rolePasscode;
-      }
-      setError(message);
+    () => {
+      setError(null);
     },
   );
 
@@ -558,96 +562,129 @@ export function JoinMantine() {
       }
     });
 
-  const codeInputProps = form.getInputProps("code");
-  const rolePasscodeInputProps = form.getInputProps("rolePasscode");
+  const {
+    error: codeErrorRaw,
+    ...codeFieldProps
+  } = form.getInputProps("code");
+  const {
+    error: rolePasscodeErrorRaw,
+    ...rolePasscodeFieldProps
+  } = form.getInputProps("rolePasscode");
+  const codeError =
+    typeof codeErrorRaw === "string" ? codeErrorRaw : null;
+  const rolePasscodeError =
+    typeof rolePasscodeErrorRaw === "string" ? rolePasscodeErrorRaw : null;
 
   return (
-    <Container size="sm" py="xl">
-      <Paper p="lg" radius="md" withBorder>
-        <Stack gap="md">
-          <Button component={Link} to="/" variant="subtle" w="fit-content" px={0}>
-            Back
-          </Button>
-          <div>
-            <Text size="sm" tt="uppercase" fw={600} c="dimmed">
-              Join game
-            </Text>
-            <Title order={1} mt="xs">
-              Session code
-            </Title>
-            <Text mt="sm" c="dimmed" size="sm">
-              Enter the four letters your host shared. Everyone in the session
-              sees the same live map.
-            </Text>
-          </div>
+    <EntryScreenLayout justify="start" skin="plain" flush>
+      <IosEntryHeader title="Join" />
+      <Container
+        size="xs"
+        w="100%"
+        px="md"
+        maw={390}
+        py="lg"
+        style={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          minHeight: 0,
+        }}
+      >
+        <Stack gap={28}>
+          <Text
+            c="var(--color-field-ink-muted)"
+            size="sm"
+            style={{ lineHeight: 1.35, textWrap: "pretty", maxWidth: "22rem" }}
+          >
+            Enter the four-letter code from your host.
+          </Text>
 
           {pendingRequest ? (
             <Stack gap="sm">
-              <Text fw={600}>{waitingLeaderCopy(pendingRequest.role)}</Text>
-              <Text size="sm" c="dimmed">
-                Stay on this screen. You&apos;ll join automatically when the
-                leader accepts.
-              </Text>
+              <IosInsetGroup>
+                <Box px="md" py="md">
+                  <Text fw={590} c="var(--color-field-ink)">
+                    {waitingLeaderCopy(pendingRequest.role)}
+                  </Text>
+                  <Text size="sm" c="var(--color-field-ink-muted)" mt={6}>
+                    Stay on this screen. You&apos;ll join automatically when the
+                    leader accepts.
+                  </Text>
+                </Box>
+              </IosInsetGroup>
               <Button
-                variant="default"
+                styles={iosGrayStyles}
                 onClick={() => void handleCancelRequest()}
                 disabled={requestBusy || loading}
                 loading={requestBusy}
+                fullWidth
               >
                 {requestBusy ? "Cancelling…" : "Cancel request"}
               </Button>
-              {error ? (
-                <Alert color="red" title="Join request">
-                  {error}
-                </Alert>
-              ) : null}
+              {error ? <IosErrorCallout>{error}</IosErrorCallout> : null}
             </Stack>
           ) : (
             <form onSubmit={handleJoin}>
-              <Stack gap="md">
-                <TextInput
-                  id="join-session-code"
-                  label="Code"
-                  {...codeInputProps}
-                  onChange={(event) => {
-                    setPreviewEnabledByTyping(true);
-                    form.setFieldValue(
-                      "code",
-                      normalizeSessionCode(event.currentTarget.value),
-                    );
-                  }}
-                  maxLength={4}
-                  placeholder={SESSION_CODE_INPUT_PLACEHOLDER}
-                  autoCapitalize="characters"
-                  autoCorrect="off"
-                  spellCheck={false}
-                  styles={{
-                    input: {
-                      textAlign: "center",
-                      fontFamily: "monospace",
-                      fontSize: "1.75rem",
-                      fontWeight: 700,
-                      letterSpacing: "0.35em",
-                      minHeight: "3.5rem",
-                    },
-                  }}
-                />
+              <Stack gap={22}>
+                <Stack gap={8}>
+                  <IosSectionLabel>Session code</IosSectionLabel>
+                  <IosInsetGroup error={Boolean(codeError)}>
+                    <TextInput
+                      id="join-session-code"
+                      aria-label="Session code"
+                      aria-invalid={Boolean(codeError)}
+                      {...codeFieldProps}
+                      onChange={(event) => {
+                        setPreviewEnabledByTyping(true);
+                        form.setFieldValue(
+                          "code",
+                          normalizeSessionCode(event.currentTarget.value),
+                        );
+                      }}
+                      maxLength={4}
+                      placeholder={SESSION_CODE_INPUT_PLACEHOLDER}
+                      autoCapitalize="characters"
+                      autoCorrect="off"
+                      spellCheck={false}
+                      error={undefined}
+                      styles={{
+                        input: {
+                          border: "none",
+                          background: "transparent",
+                          textAlign: "center",
+                          fontFamily: "var(--font-mono)",
+                          fontSize: "1.75rem",
+                          fontWeight: 700,
+                          letterSpacing: "0.28em",
+                          minHeight: "3.5rem",
+                          color: "var(--color-field-ink)",
+                          paddingInline: "1rem",
+                        },
+                      }}
+                    />
+                  </IosInsetGroup>
+                  <IosFieldError>{codeError}</IosFieldError>
+                  {previewPremium ? (
+                    <Text
+                      size="xs"
+                      fw={590}
+                      c="var(--color-signal)"
+                      px={4}
+                    >
+                      Premium · live transit
+                    </Text>
+                  ) : null}
+                  {lookupLoading ? (
+                    <Text size="sm" c="var(--color-field-ink-muted)" px={4}>
+                      Checking session…
+                    </Text>
+                  ) : null}
+                </Stack>
 
-                {previewPremium ? (
-                  <Text size="xs" fw={600} tt="uppercase" c="orange">
-                    Premium · live transit
-                  </Text>
-                ) : null}
-                {lookupLoading ? (
-                  <Text size="sm" c="dimmed">
-                    Checking session…
-                  </Text>
-                ) : null}
-
-                <div>
-                  <Text size="sm" fw={500} mb={6}>
-                    Your side
-                  </Text>
+                <Stack gap={8}>
+                  <IosSectionLabel>Your side</IosSectionLabel>
                   <SegmentedControl
                     fullWidth
                     data={JOIN_ROLE_OPTIONS}
@@ -663,74 +700,106 @@ export function JoinMantine() {
                       form.setFieldValue("rolePasscode", "");
                     }}
                     aria-label="Player side"
+                    styles={{
+                      root: {
+                        backgroundColor:
+                          "oklch(from var(--color-field-ink) l c h / 0.08)",
+                        border:
+                          "0.33px solid oklch(from var(--color-field-ink) l c h / 0.12)",
+                        borderRadius: 12,
+                        padding: 2,
+                      },
+                      label: {
+                        color: "var(--color-field-ink)",
+                        fontWeight: 510,
+                        fontSize: "0.9375rem",
+                      },
+                      indicator: {
+                        backgroundColor:
+                          "oklch(from var(--color-field-ink) l c h / 0.16)",
+                        borderRadius: 10,
+                      },
+                    }}
                   />
-                </div>
+                </Stack>
 
                 {needsRolePasscode ? (
-                  <div>
-                    <TextInput
-                      id="join-session-role-code"
-                      label="Role code"
-                      {...rolePasscodeInputProps}
-                      onChange={(event) =>
-                        form.setFieldValue(
-                          "rolePasscode",
-                          normalizeRolePasscode(event.currentTarget.value),
-                        )
-                      }
-                      maxLength={4}
-                      placeholder="Team code"
-                      autoCapitalize="characters"
-                      autoCorrect="off"
-                      spellCheck={false}
-                      styles={{
-                        input: {
-                          textAlign: "center",
-                          fontFamily: "monospace",
-                          fontSize: "1.25rem",
-                          fontWeight: 700,
-                          letterSpacing: "0.3em",
-                        },
-                      }}
-                    />
-                    <Text size="xs" c="dimmed" mt={6}>
+                  <Stack gap={8}>
+                    <IosSectionLabel>Role code</IosSectionLabel>
+                    <IosInsetGroup error={Boolean(rolePasscodeError)}>
+                      <TextInput
+                        id="join-session-role-code"
+                        aria-label="Role code"
+                        aria-invalid={Boolean(rolePasscodeError)}
+                        {...rolePasscodeFieldProps}
+                        onChange={(event) =>
+                          form.setFieldValue(
+                            "rolePasscode",
+                            normalizeRolePasscode(event.currentTarget.value),
+                          )
+                        }
+                        maxLength={4}
+                        placeholder="Team code"
+                        autoCapitalize="characters"
+                        autoCorrect="off"
+                        spellCheck={false}
+                        error={undefined}
+                        styles={{
+                          input: {
+                            border: "none",
+                            background: "transparent",
+                            textAlign: "center",
+                            fontFamily: "var(--font-mono)",
+                            fontSize: "1.25rem",
+                            fontWeight: 700,
+                            letterSpacing: "0.24em",
+                            minHeight: "3.25rem",
+                            color: "var(--color-field-ink)",
+                            paddingInline: "1rem",
+                          },
+                        }}
+                      />
+                    </IosInsetGroup>
+                    <IosFieldError>{rolePasscodeError}</IosFieldError>
+                    <Text size="xs" c="var(--color-field-ink-muted)" px={4}>
                       {playerRole === "observer"
                         ? "Ask the host for the observer code."
                         : "Leave blank if you're first on that side; otherwise ask a teammate for the role code."}
                     </Text>
-                  </div>
+                  </Stack>
                 ) : null}
 
-                <Button
-                  type="submit"
-                  disabled={formBusy}
-                  loading={joinBusy}
-                >
-                  {joinBusy ? "Joining…" : "Join session"}
-                </Button>
-
-                {canRequestAccess ? (
+                <Stack gap="sm">
                   <Button
-                    type="button"
-                    variant="default"
-                    onClick={() => void handleRequestAccess()}
+                    type="submit"
+                    fullWidth
                     disabled={formBusy}
-                    loading={requestBusy}
+                    loading={joinBusy}
+                    styles={iosFilledStyles}
                   >
-                    {requestBusy ? "Requesting…" : "Request access"}
+                    {joinBusy ? "Joining…" : "Join session"}
                   </Button>
-                ) : null}
 
-                {error ? (
-                  <Alert color="red" title="Could not join">
-                    {error}
-                  </Alert>
-                ) : null}
+                  {canRequestAccess ? (
+                    <Button
+                      type="button"
+                      fullWidth
+                      styles={iosGrayStyles}
+                      onClick={() => void handleRequestAccess()}
+                      disabled={formBusy}
+                      loading={requestBusy}
+                    >
+                      {requestBusy ? "Requesting…" : "Request access"}
+                    </Button>
+                  ) : null}
+
+                  <IosErrorCallout>{error}</IosErrorCallout>
+                </Stack>
               </Stack>
             </form>
           )}
         </Stack>
-      </Paper>
-    </Container>
+      </Container>
+    </EntryScreenLayout>
   );
 }

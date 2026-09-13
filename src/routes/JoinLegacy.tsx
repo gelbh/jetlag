@@ -24,6 +24,7 @@ import { parseSessionInviteCode } from "../services/session/sessionInviteUrl";
 import { useSessionStore } from "../state/sessionStore";
 import type { PlayerRole } from "../domain/session/players/playerRole";
 import { joinRequiresRolePasscode } from "../domain/session/players/roleGates";
+import { isPlaceholderGameArea } from "../domain/session/join/joinPreviewGameArea";
 import {
   isJoinRequestExpired,
   type JoinRequestRole,
@@ -148,10 +149,14 @@ export function JoinLegacy() {
     lookupLoading,
     existingRole,
   } = useJoinSessionPreview(suppressPreview ? "" : code);
-  const needsRolePasscode = joinRequiresRolePasscode(
-    previewSession?.memberRoles,
-    playerRole,
-    myUid ?? undefined,
+  const needsRolePasscode = Boolean(
+    previewSession &&
+      joinRequiresRolePasscode(
+        previewSession.memberRoles,
+        playerRole,
+        myUid ?? undefined,
+        !isPlaceholderGameArea(previewSession.gameArea),
+      ),
   );
   const canRequestAccess =
     Boolean(previewSession) &&
