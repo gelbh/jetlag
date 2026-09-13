@@ -73,5 +73,22 @@ export async function updateIncidentStatusHandler(db, input, deps = {}) {
     updatedAt: nowIso,
   });
 
+  if (
+    status === "resolved" &&
+    typeof incident.reporterUid === "string" &&
+    incident.reporterUid.length > 0 &&
+    typeof deps.notifyReporterResolved === "function"
+  ) {
+    try {
+      await deps.notifyReporterResolved({
+        incidentId,
+        reporterUid: incident.reporterUid,
+      });
+    } catch (error) {
+      const detail = error instanceof Error ? error.message : String(error);
+      console.warn("[updateIncidentStatus] notifyReporterResolved failed:", detail);
+    }
+  }
+
   return { status };
 }
