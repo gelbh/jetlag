@@ -357,7 +357,7 @@ describe("resolveMeasuringPendingQuestion", () => {
     expect(resolved?.metadata.measuringBoundaryJson).toBeUndefined();
   });
 
-  it("returns null when elim stays over persist slim ceiling", async () => {
+  it("keeps a rebuildable measuring annotation when elim stays over persist slim ceiling", async () => {
     const softenSpy = vi
       .spyOn(measuringGeometryBudgets, "persistSlimMeasuringGeometry")
       .mockReturnValue({
@@ -388,9 +388,16 @@ describe("resolveMeasuringPendingQuestion", () => {
       },
     });
 
-    await expect(
-      resolveMeasuringPendingQuestion(pending, "further", gameArea),
-    ).resolves.toBeNull();
+    const resolved = await resolveMeasuringPendingQuestion(
+      pending,
+      "further",
+      gameArea,
+    );
+
+    expect(resolved?.type).toBe("measuring");
+    expect(resolved?.geometry.geometry.type).toBe("Point");
+    expect(resolved?.metadata.measuringAnswer).toBe("further");
+    expect(typeof resolved?.metadata.measuringRegionInputJson).toBe("string");
 
     softenSpy.mockRestore();
   });

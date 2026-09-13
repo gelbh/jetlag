@@ -11,8 +11,8 @@ interface ChoiceButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 export function ChoiceButton({
   selected = false,
-  activeClassName = "bg-action text-action-ink",
-  inactiveClassName = "bg-surface-raised text-ink-secondary",
+  activeClassName = "bg-flag text-flag-ink",
+  inactiveClassName = "bg-canvas text-field-ink",
   fullWidth = false,
   align,
   className = "",

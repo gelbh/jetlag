@@ -64,8 +64,8 @@ export function SegmentControl<Value extends string>({
               aria-pressed={selected}
               className={`rounded-lg px-3 py-1.5 text-sm font-medium disabled:opacity-50 ${
                 selected
-                  ? "bg-highlight-soft text-highlight"
-                  : "text-ink-muted"
+                  ? "bg-flag-soft text-flag"
+                  : "text-field-ink-muted"
               }`}
             >
               {option.label}
@@ -96,8 +96,8 @@ export function SegmentControl<Value extends string>({
               aria-pressed={selected}
               className={`min-h-12 rounded-[var(--radius-hud-md)] px-2 text-sm font-medium disabled:opacity-50 ${
                 selected
-                  ? "bg-action text-action-ink"
-                  : "bg-surface-raised text-ink-secondary"
+                  ? "bg-flag text-flag-ink"
+                  : "bg-canvas text-field-ink"
               }`}
             >
               {option.label}

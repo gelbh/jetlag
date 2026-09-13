@@ -87,7 +87,7 @@ export function TentacleHudBody({
   return (
     <div
       data-testid="tentacle-hud-body"
-      className="ask-hud-mode-body mx-auto flex max-w-xl flex-col gap-2"
+      className="ask-hud-mode-body flex w-full flex-col gap-2"
     >
       {chord === "types" ? (
         <div className="space-y-2">
@@ -105,7 +105,7 @@ export function TentacleHudBody({
       ) : null}
 
       {chord === "place" ? (
-        <div className="pointer-events-auto hud-panel space-y-2 p-3">
+        <div className="pointer-events-auto ask-hud-panel space-y-2 p-3">
           <AnchorControls
             awaitingPlacement={awaitingPlacement}
             hasAnchor={hasCenter}
@@ -156,7 +156,7 @@ export function TentacleHudBody({
                 </ResolvedReadout>
               )}
               {error ? (
-                <p className="text-sm text-danger">{error}</p>
+                <p className="text-sm text-halt">{error}</p>
               ) : null}
             </>
           }

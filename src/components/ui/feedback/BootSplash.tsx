@@ -18,8 +18,8 @@ export function BootSplash({ label = "Starting…" }: BootSplashProps) {
       >
         <AppLogo variant="lockup" size="lg" />
         <div className="flex flex-col items-center gap-3">
-          <LoadingSpinnerRing size="md" className="text-brand-blue" />
-          <span className="font-display text-xs font-semibold uppercase tracking-[0.14em] text-ink-secondary">
+          <LoadingSpinnerRing size="md" className="text-signal" />
+          <span className="font-display text-xs font-semibold uppercase tracking-[0.14em] text-field-ink-muted">
             {label}
           </span>
         </div>

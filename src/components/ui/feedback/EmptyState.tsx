@@ -9,7 +9,7 @@ export type EmptyStateProps = {
 
 /**
  * Shared empty copy for lists, boards, and recovery surfaces.
- * Survey field-book skin via `.jl-empty-state` under `[data-player-ux-world="survey"]`.
+ * Survey field-book: field-ink-muted on canvas; `.jl-empty-state` keeps rule hairline under survey roots.
  */
 export function EmptyState({
   children,
@@ -19,7 +19,7 @@ export function EmptyState({
   return (
     <p
       role={role}
-      className={["jl-empty-state text-sm leading-relaxed text-ink-muted", className]
+      className={["jl-empty-state text-sm leading-relaxed text-field-ink-muted", className]
         .filter(Boolean)
         .join(" ")}
     >

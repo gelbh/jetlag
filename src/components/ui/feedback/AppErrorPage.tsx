@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { AppLink } from "../../navigation/AppLink";
 import { AppLogo } from "../brand/AppLogo";
+import { Button } from "../button";
 import { EntryScreenLayout } from "../layout/EntryScreenLayout";
 
 export type AppErrorPrimaryAction = {
@@ -35,11 +36,11 @@ export function AppErrorPage({
     <div className="mx-auto flex w-full max-w-md flex-col items-center gap-5 text-center">
       <AppLogo variant="lockup" size="md" className="justify-center" />
       <div className="space-y-2">
-        <h1 className="font-display text-balance text-[clamp(1.75rem,7vw,2.5rem)] font-bold uppercase leading-[0.95] tracking-tight text-ink">
+        <h1 className="font-display text-balance text-[clamp(1.75rem,7vw,2.5rem)] font-bold uppercase leading-[0.95] tracking-tight text-field-ink">
           {title}
         </h1>
         {message ? (
-          <p className="text-pretty text-base leading-relaxed text-ink-dim">
+          <p className="text-pretty text-base leading-relaxed text-field-ink-muted">
             {message}
           </p>
         ) : null}
@@ -48,21 +49,19 @@ export function AppErrorPage({
       {primaryAction || secondaryAction ? (
         <div className="flex flex-wrap items-center justify-center gap-3">
           {primaryAction ? (
-            <button
+            <Button
               type="button"
-              className="btn-primary px-4 py-2 text-sm"
+              variant="flag"
+              className="min-h-11 px-4 py-2 text-sm"
               onClick={primaryAction.onClick}
             >
               {primaryAction.label}
-            </button>
+            </Button>
           ) : null}
           {secondaryAction ? (
-            <AppLink
-              to={secondaryAction.to}
-              className="btn-secondary border border-border px-4 py-2 text-sm"
-            >
-              {secondaryAction.label}
-            </AppLink>
+            <Button asChild variant="default" className="min-h-11 px-4 py-2 text-sm">
+              <AppLink to={secondaryAction.to}>{secondaryAction.label}</AppLink>
+            </Button>
           ) : null}
         </div>
       ) : null}

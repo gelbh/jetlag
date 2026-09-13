@@ -3,6 +3,8 @@
  * Spec: ask-surface-kit-design rev 2026-08-05b.
  * Survey world: plain label casing (field book), not Broadcast ALL-CAPS.
  */
+import { chipVariants } from "@/components/ui/chip";
+import { cn } from "@/lib/cn";
 
 type AskCostChipProps = {
   toolLabel: string;
@@ -17,7 +19,10 @@ export function AskCostChip({ toolLabel, costLabel }: AskCostChipProps) {
     <div
       data-testid="ask-cost-chip"
       data-survey="true"
-      className="ask-cost-chip pointer-events-none font-display"
+      className={cn(
+        chipVariants({ variant: "default", size: "densify" }),
+        "ask-cost-chip pointer-events-none cursor-default font-display",
+      )}
       role="status"
       aria-label={text}
     >

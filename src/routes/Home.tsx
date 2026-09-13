@@ -208,7 +208,7 @@ export function Home() {
                   {showAdminEntry ? (
                     <AppLink
                       to="/admin"
-                      className="hud-chrome inline-flex size-[2.75rem] items-center justify-center text-ink-muted"
+                      className="hud-chrome inline-flex size-[2.75rem] items-center justify-center text-field-ink-muted"
                       aria-label="Admin — live sessions"
                     >
                       <HudAdminIcon className="size-5" />
@@ -216,14 +216,14 @@ export function Home() {
                   ) : null}
                   <AppLink
                     to="/friends"
-                    className="hud-chrome inline-flex size-[2.75rem] items-center justify-center text-ink-muted"
+                    className="hud-chrome inline-flex size-[2.75rem] items-center justify-center text-field-ink-muted"
                     aria-label="Friends"
                   >
                     <HudFriendsIcon className="size-5" />
                   </AppLink>
                   <AppLink
                     to="/leaderboard"
-                    className="hud-chrome inline-flex size-[2.75rem] items-center justify-center text-ink-muted"
+                    className="hud-chrome inline-flex size-[2.75rem] items-center justify-center text-field-ink-muted"
                     aria-label="Leaderboard"
                   >
                     <HudLeaderboardIcon className="size-5" />
@@ -231,7 +231,7 @@ export function Home() {
                   <MotionPressable
                     type="button"
                     onClick={() => setChangelogOpen(true)}
-                    className="hud-chrome shrink-0 px-2.5 py-1.5 font-mono text-xs font-bold tracking-wide text-ink-muted"
+                    className="hud-chrome shrink-0 px-2.5 py-1.5 font-mono text-xs font-bold tracking-wide text-field-ink-muted"
                     aria-label={`Version ${APP_VERSION}. Open changelog`}
                   >
                     v{APP_VERSION}
@@ -239,21 +239,21 @@ export function Home() {
                 </div>
               </div>
               <div className="space-y-1">
-                <h1 className="font-display text-balance text-[clamp(1.75rem,7.5vw,3rem)] font-bold uppercase leading-[0.95] tracking-tight text-ink">
+                <h1 className="font-display text-balance text-[clamp(1.75rem,7.5vw,3rem)] font-bold uppercase leading-[0.95] tracking-tight text-field-ink">
                   {LEGAL_APP_NAME}
                 </h1>
-                <p className="font-display text-pretty text-[clamp(1.5rem,6vw,2.25rem)] font-bold uppercase leading-none tracking-tight text-brand-blue">
+                <p className="font-display text-pretty text-[clamp(1.5rem,6vw,2.25rem)] font-bold uppercase leading-none tracking-tight text-signal">
                   Hide + Seek
                 </p>
               </div>
-              <p className="max-w-sm text-pretty text-base leading-relaxed text-ink-muted">
+              <p className="max-w-sm text-pretty text-base leading-relaxed text-field-ink-muted">
                 Unofficial fan companion for Jet Lag: The Game. Host or join synced map
                 sessions: seekers ask questions on the live map, hiders answer and set
                 hiding zones, and everyone stays on the same board.
               </p>
               {showUsernamePrompt ? (
-                <div className="flex flex-wrap items-center justify-between gap-2 border-t-2 border-border pt-3">
-                  <p className="text-sm text-ink-muted">
+                <div className="flex flex-wrap items-center justify-between gap-2 border-t-2 border-rule pt-3">
+                  <p className="text-sm text-field-ink-muted">
                     Choose a username for friends and leaderboards.
                   </p>
                   <AppLink
@@ -352,7 +352,7 @@ export function Home() {
               >
                 Privacy
               </AppLink>
-              <span className="text-ink-dim" aria-hidden="true">
+              <span className="text-field-ink-muted" aria-hidden="true">
                 ·
               </span>
               <AppLink
@@ -362,7 +362,7 @@ export function Home() {
               >
                 Terms
               </AppLink>
-              <span className="text-ink-dim" aria-hidden="true">
+              <span className="text-field-ink-muted" aria-hidden="true">
                 ·
               </span>
               <AppLink
@@ -372,7 +372,7 @@ export function Home() {
               >
                 Feedback
               </AppLink>
-              <span className="text-ink-dim" aria-hidden="true">
+              <span className="text-field-ink-muted" aria-hidden="true">
                 ·
               </span>
               <button

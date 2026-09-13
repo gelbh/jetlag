@@ -18,13 +18,13 @@ describe("AskCommitStrip", () => {
     });
     expect(button).toBeDisabled();
     expect(button).toHaveAttribute("data-armed", "false");
-    expect(button.className).not.toMatch(/btn-primary/);
+    expect(button.className.split(/\s+/)).not.toContain("bg-flag");
 
     fireEvent.click(button);
     expect(onCommit).not.toHaveBeenCalled();
   });
 
-  it("arms terracotta primary and commits when canCommit", () => {
+  it("arms Survey flag primary and commits when canCommit", () => {
     const onCommit = vi.fn();
     render(
       <AskCommitStrip
@@ -37,7 +37,7 @@ describe("AskCommitStrip", () => {
     const button = screen.getByRole("button", { name: "SEND · D2P1" });
     expect(button).toBeEnabled();
     expect(button).toHaveAttribute("data-armed", "true");
-    expect(button.className).toMatch(/btn-primary/);
+    expect(button.className.split(/\s+/)).toContain("bg-flag");
 
     fireEvent.click(button);
     expect(onCommit).toHaveBeenCalledTimes(1);

@@ -28,8 +28,8 @@ export function SheetHeader({
 }: SheetHeaderProps) {
   const titleClassName =
     titleSize === "xl"
-      ? "font-display text-xl font-bold uppercase tracking-tight text-ink"
-      : "font-display text-lg font-bold uppercase tracking-tight text-ink";
+      ? "font-display text-xl font-bold uppercase tracking-tight text-field-ink"
+      : "font-display text-lg font-bold uppercase tracking-tight text-field-ink";
 
   const header = (
     <div
@@ -38,7 +38,7 @@ export function SheetHeader({
       {eyebrow || titleSize === "xl" ? (
         <div>
           {eyebrow ? (
-            <p className="font-display text-[10px] font-semibold uppercase tracking-[0.14em] text-brand-blue">
+            <p className="font-display text-xs font-semibold uppercase tracking-[0.14em] text-signal">
               {eyebrow}
             </p>
           ) : null}
@@ -59,7 +59,7 @@ export function SheetHeader({
 
   if (sticky) {
     return (
-      <div className="sticky top-0 z-10 -mx-4 bg-surface-panel px-4 pb-3 pt-1">
+      <div className="sticky top-0 z-10 -mx-4 bg-canvas px-4 pb-3 pt-1">
         {header}
       </div>
     );

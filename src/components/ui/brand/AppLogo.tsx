@@ -112,7 +112,7 @@ export function AppLogo({
         className="shrink-0"
       />
       <span
-        className={`font-display font-semibold uppercase text-brand-blue ${WORDMARK_CLASSES[size]}`}
+        className={`font-display font-semibold uppercase text-signal ${WORDMARK_CLASSES[size]}`}
       >
         Jet Lag
       </span>

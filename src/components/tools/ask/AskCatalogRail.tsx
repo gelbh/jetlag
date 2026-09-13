@@ -27,12 +27,12 @@ export function AskCatalogRail({
   return (
     <div
       data-testid="ask-catalog-rail"
-      className="ask-catalog-rail pointer-events-auto hud-panel"
+      className="ask-catalog-rail pointer-events-auto ask-hud-panel"
       role="group"
       aria-label={ariaLabel}
     >
       {hint ? (
-        <p className="ask-catalog-rail__hint text-xs text-ink-muted">{hint}</p>
+        <p className="ask-catalog-rail__hint text-xs text-field-ink-muted">{hint}</p>
       ) : null}
       <div className="ask-catalog-rail__list jl-scroll" role="list">
         {rows.map((row) => (

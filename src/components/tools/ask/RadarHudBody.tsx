@@ -72,11 +72,11 @@ export function RadarHudBody({
   return (
     <div
       data-testid="radar-hud-body"
-      className="ask-hud-mode-body mx-auto flex max-w-xl flex-col gap-2"
+      className="ask-hud-mode-body flex w-full flex-col gap-2"
     >
       {viewOnly ? <ViewOnlyQuestionBanner /> : null}
 
-      <div className="pointer-events-auto hud-panel space-y-2 p-3">
+      <div className="pointer-events-auto ask-hud-panel space-y-2 p-3">
         <PlacementActions
           awaitingPlacement={awaitingPlacement}
           hasCenter={hasCenter}
