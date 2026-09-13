@@ -52,7 +52,10 @@ export function CreateMantine() {
   }, [savePreset, session]);
 
   return (
-    <Box className="flex h-full min-h-[100dvh] flex-col">
+    <Box
+      className="jl-create-session flex h-full min-h-[100dvh] flex-col"
+      data-player-ux-world="survey"
+    >
       <Paper
         radius={0}
         withBorder={false}
@@ -65,11 +68,7 @@ export function CreateMantine() {
         </Group>
       </Paper>
 
-      <Stack
-        gap={0}
-        className="flex min-h-0 flex-1 flex-col"
-        data-player-ux-world="survey"
-      >
+      <Stack gap={0} className="flex min-h-0 flex-1 flex-col">
         <CreateSessionMapPane
           mapStyle={session.mapStyle}
           onMapStyleChange={session.setMapStyle}

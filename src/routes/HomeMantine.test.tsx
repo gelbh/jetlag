@@ -15,6 +15,18 @@ vi.mock("@/hooks/session/useContinueActiveSession", () => ({
   }),
 }));
 
+vi.mock("@/hooks/app/useAuthBootstrapReady", () => ({
+  useAuthBootstrapReady: () => true,
+}));
+
+vi.mock("@/navigation/useRouteTransition", () => ({
+  useRouteTransition: () => ({ phase: "idle" }),
+}));
+
+vi.mock("@/services/core/firebase/firebase", () => ({
+  isFirebaseConfigured: () => false,
+}));
+
 beforeEach(() => {
   vi.stubGlobal("matchMedia", (query: string) => ({
     matches: false,

@@ -153,8 +153,26 @@ export function JoinMantine() {
 
   const code = form.values.code;
   const playerRole = form.values.playerRole;
-  /** When invite query is removed, keep typed code but suppress cached preview. */
-  const [suppressPreview, setSuppressPreview] = useState(false);
+  /**
+   * When invite query is absent, suppress preview until the user types
+   * (keeps typed code after leaving an invite URL without re-querying).
+   */
+  const [previewEnabledByTyping, setPreviewEnabledByTyping] = useState(false);
+  const inviteFromQuery = parseSessionInviteCode(codeFromQuery);
+  const suppressPreview =
+    codeFromQuery == null ? !previewEnabledByTyping : false;
+
+  const [prevCodeFromQuery, setPrevCodeFromQuery] = useState(codeFromQuery);
+  if (codeFromQuery !== prevCodeFromQuery) {
+    setPrevCodeFromQuery(codeFromQuery);
+    setPreviewEnabledByTyping(false);
+    if (inviteFromQuery) {
+      form.setFieldValue("code", inviteFromQuery);
+    } else if (codeFromQuery) {
+      form.setFieldValue("code", "");
+    }
+  }
+
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const { isSubmitting, runLocked } = useSubmitLock();
@@ -180,30 +198,13 @@ export function JoinMantine() {
     isJoinRequestRole(playerRole);
   const formBusy = joinBusy || requestBusy || pendingRequest != null;
 
-  useEffect(() => {
-    const next = parseSessionInviteCode(codeFromQuery);
-    if (!next) {
-      if (codeFromQuery) {
-        setSuppressPreview(false);
-        form.setFieldValue("code", "");
-      } else {
-        setSuppressPreview(true);
-      }
-      return;
+  const [prevExistingRole, setPrevExistingRole] = useState(existingRole);
+  if (existingRole !== prevExistingRole) {
+    setPrevExistingRole(existingRole);
+    if (existingRole) {
+      form.setFieldValue("playerRole", existingRole);
     }
-    setSuppressPreview(false);
-    form.setFieldValue("code", next);
-    // form identity is stable enough; only re-sync when invite query changes
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional: avoid re-running on every form render
-  }, [codeFromQuery]);
-
-  useEffect(() => {
-    if (!existingRole) {
-      return;
-    }
-    form.setFieldValue("playerRole", existingRole);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- sync when preview reports existing role
-  }, [existingRole]);
+  }
 
   useEffect(() => {
     if (!pendingRequest) {
@@ -609,7 +610,7 @@ export function JoinMantine() {
                   label="Code"
                   {...codeInputProps}
                   onChange={(event) => {
-                    setSuppressPreview(false);
+                    setPreviewEnabledByTyping(true);
                     form.setFieldValue(
                       "code",
                       normalizeSessionCode(event.currentTarget.value),
