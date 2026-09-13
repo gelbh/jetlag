@@ -18,7 +18,7 @@ export function ConfirmFooter({
   onConfirm,
 }: ConfirmFooterProps) {
   return (
-    <div className="sticky bottom-0 shrink-0 border-t border-rule bg-canvas px-4 pt-3 pb-[max(0.25rem,env(safe-area-inset-bottom))]">
+    <div className="shrink-0 border-t border-rule bg-canvas px-4 pt-3 pb-[max(0.25rem,env(safe-area-inset-bottom))]">
       <Button
         type="button"
         variant="flag"
