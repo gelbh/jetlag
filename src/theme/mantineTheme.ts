@@ -1,5 +1,8 @@
 import { colorsTuple, createTheme } from "@mantine/core";
 
+/** Matches `--z-modal` in `src/styles/base.css`. */
+export const JETLAG_MODAL_Z_INDEX = 1100;
+
 /** Matches `--z-toast` in `src/styles/base.css`. */
 export const JETLAG_TOAST_Z_INDEX = 1200;
 
