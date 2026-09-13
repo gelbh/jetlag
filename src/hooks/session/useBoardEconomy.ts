@@ -48,10 +48,18 @@ export function useBoardEconomy(params: {
         if (cancelled) {
           return;
         }
-        unsub = subscribeBoardEconomyState(sessionId, (next) => {
-          setState(next);
-          setReady(true);
-        });
+        unsub = subscribeBoardEconomyState(
+          sessionId,
+          (next) => {
+            setState(next);
+            setReady(true);
+          },
+          () => {
+            if (!cancelled) {
+              setReady(false);
+            }
+          },
+        );
       } catch {
         if (!cancelled) {
           setReady(false);

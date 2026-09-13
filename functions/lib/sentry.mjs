@@ -21,6 +21,8 @@ const EXPECTED_HTTPS_ERROR_KEYS = new Set([
   "resource-exhausted:Too many attempts. Try again later.",
   "permission-denied:Invalid access code.",
   "resource-exhausted:Too many recovery attempts. Try again tomorrow.",
+  "failed-precondition:Incident has no linked session.",
+  "invalid-argument:Invalid premium session payload.",
   ...EXPECTED_SESSION_UX_HTTPS_ERROR_KEYS,
 ]);
 
@@ -55,10 +57,60 @@ export function isAbortErrorNoise(error) {
 }
 
 /**
+ * Overpass/postpass undici transport noise under TypeError: fetch failed.
+ * JETLAG-3X: ConnectTimeoutError / UND_ERR_CONNECT_TIMEOUT
+ * JETLAG-3T: EPIPE
+ * Keep unrelated fetch-failed causes loud (total upstream failure).
+ * @param {unknown} cause
+ * @returns {boolean}
+ */
+function isOverpassTransportCause(cause) {
+  if (!cause || typeof cause !== "object") {
+    return false;
+  }
+
+  const name = "name" in cause ? cause.name : undefined;
+  const code = "code" in cause ? cause.code : undefined;
+  const message =
+    "message" in cause && cause.message != null ? String(cause.message) : "";
+
+  if (name === "ConnectTimeoutError" || code === "UND_ERR_CONNECT_TIMEOUT") {
+    return true;
+  }
+
+  if (code === "EPIPE" || /\bEPIPE\b/.test(message)) {
+    return true;
+  }
+
+  return false;
+}
+
+/**
+ * @param {unknown} error
+ * @returns {boolean}
+ */
+export function isOverpassTransportNoise(error) {
+  if (!error || typeof error !== "object") {
+    return false;
+  }
+
+  const name = "name" in error ? error.name : undefined;
+  const message =
+    "message" in error && error.message != null ? String(error.message) : "";
+  if (name !== "TypeError" || !/fetch failed/i.test(message)) {
+    return false;
+  }
+
+  return isOverpassTransportCause("cause" in error ? error.cause : undefined);
+}
+
+/**
  * @param {unknown} error
  * @returns {boolean}
  */
 export function isExpectedFunctionsError(error) {
+  // Overpass ConnectTimeout/EPIPE: wrap via toOverpassUpstreamError (504) on the
+  // final path; residual superseded fetch-failed envelopes stay in beforeSend only.
   if (isAbortErrorNoise(error)) {
     return true;
   }
@@ -98,6 +150,36 @@ export function isAbortErrorEvent(event) {
   return false;
 }
 
+/**
+ * @param {import("@sentry/node").ErrorEvent} event
+ * @returns {boolean}
+ */
+export function isOverpassTransportNoiseEvent(event) {
+  const values = event.exception?.values ?? [];
+  const hasFetchFailed = values.some(
+    (exception) =>
+      exception.type === "TypeError" &&
+      typeof exception.value === "string" &&
+      /fetch failed/i.test(exception.value),
+  );
+  if (!hasFetchFailed) {
+    return false;
+  }
+
+  return values.some((exception) => {
+    if (exception.type === "ConnectTimeoutError") {
+      return true;
+    }
+    if (typeof exception.value !== "string") {
+      return false;
+    }
+    return (
+      /UND_ERR_CONNECT_TIMEOUT/i.test(exception.value) ||
+      /\bEPIPE\b/.test(exception.value)
+    );
+  });
+}
+
 export function readAppVersion() {
   const functionsDir = dirname(fileURLToPath(import.meta.url));
   try {
@@ -131,7 +213,7 @@ export function initFunctionsSentry() {
     release: `jetlag@${readAppVersion()}`,
     tracesSampleRate: 0.1,
     beforeSend(event) {
-      if (isAbortErrorEvent(event)) {
+      if (isAbortErrorEvent(event) || isOverpassTransportNoiseEvent(event)) {
         return null;
       }
       return event;

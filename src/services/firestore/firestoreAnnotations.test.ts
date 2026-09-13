@@ -65,6 +65,8 @@ vi.mock("../core/auth/forceRefreshIdToken", () => ({
 
 vi.mock("../core/analytics/sentry", () => ({
   reportJoinPermissionDenied,
+  reportFirestoreListenPermissionDenied: vi.fn(),
+  captureException: vi.fn(),
 }));
 
 vi.mock("firebase/firestore", () => ({
