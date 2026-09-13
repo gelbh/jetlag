@@ -1,6 +1,6 @@
 import { isEndGameActive } from "@/domain/map/annotations";
 import { useSessionStore } from "@/state/sessionStore";
-import { questionTruthReferenceHint } from "./questionTruthReferenceHint";
+import { questionTruthReferenceHint } from "./hiderTruthReferenceCopy";
 
 export function QuestionTruthReferenceHint() {
   const endGameActive = useSessionStore((state) =>
