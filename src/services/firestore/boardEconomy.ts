@@ -9,6 +9,7 @@ import {
 import type { BoardEconomyState } from "../../domain/boardEconomy";
 import { createInitialBoardEconomyState } from "../../domain/boardEconomy";
 import { getFirestoreDb } from "../core/firebase/firebase";
+import { handleFirestoreListenError } from "./sessions/listenError";
 
 const STATE_DOC = "state";
 
@@ -143,14 +144,19 @@ export async function updateBoardEconomyEnabled(
 export function subscribeBoardEconomyState(
   sessionId: string,
   onChange: (state: BoardEconomyState | null) => void,
+  onError: (error: Error) => void = () => undefined,
 ): Unsubscribe {
-  return onSnapshot(boardEconomyStateRef(sessionId), (snap) => {
-    if (!snap.exists()) {
-      onChange(null);
-      return;
-    }
-    onChange(
-      deserializeBoardEconomyState(snap.data() as Record<string, unknown>),
-    );
-  });
+  return onSnapshot(
+    boardEconomyStateRef(sessionId),
+    (snap) => {
+      if (!snap.exists()) {
+        onChange(null);
+        return;
+      }
+      onChange(
+        deserializeBoardEconomyState(snap.data() as Record<string, unknown>),
+      );
+    },
+    (error) => handleFirestoreListenError(error, onError),
+  );
 }
