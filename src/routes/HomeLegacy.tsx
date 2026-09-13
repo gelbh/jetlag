@@ -18,26 +18,9 @@ import { IncidentResolvedBanner } from "../components/incident/IncidentResolvedB
 import { ReportProblemSheet } from "../components/incident/ReportProblemSheet";
 import { APP_VERSION } from "../domain/device/changelog";
 import { useIncidentResolvedBanner } from "../hooks/incident/useIncidentResolvedBanner";
-import { LOCAL_SESSION_ID } from "../domain/map/annotations";
-import {
-  playerRoleLabel,
-  resolvePlayerRole,
-} from "../domain/session/players/playerRole";
-import { useSessionStore } from "../state/sessionStore";
-import {
-  ensureFreshAnonymousUser,
-  isFirebaseConfigured,
-} from "../services/core/firebase/firebase";
-import { withTimeout } from "../services/core/withTimeout";
-import {
-  getRemoteSessionById,
-  healSessionMembership,
-  lookupRemoteSessionByCode,
-} from "../services/firestore/sessionMembershipHeal";
-import { isFirestorePermissionDenied } from "../services/firestore/firestoreAnnotations";
-import { useSessionExit } from "../hooks/session/useSessionExit";
-import { setPremiumApiContext } from "../services/core/auth/premiumApiContext";
-import { useAppNavigate } from "../hooks/navigation/useAppNavigate";
+import { playerRoleLabel } from "../domain/session/players/playerRole";
+import { isFirebaseConfigured } from "../services/core/firebase/firebase";
+import { useContinueActiveSession } from "../hooks/session/useContinueActiveSession";
 import { useRouteTransition } from "../navigation/useRouteTransition";
 import { usePremiumEntitlements } from "../hooks/billing/usePremiumEntitlements";
 import { resolveHomePremiumButtonDisplay } from "../domain/billing/premiumProducts";
@@ -45,19 +28,10 @@ import { useAuthBootstrapReady } from "../hooks/app/useAuthBootstrapReady";
 import { LEGAL_APP_NAME } from "../domain/legal/legalContact";
 import { useAdminAccessState } from "../hooks/admin/useAdminAccessState";
 import { useUserProfile } from "../hooks/profile/useUserProfile";
-const VERIFY_SESSION_TIMEOUT_MS = 15_000;
-const VERIFY_SESSION_TIMEOUT_MESSAGE =
-  "Couldn't verify the session. Check your connection and try again.";
 
 export function HomeLegacy() {
-  const navigate = useAppNavigate();
-  const exitSession = useSessionExit();
-  const session = useSessionStore((state) => state.session);
-  const myRole = useSessionStore((state) => state.myRole);
-  const myUid = useSessionStore((state) => state.myUid);
-  const setSession = useSessionStore((state) => state.setSession);
-  const [continueError, setContinueError] = useState<string | null>(null);
-  const [continuing, setContinuing] = useState(false);
+  const { session, myRole, continueError, continuing, handleContinue } =
+    useContinueActiveSession();
   const [changelogOpen, setChangelogOpen] = useState(false);
   const [playHubOpen, setPlayHubOpen] = useState(false);
   const [reportProblemOpen, setReportProblemOpen] = useState(false);
@@ -91,120 +65,6 @@ export function HomeLegacy() {
   ) {
     return <BootSplash label="Starting…" />;
   }
-
-  const handleContinue = async () => {
-    if (!session) {
-      return;
-    }
-
-    setContinueError(null);
-    setContinuing(true);
-
-    try {
-      if (!isFirebaseConfigured() || session.id === LOCAL_SESSION_ID) {
-        navigate("/map");
-        return;
-      }
-
-      await withTimeout(
-        (async () => {
-          const user = await ensureFreshAnonymousUser();
-          let remoteSession = null;
-          try {
-            remoteSession = await getRemoteSessionById(session.id);
-          } catch (error) {
-            if (!isFirestorePermissionDenied(error)) {
-              throw error;
-            }
-          }
-
-          if (!remoteSession) {
-            const lookup = await lookupRemoteSessionByCode(session.code);
-            if (lookup.status === "missing") {
-              await exitSession({
-                reason: "reset",
-                sessionId: session.id,
-                animate: false,
-              });
-              setContinueError("That session no longer exists.");
-              return;
-            }
-            if (lookup.status === "ended") {
-              await exitSession({
-                reason: "reset",
-                sessionId: session.id,
-                animate: false,
-              });
-              setContinueError(
-                "That session has ended. Join or create a new one."
-              );
-              return;
-            }
-            remoteSession = lookup.session;
-          }
-
-          if (remoteSession.endedAt) {
-            await exitSession({
-              reason: "reset",
-              sessionId: session.id,
-              animate: false,
-            });
-            setContinueError(
-              "That session has ended. Join or create a new one."
-            );
-            return;
-          }
-
-          const resumeRole =
-            myRole ??
-            resolvePlayerRole(remoteSession.memberRoles, myUid ?? user.uid);
-          const activeSession = await healSessionMembership(
-            remoteSession,
-            user.uid,
-            resumeRole,
-            { returningMemberUid: myUid, persistedMyUid: myUid }
-          );
-
-          const role = resolvePlayerRole(activeSession.memberRoles, user.uid);
-          if (
-            myRole &&
-            activeSession.memberRoles &&
-            activeSession.memberRoles[user.uid] &&
-            myRole !== role
-          ) {
-            setContinueError(
-              "Your role changed for this session. Rejoin with a new code."
-            );
-            return;
-          }
-
-          setSession(activeSession, user.uid);
-          setPremiumApiContext(activeSession);
-          navigate("/map");
-        })(),
-        VERIFY_SESSION_TIMEOUT_MS,
-        VERIFY_SESSION_TIMEOUT_MESSAGE
-      );
-    } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : "Couldn't continue that session.";
-      if (
-        message === "That session no longer exists." ||
-        message === "That session has ended. Join or create a new one."
-      ) {
-        await exitSession({
-          reason: "reset",
-          sessionId: session.id,
-          animate: false,
-        });
-      }
-      setContinueError(message);
-    } finally {
-      setContinuing(false);
-    }
-  };
 
   return (
     <>
@@ -347,8 +207,8 @@ export function HomeLegacy() {
                     premiumButton.variant === "unlimited"
                       ? "home-card-btn home-card-btn-premium"
                       : premiumButton.variant === "sessions"
-                      ? "home-card-btn home-card-btn-premium-sessions"
-                      : "home-card-btn home-card-btn-secondary"
+                        ? "home-card-btn home-card-btn-premium-sessions"
+                        : "home-card-btn home-card-btn-secondary"
                   }
                 >
                   <span className="home-card-btn-text">
