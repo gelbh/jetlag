@@ -209,11 +209,19 @@ export async function refreshActivityPushToken(input: {
     return;
   }
 
+  const platform = resolvePlatform();
+
   await upsertSessionDevice(input.sessionId, input.uid, {
     token: currentPushToken,
-    platform: resolvePlatform(),
+    platform,
     role: input.role,
     preferences: input.preferences,
     activityPushToken,
+  });
+
+  await upsertUserDevice(input.uid, {
+    token: currentPushToken,
+    platform,
+    preferences: input.preferences,
   });
 }
