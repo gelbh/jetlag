@@ -4,5 +4,4 @@ import { createTheme } from "@mantine/core";
 export const jetlagMantineTheme = createTheme({
   primaryColor: "orange",
   defaultRadius: "md",
-  fontFamily: "var(--mantine-font-family)",
 });
