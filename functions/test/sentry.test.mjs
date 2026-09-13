@@ -109,11 +109,15 @@ test("isOverpassTransportNoiseEvent matches ConnectTimeout / EPIPE chains", () =
   );
 });
 
-test("isExpectedFunctionsError treats overpass transport fetch-failed as noise", () => {
+test("isExpectedFunctionsError keeps overpass transport fetch-failed loud", () => {
   const cause = new Error("Connect Timeout Error");
   cause.name = "ConnectTimeoutError";
   cause.code = "UND_ERR_CONNECT_TIMEOUT";
-  assert.equal(isExpectedFunctionsError(fetchFailedWithCause(cause)), true);
+  assert.equal(isExpectedFunctionsError(fetchFailedWithCause(cause)), false);
+
+  const epipe = new Error("connect EPIPE 203.0.113.10:443");
+  epipe.code = "EPIPE";
+  assert.equal(isExpectedFunctionsError(fetchFailedWithCause(epipe)), false);
 });
 
 test("isExpectedFunctionsError matches host-only leave HttpsError", () => {

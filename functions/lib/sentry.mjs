@@ -109,7 +109,9 @@ export function isOverpassTransportNoise(error) {
  * @returns {boolean}
  */
 export function isExpectedFunctionsError(error) {
-  if (isAbortErrorNoise(error) || isOverpassTransportNoise(error)) {
+  // Overpass ConnectTimeout/EPIPE: wrap via toOverpassUpstreamError (504) on the
+  // final path; residual superseded fetch-failed envelopes stay in beforeSend only.
+  if (isAbortErrorNoise(error)) {
     return true;
   }
 
