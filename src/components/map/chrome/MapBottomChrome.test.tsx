@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { MapBottomChrome } from "./MapBottomChrome";
+import { ToolDeckGroup } from "@/components/tools/ToolDeck";
 
 const chromeCss = readFileSync(
   resolve(dirname(fileURLToPath(import.meta.url)), "../../../styles/map-bottom-chrome.css"),
@@ -192,11 +193,12 @@ describe("MapBottomChrome", () => {
     expect(side?.className).toMatch(/absolute/);
     expect(side?.className).toMatch(/jl-map-chrome-side-stack--phone/);
     expect(side?.className).toMatch(/right-0/);
+    expect(side?.getAttribute("data-chrome-side-stack")).toBe("phone");
     expect(chromeCss).toMatch(
-      /\.jl-map-chrome-side-stack--phone\s*\{[^}]*bottom:\s*calc\(\s*var\(--dock-island-height\)/s,
+      /\[data-chrome-side-stack="phone"\]\s*\{[^}]*bottom:\s*calc\(\s*var\(--dock-island-height\)/s,
     );
     expect(chromeCss).not.toMatch(
-      /\.jl-map-chrome-side-stack--phone\s*\{[^}]*safe-area-inset-bottom/s,
+      /\[data-chrome-side-stack="phone"\]\s*\{[^}]*safe-area-inset-bottom/s,
     );
     const hunt = container.querySelector("[data-tool-deck]");
     expect(hunt?.className).toMatch(/w-full/);
@@ -204,11 +206,27 @@ describe("MapBottomChrome", () => {
   });
 
   it("sizes hunt chips as equal flex without edge history islands", () => {
+    expect(chromeCss).not.toMatch(/jl-map-|jl-tool-dock/);
     expect(chromeCss).not.toMatch(/\.jl-map-island--history-start/);
     expect(chromeCss).not.toMatch(/\.jl-map-island--history-end/);
-    expect(chromeCss).toMatch(
-      /\.jl-map-island\s+\.jl-tool-dock-group-main\s+\.jl-tool-slot\s*\{[^}]*flex:\s*1\s+1\s+0/s,
+    const { container } = render(
+      <MapBottomChrome
+        layout="phone"
+        hunt={
+          <ToolDeckGroup>
+            <button type="button" className="jl-tool-slot">
+              A
+            </button>
+            <button type="button" className="jl-tool-slot">
+              B
+            </button>
+          </ToolDeckGroup>
+        }
+      />,
     );
+    const group = container.querySelector(".jl-tool-dock-group-main");
+    expect(group?.className).toMatch(/flex-1/);
+    expect(group?.className).toMatch(/justify-evenly/);
   });
 
   it("anchors container-inset map controls to --dock-height token", () => {
