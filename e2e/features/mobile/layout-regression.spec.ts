@@ -109,6 +109,35 @@ test.describe("layout regression @ default mobile", () => {
       if (!(scroll instanceof HTMLElement) || !(button instanceof HTMLElement)) {
         return { ok: false as const, reason: "missing nodes" };
       }
+
+      // Single scroll owner: form content's nearest overflow-y-auto ancestor
+      // must be the sheet scroller (fails if a nested overflow-y-auto returns).
+      const formMarker = Array.from(root.querySelectorAll("p")).find(
+        (el) => el.textContent?.trim() === "New game",
+      );
+      if (!(formMarker instanceof HTMLElement)) {
+        return { ok: false as const, reason: "missing form marker" };
+      }
+      const hasOverflowYAuto = (el: Element) =>
+        el.className
+          .toString()
+          .split(/\s+/)
+          .some((c) => c.includes("overflow-y-auto"));
+      let nearestOverflow: Element | null = null;
+      let formPathOverflowCount = 0;
+      for (
+        let node: Element | null = formMarker;
+        node && node !== root;
+        node = node.parentElement
+      ) {
+        if (hasOverflowYAuto(node)) {
+          formPathOverflowCount += 1;
+          if (!nearestOverflow) nearestOverflow = node;
+        }
+      }
+      const formScrollOwnerIsSheet = nearestOverflow === scroll;
+      const singleFormScrollport = formPathOverflowCount === 1;
+
       const spacer = document.createElement("div");
       spacer.style.height = "800px";
       scroll.appendChild(spacer);
@@ -117,13 +146,21 @@ test.describe("layout regression @ default mobile", () => {
       const moved = scroll.scrollTop > before;
       const footerOutside = !scroll.contains(button);
       spacer.remove();
-      return { ok: true as const, footerOutside, moved };
+      return {
+        ok: true as const,
+        footerOutside,
+        moved,
+        formScrollOwnerIsSheet,
+        singleFormScrollport,
+      };
     });
 
     expect(relation.ok).toBe(true);
     if (relation.ok) {
       expect(relation.footerOutside).toBe(true);
       expect(relation.moved).toBe(true);
+      expect(relation.formScrollOwnerIsSheet).toBe(true);
+      expect(relation.singleFormScrollport).toBe(true);
     }
 
     await assertLayoutSmoke(page);
