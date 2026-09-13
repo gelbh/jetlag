@@ -4,6 +4,7 @@ import {
   deserializeSessionFromFirestore,
   parseEndGameTruthAnchors,
 } from "../serialization/serializeSession";
+import { handleFirestoreListenError } from "./listenError";
 import { sessionsCollection, endGameTruthAnchorsDoc } from "./shared";
 
 export function subscribeToSession(
@@ -25,7 +26,7 @@ export function subscribeToSession(
         ),
       );
     },
-    (error) => onError(error),
+    (error) => handleFirestoreListenError(error, onError),
   );
 }
 
@@ -47,7 +48,7 @@ export function subscribeToEndGameTruthAnchors(
 
       onChange(parseEndGameTruthAnchors(snapshot.data()?.anchors));
     },
-    (error) => onError(error),
+    (error) => handleFirestoreListenError(error, onError),
   );
 }
 

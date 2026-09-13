@@ -27,6 +27,41 @@ describe("overpassFailover helpers", () => {
     assert.notEqual(mapped.name, "AbortError");
   });
 
+  it("maps ConnectTimeout / EPIPE fetch-failed to Overpass timed out.", () => {
+    const connectTimeout = new Error("Connect Timeout Error");
+    connectTimeout.name = "ConnectTimeoutError";
+    connectTimeout.code = "UND_ERR_CONNECT_TIMEOUT";
+    const fetchFailedTimeout = new TypeError("fetch failed");
+    fetchFailedTimeout.cause = connectTimeout;
+
+    const mappedTimeout = toOverpassUpstreamError(fetchFailedTimeout);
+    assert.equal(mappedTimeout.message, "Overpass timed out.");
+
+    const epipe = new Error("connect EPIPE 203.0.113.10:443");
+    epipe.code = "EPIPE";
+    const fetchFailedEpipe = new TypeError("fetch failed");
+    fetchFailedEpipe.cause = epipe;
+
+    assert.equal(
+      toOverpassUpstreamError(fetchFailedEpipe).message,
+      "Overpass timed out.",
+    );
+    assert.equal(
+      toOverpassUpstreamError(connectTimeout).message,
+      "Overpass timed out.",
+    );
+  });
+
+  it("does not remap unrelated fetch failed", () => {
+    const cause = new Error("getaddrinfo ENOTFOUND overpass.example");
+    cause.code = "ENOTFOUND";
+    const fetchFailed = new TypeError("fetch failed");
+    fetchFailed.cause = cause;
+    const mapped = toOverpassUpstreamError(fetchFailed);
+    assert.equal(mapped, fetchFailed);
+    assert.equal(mapped.message, "fetch failed");
+  });
+
   it("treats 500 as timeout-like alongside 429/502/503/504", () => {
     assert.equal(isTimeoutLikeOverpassStatus(500), true);
     assert.equal(isTimeoutLikeOverpassStatus(429), true);

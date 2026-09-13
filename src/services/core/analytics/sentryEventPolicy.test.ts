@@ -134,6 +134,38 @@ describe("classifyClientSentryEvent", () => {
     ).toBe("drop");
   });
 
+  it("drops view transition skipped wording (JETLAG-3V)", () => {
+    expect(
+      classifyClientSentryEvent(
+        exc("Error", "AbortError: Transition was skipped"),
+      ),
+    ).toBe("drop");
+  });
+
+  it("drops Firefox Firestore IDB NS_ERROR_FAILURE noise (JETLAG-3Z)", () => {
+    expect(
+      classifyClientSentryEvent(
+        exc("NS_ERROR_FAILURE", "No error message"),
+      ),
+    ).toBe("drop");
+    expect(
+      classifyClientSentryEvent(
+        exc("Error", "NS_ERROR_FAILURE: No error message"),
+      ),
+    ).toBe("drop");
+  });
+
+  it("drops IDB index lookup without in-progress transaction (JETLAG-3S)", () => {
+    expect(
+      classifyClientSentryEvent(
+        exc(
+          "UnknownError",
+          "Attempt to get all index records from database without an in-progress transaction",
+        ),
+      ),
+    ).toBe("drop");
+  });
+
   it("sends Firestore missing-or-insufficient-permissions (reopened)", () => {
     expect(
       classifyClientSentryEvent(
