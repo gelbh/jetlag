@@ -53,3 +53,4 @@ export * from "./layout-assert";
 export * from "./firestore-seed";
 export * from "./social-auth";
 export * from "./player-ux-world";
+export * from "./player-ui-mantine";
