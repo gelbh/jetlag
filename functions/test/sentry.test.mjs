@@ -109,7 +109,10 @@ test("isOverpassTransportNoiseEvent matches ConnectTimeout / EPIPE chains", () =
   );
 });
 
-test("isExpectedFunctionsError keeps overpass transport fetch-failed loud", () => {
+// Abort-parity: transport fetch-failed is not an expectedFunctionsError (final
+// path remaps via toOverpassUpstreamError → 504 "Overpass timed out." without
+// capture, same as Abort). Residual superseded envelopes drop in beforeSend.
+test("isExpectedFunctionsError does not treat overpass transport fetch-failed as expected", () => {
   const cause = new Error("Connect Timeout Error");
   cause.name = "ConnectTimeoutError";
   cause.code = "UND_ERR_CONNECT_TIMEOUT";
