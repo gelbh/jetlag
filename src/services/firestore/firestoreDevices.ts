@@ -1,4 +1,4 @@
-import { doc, setDoc } from "firebase/firestore";
+import { deleteDoc, doc, setDoc } from "firebase/firestore";
 import type {
   NotificationPreferences,
   NotificationPlatform,
@@ -16,7 +16,7 @@ export async function upsertSessionDevice(
     role: PlayerRole;
     preferences: NotificationPreferences;
     activityPushToken?: string;
-  },
+  }
 ): Promise<void> {
   const record: SessionDeviceRecord = {
     token: input.token,
@@ -32,6 +32,34 @@ export async function upsertSessionDevice(
   await setDoc(
     doc(getFirestoreDb(), "sessions", sessionId, "devices", uid),
     record,
-    { merge: true },
+    { merge: true }
   );
+}
+
+export async function upsertUserDevice(
+  uid: string,
+  input: {
+    token: string;
+    platform: NotificationPlatform;
+    preferences: NotificationPreferences;
+  }
+): Promise<void> {
+  const deviceId = input.platform;
+  await setDoc(
+    doc(getFirestoreDb(), "users", uid, "devices", deviceId),
+    {
+      token: input.token,
+      platform: input.platform,
+      updatedAt: new Date().toISOString(),
+      preferences: input.preferences,
+    },
+    { merge: true }
+  );
+}
+
+export async function deleteUserDevice(
+  uid: string,
+  platform: NotificationPlatform
+): Promise<void> {
+  await deleteDoc(doc(getFirestoreDb(), "users", uid, "devices", platform));
 }

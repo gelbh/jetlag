@@ -10,12 +10,37 @@ import { INCIDENT_NOT_FOUND } from "../incident/postIncidentMessage.mjs";
 function mockDb(incident) {
   const messages = [];
   const docs = new Map();
+  const notices = new Map();
   if (incident) {
     docs.set("inc-1", { ...incident });
   }
   return {
     messages,
+    notices,
     collection(name) {
+      if (name === "users") {
+        return {
+          doc(uid) {
+            return {
+              collection(sub) {
+                assert.equal(sub, "incidentNotices");
+                return {
+                  doc(incidentId) {
+                    return {
+                      async set(payload, options) {
+                        notices.set(`${uid}/${incidentId}`, {
+                          payload,
+                          options,
+                        });
+                      },
+                    };
+                  },
+                };
+              },
+            };
+          },
+        };
+      }
       assert.equal(name, "incidents");
       return {
         doc(id) {
@@ -110,4 +135,66 @@ test("updateIncidentStatusHandler rejects missing incident", async () => {
       }),
     (error) => error.message === INCIDENT_NOT_FOUND,
   );
+});
+
+test("resolve with reporterUid calls notifyReporterResolved once", async () => {
+  const db = mockDb({ status: "open", reporterUid: "u1" });
+  const notifyCalls = [];
+  const result = await updateIncidentStatusHandler(
+    db,
+    {
+      incidentId: "inc-1",
+      status: "resolved",
+      uid: "admin-1",
+    },
+    {
+      notifyReporterResolved: async (args) => {
+        notifyCalls.push(args);
+      },
+    },
+  );
+  assert.equal(result.status, "resolved");
+  assert.equal(notifyCalls.length, 1);
+  assert.deepEqual(notifyCalls[0], {
+    incidentId: "inc-1",
+    reporterUid: "u1",
+  });
+});
+
+test("dismiss does not call notifyReporterResolved", async () => {
+  const db = mockDb({ status: "open", reporterUid: "u1" });
+  const notifyCalls = [];
+  const result = await updateIncidentStatusHandler(
+    db,
+    {
+      incidentId: "inc-1",
+      status: "dismissed",
+      uid: "admin-1",
+    },
+    {
+      notifyReporterResolved: async (args) => {
+        notifyCalls.push(args);
+      },
+    },
+  );
+  assert.equal(result.status, "dismissed");
+  assert.equal(notifyCalls.length, 0);
+});
+
+test("notify throw does not reject handler", async () => {
+  const db = mockDb({ status: "open", reporterUid: "u1" });
+  const result = await updateIncidentStatusHandler(
+    db,
+    {
+      incidentId: "inc-1",
+      status: "resolved",
+      uid: "admin-1",
+    },
+    {
+      notifyReporterResolved: async () => {
+        throw new Error("notify boom");
+      },
+    },
+  );
+  assert.equal(result.status, "resolved");
 });

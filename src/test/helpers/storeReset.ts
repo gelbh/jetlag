@@ -33,6 +33,7 @@ export function resetAllStores(): void {
       timerChanges: true,
       chatMessages: false,
       incidentHostConfirm: true,
+      incidentResolved: true,
       liveActivities: true,
     },
     distanceUnit: "imperial",

@@ -8,7 +8,7 @@
 export const INCIDENT_EMAIL_ENDPOINT_PATH = "/api/incident-email";
 
 export async function sendIncidentEmail(
-  { workerBaseUrl, secret, adminEmail, subject, text, html, incidentUrl },
+  { workerBaseUrl, secret, adminEmail, subject, text, html, incidentUrl, audience, to },
   fetchImpl = fetch,
 ) {
   if (!workerBaseUrl) {
@@ -20,8 +20,11 @@ export async function sendIncidentEmail(
 
   const base = workerBaseUrl.replace(/\/+$/, "");
   const body = { subject, text, incidentUrl };
-  if (adminEmail) {
-    body.to = adminEmail;
+  if (audience === "reporter") {
+    body.audience = "reporter";
+    if (to) body.to = to;
+  } else if (adminEmail) {
+    body.to = adminEmail; // still ignored by Worker for admin; harmless
   }
   if (html) {
     body.html = html;
