@@ -110,7 +110,6 @@ export function useJoinSession({
   const myUid = useSessionStore((state) => state.myUid);
   const setSession = useSessionStore((state) => state.setSession);
   const onExistingRoleRef = useRef(onExistingRole);
-  onExistingRoleRef.current = onExistingRole;
 
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -142,6 +141,10 @@ export function useJoinSession({
     needsRolePasscode &&
     isJoinRequestRole(playerRole);
   const formBusy = joinBusy || requestBusy || pendingRequest != null;
+
+  useEffect(() => {
+    onExistingRoleRef.current = onExistingRole;
+  }, [onExistingRole]);
 
   useEffect(() => {
     if (!existingRole) {
