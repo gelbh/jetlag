@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import type { GameSize } from "../../domain/session/size/gameSize";
 import { useVisualViewportBottomInset } from "../../hooks/layout/useVisualViewportBottomInset";
 import type { SessionRulesInput } from "../../domain/session/rules";
@@ -86,7 +86,14 @@ export function ToolDock({
   const { drawMenuOpen, setDrawMenuOpen, closeMenus } =
     useToolDockMenus(dockRef);
 
-  const drawMenuVisible = drawMenuOpen && !dismissOverflowMenus;
+  const drawMenuVisible =
+    drawMenuOpen && !dismissOverflowMenus && !inactive;
+
+  useEffect(() => {
+    if (inactive) {
+      closeMenus();
+    }
+  }, [inactive, closeMenus]);
   const markupActive = MARKUP_DOCK_TOOL_IDS.some((toolId) => activeTool === toolId);
   const rulesInput = sessionRules ?? { gameSize };
   const visibleQuestionTools = QUESTION_DOCK_TOOL_IDS.filter((toolId) =>
@@ -122,7 +129,8 @@ export function ToolDock({
           {dockHighlight ? (
             <div
               aria-hidden={true}
-              className="jl-tool-dock-highlight"
+              data-tool-highlight=""
+              className="jl-tool-dock-highlight pointer-events-none absolute z-0 rounded-[var(--radius-hud-md)] border-2 border-highlight/55 bg-highlight-soft will-change-[transform,width,height] motion-safe:transition-[transform,width,height,opacity] motion-safe:duration-[var(--motion-base)] motion-safe:ease-[var(--ease-spring-subtle)]"
               style={{
                 transform: `translate(${dockHighlight.x}px, ${dockHighlight.y}px)`,
                 width: dockHighlight.width,
