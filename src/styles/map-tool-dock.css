@@ -1,139 +1,8 @@
-/* map-tool-dock.css — bottom tool dock */
+/* map-tool-dock.css — tool slots, menus, panels (chassis purged D7) */
 @layer components {
-  /* Bottom tool dock (map) */
-  .jl-tool-dock {
-    position: fixed;
-    z-index: var(--z-dock);
-    right: max(0.375rem, env(safe-area-inset-right));
-    bottom: 0;
-    left: max(0.375rem, env(safe-area-inset-left));
-    /* Wrapper chassis: absorb home-indicator band (not pad-inside-bar). */
-    padding-bottom: env(safe-area-inset-bottom);
-    background: oklch(from var(--color-surface-deep) l c h / 0.96);
-  }
-
-  .jl-tool-dock-bar {
-    container-type: inline-size;
-    container-name: tool-dock;
-    position: relative;
-    display: flex;
-    align-items: stretch;
-    gap: 0.25rem;
-    overflow: visible;
-    border: 2px solid var(--color-border);
-    border-top: 3px solid var(--color-highlight);
-    border-bottom: none;
-    background: oklch(from var(--color-surface-deep) l c h / 0.96);
-    padding: 0.25rem 0.375rem;
-    box-shadow: var(--shadow-hud-menu);
-  }
-
-  .jl-tool-dock-highlight {
-    position: absolute;
-    z-index: 0;
-    border-radius: var(--radius-hud-md);
-    border: 2px solid oklch(from var(--color-highlight) l c h / 0.55);
-    background: var(--color-highlight-soft);
-    pointer-events: none;
-    will-change: transform, width, height;
-  }
-
-  html:not([data-motion="reduced"]):not([data-motion="static"]) .jl-tool-dock-highlight {
-    transition:
-      transform var(--motion-base) var(--ease-spring-subtle),
-      width var(--motion-base) var(--ease-spring-subtle),
-      height var(--motion-base) var(--ease-spring-subtle),
-      opacity var(--motion-fast) var(--ease-out-quint);
-  }
-
-  .jl-tool-dock-group-main {
-    position: relative;
-    z-index: 1;
-    min-width: 0;
-    flex: 1;
-    justify-content: space-evenly;
-  }
-
   html:not([data-motion="reduced"]):not([data-motion="static"]) .jl-tool-menu {
     animation: jl-menu-enter var(--motion-fast) var(--ease-out-quint) both;
     transform-origin: bottom center;
-  }
-
-  .jl-map-banner-top {
-    top: var(--map-banner-top);
-  }
-
-  .jl-tool-dock-wide-only {
-    display: flex;
-  }
-
-  .jl-tool-dock-compact-only {
-    display: none;
-  }
-
-  @container tool-dock (min-width: 28.01rem) {
-    .jl-tool-dock-bar {
-      min-height: var(--dock-height);
-    }
-  }
-
-  @container tool-dock (max-width: 28rem) {
-    .jl-tool-dock-bar .jl-tool-slot-label {
-      display: none;
-    }
-
-    .jl-tool-dock-wide-only {
-      display: none;
-    }
-
-    .jl-tool-dock-compact-only {
-      display: flex;
-    }
-
-    .jl-tool-dock-group-main .jl-tool-slot {
-      min-width: 2.75rem;
-      flex: 1 1 0;
-    }
-
-    .jl-tool-dock-group:not(.jl-tool-dock-group-main) .jl-tool-slot {
-      min-width: 2.75rem;
-      flex: 0 0 auto;
-    }
-  }
-
-  @media (max-width: 28rem) {
-    .jl-tool-dock-bar .jl-tool-slot-label {
-      display: none;
-    }
-
-    .jl-tool-dock-wide-only {
-      display: none !important;
-      pointer-events: none;
-    }
-
-    .jl-tool-dock-compact-only {
-      display: flex;
-    }
-  }
-
-  .jl-tool-dock-group {
-    display: flex;
-    flex-shrink: 0;
-    gap: 0.125rem;
-  }
-
-  /* History lives in .jl-map-island; do not collapse it on narrow viewports. */
-
-
-  .jl-tool-dock-group-end {
-    margin-left: auto;
-  }
-
-  .jl-tool-dock-divider {
-    width: 2px;
-    align-self: stretch;
-    margin-block: 0.25rem;
-    background: oklch(from var(--color-border) l c h / 0.85);
   }
 
   .jl-tool-slot {
@@ -158,21 +27,8 @@
       opacity var(--motion-fast) var(--ease-out-quint);
   }
 
-  html:not([data-motion="reduced"]):not([data-motion="static"]) .jl-tool-dock-group-main .jl-tool-slot-active {
-    border-color: transparent;
-    background: transparent;
-  }
-
-  html[data-motion="css"] .jl-tool-dock-group-main .jl-tool-slot.hud-pressable-css:active:not(:disabled) {
-    transform: scale(0.94);
-  }
-
   html:is([data-motion="static"], [data-motion="reduced"]) .jl-tool-slot {
     transition: none;
-  }
-
-  .jl-tool-dock-group:not(.jl-tool-dock-group-main) .jl-tool-slot {
-    flex: 0 1 auto;
   }
 
   .jl-tool-slot:hover:not(:disabled) {
@@ -209,11 +65,6 @@
     .jl-tool-slot {
       min-width: 2.125rem;
       padding-inline: 0.0625rem;
-    }
-
-    .jl-tool-dock-group-main .jl-tool-slot-label {
-      font-size: 0.4375rem;
-      letter-spacing: 0.02em;
     }
 
     .jl-tool-slot-label {
@@ -484,10 +335,6 @@
     transition: transform var(--motion-base) var(--ease-out-quint);
   }
 
-  html:not([data-motion="reduced"]):not([data-motion="static"]) .jl-tool-dock {
-    transition: bottom var(--motion-base) var(--ease-out-quint);
-  }
-
   html:not([data-motion="reduced"]):not([data-motion="static"]) .btn-primary,
   html:not([data-motion="reduced"]):not([data-motion="static"]) .btn-secondary {
     transition: transform var(--motion-instant) var(--ease-out-quint);
@@ -609,19 +456,4 @@
     background: oklch(from var(--color-border) l c h / 0.85);
   }
 
-  /* Desktop ops left rail — must win over .jl-tool-dock { position: fixed } */
-  .jl-tool-dock.jl-tool-dock--rail {
-    position: relative;
-    inset: auto;
-    left: auto;
-    right: auto;
-    bottom: auto;
-    z-index: auto;
-    height: 100%;
-    width: 100%;
-    pointer-events: auto;
-    /* No bottom safe-area chassis in rail mode. */
-    padding-bottom: 0;
-    background: transparent;
-  }
 }
