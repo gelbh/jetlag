@@ -72,5 +72,9 @@ describe("CreateMantine", () => {
     expect(
       screen.getByRole("button", { name: /confirm game area/i }),
     ).toBeInTheDocument();
+    const root = document.querySelector(
+      '[data-player-ux-world="survey"].jl-create-session',
+    );
+    expect(root).toBeTruthy();
   });
 });
