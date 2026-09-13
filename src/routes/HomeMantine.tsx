@@ -12,9 +12,12 @@ import {
 } from "@mantine/core";
 import {
   CaretRight,
+  Crown,
   PlusCircle,
   SignIn,
   SquaresFour,
+  Trophy,
+  UsersThree,
 } from "@phosphor-icons/react";
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
@@ -114,6 +117,7 @@ export function HomeMantine() {
     useContinueActiveSession();
   const authBootstrapReady = useAuthBootstrapReady();
   const { phase: routeTransitionPhase } = useRouteTransition();
+  const showPremium = isFirebaseConfigured();
 
   if (
     isFirebaseConfigured() &&
@@ -215,6 +219,31 @@ export function HomeMantine() {
                   label="Browse presets"
                   icon={<SquaresFour size={22} weight="regular" />}
                 />
+              </IosInsetGroup>
+            </Stack>
+
+            <Stack gap={8}>
+              <IosSectionLabel>More</IosSectionLabel>
+              <IosInsetGroup>
+                <InsetRow
+                  to="/friends"
+                  label="Friends"
+                  icon={<UsersThree size={22} weight="regular" />}
+                />
+                <InsetRow
+                  showSeparator
+                  to="/leaderboard"
+                  label="Leaderboard"
+                  icon={<Trophy size={22} weight="regular" />}
+                />
+                {showPremium ? (
+                  <InsetRow
+                    showSeparator
+                    to="/premium"
+                    label="Premium"
+                    icon={<Crown size={22} weight="regular" />}
+                  />
+                ) : null}
               </IosInsetGroup>
             </Stack>
 
