@@ -9,6 +9,8 @@ export interface NotificationPreferences {
   chatMessages: boolean;
   /** Host-only: destructive session-ops agent actions awaiting confirm. */
   incidentHostConfirm: boolean;
+  /** Reporter push when an incident they opened is resolved. Default on. */
+  incidentResolved: boolean;
   liveActivities: boolean;
 }
 
@@ -18,6 +20,7 @@ export const DEFAULT_NOTIFICATION_PREFERENCES: NotificationPreferences = {
   timerChanges: true,
   chatMessages: false,
   incidentHostConfirm: true,
+  incidentResolved: true,
   liveActivities: true,
 };
 
