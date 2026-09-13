@@ -55,7 +55,7 @@ export function CreateLegacy() {
 
   return (
     <div
-      className="jl-create-session flex h-full min-h-[100dvh] flex-col bg-canvas"
+      className="jl-create-session flex h-full min-h-0 max-h-full flex-col overflow-hidden bg-canvas"
       data-player-ux-world="survey"
     >
       <div className={`${screenHeaderShellClassName} px-4`}>
