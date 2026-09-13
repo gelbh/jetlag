@@ -1,5 +1,8 @@
 import { colorsTuple, createTheme } from "@mantine/core";
 
+/** Matches `--z-toast` in `src/styles/base.css`. */
+export const JETLAG_TOAST_Z_INDEX = 1200;
+
 const appleSystemSans =
   '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif';
 
