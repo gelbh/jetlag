@@ -14,8 +14,10 @@ import { InlineError } from "../components/ui/banners/InlineError";
 import { VersionChangelogSheet } from "../components/ui/sheets/VersionChangelogSheet";
 import { MotionPressable } from "../components/motion/MotionPressable";
 import { PlayHubSheet } from "../components/home/PlayHubSheet";
+import { IncidentResolvedBanner } from "../components/incident/IncidentResolvedBanner";
 import { ReportProblemSheet } from "../components/incident/ReportProblemSheet";
 import { APP_VERSION } from "../domain/device/changelog";
+import { useIncidentResolvedBanner } from "../hooks/incident/useIncidentResolvedBanner";
 import { LOCAL_SESSION_ID } from "../domain/map/annotations";
 import { playerRoleLabel, resolvePlayerRole } from "../domain/session/players/playerRole";
 import { useSessionStore } from "../state/sessionStore";
@@ -73,6 +75,8 @@ export function Home() {
   const showUsernamePrompt =
     isPermanent && profileReady && profileError == null && profile == null;
   const premiumButton = resolveHomePremiumButtonDisplay(premiumEntitlements);
+  const { notice: incidentResolvedNotice, dismiss: dismissIncidentResolved } =
+    useIncidentResolvedBanner();
 
   if (
     isFirebaseConfigured() &&
@@ -198,6 +202,12 @@ export function Home() {
 
   return (
     <>
+      <IncidentResolvedBanner
+        notice={incidentResolvedNotice}
+        onDismiss={(incidentId) => {
+          void dismissIncidentResolved(incidentId);
+        }}
+      />
       <EntryScreenLayout viewport viewportLayout="center">
         <DesktopContentColumn maxWidth="entry">
           <div className="flex w-full flex-col gap-6">
