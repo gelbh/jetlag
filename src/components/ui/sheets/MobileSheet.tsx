@@ -11,6 +11,8 @@ interface MobileSheetProps {
   layout?: "scroll" | "split";
   /** Fixed header block rendered above the scroll body (split layout only). */
   pinned?: ReactNode;
+  /** Fixed footer block rendered below the scroll body (split layout only). */
+  footer?: ReactNode;
   scrollRef?: RefObject<HTMLDivElement | null>;
   handleProps?: SheetHandleProps;
   /** Skip paint of scroll body while sheet is exiting (perf). */
@@ -24,6 +26,7 @@ export function MobileSheet({
   variant = "overlay",
   layout = "scroll",
   pinned,
+  footer,
   scrollRef: externalScrollRef,
   handleProps,
   scrollIdle = false,
@@ -74,6 +77,9 @@ export function MobileSheet({
           >
             {children}
           </div>
+          {footer ? (
+            <div className="shrink-0 bg-canvas">{footer}</div>
+          ) : null}
         </div>
       </div>
     );
