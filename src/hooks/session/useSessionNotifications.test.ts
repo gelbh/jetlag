@@ -31,7 +31,7 @@ describe("useSessionNotifications", () => {
         sessionId: "session-1",
         uid: "user-1",
         role: "hider",
-      }),
+      })
     );
 
     expect(initializeNativeNotifications).toHaveBeenCalled();
@@ -44,6 +44,7 @@ describe("useSessionNotifications", () => {
       timerChanges: true,
       chatMessages: false,
       incidentHostConfirm: true,
+      incidentResolved: true,
       liveActivities: true,
     });
 
@@ -52,7 +53,7 @@ describe("useSessionNotifications", () => {
         sessionId: "session-1",
         uid: "user-1",
         role: "hider",
-      }),
+      })
     );
 
     await waitFor(() => {
@@ -71,7 +72,7 @@ describe("useSessionNotifications", () => {
         sessionId: "session-1",
         uid: "user-1",
         role: "seeker",
-      }),
+      })
     );
 
     const granted = await result.current.enableNotifications();
@@ -88,6 +89,7 @@ describe("useSessionNotifications", () => {
       timerChanges: true,
       chatMessages: false,
       incidentHostConfirm: true,
+      incidentResolved: true,
       liveActivities: true,
     });
 
@@ -96,7 +98,7 @@ describe("useSessionNotifications", () => {
         sessionId: "session-1",
         uid: "user-1",
         role: "hider",
-      }),
+      })
     );
 
     await waitFor(() => {
