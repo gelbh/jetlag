@@ -27,12 +27,16 @@ jobs:
           # fetch-metadata refuses and never enables auto-merge.
           skip-commit-verification: true
 
-      # Enables squash auto-merge only; GitHub still waits on main ruleset required checks
-      # before merging. Use a Dependabot secret (not GITHUB_TOKEN) so the eventual merge
-      # can trigger push workflows (Deploy).
-      - name: Enable squash auto-merge for npm patch/minor
+      # Grouped patch/minor only. Singletons and majors stay manual / weekly batch.
+      # GitHub still waits on main ruleset required checks before merging.
+      - name: Enable squash auto-merge for grouped patch/minor
         if: >-
-          steps.metadata.outputs.package-ecosystem == 'npm' &&
+          steps.metadata.outputs.dependency-group != '' &&
+          (
+            steps.metadata.outputs.package-ecosystem == 'npm_and_yarn' ||
+            steps.metadata.outputs.package-ecosystem == 'npm' ||
+            steps.metadata.outputs.package-ecosystem == 'github_actions'
+          ) &&
           (
             steps.metadata.outputs.update-type == 'version-update:semver-patch' ||
             steps.metadata.outputs.update-type == 'version-update:semver-minor'
@@ -42,3 +46,42 @@ jobs:
           GH_TOKEN: ${{ secrets.DEPENDABOT_AUTOMERGE_TOKEN }}
           PR_URL: ${{ github.event.pull_request.html_url }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+
+      - name: Close superseded singleton Dependabot PRs
+        if: >-
+          steps.metadata.outputs.dependency-group != '' &&
+          (
+            steps.metadata.outputs.update-type == 'version-update:semver-patch' ||
+            steps.metadata.outputs.update-type == 'version-update:semver-minor'
+          )
+        env:
+          GH_TOKEN: ${{ secrets.DEPENDABOT_AUTOMERGE_TOKEN }}
+          GROUP_PR: ${{ github.event.pull_request.number }}
+          GROUP_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          set -euo pipefail
+          # Close green singleton Dependabot PRs whose package appears in this group body.
+          # Leave majors and any PR with failing checks alone.
+          BODY=$(gh pr view "$GROUP_PR" --json body -q .body)
+          mapfile -t SINGLES < <(gh pr list --author "app/dependabot" --state open --json number,title --jq '.[] | select(.number != '"$GROUP_PR"') | select(.title | test("group"; "i") | not) | "\(.number)\t\(.title)"')
+          for row in "${SINGLES[@]:-}"; do
+            [ -z "$row" ] && continue
+            num=${row%%$'\t'*}
+            title=${row#*$'\t'}
+            if [[ "$title" =~ from\ ([0-9]+)\.[0-9.]+\ to\ ([0-9]+)\.[0-9.]+ ]]; then
+              if [[ "${BASH_REMATCH[1]}" != "${BASH_REMATCH[2]}" ]]; then
+                echo "Skip major #$num"
+                continue
+              fi
+            fi
+            pkg=$(echo "$title" | sed -nE 's/.*bump (@?[^ ]+) from.*/\1/p')
+            [ -z "$pkg" ] && continue
+            if ! echo "$BODY" | grep -Fq "$pkg"; then
+              continue
+            fi
+            if gh pr checks "$num" 2>/dev/null | grep -q $'\tfail\t'; then
+              echo "Skip red #$num"
+              continue
+            fi
+            gh pr close "$num" --comment "Superseded by grouped Dependabot PR #$GROUP_PR ($GROUP_TITLE). Safe patch/minor batching policy."
+          done
