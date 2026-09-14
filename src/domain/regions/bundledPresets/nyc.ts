@@ -16,7 +16,7 @@ export function nycPresets(): BundledGamePresetDefinition[] {
     { id: "continent-north-america", category: "Continent", name: "North America" },
     { id: "country-usa", category: "Country", name: "United States" },
     { id: "state-ny", category: "State", name: "New York" },
-    { id: "metro-nyc", category: "Metro", name: "New York City" },
+    { id: "metro-nyc", category: "City", name: "New York City" },
   ] as const;
   const boroughHierarchy = [
     ...baseHierarchy,

@@ -40,6 +40,14 @@ beforeEach(() => {
     removeEventListener: () => {},
     dispatchEvent: () => false,
   }));
+  vi.stubGlobal(
+    "ResizeObserver",
+    class {
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+    },
+  );
 });
 
 describe("GamePresetList gate", () => {
@@ -71,12 +79,12 @@ describe("GamePresetList gate", () => {
     expect(
       document.querySelector('[data-player-ux-world="mantine"]'),
     ).toBeTruthy();
+    // Full iOS browse body (Join pattern); no Survey world on the list shell.
     expect(
       document.querySelector('[data-player-ux-world="survey"]'),
-    ).toBeTruthy();
+    ).toBeNull();
   });
 });
-
 describe("GamePresetEditor gate", () => {
   it("renders Legacy framing control when flag is off", () => {
     renderWithRouter(<GamePresetEditor />, {
@@ -112,6 +120,7 @@ describe("GamePresetEditor gate", () => {
     expect(
       document.querySelector('[data-player-ux-world="mantine"]'),
     ).toBeTruthy();
+    // Survey islands remain for place search / size / advanced settings.
     expect(
       document.querySelector('[data-player-ux-world="survey"]'),
     ).toBeTruthy();

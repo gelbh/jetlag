@@ -1,19 +1,26 @@
-import { Anchor, Container, Stack } from "@mantine/core";
-import { Link } from "react-router-dom";
-import { GamePresetEditorContent } from "./GamePresetEditorContent";
+import { Container } from "@mantine/core";
+import { useParams } from "react-router-dom";
+import { IosEntryHeader } from "@/components/ui/apple/IosEntryHeader";
+import { EntryScreenLayout } from "@/components/ui/layout/EntryScreenLayout";
+import { GamePresetEditorIosContent } from "./GamePresetEditorIosContent";
 
 export function GamePresetEditorMantine() {
+  const { id } = useParams();
+  const title = id ? "Edit preset" : "New preset";
+
   return (
-    <Container size="sm" py="xl" data-player-ux-world="mantine">
-      <Stack gap="md">
-        <Anchor component={Link} to="/presets" size="sm">
-          Back
-        </Anchor>
-        {/* Survey root wraps form controls + framing map island (Create pattern). */}
-        <div data-player-ux-world="survey" className="flex flex-col gap-4">
-          <GamePresetEditorContent />
-        </div>
-      </Stack>
-    </Container>
+    <EntryScreenLayout justify="start" skin="plain" flush>
+      <IosEntryHeader title={title} backTo="/presets" />
+      <Container
+        size="xs"
+        w="100%"
+        px="md"
+        maw={390}
+        py="lg"
+        data-player-ux-world="mantine"
+      >
+        <GamePresetEditorIosContent />
+      </Container>
+    </EntryScreenLayout>
   );
 }
