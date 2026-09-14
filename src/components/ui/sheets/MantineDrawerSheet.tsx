@@ -1,5 +1,6 @@
 import { Drawer } from "@mantine/core";
 import type { ReactNode } from "react";
+import { cn } from "@/lib/cn";
 import { JETLAG_MODAL_Z_INDEX } from "@/theme/mantineTheme";
 
 export interface MantineDrawerSheetProps {
@@ -16,6 +17,8 @@ export interface MantineDrawerSheetProps {
 /**
  * Flag-on mobile/overlay sheet path: bottom Drawer with safe-area padding.
  * Desktop ContextualRail stays on SheetHost; this mirrors RadixMotionSheet scope.
+ * `size="auto"` + maxHeight on content so consumer maxHeightClassName is not
+ * clamped to Mantine's default fixed drawer height (~440px).
  */
 export function MantineDrawerSheet({
   open,
@@ -32,6 +35,7 @@ export function MantineDrawerSheet({
       opened={open}
       onClose={onClose}
       position="bottom"
+      size="auto"
       withCloseButton={false}
       closeOnClickOutside={dismissible}
       closeOnEscape={dismissible}
@@ -42,27 +46,15 @@ export function MantineDrawerSheet({
       title={ariaLabel}
       aria-label={ariaLabel}
       classNames={{
-        content: ["mantine-drawer-sheet", sheetClassName].filter(Boolean).join(" "),
-        body: maxHeightClassName,
+        content: cn("mantine-drawer-sheet", sheetClassName, maxHeightClassName),
+        body: "min-h-0 overflow-y-auto",
+        header: ariaLabel ? "sr-only" : undefined,
       }}
       styles={{
         content: {
+          height: "auto",
           paddingBottom: "env(safe-area-inset-bottom)",
         },
-        header: ariaLabel
-          ? {
-              // Title is for a11y naming; hide chrome when close button is off.
-              position: "absolute",
-              width: 1,
-              height: 1,
-              padding: 0,
-              margin: -1,
-              overflow: "hidden",
-              clip: "rect(0, 0, 0, 0)",
-              whiteSpace: "nowrap",
-              border: 0,
-            }
-          : undefined,
       }}
     >
       <div data-testid="mantine-drawer-sheet">
