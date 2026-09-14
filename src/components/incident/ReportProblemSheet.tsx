@@ -20,10 +20,12 @@ import {
   IosErrorCallout,
   IosInsetGroup,
   IosSectionLabel,
+} from "../ui/apple/iosEntryChrome";
+import {
   iosBottomDrawerStyles,
   iosFilledStyles,
   iosPlainStyles,
-} from "../ui/apple/iosEntryChrome";
+} from "../ui/apple/iosEntryStyles";
 import { SheetHost } from "../ui/sheets/SheetHost";
 import { SheetHeader } from "../ui/sheets/SheetHeader";
 import { IncidentChatPanel } from "./IncidentChatPanel";
@@ -379,6 +381,7 @@ function ReportProblemSheetContent({
         <Stack gap={8}>
           <IosSectionLabel>Diagnostics</IosSectionLabel>
           <IosInsetGroup>
+            <Box role="list">
             {(
               [
                 ["Route", diagnosticsPreview.route],
@@ -425,6 +428,7 @@ function ReportProblemSheetContent({
                 </Box>
               </Box>
             ))}
+            </Box>
           </IosInsetGroup>
         </Stack>
 

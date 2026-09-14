@@ -128,8 +128,18 @@ export function useFriendsPanelModel() {
       setQueryError(null);
     }
     if (value.trim() === "") {
+      beginRequest();
       setHasSearched(false);
       setSearchResults([]);
+      setSearching(false);
+      return;
+    }
+    const validated = validateFriendSearchQuery(value);
+    if (!validated.ok) {
+      beginRequest();
+      setSearchResults([]);
+      setHasSearched(false);
+      setSearching(false);
     }
   };
 
@@ -177,14 +187,24 @@ export function useFriendsPanelModel() {
   useEffect(() => {
     const trimmed = debouncedQuery.trim();
     if (trimmed.length === 0) {
+      /* eslint-disable react-hooks/set-state-in-effect -- invalidate in-flight search on clear */
+      beginRequest();
+      setSearchResults([]);
+      setHasSearched(false);
+      setSearching(false);
+      /* eslint-enable react-hooks/set-state-in-effect */
       return;
     }
     const validated = validateFriendSearchQuery(debouncedQuery);
     if (!validated.ok) {
+      beginRequest();
+      setSearchResults([]);
+      setHasSearched(false);
+      setSearching(false);
       return;
     }
     void runSearch(debouncedQuery, { showFieldError: false });
-  }, [debouncedQuery, runSearch]);
+  }, [beginRequest, debouncedQuery, runSearch]);
 
   const handleSearch = () => {
     if (searching) {

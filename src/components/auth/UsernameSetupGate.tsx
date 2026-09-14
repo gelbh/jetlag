@@ -6,12 +6,11 @@ import {
 } from "../../domain/game/playerProfile";
 import { claimUsername } from "../../services/profile/claimUsername";
 import {
-  IosErrorCallout,
   IosFieldError,
   IosInsetGroup,
   IosSectionLabel,
-  iosFilledStyles,
 } from "../ui/apple/iosEntryChrome";
+import { iosFilledStyles } from "../ui/apple/iosEntryStyles";
 import { InlineError } from "../ui/banners/InlineError";
 import { TextField } from "../ui/forms/TextField";
 

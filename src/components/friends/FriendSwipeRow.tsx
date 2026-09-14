@@ -7,6 +7,7 @@ import {
   useId,
   useRef,
   useState,
+  type KeyboardEvent as ReactKeyboardEvent,
   type PointerEvent as ReactPointerEvent,
   type ReactNode,
 } from "react";
@@ -50,13 +51,13 @@ export function FriendSwipeRow({
   const registry = useContext(FriendSwipeRegistryContext);
   const revealWidth = Math.max(actionCount, 1) * ACTION_WIDTH;
   const [offset, setOffset] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
   const offsetRef = useRef(0);
   const startX = useRef(0);
   const startY = useRef(0);
   const startOffset = useRef(0);
   const axis = useRef<"undecided" | "x" | "y">("undecided");
   const moved = useRef(false);
-  const dragging = useRef(false);
 
   const setOffsetBoth = useCallback((value: number) => {
     offsetRef.current = value;
@@ -95,7 +96,7 @@ export function FriendSwipeRow({
     startOffset.current = offsetRef.current;
     axis.current = "undecided";
     moved.current = false;
-    dragging.current = true;
+    setIsDragging(true);
     event.currentTarget.setPointerCapture(event.pointerId);
   };
 
@@ -123,7 +124,7 @@ export function FriendSwipeRow({
       return;
     }
     event.currentTarget.releasePointerCapture(event.pointerId);
-    dragging.current = false;
+    setIsDragging(false);
     if (axis.current !== "x") {
       return;
     }
@@ -145,9 +146,7 @@ export function FriendSwipeRow({
     }
   };
 
-  const onClick = () => {
-    // Open sheet on click (not pointerup) so the same gesture cannot hit the
-    // newly mounted drawer overlay and immediately dismiss it.
+  const openRow = () => {
     if (moved.current) {
       return;
     }
@@ -160,6 +159,20 @@ export function FriendSwipeRow({
     }
     registry?.setOpenId(null);
     onOpen?.();
+  };
+
+  const onClick = () => {
+    // Open sheet on click (not pointerup) so the same gesture cannot hit the
+    // newly mounted drawer overlay and immediately dismiss it.
+    openRow();
+  };
+
+  const onKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
+    if (event.key !== "Enter" && event.key !== " ") {
+      return;
+    }
+    event.preventDefault();
+    openRow();
   };
 
   return (
@@ -176,19 +189,22 @@ export function FriendSwipeRow({
           alignItems: "stretch",
         }}
       >
-        {actions}
+        {offset === 0 ? null : actions}
       </Box>
       <Box
+        role="button"
+        tabIndex={0}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={finishDrag}
         onPointerCancel={finishDrag}
         onClick={onClick}
+        onKeyDown={onKeyDown}
         style={{
           position: "relative",
           zIndex: 1,
           transform: `translateX(${offset}px)`,
-          transition: dragging.current
+          transition: isDragging
             ? "none"
             : "transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1)",
           backgroundColor:
