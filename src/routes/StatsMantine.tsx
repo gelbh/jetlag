@@ -82,7 +82,7 @@ function StatsBody({ roleTab }: { roleTab: LeaderboardRole }) {
       {cells ? (
         <IosInsetGroup>
           <Box
-            role="tabpanel"
+            role="region"
             aria-label={`${playerRoleLabel(roleTab)} stats`}
             px="sm"
             py="md"
@@ -125,7 +125,7 @@ function StatsBody({ roleTab }: { roleTab: LeaderboardRole }) {
       ) : (
         <IosInsetGroup>
           <Box
-            role="tabpanel"
+            role="region"
             aria-label={`${playerRoleLabel(roleTab)} stats`}
             px="md"
             py="xl"

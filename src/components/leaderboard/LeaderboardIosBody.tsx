@@ -196,7 +196,7 @@ function IosEmptyInset({
 
 function pullScrollTop(event: ReactPointerEvent<HTMLDivElement>): number {
   const scrollRoot = event.currentTarget.closest(
-    "[data-jl-scroll], .jl-scroll",
+    ".app-scroll-root, [data-jl-scroll], .jl-scroll",
   ) as HTMLElement | null;
   if (scrollRoot) {
     return scrollRoot.scrollTop;

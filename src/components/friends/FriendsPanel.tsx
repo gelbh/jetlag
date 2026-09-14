@@ -133,6 +133,7 @@ export function FriendsPanel() {
                 onAccept={() => void acceptFriend(selectedEntry.uid)}
                 onDecline={() => void declineFriend(selectedEntry.uid)}
                 onCancel={() => void cancelFriend(selectedEntry.uid)}
+                onRequest={() => void requestFriend(selectedEntry.uid)}
               />
             ) : (
               <p className="text-sm leading-relaxed text-ink-muted">
@@ -313,12 +314,14 @@ function FriendDetail({
   onAccept,
   onDecline,
   onCancel,
+  onRequest,
 }: {
   entry: SelectableFriend;
   busyUid: string | null;
   onAccept: () => void;
   onDecline: () => void;
   onCancel: () => void;
+  onRequest: () => void;
 }) {
   const busy = busyUid === entry.uid;
 
@@ -367,6 +370,16 @@ function FriendDetail({
           Connected. You’ll see each other on friends leaderboards when opted
           in.
         </p>
+      ) : null}
+      {entry.relation === "search" ? (
+        <button
+          type="button"
+          disabled={busy}
+          onClick={onRequest}
+          className="btn-secondary min-h-11 px-3 disabled:opacity-50"
+        >
+          {busy ? "Sending…" : "Request"}
+        </button>
       ) : null}
     </div>
   );
