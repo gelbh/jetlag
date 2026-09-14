@@ -13,10 +13,10 @@
   },
   "dependencies": {
     "@sentry/node": "^10.74.0",
-    "firebase-admin": "^14.3.0",
+    "firebase-admin": "^14.4.0",
     "firebase-functions": "^7.3.2",
     "stripe": "^22.6.2",
-    "zod": "^4.6.1"
+    "zod": "^4.6.2"
   },
   "overrides": {
     "protobufjs": "^7.6.5",
