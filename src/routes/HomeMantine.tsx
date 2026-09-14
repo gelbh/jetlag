@@ -51,7 +51,13 @@ export function HomeMantine() {
 
   return (
     <EntryScreenLayout viewport viewportLayout="center" skin="plain">
-      <Container size="xs" w="100%" px={0} maw={390}>
+      <Container
+        size="xs"
+        w="100%"
+        px={0}
+        maw={390}
+        data-player-ux-world="mantine"
+      >
         <Stack gap={28}>
           <Stack gap={10}>
             <Group gap="sm" align="center">
