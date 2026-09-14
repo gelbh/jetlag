@@ -5,8 +5,7 @@
  * Content width matches OverlayHost / ToolDeck (shared safe-area pad).
  * Spec: ask-surface-kit-design rev 2026-08-05b.
  */
-import { createElement, type ReactNode } from "react";
-import { Box, Group, Stack } from "@mantine/core";
+import type { ReactNode } from "react";
 import { OVERLAY_SAFE_PAD_X } from "@/components/map/chrome/OverlayHost";
 import { usePlayerUiMantine } from "@/hooks/feature/usePlayerUiMantine";
 import { cn } from "@/lib/cn";
@@ -58,68 +57,36 @@ export function AskHudHost({
     OVERLAY_SAFE_PAD_X,
   );
 
-  const topRegion = createElement(
-    mantinePlayerUi ? Stack : "div",
-    mantinePlayerUi
-      ? { gap: 8, className: topClassName }
-      : { className: topClassName },
-    <AskModeCueTicker cue={cue} />,
-    showCostChip ? (
-      createElement(
-        mantinePlayerUi ? Group : "div",
-        mantinePlayerUi
-          ? { justify: "flex-start", className: "flex justify-start" }
-          : { className: "flex justify-start" },
-        <AskCostChip toolLabel={toolLabel} costLabel={costLabel} />,
-      )
-    ) : null,
-  );
-
-  const bodyRegion = modeBody
-    ? createElement(
-        mantinePlayerUi ? Box : "div",
-        mantinePlayerUi
-          ? { component: "div" as const, className: bodyClassName }
-          : { className: bodyClassName },
-        modeBody,
-      )
-    : null;
-
-  const stripRegion = showCommitStrip
-    ? createElement(
-        mantinePlayerUi ? Box : "div",
-        mantinePlayerUi
-          ? { component: "div" as const, className: stripClassName }
-          : { className: stripClassName },
-        <div className="w-full">
-          <AskCommitStrip
-            canCommit={canCommit}
-            label={commitLabel}
-            onCommit={onCommit}
-            isSubmitting={isSubmitting}
-            error={error}
-          />
-        </div>,
-      )
-    : null;
-
-  return createElement(
-    mantinePlayerUi ? Box : "div",
-    {
-      className: hostClassName,
-      ...(mantinePlayerUi
-        ? {
-            component: "div" as const,
-            "data-testid": "ask-hud-host-mantine",
-            "data-player-ux-world": "mantine",
-          }
-        : {
-            "data-testid": "ask-hud-host",
-            "data-survey": "true",
-          }),
-    },
-    topRegion,
-    bodyRegion,
-    stripRegion,
+  return (
+    <div
+      className={hostClassName}
+      data-testid="ask-hud-host"
+      {...(mantinePlayerUi
+        ? { "data-player-ux-world": "mantine" }
+        : { "data-survey": "true" })}
+    >
+      <div className={topClassName}>
+        <AskModeCueTicker cue={cue} />
+        {showCostChip ? (
+          <div className="flex justify-start">
+            <AskCostChip toolLabel={toolLabel} costLabel={costLabel} />
+          </div>
+        ) : null}
+      </div>
+      {modeBody ? <div className={bodyClassName}>{modeBody}</div> : null}
+      {showCommitStrip ? (
+        <div className={stripClassName}>
+          <div className="w-full">
+            <AskCommitStrip
+              canCommit={canCommit}
+              label={commitLabel}
+              onCommit={onCommit}
+              isSubmitting={isSubmitting}
+              error={error}
+            />
+          </div>
+        </div>
+      ) : null}
+    </div>
   );
 }
