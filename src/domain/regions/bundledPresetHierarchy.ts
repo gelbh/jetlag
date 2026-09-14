@@ -70,6 +70,64 @@ function findOrCreateGroup(
   )!.children;
 }
 
+function countPresetsInTree(node: BundledPresetTreeNode): number {
+  if (node.kind === "preset") {
+    return 1;
+  }
+  return node.children.reduce((sum, child) => sum + countPresetsInTree(child), 0);
+}
+
+function findSolePreset(
+  node: BundledPresetTreeNode,
+): Extract<BundledPresetTreeNode, { kind: "preset" }> | null {
+  if (node.kind === "preset") {
+    return node;
+  }
+  for (const child of node.children) {
+    const hit = findSolePreset(child);
+    if (hit) {
+      return hit;
+    }
+  }
+  return null;
+}
+
+/**
+ * If a group wraps only one leaf preset (possibly through unary parents),
+ * promote that preset so the UI does not show empty nested dropdowns
+ * (e.g. Canada → BC → Prince Rupert becomes Canada → Prince Rupert).
+ * Keep Continent / Country / Constituent country rows even when unary.
+ */
+const KEEP_UNARY_GROUP_CATEGORIES = new Set([
+  "Continent",
+  "Country",
+  "Constituent country",
+]);
+
+function collapseUnaryPresetChains(
+  nodes: BundledPresetTreeNode[],
+): BundledPresetTreeNode[] {
+  const collapsed: BundledPresetTreeNode[] = [];
+  for (const node of nodes) {
+    if (node.kind === "preset") {
+      collapsed.push(node);
+      continue;
+    }
+    const children = collapseUnaryPresetChains(node.children);
+    const group: BundledPresetTreeNode = { ...node, children };
+    const keep =
+      KEEP_UNARY_GROUP_CATEGORIES.has(node.category) ||
+      countPresetsInTree(group) !== 1;
+    if (keep) {
+      collapsed.push(group);
+    } else {
+      const sole = findSolePreset(group);
+      collapsed.push(sole ?? group);
+    }
+  }
+  return collapsed.sort(compareTreeNodes);
+}
+
 export function buildBundledPresetTree(
   definitions: readonly BundledGamePresetDefinition[],
 ): BundledPresetTreeNode[] {
@@ -85,7 +143,7 @@ export function buildBundledPresetTree(
     children.sort(compareTreeNodes);
   }
 
-  return root;
+  return collapseUnaryPresetChains(root);
 }
 
 export function formatBundledPresetLocation(

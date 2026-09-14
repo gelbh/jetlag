@@ -34,7 +34,7 @@ export function tokyoPresets(): BundledGamePresetDefinition[] {
     { id: "continent-asia", category: "Continent", name: "Asia" },
     { id: "country-japan", category: "Country", name: "Japan" },
     { id: "region-kanto", category: "Region", name: "Kantō" },
-    { id: "metro-tokyo", category: "Metro", name: "Tokyo" },
+    { id: "metro-tokyo", category: "Metropolis", name: "Tokyo Metropolis" },
   ] as const;
   const wardHierarchy = [
     ...baseHierarchy,
