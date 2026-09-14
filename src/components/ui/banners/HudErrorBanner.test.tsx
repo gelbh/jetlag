@@ -2,13 +2,28 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { PLAYER_UI_MANTINE_STORAGE_KEY } from "@/hooks/feature/usePlayerUiMantine";
 
-const { show } = vi.hoisted(() => ({
+const { show, showEphemeral } = vi.hoisted(() => ({
   show: vi.fn(),
+  showEphemeral: vi.fn(),
 }));
 
 vi.mock("@mantine/notifications", () => ({
   notifications: { show },
 }));
+
+vi.mock("../notifications/showEphemeralPlayerNotification", async (importOriginal) => {
+  const actual =
+    await importOriginal<
+      typeof import("../notifications/showEphemeralPlayerNotification")
+    >();
+  return {
+    ...actual,
+    showEphemeralPlayerNotification: (input: {
+      title: string;
+      message: string;
+    }) => showEphemeral(input),
+  };
+});
 
 import { HudErrorBanner } from "./HudErrorBanner";
 
@@ -16,6 +31,14 @@ describe("HudErrorBanner", () => {
   beforeEach(() => {
     localStorage.clear();
     show.mockClear();
+    showEphemeral.mockReset();
+    showEphemeral.mockImplementation((input: { title: string; message: string }) => {
+      if (localStorage.getItem(PLAYER_UI_MANTINE_STORAGE_KEY) !== "1") {
+        return false;
+      }
+      show(input);
+      return true;
+    });
   });
 
   it("renders retry and return to join actions", () => {
@@ -42,7 +65,7 @@ describe("HudErrorBanner", () => {
 
     expect(onRetry).toHaveBeenCalledTimes(1);
     expect(onReturnToJoin).toHaveBeenCalledTimes(1);
-    expect(show).not.toHaveBeenCalled();
+    expect(showEphemeral).not.toHaveBeenCalled();
   });
 
   it("keeps Survey banner when flag is on but actions are present", () => {
@@ -63,7 +86,7 @@ describe("HudErrorBanner", () => {
 
     expect(screen.getByText("Sync failed")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Retry" })).toBeInTheDocument();
-    expect(show).not.toHaveBeenCalled();
+    expect(showEphemeral).not.toHaveBeenCalled();
   });
 
   it("shows Mantine notification and skips Survey banner when flag on and no actions", () => {
@@ -79,12 +102,29 @@ describe("HudErrorBanner", () => {
     );
 
     expect(container).toBeEmptyDOMElement();
-    expect(show).toHaveBeenCalledWith(
+    expect(showEphemeral).toHaveBeenCalledWith(
       expect.objectContaining({
         title: "Offline",
         message: "Changes will sync when you reconnect.",
       }),
     );
+  });
+
+  it("keeps Survey banner when adapter returns false (fail open)", () => {
+    localStorage.setItem(PLAYER_UI_MANTINE_STORAGE_KEY, "1");
+    showEphemeral.mockReturnValue(false);
+
+    render(
+      <HudErrorBanner
+        error={{
+          title: "Offline",
+          message: "Changes will sync when you reconnect.",
+        }}
+      />,
+    );
+
+    expect(screen.getByText("Offline")).toBeInTheDocument();
+    expect(show).not.toHaveBeenCalled();
   });
 
   it("renders Survey banner when flag is off and no actions", () => {
@@ -98,6 +138,7 @@ describe("HudErrorBanner", () => {
     );
 
     expect(screen.getByText("Offline")).toBeInTheDocument();
+    expect(showEphemeral).toHaveBeenCalled();
     expect(show).not.toHaveBeenCalled();
   });
 });

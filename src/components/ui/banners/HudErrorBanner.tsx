@@ -1,8 +1,7 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { HudBanner } from "../hud/HudBanner";
 import { MapFloatAlertPanel } from "./MapFloatAlert";
 import { showEphemeralPlayerNotification } from "../notifications/showEphemeralPlayerNotification";
-import { usePlayerUiMantine } from "@/hooks/feature/usePlayerUiMantine";
 import type { UserErrorDisplay } from "@/domain/device/feedback/userErrors";
 
 interface HudErrorBannerProps {
@@ -16,7 +15,6 @@ export function HudErrorBanner({
   onAction,
   onSecondaryAction,
 }: HudErrorBannerProps) {
-  const mantineUi = usePlayerUiMantine();
   const showPrimaryAction = Boolean(error.action && onAction && error.actionLabel);
   const showSecondaryAction = Boolean(
     error.secondaryAction &&
@@ -24,17 +22,25 @@ export function HudErrorBanner({
       error.secondaryActionLabel,
   );
   const hasActions = showPrimaryAction || showSecondaryAction;
-  const useNotification = mantineUi && !hasActions;
+  const [toastActive, setToastActive] = useState(false);
 
+  /* Toast bridge: adapter is the sole Mantine flag gate; UI follows success/fail (fail open). */
+  /* eslint-disable react-hooks/set-state-in-effect -- sync banner visibility to external toast */
   useEffect(() => {
-    if (!useNotification) return;
-    showEphemeralPlayerNotification({
-      title: error.title,
-      message: error.message,
-    });
-  }, [useNotification, error.title, error.message]);
+    if (hasActions) {
+      setToastActive(false);
+      return;
+    }
+    setToastActive(
+      showEphemeralPlayerNotification({
+        title: error.title,
+        message: error.message,
+      }),
+    );
+  }, [hasActions, error.title, error.message]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
-  if (useNotification) return null;
+  if (toastActive) return null;
 
   return (
     <HudBanner
