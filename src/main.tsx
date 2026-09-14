@@ -12,6 +12,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { installE2EBridgeIfConfigured } from "./test/e2eBridge";
 import "@mantine/core/styles.layer.css";
+import "@mantine/notifications/styles.layer.css";
 import "./index.css";
 
 installE2EBridgeIfConfigured();

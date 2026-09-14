@@ -1,5 +1,7 @@
+import { useEffect, useState } from "react";
 import { HudBanner } from "../hud/HudBanner";
 import { MapFloatAlertPanel } from "./MapFloatAlert";
+import { showEphemeralPlayerNotification } from "../notifications/showEphemeralPlayerNotification";
 import type { UserErrorDisplay } from "@/domain/device/feedback/userErrors";
 
 interface HudErrorBannerProps {
@@ -19,6 +21,26 @@ export function HudErrorBanner({
       onSecondaryAction &&
       error.secondaryActionLabel,
   );
+  const hasActions = showPrimaryAction || showSecondaryAction;
+  const [toastActive, setToastActive] = useState(false);
+
+  /* Toast bridge: adapter is the sole Mantine flag gate; UI follows success/fail (fail open). */
+  /* eslint-disable react-hooks/set-state-in-effect -- sync banner visibility to external toast */
+  useEffect(() => {
+    if (hasActions) {
+      setToastActive(false);
+      return;
+    }
+    setToastActive(
+      showEphemeralPlayerNotification({
+        title: error.title,
+        message: error.message,
+      }),
+    );
+  }, [hasActions, error.title, error.message]);
+  /* eslint-enable react-hooks/set-state-in-effect */
+
+  if (toastActive) return null;
 
   return (
     <HudBanner
@@ -31,7 +53,7 @@ export function HudErrorBanner({
           <p className="text-sm font-semibold text-status-error">{error.title}</p>
           <p className="text-xs text-ink">{error.message}</p>
         </div>
-        {showPrimaryAction || showSecondaryAction ? (
+        {hasActions ? (
           <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
             {showPrimaryAction ? (
               <button
