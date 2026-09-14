@@ -21,6 +21,24 @@ export function normalizeUsername(raw: string): string {
   return raw.trim().toLowerCase();
 }
 
+function checkUsernameShape(username: string): ValidateUsernameResult | null {
+  if (username.length > USERNAME_MAX_LENGTH) {
+    return {
+      ok: false,
+      error: `Username must be ${USERNAME_MAX_LENGTH} characters or fewer.`,
+    };
+  }
+
+  if (!USERNAME_PATTERN.test(username)) {
+    return {
+      ok: false,
+      error: "Username can only use letters, numbers, and underscore.",
+    };
+  }
+
+  return null;
+}
+
 export function validateUsername(raw: string): ValidateUsernameResult {
   const username = raw.trim();
 
@@ -35,18 +53,9 @@ export function validateUsername(raw: string): ValidateUsernameResult {
     };
   }
 
-  if (username.length > USERNAME_MAX_LENGTH) {
-    return {
-      ok: false,
-      error: `Username must be ${USERNAME_MAX_LENGTH} characters or fewer.`,
-    };
-  }
-
-  if (!USERNAME_PATTERN.test(username)) {
-    return {
-      ok: false,
-      error: "Username can only use letters, numbers, and underscore.",
-    };
+  const shapeError = checkUsernameShape(username);
+  if (shapeError) {
+    return shapeError;
   }
 
   const normalized = normalizeUsername(username);
@@ -77,18 +86,9 @@ export function validateFriendSearchQuery(
     };
   }
 
-  if (username.length > USERNAME_MAX_LENGTH) {
-    return {
-      ok: false,
-      error: `Username must be ${USERNAME_MAX_LENGTH} characters or fewer.`,
-    };
-  }
-
-  if (!USERNAME_PATTERN.test(username)) {
-    return {
-      ok: false,
-      error: "Username can only use letters, numbers, and underscore.",
-    };
+  const shapeError = checkUsernameShape(username);
+  if (shapeError) {
+    return shapeError;
   }
 
   return {

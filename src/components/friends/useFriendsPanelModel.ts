@@ -14,7 +14,7 @@ import {
   type FriendListEntry,
 } from "../../services/profile/profileFriends";
 
-export type FriendRelation = "incoming" | "outgoing" | "friend";
+export type FriendRelation = "incoming" | "outgoing" | "friend" | "search";
 export type FriendsListTab = "incoming" | "outgoing" | "friends";
 
 export interface SelectableFriend extends FriendListEntry {
@@ -32,6 +32,8 @@ export function relationLabel(relation: FriendRelation): string {
       return "Outgoing request";
     case "friend":
       return "Friend";
+    case "search":
+      return "Search result";
     default: {
       const _exhaustive: never = relation;
       return _exhaustive;
@@ -249,9 +251,13 @@ export function useFriendsPanelModel() {
     [friends, incoming, outgoing],
   );
 
-  const requestableResults = loadingList
-    ? []
-    : searchResults.filter((entry) => !relationshipUids.has(entry.uid));
+  const requestableResults = useMemo(
+    () =>
+      loadingList
+        ? []
+        : searchResults.filter((entry) => !relationshipUids.has(entry.uid)),
+    [loadingList, relationshipUids, searchResults],
+  );
 
   const selectableEntries = useMemo((): SelectableFriend[] => {
     return [
@@ -261,18 +267,16 @@ export function useFriendsPanelModel() {
     ];
   }, [friends, incoming, outgoing]);
 
-  const selectedEntry =
-    selectableEntries.find((entry) => entry.uid === selectedUid) ??
-    requestableResults
-      .map((entry) => ({ ...entry, relation: "friend" as const }))
-      .find((entry) => entry.uid === selectedUid) ??
-    null;
-
-  // Prefer explicit relation for search hits not yet connected
   const selectedSearchHit =
     selectedUid == null
       ? null
-      : requestableResults.find((entry) => entry.uid === selectedUid) ?? null;
+      : (requestableResults.find((entry) => entry.uid === selectedUid) ?? null);
+
+  const selectedEntry =
+    selectableEntries.find((entry) => entry.uid === selectedUid) ??
+    (selectedSearchHit
+      ? ({ ...selectedSearchHit, relation: "search" as const } satisfies SelectableFriend)
+      : null);
 
   useEffect(() => {
     if (selectedUid == null) {
@@ -308,9 +312,7 @@ export function useFriendsPanelModel() {
     flashSuccess,
     selectedUid,
     setSelectedUid,
-    selectedEntry: selectedSearchHit
-      ? ({ ...selectedSearchHit, relation: "friend" as const } satisfies SelectableFriend)
-      : selectedEntry,
+    selectedEntry,
     selectedSearchHit,
     selectableEntries,
     listTab,
