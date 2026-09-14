@@ -21,6 +21,7 @@
     "lint:pr-title": "bash scripts/lint-pr-title.sh",
     "typecheck": "tsc -b --noEmit",
     "tokens:build": "node scripts/build-tokens.mjs",
+    "flags:sync": "node scripts/sync-region-flags.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",

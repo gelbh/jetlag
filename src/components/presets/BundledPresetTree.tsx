@@ -9,6 +9,7 @@ import {
   type BundledPresetTreeNode,
 } from "../../domain/regions/bundledPresetHierarchy";
 import { migrateGamePreset } from "../../domain/session/presets/gamePreset";
+import { BundledPresetTreeIos } from "./BundledPresetTreeIos";
 import { PresetCard } from "./PresetCard";
 import { PresetFavouriteButton } from "./PresetFavouriteButton";
 
@@ -117,8 +118,10 @@ function PresetTreeGroup({
 
 export function BundledPresetTree({
   presets,
+  chrome = "survey",
 }: {
   presets: readonly MigratedPreset[];
+  chrome?: "survey" | "ios";
 }) {
   const tree = useMemo(
     () => buildBundledPresetTree(BUNDLED_GAME_PRESET_DEFINITIONS),
@@ -129,6 +132,10 @@ export function BundledPresetTree({
     [presets],
   );
   const [openGroupIds, setOpenGroupIds] = useState(() => new Set<string>());
+
+  if (chrome === "ios") {
+    return <BundledPresetTreeIos presets={presets} />;
+  }
 
   const toggleGroup = (groupId: string) => {
     setOpenGroupIds((current) => {
