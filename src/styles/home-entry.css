@@ -599,4 +599,13 @@
       margin-inline: auto;
     }
   }
+
+  /* Apple inset group: opaque fallback when transparency is reduced. */
+  @media (prefers-reduced-transparency: reduce) {
+    .jl-ios-inset-group {
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      background-color: oklch(from var(--color-canvas) calc(l + 0.06) c h);
+    }
+  }
 }

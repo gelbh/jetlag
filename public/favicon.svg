@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Jetlag">
-  <circle cx="32" cy="32" r="18" fill="none" stroke="#C55B40" stroke-width="4" />
-  <path d="M32 32 L44.7 19.3 A18 18 0 0 1 44.7 44.7 Z" fill="#E4B352" fill-opacity="0.5" />
-  <path d="M32 32 L44.7 19.3" stroke="#E4B352" stroke-width="2.5" stroke-linecap="round" />
-  <path d="M32 16v32M16 32h32" stroke="#4378B1" stroke-width="2" stroke-linecap="round" />
+  <circle cx="32" cy="32" r="18" fill="none" stroke="#E6783C" stroke-width="4" />
+  <path d="M32 32 L44.7 19.3 A18 18 0 0 1 44.7 44.7 Z" fill="#F0B43C" fill-opacity="0.5" />
+  <path d="M32 32 L44.7 19.3" stroke="#F0B43C" stroke-width="2.5" stroke-linecap="round" />
+  <path d="M32 16v32M16 32h32" stroke="#F0B43C" stroke-width="2" stroke-linecap="round" />
   <circle cx="32" cy="32" r="2.5" fill="#F3F4F5" />
 </svg>

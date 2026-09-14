@@ -5,6 +5,28 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { HomeMantine } from "./HomeMantine";
 import { jetlagMantineTheme } from "@/theme/mantineTheme";
 
+vi.mock("@/hooks/session/useContinueActiveSession", () => ({
+  useContinueActiveSession: () => ({
+    session: { id: "local", code: "ABCD" },
+    myRole: "seeker",
+    continueError: null,
+    continuing: false,
+    handleContinue: vi.fn(),
+  }),
+}));
+
+vi.mock("@/hooks/app/useAuthBootstrapReady", () => ({
+  useAuthBootstrapReady: () => true,
+}));
+
+vi.mock("@/navigation/useRouteTransition", () => ({
+  useRouteTransition: () => ({ phase: "idle" }),
+}));
+
+vi.mock("@/services/core/firebase/firebase", () => ({
+  isFirebaseConfigured: () => false,
+}));
+
 beforeEach(() => {
   vi.stubGlobal("matchMedia", (query: string) => ({
     matches: false,
@@ -19,7 +41,7 @@ beforeEach(() => {
 });
 
 describe("HomeMantine", () => {
-  it("renders primary CTAs with opaque Mantine button styles", () => {
+  it("renders inset play group with Join Create and Presets links", () => {
     render(
       <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
         <MemoryRouter>
@@ -27,15 +49,28 @@ describe("HomeMantine", () => {
         </MemoryRouter>
       </MantineProvider>
     );
-    const join = screen.getByRole("link", { name: /join/i });
-    expect(join).toBeInTheDocument();
-    const bg = getComputedStyle(join).backgroundColor;
-    // jsdom often leaves Mantine CSS vars unresolved; opaque bg is a manual Vite check.
-    if (!bg || bg === "rgba(0, 0, 0, 0)" || bg === "transparent") {
-      expect(join.className).toContain("mantine-Button-root");
-      return;
-    }
-    expect(bg).not.toBe("rgba(0, 0, 0, 0)");
-    expect(bg).not.toBe("transparent");
+    expect(screen.getByRole("link", { name: /Join session/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /Create session/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /Browse presets/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("shows continue card with session code when session is active", () => {
+    render(
+      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+        <MemoryRouter>
+          <HomeMantine />
+        </MemoryRouter>
+      </MantineProvider>
+    );
+    expect(
+      screen.getByRole("button", { name: /Return to map for session ABCD/i })
+    ).toBeInTheDocument();
+    expect(screen.getByText("ABCD")).toBeInTheDocument();
+    expect(screen.getByText(/^Continue$/i)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Join session/i })).toBeInTheDocument();
   });
 });

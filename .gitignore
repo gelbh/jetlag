@@ -17,6 +17,8 @@ firestore-debug.log
 ui-debug.log
 .DS_Store
 docs/
+DESIGN.md
+PRODUCT.md
 .lighthouseci
 target/
 crates/*/pkg/
