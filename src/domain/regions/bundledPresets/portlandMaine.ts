@@ -16,7 +16,7 @@ export function portlandMainePresets(): BundledGamePresetDefinition[] {
     { id: "continent-north-america", category: "Continent", name: "North America" },
     { id: "country-usa", category: "Country", name: "United States" },
     { id: "state-me", category: "State", name: "Maine" },
-    { id: "metro-portland-maine", category: "Metro", name: "Portland" },
+    { id: "metro-portland-maine", category: "City", name: "Portland" },
   ] as const;
   const districtHierarchy = [
     ...baseHierarchy,
