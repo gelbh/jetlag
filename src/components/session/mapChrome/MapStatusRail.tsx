@@ -1,5 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode, createElement } from "react";
-import { Box } from "@mantine/core";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { SyncStatus } from "@/domain/device/sync/sync";
 import type { TimerState } from "@/domain/session/timer/timer";
 import type { MapTool } from "@/state/sessionStore";
@@ -187,20 +186,18 @@ export function MapStatusRail({
       : ""
   }`;
 
-  return createElement(
-    mantinePlayerUi ? Box : "div",
-    {
-      ref: railRef,
-      className: railClassName,
-      ...(mantinePlayerUi
+  return (
+    <div
+      ref={railRef}
+      className={railClassName}
+      {...(mantinePlayerUi
         ? {
-            component: "div" as const,
             "data-testid": "map-status-rail-mantine",
             "data-player-ux-world": "mantine",
           }
-        : {}),
-    },
-    <div className="relative">
+        : {})}
+    >
+      <div className="relative">
         <TimerBlock
           open={showTimerMenu}
           onClose={() => setTimerMenuOpen(false)}
@@ -326,6 +323,7 @@ export function MapStatusRail({
           onAccept={handleAcceptJoinRequest}
           onDecline={handleDeclineJoinRequest}
         />
-      </div>,
+      </div>
+    </div>
   );
 }
