@@ -283,4 +283,20 @@ describe("MapBottomChrome Mantine gate", () => {
     const host = container.querySelector("[data-overlay-host]");
     expect(host?.className).toMatch(/pointer-events-none/);
   });
+
+  it("keeps Mantine side islands clickable under pointer-events-none chrome", () => {
+    mockUsePlayerUiMantine.mockReturnValue(true);
+    const { container } = render(
+      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+        <MapBottomChrome
+          layout="phone"
+          hunt={<button type="button">Radar</button>}
+          session={<button type="button">Chat</button>}
+        />
+      </MantineProvider>,
+    );
+    const sessionIsland = container.querySelector('[data-island="session"]');
+    expect(sessionIsland?.className).toMatch(/pointer-events-auto/);
+    expect(screen.getByRole("button", { name: "Chat" })).toBeInTheDocument();
+  });
 });

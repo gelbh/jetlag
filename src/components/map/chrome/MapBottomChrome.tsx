@@ -46,6 +46,8 @@ function SideIsland({
   const className = cn(
     "jl-map-island",
     `jl-map-island--${name}`,
+    // Match Island base hit target under OverlayHost pointer-events-none stack.
+    "pointer-events-auto",
     "h-fit w-[var(--map-chrome-side-width,3.25rem)] flex-none flex-col p-1",
     "text-field-ink-muted",
     "[&_.jl-tool-dock-group-secondary]:grow-0 [&_.jl-tool-dock-group-secondary]:shrink-0",
