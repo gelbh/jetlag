@@ -21,8 +21,8 @@ import { Link } from "react-router-dom";
 import {
   IosInsetGroup,
   IosSectionLabel,
-  iosFilledStyles,
 } from "@/components/ui/apple/iosEntryChrome";
+import { iosFilledStyles } from "@/components/ui/apple/iosEntryStyles";
 import { IosInsetRow } from "@/components/ui/apple/IosInsetRow";
 import { AppLogo } from "@/components/ui/brand/AppLogo";
 import { BootSplash } from "@/components/ui/feedback/BootSplash";

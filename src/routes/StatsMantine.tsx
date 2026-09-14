@@ -21,7 +21,10 @@ type MockStatCell = { label: string; value: string };
 
 function isStatsMockEnabled(): boolean {
   try {
-    return localStorage.getItem(STATS_MOCK_STORAGE_KEY) === "1";
+    return (
+      import.meta.env.DEV &&
+      localStorage.getItem(STATS_MOCK_STORAGE_KEY) === "1"
+    );
   } catch {
     return false;
   }

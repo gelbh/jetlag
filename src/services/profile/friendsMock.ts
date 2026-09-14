@@ -146,7 +146,10 @@ let state: MockState = createSeedState();
 
 export function isFriendsMockEnabled(): boolean {
   try {
-    return localStorage.getItem(FRIENDS_MOCK_STORAGE_KEY) === "1";
+    return (
+      import.meta.env.DEV &&
+      localStorage.getItem(FRIENDS_MOCK_STORAGE_KEY) === "1"
+    );
   } catch {
     return false;
   }

@@ -1,6 +1,6 @@
 import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { MantineProvider } from "@mantine/core";
-commiimport { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { INCIDENT_NOTE_MAX_LENGTH } from "../../domain/incident/incidentTypes";
 import { jetlagMantineTheme } from "@/theme/mantineTheme";
 import { renderWithRouter } from "../../test/renderWithRouter";

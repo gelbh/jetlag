@@ -15,9 +15,8 @@ import {
   IosErrorCallout,
   IosInsetGroup,
   IosSectionLabel,
-  iosFilledStyles,
-  iosGrayStyles,
 } from "../ui/apple/iosEntryChrome";
+import { iosFilledStyles, iosGrayStyles } from "../ui/apple/iosEntryStyles";
 import { GoogleSignInButton } from "../billing/GoogleSignInButton";
 import {
   completeOAuthRedirectIfPending,

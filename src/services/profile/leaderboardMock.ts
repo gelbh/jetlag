@@ -79,7 +79,10 @@ const MOCK_PLAYER_PROFILES: Record<string, LeaderboardPlayerSheetProfile> = {
 
 export function isLeaderboardMockEnabled(): boolean {
   try {
-    return localStorage.getItem(LEADERBOARD_MOCK_STORAGE_KEY) === "1";
+    return (
+      import.meta.env.DEV &&
+      localStorage.getItem(LEADERBOARD_MOCK_STORAGE_KEY) === "1"
+    );
   } catch {
     return false;
   }

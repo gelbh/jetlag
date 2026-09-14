@@ -37,11 +37,12 @@ import {
   IosInsetGroup,
   IosSectionLabel,
   IosSuccessCallout,
+} from "@/components/ui/apple/iosEntryChrome";
+import {
   iosCompactFilledStyles,
   iosFilledStyles,
   iosGrayStyles,
-  iosPlainStyles,
-} from "@/components/ui/apple/iosEntryChrome";
+} from "@/components/ui/apple/iosEntryStyles";
 import { IosInsetRow } from "@/components/ui/apple/IosInsetRow";
 import { USERNAME_MAX_LENGTH } from "@/domain/game/playerProfile";
 import crawlPolicy from "@/domain/seo/seoCrawlPolicy.json";
@@ -294,6 +295,16 @@ function IosEmptyInset({
   );
 }
 
+function pullScrollTop(event: ReactPointerEvent<HTMLDivElement>): number {
+  const scrollRoot = event.currentTarget.closest(
+    "[data-jl-scroll], .jl-scroll",
+  ) as HTMLElement | null;
+  if (scrollRoot) {
+    return scrollRoot.scrollTop;
+  }
+  return window.scrollY || document.documentElement.scrollTop || 0;
+}
+
 function PullToRefresh({
   refreshing,
   onRefresh,
@@ -305,18 +316,18 @@ function PullToRefresh({
 }) {
   const startY = useRef(0);
   const [pull, setPull] = useState(0);
-  const pulling = useRef(false);
+  const [isPulling, setIsPulling] = useState(false);
 
   const onPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (event.currentTarget.scrollTop > 0 || refreshing) {
+    if (pullScrollTop(event) > 0 || refreshing) {
       return;
     }
     startY.current = event.clientY;
-    pulling.current = true;
+    setIsPulling(true);
   };
 
   const onPointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (!pulling.current) {
+    if (!isPulling) {
       return;
     }
     const dy = event.clientY - startY.current;
@@ -329,10 +340,10 @@ function PullToRefresh({
   };
 
   const onPointerUp = () => {
-    if (!pulling.current) {
+    if (!isPulling) {
       return;
     }
-    pulling.current = false;
+    setIsPulling(false);
     if (pull >= 84) {
       onRefresh();
     }
@@ -358,7 +369,7 @@ function PullToRefresh({
           height: 36,
           opacity: pull || refreshing ? 1 : 0,
           transform: `translateY(${Math.max(pull - 36, refreshing ? 0 : -8)}px)`,
-          transition: pulling.current
+          transition: isPulling
             ? "none"
             : "opacity 160ms ease, transform 160ms ease",
           color: "var(--color-field-ink-muted)",
@@ -376,7 +387,12 @@ function PullToRefresh({
           {refreshing ? "Refreshing…" : pull >= 84 ? "Release to refresh" : "Pull to refresh"}
         </Text>
       </Group>
-      <Box style={{ transform: `translateY(${refreshing ? 40 : Math.max(0, pull * 0.35)}px)`, transition: pulling.current ? "none" : "transform 160ms ease" }}>
+      <Box
+        style={{
+          transform: `translateY(${refreshing ? 40 : Math.max(0, pull * 0.35)}px)`,
+          transition: isPulling ? "none" : "transform 160ms ease",
+        }}
+      >
         {children}
       </Box>
     </Box>
@@ -385,8 +401,12 @@ function PullToRefresh({
 
 const iosPlainHaltStyles = {
   root: {
-    ...iosPlainStyles.root,
+    minHeight: "2.75rem",
+    borderRadius: 14,
+    border: "none",
+    backgroundColor: "transparent",
     color: "var(--color-halt)",
+    fontWeight: 510,
     "&:hover": {
       backgroundColor: "oklch(from var(--color-halt) l c h / 0.12)",
     },
@@ -1113,7 +1133,7 @@ function FriendTabRow({
         <FriendSwipeRow
           actionCount={2}
           onOpen={onOpen}
-          onFullSwipe={onAccept}
+          onFullSwipe={busy ? undefined : onAccept}
           actions={
             <>
               <FriendSwipeAction
@@ -1150,7 +1170,7 @@ function FriendTabRow({
         <FriendSwipeRow
           actionCount={1}
           onOpen={onOpen}
-          onFullSwipe={onCancel}
+          onFullSwipe={busy ? undefined : onCancel}
           actions={
             <FriendSwipeAction
               label="Cancel"
