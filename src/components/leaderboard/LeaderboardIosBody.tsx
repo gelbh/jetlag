@@ -38,8 +38,8 @@ import {
   IosInsetGroup,
   IosSectionLabel,
   IosSuccessCallout,
-  iosFilledStyles,
 } from "@/components/ui/apple/iosEntryChrome";
+import { iosFilledStyles } from "@/components/ui/apple/iosEntryStyles";
 import { IosInsetHairline } from "@/components/ui/apple/IosInsetRow";
 import {
   formatLeaderboardValue,
@@ -51,7 +51,6 @@ import {
   leaderboardScopeLabel,
   type LeaderboardEntry,
   type LeaderboardMetric,
-  type LeaderboardRole,
   type LeaderboardScope,
 } from "@/domain/game/leaderboard";
 import {
@@ -67,7 +66,9 @@ import {
 import { GAME_SIZE_OPTIONS, gameSizeLabel } from "@/domain/session/size/gameSize";
 import { playerRoleLabel } from "@/domain/session/players/playerRole";
 import { usePermanentAuthUser } from "@/hooks/billing/usePermanentAuthUser";
+import { useLeaderboardSelfEntry } from "@/hooks/leaderboard/useLeaderboardSelfEntry";
 import { useRowInView } from "@/hooks/leaderboard/useRowInView";
+import { useUserProfile } from "@/hooks/profile/useUserProfile";
 import { isFirebaseConfigured } from "@/services/core/firebase/firebase";
 import { subscribeLeaderboardBoard } from "@/services/firestore/firestoreLeaderboard";
 import {
@@ -193,6 +194,16 @@ function IosEmptyInset({
   );
 }
 
+function pullScrollTop(event: ReactPointerEvent<HTMLDivElement>): number {
+  const scrollRoot = event.currentTarget.closest(
+    "[data-jl-scroll], .jl-scroll",
+  ) as HTMLElement | null;
+  if (scrollRoot) {
+    return scrollRoot.scrollTop;
+  }
+  return window.scrollY || document.documentElement.scrollTop || 0;
+}
+
 function PullToRefresh({
   refreshing,
   onRefresh,
@@ -204,18 +215,18 @@ function PullToRefresh({
 }) {
   const startY = useRef(0);
   const [pull, setPull] = useState(0);
-  const pulling = useRef(false);
+  const [isPulling, setIsPulling] = useState(false);
 
   const onPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (event.currentTarget.scrollTop > 0 || refreshing) {
+    if (pullScrollTop(event) > 0 || refreshing) {
       return;
     }
     startY.current = event.clientY;
-    pulling.current = true;
+    setIsPulling(true);
   };
 
   const onPointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (!pulling.current) {
+    if (!isPulling) {
       return;
     }
     const dy = event.clientY - startY.current;
@@ -227,10 +238,10 @@ function PullToRefresh({
   };
 
   const onPointerUp = () => {
-    if (!pulling.current) {
+    if (!isPulling) {
       return;
     }
-    pulling.current = false;
+    setIsPulling(false);
     if (pull >= 84) {
       onRefresh();
     }
@@ -256,6 +267,7 @@ function PullToRefresh({
           height: 36,
           opacity: pull || refreshing ? 1 : 0,
           transform: `translateY(${Math.max(0, pull * 0.2 - 8)}px)`,
+          transition: isPulling ? "none" : "opacity 160ms ease, transform 160ms ease",
           pointerEvents: "none",
           color: "var(--color-field-ink-muted)",
         }}
@@ -272,7 +284,7 @@ function PullToRefresh({
       <Box
         style={{
           transform: `translateY(${refreshing ? 40 : Math.max(0, pull * 0.35)}px)`,
-          transition: pulling.current ? "none" : "transform 160ms ease",
+          transition: isPulling ? "none" : "transform 160ms ease",
         }}
       >
         {children}
@@ -1153,7 +1165,7 @@ export function LeaderboardIosBody() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const mockEnabled = isLeaderboardMockEnabled();
-  const { user } = usePermanentAuthUser();
+  const { user, isPermanent } = usePermanentAuthUser();
   const viewerUid = mockEnabled
     ? LEADERBOARD_MOCK_SELF_UID
     : (user?.uid ?? null);
@@ -1172,11 +1184,25 @@ export function LeaderboardIosBody() {
   const [reloadToken, setReloadToken] = useState(0);
   const viewerRowRef = useRef<HTMLElement | null>(null);
   const rowRefs = useRef(new Map<string, HTMLElement>());
+  const { profile, ready: profileReady, error: profileError } = useUserProfile(
+    user?.uid,
+    !mockEnabled && isFirebaseConfigured() && isPermanent,
+  );
   const listEntry =
     viewerUid != null
       ? (entries.find((entry) => entry.uid === viewerUid) ?? null)
       : null;
+  const {
+    entry: selfEntry,
+    error: selfError,
+    loading: selfLoading,
+  } = useLeaderboardSelfEntry(
+    selection,
+    viewerUid,
+    mockEnabled || (!boardLoading && listEntry != null),
+  );
   const rowInView = useRowInView(viewerRowRef, listEntry?.uid ?? null);
+  const needsOptIn = !mockEnabled && profile != null && !profile.leaderboardOptIn;
 
   const registerRowRef = useCallback((uid: string, node: HTMLElement | null) => {
     if (node) {
@@ -1347,12 +1373,23 @@ export function LeaderboardIosBody() {
   const footerMode = resolveSelfFooterMode({
     viewerUid,
     listEntry,
-    selfEntry: listEntry,
-    selfError: false,
-    selfLoading: boardLoading,
+    selfEntry,
+    selfError,
+    selfLoading,
     rowInView,
   });
+  const footerEntry = listEntry ?? selfEntry;
   const footerVisible = footerMode !== "hidden";
+  const footerInteractive = footerMode === "pinned";
+  const footerMuted = footerMode === "unranked" || footerMode === "error";
+  const footerLabel =
+    footerMode === "unranked"
+      ? "Not ranked on this board"
+      : footerMode === "error"
+        ? "Couldn't load your rank"
+        : footerEntry
+          ? `#${footerEntry.rank} · YOU · ${formatLeaderboardValue(selection.metric, footerEntry.value)}`
+          : "YOU";
 
   const pullRefresh = () => {
     setRefreshing(true);
@@ -1481,6 +1518,22 @@ export function LeaderboardIosBody() {
         </Stack>
 
         <IosSuccessCallout>{successMessage}</IosSuccessCallout>
+        {!profileReady && !mockEnabled ? (
+          <Text size="sm" c="var(--color-field-ink-muted)" px={4}>
+            Loading profile…
+          </Text>
+        ) : null}
+        {profileError && !mockEnabled ? (
+          <IosErrorCallout>
+            Could not load profile for leaderboard opt-in status.
+          </IosErrorCallout>
+        ) : null}
+        {needsOptIn ? (
+          <Text size="sm" c="var(--color-field-ink-muted)" px={4}>
+            Leaderboard opt-in is off for your username. You can browse boards;
+            turn opt-in on to appear on global ranks.
+          </Text>
+        ) : null}
         {boardError ? <IosErrorCallout>{boardError}</IosErrorCallout> : null}
 
         {boardLoading ? (
@@ -1566,11 +1619,15 @@ export function LeaderboardIosBody() {
           />
         ) : null}
 
-        {footerVisible && listEntry ? (
+        {footerVisible ? (
           <UnstyledButton
             type="button"
             data-testid="leaderboard-self-footer"
+            disabled={!footerInteractive}
             onClick={() => {
+              if (!footerInteractive) {
+                return;
+              }
               viewerRowRef.current?.scrollIntoView({
                 block: "center",
                 behavior: "smooth",
@@ -1595,13 +1652,16 @@ export function LeaderboardIosBody() {
                   "0.33px solid oklch(from var(--color-field-ink) l c h / 0.14)",
                 backdropFilter: "blur(20px) saturate(1.4)",
                 WebkitBackdropFilter: "blur(20px) saturate(1.4)",
-                color: "var(--color-field-ink)",
+                color: footerMuted
+                  ? "var(--color-field-ink-muted)"
+                  : "var(--color-field-ink)",
                 fontWeight: 590,
                 fontSize: "0.9375rem",
+                cursor: footerInteractive ? "pointer" : "default",
               },
             }}
           >
-            {`#${listEntry.rank} · YOU · ${formatLeaderboardValue(selection.metric, listEntry.value)}`}
+            {footerLabel}
           </UnstyledButton>
         ) : null}
       </Stack>

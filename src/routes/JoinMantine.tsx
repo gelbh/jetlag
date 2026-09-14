@@ -16,9 +16,8 @@ import {
   IosFieldError,
   IosInsetGroup,
   IosSectionLabel,
-  iosFilledStyles,
-  iosGrayStyles,
 } from "@/components/ui/apple/iosEntryChrome";
+import { iosFilledStyles, iosGrayStyles } from "@/components/ui/apple/iosEntryStyles";
 import { EntryScreenLayout } from "@/components/ui/layout/EntryScreenLayout";
 import { useAppNavigate } from "@/hooks/navigation/useAppNavigate";
 import { useSubmitLock } from "@/hooks/forms/useSubmitLock";

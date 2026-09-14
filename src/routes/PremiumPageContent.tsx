@@ -45,6 +45,7 @@ export function PremiumPageContent({
   const [portalLoading, setPortalLoading] = useState(false);
   const [trialLoading, setTrialLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [checkoutNotice, setCheckoutNotice] = useState<string | null>(null);
 
   const refreshEntitlementsWithError = useCallback(async () => {
     if (!isFirebaseConfigured()) {
@@ -65,26 +66,22 @@ export function PremiumPageContent({
   }, [refreshEntitlements]);
 
   useEffect(() => {
-    /* eslint-disable react-hooks/set-state-in-effect -- refresh entitlements after Stripe redirect */
+    if (checkoutState !== "success" && checkoutState !== "cancel") {
+      return;
+    }
+    /* eslint-disable react-hooks/set-state-in-effect -- snapshot Stripe redirect notice before clearing query */
+    setCheckoutNotice(
+      checkoutState === "success"
+        ? "Payment received. Premium unlock is ready."
+        : "Checkout canceled.",
+    );
+    /* eslint-enable react-hooks/set-state-in-effect */
     if (checkoutState === "success") {
       track(ANALYTICS_EVENTS.premium_purchase_completed, {});
       void refreshEntitlementsWithError();
     }
-    /* eslint-enable react-hooks/set-state-in-effect */
-    if (checkoutState === "success" || checkoutState === "cancel") {
-      setSearchParams({}, { replace: true });
-    }
+    setSearchParams({}, { replace: true });
   }, [checkoutState, refreshEntitlementsWithError, setSearchParams]);
-
-  const checkoutNotice = useMemo(() => {
-    if (checkoutState === "success") {
-      return "Payment received. Premium unlock is ready.";
-    }
-    if (checkoutState === "cancel") {
-      return "Checkout canceled.";
-    }
-    return null;
-  }, [checkoutState]);
 
   const entitlementSummary = useMemo(
     () => formatEntitlementSummary(entitlements),
