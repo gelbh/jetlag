@@ -73,4 +73,23 @@ describe("HomeMantine", () => {
     expect(screen.getByText(/^Continue$/i)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /Join session/i })).toBeInTheDocument();
   });
+
+  it("links to privacy, terms, and feedback", () => {
+    render(
+      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+        <MemoryRouter>
+          <HomeMantine />
+        </MemoryRouter>
+      </MantineProvider>
+    );
+    expect(
+      screen.getByRole("link", { name: "Privacy Policy" }),
+    ).toHaveAttribute("href", "/privacy");
+    expect(
+      screen.getByRole("link", { name: "Terms of Service" }),
+    ).toHaveAttribute("href", "/terms");
+    expect(
+      screen.getByRole("link", { name: "Feedback and suggestions" }),
+    ).toHaveAttribute("href", "/feedback");
+  });
 });

@@ -1,12 +1,8 @@
-import { LegalDocumentPage } from "../components/legal/LegalDocumentPage";
-import { TERMS_OF_SERVICE_SECTIONS } from "../domain/legal/termsOfServiceContent";
+import { usePlayerUiMantine } from "@/hooks/feature/usePlayerUiMantine";
+import { TermsLegacy } from "./TermsLegacy";
+import { TermsMantine } from "./TermsMantine";
 
 export function Terms() {
-  return (
-    <LegalDocumentPage
-      title="Terms of Service"
-      sections={TERMS_OF_SERVICE_SECTIONS}
-      crossLink="terms"
-    />
-  );
+  if (usePlayerUiMantine()) return <TermsMantine />;
+  return <TermsLegacy />;
 }

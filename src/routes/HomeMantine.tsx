@@ -1,5 +1,6 @@
 import {
   Alert,
+  Anchor,
   Box,
   Button,
   Container,
@@ -216,6 +217,44 @@ export function HomeMantine() {
                 />
               </IosInsetGroup>
             </Stack>
+
+            <Group
+              gap="xs"
+              justify="center"
+              component="nav"
+              aria-label="Legal and feedback"
+            >
+              <Anchor
+                component={Link}
+                to="/privacy"
+                size="sm"
+                aria-label="Privacy Policy"
+              >
+                Privacy
+              </Anchor>
+              <Text size="sm" c="dimmed" aria-hidden="true">
+                ·
+              </Text>
+              <Anchor
+                component={Link}
+                to="/terms"
+                size="sm"
+                aria-label="Terms of Service"
+              >
+                Terms
+              </Anchor>
+              <Text size="sm" c="dimmed" aria-hidden="true">
+                ·
+              </Text>
+              <Anchor
+                component={Link}
+                to="/feedback"
+                size="sm"
+                aria-label="Feedback and suggestions"
+              >
+                Feedback
+              </Anchor>
+            </Group>
           </Stack>
         </Stack>
       </Container>
