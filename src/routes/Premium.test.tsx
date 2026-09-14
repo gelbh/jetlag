@@ -1,6 +1,8 @@
 import { fireEvent, screen, waitFor } from "@testing-library/react";
+import { MantineProvider } from "@mantine/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Premium } from "./Premium";
+import { jetlagMantineTheme } from "@/theme/mantineTheme";
 import { renderWithRouter } from "../test/renderWithRouter";
 import type { PremiumEntitlements } from "../domain/billing/premiumProducts";
 
@@ -14,6 +16,7 @@ const {
   waitForAuthStateReady,
   mockAuth,
   mockUsePremiumEntitlements,
+  mockUsePlayerUiMantine,
 } = vi.hoisted(() => {
   const auth = {
     currentUser: null,
@@ -39,8 +42,13 @@ const {
       refresh: vi.fn(),
       setEntitlements: vi.fn(),
     })),
+    mockUsePlayerUiMantine: vi.fn(() => false),
   };
 });
+
+vi.mock("@/hooks/feature/usePlayerUiMantine", () => ({
+  usePlayerUiMantine: () => mockUsePlayerUiMantine(),
+}));
 
 vi.mock("../services/core/firebase/firebase", () => ({
   isFirebaseConfigured,
@@ -48,6 +56,14 @@ vi.mock("../services/core/firebase/firebase", () => ({
   waitForAuthStateReady,
   getFirebaseAuth: () => mockAuth,
 }));
+
+function renderPremium() {
+  return renderWithRouter(
+    <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+      <Premium />
+    </MantineProvider>,
+  );
+}
 
 vi.mock("../services/core/auth/accountAuth", () => ({
   APPLE_SIGN_IN_ENABLED: false,
@@ -94,6 +110,8 @@ vi.mock("../services/billing/premiumBilling", () => ({
 
 describe("Premium", () => {
   beforeEach(() => {
+    mockUsePlayerUiMantine.mockReturnValue(false);
+    isFirebaseConfigured.mockReturnValue(false);
     isPermanentUser.mockReturnValue(true);
     mockUsePremiumEntitlements.mockReturnValue({
       entitlements: null,
@@ -102,6 +120,16 @@ describe("Premium", () => {
       refresh: vi.fn(),
       setEntitlements: vi.fn(),
     });
+    vi.stubGlobal("matchMedia", (query: string) => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: () => {},
+      removeListener: () => {},
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      dispatchEvent: () => false,
+    }));
   });
 
   it("shows offline billing message when Firebase is not configured", () => {
@@ -131,7 +159,7 @@ describe("Premium", () => {
       setEntitlements: vi.fn(),
     });
 
-    renderWithRouter(<Premium />);
+    renderPremium();
 
     await waitFor(() => {
       expect(
@@ -163,7 +191,7 @@ describe("Premium", () => {
       setEntitlements: vi.fn(),
     });
 
-    renderWithRouter(<Premium />);
+    renderPremium();
 
     await waitFor(() => {
       expect(screen.getByRole("button", { name: /1 session/i })).toBeVisible();
@@ -190,7 +218,7 @@ describe("Premium", () => {
       setEntitlements: vi.fn(),
     });
 
-    renderWithRouter(<Premium />);
+    renderPremium();
 
     await waitFor(() => {
       expect(screen.getByRole("button", { name: /1 session/i })).toBeEnabled();
@@ -229,7 +257,7 @@ describe("Premium", () => {
       setEntitlements: vi.fn(),
     });
 
-    renderWithRouter(<Premium />);
+    renderPremium();
 
     await waitFor(() => {
       expect(
@@ -264,7 +292,7 @@ describe("Premium", () => {
       value: { assign: assignSpy },
     });
 
-    renderWithRouter(<Premium />);
+    renderPremium();
 
     await waitFor(() => {
       expect(screen.getByRole("tab", { name: "Session packs" })).toBeEnabled();

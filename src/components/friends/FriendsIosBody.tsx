@@ -297,7 +297,7 @@ function IosEmptyInset({
 
 function pullScrollTop(event: ReactPointerEvent<HTMLDivElement>): number {
   const scrollRoot = event.currentTarget.closest(
-    "[data-jl-scroll], .jl-scroll",
+    ".app-scroll-root, [data-jl-scroll], .jl-scroll",
   ) as HTMLElement | null;
   if (scrollRoot) {
     return scrollRoot.scrollTop;
@@ -865,7 +865,7 @@ export function FriendsIosBody() {
       : model.selectableEntries.find((entry) => entry.uid === model.selectedUid) ??
         null;
   const drawerEntry: SelectableFriend | null = selectedSearchHit
-    ? { ...selectedSearchHit, relation: "friend" }
+    ? { ...selectedSearchHit, relation: "search" }
     : selectedListed;
 
   const segmentData: Array<{ value: FriendsListTab; label: string }> = [
