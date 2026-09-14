@@ -1,6 +1,8 @@
 import { fireEvent, screen, waitFor } from "@testing-library/react";
+import { MantineProvider } from "@mantine/core";
 import { describe, expect, it, vi } from "vitest";
 import { INCIDENT_NOTE_MAX_LENGTH } from "../../domain/incident/incidentTypes";
+import { jetlagMantineTheme } from "@/theme/mantineTheme";
 import { renderWithRouter } from "../../test/renderWithRouter";
 import { ReportProblemSheet } from "./ReportProblemSheet";
 
@@ -53,6 +55,40 @@ describe("ReportProblemSheet", () => {
       screen.getByRole("button", { name: "Send report" }),
     ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Cancel" })).toBeInTheDocument();
+  });
+
+  it("renders iOS drawer chrome when requested", () => {
+    vi.stubGlobal("matchMedia", (query: string) => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: () => {},
+      removeListener: () => {},
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      dispatchEvent: () => false,
+    }));
+    vi.stubGlobal(
+      "ResizeObserver",
+      class {
+        observe() {}
+        unobserve() {}
+        disconnect() {}
+      },
+    );
+    renderWithRouter(
+      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+        <ReportProblemSheet open onClose={() => {}} online chrome="ios" />
+      </MantineProvider>,
+    );
+
+    expect(
+      screen.getByRole("heading", { name: "Report a problem" }),
+    ).toBeInTheDocument();
+    expect(document.querySelector(".mantine-Drawer-content")).toBeTruthy();
+    expect(
+      screen.getByRole("button", { name: "Send report" }),
+    ).toBeInTheDocument();
   });
 
   it("caps the note at 140 characters", () => {

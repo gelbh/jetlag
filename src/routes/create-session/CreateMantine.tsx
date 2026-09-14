@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { Box, Button, Stack, Text } from "@mantine/core";
 import { IosEntryHeader } from "@/components/ui/apple/IosEntryHeader";
-import { iosFilledStyles } from "@/components/ui/apple/iosEntryChrome";
+import { iosFilledStyles } from "@/components/ui/apple/iosEntryStyles";
 import { CreateSessionMapPane } from "../../components/session/framing/CreateSessionMapPane";
 import { GameAreaFramingModal } from "../../components/session/framing/GameAreaFramingModal";
 import { MobileSheet } from "../../components/ui/sheets/MobileSheet";

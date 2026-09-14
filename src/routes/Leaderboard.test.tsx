@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { MantineProvider } from "@mantine/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { Stats } from "./Stats";
+import { Leaderboard } from "./Leaderboard";
 import { jetlagMantineTheme } from "@/theme/mantineTheme";
 import { renderWithRouter } from "../test/renderWithRouter";
 
@@ -26,6 +26,14 @@ vi.mock("@/hooks/billing/usePermanentAuthUser", () => ({
   }),
 }));
 
+vi.mock("./LeaderboardBoard", () => ({
+  LeaderboardBoard: () => <div data-testid="leaderboard-board">Board</div>,
+}));
+
+vi.mock("../components/leaderboard/LeaderboardIosBody", () => ({
+  LeaderboardIosBody: () => <div data-testid="leaderboard-ios-body">Board</div>,
+}));
+
 beforeEach(() => {
   mockUsePlayerUiMantine.mockReturnValue(false);
   vi.stubGlobal("matchMedia", (query: string) => ({
@@ -38,20 +46,14 @@ beforeEach(() => {
     removeEventListener: () => {},
     dispatchEvent: () => false,
   }));
-  vi.stubGlobal(
-    "ResizeObserver",
-    class {
-      observe() {}
-      unobserve() {}
-      disconnect() {}
-    },
-  );
 });
 
-describe("Stats gate", () => {
+describe("Leaderboard gate", () => {
   it("renders Legacy title when flag is off", () => {
-    renderWithRouter(<Stats />);
-    expect(screen.getByRole("heading", { name: "Stats" })).toBeInTheDocument();
+    renderWithRouter(<Leaderboard />);
+    expect(
+      screen.getByRole("heading", { name: "Leaderboard" }),
+    ).toBeInTheDocument();
     expect(document.querySelector('[data-player-ux-world="mantine"]')).toBeNull();
   });
 
@@ -60,11 +62,13 @@ describe("Stats gate", () => {
     render(
       <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
         <MemoryRouter>
-          <Stats />
+          <Leaderboard />
         </MemoryRouter>
       </MantineProvider>,
     );
-    expect(screen.getByRole("heading", { name: "Stats" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Leaderboard" }),
+    ).toBeInTheDocument();
     expect(
       document.querySelector('[data-player-ux-world="mantine"]'),
     ).toBeTruthy();

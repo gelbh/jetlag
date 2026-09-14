@@ -71,7 +71,8 @@
   --color-field-ink: oklch(0.925 0.000 90);
   --color-field-ink-muted: oklch(0.684 0.034 256);
   --color-flag: oklch(0.688 0.155 47);
-  --color-flag-ink: oklch(0.925 0.000 90);
+  /* Dark ink so survey .btn-primary (flag on flag-ink) clears WCAG AA 4.5:1. */
+  --color-flag-ink: oklch(0.22 0.03 47);
   --color-flag-soft: oklch(0.688 0.155 47 / 0.22);
   --color-signal: oklch(0.806 0.147 81);
   --color-signal-soft: oklch(0.806 0.147 81 / 0.22);

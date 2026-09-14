@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { MantineProvider } from "@mantine/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { Stats } from "./Stats";
+import { Friends } from "./Friends";
 import { jetlagMantineTheme } from "@/theme/mantineTheme";
 import { renderWithRouter } from "../test/renderWithRouter";
 
@@ -24,6 +24,14 @@ vi.mock("@/hooks/billing/usePermanentAuthUser", () => ({
     isPermanent: false,
     authReady: true,
   }),
+}));
+
+vi.mock("../components/friends/FriendsPanel", () => ({
+  FriendsPanel: () => <div data-testid="friends-panel">Friends panel</div>,
+}));
+
+vi.mock("../components/friends/FriendsIosBody", () => ({
+  FriendsIosBody: () => <div data-testid="friends-ios-body">Friends iOS body</div>,
 }));
 
 beforeEach(() => {
@@ -48,10 +56,10 @@ beforeEach(() => {
   );
 });
 
-describe("Stats gate", () => {
+describe("Friends gate", () => {
   it("renders Legacy title when flag is off", () => {
-    renderWithRouter(<Stats />);
-    expect(screen.getByRole("heading", { name: "Stats" })).toBeInTheDocument();
+    renderWithRouter(<Friends />);
+    expect(screen.getByRole("heading", { name: "Friends" })).toBeInTheDocument();
     expect(document.querySelector('[data-player-ux-world="mantine"]')).toBeNull();
   });
 
@@ -60,11 +68,12 @@ describe("Stats gate", () => {
     render(
       <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
         <MemoryRouter>
-          <Stats />
+          <Friends />
         </MemoryRouter>
       </MantineProvider>,
     );
-    expect(screen.getByRole("heading", { name: "Stats" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Friends" })).toBeInTheDocument();
+    expect(screen.getByRole("banner", { name: "Screen header" })).toBeInTheDocument();
     expect(
       document.querySelector('[data-player-ux-world="mantine"]'),
     ).toBeTruthy();
