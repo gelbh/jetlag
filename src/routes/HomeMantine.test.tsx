@@ -79,7 +79,7 @@ describe("HomeMantine", () => {
     expect(screen.getByRole("link", { name: /Join session/i })).toBeInTheDocument();
   });
 
-  it("links to friends and leaderboard", () => {
+  it("links to friends, leaderboard, and stats", () => {
     render(
       <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
         <MemoryRouter>
@@ -94,6 +94,10 @@ describe("HomeMantine", () => {
     expect(screen.getByRole("link", { name: /leaderboard/i })).toHaveAttribute(
       "href",
       "/leaderboard",
+    );
+    expect(screen.getByRole("link", { name: /^stats$/i })).toHaveAttribute(
+      "href",
+      "/stats",
     );
     expect(screen.queryByRole("link", { name: /^premium$/i })).toBeNull();
   });

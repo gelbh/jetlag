@@ -1,98 +1,110 @@
 import { useState } from "react";
+import { Button, Container, Stack, Text } from "@mantine/core";
 import {
-  Anchor,
-  Button,
-  Container,
-  Stack,
-  Text,
-  Title,
-} from "@mantine/core";
-import { Link } from "react-router-dom";
-import { ReportProblemSheet } from "../components/incident/ReportProblemSheet";
+  Bug,
+  ChatCircleDots,
+  Lightbulb,
+  MagnifyingGlass,
+  WarningCircle,
+} from "@phosphor-icons/react";
+import { ReportProblemSheet } from "@/components/incident/ReportProblemSheet";
+import {
+  IosInsetGroup,
+  IosSectionLabel,
+  iosFilledStyles,
+} from "@/components/ui/apple/iosEntryChrome";
+import { IosInsetRow } from "@/components/ui/apple/IosInsetRow";
+import { IosEntryHeader } from "@/components/ui/apple/IosEntryHeader";
+import { EntryScreenLayout } from "@/components/ui/layout/EntryScreenLayout";
 import {
   githubBugReportUrl,
   githubBugsBrowseUrl,
   githubIdeasBrowseUrl,
   githubIdeaSubmitUrl,
-} from "../domain/device/feedback/githubFeedback";
-
-const externalLinkProps = {
-  target: "_blank" as const,
-  rel: "noopener noreferrer",
-};
+} from "@/domain/device/feedback/githubFeedback";
 
 export function FeedbackMantine() {
   const [reportProblemOpen, setReportProblemOpen] = useState(false);
 
   return (
-    <Container size="sm" py="xl" data-player-ux-world="mantine">
-      <Stack gap="md">
-        <Anchor component={Link} to="/" size="sm">
-          Back
-        </Anchor>
-        <Title order={1}>Feedback</Title>
-        <Text c="dimmed">
-          Search existing threads before posting so bugs and ideas stay in one
-          place. For an urgent live issue mid-game, report a problem instead.
-        </Text>
+    <EntryScreenLayout justify="start" skin="plain" flush>
+      <IosEntryHeader title="Feedback" />
+      <Container
+        size="xs"
+        w="100%"
+        px="md"
+        maw={390}
+        py="lg"
+        data-player-ux-world="mantine"
+      >
+        <Stack gap={22}>
+          <Text
+            size="sm"
+            c="var(--color-field-ink-muted)"
+            style={{ lineHeight: 1.4, textWrap: "pretty" }}
+          >
+            Search existing threads before posting so bugs and ideas stay in one
+            place. For an urgent live issue mid-game, report a problem instead.
+          </Text>
 
-        <Text size="xs" tt="uppercase" fw={600} c="dimmed">
-          Live support
-        </Text>
-        <Button
-          onClick={() => setReportProblemOpen(true)}
-          aria-label="Report a problem"
-        >
-          Report a problem
-        </Button>
+          <Stack gap={8}>
+            <IosSectionLabel>Live support</IosSectionLabel>
+            <Button
+              fullWidth
+              leftSection={<WarningCircle size={18} weight="bold" />}
+              onClick={() => setReportProblemOpen(true)}
+              aria-label="Report a problem"
+              styles={iosFilledStyles}
+            >
+              Report a problem
+            </Button>
+          </Stack>
 
-        <Text size="xs" tt="uppercase" fw={600} c="dimmed">
-          Improvement ideas
-        </Text>
-        <Button
-          component="a"
-          href={githubIdeasBrowseUrl()}
-          {...externalLinkProps}
-          variant="light"
-          aria-label="Browse improvement ideas on GitHub"
-        >
-          Browse ideas
-        </Button>
-        <Button
-          component="a"
-          href={githubIdeaSubmitUrl()}
-          {...externalLinkProps}
-          aria-label="Suggest an improvement on GitHub"
-        >
-          Suggest improvement
-        </Button>
+          <Stack gap={8}>
+            <IosSectionLabel>Improvement ideas</IosSectionLabel>
+            <IosInsetGroup>
+              <IosInsetRow
+                href={githubIdeasBrowseUrl()}
+                label="Browse ideas"
+                icon={<MagnifyingGlass size={22} weight="regular" />}
+                aria-label="Browse improvement ideas on GitHub"
+              />
+              <IosInsetRow
+                showSeparator
+                href={githubIdeaSubmitUrl()}
+                label="Suggest improvement"
+                icon={<Lightbulb size={22} weight="regular" />}
+                aria-label="Suggest an improvement on GitHub"
+              />
+            </IosInsetGroup>
+          </Stack>
 
-        <Text size="xs" tt="uppercase" fw={600} c="dimmed">
-          Bug reports
-        </Text>
-        <Button
-          component="a"
-          href={githubBugsBrowseUrl()}
-          {...externalLinkProps}
-          variant="light"
-          aria-label="Browse bug reports on GitHub"
-        >
-          Browse bugs
-        </Button>
-        <Button
-          component="a"
-          href={githubBugReportUrl()}
-          {...externalLinkProps}
-          aria-label="Report a bug on GitHub"
-        >
-          Report a bug
-        </Button>
-      </Stack>
+          <Stack gap={8}>
+            <IosSectionLabel>Bug reports</IosSectionLabel>
+            <IosInsetGroup>
+              <IosInsetRow
+                href={githubBugsBrowseUrl()}
+                label="Browse bugs"
+                icon={<ChatCircleDots size={22} weight="regular" />}
+                aria-label="Browse bug reports on GitHub"
+              />
+              <IosInsetRow
+                showSeparator
+                href={githubBugReportUrl()}
+                label="Report a bug"
+                icon={<Bug size={22} weight="regular" />}
+                aria-label="Report a bug on GitHub"
+              />
+            </IosInsetGroup>
+          </Stack>
+        </Stack>
 
-      <ReportProblemSheet
-        open={reportProblemOpen}
-        onClose={() => setReportProblemOpen(false)}
-      />
-    </Container>
+        <ReportProblemSheet
+          open={reportProblemOpen}
+          onClose={() => setReportProblemOpen(false)}
+          chrome="ios"
+        />
+      </Container>
+    </EntryScreenLayout>
   );
 }

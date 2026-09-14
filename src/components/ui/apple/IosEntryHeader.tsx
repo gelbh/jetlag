@@ -48,8 +48,8 @@ function BackControl({ to, label }: { to: string; label: string }) {
 }
 
 /**
- * Shared Apple-native nav bar for Join / Create Mantine screens.
- * Safe-area inset + 52pt toolbar; back / mark / title vertically centered.
+ * Shared Apple-native nav bar for Join / Create / Friends Mantine screens.
+ * Safe-area inset + 52pt toolbar; sticky so it stays while the page scrolls.
  */
 export function IosEntryHeader({
   title,
@@ -62,9 +62,12 @@ export function IosEntryHeader({
       aria-label="Screen header"
       className="shrink-0"
       style={{
+        position: "sticky",
+        top: 0,
+        zIndex: 40,
         width: "100%",
         paddingTop: "max(0.5rem, env(safe-area-inset-top, 0px))",
-        backgroundColor: "oklch(from var(--color-canvas) l c h / 0.72)",
+        backgroundColor: "oklch(from var(--color-canvas) l c h / 0.78)",
         borderBottom:
           "0.33px solid oklch(from var(--color-field-ink) l c h / 0.12)",
         backdropFilter: "blur(20px) saturate(1.4)",
