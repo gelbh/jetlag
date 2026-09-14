@@ -296,4 +296,23 @@ describe("SheetHost", () => {
     fireEvent.click(screen.getByTestId("map-target"));
     expect(mapHit).toHaveBeenCalledTimes(1);
   });
+
+  it("applies consumer maxHeightClassName on Mantine Drawer content", () => {
+    useDesktopLayout.mockReturnValue(false);
+    usePlayerUiMantine.mockReturnValue(true);
+    render(
+      withMantine(
+        <SheetHost
+          open
+          onClose={() => {}}
+          ariaLabel="Tall settings"
+          maxHeightClassName="max-h-[min(85dvh,760px)]"
+        >
+          <p>tall body</p>
+        </SheetHost>,
+      ),
+    );
+    const content = document.querySelector(".mantine-drawer-sheet");
+    expect(content?.className).toMatch(/max-h-\[min\(85dvh,760px\)\]/);
+  });
 });
