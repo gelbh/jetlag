@@ -28,6 +28,10 @@ vi.mock("./LeaderboardBoard", () => ({
   LeaderboardBoard: () => <div data-testid="leaderboard-board">Board</div>,
 }));
 
+vi.mock("../components/leaderboard/LeaderboardIosBody", () => ({
+  LeaderboardIosBody: () => <div data-testid="leaderboard-ios-body">Board</div>,
+}));
+
 beforeEach(() => {
   mockUsePlayerUiMantine.mockReturnValue(false);
   vi.stubGlobal("matchMedia", (query: string) => ({

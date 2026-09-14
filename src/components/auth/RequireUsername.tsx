@@ -4,6 +4,7 @@ import { useUserProfile } from "../../hooks/profile/useUserProfile";
 import { isFirebaseConfigured } from "../../services/core/firebase/firebase";
 import { BootSplash } from "../ui/feedback/BootSplash";
 import { InlineError } from "../ui/banners/InlineError";
+import { IosErrorCallout } from "../ui/apple/iosEntryChrome";
 import { AccountSignInGate } from "./AccountSignInGate";
 import { UsernameSetupGate } from "./UsernameSetupGate";
 
@@ -11,12 +12,14 @@ interface RequireUsernameProps {
   continuePath: string;
   children: ReactNode;
   signInDescription?: string;
+  chrome?: "survey" | "ios";
 }
 
 export function RequireUsername({
   continuePath,
   children,
   signInDescription,
+  chrome = "survey",
 }: RequireUsernameProps) {
   const { user, isPermanent, authReady } = usePermanentAuthUser();
   const profileEnabled =
@@ -30,6 +33,7 @@ export function RequireUsername({
   if (isFirebaseConfigured() && authReady && !isPermanent) {
     return (
       <AccountSignInGate
+        chrome={chrome}
         continuePath={continuePath}
         description={
           signInDescription ??
@@ -44,6 +48,13 @@ export function RequireUsername({
   }
 
   if (profileEnabled && error) {
+    if (chrome === "ios") {
+      return (
+        <IosErrorCallout>
+          Could not load your profile. Check your connection and try again.
+        </IosErrorCallout>
+      );
+    }
     return (
       <InlineError>
         Could not load your profile. Check your connection and try again.
@@ -54,6 +65,7 @@ export function RequireUsername({
   if (profileEnabled && profile == null) {
     return (
       <UsernameSetupGate
+        chrome={chrome}
         description="Pick a unique username before using friends, stats, and leaderboards."
       />
     );
