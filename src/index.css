@@ -1,4 +1,6 @@
-@import "tailwindcss";
+@layer theme, base, components, utilities;
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);
 @import "./styles/tokens.css";
 @import "./styles/base.css";
 @import "./styles/primitives.css";
@@ -22,3 +24,26 @@
 @import "./styles/motion.css";
 @import "./styles/route-transition.css";
 @import "./styles/motion-utilities.css";
+
+/*
+ * Border-only preflight: Tailwind width utilities (border-2, border-t-2, …)
+ * need border-style: solid. Full preflight is skipped so Mantine buttons stay opaque.
+ * Kept after @import so stylelint no-invalid-position-at-import-rule stays clean.
+ */
+@layer base {
+  *,
+  *::before,
+  *::after {
+    border: 0 solid;
+  }
+}
+
+/*
+ * Transparent bare buttons inside @layer mantine (not base): same-layer specificity
+ * lets classed Mantine Buttons keep fills; Survey link-buttons lose UA buttonface gray.
+ */
+@layer mantine {
+  button {
+    background-color: transparent;
+  }
+}

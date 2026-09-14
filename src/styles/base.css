@@ -1,6 +1,8 @@
 :root {
-  --font-display: "Barlow Semi Condensed", "Source Sans 3", system-ui, sans-serif;
-  --font-body: "Source Sans 3", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-display: "Barlow Semi Condensed", "Source Sans 3", system-ui,
+    sans-serif;
+  --font-body: "Source Sans 3", system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   color-scheme: dark;
   font-family: var(--font-body);
@@ -16,14 +18,16 @@
   --chrome-gap-above-dock: 0.5rem;
   --chrome-gap-bottom: 0.75rem;
   --map-panel-bottom: calc(
-    var(--dock-total-height) + var(--chrome-gap-above-dock) + var(--safe-area-bottom)
+    var(--dock-total-height) + var(--chrome-gap-above-dock) +
+      var(--safe-area-bottom)
   );
   --map-panel-bottom-chrome-hidden: calc(
     var(--chrome-gap-bottom) + var(--safe-area-bottom)
   );
   --hider-panel-bottom: 0;
   --hider-wizard-bottom: calc(
-    var(--dock-total-height) + var(--chrome-gap-above-dock) + var(--safe-area-bottom)
+    var(--dock-total-height) + var(--chrome-gap-above-dock) +
+      var(--safe-area-bottom)
   );
   --z-dock: 1000;
   --z-banner: 1001;
@@ -82,8 +86,17 @@ body,
   background: var(--color-surface-deep);
 }
 
+/*
+ * Unlayered body rules beat @layer mantine globals so Survey chrome keeps
+ * Jetlag typography/colors while MantineProvider stays always mounted.
+ */
 body {
   margin: 0;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--color-ink-secondary);
+  background: var(--color-surface-deep);
   overscroll-behavior: none;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
