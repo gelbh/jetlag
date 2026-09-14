@@ -5,8 +5,10 @@
  * Content width matches OverlayHost / ToolDeck (shared safe-area pad).
  * Spec: ask-surface-kit-design rev 2026-08-05b.
  */
-import type { ReactNode } from "react";
+import { createElement, type ReactNode } from "react";
+import { Box, Group, Stack } from "@mantine/core";
 import { OVERLAY_SAFE_PAD_X } from "@/components/map/chrome/OverlayHost";
+import { usePlayerUiMantine } from "@/hooks/feature/usePlayerUiMantine";
 import { cn } from "@/lib/cn";
 import { AskCommitStrip } from "./AskCommitStrip";
 import { AskCostChip } from "./AskCostChip";
@@ -40,55 +42,84 @@ export function AskHudHost({
   showCommitStrip = true,
   showCostChip = true,
 }: AskHudHostProps) {
-  return (
-    <div
-      data-testid="ask-hud-host"
-      data-survey="true"
-      className="ask-hud-host pointer-events-none absolute inset-0 z-[var(--z-panel)]"
-    >
-      <div
-        className={cn(
-          "ask-hud-host__top pointer-events-none absolute inset-x-0 top-[var(--map-banner-top)] z-[1] flex flex-col items-stretch gap-2",
-          OVERLAY_SAFE_PAD_X,
-        )}
-      >
-        <AskModeCueTicker cue={cue} />
-        {showCostChip ? (
-          <div className="flex justify-start">
-            <AskCostChip toolLabel={toolLabel} costLabel={costLabel} />
-          </div>
-        ) : null}
-      </div>
+  const mantinePlayerUi = usePlayerUiMantine();
+  const hostClassName =
+    "ask-hud-host pointer-events-none absolute inset-0 z-[var(--z-panel)]";
+  const topClassName = cn(
+    "ask-hud-host__top pointer-events-none absolute inset-x-0 top-[var(--map-banner-top)] z-[1] flex flex-col items-stretch gap-2",
+    OVERLAY_SAFE_PAD_X,
+  );
+  const bodyClassName = cn(
+    "ask-hud-host__body pointer-events-none absolute inset-x-0 bottom-[calc(var(--map-panel-bottom)+var(--ask-hud-strip-height,3rem)+0.5rem)] z-[1]",
+    OVERLAY_SAFE_PAD_X,
+  );
+  const stripClassName = cn(
+    "ask-hud-host__strip pointer-events-none absolute inset-x-0 jl-panel-above-dock z-[2]",
+    OVERLAY_SAFE_PAD_X,
+  );
 
-      {modeBody ? (
-        <div
-          className={cn(
-            "ask-hud-host__body pointer-events-none absolute inset-x-0 bottom-[calc(var(--map-panel-bottom)+var(--ask-hud-strip-height,3rem)+0.5rem)] z-[1]",
-            OVERLAY_SAFE_PAD_X,
-          )}
-        >
-          {modeBody}
-        </div>
-      ) : null}
+  const topRegion = createElement(
+    mantinePlayerUi ? Stack : "div",
+    mantinePlayerUi
+      ? { gap: 8, className: topClassName }
+      : { className: topClassName },
+    <AskModeCueTicker cue={cue} />,
+    showCostChip ? (
+      createElement(
+        mantinePlayerUi ? Group : "div",
+        mantinePlayerUi
+          ? { justify: "flex-start", className: "flex justify-start" }
+          : { className: "flex justify-start" },
+        <AskCostChip toolLabel={toolLabel} costLabel={costLabel} />,
+      )
+    ) : null,
+  );
 
-      {showCommitStrip ? (
-        <div
-          className={cn(
-            "ask-hud-host__strip pointer-events-none absolute inset-x-0 jl-panel-above-dock z-[2]",
-            OVERLAY_SAFE_PAD_X,
-          )}
-        >
-          <div className="w-full">
-            <AskCommitStrip
-              canCommit={canCommit}
-              label={commitLabel}
-              onCommit={onCommit}
-              isSubmitting={isSubmitting}
-              error={error}
-            />
-          </div>
-        </div>
-      ) : null}
-    </div>
+  const bodyRegion = modeBody
+    ? createElement(
+        mantinePlayerUi ? Box : "div",
+        mantinePlayerUi
+          ? { component: "div" as const, className: bodyClassName }
+          : { className: bodyClassName },
+        modeBody,
+      )
+    : null;
+
+  const stripRegion = showCommitStrip
+    ? createElement(
+        mantinePlayerUi ? Box : "div",
+        mantinePlayerUi
+          ? { component: "div" as const, className: stripClassName }
+          : { className: stripClassName },
+        <div className="w-full">
+          <AskCommitStrip
+            canCommit={canCommit}
+            label={commitLabel}
+            onCommit={onCommit}
+            isSubmitting={isSubmitting}
+            error={error}
+          />
+        </div>,
+      )
+    : null;
+
+  return createElement(
+    mantinePlayerUi ? Box : "div",
+    {
+      className: hostClassName,
+      ...(mantinePlayerUi
+        ? {
+            component: "div" as const,
+            "data-testid": "ask-hud-host-mantine",
+            "data-player-ux-world": "mantine",
+          }
+        : {
+            "data-testid": "ask-hud-host",
+            "data-survey": "true",
+          }),
+    },
+    topRegion,
+    bodyRegion,
+    stripRegion,
   );
 }
