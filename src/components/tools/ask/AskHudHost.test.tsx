@@ -55,11 +55,10 @@ describe("AskHudHost Mantine gate", () => {
       </MantineProvider>,
     );
 
-    const host = container.querySelector('[data-testid="ask-hud-host-mantine"]');
-    expect(host).toBeTruthy();
-    expect(host?.getAttribute("data-player-ux-world")).toBe("mantine");
-    expect(host?.classList.contains("ask-hud-host")).toBe(true);
-    expect(host?.getAttribute("data-survey")).toBeNull();
-    expect(container.querySelector('[data-testid="ask-hud-host"]')).toBeNull();
+    const host = screen.getByTestId("ask-hud-host");
+    expect(host.getAttribute("data-player-ux-world")).toBe("mantine");
+    expect(host.classList.contains("ask-hud-host")).toBe(true);
+    expect(host.getAttribute("data-survey")).toBeNull();
+    expect(container.querySelector('[data-testid="ask-hud-host-mantine"]')).toBeNull();
   });
 });
