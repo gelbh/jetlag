@@ -2,9 +2,19 @@ import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { MantineProvider } from "@mantine/core";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { MapBottomChrome } from "./MapBottomChrome";
 import { ToolDeckGroup } from "@/components/tools/ToolDeck";
+import { jetlagMantineTheme } from "@/theme/mantineTheme";
+
+const { mockUsePlayerUiMantine } = vi.hoisted(() => ({
+  mockUsePlayerUiMantine: vi.fn(() => false),
+}));
+
+vi.mock("@/hooks/feature/usePlayerUiMantine", () => ({
+  usePlayerUiMantine: () => mockUsePlayerUiMantine(),
+}));
 
 const chromeCss = readFileSync(
   resolve(dirname(fileURLToPath(import.meta.url)), "../../../styles/map-bottom-chrome.css"),
@@ -17,6 +27,16 @@ const controlsCss = readFileSync(
   ),
   "utf8",
 );
+
+beforeEach(() => {
+  mockUsePlayerUiMantine.mockReturnValue(false);
+  vi.stubGlobal("matchMedia", (query: string) => ({
+    matches: false, media: query, onchange: null,
+    addListener() {}, removeListener() {},
+    addEventListener() {}, removeEventListener() {},
+    dispatchEvent: () => false,
+  }));
+});
 
 describe("MapBottomChrome", () => {
   it("renders provided islands and omits empty ones", () => {
@@ -237,5 +257,46 @@ describe("MapBottomChrome", () => {
     expect(controlsCss).not.toMatch(
       /\.map-zoom-control--container[^}]*bottom:\s*4\.25rem/s,
     );
+  });
+});
+
+describe("MapBottomChrome Mantine gate", () => {
+  it("keeps Legacy chrome markers when flag is off", () => {
+    const { container } = render(
+      <MapBottomChrome layout="phone" hunt={<button type="button">Radar</button>} />,
+    );
+    expect(container.querySelector('[data-testid="map-bottom-chrome-mantine"]')).toBeNull();
+  });
+
+  it("mounts Mantine chrome and keeps OverlayHost pointer-events-none", () => {
+    mockUsePlayerUiMantine.mockReturnValue(true);
+    const { container } = render(
+      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+        <MapBottomChrome
+          layout="phone"
+          hunt={<button type="button">Radar</button>}
+          session={<button type="button">Chat</button>}
+        />
+      </MantineProvider>,
+    );
+    expect(container.querySelector('[data-testid="map-bottom-chrome-mantine"]')).not.toBeNull();
+    const host = container.querySelector("[data-overlay-host]");
+    expect(host?.className).toMatch(/pointer-events-none/);
+  });
+
+  it("keeps Mantine side islands clickable under pointer-events-none chrome", () => {
+    mockUsePlayerUiMantine.mockReturnValue(true);
+    const { container } = render(
+      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+        <MapBottomChrome
+          layout="phone"
+          hunt={<button type="button">Radar</button>}
+          session={<button type="button">Chat</button>}
+        />
+      </MantineProvider>,
+    );
+    const sessionIsland = container.querySelector('[data-island="session"]');
+    expect(sessionIsland?.className).toMatch(/pointer-events-auto/);
+    expect(screen.getByRole("button", { name: "Chat" })).toBeInTheDocument();
   });
 });

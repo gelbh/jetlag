@@ -1,7 +1,15 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { MapLandscapeChromeProvider } from "@/components/session/mapChrome/MapLandscapeChromeContext";
 import { MapScreenChromeSlots } from "./MapScreenChromeSlots";
+
+const { mockUsePlayerUiMantine } = vi.hoisted(() => ({
+  mockUsePlayerUiMantine: vi.fn(() => false),
+}));
+
+vi.mock("@/hooks/feature/usePlayerUiMantine", () => ({
+  usePlayerUiMantine: () => mockUsePlayerUiMantine(),
+}));
 
 vi.mock("../../../hooks/layout/useDesktopLayout", () => ({
   DESKTOP_LAYOUT_MIN_WIDTH_PX: 1024,
@@ -40,6 +48,10 @@ function renderWithLandscapeProvider(ui: React.ReactElement) {
   );
 }
 
+beforeEach(() => {
+  mockUsePlayerUiMantine.mockReturnValue(false);
+});
+
 describe("MapScreenChromeSlots", () => {
   it("renders header and toolbar in the mobile HUD shell", () => {
     renderWithLandscapeProvider(
@@ -69,5 +81,27 @@ describe("MapScreenChromeSlots", () => {
     expect(screen.getByText("Fragment header")).toBeInTheDocument();
     expect(screen.getByText("Fragment toolbar")).toBeInTheDocument();
     expect(document.querySelector(".map-chrome-hud--fragments")).not.toBeNull();
+  });
+
+  it("keeps survey player-ux world when Mantine flag is off", () => {
+    renderWithLandscapeProvider(
+      <MapScreenChromeSlots header={<div>Header</div>} />,
+    );
+    expect(
+      document.querySelector('.map-chrome-hud[data-player-ux-world="survey"]'),
+    ).not.toBeNull();
+    expect(
+      document.querySelector('.map-chrome-hud[data-player-ux-world="mantine"]'),
+    ).toBeNull();
+  });
+
+  it("sets mantine player-ux world on HUD when flag is on", () => {
+    mockUsePlayerUiMantine.mockReturnValue(true);
+    renderWithLandscapeProvider(
+      <MapScreenChromeSlots header={<div>Header</div>} />,
+    );
+    expect(
+      document.querySelector('.map-chrome-hud[data-player-ux-world="mantine"]'),
+    ).not.toBeNull();
   });
 });
