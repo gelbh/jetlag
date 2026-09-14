@@ -28,6 +28,10 @@ vi.mock("../components/friends/FriendsPanel", () => ({
   FriendsPanel: () => <div data-testid="friends-panel">Friends panel</div>,
 }));
 
+vi.mock("../components/friends/FriendsIosBody", () => ({
+  FriendsIosBody: () => <div data-testid="friends-ios-body">Friends iOS body</div>,
+}));
+
 beforeEach(() => {
   mockUsePlayerUiMantine.mockReturnValue(false);
   vi.stubGlobal("matchMedia", (query: string) => ({
@@ -40,6 +44,14 @@ beforeEach(() => {
     removeEventListener: () => {},
     dispatchEvent: () => false,
   }));
+  vi.stubGlobal(
+    "ResizeObserver",
+    class {
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+    },
+  );
 });
 
 describe("Friends gate", () => {
@@ -59,6 +71,7 @@ describe("Friends gate", () => {
       </MantineProvider>,
     );
     expect(screen.getByRole("heading", { name: "Friends" })).toBeInTheDocument();
+    expect(screen.getByRole("banner", { name: "Screen header" })).toBeInTheDocument();
     expect(
       document.querySelector('[data-player-ux-world="mantine"]'),
     ).toBeTruthy();

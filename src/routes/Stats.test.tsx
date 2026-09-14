@@ -38,6 +38,14 @@ beforeEach(() => {
     removeEventListener: () => {},
     dispatchEvent: () => false,
   }));
+  vi.stubGlobal(
+    "ResizeObserver",
+    class {
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+    },
+  );
 });
 
 describe("Stats gate", () => {

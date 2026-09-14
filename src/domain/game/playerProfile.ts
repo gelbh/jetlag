@@ -57,3 +57,43 @@ export function validateUsername(raw: string): ValidateUsernameResult {
 
   return { ok: true, username, normalized };
 }
+
+/** Prefix search for friends (server requires ≥2 chars). */
+export const FRIEND_SEARCH_MIN_LENGTH = 2;
+
+export function validateFriendSearchQuery(
+  raw: string,
+): ValidateUsernameResult {
+  const username = raw.trim();
+
+  if (username.length === 0) {
+    return { ok: false, error: "Enter a username to search." };
+  }
+
+  if (username.length < FRIEND_SEARCH_MIN_LENGTH) {
+    return {
+      ok: false,
+      error: `Enter at least ${FRIEND_SEARCH_MIN_LENGTH} characters to search.`,
+    };
+  }
+
+  if (username.length > USERNAME_MAX_LENGTH) {
+    return {
+      ok: false,
+      error: `Username must be ${USERNAME_MAX_LENGTH} characters or fewer.`,
+    };
+  }
+
+  if (!USERNAME_PATTERN.test(username)) {
+    return {
+      ok: false,
+      error: "Username can only use letters, numbers, and underscore.",
+    };
+  }
+
+  return {
+    ok: true,
+    username,
+    normalized: normalizeUsername(username),
+  };
+}
