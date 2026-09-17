@@ -2,6 +2,7 @@ import { Box } from "@mantine/core";
 import type { ReactNode } from "react";
 import {
   iosBottomDrawerStyles,
+  iosChoiceChipStyles,
   iosCompactDangerStyles,
   iosCompactFilledStyles,
   iosCompactGrayStyles,
@@ -14,10 +15,12 @@ import {
   iosMapToolSlotStyles,
   iosPlainStyles,
 } from "@/components/ui/apple/iosEntryStyles";
+import type { IosChoiceTone } from "@/components/ui/apple/iosEntryStyles";
 
 /** Re-export button/drawer styles so map chrome callers keep one import path. */
 export {
   iosBottomDrawerStyles,
+  iosChoiceChipStyles,
   iosCompactDangerStyles,
   iosCompactFilledStyles,
   iosCompactGrayStyles,
@@ -30,6 +33,7 @@ export {
   iosMapToolSlotStyles,
   iosPlainStyles,
 };
+export type { IosChoiceTone };
 
 /** Frosted inset grouped list / form surface. */
 export function IosInsetGroup({
@@ -193,10 +197,22 @@ export const iosMapStatusIslandStyles = {
   color: "var(--color-field-ink)",
 } as const;
 
-/** Hunt deck accent: continuous island + flag hairline top. */
+/** Hunt deck: frosted island without Survey flag top bar (Approach B). */
 export const iosMapHuntSurfaceStyles = {
   ...iosMapChromeSurfaceStyles,
-  borderTop: "3px solid var(--color-flag)",
+} as const;
+
+/** Inset strip wrapping question tools inside the hunt deck. */
+export const iosMapHuntQuestionStripStyles = {
+  display: "flex",
+  flex: 1,
+  minWidth: 0,
+  alignItems: "stretch",
+  gap: 2,
+  borderRadius: 12,
+  padding: 2,
+  backgroundColor: "oklch(from var(--color-field-ink) l c h / 0.08)",
+  border: "0.33px solid oklch(from var(--color-field-ink) l c h / 0.12)",
 } as const;
 
 /** Drag affordance for iOS bottom drawers. */

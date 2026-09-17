@@ -1,6 +1,16 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, beforeEach, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
+import { MantineProvider } from "@mantine/core";
+import { jetlagMantineTheme } from "@/theme/mantineTheme";
 import { AskCatalogRail } from "./AskCatalogRail";
+
+const { mockUsePlayerUiMantine } = vi.hoisted(() => ({
+  mockUsePlayerUiMantine: vi.fn(() => false),
+}));
+
+vi.mock("@/hooks/feature/usePlayerUiMantine", () => ({
+  usePlayerUiMantine: () => mockUsePlayerUiMantine(),
+}));
 
 const ROWS = [
   { id: "transit", label: "Transit stop" },
@@ -8,15 +18,25 @@ const ROWS = [
   { id: "museum", label: "Museum" },
 ] as const;
 
+beforeEach(() => {
+  mockUsePlayerUiMantine.mockReturnValue(false);
+  vi.stubGlobal("matchMedia", (query: string) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener() {},
+    removeListener() {},
+    addEventListener() {},
+    removeEventListener() {},
+    dispatchEvent: () => false,
+  }));
+});
+
 describe("AskCatalogRail", () => {
   it("advances via row select and has no CONTINUE sibling control", () => {
     const onSelect = vi.fn();
     render(
-      <AskCatalogRail
-        rows={ROWS}
-        selectedId={null}
-        onSelect={onSelect}
-      />,
+      <AskCatalogRail rows={ROWS} selectedId={null} onSelect={onSelect} />,
     );
 
     expect(
@@ -30,11 +50,7 @@ describe("AskCatalogRail", () => {
   it("marks the selected row without requiring a second CTA", () => {
     const onSelect = vi.fn();
     const { container } = render(
-      <AskCatalogRail
-        rows={ROWS}
-        selectedId="park"
-        onSelect={onSelect}
-      />,
+      <AskCatalogRail rows={ROWS} selectedId="park" onSelect={onSelect} />,
     );
 
     expect(screen.getByRole("button", { name: "Park" })).toHaveAttribute(
@@ -44,9 +60,25 @@ describe("AskCatalogRail", () => {
     expect(
       screen.queryByRole("button", { name: /continue/i }),
     ).not.toBeInTheDocument();
-    // No sibling CONTINUE strip under the rail.
     expect(
       container.querySelector("[data-testid='ask-commit-strip']"),
     ).not.toBeInTheDocument();
+  });
+
+  it("mounts Mantine catalog shell and advances under flag", () => {
+    mockUsePlayerUiMantine.mockReturnValue(true);
+    const onSelect = vi.fn();
+    render(
+      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+        <AskCatalogRail rows={ROWS} selectedId={null} onSelect={onSelect} />
+      </MantineProvider>,
+    );
+
+    const rail = screen.getByTestId("ask-catalog-rail");
+    expect(rail.getAttribute("data-player-ux-world")).toBe("mantine");
+    const row = screen.getByRole("button", { name: "Museum" });
+    expect(row.getAttribute("data-player-ux-world")).toBe("mantine");
+    fireEvent.click(row);
+    expect(onSelect).toHaveBeenCalledWith("museum");
   });
 });
