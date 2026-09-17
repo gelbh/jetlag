@@ -1,7 +1,12 @@
+import { Button, Group } from "@mantine/core";
 import { MapFirstRunSheet } from "../../components/session/mapChrome/MapFirstRunSheet";
 import { MapToolsHintBanner } from "../../components/session/mapChrome/MapToolsHintBanner";
 import { AskHudHost } from "../../components/tools/ask/AskHudHost";
 import { ToolFloatingPanel } from "../../components/tools/ToolFloatingPanel";
+import {
+  iosFilledStyles,
+  iosGrayStyles,
+} from "../../components/ui/apple/iosEntryChrome";
 import {
   activeModeCue,
   canCommit,
@@ -11,6 +16,7 @@ import {
   type AskHudSurface,
 } from "../../domain/ask/askHudModes";
 import type { AskToolHudBundle } from "../../hooks/map-screen/heavyMapTools";
+import { usePlayerUiMantine } from "../../hooks/feature/usePlayerUiMantine";
 import { MAP_TOOL_DOCK_ENTRIES } from "../../domain/map/mapTools";
 import type { MapScreenController } from "./useMapScreenController";
 
@@ -161,6 +167,7 @@ export function SeekerChromeOverlays({
         cue: askCue,
       })
     : "";
+  const mantinePlayerUi = usePlayerUiMantine();
 
   const showFloatingPanel =
     activeTool !== "none" &&
@@ -181,22 +188,46 @@ export function SeekerChromeOverlays({
 
       {geometryEditAnnotation && geometryDraft ? (
         <div className="pointer-events-auto absolute inset-x-0 jl-panel-above-dock jl-panel-enter z-[var(--z-panel)] px-3">
-          <div className="hud-panel mx-auto flex max-w-xl gap-2 p-3">
-            <button
-              type="button"
-              onClick={() => void saveGeometryEdit()}
-              className="btn-primary min-h-12 flex-1"
+          {mantinePlayerUi ? (
+            <Group
+              grow
+              gap="sm"
+              p="sm"
+              className="mx-auto max-w-xl"
+              style={{
+                borderRadius: 16,
+                backgroundColor: "oklch(from var(--color-canvas) l c h / 0.94)",
+                border: "0.33px solid oklch(from var(--color-field-ink) l c h / 0.12)",
+              }}
             >
-              Save shape
-            </button>
-            <button
-              type="button"
-              onClick={cancelGeometryEdit}
-              className="btn-secondary min-h-12 flex-1"
-            >
-              Cancel
-            </button>
-          </div>
+              <Button
+                onClick={() => void saveGeometryEdit()}
+                styles={iosFilledStyles}
+              >
+                Save shape
+              </Button>
+              <Button onClick={cancelGeometryEdit} styles={iosGrayStyles}>
+                Cancel
+              </Button>
+            </Group>
+          ) : (
+            <div className="hud-panel mx-auto flex max-w-xl gap-2 p-3">
+              <button
+                type="button"
+                onClick={() => void saveGeometryEdit()}
+                className="btn-primary min-h-12 flex-1"
+              >
+                Save shape
+              </button>
+              <button
+                type="button"
+                onClick={cancelGeometryEdit}
+                className="btn-secondary min-h-12 flex-1"
+              >
+                Cancel
+              </button>
+            </div>
+          )}
         </div>
       ) : null}
 
