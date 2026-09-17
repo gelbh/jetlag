@@ -9,7 +9,13 @@ import {
 export function AppMantineProvider({ children }: { children: ReactNode }) {
   return (
     <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
-      <Notifications zIndex={JETLAG_TOAST_Z_INDEX} />
+      <Notifications
+        zIndex={JETLAG_TOAST_Z_INDEX}
+        position="top-center"
+        autoClose={4200}
+        limit={3}
+        containerWidth={420}
+      />
       {children}
     </MantineProvider>
   );

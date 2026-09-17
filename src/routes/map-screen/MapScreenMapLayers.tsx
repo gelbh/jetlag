@@ -9,6 +9,7 @@ import { LiveUserLocationLayer } from "../../components/map/layers/LiveUserLocat
 import { MapViewportTracker } from "../../components/map/chrome/MapViewportTracker";
 import { ActiveThermometerWalkLayer } from "../../components/map/layers/ActiveThermometerWalkLayer";
 import { PendingQuestionLayer } from "../../components/map/layers/PendingQuestionLayer";
+import { MapDrawStrokeCapture } from "../../components/map/helpers/MapDrawStrokeCapture";
 import { AdminBoundariesLayer, TransitLayer } from "./lazyImports";
 import type { MapScreenController } from "./useMapScreenController";
 
@@ -62,6 +63,8 @@ type MapScreenMapLayersProps = Pick<
   | "lowPowerMode"
   | "distanceUnit"
   | "handleLiveLocationError"
+  | "activeTool"
+  | "drawTool"
 >;
 
 export function MapScreenMapLayers({
@@ -113,6 +116,8 @@ export function MapScreenMapLayers({
   lowPowerMode,
   distanceUnit,
   handleLiveLocationError,
+  activeTool,
+  drawTool,
 }: MapScreenMapLayersProps) {
   return (
     <div ref={mapShellRef} className="absolute inset-0">
@@ -147,6 +152,12 @@ export function MapScreenMapLayers({
           onUserPanEnd={handleMapPanEnd}
         />
         <GameAreaMask gameArea={gameArea!} />
+        <MapDrawStrokeCapture
+          enabled={activeTool === "draw"}
+          onBegin={(lat, lng) => drawTool.beginStroke([lat, lng])}
+          onExtend={(lat, lng) => drawTool.extendStroke([lat, lng])}
+          onEnd={drawTool.endStroke}
+        />
         {transitEnabled && layerVisibility.transit ? (
           <Suspense fallback={null}>
             <TransitLayer

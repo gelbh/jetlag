@@ -209,6 +209,24 @@ export function renderAnnotationLayerItem({
   }
 
   if (
+    annotation.type === "draw" &&
+    annotation.geometry.geometry.type === "LineString"
+  ) {
+    const weight = selected ? 4 : 2.5;
+    return (
+      <MapLibreGeoJsonOverlay
+        key={`${annotation.id}-draw`}
+        id={`annotation-${annotation.id}-draw`}
+        data={annotation.geometry}
+        line={{
+          color,
+          width: weight,
+        }}
+      />
+    );
+  }
+
+  if (
     annotation.type === "pin" &&
     annotation.geometry.geometry.type === "Point"
   ) {

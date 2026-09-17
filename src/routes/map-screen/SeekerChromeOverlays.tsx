@@ -21,7 +21,7 @@ type SeekerChromeOverlaysProps = {
   firstRunDismissed: MapScreenController["firstRunDismissed"];
   setFirstRunDismissed: MapScreenController["setFirstRunDismissed"];
   forceMapToolsGuide: boolean;
-  setForceMapToolsGuide: (open: boolean) => void;
+  onDismissMapToolsGuide: () => void;
   selectedAnnotation: MapScreenController["selectedAnnotation"];
   geometryEditAnnotation: MapScreenController["geometryEditAnnotation"];
   geometryDraft: MapScreenController["geometryDraft"];
@@ -41,6 +41,7 @@ type SeekerChromeOverlaysProps = {
     | "pinTool"
     | "zoneTool"
     | "tentacleTool"
+    | "drawTool"
   >;
 };
 
@@ -61,6 +62,8 @@ function renderToolPanel(
       return tools.measuringTool.panel;
     case "pin":
       return tools.pinTool.panel;
+    case "draw":
+      return tools.drawTool.panel;
     case "tentacle":
       return tools.tentacleTool.panel;
     case "photo":
@@ -108,7 +111,7 @@ export function SeekerChromeOverlays({
   firstRunDismissed,
   setFirstRunDismissed,
   forceMapToolsGuide,
-  setForceMapToolsGuide,
+  onDismissMapToolsGuide,
   selectedAnnotation,
   geometryEditAnnotation,
   geometryDraft,
@@ -210,7 +213,7 @@ export function SeekerChromeOverlays({
         forceOpen={forceMapToolsGuide}
         onDismiss={() => {
           setFirstRunDismissed(true);
-          setForceMapToolsGuide(false);
+          onDismissMapToolsGuide();
         }}
       />
 

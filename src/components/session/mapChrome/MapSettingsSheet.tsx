@@ -1,17 +1,16 @@
 import { useState } from "react";
-import { SheetHeader } from "../../ui/sheets/SheetHeader";
+import { Box, Text } from "@mantine/core";
 import { SheetHost } from "../../ui/sheets/SheetHost";
-import { CurseReferenceSheet } from "../../expansion/CurseReferenceSheet";
-import { ReportProblemSheet } from "../../incident/ReportProblemSheet";
 import {
   SettingsSegmentControl,
   type SettingsSegment,
 } from "../settings/SettingsSegmentControl";
-import { LayerVisibilityGrid } from "./LayerVisibilityGrid";
 import type { DistanceUnit } from "@/domain/map/distance";
 import type { GameSize } from "@/domain/session/size/gameSize";
-import { type AdvancedSessionSettingsValue } from "@/domain/session/tools/advancedSessionSettings";
-import { AdvancedSessionSettings } from "../settings/AdvancedSessionSettings";
+import {
+  defaultAdvancedSessionSettings,
+  type AdvancedSessionSettingsValue,
+} from "@/domain/session/tools/advancedSessionSettings";
 import type { MapStyle, StreetBasemap } from "@/domain/map/mapBasemaps";
 import { getBasemapAttributionText } from "@/domain/map/mapBasemaps";
 import type { SessionRecord } from "@/domain/map/annotations";
@@ -20,6 +19,7 @@ import type { NotificationPreferences } from "@/domain/device/chrome/notificatio
 import { isNativeNotificationsSupported } from "@/services/core/native/notifications";
 import type { TransitRouteFilter } from "@/domain/map/transit";
 import { MapSettingsGeneralTab } from "../settings/GeneralTab";
+import { MapSettingsGameTab } from "../settings/GameTab";
 import { MapSettingsSessionTab } from "../settings/SessionTab";
 
 export interface MapSettingsGeneralProps {
@@ -94,6 +94,7 @@ export interface MapSettingsSessionProps {
   endGameBlocked?: boolean;
   expansionPackEnabled?: boolean;
   onReviewMapTools?: () => void;
+  onOpenCurseReference?: () => void;
   session?: SessionRecord | null;
   myUid?: string;
 }
@@ -106,7 +107,7 @@ interface MapSettingsSheetProps {
   layers: MapSettingsLayersProps;
   rules?: MapSettingsRulesProps;
   session: MapSettingsSessionProps;
-  /** When set, Report opens via this callback (chrome-owned sheet) instead of a nested sheet. */
+  /** Chrome-owned Report sheet opener (session island / map chrome). */
   onReportProblem?: () => void;
 }
 
@@ -121,9 +122,6 @@ export function MapSettingsSheet({
   onReportProblem,
 }: MapSettingsSheetProps) {
   const [segment, setSegment] = useState<SettingsSegment>("map");
-  const [curseSheetOpen, setCurseSheetOpen] = useState(false);
-  const [reportProblemOpen, setReportProblemOpen] = useState(false);
-  const ownsReportSheet = !onReportProblem;
 
   const nativeNotificationsSupported =
     general.nativeNotificationsSupported ?? isNativeNotificationsSupported();
@@ -137,22 +135,31 @@ export function MapSettingsSheet({
       onClose={onClose}
       ariaLabel="Settings"
       railTab="settings"
-      maxHeightClassName="max-h-[min(85dvh,760px)]"
+      maxHeightClassName="max-h-[min(85dvh,40rem)]"
       pinned={
-        <div className="space-y-3 pb-3">
-          <SheetHeader
-            title="Settings"
-            eyebrow="Setup"
-            onClose={onClose}
-            titleSize="xl"
-            flush
-            className="jl-settings-header"
-          />
+        <div className="space-y-3 pb-1">
+          <h2 className="text-[1.375rem] font-bold tracking-tight text-[var(--color-field-ink)]">
+            Settings
+          </h2>
 
           {pendingWrites > 0 ? (
-            <p className="border-2 border-status-warning/40 bg-status-warning-surface px-3 py-2 text-sm font-semibold text-status-warning">
-              {pendingWrites} pending sync
-            </p>
+            <Box
+              px="0.85rem"
+              py="0.55rem"
+              style={{
+                borderRadius: 12,
+                border: "0.33px solid oklch(from var(--color-signal) l c h / 0.55)",
+                backgroundColor: "oklch(from var(--color-signal) l c h / 0.14)",
+              }}
+            >
+              <Text
+                size="sm"
+                fw={600}
+                style={{ color: "var(--color-field-ink)" }}
+              >
+                {pendingWrites} pending sync
+              </Text>
+            </Box>
           ) : null}
 
           <SettingsSegmentControl value={segment} onChange={setSegment} />
@@ -161,7 +168,9 @@ export function MapSettingsSheet({
     >
       <div
         key={segment}
+        id={`settings-panel-${segment}`}
         role="tabpanel"
+        aria-labelledby={`settings-tab-${segment}`}
         className="jl-step-enter motion-reduce:animate-none"
       >
         {segment === "map" ? (
@@ -196,47 +205,35 @@ export function MapSettingsSheet({
             onToggleTransit={general.onToggleTransit}
             onToggleLiveTransit={general.onToggleLiveTransit}
             onTransitRouteFilterChange={general.onTransitRouteFilterChange}
-          />
-        ) : null}
-
-        {segment === "layers" ? (
-          <LayerVisibilityGrid
             layerVisibility={layers.layerVisibility}
             onLayerVisibilityChange={layers.onLayerVisibilityChange}
           />
         ) : null}
 
-        {segment === "rules" && rules ? (
-          <div className="space-y-3">
-            {!gameRulesEditable ? (
-              <p className="border-2 border-border bg-surface-deep px-3 py-2 text-sm text-ink-muted">
-                Game rules lock after the timer starts. Host can edit before
-                start.
-              </p>
-            ) : null}
-            <AdvancedSessionSettings
-              gameSize={gameSize}
-              distanceUnit={general.distanceUnit}
-              value={rules.advancedSettings}
-              onChange={rules.onAdvancedSettingsChange}
-              disabled={!gameRulesEditable}
-              collapsible={false}
-            />
-            {gameRulesEditable && rules.onSaveGameRules ? (
-              <button
-                type="button"
-                onClick={() => void rules.onSaveGameRules?.()}
-                className="btn-primary min-h-11 w-full"
-              >
-                {gameRulesSaveLabel}
-              </button>
-            ) : null}
-          </div>
+        {segment === "game" ? (
+          <MapSettingsGameTab
+            sessionCode={session.sessionCode}
+            remoteSession={session.remoteSession}
+            isHost={session.isHost ?? false}
+            session={session.session}
+            myUid={session.myUid}
+            distanceUnit={general.distanceUnit}
+            gameRulesEditable={gameRulesEditable}
+            gameSize={gameSize}
+            advancedSettings={
+              rules?.advancedSettings ??
+              defaultAdvancedSessionSettings(gameSize, general.distanceUnit)
+            }
+            onAdvancedSettingsChange={
+              rules?.onAdvancedSettingsChange ?? (() => {})
+            }
+            onSaveGameRules={rules?.onSaveGameRules}
+            gameRulesSaveLabel={gameRulesSaveLabel}
+          />
         ) : null}
 
         {segment === "session" ? (
           <MapSettingsSessionTab
-            sessionCode={session.sessionCode}
             remoteSession={session.remoteSession}
             keepScreenAwake={general.keepScreenAwake}
             onKeepScreenAwakeChange={general.onKeepScreenAwakeChange}
@@ -257,34 +254,17 @@ export function MapSettingsSheet({
             onLeaveSession={session.onLeaveSession}
             endGameBlocked={session.endGameBlocked}
             expansionPackEnabled={session.expansionPackEnabled}
-            onOpenCurseReference={() => setCurseSheetOpen(true)}
-            onReportProblem={() => {
-              if (onReportProblem) {
-                onReportProblem();
-                return;
-              }
-              setReportProblemOpen(true);
-            }}
+            onOpenCurseReference={session.onOpenCurseReference}
+            onReportProblem={onReportProblem}
             onReviewMapTools={session.onReviewMapTools}
-            session={session.session}
-            myUid={session.myUid}
           />
         ) : null}
       </div>
 
-      <p className="mt-6 border-t-2 border-border pt-3 text-xs leading-relaxed text-ink-dim">
-        {getBasemapAttributionText(general.mapStyle)}
-      </p>
-
-      <CurseReferenceSheet
-        open={curseSheetOpen}
-        onClose={() => setCurseSheetOpen(false)}
-      />
-      {ownsReportSheet ? (
-        <ReportProblemSheet
-          open={reportProblemOpen}
-          onClose={() => setReportProblemOpen(false)}
-        />
+      {segment === "map" ? (
+        <p className="mt-6 text-xs leading-relaxed text-[var(--color-field-ink-muted)]">
+          {getBasemapAttributionText(general.mapStyle)}
+        </p>
       ) : null}
     </SheetHost>
   );

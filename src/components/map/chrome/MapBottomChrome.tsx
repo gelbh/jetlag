@@ -2,7 +2,9 @@ import { createElement, forwardRef, type CSSProperties, type ReactNode } from "r
 import { Box, Paper } from "@mantine/core";
 import { cn } from "@/lib/cn";
 import { Island } from "@/components/ui/island";
+import { iosMapChromeSurfaceStyles } from "@/components/ui/apple/iosEntryChrome";
 import { OverlayHost } from "./OverlayHost";
+import { MapSideDockStack } from "./MapSideDockStack";
 import { ToolDeck } from "@/components/tools/ToolDeck";
 import { usePlayerUiMantine } from "@/hooks/feature/usePlayerUiMantine";
 
@@ -59,10 +61,15 @@ function SideIsland({
         data-island={name}
         role="group"
         aria-label={ISLAND_ARIA[name]}
-        radius="md"
-        withBorder
+        radius={0}
         p={4}
         className={className}
+        styles={{
+          root: {
+            ...iosMapChromeSurfaceStyles,
+            /* Corner radii come from map-bottom-chrome.css (anchor-aware). */
+          },
+        }}
       >
         {children}
       </Paper>
@@ -107,6 +114,7 @@ export const MapBottomChrome = forwardRef<HTMLDivElement, MapBottomChromeProps>(
     const chromeClassName = cn(
       "jl-map-bottom-chrome jl-tool-dock relative block w-full pointer-events-none bg-transparent",
       !isRail && "min-h-[calc(var(--dock-island-height)+0.75rem)]",
+      !isRail && mantinePlayerUi && "px-1",
       isRail &&
         "jl-map-bottom-chrome--rail jl-tool-dock--rail relative flex h-full min-h-0 flex-col items-stretch justify-start gap-2 p-2",
       isRail &&
@@ -150,26 +158,40 @@ export const MapBottomChrome = forwardRef<HTMLDivElement, MapBottomChromeProps>(
           >
             {hunt ? <ToolDeck density={huntDensity}>{hunt}</ToolDeck> : null}
           </div>,
-          <div
-            data-chrome-side-stack={isRail ? "rail" : "phone"}
-            className={cn(
-              "jl-map-chrome-side-stack pointer-events-none z-[3] flex flex-col items-stretch gap-2",
-              isRail
-                ? "contents"
-                : "jl-map-chrome-side-stack--phone absolute right-0",
-            )}
-          >
-            {session ? (
-              <SideIsland name="session" mantine={mantinePlayerUi}>
-                {session}
-              </SideIsland>
-            ) : null}
-            {mapControls ? (
-              <SideIsland name="map-controls" mantine={mantinePlayerUi}>
-                {mapControls}
-              </SideIsland>
-            ) : null}
-          </div>,
+          (() => {
+            const sideIslands = (
+              <>
+                {session ? (
+                  <SideIsland name="session" mantine={mantinePlayerUi}>
+                    {session}
+                  </SideIsland>
+                ) : null}
+                {mapControls ? (
+                  <SideIsland name="map-controls" mantine={mantinePlayerUi}>
+                    {mapControls}
+                  </SideIsland>
+                ) : null}
+              </>
+            );
+
+            if (mantinePlayerUi && !isRail) {
+              return <MapSideDockStack>{sideIslands}</MapSideDockStack>;
+            }
+
+            return (
+              <div
+                data-chrome-side-stack={isRail ? "rail" : "phone"}
+                className={cn(
+                  "jl-map-chrome-side-stack pointer-events-none z-[3] flex flex-col items-stretch gap-2",
+                  isRail
+                    ? "contents"
+                    : "jl-map-chrome-side-stack--phone absolute right-0",
+                )}
+              >
+                {sideIslands}
+              </div>
+            );
+          })(),
         )}
         {overlay}
       </OverlayHost>

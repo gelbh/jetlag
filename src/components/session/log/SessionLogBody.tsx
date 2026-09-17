@@ -69,81 +69,95 @@ export function SessionLogBody({
 
   const sorted = useMemo(() => sortActivityEventsDesc(events), [events]);
 
-  const rowPad = compact ? "px-2.5 py-2" : "px-3 py-2.5";
+  const rowPad = compact ? "px-3 py-2" : "px-3.5 py-2.5";
   const actionPad = compact
     ? "min-h-9 px-2.5 text-[0.8125rem]"
     : "min-h-10 px-3 text-sm";
 
-  return (
-    <div className="min-h-0 space-y-1.5">
-      {sorted.length === 0 ? (
-        <EmptyState className="text-ink-dim">No activity yet.</EmptyState>
-      ) : (
-        sorted.map((event) => {
-          const linkedId = activityAnnotationId(event);
-          const liveId =
-            linkedId && activeById.has(linkedId) ? linkedId : undefined;
-          const summary = sessionActivitySummary(event);
-          const showActions = Boolean(liveId) && !readOnly;
-          const selectable = Boolean(liveId && onSelect);
-          const late = answeredLate(event);
+  if (sorted.length === 0) {
+    return <EmptyState className="text-ink-dim">No activity yet.</EmptyState>;
+  }
 
-          return (
-            <div
-              key={event.id}
-              className={`flex items-start justify-between gap-2 rounded-md bg-surface-raised/80 ${rowPad}`}
+  return (
+    <div
+      className="jl-ios-inset-group overflow-hidden rounded-xl"
+      style={{
+        backgroundColor: "oklch(from var(--color-field-ink) l c h / 0.08)",
+        border: "0.33px solid oklch(from var(--color-field-ink) l c h / 0.12)",
+        backdropFilter: "blur(20px) saturate(1.4)",
+      }}
+    >
+      {sorted.map((event, index) => {
+        const linkedId = activityAnnotationId(event);
+        const liveId =
+          linkedId && activeById.has(linkedId) ? linkedId : undefined;
+        const summary = sessionActivitySummary(event);
+        const showActions = Boolean(liveId) && !readOnly;
+        const selectable = Boolean(liveId && onSelect);
+        const late = answeredLate(event);
+
+        return (
+          <div
+            key={event.id}
+            className={`flex items-start justify-between gap-2.5 ${rowPad}`}
+            style={{
+              borderTop:
+                index === 0
+                  ? undefined
+                  : "0.33px solid oklch(from var(--color-field-ink) l c h / 0.12)",
+            }}
+          >
+            <button
+              type="button"
+              className="min-w-0 flex-1 text-left disabled:cursor-default"
+              disabled={!selectable}
+              onClick={() => {
+                if (liveId && onSelect) {
+                  onSelect(liveId);
+                }
+              }}
             >
-              <button
-                type="button"
-                className="min-w-0 flex-1 text-left disabled:cursor-default"
-                disabled={!selectable}
-                onClick={() => {
-                  if (liveId && onSelect) {
-                    onSelect(liveId);
-                  }
-                }}
+              <p
+                className={`mb-0.5 text-[0.75rem] font-bold uppercase tracking-[0.1em] ${typeLabelClass(event.type)}`}
               >
-                <p
-                  className={`font-display text-[0.8125rem] font-semibold uppercase tracking-[0.12em] ${typeLabelClass(event.type)}`}
-                >
-                  {sessionActivityTypeLabel(event.type)}
-                </p>
-                <p className="truncate text-sm font-medium text-ink" title={summary}>
-                  {summary}
-                </p>
-                <p className="flex flex-wrap items-center gap-x-2 text-[0.8125rem] text-ink-dim">
-                  <span>
-                    {new Date(event.createdAt).toLocaleTimeString()}
+                {sessionActivityTypeLabel(event.type)}
+              </p>
+              <p
+                className="line-clamp-2 text-sm font-semibold text-field-ink"
+                title={summary}
+              >
+                {summary}
+              </p>
+              <p className="mt-0.5 flex flex-wrap items-center gap-x-2 text-xs text-field-ink-muted">
+                <span>{new Date(event.createdAt).toLocaleTimeString()}</span>
+                {late ? (
+                  <span className="font-bold uppercase tracking-wide text-halt">
+                    Late
                   </span>
-                  {late ? (
-                    <span className="font-display text-[0.8125rem] font-semibold uppercase tracking-[0.1em] text-status-error">
-                      Late
-                    </span>
-                  ) : null}
-                </p>
-              </button>
-              {showActions && liveId ? (
-                <div className="flex shrink-0 gap-1.5 pt-0.5">
-                  <button
-                    type="button"
-                    onClick={() => onEdit(liveId)}
-                    className={`rounded-md bg-border text-ink ${actionPad}`}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => onDelete(liveId)}
-                    className={`rounded-md bg-status-error-surface text-status-error ${actionPad}`}
-                  >
-                    Delete
-                  </button>
-                </div>
-              ) : null}
-            </div>
-          );
-        })
-      )}
+                ) : null}
+              </p>
+            </button>
+            {showActions && liveId ? (
+              <div className="flex shrink-0 gap-1.5 pt-0.5">
+                <button
+                  type="button"
+                  onClick={() => onEdit(liveId)}
+                  className={`rounded-lg bg-border/80 text-ink ${actionPad}`}
+                >
+                  Edit
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onDelete(liveId)}
+                  className={`rounded-lg bg-status-error-surface text-status-error ${actionPad}`}
+                >
+                  Delete
+                </button>
+              </div>
+            ) : null}
+          </div>
+        );
+      })}
     </div>
   );
 }

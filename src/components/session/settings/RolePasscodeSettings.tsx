@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Stack } from "@mantine/core";
 import type { SessionRecord } from "@/domain/map/annotations";
 import {
   isSessionRoleGated,
@@ -11,6 +12,11 @@ import {
   regenerateRolePasscode,
   revealRolePasscode,
 } from "@/services/session/rolePasscodeLifecycle";
+import {
+  IosErrorCallout,
+  IosSectionLabel,
+  IosSuccessCallout,
+} from "@/components/ui/apple/iosEntryChrome";
 import { RoleCodeStamp } from "../identity/RoleCodeStamp";
 
 type RevealRole = "seeker" | "hider" | "observer";
@@ -123,18 +129,8 @@ export function RolePasscodeSettings({
   };
 
   return (
-    <div
-      className={
-        embedded
-          ? "space-y-3"
-          : "space-y-3 border-t-2 border-border pt-4"
-      }
-    >
-      {embedded ? null : (
-        <p className="font-display text-xs font-semibold uppercase tracking-[0.12em] text-ink-muted">
-          Role codes
-        </p>
-      )}
+    <Stack gap="sm">
+      {embedded ? null : <IosSectionLabel>Role codes</IosSectionLabel>}
       {rows.map((role) => (
         <RoleCodeStamp
           key={role}
@@ -147,9 +143,9 @@ export function RolePasscodeSettings({
         />
       ))}
       {copyStatus === "copied" ? (
-        <p className="text-xs text-ink-muted">Copied to clipboard.</p>
+        <IosSuccessCallout>Copied to clipboard.</IosSuccessCallout>
       ) : null}
-      {error ? <p className="text-xs text-status-error">{error}</p> : null}
-    </div>
+      <IosErrorCallout>{error}</IosErrorCallout>
+    </Stack>
   );
 }

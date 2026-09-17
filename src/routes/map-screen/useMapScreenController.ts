@@ -137,6 +137,7 @@ export function useMapScreenController() {
     thermometerTool,
     pinTool,
     zoneTool,
+    drawTool,
     matchingTool,
     measuringTool,
     tentacleTool,
@@ -316,6 +317,7 @@ export function useMapScreenController() {
           seekerResolving: matchingTool.draft.seekerResolving,
         },
         zone: { vertices: zoneTool.draft.zoneVertices },
+        draw: { strokePoints: drawTool.draft.strokePoints },
       });
 
   const { sheetSnap, mapAttentionActive } = useWizardSheetSnap(activeTool);
@@ -563,6 +565,7 @@ export function useMapScreenController() {
     measuringTool,
     pinTool,
     zoneTool,
+    drawTool,
     tentacleTool: {
       ...tentacleTool,
       tentacleLodPhase,

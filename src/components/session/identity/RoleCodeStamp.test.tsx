@@ -1,12 +1,37 @@
-import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { fireEvent, screen } from "@testing-library/react";
+import { MantineProvider } from "@mantine/core";
+import type { ReactElement } from "react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { jetlagMantineTheme } from "@/theme/mantineTheme";
+import { renderWithRouter } from "@/test/renderWithRouter";
 import { RoleCodeStamp } from "./RoleCodeStamp";
 
+function renderUi(ui: ReactElement) {
+  return renderWithRouter(
+    <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+      {ui}
+    </MantineProvider>,
+  );
+}
+
 describe("RoleCodeStamp", () => {
+  beforeEach(() => {
+    vi.stubGlobal("matchMedia", (query: string) => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    }));
+  });
+
   it("shows masked bullets and reveal calls onReveal", () => {
     const onReveal = vi.fn();
 
-    render(
+    renderUi(
       <RoleCodeStamp
         roleLabel="Seeker code"
         code={null}
@@ -26,7 +51,7 @@ describe("RoleCodeStamp", () => {
   it("revealed tap calls onCopy", () => {
     const onCopy = vi.fn();
 
-    render(
+    renderUi(
       <RoleCodeStamp
         roleLabel="Hider code"
         code="ABCD"
@@ -46,7 +71,7 @@ describe("RoleCodeStamp", () => {
   it("wires regenerate", () => {
     const onRegenerate = vi.fn();
 
-    render(
+    renderUi(
       <RoleCodeStamp
         roleLabel="Observer code"
         code={null}
@@ -61,7 +86,7 @@ describe("RoleCodeStamp", () => {
   });
 
   it("disables actions while busy", () => {
-    render(
+    renderUi(
       <RoleCodeStamp
         roleLabel="Seeker code"
         code={null}

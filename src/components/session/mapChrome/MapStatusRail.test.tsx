@@ -61,9 +61,13 @@ function renderRail() {
 beforeEach(() => {
   mockUsePlayerUiMantine.mockReturnValue(false);
   vi.stubGlobal("matchMedia", (query: string) => ({
-    matches: false, media: query, onchange: null,
-    addListener() {}, removeListener() {},
-    addEventListener() {}, removeEventListener() {},
+    matches: typeof query === "string" && query.includes("min-width: 380"),
+    media: query,
+    onchange: null,
+    addListener() {},
+    removeListener() {},
+    addEventListener() {},
+    removeEventListener() {},
     dispatchEvent: () => false,
   }));
 });
@@ -117,6 +121,30 @@ describe("MapStatusRail Mantine gate", () => {
     );
     expect(container.querySelector('[data-testid="map-status-rail-mantine"]')).toBeTruthy();
     expect(container.querySelector('[data-player-ux-world="mantine"]')).toBeTruthy();
+  });
+
+  it("keeps frosted status bar + Start under Mantine flag", () => {
+    mockUsePlayerUiMantine.mockReturnValue(true);
+    const { container } = render(
+      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+        <MemoryRouter>
+          <RouteTransitionProvider>
+            <MapStatusRail {...railProps} canStartGame />
+          </RouteTransitionProvider>
+        </MemoryRouter>
+      </MantineProvider>,
+    );
+    const island = container.querySelector('[data-testid="tool-status-block-mantine"]');
+    expect(island).toBeTruthy();
+    expect(
+      island?.querySelector('[data-testid="sync-block-mantine"]'),
+    ).toBeTruthy();
+    expect(container.querySelector(".jl-status-header")).toBeNull();
+    expect(container.querySelector(".jl-status-bar")).toBeNull();
+    expect(container.querySelector(".jl-ticker")).toBeNull();
+    expect(screen.getByRole("button", { name: /start/i })).toBeInTheDocument();
+    expect(screen.getByText("Ready")).toBeInTheDocument();
+    expect(screen.getByText("ABCD")).toBeInTheDocument();
   });
 });
 

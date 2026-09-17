@@ -1,5 +1,5 @@
 import { createPortal } from "react-dom";
-import { useRef, type ReactNode } from "react";
+import { useRef, type CSSProperties, type ReactNode } from "react";
 import { RadixMotionSheet } from "./RadixMotionSheet";
 import { MantineDrawerSheet } from "./MantineDrawerSheet";
 import { useDialogFocus } from "@/hooks/a11y/useDialogFocus";
@@ -21,6 +21,8 @@ export interface SheetHostProps {
   dismissible?: boolean;
   sheetClassName?: string;
   maxHeightClassName?: string;
+  /** Forwarded to Mantine drawer body (e.g. keyboard inset). */
+  contentStyle?: CSSProperties;
 }
 
 function DesktopRailDialog({
@@ -73,12 +75,12 @@ export function SheetHost({
   dismissible = true,
   sheetClassName,
   maxHeightClassName,
+  contentStyle,
 }: SheetHostProps) {
   const isDesktop = useDesktopLayout();
   const railPanel = useContextualRailPanel();
   const mantinePlayerUi = usePlayerUiMantine();
 
-  // Desktop ContextualRail when a rail tab is requested (wait for panel mount).
   if (isDesktop && railTab) {
     if (!open || !railPanel?.panelEl) {
       return null;
@@ -107,6 +109,7 @@ export function SheetHost({
         dismissible={dismissible}
         sheetClassName={sheetClassName}
         maxHeightClassName={maxHeightClassName}
+        contentStyle={contentStyle}
       >
         {children}
       </MantineDrawerSheet>

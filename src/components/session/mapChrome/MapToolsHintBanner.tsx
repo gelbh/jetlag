@@ -1,5 +1,10 @@
 import { useState } from "react";
+import { Box, Button, Text } from "@mantine/core";
 import { HudBanner } from "../../ui/hud/HudBanner";
+import {
+  iosCompactGrayStyles,
+  iosMapChromeSurfaceStyles,
+} from "@/components/ui/apple/iosEntryChrome";
 
 const STORAGE_KEY = "jetlag.mapToolsHintDismissed";
 
@@ -34,23 +39,42 @@ export function MapToolsHintBanner({ hidden = false }: MapToolsHintBannerProps) 
       onDismiss={dismiss}
       className="pointer-events-none fixed inset-x-0 bottom-[var(--map-panel-bottom)] z-[var(--z-banner)] px-3"
     >
-      <div className="pointer-events-auto hud-panel mx-auto flex max-w-md items-start gap-3 px-3 py-2.5">
-        <p className="flex-1 text-pretty text-sm leading-snug text-ink-muted">
+      <Box
+        className="pointer-events-auto mx-auto flex max-w-md items-start gap-3 px-3 py-2.5"
+        style={{
+          ...iosMapChromeSurfaceStyles,
+          borderRadius: 14,
+        }}
+      >
+        <Text
+          size="sm"
+          style={{
+            flex: 1,
+            lineHeight: 1.4,
+            color: "var(--color-field-ink-muted)",
+            textWrap: "pretty",
+          }}
+        >
           Question asks open as map HUD chrome (cue · chips/catalog · primed
           send). Zone and pin live under{" "}
-          <span className="font-display font-semibold uppercase tracking-wide text-ink">
+          <Text
+            span
+            fw={600}
+            style={{ color: "var(--color-field-ink)" }}
+          >
             Draw
-          </span>
+          </Text>
           .
-        </p>
-        <button
+        </Text>
+        <Button
           type="button"
+          size="compact-sm"
           onClick={dismiss}
-          className="btn-secondary shrink-0 px-3 py-2 text-xs"
+          styles={iosCompactGrayStyles}
         >
           Close
-        </button>
-      </div>
+        </Button>
+      </Box>
     </HudBanner>
   );
 }

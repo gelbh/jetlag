@@ -12,8 +12,10 @@ import {
 } from "@/domain/session/players/playerRole";
 import { Play } from "@phosphor-icons/react";
 import { surveyPhaseLabel } from "@/domain/device/surveyStatusCopy";
+import { usePlayerUiMantine } from "@/hooks/feature/usePlayerUiMantine";
 import { JlIcon } from "../../ui/brand/JlIcon";
 import { MapTimerCluster } from "../mapChrome/MapTimerCluster";
+import { ToolStatusBlockMantine } from "./ToolStatusBlockMantine";
 
 interface ToolStatusBlockProps {
   sessionCode: string;
@@ -39,9 +41,21 @@ interface ToolStatusBlockProps {
   expanded?: boolean;
   /** Home / leave control rendered leading in the brand cell. */
   headerLeading?: ReactNode;
+  /** Trailing sync control for Mantine single island. */
+  syncSlot?: ReactNode;
 }
 
-export function ToolStatusBlock({
+export function ToolStatusBlock(props: ToolStatusBlockProps) {
+  const mantinePlayerUi = usePlayerUiMantine();
+  if (mantinePlayerUi) {
+    return <ToolStatusBlockMantine {...props} />;
+  }
+  const { syncSlot: _syncSlot, ...legacyProps } = props;
+  void _syncSlot;
+  return <ToolStatusBlockLegacy {...legacyProps} />;
+}
+
+function ToolStatusBlockLegacy({
   sessionCode,
   playerRole,
   activeTool: _activeTool,
@@ -62,7 +76,7 @@ export function ToolStatusBlock({
   moveInProgress = false,
   expanded = false,
   headerLeading,
-}: ToolStatusBlockProps) {
+}: Omit<ToolStatusBlockProps, "syncSlot">) {
   void _activeTool;
   void expanded;
   const phase = surveyPhaseLabel(
