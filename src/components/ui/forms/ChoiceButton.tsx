@@ -1,4 +1,10 @@
 import type { ButtonHTMLAttributes, ReactNode } from "react";
+import { UnstyledButton } from "@mantine/core";
+import {
+  iosChoiceChipStyles,
+  type IosChoiceTone,
+} from "@/components/ui/apple/iosEntryChrome";
+import { usePlayerUiMantine } from "@/hooks/feature/usePlayerUiMantine";
 
 interface ChoiceButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   selected?: boolean;
@@ -7,6 +13,16 @@ interface ChoiceButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   fullWidth?: boolean;
   align?: "left" | "center";
   children: ReactNode;
+}
+
+function toneFromActiveClass(activeClassName: string): IosChoiceTone {
+  if (activeClassName.includes("status-success")) {
+    return "success";
+  }
+  if (activeClassName.includes("status-negative")) {
+    return "danger";
+  }
+  return "default";
 }
 
 export function ChoiceButton({
@@ -20,12 +36,31 @@ export function ChoiceButton({
   type = "button",
   ...props
 }: ChoiceButtonProps) {
+  const mantinePlayerUi = usePlayerUiMantine();
   const alignClass =
     align === "left"
       ? "text-left"
       : align === "center"
         ? "text-center"
         : "";
+
+  if (mantinePlayerUi) {
+    return (
+      <UnstyledButton
+        type={type}
+        aria-pressed={selected}
+        data-player-ux-world="mantine"
+        className={`${fullWidth ? "w-full" : ""} ${alignClass} ${className}`.trim()}
+        styles={iosChoiceChipStyles(
+          selected,
+          selected ? toneFromActiveClass(activeClassName) : "default",
+        )}
+        {...props}
+      >
+        {children}
+      </UnstyledButton>
+    );
+  }
 
   return (
     <button

@@ -1,3 +1,7 @@
+import { UnstyledButton } from "@mantine/core";
+import { iosChoiceChipStyles } from "@/components/ui/apple/iosEntryChrome";
+import { usePlayerUiMantine } from "@/hooks/feature/usePlayerUiMantine";
+
 interface SegmentOption<Value extends string> {
   value: Value;
   label: string;
@@ -23,6 +27,8 @@ export function SegmentControl<Value extends string>({
   "aria-label": ariaLabel,
   disabled = false,
 }: SegmentControlProps<Value>) {
+  const mantinePlayerUi = usePlayerUiMantine();
+
   if (variant === "chips") {
     return (
       <div className="jl-scroll jl-segment-chips" role="tablist" aria-label={ariaLabel}>
@@ -77,6 +83,36 @@ export function SegmentControl<Value extends string>({
   }
 
   if (tone === "action") {
+    if (mantinePlayerUi) {
+      return (
+        <div
+          className="grid gap-2"
+          style={{
+            gridTemplateColumns: `repeat(${options.length}, minmax(0, 1fr))`,
+          }}
+          role="group"
+          aria-label={ariaLabel}
+          data-player-ux-world="mantine"
+        >
+          {options.map((option) => {
+            const selected = value === option.value;
+            return (
+              <UnstyledButton
+                key={option.value}
+                type="button"
+                onClick={() => onChange(option.value)}
+                disabled={disabled || option.disabled}
+                aria-pressed={selected}
+                styles={iosChoiceChipStyles(selected, "default")}
+              >
+                {option.label}
+              </UnstyledButton>
+            );
+          })}
+        </div>
+      );
+    }
+
     return (
       <div
         className="grid gap-2"
