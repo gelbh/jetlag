@@ -81,6 +81,48 @@ export const iosMapIslandFilledStyles: ButtonProps["styles"] = {
   },
 };
 
+/** Hunt / session dock chip under jl.playerUi.mantine (column icon+label). */
+export function iosMapToolSlotStyles(pressed: boolean): ButtonProps["styles"] {
+  return {
+    root: {
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: "0.125rem",
+      minWidth: "2.75rem",
+      minHeight: "2.75rem",
+      padding: "0.25rem 0.125rem",
+      borderRadius: 14,
+      border: pressed
+        ? "0.33px solid oklch(from var(--color-highlight) l c h / 0.75)"
+        : "0.33px solid transparent",
+      backgroundColor: pressed
+        ? "oklch(from var(--color-highlight) l c h / 0.22)"
+        : "transparent",
+      color: pressed
+        ? "var(--color-highlight)"
+        : "var(--color-field-ink-muted)",
+      WebkitTapHighlightColor: "transparent",
+      "&:hover:not(:disabled)": {
+        backgroundColor: pressed
+          ? "oklch(from var(--color-highlight) l c h / 0.28)"
+          : "oklch(from var(--color-canvas) l c h / 0.55)",
+        borderColor: pressed
+          ? "oklch(from var(--color-highlight) l c h / 0.85)"
+          : "oklch(from var(--color-rule) l c h / 0.55)",
+        color: pressed
+          ? "var(--color-highlight)"
+          : "var(--color-field-ink)",
+      },
+      "&:disabled": {
+        opacity: 0.35,
+        cursor: "not-allowed",
+      },
+    },
+  };
+}
+
 /** Island-height icon control (pause / resume beside the clock). */
 export const iosMapIslandIconStyles: ButtonProps["styles"] = {
   root: {

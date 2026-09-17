@@ -1,6 +1,30 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { MantineProvider } from "@mantine/core";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { jetlagMantineTheme } from "@/theme/mantineTheme";
 import { MapChromeControl } from "./MapChromeControl";
+
+const { mockUsePlayerUiMantine } = vi.hoisted(() => ({
+  mockUsePlayerUiMantine: vi.fn(() => false),
+}));
+
+vi.mock("@/hooks/feature/usePlayerUiMantine", () => ({
+  usePlayerUiMantine: () => mockUsePlayerUiMantine(),
+}));
+
+beforeEach(() => {
+  mockUsePlayerUiMantine.mockReturnValue(false);
+  vi.stubGlobal("matchMedia", (query: string) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener() {},
+    removeListener() {},
+    addEventListener() {},
+    removeEventListener() {},
+    dispatchEvent: () => false,
+  }));
+});
 
 describe("MapChromeControl", () => {
   it("renders a floating chrome button with icon slot and fires click", () => {
@@ -131,5 +155,45 @@ describe("MapChromeControl", () => {
     expect(button).toBeDisabled();
     fireEvent.click(button);
     expect(onClick).not.toHaveBeenCalled();
+  });
+
+  it("keeps Survey slot path when Mantine flag is off", () => {
+    render(
+      <MapChromeControl
+        variant="slot"
+        aria-label="Matching"
+        icon={<span>m</span>}
+        label="Match"
+        pressed
+      />,
+    );
+
+    const button = screen.getByRole("button", { name: "Matching" });
+    expect(button).toHaveClass("jl-tool-slot", "jl-tool-slot-active");
+    expect(button.getAttribute("data-player-ux-world")).toBeNull();
+    expect(button).toHaveAttribute("aria-pressed", "true");
+  });
+
+  it("mounts Mantine slot chrome when flag is on", () => {
+    mockUsePlayerUiMantine.mockReturnValue(true);
+    render(
+      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+        <MapChromeControl
+          variant="slot"
+          aria-label="Matching"
+          icon={<span data-testid="mantine-slot-icon">m</span>}
+          label="Match"
+          pressed
+        />
+      </MantineProvider>,
+    );
+
+    const button = screen.getByRole("button", { name: "Matching" });
+    expect(button.getAttribute("data-player-ux-world")).toBe("mantine");
+    expect(button).toHaveClass("jl-tool-slot");
+    expect(button).not.toHaveClass("jl-tool-slot-active");
+    expect(button).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByTestId("mantine-slot-icon")).toBeInTheDocument();
+    expect(screen.getByText("Match")).toHaveClass("jl-tool-slot-label");
   });
 });

@@ -348,24 +348,26 @@ html[data-map-side-dock="top-left"] .map-zoom-control--admin-rail {
   background:
     linear-gradient(
       165deg,
-      oklch(from var(--color-canvas) calc(l + 0.1) c h / 0.28) 0%,
-      oklch(from var(--color-canvas) l c h / 0.14) 55%,
-      oklch(from var(--color-canvas) calc(l - 0.02) c h / 0.1) 100%
+      oklch(from var(--color-canvas) calc(l + 0.1) c h / 0.18) 0%,
+      oklch(from var(--color-canvas) l c h / 0.09) 55%,
+      oklch(from var(--color-canvas) calc(l - 0.02) c h / 0.06) 100%
     );
-  backdrop-filter: blur(36px) saturate(1.9);
-  -webkit-backdrop-filter: blur(36px) saturate(1.9);
+  backdrop-filter: blur(4px) saturate(1.15);
+  -webkit-backdrop-filter: blur(4px) saturate(1.15);
   box-shadow:
-    inset 0 1px 0 oklch(1 0 0 / 0.5),
-    inset 0 -0.5px 0 oklch(from var(--color-field-ink) l c h / 0.06),
-    0 18px 40px oklch(0.12 0.04 265 / 0.22),
-    0 0 0 0.5px oklch(from var(--color-field-ink) l c h / 0.04);
+    inset 0 1px 0 oklch(1 0 0 / 0.28),
+    inset 0 -0.5px 0 oklch(from var(--color-field-ink) l c h / 0.04),
+    0 2px 4px oklch(0.12 0.04 265 / 0.12),
+    0 12px 28px oklch(0.1 0.04 265 / 0.28),
+    0 28px 56px oklch(0.08 0.03 265 / 0.22),
+    0 0 0 0.5px oklch(from var(--color-field-ink) l c h / 0.05);
 }
 
 [data-chrome-side-stack="phone"][data-dragging="true"] .jl-map-island,
 [data-chrome-nav-stack="phone"][data-dragging="true"] .jl-map-nav-dock__zoom,
 [data-chrome-nav-stack="phone"][data-dragging="true"] .mantine-ActionIcon-root {
   box-shadow: none;
-  background-color: oklch(from var(--color-canvas) l c h / 0.55);
+  background-color: oklch(from var(--color-canvas) l c h / 0.38);
   transition:
     background-color 160ms var(--ease-ios-emphasized, cubic-bezier(0.2, 0.9, 0.2, 1)),
     box-shadow 160ms var(--ease-ios-emphasized, cubic-bezier(0.2, 0.9, 0.2, 1));

@@ -38,8 +38,8 @@ describe("resolveStackedTops", () => {
 });
 
 describe("separateFromPeerRect", () => {
-  it("parks above the peer when dragged on top from above", () => {
-    const next = separateFromPeerRect(100, 40, 52, 80, {
+  it("keeps gap above the peer when dragged down into it", () => {
+    const next = separateFromPeerRect(100, 160, 52, 80, {
       left: 100,
       top: 200,
       right: 152,
@@ -47,17 +47,60 @@ describe("separateFromPeerRect", () => {
       height: 200,
     });
     expect(next.top + 80).toBeLessThanOrEqual(200 - 14 + 0.01);
+    expect(next.left).toBe(100);
   });
 
-  it("flips below when there is no room above the peer", () => {
-    const next = separateFromPeerRect(100, 140, 52, 120, {
+  it("keeps gap beside the peer when dragged sideways into it", () => {
+    const next = separateFromPeerRect(120, 250, 52, 80, {
       left: 100,
       top: 200,
       right: 152,
       bottom: 400,
       height: 200,
     });
-    expect(next.top).toBeGreaterThanOrEqual(200 + 200 + 14 - 0.01);
+    const clearLeft = next.left + 52 <= 100 - 14 + 0.01;
+    const clearRight = next.left >= 152 + 14 - 0.01;
+    expect(clearLeft || clearRight).toBe(true);
+  });
+
+  it("does not horizontally snap to the peer when already clear", () => {
+    const next = separateFromPeerRect(40, 40, 52, 80, {
+      left: 100,
+      top: 200,
+      right: 152,
+      bottom: 400,
+      height: 200,
+    });
+    expect(next).toEqual({ left: 40, top: 40 });
+  });
+
+  it("falls back below when left/right/above are clipped into the peer", () => {
+    const prevWidth = window.innerWidth;
+    const prevHeight = window.innerHeight;
+    Object.defineProperty(window, "innerWidth", {
+      configurable: true,
+      value: 120,
+    });
+    Object.defineProperty(window, "innerHeight", {
+      configurable: true,
+      value: 900,
+    });
+    const next = separateFromPeerRect(12, 30, 52, 160, {
+      left: 12,
+      top: 40,
+      right: 108,
+      bottom: 240,
+      height: 200,
+    });
+    Object.defineProperty(window, "innerWidth", {
+      configurable: true,
+      value: prevWidth,
+    });
+    Object.defineProperty(window, "innerHeight", {
+      configurable: true,
+      value: prevHeight,
+    });
+    expect(next.top).toBeGreaterThanOrEqual(240 + 14 - 0.01);
   });
 });
 
