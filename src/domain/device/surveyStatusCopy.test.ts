@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { resolveHidingPeriodMs } from "@/domain/session/rules";
 import {
+  mapIslandSessionStatus,
+  mapIslandSessionStatusCompact,
   surveyPhaseLabel,
+  surveySyncSegmentLabel,
   surveySyncShortLabel,
 } from "./surveyStatusCopy";
 
@@ -63,6 +66,90 @@ describe("surveyPhaseLabel", () => {
   });
 });
 
+describe("mapIslandSessionStatus", () => {
+  it("prefers lobby states before start", () => {
+    expect(
+      mapIslandSessionStatus({
+        timerHasStarted: false,
+        timerSyncing: true,
+        timerRunning: false,
+        canStartGame: true,
+        moveInProgress: false,
+        sessionRules: rules,
+        timerState: timer,
+      }),
+    ).toBe("Syncing");
+    expect(
+      mapIslandSessionStatus({
+        timerHasStarted: false,
+        timerSyncing: false,
+        timerRunning: false,
+        canStartGame: true,
+        moveInProgress: false,
+        sessionRules: rules,
+        timerState: timer,
+      }),
+    ).toBe("Ready");
+    expect(
+      mapIslandSessionStatus({
+        timerHasStarted: false,
+        timerSyncing: false,
+        timerRunning: false,
+        canStartGame: false,
+        moveInProgress: false,
+        sessionRules: rules,
+        timerState: timer,
+      }),
+    ).toBe("Waiting");
+  });
+
+  it("prefers Walking over phase when a thermometer walk is live", () => {
+    expect(
+      mapIslandSessionStatus({
+        timerHasStarted: true,
+        timerSyncing: false,
+        timerRunning: true,
+        canStartGame: false,
+        moveInProgress: false,
+        sessionRules: rules,
+        timerState: { accumulatedMs: 30_000, runningSince: Date.now() },
+        pendingQuestions: [
+          {
+            id: "pq-walk",
+            sessionId: "s",
+            toolType: "thermometer",
+            createdByUid: "u",
+            createdAt: new Date().toISOString(),
+            status: "walking",
+            placement: { geometryJson: "{}", metadata: {} },
+            replyOptions: [],
+            promptText: "Walk",
+          },
+        ],
+      }),
+    ).toBe("Walking");
+  });
+
+  it("returns Paused when the session clock is stopped", () => {
+    expect(
+      mapIslandSessionStatus({
+        timerHasStarted: true,
+        timerSyncing: false,
+        timerRunning: false,
+        canStartGame: false,
+        moveInProgress: false,
+        sessionRules: rules,
+        timerState: { accumulatedMs: 30_000, runningSince: null },
+      }),
+    ).toBe("Paused");
+  });
+
+  it("compacts long labels for narrow islands", () => {
+    expect(mapIslandSessionStatusCompact("Seeking")).toBe("Seek");
+    expect(mapIslandSessionStatusCompact("Walking")).toBe("Walk");
+  });
+});
+
 describe("surveySyncShortLabel", () => {
   it.each([
     ["synced", 0, "Synced"],
@@ -74,5 +161,13 @@ describe("surveySyncShortLabel", () => {
     ["error", 0, "Sync issue"],
   ] as const)("%s queued=%i → %s", (status, queued, label) => {
     expect(surveySyncShortLabel(status, queued)).toBe(label);
+  });
+});
+
+describe("surveySyncSegmentLabel", () => {
+  it("hides synced copy and shortens offline/error", () => {
+    expect(surveySyncSegmentLabel("synced", 0)).toBeNull();
+    expect(surveySyncSegmentLabel("offline", 3)).toBe("Off · 3");
+    expect(surveySyncSegmentLabel("error", 0)).toBe("Issue");
   });
 });

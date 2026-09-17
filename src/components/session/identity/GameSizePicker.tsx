@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { Text } from "@mantine/core";
 import type { GameArea } from "@/domain/map/annotations";
 import type { DistanceUnit } from "@/domain/map/distance";
 import type { GameSize } from "@/domain/session/size/gameSize";
@@ -13,6 +14,7 @@ import {
 } from "@/domain/session/size/gameSize";
 import { gameSizeRulesSummary } from "@/domain/session/size/gameSizeRules";
 import { RadioCardGroup } from "../../ui/forms/RadioCardGroup";
+import { IosSectionLabel } from "@/components/ui/apple/iosEntryChrome";
 
 interface GameSizePickerProps {
   gameArea: GameArea | null;
@@ -78,21 +80,33 @@ export function GameSizePicker({
       description: `${meta.summary} · ${rules.hidingPeriodLabel} · ${rules.tentacleLabel}`,
       footer: rules.thermometerMaxLabel,
       badge: isRecommended ? (
-        <span className="rounded-full bg-brand-blue/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-brand-blue">
+        <Text
+          size="xs"
+          fw={590}
+          px={8}
+          py={2}
+          style={{
+            borderRadius: 999,
+            backgroundColor: "oklch(from var(--color-flag) l c h / 0.16)",
+            color: "var(--color-flag)",
+            letterSpacing: "0.04em",
+            textTransform: "uppercase",
+          }}
+        >
           Recommended
-        </span>
+        </Text>
       ) : undefined,
     };
   });
 
   return (
     <div className="space-y-2">
-      <div className="flex items-baseline justify-between gap-2">
-        <p className="font-display text-xs font-semibold uppercase tracking-[0.1em] text-ink-dim">
-          Game size
-        </p>
+      <div className="flex items-baseline justify-between gap-2 px-1">
+        <IosSectionLabel>Game size</IosSectionLabel>
         {playAreaSummary ? (
-          <p className="text-xs text-ink-muted">{playAreaSummary}</p>
+          <Text size="xs" c="var(--color-field-ink-muted)">
+            {playAreaSummary}
+          </Text>
         ) : null}
       </div>
       <RadioCardGroup
@@ -106,9 +120,9 @@ export function GameSizePicker({
         disabled={disabled}
       />
       {compactArea ? (
-        <p className="text-xs text-ink-dim">
+        <Text size="xs" c="var(--color-field-ink-muted)" px={4}>
           Compact area, good for a short local game.
-        </p>
+        </Text>
       ) : null}
     </div>
   );

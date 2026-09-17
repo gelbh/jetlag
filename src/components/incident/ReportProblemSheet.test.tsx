@@ -1,6 +1,6 @@
 import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { MantineProvider } from "@mantine/core";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi, beforeEach } from "vitest";
 import { INCIDENT_NOTE_MAX_LENGTH } from "../../domain/incident/incidentTypes";
 import { jetlagMantineTheme } from "@/theme/mantineTheme";
 import { renderWithRouter } from "../../test/renderWithRouter";
@@ -35,29 +35,16 @@ vi.mock("../../hooks/incident/usePendingHostConfirm", () => ({
   }),
 }));
 
+function renderReport(ui: React.ReactNode) {
+  return renderWithRouter(
+    <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+      {ui}
+    </MantineProvider>,
+  );
+}
+
 describe("ReportProblemSheet", () => {
-  it("renders probe copy, diagnostics rows, and 0/140 counter", () => {
-    renderWithRouter(
-      <ReportProblemSheet open onClose={() => {}} online />,
-    );
-
-    expect(
-      screen.getByRole("heading", { name: "REPORT PROBLEM" }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText("Help us resolve this quickly. Optional details below."),
-    ).toBeInTheDocument();
-    expect(screen.getByText("0/140")).toBeInTheDocument();
-    expect(screen.getByText("Route")).toBeInTheDocument();
-    expect(screen.getByText("App version")).toBeInTheDocument();
-    expect(screen.getByText("Last error")).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Send report" }),
-    ).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Cancel" })).toBeInTheDocument();
-  });
-
-  it("renders iOS drawer chrome when requested", () => {
+  beforeEach(() => {
     vi.stubGlobal("matchMedia", (query: string) => ({
       matches: false,
       media: query,
@@ -76,25 +63,40 @@ describe("ReportProblemSheet", () => {
         disconnect() {}
       },
     );
-    renderWithRouter(
-      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
-        <ReportProblemSheet open onClose={() => {}} online chrome="ios" />
-      </MantineProvider>,
-    );
+  });
+
+  it("renders probe copy, diagnostics rows, and 0/140 counter", () => {
+    renderReport(<ReportProblemSheet open onClose={() => {}} online />);
 
     expect(
       screen.getByRole("heading", { name: "Report a problem" }),
     ).toBeInTheDocument();
-    expect(document.querySelector(".mantine-Drawer-content")).toBeTruthy();
+    expect(
+      screen.getByText("Help us resolve this quickly. Optional details below."),
+    ).toBeInTheDocument();
+    expect(screen.getByText("0/140")).toBeInTheDocument();
+    expect(screen.getByText("Route")).toBeInTheDocument();
+    expect(screen.getByText("App version")).toBeInTheDocument();
+    expect(screen.getByText("Last error")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Send report" }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Cancel" })).toBeInTheDocument();
+  });
+
+  it("uses SheetHost chassis (no dedicated Drawer chrome prop)", () => {
+    renderReport(<ReportProblemSheet open onClose={() => {}} online />);
+
+    expect(
+      screen.getByRole("heading", { name: "Report a problem" }),
+    ).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Send report" }),
     ).toBeInTheDocument();
   });
 
   it("caps the note at 140 characters", () => {
-    renderWithRouter(
-      <ReportProblemSheet open onClose={() => {}} online />,
-    );
+    renderReport(<ReportProblemSheet open onClose={() => {}} online />);
 
     const note = screen.getByPlaceholderText("What happened?");
     const oversized = "x".repeat(INCIDENT_NOTE_MAX_LENGTH + 40);
@@ -109,9 +111,7 @@ describe("ReportProblemSheet", () => {
   });
 
   it("disables submit when offline", () => {
-    renderWithRouter(
-      <ReportProblemSheet open onClose={() => {}} online={false} />,
-    );
+    renderReport(<ReportProblemSheet open onClose={() => {}} online={false} />);
 
     expect(
       screen.getByRole("button", { name: "Send report" }),
@@ -127,7 +127,7 @@ describe("ReportProblemSheet", () => {
       status: "open",
     });
 
-    renderWithRouter(
+    renderReport(
       <ReportProblemSheet
         open
         onClose={() => {}}

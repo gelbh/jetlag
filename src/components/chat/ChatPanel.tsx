@@ -8,7 +8,6 @@ import type {
 import type { PlayerRole } from "../../domain/session/players/playerRole";
 import { useDesktopLayout } from "../../hooks/layout/useDesktopLayout";
 import { useVisualViewportBottomInset } from "../../hooks/layout/useVisualViewportBottomInset";
-import { useAnimatedPresence } from "../../hooks/motion/useAnimatedPresence";
 import { SheetHost } from "../ui/sheets/SheetHost";
 import { ChatPanelBody } from "./ChatPanelBody";
 
@@ -22,6 +21,7 @@ interface ChatPanelProps {
   senderUid: string;
   senderRole: PlayerRole;
   isHider: boolean;
+  /** @deprecated Phone chat uses SheetHost; kept for call-site compatibility. */
   bottomClassName?: string;
   questionTruths?: ReadonlyMap<string, HiderTruthResult>;
   truthsLoading?: boolean;
@@ -53,7 +53,6 @@ export function ChatPanel({
   senderUid,
   senderRole,
   isHider,
-  bottomClassName = "jl-panel-above-dock",
   questionTruths,
   truthsLoading = false,
   truthReferenceModes,
@@ -66,13 +65,6 @@ export function ChatPanel({
 }: ChatPanelProps) {
   const isDesktop = useDesktopLayout();
   const keyboardInset = useVisualViewportBottomInset(open && !isDesktop);
-  const { mounted, animClass, setAnimNode } = useAnimatedPresence({
-    open: open && !isDesktop,
-    onClose,
-    enterClass: "jl-panel-enter",
-    exitClass: "jl-panel-exit",
-    durationMs: 200,
-  });
 
   const body = (
     <ChatPanelBody
@@ -95,38 +87,18 @@ export function ChatPanel({
     />
   );
 
-  if (isDesktop) {
-    return (
-      <SheetHost open={open} onClose={onClose} ariaLabel="Chat" railTab="chat">
-        <div className="mb-3 flex shrink-0 items-center justify-end gap-2">
-          <button
-            type="button"
-            onClick={onClose}
-            className="btn-secondary flex min-h-11 min-w-11 items-center justify-center px-3"
-          >
-            Close
-          </button>
-        </div>
-        {body}
-      </SheetHost>
-    );
-  }
-
-  if (!mounted) {
-    return null;
-  }
-
   return (
-    <div
-      ref={setAnimNode}
-      className={`jl-chat-keyboard-inset pointer-events-auto absolute inset-x-0 z-[var(--z-panel)] px-3 ${animClass} ${bottomClassName}`}
-      style={
-        keyboardInset > 0
-          ? { transform: `translateY(-${keyboardInset}px)` }
-          : undefined
+    <SheetHost
+      open={open}
+      onClose={onClose}
+      ariaLabel="Chat"
+      railTab={isDesktop ? "chat" : undefined}
+      maxHeightClassName="max-h-[min(72dvh,640px)]"
+      contentStyle={
+        keyboardInset > 0 ? { paddingBottom: keyboardInset } : undefined
       }
     >
-      <div className="tool-panel-compact hud-panel mx-auto flex min-h-0 max-h-[min(50dvh,420px)] max-w-xl flex-col overflow-hidden p-3">
+      {isDesktop ? (
         <div className="mb-3 flex shrink-0 items-center justify-end gap-2">
           <button
             type="button"
@@ -136,8 +108,8 @@ export function ChatPanel({
             Close
           </button>
         </div>
-        {body}
-      </div>
-    </div>
+      ) : null}
+      {body}
+    </SheetHost>
   );
 }

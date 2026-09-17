@@ -197,6 +197,7 @@ export function ToolDock({
           open={drawMenuVisible}
           activeTool={activeTool}
           onSelect={selectTool}
+          onClose={closeMenus}
         />
       }
     />

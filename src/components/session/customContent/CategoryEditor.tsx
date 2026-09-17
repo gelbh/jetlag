@@ -1,9 +1,19 @@
 import { useState } from "react";
+import { Box, Button, Stack, Text, Textarea, TextInput } from "@mantine/core";
 import type { AdvancedSessionSettingsValue } from "@/domain/session/tools/advancedSessionSettings";
 import {
   createSessionCustomCategoryId,
   type SessionCustomCategory,
 } from "@/domain/session/catalog/sessionCustomContent";
+import {
+  IosInsetGroup,
+  IosSectionLabel,
+  iosCompactDangerStyles,
+  iosFilledStyles,
+  iosInsetTextInputStyles,
+  iosInsetTextareaStyles,
+} from "@/components/ui/apple/iosEntryChrome";
+import { IosInsetHairline } from "@/components/ui/apple/IosInsetRow";
 
 interface CategoryEditorProps {
   value: AdvancedSessionSettingsValue;
@@ -49,101 +59,110 @@ export function CategoryEditor({
   };
 
   return (
-    <>
-      <p className="font-display text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-dim">
-        Custom POI categories
-      </p>
-      <p className="text-xs text-ink-muted">
+    <Stack gap="xs">
+      <IosSectionLabel>Custom POI categories</IosSectionLabel>
+      <Text size="xs" c="var(--color-field-ink-muted)" px={4}>
         Add Overpass tag selectors for Matching, Measuring, and Tentacle (one
         selector per line, e.g. amenity=police).
-      </p>
+      </Text>
+
       {value.customCategories.length > 0 ? (
-        <ul className="space-y-1 text-sm text-ink">
-          {value.customCategories.map((category) => (
-            <li
-              key={category.id}
-              className="flex items-center justify-between gap-2 border border-border px-2 py-1"
-            >
-              <span>
-                {category.label}
-                <span className="block text-xs text-ink-muted">
-                  {category.overpassSelectors.join(", ")}
-                </span>
-              </span>
-              <button
-                type="button"
-                disabled={disabled}
-                onClick={() =>
-                  onChange({
-                    ...value,
-                    customCategories: value.customCategories.filter(
-                      (item) => item.id !== category.id,
-                    ),
-                  })
-                }
-                className="text-xs text-error"
+        <IosInsetGroup>
+          {value.customCategories.map((category, index) => (
+            <Box key={category.id}>
+              {index > 0 ? <IosInsetHairline insetStart="1rem" /> : null}
+              <Box
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.75rem",
+                  paddingInline: "1rem",
+                  paddingBlock: "0.65rem",
+                }}
               >
-                Remove
-              </button>
-            </li>
+                <Box style={{ flex: 1, minWidth: 0 }}>
+                  <Text size="sm" c="var(--color-field-ink)">
+                    {category.label}
+                  </Text>
+                  <Text size="xs" c="var(--color-field-ink-muted)">
+                    {category.overpassSelectors.join(", ")}
+                  </Text>
+                </Box>
+                <Button
+                  type="button"
+                  size="compact-sm"
+                  disabled={disabled}
+                  styles={iosCompactDangerStyles}
+                  onClick={() =>
+                    onChange({
+                      ...value,
+                      customCategories: value.customCategories.filter(
+                        (item) => item.id !== category.id,
+                      ),
+                    })
+                  }
+                >
+                  Remove
+                </Button>
+              </Box>
+            </Box>
           ))}
-        </ul>
+        </IosInsetGroup>
       ) : null}
-      <div className="grid gap-2 sm:grid-cols-2">
-        <label className="field-label text-xs">
-          Label
-          <input
-            value={categoryDraft.label}
-            disabled={disabled}
-            onChange={(event) =>
-              setCategoryDraft((current) => ({
-                ...current,
-                label: event.target.value,
-              }))
-            }
-            className="field-input mt-1"
-          />
-        </label>
-        <label className="field-label text-xs">
-          Prompt noun
-          <input
-            value={categoryDraft.promptNoun}
-            disabled={disabled}
-            onChange={(event) =>
-              setCategoryDraft((current) => ({
-                ...current,
-                promptNoun: event.target.value,
-              }))
-            }
-            placeholder="police station"
-            className="field-input mt-1"
-          />
-        </label>
-      </div>
-      <label className="field-label text-xs">
-        Overpass selectors
-        <textarea
-          value={categoryDraft.selectors}
+
+      <IosInsetGroup>
+        <TextInput
+          label="Label"
+          value={categoryDraft.label}
           disabled={disabled}
           onChange={(event) =>
             setCategoryDraft((current) => ({
               ...current,
-              selectors: event.target.value,
+              label: event.currentTarget.value,
             }))
           }
+          styles={iosInsetTextInputStyles}
+        />
+        <IosInsetHairline insetStart="1rem" />
+        <TextInput
+          label="Prompt noun"
+          value={categoryDraft.promptNoun}
+          disabled={disabled}
+          placeholder="police station"
+          onChange={(event) =>
+            setCategoryDraft((current) => ({
+              ...current,
+              promptNoun: event.currentTarget.value,
+            }))
+          }
+          styles={iosInsetTextInputStyles}
+        />
+        <IosInsetHairline insetStart="1rem" />
+        <Textarea
+          label="Overpass selectors"
+          value={categoryDraft.selectors}
+          disabled={disabled}
           rows={3}
           placeholder="[amenity=police]"
-          className="field-input mt-1"
+          onChange={(event) =>
+            setCategoryDraft((current) => ({
+              ...current,
+              selectors: event.currentTarget.value,
+            }))
+          }
+          styles={iosInsetTextareaStyles}
         />
-      </label>
-      <button
+      </IosInsetGroup>
+
+      <Button
         type="button"
+        fullWidth
         disabled={disabled}
+        styles={iosFilledStyles}
         onClick={addCategory}
-        className="rounded-full border border-border px-3 py-1 text-xs font-semibold text-brand-blue disabled:opacity-50"
       >
         Add category
-      </button>
-    </>
+      </Button>
+    </Stack>
   );
 }

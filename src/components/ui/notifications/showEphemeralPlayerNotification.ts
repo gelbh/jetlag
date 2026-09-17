@@ -19,6 +19,8 @@ export function showEphemeralPlayerNotification(
     title: input.title,
     message: input.message,
     color: input.color ?? "red",
+    autoClose: 4200,
+    withCloseButton: true,
   });
   return true;
 }

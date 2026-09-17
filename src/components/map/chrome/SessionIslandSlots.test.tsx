@@ -3,6 +3,19 @@ import { describe, expect, it, vi } from "vitest";
 import { SessionIslandSlots } from "./SessionIslandSlots";
 
 describe("SessionIslandSlots", () => {
+  it("puts Settings above other session tools", () => {
+    render(
+      <SessionIslandSlots
+        onOpenSettings={vi.fn()}
+        onOpenChat={vi.fn()}
+        onOpenLog={vi.fn()}
+        onOpenCodes={vi.fn()}
+      />,
+    );
+    const labels = screen.getAllByRole("button").map((button) => button.getAttribute("aria-label"));
+    expect(labels[0]).toBe("Open settings");
+  });
+
   it("shows Codes when onOpenCodes is provided and opens on tap", () => {
     const onOpenCodes = vi.fn();
 

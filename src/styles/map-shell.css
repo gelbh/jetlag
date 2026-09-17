@@ -363,6 +363,22 @@
     align-items: flex-start;
   }
 
+  /*
+   * Keep map-preload spinner on the opposite side of the phone tool dock so
+   * top-left dock does not cover the beacon (dock left → spinner top-right).
+   */
+  html[data-map-side-dock="left"] .jl-preload-map-indicator,
+  html[data-map-side-dock$="-left"] .jl-preload-map-indicator {
+    left: auto;
+    right: var(--jl-sync-beacon-inset);
+    align-items: flex-end;
+  }
+
+  html[data-map-side-dock="left"] .jl-preload-detail-panel,
+  html[data-map-side-dock$="-left"] .jl-preload-detail-panel {
+    transform-origin: top right;
+  }
+
   .jl-sync-map-indicator__btn {
     pointer-events: auto;
     display: inline-flex;

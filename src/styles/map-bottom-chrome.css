@@ -12,6 +12,13 @@
   --chrome-side-stack-gap: 0.75rem;
   --chrome-side-stack-lift: 0.5rem;
   --chrome-side-stack-lift-landscape: 1rem;
+  /* Extra space so bottom snaps clear the hunt dock. */
+  --chrome-side-stack-bottom-clearance: 1.5rem;
+  /* Top snaps sit below the status island (a bit lower than flush). */
+  --chrome-side-stack-top-clearance: 1.25rem;
+  /* Continuous island radii; outer corner matches screen corners. */
+  --chrome-side-island-radius: 1.125rem;
+  --chrome-side-island-corner: 1.625rem;
   --map-chrome-side-width: 3.25rem;
   --dock-content-height: var(--dock-island-height);
   --dock-secondary-height: 0px;
@@ -19,6 +26,7 @@
   --dock-primary-content-height: var(--dock-island-height);
   /* Left map chrome stack (sat → zoom → compass) — single token owner */
   --map-left-chrome-inset: max(0.75rem, env(safe-area-inset-left));
+  --map-right-chrome-inset: max(0.75rem, env(safe-area-inset-right));
   --map-left-chrome-gap: 0.5rem;
   --map-style-control-size: 2.75rem;
   --map-compass-control-size: var(--map-zoom-btn-size, 2.75rem);
@@ -105,6 +113,125 @@
     );
   }
 
+  /*
+   * Mantine fixed stack (viewport corners). Absolute bottom rule above still
+   * covers Legacy phone stacks without data-anchor.
+   */
+  [data-chrome-side-stack="phone"].jl-map-chrome-side-stack--fixed {
+    position: fixed;
+  }
+
+  /* Default continuous rect (not stadium / not sharp square). */
+  [data-chrome-side-stack="phone"] .jl-map-island {
+    border-radius: var(--chrome-side-island-radius);
+  }
+
+  /* Map-facing edge is rounder; screen edge stays tighter. */
+  [data-chrome-side-stack="phone"][data-anchor="top-right"] .jl-map-island {
+    border-radius: var(--chrome-side-island-corner)
+      var(--chrome-side-island-radius) var(--chrome-side-island-radius)
+      var(--chrome-side-island-corner);
+  }
+
+  [data-chrome-side-stack="phone"][data-anchor="top-left"] .jl-map-island {
+    border-radius: var(--chrome-side-island-radius)
+      var(--chrome-side-island-corner) var(--chrome-side-island-corner)
+      var(--chrome-side-island-radius);
+  }
+
+  [data-chrome-side-stack="phone"][data-anchor="bottom-right"] .jl-map-island {
+    border-radius: var(--chrome-side-island-corner)
+      var(--chrome-side-island-radius) var(--chrome-side-island-radius)
+      var(--chrome-side-island-corner);
+  }
+
+  [data-chrome-side-stack="phone"][data-anchor="bottom-left"] .jl-map-island {
+    border-radius: var(--chrome-side-island-radius)
+      var(--chrome-side-island-corner) var(--chrome-side-island-corner)
+      var(--chrome-side-island-radius);
+  }
+
+  [data-chrome-side-stack="phone"][data-anchor="mid-right"] .jl-map-island {
+    border-radius: var(--chrome-side-island-corner)
+      var(--chrome-side-island-radius) var(--chrome-side-island-radius)
+      var(--chrome-side-island-corner);
+  }
+
+  [data-chrome-side-stack="phone"][data-anchor="mid-left"] .jl-map-island {
+    border-radius: var(--chrome-side-island-radius)
+      var(--chrome-side-island-corner) var(--chrome-side-island-corner)
+      var(--chrome-side-island-radius);
+  }
+
+  [data-chrome-side-stack="phone"][data-anchor="bottom-right"] {
+    top: auto;
+    transform: none;
+    bottom: calc(
+      var(--dock-island-height) + var(--chrome-side-stack-gap) +
+        var(--chrome-side-stack-lift) + var(--chrome-side-stack-bottom-clearance) +
+        env(safe-area-inset-bottom, 0px)
+    );
+    left: auto;
+    right: max(0.5rem, env(safe-area-inset-right));
+  }
+
+  [data-chrome-side-stack="phone"][data-anchor="bottom-left"] {
+    top: auto;
+    transform: none;
+    bottom: calc(
+      var(--dock-island-height) + var(--chrome-side-stack-gap) +
+        var(--chrome-side-stack-lift) + var(--chrome-side-stack-bottom-clearance) +
+        env(safe-area-inset-bottom, 0px)
+    );
+    right: auto;
+    left: max(0.5rem, env(safe-area-inset-left));
+  }
+
+  [data-chrome-side-stack="phone"][data-anchor="mid-right"] {
+    top: 50%;
+    bottom: auto;
+    left: auto;
+    right: max(0.5rem, env(safe-area-inset-right));
+    transform: translateY(-50%);
+  }
+
+  [data-chrome-side-stack="phone"][data-anchor="mid-left"] {
+    top: 50%;
+    bottom: auto;
+    right: auto;
+    left: max(0.5rem, env(safe-area-inset-left));
+    transform: translateY(-50%);
+  }
+
+  [data-chrome-side-stack="phone"][data-anchor="top-right"] {
+    bottom: auto;
+    transform: none;
+    top: calc(
+      env(safe-area-inset-top, 0px) + var(--status-bar-height, 3.25rem) +
+        var(--chrome-side-stack-top-clearance)
+    );
+    left: auto;
+    right: max(0.5rem, env(safe-area-inset-right));
+  }
+
+  [data-chrome-side-stack="phone"][data-anchor="top-left"] {
+    bottom: auto;
+    transform: none;
+    top: calc(
+      env(safe-area-inset-top, 0px) + var(--status-bar-height, 3.25rem) +
+        var(--chrome-side-stack-top-clearance)
+    );
+    right: auto;
+    left: max(0.5rem, env(safe-area-inset-left));
+  }
+
+  [data-chrome-side-stack="phone"][data-dragging="true"] {
+    /* Inline left/top from JS while dragging; clear snap edges. */
+    right: auto !important;
+    bottom: auto !important;
+    transform: none !important;
+  }
+
   @media (max-height: 430px) and (orientation: landscape) {
     [data-chrome-side-stack="phone"] {
       bottom: calc(
@@ -131,12 +258,21 @@
   [data-overlay-host] [data-tool-menu="draw"] {
     position: absolute;
     right: calc(var(--map-chrome-side-width, 3.25rem) + 0.5rem);
+    left: auto;
     bottom: calc(
       var(--dock-island-height) + env(safe-area-inset-bottom) +
         var(--chrome-side-stack-gap) + var(--chrome-side-stack-lift)
     );
     z-index: calc(var(--z-panel) + 1);
     pointer-events: auto;
+  }
+
+  html[data-map-side-dock="left"] [data-overlay-host] [data-tool-menu="draw"],
+  html[data-map-side-dock="bottom-left"] [data-overlay-host] [data-tool-menu="draw"],
+  html[data-map-side-dock="mid-left"] [data-overlay-host] [data-tool-menu="draw"],
+  html[data-map-side-dock="top-left"] [data-overlay-host] [data-tool-menu="draw"] {
+    left: calc(var(--map-chrome-side-width, 3.25rem) + 0.5rem);
+    right: auto;
   }
 
   [data-overlay-host][data-layout="rail"] [data-tool-menu="draw"] {
@@ -254,4 +390,50 @@
         var(--map-left-chrome-gap)
     );
   }
+}
+
+/* Side dock on left corners → MapView chrome flips to the right edge. */
+html[data-map-side-dock="left"] .map-zoom-control,
+html[data-map-side-dock="left"] .map-style-control,
+html[data-map-side-dock="left"] .map-compass-control,
+html[data-map-side-dock="bottom-left"] .map-zoom-control,
+html[data-map-side-dock="bottom-left"] .map-style-control,
+html[data-map-side-dock="bottom-left"] .map-compass-control,
+html[data-map-side-dock="mid-left"] .map-zoom-control,
+html[data-map-side-dock="mid-left"] .map-style-control,
+html[data-map-side-dock="mid-left"] .map-compass-control,
+html[data-map-side-dock="top-left"] .map-zoom-control,
+html[data-map-side-dock="top-left"] .map-style-control,
+html[data-map-side-dock="top-left"] .map-compass-control {
+  left: auto;
+  right: var(--map-right-chrome-inset);
+}
+
+html[data-map-side-dock="left"] .map-zoom-control--admin-rail,
+html[data-map-side-dock="bottom-left"] .map-zoom-control--admin-rail,
+html[data-map-side-dock="mid-left"] .map-zoom-control--admin-rail,
+html[data-map-side-dock="top-left"] .map-zoom-control--admin-rail {
+  right: calc(
+    var(--map-right-chrome-inset) + var(--admin-map-control-inset-right, 0px)
+  );
+  left: auto;
+}
+
+[data-chrome-side-stack="phone"][data-dragging="true"] {
+  transition: none;
+  touch-action: none;
+  z-index: calc(var(--z-dock) + 3);
+}
+
+[data-chrome-side-stack="phone"]:not([data-dragging="true"]) {
+  transition:
+    left 480ms cubic-bezier(0.22, 1, 0.36, 1),
+    right 480ms cubic-bezier(0.22, 1, 0.36, 1),
+    top 480ms cubic-bezier(0.22, 1, 0.36, 1),
+    bottom 480ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 480ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+[data-chrome-side-stack="phone"] {
+  touch-action: none;
 }

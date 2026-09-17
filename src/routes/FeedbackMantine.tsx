@@ -11,8 +11,8 @@ import { ReportProblemSheet } from "@/components/incident/ReportProblemSheet";
 import {
   IosInsetGroup,
   IosSectionLabel,
+  iosFilledStyles,
 } from "@/components/ui/apple/iosEntryChrome";
-import { iosFilledStyles } from "@/components/ui/apple/iosEntryStyles";
 import { IosInsetRow } from "@/components/ui/apple/IosInsetRow";
 import { IosEntryHeader } from "@/components/ui/apple/IosEntryHeader";
 import { EntryScreenLayout } from "@/components/ui/layout/EntryScreenLayout";
@@ -102,7 +102,6 @@ export function FeedbackMantine() {
         <ReportProblemSheet
           open={reportProblemOpen}
           onClose={() => setReportProblemOpen(false)}
-          chrome="ios"
         />
       </Container>
     </EntryScreenLayout>

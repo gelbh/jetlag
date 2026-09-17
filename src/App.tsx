@@ -67,6 +67,15 @@ import {
   StatsLazy,
   TermsLazy,
 } from "./navigation/routePreloaders";
+import { lazyWithChunkRetry } from "./domain/device/updates/lazyWithChunkRetry";
+
+const StatusDockGalleryLazy = import.meta.env.DEV
+  ? lazyWithChunkRetry(() =>
+      import("./routes/dev/StatusDockGallery").then((m) => ({
+        default: m.StatusDockGallery,
+      })),
+    )
+  : null;
 
 function RouteFallback() {
   return (
@@ -272,6 +281,16 @@ export default function App() {
                           }
                         />
                         <Route path="/join" element={<JoinSession />} />
+                        {StatusDockGalleryLazy ? (
+                          <Route
+                            path="/dev/status-dock"
+                            element={
+                              <LazyRoute>
+                                <StatusDockGalleryLazy />
+                              </LazyRoute>
+                            }
+                          />
+                        ) : null}
                         <Route
                           path="/admin"
                           element={

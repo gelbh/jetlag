@@ -5,6 +5,7 @@ import type { TimerState } from "@/domain/session/timer/timer";
 import { Paper } from "@mantine/core";
 import { CaretDown, CaretUp } from "@phosphor-icons/react";
 import { surveySyncShortLabel } from "@/domain/device/surveyStatusCopy";
+import { iosMapChromeSurfaceStyles } from "@/components/ui/apple/iosEntryChrome";
 import { usePlayerUiMantine } from "@/hooks/feature/usePlayerUiMantine";
 import { JlIcon } from "../../ui/brand/JlIcon";
 import { SyncStatusBeacon } from "../syncUi/SyncStatusDot";
@@ -94,9 +95,13 @@ export function MapLandscapeChromeChip({
         aria-expanded={!collapsed}
         aria-controls="map-chrome-hud-controls"
         aria-label={ariaLabel}
-        radius="md"
-        withBorder
-        shadow="sm"
+        radius={22}
+        styles={{
+          root: {
+            ...iosMapChromeSurfaceStyles,
+            borderRadius: 22,
+          },
+        }}
       >
         {chipBody}
       </Paper>

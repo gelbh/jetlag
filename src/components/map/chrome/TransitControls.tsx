@@ -1,4 +1,12 @@
+import { Button } from "@mantine/core";
 import type { TransitRouteFilter } from "@/domain/map/transit";
+import { SettingsToggleRow } from "@/components/session/settings/SettingsToggleRow";
+import {
+  IosInsetGroup,
+  iosCompactFilledStyles,
+  iosCompactGrayStyles,
+} from "@/components/ui/apple/iosEntryChrome";
+import { SegmentControl } from "@/components/ui/forms/SegmentControl";
 
 interface TransitControlsProps {
   enabled: boolean;
@@ -30,6 +38,65 @@ const FILTER_OPTIONS: Array<{ value: TransitRouteFilter; label: string }> = [
   { value: "ferry", label: "Ferry" },
 ];
 
+function statusLine({
+  metroLabel,
+  premiumSession,
+  enabled,
+  liveSupported,
+  liveEnabled,
+  routeCount,
+  stopCount,
+  vehicleCount,
+  loadingStatic,
+  loadingLive,
+  liveDataStale,
+  lastUpdated,
+}: {
+  metroLabel: string | null;
+  premiumSession: boolean;
+  enabled: boolean;
+  liveSupported: boolean;
+  liveEnabled: boolean;
+  routeCount: number;
+  stopCount: number;
+  vehicleCount: number;
+  loadingStatic: boolean;
+  loadingLive: boolean;
+  liveDataStale: boolean;
+  lastUpdated?: string;
+}): string {
+  const parts: string[] = [];
+  if (metroLabel) {
+    parts.push(metroLabel);
+  }
+  if (!premiumSession) {
+    parts.push("Live vehicles require a Premium session.");
+  } else if (!enabled) {
+    parts.push("Transit overlay hidden");
+  } else if (liveSupported) {
+    parts.push("Static routes and stops. Live vehicles when enabled.");
+  } else {
+    parts.push("Static routes and stops only. Live vehicles unavailable here.");
+  }
+  if (enabled) {
+    parts.push(
+      `${routeCount} routes · ${stopCount} stops${
+        liveEnabled ? ` · ${vehicleCount} live` : ""
+      }`,
+    );
+  }
+  if (loadingStatic || loadingLive) {
+    parts.push("updating…");
+  }
+  if (liveDataStale) {
+    parts.push("live data delayed");
+  }
+  if (lastUpdated) {
+    parts.push(`updated ${new Date(lastUpdated).toLocaleTimeString()}`);
+  }
+  return parts.join(" · ");
+}
+
 export function TransitControls({
   enabled,
   liveEnabled,
@@ -50,91 +117,132 @@ export function TransitControls({
   onRouteFilterChange,
   variant = "panel",
 }: TransitControlsProps) {
-  const wrapperClassName =
-    variant === "panel"
-      ? "pointer-events-auto hud-panel rounded-[var(--radius-hud-lg)] p-3"
-      : "space-y-2";
+  if (variant === "inline") {
+    return (
+      <div className="space-y-2">
+        <IosInsetGroup>
+          <SettingsToggleRow
+            label="Transit overlay"
+            description={
+              metroLabel
+                ? `${metroLabel} routes and stops on the map.`
+                : "Routes and stops on the map."
+            }
+            checked={enabled}
+            onChange={(next) => {
+              if (next !== enabled) {
+                onToggleEnabled();
+              }
+            }}
+          />
+          <SettingsToggleRow
+            showSeparator
+            label="Live vehicles"
+            description={
+              !premiumSession
+                ? "Requires a Premium session."
+                : liveSupported
+                  ? "Moving vehicles when the feed is available."
+                  : "Unavailable in this play area."
+            }
+            checked={liveEnabled}
+            disabled={!enabled || !liveSupported || !premiumSession}
+            onChange={(next) => {
+              if (next !== liveEnabled) {
+                onToggleLive();
+              }
+            }}
+          />
+        </IosInsetGroup>
+        {enabled ? (
+          <>
+            <SegmentControl
+              variant="pill"
+              value={routeFilter}
+              options={FILTER_OPTIONS}
+              onChange={onRouteFilterChange}
+              aria-label="Transit route filter"
+            />
+            <p className="px-1 text-xs text-[var(--color-field-ink-muted)]">
+              {statusLine({
+                metroLabel: null,
+                premiumSession,
+                enabled,
+                liveSupported,
+                liveEnabled,
+                routeCount,
+                stopCount,
+                vehicleCount,
+                loadingStatic,
+                loadingLive,
+                liveDataStale,
+                lastUpdated,
+              })}
+            </p>
+          </>
+        ) : null}
+        {error ? (
+          <p className="px-1 text-xs text-[var(--color-halt)]">{error}</p>
+        ) : null}
+      </div>
+    );
+  }
 
   return (
-    <div className={wrapperClassName}>
+    <div className="pointer-events-auto space-y-2 rounded-[14px] p-3" style={{
+      backgroundColor: "oklch(from var(--color-canvas) l c h / 0.88)",
+      border: "0.33px solid oklch(from var(--color-rule) l c h / 0.65)",
+      backdropFilter: "blur(24px) saturate(1.35)",
+      WebkitBackdropFilter: "blur(24px) saturate(1.35)",
+    }}>
       <div className="flex flex-wrap items-center gap-2">
-        <button
+        <Button
           type="button"
+          size="compact-sm"
           onClick={onToggleEnabled}
-          className={`min-h-12 rounded-xl px-3 text-sm font-medium ${
-            enabled ? "bg-action text-action-ink" : "bg-surface-raised text-ink"
-          }`}
+          styles={enabled ? iosCompactFilledStyles : iosCompactGrayStyles}
         >
           Transit
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
+          size="compact-sm"
           onClick={onToggleLive}
           disabled={!enabled || !liveSupported}
-          className={`min-h-12 rounded-xl px-3 text-sm font-medium disabled:opacity-40 ${
-            liveEnabled ? "bg-status-success text-action-ink" : "bg-surface-raised text-ink"
-          }`}
+          styles={liveEnabled ? iosCompactFilledStyles : iosCompactGrayStyles}
         >
           Live
-        </button>
-        <label className="min-h-12 rounded-xl bg-surface-raised px-3 text-sm text-ink">
-          <span className="sr-only">Route filter</span>
-          <select
-            value={routeFilter}
-            onChange={(event) =>
-              onRouteFilterChange(event.target.value as TransitRouteFilter)
-            }
-            disabled={!enabled}
-            className="h-12 bg-transparent text-sm outline-none disabled:opacity-40"
-          >
-            {FILTER_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </label>
+        </Button>
       </div>
+      <SegmentControl
+        variant="pill"
+        value={routeFilter}
+        options={FILTER_OPTIONS}
+        onChange={onRouteFilterChange}
+        disabled={!enabled}
+        aria-label="Transit route filter"
+      />
 
-      <div className="mt-2 flex flex-wrap gap-3 text-xs text-ink-dim">
-        <span className="inline-flex items-center gap-1">
-          <span className="h-2 w-2 rounded-full bg-ink" />
-          Rail
-        </span>
-        <span className="inline-flex items-center gap-1">
-          <span className="h-2 w-2 rounded-full bg-action" />
-          Metro
-        </span>
-        <span className="inline-flex items-center gap-1">
-          <span className="h-2 w-2 rounded-full bg-status-success" />
-          Tram
-        </span>
-        <span className="inline-flex items-center gap-1">
-          <span className="h-2 w-2 rounded-full bg-status-warning" />
-          Bus
-        </span>
-      </div>
-
-      <p className="mt-2 text-xs text-ink-dim">
-        {metroLabel ? `${metroLabel} · ` : ""}
-        {!premiumSession
-          ? "Live vehicles require a Premium session."
-          : enabled
-            ? liveSupported
-              ? "Static routes and stops. Live vehicles when enabled."
-              : "Static routes and stops only. Live vehicles are unavailable here."
-            : "Transit overlay hidden"}
-        {enabled
-          ? ` · ${routeCount} routes · ${stopCount} stops${
-              liveEnabled ? ` · ${vehicleCount} live vehicles` : ""
-            }`
-          : ""}
-        {loadingStatic || loadingLive ? " · updating…" : ""}
-        {liveDataStale ? " · live data delayed" : ""}
-        {lastUpdated ? ` · updated ${new Date(lastUpdated).toLocaleTimeString()}` : ""}
+      <p className="text-xs text-[var(--color-field-ink-muted)]">
+        {statusLine({
+          metroLabel,
+          premiumSession,
+          enabled,
+          liveSupported,
+          liveEnabled,
+          routeCount,
+          stopCount,
+          vehicleCount,
+          loadingStatic,
+          loadingLive,
+          liveDataStale,
+          lastUpdated,
+        })}
       </p>
 
-      {error ? <p className="mt-2 text-xs text-status-warning">{error}</p> : null}
+      {error ? (
+        <p className="text-xs text-[var(--color-halt)]">{error}</p>
+      ) : null}
     </div>
   );
 }

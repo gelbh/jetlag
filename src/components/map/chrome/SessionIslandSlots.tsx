@@ -46,7 +46,19 @@ export function SessionIslandSlots({
 }: SessionIslandSlotsProps) {
   return (
     <div className="jl-tool-dock-group jl-tool-dock-group-secondary flex w-full min-w-0 flex-col justify-start gap-1">
+      {onOpenSettings ? (
+        <MapChromeControl
+          variant="slot"
+          disabled={inactive}
+          onClick={onOpenSettings}
+          aria-label="Open settings"
+          icon={<JlIcon icon={GearSix} size={20} weight="regular" />}
+          label="Settings"
+        />
+      ) : null}
+
       {drawSlot}
+
       {onOpenChat ? (
         <MapChromeControl
           variant="slot"
@@ -98,17 +110,6 @@ export function SessionIslandSlots({
           data-survey-priority="secondary"
           icon={<JlIcon icon={Star} size={20} weight="regular" />}
           label="Codes"
-        />
-      ) : null}
-
-      {onOpenSettings ? (
-        <MapChromeControl
-          variant="slot"
-          disabled={inactive}
-          onClick={onOpenSettings}
-          aria-label="Open settings"
-          icon={<JlIcon icon={GearSix} size={20} weight="regular" />}
-          label="Settings"
         />
       ) : null}
 

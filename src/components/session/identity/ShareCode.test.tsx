@@ -1,17 +1,38 @@
 import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { MantineProvider } from "@mantine/core";
+import type { ReactElement } from "react";
 import { ShareCode } from "./ShareCode";
 import { renderWithRouter } from "@/test/renderWithRouter";
+import { jetlagMantineTheme } from "@/theme/mantineTheme";
 import { copyToClipboard } from "@/platform/copyToClipboard";
 
 vi.mock("../../../platform/copyToClipboard", () => ({
   copyToClipboard: vi.fn(),
 }));
 
+function renderShareCode(ui: ReactElement) {
+  return renderWithRouter(
+    <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+      {ui}
+    </MantineProvider>,
+  );
+}
+
 describe("ShareCode", () => {
   beforeEach(() => {
     vi.mocked(copyToClipboard).mockReset();
     vi.mocked(copyToClipboard).mockResolvedValue(true);
+    vi.stubGlobal("matchMedia", (query: string) => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    }));
     vi.stubGlobal("location", {
       ...window.location,
       origin: "https://play.example.com",
@@ -23,7 +44,7 @@ describe("ShareCode", () => {
   });
 
   it("displays the session code", () => {
-    renderWithRouter(<ShareCode code="WXYZ" remote />);
+    renderShareCode(<ShareCode code="WXYZ" remote />);
     expect(screen.getByText("WXYZ")).toBeInTheDocument();
     expect(
       screen.getByText(/Tap code to copy\. Invite friends with the join link\./),
@@ -34,7 +55,7 @@ describe("ShareCode", () => {
     const share = vi.fn().mockResolvedValue(undefined);
     vi.stubGlobal("navigator", { ...navigator, share });
 
-    renderWithRouter(<ShareCode code="WXYZ" remote />);
+    renderShareCode(<ShareCode code="WXYZ" remote />);
     fireEvent.click(screen.getByRole("button", { name: "Invite friends" }));
 
     await waitFor(() => {
@@ -50,7 +71,7 @@ describe("ShareCode", () => {
   it("copies the join URL when native share is unavailable", async () => {
     vi.stubGlobal("navigator", { ...navigator, share: undefined });
 
-    renderWithRouter(<ShareCode code="WXYZ" remote />);
+    renderShareCode(<ShareCode code="WXYZ" remote />);
     fireEvent.click(screen.getByRole("button", { name: "Invite friends" }));
 
     await waitFor(() => {
@@ -68,7 +89,7 @@ describe("ShareCode", () => {
     });
     vi.stubGlobal("navigator", { ...navigator, share: undefined });
 
-    renderWithRouter(<ShareCode code="WXYZ" remote />);
+    renderShareCode(<ShareCode code="WXYZ" remote />);
     fireEvent.click(screen.getByRole("button", { name: "Copy join link" }));
 
     await waitFor(() => {
@@ -84,7 +105,7 @@ describe("ShareCode", () => {
       .mockRejectedValue(new DOMException("Share canceled", "AbortError"));
     vi.stubGlobal("navigator", { ...navigator, share });
 
-    renderWithRouter(<ShareCode code="WXYZ" remote />);
+    renderShareCode(<ShareCode code="WXYZ" remote />);
     fireEvent.click(screen.getByRole("button", { name: "Invite friends" }));
 
     await waitFor(() => expect(share).toHaveBeenCalled());
@@ -99,7 +120,7 @@ describe("ShareCode", () => {
       );
     vi.stubGlobal("navigator", { ...navigator, share });
 
-    renderWithRouter(<ShareCode code="WXYZ" remote />);
+    renderShareCode(<ShareCode code="WXYZ" remote />);
     fireEvent.click(screen.getByRole("button", { name: "Invite friends" }));
 
     await waitFor(() => {
@@ -113,7 +134,7 @@ describe("ShareCode", () => {
     vi.mocked(copyToClipboard).mockResolvedValue(false);
     vi.stubGlobal("navigator", { ...navigator, share: undefined });
 
-    renderWithRouter(<ShareCode code="WXYZ" remote />);
+    renderShareCode(<ShareCode code="WXYZ" remote />);
     fireEvent.click(screen.getByRole("button", { name: "Copy join link" }));
 
     await waitFor(() => {
@@ -122,7 +143,7 @@ describe("ShareCode", () => {
   });
 
   it("hides invite actions for local-only sessions", () => {
-    renderWithRouter(<ShareCode code="WXYZ" remote={false} />);
+    renderShareCode(<ShareCode code="WXYZ" remote={false} />);
     expect(
       screen.queryByRole("button", { name: "Invite friends" }),
     ).not.toBeInTheDocument();

@@ -1,5 +1,8 @@
+import { Box } from "@mantine/core";
 import { MAP_ANNOTATION_COLORS } from "@/domain/map/mapAnnotationColors";
 import type { LayerVisibility } from "@/state/sessionStore";
+import { IosInsetGroup } from "@/components/ui/apple/iosEntryChrome";
+import { SettingsToggleRow } from "../settings/SettingsToggleRow";
 
 const LAYER_ITEMS: ReadonlyArray<{
   key: keyof LayerVisibility;
@@ -24,6 +27,7 @@ const LAYER_ITEMS: ReadonlyArray<{
   },
   { key: "zone", label: "Zone", color: MAP_ANNOTATION_COLORS.zone },
   { key: "pin", label: "Pin", color: MAP_ANNOTATION_COLORS.pin },
+  { key: "draw", label: "Freehand", color: MAP_ANNOTATION_COLORS.draw },
   { key: "tentacle", label: "Tentacle", color: MAP_ANNOTATION_COLORS.tentacle },
   {
     key: "transit",
@@ -45,32 +49,26 @@ export function LayerVisibilityGrid({
   onLayerVisibilityChange,
 }: LayerVisibilityGridProps) {
   return (
-    <div className="grid grid-cols-2 gap-2">
-      {LAYER_ITEMS.map(({ key, label, color }) => (
-        <label
+    <IosInsetGroup>
+      {LAYER_ITEMS.map(({ key, label, color }, index) => (
+        <SettingsToggleRow
           key={key}
-          className="jl-toggle-row text-sm"
-        >
-          <span className="flex min-w-0 items-center gap-2">
-            <span
-              className="h-2.5 w-2.5 shrink-0"
-              style={{ backgroundColor: color }}
-              aria-hidden="true"
+          showSeparator={index > 0}
+          label={label}
+          checked={layerVisibility[key]}
+          onChange={(visible) => onLayerVisibilityChange(key, visible)}
+          leading={
+            <Box
+              style={{
+                width: "0.625rem",
+                height: "0.625rem",
+                borderRadius: 2,
+                backgroundColor: color,
+              }}
             />
-            <span className="truncate font-display text-xs font-semibold uppercase tracking-wide">
-              {label}
-            </span>
-          </span>
-          <input
-            type="checkbox"
-            checked={layerVisibility[key]}
-            onChange={(event) =>
-              onLayerVisibilityChange(key, event.target.checked)
-            }
-            className="h-5 w-5 shrink-0 accent-action"
-          />
-        </label>
+          }
+        />
       ))}
-    </div>
+    </IosInsetGroup>
   );
 }
