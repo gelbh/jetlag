@@ -1,3 +1,4 @@
+import { Button } from "@mantine/core";
 import type { SessionRulesInput } from "../../domain/session/rules";
 import type { HiderTruthReferenceMode } from "../../domain/questions/hiderTruth/resolveHiderTruthReference";
 import type { HiderTruthResult } from "../../domain/questions/ui";
@@ -8,6 +9,8 @@ import type {
 import type { PlayerRole } from "../../domain/session/players/playerRole";
 import { useDesktopLayout } from "../../hooks/layout/useDesktopLayout";
 import { useVisualViewportBottomInset } from "../../hooks/layout/useVisualViewportBottomInset";
+import { usePlayerUiMantine } from "../../hooks/feature/usePlayerUiMantine";
+import { iosGrayStyles } from "../ui/apple/iosEntryChrome";
 import { SheetHost } from "../ui/sheets/SheetHost";
 import { ChatPanelBody } from "./ChatPanelBody";
 
@@ -64,6 +67,7 @@ export function ChatPanel({
   readOnly = false,
 }: ChatPanelProps) {
   const isDesktop = useDesktopLayout();
+  const mantinePlayerUi = usePlayerUiMantine();
   const keyboardInset = useVisualViewportBottomInset(open && !isDesktop);
 
   const body = (
@@ -100,13 +104,19 @@ export function ChatPanel({
     >
       {isDesktop ? (
         <div className="mb-3 flex shrink-0 items-center justify-end gap-2">
-          <button
-            type="button"
-            onClick={onClose}
-            className="btn-secondary flex min-h-11 min-w-11 items-center justify-center px-3"
-          >
-            Close
-          </button>
+          {mantinePlayerUi ? (
+            <Button onClick={onClose} styles={iosGrayStyles}>
+              Close
+            </Button>
+          ) : (
+            <button
+              type="button"
+              onClick={onClose}
+              className="btn-secondary flex min-h-11 min-w-11 items-center justify-center px-3"
+            >
+              Close
+            </button>
+          )}
         </div>
       ) : null}
       {body}
