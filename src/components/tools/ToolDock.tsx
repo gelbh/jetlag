@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import type { GameSize } from "../../domain/session/size/gameSize";
+import { usePlayerUiMantine } from "../../hooks/feature/usePlayerUiMantine";
 import { useVisualViewportBottomInset } from "../../hooks/layout/useVisualViewportBottomInset";
 import type { SessionRulesInput } from "../../domain/session/rules";
 import { resolveToolDockEnabled } from "../../domain/session/rules";
@@ -7,6 +8,7 @@ import {
   MARKUP_DOCK_TOOL_IDS,
   QUESTION_DOCK_TOOL_IDS,
 } from "../../domain/map/mapTools";
+import { cn } from "../../lib/cn";
 import type { MapTool } from "../../state/sessionStore";
 import { MapBottomChrome } from "../map/chrome/MapBottomChrome";
 import { SessionIslandSlots } from "../map/chrome/SessionIslandSlots";
@@ -81,6 +83,7 @@ export function ToolDock({
 }: ToolDockProps) {
   const dockRef = useRef<HTMLDivElement>(null);
   const mainGroupRef = useRef<HTMLDivElement>(null);
+  const mantinePlayerUi = usePlayerUiMantine();
   const isRail = layout === "rail";
   const viewportBottomInset = useVisualViewportBottomInset(!isRail);
   const { drawMenuOpen, setDrawMenuOpen, closeMenus } =
@@ -130,7 +133,13 @@ export function ToolDock({
             <div
               aria-hidden={true}
               data-tool-highlight=""
-              className="jl-tool-dock-highlight pointer-events-none absolute z-0 rounded-[var(--radius-hud-md)] border-2 border-highlight/55 bg-highlight-soft will-change-[transform,width,height] motion-safe:transition-[transform,width,height,opacity] motion-safe:duration-[var(--motion-base)] motion-safe:ease-[var(--ease-spring-subtle)]"
+              data-player-ux-world={mantinePlayerUi ? "mantine" : undefined}
+              className={cn(
+                "jl-tool-dock-highlight pointer-events-none absolute z-0 will-change-[transform,width,height] motion-safe:transition-[transform,width,height,opacity] motion-safe:duration-[var(--motion-base)] motion-safe:ease-[var(--ease-spring-subtle)]",
+                mantinePlayerUi
+                  ? "rounded-[14px] border-[0.33px] border-highlight/75 bg-highlight/20"
+                  : "rounded-[var(--radius-hud-md)] border-2 border-highlight/55 bg-highlight-soft",
+              )}
               style={{
                 transform: `translate(${dockHighlight.x}px, ${dockHighlight.y}px)`,
                 width: dockHighlight.width,
