@@ -29,6 +29,7 @@ import {
   primedCommitLabel,
   type AskHudReadiness,
 } from "../../domain/ask/askHudModes";
+import { useDevMockSessionFeed } from "../../hooks/dev/useDevMockSessionFeed";
 import { MapScreenChromeSlots } from "../map-screen/shared/MapScreenChromeSlots";
 import { getMapScreenRoleConfig } from "../map-screen/shared/mapScreenRoleConfig";
 import { TimeTrapPanel } from "../../components/hider/TimeTrapPanel";
@@ -272,6 +273,10 @@ export function HiderMapScreenChrome({
   mapSlot,
   chromeHudRef,
 }: HiderMapScreenChromeProps) {
+  const {
+    messages: displayMessages,
+    pendingQuestions: displayPendingQuestions,
+  } = useDevMockSessionFeed(session.id, messages, pendingQuestions);
   const syncMessage = syncStatus.remoteUpdateNotice ?? syncStatus.lastSyncError;
   const {
     inactiveChrome,
@@ -366,7 +371,7 @@ export function HiderMapScreenChrome({
         timerControlsDisabled={!canControlTimer || inactiveChrome}
         moveInProgress={moveInProgress}
         onOpenLog={onOpenLog}
-        pendingQuestions={pendingQuestions}
+        pendingQuestions={displayPendingQuestions}
         closeTimerMenu={overlay.sheet !== "none" || zoneTool.wizardOpen}
         endGameActive={isEndGameActive(session)}
         foundHiderPending={isFoundHiderPending(session)}
@@ -478,8 +483,8 @@ export function HiderMapScreenChrome({
         />
 
         <QuestionAlertBanner
-          pendingQuestions={pendingQuestions}
-          messages={messages}
+          pendingQuestions={displayPendingQuestions}
+          messages={displayMessages}
           sessionRules={session}
           sessionId={chat.sessionId || session.id}
           questionTruths={chat.questionTruths}
@@ -528,8 +533,8 @@ export function HiderMapScreenChrome({
           open={overlay.isChatOpen}
           onClose={overlay.closeSheet}
           bottomClassName="jl-panel-hider-wizard"
-          messages={messages}
-          pendingQuestions={pendingQuestions}
+          messages={displayMessages}
+          pendingQuestions={displayPendingQuestions}
           sessionRules={session}
           sessionId={session.id}
           senderUid={uid ?? ""}

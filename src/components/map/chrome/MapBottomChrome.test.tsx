@@ -245,7 +245,7 @@ describe("MapBottomChrome", () => {
       /html\[data-map-side-dock="bottom-left"\]\s*\.map-zoom-control/,
     );
     expect(chromeCss).toMatch(/--map-right-chrome-inset/);
-    expect(chromeCss).toMatch(/\[data-anchor="top-left"\]/);
+    expect(chromeCss).toMatch(/\[data-side="left"\]/);
   });
 
   it("sizes hunt chips as equal flex without edge history islands", () => {

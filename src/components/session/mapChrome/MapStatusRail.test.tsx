@@ -139,6 +139,11 @@ describe("MapStatusRail Mantine gate", () => {
     expect(
       island?.querySelector('[data-testid="sync-block-mantine"]'),
     ).toBeTruthy();
+    expect(
+      island?.querySelector('[data-testid="sync-block-mantine"]')?.getAttribute(
+        "role",
+      ),
+    ).toBe("status");
     expect(container.querySelector(".jl-status-header")).toBeNull();
     expect(container.querySelector(".jl-status-bar")).toBeNull();
     expect(container.querySelector(".jl-ticker")).toBeNull();

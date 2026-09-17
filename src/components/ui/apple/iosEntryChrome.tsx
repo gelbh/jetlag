@@ -10,6 +10,7 @@ import {
   iosInsetTextInputStyles,
   iosInsetTextareaStyles,
   iosMapIslandFilledStyles,
+  iosMapIslandIconStyles,
   iosPlainStyles,
 } from "@/components/ui/apple/iosEntryStyles";
 
@@ -24,6 +25,7 @@ export {
   iosInsetTextInputStyles,
   iosInsetTextareaStyles,
   iosMapIslandFilledStyles,
+  iosMapIslandIconStyles,
   iosPlainStyles,
 };
 
