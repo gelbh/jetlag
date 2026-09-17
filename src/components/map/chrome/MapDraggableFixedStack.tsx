@@ -193,6 +193,7 @@ function playSettleFlip(
     return null;
   }
   cancelElementAnimations(el);
+  // Transform-only FLIP. Never clear left/right/top: React owns EDGE_PAD rest.
   el.style.willChange = "transform";
   const anim = el.animate(
     [
@@ -206,16 +207,22 @@ function playSettleFlip(
     {
       duration: SETTLE_MS,
       easing: SETTLE_EASING,
-      fill: "both",
+      // none: cancel (Strict Mode cleanup) must not freeze mid-frame or call onDone.
+      fill: "none",
     },
   );
+  let completed = false;
   const finish = () => {
+    if (completed) {
+      return;
+    }
+    completed = true;
     el.style.willChange = "";
     el.style.transform = "";
     onDone();
   };
+  // Finish only. Cancel must leave settleFromRef so remount can replay.
   anim.addEventListener("finish", finish);
-  anim.addEventListener("cancel", finish);
   return anim;
 }
 
@@ -305,6 +312,7 @@ export function MapDraggableFixedStack({
     // Keep frame until finish so React Strict Mode remount can replay.
     setSettling(true);
     settleAnimRef.current?.cancel();
+    settleAnimRef.current = null;
     const anim = playSettleFlip(el, from, () => {
       if (settleFromRef.current === from) {
         settleFromRef.current = null;
@@ -314,8 +322,11 @@ export function MapDraggableFixedStack({
     });
     settleAnimRef.current = anim;
     return () => {
-      // Strict Mode: cancel but leave settleFromRef so the remount replays.
+      // Strict Mode: abort WAAPI only. Do not clear settleFromRef (cancel ≠ done).
       anim?.cancel();
+      if (settleAnimRef.current === anim) {
+        settleAnimRef.current = null;
+      }
     };
   }, [placement, dragging, dragPos]);
 
@@ -493,6 +504,7 @@ export function MapDraggableFixedStack({
       return;
     }
     cancelElementAnimations(node);
+    settleAnimRef.current = null;
     settleFromRef.current = null;
     const rect = node.getBoundingClientRect();
     sessionRef.current = {
@@ -509,6 +521,7 @@ export function MapDraggableFixedStack({
     };
     setDragPos(null);
     setDragging(false);
+    setSettling(false);
   };
 
   const pad = edgePad;
