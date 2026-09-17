@@ -8,7 +8,7 @@ import type {
 import type { SessionRulesInput } from "@/domain/session/rules";
 import { type TimerState } from "@/domain/session/timer/timer";
 import type { PlayerRole } from "@/domain/session/players/playerRole";
-import { Play } from "@phosphor-icons/react";
+import { Play, Pause } from "@phosphor-icons/react";
 import {
   mapIslandSessionStatus,
   mapIslandSessionStatusCompact,
@@ -16,6 +16,7 @@ import {
 } from "@/domain/device/surveyStatusCopy";
 import {
   iosMapIslandFilledStyles,
+  iosMapIslandIconStyles,
   iosMapStatusIslandStyles,
 } from "@/components/ui/apple/iosEntryChrome";
 import { useMinWidth } from "@/hooks/layout/useMinWidth";
@@ -43,6 +44,9 @@ export type ToolStatusBlockMantineProps = {
   timerMenuOpen?: boolean;
   /** @deprecated Island timer is view-only. */
   onOpenTimerMenu?: () => void;
+  onTimerPause?: () => void;
+  onTimerResume?: () => void;
+  timerControlsDisabled?: boolean;
   moveInProgress?: boolean;
   headerLeading?: ReactNode;
   /** Trailing sync control (segment, not a sibling floater). */
@@ -68,8 +72,9 @@ function SegmentRule() {
 }
 
 /**
- * One continuous status island (view-only aside from Home / Start / Sync):
- * Home | CODE + session status | session+phase timers | sync
+ * One continuous status island (Home / Start / Pause / Sync):
+ * Home | CODE + session status | session+phase timers | sync (display only)
+
  */
 export function ToolStatusBlockMantine({
   sessionCode,
@@ -87,6 +92,9 @@ export function ToolStatusBlockMantine({
   hostUid = null,
   seekerLocations = [],
   moveInProgress = false,
+  onTimerPause,
+  onTimerResume,
+  timerControlsDisabled = false,
   headerLeading,
   syncSlot,
   forceNarrow = false,
@@ -128,17 +136,47 @@ export function ToolStatusBlockMantine({
       timerBody = null;
     }
   } else {
+    const pauseResumeDisabled =
+      timerControlsDisabled ||
+      (!timerRunning && !onTimerResume) ||
+      (timerRunning && !onTimerPause);
     timerBody = (
-      <MapTimerClusterMantine
-        sessionRules={sessionRules}
-        timerState={timerState}
-        timerRunning={timerRunning}
-        timerHasStarted={timerHasStarted}
-        pendingQuestions={pendingQuestions}
-        myUid={myUid}
-        hostUid={hostUid}
-        seekerLocations={seekerLocations}
-      />
+      <Group gap={6} wrap="nowrap" align="center" style={{ minWidth: 0 }}>
+        <MapTimerClusterMantine
+          sessionRules={sessionRules}
+          timerState={timerState}
+          timerRunning={timerRunning}
+          timerHasStarted={timerHasStarted}
+          pendingQuestions={pendingQuestions}
+          myUid={myUid}
+          hostUid={hostUid}
+          seekerLocations={seekerLocations}
+        />
+        {onTimerPause || onTimerResume ? (
+          <Button
+            type="button"
+            size="compact-md"
+            aria-label={timerRunning ? "Pause timer" : "Resume timer"}
+            disabled={pauseResumeDisabled}
+            onClick={() => {
+              if (timerRunning) {
+                onTimerPause?.();
+              } else {
+                onTimerResume?.();
+              }
+            }}
+            styles={iosMapIslandIconStyles}
+            className="jl-map-chrome-press"
+            ml={4}
+          >
+            <JlIcon
+              icon={timerRunning ? Pause : Play}
+              size={16}
+              weight="bold"
+            />
+          </Button>
+        ) : null}
+      </Group>
     );
   }
 
@@ -153,7 +191,7 @@ export function ToolStatusBlockMantine({
           borderRadius: 22,
           minHeight: "2.75rem",
           color: "var(--color-field-ink)",
-          overflow: "hidden",
+          overflow: "visible",
         },
       }}
     >
@@ -247,11 +285,12 @@ export function ToolStatusBlockMantine({
           <>
             <SegmentRule />
             <Group
-              gap={4}
+              gap={6}
               wrap="nowrap"
               justify="flex-end"
-              px={6}
-              style={{ flex: "0 1 auto", minWidth: 0, maxWidth: "42%" }}
+              px={8}
+              py={2}
+              style={{ flex: "0 1 auto", minWidth: 0, maxWidth: "46%" }}
             >
               {timerBody}
             </Group>
@@ -271,7 +310,7 @@ export function ToolStatusBlockMantine({
                 maxWidth: comfortableWidth ? "7.5rem" : "2.75rem",
                 position: "relative",
                 color: "var(--color-field-ink)",
-                overflow: "hidden",
+                overflow: "visible",
               }}
             >
               {syncSlot}

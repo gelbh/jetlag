@@ -1,4 +1,4 @@
-import { Button } from "@mantine/core";
+import { Button, Group, Stack } from "@mantine/core";
 import type { SessionRulesInput } from "../../domain/session/rules";
 import type { HiderTruthReferenceMode } from "../../domain/questions/hiderTruth/resolveHiderTruthReference";
 import type { HiderTruthResult } from "../../domain/questions/ui";
@@ -98,28 +98,31 @@ export function ChatPanel({
       ariaLabel="Chat"
       railTab={isDesktop ? "chat" : undefined}
       maxHeightClassName="max-h-[min(72dvh,640px)]"
+      scrollMode="child"
       contentStyle={
         keyboardInset > 0 ? { paddingBottom: keyboardInset } : undefined
       }
     >
-      {isDesktop ? (
-        <div className="mb-3 flex shrink-0 items-center justify-end gap-2">
-          {mantinePlayerUi ? (
-            <Button onClick={onClose} styles={iosGrayStyles}>
-              Close
-            </Button>
-          ) : (
-            <button
-              type="button"
-              onClick={onClose}
-              className="btn-secondary flex min-h-11 min-w-11 items-center justify-center px-3"
-            >
-              Close
-            </button>
-          )}
-        </div>
-      ) : null}
-      {body}
+      <Stack gap={8} style={{ flex: 1, minHeight: 0, height: "100%" }}>
+        {isDesktop ? (
+          <Group justify="flex-end" className="shrink-0">
+            {mantinePlayerUi ? (
+              <Button onClick={onClose} styles={iosGrayStyles}>
+                Close
+              </Button>
+            ) : (
+              <button
+                type="button"
+                onClick={onClose}
+                className="btn-secondary flex min-h-11 min-w-11 items-center justify-center px-3"
+              >
+                Close
+              </button>
+            )}
+          </Group>
+        ) : null}
+        {body}
+      </Stack>
     </SheetHost>
   );
 }

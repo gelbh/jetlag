@@ -21,6 +21,13 @@ export interface SheetHostProps {
   dismissible?: boolean;
   sheetClassName?: string;
   maxHeightClassName?: string;
+  /** Forwarded to Mantine Drawer when flag-on. */
+  padding?: "xs" | "sm" | "md" | "lg" | "xl" | number;
+  /**
+   * `host` (default): sheet scrolls children.
+   * `child`: sheet locks height; child owns scroll (chat).
+   */
+  scrollMode?: "host" | "child";
   /** Forwarded to Mantine drawer body (e.g. keyboard inset). */
   contentStyle?: CSSProperties;
 }
@@ -32,6 +39,7 @@ function DesktopRailDialog({
   pinned,
   children,
   panelEl,
+  scrollMode = "host",
 }: {
   open: boolean;
   ariaLabel?: string;
@@ -39,9 +47,11 @@ function DesktopRailDialog({
   pinned?: ReactNode;
   children: ReactNode;
   panelEl: HTMLElement;
+  scrollMode?: "host" | "child";
 }) {
   const dialogRef = useRef<HTMLDivElement>(null);
   useDialogFocus(dialogRef, open);
+  const childScroll = scrollMode === "child";
 
   return createPortal(
     <div
@@ -50,10 +60,22 @@ function DesktopRailDialog({
       aria-modal="true"
       aria-label={ariaLabel}
       data-rail-tab={railTab}
-      className="contextual-rail__dialog"
+      className={
+        childScroll
+          ? "contextual-rail__dialog flex h-full min-h-0 flex-col"
+          : "contextual-rail__dialog"
+      }
     >
-      {pinned}
-      {children}
+      {pinned ? <div className="shrink-0">{pinned}</div> : null}
+      <div
+        className={
+          childScroll
+            ? "flex min-h-0 flex-1 flex-col overflow-hidden"
+            : undefined
+        }
+      >
+        {children}
+      </div>
     </div>,
     panelEl,
   );
@@ -75,6 +97,8 @@ export function SheetHost({
   dismissible = true,
   sheetClassName,
   maxHeightClassName,
+  padding,
+  scrollMode,
   contentStyle,
 }: SheetHostProps) {
   const isDesktop = useDesktopLayout();
@@ -93,6 +117,7 @@ export function SheetHost({
         railTab={railTab}
         pinned={pinned}
         panelEl={railPanel.panelEl}
+        scrollMode={scrollMode}
       >
         {children}
       </DesktopRailDialog>
@@ -109,6 +134,8 @@ export function SheetHost({
         dismissible={dismissible}
         sheetClassName={sheetClassName}
         maxHeightClassName={maxHeightClassName}
+        padding={padding}
+        scrollMode={scrollMode}
         contentStyle={contentStyle}
       >
         {children}

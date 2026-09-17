@@ -1,3 +1,4 @@
+import { Text } from "@mantine/core";
 import { type AnnotationRecord } from "@/domain/map/annotations";
 import { useSessionActivityLog } from "@/hooks/session/useSessionActivityLog";
 import { SheetHost } from "../../ui/sheets/SheetHost";
@@ -32,11 +33,23 @@ export function SessionLog({
       onClose={onClose}
       ariaLabel="Session log"
       railTab="log"
+      padding="sm"
       maxHeightClassName="max-h-[min(85dvh,40rem)]"
       pinned={
-        <h2 className="mb-1 text-[1.375rem] font-bold tracking-tight text-field-ink">
+        <Text
+          component="h2"
+          size="md"
+          fw={600}
+          mb={2}
+          lh={1.2}
+          c="var(--color-field-ink)"
+          style={{
+            fontFamily: "var(--font-display)",
+            letterSpacing: "0.04em",
+          }}
+        >
           Session log
-        </h2>
+        </Text>
       }
     >
       <SessionLogBody
@@ -46,6 +59,7 @@ export function SessionLog({
         onEdit={onEdit}
         onSelect={onSelect}
         readOnly={readOnly}
+        compact
       />
     </SheetHost>
   );

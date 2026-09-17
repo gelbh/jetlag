@@ -35,6 +35,9 @@ interface ToolStatusBlockProps {
   onCancelWalkingQuestion?: (pendingQuestionId: string) => void;
   timerMenuOpen: boolean;
   onOpenTimerMenu: () => void;
+  onTimerPause?: () => void;
+  onTimerResume?: () => void;
+  timerControlsDisabled?: boolean;
   /** Hider Play Move in progress — PHASE shows MOVE for all roles. */
   moveInProgress?: boolean;
   /** Show role + mode inline (desktop ops status). */
