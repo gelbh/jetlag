@@ -37,12 +37,13 @@ import {
   IosInsetGroup,
   IosSectionLabel,
   IosSuccessCallout,
-} from "@/components/ui/apple/iosEntryChrome";
-import {
+  IosDrawerGrabber,
+  iosBottomDrawerStyles,
   iosCompactFilledStyles,
   iosFilledStyles,
   iosGrayStyles,
-} from "@/components/ui/apple/iosEntryStyles";
+  iosPlainStyles,
+} from "@/components/ui/apple/iosEntryChrome";
 import { IosInsetRow } from "@/components/ui/apple/IosInsetRow";
 import { USERNAME_MAX_LENGTH } from "@/domain/game/playerProfile";
 import crawlPolicy from "@/domain/seo/seoCrawlPolicy.json";
@@ -295,16 +296,6 @@ function IosEmptyInset({
   );
 }
 
-function pullScrollTop(event: ReactPointerEvent<HTMLDivElement>): number {
-  const scrollRoot = event.currentTarget.closest(
-    ".app-scroll-root, [data-jl-scroll], .jl-scroll",
-  ) as HTMLElement | null;
-  if (scrollRoot) {
-    return scrollRoot.scrollTop;
-  }
-  return window.scrollY || document.documentElement.scrollTop || 0;
-}
-
 function PullToRefresh({
   refreshing,
   onRefresh,
@@ -316,18 +307,18 @@ function PullToRefresh({
 }) {
   const startY = useRef(0);
   const [pull, setPull] = useState(0);
-  const [isPulling, setIsPulling] = useState(false);
+  const pulling = useRef(false);
 
   const onPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (pullScrollTop(event) > 0 || refreshing) {
+    if (event.currentTarget.scrollTop > 0 || refreshing) {
       return;
     }
     startY.current = event.clientY;
-    setIsPulling(true);
+    pulling.current = true;
   };
 
   const onPointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (!isPulling) {
+    if (!pulling.current) {
       return;
     }
     const dy = event.clientY - startY.current;
@@ -340,10 +331,10 @@ function PullToRefresh({
   };
 
   const onPointerUp = () => {
-    if (!isPulling) {
+    if (!pulling.current) {
       return;
     }
-    setIsPulling(false);
+    pulling.current = false;
     if (pull >= 84) {
       onRefresh();
     }
@@ -369,7 +360,7 @@ function PullToRefresh({
           height: 36,
           opacity: pull || refreshing ? 1 : 0,
           transform: `translateY(${Math.max(pull - 36, refreshing ? 0 : -8)}px)`,
-          transition: isPulling
+          transition: pulling.current
             ? "none"
             : "opacity 160ms ease, transform 160ms ease",
           color: "var(--color-field-ink-muted)",
@@ -387,12 +378,7 @@ function PullToRefresh({
           {refreshing ? "Refreshing…" : pull >= 84 ? "Release to refresh" : "Pull to refresh"}
         </Text>
       </Group>
-      <Box
-        style={{
-          transform: `translateY(${refreshing ? 40 : Math.max(0, pull * 0.35)}px)`,
-          transition: isPulling ? "none" : "transform 160ms ease",
-        }}
-      >
+      <Box style={{ transform: `translateY(${refreshing ? 40 : Math.max(0, pull * 0.35)}px)`, transition: pulling.current ? "none" : "transform 160ms ease" }}>
         {children}
       </Box>
     </Box>
@@ -401,12 +387,8 @@ function PullToRefresh({
 
 const iosPlainHaltStyles = {
   root: {
-    minHeight: "2.75rem",
-    borderRadius: 14,
-    border: "none",
-    backgroundColor: "transparent",
+    ...iosPlainStyles.root,
     color: "var(--color-halt)",
-    fontWeight: 510,
     "&:hover": {
       backgroundColor: "oklch(from var(--color-halt) l c h / 0.12)",
     },
@@ -622,42 +604,10 @@ function FriendDetailDrawer({
       title={null}
       withCloseButton={false}
       overlayProps={{ backgroundOpacity: 0.4, blur: 3 }}
-      styles={{
-        inner: {
-          width: "100%",
-          maxWidth: "100%",
-          padding: 0,
-        },
-        content: {
-          flex: "0 0 100%",
-          width: "100%",
-          maxWidth: "100%",
-          height: "auto",
-          maxHeight: "min(70dvh, 34rem)",
-          backgroundColor: "var(--color-canvas)",
-          borderTopLeftRadius: 24,
-          borderTopRightRadius: 24,
-          borderTop:
-            "0.33px solid oklch(from var(--color-field-ink) l c h / 0.14)",
-          overflow: "auto",
-        },
-        body: {
-          width: "100%",
-          paddingBottom: "max(1.25rem, env(safe-area-inset-bottom))",
-        },
-      }}
+      styles={iosBottomDrawerStyles()}
     >
       <Stack gap="md">
-        <Box
-          aria-hidden
-          mx="auto"
-          style={{
-            width: 36,
-            height: 5,
-            borderRadius: 999,
-            backgroundColor: "oklch(from var(--color-field-ink) l c h / 0.28)",
-          }}
-        />
+        <IosDrawerGrabber />
         <Stack gap={8} align="center">
           <FriendMonogram username={entry.username} size={56} />
           <Text
@@ -865,7 +815,7 @@ export function FriendsIosBody() {
       : model.selectableEntries.find((entry) => entry.uid === model.selectedUid) ??
         null;
   const drawerEntry: SelectableFriend | null = selectedSearchHit
-    ? { ...selectedSearchHit, relation: "search" }
+    ? { ...selectedSearchHit, relation: "friend" }
     : selectedListed;
 
   const segmentData: Array<{ value: FriendsListTab; label: string }> = [
@@ -1133,7 +1083,7 @@ function FriendTabRow({
         <FriendSwipeRow
           actionCount={2}
           onOpen={onOpen}
-          onFullSwipe={busy ? undefined : onAccept}
+          onFullSwipe={onAccept}
           actions={
             <>
               <FriendSwipeAction
@@ -1170,7 +1120,7 @@ function FriendTabRow({
         <FriendSwipeRow
           actionCount={1}
           onOpen={onOpen}
-          onFullSwipe={busy ? undefined : onCancel}
+          onFullSwipe={onCancel}
           actions={
             <FriendSwipeAction
               label="Cancel"

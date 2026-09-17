@@ -1,5 +1,4 @@
 import type { ReactNode, RefObject } from "react";
-import { useState } from "react";
 import type { AnnotationRecord, SessionRecord } from "../../domain/map/annotations";
 import type {
   PendingQuestionRecord,
@@ -285,11 +284,12 @@ export function HiderMapScreenChrome({
     closeOverlays: overlay.closeSheet,
   });
   const onSyncErrorAction = onSyncRetry;
-  const gameOverActions = useGameOverActions(session, overlay);
+  const gameOverActions = useGameOverActions(session, {
+    closeSheet: overlay.closeAllSheets,
+  });
   const isDesktop = useDesktopLayout();
   const toolLayout = isDesktop ? "rail" : "dock";
   const roleConfig = getMapScreenRoleConfig("hider");
-  const [reportProblemOpen, setReportProblemOpen] = useState(false);
   const setSelectedAnnotationId = useAnnotationStore(
     (state) => state.setSelectedAnnotationId,
   );
@@ -298,7 +298,14 @@ export function HiderMapScreenChrome({
   );
 
   const railActiveTab: ContextualRailTab | null =
-    overlay.sheet === "none" ? null : overlay.sheet;
+    overlay.sheet === "chat" ||
+    overlay.sheet === "settings" ||
+    overlay.sheet === "log" ||
+    overlay.sheet === "codes"
+      ? overlay.sheet
+      : overlay.settingsInStack
+        ? "settings"
+        : null;
 
   const handleSelectRailTab = (tab: ContextualRailTab) => {
     switch (tab) {
@@ -323,7 +330,7 @@ export function HiderMapScreenChrome({
 
   const contextualRail = isDesktop ? (
     <ContextualRail
-      open={overlay.sheet !== "none"}
+      open={overlay.sheet !== "none" || overlay.sheetStack.length > 0}
       activeTab={railActiveTab}
       onClose={overlay.closeSheet}
       onSelectTab={handleSelectRailTab}
@@ -447,8 +454,7 @@ export function HiderMapScreenChrome({
       onOpenSettings={onOpenSettings}
       onOpenCodes={canOpenCodes ? onOpenCodes : undefined}
       onOpenReportProblem={() => {
-        overlay.closeSheet();
-        setReportProblemOpen(true);
+        overlay.pushSheet("report-problem");
       }}
       hasUnreadChat={hasUnreadChat}
       unreadCount={unreadCount}
@@ -538,78 +544,83 @@ export function HiderMapScreenChrome({
           onAnswerQuestion={chat.onAnswerQuestion}
         />
 
-        <MapSettingsSheet
-          key={overlay.isSettingsOpen ? "open" : "closed"}
-          open={overlay.isSettingsOpen}
-          onClose={overlay.closeSheet}
-          pendingWrites={0}
-          general={{
-            showCurrentLocation: mapSettings.showCurrentLocation,
-            onShowCurrentLocationChange: mapSettings.setShowCurrentLocation,
-            showAdminBoundaries: mapSettings.showAdminBoundaries,
-            onShowAdminBoundariesChange: mapSettings.setShowAdminBoundaries,
-            keepScreenAwake: mapSettings.keepScreenAwake,
-            onKeepScreenAwakeChange: mapSettings.setKeepScreenAwake,
-            lowPowerMode: mapSettings.lowPowerMode,
-            onLowPowerModeChange: mapSettings.setLowPowerMode,
-            distanceUnit: mapSettings.distanceUnit,
-            onDistanceUnitChange: () => {},
-            distanceUnitEditable: false,
-            mapStyle: mapSettings.mapStyle,
-            onMapStyleChange: mapSettings.setMapStyle,
-            streetBasemap: mapSettings.streetBasemap,
-            onStreetBasemapChange: mapSettings.setStreetBasemap,
-            locationError: mapSettings.locationError ?? null,
-            transitEnabled: false,
-            transitLiveEnabled: false,
-            transitLiveSupported: false,
-            sessionIsPremium: session.tier === "premium",
-            transitRouteFilter: "all",
-            metroLabel: null,
-            loadingStatic: false,
-            loadingLive: false,
-            liveDataStale: false,
-            stopCount: 0,
-            routeCount: 0,
-            vehicleCount: 0,
-            lastUpdated: undefined,
-            transitError: null,
-            onToggleTransit: () => undefined,
-            onToggleLiveTransit: () => undefined,
-            onTransitRouteFilterChange: () => undefined,
-            notificationPreferences: mapSettings.notificationPreferences,
-            onNotificationPreferencesChange:
-              mapSettings.updateNotificationPreferences,
-            onEnableNotifications: mapSettings.enableNotifications,
-          }}
-          layers={{
-            layerVisibility: mapSettings.layerVisibility,
-            onLayerVisibilityChange: mapSettings.setLayerVisibility,
-          }}
-          session={{
-            sessionCode: session.code,
-            remoteSession: isRemote,
-            session,
-            myUid: uid ?? undefined,
-            onClearMap,
-            endGameBlocked: isEndGameActive(session),
-            onExport: overlay.closeSheet,
-            isHost,
-            onResetBoard,
-            onResetSession: onResetSession
-              ? () => void onResetSession()
-              : undefined,
-            onEndSession: onEndSession ? () => void onEndSession() : undefined,
-            onLeaveSession: onLeaveSession
-              ? () => void onLeaveSession()
-              : undefined,
-            expansionPackEnabled,
-          }}
-          onReportProblem={() => {
-            overlay.closeSheet();
-            setReportProblemOpen(true);
-          }}
-        />
+        {overlay.settingsInStack ? (
+          <MapSettingsSheet
+            open={overlay.isSettingsOpen}
+            onClose={overlay.closeSheet}
+            pendingWrites={0}
+            general={{
+              showCurrentLocation: mapSettings.showCurrentLocation,
+              onShowCurrentLocationChange: mapSettings.setShowCurrentLocation,
+              showAdminBoundaries: mapSettings.showAdminBoundaries,
+              onShowAdminBoundariesChange: mapSettings.setShowAdminBoundaries,
+              keepScreenAwake: mapSettings.keepScreenAwake,
+              onKeepScreenAwakeChange: mapSettings.setKeepScreenAwake,
+              lowPowerMode: mapSettings.lowPowerMode,
+              onLowPowerModeChange: mapSettings.setLowPowerMode,
+              distanceUnit: mapSettings.distanceUnit,
+              onDistanceUnitChange: () => {},
+              distanceUnitEditable: false,
+              mapStyle: mapSettings.mapStyle,
+              onMapStyleChange: mapSettings.setMapStyle,
+              streetBasemap: mapSettings.streetBasemap,
+              onStreetBasemapChange: mapSettings.setStreetBasemap,
+              locationError: mapSettings.locationError ?? null,
+              transitEnabled: false,
+              transitLiveEnabled: false,
+              transitLiveSupported: false,
+              sessionIsPremium: session.tier === "premium",
+              transitRouteFilter: "all",
+              metroLabel: null,
+              loadingStatic: false,
+              loadingLive: false,
+              liveDataStale: false,
+              stopCount: 0,
+              routeCount: 0,
+              vehicleCount: 0,
+              lastUpdated: undefined,
+              transitError: null,
+              onToggleTransit: () => undefined,
+              onToggleLiveTransit: () => undefined,
+              onTransitRouteFilterChange: () => undefined,
+              notificationPreferences: mapSettings.notificationPreferences,
+              onNotificationPreferencesChange:
+                mapSettings.updateNotificationPreferences,
+              onEnableNotifications: mapSettings.enableNotifications,
+            }}
+            layers={{
+              layerVisibility: mapSettings.layerVisibility,
+              onLayerVisibilityChange: mapSettings.setLayerVisibility,
+            }}
+            session={{
+              sessionCode: session.code,
+              remoteSession: isRemote,
+              session,
+              myUid: uid ?? undefined,
+              onClearMap,
+              endGameBlocked: isEndGameActive(session),
+              onExport: () => {
+                overlay.closeAllSheets();
+              },
+              isHost,
+              onResetBoard,
+              onResetSession: onResetSession
+                ? () => void onResetSession()
+                : undefined,
+              onEndSession: onEndSession ? () => void onEndSession() : undefined,
+              onLeaveSession: onLeaveSession
+                ? () => void onLeaveSession()
+                : undefined,
+              expansionPackEnabled,
+              onOpenCurseReference: () => {
+                overlay.pushSheet("curse-reference");
+              },
+            }}
+            onReportProblem={() => {
+              overlay.pushSheet("report-problem");
+            }}
+          />
+        ) : null}
 
         {uid ? (
           <RoleCodesSheet
@@ -623,8 +634,8 @@ export function HiderMapScreenChrome({
         ) : null}
 
         <ReportProblemSheet
-          open={reportProblemOpen}
-          onClose={() => setReportProblemOpen(false)}
+          open={overlay.isReportProblemOpen}
+          onClose={overlay.closeSheet}
         />
 
         <ExpansionHiderMenu
@@ -638,7 +649,7 @@ export function HiderMapScreenChrome({
           }}
           onOpenCurseReference={() => {
             onExpansionMenuOpenChange(false);
-            onCurseSheetOpenChange(true);
+            overlay.pushSheet("curse-reference");
           }}
         />
 
@@ -677,8 +688,13 @@ export function HiderMapScreenChrome({
         </HiderZoneWizardShell>
 
         <CurseReferenceSheet
-          open={curseSheetOpen}
-          onClose={() => onCurseSheetOpenChange(false)}
+          open={overlay.isCurseReferenceOpen || curseSheetOpen}
+          onClose={() => {
+            if (overlay.isCurseReferenceOpen) {
+              overlay.closeSheet();
+            }
+            onCurseSheetOpenChange(false);
+          }}
         />
 
         <SessionLog

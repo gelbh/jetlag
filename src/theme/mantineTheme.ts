@@ -39,5 +39,34 @@ export const jetlagMantineTheme = createTheme({
         },
       },
     },
+    Notification: {
+      defaultProps: {
+        radius: 14,
+        withBorder: true,
+      },
+      styles: {
+        root: {
+          fontFamily: appleSystemSans,
+          backgroundColor: "oklch(from var(--color-canvas) l c h / 0.92)",
+          border: "0.33px solid oklch(from var(--color-field-ink) l c h / 0.14)",
+          backdropFilter: "blur(20px) saturate(1.4)",
+          WebkitBackdropFilter: "blur(20px) saturate(1.4)",
+          boxShadow: "0 8px 24px 0 oklch(0.1 0.04 265 / 0.45)",
+        },
+        title: {
+          fontWeight: 590,
+          letterSpacing: "-0.01em",
+        },
+        description: {
+          color: "var(--color-field-ink-muted)",
+        },
+      },
+    },
+    Drawer: {
+      defaultProps: {
+        radius: 24,
+        overlayProps: { backgroundOpacity: 0.4, blur: 3 },
+      },
+    },
   },
 });

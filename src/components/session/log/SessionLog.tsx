@@ -1,6 +1,5 @@
 import { type AnnotationRecord } from "@/domain/map/annotations";
 import { useSessionActivityLog } from "@/hooks/session/useSessionActivityLog";
-import { SheetHeader } from "../../ui/sheets/SheetHeader";
 import { SheetHost } from "../../ui/sheets/SheetHost";
 import { SessionLogBody } from "./SessionLogBody";
 
@@ -33,16 +32,13 @@ export function SessionLog({
       onClose={onClose}
       ariaLabel="Session log"
       railTab="log"
-      maxHeightClassName="max-h-[min(85dvh,720px)]"
+      maxHeightClassName="max-h-[min(85dvh,40rem)]"
+      pinned={
+        <h2 className="mb-1 text-[1.375rem] font-bold tracking-tight text-field-ink">
+          Session log
+        </h2>
+      }
     >
-      <SheetHeader
-        title="Session log"
-        onClose={onClose}
-        closeVariant="raised"
-        flush
-        className="shrink-0"
-      />
-
       <SessionLogBody
         events={events}
         annotations={annotations}

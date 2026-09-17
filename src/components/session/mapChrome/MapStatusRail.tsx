@@ -211,41 +211,120 @@ export function MapStatusRail({
           disabled={timerControlsDisabled || inactiveChrome}
         />
 
-        <div className="jl-status-bar">
-          <ToolStatusBlock
-            sessionCode={sessionCode}
-            playerRole={playerRole}
-            activeTool={activeTool}
-            timerState={timerState}
-            timerRunning={timerRunning}
-            timerHasStarted={timerHasStarted}
-            timerSyncing={timerSyncing}
-            canStartGame={canStartGame}
-            onStartGame={onStartGame}
-            sessionRules={sessionRules}
-            pendingQuestions={pendingQuestions}
-            myUid={myUid}
-            hostUid={hostUid}
-            seekerLocations={seekerLocations}
-            onCancelWalkingQuestion={onCancelWalkingQuestion}
-            timerMenuOpen={showTimerMenu}
-            moveInProgress={moveInProgress}
-            expanded={expanded}
-            headerLeading={
-              headerLeading ?? (
-                <ScreenNav variant="home" placement="inline" />
-              )
-            }
-            onOpenTimerMenu={() => {
-              if (inactiveChrome) {
-                return;
-              }
-              setTimerMenuOpen((open) => !open);
-              setSyncMenuOpen(false);
-              setPreloadMenuOpen(false);
+        {mantinePlayerUi ? (
+          <div
+            className="w-full"
+            style={{
+              paddingTop: "max(0.5rem, env(safe-area-inset-top))",
+              paddingLeft: "max(0.75rem, env(safe-area-inset-left))",
+              paddingRight: "max(0.75rem, env(safe-area-inset-right))",
+              paddingBottom: "0.25rem",
             }}
-          />
-        </div>
+          >
+            <ToolStatusBlock
+              sessionCode={sessionCode}
+              playerRole={playerRole}
+              activeTool={activeTool}
+              timerState={timerState}
+              timerRunning={timerRunning}
+              timerHasStarted={timerHasStarted}
+              timerSyncing={timerSyncing}
+              canStartGame={canStartGame}
+              onStartGame={onStartGame}
+              sessionRules={sessionRules}
+              pendingQuestions={pendingQuestions}
+              myUid={myUid}
+              hostUid={hostUid}
+              seekerLocations={seekerLocations}
+              onCancelWalkingQuestion={onCancelWalkingQuestion}
+              timerMenuOpen={showTimerMenu}
+              moveInProgress={moveInProgress}
+              expanded={expanded}
+              headerLeading={
+                headerLeading ?? (
+                  <ScreenNav variant="home" placement="inline" />
+                )
+              }
+              syncSlot={
+                <SyncBlock
+                  syncStatus={syncStatus}
+                  queuedWrites={queuedWrites}
+                  message={message}
+                  menuOpen={showSyncMenu}
+                  placement="segment"
+                  onMenuOpenChange={(open) => {
+                    setSyncMenuOpen(open);
+                    if (open) {
+                      setTimerMenuOpen(false);
+                      setPreloadMenuOpen(false);
+                    }
+                  }}
+                  onSyncErrorAction={onSyncErrorAction}
+                />
+              }
+              onOpenTimerMenu={() => {
+                if (inactiveChrome) {
+                  return;
+                }
+                setTimerMenuOpen((open) => !open);
+                setSyncMenuOpen(false);
+                setPreloadMenuOpen(false);
+              }}
+            />
+          </div>
+        ) : (
+          <>
+            <div className="jl-status-bar">
+              <ToolStatusBlock
+                sessionCode={sessionCode}
+                playerRole={playerRole}
+                activeTool={activeTool}
+                timerState={timerState}
+                timerRunning={timerRunning}
+                timerHasStarted={timerHasStarted}
+                timerSyncing={timerSyncing}
+                canStartGame={canStartGame}
+                onStartGame={onStartGame}
+                sessionRules={sessionRules}
+                pendingQuestions={pendingQuestions}
+                myUid={myUid}
+                hostUid={hostUid}
+                seekerLocations={seekerLocations}
+                onCancelWalkingQuestion={onCancelWalkingQuestion}
+                timerMenuOpen={showTimerMenu}
+                moveInProgress={moveInProgress}
+                expanded={expanded}
+                headerLeading={
+                  headerLeading ?? (
+                    <ScreenNav variant="home" placement="inline" />
+                  )
+                }
+                onOpenTimerMenu={() => {
+                  if (inactiveChrome) {
+                    return;
+                  }
+                  setTimerMenuOpen((open) => !open);
+                  setSyncMenuOpen(false);
+                  setPreloadMenuOpen(false);
+                }}
+              />
+            </div>
+            <SyncBlock
+              syncStatus={syncStatus}
+              queuedWrites={queuedWrites}
+              message={message}
+              menuOpen={showSyncMenu}
+              onMenuOpenChange={(open) => {
+                setSyncMenuOpen(open);
+                if (open) {
+                  setTimerMenuOpen(false);
+                  setPreloadMenuOpen(false);
+                }
+              }}
+              onSyncErrorAction={onSyncErrorAction}
+            />
+          </>
+        )}
 
         {showPreloadBanner ? (
           <GameAreaPreloadBeacon
@@ -259,20 +338,6 @@ export function MapStatusRail({
             }}
           />
         ) : null}
-        <SyncBlock
-          syncStatus={syncStatus}
-          queuedWrites={queuedWrites}
-          message={message}
-          menuOpen={showSyncMenu}
-          onMenuOpenChange={(open) => {
-            setSyncMenuOpen(open);
-            if (open) {
-              setTimerMenuOpen(false);
-              setPreloadMenuOpen(false);
-            }
-          }}
-          onSyncErrorAction={onSyncErrorAction}
-        />
 
         {showTerminalBanner ? (
           <HudErrorBanner

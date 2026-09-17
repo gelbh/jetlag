@@ -78,6 +78,8 @@ function SeekerMapScreenBody({
       lowPowerMode={controller.lowPowerMode}
       distanceUnit={controller.distanceUnit}
       handleLiveLocationError={controller.handleLiveLocationError}
+      activeTool={controller.activeTool}
+      drawTool={controller.drawTool}
     />
   );
 
@@ -177,6 +179,7 @@ function SeekerMapScreenBody({
         pinTool={controller.pinTool}
         zoneTool={controller.zoneTool}
         tentacleTool={controller.tentacleTool}
+        drawTool={controller.drawTool}
         chatMessages={controller.chatMessages}
         hasUnreadChat={controller.hasUnreadChat}
         unreadCount={controller.unreadCount}

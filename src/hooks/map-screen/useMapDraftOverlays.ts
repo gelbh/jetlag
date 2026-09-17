@@ -74,6 +74,7 @@ export interface MapDraftOverlaySources {
     seekerResolving: boolean;
   };
   zone: { vertices: LatLngTuple[] };
+  draw: { strokePoints: LatLngTuple[] };
 }
 
 export interface MapDraftOverlayResult {
@@ -376,6 +377,15 @@ export async function buildMapDraftOverlays(
         style: { color: c.zoneDraft, weight: 2 },
       });
     }
+  }
+
+  if (activeTool === "draw" && sources.draw.strokePoints.length > 0) {
+    overlays.push({
+      kind: "polyline",
+      id: "draw-draft-stroke",
+      positions: sources.draw.strokePoints,
+      style: { color: c.drawDraft, weight: 3 },
+    });
   }
 
   return { overlays, eliminationFeatures, tentacleLodPhase: "complete" };

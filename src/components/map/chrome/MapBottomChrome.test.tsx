@@ -225,10 +225,34 @@ describe("MapBottomChrome", () => {
     expect(hunt?.className).toMatch(/min-h-11/);
   });
 
+  it("uses a draggable L/R side stack under Mantine and flips map chrome CSS", () => {
+    mockUsePlayerUiMantine.mockReturnValue(true);
+    const { container } = render(
+      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+        <MapBottomChrome
+          layout="phone"
+          hunt={<button type="button">Radar</button>}
+          session={<button type="button">Chat</button>}
+        />
+      </MantineProvider>,
+    );
+    const side = container.querySelector('[data-testid="map-side-dock-stack"]');
+    expect(side).not.toBeNull();
+    expect(side?.getAttribute("data-side")).toBe("right");
+    expect(side?.getAttribute("data-anchor")).toBe("bottom-right");
+    expect(side?.getAttribute("data-chrome-side-stack")).toBe("phone");
+    expect(chromeCss).toMatch(
+      /html\[data-map-side-dock="bottom-left"\]\s*\.map-zoom-control/,
+    );
+    expect(chromeCss).toMatch(/--map-right-chrome-inset/);
+    expect(chromeCss).toMatch(/\[data-anchor="top-left"\]/);
+  });
+
   it("sizes hunt chips as equal flex without edge history islands", () => {
-    expect(chromeCss).not.toMatch(/jl-map-|jl-tool-dock/);
+    expect(chromeCss).not.toMatch(/jl-tool-dock(?!-)/);
     expect(chromeCss).not.toMatch(/\.jl-map-island--history-start/);
     expect(chromeCss).not.toMatch(/\.jl-map-island--history-end/);
+    expect(chromeCss).toMatch(/jl-map-chrome-side-stack--fixed/);
     const { container } = render(
       <MapBottomChrome
         layout="phone"
@@ -298,5 +322,20 @@ describe("MapBottomChrome Mantine gate", () => {
     const sessionIsland = container.querySelector('[data-island="session"]');
     expect(sessionIsland?.className).toMatch(/pointer-events-auto/);
     expect(screen.getByRole("button", { name: "Chat" })).toBeInTheDocument();
+  });
+
+  it("keeps Mantine hunt ToolDeck clickable under pointer-events-none chrome", () => {
+    mockUsePlayerUiMantine.mockReturnValue(true);
+    const { container } = render(
+      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+        <MapBottomChrome
+          layout="phone"
+          hunt={<button type="button">Radar</button>}
+        />
+      </MantineProvider>,
+    );
+    const hunt = container.querySelector('[data-tool-deck][data-island="hunt"]');
+    expect(hunt?.className).toMatch(/pointer-events-auto/);
+    expect(screen.getByRole("button", { name: "Radar" })).toBeInTheDocument();
   });
 });

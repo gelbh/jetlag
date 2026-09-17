@@ -1,5 +1,31 @@
 import { Box } from "@mantine/core";
 import type { ReactNode } from "react";
+import {
+  iosBottomDrawerStyles,
+  iosCompactDangerStyles,
+  iosCompactFilledStyles,
+  iosCompactGrayStyles,
+  iosFilledStyles,
+  iosGrayStyles,
+  iosInsetTextInputStyles,
+  iosInsetTextareaStyles,
+  iosMapIslandFilledStyles,
+  iosPlainStyles,
+} from "@/components/ui/apple/iosEntryStyles";
+
+/** Re-export button/drawer styles so map chrome callers keep one import path. */
+export {
+  iosBottomDrawerStyles,
+  iosCompactDangerStyles,
+  iosCompactFilledStyles,
+  iosCompactGrayStyles,
+  iosFilledStyles,
+  iosGrayStyles,
+  iosInsetTextInputStyles,
+  iosInsetTextareaStyles,
+  iosMapIslandFilledStyles,
+  iosPlainStyles,
+};
 
 /** Frosted inset grouped list / form surface. */
 export function IosInsetGroup({
@@ -144,6 +170,30 @@ export function IosSectionLabel({ children }: { children: ReactNode }) {
     </Box>
   );
 }
+
+/**
+ * Shared frosted map chrome (status island, dock, chip, ask).
+ * Quiet elevation so the map stays the hero.
+ */
+export const iosMapChromeSurfaceStyles = {
+  backgroundColor: "oklch(from var(--color-canvas) l c h / 0.88)",
+  border: "0.33px solid oklch(from var(--color-rule) l c h / 0.65)",
+  backdropFilter: "blur(24px) saturate(1.35)",
+  WebkitBackdropFilter: "blur(24px) saturate(1.35)",
+  boxShadow: "0 4px 14px 0 oklch(0.1 0.04 265 / 0.28)",
+} as const;
+
+/** Status instrument: shared chrome + Survey ink. */
+export const iosMapStatusIslandStyles = {
+  ...iosMapChromeSurfaceStyles,
+  color: "var(--color-field-ink)",
+} as const;
+
+/** Hunt deck accent: continuous island + flag hairline top. */
+export const iosMapHuntSurfaceStyles = {
+  ...iosMapChromeSurfaceStyles,
+  borderTop: "3px solid var(--color-flag)",
+} as const;
 
 /** Drag affordance for iOS bottom drawers. */
 export function IosDrawerGrabber() {

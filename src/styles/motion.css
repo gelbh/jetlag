@@ -258,6 +258,17 @@
   }
 }
 
+@keyframes jl-map-phase-live {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.35;
+  }
+}
+
 @keyframes jl-ticker-glow {
   0%,
   100% {
@@ -445,6 +456,7 @@ html[data-nav-direction="neutral"]::view-transition-new(root) {
   .home-resume-action[aria-busy="true"] .home-resume-cta,
   .jl-ticker-active,
   .jl-thermometer-live-marker,
+  .jl-map-phase-live-dot,
   .jl-unread-badge-pulse,
   .jl-tool-overflow-sheet,
   .hud-sheet-enter,
@@ -601,6 +613,61 @@ html:is([data-motion="static"], [data-motion="reduced"]) .hud-chrome,
 html:is([data-motion="static"], [data-motion="reduced"]) .btn-primary,
 html:is([data-motion="static"], [data-motion="reduced"]) .btn-secondary,
 html:is([data-motion="static"], [data-motion="reduced"]) .jl-tool-slot,
-html:is([data-motion="static"], [data-motion="reduced"]) .jl-tool-overflow-row {
+html:is([data-motion="static"], [data-motion="reduced"]) .jl-tool-overflow-row,
+html:is([data-motion="static"], [data-motion="reduced"]) .jl-map-chrome-press {
   transition: none;
+}
+
+.jl-map-phase-live-dot {
+  animation: jl-map-phase-live 1.6s ease-in-out infinite;
+}
+
+.jl-map-chrome-press {
+  transition:
+    transform var(--motion-instant) ease-out,
+    opacity var(--motion-instant) ease-out;
+}
+
+.jl-map-chrome-press:active {
+  transform: scale(0.96);
+  opacity: 0.8;
+}
+
+.map-hud-home.jl-map-status-home {
+  border-radius: 12px;
+  color: var(--color-field-ink);
+  transition:
+    transform var(--motion-instant) ease-out,
+    color var(--motion-instant) ease-out,
+    background-color var(--motion-instant) ease-out;
+}
+
+.map-hud-home.jl-map-status-home:hover {
+  color: var(--color-flag);
+  background-color: oklch(from var(--color-flag) l c h / 0.12);
+}
+
+.map-hud-home.jl-map-status-home:active {
+  transform: scale(0.94);
+  color: var(--color-flag);
+  background-color: oklch(from var(--color-flag) l c h / 0.2);
+}
+
+.map-hud-home.jl-map-status-home:focus-visible {
+  outline: 2px solid var(--color-flag);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .jl-map-chrome-press,
+  .jl-map-chrome-press:active,
+  .map-hud-home.jl-map-status-home,
+  .map-hud-home.jl-map-status-home:active {
+    transition: none;
+    transform: none;
+  }
+
+  .jl-map-chrome-press:active {
+    opacity: 1;
+  }
 }

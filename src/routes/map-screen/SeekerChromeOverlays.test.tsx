@@ -93,6 +93,7 @@ function stubTools(
     },
     pinTool: { panel: <div /> },
     zoneTool: { panel: <div /> },
+    drawTool: { panel: <div /> },
     tentacleTool: {
       panel: <div data-testid="tentacle-float-panel" />,
       hud: emptyHud("tentacle"),
@@ -112,7 +113,7 @@ describe("SeekerChromeOverlays Ask HUD wiring", () => {
         firstRunDismissed
         setFirstRunDismissed={vi.fn()}
         forceMapToolsGuide={false}
-        setForceMapToolsGuide={vi.fn()}
+        onDismissMapToolsGuide={vi.fn()}
         selectedAnnotation={null}
         geometryEditAnnotation={null}
         geometryDraft={null}
@@ -144,7 +145,7 @@ describe("SeekerChromeOverlays Ask HUD wiring", () => {
         firstRunDismissed
         setFirstRunDismissed={vi.fn()}
         forceMapToolsGuide={false}
-        setForceMapToolsGuide={vi.fn()}
+        onDismissMapToolsGuide={vi.fn()}
         selectedAnnotation={null}
         geometryEditAnnotation={null}
         geometryDraft={null}
@@ -173,7 +174,7 @@ describe("SeekerChromeOverlays Ask HUD wiring", () => {
         firstRunDismissed
         setFirstRunDismissed={vi.fn()}
         forceMapToolsGuide={false}
-        setForceMapToolsGuide={vi.fn()}
+        onDismissMapToolsGuide={vi.fn()}
         selectedAnnotation={null}
         geometryEditAnnotation={null}
         geometryDraft={null}
@@ -205,7 +206,7 @@ describe("SeekerChromeOverlays Ask HUD wiring", () => {
         firstRunDismissed
         setFirstRunDismissed={vi.fn()}
         forceMapToolsGuide={false}
-        setForceMapToolsGuide={vi.fn()}
+        onDismissMapToolsGuide={vi.fn()}
         selectedAnnotation={null}
         geometryEditAnnotation={null}
         geometryDraft={null}
@@ -237,7 +238,7 @@ describe("SeekerChromeOverlays Ask HUD wiring", () => {
         firstRunDismissed
         setFirstRunDismissed={vi.fn()}
         forceMapToolsGuide={false}
-        setForceMapToolsGuide={vi.fn()}
+        onDismissMapToolsGuide={vi.fn()}
         selectedAnnotation={null}
         geometryEditAnnotation={null}
         geometryDraft={null}
@@ -266,7 +267,7 @@ describe("SeekerChromeOverlays Ask HUD wiring", () => {
         firstRunDismissed
         setFirstRunDismissed={vi.fn()}
         forceMapToolsGuide={false}
-        setForceMapToolsGuide={vi.fn()}
+        onDismissMapToolsGuide={vi.fn()}
         selectedAnnotation={null}
         geometryEditAnnotation={null}
         geometryDraft={null}

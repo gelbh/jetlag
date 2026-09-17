@@ -62,8 +62,107 @@ export const iosCompactFilledStyles: ButtonProps["styles"] = {
   },
 };
 
+
+/** Island-height Start (matches quiet timer column, not full iOS form CTA). */
+export const iosMapIslandFilledStyles: ButtonProps["styles"] = {
+  root: {
+    minHeight: "2.25rem",
+    height: "2.25rem",
+    borderRadius: 10,
+    border: "none",
+    fontWeight: 590,
+    fontSize: "0.8125rem",
+    paddingInline: "0.75rem",
+    backgroundColor: "var(--color-flag)",
+    color: "var(--color-flag-ink)",
+    "&:hover": {
+      backgroundColor: "oklch(from var(--color-flag) calc(l + 0.03) c h)",
+    },
+  },
+};
+
+/** Compact gray / secondary control for inset list rows. */
+export const iosCompactGrayStyles: ButtonProps["styles"] = {
+  root: {
+    minHeight: "2.5rem",
+    borderRadius: 10,
+    border: "none",
+    fontWeight: 590,
+    fontSize: "0.875rem",
+    paddingInline: "0.85rem",
+    backgroundColor: "oklch(from var(--color-rule) l c h / 0.45)",
+    color: "var(--color-field-ink)",
+    "&:hover": {
+      backgroundColor: "oklch(from var(--color-rule) l c h / 0.55)",
+    },
+  },
+};
+
+/** Compact halt-tinted control for destructive row actions. */
+export const iosCompactDangerStyles: ButtonProps["styles"] = {
+  root: {
+    minHeight: "2.5rem",
+    borderRadius: 10,
+    border: "none",
+    fontWeight: 590,
+    fontSize: "0.875rem",
+    paddingInline: "0.85rem",
+    backgroundColor: "oklch(from var(--color-rule) l c h / 0.45)",
+    color: "var(--color-halt)",
+    "&:hover": {
+      backgroundColor: "oklch(from var(--color-rule) l c h / 0.55)",
+    },
+  },
+};
+
+/** Transparent TextInput sitting inside IosInsetGroup. */
+export const iosInsetTextInputStyles = {
+  root: { width: "100%" },
+  label: {
+    paddingInline: "1rem",
+    paddingTop: "0.65rem",
+    fontSize: "0.8125rem",
+    fontWeight: 510,
+    color: "var(--color-field-ink-muted)",
+  },
+  input: {
+    border: "none",
+    background: "transparent",
+    minHeight: "2.75rem",
+    color: "var(--color-field-ink)",
+    fontSize: "1rem",
+    fontWeight: 510,
+    paddingInline: "1rem",
+    paddingBlock: "0.5rem",
+  },
+} as const;
+
+/** Transparent Textarea sitting inside IosInsetGroup. */
+export const iosInsetTextareaStyles = {
+  root: { width: "100%" },
+  label: {
+    paddingInline: "1rem",
+    paddingTop: "0.65rem",
+    fontSize: "0.8125rem",
+    fontWeight: 510,
+    color: "var(--color-field-ink-muted)",
+  },
+  input: {
+    border: "none",
+    background: "transparent",
+    color: "var(--color-field-ink)",
+    fontSize: "0.9375rem",
+    fontWeight: 510,
+    paddingInline: "1rem",
+    paddingBlock: "0.65rem",
+    minHeight: "5.5rem",
+  },
+} as const;
+
 /** Full-bleed bottom Drawer chassis (Friends / Leaderboard / report sheets). */
-export function iosBottomDrawerStyles(maxHeight = "min(70dvh, 34rem)") {
+export function iosBottomDrawerStyles(
+  maxHeight: string | false = "min(70dvh, 34rem)",
+) {
   return {
     inner: {
       width: "100%",
@@ -75,7 +174,7 @@ export function iosBottomDrawerStyles(maxHeight = "min(70dvh, 34rem)") {
       width: "100%",
       maxWidth: "100%",
       height: "auto",
-      maxHeight,
+      ...(maxHeight === false ? {} : { maxHeight }),
       backgroundColor: "var(--color-canvas)",
       borderTopLeftRadius: 24,
       borderTopRightRadius: 24,
@@ -84,6 +183,7 @@ export function iosBottomDrawerStyles(maxHeight = "min(70dvh, 34rem)") {
     },
     body: {
       width: "100%",
+      paddingTop: "0.5rem",
       paddingBottom: "max(1.25rem, env(safe-area-inset-bottom))",
     },
   };

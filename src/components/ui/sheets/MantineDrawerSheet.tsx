@@ -1,6 +1,8 @@
 import { Drawer } from "@mantine/core";
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { cn } from "@/lib/cn";
+import { IosDrawerGrabber } from "@/components/ui/apple/iosEntryChrome";
+import { iosBottomDrawerStyles } from "@/components/ui/apple/iosEntryStyles";
 import { JETLAG_MODAL_Z_INDEX } from "@/theme/mantineTheme";
 
 export interface MantineDrawerSheetProps {
@@ -12,13 +14,13 @@ export interface MantineDrawerSheetProps {
   ariaLabel?: string;
   sheetClassName?: string;
   maxHeightClassName?: string;
+  /** Extra styles on the inner body wrapper (e.g. keyboard inset). */
+  contentStyle?: CSSProperties;
 }
 
 /**
- * Flag-on mobile/overlay sheet path: bottom Drawer with safe-area padding.
+ * Flag-on mobile/overlay sheet path: iOS bottom Drawer with grabber + safe-area.
  * Desktop ContextualRail stays on SheetHost; this mirrors RadixMotionSheet scope.
- * `size="auto"` + maxHeight on content so consumer maxHeightClassName is not
- * clamped to Mantine's default fixed drawer height (~440px).
  */
 export function MantineDrawerSheet({
   open,
@@ -29,6 +31,7 @@ export function MantineDrawerSheet({
   ariaLabel,
   sheetClassName = "",
   maxHeightClassName = "max-h-[min(72dvh,640px)]",
+  contentStyle,
 }: MantineDrawerSheetProps) {
   return (
     <Drawer
@@ -36,6 +39,8 @@ export function MantineDrawerSheet({
       onClose={onClose}
       position="bottom"
       size="auto"
+      padding="md"
+      radius={24}
       withCloseButton={false}
       closeOnClickOutside={dismissible}
       closeOnEscape={dismissible}
@@ -45,19 +50,20 @@ export function MantineDrawerSheet({
       zIndex={JETLAG_MODAL_Z_INDEX}
       title={ariaLabel}
       aria-label={ariaLabel}
+      overlayProps={{ backgroundOpacity: 0.4, blur: 3 }}
       classNames={{
         content: cn("mantine-drawer-sheet", sheetClassName, maxHeightClassName),
         body: "min-h-0 overflow-y-auto",
         header: ariaLabel ? "sr-only" : undefined,
       }}
-      styles={{
-        content: {
-          height: "auto",
-          paddingBottom: "env(safe-area-inset-bottom)",
-        },
-      }}
+      styles={iosBottomDrawerStyles(false)}
     >
-      <div data-testid="mantine-drawer-sheet">
+      <div
+        data-testid="mantine-drawer-sheet"
+        className="flex flex-col gap-3"
+        style={contentStyle}
+      >
+        <IosDrawerGrabber />
         {pinned}
         {children}
       </div>
