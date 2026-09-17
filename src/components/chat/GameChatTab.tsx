@@ -209,7 +209,7 @@ export function GameChatTab({
           </Box>
         ) : null}
         {gameMessages.length === 0 ? (
-          <EmptyState className="text-ink-dim">No game messages yet.</EmptyState>
+          <EmptyState>No game messages yet.</EmptyState>
         ) : (
           gameMessages.map((message) => {
             if (message.kind === "system") {

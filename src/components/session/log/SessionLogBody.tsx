@@ -26,6 +26,10 @@ import {
   type SessionActivityType,
 } from "@/domain/session/activity/sessionActivityLog";
 import { HudToolIcon } from "@/components/map/icons/ToolIcons";
+import {
+  iosCompactDangerStyles,
+  iosCompactGrayStyles,
+} from "@/components/ui/apple/iosEntryChrome";
 import { EmptyState } from "@/components/ui/feedback/EmptyState";
 import { useStickScrollToBottom } from "@/hooks/ui/useStickScrollToBottom";
 
@@ -221,7 +225,7 @@ export function SessionLogBody({
   const bottomRef = useStickScrollToBottom(entries.length);
 
   if (entries.length === 0) {
-    return <EmptyState className="text-ink-dim">No activity yet.</EmptyState>;
+    return <EmptyState>No activity yet.</EmptyState>;
   }
 
   return (
@@ -402,16 +406,15 @@ export function SessionLogBody({
               <Stack gap={4} style={{ flexShrink: 0 }}>
                 <Button
                   size="compact-xs"
-                  variant="default"
                   onClick={() => onEdit(liveId)}
+                  styles={iosCompactGrayStyles}
                 >
                   Edit
                 </Button>
                 <Button
                   size="compact-xs"
-                  variant="light"
-                  color="red"
                   onClick={() => onDelete(liveId)}
+                  styles={iosCompactDangerStyles}
                 >
                   Delete
                 </Button>

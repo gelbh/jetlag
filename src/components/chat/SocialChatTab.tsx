@@ -82,7 +82,7 @@ export function SocialChatTab({
           }}
         >
           {socialMessages.length === 0 ? (
-            <EmptyState className="text-ink-dim">No messages yet.</EmptyState>
+            <EmptyState>No messages yet.</EmptyState>
           ) : (
             socialMessages.map((message, index) => {
               const mine = message.senderUid === senderUid;
