@@ -1,7 +1,10 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { MantineProvider } from "@mantine/core";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { PhotoAnswerUploader } from "./PhotoAnswerUploader";
 import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
+import { PLAYER_UI_MANTINE_STORAGE_KEY } from "../../hooks/feature/usePlayerUiMantine";
+import { jetlagMantineTheme } from "../../theme/mantineTheme";
 
 const pendingQuestion: PendingQuestionRecord = {
   id: "pq-photo",
@@ -23,6 +26,24 @@ const pendingQuestion: PendingQuestionRecord = {
 };
 
 describe("PhotoAnswerUploader", () => {
+  beforeEach(() => {
+    localStorage.removeItem(PLAYER_UI_MANTINE_STORAGE_KEY);
+    Object.defineProperty(window, "matchMedia", {
+      writable: true,
+      configurable: true,
+      value: (query: string) => ({
+        matches: false,
+        media: query,
+        onchange: null,
+        addListener: () => {},
+        removeListener: () => {},
+        addEventListener: () => {},
+        removeEventListener: () => {},
+        dispatchEvent: () => false,
+      }),
+    });
+  });
+
   it("shows outage notice and mark-sent action", () => {
     render(
       <PhotoAnswerUploader
@@ -38,6 +59,29 @@ describe("PhotoAnswerUploader", () => {
     ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Mark sent" })).toBeInTheDocument();
     expect(document.querySelector('input[type="file"]')).toBeNull();
+  });
+
+  it("uses iOS Mantine controls under the player UI flag", () => {
+    localStorage.setItem(PLAYER_UI_MANTINE_STORAGE_KEY, "1");
+    render(
+      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="light">
+        <PhotoAnswerUploader
+          sessionId="session-1"
+          pendingQuestion={pendingQuestion}
+          messageId="msg-1"
+          onAnswerQuestion={vi.fn()}
+        />
+      </MantineProvider>,
+    );
+
+    expect(screen.getByRole("button", { name: "Mark sent" })).toHaveClass(
+      "mantine-Button-root",
+    );
+    expect(
+      screen.getByRole("button", { name: "I cannot answer the question" }),
+    ).toHaveClass("mantine-Button-root");
+    expect(document.querySelector(".btn-primary")).toBeNull();
+    expect(document.querySelector(".btn-secondary")).toBeNull();
   });
 
   it("submits mark-sent without storage calls", async () => {
