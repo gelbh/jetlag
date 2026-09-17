@@ -81,8 +81,29 @@ export const iosMapIslandFilledStyles: ButtonProps["styles"] = {
   },
 };
 
+export type IosMapToolSlotTone = "tool" | "history";
+
+/** Caption under hunt/session slot icon (sentence case; not Survey display). */
+export const iosMapToolSlotLabelStyle = {
+  display: "block",
+  maxWidth: "100%",
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  fontFamily: "var(--mantine-font-family)",
+  fontSize: "0.625rem",
+  fontWeight: 510,
+  letterSpacing: "-0.01em",
+  lineHeight: 1.15,
+  textTransform: "none" as const,
+  whiteSpace: "nowrap" as const,
+};
+
 /** Hunt / session dock chip under jl.playerUi.mantine (column icon+label). */
-export function iosMapToolSlotStyles(pressed: boolean): ButtonProps["styles"] {
+export function iosMapToolSlotStyles(
+  pressed: boolean,
+  tone: IosMapToolSlotTone = "tool",
+): ButtonProps["styles"] {
+  const history = tone === "history";
   return {
     root: {
       display: "flex",
@@ -90,33 +111,85 @@ export function iosMapToolSlotStyles(pressed: boolean): ButtonProps["styles"] {
       alignItems: "center",
       justifyContent: "center",
       gap: "0.125rem",
-      minWidth: "2.75rem",
+      minWidth: history ? "2.5rem" : "2.75rem",
       minHeight: "2.75rem",
-      padding: "0.25rem 0.125rem",
-      borderRadius: 14,
+      flex: history ? "0 0 auto" : "1 1 0",
+      padding: history ? "0.2rem 0.1rem" : "0.25rem 0.125rem",
+      borderRadius: history ? 12 : 10,
       border: pressed
         ? "0.33px solid oklch(from var(--color-highlight) l c h / 0.75)"
         : "0.33px solid transparent",
       backgroundColor: pressed
         ? "oklch(from var(--color-highlight) l c h / 0.22)"
-        : "transparent",
+        : history
+          ? "transparent"
+          : "transparent",
       color: pressed
         ? "var(--color-highlight)"
-        : "var(--color-field-ink-muted)",
+        : history
+          ? "oklch(from var(--color-field-ink-muted) l c h / 0.85)"
+          : "var(--color-field-ink-muted)",
+      opacity: history && !pressed ? 0.88 : 1,
       WebkitTapHighlightColor: "transparent",
       "&:hover:not(:disabled)": {
         backgroundColor: pressed
           ? "oklch(from var(--color-highlight) l c h / 0.28)"
-          : "oklch(from var(--color-canvas) l c h / 0.55)",
+          : "oklch(from var(--color-field-ink) l c h / 0.1)",
         borderColor: pressed
           ? "oklch(from var(--color-highlight) l c h / 0.85)"
-          : "oklch(from var(--color-rule) l c h / 0.55)",
+          : "oklch(from var(--color-field-ink) l c h / 0.14)",
         color: pressed
           ? "var(--color-highlight)"
           : "var(--color-field-ink)",
+        opacity: 1,
       },
       "&:disabled": {
         opacity: 0.35,
+        cursor: "not-allowed",
+      },
+    },
+  };
+}
+
+export type IosChoiceTone = "default" | "success" | "danger";
+
+/** Ask kit choice chip / catalog row / binary answer under Mantine flag. */
+export function iosChoiceChipStyles(
+  selected: boolean,
+  tone: IosChoiceTone = "default",
+): ButtonProps["styles"] {
+  const selectedBg =
+    tone === "success"
+      ? "var(--color-status-success, var(--color-trail))"
+      : tone === "danger"
+        ? "var(--color-halt)"
+        : "var(--color-flag)";
+  const selectedFg =
+    tone === "danger"
+      ? "var(--color-canvas)"
+      : tone === "success"
+        ? "var(--color-action-ink, var(--color-canvas))"
+        : "var(--color-flag-ink)";
+
+  return {
+    root: {
+      minHeight: "3rem",
+      borderRadius: 14,
+      border: "none",
+      fontWeight: 590,
+      fontSize: "0.875rem",
+      paddingInline: "0.75rem",
+      backgroundColor: selected
+        ? selectedBg
+        : "oklch(from var(--color-rule) l c h / 0.45)",
+      color: selected ? selectedFg : "var(--color-field-ink)",
+      "&:hover:not(:disabled)": {
+        backgroundColor: selected
+          ? selectedBg
+          : "oklch(from var(--color-rule) l c h / 0.55)",
+      },
+      "&:disabled": {
+        opacity: 0.4,
         cursor: "not-allowed",
       },
     },
