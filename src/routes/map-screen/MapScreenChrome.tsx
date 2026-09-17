@@ -12,6 +12,7 @@ import { MapStatusRail } from "../../components/session/mapChrome/MapStatusRail"
 import { SessionLog } from "../../components/session/log/SessionLog";
 import { AnnotationEditSheet } from "../../components/tools/AnnotationEditSheet";
 import { ToolDock } from "../../components/tools/ToolDock";
+import { useDevMockSessionFeed } from "../../hooks/dev/useDevMockSessionFeed";
 import { useDesktopLayout } from "../../hooks/layout/useDesktopLayout";
 import { useToolRailShortcuts } from "../../hooks/map/useToolRailShortcuts";
 import type { MapScreenController } from "./useMapScreenController";
@@ -266,6 +267,10 @@ export function MapScreenChrome({
   setAwaitingPlacement,
   mapSlot,
 }: MapScreenChromeProps) {
+  const {
+    messages: displayChatMessages,
+    pendingQuestions: displayPendingQuestions,
+  } = useDevMockSessionFeed(session?.id, chatMessages, pendingQuestions);
   const syncMessage =
     syncStatus.remoteUpdateNotice ??
     syncStatus.lastSyncError ??
@@ -367,7 +372,7 @@ export function MapScreenChrome({
         (zone) => zone.moveInProgress === true,
       )}
       onOpenLog={handleOpenLog}
-      pendingQuestions={pendingQuestions}
+      pendingQuestions={displayPendingQuestions}
       closeTimerMenu={
         overlay.sheet !== "none" ||
         activeTool !== "none" ||
@@ -639,8 +644,8 @@ export function MapScreenChrome({
         <ChatPanel
           open={overlay.isChatOpen}
           onClose={overlay.closeSheet}
-          messages={chatMessages}
-          pendingQuestions={pendingQuestions}
+          messages={displayChatMessages}
+          pendingQuestions={displayPendingQuestions}
           sessionRules={session!}
           sessionId={session!.id}
           senderUid={uid ?? ""}
@@ -669,7 +674,7 @@ export function MapScreenChrome({
             );
           }}
           onDismissExpiredQuestion={async (pendingQuestionId, messageId) => {
-            const pending = pendingQuestions.find(
+            const pending = displayPendingQuestions.find(
               (question) => question.id === pendingQuestionId,
             );
             if (!pending) {

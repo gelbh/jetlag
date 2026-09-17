@@ -77,6 +77,14 @@ const StatusDockGalleryLazy = import.meta.env.DEV
     )
   : null;
 
+const ChatLogGalleryLazy = import.meta.env.DEV
+  ? lazyWithChunkRetry(() =>
+      import("./routes/dev/ChatLogGallery").then((m) => ({
+        default: m.ChatLogGallery,
+      })),
+    )
+  : null;
+
 function RouteFallback() {
   return (
     <div
@@ -287,6 +295,16 @@ export default function App() {
                             element={
                               <LazyRoute>
                                 <StatusDockGalleryLazy />
+                              </LazyRoute>
+                            }
+                          />
+                        ) : null}
+                        {ChatLogGalleryLazy ? (
+                          <Route
+                            path="/dev/chat-log"
+                            element={
+                              <LazyRoute>
+                                <ChatLogGalleryLazy />
                               </LazyRoute>
                             }
                           />

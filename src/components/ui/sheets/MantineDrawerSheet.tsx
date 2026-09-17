@@ -14,6 +14,13 @@ export interface MantineDrawerSheetProps {
   ariaLabel?: string;
   sheetClassName?: string;
   maxHeightClassName?: string;
+  /** Mantine Drawer padding; default `md`. Pass `sm`/`xs` for denser sheets. */
+  padding?: "xs" | "sm" | "md" | "lg" | "xl" | number;
+  /**
+   * `host` (default): one scroll region for children (session log).
+   * `child`: host locks height; child owns scroll (chat tabs + list).
+   */
+  scrollMode?: "host" | "child";
   /** Extra styles on the inner body wrapper (e.g. keyboard inset). */
   contentStyle?: CSSProperties;
 }
@@ -31,15 +38,20 @@ export function MantineDrawerSheet({
   ariaLabel,
   sheetClassName = "",
   maxHeightClassName = "max-h-[min(72dvh,640px)]",
+  padding = "md",
+  scrollMode = "host",
   contentStyle,
 }: MantineDrawerSheetProps) {
+  const childScroll = scrollMode === "child";
+  const baseStyles = iosBottomDrawerStyles(false);
+
   return (
     <Drawer
       opened={open}
       onClose={onClose}
       position="bottom"
       size="auto"
-      padding="md"
+      padding={padding}
       radius={24}
       withCloseButton={false}
       closeOnClickOutside={dismissible}
@@ -52,20 +64,52 @@ export function MantineDrawerSheet({
       aria-label={ariaLabel}
       overlayProps={{ backgroundOpacity: 0.4, blur: 3 }}
       classNames={{
-        content: cn("mantine-drawer-sheet", sheetClassName, maxHeightClassName),
-        body: "min-h-0 overflow-y-auto",
+        content: cn(
+          "mantine-drawer-sheet",
+          sheetClassName,
+          maxHeightClassName,
+          "flex flex-col",
+        ),
+        body: cn(
+          "min-h-0 flex flex-1 flex-col",
+          childScroll ? "overflow-hidden" : "overflow-hidden",
+        ),
         header: ariaLabel ? "sr-only" : undefined,
       }}
-      styles={iosBottomDrawerStyles(false)}
+      styles={{
+        ...baseStyles,
+        content: {
+          ...baseStyles.content,
+          overflow: "hidden",
+          display: "flex",
+          flexDirection: "column",
+        },
+        body: {
+          ...baseStyles.body,
+          flex: 1,
+          minHeight: 0,
+          overflow: "hidden",
+          display: "flex",
+          flexDirection: "column",
+        },
+      }}
     >
       <div
         data-testid="mantine-drawer-sheet"
-        className="flex flex-col gap-3"
+        className="flex min-h-0 flex-1 flex-col gap-2"
         style={contentStyle}
       >
         <IosDrawerGrabber />
-        {pinned}
-        {children}
+        {pinned ? <div className="shrink-0">{pinned}</div> : null}
+        <div
+          className={
+            childScroll
+              ? "flex min-h-0 flex-1 flex-col overflow-hidden"
+              : "jl-scroll min-h-0 flex-1 overflow-y-auto overscroll-contain"
+          }
+        >
+          {children}
+        </div>
       </div>
     </Drawer>
   );

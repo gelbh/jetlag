@@ -1,6 +1,5 @@
-import { Group, Paper, Text, UnstyledButton } from "@mantine/core";
+import { Group, Paper, Text } from "@mantine/core";
 import type { SyncStatus } from "@/domain/device/sync/sync";
-import { userErrorFromSyncMessage } from "@/domain/device/feedback/userErrors";
 import {
   surveySyncSegmentLabel,
   surveySyncShortLabel,
@@ -9,8 +8,6 @@ import { iosMapChromeSurfaceStyles } from "@/components/ui/apple/iosEntryChrome"
 import { usePlayerUiMantine } from "@/hooks/feature/usePlayerUiMantine";
 import { useMinWidth } from "@/hooks/layout/useMinWidth";
 import { SyncStatusBeacon } from "../syncUi/SyncStatusDot";
-import { SyncStatusDetailPanel } from "../syncUi/SyncStatusDetailPanel";
-import { syncDetailContent } from "../syncUi/syncStatusDetailContent";
 import {
   SYNC_TONE_CLASSES,
   type SyncTone,
@@ -21,8 +18,11 @@ interface SyncBlockProps {
   syncStatus: SyncStatus;
   queuedWrites: number;
   message?: string | null;
-  menuOpen: boolean;
-  onMenuOpenChange: (open: boolean) => void;
+  /** @deprecated Detail modal removed; ignored. */
+  menuOpen?: boolean;
+  /** @deprecated Detail modal removed; ignored. */
+  onMenuOpenChange?: (open: boolean) => void;
+  /** @deprecated Detail modal removed; ignored. */
   onSyncErrorAction?: () => void;
   /**
    * overlay: absolute under status bar (Legacy / Mantine fallback)
@@ -52,60 +52,21 @@ function surveyShortLabelTone(status: SyncStatus): SyncTone | null {
   }
 }
 
+/** Live sync beacon in the status rail (display only; no detail modal). */
 export function SyncBlock({
   syncStatus,
   queuedWrites,
-  message,
-  menuOpen,
-  onMenuOpenChange,
-  onSyncErrorAction,
   placement = "overlay",
   compact = false,
 }: SyncBlockProps) {
   const mantinePlayerUi = usePlayerUiMantine();
   const comfortableWidth = useMinWidth(380) && !compact;
-  const syncErrorDisplay = userErrorFromSyncMessage(message);
   const shortLabel = surveySyncShortLabel(syncStatus, queuedWrites);
   const segmentLabel = comfortableWidth
     ? surveySyncSegmentLabel(syncStatus, queuedWrites)
     : null;
   const shortLabelTone = surveyShortLabelTone(syncStatus);
-  const syncDetail = syncDetailContent(
-    syncStatus,
-    queuedWrites,
-    message,
-    syncErrorDisplay,
-  );
-  const syncActionLabel =
-    syncErrorDisplay?.actionLabel ??
-    (syncStatus === "offline" ||
-    syncStatus === "degraded" ||
-    syncStatus === "error"
-      ? "Retry"
-      : null);
-
-  const ariaLabel = shortLabel
-    ? `${shortLabel}. Show sync details`
-    : syncBeaconAriaLabel(syncStatus);
-
-  const detail =
-    menuOpen ? (
-      <SyncStatusDetailPanel
-        status={syncStatus}
-        title={syncDetail.title}
-        body={syncDetail.body}
-        actionLabel={syncActionLabel}
-        onAction={
-          syncActionLabel && onSyncErrorAction
-            ? () => {
-                onSyncErrorAction();
-                onMenuOpenChange(false);
-              }
-            : undefined
-        }
-        onClose={() => onMenuOpenChange(false)}
-      />
-    ) : null;
+  const statusAria = shortLabel ?? syncBeaconAriaLabel(syncStatus);
 
   const beaconRow = (
     <Group gap={6} wrap="nowrap" justify="center">
@@ -126,10 +87,9 @@ export function SyncBlock({
   );
 
   if (mantinePlayerUi && placement === "segment") {
-    const statusAria = shortLabel ?? syncBeaconAriaLabel(syncStatus);
     return (
       <div
-        className="relative inline-flex min-h-11 min-w-11 max-w-full items-center justify-center overflow-hidden rounded-xl px-1"
+        className="relative inline-flex min-h-11 min-w-11 max-w-full items-center justify-center overflow-visible rounded-xl px-1"
         data-testid="sync-block-mantine"
         role="status"
         aria-label={statusAria}
@@ -173,15 +133,11 @@ export function SyncBlock({
         data-testid="sync-block-mantine"
       >
         <Paper
-          component="button"
-          type="button"
           radius={shortLabel ? 14 : "xl"}
-          className="pointer-events-auto inline-flex min-h-11 items-center justify-center"
+          className="pointer-events-none inline-flex min-h-11 items-center justify-center"
           px={shortLabel ? "sm" : 0}
-          onClick={() => onMenuOpenChange(!menuOpen)}
-          aria-expanded={menuOpen}
-          aria-haspopup="dialog"
-          aria-label={ariaLabel}
+          role="status"
+          aria-label={statusAria}
           styles={{
             root: {
               ...iosMapChromeSurfaceStyles,
@@ -189,32 +145,22 @@ export function SyncBlock({
               height: "2.75rem",
               minWidth: "2.75rem",
               borderRadius: shortLabel ? 14 : 999,
-              borderColor: menuOpen
-                ? "oklch(from var(--color-flag) l c h / 0.45)"
-                : iosMapChromeSurfaceStyles.border,
-              backgroundColor: menuOpen
-                ? "oklch(from var(--color-flag) l c h / 0.14)"
-                : iosMapChromeSurfaceStyles.backgroundColor,
-              cursor: "pointer",
+              cursor: "default",
             },
           }}
         >
           {beaconRow}
         </Paper>
-        {detail}
       </div>
     );
   }
 
   return (
     <div className="jl-sync-map-indicator">
-      <button
-        type="button"
-        className={`jl-sync-map-indicator__btn inline-flex min-h-11 min-w-11 items-center justify-center border border-rule bg-canvas text-field-ink shadow-none${menuOpen ? " jl-sync-map-indicator__btn--open" : ""}${shortLabel ? " jl-sync-map-indicator__btn--labeled gap-1.5 px-2.5" : ""}`}
-        onClick={() => onMenuOpenChange(!menuOpen)}
-        aria-expanded={menuOpen}
-        aria-haspopup="dialog"
-        aria-label={ariaLabel}
+      <div
+        className={`jl-sync-map-indicator__btn inline-flex min-h-11 min-w-11 items-center justify-center border border-rule bg-canvas text-field-ink shadow-none${shortLabel ? " jl-sync-map-indicator__btn--labeled gap-1.5 px-2.5" : ""}`}
+        role="status"
+        aria-label={statusAria}
       >
         {shortLabel ? (
           <span
@@ -224,8 +170,7 @@ export function SyncBlock({
           </span>
         ) : null}
         <SyncStatusBeacon status={syncStatus} size="md" />
-      </button>
-      {detail}
+      </div>
     </div>
   );
 }

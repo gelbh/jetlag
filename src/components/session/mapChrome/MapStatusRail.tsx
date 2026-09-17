@@ -119,7 +119,6 @@ export function MapStatusRail({
 }: MapStatusRailProps) {
   const mantinePlayerUi = usePlayerUiMantine();
   const [timerMenuOpen, setTimerMenuOpen] = useState(false);
-  const [syncMenuOpen, setSyncMenuOpen] = useState(false);
   const [preloadMenuOpen, setPreloadMenuOpen] = useState(false);
   const railRef = useRef<HTMLDivElement>(null);
   const {
@@ -142,17 +141,15 @@ export function MapStatusRail({
     onSyncErrorAction &&
     onReturnToJoin;
   const showTimerMenu = timerMenuOpen && !closeTimerMenu;
-  const showSyncMenu = syncMenuOpen && !closeTimerMenu;
   const showPreloadMenu = preloadMenuOpen && !closeTimerMenu;
 
   const closeOtherMenus = () => {
     setTimerMenuOpen(false);
-    setSyncMenuOpen(false);
     setPreloadMenuOpen(false);
   };
 
   useEffect(() => {
-    if (!showTimerMenu && !showSyncMenu && !showPreloadMenu) {
+    if (!showTimerMenu && !showPreloadMenu) {
       return;
     }
 
@@ -174,7 +171,7 @@ export function MapStatusRail({
       window.removeEventListener("pointerdown", handlePointerDown);
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [showPreloadMenu, showSyncMenu, showTimerMenu]);
+  }, [showPreloadMenu, showTimerMenu]);
 
   const railClassName = `jl-status-rail pointer-events-none z-[var(--z-banner)]${
     expanded
@@ -240,6 +237,9 @@ export function MapStatusRail({
               timerMenuOpen={showTimerMenu}
               moveInProgress={moveInProgress}
               expanded={expanded}
+              onTimerPause={onTimerPause}
+              onTimerResume={onTimerStart}
+              timerControlsDisabled={timerControlsDisabled || inactiveChrome}
               headerLeading={
                 headerLeading ?? (
                   <ScreenNav variant="home" placement="inline" />
@@ -250,16 +250,7 @@ export function MapStatusRail({
                   syncStatus={syncStatus}
                   queuedWrites={queuedWrites}
                   message={message}
-                  menuOpen={showSyncMenu}
                   placement="segment"
-                  onMenuOpenChange={(open) => {
-                    setSyncMenuOpen(open);
-                    if (open) {
-                      setTimerMenuOpen(false);
-                      setPreloadMenuOpen(false);
-                    }
-                  }}
-                  onSyncErrorAction={onSyncErrorAction}
                 />
               }
               onOpenTimerMenu={() => {
@@ -267,7 +258,6 @@ export function MapStatusRail({
                   return;
                 }
                 setTimerMenuOpen((open) => !open);
-                setSyncMenuOpen(false);
                 setPreloadMenuOpen(false);
               }}
             />
@@ -304,7 +294,6 @@ export function MapStatusRail({
                     return;
                   }
                   setTimerMenuOpen((open) => !open);
-                  setSyncMenuOpen(false);
                   setPreloadMenuOpen(false);
                 }}
               />
@@ -313,15 +302,6 @@ export function MapStatusRail({
               syncStatus={syncStatus}
               queuedWrites={queuedWrites}
               message={message}
-              menuOpen={showSyncMenu}
-              onMenuOpenChange={(open) => {
-                setSyncMenuOpen(open);
-                if (open) {
-                  setTimerMenuOpen(false);
-                  setPreloadMenuOpen(false);
-                }
-              }}
-              onSyncErrorAction={onSyncErrorAction}
             />
           </>
         )}
@@ -333,7 +313,6 @@ export function MapStatusRail({
               setPreloadMenuOpen(open);
               if (open) {
                 setTimerMenuOpen(false);
-                setSyncMenuOpen(false);
               }
             }}
           />

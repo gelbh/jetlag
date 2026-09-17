@@ -16,7 +16,6 @@ import {
 assertStatusDockScenarioIdsUnique();
 
 function ScenarioRow({ scenario }: { scenario: StatusDockScenario }) {
-  const [syncMenuOpen, setSyncMenuOpen] = useState(false);
   const [timerMenuOpen, setTimerMenuOpen] = useState(false);
   const frameStyle = scenario.narrowFrame
     ? { width: 360, maxWidth: "100%" }
@@ -76,10 +75,8 @@ function ScenarioRow({ scenario }: { scenario: StatusDockScenario }) {
               syncStatus={scenario.syncStatus}
               queuedWrites={scenario.queuedWrites}
               message={scenario.syncMessage}
-              menuOpen={syncMenuOpen}
               placement="segment"
               compact={scenario.narrowFrame}
-              onMenuOpenChange={setSyncMenuOpen}
             />
           }
         />

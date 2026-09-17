@@ -81,6 +81,30 @@ export const iosMapIslandFilledStyles: ButtonProps["styles"] = {
   },
 };
 
+/** Island-height icon control (pause / resume beside the clock). */
+export const iosMapIslandIconStyles: ButtonProps["styles"] = {
+  root: {
+    minHeight: "2.5rem",
+    height: "2.5rem",
+    width: "2.5rem",
+    minWidth: "2.5rem",
+    padding: 0,
+    borderRadius: 12,
+    border: "0.33px solid oklch(from var(--color-rule) l c h / 0.65)",
+    backgroundColor: "oklch(from var(--color-canvas) l c h / 0.72)",
+    backdropFilter: "blur(16px) saturate(1.2)",
+    WebkitBackdropFilter: "blur(16px) saturate(1.2)",
+    color: "var(--color-field-ink)",
+    flexShrink: 0,
+    "&:hover": {
+      backgroundColor: "oklch(from var(--color-canvas) l c h / 0.9)",
+    },
+    "&:disabled": {
+      opacity: 0.4,
+    },
+  },
+};
+
 /** Compact gray / secondary control for inset list rows. */
 export const iosCompactGrayStyles: ButtonProps["styles"] = {
   root: {

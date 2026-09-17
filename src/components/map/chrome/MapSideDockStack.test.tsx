@@ -1,11 +1,15 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { MapSideDockStack } from "./MapSideDockStack";
-import { MAP_SIDE_DOCK_STORAGE_KEY } from "@/hooks/map/useMapSideDockSide";
+import {
+  MAP_CHROME_DOCKS_STORAGE_KEY,
+  MAP_SIDE_DOCK_STORAGE_KEY,
+} from "@/hooks/map/mapChromeDockPlacement";
 
 describe("MapSideDockStack", () => {
   beforeEach(() => {
     localStorage.removeItem(MAP_SIDE_DOCK_STORAGE_KEY);
+    localStorage.removeItem(MAP_CHROME_DOCKS_STORAGE_KEY);
     delete document.documentElement.dataset.mapSideDock;
     vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockReturnValue({
       x: 300,
@@ -30,14 +34,14 @@ describe("MapSideDockStack", () => {
     );
     const stack = container.querySelector('[data-testid="map-side-dock-stack"]');
     expect(stack?.className).toMatch(/jl-map-chrome-side-stack--fixed/);
-    expect(stack?.getAttribute("data-anchor")).toBe("bottom-right");
+    expect(stack?.getAttribute("data-side")).toBe("right");
     expect(container.querySelector("[data-side-dock-handle]")).toBeNull();
     expect(
       screen.getByRole("group", { name: /Session tools\. Drag to reposition/i }),
     ).toBeInTheDocument();
   });
 
-  it("cycles side slots with keyboard on the stack", () => {
+  it("cycles placement with keyboard on the stack", () => {
     render(
       <MapSideDockStack>
         <button type="button">Chat</button>
@@ -47,10 +51,12 @@ describe("MapSideDockStack", () => {
       name: /Session tools\. Drag to reposition/i,
     });
     fireEvent.keyDown(stack, { key: "Enter" });
-    expect(document.documentElement.dataset.mapSideDock).toBe("top-left");
+    expect(stack.getAttribute("data-side")).toBe("right");
+    fireEvent.keyDown(stack, { key: "Enter" });
+    expect(document.documentElement.dataset.mapSideDock).toMatch(/left$/);
   });
 
-  it("snaps to mid-left when released near mid left", () => {
+  it("snaps to left when released near the left edge", () => {
     const { container } = render(
       <MapSideDockStack>
         <button type="button">Chat</button>
@@ -84,7 +90,6 @@ describe("MapSideDockStack", () => {
     fireEvent.pointerMove(window, { pointerId: 1, clientX: 40, clientY: 400 });
     fireEvent.pointerUp(window, { pointerId: 1, clientX: 40, clientY: 400 });
 
-    expect(stack.getAttribute("data-anchor")).toBe("mid-left");
-    expect(localStorage.getItem(MAP_SIDE_DOCK_STORAGE_KEY)).toBe("mid-left");
+    expect(stack.getAttribute("data-side")).toBe("left");
   });
 });
