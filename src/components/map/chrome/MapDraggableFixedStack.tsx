@@ -16,7 +16,6 @@ import {
   sideFromPointX,
   topPxFromTopRatio,
   topRatioFromTopPx,
-  usableVerticalBand,
   type MapChromeDockPlacement,
 } from "@/hooks/map/useMapSideDockSide";
 import {
@@ -116,7 +115,10 @@ function rectsOverlap(
   );
 }
 
-/** Live drag: park above/below peer without moving the peer yet. */
+/**
+ * Live drag: keep gap padding above / below / beside the peer.
+ * No park snap mid-drag; release settle still stacks via resolveStackedTops.
+ */
 export function separateFromPeerRect(
   left: number,
   top: number,
@@ -125,32 +127,63 @@ export function separateFromPeerRect(
   peer: PeerRect | null,
   gap = PEER_GAP_PX,
 ): DragPos {
+  const desired = clampDragPos(left, top, width, height);
   if (!peer) {
-    return clampDragPos(left, top, width, height);
+    return desired;
   }
-  if (!rectsOverlap(left, top, width, height, peer, gap)) {
-    return clampDragPos(left, top, width, height);
+  if (!rectsOverlap(desired.left, desired.top, width, height, peer, gap)) {
+    return desired;
   }
-  let preferAbove = top + height / 2 <= (peer.top + peer.bottom) / 2;
-  const aboveTop = peer.top - gap - height;
-  const belowTop = peer.top + peer.height + gap;
-  const { minTop, maxBottom } = usableVerticalBand(window.innerHeight);
-  if (preferAbove && aboveTop < minTop && belowTop + height <= maxBottom) {
-    preferAbove = false;
-  } else if (
-    !preferAbove &&
-    belowTop + height > maxBottom &&
-    aboveTop >= minTop
-  ) {
-    preferAbove = true;
+
+  const exclLeft = peer.left - gap;
+  const exclRight = peer.right + gap;
+  const exclTop = peer.top - gap;
+  const exclBottom = peer.bottom + gap;
+
+  const candidates: DragPos[] = [
+    clampDragPos(exclLeft - width, desired.top, width, height),
+    clampDragPos(exclRight, desired.top, width, height),
+    clampDragPos(desired.left, exclTop - height, width, height),
+    clampDragPos(desired.left, exclBottom, width, height),
+  ];
+
+  let best: DragPos | null = null;
+  let bestDist = Infinity;
+  for (const candidate of candidates) {
+    if (
+      rectsOverlap(candidate.left, candidate.top, width, height, peer, gap)
+    ) {
+      continue;
+    }
+    const dist = Math.hypot(
+      candidate.left - desired.left,
+      candidate.top - desired.top,
+    );
+    if (dist < bestDist) {
+      bestDist = dist;
+      best = candidate;
+    }
   }
-  const alignedLeft = peer.left + (peer.right - peer.left - width) / 2;
-  return clampDragPos(
-    alignedLeft,
-    preferAbove ? aboveTop : belowTop,
-    width,
-    height,
-  );
+  if (best) {
+    return best;
+  }
+
+  // Viewport squeeze: push on the shortest axis even if clamp still clips.
+  const pushLeft = desired.left + width - exclLeft;
+  const pushRight = exclRight - desired.left;
+  const pushUp = desired.top + height - exclTop;
+  const pushDown = exclBottom - desired.top;
+  const minPush = Math.min(pushLeft, pushRight, pushUp, pushDown);
+  if (minPush === pushLeft) {
+    return clampDragPos(desired.left - pushLeft, desired.top, width, height);
+  }
+  if (minPush === pushRight) {
+    return clampDragPos(desired.left + pushRight, desired.top, width, height);
+  }
+  if (minPush === pushUp) {
+    return clampDragPos(desired.left, desired.top - pushUp, width, height);
+  }
+  return clampDragPos(desired.left, desired.top + pushDown, width, height);
 }
 
 function peerStackEl(self: HTMLElement | null): HTMLElement | null {

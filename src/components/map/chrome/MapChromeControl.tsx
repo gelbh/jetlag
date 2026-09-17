@@ -1,4 +1,7 @@
 import type { ButtonHTMLAttributes, ReactNode } from "react";
+import { UnstyledButton } from "@mantine/core";
+import { iosMapToolSlotStyles } from "@/components/ui/apple/iosEntryChrome";
+import { usePlayerUiMantine } from "@/hooks/feature/usePlayerUiMantine";
 import { MotionPressable } from "../../motion/MotionPressable";
 
 export type MapChromeControlVariant = "floating" | "slot";
@@ -21,10 +24,12 @@ function controlClassName(
   variant: MapChromeControlVariant,
   pressed: boolean | undefined,
   className: string | undefined,
+  mantineSlot: boolean,
 ): string {
   if (variant === "slot") {
     const parts = ["jl-tool-slot", className];
-    if (pressed) {
+    // Survey active class fights iOS Styles API; flag-on uses Styles only.
+    if (pressed && !mantineSlot) {
       parts.splice(1, 0, "jl-tool-slot-active");
     }
     return parts.filter(Boolean).join(" ");
@@ -101,7 +106,14 @@ export function MapChromeControl({
   "aria-label": ariaLabel,
   ...rest
 }: MapChromeControlProps) {
-  const resolvedClassName = controlClassName(variant, pressed, className);
+  const mantinePlayerUi = usePlayerUiMantine();
+  const mantineSlot = mantinePlayerUi && variant === "slot";
+  const resolvedClassName = controlClassName(
+    variant,
+    pressed,
+    className,
+    mantineSlot,
+  );
   const body = (
     <ControlBody
       variant={variant}
@@ -112,6 +124,24 @@ export function MapChromeControl({
       {children}
     </ControlBody>
   );
+
+  if (mantineSlot) {
+    return (
+      <UnstyledButton
+        type={type}
+        disabled={disabled}
+        className={resolvedClassName}
+        styles={iosMapToolSlotStyles(Boolean(pressed))}
+        data-player-ux-world="mantine"
+        aria-label={ariaLabel}
+        aria-pressed={pressed}
+        title={title ?? ariaLabel}
+        {...rest}
+      >
+        {body}
+      </UnstyledButton>
+    );
+  }
 
   if (variant === "slot") {
     return (

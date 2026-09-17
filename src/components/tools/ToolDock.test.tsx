@@ -1,8 +1,18 @@
 import { fireEvent, screen, within } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { MantineProvider } from "@mantine/core";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { jetlagMantineTheme } from "@/theme/mantineTheme";
 import { ToolDock } from "./ToolDock";
 import { HiderToolDock } from "./HiderToolDock";
 import { renderWithRouter } from "../../test/renderWithRouter";
+
+const { mockUsePlayerUiMantine } = vi.hoisted(() => ({
+  mockUsePlayerUiMantine: vi.fn(() => false),
+}));
+
+vi.mock("@/hooks/feature/usePlayerUiMantine", () => ({
+  usePlayerUiMantine: () => mockUsePlayerUiMantine(),
+}));
 
 const dockBase = {
   activeTool: "none" as const,
@@ -15,6 +25,21 @@ const dockBase = {
   onOpenReportProblem: vi.fn(),
   onOpenLog: vi.fn(),
 };
+
+beforeEach(() => {
+  mockUsePlayerUiMantine.mockReturnValue(false);
+  dockBase.onSelect.mockClear();
+  vi.stubGlobal("matchMedia", (query: string) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener() {},
+    removeListener() {},
+    addEventListener() {},
+    removeEventListener() {},
+    dispatchEvent: () => false,
+  }));
+});
 
 describe("ToolDock", () => {
   it("exposes question tools on the dock and markup tools in Draw", () => {
@@ -263,6 +288,38 @@ describe("ToolDock", () => {
     );
     expect(screen.getByRole("button", { name: "Undo last annotation" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Redo last annotation" })).toBeDisabled();
+  });
+
+  it("selects question tools and shows hunt highlight under Mantine flag", () => {
+    mockUsePlayerUiMantine.mockReturnValue(true);
+    const onSelect = vi.fn();
+    const { rerender } = renderWithRouter(
+      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+        <ToolDock {...dockBase} onSelect={onSelect} onOpenChat={vi.fn()} />
+      </MantineProvider>,
+    );
+
+    const matching = screen.getByRole("button", { name: "Matching" });
+    expect(matching.getAttribute("data-player-ux-world")).toBe("mantine");
+    fireEvent.click(matching);
+    expect(onSelect).toHaveBeenCalledWith("matching");
+
+    rerender(
+      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+        <ToolDock
+          {...dockBase}
+          activeTool="matching"
+          onSelect={onSelect}
+          onOpenChat={vi.fn()}
+        />
+      </MantineProvider>,
+    );
+
+    expect(screen.getByRole("button", { name: "Matching" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    expect(document.querySelector("[data-tool-highlight]")).not.toBeNull();
   });
 });
 
