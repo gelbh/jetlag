@@ -320,6 +320,16 @@ describe("ToolDock", () => {
       "true",
     );
     expect(document.querySelector("[data-tool-highlight]")).not.toBeNull();
+    expect(document.querySelector("[data-hunt-question-strip]")).not.toBeNull();
+    expect(
+      screen.getByText("Match").getAttribute("data-ios-tool-label"),
+    ).toBe("");
+    expect(screen.getByText("Match")).not.toHaveClass("jl-tool-slot-label");
+    const hunt = document.querySelector(
+      '[data-island="hunt"][data-player-ux-world="mantine"]',
+    ) as HTMLElement | null;
+    expect(hunt).not.toBeNull();
+    expect(hunt?.style.borderTop).not.toBe("3px solid var(--color-flag)");
   });
 });
 

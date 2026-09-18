@@ -12,7 +12,7 @@ import { cn } from "../../lib/cn";
 import type { MapTool } from "../../state/sessionStore";
 import { MapBottomChrome } from "../map/chrome/MapBottomChrome";
 import { SessionIslandSlots } from "../map/chrome/SessionIslandSlots";
-import { ToolDeckGroup, ToolDeckInner } from "./ToolDeck";
+import { ToolDeckGroup, ToolDeckInner, ToolDeckQuestionStrip } from "./ToolDeck";
 import {
   ToolDockDrawControl,
   ToolDockHistorySlot,
@@ -137,7 +137,7 @@ export function ToolDock({
               className={cn(
                 "jl-tool-dock-highlight pointer-events-none absolute z-0 will-change-[transform,width,height] motion-safe:transition-[transform,width,height,opacity] motion-safe:duration-[var(--motion-base)] motion-safe:ease-[var(--ease-spring-subtle)]",
                 mantinePlayerUi
-                  ? "rounded-[14px] border-[0.33px] border-highlight/75 bg-highlight/20"
+                  ? "rounded-[10px] border-[0.33px] border-highlight/70 bg-highlight/18"
                   : "rounded-[var(--radius-hud-md)] border-2 border-highlight/55 bg-highlight-soft",
               )}
               style={{
@@ -147,7 +147,14 @@ export function ToolDock({
               }}
             />
           ) : null}
-          <ToolDeckGroup ref={mainGroupRef}>
+          <ToolDeckGroup
+            ref={mainGroupRef}
+            className={
+              mantinePlayerUi
+                ? "justify-start gap-1 [&_.jl-tool-slot]:flex-none [&_.jl-tool-slot]:basis-auto [&_[data-hunt-question-strip]_.jl-tool-slot]:min-h-11 [&_[data-hunt-question-strip]_.jl-tool-slot]:min-w-0 [&_[data-hunt-question-strip]_.jl-tool-slot]:flex-1 [&_[data-hunt-question-strip]_.jl-tool-slot]:basis-0"
+                : undefined
+            }
+          >
             <ToolDockHistorySlot
               kind="undo"
               canAct={canUndo}
@@ -160,15 +167,29 @@ export function ToolDock({
               onAct={onRedo}
               inactive={inactive}
             />
-            {visibleQuestionTools.map((toolId) => (
-              <ToolDockQuestionSlot
-                key={toolId}
-                toolId={toolId}
-                activeTool={activeTool}
-                canSubmitQuestion={canSubmitQuestion}
-                onSelect={selectTool}
-              />
-            ))}
+            {mantinePlayerUi ? (
+              <ToolDeckQuestionStrip>
+                {visibleQuestionTools.map((toolId) => (
+                  <ToolDockQuestionSlot
+                    key={toolId}
+                    toolId={toolId}
+                    activeTool={activeTool}
+                    canSubmitQuestion={canSubmitQuestion}
+                    onSelect={selectTool}
+                  />
+                ))}
+              </ToolDeckQuestionStrip>
+            ) : (
+              visibleQuestionTools.map((toolId) => (
+                <ToolDockQuestionSlot
+                  key={toolId}
+                  toolId={toolId}
+                  activeTool={activeTool}
+                  canSubmitQuestion={canSubmitQuestion}
+                  onSelect={selectTool}
+                />
+              ))
+            )}
           </ToolDeckGroup>
         </ToolDeckInner>
       }

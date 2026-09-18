@@ -1,6 +1,10 @@
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 import { UnstyledButton } from "@mantine/core";
-import { iosMapToolSlotStyles } from "@/components/ui/apple/iosEntryChrome";
+import {
+  iosMapToolSlotLabelStyle,
+  iosMapToolSlotStyles,
+  type IosMapToolSlotTone,
+} from "@/components/ui/apple/iosEntryChrome";
 import { usePlayerUiMantine } from "@/hooks/feature/usePlayerUiMantine";
 import { MotionPressable } from "../../motion/MotionPressable";
 
@@ -12,6 +16,8 @@ export interface MapChromeControlProps
   variant?: MapChromeControlVariant;
   /** Toggle / selected state (`aria-pressed` + active chrome class). */
   pressed?: boolean;
+  /** Flag-on slot visual weight: question tools vs undo/redo. */
+  tone?: IosMapToolSlotTone;
   icon?: ReactNode;
   /** Extra classes on the icon wrapper (e.g. unread badge host). */
   iconClassName?: string;
@@ -50,12 +56,14 @@ function ControlBody({
   iconClassName,
   label,
   children,
+  mantineSlot,
 }: {
   variant: MapChromeControlVariant;
   icon?: ReactNode;
   iconClassName?: string;
   label?: ReactNode;
   children?: ReactNode;
+  mantineSlot: boolean;
 }) {
   if (children != null) {
     return children;
@@ -69,7 +77,13 @@ function ControlBody({
       <>
         {icon != null ? <span className={iconClass}>{icon}</span> : null}
         {label != null ? (
-          <span className="jl-tool-slot-label">{label}</span>
+          mantineSlot ? (
+            <span data-ios-tool-label="" style={iosMapToolSlotLabelStyle}>
+              {label}
+            </span>
+          ) : (
+            <span className="jl-tool-slot-label">{label}</span>
+          )
         ) : null}
       </>
     );
@@ -95,6 +109,7 @@ function ControlBody({
 export function MapChromeControl({
   variant = "floating",
   pressed,
+  tone = "tool",
   disabled,
   className,
   icon,
@@ -120,6 +135,7 @@ export function MapChromeControl({
       icon={icon}
       iconClassName={iconClassName}
       label={label}
+      mantineSlot={mantineSlot}
     >
       {children}
     </ControlBody>
@@ -131,8 +147,9 @@ export function MapChromeControl({
         type={type}
         disabled={disabled}
         className={resolvedClassName}
-        styles={iosMapToolSlotStyles(Boolean(pressed))}
+        styles={iosMapToolSlotStyles(Boolean(pressed), tone)}
         data-player-ux-world="mantine"
+        data-ios-tool-tone={tone}
         aria-label={ariaLabel}
         aria-pressed={pressed}
         title={title ?? ariaLabel}
