@@ -1,8 +1,11 @@
 import { forwardRef, type ReactNode } from "react";
-import { Paper } from "@mantine/core";
+import { Box, Paper } from "@mantine/core";
 import { cn } from "@/lib/cn";
 import { Island } from "@/components/ui/island";
-import { iosMapHuntSurfaceStyles } from "@/components/ui/apple/iosEntryChrome";
+import {
+  iosMapHuntQuestionStripStyles,
+  iosMapHuntSurfaceStyles,
+} from "@/components/ui/apple/iosEntryChrome";
 import { usePlayerUiMantine } from "@/hooks/feature/usePlayerUiMantine";
 
 /** Seeker multi-tool Hunt (`tools`) vs hider 1–2 chip content-sized island (`sparse`). */
@@ -116,6 +119,30 @@ export const ToolDeckGroup = forwardRef<HTMLDivElement, ToolDeckGroupProps>(
     );
   },
 );
+
+/** Flag-on inset strip for question tools (history stays outside). */
+export function ToolDeckQuestionStrip({
+  children,
+  className,
+}: {
+  children?: ReactNode;
+  className?: string;
+}) {
+  return (
+    <Box
+      data-hunt-question-strip=""
+      className={cn(
+        "relative z-[1] min-w-0 [&_.jl-tool-slot]:min-h-11 [&_.jl-tool-slot]:min-w-0",
+        className,
+      )}
+      style={iosMapHuntQuestionStripStyles}
+      role="group"
+      aria-label="Question tools"
+    >
+      {children}
+    </Box>
+  );
+}
 
 export interface ToolDeckInnerProps {
   className?: string;
