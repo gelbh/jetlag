@@ -12,10 +12,14 @@ import {
   iosInsetTextareaStyles,
   iosMapIslandFilledStyles,
   iosMapIslandIconStyles,
+  iosMapToolSlotLabelStyle,
   iosMapToolSlotStyles,
   iosPlainStyles,
 } from "@/components/ui/apple/iosEntryStyles";
-import type { IosChoiceTone } from "@/components/ui/apple/iosEntryStyles";
+import type {
+  IosChoiceTone,
+  IosMapToolSlotTone,
+} from "@/components/ui/apple/iosEntryStyles";
 
 /** Re-export button/drawer styles so map chrome callers keep one import path. */
 export {
@@ -30,10 +34,11 @@ export {
   iosInsetTextareaStyles,
   iosMapIslandFilledStyles,
   iosMapIslandIconStyles,
+  iosMapToolSlotLabelStyle,
   iosMapToolSlotStyles,
   iosPlainStyles,
 };
-export type { IosChoiceTone };
+export type { IosChoiceTone, IosMapToolSlotTone };
 
 /** Frosted inset grouped list / form surface. */
 export function IosInsetGroup({

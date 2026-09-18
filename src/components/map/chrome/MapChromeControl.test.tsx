@@ -194,6 +194,29 @@ describe("MapChromeControl", () => {
     expect(button).not.toHaveClass("jl-tool-slot-active");
     expect(button).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByTestId("mantine-slot-icon")).toBeInTheDocument();
-    expect(screen.getByText("Match")).toHaveClass("jl-tool-slot-label");
+    expect(screen.getByText("Match")).not.toHaveClass("jl-tool-slot-label");
+    expect(screen.getByText("Match").getAttribute("data-ios-tool-label")).toBe(
+      "",
+    );
+    expect(button.getAttribute("data-ios-tool-tone")).toBe("tool");
+  });
+
+  it("marks history tone on undo-style slots when flag is on", () => {
+    mockUsePlayerUiMantine.mockReturnValue(true);
+    render(
+      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+        <MapChromeControl
+          variant="slot"
+          tone="history"
+          aria-label="Undo last annotation"
+          icon={<span>u</span>}
+          label="Undo"
+        />
+      </MantineProvider>,
+    );
+
+    expect(
+      screen.getByRole("button", { name: "Undo last annotation" }),
+    ).toHaveAttribute("data-ios-tool-tone", "history");
   });
 });
