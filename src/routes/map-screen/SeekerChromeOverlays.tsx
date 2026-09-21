@@ -263,17 +263,20 @@ export function SeekerChromeOverlays({
           showCue={
             askSurface !== "matching" &&
             askSurface !== "measuring" &&
-            askSurface !== "tentacle"
+            askSurface !== "tentacle" &&
+            askSurface !== "photo"
           }
           showCostChip={
             askSurface !== "matching" &&
             askSurface !== "measuring" &&
-            askSurface !== "tentacle"
+            askSurface !== "tentacle" &&
+            askSurface !== "photo"
           }
           showCommitStrip={
             askSurface !== "matching" &&
             askSurface !== "measuring" &&
-            askSurface !== "tentacle"
+            askSurface !== "tentacle" &&
+            askSurface !== "photo"
           }
         />
       ) : null}

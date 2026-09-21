@@ -439,7 +439,9 @@ export function MapScreenChrome({
     (activeTool === "matching" && matchingTool.hud.suppressSheet) ||
       (activeTool === "radar" && radarTool.hud.suppressSheet) ||
       (activeTool === "tentacle" && tentacleTool.hud.suppressSheet) ||
-      (activeTool === "measuring" && measuringTool.hud.suppressSheet),
+      (activeTool === "measuring" && measuringTool.hud.suppressSheet) ||
+      (activeTool === "photo" && photoTool.hud?.suppressSheet) ||
+      (activeTool === "thermometer" && thermometerTool.hud.suppressSheet),
   );
 
   const refineChip: MapRefineChipCopy = selectMapRefineChip({
