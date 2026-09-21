@@ -7,6 +7,7 @@ import { AskCatalogRail } from "@/components/tools/ask/AskCatalogRail";
 import { TentacleLocationsChord } from "@/components/tools/ask/TentacleLocationsChord";
 import { TentacleAnswerPicker } from "@/components/tools/shared/answers/TentacleAnswerPicker";
 import { AnchorControls } from "@/components/tools/shared/controls/AnchorControls";
+import { AskInlineError } from "@/components/tools/shared/readout/AskInlineError";
 import { LoadingReadout } from "@/components/tools/shared/readout/LoadingReadout";
 import { ResolvedReadout } from "@/components/tools/shared/readout/ResolvedReadout";
 import { QuestionTruthReferenceHint } from "@/components/tools/shared/QuestionTruthReferenceHint";
@@ -155,9 +156,7 @@ export function TentacleHudBody({
                   No named locations were found within {searchRadiusLabel}.
                 </ResolvedReadout>
               )}
-              {error ? (
-                <p className="text-sm text-halt">{error}</p>
-              ) : null}
+              {error ? <AskInlineError message={error} /> : null}
             </>
           }
         >
