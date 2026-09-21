@@ -10,6 +10,7 @@ import {
   iosGrayStyles,
 } from "@/components/ui/apple/iosEntryChrome";
 import { usePlayerUiMantine } from "@/hooks/feature/usePlayerUiMantine";
+import { AskInlineError } from "@/components/tools/shared/readout/AskInlineError";
 
 type AskCommitStripProps = {
   canCommit: boolean;
@@ -65,24 +66,7 @@ export function AskCommitStrip({
           {buttonLabel}
         </Button>
       )}
-      {error ? (
-        <p
-          id={errorId}
-          role="alert"
-          className="ask-commit-strip__error text-sm"
-          style={
-            mantinePlayerUi
-              ? {
-                  marginTop: "0.5rem",
-                  color: "var(--color-halt)",
-                  fontWeight: 510,
-                }
-              : undefined
-          }
-        >
-          {error}
-        </p>
-      ) : null}
+      {error ? <AskInlineError id={errorId} message={error} /> : null}
     </div>
   );
 }

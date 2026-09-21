@@ -12,6 +12,10 @@ vi.mock("@/hooks/feature/usePlayerUiMantine", () => ({
   usePlayerUiMantine: () => mockUsePlayerUiMantine(),
 }));
 
+vi.mock("@/hooks/layout/useDesktopLayout", () => ({
+  useDesktopLayout: () => false,
+}));
+
 const hostProps = {
   cue: "Pick a direction",
   toolLabel: "Radar",
@@ -19,6 +23,7 @@ const hostProps = {
   canCommit: true,
   commitLabel: "Send",
   onCommit: vi.fn(),
+  onDismiss: vi.fn(),
 };
 
 beforeEach(() => {
@@ -43,22 +48,66 @@ describe("AskHudHost Mantine gate", () => {
     expect(host).toBeInTheDocument();
     expect(host.getAttribute("data-survey")).toBe("true");
     expect(host.classList.contains("ask-hud-host")).toBe(true);
-    expect(container.querySelector('[data-testid="ask-hud-host-mantine"]')).toBeNull();
+    expect(container.querySelector('[data-testid="mantine-drawer-sheet"]')).toBeNull();
     expect(container.querySelector('[data-player-ux-world="mantine"]')).toBeNull();
   });
 
-  it("mounts Mantine ask HUD chrome when flag is on", () => {
+  it("mounts iOS SheetHost drawer when flag is on", () => {
     mockUsePlayerUiMantine.mockReturnValue(true);
-    const { container } = render(
+    render(
       <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
-        <AskHudHost {...hostProps} />
+        <AskHudHost {...hostProps} modeBody={<div>Mode body</div>} />
       </MantineProvider>,
     );
 
     const host = screen.getByTestId("ask-hud-host");
     expect(host.getAttribute("data-player-ux-world")).toBe("mantine");
-    expect(host.classList.contains("ask-hud-host")).toBe(true);
+    expect(host.getAttribute("data-ask-composition")).toBe("ask-first");
     expect(host.getAttribute("data-survey")).toBeNull();
-    expect(container.querySelector('[data-testid="ask-hud-host-mantine"]')).toBeNull();
+    expect(screen.getByTestId("mantine-drawer-sheet")).toBeInTheDocument();
+    expect(screen.getByText("Mode body")).toBeInTheDocument();
+    expect(screen.getByTestId("ask-commit-strip")).toBeInTheDocument();
+  });
+
+  it("hides muted commit strip on sheet until ready", () => {
+    mockUsePlayerUiMantine.mockReturnValue(true);
+    render(
+      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+        <AskHudHost
+          {...hostProps}
+          canCommit={false}
+          commitLabel="ASK — PICK CATEGORY"
+          modeBody={<div>Mode body</div>}
+        />
+      </MantineProvider>,
+    );
+
+    expect(screen.queryByTestId("ask-commit-strip")).toBeNull();
+    expect(screen.queryByText(/ASK —/i)).toBeNull();
+  });
+
+  it("can hide cue and cost chip for Matching sheet composition", () => {
+    mockUsePlayerUiMantine.mockReturnValue(true);
+    render(
+      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+        <AskHudHost
+          {...hostProps}
+          cue="PICK CATEGORY"
+          showCue={false}
+          showCostChip={false}
+          modeBody={<div>Mode body</div>}
+        />
+      </MantineProvider>,
+    );
+
+    expect(screen.queryByTestId("ask-mode-cue-ticker")).toBeNull();
+    expect(screen.queryByTestId("ask-cost-chip")).toBeNull();
+    expect(screen.queryByText("PICK CATEGORY")).toBeNull();
+  });
+
+  it("omits ask-first composition marker when flag is off", () => {
+    render(<AskHudHost {...hostProps} />);
+    const host = screen.getByTestId("ask-hud-host");
+    expect(host.getAttribute("data-ask-composition")).toBeNull();
   });
 });

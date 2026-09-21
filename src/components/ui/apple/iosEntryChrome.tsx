@@ -3,10 +3,14 @@ import type { ReactNode } from "react";
 import {
   iosBottomDrawerStyles,
   iosChoiceChipStyles,
+  iosCatalogTileStyles,
+  iosAskInsetSurfaceStyle,
   iosCompactDangerStyles,
   iosCompactFilledStyles,
   iosCompactGrayStyles,
   iosFilledStyles,
+  iosFilterChipStyles,
+  iosFilterChipTrackStyle,
   iosGrayStyles,
   iosInsetTextInputStyles,
   iosInsetTextareaStyles,
@@ -25,10 +29,14 @@ import type {
 export {
   iosBottomDrawerStyles,
   iosChoiceChipStyles,
+  iosCatalogTileStyles,
+  iosAskInsetSurfaceStyle,
   iosCompactDangerStyles,
   iosCompactFilledStyles,
   iosCompactGrayStyles,
   iosFilledStyles,
+  iosFilterChipStyles,
+  iosFilterChipTrackStyle,
   iosGrayStyles,
   iosInsetTextInputStyles,
   iosInsetTextareaStyles,
@@ -207,6 +215,14 @@ export const iosMapHuntSurfaceStyles = {
   ...iosMapChromeSurfaceStyles,
 } as const;
 
+/** Ask-first: hunt deck reads secondary under the Ask instrument cluster. */
+export const iosMapHuntAskFirstSurfaceStyles = {
+  ...iosMapHuntSurfaceStyles,
+  backgroundColor: "oklch(from var(--color-canvas) l c h / 0.58)",
+  boxShadow: "0 1px 6px 0 oklch(0.1 0.04 265 / 0.12)",
+  border: "0.33px solid oklch(from var(--color-rule) l c h / 0.4)",
+} as const;
+
 /** Inset strip wrapping question tools inside the hunt deck. */
 export const iosMapHuntQuestionStripStyles = {
   display: "flex",
@@ -218,6 +234,16 @@ export const iosMapHuntQuestionStripStyles = {
   padding: 2,
   backgroundColor: "oklch(from var(--color-field-ink) l c h / 0.08)",
   border: "0.33px solid oklch(from var(--color-field-ink) l c h / 0.12)",
+} as const;
+
+/** Ask-first instrument switcher strip (denser, quieter than idle tip B). */
+export const iosMapHuntAskFirstQuestionStripStyles = {
+  ...iosMapHuntQuestionStripStyles,
+  gap: 0,
+  padding: 1,
+  borderRadius: 10,
+  backgroundColor: "oklch(from var(--color-field-ink) l c h / 0.04)",
+  border: "0.33px solid oklch(from var(--color-field-ink) l c h / 0.08)",
 } as const;
 
 /** Drag affordance for iOS bottom drawers. */

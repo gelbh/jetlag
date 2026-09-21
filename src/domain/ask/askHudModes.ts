@@ -1,6 +1,6 @@
 /**
  * Ask Map HUD mode registry — cues, mode bodies, and primed-commit readiness.
- * Spec: `.cursor/specs/2026-08-05-ask-surface-kit-design.md` (rev 2026-08-05b).
+ * Spec: ask surface kit design (rev 2026-08-05b).
  * Visual: Figma MWCG8276A8eF2UwW79GSvT node 153:1186.
  */
 
@@ -74,8 +74,8 @@ const DEFINITIONS: Record<AskHudSurface, AskHudDefinition> = {
   },
   measuring: {
     surface: "measuring",
-    modeBody: "chipIsland",
-    defaultCue: "SET YOUR ANCHOR",
+    modeBody: "catalogRail",
+    defaultCue: "PICK A SOURCE",
     commitKind: "send",
   },
   thermometer: {
@@ -143,8 +143,9 @@ export function activeModeCue(
       if (!input.resolveReady) return "RESOLVE ON MAP";
       return "READY TO SEND";
     case "measuring":
-      if (!input.placementReady) return "SET YOUR ANCHOR";
+      // Catalog-first (Matching twin): source before anchor.
       if (!input.configureReady) return "PICK A SOURCE";
+      if (!input.placementReady) return "SET YOUR ANCHOR";
       if (!input.resolveReady) return "SET YOUR TARGET";
       return "READY TO SEND";
     case "thermometer":
@@ -291,9 +292,9 @@ export function primedCommitLabel(input: {
   const verb = (() => {
     switch (input.kind) {
       case "send":
-        return "SEND";
       case "ask":
-        return "ASK";
+        // Solo used to say ASK; sheets read cleaner with one Send verb.
+        return "SEND";
       case "confirm":
         return "CONFIRM";
       case "endWalk":
@@ -335,6 +336,15 @@ export function isAskHudOwnedTool(tool: string): tool is AskHudOwnedTool {
  */
 export const ASK_HUD_CAMERA_PADDING_PX = 168;
 export const ASK_HUD_CAMERA_PADDING_RAIL_PX = 280;
+
+/** Map-first Ask placement: question banner under the status rail. */
+export const MAP_FIRST_CAMERA_TOP_PX = 120;
+/** Map-first Ask placement: answer chrome (+ Send) above safe area. */
+export const MAP_FIRST_CAMERA_BOTTOM_PX = 228;
+/** @deprecated Prefer MAP_FIRST_CAMERA_TOP_PX */
+export const MATCHING_MAP_FIRST_CAMERA_TOP_PX = MAP_FIRST_CAMERA_TOP_PX;
+/** @deprecated Prefer MAP_FIRST_CAMERA_BOTTOM_PX */
+export const MATCHING_MAP_FIRST_CAMERA_BOTTOM_PX = MAP_FIRST_CAMERA_BOTTOM_PX;
 
 export function askHudCameraPaddingPx(tool: string): number {
   return tool === "matching" || tool === "tentacle" || tool === "measuring"

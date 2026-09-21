@@ -1,15 +1,25 @@
 /**
  * Catalog rail — row select advances; no sibling CONTINUE strip/button.
  * Spec: ask-surface-kit-design rev 2026-08-05b.
+ * Optional `groupLabel` on rows renders sticky section headers (Matching).
+ * Optional `columns={2}` lays category tiles in a two-column grid under each group.
  */
-import { Paper } from "@mantine/core";
+import { Paper, Text, UnstyledButton } from "@mantine/core";
 import { ListSelectRow } from "@/components/tools/shared/controls/ListSelectRow";
-import { iosMapChromeSurfaceStyles } from "@/components/ui/apple/iosEntryChrome";
+import {
+  iosCatalogTileStyles,
+  iosMapChromeSurfaceStyles,
+} from "@/components/ui/apple/iosEntryChrome";
 import { usePlayerUiMantine } from "@/hooks/feature/usePlayerUiMantine";
+import { type ReactNode } from "react";
 
 export type AskCatalogRailRow = {
   id: string;
   label: string;
+  /** Optional leading icon (e.g. Matching category glyph). */
+  icon?: ReactNode;
+  /** When set, rows with the same label share a section heading above them. */
+  groupLabel?: string;
 };
 
 type AskCatalogRailProps = {
@@ -18,7 +28,32 @@ type AskCatalogRailProps = {
   onSelect: (id: string) => void;
   "aria-label"?: string;
   hint?: string;
+  /** 1 = stacked list (default); 2 = tiles under each group heading. */
+  columns?: 1 | 2;
 };
+
+type CatalogSection = {
+  groupLabel?: string;
+  items: AskCatalogRailRow[];
+};
+
+function sectionRows(rows: readonly AskCatalogRailRow[]): CatalogSection[] {
+  const sections: CatalogSection[] = [];
+  for (const row of rows) {
+    const label = row.groupLabel;
+    const last = sections[sections.length - 1];
+    if (label && last && last.groupLabel === label) {
+      last.items.push(row);
+      continue;
+    }
+    if (!label && last && last.groupLabel === undefined) {
+      last.items.push(row);
+      continue;
+    }
+    sections.push({ groupLabel: label, items: [row] });
+  }
+  return sections;
+}
 
 export function AskCatalogRail({
   rows,
@@ -26,8 +61,151 @@ export function AskCatalogRail({
   onSelect,
   "aria-label": ariaLabel = "Catalog",
   hint = "Tap a row to advance",
+  columns = 1,
 }: AskCatalogRailProps) {
   const mantinePlayerUi = usePlayerUiMantine();
+  const sections = sectionRows(rows);
+  const twoCol = columns === 2;
+
+  const list = (
+    <div className="ask-catalog-rail__list jl-scroll" role="list">
+      {sections.map((section, sectionIndex) => (
+        <div
+          key={section.groupLabel ?? `section-${sectionIndex}`}
+          className="ask-catalog-rail__section"
+        >
+          {section.groupLabel ? (
+            <div
+              role="presentation"
+              data-ask-catalog-group=""
+              className="ask-catalog-rail__group"
+              style={
+                mantinePlayerUi
+                  ? {
+                      padding: "0.65rem 0.25rem 0.35rem",
+                      position: "sticky",
+                      top: 0,
+                      zIndex: 1,
+                      background:
+                        "oklch(from var(--color-canvas) l c h / 0.92)",
+                    }
+                  : undefined
+              }
+            >
+              {mantinePlayerUi ? (
+                <Text
+                  size="xs"
+                  fw={650}
+                  tt="uppercase"
+                  style={{
+                    letterSpacing: "0.04em",
+                    color: "var(--color-field-ink-muted)",
+                  }}
+                >
+                  {section.groupLabel}
+                </Text>
+              ) : (
+                <p className="m-0 px-1 pt-2 pb-1 text-[0.65rem] font-semibold uppercase tracking-wide text-field-ink-muted">
+                  {section.groupLabel}
+                </p>
+              )}
+            </div>
+          ) : null}
+          <div
+            className={
+              twoCol
+                ? "ask-catalog-rail__grid grid grid-cols-2 gap-2"
+                : "flex flex-col gap-2"
+            }
+          >
+            {section.items.map((row) => {
+              const selected = selectedId === row.id;
+              if (twoCol && mantinePlayerUi) {
+                return (
+                  <div key={row.id} role="listitem" className="min-w-0">
+                    <UnstyledButton
+                      type="button"
+                      aria-pressed={selected}
+                      onClick={() => onSelect(row.id)}
+                      styles={iosCatalogTileStyles(selected)}
+                    >
+                      {row.icon ? (
+                        <span
+                          aria-hidden
+                          style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            width: 36,
+                            height: 36,
+                            borderRadius: 10,
+                            backgroundColor: selected
+                              ? "oklch(from var(--color-flag) l c h / 0.18)"
+                              : "oklch(from var(--color-field-ink) l c h / 0.08)",
+                            color: selected
+                              ? "var(--color-flag)"
+                              : "var(--color-field-ink)",
+                          }}
+                        >
+                          {row.icon}
+                        </span>
+                      ) : null}
+                      <span className="min-w-0 px-0.5 text-center leading-snug">
+                        {row.label}
+                      </span>
+                    </UnstyledButton>
+                  </div>
+                );
+              }
+              return (
+                <div key={row.id} role="listitem" className="min-w-0">
+                  <ListSelectRow
+                    selected={selected}
+                    onClick={() => onSelect(row.id)}
+                    align={twoCol ? "center" : "left"}
+                  >
+                    {row.icon ? (
+                      <span
+                        className={
+                          twoCol
+                            ? "inline-flex w-full flex-col items-center gap-1.5 text-center"
+                            : "inline-flex w-full items-center gap-3"
+                        }
+                        style={{ color: "inherit" }}
+                      >
+                        <span
+                          className={
+                            twoCol
+                              ? "inline-flex h-6 w-6 shrink-0 items-center justify-center"
+                              : "inline-flex h-5 w-5 shrink-0 items-center justify-center"
+                          }
+                          aria-hidden
+                          style={{ color: "currentColor" }}
+                        >
+                          {row.icon}
+                        </span>
+                        <span
+                          className={
+                            twoCol
+                              ? "min-w-0 text-[0.8125rem] font-medium leading-snug"
+                              : "min-w-0 flex-1 text-left leading-snug"
+                          }
+                        >
+                          {row.label}
+                        </span>
+                      </span>
+                    ) : (
+                      row.label
+                    )}
+                  </ListSelectRow>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
 
   const body = (
     <>
@@ -47,18 +225,7 @@ export function AskCatalogRail({
           {hint}
         </p>
       ) : null}
-      <div className="ask-catalog-rail__list jl-scroll" role="list">
-        {rows.map((row) => (
-          <div key={row.id} role="listitem">
-            <ListSelectRow
-              selected={selectedId === row.id}
-              onClick={() => onSelect(row.id)}
-            >
-              {row.label}
-            </ListSelectRow>
-          </div>
-        ))}
-      </div>
+      {list}
     </>
   );
 
@@ -75,6 +242,7 @@ export function AskCatalogRail({
         styles={{
           root: {
             ...iosMapChromeSurfaceStyles,
+            boxShadow: "none",
             maxHeight: "var(--ask-hud-rail-max-height, 40dvh)",
             overflow: "hidden",
             display: "flex",

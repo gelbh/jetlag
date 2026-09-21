@@ -324,6 +324,28 @@ describe("MapBottomChrome Mantine gate", () => {
     expect(screen.getByRole("button", { name: "Chat" })).toBeInTheDocument();
   });
 
+  it("hides hunt and side docks when ask-first is active", () => {
+    mockUsePlayerUiMantine.mockReturnValue(true);
+    const { container } = render(
+      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+        <MapBottomChrome
+          layout="phone"
+          askFirst
+          hunt={<button type="button">Radar</button>}
+          session={<button type="button">Chat</button>}
+          mapControls={<button type="button">Zoom</button>}
+        />
+      </MantineProvider>,
+    );
+    expect(container.querySelector('[data-island="hunt"]')).toBeNull();
+    expect(container.querySelector('[data-island="session"]')).toBeNull();
+    expect(container.querySelector('[data-island="map-controls"]')).toBeNull();
+    expect(container.querySelector(".jl-map-chrome-side-stack")).toBeNull();
+    expect(
+      container.querySelector('[data-overlay-chrome][data-ask-first="true"]'),
+    ).not.toBeNull();
+  });
+
   it("keeps Mantine hunt ToolDeck clickable under pointer-events-none chrome", () => {
     mockUsePlayerUiMantine.mockReturnValue(true);
     const { container } = render(

@@ -179,6 +179,8 @@ export function iosChoiceChipStyles(
       fontWeight: 590,
       fontSize: "0.875rem",
       paddingInline: "0.75rem",
+      display: "inline-flex",
+      alignItems: "center",
       backgroundColor: selected
         ? selectedBg
         : "oklch(from var(--color-rule) l c h / 0.45)",
@@ -195,6 +197,111 @@ export function iosChoiceChipStyles(
     },
   };
 }
+
+/** Frosted track for horizontally scrolling iOS filter chips. */
+export const iosFilterChipTrackStyle = {
+  display: "flex",
+  gap: 4,
+  padding: 3,
+  borderRadius: 12,
+  backgroundColor: "oklch(from var(--color-field-ink) l c h / 0.08)",
+  border: "0.33px solid oklch(from var(--color-field-ink) l c h / 0.12)",
+  overflowX: "auto" as const,
+  WebkitOverflowScrolling: "touch" as const,
+};
+
+/**
+ * Compact filter pill (Photos / Music style) for category selectors.
+ * Selected = elevated white segment on the frosted track.
+ */
+export function iosFilterChipStyles(selected: boolean): ButtonProps["styles"] {
+  return {
+    root: {
+      flex: "0 0 auto",
+      display: "inline-flex",
+      alignItems: "center",
+      gap: 6,
+      height: 32,
+      minHeight: 32,
+      paddingInline: 12,
+      borderRadius: 10,
+      border: "none",
+      fontWeight: 590,
+      fontSize: "0.8125rem",
+      letterSpacing: "-0.01em",
+      lineHeight: 1,
+      whiteSpace: "nowrap",
+      color: "var(--color-field-ink)",
+      backgroundColor: selected
+        ? "oklch(from var(--color-canvas) l c h / 0.96)"
+        : "transparent",
+      boxShadow: selected
+        ? "0 1px 2px oklch(from var(--color-field-ink) l c h / 0.14), 0 0 0 0.33px oklch(from var(--color-field-ink) l c h / 0.08)"
+        : "none",
+      transition:
+        "background-color 140ms ease, box-shadow 140ms ease, color 140ms ease",
+      "&:hover:not(:disabled)": {
+        backgroundColor: selected
+          ? "oklch(from var(--color-canvas) l c h / 0.96)"
+          : "oklch(from var(--color-field-ink) l c h / 0.06)",
+      },
+      "&:active:not(:disabled)": {
+        opacity: 0.85,
+      },
+    },
+  };
+}
+
+/**
+ * Quiet 2-col catalog tile (Matching categories). Soft inset, no drop shadow.
+ * Selected uses a light flag wash + hairline, not a solid flag brick.
+ */
+export function iosCatalogTileStyles(selected: boolean): ButtonProps["styles"] {
+  return {
+    root: {
+      width: "100%",
+      minHeight: "4.75rem",
+      height: "100%",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 8,
+      padding: "0.7rem 0.55rem",
+      borderRadius: 14,
+      border: selected
+        ? "0.33px solid oklch(from var(--color-flag) l c h / 0.4)"
+        : "0.33px solid oklch(from var(--color-field-ink) l c h / 0.1)",
+      backgroundColor: selected
+        ? "oklch(from var(--color-flag) l c h / 0.12)"
+        : "oklch(from var(--color-field-ink) l c h / 0.045)",
+      color: "var(--color-field-ink)",
+      fontWeight: 590,
+      fontSize: "0.8125rem",
+      letterSpacing: "-0.015em",
+      lineHeight: 1.25,
+      boxShadow: "none",
+      transition:
+        "background-color 140ms ease, border-color 140ms ease, transform 120ms ease",
+      "&:hover:not(:disabled)": {
+        backgroundColor: selected
+          ? "oklch(from var(--color-flag) l c h / 0.16)"
+          : "oklch(from var(--color-field-ink) l c h / 0.08)",
+      },
+      "&:active:not(:disabled)": {
+        transform: "scale(0.98)",
+      },
+    },
+  };
+}
+
+/** Flat question / callout surface inside Ask sheets (no elevation shadow). */
+export const iosAskInsetSurfaceStyle = {
+  borderRadius: 14,
+  backgroundColor: "oklch(from var(--color-field-ink) l c h / 0.06)",
+  border: "0.33px solid oklch(from var(--color-field-ink) l c h / 0.1)",
+  boxShadow: "none",
+} as const;
 
 /** Island-height icon control (pause / resume beside the clock). */
 export const iosMapIslandIconStyles: ButtonProps["styles"] = {

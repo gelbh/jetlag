@@ -11,6 +11,7 @@ import { MapLibrePointMarkers } from "../helpers/MapLibrePointMarkers";
 import type { CircleMarkerProps } from "../helpers/mapMarkerFeatures";
 import { jlMarkerLayerId } from "../helpers/mapMarkerConstants";
 import { useMapFeatureHitTest } from "../helpers/MapFeatureHitTestContext";
+import { MatchingCategoryPinMarker } from "./MatchingCategoryPinMarker";
 
 interface MapDraftLayerProps {
   overlays: readonly MapDraftOverlay[];
@@ -59,8 +60,19 @@ export const MapDraftLayer = memo(function MapDraftLayer({
     [overlays],
   );
 
+  const iconMarkers = useMemo(
+    () =>
+      markerOverlays.filter((overlay) => Boolean(overlay.style?.iconCategoryId)),
+    [markerOverlays],
+  );
+
+  const circleMarkers = useMemo(
+    () => markerOverlays.filter((overlay) => !overlay.style?.iconCategoryId),
+    [markerOverlays],
+  );
+
   const draftMarkers = useMemo((): CircleMarkerProps[] => {
-    return markerOverlays.map((overlay) => {
+    return circleMarkers.map((overlay) => {
       const [lat, lng] = overlay.point;
       return {
         id: overlay.id,
@@ -74,7 +86,7 @@ export const MapDraftLayer = memo(function MapDraftLayer({
         hitKind: overlay.popup ? "draft-marker" : "draft-marker-no-popup",
       };
     });
-  }, [c.pin, c.strokeLight, markerOverlays]);
+  }, [c.pin, c.strokeLight, circleMarkers]);
 
   useMapFeatureHitTest(
     DRAFT_HIT_PREFIX,
@@ -180,6 +192,21 @@ export const MapDraftLayer = memo(function MapDraftLayer({
             return _exhaustive;
           }
         }
+      })}
+      {iconMarkers.map((overlay) => {
+        const categoryId = overlay.style?.iconCategoryId;
+        if (!categoryId) {
+          return null;
+        }
+        return (
+          <MatchingCategoryPinMarker
+            key={overlay.id}
+            latitude={overlay.point[0]}
+            longitude={overlay.point[1]}
+            categoryId={categoryId}
+            pulsing={overlay.style?.pulsing === true}
+          />
+        );
       })}
       <MapLibrePointMarkers
         id="draft"

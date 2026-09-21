@@ -276,11 +276,19 @@ describe("askHudModes", () => {
     expect(
       activeModeCue({
         surface: "measuring",
-        placementReady: true,
+        placementReady: false,
         configureReady: false,
         resolveReady: false,
       }),
     ).toBe("PICK A SOURCE");
+    expect(
+      activeModeCue({
+        surface: "measuring",
+        placementReady: false,
+        configureReady: true,
+        resolveReady: false,
+      }),
+    ).toBe("SET YOUR ANCHOR");
     expect(
       activeModeCue({
         surface: "measuring",
