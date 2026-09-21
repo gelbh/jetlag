@@ -231,6 +231,37 @@ describe("SeekerChromeOverlays Ask HUD wiring", () => {
     expect(screen.queryByText(/Location unavailable/i)).toBeNull();
   });
 
+  it("hides host cue / cost / commit for Measuring catalog like Matching", () => {
+    const tools = stubTools("measuring");
+    render(
+      <SeekerChromeOverlays
+        timer={stubTimer() as never}
+        activeTool="measuring"
+        overlay={stubOverlay() as never}
+        firstRunDismissed
+        setFirstRunDismissed={vi.fn()}
+        forceMapToolsGuide={false}
+        onDismissMapToolsGuide={vi.fn()}
+        selectedAnnotation={null}
+        geometryEditAnnotation={null}
+        geometryDraft={null}
+        mapPanning={false}
+        userMinimized={false}
+        setUserMinimized={vi.fn()}
+        handleSelectTool={vi.fn()}
+        cancelGeometryEdit={vi.fn()}
+        saveGeometryEdit={vi.fn()}
+        tools={tools as never}
+      />,
+    );
+
+    expect(screen.getByTestId("ask-hud-host")).toBeInTheDocument();
+    expect(screen.getByTestId("measuring-hud-body")).toBeInTheDocument();
+    expect(screen.queryByTestId("ask-mode-cue-ticker")).toBeNull();
+    expect(screen.queryByTestId("ask-commit-strip")).toBeNull();
+    expect(screen.queryByText(/SET YOUR ANCHOR/i)).toBeNull();
+  });
+
   it("mounts AskHudHost for tentacle CatalogRail and skips ToolFloatingPanel", () => {
     const tools = stubTools("tentacle");
     render(

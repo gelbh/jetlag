@@ -31,6 +31,7 @@ export interface MapViewMapLibreChromeProps {
   fitBoundsMode?: "once" | "always";
   fitBoundsPadding?: [number, number];
   focusPaddingBias?: number;
+  focusPaddingTopBias?: number;
   focusPreferFly?: boolean;
   recenterToken?: number;
   showZoomControl?: boolean;

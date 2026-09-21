@@ -102,6 +102,7 @@ function MapFocus({
   orientationResetToken = 0,
   fitBoundsPadding: fitBoundsPaddingProp,
   focusPaddingBias,
+  focusPaddingTopBias,
   preferFly = false,
 }: {
   focusBounds: MapBoundsExpression | null;
@@ -113,6 +114,7 @@ function MapFocus({
   orientationResetToken?: number;
   fitBoundsPadding?: [number, number];
   focusPaddingBias?: number;
+  focusPaddingTopBias?: number;
   preferFly?: boolean;
 }) {
   const mapRef = useMapLibreMap();
@@ -123,6 +125,7 @@ function MapFocus({
   const preferFlyRef = useRef(preferFly);
   const focusBoundsRef = useRef(focusBounds);
   const focusPaddingBiasRef = useRef(focusPaddingBias);
+  const focusPaddingTopBiasRef = useRef(focusPaddingTopBias);
   const focusMinZoomRef = useRef(focusMinZoom);
   const focusMaxZoomRef = useRef(focusMaxZoom);
   const animate = !prefersReducedMotion && !lowPowerMode;
@@ -133,6 +136,7 @@ function MapFocus({
     animate,
     focusBounds,
     focusPaddingBias,
+    focusPaddingTopBias,
     focusMaxZoom,
     focusMinZoom,
     padX,
@@ -144,12 +148,14 @@ function MapFocus({
     preferFlyRef.current = preferFly;
     focusBoundsRef.current = focusBounds;
     focusPaddingBiasRef.current = focusPaddingBias;
+    focusPaddingTopBiasRef.current = focusPaddingTopBias;
     focusMinZoomRef.current = focusMinZoom;
     focusMaxZoomRef.current = focusMaxZoom;
   }, [
     preferFly,
     focusBounds,
     focusPaddingBias,
+    focusPaddingTopBias,
     focusMinZoom,
     focusMaxZoom,
   ]);
@@ -217,11 +223,12 @@ function MapFocus({
     map.resize();
 
     const paddingBias = focusPaddingBiasRef.current ?? 0;
+    const paddingTopBias = focusPaddingTopBiasRef.current ?? 0;
     const minZoom = focusMinZoomRef.current;
     const maxZoom = focusMaxZoomRef.current;
 
     const padding = {
-      top: padY,
+      top: padY + paddingTopBias,
       left: padX,
       right: padX,
       bottom: padY + paddingBias,
@@ -321,6 +328,7 @@ export function MapViewMapLibre({
   fitBoundsMode = "always",
   fitBoundsPadding,
   focusPaddingBias,
+  focusPaddingTopBias,
   focusPreferFly,
   recenterToken = 0,
   showZoomControl,
@@ -515,6 +523,7 @@ export function MapViewMapLibre({
               orientationResetToken={orientationResetToken}
               fitBoundsPadding={fitBoundsPadding}
               focusPaddingBias={focusPaddingBias}
+              focusPaddingTopBias={focusPaddingTopBias}
               preferFly={focusPreferFly}
             />
             {chromeHudRef ? (

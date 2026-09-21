@@ -1,9 +1,21 @@
 /**
- * Measuring Ask HUD mode body — anchor / catalog rail / target / answer.
- * SingleBottomChord: one interactive surface at a time. No PhaseRail / CONTINUE.
- * Spec: ask-surface-kit-design rev 2026-08-05b.
+ * Measuring Ask HUD — Matching twin: question header + icon catalog, then map-first.
+ * Sheet path keeps anchor/target/answer chords when Mantine map-first is off.
  */
+import { useState, type ComponentType } from "react";
+import { UnstyledButton } from "@mantine/core";
+import {
+  Buildings,
+  Drop,
+  MapPinArea,
+  SquaresFour,
+  Train,
+  Tree,
+  type IconProps,
+} from "@phosphor-icons/react";
 import { AskCatalogRail } from "@/components/tools/ask/AskCatalogRail";
+import { measuringCategoryIcon } from "@/components/tools/ask/measuringCategoryIcons";
+import { HudMeasuringIcon } from "@/components/map/icons/ToolIcons";
 import { MeasuringAnchorStep } from "@/components/tools/shared/measuring/MeasuringAnchorStep";
 import {
   MeasuringAnswerSection,
@@ -14,16 +26,25 @@ import {
   type MeasuringSearchRole,
 } from "@/components/tools/shared/measuring/measuringPanelUtils";
 import { SearchResultsList } from "@/components/tools/shared/controls/SearchResultsList";
+import { QuestionPromptBlock } from "@/components/tools/shared/controls/QuestionPromptBlock";
+import { CatalogExhaustedMessage } from "@/components/tools/shared/readout/CatalogExhaustedMessage";
 import { QuestionTruthReferenceHint } from "@/components/tools/shared/QuestionTruthReferenceHint";
+import {
+  iosAskInsetSurfaceStyle,
+  iosFilterChipStyles,
+  iosFilterChipTrackStyle,
+} from "@/components/ui/apple/iosEntryChrome";
 import {
   BASE_MEASURING_CATALOG,
   MEASURING_GROUPS,
+  measuringQuestionFor,
   measuringSupportsSearch,
   measuringTargetKind,
   measuringTargetLabel,
   type MeasuringAnswer,
   type MeasuringCatalogOption,
   type MeasuringFromKind,
+  type MeasuringGroupId,
   type MeasuringLocationCategory,
   type MeasuringSubject,
   type MeasuringTargetMode,
@@ -31,6 +52,32 @@ import {
 import type { DistanceUnit } from "@/domain/map/distance";
 import type { SeaLevelEdgeCase } from "@/domain/geometry/measuring/seaLevel";
 import type { GeocodedPlace } from "@/services/geo/geocoding";
+import { usePlayerUiMantine } from "@/hooks/feature/usePlayerUiMantine";
+
+type GroupFilter = "all" | MeasuringGroupId;
+
+const GROUP_CHIP_LABEL: Record<MeasuringGroupId, string> = {
+  transit: "Transit",
+  borders: "Borders",
+  natural: "Natural",
+  poi: "Places",
+  public_utilities: "Utilities",
+};
+
+const GROUP_CHIP_ICON: Record<GroupFilter, ComponentType<IconProps>> = {
+  all: SquaresFour,
+  transit: Train,
+  borders: Buildings,
+  natural: Tree,
+  poi: MapPinArea,
+  public_utilities: Drop,
+};
+
+const MEASURING_QUESTION_INTRO = {
+  prompt: "Compared to me, are you closer to or further from [place]?",
+  ruleSummary:
+    "Pick what to measure below. Closer / further is relative to that place from your anchor.",
+};
 
 export type MeasuringHudBodyProps = {
   distanceUnit: DistanceUnit;
@@ -75,6 +122,7 @@ export type MeasuringHudBodyProps = {
   awaitHiderAnswer?: boolean;
   costLabel?: string;
   isSubmitting?: boolean;
+  toolLabel?: string;
 };
 
 export function MeasuringHudBody({
@@ -117,38 +165,75 @@ export function MeasuringHudBody({
   awaitHiderAnswer = false,
   costLabel = "D3P1",
   isSubmitting = false,
+  toolLabel = "Measuring",
 }: MeasuringHudBodyProps) {
+  const mantinePlayerUi = usePlayerUiMantine();
+  const [groupFilter, setGroupFilter] = useState<GroupFilter>("all");
+
   const locationCategory: MeasuringLocationCategory | undefined =
-    subject === "location" ? (measureFrom as MeasuringLocationCategory) : undefined;
+    subject === "location"
+      ? (measureFrom as MeasuringLocationCategory)
+      : undefined;
   const targetLabel = measuringTargetLabel(subject, locationCategory);
   const targetKind = measuringTargetKind(measureFrom);
   const isCoastline = targetKind === "coastline";
   const isSeaLevel = targetKind === "sea_level";
   const allowsSearch = measuringSupportsSearch(measureFrom);
   const measureCatalog = catalogOptions ?? BASE_MEASURING_CATALOG;
-  const hasAvailableMeasureOptions = MEASURING_GROUPS.some((group) =>
-    measureCatalog.some(
-      (option) =>
-        option.groupId === group.id && !usedMeasuringFromKinds.has(option.id),
-    ),
+
+  const selectableOptions = measureCatalog.filter(
+    (option) =>
+      !usedMeasuringFromKinds.has(option.id) || option.id === measureFrom,
   );
+  const availableOptions = measureCatalog.filter(
+    (option) => !usedMeasuringFromKinds.has(option.id),
+  );
+  const hasAvailableMeasureOptions = availableOptions.length > 0;
+
+  const groupsWithRows = MEASURING_GROUPS.filter((group) =>
+    selectableOptions.some((option) => option.groupId === group.id),
+  );
+
+  const effectiveFilter: GroupFilter =
+    groupFilter === "all" ||
+    groupsWithRows.some((group) => group.id === groupFilter)
+      ? groupFilter
+      : "all";
+
+  const filteredOptions =
+    effectiveFilter === "all"
+      ? selectableOptions
+      : selectableOptions.filter((option) => option.groupId === effectiveFilter);
+
+  const catalogRows = MEASURING_GROUPS.flatMap((group) =>
+    filteredOptions
+      .filter((option) => option.groupId === group.id)
+      .map((option) => {
+        const Icon = measuringCategoryIcon(option.id);
+        return {
+          id: option.id,
+          label: option.label,
+          groupLabel: effectiveFilter === "all" ? group.label : undefined,
+          icon: (
+            <Icon
+              size={20}
+              weight="duotone"
+              color="currentColor"
+              aria-hidden
+            />
+          ),
+        };
+      }),
+  );
+
+  const question = optionChosen
+    ? measuringQuestionFor(subject, locationCategory)
+    : MEASURING_QUESTION_INTRO;
 
   const anchorLoadingMessage = anchorResolveLoadingMessage(
     subject,
     measureFrom,
     locationCategory,
-  );
-
-  const catalogRows = MEASURING_GROUPS.flatMap((group) =>
-    measureCatalog
-      .filter(
-        (option) =>
-          option.groupId === group.id && !usedMeasuringFromKinds.has(option.id),
-      )
-      .map((option) => ({
-        id: option.id,
-        label: `${group.label}: ${option.label}`,
-      })),
   );
 
   const showAnswer =
@@ -158,19 +243,168 @@ export function MeasuringHudBody({
     distanceMeters !== null &&
     optionChosen;
 
-  const chord: "anchor" | "source" | "target" | "answer" = !hasSeekerPoint
-    ? "anchor"
-    : !optionChosen
-      ? "source"
+  const chord: "anchor" | "source" | "target" | "answer" = !optionChosen
+    ? "source"
+    : !hasSeekerPoint
+      ? "anchor"
       : showAnswer
         ? "answer"
         : "target";
+
+  const filterOptions: { value: GroupFilter; label: string }[] = [
+    { value: "all", label: "All" },
+    ...groupsWithRows.map((group) => ({
+      value: group.id as GroupFilter,
+      label: GROUP_CHIP_LABEL[group.id],
+    })),
+  ];
 
   return (
     <div
       data-testid="measuring-hud-body"
       className="ask-hud-mode-body flex w-full flex-col gap-2"
     >
+      <div
+        className={
+          mantinePlayerUi
+            ? "pointer-events-auto space-y-2 p-3"
+            : "pointer-events-auto ask-hud-panel space-y-2 p-3"
+        }
+        style={mantinePlayerUi ? iosAskInsetSurfaceStyle : undefined}
+        {...(mantinePlayerUi ? { "data-player-ux-world": "mantine" } : {})}
+      >
+        <div className="flex items-start gap-3">
+          <div
+            className="flex shrink-0 flex-col items-center gap-1"
+            style={{ minWidth: 44 }}
+          >
+            <span
+              aria-hidden
+              className="inline-flex items-center justify-center"
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: 12,
+                backgroundColor:
+                  "oklch(from var(--color-field-ink) l c h / 0.08)",
+                color: "var(--color-field-ink)",
+              }}
+            >
+              <HudMeasuringIcon width={22} height={22} />
+            </span>
+            {costLabel ? (
+              <span
+                data-testid="ask-cost-chip"
+                role="status"
+                aria-label={`${toolLabel} · ${costLabel}`}
+                style={{
+                  fontSize: "0.6875rem",
+                  fontWeight: 650,
+                  letterSpacing: "0.02em",
+                  color: "var(--color-field-ink-muted)",
+                  lineHeight: 1,
+                }}
+              >
+                {costLabel}
+              </span>
+            ) : null}
+          </div>
+          <div className="min-w-0 flex-1">
+            <p
+              className="m-0 mb-0.5 text-xs font-semibold leading-none"
+              style={{
+                color: "var(--color-field-ink-muted)",
+                letterSpacing: "0.02em",
+              }}
+            >
+              {toolLabel}
+            </p>
+            <QuestionPromptBlock
+              prompt={question.prompt}
+              ruleSummary={question.ruleSummary}
+            />
+          </div>
+        </div>
+      </div>
+
+      {chord === "source" ? (
+        <div className="space-y-2">
+          {awaitHiderAnswer ? <QuestionTruthReferenceHint /> : null}
+          {!hasAvailableMeasureOptions ? (
+            <div className="pointer-events-auto ask-hud-panel p-3">
+              <CatalogExhaustedMessage message="Every measure category has already been used on this map." />
+            </div>
+          ) : (
+            <>
+              <div
+                role="tablist"
+                aria-label="Filter measure categories"
+                className={
+                  mantinePlayerUi
+                    ? "jl-scroll"
+                    : "jl-scroll flex gap-1.5 pb-0.5"
+                }
+                style={mantinePlayerUi ? iosFilterChipTrackStyle : undefined}
+                {...(mantinePlayerUi
+                  ? { "data-player-ux-world": "mantine" }
+                  : {})}
+              >
+                {filterOptions.map((option) => {
+                  const selected = effectiveFilter === option.value;
+                  const Icon = GROUP_CHIP_ICON[option.value];
+                  if (mantinePlayerUi) {
+                    return (
+                      <UnstyledButton
+                        key={option.value}
+                        type="button"
+                        role="tab"
+                        aria-selected={selected}
+                        onClick={() => setGroupFilter(option.value)}
+                        styles={iosFilterChipStyles(selected)}
+                      >
+                        <Icon
+                          size={14}
+                          weight={selected ? "fill" : "regular"}
+                          aria-hidden
+                        />
+                        {option.label}
+                      </UnstyledButton>
+                    );
+                  }
+                  return (
+                    <button
+                      key={option.value}
+                      type="button"
+                      role="tab"
+                      aria-selected={selected}
+                      onClick={() => setGroupFilter(option.value)}
+                      className={`jl-segment-btn shrink-0 inline-flex items-center gap-1.5 ${
+                        selected ? "jl-segment-btn-selected" : ""
+                      }`}
+                    >
+                      <Icon
+                        size={14}
+                        weight={selected ? "fill" : "regular"}
+                        aria-hidden
+                      />
+                      {option.label}
+                    </button>
+                  );
+                })}
+              </div>
+              <AskCatalogRail
+                rows={catalogRows}
+                selectedId={optionChosen ? measureFrom : null}
+                onSelect={(id) => onMeasureFromChange(id as MeasuringFromKind)}
+                aria-label="Measuring from"
+                hint=""
+                columns={2}
+              />
+            </>
+          )}
+        </div>
+      ) : null}
+
       {chord === "anchor" ? (
         <div className="pointer-events-auto ask-hud-panel p-3">
           <MeasuringAnchorStep
@@ -188,25 +422,6 @@ export function MeasuringHudBody({
             onSearchQueryChange={onSearchQueryChange}
             onSearchSubmit={() => onSearchSubmit("seeker")}
           />
-        </div>
-      ) : null}
-
-      {chord === "source" ? (
-        <div className="space-y-2">
-          {awaitHiderAnswer ? <QuestionTruthReferenceHint /> : null}
-          {!hasAvailableMeasureOptions ? (
-            <p className="pointer-events-auto ask-hud-panel p-3 text-sm text-field-ink-muted">
-              Every measure category has already been added to this session.
-            </p>
-          ) : (
-            <AskCatalogRail
-              rows={catalogRows}
-              selectedId={optionChosen ? measureFrom : null}
-              onSelect={(id) => onMeasureFromChange(id as MeasuringFromKind)}
-              aria-label="Measuring from"
-              hint="Tap a row to set what you measure"
-            />
-          )}
         </div>
       ) : null}
 
