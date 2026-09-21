@@ -1,4 +1,5 @@
 import { Button } from "@mantine/core";
+import { Crosshair, MapPin } from "@phosphor-icons/react";
 import {
   iosFilledStyles,
   iosGrayStyles,
@@ -36,13 +37,30 @@ export function AnchorControls({
       ? (anchorPlaceName ?? "Location locked")
       : "Tap to use GPS";
 
+  const GpsGlyph = hasAnchor ? MapPin : Crosshair;
+
   const gpsBody = (
     <>
       <span
-        className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-current text-[0.625rem] font-bold"
+        className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px]"
         aria-hidden="true"
+        style={
+          mantinePlayerUi
+            ? {
+                backgroundColor: hasAnchor
+                  ? "oklch(from var(--color-canvas) l c h / 0.35)"
+                  : "oklch(from var(--color-canvas) l c h / 0.22)",
+              }
+            : undefined
+        }
       >
-        ●
+        {mantinePlayerUi ? (
+          <GpsGlyph size={18} weight={hasAnchor ? "fill" : "bold"} />
+        ) : (
+          <span className="flex h-5 w-5 items-center justify-center rounded-full border-2 border-current text-[0.625rem] font-bold">
+            ●
+          </span>
+        )}
       </span>
       <span className="flex min-w-0 flex-col items-start text-left leading-tight">
         <span className="text-sm font-semibold">
@@ -67,8 +85,8 @@ export function AnchorControls({
           onClick={onUseGps}
           disabled={gpsLoading}
           aria-busy={gpsLoading || undefined}
-          styles={iosFilledStyles}
-          className="flex min-h-12 items-center justify-center gap-2"
+          styles={hasAnchor && !gpsLoading ? iosGrayStyles : iosFilledStyles}
+          className="flex min-h-12 items-center justify-start gap-2.5 px-3"
         >
           {gpsBody}
         </Button>
@@ -85,7 +103,14 @@ export function AnchorControls({
       )}
 
       {passiveMap ? (
-        <p className="text-center text-xs text-field-ink-muted">
+        <p
+          className="text-center text-xs text-field-ink-muted"
+          style={
+            mantinePlayerUi
+              ? { margin: 0, lineHeight: 1.35, paddingInline: 4 }
+              : undefined
+          }
+        >
           {hasAnchor ? (
             <>
               {anchorPlaceName ? (
@@ -98,9 +123,7 @@ export function AnchorControls({
               ) : (
                 "Anchor set on the map"
               )}
-              {!hasAnchor ? null : (
-                <span className="mt-1 block">{anchorHint}</span>
-              )}
+              <span className="mt-1 block">{anchorHint}</span>
             </>
           ) : (
             "Or tap anywhere on the map to set your anchor."

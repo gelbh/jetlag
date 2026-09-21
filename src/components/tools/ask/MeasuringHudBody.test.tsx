@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import type { DistanceUnit } from "@/domain/map/distance";
 import {
   BASE_MEASURING_CATALOG,
@@ -14,7 +14,6 @@ import { MeasuringHudBody } from "./MeasuringHudBody";
 import {
   activeModeCue,
   canCommit,
-  primedCommitLabel,
   type AskHudReadiness,
 } from "@/domain/ask/askHudModes";
 
@@ -55,85 +54,77 @@ const baseProps = {
 };
 
 describe("MeasuringHudBody", () => {
-  it("shows anchor chrome without PhaseRail or CONTINUE", () => {
-    render(<MeasuringHudBody {...baseProps} />);
-
-    expect(screen.getByTestId("measuring-hud-body")).toBeInTheDocument();
-    expect(screen.queryByRole("list", { name: "Wizard phases" })).toBeNull();
-    expect(
-      screen.queryByRole("button", { name: "Continue" }),
-    ).toBeNull();
-  });
-
-  it("shows catalog rail after anchor before target", () => {
-    render(
-      <MeasuringHudBody
-        {...baseProps}
-        hasSeekerPoint
-        seekerPlaceName="Dublin"
-      />,
-    );
-
-    expect(screen.getByTestId("ask-catalog-rail")).toBeInTheDocument();
-    expect(screen.queryByRole("list", { name: "Wizard phases" })).toBeNull();
-    expect(
-      screen.queryByRole("button", { name: "Continue" }),
-    ).toBeNull();
-  });
-
-  it("wires cue ticker and muted strip until canCommit", () => {
-    const readiness: AskHudReadiness = {
-      surface: "measuring",
-      placementReady: true,
-      configureReady: true,
-      resolveReady: false,
-      answerReady: true,
-      awaitHiderAnswer: true,
-      isSubmitting: false,
-    };
-    const cue = activeModeCue({
-      surface: "measuring",
-      placementReady: true,
-      configureReady: true,
-      resolveReady: false,
-    });
-    expect(cue).toBe("SET YOUR TARGET");
-    expect(canCommit(readiness)).toBe(false);
-
+  it("shows catalog first with question text and cost in the body", () => {
     render(
       <AskHudHost
-        cue={cue}
+        cue="PICK A SOURCE"
         toolLabel="Measuring"
         costLabel="D3P1"
         canCommit={false}
-        commitLabel={primedCommitLabel({
-          kind: "send",
-          costLabel: "D3P1",
-          primed: false,
-          cue,
-        })}
+        commitLabel="SEND"
         onCommit={() => {}}
-        modeBody={
-          <MeasuringHudBody
-            {...baseProps}
-            hasSeekerPoint
-            optionChosen
-            measureFrom={DEFAULT_MEASURING_FROM_KIND}
-          />
-        }
+        modeBody={<MeasuringHudBody {...baseProps} costLabel="D3P1" />}
+        showCue={false}
+        showCostChip={false}
+        showCommitStrip={false}
       />,
     );
 
-    expect(screen.getByTestId("ask-mode-cue-ticker")).toHaveTextContent(
-      "SET YOUR TARGET",
-    );
-    expect(screen.getByTestId("ask-cost-chip")).toHaveTextContent(/Measuring/);
+    expect(screen.getByTestId("measuring-hud-body")).toBeInTheDocument();
+    expect(screen.getByTestId("ask-catalog-rail")).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "SEND — SET TARGET FIRST" }),
-    ).toBeDisabled();
+      screen.getByRole("status", { name: /Measuring · D3P1/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Compared to me, are you closer to or further from/i),
+    ).toBeInTheDocument();
+    expect(screen.queryByTestId("ask-mode-cue-ticker")).toBeNull();
+    expect(screen.queryByTestId("ask-commit-strip")).toBeNull();
+    expect(screen.queryByRole("list", { name: "Wizard phases" })).toBeNull();
   });
 
-  it("arms strip when anchor + source + target ready", () => {
+  it("shows anchor after category before target", () => {
+    render(
+      <MeasuringHudBody
+        {...baseProps}
+        optionChosen
+        hasSeekerPoint={false}
+      />,
+    );
+
+    expect(screen.queryByTestId("ask-catalog-rail")).toBeNull();
+    expect(screen.getByTestId("measuring-hud-body")).toBeInTheDocument();
+    expect(screen.queryByRole("list", { name: "Wizard phases" })).toBeNull();
+  });
+
+  it("keeps measuring cues catalog-first like Matching", () => {
+    expect(
+      activeModeCue({
+        surface: "measuring",
+        placementReady: false,
+        configureReady: false,
+        resolveReady: false,
+      }),
+    ).toBe("PICK A SOURCE");
+    expect(
+      activeModeCue({
+        surface: "measuring",
+        placementReady: false,
+        configureReady: true,
+        resolveReady: false,
+      }),
+    ).toBe("SET YOUR ANCHOR");
+    expect(
+      activeModeCue({
+        surface: "measuring",
+        placementReady: true,
+        configureReady: true,
+        resolveReady: false,
+      }),
+    ).toBe("SET YOUR TARGET");
+  });
+
+  it("arms when anchor + source + target ready", () => {
     const readiness: AskHudReadiness = {
       surface: "measuring",
       placementReady: true,
@@ -144,46 +135,5 @@ describe("MeasuringHudBody", () => {
       isSubmitting: false,
     };
     expect(canCommit(readiness)).toBe(true);
-    const cue = activeModeCue({
-      surface: "measuring",
-      placementReady: true,
-      configureReady: true,
-      resolveReady: true,
-    });
-    const onCommit = vi.fn();
-
-    render(
-      <AskHudHost
-        cue={cue}
-        toolLabel="Measuring"
-        costLabel="D3P1"
-        canCommit
-        commitLabel={primedCommitLabel({
-          kind: "send",
-          costLabel: "D3P1",
-          primed: true,
-          cue,
-        })}
-        onCommit={onCommit}
-        modeBody={
-          <MeasuringHudBody
-            {...baseProps}
-            hasSeekerPoint
-            hasTargetPoint
-            optionChosen
-            measureFrom={DEFAULT_MEASURING_FROM_KIND}
-            distanceMeters={1200}
-            targetPlaceName="Airport"
-          />
-        }
-      />,
-    );
-
-    expect(screen.getByTestId("ask-mode-cue-ticker")).toHaveTextContent(
-      "READY TO SEND",
-    );
-    fireEvent.click(screen.getByRole("button", { name: "SEND · D3P1" }));
-    expect(onCommit).toHaveBeenCalledTimes(1);
-    expect(screen.queryByRole("list", { name: "Wizard phases" })).toBeNull();
   });
 });

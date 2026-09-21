@@ -33,6 +33,7 @@ function pickMapLibreProps(props: MapViewProps): MapViewMapLibreProps {
     fitBoundsMode: props.fitBoundsMode,
     fitBoundsPadding: props.fitBoundsPadding,
     focusPaddingBias: props.focusPaddingBias,
+    focusPaddingTopBias: props.focusPaddingTopBias,
     focusPreferFly: props.focusPreferFly,
     recenterToken: props.recenterToken,
     showZoomControl: props.showZoomControl,
