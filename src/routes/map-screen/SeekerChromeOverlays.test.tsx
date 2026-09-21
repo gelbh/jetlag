@@ -349,9 +349,9 @@ describe("SeekerChromeOverlays Ask HUD wiring", () => {
 
     expect(screen.getByTestId("ask-hud-host")).toBeInTheDocument();
     expect(screen.getByTestId("photo-hud-body")).toBeInTheDocument();
-    expect(screen.getByTestId("ask-mode-cue-ticker")).toHaveTextContent(
-      "PICK A PHOTO ASK",
-    );
+    // Photo embeds cue/cost in the question box like Matching.
+    expect(screen.queryByTestId("ask-mode-cue-ticker")).toBeNull();
+    expect(screen.queryByTestId("ask-commit-strip")).toBeNull();
     expect(screen.queryByTestId("photo-float-panel")).toBeNull();
   });
 });

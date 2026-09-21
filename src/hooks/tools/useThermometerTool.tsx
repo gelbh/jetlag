@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, type ReactNode } from "react";
 import { ThermometerHudBody } from "../../components/tools/ask/ThermometerHudBody";
+import { ThermometerMapPlacementChrome } from "../../components/tools/ask/ThermometerMapPlacementChrome";
 import { ThermometerPanel } from "../../components/tools/ThermometerPanel";
 import type { AskHudReadiness } from "../../domain/ask/askHudModes";
 import type { AskToolHudBundle } from "../map-screen/heavyMapTools";
@@ -13,10 +14,13 @@ import {
   isThermometerWalkActive,
   parseThermometerStartPoint,
   questionCostBreakdown,
+  thermometerQuestionPrompt,
   thermometerUseCount,
   thermometerUseCountFromPending,
 } from "../../domain/questions";
+import { formatPresetDistance } from "../../domain/map/distance";
 import { useLiveLocation } from "../location/useLiveLocation";
+import { usePlayerUiMantine } from "@/hooks/feature/usePlayerUiMantine";
 import { useThermometerWalk } from "./useThermometerWalk";
 import { useToolSession } from "./framework/useToolSession";
 import { commitThermometerManual } from "./thermometer/commitThermometer";
@@ -409,18 +413,70 @@ export function useThermometerTool({
     void commit();
   };
 
+  const mantinePlayerUi = usePlayerUiMantine();
+  /** Answer-ready only: setup + live walk stay sheet (walk banner primary). */
+  const mapFirstEligible = mantinePlayerUi && !walkingActive && pinsReady;
+  const mapPlacementActive = Boolean(mapFirstEligible);
+
+  const travelLabel =
+    liveTravelMeters !== null
+      ? formatPresetDistance(liveTravelMeters, distanceUnit)
+      : null;
+  const distanceLabel = formatPresetDistance(
+    activeDistanceMeters,
+    distanceUnit,
+  );
+
+  const canCommitThermo =
+    configureReady &&
+    pinsReady &&
+    canSubmitQuestion &&
+    !session.isBusy &&
+    (awaitHiderAnswer || config.answer !== null);
+
+  const reopenSetup = () => {
+    patchConfig({ thermoB: null, answer: null });
+  };
+
   const hud: AskToolHudBundle = {
     readiness,
     costLabel,
-    error:
-      config.panelError ?? session.error ?? gpsError ?? walkTracker.gpsError,
+    error: mapPlacementActive
+      ? null
+      : (config.panelError ??
+        session.error ??
+        gpsError ??
+        walkTracker.gpsError),
     onCommit: onHudCommit,
     commitKind: walkingActive
       ? "endWalk"
       : awaitHiderAnswer
         ? "send"
         : "ask",
-    modeBody: (
+    suppressSheet: mapPlacementActive,
+    mapOverlay: mapPlacementActive ? (
+      <ThermometerMapPlacementChrome
+        distanceLabel={distanceLabel}
+        questionPrompt={thermometerQuestionPrompt(
+          activeDistanceMeters,
+          distanceUnit,
+        )}
+        costLabel={costLabel}
+        travelLabel={travelLabel}
+        travelTooShort={travelTooShort}
+        error={
+          config.panelError ?? session.error ?? gpsError ?? walkTracker.gpsError
+        }
+        awaitHiderAnswer={awaitHiderAnswer}
+        answer={config.answer}
+        onAnswerChange={(answer) => patchConfig({ answer })}
+        canCommit={canCommitThermo}
+        isSubmitting={session.isBusy}
+        onCommit={() => void commit()}
+        onChangeSetup={reopenSetup}
+      />
+    ) : null,
+    modeBody: mapPlacementActive ? null : (
       <ThermometerHudBody
         distanceUnit={distanceUnit}
         sessionRules={sessionRules}

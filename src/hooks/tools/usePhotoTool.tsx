@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { PhotoHudBody } from "../../components/tools/ask/PhotoHudBody";
+import { PhotoMapPlacementChrome } from "../../components/tools/ask/PhotoMapPlacementChrome";
 import { PhotoPanel } from "../../components/tools/PhotoPanel";
 import type { AskHudReadiness } from "../../domain/ask/askHudModes";
 import type { AskToolHudBundle } from "../map-screen/heavyMapTools";
@@ -9,6 +10,7 @@ import {
   firstAvailablePhotoCategoryId,
   isPhotoCategoryAvailableForGameSize,
   PHOTO_REPLY_OPTIONS,
+  photoCategoryLabelForUnit,
   photoCategoryUseCount,
   photoQuestionPrompt,
   usedPhotoCategoryIds,
@@ -20,6 +22,7 @@ import {
 } from "../../domain/questions";
 import type { SubmitPendingQuestionInput } from "../sync/usePendingQuestionActions";
 import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
+import { usePlayerUiMantine } from "@/hooks/feature/usePlayerUiMantine";
 import { useToolSession } from "./framework/useToolSession";
 
 interface PhotoSessionConfig {
@@ -71,6 +74,7 @@ export function usePhotoTool({
   );
   const [selectedCategoryId, setSelectedCategoryId] =
     useState<PhotoCategoryId>("tree");
+  const [categoryChosen, setCategoryChosen] = useState(false);
   const categoryId = useMemo(() => {
     if (
       !usedCategories.has(selectedCategoryId) &&
@@ -145,6 +149,7 @@ export function usePhotoTool({
       });
 
       setMapError(null);
+      setCategoryChosen(false);
       finishPlacementRef.current();
     },
   });
@@ -154,6 +159,19 @@ export function usePhotoTool({
   const categoryReady =
     !usedCategories.has(categoryId) &&
     isPhotoCategoryAvailableForGameSize(gameSize, categoryId);
+
+  const mantinePlayerUi = usePlayerUiMantine();
+  const mapFirstEligible =
+    mantinePlayerUi && categoryChosen && categoryReady && awaitHiderAnswer;
+
+  const handleCategoryChange = (id: PhotoCategoryId) => {
+    setSelectedCategoryId(id);
+    setCategoryChosen(true);
+  };
+
+  const reopenCategoryPicker = () => {
+    setCategoryChosen(false);
+  };
 
   const readiness: AskHudReadiness = {
     surface: "photo",
@@ -166,22 +184,50 @@ export function usePhotoTool({
     viewOnly: !canSubmitQuestion,
   };
 
+  const canCommitPhoto =
+    categoryReady &&
+    (categoryChosen || !mantinePlayerUi) &&
+    canSubmitQuestion &&
+    !session.isBusy &&
+    !hasOpenQuestion;
+
+  const mapPlacementActive = Boolean(mapFirstEligible);
+
   const hud: AskToolHudBundle | null =
     active && awaitHiderAnswer
       ? {
           readiness,
           costLabel,
-          error: mapError,
+          error: mapPlacementActive ? null : mapError,
           onCommit: () => void commit(),
-          modeBody: (
+          suppressSheet: mapPlacementActive,
+          mapOverlay: mapPlacementActive ? (
+            <PhotoMapPlacementChrome
+              categoryLabel={photoCategoryLabelForUnit(
+                categoryId,
+                distanceUnit,
+              )}
+              questionPrompt={photoQuestionPrompt(categoryId, distanceUnit)}
+              costLabel={costLabel}
+              error={mapError}
+              canCommit={canCommitPhoto}
+              isSubmitting={session.isBusy}
+              onCommit={() => void commit()}
+              onChangeCategory={reopenCategoryPicker}
+            />
+          ) : null,
+          modeBody: mapPlacementActive ? null : (
             <PhotoHudBody
               gameSize={gameSize}
               distanceUnit={distanceUnit}
               categoryId={categoryId}
+              categoryChosen={categoryChosen}
               usedCategoryIds={usedCategories}
-              onCategoryChange={setSelectedCategoryId}
+              onCategoryChange={handleCategoryChange}
               hasOpenQuestion={hasOpenQuestion}
               awaitHiderAnswer={awaitHiderAnswer}
+              costLabel={costLabel}
+              toolLabel="Photo"
             />
           ),
           sheets: null as ReactNode,
@@ -196,7 +242,7 @@ export function usePhotoTool({
         categoryId={categoryId}
         usedCategoryIds={usedCategories}
         costLabel={costLabel}
-        onCategoryChange={setSelectedCategoryId}
+        onCategoryChange={handleCategoryChange}
         onCommit={() => void commit()}
         error={mapError}
         isSubmitting={session.isBusy}
