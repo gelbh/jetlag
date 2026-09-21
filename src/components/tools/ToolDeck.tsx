@@ -3,6 +3,8 @@ import { Box, Paper } from "@mantine/core";
 import { cn } from "@/lib/cn";
 import { Island } from "@/components/ui/island";
 import {
+  iosMapHuntAskFirstQuestionStripStyles,
+  iosMapHuntAskFirstSurfaceStyles,
   iosMapHuntQuestionStripStyles,
   iosMapHuntSurfaceStyles,
 } from "@/components/ui/apple/iosEntryChrome";
@@ -13,6 +15,8 @@ export type ToolDeckDensity = "tools" | "sparse";
 
 export interface ToolDeckProps {
   density?: ToolDeckDensity;
+  /** Flag-on ask-owned tool: hunt re-roles under Ask instrument cluster. */
+  askFirst?: boolean;
   className?: string;
   children?: ReactNode;
 }
@@ -23,11 +27,13 @@ export interface ToolDeckProps {
  */
 export function ToolDeck({
   density = "tools",
+  askFirst = false,
   className,
   children,
 }: ToolDeckProps) {
   const mantinePlayerUi = usePlayerUiMantine();
   const sparse = density === "sparse";
+  const askFirstActive = mantinePlayerUi && askFirst;
   const deckClassName = cn(
     "jl-map-island jl-map-island--hunt relative min-w-0 justify-center overflow-visible p-1",
     !mantinePlayerUi && "border-t-[3px] border-t-flag",
@@ -43,11 +49,12 @@ export function ToolDeck({
         data-tool-deck=""
         data-island="hunt"
         data-hunt-density={sparse ? "sparse" : undefined}
+        data-ask-first={askFirstActive ? "true" : undefined}
         data-player-ux-world="mantine"
         role="group"
         aria-label="Hunt tools"
         radius={22}
-        p={4}
+        p={askFirstActive ? 3 : 4}
         // OverlayHost / chrome are pointer-events-none; Island baked this in.
         className={cn(
           deckClassName,
@@ -55,7 +62,9 @@ export function ToolDeck({
         )}
         styles={{
           root: {
-            ...iosMapHuntSurfaceStyles,
+            ...(askFirstActive
+              ? iosMapHuntAskFirstSurfaceStyles
+              : iosMapHuntSurfaceStyles),
             borderRadius: 22,
           },
         }}
@@ -124,20 +133,29 @@ export const ToolDeckGroup = forwardRef<HTMLDivElement, ToolDeckGroupProps>(
 export function ToolDeckQuestionStrip({
   children,
   className,
+  askFirst = false,
 }: {
   children?: ReactNode;
   className?: string;
+  askFirst?: boolean;
 }) {
   return (
     <Box
       data-hunt-question-strip=""
+      data-ask-first={askFirst ? "true" : undefined}
       className={cn(
         "relative z-[1] min-w-0 [&_.jl-tool-slot]:min-h-11 [&_.jl-tool-slot]:min-w-0",
+        askFirst &&
+          "[&_.jl-tool-slot:not([aria-pressed='true'])]:opacity-55 [&_[data-ios-tool-label]]:text-[0.5625rem] [&_[data-ios-tool-label]]:leading-tight",
         className,
       )}
-      style={iosMapHuntQuestionStripStyles}
+      style={
+        askFirst
+          ? iosMapHuntAskFirstQuestionStripStyles
+          : iosMapHuntQuestionStripStyles
+      }
       role="group"
-      aria-label="Question tools"
+      aria-label={askFirst ? "Question tool switcher" : "Question tools"}
     >
       {children}
     </Box>

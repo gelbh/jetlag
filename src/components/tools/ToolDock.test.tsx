@@ -315,20 +315,32 @@ describe("ToolDock", () => {
       </MantineProvider>,
     );
 
-    expect(screen.getByRole("button", { name: "Matching" })).toHaveAttribute(
-      "aria-pressed",
-      "true",
+    expect(document.querySelector('[data-island="hunt"]')).toBeNull();
+    expect(document.querySelector('[data-island="session"]')).toBeNull();
+    expect(
+      document.querySelector('[data-overlay-chrome][data-ask-first="true"]'),
+    ).not.toBeNull();
+  });
+
+  it("keeps idle Mantine hunt without ask-first until a question tool is active", () => {
+    mockUsePlayerUiMantine.mockReturnValue(true);
+    renderWithRouter(
+      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+        <ToolDock {...dockBase} onOpenChat={vi.fn()} />
+      </MantineProvider>,
     );
-    expect(document.querySelector("[data-tool-highlight]")).not.toBeNull();
+
+    const hunt = document.querySelector(
+      '[data-island="hunt"][data-player-ux-world="mantine"]',
+    );
+    expect(hunt).not.toBeNull();
+    expect(hunt?.getAttribute("data-ask-first")).toBeNull();
     expect(document.querySelector("[data-hunt-question-strip]")).not.toBeNull();
+    expect(document.querySelector('[data-island="session"]')).not.toBeNull();
     expect(
       screen.getByText("Match").getAttribute("data-ios-tool-label"),
     ).toBe("");
     expect(screen.getByText("Match")).not.toHaveClass("jl-tool-slot-label");
-    const hunt = document.querySelector(
-      '[data-island="hunt"][data-player-ux-world="mantine"]',
-    ) as HTMLElement | null;
-    expect(hunt).not.toBeNull();
     expect(hunt?.style.borderTop).not.toBe("3px solid var(--color-flag)");
   });
 });

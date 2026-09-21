@@ -498,11 +498,7 @@ export function GameChatTab({
 
   return (
     <div className="flex flex-col gap-2">
-      {answerError ? (
-        <InlineError className="rounded-lg border border-status-error/40 bg-status-error-surface px-3 py-2">
-          {answerError}
-        </InlineError>
-      ) : null}
+      {answerError ? <InlineError>{answerError}</InlineError> : null}
       {gameMessages.length === 0 ? (
         <EmptyState className="text-ink-dim">No game messages yet.</EmptyState>
       ) : (
