@@ -36,6 +36,19 @@ const baseProps = {
 };
 
 describe("TentacleHudBody", () => {
+  it("shows Matching-style question header with cost on catalog", () => {
+    render(
+      <TentacleHudBody {...baseProps} costLabel="D4P2" toolLabel="Tentacle" />,
+    );
+
+    expect(screen.getByText("Tentacle")).toBeInTheDocument();
+    expect(screen.getByTestId("ask-cost-chip")).toHaveTextContent("D4P2");
+    expect(
+      screen.getByText(/Within .* of me, which \[type\] are you nearest to/i),
+    ).toBeInTheDocument();
+    expect(screen.getByTestId("ask-catalog-rail")).toBeInTheDocument();
+  });
+
   it("shows catalog rail without PhaseRail or CONTINUE; row select advances", () => {
     const onCategoryChange = vi.fn();
     render(

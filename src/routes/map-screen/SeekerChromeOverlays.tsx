@@ -261,13 +261,19 @@ export function SeekerChromeOverlays({
           error={toolHud.suppressSheet ? null : toolHud.error}
           modeBody={toolHud.modeBody}
           showCue={
-            askSurface !== "matching" && askSurface !== "measuring"
+            askSurface !== "matching" &&
+            askSurface !== "measuring" &&
+            askSurface !== "tentacle"
           }
           showCostChip={
-            askSurface !== "matching" && askSurface !== "measuring"
+            askSurface !== "matching" &&
+            askSurface !== "measuring" &&
+            askSurface !== "tentacle"
           }
           showCommitStrip={
-            askSurface !== "matching" && askSurface !== "measuring"
+            askSurface !== "matching" &&
+            askSurface !== "measuring" &&
+            askSurface !== "tentacle"
           }
         />
       ) : null}
