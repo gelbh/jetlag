@@ -741,6 +741,8 @@ export function useTentacleTool({
           }
         }}
         awaitHiderAnswer={awaitHiderAnswer}
+        costLabel={costLabel}
+        toolLabel="Tentacle"
       />
     ),
     sheets: null as ReactNode,

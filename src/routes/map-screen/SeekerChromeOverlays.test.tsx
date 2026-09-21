@@ -288,9 +288,9 @@ describe("SeekerChromeOverlays Ask HUD wiring", () => {
 
     expect(screen.getByTestId("ask-hud-host")).toBeInTheDocument();
     expect(screen.getByTestId("tentacle-hud-body")).toBeInTheDocument();
-    expect(screen.getByTestId("ask-mode-cue-ticker")).toHaveTextContent(
-      "PICK TYPES",
-    );
+    // Tentacle embeds cue/cost in the question box like Matching.
+    expect(screen.queryByTestId("ask-mode-cue-ticker")).toBeNull();
+    expect(screen.queryByTestId("ask-commit-strip")).toBeNull();
     expect(screen.queryByTestId("tentacle-float-panel")).toBeNull();
   });
 
