@@ -8,6 +8,7 @@ import { hotterColderAnswerOptions } from "@/components/tools/shared/answers/bin
 import { BinaryAnswerPicker } from "@/components/tools/shared/answers/BinaryAnswerPicker";
 import { OptionChip, OptionChipRow } from "@/components/tools/shared/controls/OptionChip";
 import { QuestionPromptBlock } from "@/components/tools/shared/controls/QuestionPromptBlock";
+import { AskInlineError } from "@/components/tools/shared/readout/AskInlineError";
 import { ResolvedReadout } from "@/components/tools/shared/readout/ResolvedReadout";
 import { QuestionTruthReferenceHint } from "@/components/tools/shared/QuestionTruthReferenceHint";
 import {
@@ -207,9 +208,7 @@ export function ThermometerHudBody({
           <button type="button" onClick={onReset} className="btn-secondary w-full">
             Reset
           </button>
-          {error ? (
-            <ResolvedReadout variant="warning">{error}</ResolvedReadout>
-          ) : null}
+          {error ? <AskInlineError message={error} /> : null}
         </div>
       ) : null}
 
@@ -237,9 +236,7 @@ export function ThermometerHudBody({
               Hiders answer hotter or colder in game chat once you send.
             </ResolvedReadout>
           )}
-          {error ? (
-            <ResolvedReadout variant="warning">{error}</ResolvedReadout>
-          ) : null}
+          {error ? <AskInlineError message={error} /> : null}
         </div>
       ) : null}
     </div>

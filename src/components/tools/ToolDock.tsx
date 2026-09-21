@@ -8,6 +8,7 @@ import {
   MARKUP_DOCK_TOOL_IDS,
   QUESTION_DOCK_TOOL_IDS,
 } from "../../domain/map/mapTools";
+import { isAskHudOwnedTool } from "../../domain/ask/askHudModes";
 import { cn } from "../../lib/cn";
 import type { MapTool } from "../../state/sessionStore";
 import { MapBottomChrome } from "../map/chrome/MapBottomChrome";
@@ -117,11 +118,17 @@ export function ToolDock({
     closeMenus();
   };
 
+  const askFirst =
+    mantinePlayerUi &&
+    activeTool !== "none" &&
+    isAskHudOwnedTool(activeTool);
+
   return (
     <MapBottomChrome
       ref={dockRef}
       layout={isRail ? "rail" : "phone"}
       inactive={inactive}
+      askFirst={askFirst}
       style={
         !isRail && viewportBottomInset > 0
           ? { bottom: `${viewportBottomInset}px` }
@@ -168,7 +175,7 @@ export function ToolDock({
               inactive={inactive}
             />
             {mantinePlayerUi ? (
-              <ToolDeckQuestionStrip>
+              <ToolDeckQuestionStrip askFirst={askFirst}>
                 {visibleQuestionTools.map((toolId) => (
                   <ToolDockQuestionSlot
                     key={toolId}
