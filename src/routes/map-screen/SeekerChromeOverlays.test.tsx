@@ -190,10 +190,45 @@ describe("SeekerChromeOverlays Ask HUD wiring", () => {
 
     expect(screen.getByTestId("ask-hud-host")).toBeInTheDocument();
     expect(screen.getByTestId("matching-hud-body")).toBeInTheDocument();
-    expect(screen.getByTestId("ask-mode-cue-ticker")).toHaveTextContent(
-      "PICK CATEGORY",
-    );
+    // Matching embeds cue/cost in the question box; host cue + commit strip stay off.
+    expect(screen.queryByTestId("ask-mode-cue-ticker")).toBeNull();
+    expect(screen.queryByTestId("ask-commit-strip")).toBeNull();
+    expect(screen.queryByTestId("tool-floating-panel")).toBeNull();
     expect(screen.queryByTestId("matching-float-panel")).toBeNull();
+  });
+
+  it("does not surface location errors or SEND — PICK CATEGORY on Matching catalog", () => {
+    const tools = stubTools("matching");
+    tools.matchingTool.hud = {
+      ...tools.matchingTool.hud,
+      error: "Current location is unavailable.",
+    };
+    render(
+      <SeekerChromeOverlays
+        timer={stubTimer() as never}
+        activeTool="matching"
+        overlay={stubOverlay() as never}
+        firstRunDismissed
+        setFirstRunDismissed={vi.fn()}
+        forceMapToolsGuide={false}
+        onDismissMapToolsGuide={vi.fn()}
+        selectedAnnotation={null}
+        geometryEditAnnotation={null}
+        geometryDraft={null}
+        mapPanning={false}
+        userMinimized={false}
+        setUserMinimized={vi.fn()}
+        handleSelectTool={vi.fn()}
+        cancelGeometryEdit={vi.fn()}
+        saveGeometryEdit={vi.fn()}
+        tools={tools as never}
+      />,
+    );
+
+    expect(screen.queryByTestId("ask-commit-strip")).toBeNull();
+    expect(screen.queryByTestId("ask-inline-error")).toBeNull();
+    expect(screen.queryByText(/PICK CATEGORY/i)).toBeNull();
+    expect(screen.queryByText(/Location unavailable/i)).toBeNull();
   });
 
   it("mounts AskHudHost for tentacle CatalogRail and skips ToolFloatingPanel", () => {

@@ -10,6 +10,8 @@ export interface MapDraftOverlayStyle {
   opacity?: number;
   markerRadius?: number;
   pulsing?: boolean;
+  /** When set, draft marker renders as a category icon pin (Matching). */
+  iconCategoryId?: string;
 }
 
 export type MapDraftOverlay =

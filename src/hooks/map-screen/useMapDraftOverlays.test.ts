@@ -52,6 +52,7 @@ const emptySources = {
     boundaryPreview: null,
     eliminationPreview: null,
     seekerResolving: false,
+    categoryId: null,
   },
   zone: { vertices: [] },
 };
@@ -259,5 +260,36 @@ describe("useMapDraftOverlays", () => {
         result.current.overlays.some((overlay) => overlay.id === "pin-draft"),
       ).toBe(true);
     });
+  });
+
+  it("attaches the matching category icon id on the nearest-feature pin", async () => {
+    const { buildMapDraftOverlays } = await import("./useMapDraftOverlays");
+    const result = await buildMapDraftOverlays({
+      ...emptySources,
+      activeTool: "matching",
+      matching: {
+        ...emptySources.matching,
+        seekerPoint: [53.35, -6.26],
+        nearestFeaturePoint: [53.42, -6.27],
+        categoryId: "commercial_airport",
+        seekerResolving: true,
+      },
+    });
+
+    const seeker = result.overlays.find(
+      (overlay) => overlay.id === "matching-draft-seeker",
+    );
+    const nearest = result.overlays.find(
+      (overlay) => overlay.id === "matching-draft-nearest",
+    );
+    expect(seeker?.kind).toBe("marker");
+    expect(nearest?.kind).toBe("marker");
+    if (seeker?.kind === "marker") {
+      expect(seeker.style?.iconCategoryId).toBeUndefined();
+      expect(seeker.style?.pulsing).toBe(true);
+    }
+    if (nearest?.kind === "marker") {
+      expect(nearest.style?.iconCategoryId).toBe("commercial_airport");
+    }
   });
 });

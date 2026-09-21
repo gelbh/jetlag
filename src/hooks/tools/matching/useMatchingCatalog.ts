@@ -6,6 +6,7 @@ import type { AnnotationRecord } from "@/domain/map/annotations";
 import {
   buildMatchingEliminationRegion,
   buildSameNearestRegion,
+  matchingEliminationFromSameNearestRegion,
 } from "@/domain/geometry/measuring/matchingGeometry";
 import {
   buildCoarsePolygonFeature,
@@ -41,6 +42,11 @@ import { usePreloadStore } from "@/state/preloadStore";
 /** Temporary Voronoi/elim prefix — LOD step, not a catalog cap. */
 export const MATCHING_CATALOG_COARSE_PREFIX = 16;
 
+type MatchingElimYesCache = {
+  boundary: Feature<GeoPolygon | MultiPolygon>;
+  yes: Feature<GeoPolygon | MultiPolygon>;
+};
+
 function matchingFeatureArea(feature: MatchingFeature): number {
   if (!feature.boundary) {
     return 0;
@@ -70,6 +76,23 @@ export function matchingCoarseCatalogPrefix(
     .sort((a, b) => matchingFeatureArea(b) - matchingFeatureArea(a))
     .slice(0, MATCHING_CATALOG_COARSE_PREFIX - (nearest ? 1 : 0));
   return nearest ? [nearest, ...rest] : rest;
+}
+
+function yesElimFromBoundary(
+  cacheRef: { current: MatchingElimYesCache | null },
+  boundary: Feature<GeoPolygon | MultiPolygon>,
+  gameArea: GameArea,
+): Feature<GeoPolygon | MultiPolygon> {
+  if (cacheRef.current?.boundary === boundary) {
+    return cacheRef.current.yes;
+  }
+  const yes = matchingEliminationFromSameNearestRegion(
+    boundary,
+    gameArea,
+    "yes",
+  );
+  cacheRef.current = { boundary, yes };
+  return yes;
 }
 
 export function useMatchingCatalog(input: {
@@ -162,13 +185,14 @@ export function useMatchingCatalog(input: {
   const [matchingBoundaryPreview, setMatchingBoundaryPreview] = useState<
     Feature<GeoPolygon | MultiPolygon> | null
   >(null);
-  const [matchingEliminationPreview, setMatchingEliminationPreview] = useState<
+  const [lodEliminationPreview, setLodEliminationPreview] = useState<
     Feature<GeoPolygon | MultiPolygon> | null
   >(null);
   const [matchingLodPhase, setMatchingLodPhase] =
     useState<PolygonLodPhase>("complete");
   const elimGenerationRef = useRef(0);
   const elimLodCancelRef = useRef<(() => void) | null>(null);
+  const yesElimCacheRef = useRef<MatchingElimYesCache | null>(null);
 
   const boundaryEligible =
     !matchingNullAnswer &&
@@ -179,6 +203,8 @@ export function useMatchingCatalog(input: {
 
   useEffect(() => {
     if (!boundaryEligible || !matchingNearestFeatureId) {
+      setMatchingBoundaryPreview(null);
+      yesElimCacheRef.current = null;
       return;
     }
     let cancelled = false;
@@ -189,11 +215,13 @@ export function useMatchingCatalog(input: {
     )
       .then((region) => {
         if (!cancelled) {
+          yesElimCacheRef.current = null;
           setMatchingBoundaryPreview(region);
         }
       })
       .catch(() => {
         if (!cancelled) {
+          yesElimCacheRef.current = null;
           setMatchingBoundaryPreview(null);
         }
       });
@@ -208,14 +236,52 @@ export function useMatchingCatalog(input: {
     matchingNearestFeatureId,
   ]);
 
+  // Warm the yes complement after boundary lands (keeps the yes tap off the critical path).
+  useEffect(() => {
+    if (!matchingBoundaryPreview) {
+      return;
+    }
+    const boundary = matchingBoundaryPreview;
+    const timer = window.setTimeout(() => {
+      yesElimFromBoundary(yesElimCacheRef, boundary, gameArea);
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [gameArea, matchingBoundaryPreview]);
+
+  // Prefer deriving elim from the same-nearest boundary (yes/no are complements).
+  const derivedEliminationPreview = useMemo(() => {
+    if (!eliminationEligible || matchingAnswer === null || !matchingBoundaryPreview) {
+      return null;
+    }
+    if (matchingAnswer === "no") {
+      return matchingBoundaryPreview;
+    }
+    return yesElimFromBoundary(
+      yesElimCacheRef,
+      matchingBoundaryPreview,
+      gameArea,
+    );
+  }, [
+    eliminationEligible,
+    gameArea,
+    matchingAnswer,
+    matchingBoundaryPreview,
+  ]);
+
+  // LOD only while the boundary is still building.
   useEffect(() => {
     if (
       !eliminationEligible ||
       !matchingNearestFeatureId ||
-      matchingAnswer === null
+      matchingAnswer === null ||
+      matchingBoundaryPreview
     ) {
       elimLodCancelRef.current?.();
       elimLodCancelRef.current = null;
+      if (matchingBoundaryPreview || !eliminationEligible) {
+        setLodEliminationPreview(null);
+        setMatchingLodPhase("complete");
+      }
       return;
     }
 
@@ -253,17 +319,17 @@ export function useMatchingCatalog(input: {
             prefixRegion,
             generation,
             elimGenerationRef,
-            setMatchingEliminationPreview,
+            setLodEliminationPreview,
             setMatchingLodPhase,
             elimLodCancelRef,
           );
           return;
         }
         if (prefixRegion) {
-          setMatchingEliminationPreview(buildCoarsePolygonFeature(prefixRegion));
+          setLodEliminationPreview(buildCoarsePolygonFeature(prefixRegion));
           setMatchingLodPhase("coarse");
         } else {
-          setMatchingEliminationPreview(null);
+          setLodEliminationPreview(null);
         }
 
         if (prefixIsFull) {
@@ -292,7 +358,7 @@ export function useMatchingCatalog(input: {
           fullRegion,
           generation,
           elimGenerationRef,
-          setMatchingEliminationPreview,
+          setLodEliminationPreview,
           setMatchingLodPhase,
           elimLodCancelRef,
         );
@@ -312,9 +378,14 @@ export function useMatchingCatalog(input: {
     eliminationEligible,
     gameArea,
     matchingAnswer,
+    matchingBoundaryPreview,
     matchingFeatures,
     matchingNearestFeatureId,
   ]);
+
+  const matchingEliminationPreview = eliminationEligible
+    ? (derivedEliminationPreview ?? lodEliminationPreview)
+    : null;
 
   return {
     costLabel: cost.label,
@@ -331,9 +402,10 @@ export function useMatchingCatalog(input: {
     matchingBoundaryPreview: boundaryEligible
       ? matchingBoundaryPreview
       : null,
-    matchingEliminationPreview: eliminationEligible
-      ? matchingEliminationPreview
-      : null,
-    matchingLodPhase: eliminationEligible ? matchingLodPhase : "complete",
+    matchingEliminationPreview,
+    matchingLodPhase:
+      eliminationEligible && !matchingBoundaryPreview
+        ? matchingLodPhase
+        : "complete",
   };
 }

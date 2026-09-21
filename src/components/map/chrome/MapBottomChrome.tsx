@@ -20,6 +20,8 @@ export interface MapBottomChromeProps {
   inactive?: boolean;
   /** Default `tools` — full-width hunt shrink for many question chips. */
   huntDensity?: MapBottomChromeHuntDensity;
+  /** Flag-on ask-owned tool: ToolDeck ask-first instrument cluster. */
+  askFirst?: boolean;
   hunt?: ReactNode;
   session?: ReactNode;
   mapControls?: ReactNode;
@@ -99,6 +101,7 @@ export const MapBottomChrome = forwardRef<HTMLDivElement, MapBottomChromeProps>(
       layout = "phone",
       inactive = false,
       huntDensity = "tools",
+      askFirst = false,
       hunt,
       session,
       mapControls,
@@ -111,9 +114,13 @@ export const MapBottomChrome = forwardRef<HTMLDivElement, MapBottomChromeProps>(
     const mantinePlayerUi = usePlayerUiMantine();
     const isRail = layout === "rail";
     const sparseHunt = huntDensity === "sparse";
+    const askFirstActive = mantinePlayerUi && askFirst;
     const chromeClassName = cn(
       "jl-map-bottom-chrome jl-tool-dock relative block w-full pointer-events-none bg-transparent",
-      !isRail && "min-h-[calc(var(--dock-island-height)+0.75rem)]",
+      !isRail &&
+        !askFirstActive &&
+        "min-h-[calc(var(--dock-island-height)+0.75rem)]",
+      !isRail && askFirstActive && "min-h-0",
       !isRail && mantinePlayerUi && "px-1",
       isRail &&
         "jl-map-bottom-chrome--rail jl-tool-dock--rail relative flex h-full min-h-0 flex-col items-stretch justify-start gap-2 p-2",
@@ -126,6 +133,7 @@ export const MapBottomChrome = forwardRef<HTMLDivElement, MapBottomChromeProps>(
       inactive &&
         "jl-map-bottom-chrome--inactive [&_[data-island]]:pointer-events-none [&_[data-island]]:border-halt [&_[data-island]]:bg-halt-soft",
       sparseHunt && "jl-map-bottom-chrome--hunt-sparse",
+      askFirstActive && "jl-map-bottom-chrome--ask-first",
       className,
     );
     const ChromeRoot = mantinePlayerUi ? Box : "div";
@@ -144,6 +152,7 @@ export const MapBottomChrome = forwardRef<HTMLDivElement, MapBottomChromeProps>(
             "data-overlay-chrome": "",
             "data-layout": layout,
             "data-hunt-density": huntDensity,
+            "data-ask-first": askFirstActive ? "true" : undefined,
             className: chromeClassName,
             "aria-disabled": inactive || undefined,
             inert: inactive || undefined,
@@ -156,9 +165,17 @@ export const MapBottomChrome = forwardRef<HTMLDivElement, MapBottomChromeProps>(
               sparseHunt && !isRail && "justify-center",
             )}
           >
-            {hunt ? <ToolDeck density={huntDensity}>{hunt}</ToolDeck> : null}
+            {hunt && !askFirstActive ? (
+              <ToolDeck density={huntDensity} askFirst={false}>
+                {hunt}
+              </ToolDeck>
+            ) : null}
           </div>,
           (() => {
+            if (askFirstActive) {
+              return null;
+            }
+
             const sideIslands = (
               <>
                 {session ? (
