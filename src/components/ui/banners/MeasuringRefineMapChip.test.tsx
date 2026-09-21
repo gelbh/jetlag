@@ -1,6 +1,26 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
 import { MeasuringRefineMapChip } from "./MeasuringRefineMapChip";
+
+const mockUsePlayerUiMantine = vi.fn(() => false);
+
+vi.mock("@/hooks/feature/usePlayerUiMantine", () => ({
+  usePlayerUiMantine: () => mockUsePlayerUiMantine(),
+}));
+
+beforeEach(() => {
+  mockUsePlayerUiMantine.mockReturnValue(false);
+  vi.stubGlobal("matchMedia", (query: string) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener() {},
+    removeListener() {},
+    addEventListener() {},
+    removeEventListener() {},
+    dispatchEvent: () => false,
+  }));
+});
 
 describe("MeasuringRefineMapChip", () => {
   it("uses measuring copy by default", () => {
@@ -19,6 +39,22 @@ describe("MeasuringRefineMapChip", () => {
     );
     expect(screen.getByText("Loading places")).toBeTruthy();
     expect(screen.getByText("Adding remaining areas to the map…")).toBeTruthy();
+  });
+
+  it("uses frosted iOS chrome under mantine player UI", () => {
+    mockUsePlayerUiMantine.mockReturnValue(true);
+    render(
+      <MeasuringRefineMapChip
+        visible
+        title="Loading places"
+        body="Adding remaining areas to the map…"
+      />,
+    );
+    expect(screen.getByTestId("measuring-refine-chip")).toHaveAttribute(
+      "data-player-ux-world",
+      "mantine",
+    );
+    expect(screen.getByText("Loading places")).toBeTruthy();
   });
 
   it("hides when not refining", () => {

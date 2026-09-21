@@ -6,7 +6,6 @@
  */
 import { Box } from "@mantine/core";
 import { chipVariants } from "@/components/ui/chip";
-import { iosMapChromeSurfaceStyles } from "@/components/ui/apple/iosEntryChrome";
 import { usePlayerUiMantine } from "@/hooks/feature/usePlayerUiMantine";
 import { cn } from "@/lib/cn";
 
@@ -30,15 +29,18 @@ export function AskCostChip({ toolLabel, costLabel }: AskCostChipProps) {
         role="status"
         aria-label={text}
         style={{
-          ...iosMapChromeSurfaceStyles,
           display: "inline-flex",
           alignItems: "center",
+          flexShrink: 0,
           borderRadius: 999,
-          padding: "0.35rem 0.75rem",
-          fontSize: "0.8125rem",
+          padding: "0.3rem 0.65rem",
+          fontSize: "0.75rem",
           fontWeight: 590,
           letterSpacing: "-0.01em",
-          color: "var(--color-field-ink)",
+          color: "var(--color-field-ink-muted)",
+          backgroundColor: "oklch(from var(--color-field-ink) l c h / 0.08)",
+          border: "0.33px solid oklch(from var(--color-field-ink) l c h / 0.1)",
+          boxShadow: "none",
           width: "fit-content",
         }}
       >

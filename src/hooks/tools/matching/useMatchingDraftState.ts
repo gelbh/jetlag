@@ -84,6 +84,16 @@ export function useMatchingDraftState() {
     [clearResolvedFields],
   );
 
+  /** Back to catalog: keep tool open, clear placement/resolve, show category sheet. */
+  const reopenCategoryPicker = useCallback(() => {
+    setMatchingLoading(false);
+    setMatchingSeekerPoint(null);
+    setMatchingCategoryId(null);
+    setMatchingCategoryChosen(false);
+    clearResolvedFields();
+    setPreviewOpen(false);
+  }, [clearResolvedFields]);
+
   return {
     matchingSeekerPoint,
     matchingCategoryId,
@@ -118,6 +128,7 @@ export function useMatchingDraftState() {
     setMatchingSeekerAnchor,
     resetDraft,
     selectCategory,
+    reopenCategoryPicker,
     clearResolvedFields,
   };
 }

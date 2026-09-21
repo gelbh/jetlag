@@ -39,6 +39,46 @@ const baseProps = {
 };
 
 describe("MatchingHudBody", () => {
+  it("shows matching question prompt and category row icons", () => {
+    const { container } = render(
+      <MatchingHudBody {...baseProps} costLabel="D3P1" />,
+    );
+
+    expect(
+      screen.getByText(
+        "Is your nearest [place] the same as my nearest [place]?",
+      ),
+    ).toBeInTheDocument();
+    expect(screen.getByTestId("ask-cost-chip")).toHaveTextContent("D3P1");
+    expect(screen.queryByText("PICK CATEGORY")).toBeNull();
+
+    const airport = screen.getByRole("button", { name: /Commercial Airport/i });
+    expect(airport.querySelector("svg")).not.toBeNull();
+    expect(
+      container.querySelector(".ask-catalog-rail__grid"),
+    ).toBeInTheDocument();
+    expect(
+      container.querySelectorAll('[data-testid="ask-catalog-rail"] svg').length,
+    ).toBeGreaterThan(3);
+  });
+
+  it("shows the real category question once a category is chosen", () => {
+    render(
+      <MatchingHudBody
+        {...baseProps}
+        categoryChosen
+        categoryId="commercial_airport"
+        hasSeekerPoint
+      />,
+    );
+
+    expect(
+      screen.getByText(
+        "Is your nearest commercial airport the same as my nearest commercial airport?",
+      ),
+    ).toBeInTheDocument();
+  });
+
   it("shows catalog rail without PhaseRail or CONTINUE; row select advances", () => {
     const onCategoryChange = vi.fn();
     render(
@@ -56,6 +96,43 @@ describe("MatchingHudBody", () => {
     expect(onCategoryChange).toHaveBeenCalledWith("commercial_airport");
   });
 
+  it("filters catalog rows by category group chip", () => {
+    render(<MatchingHudBody {...baseProps} />);
+
+    const filter = screen.getByRole("tablist", {
+      name: "Filter match categories",
+    });
+    expect(filter).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Commercial Airport/i })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("tab", { name: "Transit" }));
+    expect(screen.getByRole("button", { name: /Commercial Airport/i })).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /1st Administrative Division/i }),
+    ).toBeNull();
+
+    fireEvent.click(screen.getByRole("tab", { name: "Admin" }));
+    expect(screen.queryByRole("button", { name: /Commercial Airport/i })).toBeNull();
+    expect(
+      screen.getByRole("button", { name: /1st Administrative Division/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("renders GPS timeout with AskInlineError treatment", () => {
+    render(
+      <MatchingHudBody
+        {...baseProps}
+        categoryChosen
+        categoryId="commercial_airport"
+        hasSeekerPoint
+        error="Timed out while waiting for your location."
+      />,
+    );
+
+    expect(screen.getByTestId("ask-inline-error")).toBeInTheDocument();
+    expect(screen.getByText("Location timed out")).toBeInTheDocument();
+  });
+
   it("after category, shows resolve chord without CONTINUE strip sibling", () => {
     render(
       <MatchingHudBody
@@ -68,6 +145,8 @@ describe("MatchingHudBody", () => {
 
     expect(screen.queryByTestId("ask-catalog-rail")).toBeNull();
     expect(screen.getByTestId("matching-hud-body")).toBeInTheDocument();
+    expect(screen.getByText("Commercial Airport")).toBeInTheDocument();
+    expect(screen.getByText("Category")).toBeInTheDocument();
     expect(
       screen.queryByRole("button", { name: "Continue" }),
     ).toBeNull();

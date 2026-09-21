@@ -248,22 +248,25 @@ export function SeekerChromeOverlays({
         }}
       />
 
-      {askHudOwned && askSurface && toolHud ? (
-        <>
-          <AskHudHost
-            cue={askCue}
-            toolLabel={dockEntry?.name ?? activeTool}
-            costLabel={toolHud.costLabel}
-            canCommit={askCanCommit}
-            commitLabel={askCommitLabel}
-            onCommit={toolHud.onCommit}
-            isSubmitting={toolHud.readiness.isSubmitting}
-            error={toolHud.error}
-            modeBody={toolHud.modeBody}
-          />
-          {toolHud.sheets}
-        </>
+      {askHudOwned && askSurface && toolHud && !toolHud.suppressSheet ? (
+        <AskHudHost
+          cue={askCue}
+          toolLabel={dockEntry?.name ?? activeTool}
+          costLabel={toolHud.costLabel}
+          canCommit={askCanCommit}
+          commitLabel={askCommitLabel}
+          onCommit={toolHud.onCommit}
+          onDismiss={() => handleSelectTool("none")}
+          isSubmitting={toolHud.readiness.isSubmitting}
+          error={toolHud.suppressSheet ? null : toolHud.error}
+          modeBody={toolHud.modeBody}
+          showCue={askSurface !== "matching"}
+          showCostChip={askSurface !== "matching"}
+          showCommitStrip={askSurface !== "matching"}
+        />
       ) : null}
+      {askHudOwned && toolHud?.mapOverlay ? toolHud.mapOverlay : null}
+      {askHudOwned && toolHud?.sheets ? toolHud.sheets : null}
 
       {showFloatingPanel ? (
         <ToolFloatingPanel

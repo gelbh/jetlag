@@ -1,12 +1,11 @@
 /**
- * Ask Map HUD host — map overlay chrome (no scrim, no floating panel).
- * Pointer-events none except HUD interactive nodes; clears dock via
- * `--dock-content-height` / `jl-panel-above-dock`.
- * Content width matches OverlayHost / ToolDeck (shared safe-area pad).
- * Spec: ask-surface-kit-design rev 2026-08-05b.
+ * Ask Map HUD host — flag-off: map overlay bands (Survey).
+ * Flag-on: iOS entry SheetHost (Mantine bottom Drawer), same chassis as Chat.
  */
 import type { ReactNode } from "react";
+import { Stack } from "@mantine/core";
 import { OVERLAY_SAFE_PAD_X } from "@/components/map/chrome/OverlayHost";
+import { SheetHost } from "@/components/ui/sheets/SheetHost";
 import { usePlayerUiMantine } from "@/hooks/feature/usePlayerUiMantine";
 import { cn } from "@/lib/cn";
 import { AskCommitStrip } from "./AskCommitStrip";
@@ -20,12 +19,16 @@ export type AskHudHostProps = {
   canCommit: boolean;
   commitLabel: string;
   onCommit: () => void;
+  /** Flag-on sheet dismiss (clears active ask tool). */
+  onDismiss?: () => void;
   isSubmitting?: boolean;
   error?: string | null;
   /** ONE OF chips island | catalog rail | walk banner — or null scaffold. */
   modeBody?: ReactNode | null;
   showCommitStrip?: boolean;
   showCostChip?: boolean;
+  /** Hide GlanceVerb ticker (Matching embeds cost in the question box). */
+  showCue?: boolean;
 };
 
 export function AskHudHost({
@@ -35,13 +38,83 @@ export function AskHudHost({
   canCommit,
   commitLabel,
   onCommit,
+  onDismiss,
   isSubmitting = false,
   error = null,
   modeBody = null,
   showCommitStrip = true,
   showCostChip = true,
+  showCue = true,
 }: AskHudHostProps) {
   const mantinePlayerUi = usePlayerUiMantine();
+
+  const cueTicker = showCue ? <AskModeCueTicker cue={cue} /> : null;
+
+  const costChip =
+    showCostChip ? (
+      <div className="flex justify-start">
+        <AskCostChip toolLabel={toolLabel} costLabel={costLabel} />
+      </div>
+    ) : null;
+
+  // Sheet path: hide muted "SEND/ASK — …" footer; cue already states the next step.
+  const sheetShowCommit =
+    showCommitStrip && (canCommit || Boolean(error) || isSubmitting);
+
+  const commit =
+    showCommitStrip ? (
+      <AskCommitStrip
+        canCommit={canCommit}
+        label={commitLabel}
+        onCommit={onCommit}
+        isSubmitting={isSubmitting}
+        error={error}
+      />
+    ) : null;
+
+  const sheetCommit =
+    sheetShowCommit ? (
+      <AskCommitStrip
+        canCommit={canCommit}
+        label={commitLabel}
+        onCommit={onCommit}
+        isSubmitting={isSubmitting}
+        error={error}
+      />
+    ) : null;
+
+  const pinned =
+    cueTicker || costChip ? (
+      <Stack gap={8}>
+        {cueTicker}
+        {costChip}
+      </Stack>
+    ) : null;
+
+  if (mantinePlayerUi) {
+    return (
+      <div
+        data-testid="ask-hud-host"
+        data-player-ux-world="mantine"
+        data-ask-composition="ask-first"
+      >
+        <SheetHost
+          open
+          onClose={onDismiss ?? (() => undefined)}
+          ariaLabel={toolLabel}
+          maxHeightClassName="max-h-[min(72dvh,640px)]"
+          padding="sm"
+          pinned={pinned}
+        >
+          <Stack gap="md" pb="xs">
+            {modeBody}
+            {sheetCommit}
+          </Stack>
+        </SheetHost>
+      </div>
+    );
+  }
+
   const hostClassName =
     "ask-hud-host pointer-events-none absolute inset-0 z-[var(--z-panel)]";
   const topClassName = cn(
@@ -61,30 +134,16 @@ export function AskHudHost({
     <div
       className={hostClassName}
       data-testid="ask-hud-host"
-      {...(mantinePlayerUi
-        ? { "data-player-ux-world": "mantine" }
-        : { "data-survey": "true" })}
+      data-survey="true"
     >
       <div className={topClassName}>
-        <AskModeCueTicker cue={cue} />
-        {showCostChip ? (
-          <div className="flex justify-start">
-            <AskCostChip toolLabel={toolLabel} costLabel={costLabel} />
-          </div>
-        ) : null}
+        {cueTicker}
+        {costChip}
       </div>
       {modeBody ? <div className={bodyClassName}>{modeBody}</div> : null}
-      {showCommitStrip ? (
+      {commit ? (
         <div className={stripClassName}>
-          <div className="w-full">
-            <AskCommitStrip
-              canCommit={canCommit}
-              label={commitLabel}
-              onCommit={onCommit}
-              isSubmitting={isSubmitting}
-              error={error}
-            />
-          </div>
+          <div className="w-full">{commit}</div>
         </div>
       ) : null}
     </div>

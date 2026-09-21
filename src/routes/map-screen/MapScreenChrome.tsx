@@ -432,13 +432,23 @@ export function MapScreenChrome({
     tentacleTool.tentacleLodPhase === "coarse" ||
     tentacleTool.tentacleLodPhase === "refining";
   const catalogHydrating =
-    activeTool === "matching" && !matchingTool.matchingCatalogComplete;
+    activeTool === "matching" &&
+    !matchingTool.matchingCatalogComplete &&
+    !matchingTool.hud.suppressSheet;
+  const askMapFirst = Boolean(
+    (activeTool === "matching" && matchingTool.hud.suppressSheet) ||
+      (activeTool === "radar" && radarTool.hud.suppressSheet) ||
+      (activeTool === "tentacle" && tentacleTool.hud.suppressSheet) ||
+      (activeTool === "measuring" && measuringTool.hud.suppressSheet),
+  );
 
   const refineChip: MapRefineChipCopy = selectMapRefineChip({
     catalogHydrating,
     measuringActiveAndRefining: measuringLodRefining && activeTool === "measuring",
     shadeRefining:
-      matchingLodRefining || measuringLodRefining || tentacleLodRefining,
+      (!askMapFirst && matchingLodRefining) ||
+      measuringLodRefining ||
+      tentacleLodRefining,
   });
 
   const header = (

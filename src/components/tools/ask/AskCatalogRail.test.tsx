@@ -81,4 +81,31 @@ describe("AskCatalogRail", () => {
     fireEvent.click(row);
     expect(onSelect).toHaveBeenCalledWith("museum");
   });
+
+  it("renders group headings once per section without prefixing row labels", () => {
+    const onSelect = vi.fn();
+    render(
+      <AskCatalogRail
+        columns={2}
+        rows={[
+          { id: "bus", label: "Bus stop", groupLabel: "Transit" },
+          { id: "rail", label: "Rail station", groupLabel: "Transit" },
+          { id: "park", label: "Park", groupLabel: "Nature" },
+        ]}
+        selectedId={null}
+        onSelect={onSelect}
+      />,
+    );
+
+    expect(screen.getAllByText("Transit")).toHaveLength(1);
+    expect(screen.getByText("Nature")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /Transit:/i }),
+    ).not.toBeInTheDocument();
+    expect(
+      document.querySelector(".ask-catalog-rail__grid"),
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Bus stop" }));
+    expect(onSelect).toHaveBeenCalledWith("bus");
+  });
 });

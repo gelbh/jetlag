@@ -24,6 +24,15 @@ export type AskToolHudBundle = {
   sheets: ReactNode;
   /** Override strip verb (e.g. thermometer END WALK while walking). */
   commitKind?: AskHudCommitKind;
+  /**
+   * Flag-on: hide Ask sheet and show map-first chrome.
+   * `mapOverlay` renders above the map instead.
+   */
+  suppressSheet?: boolean;
+  mapOverlay?: ReactNode;
+  /** Optional camera padding overrides while map-first. */
+  mapFirstCameraTopPx?: number;
+  mapFirstCameraBottomPx?: number;
 };
 
 export interface MatchingToolApi {
@@ -34,6 +43,7 @@ export interface MatchingToolApi {
     matchingEliminationPreview: Feature<Polygon | MultiPolygon> | null;
     matchingLodPhase?: PolygonLodPhase;
     matchingCatalogComplete?: boolean;
+    matchingCategoryId: string | null;
     seekerResolving: boolean;
   };
   matchingLodPhase: PolygonLodPhase;
@@ -56,6 +66,7 @@ export interface MeasuringToolApi {
     measuringBoundaryPreview: Feature<Polygon | MultiPolygon> | null;
     measuringEliminationPreview: Feature<Polygon | MultiPolygon> | null;
     measuringLodPhase?: MeasuringLodPhase;
+    measuringCategoryId?: string | null;
     seekerResolving: boolean;
   };
   measuringLodPhase: MeasuringLodPhase;
@@ -155,6 +166,7 @@ export function createIdleHeavyMapTools(): HeavyMapToolsApi {
       matchingEliminationPreview: null,
       matchingLodPhase: "complete",
       matchingCatalogComplete: true,
+      matchingCategoryId: null,
       seekerResolving: false,
     },
     matchingLodPhase: "complete",
@@ -176,6 +188,7 @@ export function createIdleHeavyMapTools(): HeavyMapToolsApi {
       measuringBoundaryPreview: null,
       measuringEliminationPreview: null,
       measuringLodPhase: "complete",
+      measuringCategoryId: null,
       seekerResolving: false,
     },
     measuringLodPhase: "complete",
