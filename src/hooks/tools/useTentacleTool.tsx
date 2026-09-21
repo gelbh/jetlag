@@ -2,6 +2,10 @@ import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } fro
 import { useLatestRequest } from "../forms/useLatestRequest";
 import { useDebouncedValue } from "../forms/useDebouncedValue";
 import { TentacleHudBody } from "../../components/tools/ask/TentacleHudBody";
+import {
+  TentacleMapPlacementChrome,
+  type TentacleMapPlacementPhase,
+} from "../../components/tools/ask/TentacleMapPlacementChrome";
 import { TentaclePanel } from "../../components/tools/TentaclePanel";
 import type { AskHudReadiness } from "@/domain/ask/askHudModes";
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
@@ -17,8 +21,10 @@ import { sessionGameSize } from "../../domain/session/rules";
 import {
   firstAvailableTentacleCategoryIdForSession,
   isTentacleCategoryAvailableInSession,
+  tentacleCategoriesForGameSize,
   tentacleCategoryUseCount,
   tentacleCategoryUseCountFromPending,
+  tentacleQuestionPrompt,
   tentacleSearchRadiusMetersForSession,
   usedTentacleCategoryIds,
   type TentacleExtendedCategoryId,
@@ -35,6 +41,11 @@ import {
   poiCandidateToTentaclePoi,
 } from "@/domain/geo/poiCandidateAdapters";
 import { useMapStore } from "@/state/mapStore";
+import { usePlayerUiMantine } from "@/hooks/feature/usePlayerUiMantine";
+import {
+  queryGeolocationPermission,
+  type GeolocationPermissionState,
+} from "../../services/core/location/geolocation";
 import { useToolSession } from "./framework/useToolSession";
 import { useToolSessionOptions } from "./useToolSessionOptions";
 import { commitTentacle } from "./tentacle/commitTentacle";
@@ -539,12 +550,171 @@ export function useTentacleTool({
     resolving: tentacleLoading && tentacleCenter !== null,
   };
 
+  const mantinePlayerUi = usePlayerUiMantine();
+  const mapFirstEligible =
+    mantinePlayerUi &&
+    tentacleCategoryChosen &&
+    tentacleCategoryId !== null &&
+    categorySelectionAvailable;
+
+  const [placementGeo, setPlacementGeo] = useState<
+    GeolocationPermissionState | "checking"
+  >("checking");
+  const autoGpsForCategoryRef = useRef<TentacleExtendedCategoryId | null>(null);
+  const handleUseGpsRef = useRef(handleUseGps);
+  handleUseGpsRef.current = handleUseGps;
+
+  useEffect(() => {
+    if (!mapFirstEligible) {
+      setPlacementGeo("checking");
+      autoGpsForCategoryRef.current = null;
+      return;
+    }
+
+    let cancelled = false;
+    void (async () => {
+      const permission = await queryGeolocationPermission();
+      if (cancelled) {
+        return;
+      }
+      setPlacementGeo(permission);
+      if (
+        permission === "granted" &&
+        tentacleCenter === null &&
+        autoGpsForCategoryRef.current !== tentacleCategoryId
+      ) {
+        autoGpsForCategoryRef.current = tentacleCategoryId;
+        void handleUseGpsRef.current();
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- category entry only
+  }, [mapFirstEligible, tentacleCategoryId]);
+
+  useEffect(() => {
+    autoGpsForCategoryRef.current = null;
+  }, [tentacleCategoryId]);
+
+  const mapPlacementActive = Boolean(mapFirstEligible);
+  const placementError =
+    tentacleError ??
+    (tentacleCenter === null ? gpsError : null) ??
+    mapError ??
+    null;
+
+  let placementPhase: TentacleMapPlacementPhase;
+  if (tentacleCenter !== null && !tentacleLoading) {
+    placementPhase = "answer";
+  } else if (tentacleCenter !== null && tentacleLoading) {
+    placementPhase = "resolving";
+  } else if (gpsLoading || placementGeo === "checking") {
+    placementPhase = "locating";
+  } else if (placementError) {
+    placementPhase = "failed";
+  } else if (placementGeo === "denied" || placementGeo === "prompt") {
+    placementPhase = "needs_permission";
+  } else {
+    placementPhase = "needs_permission";
+  }
+
+  const categoryLabel =
+    tentacleCategoryId !== null
+      ? (tentacleCategoriesForGameSize(gameSize).find(
+          (c) => c.id === tentacleCategoryId,
+        )?.label ?? tentacleCategoryId)
+      : "";
+
+  const questionPrompt =
+    tentacleCategoryId !== null
+      ? tentacleQuestionPrompt(
+          tentacleCategoryId,
+          distanceUnit,
+          searchRadiusMeters,
+        )
+      : "Pick a location type";
+
+  const reopenCategoryPicker = () => {
+    cancelRequests();
+    setTentacleLoading(false);
+    setTentacleCategoryChosen(false);
+    setTentacleCategoryId(null);
+    setTentaclePois([]);
+    setTentacleOutOfReach(false);
+    setSelectedPoiId(null);
+    setTentacleError(null);
+    setTentacleCenter(null);
+  };
+
+  const canCommitTentacle =
+    tentacleCenter !== null &&
+    tentacleCategoryChosen &&
+    categorySelectionAvailable &&
+    !tentacleLoading &&
+    (awaitHiderAnswer || hasRecordedAnswer) &&
+    canSubmitQuestion &&
+    !session.isBusy;
+
+  const statusTitle =
+    placementPhase === "locating"
+      ? "Getting your location"
+      : placementPhase === "resolving"
+        ? tentaclePois.length > 0
+          ? "Confirming places"
+          : "Finding places"
+        : "Ready";
+  const statusBody =
+    placementPhase === "locating"
+      ? "Waiting for GPS…"
+      : placementPhase === "resolving"
+        ? tentaclePois.length > 0
+          ? `Confirming ${tentaclePois.length} preview${
+              tentaclePois.length === 1 ? "" : "s"
+            }…`
+          : `Searching within ${formatDistance(searchRadiusMeters, distanceUnit)}…`
+        : categoryLabel;
+
   const hud = {
     readiness,
     costLabel,
-    error: tentacleError ?? mapError ?? gpsError ?? null,
+    error: mapPlacementActive
+      ? null
+      : (tentacleError ?? mapError ?? gpsError ?? null),
     onCommit: () => void commit(),
-    modeBody: (
+    suppressSheet: mapPlacementActive,
+    mapOverlay: mapPlacementActive && tentacleCategoryId ? (
+      <TentacleMapPlacementChrome
+        categoryLabel={categoryLabel}
+        questionPrompt={questionPrompt}
+        costLabel={costLabel}
+        phase={placementPhase}
+        onUseGps={() => void handleUseGps()}
+        error={placementError}
+        awaitHiderAnswer={awaitHiderAnswer}
+        categoryId={tentacleCategoryId}
+        distanceUnit={distanceUnit}
+        searchRadiusMeters={searchRadiusMeters}
+        poiOptions={tentaclePois}
+        selectedPoiId={selectedPoiId}
+        outOfReach={tentacleOutOfReach}
+        onSelectPoi={handleSelectPoi}
+        onOutOfReachChange={(nextOutOfReach) => {
+          setTentacleOutOfReach(nextOutOfReach);
+          if (nextOutOfReach) {
+            setSelectedPoiId(null);
+          }
+        }}
+        canCommit={canCommitTentacle}
+        isSubmitting={session.isBusy}
+        onCommit={() => void commit()}
+        onChangeCategory={reopenCategoryPicker}
+        statusTitle={statusTitle}
+        statusBody={statusBody}
+      />
+    ) : null,
+    modeBody: mapPlacementActive ? null : (
       <TentacleHudBody
         gameSize={gameSize}
         categoryId={tentacleCategoryId}
