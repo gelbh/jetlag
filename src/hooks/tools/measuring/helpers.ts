@@ -2,6 +2,7 @@ import type { Feature, LineString, MultiPolygon, Polygon } from "geojson";
 import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
 import type { MeasuringPlace } from "@/domain/geo/types";
 import {
+  measuringTargetKind,
   measuringUsesAllPlacesInArea,
   type MeasuringFromKind,
   type MeasuringLocationCategory,
@@ -12,10 +13,13 @@ export function usesDebouncedSeekerResolve(
   subject: MeasuringSubject,
   kind: MeasuringFromKind,
 ): boolean {
+  const targetKind = measuringTargetKind(kind);
   return (
     subject === "coastline" ||
     subject === "sea_level" ||
-    measuringUsesAllPlacesInArea(kind)
+    measuringUsesAllPlacesInArea(kind) ||
+    targetKind === "linear" ||
+    targetKind === "polygon"
   );
 }
 

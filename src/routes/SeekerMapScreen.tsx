@@ -41,6 +41,7 @@ function SeekerMapScreenBody({
       effectiveMapFocusBounds={controller.effectiveMapFocusBounds}
       placementRecenterToken={controller.placementRecenterToken}
       placementFocusPaddingBias={controller.placementFocusPaddingBias}
+      placementFocusPaddingTopBias={controller.placementFocusPaddingTopBias}
       placementFocusMinZoom={controller.placementFocusMinZoom}
       placementFocusMaxZoom={controller.placementFocusMaxZoom}
       placementFocusPreferFly={controller.placementFocusPreferFly}

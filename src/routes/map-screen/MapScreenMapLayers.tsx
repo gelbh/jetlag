@@ -10,6 +10,8 @@ import { MapViewportTracker } from "../../components/map/chrome/MapViewportTrack
 import { ActiveThermometerWalkLayer } from "../../components/map/layers/ActiveThermometerWalkLayer";
 import { PendingQuestionLayer } from "../../components/map/layers/PendingQuestionLayer";
 import { MapDrawStrokeCapture } from "../../components/map/helpers/MapDrawStrokeCapture";
+import { isAskHudOwnedTool } from "../../domain/ask/askHudModes";
+import { usePlayerUiMantine } from "../../hooks/feature/usePlayerUiMantine";
 import { AdminBoundariesLayer, TransitLayer } from "./lazyImports";
 import type { MapScreenController } from "./useMapScreenController";
 
@@ -26,6 +28,7 @@ type MapScreenMapLayersProps = Pick<
   | "effectiveMapFocusBounds"
   | "placementRecenterToken"
   | "placementFocusPaddingBias"
+  | "placementFocusPaddingTopBias"
   | "placementFocusMinZoom"
   | "placementFocusMaxZoom"
   | "placementFocusPreferFly"
@@ -79,6 +82,7 @@ export function MapScreenMapLayers({
   effectiveMapFocusBounds,
   placementRecenterToken,
   placementFocusPaddingBias,
+  placementFocusPaddingTopBias,
   placementFocusMinZoom,
   placementFocusMaxZoom,
   placementFocusPreferFly,
@@ -119,6 +123,12 @@ export function MapScreenMapLayers({
   activeTool,
   drawTool,
 }: MapScreenMapLayersProps) {
+  const mantinePlayerUi = usePlayerUiMantine();
+  const hideMapControls =
+    mantinePlayerUi &&
+    activeTool !== "none" &&
+    isAskHudOwnedTool(activeTool);
+
   return (
     <div ref={mapShellRef} className="absolute inset-0">
       <MapView
@@ -126,7 +136,9 @@ export function MapScreenMapLayers({
         mapKey={session!.id}
         mapStyle={effectiveBasemapStyle}
         streetBasemap={streetBasemap}
-        onMapStyleChange={handleMapStyleChange}
+        onMapStyleChange={hideMapControls ? undefined : handleMapStyleChange}
+        showMapStyleToggle={!hideMapControls}
+        showZoomControl={!hideMapControls}
         zoomControlInset={mapChromeControlInset}
         mapStyleControlInset={mapChromeControlInset}
         center={center}
@@ -137,8 +149,9 @@ export function MapScreenMapLayers({
         fitBoundsMode="once"
         recenterToken={placementRecenterToken}
         focusPaddingBias={placementFocusPaddingBias}
+        focusPaddingTopBias={placementFocusPaddingTopBias}
         focusPreferFly={placementFocusPreferFly}
-        showCompassControl
+        showCompassControl={!hideMapControls}
         onRecenter={requestPlacementRecenter}
         onMapClick={handleMapClick}
         chromeHudRef={chromeHudRef}
