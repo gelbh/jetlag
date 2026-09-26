@@ -32,241 +32,130 @@ import {
   type MapRefineChipCopy,
 } from "./shared/selectMapRefineChip";
 
-type MapScreenChromeProps = Pick<
-  MapScreenController,
-  | "session"
-  | "gameArea"
-  | "uid"
-  | "isHost"
-  | "activeTool"
-  | "annotations"
-  | "pendingQuestions"
-  | "pendingWrites"
-  | "distanceUnit"
-  | "handleMapStyleChange"
-  | "effectiveBasemapStyle"
-  | "streetBasemap"
-  | "setStreetBasemap"
-  | "lowPowerMode"
-  | "layerVisibility"
-  | "showCurrentLocation"
-  | "setShowCurrentLocation"
-  | "showAdminBoundaries"
-  | "setShowAdminBoundaries"
-  | "keepScreenAwake"
-  | "setKeepScreenAwake"
-  | "setLowPowerMode"
-  | "setLayerVisibility"
-  | "notificationPreferences"
-  | "transitEnabled"
-  | "transitLiveEnabled"
-  | "transitLiveSupported"
-  | "sessionIsPremium"
-  | "transitRouteFilter"
-  | "setTransitEnabled"
-  | "setTransitLiveEnabled"
-  | "setTransitRouteFilter"
-  | "transitMetro"
-  | "transitStaticData"
-  | "transitLiveData"
-  | "transitLoadingStatic"
-  | "transitLoadingLive"
-  | "transitLiveDataStale"
-  | "transitError"
-  | "chromeHudRef"
-  | "overlay"
-  | "syncStatus"
-  | "matchingAreasError"
-  | "timer"
-  | "timerSyncing"
-  | "canControlTimer"
-  | "confirmedHidingZones"
-  | "canUndoLastTool"
-  | "canRedoLastTool"
-  | "awaitHiderAnswer"
-  | "canSubmitQuestion"
-  | "canStartEndGame"
-  | "endGameBlocked"
-  | "canRequestFoundHider"
-  | "firstRunDismissed"
-  | "setFirstRunDismissed"
-  | "mapPanning"
-  | "userMinimized"
-  | "setUserMinimized"
-  | "selectedAnnotation"
-  | "selectedAnnotationId"
-  | "setSelectedAnnotationId"
-  | "geometryEditAnnotation"
-  | "geometryDraft"
-  | "radarTool"
-  | "photoTool"
-  | "thermometerTool"
-  | "matchingTool"
-  | "measuringTool"
-  | "pinTool"
-  | "zoneTool"
-  | "tentacleTool"
-  | "drawTool"
-  | "chatMessages"
-  | "hasUnreadChat"
-  | "unreadCount"
-  | "liveLocationError"
-  | "isRemote"
-  | "gameRulesEditable"
-  | "draftAdvancedSettings"
-  | "setDraftAdvancedSettings"
-  | "updateNotificationPreferences"
-  | "enableNotifications"
-  | "deleteAnnotation"
-  | "updateAnnotation"
-  | "startGeometryEdit"
-  | "cancelGeometryEdit"
-  | "saveGeometryEdit"
-  | "handleSelectTool"
-  | "handleOpenChat"
-  | "handleOpenSettings"
-  | "handleOpenLog"
-  | "handleOpenCodes"
-  | "handleUndoLastAnnotation"
-  | "handleRedoLastAnnotation"
-  | "handleResetEndGame"
-  | "handleStartEndGame"
-  | "handleRequestFoundHider"
-  | "handleDeclineFoundHider"
-  | "handleClearMap"
-  | "handleResetBoard"
-  | "handleResetSession"
-  | "handleEndSession"
-  | "handleLeaveSession"
-  | "handleSaveGameRules"
-  | "handleDistanceUnitChange"
-  | "exportMap"
-  | "answerPendingQuestion"
-  | "dismissExpiredPendingQuestion"
-  | "handleCancelWalkingQuestion"
-  | "seekerLocations"
-  | "setActiveTool"
-  | "setAwaitingPlacement"
-> & {
+export type MapScreenChromeProps = {
+  controller: MapScreenController;
   /** When set with desktop layout, map fills the ops shell center slot. */
   mapSlot?: ReactNode;
 };
 
 export function MapScreenChrome({
-  session,
-  gameArea,
-  uid,
-  isHost,
-  activeTool,
-  annotations,
-  pendingQuestions,
-  pendingWrites,
-  distanceUnit,
-  handleMapStyleChange,
-  effectiveBasemapStyle,
-  streetBasemap,
-  setStreetBasemap,
-  lowPowerMode,
-  layerVisibility,
-  showCurrentLocation,
-  setShowCurrentLocation,
-  showAdminBoundaries,
-  setShowAdminBoundaries,
-  keepScreenAwake,
-  setKeepScreenAwake,
-  setLowPowerMode,
-  setLayerVisibility,
-  notificationPreferences,
-  transitEnabled,
-  transitLiveEnabled,
-  transitLiveSupported,
-  sessionIsPremium,
-  transitRouteFilter,
-  setTransitEnabled,
-  setTransitLiveEnabled,
-  setTransitRouteFilter,
-  transitMetro,
-  transitStaticData,
-  transitLiveData,
-  transitLoadingStatic,
-  transitLoadingLive,
-  transitLiveDataStale,
-  transitError,
-  chromeHudRef,
-  overlay,
-  syncStatus,
-  matchingAreasError,
-  timer,
-  timerSyncing,
-  canControlTimer,
-  confirmedHidingZones,
-  canUndoLastTool,
-  canRedoLastTool,
-  awaitHiderAnswer,
-  canSubmitQuestion,
-  canStartEndGame,
-  endGameBlocked,
-  canRequestFoundHider,
-  firstRunDismissed,
-  setFirstRunDismissed,
-  mapPanning,
-  userMinimized,
-  setUserMinimized,
-  selectedAnnotation,
-  setSelectedAnnotationId,
-  geometryEditAnnotation,
-  geometryDraft,
-  radarTool,
-  photoTool,
-  thermometerTool,
-  matchingTool,
-  measuringTool,
-  pinTool,
-  zoneTool,
-  tentacleTool,
-  drawTool,
-  chatMessages,
-  hasUnreadChat,
-  unreadCount,
-  liveLocationError,
-  isRemote,
-  gameRulesEditable,
-  draftAdvancedSettings,
-  setDraftAdvancedSettings,
-  updateNotificationPreferences,
-  enableNotifications,
-  deleteAnnotation,
-  updateAnnotation,
-  startGeometryEdit,
-  cancelGeometryEdit,
-  saveGeometryEdit,
-  handleSelectTool,
-  handleOpenChat,
-  handleOpenSettings,
-  handleOpenLog,
-  handleOpenCodes,
-  handleUndoLastAnnotation,
-  handleRedoLastAnnotation,
-  handleResetEndGame,
-  handleStartEndGame,
-  handleRequestFoundHider,
-  handleDeclineFoundHider,
-  handleClearMap,
-  handleResetBoard,
-  handleResetSession,
-  handleEndSession,
-  handleLeaveSession,
-  handleSaveGameRules,
-  handleDistanceUnitChange,
-  exportMap,
-  answerPendingQuestion,
-  dismissExpiredPendingQuestion,
-  handleCancelWalkingQuestion,
-  seekerLocations,
-  setActiveTool,
-  setAwaitingPlacement,
+  controller,
   mapSlot,
 }: MapScreenChromeProps) {
+  const {
+    session,
+    gameArea,
+    uid,
+    isHost,
+    activeTool,
+    annotations,
+    pendingQuestions,
+    pendingWrites,
+    distanceUnit,
+    handleMapStyleChange,
+    effectiveBasemapStyle,
+    streetBasemap,
+    setStreetBasemap,
+    lowPowerMode,
+    layerVisibility,
+    showCurrentLocation,
+    setShowCurrentLocation,
+    showAdminBoundaries,
+    setShowAdminBoundaries,
+    keepScreenAwake,
+    setKeepScreenAwake,
+    setLowPowerMode,
+    setLayerVisibility,
+    notificationPreferences,
+    transitEnabled,
+    transitLiveEnabled,
+    transitLiveSupported,
+    sessionIsPremium,
+    transitRouteFilter,
+    setTransitEnabled,
+    setTransitLiveEnabled,
+    setTransitRouteFilter,
+    transitMetro,
+    transitStaticData,
+    transitLiveData,
+    transitLoadingStatic,
+    transitLoadingLive,
+    transitLiveDataStale,
+    transitError,
+    chromeHudRef,
+    overlay,
+    syncStatus,
+    matchingAreasError,
+    timer,
+    timerSyncing,
+    canControlTimer,
+    confirmedHidingZones,
+    canUndoLastTool,
+    canRedoLastTool,
+    awaitHiderAnswer,
+    canSubmitQuestion,
+    canStartEndGame,
+    endGameBlocked,
+    canRequestFoundHider,
+    firstRunDismissed,
+    setFirstRunDismissed,
+    mapPanning,
+    userMinimized,
+    setUserMinimized,
+    selectedAnnotation,
+    setSelectedAnnotationId,
+    geometryEditAnnotation,
+    geometryDraft,
+    radarTool,
+    photoTool,
+    thermometerTool,
+    matchingTool,
+    measuringTool,
+    pinTool,
+    zoneTool,
+    tentacleTool,
+    drawTool,
+    chatMessages,
+    hasUnreadChat,
+    unreadCount,
+    liveLocationError,
+    isRemote,
+    gameRulesEditable,
+    draftAdvancedSettings,
+    setDraftAdvancedSettings,
+    updateNotificationPreferences,
+    enableNotifications,
+    deleteAnnotation,
+    updateAnnotation,
+    startGeometryEdit,
+    cancelGeometryEdit,
+    saveGeometryEdit,
+    handleSelectTool,
+    handleOpenChat,
+    handleOpenSettings,
+    handleOpenLog,
+    handleOpenCodes,
+    handleUndoLastAnnotation,
+    handleRedoLastAnnotation,
+    handleResetEndGame,
+    handleStartEndGame,
+    handleRequestFoundHider,
+    handleDeclineFoundHider,
+    handleClearMap,
+    handleResetBoard,
+    handleResetSession,
+    handleEndSession,
+    handleLeaveSession,
+    handleSaveGameRules,
+    handleDistanceUnitChange,
+    exportMap,
+    answerPendingQuestion,
+    dismissExpiredPendingQuestion,
+    handleCancelWalkingQuestion,
+    seekerLocations,
+    setActiveTool,
+    setAwaitingPlacement,
+  } = controller;
   const {
     messages: displayChatMessages,
     pendingQuestions: displayPendingQuestions,

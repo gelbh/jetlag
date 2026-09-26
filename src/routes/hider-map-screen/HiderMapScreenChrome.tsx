@@ -87,7 +87,8 @@ type HidingZonePanelTool = {
   error: string | null;
 };
 
-export type HiderMapScreenChromeProps = {
+/** Chrome bag for hider map (W3-D2). Full `useHiderMapScreenController` deferred: extract ~800 LOC would blow jumbo soft-gate. */
+export type HiderMapScreenController = {
   session: SessionRecord;
   hasMyZone: boolean;
   uid: string | null;
@@ -207,72 +208,79 @@ export type HiderMapScreenChromeProps = {
       deadlineExpired?: boolean,
     ) => Promise<void>;
   };
-  /** When set with desktop layout, map fills the ops shell center slot. */
-  mapSlot?: ReactNode;
   /** HUD root for pan-hide (`data-map-interacting`) — same as seeker. */
   chromeHudRef?: RefObject<HTMLDivElement | null>;
 };
 
+export type HiderMapScreenChromeProps = {
+  controller: HiderMapScreenController;
+  /** When set with desktop layout, map fills the ops shell center slot. */
+  mapSlot?: ReactNode;
+};
+
 export function HiderMapScreenChrome({
-  session,
-  hasMyZone,
-  uid,
-  isHost,
-  annotations,
-  pendingQuestions,
-  messages,
-  overlay,
-  syncStatus,
-  timer,
-  timerSyncing,
-  canControlTimer,
-  moveInProgress = false,
-  isRemote,
-  hasUnreadChat,
-  unreadCount,
-  hiderOutsideZone,
-  truthReveal,
-  onDismissTruthReveal,
-  onResetEndGame,
-  onAcceptFoundHider,
-  onDeclineFoundHider,
-  onOpenLog,
-  zoneTool,
-  hidingZonePanelTool,
-  hidingZoneRadiusLabel,
-  onHidingZoneStepChange,
-  onSearchThisArea,
-  sheetBlocksWizard,
-  onOpenWizard,
-  onOpenChat,
-  onOpenSettings,
-  onOpenCodes,
-  handLabel,
-  onOpenHand,
-  boardEconomyEnabled = false,
-  hasMoveCard = false,
-  expansionPackEnabled,
-  expansionMenuOpen,
-  onExpansionMenuOpenChange,
-  timeTrapSheetOpen,
-  onTimeTrapSheetOpenChange,
-  timeTrapPeeked,
-  onTimeTrapPeekedChange,
-  timeTrapTool,
-  myTrap,
-  onTimeTrapSearchThisArea,
-  curseSheetOpen,
-  onCurseSheetOpenChange,
-  onClearMap,
-  onResetBoard,
-  onResetSession,
-  onEndSession,
-  onLeaveSession,
-  mapSettings,
-  chat,
+  controller,
   mapSlot,
-  chromeHudRef,
 }: HiderMapScreenChromeProps) {
+  const {
+    session,
+    hasMyZone,
+    uid,
+    isHost,
+    annotations,
+    pendingQuestions,
+    messages,
+    overlay,
+    syncStatus,
+    timer,
+    timerSyncing,
+    canControlTimer,
+    moveInProgress = false,
+    isRemote,
+    hasUnreadChat,
+    unreadCount,
+    hiderOutsideZone,
+    truthReveal,
+    onDismissTruthReveal,
+    onResetEndGame,
+    onAcceptFoundHider,
+    onDeclineFoundHider,
+    onOpenLog,
+    zoneTool,
+    hidingZonePanelTool,
+    hidingZoneRadiusLabel,
+    onHidingZoneStepChange,
+    onSearchThisArea,
+    sheetBlocksWizard,
+    onOpenWizard,
+    onOpenChat,
+    onOpenSettings,
+    onOpenCodes,
+    handLabel,
+    onOpenHand,
+    boardEconomyEnabled = false,
+    hasMoveCard = false,
+    expansionPackEnabled,
+    expansionMenuOpen,
+    onExpansionMenuOpenChange,
+    timeTrapSheetOpen,
+    onTimeTrapSheetOpenChange,
+    timeTrapPeeked,
+    onTimeTrapPeekedChange,
+    timeTrapTool,
+    myTrap,
+    onTimeTrapSearchThisArea,
+    curseSheetOpen,
+    onCurseSheetOpenChange,
+    onClearMap,
+    onResetBoard,
+    onResetSession,
+    onEndSession,
+    onLeaveSession,
+    mapSettings,
+    chat,
+    chromeHudRef,
+  } = controller;
   const {
     messages: displayMessages,
     pendingQuestions: displayPendingQuestions,

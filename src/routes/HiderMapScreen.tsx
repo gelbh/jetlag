@@ -956,116 +956,118 @@ export function HiderMapScreen() {
       ) : null}
       {isDesktop ? null : mapLayersContent}
       <HiderMapScreenChrome
-        session={session}
-        hasMyZone={Boolean(myZone)}
-        uid={uid}
-        isHost={isHost}
-        chromeHudRef={chromeHudRef}
         mapSlot={isDesktop ? mapLayersContent : undefined}
-        annotations={annotations}
-        pendingQuestions={pendingQuestions}
-        messages={messages}
-        overlay={overlay}
-        syncStatus={syncStatus}
-        timer={timer}
-        timerSyncing={timerSyncing}
-        canControlTimer={canControlTimer}
-        moveInProgress={hidingZones.some((zone) => zone.moveInProgress === true)}
-        isRemote={isRemote}
-        hasUnreadChat={hasUnreadChat}
-        unreadCount={unreadCount}
-        hiderOutsideZone={hiderOutsideZone}
-        truthReveal={truthReveal}
-        onDismissTruthReveal={dismissTruthReveal}
-        onResetEndGame={handleResetEndGame}
-        onAcceptFoundHider={handleAcceptFoundHider}
-        onDeclineFoundHider={handleDeclineFoundHider}
-        onOpenLog={openLogExclusive}
-        zoneTool={{
-          wizardOpen: zoneTool.wizardOpen,
-          hasZone: zoneTool.hasZone,
-          moveMode: zoneTool.moveMode,
-          writesEnabled: zoneTool.writesEnabled,
-          openWizard: zoneTool.openWizard,
-          closeWizard: zoneTool.closeWizard,
-          startMove: zoneTool.startMove,
-        }}
-        hidingZonePanelTool={hidingZonePanelTool}
-        hidingZoneRadiusLabel={hidingZoneRadiusLabel}
-        onHidingZoneStepChange={handleHidingZoneStepChange}
-        onSearchThisArea={handleSearchThisArea}
-        sheetBlocksWizard={sheetBlocksWizard}
-        onOpenWizard={openWizardExclusive}
-        onOpenChat={openChatExclusive}
-        onOpenSettings={openSettingsExclusive}
-        onOpenCodes={openCodesExclusive}
-        {...(boardEconomyEnabled
-          ? {
-              ...hiderBoardEconomyDockProps(boardEconomy.state),
-              onOpenHand: boardEconomy.state
-                ? () => setHandSheetOpen(true)
-                : undefined,
-              boardEconomyEnabled: true,
-            }
-          : {})}
-        expansionPackEnabled={expansionPackEnabled}
-        expansionMenuOpen={expansionMenuOpen}
-        onExpansionMenuOpenChange={setExpansionMenuOpen}
-        timeTrapSheetOpen={timeTrapSheetOpen}
-        onTimeTrapSheetOpenChange={setTimeTrapSheetOpen}
-        timeTrapPeeked={timeTrapPeeked}
-        onTimeTrapPeekedChange={setTimeTrapPeeked}
-        timeTrapTool={{
-          query: timeTrapTool.query,
-          setQuery: timeTrapTool.setQuery,
-          stations: timeTrapTool.stations,
-          stationsLoading: timeTrapTool.stationsLoading,
-          stationsError: timeTrapTool.stationsError,
-          selectedStation: timeTrapTool.selectedStation,
-          setSelectedStation: timeTrapTool.setSelectedStation,
-          confirmTrap: timeTrapTool.confirmTrap,
-          saving: timeTrapTool.saving,
-          error: timeTrapTool.error,
-        }}
-        myTrap={myTrap}
-        onTimeTrapSearchThisArea={handleTimeTrapSearchThisArea}
-        curseSheetOpen={curseSheetOpen}
-        onCurseSheetOpenChange={setCurseSheetOpen}
-        onClearMap={isHost ? handleClearMap : undefined}
-        onResetBoard={isHost ? handleResetBoard : undefined}
-        onResetSession={isHost ? handleResetSession : undefined}
-        onEndSession={isHost ? handleEndSession : undefined}
-        onLeaveSession={handleLeaveSession}
-        mapSettings={{
-          showCurrentLocation,
-          setShowCurrentLocation,
-          showAdminBoundaries,
-          setShowAdminBoundaries,
-          keepScreenAwake,
-          setKeepScreenAwake,
-          lowPowerMode,
-          setLowPowerMode,
-          layerVisibility,
-          setLayerVisibility,
-          distanceUnit,
-          mapStyle: effectiveBasemapStyle,
-          setMapStyle: handleMapStyleChange,
-          streetBasemap,
-          setStreetBasemap,
-          notificationPreferences,
-          updateNotificationPreferences,
-          enableNotifications,
-          locationError,
-        }}
-        chat={{
-          sessionId: sessionId ?? "",
-          questionTruths,
-          truthsLoading,
-          truthReferenceModes,
-          answerError: chatAnswerError,
-          answerSubmitting,
-          answeredPendingIds,
-          onAnswerQuestion: submitHiderAnswer,
+        controller={{
+          session,
+          hasMyZone: Boolean(myZone),
+          uid,
+          isHost,
+          chromeHudRef,
+          annotations,
+          pendingQuestions,
+          messages,
+          overlay,
+          syncStatus,
+          timer,
+          timerSyncing,
+          canControlTimer,
+          moveInProgress: hidingZones.some((zone) => zone.moveInProgress === true),
+          isRemote,
+          hasUnreadChat,
+          unreadCount,
+          hiderOutsideZone,
+          truthReveal,
+          onDismissTruthReveal: dismissTruthReveal,
+          onResetEndGame: handleResetEndGame,
+          onAcceptFoundHider: handleAcceptFoundHider,
+          onDeclineFoundHider: handleDeclineFoundHider,
+          onOpenLog: openLogExclusive,
+          zoneTool: {
+            wizardOpen: zoneTool.wizardOpen,
+            hasZone: zoneTool.hasZone,
+            moveMode: zoneTool.moveMode,
+            writesEnabled: zoneTool.writesEnabled,
+            openWizard: zoneTool.openWizard,
+            closeWizard: zoneTool.closeWizard,
+            startMove: zoneTool.startMove,
+          },
+          hidingZonePanelTool,
+          hidingZoneRadiusLabel,
+          onHidingZoneStepChange: handleHidingZoneStepChange,
+          onSearchThisArea: handleSearchThisArea,
+          sheetBlocksWizard,
+          onOpenWizard: openWizardExclusive,
+          onOpenChat: openChatExclusive,
+          onOpenSettings: openSettingsExclusive,
+          onOpenCodes: openCodesExclusive,
+          ...(boardEconomyEnabled
+            ? {
+                ...hiderBoardEconomyDockProps(boardEconomy.state),
+                onOpenHand: boardEconomy.state
+                  ? () => setHandSheetOpen(true)
+                  : undefined,
+                boardEconomyEnabled: true,
+              }
+            : {}),
+          expansionPackEnabled,
+          expansionMenuOpen,
+          onExpansionMenuOpenChange: setExpansionMenuOpen,
+          timeTrapSheetOpen,
+          onTimeTrapSheetOpenChange: setTimeTrapSheetOpen,
+          timeTrapPeeked,
+          onTimeTrapPeekedChange: setTimeTrapPeeked,
+          timeTrapTool: {
+            query: timeTrapTool.query,
+            setQuery: timeTrapTool.setQuery,
+            stations: timeTrapTool.stations,
+            stationsLoading: timeTrapTool.stationsLoading,
+            stationsError: timeTrapTool.stationsError,
+            selectedStation: timeTrapTool.selectedStation,
+            setSelectedStation: timeTrapTool.setSelectedStation,
+            confirmTrap: timeTrapTool.confirmTrap,
+            saving: timeTrapTool.saving,
+            error: timeTrapTool.error,
+          },
+          myTrap,
+          onTimeTrapSearchThisArea: handleTimeTrapSearchThisArea,
+          curseSheetOpen,
+          onCurseSheetOpenChange: setCurseSheetOpen,
+          onClearMap: isHost ? handleClearMap : undefined,
+          onResetBoard: isHost ? handleResetBoard : undefined,
+          onResetSession: isHost ? handleResetSession : undefined,
+          onEndSession: isHost ? handleEndSession : undefined,
+          onLeaveSession: handleLeaveSession,
+          mapSettings: {
+            showCurrentLocation,
+            setShowCurrentLocation,
+            showAdminBoundaries,
+            setShowAdminBoundaries,
+            keepScreenAwake,
+            setKeepScreenAwake,
+            lowPowerMode,
+            setLowPowerMode,
+            layerVisibility,
+            setLayerVisibility,
+            distanceUnit,
+            mapStyle: effectiveBasemapStyle,
+            setMapStyle: handleMapStyleChange,
+            streetBasemap,
+            setStreetBasemap,
+            notificationPreferences,
+            updateNotificationPreferences,
+            enableNotifications,
+            locationError,
+          },
+          chat: {
+            sessionId: sessionId ?? "",
+            questionTruths,
+            truthsLoading,
+            truthReferenceModes,
+            answerError: chatAnswerError,
+            answerSubmitting,
+            answeredPendingIds,
+            onAnswerQuestion: submitHiderAnswer,
+          },
         }}
       />
       {boardEconomyEnabled ? (
