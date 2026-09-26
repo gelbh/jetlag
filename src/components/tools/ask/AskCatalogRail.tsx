@@ -32,8 +32,8 @@ type AskCatalogRailProps = {
   onSelect: (id: string) => void;
   "aria-label"?: string;
   hint?: string;
-  /** 1 = stacked list (default); 2|3 = tile grid under each group heading. */
-  columns?: 1 | 2 | 3;
+  /** 1 = stacked list (default); 2|3|4 = tile grid under each group heading. */
+  columns?: 1 | 2 | 3 | 4;
 };
 
 type CatalogSection = {
@@ -67,7 +67,7 @@ function CatalogTileIcon({
 }: {
   icon: ReactNode;
   selected: boolean;
-  columns: 1 | 2 | 3;
+  columns: 1 | 2 | 3 | 4;
 }) {
   return (
     <span
@@ -76,8 +76,8 @@ function CatalogTileIcon({
         display: "inline-flex",
         alignItems: "center",
         justifyContent: "center",
-        width: columns === 3 ? 32 : 36,
-        height: columns === 3 ? 32 : 36,
+        width: columns >= 3 ? 32 : 36,
+        height: columns >= 3 ? 32 : 36,
         borderRadius: 10,
         backgroundColor: selected
           ? "oklch(from var(--color-flag) l c h / 0.18)"

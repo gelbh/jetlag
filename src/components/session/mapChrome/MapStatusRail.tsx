@@ -232,7 +232,6 @@ export function MapStatusRail({ model, headerLeading }: MapStatusRailProps) {
             onCancelWalkingQuestion={onCancelWalkingQuestion}
             timerMenuOpen={showTimerMenu}
             moveInProgress={moveInProgress}
-            expanded={expanded}
             onTimerPause={onTimerPause}
             onTimerResume={onTimerStart}
             timerControlsDisabled={timerControlsDisabled || inactiveChrome}

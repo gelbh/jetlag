@@ -1,6 +1,6 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { isValidElement } from "react";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { useThermometerTool } from "./useThermometerTool";
 import { createToolHookMocks } from "../../test/helpers/toolHookMocks";
 

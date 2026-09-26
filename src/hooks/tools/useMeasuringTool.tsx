@@ -468,7 +468,7 @@ export function useMeasuringTool({
         distanceMeters={draft.measuringDistanceMeters}
         distanceUnit={distanceUnit}
         statusTitle={statusTitle}
-        statusBody={statusBody}
+        statusBody={statusBody ?? ""}
         midSlot={midSlot}
       />
     ) : null,

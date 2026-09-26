@@ -9,7 +9,6 @@ import { tentacleEliminationJsonForAnswer } from "@/domain/geometry/tentacle/ten
 import {
   tentacleCategoryIdForAnnotation,
   tentacleQuestionPrompt,
-  type TentacleExtendedCategoryId,
 } from "@/domain/questions";
 import { QuestionPromptBlock } from "../shared/controls/QuestionPromptBlock";
 import { TentacleAnswerPicker } from "../shared/answers/TentacleAnswerPicker";

@@ -1,16 +1,19 @@
 import { render, screen } from "@testing-library/react";
 import { MantineProvider } from "@mantine/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { MapLandscapeChromeChip } from "./MapLandscapeChromeChip";
+import {
+  MapLandscapeChromeChip,
+  type MapLandscapeChromeChipProps,
+} from "./MapLandscapeChromeChip";
 import { jetlagTheme } from "@/theme/theme";
 
-const chipProps = {
-  collapsed: true as const,
+const chipProps: MapLandscapeChromeChipProps = {
+  collapsed: true,
   onToggle: () => undefined,
-  sessionRules: { gameSize: "medium" as const },
+  sessionRules: { gameSize: "medium" },
   timerState: { runningSince: Date.now() - 60_000, accumulatedMs: 0 },
   timerHasStarted: true,
-  syncStatus: "offline" as const,
+  syncStatus: "offline",
   queuedWrites: 2,
 };
 
@@ -23,7 +26,7 @@ beforeEach(() => {
   }));
 });
 
-function renderChip(props: typeof chipProps = chipProps) {
+function renderChip(props: MapLandscapeChromeChipProps = chipProps) {
   return render(
     <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
       <MapLandscapeChromeChip {...props} />

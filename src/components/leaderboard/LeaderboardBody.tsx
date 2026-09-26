@@ -53,7 +53,6 @@ import {
   leaderboardScopeLabel,
   type LeaderboardEntry,
   type LeaderboardMetric,
-  type LeaderboardRole,
   type LeaderboardScope,
 } from "@/domain/game/leaderboard";
 import {

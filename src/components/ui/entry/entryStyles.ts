@@ -1,7 +1,15 @@
-import type { ButtonProps } from "@mantine/core";
+import type { CSSProperties } from "react";
+
+/**
+ * Concrete Mantine `styles` object (not the function form).
+ * Keeps `.root` accessible when callers spread/override shared chrome styles.
+ */
+export type EntryButtonStyles = {
+  root: CSSProperties & Record<string, unknown>;
+};
 
 /** iOS filled tint control (logo orange). */
-export const filledStyles: ButtonProps["styles"] = {
+export const filledStyles: EntryButtonStyles = {
   root: {
     minHeight: "3.125rem",
     borderRadius: 14,
@@ -16,7 +24,7 @@ export const filledStyles: ButtonProps["styles"] = {
 };
 
 /** iOS gray / secondary filled control. */
-export const grayStyles: ButtonProps["styles"] = {
+export const grayStyles: EntryButtonStyles = {
   root: {
     minHeight: "3.125rem",
     borderRadius: 14,
@@ -31,7 +39,7 @@ export const grayStyles: ButtonProps["styles"] = {
 };
 
 /** iOS plain tinted text control. */
-export const plainStyles: ButtonProps["styles"] = {
+export const plainStyles: EntryButtonStyles = {
   root: {
     minHeight: "2.75rem",
     borderRadius: 14,
@@ -46,7 +54,7 @@ export const plainStyles: ButtonProps["styles"] = {
 };
 
 /** Compact flag control for inset list rows (friends, presets). */
-export const compactFilledStyles: ButtonProps["styles"] = {
+export const compactFilledStyles: EntryButtonStyles = {
   root: {
     minHeight: "2.5rem",
     borderRadius: 10,
@@ -64,7 +72,7 @@ export const compactFilledStyles: ButtonProps["styles"] = {
 
 
 /** Island-height Start (matches quiet timer column, not full iOS form CTA). */
-export const mapIslandFilledStyles: ButtonProps["styles"] = {
+export const mapIslandFilledStyles: EntryButtonStyles = {
   root: {
     minHeight: "2.25rem",
     height: "2.25rem",
@@ -102,7 +110,7 @@ export const mapToolSlotLabelStyle = {
 export function mapToolSlotStyles(
   pressed: boolean,
   tone: MapToolSlotTone = "tool",
-): ButtonProps["styles"] {
+): EntryButtonStyles {
   const history = tone === "history";
   return {
     root: {
@@ -157,7 +165,7 @@ export type ChoiceTone = "default" | "success" | "danger";
 export function choiceChipStyles(
   selected: boolean,
   tone: ChoiceTone = "default",
-): ButtonProps["styles"] {
+): EntryButtonStyles {
   const selectedBg =
     tone === "success"
       ? "var(--color-status-success, var(--color-trail))"
@@ -214,7 +222,7 @@ export const filterChipTrackStyle = {
  * Compact filter pill (Photos / Music style) for category selectors.
  * Selected = elevated white segment on the frosted track.
  */
-export function filterChipStyles(selected: boolean): ButtonProps["styles"] {
+export function filterChipStyles(selected: boolean): EntryButtonStyles {
   return {
     root: {
       flex: "0 0 auto",
@@ -256,7 +264,7 @@ export function filterChipStyles(selected: boolean): ButtonProps["styles"] {
  * Quiet 2-col catalog tile (Matching categories). Soft inset, no drop shadow.
  * Selected uses a light flag wash + hairline, not a solid flag brick.
  */
-export function catalogTileStyles(selected: boolean): ButtonProps["styles"] {
+export function catalogTileStyles(selected: boolean): EntryButtonStyles {
   return {
     root: {
       width: "100%",
@@ -304,7 +312,7 @@ export const askInsetSurfaceStyle = {
 } as const;
 
 /** Island-height icon control (pause / resume beside the clock). */
-export const mapIslandIconStyles: ButtonProps["styles"] = {
+export const mapIslandIconStyles: EntryButtonStyles = {
   root: {
     minHeight: "2.5rem",
     height: "2.5rem",
@@ -328,7 +336,7 @@ export const mapIslandIconStyles: ButtonProps["styles"] = {
 };
 
 /** Compact gray / secondary control for inset list rows. */
-export const compactGrayStyles: ButtonProps["styles"] = {
+export const compactGrayStyles: EntryButtonStyles = {
   root: {
     minHeight: "2.5rem",
     borderRadius: 10,
@@ -345,7 +353,7 @@ export const compactGrayStyles: ButtonProps["styles"] = {
 };
 
 /** Compact halt-tinted control for destructive row actions. */
-export const compactDangerStyles: ButtonProps["styles"] = {
+export const compactDangerStyles: EntryButtonStyles = {
   root: {
     minHeight: "2.5rem",
     borderRadius: 10,

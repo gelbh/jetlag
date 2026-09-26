@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import {
   MAP_CHROME_DOCKS_CHANGE_EVENT,
-  MAP_SIDE_DOCK_STORAGE_KEY,
   legacyAnchorFromPlacement,
   mapSideDockIsLeft,
   readMapChromeDocksState,
@@ -13,7 +12,6 @@ import {
 
 export type { MapSideDockAnchor, MapChromeDockPlacement };
 export {
-  MAP_SIDE_DOCK_STORAGE_KEY,
   MAP_NAV_DOCK_STORAGE_KEY,
   normalizeStoredAnchor,
   placementFromLegacyAnchor,

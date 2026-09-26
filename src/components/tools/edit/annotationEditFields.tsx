@@ -79,6 +79,8 @@ export function annotationEditFields(
           onSavePayloadChange={context.onSavePayloadChange}
         />
       );
+    case "draw":
+      return null;
     default: {
       const _exhaustive: never = annotation.type;
       return _exhaustive;

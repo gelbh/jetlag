@@ -1,4 +1,4 @@
-import { createElement, forwardRef, type CSSProperties, type ReactNode } from "react";
+import { forwardRef, type CSSProperties, type ReactNode } from "react";
 import { Box, Paper } from "@mantine/core";
 import { cn } from "@/lib/cn";
 import { mapChromeSurfaceStyles } from "@/components/ui/entry/entryChrome";
@@ -118,19 +118,17 @@ export const MapBottomChrome = forwardRef<HTMLDivElement, MapBottomChromeProps>(
     );
     return (
       <OverlayHost ref={ref} layout={layout} style={style}>
-        {createElement(
-          Box,
-          {
-            component: "div" as const,
-            "data-testid": "map-bottom-chrome-mantine",
-            "data-overlay-chrome": "",
-            "data-layout": layout,
-            "data-hunt-density": huntDensity,
-            "data-ask-first": askFirstActive ? "true" : undefined,
-            className: chromeClassName,
-            "aria-disabled": inactive || undefined,
-            inert: inactive || undefined,
-          },
+        <Box
+          component="div"
+          data-testid="map-bottom-chrome-mantine"
+          data-overlay-chrome=""
+          data-layout={layout}
+          data-hunt-density={huntDensity}
+          data-ask-first={askFirstActive ? "true" : undefined}
+          className={chromeClassName}
+          aria-disabled={inactive || undefined}
+          {...(inactive ? { inert: true } : {})}
+        >
           <div
             className={cn(
               "jl-map-chrome-bottom-band flex w-full flex-row items-end justify-center gap-2",
@@ -144,8 +142,8 @@ export const MapBottomChrome = forwardRef<HTMLDivElement, MapBottomChromeProps>(
                 {hunt}
               </ToolDeck>
             ) : null}
-          </div>,
-          (() => {
+          </div>
+          {(() => {
             if (askFirstActive) {
               return null;
             }
@@ -178,8 +176,8 @@ export const MapBottomChrome = forwardRef<HTMLDivElement, MapBottomChromeProps>(
                 {sideIslands}
               </div>
             );
-          })(),
-        )}
+          })()}
+        </Box>
         {overlay}
       </OverlayHost>
     );
