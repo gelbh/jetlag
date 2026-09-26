@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { lineString } from "@turf/helpers";
 import buffer from "@turf/buffer";
 import difference from "@turf/difference";
-import { geodesicLineBuffer } from "./geodesicLineBuffer";
+import { geodesicLineBuffer } from "../kernel/geodesicLineBuffer";
 
 describe("geodesicLineBuffer", () => {
   it("splits a play area when subtracted from a vertical waterway", () => {

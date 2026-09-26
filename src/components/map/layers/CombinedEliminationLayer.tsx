@@ -64,9 +64,9 @@ export const CombinedEliminationLayer = memo(function CombinedEliminationLayer({
   const pulsing = useMemo(
     () =>
       annotations.some((annotation) =>
-        annotationHasEliminationFeature(annotation, gameArea, pulsingIds),
+        annotationHasEliminationFeature(annotation, pulsingIds),
       ),
-    [annotations, gameArea, pulsingIds],
+    [annotations, pulsingIds],
   );
 
   if (hidden || !combinedMask) {

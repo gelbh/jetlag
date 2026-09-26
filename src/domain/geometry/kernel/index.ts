@@ -11,22 +11,13 @@ export {
 } from "./featureConvert";
 export { clipMaskToGameArea } from "./clipMask";
 export {
-  buildEndGameMaskFromDisks,
-  buildMaskFromUnionInput,
-} from "./buildMask";
-export {
   unionDiskSpecs,
   unionEliminationParts,
   unionEliminationPartsLegacy,
   unionPolygonFeatures,
   unionPolygonFeaturesLegacy,
 } from "./unionPolygonFeatures";
-export {
-  buildHalfPlanePolygon,
-  buildRadarShadedRegion,
-  isPointInGameArea,
-} from "./radarHalfPlane";
-export { geodesicLineBuffer } from "./geodesicLineBuffer";
+export { isPointInGameArea } from "./radarHalfPlane";
 export type { SpatialVoronoiSite } from "./spatialVoronoi";
 export {
   resolveVoronoiCellPoiId,

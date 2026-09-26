@@ -11,10 +11,8 @@ import Flatbush from "flatbush";
 import { around as geoflatbushAround } from "geoflatbush";
 import { unionPolygonFeaturesInSlices } from "../progressive/unionSlices";
 import type { GameArea } from "../../map/annotations";
-import {
-  dispatchGeodesicLineBuffer,
-  geodesicLineBuffer,
-} from "./geodesicLineBuffer";
+import { dispatchGeodesicLineBuffer } from "./geodesicLineBuffer";
+import { geodesicLineBuffer } from "../kernel/geodesicLineBuffer";
 import {
   dispatchNearRegionBatch,
   featureToGameAreaGeometry,
