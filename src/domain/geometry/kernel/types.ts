@@ -1,4 +1,4 @@
-import type { Feature, MultiPolygon, Polygon as GeoPolygon } from "geojson";
+import type { Feature, LineString, MultiPolygon, Polygon as GeoPolygon } from "geojson";
 
 export type LatLngTuple = [number, number];
 
@@ -18,3 +18,11 @@ export interface EliminationUnionInput {
 export type GameAreaGeometry =
   | { type: "Polygon"; coordinates: number[][][] }
   | { type: "MultiPolygon"; coordinates: number[][][][] };
+
+/** Near-region batch input for the kernel wasm / TS dispatch path. */
+export type NearRegionBatchInput = {
+  segments: readonly Feature<LineString>[];
+  distanceMeters: number;
+  disks: readonly DiskSpec[];
+  gameArea: GameAreaGeometry;
+};

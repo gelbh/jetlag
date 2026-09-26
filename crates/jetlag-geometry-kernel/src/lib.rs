@@ -46,7 +46,8 @@ fn feature_to_js(feature: Option<PolygonFeature>) -> Result<JsValue, JsValue> {
     match feature {
         None => Ok(JsValue::UNDEFINED),
         Some(feature) => {
-            let json = serde_json::to_string(&feature).map_err(|e| js_err(e.to_string()))?;
+            let json =
+                serde_json::to_string(&feature).map_err(|e| js_err(format!("feature: {e}")))?;
             Ok(JsValue::from_str(&json))
         }
     }

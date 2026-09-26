@@ -4,19 +4,12 @@ use crate::mask::{
     disk_to_polygon, feature_to_multipolygon, fold_union, multipolygon_to_feature, DiskSpec,
     GameArea,
 };
-use crate::types::{GameAreaGeometry, PolygonFeature};
+use crate::types::{GameAreaGeometry, PolygonFeature, TentacleSiteJson};
 use geo::{BooleanOps, MultiPolygon, Polygon};
 use serde::Deserialize;
 use serde_json::Value;
 
 const POI_CELL_FALLBACK_RADIUS_M: f64 = 25.0;
-
-#[derive(Debug, Clone, Deserialize)]
-pub struct TentacleSiteJson {
-    pub id: String,
-    pub lat: f64,
-    pub lng: f64,
-}
 
 #[derive(Debug, Clone, Deserialize)]
 struct FeatureCollectionJson {
