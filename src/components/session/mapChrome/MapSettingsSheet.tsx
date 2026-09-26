@@ -175,38 +175,11 @@ export function MapSettingsSheet({
       >
         {segment === "map" ? (
           <MapSettingsGeneralTab
-            showCurrentLocation={general.showCurrentLocation}
-            onShowCurrentLocationChange={general.onShowCurrentLocationChange}
-            showAdminBoundaries={general.showAdminBoundaries}
-            onShowAdminBoundariesChange={general.onShowAdminBoundariesChange}
-            lowPowerMode={general.lowPowerMode}
-            distanceUnit={general.distanceUnit}
-            onDistanceUnitChange={general.onDistanceUnitChange}
-            distanceUnitEditable={general.distanceUnitEditable}
-            mapStyle={general.mapStyle}
-            onMapStyleChange={general.onMapStyleChange}
-            streetBasemap={general.streetBasemap}
-            onStreetBasemapChange={general.onStreetBasemapChange}
-            locationError={general.locationError}
-            transitEnabled={general.transitEnabled}
-            transitLiveEnabled={general.transitLiveEnabled}
-            transitLiveSupported={general.transitLiveSupported}
-            sessionIsPremium={general.sessionIsPremium}
-            transitRouteFilter={general.transitRouteFilter}
-            metroLabel={general.metroLabel}
-            loadingStatic={general.loadingStatic}
-            loadingLive={general.loadingLive}
-            liveDataStale={general.liveDataStale}
-            stopCount={general.stopCount}
-            routeCount={general.routeCount}
-            vehicleCount={general.vehicleCount}
-            lastUpdated={general.lastUpdated}
-            transitError={general.transitError}
-            onToggleTransit={general.onToggleTransit}
-            onToggleLiveTransit={general.onToggleLiveTransit}
-            onTransitRouteFilterChange={general.onTransitRouteFilterChange}
-            layerVisibility={layers.layerVisibility}
-            onLayerVisibilityChange={layers.onLayerVisibilityChange}
+            model={{
+              ...general,
+              layerVisibility: layers.layerVisibility,
+              onLayerVisibilityChange: layers.onLayerVisibilityChange,
+            }}
           />
         ) : null}
 

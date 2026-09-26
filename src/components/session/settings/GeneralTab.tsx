@@ -13,7 +13,8 @@ import { SettingsToggleRow } from "../settings/SettingsToggleRow";
 import { LayerVisibilityGrid } from "../mapChrome/LayerVisibilityGrid";
 import type { LayerVisibility } from "@/state/sessionStore";
 
-export interface MapSettingsGeneralTabProps {
+/** Flat general/layers fields bag for MapSettingsGeneralTab (W4-C peel). */
+export type MapSettingsGeneralTabModel = {
   showCurrentLocation: boolean;
   onShowCurrentLocationChange: (enabled: boolean) => void;
   showAdminBoundaries: boolean;
@@ -50,42 +51,47 @@ export interface MapSettingsGeneralTabProps {
     layer: keyof LayerVisibility,
     visible: boolean,
   ) => void;
-}
+};
 
-export function MapSettingsGeneralTab({
-  showCurrentLocation,
-  onShowCurrentLocationChange,
-  showAdminBoundaries,
-  onShowAdminBoundariesChange,
-  lowPowerMode,
-  distanceUnit,
-  onDistanceUnitChange,
-  distanceUnitEditable = false,
-  mapStyle,
-  onMapStyleChange,
-  streetBasemap,
-  onStreetBasemapChange,
-  locationError,
-  transitEnabled,
-  transitLiveEnabled,
-  transitLiveSupported,
-  sessionIsPremium = false,
-  transitRouteFilter,
-  metroLabel,
-  loadingStatic,
-  loadingLive,
-  liveDataStale = false,
-  stopCount,
-  routeCount,
-  vehicleCount,
-  lastUpdated,
-  transitError,
-  onToggleTransit,
-  onToggleLiveTransit,
-  onTransitRouteFilterChange,
-  layerVisibility,
-  onLayerVisibilityChange,
-}: MapSettingsGeneralTabProps) {
+export type MapSettingsGeneralTabProps = {
+  model: MapSettingsGeneralTabModel;
+};
+
+export function MapSettingsGeneralTab({ model }: MapSettingsGeneralTabProps) {
+  const {
+    showCurrentLocation,
+    onShowCurrentLocationChange,
+    showAdminBoundaries,
+    onShowAdminBoundariesChange,
+    lowPowerMode,
+    distanceUnit,
+    onDistanceUnitChange,
+    distanceUnitEditable = false,
+    mapStyle,
+    onMapStyleChange,
+    streetBasemap,
+    onStreetBasemapChange,
+    locationError,
+    transitEnabled,
+    transitLiveEnabled,
+    transitLiveSupported,
+    sessionIsPremium = false,
+    transitRouteFilter,
+    metroLabel,
+    loadingStatic,
+    loadingLive,
+    liveDataStale = false,
+    stopCount,
+    routeCount,
+    vehicleCount,
+    lastUpdated,
+    transitError,
+    onToggleTransit,
+    onToggleLiveTransit,
+    onTransitRouteFilterChange,
+    layerVisibility,
+    onLayerVisibilityChange,
+  } = model;
   const displayedMapStyle = effectiveMapStyle(mapStyle, lowPowerMode);
 
   return (
