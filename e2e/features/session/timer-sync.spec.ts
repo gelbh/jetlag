@@ -20,8 +20,7 @@ test.describe("timer rejoin", () => {
     await createHostSession(hostPage);
     await startSessionTimer(hostPage);
 
-    // Need a wall-clock gap before sampling elapsed; event-driven wait lands in session rewrite.
-    // eslint-disable-next-line playwright/no-wait-for-timeout -- park until timer sync is rewritten
+    // eslint-disable-next-line playwright/no-wait-for-timeout -- wall-clock gap before sampling elapsed
     await hostPage.waitForTimeout(2_500);
     const elapsedBeforeLeave = await readSessionElapsedSeconds(hostPage);
 
@@ -43,8 +42,7 @@ test.describe("timer rejoin", () => {
     await joinAsRole(guestPage, code, "seeker");
 
     await startSessionTimer(hostPage);
-    // Need a wall-clock gap before sampling elapsed; event-driven wait lands in session rewrite.
-    // eslint-disable-next-line playwright/no-wait-for-timeout -- park until timer sync is rewritten
+    // eslint-disable-next-line playwright/no-wait-for-timeout -- wall-clock gap before sampling elapsed
     await hostPage.waitForTimeout(2_000);
     const hostElapsed = await readSessionElapsedSeconds(hostPage);
 

@@ -51,7 +51,7 @@ export default defineConfig([
     files: ["e2e/**/*.{ts,tsx}"],
     extends: [playwright.configs["flat/recommended"]],
     rules: {
-      // Prefer fail-loud over warn for sleeps; Band 3+ rewrites retire remaining debt.
+      // Sleeps must fail CI (recommended defaults to warn).
       "playwright/no-wait-for-timeout": "error",
     },
   },
