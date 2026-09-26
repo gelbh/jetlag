@@ -1,7 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "jetlag",
-  "compatibility_date": "2026-07-12",
+  "compatibility_date": "2026-09-26",
   "main": "worker/index.ts",
   "workers_dev": false,
   "routes": [
