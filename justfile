@@ -1,6 +1,8 @@
 # Jetlag maintainer DX. CI/husky use `npm run <contract>` in package.json.
 # Install: brew install just   then: just --list
 
+export PATH := justfile_directory() + "/node_modules/.bin:" + env_var("PATH")
+
 # --- env / dev ---
 
 env-pull:
