@@ -23,6 +23,11 @@ export interface MantineDrawerSheetProps {
   scrollMode?: "host" | "child";
   /** Extra styles on the inner body wrapper (e.g. keyboard inset). */
   contentStyle?: CSSProperties;
+  /**
+   * Ask placement: keep the dim scrim but let map taps pass through.
+   * Also disables outside-click dismiss so pin taps do not close the tool.
+   */
+  mapInteractive?: boolean;
 }
 
 /**
@@ -41,6 +46,7 @@ export function MantineDrawerSheet({
   padding = "md",
   scrollMode = "host",
   contentStyle,
+  mapInteractive = false,
 }: MantineDrawerSheetProps) {
   const childScroll = scrollMode === "child";
   const baseStyles = iosBottomDrawerStyles(false);
@@ -54,7 +60,7 @@ export function MantineDrawerSheet({
       padding={padding}
       radius={24}
       withCloseButton={false}
-      closeOnClickOutside={dismissible}
+      closeOnClickOutside={dismissible && !mapInteractive}
       closeOnEscape={dismissible}
       lockScroll
       withinPortal
@@ -62,7 +68,11 @@ export function MantineDrawerSheet({
       zIndex={JETLAG_MODAL_Z_INDEX}
       title={ariaLabel}
       aria-label={ariaLabel}
-      overlayProps={{ backgroundOpacity: 0.4, blur: 3 }}
+      overlayProps={{
+        backgroundOpacity: 0.4,
+        blur: 3,
+        ...(mapInteractive ? { style: { pointerEvents: "none" } } : {}),
+      }}
       classNames={{
         content: cn(
           "mantine-drawer-sheet",
