@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 import bboxPolygon from "@turf/bbox-polygon";
 import type { Feature, LineString } from "geojson";
 import {
-  buildHalfPlanePolygon,
   boundsToGameArea,
   centerToViewportEdgeRadiusMeters,
   circleToGameArea,
@@ -13,6 +12,7 @@ import {
   normalizeBoundingBox,
   safeDifference,
 } from "./geometry";
+import { buildHalfPlanePolygon } from "../kernel/radarHalfPlane";
 import {
   buildCoastlineEliminationRegion,
   buildCoastlineNearRegionTs,

@@ -4,20 +4,20 @@ import type { MapDraftOverlay } from "../../map/mapDraftOverlay";
 import { MAP_ANNOTATION_COLORS } from "../../map/mapAnnotationColors";
 import type { MapStyle, StreetBasemap } from "../../map/mapBasemaps";
 import {
-  buildMeasuringBoundaryPreviewTs,
+  buildMeasuringBoundaryPreview,
   type MeasuringRegionInput,
 } from "../../geometry/measuring/measuringRegions";
 import { measuringPlacesFromMetadata } from "../measuringPlacesFromMetadata";
 import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
 import { pushBoundaryOverlay, type OverlayBuildResult } from "./shared";
 
-export function buildMeasuringOverlays(
+export async function buildMeasuringOverlays(
   question: PendingQuestionRecord,
   gameArea: GameArea,
   prefix: string,
   mapStyle: MapStyle,
   streetBasemap: StreetBasemap = "light",
-): OverlayBuildResult {
+): Promise<OverlayBuildResult> {
   const metadata = question.placement.metadata;
   const regionInputJson = metadata.measuringRegionInputJson;
   const geometry = parseGeometryJson(question.placement.geometryJson);
@@ -42,7 +42,7 @@ export function buildMeasuringOverlays(
       pushBoundaryOverlay(
         overlays,
         `${prefix}-boundary`,
-        buildMeasuringBoundaryPreviewTs({
+        await buildMeasuringBoundaryPreview({
           ...regionInput,
           measuringPlaces: measuringPlacesFromMetadata(
             metadata,

@@ -251,8 +251,6 @@ export {
   safeDifference,
 } from "./geodesicPrimitives";
 export {
-  buildHalfPlanePolygon,
-  buildRadarShadedRegion,
   isPointInGameArea,
 } from "./radarHalfPlane";
 export type { LatLngTuple } from "./types";

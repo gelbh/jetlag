@@ -1,8 +1,4 @@
-export {
-  buildHalfPlanePolygon,
-  buildRadarShadedRegion,
-  isPointInGameArea,
-} from "../kernel/radarHalfPlane";
+export { isPointInGameArea } from "../kernel/radarHalfPlane";
 export {
   dispatchHalfPlane,
   dispatchRadarShadedRegion,
