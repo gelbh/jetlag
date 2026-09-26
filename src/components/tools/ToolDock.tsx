@@ -117,9 +117,7 @@ export function ToolDock({
   };
 
   const askFirst =
-    true &&
-    activeTool !== "none" &&
-    isAskHudOwnedTool(activeTool);
+    activeTool !== "none" && isAskHudOwnedTool(activeTool);
 
   return (
     <MapBottomChrome
@@ -138,12 +136,10 @@ export function ToolDock({
             <div
               aria-hidden={true}
               data-tool-highlight=""
-              data-player-ux-world={true ? "mantine" : undefined}
+              data-player-ux-world="mantine"
               className={cn(
                 "jl-tool-dock-highlight pointer-events-none absolute z-0 will-change-[transform,width,height] motion-safe:transition-[transform,width,height,opacity] motion-safe:duration-[var(--motion-base)] motion-safe:ease-[var(--ease-spring-subtle)]",
-                true
-                  ? "rounded-[10px] border-[0.33px] border-highlight/70 bg-highlight/18"
-                  : "rounded-[var(--radius-hud-md)] border-2 border-highlight/55 bg-highlight-soft",
+                "rounded-[10px] border-[0.33px] border-highlight/70 bg-highlight/18",
               )}
               style={{
                 transform: `translate(${dockHighlight.x}px, ${dockHighlight.y}px)`,
@@ -154,11 +150,7 @@ export function ToolDock({
           ) : null}
           <ToolDeckGroup
             ref={mainGroupRef}
-            className={
-              true
-                ? "justify-start gap-1 [&_.jl-tool-slot]:flex-none [&_.jl-tool-slot]:basis-auto [&_[data-hunt-question-strip]_.jl-tool-slot]:min-h-11 [&_[data-hunt-question-strip]_.jl-tool-slot]:min-w-0 [&_[data-hunt-question-strip]_.jl-tool-slot]:flex-1 [&_[data-hunt-question-strip]_.jl-tool-slot]:basis-0"
-                : undefined
-            }
+            className="justify-start gap-1 [&_.jl-tool-slot]:flex-none [&_.jl-tool-slot]:basis-auto [&_[data-hunt-question-strip]_.jl-tool-slot]:min-h-11 [&_[data-hunt-question-strip]_.jl-tool-slot]:min-w-0 [&_[data-hunt-question-strip]_.jl-tool-slot]:flex-1 [&_[data-hunt-question-strip]_.jl-tool-slot]:basis-0"
           >
             <ToolDockHistorySlot
               kind="undo"
@@ -172,20 +164,8 @@ export function ToolDock({
               onAct={onRedo}
               inactive={inactive}
             />
-            {true ? (
-              <ToolDeckQuestionStrip askFirst={askFirst}>
-                {visibleQuestionTools.map((toolId) => (
-                  <ToolDockQuestionSlot
-                    key={toolId}
-                    toolId={toolId}
-                    activeTool={activeTool}
-                    canSubmitQuestion={canSubmitQuestion}
-                    onSelect={selectTool}
-                  />
-                ))}
-              </ToolDeckQuestionStrip>
-            ) : (
-              visibleQuestionTools.map((toolId) => (
+            <ToolDeckQuestionStrip askFirst={askFirst}>
+              {visibleQuestionTools.map((toolId) => (
                 <ToolDockQuestionSlot
                   key={toolId}
                   toolId={toolId}
@@ -193,8 +173,8 @@ export function ToolDock({
                   canSubmitQuestion={canSubmitQuestion}
                   onSelect={selectTool}
                 />
-              ))
-            )}
+              ))}
+            </ToolDeckQuestionStrip>
           </ToolDeckGroup>
         </ToolDeckInner>
       }

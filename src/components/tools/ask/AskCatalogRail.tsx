@@ -119,36 +119,25 @@ export function AskCatalogRail({
               role="presentation"
               data-ask-catalog-group=""
               className="ask-catalog-rail__group"
-              style={
-                true
-                  ? {
-                      padding: "0.65rem 0.25rem 0.35rem",
-                      position: "sticky",
-                      top: 0,
-                      zIndex: 1,
-                      background:
-                        "oklch(from var(--color-canvas) l c h / 0.92)",
-                    }
-                  : undefined
-              }
+              style={{
+                padding: "0.65rem 0.25rem 0.35rem",
+                position: "sticky",
+                top: 0,
+                zIndex: 1,
+                background: "oklch(from var(--color-canvas) l c h / 0.92)",
+              }}
             >
-              {true ? (
-                <Text
-                  size="xs"
-                  fw={650}
-                  tt="uppercase"
-                  style={{
-                    letterSpacing: "0.04em",
-                    color: "var(--color-field-ink-muted)",
-                  }}
-                >
-                  {section.groupLabel}
-                </Text>
-              ) : (
-                <p className="m-0 px-1 pt-2 pb-1 text-[0.65rem] font-semibold uppercase tracking-wide text-field-ink-muted">
-                  {section.groupLabel}
-                </p>
-              )}
+              <Text
+                size="xs"
+                fw={650}
+                tt="uppercase"
+                style={{
+                  letterSpacing: "0.04em",
+                  color: "var(--color-field-ink-muted)",
+                }}
+              >
+                {section.groupLabel}
+              </Text>
             </div>
           ) : null}
           <div className={gridClass}>
@@ -156,7 +145,7 @@ export function AskCatalogRail({
               const selected = selectedId === row.id;
               const tileBody = (
                 <>
-                  {row.icon && multiCol && true ? (
+                  {row.icon && multiCol ? (
                     <CatalogTileIcon
                       icon={row.icon}
                       selected={selected}
@@ -172,7 +161,7 @@ export function AskCatalogRail({
                   )}
                 </>
               );
-              if (multiCol && true) {
+              if (multiCol) {
                 const tileRoot = {
                   ...iosCatalogTileStyles(selected).root,
                   ...(columns === 3
@@ -261,15 +250,11 @@ export function AskCatalogRail({
       {hint ? (
         <p
           className="ask-catalog-rail__hint text-xs text-field-ink-muted"
-          style={
-            true
-              ? {
-                  margin: "0 0 0.5rem",
-                  color: "var(--color-field-ink-muted)",
-                  fontSize: "0.75rem",
-                }
-              : undefined
-          }
+          style={{
+            margin: "0 0 0.5rem",
+            color: "var(--color-field-ink-muted)",
+            fontSize: "0.75rem",
+          }}
         >
           {hint}
         </p>
@@ -278,40 +263,27 @@ export function AskCatalogRail({
     </>
   );
 
-  if (true) {
-    return (
-      <Paper
-        data-testid="ask-catalog-rail"
-        data-player-ux-world="mantine"
-        className="ask-catalog-rail pointer-events-auto"
-        role="group"
-        aria-label={ariaLabel}
-        radius={16}
-        p="sm"
-        styles={{
-          root: {
-            ...iosMapChromeSurfaceStyles,
-            boxShadow: "none",
-            maxHeight: "var(--ask-hud-rail-max-height, 40dvh)",
-            overflow: "hidden",
-            display: "flex",
-            flexDirection: "column",
-          },
-        }}
-      >
-        {body}
-      </Paper>
-    );
-  }
-
   return (
-    <div
+    <Paper
       data-testid="ask-catalog-rail"
-      className="ask-catalog-rail pointer-events-auto ask-hud-panel"
+      data-player-ux-world="mantine"
+      className="ask-catalog-rail pointer-events-auto"
       role="group"
       aria-label={ariaLabel}
+      radius={16}
+      p="sm"
+      styles={{
+        root: {
+          ...iosMapChromeSurfaceStyles,
+          boxShadow: "none",
+          maxHeight: "var(--ask-hud-rail-max-height, 40dvh)",
+          overflow: "hidden",
+          display: "flex",
+          flexDirection: "column",
+        },
+      }}
     >
       {body}
-    </div>
+    </Paper>
   );
 }
