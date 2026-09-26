@@ -1,5 +1,6 @@
 /**
- * Flag-on smoke for Ask HUD map-first Photo + Thermometer (and Matching sanity).
+ * Ask HUD map-first Photo + Thermometer (and Matching sanity).
+ * Mantine is the sole player path; no flag bootstrap.
  */
 import type { Page } from "@playwright/test";
 import {
@@ -7,7 +8,6 @@ import {
   expect,
   clickMapAtLatLng,
   clickToolDockButton,
-  enablePlayerUiMantine,
   openMapWithLocalSession,
 } from "../../fixtures";
 
@@ -18,10 +18,6 @@ async function pickRow(page: Page, label: RegExp) {
 }
 
 test.describe("ask map-first smoke (mantine)", () => {
-  test.beforeEach(async ({ page }) => {
-    await enablePlayerUiMantine(page);
-  });
-
   test("Matching map-first after category", async ({ page }) => {
     await openMapWithLocalSession(page);
     await clickToolDockButton(page, "Matching");
