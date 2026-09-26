@@ -10,8 +10,8 @@ export type KernelEntrypoint =
   | "nearRegionBatch";
 
 /**
- * Per-entrypoint WASM readiness. Wave-1 and Wave-2 entrypoints are enabled
- * after topology + perf gates. Keep TS fallback via dispatchKernel.
+ * Per-entrypoint WASM readiness after topology + perf gates.
+ * False keeps TS fallback via dispatchKernel.
  */
 export const KERNEL_WASM_READY: Record<KernelEntrypoint, boolean> = {
   maskFromUnionInput: true,

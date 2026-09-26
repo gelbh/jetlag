@@ -28,12 +28,12 @@ use mask::{
     build_end_game_mask_from_disks as build_end_game_native,
     build_mask_from_union_input as build_mask_native,
 };
+use near_region::build_near_region as build_near_region_native;
 use tentacle::{
     build_tentacle_elimination_region as build_tentacle_elimination_native,
     build_tentacle_poi_answer_elimination_region as build_tentacle_poi_answer_native,
     game_area_from_json, parse_anchor, parse_sites, parse_voronoi_cells,
 };
-use near_region::build_near_region as build_near_region_native;
 use types::{DiskSpecJson, EliminationUnionInputJson, NearRegionInputJson};
 use voronoi::spatial_voronoi_rings_from_coords as spatial_voronoi_rings_native;
 use wasm_bindgen::prelude::*;
@@ -175,8 +175,8 @@ pub fn geodesic_line_buffer_json(
     distance_meters: f64,
     sample_spacing_meters: Option<f64>,
 ) -> Result<JsValue, JsValue> {
-    let coordinates: Vec<[f64; 2]> = serde_json::from_str(coordinates_json)
-        .map_err(|e| js_err(format!("coordinates: {e}")))?;
+    let coordinates: Vec<[f64; 2]> =
+        serde_json::from_str(coordinates_json).map_err(|e| js_err(format!("coordinates: {e}")))?;
     feature_to_js(geodesic_line_buffer_native(
         &coordinates,
         distance_meters,

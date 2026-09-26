@@ -1,23 +1,12 @@
 import type { Feature, LineString } from "geojson";
 import { dispatchKernel } from "./dispatchKernel";
+import { createLazyWasmImport } from "./lazyWasmImport";
 import type { MaskKernelMode } from "./maskKernelMode";
 import { bboxFromGameArea, maskTopologyMatches } from "./maskTopology";
 import type { DiskSpec, GameAreaGeometry, PolygonFeature } from "./types";
 import type { NearRegionBatchInput } from "./nearRegionWasm";
 
-type NearRegionWasmApi = typeof import("./nearRegionWasm");
-
-let nearRegionWasmModulePromise: Promise<NearRegionWasmApi> | null = null;
-
-function loadNearRegionWasmModule(): Promise<NearRegionWasmApi> {
-  if (!nearRegionWasmModulePromise) {
-    nearRegionWasmModulePromise = import("./nearRegionWasm").catch((error) => {
-      nearRegionWasmModulePromise = null;
-      throw error;
-    });
-  }
-  return nearRegionWasmModulePromise;
-}
+const nearRegionWasm = createLazyWasmImport(() => import("./nearRegionWasm"));
 
 export type NearRegionBatchParams = {
   segments: readonly Feature<LineString>[];
@@ -27,15 +16,6 @@ export type NearRegionBatchParams = {
   runTs: () => PolygonFeature | null;
 };
 
-/** Production near-region batch entrypoint (mode + KERNEL_WASM_READY). */
-export async function runNearRegionBatch(
-  params: NearRegionBatchParams,
-  mode: MaskKernelMode = "wasm",
-): Promise<PolygonFeature | null> {
-  return dispatchNearRegionBatch(params, mode);
-}
-
-/** Mode + KERNEL_WASM_READY dispatch for near-region batch. */
 export async function dispatchNearRegionBatch(
   params: NearRegionBatchParams,
   mode: MaskKernelMode = "wasm",
@@ -53,7 +33,7 @@ export async function dispatchNearRegionBatch(
     label: "nearRegionBatch",
     runTs: params.runTs,
     runWasm: async () => {
-      const wasm = await loadNearRegionWasmModule();
+      const wasm = await nearRegionWasm.load();
       return wasm.wasmBuildNearRegion(input);
     },
     matches: (wasmResult, tsResult) =>
@@ -64,3 +44,6 @@ export async function dispatchNearRegionBatch(
       ),
   });
 }
+
+/** Public alias; callers may import either name. */
+export const runNearRegionBatch = dispatchNearRegionBatch;
