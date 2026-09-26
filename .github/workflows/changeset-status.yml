@@ -16,7 +16,7 @@ jobs:
     if: >
       github.event.pull_request.head.repo.full_name == github.repository &&
       !startsWith(github.head_ref, 'changeset-release/') &&
-      !contains(join(github.event.pull_request.labels.*.name, ','), 'skip-changeset')
+      !contains(github.event.pull_request.labels.*.name, 'skip-changeset')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -24,11 +24,15 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
       - name: Fetch base branch
-        run: git fetch --no-tags origin "${{ github.base_ref }}:refs/remotes/origin/${{ github.base_ref }}"
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: git fetch --no-tags origin "${BASE_REF}:refs/remotes/origin/${BASE_REF}"
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 24
           cache: npm
       - run: npm ci
       - name: Require changeset since base
-        run: npx changeset status --since="origin/${{ github.base_ref }}"
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: npx changeset status --since="origin/${BASE_REF}"
