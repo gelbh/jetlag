@@ -104,6 +104,7 @@ jobs:
               - 'vite.sentry.ts'
               - 'vite.pwa.ts'
               - 'vitest.config.ts'
+              - 'vitest.shared.ts'
               - '.github/actions/setup-rust-wasm/action.yml'
       - name: Geometry perf gates
         if: steps.geometry.outputs.geometry == 'true'
