@@ -4,7 +4,7 @@ import {
   surveySyncSegmentLabel,
   surveySyncShortLabel,
 } from "@/domain/device/surveyStatusCopy";
-import { iosMapChromeSurfaceStyles } from "@/components/ui/apple/iosEntryChrome";
+import { mapChromeSurfaceStyles } from "@/components/ui/entry/entryChrome";
 import { useMinWidth } from "@/hooks/layout/useMinWidth";
 import { SyncStatusBeacon } from "../syncUi/SyncStatusDot";
 import {
@@ -137,7 +137,7 @@ export function SyncBlock({
         aria-label={statusAria}
         styles={{
           root: {
-            ...iosMapChromeSurfaceStyles,
+            ...mapChromeSurfaceStyles,
             width: shortLabel ? "auto" : "2.75rem",
             height: "2.75rem",
             minWidth: "2.75rem",

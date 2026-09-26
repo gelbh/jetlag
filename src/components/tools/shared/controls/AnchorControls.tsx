@@ -1,9 +1,9 @@
 import { Button } from "@mantine/core";
 import { Crosshair, MapPin } from "@phosphor-icons/react";
 import {
-  iosFilledStyles,
-  iosGrayStyles,
-} from "@/components/ui/apple/iosEntryChrome";
+  filledStyles,
+  grayStyles,
+} from "@/components/ui/entry/entryChrome";
 
 interface AnchorControlsProps {
   gpsLoading: boolean;
@@ -69,7 +69,7 @@ export function AnchorControls({
         onClick={onUseGps}
         disabled={gpsLoading}
         aria-busy={gpsLoading || undefined}
-        styles={hasAnchor && !gpsLoading ? iosGrayStyles : iosFilledStyles}
+        styles={hasAnchor && !gpsLoading ? grayStyles : filledStyles}
         className="flex min-h-12 items-center justify-start gap-2.5 px-3"
       >
         {gpsBody}
@@ -104,7 +104,7 @@ export function AnchorControls({
             type="button"
             fullWidth
             onClick={onPlaceAtMapTap}
-            styles={awaitingPlacement ? iosFilledStyles : iosGrayStyles}
+            styles={awaitingPlacement ? filledStyles : grayStyles}
           >
             {awaitingPlacement ? "Tap the map" : "Place at map tap"}
           </Button>

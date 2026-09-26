@@ -1,7 +1,7 @@
 import type { ButtonProps } from "@mantine/core";
 
 /** iOS filled tint control (logo orange). */
-export const iosFilledStyles: ButtonProps["styles"] = {
+export const filledStyles: ButtonProps["styles"] = {
   root: {
     minHeight: "3.125rem",
     borderRadius: 14,
@@ -16,7 +16,7 @@ export const iosFilledStyles: ButtonProps["styles"] = {
 };
 
 /** iOS gray / secondary filled control. */
-export const iosGrayStyles: ButtonProps["styles"] = {
+export const grayStyles: ButtonProps["styles"] = {
   root: {
     minHeight: "3.125rem",
     borderRadius: 14,
@@ -31,7 +31,7 @@ export const iosGrayStyles: ButtonProps["styles"] = {
 };
 
 /** iOS plain tinted text control. */
-export const iosPlainStyles: ButtonProps["styles"] = {
+export const plainStyles: ButtonProps["styles"] = {
   root: {
     minHeight: "2.75rem",
     borderRadius: 14,
@@ -46,7 +46,7 @@ export const iosPlainStyles: ButtonProps["styles"] = {
 };
 
 /** Compact flag control for inset list rows (friends, presets). */
-export const iosCompactFilledStyles: ButtonProps["styles"] = {
+export const compactFilledStyles: ButtonProps["styles"] = {
   root: {
     minHeight: "2.5rem",
     borderRadius: 10,
@@ -64,7 +64,7 @@ export const iosCompactFilledStyles: ButtonProps["styles"] = {
 
 
 /** Island-height Start (matches quiet timer column, not full iOS form CTA). */
-export const iosMapIslandFilledStyles: ButtonProps["styles"] = {
+export const mapIslandFilledStyles: ButtonProps["styles"] = {
   root: {
     minHeight: "2.25rem",
     height: "2.25rem",
@@ -81,10 +81,10 @@ export const iosMapIslandFilledStyles: ButtonProps["styles"] = {
   },
 };
 
-export type IosMapToolSlotTone = "tool" | "history";
+export type MapToolSlotTone = "tool" | "history";
 
 /** Caption under hunt/session slot icon (sentence case; not Survey display). */
-export const iosMapToolSlotLabelStyle = {
+export const mapToolSlotLabelStyle = {
   display: "block",
   maxWidth: "100%",
   overflow: "hidden",
@@ -99,9 +99,9 @@ export const iosMapToolSlotLabelStyle = {
 };
 
 /** Hunt / session dock chip (column icon+label). */
-export function iosMapToolSlotStyles(
+export function mapToolSlotStyles(
   pressed: boolean,
-  tone: IosMapToolSlotTone = "tool",
+  tone: MapToolSlotTone = "tool",
 ): ButtonProps["styles"] {
   const history = tone === "history";
   return {
@@ -151,12 +151,12 @@ export function iosMapToolSlotStyles(
   };
 }
 
-export type IosChoiceTone = "default" | "success" | "danger";
+export type ChoiceTone = "default" | "success" | "danger";
 
 /** Ask kit choice chip / catalog row / binary answer under Mantine flag. */
-export function iosChoiceChipStyles(
+export function choiceChipStyles(
   selected: boolean,
-  tone: IosChoiceTone = "default",
+  tone: ChoiceTone = "default",
 ): ButtonProps["styles"] {
   const selectedBg =
     tone === "success"
@@ -199,7 +199,7 @@ export function iosChoiceChipStyles(
 }
 
 /** Frosted track for horizontally scrolling iOS filter chips. */
-export const iosFilterChipTrackStyle = {
+export const filterChipTrackStyle = {
   display: "flex",
   gap: 4,
   padding: 3,
@@ -214,7 +214,7 @@ export const iosFilterChipTrackStyle = {
  * Compact filter pill (Photos / Music style) for category selectors.
  * Selected = elevated white segment on the frosted track.
  */
-export function iosFilterChipStyles(selected: boolean): ButtonProps["styles"] {
+export function filterChipStyles(selected: boolean): ButtonProps["styles"] {
   return {
     root: {
       flex: "0 0 auto",
@@ -256,7 +256,7 @@ export function iosFilterChipStyles(selected: boolean): ButtonProps["styles"] {
  * Quiet 2-col catalog tile (Matching categories). Soft inset, no drop shadow.
  * Selected uses a light flag wash + hairline, not a solid flag brick.
  */
-export function iosCatalogTileStyles(selected: boolean): ButtonProps["styles"] {
+export function catalogTileStyles(selected: boolean): ButtonProps["styles"] {
   return {
     root: {
       width: "100%",
@@ -296,7 +296,7 @@ export function iosCatalogTileStyles(selected: boolean): ButtonProps["styles"] {
 }
 
 /** Flat question / callout surface inside Ask sheets (no elevation shadow). */
-export const iosAskInsetSurfaceStyle = {
+export const askInsetSurfaceStyle = {
   borderRadius: 14,
   backgroundColor: "oklch(from var(--color-field-ink) l c h / 0.06)",
   border: "0.33px solid oklch(from var(--color-field-ink) l c h / 0.1)",
@@ -304,7 +304,7 @@ export const iosAskInsetSurfaceStyle = {
 } as const;
 
 /** Island-height icon control (pause / resume beside the clock). */
-export const iosMapIslandIconStyles: ButtonProps["styles"] = {
+export const mapIslandIconStyles: ButtonProps["styles"] = {
   root: {
     minHeight: "2.5rem",
     height: "2.5rem",
@@ -328,7 +328,7 @@ export const iosMapIslandIconStyles: ButtonProps["styles"] = {
 };
 
 /** Compact gray / secondary control for inset list rows. */
-export const iosCompactGrayStyles: ButtonProps["styles"] = {
+export const compactGrayStyles: ButtonProps["styles"] = {
   root: {
     minHeight: "2.5rem",
     borderRadius: 10,
@@ -345,7 +345,7 @@ export const iosCompactGrayStyles: ButtonProps["styles"] = {
 };
 
 /** Compact halt-tinted control for destructive row actions. */
-export const iosCompactDangerStyles: ButtonProps["styles"] = {
+export const compactDangerStyles: ButtonProps["styles"] = {
   root: {
     minHeight: "2.5rem",
     borderRadius: 10,
@@ -361,8 +361,8 @@ export const iosCompactDangerStyles: ButtonProps["styles"] = {
   },
 };
 
-/** Transparent TextInput sitting inside IosInsetGroup. */
-export const iosInsetTextInputStyles = {
+/** Transparent TextInput sitting inside InsetGroup. */
+export const insetTextInputStyles = {
   root: { width: "100%" },
   label: {
     paddingInline: "1rem",
@@ -383,8 +383,8 @@ export const iosInsetTextInputStyles = {
   },
 } as const;
 
-/** Transparent Textarea sitting inside IosInsetGroup. */
-export const iosInsetTextareaStyles = {
+/** Transparent Textarea sitting inside InsetGroup. */
+export const insetTextareaStyles = {
   root: { width: "100%" },
   label: {
     paddingInline: "1rem",
@@ -406,7 +406,7 @@ export const iosInsetTextareaStyles = {
 } as const;
 
 /** Full-bleed bottom Drawer chassis (Friends / Leaderboard / report sheets). */
-export function iosBottomDrawerStyles(
+export function bottomDrawerStyles(
   maxHeight: string | false = "min(70dvh, 34rem)",
 ) {
   return {

@@ -1,7 +1,7 @@
 import { fireEvent, screen, within } from "@testing-library/react";
 import { MantineProvider } from "@mantine/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { jetlagMantineTheme } from "@/theme/mantineTheme";
+import { jetlagTheme } from "@/theme/theme";
 import { ToolDock } from "./ToolDock";
 import { HiderToolDock } from "./HiderToolDock";
 import { renderWithRouter } from "../../test/renderWithRouter";
@@ -36,7 +36,7 @@ beforeEach(() => {
 
 function wrapDock(ui: React.ReactElement) {
   return (
-    <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+    <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
       {ui}
     </MantineProvider>
   );
@@ -329,7 +329,7 @@ describe("ToolDock", () => {
 
   it("keeps idle Mantine hunt without ask-first until a question tool is active", () => {
     renderDock(
-      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
         <ToolDock {...dockBase} onOpenChat={vi.fn()} />
       </MantineProvider>,
     );

@@ -3,7 +3,7 @@
  * Spec: ask-surface-kit-design rev 2026-08-05b.
  */
 import { Paper } from "@mantine/core";
-import { iosMapChromeSurfaceStyles } from "@/components/ui/apple/iosEntryChrome";
+import { mapChromeSurfaceStyles } from "@/components/ui/entry/entryChrome";
 import { cn } from "@/lib/cn";
 
 type AskModeCueTickerProps = {
@@ -27,7 +27,7 @@ export function AskModeCueTicker({ cue }: AskModeCueTickerProps) {
       )}
       styles={{
         root: {
-          ...iosMapChromeSurfaceStyles,
+          ...mapChromeSurfaceStyles,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",

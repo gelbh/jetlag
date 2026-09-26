@@ -1,5 +1,5 @@
 import { Button } from "@mantine/core";
-import { iosGrayStyles } from "@/components/ui/apple/iosEntryChrome";
+import { grayStyles } from "@/components/ui/entry/entryChrome";
 
 interface DrawPanelProps {
   pointCount: number;
@@ -34,7 +34,7 @@ export function DrawPanel({
         fullWidth
         disabled={clearDisabled}
         onClick={onClear}
-        styles={iosGrayStyles}
+        styles={grayStyles}
       >
         Clear draft
       </Button>

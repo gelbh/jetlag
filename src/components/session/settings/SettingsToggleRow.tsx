@@ -1,7 +1,7 @@
 import { useId } from "react";
 import { Box, Switch, Text } from "@mantine/core";
 import type { ReactNode } from "react";
-import { IosInsetHairline } from "@/components/ui/apple/IosInsetRow";
+import { InsetHairline } from "@/components/ui/entry/InsetRow";
 
 interface SettingsToggleRowProps {
   label: string;
@@ -29,7 +29,7 @@ export function SettingsToggleRow({
 
   return (
     <>
-      {showSeparator ? <IosInsetHairline insetStart="1rem" /> : null}
+      {showSeparator ? <InsetHairline insetStart="1rem" /> : null}
       <Box
         component="label"
         htmlFor={switchId}

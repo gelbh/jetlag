@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { MantineProvider } from "@mantine/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { jetlagMantineTheme } from "@/theme/mantineTheme";
+import { jetlagTheme } from "@/theme/theme";
 import type { TentaclePoi } from "@/domain/map/annotations";
 import { TentacleAnswerPicker } from "./TentacleAnswerPicker";
 
@@ -48,7 +48,7 @@ beforeEach(() => {
 describe("TentacleAnswerPicker", () => {
   it("uses iOS Mantine choice list without Survey section chrome", () => {
     render(
-      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
         <TentacleAnswerPicker {...baseProps} />
       </MantineProvider>,
     );

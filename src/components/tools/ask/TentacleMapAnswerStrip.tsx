@@ -12,10 +12,10 @@ import type { TentaclePoi } from "@/domain/map/annotations";
 import type { DistanceUnit } from "@/domain/map/distance";
 import { useCopyFeedback } from "@/hooks/forms/useCopyFeedback";
 import {
-  iosChoiceChipStyles,
-  iosCompactGrayStyles,
-  iosMapChromeSurfaceStyles,
-} from "@/components/ui/apple/iosEntryChrome";
+  choiceChipStyles,
+  compactGrayStyles,
+  mapChromeSurfaceStyles,
+} from "@/components/ui/entry/entryChrome";
 
 export type TentacleMapAnswerStripProps = {
   categoryId: TentacleExtendedCategoryId;
@@ -73,7 +73,7 @@ export function TentacleMapAnswerStrip({
       data-testid="tentacle-map-answer-strip"
       className="flex flex-col gap-2"
       style={{
-        ...iosMapChromeSurfaceStyles,
+        ...mapChromeSurfaceStyles,
         borderRadius: 16,
         padding: "0.65rem 0.7rem",
         color: "var(--color-field-ink)",
@@ -102,7 +102,7 @@ export function TentacleMapAnswerStrip({
           aria-label={COPY_LOCATIONS_LABEL}
           styles={{
             root: {
-              ...iosCompactGrayStyles.root,
+              ...compactGrayStyles.root,
               width: "100%",
               minHeight: "2.25rem",
               height: "auto",
@@ -126,7 +126,7 @@ export function TentacleMapAnswerStrip({
         onClick={() => onOutOfReachChange(true)}
         styles={{
           root: {
-            ...iosChoiceChipStyles(outOfReach, outOfReach ? "danger" : "default")
+            ...choiceChipStyles(outOfReach, outOfReach ? "danger" : "default")
               .root,
             width: "100%",
             justifyContent: "center",

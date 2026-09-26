@@ -16,12 +16,12 @@ import {
 import { getFirebaseAuth, isFirebaseConfigured } from "../../services/core/firebase/firebase";
 import { useSessionStore } from "../../state/sessionStore";
 import {
-  IosErrorCallout,
-  IosInsetGroup,
-  IosSectionLabel,
-  iosFilledStyles,
-  iosPlainStyles,
-} from "../ui/apple/iosEntryChrome";
+  ErrorCallout,
+  InsetGroup,
+  SectionLabel,
+  filledStyles,
+  plainStyles,
+} from "../ui/entry/entryChrome";
 import { SheetHost } from "../ui/sheets/SheetHost";
 import { IncidentChatPanel } from "./IncidentChatPanel";
 import { SupportAgentChat } from "./SupportAgentChat";
@@ -39,12 +39,7 @@ export interface ReportProblemSheetProps {
     input: CreateIncidentInput,
   ) => Promise<CreateIncidentResult>;
   /** Optional pre-seeded client errors (otherwise empty until a ring buffer lands). */
-  lastClientErrors?: readonly IncidentClientError[];
-  /**
-   * @deprecated SheetHost is the only chassis. Kept for call-site compatibility.
-   */
-  chrome?: "legacy" | "ios";
-}
+  lastClientErrors?: readonly IncidentClientError[];}
 
 function formatErrorAt(iso: string): string {
   const date = new Date(iso);
@@ -257,8 +252,8 @@ function ReportProblemSheetContent({
       </Stack>
 
       <Stack gap={8}>
-        <IosSectionLabel>Note (optional)</IosSectionLabel>
-        <IosInsetGroup>
+        <SectionLabel>Note (optional)</SectionLabel>
+        <InsetGroup>
           <Box px="sm" pt="sm" pb="xs" style={{ position: "relative" }}>
             <Textarea
               id={noteId}
@@ -296,12 +291,12 @@ function ReportProblemSheetContent({
               {noteLength}/{INCIDENT_NOTE_MAX_LENGTH}
             </Text>
           </Box>
-        </IosInsetGroup>
+        </InsetGroup>
       </Stack>
 
       <Stack gap={8}>
-        <IosSectionLabel>Session code</IosSectionLabel>
-        <IosInsetGroup>
+        <SectionLabel>Session code</SectionLabel>
+        <InsetGroup>
           <Box px="md" py="sm">
             <Text
               fw={sessionCode ? 700 : 500}
@@ -318,12 +313,12 @@ function ReportProblemSheetContent({
               {sessionCode ?? "No active session"}
             </Text>
           </Box>
-        </IosInsetGroup>
+        </InsetGroup>
       </Stack>
 
       <Stack gap={8}>
-        <IosSectionLabel>Diagnostics</IosSectionLabel>
-        <IosInsetGroup>
+        <SectionLabel>Diagnostics</SectionLabel>
+        <InsetGroup>
           {(
             [
               ["Route", diagnosticsPreview.route],
@@ -370,10 +365,10 @@ function ReportProblemSheetContent({
               </Box>
             </Box>
           ))}
-        </IosInsetGroup>
+        </InsetGroup>
       </Stack>
 
-      <IosErrorCallout>{submitError}</IosErrorCallout>
+      <ErrorCallout>{submitError}</ErrorCallout>
       {!online ? (
         <Text size="sm" c="var(--color-field-ink-muted)" px={4}>
           You&apos;re offline. Reconnect to send a report.
@@ -386,11 +381,11 @@ function ReportProblemSheetContent({
           loading={submitting}
           disabled={!canSubmit}
           onClick={() => void handleSubmit()}
-          styles={iosFilledStyles}
+          styles={filledStyles}
         >
           Send report
         </Button>
-        <Button fullWidth variant="subtle" onClick={onClose} styles={iosPlainStyles}>
+        <Button fullWidth variant="subtle" onClick={onClose} styles={plainStyles}>
           Cancel
         </Button>
       </Stack>

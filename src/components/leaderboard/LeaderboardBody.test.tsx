@@ -2,8 +2,8 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MantineProvider } from "@mantine/core";
 import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { jetlagMantineTheme } from "@/theme/mantineTheme";
-import { LeaderboardIosBody } from "./LeaderboardIosBody";
+import { jetlagTheme } from "@/theme/theme";
+import { LeaderboardBody } from "./LeaderboardBody";
 import { LEADERBOARD_MOCK_STORAGE_KEY } from "@/services/profile/leaderboardMock";
 
 vi.mock("@/hooks/billing/usePermanentAuthUser", () => ({
@@ -21,14 +21,14 @@ vi.mock("@/services/core/firebase/firebase", () => ({
 function renderBody(initialEntry = "/leaderboard") {
   return render(
     <MemoryRouter initialEntries={[initialEntry]}>
-      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
-        <LeaderboardIosBody />
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
+        <LeaderboardBody />
       </MantineProvider>
     </MemoryRouter>,
   );
 }
 
-describe("LeaderboardIosBody", () => {
+describe("LeaderboardBody", () => {
   beforeEach(() => {
     localStorage.setItem(LEADERBOARD_MOCK_STORAGE_KEY, "1");
     vi.stubGlobal("matchMedia", (query: string) => ({

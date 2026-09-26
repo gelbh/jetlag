@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { MantineProvider } from "@mantine/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { jetlagMantineTheme } from "@/theme/mantineTheme";
+import { jetlagTheme } from "@/theme/theme";
 import { GameAreaFramingModal } from "./GameAreaFramingModal";
 import type { GameAreaFramingController } from "./GameAreaFramingModal";
 
@@ -60,7 +60,7 @@ beforeEach(() => {
 describe("GameAreaFramingModal", () => {
   it("renders Mantine framing chrome when open", () => {
     render(
-      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
         <GameAreaFramingModal
           open
           mapStyle="standard"
@@ -85,7 +85,7 @@ describe("GameAreaFramingModal", () => {
 
   it("renders nothing when closed", () => {
     render(
-      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
         <GameAreaFramingModal
           open={false}
           mapStyle="standard"

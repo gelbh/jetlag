@@ -3,7 +3,7 @@ import { MemoryRouter } from "react-router-dom";
 import { MantineProvider } from "@mantine/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { RouteTransitionProvider } from "@/navigation/RouteTransitionContext";
-import { jetlagMantineTheme } from "@/theme/mantineTheme";
+import { jetlagTheme } from "@/theme/theme";
 import { MapStatusRail } from "./MapStatusRail";
 
 vi.mock("../../../state/mapStore", () => ({
@@ -42,7 +42,7 @@ const railProps = {
 
 function renderRail(extra?: Partial<typeof railProps> & { canStartGame?: boolean }) {
   return render(
-    <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+    <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
       <MemoryRouter>
         <RouteTransitionProvider>
           <MapStatusRail {...railProps} {...extra} />
@@ -104,7 +104,7 @@ describe("MapStatusRail Mantine", () => {
 describe("MapStatusRail inactive chrome", () => {
   it("shows retry and return to join for terminal session errors", () => {
     render(
-      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
         <MemoryRouter>
           <RouteTransitionProvider>
             <MapStatusRail

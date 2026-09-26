@@ -3,7 +3,7 @@ import { CaretRight } from "@phosphor-icons/react";
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 
-export function IosInsetHairline({
+export function InsetHairline({
   insetStart = "3.25rem",
 }: {
   insetStart?: string;
@@ -21,7 +21,7 @@ export function IosInsetHairline({
 }
 
 /** Home-style inset navigation row (icon · label · chevron). */
-export function IosInsetRow({
+export function InsetRow({
   to,
   href,
   label,
@@ -100,7 +100,7 @@ export function IosInsetRow({
 
   return (
     <>
-      {showSeparator ? <IosInsetHairline /> : null}
+      {showSeparator ? <InsetHairline /> : null}
       {to ? (
         <UnstyledButton
           component={Link}

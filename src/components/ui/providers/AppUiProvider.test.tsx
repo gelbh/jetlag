@@ -6,7 +6,7 @@ vi.mock("@mantine/notifications", () => ({
   notifications: { show: vi.fn() },
 }));
 
-import { AppMantineProvider } from "./AppMantineProvider";
+import { AppUiProvider } from "./AppUiProvider";
 
 beforeEach(() => {
   vi.stubGlobal("matchMedia", (query: string) => ({
@@ -21,12 +21,12 @@ beforeEach(() => {
   }));
 });
 
-describe("AppMantineProvider", () => {
+describe("AppUiProvider", () => {
   it("mounts Notifications under MantineProvider", () => {
     render(
-      <AppMantineProvider>
+      <AppUiProvider>
         <span>child</span>
-      </AppMantineProvider>,
+      </AppUiProvider>,
     );
 
     expect(screen.getByTestId("mantine-notifications")).toBeInTheDocument();

@@ -2,10 +2,10 @@ import { Button } from "@mantine/core";
 import type { TransitRouteFilter } from "@/domain/map/transit";
 import { SettingsToggleRow } from "@/components/session/settings/SettingsToggleRow";
 import {
-  IosInsetGroup,
-  iosCompactFilledStyles,
-  iosCompactGrayStyles,
-} from "@/components/ui/apple/iosEntryChrome";
+  InsetGroup,
+  compactFilledStyles,
+  compactGrayStyles,
+} from "@/components/ui/entry/entryChrome";
 import { SegmentControl } from "@/components/ui/forms/SegmentControl";
 
 interface TransitControlsProps {
@@ -120,7 +120,7 @@ export function TransitControls({
   if (variant === "inline") {
     return (
       <div className="space-y-2">
-        <IosInsetGroup>
+        <InsetGroup>
           <SettingsToggleRow
             label="Transit overlay"
             description={
@@ -153,7 +153,7 @@ export function TransitControls({
               }
             }}
           />
-        </IosInsetGroup>
+        </InsetGroup>
         {enabled ? (
           <>
             <SegmentControl
@@ -200,7 +200,7 @@ export function TransitControls({
           type="button"
           size="compact-sm"
           onClick={onToggleEnabled}
-          styles={enabled ? iosCompactFilledStyles : iosCompactGrayStyles}
+          styles={enabled ? compactFilledStyles : compactGrayStyles}
         >
           Transit
         </Button>
@@ -209,7 +209,7 @@ export function TransitControls({
           size="compact-sm"
           onClick={onToggleLive}
           disabled={!enabled || !liveSupported}
-          styles={liveEnabled ? iosCompactFilledStyles : iosCompactGrayStyles}
+          styles={liveEnabled ? compactFilledStyles : compactGrayStyles}
         >
           Live
         </Button>

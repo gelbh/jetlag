@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { MantineProvider } from "@mantine/core";
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { jetlagMantineTheme } from "@/theme/mantineTheme";
+import { jetlagTheme } from "@/theme/theme";
 import type { TentaclePoi } from "@/domain/map/annotations";
 import { TentacleMapAnswerStrip } from "./TentacleMapAnswerStrip";
 
@@ -42,7 +42,7 @@ beforeEach(() => {
 describe("TentacleMapAnswerStrip", () => {
   it("prompts to tap the map when nothing is selected", () => {
     render(
-      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
         <TentacleMapAnswerStrip {...baseProps} />
       </MantineProvider>,
     );
@@ -59,7 +59,7 @@ describe("TentacleMapAnswerStrip", () => {
 
   it("shows copy-locations control only when solo seeker mode requests it", () => {
     const { rerender } = render(
-      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
         <TentacleMapAnswerStrip {...baseProps} showCopyForHider />
       </MantineProvider>,
     );
@@ -71,7 +71,7 @@ describe("TentacleMapAnswerStrip", () => {
     ).toBeInTheDocument();
 
     rerender(
-      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
         <TentacleMapAnswerStrip {...baseProps} showCopyForHider={false} />
       </MantineProvider>,
     );
@@ -85,7 +85,7 @@ describe("TentacleMapAnswerStrip", () => {
   it("shows the selected place name and allows Not within reach", () => {
     const onOutOfReachChange = vi.fn();
     render(
-      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
         <TentacleMapAnswerStrip
           {...baseProps}
           selectedPoiId="poi-1"

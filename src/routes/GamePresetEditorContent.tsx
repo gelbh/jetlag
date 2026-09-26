@@ -1,5 +1,20 @@
-import { AppLink } from "../components/navigation/AppLink";
-import { Button } from "../components/ui/button";
+import {
+  Box,
+  Button,
+  SegmentedControl,
+  Stack,
+  Text,
+  TextInput,
+} from "@mantine/core";
+import { Link } from "react-router-dom";
+import {
+  ErrorCallout,
+  InsetGroup,
+  SectionLabel,
+  filledStyles,
+  grayStyles,
+  plainStyles,
+} from "@/components/ui/entry/entryChrome";
 import { AdvancedSessionSettings } from "../components/session/settings/AdvancedSessionSettings";
 import { GameAreaFramingModal } from "../components/session/framing/GameAreaFramingModal";
 import { GameAreaFramingStats } from "../components/session/framing/GameAreaFramingControls";
@@ -12,9 +27,7 @@ import { RequestPackWhenUnavailable } from "../components/presets/RequestPackWhe
 import { buildPreloadPresetSnapshot } from "../domain/preloadRequest/buildPreloadPresetSnapshot";
 import { useGamePresetEditorModel } from "./GamePresetEditorModel";
 
-/**
- * Preset editor sections + GameAreaFramingModal map island.
- */
+/** Join-style iOS editor body for Mantine presets (title lives in EntryHeader). */
 export function GamePresetEditorContent() {
   const model = useGamePresetEditorModel();
 
@@ -42,81 +55,102 @@ export function GamePresetEditorContent() {
         }}
       />
 
-      <div className="space-y-4">
-        <h1 className="font-display text-2xl font-bold uppercase tracking-tight text-field-ink">
-          {model.title}
-        </h1>
-
+      <Stack gap={22}>
         {model.needsMigrationReview ? (
-          <div
-            className="rounded-[var(--radius-hud-md)] border border-status-warning/40 bg-status-warning-surface px-3 py-2 text-sm text-status-warning"
+          <Box
             role="status"
+            style={{
+              borderRadius: 12,
+              padding: "0.75rem 1rem",
+              backgroundColor:
+                "oklch(from var(--color-status-warning) l c h / 0.14)",
+              border:
+                "0.33px solid oklch(from var(--color-status-warning) l c h / 0.35)",
+            }}
           >
-            This preset uses an older format. Review settings and save to
-            upgrade.
-          </div>
+            <Text size="sm" fw={510} c="var(--color-status-warning)">
+              This preset uses an older format. Review settings and save to
+              upgrade.
+            </Text>
+          </Box>
         ) : null}
 
-        <div className="jl-field-frame space-y-3">
-          <div className="space-y-1">
-            <p className="font-display text-xs font-semibold uppercase tracking-[0.1em] text-field-ink-muted">
-              Play boundary
-            </p>
-            <p className="text-xs leading-snug text-field-ink-muted">
-              Optional. Search for a place or draw the play area on the map.
-            </p>
+        <Stack gap={8}>
+          <SectionLabel>Play boundary</SectionLabel>
+          <Text size="xs" c="var(--color-field-ink-muted)" px={4}>
+            Optional. Search for a place or draw the play area on the map.
+          </Text>
+
+          <div className="flex flex-col gap-3">
+            <PlaceAreaSearchFields
+              locationQuery={model.placeSearch.locationQuery}
+              onLocationQueryChange={model.placeSearch.setLocationQuery}
+              onSearch={() => void model.placeSearch.handleSearch()}
+              searchLoading={model.placeSearch.searchLoading}
+              searchResults={model.placeSearch.searchResults}
+              selectedPlaceId={model.placeSearch.selectedPlaceId}
+              selectedPlace={model.placeSearch.selectedPlace}
+              onSelectPlace={model.placeSearch.applyPlace}
+            />
           </div>
 
-          <PlaceAreaSearchFields
-            locationQuery={model.placeSearch.locationQuery}
-            onLocationQueryChange={model.placeSearch.setLocationQuery}
-            onSearch={() => void model.placeSearch.handleSearch()}
-            searchLoading={model.placeSearch.searchLoading}
-            searchResults={model.placeSearch.searchResults}
-            selectedPlaceId={model.placeSearch.selectedPlaceId}
-            selectedPlace={model.placeSearch.selectedPlace}
-            onSelectPlace={model.placeSearch.applyPlace}
-          />
-
           {model.placeSearch.searchError ? (
-            <p className="text-sm text-error">{model.placeSearch.searchError}</p>
+            <ErrorCallout>{model.placeSearch.searchError}</ErrorCallout>
           ) : null}
 
           <Button
             type="button"
-            variant="flag"
+            fullWidth
+            styles={filledStyles}
             onClick={() => model.setFramingModalOpen(true)}
             disabled={model.placeSearch.searchLoading}
-            className="min-h-11 w-full"
           >
             Open fullscreen map
           </Button>
 
           {model.gameArea ? (
-            <div className="space-y-2 border-t border-rule pt-3">
+            <Stack
+              gap="sm"
+              pt="sm"
+              style={{
+                borderTop:
+                  "0.33px solid oklch(from var(--color-field-ink) l c h / 0.12)",
+              }}
+            >
               <GameAreaFramingStats gameArea={model.gameArea} compact />
-              <div className="flex gap-3">
-                <button
-                  type="button"
-                  onClick={() => model.setFramingModalOpen(true)}
-                  className="font-display text-xs font-semibold uppercase tracking-wide text-signal"
-                >
-                  Reframe
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    model.setGameArea(null);
-                    model.setPlaceLabel("");
-                    model.setFocusBounds(null);
-                    model.placeSearch.resetSearch();
-                    model.framing.resetManualFraming();
-                  }}
-                  className="font-display text-xs font-semibold uppercase tracking-wide text-error"
-                >
-                  Clear
-                </button>
-              </div>
+              <Button
+                type="button"
+                styles={plainStyles}
+                onClick={() => model.setFramingModalOpen(true)}
+              >
+                Reframe
+              </Button>
+              <Button
+                type="button"
+                styles={{
+                  root: {
+                    minHeight: "2.75rem",
+                    borderRadius: 14,
+                    border: "none",
+                    backgroundColor: "transparent",
+                    color: "var(--color-halt)",
+                    fontWeight: 510,
+                    "&:hover": {
+                      backgroundColor:
+                        "oklch(from var(--color-halt) l c h / 0.12)",
+                    },
+                  },
+                }}
+                onClick={() => {
+                  model.setGameArea(null);
+                  model.setPlaceLabel("");
+                  model.setFocusBounds(null);
+                  model.placeSearch.resetSearch();
+                  model.framing.resetManualFraming();
+                }}
+              >
+                Clear
+              </Button>
               {model.packAttach.packId ? (
                 <PackAttachChip
                   packId={model.packAttach.packId}
@@ -125,111 +159,144 @@ export function GamePresetEditorContent() {
                   onChangePack={model.packAttach.changePack}
                 />
               ) : null}
-            </div>
+            </Stack>
+          ) : null}
+        </Stack>
+
+        <Stack gap={8}>
+          <SectionLabel>Preset name</SectionLabel>
+          <InsetGroup>
+            <TextInput
+              aria-label="Preset name"
+              value={model.name}
+              onChange={(event) => {
+                model.setName(event.currentTarget.value);
+                model.setError(null);
+              }}
+              styles={{
+                input: {
+                  border: "none",
+                  background: "transparent",
+                  minHeight: "3.25rem",
+                  color: "var(--color-field-ink)",
+                  fontSize: "1rem",
+                  fontWeight: 510,
+                  paddingInline: "1rem",
+                },
+              }}
+            />
+          </InsetGroup>
+        </Stack>
+
+        <Stack gap={8}>
+          <SectionLabel>Distance edition</SectionLabel>
+          <SegmentedControl
+            fullWidth
+            value={model.distanceUnit}
+            onChange={(value) => {
+              const unit = value as "imperial" | "metric";
+              model.setDistanceUnit(unit);
+              model.setAdvancedSettings(
+                defaultAdvancedSessionSettings(model.gameSize, unit),
+              );
+            }}
+            data={[
+              { label: "Imperial (mi)", value: "imperial" },
+              { label: "Metric (km)", value: "metric" },
+            ]}
+            aria-label="Distance edition"
+            styles={{
+              root: {
+                backgroundColor:
+                  "oklch(from var(--color-field-ink) l c h / 0.08)",
+                border:
+                  "0.33px solid oklch(from var(--color-field-ink) l c h / 0.12)",
+                borderRadius: 12,
+                padding: 2,
+              },
+              label: {
+                color: "var(--color-field-ink)",
+                fontWeight: 510,
+                fontSize: "0.875rem",
+              },
+              indicator: {
+                backgroundColor:
+                  "oklch(from var(--color-field-ink) l c h / 0.16)",
+                borderRadius: 10,
+              },
+            }}
+          />
+        </Stack>
+
+        <div className="flex flex-col gap-4">
+          <GameSizePicker
+            gameArea={model.gameArea}
+            value={model.gameSize}
+            distanceUnit={model.distanceUnit}
+            onChange={(size) => {
+              model.setGameSize(size);
+              model.setAdvancedSettings((current) => ({
+                ...defaultAdvancedSessionSettings(size, model.distanceUnit),
+                ...current,
+                hidingZoneRadiusMeters: hidingZoneRadiusMeters(
+                  size,
+                  model.distanceUnit,
+                ),
+              }));
+            }}
+          />
+
+          <AdvancedSessionSettings
+            gameSize={model.gameSize}
+            distanceUnit={model.distanceUnit}
+            value={model.advancedSettings}
+            onChange={model.setAdvancedSettings}
+          />
+
+          {model.isUserPreset && model.packAttach.showRequestCta ? (
+            <RequestPackWhenUnavailable
+              getSnapshot={() =>
+                buildPreloadPresetSnapshot({
+                  name: model.name,
+                  placeLabel: model.placeLabel,
+                  gameSize: model.gameSize,
+                  distanceUnit: model.distanceUnit,
+                  focusBounds: model.focusBounds,
+                  gameArea: model.gameArea,
+                  regionPackId: model.packAttach.packId,
+                  presetId: model.existing?.id,
+                })
+              }
+            />
           ) : null}
         </div>
 
-        <label className="field-label font-display text-xs uppercase tracking-[0.1em]">
-          Preset name
-          <input
-            value={model.name}
-            onChange={(event) => {
-              model.setName(event.target.value);
-              model.setError(null);
-            }}
-            className="field-input mt-2"
-          />
-        </label>
+        <ErrorCallout>{model.error}</ErrorCallout>
 
-        <div className="space-y-2">
-          <p className="font-display text-xs font-semibold uppercase tracking-[0.1em] text-field-ink-muted">
-            Distance edition
-          </p>
-          <div className="grid grid-cols-2 gap-2">
-            {(["imperial", "metric"] as const).map((unit) => (
-              <button
-                key={unit}
-                type="button"
-                onClick={() => {
-                  model.setDistanceUnit(unit);
-                  model.setAdvancedSettings(
-                    defaultAdvancedSessionSettings(model.gameSize, unit),
-                  );
-                }}
-                className={`min-h-11 border-2 px-3 py-2 text-sm font-semibold ${
-                  model.distanceUnit === unit
-                    ? "border-flag bg-flag-soft text-flag"
-                    : "border-rule bg-canvas text-field-ink"
-                }`}
-              >
-                {unit === "metric" ? "Metric (km)" : "Imperial (mi)"}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <GameSizePicker
-          gameArea={model.gameArea}
-          value={model.gameSize}
-          distanceUnit={model.distanceUnit}
-          onChange={(size) => {
-            model.setGameSize(size);
-            model.setAdvancedSettings((current) => ({
-              ...defaultAdvancedSessionSettings(size, model.distanceUnit),
-              ...current,
-              hidingZoneRadiusMeters: hidingZoneRadiusMeters(
-                size,
-                model.distanceUnit,
-              ),
-            }));
-          }}
-        />
-
-        <AdvancedSessionSettings
-          gameSize={model.gameSize}
-          distanceUnit={model.distanceUnit}
-          value={model.advancedSettings}
-          onChange={model.setAdvancedSettings}
-        />
-
-        {model.isUserPreset && model.packAttach.showRequestCta ? (
-          <RequestPackWhenUnavailable
-            getSnapshot={() =>
-              buildPreloadPresetSnapshot({
-                name: model.name,
-                placeLabel: model.placeLabel,
-                gameSize: model.gameSize,
-                distanceUnit: model.distanceUnit,
-                focusBounds: model.focusBounds,
-                gameArea: model.gameArea,
-                regionPackId: model.packAttach.packId,
-                presetId: model.existing?.id,
-              })
-            }
-          />
-        ) : null}
-
-        {model.error ? <p className="text-error">{model.error}</p> : null}
-
-        <div className="flex flex-wrap gap-2">
+        <Stack gap="sm">
           <Button
             type="button"
-            variant="flag"
-            className="min-h-11"
+            fullWidth
+            styles={filledStyles}
             onClick={model.handleSave}
           >
             Save preset
           </Button>
           {model.existing && !model.needsMigrationReview ? (
-            <Button asChild variant="default" className="min-h-11">
-              <AppLink to={`/create?preset=${model.existing.id}`}>Host</AppLink>
+            <Button
+              component={Link}
+              to={`/create?preset=${model.existing.id}`}
+              fullWidth
+              styles={grayStyles}
+            >
+              Host
             </Button>
           ) : null}
           {model.existing ? (
             <Button
               type="button"
-              variant="default"
-              className="min-h-11"
+              fullWidth
+              styles={grayStyles}
               onClick={() => {
                 model.deletePreset(model.existing!.id);
                 model.navigate("/presets");
@@ -238,11 +305,16 @@ export function GamePresetEditorContent() {
               Delete
             </Button>
           ) : null}
-          <Button asChild variant="default" className="min-h-11">
-            <AppLink to="/presets">Cancel</AppLink>
+          <Button
+            component={Link}
+            to="/presets"
+            fullWidth
+            styles={plainStyles}
+          >
+            Cancel
           </Button>
-        </div>
-      </div>
+        </Stack>
+      </Stack>
     </>
   );
 }

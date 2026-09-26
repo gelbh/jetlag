@@ -7,10 +7,10 @@ import type { SessionRecord } from "@/domain/map/annotations";
 import { ShareCode } from "../identity/ShareCode";
 import { RolePasscodeSettings } from "./RolePasscodeSettings";
 import {
-  IosInsetGroup,
-  IosSectionLabel,
-  iosFilledStyles,
-} from "@/components/ui/apple/iosEntryChrome";
+  InsetGroup,
+  SectionLabel,
+  filledStyles,
+} from "@/components/ui/entry/entryChrome";
 import { sessionRulesSummary } from "@/domain/session/rules";
 
 export interface MapSettingsGameTabProps {
@@ -79,13 +79,13 @@ export function MapSettingsGameTab({
   return (
     <Stack gap="lg">
       <Stack gap="xs">
-        <IosSectionLabel>Join code</IosSectionLabel>
+        <SectionLabel>Join code</SectionLabel>
         <ShareCode code={sessionCode} remote={remoteSession} />
       </Stack>
 
       {session && myUid ? (
         <Stack gap="xs">
-          <IosSectionLabel>Role passcodes</IosSectionLabel>
+          <SectionLabel>Role passcodes</SectionLabel>
           <RolePasscodeSettings
             session={session}
             myUid={myUid}
@@ -96,19 +96,19 @@ export function MapSettingsGameTab({
       ) : null}
 
       <Stack gap="xs">
-        <IosSectionLabel>Game rules</IosSectionLabel>
-        <IosInsetGroup>
+        <SectionLabel>Game rules</SectionLabel>
+        <InsetGroup>
           <p className="px-4 py-3 text-sm leading-snug text-[var(--color-field-ink-muted)]">
             {summary.hidingPeriodLabel} · {summary.hidingZoneLabel} ·{" "}
             {summary.tentacleLabel} · {summary.thermometerMaxLabel}
           </p>
-        </IosInsetGroup>
+        </InsetGroup>
         {!gameRulesEditable ? (
-          <IosInsetGroup>
+          <InsetGroup>
             <p className="px-4 py-3 text-sm leading-snug text-[var(--color-field-ink-muted)]">
               Rules lock after the timer starts. Host can edit before start.
             </p>
-          </IosInsetGroup>
+          </InsetGroup>
         ) : null}
         <AdvancedSessionSettings
           gameSize={gameSize}
@@ -121,7 +121,7 @@ export function MapSettingsGameTab({
         {gameRulesEditable && onSaveGameRules ? (
           <Button
             fullWidth
-            styles={iosFilledStyles}
+            styles={filledStyles}
             onClick={() => void onSaveGameRules()}
           >
             {gameRulesSaveLabel}

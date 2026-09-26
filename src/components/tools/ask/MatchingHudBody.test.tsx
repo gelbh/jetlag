@@ -8,7 +8,7 @@ import {
   type MatchingAnswer,
   type MatchingCategoryId,
 } from "@/domain/questions";
-import { jetlagMantineTheme } from "@/theme/mantineTheme";
+import { jetlagTheme } from "@/theme/theme";
 import { AskHudHost } from "./AskHudHost";
 import { MatchingHudBody } from "./MatchingHudBody";
 import {
@@ -43,7 +43,7 @@ const baseProps = {
 
 function renderMatching(ui: ReactElement) {
   return render(
-    <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+    <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
       {ui}
     </MantineProvider>,
   );

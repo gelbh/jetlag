@@ -32,19 +32,19 @@ import {
 } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  IosErrorCallout,
-  IosFieldError,
-  IosInsetGroup,
-  IosSectionLabel,
-  IosSuccessCallout,
-  IosDrawerGrabber,
-  iosBottomDrawerStyles,
-  iosCompactFilledStyles,
-  iosFilledStyles,
-  iosGrayStyles,
-  iosPlainStyles,
-} from "@/components/ui/apple/iosEntryChrome";
-import { IosInsetRow } from "@/components/ui/apple/IosInsetRow";
+  ErrorCallout,
+  FieldError,
+  InsetGroup,
+  SectionLabel,
+  SuccessCallout,
+  DrawerGrabber,
+  bottomDrawerStyles,
+  compactFilledStyles,
+  filledStyles,
+  grayStyles,
+  plainStyles,
+} from "@/components/ui/entry/entryChrome";
+import { InsetRow } from "@/components/ui/entry/InsetRow";
 import { USERNAME_MAX_LENGTH } from "@/domain/game/playerProfile";
 import crawlPolicy from "@/domain/seo/seoCrawlPolicy.json";
 import { copyToClipboard } from "@/platform/copyToClipboard";
@@ -265,7 +265,7 @@ function FriendRowFace({
   );
 }
 
-function IosEmptyInset({
+function EmptyInset({
   icon,
   children,
 }: {
@@ -273,7 +273,7 @@ function IosEmptyInset({
   children: ReactNode;
 }) {
   return (
-    <IosInsetGroup>
+    <InsetGroup>
       <Stack gap={8} align="center" px="md" py="xl">
         <Box
           c="var(--color-field-ink-muted)"
@@ -292,7 +292,7 @@ function IosEmptyInset({
           {children}
         </Text>
       </Stack>
-    </IosInsetGroup>
+    </InsetGroup>
   );
 }
 
@@ -385,9 +385,9 @@ function PullToRefresh({
   );
 }
 
-const iosPlainHaltStyles = {
+const plainHaltStyles = {
   root: {
-    ...iosPlainStyles.root,
+    ...plainStyles.root,
     color: "var(--color-halt)",
     "&:hover": {
       backgroundColor: "oklch(from var(--color-halt) l c h / 0.12)",
@@ -604,10 +604,10 @@ function FriendDetailDrawer({
       title={null}
       withCloseButton={false}
       overlayProps={{ backgroundOpacity: 0.4, blur: 3 }}
-      styles={iosBottomDrawerStyles()}
+      styles={bottomDrawerStyles()}
     >
       <Stack gap="md">
-        <IosDrawerGrabber />
+        <DrawerGrabber />
         <Stack gap={8} align="center">
           <FriendMonogram username={entry.username} size={56} />
           <Text
@@ -629,7 +629,7 @@ function FriendDetailDrawer({
           <FriendStatsStrip profile={profile} />
         ) : null}
 
-        <IosSuccessCallout>{inviteNote}</IosSuccessCallout>
+        <SuccessCallout>{inviteNote}</SuccessCallout>
 
         <Stack gap={10}>
           {isSearchHit ? (
@@ -642,7 +642,7 @@ function FriendDetailDrawer({
                 loading={busy}
                 leftSection={<UserPlus size={18} weight="bold" />}
                 onClick={onRequest}
-                styles={iosFilledStyles}
+                styles={filledStyles}
               >
                 Send request
               </Button>
@@ -658,7 +658,7 @@ function FriendDetailDrawer({
                     loading={inviting}
                     leftSection={<PaperPlaneTilt size={18} weight="bold" />}
                     onClick={() => void inviteToSession()}
-                    styles={iosFilledStyles}
+                    styles={filledStyles}
                   >
                     {`Invite to ${inviteSessionCode}`}
                   </Button>
@@ -666,7 +666,7 @@ function FriendDetailDrawer({
                     fullWidth
                     leftSection={<GameController size={18} weight="bold" />}
                     onClick={startNewGame}
-                    styles={iosGrayStyles}
+                    styles={grayStyles}
                   >
                     Start new game
                   </Button>
@@ -676,19 +676,19 @@ function FriendDetailDrawer({
                   fullWidth
                   leftSection={<GameController size={18} weight="bold" />}
                   onClick={startNewGame}
-                  styles={iosFilledStyles}
+                  styles={filledStyles}
                 >
                   Start new game
                 </Button>
               )}
 
-              <IosInsetGroup>
-                <IosInsetRow
+              <InsetGroup>
+                <InsetRow
                   to={`/leaderboard?user=${encodeURIComponent(entry.username)}`}
                   label="View on leaderboard"
                   icon={<Trophy size={22} weight="regular" />}
                 />
-                <IosInsetRow
+                <InsetRow
                   showSeparator
                   label={confirmRemove ? "Confirm remove" : "Remove friend"}
                   icon={<UserMinus size={22} weight="regular" />}
@@ -702,7 +702,7 @@ function FriendDetailDrawer({
                     onRemove();
                   }}
                 />
-              </IosInsetGroup>
+              </InsetGroup>
             </>
           ) : null}
 
@@ -713,7 +713,7 @@ function FriendDetailDrawer({
                 loading={busy}
                 onClick={onAccept}
                 leftSection={<Check size={18} weight="bold" />}
-                styles={iosFilledStyles}
+                styles={filledStyles}
               >
                 Accept request
               </Button>
@@ -721,7 +721,7 @@ function FriendDetailDrawer({
                 fullWidth
                 loading={busy}
                 onClick={onDecline}
-                styles={iosPlainHaltStyles}
+                styles={plainHaltStyles}
               >
                 Decline
               </Button>
@@ -738,7 +738,7 @@ function FriendDetailDrawer({
                 loading={busy}
                 onClick={onCancel}
                 leftSection={<UserMinus size={16} weight="bold" />}
-                styles={iosGrayStyles}
+                styles={grayStyles}
               >
                 Cancel request
               </Button>
@@ -766,7 +766,7 @@ function FriendDetailDrawer({
 }
 
 /** Join/Presets-style iOS body for the Mantine Friends route. */
-export function FriendsIosBody() {
+export function FriendsBody() {
   const model = useFriendsPanelModel();
   const sessionCode = useSessionStore((state) => state.session?.code ?? null);
   const inviteSessionCode = sessionCode ?? getFriendsMockSessionCode();
@@ -855,10 +855,10 @@ export function FriendsIosBody() {
           }}
         >
           <Stack gap={8}>
-            <IosSectionLabel>Find people</IosSectionLabel>
+            <SectionLabel>Find people</SectionLabel>
             <Group gap={8} align="stretch" wrap="nowrap">
               <Box style={{ flex: 1, minWidth: 0 }}>
-                <IosInsetGroup error={Boolean(model.queryError)}>
+                <InsetGroup error={Boolean(model.queryError)}>
                   <TextInput
                     id="friends-search-username"
                     aria-label="Search username"
@@ -906,7 +906,7 @@ export function FriendsIosBody() {
                       },
                     }}
                   />
-                </IosInsetGroup>
+                </InsetGroup>
               </Box>
               <ActionIcon
                 type="submit"
@@ -935,26 +935,26 @@ export function FriendsIosBody() {
                 <MagnifyingGlass size={22} weight="bold" aria-hidden />
               </ActionIcon>
             </Group>
-            <IosFieldError>{model.queryError}</IosFieldError>
+            <FieldError>{model.queryError}</FieldError>
             <Text size="xs" c="var(--color-field-ink-muted)" px={4}>
               Live results while you type · at least 2 characters
             </Text>
           </Stack>
         </form>
 
-        <IosSuccessCallout>{model.successMessage}</IosSuccessCallout>
-        {model.error ? <IosErrorCallout>{model.error}</IosErrorCallout> : null}
+        <SuccessCallout>{model.successMessage}</SuccessCallout>
+        {model.error ? <ErrorCallout>{model.error}</ErrorCallout> : null}
 
         {showSearchEmpty ? (
-          <IosEmptyInset icon={<MagnifyingGlass size={28} weight="regular" />}>
+          <EmptyInset icon={<MagnifyingGlass size={28} weight="regular" />}>
             No users found for that username.
-          </IosEmptyInset>
+          </EmptyInset>
         ) : null}
 
         {model.requestableResults.length > 0 ? (
           <Stack gap={8}>
-            <IosSectionLabel>Results</IosSectionLabel>
-            <IosInsetGroup>
+            <SectionLabel>Results</SectionLabel>
+            <InsetGroup>
               {model.requestableResults.map((entry, index) => (
                 <Box key={entry.uid}>
                   <FriendRowFace
@@ -973,7 +973,7 @@ export function FriendsIosBody() {
                           )
                         }
                         onClick={() => void model.requestFriend(entry.uid)}
-                        styles={iosCompactFilledStyles}
+                        styles={compactFilledStyles}
                       >
                         Request
                       </Button>
@@ -984,7 +984,7 @@ export function FriendsIosBody() {
                   ) : null}
                 </Box>
               ))}
-            </IosInsetGroup>
+            </InsetGroup>
           </Stack>
         ) : null}
 
@@ -999,7 +999,7 @@ export function FriendsIosBody() {
           />
 
           {model.loadingList ? (
-            <IosInsetGroup>
+            <InsetGroup>
               <Group gap={10} px="md" py="md" c="var(--color-field-ink-muted)">
                 <CircleNotch
                   size={18}
@@ -1009,12 +1009,12 @@ export function FriendsIosBody() {
                 />
                 <Text size="sm">Loading…</Text>
               </Group>
-            </IosInsetGroup>
+            </InsetGroup>
           ) : tabEntries.length === 0 ? (
-            <IosEmptyInset icon={tabEmptyIcon}>{tabEmpty}</IosEmptyInset>
+            <EmptyInset icon={tabEmptyIcon}>{tabEmpty}</EmptyInset>
           ) : (
             <FriendSwipeRegistry>
-              <IosInsetGroup>
+              <InsetGroup>
                 {tabEntries.map((entry, index) => (
                   <FriendTabRow
                     key={entry.uid}
@@ -1029,7 +1029,7 @@ export function FriendsIosBody() {
                     onCancel={() => void model.cancelFriend(entry.uid)}
                   />
                 ))}
-              </IosInsetGroup>
+              </InsetGroup>
             </FriendSwipeRegistry>
           )}
         </Stack>

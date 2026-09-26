@@ -6,7 +6,7 @@ import { MantineProvider } from "@mantine/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { MapBottomChrome } from "./MapBottomChrome";
 import { ToolDeckGroup } from "@/components/tools/ToolDeck";
-import { jetlagMantineTheme } from "@/theme/mantineTheme";
+import { jetlagTheme } from "@/theme/theme";
 
 const chromeCss = readFileSync(
   resolve(dirname(fileURLToPath(import.meta.url)), "../../../styles/map-bottom-chrome.css"),
@@ -31,7 +31,7 @@ beforeEach(() => {
 
 function renderChrome(ui: React.ReactElement) {
   return render(
-    <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+    <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
       {ui}
     </MantineProvider>,
   );
@@ -220,7 +220,7 @@ describe("MapBottomChrome", () => {
 
   it("uses a draggable L/R side stack under Mantine and flips map chrome CSS", () => {
     const { container } = renderChrome(
-      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
         <MapBottomChrome
           layout="phone"
           hunt={<button type="button">Radar</button>}
@@ -279,7 +279,7 @@ describe("MapBottomChrome", () => {
 describe("MapBottomChrome Mantine", () => {
   it("mounts Mantine chrome and keeps OverlayHost pointer-events-none", () => {
     const { container } = renderChrome(
-      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
         <MapBottomChrome
           layout="phone"
           hunt={<button type="button">Radar</button>}
@@ -294,7 +294,7 @@ describe("MapBottomChrome Mantine", () => {
 
   it("keeps Mantine side islands clickable under pointer-events-none chrome", () => {
     const { container } = renderChrome(
-      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
         <MapBottomChrome
           layout="phone"
           hunt={<button type="button">Radar</button>}
@@ -309,7 +309,7 @@ describe("MapBottomChrome Mantine", () => {
 
   it("hides hunt and side docks when ask-first is active", () => {
     const { container } = renderChrome(
-      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
         <MapBottomChrome
           layout="phone"
           askFirst
@@ -330,7 +330,7 @@ describe("MapBottomChrome Mantine", () => {
 
   it("keeps Mantine hunt ToolDeck clickable under pointer-events-none chrome", () => {
     const { container } = renderChrome(
-      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
         <MapBottomChrome
           layout="phone"
           hunt={<button type="button">Radar</button>}

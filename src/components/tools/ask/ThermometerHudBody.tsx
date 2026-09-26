@@ -9,7 +9,7 @@ import { HudThermometerIcon } from "@/components/map/icons/ToolIcons";
 import { AskInlineError } from "@/components/tools/shared/readout/AskInlineError";
 import { ResolvedReadout } from "@/components/tools/shared/readout/ResolvedReadout";
 import { QuestionTruthReferenceHint } from "@/components/tools/shared/QuestionTruthReferenceHint";
-import { iosAskInsetSurfaceStyle } from "@/components/ui/apple/iosEntryChrome";
+import { askInsetSurfaceStyle } from "@/components/ui/entry/entryChrome";
 import {
   formatPresetDistance,
   type DistanceUnit,
@@ -110,7 +110,7 @@ export function ThermometerHudBody({
         role="status"
         aria-live="polite"
         style={{
-          ...iosAskInsetSurfaceStyle,
+          ...askInsetSurfaceStyle,
           borderRadius: 16,
           padding: "0.85rem 1rem",
         }}

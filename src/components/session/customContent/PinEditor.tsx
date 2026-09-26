@@ -4,13 +4,13 @@ import type { AdvancedSessionSettingsValue } from "@/domain/session/tools/advanc
 import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
 import type { SessionCustomLocationPin } from "@/domain/session/catalog/sessionCustomContent";
 import {
-  IosInsetGroup,
-  IosSectionLabel,
-  iosCompactDangerStyles,
-  iosFilledStyles,
-  iosInsetTextInputStyles,
-} from "@/components/ui/apple/iosEntryChrome";
-import { IosInsetHairline } from "@/components/ui/apple/IosInsetRow";
+  InsetGroup,
+  SectionLabel,
+  compactDangerStyles,
+  filledStyles,
+  insetTextInputStyles,
+} from "@/components/ui/entry/entryChrome";
+import { InsetHairline } from "@/components/ui/entry/InsetRow";
 
 interface PinEditorProps {
   value: AdvancedSessionSettingsValue;
@@ -53,16 +53,16 @@ export function PinEditor({ value, onChange, disabled }: PinEditorProps) {
 
   return (
     <Stack gap="xs">
-      <IosSectionLabel>Manual location pins</IosSectionLabel>
+      <SectionLabel>Manual location pins</SectionLabel>
       <Text size="xs" c="var(--color-field-ink-muted)" px={4}>
         Named points for Measuring and Tentacle when map data is missing.
       </Text>
 
       {value.customLocationPins.length > 0 ? (
-        <IosInsetGroup>
+        <InsetGroup>
           {value.customLocationPins.map((pin, index) => (
             <Box key={pin.id}>
-              {index > 0 ? <IosInsetHairline insetStart="1rem" /> : null}
+              {index > 0 ? <InsetHairline insetStart="1rem" /> : null}
               <Box
                 style={{
                   display: "flex",
@@ -84,7 +84,7 @@ export function PinEditor({ value, onChange, disabled }: PinEditorProps) {
                   type="button"
                   size="compact-sm"
                   disabled={disabled}
-                  styles={iosCompactDangerStyles}
+                  styles={compactDangerStyles}
                   onClick={() =>
                     onChange({
                       ...value,
@@ -99,10 +99,10 @@ export function PinEditor({ value, onChange, disabled }: PinEditorProps) {
               </Box>
             </Box>
           ))}
-        </IosInsetGroup>
+        </InsetGroup>
       ) : null}
 
-      <IosInsetGroup>
+      <InsetGroup>
         <TextInput
           label="Name"
           value={pinDraft.name}
@@ -113,9 +113,9 @@ export function PinEditor({ value, onChange, disabled }: PinEditorProps) {
               name: event.currentTarget.value,
             }))
           }
-          styles={iosInsetTextInputStyles}
+          styles={insetTextInputStyles}
         />
-        <IosInsetHairline insetStart="1rem" />
+        <InsetHairline insetStart="1rem" />
         <TextInput
           label="Latitude"
           value={pinDraft.lat}
@@ -127,9 +127,9 @@ export function PinEditor({ value, onChange, disabled }: PinEditorProps) {
               lat: event.currentTarget.value,
             }))
           }
-          styles={iosInsetTextInputStyles}
+          styles={insetTextInputStyles}
         />
-        <IosInsetHairline insetStart="1rem" />
+        <InsetHairline insetStart="1rem" />
         <TextInput
           label="Longitude"
           value={pinDraft.lng}
@@ -141,15 +141,15 @@ export function PinEditor({ value, onChange, disabled }: PinEditorProps) {
               lng: event.currentTarget.value,
             }))
           }
-          styles={iosInsetTextInputStyles}
+          styles={insetTextInputStyles}
         />
-      </IosInsetGroup>
+      </InsetGroup>
 
       <Button
         type="button"
         fullWidth
         disabled={disabled}
-        styles={iosFilledStyles}
+        styles={filledStyles}
         onClick={addPin}
       >
         Add pin

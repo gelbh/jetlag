@@ -4,7 +4,7 @@ import { MantineProvider } from "@mantine/core";
 import type { ReactElement } from "react";
 import { ShareCode } from "./ShareCode";
 import { renderWithRouter } from "@/test/renderWithRouter";
-import { jetlagMantineTheme } from "@/theme/mantineTheme";
+import { jetlagTheme } from "@/theme/theme";
 import { copyToClipboard } from "@/platform/copyToClipboard";
 
 vi.mock("../../../platform/copyToClipboard", () => ({
@@ -13,7 +13,7 @@ vi.mock("../../../platform/copyToClipboard", () => ({
 
 function renderShareCode(ui: ReactElement) {
   return renderWithRouter(
-    <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+    <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
       {ui}
     </MantineProvider>,
   );

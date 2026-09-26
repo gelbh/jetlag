@@ -8,7 +8,7 @@ import {
 } from "@/domain/map/mapBasemaps";
 import { previewTileUrlsFromOrigin } from "@/domain/map/mapTilePreview";
 import { useMapNavDockSide } from "@/hooks/map/useMapNavDockSide";
-import { iosMapChromeSurfaceStyles } from "@/components/ui/apple/iosEntryChrome";
+import { mapChromeSurfaceStyles } from "@/components/ui/entry/entryChrome";
 import { HudCompassIcon, HudMinusIcon, HudPlusIcon } from "../../ui/brand/HudIcons";
 import {
   useMapLibreInteracting,
@@ -21,7 +21,7 @@ const NAV_BTN_SIZE = 44;
 
 const navControlStyles = {
   root: {
-    ...iosMapChromeSurfaceStyles,
+    ...mapChromeSurfaceStyles,
     width: NAV_BTN_SIZE,
     height: NAV_BTN_SIZE,
     minWidth: NAV_BTN_SIZE,
@@ -35,7 +35,7 @@ const navControlStyles = {
 } as const;
 
 const zoomIslandStyles = {
-  ...iosMapChromeSurfaceStyles,
+  ...mapChromeSurfaceStyles,
   width: NAV_BTN_SIZE,
   borderRadius: 14,
   overflow: "hidden",
@@ -159,7 +159,7 @@ export function MapNavControlStack({
                 overflow: "hidden",
                 borderColor: satelliteActive
                   ? "oklch(from var(--color-flag) l c h / 0.55)"
-                  : iosMapChromeSurfaceStyles.border,
+                  : mapChromeSurfaceStyles.border,
               },
             }}
           >

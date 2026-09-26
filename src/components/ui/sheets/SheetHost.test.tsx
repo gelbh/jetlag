@@ -7,7 +7,7 @@ import {
   ContextualRailPanelProvider,
 } from "../../map/chrome/ContextualRailContext";
 import { useContextualRailPanel } from "../../map/helpers/useContextualRailPanel";
-import { jetlagMantineTheme } from "@/theme/mantineTheme";
+import { jetlagTheme } from "@/theme/theme";
 
 const useDesktopLayout = vi.fn();
 vi.mock("../../../hooks/layout/useDesktopLayout", () => ({
@@ -34,9 +34,9 @@ function RailPanelMount({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }
 
-function withMantine(ui: ReactNode) {
+function withAppUi(ui: ReactNode) {
   return (
-    <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+    <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
       {ui}
     </MantineProvider>
   );
@@ -60,7 +60,7 @@ describe("SheetHost", () => {
   it("uses Mantine Drawer under 1024", () => {
     useDesktopLayout.mockReturnValue(false);
     render(
-      withMantine(
+      withAppUi(
         <SheetHost open onClose={() => {}} ariaLabel="Settings" railTab="settings">
           <p>mantine body</p>
         </SheetHost>,
@@ -75,7 +75,7 @@ describe("SheetHost", () => {
   it("portals into contextual rail on desktop even when flag on", async () => {
     useDesktopLayout.mockReturnValue(true);
     render(
-      withMantine(
+      withAppUi(
         <ContextualRailPanelProvider>
           <RailPanelMount>
             <SheetHost
@@ -153,7 +153,7 @@ describe("SheetHost", () => {
     useDesktopLayout.mockReturnValue(false);
     const onClose = vi.fn();
     render(
-      withMantine(
+      withAppUi(
         <SheetHost open onClose={onClose} ariaLabel="Settings" railTab="settings">
           <p>body</p>
         </SheetHost>,
@@ -169,7 +169,7 @@ describe("SheetHost", () => {
   it("uses overlay path on desktop when railTab is omitted", () => {
     useDesktopLayout.mockReturnValue(true);
     render(
-      withMantine(
+      withAppUi(
         <SheetHost open onClose={() => {}} ariaLabel="Map tools guide">
           <p>first-run</p>
         </SheetHost>,
@@ -183,7 +183,7 @@ describe("SheetHost", () => {
   it("uses Mantine Drawer on desktop overlay when railTab omitted", () => {
     useDesktopLayout.mockReturnValue(true);
     render(
-      withMantine(
+      withAppUi(
         <SheetHost open onClose={() => {}} ariaLabel="Map tools guide">
           <p>first-run</p>
         </SheetHost>,
@@ -241,7 +241,7 @@ describe("SheetHost", () => {
       );
     }
 
-    render(withMantine(<Harness />));
+    render(withAppUi(<Harness />));
 
     expect(screen.getByTestId("mantine-drawer-sheet")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "close-sheet" }));
@@ -263,7 +263,7 @@ describe("SheetHost", () => {
   it("applies consumer maxHeightClassName on Mantine Drawer content", () => {
     useDesktopLayout.mockReturnValue(false);
     render(
-      withMantine(
+      withAppUi(
         <SheetHost
           open
           onClose={() => {}}

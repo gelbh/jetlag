@@ -1,8 +1,8 @@
 import { Button, Stack, Text, UnstyledButton } from "@mantine/core";
 import {
-  IosInsetGroup,
-  iosGrayStyles,
-} from "@/components/ui/apple/iosEntryChrome";
+  InsetGroup,
+  grayStyles,
+} from "@/components/ui/entry/entryChrome";
 
 export interface RoleCodeStampProps {
   roleLabel: string;
@@ -27,7 +27,7 @@ export function RoleCodeStamp({
 
   return (
     <Stack gap="xs">
-      <IosInsetGroup>
+      <InsetGroup>
         <UnstyledButton
           type="button"
           disabled={busy}
@@ -74,12 +74,12 @@ export function RoleCodeStamp({
             {revealed ? code : MASKED_CODE}
           </Text>
         </UnstyledButton>
-      </IosInsetGroup>
+      </InsetGroup>
       <Button
         type="button"
         fullWidth
         disabled={busy}
-        styles={iosGrayStyles}
+        styles={grayStyles}
         onClick={onRegenerate}
         aria-label={`Regenerate ${roleLabel}`}
       >

@@ -30,9 +30,9 @@ import { SearchResultsList } from "@/components/tools/shared/controls/SearchResu
 import { CatalogExhaustedMessage } from "@/components/tools/shared/readout/CatalogExhaustedMessage";
 import { QuestionTruthReferenceHint } from "@/components/tools/shared/QuestionTruthReferenceHint";
 import {
-  iosFilterChipStyles,
-  iosFilterChipTrackStyle,
-} from "@/components/ui/apple/iosEntryChrome";
+  filterChipStyles,
+  filterChipTrackStyle,
+} from "@/components/ui/entry/entryChrome";
 import {
   BASE_MEASURING_CATALOG,
   MEASURING_GROUPS,
@@ -282,7 +282,7 @@ export function MeasuringHudBody({
                 role="tablist"
                 aria-label="Filter measure categories"
                 className="jl-scroll"
-                style={iosFilterChipTrackStyle}
+                style={filterChipTrackStyle}
               >
                 {filterOptions.map((option) => {
                   const selected = effectiveFilter === option.value;
@@ -294,7 +294,7 @@ export function MeasuringHudBody({
                       role="tab"
                       aria-selected={selected}
                       onClick={() => setGroupFilter(option.value)}
-                      styles={iosFilterChipStyles(selected)}
+                      styles={filterChipStyles(selected)}
                     >
                       <Icon
                         size={14}

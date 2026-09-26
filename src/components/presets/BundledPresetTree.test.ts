@@ -12,7 +12,7 @@ function countPresets(node: BundledPresetTreeNode): number {
   return node.children.reduce((sum, child) => sum + countPresets(child), 0);
 }
 
-describe("BundledPresetTreeIos counts", () => {
+describe("BundledPresetTree counts", () => {
   it("root group counts sum to all bundled definitions", () => {
     const tree = buildBundledPresetTree(BUNDLED_GAME_PRESET_DEFINITIONS);
     const total = tree.reduce((sum, node) => sum + countPresets(node), 0);

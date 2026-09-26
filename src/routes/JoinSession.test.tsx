@@ -2,8 +2,8 @@ import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { MantineProvider } from "@mantine/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { JoinMantine } from "./JoinMantine";
-import { jetlagMantineTheme } from "@/theme/mantineTheme";
+import { JoinSession } from "./JoinSession";
+import { jetlagTheme } from "@/theme/theme";
 
 vi.mock("@/hooks/navigation/useAppNavigate", () => ({
   useAppNavigate: () => vi.fn(),
@@ -44,12 +44,12 @@ beforeEach(() => {
   );
 });
 
-describe("JoinMantine", () => {
+describe("JoinSession", () => {
   it("renders session code field and Join submit control", () => {
     render(
-      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
         <MemoryRouter>
-          <JoinMantine />
+          <JoinSession />
         </MemoryRouter>
       </MantineProvider>,
     );
