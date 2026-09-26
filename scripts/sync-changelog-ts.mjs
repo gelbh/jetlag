@@ -139,7 +139,21 @@ function readPackageVersion() {
   return packageJson.version;
 }
 
-const markdown = readFileSync(changelogMdPath, "utf8");
+function ensureDatedVersionHeaders(content) {
+  const today = new Date().toISOString().slice(0, 10);
+  return content.replace(
+    /^## (\d+\.\d+\.\d+)[ \t]*$/gm,
+    `## $1 - ${today}`,
+  );
+}
+
+let markdown = readFileSync(changelogMdPath, "utf8");
+const datedMarkdown = ensureDatedVersionHeaders(markdown);
+if (datedMarkdown !== markdown) {
+  writeFileSync(changelogMdPath, datedMarkdown);
+  markdown = datedMarkdown;
+  console.info("Stamped undated CHANGELOG.md version headers with today's UTC date.");
+}
 const entries = parseChangelogMarkdown(markdown);
 const packageVersion = readPackageVersion();
 
