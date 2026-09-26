@@ -46,6 +46,7 @@ export function resetAllStores(): void {
       matching: true,
       zone: true,
       pin: true,
+      draw: true,
       tentacle: true,
       transit: true,
     },

@@ -8,6 +8,7 @@ export function resolvePlacementPhase(
   switch (tool) {
     case "none":
     case "photo":
+    case "draw":
       return "idle";
     case "pin":
       return draft.pin.point ? "pick_center" : "idle";

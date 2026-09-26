@@ -27,6 +27,7 @@ import type { PendingQuestionRecord } from "../../domain/session/activity/sessio
 import type { SubmitPendingQuestionInput } from "../../hooks/sync/usePendingQuestionActions";
 import type { GameSize } from "../../domain/session/size/gameSize";
 import { usePlayerUiMantine } from "@/hooks/feature/usePlayerUiMantine";
+import type { AskToolHudBundle } from "../map-screen/heavyMapTools";
 import {
   queryGeolocationPermission,
   type GeolocationPermissionState,
@@ -416,7 +417,7 @@ export function useRadarTool({
     canSubmitQuestion &&
     !session.isBusy;
 
-  const hud = {
+  const hud: AskToolHudBundle = {
     readiness,
     costLabel,
     error: mantinePlayerUi ? null : (mapError ?? gpsError ?? null),

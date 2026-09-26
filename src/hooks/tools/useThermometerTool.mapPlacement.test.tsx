@@ -1,4 +1,5 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
+import { isValidElement } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { useThermometerTool } from "./useThermometerTool";
 import { createToolHookMocks } from "../../test/helpers/toolHookMocks";
@@ -36,7 +37,11 @@ describe("useThermometerTool map-first", () => {
     expect(result.current.hud.modeBody).toBeNull();
 
     act(() => {
-      result.current.hud.mapOverlay?.props.onPlacementModeChange("manual");
+      const overlay = result.current.hud.mapOverlay;
+      if (isValidElement(overlay)) {
+        (overlay.props as { onPlacementModeChange?: (mode: string) => void })
+          .onPlacementModeChange?.("manual");
+      }
     });
     act(() => {
       result.current.handleMapClick([53.35, -6.26]);
@@ -74,7 +79,10 @@ describe("useThermometerTool map-first", () => {
     });
 
     act(() => {
-      result.current.hud.mapOverlay?.props.onChangeSetup();
+      const overlay = result.current.hud.mapOverlay;
+      if (isValidElement(overlay)) {
+        (overlay.props as { onChangeSetup?: () => void }).onChangeSetup?.();
+      }
     });
 
     await waitFor(() => {

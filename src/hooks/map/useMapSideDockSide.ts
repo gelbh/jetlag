@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import {
   MAP_CHROME_DOCKS_CHANGE_EVENT,
-  MAP_SIDE_DOCK_STORAGE_KEY,
   legacyAnchorFromPlacement,
   mapSideDockIsLeft,
   readMapChromeDocksState,

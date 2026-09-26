@@ -100,7 +100,7 @@ export function MapTimerClusterMantine({
   );
   const questionTimer = selectPrimaryQuestionTimer(pendingQuestions, sessionRules);
 
-  let secondaryLabel: string | null = null;
+  let secondaryLabel: string | null;
   let secondaryColor = "var(--color-field-ink-muted)";
 
   if (questionTimer) {

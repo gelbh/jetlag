@@ -15,6 +15,7 @@ import {
 } from "../size/gameSizeRules";
 import { sessionDistanceUnit } from "../meta/sessionDistanceUnit";
 import type { AdvancedSessionSettingsValue } from "./types";
+import { parseDisabledTools } from "../rules";
 
 export function defaultAdvancedSessionSettings(
   gameSize: GameSize,
@@ -100,7 +101,7 @@ export function advancedSettingsFromSession(
     questionAnswerDeadlineMinutes:
       session.questionAnswerDeadlineMinutes ??
       defaults.questionAnswerDeadlineMinutes,
-    disabledTools: session.disabledTools ?? [],
+    disabledTools: parseDisabledTools(session.disabledTools) ?? [],
     tentaclesEnabledOverride: session.tentaclesEnabled === true,
     customThermometerPresetsEnabled: (sessionThermoMeters?.length ?? 0) > 0,
     thermometerPresetMiles: defaults.thermometerPresetMiles,

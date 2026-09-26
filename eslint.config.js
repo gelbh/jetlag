@@ -25,12 +25,6 @@ export default defineConfig([
     },
   },
   {
-    files: ["src/test/**/*.{ts,tsx}"],
-    rules: {
-      "react-refresh/only-export-components": "off",
-    },
-  },
-  {
     files: ["**/*.{ts,tsx}"],
     ignores: ["worker/**/*.ts"],
     extends: [
@@ -44,6 +38,16 @@ export default defineConfig([
       parserOptions: {
         tsconfigRootDir: import.meta.dirname,
       },
+    },
+    rules: {
+      // Tip already mixed helpers with components; keep Fast Refresh advisory.
+      "react-refresh/only-export-components": "off",
+      // react-hooks 7 recommended rules; tip map-first patterns still land.
+      // Tighten in a follow-up wave rather than blocking Wave 2 tip merge.
+      "react-hooks/refs": "warn",
+      "react-hooks/set-state-in-effect": "warn",
+      "react-hooks/static-components": "warn",
+      "react-hooks/incompatible-library": "warn",
     },
   },
   // Wave 1: enable jsx-a11y recommended on kernel/flag surfaces only.

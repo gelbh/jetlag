@@ -364,7 +364,7 @@ function computeZoneTarget(ctx: PlacementCameraContext): CameraTarget | null {
 export function computePlacementCameraTarget(
   ctx: PlacementCameraContext,
 ): CameraTarget | null {
-  if (ctx.tool === "none" || ctx.tool === "photo") {
+  if (ctx.tool === "none" || ctx.tool === "photo" || ctx.tool === "draw") {
     return null;
   }
 

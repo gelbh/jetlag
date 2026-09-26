@@ -1,7 +1,14 @@
-import type { ButtonProps } from "@mantine/core";
+/**
+ * Object-form button styles only.
+ * Do not use `ButtonProps["styles"]` here: that union includes the theme
+ * callback form, so `.root` access and UnstyledButton assigns fail under tsc.
+ */
+export type IosButtonStyles = {
+  root: Record<string, unknown>;
+};
 
 /** iOS filled tint control (logo orange). */
-export const iosFilledStyles: ButtonProps["styles"] = {
+export const iosFilledStyles: IosButtonStyles = {
   root: {
     minHeight: "3.125rem",
     borderRadius: 14,
@@ -16,7 +23,7 @@ export const iosFilledStyles: ButtonProps["styles"] = {
 };
 
 /** iOS gray / secondary filled control. */
-export const iosGrayStyles: ButtonProps["styles"] = {
+export const iosGrayStyles: IosButtonStyles = {
   root: {
     minHeight: "3.125rem",
     borderRadius: 14,
@@ -31,7 +38,7 @@ export const iosGrayStyles: ButtonProps["styles"] = {
 };
 
 /** iOS plain tinted text control. */
-export const iosPlainStyles: ButtonProps["styles"] = {
+export const iosPlainStyles: IosButtonStyles = {
   root: {
     minHeight: "2.75rem",
     borderRadius: 14,
@@ -46,7 +53,7 @@ export const iosPlainStyles: ButtonProps["styles"] = {
 };
 
 /** Compact flag control for inset list rows (friends, presets). */
-export const iosCompactFilledStyles: ButtonProps["styles"] = {
+export const iosCompactFilledStyles: IosButtonStyles = {
   root: {
     minHeight: "2.5rem",
     borderRadius: 10,
@@ -64,7 +71,7 @@ export const iosCompactFilledStyles: ButtonProps["styles"] = {
 
 
 /** Island-height Start (matches quiet timer column, not full iOS form CTA). */
-export const iosMapIslandFilledStyles: ButtonProps["styles"] = {
+export const iosMapIslandFilledStyles: IosButtonStyles = {
   root: {
     minHeight: "2.25rem",
     height: "2.25rem",
@@ -102,7 +109,7 @@ export const iosMapToolSlotLabelStyle = {
 export function iosMapToolSlotStyles(
   pressed: boolean,
   tone: IosMapToolSlotTone = "tool",
-): ButtonProps["styles"] {
+): IosButtonStyles {
   const history = tone === "history";
   return {
     root: {
@@ -157,7 +164,7 @@ export type IosChoiceTone = "default" | "success" | "danger";
 export function iosChoiceChipStyles(
   selected: boolean,
   tone: IosChoiceTone = "default",
-): ButtonProps["styles"] {
+): IosButtonStyles {
   const selectedBg =
     tone === "success"
       ? "var(--color-status-success, var(--color-trail))"
@@ -214,7 +221,7 @@ export const iosFilterChipTrackStyle = {
  * Compact filter pill (Photos / Music style) for category selectors.
  * Selected = elevated white segment on the frosted track.
  */
-export function iosFilterChipStyles(selected: boolean): ButtonProps["styles"] {
+export function iosFilterChipStyles(selected: boolean): IosButtonStyles {
   return {
     root: {
       flex: "0 0 auto",
@@ -256,7 +263,7 @@ export function iosFilterChipStyles(selected: boolean): ButtonProps["styles"] {
  * Quiet 2-col catalog tile (Matching categories). Soft inset, no drop shadow.
  * Selected uses a light flag wash + hairline, not a solid flag brick.
  */
-export function iosCatalogTileStyles(selected: boolean): ButtonProps["styles"] {
+export function iosCatalogTileStyles(selected: boolean): IosButtonStyles {
   return {
     root: {
       width: "100%",
@@ -304,7 +311,7 @@ export const iosAskInsetSurfaceStyle = {
 } as const;
 
 /** Island-height icon control (pause / resume beside the clock). */
-export const iosMapIslandIconStyles: ButtonProps["styles"] = {
+export const iosMapIslandIconStyles: IosButtonStyles = {
   root: {
     minHeight: "2.5rem",
     height: "2.5rem",
@@ -328,7 +335,7 @@ export const iosMapIslandIconStyles: ButtonProps["styles"] = {
 };
 
 /** Compact gray / secondary control for inset list rows. */
-export const iosCompactGrayStyles: ButtonProps["styles"] = {
+export const iosCompactGrayStyles: IosButtonStyles = {
   root: {
     minHeight: "2.5rem",
     borderRadius: 10,
@@ -345,7 +352,7 @@ export const iosCompactGrayStyles: ButtonProps["styles"] = {
 };
 
 /** Compact halt-tinted control for destructive row actions. */
-export const iosCompactDangerStyles: ButtonProps["styles"] = {
+export const iosCompactDangerStyles: IosButtonStyles = {
   root: {
     minHeight: "2.5rem",
     borderRadius: 10,

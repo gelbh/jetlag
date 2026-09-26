@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { SeekerChromeOverlays } from "./SeekerChromeOverlays";
 import type { AskHudReadiness } from "@/domain/ask/askHudModes";
+import type { AskToolHudBundle } from "@/hooks/map-screen/heavyMapTools";
 
 function stubTimer() {
   return { hasStarted: true };
@@ -20,7 +21,7 @@ function emptyHud(
     | "thermometer"
     | "photo",
   overrides?: Partial<AskHudReadiness>,
-) {
+): AskToolHudBundle {
   const readiness: AskHudReadiness = {
     surface,
     placementReady: false,

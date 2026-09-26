@@ -34,7 +34,7 @@ type AskCatalogRailProps = {
   "aria-label"?: string;
   hint?: string;
   /** 1 = stacked list (default); 2|3 = tile grid under each group heading. */
-  columns?: 1 | 2 | 3;
+  columns?: 1 | 2 | 3 | 4;
 };
 
 type CatalogSection = {
@@ -68,7 +68,7 @@ function CatalogTileIcon({
 }: {
   icon: ReactNode;
   selected: boolean;
-  columns: 1 | 2 | 3;
+  columns: 1 | 2 | 3 | 4;
 }) {
   return (
     <span
@@ -103,11 +103,13 @@ export function AskCatalogRail({
   const sections = sectionRows(rows);
   const multiCol = columns > 1;
   const gridClass =
-    columns === 3
-      ? "ask-catalog-rail__grid grid grid-cols-3 gap-2"
-      : columns === 2
-        ? "ask-catalog-rail__grid grid grid-cols-2 gap-2"
-        : "flex flex-col gap-2";
+    columns === 4
+      ? "ask-catalog-rail__grid grid grid-cols-4 gap-2"
+      : columns === 3
+        ? "ask-catalog-rail__grid grid grid-cols-3 gap-2"
+        : columns === 2
+          ? "ask-catalog-rail__grid grid grid-cols-2 gap-2"
+          : "flex flex-col gap-2";
 
   const list = (
     <div className="ask-catalog-rail__list jl-scroll" role="list">

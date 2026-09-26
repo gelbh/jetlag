@@ -55,6 +55,7 @@ const emptySources = {
     categoryId: null,
   },
   zone: { vertices: [] },
+  draw: { strokePoints: [] },
 };
 
 describe("buildMapDraftOverlays", () => {
