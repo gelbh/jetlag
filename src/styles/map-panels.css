@@ -85,11 +85,11 @@
   }
 
   .jl-preload-detail-panel--loading {
-    border-color: oklch(from var(--color-status-info) l c h / 0.35);
+    border-color: oklch(from var(--color-status-info) l c h / 35%);
   }
 
   .jl-preload-detail-panel--failed {
-    border-color: oklch(from var(--color-status-warning) l c h / 0.4);
+    border-color: oklch(from var(--color-status-warning) l c h / 40%);
   }
 
   .jl-preload-detail-panel__row {
@@ -191,7 +191,7 @@
   .jl-sync-beacon__lamp {
     border-radius: 9999px;
     background: var(--color-status-info);
-    box-shadow: 0 0 0 1px oklch(from var(--color-surface-deep) l c h / 0.65);
+    box-shadow: 0 0 0 1px oklch(from var(--color-surface-deep) l c h / 65%);
   }
 
   .jl-sync-beacon--sm .jl-sync-beacon__lamp {
@@ -205,51 +205,51 @@
   }
 
   .jl-sync-beacon--synced {
-    border-color: oklch(from var(--color-status-success) l c h / 0.55);
-    background: oklch(from var(--color-status-success) l c h / 0.1);
+    border-color: oklch(from var(--color-status-success) l c h / 55%);
+    background: oklch(from var(--color-status-success) l c h / 10%);
   }
 
   .jl-sync-beacon--synced .jl-sync-beacon__lamp {
     background: var(--color-status-success);
     box-shadow:
-      0 0 0 1px oklch(from var(--color-status-success) l c h / 0.35),
-      0 0 8px oklch(from var(--color-status-success) l c h / 0.4);
+      0 0 0 1px oklch(from var(--color-status-success) l c h / 35%),
+      0 0 8px oklch(from var(--color-status-success) l c h / 40%);
   }
 
   .jl-sync-beacon--saving {
-    border-color: oklch(from var(--color-status-info) l c h / 0.55);
-    background: oklch(from var(--color-status-info) l c h / 0.1);
+    border-color: oklch(from var(--color-status-info) l c h / 55%);
+    background: oklch(from var(--color-status-info) l c h / 10%);
   }
 
   .jl-sync-beacon--saving .jl-sync-beacon__lamp {
     background: var(--color-status-info);
-    box-shadow: 0 0 8px oklch(from var(--color-status-info) l c h / 0.4);
+    box-shadow: 0 0 8px oklch(from var(--color-status-info) l c h / 40%);
   }
 
   .jl-sync-beacon--offline,
   .jl-sync-beacon--degraded {
-    border-color: oklch(from var(--color-status-warning) l c h / 0.6);
+    border-color: oklch(from var(--color-status-warning) l c h / 60%);
     border-style: dashed;
-    background: oklch(from var(--color-status-warning) l c h / 0.1);
+    background: oklch(from var(--color-status-warning) l c h / 10%);
   }
 
   .jl-sync-beacon--offline .jl-sync-beacon__lamp,
   .jl-sync-beacon--degraded .jl-sync-beacon__lamp {
     background: var(--color-status-warning);
-    box-shadow: 0 0 8px oklch(from var(--color-status-warning) l c h / 0.35);
+    box-shadow: 0 0 8px oklch(from var(--color-status-warning) l c h / 35%);
   }
 
   .jl-sync-beacon--error {
-    border-color: oklch(from var(--color-status-error) l c h / 0.65);
-    background: oklch(from var(--color-status-error) l c h / 0.12);
+    border-color: oklch(from var(--color-status-error) l c h / 65%);
+    background: oklch(from var(--color-status-error) l c h / 12%);
   }
 
   .jl-sync-beacon--error .jl-sync-beacon__lamp {
     background: var(--color-status-error);
-    box-shadow: 0 0 8px oklch(from var(--color-status-error) l c h / 0.4);
+    box-shadow: 0 0 8px oklch(from var(--color-status-error) l c h / 40%);
   }
 
-  html:not([data-motion="reduced"]):not([data-motion="static"]) .jl-sync-beacon--saving .jl-sync-beacon__lamp {
+  html:not([data-motion="reduced"], [data-motion="static"]) .jl-sync-beacon--saving .jl-sync-beacon__lamp {
     animation: jl-sync-beacon-pulse 1.1s var(--ease-out-quint) infinite;
   }
 

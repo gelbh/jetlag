@@ -9,6 +9,9 @@ test-results
 *.local
 .env
 .env.*
+.dev.vars
+.dev.vars.*
+!.dev.vars.example
 !functions/.env.jet-lag-map-companion
 functions/.secret.local
 .firebase
@@ -20,3 +23,4 @@ docs/
 .lighthouseci
 target/
 crates/*/pkg/
+.stylelintcache

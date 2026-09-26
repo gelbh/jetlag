@@ -1,6 +1,6 @@
 import { isEndGameActive } from "@/domain/map/annotations";
 import { useSessionStore } from "@/state/sessionStore";
-import { questionTruthReferenceHint } from "./questionTruthReferenceHint";
+import { hiderTruthReferenceHint } from "@/domain/questions/hiderTruth/hiderTruthReferenceCopy";
 
 export function QuestionTruthReferenceHint() {
   const endGameActive = useSessionStore((state) =>
@@ -9,7 +9,7 @@ export function QuestionTruthReferenceHint() {
 
   return (
     <p className="text-xs text-ink-dim">
-      {questionTruthReferenceHint(endGameActive)}
+      {hiderTruthReferenceHint(endGameActive)}
     </p>
   );
 }

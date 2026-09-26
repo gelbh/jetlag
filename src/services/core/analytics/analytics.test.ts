@@ -16,6 +16,7 @@ import {
   trackPageView,
   trackSessionEnded,
 } from "./analytics";
+import { filterPosthogException } from "./posthogExceptionPolicy";
 import { resetClientEnvForTests } from "@/config/env";
 
 const {
@@ -176,6 +177,7 @@ describe("analytics facade", () => {
       disable_external_dependency_loading: false,
       disable_surveys: true,
       person_profiles: "identified_only",
+      before_send: filterPosthogException,
     });
     expect(posthogRegister).toHaveBeenCalledWith({ $geoip_disable: true });
   });

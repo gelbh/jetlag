@@ -54,9 +54,6 @@
   .jl-status-rail--expanded {
     position: relative;
     inset: auto;
-    top: auto;
-    right: auto;
-    left: auto;
   }
 
   .desktop-ops-observer-rail {
@@ -67,7 +64,7 @@
     padding: 0.375rem 0.25rem;
     border-right: 2px solid var(--color-border);
     border-left: 3px solid var(--color-highlight);
-    background: oklch(from var(--color-surface-deep) l c h / 0.96);
+    background: oklch(from var(--color-surface-deep) l c h / 96%);
     box-shadow: var(--shadow-hud-menu);
     pointer-events: auto;
   }
