@@ -1,4 +1,4 @@
-import type { LatLngTuple } from "./geometryCore";
+import type { LatLngTuple } from "../core/types";
 import turfDistance from "@turf/distance";
 import { point as turfPoint } from "@turf/helpers";
 
