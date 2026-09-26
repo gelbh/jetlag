@@ -1,5 +1,7 @@
-/* map-tool-dock.css — W5-D residual: panel geometry, wizard nav, unread pulse,
- * route fallback. Slot / menu / overflow chrome → MapChromeControl + entryStyles. */
+/* map-tool-dock.css — W5-E residual: panel geometry, wizard nav, unread pulse,
+ * route fallback. Slot / menu / overflow chrome → MapChromeControl + entryStyles.
+ * Dead (W5-E): jl-panel-hider-actions, thermometer-live-marker, chat-keyboard-inset,
+ * home-card-btn press scale. */
 @layer components {
   /* Floating panels above dock */
   .jl-panel-above-dock {
@@ -57,11 +59,6 @@
     line-height: 1.2;
     text-transform: uppercase;
     color: var(--color-highlight);
-  }
-
-  .jl-panel-hider-actions {
-    bottom: var(--hider-panel-bottom);
-    padding-bottom: env(safe-area-inset-bottom);
   }
 
   .jl-panel-hider-wizard {
@@ -139,10 +136,6 @@
     overscroll-behavior: contain;
   }
 
-  html:not([data-motion="reduced"]):not([data-motion="static"]) .jl-thermometer-live-marker {
-    animation: jl-thermometer-live-pulse 1.8s var(--ease-out-quint) infinite;
-  }
-
   html:not([data-motion="reduced"]):not([data-motion="static"]) .jl-unread-badge-pulse {
     animation: jl-unread-pulse 600ms var(--ease-out-quint) 1;
   }
@@ -159,10 +152,6 @@
     cursor: grabbing;
   }
 
-  html:not([data-motion="reduced"]):not([data-motion="static"]) .jl-chat-keyboard-inset {
-    transition: transform var(--motion-base) var(--ease-out-quint);
-  }
-
   html:not([data-motion="reduced"]):not([data-motion="static"]) .btn-primary,
   html:not([data-motion="reduced"]):not([data-motion="static"]) .btn-secondary {
     transition: transform var(--motion-instant) var(--ease-out-quint);
@@ -170,10 +159,6 @@
 
   html:not([data-motion="reduced"]):not([data-motion="static"]) .btn-primary:active:not(:disabled),
   html:not([data-motion="reduced"]):not([data-motion="static"]) .btn-secondary:active:not(:disabled) {
-    transform: scale(0.97);
-  }
-
-  html:not([data-motion="reduced"]):not([data-motion="static"]) .home-card-btn:active {
     transform: scale(0.97);
   }
 

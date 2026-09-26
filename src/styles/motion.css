@@ -282,17 +282,6 @@
   }
 }
 
-@keyframes jl-thermometer-live-pulse {
-  0%,
-  100% {
-    opacity: 1;
-  }
-
-  50% {
-    opacity: 0.72;
-  }
-}
-
 @keyframes jl-unread-pulse {
   0% {
     transform: scale(1);
@@ -455,10 +444,8 @@ html[data-nav-direction="neutral"]::view-transition-new(root) {
   .home-enter-actions,
   .home-resume-action[aria-busy="true"] .home-resume-cta,
   .jl-ticker-active,
-  .jl-thermometer-live-marker,
   .jl-map-phase-live-dot,
   .jl-unread-badge-pulse,
-  .jl-tool-overflow-sheet,
   .hud-sheet-enter,
   .hud-sheet-exit,
   .hud-scrim-enter,
@@ -484,13 +471,10 @@ html[data-nav-direction="neutral"]::view-transition-new(root) {
   .map-compass-control,
   [data-tool-highlight],
   [data-overlay-chrome],
-  .jl-chat-keyboard-inset,
-  .home-card-btn,
   .hud-chrome,
   .btn-primary,
   .btn-secondary,
-  .jl-tool-slot,
-  .jl-tool-overflow-row {
+  .jl-tool-slot {
     transition: none;
   }
 }
@@ -514,7 +498,6 @@ html[data-motion-decorative="off"] .loading-spinner,
 html[data-motion-decorative="off"] .home-enter-actions,
 html[data-motion-decorative="off"] .home-resume-action[aria-busy="true"] .home-resume-cta,
 html[data-motion-decorative="off"] .jl-ticker-active,
-html[data-motion-decorative="off"] .jl-thermometer-live-marker,
 html[data-motion-decorative="off"] .jl-unread-badge-pulse,
 html[data-motion="reduced"] .jl-sync-beacon--saving .jl-sync-beacon__lamp,
 html[data-motion="reduced"] .annotation-pulse,
@@ -523,7 +506,6 @@ html[data-motion="reduced"] .loading-spinner,
 html[data-motion="reduced"] .home-enter-actions,
 html[data-motion="reduced"] .home-resume-action[aria-busy="true"] .home-resume-cta,
 html[data-motion="reduced"] .jl-ticker-active,
-html[data-motion="reduced"] .jl-thermometer-live-marker,
 html[data-motion="reduced"] .jl-unread-badge-pulse,
 html:is([data-motion="static"], [data-motion="reduced"]) .jl-sync-beacon--saving .jl-sync-beacon__lamp,
 html:is([data-motion="static"], [data-motion="reduced"]) .annotation-pulse,
@@ -532,9 +514,7 @@ html:is([data-motion="static"], [data-motion="reduced"]) .loading-spinner,
 html:is([data-motion="static"], [data-motion="reduced"]) .home-enter-actions,
 html:is([data-motion="static"], [data-motion="reduced"]) .home-resume-action[aria-busy="true"] .home-resume-cta,
 html:is([data-motion="static"], [data-motion="reduced"]) .jl-ticker-active,
-html:is([data-motion="static"], [data-motion="reduced"]) .jl-thermometer-live-marker,
 html:is([data-motion="static"], [data-motion="reduced"]) .jl-unread-badge-pulse,
-html:is([data-motion="static"], [data-motion="reduced"]) .jl-tool-overflow-sheet,
 html:is([data-motion="static"], [data-motion="reduced"]) .hud-sheet-enter,
 html:is([data-motion="static"], [data-motion="reduced"]) .hud-sheet-exit,
 html:is([data-motion="static"], [data-motion="reduced"]) .hud-scrim-enter,
@@ -556,17 +536,14 @@ html:is([data-motion="static"], [data-motion="reduced"]) .jl-route-fallback-ente
   animation: none;
 }
 
-html[data-motion-decorative="off"] .jl-tool-overflow-sheet,
 html[data-motion-decorative="off"] .jl-wizard-step-forward,
 html[data-motion-decorative="off"] .jl-wizard-step-back,
-html[data-motion-decorative="off"] .jl-thermometer-live-marker,
 html[data-motion-decorative="off"] .jl-unread-badge-pulse,
 html[data-motion-decorative="off"] .jl-tool-menu,
 html[data-motion-decorative="off"] .route-loading-enter,
 html[data-motion-decorative="off"] .jl-route-fallback-enter-forward,
 html[data-motion-decorative="off"] .jl-route-fallback-enter-back,
 html[data-motion-decorative="off"] .jl-route-fallback-enter-neutral,
-html[data-motion="reduced"] .jl-tool-overflow-sheet,
 html[data-motion="reduced"] .hud-sheet-enter,
 html[data-motion="reduced"] .hud-sheet-exit,
 html[data-motion="reduced"] .hud-scrim-enter,
@@ -594,26 +571,20 @@ html[data-motion-decorative="off"] .map-style-control,
 html[data-motion-decorative="off"] .map-compass-control,
 html[data-motion-decorative="off"] [data-tool-highlight],
 html[data-motion-decorative="off"] [data-overlay-chrome],
-html[data-motion-decorative="off"] .jl-chat-keyboard-inset,
-html[data-motion-decorative="off"] .home-card-btn,
 html[data-motion-decorative="off"] .hud-chrome,
 html[data-motion-decorative="off"] .btn-primary,
 html[data-motion-decorative="off"] .btn-secondary,
 html[data-motion-decorative="off"] .jl-tool-slot,
-html[data-motion-decorative="off"] .jl-tool-overflow-row,
 html:is([data-motion="static"], [data-motion="reduced"]) .map-chrome-hud,
 html:is([data-motion="static"], [data-motion="reduced"]) .map-zoom-control,
 html:is([data-motion="static"], [data-motion="reduced"]) .map-style-control,
 html:is([data-motion="static"], [data-motion="reduced"]) .map-compass-control,
 html:is([data-motion="static"], [data-motion="reduced"]) [data-tool-highlight],
 html:is([data-motion="static"], [data-motion="reduced"]) [data-overlay-chrome],
-html:is([data-motion="static"], [data-motion="reduced"]) .jl-chat-keyboard-inset,
-html:is([data-motion="static"], [data-motion="reduced"]) .home-card-btn,
 html:is([data-motion="static"], [data-motion="reduced"]) .hud-chrome,
 html:is([data-motion="static"], [data-motion="reduced"]) .btn-primary,
 html:is([data-motion="static"], [data-motion="reduced"]) .btn-secondary,
 html:is([data-motion="static"], [data-motion="reduced"]) .jl-tool-slot,
-html:is([data-motion="static"], [data-motion="reduced"]) .jl-tool-overflow-row,
 html:is([data-motion="static"], [data-motion="reduced"]) .jl-map-chrome-press {
   transition: none;
 }

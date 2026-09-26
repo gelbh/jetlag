@@ -25,7 +25,6 @@
   --map-panel-bottom-chrome-hidden: calc(
     var(--chrome-gap-bottom) + var(--safe-area-bottom)
   );
-  --hider-panel-bottom: 0;
   --hider-wizard-bottom: calc(
     var(--dock-total-height) + var(--chrome-gap-above-dock) +
       var(--safe-area-bottom)
