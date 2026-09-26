@@ -77,16 +77,6 @@ vi.mock("./useSessionTimer", () => ({
 vi.mock("./useSessionEndedRedirect", () => ({
   useSessionEndedRedirect: vi.fn(),
 }));
-vi.mock("./useSessionNotifications", () => ({
-  useSessionNotifications: vi.fn(() => ({
-    notificationPreferences: {},
-    enableNotifications: vi.fn(),
-    updateNotificationPreferences: vi.fn(),
-  })),
-}));
-vi.mock("../sync/useLiveActivitySync", () => ({
-  useLiveActivitySync: vi.fn(),
-}));
 vi.mock("../sync/useSyncStatus", () => ({
   useSyncStatus: vi.fn(() => ({ status: "synced" })),
 }));
@@ -106,7 +96,6 @@ describe("useSharedSessionScreen", () => {
         isChatOpen: false,
         notificationRole: "observer",
         authMode: "admin-permanent",
-        liveActivityEnabled: false,
         exitPath: "/admin",
       }),
     );
@@ -130,7 +119,6 @@ describe("useSharedSessionScreen", () => {
         isChatOpen: false,
         notificationRole: "observer",
         authMode: "admin-permanent",
-        liveActivityEnabled: false,
         exitPath: "/admin",
       }),
     );

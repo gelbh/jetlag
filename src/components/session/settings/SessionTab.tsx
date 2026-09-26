@@ -1,8 +1,6 @@
 import { useState } from "react";
-import type { NotificationPreferences } from "@/domain/device/chrome/notifications";
 import { ShareCode } from "../identity/ShareCode";
 import { SettingsToggleRow } from "../settings/SettingsToggleRow";
-import { NotificationPreferencesSection } from "./NotificationPreferencesSection";
 import { RolePasscodeSettings } from "./RolePasscodeSettings";
 import { type SessionRecord } from "@/domain/map/annotations";
 
@@ -13,12 +11,6 @@ export interface MapSettingsSessionTabProps {
   onKeepScreenAwakeChange: (enabled: boolean) => void;
   lowPowerMode: boolean;
   onLowPowerModeChange: (enabled: boolean) => void;
-  notificationPreferences?: NotificationPreferences;
-  nativeNotificationsSupported?: boolean;
-  onNotificationPreferencesChange?: (
-    patch: Partial<NotificationPreferences>,
-  ) => void;
-  onEnableNotifications?: () => Promise<boolean>;
   onClearMap?: () => void;
   onExport?: () => void;
   isHost: boolean;
@@ -42,10 +34,6 @@ export function MapSettingsSessionTab({
   onKeepScreenAwakeChange,
   lowPowerMode,
   onLowPowerModeChange,
-  notificationPreferences,
-  nativeNotificationsSupported = false,
-  onNotificationPreferencesChange,
-  onEnableNotifications,
   onClearMap,
   onExport,
   isHost,
@@ -94,15 +82,6 @@ export function MapSettingsSessionTab({
               checked={lowPowerMode}
               onChange={onLowPowerModeChange}
             />
-            {nativeNotificationsSupported &&
-            notificationPreferences &&
-            onNotificationPreferencesChange ? (
-              <NotificationPreferencesSection
-                preferences={notificationPreferences}
-                onChange={onNotificationPreferencesChange}
-                onEnableNotifications={onEnableNotifications}
-              />
-            ) : null}
           </div>
         ) : null}
       </div>

@@ -132,10 +132,6 @@ export function HiderMapScreen() {
     },
     [lowPowerMode, setLowPowerMode, setMapStyle],
   );
-  const notificationPreferences = useMapStore(
-    (state) => state.notificationPreferences,
-  );
-
   const overlay = useMapOverlayState();
   const {
     uid,
@@ -155,8 +151,6 @@ export function HiderMapScreen() {
     acknowledgeFingerprints,
     authReady,
     isRemote,
-    enableNotifications,
-    updateNotificationPreferences,
   } = useSharedSessionScreen({
     isChatOpen: overlay.isChatOpen,
     notificationRole: "hider",
@@ -1052,9 +1046,6 @@ export function HiderMapScreen() {
           setMapStyle: handleMapStyleChange,
           streetBasemap,
           setStreetBasemap,
-          notificationPreferences,
-          updateNotificationPreferences,
-          enableNotifications,
           locationError,
         }}
         chat={{
