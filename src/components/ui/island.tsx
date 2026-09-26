@@ -6,8 +6,8 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/cn";
 
 /**
- * Floating map/chrome island shell — Survey canvas + rule edge.
- * Layout composition (OverlayHost / ToolDeck) lands in later slices; this is the skin primitive.
+ * Floating map/chrome island shell (allowed composite; not a UI kit).
+ * Frosted navy canvas + hairline rule; Wave 5 may fold into Mantine Paper.
  */
 const islandVariants = cva(
   "pointer-events-auto flex items-center border border-rule bg-canvas text-field-ink shadow-[0_8px_24px_0_oklch(0.1_0.04_265_/_0.45)]",
