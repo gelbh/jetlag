@@ -4,6 +4,14 @@ import { optionalKernelWasmPkg } from "./vite.optional-kernel-wasm-pkg";
 
 export default defineConfig({
   test: {
+    // Root-only (NonProjectOptions): watcher ignores these on project configs.
+    forceRerunTriggers: [
+      "**/vitest.config.ts",
+      "**/vitest.shared.ts",
+      "**/vite.config.ts",
+      "**/package.json",
+      "**/src/test/setup.ts",
+    ],
     coverage: {
       provider: "v8",
       include: ["src/**/*.{ts,tsx}"],
@@ -29,13 +37,6 @@ export default defineConfig({
           name: "unit",
           environment: "jsdom",
           setupFiles: "./src/test/setup.ts",
-          forceRerunTriggers: [
-            "**/vitest.config.ts",
-            "**/vitest.shared.ts",
-            "**/vite.config.ts",
-            "**/package.json",
-            "**/src/test/setup.ts",
-          ],
           exclude: [
             "functions/**",
             "dist/**",
