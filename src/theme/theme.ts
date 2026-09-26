@@ -238,13 +238,10 @@ export const jetlagTheme: MantineThemeOverride = createTheme({
       styles: {
         root: {
           fontFamily: appleSystemSans,
-          backgroundColor: `oklch(from ${jetlagBrand.halt} l c h / 0.12)`,
-          border: `${jetlagBrand.hairline} solid oklch(from ${jetlagBrand.halt} l c h / 0.35)`,
         },
         title: {
           fontWeight: 590,
           letterSpacing: "-0.01em",
-          color: jetlagBrand.halt,
         },
         message: {
           color: jetlagBrand.fieldInk,
