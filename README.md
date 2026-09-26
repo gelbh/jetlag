@@ -47,3 +47,7 @@ Unofficial fan companion for [Jet Lag: The Game](https://jetlagthegame.com/). No
 - [Jet Lag: The Game on YouTube](https://jetlagthegame.com/)
 - [Hide + Seek board game (Nebula Store)](https://store.nebula.tv/products/jet-lag-the-game-hide-and-seek-transit-game)
 - [Expansion rules reference](https://rules.jetlagthegame.com/expansion/)
+
+## Contributor tooling
+
+CI and hooks use `npm run <script>` contracts in `package.json`. Day-to-day maintainer recipes live in the root `justfile` (`brew install just`, then `just --list`).

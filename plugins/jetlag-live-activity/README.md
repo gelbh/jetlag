@@ -41,7 +41,7 @@ Do **not** hand-edit `dist/**`. Prefer committing rebuilt `dist/` in the same ch
 After native plugin source changes (Swift / Java / widget), sync into the app shells:
 
 ```bash
-npm run cap:sync
+just cap-sync
 ```
 
 Then open the platform project if you need Xcode/Android Studio verification:
@@ -60,7 +60,7 @@ These are Capacitor host entry points; they do not contain Live Activity logic. 
 
 ## iOS setup
 
-1. Open `ios/App` in Xcode after `npm run cap:sync`.
+1. Open `ios/App` in Xcode after `just cap-sync`.
 2. Add a **Widget Extension** target named `JetlagWidgets`.
 3. Include the Swift sources from `plugins/jetlag-live-activity/ios/Widget/` and share `JetlagQuestionAttributes` / `JetlagSessionTimerAttributes` from `ios/Sources/JetlagLiveActivityPlugin/JetlagLiveActivityPlugin.swift` with the widget target.
 4. Enable **Push Notifications** and **Background Modes → Remote notifications** for the app target.
