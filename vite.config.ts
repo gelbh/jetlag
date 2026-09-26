@@ -9,6 +9,7 @@ import { clientChunkGroups } from "./vite.chunk-groups";
 import { optionalKernelWasmPkg } from "./vite.optional-kernel-wasm-pkg";
 import { createPwaPlugin } from "./vite.pwa";
 import { createSentryPlugins } from "./vite.sentry";
+import { sharedAlias } from "./vite.resolve-shared";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -20,9 +21,7 @@ const appVersion = (
 
 export default defineConfig(({ mode }) => ({
   resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "src"),
-    },
+    alias: { ...sharedAlias },
   },
   server: {
     // Avoid colliding with `vite preview` / Playwright (4173), which registers a SW.

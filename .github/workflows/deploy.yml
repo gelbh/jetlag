@@ -216,6 +216,7 @@ jobs:
               - 'vite.chunk-groups.ts'
               - 'vite.sentry.ts'
               - 'vite.pwa.ts'
+              - 'vite.resolve-shared.ts'
               - 'wrangler.jsonc'
               - 'package.json'
               - 'package-lock.json'
