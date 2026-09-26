@@ -6,7 +6,7 @@ export function PremiumMantine() {
   const navigate = useAppNavigate();
 
   return (
-    <Container size="sm" py="xl" data-player-ux-world="mantine">
+    <Container size="sm" py="xl">
       <Stack gap="md">
         <Anchor
           component="button"
@@ -17,7 +17,7 @@ export function PremiumMantine() {
         >
           Back
         </Anchor>
-        <div data-player-ux-world="survey" className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4">
           <PremiumPageContent headerOffset={false} />
         </div>
       </Stack>

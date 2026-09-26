@@ -44,7 +44,6 @@ export function TentacleAnswerPicker({
   return (
     <div
       data-testid="tentacle-answer-picker"
-      data-player-ux-world="mantine"
       className="flex flex-col gap-2"
       data-wizard-no-swipe
     >

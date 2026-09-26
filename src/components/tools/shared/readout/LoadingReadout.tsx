@@ -34,7 +34,6 @@ export function LoadingReadout({
       role="status"
       aria-live="polite"
       aria-busy="true"
-      data-player-ux-world="mantine"
       className="space-y-1"
       style={{
         fontFamily: "ui-monospace, monospace",

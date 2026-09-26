@@ -50,8 +50,5 @@ describe("Leaderboard", () => {
     expect(
       screen.getByRole("heading", { name: "Leaderboard" }),
     ).toBeInTheDocument();
-    expect(
-      document.querySelector('[data-player-ux-world="mantine"]'),
-    ).toBeTruthy();
   });
 });

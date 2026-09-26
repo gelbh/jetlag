@@ -166,7 +166,6 @@ export function StatsMantine() {
         px="md"
         maw={390}
         py="lg"
-        data-player-ux-world="mantine"
       >
         <Stack gap={18}>
           <Text

@@ -57,8 +57,5 @@ describe("Friends", () => {
     );
     expect(screen.getByRole("heading", { name: "Friends" })).toBeInTheDocument();
     expect(screen.getByRole("banner", { name: "Screen header" })).toBeInTheDocument();
-    expect(
-      document.querySelector('[data-player-ux-world="mantine"]'),
-    ).toBeTruthy();
   });
 });

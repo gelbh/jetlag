@@ -111,7 +111,7 @@ export function RadarDistancePicker({
     });
 
     return (
-      <div data-testid="radar-distance-picker" data-player-ux-world="mantine">
+      <div data-testid="radar-distance-picker">
         {exhausted ? (
           <CatalogExhaustedMessage message="Every radar distance option has already been used this session." />
         ) : (

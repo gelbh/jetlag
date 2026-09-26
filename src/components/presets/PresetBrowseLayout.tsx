@@ -122,10 +122,7 @@ export function PresetBrowseBody({
 
 export function PresetBrowseLayout(props: PresetBrowseBodyProps) {
   return (
-    <main
-      className="home-poster flex min-h-[100dvh] flex-col px-5 py-8"
-      data-player-ux-world="survey"
-    >
+    <main className="home-poster flex min-h-[100dvh] flex-col px-5 py-8">
       <ScreenHeader backTo="/" backLabel="Back" />
       <DesktopContentColumn maxWidth="social">
         <div

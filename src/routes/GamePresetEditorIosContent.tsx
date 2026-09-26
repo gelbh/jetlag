@@ -81,7 +81,7 @@ export function GamePresetEditorIosContent() {
             Optional. Search for a place or draw the play area on the map.
           </Text>
 
-          <div data-player-ux-world="survey" className="flex flex-col gap-3">
+          <div className="flex flex-col gap-3">
             <PlaceAreaSearchFields
               locationQuery={model.placeSearch.locationQuery}
               onLocationQueryChange={model.placeSearch.setLocationQuery}
@@ -117,9 +117,7 @@ export function GamePresetEditorIosContent() {
                   "0.33px solid oklch(from var(--color-field-ink) l c h / 0.12)",
               }}
             >
-              <div data-player-ux-world="survey">
-                <GameAreaFramingStats gameArea={model.gameArea} compact />
-              </div>
+              <GameAreaFramingStats gameArea={model.gameArea} compact />
               <Button
                 type="button"
                 styles={iosPlainStyles}
@@ -154,14 +152,12 @@ export function GamePresetEditorIosContent() {
                 Clear
               </Button>
               {model.packAttach.packId ? (
-                <div data-player-ux-world="survey">
-                  <PackAttachChip
-                    packId={model.packAttach.packId}
-                    source={model.packAttach.source}
-                    onClear={model.packAttach.clearPack}
-                    onChangePack={model.packAttach.changePack}
-                  />
-                </div>
+                <PackAttachChip
+                  packId={model.packAttach.packId}
+                  source={model.packAttach.source}
+                  onClear={model.packAttach.clearPack}
+                  onChangePack={model.packAttach.changePack}
+                />
               ) : null}
             </Stack>
           ) : null}
@@ -232,7 +228,7 @@ export function GamePresetEditorIosContent() {
           />
         </Stack>
 
-        <div data-player-ux-world="survey" className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4">
           <GameSizePicker
             gameArea={model.gameArea}
             value={model.gameSize}

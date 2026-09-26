@@ -54,7 +54,7 @@ describe("TentacleAnswerPicker", () => {
     );
 
     const root = screen.getByTestId("tentacle-answer-picker");
-    expect(root.getAttribute("data-player-ux-world")).toBe("mantine");
+    expect(root).toBeInTheDocument();
     expect(screen.queryByText("Answer")).toBeNull();
     expect(screen.queryByText("In progress")).toBeNull();
     expect(screen.getByText("Choose one")).toBeInTheDocument();

@@ -41,7 +41,6 @@ describe("AskHudHost", () => {
     );
 
     const host = screen.getByTestId("ask-hud-host");
-    expect(host.getAttribute("data-player-ux-world")).toBe("mantine");
     expect(host.getAttribute("data-ask-composition")).toBe("ask-first");
     expect(host.getAttribute("data-survey")).toBeNull();
     expect(screen.getByTestId("mantine-drawer-sheet")).toBeInTheDocument();

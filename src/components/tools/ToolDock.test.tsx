@@ -306,7 +306,6 @@ describe("ToolDock", () => {
     );
 
     const matching = screen.getByRole("button", { name: "Matching" });
-    expect(matching.getAttribute("data-player-ux-world")).toBe("mantine");
     fireEvent.click(matching);
     expect(onSelect).toHaveBeenCalledWith("matching");
 
@@ -335,9 +334,7 @@ describe("ToolDock", () => {
       </MantineProvider>,
     );
 
-    const hunt = document.querySelector(
-      '[data-island="hunt"][data-player-ux-world="mantine"]',
-    );
+    const hunt = document.querySelector('[data-island="hunt"]');
     expect(hunt).not.toBeNull();
     expect(hunt?.getAttribute("data-ask-first")).toBeNull();
     expect(document.querySelector("[data-hunt-question-strip]")).not.toBeNull();

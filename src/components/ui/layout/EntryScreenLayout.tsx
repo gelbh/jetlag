@@ -8,8 +8,8 @@ interface EntryScreenLayoutProps {
   /** Viewport layout: start packs from the top; home uses between or center. */
   viewportLayout?: "start" | "between" | "center";
   /**
-   * `survey` (default): opaque field-book canvas + token remaps (Legacy).
-   * `plain`: transparent shell so `AppEntryBackdrop` shows through (Mantine).
+   * `survey` (default): opaque field-book canvas classes (Legacy entry shells).
+   * `plain`: transparent shell so `AppEntryBackdrop` shows through (iOS entry).
    */
   skin?: "survey" | "plain";
   /**
@@ -23,9 +23,10 @@ export function EntryScreenLayout({
   justify = "between",
   viewport = false,
   viewportLayout = "start",
-  skin = "survey",
+  skin: _skin = "survey",
   flush = false,
 }: EntryScreenLayoutProps) {
+  void _skin;
   const justifyClass =
     justify === "center"
       ? "jl-scroll justify-center gap-8 overflow-y-auto"
@@ -51,7 +52,6 @@ export function EntryScreenLayout({
 
   return (
     <main
-      {...(skin === "survey" ? { "data-player-ux-world": "survey" } : {})}
       className={`home-poster home-terminal-accent flex ${minHeightClass} flex-col ${viewport ? viewportClass : justifyClass} ${insetClass}`}
     >
       {children}

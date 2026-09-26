@@ -45,7 +45,6 @@ export function ToolDeck({
       data-island="hunt"
       data-hunt-density={sparse ? "sparse" : undefined}
       data-ask-first={askFirstActive ? "true" : undefined}
-      data-player-ux-world="mantine"
       role="group"
       aria-label="Hunt tools"
       radius={22}

@@ -78,7 +78,6 @@ describe("MapStatusRail Mantine", () => {
   it("mounts Mantine rail chrome", () => {
     const { container } = renderRail();
     expect(container.querySelector('[data-testid="map-status-rail-mantine"]')).toBeTruthy();
-    expect(container.querySelector('[data-player-ux-world="mantine"]')).toBeTruthy();
   });
 
   it("keeps frosted status bar + Start", () => {

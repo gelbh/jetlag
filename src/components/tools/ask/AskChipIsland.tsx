@@ -26,7 +26,6 @@ export function AskChipIsland({
   return (
     <div
       data-testid="ask-chip-island"
-      data-player-ux-world="mantine"
       className="ask-chip-island pointer-events-auto"
       role="group"
       aria-label={ariaLabel}

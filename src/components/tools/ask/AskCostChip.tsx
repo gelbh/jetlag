@@ -19,7 +19,6 @@ export function AskCostChip({ toolLabel, costLabel }: AskCostChipProps) {
     <Box
       component="div"
       data-testid="ask-cost-chip"
-      data-player-ux-world="mantine"
       className="ask-cost-chip pointer-events-none cursor-default"
       role="status"
       aria-label={text}

@@ -62,7 +62,7 @@ export function AnchorControls({
   );
 
   return (
-    <div className="space-y-2" data-player-ux-world="mantine">
+    <div className="space-y-2">
       <Button
         type="button"
         fullWidth

@@ -48,8 +48,5 @@ describe("Stats", () => {
       </MantineProvider>,
     );
     expect(screen.getByRole("heading", { name: "Stats" })).toBeInTheDocument();
-    expect(
-      document.querySelector('[data-player-ux-world="mantine"]'),
-    ).toBeTruthy();
   });
 });

@@ -31,8 +31,8 @@ export interface MantineDrawerSheetProps {
 }
 
 /**
- * Flag-on mobile/overlay sheet path: iOS bottom Drawer with grabber + safe-area.
- * Desktop ContextualRail stays on SheetHost; this mirrors RadixMotionSheet scope.
+ * Mobile/overlay sheet path: iOS bottom Drawer with grabber + safe-area.
+ * Desktop ContextualRail stays on SheetHost.
  */
 export function MantineDrawerSheet({
   open,

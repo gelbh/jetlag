@@ -40,14 +40,12 @@ export function MapScreenChromeSlots({
   children,
 }: MapScreenChromeSlotsProps) {
   const isDesktop = useDesktopLayout();
-  const playerUxWorld = "mantine";
   const { mode: landscapeChromeMode, chip: landscapeChip } =
     useMapLandscapeChrome();
   if (layout === "fragments") {
     return (
       <div
         className="map-chrome-hud map-chrome-hud--fragments group/map-chrome pointer-events-none fixed inset-0 z-[var(--z-dock)] overflow-visible"
-        data-player-ux-world={playerUxWorld}
         data-landscape-chrome={
           landscapeChromeMode === "portrait" ? undefined : landscapeChromeMode
         }
@@ -81,7 +79,6 @@ export function MapScreenChromeSlots({
         ref={chromeHudRef}
         id="map-chrome-hud-controls"
         className="map-chrome-hud group/map-chrome pointer-events-none fixed inset-0 z-[var(--z-dock)] overflow-visible"
-        data-player-ux-world={playerUxWorld}
         data-landscape-chrome={
           landscapeChromeMode === "portrait" ? undefined : landscapeChromeMode
         }

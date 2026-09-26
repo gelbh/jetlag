@@ -61,9 +61,6 @@ describe("MapLandscapeChromeChip", () => {
     expect(
       container.querySelector('[data-testid="map-landscape-chrome-chip-mantine"]'),
     ).not.toBeNull();
-    expect(
-      container.querySelector('[data-player-ux-world="mantine"]'),
-    ).not.toBeNull();
     expect(screen.getByText("HIDE")).toBeInTheDocument();
   });
 });

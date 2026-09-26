@@ -28,7 +28,6 @@ describe("ChoiceButton", () => {
       </MantineProvider>,
     );
     const button = screen.getByRole("button", { name: "Match" });
-    expect(button.getAttribute("data-player-ux-world")).toBe("mantine");
     expect(button).toHaveAttribute("aria-pressed", "true");
     fireEvent.click(button);
     expect(onClick).toHaveBeenCalledTimes(1);

@@ -33,8 +33,5 @@ describe("Privacy", () => {
     expect(
       screen.getByRole("heading", { name: "Privacy Policy" }),
     ).toBeInTheDocument();
-    expect(
-      document.querySelector('[data-player-ux-world="mantine"]'),
-    ).toBeTruthy();
   });
 });

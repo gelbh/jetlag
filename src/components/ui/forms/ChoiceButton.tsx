@@ -46,7 +46,6 @@ export function ChoiceButton({
     <UnstyledButton
       type={type}
       aria-pressed={selected}
-      data-player-ux-world="mantine"
       className={`${fullWidth ? "w-full" : ""} ${alignClass} ${className}`.trim()}
       styles={iosChoiceChipStyles(
         selected,
