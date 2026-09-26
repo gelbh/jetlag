@@ -168,13 +168,13 @@ describe("analytics facade", () => {
     expect(posthogOptIn).toHaveBeenCalled();
     expect(posthogInit).toHaveBeenCalledOnce();
     expect(posthogInit.mock.calls[0]?.[1]).toMatchObject({
-      api_host: "/ingest",
+      api_host: "/ph",
       ui_host: "https://eu.posthog.com",
       persistence: "localStorage",
       capture_pageleave: true,
       capture_performance: true,
       disable_session_recording: true,
-      disable_external_dependency_loading: false,
+      disable_external_dependency_loading: true,
       disable_surveys: true,
       person_profiles: "identified_only",
       before_send: filterPosthogException,
