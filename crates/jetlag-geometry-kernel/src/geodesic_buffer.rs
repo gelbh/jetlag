@@ -73,8 +73,7 @@ fn extend_line_ends(coordinates: &[[f64; 2]], extension_meters: f64) -> Vec<[f64
 
     let start_anchor: LatLng = (first[1], first[0]);
     let end_anchor: LatLng = (last[1], last[0]);
-    let start_bearing =
-        (bearing_degrees(start_anchor, (second[1], second[0])) + 180.0) % 360.0;
+    let start_bearing = (bearing_degrees(start_anchor, (second[1], second[0])) + 180.0) % 360.0;
     let end_bearing = bearing_degrees((before_last[1], before_last[0]), end_anchor);
 
     let extended_start = destination_point(start_anchor, extension_meters, start_bearing);

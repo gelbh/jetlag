@@ -230,10 +230,7 @@ function buildEliminationViaWrongCellUnion(
   return clipToGameArea(smoothed, gameArea);
 }
 
-/**
- * Within the seeker's radius, shade everywhere except the answered site's
- * nearest-neighbor cell (spatial Voronoi), clipped to the search disk.
- */
+/** Shade the search disk except the answered site's Voronoi cell. */
 export function buildTentacleEliminationRegion(
   anchor: LatLngTuple,
   radiusMeters: number,
@@ -306,10 +303,7 @@ function buildTentacleExteriorElimination(
   return clipToGameArea(smoothed, gameArea);
 }
 
-/**
- * POI-answer elimination: play area outside the search disk plus inner Voronoi
- * shading within the disk (radar-yes exterior + tentacle bisector interior).
- */
+/** Play area outside the search disk plus Voronoi shading inside it. */
 export function buildTentaclePoiAnswerEliminationRegion(
   anchor: LatLngTuple,
   radiusMeters: number,

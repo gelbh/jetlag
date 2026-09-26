@@ -61,10 +61,7 @@ fn hotter_side_polygon(anchor: LatLng, bearing: f64) -> MultiPolygon<f64> {
             x: left.1,
             y: left.0,
         },
-        Coord {
-            x: far.1,
-            y: far.0,
-        },
+        Coord { x: far.1, y: far.0 },
         Coord {
             x: right.1,
             y: right.0,

@@ -48,6 +48,8 @@ export {
   runSpatialVoronoi,
 } from "./voronoiKernelRunner";
 export {
+  dispatchTentacleEliminationRegion,
+  dispatchTentaclePoiAnswerEliminationRegion,
   runTentacleEliminationRegion,
   runTentaclePoiAnswerEliminationRegion,
   type TentacleEliminationParams,

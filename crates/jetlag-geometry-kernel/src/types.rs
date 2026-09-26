@@ -17,7 +17,9 @@ pub struct PolygonFeature {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "type")]
 pub enum GameAreaGeometry {
-    Polygon { coordinates: Vec<Vec<Vec<f64>>> },
+    Polygon {
+        coordinates: Vec<Vec<Vec<f64>>>,
+    },
     MultiPolygon {
         coordinates: Vec<Vec<Vec<Vec<f64>>>>,
     },
