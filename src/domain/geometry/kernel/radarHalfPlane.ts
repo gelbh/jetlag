@@ -5,7 +5,6 @@ import turfCircle from "@turf/circle";
 import intersect from "@turf/intersect";
 import { point as turfPoint } from "@turf/helpers";
 import { polygon as turfPolygon } from "@turf/helpers";
-import { gameAreaToBoundingBox } from "../gameArea/gameAreaBounds";
 import {
   bearingDegrees,
   destinationPoint,
@@ -13,6 +12,7 @@ import {
   safeDifference,
 } from "../core/geodesicPrimitives";
 import { gameAreaGeometryToFeature } from "./featureConvert";
+import { normalizedBboxFromGameArea } from "./maskTopology";
 import type { GameAreaGeometry, LatLngTuple } from "./types";
 
 export function buildHalfPlanePolygon(
@@ -23,7 +23,7 @@ export function buildHalfPlanePolygon(
   divisionAnchor: "midpoint" | "start" = "midpoint",
 ): Feature<Polygon | MultiPolygon> | null {
   const gameFeature = gameAreaGeometryToFeature(gameArea);
-  const { south, west, north, east } = gameAreaToBoundingBox(gameArea);
+  const { south, west, north, east } = normalizedBboxFromGameArea(gameArea);
   const gameBbox = bboxPolygon([west, south, east, north]);
 
   const anchor = divisionAnchor === "start" ? pointA : midpoint(pointA, pointB);
