@@ -4,10 +4,6 @@ import { useRadarTool } from "./useRadarTool";
 import { createToolHookMocks } from "../../test/helpers/toolHookMocks";
 import { milesToMeters } from "../../domain/map/distance";
 
-vi.mock("@/hooks/feature/usePlayerUiMantine", () => ({
-  usePlayerUiMantine: () => true,
-}));
-
 vi.mock("../../services/core/location/geolocation", async (importOriginal) => {
   const actual =
     await importOriginal<

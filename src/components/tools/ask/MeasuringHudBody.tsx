@@ -51,8 +51,6 @@ import {
 import type { DistanceUnit } from "@/domain/map/distance";
 import type { SeaLevelEdgeCase } from "@/domain/geometry/measuring/seaLevel";
 import type { GeocodedPlace } from "@/services/geo/geocoding";
-import { usePlayerUiMantine } from "@/hooks/feature/usePlayerUiMantine";
-
 type GroupFilter = "all" | MeasuringGroupId;
 
 const GROUP_CHIP_LABEL: Record<MeasuringGroupId, string> = {
@@ -166,7 +164,6 @@ export function MeasuringHudBody({
   isSubmitting = false,
   toolLabel = "Measuring",
 }: MeasuringHudBodyProps) {
-  const mantinePlayerUi = usePlayerUiMantine();
   const [groupFilter, setGroupFilter] = useState<GroupFilter>("all");
 
   const locationCategory: MeasuringLocationCategory | undefined =
@@ -269,7 +266,7 @@ export function MeasuringHudBody({
         icon={<HudMeasuringIcon width={22} height={22} />}
         prompt={question.prompt}
         ruleSummary={question.ruleSummary}
-        mantine={mantinePlayerUi}
+        mantine={true}
       />
 
       {chord === "source" ? (
@@ -285,19 +282,19 @@ export function MeasuringHudBody({
                 role="tablist"
                 aria-label="Filter measure categories"
                 className={
-                  mantinePlayerUi
+                  true
                     ? "jl-scroll"
                     : "jl-scroll flex gap-1.5 pb-0.5"
                 }
-                style={mantinePlayerUi ? iosFilterChipTrackStyle : undefined}
-                {...(mantinePlayerUi
+                style={true ? iosFilterChipTrackStyle : undefined}
+                {...(true
                   ? { "data-player-ux-world": "mantine" }
                   : {})}
               >
                 {filterOptions.map((option) => {
                   const selected = effectiveFilter === option.value;
                   const Icon = GROUP_CHIP_ICON[option.value];
-                  if (mantinePlayerUi) {
+                  if (true) {
                     return (
                       <UnstyledButton
                         key={option.value}

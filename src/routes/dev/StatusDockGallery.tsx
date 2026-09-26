@@ -1,12 +1,8 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Box, Stack, Text, Title } from "@mantine/core";
 import { ToolStatusBlockMantine } from "@/components/session/status/ToolStatusBlockMantine";
 import { SyncBlock } from "@/components/session/status/SyncBlock";
 import { ScreenNav } from "@/components/ui/layout/ScreenNav";
-import {
-  PLAYER_UI_MANTINE_STORAGE_KEY,
-  setPlayerUiMantineEnabled,
-} from "@/hooks/feature/usePlayerUiMantine";
 import {
   STATUS_DOCK_SCENARIOS,
   assertStatusDockScenarioIdsUnique,
@@ -87,13 +83,9 @@ function ScenarioRow({ scenario }: { scenario: StatusDockScenario }) {
 
 /**
  * Dev-only gallery of status-island states.
- * Open `/dev/status-dock` with Vite; ensures `jl.playerUi.mantine=1` for Sync segment.
+ * Open `/dev/status-dock` with Vite.
  */
 export function StatusDockGallery() {
-  useEffect(() => {
-    setPlayerUiMantineEnabled(true);
-  }, []);
-
   return (
     <Box
       component="main"
@@ -108,8 +100,7 @@ export function StatusDockGallery() {
           Status dock scenarios
         </Title>
         <Text size="sm" style={{ color: "var(--color-field-ink-muted)" }}>
-          Mock fixtures for the Mantine top island. Flag set to{" "}
-          <code>{PLAYER_UI_MANTINE_STORAGE_KEY}=1</code>. Resize the window under
+          Mock fixtures for the Mantine top island. Resize the window under
           380px to exercise compact layout on non-framed rows.
         </Text>
       </Stack>

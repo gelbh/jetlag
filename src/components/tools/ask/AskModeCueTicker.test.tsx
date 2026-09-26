@@ -5,16 +5,7 @@ import { cueExcludesCostTokens } from "@/domain/ask/askHudModes";
 import { jetlagMantineTheme } from "@/theme/mantineTheme";
 import { AskModeCueTicker } from "./AskModeCueTicker";
 
-const { mockUsePlayerUiMantine } = vi.hoisted(() => ({
-  mockUsePlayerUiMantine: vi.fn(() => false),
-}));
-
-vi.mock("@/hooks/feature/usePlayerUiMantine", () => ({
-  usePlayerUiMantine: () => mockUsePlayerUiMantine(),
-}));
-
 beforeEach(() => {
-  mockUsePlayerUiMantine.mockReturnValue(false);
   vi.stubGlobal("matchMedia", (query: string) => ({
     matches: false,
     media: query,
@@ -27,9 +18,17 @@ beforeEach(() => {
   }));
 });
 
+function renderCue(cue: string) {
+  return render(
+    <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+      <AskModeCueTicker cue={cue} />
+    </MantineProvider>,
+  );
+}
+
 describe("AskModeCueTicker", () => {
   it("renders verb-only cue and is not a button", () => {
-    render(<AskModeCueTicker cue="TAP MAP TO SET CENTER" />);
+    renderCue("TAP MAP TO SET CENTER");
 
     const cue = screen.getByTestId("ask-mode-cue-ticker");
     expect(cue).toHaveTextContent("TAP MAP TO SET CENTER");
@@ -39,7 +38,7 @@ describe("AskModeCueTicker", () => {
   });
 
   it("excludes DnPm / cost tokens from the cue surface", () => {
-    render(<AskModeCueTicker cue="PICK CATEGORY" />);
+    renderCue("PICK CATEGORY");
 
     const text = screen.getByTestId("ask-mode-cue-ticker").textContent ?? "";
     expect(text).not.toMatch(/\bD\d/i);
@@ -47,13 +46,8 @@ describe("AskModeCueTicker", () => {
     expect(cueExcludesCostTokens(text)).toBe(true);
   });
 
-  it("mounts Mantine cue chrome when flag is on", () => {
-    mockUsePlayerUiMantine.mockReturnValue(true);
-    render(
-      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
-        <AskModeCueTicker cue="PICK CATEGORY" />
-      </MantineProvider>,
-    );
+  it("mounts Mantine cue chrome", () => {
+    renderCue("PICK CATEGORY");
 
     const cue = screen.getByTestId("ask-mode-cue-ticker");
     expect(cue.getAttribute("data-player-ux-world")).toBe("mantine");

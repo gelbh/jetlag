@@ -1,6 +1,5 @@
 import { UnstyledButton } from "@mantine/core";
 import { iosChoiceChipStyles } from "@/components/ui/apple/iosEntryChrome";
-import { usePlayerUiMantine } from "@/hooks/feature/usePlayerUiMantine";
 
 interface SegmentOption<Value extends string> {
   value: Value;
@@ -27,8 +26,6 @@ export function SegmentControl<Value extends string>({
   "aria-label": ariaLabel,
   disabled = false,
 }: SegmentControlProps<Value>) {
-  const mantinePlayerUi = usePlayerUiMantine();
-
   if (variant === "chips") {
     return (
       <div className="jl-scroll jl-segment-chips" role="tablist" aria-label={ariaLabel}>
@@ -83,61 +80,29 @@ export function SegmentControl<Value extends string>({
   }
 
   if (tone === "action") {
-    if (mantinePlayerUi) {
-      return (
-        <div
-          className="grid gap-2"
-          style={{
-            gridTemplateColumns: `repeat(${options.length}, minmax(0, 1fr))`,
-          }}
-          role="group"
-          aria-label={ariaLabel}
-          data-player-ux-world="mantine"
-        >
-          {options.map((option) => {
-            const selected = value === option.value;
-            return (
-              <UnstyledButton
-                key={option.value}
-                type="button"
-                onClick={() => onChange(option.value)}
-                disabled={disabled || option.disabled}
-                aria-pressed={selected}
-                styles={iosChoiceChipStyles(selected, "default")}
-              >
-                {option.label}
-              </UnstyledButton>
-            );
-          })}
-        </div>
-      );
-    }
-
     return (
       <div
         className="grid gap-2"
-        style={{ gridTemplateColumns: `repeat(${options.length}, minmax(0, 1fr))` }}
+        style={{
+          gridTemplateColumns: `repeat(${options.length}, minmax(0, 1fr))`,
+        }}
         role="group"
         aria-label={ariaLabel}
+        data-player-ux-world="mantine"
       >
         {options.map((option) => {
           const selected = value === option.value;
-
           return (
-            <button
+            <UnstyledButton
               key={option.value}
               type="button"
               onClick={() => onChange(option.value)}
               disabled={disabled || option.disabled}
               aria-pressed={selected}
-              className={`min-h-12 rounded-[var(--radius-hud-md)] px-2 text-sm font-medium disabled:opacity-50 ${
-                selected
-                  ? "bg-flag text-flag-ink"
-                  : "bg-canvas text-field-ink"
-              }`}
+              styles={iosChoiceChipStyles(selected, "default")}
             >
               {option.label}
-            </button>
+            </UnstyledButton>
           );
         })}
       </div>

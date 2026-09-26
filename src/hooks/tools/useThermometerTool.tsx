@@ -20,7 +20,6 @@ import {
 } from "../../domain/questions";
 import { formatPresetDistance } from "../../domain/map/distance";
 import { useLiveLocation } from "../location/useLiveLocation";
-import { usePlayerUiMantine } from "@/hooks/feature/usePlayerUiMantine";
 import { useThermometerWalk } from "./useThermometerWalk";
 import { useToolSession } from "./framework/useToolSession";
 import { commitThermometerManual } from "./thermometer/commitThermometer";
@@ -415,14 +414,12 @@ export function useThermometerTool({
     void commit();
   };
 
-  const mantinePlayerUi = usePlayerUiMantine();
   /**
    * Manual: leave the sheet after mode/distance so pins can be tapped on the map.
    * GPS setup + live walk stay on the sheet; answer chrome only once pins exist.
    */
   /** After distance pick: map for GPS start or manual pins (Matching/Radar twin). */
-  const mapFirstEligible =
-    mantinePlayerUi && !walkingActive && !editingSetup;
+  const mapFirstEligible = !walkingActive && !editingSetup;
   const mapPlacementActive = Boolean(mapFirstEligible);
 
   const travelLabel =

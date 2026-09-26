@@ -5,8 +5,6 @@ import {
   iosMapToolSlotStyles,
   type IosMapToolSlotTone,
 } from "@/components/ui/apple/iosEntryChrome";
-import { usePlayerUiMantine } from "@/hooks/feature/usePlayerUiMantine";
-import { MotionPressable } from "../../motion/MotionPressable";
 
 export type MapChromeControlVariant = "floating" | "slot";
 
@@ -16,7 +14,7 @@ export interface MapChromeControlProps
   variant?: MapChromeControlVariant;
   /** Toggle / selected state (`aria-pressed` + active chrome class). */
   pressed?: boolean;
-  /** Flag-on slot visual weight: question tools vs undo/redo. */
+  /** Slot visual weight: question tools vs undo/redo. */
   tone?: IosMapToolSlotTone;
   icon?: ReactNode;
   /** Extra classes on the icon wrapper (e.g. unread badge host). */
@@ -30,15 +28,9 @@ function controlClassName(
   variant: MapChromeControlVariant,
   pressed: boolean | undefined,
   className: string | undefined,
-  mantineSlot: boolean,
 ): string {
   if (variant === "slot") {
-    const parts = ["jl-tool-slot", className];
-    // Survey active class fights iOS Styles API; flag-on uses Styles only.
-    if (pressed && !mantineSlot) {
-      parts.splice(1, 0, "jl-tool-slot-active");
-    }
-    return parts.filter(Boolean).join(" ");
+    return ["jl-tool-slot", className].filter(Boolean).join(" ");
   }
 
   const parts = [
@@ -56,14 +48,12 @@ function ControlBody({
   iconClassName,
   label,
   children,
-  mantineSlot,
 }: {
   variant: MapChromeControlVariant;
   icon?: ReactNode;
   iconClassName?: string;
   label?: ReactNode;
   children?: ReactNode;
-  mantineSlot: boolean;
 }) {
   if (children != null) {
     return children;
@@ -77,13 +67,9 @@ function ControlBody({
       <>
         {icon != null ? <span className={iconClass}>{icon}</span> : null}
         {label != null ? (
-          mantineSlot ? (
-            <span data-ios-tool-label="" style={iosMapToolSlotLabelStyle}>
-              {label}
-            </span>
-          ) : (
-            <span className="jl-tool-slot-label">{label}</span>
-          )
+          <span data-ios-tool-label="" style={iosMapToolSlotLabelStyle}>
+            {label}
+          </span>
         ) : null}
       </>
     );
@@ -121,27 +107,19 @@ export function MapChromeControl({
   "aria-label": ariaLabel,
   ...rest
 }: MapChromeControlProps) {
-  const mantinePlayerUi = usePlayerUiMantine();
-  const mantineSlot = mantinePlayerUi && variant === "slot";
-  const resolvedClassName = controlClassName(
-    variant,
-    pressed,
-    className,
-    mantineSlot,
-  );
+  const resolvedClassName = controlClassName(variant, pressed, className);
   const body = (
     <ControlBody
       variant={variant}
       icon={icon}
       iconClassName={iconClassName}
       label={label}
-      mantineSlot={mantineSlot}
     >
       {children}
     </ControlBody>
   );
 
-  if (mantineSlot) {
+  if (variant === "slot") {
     return (
       <UnstyledButton
         type={type}
@@ -157,22 +135,6 @@ export function MapChromeControl({
       >
         {body}
       </UnstyledButton>
-    );
-  }
-
-  if (variant === "slot") {
-    return (
-      <MotionPressable
-        type={type}
-        disabled={disabled}
-        className={resolvedClassName}
-        aria-label={ariaLabel}
-        aria-pressed={pressed}
-        title={title ?? ariaLabel}
-        {...rest}
-      >
-        {body}
-      </MotionPressable>
     );
   }
 

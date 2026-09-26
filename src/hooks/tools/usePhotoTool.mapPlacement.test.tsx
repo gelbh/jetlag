@@ -3,10 +3,6 @@ import { describe, expect, it, vi } from "vitest";
 import { usePhotoTool } from "./usePhotoTool";
 import { createToolHookMocks } from "../../test/helpers/toolHookMocks";
 
-vi.mock("@/hooks/feature/usePlayerUiMantine", () => ({
-  usePlayerUiMantine: () => true,
-}));
-
 describe("usePhotoTool map-first", () => {
   it("suppresses the Ask sheet after a photo category is chosen", async () => {
     const mocks = createToolHookMocks();

@@ -1,5 +1,3 @@
-import { usePlayerUiMantine } from "@/hooks/feature/usePlayerUiMantine";
-
 type AskInlineErrorProps = {
   message: string;
   id?: string;
@@ -64,59 +62,44 @@ export function isLocationInlineError(message: string): boolean {
  * Replaces bare `text-halt` paragraphs.
  */
 export function AskInlineError({ message, id }: AskInlineErrorProps) {
-  const mantinePlayerUi = usePlayerUiMantine();
   const { title, detail } = askInlineErrorCopy(message);
-
-  if (mantinePlayerUi) {
-    return (
-      <div
-        id={id}
-        role="alert"
-        data-testid="ask-inline-error"
-        data-player-ux-world="mantine"
-        style={{
-          borderRadius: 14,
-          padding: "0.75rem 0.875rem",
-          backgroundColor: "oklch(from var(--color-canvas) l c h / 0.96)",
-          border: "0.33px solid oklch(from var(--color-halt) l c h / 0.4)",
-          backdropFilter: "blur(20px) saturate(1.25)",
-          WebkitBackdropFilter: "blur(20px) saturate(1.25)",
-          boxShadow: "0 4px 16px 0 oklch(0.12 0.04 25 / 0.18)",
-        }}
-      >
-        <p
-          style={{
-            margin: 0,
-            fontSize: "0.875rem",
-            fontWeight: 650,
-            color: "var(--color-halt)",
-          }}
-        >
-          {title}
-        </p>
-        <p
-          style={{
-            margin: "0.25rem 0 0",
-            fontSize: "0.8125rem",
-            lineHeight: 1.35,
-            color: "var(--color-field-ink)",
-          }}
-        >
-          {detail}
-        </p>
-      </div>
-    );
-  }
 
   return (
     <div
       id={id}
       role="alert"
       data-testid="ask-inline-error"
-      className="rounded-[var(--radius-hud-md)] border border-halt/40 bg-halt-soft px-3 py-2.5"
+      data-player-ux-world="mantine"
+      style={{
+        borderRadius: 14,
+        padding: "0.75rem 0.875rem",
+        backgroundColor: "oklch(from var(--color-canvas) l c h / 0.96)",
+        border: "0.33px solid oklch(from var(--color-halt) l c h / 0.4)",
+        backdropFilter: "blur(20px) saturate(1.25)",
+        WebkitBackdropFilter: "blur(20px) saturate(1.25)",
+        boxShadow: "0 4px 16px 0 oklch(0.12 0.04 25 / 0.18)",
+      }}
     >
-      <p className="m-0 text-sm font-semibold text-halt">{title}</p>
-      <p className="mt-1 mb-0 text-xs leading-snug text-field-ink">{detail}</p>
+      <p
+        style={{
+          margin: 0,
+          fontSize: "0.875rem",
+          fontWeight: 650,
+          color: "var(--color-halt)",
+        }}
+      >
+        {title}
+      </p>
+      <p
+        style={{
+          margin: "0.25rem 0 0",
+          fontSize: "0.8125rem",
+          lineHeight: 1.35,
+          color: "var(--color-field-ink)",
+        }}
+      >
+        {detail}
+      </p>
     </div>
   );
 }

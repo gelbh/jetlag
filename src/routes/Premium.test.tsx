@@ -16,7 +16,6 @@ const {
   waitForAuthStateReady,
   mockAuth,
   mockUsePremiumEntitlements,
-  mockUsePlayerUiMantine,
 } = vi.hoisted(() => {
   const auth = {
     currentUser: null,
@@ -42,13 +41,8 @@ const {
       refresh: vi.fn(),
       setEntitlements: vi.fn(),
     })),
-    mockUsePlayerUiMantine: vi.fn(() => false),
   };
 });
-
-vi.mock("@/hooks/feature/usePlayerUiMantine", () => ({
-  usePlayerUiMantine: () => mockUsePlayerUiMantine(),
-}));
 
 vi.mock("../services/core/firebase/firebase", () => ({
   isFirebaseConfigured,
@@ -110,7 +104,6 @@ vi.mock("../services/billing/premiumBilling", () => ({
 
 describe("Premium", () => {
   beforeEach(() => {
-    mockUsePlayerUiMantine.mockReturnValue(false);
     isFirebaseConfigured.mockReturnValue(false);
     isPermanentUser.mockReturnValue(true);
     mockUsePremiumEntitlements.mockReturnValue({
@@ -133,7 +126,7 @@ describe("Premium", () => {
   });
 
   it("shows offline billing message when Firebase is not configured", () => {
-    renderWithRouter(<Premium />);
+    renderPremium();
 
     expect(screen.getByRole("heading", { name: "Premium" })).toBeInTheDocument();
     expect(

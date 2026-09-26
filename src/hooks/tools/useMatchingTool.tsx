@@ -9,7 +9,6 @@ import { useLatestRequest } from "../forms/useLatestRequest";
 import { useDebouncedValue } from "../forms/useDebouncedValue";
 import type { AskHudReadiness } from "@/domain/ask/askHudModes";
 import { canCommit as askCanCommit } from "@/domain/ask/askHudModes";
-import { usePlayerUiMantine } from "@/hooks/feature/usePlayerUiMantine";
 import { isActive } from "../../domain/map/annotations";
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import { formatDistance } from "../../domain/map/distance";
@@ -578,11 +577,8 @@ export function useMatchingTool({
   const resolveComplete =
     matchingNullAnswer || matchingNearestFeatureName !== null;
 
-  const mantinePlayerUi = usePlayerUiMantine();
   const mapFirstEligible =
-    mantinePlayerUi &&
-    matchingCategoryChosen &&
-    matchingCategoryId !== null;
+    matchingCategoryChosen && matchingCategoryId !== null;
 
   const [placementGeo, setPlacementGeo] = useState<
     GeolocationPermissionState | "checking"

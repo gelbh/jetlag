@@ -25,7 +25,6 @@ import {
   tentacleQuestionPrompt,
   type TentacleExtendedCategoryId,
 } from "@/domain/questions";
-import { usePlayerUiMantine } from "@/hooks/feature/usePlayerUiMantine";
 import { tentacleCategoryIcon } from "./tentacleCategoryIcons";
 
 const TENTACLE_QUESTION_INTRO_RULE =
@@ -80,7 +79,6 @@ export function TentacleHudBody({
   costLabel = null,
   toolLabel = "Tentacle",
 }: TentacleHudBodyProps) {
-  const mantinePlayerUi = usePlayerUiMantine();
   const availableCategories = tentacleCategoriesForGameSize(gameSize).filter(
     (category) =>
       !usedCategoryIds.has(category.id) || category.id === categoryId,
@@ -135,7 +133,7 @@ export function TentacleHudBody({
         icon={<HudTentacleIcon width={22} height={22} />}
         prompt={question.prompt}
         ruleSummary={question.ruleSummary}
-        mantine={mantinePlayerUi}
+        mantine={true}
       />
 
       {chord === "types" ? (

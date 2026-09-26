@@ -4,7 +4,6 @@ import {
   iosFilledStyles,
   iosGrayStyles,
 } from "@/components/ui/apple/iosEntryChrome";
-import { usePlayerUiMantine } from "@/hooks/feature/usePlayerUiMantine";
 
 interface AnchorControlsProps {
   gpsLoading: boolean;
@@ -29,7 +28,6 @@ export function AnchorControls({
   gpsLabel = "Use my location",
   gpsLoadingLabel = "Reading GPS…",
 }: AnchorControlsProps) {
-  const mantinePlayerUi = usePlayerUiMantine();
   const passiveMap = onPlaceAtMapTap === undefined;
   const gpsStatus = gpsLoading
     ? gpsLoadingLabel
@@ -44,23 +42,13 @@ export function AnchorControls({
       <span
         className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px]"
         aria-hidden="true"
-        style={
-          mantinePlayerUi
-            ? {
-                backgroundColor: hasAnchor
-                  ? "oklch(from var(--color-canvas) l c h / 0.35)"
-                  : "oklch(from var(--color-canvas) l c h / 0.22)",
-              }
-            : undefined
-        }
+        style={{
+          backgroundColor: hasAnchor
+            ? "oklch(from var(--color-canvas) l c h / 0.35)"
+            : "oklch(from var(--color-canvas) l c h / 0.22)",
+        }}
       >
-        {mantinePlayerUi ? (
-          <GpsGlyph size={18} weight={hasAnchor ? "fill" : "bold"} />
-        ) : (
-          <span className="flex h-5 w-5 items-center justify-center rounded-full border-2 border-current text-[0.625rem] font-bold">
-            ●
-          </span>
-        )}
+        <GpsGlyph size={18} weight={hasAnchor ? "fill" : "bold"} />
       </span>
       <span className="flex min-w-0 flex-col items-start text-left leading-tight">
         <span className="text-sm font-semibold">
@@ -74,42 +62,23 @@ export function AnchorControls({
   );
 
   return (
-    <div
-      className="space-y-2"
-      {...(mantinePlayerUi ? { "data-player-ux-world": "mantine" } : {})}
-    >
-      {mantinePlayerUi ? (
-        <Button
-          type="button"
-          fullWidth
-          onClick={onUseGps}
-          disabled={gpsLoading}
-          aria-busy={gpsLoading || undefined}
-          styles={hasAnchor && !gpsLoading ? iosGrayStyles : iosFilledStyles}
-          className="flex min-h-12 items-center justify-start gap-2.5 px-3"
-        >
-          {gpsBody}
-        </Button>
-      ) : (
-        <button
-          type="button"
-          onClick={onUseGps}
-          disabled={gpsLoading}
-          aria-busy={gpsLoading}
-          className="btn-primary flex min-h-12 w-full items-center justify-center gap-2 disabled:opacity-40"
-        >
-          {gpsBody}
-        </button>
-      )}
+    <div className="space-y-2" data-player-ux-world="mantine">
+      <Button
+        type="button"
+        fullWidth
+        onClick={onUseGps}
+        disabled={gpsLoading}
+        aria-busy={gpsLoading || undefined}
+        styles={hasAnchor && !gpsLoading ? iosGrayStyles : iosFilledStyles}
+        className="flex min-h-12 items-center justify-start gap-2.5 px-3"
+      >
+        {gpsBody}
+      </Button>
 
       {passiveMap ? (
         <p
           className="text-center text-xs text-field-ink-muted"
-          style={
-            mantinePlayerUi
-              ? { margin: 0, lineHeight: 1.35, paddingInline: 4 }
-              : undefined
-          }
+          style={{ margin: 0, lineHeight: 1.35, paddingInline: 4 }}
         >
           {hasAnchor ? (
             <>
@@ -131,28 +100,14 @@ export function AnchorControls({
         </p>
       ) : (
         <>
-          {mantinePlayerUi ? (
-            <Button
-              type="button"
-              fullWidth
-              onClick={onPlaceAtMapTap}
-              styles={awaitingPlacement ? iosFilledStyles : iosGrayStyles}
-            >
-              {awaitingPlacement ? "Tap the map" : "Place at map tap"}
-            </Button>
-          ) : (
-            <button
-              type="button"
-              onClick={onPlaceAtMapTap}
-              className={`min-h-11 w-full rounded-md border px-3 text-sm font-medium ${
-                awaitingPlacement
-                  ? "border-flag bg-flag-soft text-flag"
-                  : "border-rule bg-canvas text-field-ink-muted"
-              }`}
-            >
-              {awaitingPlacement ? "Tap the map" : "Place at map tap"}
-            </button>
-          )}
+          <Button
+            type="button"
+            fullWidth
+            onClick={onPlaceAtMapTap}
+            styles={awaitingPlacement ? iosFilledStyles : iosGrayStyles}
+          >
+            {awaitingPlacement ? "Tap the map" : "Place at map tap"}
+          </Button>
           {hasAnchor ? (
             <p className="text-xs text-field-ink-muted">{anchorHint}</p>
           ) : null}

@@ -20,8 +20,6 @@ import { OptionChip, OptionChipRow } from "./shared/controls/OptionChip";
 import { QuestionPromptBlock } from "./shared/controls/QuestionPromptBlock";
 import { ToolSection } from "./shared/panels/ToolSection";
 import { iosChoiceChipStyles } from "@/components/ui/apple/iosEntryChrome";
-import { usePlayerUiMantine } from "@/hooks/feature/usePlayerUiMantine";
-
 interface RadarDistancePickerProps {
   radiusMeters: number;
   chooseCustom: boolean;
@@ -80,7 +78,6 @@ export function RadarDistancePicker({
   showPrompt = true,
   compact = false,
 }: RadarDistancePickerProps) {
-  const mantinePlayerUi = usePlayerUiMantine();
   const resolvedRadius =
     parseDistanceInput(customRadius, distanceUnit) ?? radiusMeters;
   const availablePresets = availableRadarDistancePresets(
@@ -97,7 +94,7 @@ export function RadarDistancePicker({
     parsedCustomRadius > maxCustomRadiusMeters;
   const exhausted = availablePresets.length === 0 && !chooseAvailable;
 
-  if (mantinePlayerUi && compact) {
+  if (true && compact) {
     const unitShort = compactUnitShort(distanceUnit);
     const tileRoot = (selected: boolean) => ({
       ...iosChoiceChipStyles(selected).root,

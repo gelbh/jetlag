@@ -18,8 +18,6 @@ import {
   photoQuestionFor,
   type PhotoCategoryId,
 } from "@/domain/questions";
-import { usePlayerUiMantine } from "@/hooks/feature/usePlayerUiMantine";
-
 /** Prefer chips when few options; short rail when the catalog is longer. */
 const CHIP_ISLAND_MAX = 6;
 
@@ -53,12 +51,11 @@ export function PhotoHudBody({
   costLabel = null,
   toolLabel = "Photo",
 }: PhotoHudBodyProps) {
-  const mantinePlayerUi = usePlayerUiMantine();
   const availableCategories = photoCategoriesForGameSize(gameSize).filter(
     (category) => !usedCategoryIds.has(category.id),
   );
   /** Flag-off keeps prior always-selected catalog; Mantine waits for an explicit tap. */
-  const showAsChosen = categoryChosen || !mantinePlayerUi;
+  const showAsChosen = categoryChosen || !true;
   const question = showAsChosen
     ? photoQuestionFor(categoryId, distanceUnit)
     : PHOTO_QUESTION_INTRO;
@@ -76,12 +73,12 @@ export function PhotoHudBody({
     >
       <div
         className={
-          mantinePlayerUi
+          true
             ? "pointer-events-auto space-y-2 p-3"
             : "pointer-events-auto ask-hud-panel space-y-2 p-3"
         }
-        style={mantinePlayerUi ? iosAskInsetSurfaceStyle : undefined}
-        {...(mantinePlayerUi ? { "data-player-ux-world": "mantine" } : {})}
+        style={true ? iosAskInsetSurfaceStyle : undefined}
+        {...(true ? { "data-player-ux-world": "mantine" } : {})}
       >
         <div className="flex items-start gap-3">
           <div
@@ -137,7 +134,7 @@ export function PhotoHudBody({
         </div>
       </div>
 
-      {!showAsChosen || !mantinePlayerUi ? (
+      {!showAsChosen || !true ? (
         <div className="space-y-2">
           {awaitHiderAnswer ? <QuestionTruthReferenceHint /> : null}
           {availableCategories.length === 0 ? (

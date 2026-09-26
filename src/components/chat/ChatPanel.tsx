@@ -9,7 +9,6 @@ import type {
 import type { PlayerRole } from "../../domain/session/players/playerRole";
 import { useDesktopLayout } from "../../hooks/layout/useDesktopLayout";
 import { useVisualViewportBottomInset } from "../../hooks/layout/useVisualViewportBottomInset";
-import { usePlayerUiMantine } from "../../hooks/feature/usePlayerUiMantine";
 import { iosGrayStyles } from "../ui/apple/iosEntryChrome";
 import { SheetHost } from "../ui/sheets/SheetHost";
 import { ChatPanelBody } from "./ChatPanelBody";
@@ -67,7 +66,6 @@ export function ChatPanel({
   readOnly = false,
 }: ChatPanelProps) {
   const isDesktop = useDesktopLayout();
-  const mantinePlayerUi = usePlayerUiMantine();
   const keyboardInset = useVisualViewportBottomInset(open && !isDesktop);
 
   const body = (
@@ -106,19 +104,9 @@ export function ChatPanel({
       <Stack gap={8} style={{ flex: 1, minHeight: 0, height: "100%" }}>
         {isDesktop ? (
           <Group justify="flex-end" className="shrink-0">
-            {mantinePlayerUi ? (
-              <Button onClick={onClose} styles={iosGrayStyles}>
-                Close
-              </Button>
-            ) : (
-              <button
-                type="button"
-                onClick={onClose}
-                className="btn-secondary flex min-h-11 min-w-11 items-center justify-center px-3"
-              >
-                Close
-              </button>
-            )}
+            <Button onClick={onClose} styles={iosGrayStyles}>
+              Close
+            </Button>
           </Group>
         ) : null}
         {body}
