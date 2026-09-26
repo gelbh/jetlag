@@ -30,7 +30,11 @@ function clientMode(mode: MaskKernelMode): MaskKernelMode {
   return mode === "dual" ? "wasm" : mode;
 }
 
-/** Resolve mask kernel mode: localStorage overrides env; missing → "wasm"; invalid → "ts". */
+/**
+ * Resolve client mask kernel mode: localStorage overrides env; missing → "wasm";
+ * invalid → "ts". Client `"dual"` maps to `"wasm"` (live dual compare stays on
+ * explicit runner `mode: "dual"` only).
+ */
 export function resolveMaskKernelMode(options?: {
   envValue?: string | undefined;
   localStorageValue?: string | null;
