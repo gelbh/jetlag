@@ -1,5 +1,6 @@
-import { test, expect } from "../fixtures";
 import {
+  test,
+  expect,
   answerInChat,
   closePanel,
   confirmInitialHidingZoneAtStation,
@@ -19,37 +20,43 @@ test("@smoke seeker asks via radar and hider answers in game chat", async ({
   const { hostPage, guestPage, cleanup } =
     await createMultiplayerContexts(browser);
 
-  const { code } = await createHostSession(hostPage);
-  await joinAsRole(guestPage, code, "hider");
+  try {
+    await test.step("start host/hider session", async () => {
+      const { code } = await createHostSession(hostPage);
+      await joinAsRole(guestPage, code, "hider");
+      await confirmInitialHidingZoneAtStation(guestPage, "Dublin Central");
+    });
 
-  await confirmInitialHidingZoneAtStation(guestPage, "Dublin Central");
+    await test.step("seeker sends radar; hider sees pending ask", async () => {
+      await sendRadarToHiders(hostPage);
+      await openChat(hostPage);
+      await expect(
+        gameChatScroll(hostPage).getByText(/Are you within/i),
+      ).toBeVisible({
+        timeout: 15_000,
+      });
+      await closePanel(hostPage);
+      await expectPendingQuestionText(guestPage, /Are you within/i);
+    });
 
-  await sendRadarToHiders(hostPage);
-
-  await openChat(hostPage);
-  await expect(
-    gameChatScroll(hostPage).getByText(/Are you within/i),
-  ).toBeVisible({
-    timeout: 15_000,
-  });
-  await closePanel(hostPage);
-
-  await expectPendingQuestionText(guestPage, /Are you within/i);
-  await answerInChat(guestPage, "Yes");
-
-  await openChat(guestPage);
-  await expect(
-    guestPage.getByRole("button", { name: "Close", exact: true }),
-  ).toBeVisible({
-    timeout: 10_000,
-  });
-  await expectChatAnswer(guestPage, "yes");
-  await expect(guestPage.getByTestId("hider-truth-reveal-banner")).toBeHidden({
-    timeout: 5_000,
-  });
-
-  await openChat(hostPage);
-  await expectChatAnswer(hostPage, "yes");
-
-  await cleanup();
+    await test.step("hider answers; both chats show yes", async () => {
+      await answerInChat(guestPage, "Yes");
+      await openChat(guestPage);
+      await expect(
+        guestPage.getByRole("button", { name: "Close", exact: true }),
+      ).toBeVisible({
+        timeout: 10_000,
+      });
+      await expectChatAnswer(guestPage, "yes");
+      await expect(guestPage.getByTestId("hider-truth-reveal-banner")).toBeHidden(
+        {
+          timeout: 5_000,
+        },
+      );
+      await openChat(hostPage);
+      await expectChatAnswer(hostPage, "yes");
+    });
+  } finally {
+    await cleanup();
+  }
 });

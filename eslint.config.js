@@ -53,6 +53,24 @@ export default defineConfig([
     rules: {
       // Sleeps must fail CI (recommended defaults to warn).
       "playwright/no-wait-for-timeout": "error",
+      "playwright/expect-expect": [
+        "warn",
+        {
+          assertFunctionNames: [
+            "completeRadarSolo",
+            "completeMatchingSolo",
+            "completeMeasuringSolo",
+            "placePin",
+            "drawZone",
+            "expectRedoEnabled",
+            "expectMapHasAnnotations",
+            "expectEliminationMaskVisible",
+            "expectChatAnswer",
+            "expectPendingQuestionText",
+            "expectCreatePageMapPreviewLoaded",
+          ],
+        },
+      ],
     },
   },
   // Wave 1: enable jsx-a11y recommended on kernel/flag surfaces only.
