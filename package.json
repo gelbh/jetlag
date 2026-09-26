@@ -17,7 +17,7 @@
     "build:secrets": "doppler run --config prd -- npm run build",
     "preview": "vite preview",
     "lint": "eslint .",
-    "lint:css": "stylelint \"src/**/*.css\" \"public/**/*.css\"",
+    "lint:css": "stylelint --cache --report-needless-disables --report-invalid-scope-disables \"src/**/*.css\" \"public/**/*.css\"",
     "lint:pr-title": "bash scripts/lint-pr-title.sh",
     "typecheck": "tsc -b --noEmit",
     "tokens:build": "node scripts/build-tokens.mjs",

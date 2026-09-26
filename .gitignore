@@ -20,3 +20,4 @@ docs/
 .lighthouseci
 target/
 crates/*/pkg/
+.stylelintcache
