@@ -119,7 +119,7 @@ describe("eliminationMaskWorkerClient", () => {
     );
   });
 
-  it("passes localStorage mask kernel mode over env to the worker", async () => {
+  it("maps localStorage dual to wasm for the worker", async () => {
     getClientEnv.mockReturnValue({
       VITE_GEOMETRY_MASK_KERNEL: "ts",
     });
@@ -130,7 +130,7 @@ describe("eliminationMaskWorkerClient", () => {
     expect(buildMaskFromUnionInput).toHaveBeenCalledWith(
       expect.any(Object),
       gameArea,
-      "dual",
+      "wasm",
     );
   });
 

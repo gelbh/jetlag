@@ -27,22 +27,14 @@ export {
   isPointInGameArea,
 } from "./radarHalfPlane";
 export { geodesicLineBuffer } from "./geodesicLineBuffer";
-export {
-  geoSpatialVoronoi,
-  geoSpatialVoronoiFromSites,
-  type SpatialVoronoiSite,
-} from "./spatialVoronoi";
+export type { SpatialVoronoiSite } from "./spatialVoronoi";
 export {
   resolveVoronoiCellPoiId,
   resolveVoronoiCellSiteId,
   voronoiCellSiteId,
   type VoronoiSiteRef,
 } from "./voronoiCellSiteId";
-export {
-  buildTentacleEliminationRegion,
-  buildTentaclePoiAnswerEliminationRegion,
-  type TentacleSite,
-} from "./tentacleRegions";
+export type { TentacleSite } from "./tentacleKernelRunner";
 export {
   dispatchSpatialVoronoi,
   runSpatialVoronoi,

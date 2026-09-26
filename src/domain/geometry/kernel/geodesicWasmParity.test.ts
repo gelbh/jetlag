@@ -60,8 +60,8 @@ describe.skipIf(!wasmPkgReady)("geodesic wasm parity", () => {
   );
 });
 
-describe("geodesic wasm fallback", () => {
-  it("wasm init failure falls back to TS when entrypoint forced ready", async () => {
+describe("geodesic wasm failure", () => {
+  it("wasm init failure rethrows when entrypoint forced ready", async () => {
     vi.resetModules();
     vi.doMock("./kernelWasmReady", async () => {
       const actual =
@@ -95,12 +95,11 @@ describe("geodesic wasm fallback", () => {
     const { dispatchGeodesicLineBuffer: runWithMock } = await import(
       "./geodesicKernelRunner"
     );
-    const { geodesicLineBuffer: buildTs } = await import("./geodesicLineBuffer");
 
-    const expected = buildTs(shortLine, 200);
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
-    const result = await runWithMock(shortLine, 200, undefined, "wasm");
-    expect(result).toEqual(expected);
+    await expect(
+      runWithMock(shortLine, 200, undefined, "wasm"),
+    ).rejects.toThrow("wasm init failed");
     expect(warnSpy).toHaveBeenCalled();
     warnSpy.mockRestore();
 

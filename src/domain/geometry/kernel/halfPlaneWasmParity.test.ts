@@ -103,12 +103,8 @@ describe.skipIf(!wasmPkgReady)("half-plane wasm parity", () => {
   });
 });
 
-describe("half-plane wasm fallback", () => {
-  it("wasm init failure falls back to TS when ready (dispatch path)", async () => {
-    // Registry keeps halfPlane not ready today; force ready via shouldUseWasm mock
-    // would be Task 6. Fallback is covered by dispatchKernel + mask tests.
-    // Here: when WASM throws after a future flip, runner falls back — exercise
-    // by temporarily stubbing KERNEL_WASM_READY through shouldUseWasm.
+describe("half-plane wasm failure", () => {
+  it("wasm init failure rethrows when ready (dispatch path)", async () => {
     vi.resetModules();
     vi.doMock("./kernelWasmReady", async () => {
       const actual =
@@ -145,19 +141,18 @@ describe("half-plane wasm fallback", () => {
     const { dispatchHalfPlane: runWithMock } = await import(
       "./halfPlaneKernelRunner"
     );
-    const { buildHalfPlanePolygon: buildTs } = await import("./radarHalfPlane");
 
-    const expected = buildTs(thermoA, thermoB, gameArea, "cold");
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
-    const result = await runWithMock(
-      thermoA,
-      thermoB,
-      gameArea,
-      "cold",
-      "midpoint",
-      "wasm",
-    );
-    expect(result).toEqual(expected);
+    await expect(
+      runWithMock(
+        thermoA,
+        thermoB,
+        gameArea,
+        "cold",
+        "midpoint",
+        "wasm",
+      ),
+    ).rejects.toThrow("wasm init failed");
     expect(warnSpy).toHaveBeenCalled();
     warnSpy.mockRestore();
 

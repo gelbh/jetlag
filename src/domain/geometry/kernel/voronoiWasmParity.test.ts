@@ -1,8 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
-import { geoSpatialVoronoiFromSites } from "./spatialVoronoi";
 
 describe("voronoiWasmParity", () => {
-  it("wasm init failure falls back to TS when entrypoint is ready", async () => {
+  it("wasm init failure rethrows when entrypoint is ready", async () => {
     vi.resetModules();
     vi.doMock("./kernelWasmReady", async () => {
       const actual = await vi.importActual<typeof import("./kernelWasmReady")>(
@@ -38,9 +37,10 @@ describe("voronoiWasmParity", () => {
       { lng: -0.18, lat: 51.45, properties: { poiId: "west" } },
       { lng: -0.12, lat: 51.45, properties: { poiId: "east" } },
     ];
-    const expected = geoSpatialVoronoiFromSites(sites);
-    const result = await runWithMock(sites, "wasm");
-    expect(result).toEqual(expected);
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    await expect(runWithMock(sites, "wasm")).rejects.toThrow("wasm init failed");
+    expect(warnSpy).toHaveBeenCalled();
+    warnSpy.mockRestore();
 
     vi.doUnmock("./voronoiWasm");
     vi.doUnmock("./kernelWasmReady");

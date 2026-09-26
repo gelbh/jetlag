@@ -123,8 +123,8 @@ describe.skipIf(!wasmPkgReady)("mask wasm parity", () => {
   });
 });
 
-describe("mask wasm fallback", () => {
-  it("wasm init failure falls back to TS", async () => {
+describe("mask wasm failure", () => {
+  it("wasm init failure rethrows (no silent TS fail-soft)", async () => {
     vi.resetModules();
     vi.doMock("./maskWasm", () => ({
       wasmBuildMaskFromUnionInput: vi.fn(async () => {
@@ -139,12 +139,14 @@ describe("mask wasm fallback", () => {
     const { runMaskFromUnionInput: runWithMock } = await import(
       "./maskKernelRunner"
     );
-    const { buildMaskFromUnionInput: buildTs } = await import("./buildMask");
 
     const input = { polygons: [square(-0.18)], disks: [] };
-    const expected = buildTs(input, gameArea);
-    const result = await runWithMock(input, gameArea, "wasm");
-    expect(result).toEqual(expected);
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    await expect(runWithMock(input, gameArea, "wasm")).rejects.toThrow(
+      "wasm init failed",
+    );
+    expect(warnSpy).toHaveBeenCalled();
+    warnSpy.mockRestore();
 
     vi.doUnmock("./maskWasm");
     vi.resetModules();
