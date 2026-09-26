@@ -1,6 +1,9 @@
 :root {
-  --font-display: "Barlow Semi Condensed", "Source Sans 3", system-ui, sans-serif;
-  --font-body: "Source Sans 3", system-ui, -apple-system, blinkmacsystemfont, "Segoe UI", sans-serif;
+  /* iOS Mantine Operate: system stack matches jetlagTheme fontFamily */
+  --font-display: -apple-system, blinkmacsystemfont, "SF Pro Text", "Segoe UI",
+    system-ui, sans-serif;
+  --font-body: -apple-system, blinkmacsystemfont, "SF Pro Text", "Segoe UI",
+    system-ui, sans-serif;
   --font-mono: ui-monospace, sfmono-regular, menlo, monaco, consolas, monospace;
 
   color-scheme: dark;
@@ -91,8 +94,8 @@ body,
 }
 
 /*
- * Unlayered body rules beat @layer mantine globals so Survey chrome keeps
- * Jetlag typography/colors while MantineProvider stays always mounted.
+ * Unlayered body rules beat @layer mantine globals so residual CSS chrome
+ * keeps Jetlag typography/colors while MantineProvider stays always mounted.
  */
 body {
   margin: 0;

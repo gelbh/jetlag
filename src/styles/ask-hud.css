@@ -1,4 +1,4 @@
-/* ask-hud.css — Ask Map HUD kit on Survey roles (canvas / field-ink / flag / rule / halt) */
+/* ask-hud.css — Ask Map HUD on iOS Mantine brand roles (canvas / field-ink / flag / rule / halt) */
 @layer components {
   :root {
     --ask-hud-strip-height: 3rem; /* ≥44px touch */
@@ -6,7 +6,7 @@
     --ask-hud-camera-padding-bottom: 0px;
   }
 
-  /* Ask path panel — Survey canvas; do not use Broadcast hud-panel / surface-* */
+  /* Ask path panel — frosted canvas; Wave 5 may fold into Mantine Paper */
   .ask-hud-panel {
     position: relative;
     overflow: hidden;
