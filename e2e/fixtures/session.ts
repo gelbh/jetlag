@@ -1,7 +1,7 @@
 import { type Browser, type Page, expect } from "@playwright/test";
+import { toLocalStorageSeed } from "../../src/test/scenarios/adapters/toLocalStorageSeed";
 import {
   E2E_GEOLOCATION,
-  LOCAL_GAME_AREA,
   MAP_CONTAINER_SELECTOR,
 } from "./map";
 import { dismissMapOnboarding, prepareE2EPage } from "./page-init";
@@ -24,73 +24,19 @@ export async function seedLocalSession(
   page: Page,
   options: LocalSessionSeedOptions = {},
 ) {
-  const {
-    code = "TEST",
-    myRole = "seeker",
-    gameSize = "medium",
-    sessionId = "local",
-    hidingPeriodMinutes,
-    memberRoles,
-  } = options;
-
-  await page.addInitScript(() => {
-      localStorage.setItem(
-        "jetlag-annotations",
-        JSON.stringify({ state: { annotations: [] }, version: 0 }),
-      );
-      localStorage.removeItem("jetlag-timer");
-    });
+  const { network: _network, ...seedOptions } = options;
+  const seed = toLocalStorageSeed("dublin-local-map", seedOptions);
 
   await page.addInitScript(
-    ({ sessionState, role }) => {
-      localStorage.setItem(
-        "jetlag-session",
-        JSON.stringify({
-          state: {
-            session: sessionState,
-            myRole: role,
-            myUid: null,
-          },
-          version: 0,
-        }),
-      );
-      localStorage.setItem(
-        "jetlag-map",
-        JSON.stringify({
-          state: {
-            keepScreenAwake: false,
-            distanceUnit: "imperial",
-            mapStyle: "standard",
-            layerVisibility: {
-              radar: true,
-              thermometer: true,
-              measuring: true,
-              matching: true,
-              zone: true,
-              pin: true,
-              tentacle: true,
-              transit: true,
-            },
-            lowPowerMode: true,
-          },
-          version: 0,
-        }),
-      );
+    ({ sessionBlob, mapBlob, annotationsBlob, clearTimer }) => {
+      localStorage.setItem("jetlag-session", sessionBlob);
+      localStorage.setItem("jetlag-map", mapBlob);
+      localStorage.setItem("jetlag-annotations", annotationsBlob);
+      if (clearTimer) {
+        localStorage.removeItem("jetlag-timer");
+      }
     },
-    {
-      sessionState: {
-        id: sessionId,
-        code,
-        gameArea: LOCAL_GAME_AREA,
-        createdAt: "2026-01-01T00:00:00.000Z",
-        memberUids: [],
-        tier: "free",
-        gameSize,
-        ...(hidingPeriodMinutes !== undefined ? { hidingPeriodMinutes } : {}),
-        ...(memberRoles ? { memberRoles } : {}),
-      },
-      role: myRole,
-    },
+    seed,
   );
 }
 

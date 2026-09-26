@@ -1,7 +1,10 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
+import { LOCAL_SESSION_ID } from "../../domain/map/annotations";
 import { DUBLIN_CITY_GAME_AREA } from "../fixtures/dublinGameArea";
+import { toLocalStorageSeed } from "./adapters/toLocalStorageSeed";
+import { toUnitFixture } from "./adapters/toUnitFixture";
 import { getScenario, listScenarios } from "./catalog";
 
 describe("scenario catalog", () => {
@@ -32,5 +35,36 @@ describe("scenario catalog", () => {
     const corner = "[-6.45, 53.27]";
     expect(cityFile.includes(corner)).toBe(true);
     expect(e2eMap.includes(corner)).toBe(false);
+  });
+
+  it("toUnitFixture builds a local session matching defaults", () => {
+    const { session, myRole } = toUnitFixture("dublin-local-map");
+    expect(session.id).toBe(LOCAL_SESSION_ID);
+    expect(session.code).toBe("TEST");
+    expect(myRole).toBe("seeker");
+  });
+
+  it("toLocalStorageSeed writes zustand-shaped session blob", () => {
+    const seed = toLocalStorageSeed("dublin-local-map");
+    const parsed = JSON.parse(seed.sessionBlob) as {
+      state: { session: { id: string; code: string }; myRole: string };
+    };
+    expect(parsed.state.session.id).toBe(LOCAL_SESSION_ID);
+    expect(parsed.state.session.code).toBe("TEST");
+    expect(parsed.state.myRole).toBe("seeker");
+    expect(seed.clearTimer).toBe(true);
+  });
+
+  it("adapters do not import playwright", () => {
+    const unitSrc = readFileSync(
+      resolve(__dirname, "./adapters/toUnitFixture.ts"),
+      "utf8",
+    );
+    const localSrc = readFileSync(
+      resolve(__dirname, "./adapters/toLocalStorageSeed.ts"),
+      "utf8",
+    );
+    expect(unitSrc).not.toMatch(/playwright/i);
+    expect(localSrc).not.toMatch(/playwright/i);
   });
 });
