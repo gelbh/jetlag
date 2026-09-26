@@ -1,9 +1,12 @@
 /**
- * Thermometer Ask HUD mode body — walk banner owns status; strip owns exit.
- * No PhaseRail / CONTINUE / duplicate END WALK in the body.
+ * Thermometer Ask HUD — Matching twin: question header + distance catalog, then map-first.
  * Spec: ask-surface-kit-design rev 2026-08-05b.
  */
+import { Crosshair } from "@phosphor-icons/react";
+import { AskCatalogRail } from "@/components/tools/ask/AskCatalogRail";
 import { AskChipIsland } from "@/components/tools/ask/AskChipIsland";
+import { AskToolQuestionHeader } from "@/components/tools/ask/AskToolQuestionHeader";
+import { HudThermometerIcon } from "@/components/map/icons/ToolIcons";
 import { hotterColderAnswerOptions } from "@/components/tools/shared/answers/binaryAnswerOptions";
 import { BinaryAnswerPicker } from "@/components/tools/shared/answers/BinaryAnswerPicker";
 import { OptionChip, OptionChipRow } from "@/components/tools/shared/controls/OptionChip";
@@ -11,6 +14,7 @@ import { QuestionPromptBlock } from "@/components/tools/shared/controls/Question
 import { AskInlineError } from "@/components/tools/shared/readout/AskInlineError";
 import { ResolvedReadout } from "@/components/tools/shared/readout/ResolvedReadout";
 import { QuestionTruthReferenceHint } from "@/components/tools/shared/QuestionTruthReferenceHint";
+import { iosAskInsetSurfaceStyle } from "@/components/ui/apple/iosEntryChrome";
 import {
   formatPresetDistance,
   type DistanceUnit,
@@ -22,8 +26,15 @@ import {
   type ThermometerAnswer,
 } from "@/domain/questions";
 import type { SessionRulesInput } from "@/domain/session/rules";
+import { usePlayerUiMantine } from "@/hooks/feature/usePlayerUiMantine";
 
 type PlacementMode = "gps" | "manual";
+
+const THERMO_QUESTION_INTRO = {
+  prompt: "After traveling [distance], am I hotter or colder?",
+  ruleSummary:
+    "Pick a walk distance. On the map, start a GPS track or place start and end pins.",
+};
 
 export type ThermometerHudBodyProps = {
   distanceUnit: DistanceUnit;
@@ -46,6 +57,7 @@ export type ThermometerHudBodyProps = {
   onReset: () => void;
   onStartWalk: () => void;
   awaitHiderAnswer?: boolean;
+  toolLabel?: string;
 };
 
 export function ThermometerHudBody({
@@ -69,7 +81,9 @@ export function ThermometerHudBody({
   onReset,
   onStartWalk,
   awaitHiderAnswer = false,
+  toolLabel = "Thermometer",
 }: ThermometerHudBodyProps) {
+  const mantinePlayerUi = usePlayerUiMantine();
   const availableDistancePresets =
     availableThermometerDistancePresetsForSession(sessionRules);
   const distanceAvailable = isThermometerDistanceOptionAvailableForSession(
@@ -86,7 +100,6 @@ export function ThermometerHudBody({
   } else if (pinsReady && placementMode === "manual") {
     chord = "answer";
   } else if (pinsReady && placementMode === "gps" && !awaitHiderAnswer) {
-    // Local GPS walk finished → answer before ASK strip.
     chord = "answer";
   }
 
@@ -109,29 +122,100 @@ export function ThermometerHudBody({
     return "Both pins are set.";
   })();
 
+  const distanceRows = availableDistancePresets.map((preset) => ({
+    id: String(preset),
+    label:
+      presetUseCount > 0 && preset === distanceMeters
+        ? `${formatPresetDistance(preset, distanceUnit)} · ${costLabel}`
+        : formatPresetDistance(preset, distanceUnit),
+    icon: (
+      <Crosshair
+        size={20}
+        weight="duotone"
+        color="currentColor"
+        aria-hidden
+      />
+    ),
+  }));
+
+  const walkBanner =
+    chord === "walking" ? (
+      <div
+        data-testid="ask-walk-banner"
+        className="ask-walk-banner pointer-events-auto"
+        role="status"
+        aria-live="polite"
+        {...(mantinePlayerUi ? { "data-player-ux-world": "mantine" } : {})}
+        style={
+          mantinePlayerUi
+            ? {
+                ...iosAskInsetSurfaceStyle,
+                borderRadius: 16,
+                padding: "0.85rem 1rem",
+              }
+            : undefined
+        }
+      >
+        <p className="ask-walk-banner__label text-xs">Walking</p>
+        <p className="ask-walk-banner__progress font-display text-xl">
+          {walkedLabel}
+          <span className="ask-walk-banner__sep"> / </span>
+          {targetLabel}
+        </p>
+        <p className="ask-walk-banner__hint text-xs text-field-ink-muted">
+          Line updates live for hiders. End walk on the strip when ready.
+        </p>
+      </div>
+    ) : null;
+
+  if (mantinePlayerUi) {
+    return (
+      <div
+        data-testid="thermometer-hud-body"
+        data-player-ux-world="mantine"
+        className="ask-hud-mode-body flex w-full flex-col gap-2"
+      >
+        {walkBanner}
+
+        {chord === "setup" ? (
+          <div className="flex w-full flex-col gap-2">
+            <AskToolQuestionHeader
+              toolLabel={toolLabel}
+              costLabel={costLabel}
+              icon={<HudThermometerIcon width={22} height={22} />}
+              prompt={THERMO_QUESTION_INTRO.prompt}
+              ruleSummary={THERMO_QUESTION_INTRO.ruleSummary}
+            />
+
+            {awaitHiderAnswer ? <QuestionTruthReferenceHint /> : null}
+
+            <AskCatalogRail
+              rows={distanceRows}
+              selectedId={null}
+              onSelect={(id) => onDistanceChange(Number(id))}
+              aria-label="Thermometer distance"
+              hint="Tap a walk distance"
+              columns={availableDistancePresets.length <= 3 ? 3 : 4}
+            />
+
+            {!canSubmitQuestion ? (
+              <ResolvedReadout variant="warning">
+                Finish the open question before starting another.
+              </ResolvedReadout>
+            ) : null}
+            {error ? <AskInlineError message={error} /> : null}
+          </div>
+        ) : null}
+      </div>
+    );
+  }
+
   return (
     <div
       data-testid="thermometer-hud-body"
       className="ask-hud-mode-body flex w-full flex-col gap-2"
     >
-      {chord === "walking" ? (
-        <div
-          data-testid="ask-walk-banner"
-          className="ask-walk-banner pointer-events-auto"
-          role="status"
-          aria-live="polite"
-        >
-          <p className="ask-walk-banner__label text-xs">Walking</p>
-          <p className="ask-walk-banner__progress font-display text-xl">
-            {walkedLabel}
-            <span className="ask-walk-banner__sep"> / </span>
-            {targetLabel}
-          </p>
-          <p className="ask-walk-banner__hint text-xs text-field-ink-muted">
-            Line updates live for hiders. End walk on the strip when ready.
-          </p>
-        </div>
-      ) : null}
+      {walkBanner}
 
       {chord === "setup" ? (
         <div className="pointer-events-auto ask-hud-panel space-y-3 p-3">

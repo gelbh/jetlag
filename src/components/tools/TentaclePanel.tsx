@@ -233,9 +233,6 @@ export function TentaclePanel({
       {phaseId === "ask" && !awaitHiderAnswer && categoryId ? (
         <TentacleLocationsChord className="ask-scroll-chord">
           <TentacleAnswerPicker
-            categoryId={categoryId}
-            distanceUnit={distanceUnit}
-            searchRadiusMeters={searchRadiusMeters}
             poiOptions={poiOptions}
             selectedPoiId={selectedPoiId}
             outOfReach={outOfReach}

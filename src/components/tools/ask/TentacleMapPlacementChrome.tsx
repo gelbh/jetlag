@@ -1,5 +1,5 @@
 /**
- * Map-first Tentacle chrome: shared placement shell + POI / out-of-reach answer.
+ * Map-first Tentacle chrome: shared placement shell + map-primary answer strip.
  */
 import { Button } from "@mantine/core";
 import { PaperPlaneTilt } from "@phosphor-icons/react";
@@ -9,7 +9,7 @@ import {
   askMapPlacementSendStyles,
   type AskMapPlacementPhase,
 } from "@/components/tools/ask/AskMapPlacementChrome";
-import { TentacleAnswerPicker } from "@/components/tools/shared/answers/TentacleAnswerPicker";
+import { TentacleMapAnswerStrip } from "@/components/tools/ask/TentacleMapAnswerStrip";
 import { iosMapChromeSurfaceStyles } from "@/components/ui/apple/iosEntryChrome";
 import type { TentaclePoi } from "@/domain/map/annotations";
 import type { DistanceUnit } from "@/domain/map/distance";
@@ -31,7 +31,6 @@ export type TentacleMapPlacementChromeProps = {
   poiOptions: TentaclePoi[];
   selectedPoiId: string | null;
   outOfReach: boolean;
-  onSelectPoi: (poiId: string) => void;
   onOutOfReachChange: (outOfReach: boolean) => void;
   canCommit?: boolean;
   isSubmitting?: boolean;
@@ -55,7 +54,6 @@ export function TentacleMapPlacementChrome({
   poiOptions,
   selectedPoiId,
   outOfReach,
-  onSelectPoi,
   onOutOfReachChange,
   canCommit = false,
   isSubmitting = false,
@@ -73,9 +71,22 @@ export function TentacleMapPlacementChrome({
         className="flex flex-col gap-2"
       >
         {!awaitHiderAnswer ? (
+          <TentacleMapAnswerStrip
+            categoryId={categoryId}
+            distanceUnit={distanceUnit}
+            searchRadiusMeters={searchRadiusMeters}
+            poiOptions={poiOptions}
+            selectedPoiId={selectedPoiId}
+            outOfReach={outOfReach}
+            onOutOfReachChange={onOutOfReachChange}
+            showCopyForHider
+          />
+        ) : null}
+
+        {awaitHiderAnswer || hasAnswer ? (
           <div
-            data-testid="tentacle-map-placement-choices"
-            className="max-h-[40dvh] overflow-y-auto"
+            data-testid="tentacle-map-placement-send"
+            className="flex flex-col gap-2"
             style={{
               ...iosMapChromeSurfaceStyles,
               borderRadius: 16,
@@ -83,29 +94,6 @@ export function TentacleMapPlacementChrome({
               color: "var(--color-field-ink)",
             }}
           >
-            <TentacleAnswerPicker
-              categoryId={categoryId}
-              distanceUnit={distanceUnit}
-              searchRadiusMeters={searchRadiusMeters}
-              poiOptions={poiOptions}
-              selectedPoiId={selectedPoiId}
-              outOfReach={outOfReach}
-              onSelectPoi={onSelectPoi}
-              onOutOfReachChange={onOutOfReachChange}
-            />
-          </div>
-        ) : null}
-
-        <div
-          className="flex flex-col gap-2"
-          style={{
-            ...iosMapChromeSurfaceStyles,
-            borderRadius: 16,
-            padding: "0.55rem",
-            color: "var(--color-field-ink)",
-          }}
-        >
-          {awaitHiderAnswer || hasAnswer ? (
             <Button
               type="button"
               fullWidth
@@ -127,8 +115,8 @@ export function TentacleMapPlacementChrome({
                   ? "Send to hiders"
                   : "Send"}
             </Button>
-          ) : null}
-        </div>
+          </div>
+        ) : null}
       </div>
     ) : null;
 
@@ -149,7 +137,7 @@ export function TentacleMapPlacementChrome({
       onChangeConfigure={onChangeCategory}
       changeConfigureAriaLabel="Change category"
       answerSlot={answerSlot}
-      answerTall={!awaitHiderAnswer}
+      answerTall={false}
     />
   );
 }

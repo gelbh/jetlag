@@ -17,3 +17,72 @@
 .maplibregl-map > [mapboxgl-children] .maplibregl-popup {
   pointer-events: auto;
 }
+
+/* Frosted place-name / feature label (iOS map chrome). */
+.jl-map-feature-popup.maplibregl-popup {
+  z-index: 2;
+}
+
+.jl-map-feature-popup .maplibregl-popup-content {
+  margin: 0;
+  padding: 0;
+  background: oklch(from var(--color-canvas) l c h / 0.92);
+  color: var(--color-field-ink);
+  border: 0.33px solid oklch(from var(--color-rule) l c h / 0.7);
+  border-radius: 14px;
+  box-shadow:
+    0 10px 28px 0 oklch(0.1 0.04 265 / 0.34),
+    0 1px 0 0 oklch(1 0 0 / 0.12) inset;
+  backdrop-filter: blur(24px) saturate(1.35);
+  -webkit-backdrop-filter: blur(24px) saturate(1.35);
+  overflow: hidden;
+}
+
+.jl-map-feature-popup .maplibregl-popup-tip {
+  display: none;
+}
+
+.jl-map-feature-popup__body {
+  position: relative;
+  box-sizing: border-box;
+  min-width: 7.5rem;
+  max-width: 16.5rem;
+  padding: 0.7rem 2.35rem 0.7rem 0.85rem;
+  font-family: var(--mantine-font-family, inherit);
+  font-size: 0.9375rem;
+  font-weight: 590;
+  letter-spacing: -0.015em;
+  line-height: 1.3;
+  color: var(--color-field-ink);
+  overflow-wrap: break-word;
+}
+
+.jl-map-feature-popup__close {
+  position: absolute;
+  top: 0.35rem;
+  right: 0.3rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  background: oklch(from var(--color-field-ink) l c h / 0.08);
+  color: var(--color-field-ink-muted);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.jl-map-feature-popup__close:hover,
+.jl-map-feature-popup__close:focus-visible {
+  background: oklch(from var(--color-field-ink) l c h / 0.14);
+  color: var(--color-field-ink);
+  outline: none;
+}
+
+.jl-map-feature-popup__close:active {
+  background: oklch(from var(--color-field-ink) l c h / 0.18);
+}

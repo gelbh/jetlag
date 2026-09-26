@@ -105,7 +105,6 @@ export function AskHudHost({
           maxHeightClassName="max-h-[min(72dvh,640px)]"
           padding="sm"
           pinned={pinned}
-          mapInteractive
         >
           <Stack gap="md" pb="xs">
             {modeBody}
