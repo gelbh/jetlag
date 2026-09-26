@@ -69,7 +69,7 @@ describe("useTentacleTool", () => {
     );
 
     act(() => {
-      result.current.panel.props.onCategoryChange("museum");
+      result.current.panel.props.model.onCategoryChange("museum");
     });
 
     expect(result.current.draft.tentacleCenter).toBeNull();
@@ -102,7 +102,7 @@ describe("useTentacleTool", () => {
     );
 
     act(() => {
-      result.current.panel.props.onCategoryChange("museum");
+      result.current.panel.props.model.onCategoryChange("museum");
     });
 
     act(() => {
@@ -150,7 +150,7 @@ describe("useTentacleTool", () => {
     );
 
     act(() => {
-      result.current.panel.props.onCategoryChange("museum");
+      result.current.panel.props.model.onCategoryChange("museum");
     });
 
     act(() => {
@@ -199,7 +199,7 @@ describe("useTentacleTool", () => {
     );
 
     act(() => {
-      result.current.panel.props.onCategoryChange("museum");
+      result.current.panel.props.model.onCategoryChange("museum");
     });
     act(() => {
       result.current.handleMapClick([53.35, -6.26]);
@@ -217,6 +217,7 @@ describe("useTentacleTool", () => {
     });
 
     expect(result.current.draft.tentacleSelectedPoiId).toBeNull();
-    expect(result.current.hud.error).toMatch(/Preview only/i);
+    // Map-first placement nulls hud.error; panel model still surfaces tentacleError.
+    expect(result.current.panel.props.model.error).toMatch(/Preview only/i);
   });
 });

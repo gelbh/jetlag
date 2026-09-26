@@ -540,23 +540,25 @@ export function HiderMapScreenChrome({
         ) : null}
 
         <ChatPanel
-          open={overlay.isChatOpen}
-          onClose={overlay.closeSheet}
-          bottomClassName="jl-panel-hider-wizard"
-          messages={displayMessages}
-          pendingQuestions={displayPendingQuestions}
-          sessionRules={session}
-          sessionId={session.id}
-          senderUid={uid ?? ""}
-          senderRole="hider"
-          isHider
-          questionTruths={chat.questionTruths}
-          truthsLoading={chat.truthsLoading}
-          truthReferenceModes={chat.truthReferenceModes}
-          answerError={chat.answerError}
-          answerSubmitting={chat.answerSubmitting}
-          answeredPendingIds={chat.answeredPendingIds}
-          onAnswerQuestion={chat.onAnswerQuestion}
+          model={{
+            open: overlay.isChatOpen,
+            onClose: overlay.closeSheet,
+            bottomClassName: "jl-panel-hider-wizard",
+            messages: displayMessages,
+            pendingQuestions: displayPendingQuestions,
+            sessionRules: session,
+            sessionId: session.id,
+            senderUid: uid ?? "",
+            senderRole: "hider",
+            isHider: true,
+            questionTruths: chat.questionTruths,
+            truthsLoading: chat.truthsLoading,
+            truthReferenceModes: chat.truthReferenceModes,
+            answerError: chat.answerError,
+            answerSubmitting: chat.answerSubmitting,
+            answeredPendingIds: chat.answeredPendingIds,
+            onAnswerQuestion: chat.onAnswerQuestion,
+          }}
         />
 
         {overlay.settingsInStack ? (

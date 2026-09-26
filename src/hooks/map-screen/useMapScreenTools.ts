@@ -23,6 +23,7 @@ import { useRadarTool } from "../tools/useRadarTool";
 import { useThermometerTool } from "../tools/useThermometerTool";
 import { useZoneTool } from "../tools/useZoneTool";
 import type { MapTool } from "../../state/sessionStore";
+import type { HeavyToolHostModel } from "../../components/tools/HeavyToolHost";
 import { useHeavyMapToolsState } from "./useHeavyMapToolsState";
 import { useSeekerOptimisticPendingOverlays } from "./useSeekerOptimisticPendingOverlays";
 
@@ -291,7 +292,7 @@ export function useMapScreenTools({
     [measuringTool.draft.measuringPlaces],
   );
 
-  const heavyMapToolsSlotProps = {
+  const heavyMapToolsSlotProps: HeavyToolHostModel = {
     activeTool,
     sessionRules,
     annotations,

@@ -13,7 +13,8 @@ import { grayStyles } from "../ui/entry/entryChrome";
 import { SheetHost } from "../ui/sheets/SheetHost";
 import { ChatPanelBody } from "./ChatPanelBody";
 
-interface ChatPanelProps {
+/** Flat chat sheet fields bag for ChatPanel (W4-F peel). */
+export type ChatPanelModel = {
   open: boolean;
   onClose: () => void;
   messages: readonly SessionMessageRecord[];
@@ -43,28 +44,33 @@ interface ChatPanelProps {
     messageId: string,
   ) => Promise<void>;
   readOnly?: boolean;
-}
+};
 
-export function ChatPanel({
-  open,
-  onClose,
-  messages,
-  pendingQuestions = [],
-  sessionRules = { gameSize: "medium" },
-  sessionId,
-  senderUid,
-  senderRole,
-  isHider,
-  questionTruths,
-  truthsLoading = false,
-  truthReferenceModes,
-  answerError = null,
-  answerSubmitting = false,
-  answeredPendingIds,
-  onAnswerQuestion,
-  onDismissExpiredQuestion,
-  readOnly = false,
-}: ChatPanelProps) {
+export type ChatPanelProps = {
+  model: ChatPanelModel;
+};
+
+export function ChatPanel({ model }: ChatPanelProps) {
+  const {
+    open,
+    onClose,
+    messages,
+    pendingQuestions = [],
+    sessionRules = { gameSize: "medium" },
+    sessionId,
+    senderUid,
+    senderRole,
+    isHider,
+    questionTruths,
+    truthsLoading = false,
+    truthReferenceModes,
+    answerError = null,
+    answerSubmitting = false,
+    answeredPendingIds,
+    onAnswerQuestion,
+    onDismissExpiredQuestion,
+    readOnly = false,
+  } = model;
   const isDesktop = useDesktopLayout();
   const keyboardInset = useVisualViewportBottomInset(open && !isDesktop);
 

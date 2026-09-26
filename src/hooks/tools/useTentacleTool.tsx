@@ -483,40 +483,41 @@ export function useTentacleTool({
 
   const panel = (
     <TentaclePanel
-      gameSize={sessionGameSize(sessionRules)}
-      categoryId={tentacleCategoryId}
-      categoryChosen={tentacleCategoryChosen}
-      searchRadiusMeters={searchRadiusMeters}
-      usedCategoryIds={usedTentacleCategories}
-      distanceUnit={distanceUnit}
-      poiOptions={tentaclePois}
-      selectedPoiId={selectedPoiId}
-      outOfReach={tentacleOutOfReach}
-      loading={tentacleLoading}
-      awaitingPlacement={awaitingPlacement}
-      hasCenter={tentacleCenter !== null}
-      gpsLoading={gpsLoading}
-      error={tentacleError ?? mapError ?? gpsError}
-      onCategoryChange={handleCategoryChange}
-      onUseGps={() => void handleUseGps()}
-      onPlaceAtMapTap={armPlacement}
-      onSelectPoi={handleSelectPoi}
-      onOutOfReachChange={(nextOutOfReach) => {
-        setTentacleOutOfReach(nextOutOfReach);
-        if (nextOutOfReach) {
-          setSelectedPoiId(null);
-        }
+      model={{
+        gameSize: sessionGameSize(sessionRules),
+        categoryId: tentacleCategoryId,
+        categoryChosen: tentacleCategoryChosen,
+        searchRadiusMeters,
+        usedCategoryIds: usedTentacleCategories,
+        distanceUnit,
+        poiOptions: tentaclePois,
+        selectedPoiId,
+        outOfReach: tentacleOutOfReach,
+        loading: tentacleLoading,
+        awaitingPlacement,
+        hasCenter: tentacleCenter !== null,
+        gpsLoading,
+        error: tentacleError ?? mapError ?? gpsError,
+        onCategoryChange: handleCategoryChange,
+        onUseGps: () => void handleUseGps(),
+        onPlaceAtMapTap: armPlacement,
+        onSelectPoi: handleSelectPoi,
+        onOutOfReachChange: (nextOutOfReach) => {
+          setTentacleOutOfReach(nextOutOfReach);
+          if (nextOutOfReach) {
+            setSelectedPoiId(null);
+          }
+        },
+        onCommit: () => void commit(),
+        awaitHiderAnswer,
+        costLabel,
+        isSubmitting: session.isBusy,
+        onRetry:
+          tentacleCenter && tentacleCategoryId
+            ? () => void loadPoisForCenter(tentacleCenter, tentacleCategoryId)
+            : undefined,
+        wizardStepRef,
       }}
-      onCommit={() => void commit()}
-      awaitHiderAnswer={awaitHiderAnswer}
-      costLabel={costLabel}
-      isSubmitting={session.isBusy}
-      onRetry={
-        tentacleCenter && tentacleCategoryId
-          ? () => void loadPoisForCenter(tentacleCenter, tentacleCategoryId)
-          : undefined
-      }
-      wizardStepRef={wizardStepRef}
     />
   );
 
