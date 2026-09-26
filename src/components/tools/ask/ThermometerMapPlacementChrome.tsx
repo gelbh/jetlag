@@ -1,9 +1,15 @@
 /**
- * Map-first Thermometer chrome: hotter/colder + Send after pins / walk ready.
- * Walk setup and live walk banner stay on the sheet.
+ * Map-first Thermometer chrome: mode + place/start, then hotter/colder + Send.
+ * Distance catalog stays on the sheet; live walk banner stays on the sheet.
  */
 import { Button, UnstyledButton } from "@mantine/core";
-import { PaperPlaneTilt } from "@phosphor-icons/react";
+import {
+  Flame,
+  GpsFix,
+  PaperPlaneTilt,
+  Path,
+  Snowflake,
+} from "@phosphor-icons/react";
 import { HudThermometerIcon } from "@/components/map/icons/ToolIcons";
 import {
   AskMapPlacementChrome,
@@ -14,17 +20,25 @@ import { hotterColderAnswerOptions } from "@/components/tools/shared/answers/bin
 import {
   iosAskInsetSurfaceStyle,
   iosChoiceChipStyles,
+  iosFilledStyles,
   iosMapChromeSurfaceStyles,
 } from "@/components/ui/apple/iosEntryChrome";
 import type { ThermometerAnswer } from "@/domain/questions";
+
+type PlacementMode = "gps" | "manual";
 
 export type ThermometerMapPlacementChromeProps = {
   distanceLabel: string;
   questionPrompt: string;
   costLabel?: string;
+  pinStep: "a" | "b" | "ready";
+  placementMode: PlacementMode;
+  onPlacementModeChange: (mode: PlacementMode) => void;
+  onStartWalk: () => void;
+  gpsLoading?: boolean;
+  canStartWalk?: boolean;
   travelLabel?: string | null;
   travelTooShort?: boolean;
-  error?: string | null;
   awaitHiderAnswer?: boolean;
   answer?: ThermometerAnswer | null;
   onAnswerChange?: (answer: ThermometerAnswer) => void;
@@ -34,42 +48,41 @@ export type ThermometerMapPlacementChromeProps = {
   onChangeSetup?: () => void;
 };
 
-const compactChoiceStyles = (
+const answerSegmentStyles = (
   selected: boolean,
-  tone: "success" | "danger" | "default",
+  tone: "success" | "danger",
 ) => {
   const base = iosChoiceChipStyles(selected, tone);
-  const selectedSoft =
-    tone === "success"
-      ? {
-          backgroundColor:
-            "color-mix(in oklch, var(--color-canvas) 72%, var(--color-status-success) 28%)",
-          color: "var(--color-status-success)",
-          border:
-            "0.5px solid oklch(from var(--color-status-success) l c h / 0.55)",
-        }
-      : tone === "danger"
-        ? {
-            backgroundColor:
-              "color-mix(in oklch, var(--color-canvas) 72%, var(--color-halt) 28%)",
-            color: "var(--color-halt)",
-            border: "0.5px solid oklch(from var(--color-halt) l c h / 0.55)",
-          }
-        : {
-            backgroundColor:
-              "color-mix(in oklch, var(--color-canvas) 72%, var(--color-flag) 28%)",
-            color: "var(--color-flag)",
-            border: "0.5px solid oklch(from var(--color-flag) l c h / 0.5)",
-          };
-
   return {
     root: {
       ...base.root,
-      minHeight: "2.75rem",
       flex: 1,
-      borderRadius: 12,
+      minHeight: "2.75rem",
+      height: "2.75rem",
+      borderRadius: 10,
+      paddingInline: "0.7rem",
+      fontSize: "0.9375rem",
       fontWeight: 650,
-      ...(selected ? selectedSoft : {}),
+      letterSpacing: "-0.02em",
+      justifyContent: "center",
+      gap: 6,
+      boxShadow: "none",
+      transition:
+        "background-color 160ms ease, color 160ms ease, transform 120ms ease",
+      ...(selected
+        ? null
+        : {
+            backgroundColor: "transparent",
+            border: "none",
+            color: "var(--color-field-ink-muted)",
+            "&:hover:not(:disabled)": {
+              backgroundColor: "oklch(from var(--color-field-ink) l c h / 0.08)",
+              color: "var(--color-field-ink)",
+            },
+          }),
+      "&:active:not(:disabled)": {
+        transform: "scale(0.98)",
+      },
     },
   };
 };
@@ -78,9 +91,14 @@ export function ThermometerMapPlacementChrome({
   distanceLabel,
   questionPrompt,
   costLabel,
+  pinStep,
+  placementMode,
+  onPlacementModeChange,
+  onStartWalk,
+  gpsLoading = false,
+  canStartWalk = false,
   travelLabel = null,
   travelTooShort = false,
-  error = null,
   awaitHiderAnswer = false,
   answer = null,
   onAnswerChange,
@@ -89,40 +107,25 @@ export function ThermometerMapPlacementChrome({
   onCommit,
   onChangeSetup,
 }: ThermometerMapPlacementChromeProps) {
+  const pinsReady = pinStep === "ready";
   const phase: AskMapPlacementPhase = "answer";
+  const showSoloAnswers =
+    pinsReady && !awaitHiderAnswer && Boolean(onAnswerChange);
+
+  const placeHint =
+    placementMode === "manual" && pinStep === "a"
+      ? "Tap the map for the start of movement."
+      : placementMode === "manual" && pinStep === "b"
+        ? "Tap the map for the end of movement."
+        : placementMode === "gps" && !pinsReady
+          ? "Start a GPS track, or switch to manual pins."
+          : null;
 
   const answerSlot = (
     <div
       data-testid="thermometer-map-placement-answer"
-      className="flex flex-col gap-2"
+      className="mx-auto flex w-full max-w-[22rem] flex-col gap-2"
     >
-      {!awaitHiderAnswer && onAnswerChange ? (
-        <div
-          data-testid="thermometer-map-placement-choices"
-          className="flex items-center justify-center gap-2"
-        >
-          {hotterColderAnswerOptions.map((option) => {
-            const selected = answer === option.value;
-            const tone = option.activeClassName.includes("status-success")
-              ? "success"
-              : option.activeClassName.includes("status-negative")
-                ? "danger"
-                : "default";
-            return (
-              <UnstyledButton
-                key={option.value}
-                type="button"
-                aria-pressed={selected}
-                onClick={() => onAnswerChange(option.value)}
-                styles={compactChoiceStyles(selected, tone)}
-              >
-                {option.label}
-              </UnstyledButton>
-            );
-          })}
-        </div>
-      ) : null}
-
       <div
         className="flex flex-col gap-2"
         style={{
@@ -132,12 +135,89 @@ export function ThermometerMapPlacementChrome({
           color: "var(--color-field-ink)",
         }}
       >
-        {travelLabel ? (
+        {!pinsReady ? (
           <div
-            className="flex items-baseline justify-between gap-2 px-1"
+            className="flex gap-1"
+            role="group"
+            aria-label="Movement mode"
             style={{
               ...iosAskInsetSurfaceStyle,
-              padding: "0.4rem 0.55rem",
+              borderRadius: 14,
+              padding: 4,
+            }}
+          >
+            {(
+              [
+                {
+                  id: "gps" as const,
+                  label: "GPS track",
+                  icon: <GpsFix size={16} weight="duotone" aria-hidden />,
+                },
+                {
+                  id: "manual" as const,
+                  label: "Manual pins",
+                  icon: <Path size={16} weight="duotone" aria-hidden />,
+                },
+              ] as const
+            ).map((mode) => {
+              const selected = placementMode === mode.id;
+              return (
+                <UnstyledButton
+                  key={mode.id}
+                  type="button"
+                  aria-pressed={selected}
+                  onClick={() => onPlacementModeChange(mode.id)}
+                  styles={{
+                    root: {
+                      ...iosChoiceChipStyles(selected).root,
+                      flex: 1,
+                      minHeight: "2.5rem",
+                      height: "2.5rem",
+                      justifyContent: "center",
+                      gap: 6,
+                      borderRadius: 10,
+                      fontSize: "0.8125rem",
+                      fontWeight: 650,
+                    },
+                  }}
+                >
+                  {mode.icon}
+                  {mode.label}
+                </UnstyledButton>
+              );
+            })}
+          </div>
+        ) : null}
+
+        {placeHint ? (
+          <p
+            data-testid="thermometer-map-placement-place-hint"
+            className="m-0 px-1 text-sm font-semibold leading-snug"
+            role="status"
+          >
+            {placeHint}
+          </p>
+        ) : null}
+
+        {!pinsReady && placementMode === "gps" ? (
+          <Button
+            type="button"
+            fullWidth
+            onClick={onStartWalk}
+            disabled={!canStartWalk || isSubmitting}
+            loading={gpsLoading || isSubmitting}
+            styles={iosFilledStyles}
+          >
+            {gpsLoading ? "Getting GPS…" : "Start track"}
+          </Button>
+        ) : null}
+
+        {travelLabel ? (
+          <div
+            className="flex items-baseline justify-between gap-2"
+            style={{
+              ...iosAskInsetSurfaceStyle,
+              padding: "0.45rem 0.65rem",
             }}
           >
             <p className="m-0 min-w-0 truncate text-sm font-semibold">
@@ -153,7 +233,7 @@ export function ThermometerMapPlacementChrome({
             Movement is shorter than the selected distance.
           </p>
         ) : null}
-        {awaitHiderAnswer ? (
+        {pinsReady && awaitHiderAnswer ? (
           <p
             className="m-0 px-1 text-xs leading-snug"
             style={{ color: "var(--color-field-ink-muted)" }}
@@ -161,16 +241,46 @@ export function ThermometerMapPlacementChrome({
             Hiders answer hotter or colder in game chat once you send.
           </p>
         ) : null}
-        {error ? (
-          <p
-            className="m-0 px-1 text-xs leading-snug"
-            style={{ color: "var(--color-halt)" }}
+
+        {showSoloAnswers ? (
+          <div
+            data-testid="thermometer-map-placement-choices"
+            role="group"
+            aria-label="Thermometer answer"
+            className="flex items-stretch gap-1"
+            style={{
+              ...iosAskInsetSurfaceStyle,
+              borderRadius: 14,
+              padding: 4,
+            }}
           >
-            {error}
-          </p>
+            {hotterColderAnswerOptions.map((option) => {
+              const selected = answer === option.value;
+              const tone = option.activeClassName.includes("status-success")
+                ? "success"
+                : "danger";
+              const Icon = option.value === "hotter" ? Flame : Snowflake;
+              return (
+                <UnstyledButton
+                  key={option.value}
+                  type="button"
+                  aria-pressed={selected}
+                  onClick={() => onAnswerChange?.(option.value)}
+                  styles={answerSegmentStyles(selected, tone)}
+                >
+                  <Icon
+                    size={16}
+                    weight={selected ? "fill" : "regular"}
+                    aria-hidden
+                  />
+                  {option.label}
+                </UnstyledButton>
+              );
+            })}
+          </div>
         ) : null}
 
-        {awaitHiderAnswer || answer ? (
+        {pinsReady && (awaitHiderAnswer || answer) ? (
           <Button
             type="button"
             fullWidth
@@ -212,10 +322,10 @@ export function ThermometerMapPlacementChrome({
       toolIcon={<HudThermometerIcon width={20} height={20} />}
       questionAriaLabel="Thermometer question"
       onChangeConfigure={onChangeSetup}
-      changeConfigureAriaLabel="Change thermometer setup"
+      changeConfigureAriaLabel="Change thermometer distance"
       changeConfigureTestId="thermometer-change-setup"
       answerSlot={answerSlot}
-      answerTall={!awaitHiderAnswer}
+      answerTall={false}
     />
   );
 }

@@ -2,7 +2,7 @@
  * Map-first Radar chrome: shared placement shell + Yes/No + distance mid-strip.
  */
 import { Button, UnstyledButton } from "@mantine/core";
-import { PaperPlaneTilt } from "@phosphor-icons/react";
+import { Check, PaperPlaneTilt, X } from "@phosphor-icons/react";
 import { HudRadarIcon } from "@/components/map/icons/ToolIcons";
 import {
   AskMapPlacementChrome,
@@ -12,6 +12,7 @@ import {
 import { RadarDistancePicker } from "@/components/tools/RadarDistancePicker";
 import { yesNoAnswerOptions } from "@/components/tools/shared/answers/binaryAnswerOptions";
 import {
+  iosAskInsetSurfaceStyle,
   iosChoiceChipStyles,
   iosMapChromeSurfaceStyles,
 } from "@/components/ui/apple/iosEntryChrome";
@@ -50,66 +51,42 @@ export type RadarMapPlacementChromeProps = {
   onCustomRadiusChange: (value: string) => void;
 };
 
-const compactChoiceStyles = (
+/** iOS segmented Yes/No — solid selected chip tones inside an inset track. */
+const answerSegmentStyles = (
   selected: boolean,
-  tone: "success" | "danger" | "default",
+  tone: "success" | "danger",
 ) => {
   const base = iosChoiceChipStyles(selected, tone);
-  const selectedSoft =
-    tone === "success"
-      ? {
-          backgroundColor:
-            "color-mix(in oklch, var(--color-canvas) 72%, var(--color-status-success) 28%)",
-          color: "var(--color-status-success)",
-          border:
-            "0.5px solid oklch(from var(--color-status-success) l c h / 0.55)",
-        }
-      : tone === "danger"
-        ? {
-            backgroundColor:
-              "color-mix(in oklch, var(--color-canvas) 72%, var(--color-halt) 28%)",
-            color: "var(--color-halt)",
-            border: "0.5px solid oklch(from var(--color-halt) l c h / 0.55)",
-          }
-        : {
-            backgroundColor:
-              "color-mix(in oklch, var(--color-canvas) 72%, var(--color-flag) 28%)",
-            color: "var(--color-flag)",
-            border: "0.5px solid oklch(from var(--color-flag) l c h / 0.5)",
-          };
-
   return {
     root: {
       ...base.root,
-      width: "2.75rem",
-      height: "2.75rem",
-      minWidth: "2.75rem",
+      flex: 1,
       minHeight: "2.75rem",
-      padding: 0,
+      height: "2.75rem",
       borderRadius: 10,
-      fontSize: "0.8125rem",
+      paddingInline: "0.7rem",
+      fontSize: "0.9375rem",
       fontWeight: 650,
-      flex: "0 0 auto",
-      display: "inline-flex",
-      alignItems: "center",
+      letterSpacing: "-0.02em",
       justifyContent: "center",
+      gap: 6,
+      boxShadow: "none",
+      transition:
+        "background-color 160ms ease, color 160ms ease, transform 120ms ease",
       ...(selected
-        ? {
-            ...selectedSoft,
-            "&:hover:not(:disabled)": {
-              backgroundColor: selectedSoft.backgroundColor,
-            },
-          }
+        ? null
         : {
-            backgroundColor: "oklch(from var(--color-canvas) l c h / 0.96)",
-            color: "var(--color-field-ink)",
-            border:
-              "0.5px solid oklch(from var(--color-field-ink) l c h / 0.18)",
-            backdropFilter: "blur(24px) saturate(1.35)",
-            WebkitBackdropFilter: "blur(24px) saturate(1.35)",
+            backgroundColor: "transparent",
+            border: "none",
+            color: "var(--color-field-ink-muted)",
+            "&:hover:not(:disabled)": {
+              backgroundColor: "oklch(from var(--color-field-ink) l c h / 0.08)",
+              color: "var(--color-field-ink)",
+            },
           }),
-      boxShadow:
-        "0 6px 18px 0 oklch(0.12 0.04 265 / 0.32), 0 1px 0 0 oklch(1 0 0 / 0.35) inset",
+      "&:active:not(:disabled)": {
+        transform: "scale(0.98)",
+      },
     },
   };
 };
@@ -143,32 +120,86 @@ export function RadarMapPlacementChrome({
   const statusBody =
     phase === "locating" ? "Waiting for GPS…" : distanceLabel;
 
+  const showSoloAnswers =
+    phase === "answer" && !awaitHiderAnswer && Boolean(onAnswerChange);
+
+  const distancePlate = (
+    <div
+      data-testid="radar-map-placement-distance"
+      className="mx-auto w-full max-w-[22rem]"
+      style={{
+        ...iosMapChromeSurfaceStyles,
+        borderRadius: 16,
+        padding: "0.55rem",
+        color: "var(--color-field-ink)",
+      }}
+    >
+      <RadarDistancePicker
+        radiusMeters={radiusMeters ?? 0}
+        chooseCustom={chooseCustom}
+        customRadius={customRadius}
+        distanceUnit={distanceUnit}
+        gameSize={gameSize}
+        usedDistanceOptions={usedDistanceOptions}
+        onPresetSelect={onPresetSelect}
+        onChooseSelect={onChooseSelect}
+        onCustomRadiusChange={onCustomRadiusChange}
+        showPrompt={false}
+        compact
+      />
+      {showSoloAnswers ? (
+        <div
+          data-testid="radar-map-placement-choices"
+          className="mt-2.5"
+          style={{
+            paddingTop: 10,
+            borderTop:
+              "0.33px solid oklch(from var(--color-field-ink) l c h / 0.1)",
+          }}
+        >
+          <div
+            role="group"
+            aria-label="Radar answer"
+            className="flex items-stretch gap-1"
+            style={{
+              ...iosAskInsetSurfaceStyle,
+              borderRadius: 14,
+              padding: 4,
+            }}
+          >
+            {yesNoAnswerOptions.map((option) => {
+              const selected = answer === option.value;
+              const tone = option.activeClassName.includes("status-success")
+                ? "success"
+                : "danger";
+              const Icon = option.value === "yes" ? Check : X;
+              return (
+                <UnstyledButton
+                  key={option.value}
+                  type="button"
+                  aria-pressed={selected}
+                  onClick={() => onAnswerChange?.(option.value)}
+                  styles={answerSegmentStyles(selected, tone)}
+                >
+                  <Icon
+                    size={16}
+                    weight={selected ? "bold" : "regular"}
+                    aria-hidden
+                  />
+                  {option.label}
+                </UnstyledButton>
+              );
+            })}
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
+
   const midSlot =
-    phase === "answer" || phase === "locating" || phase === "failed" ? (
-      <div
-        data-testid="radar-map-placement-distance"
-        className="mx-auto w-full max-w-[22rem]"
-        style={{
-          ...iosMapChromeSurfaceStyles,
-          borderRadius: 14,
-          padding: "0.45rem",
-          color: "var(--color-field-ink)",
-        }}
-      >
-        <RadarDistancePicker
-          radiusMeters={radiusMeters ?? 0}
-          chooseCustom={chooseCustom}
-          customRadius={customRadius}
-          distanceUnit={distanceUnit}
-          gameSize={gameSize}
-          usedDistanceOptions={usedDistanceOptions}
-          onPresetSelect={onPresetSelect}
-          onChooseSelect={onChooseSelect}
-          onCustomRadiusChange={onCustomRadiusChange}
-          showPrompt={false}
-        />
-      </div>
-    ) : null;
+    phase === "answer" || phase === "locating" || phase === "failed"
+      ? distancePlate
+      : null;
 
   const answerSlot =
     phase === "answer" ? (
@@ -176,43 +207,16 @@ export function RadarMapPlacementChrome({
         data-testid="radar-map-placement-answer"
         className="flex flex-col gap-2"
       >
-        {!awaitHiderAnswer && onAnswerChange ? (
+        {awaitHiderAnswer || answer ? (
           <div
-            data-testid="radar-map-placement-choices"
-            className="flex items-center justify-center gap-2"
+            className="flex flex-col gap-2"
+            style={{
+              ...iosMapChromeSurfaceStyles,
+              borderRadius: 16,
+              padding: "0.55rem",
+              color: "var(--color-field-ink)",
+            }}
           >
-            {yesNoAnswerOptions.map((option) => {
-              const selected = answer === option.value;
-              const tone = option.activeClassName.includes("status-success")
-                ? "success"
-                : option.activeClassName.includes("status-negative")
-                  ? "danger"
-                  : "default";
-              return (
-                <UnstyledButton
-                  key={option.value}
-                  type="button"
-                  aria-pressed={selected}
-                  onClick={() => onAnswerChange(option.value)}
-                  styles={compactChoiceStyles(selected, tone)}
-                >
-                  {option.label}
-                </UnstyledButton>
-              );
-            })}
-          </div>
-        ) : null}
-
-        <div
-          className="flex flex-col gap-2"
-          style={{
-            ...iosMapChromeSurfaceStyles,
-            borderRadius: 16,
-            padding: "0.55rem",
-            color: "var(--color-field-ink)",
-          }}
-        >
-          {awaitHiderAnswer || answer ? (
             <Button
               type="button"
               fullWidth
@@ -234,10 +238,11 @@ export function RadarMapPlacementChrome({
                   ? "Send to hiders"
                   : "Send"}
             </Button>
-          ) : null}
-        </div>
+          </div>
+        ) : null}
       </div>
     ) : null;
+
 
   return (
     <AskMapPlacementChrome
@@ -256,7 +261,7 @@ export function RadarMapPlacementChrome({
       onChangeConfigure={onChangeDistance}
       changeConfigureAriaLabel="Change distance"
       answerSlot={answerSlot}
-      answerTall={!awaitHiderAnswer}
+      answerTall={false}
       midSlot={midSlot}
     />
   );

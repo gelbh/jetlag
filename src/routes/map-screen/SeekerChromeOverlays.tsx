@@ -264,19 +264,26 @@ export function SeekerChromeOverlays({
             askSurface !== "matching" &&
             askSurface !== "measuring" &&
             askSurface !== "tentacle" &&
-            askSurface !== "photo"
+            askSurface !== "photo" &&
+            askSurface !== "radar" &&
+            askSurface !== "thermometer"
           }
           showCostChip={
             askSurface !== "matching" &&
             askSurface !== "measuring" &&
             askSurface !== "tentacle" &&
-            askSurface !== "photo"
+            askSurface !== "photo" &&
+            askSurface !== "radar" &&
+            askSurface !== "thermometer"
           }
           showCommitStrip={
-            askSurface !== "matching" &&
-            askSurface !== "measuring" &&
-            askSurface !== "tentacle" &&
-            askSurface !== "photo"
+            askSurface === "thermometer"
+              ? toolHud.commitKind === "endWalk"
+              : askSurface !== "matching" &&
+                askSurface !== "measuring" &&
+                askSurface !== "tentacle" &&
+                askSurface !== "photo" &&
+                askSurface !== "radar"
           }
         />
       ) : null}

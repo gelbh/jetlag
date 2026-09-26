@@ -115,6 +115,9 @@ export function useRadarTool({
   const [radarAnswer, setRadarAnswer] = useState<RadarAnswer | null>(null);
   const [radarCenter, setRadarCenter] = useState<LatLngTuple | null>(null);
   const [editingDistance, setEditingDistance] = useState(false);
+  /** Ignore catalog taps briefly after back — same-gesture click-through. */
+  const [distanceCatalogArmed, setDistanceCatalogArmed] = useState(true);
+  const distanceCatalogArmEpochRef = useRef(0);
 
   const resolvedRadarRadius = radarChooseCustom
     ? (parseDistanceInput(radarCustomRadius, distanceUnit) ??
@@ -258,6 +261,43 @@ export function useRadarTool({
     setEditingDistance(false);
   };
 
+  const onChooseSelect = () => {
+    if (!distanceCatalogArmed) {
+      return;
+    }
+    setRadarChooseCustom(true);
+    setEditingDistance(true);
+  };
+
+  const onCustomDistanceCommit = () => {
+    if (!radarChooseCustom || !distanceSelectionAvailable) {
+      return;
+    }
+    setEditingDistance(false);
+  };
+
+  const reopenDistancePicker = () => {
+    setRadarRadius(null);
+    setRadarChooseCustom(false);
+    setRadarCustomRadius("");
+    setEditingDistance(true);
+    setDistanceCatalogArmed(false);
+    const epoch = distanceCatalogArmEpochRef.current + 1;
+    distanceCatalogArmEpochRef.current = epoch;
+    window.setTimeout(() => {
+      if (distanceCatalogArmEpochRef.current === epoch) {
+        setDistanceCatalogArmed(true);
+      }
+    }, 350);
+  };
+
+  const onPresetSelectArmed = (radiusMeters: number) => {
+    if (!distanceCatalogArmed) {
+      return;
+    }
+    onPresetSelect(radiusMeters);
+  };
+
   const mapFirstEligible =
     mantinePlayerUi && distanceSelectionAvailable && !editingDistance;
 
@@ -302,6 +342,12 @@ export function useRadarTool({
     autoGpsForDistanceRef.current = null;
   }, [resolvedForReady]);
 
+  useEffect(() => {
+    return () => {
+      distanceCatalogArmEpochRef.current += 1;
+    };
+  }, []);
+
   const mapPlacementActive = Boolean(mapFirstEligible);
   const placementError =
     (radarCenter === null ? gpsError : null) ?? mapError ?? null;
@@ -334,7 +380,7 @@ export function useRadarTool({
       usedDistanceOptions={usedRadarOptions}
       answer={radarAnswer}
       onPresetSelect={onPresetSelect}
-      onChooseSelect={() => setRadarChooseCustom(true)}
+      onChooseSelect={onChooseSelect}
       onCustomRadiusChange={setRadarCustomRadius}
       onAnswerChange={setRadarAnswer}
       onUseGps={() => void handleUseGps()}
@@ -373,7 +419,7 @@ export function useRadarTool({
   const hud = {
     readiness,
     costLabel,
-    error: mapPlacementActive ? null : (mapError ?? gpsError ?? null),
+    error: mantinePlayerUi ? null : (mapError ?? gpsError ?? null),
     onCommit: () => void commit(),
     suppressSheet: mapPlacementActive,
     mapOverlay: mapPlacementActive ? (
@@ -386,14 +432,14 @@ export function useRadarTool({
         costLabel={costLabel}
         phase={placementPhase}
         onUseGps={() => void handleUseGps()}
-        error={placementError}
+        error={null}
         awaitHiderAnswer={awaitHiderAnswer}
         answer={radarAnswer}
         onAnswerChange={setRadarAnswer}
         canCommit={canCommitRadar}
         isSubmitting={session.isBusy}
         onCommit={() => void commit()}
-        onChangeDistance={() => setEditingDistance(true)}
+        onChangeDistance={reopenDistancePicker}
         radiusMeters={radarRadius}
         chooseCustom={radarChooseCustom}
         customRadius={radarCustomRadius}
@@ -402,6 +448,7 @@ export function useRadarTool({
         usedDistanceOptions={usedRadarOptions}
         onPresetSelect={onPresetSelect}
         onChooseSelect={() => {
+          // Stay map-first; keep last preset as fallback until custom parses.
           setRadarChooseCustom(true);
         }}
         onCustomRadiusChange={setRadarCustomRadius}
@@ -416,9 +463,10 @@ export function useRadarTool({
         gameSize={gameSize}
         usedDistanceOptions={usedRadarOptions}
         answer={radarAnswer}
-        onPresetSelect={onPresetSelect}
-        onChooseSelect={() => setRadarChooseCustom(true)}
+        onPresetSelect={onPresetSelectArmed}
+        onChooseSelect={onChooseSelect}
         onCustomRadiusChange={setRadarCustomRadius}
+        onCustomDistanceCommit={onCustomDistanceCommit}
         onAnswerChange={setRadarAnswer}
         onUseGps={() => void handleUseGps()}
         onPlaceAtMapTap={armPlacement}
@@ -427,6 +475,9 @@ export function useRadarTool({
         gpsLoading={gpsLoading}
         awaitHiderAnswer={awaitHiderAnswer}
         viewOnly={!canSubmitQuestion}
+        costLabel={costLabel}
+        toolLabel="Radar"
+        editingDistance={editingDistance}
       />
     ),
     sheets: null as ReactNode,

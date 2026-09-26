@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { MantineProvider } from "@mantine/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { jetlagMantineTheme } from "@/theme/mantineTheme";
@@ -28,6 +28,7 @@ const hostProps = {
 
 beforeEach(() => {
   mockUsePlayerUiMantine.mockReturnValue(false);
+  hostProps.onDismiss = vi.fn();
   vi.stubGlobal("matchMedia", (query: string) => ({
     matches: false,
     media: query,
@@ -69,6 +70,22 @@ describe("AskHudHost Mantine gate", () => {
     expect(screen.getByTestId("ask-commit-strip")).toBeInTheDocument();
   });
 
+  it("dismisses via blurred map overlay click when flag is on", () => {
+    mockUsePlayerUiMantine.mockReturnValue(true);
+    render(
+      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+        <AskHudHost {...hostProps} modeBody={<div>Mode body</div>} />
+      </MantineProvider>,
+    );
+
+    const overlay = document.querySelector(".mantine-Drawer-overlay");
+    expect(overlay).toBeTruthy();
+    expect((overlay as HTMLElement).style.pointerEvents).not.toBe("none");
+    fireEvent.mouseDown(overlay!);
+    fireEvent.click(overlay!);
+    expect(hostProps.onDismiss).toHaveBeenCalled();
+  });
+
   it("hides muted commit strip on sheet until ready", () => {
     mockUsePlayerUiMantine.mockReturnValue(true);
     render(
@@ -76,7 +93,7 @@ describe("AskHudHost Mantine gate", () => {
         <AskHudHost
           {...hostProps}
           canCommit={false}
-          commitLabel="ASK — PICK CATEGORY"
+          commitLabel="ASK - PICK CATEGORY"
           modeBody={<div>Mode body</div>}
         />
       </MantineProvider>,

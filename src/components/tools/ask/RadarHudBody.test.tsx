@@ -1,5 +1,7 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, beforeEach, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
+import { MantineProvider } from "@mantine/core";
+import { jetlagMantineTheme } from "@/theme/mantineTheme";
 import type { DistanceUnit } from "@/domain/map/distance";
 import type { GameSize } from "@/domain/session/size/gameSize";
 import type { RadarDistanceOptionKey } from "@/domain/questions";
@@ -12,6 +14,13 @@ import {
   type AskHudReadiness,
 } from "@/domain/ask/askHudModes";
 
+const { mockUsePlayerUiMantine } = vi.hoisted(() => ({
+  mockUsePlayerUiMantine: vi.fn(() => false),
+}));
+
+vi.mock("@/hooks/feature/usePlayerUiMantine", () => ({
+  usePlayerUiMantine: () => mockUsePlayerUiMantine(),
+}));
 const baseBodyProps = {
   radiusMeters: null as number | null,
   chooseCustom: false,
@@ -32,7 +41,78 @@ const baseBodyProps = {
   awaitHiderAnswer: true,
 };
 
+beforeEach(() => {
+  mockUsePlayerUiMantine.mockReturnValue(false);
+  vi.stubGlobal("matchMedia", (query: string) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener() {},
+    removeListener() {},
+    addEventListener() {},
+    removeEventListener() {},
+    dispatchEvent: () => false,
+  }));
+});
+
 describe("RadarHudBody", () => {
+  it("types custom distance inside Choose with unit and digits only", () => {
+    mockUsePlayerUiMantine.mockReturnValue(true);
+    const onChooseSelect = vi.fn();
+    const onCustomRadiusChange = vi.fn();
+    render(
+      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+        <RadarHudBody
+          {...baseBodyProps}
+          onChooseSelect={onChooseSelect}
+          onCustomRadiusChange={onCustomRadiusChange}
+          chooseCustom
+          customRadius=""
+          editingDistance
+        />
+      </MantineProvider>,
+    );
+
+    const input = screen.getByTestId("radar-choose-distance-input");
+    expect(screen.getByText("mi")).toBeInTheDocument();
+    fireEvent.change(input, { target: { value: "2a.5x" } });
+    expect(onCustomRadiusChange).toHaveBeenCalledWith("2.5");
+  });
+
+  it("keeps catalog open while typing custom distance until commit", () => {
+    mockUsePlayerUiMantine.mockReturnValue(true);
+    const onCustomDistanceCommit = vi.fn();
+    const onCustomRadiusChange = vi.fn();
+    const onChooseSelect = vi.fn();
+    render(
+      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+        <RadarHudBody
+          {...baseBodyProps}
+          chooseCustom
+          customRadius="1"
+          editingDistance
+          onChooseSelect={onChooseSelect}
+          onCustomRadiusChange={onCustomRadiusChange}
+          onCustomDistanceCommit={onCustomDistanceCommit}
+        />
+      </MantineProvider>,
+    );
+
+    expect(screen.getByTestId("ask-catalog-rail")).toBeInTheDocument();
+    const input = screen.getByTestId("radar-choose-distance-input");
+    fireEvent.change(input, { target: { value: "12" } });
+    expect(onCustomRadiusChange).toHaveBeenCalledWith("12");
+    expect(onCustomDistanceCommit).not.toHaveBeenCalled();
+    expect(screen.getByTestId("ask-catalog-rail")).toBeInTheDocument();
+
+    fireEvent.keyDown(input, { key: "Enter" });
+    expect(onCustomDistanceCommit).toHaveBeenCalledTimes(1);
+
+    onCustomDistanceCommit.mockClear();
+    fireEvent.click(screen.getByTestId("radar-choose-distance-commit"));
+    expect(onCustomDistanceCommit).toHaveBeenCalledTimes(1);
+  });
+
   it("renders chip island chrome without PhaseRail or CONTINUE wizard nav", () => {
     render(<RadarHudBody {...baseBodyProps} />);
 
@@ -59,7 +139,7 @@ describe("RadarHudBody", () => {
       configureReady: readiness.configureReady,
       resolveReady: readiness.resolveReady,
     });
-    expect(cue).toBe("PICK A DISTANCE");
+    expect(cue).toBe("");
     expect(canCommit(readiness)).toBe(false);
 
     const onCommit = vi.fn();
@@ -76,6 +156,9 @@ describe("RadarHudBody", () => {
           cue,
         })}
         onCommit={onCommit}
+        showCostChip={false}
+        showCue={false}
+        showCommitStrip={false}
         modeBody={
           <RadarHudBody
             {...baseBodyProps}
@@ -87,20 +170,15 @@ describe("RadarHudBody", () => {
       />,
     );
 
-    expect(screen.getByTestId("ask-mode-cue-ticker")).toHaveTextContent(
-      "PICK A DISTANCE",
-    );
-    expect(screen.getByTestId("ask-cost-chip")).toHaveTextContent(/Radar/);
+    expect(screen.queryByTestId("ask-mode-cue-ticker")).toBeNull();
+    expect(screen.queryByTestId("ask-cost-chip")).toBeNull();
+    expect(screen.queryByTestId("ask-commit-strip")).toBeNull();
     expect(screen.getByTestId("radar-hud-body")).toBeInTheDocument();
     expect(screen.getByText("Distance")).toBeInTheDocument();
-    const strip = screen.getByTestId("ask-commit-strip").querySelector("button");
-    expect(strip).toBeDisabled();
-    expect(strip).toHaveAttribute("data-armed", "false");
-    fireEvent.click(strip!);
     expect(onCommit).not.toHaveBeenCalled();
   });
 
-  it("arms commit strip when center + distance ready (multiplayer)", () => {
+  it("is commit-ready when center + distance ready (multiplayer; map-first owns send)", () => {
     const readiness: AskHudReadiness = {
       surface: "radar",
       placementReady: true,
@@ -132,6 +210,9 @@ describe("RadarHudBody", () => {
           cue,
         })}
         onCommit={onCommit}
+        showCostChip={false}
+        showCue={false}
+        showCommitStrip={false}
         modeBody={
           <RadarHudBody
             {...baseBodyProps}
@@ -143,13 +224,18 @@ describe("RadarHudBody", () => {
       />,
     );
 
-    expect(screen.getByTestId("ask-mode-cue-ticker")).toHaveTextContent(
-      "READY TO SEND",
-    );
-    const strip = screen.getByRole("button", { name: "SEND · D2P1" });
-    expect(strip).toHaveAttribute("data-armed", "true");
-    fireEvent.click(strip);
-    expect(onCommit).toHaveBeenCalledTimes(1);
+    expect(cue).toBe("READY TO SEND");
+    expect(
+      primedCommitLabel({
+        kind: "send",
+        costLabel: "D2P1",
+        primed: true,
+        cue,
+      }),
+    ).toBe("SEND · D2P1");
+    expect(screen.queryByTestId("ask-mode-cue-ticker")).toBeNull();
+    expect(screen.queryByTestId("ask-cost-chip")).toBeNull();
+    expect(screen.queryByTestId("ask-commit-strip")).toBeNull();
     expect(screen.queryByRole("list", { name: "Wizard phases" })).toBeNull();
   });
 });
