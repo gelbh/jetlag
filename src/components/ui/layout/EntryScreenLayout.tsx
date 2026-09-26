@@ -8,8 +8,8 @@ interface EntryScreenLayoutProps {
   /** Viewport layout: start packs from the top; home uses between or center. */
   viewportLayout?: "start" | "between" | "center";
   /**
-   * `survey` (default): opaque field-book canvas classes (Legacy entry shells).
-   * `plain`: transparent shell so `AppEntryBackdrop` shows through (iOS entry).
+   * `plain` (preferred): transparent shell so `AppEntryBackdrop` shows through.
+   * `survey`: legacy alias kept for call sites; skin classes are no-ops post W3-B.
    */
   skin?: "survey" | "plain";
   /**
@@ -23,7 +23,7 @@ export function EntryScreenLayout({
   justify = "between",
   viewport = false,
   viewportLayout = "start",
-  skin: _skin = "survey",
+  skin: _skin = "plain",
   flush = false,
 }: EntryScreenLayoutProps) {
   void _skin;

@@ -9,7 +9,7 @@ export type EmptyStateProps = {
 
 /**
  * Shared empty copy for lists, boards, and recovery surfaces.
- * Survey field-book: field-ink-muted on canvas; `.jl-empty-state` keeps rule hairline under survey roots.
+ * field-ink-muted on canvas; `.jl-empty-state` keeps a hairline under residual roots.
  */
 export function EmptyState({
   children,

@@ -22,7 +22,7 @@ beforeEach(() => {
 });
 
 describe("AppUiProvider", () => {
-  it("mounts Notifications under MantineProvider", () => {
+  it("mounts Notifications under MantineProvider with theme bridge", () => {
     render(
       <AppUiProvider>
         <span>child</span>
