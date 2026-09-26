@@ -1,0 +1,24 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "jetlag",
+  "compatibility_date": "2026-07-12",
+  "main": "worker/index.ts",
+  "workers_dev": false,
+  "routes": [
+    {
+      "pattern": "jetlag.gelbhart.dev",
+      "custom_domain": true
+    }
+  ],
+  "observability": {
+    "enabled": true
+  },
+  // Secrets: see worker/README.md (wrangler secret put / .dev.vars). Never commit values.
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "single-page-application",
+    "binding": "ASSETS",
+    // HTML nonce CSP + /api/*; trades asset-first latency for middleware on all routes
+    "run_worker_first": true
+  }
+}
