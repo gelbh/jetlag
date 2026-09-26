@@ -1,5 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { MantineProvider } from "@mantine/core";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { jetlagTheme } from "@/theme/theme";
 import { ClientUpdateRequiredPage } from "./ClientUpdateRequiredPage";
 
 const applyUpdate = vi.fn();
@@ -18,9 +20,27 @@ vi.mock("@/hooks/app/useAppUpdateState", () => ({
   }),
 }));
 
+beforeEach(() => {
+  applyUpdate.mockClear();
+  vi.stubGlobal("matchMedia", (query: string) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener() {},
+    removeListener() {},
+    addEventListener() {},
+    removeEventListener() {},
+    dispatchEvent: () => false,
+  }));
+});
+
 describe("ClientUpdateRequiredPage", () => {
   it("Refresh applies the service-worker update path (not soft reload alone)", () => {
-    render(<ClientUpdateRequiredPage minVersion="0.11.0" />);
+    render(
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
+        <ClientUpdateRequiredPage minVersion="0.11.0" />
+      </MantineProvider>,
+    );
 
     fireEvent.click(screen.getByRole("button", { name: "Refresh" }));
 
