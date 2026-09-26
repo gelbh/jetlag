@@ -1,10 +1,12 @@
-/* map-chrome-controls.css — MapLibre map shell + floating controls */
+/* map-chrome-controls.css — MapLibre geometry allowlist + control positioning hooks.
+ * Button chrome lives on MapChromeControl (hudChromeStyles). */
+
+/* Allowlist: MapLibre canvas geometry / touch / basemap filters / default attrib hide. */
 .maplibregl-map {
   width: 100%;
   height: 100%;
   background: var(--color-map-canvas);
   font: inherit;
-
   /* Leaflet calls preventDefault on touchmove while dragging; browser-native pan
      (pan-x/pan-y) marks those events non-cancelable and triggers Chrome warnings. */
   touch-action: none;
@@ -22,6 +24,7 @@
   display: none !important;
 }
 
+/* Positioning hooks for portal chrome (visual skin is Mantine UnstyledButton). */
 .map-zoom-control {
   position: absolute;
   z-index: var(--z-dock);
@@ -37,74 +40,6 @@
   z-index: var(--z-dock);
   left: max(0.75rem, env(safe-area-inset-left));
   pointer-events: auto;
-}
-
-.map-style-control__btn,
-.map-zoom-control__btn {
-  box-shadow: none;
-}
-
-.map-style-control__btn {
-  height: 2.75rem;
-  width: 2.75rem;
-  min-height: 2.75rem;
-  min-width: 2.75rem;
-  padding: 0;
-  overflow: hidden;
-}
-
-.map-style-control__preview {
-  position: relative;
-  display: block;
-  height: 100%;
-  width: 100%;
-}
-
-.map-style-control__tiles {
-  display: grid;
-  height: 100%;
-  width: 100%;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  grid-template-rows: repeat(2, minmax(0, 1fr));
-  background: var(--color-map-canvas);
-}
-
-.map-style-control__tile {
-  display: block;
-  height: 100%;
-  width: 100%;
-  object-fit: cover;
-}
-
-.map-style-control__label {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  background: oklch(from var(--color-surface-deep) l c h / 78%);
-  padding: 0.125rem 0.2rem;
-  text-align: center;
-  font-family: var(--font-display);
-  font-size: 0.5rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  line-height: 1.1;
-  text-transform: uppercase;
-  color: var(--color-ink);
-}
-
-.map-style-control__btn--active {
-  border-color: oklch(from var(--color-highlight) l c h / 55%);
-  box-shadow:
-    0 0 0 1px oklch(from var(--color-highlight) l c h / 35%),
-    var(--shadow-hud-float);
-}
-
-.map-zoom-control__btn {
-  height: var(--map-zoom-btn-size, 2.75rem);
-  width: var(--map-zoom-btn-size, 2.75rem);
-  min-height: var(--map-zoom-btn-size, 2.75rem);
-  min-width: var(--map-zoom-btn-size, 2.75rem);
 }
 
 .map-zoom-control--dock,
@@ -147,31 +82,13 @@
   );
 }
 
-@media (width >= 40rem) {
+@media (min-width: 40rem) {
   :root {
     --map-zoom-btn-size: 3rem;
   }
-
-  .map-style-control__btn {
-    height: 3rem;
-    width: 3rem;
-    min-height: 3rem;
-    min-width: 3rem;
-  }
-
-  .map-style-control__label {
-    font-size: 0.5625rem;
-  }
-
-  .map-zoom-control__btn {
-    height: var(--map-zoom-btn-size);
-    width: var(--map-zoom-btn-size);
-    min-height: var(--map-zoom-btn-size);
-    min-width: var(--map-zoom-btn-size);
-  }
 }
 
-@media (width <= 28rem) {
+@media (max-width: 28rem) {
   .map-zoom-control--dock,
   .map-style-control--dock {
     bottom: calc(
@@ -181,8 +98,8 @@
   }
 }
 
-html:not([data-motion="reduced"], [data-motion="static"]) .map-zoom-control,
-html:not([data-motion="reduced"], [data-motion="static"]) .map-style-control {
+html:not([data-motion="reduced"]):not([data-motion="static"]) .map-zoom-control,
+html:not([data-motion="reduced"]):not([data-motion="static"]) .map-style-control {
   transition: opacity var(--motion-base) var(--ease-out-quint);
 }
 
@@ -219,8 +136,6 @@ html:not([data-motion="reduced"], [data-motion="static"]) .map-style-control {
   cursor: crosshair;
 }
 
-/* .scrollbar-hidden lives in scrollbars.css */
-
 .user-location-icon {
   background: transparent;
   border: 0;
@@ -231,6 +146,7 @@ html:not([data-motion="reduced"], [data-motion="static"]) .map-style-control {
   border: 0;
 }
 
+/* MapLibre marker skins (thermometer walk) — residual until marker chrome band. */
 .jl-thermometer-walk-progress,
 .jl-thermometer-walk-end-label {
   background: transparent;
@@ -245,7 +161,7 @@ html:not([data-motion="reduced"], [data-motion="static"]) .map-style-control {
   border-radius: 9999px;
   border: 2px solid var(--color-thermometer-axis, #c55b40);
   background: var(--color-surface-deep, #1d2835);
-  box-shadow: var(--shadow-hud-float, 0 2px 8px rgb(15 23 42 / 35%));
+  box-shadow: var(--shadow-hud-float, 0 2px 8px rgba(15, 23, 42, 0.35));
   font-family: var(--font-mono, ui-monospace, monospace);
   font-size: 0.68rem;
   font-variant-numeric: tabular-nums;
@@ -272,7 +188,7 @@ html:not([data-motion="reduced"], [data-motion="static"]) .map-style-control {
   padding: 0.1rem 0.35rem;
   border-radius: 0.25rem;
   background: var(--color-surface-deep, #1d2835);
-  border: 1px solid rgb(255 255 255 / 85%);
+  border: 1px solid rgba(255, 255, 255, 0.85);
   color: var(--color-ink-primary, #f8fafc);
   font-family: var(--font-display, "Barlow Condensed", sans-serif);
   font-size: 0.58rem;
@@ -281,10 +197,10 @@ html:not([data-motion="reduced"], [data-motion="static"]) .map-style-control {
   line-height: 1;
   text-transform: uppercase;
   white-space: nowrap;
-  box-shadow: 0 1px 4px rgb(15 23 42 / 35%);
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.35);
 }
 
 .jl-thermometer-walk-end-label--satellite .jl-thermometer-walk-end-label__text {
-  background: rgb(29 40 53 / 88%);
+  background: rgba(29, 40, 53, 0.88);
   border-color: var(--color-highlight, #e4b352);
 }

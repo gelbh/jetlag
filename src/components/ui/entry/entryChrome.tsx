@@ -2,6 +2,7 @@
 import { Box } from "@mantine/core";
 import type { ReactNode } from "react";
 import {
+  askHudPanelStyle,
   bottomDrawerStyles,
   choiceChipStyles,
   catalogTileStyles,
@@ -24,8 +25,13 @@ import {
   homeFeedbackLinkStyle,
   homePosterStyle,
   homeTerminalAccentBarStyle,
+  hudChromeStyles,
+  hudPanelStyle,
+  hudScrimStyle,
+  hudSheetStyle,
   insetTextInputStyles,
   insetTextareaStyles,
+  mapAttentionRingStyle,
   mapIslandFilledStyles,
   mapIslandIconStyles,
   mapToolSlotLabelStyle,
@@ -33,6 +39,7 @@ import {
   oauthProviderButtonIconStyle,
   oauthProviderButtonStyle,
   plainStyles,
+  preloadBeaconStyle,
   premiumAccountActionsStyle,
   premiumEntitlementPillStyle,
   premiumOfferRowHintStyle,
@@ -46,16 +53,20 @@ import {
   segmentChipsTrackStyle,
   segmentControlTrackStyle,
   sheetHandleStyle,
+  sheetIconCloseStyle,
+  syncBeaconStyle,
   toggleRowStyle,
 } from "@/components/ui/entry/entryStyles";
 import type {
   ChoiceTone,
   HomeCardBtnVariant,
   MapToolSlotTone,
+  SyncBeaconStatus,
 } from "@/components/ui/entry/entryStyles";
 
 /** Re-export button/drawer styles so map chrome callers keep one import path. */
 export {
+  askHudPanelStyle,
   bottomDrawerStyles,
   choiceChipStyles,
   catalogTileStyles,
@@ -78,8 +89,13 @@ export {
   homeFeedbackLinkStyle,
   homePosterStyle,
   homeTerminalAccentBarStyle,
+  hudChromeStyles,
+  hudPanelStyle,
+  hudScrimStyle,
+  hudSheetStyle,
   insetTextInputStyles,
   insetTextareaStyles,
+  mapAttentionRingStyle,
   mapIslandFilledStyles,
   mapIslandIconStyles,
   mapToolSlotLabelStyle,
@@ -87,6 +103,7 @@ export {
   oauthProviderButtonIconStyle,
   oauthProviderButtonStyle,
   plainStyles,
+  preloadBeaconStyle,
   premiumAccountActionsStyle,
   premiumEntitlementPillStyle,
   premiumOfferRowHintStyle,
@@ -100,9 +117,11 @@ export {
   segmentChipsTrackStyle,
   segmentControlTrackStyle,
   sheetHandleStyle,
+  sheetIconCloseStyle,
+  syncBeaconStyle,
   toggleRowStyle,
 };
-export type { ChoiceTone, HomeCardBtnVariant, MapToolSlotTone };
+export type { ChoiceTone, HomeCardBtnVariant, MapToolSlotTone, SyncBeaconStatus };
 
 /** Frosted inset grouped list / form surface. */
 export function InsetGroup({

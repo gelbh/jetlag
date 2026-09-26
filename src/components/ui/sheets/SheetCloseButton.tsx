@@ -1,3 +1,4 @@
+import { sheetIconCloseStyle } from "@/components/ui/entry/entryChrome";
 import { Button } from "../button";
 
 interface SheetCloseButtonProps {
@@ -18,7 +19,8 @@ export function SheetCloseButton({
       <button
         type="button"
         onClick={onClick}
-        className={`jl-sync-detail-panel__close ${className}`.trim()}
+        className={className.trim()}
+        style={sheetIconCloseStyle}
         aria-label={label}
       >
         <svg
