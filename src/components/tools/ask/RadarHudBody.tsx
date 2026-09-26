@@ -1,6 +1,5 @@
 /**
  * Radar Ask HUD — Matching twin: question header + distance catalog, then map-first.
- * Sheet path keeps placement/answer when Mantine map-first is off.
  */
 import { Text } from "@mantine/core";
 import { useEffect, useRef } from "react";
@@ -8,7 +7,6 @@ import { Check, Crosshair, PencilSimple } from "@phosphor-icons/react";
 import { AskCatalogRail } from "@/components/tools/ask/AskCatalogRail";
 import { AskToolQuestionHeader } from "@/components/tools/ask/AskToolQuestionHeader";
 import { HudRadarIcon } from "@/components/map/icons/ToolIcons";
-import { RadarDistancePicker } from "@/components/tools/RadarDistancePicker";
 import { yesNoAnswerOptions } from "@/components/tools/shared/answers/binaryAnswerOptions";
 import { BinaryAnswerPicker } from "@/components/tools/shared/answers/BinaryAnswerPicker";
 import { AnchorControls } from "@/components/tools/shared/controls/AnchorControls";
@@ -328,136 +326,91 @@ export function RadarHudBody({
   const chord: "distance" | "place" =
     editingDistance || !distanceSelectionAvailable ? "distance" : "place";
 
-  if (true) {
-    return (
-      <div
-        data-testid="radar-hud-body"
-        data-player-ux-world="mantine"
-        className="ask-hud-mode-body flex w-full flex-col gap-2"
-      >
-        {viewOnly ? <ViewOnlyQuestionBanner /> : null}
-
-        <AskToolQuestionHeader
-          toolLabel={toolLabel}
-          costLabel={costLabel}
-          icon={<HudRadarIcon width={22} height={22} />}
-          prompt={question.prompt}
-          ruleSummary={question.ruleSummary}
-        />
-
-        {chord === "distance" ? (
-          <div className="space-y-2">
-            {awaitHiderAnswer ? <QuestionTruthReferenceHint /> : null}
-            {exhausted ? (
-              <div className="pointer-events-auto ask-hud-panel p-3">
-                <CatalogExhaustedMessage message="Every radar distance option has already been used this session." />
-              </div>
-            ) : (
-              <>
-                <AskCatalogRail
-                  rows={catalogRows}
-                  selectedId={selectedCatalogId}
-                  onSelect={(id) => {
-                    if (id === CHOOSE_ROW_ID) {
-                      if (canCommitCustom) {
-                        onCustomDistanceCommit?.();
-                        return;
-                      }
-                      onChooseSelect();
-                      chooseInputRef.current?.focus();
-                      return;
-                    }
-                    const meters = Number(id);
-                    if (Number.isFinite(meters)) {
-                      onPresetSelect(meters);
-                    }
-                  }}
-                  aria-label="Radar distance"
-                  hint="Tap a distance, or type a custom one"
-                  columns={3}
-                />
-                {chooseCustom && customRadiusOverLimit ? (
-                  <Text
-                    size="xs"
-                    style={{ color: "var(--color-halt)", paddingInline: 4 }}
-                  >
-                    Max {formatDistance(maxCustomRadiusMeters, distanceUnit)}{" "}
-                    for this game size.
-                  </Text>
-                ) : null}
-              </>
-            )}
-          </div>
-        ) : null}
-
-        {chord === "place" ? (
-          <div
-            className="pointer-events-auto space-y-3 p-3"
-            style={iosAskInsetSurfaceStyle}
-          >
-            <AnchorControls
-              awaitingPlacement={awaitingPlacement}
-              hasAnchor={hasCenter}
-              gpsLoading={gpsLoading}
-              onUseGps={onUseGps}
-              onPlaceAtMapTap={onPlaceAtMapTap}
-              anchorHint="Center pinned on the map. Tap again to move it."
-              gpsLoadingLabel="Locating…"
-            />
-            {showAnswer ? (
-              <BinaryAnswerPicker
-                value={answer}
-                onChange={onAnswerChange}
-                options={yesNoAnswerOptions}
-                label=""
-              />
-            ) : null}
-          </div>
-        ) : null}
-      </div>
-    );
-  }
-
   return (
     <div
       data-testid="radar-hud-body"
+      data-player-ux-world="mantine"
       className="ask-hud-mode-body flex w-full flex-col gap-2"
     >
       {viewOnly ? <ViewOnlyQuestionBanner /> : null}
 
-      <div className="pointer-events-auto ask-hud-panel space-y-2 p-3">
-        <AnchorControls
-          awaitingPlacement={awaitingPlacement}
-          hasAnchor={hasCenter}
-          gpsLoading={gpsLoading}
-          onUseGps={onUseGps}
-          onPlaceAtMapTap={onPlaceAtMapTap}
-          anchorHint="Center pinned on the map. Tap again to move it."
-          gpsLoadingLabel="Locating…"
-        />
+      <AskToolQuestionHeader
+        toolLabel={toolLabel}
+        costLabel={costLabel}
+        icon={<HudRadarIcon width={22} height={22} />}
+        prompt={question.prompt}
+        ruleSummary={question.ruleSummary}
+      />
 
-        <RadarDistancePicker
-          radiusMeters={radiusMeters ?? 0}
-          chooseCustom={chooseCustom}
-          customRadius={customRadius}
-          distanceUnit={distanceUnit}
-          gameSize={gameSize}
-          usedDistanceOptions={usedDistanceOptions}
-          onPresetSelect={onPresetSelect}
-          onChooseSelect={onChooseSelect}
-          onCustomRadiusChange={onCustomRadiusChange}
-          showPrompt={hasCenter}
-        />
+      {chord === "distance" ? (
+        <div className="space-y-2">
+          {awaitHiderAnswer ? <QuestionTruthReferenceHint /> : null}
+          {exhausted ? (
+            <div className="pointer-events-auto ask-hud-panel p-3">
+              <CatalogExhaustedMessage message="Every radar distance option has already been used this session." />
+            </div>
+          ) : (
+            <>
+              <AskCatalogRail
+                rows={catalogRows}
+                selectedId={selectedCatalogId}
+                onSelect={(id) => {
+                  if (id === CHOOSE_ROW_ID) {
+                    if (canCommitCustom) {
+                      onCustomDistanceCommit?.();
+                      return;
+                    }
+                    onChooseSelect();
+                    chooseInputRef.current?.focus();
+                    return;
+                  }
+                  const meters = Number(id);
+                  if (Number.isFinite(meters)) {
+                    onPresetSelect(meters);
+                  }
+                }}
+                aria-label="Radar distance"
+                hint="Tap a distance, or type a custom one"
+                columns={3}
+              />
+              {chooseCustom && customRadiusOverLimit ? (
+                <Text
+                  size="xs"
+                  style={{ color: "var(--color-halt)", paddingInline: 4 }}
+                >
+                  Max {formatDistance(maxCustomRadiusMeters, distanceUnit)}{" "}
+                  for this game size.
+                </Text>
+              ) : null}
+            </>
+          )}
+        </div>
+      ) : null}
 
-        {showAnswer ? (
-          <BinaryAnswerPicker
-            value={answer}
-            onChange={onAnswerChange}
-            options={yesNoAnswerOptions}
-            label=""
+      {chord === "place" ? (
+        <div
+          className="pointer-events-auto space-y-3 p-3"
+          style={iosAskInsetSurfaceStyle}
+        >
+          <AnchorControls
+            awaitingPlacement={awaitingPlacement}
+            hasAnchor={hasCenter}
+            gpsLoading={gpsLoading}
+            onUseGps={onUseGps}
+            onPlaceAtMapTap={onPlaceAtMapTap}
+            anchorHint="Center pinned on the map. Tap again to move it."
+            gpsLoadingLabel="Locating…"
           />
-        ) : null}
-      </div>
+          {showAnswer ? (
+            <BinaryAnswerPicker
+              value={answer}
+              onChange={onAnswerChange}
+              options={yesNoAnswerOptions}
+              label=""
+            />
+          ) : null}
+        </div>
+      ) : null}
     </div>
   );
 }

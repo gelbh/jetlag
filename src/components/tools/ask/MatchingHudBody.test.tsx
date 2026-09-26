@@ -1,11 +1,14 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
+import { MantineProvider } from "@mantine/core";
+import type { ReactElement } from "react";
 import type { DistanceUnit } from "@/domain/map/distance";
 import {
   MATCHING_CATEGORIES,
   type MatchingAnswer,
   type MatchingCategoryId,
 } from "@/domain/questions";
+import { jetlagMantineTheme } from "@/theme/mantineTheme";
 import { AskHudHost } from "./AskHudHost";
 import { MatchingHudBody } from "./MatchingHudBody";
 import {
@@ -38,9 +41,30 @@ const baseProps = {
   awaitHiderAnswer: true,
 };
 
+function renderMatching(ui: ReactElement) {
+  return render(
+    <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+      {ui}
+    </MantineProvider>,
+  );
+}
+
+beforeEach(() => {
+  vi.stubGlobal("matchMedia", (query: string) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener() {},
+    removeListener() {},
+    addEventListener() {},
+    removeEventListener() {},
+    dispatchEvent: () => false,
+  }));
+});
+
 describe("MatchingHudBody", () => {
   it("shows matching question prompt and category row icons", () => {
-    const { container } = render(
+    const { container } = renderMatching(
       <MatchingHudBody {...baseProps} costLabel="D3P1" />,
     );
 
@@ -63,7 +87,7 @@ describe("MatchingHudBody", () => {
   });
 
   it("shows the real category question once a category is chosen", () => {
-    render(
+    renderMatching(
       <MatchingHudBody
         {...baseProps}
         categoryChosen
@@ -81,7 +105,7 @@ describe("MatchingHudBody", () => {
 
   it("shows catalog rail without PhaseRail or CONTINUE; row select advances", () => {
     const onCategoryChange = vi.fn();
-    render(
+    renderMatching(
       <MatchingHudBody {...baseProps} onCategoryChange={onCategoryChange} />,
     );
 
@@ -97,7 +121,7 @@ describe("MatchingHudBody", () => {
   });
 
   it("filters catalog rows by category group chip", () => {
-    render(<MatchingHudBody {...baseProps} />);
+    renderMatching(<MatchingHudBody {...baseProps} />);
 
     const filter = screen.getByRole("tablist", {
       name: "Filter match categories",
@@ -119,7 +143,7 @@ describe("MatchingHudBody", () => {
   });
 
   it("renders GPS timeout with AskInlineError treatment", () => {
-    render(
+    renderMatching(
       <MatchingHudBody
         {...baseProps}
         categoryChosen
@@ -134,7 +158,7 @@ describe("MatchingHudBody", () => {
   });
 
   it("after category, shows resolve chord without CONTINUE strip sibling", () => {
-    render(
+    renderMatching(
       <MatchingHudBody
         {...baseProps}
         categoryChosen
@@ -171,7 +195,7 @@ describe("MatchingHudBody", () => {
     expect(cue).toBe("RESOLVE ON MAP");
     expect(canCommit(readiness)).toBe(false);
 
-    render(
+    renderMatching(
       <AskHudHost
         cue={cue}
         toolLabel="Matching"
@@ -198,9 +222,8 @@ describe("MatchingHudBody", () => {
     expect(screen.getByTestId("ask-mode-cue-ticker")).toHaveTextContent(
       "RESOLVE ON MAP",
     );
-    expect(
-      screen.getByRole("button", { name: "SEND — RESOLVE ON MAP" }),
-    ).toBeDisabled();
+    // Sheet path hides muted SEND footer; cue carries the next-step hint.
+    expect(screen.queryByTestId("ask-commit-strip")).toBeNull();
   });
 
   it("arms PrimedCommitStrip only when canCommit", () => {
@@ -222,7 +245,7 @@ describe("MatchingHudBody", () => {
     });
     const onCommit = vi.fn();
 
-    render(
+    renderMatching(
       <AskHudHost
         cue={cue}
         toolLabel="Matching"

@@ -185,12 +185,8 @@ export function MapStatusRail({
     <div
       ref={railRef}
       className={railClassName}
-      {...(true
-        ? {
-            "data-testid": "map-status-rail-mantine",
-            "data-player-ux-world": "mantine",
-          }
-        : {})}
+      data-testid="map-status-rail-mantine"
+      data-player-ux-world="mantine"
     >
       <div className="relative">
         <TimerBlock
@@ -206,103 +202,59 @@ export function MapStatusRail({
           disabled={timerControlsDisabled || inactiveChrome}
         />
 
-        {true ? (
-          <div
-            className="w-full"
-            style={{
-              paddingTop: "max(0.5rem, env(safe-area-inset-top))",
-              paddingLeft: "max(0.75rem, env(safe-area-inset-left))",
-              paddingRight: "max(0.75rem, env(safe-area-inset-right))",
-              paddingBottom: "0.25rem",
-            }}
-          >
-            <ToolStatusBlock
-              sessionCode={sessionCode}
-              playerRole={playerRole}
-              activeTool={activeTool}
-              timerState={timerState}
-              timerRunning={timerRunning}
-              timerHasStarted={timerHasStarted}
-              timerSyncing={timerSyncing}
-              canStartGame={canStartGame}
-              onStartGame={onStartGame}
-              sessionRules={sessionRules}
-              pendingQuestions={pendingQuestions}
-              myUid={myUid}
-              hostUid={hostUid}
-              seekerLocations={seekerLocations}
-              onCancelWalkingQuestion={onCancelWalkingQuestion}
-              timerMenuOpen={showTimerMenu}
-              moveInProgress={moveInProgress}
-              expanded={expanded}
-              onTimerPause={onTimerPause}
-              onTimerResume={onTimerStart}
-              timerControlsDisabled={timerControlsDisabled || inactiveChrome}
-              headerLeading={
-                headerLeading ?? (
-                  <ScreenNav variant="home" placement="inline" />
-                )
-              }
-              syncSlot={
-                <SyncBlock
-                  syncStatus={syncStatus}
-                  queuedWrites={queuedWrites}
-                  message={message}
-                  placement="segment"
-                />
-              }
-              onOpenTimerMenu={() => {
-                if (inactiveChrome) {
-                  return;
-                }
-                setTimerMenuOpen((open) => !open);
-                setPreloadMenuOpen(false);
-              }}
-            />
-          </div>
-        ) : (
-          <>
-            <div className="jl-status-bar">
-              <ToolStatusBlock
-                sessionCode={sessionCode}
-                playerRole={playerRole}
-                activeTool={activeTool}
-                timerState={timerState}
-                timerRunning={timerRunning}
-                timerHasStarted={timerHasStarted}
-                timerSyncing={timerSyncing}
-                canStartGame={canStartGame}
-                onStartGame={onStartGame}
-                sessionRules={sessionRules}
-                pendingQuestions={pendingQuestions}
-                myUid={myUid}
-                hostUid={hostUid}
-                seekerLocations={seekerLocations}
-                onCancelWalkingQuestion={onCancelWalkingQuestion}
-                timerMenuOpen={showTimerMenu}
-                moveInProgress={moveInProgress}
-                expanded={expanded}
-                headerLeading={
-                  headerLeading ?? (
-                    <ScreenNav variant="home" placement="inline" />
-                  )
-                }
-                onOpenTimerMenu={() => {
-                  if (inactiveChrome) {
-                    return;
-                  }
-                  setTimerMenuOpen((open) => !open);
-                  setPreloadMenuOpen(false);
-                }}
+        <div
+          className="w-full"
+          style={{
+            paddingTop: "max(0.5rem, env(safe-area-inset-top))",
+            paddingLeft: "max(0.75rem, env(safe-area-inset-left))",
+            paddingRight: "max(0.75rem, env(safe-area-inset-right))",
+            paddingBottom: "0.25rem",
+          }}
+        >
+          <ToolStatusBlock
+            sessionCode={sessionCode}
+            playerRole={playerRole}
+            activeTool={activeTool}
+            timerState={timerState}
+            timerRunning={timerRunning}
+            timerHasStarted={timerHasStarted}
+            timerSyncing={timerSyncing}
+            canStartGame={canStartGame}
+            onStartGame={onStartGame}
+            sessionRules={sessionRules}
+            pendingQuestions={pendingQuestions}
+            myUid={myUid}
+            hostUid={hostUid}
+            seekerLocations={seekerLocations}
+            onCancelWalkingQuestion={onCancelWalkingQuestion}
+            timerMenuOpen={showTimerMenu}
+            moveInProgress={moveInProgress}
+            expanded={expanded}
+            onTimerPause={onTimerPause}
+            onTimerResume={onTimerStart}
+            timerControlsDisabled={timerControlsDisabled || inactiveChrome}
+            headerLeading={
+              headerLeading ?? (
+                <ScreenNav variant="home" placement="inline" />
+              )
+            }
+            syncSlot={
+              <SyncBlock
+                syncStatus={syncStatus}
+                queuedWrites={queuedWrites}
+                message={message}
+                placement="segment"
               />
-            </div>
-            <SyncBlock
-              syncStatus={syncStatus}
-              queuedWrites={queuedWrites}
-              message={message}
-            />
-          </>
-        )}
+            }
+            onOpenTimerMenu={() => {
+              if (inactiveChrome) {
+                return;
+              }
+              setTimerMenuOpen((open) => !open);
+              setPreloadMenuOpen(false);
+            }}
+          />
+        </div>
 
         {showPreloadBanner ? (
           <GameAreaPreloadBeacon

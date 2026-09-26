@@ -1,7 +1,6 @@
 import { createElement, forwardRef, type CSSProperties, type ReactNode } from "react";
 import { Box, Paper } from "@mantine/core";
 import { cn } from "@/lib/cn";
-import { Island } from "@/components/ui/island";
 import { iosMapChromeSurfaceStyles } from "@/components/ui/apple/iosEntryChrome";
 import { OverlayHost } from "./OverlayHost";
 import { MapSideDockStack } from "./MapSideDockStack";
@@ -18,7 +17,7 @@ export interface MapBottomChromeProps {
   inactive?: boolean;
   /** Default `tools` — full-width hunt shrink for many question chips. */
   huntDensity?: MapBottomChromeHuntDensity;
-  /** Flag-on ask-owned tool: ToolDeck ask-first instrument cluster. */
+  /** Ask-owned tool: ToolDeck ask-first instrument cluster. */
   askFirst?: boolean;
   hunt?: ReactNode;
   session?: ReactNode;
@@ -39,11 +38,9 @@ const ISLAND_ARIA: Record<Exclude<MapBottomChromeIslandName, "hunt">, string> =
 function SideIsland({
   name,
   children,
-  mantine,
 }: {
   name: Exclude<MapBottomChromeIslandName, "hunt">;
   children: ReactNode;
-  mantine: boolean;
 }) {
   const className = cn(
     "jl-map-island",
@@ -55,37 +52,23 @@ function SideIsland({
     "[&_.jl-tool-dock-group-secondary]:grow-0 [&_.jl-tool-dock-group-secondary]:shrink-0",
     "[&_.jl-tool-slot]:w-11 [&_.jl-tool-slot]:max-w-11 [&_.jl-tool-slot]:flex-none",
   );
-  if (mantine) {
-    return (
-      <Paper
-        data-island={name}
-        role="group"
-        aria-label={ISLAND_ARIA[name]}
-        radius={0}
-        p={4}
-        className={className}
-        styles={{
-          root: {
-            ...iosMapChromeSurfaceStyles,
-            /* Corner radii come from map-bottom-chrome.css (anchor-aware). */
-          },
-        }}
-      >
-        {children}
-      </Paper>
-    );
-  }
   return (
-    <Island
+    <Paper
       data-island={name}
       role="group"
       aria-label={ISLAND_ARIA[name]}
-      size="default"
-      variant="default"
+      radius={0}
+      p={4}
       className={className}
+      styles={{
+        root: {
+          ...iosMapChromeSurfaceStyles,
+          /* Corner radii come from map-bottom-chrome.css (anchor-aware). */
+        },
+      }}
     >
       {children}
-    </Island>
+    </Paper>
   );
 }
 
@@ -111,14 +94,14 @@ export const MapBottomChrome = forwardRef<HTMLDivElement, MapBottomChromeProps>(
   ) {
     const isRail = layout === "rail";
     const sparseHunt = huntDensity === "sparse";
-    const askFirstActive = true && askFirst;
+    const askFirstActive = askFirst;
     const chromeClassName = cn(
       "jl-map-bottom-chrome jl-tool-dock relative block w-full pointer-events-none bg-transparent",
       !isRail &&
         !askFirstActive &&
         "min-h-[calc(var(--dock-island-height)+0.75rem)]",
       !isRail && askFirstActive && "min-h-0",
-      !isRail && true && "px-1",
+      !isRail && "px-1",
       isRail &&
         "jl-map-bottom-chrome--rail jl-tool-dock--rail relative flex h-full min-h-0 flex-col items-stretch justify-start gap-2 p-2",
       isRail &&
@@ -133,19 +116,14 @@ export const MapBottomChrome = forwardRef<HTMLDivElement, MapBottomChromeProps>(
       askFirstActive && "jl-map-bottom-chrome--ask-first",
       className,
     );
-    const ChromeRoot = true ? Box : "div";
     return (
       <OverlayHost ref={ref} layout={layout} style={style}>
         {createElement(
-          ChromeRoot,
+          Box,
           {
-            ...(true
-              ? {
-                  component: "div" as const,
-                  "data-testid": "map-bottom-chrome-mantine",
-                  "data-player-ux-world": "mantine",
-                }
-              : {}),
+            component: "div" as const,
+            "data-testid": "map-bottom-chrome-mantine",
+            "data-player-ux-world": "mantine",
             "data-overlay-chrome": "",
             "data-layout": layout,
             "data-hunt-density": huntDensity,
@@ -176,19 +154,15 @@ export const MapBottomChrome = forwardRef<HTMLDivElement, MapBottomChromeProps>(
             const sideIslands = (
               <>
                 {session ? (
-                  <SideIsland name="session" mantine={true}>
-                    {session}
-                  </SideIsland>
+                  <SideIsland name="session">{session}</SideIsland>
                 ) : null}
                 {mapControls ? (
-                  <SideIsland name="map-controls" mantine={true}>
-                    {mapControls}
-                  </SideIsland>
+                  <SideIsland name="map-controls">{mapControls}</SideIsland>
                 ) : null}
               </>
             );
 
-            if (true && !isRail) {
+            if (!isRail) {
               return <MapSideDockStack>{sideIslands}</MapSideDockStack>;
             }
 

@@ -72,13 +72,9 @@ export function PhotoHudBody({
       className="ask-hud-mode-body flex w-full flex-col gap-2"
     >
       <div
-        className={
-          true
-            ? "pointer-events-auto space-y-2 p-3"
-            : "pointer-events-auto ask-hud-panel space-y-2 p-3"
-        }
-        style={true ? iosAskInsetSurfaceStyle : undefined}
-        {...(true ? { "data-player-ux-world": "mantine" } : {})}
+        className="pointer-events-auto space-y-2 p-3"
+        style={iosAskInsetSurfaceStyle}
+        data-player-ux-world="mantine"
       >
         <div className="flex items-start gap-3">
           <div
@@ -134,7 +130,7 @@ export function PhotoHudBody({
         </div>
       </div>
 
-      {!showAsChosen || !true ? (
+      {!showAsChosen ? (
         <div className="space-y-2">
           {awaitHiderAnswer ? <QuestionTruthReferenceHint /> : null}
           {availableCategories.length === 0 ? (

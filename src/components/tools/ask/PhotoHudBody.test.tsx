@@ -1,7 +1,10 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
+import { MantineProvider } from "@mantine/core";
+import type { ReactElement } from "react";
 import type { GameSize } from "@/domain/session/size/gameSize";
 import type { PhotoCategoryId } from "@/domain/questions";
+import { jetlagMantineTheme } from "@/theme/mantineTheme";
 import { AskHudHost } from "./AskHudHost";
 import { PhotoHudBody } from "./PhotoHudBody";
 import {
@@ -20,9 +23,30 @@ const baseProps = {
   hasOpenQuestion: false,
 };
 
+function renderPhoto(ui: ReactElement) {
+  return render(
+    <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+      {ui}
+    </MantineProvider>,
+  );
+}
+
+beforeEach(() => {
+  vi.stubGlobal("matchMedia", (query: string) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener() {},
+    removeListener() {},
+    addEventListener() {},
+    removeEventListener() {},
+    dispatchEvent: () => false,
+  }));
+});
+
 describe("PhotoHudBody", () => {
   it("renders category picker without CONTINUE sibling", () => {
-    render(<PhotoHudBody {...baseProps} />);
+    renderPhoto(<PhotoHudBody {...baseProps} />);
 
     expect(screen.getByTestId("photo-hud-body")).toBeInTheDocument();
     // Medium catalogs exceed chip threshold → short CatalogRail.
@@ -58,7 +82,7 @@ describe("PhotoHudBody", () => {
 
     const onCommit = vi.fn();
     const onCategoryChange = vi.fn();
-    render(
+    renderPhoto(
       <AskHudHost
         cue="READY TO SEND"
         toolLabel="Photo"

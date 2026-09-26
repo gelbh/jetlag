@@ -260,48 +260,21 @@ export function MatchingHudBody({
               <div
                 role="tablist"
                 aria-label="Filter match categories"
-                className={
-                  true
-                    ? "jl-scroll"
-                    : "jl-scroll flex gap-1.5 pb-0.5"
-                }
-                style={true ? iosFilterChipTrackStyle : undefined}
-                {...(true
-                  ? { "data-player-ux-world": "mantine" }
-                  : {})}
+                className="jl-scroll"
+                style={iosFilterChipTrackStyle}
+                data-player-ux-world="mantine"
               >
                 {filterOptions.map((option) => {
                   const selected = effectiveFilter === option.value;
                   const Icon = GROUP_CHIP_ICON[option.value];
-                  if (true) {
-                    return (
-                      <UnstyledButton
-                        key={option.value}
-                        type="button"
-                        role="tab"
-                        aria-selected={selected}
-                        onClick={() => setGroupFilter(option.value)}
-                        styles={iosFilterChipStyles(selected)}
-                      >
-                        <Icon
-                          size={14}
-                          weight={selected ? "fill" : "regular"}
-                          aria-hidden
-                        />
-                        {option.label}
-                      </UnstyledButton>
-                    );
-                  }
                   return (
-                    <button
+                    <UnstyledButton
                       key={option.value}
                       type="button"
                       role="tab"
                       aria-selected={selected}
                       onClick={() => setGroupFilter(option.value)}
-                      className={`jl-segment-btn shrink-0 inline-flex items-center gap-1.5 ${
-                        selected ? "jl-segment-btn-selected" : ""
-                      }`}
+                      styles={iosFilterChipStyles(selected)}
                     >
                       <Icon
                         size={14}
@@ -309,7 +282,7 @@ export function MatchingHudBody({
                         aria-hidden
                       />
                       {option.label}
-                    </button>
+                    </UnstyledButton>
                   );
                 })}
               </div>
@@ -333,13 +306,9 @@ export function MatchingHudBody({
 
       {chord === "resolve" ? (
         <div
-          className={
-            true
-              ? "pointer-events-auto space-y-3 p-3"
-              : "pointer-events-auto ask-hud-panel space-y-2 p-3"
-          }
-          style={true ? iosAskInsetSurfaceStyle : undefined}
-          {...(true ? { "data-player-ux-world": "mantine" } : {})}
+          className="pointer-events-auto space-y-3 p-3"
+          style={iosAskInsetSurfaceStyle}
+          data-player-ux-world="mantine"
         >
           {category ? (
             <div className="flex items-center gap-2.5">
@@ -386,18 +355,14 @@ export function MatchingHudBody({
             </ResolvedReadout>
           ) : nearestFeatureSummary ? (
             <div
-              style={
-                true
-                  ? {
-                      borderRadius: 12,
-                      padding: "0.65rem 0.75rem",
-                      backgroundColor:
-                        "oklch(from var(--color-field-ink) l c h / 0.05)",
-                      border:
-                        "0.33px solid oklch(from var(--color-field-ink) l c h / 0.1)",
-                    }
-                  : undefined
-              }
+              style={{
+                borderRadius: 12,
+                padding: "0.65rem 0.75rem",
+                backgroundColor:
+                  "oklch(from var(--color-field-ink) l c h / 0.05)",
+                border:
+                  "0.33px solid oklch(from var(--color-field-ink) l c h / 0.1)",
+              }}
             >
               <ResolvedReadout caption={featureCountLabel}>
                 <span className="inline-flex flex-wrap items-center">
@@ -421,13 +386,9 @@ export function MatchingHudBody({
 
       {chord === "answer" ? (
         <div
-          className={
-            true
-              ? "pointer-events-auto space-y-3 p-3"
-              : "pointer-events-auto ask-hud-panel space-y-2 p-3"
-          }
-          style={true ? iosAskInsetSurfaceStyle : undefined}
-          {...(true ? { "data-player-ux-world": "mantine" } : {})}
+          className="pointer-events-auto space-y-3 p-3"
+          style={iosAskInsetSurfaceStyle}
+          data-player-ux-world="mantine"
         >
           {category ? (
             <div className="flex items-center gap-2.5">
@@ -462,18 +423,14 @@ export function MatchingHudBody({
           ) : null}
           {nearestFeatureSummary ? (
             <div
-              style={
-                true
-                  ? {
-                      borderRadius: 12,
-                      padding: "0.65rem 0.75rem",
-                      backgroundColor:
-                        "oklch(from var(--color-field-ink) l c h / 0.05)",
-                      border:
-                        "0.33px solid oklch(from var(--color-field-ink) l c h / 0.1)",
-                    }
-                  : undefined
-              }
+              style={{
+                borderRadius: 12,
+                padding: "0.65rem 0.75rem",
+                backgroundColor:
+                  "oklch(from var(--color-field-ink) l c h / 0.05)",
+                border:
+                  "0.33px solid oklch(from var(--color-field-ink) l c h / 0.1)",
+              }}
             >
               <ResolvedReadout caption={featureCountLabel}>
                 {nearestFeatureSummary}
