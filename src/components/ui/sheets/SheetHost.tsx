@@ -30,6 +30,8 @@ export interface SheetHostProps {
   scrollMode?: "host" | "child";
   /** Forwarded to Mantine drawer body (e.g. keyboard inset). */
   contentStyle?: CSSProperties;
+  /** Ask HUD: scrim stays visual; map taps pass through for placement. */
+  mapInteractive?: boolean;
 }
 
 function DesktopRailDialog({
@@ -100,6 +102,7 @@ export function SheetHost({
   padding,
   scrollMode,
   contentStyle,
+  mapInteractive = false,
 }: SheetHostProps) {
   const isDesktop = useDesktopLayout();
   const railPanel = useContextualRailPanel();
@@ -137,6 +140,7 @@ export function SheetHost({
         padding={padding}
         scrollMode={scrollMode}
         contentStyle={contentStyle}
+        mapInteractive={mapInteractive}
       >
         {children}
       </MantineDrawerSheet>
