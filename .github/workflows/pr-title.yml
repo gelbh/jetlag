@@ -24,4 +24,6 @@ jobs:
           cache: npm
       - run: npm ci
       - name: Lint PR title
-        run: npm run lint:pr-title -- "${{ github.event.pull_request.title }}"
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: npm run lint:pr-title -- "$PR_TITLE"
