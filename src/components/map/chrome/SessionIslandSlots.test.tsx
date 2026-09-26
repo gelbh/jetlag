@@ -1,10 +1,11 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, screen } from "@testing-library/react";
+import { renderWithAppUi } from "../../../test/renderWithAppUi";
 import { describe, expect, it, vi } from "vitest";
 import { SessionIslandSlots } from "./SessionIslandSlots";
 
 describe("SessionIslandSlots", () => {
   it("puts Settings above other session tools", () => {
-    render(
+    renderWithAppUi(
       <SessionIslandSlots
         onOpenSettings={vi.fn()}
         onOpenChat={vi.fn()}
@@ -19,7 +20,7 @@ describe("SessionIslandSlots", () => {
   it("shows Codes when onOpenCodes is provided and opens on tap", () => {
     const onOpenCodes = vi.fn();
 
-    render(
+    renderWithAppUi(
       <SessionIslandSlots
         onOpenSettings={vi.fn()}
         onOpenCodes={onOpenCodes}
@@ -31,7 +32,7 @@ describe("SessionIslandSlots", () => {
   });
 
   it("hides Codes when onOpenCodes is omitted", () => {
-    render(<SessionIslandSlots onOpenSettings={vi.fn()} />);
+    renderWithAppUi(<SessionIslandSlots onOpenSettings={vi.fn()} />);
 
     expect(
       screen.queryByRole("button", { name: "Open role codes" }),

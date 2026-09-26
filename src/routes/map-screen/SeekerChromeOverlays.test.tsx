@@ -1,7 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
+import { renderWithAppUi } from "../../test/renderWithAppUi";
 import { SeekerChromeOverlays } from "./SeekerChromeOverlays";
-import type { AskHudReadiness } from "@/domain/ask/askHudModes";
+import type { AskHudCommitKind, AskHudReadiness } from "@/domain/ask/askHudModes";
 
 function stubTimer() {
   return { hasStarted: true };
@@ -53,11 +54,13 @@ function emptyHud(
           : surface === "tentacle"
             ? "D4P2"
             : "D3P1",
-    error: null,
+    error: null as string | null,
     onCommit: vi.fn(),
     modeBody: <div data-testid={bodyId} />,
     sheets: null,
-    ...(surface === "thermometer" ? { commitKind: "send" as const } : {}),
+    ...(surface === "thermometer"
+      ? { commitKind: "send" as AskHudCommitKind }
+      : {}),
   };
 }
 
@@ -105,7 +108,7 @@ function stubTools(
 describe("SeekerChromeOverlays Ask HUD wiring", () => {
   it("mounts AskHudHost for radar and skips ToolFloatingPanel", () => {
     const tools = stubTools("radar");
-    render(
+    renderWithAppUi(
       <SeekerChromeOverlays
         timer={stubTimer() as never}
         activeTool="radar"
@@ -136,7 +139,7 @@ describe("SeekerChromeOverlays Ask HUD wiring", () => {
 
   it("mounts AskHudHost for measuring and skips ToolFloatingPanel", () => {
     const tools = stubTools("measuring");
-    render(
+    renderWithAppUi(
       <SeekerChromeOverlays
         timer={stubTimer() as never}
         activeTool="measuring"
@@ -165,7 +168,7 @@ describe("SeekerChromeOverlays Ask HUD wiring", () => {
 
   it("mounts AskHudHost for matching CatalogRail and skips ToolFloatingPanel", () => {
     const tools = stubTools("matching");
-    render(
+    renderWithAppUi(
       <SeekerChromeOverlays
         timer={stubTimer() as never}
         activeTool="matching"
@@ -202,7 +205,7 @@ describe("SeekerChromeOverlays Ask HUD wiring", () => {
       ...tools.matchingTool.hud,
       error: "Current location is unavailable.",
     };
-    render(
+    renderWithAppUi(
       <SeekerChromeOverlays
         timer={stubTimer() as never}
         activeTool="matching"
@@ -232,7 +235,7 @@ describe("SeekerChromeOverlays Ask HUD wiring", () => {
 
   it("hides host cue / cost / commit for Measuring catalog like Matching", () => {
     const tools = stubTools("measuring");
-    render(
+    renderWithAppUi(
       <SeekerChromeOverlays
         timer={stubTimer() as never}
         activeTool="measuring"
@@ -263,7 +266,7 @@ describe("SeekerChromeOverlays Ask HUD wiring", () => {
 
   it("mounts AskHudHost for tentacle CatalogRail and skips ToolFloatingPanel", () => {
     const tools = stubTools("tentacle");
-    render(
+    renderWithAppUi(
       <SeekerChromeOverlays
         timer={stubTimer() as never}
         activeTool="tentacle"
@@ -295,7 +298,7 @@ describe("SeekerChromeOverlays Ask HUD wiring", () => {
 
   it("mounts AskHudHost for thermometer and skips ToolFloatingPanel", () => {
     const tools = stubTools("thermometer");
-    render(
+    renderWithAppUi(
       <SeekerChromeOverlays
         timer={stubTimer() as never}
         activeTool="thermometer"
@@ -333,10 +336,13 @@ describe("SeekerChromeOverlays Ask HUD wiring", () => {
       commitKind: "endWalk",
       readiness: {
         ...tools.thermometerTool.hud.readiness,
+        placementReady: true,
+        configureReady: true,
         resolveReady: true,
+        answerReady: true,
       },
     };
-    render(
+    renderWithAppUi(
       <SeekerChromeOverlays
         timer={stubTimer() as never}
         activeTool="thermometer"
@@ -364,7 +370,7 @@ describe("SeekerChromeOverlays Ask HUD wiring", () => {
 
   it("mounts AskHudHost for photo and skips ToolFloatingPanel", () => {
     const tools = stubTools("photo");
-    render(
+    renderWithAppUi(
       <SeekerChromeOverlays
         timer={stubTimer() as never}
         activeTool="photo"

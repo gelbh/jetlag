@@ -387,11 +387,14 @@ export function useMapScreenController() {
               : activeTool === "photo"
                 ? photoTool.hud
                 : null;
-  const askMapFirst = Boolean(activeAskHud?.suppressSheet);
+  const askHudBundle = activeAskHud as
+    | import("../../hooks/map-screen/heavyMapTools").AskToolHudBundle
+    | null;
+  const askMapFirst = Boolean(askHudBundle?.suppressSheet);
   const mapFirstBottomPx =
-    activeAskHud?.mapFirstCameraBottomPx ?? MAP_FIRST_CAMERA_BOTTOM_PX;
+    askHudBundle?.mapFirstCameraBottomPx ?? MAP_FIRST_CAMERA_BOTTOM_PX;
   const mapFirstTopPx =
-    activeAskHud?.mapFirstCameraTopPx ?? MAP_FIRST_CAMERA_TOP_PX;
+    askHudBundle?.mapFirstCameraTopPx ?? MAP_FIRST_CAMERA_TOP_PX;
   const panelPeekHeightPx = askMapFirst
     ? mapFirstBottomPx
     : isAskHudOwnedTool(activeTool)

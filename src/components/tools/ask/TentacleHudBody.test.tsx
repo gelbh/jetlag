@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, screen } from "@testing-library/react";
+import { renderWithAppUi } from "../../../test/renderWithAppUi";
 import type { DistanceUnit } from "@/domain/map/distance";
 import type { TentaclePoi } from "@/domain/map/annotations";
 import type { GameSize } from "@/domain/session/size/gameSize";
@@ -37,7 +38,7 @@ const baseProps = {
 
 describe("TentacleHudBody", () => {
   it("shows Matching-style question header with cost on catalog", () => {
-    render(
+    renderWithAppUi(
       <TentacleHudBody {...baseProps} costLabel="D4P2" toolLabel="Tentacle" />,
     );
 
@@ -51,7 +52,7 @@ describe("TentacleHudBody", () => {
 
   it("shows catalog rail without PhaseRail or CONTINUE; row select advances", () => {
     const onCategoryChange = vi.fn();
-    render(
+    renderWithAppUi(
       <TentacleHudBody {...baseProps} onCategoryChange={onCategoryChange} />,
     );
 
@@ -67,7 +68,7 @@ describe("TentacleHudBody", () => {
   });
 
   it("after types, shows map-radius place chord without CONTINUE", () => {
-    render(
+    renderWithAppUi(
       <TentacleHudBody
         {...baseProps}
         categoryChosen
@@ -102,7 +103,7 @@ describe("TentacleHudBody", () => {
     expect(cue).toBe("SET CENTER ON MAP");
     expect(canCommit(readiness)).toBe(false);
 
-    render(
+    renderWithAppUi(
       <AskHudHost
         cue={cue}
         toolLabel="Tentacles"
@@ -128,9 +129,8 @@ describe("TentacleHudBody", () => {
     expect(screen.getByTestId("ask-mode-cue-ticker")).toHaveTextContent(
       "SET CENTER ON MAP",
     );
-    expect(
-      screen.getByRole("button", { name: "SEND — SET CENTER FIRST" }),
-    ).toBeDisabled();
+    // Sheet path hides muted commit strip; cue carries next-step copy.
+    expect(screen.queryByTestId("ask-commit-strip")).toBeNull();
   });
 
   it("arms PrimedCommitStrip only when canCommit", () => {
@@ -161,7 +161,7 @@ describe("TentacleHudBody", () => {
       },
     ];
 
-    render(
+    renderWithAppUi(
       <AskHudHost
         cue={cue}
         toolLabel="Tentacles"
@@ -213,7 +213,7 @@ describe("TentacleHudBody", () => {
         category: "museum",
       },
     ];
-    render(
+    renderWithAppUi(
       <TentacleHudBody
         {...baseProps}
         awaitHiderAnswer={false}
@@ -239,7 +239,7 @@ describe("TentacleHudBody", () => {
         category: "museum",
       },
     ];
-    render(
+    renderWithAppUi(
       <TentacleHudBody
         {...baseProps}
         awaitHiderAnswer={false}

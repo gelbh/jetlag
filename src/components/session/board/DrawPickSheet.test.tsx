@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, screen } from "@testing-library/react";
+import { renderWithAppUi } from "../../../test/renderWithAppUi";
 import { DrawPickSheet } from "./DrawPickSheet";
 import {
   beginSequentialRewardPick,
@@ -14,7 +15,7 @@ describe("DrawPickSheet", () => {
     );
     expect(started.pendingPick).not.toBeNull();
     const onConfirm = vi.fn();
-    render(
+    renderWithAppUi(
       <DrawPickSheet
         pending={started.pendingPick}
         gameSize="medium"
@@ -22,7 +23,7 @@ describe("DrawPickSheet", () => {
       />,
     );
 
-    expect(screen.getByLabelText("Choose cards to keep")).toBeInTheDocument();
+    expect(screen.getAllByLabelText("Choose cards to keep")[0]).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: /Confirm keep/i }));
     expect(screen.getByRole("alert")).toHaveTextContent(/exactly 1/i);
     expect(onConfirm).not.toHaveBeenCalled();
