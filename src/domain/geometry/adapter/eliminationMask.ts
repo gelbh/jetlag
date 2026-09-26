@@ -8,14 +8,12 @@ import { thermometerShadedSide } from "../../questions/thermometerQuestions";
 import { measuringPlacesFromMetadata } from "../../questions/measuringPlacesFromMetadata";
 import type { HidingZoneRecord } from "../../session/hiding/hidingZone";
 import {
-  buildHalfPlanePolygon,
-  buildRadarShadedRegion,
   dispatchHalfPlane,
   dispatchRadarShadedRegion,
 } from "../core/radarHalfPlane";
 import { resolveClientMaskKernelMode } from "../kernel";
 import {
-  buildMeasuringEliminationPreviewTs,
+  buildMeasuringEliminationPreview,
   type MeasuringRegionInput,
 } from "../measuring/measuringRegions";
 import type {
@@ -74,10 +72,10 @@ export function eliminationDiskForAnnotation(
   return null;
 }
 
-function measuringEliminationFromStoredMetadata(
+async function measuringEliminationFromStoredMetadata(
   annotation: AnnotationRecord,
   gameArea: GameArea,
-): PolygonFeature | null {
+): Promise<PolygonFeature | null> {
   const answer = annotation.metadata.measuringAnswer;
   const regionInputJson = annotation.metadata.measuringRegionInputJson;
   if (!answer || typeof regionInputJson !== "string") {
@@ -89,7 +87,7 @@ function measuringEliminationFromStoredMetadata(
       MeasuringRegionInput,
       "measuringAnswer" | "gameArea"
     >;
-    const feature = buildMeasuringEliminationPreviewTs({
+    const feature = await buildMeasuringEliminationPreview({
       ...regionInput,
       measuringPlaces: measuringPlacesFromMetadata(
         { measuringPlacesJson: annotation.metadata.measuringPlacesJson },
@@ -114,7 +112,6 @@ function measuringEliminationFromStoredMetadata(
 
 function eliminationFeatureFromNonKernel(
   annotation: AnnotationRecord,
-  gameArea: GameArea,
 ): PolygonFeature | null {
   if (!isActive(annotation)) {
     return null;
@@ -142,7 +139,7 @@ function eliminationFeatureFromNonKernel(
     if (geometry.type === "Polygon" || geometry.type === "MultiPolygon") {
       return annotation.geometry as PolygonFeature;
     }
-    return measuringEliminationFromStoredMetadata(annotation, gameArea);
+    return null;
   }
 
   if (annotation.type === "tentacle") {
@@ -170,80 +167,28 @@ function eliminationFeatureFromNonKernel(
   return null;
 }
 
-/** Sync TS-only half-plane/radar for bootstrap and presence checks. */
-function eliminationFeatureKernelTs(
-  annotation: AnnotationRecord,
-  gameArea: GameArea,
-): PolygonFeature | null {
-  if (!isActive(annotation)) {
-    return null;
-  }
-
-  if (
-    annotation.type === "thermometer" &&
-    annotation.geometry.geometry.type === "LineString" &&
-    annotation.metadata.thermometerAnswer
-  ) {
-    const coordinates = annotation.geometry.geometry.coordinates;
-    const thermoA: LatLngTuple = [coordinates[0][1], coordinates[0][0]];
-    const thermoB: LatLngTuple = [
-      coordinates[coordinates.length - 1][1],
-      coordinates[coordinates.length - 1][0],
-    ];
-
-    return buildHalfPlanePolygon(
-      thermoA,
-      thermoB,
-      gameArea,
-      thermometerShadedSide(annotation.metadata.thermometerAnswer),
-    );
-  }
-
-  if (annotation.type === "radar") {
-    const geometry = annotation.geometry.geometry;
-    if (geometry.type !== "Point") {
-      return null;
-    }
-
-    if (typeof annotation.metadata.inside !== "boolean") {
-      return null;
-    }
-
-    const center: LatLngTuple = [geometry.coordinates[1], geometry.coordinates[0]];
-    const radiusMeters = annotation.metadata.radiusMeters ?? DEFAULT_RADIUS_METERS;
-
-    // yes (inside): eliminate exterior. no: disk path in eliminationDiskForAnnotation.
-    if (!annotation.metadata.inside) {
-      return null;
-    }
-
-    return buildRadarShadedRegion(center, radiusMeters, gameArea, false);
-  }
-
-  return null;
-}
-
+/** Non-kernel sync feature only (tests / presence). Kernel paths are async. */
 export function eliminationFeatureForAnnotationTs(
   annotation: AnnotationRecord,
-  gameArea: GameArea,
 ): PolygonFeature | null {
-  return (
-    eliminationFeatureFromNonKernel(annotation, gameArea) ??
-    eliminationFeatureKernelTs(annotation, gameArea)
-  );
+  return eliminationFeatureFromNonKernel(annotation);
 }
 
 export async function eliminationFeatureForAnnotation(
   annotation: AnnotationRecord,
   gameArea: GameArea,
 ): Promise<PolygonFeature | null> {
-  const nonKernel = eliminationFeatureFromNonKernel(annotation, gameArea);
+  const nonKernel = eliminationFeatureFromNonKernel(annotation);
   if (nonKernel) {
     return nonKernel;
   }
 
   if (!isActive(annotation)) {
     return null;
+  }
+
+  if (annotation.type === "measuring") {
+    return measuringEliminationFromStoredMetadata(annotation, gameArea);
   }
 
   const mode = resolveClientMaskKernelMode();
@@ -300,6 +245,7 @@ export async function eliminationFeatureForAnnotation(
   return null;
 }
 
+/** Sync union input for tests/parity only (non-kernel polygons + disks). */
 export function computeEliminationUnionInputTs(
   annotations: readonly AnnotationRecord[],
   gameArea: GameArea,
@@ -315,7 +261,7 @@ export function computeEliminationUnionInputTs(
       continue;
     }
 
-    const feature = eliminationFeatureForAnnotationTs(annotation, gameArea);
+    const feature = eliminationFeatureForAnnotationTs(annotation);
     if (feature) {
       polygons.push(feature);
     }
@@ -357,17 +303,62 @@ export function annotationsToEndGameDisks(
   }));
 }
 
+function annotationLikelyHasEliminationFeature(
+  annotation: AnnotationRecord,
+): boolean {
+  if (eliminationDiskForAnnotation(annotation) !== null) {
+    return true;
+  }
+  if (!isActive(annotation)) {
+    return false;
+  }
+
+  if (annotation.type === "matching" || annotation.type === "zone") {
+    const geometry = annotation.geometry.geometry;
+    return geometry.type === "Polygon" || geometry.type === "MultiPolygon";
+  }
+
+  if (annotation.type === "measuring") {
+    const geometry = annotation.geometry.geometry;
+    if (geometry.type === "Polygon" || geometry.type === "MultiPolygon") {
+      return true;
+    }
+    return (
+      Boolean(annotation.metadata.measuringAnswer) &&
+      typeof annotation.metadata.measuringRegionInputJson === "string"
+    );
+  }
+
+  if (annotation.type === "tentacle") {
+    return typeof annotation.metadata.tentacleEliminationJson === "string";
+  }
+
+  if (
+    annotation.type === "thermometer" &&
+    annotation.geometry.geometry.type === "LineString" &&
+    annotation.metadata.thermometerAnswer
+  ) {
+    return true;
+  }
+
+  if (
+    annotation.type === "radar" &&
+    annotation.geometry.geometry.type === "Point" &&
+    typeof annotation.metadata.inside === "boolean"
+  ) {
+    return true;
+  }
+
+  return false;
+}
+
 export function annotationHasEliminationFeature(
   annotation: AnnotationRecord,
-  gameArea: GameArea,
   pulsingIds: ReadonlySet<string>,
 ): boolean {
   if (!pulsingIds.has(annotation.id)) {
     return false;
   }
 
-  return (
-    eliminationFeatureForAnnotationTs(annotation, gameArea) !== null ||
-    eliminationDiskForAnnotation(annotation) !== null
-  );
+  return annotationLikelyHasEliminationFeature(annotation);
 }

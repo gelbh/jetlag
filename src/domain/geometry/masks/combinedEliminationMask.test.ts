@@ -69,7 +69,7 @@ describe("combinedEliminationMask parity", () => {
     const candidate = buildCombinedEliminationMask(annotations, gameArea);
     const baseline = unionEliminationPartsLegacy({
       polygons: annotations.map(
-        (annotation) => eliminationFeatureForAnnotationTs(annotation, gameArea)!,
+        (annotation) => eliminationFeatureForAnnotationTs(annotation)!,
       ),
       disks: [],
     });
@@ -121,7 +121,6 @@ describe("combinedEliminationMask", () => {
   it("includes draft preview features with committed eliminations", () => {
     const draft = eliminationFeatureForAnnotationTs(
       matchingAnnotation("draft", -0.12),
-      gameArea,
     );
 
     expect(draft).not.toBeNull();
@@ -144,7 +143,6 @@ describe("combinedEliminationMask", () => {
   it("does not throw when union receives an invalid draft polygon", () => {
     const invalidDraft = eliminationFeatureForAnnotationTs(
       matchingAnnotation("draft", -0.12),
-      gameArea,
     );
     expect(invalidDraft).not.toBeNull();
 
