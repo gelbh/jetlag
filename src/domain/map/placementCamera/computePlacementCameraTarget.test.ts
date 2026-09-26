@@ -1,9 +1,14 @@
 import { describe, expect, it } from "vitest";
+import type { Feature, Polygon } from "geojson";
 import { toMapBounds } from "../mapBounds";
 import {
   buildMapDraftOverlays,
   type MapDraftOverlaySources,
 } from "@/hooks/map-screen/useMapDraftOverlays";
+import {
+  gameAreaToPolygon,
+  safeDifference,
+} from "../../geometry/gameArea/geometry";
 import { DUBLIN_CITY_GAME_AREA } from "@/test/fixtures/dublinGameArea";
 import {
   computePlacementCameraTarget,
@@ -198,5 +203,108 @@ describe("computePlacementCameraTarget", () => {
     expect(target).not.toBeNull();
     expect(boundsSpanMeters(target)).toBeGreaterThan(500);
     expect(boundsSpanMeters(target)).toBeLessThan(5_000);
+  });
+
+  it("frames matching yes onto the kept pocket with chrome top padding", async () => {
+    const cell: Feature<Polygon> = {
+      type: "Feature",
+      properties: {},
+      geometry: {
+        type: "Polygon",
+        coordinates: [
+          [
+            [-6.265, 53.348],
+            [-6.255, 53.348],
+            [-6.255, 53.352],
+            [-6.265, 53.352],
+            [-6.265, 53.348],
+          ],
+        ],
+      },
+    };
+    const elim = safeDifference(gameAreaToPolygon(DUBLIN_CITY_GAME_AREA), cell);
+    expect(elim).not.toBeNull();
+
+    const target = computePlacementCameraTarget({
+      tool: "matching",
+      phase: "answered",
+      draft: placementCameraDraftFromOverlaySources({
+        ...emptySources,
+        activeTool: "matching",
+        matching: {
+          seekerPoint: dublinCenter,
+          nearestFeaturePoint: [53.35, -6.26],
+          boundaryPreview: cell,
+          eliminationPreview: elim,
+          seekerResolving: false,
+        },
+      }),
+      gameArea: DUBLIN_CITY_GAME_AREA,
+      overlays: [
+        {
+          kind: "marker",
+          id: "matching-draft-seeker",
+          point: dublinCenter,
+        },
+        {
+          kind: "marker",
+          id: "matching-draft-nearest",
+          point: [53.35, -6.26],
+        },
+      ],
+      eliminationFeatures: elim ? [elim] : [],
+      panelPeekHeightPx: 228,
+      panelTopPaddingPx: 120,
+    });
+
+    expect(target).not.toBeNull();
+    expect(target?.paddingTopBiasPx).toBe(120);
+    expect(target?.paddingBiasPx).toBeGreaterThan(228);
+    expect(target?.forceReframe).toBe(false);
+    expect(boundsSpanMeters(target)).toBeLessThan(3_000);
+  });
+
+  it("frames matching no onto the shaded cell", () => {
+    const cell: Feature<Polygon> = {
+      type: "Feature",
+      properties: {},
+      geometry: {
+        type: "Polygon",
+        coordinates: [
+          [
+            [-6.265, 53.348],
+            [-6.255, 53.348],
+            [-6.255, 53.352],
+            [-6.265, 53.352],
+            [-6.265, 53.348],
+          ],
+        ],
+      },
+    };
+
+    const target = computePlacementCameraTarget({
+      tool: "matching",
+      phase: "answered",
+      draft: placementCameraDraftFromOverlaySources({
+        ...emptySources,
+        activeTool: "matching",
+        matching: {
+          seekerPoint: dublinCenter,
+          nearestFeaturePoint: [53.35, -6.26],
+          boundaryPreview: null,
+          eliminationPreview: cell,
+          seekerResolving: false,
+        },
+      }),
+      gameArea: DUBLIN_CITY_GAME_AREA,
+      overlays: [],
+      eliminationFeatures: [cell],
+      panelPeekHeightPx: 228,
+      panelTopPaddingPx: 120,
+    });
+
+    expect(target).not.toBeNull();
+    expect(target?.paddingTopBiasPx).toBe(120);
+    expect(boundsSpanMeters(target)).toBeLessThan(2_500);
   });
 });

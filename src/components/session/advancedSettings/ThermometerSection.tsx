@@ -1,7 +1,12 @@
 import { formatPresetDistance } from "@/domain/map/distance";
 import { toggleThermometerPresetInSettings } from "@/domain/session/tools/advancedSessionSettings";
 import { thermometerPresetsMetersForGameSize } from "@/domain/session/size/gameSizeRules";
-import { AdvancedSettingsToggle } from "./shared";
+import { Button } from "@mantine/core";
+import {
+  AdvancedSettingsInset,
+  AdvancedSettingsToggle,
+} from "./shared";
+import { filledStyles, grayStyles } from "@/components/ui/entry/entryChrome";
 import type { AdvancedSettingsSectionProps } from "./types";
 
 export function ThermometerSection({
@@ -17,7 +22,7 @@ export function ThermometerSection({
   );
 
   return (
-    <>
+    <AdvancedSettingsInset>
       <AdvancedSettingsToggle
         checked={value.customThermometerPresetsEnabled}
         onChange={(customThermometerPresetsEnabled) =>
@@ -34,15 +39,16 @@ export function ThermometerSection({
       />
 
       {value.customThermometerPresetsEnabled ? (
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 px-4 pb-3">
           {availableThermoPresets.map((presetMeters) => {
             const selected = value.thermometerPresetMeters.some(
               (meters) => Math.abs(meters - presetMeters) < 5,
             );
             return (
-              <button
+              <Button
                 key={presetMeters}
                 type="button"
+                size="compact-sm"
                 disabled={disabled}
                 onClick={() =>
                   onChange(
@@ -54,18 +60,14 @@ export function ThermometerSection({
                     ),
                   )
                 }
-                className={`rounded-full border px-3 py-1 text-xs font-semibold disabled:opacity-50 ${
-                  selected
-                    ? "border-highlight bg-highlight-soft text-highlight"
-                    : "border-border text-brand-blue"
-                }`}
+                styles={selected ? filledStyles : grayStyles}
               >
                 {formatPresetDistance(presetMeters, distanceUnit)}
-              </button>
+              </Button>
             );
           })}
         </div>
       ) : null}
-    </>
+    </AdvancedSettingsInset>
   );
 }

@@ -1,25 +1,19 @@
-import { useState, type ReactElement } from "react";
+import type { ReactElement } from "react";
 import { ReportProblemSheet } from "../../../components/incident/ReportProblemSheet";
 
 /**
- * Report-problem sheet + opener used by role docks/settings.
- * Closes the active overlay before opening so sheets do not stack.
+ * Report-problem sheet driven by the map overlay stack.
+ * Open with `pushSheet("report-problem")` so closing returns to the prior sheet.
  */
-export function useMapScreenReportProblemSheet(closeOverlays: () => void): {
-  openReportProblem: () => void;
+export function useMapScreenReportProblemSheet(
+  isOpen: boolean,
+  onClose: () => void,
+): {
   reportProblemSheet: ReactElement;
 } {
-  const [reportProblemOpen, setReportProblemOpen] = useState(false);
   return {
-    openReportProblem: () => {
-      closeOverlays();
-      setReportProblemOpen(true);
-    },
     reportProblemSheet: (
-      <ReportProblemSheet
-        open={reportProblemOpen}
-        onClose={() => setReportProblemOpen(false)}
-      />
+      <ReportProblemSheet open={isOpen} onClose={onClose} />
     ),
   };
 }

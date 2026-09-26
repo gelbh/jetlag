@@ -26,6 +26,8 @@ import { isQuestionDockTool } from "../../domain/map/mapTools";
 import {
   askHudCameraPaddingPx,
   isAskHudOwnedTool,
+  MAP_FIRST_CAMERA_BOTTOM_PX,
+  MAP_FIRST_CAMERA_TOP_PX,
 } from "../../domain/ask/askHudModes";
 import type { MapTool } from "../../state/sessionStore";
 import { tentacleDraftPoiIdFromOverlayId } from "../../domain/map/tentacleDraftOverlay";
@@ -137,6 +139,7 @@ export function useMapScreenController() {
     thermometerTool,
     pinTool,
     zoneTool,
+    drawTool,
     matchingTool,
     measuringTool,
     tentacleTool,
@@ -307,6 +310,7 @@ export function useMapScreenController() {
           boundaryPreview: measuringTool.draft.measuringBoundaryPreview,
           eliminationPreview: measuringTool.draft.measuringEliminationPreview,
           seekerResolving: measuringTool.draft.seekerResolving,
+          categoryId: measuringTool.draft.measuringCategoryId,
         },
         matching: {
           seekerPoint: matchingTool.draft.matchingSeekerPoint,
@@ -314,8 +318,10 @@ export function useMapScreenController() {
           boundaryPreview: matchingTool.draft.matchingBoundaryPreview,
           eliminationPreview: matchingTool.draft.matchingEliminationPreview,
           seekerResolving: matchingTool.draft.seekerResolving,
+          categoryId: matchingTool.draft.matchingCategoryId,
         },
         zone: { vertices: zoneTool.draft.zoneVertices },
+        draw: { strokePoints: drawTool.draft.strokePoints },
       });
 
   const { sheetSnap, mapAttentionActive } = useWizardSheetSnap(activeTool);
@@ -367,11 +373,32 @@ export function useMapScreenController() {
     ],
   );
 
-  const panelPeekHeightPx = isAskHudOwnedTool(activeTool)
-    ? askHudCameraPaddingPx(activeTool)
-    : panelMinimized
-      ? PANEL_PEEK_HEIGHT_PX
-      : DEFAULT_PANEL_HEIGHT_PX;
+  const activeAskHud =
+    activeTool === "matching"
+      ? matchingTool.hud
+      : activeTool === "radar"
+        ? radarTool.hud
+        : activeTool === "tentacle"
+          ? tentacleTool.hud
+          : activeTool === "measuring"
+            ? measuringTool.hud
+            : activeTool === "thermometer"
+              ? thermometerTool.hud
+              : activeTool === "photo"
+                ? photoTool.hud
+                : null;
+  const askMapFirst = Boolean(activeAskHud?.suppressSheet);
+  const mapFirstBottomPx =
+    activeAskHud?.mapFirstCameraBottomPx ?? MAP_FIRST_CAMERA_BOTTOM_PX;
+  const mapFirstTopPx =
+    activeAskHud?.mapFirstCameraTopPx ?? MAP_FIRST_CAMERA_TOP_PX;
+  const panelPeekHeightPx = askMapFirst
+    ? mapFirstBottomPx
+    : isAskHudOwnedTool(activeTool)
+      ? askHudCameraPaddingPx(activeTool)
+      : panelMinimized
+        ? PANEL_PEEK_HEIGHT_PX
+        : DEFAULT_PANEL_HEIGHT_PX;
 
   const placementViewportFrame = useMemo((): PlacementViewportFrame | null => {
     if (!mapViewport || mapShellSize.width <= 0 || mapShellSize.height <= 0) {
@@ -390,6 +417,7 @@ export function useMapScreenController() {
     effectiveFocusBounds: effectiveMapFocusBounds,
     placementRecenterToken,
     focusPaddingBias: placementFocusPaddingBias,
+    focusPaddingTopBias: placementFocusPaddingTopBias,
     focusMinZoom: placementFocusMinZoom,
     focusMaxZoom: placementFocusMaxZoom,
     focusPreferFly: placementFocusPreferFly,
@@ -403,9 +431,12 @@ export function useMapScreenController() {
     defaultFocusBounds: mapFocusBounds,
     enabled: true,
     panelMinimized,
-    hudBottomPaddingPx: isAskHudOwnedTool(activeTool)
-      ? askHudCameraPaddingPx(activeTool)
-      : null,
+    hudBottomPaddingPx: askMapFirst
+      ? mapFirstBottomPx
+      : isAskHudOwnedTool(activeTool)
+        ? askHudCameraPaddingPx(activeTool)
+        : null,
+    hudTopPaddingPx: askMapFirst ? mapFirstTopPx : null,
     selectedPoiId: deferredTentacleSelectedPoiId,
     walkActive: thermometerTool.draft.walkingQuestionId !== null,
     viewportFrame: placementViewportFrame,
@@ -507,6 +538,7 @@ export function useMapScreenController() {
     effectiveMapFocusBounds,
     placementRecenterToken,
     placementFocusPaddingBias,
+    placementFocusPaddingTopBias,
     placementFocusMinZoom,
     placementFocusMaxZoom,
     placementFocusPreferFly,
@@ -563,6 +595,7 @@ export function useMapScreenController() {
     measuringTool,
     pinTool,
     zoneTool,
+    drawTool,
     tentacleTool: {
       ...tentacleTool,
       tentacleLodPhase,

@@ -14,6 +14,10 @@ import {
 } from "./bounds";
 import { MAX_ZOOM_PIN, MAX_ZOOM_RADAR_CENTER, PANEL_PADDING_EXTRA_PX } from "./constants";
 import type { CameraTarget, PlacementCameraContext } from "./types";
+import {
+  gameAreaToBoundingBox,
+  type BoundingBox,
+} from "../../geometry/gameArea/gameAreaBounds";
 
 function findMarker(
   overlays: readonly MapDraftOverlay[],
@@ -60,6 +64,7 @@ function buildTarget(
       options.minZoom ??
       approximatePlayAreaContextMinZoom(ctx.gameArea, box),
     paddingBiasPx: ctx.panelPeekHeightPx + PANEL_PADDING_EXTRA_PX,
+    paddingTopBiasPx: ctx.panelTopPaddingPx,
     forceReframe: options.forceReframe ?? ctx.forceReframe,
   };
 }
@@ -78,6 +83,7 @@ function playAreaCameraTarget(
       ? approximatePlayAreaContextMinZoom(ctx.gameArea, options.contextBox)
       : undefined,
     paddingBiasPx: ctx.panelPeekHeightPx + PANEL_PADDING_EXTRA_PX,
+    paddingTopBiasPx: ctx.panelTopPaddingPx,
     forceReframe: options.forceReframe ?? ctx.forceReframe,
   };
 }
@@ -95,7 +101,59 @@ function answeredEliminationTarget(
     bounds: boundingBoxToBoundsExpression(eliminationBox),
     minZoom: approximatePlayAreaContextMinZoom(ctx.gameArea, eliminationBox),
     paddingBiasPx: ctx.panelPeekHeightPx + PANEL_PADDING_EXTRA_PX,
+    paddingTopBiasPx: ctx.panelTopPaddingPx,
     forceReframe: forceReframe || ctx.forceReframe,
+  };
+}
+
+function boundingBoxArea(box: BoundingBox): number {
+  return Math.max(box.east - box.west, 0) * Math.max(box.north - box.south, 0);
+}
+
+/** Frame the shaded cell (no) or the kept pocket (yes) into the visible map band. */
+function matchingAnsweredFocusBox(
+  ctx: PlacementCameraContext,
+): BoundingBox | null {
+  const eliminationBox = boundsForGeoJsonFeatures(ctx.eliminationFeatures);
+  if (!eliminationBox) {
+    return null;
+  }
+
+  const playBox = gameAreaToBoundingBox(ctx.gameArea);
+  if (boundingBoxArea(eliminationBox) <= boundingBoxArea(playBox) * 0.55) {
+    return eliminationBox;
+  }
+
+  // Yes-elim is the large complement — frame seeker/nearest instead of
+  // running safeDifference on the click/reframe path.
+  const seeker = findMarker(ctx.overlays, "matching-draft-seeker");
+  const nearest = findMarker(ctx.overlays, "matching-draft-nearest");
+  if (seeker && nearest) {
+    return boundsForTwoPoints(seeker, nearest);
+  }
+  if (nearest) {
+    return boundsForPinPoint(nearest);
+  }
+  if (seeker) {
+    return boundsForPinPoint(seeker);
+  }
+
+  return eliminationBox;
+}
+
+function matchingAnsweredTarget(ctx: PlacementCameraContext): CameraTarget | null {
+  const focusBox = matchingAnsweredFocusBox(ctx);
+  if (!focusBox) {
+    return null;
+  }
+
+  return {
+    bounds: boundingBoxToBoundsExpression(focusBox),
+    // Fit the region into chrome-aware padding; do not floor to play-area zoom.
+    paddingBiasPx: ctx.panelPeekHeightPx + PANEL_PADDING_EXTRA_PX,
+    paddingTopBiasPx: ctx.panelTopPaddingPx,
+    // First answered paint reframes via fingerprint; yes/no flips stay put.
+    forceReframe: false,
   };
 }
 
@@ -269,7 +327,7 @@ function computeMeasuringTarget(ctx: PlacementCameraContext): CameraTarget | nul
 
 function computeMatchingTarget(ctx: PlacementCameraContext): CameraTarget | null {
   if (ctx.phase === "answered") {
-    return answeredEliminationTarget(ctx);
+    return matchingAnsweredTarget(ctx);
   }
 
   const seeker = findMarker(ctx.overlays, "matching-draft-seeker");

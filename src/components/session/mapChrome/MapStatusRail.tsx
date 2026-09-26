@@ -23,7 +23,8 @@ import { TimerBlock } from "../status/TimerBlock";
 import { ToolStatusBlock } from "../status/ToolStatusBlock";
 import { SYNC_TONE_CLASSES, syncRailDisplay } from "../status/syncRailDisplay";
 
-interface MapStatusRailProps {
+/** Role-agnostic status/timer/sync bag for MapStatusRail (W4-A peel). */
+export type MapStatusRailModel = {
   sessionCode: string;
   sessionId?: string | null;
   roleGates?: RoleGates | null;
@@ -62,62 +63,66 @@ interface MapStatusRailProps {
   onSyncErrorAction?: () => void;
   /** Dim chrome and block tool/timer interaction when the session is gone. */
   inactiveChrome?: boolean;
-  terminalSessionError?: import("@/domain/device/feedback/userErrors").UserErrorDisplay | null;
+  terminalSessionError?:
+    import("@/domain/device/feedback/userErrors").UserErrorDisplay | null;
   onReturnToJoin?: () => void;
   /** In-flow status for DesktopOpsShell (vs absolute overlay on mobile). */
   expanded?: boolean;
-  /** Replace default in-header home ScreenNav (e.g. observer leave control). */
-  headerLeading?: ReactNode;
   /** Synced hiding-zone Move card — drives PHASE=MOVE in status chrome. */
   moveInProgress?: boolean;
-}
+};
 
-export function MapStatusRail({
-  sessionCode,
-  sessionId = null,
-  roleGates = null,
-  sessionRules = { gameSize: "medium" },
-  playerRole = "seeker",
-  activeTool,
-  syncStatus,
-  queuedWrites,
-  message,
-  timerState,
-  timerRunning,
-  timerHasStarted,
-  timerSyncing = false,
-  canStartGame,
-  onStartGame,
-  onTimerStart,
-  onTimerPause,
-  onTimerReset,
-  timerControlsDisabled = false,
-  onOpenLog,
-  pendingQuestions = [],
-  closeTimerMenu = false,
-  showPreloadBanner = false,
-  endGameActive = false,
-  myUid,
-  hostUid = null,
-  seekerLocations = [],
-  onCancelWalkingQuestion,
-  isHost = false,
-  onResetEndGame,
-  foundHiderPending = false,
-  foundRequestedByUid,
-  onAcceptFoundHider,
-  onDeclineFoundHider,
-  hiderOutsideZone = false,
-  onSyncErrorAction,
-  inactiveChrome = false,
-  terminalSessionError = null,
-  onReturnToJoin,
-  expanded = false,
-  headerLeading,
-  moveInProgress = false,
-}: MapStatusRailProps) {
+export type MapStatusRailProps = {
+  model: MapStatusRailModel;
+  /** Replace default in-header home ScreenNav (e.g. observer leave control). */
+  headerLeading?: ReactNode;
+};
+
+export function MapStatusRail({ model, headerLeading }: MapStatusRailProps) {
+  const {
+    sessionCode,
+    sessionId = null,
+    roleGates = null,
+    sessionRules = { gameSize: "medium" },
+    playerRole = "seeker",
+    activeTool,
+    syncStatus,
+    queuedWrites,
+    message,
+    timerState,
+    timerRunning,
+    timerHasStarted,
+    timerSyncing = false,
+    canStartGame,
+    onStartGame,
+    onTimerStart,
+    onTimerPause,
+    onTimerReset,
+    timerControlsDisabled = false,
+    onOpenLog,
+    pendingQuestions = [],
+    closeTimerMenu = false,
+    showPreloadBanner = false,
+    endGameActive = false,
+    myUid,
+    hostUid = null,
+    seekerLocations = [],
+    onCancelWalkingQuestion,
+    isHost = false,
+    onResetEndGame,
+    foundHiderPending = false,
+    foundRequestedByUid,
+    onAcceptFoundHider,
+    onDeclineFoundHider,
+    hiderOutsideZone = false,
+    onSyncErrorAction,
+    inactiveChrome = false,
+    terminalSessionError = null,
+    onReturnToJoin,
+    expanded = false,
+    moveInProgress = false,
+  } = model;
   const [timerMenuOpen, setTimerMenuOpen] = useState(false);
-  const [syncMenuOpen, setSyncMenuOpen] = useState(false);
   const [preloadMenuOpen, setPreloadMenuOpen] = useState(false);
   const railRef = useRef<HTMLDivElement>(null);
   const {
@@ -140,17 +145,15 @@ export function MapStatusRail({
     onSyncErrorAction &&
     onReturnToJoin;
   const showTimerMenu = timerMenuOpen && !closeTimerMenu;
-  const showSyncMenu = syncMenuOpen && !closeTimerMenu;
   const showPreloadMenu = preloadMenuOpen && !closeTimerMenu;
 
   const closeOtherMenus = () => {
     setTimerMenuOpen(false);
-    setSyncMenuOpen(false);
     setPreloadMenuOpen(false);
   };
 
   useEffect(() => {
-    if (!showTimerMenu && !showSyncMenu && !showPreloadMenu) {
+    if (!showTimerMenu && !showPreloadMenu) {
       return;
     }
 
@@ -172,20 +175,21 @@ export function MapStatusRail({
       window.removeEventListener("pointerdown", handlePointerDown);
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [showPreloadMenu, showSyncMenu, showTimerMenu]);
+  }, [showPreloadMenu, showTimerMenu]);
+
+  const railClassName = `jl-status-rail pointer-events-none z-[var(--z-banner)]${
+    expanded ? " jl-status-rail--expanded" : " absolute inset-x-0 top-0"
+  }${
+    inactiveChrome
+      ? " [&_.jl-status-header-col--timer_.jl-ticker]:pointer-events-none [&_.jl-status-header-col--timer_.jl-ticker]:opacity-55 [&_.jl-status-header-col--timer_button]:pointer-events-none [&_.jl-status-header-col--timer_button]:opacity-55"
+      : ""
+  }`;
 
   return (
     <div
       ref={railRef}
-      className={`jl-status-rail pointer-events-none z-[var(--z-banner)]${
-        expanded
-          ? " jl-status-rail--expanded"
-          : " absolute inset-x-0 top-0"
-      }${
-        inactiveChrome
-          ? " [&_.jl-status-header-col--timer_.jl-ticker]:pointer-events-none [&_.jl-status-header-col--timer_.jl-ticker]:opacity-55 [&_.jl-status-header-col--timer_button]:pointer-events-none [&_.jl-status-header-col--timer_button]:opacity-55"
-          : ""
-      }`}
+      className={railClassName}
+      data-testid="map-status-rail-mantine"
     >
       <div className="relative">
         <TimerBlock
@@ -201,7 +205,15 @@ export function MapStatusRail({
           disabled={timerControlsDisabled || inactiveChrome}
         />
 
-        <div className="jl-status-bar">
+        <div
+          className="w-full"
+          style={{
+            paddingTop: "max(0.5rem, env(safe-area-inset-top))",
+            paddingLeft: "max(0.75rem, env(safe-area-inset-left))",
+            paddingRight: "max(0.75rem, env(safe-area-inset-right))",
+            paddingBottom: "0.25rem",
+          }}
+        >
           <ToolStatusBlock
             sessionCode={sessionCode}
             playerRole={playerRole}
@@ -221,17 +233,25 @@ export function MapStatusRail({
             timerMenuOpen={showTimerMenu}
             moveInProgress={moveInProgress}
             expanded={expanded}
+            onTimerPause={onTimerPause}
+            onTimerResume={onTimerStart}
+            timerControlsDisabled={timerControlsDisabled || inactiveChrome}
             headerLeading={
-              headerLeading ?? (
-                <ScreenNav variant="home" placement="inline" />
-              )
+              headerLeading ?? <ScreenNav variant="home" placement="inline" />
+            }
+            syncSlot={
+              <SyncBlock
+                syncStatus={syncStatus}
+                queuedWrites={queuedWrites}
+                message={message}
+                placement="segment"
+              />
             }
             onOpenTimerMenu={() => {
               if (inactiveChrome) {
                 return;
               }
               setTimerMenuOpen((open) => !open);
-              setSyncMenuOpen(false);
               setPreloadMenuOpen(false);
             }}
           />
@@ -244,25 +264,10 @@ export function MapStatusRail({
               setPreloadMenuOpen(open);
               if (open) {
                 setTimerMenuOpen(false);
-                setSyncMenuOpen(false);
               }
             }}
           />
         ) : null}
-        <SyncBlock
-          syncStatus={syncStatus}
-          queuedWrites={queuedWrites}
-          message={message}
-          menuOpen={showSyncMenu}
-          onMenuOpenChange={(open) => {
-            setSyncMenuOpen(open);
-            if (open) {
-              setTimerMenuOpen(false);
-              setPreloadMenuOpen(false);
-            }
-          }}
-          onSyncErrorAction={onSyncErrorAction}
-        />
 
         {showTerminalBanner ? (
           <HudErrorBanner

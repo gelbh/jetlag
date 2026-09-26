@@ -12,9 +12,8 @@ type MapViewWithLandscapeInsetProps = ComponentProps<typeof MapView> & {
 export function MapViewWithLandscapeInset({
   isDesktop,
   mobileInset = "dock",
-  mapStyleControlInset: mapStyleControlInsetProp,
-  zoomControlInset: zoomControlInsetProp,
-  ...props
+  model,
+  children,
 }: MapViewWithLandscapeInsetProps) {
   const landscape = useMapLandscapeChrome();
   const baseInset = isDesktop ? "safe-area" : mobileInset;
@@ -26,9 +25,13 @@ export function MapViewWithLandscapeInset({
 
   return (
     <MapView
-      {...props}
-      mapStyleControlInset={mapStyleControlInsetProp ?? resolvedInset}
-      zoomControlInset={zoomControlInsetProp ?? resolvedInset}
-    />
+      model={{
+        ...model,
+        mapStyleControlInset: model.mapStyleControlInset ?? resolvedInset,
+        zoomControlInset: model.zoomControlInset ?? resolvedInset,
+      }}
+    >
+      {children}
+    </MapView>
   );
 }

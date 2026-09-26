@@ -1,115 +1,108 @@
 import { useState } from "react";
-import { DesktopContentColumn } from "../components/ui/layout/DesktopContentColumn";
-import { EntryScreenLayout } from "../components/ui/layout/EntryScreenLayout";
-import { MotionPressable } from "../components/motion/MotionPressable";
+import { Button, Container, Stack, Text } from "@mantine/core";
 import {
-  ScreenHeader,
-  screenHeaderOffsetClassName,
-} from "../components/ui/layout/ScreenHeader";
-import { ReportProblemSheet } from "../components/incident/ReportProblemSheet";
+  Bug,
+  ChatCircleDots,
+  Lightbulb,
+  MagnifyingGlass,
+  WarningCircle,
+} from "@phosphor-icons/react";
+import { ReportProblemSheet } from "@/components/incident/ReportProblemSheet";
+import {
+  InsetGroup,
+  SectionLabel,
+  filledStyles,
+} from "@/components/ui/entry/entryChrome";
+import { InsetRow } from "@/components/ui/entry/InsetRow";
+import { EntryHeader } from "@/components/ui/entry/EntryHeader";
+import { EntryScreenLayout } from "@/components/ui/layout/EntryScreenLayout";
 import {
   githubBugReportUrl,
   githubBugsBrowseUrl,
   githubIdeasBrowseUrl,
   githubIdeaSubmitUrl,
-} from "../domain/device/feedback/githubFeedback";
-
-const externalLinkProps = {
-  target: "_blank" as const,
-  rel: "noopener noreferrer",
-};
+} from "@/domain/device/feedback/githubFeedback";
 
 export function Feedback() {
   const [reportProblemOpen, setReportProblemOpen] = useState(false);
 
   return (
-    <EntryScreenLayout>
-      <ScreenHeader backTo="/" backLabel="Back" />
-      <DesktopContentColumn
-        maxWidth="entry"
-        className="flex min-h-0 flex-1 flex-col"
+    <EntryScreenLayout justify="start" skin="plain" flush>
+      <EntryHeader title="Feedback" />
+      <Container
+        size="xs"
+        w="100%"
+        px="md"
+        maw={390}
+        py="lg"
       >
-        <div className="flex min-h-0 flex-1 flex-col justify-between">
-          <div className={`space-y-3 ${screenHeaderOffsetClassName}`}>
-            <h1 className="font-display text-balance text-[clamp(2rem,10vw,3rem)] font-bold uppercase leading-[0.92] tracking-tight text-field-ink">
-              Feedback
-            </h1>
-            <p className="jl-selectable max-w-sm text-pretty text-base leading-relaxed text-field-ink-muted">
-              Search existing threads before posting so bugs and ideas stay in one
-              place. For an urgent live issue mid-game, report a problem instead.
-            </p>
-          </div>
+        <Stack gap={22}>
+          <Text
+            size="sm"
+            c="var(--color-field-ink-muted)"
+            style={{ lineHeight: 1.4, textWrap: "pretty" }}
+          >
+            Search existing threads before posting so bugs and ideas stay in one
+            place. For an urgent live issue mid-game, report a problem instead.
+          </Text>
 
-          <div className="home-enter-actions space-y-2.5 pb-[max(1rem,env(safe-area-inset-bottom))]">
-            <p className="font-display text-[10px] font-semibold uppercase tracking-[0.12em] text-field-ink-muted">
-              Live support
-            </p>
-            <MotionPressable
-              as="button"
-              type="button"
+          <Stack gap={8}>
+            <SectionLabel>Live support</SectionLabel>
+            <Button
+              fullWidth
+              leftSection={<WarningCircle size={18} weight="bold" />}
               onClick={() => setReportProblemOpen(true)}
               aria-label="Report a problem"
-              className="home-card-btn home-card-btn-primary"
+              styles={filledStyles}
             >
-              <span>Report a problem</span>
-              <span className="home-card-btn-hint">Live incident desk</span>
-            </MotionPressable>
+              Report a problem
+            </Button>
+          </Stack>
 
-            <p className="pt-2 font-display text-[10px] font-semibold uppercase tracking-[0.12em] text-field-ink-muted">
-              Improvement ideas
-            </p>
-            <MotionPressable
-              as="a"
-              href={githubIdeasBrowseUrl()}
-              {...externalLinkProps}
-              aria-label="Browse improvement ideas on GitHub"
-              className="home-card-btn home-card-btn-secondary"
-            >
-              <span>Browse ideas</span>
-              <span className="home-card-btn-hint">GitHub Issues</span>
-            </MotionPressable>
-            <MotionPressable
-              as="a"
-              href={githubIdeaSubmitUrl()}
-              {...externalLinkProps}
-              aria-label="Suggest an improvement on GitHub"
-              className="home-card-btn home-card-btn-primary"
-            >
-              <span>Suggest improvement</span>
-              <span className="home-card-btn-hint">New idea issue</span>
-            </MotionPressable>
+          <Stack gap={8}>
+            <SectionLabel>Improvement ideas</SectionLabel>
+            <InsetGroup>
+              <InsetRow
+                href={githubIdeasBrowseUrl()}
+                label="Browse ideas"
+                icon={<MagnifyingGlass size={22} weight="regular" />}
+                aria-label="Browse improvement ideas on GitHub"
+              />
+              <InsetRow
+                showSeparator
+                href={githubIdeaSubmitUrl()}
+                label="Suggest improvement"
+                icon={<Lightbulb size={22} weight="regular" />}
+                aria-label="Suggest an improvement on GitHub"
+              />
+            </InsetGroup>
+          </Stack>
 
-            <p className="pt-2 font-display text-[10px] font-semibold uppercase tracking-[0.12em] text-field-ink-muted">
-              Bug reports
-            </p>
-            <MotionPressable
-              as="a"
-              href={githubBugsBrowseUrl()}
-              {...externalLinkProps}
-              aria-label="Browse bug reports on GitHub"
-              className="home-card-btn home-card-btn-secondary"
-            >
-              <span>Browse bugs</span>
-              <span className="home-card-btn-hint">GitHub Issues</span>
-            </MotionPressable>
-            <MotionPressable
-              as="a"
-              href={githubBugReportUrl()}
-              {...externalLinkProps}
-              aria-label="Report a bug on GitHub"
-              className="home-card-btn home-card-btn-primary"
-            >
-              <span>Report a bug</span>
-              <span className="home-card-btn-hint">Bug report form</span>
-            </MotionPressable>
-          </div>
-        </div>
-      </DesktopContentColumn>
+          <Stack gap={8}>
+            <SectionLabel>Bug reports</SectionLabel>
+            <InsetGroup>
+              <InsetRow
+                href={githubBugsBrowseUrl()}
+                label="Browse bugs"
+                icon={<ChatCircleDots size={22} weight="regular" />}
+                aria-label="Browse bug reports on GitHub"
+              />
+              <InsetRow
+                showSeparator
+                href={githubBugReportUrl()}
+                label="Report a bug"
+                icon={<Bug size={22} weight="regular" />}
+                aria-label="Report a bug on GitHub"
+              />
+            </InsetGroup>
+          </Stack>
+        </Stack>
 
-      <ReportProblemSheet
-        open={reportProblemOpen}
-        onClose={() => setReportProblemOpen(false)}
-      />
+        <ReportProblemSheet
+          open={reportProblemOpen}
+          onClose={() => setReportProblemOpen(false)}
+        />
+      </Container>
     </EntryScreenLayout>
   );
 }

@@ -9,137 +9,104 @@ import { LiveUserLocationLayer } from "../../components/map/layers/LiveUserLocat
 import { MapViewportTracker } from "../../components/map/chrome/MapViewportTracker";
 import { ActiveThermometerWalkLayer } from "../../components/map/layers/ActiveThermometerWalkLayer";
 import { PendingQuestionLayer } from "../../components/map/layers/PendingQuestionLayer";
+import { MapDrawStrokeCapture } from "../../components/map/helpers/MapDrawStrokeCapture";
+import { isAskHudOwnedTool } from "../../domain/ask/askHudModes";
 import { AdminBoundariesLayer, TransitLayer } from "./lazyImports";
 import type { MapScreenController } from "./useMapScreenController";
 
-type MapScreenMapLayersProps = Pick<
-  MapScreenController,
-  | "session"
-  | "gameArea"
-  | "toolGameArea"
-  | "effectiveBasemapStyle"
-  | "streetBasemap"
-  | "handleMapStyleChange"
-  | "mapChromeControlInset"
-  | "center"
-  | "effectiveMapFocusBounds"
-  | "placementRecenterToken"
-  | "placementFocusPaddingBias"
-  | "placementFocusMinZoom"
-  | "placementFocusMaxZoom"
-  | "placementFocusPreferFly"
-  | "requestPlacementRecenter"
-  | "handleMapClick"
-  | "handleDraftMarkerActivate"
-  | "chromeHudRef"
-  | "mapShellRef"
-  | "exportLegendRef"
-  | "placementCrosshair"
-  | "handleMapViewportChange"
-  | "handleMapPanStart"
-  | "handleMapPanEnd"
-  | "transitEnabled"
-  | "layerVisibility"
-  | "transitStaticData"
-  | "transitLiveData"
-  | "mapViewport"
-  | "annotations"
-  | "selectedAnnotationId"
-  | "draftEliminationFeatures"
-  | "confirmedHidingZones"
-  | "seekerLocations"
-  | "uid"
-  | "activeThermometerWalk"
-  | "pendingQuestions"
-  | "geometryEditAnnotation"
-  | "geometryDraft"
-  | "mapDraftOverlays"
-  | "showAdminBoundaries"
-  | "adminBoundaryLoading"
-  | "adminBoundaryFeatures"
-  | "showCurrentLocation"
-  | "awaitingPlacement"
-  | "lowPowerMode"
-  | "distanceUnit"
-  | "handleLiveLocationError"
->;
+export type MapScreenMapLayersProps = {
+  controller: MapScreenController;
+};
 
-export function MapScreenMapLayers({
-  session,
-  gameArea,
-  toolGameArea,
-  effectiveBasemapStyle,
-  streetBasemap,
-  handleMapStyleChange,
-  mapChromeControlInset,
-  center,
-  effectiveMapFocusBounds,
-  placementRecenterToken,
-  placementFocusPaddingBias,
-  placementFocusMinZoom,
-  placementFocusMaxZoom,
-  placementFocusPreferFly,
-  requestPlacementRecenter,
-  handleMapClick,
-  handleDraftMarkerActivate,
-  chromeHudRef,
-  mapShellRef,
-  exportLegendRef,
-  placementCrosshair,
-  handleMapViewportChange,
-  handleMapPanStart,
-  handleMapPanEnd,
-  transitEnabled,
-  layerVisibility,
-  transitStaticData,
-  transitLiveData,
-  mapViewport,
-  annotations,
-  selectedAnnotationId,
-  draftEliminationFeatures,
-  confirmedHidingZones,
-  seekerLocations,
-  uid,
-  activeThermometerWalk,
-  pendingQuestions,
-  geometryEditAnnotation,
-  geometryDraft,
-  mapDraftOverlays,
-  showAdminBoundaries,
-  adminBoundaryLoading,
-  adminBoundaryFeatures,
-  showCurrentLocation,
-  awaitingPlacement,
-  lowPowerMode,
-  distanceUnit,
-  handleLiveLocationError,
-}: MapScreenMapLayersProps) {
+export function MapScreenMapLayers({ controller }: MapScreenMapLayersProps) {
+  const {
+    session,
+    gameArea,
+    toolGameArea,
+    effectiveBasemapStyle,
+    streetBasemap,
+    handleMapStyleChange,
+    mapChromeControlInset,
+    center,
+    effectiveMapFocusBounds,
+    placementRecenterToken,
+    placementFocusPaddingBias,
+    placementFocusPaddingTopBias,
+    placementFocusMinZoom,
+    placementFocusMaxZoom,
+    placementFocusPreferFly,
+    requestPlacementRecenter,
+    handleMapClick,
+    handleDraftMarkerActivate,
+    chromeHudRef,
+    mapShellRef,
+    exportLegendRef,
+    placementCrosshair,
+    handleMapViewportChange,
+    handleMapPanStart,
+    handleMapPanEnd,
+    transitEnabled,
+    layerVisibility,
+    transitStaticData,
+    transitLiveData,
+    mapViewport,
+    annotations,
+    selectedAnnotationId,
+    draftEliminationFeatures,
+    confirmedHidingZones,
+    seekerLocations,
+    uid,
+    activeThermometerWalk,
+    mapPendingQuestions: pendingQuestions,
+    geometryEditAnnotation,
+    geometryDraft,
+    mapDraftOverlays,
+    showAdminBoundaries,
+    adminBoundaryLoading,
+    adminBoundaryFeatures,
+    showCurrentLocation,
+    awaitingPlacement,
+    lowPowerMode,
+    distanceUnit,
+    handleLiveLocationError,
+    activeTool,
+    drawTool,
+  } = controller;
+
+  const hideMapControls =
+    activeTool !== "none" && isAskHudOwnedTool(activeTool);
+
   return (
     <div ref={mapShellRef} className="absolute inset-0">
       <MapView
         key={session!.id}
-        mapKey={session!.id}
-        mapStyle={effectiveBasemapStyle}
-        streetBasemap={streetBasemap}
-        onMapStyleChange={handleMapStyleChange}
-        zoomControlInset={mapChromeControlInset}
-        mapStyleControlInset={mapChromeControlInset}
-        center={center}
-        zoom={12}
-        focusBounds={effectiveMapFocusBounds}
-        focusMinZoom={placementFocusMinZoom}
-        focusMaxZoom={placementFocusMaxZoom}
-        fitBoundsMode="once"
-        recenterToken={placementRecenterToken}
-        focusPaddingBias={placementFocusPaddingBias}
-        focusPreferFly={placementFocusPreferFly}
-        showCompassControl
-        onRecenter={requestPlacementRecenter}
-        onMapClick={handleMapClick}
-        chromeHudRef={chromeHudRef}
-        className={
-          placementCrosshair ? "map-crosshair h-full w-full" : "h-full w-full"
-        }
+        model={{
+          mapKey: session!.id,
+          mapStyle: effectiveBasemapStyle,
+          streetBasemap,
+          onMapStyleChange: hideMapControls ? undefined : handleMapStyleChange,
+          showMapStyleToggle: !hideMapControls,
+          showZoomControl: !hideMapControls,
+          zoomControlInset: mapChromeControlInset,
+          mapStyleControlInset: mapChromeControlInset,
+          center,
+          zoom: 12,
+          focusBounds: effectiveMapFocusBounds,
+          focusMinZoom: placementFocusMinZoom,
+          focusMaxZoom: placementFocusMaxZoom,
+          fitBoundsMode: "once",
+          recenterToken: placementRecenterToken,
+          focusPaddingBias: placementFocusPaddingBias,
+          focusPaddingTopBias: placementFocusPaddingTopBias,
+          focusPreferFly: placementFocusPreferFly,
+          showCompassControl: !hideMapControls,
+          onRecenter: requestPlacementRecenter,
+          onMapClick: handleMapClick,
+          chromeHudRef,
+          className: placementCrosshair
+            ? "map-crosshair h-full w-full"
+            : "h-full w-full",
+        }}
       >
         <MapViewportTracker
           onViewportChange={handleMapViewportChange}
@@ -147,6 +114,12 @@ export function MapScreenMapLayers({
           onUserPanEnd={handleMapPanEnd}
         />
         <GameAreaMask gameArea={gameArea!} />
+        <MapDrawStrokeCapture
+          enabled={activeTool === "draw"}
+          onBegin={(lat, lng) => drawTool.beginStroke([lat, lng])}
+          onExtend={(lat, lng) => drawTool.extendStroke([lat, lng])}
+          onEnd={drawTool.endStroke}
+        />
         {transitEnabled && layerVisibility.transit ? (
           <Suspense fallback={null}>
             <TransitLayer

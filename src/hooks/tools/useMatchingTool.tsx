@@ -1,11 +1,17 @@
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MatchingHudBody } from "@/components/tools/ask/MatchingHudBody";
+import {
+  MatchingMapPlacementChrome,
+  type MatchingMapPlacementPhase,
+} from "@/components/tools/ask/MatchingMapPlacementChrome";
 import { QuestionPreviewSheet } from "@/components/tools/shared/controls/QuestionPreviewSheet";
 import { useLatestRequest } from "../forms/useLatestRequest";
 import { useDebouncedValue } from "../forms/useDebouncedValue";
 import type { AskHudReadiness } from "@/domain/ask/askHudModes";
+import { canCommit as askCanCommit } from "@/domain/ask/askHudModes";
 import { isActive } from "../../domain/map/annotations";
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
+import { formatDistance } from "../../domain/map/distance";
 import {
   defaultMatchingCategoryId,
   firstAvailableMatchingCategoryId,
@@ -17,6 +23,14 @@ import {
   type MatchingAnswer,
   type MatchingCategoryId,
 } from "../../domain/questions";
+import {
+  queryGeolocationPermission,
+  type GeolocationPermissionState,
+} from "../../services/core/location/geolocation";
+import {
+  matchingFeatureCountLabel,
+  matchingNullAnswerMessage,
+} from "../../services/geo/matching";
 import { isAdminDivisionCategoryAvailable } from "../../services/geo/overpass/adminDivisionAvailability";
 import { poiCandidateToMatchingFeature } from "@/domain/geo/poiCandidateAdapters";
 import { previewBasemapPois } from "@/services/geo/maplibre/previewBasemapPois";
@@ -104,6 +118,7 @@ export function useMatchingTool({
     setMatchingSeekerAnchor,
     resetDraft: resetMatchingDraft,
     selectCategory,
+    reopenCategoryPicker,
   } = draft;
 
   const activeAnnotations = useMemo(
@@ -352,9 +367,7 @@ export function useMatchingTool({
       const mapStyle = useMapStore.getState().mapStyle;
       const categoryId = matchingCategoryChosen ? matchingCategoryId : null;
       const resolver =
-        categoryId != null
-          ? getMatchingCategory(categoryId).resolver
-          : null;
+        categoryId != null ? getMatchingCategory(categoryId).resolver : null;
       const tapHit =
         resolver === "overpassPoint" && categoryId != null
           ? previewBasemapPois({
@@ -376,7 +389,7 @@ export function useMatchingTool({
     ],
   );
 
-  const handleGps = async () => {
+  const handleGps = useCallback(async () => {
     setMatchingError(null);
 
     try {
@@ -393,7 +406,15 @@ export function useMatchingTool({
         error instanceof Error ? error.message : "GPS location unavailable.",
       );
     }
-  };
+  }, [
+    ensurePointInGameArea,
+    refreshGps,
+    setMatchingError,
+    setMatchingSeekerAnchor,
+  ]);
+
+  const handleGpsRef = useRef(handleGps);
+  handleGpsRef.current = handleGps;
 
   const buildCommitInput = useCallback((): CommitMatchingInput => {
     return {
@@ -483,52 +504,51 @@ export function useMatchingTool({
 
   const nearestProvisional =
     matchingLoading &&
-    matchingFeatures.some(
-      (feature) => feature.confirmStatus === "provisional",
-    );
+    matchingFeatures.some((feature) => feature.confirmStatus === "provisional");
 
   const panel = (
     <MatchingToolPanel
-      distanceUnit={distanceUnit}
-      categoryId={matchingCategoryId}
-      categoryChosen={matchingCategoryChosen}
-      usedCategoryIds={usedMatchingCategories}
-      catalogCategories={catalog.matchingCatalog}
-      matchingSeekerPoint={matchingSeekerPoint}
-      matchingUsesContainment={catalog.matchingUsesContainment}
-      matchingNearestFeatureName={matchingNearestFeatureName}
-      matchingDistanceMeters={matchingDistanceMeters}
-      matchingFeatureCount={matchingFeatureCount}
-      matchingInPlayAreaFeatureCount={matchingInPlayAreaFeatureCount}
-      matchingNearestOutsidePlayArea={matchingNearestOutsidePlayArea}
-      matchingNullAnswer={matchingNullAnswer}
-      matchingLoading={matchingLoading}
-      nearestProvisional={nearestProvisional}
-      satelliteBasemap={mapStyle === "satellite"}
-      gpsLoading={gpsLoading}
-      matchingAnswer={matchingAnswer}
-      error={matchingError ?? gpsError ?? mapError}
-      awaitHiderAnswer={awaitHiderAnswer}
-      costLabel={catalog.costLabel}
-      isSubmitting={session.isBusy}
-      previewOpen={previewOpen}
-      previewQuestion={previewQuestion}
-      wizardStepRef={wizardStepRef}
-      onCategoryChange={handleCategoryChange}
-      onUseGps={() => void handleGps()}
-      onAnswerChange={setMatchingAnswerSynced}
-      onCommit={() => void commit()}
-      onRetry={
-        matchingSeekerPoint && matchingCategoryId
-          ? () => void resolveForAnchor(matchingSeekerPoint, matchingCategoryId)
-          : undefined
-      }
-      onPreviewConfirm={() =>
-        void session.runAction(async () => {
-          await performMatchingCommit(buildCommitInput());
-        })
-      }
-      onPreviewCancel={() => setPreviewOpen(false)}
+      model={{
+        distanceUnit,
+        categoryId: matchingCategoryId,
+        categoryChosen: matchingCategoryChosen,
+        usedCategoryIds: usedMatchingCategories,
+        catalogCategories: catalog.matchingCatalog,
+        matchingSeekerPoint,
+        matchingUsesContainment: catalog.matchingUsesContainment,
+        matchingNearestFeatureName,
+        matchingDistanceMeters,
+        matchingFeatureCount,
+        matchingInPlayAreaFeatureCount,
+        matchingNearestOutsidePlayArea,
+        matchingNullAnswer,
+        matchingLoading,
+        nearestProvisional,
+        satelliteBasemap: mapStyle === "satellite",
+        gpsLoading,
+        matchingAnswer,
+        error: matchingError ?? gpsError ?? mapError,
+        awaitHiderAnswer,
+        costLabel: catalog.costLabel,
+        isSubmitting: session.isBusy,
+        previewOpen,
+        previewQuestion,
+        wizardStepRef,
+        onCategoryChange: handleCategoryChange,
+        onUseGps: () => void handleGps(),
+        onAnswerChange: setMatchingAnswerSynced,
+        onCommit: () => void commit(),
+        onRetry:
+          matchingSeekerPoint && matchingCategoryId
+            ? () =>
+                void resolveForAnchor(matchingSeekerPoint, matchingCategoryId)
+            : undefined,
+        onPreviewConfirm: () =>
+          void session.runAction(async () => {
+            await performMatchingCommit(buildCommitInput());
+          }),
+        onPreviewCancel: () => setPreviewOpen(false),
+      }}
     />
   );
 
@@ -538,8 +558,7 @@ export function useMatchingTool({
       wizardStepRef.current = "category";
       return;
     }
-    const resolved =
-      matchingNullAnswer || matchingNearestFeatureName !== null;
+    const resolved = matchingNullAnswer || matchingNearestFeatureName !== null;
     if (!matchingSeekerPoint || matchingLoading || !resolved) {
       wizardStepRef.current = "place";
       return;
@@ -559,6 +578,120 @@ export function useMatchingTool({
   const resolveComplete =
     matchingNullAnswer || matchingNearestFeatureName !== null;
 
+  const mapFirstEligible =
+    matchingCategoryChosen && matchingCategoryId !== null;
+
+  const [placementGeo, setPlacementGeo] = useState<
+    GeolocationPermissionState | "checking"
+  >("checking");
+  const autoGpsForCategoryRef = useRef<MatchingCategoryId | null>(null);
+
+  useEffect(() => {
+    if (!mapFirstEligible) {
+      setPlacementGeo("checking");
+      autoGpsForCategoryRef.current = null;
+      return;
+    }
+
+    let cancelled = false;
+    void (async () => {
+      const permission = await queryGeolocationPermission();
+      if (cancelled) {
+        return;
+      }
+      setPlacementGeo(permission);
+      if (
+        permission === "granted" &&
+        matchingSeekerPoint === null &&
+        autoGpsForCategoryRef.current !== matchingCategoryId
+      ) {
+        autoGpsForCategoryRef.current = matchingCategoryId;
+        void handleGpsRef.current();
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+    // matchingSeekerPoint intentionally omitted: only gate auto-GPS at entry
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- category entry only
+  }, [mapFirstEligible, matchingCategoryId]);
+
+  useEffect(() => {
+    autoGpsForCategoryRef.current = null;
+  }, [matchingCategoryId]);
+
+  // Stay map-first for the whole post-category flow (locate → resolve → answer/send).
+  const mapPlacementActive = Boolean(mapFirstEligible);
+
+  // Drop stale GPS errors once an anchor exists (map tap or later successful fix).
+  const placementError =
+    matchingError ??
+    (matchingSeekerPoint === null ? gpsError : null) ??
+    mapError ??
+    null;
+  const categoryDef =
+    matchingCategoryId !== null
+      ? getMatchingCategory(matchingCategoryId)
+      : null;
+  const usesContainmentMatching = catalog.matchingUsesContainment;
+  const usesLandmassMatching = categoryDef?.resolver === "landmass";
+
+  const nearestFeatureSummary = matchingNearestFeatureName
+    ? `${matchingNearestFeatureName}${
+        !usesContainmentMatching &&
+        matchingDistanceMeters !== null &&
+        !matchingNearestOutsidePlayArea
+          ? ` · ${formatDistance(matchingDistanceMeters, distanceUnit)}`
+          : ""
+      }${matchingNearestOutsidePlayArea ? " (outside play area)" : ""}`
+    : null;
+
+  const featureCountLabel =
+    matchingFeatureCount !== null && matchingInPlayAreaFeatureCount !== null
+      ? matchingFeatureCountLabel(
+          matchingFeatureCount,
+          matchingInPlayAreaFeatureCount,
+          usesContainmentMatching,
+          usesLandmassMatching,
+        )
+      : null;
+
+  const answerNearestSummary = nearestFeatureSummary
+    ? featureCountLabel
+      ? `${nearestFeatureSummary} · ${featureCountLabel}`
+      : nearestFeatureSummary
+    : null;
+
+  let placementPhase: MatchingMapPlacementPhase;
+  if (matchingSeekerPoint !== null && resolveComplete && !matchingLoading) {
+    placementPhase = "answer";
+  } else if (
+    matchingSeekerPoint !== null &&
+    (matchingLoading || !resolveComplete)
+  ) {
+    placementPhase = "resolving";
+  } else if (matchingSeekerPoint === null && gpsLoading) {
+    placementPhase = "locating";
+  } else if (matchingSeekerPoint === null && placementError) {
+    placementPhase = "failed";
+  } else if (
+    matchingSeekerPoint === null &&
+    (placementGeo === "prompt" ||
+      placementGeo === "denied" ||
+      placementGeo === "unavailable")
+  ) {
+    placementPhase = placementGeo === "prompt" ? "needs_permission" : "failed";
+  } else {
+    placementPhase = "locating";
+  }
+
+  const placementCategoryLabel = categoryDef?.label ?? "";
+  const placementQuestionPrompt =
+    matchingCategoryId !== null
+      ? matchingQuestionFor(matchingCategoryId, catalog.customCategories).prompt
+      : "";
+
   const readiness: AskHudReadiness = {
     surface: "matching",
     placementReady: matchingSeekerPoint !== null,
@@ -573,9 +706,34 @@ export function useMatchingTool({
   const hud = {
     readiness,
     costLabel: catalog.costLabel,
-    error: matchingError ?? gpsError ?? mapError ?? null,
+    error: placementError,
     onCommit: () => void commit(),
-    modeBody: (
+    suppressSheet: mapPlacementActive,
+    mapOverlay: mapPlacementActive ? (
+      <MatchingMapPlacementChrome
+        categoryLabel={placementCategoryLabel}
+        questionPrompt={placementQuestionPrompt}
+        costLabel={catalog.costLabel}
+        phase={placementPhase}
+        onUseGps={() => void handleGps()}
+        error={placementError}
+        nearestPlaceName={matchingNearestFeatureName}
+        awaitHiderAnswer={awaitHiderAnswer}
+        nearestSummary={answerNearestSummary}
+        nullAnswerMessage={
+          matchingNullAnswer && matchingCategoryId
+            ? matchingNullAnswerMessage(matchingCategoryId)
+            : null
+        }
+        answer={matchingAnswer}
+        onAnswerChange={setMatchingAnswerSynced}
+        canCommit={askCanCommit(readiness)}
+        isSubmitting={session.isBusy}
+        onCommit={() => void commit()}
+        onChangeCategory={reopenCategoryPicker}
+      />
+    ) : null,
+    modeBody: mapPlacementActive ? null : (
       <MatchingHudBody
         distanceUnit={distanceUnit}
         categoryId={matchingCategoryId}
@@ -599,6 +757,8 @@ export function useMatchingTool({
         onUseGps={() => void handleGps()}
         onAnswerChange={setMatchingAnswerSynced}
         awaitHiderAnswer={awaitHiderAnswer}
+        costLabel={catalog.costLabel}
+        toolLabel="Matching"
       />
     ),
     sheets: (
@@ -628,6 +788,7 @@ export function useMatchingTool({
       matchingEliminationPreview: catalog.matchingEliminationPreview,
       matchingLodPhase: catalog.matchingLodPhase,
       matchingCatalogComplete: !matchingLoading,
+      matchingCategoryId,
       seekerResolving: matchingLoading && matchingSeekerPoint !== null,
     },
     matchingLodPhase: catalog.matchingLodPhase,

@@ -1,4 +1,5 @@
 import { Capacitor } from "@capacitor/core";
+import { Box, Button, Stack, Text, Textarea } from "@mantine/core";
 import { useEffect, useId, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { APP_VERSION } from "../../domain/device/changelog";
@@ -14,8 +15,14 @@ import {
 } from "../../services/incident/incidentApi";
 import { getFirebaseAuth, isFirebaseConfigured } from "../../services/core/firebase/firebase";
 import { useSessionStore } from "../../state/sessionStore";
+import {
+  ErrorCallout,
+  InsetGroup,
+  SectionLabel,
+  filledStyles,
+  plainStyles,
+} from "../ui/entry/entryChrome";
 import { SheetHost } from "../ui/sheets/SheetHost";
-import { SheetHeader } from "../ui/sheets/SheetHeader";
 import { IncidentChatPanel } from "./IncidentChatPanel";
 import { SupportAgentChat } from "./SupportAgentChat";
 import "./ReportProblemSheet.css";
@@ -32,8 +39,7 @@ export interface ReportProblemSheetProps {
     input: CreateIncidentInput,
   ) => Promise<CreateIncidentResult>;
   /** Optional pre-seeded client errors (otherwise empty until a ring buffer lands). */
-  lastClientErrors?: readonly IncidentClientError[];
-}
+  lastClientErrors?: readonly IncidentClientError[];}
 
 function formatErrorAt(iso: string): string {
   const date = new Date(iso);
@@ -86,24 +92,19 @@ export function ReportProblemSheet({
   createIncidentFn = createIncident,
   lastClientErrors = [],
 }: ReportProblemSheetProps) {
-  const handleClose = () => {
-    onClose();
-  };
-
   return (
     <SheetHost
       open={open}
-      onClose={handleClose}
+      onClose={onClose}
       ariaLabel="Report problem"
-      sheetClassName="mx-auto max-w-lg jl-report-host"
-      maxHeightClassName="max-h-[min(85dvh,760px)]"
+      maxHeightClassName="max-h-[min(85dvh,40rem)]"
     >
       {open ? (
         <ReportProblemSheetContent
           onlineOverride={onlineOverride}
           createIncidentFn={createIncidentFn}
           lastClientErrors={lastClientErrors}
-          onClose={handleClose}
+          onClose={onClose}
         />
       ) : null}
     </SheetHost>
@@ -192,10 +193,6 @@ function ReportProblemSheetContent({
     }
   };
 
-  const handleClose = () => {
-    onClose();
-  };
-
   if (incidentId) {
     return (
       <div className="jl-report-sheet jl-report-post" data-testid="report-post">
@@ -225,137 +222,173 @@ function ReportProblemSheetContent({
           ))}
         </div>
         {postReportTab === "agent" ? (
-          <SupportAgentChat incidentId={incidentId} onClose={handleClose} />
+          <SupportAgentChat incidentId={incidentId} onClose={onClose} />
         ) : (
-          <IncidentChatPanel incidentId={incidentId} onClose={handleClose} />
+          <IncidentChatPanel incidentId={incidentId} onClose={onClose} />
         )}
       </div>
     );
   }
 
   return (
-    <div className="jl-report-sheet">
-      <SheetHeader
-            title="REPORT PROBLEM"
-            onClose={handleClose}
-            titleSize="xl"
-            flush
-            closeLabel="Close"
-          />
-          <p className="jl-report-helper">
-            Help us resolve this quickly. Optional details below.
-          </p>
+    <Stack gap="md">
+      <Stack gap={6} align="center">
+        <Text
+          component="h2"
+          fw={600}
+          c="var(--color-field-ink)"
+          style={{ fontSize: "1.25rem", letterSpacing: "-0.02em" }}
+        >
+          Report a problem
+        </Text>
+        <Text
+          size="sm"
+          c="var(--color-field-ink-muted)"
+          ta="center"
+          style={{ lineHeight: 1.4, textWrap: "pretty" }}
+        >
+          Help us resolve this quickly. Optional details below.
+        </Text>
+      </Stack>
 
-          <div>
-            <label htmlFor={noteId} className="jl-report-section-label">
-              Note (optional)
-            </label>
-            <div className="jl-report-note-wrap">
-              <textarea
-                id={noteId}
-                value={note}
-                maxLength={INCIDENT_NOTE_MAX_LENGTH}
-                onChange={(event) =>
-                  setNote(event.target.value.slice(0, INCIDENT_NOTE_MAX_LENGTH))
-                }
-                className="field-input jl-report-note"
-                placeholder="What happened?"
-                aria-describedby={`${noteId}-count`}
-              />
-              <span
-                id={`${noteId}-count`}
-                className="jl-report-note-count"
-                aria-live="polite"
-              >
-                {noteLength}/{INCIDENT_NOTE_MAX_LENGTH}
-              </span>
-            </div>
-          </div>
-
-          <div>
-            <p className="jl-report-section-label">Session code</p>
-            <div className="jl-report-session-stamp">
-              <span className="jl-report-session-glyph" aria-hidden="true">
-                !
-              </span>
-              <span
-                className={
-                  sessionCode
-                    ? "jl-report-session-code"
-                    : "jl-report-session-code jl-report-session-empty"
-                }
-              >
-                {sessionCode ?? "No active session"}
-              </span>
-            </div>
-          </div>
-
-          <div>
-            <p className="jl-report-section-label">Diagnostics summary</p>
-            <div className="jl-report-diagnostics" role="list">
-              <div className="jl-report-diagnostics-row" role="listitem">
-                <span className="jl-report-diagnostics-icon" aria-hidden="true">
-                  ◎
-                </span>
-                <span className="jl-report-diagnostics-label">Route</span>
-                <span className="jl-report-diagnostics-value">
-                  {diagnosticsPreview.route}
-                </span>
-              </div>
-              <div className="jl-report-diagnostics-row" role="listitem">
-                <span className="jl-report-diagnostics-icon" aria-hidden="true">
-                  ▣
-                </span>
-                <span className="jl-report-diagnostics-label">App version</span>
-                <span className="jl-report-diagnostics-value">
-                  {diagnosticsPreview.appVersion}
-                </span>
-              </div>
-              <div className="jl-report-diagnostics-row" role="listitem">
-                <span className="jl-report-diagnostics-icon" aria-hidden="true">
-                  ⚠
-                </span>
-                <span className="jl-report-diagnostics-label">Last error</span>
-                <span className="jl-report-diagnostics-value">
-                  {lastError ? lastError.name : "—"}
-                  {lastError ? (
-                    <span className="jl-report-diagnostics-sub">
-                      {formatErrorAt(lastError.at)}
-                    </span>
-                  ) : null}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {submitError ? (
-            <p className="jl-report-error" role="alert">
-              {submitError}
-            </p>
-          ) : null}
-          {!online ? (
-            <p className="jl-report-offline">
-              You&apos;re offline. Reconnect to send a report.
-            </p>
-          ) : null}
-
-          <div className="jl-report-actions">
-            <button
-              type="button"
-              className="btn-primary min-h-12 w-full"
-              disabled={!canSubmit}
-              onClick={() => void handleSubmit()}
+      <Stack gap={8}>
+        <SectionLabel>Note (optional)</SectionLabel>
+        <InsetGroup>
+          <Box px="sm" pt="sm" pb="xs" style={{ position: "relative" }}>
+            <Textarea
+              id={noteId}
+              value={note}
+              maxLength={INCIDENT_NOTE_MAX_LENGTH}
+              onChange={(event) =>
+                setNote(event.currentTarget.value.slice(0, INCIDENT_NOTE_MAX_LENGTH))
+              }
+              placeholder="What happened?"
+              minRows={4}
+              aria-describedby={`${noteId}-count`}
+              styles={{
+                input: {
+                  border: "none",
+                  backgroundColor: "transparent",
+                  color: "var(--color-field-ink)",
+                  fontSize: "1rem",
+                  paddingBottom: "1.5rem",
+                },
+              }}
+            />
+            <Text
+              id={`${noteId}-count`}
+              size="xs"
+              c="var(--color-field-ink-muted)"
+              aria-live="polite"
+              style={{
+                position: "absolute",
+                right: 12,
+                bottom: 10,
+                fontVariantNumeric: "tabular-nums",
+                pointerEvents: "none",
+              }}
             >
-              {submitting ? "Sending…" : "Send report"}
-            </button>
-            <button
-              type="button"
-              className="jl-report-cancel"
-              onClick={handleClose}
+              {noteLength}/{INCIDENT_NOTE_MAX_LENGTH}
+            </Text>
+          </Box>
+        </InsetGroup>
+      </Stack>
+
+      <Stack gap={8}>
+        <SectionLabel>Session code</SectionLabel>
+        <InsetGroup>
+          <Box px="md" py="sm">
+            <Text
+              fw={sessionCode ? 700 : 500}
+              c={
+                sessionCode
+                  ? "var(--color-field-ink)"
+                  : "var(--color-field-ink-muted)"
+              }
+              style={{
+                fontFamily: sessionCode ? "var(--font-mono)" : undefined,
+                letterSpacing: sessionCode ? "0.06em" : undefined,
+              }}
             >
-              Cancel
-            </button>
-          </div>
-        </div>
+              {sessionCode ?? "No active session"}
+            </Text>
+          </Box>
+        </InsetGroup>
+      </Stack>
+
+      <Stack gap={8}>
+        <SectionLabel>Diagnostics</SectionLabel>
+        <InsetGroup>
+          {(
+            [
+              ["Route", diagnosticsPreview.route],
+              ["App version", diagnosticsPreview.appVersion],
+              [
+                "Last error",
+                lastError ? lastError.name : "None",
+                lastError ? formatErrorAt(lastError.at) : null,
+              ],
+            ] as const
+          ).map(([label, value, sub], index) => (
+            <Box
+              key={label}
+              role="listitem"
+              px="md"
+              py="sm"
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                gap: 12,
+                borderTop:
+                  index === 0
+                    ? undefined
+                    : "0.33px solid oklch(from var(--color-field-ink) l c h / 0.12)",
+              }}
+            >
+              <Text size="sm" c="var(--color-field-ink-muted)">
+                {label}
+              </Text>
+              <Box style={{ textAlign: "right", minWidth: 0 }}>
+                <Text
+                  size="sm"
+                  fw={600}
+                  c="var(--color-field-ink)"
+                  style={{ overflowWrap: "anywhere" }}
+                >
+                  {value}
+                </Text>
+                {sub ? (
+                  <Text size="xs" c="var(--color-field-ink-muted)">
+                    {sub}
+                  </Text>
+                ) : null}
+              </Box>
+            </Box>
+          ))}
+        </InsetGroup>
+      </Stack>
+
+      <ErrorCallout>{submitError}</ErrorCallout>
+      {!online ? (
+        <Text size="sm" c="var(--color-field-ink-muted)" px={4}>
+          You&apos;re offline. Reconnect to send a report.
+        </Text>
+      ) : null}
+
+      <Stack gap={8}>
+        <Button
+          fullWidth
+          loading={submitting}
+          disabled={!canSubmit}
+          onClick={() => void handleSubmit()}
+          styles={filledStyles}
+        >
+          Send report
+        </Button>
+        <Button fullWidth variant="subtle" onClick={onClose} styles={plainStyles}>
+          Cancel
+        </Button>
+      </Stack>
+    </Stack>
   );
 }

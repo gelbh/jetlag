@@ -1,11 +1,9 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { SyncBlock } from "./SyncBlock";
 
 const baseProps = {
   queuedWrites: 0,
-  menuOpen: false,
-  onMenuOpenChange: vi.fn(),
 };
 
 describe("SyncBlock unhealthy sync text", () => {
@@ -16,9 +14,7 @@ describe("SyncBlock unhealthy sync text", () => {
   ] as const)("shows plain text for %s status", (syncStatus, label) => {
     render(<SyncBlock {...baseProps} syncStatus={syncStatus} />);
 
-    expect(
-      screen.getByRole("button", { name: new RegExp(label, "i") }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("status", { name: new RegExp(label, "i") })).toBeInTheDocument();
     expect(screen.getByText(label)).toBeVisible();
   });
 
@@ -30,13 +26,13 @@ describe("SyncBlock unhealthy sync text", () => {
     expect(screen.getByText("Offline · 2 queued")).toBeVisible();
   });
 
-  it("keeps Synced label on the control when healthy", () => {
+  it("keeps Synced label on the status when healthy", () => {
     render(<SyncBlock {...baseProps} syncStatus="synced" />);
 
     expect(screen.queryByText(/Offline|Sync issue|Unstable/i)).toBeNull();
     expect(screen.getByText("Synced")).toBeVisible();
     expect(
-      screen.getByRole("button", { name: /Synced\. Show sync details/i }),
+      screen.getByRole("status", { name: /Synced/i }),
     ).toHaveClass("jl-sync-map-indicator__btn--labeled");
   });
 
@@ -44,7 +40,7 @@ describe("SyncBlock unhealthy sync text", () => {
     render(<SyncBlock {...baseProps} syncStatus="offline" />);
 
     expect(
-      screen.getByRole("button", { name: /Offline/i }),
+      screen.getByRole("status", { name: /Offline/i }),
     ).toHaveClass("jl-sync-map-indicator__btn--labeled");
   });
 });

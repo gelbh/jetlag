@@ -58,6 +58,7 @@ describe("placementCameraFingerprint", () => {
     ]);
     ring.push(ring[0]!);
 
+    const started = performance.now();
     const result = placementCameraFingerprint({
       tool: "thermometer",
       phase: "answered",
@@ -68,16 +69,65 @@ describe("placementCameraFingerprint", () => {
             type: "MultiPolygon",
             coordinates: [[ring]],
           },
-        } as { geometry: { type: string } },
+        } as { geometry: { type: string; coordinates?: unknown } },
       ],
       selectedPoiId: null,
       seekerResolving: false,
       eliminationPreview: true,
     });
+    expect(performance.now() - started).toBeLessThan(50);
 
     expect(() => JSON.parse(result)).not.toThrow();
     const parsed = JSON.parse(result);
     expect(parsed.eliminationHash).toBeTypeOf("string");
-    expect(parsed.eliminationHash).toContain(",");
+  });
+
+  it("keeps matching yes/no flips on a stable elimination fingerprint", () => {
+    const yesElim = {
+      geometry: {
+        type: "MultiPolygon",
+        coordinates: [
+          [
+            [
+              [-6.3, 53.3],
+              [-6.2, 53.3],
+              [-6.2, 53.4],
+              [-6.3, 53.4],
+              [-6.3, 53.3],
+            ],
+          ],
+        ],
+      },
+    } as { geometry: { type: string; coordinates?: unknown } };
+    const noElim = {
+      geometry: {
+        type: "Polygon",
+        coordinates: [
+          [
+            [-6.26, 53.35],
+            [-6.25, 53.35],
+            [-6.25, 53.36],
+            [-6.26, 53.36],
+            [-6.26, 53.35],
+          ],
+        ],
+      },
+    } as { geometry: { type: string; coordinates?: unknown } };
+
+    const yesFp = placementCameraFingerprint({
+      tool: "matching",
+      phase: "answered",
+      overlays: [],
+      eliminationFeatures: [yesElim],
+      eliminationPreview: true,
+    });
+    const noFp = placementCameraFingerprint({
+      tool: "matching",
+      phase: "answered",
+      overlays: [],
+      eliminationFeatures: [noElim],
+      eliminationPreview: true,
+    });
+    expect(yesFp).toBe(noFp);
   });
 });

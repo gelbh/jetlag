@@ -13,7 +13,7 @@ import {
   QUESTION_ANSWER_DEADLINE_PRESET_MINUTES,
 } from "@/domain/session/rules";
 import {
-  AdvancedSettingsSectionHeader,
+  AdvancedSettingsCategory,
   ToggleNumberWithPresets,
 } from "./shared";
 import type { AdvancedSettingsSectionProps } from "./types";
@@ -24,9 +24,7 @@ export function DeadlinesSection({
   disabled,
 }: AdvancedSettingsSectionProps) {
   return (
-    <div className="space-y-3 border-t border-border pt-3">
-      <AdvancedSettingsSectionHeader title="Timers" />
-
+    <AdvancedSettingsCategory title="Timers">
       <ToggleNumberWithPresets
         enabled={value.customHidingPeriodEnabled}
         onEnabledChange={(customHidingPeriodEnabled) =>
@@ -97,6 +95,6 @@ export function DeadlinesSection({
           value: minutes,
         }))}
       />
-    </div>
+    </AdvancedSettingsCategory>
   );
 }

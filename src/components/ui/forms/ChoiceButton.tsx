@@ -1,4 +1,9 @@
 import type { ButtonHTMLAttributes, ReactNode } from "react";
+import { UnstyledButton } from "@mantine/core";
+import {
+  choiceChipStyles,
+  type ChoiceTone,
+} from "@/components/ui/entry/entryChrome";
 
 interface ChoiceButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   selected?: boolean;
@@ -7,6 +12,16 @@ interface ChoiceButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   fullWidth?: boolean;
   align?: "left" | "center";
   children: ReactNode;
+}
+
+function toneFromActiveClass(activeClassName: string): ChoiceTone {
+  if (activeClassName.includes("status-success")) {
+    return "success";
+  }
+  if (activeClassName.includes("status-negative")) {
+    return "danger";
+  }
+  return "default";
 }
 
 export function ChoiceButton({
@@ -28,15 +43,17 @@ export function ChoiceButton({
         : "";
 
   return (
-    <button
+    <UnstyledButton
       type={type}
       aria-pressed={selected}
-      className={`min-h-12 rounded-[var(--radius-hud-md)] px-3 text-sm font-medium disabled:opacity-40 ${
-        fullWidth ? "w-full" : ""
-      } ${alignClass} ${selected ? activeClassName : inactiveClassName} ${className}`.trim()}
+      className={`${fullWidth ? "w-full" : ""} ${alignClass} ${className}`.trim()}
+      styles={choiceChipStyles(
+        selected,
+        selected ? toneFromActiveClass(activeClassName) : "default",
+      )}
       {...props}
     >
       {children}
-    </button>
+    </UnstyledButton>
   );
 }
