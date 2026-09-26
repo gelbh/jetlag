@@ -1,6 +1,8 @@
+import { MantineProvider } from "@mantine/core";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createTestRemoteSession } from "@/test/fixtures/sessions";
+import { jetlagMantineTheme } from "@/theme/mantineTheme";
 import { RoleCodesSheet } from "./RoleCodesSheet";
 
 const revealRolePasscode = vi.fn();
@@ -48,13 +50,15 @@ describe("RoleCodesSheet", () => {
     revealRolePasscode.mockResolvedValue({ rolePasscode: "WXYZ" });
 
     render(
-      <RoleCodesSheet
-        open
-        onClose={vi.fn()}
-        session={gatedSession}
-        myUid="host-1"
-        isHost
-      />,
+      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+        <RoleCodesSheet
+          open
+          onClose={vi.fn()}
+          session={gatedSession}
+          myUid="host-1"
+          isHost
+        />
+      </MantineProvider>,
     );
 
     expect(screen.getByRole("dialog", { name: "Role codes" })).toBeInTheDocument();

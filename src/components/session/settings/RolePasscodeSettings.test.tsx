@@ -1,6 +1,8 @@
+import { MantineProvider } from "@mantine/core";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createTestRemoteSession } from "@/test/fixtures/sessions";
+import { jetlagMantineTheme } from "@/theme/mantineTheme";
 import { RolePasscodeSettings } from "./RolePasscodeSettings";
 
 const revealRolePasscode = vi.fn();
@@ -45,11 +47,13 @@ describe("RolePasscodeSettings", () => {
     revealRolePasscode.mockResolvedValue({ rolePasscode: "WXYZ" });
 
     render(
-      <RolePasscodeSettings
-        session={gatedSession}
-        myUid="host-1"
-        isHost
-      />,
+      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+        <RolePasscodeSettings
+          session={gatedSession}
+          myUid="host-1"
+          isHost
+        />
+      </MantineProvider>,
     );
 
     expect(screen.getAllByText("••••").length).toBeGreaterThan(0);
