@@ -50,3 +50,4 @@ tech: Tighten release:check version alignment
 - `npm run changeset` – create a changeset
 - `npm run version` – apply pending changesets, normalize Fixes/Improvements/Technical, sync TS
 - `npm run release:sync` / `release:check` – sync and verify package / CHANGELOG / APP_VERSION alignment
+- `npm run test:changeset-map` – run the section-map `node:test` suite (not collected by Vitest)
