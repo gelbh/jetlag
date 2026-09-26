@@ -37,6 +37,9 @@ describe("jetlagTheme", () => {
     expect(resolved.variables?.["--jl-control-radius"]).toBe("14px");
     expect(resolved.variables?.["--jl-sheet-radius"]).toBe("24px");
     expect(resolved.variables?.["--jl-dock-height"]).toBe("4.25rem");
+    expect(resolved.variables?.["--jl-ops-rail-width"]).toBe("22rem");
+    expect(resolved.variables?.["--ops-rail-width"]).toBe("22rem");
+    expect(resolved.variables?.["--ask-hud-strip-height"]).toBe("3rem");
     expect(resolved.variables?.["--jl-safe-area-bottom"]).toBe(
       jetlagBrand.safeAreaBottom,
     );
