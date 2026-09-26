@@ -1,4 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { MantineProvider } from "@mantine/core";
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createMemoryRouter, RouterProvider } from "react-router-dom";
@@ -7,6 +8,7 @@ import { renderWithRouter } from "../test/renderWithRouter";
 import { RouteTransitionTestProvider } from "../test/RouteTransitionTestProvider";
 import { resetAllStores } from "../test/helpers/storeReset";
 import { createTestRemoteSession } from "../test/fixtures/sessions";
+import { jetlagMantineTheme } from "@/theme/mantineTheme";
 import {
   lookupRemoteSessionByCode,
   waitForServerHiderRole,
@@ -120,11 +122,13 @@ function renderJoinSessionAt(path: string) {
       {
         path: "/join",
         element: (
-          <QueryClientProvider client={queryClient}>
-            <RouteTransitionTestProvider>
-              <JoinLegacy />
-            </RouteTransitionTestProvider>
-          </QueryClientProvider>
+          <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+            <QueryClientProvider client={queryClient}>
+              <RouteTransitionTestProvider>
+                <JoinLegacy />
+              </RouteTransitionTestProvider>
+            </QueryClientProvider>
+          </MantineProvider>
         ),
       },
     ],

@@ -1,9 +1,11 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { MantineProvider } from "@mantine/core";
 import { render, type RenderOptions } from "@testing-library/react";
 import { type ReactElement, type ReactNode } from "react";
 import { MemoryRouter, type MemoryRouterProps } from "react-router-dom";
 import { RouteTransitionTestProvider } from "./RouteTransitionTestProvider";
 import { resetAllStores } from "./helpers/storeReset";
+import { jetlagMantineTheme } from "@/theme/mantineTheme";
 
 interface RenderWithRouterOptions extends Omit<RenderOptions, "wrapper"> {
   route?: string;
@@ -37,11 +39,13 @@ export function renderWithRouter(
 
   function Wrapper({ children }: { children: ReactNode }) {
     return (
-      <QueryClientProvider client={queryClient}>
-        <MemoryRouter initialEntries={[route]} {...routerProps}>
-          <RouteTransitionTestProvider>{children}</RouteTransitionTestProvider>
-        </MemoryRouter>
-      </QueryClientProvider>
+      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+        <QueryClientProvider client={queryClient}>
+          <MemoryRouter initialEntries={[route]} {...routerProps}>
+            <RouteTransitionTestProvider>{children}</RouteTransitionTestProvider>
+          </MemoryRouter>
+        </QueryClientProvider>
+      </MantineProvider>
     );
   }
 

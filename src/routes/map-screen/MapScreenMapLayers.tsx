@@ -165,12 +165,14 @@ export function MapScreenMapLayers({
           onUserPanEnd={handleMapPanEnd}
         />
         <GameAreaMask gameArea={gameArea!} />
-        <MapDrawStrokeCapture
-          enabled={activeTool === "draw"}
-          onBegin={(lat, lng) => drawTool.beginStroke([lat, lng])}
-          onExtend={(lat, lng) => drawTool.extendStroke([lat, lng])}
-          onEnd={drawTool.endStroke}
-        />
+        {activeTool === "draw" ? (
+          <MapDrawStrokeCapture
+            enabled
+            onBegin={(lat, lng) => drawTool.beginStroke([lat, lng])}
+            onExtend={(lat, lng) => drawTool.extendStroke([lat, lng])}
+            onEnd={drawTool.endStroke}
+          />
+        ) : null}
         {transitEnabled && layerVisibility.transit ? (
           <Suspense fallback={null}>
             <TransitLayer
