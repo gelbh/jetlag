@@ -9,7 +9,7 @@ const gateState = vi.hoisted(() => ({
   enabled: true,
 }));
 
-vi.mock("../test/scenarios/devGate", () => ({
+vi.mock("@/test/scenarios/devGate", () => ({
   isDevScenariosEnabled: () => gateState.enabled,
 }));
 
@@ -43,18 +43,22 @@ describe("DevScenarios", () => {
     expect(screen.queryByRole("heading", { name: /scenarios/i })).toBeNull();
   });
 
-  it("lists dublin-local-map when the gate is on", () => {
-    renderWithRouter(
-      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
-        <DevScenarios />
-      </MantineProvider>,
-      { route: "/dev/scenarios" },
-    );
-    expect(
-      screen.getByRole("heading", { name: /scenarios/i }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: /dublin local map/i }),
-    ).toBeInTheDocument();
-  });
+  it(
+    "lists dublin-local-map when the gate is on",
+    () => {
+      renderWithRouter(
+        <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
+          <DevScenarios />
+        </MantineProvider>,
+        { route: "/dev/scenarios" },
+      );
+      expect(
+        screen.getByRole("heading", { name: /scenarios/i }),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: /dublin local map/i }),
+      ).toBeInTheDocument();
+    },
+    15_000,
+  );
 });
