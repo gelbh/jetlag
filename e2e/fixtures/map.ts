@@ -63,6 +63,14 @@ export async function clickMapAtLatLng(
     state: "visible",
     timeout: 15_000,
   });
+  await page.waitForFunction(
+    () =>
+      Boolean(
+        (window as Window & { __JETLAG_MAPLIBRE__?: unknown }).__JETLAG_MAPLIBRE__,
+      ),
+    undefined,
+    { timeout: 15_000 },
+  );
   const fired = await page.evaluate(
     ({ latitude: lat, longitude: lng }) => {
       type MapLike = {

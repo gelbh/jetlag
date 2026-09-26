@@ -86,6 +86,12 @@ describe("Home", () => {
   it("links play actions for join, create, and presets", () => {
     renderHome();
 
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: /Play - create, join, or custom game/i,
+      }),
+    );
+
     expect(screen.getByRole("link", { name: "Create session" })).toHaveAttribute(
       "href",
       "/create",
@@ -94,10 +100,9 @@ describe("Home", () => {
       "href",
       "/join",
     );
-    expect(screen.getByRole("link", { name: "Browse presets" })).toHaveAttribute(
-      "href",
-      "/presets",
-    );
+    expect(
+      screen.getByRole("link", { name: "Custom game presets" }),
+    ).toHaveAttribute("href", "/presets");
   });
 
   it("links to friends and leaderboard in the header", () => {
