@@ -42,9 +42,11 @@ describe("useMeasuringTool map-first", () => {
     act(() => {
       (
         result.current.hud.modeBody as {
-          props: { onMeasureFromChange: (kind: string) => void };
+          props: {
+            model: { onMeasureFromChange: (kind: string) => void };
+          };
         }
-      ).props.onMeasureFromChange("train_station");
+      ).props.model.onMeasureFromChange("train_station");
     });
 
     await waitFor(() => {
