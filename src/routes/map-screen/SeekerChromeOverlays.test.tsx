@@ -57,7 +57,7 @@ function emptyHud(
     onCommit: vi.fn(),
     modeBody: <div data-testid={bodyId} />,
     sheets: null,
-    ...(surface === "thermometer" ? { commitKind: "endWalk" as const } : {}),
+    ...(surface === "thermometer" ? { commitKind: "send" as const } : {}),
   };
 }
 
@@ -129,9 +129,8 @@ describe("SeekerChromeOverlays Ask HUD wiring", () => {
 
     expect(screen.getByTestId("ask-hud-host")).toBeInTheDocument();
     expect(screen.getByTestId("radar-hud-body")).toBeInTheDocument();
-    expect(screen.getByTestId("ask-mode-cue-ticker")).toHaveTextContent(
-      "TAP MAP TO SET CENTER",
-    );
+    expect(screen.queryByTestId("ask-mode-cue-ticker")).toBeNull();
+    expect(screen.queryByTestId("ask-commit-strip")).toBeNull();
     expect(screen.queryByTestId("radar-float-panel")).toBeNull();
   });
 
@@ -320,7 +319,47 @@ describe("SeekerChromeOverlays Ask HUD wiring", () => {
 
     expect(screen.getByTestId("ask-hud-host")).toBeInTheDocument();
     expect(screen.getByTestId("thermometer-hud-body")).toBeInTheDocument();
+    expect(screen.queryByTestId("ask-mode-cue-ticker")).toBeNull();
+    expect(screen.queryByTestId("ask-cost-chip")).toBeNull();
+    // Setup uses map-first answer chrome; END WALK strip only while walking.
+    expect(screen.queryByTestId("ask-commit-strip")).toBeNull();
     expect(screen.queryByTestId("thermometer-float-panel")).toBeNull();
+  });
+
+  it("shows END WALK commit strip only while thermometer is walking", () => {
+    const tools = stubTools("thermometer");
+    tools.thermometerTool.hud = {
+      ...tools.thermometerTool.hud,
+      commitKind: "endWalk",
+      readiness: {
+        ...tools.thermometerTool.hud.readiness,
+        resolveReady: true,
+      },
+    };
+    render(
+      <SeekerChromeOverlays
+        timer={stubTimer() as never}
+        activeTool="thermometer"
+        overlay={stubOverlay() as never}
+        firstRunDismissed
+        setFirstRunDismissed={vi.fn()}
+        forceMapToolsGuide={false}
+        onDismissMapToolsGuide={vi.fn()}
+        selectedAnnotation={null}
+        geometryEditAnnotation={null}
+        geometryDraft={null}
+        mapPanning={false}
+        userMinimized={false}
+        setUserMinimized={vi.fn()}
+        handleSelectTool={vi.fn()}
+        cancelGeometryEdit={vi.fn()}
+        saveGeometryEdit={vi.fn()}
+        tools={tools as never}
+      />,
+    );
+
+    expect(screen.getByTestId("ask-commit-strip")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /end walk/i })).toBeInTheDocument();
   });
 
   it("mounts AskHudHost for photo and skips ToolFloatingPanel", () => {

@@ -159,13 +159,15 @@ export function useTentacleTool({
           usedTentacleCategories,
         )
       : null);
-  const searchRadiusMeters =
-    tentacleCenter && previewTentacleCategoryId
-      ? tentacleSearchRadiusMetersForSession(
-          sessionRules,
-          previewTentacleCategoryId,
-        )
-      : 0;
+  const radiusCategoryId =
+    previewTentacleCategoryId ??
+    firstAvailableTentacleCategoryIdForSession(
+      sessionRules,
+      usedTentacleCategories,
+    );
+  const searchRadiusMeters = radiusCategoryId
+    ? tentacleSearchRadiusMetersForSession(sessionRules, radiusCategoryId)
+    : 0;
 
   useToolSessionOptions({
     active: active && tentacleCategoryChosen && tentacleCategoryId !== null,
@@ -699,7 +701,6 @@ export function useTentacleTool({
         poiOptions={tentaclePois}
         selectedPoiId={selectedPoiId}
         outOfReach={tentacleOutOfReach}
-        onSelectPoi={handleSelectPoi}
         onOutOfReachChange={(nextOutOfReach) => {
           setTentacleOutOfReach(nextOutOfReach);
           if (nextOutOfReach) {

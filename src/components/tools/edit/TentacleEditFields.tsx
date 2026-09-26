@@ -100,14 +100,6 @@ export function TentacleEditFields({
         />
       </ToolSection>
       <TentacleAnswerPicker
-        categoryId={
-          (tentacleCategoryIdForAnnotation(annotation) ??
-            "museum") as TentacleExtendedCategoryId
-        }
-        distanceUnit={distanceUnit}
-        searchRadiusMeters={
-          annotation.metadata.radiusMeters ?? DEFAULT_RADIUS_METERS
-        }
         poiOptions={annotation.metadata.pois ?? []}
         selectedPoiId={tentacleAnswerPoiId}
         outOfReach={tentacleOutOfReach}

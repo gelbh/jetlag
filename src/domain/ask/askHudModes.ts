@@ -133,11 +133,10 @@ export function activeModeCue(
   const def = DEFINITIONS[input.surface];
   switch (input.surface) {
     case "radar":
-      return input.placementReady
-        ? input.configureReady
-          ? "READY TO SEND"
-          : "PICK A DISTANCE"
-        : def.defaultCue;
+      // Distance catalog owns the job; keep the top cue quiet (Matching-style sheet).
+      if (!input.configureReady) return "";
+      if (!input.placementReady) return "TAP MAP TO SET CENTER";
+      return "READY TO SEND";
     case "matching":
       if (!input.configureReady) return "PICK CATEGORY";
       if (!input.resolveReady) return "RESOLVE ON MAP";
@@ -274,6 +273,7 @@ export function notReadyCommitHint(cue: string): string {
     case "READY TO CONFIRM":
       return "NOT READY";
     case "":
+      // Quiet ticker (radar distance catalog, thermometer walk banner).
       return "NOT READY";
     default:
       return "NOT READY";
@@ -347,7 +347,10 @@ export const MATCHING_MAP_FIRST_CAMERA_TOP_PX = MAP_FIRST_CAMERA_TOP_PX;
 export const MATCHING_MAP_FIRST_CAMERA_BOTTOM_PX = MAP_FIRST_CAMERA_BOTTOM_PX;
 
 export function askHudCameraPaddingPx(tool: string): number {
-  return tool === "matching" || tool === "tentacle" || tool === "measuring"
+  return tool === "matching" ||
+    tool === "tentacle" ||
+    tool === "measuring" ||
+    tool === "radar"
     ? ASK_HUD_CAMERA_PADDING_RAIL_PX
     : ASK_HUD_CAMERA_PADDING_PX;
 }

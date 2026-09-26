@@ -220,10 +220,8 @@ export async function buildMapDraftOverlays(
           point: [poi.lat, poi.lng],
           popup: poi.name,
           style: {
-            color: selected ? c.highlight : c.strokeLight,
-            weight: selected ? 3 : 2,
-            fillColor: c.tentacle,
-            markerRadius: selected ? 7 : 6,
+            tentaclePoiSelected: selected,
+            tentacleCategoryId: poi.category,
           },
         });
       }

@@ -15,11 +15,11 @@ import {
   type IconProps,
 } from "@phosphor-icons/react";
 import { AskCatalogRail } from "@/components/tools/ask/AskCatalogRail";
+import { AskToolQuestionHeader } from "@/components/tools/ask/AskToolQuestionHeader";
 import { HudMatchingIcon } from "@/components/map/icons/ToolIcons";
 import { yesNoAnswerOptions } from "@/components/tools/shared/answers/binaryAnswerOptions";
 import { BinaryAnswerPicker } from "@/components/tools/shared/answers/BinaryAnswerPicker";
 import { AnchorControls } from "@/components/tools/shared/controls/AnchorControls";
-import { QuestionPromptBlock } from "@/components/tools/shared/controls/QuestionPromptBlock";
 import { CatalogExhaustedMessage } from "@/components/tools/shared/readout/CatalogExhaustedMessage";
 import { AskInlineError } from "@/components/tools/shared/readout/AskInlineError";
 import { LoadingReadout } from "@/components/tools/shared/readout/LoadingReadout";
@@ -241,67 +241,14 @@ export function MatchingHudBody({
       data-testid="matching-hud-body"
       className="ask-hud-mode-body flex w-full flex-col gap-2"
     >
-      <div
-        className={
-          mantinePlayerUi
-            ? "pointer-events-auto space-y-2 p-3"
-            : "pointer-events-auto ask-hud-panel space-y-2 p-3"
-        }
-        style={mantinePlayerUi ? iosAskInsetSurfaceStyle : undefined}
-        {...(mantinePlayerUi ? { "data-player-ux-world": "mantine" } : {})}
-      >
-        <div className="flex items-start gap-3">
-          <div
-            className="flex shrink-0 flex-col items-center gap-1"
-            style={{ minWidth: 44 }}
-          >
-            <span
-              aria-hidden
-              className="inline-flex items-center justify-center"
-              style={{
-                width: 40,
-                height: 40,
-                borderRadius: 12,
-                backgroundColor: "oklch(from var(--color-field-ink) l c h / 0.08)",
-                color: "var(--color-field-ink)",
-              }}
-            >
-              <HudMatchingIcon width={22} height={22} />
-            </span>
-            {costLabel ? (
-              <span
-                data-testid="ask-cost-chip"
-                role="status"
-                aria-label={`${toolLabel} · ${costLabel}`}
-                style={{
-                  fontSize: "0.6875rem",
-                  fontWeight: 650,
-                  letterSpacing: "0.02em",
-                  color: "var(--color-field-ink-muted)",
-                  lineHeight: 1,
-                }}
-              >
-                {costLabel}
-              </span>
-            ) : null}
-          </div>
-          <div className="min-w-0 flex-1">
-            <p
-              className="m-0 mb-0.5 text-xs font-semibold leading-none"
-              style={{
-                color: "var(--color-field-ink-muted)",
-                letterSpacing: "0.02em",
-              }}
-            >
-              {toolLabel}
-            </p>
-            <QuestionPromptBlock
-              prompt={question.prompt}
-              ruleSummary={question.ruleSummary}
-            />
-          </div>
-        </div>
-      </div>
+      <AskToolQuestionHeader
+        toolLabel={toolLabel}
+        costLabel={costLabel}
+        icon={<HudMatchingIcon width={22} height={22} />}
+        prompt={question.prompt}
+        ruleSummary={question.ruleSummary}
+        mantine={mantinePlayerUi}
+      />
 
       {chord === "category" ? (
         <div className="space-y-2">
