@@ -87,7 +87,7 @@ export function HiderAnswerPicker({
                     ? "var(--color-flag-ink)"
                     : "var(--color-field-ink)",
                   fontWeight: 600,
-                  "&:disabled": { opacity: 0.5 },
+                  opacity: disabled ? 0.5 : undefined,
                 },
               }}
             >
