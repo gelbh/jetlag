@@ -27,6 +27,10 @@ describe("jetlagTheme", () => {
     expect(jetlagTheme.components?.Button).toBeDefined();
     expect(jetlagTheme.components?.Drawer).toBeDefined();
     expect(jetlagTheme.components?.Modal).toBeDefined();
+    expect(jetlagTheme.components?.Notification).toBeDefined();
+    expect(jetlagTheme.components?.Alert).toBeDefined();
+    expect(jetlagTheme.colors?.halt).toBeDefined();
+    expect(jetlagBrand.halt).toMatch(/^oklch/);
   });
 
   it("resolves Wave 5 bridge CSS variables", () => {
