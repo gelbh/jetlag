@@ -6,7 +6,6 @@ import { iosMapChromeSurfaceStyles } from "@/components/ui/apple/iosEntryChrome"
 import { OverlayHost } from "./OverlayHost";
 import { MapSideDockStack } from "./MapSideDockStack";
 import { ToolDeck } from "@/components/tools/ToolDeck";
-import { usePlayerUiMantine } from "@/hooks/feature/usePlayerUiMantine";
 
 export type MapBottomChromeLayout = "phone" | "rail";
 
@@ -111,17 +110,16 @@ export const MapBottomChrome = forwardRef<HTMLDivElement, MapBottomChromeProps>(
     },
     ref,
   ) {
-    const mantinePlayerUi = usePlayerUiMantine();
     const isRail = layout === "rail";
     const sparseHunt = huntDensity === "sparse";
-    const askFirstActive = mantinePlayerUi && askFirst;
+    const askFirstActive = askFirst;
     const chromeClassName = cn(
       "jl-map-bottom-chrome jl-tool-dock relative block w-full pointer-events-none bg-transparent",
       !isRail &&
         !askFirstActive &&
         "min-h-[calc(var(--dock-island-height)+0.75rem)]",
       !isRail && askFirstActive && "min-h-0",
-      !isRail && mantinePlayerUi && "px-1",
+      !isRail && "px-1",
       isRail &&
         "jl-map-bottom-chrome--rail jl-tool-dock--rail relative flex h-full min-h-0 flex-col items-stretch justify-start gap-2 p-2",
       isRail &&
@@ -160,19 +158,19 @@ export const MapBottomChrome = forwardRef<HTMLDivElement, MapBottomChromeProps>(
           const sideIslands = (
             <>
               {session ? (
-                <SideIsland name="session" mantine={mantinePlayerUi}>
+                <SideIsland name="session" mantine>
                   {session}
                 </SideIsland>
               ) : null}
               {mapControls ? (
-                <SideIsland name="map-controls" mantine={mantinePlayerUi}>
+                <SideIsland name="map-controls" mantine>
                   {mapControls}
                 </SideIsland>
               ) : null}
             </>
           );
 
-          if (mantinePlayerUi && !isRail) {
+          if (!isRail) {
             return <MapSideDockStack>{sideIslands}</MapSideDockStack>;
           }
 
@@ -195,34 +193,20 @@ export const MapBottomChrome = forwardRef<HTMLDivElement, MapBottomChromeProps>(
 
     return (
       <OverlayHost ref={ref} layout={layout} style={style}>
-        {mantinePlayerUi ? (
-          <Box
-            component="div"
-            data-testid="map-bottom-chrome-mantine"
-            data-player-ux-world="mantine"
-            data-overlay-chrome=""
-            data-layout={layout}
-            data-hunt-density={huntDensity}
-            data-ask-first={askFirstActive ? "true" : undefined}
-            className={chromeClassName}
-            aria-disabled={inactive || undefined}
-            inert={inactive || undefined}
-          >
-            {chromeChildren}
-          </Box>
-        ) : (
-          <div
-            data-overlay-chrome=""
-            data-layout={layout}
-            data-hunt-density={huntDensity}
-            data-ask-first={askFirstActive ? "true" : undefined}
-            className={chromeClassName}
-            aria-disabled={inactive || undefined}
-            inert={inactive || undefined}
-          >
-            {chromeChildren}
-          </div>
-        )}
+        <Box
+          component="div"
+          data-testid="map-bottom-chrome-mantine"
+          data-player-ux-world="mantine"
+          data-overlay-chrome=""
+          data-layout={layout}
+          data-hunt-density={huntDensity}
+          data-ask-first={askFirstActive ? "true" : undefined}
+          className={chromeClassName}
+          aria-disabled={inactive || undefined}
+          inert={inactive || undefined}
+        >
+          {chromeChildren}
+        </Box>
         {overlay}
       </OverlayHost>
     );

@@ -4,19 +4,9 @@ import { MantineProvider } from "@mantine/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Privacy } from "./Privacy";
 import { jetlagMantineTheme } from "@/theme/mantineTheme";
-import { renderWithRouter } from "../test/renderWithRouter";
 import { RouteTransitionTestProvider } from "../test/RouteTransitionTestProvider";
 
-const { mockUsePlayerUiMantine } = vi.hoisted(() => ({
-  mockUsePlayerUiMantine: vi.fn(() => false),
-}));
-
-vi.mock("@/hooks/feature/usePlayerUiMantine", () => ({
-  usePlayerUiMantine: () => mockUsePlayerUiMantine(),
-}));
-
 beforeEach(() => {
-  mockUsePlayerUiMantine.mockReturnValue(false);
   vi.stubGlobal("matchMedia", (query: string) => ({
     matches: false,
     media: query,
@@ -29,17 +19,8 @@ beforeEach(() => {
   }));
 });
 
-describe("Privacy gate", () => {
-  it("renders Legacy LegalDocumentPage when flag is off", () => {
-    renderWithRouter(<Privacy />);
-    expect(
-      screen.getByRole("heading", { name: "Privacy Policy" }),
-    ).toBeInTheDocument();
-    expect(document.querySelector('[data-player-ux-world="mantine"]')).toBeNull();
-  });
-
-  it("renders Mantine shell when flag is on", () => {
-    mockUsePlayerUiMantine.mockReturnValue(true);
+describe("Privacy", () => {
+  it("renders Mantine shell", () => {
     render(
       <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
         <MemoryRouter>

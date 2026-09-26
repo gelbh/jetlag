@@ -1,10 +1,8 @@
 import { createPortal } from "react-dom";
 import { useRef, type CSSProperties, type ReactNode } from "react";
-import { RadixMotionSheet } from "./RadixMotionSheet";
 import { MantineDrawerSheet } from "./MantineDrawerSheet";
 import { useDialogFocus } from "@/hooks/a11y/useDialogFocus";
 import { useDesktopLayout } from "@/hooks/layout/useDesktopLayout";
-import { usePlayerUiMantine } from "@/hooks/feature/usePlayerUiMantine";
 import {
   type ContextualRailTab,
 } from "../../map/chrome/ContextualRailContext";
@@ -21,7 +19,7 @@ export interface SheetHostProps {
   dismissible?: boolean;
   sheetClassName?: string;
   maxHeightClassName?: string;
-  /** Forwarded to Mantine Drawer when flag-on. */
+  /** Forwarded to Mantine Drawer. */
   padding?: "xs" | "sm" | "md" | "lg" | "xl" | number;
   /**
    * `host` (default): sheet scrolls children.
@@ -85,9 +83,8 @@ function DesktopRailDialog({
 
 /**
  * Stable sheet host API for map chrome.
- * Desktop + railTab → ContextualRail portal (unchanged under flag).
- * Flag off (non-rail) → RadixMotionSheet.
- * Flag on (non-rail) → Mantine Drawer.
+ * Desktop + railTab → ContextualRail portal.
+ * Mobile / non-rail → Mantine Drawer.
  */
 export function SheetHost({
   open,
@@ -106,7 +103,6 @@ export function SheetHost({
 }: SheetHostProps) {
   const isDesktop = useDesktopLayout();
   const railPanel = useContextualRailPanel();
-  const mantinePlayerUi = usePlayerUiMantine();
 
   if (isDesktop && railTab) {
     if (!open || !railPanel?.panelEl) {
@@ -127,28 +123,8 @@ export function SheetHost({
     );
   }
 
-  if (mantinePlayerUi) {
-    return (
-      <MantineDrawerSheet
-        open={open}
-        onClose={onClose}
-        ariaLabel={ariaLabel}
-        pinned={pinned}
-        dismissible={dismissible}
-        sheetClassName={sheetClassName}
-        maxHeightClassName={maxHeightClassName}
-        padding={padding}
-        scrollMode={scrollMode}
-        contentStyle={contentStyle}
-        mapInteractive={mapInteractive}
-      >
-        {children}
-      </MantineDrawerSheet>
-    );
-  }
-
   return (
-    <RadixMotionSheet
+    <MantineDrawerSheet
       open={open}
       onClose={onClose}
       ariaLabel={ariaLabel}
@@ -156,8 +132,12 @@ export function SheetHost({
       dismissible={dismissible}
       sheetClassName={sheetClassName}
       maxHeightClassName={maxHeightClassName}
+      padding={padding}
+      scrollMode={scrollMode}
+      contentStyle={contentStyle}
+      mapInteractive={mapInteractive}
     >
       {children}
-    </RadixMotionSheet>
+    </MantineDrawerSheet>
   );
 }

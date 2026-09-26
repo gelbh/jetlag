@@ -41,7 +41,6 @@ import {
   poiCandidateToTentaclePoi,
 } from "@/domain/geo/poiCandidateAdapters";
 import { useMapStore } from "@/state/mapStore";
-import { usePlayerUiMantine } from "@/hooks/feature/usePlayerUiMantine";
 import {
   queryGeolocationPermission,
   type GeolocationPermissionState,
@@ -552,9 +551,7 @@ export function useTentacleTool({
     resolving: tentacleLoading && tentacleCenter !== null,
   };
 
-  const mantinePlayerUi = usePlayerUiMantine();
   const mapFirstEligible =
-    mantinePlayerUi &&
     tentacleCategoryChosen &&
     tentacleCategoryId !== null &&
     categorySelectionAvailable;

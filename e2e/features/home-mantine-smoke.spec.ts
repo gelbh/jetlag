@@ -2,13 +2,11 @@ import {
   test,
   expect,
   prepareE2EPage,
-  enablePlayerUiMantine,
   seedPersistedLocalSessionOnHome,
 } from "../fixtures";
 
-test("Home Mantine smoke when flag on", async ({ page }) => {
+test("Home Mantine smoke", async ({ page }) => {
   await prepareE2EPage(page);
-  await enablePlayerUiMantine(page);
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   await expect(page.getByRole("link", { name: /Join session/i })).toBeVisible();
@@ -17,10 +15,7 @@ test("Home Mantine smoke when flag on", async ({ page }) => {
   ).toBeVisible();
 });
 
-test("Home Mantine continue navigates to map when flag on", async ({
-  page,
-}) => {
-  await enablePlayerUiMantine(page);
+test("Home Mantine continue navigates to map", async ({ page }) => {
   await seedPersistedLocalSessionOnHome(page, { code: "ABCD" });
 
   await expect(

@@ -4,10 +4,6 @@ import { useTentacleTool } from "./useTentacleTool";
 import { createToolHookMocks } from "../../test/helpers/toolHookMocks";
 import { DUBLIN_CITY_GAME_AREA } from "../../test/fixtures/dublinGameArea";
 
-vi.mock("@/hooks/feature/usePlayerUiMantine", () => ({
-  usePlayerUiMantine: () => true,
-}));
-
 vi.mock("../forms/useDebouncedValue", () => ({
   useDebouncedValue: <T,>(value: T) => value,
 }));

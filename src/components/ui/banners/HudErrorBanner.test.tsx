@@ -1,6 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { PLAYER_UI_MANTINE_STORAGE_KEY } from "@/hooks/feature/usePlayerUiMantine";
 
 const { show, showEphemeral } = vi.hoisted(() => ({
   show: vi.fn(),
@@ -29,13 +28,9 @@ import { HudErrorBanner } from "./HudErrorBanner";
 
 describe("HudErrorBanner", () => {
   beforeEach(() => {
-    localStorage.clear();
     show.mockClear();
     showEphemeral.mockReset();
     showEphemeral.mockImplementation((input: { title: string; message: string }) => {
-      if (localStorage.getItem(PLAYER_UI_MANTINE_STORAGE_KEY) !== "1") {
-        return false;
-      }
       show(input);
       return true;
     });
@@ -68,8 +63,7 @@ describe("HudErrorBanner", () => {
     expect(showEphemeral).not.toHaveBeenCalled();
   });
 
-  it("keeps Survey banner when flag is on but actions are present", () => {
-    localStorage.setItem(PLAYER_UI_MANTINE_STORAGE_KEY, "1");
+  it("keeps banner when actions are present", () => {
     const onRetry = vi.fn();
 
     render(
@@ -89,9 +83,7 @@ describe("HudErrorBanner", () => {
     expect(showEphemeral).not.toHaveBeenCalled();
   });
 
-  it("shows Mantine notification and skips Survey banner when flag on and no actions", () => {
-    localStorage.setItem(PLAYER_UI_MANTINE_STORAGE_KEY, "1");
-
+  it("shows Mantine notification and skips banner when no actions", () => {
     const { container } = render(
       <HudErrorBanner
         error={{
@@ -110,8 +102,7 @@ describe("HudErrorBanner", () => {
     );
   });
 
-  it("keeps Survey banner when adapter returns false (fail open)", () => {
-    localStorage.setItem(PLAYER_UI_MANTINE_STORAGE_KEY, "1");
+  it("keeps banner when adapter returns false (fail open)", () => {
     showEphemeral.mockReturnValue(false);
 
     render(
@@ -124,21 +115,6 @@ describe("HudErrorBanner", () => {
     );
 
     expect(screen.getByText("Offline")).toBeInTheDocument();
-    expect(show).not.toHaveBeenCalled();
-  });
-
-  it("renders Survey banner when flag is off and no actions", () => {
-    render(
-      <HudErrorBanner
-        error={{
-          title: "Offline",
-          message: "Changes will sync when you reconnect.",
-        }}
-      />,
-    );
-
-    expect(screen.getByText("Offline")).toBeInTheDocument();
-    expect(showEphemeral).toHaveBeenCalled();
     expect(show).not.toHaveBeenCalled();
   });
 });

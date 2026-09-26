@@ -10,7 +10,6 @@ import {
   iosCatalogTileStyles,
   iosMapChromeSurfaceStyles,
 } from "@/components/ui/apple/iosEntryChrome";
-import { usePlayerUiMantine } from "@/hooks/feature/usePlayerUiMantine";
 import { type ReactNode } from "react";
 
 export type AskCatalogRailRow = {
@@ -99,7 +98,6 @@ export function AskCatalogRail({
   hint = "Tap a row to advance",
   columns = 1,
 }: AskCatalogRailProps) {
-  const mantinePlayerUi = usePlayerUiMantine();
   const sections = sectionRows(rows);
   const multiCol = columns > 1;
   const gridClass =
@@ -124,7 +122,7 @@ export function AskCatalogRail({
               data-ask-catalog-group=""
               className="ask-catalog-rail__group"
               style={
-                mantinePlayerUi
+                true
                   ? {
                       padding: "0.65rem 0.25rem 0.35rem",
                       position: "sticky",
@@ -136,7 +134,7 @@ export function AskCatalogRail({
                   : undefined
               }
             >
-              {mantinePlayerUi ? (
+              {true ? (
                 <Text
                   size="xs"
                   fw={650}
@@ -160,7 +158,7 @@ export function AskCatalogRail({
               const selected = selectedId === row.id;
               const tileBody = (
                 <>
-                  {row.icon && multiCol && mantinePlayerUi ? (
+                  {row.icon && multiCol && true ? (
                     <CatalogTileIcon
                       icon={row.icon}
                       selected={selected}
@@ -176,7 +174,7 @@ export function AskCatalogRail({
                   )}
                 </>
               );
-              if (multiCol && mantinePlayerUi) {
+              if (multiCol && true) {
                 const tileRoot = {
                   ...iosCatalogTileStyles(selected).root,
                   ...(columns === 3
@@ -266,7 +264,7 @@ export function AskCatalogRail({
         <p
           className="ask-catalog-rail__hint text-xs text-field-ink-muted"
           style={
-            mantinePlayerUi
+            true
               ? {
                   margin: "0 0 0.5rem",
                   color: "var(--color-field-ink-muted)",
@@ -282,7 +280,7 @@ export function AskCatalogRail({
     </>
   );
 
-  if (mantinePlayerUi) {
+  if (true) {
     return (
       <Paper
         data-testid="ask-catalog-rail"

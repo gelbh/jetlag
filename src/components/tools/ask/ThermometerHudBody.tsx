@@ -26,8 +26,6 @@ import {
   type ThermometerAnswer,
 } from "@/domain/questions";
 import type { SessionRulesInput } from "@/domain/session/rules";
-import { usePlayerUiMantine } from "@/hooks/feature/usePlayerUiMantine";
-
 type PlacementMode = "gps" | "manual";
 
 const THERMO_QUESTION_INTRO = {
@@ -83,7 +81,6 @@ export function ThermometerHudBody({
   awaitHiderAnswer = false,
   toolLabel = "Thermometer",
 }: ThermometerHudBodyProps) {
-  const mantinePlayerUi = usePlayerUiMantine();
   const availableDistancePresets =
     availableThermometerDistancePresetsForSession(sessionRules);
   const distanceAvailable = isThermometerDistanceOptionAvailableForSession(
@@ -145,9 +142,9 @@ export function ThermometerHudBody({
         className="ask-walk-banner pointer-events-auto"
         role="status"
         aria-live="polite"
-        {...(mantinePlayerUi ? { "data-player-ux-world": "mantine" } : {})}
+        {...(true ? { "data-player-ux-world": "mantine" } : {})}
         style={
-          mantinePlayerUi
+          true
             ? {
                 ...iosAskInsetSurfaceStyle,
                 borderRadius: 16,
@@ -168,7 +165,7 @@ export function ThermometerHudBody({
       </div>
     ) : null;
 
-  if (mantinePlayerUi) {
+  if (true) {
     return (
       <div
         data-testid="thermometer-hud-body"

@@ -4,15 +4,6 @@ import { MantineProvider } from "@mantine/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Leaderboard } from "./Leaderboard";
 import { jetlagMantineTheme } from "@/theme/mantineTheme";
-import { renderWithRouter } from "../test/renderWithRouter";
-
-const { mockUsePlayerUiMantine } = vi.hoisted(() => ({
-  mockUsePlayerUiMantine: vi.fn(() => false),
-}));
-
-vi.mock("@/hooks/feature/usePlayerUiMantine", () => ({
-  usePlayerUiMantine: () => mockUsePlayerUiMantine(),
-}));
 
 vi.mock("@/services/core/firebase/firebase", () => ({
   isFirebaseConfigured: () => false,
@@ -35,7 +26,6 @@ vi.mock("../components/leaderboard/LeaderboardIosBody", () => ({
 }));
 
 beforeEach(() => {
-  mockUsePlayerUiMantine.mockReturnValue(false);
   vi.stubGlobal("matchMedia", (query: string) => ({
     matches: false,
     media: query,
@@ -48,17 +38,8 @@ beforeEach(() => {
   }));
 });
 
-describe("Leaderboard gate", () => {
-  it("renders Legacy title when flag is off", () => {
-    renderWithRouter(<Leaderboard />);
-    expect(
-      screen.getByRole("heading", { name: "Leaderboard" }),
-    ).toBeInTheDocument();
-    expect(document.querySelector('[data-player-ux-world="mantine"]')).toBeNull();
-  });
-
-  it("renders Mantine shell when flag is on", () => {
-    mockUsePlayerUiMantine.mockReturnValue(true);
+describe("Leaderboard", () => {
+  it("renders Mantine shell", () => {
     render(
       <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
         <MemoryRouter>

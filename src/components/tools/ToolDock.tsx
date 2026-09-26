@@ -1,6 +1,5 @@
 import { useEffect, useRef } from "react";
 import type { GameSize } from "../../domain/session/size/gameSize";
-import { usePlayerUiMantine } from "../../hooks/feature/usePlayerUiMantine";
 import { useVisualViewportBottomInset } from "../../hooks/layout/useVisualViewportBottomInset";
 import type { SessionRulesInput } from "../../domain/session/rules";
 import { resolveToolDockEnabled } from "../../domain/session/rules";
@@ -84,7 +83,6 @@ export function ToolDock({
 }: ToolDockProps) {
   const dockRef = useRef<HTMLDivElement>(null);
   const mainGroupRef = useRef<HTMLDivElement>(null);
-  const mantinePlayerUi = usePlayerUiMantine();
   const isRail = layout === "rail";
   const viewportBottomInset = useVisualViewportBottomInset(!isRail);
   const { drawMenuOpen, setDrawMenuOpen, closeMenus } =
@@ -119,7 +117,7 @@ export function ToolDock({
   };
 
   const askFirst =
-    mantinePlayerUi &&
+    true &&
     activeTool !== "none" &&
     isAskHudOwnedTool(activeTool);
 
@@ -140,10 +138,10 @@ export function ToolDock({
             <div
               aria-hidden={true}
               data-tool-highlight=""
-              data-player-ux-world={mantinePlayerUi ? "mantine" : undefined}
+              data-player-ux-world={true ? "mantine" : undefined}
               className={cn(
                 "jl-tool-dock-highlight pointer-events-none absolute z-0 will-change-[transform,width,height] motion-safe:transition-[transform,width,height,opacity] motion-safe:duration-[var(--motion-base)] motion-safe:ease-[var(--ease-spring-subtle)]",
-                mantinePlayerUi
+                true
                   ? "rounded-[10px] border-[0.33px] border-highlight/70 bg-highlight/18"
                   : "rounded-[var(--radius-hud-md)] border-2 border-highlight/55 bg-highlight-soft",
               )}
@@ -157,7 +155,7 @@ export function ToolDock({
           <ToolDeckGroup
             ref={mainGroupRef}
             className={
-              mantinePlayerUi
+              true
                 ? "justify-start gap-1 [&_.jl-tool-slot]:flex-none [&_.jl-tool-slot]:basis-auto [&_[data-hunt-question-strip]_.jl-tool-slot]:min-h-11 [&_[data-hunt-question-strip]_.jl-tool-slot]:min-w-0 [&_[data-hunt-question-strip]_.jl-tool-slot]:flex-1 [&_[data-hunt-question-strip]_.jl-tool-slot]:basis-0"
                 : undefined
             }
@@ -174,7 +172,7 @@ export function ToolDock({
               onAct={onRedo}
               inactive={inactive}
             />
-            {mantinePlayerUi ? (
+            {true ? (
               <ToolDeckQuestionStrip askFirst={askFirst}>
                 {visibleQuestionTools.map((toolId) => (
                   <ToolDockQuestionSlot

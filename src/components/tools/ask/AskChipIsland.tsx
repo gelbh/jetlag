@@ -3,7 +3,6 @@
  * Spec: ask-surface-kit-design rev 2026-08-05b.
  */
 import { OptionChip, OptionChipRow } from "@/components/tools/shared/controls/OptionChip";
-import { usePlayerUiMantine } from "@/hooks/feature/usePlayerUiMantine";
 
 export type AskChipIslandChip = {
   id: string;
@@ -24,15 +23,13 @@ export function AskChipIsland({
   onSelect,
   "aria-label": ariaLabel = "Options",
 }: AskChipIslandProps) {
-  const mantinePlayerUi = usePlayerUiMantine();
-
   return (
     <div
       data-testid="ask-chip-island"
+      data-player-ux-world="mantine"
       className="ask-chip-island pointer-events-auto"
       role="group"
       aria-label={ariaLabel}
-      {...(mantinePlayerUi ? { "data-player-ux-world": "mantine" } : {})}
     >
       <OptionChipRow>
         {chips.map((chip) => (

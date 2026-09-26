@@ -4,15 +4,13 @@ import {
   createHostSession,
   createMultiplayerContexts,
   dismissMapOnboarding,
-  enablePlayerUiMantine,
 } from "../fixtures";
 
-test("Join submit works with Mantine flag on", async ({ browser }) => {
+test("Join submit works", async ({ browser }) => {
   const { hostPage, guestPage, cleanup } =
     await createMultiplayerContexts(browser);
 
   const { code } = await createHostSession(hostPage);
-  await enablePlayerUiMantine(guestPage);
 
   // Same path as joinAsRole, but click the SegmentedControl label (radios are hidden).
   await guestPage.goto("/join");

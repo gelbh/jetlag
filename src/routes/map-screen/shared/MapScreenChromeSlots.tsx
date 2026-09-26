@@ -6,7 +6,6 @@ import {
   mapLandscapeChromeToolbarCollapseClass,
 } from "@/components/session/mapChrome/mapLandscapeChromeClasses";
 import { useDesktopLayout } from "@/hooks/layout/useDesktopLayout";
-import { usePlayerUiMantine } from "@/hooks/feature/usePlayerUiMantine";
 
 export type MapScreenChromeSlotsLayout = "ops-or-hud" | "fragments";
 
@@ -41,8 +40,7 @@ export function MapScreenChromeSlots({
   children,
 }: MapScreenChromeSlotsProps) {
   const isDesktop = useDesktopLayout();
-  const mantinePlayerUi = usePlayerUiMantine();
-  const playerUxWorld = mantinePlayerUi ? "mantine" : "survey";
+  const playerUxWorld = "mantine";
   const { mode: landscapeChromeMode, chip: landscapeChip } =
     useMapLandscapeChrome();
   if (layout === "fragments") {

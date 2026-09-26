@@ -11,7 +11,6 @@ import {
 } from "../../domain/questions";
 import type { DistanceUnit } from "../../domain/map/distance";
 import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
-import { usePlayerUiMantine } from "../../hooks/feature/usePlayerUiMantine";
 import {
   iosFilledStyles,
   iosGrayStyles,
@@ -41,7 +40,6 @@ export function PhotoAnswerUploader({
   disabled = false,
   onAnswerQuestion,
 }: PhotoAnswerUploaderProps) {
-  const mantinePlayerUi = usePlayerUiMantine();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const categoryId = readPhotoCategoryId(pendingQuestion);
@@ -76,78 +74,48 @@ export function PhotoAnswerUploader({
     }
   };
 
-  if (mantinePlayerUi) {
-    return (
-      <Stack gap={8} mt={8}>
-        <Text
-          size="xs"
-          c="var(--color-field-ink)"
-          lh={1.35}
-          px={10}
-          py={8}
-          style={{
-            borderRadius: 12,
-            border: "1px solid oklch(from var(--color-halt) l c h / 0.35)",
-            backgroundColor: "oklch(from var(--color-halt) l c h / 0.1)",
-          }}
-        >
-          {PHOTO_UPLOAD_OUTAGE_NOTICE}
-        </Text>
-        {ruleSummary ? (
-          <Text size="xs" c="var(--color-field-ink-muted)" lh={1.35}>
-            {ruleSummary}
-          </Text>
-        ) : null}
-        <Button
-          fullWidth
-          disabled={busy}
-          onClick={() => void submitAnswer({ kind: "sent_externally" })}
-          styles={iosFilledStyles}
-        >
-          {PHOTO_SENT_EXTERNALLY_LABEL}
-        </Button>
-        <Button
-          fullWidth
-          disabled={busy}
-          onClick={() => void submitAnswer({ kind: "cannot_answer" })}
-          styles={iosGrayStyles}
-        >
-          {PHOTO_CANNOT_ANSWER_LABEL}
-        </Button>
-        {error ? (
-          <Text size="sm" c="var(--color-halt)" role="alert">
-            {error}
-          </Text>
-        ) : null}
-      </Stack>
-    );
-  }
-
   return (
-    <div className="mt-3 space-y-2">
-      <p className="rounded-lg border border-status-warning/30 bg-status-warning/10 px-3 py-2 text-xs leading-snug text-ink">
+    <Stack gap={8} mt={8}>
+      <Text
+        size="xs"
+        c="var(--color-field-ink)"
+        lh={1.35}
+        px={10}
+        py={8}
+        style={{
+          borderRadius: 12,
+          border: "1px solid oklch(from var(--color-halt) l c h / 0.35)",
+          backgroundColor: "oklch(from var(--color-halt) l c h / 0.1)",
+        }}
+      >
         {PHOTO_UPLOAD_OUTAGE_NOTICE}
-      </p>
+      </Text>
       {ruleSummary ? (
-        <p className="text-xs leading-snug text-ink-dim">{ruleSummary}</p>
+        <Text size="xs" c="var(--color-field-ink-muted)" lh={1.35}>
+          {ruleSummary}
+        </Text>
       ) : null}
-      <button
-        type="button"
+      <Button
+        fullWidth
         disabled={busy}
         onClick={() => void submitAnswer({ kind: "sent_externally" })}
-        className="btn-primary min-h-11 w-full disabled:opacity-50"
+        styles={iosFilledStyles}
       >
         {PHOTO_SENT_EXTERNALLY_LABEL}
-      </button>
-      <button
-        type="button"
+      </Button>
+      <Button
+        fullWidth
         disabled={busy}
         onClick={() => void submitAnswer({ kind: "cannot_answer" })}
-        className="btn-secondary min-h-11 w-full disabled:opacity-50"
+        styles={iosGrayStyles}
       >
         {PHOTO_CANNOT_ANSWER_LABEL}
-      </button>
-      {error ? <p className="text-sm text-status-error">{error}</p> : null}
-    </div>
+      </Button>
+      {error ? (
+        <Text size="sm" c="var(--color-halt)" role="alert">
+          {error}
+        </Text>
+      ) : null}
+    </Stack>
   );
 }

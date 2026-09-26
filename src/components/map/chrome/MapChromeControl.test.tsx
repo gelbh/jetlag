@@ -4,16 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { jetlagMantineTheme } from "@/theme/mantineTheme";
 import { MapChromeControl } from "./MapChromeControl";
 
-const { mockUsePlayerUiMantine } = vi.hoisted(() => ({
-  mockUsePlayerUiMantine: vi.fn(() => false),
-}));
-
-vi.mock("@/hooks/feature/usePlayerUiMantine", () => ({
-  usePlayerUiMantine: () => mockUsePlayerUiMantine(),
-}));
-
 beforeEach(() => {
-  mockUsePlayerUiMantine.mockReturnValue(false);
   vi.stubGlobal("matchMedia", (query: string) => ({
     matches: false,
     media: query,
@@ -26,10 +17,18 @@ beforeEach(() => {
   }));
 });
 
+function renderControl(ui: React.ReactElement) {
+  return render(
+    <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+      {ui}
+    </MantineProvider>,
+  );
+}
+
 describe("MapChromeControl", () => {
   it("renders a floating chrome button with icon slot and fires click", () => {
     const onClick = vi.fn();
-    render(
+    renderControl(
       <MapChromeControl
         aria-label="Zoom in"
         icon={<span data-testid="icon">+</span>}
@@ -74,7 +73,7 @@ describe("MapChromeControl", () => {
   });
 
   it("renders a side-dock slot with icon and label", () => {
-    render(
+    renderControl(
       <MapChromeControl
         variant="slot"
         aria-label="Recenter map on play area"
@@ -89,12 +88,14 @@ describe("MapChromeControl", () => {
     expect(button).toHaveClass("jl-tool-slot");
     expect(button).not.toHaveClass("map-chrome-control");
     expect(screen.getByTestId("slot-icon")).toBeInTheDocument();
-    expect(screen.getByText("Recenter")).toHaveClass("jl-tool-slot-label");
+    expect(screen.getByText("Recenter").getAttribute("data-ios-tool-label")).toBe(
+      "",
+    );
   });
 
   it("fires clicks and honors disabled for side-dock slots", () => {
     const onClick = vi.fn();
-    const { rerender } = render(
+    const { rerender } = renderControl(
       <MapChromeControl
         variant="slot"
         aria-label="Open chat"
@@ -108,14 +109,16 @@ describe("MapChromeControl", () => {
     expect(onClick).toHaveBeenCalledTimes(1);
 
     rerender(
-      <MapChromeControl
-        variant="slot"
-        aria-label="Open chat"
-        icon={<span>chat</span>}
-        label="Chat"
-        disabled
-        onClick={onClick}
-      />,
+      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+        <MapChromeControl
+          variant="slot"
+          aria-label="Open chat"
+          icon={<span>chat</span>}
+          label="Chat"
+          disabled
+          onClick={onClick}
+        />
+      </MantineProvider>,
     );
 
     const button = screen.getByRole("button", { name: "Open chat" });
@@ -157,25 +160,7 @@ describe("MapChromeControl", () => {
     expect(onClick).not.toHaveBeenCalled();
   });
 
-  it("keeps Survey slot path when Mantine flag is off", () => {
-    render(
-      <MapChromeControl
-        variant="slot"
-        aria-label="Matching"
-        icon={<span>m</span>}
-        label="Match"
-        pressed
-      />,
-    );
-
-    const button = screen.getByRole("button", { name: "Matching" });
-    expect(button).toHaveClass("jl-tool-slot", "jl-tool-slot-active");
-    expect(button.getAttribute("data-player-ux-world")).toBeNull();
-    expect(button).toHaveAttribute("aria-pressed", "true");
-  });
-
-  it("mounts Mantine slot chrome when flag is on", () => {
-    mockUsePlayerUiMantine.mockReturnValue(true);
+  it("mounts Mantine slot chrome", () => {
     render(
       <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
         <MapChromeControl
@@ -201,8 +186,7 @@ describe("MapChromeControl", () => {
     expect(button.getAttribute("data-ios-tool-tone")).toBe("tool");
   });
 
-  it("marks history tone on undo-style slots when flag is on", () => {
-    mockUsePlayerUiMantine.mockReturnValue(true);
+  it("marks history tone on undo-style slots", () => {
     render(
       <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
         <MapChromeControl

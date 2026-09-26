@@ -5,14 +5,6 @@ import { jetlagMantineTheme } from "@/theme/mantineTheme";
 import type { TentaclePoi } from "@/domain/map/annotations";
 import { TentacleAnswerPicker } from "./TentacleAnswerPicker";
 
-const { mockUsePlayerUiMantine } = vi.hoisted(() => ({
-  mockUsePlayerUiMantine: vi.fn(() => false),
-}));
-
-vi.mock("@/hooks/feature/usePlayerUiMantine", () => ({
-  usePlayerUiMantine: () => mockUsePlayerUiMantine(),
-}));
-
 const pois: TentaclePoi[] = [
   {
     id: "poi-1",
@@ -39,7 +31,6 @@ const baseProps = {
 };
 
 beforeEach(() => {
-  mockUsePlayerUiMantine.mockReturnValue(false);
   baseProps.onSelectPoi = vi.fn();
   baseProps.onOutOfReachChange = vi.fn();
   vi.stubGlobal("matchMedia", (query: string) => ({
@@ -55,17 +46,7 @@ beforeEach(() => {
 });
 
 describe("TentacleAnswerPicker", () => {
-  it("keeps Survey Answer / In progress chrome when flag is off", () => {
-    render(<TentacleAnswerPicker {...baseProps} />);
-
-    expect(screen.getByText("Answer")).toBeInTheDocument();
-    expect(screen.getByText("In progress")).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /Copy for hider/i })).toBeNull();
-    expect(screen.getByText("Irish Jewish Museum")).toBeInTheDocument();
-  });
-
-  it("uses iOS Mantine choice list without Survey section chrome when flag is on", () => {
-    mockUsePlayerUiMantine.mockReturnValue(true);
+  it("uses iOS Mantine choice list without Survey section chrome", () => {
     render(
       <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
         <TentacleAnswerPicker {...baseProps} />

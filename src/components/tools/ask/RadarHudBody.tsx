@@ -33,8 +33,6 @@ import {
   type RadarDistanceOptionKey,
 } from "@/domain/questions";
 import type { GameSize } from "@/domain/session/size/gameSize";
-import { usePlayerUiMantine } from "@/hooks/feature/usePlayerUiMantine";
-
 const RADAR_QUESTION_INTRO = {
   prompt: "Are you within [distance] of me?",
   ruleSummary:
@@ -122,14 +120,13 @@ export function RadarHudBody({
   toolLabel = "Radar",
   editingDistance = false,
 }: RadarHudBodyProps) {
-  const mantinePlayerUi = usePlayerUiMantine();
   const chooseInputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
-    if (!chooseCustom || !mantinePlayerUi) {
+    if (!chooseCustom || !true) {
       return;
     }
     chooseInputRef.current?.focus();
-  }, [chooseCustom, mantinePlayerUi]);
+  }, [chooseCustom, true]);
   const resolvedRadius = chooseCustom
     ? (parseDistanceInput(customRadius, distanceUnit) ?? radiusMeters)
     : radiusMeters;
@@ -331,7 +328,7 @@ export function RadarHudBody({
   const chord: "distance" | "place" =
     editingDistance || !distanceSelectionAvailable ? "distance" : "place";
 
-  if (mantinePlayerUi) {
+  if (true) {
     return (
       <div
         data-testid="radar-hud-body"

@@ -1,5 +1,4 @@
 import type { ReactNode, Ref } from "react";
-import { usePlayerUiMantine } from "@/hooks/feature/usePlayerUiMantine";
 
 export interface DesktopOpsShellProps {
   status: ReactNode;
@@ -22,12 +21,11 @@ export function DesktopOpsShell({
   className = "",
 }: DesktopOpsShellProps) {
   const mapSlot = map ?? children;
-  const playerUxWorld = usePlayerUiMantine() ? "mantine" : "survey";
   return (
     <div
       ref={chromeHudRef}
       className={`desktop-ops-shell map-chrome-hud ${className}`.trim()}
-      data-player-ux-world={playerUxWorld}
+      data-player-ux-world="mantine"
     >
       <div
         className="desktop-ops-shell__status"

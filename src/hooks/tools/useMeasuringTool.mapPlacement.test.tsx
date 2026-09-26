@@ -4,10 +4,6 @@ import { useMeasuringTool } from "./useMeasuringTool";
 import { createToolHookMocks } from "../../test/helpers/toolHookMocks";
 import { DUBLIN_CITY_GAME_AREA } from "../../test/fixtures/dublinGameArea";
 
-vi.mock("@/hooks/feature/usePlayerUiMantine", () => ({
-  usePlayerUiMantine: () => true,
-}));
-
 vi.mock("../../services/core/location/geolocation", async (importOriginal) => {
   const actual =
     await importOriginal<

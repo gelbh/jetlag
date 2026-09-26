@@ -22,7 +22,6 @@ import {
 } from "../../domain/questions";
 import type { SubmitPendingQuestionInput } from "../sync/usePendingQuestionActions";
 import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
-import { usePlayerUiMantine } from "@/hooks/feature/usePlayerUiMantine";
 import { useToolSession } from "./framework/useToolSession";
 
 interface PhotoSessionConfig {
@@ -160,9 +159,8 @@ export function usePhotoTool({
     !usedCategories.has(categoryId) &&
     isPhotoCategoryAvailableForGameSize(gameSize, categoryId);
 
-  const mantinePlayerUi = usePlayerUiMantine();
   const mapFirstEligible =
-    mantinePlayerUi && categoryChosen && categoryReady && awaitHiderAnswer;
+    categoryChosen && categoryReady && awaitHiderAnswer;
 
   const handleCategoryChange = (id: PhotoCategoryId) => {
     setSelectedCategoryId(id);
@@ -186,7 +184,7 @@ export function usePhotoTool({
 
   const canCommitPhoto =
     categoryReady &&
-    (categoryChosen || !mantinePlayerUi) &&
+    categoryChosen &&
     canSubmitQuestion &&
     !session.isBusy &&
     !hasOpenQuestion;

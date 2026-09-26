@@ -2,14 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { MeasuringRefineMapChip } from "./MeasuringRefineMapChip";
 
-const mockUsePlayerUiMantine = vi.fn(() => false);
-
-vi.mock("@/hooks/feature/usePlayerUiMantine", () => ({
-  usePlayerUiMantine: () => mockUsePlayerUiMantine(),
-}));
-
 beforeEach(() => {
-  mockUsePlayerUiMantine.mockReturnValue(false);
   vi.stubGlobal("matchMedia", (query: string) => ({
     matches: false,
     media: query,
@@ -41,8 +34,7 @@ describe("MeasuringRefineMapChip", () => {
     expect(screen.getByText("Adding remaining areas to the map…")).toBeTruthy();
   });
 
-  it("uses frosted iOS chrome under mantine player UI", () => {
-    mockUsePlayerUiMantine.mockReturnValue(true);
+  it("uses frosted iOS chrome", () => {
     render(
       <MeasuringRefineMapChip
         visible

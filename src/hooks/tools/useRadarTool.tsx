@@ -26,7 +26,6 @@ import { questionCostBreakdown } from "../../domain/questions";
 import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
 import type { SubmitPendingQuestionInput } from "../../hooks/sync/usePendingQuestionActions";
 import type { GameSize } from "../../domain/session/size/gameSize";
-import { usePlayerUiMantine } from "@/hooks/feature/usePlayerUiMantine";
 import type { AskToolHudBundle } from "../map-screen/heavyMapTools";
 import {
   queryGeolocationPermission,
@@ -253,8 +252,6 @@ export function useRadarTool({
       radarChooseCustom,
     );
 
-  const mantinePlayerUi = usePlayerUiMantine();
-
   const onPresetSelect = (radiusMeters: number) => {
     setRadarChooseCustom(false);
     setRadarCustomRadius("");
@@ -300,7 +297,7 @@ export function useRadarTool({
   };
 
   const mapFirstEligible =
-    mantinePlayerUi && distanceSelectionAvailable && !editingDistance;
+    distanceSelectionAvailable && !editingDistance;
 
   const [placementGeo, setPlacementGeo] = useState<
     GeolocationPermissionState | "checking"
@@ -420,7 +417,7 @@ export function useRadarTool({
   const hud: AskToolHudBundle = {
     readiness,
     costLabel,
-    error: mantinePlayerUi ? null : (mapError ?? gpsError ?? null),
+    error: null,
     onCommit: () => void commit(),
     suppressSheet: mapPlacementActive,
     mapOverlay: mapPlacementActive ? (
