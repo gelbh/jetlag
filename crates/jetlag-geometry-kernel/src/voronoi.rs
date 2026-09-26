@@ -84,11 +84,13 @@ pub fn spatial_voronoi_rings_from_coords(coords: &[f64]) -> Result<Vec<f64>, Str
     if coords.is_empty() {
         return Ok(Vec::new());
     }
-    if coords.len() % 2 != 0 {
+    if !coords.len().is_multiple_of(2) {
         return Err("voronoi: coords length must be even (lng/lat pairs)".into());
     }
     let sites: Vec<SiteIn> = coords
-        .chunks_exact(2)
+        .as_chunks::<2>()
+        .0
+        .iter()
         .map(|pair| SiteIn {
             lng: pair[0],
             lat: pair[1],

@@ -14,7 +14,7 @@ runs:
       with:
         toolchain: stable
         targets: wasm32-unknown-unknown
-        components: rustfmt
+        components: rustfmt, clippy
 
     - name: Install wasm-pack
       shell: bash
