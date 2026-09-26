@@ -143,17 +143,19 @@ export function AdminMapScreen({
   const mapLayers = (
     <MapView
       key={controller.session.id}
-      mapKey={controller.session.id}
-      mapStyle={controller.effectiveBasemapStyle}
-      onMapStyleChange={controller.handleMapStyleChange}
-      mapStyleControlInset={mapControlInset}
-      zoomControlInset={mapControlInset}
-      center={controller.center}
-      zoom={12}
-      focusBounds={controller.mapFocusBounds}
-      fitBoundsMode="once"
-      showZoomControl={false}
-      className="h-full w-full"
+      model={{
+        mapKey: controller.session.id,
+        mapStyle: controller.effectiveBasemapStyle,
+        onMapStyleChange: controller.handleMapStyleChange,
+        mapStyleControlInset: mapControlInset,
+        zoomControlInset: mapControlInset,
+        center: controller.center,
+        zoom: 12,
+        focusBounds: controller.mapFocusBounds,
+        fitBoundsMode: "once",
+        showZoomControl: false,
+        className: "h-full w-full",
+      }}
     >
       <MapViewportTracker onViewportChange={controller.setMapViewport} />
       {embeddedMonitor ? <AdminMonitorPlayerFocus /> : null}

@@ -80,31 +80,33 @@ export function MapScreenMapLayers({ controller }: MapScreenMapLayersProps) {
     <div ref={mapShellRef} className="absolute inset-0">
       <MapView
         key={session!.id}
-        mapKey={session!.id}
-        mapStyle={effectiveBasemapStyle}
-        streetBasemap={streetBasemap}
-        onMapStyleChange={hideMapControls ? undefined : handleMapStyleChange}
-        showMapStyleToggle={!hideMapControls}
-        showZoomControl={!hideMapControls}
-        zoomControlInset={mapChromeControlInset}
-        mapStyleControlInset={mapChromeControlInset}
-        center={center}
-        zoom={12}
-        focusBounds={effectiveMapFocusBounds}
-        focusMinZoom={placementFocusMinZoom}
-        focusMaxZoom={placementFocusMaxZoom}
-        fitBoundsMode="once"
-        recenterToken={placementRecenterToken}
-        focusPaddingBias={placementFocusPaddingBias}
-        focusPaddingTopBias={placementFocusPaddingTopBias}
-        focusPreferFly={placementFocusPreferFly}
-        showCompassControl={!hideMapControls}
-        onRecenter={requestPlacementRecenter}
-        onMapClick={handleMapClick}
-        chromeHudRef={chromeHudRef}
-        className={
-          placementCrosshair ? "map-crosshair h-full w-full" : "h-full w-full"
-        }
+        model={{
+          mapKey: session!.id,
+          mapStyle: effectiveBasemapStyle,
+          streetBasemap,
+          onMapStyleChange: hideMapControls ? undefined : handleMapStyleChange,
+          showMapStyleToggle: !hideMapControls,
+          showZoomControl: !hideMapControls,
+          zoomControlInset: mapChromeControlInset,
+          mapStyleControlInset: mapChromeControlInset,
+          center,
+          zoom: 12,
+          focusBounds: effectiveMapFocusBounds,
+          focusMinZoom: placementFocusMinZoom,
+          focusMaxZoom: placementFocusMaxZoom,
+          fitBoundsMode: "once",
+          recenterToken: placementRecenterToken,
+          focusPaddingBias: placementFocusPaddingBias,
+          focusPaddingTopBias: placementFocusPaddingTopBias,
+          focusPreferFly: placementFocusPreferFly,
+          showCompassControl: !hideMapControls,
+          onRecenter: requestPlacementRecenter,
+          onMapClick: handleMapClick,
+          chromeHudRef,
+          className: placementCrosshair
+            ? "map-crosshair h-full w-full"
+            : "h-full w-full",
+        }}
       >
         <MapViewportTracker
           onViewportChange={handleMapViewportChange}

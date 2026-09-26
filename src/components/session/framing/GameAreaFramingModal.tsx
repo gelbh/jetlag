@@ -122,18 +122,20 @@ export function GameAreaFramingModal({
     >
       <Box className="absolute inset-0">
         <MapView
-          mapStyle={mapStyle}
-          onMapStyleChange={onMapStyleChange}
-          zoom={10}
-          focusBounds={effectiveFocusBounds}
-          fitBoundsPadding={[56, 56]}
-          showZoomControl
-          zoomControlInset="safe-area"
-          mapStyleControlInset="safe-area"
-          onBoundsChange={framing.handleBoundsChange}
-          onUserViewportFramed={framing.handleUserViewportFramed}
-          onMapClick={framing.handleMapClick}
-          className="h-full w-full"
+          model={{
+            mapStyle,
+            onMapStyleChange,
+            zoom: 10,
+            focusBounds: effectiveFocusBounds,
+            fitBoundsPadding: [56, 56],
+            showZoomControl: true,
+            zoomControlInset: "safe-area",
+            mapStyleControlInset: "safe-area",
+            onBoundsChange: framing.handleBoundsChange,
+            onUserViewportFramed: framing.handleUserViewportFramed,
+            onMapClick: framing.handleMapClick,
+            className: "h-full w-full",
+          }}
         >
           {manualFramingActive ? (
             <FramingPreviewLayers
