@@ -1,4 +1,5 @@
-/* primitives.css — HUD chrome, buttons, fields */
+/* primitives.css — residual HUD / form chrome still class-bound (W5-D/E consumers).
+ * Map floating controls use hudChromeStyles; entry routes use entryStyles. */
 @layer components {
   .btn-primary,
   .btn-secondary {
@@ -15,17 +16,20 @@
     cursor: pointer;
   }
 
+  /* Residual for ScreenNav / admin / leaderboard until those migrate. */
   .hud-chrome {
     display: flex;
     min-height: 3rem;
     min-width: 3rem;
     align-items: center;
     justify-content: center;
-    border-radius: var(--radius-hud-md);
-    border: 1px solid oklch(from var(--color-border) l c h / 0.85);
-    background: var(--color-surface-panel);
-    color: var(--color-ink);
-    box-shadow: var(--shadow-hud-float);
+    border-radius: var(--jl-control-radius, 14px);
+    border: var(--jl-hairline, 0.33px) solid oklch(from var(--color-rule) l c h / 0.65);
+    background: oklch(from var(--color-canvas) l c h / 0.88);
+    color: var(--color-field-ink);
+    box-shadow: var(--jl-float-shadow, 0 4px 14px 0 oklch(0.1 0.04 265 / 0.28));
+    backdrop-filter: var(--jl-frost-blur, blur(20px) saturate(1.4));
+    -webkit-backdrop-filter: var(--jl-frost-blur, blur(20px) saturate(1.4));
   }
 
   html:not([data-motion="reduced"]):not([data-motion="static"]) .hud-chrome {
@@ -48,7 +52,7 @@
   }
 
   .hud-chrome:hover:not(:disabled) {
-    background: var(--color-surface-raised);
+    background: oklch(from var(--color-canvas) l c h / 0.96);
   }
 
   .hud-chrome:disabled {
@@ -56,7 +60,7 @@
   }
 
   .hud-chrome:focus-visible {
-    outline: 2px solid var(--color-action);
+    outline: 2px solid var(--color-flag);
     outline-offset: 2px;
   }
 
@@ -67,46 +71,35 @@
   }
 
   .map-hud-home:hover:not(:disabled) {
-    background: oklch(from var(--color-surface-panel) l c h / 0.72);
+    background: oklch(from var(--color-canvas) l c h / 0.72);
   }
 
   .hud-chrome-active {
     border-color: oklch(from var(--color-highlight) l c h / 0.55);
-    background: var(--color-highlight-soft);
+    background: oklch(from var(--color-highlight) l c h / 0.22);
     color: var(--color-highlight);
   }
 
   .hud-panel {
     position: relative;
     overflow: hidden;
-    border-radius: var(--radius-hud-lg);
-    border: 2px solid var(--color-border);
-    background: var(--color-surface-panel);
-    box-shadow: var(--shadow-hud-menu);
-  }
-
-  .hud-panel::before {
-    content: "";
-    position: absolute;
-    inset-inline: 0;
-    top: 0;
-    height: 3px;
-    background: linear-gradient(
-      90deg,
-      var(--color-brand-blue),
-      var(--color-highlight) 50%,
-      var(--color-action)
-    );
+    border-radius: 16px;
+    border: var(--jl-hairline, 0.33px) solid oklch(from var(--color-rule) l c h / 0.65);
+    background: oklch(from var(--color-canvas) l c h / 0.92);
+    box-shadow: 0 8px 24px 0 oklch(0.1 0.04 265 / 0.35);
+    backdrop-filter: var(--jl-frost-blur, blur(20px) saturate(1.4));
+    -webkit-backdrop-filter: var(--jl-frost-blur, blur(20px) saturate(1.4));
+    color: var(--color-field-ink);
   }
 
   .hud-sheet {
-    border-top: 3px solid var(--color-highlight);
-    background: var(--color-surface-panel);
+    border-top: 3px solid var(--color-flag);
+    background: oklch(from var(--color-canvas) l c h / 0.96);
     box-shadow: 0 -12px 40px oklch(0.08 0.04 265 / 0.55);
   }
 
   .hud-scrim {
-    background: oklch(from var(--color-surface-deep) l c h / 0.88);
+    background: oklch(from var(--color-canvas) l c h / 0.88);
   }
 
   .font-display {
@@ -120,12 +113,12 @@
     min-height: 3rem;
     align-items: center;
     justify-content: center;
-    border-radius: var(--radius-hud-md);
-    border: 2px solid oklch(from var(--color-action) l c h / 0.85);
-    background: var(--color-action);
+    border-radius: var(--jl-control-radius, 14px);
+    border: 2px solid oklch(from var(--color-flag) l c h / 0.85);
+    background: var(--color-flag);
     padding-inline: 1rem;
     letter-spacing: 0.06em;
-    color: var(--color-action-ink);
+    color: var(--color-flag-ink);
     transition:
       filter var(--motion-fast) ease-out,
       transform var(--motion-fast) ease-out;
@@ -140,7 +133,7 @@
   }
 
   .btn-primary:focus-visible {
-    outline: 2px solid var(--color-action);
+    outline: 2px solid var(--color-flag);
     outline-offset: 2px;
   }
 
@@ -149,17 +142,17 @@
     min-height: 3rem;
     align-items: center;
     justify-content: center;
-    border-radius: var(--radius-hud-md);
-    border: 2px solid var(--color-border);
-    background: var(--color-surface-raised);
+    border-radius: var(--jl-control-radius, 14px);
+    border: 2px solid var(--color-rule);
+    background: oklch(from var(--color-rule) l c h / 0.45);
     padding-inline: 1rem;
     letter-spacing: 0.05em;
-    color: var(--color-ink-secondary);
+    color: var(--color-field-ink);
     transition: background var(--motion-fast) ease-out;
   }
 
   .btn-secondary:hover:not(:disabled) {
-    background: var(--color-border);
+    background: oklch(from var(--color-rule) l c h / 0.55);
   }
 
   .btn-secondary:disabled {
@@ -170,23 +163,23 @@
     margin-top: 0.25rem;
     min-height: 3rem;
     width: 100%;
-    border-radius: var(--radius-hud-md);
-    border: 1px solid var(--color-border);
-    background: var(--color-surface-base);
+    border-radius: var(--jl-control-radius, 14px);
+    border: 1px solid var(--color-rule);
+    background: var(--color-canvas);
     padding-inline: 0.75rem;
-    color: var(--color-ink);
+    color: var(--color-field-ink);
   }
 
   .field-input:focus {
-    outline: 2px solid var(--color-action);
+    outline: 2px solid var(--color-flag);
     outline-offset: 0;
-    border-color: var(--color-action);
+    border-color: var(--color-flag);
   }
 
   .field-label {
     display: block;
     font-size: 0.875rem;
-    color: var(--color-ink-muted);
+    color: var(--color-field-ink-muted);
   }
 
   .tool-panel-compact {
@@ -212,7 +205,7 @@
 
   .text-error {
     font-size: 0.875rem;
-    color: var(--color-status-error);
+    color: var(--color-halt);
   }
 
   .jl-selectable {

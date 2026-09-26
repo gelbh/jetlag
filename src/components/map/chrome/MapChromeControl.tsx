@@ -1,6 +1,7 @@
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 import { UnstyledButton } from "@mantine/core";
 import {
+  hudChromeStyles,
   mapToolSlotLabelStyle,
   mapToolSlotStyles,
   type MapToolSlotTone,
@@ -138,16 +139,17 @@ export function MapChromeControl({
   }
 
   return (
-    <button
+    <UnstyledButton
       type={type}
       disabled={disabled}
       className={resolvedClassName}
+      styles={hudChromeStyles(Boolean(pressed))}
       aria-label={ariaLabel}
       aria-pressed={pressed}
       title={title ?? ariaLabel}
       {...rest}
     >
       {body}
-    </button>
+    </UnstyledButton>
   );
 }

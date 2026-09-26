@@ -1,3 +1,4 @@
+import { AskHudPanel } from "@/components/tools/ask/AskHudPanel";
 /**
  * Radar Ask HUD — Matching twin: question header + distance catalog, then map-first.
  */
@@ -345,9 +346,9 @@ export function RadarHudBody({
         <div className="space-y-2">
           {awaitHiderAnswer ? <QuestionTruthReferenceHint /> : null}
           {exhausted ? (
-            <div className="pointer-events-auto ask-hud-panel p-3">
+            <AskHudPanel className="p-3">
               <CatalogExhaustedMessage message="Every radar distance option has already been used this session." />
-            </div>
+            </AskHudPanel>
           ) : (
             <>
               <AskCatalogRail
