@@ -27,12 +27,11 @@ test.describe("hider chat scroll", () => {
     await openChat(guestPage);
 
     const scrollRegion = gameChatScroll(guestPage);
-    const secondAnswerButton = scrollRegion.getByRole("button", {
-      name: "Send answer: Yes",
-    });
-    await expect
-      .poll(async () => secondAnswerButton.isVisible(), { timeout: 30_000 })
-      .toBe(true);
+    // Recommended truth suffixes aria-label; prefer the latest pending Yes.
+    const secondAnswerButton = scrollRegion
+      .getByRole("button", { name: /Send answer:\s*Yes/i })
+      .last();
+    await expect(secondAnswerButton).toBeVisible({ timeout: 30_000 });
 
     await expect(scrollRegion).toBeVisible();
 

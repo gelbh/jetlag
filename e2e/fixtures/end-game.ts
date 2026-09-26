@@ -2,12 +2,12 @@ import { type Page, expect } from "@playwright/test";
 import { openSettings } from "./tools/navigation";
 
 export async function startEndGameFromFoundStation(hostPage: Page) {
+  const stationButton = hostPage.getByRole("button", {
+    name: /Declare found hiding-zone station|start end game/i,
+  });
+  await expect(stationButton).toBeVisible({ timeout: 30_000 });
   hostPage.once("dialog", (dialog) => dialog.accept());
-  await hostPage
-    .getByRole("button", {
-      name: "Declare found hiding-zone station / start end game",
-    })
-    .click();
+  await stationButton.click();
 }
 
 export async function expectEndGameStarted(hostPage: Page, guestPage: Page) {

@@ -50,6 +50,9 @@ export async function clickMapAt(
  * Fire a MapLibre map click at a WGS84 point. Prefer this under Ask HUD /
  * Mantine Drawer stacking — Playwright canvas clicks often never reach
  * MapLibre's own click handlers.
+ *
+ * Prefers `window.__JETLAG_MAPLIBRE__` (set by mapLibreMapRegistry) over a
+ * React fiber walk, which breaks under react-map-gl / Mantine remounts.
  */
 export async function clickMapAtLatLng(
   page: Page,
@@ -61,79 +64,38 @@ export async function clickMapAtLatLng(
     timeout: 15_000,
   });
   const fired = await page.evaluate(
-    ({ sel, latitude: lat, longitude: lng }) => {
-      const root = document.querySelector(sel) as HTMLElement | null;
-      if (!root) {
-        return false;
-      }
-      type AnyRec = Record<string, unknown>;
-      const seen = new Set<unknown>();
-      let map: {
+    ({ latitude: lat, longitude: lng }) => {
+      type MapLike = {
         fire: (type: string, ev: unknown) => void;
         project: (lngLat: [number, number]) => { x: number; y: number };
-      } | null = null;
-      const visit = (node: unknown, depth: number) => {
-        if (!node || depth > 14 || seen.has(node) || typeof node !== "object") {
-          return;
-        }
-        seen.add(node);
-        const rec = node as AnyRec;
-        if (
-          typeof rec.fire === "function" &&
-          typeof rec.project === "function" &&
-          typeof rec.on === "function"
-        ) {
-          map = rec as typeof map;
-          return;
-        }
-        for (const key of Object.getOwnPropertyNames(rec)) {
-          if (map) {
-            return;
-          }
-          if (
-            key.startsWith("__react") ||
-            key === "stateNode" ||
-            key === "child" ||
-            key === "memoizedState" ||
-            key === "memoizedProps" ||
-            key === "return" ||
-            key === "sibling" ||
-            key === "current" ||
-            key === "map" ||
-            key === "_map" ||
-            key === "deps" ||
-            key === "next" ||
-            key === "queue"
-          ) {
-            try {
-              visit(rec[key], depth + 1);
-            } catch {
-              /* ignore cyclic / revoked */
-            }
-          }
-        }
       };
-      const fiberKey = Object.keys(root).find((k) =>
-        k.startsWith("__reactFiber"),
-      );
-      if (fiberKey) {
-        visit((root as AnyRec)[fiberKey], 0);
-      }
-      if (!map) {
+      const fromWindow = (
+        window as Window & { __JETLAG_MAPLIBRE__?: MapLike | null }
+      ).__JETLAG_MAPLIBRE__;
+      const map = fromWindow ?? null;
+      if (
+        !map ||
+        typeof map.fire !== "function" ||
+        typeof map.project !== "function"
+      ) {
         return false;
       }
       const point = map.project([lng, lat]);
+      const lngLat = { lng, lat };
       map.fire("click", {
-        lngLat: { lng, lat },
+        type: "click",
+        lngLat,
         point,
-        originalEvent: new MouseEvent("click"),
+        originalEvent: new MouseEvent("click", { bubbles: true }),
       });
       return true;
     },
-    { sel: MAP_CONTAINER_SELECTOR, latitude, longitude },
+    { latitude, longitude },
   );
   if (!fired) {
-    throw new Error("MapLibre map instance not found for clickMapAtLatLng.");
+    throw new Error(
+      "MapLibre map instance not found for clickMapAtLatLng (window.__JETLAG_MAPLIBRE__).",
+    );
   }
 }
 
