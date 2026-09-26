@@ -12,8 +12,10 @@ import type {
   EliminationUnionInput,
   PolygonFeature,
 } from "../kernel/types";
-import type { MaskKernelMode } from "../kernel/maskKernelMode";
-import { resolveClientMaskKernelMode } from "../kernel/resolveClientMaskKernelMode";
+import {
+  resolveClientMaskKernelMode,
+  type MaskKernelMode,
+} from "../kernel";
 
 type EliminationMaskWorkerApi = {
   buildMaskFromUnionInput: (

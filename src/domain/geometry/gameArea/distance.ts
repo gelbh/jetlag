@@ -23,3 +23,11 @@ export function distanceBetweenLatLngPoints(
     units: "meters",
   });
 }
+
+/** Turf geodesic meters; alias kept for call sites that say distanceBetweenPoints. */
+export function distanceBetweenPoints(
+  from: LatLngTuple,
+  to: LatLngTuple,
+): number {
+  return distanceBetweenLatLngPoints(from, to);
+}
