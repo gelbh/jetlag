@@ -948,3 +948,178 @@ export const mapAttentionRingStyle: CSSProperties = {
   zIndex: 1001,
   boxShadow: "inset 0 0 0 3px oklch(from var(--color-highlight) l c h / 0.5)",
 };
+
+/** Icon wrap inside hunt / session slot (was `.jl-tool-slot-icon`). */
+export const mapToolSlotIconStyle: CSSProperties = {
+  display: "flex",
+  height: "1.75rem",
+  width: "1.75rem",
+  alignItems: "center",
+  justifyContent: "center",
+};
+
+/** Desktop ops absolute grid shell (was `.desktop-ops-shell`). */
+export const desktopOpsShellStyle: CSSProperties = {
+  position: "absolute",
+  inset: 0,
+  display: "grid",
+  gridTemplateColumns:
+    "var(--ops-tool-rail-width, 5rem) minmax(0, 1fr) auto",
+  gridTemplateRows: "auto minmax(0, 1fr)",
+  minHeight: 0,
+  height: "100%",
+};
+
+export const desktopOpsShellStatusStyle: CSSProperties = {
+  gridColumn: "1 / -1",
+  gridRow: 1,
+  position: "relative",
+  zIndex: "var(--z-banner)",
+  pointerEvents: "none",
+};
+
+export const desktopOpsShellToolsStyle: CSSProperties = {
+  gridColumn: 1,
+  gridRow: 2,
+  position: "relative",
+  zIndex: "var(--z-dock)",
+  minHeight: 0,
+  pointerEvents: "none",
+};
+
+export const desktopOpsShellMapStyle: CSSProperties = {
+  gridColumn: 2,
+  gridRow: 2,
+  position: "relative",
+  minWidth: 0,
+  minHeight: 0,
+  overflow: "hidden",
+};
+
+export const desktopOpsShellContextualStyle: CSSProperties = {
+  gridColumn: 3,
+  gridRow: 2,
+  position: "relative",
+  zIndex: "var(--z-dock)",
+  minHeight: 0,
+};
+
+/** Expanded status sits in-flow in the ops status row. */
+export const desktopOpsStatusExpandedStyle: CSSProperties = {
+  position: "relative",
+  inset: "auto",
+  top: "auto",
+  right: "auto",
+  left: "auto",
+};
+
+/** Desktop contextual rail host (was `.contextual-rail`). */
+export function contextualRailStyle(open: boolean): CSSProperties {
+  return {
+    display: "flex",
+    height: "100%",
+    flexDirection: "column",
+    width: open
+      ? "var(--ops-rail-width, 22rem)"
+      : "var(--ops-rail-collapsed-width, 2.75rem)",
+    borderInlineStart: "2px solid var(--color-border)",
+    background: "var(--color-surface-panel)",
+    pointerEvents: "auto",
+    transition: "width 180ms ease",
+  };
+}
+
+export const contextualRailHeaderStyle: CSSProperties = {
+  display: "flex",
+  minHeight: "2.75rem",
+  flexShrink: 0,
+  alignItems: "center",
+  gap: "0.5rem",
+  borderBottom: "1px solid var(--color-border)",
+  padding: "0.25rem 0.5rem",
+};
+
+export const contextualRailIconTabsStyle: CSSProperties = {
+  display: "flex",
+  flex: 1,
+  flexDirection: "column",
+  gap: "0.25rem",
+  padding: "0.375rem 0.25rem",
+};
+
+export function contextualRailIconTabStyle(active: boolean): CSSProperties {
+  return {
+    display: "flex",
+    minHeight: "2.75rem",
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: "var(--radius-hud-md)",
+    fontSize: "0.625rem",
+    fontWeight: 700,
+    letterSpacing: "0.04em",
+    textTransform: "uppercase",
+    color: active ? "var(--color-ink)" : "var(--color-ink-muted)",
+    background: active ? "var(--color-surface-raised)" : "transparent",
+  };
+}
+
+export const contextualRailTabsStyle: CSSProperties = {
+  display: "flex",
+  flexShrink: 0,
+  gap: "0.125rem",
+  overflowX: "auto",
+  borderBottom: "1px solid var(--color-border)",
+  padding: "0.375rem 0.5rem",
+};
+
+export function contextualRailTabStyle(active: boolean): CSSProperties {
+  return {
+    minHeight: "2.75rem",
+    flexShrink: 0,
+    borderRadius: "var(--radius-hud-md)",
+    padding: "0 0.625rem",
+    fontFamily: "var(--font-display)",
+    fontSize: "0.75rem",
+    fontWeight: 600,
+    letterSpacing: "0.04em",
+    textTransform: "uppercase",
+    color: active ? "var(--color-action-ink)" : "var(--color-ink-muted)",
+    background: active ? "var(--color-action)" : "transparent",
+    transition: "background-color 150ms ease, color 150ms ease",
+  };
+}
+
+export const contextualRailPanelStyle: CSSProperties = {
+  minHeight: 0,
+  flex: 1,
+  overflowY: "auto",
+  overscrollBehavior: "contain",
+  padding: "0.75rem",
+};
+
+/** Chat unread pip on session dock slots (was `.jl-unread-badge`). */
+export const chatUnreadBadgeStyle: CSSProperties = {
+  position: "absolute",
+  top: "-0.375rem",
+  right: "-0.5rem",
+  minWidth: "1.375rem",
+  height: "1.375rem",
+  borderRadius: 9999,
+  border: "2px solid var(--color-surface-deep)",
+  background: "var(--color-action)",
+  boxShadow: "0 0 0 2px oklch(from var(--color-action) l c h / 0.35)",
+  pointerEvents: "none",
+  padding: "0 0.25rem",
+  fontSize: "0.6875rem",
+  fontWeight: 700,
+  lineHeight: 1,
+  color: "var(--color-action-ink)",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+};
+
+export const chatUnreadBadgeHostStyle: CSSProperties = {
+  position: "relative",
+};

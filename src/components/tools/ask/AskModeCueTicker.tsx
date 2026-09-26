@@ -23,7 +23,7 @@ export function AskModeCueTicker({ cue }: AskModeCueTickerProps) {
       radius={14}
       p="sm"
       className={cn(
-        "ask-mode-cue-ticker pointer-events-none w-full max-w-md justify-center",
+        "pointer-events-none mx-auto w-full max-w-md justify-center",
       )}
       styles={{
         root: {
