@@ -1,6 +1,19 @@
 /* map-tool-dock.css — W5-D residual: panel geometry, wizard nav, unread pulse,
  * route fallback. Slot / menu / overflow chrome → MapChromeControl + entryStyles. */
 @layer components {
+  /* Narrow phone: shrink hunt/session tool slots (was pre-Mantine map-tool-dock). */
+  @media (max-width: 28rem) {
+    .jl-tool-slot {
+      min-width: 2.125rem !important;
+      padding-inline: 0.0625rem !important;
+    }
+
+    .jl-tool-slot-label {
+      font-size: 0.5rem !important;
+      letter-spacing: 0.04em !important;
+    }
+  }
+
   /* Floating panels above dock */
   .jl-panel-above-dock {
     bottom: var(--map-panel-bottom);
