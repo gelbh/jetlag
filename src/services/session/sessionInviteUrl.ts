@@ -20,7 +20,7 @@ export function parseSessionInviteCode(
 
 /**
  * Prefer the current browser origin for shareable invites, but fall back to the
- * public site origin for Capacitor/WebView hosts (localhost / non-http schemes).
+ * public site origin for non-http or loopback hosts.
  */
 export function resolveSessionInviteOrigin(
   currentOrigin: string,
