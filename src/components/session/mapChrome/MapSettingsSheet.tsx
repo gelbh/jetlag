@@ -16,8 +16,6 @@ import type { MapStyle, StreetBasemap } from "@/domain/map/mapBasemaps";
 import { getBasemapAttributionText } from "@/domain/map/mapBasemaps";
 import type { SessionRecord } from "@/domain/map/annotations";
 import type { LayerVisibility } from "@/state/sessionStore";
-import type { NotificationPreferences } from "@/domain/device/chrome/notifications";
-import { isNativeNotificationsSupported } from "@/services/core/native/notifications";
 import type { TransitRouteFilter } from "@/domain/map/transit";
 import { MapSettingsGeneralTab } from "../settings/GeneralTab";
 import { MapSettingsSessionTab } from "../settings/SessionTab";
@@ -56,12 +54,6 @@ export interface MapSettingsGeneralProps {
   onToggleTransit: () => void;
   onToggleLiveTransit: () => void;
   onTransitRouteFilterChange: (value: TransitRouteFilter) => void;
-  notificationPreferences?: NotificationPreferences;
-  nativeNotificationsSupported?: boolean;
-  onNotificationPreferencesChange?: (
-    patch: Partial<NotificationPreferences>,
-  ) => void;
-  onEnableNotifications?: () => Promise<boolean>;
 }
 
 export interface MapSettingsLayersProps {
@@ -125,8 +117,6 @@ export function MapSettingsSheet({
   const [reportProblemOpen, setReportProblemOpen] = useState(false);
   const ownsReportSheet = !onReportProblem;
 
-  const nativeNotificationsSupported =
-    general.nativeNotificationsSupported ?? isNativeNotificationsSupported();
   const gameRulesEditable = rules?.gameRulesEditable ?? false;
   const gameSize = rules?.gameSize ?? "medium";
   const gameRulesSaveLabel = rules?.gameRulesSaveLabel ?? "Save game rules";
@@ -242,12 +232,6 @@ export function MapSettingsSheet({
             onKeepScreenAwakeChange={general.onKeepScreenAwakeChange}
             lowPowerMode={general.lowPowerMode}
             onLowPowerModeChange={general.onLowPowerModeChange}
-            notificationPreferences={general.notificationPreferences}
-            nativeNotificationsSupported={nativeNotificationsSupported}
-            onNotificationPreferencesChange={
-              general.onNotificationPreferencesChange
-            }
-            onEnableNotifications={general.onEnableNotifications}
             onClearMap={session.onClearMap}
             onExport={session.onExport}
             isHost={session.isHost ?? false}
