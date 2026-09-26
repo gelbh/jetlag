@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
+  JETLAG_DOCK_Z_INDEX,
+  JETLAG_MODAL_Z_INDEX,
   jetlagBrand,
   jetlagCssVariablesResolver,
   jetlagTheme,
@@ -16,6 +18,11 @@ describe("jetlagTheme", () => {
       controlRadius: 14,
       sheetRadius: 24,
       frostBlur: jetlagBrand.frostBlur,
+      dockHeight: "4.25rem",
+      chromeGapAboveDock: "0.5rem",
+      safeAreaBottom: "env(safe-area-inset-bottom, 0px)",
+      zDock: JETLAG_DOCK_Z_INDEX,
+      zModal: JETLAG_MODAL_Z_INDEX,
     });
     expect(jetlagTheme.components?.Button).toBeDefined();
     expect(jetlagTheme.components?.Drawer).toBeDefined();
@@ -29,6 +36,12 @@ describe("jetlagTheme", () => {
     );
     expect(resolved.variables?.["--jl-control-radius"]).toBe("14px");
     expect(resolved.variables?.["--jl-sheet-radius"]).toBe("24px");
+    expect(resolved.variables?.["--jl-dock-height"]).toBe("4.25rem");
+    expect(resolved.variables?.["--jl-safe-area-bottom"]).toBe(
+      jetlagBrand.safeAreaBottom,
+    );
+    expect(resolved.variables?.["--jl-z-dock"]).toBe("1000");
+    expect(resolved.variables?.["--jl-z-modal"]).toBe("1100");
     expect(resolved.dark?.["--mantine-color-body"]).toBe(jetlagBrand.canvas);
   });
 });
