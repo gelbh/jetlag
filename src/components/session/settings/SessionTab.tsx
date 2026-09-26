@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from "react";
-import { Button as MantineButton, Stack } from "@mantine/core";
+import { Button, Stack } from "@mantine/core";
 import {
   BookOpen,
   Export,
@@ -10,10 +10,10 @@ import type { NotificationPreferences } from "@/domain/device/chrome/notificatio
 import { SettingsToggleRow } from "../settings/SettingsToggleRow";
 import { NotificationPreferencesSection } from "./NotificationPreferencesSection";
 import {
-  IosInsetGroup,
-  IosSectionLabel,
-} from "@/components/ui/apple/iosEntryChrome";
-import { IosInsetRow } from "@/components/ui/apple/IosInsetRow";
+  InsetGroup,
+  SectionLabel,
+} from "@/components/ui/entry/entryChrome";
+import { InsetRow } from "@/components/ui/entry/InsetRow";
 
 const haltQuietRoot = {
   minHeight: "2.875rem",
@@ -136,8 +136,8 @@ export function MapSettingsSessionTab({
   return (
     <Stack gap="lg">
       <Stack gap="xs">
-        <IosSectionLabel>Device & alerts</IosSectionLabel>
-        <IosInsetGroup>
+        <SectionLabel>Device & alerts</SectionLabel>
+        <InsetGroup>
           <SettingsToggleRow
             label="Keep screen awake"
             checked={keepScreenAwake}
@@ -150,7 +150,7 @@ export function MapSettingsSessionTab({
             checked={lowPowerMode}
             onChange={onLowPowerModeChange}
           />
-        </IosInsetGroup>
+        </InsetGroup>
         {nativeNotificationsSupported &&
         notificationPreferences &&
         onNotificationPreferencesChange ? (
@@ -164,10 +164,10 @@ export function MapSettingsSessionTab({
 
       {helpItems.length > 0 ? (
         <Stack gap="xs">
-          <IosSectionLabel>Help</IosSectionLabel>
-          <IosInsetGroup>
+          <SectionLabel>Help</SectionLabel>
+          <InsetGroup>
             {helpItems.map((item, index) => (
-              <IosInsetRow
+              <InsetRow
                 key={item.key}
                 label={item.label}
                 icon={item.icon}
@@ -176,12 +176,12 @@ export function MapSettingsSessionTab({
                 tone={item.tone}
               />
             ))}
-          </IosInsetGroup>
+          </InsetGroup>
         </Stack>
       ) : null}
 
       <Stack gap="xs">
-        <IosSectionLabel>Danger zone</IosSectionLabel>
+        <SectionLabel>Danger zone</SectionLabel>
         {endGameBlocked ? (
           <p className="px-1 text-sm text-[var(--color-field-ink-muted)]">
             Clear map and reset board are unavailable during end game.
@@ -189,30 +189,30 @@ export function MapSettingsSessionTab({
         ) : null}
         <Stack gap="sm">
           {onClearMap ? (
-            <MantineButton
+            <Button
               fullWidth
               styles={{ root: haltQuietRoot }}
               disabled={endGameBlocked}
               onClick={onClearMap}
             >
               Clear map
-            </MantineButton>
+            </Button>
           ) : null}
 
           {isHost ? (
             <>
-              <MantineButton
+              <Button
                 fullWidth
                 styles={{ root: haltQuietRoot }}
                 aria-expanded={resetMenuOpen}
                 onClick={() => setResetMenuOpen((open) => !open)}
               >
                 {resetMenuOpen ? "Hide reset options" : "Reset options"}
-              </MantineButton>
+              </Button>
               {resetMenuOpen ? (
-                <IosInsetGroup>
+                <InsetGroup>
                   <div className="flex flex-col gap-2 p-3">
-                    <MantineButton
+                    <Button
                       fullWidth
                       styles={{
                         root: { ...haltQuietRoot, minHeight: "2.75rem" },
@@ -224,10 +224,10 @@ export function MapSettingsSessionTab({
                       }}
                     >
                       Reset board for everyone
-                    </MantineButton>
+                    </Button>
                     {remoteSession && onResetSession ? (
                       <>
-                        <MantineButton
+                        <Button
                           fullWidth
                           styles={{
                             root: { ...haltSolidRoot, minHeight: "2.75rem" },
@@ -238,7 +238,7 @@ export function MapSettingsSessionTab({
                           }}
                         >
                           Reset session progress
-                        </MantineButton>
+                        </Button>
                         <p className="text-xs leading-relaxed text-[var(--color-field-ink-muted)]">
                           Keeps the code and roster. Clears timer, map,
                           questions, chat, zones, traps, and end-game state.
@@ -246,20 +246,20 @@ export function MapSettingsSessionTab({
                       </>
                     ) : null}
                   </div>
-                </IosInsetGroup>
+                </InsetGroup>
               ) : null}
-              <MantineButton
+              <Button
                 fullWidth
                 styles={{ root: haltSolidRoot }}
                 onClick={onEndSession}
               >
                 End session for everyone
-              </MantineButton>
+              </Button>
             </>
           ) : null}
 
           {onLeaveSession ? (
-            <MantineButton
+            <Button
               fullWidth
               styles={{
                 root: {
@@ -277,7 +277,7 @@ export function MapSettingsSessionTab({
               onClick={onLeaveSession}
             >
               Leave session
-            </MantineButton>
+            </Button>
           ) : null}
         </Stack>
       </Stack>

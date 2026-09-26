@@ -12,9 +12,9 @@ import {
 import type { DistanceUnit } from "../../domain/map/distance";
 import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
 import {
-  iosFilledStyles,
-  iosGrayStyles,
-} from "../ui/apple/iosEntryChrome";
+  filledStyles,
+  grayStyles,
+} from "../ui/entry/entryChrome";
 
 interface PhotoAnswerUploaderProps {
   sessionId: string;
@@ -99,7 +99,7 @@ export function PhotoAnswerUploader({
         fullWidth
         disabled={busy}
         onClick={() => void submitAnswer({ kind: "sent_externally" })}
-        styles={iosFilledStyles}
+        styles={filledStyles}
       >
         {PHOTO_SENT_EXTERNALLY_LABEL}
       </Button>
@@ -107,7 +107,7 @@ export function PhotoAnswerUploader({
         fullWidth
         disabled={busy}
         onClick={() => void submitAnswer({ kind: "cannot_answer" })}
-        styles={iosGrayStyles}
+        styles={grayStyles}
       >
         {PHOTO_CANNOT_ANSWER_LABEL}
       </Button>

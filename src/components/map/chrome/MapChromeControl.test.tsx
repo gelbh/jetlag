@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { MantineProvider } from "@mantine/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { jetlagMantineTheme } from "@/theme/mantineTheme";
+import { jetlagTheme } from "@/theme/theme";
 import { MapChromeControl } from "./MapChromeControl";
 
 beforeEach(() => {
@@ -19,7 +19,7 @@ beforeEach(() => {
 
 function renderControl(ui: React.ReactElement) {
   return render(
-    <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+    <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
       {ui}
     </MantineProvider>,
   );
@@ -109,7 +109,7 @@ describe("MapChromeControl", () => {
     expect(onClick).toHaveBeenCalledTimes(1);
 
     rerender(
-      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
         <MapChromeControl
           variant="slot"
           aria-label="Open chat"
@@ -162,7 +162,7 @@ describe("MapChromeControl", () => {
 
   it("mounts Mantine slot chrome", () => {
     render(
-      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
         <MapChromeControl
           variant="slot"
           aria-label="Matching"
@@ -187,7 +187,7 @@ describe("MapChromeControl", () => {
 
   it("marks history tone on undo-style slots", () => {
     render(
-      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
         <MapChromeControl
           variant="slot"
           tone="history"

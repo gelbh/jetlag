@@ -9,7 +9,7 @@ import {
   askMapPlacementSendStyles,
   type AskMapPlacementPhase,
 } from "@/components/tools/ask/AskMapPlacementChrome";
-import { iosMapChromeSurfaceStyles } from "@/components/ui/apple/iosEntryChrome";
+import { mapChromeSurfaceStyles } from "@/components/ui/entry/entryChrome";
 
 export type PhotoMapPlacementChromeProps = {
   categoryLabel: string;
@@ -38,7 +38,7 @@ export function PhotoMapPlacementChrome({
       data-testid="photo-map-placement-answer"
       className="flex flex-col gap-2"
       style={{
-        ...iosMapChromeSurfaceStyles,
+        ...mapChromeSurfaceStyles,
         borderRadius: 16,
         padding: "0.55rem",
         color: "var(--color-field-ink)",

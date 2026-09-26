@@ -1,11 +1,11 @@
 import { Box, Button, Stack, Text } from "@mantine/core";
 import { usePersistedDismiss } from "@/hooks/forms/usePersistedDismiss";
 import {
-  IosInsetGroup,
-  IosSectionLabel,
-  iosFilledStyles,
-} from "@/components/ui/apple/iosEntryChrome";
-import { IosInsetHairline } from "@/components/ui/apple/IosInsetRow";
+  InsetGroup,
+  SectionLabel,
+  filledStyles,
+} from "@/components/ui/entry/entryChrome";
+import { InsetHairline } from "@/components/ui/entry/InsetRow";
 import { SheetHost } from "../../ui/sheets/SheetHost";
 
 const STORAGE_KEY = "jetlag.mapFirstRunDismissed";
@@ -28,7 +28,7 @@ function GuideRow({
 }) {
   return (
     <>
-      {showSeparator ? <IosInsetHairline insetStart="1rem" /> : null}
+      {showSeparator ? <InsetHairline insetStart="1rem" /> : null}
       <Box px="1rem" py="0.75rem">
         <Text
           style={{
@@ -98,8 +98,8 @@ export function MapFirstRunSheet({
         </Text>
 
         <Stack gap="xs">
-          <IosSectionLabel>Hunt dock</IosSectionLabel>
-          <IosInsetGroup>
+          <SectionLabel>Hunt dock</SectionLabel>
+          <InsetGroup>
             <GuideRow
               title="Ask tools"
               body="Matching, Measuring, Thermometer, Radar, Tentacles, and Photo. Place on the map, then commit from the primed strip."
@@ -109,30 +109,30 @@ export function MapFirstRunSheet({
               title="Cue and cost"
               body="The top cue names the next step. Cost chips show the question card spend before you send."
             />
-          </IosInsetGroup>
+          </InsetGroup>
         </Stack>
 
         <Stack gap="xs">
-          <IosSectionLabel>Draw</IosSectionLabel>
-          <IosInsetGroup>
+          <SectionLabel>Draw</SectionLabel>
+          <InsetGroup>
             <GuideRow
               title="Zone, Pin, Freehand"
               body="Open Draw (or More on narrow phones) for boundaries, point marks, and freehand scribbles."
             />
-          </IosInsetGroup>
+          </InsetGroup>
         </Stack>
 
         <Stack gap="xs">
-          <IosSectionLabel>Settings</IosSectionLabel>
-          <IosInsetGroup>
+          <SectionLabel>Settings</SectionLabel>
+          <InsetGroup>
             <GuideRow
               title="Map, Game, Session"
               body="Layers and basemap under Map. Join code and rules under Game. Device power, help, and leave under Session."
             />
-          </IosInsetGroup>
+          </InsetGroup>
         </Stack>
 
-        <Button fullWidth styles={iosFilledStyles} onClick={dismiss}>
+        <Button fullWidth styles={filledStyles} onClick={dismiss}>
           {forceOpen ? "Done" : "Got it"}
         </Button>
       </Stack>

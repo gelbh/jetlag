@@ -13,10 +13,10 @@ import {
   revealRolePasscode,
 } from "@/services/session/rolePasscodeLifecycle";
 import {
-  IosErrorCallout,
-  IosSectionLabel,
-  IosSuccessCallout,
-} from "@/components/ui/apple/iosEntryChrome";
+  ErrorCallout,
+  SectionLabel,
+  SuccessCallout,
+} from "@/components/ui/entry/entryChrome";
 import { RoleCodeStamp } from "../identity/RoleCodeStamp";
 
 type RevealRole = "seeker" | "hider" | "observer";
@@ -130,7 +130,7 @@ export function RolePasscodeSettings({
 
   return (
     <Stack gap="sm">
-      {embedded ? null : <IosSectionLabel>Role codes</IosSectionLabel>}
+      {embedded ? null : <SectionLabel>Role codes</SectionLabel>}
       {rows.map((role) => (
         <RoleCodeStamp
           key={role}
@@ -143,9 +143,9 @@ export function RolePasscodeSettings({
         />
       ))}
       {copyStatus === "copied" ? (
-        <IosSuccessCallout>Copied to clipboard.</IosSuccessCallout>
+        <SuccessCallout>Copied to clipboard.</SuccessCallout>
       ) : null}
-      <IosErrorCallout>{error}</IosErrorCallout>
+      <ErrorCallout>{error}</ErrorCallout>
     </Stack>
   );
 }

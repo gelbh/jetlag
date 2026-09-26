@@ -22,10 +22,10 @@ import {
 } from "./GameAreaFramingControls";
 import { framingModeHint } from "./gameAreaFramingUi";
 import {
-  iosFilledStyles,
-  iosGrayStyles,
-} from "@/components/ui/apple/iosEntryStyles";
-import { JETLAG_MODAL_Z_INDEX } from "@/theme/mantineTheme";
+  filledStyles,
+  grayStyles,
+} from "@/components/ui/entry/entryStyles";
+import { JETLAG_MODAL_Z_INDEX } from "@/theme/theme";
 
 export interface GameAreaFramingController {
   framingMode: FramingMode;
@@ -175,12 +175,12 @@ export function GameAreaFramingModal({
                 </Title>
               </Box>
               <Group gap="xs" wrap="nowrap" className="shrink-0">
-                <Button type="button" styles={iosGrayStyles} onClick={onClose}>
+                <Button type="button" styles={grayStyles} onClick={onClose}>
                   Cancel
                 </Button>
                 <Button
                   type="button"
-                  styles={iosFilledStyles}
+                  styles={filledStyles}
                   onClick={handleConfirm}
                   disabled={!hasValidDraft}
                 >

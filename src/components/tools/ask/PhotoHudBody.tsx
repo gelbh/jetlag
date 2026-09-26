@@ -8,7 +8,7 @@ import { HudPhotoIcon } from "@/components/map/icons/ToolIcons";
 import { CatalogExhaustedMessage } from "@/components/tools/shared/readout/CatalogExhaustedMessage";
 import { QuestionPromptBlock } from "@/components/tools/shared/controls/QuestionPromptBlock";
 import { QuestionTruthReferenceHint } from "@/components/tools/shared/QuestionTruthReferenceHint";
-import { iosAskInsetSurfaceStyle } from "@/components/ui/apple/iosEntryChrome";
+import { askInsetSurfaceStyle } from "@/components/ui/entry/entryChrome";
 import type { DistanceUnit } from "@/domain/map/distance";
 import type { GameSize } from "@/domain/session/size/gameSize";
 import {
@@ -73,7 +73,7 @@ export function PhotoHudBody({
     >
       <div
         className="pointer-events-auto space-y-2 p-3"
-        style={iosAskInsetSurfaceStyle}
+        style={askInsetSurfaceStyle}
       >
         <div className="flex items-start gap-3">
           <div

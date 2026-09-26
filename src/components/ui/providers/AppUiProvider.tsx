@@ -3,12 +3,12 @@ import { Notifications } from "@mantine/notifications";
 import type { ReactNode } from "react";
 import {
   JETLAG_TOAST_Z_INDEX,
-  jetlagMantineTheme,
-} from "@/theme/mantineTheme";
+  jetlagTheme,
+} from "@/theme/theme";
 
-export function AppMantineProvider({ children }: { children: ReactNode }) {
+export function AppUiProvider({ children }: { children: ReactNode }) {
   return (
-    <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+    <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
       <Notifications
         zIndex={JETLAG_TOAST_Z_INDEX}
         position="top-center"

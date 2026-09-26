@@ -3,7 +3,7 @@ import { MemoryRouter } from "react-router-dom";
 import { MantineProvider } from "@mantine/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Privacy } from "./Privacy";
-import { jetlagMantineTheme } from "@/theme/mantineTheme";
+import { jetlagTheme } from "@/theme/theme";
 import { RouteTransitionTestProvider } from "../test/RouteTransitionTestProvider";
 
 beforeEach(() => {
@@ -22,7 +22,7 @@ beforeEach(() => {
 describe("Privacy", () => {
   it("renders Mantine shell", () => {
     render(
-      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
         <MemoryRouter>
           <RouteTransitionTestProvider>
             <Privacy />

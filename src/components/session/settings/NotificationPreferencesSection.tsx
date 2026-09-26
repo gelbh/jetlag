@@ -1,8 +1,8 @@
 import type { NotificationPreferences } from "@/domain/device/chrome/notifications";
 import {
-  IosInsetGroup,
-  IosSectionLabel,
-} from "@/components/ui/apple/iosEntryChrome";
+  InsetGroup,
+  SectionLabel,
+} from "@/components/ui/entry/entryChrome";
 import { Stack } from "@mantine/core";
 import { SettingsToggleRow } from "../settings/SettingsToggleRow";
 
@@ -27,8 +27,8 @@ export function NotificationPreferencesSection({
 
   return (
     <Stack gap="xs">
-      <IosSectionLabel>Phone alerts</IosSectionLabel>
-      <IosInsetGroup>
+      <SectionLabel>Phone alerts</SectionLabel>
+      <InsetGroup>
         <SettingsToggleRow
           label="Push notifications"
           description="Alerts when questions arrive, timers change, or chat messages are sent while the app is in the background."
@@ -74,7 +74,7 @@ export function NotificationPreferencesSection({
           onChange={(liveActivities) => onChange({ liveActivities })}
           disabled={!preferences.enabled}
         />
-      </IosInsetGroup>
+      </InsetGroup>
     </Stack>
   );
 }

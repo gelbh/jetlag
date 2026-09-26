@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { MantineProvider } from "@mantine/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { jetlagMantineTheme } from "@/theme/mantineTheme";
+import { jetlagTheme } from "@/theme/theme";
 import { ChoiceButton } from "./ChoiceButton";
 
 beforeEach(() => {
@@ -21,7 +21,7 @@ describe("ChoiceButton", () => {
   it("mounts Mantine chip", () => {
     const onClick = vi.fn();
     render(
-      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
         <ChoiceButton selected onClick={onClick}>
           Match
         </ChoiceButton>

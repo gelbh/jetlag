@@ -1,16 +1,27 @@
 import { act, fireEvent, screen, waitFor } from "@testing-library/react";
+import { MantineProvider } from "@mantine/core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Home } from "./Home";
 import { LOCAL_SESSION_ID } from "../domain/map/annotations";
 import { renderWithRouter } from "../test/renderWithRouter";
 import { createTestRemoteSession, createTestSession } from "../test/fixtures/sessions";
 import { useSessionStore } from "../state/sessionStore";
+import { jetlagTheme } from "@/theme/theme";
 
 const navigate = vi.fn();
 const mockIsFirebaseConfigured = vi.fn(() => false);
 const mockEnsureAnonymousUser = vi.fn();
 const mockGetRemoteSessionById = vi.fn();
 const mockEnsureRemoteSessionMembership = vi.fn();
+
+function renderHome(options?: { resetStores?: boolean }) {
+  return renderWithRouter(
+    <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
+      <Home />
+    </MantineProvider>,
+    options,
+  );
+}
 
 vi.mock("../services/core/firebase/firebase", () => ({
   isFirebaseConfigured: () => mockIsFirebaseConfigured(),
@@ -56,26 +67,24 @@ describe("Home", () => {
     mockIsFirebaseConfigured.mockReturnValue(false);
     mockEnsureAnonymousUser.mockResolvedValue({ uid: "user-new" });
     useSessionStore.getState().setSession(null);
+    vi.stubGlobal("matchMedia", (query: string) => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: () => {},
+      removeListener: () => {},
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      dispatchEvent: () => false,
+    }));
   });
 
   afterEach(() => {
     vi.useRealTimers();
   });
 
-  it("opens play hub with create, join, and custom actions", async () => {
-    renderWithRouter(<Home />);
-
-    expect(screen.queryByRole("link", { name: "Create session" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("link", { name: "Join session" })).not.toBeInTheDocument();
-
-    const playButton = screen.getByRole("button", {
-      name: "Play — create, join, or custom game",
-    });
-    expect(playButton).toHaveAttribute("aria-haspopup", "dialog");
-    expect(playButton).toHaveAttribute("aria-expanded", "false");
-
-    fireEvent.click(playButton);
-    expect(playButton).toHaveAttribute("aria-expanded", "true");
+  it("links play actions for join, create, and presets", () => {
+    renderHome();
 
     expect(screen.getByRole("link", { name: "Create session" })).toHaveAttribute(
       "href",
@@ -85,19 +94,14 @@ describe("Home", () => {
       "href",
       "/join",
     );
-    expect(screen.getByRole("link", { name: "Custom game presets" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "Browse presets" })).toHaveAttribute(
       "href",
       "/presets",
     );
-
-    fireEvent.click(screen.getByRole("link", { name: "Create session" }));
-    await waitFor(() => {
-      expect(screen.queryByRole("dialog", { name: "Play" })).not.toBeInTheDocument();
-    });
   });
 
   it("links to friends and leaderboard in the header", () => {
-    renderWithRouter(<Home />);
+    renderHome();
 
     expect(screen.getByRole("link", { name: "Friends" })).toHaveAttribute(
       "href",
@@ -112,7 +116,7 @@ describe("Home", () => {
   it("continues a local session without remote verification", () => {
     useSessionStore.getState().setSession(createTestSession());
 
-    renderWithRouter(<Home />, { resetStores: false });
+    renderHome({ resetStores: false });
     fireEvent.click(
       screen.getByRole("button", { name: /Return to map for session TEST/i }),
     );
@@ -138,7 +142,7 @@ describe("Home", () => {
     useSessionStore.getState().setSession(remoteSession, "user-old");
     useSessionStore.getState().setMyUid("user-old");
 
-    renderWithRouter(<Home />, { resetStores: false });
+    renderHome({ resetStores: false });
     fireEvent.click(
       screen.getByRole("button", { name: /Return to map for session ABCD/i }),
     );
@@ -163,12 +167,12 @@ describe("Home", () => {
       createTestSession({ id: LOCAL_SESSION_ID, code: "WXYZ" }),
     );
 
-    renderWithRouter(<Home />, { resetStores: false });
+    renderHome({ resetStores: false });
     expect(screen.getByText("WXYZ")).toBeInTheDocument();
   });
 
   it("links to the feedback page", () => {
-    renderWithRouter(<Home />);
+    renderHome();
 
     expect(
       screen.getByRole("link", {
@@ -178,7 +182,7 @@ describe("Home", () => {
   });
 
   it("centers the home entry stack in the viewport layout", () => {
-    renderWithRouter(<Home />);
+    renderHome();
 
     const main = screen.getByRole("main");
     expect(main.className).toContain("justify-center");
@@ -199,7 +203,7 @@ describe("Home", () => {
     useSessionStore.getState().setSession(remoteSession, "user-old");
     useSessionStore.getState().setMyUid("user-old");
 
-    renderWithRouter(<Home />, { resetStores: false });
+    renderHome({ resetStores: false });
     const continueButton = screen.getByRole("button", {
       name: /Return to map for session ABCD/i,
     });

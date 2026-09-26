@@ -12,10 +12,10 @@ import {
 import { RadarDistancePicker } from "@/components/tools/RadarDistancePicker";
 import { yesNoAnswerOptions } from "@/components/tools/shared/answers/binaryAnswerOptions";
 import {
-  iosAskInsetSurfaceStyle,
-  iosChoiceChipStyles,
-  iosMapChromeSurfaceStyles,
-} from "@/components/ui/apple/iosEntryChrome";
+  askInsetSurfaceStyle,
+  choiceChipStyles,
+  mapChromeSurfaceStyles,
+} from "@/components/ui/entry/entryChrome";
 import type { DistanceUnit } from "@/domain/map/distance";
 import type {
   RadarAnswer,
@@ -56,7 +56,7 @@ const answerSegmentStyles = (
   selected: boolean,
   tone: "success" | "danger",
 ) => {
-  const base = iosChoiceChipStyles(selected, tone);
+  const base = choiceChipStyles(selected, tone);
   return {
     root: {
       ...base.root,
@@ -128,7 +128,7 @@ export function RadarMapPlacementChrome({
       data-testid="radar-map-placement-distance"
       className="mx-auto w-full max-w-[22rem]"
       style={{
-        ...iosMapChromeSurfaceStyles,
+        ...mapChromeSurfaceStyles,
         borderRadius: 16,
         padding: "0.55rem",
         color: "var(--color-field-ink)",
@@ -162,7 +162,7 @@ export function RadarMapPlacementChrome({
             aria-label="Radar answer"
             className="flex items-stretch gap-1"
             style={{
-              ...iosAskInsetSurfaceStyle,
+              ...askInsetSurfaceStyle,
               borderRadius: 14,
               padding: 4,
             }}
@@ -211,7 +211,7 @@ export function RadarMapPlacementChrome({
           <div
             className="flex flex-col gap-2"
             style={{
-              ...iosMapChromeSurfaceStyles,
+              ...mapChromeSurfaceStyles,
               borderRadius: 16,
               padding: "0.55rem",
               color: "var(--color-field-ink)",

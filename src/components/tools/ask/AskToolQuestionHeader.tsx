@@ -4,7 +4,7 @@
  */
 import type { ReactNode } from "react";
 import { QuestionPromptBlock } from "@/components/tools/shared/controls/QuestionPromptBlock";
-import { iosAskInsetSurfaceStyle } from "@/components/ui/apple/iosEntryChrome";
+import { askInsetSurfaceStyle } from "@/components/ui/entry/entryChrome";
 
 export type AskToolQuestionHeaderProps = {
   toolLabel: string;
@@ -31,7 +31,7 @@ export function AskToolQuestionHeader({
           ? "pointer-events-auto space-y-2 p-3"
           : "pointer-events-auto ask-hud-panel space-y-2 p-3"
       }
-      style={mantine ? iosAskInsetSurfaceStyle : undefined}
+      style={mantine ? askInsetSurfaceStyle : undefined}
     >
       <div className="flex items-start gap-3">
         <div

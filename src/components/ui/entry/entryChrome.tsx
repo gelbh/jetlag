@@ -1,55 +1,55 @@
 import { Box } from "@mantine/core";
 import type { ReactNode } from "react";
 import {
-  iosBottomDrawerStyles,
-  iosChoiceChipStyles,
-  iosCatalogTileStyles,
-  iosAskInsetSurfaceStyle,
-  iosCompactDangerStyles,
-  iosCompactFilledStyles,
-  iosCompactGrayStyles,
-  iosFilledStyles,
-  iosFilterChipStyles,
-  iosFilterChipTrackStyle,
-  iosGrayStyles,
-  iosInsetTextInputStyles,
-  iosInsetTextareaStyles,
-  iosMapIslandFilledStyles,
-  iosMapIslandIconStyles,
-  iosMapToolSlotLabelStyle,
-  iosMapToolSlotStyles,
-  iosPlainStyles,
-} from "@/components/ui/apple/iosEntryStyles";
+  bottomDrawerStyles,
+  choiceChipStyles,
+  catalogTileStyles,
+  askInsetSurfaceStyle,
+  compactDangerStyles,
+  compactFilledStyles,
+  compactGrayStyles,
+  filledStyles,
+  filterChipStyles,
+  filterChipTrackStyle,
+  grayStyles,
+  insetTextInputStyles,
+  insetTextareaStyles,
+  mapIslandFilledStyles,
+  mapIslandIconStyles,
+  mapToolSlotLabelStyle,
+  mapToolSlotStyles,
+  plainStyles,
+} from "@/components/ui/entry/entryStyles";
 import type {
-  IosChoiceTone,
-  IosMapToolSlotTone,
-} from "@/components/ui/apple/iosEntryStyles";
+  ChoiceTone,
+  MapToolSlotTone,
+} from "@/components/ui/entry/entryStyles";
 
 /** Re-export button/drawer styles so map chrome callers keep one import path. */
 export {
-  iosBottomDrawerStyles,
-  iosChoiceChipStyles,
-  iosCatalogTileStyles,
-  iosAskInsetSurfaceStyle,
-  iosCompactDangerStyles,
-  iosCompactFilledStyles,
-  iosCompactGrayStyles,
-  iosFilledStyles,
-  iosFilterChipStyles,
-  iosFilterChipTrackStyle,
-  iosGrayStyles,
-  iosInsetTextInputStyles,
-  iosInsetTextareaStyles,
-  iosMapIslandFilledStyles,
-  iosMapIslandIconStyles,
-  iosMapToolSlotLabelStyle,
-  iosMapToolSlotStyles,
-  iosPlainStyles,
+  bottomDrawerStyles,
+  choiceChipStyles,
+  catalogTileStyles,
+  askInsetSurfaceStyle,
+  compactDangerStyles,
+  compactFilledStyles,
+  compactGrayStyles,
+  filledStyles,
+  filterChipStyles,
+  filterChipTrackStyle,
+  grayStyles,
+  insetTextInputStyles,
+  insetTextareaStyles,
+  mapIslandFilledStyles,
+  mapIslandIconStyles,
+  mapToolSlotLabelStyle,
+  mapToolSlotStyles,
+  plainStyles,
 };
-export type { IosChoiceTone, IosMapToolSlotTone };
+export type { ChoiceTone, MapToolSlotTone };
 
 /** Frosted inset grouped list / form surface. */
-export function IosInsetGroup({
+export function InsetGroup({
   children,
   error = false,
 }: {
@@ -58,7 +58,7 @@ export function IosInsetGroup({
 }) {
   return (
     <Box
-      className="jl-ios-inset-group"
+      className="jl-inset-group"
       style={{
         borderRadius: 12,
         overflow: "hidden",
@@ -80,7 +80,7 @@ export function IosInsetGroup({
 }
 
 /** Caption under an inset field (field-level validation). */
-export function IosFieldError({
+export function FieldError({
   children,
   id,
 }: {
@@ -110,7 +110,7 @@ export function IosFieldError({
 }
 
 /** Soft banner for join/submit failures (not a heavy Alert title block). */
-export function IosErrorCallout({ children }: { children: ReactNode }) {
+export function ErrorCallout({ children }: { children: ReactNode }) {
   if (children == null || children === false || children === "") {
     return null;
   }
@@ -142,7 +142,7 @@ export function IosErrorCallout({ children }: { children: ReactNode }) {
 }
 
 /** Transient success banner (no @mantine/notifications). */
-export function IosSuccessCallout({ children }: { children: ReactNode }) {
+export function SuccessCallout({ children }: { children: ReactNode }) {
   if (children == null || children === false || children === "") {
     return null;
   }
@@ -173,7 +173,7 @@ export function IosSuccessCallout({ children }: { children: ReactNode }) {
   );
 }
 
-export function IosSectionLabel({ children }: { children: ReactNode }) {
+export function SectionLabel({ children }: { children: ReactNode }) {
   return (
     <Box
       component="p"
@@ -196,7 +196,7 @@ export function IosSectionLabel({ children }: { children: ReactNode }) {
  * Shared frosted map chrome (status island, dock, chip, ask).
  * Quiet elevation so the map stays the hero.
  */
-export const iosMapChromeSurfaceStyles = {
+export const mapChromeSurfaceStyles = {
   backgroundColor: "oklch(from var(--color-canvas) l c h / 0.88)",
   border: "0.33px solid oklch(from var(--color-rule) l c h / 0.65)",
   backdropFilter: "blur(24px) saturate(1.35)",
@@ -205,26 +205,26 @@ export const iosMapChromeSurfaceStyles = {
 } as const;
 
 /** Status instrument: shared chrome + Survey ink. */
-export const iosMapStatusIslandStyles = {
-  ...iosMapChromeSurfaceStyles,
+export const mapStatusIslandStyles = {
+  ...mapChromeSurfaceStyles,
   color: "var(--color-field-ink)",
 } as const;
 
 /** Hunt deck: frosted island without Survey flag top bar (Approach B). */
-export const iosMapHuntSurfaceStyles = {
-  ...iosMapChromeSurfaceStyles,
+export const mapHuntSurfaceStyles = {
+  ...mapChromeSurfaceStyles,
 } as const;
 
 /** Ask-first: hunt deck reads secondary under the Ask instrument cluster. */
-export const iosMapHuntAskFirstSurfaceStyles = {
-  ...iosMapHuntSurfaceStyles,
+export const mapHuntAskFirstSurfaceStyles = {
+  ...mapHuntSurfaceStyles,
   backgroundColor: "oklch(from var(--color-canvas) l c h / 0.58)",
   boxShadow: "0 1px 6px 0 oklch(0.1 0.04 265 / 0.12)",
   border: "0.33px solid oklch(from var(--color-rule) l c h / 0.4)",
 } as const;
 
 /** Inset strip wrapping question tools inside the hunt deck. */
-export const iosMapHuntQuestionStripStyles = {
+export const mapHuntQuestionStripStyles = {
   display: "flex",
   flex: 1,
   minWidth: 0,
@@ -237,8 +237,8 @@ export const iosMapHuntQuestionStripStyles = {
 } as const;
 
 /** Ask-first instrument switcher strip (denser, quieter than idle tip B). */
-export const iosMapHuntAskFirstQuestionStripStyles = {
-  ...iosMapHuntQuestionStripStyles,
+export const mapHuntAskFirstQuestionStripStyles = {
+  ...mapHuntQuestionStripStyles,
   gap: 0,
   padding: 1,
   borderRadius: 10,
@@ -247,7 +247,7 @@ export const iosMapHuntAskFirstQuestionStripStyles = {
 } as const;
 
 /** Drag affordance for iOS bottom drawers. */
-export function IosDrawerGrabber() {
+export function DrawerGrabber() {
   return (
     <Box
       aria-hidden

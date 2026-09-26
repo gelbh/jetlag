@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { Box, Text, UnstyledButton } from "@mantine/core";
-import { IosInsetGroup, IosSectionLabel } from "@/components/ui/apple/iosEntryChrome";
-import { IosInsetHairline } from "@/components/ui/apple/IosInsetRow";
+import { InsetGroup, SectionLabel } from "@/components/ui/entry/entryChrome";
+import { InsetHairline } from "@/components/ui/entry/InsetRow";
 
 interface RadioCardOption<Value extends string> {
   value: Value;
@@ -30,15 +30,15 @@ export function RadioCardGroup<Value extends string>({
 }: RadioCardGroupProps<Value>) {
   return (
     <div className="space-y-2">
-      {label ? <IosSectionLabel>{label}</IosSectionLabel> : null}
-      <IosInsetGroup>
+      {label ? <SectionLabel>{label}</SectionLabel> : null}
+      <InsetGroup>
         <div role="radiogroup" aria-label={ariaLabel}>
           {options.map((option, index) => {
             const selected = value === option.value;
 
             return (
               <Box key={option.value}>
-                {index > 0 ? <IosInsetHairline insetStart="1rem" /> : null}
+                {index > 0 ? <InsetHairline insetStart="1rem" /> : null}
                 <UnstyledButton
                   type="button"
                   role="radio"
@@ -105,7 +105,7 @@ export function RadioCardGroup<Value extends string>({
             );
           })}
         </div>
-      </IosInsetGroup>
+      </InsetGroup>
     </div>
   );
 }

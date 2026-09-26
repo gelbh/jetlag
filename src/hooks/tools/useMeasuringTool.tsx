@@ -28,7 +28,7 @@ import {
   queryGeolocationPermission,
   type GeolocationPermissionState,
 } from "../../services/core/location/geolocation";
-import { iosMapChromeSurfaceStyles } from "@/components/ui/apple/iosEntryChrome";
+import { mapChromeSurfaceStyles } from "@/components/ui/entry/entryChrome";
 import { useToolSession } from "./framework/useToolSession";
 import { useToolSessionOptions } from "./useToolSessionOptions";
 import { MeasuringToolPanel } from "./measuring/MeasuringToolPanel";
@@ -381,7 +381,7 @@ export function useMeasuringTool({
         data-testid="measuring-map-placement-target"
         className="mx-auto w-full max-w-[22rem] max-h-[36dvh] overflow-y-auto"
         style={{
-          ...iosMapChromeSurfaceStyles,
+          ...mapChromeSurfaceStyles,
           borderRadius: 14,
           padding: "0.55rem",
           color: "var(--color-field-ink)",

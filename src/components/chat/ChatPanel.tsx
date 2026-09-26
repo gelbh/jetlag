@@ -9,7 +9,7 @@ import type {
 import type { PlayerRole } from "../../domain/session/players/playerRole";
 import { useDesktopLayout } from "../../hooks/layout/useDesktopLayout";
 import { useVisualViewportBottomInset } from "../../hooks/layout/useVisualViewportBottomInset";
-import { iosGrayStyles } from "../ui/apple/iosEntryChrome";
+import { grayStyles } from "../ui/entry/entryChrome";
 import { SheetHost } from "../ui/sheets/SheetHost";
 import { ChatPanelBody } from "./ChatPanelBody";
 
@@ -104,7 +104,7 @@ export function ChatPanel({
       <Stack gap={8} style={{ flex: 1, minHeight: 0, height: "100%" }}>
         {isDesktop ? (
           <Group justify="flex-end" className="shrink-0">
-            <Button onClick={onClose} styles={iosGrayStyles}>
+            <Button onClick={onClose} styles={grayStyles}>
               Close
             </Button>
           </Group>

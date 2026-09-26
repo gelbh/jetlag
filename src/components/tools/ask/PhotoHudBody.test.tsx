@@ -4,7 +4,7 @@ import { MantineProvider } from "@mantine/core";
 import type { ReactElement } from "react";
 import type { GameSize } from "@/domain/session/size/gameSize";
 import type { PhotoCategoryId } from "@/domain/questions";
-import { jetlagMantineTheme } from "@/theme/mantineTheme";
+import { jetlagTheme } from "@/theme/theme";
 import { AskHudHost } from "./AskHudHost";
 import { PhotoHudBody } from "./PhotoHudBody";
 import {
@@ -25,7 +25,7 @@ const baseProps = {
 
 function renderPhoto(ui: ReactElement) {
   return render(
-    <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+    <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
       {ui}
     </MantineProvider>,
   );

@@ -1,19 +1,19 @@
 import { Button, Stack, Text, TextInput } from "@mantine/core";
 import { Link } from "react-router-dom";
 import {
-  IosInsetGroup,
-  IosSectionLabel,
-  iosFilledStyles,
-} from "@/components/ui/apple/iosEntryChrome";
+  InsetGroup,
+  SectionLabel,
+  filledStyles,
+} from "@/components/ui/entry/entryChrome";
 import { EmptyState } from "@/components/ui/feedback/EmptyState";
 import { BundledPresetTree } from "@/components/presets/BundledPresetTree";
 import {
-  IosPresetBadge,
-  IosPresetCard,
-  IosPresetDangerButton,
-  IosPresetHostButton,
-  IosPresetSecondaryLink,
-} from "@/components/presets/IosPresetCard";
+  PresetBadge,
+  PresetCard,
+  PresetDangerButton,
+  PresetHostButton,
+  PresetSecondaryLink,
+} from "@/components/presets/PresetCard";
 import { PresetFavouriteButton } from "@/components/presets/PresetFavouriteButton";
 import {
   bundledPresetDefinition,
@@ -29,13 +29,13 @@ function presetBadges(preset: MigratedPreset) {
   return (
     <>
       {preset.advancedSettings.expansionPackEnabled ? (
-        <IosPresetBadge>Expansion</IosPresetBadge>
+        <PresetBadge>Expansion</PresetBadge>
       ) : null}
       {preset.advancedSettings.customQuestionPackEnabled ? (
-        <IosPresetBadge>Custom Q</IosPresetBadge>
+        <PresetBadge>Custom Q</PresetBadge>
       ) : null}
       {preset.migrationStatus === "manual_required" ? (
-        <IosPresetBadge tone="warning">Review</IosPresetBadge>
+        <PresetBadge tone="warning">Review</PresetBadge>
       ) : null}
     </>
   );
@@ -61,22 +61,22 @@ function PresetRowActions({
   return (
     <>
       {preset.migrationStatus === "manual_required" ? (
-        <IosPresetHostButton to={`/presets/${preset.id}/edit`}>
+        <PresetHostButton to={`/presets/${preset.id}/edit`}>
           Review
-        </IosPresetHostButton>
+        </PresetHostButton>
       ) : (
-        <IosPresetHostButton to={`/create?preset=${preset.id}`}>
+        <PresetHostButton to={`/create?preset=${preset.id}`}>
           Host
-        </IosPresetHostButton>
+        </PresetHostButton>
       )}
       {!bundled ? (
         <>
-          <IosPresetSecondaryLink to={`/presets/${preset.id}/edit`}>
+          <PresetSecondaryLink to={`/presets/${preset.id}/edit`}>
             Edit
-          </IosPresetSecondaryLink>
-          <IosPresetDangerButton onClick={() => onDelete(preset.id)}>
+          </PresetSecondaryLink>
+          <PresetDangerButton onClick={() => onDelete(preset.id)}>
             Delete
-          </IosPresetDangerButton>
+          </PresetDangerButton>
         </>
       ) : null}
     </>
@@ -96,13 +96,13 @@ function UserOrFavouriteRow({
     : undefined;
 
   return (
-    <IosPresetCard
+    <PresetCard
       name={preset.name}
       meta={presetMeta(preset)}
       description={description}
       badges={!bundled ? presetBadges(preset) : undefined}
       headerAction={
-        <PresetFavouriteButton presetId={preset.id} chrome="ios" />
+        <PresetFavouriteButton presetId={preset.id} />
       }
       actions={<PresetRowActions preset={preset} onDelete={onDelete} />}
     />
@@ -124,14 +124,14 @@ function SearchResultRow({
     : undefined;
 
   return (
-    <IosPresetCard
+    <PresetCard
       name={preset.name}
       meta={presetMeta(preset)}
       location={location}
       description={description}
       badges={!bundled ? presetBadges(preset) : undefined}
       headerAction={
-        <PresetFavouriteButton presetId={preset.id} chrome="ios" />
+        <PresetFavouriteButton presetId={preset.id} />
       }
       actions={<PresetRowActions preset={preset} onDelete={onDelete} />}
     />
@@ -139,14 +139,14 @@ function SearchResultRow({
 }
 
 /** Join-style iOS browse body for Mantine presets list. */
-export function GamePresetListIosBody() {
+export function GamePresetListBody() {
   const model = useGamePresetListModel();
 
   return (
     <Stack gap={22}>
       <Stack gap={8}>
-        <IosSectionLabel>Search</IosSectionLabel>
-        <IosInsetGroup>
+        <SectionLabel>Search</SectionLabel>
+        <InsetGroup>
           <TextInput
             id={model.searchId}
             aria-label="Search presets"
@@ -169,14 +169,14 @@ export function GamePresetListIosBody() {
               },
             }}
           />
-        </IosInsetGroup>
+        </InsetGroup>
       </Stack>
 
       <Button
         component={Link}
         to="/presets/new"
         fullWidth
-        styles={iosFilledStyles}
+        styles={filledStyles}
       >
         New preset
       </Button>
@@ -199,7 +199,7 @@ export function GamePresetListIosBody() {
         <Stack gap={22}>
           {model.favouritePresets.length > 0 ? (
             <Stack gap={8}>
-              <IosSectionLabel>Favourites</IosSectionLabel>
+              <SectionLabel>Favourites</SectionLabel>
               <Stack gap="sm">
                 {model.favouritePresets.map((preset) => (
                   <UserOrFavouriteRow
@@ -214,12 +214,12 @@ export function GamePresetListIosBody() {
 
           {model.bundledPresets.length > 0 ? (
             <Stack gap={8}>
-              <IosSectionLabel>Recommended</IosSectionLabel>
+              <SectionLabel>Recommended</SectionLabel>
               <Text size="xs" c="var(--color-field-ink-muted)" px={4}>
                 Browse by continent, country, and region. More areas ship over
                 time.
               </Text>
-              <BundledPresetTree presets={model.bundledPresets} chrome="ios" />
+              <BundledPresetTree presets={model.bundledPresets} />
             </Stack>
           ) : null}
 
@@ -230,7 +230,7 @@ export function GamePresetListIosBody() {
           ) : (
             <Stack gap={8}>
               {model.bundledPresets.length > 0 ? (
-                <IosSectionLabel>Your presets</IosSectionLabel>
+                <SectionLabel>Your presets</SectionLabel>
               ) : null}
               <Stack gap="sm">
                 {model.userPresets.map((preset) => (

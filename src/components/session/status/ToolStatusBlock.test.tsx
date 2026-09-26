@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { MantineProvider } from "@mantine/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { jetlagMantineTheme } from "@/theme/mantineTheme";
+import { jetlagTheme } from "@/theme/theme";
 import { ToolStatusBlock } from "./ToolStatusBlock";
 
 vi.mock("../../../state/mapStore", () => ({
@@ -29,7 +29,7 @@ beforeEach(() => {
 
 function renderStatus(ui: React.ReactElement) {
   return render(
-    <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+    <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
       {ui}
     </MantineProvider>,
   );
@@ -222,7 +222,7 @@ describe("ToolStatusBlock", () => {
     expect(screen.getByText("Moving")).toBeInTheDocument();
 
     rerender(
-      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
         <ToolStatusBlock
           sessionCode="ABCD"
           playerRole="seeker"

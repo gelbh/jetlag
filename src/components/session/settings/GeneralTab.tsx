@@ -6,9 +6,9 @@ import type { MapStyle, StreetBasemap } from "@/domain/map/mapBasemaps";
 import { effectiveMapStyle } from "@/domain/device/power/powerProfile";
 import { SegmentControl } from "../../ui/forms/SegmentControl";
 import {
-  IosInsetGroup,
-  IosSectionLabel,
-} from "@/components/ui/apple/iosEntryChrome";
+  InsetGroup,
+  SectionLabel,
+} from "@/components/ui/entry/entryChrome";
 import { SettingsToggleRow } from "../settings/SettingsToggleRow";
 import { LayerVisibilityGrid } from "../mapChrome/LayerVisibilityGrid";
 import type { LayerVisibility } from "@/state/sessionStore";
@@ -91,8 +91,8 @@ export function MapSettingsGeneralTab({
   return (
     <Stack gap="lg">
       <Stack gap="xs">
-        <IosSectionLabel>Location</IosSectionLabel>
-        <IosInsetGroup>
+        <SectionLabel>Location</SectionLabel>
+        <InsetGroup>
           <SettingsToggleRow
             label="Show my location"
             checked={showCurrentLocation}
@@ -105,15 +105,15 @@ export function MapSettingsGeneralTab({
             checked={showAdminBoundaries}
             onChange={onShowAdminBoundariesChange}
           />
-        </IosInsetGroup>
+        </InsetGroup>
         {locationError ? (
           <p className="px-1 text-sm text-[var(--color-halt)]">{locationError}</p>
         ) : null}
       </Stack>
 
       <Stack gap="xs">
-        <IosSectionLabel>Units & basemap</IosSectionLabel>
-        <IosInsetGroup>
+        <SectionLabel>Units & basemap</SectionLabel>
+        <InsetGroup>
           <div className="space-y-3 px-3 py-3">
             <SegmentControl
               variant="pill"
@@ -168,11 +168,11 @@ export function MapSettingsGeneralTab({
               </p>
             )}
           </div>
-        </IosInsetGroup>
+        </InsetGroup>
       </Stack>
 
       <Stack gap="xs">
-        <IosSectionLabel>Annotation layers</IosSectionLabel>
+        <SectionLabel>Annotation layers</SectionLabel>
         <LayerVisibilityGrid
           layerVisibility={layerVisibility}
           onLayerVisibilityChange={onLayerVisibilityChange}
@@ -180,7 +180,7 @@ export function MapSettingsGeneralTab({
       </Stack>
 
       <Stack gap="xs">
-        <IosSectionLabel>Transit</IosSectionLabel>
+        <SectionLabel>Transit</SectionLabel>
         <TransitControls
           variant="inline"
           enabled={transitEnabled}

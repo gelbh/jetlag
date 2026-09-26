@@ -6,7 +6,7 @@ import {
   AdvancedSettingsInset,
   AdvancedSettingsToggle,
 } from "./shared";
-import { iosFilledStyles, iosGrayStyles } from "@/components/ui/apple/iosEntryChrome";
+import { filledStyles, grayStyles } from "@/components/ui/entry/entryChrome";
 import type { AdvancedSettingsSectionProps } from "./types";
 
 export function ThermometerSection({
@@ -60,7 +60,7 @@ export function ThermometerSection({
                     ),
                   )
                 }
-                styles={selected ? iosFilledStyles : iosGrayStyles}
+                styles={selected ? filledStyles : grayStyles}
               >
                 {formatPresetDistance(presetMeters, distanceUnit)}
               </Button>

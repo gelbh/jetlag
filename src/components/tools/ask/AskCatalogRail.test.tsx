@@ -1,7 +1,7 @@
 import { describe, expect, it, beforeEach, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { MantineProvider } from "@mantine/core";
-import { jetlagMantineTheme } from "@/theme/mantineTheme";
+import { jetlagTheme } from "@/theme/theme";
 import { AskCatalogRail } from "./AskCatalogRail";
 
 const ROWS = [
@@ -25,7 +25,7 @@ beforeEach(() => {
 
 function renderRail(ui: React.ReactElement) {
   return render(
-    <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+    <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
       {ui}
     </MantineProvider>,
   );
@@ -67,7 +67,7 @@ describe("AskCatalogRail", () => {
   it("mounts Mantine catalog shell and advances under flag", () => {
     const onSelect = vi.fn();
     render(
-      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
         <AskCatalogRail rows={ROWS} selectedId={null} onSelect={onSelect} />
       </MantineProvider>,
     );

@@ -3,7 +3,7 @@ import { formatHidingZoneRadiusLabel } from "@/domain/session/size/gameSize";
 import { milesToMeters } from "@/domain/map/distance";
 import { tentacleRadiusPresetMeters } from "@/domain/map/distancePresets";
 import { clampTentacleRadiusMeters } from "@/domain/session/rules";
-import { iosInsetTextInputStyles } from "@/components/ui/apple/iosEntryChrome";
+import { insetTextInputStyles } from "@/components/ui/entry/entryChrome";
 import {
   AdvancedSettingsInset,
   AdvancedSettingsToggle,
@@ -67,7 +67,7 @@ export function TentaclesSection({
                     clampTentacleRadiusMeters(meters),
                 });
               }}
-              styles={iosInsetTextInputStyles}
+              styles={insetTextInputStyles}
             />
             <div className="flex flex-wrap gap-2 px-4">
               {tentacleRadiusPresets.slice(0, 2).map((meters) => (
@@ -133,7 +133,7 @@ export function TentaclesSection({
                       clampTentacleRadiusMeters(meters),
                   });
                 }}
-                styles={iosInsetTextInputStyles}
+                styles={insetTextInputStyles}
               />
               <div className="flex flex-wrap gap-2 px-4">
                 {tentacleRadiusPresets.map((meters) => (

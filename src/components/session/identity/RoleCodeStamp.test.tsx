@@ -2,13 +2,13 @@ import { fireEvent, screen } from "@testing-library/react";
 import { MantineProvider } from "@mantine/core";
 import type { ReactElement } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { jetlagMantineTheme } from "@/theme/mantineTheme";
+import { jetlagTheme } from "@/theme/theme";
 import { renderWithRouter } from "@/test/renderWithRouter";
 import { RoleCodeStamp } from "./RoleCodeStamp";
 
 function renderUi(ui: ReactElement) {
   return renderWithRouter(
-    <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+    <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
       {ui}
     </MantineProvider>,
   );

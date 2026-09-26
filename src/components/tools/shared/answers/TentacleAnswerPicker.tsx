@@ -2,7 +2,7 @@ import { Text, UnstyledButton } from "@mantine/core";
 import type { TentaclePoi } from "@/domain/map/annotations";
 import { TENTACLE_NOT_WITHIN_REACH_LABEL } from "@/domain/questions";
 import { isConfirmedPoiLike } from "@/domain/geo/poiCandidateAdapters";
-import { iosChoiceChipStyles } from "@/components/ui/apple/iosEntryChrome";
+import { choiceChipStyles } from "@/components/ui/entry/entryChrome";
 import { ProvisionalBadge } from "../readout/ProvisionalBadge";
 
 interface TentacleAnswerPickerProps {
@@ -14,7 +14,7 @@ interface TentacleAnswerPickerProps {
 }
 
 function choiceRowStyles(selected: boolean, tone: "default" | "danger" = "default") {
-  const base = iosChoiceChipStyles(selected, tone);
+  const base = choiceChipStyles(selected, tone);
   return {
     root: {
       ...base.root,

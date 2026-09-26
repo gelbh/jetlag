@@ -2,11 +2,11 @@ import { useId, useState, type ReactNode } from "react";
 import { Button, TextInput, UnstyledButton } from "@mantine/core";
 import { CaretDown } from "@phosphor-icons/react";
 import {
-  IosInsetGroup,
-  IosSectionLabel,
-  iosGrayStyles,
-  iosInsetTextInputStyles,
-} from "@/components/ui/apple/iosEntryChrome";
+  InsetGroup,
+  SectionLabel,
+  grayStyles,
+  insetTextInputStyles,
+} from "@/components/ui/entry/entryChrome";
 import { SettingsToggleRow } from "../settings/SettingsToggleRow";
 
 interface AdvancedSettingsCategoryProps {
@@ -47,7 +47,7 @@ export function AdvancedSettingsCategory({
           },
         }}
       >
-        <IosSectionLabel>{title}</IosSectionLabel>
+        <SectionLabel>{title}</SectionLabel>
         <CaretDown
           size={14}
           weight="bold"
@@ -73,7 +73,7 @@ export function AdvancedSettingsSectionHeader({
   title: string;
   bordered?: boolean;
 }) {
-  return <IosSectionLabel>{title}</IosSectionLabel>;
+  return <SectionLabel>{title}</SectionLabel>;
 }
 
 interface AdvancedSettingsToggleProps {
@@ -137,7 +137,7 @@ export function ToggleNumberWithPresets({
   presets,
 }: ToggleNumberWithPresetsProps) {
   return (
-    <IosInsetGroup>
+    <InsetGroup>
       <AdvancedSettingsToggle
         checked={enabled}
         onChange={onEnabledChange}
@@ -167,7 +167,7 @@ export function ToggleNumberWithPresets({
               }
               onNumberChange(parsed);
             }}
-            styles={iosInsetTextInputStyles}
+            styles={insetTextInputStyles}
           />
           <div className="flex flex-wrap gap-2 px-4">
             {presets.map((preset) => (
@@ -181,7 +181,7 @@ export function ToggleNumberWithPresets({
           </div>
         </div>
       ) : null}
-    </IosInsetGroup>
+    </InsetGroup>
   );
 }
 
@@ -206,7 +206,7 @@ export function PresetButton({
       size="compact-sm"
       disabled={disabled}
       onClick={onClick}
-      styles={iosGrayStyles}
+      styles={grayStyles}
     >
       {label}
     </Button>
@@ -215,5 +215,5 @@ export function PresetButton({
 
 /** Wrap one or more toggle rows in the shared inset surface. */
 export function AdvancedSettingsInset({ children }: { children: ReactNode }) {
-  return <IosInsetGroup>{children}</IosInsetGroup>;
+  return <InsetGroup>{children}</InsetGroup>;
 }

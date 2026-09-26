@@ -1,5 +1,5 @@
 import { UnstyledButton } from "@mantine/core";
-import { iosChoiceChipStyles } from "@/components/ui/apple/iosEntryChrome";
+import { choiceChipStyles } from "@/components/ui/entry/entryChrome";
 
 interface SegmentOption<Value extends string> {
   value: Value;
@@ -98,7 +98,7 @@ export function SegmentControl<Value extends string>({
               onClick={() => onChange(option.value)}
               disabled={disabled || option.disabled}
               aria-pressed={selected}
-              styles={iosChoiceChipStyles(selected, "default")}
+              styles={choiceChipStyles(selected, "default")}
             >
               {option.label}
             </UnstyledButton>

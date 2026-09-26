@@ -3,7 +3,7 @@ import { MantineProvider } from "@mantine/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { PhotoAnswerUploader } from "./PhotoAnswerUploader";
 import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
-import { jetlagMantineTheme } from "../../theme/mantineTheme";
+import { jetlagTheme } from "../../theme/theme";
 
 const pendingQuestion: PendingQuestionRecord = {
   id: "pq-photo",
@@ -28,7 +28,7 @@ function renderUploader(
   onAnswerQuestion: ReturnType<typeof vi.fn> = vi.fn(),
 ) {
   return render(
-    <MantineProvider theme={jetlagMantineTheme} forceColorScheme="light">
+    <MantineProvider theme={jetlagTheme} forceColorScheme="light">
       <PhotoAnswerUploader
         sessionId="session-1"
         pendingQuestion={pendingQuestion}

@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { MantineProvider } from "@mantine/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { MapLandscapeChromeChip } from "./MapLandscapeChromeChip";
-import { jetlagMantineTheme } from "@/theme/mantineTheme";
+import { jetlagTheme } from "@/theme/theme";
 
 const chipProps = {
   collapsed: true as const,
@@ -25,7 +25,7 @@ beforeEach(() => {
 
 function renderChip(props: typeof chipProps = chipProps) {
   return render(
-    <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+    <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
       <MapLandscapeChromeChip {...props} />
     </MantineProvider>,
   );

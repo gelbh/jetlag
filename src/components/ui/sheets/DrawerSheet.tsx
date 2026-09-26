@@ -1,11 +1,11 @@
 import { Drawer } from "@mantine/core";
 import type { CSSProperties, ReactNode } from "react";
 import { cn } from "@/lib/cn";
-import { IosDrawerGrabber } from "@/components/ui/apple/iosEntryChrome";
-import { iosBottomDrawerStyles } from "@/components/ui/apple/iosEntryStyles";
-import { JETLAG_MODAL_Z_INDEX } from "@/theme/mantineTheme";
+import { DrawerGrabber } from "@/components/ui/entry/entryChrome";
+import { bottomDrawerStyles } from "@/components/ui/entry/entryStyles";
+import { JETLAG_MODAL_Z_INDEX } from "@/theme/theme";
 
-export interface MantineDrawerSheetProps {
+export interface DrawerSheetProps {
   open: boolean;
   onClose: () => void;
   children: ReactNode;
@@ -34,7 +34,7 @@ export interface MantineDrawerSheetProps {
  * Mobile/overlay sheet path: iOS bottom Drawer with grabber + safe-area.
  * Desktop ContextualRail stays on SheetHost.
  */
-export function MantineDrawerSheet({
+export function DrawerSheet({
   open,
   onClose,
   children,
@@ -47,9 +47,9 @@ export function MantineDrawerSheet({
   scrollMode = "host",
   contentStyle,
   mapInteractive = false,
-}: MantineDrawerSheetProps) {
+}: DrawerSheetProps) {
   const childScroll = scrollMode === "child";
-  const baseStyles = iosBottomDrawerStyles(false);
+  const baseStyles = bottomDrawerStyles(false);
 
   return (
     <Drawer
@@ -109,7 +109,7 @@ export function MantineDrawerSheet({
         className="flex min-h-0 flex-1 flex-col gap-2"
         style={contentStyle}
       >
-        <IosDrawerGrabber />
+        <DrawerGrabber />
         {pinned ? <div className="shrink-0">{pinned}</div> : null}
         <div
           className={

@@ -2,8 +2,8 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { MantineProvider } from "@mantine/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { HomeMantine } from "./HomeMantine";
-import { jetlagMantineTheme } from "@/theme/mantineTheme";
+import { Home } from "./Home";
+import { jetlagTheme } from "@/theme/theme";
 
 const { isFirebaseConfigured } = vi.hoisted(() => ({
   isFirebaseConfigured: vi.fn(() => false),
@@ -45,12 +45,12 @@ beforeEach(() => {
   }));
 });
 
-describe("HomeMantine", () => {
+describe("Home", () => {
   it("renders play hub with Join Create and Presets links", () => {
     render(
-      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
         <MemoryRouter>
-          <HomeMantine />
+          <Home />
         </MemoryRouter>
       </MantineProvider>
     );
@@ -70,9 +70,9 @@ describe("HomeMantine", () => {
 
   it("shows continue card with session code when session is active", () => {
     render(
-      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
         <MemoryRouter>
-          <HomeMantine />
+          <Home />
         </MemoryRouter>
       </MantineProvider>
     );
@@ -85,9 +85,9 @@ describe("HomeMantine", () => {
 
   it("links to friends, leaderboard, and stats", () => {
     render(
-      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
         <MemoryRouter>
-          <HomeMantine />
+          <Home />
         </MemoryRouter>
       </MantineProvider>
     );
@@ -109,9 +109,9 @@ describe("HomeMantine", () => {
   it("links to premium when Firebase is configured", () => {
     isFirebaseConfigured.mockReturnValue(true);
     render(
-      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
         <MemoryRouter>
-          <HomeMantine />
+          <Home />
         </MemoryRouter>
       </MantineProvider>
     );
@@ -123,9 +123,9 @@ describe("HomeMantine", () => {
 
   it("links to privacy, terms, and feedback", () => {
     render(
-      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
         <MemoryRouter>
-          <HomeMantine />
+          <Home />
         </MemoryRouter>
       </MantineProvider>
     );

@@ -3,7 +3,7 @@ import { MemoryRouter } from "react-router-dom";
 import { MantineProvider } from "@mantine/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Friends } from "./Friends";
-import { jetlagMantineTheme } from "@/theme/mantineTheme";
+import { jetlagTheme } from "@/theme/theme";
 
 vi.mock("@/services/core/firebase/firebase", () => ({
   isFirebaseConfigured: () => false,
@@ -21,8 +21,8 @@ vi.mock("../components/friends/FriendsPanel", () => ({
   FriendsPanel: () => <div data-testid="friends-panel">Friends panel</div>,
 }));
 
-vi.mock("../components/friends/FriendsIosBody", () => ({
-  FriendsIosBody: () => <div data-testid="friends-ios-body">Friends iOS body</div>,
+vi.mock("../components/friends/FriendsBody", () => ({
+  FriendsBody: () => <div data-testid="friends-body">Friends body</div>,
 }));
 
 beforeEach(() => {
@@ -49,7 +49,7 @@ beforeEach(() => {
 describe("Friends", () => {
   it("renders Mantine shell", () => {
     render(
-      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
         <MemoryRouter>
           <Friends />
         </MemoryRouter>

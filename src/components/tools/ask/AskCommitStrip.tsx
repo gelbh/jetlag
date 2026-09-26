@@ -3,11 +3,11 @@
  * Flag on: iOS continuous filled / gray controls.
  * Spec: ask-surface-kit-design rev 2026-08-05b.
  */
-import { Button as MantineButton } from "@mantine/core";
+import { Button } from "@mantine/core";
 import {
-  iosFilledStyles,
-  iosGrayStyles,
-} from "@/components/ui/apple/iosEntryChrome";
+  filledStyles,
+  grayStyles,
+} from "@/components/ui/entry/entryChrome";
 import { AskInlineError } from "@/components/tools/shared/readout/AskInlineError";
 
 type AskCommitStripProps = {
@@ -34,7 +34,7 @@ export function AskCommitStrip({
       data-testid="ask-commit-strip"
       className="ask-commit-strip pointer-events-auto"
     >
-      <MantineButton
+      <Button
         type="button"
         fullWidth
         data-armed={armed ? "true" : "false"}
@@ -43,10 +43,10 @@ export function AskCommitStrip({
         aria-describedby={error ? errorId : undefined}
         onClick={onCommit}
         className="ask-commit-strip__btn"
-        styles={armed ? iosFilledStyles : iosGrayStyles}
+        styles={armed ? filledStyles : grayStyles}
       >
         {buttonLabel}
-      </MantineButton>
+      </Button>
       {error ? <AskInlineError id={errorId} message={error} /> : null}
     </div>
   );

@@ -13,7 +13,7 @@ interface EntryScreenLayoutProps {
    */
   skin?: "survey" | "plain";
   /**
-   * Drop page padding so a full-bleed chrome (e.g. IosEntryHeader) owns safe-area.
+   * Drop page padding so a full-bleed chrome (e.g. EntryHeader) owns safe-area.
    */
   flush?: boolean;
 }

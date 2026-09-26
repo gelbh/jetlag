@@ -2,9 +2,9 @@ import { useState } from "react";
 import { Box, Button, Text } from "@mantine/core";
 import { HudBanner } from "../../ui/hud/HudBanner";
 import {
-  iosCompactGrayStyles,
-  iosMapChromeSurfaceStyles,
-} from "@/components/ui/apple/iosEntryChrome";
+  compactGrayStyles,
+  mapChromeSurfaceStyles,
+} from "@/components/ui/entry/entryChrome";
 
 const STORAGE_KEY = "jetlag.mapToolsHintDismissed";
 
@@ -42,7 +42,7 @@ export function MapToolsHintBanner({ hidden = false }: MapToolsHintBannerProps) 
       <Box
         className="pointer-events-auto mx-auto flex max-w-md items-start gap-3 px-3 py-2.5"
         style={{
-          ...iosMapChromeSurfaceStyles,
+          ...mapChromeSurfaceStyles,
           borderRadius: 14,
         }}
       >
@@ -70,7 +70,7 @@ export function MapToolsHintBanner({ hidden = false }: MapToolsHintBannerProps) 
           type="button"
           size="compact-sm"
           onClick={dismiss}
-          styles={iosCompactGrayStyles}
+          styles={compactGrayStyles}
         >
           Close
         </Button>

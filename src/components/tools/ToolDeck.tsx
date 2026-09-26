@@ -2,11 +2,11 @@ import { forwardRef, type ReactNode } from "react";
 import { Box, Paper } from "@mantine/core";
 import { cn } from "@/lib/cn";
 import {
-  iosMapHuntAskFirstQuestionStripStyles,
-  iosMapHuntAskFirstSurfaceStyles,
-  iosMapHuntQuestionStripStyles,
-  iosMapHuntSurfaceStyles,
-} from "@/components/ui/apple/iosEntryChrome";
+  mapHuntAskFirstQuestionStripStyles,
+  mapHuntAskFirstSurfaceStyles,
+  mapHuntQuestionStripStyles,
+  mapHuntSurfaceStyles,
+} from "@/components/ui/entry/entryChrome";
 
 /** Seeker multi-tool Hunt (`tools`) vs hider 1–2 chip content-sized island (`sparse`). */
 export type ToolDeckDensity = "tools" | "sparse";
@@ -57,8 +57,8 @@ export function ToolDeck({
       styles={{
         root: {
           ...(askFirstActive
-            ? iosMapHuntAskFirstSurfaceStyles
-            : iosMapHuntSurfaceStyles),
+            ? mapHuntAskFirstSurfaceStyles
+            : mapHuntSurfaceStyles),
           borderRadius: 22,
         },
       }}
@@ -129,8 +129,8 @@ export function ToolDeckQuestionStrip({
       )}
       style={
         askFirst
-          ? iosMapHuntAskFirstQuestionStripStyles
-          : iosMapHuntQuestionStripStyles
+          ? mapHuntAskFirstQuestionStripStyles
+          : mapHuntQuestionStripStyles
       }
       role="group"
       aria-label={askFirst ? "Question tool switcher" : "Question tools"}

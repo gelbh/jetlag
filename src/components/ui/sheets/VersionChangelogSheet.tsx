@@ -6,7 +6,7 @@ import {
   type MajorGroupNode,
   type MinorGroupNode,
 } from "@/domain/device/chrome/groupChangelog";
-import { MantineDrawerSheet } from "./MantineDrawerSheet";
+import { DrawerSheet } from "./DrawerSheet";
 import { SheetHeader } from "./SheetHeader";
 
 function ChangelogEntrySections({ entry }: { entry: ChangelogEntry }) {
@@ -257,7 +257,7 @@ export function VersionChangelogSheet({
   const latestVersion = firstVersionLabel(changelogNodes);
 
   return (
-    <MantineDrawerSheet
+    <DrawerSheet
       open={open}
       onClose={onClose}
       ariaLabel="Changelog"
@@ -284,6 +284,6 @@ export function VersionChangelogSheet({
           );
         })}
       </div>
-    </MantineDrawerSheet>
+    </DrawerSheet>
   );
 }

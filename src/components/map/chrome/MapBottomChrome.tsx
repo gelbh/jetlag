@@ -1,7 +1,7 @@
 import { forwardRef, type CSSProperties, type ReactNode } from "react";
 import { Box, Paper } from "@mantine/core";
 import { cn } from "@/lib/cn";
-import { iosMapChromeSurfaceStyles } from "@/components/ui/apple/iosEntryChrome";
+import { mapChromeSurfaceStyles } from "@/components/ui/entry/entryChrome";
 import { OverlayHost } from "./OverlayHost";
 import { MapSideDockStack } from "./MapSideDockStack";
 import { ToolDeck } from "@/components/tools/ToolDeck";
@@ -63,7 +63,7 @@ function SideIsland({
       className={className}
       styles={{
         root: {
-          ...iosMapChromeSurfaceStyles,
+          ...mapChromeSurfaceStyles,
           /* Corner radii come from map-bottom-chrome.css (anchor-aware). */
         },
       }}

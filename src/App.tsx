@@ -16,7 +16,7 @@ import { AnalyticsConsentBanner } from "./components/ui/banners/AnalyticsConsent
 import { AppUpdateBanner } from "./components/ui/banners/AppUpdateBanner";
 import { PwaInstallTipBanner } from "./components/ui/banners/PwaInstallTipBanner";
 import { AppUpdateProvider } from "./components/ui/banners/AppUpdateProvider";
-import { AppMantineProvider } from "./components/ui/providers/AppMantineProvider";
+import { AppUiProvider } from "./components/ui/providers/AppUiProvider";
 import { LowBatteryPrompt } from "./components/session/banners/LowBatteryPrompt";
 import { LocationPermissionPrompt } from "./components/session/status/LocationPermissionPrompt";
 import { MotionDatasetEffect } from "./components/motion/MotionDatasetEffect";
@@ -196,7 +196,7 @@ export default function App() {
 
   return (
     <QueryClientProvider client={appQueryClient}>
-      <AppMantineProvider>
+      <AppUiProvider>
         <BrowserRouter>
           <RouteTransitionProvider>
             <AppUpdateProvider>
@@ -395,7 +395,7 @@ export default function App() {
             </AppUpdateProvider>
           </RouteTransitionProvider>
         </BrowserRouter>
-      </AppMantineProvider>
+      </AppUiProvider>
     </QueryClientProvider>
   );
 }

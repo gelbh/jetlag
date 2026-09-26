@@ -14,7 +14,7 @@ import {
 } from "@/domain/session/size/gameSize";
 import { gameSizeRulesSummary } from "@/domain/session/size/gameSizeRules";
 import { RadioCardGroup } from "../../ui/forms/RadioCardGroup";
-import { IosSectionLabel } from "@/components/ui/apple/iosEntryChrome";
+import { SectionLabel } from "@/components/ui/entry/entryChrome";
 
 interface GameSizePickerProps {
   gameArea: GameArea | null;
@@ -102,7 +102,7 @@ export function GameSizePicker({
   return (
     <div className="space-y-2">
       <div className="flex items-baseline justify-between gap-2 px-1">
-        <IosSectionLabel>Game size</IosSectionLabel>
+        <SectionLabel>Game size</SectionLabel>
         {playAreaSummary ? (
           <Text size="xs" c="var(--color-field-ink-muted)">
             {playAreaSummary}
