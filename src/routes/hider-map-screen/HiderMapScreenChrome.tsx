@@ -357,43 +357,45 @@ export function HiderMapScreenChrome({
         onDismiss={onDismissTruthReveal}
       />
       <MapStatusRail
-        sessionCode={session.code}
-        sessionId={session.id}
-        roleGates={session.roleGates}
-        sessionRules={session}
-        playerRole={roleConfig.statusPlayerRole}
-        expanded={isDesktop}
-        activeTool="none"
-        syncStatus={syncStatus.status}
-        queuedWrites={syncStatus.queuedWrites}
-        message={syncMessage}
-        timerState={timer.timerState}
-        timerRunning={timer.running}
-        timerHasStarted={timer.hasStarted}
-        timerSyncing={timerSyncing}
-        canStartGame={canControlTimer}
-        onStartGame={timer.start}
-        onTimerStart={timer.start}
-        onTimerPause={timer.pause}
-        onTimerReset={timer.reset}
-        timerControlsDisabled={!canControlTimer || inactiveChrome}
-        moveInProgress={moveInProgress}
-        onOpenLog={onOpenLog}
-        pendingQuestions={displayPendingQuestions}
-        closeTimerMenu={overlay.sheet !== "none" || zoneTool.wizardOpen}
-        endGameActive={isEndGameActive(session)}
-        foundHiderPending={isFoundHiderPending(session)}
-        foundRequestedByUid={session.foundRequestedByUid}
-        myUid={uid ?? undefined}
-        isHost={isHost}
-        onResetEndGame={() => void onResetEndGame()}
-        onAcceptFoundHider={() => void onAcceptFoundHider()}
-        onDeclineFoundHider={() => void onDeclineFoundHider()}
-        hiderOutsideZone={hiderOutsideZone}
-        onSyncErrorAction={onSyncErrorAction}
-        inactiveChrome={inactiveChrome}
-        terminalSessionError={terminalSessionError}
-        onReturnToJoin={onReturnToJoin}
+        model={{
+          sessionCode: session.code,
+          sessionId: session.id,
+          roleGates: session.roleGates,
+          sessionRules: session,
+          playerRole: roleConfig.statusPlayerRole,
+          expanded: isDesktop,
+          activeTool: "none",
+          syncStatus: syncStatus.status,
+          queuedWrites: syncStatus.queuedWrites,
+          message: syncMessage,
+          timerState: timer.timerState,
+          timerRunning: timer.running,
+          timerHasStarted: timer.hasStarted,
+          timerSyncing,
+          canStartGame: canControlTimer,
+          onStartGame: timer.start,
+          onTimerStart: timer.start,
+          onTimerPause: timer.pause,
+          onTimerReset: timer.reset,
+          timerControlsDisabled: !canControlTimer || inactiveChrome,
+          moveInProgress,
+          onOpenLog,
+          pendingQuestions: displayPendingQuestions,
+          closeTimerMenu: overlay.sheet !== "none" || zoneTool.wizardOpen,
+          endGameActive: isEndGameActive(session),
+          foundHiderPending: isFoundHiderPending(session),
+          foundRequestedByUid: session.foundRequestedByUid,
+          myUid: uid ?? undefined,
+          isHost,
+          onResetEndGame: () => void onResetEndGame(),
+          onAcceptFoundHider: () => void onAcceptFoundHider(),
+          onDeclineFoundHider: () => void onDeclineFoundHider(),
+          hiderOutsideZone,
+          onSyncErrorAction,
+          inactiveChrome,
+          terminalSessionError,
+          onReturnToJoin,
+        }}
       />
       <FirestorePersistenceBanner />
       <AppUpdateMapChip />

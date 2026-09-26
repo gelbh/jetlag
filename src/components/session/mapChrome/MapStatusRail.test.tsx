@@ -4,7 +4,11 @@ import { MantineProvider } from "@mantine/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { RouteTransitionProvider } from "@/navigation/RouteTransitionContext";
 import { jetlagTheme } from "@/theme/theme";
-import { MapStatusRail } from "./MapStatusRail";
+import {
+  MapStatusRail,
+  type MapStatusRailModel,
+  type MapStatusRailProps,
+} from "./MapStatusRail";
 
 vi.mock("../../../state/mapStore", () => ({
   useMapStore: (selector: (state: { lowPowerMode: boolean }) => unknown) =>
@@ -25,10 +29,10 @@ vi.mock("../../../hooks/map-screen/useLeaderJoinRequests", () => ({
   }),
 }));
 
-const railProps = {
+const baseModel: MapStatusRailModel = {
   sessionCode: "ABCD",
-  activeTool: "none" as const,
-  syncStatus: "synced" as const,
+  activeTool: "none",
+  syncStatus: "synced",
   queuedWrites: 0,
   timerState: { accumulatedMs: 0, runningSince: null },
   timerRunning: false,
@@ -40,12 +44,20 @@ const railProps = {
   onTimerReset: vi.fn(),
 };
 
-function renderRail(extra?: Partial<typeof railProps> & { canStartGame?: boolean }) {
+function renderRail(
+  extra?: Partial<MapStatusRailModel> & {
+    headerLeading?: MapStatusRailProps["headerLeading"];
+  },
+) {
+  const { headerLeading, ...modelExtra } = extra ?? {};
   return render(
     <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
       <MemoryRouter>
         <RouteTransitionProvider>
-          <MapStatusRail {...railProps} {...extra} />
+          <MapStatusRail
+            model={{ ...baseModel, ...modelExtra }}
+            headerLeading={headerLeading}
+          />
         </RouteTransitionProvider>
       </MemoryRouter>
     </MantineProvider>,
@@ -63,6 +75,31 @@ beforeEach(() => {
     removeEventListener() {},
     dispatchEvent: () => false,
   }));
+});
+
+describe("MapStatusRail public props (AC #1)", () => {
+  it("accepts a single model options object plus optional headerLeading", () => {
+    const props: MapStatusRailProps = {
+      model: baseModel,
+    };
+    const keys = Object.keys(props) as Array<keyof MapStatusRailProps>;
+    expect(keys).toEqual(["model"]);
+    expect(keys.length).toBeLessThanOrEqual(10);
+
+    render(
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
+        <MemoryRouter>
+          <RouteTransitionProvider>
+            <MapStatusRail {...props} />
+          </RouteTransitionProvider>
+        </MemoryRouter>
+      </MantineProvider>,
+    );
+
+    expect(
+      screen.getByTestId("map-status-rail-mantine"),
+    ).toBeInTheDocument();
+  });
 });
 
 describe("MapStatusRail header home", () => {
@@ -103,40 +140,24 @@ describe("MapStatusRail Mantine", () => {
 
 describe("MapStatusRail inactive chrome", () => {
   it("shows retry and return to join for terminal session errors", () => {
-    render(
-      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
-        <MemoryRouter>
-          <RouteTransitionProvider>
-            <MapStatusRail
-              sessionCode="ABCD"
-              activeTool="none"
-              syncStatus="error"
-              queuedWrites={0}
-              message="That session no longer exists."
-              timerState={{ accumulatedMs: 120_000, runningSince: Date.now() - 60_000 }}
-              timerRunning
-              timerHasStarted
-              canStartGame={false}
-              onStartGame={vi.fn()}
-              onTimerStart={vi.fn()}
-              onTimerPause={vi.fn()}
-              onTimerReset={vi.fn()}
-              inactiveChrome
-              terminalSessionError={{
-                title: "Session gone",
-                message: "That session no longer exists.",
-                action: "retry",
-                actionLabel: "Retry",
-                secondaryAction: "rejoin",
-                secondaryActionLabel: "Return to join",
-              }}
-              onSyncErrorAction={vi.fn()}
-              onReturnToJoin={vi.fn()}
-            />
-          </RouteTransitionProvider>
-        </MemoryRouter>
-      </MantineProvider>,
-    );
+    renderRail({
+      syncStatus: "error",
+      message: "That session no longer exists.",
+      timerState: { accumulatedMs: 120_000, runningSince: Date.now() - 60_000 },
+      timerRunning: true,
+      timerHasStarted: true,
+      inactiveChrome: true,
+      terminalSessionError: {
+        title: "Session gone",
+        message: "That session no longer exists.",
+        action: "retry",
+        actionLabel: "Retry",
+        secondaryAction: "rejoin",
+        secondaryActionLabel: "Return to join",
+      },
+      onSyncErrorAction: vi.fn(),
+      onReturnToJoin: vi.fn(),
+    });
 
     expect(screen.getByRole("button", { name: "Retry" })).toBeInTheDocument();
     expect(

@@ -23,7 +23,8 @@ import { TimerBlock } from "../status/TimerBlock";
 import { ToolStatusBlock } from "../status/ToolStatusBlock";
 import { SYNC_TONE_CLASSES, syncRailDisplay } from "../status/syncRailDisplay";
 
-interface MapStatusRailProps {
+/** Role-agnostic status/timer/sync bag for MapStatusRail (W4-A peel). */
+export type MapStatusRailModel = {
   sessionCode: string;
   sessionId?: string | null;
   roleGates?: RoleGates | null;
@@ -66,56 +67,63 @@ interface MapStatusRailProps {
   onReturnToJoin?: () => void;
   /** In-flow status for DesktopOpsShell (vs absolute overlay on mobile). */
   expanded?: boolean;
-  /** Replace default in-header home ScreenNav (e.g. observer leave control). */
-  headerLeading?: ReactNode;
   /** Synced hiding-zone Move card — drives PHASE=MOVE in status chrome. */
   moveInProgress?: boolean;
-}
+};
+
+export type MapStatusRailProps = {
+  model: MapStatusRailModel;
+  /** Replace default in-header home ScreenNav (e.g. observer leave control). */
+  headerLeading?: ReactNode;
+};
 
 export function MapStatusRail({
-  sessionCode,
-  sessionId = null,
-  roleGates = null,
-  sessionRules = { gameSize: "medium" },
-  playerRole = "seeker",
-  activeTool,
-  syncStatus,
-  queuedWrites,
-  message,
-  timerState,
-  timerRunning,
-  timerHasStarted,
-  timerSyncing = false,
-  canStartGame,
-  onStartGame,
-  onTimerStart,
-  onTimerPause,
-  onTimerReset,
-  timerControlsDisabled = false,
-  onOpenLog,
-  pendingQuestions = [],
-  closeTimerMenu = false,
-  showPreloadBanner = false,
-  endGameActive = false,
-  myUid,
-  hostUid = null,
-  seekerLocations = [],
-  onCancelWalkingQuestion,
-  isHost = false,
-  onResetEndGame,
-  foundHiderPending = false,
-  foundRequestedByUid,
-  onAcceptFoundHider,
-  onDeclineFoundHider,
-  hiderOutsideZone = false,
-  onSyncErrorAction,
-  inactiveChrome = false,
-  terminalSessionError = null,
-  onReturnToJoin,
-  expanded = false,
+  model,
   headerLeading,
-  moveInProgress = false,
 }: MapStatusRailProps) {
+  const {
+    sessionCode,
+    sessionId = null,
+    roleGates = null,
+    sessionRules = { gameSize: "medium" },
+    playerRole = "seeker",
+    activeTool,
+    syncStatus,
+    queuedWrites,
+    message,
+    timerState,
+    timerRunning,
+    timerHasStarted,
+    timerSyncing = false,
+    canStartGame,
+    onStartGame,
+    onTimerStart,
+    onTimerPause,
+    onTimerReset,
+    timerControlsDisabled = false,
+    onOpenLog,
+    pendingQuestions = [],
+    closeTimerMenu = false,
+    showPreloadBanner = false,
+    endGameActive = false,
+    myUid,
+    hostUid = null,
+    seekerLocations = [],
+    onCancelWalkingQuestion,
+    isHost = false,
+    onResetEndGame,
+    foundHiderPending = false,
+    foundRequestedByUid,
+    onAcceptFoundHider,
+    onDeclineFoundHider,
+    hiderOutsideZone = false,
+    onSyncErrorAction,
+    inactiveChrome = false,
+    terminalSessionError = null,
+    onReturnToJoin,
+    expanded = false,
+    moveInProgress = false,
+  } = model;
   const [timerMenuOpen, setTimerMenuOpen] = useState(false);
   const [preloadMenuOpen, setPreloadMenuOpen] = useState(false);
   const railRef = useRef<HTMLDivElement>(null);
