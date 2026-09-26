@@ -73,6 +73,7 @@
     border-color: var(--color-flag);
     border-top-width: 2px;
     background: var(--color-flag-soft);
+
     /* Soft wash on dark canvas — field-ink; flag-ink reserved for solid flag fills. */
     color: var(--color-field-ink);
   }
