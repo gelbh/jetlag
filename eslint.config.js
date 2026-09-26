@@ -3,6 +3,7 @@ import globals from "globals";
 import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
 import jsxA11y from "eslint-plugin-jsx-a11y";
+import playwright from "eslint-plugin-playwright";
 import tseslint from "typescript-eslint";
 import { defineConfig, globalIgnores } from "eslint/config";
 
@@ -44,6 +45,14 @@ export default defineConfig([
       parserOptions: {
         tsconfigRootDir: import.meta.dirname,
       },
+    },
+  },
+  {
+    files: ["e2e/**/*.{ts,tsx}"],
+    extends: [playwright.configs["flat/recommended"]],
+    rules: {
+      // Sleeps must fail CI (recommended defaults to warn).
+      "playwright/no-wait-for-timeout": "error",
     },
   },
   // Wave 1: enable jsx-a11y recommended on kernel/flag surfaces only.

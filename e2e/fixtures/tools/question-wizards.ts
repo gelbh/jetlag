@@ -279,6 +279,7 @@ async function placeThermometerGpsWalk(page: Page) {
   // Poll/throttle windows in useThermometerWalk are ~500–750ms.
   for (const lat of [53.355, 53.36, 53.365, 53.37]) {
     await stepE2eGeolocation(page, { latitude: lat, longitude: -6.26 });
+    // eslint-disable-next-line playwright/no-wait-for-timeout -- cover ~500–750ms thermometer poll/throttle
     await page.waitForTimeout(1_100);
   }
 
