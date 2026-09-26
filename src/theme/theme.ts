@@ -5,6 +5,15 @@ import {
   type MantineThemeOverride,
 } from "@mantine/core";
 
+/** Matches `--z-dock` in `src/styles/base.css`. */
+export const JETLAG_DOCK_Z_INDEX = 1000;
+
+/** Matches `--z-banner` in `src/styles/base.css`. */
+export const JETLAG_BANNER_Z_INDEX = 1001;
+
+/** Matches `--z-panel` in `src/styles/base.css`. */
+export const JETLAG_PANEL_Z_INDEX = 1002;
+
 /** Matches `--z-modal` in `src/styles/base.css`. */
 export const JETLAG_MODAL_Z_INDEX = 1100;
 
@@ -17,6 +26,7 @@ const appleSystemSans =
 /**
  * Brand + chrome tokens for Wave 5 map-shell/dock migration.
  * Prefer reading these via `theme.other` / CSS vars over new global CSS.
+ * Dock / safe-area / z-index / spacing mirror `src/styles/base.css` (bridge until W5-E).
  */
 export const jetlagBrand = {
   canvas: "oklch(0.285 0.036 255)",
@@ -37,6 +47,27 @@ export const jetlagBrand = {
   hairline: "0.33px",
   frostBlur: "blur(20px) saturate(1.4)",
   floatShadow: "0 8px 24px 0 oklch(0.1 0.04 265 / 0.45)",
+  /** Matches `--dock-height`. */
+  dockHeight: "4.25rem",
+  /** Matches `--dock-content-height` (narrow default; wide media bumps to dockHeight). */
+  dockContentHeight: "2.75rem",
+  /** Matches `--status-bar-height`. */
+  statusBarHeight: "3.25rem",
+  /** Matches `--hider-action-bar-height` (phone default). */
+  hiderActionBarHeight: "3.75rem",
+  /** Matches `--chrome-gap-above-dock`. */
+  chromeGapAboveDock: "0.5rem",
+  /** Matches `--chrome-gap-bottom`. */
+  chromeGapBottom: "0.75rem",
+  /** Matches `--safe-area-top` / env bridge (Cap AC may keep env until proven). */
+  safeAreaTop: "env(safe-area-inset-top, 0px)",
+  /** Matches `--safe-area-bottom`. */
+  safeAreaBottom: "env(safe-area-inset-bottom, 0px)",
+  zDock: JETLAG_DOCK_Z_INDEX,
+  zBanner: JETLAG_BANNER_Z_INDEX,
+  zPanel: JETLAG_PANEL_Z_INDEX,
+  zModal: JETLAG_MODAL_Z_INDEX,
+  zToast: JETLAG_TOAST_Z_INDEX,
 } as const;
 
 const hairlineBorder = `${jetlagBrand.hairline} solid oklch(from ${jetlagBrand.fieldInk} l c h / 0.14)`;
@@ -205,7 +236,7 @@ export const jetlagTheme: MantineThemeOverride = createTheme({
   },
 });
 
-/** Bridges brand tokens onto `:root` for residual CSS until Wave 5 chrome kill. */
+/** Bridges brand + chrome tokens onto `:root` for residual CSS until Wave 5 chrome kill. */
 export const jetlagCssVariablesResolver: CSSVariablesResolver = () => ({
   variables: {
     "--jl-control-radius": `${jetlagBrand.controlRadius}px`,
@@ -214,6 +245,19 @@ export const jetlagCssVariablesResolver: CSSVariablesResolver = () => ({
     "--jl-hairline": jetlagBrand.hairline,
     "--jl-frost-blur": jetlagBrand.frostBlur,
     "--jl-float-shadow": jetlagBrand.floatShadow,
+    "--jl-dock-height": jetlagBrand.dockHeight,
+    "--jl-dock-content-height": jetlagBrand.dockContentHeight,
+    "--jl-status-bar-height": jetlagBrand.statusBarHeight,
+    "--jl-hider-action-bar-height": jetlagBrand.hiderActionBarHeight,
+    "--jl-chrome-gap-above-dock": jetlagBrand.chromeGapAboveDock,
+    "--jl-chrome-gap-bottom": jetlagBrand.chromeGapBottom,
+    "--jl-safe-area-top": jetlagBrand.safeAreaTop,
+    "--jl-safe-area-bottom": jetlagBrand.safeAreaBottom,
+    "--jl-z-dock": String(jetlagBrand.zDock),
+    "--jl-z-banner": String(jetlagBrand.zBanner),
+    "--jl-z-panel": String(jetlagBrand.zPanel),
+    "--jl-z-modal": String(jetlagBrand.zModal),
+    "--jl-z-toast": String(jetlagBrand.zToast),
   },
   light: {},
   dark: {
