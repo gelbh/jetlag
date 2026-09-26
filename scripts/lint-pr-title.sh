@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# Lint a PR title with commitlint (Conventional Commits).
 # Usage:
 #   npm run lint:pr-title -- "feat(ui): add dark mode"
 #   gh pr view --json title -q .title | npm run lint:pr-title
