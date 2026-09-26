@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { MantineProvider } from "@mantine/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -46,7 +46,7 @@ beforeEach(() => {
 });
 
 describe("HomeMantine", () => {
-  it("renders inset play group with Join Create and Presets links", () => {
+  it("renders play hub with Join Create and Presets links", () => {
     render(
       <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
         <MemoryRouter>
@@ -54,12 +54,17 @@ describe("HomeMantine", () => {
         </MemoryRouter>
       </MantineProvider>
     );
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: /Play - create, join, or custom game/i,
+      }),
+    );
     expect(screen.getByRole("link", { name: /Join session/i })).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: /Create session/i }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("link", { name: /Browse presets/i }),
+      screen.getByRole("link", { name: /Custom game presets/i }),
     ).toBeInTheDocument();
   });
 
@@ -76,7 +81,6 @@ describe("HomeMantine", () => {
     ).toBeInTheDocument();
     expect(screen.getByText("ABCD")).toBeInTheDocument();
     expect(screen.getByText(/^Continue$/i)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /Join session/i })).toBeInTheDocument();
   });
 
   it("links to friends, leaderboard, and stats", () => {
