@@ -23,7 +23,7 @@ Handlers run in this order (first match wins for early returns):
 | Path | Role |
 |------|------|
 | `sentryTunnel.ts` | Browser → Sentry envelope tunnel |
-| `posthogProxy.ts` | First-party PostHog ingest/proxy |
+| `posthogProxy.ts` | First-party PostHog /ph proxy |
 | `documentCsp.ts` | Nonce generation + CSP header / HTML rewrite |
 | `assetCacheHeaders.ts` | Cache-Control by pathname |
 | `incidentEmail.ts` | Incident desk email webhook |
