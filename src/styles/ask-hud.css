@@ -18,7 +18,7 @@
   }
 
   .ask-mode-cue-ticker {
-    /* layout only — Island owns Survey skin */
+    /* layout only; Island owns surface skin */
     width: 100%;
     max-width: 28rem;
     margin-inline: auto;
@@ -40,7 +40,7 @@
   }
 
   .ask-cost-chip {
-    /* chipVariants owns Survey skin; keep display label density */
+    /* chipVariants owns surface skin; keep display label density */
     max-width: 100%;
     letter-spacing: 0.06em;
   }

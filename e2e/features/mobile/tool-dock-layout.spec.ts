@@ -13,7 +13,6 @@ import {
   SIMULATED_SAFE_AREA_TOP_PX,
   clickViaEvaluate,
   assertInViewport,
-  enablePlayerUxWorld,
 } from "../../fixtures";
 import type { Page } from "@playwright/test";
 
@@ -458,7 +457,6 @@ test.describe("landscape map-dominant chrome", () => {
   test("distills secondary actions when landscape chrome is expanded", async ({
     page,
   }) => {
-    await enablePlayerUxWorld(page);
     await expect(page.locator(".map-chrome-hud")).toBeVisible();
     const chip = page.getByRole("button", {
       name: /Show map controls|Hide map controls/i,
