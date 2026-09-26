@@ -37,7 +37,8 @@ import {
 import { useToolWizard } from "../../hooks/wizard/useToolWizard";
 import { QuestionTruthReferenceHint } from "./shared/QuestionTruthReferenceHint";
 
-interface MatchingPanelProps {
+/** Flat matching wizard fields bag for MatchingPanel (W4-D peel). */
+export type MatchingPanelModel = {
   distanceUnit: DistanceUnit;
   categoryId: MatchingCategoryId | null;
   categoryChosen: boolean;
@@ -70,40 +71,45 @@ interface MatchingPanelProps {
   isSubmitting?: boolean;
   onRetry?: () => void;
   wizardStepRef?: RefObject<string>;
-}
+};
 
-export function MatchingPanel({
-  distanceUnit,
-  categoryId,
-  categoryChosen,
-  usedCategoryIds,
-  catalogCategories = MATCHING_CATEGORIES,
-  anchorLat = null,
-  anchorLng = null,
-  usesContainmentMatching,
-  hasSeekerPoint,
-  nearestFeatureName,
-  distanceMeters,
-  featureCount,
-  inPlayAreaFeatureCount,
-  nearestOutsidePlayArea,
-  nullAnswer,
-  loading,
-  nearestProvisional = false,
-  satelliteBasemap = false,
-  gpsLoading,
-  answer,
-  error,
-  onCategoryChange,
-  onUseGps,
-  onAnswerChange,
-  onCommit,
-  awaitHiderAnswer = false,
-  costLabel = "D3P1",
-  isSubmitting = false,
-  onRetry,
-  wizardStepRef,
-}: MatchingPanelProps) {
+export type MatchingPanelProps = {
+  model: MatchingPanelModel;
+};
+
+export function MatchingPanel({ model }: MatchingPanelProps) {
+  const {
+    distanceUnit,
+    categoryId,
+    categoryChosen,
+    usedCategoryIds,
+    catalogCategories = MATCHING_CATEGORIES,
+    anchorLat = null,
+    anchorLng = null,
+    usesContainmentMatching,
+    hasSeekerPoint,
+    nearestFeatureName,
+    distanceMeters,
+    featureCount,
+    inPlayAreaFeatureCount,
+    nearestOutsidePlayArea,
+    nullAnswer,
+    loading,
+    nearestProvisional = false,
+    satelliteBasemap = false,
+    gpsLoading,
+    answer,
+    error,
+    onCategoryChange,
+    onUseGps,
+    onAnswerChange,
+    onCommit,
+    awaitHiderAnswer = false,
+    costLabel = "D3P1",
+    isSubmitting = false,
+    onRetry,
+    wizardStepRef,
+  } = model;
   const {
     phaseId,
     stepId,

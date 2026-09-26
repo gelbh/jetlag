@@ -507,46 +507,47 @@ export function useMatchingTool({
 
   const panel = (
     <MatchingToolPanel
-      distanceUnit={distanceUnit}
-      categoryId={matchingCategoryId}
-      categoryChosen={matchingCategoryChosen}
-      usedCategoryIds={usedMatchingCategories}
-      catalogCategories={catalog.matchingCatalog}
-      matchingSeekerPoint={matchingSeekerPoint}
-      matchingUsesContainment={catalog.matchingUsesContainment}
-      matchingNearestFeatureName={matchingNearestFeatureName}
-      matchingDistanceMeters={matchingDistanceMeters}
-      matchingFeatureCount={matchingFeatureCount}
-      matchingInPlayAreaFeatureCount={matchingInPlayAreaFeatureCount}
-      matchingNearestOutsidePlayArea={matchingNearestOutsidePlayArea}
-      matchingNullAnswer={matchingNullAnswer}
-      matchingLoading={matchingLoading}
-      nearestProvisional={nearestProvisional}
-      satelliteBasemap={mapStyle === "satellite"}
-      gpsLoading={gpsLoading}
-      matchingAnswer={matchingAnswer}
-      error={matchingError ?? gpsError ?? mapError}
-      awaitHiderAnswer={awaitHiderAnswer}
-      costLabel={catalog.costLabel}
-      isSubmitting={session.isBusy}
-      previewOpen={previewOpen}
-      previewQuestion={previewQuestion}
-      wizardStepRef={wizardStepRef}
-      onCategoryChange={handleCategoryChange}
-      onUseGps={() => void handleGps()}
-      onAnswerChange={setMatchingAnswerSynced}
-      onCommit={() => void commit()}
-      onRetry={
-        matchingSeekerPoint && matchingCategoryId
-          ? () => void resolveForAnchor(matchingSeekerPoint, matchingCategoryId)
-          : undefined
-      }
-      onPreviewConfirm={() =>
-        void session.runAction(async () => {
-          await performMatchingCommit(buildCommitInput());
-        })
-      }
-      onPreviewCancel={() => setPreviewOpen(false)}
+      model={{
+        distanceUnit,
+        categoryId: matchingCategoryId,
+        categoryChosen: matchingCategoryChosen,
+        usedCategoryIds: usedMatchingCategories,
+        catalogCategories: catalog.matchingCatalog,
+        matchingSeekerPoint,
+        matchingUsesContainment: catalog.matchingUsesContainment,
+        matchingNearestFeatureName,
+        matchingDistanceMeters,
+        matchingFeatureCount,
+        matchingInPlayAreaFeatureCount,
+        matchingNearestOutsidePlayArea,
+        matchingNullAnswer,
+        matchingLoading,
+        nearestProvisional,
+        satelliteBasemap: mapStyle === "satellite",
+        gpsLoading,
+        matchingAnswer,
+        error: matchingError ?? gpsError ?? mapError,
+        awaitHiderAnswer,
+        costLabel: catalog.costLabel,
+        isSubmitting: session.isBusy,
+        previewOpen,
+        previewQuestion,
+        wizardStepRef,
+        onCategoryChange: handleCategoryChange,
+        onUseGps: () => void handleGps(),
+        onAnswerChange: setMatchingAnswerSynced,
+        onCommit: () => void commit(),
+        onRetry:
+          matchingSeekerPoint && matchingCategoryId
+            ? () =>
+                void resolveForAnchor(matchingSeekerPoint, matchingCategoryId)
+            : undefined,
+        onPreviewConfirm: () =>
+          void session.runAction(async () => {
+            await performMatchingCommit(buildCommitInput());
+          }),
+        onPreviewCancel: () => setPreviewOpen(false),
+      }}
     />
   );
 
