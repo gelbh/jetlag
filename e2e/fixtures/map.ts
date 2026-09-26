@@ -218,11 +218,13 @@ export async function waitForMapTilesLoaded(page: Page) {
 }
 
 export async function clickToolDockButton(page: Page, name: string) {
-  // Ask-first hunt re-labels the strip to "Question tool switcher" once an Ask
-  // tool is active; match both so post-click aria-pressed checks still resolve.
-  const questionTools = page.getByLabel(
-    /Question tools|Question tool switcher/,
-  );
+  // Default dock groups undo+questions as "History and question tools".
+  // Flag-on ask-first uses "Question tools" / "Question tool switcher".
+  // Playwright RegExp labels are full-string matches (strings are substrings).
+  const questionTools = page
+    .getByLabel("History and question tools")
+    .or(page.getByLabel("Question tools"))
+    .or(page.getByLabel("Question tool switcher"));
   const button = questionTools.getByRole("button", { name, exact: true });
   await expect(button).toBeVisible();
   const isPreviewOnly =
@@ -282,5 +284,9 @@ export async function selectDrawTool(page: Page, toolName: "Pin" | "Zone") {
       el.click();
     }
   });
-  await page.getByRole("menuitemradio", { name: toolName }).click();
+  // Wave 2 Draw menu is a SheetHost dialog (not an inline popover).
+  const drawSheet = page.getByRole("dialog", { name: "Draw on map" });
+  await expect(drawSheet).toBeVisible({ timeout: 10_000 });
+  await drawSheet.getByRole("menuitemradio", { name: toolName }).click();
+  await expect(drawSheet).toBeHidden({ timeout: 10_000 });
 }

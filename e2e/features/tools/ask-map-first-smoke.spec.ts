@@ -69,13 +69,21 @@ test.describe("ask map-first smoke (mantine)", () => {
     await clickToolDockButton(page, "Thermometer");
     await expect(page.getByTestId("thermometer-hud-body")).toBeVisible();
 
-    // SheetHost portals the dialog outside ask-hud-host; scope to dialog.
-    const sheet = page.getByRole("dialog", { name: "Thermometer" });
-    await sheet.getByRole("button", { name: /^Manual pins$/i }).click();
-    await expect(sheet.getByText(/Tap the map for the start/i)).toBeVisible();
+    // Mantine setup is distance-first; Manual pins live on map placement chrome.
+    const distanceRail = page.getByLabel("Thermometer distance");
+    await expect(distanceRail.getByRole("button").first()).toBeVisible({
+      timeout: 10_000,
+    });
+    await distanceRail.getByRole("button").first().click();
+
+    await expect(page.getByTestId("thermometer-map-placement")).toBeVisible({
+      timeout: 15_000,
+    });
+    await page.getByRole("button", { name: "Manual pins" }).click();
+    await expect(page.getByText(/Tap the map for the start/i)).toBeVisible();
     // Canvas clicks miss MapLibre under Ask HUD; fire lng/lat on the map.
     await clickMapAtLatLng(page, 53.35, -6.26);
-    await expect(sheet.getByText(/Tap the map for the end/i)).toBeVisible({
+    await expect(page.getByText(/Tap the map for the end/i)).toBeVisible({
       timeout: 10_000,
     });
     await clickMapAtLatLng(page, 53.36, -6.25);
