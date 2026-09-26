@@ -268,7 +268,6 @@ export function AskCatalogRail({
   return (
     <Paper
       data-testid="ask-catalog-rail"
-      data-player-ux-world="mantine"
       className="ask-catalog-rail pointer-events-auto"
       role="group"
       aria-label={ariaLabel}

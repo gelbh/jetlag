@@ -283,7 +283,6 @@ export function MeasuringHudBody({
                 aria-label="Filter measure categories"
                 className="jl-scroll"
                 style={iosFilterChipTrackStyle}
-                data-player-ux-world="mantine"
               >
                 {filterOptions.map((option) => {
                   const selected = effectiveFilter === option.value;

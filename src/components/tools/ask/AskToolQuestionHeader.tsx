@@ -32,7 +32,6 @@ export function AskToolQuestionHeader({
           : "pointer-events-auto ask-hud-panel space-y-2 p-3"
       }
       style={mantine ? iosAskInsetSurfaceStyle : undefined}
-      {...(mantine ? { "data-player-ux-world": "mantine" } : {})}
     >
       <div className="flex items-start gap-3">
         <div

@@ -74,7 +74,6 @@ export function PhotoHudBody({
       <div
         className="pointer-events-auto space-y-2 p-3"
         style={iosAskInsetSurfaceStyle}
-        data-player-ux-world="mantine"
       >
         <div className="flex items-start gap-3">
           <div

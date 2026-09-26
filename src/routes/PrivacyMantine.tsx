@@ -14,7 +14,6 @@ export function PrivacyMantine() {
         px="md"
         maw={390}
         py="lg"
-        data-player-ux-world="mantine"
       >
         <LegalDocumentIosBody
           title="Privacy Policy"

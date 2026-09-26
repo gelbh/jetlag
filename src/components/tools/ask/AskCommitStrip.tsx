@@ -32,7 +32,6 @@ export function AskCommitStrip({
   return (
     <div
       data-testid="ask-commit-strip"
-      data-player-ux-world="mantine"
       className="ask-commit-strip pointer-events-auto"
     >
       <MantineButton

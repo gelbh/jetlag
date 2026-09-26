@@ -20,7 +20,7 @@ export function ResolvedReadout({
   variant = "default",
 }: ResolvedReadoutProps) {
   return (
-    <div className="space-y-1" data-player-ux-world="mantine">
+    <div className="space-y-1">
       <p
         style={{
           margin: 0,

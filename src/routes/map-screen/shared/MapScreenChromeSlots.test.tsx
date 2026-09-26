@@ -70,13 +70,4 @@ describe("MapScreenChromeSlots", () => {
     expect(screen.getByText("Fragment toolbar")).toBeInTheDocument();
     expect(document.querySelector(".map-chrome-hud--fragments")).not.toBeNull();
   });
-
-  it("sets mantine player-ux world on HUD", () => {
-    renderWithLandscapeProvider(
-      <MapScreenChromeSlots header={<div>Header</div>} />,
-    );
-    expect(
-      document.querySelector('.map-chrome-hud[data-player-ux-world="mantine"]'),
-    ).not.toBeNull();
-  });
 });

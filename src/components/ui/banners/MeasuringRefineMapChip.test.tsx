@@ -42,10 +42,7 @@ describe("MeasuringRefineMapChip", () => {
         body="Adding remaining areas to the map…"
       />,
     );
-    expect(screen.getByTestId("measuring-refine-chip")).toHaveAttribute(
-      "data-player-ux-world",
-      "mantine",
-    );
+    expect(screen.getByTestId("measuring-refine-chip")).toBeInTheDocument();
     expect(screen.getByText("Loading places")).toBeTruthy();
   });
 

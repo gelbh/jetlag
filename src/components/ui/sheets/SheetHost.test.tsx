@@ -15,28 +15,6 @@ vi.mock("../../../hooks/layout/useDesktopLayout", () => ({
   useDesktopLayout: () => useDesktopLayout(),
 }));
 
-vi.mock("./RadixMotionSheet", () => ({
-  RadixMotionSheet: ({
-    open,
-    children,
-    ariaLabel,
-    onClose,
-  }: {
-    open: boolean;
-    children: ReactNode;
-    ariaLabel?: string;
-    onClose: () => void;
-  }) =>
-    open ? (
-      <div role="dialog" aria-label={ariaLabel} data-testid="radix-motion-sheet">
-        <button type="button" onClick={onClose}>
-          close-radix
-        </button>
-        {children}
-      </div>
-    ) : null,
-}));
-
 function RailPanelMount({ children }: { children: ReactNode }) {
   const rail = useContextualRailPanel();
   const setPanelEl = rail?.setPanelEl;

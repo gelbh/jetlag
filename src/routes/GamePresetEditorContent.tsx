@@ -13,9 +13,7 @@ import { buildPreloadPresetSnapshot } from "../domain/preloadRequest/buildPreloa
 import { useGamePresetEditorModel } from "./GamePresetEditorModel";
 
 /**
- * Survey editor sections + GameAreaFramingModal map island.
- * Parent must set `data-player-ux-world="survey"` on a root that wraps this
- * (Create readiness: CSS selectors need the attribute on the right root).
+ * Preset editor sections + GameAreaFramingModal map island.
  */
 export function GamePresetEditorContent() {
   const model = useGamePresetEditorModel();

@@ -54,10 +54,7 @@ export function CreateMantine() {
   const confirmBusy = session.loading || session.verifyingAccess;
 
   return (
-    <Box
-      className="jl-create-session flex h-full min-h-0 max-h-full flex-col overflow-hidden"
-      data-player-ux-world="survey"
-    >
+    <Box className="jl-create-session flex h-full min-h-0 max-h-full flex-col overflow-hidden">
       <IosEntryHeader title="Create" />
 
       <Stack gap={0} className="flex min-h-0 flex-1 flex-col overflow-hidden">

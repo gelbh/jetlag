@@ -77,7 +77,6 @@ export function HomeMantine() {
           w="100%"
           px={0}
           maw={390}
-          data-player-ux-world="mantine"
         >
           <Stack gap={28}>
             <Stack gap={10}>

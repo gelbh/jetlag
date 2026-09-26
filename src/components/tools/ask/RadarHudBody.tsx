@@ -329,7 +329,6 @@ export function RadarHudBody({
   return (
     <div
       data-testid="radar-hud-body"
-      data-player-ux-world="mantine"
       className="ask-hud-mode-body flex w-full flex-col gap-2"
     >
       {viewOnly ? <ViewOnlyQuestionBanner /> : null}

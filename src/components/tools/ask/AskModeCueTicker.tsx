@@ -18,7 +18,6 @@ export function AskModeCueTicker({ cue }: AskModeCueTickerProps) {
   return (
     <Paper
       data-testid="ask-mode-cue-ticker"
-      data-player-ux-world="mantine"
       role="status"
       aria-live="polite"
       radius={14}

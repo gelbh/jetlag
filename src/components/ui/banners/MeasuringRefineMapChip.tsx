@@ -20,7 +20,6 @@ export function MeasuringRefineMapChip({
     >
       <div
         data-testid="measuring-refine-chip"
-        data-player-ux-world="mantine"
         className="mx-auto flex max-w-[min(calc(100%-1.5rem),22rem)] items-center gap-2.5 px-3 py-2.5"
         style={{
           ...iosMapChromeSurfaceStyles,

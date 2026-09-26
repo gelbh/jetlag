@@ -168,7 +168,6 @@ export function AskMapPlacementChrome({
     <div
       data-testid={testId}
       data-ask-placement-phase={phase}
-      data-player-ux-world="mantine"
       className="pointer-events-none absolute inset-0 z-[var(--z-panel)]"
     >
       <style>{`

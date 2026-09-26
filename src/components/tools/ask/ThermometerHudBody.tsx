@@ -109,7 +109,6 @@ export function ThermometerHudBody({
         className="ask-walk-banner pointer-events-auto"
         role="status"
         aria-live="polite"
-        data-player-ux-world="mantine"
         style={{
           ...iosAskInsetSurfaceStyle,
           borderRadius: 16,
@@ -131,7 +130,6 @@ export function ThermometerHudBody({
   return (
     <div
       data-testid="thermometer-hud-body"
-      data-player-ux-world="mantine"
       className="ask-hud-mode-body flex w-full flex-col gap-2"
     >
       {walkBanner}

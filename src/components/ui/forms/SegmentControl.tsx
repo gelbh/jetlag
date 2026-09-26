@@ -88,7 +88,6 @@ export function SegmentControl<Value extends string>({
         }}
         role="group"
         aria-label={ariaLabel}
-        data-player-ux-world="mantine"
       >
         {options.map((option) => {
           const selected = value === option.value;

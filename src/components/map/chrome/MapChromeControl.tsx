@@ -126,7 +126,6 @@ export function MapChromeControl({
         disabled={disabled}
         className={resolvedClassName}
         styles={iosMapToolSlotStyles(Boolean(pressed), tone)}
-        data-player-ux-world="mantine"
         data-ios-tool-tone={tone}
         aria-label={ariaLabel}
         aria-pressed={pressed}

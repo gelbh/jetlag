@@ -71,7 +71,6 @@ export function TentacleMapAnswerStrip({
   return (
     <div
       data-testid="tentacle-map-answer-strip"
-      data-player-ux-world="mantine"
       className="flex flex-col gap-2"
       style={{
         ...iosMapChromeSurfaceStyles,

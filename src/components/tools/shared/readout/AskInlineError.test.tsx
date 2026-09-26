@@ -17,8 +17,7 @@ describe("AskInlineError", () => {
     render(
       <AskInlineError message="Timed out while waiting for your location." />,
     );
-    const alert = screen.getByTestId("ask-inline-error");
-    expect(alert.getAttribute("data-player-ux-world")).toBe("mantine");
+    expect(screen.getByTestId("ask-inline-error")).toBeInTheDocument();
     expect(screen.getByText("Location timed out")).toBeInTheDocument();
   });
 });

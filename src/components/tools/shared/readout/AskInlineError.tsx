@@ -69,7 +69,6 @@ export function AskInlineError({ message, id }: AskInlineErrorProps) {
       id={id}
       role="alert"
       data-testid="ask-inline-error"
-      data-player-ux-world="mantine"
       style={{
         borderRadius: 14,
         padding: "0.75rem 0.875rem",

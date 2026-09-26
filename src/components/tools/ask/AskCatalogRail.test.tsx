@@ -73,9 +73,8 @@ describe("AskCatalogRail", () => {
     );
 
     const rail = screen.getByTestId("ask-catalog-rail");
-    expect(rail.getAttribute("data-player-ux-world")).toBe("mantine");
+    expect(rail).toBeInTheDocument();
     const row = screen.getByRole("button", { name: "Museum" });
-    expect(row.getAttribute("data-player-ux-world")).toBe("mantine");
     fireEvent.click(row);
     expect(onSelect).toHaveBeenCalledWith("museum");
   });
