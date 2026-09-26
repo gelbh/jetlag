@@ -28,16 +28,12 @@ import { TimerBlock } from "../status/TimerBlock";
 import { ToolStatusBlock } from "../status/ToolStatusBlock";
 import { SYNC_TONE_CLASSES, syncRailDisplay } from "../status/syncRailDisplay";
 
-function errorHasActions(
-  error: UserErrorDisplay,
-  onAction?: () => void,
-  onSecondaryAction?: () => void,
-): boolean {
-  const showPrimary = Boolean(error.action && onAction && error.actionLabel);
-  const showSecondary = Boolean(
-    error.secondaryAction && onSecondaryAction && error.secondaryActionLabel,
+/** Spec: action / secondaryAction fields → sticky; only toast when action-free. */
+function errorHasActions(error: UserErrorDisplay): boolean {
+  return Boolean(
+    (error.action && error.actionLabel) ||
+      (error.secondaryAction && error.secondaryActionLabel),
   );
-  return showPrimary || showSecondary;
 }
 
 /** Channel 1 vs 2: actionful → sticky Alert; action-free → ephemeral toast. */
@@ -50,7 +46,7 @@ function MapPlayerErrorChannel({
   onAction?: () => void;
   onSecondaryAction?: () => void;
 }) {
-  const hasActions = errorHasActions(error, onAction, onSecondaryAction);
+  const hasActions = errorHasActions(error);
 
   useEffect(() => {
     if (hasActions) {

@@ -21,9 +21,7 @@ function ephemeralId(input: EphemeralInput): string {
 }
 
 /** Bridge from HUD ephemeral errors to Mantine notifications (channel 1). */
-export function showEphemeralPlayerNotification(
-  input: EphemeralInput,
-): boolean {
+export function showEphemeralPlayerNotification(input: EphemeralInput): void {
   notifications.show({
     id: ephemeralId(input),
     title: input.title,
@@ -32,5 +30,4 @@ export function showEphemeralPlayerNotification(
     autoClose: 4200,
     withCloseButton: true,
   });
-  return true;
 }
