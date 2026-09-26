@@ -1,5 +1,10 @@
 import { UnstyledButton } from "@mantine/core";
-import { choiceChipStyles } from "@/components/ui/entry/entryChrome";
+import {
+  choiceChipStyles,
+  segmentBtnStyle,
+  segmentChipsTrackStyle,
+  segmentControlTrackStyle,
+} from "@/components/ui/entry/entryChrome";
 
 interface SegmentOption<Value extends string> {
   value: Value;
@@ -28,7 +33,12 @@ export function SegmentControl<Value extends string>({
 }: SegmentControlProps<Value>) {
   if (variant === "chips") {
     return (
-      <div className="jl-scroll jl-segment-chips" role="tablist" aria-label={ariaLabel}>
+      <div
+        className="jl-scroll"
+        style={segmentChipsTrackStyle}
+        role="tablist"
+        aria-label={ariaLabel}
+      >
         {options.map((option) => {
           const selected = value === option.value;
 
@@ -40,9 +50,13 @@ export function SegmentControl<Value extends string>({
               aria-selected={selected}
               disabled={disabled || option.disabled}
               onClick={() => onChange(option.value)}
-              className={`jl-segment-btn ${
-                selected ? "jl-segment-btn-selected" : ""
-              } disabled:opacity-50`}
+              data-feedback="tap"
+              style={{
+                ...segmentBtnStyle(selected),
+                flex: "0 0 auto",
+                whiteSpace: "nowrap",
+              }}
+              className="disabled:opacity-50"
             >
               {option.label}
             </button>
@@ -110,8 +124,10 @@ export function SegmentControl<Value extends string>({
 
   return (
     <div
-      className="jl-segment-control"
-      style={{ gridTemplateColumns: `repeat(${options.length}, 1fr)` }}
+      style={{
+        ...segmentControlTrackStyle,
+        gridTemplateColumns: `repeat(${options.length}, 1fr)`,
+      }}
       role="tablist"
       aria-label={ariaLabel}
     >
@@ -126,9 +142,9 @@ export function SegmentControl<Value extends string>({
             aria-selected={selected}
             disabled={disabled}
             onClick={() => onChange(option.value)}
-            className={`jl-segment-btn ${
-              selected ? "jl-segment-btn-selected" : ""
-            } disabled:opacity-50`}
+            data-feedback="tap"
+            style={segmentBtnStyle(selected)}
+            className="disabled:opacity-50"
           >
             {option.label}
           </button>

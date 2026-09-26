@@ -1,3 +1,4 @@
+import { premiumEntitlementPillStyle } from "@/components/ui/entry/entryStyles";
 import { screenHeaderOffsetClassName } from "../ui/layout/ScreenHeader";
 
 export function PremiumFeatureList({
@@ -21,7 +22,9 @@ export function PremiumFeatureList({
         Live transit and faster map loads for hosted sessions.
       </p>
       {entitlementSummary ? (
-        <p className="premium-entitlement-pill">{entitlementSummary}</p>
+        <p data-testid="premium-entitlement-pill" style={premiumEntitlementPillStyle}>
+          {entitlementSummary}
+        </p>
       ) : null}
       {checkoutNotice ? (
         <p className="text-sm text-ink-secondary">{checkoutNotice}</p>

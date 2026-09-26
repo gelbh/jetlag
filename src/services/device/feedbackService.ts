@@ -78,7 +78,7 @@ export async function feedback(event: FeedbackEvent): Promise<void> {
 }
 
 const DELEGATED_FEEDBACK_SELECTOR =
-  '[data-feedback="tap"], .hud-chrome, .home-card-btn, .btn-primary, .btn-secondary, .jl-tool-slot';
+  '[data-feedback="tap"], .hud-chrome, .btn-primary, .btn-secondary, .jl-tool-slot';
 
 /** One delegated listener for tap feedback on common HUD controls. */
 export function bindDelegatedTapFeedback(root: ParentNode = document): () => void {

@@ -8,7 +8,7 @@ Do not delete or rewrite live chrome modules in W5-A; later bands consume this t
 | Tip SHA | `56e415db3662ecad0a881ec17beb95b749c634e3` |
 | Baseline `wc -l src/styles/*.css` (pre `map-hud.css` delete) | **5053** |
 | Baseline after orphan `map-hud.css` delete | **5052** |
-| Band | W5-A (inventory + theme harden only) |
+| Band | W5-B (entry chrome → Mantine + theme) |
 
 ## Classes
 
@@ -26,7 +26,6 @@ Do not delete or rewrite live chrome modules in W5-A; later bands consume this t
 | `ask-hud.css` | 138 | replace | W5-C / W5-D | Ask HUD chrome (panels, cues) in C; residual strip/height tokens in D. |
 | `base.css` | 150 | bridge | until E | Fonts, dock/safe-area/z-index CSS vars. Keep `env(safe-area-*)` until Cap AC proven. Theme now mirrors via `jetlagBrand` / `--jl-*`. |
 | `desktop-ops.css` | 211 | replace | W5-D | Desktop ops chrome layout. |
-| `home-entry.css` | 606 | replace | W5-B | Home / entry surfaces. |
 | `map-attribution.css` | 51 | allowlist | geometry | MapLibre attribution control + ask/matching placement clearance overrides. |
 | `map-bottom-chrome.css` | 418 | replace | W5-D | Primary: dock / island clearance tokens + chrome layout. **Allowlist carve-out:** left-stack geometry / safe-area insets (`--map-left-*`, tier bottoms). |
 | `map-chrome-controls.css` | 289 | replace | W5-C | Primary: floating zoom/style chrome. **Allowlist carve-out:** MapLibre canvas size, `touch-action`, basemap filters, hiding default attrib. |
@@ -38,10 +37,16 @@ Do not delete or rewrite live chrome modules in W5-A; later bands consume this t
 | `map-wizard-attention.css` | 25 | replace | W5-C | Wizard place-phase attention ring (chrome). |
 | `motion-utilities.css` | 63 | bridge | until E | Motion utility classes; bridge until motion system lands in theme/kit. |
 | `motion.css` | 673 | bridge | until E | Keyframes / motion contracts. |
-| `primitives.css` | 223 | replace | W5-B | Shared HUD primitives (`hud-chrome`, panels, scrim). |
+| `primitives.css` | 223 | replace (residual) | W5-B → W5-C | Entry-route consumers migrated with W5-B. Residual map HUD (`hud-chrome`, `hud-panel`, `hud-sheet`, `hud-scrim`, `btn-primary`/`btn-secondary`, `field-*`, etc.) kept; continue under W5-C map chrome. |
 | `route-transition.css` | 153 | bridge | until E | Route transition motion. |
 | `scrollbars.css` | 42 | bridge | until E | Scrollbar skin; keep until chrome kill. |
 | `tokens.css` | 62 | bridge | until E | Residual `@theme` color/radius tokens; prefer `jetlagBrand` for new UI. |
+
+## Deleted in W5-B
+
+| File | Lines | Class | Band | Notes |
+| --- | ---: | --- | --- | --- |
+| `home-entry.css` | 606 | delete | W5-B | Entry chrome → `entryStyles.ts` / layout shells. |
 
 ## Deleted in W5-A
 
