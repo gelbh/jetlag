@@ -24,8 +24,22 @@ export async function seedLocalSession(
   page: Page,
   options: LocalSessionSeedOptions = {},
 ) {
-  const { network: _network, ...seedOptions } = options;
-  const seed = toLocalStorageSeed("dublin-local-map", seedOptions);
+  const {
+    code,
+    myRole,
+    gameSize,
+    sessionId,
+    hidingPeriodMinutes,
+    memberRoles,
+  } = options;
+  const seed = toLocalStorageSeed("dublin-local-map", {
+    code,
+    myRole,
+    gameSize,
+    sessionId,
+    hidingPeriodMinutes,
+    memberRoles,
+  });
 
   await page.addInitScript(
     ({ sessionBlob, mapBlob, annotationsBlob, clearTimer }) => {
