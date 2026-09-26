@@ -13,9 +13,8 @@ import {
   assertInViewport,
   assertMinTapTargets,
   assertNoSeriousAxeViolations,
-  assertSurveyMapChromeAxe,
-  assertSurveyEntryAxe,
-  enablePlayerUxWorld,
+  assertMapChromeAxe,
+  assertEntryAxe,
   expectCreatePageMapPreviewLoaded,
 } from "../../fixtures";
 
@@ -205,15 +204,13 @@ test.describe("layout regression @ default mobile", () => {
   test("@smoke map chrome axe includes color-contrast", async ({
     page,
   }) => {
-    await enablePlayerUxWorld(page);
     await openMapWithLocalSession(page);
     await expect(page.locator(".map-chrome-hud")).toBeVisible();
     await assertNoHorizontalOverflow(page);
-    await assertSurveyMapChromeAxe(page);
+    await assertMapChromeAxe(page);
   });
 
   test("@smoke home axe includes color-contrast", async ({ page }) => {
-    await enablePlayerUxWorld(page);
     await prepareE2EPage(page);
     await page.goto("/");
     await expect(
@@ -221,7 +218,7 @@ test.describe("layout regression @ default mobile", () => {
     ).toBeVisible();
     await expect(page.locator("main.home-poster").first()).toBeVisible();
     await assertNoHorizontalOverflow(page);
-    await assertSurveyEntryAxe(page);
+    await assertEntryAxe(page);
   });
 
   test("@smoke leaderboard board sheet opens", async ({ page }) => {

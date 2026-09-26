@@ -8,7 +8,7 @@ import type { SessionRulesInput } from "@/domain/session/rules";
 import type { PendingQuestionRecord } from "@/domain/session/activity/sessionChat";
 import { selectPrimaryQuestionTimer } from "@/domain/questions";
 
-/** Plain-language phase for Survey field-book status strip (jargon stays secondary). */
+/** Plain-language phase for the map status strip (jargon stays secondary). */
 export function surveyPhaseLabel(
   timerHasStarted: boolean,
   sessionRules: SessionRulesInput,

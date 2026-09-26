@@ -100,7 +100,7 @@ export function StatusDockGallery() {
           Status dock scenarios
         </Title>
         <Text size="sm" style={{ color: "var(--color-field-ink-muted)" }}>
-          Mock fixtures for the Mantine top island. Resize the window under
+          Mock fixtures for the status top island. Resize the window under
           380px to exercise compact layout on non-framed rows.
         </Text>
       </Stack>
