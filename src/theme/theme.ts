@@ -87,6 +87,8 @@ export const jetlagTheme: MantineThemeOverride = createTheme({
   primaryShade: { light: 6, dark: 5 },
   colors: {
     flag: colorsTuple(jetlagBrand.flag),
+    /** Error / dead-session role (W3-E halt); prefer over unthemed Mantine red. */
+    halt: colorsTuple(jetlagBrand.halt),
   },
   white: jetlagBrand.fieldInk,
   black: jetlagBrand.canvas,
@@ -207,6 +209,7 @@ export const jetlagTheme: MantineThemeOverride = createTheme({
       defaultProps: {
         radius: jetlagBrand.controlRadius,
         withBorder: true,
+        color: "halt",
       },
       styles: {
         root: {
@@ -223,6 +226,28 @@ export const jetlagTheme: MantineThemeOverride = createTheme({
         },
         description: {
           color: jetlagBrand.fieldInkMuted,
+        },
+      },
+    },
+    Alert: {
+      defaultProps: {
+        radius: jetlagBrand.controlRadius,
+        color: "halt",
+        variant: "light",
+      },
+      styles: {
+        root: {
+          fontFamily: appleSystemSans,
+          backgroundColor: `oklch(from ${jetlagBrand.halt} l c h / 0.12)`,
+          border: `${jetlagBrand.hairline} solid oklch(from ${jetlagBrand.halt} l c h / 0.35)`,
+        },
+        title: {
+          fontWeight: 590,
+          letterSpacing: "-0.01em",
+          color: jetlagBrand.halt,
+        },
+        message: {
+          color: jetlagBrand.fieldInk,
         },
       },
     },
