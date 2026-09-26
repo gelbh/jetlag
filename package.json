@@ -48,6 +48,7 @@
     "cap:ios": "npm run cap:sync && npx cap open ios",
     "changeset": "changeset",
     "version": "changeset version && node scripts/normalize-changelog-sections.mjs && node scripts/sync-changelog-ts.mjs",
+    "release": "changeset publish",
     "release:sync": "node scripts/sync-changelog-ts.mjs && node scripts/release-check.mjs",
     "release:check": "node scripts/release-check.mjs",
     "prepare": "husky"
