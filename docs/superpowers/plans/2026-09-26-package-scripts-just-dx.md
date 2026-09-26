@@ -31,7 +31,7 @@
 | `worker/README.md` | `just preview-worker` / `just cf-typegen` |
 | `plugins/jetlag-live-activity/README.md` | `just cap-sync` |
 | `scripts/run-geometry-gates.mjs` | Header comment → Just / node path |
-| Geometry docs under `docs/superpowers/` that name `npm run test:geometry-gates` | Retarget to `just geometry-gates` |
+| Geometry docs under `docs/superpowers/` that name former script `test:geometry-gates` | Retarget to `just geometry-gates` |
 
 Projected footprint: ~8 files, well under jumbo thresholds. Single PR.
 
@@ -206,7 +206,7 @@ git commit -m "chore(dx): keep package.json scripts as CI contracts"
 - Modify: `worker/README.md`
 - Modify: `plugins/jetlag-live-activity/README.md`
 - Modify: `scripts/run-geometry-gates.mjs` (header comment only)
-- Modify: geometry docs that still say `npm run test:geometry-gates` (grep-driven list)
+- Modify: geometry docs that still name former script `test:geometry-gates` (grep-driven list)
 
 **Interfaces:**
 - Consumes: Just recipe names from Task 1
@@ -226,12 +226,12 @@ Expected: hits in docs / comments only (not `package.json`). Update each hit in 
 
 `worker/README.md`:
 
-- `npm run preview:worker` → `just preview-worker`
-- `npm run cf-typegen` → `just cf-typegen`
+- former script `preview:worker` → `just preview-worker`
+- former script `cf-typegen` → `just cf-typegen`
 
 `plugins/jetlag-live-activity/README.md`:
 
-- `npm run cap:sync` → `just cap-sync` (both occurrences)
+- former script `cap:sync` → `just cap-sync` (both occurrences)
 
 `scripts/run-geometry-gates.mjs` header:
 
@@ -250,7 +250,7 @@ Expected: hits in docs / comments only (not `package.json`). Update each hit in 
 CI and hooks use `npm run <script>` contracts in `package.json`. Day-to-day maintainer recipes live in the root `justfile` (`brew install just`, then `just --list`).
 ```
 
-Geometry docs: replace `npm run test:geometry-gates` with `just geometry-gates` wherever Step 1 found them under `docs/superpowers/`.
+Geometry docs: replace former script `test:geometry-gates` with `just geometry-gates` wherever Step 1 found them under `docs/superpowers/`.
 
 - [ ] **Step 3: Re-grep stale npm DX names**
 

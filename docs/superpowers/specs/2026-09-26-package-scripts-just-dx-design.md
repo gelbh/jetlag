@@ -1,9 +1,9 @@
 # Package scripts contract + Just DX (Approach C)
 
 **Date:** 2026-09-26  
-**Status:** design (review-only; not committed)  
+**Status:** design (accepted; implemented on branch chore/package-scripts-just-dx)  
 **Work kind:** personal (no Jira)  
-**Mode lock:** Approach **C** — human DX via Just; `package.json` scripts = contracts only  
+**Mode lock:** Approach **C**: human DX via Just; `package.json` scripts = contracts only  
 **DX tool lock:** **Just** (`justfile`), not mise (mise deferred; Node/`packageManager` already pin the toolchain)  
 **Prior art:** `c51b857e` package.json hygiene (orchestrators + prune); `#567` vitest/stylelint script retargets  
 **Scope upgrade:** earlier “delete ~8 thin aliases” → durable two-layer catalog (npm contracts + Just recipes)
@@ -41,7 +41,7 @@ Root `package.json` holds ~42 scripts that mix three jobs: npm lifecycle, CI/hus
 
 ## Design
 
-### Layer 1 — keep in `package.json` (contracts)
+### Layer 1: keep in `package.json` (contracts)
 
 Keep (names stable; CI/husky/Playwright/CodeRabbit may call them):
 
@@ -61,7 +61,7 @@ Keep (names stable; CI/husky/Playwright/CodeRabbit may call them):
 
 Rough target: ~22 scripts (down from 42). Exact set confirmed at implement time by grepping `.github/`, `.husky/`, `playwright.config.ts`, `.coderabbit.yaml`.
 
-### Layer 2 — move to `justfile` (DX)
+### Layer 2: move to `justfile` (DX)
 
 Remove from `package.json` and re-home as Just recipes (kebab-case recipe names; comments group sections):
 
@@ -93,7 +93,7 @@ Update call sites that named removed scripts:
 
 - `worker/README.md` → `just preview-worker` / `just cf-typegen`
 - `plugins/jetlag-live-activity/README.md` → `just cap-sync`
-- Geometry plans/specs that say `npm run test:geometry-gates` → `just geometry-gates` (or “`just geometry-gates` / `node scripts/run-geometry-gates.mjs`”)
+- Geometry plans/specs that still name former script `test:geometry-gates` → `just geometry-gates` (or “`just geometry-gates` / `node scripts/run-geometry-gates.mjs`”)
 - `scripts/run-geometry-gates.mjs` header comment
 - Root `README.md` only if it documents scripts today (currently does not); add a one-line “Install Just; `just --list` for DX” if a contributor section exists or is added minimally
 
@@ -114,7 +114,7 @@ Unchanged. `build` still → `scripts/run-build.mjs`; lighthouse / geometry-gate
 1. Grep: every `npm run …` in `.github/workflows`, `.husky`, `playwright.config.ts`, `.coderabbit.yaml` resolves to a remaining `package.json` script.
 2. `node -e` assert: removed DX names are absent from `package.json` scripts.
 3. `just --list` (local) lists the moved recipes; spot-check `just cf-typegen --dry-run` or equivalent recipe dry-run if available; otherwise `just --show cf-typegen` shows the wrangler line.
-4. Docs grep: no stale `npm run cap:sync` / `npm run preview:worker` / `npm run test:geometry-gates` in tracked README/spec paths touched by the PR (or updated in-PR).
+4. Docs grep: no stale maintainer invocations for removed DX names (e.g. former scripts `cap:sync`, `preview:worker`, `test:geometry-gates`) in tracked README/spec paths touched by the PR (or updated in-PR).
 5. No CI workflow gains a Just install step.
 
 ## Challenge lenses
