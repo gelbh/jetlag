@@ -98,9 +98,7 @@ export const mapToolSlotLabelStyle = {
   overflow: "hidden",
   textOverflow: "ellipsis",
   fontFamily: "var(--mantine-font-family)",
-  fontSize: "0.625rem",
   fontWeight: 510,
-  letterSpacing: "-0.01em",
   lineHeight: 1.15,
   textTransform: "none" as const,
   whiteSpace: "nowrap" as const,
@@ -139,6 +137,18 @@ export function mapToolSlotStyles(
           : "var(--color-field-ink-muted)",
       opacity: history && !pressed ? 0.88 : 1,
       WebkitTapHighlightColor: "transparent",
+      "& [data-ios-tool-label]": {
+        fontSize: "0.625rem",
+        letterSpacing: "-0.01em",
+      },
+      "@media (max-width: 28rem)": {
+        minWidth: "2.125rem",
+        paddingInline: "0.0625rem",
+        "& [data-ios-tool-label]": {
+          fontSize: "0.5rem",
+          letterSpacing: "0.04em",
+        },
+      },
       "&:hover:not(:disabled)": {
         backgroundColor: pressed
           ? "oklch(from var(--color-highlight) l c h / 0.28)"
