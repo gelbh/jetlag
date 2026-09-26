@@ -475,60 +475,62 @@ export function useMeasuringTool({
     ) : null,
     modeBody: mapPlacementActive ? null : (
       <MeasuringHudBody
-        distanceUnit={distanceUnit}
-        optionChosen={draft.measuringOptionChosen}
-        usedMeasuringFromKinds={draft.usedMeasuringFromKindsSet}
-        catalogOptions={draft.measuringCatalog}
-        anchorLat={draft.measuringSeekerPoint?.[0] ?? null}
-        anchorLng={draft.measuringSeekerPoint?.[1] ?? null}
-        measureFrom={measureFromKey}
-        subject={draft.measuringSubject}
-        targetMode={draft.measuringTargetMode}
-        usesAllPlacesInArea={draft.usesAllPlacesInArea}
-        hasSeekerPoint={draft.measuringSeekerPoint !== null}
-        hasTargetPoint={hasMeasuringTarget}
-        anchorAltitudeMeters={draft.measuringAnchorElevationMeters}
-        seekerPlaceName={draft.measuringSeekerPlaceName}
-        targetPlaceName={draft.measuringTargetPlaceName}
-        distanceMeters={draft.measuringDistanceMeters}
-        loading={draft.measuringLoading}
-        gpsLoading={gpsLoading}
-        searchQuery={draft.measuringSearchQuery}
-        searchResults={draft.measuringSearchResults}
-        searchLoading={draft.measuringSearchLoading}
-        searchRole={draft.measuringSearchRole}
-        answer={draft.measuringAnswer}
-        seaLevelEdgeCase={draft.measuringSeaLevelEdgeCase}
-        error={draft.measuringError ?? gpsError ?? mapError}
-        onMeasureFromChange={loaders.handleMeasureFromChange}
-        onTargetModeChange={loaders.handleTargetModeChange}
-        onSearchQueryChange={draft.setMeasuringSearchQuery}
-        onSearchSubmit={(role) => void interactions.handleSearch(role)}
-        onSearchResultSelect={interactions.applySearchResult}
-        onUseGps={() => void interactions.handleGps()}
-        onFindCoastline={() => {
-          if (draft.measuringSeekerPoint) {
-            void loaders.loadMeasuringCoastlineAt(draft.measuringSeekerPoint);
-          }
+        model={{
+          distanceUnit,
+          optionChosen: draft.measuringOptionChosen,
+          usedMeasuringFromKinds: draft.usedMeasuringFromKindsSet,
+          catalogOptions: draft.measuringCatalog,
+          anchorLat: draft.measuringSeekerPoint?.[0] ?? null,
+          anchorLng: draft.measuringSeekerPoint?.[1] ?? null,
+          measureFrom: measureFromKey,
+          subject: draft.measuringSubject,
+          targetMode: draft.measuringTargetMode,
+          usesAllPlacesInArea: draft.usesAllPlacesInArea,
+          hasSeekerPoint: draft.measuringSeekerPoint !== null,
+          hasTargetPoint: hasMeasuringTarget,
+          anchorAltitudeMeters: draft.measuringAnchorElevationMeters,
+          seekerPlaceName: draft.measuringSeekerPlaceName,
+          targetPlaceName: draft.measuringTargetPlaceName,
+          distanceMeters: draft.measuringDistanceMeters,
+          loading: draft.measuringLoading,
+          gpsLoading,
+          searchQuery: draft.measuringSearchQuery,
+          searchResults: draft.measuringSearchResults,
+          searchLoading: draft.measuringSearchLoading,
+          searchRole: draft.measuringSearchRole,
+          answer: draft.measuringAnswer,
+          seaLevelEdgeCase: draft.measuringSeaLevelEdgeCase,
+          error: draft.measuringError ?? gpsError ?? mapError,
+          onMeasureFromChange: loaders.handleMeasureFromChange,
+          onTargetModeChange: loaders.handleTargetModeChange,
+          onSearchQueryChange: draft.setMeasuringSearchQuery,
+          onSearchSubmit: (role) => void interactions.handleSearch(role),
+          onSearchResultSelect: interactions.applySearchResult,
+          onUseGps: () => void interactions.handleGps(),
+          onFindCoastline: () => {
+            if (draft.measuringSeekerPoint) {
+              void loaders.loadMeasuringCoastlineAt(draft.measuringSeekerPoint);
+            }
+          },
+          onRetrySeaLevel: () => {
+            if (draft.measuringSeekerPoint) {
+              void loaders.loadSeaLevelContextAt(draft.measuringSeekerPoint);
+            }
+          },
+          onFindLinearFeature: () => {
+            if (draft.measuringSeekerPoint) {
+              void loaders.loadMeasuringLinearAt(draft.measuringSeekerPoint);
+            }
+          },
+          onFindNearest: () => void interactions.loadNearest(),
+          onAnswerChange: (answer) => {
+            startTransition(() => draft.setMeasuringAnswer(answer));
+          },
+          awaitHiderAnswer,
+          costLabel: questionCost.label,
+          isSubmitting: session.isBusy,
+          toolLabel: "Measuring",
         }}
-        onRetrySeaLevel={() => {
-          if (draft.measuringSeekerPoint) {
-            void loaders.loadSeaLevelContextAt(draft.measuringSeekerPoint);
-          }
-        }}
-        onFindLinearFeature={() => {
-          if (draft.measuringSeekerPoint) {
-            void loaders.loadMeasuringLinearAt(draft.measuringSeekerPoint);
-          }
-        }}
-        onFindNearest={() => void interactions.loadNearest()}
-        onAnswerChange={(answer) => {
-          startTransition(() => draft.setMeasuringAnswer(answer));
-        }}
-        awaitHiderAnswer={awaitHiderAnswer}
-        costLabel={questionCost.label}
-        isSubmitting={session.isBusy}
-        toolLabel="Measuring"
       />
     ),
     sheets: (

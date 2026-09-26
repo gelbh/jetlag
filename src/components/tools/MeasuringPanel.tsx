@@ -39,7 +39,8 @@ import {
 import { useToolWizard } from "../../hooks/wizard/useToolWizard";
 import { QuestionTruthReferenceHint } from "./shared/QuestionTruthReferenceHint";
 
-interface MeasuringPanelProps {
+/** Flat measuring wizard fields bag for MeasuringPanel (W4-B peel). */
+export type MeasuringPanelModel = {
   distanceUnit: DistanceUnit;
   optionChosen: boolean;
   measureFrom: MeasuringFromKind;
@@ -85,51 +86,56 @@ interface MeasuringPanelProps {
   costLabel?: string;
   isSubmitting?: boolean;
   wizardStepRef?: RefObject<string>;
-}
+};
 
-export function MeasuringPanel({
-  distanceUnit,
-  optionChosen,
-  measureFrom,
-  usesAllPlacesInArea,
-  usedMeasuringFromKinds,
-  catalogOptions,
-  anchorLat = null,
-  anchorLng = null,
-  subject,
-  targetMode,
-  anchorAltitudeMeters,
-  hasSeekerPoint,
-  hasTargetPoint,
-  seekerPlaceName,
-  targetPlaceName,
-  distanceMeters,
-  loading,
-  gpsLoading,
-  searchQuery,
-  searchResults,
-  searchLoading,
-  searchRole,
-  answer,
-  seaLevelEdgeCase = null,
-  error,
-  onMeasureFromChange,
-  onTargetModeChange,
-  onSearchQueryChange,
-  onSearchSubmit,
-  onSearchResultSelect,
-  onUseGps,
-  onFindCoastline,
-  onRetrySeaLevel,
-  onFindLinearFeature,
-  onFindNearest,
-  onAnswerChange,
-  onCommit,
-  awaitHiderAnswer = false,
-  costLabel = "D3P1",
-  isSubmitting = false,
-  wizardStepRef,
-}: MeasuringPanelProps) {
+export type MeasuringPanelProps = {
+  model: MeasuringPanelModel;
+};
+
+export function MeasuringPanel({ model }: MeasuringPanelProps) {
+  const {
+    distanceUnit,
+    optionChosen,
+    measureFrom,
+    usesAllPlacesInArea,
+    usedMeasuringFromKinds,
+    catalogOptions,
+    anchorLat = null,
+    anchorLng = null,
+    subject,
+    targetMode,
+    anchorAltitudeMeters,
+    hasSeekerPoint,
+    hasTargetPoint,
+    seekerPlaceName,
+    targetPlaceName,
+    distanceMeters,
+    loading,
+    gpsLoading,
+    searchQuery,
+    searchResults,
+    searchLoading,
+    searchRole,
+    answer,
+    seaLevelEdgeCase = null,
+    error,
+    onMeasureFromChange,
+    onTargetModeChange,
+    onSearchQueryChange,
+    onSearchSubmit,
+    onSearchResultSelect,
+    onUseGps,
+    onFindCoastline,
+    onRetrySeaLevel,
+    onFindLinearFeature,
+    onFindNearest,
+    onAnswerChange,
+    onCommit,
+    awaitHiderAnswer = false,
+    costLabel = "D3P1",
+    isSubmitting = false,
+    wizardStepRef,
+  } = model;
   const {
     phaseId,
     stepId,

@@ -76,7 +76,8 @@ const MEASURING_QUESTION_INTRO = {
     "Pick what to measure below. Closer / further is relative to that place from your anchor.",
 };
 
-export type MeasuringHudBodyProps = {
+/** Flat measuring Ask HUD fields bag for MeasuringHudBody (W4-B peel). */
+export type MeasuringHudBodyModel = {
   distanceUnit: DistanceUnit;
   optionChosen: boolean;
   measureFrom: MeasuringFromKind;
@@ -122,48 +123,53 @@ export type MeasuringHudBodyProps = {
   toolLabel?: string;
 };
 
-export function MeasuringHudBody({
-  distanceUnit,
-  optionChosen,
-  measureFrom,
-  usesAllPlacesInArea,
-  usedMeasuringFromKinds,
-  catalogOptions,
-  anchorLat = null,
-  anchorLng = null,
-  subject,
-  targetMode,
-  anchorAltitudeMeters,
-  hasSeekerPoint,
-  hasTargetPoint,
-  seekerPlaceName,
-  targetPlaceName,
-  distanceMeters,
-  loading,
-  gpsLoading,
-  searchQuery,
-  searchResults,
-  searchLoading,
-  searchRole,
-  answer,
-  seaLevelEdgeCase = null,
-  error = null,
-  onMeasureFromChange,
-  onTargetModeChange,
-  onSearchQueryChange,
-  onSearchSubmit,
-  onSearchResultSelect,
-  onUseGps,
-  onFindCoastline,
-  onRetrySeaLevel,
-  onFindLinearFeature,
-  onFindNearest,
-  onAnswerChange,
-  awaitHiderAnswer = false,
-  costLabel = "D3P1",
-  isSubmitting = false,
-  toolLabel = "Measuring",
-}: MeasuringHudBodyProps) {
+export type MeasuringHudBodyProps = {
+  model: MeasuringHudBodyModel;
+};
+
+export function MeasuringHudBody({ model }: MeasuringHudBodyProps) {
+  const {
+    distanceUnit,
+    optionChosen,
+    measureFrom,
+    usesAllPlacesInArea,
+    usedMeasuringFromKinds,
+    catalogOptions,
+    anchorLat = null,
+    anchorLng = null,
+    subject,
+    targetMode,
+    anchorAltitudeMeters,
+    hasSeekerPoint,
+    hasTargetPoint,
+    seekerPlaceName,
+    targetPlaceName,
+    distanceMeters,
+    loading,
+    gpsLoading,
+    searchQuery,
+    searchResults,
+    searchLoading,
+    searchRole,
+    answer,
+    seaLevelEdgeCase = null,
+    error = null,
+    onMeasureFromChange,
+    onTargetModeChange,
+    onSearchQueryChange,
+    onSearchSubmit,
+    onSearchResultSelect,
+    onUseGps,
+    onFindCoastline,
+    onRetrySeaLevel,
+    onFindLinearFeature,
+    onFindNearest,
+    onAnswerChange,
+    awaitHiderAnswer = false,
+    costLabel = "D3P1",
+    isSubmitting = false,
+    toolLabel = "Measuring",
+  } = model;
   const [groupFilter, setGroupFilter] = useState<GroupFilter>("all");
 
   const locationCategory: MeasuringLocationCategory | undefined =

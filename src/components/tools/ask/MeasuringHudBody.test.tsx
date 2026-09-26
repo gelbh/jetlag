@@ -1,5 +1,7 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
+import { MantineProvider } from "@mantine/core";
+import type { ReactElement } from "react";
 import type { DistanceUnit } from "@/domain/map/distance";
 import {
   BASE_MEASURING_CATALOG,
@@ -9,15 +11,41 @@ import {
   type MeasuringSubject,
   type MeasuringTargetMode,
 } from "@/domain/questions";
+import { jetlagTheme } from "@/theme/theme";
 import { AskHudHost } from "./AskHudHost";
-import { MeasuringHudBody } from "./MeasuringHudBody";
+import {
+  MeasuringHudBody,
+  type MeasuringHudBodyModel,
+  type MeasuringHudBodyProps,
+} from "./MeasuringHudBody";
 import {
   activeModeCue,
   canCommit,
   type AskHudReadiness,
 } from "@/domain/ask/askHudModes";
 
-const baseProps = {
+function renderHud(ui: ReactElement) {
+  return render(
+    <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
+      {ui}
+    </MantineProvider>,
+  );
+}
+
+beforeEach(() => {
+  vi.stubGlobal("matchMedia", (query: string) => ({
+    matches: typeof query === "string" && query.includes("min-width: 380"),
+    media: query,
+    onchange: null,
+    addListener() {},
+    removeListener() {},
+    addEventListener() {},
+    removeEventListener() {},
+    dispatchEvent: () => false,
+  }));
+});
+
+const baseModel: MeasuringHudBodyModel = {
   distanceUnit: "imperial" as DistanceUnit,
   optionChosen: false,
   measureFrom: DEFAULT_MEASURING_FROM_KIND as MeasuringFromKind,
@@ -53,9 +81,24 @@ const baseProps = {
   awaitHiderAnswer: true,
 };
 
+describe("MeasuringHudBody public props (AC #1)", () => {
+  it("accepts a single model options object", () => {
+    const props: MeasuringHudBodyProps = {
+      model: baseModel,
+    };
+    const keys = Object.keys(props) as Array<keyof MeasuringHudBodyProps>;
+    expect(keys).toEqual(["model"]);
+    expect(keys.length).toBeLessThanOrEqual(10);
+
+    renderHud(<MeasuringHudBody {...props} />);
+
+    expect(screen.getByTestId("measuring-hud-body")).toBeInTheDocument();
+  });
+});
+
 describe("MeasuringHudBody", () => {
   it("shows catalog first with question text and cost in the body", () => {
-    render(
+    renderHud(
       <AskHudHost
         cue="PICK A SOURCE"
         toolLabel="Measuring"
@@ -63,7 +106,11 @@ describe("MeasuringHudBody", () => {
         canCommit={false}
         commitLabel="SEND"
         onCommit={() => {}}
-        modeBody={<MeasuringHudBody {...baseProps} costLabel="D3P1" />}
+        modeBody={
+          <MeasuringHudBody
+            model={{ ...baseModel, costLabel: "D3P1" }}
+          />
+        }
         showCue={false}
         showCostChip={false}
         showCommitStrip={false}
@@ -84,11 +131,13 @@ describe("MeasuringHudBody", () => {
   });
 
   it("shows anchor after category before target", () => {
-    render(
+    renderHud(
       <MeasuringHudBody
-        {...baseProps}
-        optionChosen
-        hasSeekerPoint={false}
+        model={{
+          ...baseModel,
+          optionChosen: true,
+          hasSeekerPoint: false,
+        }}
       />,
     );
 
