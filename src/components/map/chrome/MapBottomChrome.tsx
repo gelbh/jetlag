@@ -1,7 +1,6 @@
 import { forwardRef, type CSSProperties, type ReactNode } from "react";
 import { Box, Paper } from "@mantine/core";
 import { cn } from "@/lib/cn";
-import { Island } from "@/components/ui/island";
 import { iosMapChromeSurfaceStyles } from "@/components/ui/apple/iosEntryChrome";
 import { OverlayHost } from "./OverlayHost";
 import { MapSideDockStack } from "./MapSideDockStack";
@@ -40,11 +39,9 @@ const ISLAND_ARIA: Record<Exclude<MapBottomChromeIslandName, "hunt">, string> =
 function SideIsland({
   name,
   children,
-  mantine,
 }: {
   name: Exclude<MapBottomChromeIslandName, "hunt">;
   children: ReactNode;
-  mantine: boolean;
 }) {
   const className = cn(
     "jl-map-island",
@@ -56,37 +53,23 @@ function SideIsland({
     "[&_.jl-tool-dock-group-secondary]:grow-0 [&_.jl-tool-dock-group-secondary]:shrink-0",
     "[&_.jl-tool-slot]:w-11 [&_.jl-tool-slot]:max-w-11 [&_.jl-tool-slot]:flex-none",
   );
-  if (mantine) {
-    return (
-      <Paper
-        data-island={name}
-        role="group"
-        aria-label={ISLAND_ARIA[name]}
-        radius={0}
-        p={4}
-        className={className}
-        styles={{
-          root: {
-            ...iosMapChromeSurfaceStyles,
-            /* Corner radii come from map-bottom-chrome.css (anchor-aware). */
-          },
-        }}
-      >
-        {children}
-      </Paper>
-    );
-  }
   return (
-    <Island
+    <Paper
       data-island={name}
       role="group"
       aria-label={ISLAND_ARIA[name]}
-      size="default"
-      variant="default"
+      radius={0}
+      p={4}
       className={className}
+      styles={{
+        root: {
+          ...iosMapChromeSurfaceStyles,
+          /* Corner radii come from map-bottom-chrome.css (anchor-aware). */
+        },
+      }}
     >
       {children}
-    </Island>
+    </Paper>
   );
 }
 
@@ -158,12 +141,12 @@ export const MapBottomChrome = forwardRef<HTMLDivElement, MapBottomChromeProps>(
           const sideIslands = (
             <>
               {session ? (
-                <SideIsland name="session" mantine>
+                <SideIsland name="session">
                   {session}
                 </SideIsland>
               ) : null}
               {mapControls ? (
-                <SideIsland name="map-controls" mantine>
+                <SideIsland name="map-controls">
                   {mapControls}
                 </SideIsland>
               ) : null}

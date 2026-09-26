@@ -105,7 +105,7 @@ export const iosMapToolSlotLabelStyle = {
   whiteSpace: "nowrap" as const,
 };
 
-/** Hunt / session dock chip under jl.playerUi.mantine (column icon+label). */
+/** Hunt / session dock chip (column icon+label). */
 export function iosMapToolSlotStyles(
   pressed: boolean,
   tone: IosMapToolSlotTone = "tool",

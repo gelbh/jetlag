@@ -281,48 +281,21 @@ export function MeasuringHudBody({
               <div
                 role="tablist"
                 aria-label="Filter measure categories"
-                className={
-                  true
-                    ? "jl-scroll"
-                    : "jl-scroll flex gap-1.5 pb-0.5"
-                }
-                style={true ? iosFilterChipTrackStyle : undefined}
-                {...(true
-                  ? { "data-player-ux-world": "mantine" }
-                  : {})}
+                className="jl-scroll"
+                style={iosFilterChipTrackStyle}
+                data-player-ux-world="mantine"
               >
                 {filterOptions.map((option) => {
                   const selected = effectiveFilter === option.value;
                   const Icon = GROUP_CHIP_ICON[option.value];
-                  if (true) {
-                    return (
-                      <UnstyledButton
-                        key={option.value}
-                        type="button"
-                        role="tab"
-                        aria-selected={selected}
-                        onClick={() => setGroupFilter(option.value)}
-                        styles={iosFilterChipStyles(selected)}
-                      >
-                        <Icon
-                          size={14}
-                          weight={selected ? "fill" : "regular"}
-                          aria-hidden
-                        />
-                        {option.label}
-                      </UnstyledButton>
-                    );
-                  }
                   return (
-                    <button
+                    <UnstyledButton
                       key={option.value}
                       type="button"
                       role="tab"
                       aria-selected={selected}
                       onClick={() => setGroupFilter(option.value)}
-                      className={`jl-segment-btn shrink-0 inline-flex items-center gap-1.5 ${
-                        selected ? "jl-segment-btn-selected" : ""
-                      }`}
+                      styles={iosFilterChipStyles(selected)}
                     >
                       <Icon
                         size={14}
@@ -330,7 +303,7 @@ export function MeasuringHudBody({
                         aria-hidden
                       />
                       {option.label}
-                    </button>
+                    </UnstyledButton>
                   );
                 })}
               </div>
