@@ -14,7 +14,6 @@ import type {
   PendingQuestionRecord,
   SessionMessageRecord,
 } from "@/domain/session/activity/sessionChat";
-import { setPlayerUiMantineEnabled } from "@/hooks/feature/usePlayerUiMantine";
 
 const SEED_MESSAGES = buildMockChatMessages(MOCK_SESSION_FEED_ID);
 const SEED_PENDING = buildMockPendingQuestions(MOCK_SESSION_FEED_ID);
@@ -54,7 +53,6 @@ export function ChatLogGallery() {
   );
 
   useEffect(() => {
-    setPlayerUiMantineEnabled(true);
     setDevMockSessionFeedEnabled(true);
   }, []);
 

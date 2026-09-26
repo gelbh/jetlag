@@ -11,7 +11,6 @@ import { ActiveThermometerWalkLayer } from "../../components/map/layers/ActiveTh
 import { PendingQuestionLayer } from "../../components/map/layers/PendingQuestionLayer";
 import { MapDrawStrokeCapture } from "../../components/map/helpers/MapDrawStrokeCapture";
 import { isAskHudOwnedTool } from "../../domain/ask/askHudModes";
-import { usePlayerUiMantine } from "../../hooks/feature/usePlayerUiMantine";
 import { AdminBoundariesLayer, TransitLayer } from "./lazyImports";
 import type { MapScreenController } from "./useMapScreenController";
 
@@ -123,11 +122,8 @@ export function MapScreenMapLayers({
   activeTool,
   drawTool,
 }: MapScreenMapLayersProps) {
-  const mantinePlayerUi = usePlayerUiMantine();
   const hideMapControls =
-    mantinePlayerUi &&
-    activeTool !== "none" &&
-    isAskHudOwnedTool(activeTool);
+    activeTool !== "none" && isAskHudOwnedTool(activeTool);
 
   return (
     <div ref={mapShellRef} className="absolute inset-0">

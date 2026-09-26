@@ -14,13 +14,6 @@ import {
   type AskHudReadiness,
 } from "@/domain/ask/askHudModes";
 
-const { mockUsePlayerUiMantine } = vi.hoisted(() => ({
-  mockUsePlayerUiMantine: vi.fn(() => false),
-}));
-
-vi.mock("@/hooks/feature/usePlayerUiMantine", () => ({
-  usePlayerUiMantine: () => mockUsePlayerUiMantine(),
-}));
 const baseBodyProps = {
   radiusMeters: null as number | null,
   chooseCustom: false,
@@ -42,7 +35,6 @@ const baseBodyProps = {
 };
 
 beforeEach(() => {
-  mockUsePlayerUiMantine.mockReturnValue(false);
   vi.stubGlobal("matchMedia", (query: string) => ({
     matches: false,
     media: query,
@@ -57,7 +49,6 @@ beforeEach(() => {
 
 describe("RadarHudBody", () => {
   it("types custom distance inside Choose with unit and digits only", () => {
-    mockUsePlayerUiMantine.mockReturnValue(true);
     const onChooseSelect = vi.fn();
     const onCustomRadiusChange = vi.fn();
     render(
@@ -80,7 +71,6 @@ describe("RadarHudBody", () => {
   });
 
   it("keeps catalog open while typing custom distance until commit", () => {
-    mockUsePlayerUiMantine.mockReturnValue(true);
     const onCustomDistanceCommit = vi.fn();
     const onCustomRadiusChange = vi.fn();
     const onChooseSelect = vi.fn();
@@ -114,7 +104,11 @@ describe("RadarHudBody", () => {
   });
 
   it("renders chip island chrome without PhaseRail or CONTINUE wizard nav", () => {
-    render(<RadarHudBody {...baseBodyProps} />);
+    render(
+      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+        <RadarHudBody {...baseBodyProps} />
+      </MantineProvider>,
+    );
 
     expect(screen.getByTestId("radar-hud-body")).toBeInTheDocument();
     expect(screen.queryByRole("list", { name: "Wizard phases" })).toBeNull();
@@ -144,37 +138,38 @@ describe("RadarHudBody", () => {
 
     const onCommit = vi.fn();
     render(
-      <AskHudHost
-        cue={cue}
-        toolLabel="Radar"
-        costLabel="D2P1"
-        canCommit={canCommit(readiness)}
-        commitLabel={primedCommitLabel({
-          kind: "send",
-          costLabel: "D2P1",
-          primed: false,
-          cue,
-        })}
-        onCommit={onCommit}
-        showCostChip={false}
-        showCue={false}
-        showCommitStrip={false}
-        modeBody={
-          <RadarHudBody
-            {...baseBodyProps}
-            hasCenter
-            awaitingPlacement={false}
-            radiusMeters={1609}
-          />
-        }
-      />,
+      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+        <AskHudHost
+          cue={cue}
+          toolLabel="Radar"
+          costLabel="D2P1"
+          canCommit={canCommit(readiness)}
+          commitLabel={primedCommitLabel({
+            kind: "send",
+            costLabel: "D2P1",
+            primed: false,
+            cue,
+          })}
+          onCommit={onCommit}
+          showCostChip={false}
+          showCue={false}
+          showCommitStrip={false}
+          modeBody={
+            <RadarHudBody
+              {...baseBodyProps}
+              hasCenter
+              awaitingPlacement={false}
+              radiusMeters={1609}
+            />
+          }
+        />
+      </MantineProvider>,
     );
 
     expect(screen.queryByTestId("ask-mode-cue-ticker")).toBeNull();
     expect(screen.queryByTestId("ask-cost-chip")).toBeNull();
     expect(screen.queryByTestId("ask-commit-strip")).toBeNull();
     expect(screen.getByTestId("radar-hud-body")).toBeInTheDocument();
-    expect(screen.getByText("Distance")).toBeInTheDocument();
     expect(onCommit).not.toHaveBeenCalled();
   });
 
@@ -198,30 +193,32 @@ describe("RadarHudBody", () => {
 
     const onCommit = vi.fn();
     render(
-      <AskHudHost
-        cue={cue}
-        toolLabel="Radar"
-        costLabel="D2P1"
-        canCommit
-        commitLabel={primedCommitLabel({
-          kind: "send",
-          costLabel: "D2P1",
-          primed: true,
-          cue,
-        })}
-        onCommit={onCommit}
-        showCostChip={false}
-        showCue={false}
-        showCommitStrip={false}
-        modeBody={
-          <RadarHudBody
-            {...baseBodyProps}
-            hasCenter
-            awaitingPlacement={false}
-            radiusMeters={1609}
-          />
-        }
-      />,
+      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+        <AskHudHost
+          cue={cue}
+          toolLabel="Radar"
+          costLabel="D2P1"
+          canCommit
+          commitLabel={primedCommitLabel({
+            kind: "send",
+            costLabel: "D2P1",
+            primed: true,
+            cue,
+          })}
+          onCommit={onCommit}
+          showCostChip={false}
+          showCue={false}
+          showCommitStrip={false}
+          modeBody={
+            <RadarHudBody
+              {...baseBodyProps}
+              hasCenter
+              awaitingPlacement={false}
+              radiusMeters={1609}
+            />
+          }
+        />
+      </MantineProvider>,
     );
 
     expect(cue).toBe("READY TO SEND");

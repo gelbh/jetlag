@@ -43,7 +43,6 @@ import {
   type MatchingCategoryGroupId,
   type MatchingCategoryId,
 } from "@/domain/questions";
-import { usePlayerUiMantine } from "@/hooks/feature/usePlayerUiMantine";
 import {
   matchingFeatureCountLabel,
   matchingNullAnswerMessage,
@@ -132,7 +131,6 @@ export function MatchingHudBody({
   costLabel = null,
   toolLabel = "Matching",
 }: MatchingHudBodyProps) {
-  const mantinePlayerUi = usePlayerUiMantine();
   const [groupFilter, setGroupFilter] = useState<GroupFilter>("all");
 
   const selectableCategories = catalogCategories.filter(
@@ -247,7 +245,7 @@ export function MatchingHudBody({
         icon={<HudMatchingIcon width={22} height={22} />}
         prompt={question.prompt}
         ruleSummary={question.ruleSummary}
-        mantine={mantinePlayerUi}
+        mantine={true}
       />
 
       {chord === "category" ? (
@@ -263,19 +261,19 @@ export function MatchingHudBody({
                 role="tablist"
                 aria-label="Filter match categories"
                 className={
-                  mantinePlayerUi
+                  true
                     ? "jl-scroll"
                     : "jl-scroll flex gap-1.5 pb-0.5"
                 }
-                style={mantinePlayerUi ? iosFilterChipTrackStyle : undefined}
-                {...(mantinePlayerUi
+                style={true ? iosFilterChipTrackStyle : undefined}
+                {...(true
                   ? { "data-player-ux-world": "mantine" }
                   : {})}
               >
                 {filterOptions.map((option) => {
                   const selected = effectiveFilter === option.value;
                   const Icon = GROUP_CHIP_ICON[option.value];
-                  if (mantinePlayerUi) {
+                  if (true) {
                     return (
                       <UnstyledButton
                         key={option.value}
@@ -336,12 +334,12 @@ export function MatchingHudBody({
       {chord === "resolve" ? (
         <div
           className={
-            mantinePlayerUi
+            true
               ? "pointer-events-auto space-y-3 p-3"
               : "pointer-events-auto ask-hud-panel space-y-2 p-3"
           }
-          style={mantinePlayerUi ? iosAskInsetSurfaceStyle : undefined}
-          {...(mantinePlayerUi ? { "data-player-ux-world": "mantine" } : {})}
+          style={true ? iosAskInsetSurfaceStyle : undefined}
+          {...(true ? { "data-player-ux-world": "mantine" } : {})}
         >
           {category ? (
             <div className="flex items-center gap-2.5">
@@ -389,7 +387,7 @@ export function MatchingHudBody({
           ) : nearestFeatureSummary ? (
             <div
               style={
-                mantinePlayerUi
+                true
                   ? {
                       borderRadius: 12,
                       padding: "0.65rem 0.75rem",
@@ -424,12 +422,12 @@ export function MatchingHudBody({
       {chord === "answer" ? (
         <div
           className={
-            mantinePlayerUi
+            true
               ? "pointer-events-auto space-y-3 p-3"
               : "pointer-events-auto ask-hud-panel space-y-2 p-3"
           }
-          style={mantinePlayerUi ? iosAskInsetSurfaceStyle : undefined}
-          {...(mantinePlayerUi ? { "data-player-ux-world": "mantine" } : {})}
+          style={true ? iosAskInsetSurfaceStyle : undefined}
+          {...(true ? { "data-player-ux-world": "mantine" } : {})}
         >
           {category ? (
             <div className="flex items-center gap-2.5">
@@ -465,7 +463,7 @@ export function MatchingHudBody({
           {nearestFeatureSummary ? (
             <div
               style={
-                mantinePlayerUi
+                true
                   ? {
                       borderRadius: 12,
                       padding: "0.65rem 0.75rem",

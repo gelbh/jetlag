@@ -1,6 +1,5 @@
 import { Button } from "@mantine/core";
 import { iosGrayStyles } from "@/components/ui/apple/iosEntryChrome";
-import { usePlayerUiMantine } from "@/hooks/feature/usePlayerUiMantine";
 
 interface DrawPanelProps {
   pointCount: number;
@@ -15,7 +14,6 @@ export function DrawPanel({
   busy,
   onClear,
 }: DrawPanelProps) {
-  const mantinePlayerUi = usePlayerUiMantine();
   const clearDisabled = pointCount === 0 || busy;
 
   return (
@@ -32,25 +30,14 @@ export function DrawPanel({
               ? `Last stroke: ${pointCount} points`
               : "Ready"}
       </p>
-      {mantinePlayerUi ? (
-        <Button
-          fullWidth
-          disabled={clearDisabled}
-          onClick={onClear}
-          styles={iosGrayStyles}
-        >
-          Clear draft
-        </Button>
-      ) : (
-        <button
-          type="button"
-          onClick={onClear}
-          disabled={clearDisabled}
-          className="btn-secondary min-h-11 w-full"
-        >
-          Clear draft
-        </button>
-      )}
+      <Button
+        fullWidth
+        disabled={clearDisabled}
+        onClick={onClear}
+        styles={iosGrayStyles}
+      >
+        Clear draft
+      </Button>
     </div>
   );
 }

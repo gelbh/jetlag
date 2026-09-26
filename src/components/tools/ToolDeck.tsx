@@ -1,28 +1,26 @@
 import { forwardRef, type ReactNode } from "react";
 import { Box, Paper } from "@mantine/core";
 import { cn } from "@/lib/cn";
-import { Island } from "@/components/ui/island";
 import {
   iosMapHuntAskFirstQuestionStripStyles,
   iosMapHuntAskFirstSurfaceStyles,
   iosMapHuntQuestionStripStyles,
   iosMapHuntSurfaceStyles,
 } from "@/components/ui/apple/iosEntryChrome";
-import { usePlayerUiMantine } from "@/hooks/feature/usePlayerUiMantine";
 
 /** Seeker multi-tool Hunt (`tools`) vs hider 1–2 chip content-sized island (`sparse`). */
 export type ToolDeckDensity = "tools" | "sparse";
 
 export interface ToolDeckProps {
   density?: ToolDeckDensity;
-  /** Flag-on ask-owned tool: hunt re-roles under Ask instrument cluster. */
+  /** Ask-owned tool: hunt re-roles under Ask instrument cluster. */
   askFirst?: boolean;
   className?: string;
   children?: ReactNode;
 }
 
 /**
- * Full-bleed hunt tool deck — Island skin + equal-flex slots (≥44px hit areas).
+ * Full-bleed hunt tool deck — equal-flex slots (≥44px hit areas).
  * Spans OverlayHost content width; side session stack overlays trailing edge (choice a).
  */
 export function ToolDeck({
@@ -31,62 +29,43 @@ export function ToolDeck({
   className,
   children,
 }: ToolDeckProps) {
-  const mantinePlayerUi = usePlayerUiMantine();
   const sparse = density === "sparse";
-  const askFirstActive = mantinePlayerUi && askFirst;
+  const askFirstActive = askFirst;
   const deckClassName = cn(
     "jl-map-island jl-map-island--hunt relative min-w-0 justify-center overflow-visible p-1",
-    !mantinePlayerUi && "border-t-[3px] border-t-flag",
     sparse
       ? "jl-map-island--hunt-sparse mx-auto w-max max-w-full flex-none"
       : "w-full flex-1",
     className,
   );
 
-  if (mantinePlayerUi) {
-    return (
-      <Paper
-        data-tool-deck=""
-        data-island="hunt"
-        data-hunt-density={sparse ? "sparse" : undefined}
-        data-ask-first={askFirstActive ? "true" : undefined}
-        data-player-ux-world="mantine"
-        role="group"
-        aria-label="Hunt tools"
-        radius={22}
-        p={askFirstActive ? 3 : 4}
-        // OverlayHost / chrome are pointer-events-none; Island baked this in.
-        className={cn(
-          deckClassName,
-          "pointer-events-auto flex min-h-11 items-center",
-        )}
-        styles={{
-          root: {
-            ...(askFirstActive
-              ? iosMapHuntAskFirstSurfaceStyles
-              : iosMapHuntSurfaceStyles),
-            borderRadius: 22,
-          },
-        }}
-      >
-        {children}
-      </Paper>
-    );
-  }
-
   return (
-    <Island
+    <Paper
       data-tool-deck=""
       data-island="hunt"
       data-hunt-density={sparse ? "sparse" : undefined}
+      data-ask-first={askFirstActive ? "true" : undefined}
+      data-player-ux-world="mantine"
       role="group"
       aria-label="Hunt tools"
-      size="default"
-      variant="default"
-      className={deckClassName}
+      radius={22}
+      p={askFirstActive ? 3 : 4}
+      // OverlayHost / chrome are pointer-events-none; Island baked this in.
+      className={cn(
+        deckClassName,
+        "pointer-events-auto flex min-h-11 items-center",
+      )}
+      styles={{
+        root: {
+          ...(askFirstActive
+            ? iosMapHuntAskFirstSurfaceStyles
+            : iosMapHuntSurfaceStyles),
+          borderRadius: 22,
+        },
+      }}
     >
       {children}
-    </Island>
+    </Paper>
   );
 }
 
@@ -129,7 +108,7 @@ export const ToolDeckGroup = forwardRef<HTMLDivElement, ToolDeckGroupProps>(
   },
 );
 
-/** Flag-on inset strip for question tools (history stays outside). */
+/** Inset strip for question tools (history stays outside). */
 export function ToolDeckQuestionStrip({
   children,
   className,

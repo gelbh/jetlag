@@ -4,14 +4,6 @@ import { MantineProvider } from "@mantine/core";
 import { jetlagMantineTheme } from "@/theme/mantineTheme";
 import { AskCatalogRail } from "./AskCatalogRail";
 
-const { mockUsePlayerUiMantine } = vi.hoisted(() => ({
-  mockUsePlayerUiMantine: vi.fn(() => false),
-}));
-
-vi.mock("@/hooks/feature/usePlayerUiMantine", () => ({
-  usePlayerUiMantine: () => mockUsePlayerUiMantine(),
-}));
-
 const ROWS = [
   { id: "transit", label: "Transit stop" },
   { id: "park", label: "Park" },
@@ -19,7 +11,6 @@ const ROWS = [
 ] as const;
 
 beforeEach(() => {
-  mockUsePlayerUiMantine.mockReturnValue(false);
   vi.stubGlobal("matchMedia", (query: string) => ({
     matches: false,
     media: query,
@@ -32,10 +23,18 @@ beforeEach(() => {
   }));
 });
 
+function renderRail(ui: React.ReactElement) {
+  return render(
+    <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+      {ui}
+    </MantineProvider>,
+  );
+}
+
 describe("AskCatalogRail", () => {
   it("advances via row select and has no CONTINUE sibling control", () => {
     const onSelect = vi.fn();
-    render(
+    renderRail(
       <AskCatalogRail rows={ROWS} selectedId={null} onSelect={onSelect} />,
     );
 
@@ -49,7 +48,7 @@ describe("AskCatalogRail", () => {
 
   it("marks the selected row without requiring a second CTA", () => {
     const onSelect = vi.fn();
-    const { container } = render(
+    const { container } = renderRail(
       <AskCatalogRail rows={ROWS} selectedId="park" onSelect={onSelect} />,
     );
 
@@ -66,7 +65,6 @@ describe("AskCatalogRail", () => {
   });
 
   it("mounts Mantine catalog shell and advances under flag", () => {
-    mockUsePlayerUiMantine.mockReturnValue(true);
     const onSelect = vi.fn();
     render(
       <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
@@ -84,7 +82,7 @@ describe("AskCatalogRail", () => {
 
   it("renders group headings once per section without prefixing row labels", () => {
     const onSelect = vi.fn();
-    render(
+    renderRail(
       <AskCatalogRail
         columns={2}
         rows={[

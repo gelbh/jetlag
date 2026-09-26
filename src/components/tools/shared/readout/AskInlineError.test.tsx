@@ -1,18 +1,6 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { AskInlineError, askInlineErrorCopy } from "./AskInlineError";
-
-const { mockUsePlayerUiMantine } = vi.hoisted(() => ({
-  mockUsePlayerUiMantine: vi.fn(() => false),
-}));
-
-vi.mock("@/hooks/feature/usePlayerUiMantine", () => ({
-  usePlayerUiMantine: () => mockUsePlayerUiMantine(),
-}));
-
-beforeEach(() => {
-  mockUsePlayerUiMantine.mockReturnValue(false);
-});
 
 describe("askInlineErrorCopy", () => {
   it("rewrites GPS timeout into actionable copy", () => {
@@ -25,8 +13,7 @@ describe("askInlineErrorCopy", () => {
 });
 
 describe("AskInlineError", () => {
-  it("renders a soft callout under Mantine", () => {
-    mockUsePlayerUiMantine.mockReturnValue(true);
+  it("renders a soft callout", () => {
     render(
       <AskInlineError message="Timed out while waiting for your location." />,
     );

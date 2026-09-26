@@ -24,7 +24,6 @@ import {
 import { questionCostBreakdown } from "../../domain/questions";
 import { firstUnusedCatalogOption } from "../../domain/session/tools/toolSessionOptions";
 import { adminBorderKindAvailability } from "../../services/geo/overpass/adminDivisionAvailability";
-import { usePlayerUiMantine } from "@/hooks/feature/usePlayerUiMantine";
 import {
   queryGeolocationPermission,
   type GeolocationPermissionState,
@@ -235,9 +234,7 @@ export function useMeasuringTool({
     resolving: draft.measuringLoading && draft.measuringSeekerPoint !== null,
   };
 
-  const mantinePlayerUi = usePlayerUiMantine();
-  const mapFirstEligible =
-    mantinePlayerUi && draft.measuringOptionChosen;
+  const mapFirstEligible = draft.measuringOptionChosen;
 
   const [placementGeo, setPlacementGeo] = useState<
     GeolocationPermissionState | "checking"

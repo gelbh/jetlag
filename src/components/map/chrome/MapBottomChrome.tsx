@@ -6,8 +6,6 @@ import { iosMapChromeSurfaceStyles } from "@/components/ui/apple/iosEntryChrome"
 import { OverlayHost } from "./OverlayHost";
 import { MapSideDockStack } from "./MapSideDockStack";
 import { ToolDeck } from "@/components/tools/ToolDeck";
-import { usePlayerUiMantine } from "@/hooks/feature/usePlayerUiMantine";
-
 export type MapBottomChromeLayout = "phone" | "rail";
 
 /** Seeker multi-tool Hunt (`tools`) vs hider 1–2 chip content-sized island (`sparse`). */
@@ -111,17 +109,16 @@ export const MapBottomChrome = forwardRef<HTMLDivElement, MapBottomChromeProps>(
     },
     ref,
   ) {
-    const mantinePlayerUi = usePlayerUiMantine();
     const isRail = layout === "rail";
     const sparseHunt = huntDensity === "sparse";
-    const askFirstActive = mantinePlayerUi && askFirst;
+    const askFirstActive = true && askFirst;
     const chromeClassName = cn(
       "jl-map-bottom-chrome jl-tool-dock relative block w-full pointer-events-none bg-transparent",
       !isRail &&
         !askFirstActive &&
         "min-h-[calc(var(--dock-island-height)+0.75rem)]",
       !isRail && askFirstActive && "min-h-0",
-      !isRail && mantinePlayerUi && "px-1",
+      !isRail && true && "px-1",
       isRail &&
         "jl-map-bottom-chrome--rail jl-tool-dock--rail relative flex h-full min-h-0 flex-col items-stretch justify-start gap-2 p-2",
       isRail &&
@@ -136,13 +133,13 @@ export const MapBottomChrome = forwardRef<HTMLDivElement, MapBottomChromeProps>(
       askFirstActive && "jl-map-bottom-chrome--ask-first",
       className,
     );
-    const ChromeRoot = mantinePlayerUi ? Box : "div";
+    const ChromeRoot = true ? Box : "div";
     return (
       <OverlayHost ref={ref} layout={layout} style={style}>
         {createElement(
           ChromeRoot,
           {
-            ...(mantinePlayerUi
+            ...(true
               ? {
                   component: "div" as const,
                   "data-testid": "map-bottom-chrome-mantine",
@@ -179,19 +176,19 @@ export const MapBottomChrome = forwardRef<HTMLDivElement, MapBottomChromeProps>(
             const sideIslands = (
               <>
                 {session ? (
-                  <SideIsland name="session" mantine={mantinePlayerUi}>
+                  <SideIsland name="session" mantine={true}>
                     {session}
                   </SideIsland>
                 ) : null}
                 {mapControls ? (
-                  <SideIsland name="map-controls" mantine={mantinePlayerUi}>
+                  <SideIsland name="map-controls" mantine={true}>
                     {mapControls}
                   </SideIsland>
                 ) : null}
               </>
             );
 
-            if (mantinePlayerUi && !isRail) {
+            if (true && !isRail) {
               return <MapSideDockStack>{sideIslands}</MapSideDockStack>;
             }
 

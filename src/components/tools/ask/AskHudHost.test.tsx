@@ -4,14 +4,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { jetlagMantineTheme } from "@/theme/mantineTheme";
 import { AskHudHost } from "./AskHudHost";
 
-const { mockUsePlayerUiMantine } = vi.hoisted(() => ({
-  mockUsePlayerUiMantine: vi.fn(() => false),
-}));
-
-vi.mock("@/hooks/feature/usePlayerUiMantine", () => ({
-  usePlayerUiMantine: () => mockUsePlayerUiMantine(),
-}));
-
 vi.mock("@/hooks/layout/useDesktopLayout", () => ({
   useDesktopLayout: () => false,
 }));
@@ -27,7 +19,6 @@ const hostProps = {
 };
 
 beforeEach(() => {
-  mockUsePlayerUiMantine.mockReturnValue(false);
   hostProps.onDismiss = vi.fn();
   vi.stubGlobal("matchMedia", (query: string) => ({
     matches: false,
@@ -41,20 +32,8 @@ beforeEach(() => {
   }));
 });
 
-describe("AskHudHost Mantine gate", () => {
-  it("keeps Survey ask HUD when flag is off", () => {
-    const { container } = render(<AskHudHost {...hostProps} />);
-
-    const host = screen.getByTestId("ask-hud-host");
-    expect(host).toBeInTheDocument();
-    expect(host.getAttribute("data-survey")).toBe("true");
-    expect(host.classList.contains("ask-hud-host")).toBe(true);
-    expect(container.querySelector('[data-testid="mantine-drawer-sheet"]')).toBeNull();
-    expect(container.querySelector('[data-player-ux-world="mantine"]')).toBeNull();
-  });
-
-  it("mounts iOS SheetHost drawer when flag is on", () => {
-    mockUsePlayerUiMantine.mockReturnValue(true);
+describe("AskHudHost", () => {
+  it("mounts iOS SheetHost drawer", () => {
     render(
       <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
         <AskHudHost {...hostProps} modeBody={<div>Mode body</div>} />
@@ -70,8 +49,7 @@ describe("AskHudHost Mantine gate", () => {
     expect(screen.getByTestId("ask-commit-strip")).toBeInTheDocument();
   });
 
-  it("dismisses via blurred map overlay click when flag is on", () => {
-    mockUsePlayerUiMantine.mockReturnValue(true);
+  it("dismisses via blurred map overlay click", () => {
     render(
       <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
         <AskHudHost {...hostProps} modeBody={<div>Mode body</div>} />
@@ -87,7 +65,6 @@ describe("AskHudHost Mantine gate", () => {
   });
 
   it("hides muted commit strip on sheet until ready", () => {
-    mockUsePlayerUiMantine.mockReturnValue(true);
     render(
       <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
         <AskHudHost
@@ -104,7 +81,6 @@ describe("AskHudHost Mantine gate", () => {
   });
 
   it("can hide cue and cost chip for Matching sheet composition", () => {
-    mockUsePlayerUiMantine.mockReturnValue(true);
     render(
       <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
         <AskHudHost
@@ -120,11 +96,5 @@ describe("AskHudHost Mantine gate", () => {
     expect(screen.queryByTestId("ask-mode-cue-ticker")).toBeNull();
     expect(screen.queryByTestId("ask-cost-chip")).toBeNull();
     expect(screen.queryByText("PICK CATEGORY")).toBeNull();
-  });
-
-  it("omits ask-first composition marker when flag is off", () => {
-    render(<AskHudHost {...hostProps} />);
-    const host = screen.getByTestId("ask-hud-host");
-    expect(host.getAttribute("data-ask-composition")).toBeNull();
   });
 });

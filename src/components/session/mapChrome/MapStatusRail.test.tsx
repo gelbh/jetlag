@@ -6,14 +6,6 @@ import { RouteTransitionProvider } from "@/navigation/RouteTransitionContext";
 import { jetlagMantineTheme } from "@/theme/mantineTheme";
 import { MapStatusRail } from "./MapStatusRail";
 
-const { mockUsePlayerUiMantine } = vi.hoisted(() => ({
-  mockUsePlayerUiMantine: vi.fn(() => false),
-}));
-
-vi.mock("@/hooks/feature/usePlayerUiMantine", () => ({
-  usePlayerUiMantine: () => mockUsePlayerUiMantine(),
-}));
-
 vi.mock("../../../state/mapStore", () => ({
   useMapStore: (selector: (state: { lowPowerMode: boolean }) => unknown) =>
     selector({ lowPowerMode: false }),
@@ -48,18 +40,19 @@ const railProps = {
   onTimerReset: vi.fn(),
 };
 
-function renderRail() {
+function renderRail(extra?: Partial<typeof railProps> & { canStartGame?: boolean }) {
   return render(
-    <MemoryRouter>
-      <RouteTransitionProvider>
-        <MapStatusRail {...railProps} />
-      </RouteTransitionProvider>
-    </MemoryRouter>,
+    <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+      <MemoryRouter>
+        <RouteTransitionProvider>
+          <MapStatusRail {...railProps} {...extra} />
+        </RouteTransitionProvider>
+      </MemoryRouter>
+    </MantineProvider>,
   );
 }
 
 beforeEach(() => {
-  mockUsePlayerUiMantine.mockReturnValue(false);
   vi.stubGlobal("matchMedia", (query: string) => ({
     matches: typeof query === "string" && query.includes("min-width: 380"),
     media: query,
@@ -79,61 +72,17 @@ describe("MapStatusRail header home", () => {
     const home = screen.getByRole("link", { name: "Home" });
     expect(home.closest(".jl-status-header-brand")).toBeTruthy();
   });
-
-  it("keeps ticker-band composition with stamp-code and below-bar sync", () => {
-    const { container } = render(
-      <MemoryRouter>
-        <RouteTransitionProvider>
-          <MapStatusRail {...railProps} canStartGame />
-        </RouteTransitionProvider>
-      </MemoryRouter>,
-    );
-
-    expect(container.querySelector(".jl-status-header")).toBeTruthy();
-    expect(screen.getByText("ABCD").closest(".jl-stamp-code")).toBeTruthy();
-    expect(screen.getByRole("button", { name: /start/i }).className).toContain(
-      "jl-status-header-start",
-    );
-    expect(container.querySelector(".jl-sync-map-indicator")).toBeTruthy();
-    expect(
-      container.querySelector(".jl-sync-map-indicator")?.closest(".jl-status-header"),
-    ).toBeNull();
-  });
 });
 
-describe("MapStatusRail Mantine gate", () => {
-  it("keeps Legacy survey rail when flag is off", () => {
+describe("MapStatusRail Mantine", () => {
+  it("mounts Mantine rail chrome", () => {
     const { container } = renderRail();
-    expect(container.querySelector(".jl-status-rail")).toBeTruthy();
-    expect(container.querySelector('[data-testid="map-status-rail-mantine"]')).toBeNull();
-  });
-
-  it("mounts Mantine rail chrome when flag is on", () => {
-    mockUsePlayerUiMantine.mockReturnValue(true);
-    const { container } = render(
-      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
-        <MemoryRouter>
-          <RouteTransitionProvider>
-            <MapStatusRail {...railProps} />
-          </RouteTransitionProvider>
-        </MemoryRouter>
-      </MantineProvider>,
-    );
     expect(container.querySelector('[data-testid="map-status-rail-mantine"]')).toBeTruthy();
     expect(container.querySelector('[data-player-ux-world="mantine"]')).toBeTruthy();
   });
 
-  it("keeps frosted status bar + Start under Mantine flag", () => {
-    mockUsePlayerUiMantine.mockReturnValue(true);
-    const { container } = render(
-      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
-        <MemoryRouter>
-          <RouteTransitionProvider>
-            <MapStatusRail {...railProps} canStartGame />
-          </RouteTransitionProvider>
-        </MemoryRouter>
-      </MantineProvider>,
-    );
+  it("keeps frosted status bar + Start", () => {
+    const { container } = renderRail({ canStartGame: true });
     const island = container.querySelector('[data-testid="tool-status-block-mantine"]');
     expect(island).toBeTruthy();
     expect(
@@ -156,36 +105,38 @@ describe("MapStatusRail Mantine gate", () => {
 describe("MapStatusRail inactive chrome", () => {
   it("shows retry and return to join for terminal session errors", () => {
     render(
-      <MemoryRouter>
-        <RouteTransitionProvider>
-          <MapStatusRail
-            sessionCode="ABCD"
-            activeTool="none"
-            syncStatus="error"
-            queuedWrites={0}
-            message="That session no longer exists."
-            timerState={{ accumulatedMs: 120_000, runningSince: Date.now() - 60_000 }}
-            timerRunning
-            timerHasStarted
-            canStartGame={false}
-            onStartGame={vi.fn()}
-            onTimerStart={vi.fn()}
-            onTimerPause={vi.fn()}
-            onTimerReset={vi.fn()}
-            inactiveChrome
-            terminalSessionError={{
-              title: "Session gone",
-              message: "That session no longer exists.",
-              action: "retry",
-              actionLabel: "Retry",
-              secondaryAction: "rejoin",
-              secondaryActionLabel: "Return to join",
-            }}
-            onSyncErrorAction={vi.fn()}
-            onReturnToJoin={vi.fn()}
-          />
-        </RouteTransitionProvider>
-      </MemoryRouter>,
+      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+        <MemoryRouter>
+          <RouteTransitionProvider>
+            <MapStatusRail
+              sessionCode="ABCD"
+              activeTool="none"
+              syncStatus="error"
+              queuedWrites={0}
+              message="That session no longer exists."
+              timerState={{ accumulatedMs: 120_000, runningSince: Date.now() - 60_000 }}
+              timerRunning
+              timerHasStarted
+              canStartGame={false}
+              onStartGame={vi.fn()}
+              onTimerStart={vi.fn()}
+              onTimerPause={vi.fn()}
+              onTimerReset={vi.fn()}
+              inactiveChrome
+              terminalSessionError={{
+                title: "Session gone",
+                message: "That session no longer exists.",
+                action: "retry",
+                actionLabel: "Retry",
+                secondaryAction: "rejoin",
+                secondaryActionLabel: "Return to join",
+              }}
+              onSyncErrorAction={vi.fn()}
+              onReturnToJoin={vi.fn()}
+            />
+          </RouteTransitionProvider>
+        </MemoryRouter>
+      </MantineProvider>,
     );
 
     expect(screen.getByRole("button", { name: "Retry" })).toBeInTheDocument();

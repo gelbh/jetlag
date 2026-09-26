@@ -1,5 +1,5 @@
 /**
- * Flag-on smoke for Ask HUD map-first Photo + Thermometer (and Matching sanity).
+ * Ask HUD map-first Photo + Thermometer (and Matching sanity).
  */
 import type { Page } from "@playwright/test";
 import {
@@ -7,7 +7,6 @@ import {
   expect,
   clickMapAtLatLng,
   clickToolDockButton,
-  enablePlayerUiMantine,
   openMapWithLocalSession,
 } from "../../fixtures";
 
@@ -17,11 +16,7 @@ async function pickRow(page: Page, label: RegExp) {
   await row.click();
 }
 
-test.describe("ask map-first smoke (mantine)", () => {
-  test.beforeEach(async ({ page }) => {
-    await enablePlayerUiMantine(page);
-  });
-
+test.describe("ask map-first smoke", () => {
   test("Matching map-first after category", async ({ page }) => {
     await openMapWithLocalSession(page);
     await clickToolDockButton(page, "Matching");
@@ -64,28 +59,31 @@ test.describe("ask map-first smoke (mantine)", () => {
     ).toBeVisible();
   });
 
-  test("Thermometer map-first after manual pins", async ({ page }) => {
+  test("Thermometer map-first after distance pick", async ({ page }) => {
     await openMapWithLocalSession(page);
     await clickToolDockButton(page, "Thermometer");
     await expect(page.getByTestId("thermometer-hud-body")).toBeVisible();
 
-    // SheetHost portals the dialog outside ask-hud-host; scope to dialog.
     const sheet = page.getByRole("dialog", { name: "Thermometer" });
-    await sheet.getByRole("button", { name: /^Manual pins$/i }).click();
-    await expect(sheet.getByText(/Tap the map for the start/i)).toBeVisible();
-    // Canvas clicks miss MapLibre under Ask HUD; fire lng/lat on the map.
-    await clickMapAtLatLng(page, 53.35, -6.26);
-    await expect(sheet.getByText(/Tap the map for the end/i)).toBeVisible({
-      timeout: 10_000,
-    });
-    await clickMapAtLatLng(page, 53.36, -6.25);
+    await sheet.getByRole("button", { name: /1\/2 mi/i }).click();
 
     await expect(page.getByTestId("thermometer-map-placement")).toBeVisible({
       timeout: 15_000,
     });
     await expect(page.getByTestId("ask-hud-host")).toHaveCount(0);
+
+    await page.getByRole("button", { name: /^Manual pins$/i }).click();
+    await expect(
+      page.getByText(/Tap the map for the start/i),
+    ).toBeVisible();
+    await clickMapAtLatLng(page, 53.35, -6.26);
+    await expect(page.getByText(/Tap the map for the end/i)).toBeVisible({
+      timeout: 10_000,
+    });
+    await clickMapAtLatLng(page, 53.36, -6.25);
+
     await expect(
       page.getByTestId("thermometer-map-placement-choices"),
-    ).toBeVisible();
+    ).toBeVisible({ timeout: 15_000 });
   });
 });

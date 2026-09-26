@@ -15,11 +15,6 @@ vi.mock("../../../hooks/layout/useDesktopLayout", () => ({
   useDesktopLayout: () => useDesktopLayout(),
 }));
 
-const usePlayerUiMantine = vi.fn(() => false);
-vi.mock("@/hooks/feature/usePlayerUiMantine", () => ({
-  usePlayerUiMantine: () => usePlayerUiMantine(),
-}));
-
 vi.mock("./RadixMotionSheet", () => ({
   RadixMotionSheet: ({
     open,
@@ -72,8 +67,6 @@ function withMantine(ui: ReactNode) {
 describe("SheetHost", () => {
   beforeEach(() => {
     useDesktopLayout.mockReset();
-    usePlayerUiMantine.mockReset();
-    usePlayerUiMantine.mockReturnValue(false);
     vi.stubGlobal("matchMedia", (query: string) => ({
       matches: false,
       media: query,
@@ -86,21 +79,8 @@ describe("SheetHost", () => {
     }));
   });
 
-  it("uses RadixMotionSheet under 1024 when flag off", () => {
+  it("uses Mantine Drawer under 1024", () => {
     useDesktopLayout.mockReturnValue(false);
-    usePlayerUiMantine.mockReturnValue(false);
-    render(
-      <SheetHost open onClose={() => {}} ariaLabel="Settings" railTab="settings">
-        <p>body</p>
-      </SheetHost>,
-    );
-    expect(screen.getByTestId("radix-motion-sheet")).toBeInTheDocument();
-    expect(screen.getByText("body")).toBeInTheDocument();
-  });
-
-  it("uses Mantine Drawer under 1024 when flag on", () => {
-    useDesktopLayout.mockReturnValue(false);
-    usePlayerUiMantine.mockReturnValue(true);
     render(
       withMantine(
         <SheetHost open onClose={() => {}} ariaLabel="Settings" railTab="settings">
@@ -116,7 +96,6 @@ describe("SheetHost", () => {
 
   it("portals into contextual rail on desktop even when flag on", async () => {
     useDesktopLayout.mockReturnValue(true);
-    usePlayerUiMantine.mockReturnValue(true);
     render(
       withMantine(
         <ContextualRailPanelProvider>
@@ -192,32 +171,39 @@ describe("SheetHost", () => {
     expect(screen.queryByText("hidden")).not.toBeInTheDocument();
   });
 
-  it("closes via control when sheet requests close", () => {
+  it("closes via overlay when sheet requests close", () => {
     useDesktopLayout.mockReturnValue(false);
     const onClose = vi.fn();
     render(
-      <SheetHost open onClose={onClose} ariaLabel="Settings" railTab="settings">
-        <p>body</p>
-      </SheetHost>,
+      withMantine(
+        <SheetHost open onClose={onClose} ariaLabel="Settings" railTab="settings">
+          <p>body</p>
+        </SheetHost>,
+      ),
     );
-    fireEvent.click(screen.getByRole("button", { name: "close-radix" }));
-    expect(onClose).toHaveBeenCalledTimes(1);
+    const overlay = document.querySelector(".mantine-Drawer-overlay");
+    expect(overlay).toBeTruthy();
+    fireEvent.mouseDown(overlay!);
+    fireEvent.click(overlay!);
+    expect(onClose).toHaveBeenCalled();
   });
 
   it("uses overlay path on desktop when railTab is omitted", () => {
     useDesktopLayout.mockReturnValue(true);
     render(
-      <SheetHost open onClose={() => {}} ariaLabel="Map tools guide">
-        <p>first-run</p>
-      </SheetHost>,
+      withMantine(
+        <SheetHost open onClose={() => {}} ariaLabel="Map tools guide">
+          <p>first-run</p>
+        </SheetHost>,
+      ),
     );
-    expect(screen.getByTestId("radix-motion-sheet")).toBeInTheDocument();
+    expect(screen.queryByTestId("radix-motion-sheet")).not.toBeInTheDocument();
+    expect(screen.getByTestId("mantine-drawer-sheet")).toBeInTheDocument();
     expect(screen.getByText("first-run")).toBeInTheDocument();
   });
 
-  it("uses Mantine Drawer on desktop overlay when flag on and railTab omitted", () => {
+  it("uses Mantine Drawer on desktop overlay when railTab omitted", () => {
     useDesktopLayout.mockReturnValue(true);
-    usePlayerUiMantine.mockReturnValue(true);
     render(
       withMantine(
         <SheetHost open onClose={() => {}} ariaLabel="Map tools guide">
@@ -249,7 +235,6 @@ describe("SheetHost", () => {
    */
   it("restores map pointer events after Mantine Drawer closes (Verify #4)", async () => {
     useDesktopLayout.mockReturnValue(false);
-    usePlayerUiMantine.mockReturnValue(true);
     const mapHit = vi.fn();
 
     function Harness() {
@@ -299,7 +284,6 @@ describe("SheetHost", () => {
 
   it("applies consumer maxHeightClassName on Mantine Drawer content", () => {
     useDesktopLayout.mockReturnValue(false);
-    usePlayerUiMantine.mockReturnValue(true);
     render(
       withMantine(
         <SheetHost

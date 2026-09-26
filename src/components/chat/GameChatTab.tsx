@@ -21,7 +21,6 @@ import {
 } from "../../domain/map/mapTools";
 import type { SessionMessageRecord } from "../../domain/session/activity/sessionChat";
 import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
-import { usePlayerUiMantine } from "../../hooks/feature/usePlayerUiMantine";
 import { useStickScrollToBottom } from "../../hooks/ui/useStickScrollToBottom";
 import { HudToolIcon } from "../map/icons/ToolIcons";
 import { HiderPendingQuestionAnswer } from "./HiderPendingQuestionAnswer";
@@ -173,7 +172,6 @@ export function GameChatTab({
   readOnly = false,
 }: GameChatTabProps) {
   const [nowMs, setNowMs] = useState(0);
-  const mantinePlayerUi = usePlayerUiMantine();
   const gameMessages = messages
     .filter((message) => message.channel === "game")
     .sort((left, right) => left.createdAt.localeCompare(right.createdAt));
@@ -190,8 +188,7 @@ export function GameChatTab({
     return () => window.clearInterval(interval);
   }, []);
 
-  if (mantinePlayerUi) {
-    return (
+  return (
       <Stack gap={8}>
         {answerError ? (
           <Box
@@ -489,165 +486,5 @@ export function GameChatTab({
         )}
         <div ref={bottomRef} aria-hidden />
       </Stack>
-    );
-  }
-
-  const systemClass =
-    "rounded-lg bg-surface-raised px-3 py-2 text-center text-xs text-ink-muted";
-  const cardClass = "rounded-xl border border-border bg-surface-deep px-3 py-3";
-
-  return (
-    <div className="flex flex-col gap-2">
-      {answerError ? <InlineError>{answerError}</InlineError> : null}
-      {gameMessages.length === 0 ? (
-        <EmptyState className="text-ink-dim">No game messages yet.</EmptyState>
-      ) : (
-        gameMessages.map((message) => {
-          if (message.kind === "system") {
-            return (
-              <p key={message.id} className={systemClass}>
-                {message.text}
-              </p>
-            );
-          }
-
-          if (message.kind !== "question") {
-            return null;
-          }
-
-          const pending = pendingQuestionForMessage(
-            pendingQuestions,
-            message.pendingQuestionId,
-          );
-          const walking = pending?.status === "walking";
-          const cancelled =
-            message.status === "cancelled" || pending?.status === "cancelled";
-          const answered =
-            message.status === "answered" || message.status === "resolved";
-          const closed = answered || cancelled;
-          const deadlineMs = pending
-            ? questionAnswerDeadlineMs(pending.toolType, sessionRules)
-            : questionAnswerDeadlineMs("matching", sessionRules);
-          const countdown =
-            !walking && !closed && pending?.answerableAt
-              ? formatExpiredAnswerCountdown(
-                  pending.answerableAt,
-                  deadlineMs,
-                  pending.deadlineExpiredAt,
-                  nowMs,
-                )
-              : null;
-          const expired =
-            pending?.deadlineExpiredAt !== undefined ||
-            countdown === "Time expired. Timer paused";
-
-          const isPhotoQuestion = pending?.toolType === "photo";
-          const toolLabel =
-            message.toolType && isQuestionDockTool(message.toolType)
-              ? mapToolDockShortLabel(message.toolType)
-              : (message.toolType ?? "Question");
-          const canDismissExpired =
-            !isHider &&
-            !readOnly &&
-            !closed &&
-            pending?.status === "pending" &&
-            expired &&
-            Boolean(onDismissExpiredQuestion) &&
-            Boolean(message.pendingQuestionId);
-
-          const showHiderAnswer =
-            isHider &&
-            !readOnly &&
-            !closed &&
-            !(
-              message.pendingQuestionId != null &&
-              answeredPendingIds?.has(message.pendingQuestionId)
-            );
-
-          return (
-            <div key={message.id} className={cardClass}>
-              {showHiderAnswer ? (
-                <HiderPendingQuestionAnswer
-                  message={message}
-                  pending={pending}
-                  sessionRules={sessionRules}
-                  sessionId={sessionId}
-                  truth={
-                    message.pendingQuestionId
-                      ? (questionTruths?.get(message.pendingQuestionId) ?? null)
-                      : null
-                  }
-                  truthsLoading={truthsLoading}
-                  truthReferenceMode={
-                    (message.pendingQuestionId
-                      ? truthReferenceModes?.get(message.pendingQuestionId)
-                      : undefined) ?? "hidingZoneCenter"
-                  }
-                  nowMs={nowMs}
-                  disabled={
-                    answerSubmitting ||
-                    (message.pendingQuestionId != null &&
-                      answeredPendingIds?.has(message.pendingQuestionId) ===
-                        true)
-                  }
-                  onAnswerQuestion={onAnswerQuestion}
-                />
-              ) : (
-                <>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-brand-blue">
-                    {toolLabel}
-                  </p>
-                  <p className="mt-1 text-sm text-ink">{message.promptText}</p>
-                  {walking ? (
-                    <p className="mt-2 text-xs text-brand-gold">
-                      Seeker is walking. Answer when the full question arrives.
-                    </p>
-                  ) : null}
-                  {countdown ? (
-                    <p
-                      className={`mt-1 text-xs tabular-nums ${expired ? "text-status-warning" : "text-ink-dim"}`}
-                    >
-                      {countdown}
-                    </p>
-                  ) : null}
-                  {pending?.answeredLate ? (
-                    <p className="mt-1 text-xs text-status-warning">
-                      Answered late. Card draw forfeited.
-                    </p>
-                  ) : null}
-                </>
-              )}
-              {answered && isPhotoQuestion ? (
-                <PhotoAnswerPreview answer={pending?.answer} />
-              ) : answered ? (
-                <p className="mt-2 text-xs text-ink-dim">
-                  Answered: {message.selectedReply ?? "-"}
-                </p>
-              ) : cancelled ? (
-                <p className="mt-2 text-xs text-ink-dim">Question dismissed.</p>
-              ) : !isHider && !walking ? (
-                <p className="mt-2 text-xs text-ink-dim">Waiting for hider…</p>
-              ) : null}
-              {canDismissExpired ? (
-                <button
-                  type="button"
-                  className="mt-2 text-xs text-ink-muted underline"
-                  onClick={() =>
-                    void onDismissExpiredQuestion?.(
-                      message.pendingQuestionId!,
-                      message.id,
-                    )
-                  }
-                >
-                  Dismiss question
-                </button>
-              ) : null}
-              {message.senderUid === senderUid ? null : null}
-            </div>
-          );
-        })
-      )}
-      <div ref={bottomRef} aria-hidden />
-    </div>
   );
 }

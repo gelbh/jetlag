@@ -44,12 +44,8 @@ import {
 import { useMapLibreMarkerImages } from "../helpers/mapLibreIconRegistry";
 import { registerMapLibreMap } from "@/services/geo/maplibre/mapLibreMapRegistry";
 import { MapChromeListener } from "./MapChromeListener";
-import { MapCompassControl } from "./MapCompassControl";
 import { MapNavControlStack } from "./MapNavControlStack";
-import { MapStyleToggle } from "./MapStyleToggle";
-import { MapZoomControl } from "./MapZoomControl";
 import type { MapViewMapLibreProps } from "./mapViewTypes";
-import { usePlayerUiMantine } from "@/hooks/feature/usePlayerUiMantine";
 
 setWorkerUrl(mapLibreWorkerUrl);
 
@@ -373,8 +369,6 @@ export function MapViewMapLibre({
   const mapStyleToggleEnabled =
     (showMapStyleToggle ?? Boolean(onMapStyleChange)) &&
     Boolean(onMapStyleChange);
-  const styleControlInset = mapStyleControlInset ?? zoomControlInset;
-  const mantinePlayerUi = usePlayerUiMantine();
   const { lowPowerMode } = useMotionProfile();
   const maxPitchDegrees = resolveMapPitchDegrees(lowPowerMode);
   const pitchGesturesEnabled = interactive && maxPitchDegrees > 0;
@@ -529,38 +523,15 @@ export function MapViewMapLibre({
             {chromeHudRef ? (
               <MapChromeListener chromeHudRef={chromeHudRef} />
             ) : null}
-            {mantinePlayerUi ? (
-              <MapNavControlStack
-                zoomEnabled={zoomControlEnabled}
-                compassEnabled={compassControlEnabled}
-                styleEnabled={mapStyleToggleEnabled}
-                mapStyle={mapStyle}
-                streetBasemap={streetBasemap}
-                onMapStyleChange={onMapStyleChange}
-                onResetCamera={handleCompassReset}
-              />
-            ) : (
-              <>
-                <MapCompassControl
-                  enabled={compassControlEnabled}
-                  inset={zoomControlInset}
-                  onResetCamera={handleCompassReset}
-                />
-                <MapZoomControl
-                  enabled={zoomControlEnabled}
-                  inset={zoomControlInset}
-                />
-                {onMapStyleChange ? (
-                  <MapStyleToggle
-                    enabled={mapStyleToggleEnabled}
-                    mapStyle={mapStyle}
-                    streetBasemap={streetBasemap}
-                    onMapStyleChange={onMapStyleChange}
-                    inset={styleControlInset}
-                  />
-                ) : null}
-              </>
-            )}
+            <MapNavControlStack
+              zoomEnabled={zoomControlEnabled}
+              compassEnabled={compassControlEnabled}
+              styleEnabled={mapStyleToggleEnabled}
+              mapStyle={mapStyle}
+              streetBasemap={streetBasemap}
+              onMapStyleChange={onMapStyleChange}
+              onResetCamera={handleCompassReset}
+            />
             <AttributionControl compact position="bottom-left" />
             {children}
           </MapFeatureHitTestProvider>

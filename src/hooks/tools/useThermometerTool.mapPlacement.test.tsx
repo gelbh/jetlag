@@ -3,10 +3,6 @@ import { describe, expect, it, vi } from "vitest";
 import { useThermometerTool } from "./useThermometerTool";
 import { createToolHookMocks } from "../../test/helpers/toolHookMocks";
 
-vi.mock("@/hooks/feature/usePlayerUiMantine", () => ({
-  usePlayerUiMantine: () => true,
-}));
-
 describe("useThermometerTool map-first", () => {
   it("suppresses the Ask sheet after choosing a distance", async () => {
     const mocks = createToolHookMocks();

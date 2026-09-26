@@ -3,10 +3,6 @@ import { describe, expect, it, vi } from "vitest";
 import { useMatchingTool } from "./useMatchingTool";
 import { createToolHookMocks } from "../../test/helpers/toolHookMocks";
 
-vi.mock("@/hooks/feature/usePlayerUiMantine", () => ({
-  usePlayerUiMantine: () => true,
-}));
-
 vi.mock("../forms/useDebouncedValue", () => ({
   useDebouncedValue: <T,>(value: T) => value,
 }));

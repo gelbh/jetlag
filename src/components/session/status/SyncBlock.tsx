@@ -5,7 +5,6 @@ import {
   surveySyncShortLabel,
 } from "@/domain/device/surveyStatusCopy";
 import { iosMapChromeSurfaceStyles } from "@/components/ui/apple/iosEntryChrome";
-import { usePlayerUiMantine } from "@/hooks/feature/usePlayerUiMantine";
 import { useMinWidth } from "@/hooks/layout/useMinWidth";
 import { SyncStatusBeacon } from "../syncUi/SyncStatusDot";
 import {
@@ -25,7 +24,7 @@ interface SyncBlockProps {
   /** @deprecated Detail modal removed; ignored. */
   onSyncErrorAction?: () => void;
   /**
-   * overlay: absolute under status bar (Legacy / Mantine fallback)
+   * overlay: absolute under status bar
    * inline: floating sibling Paper
    * segment: control only inside the single status island
    */
@@ -59,7 +58,6 @@ export function SyncBlock({
   placement = "overlay",
   compact = false,
 }: SyncBlockProps) {
-  const mantinePlayerUi = usePlayerUiMantine();
   const comfortableWidth = useMinWidth(380) && !compact;
   const shortLabel = surveySyncShortLabel(syncStatus, queuedWrites);
   const segmentLabel = comfortableWidth
@@ -86,7 +84,7 @@ export function SyncBlock({
     </Group>
   );
 
-  if (mantinePlayerUi && placement === "segment") {
+  if (placement === "segment") {
     return (
       <div
         className="relative inline-flex min-h-11 min-w-11 max-w-full items-center justify-center overflow-visible rounded-xl px-1"
@@ -121,56 +119,35 @@ export function SyncBlock({
     );
   }
 
-  if (mantinePlayerUi) {
-    const inline = placement === "inline";
-    return (
-      <div
-        className={
-          inline
-            ? "pointer-events-auto relative shrink-0"
-            : "jl-sync-map-indicator"
-        }
-        data-testid="sync-block-mantine"
-      >
-        <Paper
-          radius={shortLabel ? 14 : "xl"}
-          className="pointer-events-none inline-flex min-h-11 items-center justify-center"
-          px={shortLabel ? "sm" : 0}
-          role="status"
-          aria-label={statusAria}
-          styles={{
-            root: {
-              ...iosMapChromeSurfaceStyles,
-              width: shortLabel ? "auto" : "2.75rem",
-              height: "2.75rem",
-              minWidth: "2.75rem",
-              borderRadius: shortLabel ? 14 : 999,
-              cursor: "default",
-            },
-          }}
-        >
-          {beaconRow}
-        </Paper>
-      </div>
-    );
-  }
-
+  const inline = placement === "inline";
   return (
-    <div className="jl-sync-map-indicator">
-      <div
-        className={`jl-sync-map-indicator__btn inline-flex min-h-11 min-w-11 items-center justify-center border border-rule bg-canvas text-field-ink shadow-none${shortLabel ? " jl-sync-map-indicator__btn--labeled gap-1.5 px-2.5" : ""}`}
+    <div
+      className={
+        inline
+          ? "pointer-events-auto relative shrink-0"
+          : "jl-sync-map-indicator"
+      }
+      data-testid="sync-block-mantine"
+    >
+      <Paper
+        radius={shortLabel ? 14 : "xl"}
+        className="pointer-events-none inline-flex min-h-11 items-center justify-center"
+        px={shortLabel ? "sm" : 0}
         role="status"
         aria-label={statusAria}
+        styles={{
+          root: {
+            ...iosMapChromeSurfaceStyles,
+            width: shortLabel ? "auto" : "2.75rem",
+            height: "2.75rem",
+            minWidth: "2.75rem",
+            borderRadius: shortLabel ? 14 : 999,
+            cursor: "default",
+          },
+        }}
       >
-        {shortLabel ? (
-          <span
-            className={`max-w-[7.5rem] text-pretty text-xs font-semibold leading-tight${shortLabelTone ? ` ${SYNC_TONE_CLASSES[shortLabelTone].text}` : ""}`}
-          >
-            {shortLabel}
-          </span>
-        ) : null}
-        <SyncStatusBeacon status={syncStatus} size="md" />
-      </div>
+        {beaconRow}
+      </Paper>
     </div>
   );
 }

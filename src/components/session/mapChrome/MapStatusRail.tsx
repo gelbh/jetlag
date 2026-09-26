@@ -14,7 +14,6 @@ import type { SessionRulesInput } from "@/domain/session/rules";
 import type { PlayerRole } from "@/domain/session/players/playerRole";
 import type { RoleGates } from "@/domain/session/players/roleGates";
 import { useLeaderJoinRequests } from "@/hooks/map-screen/useLeaderJoinRequests";
-import { usePlayerUiMantine } from "@/hooks/feature/usePlayerUiMantine";
 import { EndGameAlert } from "../status/EndGameAlert";
 import { FoundHiderAlert } from "../status/FoundHiderAlert";
 import { HiderOutsideZoneAlert } from "../status/HiderOutsideZoneAlert";
@@ -117,7 +116,6 @@ export function MapStatusRail({
   headerLeading,
   moveInProgress = false,
 }: MapStatusRailProps) {
-  const mantinePlayerUi = usePlayerUiMantine();
   const [timerMenuOpen, setTimerMenuOpen] = useState(false);
   const [preloadMenuOpen, setPreloadMenuOpen] = useState(false);
   const railRef = useRef<HTMLDivElement>(null);
@@ -187,7 +185,7 @@ export function MapStatusRail({
     <div
       ref={railRef}
       className={railClassName}
-      {...(mantinePlayerUi
+      {...(true
         ? {
             "data-testid": "map-status-rail-mantine",
             "data-player-ux-world": "mantine",
@@ -208,7 +206,7 @@ export function MapStatusRail({
           disabled={timerControlsDisabled || inactiveChrome}
         />
 
-        {mantinePlayerUi ? (
+        {true ? (
           <div
             className="w-full"
             style={{
