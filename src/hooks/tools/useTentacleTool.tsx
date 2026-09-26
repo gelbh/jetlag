@@ -570,16 +570,19 @@ export function useTentacleTool({
     tentacleCategoryId !== null &&
     categorySelectionAvailable;
 
-  const [placementGeo, setPlacementGeo] = useState<
+  const [eligiblePlacementGeo, setEligiblePlacementGeo] = useState<
     GeolocationPermissionState | "checking"
   >("checking");
   const autoGpsForCategoryRef = useRef<TentacleExtendedCategoryId | null>(null);
   const handleUseGpsRef = useRef(handleUseGps);
-  handleUseGpsRef.current = handleUseGps;
+  const placementGeo = mapFirstEligible ? eligiblePlacementGeo : "checking";
+
+  useEffect(() => {
+    handleUseGpsRef.current = handleUseGps;
+  }, [handleUseGps]);
 
   useEffect(() => {
     if (!mapFirstEligible) {
-      setPlacementGeo("checking");
       autoGpsForCategoryRef.current = null;
       return;
     }
@@ -590,7 +593,7 @@ export function useTentacleTool({
       if (cancelled) {
         return;
       }
-      setPlacementGeo(permission);
+      setEligiblePlacementGeo(permission);
       if (
         permission === "granted" &&
         tentacleCenter === null &&

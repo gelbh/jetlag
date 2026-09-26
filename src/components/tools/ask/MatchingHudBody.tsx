@@ -3,7 +3,7 @@
  * SingleBottomChord: row tap advances; no PhaseRail / CONTINUE.
  * Spec: ask-surface-kit-design rev 2026-08-05b.
  */
-import { useState, type ComponentType } from "react";
+import { createElement, useState, type ComponentType } from "react";
 import { UnstyledButton } from "@mantine/core";
 import {
   Buildings,
@@ -186,7 +186,7 @@ export function MatchingHudBody({
     categoryId != null
       ? matchingQuestionFor(categoryId)
       : MATCHING_QUESTION_INTRO;
-  const CategoryIcon = category ? matchingCategoryIcon(category.id) : null;
+  const categoryIcon = category ? matchingCategoryIcon(category.id) : null;
   const usesLandmassMatching = category?.resolver === "landmass";
   const resolveComplete = nullAnswer || nearestFeatureName !== null;
 
@@ -322,9 +322,9 @@ export function MatchingHudBody({
                   color: "var(--color-flag)",
                 }}
               >
-                {CategoryIcon ? (
-                  <CategoryIcon size={18} weight="duotone" />
-                ) : null}
+                {categoryIcon
+                  ? createElement(categoryIcon, { size: 18, weight: "duotone" })
+                  : null}
               </span>
               <div className="min-w-0">
                 <p
@@ -401,9 +401,9 @@ export function MatchingHudBody({
                   color: "var(--color-flag)",
                 }}
               >
-                {CategoryIcon ? (
-                  <CategoryIcon size={18} weight="duotone" />
-                ) : null}
+                {categoryIcon
+                  ? createElement(categoryIcon, { size: 18, weight: "duotone" })
+                  : null}
               </span>
               <div className="min-w-0">
                 <p

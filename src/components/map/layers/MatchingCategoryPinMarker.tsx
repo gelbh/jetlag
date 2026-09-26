@@ -1,6 +1,7 @@
 /**
  * Category icon pin (Matching / Measuring): frosted disc + category glyph.
  */
+import { createElement } from "react";
 import { Marker } from "react-map-gl/maplibre";
 import type { MatchingCategoryId, MeasuringFromKind } from "@/domain/questions";
 import { matchingCategoryIcon } from "@/components/tools/ask/matchingCategoryIcons";
@@ -29,8 +30,6 @@ export function MatchingCategoryPinMarker({
   categoryId,
   pulsing = false,
 }: MatchingCategoryPinMarkerProps) {
-  const Icon = placementCategoryIcon(categoryId);
-
   return (
     <Marker longitude={longitude} latitude={latitude} anchor="bottom">
       <div
@@ -76,12 +75,12 @@ export function MatchingCategoryPinMarker({
               }}
             />
           ) : null}
-          <Icon
-            size={22}
-            weight="fill"
-            aria-hidden
-            style={{ position: "relative", zIndex: 1 }}
-          />
+          {createElement(placementCategoryIcon(categoryId), {
+            size: 22,
+            weight: "fill",
+            "aria-hidden": true,
+            style: { position: "relative", zIndex: 1 },
+          })}
         </div>
         <span
           aria-hidden

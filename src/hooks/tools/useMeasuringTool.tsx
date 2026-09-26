@@ -234,21 +234,25 @@ export function useMeasuringTool({
 
   const mapFirstEligible = draft.measuringOptionChosen;
 
-  const [placementGeo, setPlacementGeo] = useState<
-    GeolocationPermissionState | "checking"
-  >("checking");
   const autoGpsForOptionRef = useRef<string | null>(null);
   const handleGpsRef = useRef(interactions.handleGps);
-  handleGpsRef.current = interactions.handleGps;
+
+  useEffect(() => {
+    handleGpsRef.current = interactions.handleGps;
+  }, [interactions.handleGps]);
 
   const measureFromKey = measuringFromKind(
     draft.measuringSubject,
     draft.measuringLocationCategory,
   );
 
+  const [eligiblePlacementGeo, setEligiblePlacementGeo] = useState<
+    GeolocationPermissionState | "checking"
+  >("checking");
+  const placementGeo = mapFirstEligible ? eligiblePlacementGeo : "checking";
+
   useEffect(() => {
     if (!mapFirstEligible) {
-      setPlacementGeo("checking");
       autoGpsForOptionRef.current = null;
       return;
     }
@@ -259,7 +263,7 @@ export function useMeasuringTool({
       if (cancelled) {
         return;
       }
-      setPlacementGeo(permission);
+      setEligiblePlacementGeo(permission);
       if (
         permission === "granted" &&
         draft.measuringSeekerPoint === null &&

@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components -- dock stack exports peer-separation helper used by unit tests */
 import {
   useCallback,
   useEffect,
@@ -272,7 +273,9 @@ export function MapDraggableFixedStack({
   const [dragging, setDragging] = useState(false);
   const [settling, setSettling] = useState(false);
   const [stackHeight, setStackHeight] = useState(200);
-  const [edgePad, setEdgePad] = useState(EDGE_PAD_PX);
+  const [edgePad] = useState(() =>
+    typeof window !== "undefined" ? edgePadPx() : EDGE_PAD_PX,
+  );
   const sessionRef = useRef<DragSession | null>(null);
   const rootRef = useRef<HTMLDivElement | null>(null);
   const settleFromRef = useRef<SettleFrame | null>(null);
@@ -280,12 +283,10 @@ export function MapDraggableFixedStack({
   const draggingRef = useRef(false);
   const settleAnimRef = useRef<Animation | null>(null);
 
-  placementRef.current = placement;
-  draggingRef.current = dragging;
-
   useEffect(() => {
-    setEdgePad(edgePadPx());
-  }, []);
+    placementRef.current = placement;
+    draggingRef.current = dragging;
+  }, [placement, dragging]);
 
   useLayoutEffect(() => {
     const node = rootRef.current;

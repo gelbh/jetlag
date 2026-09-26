@@ -414,7 +414,10 @@ export function useMatchingTool({
   ]);
 
   const handleGpsRef = useRef(handleGps);
-  handleGpsRef.current = handleGps;
+
+  useEffect(() => {
+    handleGpsRef.current = handleGps;
+  }, [handleGps]);
 
   const buildCommitInput = useCallback((): CommitMatchingInput => {
     return {
@@ -581,14 +584,14 @@ export function useMatchingTool({
   const mapFirstEligible =
     matchingCategoryChosen && matchingCategoryId !== null;
 
-  const [placementGeo, setPlacementGeo] = useState<
+  const [eligiblePlacementGeo, setEligiblePlacementGeo] = useState<
     GeolocationPermissionState | "checking"
   >("checking");
   const autoGpsForCategoryRef = useRef<MatchingCategoryId | null>(null);
+  const placementGeo = mapFirstEligible ? eligiblePlacementGeo : "checking";
 
   useEffect(() => {
     if (!mapFirstEligible) {
-      setPlacementGeo("checking");
       autoGpsForCategoryRef.current = null;
       return;
     }
@@ -599,7 +602,7 @@ export function useMatchingTool({
       if (cancelled) {
         return;
       }
-      setPlacementGeo(permission);
+      setEligiblePlacementGeo(permission);
       if (
         permission === "granted" &&
         matchingSeekerPoint === null &&
