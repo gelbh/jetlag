@@ -28,6 +28,25 @@ Handlers run in this order (first match wins for early returns):
 | `assetCacheHeaders.ts` | Cache-Control by pathname |
 | `incidentEmail.ts` | Incident desk email webhook |
 
+## Secrets (Worker env)
+
+Injected at runtime via `wrangler secret put` (prod) or `.dev.vars` (local). Never commit real values.
+
+| Binding | Required | Purpose |
+|---------|----------|---------|
+| `RESEND_API_KEY` | yes (for email) | Resend API key |
+| `INCIDENT_EMAIL_SECRET` | yes (for email) | Bearer shared with Cloud Function |
+| `INCIDENT_ADMIN_EMAIL` | no | Admin recipient (code default if unset) |
+| `INCIDENT_EMAIL_FROM` | no | Verified Resend From (code default if unset) |
+
+Copy `.dev.vars.example` → `.dev.vars` for `npm run preview:worker`.
+
+## Config notes
+
+- `assets.run_worker_first: true` so HTML nonce CSP and `/api/*` (csp-report, incident-email, tunnels) run before static Assets. Do not narrow back to path lists without a CSP + latency proof.
+- Config SoT: `wrangler.jsonc` (not TOML).
+- Regenerate types with `npm run cf-typegen` (uses `.dev.vars.example`). Do **not** run typegen under `doppler run` / a shell full of `VITE_*` client keys; that pollutes `Env` in `worker-configuration.d.ts`.
+
 ## Tests
 
 ```bash

@@ -213,7 +213,11 @@ jobs:
               - 'worker/**'
               - 'index.html'
               - 'vite.config.ts'
-              - 'wrangler.toml'
+              - 'vite.chunk-groups.ts'
+              - 'vite.sentry.ts'
+              - 'vite.pwa.ts'
+              - 'vite.resolve-shared.ts'
+              - 'wrangler.jsonc'
               - 'package.json'
               - 'package-lock.json'
               - 'tsconfig*.json'
@@ -297,7 +301,7 @@ jobs:
             exit 1
           fi
           if [ -f dist/_redirects ]; then
-            echo "::error::dist/_redirects conflicts with wrangler.toml SPA handling. Remove public/_redirects."
+            echo "::error::dist/_redirects conflicts with wrangler.jsonc SPA handling. Remove public/_redirects."
             exit 1
           fi
           if ! grep -qiE 'uploaded|source maps' build.log; then

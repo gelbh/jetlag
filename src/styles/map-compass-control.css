@@ -52,7 +52,7 @@
   left: auto;
 }
 
-html:not([data-motion="reduced"]):not([data-motion="static"]) .map-compass-control {
+html:not([data-motion="reduced"], [data-motion="static"]) .map-compass-control {
   transition: opacity var(--motion-base) var(--ease-out-quint);
 }
 

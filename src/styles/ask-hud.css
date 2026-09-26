@@ -12,7 +12,7 @@
     overflow: hidden;
     border-radius: var(--radius-hud-lg);
     border: 1px solid var(--color-rule);
-    background: oklch(from var(--color-canvas) l c h / 0.94);
+    background: oklch(from var(--color-canvas) l c h / 94%);
     box-shadow: var(--shadow-hud-menu);
     color: var(--color-field-ink);
   }
@@ -105,8 +105,8 @@
     gap: 0.25rem;
     padding: 0.75rem 1rem;
     border-radius: var(--radius-hud-md);
-    border: 1px solid oklch(from var(--color-rule) l c h / 0.7);
-    background: oklch(from var(--color-canvas) l c h / 0.92);
+    border: 1px solid oklch(from var(--color-rule) l c h / 70%);
+    background: oklch(from var(--color-canvas) l c h / 92%);
     box-shadow: var(--shadow-hud-float);
   }
 

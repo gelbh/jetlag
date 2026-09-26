@@ -29,7 +29,7 @@
 
 #boot-splash-wordmark {
   margin: 0;
-  font-family: "Barlow", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+  font-family: Barlow, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     sans-serif;
   font-size: 0.875rem;
   font-weight: 600;
@@ -41,14 +41,14 @@
 
 #boot-splash-status {
   margin: 0;
-  font-family: "Barlow", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+  font-family: Barlow, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     sans-serif;
   font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.14em;
   line-height: 1.2;
   text-transform: uppercase;
-  color: rgba(243, 244, 245, 0.72);
+  color: rgb(243 244 245 / 72%);
 }
 
 #boot-splash-error {
@@ -78,14 +78,14 @@
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-size: 0.9375rem;
   line-height: 1.45;
-  color: rgba(243, 244, 245, 0.88);
+  color: rgb(243 244 245 / 88%);
 }
 
 #boot-splash-retry {
   appearance: none;
-  border: 1px solid rgba(243, 244, 245, 0.24);
+  border: 1px solid rgb(243 244 245 / 24%);
   border-radius: 0.5rem;
-  background: rgba(243, 244, 245, 0.08);
+  background: rgb(243 244 245 / 8%);
   color: #f3f4f5;
   cursor: pointer;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -112,6 +112,7 @@
     opacity: 1;
     transform: scale(1);
   }
+
   50% {
     opacity: 0.88;
     transform: scale(0.98);

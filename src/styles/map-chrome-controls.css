@@ -4,6 +4,7 @@
   height: 100%;
   background: var(--color-map-canvas);
   font: inherit;
+
   /* Leaflet calls preventDefault on touchmove while dragging; browser-native pan
      (pan-x/pan-y) marks those events non-cancelable and triggers Chrome warnings. */
   touch-action: none;
@@ -80,7 +81,7 @@
   right: 0;
   bottom: 0;
   left: 0;
-  background: oklch(from var(--color-surface-deep) l c h / 0.78);
+  background: oklch(from var(--color-surface-deep) l c h / 78%);
   padding: 0.125rem 0.2rem;
   text-align: center;
   font-family: var(--font-display);
@@ -93,9 +94,9 @@
 }
 
 .map-style-control__btn--active {
-  border-color: oklch(from var(--color-highlight) l c h / 0.55);
+  border-color: oklch(from var(--color-highlight) l c h / 55%);
   box-shadow:
-    0 0 0 1px oklch(from var(--color-highlight) l c h / 0.35),
+    0 0 0 1px oklch(from var(--color-highlight) l c h / 35%),
     var(--shadow-hud-float);
 }
 
@@ -146,7 +147,7 @@
   );
 }
 
-@media (min-width: 40rem) {
+@media (width >= 40rem) {
   :root {
     --map-zoom-btn-size: 3rem;
   }
@@ -170,7 +171,7 @@
   }
 }
 
-@media (max-width: 28rem) {
+@media (width <= 28rem) {
   .map-zoom-control--dock,
   .map-style-control--dock {
     bottom: calc(
@@ -180,8 +181,8 @@
   }
 }
 
-html:not([data-motion="reduced"]):not([data-motion="static"]) .map-zoom-control,
-html:not([data-motion="reduced"]):not([data-motion="static"]) .map-style-control {
+html:not([data-motion="reduced"], [data-motion="static"]) .map-zoom-control,
+html:not([data-motion="reduced"], [data-motion="static"]) .map-style-control {
   transition: opacity var(--motion-base) var(--ease-out-quint);
 }
 
@@ -233,7 +234,7 @@ html:not([data-motion="reduced"]):not([data-motion="static"]) .map-style-control
   border-radius: 9999px;
   border: 2px solid var(--color-thermometer-axis, #c55b40);
   background: var(--color-surface-deep, #1d2835);
-  box-shadow: var(--shadow-hud-float, 0 2px 8px rgba(15, 23, 42, 0.35));
+  box-shadow: var(--shadow-hud-float, 0 2px 8px rgb(15 23 42 / 35%));
   font-family: var(--font-mono, ui-monospace, monospace);
   font-size: 0.68rem;
   font-variant-numeric: tabular-nums;
@@ -260,7 +261,7 @@ html:not([data-motion="reduced"]):not([data-motion="static"]) .map-style-control
   padding: 0.1rem 0.35rem;
   border-radius: 0.25rem;
   background: var(--color-surface-deep, #1d2835);
-  border: 1px solid rgba(255, 255, 255, 0.85);
+  border: 1px solid rgb(255 255 255 / 85%);
   color: var(--color-ink-primary, #f8fafc);
   font-family: var(--font-display, "Barlow Condensed", sans-serif);
   font-size: 0.58rem;
@@ -269,10 +270,10 @@ html:not([data-motion="reduced"]):not([data-motion="static"]) .map-style-control
   line-height: 1;
   text-transform: uppercase;
   white-space: nowrap;
-  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.35);
+  box-shadow: 0 1px 4px rgb(15 23 42 / 35%);
 }
 
 .jl-thermometer-walk-end-label--satellite .jl-thermometer-walk-end-label__text {
-  background: rgba(29, 40, 53, 0.88);
+  background: rgb(29 40 53 / 88%);
   border-color: var(--color-highlight, #e4b352);
 }

@@ -1,8 +1,4 @@
 #!/usr/bin/env node
-/**
- * Dual LHCI autorun (mobile + desktop). Exit nonzero if either fails.
- * Invoked by `npm run test:lighthouse`.
- */
 import { spawnSync } from "node:child_process";
 import { delimiter, resolve } from "node:path";
 

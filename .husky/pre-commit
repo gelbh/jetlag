@@ -70,7 +70,7 @@ reject_partial "$css"
 reject_partial "$related"
 
 if [ -s "$css" ]; then
-  xargs -0 npx stylelint -- <"$css"
+  xargs -0 npx stylelint --cache --report-needless-disables --report-invalid-scope-disables -- <"$css"
 fi
 
 if [ ! -s "$related" ]; then

@@ -100,7 +100,12 @@ jobs:
               - 'package.json'
               - 'vite.optional-kernel-wasm-pkg.ts'
               - 'vite.config.ts'
+              - 'vite.chunk-groups.ts'
+              - 'vite.sentry.ts'
+              - 'vite.pwa.ts'
+              - 'vite.resolve-shared.ts'
               - 'vitest.config.ts'
+              - 'vitest.shared.ts'
               - '.github/actions/setup-rust-wasm/action.yml'
       - name: Geometry perf gates
         if: steps.geometry.outputs.geometry == 'true'

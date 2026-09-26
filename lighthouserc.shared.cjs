@@ -1,4 +1,4 @@
-function createLhciConfig({ formFactor, homeJoinPerf, createPerf, outputDir, collectSettings }) {
+function createLhciConfig({ homeJoinPerf, createPerf, outputDir, collectSettings }) {
   // Native-feel PWA locks browser page zoom (user-scalable=no). Skip meta-viewport
   // so the a11y category score is not dragged below the gate; map zoom is separate.
   const skipAudits = [
@@ -62,4 +62,5 @@ function createLhciConfig({ formFactor, homeJoinPerf, createPerf, outputDir, col
   };
 }
 
+// LHCI loadRcFile require()s only .cjs/.js; keep .cjs under "type":"module".
 module.exports = { createLhciConfig };

@@ -5,10 +5,10 @@
   inset: 0;
   pointer-events: none;
   z-index: calc(var(--z-panel) - 1);
-  box-shadow: inset 0 0 0 3px oklch(from var(--color-highlight) l c h / 0.5);
+  box-shadow: inset 0 0 0 3px oklch(from var(--color-highlight) l c h / 50%);
 }
 
-html:not([data-motion="reduced"]):not([data-motion="static"])
+html:not([data-motion="reduced"], [data-motion="static"])
   .map-screen-shell[data-map-attention="true"]::after {
   animation: map-attention-pulse 2.4s var(--ease-ios-standard) infinite;
 }
@@ -16,10 +16,10 @@ html:not([data-motion="reduced"]):not([data-motion="static"])
 @keyframes map-attention-pulse {
   0%,
   100% {
-    box-shadow: inset 0 0 0 3px oklch(from var(--color-highlight) l c h / 0.45);
+    box-shadow: inset 0 0 0 3px oklch(from var(--color-highlight) l c h / 45%);
   }
 
   50% {
-    box-shadow: inset 0 0 0 3px oklch(from var(--color-highlight) l c h / 0.72);
+    box-shadow: inset 0 0 0 3px oklch(from var(--color-highlight) l c h / 72%);
   }
 }

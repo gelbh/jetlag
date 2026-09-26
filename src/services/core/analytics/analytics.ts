@@ -10,6 +10,7 @@ import {
   type AnalyticsEventProps,
   type SessionEndedReason,
 } from "./analyticsEvents";
+import { filterPosthogException } from "./posthogExceptionPolicy";
 
 export {
   ANALYTICS_EVENTS,
@@ -173,6 +174,7 @@ export function initAnalytics(): void {
       disable_external_dependency_loading: false,
       disable_surveys: true,
       person_profiles: "identified_only",
+      before_send: filterPosthogException,
     });
     // IP is personal data; PostHog's `ip: false` is a no-op — disable GeoIP enrichment.
     posthog.register({ $geoip_disable: true });

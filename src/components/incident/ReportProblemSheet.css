@@ -50,8 +50,8 @@
   align-items: center;
   gap: 0.75rem;
   min-height: 3rem;
-  border: 2px dashed oklch(from var(--color-action) l c h / 0.75);
-  background: oklch(from var(--color-action) l c h / 0.08);
+  border: 2px dashed oklch(from var(--color-action) l c h / 75%);
+  background: oklch(from var(--color-action) l c h / 8%);
   padding: 0.625rem 0.75rem;
 }
 
@@ -62,7 +62,7 @@
   justify-content: center;
   width: 1.75rem;
   height: 1.75rem;
-  border: 1px solid oklch(from var(--color-action) l c h / 0.55);
+  border: 1px solid oklch(from var(--color-action) l c h / 55%);
   background: var(--color-action);
   color: var(--color-action-ink);
   font-family: var(--font-display);
@@ -102,7 +102,7 @@
   align-items: start;
   gap: 0.625rem;
   padding: 0.625rem 0.75rem;
-  border-top: 1px solid oklch(from var(--color-border) l c h / 0.7);
+  border-top: 1px solid oklch(from var(--color-border) l c h / 70%);
 }
 
 .jl-report-diagnostics-row:first-child {
@@ -177,7 +177,7 @@
 }
 
 .jl-report-error {
-  border: 2px solid oklch(from var(--color-status-error) l c h / 0.45);
+  border: 2px solid oklch(from var(--color-status-error) l c h / 45%);
   background: var(--color-status-error-surface);
   padding: 0.625rem 0.75rem;
   font-size: 0.875rem;
