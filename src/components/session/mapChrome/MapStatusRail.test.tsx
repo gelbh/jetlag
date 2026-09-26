@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { MantineProvider } from "@mantine/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -9,6 +9,16 @@ import {
   type MapStatusRailModel,
   type MapStatusRailProps,
 } from "./MapStatusRail";
+
+const { showEphemeral } = vi.hoisted(() => ({
+  showEphemeral: vi.fn(() => true),
+}));
+
+vi.mock("../../ui/notifications/showEphemeralPlayerNotification", () => ({
+  showEphemeralPlayerNotification: (
+    input: { title: string; message: string },
+  ) => showEphemeral(input),
+}));
 
 vi.mock("../../../state/mapStore", () => ({
   useMapStore: (selector: (state: { lowPowerMode: boolean }) => unknown) =>
@@ -65,6 +75,8 @@ function renderRail(
 }
 
 beforeEach(() => {
+  showEphemeral.mockClear();
+  showEphemeral.mockImplementation(() => true);
   vi.stubGlobal("matchMedia", (query: string) => ({
     matches: typeof query === "string" && query.includes("min-width: 380"),
     media: query,
@@ -140,6 +152,8 @@ describe("MapStatusRail Mantine", () => {
 
 describe("MapStatusRail inactive chrome", () => {
   it("shows retry and return to join for terminal session errors", () => {
+    const onRetry = vi.fn();
+    const onReturnToJoin = vi.fn();
     renderRail({
       syncStatus: "error",
       message: "That session no longer exists.",
@@ -155,13 +169,47 @@ describe("MapStatusRail inactive chrome", () => {
         secondaryAction: "rejoin",
         secondaryActionLabel: "Return to join",
       },
-      onSyncErrorAction: vi.fn(),
-      onReturnToJoin: vi.fn(),
+      onSyncErrorAction: onRetry,
+      onReturnToJoin,
     });
 
-    expect(screen.getByRole("button", { name: "Retry" })).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Return to join" }),
-    ).toBeInTheDocument();
+    expect(screen.getByText("Session gone")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Retry" }));
+    fireEvent.click(screen.getByRole("button", { name: "Return to join" }));
+    expect(onRetry).toHaveBeenCalledTimes(1);
+    expect(onReturnToJoin).toHaveBeenCalledTimes(1);
+    expect(showEphemeral).not.toHaveBeenCalled();
+  });
+});
+
+describe("MapStatusRail error channels (W5-F2)", () => {
+  it("routes actionful sync errors to sticky Alert", () => {
+    const onRetry = vi.fn();
+    renderRail({
+      syncStatus: "error",
+      message: "Sync failed · permission denied",
+      onSyncErrorAction: onRetry,
+    });
+
+    expect(screen.getByText("Sync failed")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Retry" }));
+    expect(onRetry).toHaveBeenCalledTimes(1);
+    expect(showEphemeral).not.toHaveBeenCalled();
+  });
+
+  it("routes action-free sync errors to ephemeral toast", () => {
+    const { container } = renderRail({
+      syncStatus: "error",
+      message: "Sync failed · permission denied",
+    });
+
+    expect(showEphemeral).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: "Sync failed",
+        message: "Sync failed · permission denied",
+      }),
+    );
+    expect(screen.queryByRole("button", { name: "Retry" })).toBeNull();
+    expect(container.querySelector(".mantine-Alert-root")).toBeNull();
   });
 });
