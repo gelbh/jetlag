@@ -644,13 +644,13 @@ html:is([data-motion="static"], [data-motion="reduced"]) .jl-map-chrome-press {
 
 .map-hud-home.jl-map-status-home:hover {
   color: var(--color-flag);
-  background-color: oklch(from var(--color-flag) l c h / 0.12);
+  background-color: oklch(from var(--color-flag) l c h / 12%);
 }
 
 .map-hud-home.jl-map-status-home:active {
   transform: scale(0.94);
   color: var(--color-flag);
-  background-color: oklch(from var(--color-flag) l c h / 0.2);
+  background-color: oklch(from var(--color-flag) l c h / 20%);
 }
 
 .map-hud-home.jl-map-status-home:focus-visible {

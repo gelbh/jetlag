@@ -119,7 +119,7 @@
   [data-player-ux-world="survey"] .hud-sheet {
     border-top: 2px solid var(--color-flag);
     background: var(--color-canvas);
-    box-shadow: 0 -8px 28px oklch(from var(--color-field-ink) l c h / 0.18);
+    box-shadow: 0 -8px 28px oklch(from var(--color-field-ink) l c h / 18%);
     color: var(--color-field-ink);
   }
 
@@ -131,7 +131,7 @@
 
   [data-player-ux-world="survey"] .hud-scrim,
   .jl-survey-world.hud-scrim {
-    background: oklch(from var(--color-field-ink) l c h / 0.42);
+    background: oklch(from var(--color-field-ink) l c h / 42%);
   }
 
   [data-player-ux-world="survey"] .jl-sheet-handle {
@@ -152,7 +152,7 @@
   [data-player-ux-world="survey"] .ask-mode-cue-ticker {
     border-radius: 0.25rem;
     border: 1px solid var(--color-rule);
-    background: oklch(from var(--color-canvas) l c h / 0.94);
+    background: oklch(from var(--color-canvas) l c h / 94%);
     box-shadow: none;
   }
 
@@ -194,7 +194,7 @@
   [data-player-ux-world="survey"] .ask-walk-banner {
     border-radius: 0.35rem;
     border: 1px solid var(--color-rule);
-    background: oklch(from var(--color-canvas) l c h / 0.94);
+    background: oklch(from var(--color-canvas) l c h / 94%);
     box-shadow: none;
   }
 

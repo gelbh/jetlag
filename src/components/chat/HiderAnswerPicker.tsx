@@ -6,7 +6,7 @@ import { usePlayerUiMantine } from "../../hooks/feature/usePlayerUiMantine";
 import {
   hiderTruthReferenceLabel,
   hiderTruthReferenceLoadingLabel,
-} from "../tools/shared/hiderTruthReferenceCopy";
+} from "../../domain/questions/hiderTruth/hiderTruthReferenceCopy";
 import { LoadingReadout } from "../tools/shared/readout/LoadingReadout";
 
 interface HiderAnswerPickerProps {

@@ -23,18 +23,18 @@
     background-image:
       linear-gradient(
         to bottom,
-        oklch(from var(--color-rule) l c h / 0.12) 0,
-        oklch(from var(--color-rule) l c h / 0.12) 1px,
+        oklch(from var(--color-rule) l c h / 12%) 0,
+        oklch(from var(--color-rule) l c h / 12%) 1px,
         transparent 1px
       ),
       radial-gradient(
         ellipse 70% 45% at 100% 0%,
-        oklch(from var(--color-flag) l c h / 0.1),
+        oklch(from var(--color-flag) l c h / 10%),
         transparent 55%
       ),
       radial-gradient(
         ellipse 60% 50% at 0% 100%,
-        oklch(from var(--color-signal) l c h / 0.08),
+        oklch(from var(--color-signal) l c h / 8%),
         transparent 60%
       );
     background-size:
@@ -65,7 +65,7 @@
     letter-spacing: 0.07em;
   }
 
-  html:not([data-motion="reduced"]):not([data-motion="static"]) .home-card-btn {
+  html:not([data-motion="reduced"], [data-motion="static"]) .home-card-btn {
     transition:
       background var(--motion-fast) var(--ease-out-quint),
       border-color var(--motion-fast) var(--ease-out-quint),
@@ -89,7 +89,7 @@
 
   .home-card-btn-secondary:hover {
     border-color: var(--color-signal);
-    background: oklch(from var(--color-signal) l c h / 0.12);
+    background: oklch(from var(--color-signal) l c h / 12%);
   }
 
   .home-card-btn-hint {
@@ -120,7 +120,7 @@
   }
 
   .home-card-btn-premium {
-    border-color: oklch(from var(--color-flag) l c h / 0.65);
+    border-color: oklch(from var(--color-flag) l c h / 65%);
     border-top-width: 3px;
     background: var(--color-flag-soft);
     color: var(--color-flag);
@@ -128,7 +128,7 @@
 
   .home-card-btn-premium:hover {
     border-color: var(--color-flag);
-    background: oklch(from var(--color-flag) l c h / 0.28);
+    background: oklch(from var(--color-flag) l c h / 28%);
   }
 
   .home-card-btn-premium .home-card-btn-hint {
@@ -136,11 +136,11 @@
     text-align: right;
     text-wrap: pretty;
     opacity: 1;
-    color: oklch(from var(--color-flag) l c h / 0.88);
+    color: oklch(from var(--color-flag) l c h / 88%);
   }
 
   .home-card-btn-premium-sessions {
-    border-color: oklch(from var(--color-signal) l c h / 0.65);
+    border-color: oklch(from var(--color-signal) l c h / 65%);
     border-top-width: 3px;
     background: var(--color-signal-soft);
     color: var(--color-signal);
@@ -148,7 +148,7 @@
 
   .home-card-btn-premium-sessions:hover {
     border-color: var(--color-signal);
-    background: oklch(from var(--color-signal) l c h / 0.28);
+    background: oklch(from var(--color-signal) l c h / 28%);
   }
 
   .home-card-btn-premium-sessions .home-card-btn-hint {
@@ -156,7 +156,7 @@
     text-align: right;
     text-wrap: pretty;
     opacity: 1;
-    color: oklch(from var(--color-signal) l c h / 0.88);
+    color: oklch(from var(--color-signal) l c h / 88%);
   }
 
   .premium-entitlement-pill {
@@ -164,7 +164,7 @@
     max-width: 100%;
     align-items: center;
     border-radius: var(--radius-hud-sm);
-    border: 2px solid oklch(from var(--color-flag) l c h / 0.55);
+    border: 2px solid oklch(from var(--color-flag) l c h / 55%);
     background: var(--color-flag-soft);
     padding: 0.25rem 0.625rem;
     font-size: 0.8125rem;
@@ -196,7 +196,7 @@
     color: var(--color-field-ink);
   }
 
-  html:not([data-motion="reduced"]):not([data-motion="static"]) .premium-pack-cell {
+  html:not([data-motion="reduced"], [data-motion="static"]) .premium-pack-cell {
     transition:
       background var(--motion-fast) var(--ease-out-quint),
       border-color var(--motion-fast) var(--ease-out-quint);
@@ -208,7 +208,7 @@
 
   .premium-pack-cell:hover:not(:disabled) {
     border-color: var(--color-signal);
-    background: oklch(from var(--color-signal) l c h / 0.12);
+    background: oklch(from var(--color-signal) l c h / 12%);
   }
 
   .premium-pack-cell:disabled {
@@ -245,7 +245,7 @@
     color: var(--color-field-ink);
   }
 
-  html:not([data-motion="reduced"]):not([data-motion="static"]) .premium-offer-row {
+  html:not([data-motion="reduced"], [data-motion="static"]) .premium-offer-row {
     transition:
       background var(--motion-fast) var(--ease-out-quint),
       border-color var(--motion-fast) var(--ease-out-quint);
@@ -257,7 +257,7 @@
 
   .premium-offer-row:hover:not(:disabled) {
     border-color: var(--color-signal);
-    background: oklch(from var(--color-signal) l c h / 0.12);
+    background: oklch(from var(--color-signal) l c h / 12%);
   }
 
   .premium-offer-row:disabled {
@@ -306,9 +306,9 @@
     justify-content: center;
     gap: 0.75rem;
     border-radius: var(--radius-hud-md);
-    border: 2px solid oklch(0.99 0.002 250);
-    background: oklch(0.99 0.002 250);
-    color: oklch(0.18 0.02 250);
+    border: 2px solid oklch(99% 0.002 250deg);
+    background: oklch(99% 0.002 250deg);
+    color: oklch(18% 0.02 250deg);
     font-family: var(--font-body);
     font-size: 1rem;
     font-weight: 500;
@@ -317,7 +317,7 @@
   }
 
   .oauth-provider-button:hover {
-    background: oklch(0.97 0.003 250);
+    background: oklch(97% 0.003 250deg);
   }
 
   .oauth-provider-button-icon {
@@ -383,7 +383,7 @@
     color: var(--color-field-ink);
   }
 
-  html:not([data-motion="reduced"]):not([data-motion="static"]) .jl-choice-btn {
+  html:not([data-motion="reduced"], [data-motion="static"]) .jl-choice-btn {
     transition:
       background var(--motion-fast) ease-out,
       border-color var(--motion-fast) ease-out;
@@ -453,7 +453,7 @@
     color: var(--color-field-ink-muted);
   }
 
-  html:not([data-motion="reduced"]):not([data-motion="static"]) .jl-segment-btn {
+  html:not([data-motion="reduced"], [data-motion="static"]) .jl-segment-btn {
     transition:
       background var(--motion-fast) ease-out,
       border-color var(--motion-fast) ease-out,
@@ -474,7 +474,7 @@
     background-color: var(--color-canvas);
     background-image: radial-gradient(
       ellipse 120% 70% at 50% -15%,
-      oklch(from var(--color-signal) l c h / 0.22),
+      oklch(from var(--color-signal) l c h / 22%),
       transparent 58%
     );
   }
@@ -530,7 +530,7 @@
     font-weight: 500;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: oklch(from var(--color-flag-ink) l c h / 0.62);
+    color: oklch(from var(--color-flag-ink) l c h / 62%);
   }
 
   .home-resume-code {
@@ -557,11 +557,11 @@
     width: 1px;
     align-self: stretch;
     margin-block: 0.125rem;
-    background: oklch(from var(--color-flag-ink) l c h / 0.2);
+    background: oklch(from var(--color-flag-ink) l c h / 20%);
   }
 
   @media (prefers-reduced-motion: no-preference) {
-    html:not([data-motion="reduced"]):not([data-motion="static"]) .home-resume-action[aria-busy="true"] .home-resume-cta {
+    html:not([data-motion="reduced"], [data-motion="static"]) .home-resume-action[aria-busy="true"] .home-resume-cta {
       animation: home-resume-pulse 1.2s ease-in-out infinite;
     }
   }
@@ -583,7 +583,7 @@
     padding-top: 0.125rem;
   }
 
-  @media (min-width: 1024px) {
+  @media (width >= 1024px) {
     /* Entry hosts only — do not bare-select .home-card-btn / .jl-field-frame
        (create-session and admin share those classes). */
     .home-enter-actions .home-card-btn,
@@ -604,7 +604,6 @@
   @media (prefers-reduced-transparency: reduce) {
     .jl-ios-inset-group {
       backdrop-filter: none;
-      -webkit-backdrop-filter: none;
       background-color: oklch(from var(--color-canvas) calc(l + 0.06) c h);
     }
   }

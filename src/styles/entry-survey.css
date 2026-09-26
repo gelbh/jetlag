@@ -73,6 +73,7 @@
     border-color: var(--color-flag);
     border-top-width: 2px;
     background: var(--color-flag-soft);
+
     /* Soft wash on dark canvas — field-ink; flag-ink reserved for solid flag fills. */
     color: var(--color-field-ink);
   }
@@ -137,6 +138,7 @@
 
   [data-player-ux-world="survey"].jl-create-session {
     background: var(--color-canvas);
+
     /* Pin to app-scroll-root; sheet body owns scroll (header+map+sheet > 100dvh). */
     height: 100%;
     max-height: 100%;
