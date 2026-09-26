@@ -262,7 +262,6 @@ export function MatchingHudBody({
                 aria-label="Filter match categories"
                 className="jl-scroll"
                 style={iosFilterChipTrackStyle}
-                data-player-ux-world="mantine"
               >
                 {filterOptions.map((option) => {
                   const selected = effectiveFilter === option.value;
@@ -308,7 +307,6 @@ export function MatchingHudBody({
         <div
           className="pointer-events-auto space-y-3 p-3"
           style={iosAskInsetSurfaceStyle}
-          data-player-ux-world="mantine"
         >
           {category ? (
             <div className="flex items-center gap-2.5">
@@ -388,7 +386,6 @@ export function MatchingHudBody({
         <div
           className="pointer-events-auto space-y-3 p-3"
           style={iosAskInsetSurfaceStyle}
-          data-player-ux-world="mantine"
         >
           {category ? (
             <div className="flex items-center gap-2.5">

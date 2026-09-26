@@ -123,7 +123,6 @@ export const MapBottomChrome = forwardRef<HTMLDivElement, MapBottomChromeProps>(
           {
             component: "div" as const,
             "data-testid": "map-bottom-chrome-mantine",
-            "data-player-ux-world": "mantine",
             "data-overlay-chrome": "",
             "data-layout": layout,
             "data-hunt-density": huntDensity,

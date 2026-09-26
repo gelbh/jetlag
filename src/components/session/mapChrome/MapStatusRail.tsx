@@ -186,7 +186,6 @@ export function MapStatusRail({
       ref={railRef}
       className={railClassName}
       data-testid="map-status-rail-mantine"
-      data-player-ux-world="mantine"
     >
       <div className="relative">
         <TimerBlock

@@ -25,7 +25,6 @@ export function DesktopOpsShell({
     <div
       ref={chromeHudRef}
       className={`desktop-ops-shell map-chrome-hud ${className}`.trim()}
-      data-player-ux-world="mantine"
     >
       <div
         className="desktop-ops-shell__status"

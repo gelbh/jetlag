@@ -50,7 +50,6 @@ describe("AskModeCueTicker", () => {
     renderCue("PICK CATEGORY");
 
     const cue = screen.getByTestId("ask-mode-cue-ticker");
-    expect(cue.getAttribute("data-player-ux-world")).toBe("mantine");
     expect(cue).toHaveTextContent("PICK CATEGORY");
   });
 });

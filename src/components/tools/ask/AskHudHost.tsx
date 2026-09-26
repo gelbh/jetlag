@@ -77,7 +77,6 @@ export function AskHudHost({
   return (
     <div
       data-testid="ask-hud-host"
-      data-player-ux-world="mantine"
       data-ask-composition="ask-first"
     >
       <SheetHost

@@ -2,7 +2,6 @@
 export function ProvisionalBadge() {
   return (
     <span
-      data-player-ux-world="mantine"
       style={{
         marginLeft: "0.5rem",
         display: "inline-flex",

@@ -33,8 +33,5 @@ describe("Terms", () => {
     expect(
       screen.getByRole("heading", { name: "Terms of Service" }),
     ).toBeInTheDocument();
-    expect(
-      document.querySelector('[data-player-ux-world="mantine"]'),
-    ).toBeTruthy();
   });
 });

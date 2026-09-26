@@ -59,7 +59,6 @@ export function MapLandscapeChromeChip({
       component="button"
       type="button"
       data-testid="map-landscape-chrome-chip-mantine"
-      data-player-ux-world="mantine"
       className={chipClassName}
       onClick={onToggle}
       aria-expanded={!collapsed}

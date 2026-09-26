@@ -174,7 +174,6 @@ describe("MapChromeControl", () => {
     );
 
     const button = screen.getByRole("button", { name: "Matching" });
-    expect(button.getAttribute("data-player-ux-world")).toBe("mantine");
     expect(button).toHaveClass("jl-tool-slot");
     expect(button).not.toHaveClass("jl-tool-slot-active");
     expect(button).toHaveAttribute("aria-pressed", "true");
