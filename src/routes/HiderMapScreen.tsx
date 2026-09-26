@@ -16,6 +16,7 @@ import { HidingZoneStationsLayer } from "../components/map/layers/HidingZoneStat
 import { LiveHiderLocationsLayer } from "../components/map/layers/LiveHiderLocationsLayer";
 import { LiveSeekerLocationsLayer } from "../components/map/layers/LiveSeekerLocationsLayer";
 import { MapViewWithLandscapeInset } from "../components/map/MapViewWithLandscapeInset";
+import { MapAttentionRing } from "../components/map/chrome/MapAttentionRing";
 import {
   MapViewportTracker,
   type MapViewportState,
@@ -962,6 +963,7 @@ export function HiderMapScreen() {
         className="map-screen-shell"
         data-map-attention={mapAttentionActive ? "true" : undefined}
       >
+        <MapAttentionRing active={mapAttentionActive} />
         {inactiveChrome ? (
           <div
             aria-hidden

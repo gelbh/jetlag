@@ -767,3 +767,191 @@ export function segmentBtnStyle(selected: boolean): CSSProperties {
 export const homeEnterActionsStyle: CSSProperties = {
   animation: "home-enter 0.22s ease-out both",
 };
+
+/** Frosted map floating control (zoom / style / recenter). Was `.hud-chrome`. */
+export function hudChromeStyles(pressed = false): ButtonProps["styles"] {
+  return {
+    root: {
+      display: "inline-flex",
+      minHeight: "2.75rem",
+      minWidth: "2.75rem",
+      height: "var(--map-zoom-btn-size, 2.75rem)",
+      width: "var(--map-zoom-btn-size, 2.75rem)",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: 0,
+      borderRadius: 14,
+      border: pressed
+        ? "0.33px solid oklch(from var(--color-highlight) l c h / 0.55)"
+        : "0.33px solid oklch(from var(--color-rule) l c h / 0.65)",
+      backgroundColor: pressed
+        ? "oklch(from var(--color-highlight) l c h / 0.22)"
+        : "oklch(from var(--color-canvas) l c h / 0.88)",
+      color: pressed ? "var(--color-highlight)" : "var(--color-field-ink)",
+      backdropFilter: "blur(24px) saturate(1.35)",
+      WebkitBackdropFilter: "blur(24px) saturate(1.35)",
+      boxShadow: pressed
+        ? "0 0 0 1px oklch(from var(--color-highlight) l c h / 0.35), 0 4px 14px 0 oklch(0.1 0.04 265 / 0.28)"
+        : "0 4px 14px 0 oklch(0.1 0.04 265 / 0.28)",
+      overflow: "hidden",
+      WebkitTapHighlightColor: "transparent",
+      "&:hover:not(:disabled)": {
+        backgroundColor: pressed
+          ? "oklch(from var(--color-highlight) l c h / 0.28)"
+          : "oklch(from var(--color-canvas) l c h / 0.96)",
+      },
+      "&:disabled": {
+        opacity: 0.4,
+        cursor: "not-allowed",
+      },
+    },
+  };
+}
+
+/** Map floating panel / sheet surface (was `.hud-panel`). */
+export const hudPanelStyle: CSSProperties = {
+  position: "relative",
+  overflow: "hidden",
+  borderRadius: 16,
+  border: "0.33px solid oklch(from var(--color-rule) l c h / 0.65)",
+  backgroundColor: "oklch(from var(--color-canvas) l c h / 0.92)",
+  backdropFilter: "blur(24px) saturate(1.35)",
+  WebkitBackdropFilter: "blur(24px) saturate(1.35)",
+  boxShadow: "0 8px 24px 0 oklch(0.1 0.04 265 / 0.35)",
+  color: "var(--color-field-ink)",
+};
+
+/** Bottom sheet skin (was `.hud-sheet`). */
+export const hudSheetStyle: CSSProperties = {
+  borderTop: "3px solid var(--color-flag)",
+  backgroundColor: "oklch(from var(--color-canvas) l c h / 0.96)",
+  boxShadow: "0 -12px 40px oklch(0.08 0.04 265 / 0.55)",
+};
+
+/** Modal scrim (was `.hud-scrim`). */
+export const hudScrimStyle: CSSProperties = {
+  backgroundColor: "oklch(from var(--color-canvas) l c h / 0.88)",
+};
+
+/** Ask path frosted panel (was `.ask-hud-panel`). */
+export const askHudPanelStyle: CSSProperties = {
+  position: "relative",
+  overflow: "hidden",
+  borderRadius: 16,
+  border: "0.33px solid oklch(from var(--color-rule) l c h / 0.65)",
+  backgroundColor: "oklch(from var(--color-canvas) l c h / 0.94)",
+  backdropFilter: "blur(24px) saturate(1.35)",
+  WebkitBackdropFilter: "blur(24px) saturate(1.35)",
+  boxShadow: "0 8px 24px 0 oklch(0.1 0.04 265 / 0.35)",
+  color: "var(--color-field-ink)",
+};
+
+/** Detail-panel icon close (was `.jl-sync-detail-panel__close`). */
+export const sheetIconCloseStyle: CSSProperties = {
+  display: "inline-flex",
+  height: "2rem",
+  width: "2rem",
+  flexShrink: 0,
+  alignItems: "center",
+  justifyContent: "center",
+  margin: "-0.125rem -0.25rem -0.125rem 0",
+  border: "none",
+  borderRadius: 10,
+  background: "transparent",
+  color: "var(--color-field-ink-muted)",
+  cursor: "pointer",
+};
+
+export type SyncBeaconStatus =
+  | "synced"
+  | "saving"
+  | "offline"
+  | "degraded"
+  | "error";
+
+const syncBeaconTone: Record<
+  SyncBeaconStatus,
+  { border: string; background: string; color: string; dashed?: boolean }
+> = {
+  synced: {
+    border: "oklch(from var(--color-trail) l c h / 0.55)",
+    background: "oklch(from var(--color-trail) l c h / 0.1)",
+    color: "var(--color-trail)",
+  },
+  saving: {
+    border: "oklch(from var(--color-signal) l c h / 0.55)",
+    background: "oklch(from var(--color-signal) l c h / 0.1)",
+    color: "var(--color-signal)",
+  },
+  offline: {
+    border: "oklch(from var(--color-flag) l c h / 0.6)",
+    background: "oklch(from var(--color-flag) l c h / 0.1)",
+    color: "var(--color-flag)",
+    dashed: true,
+  },
+  degraded: {
+    border: "oklch(from var(--color-flag) l c h / 0.6)",
+    background: "oklch(from var(--color-flag) l c h / 0.1)",
+    color: "var(--color-flag)",
+    dashed: true,
+  },
+  error: {
+    border: "oklch(from var(--color-halt) l c h / 0.65)",
+    background: "oklch(from var(--color-halt) l c h / 0.12)",
+    color: "var(--color-halt)",
+  },
+};
+
+/** Sync status beacon (was `.jl-sync-beacon*`). */
+export function syncBeaconStyle(
+  status: SyncBeaconStatus,
+  size: "sm" | "md" = "md",
+): CSSProperties {
+  const tone = syncBeaconTone[status];
+  const dim = size === "sm" ? "1.25rem" : "1.625rem";
+  return {
+    display: "inline-flex",
+    flexShrink: 0,
+    alignItems: "center",
+    justifyContent: "center",
+    width: dim,
+    height: dim,
+    borderRadius: 9999,
+    border: `${tone.dashed ? "1.5px dashed" : "1.5px solid"} ${tone.border}`,
+    background: tone.background,
+    color: tone.color,
+    boxShadow: "0 4px 14px 0 oklch(0.1 0.04 265 / 0.28)",
+  };
+}
+
+/** Preload leading beacon in detail panels. */
+export function preloadBeaconStyle(
+  tone: "loading" | "failed",
+  size: "sm" | "md" = "sm",
+): CSSProperties {
+  const dim = size === "sm" ? "1.25rem" : "1.625rem";
+  const color =
+    tone === "failed" ? "var(--color-flag)" : "var(--color-signal)";
+  return {
+    display: "inline-flex",
+    flexShrink: 0,
+    alignItems: "center",
+    justifyContent: "center",
+    width: dim,
+    height: dim,
+    borderRadius: 9999,
+    border: `1.5px solid oklch(from ${color} l c h / 0.55)`,
+    background: `oklch(from ${color} l c h / 0.14)`,
+    color,
+    boxShadow: "0 4px 14px 0 oklch(0.1 0.04 265 / 0.28)",
+  };
+}
+
+/** Wizard place-phase attention ring overlay. */
+export const mapAttentionRingStyle: CSSProperties = {
+  position: "fixed",
+  inset: 0,
+  pointerEvents: "none",
+  zIndex: 1001,
+  boxShadow: "inset 0 0 0 3px oklch(from var(--color-highlight) l c h / 0.5)",
+};

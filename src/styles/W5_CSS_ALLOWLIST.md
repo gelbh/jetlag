@@ -5,10 +5,10 @@ Do not delete or rewrite live chrome modules in W5-A; later bands consume this t
 
 | Field | Value |
 | --- | --- |
-| Tip SHA | `56e415db3662ecad0a881ec17beb95b749c634e3` |
+| Tip SHA | `345487b9` (W5-C branch tip at band start; update on merge) |
 | Baseline `wc -l src/styles/*.css` (pre `map-hud.css` delete) | **5053** |
 | Baseline after orphan `map-hud.css` delete | **5052** |
-| Band | W5-B (entry chrome → Mantine + theme) |
+| Band | W5-C (map panels / controls → Mantine + theme) |
 
 ## Classes
 
@@ -22,25 +22,30 @@ Do not delete or rewrite live chrome modules in W5-A; later bands consume this t
 ## Full inventory
 
 | File | Lines | Class | Band | Notes |
-| --- | --- | ---: | --- | --- |
-| `ask-hud.css` | 138 | replace | W5-C / W5-D | Ask HUD chrome (panels, cues) in C; residual strip/height tokens in D. |
+| --- | ---: | --- | --- | --- |
+| `ask-hud.css` | 99 | replace (residual) | W5-C → W5-D | Panel/cue chrome → `AskHudPanel` / `askHudPanelStyle`. Residual: strip/rail height tokens + layout hooks. |
 | `base.css` | 150 | bridge | until E | Fonts, dock/safe-area/z-index CSS vars. Keep `env(safe-area-*)` until Cap AC proven. Theme now mirrors via `jetlagBrand` / `--jl-*`. |
 | `desktop-ops.css` | 211 | replace | W5-D | Desktop ops chrome layout. |
 | `map-attribution.css` | 51 | allowlist | geometry | MapLibre attribution control + ask/matching placement clearance overrides. |
 | `map-bottom-chrome.css` | 418 | replace | W5-D | Primary: dock / island clearance tokens + chrome layout. **Allowlist carve-out:** left-stack geometry / safe-area insets (`--map-left-*`, tier bottoms). |
-| `map-chrome-controls.css` | 289 | replace | W5-C | Primary: floating zoom/style chrome. **Allowlist carve-out:** MapLibre canvas size, `touch-action`, basemap filters, hiding default attrib. |
+| `map-chrome-controls.css` | 206 | allowlist (+ residual) | W5-C | **Allowlist:** MapLibre canvas size, `touch-action`, basemap filters, default attrib hide. **Residual:** zoom/style positioning hooks, interact/landscape distill, thermometer marker skins. Button chrome → `hudChromeStyles` / `MapChromeControl`. |
 | `map-compass-control.css` | 67 | allowlist | geometry | Needle + tier bottom geometry. Chrome button skin may migrate later; keep positioning. |
-| `map-panels.css` | 259 | replace | W5-C | Map floating panels / sheet chrome. |
-| `map-shell.css` | 1058 | allowlist | geometry (+ replace carve-out) | Primary: map container, shell mask, safe-area hit targets. **Replace carve-out:** status chrome (`jl-status-*`, `map-float-alert`, dock-waiting host skins). |
+| `map-shell.css` | 790 | allowlist | geometry (+ replace carve-out) | Primary: map container, shell mask, safe-area hit targets, sync/preload **positioning**. W5-C removed duplicate panel/beacon visual chrome (now Mantine). **Replace later:** `.jl-status-*`, `.map-float-alert`, dock-waiting host skins. |
 | `map-tool-dock.css` | 476 | replace | W5-D | Tool dock / deck chrome. |
 | `map-touch-gestures.css` | 88 | allowlist | geometry | MapLibre children gesture pass-through + feature popup geometry (imported from MapView, not `index.css`). |
-| `map-wizard-attention.css` | 25 | replace | W5-C | Wizard place-phase attention ring (chrome). |
 | `motion-utilities.css` | 63 | bridge | until E | Motion utility classes; bridge until motion system lands in theme/kit. |
-| `motion.css` | 673 | bridge | until E | Keyframes / motion contracts. |
-| `primitives.css` | 223 | replace (residual) | W5-B → W5-C | Entry-route consumers migrated with W5-B. Residual map HUD (`hud-chrome`, `hud-panel`, `hud-sheet`, `hud-scrim`, `btn-primary`/`btn-secondary`, `field-*`, etc.) kept; continue under W5-C map chrome. |
+| `motion.css` | 690 | bridge | until E | Keyframes / motion contracts. Hosts `map-attention-pulse` for `MapAttentionRing`. |
+| `primitives.css` | 216 | replace (residual) | W5-C → W5-D/E | Map floating controls use `hudChromeStyles`. Residual: `hud-*` / `btn-*` / `field-*` for ScreenNav, banners, admin, sheets until those migrate. |
 | `route-transition.css` | 153 | bridge | until E | Route transition motion. |
 | `scrollbars.css` | 42 | bridge | until E | Scrollbar skin; keep until chrome kill. |
 | `tokens.css` | 62 | bridge | until E | Residual `@theme` color/radius tokens; prefer `jetlagBrand` for new UI. |
+
+## Deleted in W5-C
+
+| File | Lines | Class | Band | Notes |
+| --- | ---: | --- | --- | --- |
+| `map-panels.css` | 259 | delete | W5-C | Sync/preload panel + beacon chrome → `HudDetailPanel` / `syncBeaconStyle` / `preloadBeaconStyle`. Geometry hooks remain in `map-shell.css`. |
+| `map-wizard-attention.css` | 25 | delete | W5-C | Attention ring → `MapAttentionRing` + `mapAttentionRingStyle`; pulse keyframes in `motion.css`. |
 
 ## Deleted in W5-B
 
@@ -51,20 +56,21 @@ Do not delete or rewrite live chrome modules in W5-A; later bands consume this t
 ## Deleted in W5-A
 
 | File | Lines | Class | Band | Notes |
-| --- | --- | ---: | --- | --- |
+| --- | ---: | --- | --- | --- |
 | `map-hud.css` | 1 | delete | W5-A | Orphan stub comment only; not imported in `index.css`. Removed. Class names like `map-hud-home` live in `primitives.css` and stay. |
 
 ## Geometry carve-outs (detail)
 
 ### `map-shell.css`
 
-- **Allowlist:** `.map-screen-shell` container / dvh fill, `::before` safe-area paint band, map chrome host overflow, sync-beacon insets, hit-target / mask geometry tied to safe-area and dock clearance.
+- **Allowlist:** `.map-screen-shell` container / dvh fill, `::before` safe-area paint band, map chrome host overflow, sync-beacon insets, hit-target / mask geometry tied to safe-area and dock clearance; sync/preload indicator **positioning** (`.jl-sync-map-indicator`, `.jl-preload-map-indicator`, panel `transform-origin` / width hooks).
 - **Replace (later band):** `.jl-status-*`, `.map-float-alert`, `.dock-waiting-host` visual chrome (colors, typography, frosted skins).
 
 ### `map-chrome-controls.css`
 
 - **Allowlist:** `.maplibregl-map` width/height/background, `touch-action: none`, basemap filter classes, default `.maplibregl-ctrl-attrib { display: none }`.
-- **Replace:** `.map-zoom-control*`, `.map-style-control*` chrome buttons and positioning that duplicate theme tokens.
+- **Residual (W5-C):** `.map-zoom-control*` / `.map-style-control*` **positioning** + interact/landscape distill; thermometer walk marker skins.
+- **Replaced:** floating button chrome → `MapChromeControl` + `hudChromeStyles`.
 
 ### `map-bottom-chrome.css`
 
@@ -84,10 +90,8 @@ Do not delete or rewrite live chrome modules in W5-A; later bands consume this t
 
 - **Allowlist:** MapLibre attrib control styling + placement clearance CSS vars.
 
-### `map-wizard-attention.css`
-
-- No geometry carve-out; classified **replace** (attention ring chrome).
-
-## Theme bridge (W5-A)
+## Theme bridge (W5-A / W5-C)
 
 `src/theme/theme.ts` exposes dock / safe-area / z-index / spacing on `jetlagBrand` → `theme.other` and `--jl-*` via `jetlagCssVariablesResolver`. Residual CSS may keep `--dock-height` / `--z-*` in `base.css` until W5-E; new chrome code should prefer theme tokens.
+
+W5-C helpers (extend, do not invent a kit): `hudChromeStyles`, `askHudPanelStyle`, `syncBeaconStyle`, `preloadBeaconStyle`, `mapAttentionRingStyle`, `sheetIconCloseStyle` in `entryStyles` / `entryChrome`.
