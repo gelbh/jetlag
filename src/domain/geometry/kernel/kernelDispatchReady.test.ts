@@ -27,7 +27,7 @@ const eastSite = { id: "east", lat: 51.45, lng: -0.12 };
 const anchor: LatLngTuple = [51.45, -0.15];
 const oneMileMeters = 1609.344;
 
-describe("wave2 kernel dispatch", () => {
+describe("kernel dispatch ready", () => {
   it("mode wasm + spatialVoronoi ready → FeatureCollection with site count", async () => {
     const sites = [
       { lng: -0.18, lat: 51.45, properties: { poiId: "west" } },

@@ -1,4 +1,5 @@
 import { dispatchKernel } from "./dispatchKernel";
+import { createLazyWasmImport } from "./lazyWasmImport";
 import type { MaskKernelMode } from "./maskKernelMode";
 import { bboxFromGameArea, maskTopologyMatches } from "./maskTopology";
 import {
@@ -7,57 +8,8 @@ import {
 } from "./radarHalfPlane";
 import type { GameAreaGeometry, LatLngTuple, PolygonFeature } from "./types";
 
-type HalfPlaneWasmApi = typeof import("./halfPlaneWasm");
+const halfPlaneWasm = createLazyWasmImport(() => import("./halfPlaneWasm"));
 
-let halfPlaneWasmModulePromise: Promise<HalfPlaneWasmApi> | null = null;
-
-function loadHalfPlaneWasmModule(): Promise<HalfPlaneWasmApi> {
-  if (!halfPlaneWasmModulePromise) {
-    halfPlaneWasmModulePromise = import("./halfPlaneWasm").catch((error) => {
-      halfPlaneWasmModulePromise = null;
-      throw error;
-    });
-  }
-  return halfPlaneWasmModulePromise;
-}
-
-/** Production half-plane entrypoint (mode + KERNEL_WASM_READY). */
-export async function runHalfPlane(
-  pointA: LatLngTuple,
-  pointB: LatLngTuple,
-  gameArea: GameAreaGeometry,
-  shadedSide: "hot" | "cold" = "cold",
-  divisionAnchor: "midpoint" | "start" = "midpoint",
-  mode: MaskKernelMode = "wasm",
-): Promise<PolygonFeature | null> {
-  return dispatchHalfPlane(
-    pointA,
-    pointB,
-    gameArea,
-    shadedSide,
-    divisionAnchor,
-    mode,
-  );
-}
-
-/** Production radar shaded-region entrypoint (same halfPlane registry bit). */
-export async function runRadarShadedRegion(
-  center: LatLngTuple,
-  radiusMeters: number,
-  gameArea: GameAreaGeometry,
-  shadedInside: boolean,
-  mode: MaskKernelMode = "wasm",
-): Promise<PolygonFeature | null> {
-  return dispatchRadarShadedRegion(
-    center,
-    radiusMeters,
-    gameArea,
-    shadedInside,
-    mode,
-  );
-}
-
-/** Mode + KERNEL_WASM_READY dispatch for half-plane. */
 export async function dispatchHalfPlane(
   pointA: LatLngTuple,
   pointB: LatLngTuple,
@@ -79,7 +31,7 @@ export async function dispatchHalfPlane(
         divisionAnchor,
       ),
     runWasm: async () => {
-      const wasm = await loadHalfPlaneWasmModule();
+      const wasm = await halfPlaneWasm.load();
       return wasm.wasmBuildHalfPlanePolygon(
         pointA,
         pointB,
@@ -93,7 +45,6 @@ export async function dispatchHalfPlane(
   });
 }
 
-/** Mode + KERNEL_WASM_READY dispatch for radar shaded region (same entrypoint). */
 export async function dispatchRadarShadedRegion(
   center: LatLngTuple,
   radiusMeters: number,
@@ -108,7 +59,7 @@ export async function dispatchRadarShadedRegion(
     runTs: () =>
       buildRadarShadedRegion(center, radiusMeters, gameArea, shadedInside),
     runWasm: async () => {
-      const wasm = await loadHalfPlaneWasmModule();
+      const wasm = await halfPlaneWasm.load();
       return wasm.wasmBuildRadarShadedRegion(
         center,
         radiusMeters,
@@ -120,3 +71,9 @@ export async function dispatchRadarShadedRegion(
       maskTopologyMatches(wasmResult, tsResult, bboxFromGameArea(gameArea)),
   });
 }
+
+/** Public alias; callers may import either name. */
+export const runHalfPlane = dispatchHalfPlane;
+
+/** Public alias; callers may import either name. */
+export const runRadarShadedRegion = dispatchRadarShadedRegion;

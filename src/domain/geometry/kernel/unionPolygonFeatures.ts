@@ -295,7 +295,6 @@ function mergeUnionResults(
   return unionPair(left, right, engine) ?? concatPolygonFeatures(left, right);
 }
 
-/** Unions polygon features using martinez with turf fallback. */
 export function unionPolygonFeatures(
   features: readonly PolygonFeature[],
 ): PolygonFeature | null {

@@ -5,10 +5,6 @@ import { wasmBuildSpatialVoronoiFromSites } from "./voronoiWasm";
 
 const runGeometryPerf = process.env.GEOMETRY_PERF === "1";
 
-/**
- * Interleaved median: Wave-2 Gate A for the production Voronoi path
- * (`wasmBuildSpatialVoronoiFromSites` vs `geoSpatialVoronoiFromSites`).
- */
 async function measureInterleavedMedianRatio(
   runTs: () => void,
   runWasm: () => Promise<void>,

@@ -1,23 +1,12 @@
 import type { Feature, LineString } from "geojson";
 import { dispatchKernel } from "./dispatchKernel";
 import { geodesicLineBuffer } from "./geodesicLineBuffer";
+import { createLazyWasmImport } from "./lazyWasmImport";
 import type { MaskKernelMode } from "./maskKernelMode";
 import { bboxFromGameArea, maskTopologyMatches } from "./maskTopology";
 import type { PolygonFeature } from "./types";
 
-type GeodesicWasmApi = typeof import("./geodesicWasm");
-
-let geodesicWasmModulePromise: Promise<GeodesicWasmApi> | null = null;
-
-function loadGeodesicWasmModule(): Promise<GeodesicWasmApi> {
-  if (!geodesicWasmModulePromise) {
-    geodesicWasmModulePromise = import("./geodesicWasm").catch((error) => {
-      geodesicWasmModulePromise = null;
-      throw error;
-    });
-  }
-  return geodesicWasmModulePromise;
-}
+const geodesicWasm = createLazyWasmImport(() => import("./geodesicWasm"));
 
 function topologyBboxFromResults(
   wasmResult: PolygonFeature | null,
@@ -30,22 +19,6 @@ function topologyBboxFromResults(
   return bboxFromGameArea(feature.geometry);
 }
 
-/** Production geodesic buffer entrypoint (mode + KERNEL_WASM_READY). */
-export async function runGeodesicLineBuffer(
-  segment: Feature<LineString>,
-  distanceMeters: number,
-  sampleSpacingMeters?: number,
-  mode: MaskKernelMode = "wasm",
-): Promise<PolygonFeature | null> {
-  return dispatchGeodesicLineBuffer(
-    segment,
-    distanceMeters,
-    sampleSpacingMeters,
-    mode,
-  );
-}
-
-/** Mode + KERNEL_WASM_READY dispatch for geodesic line buffer. */
 export async function dispatchGeodesicLineBuffer(
   segment: Feature<LineString>,
   distanceMeters: number,
@@ -59,7 +32,7 @@ export async function dispatchGeodesicLineBuffer(
     runTs: () =>
       geodesicLineBuffer(segment, distanceMeters, sampleSpacingMeters),
     runWasm: async () => {
-      const wasm = await loadGeodesicWasmModule();
+      const wasm = await geodesicWasm.load();
       return wasm.wasmGeodesicLineBuffer(
         segment,
         distanceMeters,
@@ -74,3 +47,6 @@ export async function dispatchGeodesicLineBuffer(
       ),
   });
 }
+
+/** Public alias; callers may import either name. */
+export const runGeodesicLineBuffer = dispatchGeodesicLineBuffer;

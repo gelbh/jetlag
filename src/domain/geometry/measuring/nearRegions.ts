@@ -468,8 +468,6 @@ export function buildCoastlineNearRegionTs(
   distanceMeters: number,
   gameArea: GameArea,
 ): Feature<Polygon | MultiPolygon> | null {
-  // Sync wrapper: geodesicLineBuffer is sync; Promise.resolve unused.
-  // Keep API sync for existing tests by inlining the sync buffer loop.
   if (segments.length === 0 || distanceMeters <= 0) {
     return null;
   }
@@ -578,7 +576,7 @@ export function distanceBetweenPoints(
   );
 }
 
-/** Match radar / elimination / hiding-zone disks — coarse steps undersize near chords. */
+/** Match radar / elimination / hiding-zone disks; coarse steps undersize near chords. */
 const NEAR_REGION_DISK_STEPS = 64;
 
 export function buildLocationNearRegion(
@@ -666,7 +664,6 @@ export function buildMultiPlaceNearRegionTs(
   return clipped as Feature<Polygon | MultiPolygon>;
 }
 
-/** Union of equal-radius buffers around every site (e.g. all airports in the play area). */
 export async function buildMultiPlaceNearRegion(
   places: readonly LatLngTuple[],
   distanceMeters: number,

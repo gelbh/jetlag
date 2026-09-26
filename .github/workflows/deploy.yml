@@ -66,6 +66,8 @@ jobs:
           npm run release:check
       - uses: ./.github/actions/setup-rust-wasm
         if: needs.changes.outputs.code == 'true'
+      - run: cargo fmt --all -- --check
+        if: needs.changes.outputs.code == 'true'
       - run: cargo test --locked -p jetlag-geometry-kernel
         if: needs.changes.outputs.code == 'true'
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0

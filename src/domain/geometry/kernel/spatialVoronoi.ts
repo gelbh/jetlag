@@ -3,11 +3,11 @@ import type { Feature, FeatureCollection, Point, Polygon } from "geojson";
 
 const METERS_PER_DEGREE_LAT = 110_574;
 const METERS_PER_DEGREE_LNG_AT_EQUATOR = 111_320;
-/** Extent multiplier applied to the sites' bbox span so boundary cells stay finite. */
+/** Scale bbox span so unbounded Voronoi cells stay finite. */
 const EXTENT_MARGIN_MULTIPLIER = 3;
 /**
  * Floor margin for tightly clustered sites. Must exceed largest tentacle/matching
- * search disks in presets (15 mi ≈ 24 km) with headroom so disk−cell geometry is not
+ * search disks in presets (15 mi ≈ 24 km) with headroom so disk-cell geometry is not
  * truncated by the finite Voronoi clip.
  */
 const MIN_EXTENT_MARGIN_METERS = 50_000;
@@ -24,13 +24,7 @@ function metersPerDegreeLng(latDegrees: number): number {
   return scale || METERS_PER_DEGREE_LNG_AT_EQUATOR;
 }
 
-/**
- * Computes a Voronoi diagram for the given sites in a local planar frame
- * (equirectangular projection about the sites' mean latitude), clipped to a
- * finite extent around the sites' bounding box. A local projection keeps
- * cell bisectors accurate at play-area scale, unlike a spherical Voronoi
- * reprojected through an arbitrary global Mercator scale factor.
- */
+/** Local equirectangular Voronoi; global Mercator bisectors skew at play-area scale. */
 export function geoSpatialVoronoiFromSites<
   T extends Record<string, unknown> = Record<string, unknown>,
 >(sites: Array<SpatialVoronoiSite<T>>): FeatureCollection {

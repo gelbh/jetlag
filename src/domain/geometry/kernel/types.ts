@@ -14,7 +14,7 @@ export interface EliminationUnionInput {
   disks: DiskSpec[];
 }
 
-/** Plain play-area polygon; structurally identical to map `GameArea`. */
+/** Structurally identical to map `GameArea`. */
 export type GameAreaGeometry =
   | { type: "Polygon"; coordinates: number[][][] }
   | { type: "MultiPolygon"; coordinates: number[][][][] };

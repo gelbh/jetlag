@@ -332,17 +332,13 @@ function buildNearRegionFromRects(
   return clipNearMultiPolygon(coordinates, gameArea);
 }
 
-/**
- * Build near-sea-level region, replacing ambiguous coarse cells with refined
- * subcell classifications when provided (freehand local refine).
- */
 export function buildSeaLevelNearRegionWithLocalRefine(args: {
   cells: ElevationSampleCell[];
   elevations: number[];
   seekerDistanceFromSeaLevelMeters: number;
   gameArea: GameArea;
   refineCells?: ElevationSampleCell[];
-  /** Parallel to refineCells — `${parent.row}:${parent.col}` from the subdivider. */
+  /** Parallel to refineCells: `${parent.row}:${parent.col}` from the subdivider. */
   refineParentKeys?: string[];
   refineElevations?: number[];
 }): SeaLevelNearRegionBuildResult {

@@ -296,11 +296,10 @@ pub(crate) fn multipolygon_to_feature(mp: &MultiPolygon<f64>) -> Option<PolygonF
             }),
         });
     }
-    let coordinates: Vec<Value> = mp
-        .0
-        .iter()
-        .map(|poly| Value::Array(polygon_to_coords(poly)))
-        .collect();
+    let coordinates: Vec<Value> =
+        mp.0.iter()
+            .map(|poly| Value::Array(polygon_to_coords(poly)))
+            .collect();
     Some(PolygonFeature {
         feature_type: "Feature".to_string(),
         properties: json!({}),
@@ -321,8 +320,5 @@ fn polygon_to_coords(poly: &Polygon<f64>) -> Vec<Value> {
 }
 
 fn linestring_to_coords(ls: &LineString<f64>) -> Vec<Value> {
-    ls.0
-        .iter()
-        .map(|c| json!([c.x, c.y]))
-        .collect()
+    ls.0.iter().map(|c| json!([c.x, c.y])).collect()
 }

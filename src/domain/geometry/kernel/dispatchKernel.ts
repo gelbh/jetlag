@@ -41,11 +41,8 @@ export function dispatchKernelSync<T>(
 }
 
 /**
- * Mode + KERNEL_WASM_READY dispatch:
- * - not ready → always TS (even if mode is wasm/dual)
- * - ts → TS only
- * - wasm → WASM with TS fallback on failure
- * - dual → TS + optional WASM compare; always return TS
+ * Not-ready entrypoints always use TS (even for wasm/dual).
+ * wasm falls back to TS on failure; dual compares then returns TS.
  */
 export async function dispatchKernel<T>(
   options: DispatchKernelOptions<T>,
