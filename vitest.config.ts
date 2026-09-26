@@ -21,7 +21,10 @@ export default defineConfig({
     projects: [
       {
         extends: "./vitest.shared.ts",
-        plugins: [optionalKernelWasmPkg(), wasm()],
+        // vite-plugin-wasm embeds .wasm as base64 only when it sees a plugin
+        // named exactly "vitest". Vitest projects register "vitest:project"
+        // instead, so URL fetch breaks in jsdom (Invalid URL).
+        plugins: [{ name: "vitest" }, optionalKernelWasmPkg(), wasm()],
         test: {
           name: "unit",
           environment: "jsdom",
