@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { isTerminalSessionSyncMessage } from "../domain/device/sync/terminalSessionMessage";
+import { MapAttentionRing } from "../components/map/chrome/MapAttentionRing";
 import { MapLandscapeChromeShell } from "../components/session/mapChrome/MapLandscapeChromeShell";
 import { useMapLandscapeChrome } from "../components/session/mapChrome/MapLandscapeChromeContext";
 import { resolveLandscapeMapControlInset } from "../components/session/mapChrome/resolveLandscapeMapControlInset";
@@ -46,6 +47,7 @@ function SeekerMapScreenBody({
       className="map-screen-shell"
       data-map-attention={controller.mapAttentionActive ? "true" : undefined}
     >
+      <MapAttentionRing active={controller.mapAttentionActive} />
       {inactiveChrome ? (
         <div
           aria-hidden

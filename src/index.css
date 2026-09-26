@@ -8,9 +8,7 @@
 @import "./styles/scrollbars.css";
 @import "./styles/map-shell.css";
 @import "./styles/desktop-ops.css";
-@import "./styles/map-panels.css";
 @import "./styles/map-tool-dock.css";
-@import "./styles/map-wizard-attention.css";
 @import "./styles/map-chrome-controls.css";
 @import "./styles/map-compass-control.css";
 /* After map-chrome-controls so left zoom stack + side clearance tokens win. */

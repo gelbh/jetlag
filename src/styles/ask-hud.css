@@ -1,4 +1,4 @@
-/* ask-hud.css — Ask Map HUD on iOS Mantine brand roles (canvas / field-ink / flag / rule / halt) */
+/* ask-hud.css — residual strip / height tokens for W5-D (chrome migrated to AskHudPanel). */
 @layer components {
   :root {
     --ask-hud-strip-height: 3rem; /* ≥44px touch */
@@ -6,41 +6,13 @@
     --ask-hud-camera-padding-bottom: 0px;
   }
 
-  /* Ask path panel — frosted canvas; Wave 5 may fold into Mantine Paper */
-  .ask-hud-panel {
-    position: relative;
-    overflow: hidden;
-    border-radius: var(--radius-hud-lg);
-    border: 1px solid var(--color-rule);
-    background: oklch(from var(--color-canvas) l c h / 0.94);
-    box-shadow: var(--shadow-hud-menu);
-    color: var(--color-field-ink);
-  }
-
   .ask-mode-cue-ticker {
-    /* layout only; Island owns surface skin */
     width: 100%;
     max-width: 28rem;
     margin-inline: auto;
   }
 
-  .ask-mode-cue-ticker__text {
-    margin: 0;
-    max-width: 100%;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    font-size: 0.8125rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    line-height: 1.2;
-    text-transform: uppercase;
-    text-align: center;
-    color: var(--color-flag);
-  }
-
   .ask-cost-chip {
-    /* chipVariants owns surface skin; keep display label density */
     max-width: 100%;
     letter-spacing: 0.06em;
   }
@@ -53,12 +25,6 @@
 
   .ask-commit-strip__btn {
     min-height: var(--ask-hud-strip-height);
-  }
-
-  .ask-commit-strip__error {
-    margin: 0;
-    text-align: center;
-    color: var(--color-halt);
   }
 
   .ask-catalog-rail,
@@ -103,11 +69,6 @@
     margin-inline: auto;
     flex-direction: column;
     gap: 0.25rem;
-    padding: 0.75rem 1rem;
-    border-radius: var(--radius-hud-md);
-    border: 1px solid oklch(from var(--color-rule) l c h / 0.7);
-    background: oklch(from var(--color-canvas) l c h / 0.92);
-    box-shadow: var(--shadow-hud-float);
   }
 
   .ask-walk-banner__label {

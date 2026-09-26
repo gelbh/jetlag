@@ -1,9 +1,12 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi, beforeEach } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
+import { MantineProvider } from "@mantine/core";
+import type { ReactElement } from "react";
 import type { DistanceUnit } from "@/domain/map/distance";
 import type { TentaclePoi } from "@/domain/map/annotations";
 import type { GameSize } from "@/domain/session/size/gameSize";
 import type { TentacleExtendedCategoryId } from "@/domain/questions";
+import { jetlagTheme } from "@/theme/theme";
 import { AskHudHost } from "./AskHudHost";
 import { TentacleHudBody } from "./TentacleHudBody";
 import {
@@ -12,6 +15,27 @@ import {
   primedCommitLabel,
   type AskHudReadiness,
 } from "@/domain/ask/askHudModes";
+
+function renderHud(ui: ReactElement) {
+  return render(
+    <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
+      {ui}
+    </MantineProvider>,
+  );
+}
+
+beforeEach(() => {
+  vi.stubGlobal("matchMedia", (query: string) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener() {},
+    removeListener() {},
+    addEventListener() {},
+    removeEventListener() {},
+    dispatchEvent: () => false,
+  }));
+});
 
 const baseProps = {
   gameSize: "medium" as GameSize,
@@ -37,7 +61,7 @@ const baseProps = {
 
 describe("TentacleHudBody", () => {
   it("shows Matching-style question header with cost on catalog", () => {
-    render(
+    renderHud(
       <TentacleHudBody {...baseProps} costLabel="D4P2" toolLabel="Tentacle" />,
     );
 
@@ -51,7 +75,7 @@ describe("TentacleHudBody", () => {
 
   it("shows catalog rail without PhaseRail or CONTINUE; row select advances", () => {
     const onCategoryChange = vi.fn();
-    render(
+    renderHud(
       <TentacleHudBody {...baseProps} onCategoryChange={onCategoryChange} />,
     );
 
@@ -67,7 +91,7 @@ describe("TentacleHudBody", () => {
   });
 
   it("after types, shows map-radius place chord without CONTINUE", () => {
-    render(
+    renderHud(
       <TentacleHudBody
         {...baseProps}
         categoryChosen
@@ -102,7 +126,7 @@ describe("TentacleHudBody", () => {
     expect(cue).toBe("SET CENTER ON MAP");
     expect(canCommit(readiness)).toBe(false);
 
-    render(
+    renderHud(
       <AskHudHost
         cue={cue}
         toolLabel="Tentacles"
@@ -128,9 +152,8 @@ describe("TentacleHudBody", () => {
     expect(screen.getByTestId("ask-mode-cue-ticker")).toHaveTextContent(
       "SET CENTER ON MAP",
     );
-    expect(
-      screen.getByRole("button", { name: "SEND — SET CENTER FIRST" }),
-    ).toBeDisabled();
+    // Sheet path: muted SEND footer stays hidden until canCommit / error / submit.
+    expect(screen.queryByTestId("ask-commit-strip")).toBeNull();
   });
 
   it("arms PrimedCommitStrip only when canCommit", () => {
@@ -161,7 +184,7 @@ describe("TentacleHudBody", () => {
       },
     ];
 
-    render(
+    renderHud(
       <AskHudHost
         cue={cue}
         toolLabel="Tentacles"
@@ -213,7 +236,7 @@ describe("TentacleHudBody", () => {
         category: "museum",
       },
     ];
-    render(
+    renderHud(
       <TentacleHudBody
         {...baseProps}
         awaitHiderAnswer={false}
@@ -239,7 +262,7 @@ describe("TentacleHudBody", () => {
         category: "museum",
       },
     ];
-    render(
+    renderHud(
       <TentacleHudBody
         {...baseProps}
         awaitHiderAnswer={false}

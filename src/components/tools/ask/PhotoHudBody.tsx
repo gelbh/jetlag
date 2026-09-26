@@ -1,3 +1,4 @@
+import { AskHudPanel } from "@/components/tools/ask/AskHudPanel";
 /**
  * Photo Ask HUD mode body — Matching twin: question header + catalog/chips.
  * Map-first overlay owns Send after category is chosen (Mantine flag).
@@ -133,9 +134,9 @@ export function PhotoHudBody({
         <div className="space-y-2">
           {awaitHiderAnswer ? <QuestionTruthReferenceHint /> : null}
           {availableCategories.length === 0 ? (
-            <div className="pointer-events-auto ask-hud-panel p-3">
+            <AskHudPanel className="p-3">
               <CatalogExhaustedMessage message="Every photo question has already been used this session." />
-            </div>
+            </AskHudPanel>
           ) : useRail ? (
             <AskCatalogRail
               rows={availableCategories.map((category) => ({
