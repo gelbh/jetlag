@@ -9,15 +9,6 @@
  * `{ from, to, subject, text, html }`, success response `{ id }`).
  */
 
-declare global {
-  interface Env {
-    RESEND_API_KEY?: string;
-    INCIDENT_EMAIL_SECRET?: string;
-    INCIDENT_ADMIN_EMAIL?: string;
-    INCIDENT_EMAIL_FROM?: string;
-  }
-}
-
 export const INCIDENT_EMAIL_PATH = "/api/incident-email";
 
 const RESEND_ENDPOINT = "https://api.resend.com/emails";
