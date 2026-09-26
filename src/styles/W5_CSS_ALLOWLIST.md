@@ -1,104 +1,97 @@
-# Wave 5 CSS allowlist (source of truth)
+# Wave 5 CSS allowlist (final / W5-E)
 
-Inventory + classification for Mantine player UI Wave 5 chrome migration.
-Do not delete or rewrite live chrome modules in W5-A; later bands consume this table.
+Source of truth for remaining global player chrome CSS after Waves 5-A…E.
+Do not delete **geometry** or **bridge** rows without Cap/WebView proof (AC #10).
+Thin **keep** residuals (ScreenNav / admin / wizard / banners) wait Wave 7 or on-touch migrate.
 
 | Field | Value |
 | --- | --- |
-| Tip SHA | `aba33649` (W5-C tip; W5-D updates line counts below) |
+| Tip SHA (pre-W5-E prune) | `125dd2c7` (W5-D #583) |
 | Baseline `wc -l src/styles/*.css` (pre `map-hud.css` delete) | **5053** |
 | Baseline after orphan `map-hud.css` delete | **5052** |
 | After W5-C panel kill | **~3782** |
-| After W5-D dock band (this PR) | **3206** |
-| Band | W5-D (dock / bottom chrome → Mantine + theme) |
+| After W5-D dock band | **3206** |
+| After W5-E prune (this band) | **3150** (−56 vs W5-D tip 3206; −1903 vs W5-A baseline 5053) |
+| Band | W5-E (prune dead selectors; final allowlist) |
 
 ## Classes
 
 | Class | Meaning |
 | --- | --- |
-| **replace** | Migrate chrome to Mantine / theme tokens, then delete the CSS module (or the chrome subset). |
-| **allowlist** | Keep for MapLibre / geometry / safe-area hit targets until a later proven AC. |
-| **delete** | Dead file; remove in this PR. |
-| **bridge** | Replace eventually (through W5-E); keep env/safe-area and motion bridges until Cap AC proven. |
+| **keep** | Still referenced residual chrome; migrate later (Wave 7 / on-touch), not emptied. |
+| **geometry** | MapLibre / left-stack / safe-area / hit-target CSS. Keep until proven replacement. |
+| **bridge** | Env/safe-area vars, motion, scrollbars, tokens. Keep until Cap AC proven or theme fully owns. |
+| **delete** | Removed in a prior band (or zero-consumer rules pruned in W5-E). |
 
-## Full inventory
+## Final inventory (every remaining `src/styles/*.css`)
 
-| File | Lines | Class | Band | Notes |
-| --- | ---: | --- | --- | --- |
-| `base.css` | 150 | bridge | until E | Fonts, dock/safe-area/z-index CSS vars. Keep `env(safe-area-*)` until Cap AC proven. Theme now mirrors via `jetlagBrand` / `--jl-*`. |
-| `map-attribution.css` | 51 | allowlist | geometry | MapLibre attribution control + ask/matching placement clearance overrides. |
-| `map-bottom-chrome.css` | 418 | allowlist (+ residual) | W5-D | **Allowlist:** `--map-left-*` stack bases/tiers, safe-area insets, zoom/style bottoms, side-stack snap / drag glass. Island / ToolDeck skins already Mantine (`mapChromeSurfaceStyles`). |
-| `map-chrome-controls.css` | 206 | allowlist (+ residual) | W5-C | **Allowlist:** MapLibre canvas size, `touch-action`, basemap filters, default attrib hide. **Residual:** zoom/style positioning hooks, interact/landscape distill, thermometer marker skins. Button chrome → `hudChromeStyles` / `MapChromeControl`. |
-| `map-compass-control.css` | 67 | allowlist | geometry | Needle + tier bottom geometry. Chrome button skin may migrate later; keep positioning. |
-| `map-shell.css` | 790 | allowlist | geometry (+ replace carve-out) | Primary: map container, shell mask, safe-area hit targets, sync/preload **positioning**. W5-C removed duplicate panel/beacon visual chrome (now Mantine). **Replace later:** `.jl-status-*`, `.map-float-alert`, dock-waiting host skins. |
-| `map-tool-dock.css` | 210 | replace (residual) | W5-D → W5-E | Slot / menu / overflow chrome deleted (→ `mapToolSlotStyles` / `MapChromeControl`). Residual: panel-above-dock geometry, wizard nav, unread pulse, route-fallback. |
-| `map-touch-gestures.css` | 88 | allowlist | geometry | MapLibre children gesture pass-through + feature popup geometry (imported from MapView, not `index.css`). |
-| `motion-utilities.css` | 63 | bridge | until E | Motion utility classes; bridge until motion system lands in theme/kit. |
-| `motion.css` | 690 | bridge | until E | Keyframes / motion contracts. Hosts `map-attention-pulse` for `MapAttentionRing`. |
-| `primitives.css` | 216 | replace (residual) | W5-C → W5-E | Map floating controls use `hudChromeStyles`. Residual: `hud-*` / `btn-*` / `field-*` for ScreenNav, banners, admin, sheets until those migrate. Soft-gate: left for W5-E. |
-| `route-transition.css` | 153 | bridge | until E | Route transition motion. |
-| `scrollbars.css` | 42 | bridge | until E | Scrollbar skin; keep until chrome kill. |
-| `tokens.css` | 62 | bridge | until E | Residual `@theme` color/radius tokens; prefer `jetlagBrand` for new UI. |
+| File | Class | Notes |
+| --- | --- | --- |
+| `tokens.css` | bridge | Residual `@theme` color/radius; prefer `jetlagBrand` for new UI. |
+| `base.css` | bridge | Fonts, dock/safe-area/z-index CSS vars (`env(safe-area-*)`). Theme mirrors via `jetlagBrand` / `--jl-*`. |
+| `primitives.css` | keep | `hud-*` / `btn-*` / `field-*` / `screen-back-control` for ScreenNav, banners, admin, sheets. Map floating controls already `hudChromeStyles`. |
+| `scrollbars.css` | bridge | Scrollbar skin until chrome kill. |
+| `map-shell.css` | geometry (+ keep carve-out) | Container / dvh / safe-area / sync-preload **positioning**. Later: `.jl-status-*`, `.map-float-alert`, dock-waiting skins. |
+| `map-tool-dock.css` | keep | Panel-above-dock geometry, wizard nav, unread pulse, route-fallback skeleton. Slot/menu chrome already Mantine. |
+| `map-chrome-controls.css` | geometry (+ keep) | MapLibre canvas / touch / basemap filters / attrib hide; zoom/style inset positioning; interact/landscape distill; thermometer walk marker skins. |
+| `map-compass-control.css` | geometry | Needle + tier bottom; optional later ActionIcon skin. |
+| `map-bottom-chrome.css` | geometry | `--map-left-*` stack bases/tiers, safe-area insets, side-stack snap / drag glass. Island/ToolDeck already Mantine. |
+| `map-attribution.css` | geometry | MapLibre attribution + ask/matching clearance. |
+| `map-touch-gestures.css` | geometry | Imported from MapView (not `index.css`). Gesture pass-through + popup geometry. |
+| `motion.css` | bridge | Keyframes / reduced-motion contracts (`map-attention-pulse`, `jl-unread-pulse`, …). |
+| `route-transition.css` | bridge | Route transition motion. |
+| `motion-utilities.css` | bridge | Enter/exit utility classes (`hud-sheet-*`, `jl-panel-*`, wizard steps, …). |
 
-## Deleted in W5-D
+`index.css` imports every file above except `map-touch-gestures.css` (MapView).
 
-| File | Lines | Class | Band | Notes |
-| --- | ---: | --- | --- | --- |
-| `desktop-ops.css` | 211 | delete | W5-D | Ops shell grid + contextual rail → `desktopOpsShellStyle` / `contextualRailStyle` + `jetlagBrand` ops tokens. |
-| `ask-hud.css` | 99 | delete | W5-D | Strip/rail height tokens → `jetlagBrand` / `--ask-hud-*` CSS vars; layout → Tailwind / component styles. |
+## Deleted modules (prior bands)
 
-## Deleted in W5-C
+| File | Band | Notes |
+| --- | --- | --- |
+| `map-hud.css` | W5-A | Orphan stub. |
+| `home-entry.css` | W5-B | → `entryStyles` / entry shells. |
+| `map-panels.css` | W5-C | → `HudDetailPanel` / beacon styles; geometry stays in `map-shell`. |
+| `map-wizard-attention.css` | W5-C | → `MapAttentionRing`; pulse in `motion.css`. |
+| `desktop-ops.css` | W5-D | → `desktopOpsShellStyle` / `contextualRailStyle`. |
+| `ask-hud.css` | W5-D | → `jetlagBrand` / `--ask-hud-*` + Tailwind. |
 
-| File | Lines | Class | Band | Notes |
-| --- | ---: | --- | --- | --- |
-| `map-panels.css` | 259 | delete | W5-C | Sync/preload panel + beacon chrome → `HudDetailPanel` / `syncBeaconStyle` / `preloadBeaconStyle`. Geometry hooks remain in `map-shell.css`. |
-| `map-wizard-attention.css` | 25 | delete | W5-C | Attention ring → `MapAttentionRing` + `mapAttentionRingStyle`; pulse keyframes in `motion.css`. |
+## W5-E dead-rule prune (no whole-file delete)
 
-## Deleted in W5-B
+Zero-consumer selectors removed (verified via `rg` against `src/` + `e2e/`, excluding CSS):
 
-| File | Lines | Class | Band | Notes |
-| --- | ---: | --- | --- | --- |
-| `home-entry.css` | 606 | delete | W5-B | Entry chrome → `entryStyles.ts` / layout shells. |
+- `map-tool-dock.css`: `.jl-panel-hider-actions`, `.jl-thermometer-live-marker` pulse, `.jl-chat-keyboard-inset` transition, `.home-card-btn:active`
+- `map-chrome-controls.css`: `.user-location-icon`, `.map-dot-icon` (MapLibre icons use `jl-icon-*` registry)
+- `base.css`: `--hider-panel-bottom` (only consumer was deleted rule)
+- `motion.css` / `motion-utilities.css`: dead companion selectors + `@keyframes jl-thermometer-live-pulse`
 
-## Deleted in W5-A
+**Kept on purpose:** zoom/style `--*` inset modifiers (dynamic `MapChromeControlInset` template), MapLibre-generated `.maplibregl-*`, all geometry carve-outs, still-referenced `hud-*` / wizard / route-fallback / unread pulse.
 
-| File | Lines | Class | Band | Notes |
-| --- | ---: | --- | --- | --- |
-| `map-hud.css` | 1 | delete | W5-A | Orphan stub comment only; not imported in `index.css`. Removed. Class names like `map-hud-home` live in `primitives.css` and stay. |
-
-## Geometry carve-outs (detail)
+## Geometry carve-outs (must remain)
 
 ### `map-shell.css`
 
-- **Allowlist:** `.map-screen-shell` container / dvh fill, `::before` safe-area paint band, map chrome host overflow, sync-beacon insets, hit-target / mask geometry tied to safe-area and dock clearance; sync/preload indicator **positioning** (`.jl-sync-map-indicator`, `.jl-preload-map-indicator`, panel `transform-origin` / width hooks).
-- **Replace (later band):** `.jl-status-*`, `.map-float-alert`, `.dock-waiting-host` visual chrome (colors, typography, frosted skins).
+- **geometry:** `.map-screen-shell` / dvh fill, safe-area paint band, hit-target / mask, sync/preload indicator **positioning**.
+- **keep (later):** `.jl-status-*`, `.map-float-alert`, `.dock-waiting-host` visual skins.
 
 ### `map-chrome-controls.css`
 
-- **Allowlist:** `.maplibregl-map` width/height/background, `touch-action: none`, basemap filter classes, default `.maplibregl-ctrl-attrib { display: none }`.
-- **Residual (W5-C):** `.map-zoom-control*` / `.map-style-control*` **positioning** + interact/landscape distill; thermometer walk marker skins.
-- **Replaced:** floating button chrome → `MapChromeControl` + `hudChromeStyles`.
+- **geometry:** `.maplibregl-map` size/background/`touch-action`, basemap filters, default attrib hide.
+- **keep:** `.map-zoom-control*` / `.map-style-control*` positioning + interact/landscape; thermometer walk marker skins.
 
 ### `map-bottom-chrome.css`
 
-- **Allowlist (W5-D keep):** `--map-left-*` stack bases/tiers, safe-area insets for left MapView portals, ask/matching clearance coupling, side-stack phone bottoms / radii / drag glass, draw-menu abspos under OverlayHost.
-- Island / ToolDeck / OverlayHost layout already Tailwind + Mantine Paper styles (`mapChromeSurfaceStyles` / `mapHuntSurfaceStyles`).
+- **geometry:** `--map-left-*` / safe-area / side-stack phone bottoms / radii / drag glass / draw-menu abspos.
 
-### `map-compass-control.css`
+### `map-compass-control.css` / `map-touch-gestures.css` / `map-attribution.css`
 
-- **Allowlist:** needle transform, tier `bottom` vars, control size geometry.
-- **Optional later:** button chrome skin via Mantine `ActionIcon`.
+- Full-file geometry allowlist.
 
-### `map-touch-gestures.css`
+## Theme bridge
 
-- **Allowlist:** full file (MapLibre children / marker pointer-events / touch-action).
+`src/theme/theme.ts` → `jetlagBrand` / `--jl-*` (+ bridge `--ops-*` / `--ask-hud-*`). Prefer theme for new chrome. Residual CSS may keep `--dock-height` / `--z-*` in `base.css` until Cap-proven theme ownership.
 
-### `map-attribution.css`
+Helpers (extend, do not invent a kit): `entryStyles` / `hudChromeStyles` / `mapToolSlotStyles` / `mapChromeSurfaceStyles` / `chatUnreadBadgeStyle` / `desktopOpsShellStyle*` / `askHudPanelStyle`.
 
-- **Allowlist:** MapLibre attrib control styling + placement clearance CSS vars.
+## AC #1 note (CVA kit)
 
-## Theme bridge (W5-A / W5-C / W5-D)
-
-`src/theme/theme.ts` exposes dock / safe-area / z-index / spacing / ops rail / ask HUD heights on `jetlagBrand` → `theme.other` and `--jl-*` (plus bridge `--ops-*` / `--ask-hud-*`) via `jetlagCssVariablesResolver`. Residual CSS may keep `--dock-height` / `--z-*` in `base.css` until W5-E; new chrome code should prefer theme tokens.
-
-W5-D helpers (extend, do not invent a kit): `desktopOpsShellStyle*`, `contextualRailStyle*`, `mapToolSlotIconStyle`, `chatUnreadBadgeStyle`, plus existing `hudChromeStyles` / `mapToolSlotStyles` / `askHudPanelStyle` / `mapChromeSurfaceStyles`.
+`class-variance-authority` + `src/components/ui/button|chip|island` still have live consumers on tip (Join, Ask commit, ToolDeck Island, …). Soft-gate: **do not** purge in W5-E; Wave 7 / on-touch. No new kit invented this band.

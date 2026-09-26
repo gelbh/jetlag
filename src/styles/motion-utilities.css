@@ -1,6 +1,5 @@
 /* motion-utilities.css — reusable enter/exit animation classes (extracted from map chrome) */
 
-.jl-tool-overflow-sheet,
 .hud-sheet-enter {
   animation: hud-sheet-enter var(--motion-sheet-present) var(--ease-ios-standard) both;
 }

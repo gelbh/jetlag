@@ -136,16 +136,6 @@ html:not([data-motion="reduced"]):not([data-motion="static"]) .map-style-control
   cursor: crosshair;
 }
 
-.user-location-icon {
-  background: transparent;
-  border: 0;
-}
-
-.map-dot-icon {
-  background: transparent;
-  border: 0;
-}
-
 /* MapLibre marker skins (thermometer walk) — residual until marker chrome band. */
 .jl-thermometer-walk-progress,
 .jl-thermometer-walk-end-label {
