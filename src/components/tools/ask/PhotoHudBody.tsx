@@ -55,7 +55,7 @@ export function PhotoHudBody({
     (category) => !usedCategoryIds.has(category.id),
   );
   /** Flag-off keeps prior always-selected catalog; Mantine waits for an explicit tap. */
-  const showAsChosen = categoryChosen || !true;
+  const showAsChosen = categoryChosen;
   const question = showAsChosen
     ? photoQuestionFor(categoryId, distanceUnit)
     : PHOTO_QUESTION_INTRO;

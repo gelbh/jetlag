@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Alert,
   Anchor,
@@ -7,13 +8,11 @@ import {
   Stack,
   Text,
   Title,
+  UnstyledButton,
 } from "@mantine/core";
 import {
   Crown,
   ChartBar,
-  PlusCircle,
-  SignIn,
-  SquaresFour,
   Trophy,
   UsersThree,
 } from "@phosphor-icons/react";
@@ -27,10 +26,15 @@ import { IosInsetRow } from "@/components/ui/apple/IosInsetRow";
 import { AppLogo } from "@/components/ui/brand/AppLogo";
 import { BootSplash } from "@/components/ui/feedback/BootSplash";
 import { EntryScreenLayout } from "@/components/ui/layout/EntryScreenLayout";
+import { PlayHubSheet } from "@/components/home/PlayHubSheet";
+import { VersionChangelogSheet } from "@/components/ui/sheets/VersionChangelogSheet";
+import { APP_VERSION } from "@/domain/device/changelog";
 import { LEGAL_APP_NAME } from "@/domain/legal/legalContact";
 import { playerRoleLabel } from "@/domain/session/players/playerRole";
 import { useAuthBootstrapReady } from "@/hooks/app/useAuthBootstrapReady";
+import { useAdminAccessState } from "@/hooks/admin/useAdminAccessState";
 import { useContinueActiveSession } from "@/hooks/session/useContinueActiveSession";
+import { useUserProfile } from "@/hooks/profile/useUserProfile";
 import { useRouteTransition } from "@/navigation/useRouteTransition";
 import { isFirebaseConfigured } from "@/services/core/firebase/firebase";
 
@@ -40,6 +44,22 @@ export function HomeMantine() {
   const authBootstrapReady = useAuthBootstrapReady();
   const { phase: routeTransitionPhase } = useRouteTransition();
   const showPremium = isFirebaseConfigured();
+  const [changelogOpen, setChangelogOpen] = useState(false);
+  const [playHubOpen, setPlayHubOpen] = useState(false);
+  const {
+    user: permanentUser,
+    isPermanent,
+  } = useAdminAccessState();
+  const {
+    profile,
+    ready: profileReady,
+    error: profileError,
+  } = useUserProfile(
+    permanentUser?.uid,
+    isFirebaseConfigured() && isPermanent && permanentUser != null,
+  );
+  const showUsernamePrompt =
+    isPermanent && profileReady && profileError == null && profile == null;
 
   if (
     isFirebaseConfigured() &&
@@ -50,177 +70,222 @@ export function HomeMantine() {
   }
 
   return (
-    <EntryScreenLayout viewport viewportLayout="center" skin="plain">
-      <Container
-        size="xs"
-        w="100%"
-        px={0}
-        maw={390}
-        data-player-ux-world="mantine"
-      >
-        <Stack gap={28}>
-          <Stack gap={10}>
-            <Group gap="sm" align="center">
-              <AppLogo variant="mark" size="md" />
-              <Title
-                order={1}
-                c="var(--color-field-ink)"
-                fw={700}
-                style={{
-                  fontSize: "2.125rem",
-                  lineHeight: 1.15,
-                  letterSpacing: "-0.03em",
-                }}
+    <>
+      <EntryScreenLayout viewport viewportLayout="center" skin="plain">
+        <Container
+          size="xs"
+          w="100%"
+          px={0}
+          maw={390}
+          data-player-ux-world="mantine"
+        >
+          <Stack gap={28}>
+            <Stack gap={10}>
+              <Group gap="sm" align="center" justify="space-between" wrap="nowrap">
+                <Group gap="sm" align="center" wrap="nowrap">
+                  <AppLogo variant="mark" size="md" />
+                  <Title
+                    order={1}
+                    c="var(--color-field-ink)"
+                    fw={700}
+                    style={{
+                      fontSize: "2.125rem",
+                      lineHeight: 1.15,
+                      letterSpacing: "-0.03em",
+                    }}
+                  >
+                    {LEGAL_APP_NAME}
+                  </Title>
+                </Group>
+                <UnstyledButton
+                  onClick={() => setChangelogOpen(true)}
+                  aria-label={`Version ${APP_VERSION}. Open changelog`}
+                  style={{
+                    fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+                    fontSize: "0.75rem",
+                    fontWeight: 700,
+                    letterSpacing: "0.04em",
+                    color: "var(--color-field-ink-muted)",
+                    minHeight: "2.75rem",
+                    paddingInline: "0.65rem",
+                  }}
+                >
+                  v{APP_VERSION}
+                </UnstyledButton>
+              </Group>
+              <Text
+                c="var(--color-field-ink-muted)"
+                size="sm"
+                style={{ lineHeight: 1.35, textWrap: "pretty", maxWidth: "22rem" }}
               >
-                {LEGAL_APP_NAME}
-              </Title>
-            </Group>
-            <Text
-              c="var(--color-field-ink-muted)"
-              size="sm"
-              style={{ lineHeight: 1.35, textWrap: "pretty", maxWidth: "22rem" }}
-            >
-              Unofficial fan companion for Jet Lag: The Game.
-            </Text>
-          </Stack>
-
-          <Stack gap={22}>
-            {session ? (
-              <Stack gap={8}>
-                <Text
-                  size="xs"
-                  c="var(--color-field-ink-muted)"
-                  fw={590}
-                  style={{ letterSpacing: "-0.01em", paddingInline: 4 }}
+                Unofficial fan companion for Jet Lag: The Game.
+              </Text>
+              {showUsernamePrompt ? (
+                <Group
+                  justify="space-between"
+                  gap="sm"
+                  wrap="wrap"
+                  style={{
+                    borderTop: "1px solid var(--color-rule)",
+                    paddingTop: "0.75rem",
+                  }}
                 >
-                  Active session
-                  {myRole ? ` · ${playerRoleLabel(myRole)}` : ""}
-                </Text>
-                <Button
-                  fullWidth
-                  loading={continuing}
-                  onClick={() => void handleContinue()}
-                  aria-busy={continuing}
-                  aria-label={
-                    continuing
-                      ? `Verifying session ${session.code}`
-                      : `Return to map for session ${session.code}`
-                  }
-                  styles={iosFilledStyles}
-                >
-                  Continue
-                </Button>
-                <Text
-                  ta="center"
-                  size="sm"
-                  c="var(--color-field-ink-muted)"
-                  ff="monospace"
-                  style={{ letterSpacing: "0.16em" }}
-                >
-                  {session.code}
-                </Text>
-                {continueError ? (
-                  <Alert color="red" title="Could not continue" radius={14}>
-                    {continueError}
-                  </Alert>
-                ) : null}
-              </Stack>
-            ) : null}
-
-            <Stack gap={8}>
-              <IosSectionLabel>Play</IosSectionLabel>
-              <IosInsetGroup>
-                <IosInsetRow
-                  to="/join"
-                  label="Join session"
-                  icon={<SignIn size={22} weight="regular" />}
-                />
-                <IosInsetRow
-                  showSeparator
-                  to="/create"
-                  label="Create session"
-                  icon={<PlusCircle size={22} weight="regular" />}
-                />
-                <IosInsetRow
-                  showSeparator
-                  to="/presets"
-                  label="Browse presets"
-                  icon={<SquaresFour size={22} weight="regular" />}
-                />
-              </IosInsetGroup>
+                  <Text size="sm" c="var(--color-field-ink-muted)" maw="16rem">
+                    Choose a username for friends and leaderboards.
+                  </Text>
+                  <Anchor
+                    component={Link}
+                    to="/friends"
+                    size="sm"
+                    fw={600}
+                    style={{ minHeight: "2.75rem", display: "inline-flex", alignItems: "center" }}
+                  >
+                    Set username
+                  </Anchor>
+                </Group>
+              ) : null}
             </Stack>
 
-            <Stack gap={8}>
-              <IosSectionLabel>More</IosSectionLabel>
-              <IosInsetGroup>
-                <IosInsetRow
-                  to="/friends"
-                  label="Friends"
-                  icon={<UsersThree size={22} weight="regular" />}
-                />
-                <IosInsetRow
-                  showSeparator
-                  to="/leaderboard"
-                  label="Leaderboard"
-                  icon={<Trophy size={22} weight="regular" />}
-                />
-                <IosInsetRow
-                  showSeparator
-                  to="/stats"
-                  label="Stats"
-                  icon={<ChartBar size={22} weight="regular" />}
-                />
-                {showPremium ? (
+            <Stack gap={22}>
+              {session ? (
+                <Stack gap={8}>
+                  <Text
+                    size="xs"
+                    c="var(--color-field-ink-muted)"
+                    fw={590}
+                    style={{ letterSpacing: "-0.01em", paddingInline: 4 }}
+                  >
+                    Active session
+                    {myRole ? ` · ${playerRoleLabel(myRole)}` : ""}
+                  </Text>
+                  <Button
+                    fullWidth
+                    loading={continuing}
+                    onClick={() => void handleContinue()}
+                    aria-busy={continuing}
+                    aria-label={
+                      continuing
+                        ? `Verifying session ${session.code}`
+                        : `Return to map for session ${session.code}`
+                    }
+                    styles={iosFilledStyles}
+                  >
+                    Continue
+                  </Button>
+                  <Text
+                    ta="center"
+                    size="sm"
+                    c="var(--color-field-ink-muted)"
+                    ff="monospace"
+                    style={{ letterSpacing: "0.16em" }}
+                  >
+                    {session.code}
+                  </Text>
+                  {continueError ? (
+                    <Alert color="red" title="Could not continue" radius={14}>
+                      {continueError}
+                    </Alert>
+                  ) : null}
+                </Stack>
+              ) : null}
+
+              <Button
+                fullWidth
+                onClick={() => setPlayHubOpen(true)}
+                aria-label="Play - create, join, or custom game"
+                aria-haspopup="dialog"
+                aria-expanded={playHubOpen}
+                styles={iosFilledStyles}
+                variant={session ? "default" : undefined}
+              >
+                Play
+              </Button>
+              <Text
+                size="xs"
+                c="var(--color-field-ink-muted)"
+                ta="center"
+                style={{ marginTop: "-0.85rem" }}
+              >
+                Create, join, or custom
+              </Text>
+
+              <Stack gap={8}>
+                <IosSectionLabel>More</IosSectionLabel>
+                <IosInsetGroup>
+                  <IosInsetRow
+                    to="/friends"
+                    label="Friends"
+                    icon={<UsersThree size={22} weight="regular" />}
+                  />
                   <IosInsetRow
                     showSeparator
-                    to="/premium"
-                    label="Premium"
-                    icon={<Crown size={22} weight="regular" />}
+                    to="/leaderboard"
+                    label="Leaderboard"
+                    icon={<Trophy size={22} weight="regular" />}
                   />
-                ) : null}
-              </IosInsetGroup>
-            </Stack>
+                  <IosInsetRow
+                    showSeparator
+                    to="/stats"
+                    label="Stats"
+                    icon={<ChartBar size={22} weight="regular" />}
+                  />
+                  {showPremium ? (
+                    <IosInsetRow
+                      showSeparator
+                      to="/premium"
+                      label="Premium"
+                      icon={<Crown size={22} weight="regular" />}
+                    />
+                  ) : null}
+                </IosInsetGroup>
+              </Stack>
 
-            <Group
-              gap="xs"
-              justify="center"
-              component="nav"
-              aria-label="Legal and feedback"
-            >
-              <Anchor
-                component={Link}
-                to="/privacy"
-                size="sm"
-                aria-label="Privacy Policy"
+              <Group
+                gap="xs"
+                justify="center"
+                component="nav"
+                aria-label="Legal and feedback"
               >
-                Privacy
-              </Anchor>
-              <Text size="sm" c="dimmed" aria-hidden="true">
-                ·
-              </Text>
-              <Anchor
-                component={Link}
-                to="/terms"
-                size="sm"
-                aria-label="Terms of Service"
-              >
-                Terms
-              </Anchor>
-              <Text size="sm" c="dimmed" aria-hidden="true">
-                ·
-              </Text>
-              <Anchor
-                component={Link}
-                to="/feedback"
-                size="sm"
-                aria-label="Feedback and suggestions"
-              >
-                Feedback
-              </Anchor>
-            </Group>
+                <Anchor
+                  component={Link}
+                  to="/privacy"
+                  size="sm"
+                  aria-label="Privacy Policy"
+                >
+                  Privacy
+                </Anchor>
+                <Text size="sm" c="dimmed" aria-hidden="true">
+                  ·
+                </Text>
+                <Anchor
+                  component={Link}
+                  to="/terms"
+                  size="sm"
+                  aria-label="Terms of Service"
+                >
+                  Terms
+                </Anchor>
+                <Text size="sm" c="dimmed" aria-hidden="true">
+                  ·
+                </Text>
+                <Anchor
+                  component={Link}
+                  to="/feedback"
+                  size="sm"
+                  aria-label="Feedback and suggestions"
+                >
+                  Feedback
+                </Anchor>
+              </Group>
+            </Stack>
           </Stack>
-        </Stack>
-      </Container>
-    </EntryScreenLayout>
+        </Container>
+      </EntryScreenLayout>
+      <VersionChangelogSheet
+        open={changelogOpen}
+        onClose={() => setChangelogOpen(false)}
+      />
+      <PlayHubSheet open={playHubOpen} onClose={() => setPlayHubOpen(false)} />
+    </>
   );
 }

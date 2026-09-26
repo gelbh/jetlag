@@ -47,7 +47,7 @@ export async function prepareE2EPage(
 
 export async function openPlayHub(page: Page) {
   await page
-    .getByRole("button", { name: /Play — create, join, or custom game/i })
+    .getByRole("button", { name: /Play - create, join, or custom game/i })
     .click();
   await expect(page.getByRole("link", { name: "Create session" })).toBeVisible();
 }
