@@ -189,21 +189,7 @@ export function GameChatTab({
 
   return (
       <Stack gap={8}>
-        {answerError ? (
-          <Box
-            px={10}
-            py={8}
-            style={{
-              borderRadius: "0.35rem",
-              border: "1px solid var(--color-halt)",
-              backgroundColor: "var(--color-halt-soft)",
-            }}
-          >
-            <Text size="sm" c="var(--color-field-ink)">
-              {answerError}
-            </Text>
-          </Box>
-        ) : null}
+        {answerError ? <InlineError>{answerError}</InlineError> : null}
         {gameMessages.length === 0 ? (
           <EmptyState>No game messages yet.</EmptyState>
         ) : (

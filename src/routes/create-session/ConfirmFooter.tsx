@@ -1,4 +1,5 @@
 import { Button } from "../../components/ui/button";
+import { InlineError } from "../../components/ui/banners/InlineError";
 
 export interface ConfirmFooterProps {
   confirmLabel: string;
@@ -28,7 +29,7 @@ export function ConfirmFooter({
       >
         {confirmLabel}
       </Button>
-      {error ? <p className="mt-2 text-halt">{error}</p> : null}
+      {error ? <InlineError className="mt-2">{error}</InlineError> : null}
     </div>
   );
 }
