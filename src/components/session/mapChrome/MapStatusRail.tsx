@@ -63,7 +63,8 @@ export type MapStatusRailModel = {
   onSyncErrorAction?: () => void;
   /** Dim chrome and block tool/timer interaction when the session is gone. */
   inactiveChrome?: boolean;
-  terminalSessionError?: import("@/domain/device/feedback/userErrors").UserErrorDisplay | null;
+  terminalSessionError?:
+    import("@/domain/device/feedback/userErrors").UserErrorDisplay | null;
   onReturnToJoin?: () => void;
   /** In-flow status for DesktopOpsShell (vs absolute overlay on mobile). */
   expanded?: boolean;
@@ -77,10 +78,7 @@ export type MapStatusRailProps = {
   headerLeading?: ReactNode;
 };
 
-export function MapStatusRail({
-  model,
-  headerLeading,
-}: MapStatusRailProps) {
+export function MapStatusRail({ model, headerLeading }: MapStatusRailProps) {
   const {
     sessionCode,
     sessionId = null,
@@ -180,9 +178,7 @@ export function MapStatusRail({
   }, [showPreloadMenu, showTimerMenu]);
 
   const railClassName = `jl-status-rail pointer-events-none z-[var(--z-banner)]${
-    expanded
-      ? " jl-status-rail--expanded"
-      : " absolute inset-x-0 top-0"
+    expanded ? " jl-status-rail--expanded" : " absolute inset-x-0 top-0"
   }${
     inactiveChrome
       ? " [&_.jl-status-header-col--timer_.jl-ticker]:pointer-events-none [&_.jl-status-header-col--timer_.jl-ticker]:opacity-55 [&_.jl-status-header-col--timer_button]:pointer-events-none [&_.jl-status-header-col--timer_button]:opacity-55"
@@ -241,9 +237,7 @@ export function MapStatusRail({
             onTimerResume={onTimerStart}
             timerControlsDisabled={timerControlsDisabled || inactiveChrome}
             headerLeading={
-              headerLeading ?? (
-                <ScreenNav variant="home" placement="inline" />
-              )
+              headerLeading ?? <ScreenNav variant="home" placement="inline" />
             }
             syncSlot={
               <SyncBlock

@@ -58,7 +58,7 @@ describe("useMatchingTool map-first answer", () => {
     );
 
     await act(async () => {
-      result.current.panel.props.onCategoryChange("commercial_airport");
+      result.current.panel.props.model.onCategoryChange("commercial_airport");
     });
 
     await waitFor(() => {

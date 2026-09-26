@@ -1,6 +1,9 @@
 import type { ReactNode } from "react";
 import { useMemo } from "react";
-import { isEndGameActive, isFoundHiderPending } from "../../domain/map/annotations";
+import {
+  isEndGameActive,
+  isFoundHiderPending,
+} from "../../domain/map/annotations";
 import { QUESTION_DOCK_TOOL_IDS } from "../../domain/map/mapTools";
 import { resolveToolDockEnabled } from "../../domain/session/rules";
 import { ChatPanel } from "../../components/chat/ChatPanel";
@@ -38,10 +41,7 @@ export type MapScreenChromeProps = {
   mapSlot?: ReactNode;
 };
 
-export function MapScreenChrome({
-  controller,
-  mapSlot,
-}: MapScreenChromeProps) {
+export function MapScreenChrome({ controller, mapSlot }: MapScreenChromeProps) {
   const {
     session,
     gameArea,
@@ -164,16 +164,12 @@ export function MapScreenChrome({
     syncStatus.remoteUpdateNotice ??
     syncStatus.lastSyncError ??
     matchingAreasError;
-  const {
-    inactiveChrome,
-    terminalSessionError,
-    onReturnToJoin,
-    onSyncRetry,
-  } = useMapTerminalSessionChrome({
-    syncMessage,
-    sessionId: session!.id,
-    closeOverlays: overlay.closeAllSheets,
-  });
+  const { inactiveChrome, terminalSessionError, onReturnToJoin, onSyncRetry } =
+    useMapTerminalSessionChrome({
+      syncMessage,
+      sessionId: session!.id,
+      closeOverlays: overlay.closeAllSheets,
+    });
   const onSyncErrorAction = onSyncRetry;
   const gameOverActions = useGameOverActions(session, {
     closeSheet: overlay.closeAllSheets,
@@ -327,16 +323,17 @@ export function MapScreenChrome({
     !matchingTool.hud.suppressSheet;
   const askMapFirst = Boolean(
     (activeTool === "matching" && matchingTool.hud.suppressSheet) ||
-      (activeTool === "radar" && radarTool.hud.suppressSheet) ||
-      (activeTool === "tentacle" && tentacleTool.hud.suppressSheet) ||
-      (activeTool === "measuring" && measuringTool.hud.suppressSheet) ||
-      (activeTool === "photo" && photoTool.hud?.suppressSheet) ||
-      (activeTool === "thermometer" && thermometerTool.hud.suppressSheet),
+    (activeTool === "radar" && radarTool.hud.suppressSheet) ||
+    (activeTool === "tentacle" && tentacleTool.hud.suppressSheet) ||
+    (activeTool === "measuring" && measuringTool.hud.suppressSheet) ||
+    (activeTool === "photo" && photoTool.hud?.suppressSheet) ||
+    (activeTool === "thermometer" && thermometerTool.hud.suppressSheet),
   );
 
   const refineChip: MapRefineChipCopy = selectMapRefineChip({
     catalogHydrating,
-    measuringActiveAndRefining: measuringLodRefining && activeTool === "measuring",
+    measuringActiveAndRefining:
+      measuringLodRefining && activeTool === "measuring",
     shadeRefining:
       (!askMapFirst && matchingLodRefining) ||
       measuringLodRefining ||

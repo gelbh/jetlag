@@ -58,11 +58,7 @@ export function AdminMapScreen({
     }
     setSession(null);
     navigate("/admin");
-  }, [
-    controller.session?.id,
-    navigate,
-    setSession,
-  ]);
+  }, [controller.session?.id, navigate, setSession]);
 
   const handleModerationAction = useCallback(
     async (action: "end" | "resetBoard" | "cleanupCode") => {

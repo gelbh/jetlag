@@ -8,9 +8,7 @@ import type { GameArea } from "@/domain/map/annotations";
 import type { MapStyle } from "@/domain/map/mapBasemaps";
 import type { FramingMode } from "@/hooks/session/useGameAreaFraming";
 import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
-import {
-  GameAreaFramingStats,
-} from "./GameAreaFramingControls";
+import { GameAreaFramingStats } from "./GameAreaFramingControls";
 import { framingModeHint } from "./gameAreaFramingUi";
 import { type GameSize } from "@/domain/session/size/gameSize";
 

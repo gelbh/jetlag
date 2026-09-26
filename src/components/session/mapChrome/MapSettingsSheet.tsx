@@ -148,7 +148,8 @@ export function MapSettingsSheet({
               py="0.55rem"
               style={{
                 borderRadius: 12,
-                border: "0.33px solid oklch(from var(--color-signal) l c h / 0.55)",
+                border:
+                  "0.33px solid oklch(from var(--color-signal) l c h / 0.55)",
                 backgroundColor: "oklch(from var(--color-signal) l c h / 0.14)",
               }}
             >

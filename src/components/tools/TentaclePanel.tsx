@@ -1,6 +1,9 @@
 import { type RefObject } from "react";
 import type { TentaclePoi } from "../../domain/map/annotations";
-import { formatPresetDistance, type DistanceUnit } from "../../domain/map/distance";
+import {
+  formatPresetDistance,
+  type DistanceUnit,
+} from "../../domain/map/distance";
 import type { GameSize } from "../../domain/session/size/gameSize";
 import {
   isTentacleCategoryAvailable,
@@ -159,9 +162,7 @@ export function TentaclePanel({ model }: TentaclePanelProps) {
     <>
       {phaseId === "configure" && stepId === "category" ? (
         <ToolSection first compact status="active">
-          {awaitHiderAnswer ? (
-            <QuestionTruthReferenceHint />
-          ) : null}
+          {awaitHiderAnswer ? <QuestionTruthReferenceHint /> : null}
           <QuestionPromptBlock
             prompt={prompt}
             ruleSummary={
@@ -179,7 +180,9 @@ export function TentaclePanel({ model }: TentaclePanelProps) {
                 if (!value) {
                   return;
                 }
-                onCategoryChange(event.target.value as TentacleExtendedCategoryId);
+                onCategoryChange(
+                  event.target.value as TentacleExtendedCategoryId,
+                );
               }}
               className="field-input"
             >
@@ -266,8 +269,7 @@ export function TentaclePanel({ model }: TentaclePanelProps) {
         <Stepper
           nav={{
             canGoBack:
-              phaseIndex > 0 ||
-              (phaseId === "configure" && configureIndex > 0),
+              phaseIndex > 0 || (phaseId === "configure" && configureIndex > 0),
             onBack: goBack,
             ...toolWizardPhasePrimaryNav({
               phaseId,

@@ -367,9 +367,7 @@ export function useMatchingTool({
       const mapStyle = useMapStore.getState().mapStyle;
       const categoryId = matchingCategoryChosen ? matchingCategoryId : null;
       const resolver =
-        categoryId != null
-          ? getMatchingCategory(categoryId).resolver
-          : null;
+        categoryId != null ? getMatchingCategory(categoryId).resolver : null;
       const tapHit =
         resolver === "overpassPoint" && categoryId != null
           ? previewBasemapPois({
@@ -408,7 +406,12 @@ export function useMatchingTool({
         error instanceof Error ? error.message : "GPS location unavailable.",
       );
     }
-  }, [ensurePointInGameArea, refreshGps, setMatchingError, setMatchingSeekerAnchor]);
+  }, [
+    ensurePointInGameArea,
+    refreshGps,
+    setMatchingError,
+    setMatchingSeekerAnchor,
+  ]);
 
   const handleGpsRef = useRef(handleGps);
   handleGpsRef.current = handleGps;
@@ -501,9 +504,7 @@ export function useMatchingTool({
 
   const nearestProvisional =
     matchingLoading &&
-    matchingFeatures.some(
-      (feature) => feature.confirmStatus === "provisional",
-    );
+    matchingFeatures.some((feature) => feature.confirmStatus === "provisional");
 
   const panel = (
     <MatchingToolPanel
@@ -557,8 +558,7 @@ export function useMatchingTool({
       wizardStepRef.current = "category";
       return;
     }
-    const resolved =
-      matchingNullAnswer || matchingNearestFeatureName !== null;
+    const resolved = matchingNullAnswer || matchingNearestFeatureName !== null;
     if (!matchingSeekerPoint || matchingLoading || !resolved) {
       wizardStepRef.current = "place";
       return;
@@ -664,11 +664,7 @@ export function useMatchingTool({
     : null;
 
   let placementPhase: MatchingMapPlacementPhase;
-  if (
-    matchingSeekerPoint !== null &&
-    resolveComplete &&
-    !matchingLoading
-  ) {
+  if (matchingSeekerPoint !== null && resolveComplete && !matchingLoading) {
     placementPhase = "answer";
   } else if (
     matchingSeekerPoint !== null &&
@@ -685,8 +681,7 @@ export function useMatchingTool({
       placementGeo === "denied" ||
       placementGeo === "unavailable")
   ) {
-    placementPhase =
-      placementGeo === "prompt" ? "needs_permission" : "failed";
+    placementPhase = placementGeo === "prompt" ? "needs_permission" : "failed";
   } else {
     placementPhase = "locating";
   }

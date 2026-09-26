@@ -7,9 +7,7 @@ import {
 import { QuestionPreviewSheet } from "@/components/tools/shared/controls/QuestionPreviewSheet";
 import { MeasuringTargetSection } from "@/components/tools/shared/measuring/MeasuringTargetStep";
 import { SearchResultsList } from "@/components/tools/shared/controls/SearchResultsList";
-import {
-  anchorResolveLoadingMessage,
-} from "@/components/tools/shared/measuring/measuringPanelUtils";
+import { anchorResolveLoadingMessage } from "@/components/tools/shared/measuring/measuringPanelUtils";
 import type { AskHudReadiness } from "@/domain/ask/askHudModes";
 import { isActive } from "../../domain/map/annotations";
 import {
@@ -314,8 +312,7 @@ export function useMeasuringTool({
       placementGeo === "denied" ||
       placementGeo === "unavailable")
   ) {
-    placementPhase =
-      placementGeo === "prompt" ? "needs_permission" : "failed";
+    placementPhase = placementGeo === "prompt" ? "needs_permission" : "failed";
   } else {
     placementPhase = "locating";
   }
@@ -365,12 +362,12 @@ export function useMeasuringTool({
     placementPhase === "locating"
       ? "Waiting for GPS…"
       : placementPhase === "resolving"
-        ? draft.measuringTargetPlaceName ??
+        ? (draft.measuringTargetPlaceName ??
           anchorResolveLoadingMessage(
             draft.measuringSubject,
             measureFromKey,
             locationCategory,
-          )
+          ))
         : configureLabel;
 
   const midSlot =
@@ -444,7 +441,9 @@ export function useMeasuringTool({
   const hud = {
     readiness,
     costLabel: questionCost.label,
-    error: mapPlacementActive ? null : (draft.measuringError ?? gpsError ?? mapError ?? null),
+    error: mapPlacementActive
+      ? null
+      : (draft.measuringError ?? gpsError ?? mapError ?? null),
     onCommit: () => void commit(),
     suppressSheet: mapPlacementActive,
     mapOverlay: mapPlacementActive ? (

@@ -205,7 +205,9 @@ export function MeasuringHudBody({ model }: MeasuringHudBodyProps) {
   const filteredOptions =
     effectiveFilter === "all"
       ? selectableOptions
-      : selectableOptions.filter((option) => option.groupId === effectiveFilter);
+      : selectableOptions.filter(
+          (option) => option.groupId === effectiveFilter,
+        );
 
   const catalogRows = MEASURING_GROUPS.flatMap((group) =>
     filteredOptions
@@ -217,12 +219,7 @@ export function MeasuringHudBody({ model }: MeasuringHudBodyProps) {
           label: option.label,
           groupLabel: effectiveFilter === "all" ? group.label : undefined,
           icon: (
-            <Icon
-              size={20}
-              weight="duotone"
-              color="currentColor"
-              aria-hidden
-            />
+            <Icon size={20} weight="duotone" color="currentColor" aria-hidden />
           ),
         };
       }),

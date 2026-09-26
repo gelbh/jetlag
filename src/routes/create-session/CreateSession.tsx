@@ -62,7 +62,9 @@ export function CreateSession() {
           mapStyle={session.mapStyle}
           onMapStyleChange={session.setMapStyle}
           focusBounds={session.mapFocusBounds}
-          previewGameArea={session.mapPreviewGameArea ?? session.previewGameArea}
+          previewGameArea={
+            session.mapPreviewGameArea ?? session.previewGameArea
+          }
           selectedGameSize={session.gameSize}
           manualFramingActive={session.manualFramingActive}
           framingMode={session.framing.framingMode}
@@ -132,7 +134,8 @@ export function CreateSession() {
           <GameAreaSection
             model={{
               bundledPresetSelectGroups: session.bundledPresetSelectGroups,
-              favouritePresetSelectOptions: session.favouritePresetSelectOptions,
+              favouritePresetSelectOptions:
+                session.favouritePresetSelectOptions,
               userPresets: session.userPresets,
               loading: session.loading,
               verifyingAccess: session.verifyingAccess,

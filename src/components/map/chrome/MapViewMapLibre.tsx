@@ -1,8 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import Map, {
-  AttributionControl,
-  type MapRef,
-} from "react-map-gl/maplibre";
+import Map, { AttributionControl, type MapRef } from "react-map-gl/maplibre";
 import { setWorkerUrl, type Map as MapLibreMap } from "maplibre-gl";
 import {
   createMapBounds,
@@ -13,10 +10,7 @@ import {
 import "maplibre-gl/dist/maplibre-gl.css";
 import "@/styles/map-touch-gestures.css";
 import mapLibreWorkerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
-import {
-  getBasemapSurface,
-  getMapLibreStyle,
-} from "@/domain/map/mapBasemaps";
+import { getBasemapSurface, getMapLibreStyle } from "@/domain/map/mapBasemaps";
 import {
   DEFAULT_MAP_CENTER,
   DEFAULT_MAP_LNGLAT,
@@ -274,9 +268,7 @@ function MapFocus({
       };
     }
 
-    if (
-      isLargeCameraJumpMapLibre(map, center, zoom, preferFlyRef.current)
-    ) {
+    if (isLargeCameraJumpMapLibre(map, center, zoom, preferFlyRef.current)) {
       map.flyTo({
         center,
         zoom,
@@ -328,13 +320,13 @@ export function MapViewMapLibre({ model, children }: MapViewMapLibreProps) {
     focusPreferFly,
     recenterToken = 0,
     showZoomControl,
-    zoomControlInset = "dock",
     onMapStyleChange,
     showMapStyleToggle,
-    mapStyleControlInset,
     showCompassControl,
     onRecenter,
   } = model;
+  // zoomControlInset / mapStyleControlInset stay on MapViewModel for call-site
+  // parity; MapNavControlStack owns nav layout now.
   const mapRef = useRef<MapRef>(null);
   const onBoundsChangeRef = useRef(onBoundsChange);
   const onUserViewportFramedRef = useRef(onUserViewportFramed);
@@ -354,9 +346,7 @@ export function MapViewMapLibre({ model, children }: MapViewMapLibreProps) {
   const compassControlEnabled = showCompassControl ?? false;
   const [fallbackRecenterToken, setFallbackRecenterToken] = useState(0);
   const [orientationResetToken, setOrientationResetToken] = useState(0);
-  const focusRecenterToken = onRecenter
-    ? recenterToken
-    : fallbackRecenterToken;
+  const focusRecenterToken = onRecenter ? recenterToken : fallbackRecenterToken;
   const handleCompassReset = useCallback(() => {
     // Orientation signal is compass-only; pan/zoom home uses recenter token.
     setOrientationResetToken((value) => value + 1);

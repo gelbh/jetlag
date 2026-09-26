@@ -96,9 +96,7 @@ describe("MapStatusRail public props (AC #1)", () => {
       </MantineProvider>,
     );
 
-    expect(
-      screen.getByTestId("map-status-rail-mantine"),
-    ).toBeInTheDocument();
+    expect(screen.getByTestId("map-status-rail-mantine")).toBeInTheDocument();
   });
 });
 
@@ -114,20 +112,24 @@ describe("MapStatusRail header home", () => {
 describe("MapStatusRail Mantine", () => {
   it("mounts Mantine rail chrome", () => {
     const { container } = renderRail();
-    expect(container.querySelector('[data-testid="map-status-rail-mantine"]')).toBeTruthy();
+    expect(
+      container.querySelector('[data-testid="map-status-rail-mantine"]'),
+    ).toBeTruthy();
   });
 
   it("keeps frosted status bar + Start", () => {
     const { container } = renderRail({ canStartGame: true });
-    const island = container.querySelector('[data-testid="tool-status-block-mantine"]');
+    const island = container.querySelector(
+      '[data-testid="tool-status-block-mantine"]',
+    );
     expect(island).toBeTruthy();
     expect(
       island?.querySelector('[data-testid="sync-block-mantine"]'),
     ).toBeTruthy();
     expect(
-      island?.querySelector('[data-testid="sync-block-mantine"]')?.getAttribute(
-        "role",
-      ),
+      island
+        ?.querySelector('[data-testid="sync-block-mantine"]')
+        ?.getAttribute("role"),
     ).toBe("status");
     expect(container.querySelector(".jl-status-header")).toBeNull();
     expect(container.querySelector(".jl-status-bar")).toBeNull();

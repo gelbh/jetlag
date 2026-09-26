@@ -38,16 +38,14 @@ export function ObserverMapScreen() {
     }
     setSession(null);
     navigate(controller.exitPath);
-  }, [
-    controller.exitPath,
-    controller.session?.id,
-    navigate,
-    setSession,
-  ]);
+  }, [controller.exitPath, controller.session?.id, navigate, setSession]);
 
   if (!controller.session) {
     return (
-      <AppNavigate to={controller.myRole === "admin" ? "/admin" : "/"} replace />
+      <AppNavigate
+        to={controller.myRole === "admin" ? "/admin" : "/"}
+        replace
+      />
     );
   }
 
@@ -122,69 +120,69 @@ export function ObserverMapScreen() {
         queuedWrites={controller.syncStatus.queuedWrites}
         syncMessage={controller.syncStatus.lastSyncError}
       >
-      <div className="map-screen-shell">
-        {isDesktop ? null : mapLayers}
+        <div className="map-screen-shell">
+          {isDesktop ? null : mapLayers}
 
-        <ObserverMapScreenChrome
-          session={controller.session}
-          myRole={controller.myRole ?? "observer"}
-          myUid={controller.uid ?? undefined}
-          isHost={
-            Boolean(controller.uid) &&
-            controller.session.hostUid === controller.uid
-          }
-          timer={controller.timer}
-          overlay={controller.overlay}
-          onLeave={() => void handleLeave()}
-          mapSlot={isDesktop ? mapLayers : undefined}
-          moveInProgress={controller.hidingZones.some(
-            (zone) => zone.moveInProgress === true,
-          )}
-        />
+          <ObserverMapScreenChrome
+            session={controller.session}
+            myRole={controller.myRole ?? "observer"}
+            myUid={controller.uid ?? undefined}
+            isHost={
+              Boolean(controller.uid) &&
+              controller.session.hostUid === controller.uid
+            }
+            timer={controller.timer}
+            overlay={controller.overlay}
+            onLeave={() => void handleLeave()}
+            mapSlot={isDesktop ? mapLayers : undefined}
+            moveInProgress={controller.hidingZones.some(
+              (zone) => zone.moveInProgress === true,
+            )}
+          />
 
-        {controller.syncStatus.lastSyncError ? (
-          <div className="pointer-events-none absolute inset-x-0 top-20 z-[var(--z-panel)] px-3">
-            <InlineError className="pointer-events-auto mx-auto max-w-xl">
-              {controller.syncStatus.lastSyncError}
-            </InlineError>
-          </div>
-        ) : null}
+          {controller.syncStatus.lastSyncError ? (
+            <div className="pointer-events-none absolute inset-x-0 top-20 z-[var(--z-panel)] px-3">
+              <InlineError className="pointer-events-auto mx-auto max-w-xl">
+                {controller.syncStatus.lastSyncError}
+              </InlineError>
+            </div>
+          ) : null}
 
-        <SessionLog
-          open={controller.overlay.isLogOpen}
-          sessionId={controller.session.id}
-          annotations={controller.annotations}
-          onClose={controller.overlay.closeSheet}
-          onDelete={() => undefined}
-          onEdit={() => undefined}
-          readOnly
-          onSelect={(id) => {
-            controller.overlay.closeSheet();
-            setSelectedAnnotationId(id);
-            markAnnotationPulse(id);
-          }}
-        />
-
-        {controller.sessionId && controller.uid ? (
-          <ChatPanel
-            model={{
-              open: controller.overlay.isChatOpen,
-              onClose: controller.overlay.closeSheet,
-              messages: controller.chatMessages,
-              pendingQuestions: controller.pendingQuestions,
-              sessionRules,
-              sessionId: controller.sessionId,
-              senderUid: controller.uid,
-              senderRole: chatDisplayRole,
-              isHider: false,
-              bottomClassName:
-                "bottom-[calc(7.75rem+env(safe-area-inset-bottom))]",
-              onAnswerQuestion: async () => undefined,
-              readOnly: true,
+          <SessionLog
+            open={controller.overlay.isLogOpen}
+            sessionId={controller.session.id}
+            annotations={controller.annotations}
+            onClose={controller.overlay.closeSheet}
+            onDelete={() => undefined}
+            onEdit={() => undefined}
+            readOnly
+            onSelect={(id) => {
+              controller.overlay.closeSheet();
+              setSelectedAnnotationId(id);
+              markAnnotationPulse(id);
             }}
           />
-        ) : null}
-      </div>
+
+          {controller.sessionId && controller.uid ? (
+            <ChatPanel
+              model={{
+                open: controller.overlay.isChatOpen,
+                onClose: controller.overlay.closeSheet,
+                messages: controller.chatMessages,
+                pendingQuestions: controller.pendingQuestions,
+                sessionRules,
+                sessionId: controller.sessionId,
+                senderUid: controller.uid,
+                senderRole: chatDisplayRole,
+                isHider: false,
+                bottomClassName:
+                  "bottom-[calc(7.75rem+env(safe-area-inset-bottom))]",
+                onAnswerQuestion: async () => undefined,
+                readOnly: true,
+              }}
+            />
+          ) : null}
+        </div>
       </MapLandscapeChromeShell>
     </ContextualRailPanelProvider>
   );

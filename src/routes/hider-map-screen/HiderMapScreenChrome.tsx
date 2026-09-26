@@ -1,5 +1,8 @@
 import type { ReactNode, RefObject } from "react";
-import type { AnnotationRecord, SessionRecord } from "../../domain/map/annotations";
+import type {
+  AnnotationRecord,
+  SessionRecord,
+} from "../../domain/map/annotations";
 import type {
   PendingQuestionRecord,
   SessionMessageRecord,
@@ -44,15 +47,16 @@ import { FirestorePersistenceBanner } from "../../components/session/banners/Fir
 import { MapStatusRail } from "../../components/session/mapChrome/MapStatusRail";
 import { MapSettingsSheet } from "../../components/session/mapChrome/MapSettingsSheet";
 import { RoleCodesSheet } from "../../components/session/settings/RoleCodesSheet";
-import {
-  HiderTruthRevealBanner,
-} from "../../components/session/banners/HiderTruthRevealBanner";
+import { HiderTruthRevealBanner } from "../../components/session/banners/HiderTruthRevealBanner";
 import { QuestionAlertBanner } from "../../components/session/banners/QuestionAlertBanner";
 import { useDesktopLayout } from "../../hooks/layout/useDesktopLayout";
 import { useMapTerminalSessionChrome } from "../../hooks/session/useMapTerminalSessionChrome";
 import { HiderToolDock } from "../../components/tools/HiderToolDock";
 import { SessionLog } from "../../components/session/log/SessionLog";
-import { isEndGameActive, isFoundHiderPending } from "../../domain/map/annotations";
+import {
+  isEndGameActive,
+  isFoundHiderPending,
+} from "../../domain/map/annotations";
 import { GameOverChrome } from "../../components/session/game-over/GameOverChrome";
 import { useGameOverActions } from "../../hooks/session/useGameOverActions";
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
@@ -286,16 +290,12 @@ export function HiderMapScreenChrome({
     pendingQuestions: displayPendingQuestions,
   } = useDevMockSessionFeed(session.id, messages, pendingQuestions);
   const syncMessage = syncStatus.remoteUpdateNotice ?? syncStatus.lastSyncError;
-  const {
-    inactiveChrome,
-    terminalSessionError,
-    onReturnToJoin,
-    onSyncRetry,
-  } = useMapTerminalSessionChrome({
-    syncMessage,
-    sessionId: session.id,
-    closeOverlays: overlay.closeSheet,
-  });
+  const { inactiveChrome, terminalSessionError, onReturnToJoin, onSyncRetry } =
+    useMapTerminalSessionChrome({
+      syncMessage,
+      sessionId: session.id,
+      closeOverlays: overlay.closeSheet,
+    });
   const onSyncErrorAction = onSyncRetry;
   const gameOverActions = useGameOverActions(session, {
     closeSheet: overlay.closeAllSheets,
@@ -531,9 +531,7 @@ export function HiderMapScreenChrome({
                 zoneTool={hidingZonePanelTool}
                 onStepChange={onHidingZoneStepChange}
                 onSearchThisArea={onSearchThisArea}
-                onDismiss={
-                  zoneTool.moveMode ? undefined : zoneTool.closeWizard
-                }
+                onDismiss={zoneTool.moveMode ? undefined : zoneTool.closeWizard}
               />
             }
           />
@@ -624,7 +622,9 @@ export function HiderMapScreenChrome({
               onResetSession: onResetSession
                 ? () => void onResetSession()
                 : undefined,
-              onEndSession: onEndSession ? () => void onEndSession() : undefined,
+              onEndSession: onEndSession
+                ? () => void onEndSession()
+                : undefined,
               onLeaveSession: onLeaveSession
                 ? () => void onLeaveSession()
                 : undefined,
@@ -695,7 +695,9 @@ export function HiderMapScreenChrome({
               searchDisabled={timeTrapTool.stationsLoading}
               existingTrapStationName={myTrap?.stationName ?? null}
               onConfirm={() =>
-                void timeTrapTool.confirmTrap().then(() => onTimeTrapSheetOpenChange(false))
+                void timeTrapTool
+                  .confirmTrap()
+                  .then(() => onTimeTrapSheetOpenChange(false))
               }
               saving={timeTrapTool.saving}
               error={timeTrapTool.error}
