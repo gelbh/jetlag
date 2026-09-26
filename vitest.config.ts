@@ -8,6 +8,7 @@ export default defineConfig({
     forceRerunTriggers: [
       "**/vitest.config.ts",
       "**/vitest.shared.ts",
+      "**/vite.resolve-shared.ts",
       "**/vite.config.ts",
       "**/package.json",
       "**/src/test/setup.ts",
