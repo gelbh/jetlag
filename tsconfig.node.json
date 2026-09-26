@@ -27,6 +27,7 @@
     "vite.sentry.ts",
     "vite.pwa.ts",
     "vitest.config.ts",
+    "vitest.shared.ts",
     "scripts/deploy-production.mjs"
   ]
 }
