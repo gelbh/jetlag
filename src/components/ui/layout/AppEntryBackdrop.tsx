@@ -1,4 +1,5 @@
 import { useLocation } from "react-router-dom";
+import { entryBackdropStyle } from "@/components/ui/entry/entryStyles";
 
 export function AppEntryBackdrop() {
   const location = useLocation();
@@ -7,5 +8,5 @@ export function AppEntryBackdrop() {
     return null;
   }
 
-  return <div aria-hidden className="app-entry-backdrop" />;
+  return <div aria-hidden className="app-entry-backdrop" style={entryBackdropStyle} />;
 }

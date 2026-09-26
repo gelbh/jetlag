@@ -1,4 +1,5 @@
 import type { ButtonProps } from "@mantine/core";
+import type { CSSProperties } from "react";
 
 /** iOS filled tint control (logo orange). */
 export const filledStyles: ButtonProps["styles"] = {
@@ -434,3 +435,328 @@ export function bottomDrawerStyles(
     },
   };
 }
+
+/** Fixed entry-route backdrop (non-map routes). */
+export const entryBackdropStyle: CSSProperties = {
+  position: "fixed",
+  inset: 0,
+  zIndex: -1,
+  pointerEvents: "none",
+  backgroundColor: "var(--color-canvas)",
+  backgroundImage: [
+    "radial-gradient(ellipse 70% 45% at 100% 0%, oklch(from var(--color-flag) l c h / 0.12), transparent 55%)",
+    "radial-gradient(ellipse 60% 50% at 0% 100%, oklch(from var(--color-signal) l c h / 0.08), transparent 60%)",
+  ].join(", "),
+};
+
+/** Home / entry route poster shell. */
+export const homePosterStyle: CSSProperties = {
+  position: "relative",
+  isolation: "isolate",
+  backgroundColor: "transparent",
+};
+
+/** Top signal→flag accent bar (replaces `.home-terminal-accent::after`). */
+export const homeTerminalAccentBarStyle: CSSProperties = {
+  position: "fixed",
+  top: "env(safe-area-inset-top, 0)",
+  left: 0,
+  right: 0,
+  zIndex: 0,
+  height: 3,
+  pointerEvents: "none",
+  background:
+    "linear-gradient(90deg, var(--color-signal), var(--color-flag) 45%, var(--color-flag))",
+};
+
+export type HomeCardBtnVariant =
+  | "primary"
+  | "secondary"
+  | "premium"
+  | "premiumSessions";
+
+const homeCardBtnBase: CSSProperties = {
+  display: "flex",
+  minHeight: "3.125rem",
+  width: "100%",
+  alignItems: "center",
+  justifyContent: "space-between",
+  borderRadius: "var(--jl-control-radius, 14px)",
+  border: "var(--jl-hairline, 0.33px) solid oklch(from var(--color-field-ink) l c h / 0.14)",
+  padding: "0.875rem 1rem",
+  fontFamily: "var(--font-body)",
+  fontSize: "1.0625rem",
+  fontWeight: 590,
+  letterSpacing: "-0.01em",
+  textTransform: "none",
+  backdropFilter: "var(--jl-frost-blur, blur(20px) saturate(1.4))",
+  WebkitBackdropFilter: "var(--jl-frost-blur, blur(20px) saturate(1.4))",
+  textDecoration: "none",
+  boxSizing: "border-box",
+};
+
+/** Frosted home / premium / play-hub row control (was `.home-card-btn*`). */
+export function homeCardBtnStyle(
+  variant: HomeCardBtnVariant = "secondary",
+): CSSProperties {
+  switch (variant) {
+    case "primary":
+      return {
+        ...homeCardBtnBase,
+        borderColor: "var(--color-flag)",
+        background: "var(--color-flag)",
+        color: "var(--color-flag-ink)",
+      };
+    case "premium":
+      return {
+        ...homeCardBtnBase,
+        borderColor: "oklch(from var(--color-flag) l c h / 0.45)",
+        background: "var(--color-flag-soft)",
+        color: "var(--color-flag)",
+      };
+    case "premiumSessions":
+      return {
+        ...homeCardBtnBase,
+        borderColor: "oklch(from var(--color-signal) l c h / 0.45)",
+        background: "var(--color-signal-soft)",
+        color: "var(--color-signal)",
+      };
+    default:
+      return {
+        ...homeCardBtnBase,
+        background: "oklch(from var(--color-canvas) calc(l + 0.04) c h)",
+        color: "var(--color-field-ink)",
+      };
+  }
+}
+
+export const homeCardBtnHintStyle: CSSProperties = {
+  fontSize: "0.8125rem",
+  fontWeight: 510,
+  letterSpacing: "-0.01em",
+  opacity: 0.72,
+};
+
+export const homeCardBtnHintOnPrimaryStyle: CSSProperties = {
+  ...homeCardBtnHintStyle,
+  color: "var(--color-flag-ink)",
+  opacity: 0.72,
+};
+
+export const homeCardBtnHintPremiumStyle: CSSProperties = {
+  ...homeCardBtnHintStyle,
+  maxWidth: "9.5rem",
+  textAlign: "right",
+  textWrap: "pretty",
+  opacity: 1,
+  color: "oklch(from var(--color-flag) l c h / 0.88)",
+};
+
+export const homeCardBtnHintPremiumSessionsStyle: CSSProperties = {
+  ...homeCardBtnHintPremiumStyle,
+  color: "oklch(from var(--color-signal) l c h / 0.88)",
+};
+
+export const premiumEntitlementPillStyle: CSSProperties = {
+  display: "inline-flex",
+  maxWidth: "100%",
+  alignItems: "center",
+  borderRadius: 999,
+  border: "var(--jl-hairline, 0.33px) solid oklch(from var(--color-flag) l c h / 0.45)",
+  background: "var(--color-flag-soft)",
+  padding: "0.25rem 0.625rem",
+  fontSize: "0.8125rem",
+  fontWeight: 590,
+  lineHeight: 1.3,
+  color: "var(--color-flag)",
+  textWrap: "pretty",
+};
+
+export const premiumPackGridStyle: CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+  gap: "0.5rem",
+};
+
+export const premiumPackCellStyle: CSSProperties = {
+  display: "flex",
+  minHeight: "2.75rem",
+  flexDirection: "column",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: "0.125rem",
+  borderRadius: "var(--jl-control-radius, 14px)",
+  border: "var(--jl-hairline, 0.33px) solid oklch(from var(--color-field-ink) l c h / 0.14)",
+  background: "oklch(from var(--color-canvas) calc(l + 0.04) c h)",
+  padding: "0.5rem 0.375rem",
+  fontFamily: "var(--font-body)",
+  textAlign: "center",
+  color: "var(--color-field-ink)",
+};
+
+export const premiumPackCellLabelStyle: CSSProperties = {
+  fontSize: "0.75rem",
+  fontWeight: 600,
+  letterSpacing: "0.06em",
+  lineHeight: 1.1,
+  textTransform: "uppercase",
+};
+
+export const premiumPackCellPriceStyle: CSSProperties = {
+  fontSize: "0.6875rem",
+  fontWeight: 500,
+  letterSpacing: "0.04em",
+  color: "var(--color-field-ink-muted)",
+};
+
+export const premiumOfferRowStyle: CSSProperties = {
+  display: "flex",
+  minHeight: "3rem",
+  width: "100%",
+  alignItems: "center",
+  justifyContent: "space-between",
+  gap: "0.75rem",
+  borderRadius: "var(--radius-hud-md)",
+  border: "2px solid var(--color-rule)",
+  background: "var(--color-canvas)",
+  padding: "0.5rem 0.75rem",
+  textAlign: "left",
+  color: "var(--color-field-ink)",
+  fontFamily: "var(--font-body)",
+  fontWeight: 590,
+  textTransform: "none",
+  letterSpacing: "-0.01em",
+};
+
+export const premiumOfferRowLabelStyle: CSSProperties = {
+  fontSize: "0.875rem",
+  letterSpacing: "0.05em",
+  lineHeight: 1.2,
+};
+
+export const premiumOfferRowHintStyle: CSSProperties = {
+  flexShrink: 0,
+  fontSize: "0.6875rem",
+  fontWeight: 500,
+  letterSpacing: "0.05em",
+  opacity: 0.8,
+  textAlign: "right",
+};
+
+export const premiumAccountActionsStyle: CSSProperties = {
+  display: "flex",
+  flexDirection: "column",
+  gap: "0.5rem",
+};
+
+export const oauthProviderButtonStyle: CSSProperties = {
+  display: "flex",
+  minHeight: "3.75rem",
+  width: "100%",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: "0.75rem",
+  borderRadius: "var(--radius-hud-md)",
+  border: "2px solid oklch(0.99 0.002 250)",
+  background: "oklch(0.99 0.002 250)",
+  color: "oklch(0.18 0.02 250)",
+  fontFamily: "var(--font-body)",
+  fontSize: "1rem",
+  fontWeight: 500,
+  letterSpacing: "0.01em",
+  textTransform: "none",
+};
+
+export const oauthProviderButtonIconStyle: CSSProperties = {
+  display: "inline-flex",
+  flexShrink: 0,
+};
+
+export const homeFeedbackLinkStyle: CSSProperties = {
+  display: "block",
+  width: "100%",
+  marginTop: "0.25rem",
+  padding: "0.625rem 0.25rem",
+  textAlign: "center",
+  fontSize: "0.8125rem",
+  fontWeight: 600,
+  letterSpacing: "0.04em",
+  textTransform: "uppercase",
+  color: "var(--color-field-ink-muted)",
+  textDecoration: "none",
+  backgroundColor: "transparent",
+  border: "none",
+  cursor: "pointer",
+};
+
+export const fieldFrameStyle: CSSProperties = {
+  border: "2px solid var(--color-rule)",
+  background: "var(--color-canvas)",
+  padding: "1rem",
+};
+
+export const sheetHandleStyle: CSSProperties = {
+  marginInline: "auto",
+  marginBottom: "0.75rem",
+  height: 3,
+  width: "2.5rem",
+  background: "var(--color-flag)",
+  display: "block",
+  borderRadius: 0,
+};
+
+export const toggleRowStyle: CSSProperties = {
+  display: "flex",
+  minHeight: "3rem",
+  cursor: "pointer",
+  alignItems: "center",
+  justifyContent: "space-between",
+  gap: "0.75rem",
+  border: "2px solid var(--color-rule)",
+  background: "oklch(from var(--color-canvas) calc(l + 0.04) c h)",
+  paddingInline: "1rem",
+  fontSize: "0.875rem",
+  color: "var(--color-field-ink)",
+};
+
+export const segmentControlTrackStyle: CSSProperties = {
+  display: "grid",
+  gap: "0.25rem",
+  border: "2px solid var(--color-rule)",
+  background: "var(--color-canvas)",
+  padding: "0.25rem",
+};
+
+export const segmentChipsTrackStyle: CSSProperties = {
+  display: "flex",
+  gap: "0.25rem",
+  overflowX: "auto",
+  overscrollBehaviorX: "contain",
+  border: "2px solid var(--color-rule)",
+  background: "var(--color-canvas)",
+  padding: "0.25rem",
+  WebkitOverflowScrolling: "touch",
+};
+
+export function segmentBtnStyle(selected: boolean): CSSProperties {
+  return {
+    minHeight: "2.75rem",
+    minWidth: 0,
+    borderRadius: "var(--radius-hud-sm)",
+    border: selected
+      ? "2px solid var(--color-flag)"
+      : "2px solid transparent",
+    background: selected ? "var(--color-flag-soft)" : "transparent",
+    fontFamily: "var(--font-body)",
+    fontSize: "0.8125rem",
+    fontWeight: 590,
+    letterSpacing: "0.06em",
+    textTransform: "none",
+    color: selected ? "var(--color-flag)" : "var(--color-field-ink-muted)",
+  };
+}
+
+/** Enter animation class hook kept for motion.css reduced-motion overrides. */
+export const homeEnterActionsStyle: CSSProperties = {
+  animation: "home-enter 0.22s ease-out both",
+};

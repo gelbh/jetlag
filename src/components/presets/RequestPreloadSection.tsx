@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { fieldFrameStyle } from "@/components/ui/entry/entryStyles";
 import {
   PRELOAD_NOTE_MAX_LENGTH,
   type PreloadPresetSnapshot,
@@ -68,7 +69,8 @@ export function RequestPreloadSection({
 
   return (
     <section
-      className="jl-field-frame space-y-3"
+      className="space-y-3"
+      style={fieldFrameStyle}
       aria-labelledby="request-preload-heading"
     >
       <div className="space-y-1">
