@@ -4,7 +4,7 @@ import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
 import {
   nearestPointToCoastlines,
   prepareMeasuringLineSegments,
-} from "@/domain/geometry/gameArea/geometry";
+} from "@/domain/geometry/measuring/geometryMeasuring";
 import { polygonOuterRingToLineString } from "@/domain/geometry/measuring/ringToLineString";
 import type { SessionCustomMeasureGeometry } from "@/domain/session/catalog/customMeasureGeometry";
 import { parseCustomMeasureGeometryFeature } from "@/domain/session/catalog/customMeasureGeometry";
