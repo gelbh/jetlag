@@ -112,8 +112,8 @@
 
 ### Technical
 
-- Measuring near-regions (coastlines and multi-place disks) run on the WASM geometry kernel by default, with TypeScript fallback.
-- Spatial Voronoi runs on WASM by default (TS d3-delaunay fallback on failure)
+- Measuring near-regions (coastlines and multi-place disks) run on the WASM geometry kernel by default.
+- Spatial Voronoi runs on WASM by default.
 
 ## 0.11.0 - 2026-08-02
 
@@ -244,8 +244,8 @@
 
 ### Technical
 
-- Map: elimination masks use the WASM geometry kernel by default; set `jl.geometry.maskKernel=ts` (or the env override) to force TypeScript.
-- Enable the WASM geometry kernel for radar/half-plane shading (still overridable via `jl.geometry.maskKernel` / env). Measuring geodesic buffers stay on TypeScript until their ready flip.
+- Map: elimination masks use the WASM geometry kernel by default; set `jl.geometry.maskKernel=ts` (or the env override) for emergency TypeScript only.
+- Enable the WASM geometry kernel for radar/half-plane shading (emergency override: `jl.geometry.maskKernel=ts` / env). Client `dual` maps to wasm.
 
 ## 0.9.5 - 2026-07-25
 

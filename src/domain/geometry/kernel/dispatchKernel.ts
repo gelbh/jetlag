@@ -42,7 +42,7 @@ export function dispatchKernelSync<T>(
 
 /**
  * Not-ready entrypoints always use TS (even for wasm/dual).
- * wasm falls back to TS on failure; dual compares then returns TS.
+ * wasm rethrows on failure (no silent TS fail-soft); dual compares then returns TS.
  */
 export async function dispatchKernel<T>(
   options: DispatchKernelOptions<T>,
@@ -61,7 +61,7 @@ export async function dispatchKernel<T>(
         return await runWasm();
       } catch (error) {
         console.warn(`[geometry] kernel wasm failed (${label})`, error);
-        return runTs();
+        throw error;
       }
     case "dual": {
       const tsResult = runTs();

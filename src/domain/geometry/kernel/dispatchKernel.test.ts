@@ -58,23 +58,25 @@ describe("dispatchKernel", () => {
     expect(runTs).not.toHaveBeenCalled();
   });
 
-  it("falls back to TS when WASM throws in wasm mode", async () => {
+  it("rethrows when WASM throws in wasm mode", async () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     const runTs = vi.fn(() => "ts");
     const runWasm = vi.fn(async () => {
       throw new Error("boom");
     });
 
-    const result = await dispatchKernel({
-      mode: "wasm",
-      entrypoint: "maskFromUnionInput",
-      label: "mask",
-      runTs,
-      runWasm,
-    });
+    await expect(
+      dispatchKernel({
+        mode: "wasm",
+        entrypoint: "maskFromUnionInput",
+        label: "mask",
+        runTs,
+        runWasm,
+      }),
+    ).rejects.toThrow("boom");
 
-    expect(result).toBe("ts");
     expect(warn).toHaveBeenCalled();
+    expect(runTs).not.toHaveBeenCalled();
   });
 
   it("dual returns TS and compares when ready", async () => {

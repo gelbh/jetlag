@@ -90,8 +90,8 @@ describe.skipIf(!wasmPkgReady)("near-region batch wasm parity", () => {
   });
 });
 
-describe("near-region batch wasm fallback", () => {
-  it("wasm init failure falls back to TS when entrypoint forced ready", async () => {
+describe("near-region batch wasm failure", () => {
+  it("wasm init failure rethrows when entrypoint forced ready", async () => {
     vi.resetModules();
     vi.doMock("./kernelWasmReady", async () => {
       const actual =
@@ -123,17 +123,21 @@ describe("near-region batch wasm fallback", () => {
 
     const { runNearRegionBatch } = await import("./nearRegionKernelRunner");
     const ts = buildCoastlineNearRegionTs([segment], 200, sampleGameArea);
-    const result = await runNearRegionBatch(
-      {
-        segments: [segment],
-        distanceMeters: 200,
-        disks: [],
-        gameArea: sampleGameArea,
-        runTs: () => ts,
-      },
-      "wasm",
-    );
-    expect(result).toEqual(ts);
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    await expect(
+      runNearRegionBatch(
+        {
+          segments: [segment],
+          distanceMeters: 200,
+          disks: [],
+          gameArea: sampleGameArea,
+          runTs: () => ts,
+        },
+        "wasm",
+      ),
+    ).rejects.toThrow("wasm boom");
+    expect(warnSpy).toHaveBeenCalled();
+    warnSpy.mockRestore();
 
     vi.doUnmock("./kernelWasmReady");
     vi.doUnmock("./nearRegionWasm");

@@ -25,6 +25,11 @@ function isInvalidMaskKernelMode(value: string | undefined | null): boolean {
   return parseMaskKernelMode(trimmed) === null;
 }
 
+/** Client dual is deprecated; map to wasm. Explicit runner dual args are unchanged. */
+function clientMode(mode: MaskKernelMode): MaskKernelMode {
+  return mode === "dual" ? "wasm" : mode;
+}
+
 /** Resolve mask kernel mode: localStorage overrides env; missing → "wasm"; invalid → "ts". */
 export function resolveMaskKernelMode(options?: {
   envValue?: string | undefined;
@@ -32,11 +37,11 @@ export function resolveMaskKernelMode(options?: {
 }): MaskKernelMode {
   const fromLocalStorage = parseMaskKernelMode(options?.localStorageValue);
   if (fromLocalStorage) {
-    return fromLocalStorage;
+    return clientMode(fromLocalStorage);
   }
   const fromEnv = parseMaskKernelMode(options?.envValue);
   if (fromEnv) {
-    return fromEnv;
+    return clientMode(fromEnv);
   }
   if (
     isInvalidMaskKernelMode(options?.localStorageValue) ||

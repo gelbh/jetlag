@@ -137,8 +137,8 @@ export const CHANGELOG: ChangelogEntry[] = [
       {
         title: "Technical",
         items: [
-          "Measuring near-regions (coastlines and multi-place disks) run on the WASM geometry kernel by default, with TypeScript fallback.",
-          "Spatial Voronoi runs on WASM by default (TS d3-delaunay fallback on failure)",
+          "Measuring near-regions (coastlines and multi-place disks) run on the WASM geometry kernel by default.",
+          "Spatial Voronoi runs on WASM by default.",
         ],
       }
     ],
@@ -341,8 +341,8 @@ export const CHANGELOG: ChangelogEntry[] = [
       {
         title: "Technical",
         items: [
-          "Map: elimination masks use the WASM geometry kernel by default; set `jl.geometry.maskKernel=ts` (or the env override) to force TypeScript.",
-          "Enable the WASM geometry kernel for radar/half-plane shading (still overridable via `jl.geometry.maskKernel` / env). Measuring geodesic buffers stay on TypeScript until their ready flip.",
+          "Map: elimination masks use the WASM geometry kernel by default; set `jl.geometry.maskKernel=ts` (or the env override) for emergency TypeScript only.",
+          "Enable the WASM geometry kernel for radar/half-plane shading (emergency override: `jl.geometry.maskKernel=ts` / env). Client `dual` maps to wasm.",
         ],
       }
     ],

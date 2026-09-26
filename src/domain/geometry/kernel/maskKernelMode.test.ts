@@ -12,10 +12,10 @@ describe("resolveMaskKernelMode", () => {
     ).toBe("ts");
   });
 
-  it("localStorage overrides env", () => {
+  it("localStorage overrides env; client dual maps to wasm", () => {
     expect(
       resolveMaskKernelMode({ envValue: "ts", localStorageValue: "dual" }),
-    ).toBe("dual");
+    ).toBe("wasm");
   });
 
   it("invalid values fall back to ts", () => {
@@ -34,12 +34,12 @@ describe("resolveMaskKernelMode", () => {
     ).toBe("wasm");
   });
 
-  it("ignores invalid localStorage and uses env", () => {
+  it("ignores invalid localStorage and uses env; client dual maps to wasm", () => {
     expect(
       resolveMaskKernelMode({
         envValue: "dual",
         localStorageValue: "invalid",
       }),
-    ).toBe("dual");
+    ).toBe("wasm");
   });
 });
