@@ -2,24 +2,26 @@ import { describe, expect, it } from "vitest";
 import bboxPolygon from "@turf/bbox-polygon";
 import type { Feature, LineString } from "geojson";
 import {
-  buildCoastlineEliminationRegion,
-  buildCoastlineNearRegionTs,
-  buildLocationEliminationRegion,
-  buildLocationNearRegion,
   buildHalfPlanePolygon,
   boundsToGameArea,
   centerToViewportEdgeRadiusMeters,
   circleToGameArea,
-  clearCoastlineNearRegionCacheForTests,
   distanceBetweenPoints,
   gameAreaOutsideMask,
   gameAreaExteriorStrokeRings,
   isPointInGameArea,
-  nearestPointToCoastlines,
   normalizeBoundingBox,
-  prepareMeasuringLineSegments,
   safeDifference,
 } from "./geometry";
+import {
+  buildCoastlineEliminationRegion,
+  buildCoastlineNearRegionTs,
+  buildLocationEliminationRegion,
+  buildLocationNearRegion,
+  clearCoastlineNearRegionCacheForTests,
+  nearestPointToCoastlines,
+  prepareMeasuringLineSegments,
+} from "../measuring/geometryMeasuring";
 import type { GameArea } from "../../map/annotations";
 
 const sampleGameArea: GameArea = {

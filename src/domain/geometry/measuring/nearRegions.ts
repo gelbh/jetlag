@@ -9,24 +9,26 @@ import nearestPointOnLine from "@turf/nearest-point-on-line";
 import simplify from "@turf/simplify";
 import Flatbush from "flatbush";
 import { around as geoflatbushAround } from "geoflatbush";
-import {
-  unionDiskSpecs,
-  unionPolygonFeatures,
-} from "../masks/unionPolygonFeatures";
 import { unionPolygonFeaturesInSlices } from "../progressive/unionSlices";
 import type { GameArea } from "../../map/annotations";
-import { dispatchGeodesicLineBuffer } from "./geodesicLineBuffer";
-import { featureToGameAreaGeometry } from "../kernel/featureConvert";
-import { shouldUseWasm } from "../kernel/kernelWasmReady";
-import { dispatchNearRegionBatch } from "../kernel/nearRegionKernelRunner";
-import { resolveClientMaskKernelMode } from "../kernel/resolveClientMaskKernelMode";
+import {
+  dispatchGeodesicLineBuffer,
+  geodesicLineBuffer,
+} from "./geodesicLineBuffer";
+import {
+  dispatchNearRegionBatch,
+  featureToGameAreaGeometry,
+  resolveClientMaskKernelMode,
+  shouldUseWasm,
+  unionDiskSpecs,
+  unionPolygonFeatures,
+} from "../kernel";
 import {
   gameAreaFingerprint,
   gameAreaToFeature,
   gameAreaToPolygon,
   type LatLngTuple,
 } from "../gameArea/geometryCore";
-import { geodesicLineBuffer } from "../kernel/geodesicLineBuffer";
 
 type SegmentBoundingBox = {
   south: number;
@@ -563,18 +565,7 @@ export async function buildCoastlineNearRegion(
   );
 }
 
-export function distanceBetweenPoints(
-  from: LatLngTuple,
-  to: LatLngTuple,
-): number {
-  return turfDistance(
-    turfPoint([from[1], from[0]]),
-    turfPoint([to[1], to[0]]),
-    {
-      units: "meters",
-    },
-  );
-}
+export { distanceBetweenPoints } from "../gameArea/distance";
 
 /** Match radar / elimination / hiding-zone disks; coarse steps undersize near chords. */
 const NEAR_REGION_DISK_STEPS = 64;

@@ -13,7 +13,7 @@ import {
   dispatchHalfPlane,
   dispatchRadarShadedRegion,
 } from "../core/radarHalfPlane";
-import { resolveClientMaskKernelMode } from "../kernel/resolveClientMaskKernelMode";
+import { resolveClientMaskKernelMode } from "../kernel";
 import {
   buildMeasuringEliminationPreviewTs,
   type MeasuringRegionInput,

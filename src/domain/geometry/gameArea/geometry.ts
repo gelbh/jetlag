@@ -1,5 +1,4 @@
 export * from "./geometryCore";
-export * from "../measuring/geometryMeasuring";
 export {
   lineEndpointsFromFeature,
   parseGeometryJson,

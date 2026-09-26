@@ -3,7 +3,7 @@ import { LRUCache } from "lru-cache";
 import type { GameArea, TentaclePoi } from "../../map/annotations";
 import { gameAreaFingerprint } from "../core/gameAreaConvert";
 import type { LatLngTuple } from "../kernel/types";
-import { resolveClientMaskKernelMode } from "../kernel/resolveClientMaskKernelMode";
+import { resolveClientMaskKernelMode } from "../kernel";
 import {
   dispatchTentacleEliminationRegion,
   dispatchTentaclePoiAnswerEliminationRegion,

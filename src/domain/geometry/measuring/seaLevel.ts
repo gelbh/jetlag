@@ -5,10 +5,10 @@ import {
   gameAreaToBoundingBox,
   gameAreaToPolygon,
   isPointInGameArea,
-  buildMeasuringEliminationRegion,
   gameAreaFingerprint,
   type LatLngTuple,
-} from "../gameArea/geometry";
+} from "../gameArea/geometryCore";
+import { buildMeasuringEliminationRegion } from "./eliminationRegions";
 import type { MeasuringAnswer } from "../../questions/measuringQuestions";
 import {
   MIN_GAME_AREA_LAT_SPAN,

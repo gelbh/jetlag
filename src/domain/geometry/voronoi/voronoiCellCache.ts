@@ -1,7 +1,9 @@
 import { LRUCache } from "lru-cache";
 import type { FeatureCollection } from "geojson";
-import { resolveClientMaskKernelMode } from "../kernel/resolveClientMaskKernelMode";
-import type { MaskKernelMode } from "../kernel/maskKernelMode";
+import {
+  resolveClientMaskKernelMode,
+  type MaskKernelMode,
+} from "../kernel";
 import { runSpatialVoronoi } from "../kernel/voronoiKernelRunner";
 
 const VORONOI_CACHE_MAX = 8;

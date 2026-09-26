@@ -1,5 +1,5 @@
 import type { GameArea } from "@/domain/map/annotations";
-import type { PreparedLinearSegments } from "@/domain/geometry/gameArea/geometry";
+import type { PreparedLinearSegments } from "@/domain/geometry/measuring/geometryMeasuring";
 import type { ElevationSampleCell } from "@/domain/geometry/measuring/seaLevel";
 import { clearPersistedCacheForTests, readPersistedEntry, readPersistedEntryIgnoringExpiry, writePersistedEntry } from "./indexedDb";
 import {
