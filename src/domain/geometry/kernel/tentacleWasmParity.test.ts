@@ -1,4 +1,4 @@
-import { beforeAll, describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it, vi } from "vitest";
 import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
@@ -130,5 +130,72 @@ describe.skipIf(!wasmPkgReady)("tentacle wasm parity", () => {
       cells,
     );
     assertPolygonTopologyParity(wasm, ts, topologyBbox);
+  });
+});
+
+describe("tentacle wasm failure", () => {
+  it("wasm init failure rethrows when entrypoint is ready", async () => {
+    vi.resetModules();
+    vi.doMock("./kernelWasmReady", async () => {
+      const actual = await vi.importActual<typeof import("./kernelWasmReady")>(
+        "./kernelWasmReady",
+      );
+      return {
+        ...actual,
+        KERNEL_WASM_READY: {
+          ...actual.KERNEL_WASM_READY,
+          tentacleEliminationRegion: true,
+        },
+        shouldUseWasm: (mode: string, entrypoint: string) => {
+          if (entrypoint === "tentacleEliminationRegion") {
+            return mode === "wasm" || mode === "dual";
+          }
+          return actual.shouldUseWasm(
+            mode as "ts" | "dual" | "wasm",
+            entrypoint as import("./kernelWasmReady").KernelEntrypoint,
+          );
+        },
+      };
+    });
+    vi.doMock("./tentacleWasm", () => ({
+      wasmBuildTentacleEliminationRegion: vi.fn(async () => {
+        throw new Error("wasm init failed");
+      }),
+      wasmBuildTentaclePoiAnswerEliminationRegion: vi.fn(async () => {
+        throw new Error("wasm init failed");
+      }),
+      resetTentacleWasmForTests: vi.fn(),
+    }));
+
+    const { runTentacleEliminationRegion: runWithMock } = await import(
+      "./tentacleKernelRunner"
+    );
+    const cells = geoSpatialVoronoiFromSites(
+      [westSite, eastSite].map((s) => ({
+        lng: s.lng,
+        lat: s.lat,
+        properties: { poiId: s.id },
+      })),
+    );
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    await expect(
+      runWithMock(
+        {
+          anchor,
+          radiusMeters: oneMileMeters,
+          sites: [westSite, eastSite],
+          answeredSiteId: "east",
+          gameArea,
+          voronoiCells: cells,
+        },
+        "wasm",
+      ),
+    ).rejects.toThrow("wasm init failed");
+    expect(warnSpy).toHaveBeenCalled();
+    warnSpy.mockRestore();
+
+    vi.doUnmock("./tentacleWasm");
+    vi.doUnmock("./kernelWasmReady");
+    vi.resetModules();
   });
 });

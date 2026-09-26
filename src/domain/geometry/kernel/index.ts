@@ -34,7 +34,7 @@ export {
   voronoiCellSiteId,
   type VoronoiSiteRef,
 } from "./voronoiCellSiteId";
-export type { TentacleSite } from "./tentacleKernelRunner";
+export type { TentacleSite } from "./tentacleRegions";
 export {
   dispatchSpatialVoronoi,
   runSpatialVoronoi,
