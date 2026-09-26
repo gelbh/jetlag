@@ -130,36 +130,39 @@ export function CreateSession() {
           }
         >
           <GameAreaSection
-            bundledPresetSelectGroups={session.bundledPresetSelectGroups}
-            favouritePresetSelectOptions={session.favouritePresetSelectOptions}
-            userPresets={session.userPresets}
-            loading={session.loading}
-            verifyingAccess={session.verifyingAccess}
-            searchLoading={session.searchLoading}
-            importLoading={session.importLoading}
-            importFileInputRef={session.importFileInputRef}
-            locationQuery={session.locationQuery}
-            searchResults={session.searchResults}
-            selectedPlaceId={session.selectedPlaceId}
-            selectedPlace={session.selectedPlace}
-            selectedAreas={session.selectedAreas}
-            previewGameArea={session.previewGameArea}
-            manualFramingActive={session.manualFramingActive}
-            framing={session.framing}
-            transitMetroId={session.transitMetroId}
-            metros={session.metros}
-            onPresetSelect={handlePresetSelect}
-            onSavePreset={handleSavePreset}
-            onOpenFramingModal={() => session.setFramingModalOpen(true)}
-            onFramingModeChange={session.handleFramingModeChange}
-            onRemoveSelectedArea={session.removeSelectedArea}
-            onLocationQueryChange={session.handleLocationQueryChange}
-            onSearch={() => void session.handleSearch()}
-            onAddCurrentArea={session.addCurrentArea}
-            onBoundaryImport={(event) => void session.handleBoundaryImport(event)}
-            onApplyPlace={session.applyPlace}
-            onRequestLocationBias={session.requestLocationBias}
-            onTransitMetroChange={session.setTransitMetroOverride}
+            model={{
+              bundledPresetSelectGroups: session.bundledPresetSelectGroups,
+              favouritePresetSelectOptions: session.favouritePresetSelectOptions,
+              userPresets: session.userPresets,
+              loading: session.loading,
+              verifyingAccess: session.verifyingAccess,
+              searchLoading: session.searchLoading,
+              importLoading: session.importLoading,
+              importFileInputRef: session.importFileInputRef,
+              locationQuery: session.locationQuery,
+              searchResults: session.searchResults,
+              selectedPlaceId: session.selectedPlaceId,
+              selectedPlace: session.selectedPlace,
+              selectedAreas: session.selectedAreas,
+              previewGameArea: session.previewGameArea,
+              manualFramingActive: session.manualFramingActive,
+              framing: session.framing,
+              transitMetroId: session.transitMetroId,
+              metros: session.metros,
+              onPresetSelect: handlePresetSelect,
+              onSavePreset: handleSavePreset,
+              onOpenFramingModal: () => session.setFramingModalOpen(true),
+              onFramingModeChange: session.handleFramingModeChange,
+              onRemoveSelectedArea: session.removeSelectedArea,
+              onLocationQueryChange: session.handleLocationQueryChange,
+              onSearch: () => void session.handleSearch(),
+              onAddCurrentArea: session.addCurrentArea,
+              onBoundaryImport: (event) =>
+                void session.handleBoundaryImport(event),
+              onApplyPlace: session.applyPlace,
+              onRequestLocationBias: session.requestLocationBias,
+              onTransitMetroChange: session.setTransitMetroOverride,
+            }}
             settingsSlot={
               <SessionSettingsSection
                 loading={session.loading}

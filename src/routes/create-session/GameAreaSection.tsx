@@ -15,7 +15,8 @@ import type { TransitMetro } from "../../domain/map/transit";
 
 type GameAreaFraming = ReturnType<typeof useGameAreaFraming>;
 
-export interface GameAreaSectionProps {
+/** Flat create-session framing fields bag for GameAreaSection (W4-E peel). */
+export type GameAreaSectionModel = {
   bundledPresetSelectGroups: BundledPresetSelectGroup[];
   favouritePresetSelectOptions: { presetId: string; name: string }[];
   userPresets: GamePreset[];
@@ -46,8 +47,12 @@ export interface GameAreaSectionProps {
   onApplyPlace: (place: GeocodedPlace) => void;
   onRequestLocationBias: () => void;
   onTransitMetroChange: (metroId: string) => void;
+};
+
+export type GameAreaSectionProps = {
+  model: GameAreaSectionModel;
   settingsSlot?: ReactNode;
-}
+};
 
 function SectionLabel({ children }: { children: ReactNode }) {
   return (
@@ -60,39 +65,39 @@ function SectionLabel({ children }: { children: ReactNode }) {
   );
 }
 
-export function GameAreaSection({
-  bundledPresetSelectGroups,
-  favouritePresetSelectOptions,
-  userPresets,
-  loading,
-  verifyingAccess,
-  searchLoading,
-  importLoading,
-  importFileInputRef,
-  locationQuery,
-  searchResults,
-  selectedPlaceId,
-  selectedPlace,
-  selectedAreas,
-  previewGameArea,
-  manualFramingActive,
-  framing,
-  transitMetroId,
-  metros,
-  onPresetSelect,
-  onSavePreset,
-  onOpenFramingModal,
-  onFramingModeChange,
-  onRemoveSelectedArea,
-  onLocationQueryChange,
-  onSearch,
-  onAddCurrentArea,
-  onBoundaryImport,
-  onApplyPlace,
-  onRequestLocationBias,
-  onTransitMetroChange,
-  settingsSlot,
-}: GameAreaSectionProps) {
+export function GameAreaSection({ model, settingsSlot }: GameAreaSectionProps) {
+  const {
+    bundledPresetSelectGroups,
+    favouritePresetSelectOptions,
+    userPresets,
+    loading,
+    verifyingAccess,
+    searchLoading,
+    importLoading,
+    importFileInputRef,
+    locationQuery,
+    searchResults,
+    selectedPlaceId,
+    selectedPlace,
+    selectedAreas,
+    previewGameArea,
+    manualFramingActive,
+    framing,
+    transitMetroId,
+    metros,
+    onPresetSelect,
+    onSavePreset,
+    onOpenFramingModal,
+    onFramingModeChange,
+    onRemoveSelectedArea,
+    onLocationQueryChange,
+    onSearch,
+    onAddCurrentArea,
+    onBoundaryImport,
+    onApplyPlace,
+    onRequestLocationBias,
+    onTransitMetroChange,
+  } = model;
   return (
     <>
       <div className="mt-4 space-y-2">

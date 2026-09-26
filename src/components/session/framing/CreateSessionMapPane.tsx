@@ -112,17 +112,19 @@ function CreateSessionMapPaneInner({
     <CreateSessionMapShell>
       <div className="absolute inset-0">
         <MapView
-          mapStyle={mapStyle}
-          onMapStyleChange={onMapStyleChange}
-          onBoundsChange={onBoundsChange}
-          onUserViewportFramed={onUserViewportFramed}
-          onMapClick={onMapClick}
-          zoom={10}
-          focusBounds={focusBounds}
-          fitBoundsMode="once"
-          fitBoundsPadding={[48, 48]}
-          zoomControlInset="container"
-          className="h-full w-full"
+          model={{
+            mapStyle,
+            onMapStyleChange,
+            onBoundsChange,
+            onUserViewportFramed,
+            onMapClick,
+            zoom: 10,
+            focusBounds,
+            fitBoundsMode: "once",
+            fitBoundsPadding: [48, 48],
+            zoomControlInset: "container",
+            className: "h-full w-full",
+          }}
         >
           {manualFramingActive ? (
             <FramingPreviewLayers

@@ -77,15 +77,17 @@ export function ObserverMapScreen() {
       <MapViewWithLandscapeInset
         isDesktop={isDesktop}
         key={controller.session.id}
-        mapKey={controller.session.id}
-        mapStyle={controller.effectiveBasemapStyle}
-        onMapStyleChange={controller.handleMapStyleChange}
-        center={controller.center}
-        zoom={12}
-        focusBounds={controller.mapFocusBounds}
-        fitBoundsMode="once"
-        showZoomControl={false}
-        className="h-full w-full"
+        model={{
+          mapKey: controller.session.id,
+          mapStyle: controller.effectiveBasemapStyle,
+          onMapStyleChange: controller.handleMapStyleChange,
+          center: controller.center,
+          zoom: 12,
+          focusBounds: controller.mapFocusBounds,
+          fitBoundsMode: "once",
+          showZoomControl: false,
+          className: "h-full w-full",
+        }}
       >
         <MapViewportTracker onViewportChange={controller.setMapViewport} />
         <GameAreaMask gameArea={gameArea} />

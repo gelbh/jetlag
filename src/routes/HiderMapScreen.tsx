@@ -813,21 +813,23 @@ export function HiderMapScreen() {
       <div className="absolute inset-0">
         <MapViewWithLandscapeInset
           isDesktop={isDesktop}
-          chromeHudRef={chromeHudRef}
           key={session.id}
-          mapKey={session.id}
-          mapStyle={effectiveBasemapStyle}
-          streetBasemap={streetBasemap}
-          onMapStyleChange={handleMapStyleChange}
-          center={center}
-          zoom={12}
-          focusBounds={mapFocusBounds}
-          fitBoundsMode="once"
-          recenterToken={recenterToken}
-          showCompassControl
-          onRecenter={() => setRecenterToken((value) => value + 1)}
-          onMapClick={handleMapClick}
-          className="h-full w-full"
+          model={{
+            chromeHudRef,
+            mapKey: session.id,
+            mapStyle: effectiveBasemapStyle,
+            streetBasemap,
+            onMapStyleChange: handleMapStyleChange,
+            center,
+            zoom: 12,
+            focusBounds: mapFocusBounds,
+            fitBoundsMode: "once",
+            recenterToken,
+            showCompassControl: true,
+            onRecenter: () => setRecenterToken((value) => value + 1),
+            onMapClick: handleMapClick,
+            className: "h-full w-full",
+          }}
         >
           <MapViewportTracker
             onViewportChange={handleMapViewportChange}
