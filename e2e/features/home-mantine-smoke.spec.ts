@@ -9,7 +9,9 @@ test("Home Mantine smoke", async ({ page }) => {
   await prepareE2EPage(page);
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-  await expect(page.getByRole("link", { name: /Join session/i })).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: /Play - create, join, or custom game/i }),
+  ).toBeVisible();
   await expect(
     page.locator('[data-player-ux-world="mantine"]').first(),
   ).toBeVisible();
