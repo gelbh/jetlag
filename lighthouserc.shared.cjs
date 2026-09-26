@@ -62,4 +62,5 @@ function createLhciConfig({ homeJoinPerf, createPerf, outputDir, collectSettings
   };
 }
 
+// LHCI loadRcFile require()s only .cjs/.js; keep .cjs under "type":"module".
 module.exports = { createLhciConfig };
