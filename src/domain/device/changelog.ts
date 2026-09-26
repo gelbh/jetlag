@@ -11,6 +11,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "Unreleased",
+    date: "",
+    sections: [
+      {
+        title: "Technical",
+        items: [
+          "Geometry kernel (G5): client `jl.geometry.maskKernel=dual` maps to wasm; emergency `ts` override remains; wasm dispatch failures rethrow instead of silent TypeScript fail-soft.",
+        ],
+      },
+    ],
+  },
+  {
     version: "0.13.0",
     date: "2026-08-16",
     sections: [

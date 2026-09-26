@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Technical
+
+- Geometry kernel (G5): client `jl.geometry.maskKernel=dual` maps to wasm; emergency `ts` override remains; wasm dispatch failures rethrow instead of silent TypeScript fail-soft.
+
 ## 0.13.0 - 2026-08-16
 
 ### Fixes
