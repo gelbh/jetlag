@@ -19,7 +19,7 @@ import { CatalogExhaustedMessage } from "./shared/readout/CatalogExhaustedMessag
 import { OptionChip, OptionChipRow } from "./shared/controls/OptionChip";
 import { QuestionPromptBlock } from "./shared/controls/QuestionPromptBlock";
 import { ToolSection } from "./shared/panels/ToolSection";
-import { iosChoiceChipStyles } from "@/components/ui/apple/iosEntryChrome";
+import { choiceChipStyles } from "@/components/ui/entry/entryChrome";
 interface RadarDistancePickerProps {
   radiusMeters: number;
   chooseCustom: boolean;
@@ -97,7 +97,7 @@ export function RadarDistancePicker({
   if (true && compact) {
     const unitShort = compactUnitShort(distanceUnit);
     const tileRoot = (selected: boolean) => ({
-      ...iosChoiceChipStyles(selected).root,
+      ...choiceChipStyles(selected).root,
       width: "100%",
       minHeight: "2.5rem",
       height: "100%",

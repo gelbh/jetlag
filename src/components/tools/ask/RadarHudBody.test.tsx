@@ -1,7 +1,7 @@
 import { describe, expect, it, beforeEach, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { MantineProvider } from "@mantine/core";
-import { jetlagMantineTheme } from "@/theme/mantineTheme";
+import { jetlagTheme } from "@/theme/theme";
 import type { DistanceUnit } from "@/domain/map/distance";
 import type { GameSize } from "@/domain/session/size/gameSize";
 import type { RadarDistanceOptionKey } from "@/domain/questions";
@@ -52,7 +52,7 @@ describe("RadarHudBody", () => {
     const onChooseSelect = vi.fn();
     const onCustomRadiusChange = vi.fn();
     render(
-      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
         <RadarHudBody
           {...baseBodyProps}
           onChooseSelect={onChooseSelect}
@@ -75,7 +75,7 @@ describe("RadarHudBody", () => {
     const onCustomRadiusChange = vi.fn();
     const onChooseSelect = vi.fn();
     render(
-      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
         <RadarHudBody
           {...baseBodyProps}
           chooseCustom
@@ -105,7 +105,7 @@ describe("RadarHudBody", () => {
 
   it("renders chip island chrome without PhaseRail or CONTINUE wizard nav", () => {
     render(
-      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
         <RadarHudBody {...baseBodyProps} />
       </MantineProvider>,
     );
@@ -138,7 +138,7 @@ describe("RadarHudBody", () => {
 
     const onCommit = vi.fn();
     render(
-      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
         <AskHudHost
           cue={cue}
           toolLabel="Radar"
@@ -193,7 +193,7 @@ describe("RadarHudBody", () => {
 
     const onCommit = vi.fn();
     render(
-      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
         <AskHudHost
           cue={cue}
           toolLabel="Radar"

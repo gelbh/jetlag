@@ -6,9 +6,9 @@ import {
   searchExpansionCurses,
 } from "../../domain/expansion/expansionCurses";
 import {
-  IosInsetGroup,
-  iosInsetTextInputStyles,
-} from "@/components/ui/apple/iosEntryChrome";
+  InsetGroup,
+  insetTextInputStyles,
+} from "@/components/ui/entry/entryChrome";
 
 interface CurseReferenceSheetProps {
   open: boolean;
@@ -39,7 +39,7 @@ export function CurseReferenceSheet({ open, onClose }: CurseReferenceSheetProps)
           only; play the physical card in your group.
         </Text>
 
-        <IosInsetGroup>
+        <InsetGroup>
           <TextInput
             id={searchId}
             label="Search curses"
@@ -51,9 +51,9 @@ export function CurseReferenceSheet({ open, onClose }: CurseReferenceSheetProps)
             spellCheck={false}
             enterKeyHint="search"
             inputMode="search"
-            styles={iosInsetTextInputStyles}
+            styles={insetTextInputStyles}
           />
-        </IosInsetGroup>
+        </InsetGroup>
 
         <div className="jl-scroll space-y-4 overflow-y-auto pr-1">
           {visibleCurses.map((curse) => (

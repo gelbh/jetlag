@@ -8,9 +8,9 @@ import { CaretLeft, Crosshair } from "@phosphor-icons/react";
 import { askInlineErrorCopy } from "@/components/tools/shared/readout/AskInlineError";
 import { OVERLAY_SAFE_PAD_X } from "@/components/map/chrome/OverlayHost";
 import {
-  iosCompactFilledStyles,
-  iosMapChromeSurfaceStyles,
-} from "@/components/ui/apple/iosEntryChrome";
+  compactFilledStyles,
+  mapChromeSurfaceStyles,
+} from "@/components/ui/entry/entryChrome";
 import { cn } from "@/lib/cn";
 
 export type AskMapPlacementPhase =
@@ -47,7 +47,7 @@ export type AskMapPlacementChromeProps = {
 };
 
 const frostedStatusCardStyle = {
-  ...iosMapChromeSurfaceStyles,
+  ...mapChromeSurfaceStyles,
   borderRadius: 14,
   color: "var(--color-field-ink)",
 };
@@ -71,7 +71,7 @@ export const askMapPlacementLocationCtaStyles = {
 
 export const askMapPlacementSendStyles = {
   root: {
-    ...iosCompactFilledStyles.root,
+    ...compactFilledStyles.root,
     minHeight: "2.5rem",
     height: "2.5rem",
     borderRadius: 8,
@@ -185,7 +185,7 @@ export function AskMapPlacementChrome({
           data-testid={`${testId}-question`}
           className="flex items-center gap-2 p-2"
           style={{
-            ...iosMapChromeSurfaceStyles,
+            ...mapChromeSurfaceStyles,
             borderRadius: 16,
             color: "var(--color-field-ink)",
           }}
@@ -304,7 +304,7 @@ export function AskMapPlacementChrome({
             data-testid={`${testId}-cta`}
             className="flex flex-col gap-2"
             style={{
-              ...iosMapChromeSurfaceStyles,
+              ...mapChromeSurfaceStyles,
               borderRadius: 16,
               padding: "0.55rem",
               color: "var(--color-field-ink)",

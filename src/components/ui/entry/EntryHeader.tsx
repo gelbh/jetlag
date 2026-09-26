@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { AppLogo } from "@/components/ui/brand/AppLogo";
 import { JetlagBackChevron } from "@/components/ui/brand/JetlagBackChevron";
 
-export interface IosEntryHeaderProps {
+export interface EntryHeaderProps {
   title: string;
   backTo?: string;
   backLabel?: string;
@@ -51,11 +51,11 @@ function BackControl({ to, label }: { to: string; label: string }) {
  * Shared Apple-native nav bar for Join / Create / Friends Mantine screens.
  * Safe-area inset + 52pt toolbar; sticky so it stays while the page scrolls.
  */
-export function IosEntryHeader({
+export function EntryHeader({
   title,
   backTo = "/",
   backLabel = "Back",
-}: IosEntryHeaderProps) {
+}: EntryHeaderProps) {
   return (
     <Box
       component="header"

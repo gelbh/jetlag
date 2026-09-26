@@ -1,10 +1,10 @@
 import { Box, Stack, Text } from "@mantine/core";
 import { FileText, Shield } from "@phosphor-icons/react";
 import {
-  IosInsetGroup,
-  IosSectionLabel,
-} from "@/components/ui/apple/iosEntryChrome";
-import { IosInsetRow } from "@/components/ui/apple/IosInsetRow";
+  InsetGroup,
+  SectionLabel,
+} from "@/components/ui/entry/entryChrome";
+import { InsetRow } from "@/components/ui/entry/InsetRow";
 import {
   LEGAL_EFFECTIVE_DATE,
   LEGAL_FEEDBACK_URL,
@@ -14,7 +14,7 @@ import {
 } from "@/domain/legal/legalContact";
 
 /** Mantine / iOS legal article body (header chrome owned by the route). */
-export function LegalDocumentIosBody({
+export function LegalDocumentBody({
   title,
   sections,
   crossLink,
@@ -56,8 +56,8 @@ export function LegalDocumentIosBody({
 
       {sections.map((section) => (
         <Stack key={section.id} gap={8}>
-          <IosSectionLabel>{section.title}</IosSectionLabel>
-          <IosInsetGroup>
+          <SectionLabel>{section.title}</SectionLabel>
+          <InsetGroup>
             <Box px="md" py="md">
               <Stack gap={10}>
                 {section.paragraphs.map((paragraph) => (
@@ -72,25 +72,25 @@ export function LegalDocumentIosBody({
                 ))}
               </Stack>
             </Box>
-          </IosInsetGroup>
+          </InsetGroup>
         </Stack>
       ))}
 
       <Stack gap={8}>
-        <IosSectionLabel>More</IosSectionLabel>
-        <IosInsetGroup>
-          <IosInsetRow
+        <SectionLabel>More</SectionLabel>
+        <InsetGroup>
+          <InsetRow
             to={otherPath}
             label={otherLabel}
             icon={otherIcon}
           />
-          <IosInsetRow
+          <InsetRow
             showSeparator
             href={LEGAL_FEEDBACK_URL}
             label="Open a GitHub issue"
             icon={<FileText size={22} weight="regular" />}
           />
-        </IosInsetGroup>
+        </InsetGroup>
         <Text size="xs" c="var(--color-field-ink-muted)" px={4}>
           Questions or privacy requests can go through Feedback or GitHub.
         </Text>

@@ -7,9 +7,9 @@
 import { Paper, Text, UnstyledButton } from "@mantine/core";
 import { ListSelectRow } from "@/components/tools/shared/controls/ListSelectRow";
 import {
-  iosCatalogTileStyles,
-  iosMapChromeSurfaceStyles,
-} from "@/components/ui/apple/iosEntryChrome";
+  catalogTileStyles,
+  mapChromeSurfaceStyles,
+} from "@/components/ui/entry/entryChrome";
 import { type ReactNode } from "react";
 
 export type AskCatalogRailRow = {
@@ -163,7 +163,7 @@ export function AskCatalogRail({
               );
               if (multiCol) {
                 const tileRoot = {
-                  ...iosCatalogTileStyles(selected).root,
+                  ...catalogTileStyles(selected).root,
                   ...(columns === 3
                     ? {
                         minHeight: "4rem",
@@ -273,7 +273,7 @@ export function AskCatalogRail({
       p="sm"
       styles={{
         root: {
-          ...iosMapChromeSurfaceStyles,
+          ...mapChromeSurfaceStyles,
           boxShadow: "none",
           maxHeight: "var(--ask-hud-rail-max-height, 40dvh)",
           overflow: "hidden",

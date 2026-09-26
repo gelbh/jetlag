@@ -1,5 +1,5 @@
 import { HudBanner } from "../hud/HudBanner";
-import { iosMapChromeSurfaceStyles } from "@/components/ui/apple/iosEntryChrome";
+import { mapChromeSurfaceStyles } from "@/components/ui/entry/entryChrome";
 
 const DEFAULT_TITLE = "Refining measure";
 const DEFAULT_BODY = "Adding detail to the shaded area…";
@@ -22,7 +22,7 @@ export function MeasuringRefineMapChip({
         data-testid="measuring-refine-chip"
         className="mx-auto flex max-w-[min(calc(100%-1.5rem),22rem)] items-center gap-2.5 px-3 py-2.5"
         style={{
-          ...iosMapChromeSurfaceStyles,
+          ...mapChromeSurfaceStyles,
           borderRadius: 14,
           color: "var(--color-field-ink)",
         }}

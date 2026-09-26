@@ -4,12 +4,12 @@ import type { ReactElement } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { AnnotationRecord } from "@/domain/map/annotations";
 import type { SessionActivityEvent } from "@/domain/session/activity/sessionActivityLog";
-import { jetlagMantineTheme } from "@/theme/mantineTheme";
+import { jetlagTheme } from "@/theme/theme";
 import { SessionLogBody } from "./SessionLogBody";
 
 function renderUi(ui: ReactElement) {
   return render(
-    <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+    <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
       {ui}
     </MantineProvider>,
   );

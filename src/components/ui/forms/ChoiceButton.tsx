@@ -1,9 +1,9 @@
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 import { UnstyledButton } from "@mantine/core";
 import {
-  iosChoiceChipStyles,
-  type IosChoiceTone,
-} from "@/components/ui/apple/iosEntryChrome";
+  choiceChipStyles,
+  type ChoiceTone,
+} from "@/components/ui/entry/entryChrome";
 
 interface ChoiceButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   selected?: boolean;
@@ -14,7 +14,7 @@ interface ChoiceButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode;
 }
 
-function toneFromActiveClass(activeClassName: string): IosChoiceTone {
+function toneFromActiveClass(activeClassName: string): ChoiceTone {
   if (activeClassName.includes("status-success")) {
     return "success";
   }
@@ -47,7 +47,7 @@ export function ChoiceButton({
       type={type}
       aria-pressed={selected}
       className={`${fullWidth ? "w-full" : ""} ${alignClass} ${className}`.trim()}
-      styles={iosChoiceChipStyles(
+      styles={choiceChipStyles(
         selected,
         selected ? toneFromActiveClass(activeClassName) : "default",
       )}

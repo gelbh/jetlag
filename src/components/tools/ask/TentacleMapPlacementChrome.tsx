@@ -10,7 +10,7 @@ import {
   type AskMapPlacementPhase,
 } from "@/components/tools/ask/AskMapPlacementChrome";
 import { TentacleMapAnswerStrip } from "@/components/tools/ask/TentacleMapAnswerStrip";
-import { iosMapChromeSurfaceStyles } from "@/components/ui/apple/iosEntryChrome";
+import { mapChromeSurfaceStyles } from "@/components/ui/entry/entryChrome";
 import type { TentaclePoi } from "@/domain/map/annotations";
 import type { DistanceUnit } from "@/domain/map/distance";
 import type { TentacleExtendedCategoryId } from "@/domain/questions";
@@ -88,7 +88,7 @@ export function TentacleMapPlacementChrome({
             data-testid="tentacle-map-placement-send"
             className="flex flex-col gap-2"
             style={{
-              ...iosMapChromeSurfaceStyles,
+              ...mapChromeSurfaceStyles,
               borderRadius: 16,
               padding: "0.55rem",
               color: "var(--color-field-ink)",

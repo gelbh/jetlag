@@ -18,11 +18,11 @@ import {
 } from "@/components/tools/ask/AskMapPlacementChrome";
 import { hotterColderAnswerOptions } from "@/components/tools/shared/answers/binaryAnswerOptions";
 import {
-  iosAskInsetSurfaceStyle,
-  iosChoiceChipStyles,
-  iosFilledStyles,
-  iosMapChromeSurfaceStyles,
-} from "@/components/ui/apple/iosEntryChrome";
+  askInsetSurfaceStyle,
+  choiceChipStyles,
+  filledStyles,
+  mapChromeSurfaceStyles,
+} from "@/components/ui/entry/entryChrome";
 import type { ThermometerAnswer } from "@/domain/questions";
 
 type PlacementMode = "gps" | "manual";
@@ -52,7 +52,7 @@ const answerSegmentStyles = (
   selected: boolean,
   tone: "success" | "danger",
 ) => {
-  const base = iosChoiceChipStyles(selected, tone);
+  const base = choiceChipStyles(selected, tone);
   return {
     root: {
       ...base.root,
@@ -129,7 +129,7 @@ export function ThermometerMapPlacementChrome({
       <div
         className="flex flex-col gap-2"
         style={{
-          ...iosMapChromeSurfaceStyles,
+          ...mapChromeSurfaceStyles,
           borderRadius: 16,
           padding: "0.55rem",
           color: "var(--color-field-ink)",
@@ -141,7 +141,7 @@ export function ThermometerMapPlacementChrome({
             role="group"
             aria-label="Movement mode"
             style={{
-              ...iosAskInsetSurfaceStyle,
+              ...askInsetSurfaceStyle,
               borderRadius: 14,
               padding: 4,
             }}
@@ -169,7 +169,7 @@ export function ThermometerMapPlacementChrome({
                   onClick={() => onPlacementModeChange(mode.id)}
                   styles={{
                     root: {
-                      ...iosChoiceChipStyles(selected).root,
+                      ...choiceChipStyles(selected).root,
                       flex: 1,
                       minHeight: "2.5rem",
                       height: "2.5rem",
@@ -206,7 +206,7 @@ export function ThermometerMapPlacementChrome({
             onClick={onStartWalk}
             disabled={!canStartWalk || isSubmitting}
             loading={gpsLoading || isSubmitting}
-            styles={iosFilledStyles}
+            styles={filledStyles}
           >
             {gpsLoading ? "Getting GPS…" : "Start track"}
           </Button>
@@ -216,7 +216,7 @@ export function ThermometerMapPlacementChrome({
           <div
             className="flex items-baseline justify-between gap-2"
             style={{
-              ...iosAskInsetSurfaceStyle,
+              ...askInsetSurfaceStyle,
               padding: "0.45rem 0.65rem",
             }}
           >
@@ -249,7 +249,7 @@ export function ThermometerMapPlacementChrome({
             aria-label="Thermometer answer"
             className="flex items-stretch gap-1"
             style={{
-              ...iosAskInsetSurfaceStyle,
+              ...askInsetSurfaceStyle,
               borderRadius: 14,
               padding: 4,
             }}

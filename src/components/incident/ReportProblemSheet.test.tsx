@@ -2,7 +2,7 @@ import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { MantineProvider } from "@mantine/core";
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { INCIDENT_NOTE_MAX_LENGTH } from "../../domain/incident/incidentTypes";
-import { jetlagMantineTheme } from "@/theme/mantineTheme";
+import { jetlagTheme } from "@/theme/theme";
 import { renderWithRouter } from "../../test/renderWithRouter";
 import { ReportProblemSheet } from "./ReportProblemSheet";
 
@@ -37,7 +37,7 @@ vi.mock("../../hooks/incident/usePendingHostConfirm", () => ({
 
 function renderReport(ui: React.ReactNode) {
   return renderWithRouter(
-    <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+    <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
       {ui}
     </MantineProvider>,
   );

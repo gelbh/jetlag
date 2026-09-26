@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { MantineProvider } from "@mantine/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { jetlagMantineTheme } from "@/theme/mantineTheme";
+import { jetlagTheme } from "@/theme/theme";
 import { AskHudHost } from "./AskHudHost";
 
 vi.mock("@/hooks/layout/useDesktopLayout", () => ({
@@ -35,7 +35,7 @@ beforeEach(() => {
 describe("AskHudHost", () => {
   it("mounts iOS SheetHost drawer", () => {
     render(
-      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
         <AskHudHost {...hostProps} modeBody={<div>Mode body</div>} />
       </MantineProvider>,
     );
@@ -50,7 +50,7 @@ describe("AskHudHost", () => {
 
   it("dismisses via blurred map overlay click", () => {
     render(
-      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
         <AskHudHost {...hostProps} modeBody={<div>Mode body</div>} />
       </MantineProvider>,
     );
@@ -65,7 +65,7 @@ describe("AskHudHost", () => {
 
   it("hides muted commit strip on sheet until ready", () => {
     render(
-      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
         <AskHudHost
           {...hostProps}
           canCommit={false}
@@ -81,7 +81,7 @@ describe("AskHudHost", () => {
 
   it("can hide cue and cost chip for Matching sheet composition", () => {
     render(
-      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
         <AskHudHost
           {...hostProps}
           cue="PICK CATEGORY"

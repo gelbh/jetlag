@@ -7,9 +7,9 @@ import {
   resolveSessionInviteOrigin,
 } from "@/services/session/sessionInviteUrl";
 import {
-  iosFilledStyles,
-  iosGrayStyles,
-} from "@/components/ui/apple/iosEntryChrome";
+  filledStyles,
+  grayStyles,
+} from "@/components/ui/entry/entryChrome";
 
 interface ShareCodeProps {
   code: string;
@@ -179,10 +179,10 @@ export function ShareCode({
 
       {inviteUrl ? (
         <Stack gap="xs">
-          <Button fullWidth styles={iosFilledStyles} onClick={() => void handleInvite()}>
+          <Button fullWidth styles={filledStyles} onClick={() => void handleInvite()}>
             Invite friends
           </Button>
-          <Button fullWidth styles={iosGrayStyles} onClick={() => void handleCopyLink()}>
+          <Button fullWidth styles={grayStyles} onClick={() => void handleCopyLink()}>
             Copy join link
           </Button>
         </Stack>

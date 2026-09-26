@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import type { ComponentProps } from "react";
 import { MantineProvider } from "@mantine/core";
-import { jetlagMantineTheme } from "@/theme/mantineTheme";
+import { jetlagTheme } from "@/theme/theme";
 import { MatchingMapPlacementChrome } from "./MatchingMapPlacementChrome";
 
 beforeEach(() => {
@@ -26,7 +26,7 @@ function renderChrome(
   const onAnswerChange = props.onAnswerChange ?? vi.fn();
   const onChangeCategory = props.onChangeCategory ?? vi.fn();
   render(
-    <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+    <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
       <MatchingMapPlacementChrome
         categoryLabel="Commercial Airport"
         questionPrompt="Is your nearest commercial airport the same as my nearest commercial airport?"

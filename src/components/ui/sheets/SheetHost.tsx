@@ -1,6 +1,6 @@
 import { createPortal } from "react-dom";
 import { useRef, type CSSProperties, type ReactNode } from "react";
-import { MantineDrawerSheet } from "./MantineDrawerSheet";
+import { DrawerSheet } from "./DrawerSheet";
 import { useDialogFocus } from "@/hooks/a11y/useDialogFocus";
 import { useDesktopLayout } from "@/hooks/layout/useDesktopLayout";
 import {
@@ -124,7 +124,7 @@ export function SheetHost({
   }
 
   return (
-    <MantineDrawerSheet
+    <DrawerSheet
       open={open}
       onClose={onClose}
       ariaLabel={ariaLabel}
@@ -138,6 +138,6 @@ export function SheetHost({
       mapInteractive={mapInteractive}
     >
       {children}
-    </MantineDrawerSheet>
+    </DrawerSheet>
   );
 }

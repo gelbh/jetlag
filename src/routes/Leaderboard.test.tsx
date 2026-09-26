@@ -3,7 +3,7 @@ import { MemoryRouter } from "react-router-dom";
 import { MantineProvider } from "@mantine/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Leaderboard } from "./Leaderboard";
-import { jetlagMantineTheme } from "@/theme/mantineTheme";
+import { jetlagTheme } from "@/theme/theme";
 
 vi.mock("@/services/core/firebase/firebase", () => ({
   isFirebaseConfigured: () => false,
@@ -21,8 +21,8 @@ vi.mock("./LeaderboardBoard", () => ({
   LeaderboardBoard: () => <div data-testid="leaderboard-board">Board</div>,
 }));
 
-vi.mock("../components/leaderboard/LeaderboardIosBody", () => ({
-  LeaderboardIosBody: () => <div data-testid="leaderboard-ios-body">Board</div>,
+vi.mock("../components/leaderboard/LeaderboardBody", () => ({
+  LeaderboardBody: () => <div data-testid="leaderboard-body">Board</div>,
 }));
 
 beforeEach(() => {
@@ -41,7 +41,7 @@ beforeEach(() => {
 describe("Leaderboard", () => {
   it("renders Mantine shell", () => {
     render(
-      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
         <MemoryRouter>
           <Leaderboard />
         </MemoryRouter>

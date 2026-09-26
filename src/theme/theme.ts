@@ -10,7 +10,7 @@ const appleSystemSans =
   '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif';
 
 /** Apple-native controls; logo navy + sunset orange tint. */
-export const jetlagMantineTheme = createTheme({
+export const jetlagTheme = createTheme({
   primaryColor: "flag",
   colors: {
     flag: colorsTuple("oklch(0.688 0.155 47)"),

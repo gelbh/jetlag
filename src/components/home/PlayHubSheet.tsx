@@ -1,6 +1,6 @@
 import { AppLink } from "../navigation/AppLink";
 import { DesktopContentColumn } from "../ui/layout/DesktopContentColumn";
-import { MantineDrawerSheet } from "../ui/sheets/MantineDrawerSheet";
+import { DrawerSheet } from "../ui/sheets/DrawerSheet";
 import { SheetHeader } from "../ui/sheets/SheetHeader";
 
 interface PlayHubSheetProps {
@@ -10,7 +10,7 @@ interface PlayHubSheetProps {
 
 export function PlayHubSheet({ open, onClose }: PlayHubSheetProps) {
   return (
-    <MantineDrawerSheet
+    <DrawerSheet
       open={open}
       onClose={onClose}
       ariaLabel="Play"
@@ -50,6 +50,6 @@ export function PlayHubSheet({ open, onClose }: PlayHubSheetProps) {
           </AppLink>
         </div>
       </DesktopContentColumn>
-    </MantineDrawerSheet>
+    </DrawerSheet>
   );
 }

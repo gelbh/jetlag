@@ -27,9 +27,9 @@ import {
 } from "@/domain/session/activity/sessionActivityLog";
 import { HudToolIcon } from "@/components/map/icons/ToolIcons";
 import {
-  iosCompactDangerStyles,
-  iosCompactGrayStyles,
-} from "@/components/ui/apple/iosEntryChrome";
+  compactDangerStyles,
+  compactGrayStyles,
+} from "@/components/ui/entry/entryChrome";
 import { EmptyState } from "@/components/ui/feedback/EmptyState";
 import { useStickScrollToBottom } from "@/hooks/ui/useStickScrollToBottom";
 
@@ -407,14 +407,14 @@ export function SessionLogBody({
                 <Button
                   size="compact-xs"
                   onClick={() => onEdit(liveId)}
-                  styles={iosCompactGrayStyles}
+                  styles={compactGrayStyles}
                 >
                   Edit
                 </Button>
                 <Button
                   size="compact-xs"
                   onClick={() => onDelete(liveId)}
-                  styles={iosCompactDangerStyles}
+                  styles={compactDangerStyles}
                 >
                   Delete
                 </Button>

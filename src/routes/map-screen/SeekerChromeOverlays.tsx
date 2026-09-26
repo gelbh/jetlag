@@ -4,9 +4,9 @@ import { MapToolsHintBanner } from "../../components/session/mapChrome/MapToolsH
 import { AskHudHost } from "../../components/tools/ask/AskHudHost";
 import { ToolFloatingPanel } from "../../components/tools/ToolFloatingPanel";
 import {
-  iosFilledStyles,
-  iosGrayStyles,
-} from "../../components/ui/apple/iosEntryChrome";
+  filledStyles,
+  grayStyles,
+} from "../../components/ui/entry/entryChrome";
 import {
   activeModeCue,
   canCommit,
@@ -199,11 +199,11 @@ export function SeekerChromeOverlays({
           >
             <Button
               onClick={() => void saveGeometryEdit()}
-              styles={iosFilledStyles}
+              styles={filledStyles}
             >
               Save shape
             </Button>
-            <Button onClick={cancelGeometryEdit} styles={iosGrayStyles}>
+            <Button onClick={cancelGeometryEdit} styles={grayStyles}>
               Cancel
             </Button>
           </Group>

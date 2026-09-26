@@ -12,10 +12,10 @@ import {
 } from "@/components/tools/ask/AskMapPlacementChrome";
 import { closerFurtherAnswerOptions } from "@/components/tools/shared/answers/binaryAnswerOptions";
 import {
-  iosAskInsetSurfaceStyle,
-  iosChoiceChipStyles,
-  iosMapChromeSurfaceStyles,
-} from "@/components/ui/apple/iosEntryChrome";
+  askInsetSurfaceStyle,
+  choiceChipStyles,
+  mapChromeSurfaceStyles,
+} from "@/components/ui/entry/entryChrome";
 import type { MeasuringAnswer } from "@/domain/questions";
 import { formatDistance, type DistanceUnit } from "@/domain/map/distance";
 
@@ -49,7 +49,7 @@ const compactChoiceStyles = (
   selected: boolean,
   tone: "success" | "danger" | "default",
 ) => {
-  const base = iosChoiceChipStyles(selected, tone);
+  const base = choiceChipStyles(selected, tone);
   const selectedSoft =
     tone === "success"
       ? {
@@ -171,7 +171,7 @@ export function MeasuringMapPlacementChrome({
         <div
           className="flex flex-col gap-2"
           style={{
-            ...iosMapChromeSurfaceStyles,
+            ...mapChromeSurfaceStyles,
             borderRadius: 16,
             padding: "0.55rem",
             color: "var(--color-field-ink)",
@@ -181,7 +181,7 @@ export function MeasuringMapPlacementChrome({
             <div
               className="flex flex-col gap-1 px-1"
               style={{
-                ...iosAskInsetSurfaceStyle,
+                ...askInsetSurfaceStyle,
                 padding: "0.4rem 0.55rem",
               }}
             >

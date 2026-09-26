@@ -2,8 +2,8 @@ import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { MantineProvider } from "@mantine/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { CreateMantine } from "./CreateMantine";
-import { jetlagMantineTheme } from "@/theme/mantineTheme";
+import { CreateSession } from "./CreateSession";
+import { jetlagTheme } from "@/theme/theme";
 
 vi.mock("@/hooks/navigation/useAppNavigate", () => ({
   useAppNavigate: () => vi.fn(),
@@ -58,12 +58,12 @@ beforeEach(() => {
   vi.stubGlobal("cancelAnimationFrame", vi.fn());
 });
 
-describe("CreateMantine", () => {
+describe("CreateSession", () => {
   it("renders Apple Back control, Create title, and confirm footer", () => {
     render(
-      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
         <MemoryRouter>
-          <CreateMantine />
+          <CreateSession />
         </MemoryRouter>
       </MantineProvider>,
     );

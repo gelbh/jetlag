@@ -13,7 +13,7 @@ import { AnchorControls } from "@/components/tools/shared/controls/AnchorControl
 import { CatalogExhaustedMessage } from "@/components/tools/shared/readout/CatalogExhaustedMessage";
 import { QuestionTruthReferenceHint } from "@/components/tools/shared/QuestionTruthReferenceHint";
 import { ViewOnlyQuestionBanner } from "@/components/tools/shared/readout/ViewOnlyQuestionBanner";
-import { iosAskInsetSurfaceStyle } from "@/components/ui/apple/iosEntryChrome";
+import { askInsetSurfaceStyle } from "@/components/ui/entry/entryChrome";
 import {
   distanceUnitLabel,
   formatDistance,
@@ -389,7 +389,7 @@ export function RadarHudBody({
       {chord === "place" ? (
         <div
           className="pointer-events-auto space-y-3 p-3"
-          style={iosAskInsetSurfaceStyle}
+          style={askInsetSurfaceStyle}
         >
           <AnchorControls
             awaitingPlacement={awaitingPlacement}

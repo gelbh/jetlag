@@ -2,7 +2,7 @@ import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { MantineProvider } from "@mantine/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Premium } from "./Premium";
-import { jetlagMantineTheme } from "@/theme/mantineTheme";
+import { jetlagTheme } from "@/theme/theme";
 import { renderWithRouter } from "../test/renderWithRouter";
 import type { PremiumEntitlements } from "../domain/billing/premiumProducts";
 
@@ -53,7 +53,7 @@ vi.mock("../services/core/firebase/firebase", () => ({
 
 function renderPremium() {
   return renderWithRouter(
-    <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+    <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
       <Premium />
     </MantineProvider>,
   );

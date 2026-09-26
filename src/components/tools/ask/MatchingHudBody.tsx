@@ -27,10 +27,10 @@ import { ProvisionalBadge } from "@/components/tools/shared/readout/ProvisionalB
 import { ResolvedReadout } from "@/components/tools/shared/readout/ResolvedReadout";
 import { QuestionTruthReferenceHint } from "@/components/tools/shared/QuestionTruthReferenceHint";
 import {
-  iosAskInsetSurfaceStyle,
-  iosFilterChipStyles,
-  iosFilterChipTrackStyle,
-} from "@/components/ui/apple/iosEntryChrome";
+  askInsetSurfaceStyle,
+  filterChipStyles,
+  filterChipTrackStyle,
+} from "@/components/ui/entry/entryChrome";
 import { formatDistance, type DistanceUnit } from "@/domain/map/distance";
 import {
   isMatchingCategoryAvailable,
@@ -261,7 +261,7 @@ export function MatchingHudBody({
                 role="tablist"
                 aria-label="Filter match categories"
                 className="jl-scroll"
-                style={iosFilterChipTrackStyle}
+                style={filterChipTrackStyle}
               >
                 {filterOptions.map((option) => {
                   const selected = effectiveFilter === option.value;
@@ -273,7 +273,7 @@ export function MatchingHudBody({
                       role="tab"
                       aria-selected={selected}
                       onClick={() => setGroupFilter(option.value)}
-                      styles={iosFilterChipStyles(selected)}
+                      styles={filterChipStyles(selected)}
                     >
                       <Icon
                         size={14}
@@ -306,7 +306,7 @@ export function MatchingHudBody({
       {chord === "resolve" ? (
         <div
           className="pointer-events-auto space-y-3 p-3"
-          style={iosAskInsetSurfaceStyle}
+          style={askInsetSurfaceStyle}
         >
           {category ? (
             <div className="flex items-center gap-2.5">
@@ -385,7 +385,7 @@ export function MatchingHudBody({
       {chord === "answer" ? (
         <div
           className="pointer-events-auto space-y-3 p-3"
-          style={iosAskInsetSurfaceStyle}
+          style={askInsetSurfaceStyle}
         >
           {category ? (
             <div className="flex items-center gap-2.5">

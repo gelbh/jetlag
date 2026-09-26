@@ -6,14 +6,14 @@ import {
   type SessionCustomMeasureGeometry,
 } from "@/domain/session/catalog/customMeasureGeometry";
 import {
-  IosErrorCallout,
-  IosInsetGroup,
-  iosCompactDangerStyles,
-  iosFilledStyles,
-  iosInsetTextInputStyles,
-  iosInsetTextareaStyles,
-} from "@/components/ui/apple/iosEntryChrome";
-import { IosInsetHairline } from "@/components/ui/apple/IosInsetRow";
+  ErrorCallout,
+  InsetGroup,
+  compactDangerStyles,
+  filledStyles,
+  insetTextInputStyles,
+  insetTextareaStyles,
+} from "@/components/ui/entry/entryChrome";
+import { InsetHairline } from "@/components/ui/entry/InsetRow";
 
 interface CustomMeasureGeometrySettingsProps {
   value: AdvancedSessionSettingsValue;
@@ -121,10 +121,10 @@ export function CustomMeasureGeometrySettings({
       </Text>
 
       {customMeasureGeometries.length > 0 ? (
-        <IosInsetGroup>
+        <InsetGroup>
           {customMeasureGeometries.map((geometry, index) => (
             <Box key={geometry.id}>
-              {index > 0 ? <IosInsetHairline insetStart="1rem" /> : null}
+              {index > 0 ? <InsetHairline insetStart="1rem" /> : null}
               <Box
                 style={{
                   display: "flex",
@@ -146,7 +146,7 @@ export function CustomMeasureGeometrySettings({
                   type="button"
                   size="compact-sm"
                   disabled={disabled}
-                  styles={iosCompactDangerStyles}
+                  styles={compactDangerStyles}
                   onClick={() => removeGeometry(geometry.id)}
                 >
                   Remove
@@ -154,10 +154,10 @@ export function CustomMeasureGeometrySettings({
               </Box>
             </Box>
           ))}
-        </IosInsetGroup>
+        </InsetGroup>
       ) : null}
 
-      <IosInsetGroup error={Boolean(error)}>
+      <InsetGroup error={Boolean(error)}>
         <TextInput
           label="Label"
           value={label}
@@ -165,9 +165,9 @@ export function CustomMeasureGeometrySettings({
           placeholder="South coast trace"
           aria-describedby={panelId}
           onChange={(event) => setLabel(event.currentTarget.value)}
-          styles={iosInsetTextInputStyles}
+          styles={insetTextInputStyles}
         />
-        <IosInsetHairline insetStart="1rem" />
+        <InsetHairline insetStart="1rem" />
         <Textarea
           label="GeoJSON"
           value={geoJson}
@@ -176,23 +176,23 @@ export function CustomMeasureGeometrySettings({
           rows={5}
           onChange={(event) => setGeoJson(event.currentTarget.value)}
           styles={{
-            ...iosInsetTextareaStyles,
+            ...insetTextareaStyles,
             input: {
-              ...iosInsetTextareaStyles.input,
+              ...insetTextareaStyles.input,
               fontFamily: "var(--font-mono)",
               fontSize: "0.8125rem",
             },
           }}
         />
-      </IosInsetGroup>
+      </InsetGroup>
 
-      <IosErrorCallout>{error}</IosErrorCallout>
+      <ErrorCallout>{error}</ErrorCallout>
 
       <Button
         type="button"
         fullWidth
         disabled={disabled || !label.trim() || !geoJson.trim()}
-        styles={iosFilledStyles}
+        styles={filledStyles}
         onClick={addGeometry}
       >
         Add measuring geometry

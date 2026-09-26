@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Box, Stack, Text, Title } from "@mantine/core";
-import { ToolStatusBlockMantine } from "@/components/session/status/ToolStatusBlockMantine";
+import { ToolStatusBlock } from "@/components/session/status/ToolStatusBlock";
 import { SyncBlock } from "@/components/session/status/SyncBlock";
 import { ScreenNav } from "@/components/ui/layout/ScreenNav";
 import {
@@ -45,7 +45,7 @@ function ScenarioRow({ scenario }: { scenario: StatusDockScenario }) {
           padding: 12,
         }}
       >
-        <ToolStatusBlockMantine
+        <ToolStatusBlock
           sessionCode={scenario.sessionCode}
           playerRole={scenario.playerRole}
           activeTool="none"

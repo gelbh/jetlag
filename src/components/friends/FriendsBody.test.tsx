@@ -2,8 +2,8 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MantineProvider } from "@mantine/core";
 import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { jetlagMantineTheme } from "@/theme/mantineTheme";
-import { FriendsIosBody } from "./FriendsIosBody";
+import { jetlagTheme } from "@/theme/theme";
+import { FriendsBody } from "./FriendsBody";
 import { searchFriends } from "../../services/profile/profileFriends";
 
 vi.mock("../../services/profile/profileFriends", () => ({
@@ -23,14 +23,14 @@ vi.mock("../../services/profile/profileFriends", () => ({
 function renderBody() {
   return render(
     <MemoryRouter>
-      <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
-        <FriendsIosBody />
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
+        <FriendsBody />
       </MantineProvider>
     </MemoryRouter>,
   );
 }
 
-describe("FriendsIosBody", () => {
+describe("FriendsBody", () => {
   beforeEach(() => {
     localStorage.removeItem("jl.friends.mock");
     vi.mocked(searchFriends).mockClear();

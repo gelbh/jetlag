@@ -34,15 +34,15 @@ import {
 } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
-  IosErrorCallout,
-  IosInsetGroup,
-  IosSectionLabel,
-  IosSuccessCallout,
-  IosDrawerGrabber,
-  iosBottomDrawerStyles,
-  iosFilledStyles,
-} from "@/components/ui/apple/iosEntryChrome";
-import { IosInsetHairline } from "@/components/ui/apple/IosInsetRow";
+  ErrorCallout,
+  InsetGroup,
+  SectionLabel,
+  SuccessCallout,
+  DrawerGrabber,
+  bottomDrawerStyles,
+  filledStyles,
+} from "@/components/ui/entry/entryChrome";
+import { InsetHairline } from "@/components/ui/entry/InsetRow";
 import {
   formatLeaderboardValue,
   LEADERBOARD_METRICS,
@@ -164,7 +164,7 @@ function PlayerMonogram({
   );
 }
 
-function IosEmptyInset({
+function EmptyInset({
   icon,
   children,
 }: {
@@ -172,7 +172,7 @@ function IosEmptyInset({
   children: ReactNode;
 }) {
   return (
-    <IosInsetGroup>
+    <InsetGroup>
       <Stack gap={8} align="center" px="md" py="xl">
         <Box
           c="var(--color-field-ink-muted)"
@@ -191,7 +191,7 @@ function IosEmptyInset({
           {children}
         </Text>
       </Stack>
-    </IosInsetGroup>
+    </InsetGroup>
   );
 }
 
@@ -691,10 +691,10 @@ function BoardPickerDrawer({
       title={null}
       withCloseButton={false}
       overlayProps={{ backgroundOpacity: 0.4, blur: 3 }}
-      styles={iosBottomDrawerStyles("min(78dvh, 40rem)")}
+      styles={bottomDrawerStyles("min(78dvh, 40rem)")}
     >
       <Stack gap="lg">
-        <IosDrawerGrabber />
+        <DrawerGrabber />
 
         <Stack gap={6} align="center">
           <Text
@@ -717,7 +717,7 @@ function BoardPickerDrawer({
         </Stack>
 
         <Stack gap={10}>
-          <IosSectionLabel>Game size</IosSectionLabel>
+          <SectionLabel>Game size</SectionLabel>
           <Group
             gap={8}
             align="stretch"
@@ -741,7 +741,7 @@ function BoardPickerDrawer({
         </Stack>
 
         <Stack gap={10}>
-          <IosSectionLabel>Role</IosSectionLabel>
+          <SectionLabel>Role</SectionLabel>
           <Group
             gap={8}
             align="stretch"
@@ -761,8 +761,8 @@ function BoardPickerDrawer({
         </Stack>
 
         <Stack gap={10}>
-          <IosSectionLabel>Metric</IosSectionLabel>
-          <IosInsetGroup>
+          <SectionLabel>Metric</SectionLabel>
+          <InsetGroup>
             <Box role="listbox" aria-label="Leaderboard metric">
               {LEADERBOARD_METRICS.map((value, index) => {
                 const selected = selection.metric === value;
@@ -818,16 +818,16 @@ function BoardPickerDrawer({
                       )}
                     </UnstyledButton>
                     {index < LEADERBOARD_METRICS.length - 1 ? (
-                      <IosInsetHairline insetStart="1rem" />
+                      <InsetHairline insetStart="1rem" />
                     ) : null}
                   </Box>
                 );
               })}
             </Box>
-          </IosInsetGroup>
+          </InsetGroup>
         </Stack>
 
-        <Button fullWidth onClick={onClose} styles={iosFilledStyles}>
+        <Button fullWidth onClick={onClose} styles={filledStyles}>
           Done
         </Button>
       </Stack>
@@ -873,10 +873,10 @@ function PlayerDetailDrawer({
       title={null}
       withCloseButton={false}
       overlayProps={{ backgroundOpacity: 0.4, blur: 3 }}
-      styles={iosBottomDrawerStyles()}
+      styles={bottomDrawerStyles()}
     >
       <Stack gap="md">
-        <IosDrawerGrabber />
+        <DrawerGrabber />
         <Stack gap={8} align="center">
           <PlayerMonogram username={label} size={56} />
           <Text
@@ -953,7 +953,7 @@ function PlayerDetailDrawer({
               fullWidth
               leftSection={<UserPlus size={18} weight="bold" />}
               onClick={onAddFriend}
-              styles={iosFilledStyles}
+              styles={filledStyles}
             >
               Add friend
             </Button>
@@ -962,7 +962,7 @@ function PlayerDetailDrawer({
               This is your standing on the current board.
             </Text>
           )}
-          <IosInsetGroup>
+          <InsetGroup>
             <UnstyledButton
               type="button"
               onClick={onOpenFriends}
@@ -987,7 +987,7 @@ function PlayerDetailDrawer({
               <Text style={{ flex: 1 }}>Open friends</Text>
               <CaretRight size={16} weight="bold" />
             </UnstyledButton>
-          </IosInsetGroup>
+          </InsetGroup>
         </Stack>
 
         <UnstyledButton
@@ -1098,7 +1098,7 @@ function RankRow({
           <CaretRight size={14} weight="bold" />
         </Box>
       </UnstyledButton>
-      {showDivider ? <IosInsetHairline insetStart="5.5rem" /> : null}
+      {showDivider ? <InsetHairline insetStart="5.5rem" /> : null}
     </Box>
   );
 }
@@ -1107,7 +1107,7 @@ const EMPTY_BOARD_MESSAGE =
   "No ranked entries yet. Finish synced rounds with leaderboard opt-in to populate this board.";
 
 /** Join/Friends-style iOS body for the Mantine Leaderboard route. */
-export function LeaderboardIosBody() {
+export function LeaderboardBody() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const mockEnabled = isLeaderboardMockEnabled();
@@ -1327,7 +1327,7 @@ export function LeaderboardIosBody() {
     <PullToRefresh refreshing={refreshing} onRefresh={pullRefresh}>
       <Stack gap={18} pb={footerVisible ? 72 : 8}>
         <Stack gap={8}>
-          <IosSectionLabel>Find players</IosSectionLabel>
+          <SectionLabel>Find players</SectionLabel>
           <form
             onSubmit={(event) => {
               event.preventDefault();
@@ -1336,7 +1336,7 @@ export function LeaderboardIosBody() {
           >
             <Group gap={8} align="stretch" wrap="nowrap">
               <Box style={{ flex: 1, minWidth: 0 }}>
-                <IosInsetGroup>
+                <InsetGroup>
                   <TextInput
                     aria-label="Search players"
                     value={query}
@@ -1368,7 +1368,7 @@ export function LeaderboardIosBody() {
                     }
                     styles={insetInputStyles}
                   />
-                </IosInsetGroup>
+                </InsetGroup>
               </Box>
               <ActionIcon
                 type="submit"
@@ -1438,11 +1438,11 @@ export function LeaderboardIosBody() {
           />
         </Stack>
 
-        <IosSuccessCallout>{successMessage}</IosSuccessCallout>
-        {boardError ? <IosErrorCallout>{boardError}</IosErrorCallout> : null}
+        <SuccessCallout>{successMessage}</SuccessCallout>
+        {boardError ? <ErrorCallout>{boardError}</ErrorCallout> : null}
 
         {boardLoading ? (
-          <IosInsetGroup>
+          <InsetGroup>
             <Group gap={10} px="md" py="md" c="var(--color-field-ink-muted)">
               <CircleNotch
                 size={18}
@@ -1452,18 +1452,18 @@ export function LeaderboardIosBody() {
               />
               <Text size="sm">Loading board…</Text>
             </Group>
-          </IosInsetGroup>
+          </InsetGroup>
         ) : null}
 
         {!boardLoading && !boardError && entries.length === 0 ? (
-          <IosEmptyInset icon={<Trophy size={28} weight="regular" />}>
+          <EmptyInset icon={<Trophy size={28} weight="regular" />}>
             {EMPTY_BOARD_MESSAGE}
-          </IosEmptyInset>
+          </EmptyInset>
         ) : null}
 
         {!boardLoading && !boardError && lead.length > 0 ? (
           <Stack gap={8}>
-            <IosSectionLabel>Podium</IosSectionLabel>
+            <SectionLabel>Podium</SectionLabel>
             <LeaderboardPodium
               entries={lead}
               metric={selection.metric}
@@ -1478,8 +1478,8 @@ export function LeaderboardIosBody() {
 
         {!boardLoading && !boardError && rest.length > 0 ? (
           <Stack gap={8}>
-            <IosSectionLabel>Ranks</IosSectionLabel>
-            <IosInsetGroup>
+            <SectionLabel>Ranks</SectionLabel>
+            <InsetGroup>
               <Box component="ol" m={0} p={0} style={{ listStyle: "none" }}>
                 {rest.map((entry, index) => (
                   <RankRow
@@ -1499,7 +1499,7 @@ export function LeaderboardIosBody() {
                   />
                 ))}
               </Box>
-            </IosInsetGroup>
+            </InsetGroup>
           </Stack>
         ) : null}
 

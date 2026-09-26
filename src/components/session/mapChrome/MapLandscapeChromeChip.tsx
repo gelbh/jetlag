@@ -5,7 +5,7 @@ import type { TimerState } from "@/domain/session/timer/timer";
 import { Paper } from "@mantine/core";
 import { CaretDown, CaretUp } from "@phosphor-icons/react";
 import { surveySyncShortLabel } from "@/domain/device/surveyStatusCopy";
-import { iosMapChromeSurfaceStyles } from "@/components/ui/apple/iosEntryChrome";
+import { mapChromeSurfaceStyles } from "@/components/ui/entry/entryChrome";
 import { JlIcon } from "../../ui/brand/JlIcon";
 import { SyncStatusBeacon } from "../syncUi/SyncStatusDot";
 import { SYNC_TONE_CLASSES, syncRailDisplay } from "../status/syncRailDisplay";
@@ -67,7 +67,7 @@ export function MapLandscapeChromeChip({
       radius={22}
       styles={{
         root: {
-          ...iosMapChromeSurfaceStyles,
+          ...mapChromeSurfaceStyles,
           borderRadius: 22,
         },
       }}

@@ -6,14 +6,14 @@ import {
   type SessionCustomCategory,
 } from "@/domain/session/catalog/sessionCustomContent";
 import {
-  IosInsetGroup,
-  IosSectionLabel,
-  iosCompactDangerStyles,
-  iosFilledStyles,
-  iosInsetTextInputStyles,
-  iosInsetTextareaStyles,
-} from "@/components/ui/apple/iosEntryChrome";
-import { IosInsetHairline } from "@/components/ui/apple/IosInsetRow";
+  InsetGroup,
+  SectionLabel,
+  compactDangerStyles,
+  filledStyles,
+  insetTextInputStyles,
+  insetTextareaStyles,
+} from "@/components/ui/entry/entryChrome";
+import { InsetHairline } from "@/components/ui/entry/InsetRow";
 
 interface CategoryEditorProps {
   value: AdvancedSessionSettingsValue;
@@ -60,17 +60,17 @@ export function CategoryEditor({
 
   return (
     <Stack gap="xs">
-      <IosSectionLabel>Custom POI categories</IosSectionLabel>
+      <SectionLabel>Custom POI categories</SectionLabel>
       <Text size="xs" c="var(--color-field-ink-muted)" px={4}>
         Add Overpass tag selectors for Matching, Measuring, and Tentacle (one
         selector per line, e.g. amenity=police).
       </Text>
 
       {value.customCategories.length > 0 ? (
-        <IosInsetGroup>
+        <InsetGroup>
           {value.customCategories.map((category, index) => (
             <Box key={category.id}>
-              {index > 0 ? <IosInsetHairline insetStart="1rem" /> : null}
+              {index > 0 ? <InsetHairline insetStart="1rem" /> : null}
               <Box
                 style={{
                   display: "flex",
@@ -92,7 +92,7 @@ export function CategoryEditor({
                   type="button"
                   size="compact-sm"
                   disabled={disabled}
-                  styles={iosCompactDangerStyles}
+                  styles={compactDangerStyles}
                   onClick={() =>
                     onChange({
                       ...value,
@@ -107,10 +107,10 @@ export function CategoryEditor({
               </Box>
             </Box>
           ))}
-        </IosInsetGroup>
+        </InsetGroup>
       ) : null}
 
-      <IosInsetGroup>
+      <InsetGroup>
         <TextInput
           label="Label"
           value={categoryDraft.label}
@@ -121,9 +121,9 @@ export function CategoryEditor({
               label: event.currentTarget.value,
             }))
           }
-          styles={iosInsetTextInputStyles}
+          styles={insetTextInputStyles}
         />
-        <IosInsetHairline insetStart="1rem" />
+        <InsetHairline insetStart="1rem" />
         <TextInput
           label="Prompt noun"
           value={categoryDraft.promptNoun}
@@ -135,9 +135,9 @@ export function CategoryEditor({
               promptNoun: event.currentTarget.value,
             }))
           }
-          styles={iosInsetTextInputStyles}
+          styles={insetTextInputStyles}
         />
-        <IosInsetHairline insetStart="1rem" />
+        <InsetHairline insetStart="1rem" />
         <Textarea
           label="Overpass selectors"
           value={categoryDraft.selectors}
@@ -150,15 +150,15 @@ export function CategoryEditor({
               selectors: event.currentTarget.value,
             }))
           }
-          styles={iosInsetTextareaStyles}
+          styles={insetTextareaStyles}
         />
-      </IosInsetGroup>
+      </InsetGroup>
 
       <Button
         type="button"
         fullWidth
         disabled={disabled}
-        styles={iosFilledStyles}
+        styles={filledStyles}
         onClick={addCategory}
       >
         Add category

@@ -1,10 +1,10 @@
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 import { UnstyledButton } from "@mantine/core";
 import {
-  iosMapToolSlotLabelStyle,
-  iosMapToolSlotStyles,
-  type IosMapToolSlotTone,
-} from "@/components/ui/apple/iosEntryChrome";
+  mapToolSlotLabelStyle,
+  mapToolSlotStyles,
+  type MapToolSlotTone,
+} from "@/components/ui/entry/entryChrome";
 
 export type MapChromeControlVariant = "floating" | "slot";
 
@@ -15,7 +15,7 @@ export interface MapChromeControlProps
   /** Toggle / selected state (`aria-pressed` + active chrome class). */
   pressed?: boolean;
   /** Slot visual weight: question tools vs undo/redo. */
-  tone?: IosMapToolSlotTone;
+  tone?: MapToolSlotTone;
   icon?: ReactNode;
   /** Extra classes on the icon wrapper (e.g. unread badge host). */
   iconClassName?: string;
@@ -67,7 +67,7 @@ function ControlBody({
       <>
         {icon != null ? <span className={iconClass}>{icon}</span> : null}
         {label != null ? (
-          <span data-ios-tool-label="" style={iosMapToolSlotLabelStyle}>
+          <span data-ios-tool-label="" style={mapToolSlotLabelStyle}>
             {label}
           </span>
         ) : null}
@@ -125,7 +125,7 @@ export function MapChromeControl({
         type={type}
         disabled={disabled}
         className={resolvedClassName}
-        styles={iosMapToolSlotStyles(Boolean(pressed), tone)}
+        styles={mapToolSlotStyles(Boolean(pressed), tone)}
         data-ios-tool-tone={tone}
         aria-label={ariaLabel}
         aria-pressed={pressed}

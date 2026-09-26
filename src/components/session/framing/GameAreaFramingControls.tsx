@@ -8,9 +8,9 @@ import {
   recommendGameSize,
 } from "@/domain/session/size/gameSize";
 import {
-  iosCompactFilledStyles,
-  iosGrayStyles,
-} from "@/components/ui/apple/iosEntryStyles";
+  compactFilledStyles,
+  grayStyles,
+} from "@/components/ui/entry/entryStyles";
 import { FRAMING_MODE_OPTIONS } from "./gameAreaFramingUi";
 
 interface FramingModeSegmentControlProps {
@@ -132,7 +132,7 @@ export function GameAreaFramingPolygonActions({
     <Group grow gap="sm">
       <Button
         type="button"
-        styles={iosCompactFilledStyles}
+        styles={compactFilledStyles}
         onClick={onClose}
         disabled={vertexCount < 3}
       >
@@ -140,7 +140,7 @@ export function GameAreaFramingPolygonActions({
       </Button>
       <Button
         type="button"
-        styles={iosGrayStyles}
+        styles={grayStyles}
         onClick={onReset}
         disabled={vertexCount === 0}
       >

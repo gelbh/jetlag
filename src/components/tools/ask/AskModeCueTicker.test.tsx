@@ -2,7 +2,7 @@ import { describe, expect, it, beforeEach, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { MantineProvider } from "@mantine/core";
 import { cueExcludesCostTokens } from "@/domain/ask/askHudModes";
-import { jetlagMantineTheme } from "@/theme/mantineTheme";
+import { jetlagTheme } from "@/theme/theme";
 import { AskModeCueTicker } from "./AskModeCueTicker";
 
 beforeEach(() => {
@@ -20,7 +20,7 @@ beforeEach(() => {
 
 function renderCue(cue: string) {
   return render(
-    <MantineProvider theme={jetlagMantineTheme} forceColorScheme="dark">
+    <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
       <AskModeCueTicker cue={cue} />
     </MantineProvider>,
   );

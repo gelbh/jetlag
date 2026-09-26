@@ -5,13 +5,13 @@ import type { MatchingAdminLevel } from "@/domain/session/catalog/sessionCustomC
 import { parseMatchingAreaGeoJson } from "@/services/geo/matching/matchingAreaGeoJson";
 import type { GameArea } from "@/domain/map/annotations";
 import {
-  IosErrorCallout,
-  IosInsetGroup,
-  IosSectionLabel,
-  iosCompactDangerStyles,
-  iosCompactGrayStyles,
-} from "@/components/ui/apple/iosEntryChrome";
-import { IosInsetHairline } from "@/components/ui/apple/IosInsetRow";
+  ErrorCallout,
+  InsetGroup,
+  SectionLabel,
+  compactDangerStyles,
+  compactGrayStyles,
+} from "@/components/ui/entry/entryChrome";
+import { InsetHairline } from "@/components/ui/entry/InsetRow";
 
 const ADMIN_LEVEL_LABELS: Record<MatchingAdminLevel, string> = {
   4: "1st division (admin level 4)",
@@ -68,7 +68,7 @@ export function MatchingAreaUpload({
 
   return (
     <Stack gap="xs">
-      <IosSectionLabel>Custom matching areas</IosSectionLabel>
+      <SectionLabel>Custom matching areas</SectionLabel>
       <Text size="xs" c="var(--color-field-ink-muted)" px={4}>
         Upload GeoJSON FeatureCollections to replace OpenStreetMap admin
         boundaries for a division level in this session.
@@ -78,13 +78,13 @@ export function MatchingAreaUpload({
           Frame a play area to validate imported boundaries.
         </Text>
       ) : null}
-      <IosInsetGroup>
+      <InsetGroup>
         {([4, 6, 8, 9] as const).map((level, index) => {
           const uploaded = Boolean(value.customMatchingAreas[level]);
 
           return (
             <Box key={level}>
-              {index > 0 ? <IosInsetHairline insetStart="1rem" /> : null}
+              {index > 0 ? <InsetHairline insetStart="1rem" /> : null}
               <Box
                 style={{
                   display: "flex",
@@ -132,7 +132,7 @@ export function MatchingAreaUpload({
                   type="button"
                   size="compact-sm"
                   disabled={disabled}
-                  styles={iosCompactGrayStyles}
+                  styles={compactGrayStyles}
                   onClick={() => fileInputRefs.current[level]?.click()}
                 >
                   {uploaded ? "Replace" : "Upload"}
@@ -142,7 +142,7 @@ export function MatchingAreaUpload({
                     type="button"
                     size="compact-sm"
                     disabled={disabled}
-                    styles={iosCompactDangerStyles}
+                    styles={compactDangerStyles}
                     onClick={() => {
                       const next = { ...value.customMatchingAreas };
                       delete next[level];
@@ -156,8 +156,8 @@ export function MatchingAreaUpload({
             </Box>
           );
         })}
-      </IosInsetGroup>
-      <IosErrorCallout>{uploadError}</IosErrorCallout>
+      </InsetGroup>
+      <ErrorCallout>{uploadError}</ErrorCallout>
     </Stack>
   );
 }
