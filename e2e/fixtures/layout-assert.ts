@@ -57,7 +57,7 @@ export async function assertNoSeriousAxeViolations(
 }
 
 /** Axe map chrome with color-contrast re-enabled (Wave 3). */
-export async function assertSurveyMapChromeAxe(page: Page) {
+export async function assertMapChromeAxe(page: Page) {
   const builder = new AxeBuilder({ page })
     .include(".map-chrome-hud")
     .withTags(["wcag2a", "wcag2aa"])
@@ -70,7 +70,7 @@ export async function assertSurveyMapChromeAxe(page: Page) {
 }
 
 /** Axe entry/secondary roots with color-contrast (Wave 5). */
-export async function assertSurveyEntryAxe(page: Page) {
+export async function assertEntryAxe(page: Page) {
   const builder = new AxeBuilder({ page })
     .include("main.home-poster")
     .withTags(["wcag2a", "wcag2aa"]);
