@@ -64,7 +64,7 @@ test.describe("layout regression @ default mobile", () => {
     await prepareE2EPage(page);
     await page.goto("/join");
     await expect(
-      page.getByRole("heading", { name: "Session code" })
+      page.getByLabel("Session code"),
     ).toBeVisible();
     await assertLayoutSmoke(page);
   });
@@ -187,9 +187,9 @@ test.describe("layout regression @ default mobile", () => {
     await assertInViewport(session);
     // Session island lives in the right-stack, not the bottom band.
     await expect(page.locator(".jl-map-chrome-bottom-band")).toHaveCount(1);
-    await expect(page.locator(".jl-map-chrome-side-stack")).toHaveCount(1);
+    await expect(page.getByTestId("map-side-dock-stack")).toHaveCount(1);
     await expect(
-      page.locator(".jl-map-chrome-side-stack [data-island='session']")
+      page.getByTestId("map-side-dock-stack").locator("[data-island='session']"),
     ).toHaveCount(1);
     // Verify tap targets on session controls (side-stack slots: 2.75rem = 44px,
     // borders may measure slightly under, so allow 40px minimum).
@@ -214,9 +214,11 @@ test.describe("layout regression @ default mobile", () => {
     await prepareE2EPage(page);
     await page.goto("/");
     await expect(
-      page.getByRole("button", { name: /Play — create, join, or custom game/i })
+      page.getByRole("link", { name: "Create session" }),
     ).toBeVisible();
-    await expect(page.locator("main.home-poster").first()).toBeVisible();
+    await expect(
+      page.locator("main.home-poster-viewport, main.home-poster").first(),
+    ).toBeVisible();
     await assertNoHorizontalOverflow(page);
     await assertEntryAxe(page);
   });
@@ -250,7 +252,7 @@ test.describe("layout regression @ 320px", () => {
     await prepareE2EPage(page);
     await page.goto("/join");
     await expect(
-      page.getByRole("heading", { name: "Session code" })
+      page.getByLabel("Session code"),
     ).toBeVisible();
     await assertLayoutSmoke(page);
   });

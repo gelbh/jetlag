@@ -72,7 +72,7 @@ export async function assertMapChromeAxe(page: Page) {
 /** Axe entry/secondary roots with color-contrast. */
 export async function assertEntryAxe(page: Page) {
   const builder = new AxeBuilder({ page })
-    .include("main.home-poster")
+    .include("main.home-poster-viewport, main.home-poster")
     .withTags(["wcag2a", "wcag2aa"]);
   const results = await builder.analyze();
   const blocking = results.violations.filter(

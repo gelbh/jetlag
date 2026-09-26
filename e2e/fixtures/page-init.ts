@@ -46,10 +46,19 @@ export async function prepareE2EPage(
 }
 
 export async function openPlayHub(page: Page) {
+  // Wave 1+ home shows Play links inline; older builds used a Play sheet button.
+  const create = page.getByRole("link", { name: "Create session" });
+  const join = page.getByRole("link", { name: "Join session" });
+  if (await create.isVisible().catch(() => false)) {
+    await expect(create).toBeVisible();
+    await expect(join).toBeVisible();
+    return;
+  }
+
   await page
-    .getByRole("button", { name: /Play — create, join, or custom game/i })
+    .getByRole("button", { name: /Play .{1,3} create, join, or custom game/i })
     .click();
-  await expect(page.getByRole("link", { name: "Create session" })).toBeVisible();
+  await expect(create).toBeVisible();
 }
 
 export async function dismissMapOnboarding(page: Page) {
