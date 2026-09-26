@@ -196,6 +196,17 @@ html:not([data-motion="reduced"]):not([data-motion="static"]) .map-style-control
   pointer-events: auto;
 }
 
+/* Landscape distill: fewer equal-weight actions when chrome is revealed.
+ * !important beats Mantine slot inline display:flex on secondary controls. */
+.map-chrome-hud[data-landscape-chrome="revealed"] [data-island="map-controls"] {
+  display: none;
+}
+
+.map-chrome-hud[data-landscape-chrome="revealed"]
+  [data-survey-priority="secondary"] {
+  display: none !important;
+}
+
 .map-zoom-control[data-map-interacting="true"],
 .map-style-control[data-map-interacting="true"] {
   opacity: 0;
