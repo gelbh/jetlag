@@ -8,8 +8,12 @@ import type {
 } from "@/domain/session/activity/sessionChat";
 import { ScreenNav } from "../../ui/layout/ScreenNav";
 import { GameAreaPreloadBeacon } from "../preload/GameAreaPreloadBeacon";
-import { HudErrorBanner } from "../../ui/banners/HudErrorBanner";
-import { userErrorFromSyncMessage } from "@/domain/device/feedback/userErrors";
+import { PlayerStickyErrorAlert } from "../../ui/feedback/PlayerStickyErrorAlert";
+import { showEphemeralPlayerNotification } from "../../ui/notifications/showEphemeralPlayerNotification";
+import {
+  userErrorFromSyncMessage,
+  type UserErrorDisplay,
+} from "@/domain/device/feedback/userErrors";
 import type { SessionRulesInput } from "@/domain/session/rules";
 import type { PlayerRole } from "@/domain/session/players/playerRole";
 import type { RoleGates } from "@/domain/session/players/roleGates";
@@ -23,6 +27,52 @@ import { SyncBlock } from "../status/SyncBlock";
 import { TimerBlock } from "../status/TimerBlock";
 import { ToolStatusBlock } from "../status/ToolStatusBlock";
 import { SYNC_TONE_CLASSES, syncRailDisplay } from "../status/syncRailDisplay";
+
+function errorHasActions(
+  error: UserErrorDisplay,
+  onAction?: () => void,
+  onSecondaryAction?: () => void,
+): boolean {
+  const showPrimary = Boolean(error.action && onAction && error.actionLabel);
+  const showSecondary = Boolean(
+    error.secondaryAction && onSecondaryAction && error.secondaryActionLabel,
+  );
+  return showPrimary || showSecondary;
+}
+
+/** Channel 1 vs 2: actionful → sticky Alert; action-free → ephemeral toast. */
+function MapPlayerErrorChannel({
+  error,
+  onAction,
+  onSecondaryAction,
+}: {
+  error: UserErrorDisplay;
+  onAction?: () => void;
+  onSecondaryAction?: () => void;
+}) {
+  const hasActions = errorHasActions(error, onAction, onSecondaryAction);
+
+  useEffect(() => {
+    if (hasActions) {
+      return;
+    }
+    showEphemeralPlayerNotification(error);
+  }, [hasActions, error.title, error.message]);
+
+  if (!hasActions) {
+    return null;
+  }
+
+  return (
+    <div className="pointer-events-auto mx-3 mt-1.5">
+      <PlayerStickyErrorAlert
+        error={error}
+        onAction={onAction}
+        onSecondaryAction={onSecondaryAction}
+      />
+    </div>
+  );
+}
 
 /** Role-agnostic status/timer/sync bag for MapStatusRail (W4-A peel). */
 export type MapStatusRailModel = {
@@ -276,14 +326,14 @@ export function MapStatusRail({
         ) : null}
 
         {showTerminalBanner ? (
-          <HudErrorBanner
+          <MapPlayerErrorChannel
             error={terminalSessionError}
             onAction={onSyncErrorAction}
             onSecondaryAction={onReturnToJoin}
           />
         ) : sync.banner?.visible ? (
-          syncErrorDisplay && onSyncErrorAction ? (
-            <HudErrorBanner
+          syncErrorDisplay ? (
+            <MapPlayerErrorChannel
               error={syncErrorDisplay}
               onAction={onSyncErrorAction}
             />
