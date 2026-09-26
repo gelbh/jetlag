@@ -44,6 +44,8 @@ export default defineConfig({
             "node_modules/**",
             "e2e/**",
             "scripts/**",
+            // node:test suite; run via `npm run test:changeset-map`.
+            ".changeset/**",
             "**/*.emulator.test.*",
             "src/test/emulator/**",
             // Sibling git worktrees must not be collected from the primary clone.
@@ -61,7 +63,7 @@ export default defineConfig({
             "**/*.emulator.test.{ts,tsx}",
             "src/test/emulator/**/*.test.ts",
           ],
-          exclude: [".worktrees/**", "node_modules/**", "dist/**"],
+          exclude: [".changeset/**", ".worktrees/**", "node_modules/**", "dist/**"],
           testTimeout: 30_000,
           hookTimeout: 30_000,
           fileParallelism: false,
