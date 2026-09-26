@@ -25,7 +25,7 @@
     "test:watch": "vitest --project unit",
     "test:coverage": "vitest run --coverage --project unit",
     "test:changed": "vitest run --changed origin/main --passWithNoTests --project unit",
-    "test:changeset-map": "node --test .changeset/section-map.test.mjs",
+    "test:changeset-map": "node --test .changeset/section-map.test.mjs scripts/normalize-changelog-sections.test.mjs scripts/changelog-release-body.test.mjs",
     "test:functions": "env -u npm_config_allow_scripts sh -c 'cd functions && npm ci && npm test'",
     "test:emulator": "firebase emulators:exec --project demo-jetlag --only auth,firestore,storage \"npm run test:emulator:vitest\"",
     "test:emulator:vitest": "vitest run --project emulator",
@@ -48,7 +48,7 @@
     "cap:ios": "npm run cap:sync && npx cap open ios",
     "changeset": "changeset",
     "version": "changeset version && node scripts/normalize-changelog-sections.mjs && node scripts/sync-changelog-ts.mjs",
-    "release": "changeset publish",
+    "release": "changeset publish && node scripts/create-github-release.mjs",
     "release:sync": "node scripts/sync-changelog-ts.mjs && node scripts/release-check.mjs",
     "release:check": "node scripts/release-check.mjs",
     "prepare": "husky"
