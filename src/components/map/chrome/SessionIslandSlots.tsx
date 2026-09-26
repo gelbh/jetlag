@@ -67,7 +67,7 @@ export function SessionIslandSlots({
           aria-label={
             hasUnreadChat ? "Open chat, unread messages" : "Open chat"
           }
-          iconClassName="jl-unread-badge-host"
+          iconClassName="jl-unread-badge-host relative"
           icon={
             <>
               <JlIcon icon={ChatCircle} size={20} weight="regular" />

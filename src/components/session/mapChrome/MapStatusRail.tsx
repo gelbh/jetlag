@@ -14,6 +14,7 @@ import type { SessionRulesInput } from "@/domain/session/rules";
 import type { PlayerRole } from "@/domain/session/players/playerRole";
 import type { RoleGates } from "@/domain/session/players/roleGates";
 import { useLeaderJoinRequests } from "@/hooks/map-screen/useLeaderJoinRequests";
+import { desktopOpsStatusExpandedStyle } from "@/components/ui/entry/entryChrome";
 import { EndGameAlert } from "../status/EndGameAlert";
 import { FoundHiderAlert } from "../status/FoundHiderAlert";
 import { HiderOutsideZoneAlert } from "../status/HiderOutsideZoneAlert";
@@ -180,9 +181,7 @@ export function MapStatusRail({
   }, [showPreloadMenu, showTimerMenu]);
 
   const railClassName = `jl-status-rail pointer-events-none z-[var(--z-banner)]${
-    expanded
-      ? " jl-status-rail--expanded"
-      : " absolute inset-x-0 top-0"
+    expanded ? "" : " absolute inset-x-0 top-0"
   }${
     inactiveChrome
       ? " [&_.jl-status-header-col--timer_.jl-ticker]:pointer-events-none [&_.jl-status-header-col--timer_.jl-ticker]:opacity-55 [&_.jl-status-header-col--timer_button]:pointer-events-none [&_.jl-status-header-col--timer_button]:opacity-55"
@@ -193,6 +192,7 @@ export function MapStatusRail({
     <div
       ref={railRef}
       className={railClassName}
+      style={expanded ? desktopOpsStatusExpandedStyle : undefined}
       data-testid="map-status-rail-mantine"
     >
       <div className="relative">

@@ -1,95 +1,6 @@
-/* map-tool-dock.css — tool slots, menus, panels (chassis purged D7) */
+/* map-tool-dock.css — W5-D residual: panel geometry, wizard nav, unread pulse,
+ * route fallback. Slot / menu / overflow chrome → MapChromeControl + entryStyles. */
 @layer components {
-  html:not([data-motion="reduced"]):not([data-motion="static"]) .jl-tool-menu {
-    animation: jl-menu-enter var(--motion-fast) var(--ease-out-quint) both;
-    transform-origin: bottom center;
-  }
-
-  .jl-tool-slot {
-    display: flex;
-    min-width: 2.75rem;
-    min-height: 2.75rem;
-    flex: 1 1 0;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 0.125rem;
-    border-radius: 0.875rem;
-    border: 2px solid transparent;
-    background: transparent;
-    padding: 0.25rem 0.125rem;
-    color: var(--color-ink-secondary);
-    -webkit-tap-highlight-color: transparent;
-  }
-
-  html:not([data-motion="reduced"]):not([data-motion="static"]) .jl-tool-slot {
-    transition:
-      color var(--motion-fast) var(--ease-out-quint),
-      background-color var(--motion-fast) var(--ease-out-quint),
-      border-color var(--motion-fast) var(--ease-out-quint),
-      opacity var(--motion-fast) var(--ease-out-quint);
-  }
-
-  html:is([data-motion="static"], [data-motion="reduced"]) .jl-tool-slot {
-    transition: none;
-  }
-
-  .jl-tool-slot:hover:not(:disabled) {
-    background: oklch(from var(--color-surface-raised) l c h / 0.92);
-    border-color: oklch(from var(--color-border) l c h / 0.85);
-    color: var(--color-ink);
-  }
-
-  .jl-tool-slot:active:not(:disabled) {
-    background: var(--color-highlight-soft);
-    border-color: oklch(from var(--color-highlight) l c h / 0.5);
-    color: var(--color-highlight);
-  }
-
-  .jl-tool-slot:disabled {
-    opacity: 0.35;
-    cursor: not-allowed;
-  }
-
-  .jl-tool-slot-active {
-    border-color: var(--color-highlight);
-    background: var(--color-highlight-soft);
-    color: var(--color-highlight);
-  }
-
-  .jl-tool-slot-active:hover:not(:disabled),
-  .jl-tool-slot-active:active:not(:disabled) {
-    border-color: oklch(from var(--color-highlight) l c h / 0.75);
-    background: oklch(from var(--color-highlight) l c h / 0.22);
-    color: var(--color-highlight);
-  }
-
-  .jl-tool-slot-label {
-    display: block;
-    max-width: 100%;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    font-family: var(--font-display);
-    font-size: 0.5625rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    line-height: 1.1;
-    text-transform: uppercase;
-    white-space: nowrap;
-  }
-
-  @media (max-width: 28rem) {
-    .jl-tool-slot {
-      min-width: 2.125rem;
-      padding-inline: 0.0625rem;
-    }
-
-    .jl-tool-slot-label {
-      font-size: 0.5rem;
-      letter-spacing: 0.04em;
-    }
-  }
-
   /* Floating panels above dock */
   .jl-panel-above-dock {
     bottom: var(--map-panel-bottom);
@@ -228,112 +139,12 @@
     overscroll-behavior: contain;
   }
 
-  .jl-tool-slot-icon {
-    display: flex;
-    height: 1.75rem;
-    width: 1.75rem;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .jl-unread-badge-host {
-    position: relative;
-  }
-
-  .jl-unread-badge {
-    position: absolute;
-    top: -0.375rem;
-    right: -0.5rem;
-    min-width: 1.375rem;
-    height: 1.375rem;
-    border-radius: 9999px;
-    border: 2px solid var(--color-surface-deep);
-    background: var(--color-action);
-    box-shadow: 0 0 0 2px oklch(from var(--color-action) l c h / 0.35);
-    pointer-events: none;
-    padding: 0 0.25rem;
-    font-size: 0.6875rem;
-    font-weight: 700;
-    line-height: 1;
-    color: var(--color-action-ink);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
   html:not([data-motion="reduced"]):not([data-motion="static"]) .jl-thermometer-live-marker {
     animation: jl-thermometer-live-pulse 1.8s var(--ease-out-quint) infinite;
   }
 
   html:not([data-motion="reduced"]):not([data-motion="static"]) .jl-unread-badge-pulse {
     animation: jl-unread-pulse 600ms var(--ease-out-quint) 1;
-  }
-
-  .jl-tool-menu {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.125rem;
-    position: absolute;
-    z-index: var(--z-panel);
-    min-width: 11.5rem;
-    max-width: min(calc(100vw - 2rem), 16rem);
-    max-height: min(50dvh, 20rem);
-    overflow-y: auto;
-    padding: 0.375rem;
-    padding-top: 0.625rem;
-  }
-
-  .jl-tool-menu-dock {
-    right: 0;
-    bottom: calc(100% + 0.5rem);
-  }
-
-  .jl-tool-menu-item {
-    display: flex;
-    width: 100%;
-    flex-direction: row;
-    align-items: center;
-    gap: 0.625rem;
-    border-radius: var(--radius-hud-md);
-    padding: 0.5rem 0.625rem;
-    text-align: left;
-  }
-
-  .jl-tool-menu-item-body {
-    display: flex;
-    min-width: 0;
-    flex: 1;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.125rem;
-  }
-
-  .jl-tool-menu-item-icon {
-    display: flex;
-    height: 1.75rem;
-    width: 1.75rem;
-    flex-shrink: 0;
-    align-items: center;
-    justify-content: center;
-    color: var(--color-ink-secondary);
-  }
-
-  .jl-tool-menu-item-active {
-    background: var(--color-action);
-    color: var(--color-action-ink);
-  }
-
-  .jl-tool-menu-item-active .jl-tool-menu-item-icon {
-    color: var(--color-action-ink);
-  }
-
-  .jl-tool-menu-item-default {
-    color: var(--color-ink-secondary);
-  }
-
-  .jl-tool-menu-item-default:hover:not(:disabled) {
-    background: var(--color-surface-raised);
   }
 
   .jl-sheet-drag-handle {
@@ -370,35 +181,6 @@
     view-transition-name: jl-session-code;
   }
 
-  /* Tool overflow sheet rows */
-  .jl-tool-overflow-row {
-    display: flex;
-    width: 100%;
-    min-height: 3rem;
-    align-items: center;
-    gap: 0.75rem;
-    border-radius: var(--radius-hud-md);
-    padding: 0.5rem 0.625rem;
-    text-align: left;
-    color: var(--color-ink-secondary);
-  }
-
-  html:not([data-motion="reduced"]):not([data-motion="static"]) .jl-tool-overflow-row {
-    transition:
-      background var(--motion-fast) var(--ease-out-quint),
-      border-color var(--motion-fast) var(--ease-out-quint),
-      color var(--motion-fast) var(--ease-out-quint),
-      transform var(--motion-instant) var(--ease-out-quint);
-  }
-
-  html:not([data-motion="reduced"]):not([data-motion="static"]) .jl-tool-overflow-row:active:not(:disabled) {
-    transform: scale(0.97);
-  }
-
-  html:is([data-motion="static"], [data-motion="reduced"]) .jl-tool-overflow-row {
-    transition: none;
-  }
-
   .route-fallback-skeleton {
     display: flex;
     min-height: 100%;
@@ -425,52 +207,4 @@
     border-top: 3px solid var(--color-highlight);
     background: oklch(from var(--color-surface-deep) l c h / 0.96);
   }
-
-  .jl-tool-overflow-row:hover:not(:disabled) {
-    background: var(--color-surface-raised);
-  }
-
-  .jl-tool-overflow-row:disabled {
-    opacity: 0.35;
-    cursor: not-allowed;
-  }
-
-  .jl-tool-overflow-row-active {
-    border: 2px solid var(--color-highlight);
-    background: var(--color-highlight-soft);
-    color: var(--color-highlight);
-  }
-
-  .jl-tool-overflow-row-icon {
-    display: flex;
-    height: 2.25rem;
-    width: 2.25rem;
-    flex-shrink: 0;
-    align-items: center;
-    justify-content: center;
-    border-radius: var(--radius-hud-md);
-    border: 2px solid var(--color-border);
-    background: var(--color-surface-deep);
-  }
-
-  .jl-tool-overflow-row-active .jl-tool-overflow-row-icon {
-    border-color: oklch(from var(--color-highlight) l c h / 0.55);
-    color: var(--color-highlight);
-  }
-
-  .jl-tool-overflow-row-text {
-    display: flex;
-    min-width: 0;
-    flex: 1;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.125rem;
-  }
-
-  .jl-tool-overflow-divider {
-    height: 2px;
-    margin-block: 0.375rem;
-    background: oklch(from var(--color-border) l c h / 0.85);
-  }
-
 }

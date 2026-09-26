@@ -2,6 +2,7 @@ import type { ButtonHTMLAttributes, ReactNode } from "react";
 import { UnstyledButton } from "@mantine/core";
 import {
   hudChromeStyles,
+  mapToolSlotIconStyle,
   mapToolSlotLabelStyle,
   mapToolSlotStyles,
   type MapToolSlotTone,
@@ -66,7 +67,11 @@ function ControlBody({
       .join(" ");
     return (
       <>
-        {icon != null ? <span className={iconClass}>{icon}</span> : null}
+        {icon != null ? (
+          <span className={iconClass} style={mapToolSlotIconStyle}>
+            {icon}
+          </span>
+        ) : null}
         {label != null ? (
           <span data-ios-tool-label="" style={mapToolSlotLabelStyle}>
             {label}
