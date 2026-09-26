@@ -199,19 +199,37 @@ describe("MapStatusRail error channels (W5-F2)", () => {
     expect(showEphemeral).not.toHaveBeenCalled();
   });
 
-  it("routes action-free sync errors to ephemeral toast", () => {
+  it("keeps actionful sync errors sticky when retry callback is missing", () => {
     const { container } = renderRail({
       syncStatus: "error",
       message: "Sync failed · permission denied",
     });
 
+    expect(screen.getByText("Sync failed")).toBeInTheDocument();
+    expect(container.querySelector(".mantine-Alert-root")).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Retry" })).toBeNull();
+    expect(showEphemeral).not.toHaveBeenCalled();
+  });
+
+  it("routes action-free errors to ephemeral toast", () => {
+    const { container } = renderRail({
+      syncStatus: "error",
+      message: "Sync failed · permission denied",
+      inactiveChrome: true,
+      terminalSessionError: {
+        title: "Heads up",
+        message: "Session paused briefly.",
+      },
+      onSyncErrorAction: vi.fn(),
+      onReturnToJoin: vi.fn(),
+    });
+
     expect(showEphemeral).toHaveBeenCalledWith(
       expect.objectContaining({
-        title: "Sync failed",
-        message: "Sync failed · permission denied",
+        title: "Heads up",
+        message: "Session paused briefly.",
       }),
     );
-    expect(screen.queryByRole("button", { name: "Retry" })).toBeNull();
     expect(container.querySelector(".mantine-Alert-root")).toBeNull();
   });
 });
