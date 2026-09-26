@@ -14,114 +14,65 @@ import { isAskHudOwnedTool } from "../../domain/ask/askHudModes";
 import { AdminBoundariesLayer, TransitLayer } from "./lazyImports";
 import type { MapScreenController } from "./useMapScreenController";
 
-type MapScreenMapLayersProps = Pick<
-  MapScreenController,
-  | "session"
-  | "gameArea"
-  | "toolGameArea"
-  | "effectiveBasemapStyle"
-  | "streetBasemap"
-  | "handleMapStyleChange"
-  | "mapChromeControlInset"
-  | "center"
-  | "effectiveMapFocusBounds"
-  | "placementRecenterToken"
-  | "placementFocusPaddingBias"
-  | "placementFocusPaddingTopBias"
-  | "placementFocusMinZoom"
-  | "placementFocusMaxZoom"
-  | "placementFocusPreferFly"
-  | "requestPlacementRecenter"
-  | "handleMapClick"
-  | "handleDraftMarkerActivate"
-  | "chromeHudRef"
-  | "mapShellRef"
-  | "exportLegendRef"
-  | "placementCrosshair"
-  | "handleMapViewportChange"
-  | "handleMapPanStart"
-  | "handleMapPanEnd"
-  | "transitEnabled"
-  | "layerVisibility"
-  | "transitStaticData"
-  | "transitLiveData"
-  | "mapViewport"
-  | "annotations"
-  | "selectedAnnotationId"
-  | "draftEliminationFeatures"
-  | "confirmedHidingZones"
-  | "seekerLocations"
-  | "uid"
-  | "activeThermometerWalk"
-  | "pendingQuestions"
-  | "geometryEditAnnotation"
-  | "geometryDraft"
-  | "mapDraftOverlays"
-  | "showAdminBoundaries"
-  | "adminBoundaryLoading"
-  | "adminBoundaryFeatures"
-  | "showCurrentLocation"
-  | "awaitingPlacement"
-  | "lowPowerMode"
-  | "distanceUnit"
-  | "handleLiveLocationError"
-  | "activeTool"
-  | "drawTool"
->;
+export type MapScreenMapLayersProps = {
+  controller: MapScreenController;
+};
 
-export function MapScreenMapLayers({
-  session,
-  gameArea,
-  toolGameArea,
-  effectiveBasemapStyle,
-  streetBasemap,
-  handleMapStyleChange,
-  mapChromeControlInset,
-  center,
-  effectiveMapFocusBounds,
-  placementRecenterToken,
-  placementFocusPaddingBias,
-  placementFocusPaddingTopBias,
-  placementFocusMinZoom,
-  placementFocusMaxZoom,
-  placementFocusPreferFly,
-  requestPlacementRecenter,
-  handleMapClick,
-  handleDraftMarkerActivate,
-  chromeHudRef,
-  mapShellRef,
-  exportLegendRef,
-  placementCrosshair,
-  handleMapViewportChange,
-  handleMapPanStart,
-  handleMapPanEnd,
-  transitEnabled,
-  layerVisibility,
-  transitStaticData,
-  transitLiveData,
-  mapViewport,
-  annotations,
-  selectedAnnotationId,
-  draftEliminationFeatures,
-  confirmedHidingZones,
-  seekerLocations,
-  uid,
-  activeThermometerWalk,
-  pendingQuestions,
-  geometryEditAnnotation,
-  geometryDraft,
-  mapDraftOverlays,
-  showAdminBoundaries,
-  adminBoundaryLoading,
-  adminBoundaryFeatures,
-  showCurrentLocation,
-  awaitingPlacement,
-  lowPowerMode,
-  distanceUnit,
-  handleLiveLocationError,
-  activeTool,
-  drawTool,
-}: MapScreenMapLayersProps) {
+export function MapScreenMapLayers({ controller }: MapScreenMapLayersProps) {
+  const {
+    session,
+    gameArea,
+    toolGameArea,
+    effectiveBasemapStyle,
+    streetBasemap,
+    handleMapStyleChange,
+    mapChromeControlInset,
+    center,
+    effectiveMapFocusBounds,
+    placementRecenterToken,
+    placementFocusPaddingBias,
+    placementFocusPaddingTopBias,
+    placementFocusMinZoom,
+    placementFocusMaxZoom,
+    placementFocusPreferFly,
+    requestPlacementRecenter,
+    handleMapClick,
+    handleDraftMarkerActivate,
+    chromeHudRef,
+    mapShellRef,
+    exportLegendRef,
+    placementCrosshair,
+    handleMapViewportChange,
+    handleMapPanStart,
+    handleMapPanEnd,
+    transitEnabled,
+    layerVisibility,
+    transitStaticData,
+    transitLiveData,
+    mapViewport,
+    annotations,
+    selectedAnnotationId,
+    draftEliminationFeatures,
+    confirmedHidingZones,
+    seekerLocations,
+    uid,
+    activeThermometerWalk,
+    mapPendingQuestions: pendingQuestions,
+    geometryEditAnnotation,
+    geometryDraft,
+    mapDraftOverlays,
+    showAdminBoundaries,
+    adminBoundaryLoading,
+    adminBoundaryFeatures,
+    showCurrentLocation,
+    awaitingPlacement,
+    lowPowerMode,
+    distanceUnit,
+    handleLiveLocationError,
+    activeTool,
+    drawTool,
+  } = controller;
+
   const hideMapControls =
     activeTool !== "none" && isAskHudOwnedTool(activeTool);
 
