@@ -23,6 +23,9 @@
   "include": [
     "vite.config.ts",
     "vite.optional-kernel-wasm-pkg.ts",
+    "vite.chunk-groups.ts",
+    "vite.sentry.ts",
+    "vite.pwa.ts",
     "vitest.config.ts",
     "scripts/deploy-production.mjs"
   ]
