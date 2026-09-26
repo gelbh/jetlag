@@ -17,10 +17,10 @@ import {
 import type { Page } from "@playwright/test";
 
 async function assertSideStackClearsZoom(page: Page) {
-  const sideStack = page.locator(".jl-map-chrome-side-stack");
+  const sideStack = page.getByTestId("map-side-dock-stack");
   const session = sideStack.locator("[data-island='session']");
-  const zoom = page.locator(".map-zoom-control");
-  const style = page.locator(".map-style-control");
+  const zoom = page.getByRole("button", { name: "Zoom in" });
+  const style = page.getByRole("button", { name: /Switch to (satellite|standard) view/i });
   await expect(sideStack).toHaveCount(1);
   await expect(sideStack).toBeVisible();
   await expect(session).toHaveCount(1);
@@ -32,11 +32,17 @@ async function assertSideStackClearsZoom(page: Page) {
   await assertInViewport(zoom);
 
   const metrics = await page.evaluate(() => {
-    const side = document.querySelector(".jl-map-chrome-side-stack");
-    const zoomEl = document.querySelector(".map-zoom-control");
-    const styleEl = document.querySelector(".map-style-control");
+    const side = document.querySelector(
+      '[data-testid="map-side-dock-stack"]',
+    );
+    const zoomEl = document.querySelector(
+      'button[aria-label="Zoom in"], .map-zoom-control',
+    );
+    const styleEl = document.querySelector(
+      'button[aria-label*="satellite"], button[aria-label*="standard"], .map-style-control',
+    );
     const sessionEl = document.querySelector(
-      ".jl-map-chrome-side-stack [data-island='session']",
+      '[data-testid="map-side-dock-stack"] [data-island="session"]',
     );
     if (!side || !zoomEl || !styleEl || !sessionEl) {
       return { missing: true as const };
@@ -95,7 +101,9 @@ test.describe("mobile tool dock", () => {
       page.getByRole("button", { name: "More tools" }),
     ).toHaveCount(0);
 
-    const sessionTools = page.getByLabel("Session tools");
+    const sessionTools = page
+      .getByTestId("map-side-dock-stack")
+      .getByRole("group", { name: "Session tools" });
     await expect(sessionTools).toBeVisible();
     const drawButton = sessionTools.getByRole("button", { name: "Draw on map" });
     await expect(drawButton).toBeVisible();
@@ -389,14 +397,16 @@ test.describe("iPhone 13 PWA home safe area", () => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/");
     await expect(
-      page.getByRole("button", { name: /Play — create, join, or custom game/i }),
+      page.getByRole("link", { name: "Create session" }),
     ).toBeVisible();
     await injectSimulatedSafeAreaBottom(page, SIMULATED_SAFE_AREA_BOTTOM_PX);
   });
 
   test("global entry backdrop covers the viewport", async ({ page }) => {
     const metrics = await page.evaluate(() => {
-      const poster = document.querySelector(".home-poster");
+      const poster = document.querySelector(
+        "main.home-poster-viewport, main.home-poster, .home-poster",
+      );
       const posterRect = poster?.getBoundingClientRect();
       const backdrop = document.querySelector(".app-entry-backdrop");
       const backdropStyle = backdrop ? getComputedStyle(backdrop) : null;
@@ -486,7 +496,7 @@ test.describe("iPhone 13 PWA join safe area", () => {
     await prepareE2EPage(page);
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/join");
-    await expect(page.getByRole("heading", { name: "Session code" })).toBeVisible();
+    await expect(page.getByLabel("Session code")).toBeVisible();
     await injectSimulatedSafeAreaBottom(page, SIMULATED_SAFE_AREA_BOTTOM_PX);
   });
 

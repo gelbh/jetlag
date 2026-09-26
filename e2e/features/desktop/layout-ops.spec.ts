@@ -25,7 +25,7 @@ test.describe("desktop layout @ 1280", () => {
   test("@smoke social column ≤36rem on /stats", async ({ page }) => {
     await prepareE2EPage(page);
     await page.goto("/stats");
-    const main = page.locator("main .mx-auto").first();
+    const main = page.locator("main .mantine-Container-root").first();
     await expect(main).toBeVisible();
     const box = await main.boundingBox();
     expect(box).not.toBeNull();
