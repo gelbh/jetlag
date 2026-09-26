@@ -156,7 +156,9 @@ describe("Premium", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText("2 premium sessions left", { selector: ".premium-entitlement-pill" }),
+        screen.getByText("2 premium sessions left", {
+          selector: '[data-testid="premium-entitlement-pill"]',
+        }),
       ).toBeInTheDocument();
       expect(screen.getByRole("button", { name: /1 session/i })).toBeInTheDocument();
     });

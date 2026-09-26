@@ -24,7 +24,7 @@ export function ConfirmFooter({
         variant="flag"
         onClick={onConfirm}
         disabled={loading || verifyingAccess || requiresPremiumSignIn}
-        className="home-entry-action min-h-14 w-full"
+        className="min-h-14 w-full"
       >
         {confirmLabel}
       </Button>

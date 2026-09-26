@@ -24,6 +24,10 @@ import {
   startPremiumTrial,
 } from "../services/billing/premiumBilling";
 import { usePremiumEntitlements } from "../hooks/billing/usePremiumEntitlements";
+import {
+  homeEnterActionsStyle,
+  homeFeedbackLinkStyle,
+} from "@/components/ui/entry/entryStyles";
 
 export function PremiumPageContent({
   headerOffset = true,
@@ -170,7 +174,7 @@ export function PremiumPageContent({
       />
 
       <PremiumSignInGate onSignedIn={() => void refreshEntitlementsWithError()}>
-        <div className="home-enter-actions space-y-3">
+        <div className="home-enter-actions space-y-3" style={homeEnterActionsStyle}>
           <PremiumTierCards
             entitlements={entitlements}
             loading={loading}
@@ -195,7 +199,7 @@ export function PremiumPageContent({
       <button
         type="button"
         onClick={() => navigate("/create")}
-        className="home-feedback-link"
+        style={homeFeedbackLinkStyle}
       >
         Back to create session
       </button>
