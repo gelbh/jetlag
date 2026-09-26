@@ -544,53 +544,55 @@ export function MapScreenChrome({
         />
 
         <ChatPanel
-          open={overlay.isChatOpen}
-          onClose={overlay.closeSheet}
-          messages={displayChatMessages}
-          pendingQuestions={displayPendingQuestions}
-          sessionRules={session!}
-          sessionId={session!.id}
-          senderUid={uid ?? ""}
-          senderRole="seeker"
-          isHider={false}
-          onAnswerQuestion={async (
-            pendingQuestionId,
-            messageId,
-            answer,
-            selectedReply,
-            deadlineExpired,
-          ) => {
-            await answerPendingQuestion(
-              session!.id,
+          model={{
+            open: overlay.isChatOpen,
+            onClose: overlay.closeSheet,
+            messages: displayChatMessages,
+            pendingQuestions: displayPendingQuestions,
+            sessionRules: session!,
+            sessionId: session!.id,
+            senderUid: uid ?? "",
+            senderRole: "seeker",
+            isHider: false,
+            onAnswerQuestion: async (
               pendingQuestionId,
               messageId,
               answer,
               selectedReply,
-              deadlineExpired
-                ? {
-                    deadlineExpired: true,
-                    senderUid: uid ?? "",
-                    senderRole: "seeker",
-                  }
-                : undefined,
-            );
-          }}
-          onDismissExpiredQuestion={async (pendingQuestionId, messageId) => {
-            const pending = displayPendingQuestions.find(
-              (question) => question.id === pendingQuestionId,
-            );
-            if (!pending) {
-              return;
-            }
-            await dismissExpiredPendingQuestion({
-              sessionId: session!.id,
-              pendingQuestionId,
-              messageId,
-              senderUid: uid ?? "",
-              senderRole: "seeker",
-              toolType: pending.toolType,
-              promptText: pending.promptText,
-            });
+              deadlineExpired,
+            ) => {
+              await answerPendingQuestion(
+                session!.id,
+                pendingQuestionId,
+                messageId,
+                answer,
+                selectedReply,
+                deadlineExpired
+                  ? {
+                      deadlineExpired: true,
+                      senderUid: uid ?? "",
+                      senderRole: "seeker",
+                    }
+                  : undefined,
+              );
+            },
+            onDismissExpiredQuestion: async (pendingQuestionId, messageId) => {
+              const pending = displayPendingQuestions.find(
+                (question) => question.id === pendingQuestionId,
+              );
+              if (!pending) {
+                return;
+              }
+              await dismissExpiredPendingQuestion({
+                sessionId: session!.id,
+                pendingQuestionId,
+                messageId,
+                senderUid: uid ?? "",
+                senderRole: "seeker",
+                toolType: pending.toolType,
+                promptText: pending.promptText,
+              });
+            },
           }}
         />
       </MapScreenChromeSlots>

@@ -54,7 +54,7 @@ function SeekerMapScreenBody({
       ) : null}
       {controller.heavyToolActive ? (
         <Suspense fallback={null}>
-          <HeavyToolHost {...controller.heavyMapToolsSlotProps} />
+          <HeavyToolHost model={controller.heavyMapToolsSlotProps} />
         </Suspense>
       ) : null}
       {isDesktop ? null : mapLayersContent}

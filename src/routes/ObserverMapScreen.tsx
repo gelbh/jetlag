@@ -167,18 +167,21 @@ export function ObserverMapScreen() {
 
         {controller.sessionId && controller.uid ? (
           <ChatPanel
-            open={controller.overlay.isChatOpen}
-            onClose={controller.overlay.closeSheet}
-            messages={controller.chatMessages}
-            pendingQuestions={controller.pendingQuestions}
-            sessionRules={sessionRules}
-            sessionId={controller.sessionId}
-            senderUid={controller.uid}
-            senderRole={chatDisplayRole}
-            isHider={false}
-            bottomClassName="bottom-[calc(7.75rem+env(safe-area-inset-bottom))]"
-            onAnswerQuestion={async () => undefined}
-            readOnly
+            model={{
+              open: controller.overlay.isChatOpen,
+              onClose: controller.overlay.closeSheet,
+              messages: controller.chatMessages,
+              pendingQuestions: controller.pendingQuestions,
+              sessionRules,
+              sessionId: controller.sessionId,
+              senderUid: controller.uid,
+              senderRole: chatDisplayRole,
+              isHider: false,
+              bottomClassName:
+                "bottom-[calc(7.75rem+env(safe-area-inset-bottom))]",
+              onAnswerQuestion: async () => undefined,
+              readOnly: true,
+            }}
           />
         ) : null}
       </div>

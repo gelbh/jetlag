@@ -28,7 +28,8 @@ import {
 import { useToolWizard } from "../../hooks/wizard/useToolWizard";
 import { QuestionTruthReferenceHint } from "./shared/QuestionTruthReferenceHint";
 
-interface TentaclePanelProps {
+/** Flat tentacle wizard fields bag for TentaclePanel (W4-F peel). */
+export type TentaclePanelModel = {
   gameSize: GameSize;
   categoryId: TentacleExtendedCategoryId | null;
   categoryChosen: boolean;
@@ -54,34 +55,39 @@ interface TentaclePanelProps {
   isSubmitting?: boolean;
   onRetry?: () => void;
   wizardStepRef?: RefObject<string>;
-}
+};
 
-export function TentaclePanel({
-  gameSize,
-  categoryId,
-  categoryChosen,
-  searchRadiusMeters,
-  distanceUnit,
-  poiOptions,
-  selectedPoiId,
-  outOfReach,
-  loading,
-  awaitingPlacement,
-  hasCenter,
-  gpsLoading = false,
-  error,
-  onCategoryChange,
-  onUseGps,
-  onPlaceAtMapTap,
-  onSelectPoi,
-  onOutOfReachChange,
-  onCommit,
-  awaitHiderAnswer = false,
-  costLabel = "D4P2",
-  isSubmitting = false,
-  onRetry,
-  wizardStepRef,
-}: TentaclePanelProps) {
+export type TentaclePanelProps = {
+  model: TentaclePanelModel;
+};
+
+export function TentaclePanel({ model }: TentaclePanelProps) {
+  const {
+    gameSize,
+    categoryId,
+    categoryChosen,
+    searchRadiusMeters,
+    distanceUnit,
+    poiOptions,
+    selectedPoiId,
+    outOfReach,
+    loading,
+    awaitingPlacement,
+    hasCenter,
+    gpsLoading = false,
+    error,
+    onCategoryChange,
+    onUseGps,
+    onPlaceAtMapTap,
+    onSelectPoi,
+    onOutOfReachChange,
+    onCommit,
+    awaitHiderAnswer = false,
+    costLabel = "D4P2",
+    isSubmitting = false,
+    onRetry,
+    wizardStepRef,
+  } = model;
   const {
     phaseId,
     stepId,
