@@ -1,19 +1,11 @@
 {
+  "extends": "./tsconfig.base.json",
   "compilerOptions": {
     "target": "ES2022",
     "lib": ["ES2022"],
     "module": "ES2022",
-    "moduleResolution": "bundler",
     "types": ["@cloudflare/workers-types"],
-    "strict": true,
-    "noEmit": true,
-    "skipLibCheck": true,
-    "isolatedModules": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true,
-    "verbatimModuleSyntax": true,
-    "erasableSyntaxOnly": true
+    "isolatedModules": true
   },
   "include": ["worker/**/*.ts", "worker-configuration.d.ts"],
   "exclude": ["worker/**/*.test.ts"]
