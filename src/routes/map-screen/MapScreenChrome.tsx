@@ -224,54 +224,55 @@ export function MapScreenChrome({
 
   const statusRail = (
     <MapStatusRail
-      sessionCode={session!.code}
-      sessionId={session!.id}
-      roleGates={session!.roleGates}
-      sessionRules={session!}
-      playerRole={roleConfig.statusPlayerRole}
-      showPreloadBanner
-      expanded={isDesktop}
-      activeTool={activeTool}
-      syncStatus={syncStatus.status}
-      queuedWrites={syncStatus.queuedWrites}
-      message={syncMessage}
-      endGameActive={isEndGameActive(session)}
-      foundHiderPending={isFoundHiderPending(session)}
-      foundRequestedByUid={session!.foundRequestedByUid}
-      onDeclineFoundHider={() => void handleDeclineFoundHider()}
-      myUid={uid ?? undefined}
-      hostUid={session!.hostUid}
-      seekerLocations={seekerLocations}
-      onCancelWalkingQuestion={(pendingQuestionId) => {
-        void handleCancelWalkingQuestion(pendingQuestionId);
+      model={{
+        sessionCode: session!.code,
+        sessionId: session!.id,
+        roleGates: session!.roleGates,
+        sessionRules: session!,
+        playerRole: roleConfig.statusPlayerRole,
+        showPreloadBanner: true,
+        expanded: isDesktop,
+        activeTool,
+        syncStatus: syncStatus.status,
+        queuedWrites: syncStatus.queuedWrites,
+        message: syncMessage,
+        endGameActive: isEndGameActive(session),
+        foundHiderPending: isFoundHiderPending(session),
+        foundRequestedByUid: session!.foundRequestedByUid,
+        onDeclineFoundHider: () => void handleDeclineFoundHider(),
+        myUid: uid ?? undefined,
+        hostUid: session!.hostUid,
+        seekerLocations,
+        onCancelWalkingQuestion: (pendingQuestionId) => {
+          void handleCancelWalkingQuestion(pendingQuestionId);
+        },
+        isHost,
+        onResetEndGame: () => void handleResetEndGame(),
+        timerState: timer.timerState,
+        timerRunning: timer.running,
+        timerHasStarted: timer.hasStarted,
+        timerSyncing,
+        canStartGame: canControlTimer,
+        onStartGame: timer.start,
+        onTimerStart: timer.start,
+        onTimerPause: timer.pause,
+        onTimerReset: timer.reset,
+        timerControlsDisabled: !canControlTimer || inactiveChrome,
+        moveInProgress: confirmedHidingZones.some(
+          (zone) => zone.moveInProgress === true,
+        ),
+        onOpenLog: handleOpenLog,
+        pendingQuestions: displayPendingQuestions,
+        closeTimerMenu:
+          overlay.sheet !== "none" ||
+          activeTool !== "none" ||
+          Boolean(selectedAnnotation) ||
+          Boolean(geometryEditAnnotation && geometryDraft),
+        onSyncErrorAction,
+        inactiveChrome,
+        terminalSessionError,
+        onReturnToJoin,
       }}
-      isHost={isHost}
-      onResetEndGame={() => void handleResetEndGame()}
-      timerState={timer.timerState}
-      timerRunning={timer.running}
-      timerHasStarted={timer.hasStarted}
-      timerSyncing={timerSyncing}
-      canStartGame={canControlTimer}
-      onStartGame={timer.start}
-      onTimerStart={timer.start}
-      onTimerPause={timer.pause}
-      onTimerReset={timer.reset}
-      timerControlsDisabled={!canControlTimer || inactiveChrome}
-      moveInProgress={confirmedHidingZones.some(
-        (zone) => zone.moveInProgress === true,
-      )}
-      onOpenLog={handleOpenLog}
-      pendingQuestions={displayPendingQuestions}
-      closeTimerMenu={
-        overlay.sheet !== "none" ||
-        activeTool !== "none" ||
-        Boolean(selectedAnnotation) ||
-        Boolean(geometryEditAnnotation && geometryDraft)
-      }
-      onSyncErrorAction={onSyncErrorAction}
-      inactiveChrome={inactiveChrome}
-      terminalSessionError={terminalSessionError}
-      onReturnToJoin={onReturnToJoin}
     />
   );
 
