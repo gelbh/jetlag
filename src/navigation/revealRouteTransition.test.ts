@@ -1,9 +1,26 @@
+import { readFileSync } from "node:fs";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   clearActiveRevealTransition,
   clearActiveRevealTransitionForTests,
   revealRouteTransition,
 } from "./revealRouteTransition";
+
+const flushSyncMock = vi.hoisted(() =>
+  vi.fn((callback: () => void) => {
+    callback();
+  }),
+);
+
+vi.mock("react-dom", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("react-dom")>();
+  return {
+    ...actual,
+    flushSync: flushSyncMock,
+  };
+});
 
 type FakeViewTransition = ViewTransition & {
   resolveFinished: () => void;
@@ -29,11 +46,22 @@ function createFakeViewTransition(): FakeViewTransition {
   } as unknown as FakeViewTransition;
 }
 
+const FALLBACK_CLASSES = [
+  "jl-route-fallback-enter-forward",
+  "jl-route-fallback-enter-back",
+  "jl-route-fallback-enter-neutral",
+] as const;
+
+function hasFallbackEnterClass(el: Element): boolean {
+  return FALLBACK_CLASSES.some((className) => el.classList.contains(className));
+}
+
 describe("revealRouteTransition", () => {
   const originalStartViewTransition = document.startViewTransition;
 
   beforeEach(() => {
     clearActiveRevealTransitionForTests();
+    flushSyncMock.mockClear();
     document.documentElement.removeAttribute("data-nav-direction");
   });
 
@@ -42,7 +70,7 @@ describe("revealRouteTransition", () => {
     document.getElementById("root")?.remove();
   });
 
-  it("commits navigation inside the startViewTransition callback", async () => {
+  it("commits navigation via flushSync inside startViewTransition (Verify #1)", async () => {
     const order: string[] = [];
     let capturedCallback: (() => void) | undefined;
     const startViewTransition = vi.fn((callback: () => void) => {
@@ -57,8 +85,10 @@ describe("revealRouteTransition", () => {
 
     expect(startViewTransition).toHaveBeenCalledTimes(1);
     expect(commit).not.toHaveBeenCalled();
+    expect(flushSyncMock).not.toHaveBeenCalled();
 
     capturedCallback?.();
+    expect(flushSyncMock).toHaveBeenCalledTimes(1);
     expect(order).toEqual(["commit"]);
 
     const transition = startViewTransition.mock.results[0]?.value as FakeViewTransition;
@@ -100,7 +130,7 @@ describe("revealRouteTransition", () => {
     expect(transition.skipTransition).toHaveBeenCalledTimes(1);
   });
 
-  it("navigates immediately without VT when startViewTransition is missing", async () => {
+  it("applies then clears fallback enter class when VT is missing (Verify #4)", async () => {
     // @ts-expect-error simulating an environment without View Transitions support
     document.startViewTransition = undefined;
     vi.useFakeTimers();
@@ -115,9 +145,12 @@ describe("revealRouteTransition", () => {
 
       expect(commit).toHaveBeenCalledTimes(1);
       expect(document.documentElement.dataset.navDirection).toBe("back");
+      expect(root.classList.contains("jl-route-fallback-enter-back")).toBe(true);
 
       await vi.advanceTimersByTimeAsync(500);
       await pending;
+
+      expect(root.classList.contains("jl-route-fallback-enter-back")).toBe(false);
     } finally {
       vi.useRealTimers();
     }
@@ -148,20 +181,25 @@ describe("revealRouteTransition", () => {
     expect(root.classList.contains("jl-route-fallback-enter-forward")).toBe(false);
   });
 
-  it("navigates immediately without VT when animate is false", async () => {
+  it("commits with no VT and no fallback class when decorative animate is false (Verify #2)", async () => {
     const startViewTransition = vi.fn();
     document.startViewTransition = startViewTransition;
 
     const commit = vi.fn();
+    const root = document.createElement("div");
+    root.id = "root";
+    document.body.appendChild(root);
 
     await revealRouteTransition("neutral", false, commit);
 
     expect(commit).toHaveBeenCalledTimes(1);
     expect(startViewTransition).not.toHaveBeenCalled();
+    expect(flushSyncMock).not.toHaveBeenCalled();
+    expect(hasFallbackEnterClass(root)).toBe(false);
     expect(document.documentElement.dataset.navDirection).toBe("neutral");
   });
 
-  it("commits without startViewTransition when document is hidden", async () => {
+  it("commits without startViewTransition when document is hidden (Verify #3)", async () => {
     const visibilityDescriptor = Object.getOwnPropertyDescriptor(
       Document.prototype,
       "visibilityState",
@@ -175,11 +213,16 @@ describe("revealRouteTransition", () => {
       const startViewTransition = vi.fn();
       document.startViewTransition = startViewTransition;
       const commit = vi.fn();
+      const root = document.createElement("div");
+      root.id = "root";
+      document.body.appendChild(root);
 
       await revealRouteTransition("forward", true, commit);
 
       expect(commit).toHaveBeenCalledTimes(1);
       expect(startViewTransition).not.toHaveBeenCalled();
+      expect(flushSyncMock).not.toHaveBeenCalled();
+      expect(hasFallbackEnterClass(root)).toBe(false);
       expect(document.documentElement.dataset.navDirection).toBe("forward");
     } finally {
       if (visibilityDescriptor) {
@@ -221,5 +264,31 @@ describe("revealRouteTransition", () => {
     } finally {
       process.off("unhandledRejection", onUnhandled);
     }
+  });
+
+  it("route CSS durations use --motion-route tokens (Verify #5)", () => {
+    const stylesDir = resolve(
+      dirname(fileURLToPath(import.meta.url)),
+      "../styles",
+    );
+    const baseCss = readFileSync(resolve(stylesDir, "base.css"), "utf8");
+    const motionCss = readFileSync(resolve(stylesDir, "motion.css"), "utf8");
+    const routeTransitionCss = readFileSync(
+      resolve(stylesDir, "route-transition.css"),
+      "utf8",
+    );
+
+    expect(baseCss).toMatch(/--motion-route-reveal:\s*260ms/);
+    expect(baseCss).toMatch(/--motion-route-overlay-exit:\s*200ms/);
+    expect(motionCss).toMatch(
+      /\.jl-route-fallback-enter-forward\s*\{[^}]*var\(--motion-route-reveal\)/s,
+    );
+    expect(motionCss).toMatch(
+      /::view-transition-old\(root\)[^;{]*\{[^}]*var\(--motion-route-reveal\)/s,
+    );
+    expect(routeTransitionCss).toMatch(/var\(--motion-route-overlay-exit/);
+    expect(motionCss).not.toMatch(
+      /\.jl-route-fallback-enter-\w+\s*\{[^}]*animation:[^;]*\d+ms/s,
+    );
   });
 });

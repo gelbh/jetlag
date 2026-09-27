@@ -50,10 +50,12 @@ function runFallbackAnimation(direction: NavRevealDirection): Promise<void> {
 }
 
 /**
- * Runs `commit` (a navigation) inside `document.startViewTransition` so WebKit
- * captures distinct before/after snapshots, falling back to a CSS enter class
- * when the View Transitions API is unavailable. `animate` should reflect
- * decorative motion (reduced motion + low power), matching the CSS gates.
+ * Custom route reveal step (chassis lock: keep `viewTransition: false` on RR
+ * navigate). RR VT alone cannot own warm/settle/direction; this helper is the
+ * pluggable reveal after the orchestrator decides. `animate` is
+ * `useMotionProfile().decorativeAnimate` (reduced-motion + low-power), not a
+ * separate flag. When true and VT exists, `commit` runs under flushSync inside
+ * `startViewTransition`; otherwise commit only (or CSS fallback if VT missing).
  */
 export function revealRouteTransition(
   direction: NavRevealDirection,
@@ -62,6 +64,7 @@ export function revealRouteTransition(
 ): Promise<void> {
   setNavDirection(direction);
 
+  // Decorative off: instant commit, no VT and no fallback enter class.
   if (!animate) {
     commit();
     return Promise.resolve();
@@ -82,6 +85,7 @@ export function revealRouteTransition(
   activeViewTransition = null;
 
   try {
+    // flushSync so React commits the new route before VT captures the after tree.
     const transition = document.startViewTransition(() => {
       flushSync(commit);
     });
