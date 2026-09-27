@@ -1,1 +1,1 @@
-export type MaskKernelMode = "dual" | "wasm";
+export type MaskKernelMode = "wasm";

@@ -8,7 +8,6 @@ import {
 } from "./buildMask";
 import {
   runEndGameMaskFromDisks,
-  runMaskFromUnionInput,
 } from "./maskKernelRunner";
 import { assertPolygonTopologyParity } from "./parity";
 import type { DiskSpec, GameAreaGeometry, PolygonFeature } from "./types";
@@ -108,19 +107,6 @@ describe.skipIf(!wasmPkgReady)("mask wasm parity", () => {
     assertPolygonTopologyParity(result, ts, topologyBbox);
   });
 
-  it("dual mode returns TS for multi-disk end-game", async () => {
-    const disks = overlappingEndGameDisks();
-    const ts = buildEndGameMaskFromDisks(gameArea, disks);
-    const dual = await runEndGameMaskFromDisks(gameArea, disks, "dual");
-    expect(dual).toEqual(ts);
-  });
-
-  it("dual mode returns TS for polygon-only union", async () => {
-    const input = { polygons: [square(-0.18)], disks: [] };
-    const ts = buildMaskFromUnionInput(input, gameArea);
-    const dual = await runMaskFromUnionInput(input, gameArea, "dual");
-    expect(dual).toEqual(ts);
-  });
 });
 
 describe("mask wasm failure", () => {

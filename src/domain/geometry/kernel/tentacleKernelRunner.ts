@@ -2,7 +2,6 @@ import type { Feature, FeatureCollection, MultiPolygon, Polygon } from "geojson"
 import { dispatchKernel } from "./dispatchKernel";
 import { createLazyWasmImport } from "./lazyWasmImport";
 import type { MaskKernelMode } from "./maskKernelMode";
-import { bboxFromGameArea, maskTopologyMatches } from "./maskTopology";
 import {
   buildTentacleEliminationRegion,
   buildTentaclePoiAnswerEliminationRegion,
@@ -22,14 +21,6 @@ export type TentacleEliminationParams = {
 };
 
 const tentacleWasm = createLazyWasmImport(() => import("./tentacleWasm"));
-
-function tentacleTopologyMatches(
-  wasm: Feature<Polygon | MultiPolygon> | null,
-  ts: Feature<Polygon | MultiPolygon> | null,
-  gameArea: GameAreaGeometry,
-): boolean {
-  return maskTopologyMatches(wasm, ts, bboxFromGameArea(gameArea));
-}
 
 export async function dispatchTentacleEliminationRegion(
   params: TentacleEliminationParams,
@@ -61,8 +52,6 @@ export async function dispatchTentacleEliminationRegion(
         voronoiCells,
       );
     },
-    matches: (wasmResult, tsResult) =>
-      tentacleTopologyMatches(wasmResult, tsResult, gameArea),
   });
 }
 
@@ -96,8 +85,6 @@ export async function dispatchTentaclePoiAnswerEliminationRegion(
         voronoiCells,
       );
     },
-    matches: (wasmResult, tsResult) =>
-      tentacleTopologyMatches(wasmResult, tsResult, gameArea),
   });
 }
 

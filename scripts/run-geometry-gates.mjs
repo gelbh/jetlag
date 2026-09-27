@@ -27,7 +27,6 @@ function run(command, args) {
 }
 
 const parityTests = [
-  "src/domain/geometry/kernel/dualGoldenParity.test.ts",
   "src/domain/geometry/kernel/geodesicWasmParity.test.ts",
   "src/domain/geometry/kernel/dispatchKernel.test.ts",
   "src/domain/geometry/kernel/extrasWasmDispatch.test.ts",

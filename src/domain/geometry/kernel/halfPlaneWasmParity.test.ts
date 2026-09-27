@@ -119,10 +119,10 @@ describe("half-plane wasm failure", () => {
         },
         shouldUseWasm: (mode: string, entrypoint: string) => {
           if (entrypoint === "halfPlane") {
-            return mode === "wasm" || mode === "dual";
+            return mode === "wasm";
           }
           return actual.shouldUseWasm(
-            mode as "dual" | "wasm",
+            mode as "wasm",
             entrypoint as import("./kernelWasmReady").KernelEntrypoint,
           );
         },

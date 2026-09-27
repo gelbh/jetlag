@@ -31,5 +31,5 @@ export function shouldUseWasm(
   if (!KERNEL_WASM_READY[entrypoint]) {
     return false;
   }
-  return mode === "wasm" || mode === "dual";
+  return mode === "wasm";
 }

@@ -22,17 +22,11 @@ describe("shouldUseWasm", () => {
     expect(shouldUseWasm("wasm", "geodesicLineBuffer")).toBe(true);
     expect(shouldUseWasm("wasm", "maskFromUnionInput")).toBe(true);
     expect(shouldUseWasm("wasm", "nearRegionBatch")).toBe(true);
-    expect(shouldUseWasm("dual", "halfPlane")).toBe(true);
-    expect(shouldUseWasm("dual", "geodesicLineBuffer")).toBe(true);
-    expect(shouldUseWasm("dual", "nearRegionBatch")).toBe(true);
   });
 
   it("returns true for spatialVoronoi, tentacle, and nearRegionBatch when ready", () => {
     expect(shouldUseWasm("wasm", "spatialVoronoi")).toBe(true);
     expect(shouldUseWasm("wasm", "nearRegionBatch")).toBe(true);
     expect(shouldUseWasm("wasm", "tentacleEliminationRegion")).toBe(true);
-    expect(shouldUseWasm("dual", "spatialVoronoi")).toBe(true);
-    expect(shouldUseWasm("dual", "nearRegionBatch")).toBe(true);
-    expect(shouldUseWasm("dual", "tentacleEliminationRegion")).toBe(true);
   });
 });

@@ -38,16 +38,6 @@ describe("kernel dispatch ready", () => {
     expect(result.features).toHaveLength(2);
   });
 
-  it("mode dual + spatialVoronoi → TS result", async () => {
-    const sites = [
-      { lng: -0.18, lat: 51.45, properties: { poiId: "west" } },
-      { lng: -0.12, lat: 51.45, properties: { poiId: "east" } },
-    ];
-    const expected = geoSpatialVoronoiFromSites(sites);
-    const result = await dispatchSpatialVoronoi(sites, "dual");
-    expect(result).toEqual(expected);
-  });
-
   it("mode wasm + tentacleEliminationRegion ready → WASM via runner", async () => {
     const sites = [westSite, eastSite];
     const cells = geoSpatialVoronoiFromSites(

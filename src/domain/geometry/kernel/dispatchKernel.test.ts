@@ -16,11 +16,11 @@ describe("dispatchKernel", () => {
         halfPlane: true,
         geodesicLineBuffer: false,
       },
-      shouldUseWasm: (mode: "dual" | "wasm", entrypoint: string) => {
+      shouldUseWasm: (mode: "wasm", entrypoint: string) => {
         if (entrypoint === "geodesicLineBuffer") {
           return false;
         }
-        return mode === "wasm" || mode === "dual";
+        return mode === "wasm";
       },
     }));
 
@@ -77,62 +77,6 @@ describe("dispatchKernel", () => {
 
     expect(warn).toHaveBeenCalled();
     expect(runTs).not.toHaveBeenCalled();
-  });
-
-  it("dual returns TS and compares when ready", async () => {
-    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
-    const runTs = vi.fn(() => "ts");
-    const runWasm = vi.fn(async () => "wasm");
-    const matches = vi.fn(() => false);
-
-    const result = await dispatchKernel({
-      mode: "dual",
-      entrypoint: "maskFromUnionInput",
-      label: "mask",
-      runTs,
-      runWasm,
-      matches,
-    });
-
-    expect(result).toBe("ts");
-    expect(runTs).toHaveBeenCalledOnce();
-    expect(runWasm).toHaveBeenCalledOnce();
-    expect(matches).toHaveBeenCalledWith("wasm", "ts");
-    expect(warn).toHaveBeenCalled();
-  });
-
-  it("dual skips WASM when entrypoint not ready", async () => {
-    vi.resetModules();
-    vi.doMock("./kernelWasmReady", () => ({
-      KERNEL_WASM_READY: {
-        maskFromUnionInput: true,
-        endGameMaskFromDisks: true,
-        halfPlane: true,
-        geodesicLineBuffer: false,
-      },
-      shouldUseWasm: (mode: "dual" | "wasm", entrypoint: string) => {
-        if (entrypoint === "geodesicLineBuffer") {
-          return false;
-        }
-        return mode === "wasm" || mode === "dual";
-      },
-    }));
-
-    const { dispatchKernel: dispatch } = await import("./dispatchKernel");
-    const runTs = vi.fn(() => "ts");
-    const runWasm = vi.fn(async () => "wasm");
-
-    const result = await dispatch({
-      mode: "dual",
-      entrypoint: "geodesicLineBuffer",
-      label: "geodesic",
-      runTs,
-      runWasm,
-    });
-
-    expect(result).toBe("ts");
-    expect(runTs).toHaveBeenCalledOnce();
-    expect(runWasm).not.toHaveBeenCalled();
   });
 });
 

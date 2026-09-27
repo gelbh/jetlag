@@ -2,7 +2,6 @@ import type { Feature, LineString } from "geojson";
 import { dispatchKernel } from "./dispatchKernel";
 import { createLazyWasmImport } from "./lazyWasmImport";
 import type { MaskKernelMode } from "./maskKernelMode";
-import { bboxFromGameArea, maskTopologyMatches } from "./maskTopology";
 import type { DiskSpec, GameAreaGeometry, PolygonFeature } from "./types";
 import type { NearRegionBatchInput } from "./nearRegionWasm";
 
@@ -36,12 +35,6 @@ export async function dispatchNearRegionBatch(
       const wasm = await nearRegionWasm.load();
       return wasm.wasmBuildNearRegion(input);
     },
-    matches: (wasmResult, tsResult) =>
-      maskTopologyMatches(
-        wasmResult,
-        tsResult,
-        bboxFromGameArea(params.gameArea),
-      ),
   });
 }
 

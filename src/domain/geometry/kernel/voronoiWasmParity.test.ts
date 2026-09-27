@@ -15,10 +15,10 @@ describe("voronoiWasmParity", () => {
         },
         shouldUseWasm: (mode: string, entrypoint: string) => {
           if (entrypoint === "spatialVoronoi") {
-            return mode === "wasm" || mode === "dual";
+            return mode === "wasm";
           }
           return actual.shouldUseWasm(
-            mode as "dual" | "wasm",
+            mode as "wasm",
             entrypoint as import("./kernelWasmReady").KernelEntrypoint,
           );
         },
