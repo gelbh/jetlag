@@ -78,4 +78,3 @@ export async function assertEntryAxe(page: Page) {
   );
   expect(blocking, JSON.stringify(blocking, null, 2)).toEqual([]);
 }
-

@@ -114,10 +114,14 @@ export const SIMULATED_SAFE_AREA_TOP_PX = 59;
 export async function injectStandaloneDisplayMode(page: Page) {
   await page.emulateMedia({ media: "screen" });
   await page.addInitScript(() => {
-    Object.defineProperty(window.matchMedia("(display-mode: standalone)"), "matches", {
-      configurable: true,
-      get: () => true,
-    });
+    Object.defineProperty(
+      window.matchMedia("(display-mode: standalone)"),
+      "matches",
+      {
+        configurable: true,
+        get: () => true,
+      },
+    );
     const apply = () => {
       document.documentElement.classList.add("jl-e2e-standalone");
       if (document.getElementById("jl-e2e-standalone-mode")) return;

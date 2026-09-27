@@ -12,11 +12,7 @@ export async function clickMapCenter(page: Page) {
 
 export const MAP_CONTAINER_SELECTOR = ".maplibregl-map";
 
-export async function clickMapAt(
-  page: Page,
-  xRatio: number,
-  yRatio: number,
-) {
+export async function clickMapAt(page: Page, xRatio: number, yRatio: number) {
   // Prefer the WebGL canvas: MapLibre listens there; parent .maplibregl-map
   // clicks can miss the handler under Ask HUD stacking.
   const canvas = page.locator(`${MAP_CONTAINER_SELECTOR} canvas`).first();
@@ -154,32 +150,35 @@ export async function expectEliminationMaskVisible(page: Page) {
   });
   await waitForMapTilesLoaded(page);
   await expect
-    .poll(async () => {
-      const questionAnnotations = await page.evaluate(() => {
-        try {
-          const raw = localStorage.getItem("jetlag-annotations");
-          if (!raw) {
+    .poll(
+      async () => {
+        const questionAnnotations = await page.evaluate(() => {
+          try {
+            const raw = localStorage.getItem("jetlag-annotations");
+            if (!raw) {
+              return 0;
+            }
+            const parsed = JSON.parse(raw) as {
+              state?: {
+                annotations?: Array<{ status?: string; type?: string }>;
+              };
+            };
+            return (
+              parsed.state?.annotations?.filter(
+                (a) =>
+                  a.status !== "deleted" &&
+                  a.type !== "pin" &&
+                  a.type !== "zone",
+              ).length ?? 0
+            );
+          } catch {
             return 0;
           }
-          const parsed = JSON.parse(raw) as {
-            state?: {
-              annotations?: Array<{ status?: string; type?: string }>;
-            };
-          };
-          return (
-            parsed.state?.annotations?.filter(
-              (a) =>
-                a.status !== "deleted" &&
-                a.type !== "pin" &&
-                a.type !== "zone",
-            ).length ?? 0
-          );
-        } catch {
-          return 0;
-        }
-      });
-      return questionAnnotations;
-    }, { timeout: 15_000 })
+        });
+        return questionAnnotations;
+      },
+      { timeout: 15_000 },
+    )
     .toBeGreaterThan(0);
 }
 
