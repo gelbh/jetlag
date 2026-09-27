@@ -2,6 +2,7 @@ import {
   isEndGameActive,
   isFoundHiderPending,
 } from "../../domain/map/annotations";
+import { sessionHasHiders } from "../../domain/session/players/playerRole";
 import { ChatPanel } from "../../components/chat/ChatPanel";
 import { GameOverChrome } from "../../components/session/game-over/GameOverChrome";
 import { MapSettingsSheet } from "../../components/session/mapChrome/MapSettingsSheet";
@@ -234,6 +235,8 @@ export function MapScreenChrome({ controller }: MapScreenChromeProps) {
     isHost,
   });
 
+  const showHistory = !sessionHasHiders(session?.memberRoles);
+
   const toolDock = (
     <ToolDock
       inactive={inactiveChrome}
@@ -242,10 +245,11 @@ export function MapScreenChrome({ controller }: MapScreenChromeProps) {
       gameSize={session!.gameSize ?? "medium"}
       hasHiders={awaitHiderAnswer}
       onSelect={handleSelectTool}
-      canUndo={canUndoLastTool}
-      canRedo={canRedoLastTool}
-      onUndo={handleUndoLastAnnotation}
-      onRedo={handleRedoLastAnnotation}
+      showHistory={showHistory}
+      canUndo={showHistory && canUndoLastTool}
+      canRedo={showHistory && canRedoLastTool}
+      onUndo={showHistory ? handleUndoLastAnnotation : () => {}}
+      onRedo={showHistory ? handleRedoLastAnnotation : () => {}}
       onOpenSettings={handleOpenSettings}
       onOpenCodes={canOpenCodes ? handleOpenCodes : undefined}
       onOpenReportProblem={openReportProblem}

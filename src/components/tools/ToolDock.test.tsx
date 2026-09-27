@@ -275,6 +275,25 @@ describe("ToolDock", () => {
     expect(onRedo).toHaveBeenCalledTimes(1);
   });
 
+  it("omits Undo and Redo when showHistory is false", () => {
+    renderDock(
+      <ToolDock {...dockBase} showHistory={false} canUndo canRedo />,
+    );
+    expect(
+      screen.queryByRole("button", { name: "Undo last annotation" }),
+    ).toBeNull();
+    expect(
+      screen.queryByRole("button", { name: "Redo last annotation" }),
+    ).toBeNull();
+  });
+
+  it("keeps Undo and Redo when showHistory is true (default)", () => {
+    renderDock(<ToolDock {...dockBase} canUndo canRedo />);
+    expect(
+      screen.getByRole("button", { name: "Undo last annotation" }),
+    ).toBeInTheDocument();
+  });
+
   it("disables unavailable and inactive history slots", () => {
     const { rerender } = renderDock(
       <ToolDock {...dockBase} canUndo={false} canRedo={false} />,

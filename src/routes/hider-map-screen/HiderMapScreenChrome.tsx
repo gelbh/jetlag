@@ -19,16 +19,14 @@ import type { useHiderZoneTool } from "../../hooks/session/useHiderZoneTool";
 import type { useTimeTrapTool } from "../../hooks/session/useTimeTrapTool";
 import { ChatPanel } from "../../components/chat/ChatPanel";
 import { HidingZoneHudBody } from "../../components/tools/ask/HidingZoneHudBody";
+import { HidingZoneMapPlacementChrome } from "../../components/tools/ask/HidingZoneMapPlacementChrome";
 import { AskHudHost } from "../../components/tools/ask/AskHudHost";
-import {
-  activeModeCue,
-  canCommit,
-  primedCommitLabel,
-  type AskHudReadiness,
-} from "../../domain/ask/askHudModes";
+import { activeModeCue } from "../../domain/ask/askHudModes";
 import { useDevMockSessionFeed } from "../../hooks/dev/useDevMockSessionFeed";
 import { MapScreenChromeSlots } from "../map-screen/shared/MapScreenChromeSlots";
 import { getMapScreenRoleConfig } from "../map-screen/shared/mapScreenRoleConfig";
+// ponytail yagni waiver: keep named helper + matrix tests (1 call site, readiness-reviewed).
+import { isHidingZoneMapFirstEligible } from "./hidingZoneMapFirst";
 import { TimeTrapPanel } from "../../components/hider/TimeTrapPanel";
 import { ExpansionHiderMenu } from "../../components/hider/ExpansionHiderMenu";
 import { CurseReferenceSheet } from "../../components/expansion/CurseReferenceSheet";
@@ -378,23 +376,19 @@ export function HiderMapScreenChrome({
   const hidingZoneSurface = zoneTool.moveMode
     ? ("hiding-zone-move" as const)
     : ("hiding-zone-create" as const);
-  const hidingZoneReadiness: AskHudReadiness = {
+  const hidingZoneCue = activeModeCue({
     surface: hidingZoneSurface,
     placementReady: hidingZonePanelTool.hasPlacement,
     configureReady: zoneTool.moveMode || hidingZonePanelTool.methodChosen,
     resolveReady: true,
-    answerReady: true,
-    awaitHiderAnswer: true,
-    isSubmitting: hidingZonePanelTool.saving,
-    viewOnly: !zoneTool.writesEnabled,
-  };
-  const hidingZoneCue = activeModeCue({
-    surface: hidingZoneSurface,
-    placementReady: hidingZoneReadiness.placementReady,
-    configureReady: hidingZoneReadiness.configureReady,
-    resolveReady: true,
   });
-  const hidingZoneCanCommit = canCommit(hidingZoneReadiness);
+
+  const mapFirstEligible = isHidingZoneMapFirstEligible({
+    wizardOpen: zoneTool.wizardOpen,
+    sheetBlocksWizard,
+    moveMode: zoneTool.moveMode,
+    methodChosen: hidingZonePanelTool.methodChosen,
+  });
 
   const toolDock = (
     <HiderToolDock
@@ -445,31 +439,39 @@ export function HiderMapScreenChrome({
           onAnswerQuestion={chat.onAnswerQuestion}
         />
 
-        {zoneTool.wizardOpen && !sheetBlocksWizard ? (
+        {mapFirstEligible ? (
+          <HidingZoneMapPlacementChrome
+            moveMode={zoneTool.moveMode}
+            radiusLabel={hidingZoneRadiusLabel}
+            zoneTool={hidingZonePanelTool}
+            onStepChange={onHidingZoneStepChange}
+            onSearchThisArea={onSearchThisArea}
+            writesEnabled={zoneTool.writesEnabled}
+            onDismiss={zoneTool.moveMode ? undefined : zoneTool.closeWizard}
+            onBackToMethod={
+              zoneTool.moveMode
+                ? undefined
+                : () => {
+                    zoneTool.openWizard();
+                  }
+            }
+          />
+        ) : zoneTool.wizardOpen && !sheetBlocksWizard ? (
           <AskHudHost
             cue={hidingZoneCue}
             toolLabel={zoneTool.moveMode ? "Move zone" : "Hiding zone"}
             costLabel={null}
             showCostChip={false}
-            canCommit={hidingZoneCanCommit}
-            commitLabel={primedCommitLabel({
-              kind: "confirm",
-              costLabel: null,
-              primed: hidingZoneCanCommit,
-              cue: hidingZoneCue,
-            })}
-            onCommit={() => {
-              void hidingZonePanelTool.confirmZone();
-            }}
-            isSubmitting={hidingZonePanelTool.saving}
+            canCommit={false}
+            commitLabel="CONFIRM"
+            onCommit={() => undefined}
+            isSubmitting={false}
             error={hidingZonePanelTool.error}
             modeBody={
               <HidingZoneHudBody
                 moveMode={zoneTool.moveMode}
-                radiusLabel={hidingZoneRadiusLabel}
                 zoneTool={hidingZonePanelTool}
                 onStepChange={onHidingZoneStepChange}
-                onSearchThisArea={onSearchThisArea}
                 onDismiss={zoneTool.moveMode ? undefined : zoneTool.closeWizard}
               />
             }
