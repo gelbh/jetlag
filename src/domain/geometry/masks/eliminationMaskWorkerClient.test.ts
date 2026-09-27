@@ -70,7 +70,7 @@ describe("eliminationMaskWorkerClient", () => {
     vi.clearAllMocks();
   });
 
-  it("requests combined elimination mask from the worker with wasm mode", async () => {
+  it("requests combined elimination mask from the worker", async () => {
     const result = await workerClient.requestCombinedEliminationMask(
       [],
       gameArea,
@@ -85,38 +85,8 @@ describe("eliminationMaskWorkerClient", () => {
         disks: expect.any(Array),
       }),
       gameArea,
-      "wasm",
     );
     expect(buildEndGameMaskFromDisks).not.toHaveBeenCalled();
-  });
-
-  it("passes wasm mode to end-game worker calls", async () => {
-    const endGameHidingZones = [
-      {
-        hiderUid: "hider",
-        sessionId: "session",
-        stationId: "station",
-        stationName: "Station",
-        center: { lat: 51.5, lng: -0.1 },
-        radiusMeters: 500,
-        geometryJson: "{}",
-        status: "confirmed" as const,
-        confirmedAt: "2026-01-01T00:00:00.000Z",
-      },
-    ];
-
-    await workerClient.requestCombinedEliminationMask(
-      [],
-      gameArea,
-      [],
-      endGameHidingZones,
-    );
-
-    expect(buildEndGameMaskFromDisks).toHaveBeenCalledWith(
-      gameArea,
-      [{ center: [51.5, -0.1], radiusMeters: 500 }],
-      "wasm",
-    );
   });
 
   it("requests end-game mask from disks when hiding zones are present", async () => {
@@ -142,11 +112,9 @@ describe("eliminationMaskWorkerClient", () => {
     );
 
     expect(result?.geometry.type).toBe("Polygon");
-    expect(buildEndGameMaskFromDisks).toHaveBeenCalledWith(
-      gameArea,
-      [{ center: [51.5, -0.1], radiusMeters: 500 }],
-      "wasm",
-    );
+    expect(buildEndGameMaskFromDisks).toHaveBeenCalledWith(gameArea, [
+      { center: [51.5, -0.1], radiusMeters: 500 },
+    ]);
     expect(buildMaskFromUnionInput).not.toHaveBeenCalled();
   });
 
