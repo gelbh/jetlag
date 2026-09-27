@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Technical
+
+- Geometry kernel (G5e): production always uses the WASM geometry kernel; client localStorage/env override removed. Wasm dispatch failures rethrow instead of silent TypeScript fail-soft.
+
 ## 0.15.0 - 2026-09-27
 
 ### Fixes

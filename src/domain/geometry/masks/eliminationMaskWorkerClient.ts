@@ -12,19 +12,15 @@ import type {
   EliminationUnionInput,
   PolygonFeature,
 } from "../kernel/types";
-import type { MaskKernelMode } from "../kernel/maskKernelMode";
-import { resolveClientMaskKernelMode } from "../kernel/resolveClientMaskKernelMode";
 
 type EliminationMaskWorkerApi = {
   buildMaskFromUnionInput: (
     input: EliminationUnionInput,
     gameArea: GameArea,
-    mode?: MaskKernelMode,
   ) => Promise<PolygonFeature | null>;
   buildEndGameMaskFromDisks: (
     gameArea: GameArea,
     disks: readonly DiskSpec[],
-    mode?: MaskKernelMode,
   ) => Promise<PolygonFeature | null>;
 };
 
@@ -73,7 +69,6 @@ export async function requestCombinedEliminationMask(
   endGameHidingZones: readonly HidingZoneRecord[],
 ): Promise<PolygonFeature | null> {
   const api = getWorkerApi();
-  const mode = resolveClientMaskKernelMode();
   let releasePending: (() => void) | undefined;
 
   const pendingFailure = new Promise<never>((_, reject) => {
@@ -92,7 +87,6 @@ export async function requestCombinedEliminationMask(
         api.buildEndGameMaskFromDisks(
           gameArea,
           annotationsToEndGameDisks(endGameHidingZones),
-          mode,
         ),
         pendingFailure,
       ]);
@@ -104,7 +98,7 @@ export async function requestCombinedEliminationMask(
       draftFeatures,
     );
     return await Promise.race([
-      api.buildMaskFromUnionInput(input, gameArea, mode),
+      api.buildMaskFromUnionInput(input, gameArea),
       pendingFailure,
     ]);
   } catch (error) {

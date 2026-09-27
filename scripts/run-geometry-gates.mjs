@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Geometry WASM parity + perf gates.
- * Invoked by `npm run test:geometry-gates`.
+ * Invoked by `just geometry-gates` (or `node scripts/run-geometry-gates.mjs`).
  */
 import { spawnSync } from "node:child_process";
 import { delimiter, resolve } from "node:path";
@@ -27,13 +27,15 @@ function run(command, args) {
 }
 
 const parityTests = [
-  "src/domain/geometry/kernel/dualGoldenParity.test.ts",
   "src/domain/geometry/kernel/geodesicWasmParity.test.ts",
   "src/domain/geometry/kernel/dispatchKernel.test.ts",
   "src/domain/geometry/kernel/extrasWasmDispatch.test.ts",
   "src/domain/geometry/kernel/maskWasmParity.test.ts",
   "src/domain/geometry/kernel/halfPlaneWasmParity.test.ts",
   "src/domain/geometry/kernel/nearRegionWasmParity.test.ts",
+  "src/domain/geometry/kernel/tentacleWasmParity.test.ts",
+  "src/domain/geometry/kernel/voronoiWasmParity.test.ts",
+  "src/domain/geometry/kernel/spatialVoronoiOutcomeParity.test.ts",
 ];
 
 run("npm", ["run", "wasm:build"]);

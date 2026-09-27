@@ -39,13 +39,13 @@ Injected at runtime via `wrangler secret put` (prod) or `.dev.vars` (local). Nev
 | `INCIDENT_ADMIN_EMAIL` | no | Admin recipient (code default if unset) |
 | `INCIDENT_EMAIL_FROM` | no | Verified Resend From (code default if unset) |
 
-Copy `.dev.vars.example` → `.dev.vars` for `npm run preview:worker`.
+Copy `.dev.vars.example` → `.dev.vars` for `just preview-worker`.
 
 ## Config notes
 
 - `assets.run_worker_first: true` so HTML nonce CSP and `/api/*` (csp-report, incident-email, tunnels) run before static Assets. Do not narrow back to path lists without a CSP + latency proof.
 - Config SoT: `wrangler.jsonc` (not TOML).
-- Regenerate types with `npm run cf-typegen` (uses `.dev.vars.example`). Do **not** run typegen under `doppler run` / a shell full of `VITE_*` client keys; that pollutes `Env` in `worker-configuration.d.ts`.
+- Regenerate types with `just cf-typegen` (uses `.dev.vars.example`). Do **not** run typegen under `doppler run` / a shell full of `VITE_*` client keys; that pollutes `Env` in `worker-configuration.d.ts`.
 
 ## Tests
 

@@ -13,3 +13,5 @@ export {
   denyHostConfirm,
   postSupportAgentTurn,
 } from "./incident/sessionOpsCallables.mjs";
+
+export { sessionOpsMcp } from "./incident/sessionOpsMcpHttp.mjs";

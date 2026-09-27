@@ -25,7 +25,6 @@ import { useWakeLock } from "@/hooks/location/useWakeLock";
 import { useAnnotations } from "@/hooks/map/useAnnotations";
 import { useMapOverlayState } from "@/hooks/map/useMapOverlayState";
 import { useSessionAnnotations } from "@/hooks/map/useSessionAnnotations";
-import { useEnsureSessionMembership } from "@/hooks/session/useEnsureSessionMembership";
 import { useResolvedSessionRules } from "@/hooks/session/useResolvedSessionRules";
 import { useSessionDistanceUnit } from "@/hooks/session/useSessionDistanceUnit";
 import { useSharedSessionScreen } from "@/hooks/session/useSharedSessionScreen";
@@ -264,8 +263,6 @@ export function useMapScreenCore(options: UseMapScreenCoreOptions = {}) {
     session,
     sessionRules.customMatchingAreas,
   ]);
-
-  useEnsureSessionMembership();
 
   useEffect(() => {
     markMapResumeStart();

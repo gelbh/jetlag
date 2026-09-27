@@ -1,8 +1,8 @@
 import {
   distanceBetweenPoints,
-  nearestPointToCoastlines,
   type LatLngTuple,
 } from "../../geometry/gameArea/geometry";
+import { nearestPointToCoastlines } from "../../geometry/measuring/geometryMeasuring";
 import type { MeasuringRegionInput } from "../../geometry/measuring/measuringRegions";
 import { fetchElevations } from "@/services/geo/elevation";
 import type { PendingQuestionRecord } from "../../session/activity/sessionChat";

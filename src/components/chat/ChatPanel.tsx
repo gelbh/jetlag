@@ -1,4 +1,4 @@
-import { Button, Group, Stack } from "@mantine/core";
+import { Stack } from "@mantine/core";
 import type { SessionRulesInput } from "../../domain/session/rules";
 import type { HiderTruthReferenceMode } from "../../domain/questions/hiderTruth/resolveHiderTruthReference";
 import type { HiderTruthResult } from "../../domain/questions/ui";
@@ -7,13 +7,10 @@ import type {
   SessionMessageRecord,
 } from "../../domain/session/activity/sessionChat";
 import type { PlayerRole } from "../../domain/session/players/playerRole";
-import { useDesktopLayout } from "../../hooks/layout/useDesktopLayout";
 import { useVisualViewportBottomInset } from "../../hooks/layout/useVisualViewportBottomInset";
-import { grayStyles } from "../ui/entry/entryChrome";
 import { SheetHost } from "../ui/sheets/SheetHost";
 import { ChatPanelBody } from "./ChatPanelBody";
 
-/** Flat chat sheet fields bag for ChatPanel (W4-F peel). */
 export type ChatPanelModel = {
   open: boolean;
   onClose: () => void;
@@ -24,7 +21,7 @@ export type ChatPanelModel = {
   senderUid: string;
   senderRole: PlayerRole;
   isHider: boolean;
-  /** @deprecated Phone chat uses SheetHost; kept for call-site compatibility. */
+  /** @deprecated Ignored; kept for call-site compatibility. */
   bottomClassName?: string;
   questionTruths?: ReadonlyMap<string, HiderTruthResult>;
   truthsLoading?: boolean;
@@ -71,8 +68,7 @@ export function ChatPanel({ model }: ChatPanelProps) {
     onDismissExpiredQuestion,
     readOnly = false,
   } = model;
-  const isDesktop = useDesktopLayout();
-  const keyboardInset = useVisualViewportBottomInset(open && !isDesktop);
+  const keyboardInset = useVisualViewportBottomInset(open);
 
   const body = (
     <ChatPanelBody
@@ -100,7 +96,6 @@ export function ChatPanel({ model }: ChatPanelProps) {
       open={open}
       onClose={onClose}
       ariaLabel="Chat"
-      railTab={isDesktop ? "chat" : undefined}
       maxHeightClassName="max-h-[min(72dvh,640px)]"
       scrollMode="child"
       contentStyle={
@@ -108,13 +103,6 @@ export function ChatPanel({ model }: ChatPanelProps) {
       }
     >
       <Stack gap={8} style={{ flex: 1, minHeight: 0, height: "100%" }}>
-        {isDesktop ? (
-          <Group justify="flex-end" className="shrink-0">
-            <Button onClick={onClose} styles={grayStyles}>
-              Close
-            </Button>
-          </Group>
-        ) : null}
         {body}
       </Stack>
     </SheetHost>

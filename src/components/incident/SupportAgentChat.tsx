@@ -142,6 +142,14 @@ export function SupportAgentChat({
   }, [messages.length]);
 
   const waitingOnHost = useMemo(() => isWaitingOnHost(messages), [messages]);
+  const agentWorking = useMemo(() => {
+    const runStatus = incident?.supportAgentRun?.status;
+    if (runStatus === "working" || runStatus === "running") {
+      return true;
+    }
+    return messages.some((message) => message.working === true);
+  }, [incident?.supportAgentRun?.status, messages]);
+  const composerDisabled = sending || agentWorking;
 
   const send = async (text: string) => {
     const trimmed = text.trim();
@@ -203,6 +211,12 @@ export function SupportAgentChat({
         </p>
       ) : null}
 
+      {agentWorking ? (
+        <p className="jl-support-chat-banner" role="status">
+          Fix agent is working on your last message…
+        </p>
+      ) : null}
+
       {error ? (
         <p className="jl-support-chat-error" role="alert">
           {error.message}
@@ -227,11 +241,20 @@ export function SupportAgentChat({
             const isToolRow =
               message.kind === "tool_result" ||
               message.kind === "host_confirm";
-            const rowClass = isToolRow
-              ? "jl-support-msg jl-support-msg--tool"
-              : `jl-support-msg jl-support-msg--${message.sender}`;
+            const rowClass = [
+              isToolRow
+                ? "jl-support-msg jl-support-msg--tool"
+                : `jl-support-msg jl-support-msg--${message.sender}`,
+              message.working ? "jl-support-msg--working" : "",
+            ]
+              .filter(Boolean)
+              .join(" ");
             return (
-              <div key={message.id} className={rowClass}>
+              <div
+                key={message.id}
+                className={rowClass}
+                aria-busy={message.working === true ? true : undefined}
+              >
                 <p className="jl-support-msg-sender">
                   {isToolRow
                     ? "Tool"
@@ -262,10 +285,10 @@ export function SupportAgentChat({
           <button
             type="button"
             className="btn-primary min-h-11 px-4"
-            disabled={sending || summonsLeft <= 0}
+            disabled={composerDisabled || summonsLeft <= 0}
             onClick={summon}
           >
-            {sending ? "Summoning…" : "Ask fix agent"}
+            {sending || agentWorking ? "Working…" : "Ask fix agent"}
           </button>
           {summonsLeft <= 0 ? (
             <p className="jl-support-chat-caps">
@@ -291,15 +314,15 @@ export function SupportAgentChat({
                 : "Reply to the fix agent…"
             }
             aria-label="Fix agent message"
-            disabled={sending}
+            disabled={composerDisabled}
           />
           <button
             type="button"
             onClick={() => void send(draft)}
-            disabled={sending || draft.trim().length === 0}
+            disabled={composerDisabled || draft.trim().length === 0}
             className="btn-primary min-h-11 px-4 disabled:opacity-50"
           >
-            Send
+            {agentWorking ? "Working…" : "Send"}
           </button>
         </div>
       )}

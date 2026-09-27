@@ -4,10 +4,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { jetlagTheme } from "@/theme/theme";
 import { AskHudHost } from "./AskHudHost";
 
-vi.mock("@/hooks/layout/useDesktopLayout", () => ({
-  useDesktopLayout: () => false,
-}));
-
 const hostProps = {
   cue: "Pick a direction",
   toolLabel: "Radar",

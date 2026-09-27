@@ -1,14 +1,29 @@
 import { describe, expect, it } from "vitest";
 import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
 import { point as turfPoint } from "@turf/helpers";
+import { existsSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import path from "node:path";
 import type { AnnotationRecord, GameArea } from "../../map/annotations";
 import type { HidingZoneRecord } from "../../session/hiding/hidingZone";
 import {
-  buildCombinedEliminationMask,
-  buildEndGameEliminationMask,
+  annotationsToEndGameDisks,
+  computeEliminationUnionInputTs,
   eliminationFeatureForAnnotationTs,
-} from "./combinedEliminationMask";
-import { unionEliminationPartsLegacy } from "./unionPolygonFeatures";
+} from "../adapter/eliminationMask";
+import {
+  runEndGameMaskFromDisks,
+  runMaskFromUnionInput,
+} from "../kernel/maskKernelRunner";
+import { featureToGameAreaGeometry } from "../kernel/featureConvert";
+import { gameAreaToFeature } from "../core/gameAreaConvert";
+import { unionEliminationParts } from "../kernel/unionPolygonFeatures";
+
+const pkgEntry = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  "../../../../crates/jetlag-geometry-kernel/pkg/jetlag_geometry_kernel.js",
+);
+const wasmPkgReady = existsSync(pkgEntry);
 
 const gameArea: GameArea = {
   type: "Polygon",
@@ -58,21 +73,43 @@ function matchingAnnotation(
   };
 }
 
-describe("combinedEliminationMask parity", () => {
-  it("matches legacy union for mixed committed annotations", () => {
+async function buildCombinedMask(
+  annotations: readonly AnnotationRecord[],
+  area: GameArea,
+  draftFeatures: readonly import("../kernel/types").PolygonFeature[] = [],
+  endGameHidingZones: readonly HidingZoneRecord[] = [],
+) {
+  const geometry = featureToGameAreaGeometry(gameAreaToFeature(area));
+  if (endGameHidingZones.length > 0) {
+    return runEndGameMaskFromDisks(
+      geometry,
+      annotationsToEndGameDisks(endGameHidingZones),
+    );
+  }
+  return runMaskFromUnionInput(
+    computeEliminationUnionInputTs(annotations, area, draftFeatures),
+    geometry,
+  );
+}
+
+describe.skipIf(!wasmPkgReady)("combinedEliminationMask parity", () => {
+  it("matches turf engine union for mixed committed annotations", async () => {
     const annotations = [
       matchingAnnotation("a", -0.19),
       matchingAnnotation("b", -0.16),
       matchingAnnotation("c", -0.13),
     ];
 
-    const candidate = buildCombinedEliminationMask(annotations, gameArea);
-    const baseline = unionEliminationPartsLegacy({
-      polygons: annotations.map(
-        (annotation) => eliminationFeatureForAnnotationTs(annotation, gameArea)!,
-      ),
-      disks: [],
-    });
+    const candidate = await buildCombinedMask(annotations, gameArea);
+    const baseline = unionEliminationParts(
+      {
+        polygons: annotations.map(
+          (annotation) => eliminationFeatureForAnnotationTs(annotation)!,
+        ),
+        disks: [],
+      },
+      "turf",
+    );
 
     expect(candidate).not.toBeNull();
     expect(baseline).not.toBeNull();
@@ -85,9 +122,9 @@ describe("combinedEliminationMask parity", () => {
   });
 });
 
-describe("combinedEliminationMask", () => {
-  it("merges multiple elimination regions into one mask", () => {
-    const combined = buildCombinedEliminationMask(
+describe.skipIf(!wasmPkgReady)("combinedEliminationMask", () => {
+  it("merges multiple elimination regions into one mask", async () => {
+    const combined = await buildCombinedMask(
       [matchingAnnotation("a", -0.19), matchingAnnotation("b", -0.16)],
       gameArea,
     );
@@ -101,12 +138,12 @@ describe("combinedEliminationMask", () => {
     ).toBe(true);
   });
 
-  it("adds a new elimination region to an existing mask", () => {
-    const first = buildCombinedEliminationMask(
+  it("adds a new elimination region to an existing mask", async () => {
+    const first = await buildCombinedMask(
       [matchingAnnotation("a", -0.19)],
       gameArea,
     );
-    const combined = buildCombinedEliminationMask(
+    const combined = await buildCombinedMask(
       [matchingAnnotation("a", -0.19), matchingAnnotation("b", -0.16)],
       gameArea,
     );
@@ -118,15 +155,14 @@ describe("combinedEliminationMask", () => {
     ).toBe(true);
   });
 
-  it("includes draft preview features with committed eliminations", () => {
+  it("includes draft preview features with committed eliminations", async () => {
     const draft = eliminationFeatureForAnnotationTs(
       matchingAnnotation("draft", -0.12),
-      gameArea,
     );
 
     expect(draft).not.toBeNull();
 
-    const combined = buildCombinedEliminationMask(
+    const combined = await buildCombinedMask(
       [matchingAnnotation("a", -0.19)],
       gameArea,
       draft ? [draft] : [],
@@ -141,13 +177,7 @@ describe("combinedEliminationMask", () => {
     ).toBe(true);
   });
 
-  it("does not throw when union receives an invalid draft polygon", () => {
-    const invalidDraft = eliminationFeatureForAnnotationTs(
-      matchingAnnotation("draft", -0.12),
-      gameArea,
-    );
-    expect(invalidDraft).not.toBeNull();
-
+  it("does not throw when union receives an invalid draft polygon", async () => {
     const invalidGeometry = {
       type: "Feature",
       properties: {},
@@ -163,18 +193,18 @@ describe("combinedEliminationMask", () => {
           ],
         ],
       },
-    } as unknown as NonNullable<Parameters<typeof buildCombinedEliminationMask>[2]>[number];
+    } as import("../kernel/types").PolygonFeature;
 
-    expect(() =>
-      buildCombinedEliminationMask(
+    await expect(
+      buildCombinedMask(
         [matchingAnnotation("a", -0.19)],
         gameArea,
         [invalidGeometry],
       ),
-    ).not.toThrow();
+    ).resolves.not.toThrow();
   });
 
-  it("replaces elimination with end-game zone reveal mask", () => {
+  it("replaces elimination with end-game zone reveal mask", async () => {
     const hidingZone: HidingZoneRecord = {
       hiderUid: "hider-1",
       sessionId: "session",
@@ -187,7 +217,7 @@ describe("combinedEliminationMask", () => {
       confirmedAt: "2026-01-01T00:00:00.000Z",
     };
 
-    const endGameMask = buildEndGameEliminationMask(gameArea, [hidingZone]);
+    const endGameMask = await buildCombinedMask([], gameArea, [], [hidingZone]);
     expect(endGameMask).not.toBeNull();
     expect(
       booleanPointInPolygon(turfPoint([-0.15, 51.45]), endGameMask!),
@@ -197,7 +227,7 @@ describe("combinedEliminationMask", () => {
     ).toBe(true);
   });
 
-  it("uses end-game mask when hiding zones are provided to buildCombinedEliminationMask", () => {
+  it("uses end-game mask when hiding zones are provided", async () => {
     const hidingZone: HidingZoneRecord = {
       hiderUid: "hider-1",
       sessionId: "session",
@@ -210,7 +240,7 @@ describe("combinedEliminationMask", () => {
       confirmedAt: "2026-01-01T00:00:00.000Z",
     };
 
-    const combined = buildCombinedEliminationMask(
+    const combined = await buildCombinedMask(
       [matchingAnnotation("a", -0.19)],
       gameArea,
       [],
@@ -223,7 +253,7 @@ describe("combinedEliminationMask", () => {
     ).toBe(false);
   });
 
-  it("clips elimination shading to the play area boundary", () => {
+  it("clips elimination shading to the play area boundary", async () => {
     const outsideWest: AnnotationRecord = {
       ...matchingAnnotation("outside", -0.19),
       geometry: {
@@ -244,7 +274,7 @@ describe("combinedEliminationMask", () => {
       },
     };
 
-    const combined = buildCombinedEliminationMask([outsideWest], gameArea);
+    const combined = await buildCombinedMask([outsideWest], gameArea);
 
     expect(combined).not.toBeNull();
     expect(
@@ -255,7 +285,7 @@ describe("combinedEliminationMask", () => {
     ).toBe(true);
   });
 
-  it("returns null when elimination geometry is entirely outside the play area", () => {
+  it("returns null when elimination geometry is entirely outside the play area", async () => {
     const outsideEast: AnnotationRecord = {
       ...matchingAnnotation("outside-east", -0.19),
       geometry: {
@@ -276,6 +306,6 @@ describe("combinedEliminationMask", () => {
       },
     };
 
-    expect(buildCombinedEliminationMask([outsideEast], gameArea)).toBeNull();
+    expect(await buildCombinedMask([outsideEast], gameArea)).toBeNull();
   });
 });

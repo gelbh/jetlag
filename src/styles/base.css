@@ -192,3 +192,76 @@ html.jl-standalone-shell .app-scroll-root {
   height: 100vh;
   height: 100lvh;
 }
+
+/*
+ * Entry viewport / flow height: dvh in browser tabs; lvh in standalone (W5-G).
+ * Inside PlayerPhoneShell, fill the column so letterbox + shell height stay coherent.
+ */
+.home-poster-viewport {
+  height: 100dvh;
+  max-height: 100dvh;
+}
+
+.entry-screen-layout-flow {
+  min-height: 100dvh;
+}
+
+@media (display-mode: standalone) {
+  .home-poster-viewport {
+    height: 100vh;
+    height: 100lvh;
+    max-height: 100vh;
+    max-height: 100lvh;
+  }
+
+  .entry-screen-layout-flow {
+    min-height: 100vh;
+    min-height: 100lvh;
+  }
+}
+
+html.jl-standalone-shell .home-poster-viewport {
+  height: 100vh;
+  height: 100lvh;
+  max-height: 100vh;
+  max-height: 100lvh;
+}
+
+html.jl-standalone-shell .entry-screen-layout-flow {
+  min-height: 100vh;
+  min-height: 100lvh;
+}
+
+[data-player-phone-shell] .home-poster-viewport {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: auto;
+  max-height: none;
+}
+
+[data-player-phone-shell] .entry-screen-layout-flow {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+@media (display-mode: standalone) {
+  [data-player-phone-shell] .home-poster-viewport {
+    min-height: 100%;
+    height: 100%;
+    max-height: none;
+  }
+
+  [data-player-phone-shell] .entry-screen-layout-flow {
+    min-height: 100%;
+  }
+}
+
+html.jl-standalone-shell [data-player-phone-shell] .home-poster-viewport {
+  min-height: 100%;
+  height: 100%;
+  max-height: none;
+}
+
+html.jl-standalone-shell [data-player-phone-shell] .entry-screen-layout-flow {
+  min-height: 100%;
+}

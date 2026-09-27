@@ -1,26 +1,39 @@
 import { describe, expect, it } from "vitest";
 import bboxPolygon from "@turf/bbox-polygon";
 import type { Feature, LineString } from "geojson";
+import { existsSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import path from "node:path";
 import {
-  buildCoastlineEliminationRegion,
-  buildCoastlineNearRegionTs,
-  buildLocationEliminationRegion,
-  buildLocationNearRegion,
-  buildHalfPlanePolygon,
   boundsToGameArea,
   centerToViewportEdgeRadiusMeters,
   circleToGameArea,
-  clearCoastlineNearRegionCacheForTests,
   distanceBetweenPoints,
   gameAreaOutsideMask,
   gameAreaExteriorStrokeRings,
   isPointInGameArea,
-  nearestPointToCoastlines,
   normalizeBoundingBox,
-  prepareMeasuringLineSegments,
   safeDifference,
 } from "./geometry";
+import { runHalfPlane } from "../kernel/halfPlaneKernelRunner";
+import { featureToGameAreaGeometry } from "../kernel/featureConvert";
+import { gameAreaToFeature } from "../core/gameAreaConvert";
+import {
+  buildCoastlineEliminationRegion,
+  buildCoastlineNearRegion,
+  buildLocationEliminationRegion,
+  buildLocationNearRegion,
+  clearCoastlineNearRegionCacheForTests,
+  nearestPointToCoastlines,
+  prepareMeasuringLineSegments,
+} from "../measuring/geometryMeasuring";
 import type { GameArea } from "../../map/annotations";
+
+const pkgEntry = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  "../../../../crates/jetlag-geometry-kernel/pkg/jetlag_geometry_kernel.js",
+);
+const wasmPkgReady = existsSync(pkgEntry);
 
 const sampleGameArea: GameArea = {
   type: "Polygon",
@@ -77,37 +90,46 @@ describe("geometry helpers", () => {
     expect(gameArea.east - gameArea.west).toBeGreaterThan(0);
   });
 
-  it("returns a clipped polygon for thermometer shading", () => {
-    const colderSide = buildHalfPlanePolygon(
-      [51.45, -0.18],
-      [51.46, -0.12],
-      sampleGameArea,
-    );
-    expect(colderSide?.geometry.type).toBe("Polygon");
-  });
+  it.skipIf(!wasmPkgReady)(
+    "returns a clipped polygon for thermometer shading",
+    async () => {
+      const colderSide = await runHalfPlane(
+        [51.45, -0.18],
+        [51.46, -0.12],
+        featureToGameAreaGeometry(gameAreaToFeature(sampleGameArea)),
+      );
+      expect(colderSide?.geometry.type).toBe("Polygon");
+    },
+  );
 
-  it("shades opposite halves for hotter and colder answers", () => {
-    const pointA: [number, number] = [51.45, -0.18];
-    const pointB: [number, number] = [51.46, -0.12];
-    const colderAnswerSide = buildHalfPlanePolygon(
-      pointA,
-      pointB,
-      sampleGameArea,
-      "cold",
-    );
-    const hotterAnswerSide = buildHalfPlanePolygon(
-      pointA,
-      pointB,
-      sampleGameArea,
-      "hot",
-    );
+  it.skipIf(!wasmPkgReady)(
+    "shades opposite halves for hotter and colder answers",
+    async () => {
+      const pointA: [number, number] = [51.45, -0.18];
+      const pointB: [number, number] = [51.46, -0.12];
+      const geometry = featureToGameAreaGeometry(
+        gameAreaToFeature(sampleGameArea),
+      );
+      const colderAnswerSide = await runHalfPlane(
+        pointA,
+        pointB,
+        geometry,
+        "cold",
+      );
+      const hotterAnswerSide = await runHalfPlane(
+        pointA,
+        pointB,
+        geometry,
+        "hot",
+      );
 
-    expect(colderAnswerSide?.geometry.type).toBe("Polygon");
-    expect(hotterAnswerSide?.geometry.type).toBe("Polygon");
-    expect(colderAnswerSide?.geometry.coordinates).not.toEqual(
-      hotterAnswerSide?.geometry.coordinates,
-    );
-  });
+      expect(colderAnswerSide?.geometry.type).toBe("Polygon");
+      expect(hotterAnswerSide?.geometry.type).toBe("Polygon");
+      expect(colderAnswerSide?.geometry.coordinates).not.toEqual(
+        hotterAnswerSide?.geometry.coordinates,
+      );
+    },
+  );
 
   it("subtracts an inner polygon safely", () => {
     const outer = bboxPolygon([-0.2, 51.4, -0.1, 51.5]);
@@ -191,7 +213,11 @@ describe("geometry helpers", () => {
         ],
       },
     };
-    const nearCoast = buildCoastlineNearRegionTs([coast], 5_000, sampleGameArea);
+    const nearCoast = await buildCoastlineNearRegion(
+      [coast],
+      5_000,
+      sampleGameArea,
+    );
     const eliminated = await buildCoastlineEliminationRegion(
       [coast],
       5_000,
@@ -217,7 +243,11 @@ describe("geometry helpers", () => {
         ],
       },
     };
-    const nearCoast = buildCoastlineNearRegionTs([coast], 5_000, sampleGameArea);
+    const nearCoast = await buildCoastlineNearRegion(
+      [coast],
+      5_000,
+      sampleGameArea,
+    );
     const eliminated = await buildCoastlineEliminationRegion(
       [coast],
       5_000,
@@ -229,7 +259,7 @@ describe("geometry helpers", () => {
     expect(eliminated).toEqual(nearCoast);
   });
 
-  it("reuses cached coastline near regions for identical inputs", () => {
+  it("reuses cached coastline near regions for identical inputs", async () => {
     clearCoastlineNearRegionCacheForTests();
 
     const coast: Feature<LineString> = {
@@ -244,8 +274,12 @@ describe("geometry helpers", () => {
       },
     };
 
-    const first = buildCoastlineNearRegionTs([coast], 5_000, sampleGameArea);
-    const second = buildCoastlineNearRegionTs([coast], 5_000, sampleGameArea);
+    const first = await buildCoastlineNearRegion([coast], 5_000, sampleGameArea);
+    const second = await buildCoastlineNearRegion(
+      [coast],
+      5_000,
+      sampleGameArea,
+    );
 
     expect(first).toBe(second);
   });

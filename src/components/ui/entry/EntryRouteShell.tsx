@@ -2,6 +2,7 @@ import type { CSSProperties, ReactNode } from "react";
 import { Container } from "@mantine/core";
 import { EntryHeader } from "@/components/ui/entry/EntryHeader";
 import { EntryScreenLayout } from "@/components/ui/layout/EntryScreenLayout";
+import { PHONE_SHELL_MAX_WIDTH_PX } from "@/theme/phoneShell";
 
 type EntryRouteShellProps = {
   title: string;
@@ -12,10 +13,6 @@ type EntryRouteShellProps = {
   centerBody?: boolean;
 };
 
-/**
- * Shared entry route chrome: plain flush layout + header + xs body column.
- * Used by Friends / Leaderboard / Legal / Presets / Join (and peers that match).
- */
 export function EntryRouteShell({
   title,
   backTo,
@@ -40,7 +37,7 @@ export function EntryRouteShell({
         size="xs"
         w="100%"
         px="md"
-        maw={390}
+        maw={PHONE_SHELL_MAX_WIDTH_PX}
         py="lg"
         style={centerStyle}
       >

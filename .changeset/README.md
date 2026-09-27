@@ -49,7 +49,7 @@ Version Packages PRs opened with the default `GITHUB_TOKEN` usually skip CI. Pre
 
 ## Scripts
 
-- `npm run changeset` – create a changeset
+- `just changeset` – create a changeset
 - `npm run version` – apply pending changesets, normalize Fixes/Improvements/Technical, sync TS
 - `npm run release` – tag private package versions and create a GitHub Release from the dated CHANGELOG section (Release workflow; no npm publish)
 - `npm run release:sync` / `release:check` – sync and verify package / CHANGELOG / APP_VERSION alignment

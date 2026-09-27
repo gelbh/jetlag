@@ -8,10 +8,6 @@ import {
   type ChatPanelProps,
 } from "./ChatPanel";
 
-vi.mock("../../hooks/layout/useDesktopLayout", () => ({
-  useDesktopLayout: () => false,
-}));
-
 vi.mock("../../hooks/layout/useVisualViewportBottomInset", () => ({
   useVisualViewportBottomInset: () => 0,
 }));

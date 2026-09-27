@@ -1,12 +1,12 @@
 import type { Feature, LineString } from "geojson";
 import type { GameArea } from "@/domain/map/annotations";
 import type { RegionPackId } from "@/domain/regions/regionPack";
+import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
 import {
   nearestPointToCoastlines,
   prepareMeasuringLineSegments,
-  type LatLngTuple,
   type PreparedLinearSegments,
-} from "@/domain/geometry/gameArea/geometry";
+} from "@/domain/geometry/measuring/geometryMeasuring";
 import {
   coastlineSegmentsCacheKey,
   getOrFetchCached,

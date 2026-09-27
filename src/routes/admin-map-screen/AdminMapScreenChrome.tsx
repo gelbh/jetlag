@@ -174,7 +174,6 @@ export function AdminMapScreenChrome({
 
   const toolbar = (
     <MapBottomChrome
-      layout="phone"
       session={
         <div className="jl-tool-dock-group jl-tool-dock-group-secondary flex w-full min-w-0 flex-col justify-start gap-1">
           <MapChromeControl

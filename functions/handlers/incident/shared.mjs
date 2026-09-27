@@ -44,7 +44,6 @@ import {
   softDeleteAnnotationInSession,
 } from "../../incident/sessionOpsExecute.mjs";
 import {
-  SUPPORT_AGENT_LLM_FAILED,
   SUPPORT_AGENT_NO_SESSION,
   SUPPORT_AGENT_UNAUTHENTICATED,
   SESSION_OPS_GLOBAL_TOOL_CAP,
@@ -52,6 +51,9 @@ import {
   SESSION_OPS_SUMMON_NOT_FOUND,
   SESSION_OPS_TOOL_CAP,
   SESSION_OPS_TURN_CAP,
+  SESSION_OPS_AGENT_BUSY,
+  SESSION_OPS_AGENT_FAILED,
+  SESSION_OPS_AGENT_MISCONFIGURED,
 } from "../../incident/supportAgentTurn.mjs";
 import {
   CURSOR_HOTFIX_FAILED,
@@ -62,18 +64,16 @@ import { CURSOR_HOTFIX_ALREADY_LAUNCHED } from "../../incident/launchIncidentCur
 
 export const sentryDsnSecret = getSentryDsnSecret();
 export const incidentEmailSecret = defineSecret("INCIDENT_EMAIL_SECRET");
-/** OpenAI-compatible API key for session-ops support agent (never client-side). */
-export const sessionOpsLlmApiKey = defineSecret("SESSION_OPS_LLM_API_KEY");
-/** Cursor Cloud Agents API key for clear-bug hotfix launches (never client-side). */
+/** Cursor Cloud Agents API key (hotfix + session-ops). Never client-side. */
 export const cursorApiKey = defineSecret("CURSOR_API_KEY");
+/** Shared secret for Cursor → Jetlag session-ops MCP Bearer auth. */
+export const sessionOpsMcpAuthSecret = defineSecret("SESSION_OPS_MCP_AUTH_SECRET");
 export const incidentWorkerBaseUrl = defineString("INCIDENT_WORKER_BASE_URL", {
   default: "https://jetlag.gelbhart.dev",
 });
-export const sessionOpsLlmBaseUrl = defineString("SESSION_OPS_LLM_BASE_URL", {
-  default: "https://api.openai.com/v1",
-});
-export const sessionOpsLlmModel = defineString("SESSION_OPS_LLM_MODEL", {
-  default: "gpt-4o-mini",
+/** Public HTTPS URL of the sessionOpsMcp Cloud Function (Cursor mcpServers.url). */
+export const sessionOpsMcpUrl = defineString("SESSION_OPS_MCP_URL", {
+  default: "https://us-central1-jet-lag-map-companion.cloudfunctions.net/sessionOpsMcp",
 });
 export const cursorHotfixRepoUrl = defineString("CURSOR_HOTFIX_REPO_URL", {
   default: "https://github.com/gelbh/jetlag",
@@ -177,10 +177,20 @@ export function mapIncidentError(error) {
         "failed-precondition",
         "Incident has no linked session.",
       );
-    case SUPPORT_AGENT_LLM_FAILED:
+    case SESSION_OPS_AGENT_FAILED:
       throw new HttpsError(
         "internal",
         "Support agent is temporarily unavailable.",
+      );
+    case SESSION_OPS_AGENT_MISCONFIGURED:
+      throw new HttpsError(
+        "failed-precondition",
+        "Support agent is not configured.",
+      );
+    case SESSION_OPS_AGENT_BUSY:
+      throw new HttpsError(
+        "resource-exhausted",
+        "Support agent is still working on a previous request. Try again shortly.",
       );
     case SESSION_OPS_SUMMON_CAP:
     case SESSION_OPS_TURN_CAP:

@@ -1,4 +1,3 @@
-export { geodesicLineBuffer } from "../kernel/geodesicLineBuffer";
 export {
   dispatchGeodesicLineBuffer,
   runGeodesicLineBuffer,

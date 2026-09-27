@@ -1,5 +1,6 @@
 import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
 import { point as turfPoint } from "@turf/helpers";
+import { normalizeBoundingBox, type BoundingBox } from "./boundingBox";
 import type { GameAreaGeometry, PolygonFeature } from "./types";
 
 export function sampleGridPoints(
@@ -65,6 +66,34 @@ export function bboxFromGameArea(gameArea: GameAreaGeometry): {
   }
 
   return { west, east, south, north };
+}
+
+/** Raw AABB (no zero fallback) plus min-span normalize; matches `gameAreaToBoundingBox`. */
+export function normalizedBboxFromGameArea(
+  gameArea: GameAreaGeometry,
+): BoundingBox {
+  let west = Infinity;
+  let east = -Infinity;
+  let south = Infinity;
+  let north = -Infinity;
+
+  const rings =
+    gameArea.type === "Polygon"
+      ? gameArea.coordinates
+      : gameArea.coordinates.flatMap((polygon) => polygon);
+
+  for (const ring of rings) {
+    for (const position of ring) {
+      const lng = position[0];
+      const lat = position[1];
+      if (lng < west) west = lng;
+      if (lng > east) east = lng;
+      if (lat < south) south = lat;
+      if (lat > north) north = lat;
+    }
+  }
+
+  return normalizeBoundingBox({ south, west, north, east });
 }
 
 /** Non-throwing grid PIP topology compare for dual-run. */

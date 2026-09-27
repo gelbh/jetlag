@@ -50,6 +50,8 @@ export interface IncidentThreadMessageRecord {
   kind: IncidentThreadMessageKind;
   visibility?: IncidentThreadId;
   toolCall?: IncidentThreadToolCall | null;
+  /** True while a Cursor session-ops run is in flight for this placeholder. */
+  working?: boolean;
 }
 
 const THREAD_SENDERS = new Set<IncidentThreadMessageSender>([
@@ -156,6 +158,9 @@ export function deserializeIncidentThreadMessageFromFirestore(
   const toolCall = parseToolCall(data.toolCall);
   if (toolCall) {
     message.toolCall = toolCall;
+  }
+  if (data.working === true) {
+    message.working = true;
   }
   return message;
 }

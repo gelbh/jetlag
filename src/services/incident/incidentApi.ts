@@ -255,8 +255,12 @@ export async function denyHostConfirm(
 
 export interface PostSupportAgentTurnResult {
   summonId: string;
+  runId?: string | null;
+  agentId?: string | null;
+  status?: string | null;
+  workingMessageId?: string | null;
   assistantMessageId: string | null;
-  content: string;
+  content: string | null;
   toolOutcomes: unknown[];
 }
 
