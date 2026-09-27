@@ -151,6 +151,7 @@ export function PremiumPageContent() {
         <PremiumFeatureList
           entitlementSummary={null}
           checkoutNotice={null}
+          headerOffset={false}
         />
         <p className="max-w-sm text-sm text-field-ink-muted">
           Premium billing needs an online connection. Use a synced session to
@@ -165,6 +166,7 @@ export function PremiumPageContent() {
       <PremiumFeatureList
         entitlementSummary={entitlementSummary}
         checkoutNotice={checkoutNotice}
+        headerOffset={false}
       />
 
       <PremiumSignInGate onSignedIn={() => void refreshEntitlementsWithError()}>
