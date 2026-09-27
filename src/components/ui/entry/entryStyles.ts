@@ -769,7 +769,7 @@ export const homeEnterActionsStyle: CSSProperties = {
 };
 
 /** Frosted map floating control (zoom / style / recenter). Was `.hud-chrome`. */
-export function hudChromeStyles(pressed = false): ButtonProps["styles"] {
+export function hudChromeStyles(pressed = false): EntryButtonStyles {
   return {
     root: {
       display: "inline-flex",

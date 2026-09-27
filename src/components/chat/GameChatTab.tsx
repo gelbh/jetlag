@@ -24,6 +24,7 @@ import type { PendingQuestionRecord } from "../../domain/session/activity/sessio
 import { useStickScrollToBottom } from "../../hooks/ui/useStickScrollToBottom";
 import { HudToolIcon } from "../map/icons/ToolIcons";
 import { HiderPendingQuestionAnswer } from "./HiderPendingQuestionAnswer";
+import { InlineError } from "../ui/banners/InlineError";
 import { EmptyState } from "../ui/feedback/EmptyState";
 import { PhotoAnswerPreview } from "./PhotoAnswerPreview";
 
