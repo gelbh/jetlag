@@ -27,7 +27,9 @@ function resolveScenario(
 }
 
 function sessionFromSpec(spec: ScenarioSessionSpec): SessionRecord {
-  const { myRole: _myRole, ...session } = spec;
+  // myRole is scenario metadata, not a SessionRecord field
+  const { myRole, ...session } = spec;
+  void myRole;
   return session;
 }
 
