@@ -17,6 +17,8 @@ export {
   placementFromLegacyAnchor,
   legacyAnchorFromPlacement,
   resolveStackedTops,
+  resolveSafeAreaTopPx,
+  resolveUsableVerticalBand,
   sideFromPointX,
   topPxFromTopRatio,
   topRatioFromTopPx,

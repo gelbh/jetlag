@@ -253,15 +253,7 @@ export function MapStatusRail({ model, headerLeading }: MapStatusRailProps) {
           disabled={timerControlsDisabled || inactiveChrome}
         />
 
-        <div
-          className="w-full"
-          style={{
-            paddingTop: "max(0.5rem, env(safe-area-inset-top))",
-            paddingLeft: "max(0.75rem, env(safe-area-inset-left))",
-            paddingRight: "max(0.75rem, env(safe-area-inset-right))",
-            paddingBottom: "0.25rem",
-          }}
-        >
+        <div className="jl-status-rail-float w-full">
           <ToolStatusBlock
             sessionCode={sessionCode}
             playerRole={playerRole}
