@@ -39,9 +39,14 @@ describe("LocationPermissionPrompt", () => {
       </MemoryRouter>,
     );
 
-    expect(
-      await screen.findByRole("dialog", { name: /allow location/i }),
-    ).toBeInTheDocument();
+    const dialog = await screen.findByRole("dialog", {
+      name: /allow location/i,
+    });
+    expect(dialog).toBeInTheDocument();
+    await waitFor(() => {
+      expect(dialog).toHaveFocus();
+    });
+    expect(dialog.className).not.toMatch(/map-float-alert/);
     expect(
       screen.getByRole("button", { name: /allow location/i }),
     ).toBeInTheDocument();

@@ -131,13 +131,15 @@ export function LocationPermissionPrompt() {
       animated={false}
       className="pointer-events-auto fixed inset-x-3 top-[var(--map-banner-top)] z-[var(--z-panel)]"
     >
-      <div ref={dialogRef} tabIndex={-1} className="mx-auto max-w-xl outline-none">
-        <MapFloatSurface
-          tone="flag"
-          role="dialog"
-          aria-labelledby="location-permission-prompt-title"
-          aria-describedby="location-permission-prompt-body"
-        >
+      <div
+        ref={dialogRef}
+        tabIndex={-1}
+        role="dialog"
+        aria-labelledby="location-permission-prompt-title"
+        aria-describedby="location-permission-prompt-body"
+        className="mx-auto max-w-xl outline-none"
+      >
+        <MapFloatSurface tone="flag">
           <p
             id="location-permission-prompt-title"
             className="font-display text-xs font-semibold tracking-wide text-field-ink"
