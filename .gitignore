@@ -22,5 +22,6 @@ ui-debug.log
 docs/
 .lighthouseci
 target/
+# No trailing slash: also ignore worktree pkg symlinks (dir form alone missed them).
 crates/*/pkg
 .stylelintcache

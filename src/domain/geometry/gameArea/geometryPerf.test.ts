@@ -234,7 +234,6 @@ describe.skipIf(!runGeometryPerf)("geometry performance gates", () => {
       await wasmBuildMaskFromUnionInput(input, gameArea);
     });
 
-    // G5j measured median ~0.07ms (arm64); keep 50ms for CI headroom.
     expect(wasmMs).toBeLessThan(50);
   });
 
@@ -247,7 +246,6 @@ describe.skipIf(!runGeometryPerf)("geometry performance gates", () => {
       await wasmBuildEndGameMaskFromDisks(gameArea, disks);
     });
 
-    // G5j measured median ~1.3ms (arm64); keep 100ms for CI headroom.
     expect(wasmMs).toBeLessThan(100);
   });
 
@@ -273,7 +271,6 @@ describe.skipIf(!runGeometryPerf)("geometry performance gates", () => {
       );
     });
 
-    // G5j measured median ~0.007ms (arm64); keep 20ms for CI headroom.
     expect(wasmMs).toBeLessThan(20);
   });
 
@@ -289,7 +286,6 @@ describe.skipIf(!runGeometryPerf)("geometry performance gates", () => {
       wasmPkg.geodesic_line_buffer_json(coordinatesJson, 200, null);
     });
 
-    // G5j measured median ~0.1ms (arm64); keep 20ms for CI headroom.
     expect(wasmMs).toBeLessThan(20);
   });
 });
