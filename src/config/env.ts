@@ -77,7 +77,7 @@ export type FirebaseClientConfig = {
   appId: string;
 };
 
-/** Demo project used by Playwright + local `npm run emulators:start`. */
+/** Demo project used by Playwright + local `just emulators`. */
 const DEMO_FIREBASE_EMULATOR_ENV = {
   VITE_USE_FIREBASE_EMULATOR: "true",
   VITE_FIREBASE_API_KEY: "demo-api-key",
@@ -137,7 +137,7 @@ function readRawClientEnv(): Record<string, unknown> {
     if (!loggedDemoEmulatorNotice) {
       loggedDemoEmulatorNotice = true;
       console.info(
-        "[firebase] Using demo emulator config. Run `npm run emulators:start` in another terminal.",
+        "[firebase] Using demo emulator config. Run `just emulators` in another terminal.",
       );
     }
     return { ...raw, ...DEMO_FIREBASE_EMULATOR_ENV };

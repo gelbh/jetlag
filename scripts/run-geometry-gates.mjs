@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Geometry WASM parity + perf gates.
- * Invoked by `npm run test:geometry-gates`.
+ * Invoked by `just geometry-gates` (or `node scripts/run-geometry-gates.mjs`).
  */
 import { spawnSync } from "node:child_process";
 import { delimiter, resolve } from "node:path";
