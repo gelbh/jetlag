@@ -41,8 +41,8 @@ export async function assertNoSeriousAxeViolations(
 ) {
   let builder = new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa"]);
   // Brand token contrast debt is serious across entry surfaces; layout smoke
-  // gates overflow/structure. Contrast tracked via design tokens separately —
-  // except scoped survey chrome which re-enables color-contrast.
+  // gates overflow/structure. Contrast tracked via design tokens separately.
+  // Map/entry helpers below re-enable color-contrast for scoped chrome.
   if (!options?.includeColorContrast) {
     builder = builder.disableRules(["color-contrast"]);
   }
@@ -56,7 +56,7 @@ export async function assertNoSeriousAxeViolations(
   expect(blocking, JSON.stringify(blocking, null, 2)).toEqual([]);
 }
 
-/** Axe map chrome with color-contrast re-enabled (Wave 3). */
+/** Axe map chrome with color-contrast re-enabled. */
 export async function assertMapChromeAxe(page: Page) {
   const builder = new AxeBuilder({ page })
     .include(".map-chrome-hud")
@@ -69,10 +69,10 @@ export async function assertMapChromeAxe(page: Page) {
   expect(blocking, JSON.stringify(blocking, null, 2)).toEqual([]);
 }
 
-/** Axe entry/secondary roots with color-contrast (Wave 5). */
+/** Axe entry/secondary roots with color-contrast. */
 export async function assertEntryAxe(page: Page) {
   const builder = new AxeBuilder({ page })
-    .include("main.home-poster")
+    .include("main.home-poster-viewport, main.home-poster")
     .withTags(["wcag2a", "wcag2aa"]);
   const results = await builder.analyze();
   const blocking = results.violations.filter(

@@ -1,16 +1,13 @@
 import { type Page, expect } from "@playwright/test";
 
 export async function waitForHidingZoneWizard(page: Page) {
-  await expect(page.getByTestId("ask-hud-host")).toBeVisible({
+  // Hiding zone uses AskHudHost portal (Drawer); host wrapper is zero-box.
+  await expect(page.getByTestId("ask-hud-host")).toBeAttached({
     timeout: 15_000,
   });
-  const methodGroup = page.getByRole("group", {
-    name: "Hiding zone placement method",
-  });
-  const locationSearch = page.getByPlaceholder("Search stations…");
-  await expect(methodGroup.or(locationSearch)).toBeVisible({
-    timeout: 15_000,
-  });
+  await expect(
+    page.getByRole("group", { name: "Hiding zone placement method" }),
+  ).toBeVisible({ timeout: 15_000 });
 }
 
 export async function searchStationsInArea(page: Page) {

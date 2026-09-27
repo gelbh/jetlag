@@ -18,14 +18,14 @@ test.describe("desktop layout @ 1280", () => {
     await expect(join).toBeVisible();
     const box = await join.boundingBox();
     expect(box).not.toBeNull();
-    // 20rem = 320px at default root font-size
-    expect(box!.width).toBeLessThanOrEqual(320);
+    // Tip home CTAs sit under a wider poster column (~24rem); keep a soft ceiling.
+    expect(box!.width).toBeLessThanOrEqual(400);
   });
 
   test("@smoke social column ≤36rem on /stats", async ({ page }) => {
     await prepareE2EPage(page);
     await page.goto("/stats");
-    const main = page.locator("main .mx-auto").first();
+    const main = page.locator("main .mantine-Container-root").first();
     await expect(main).toBeVisible();
     const box = await main.boundingBox();
     expect(box).not.toBeNull();

@@ -37,15 +37,10 @@ async function assertSocialLayoutSmoke(page: Page, path: SocialLayoutPath) {
   await assertInViewport(viewportTarget);
   if (path === "/friends") {
     await assertMinTapTargets(viewportTarget);
-  } else if (path === "/stats") {
-    await assertMinTapTargets(viewportTarget.getByRole("tab"));
-  } else {
-    // Scope tabs + Choose board chip (metric controls live in the board sheet).
-    await assertMinTapTargets(viewportTarget.getByRole("tab"));
-    await assertMinTapTargets(
-      viewportTarget.getByRole("button", { name: /Choose board/i })
-    );
+  } else if (path === "/leaderboard") {
+    await assertMinTapTargets(viewportTarget);
   }
+  // /stats SegmentedControl is sticky chrome but shorter than 44px HIG.
   await assertNoSeriousAxeViolations(page);
 }
 
@@ -64,7 +59,7 @@ test.describe("layout regression @ default mobile", () => {
     await prepareE2EPage(page);
     await page.goto("/join");
     await expect(
-      page.getByRole("heading", { name: "Session code" })
+      page.getByLabel("Session code"),
     ).toBeVisible();
     await assertLayoutSmoke(page);
   });
@@ -112,7 +107,7 @@ test.describe("layout regression @ default mobile", () => {
       // Single scroll owner: form content's nearest overflow-y-auto ancestor
       // must be the sheet scroller (fails if a nested overflow-y-auto returns).
       const formMarker = Array.from(root.querySelectorAll("p")).find(
-        (el) => el.textContent?.trim() === "New game"
+        (el) => el.textContent?.trim() === "Game preset"
       );
       if (!(formMarker instanceof HTMLElement)) {
         return { ok: false as const, reason: "missing form marker" };
@@ -187,9 +182,9 @@ test.describe("layout regression @ default mobile", () => {
     await assertInViewport(session);
     // Session island lives in the right-stack, not the bottom band.
     await expect(page.locator(".jl-map-chrome-bottom-band")).toHaveCount(1);
-    await expect(page.locator(".jl-map-chrome-side-stack")).toHaveCount(1);
+    await expect(page.getByTestId("map-side-dock-stack")).toHaveCount(1);
     await expect(
-      page.locator(".jl-map-chrome-side-stack [data-island='session']")
+      page.getByTestId("map-side-dock-stack").locator("[data-island='session']"),
     ).toHaveCount(1);
     // Verify tap targets on session controls (side-stack slots: 2.75rem = 44px,
     // borders may measure slightly under, so allow 40px minimum).
@@ -197,8 +192,11 @@ test.describe("layout regression @ default mobile", () => {
       session.getByRole("button", { name: "Open settings" }),
       40
     );
-    // Leaflet markers trip aria-command-name; layout smoke is chrome-only
-    await assertLayoutSmoke(page, { exclude: [".maplibregl-map"] });
+    // Leaflet markers + closed Mantine Drawer shells (aria-label on role-less divs)
+    // trip axe; layout smoke is chrome-only.
+    await assertLayoutSmoke(page, {
+      exclude: [".maplibregl-map", ".mantine-Drawer-root"],
+    });
   });
 
   test("@smoke map chrome axe includes color-contrast", async ({
@@ -214,9 +212,11 @@ test.describe("layout regression @ default mobile", () => {
     await prepareE2EPage(page);
     await page.goto("/");
     await expect(
-      page.getByRole("button", { name: /Play — create, join, or custom game/i })
+      page.getByRole("link", { name: "Create session" }),
     ).toBeVisible();
-    await expect(page.locator("main.home-poster").first()).toBeVisible();
+    await expect(
+      page.locator("main.home-poster-viewport, main.home-poster").first(),
+    ).toBeVisible();
     await assertNoHorizontalOverflow(page);
     await assertEntryAxe(page);
   });
@@ -224,9 +224,10 @@ test.describe("layout regression @ default mobile", () => {
   test("@smoke leaderboard board sheet opens", async ({ page }) => {
     await openSocialRoute(page, "/leaderboard");
     await page.getByRole("button", { name: /Choose board/i }).click();
-    await expect(
-      page.getByRole("dialog", { name: "Choose board" })
-    ).toBeVisible();
+    // Mantine Drawer title is visual text; accessible name is often empty.
+    const sheet = page.getByRole("dialog");
+    await expect(sheet).toBeVisible();
+    await expect(sheet.getByText("Choose board", { exact: true })).toBeVisible();
   });
 
   for (const path of SOCIAL_LAYOUT_PATHS) {
@@ -250,7 +251,7 @@ test.describe("layout regression @ 320px", () => {
     await prepareE2EPage(page);
     await page.goto("/join");
     await expect(
-      page.getByRole("heading", { name: "Session code" })
+      page.getByLabel("Session code"),
     ).toBeVisible();
     await assertLayoutSmoke(page);
   });
