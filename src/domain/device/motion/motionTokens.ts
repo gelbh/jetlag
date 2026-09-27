@@ -18,6 +18,9 @@ export const WIZARD_SWIPE_AXIS_SLOP_PX = 8;
 export const WIZARD_SWIPE_COMMIT_FRACTION = 0.35;
 export const WIZARD_SWIPE_COMMIT_VELOCITY_PX_MS = 0.35;
 
+/** Matches `--motion-sheet-present` in base.css (Drawer enter/exit duration). */
+export const MOTION_SHEET_PRESENT_MS = 380;
+
 export const MOTION_TRANSITION_SHEET =
   "transform var(--motion-sheet-present) var(--ease-ios-standard)";
 export const MOTION_TRANSITION_PANEL = MOTION_TRANSITION_SHEET;
