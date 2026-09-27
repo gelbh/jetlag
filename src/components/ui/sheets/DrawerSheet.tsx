@@ -67,6 +67,28 @@ function resolveDrawerBodyInlinePadding(
 }
 
 /**
+ * One bottom inset for scroll/body: keyboard pad replaces safe-area (no stack).
+ * ChatPanel passes paddingBottom when the visual viewport keyboard inset > 0.
+ */
+function resolveDrawerBodyBottomPadding(
+  contentStyle: CSSProperties | undefined,
+): string | number {
+  const raw = contentStyle?.paddingBottom;
+  if (typeof raw === "number" && raw > 0) return raw;
+  if (typeof raw === "string" && Number.parseFloat(raw) > 0) return raw;
+  return SHEET_BODY_SAFE_BOTTOM;
+}
+
+/** Drop paddingBottom so keyboard inset is not applied on the gesture wrapper too. */
+function stripPaddingBottom(
+  style: CSSProperties | undefined,
+): CSSProperties | undefined {
+  if (style == null || style.paddingBottom === undefined) return style;
+  const { paddingBottom: _paddingBottom, ...rest } = style;
+  return rest;
+}
+
+/**
  * Phone-shell sheet path: iOS bottom Drawer with grabber + safe-area.
  * Portals into PlayerPhoneShell when mounted so overlays stay in the 390 column.
  */
@@ -107,8 +129,9 @@ export function DrawerSheet({
   const bodyInlinePadding = resolveDrawerBodyInlinePadding(padding);
   const bodyPadStyle: CSSProperties = {
     paddingInline: bodyInlinePadding,
-    paddingBottom: SHEET_BODY_SAFE_BOTTOM,
+    paddingBottom: resolveDrawerBodyBottomPadding(contentStyle),
   };
+  const gestureContentStyle = stripPaddingBottom(contentStyle);
 
   return (
     <Drawer
@@ -186,9 +209,9 @@ export function DrawerSheet({
         className="flex min-h-0 flex-1 flex-col gap-2"
         style={{
           ...sheetChromeStyle,
-          // No chrome-only bottom bar; safe-area lives on scroll/content.
+          // No chrome-only bottom bar; safe-area / keyboard live on scroll.
           paddingTop: "0.5rem",
-          ...contentStyle,
+          ...gestureContentStyle,
           ...sheetStyle,
         }}
       >
