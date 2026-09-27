@@ -1,5 +1,3 @@
-import type { MaskKernelMode } from "./maskKernelMode";
-
 export type KernelEntrypoint =
   | "maskFromUnionInput"
   | "endGameMaskFromDisks"
@@ -11,7 +9,7 @@ export type KernelEntrypoint =
 
 /**
  * Per-entrypoint WASM readiness after topology + perf gates.
- * False keeps TS via dispatchKernel (not-ready path).
+ * False throws from dispatchKernel (no TS fallback).
  */
 export const KERNEL_WASM_READY: Record<KernelEntrypoint, boolean> = {
   maskFromUnionInput: true,
@@ -23,13 +21,7 @@ export const KERNEL_WASM_READY: Record<KernelEntrypoint, boolean> = {
   nearRegionBatch: true,
 };
 
-/** True when mode asks for WASM and the entrypoint registry marks it ready. */
-export function shouldUseWasm(
-  mode: MaskKernelMode,
-  entrypoint: KernelEntrypoint,
-): boolean {
-  if (!KERNEL_WASM_READY[entrypoint]) {
-    return false;
-  }
-  return mode === "wasm";
+/** True when the entrypoint registry marks it ready for wasm. */
+export function shouldUseWasm(entrypoint: KernelEntrypoint): boolean {
+  return KERNEL_WASM_READY[entrypoint];
 }

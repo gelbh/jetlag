@@ -129,13 +129,11 @@ describe("tentacle wasm failure", () => {
           ...actual.KERNEL_WASM_READY,
           tentacleEliminationRegion: true,
         },
-        shouldUseWasm: (mode: string, entrypoint: string) => {
+        shouldUseWasm: (entrypoint: string) => {
           if (entrypoint === "tentacleEliminationRegion") {
-            return mode === "wasm";
+            return true;
           }
-          return actual.shouldUseWasm(
-            mode as "wasm",
-            entrypoint as import("./kernelWasmReady").KernelEntrypoint,
+          return actual.shouldUseWasm(entrypoint as import("./kernelWasmReady").KernelEntrypoint,
           );
         },
       };

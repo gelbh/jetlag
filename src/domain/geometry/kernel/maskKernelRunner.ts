@@ -1,6 +1,5 @@
 import { dispatchKernel } from "./dispatchKernel";
 import { createLazyWasmImport } from "./lazyWasmImport";
-import type { MaskKernelMode } from "./maskKernelMode";
 import type {
   DiskSpec,
   EliminationUnionInput,
@@ -12,11 +11,9 @@ const maskWasm = createLazyWasmImport(() => import("./maskWasm"));
 
 export async function runMaskFromUnionInput(
   input: EliminationUnionInput,
-  gameArea: GameAreaGeometry,
-  mode: MaskKernelMode = "wasm",
+  gameArea: GameAreaGeometry
 ): Promise<PolygonFeature | null> {
   return dispatchKernel({
-    mode,
     entrypoint: "maskFromUnionInput",
     label: "buildMaskFromUnionInput",
     runWasm: async () => {
@@ -28,11 +25,9 @@ export async function runMaskFromUnionInput(
 
 export async function runEndGameMaskFromDisks(
   gameArea: GameAreaGeometry,
-  disks: readonly DiskSpec[],
-  mode: MaskKernelMode = "wasm",
+  disks: readonly DiskSpec[]
 ): Promise<PolygonFeature | null> {
   return dispatchKernel({
-    mode,
     entrypoint: "endGameMaskFromDisks",
     label: "buildEndGameMaskFromDisks",
     runWasm: async () => {

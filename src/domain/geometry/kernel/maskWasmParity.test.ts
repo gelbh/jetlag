@@ -98,7 +98,7 @@ describe.skipIf(!wasmPkgReady)("mask wasm parity", () => {
   it("wasm mode matches golden topology for multi-disk end-game", async () => {
     const disks = overlappingEndGameDisks();
     const golden = loadPolygonGolden("mask", "multi-endgame-disks.json");
-    const result = await runEndGameMaskFromDisks(gameArea, disks, "wasm");
+    const result = await runEndGameMaskFromDisks(gameArea, disks);
     assertPolygonTopologyParity(result, golden, topologyBbox);
   });
 });
@@ -122,7 +122,7 @@ describe("mask wasm failure", () => {
 
     const input = { polygons: [square(-0.18)], disks: [] };
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
-    await expect(runWithMock(input, gameArea, "wasm")).rejects.toThrow(
+    await expect(runWithMock(input, gameArea)).rejects.toThrow(
       "wasm init failed",
     );
     expect(warnSpy).toHaveBeenCalled();
@@ -149,7 +149,7 @@ describe("mask wasm failure", () => {
     const disks: DiskSpec[] = [
       { center: [51.45, -0.15], radiusMeters: 400 },
     ];
-    await runWithMock(gameArea, disks, "wasm");
+    await runWithMock(gameArea, disks);
     expect(wasmBuildEndGame).toHaveBeenCalled();
 
     vi.doUnmock("./maskWasm");

@@ -61,7 +61,6 @@ describe("extras wasm dispatch (halfPlane ready)", () => {
       gameArea,
       "cold",
       "midpoint",
-      "wasm",
     );
     expect(half).toEqual(coldGolden);
     expect(wasmBuildHalfPlanePolygon).toHaveBeenCalledOnce();
@@ -71,7 +70,6 @@ describe("extras wasm dispatch (halfPlane ready)", () => {
       400,
       gameArea,
       false,
-      "wasm",
     );
     expect(radar).toEqual(radarGolden);
     expect(wasmBuildRadarShadedRegion).toHaveBeenCalledOnce();
@@ -101,8 +99,8 @@ describe("extras wasm dispatch (halfPlane ready)", () => {
       "./geodesicKernelRunner"
     );
     await expect(
-      dispatchGeodesicLineBuffer(shortLine, 200, undefined, "wasm"),
-    ).rejects.toThrow(/not wasm-ready and has no TS fallback/);
+      dispatchGeodesicLineBuffer(shortLine, 200, undefined),
+    ).rejects.toThrow(/not wasm-ready/);
     expect(wasmGeodesicLineBuffer).not.toHaveBeenCalled();
   });
 });

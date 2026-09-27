@@ -71,13 +71,11 @@ describe("geodesic wasm failure", () => {
           ...actual.KERNEL_WASM_READY,
           geodesicLineBuffer: true,
         },
-        shouldUseWasm: (mode: string, entrypoint: string) => {
+        shouldUseWasm: (entrypoint: string) => {
           if (entrypoint === "geodesicLineBuffer") {
-            return mode === "wasm";
+            return true;
           }
-          return actual.shouldUseWasm(
-            mode as "wasm",
-            entrypoint as import("./kernelWasmReady").KernelEntrypoint,
+          return actual.shouldUseWasm(entrypoint as import("./kernelWasmReady").KernelEntrypoint,
           );
         },
       };
@@ -95,7 +93,7 @@ describe("geodesic wasm failure", () => {
 
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
     await expect(
-      runWithMock(shortLine, 200, undefined, "wasm"),
+      runWithMock(shortLine, 200, undefined),
     ).rejects.toThrow("wasm init failed");
     expect(warnSpy).toHaveBeenCalled();
     warnSpy.mockRestore();
