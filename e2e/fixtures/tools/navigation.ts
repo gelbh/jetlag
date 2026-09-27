@@ -39,8 +39,16 @@ export async function openSettings(page: Page) {
 }
 
 export async function closePanel(page: Page) {
-  // Tip DrawerSheet: withCloseButton={false}; Escape dismisses.
+  // Mobile Drawer: Escape. Desktop contextual rail skips Escape while
+  // aria-modal Settings is open, so collapse the rail instead.
   const dialog = page.getByRole("dialog", { name: "Settings" });
-  await page.keyboard.press("Escape");
+  const collapseRail = page.getByRole("button", {
+    name: "Collapse map panels",
+  });
+  if (await collapseRail.isVisible().catch(() => false)) {
+    await collapseRail.click();
+  } else {
+    await page.keyboard.press("Escape");
+  }
   await expect(dialog).toBeHidden({ timeout: 10_000 });
 }

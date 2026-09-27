@@ -1,6 +1,5 @@
 import { type Page, expect } from "@playwright/test";
 import {
-  clickMapAt,
   clickMapAtLatLng,
   E2E_GEOLOCATION,
   expectMapHasAnnotations,
@@ -30,10 +29,14 @@ export async function placePin(page: Page, note = "Camp") {
 }
 
 export async function drawZone(page: Page, label = "Search zone") {
+  await dismissActiveToolPanel(page);
   await selectDrawTool(page, "Zone");
-  await clickMapAt(page, 0.45, 0.45);
-  await clickMapAt(page, 0.55, 0.45);
-  await clickMapAt(page, 0.5, 0.52);
+  await expandToolPanelIfPeeked(page);
+  // Percentage canvas clicks often hit chrome; place vertices via MapLibre GPS.
+  const { latitude: lat, longitude: lng } = E2E_GEOLOCATION;
+  await clickMapAtLatLng(page, lat, lng);
+  await clickMapAtLatLng(page, lat, lng + 0.002);
+  await clickMapAtLatLng(page, lat - 0.002, lng + 0.001);
   await expect(page.getByText(/Vertices:\s*3/i)).toBeVisible({ timeout: 15_000 });
   await page.getByPlaceholder("Optional zone label").fill(label);
   await page.getByRole("button", { name: "Close zone", exact: true }).click();
