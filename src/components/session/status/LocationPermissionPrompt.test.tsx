@@ -5,7 +5,11 @@ import {
   createMockGeolocationPosition,
   mockGeolocation,
 } from "@/test/mocks/geolocation";
-import { retainLocationPermissionDemand, resetLocationPermissionUiForTests } from "@/services/core/location/locationPermissionUi";
+import {
+  persistLocationAccessConfirmed,
+  retainLocationPermissionDemand,
+  resetLocationPermissionUiForTests,
+} from "@/services/core/location/locationPermissionUi";
 import { LocationPermissionPrompt } from "./LocationPermissionPrompt";
 
 function mockPermissions(state: PermissionState): void {
@@ -70,6 +74,25 @@ describe("LocationPermissionPrompt", () => {
 
     fireEvent.click(
       await screen.findByRole("button", { name: /allow location/i }),
+    );
+
+    await waitFor(() => {
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    });
+
+    release();
+  });
+
+  it("hides when persisted confirmation quietly restores", async () => {
+    mockGeolocation(createMockGeolocationPosition(53.35, -6.26));
+    mockPermissions("prompt");
+    persistLocationAccessConfirmed();
+    const release = retainLocationPermissionDemand();
+
+    render(
+      <MemoryRouter initialEntries={["/map"]}>
+        <LocationPermissionPrompt />
+      </MemoryRouter>,
     );
 
     await waitFor(() => {
