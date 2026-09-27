@@ -25,7 +25,6 @@ export const CREATE_SESSION_MAP_SHELL_CLASS =
 
 interface CreateSessionMapPaneProps {
   mapStyle: MapStyle;
-  onMapStyleChange?: (style: MapStyle) => void;
   focusBounds: MapBoundsExpression | null;
   previewGameArea: GameArea | null;
   selectedGameSize: GameSize;

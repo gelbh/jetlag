@@ -65,13 +65,10 @@ beforeEach(() => {
 
 describe("CreateSessionMapPane", () => {
   it("hides zoom, map style, and compass chrome on the MapView model", async () => {
-    const onMapStyleChange = vi.fn();
-
     render(
       <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
         <CreateSessionMapPane
           mapStyle="standard"
-          onMapStyleChange={onMapStyleChange}
           focusBounds={null}
           previewGameArea={null}
           selectedGameSize="medium"
