@@ -124,7 +124,7 @@ export async function injectStandaloneDisplayMode(page: Page) {
       el.id = "jl-e2e-standalone-mode";
       el.textContent = `@media (display-mode: standalone) {
   .jl-e2e-standalone .jl-map-bottom-chrome-host,
-  .jl-e2e-standalone .jl-tool-dock:not(.jl-tool-dock--rail) {
+  .jl-e2e-standalone .jl-tool-dock {
     bottom: 0;
   }
 }`;
@@ -141,7 +141,7 @@ export async function injectStandaloneDisplayMode(page: Page) {
     const sheet = document.getElementById("jl-e2e-standalone-mode");
     const css = `@media (display-mode: standalone) {
   .jl-e2e-standalone .jl-map-bottom-chrome-host,
-  .jl-e2e-standalone .jl-tool-dock:not(.jl-tool-dock--rail) {
+  .jl-e2e-standalone .jl-tool-dock {
     bottom: 0;
   }
 }`;
