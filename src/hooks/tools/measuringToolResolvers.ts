@@ -5,10 +5,8 @@ import type {
   MultiPolygon,
 } from "geojson";
 import type { GameArea } from "../../domain/map/annotations";
-import {
-  nearestPointToCoastlines,
-  type LatLngTuple,
-} from "../../domain/geometry/gameArea/geometry";
+import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
+import { nearestPointToCoastlines } from "../../domain/geometry/measuring/geometryMeasuring";
 import type { SeaLevelEdgeCase } from "../../domain/geometry/measuring/seaLevel";
 import {
   isMeasuringLinearLocation,

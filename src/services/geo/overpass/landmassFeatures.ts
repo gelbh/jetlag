@@ -3,7 +3,6 @@ import area from "@turf/area";
 import difference from "@turf/difference";
 import { lineString } from "@turf/helpers";
 import { dispatchGeodesicLineBuffer } from "@/domain/geometry/measuring/geodesicLineBuffer";
-import { resolveClientMaskKernelMode } from "@/domain/geometry/kernel/resolveClientMaskKernelMode";
 import { unionPolygonFeatures } from "@/domain/geometry/masks/unionPolygonFeatures";
 import type { GameArea } from "@/domain/map/annotations";
 import type { RegionPackId } from "@/domain/regions/regionPack";
@@ -129,7 +128,6 @@ export async function obstacleFeaturesFromElements(
   elements: OverpassElement[],
 ): Promise<Feature<Polygon | MultiPolygon>[]> {
   const obstacles: Feature<Polygon | MultiPolygon>[] = [];
-  const mode = resolveClientMaskKernelMode();
 
   for (const element of elements) {
     if (element.type !== "way" || !element.geometry) {
@@ -155,7 +153,6 @@ export async function obstacleFeaturesFromElements(
         line,
         WATERWAY_BUFFER_METERS,
         undefined,
-        mode,
       );
 
       if (buffered) {

@@ -1,6 +1,5 @@
 import type { PolygonFeature } from "./types";
 
-/** Full wasm-bindgen surface for the geometry kernel pkg. */
 export type KernelWasmModule = {
   build_mask_from_union_input_json: (
     inputJson: string,
@@ -44,7 +43,7 @@ export type KernelWasmModule = {
     gameAreaJson: string,
     voronoiCellsJson: string,
   ) => unknown;
-  build_spatial_voronoi_rings: (coords: Float64Array | number[]) => ArrayLike<number>;
+  build_spatial_voronoi_rings: (coords: Float64Array | number[]) => Float64Array;
   build_near_region_json: (inputJson: string) => unknown;
 };
 
@@ -85,7 +84,6 @@ export function parseWasmFeature(result: unknown): PolygonFeature | null {
   throw new Error("Geometry kernel returned an invalid feature");
 }
 
-/** Single shared pkg promise for mask / half-plane / geodesic wrappers. */
 export async function loadKernelWasm(): Promise<KernelWasmModule> {
   if (!wasmModulePromise) {
     // Relative path: pkg/ is gitignored; avoid file: dep so npm ci works before wasm:build.
@@ -101,7 +99,6 @@ export async function loadKernelWasm(): Promise<KernelWasmModule> {
   return wasmModulePromise;
 }
 
-/** Reset lazy WASM module (tests). */
 export function resetKernelWasmForTests(): void {
   wasmModulePromise = null;
 }
