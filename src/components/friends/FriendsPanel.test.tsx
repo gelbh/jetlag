@@ -5,12 +5,6 @@ import { jetlagTheme } from "@/theme/theme";
 import { FriendsPanel } from "./FriendsPanel";
 import { searchFriends } from "../../services/profile/profileFriends";
 
-const useDesktopLayout = vi.fn();
-vi.mock("../../hooks/layout/useDesktopLayout", () => ({
-  DESKTOP_LAYOUT_MIN_WIDTH_PX: 1024,
-  useDesktopLayout: () => useDesktopLayout(),
-}));
-
 vi.mock("../../services/profile/profileFriends", () => ({
   listFriends: vi.fn(async () => ({
     friends: [{ uid: "f1", username: "ally" }],
@@ -34,12 +28,10 @@ function renderPanel() {
 
 describe("FriendsPanel", () => {
   beforeEach(() => {
-    useDesktopLayout.mockReset();
     vi.clearAllMocks();
   });
 
-  it("keeps stacked sections under 1024", async () => {
-    useDesktopLayout.mockReturnValue(false);
+  it("keeps stacked sections (phone shell)", async () => {
     renderPanel();
 
     await waitFor(() => {
@@ -52,25 +44,7 @@ describe("FriendsPanel", () => {
     expect(screen.getByText("Cancel")).toBeInTheDocument();
   });
 
-  it("renders master–detail with 14rem list on desktop", async () => {
-    useDesktopLayout.mockReturnValue(true);
-    renderPanel();
-
-    await waitFor(() => {
-      expect(screen.getByTestId("friends-master-list")).toBeInTheDocument();
-    });
-
-    const list = screen.getByTestId("friends-master-list");
-    expect(list.className).toMatch(/w-\[14rem\]/);
-    expect(screen.getByRole("complementary", { name: /Friend detail/i })).toBeInTheDocument();
-    expect(
-      screen.getByText(/Select a friend or request to see details/i),
-    ).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Accept" })).not.toBeInTheDocument();
-  });
-
   it("blocks search and shows an error for short queries", async () => {
-    useDesktopLayout.mockReturnValue(false);
     renderPanel();
 
     await waitFor(() => {

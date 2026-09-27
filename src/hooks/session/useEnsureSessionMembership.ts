@@ -11,7 +11,10 @@ import {
 } from "../../services/firestore/sessionMembershipHeal";
 import { useSessionStore } from "../../state/sessionStore";
 
-export function useEnsureSessionMembership(): void {
+export function useEnsureSessionMembership(options?: {
+  enabled?: boolean;
+}): void {
+  const enabled = options?.enabled ?? true;
   const sessionId = useSessionStore((state) => state.session?.id);
   const myRole = useSessionStore((state) => state.myRole);
   const myUid = useSessionStore((state) => state.myUid);
@@ -19,6 +22,10 @@ export function useEnsureSessionMembership(): void {
   const setLastSyncError = useSessionStore((state) => state.setLastSyncError);
 
   useEffect(() => {
+    if (!enabled) {
+      return;
+    }
+
     const session = useSessionStore.getState().session;
     if (
       !sessionId ||
@@ -81,5 +88,5 @@ export function useEnsureSessionMembership(): void {
     return () => {
       cancelled = true;
     };
-  }, [myRole, myUid, sessionId, setLastSyncError, setSession]);
+  }, [enabled, myRole, myUid, sessionId, setLastSyncError, setSession]);
 }

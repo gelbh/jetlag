@@ -1,6 +1,5 @@
 import { useCallback, useDeferredValue, useEffect, useMemo, useState } from "react";
 import type { MapChromeControlInset } from "../../components/map/helpers/mapChromeControlInset";
-import { useDesktopLayout } from "../../hooks/layout/useDesktopLayout";
 import { useMapScreenTools } from "../../hooks/map-screen/useMapScreenTools";
 import { useMapSessionActions } from "../../hooks/map-screen/useMapSessionActions";
 import { useMapOverlayActions } from "../../hooks/map-screen/useMapOverlayActions";
@@ -334,13 +333,8 @@ export function useMapScreenController() {
     sheetSnap:
       activeTool !== "none" && isQuestionDockTool(activeTool) ? sheetSnap : "mid",
   });
-  const isDesktopLayout = useDesktopLayout();
   const mapChromeControlInset: MapChromeControlInset =
-    panelMinimized || mapPanning
-      ? "chrome-hidden"
-      : isDesktopLayout
-        ? "safe-area"
-        : "dock";
+    panelMinimized || mapPanning ? "chrome-hidden" : "dock";
 
   const placementCameraDraft = useMemo(
     () =>

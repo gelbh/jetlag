@@ -30,7 +30,7 @@ function simplifyAtTolerance(
       return simplified;
     }
   } catch {
-    // Keep input on Turf failure.
+    /* Turf can throw on bad rings; keep input. */
   }
   return feature;
 }
@@ -39,7 +39,6 @@ function shouldSkipTurfLod(feature: Feature<Polygon | MultiPolygon>): boolean {
   return countPolygonVertices(feature) > POLYGON_LOD_TURF_VERTEX_CEILING;
 }
 
-/** Aggressive outline for first paint — fewer verts than full when dense. */
 export function buildCoarsePolygonFeature(
   feature: Feature<Polygon | MultiPolygon>,
 ): Feature<Polygon | MultiPolygon> {

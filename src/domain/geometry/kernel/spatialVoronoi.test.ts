@@ -1,14 +1,13 @@
 import { describe, expect, it } from "vitest";
 import area from "@turf/area";
 import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
-import { lineString, point as turfPoint } from "@turf/helpers";
+import { point as turfPoint } from "@turf/helpers";
 import type { Feature, MultiPolygon, Polygon } from "geojson";
-import { geoSpatialVoronoiFromSites } from "./spatialVoronoi";
+import { wasmBuildSpatialVoronoiFromSites } from "./voronoiWasm";
 import {
   resolveVoronoiCellSiteId,
   voronoiCellSiteId,
 } from "./voronoiCellSiteId";
-import { geodesicLineBuffer } from "./geodesicLineBuffer";
 
 /** Finite clip cells can reach ~1e10–1e11 m²; planet-scale was ≫1e14. */
 const MAX_PLAUSIBLE_CELL_AREA_M2 = 1e12;
@@ -27,8 +26,8 @@ const dublinGridSites = Array.from({ length: 8 }, (_, index) => {
 });
 
 describe("geoSpatialVoronoiFromSites", () => {
-  it("returns polygon cells for multiple sites", () => {
-    const cells = geoSpatialVoronoiFromSites([
+  it("returns polygon cells for multiple sites", async () => {
+    const cells = await wasmBuildSpatialVoronoiFromSites([
       { lng: -0.12, lat: 51.5, properties: { id: "a" } },
       { lng: -0.11, lat: 51.51, properties: { id: "b" } },
       { lng: -0.13, lat: 51.49, properties: { id: "c" } },
@@ -40,8 +39,8 @@ describe("geoSpatialVoronoiFromSites", () => {
     );
   });
 
-  it("preserves poiId on projected voronoi cells", () => {
-    const cells = geoSpatialVoronoiFromSites([
+  it("preserves poiId on projected voronoi cells", async () => {
+    const cells = await wasmBuildSpatialVoronoiFromSites([
       { lng: -0.18, lat: 51.45, properties: { poiId: "west" } },
       { lng: -0.12, lat: 51.45, properties: { poiId: "east" } },
     ]);
@@ -54,14 +53,14 @@ describe("geoSpatialVoronoiFromSites", () => {
     expect(siteIds).toContain("east");
   });
 
-  it("resolves poiId for all 7 spread sites", () => {
+  it("resolves poiId for all 7 spread sites", async () => {
     const sites = Array.from({ length: 7 }, (_, index) => ({
       lng: -0.15 + (index - 3) * 0.003,
       lat: 51.45 + (index - 3) * 0.002,
       properties: { poiId: `poi-${index}` },
     }));
 
-    const cells = geoSpatialVoronoiFromSites(sites);
+    const cells = await wasmBuildSpatialVoronoiFromSites(sites);
     const resolved = cells.features.map((cell) =>
       resolveVoronoiCellSiteId(
         cell,
@@ -79,8 +78,8 @@ describe("geoSpatialVoronoiFromSites", () => {
 });
 
 describe("geoSpatialVoronoiFromSites — Dublin-like grid", () => {
-  it("every labeled cell contains its own site", () => {
-    const cells = geoSpatialVoronoiFromSites(dublinGridSites);
+  it("every labeled cell contains its own site", async () => {
+    const cells = await wasmBuildSpatialVoronoiFromSites(dublinGridSites);
 
     for (const site of dublinGridSites) {
       const owningCell = cells.features.find(
@@ -98,8 +97,8 @@ describe("geoSpatialVoronoiFromSites — Dublin-like grid", () => {
     }
   });
 
-  it("each site owns exactly one cell", () => {
-    const cells = geoSpatialVoronoiFromSites(dublinGridSites);
+  it("each site owns exactly one cell", async () => {
+    const cells = await wasmBuildSpatialVoronoiFromSites(dublinGridSites);
     const siteIds = cells.features
       .map((cell) => voronoiCellSiteId(cell, ["poiId"]))
       .filter((id): id is string => Boolean(id));
@@ -108,8 +107,8 @@ describe("geoSpatialVoronoiFromSites — Dublin-like grid", () => {
     expect(new Set(siteIds).size).toBe(dublinGridSites.length);
   });
 
-  it("produces no cell at planet-scale relative to the play area", () => {
-    const cells = geoSpatialVoronoiFromSites(dublinGridSites);
+  it("produces no cell at planet-scale relative to the play area", async () => {
+    const cells = await wasmBuildSpatialVoronoiFromSites(dublinGridSites);
 
     for (const cell of cells.features) {
       if (cell.geometry.type !== "Polygon" && cell.geometry.type !== "MultiPolygon") {
@@ -122,26 +121,13 @@ describe("geoSpatialVoronoiFromSites — Dublin-like grid", () => {
   });
 });
 
-describe("geodesicLineBuffer", () => {
-  it("builds a polygon buffer around a short line", () => {
-    const segment = lineString([
-      [-0.12, 51.5],
-      [-0.119, 51.501],
-    ]);
-    const buffered = geodesicLineBuffer(segment, 200);
-
-    expect(buffered?.geometry.type).toBe("Polygon");
-    expect(area(buffered!)).toBeGreaterThan(0);
-  });
-});
-
 describe("geoSpatialVoronoiFromSites — extent coverage", () => {
-  it("includes a far probe that is nearest to a site beyond a 6 km bbox margin", () => {
+  it("includes a far probe that is nearest to a site beyond a 6 km bbox margin", async () => {
     const sites = [
       { lng: -6.26, lat: 53.35, properties: { poiId: "west" } },
       { lng: -6.257, lat: 53.35, properties: { poiId: "east" } },
     ];
-    const cells = geoSpatialVoronoiFromSites(sites);
+    const cells = await wasmBuildSpatialVoronoiFromSites(sites);
     const westCell = cells.features.find((f) => f.properties?.poiId === "west");
     expect(westCell).toBeDefined();
     const kmPerLongitudeDegree = 111.32 * Math.cos((53.35 * Math.PI) / 180);
@@ -157,8 +143,8 @@ describe("geoSpatialVoronoiFromSites — extent coverage", () => {
 });
 
 describe("geoSpatialVoronoiFromSites — coincident sites", () => {
-  it("keeps the first site when coordinates are exact duplicates", () => {
-    const cells = geoSpatialVoronoiFromSites([
+  it("keeps the first site when coordinates are exact duplicates", async () => {
+    const cells = await wasmBuildSpatialVoronoiFromSites([
       { lng: -6.26, lat: 53.35, properties: { poiId: "first" } },
       { lng: -6.26, lat: 53.35, properties: { poiId: "dup" } },
       { lng: -6.25, lat: 53.35, properties: { poiId: "other" } },

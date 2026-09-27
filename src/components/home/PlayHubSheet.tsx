@@ -1,5 +1,4 @@
 import { AppLink } from "../navigation/AppLink";
-import { DesktopContentColumn } from "../ui/layout/DesktopContentColumn";
 import { DrawerSheet } from "../ui/sheets/DrawerSheet";
 import { SheetHeader } from "../ui/sheets/SheetHeader";
 import {
@@ -24,40 +23,38 @@ export function PlayHubSheet({ open, onClose }: PlayHubSheetProps) {
     >
       <SheetHeader title="Play" onClose={onClose} />
 
-      <DesktopContentColumn maxWidth="entry">
-        <div className="space-y-2.5 lg:[&_a]:mx-auto lg:[&_a]:w-full lg:[&_a]:max-w-[20rem]">
-          <AppLink
-            to="/create"
-            onClick={onClose}
-            aria-label="Create session"
-            data-feedback="tap"
-            style={homeCardBtnStyle("primary")}
-          >
-            <span>Create session</span>
-            <span style={homeCardBtnHintOnPrimaryStyle}>Host a game</span>
-          </AppLink>
-          <AppLink
-            to="/join"
-            onClick={onClose}
-            aria-label="Join session"
-            data-feedback="tap"
-            style={homeCardBtnStyle("secondary")}
-          >
-            <span>Join session</span>
-            <span style={homeCardBtnHintStyle}>Enter 4-letter code</span>
-          </AppLink>
-          <AppLink
-            to="/presets"
-            onClick={onClose}
-            aria-label="Custom game presets"
-            data-feedback="tap"
-            style={homeCardBtnStyle("secondary")}
-          >
-            <span>Custom game</span>
-            <span style={homeCardBtnHintStyle}>Saved templates</span>
-          </AppLink>
-        </div>
-      </DesktopContentColumn>
+      <div className="space-y-2.5 lg:[&_a]:mx-auto lg:[&_a]:w-full lg:[&_a]:max-w-[20rem]">
+        <AppLink
+          to="/create"
+          onClick={onClose}
+          aria-label="Create session"
+          data-feedback="tap"
+          style={homeCardBtnStyle("primary")}
+        >
+          <span>Create session</span>
+          <span style={homeCardBtnHintOnPrimaryStyle}>Host a game</span>
+        </AppLink>
+        <AppLink
+          to="/join"
+          onClick={onClose}
+          aria-label="Join session"
+          data-feedback="tap"
+          style={homeCardBtnStyle("secondary")}
+        >
+          <span>Join session</span>
+          <span style={homeCardBtnHintStyle}>Enter 4-letter code</span>
+        </AppLink>
+        <AppLink
+          to="/presets"
+          onClick={onClose}
+          aria-label="Custom game presets"
+          data-feedback="tap"
+          style={homeCardBtnStyle("secondary")}
+        >
+          <span>Custom game</span>
+          <span style={homeCardBtnHintStyle}>Saved templates</span>
+        </AppLink>
+      </div>
     </DrawerSheet>
   );
 }

@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import {
   BrowserRouter,
   Navigate,
+  Outlet,
   Route,
   Routes,
   useLocation,
@@ -12,6 +13,7 @@ import { appQueryClient } from "./lib/queryClient";
 import { trackPageView } from "./services/core/analytics/analytics";
 import { MapErrorBoundary } from "./components/ui/feedback/MapErrorBoundary";
 import { AppEntryBackdrop } from "./components/ui/layout/AppEntryBackdrop";
+import { PlayerPhoneShell } from "./components/ui/layout/PlayerPhoneShell";
 import { AnalyticsConsentBanner } from "./components/ui/banners/AnalyticsConsentBanner";
 import { AppUpdateBanner } from "./components/ui/banners/AppUpdateBanner";
 import { PwaInstallTipBanner } from "./components/ui/banners/PwaInstallTipBanner";
@@ -129,6 +131,14 @@ function EdgeSwipeBackBinder() {
   return null;
 }
 
+function PlayerPhoneShellOutlet() {
+  return (
+    <PlayerPhoneShell>
+      <Outlet />
+    </PlayerPhoneShell>
+  );
+}
+
 function ChunkReloadContextBinder() {
   const session = useSessionStore((state) => state.session);
   const location = useLocation();
@@ -223,92 +233,140 @@ export default function App() {
                       <LowBatteryPrompt />
                       <LocationPermissionPrompt />
                       <Routes>
-                        <Route path="/" element={<Home />} />
-                        <Route
-                          path="/feedback"
-                          element={
-                            <LazyRoute>
-                              <FeedbackLazy />
-                            </LazyRoute>
-                          }
-                        />
-                        <Route
-                          path="/stats"
-                          element={
-                            <LazyRoute>
-                              <StatsLazy />
-                            </LazyRoute>
-                          }
-                        />
-                        <Route
-                          path="/friends"
-                          element={
-                            <LazyRoute>
-                              <FriendsLazy />
-                            </LazyRoute>
-                          }
-                        />
-                        <Route
-                          path="/leaderboard"
-                          element={
-                            <LazyRoute>
-                              <LeaderboardLazy />
-                            </LazyRoute>
-                          }
-                        />
-                        <Route
-                          path="/privacy"
-                          element={
-                            <LazyRoute>
-                              <PrivacyLazy />
-                            </LazyRoute>
-                          }
-                        />
-                        <Route
-                          path="/terms"
-                          element={
-                            <LazyRoute>
-                              <TermsLazy />
-                            </LazyRoute>
-                          }
-                        />
-                        <Route
-                          path="/premium"
-                          element={
-                            <LazyRoute>
-                              <PremiumLazy />
-                            </LazyRoute>
-                          }
-                        />
-                        <Route
-                          path="/create"
-                          element={
-                            <LazyRoute>
-                              <CreateSessionLazy />
-                            </LazyRoute>
-                          }
-                        />
-                        <Route path="/join" element={<JoinSession />} />
-                        {StatusDockGalleryLazy ? (
+                        <Route element={<PlayerPhoneShellOutlet />}>
+                          <Route path="/" element={<Home />} />
                           <Route
-                            path="/dev/status-dock"
+                            path="/feedback"
                             element={
                               <LazyRoute>
-                                <StatusDockGalleryLazy />
+                                <FeedbackLazy />
                               </LazyRoute>
                             }
                           />
-                        ) : null}
-                        {ChatLogGalleryLazy ? (
                           <Route
-                            path="/dev/chat-log"
+                            path="/stats"
                             element={
                               <LazyRoute>
-                                <ChatLogGalleryLazy />
+                                <StatsLazy />
                               </LazyRoute>
                             }
                           />
-                        ) : null}
+                          <Route
+                            path="/friends"
+                            element={
+                              <LazyRoute>
+                                <FriendsLazy />
+                              </LazyRoute>
+                            }
+                          />
+                          <Route
+                            path="/leaderboard"
+                            element={
+                              <LazyRoute>
+                                <LeaderboardLazy />
+                              </LazyRoute>
+                            }
+                          />
+                          <Route
+                            path="/privacy"
+                            element={
+                              <LazyRoute>
+                                <PrivacyLazy />
+                              </LazyRoute>
+                            }
+                          />
+                          <Route
+                            path="/terms"
+                            element={
+                              <LazyRoute>
+                                <TermsLazy />
+                              </LazyRoute>
+                            }
+                          />
+                          <Route
+                            path="/premium"
+                            element={
+                              <LazyRoute>
+                                <PremiumLazy />
+                              </LazyRoute>
+                            }
+                          />
+                          <Route
+                            path="/create"
+                            element={
+                              <LazyRoute>
+                                <CreateSessionLazy />
+                              </LazyRoute>
+                            }
+                          />
+                          <Route path="/join" element={<JoinSession />} />
+                          {StatusDockGalleryLazy ? (
+                            <Route
+                              path="/dev/status-dock"
+                              element={
+                                <LazyRoute>
+                                  <StatusDockGalleryLazy />
+                                </LazyRoute>
+                              }
+                            />
+                          ) : null}
+                          {ChatLogGalleryLazy ? (
+                            <Route
+                              path="/dev/chat-log"
+                              element={
+                                <LazyRoute>
+                                  <ChatLogGalleryLazy />
+                                </LazyRoute>
+                              }
+                            />
+                          ) : null}
+                          <Route
+                            path="/presets"
+                            element={
+                              <LazyRoute>
+                                <GamePresetListLazy />
+                              </LazyRoute>
+                            }
+                          />
+                          <Route
+                            path="/presets/new"
+                            element={
+                              <LazyRoute>
+                                <GamePresetEditorLazy />
+                              </LazyRoute>
+                            }
+                          />
+                          <Route
+                            path="/presets/:id/edit"
+                            element={
+                              <LazyRoute>
+                                <GamePresetEditorLazy />
+                              </LazyRoute>
+                            }
+                          />
+                          <Route
+                            path="/map"
+                            element={
+                              <LazyRoute>
+                                <MapErrorBoundary>
+                                  <MapScreenLazy />
+                                </MapErrorBoundary>
+                              </LazyRoute>
+                            }
+                          />
+                          <Route
+                            path="/tutorial"
+                            element={<Navigate to="/" replace />}
+                          />
+                          <Route
+                            path="*"
+                            element={
+                              <LazyRoute>
+                                <NotFoundLazy />
+                              </LazyRoute>
+                            }
+                          />
+                        </Route>
                         <Route
                           path="/admin"
                           element={
@@ -338,52 +396,6 @@ export default function App() {
                           element={
                             <LazyRoute>
                               <AdminPreloadRequestInboxLazy />
-                            </LazyRoute>
-                          }
-                        />
-                        <Route
-                          path="/presets"
-                          element={
-                            <LazyRoute>
-                              <GamePresetListLazy />
-                            </LazyRoute>
-                          }
-                        />
-                        <Route
-                          path="/presets/new"
-                          element={
-                            <LazyRoute>
-                              <GamePresetEditorLazy />
-                            </LazyRoute>
-                          }
-                        />
-                        <Route
-                          path="/presets/:id/edit"
-                          element={
-                            <LazyRoute>
-                              <GamePresetEditorLazy />
-                            </LazyRoute>
-                          }
-                        />
-                        <Route
-                          path="/map"
-                          element={
-                            <LazyRoute>
-                              <MapErrorBoundary>
-                                <MapScreenLazy />
-                              </MapErrorBoundary>
-                            </LazyRoute>
-                          }
-                        />
-                        <Route
-                          path="/tutorial"
-                          element={<Navigate to="/" replace />}
-                        />
-                        <Route
-                          path="*"
-                          element={
-                            <LazyRoute>
-                              <NotFoundLazy />
                             </LazyRoute>
                           }
                         />
