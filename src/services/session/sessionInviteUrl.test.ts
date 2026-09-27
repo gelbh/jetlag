@@ -41,7 +41,7 @@ describe("resolveSessionInviteOrigin", () => {
       resolveSessionInviteOrigin("https://[::1]", publicOrigin),
     ).toBe(publicOrigin);
     expect(
-      resolveSessionInviteOrigin("capacitor://localhost", publicOrigin),
+      resolveSessionInviteOrigin("app://localhost", publicOrigin),
     ).toBe(publicOrigin);
     expect(resolveSessionInviteOrigin("not a url", publicOrigin)).toBe(
       publicOrigin,

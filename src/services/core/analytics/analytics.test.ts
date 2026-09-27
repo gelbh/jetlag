@@ -120,7 +120,6 @@ describe("analytics facade", () => {
     resetClientEnvForTests();
     vi.unstubAllEnvs();
     vi.unstubAllGlobals();
-    Reflect.deleteProperty(globalThis, "Capacitor");
     Reflect.deleteProperty(document, "referrer");
   });
 
@@ -180,22 +179,6 @@ describe("analytics facade", () => {
       before_send: filterPosthogException,
     });
     expect(posthogRegister).toHaveBeenCalledWith({ $geoip_disable: true });
-  });
-
-  it("uses direct PostHog EU host on Capacitor native", () => {
-    vi.stubEnv("PROD", true);
-    vi.stubEnv("MODE", "production");
-    writeAnalyticsConsent("granted");
-    (
-      globalThis as { Capacitor?: { isNativePlatform: () => boolean } }
-    ).Capacitor = { isNativePlatform: () => true };
-
-    initAnalytics();
-
-    expect(posthogInit).toHaveBeenCalledOnce();
-    expect(posthogInit.mock.calls[0]?.[1]).toMatchObject({
-      api_host: "https://eu.i.posthog.com",
-    });
   });
 
   it("strips query from pageview path", () => {

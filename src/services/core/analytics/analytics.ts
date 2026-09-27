@@ -30,15 +30,6 @@ export const POSTHOG_API_HOST = "/ph";
 export const POSTHOG_UI_HOST = "https://eu.posthog.com";
 
 function resolvePosthogApiHost(): string {
-  try {
-    const cap = (globalThis as { Capacitor?: { isNativePlatform?: () => boolean } })
-      .Capacitor;
-    if (cap?.isNativePlatform?.()) {
-      return "https://eu.i.posthog.com";
-    }
-  } catch {
-    // ignore
-  }
   return POSTHOG_API_HOST;
 }
 

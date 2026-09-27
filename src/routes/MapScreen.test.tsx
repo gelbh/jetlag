@@ -56,25 +56,6 @@ vi.mock("../hooks/location/useWakeLock", () => ({
   useWakeLock: () => undefined,
 }));
 
-vi.mock("../hooks/session/useSessionNotifications", () => ({
-  useSessionNotifications: () => ({
-    nativeSupported: false,
-    notificationPreferences: {
-      enabled: false,
-      newQuestions: true,
-      timerChanges: true,
-      chatMessages: false,
-      liveActivities: true,
-    },
-    enableNotifications: vi.fn(),
-    updateNotificationPreferences: vi.fn(),
-  }),
-}));
-
-vi.mock("../hooks/sync/useLiveActivitySync", () => ({
-  useLiveActivitySync: () => undefined,
-}));
-
 vi.mock("../services/geo/matching/resolveSessionMatchingAreas", async (importOriginal) => {
   const actual = await importOriginal<
     typeof import("../services/geo/matching/resolveSessionMatchingAreas")

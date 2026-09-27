@@ -128,7 +128,6 @@ function SeekerMapScreenBody({
         setKeepScreenAwake={controller.setKeepScreenAwake}
         setLowPowerMode={controller.setLowPowerMode}
         setLayerVisibility={controller.setLayerVisibility}
-        notificationPreferences={controller.notificationPreferences}
         transitEnabled={controller.transitEnabled}
         transitLiveEnabled={controller.transitLiveEnabled}
         transitLiveSupported={controller.transitLiveSupported}
@@ -185,8 +184,6 @@ function SeekerMapScreenBody({
         gameRulesEditable={controller.gameRulesEditable}
         draftAdvancedSettings={controller.draftAdvancedSettings}
         setDraftAdvancedSettings={controller.setDraftAdvancedSettings}
-        updateNotificationPreferences={controller.updateNotificationPreferences}
-        enableNotifications={controller.enableNotifications}
         deleteAnnotation={controller.deleteAnnotation}
         updateAnnotation={controller.updateAnnotation}
         startGeometryEdit={controller.startGeometryEdit}

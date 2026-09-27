@@ -55,7 +55,6 @@ type MapScreenChromeProps = Pick<
   | "setKeepScreenAwake"
   | "setLowPowerMode"
   | "setLayerVisibility"
-  | "notificationPreferences"
   | "transitEnabled"
   | "transitLiveEnabled"
   | "transitLiveSupported"
@@ -112,8 +111,6 @@ type MapScreenChromeProps = Pick<
   | "gameRulesEditable"
   | "draftAdvancedSettings"
   | "setDraftAdvancedSettings"
-  | "updateNotificationPreferences"
-  | "enableNotifications"
   | "deleteAnnotation"
   | "updateAnnotation"
   | "startGeometryEdit"
@@ -173,7 +170,6 @@ export function MapScreenChrome({
   setKeepScreenAwake,
   setLowPowerMode,
   setLayerVisibility,
-  notificationPreferences,
   transitEnabled,
   transitLiveEnabled,
   transitLiveSupported,
@@ -229,8 +225,6 @@ export function MapScreenChrome({
   gameRulesEditable,
   draftAdvancedSettings,
   setDraftAdvancedSettings,
-  updateNotificationPreferences,
-  enableNotifications,
   deleteAnnotation,
   updateAnnotation,
   startGeometryEdit,
@@ -520,9 +514,6 @@ export function MapScreenChrome({
             onToggleTransit: () => setTransitEnabled(!transitEnabled),
             onToggleLiveTransit: () => setTransitLiveEnabled(!transitLiveEnabled),
             onTransitRouteFilterChange: setTransitRouteFilter,
-            notificationPreferences,
-            onNotificationPreferencesChange: updateNotificationPreferences,
-            onEnableNotifications: enableNotifications,
           }}
           layers={{
             layerVisibility,
