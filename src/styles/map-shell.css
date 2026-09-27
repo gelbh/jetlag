@@ -84,12 +84,6 @@
     color: var(--color-ink-muted);
   }
 
-  /* Broadcast status bar (map top) */
-  .map-float-alert {
-    border-radius: var(--radius-hud-xl);
-    box-shadow: var(--shadow-hud-float);
-  }
-
   /*
    * Float inset must live in real CSS (Tailwind v4 omits env()-collapse utilities).
    * Phone status island mirrors bottom --dock-float-gap; map full-bleeds under notch.
@@ -563,13 +557,6 @@
 
   .jl-app-update-chip {
     bottom: calc(var(--dock-height) + max(0.5rem, env(safe-area-inset-bottom)));
-  }
-
-  @media (width <= 380px) {
-    .jl-app-update-chip .map-float-alert {
-      flex-direction: column;
-      align-items: stretch;
-    }
   }
 
   /* Admin map: mission-control layout (tablet/desktop) */
