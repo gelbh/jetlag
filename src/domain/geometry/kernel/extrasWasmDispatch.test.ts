@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { Feature, LineString } from "geojson";
-import { buildHalfPlanePolygon, buildRadarShadedRegion } from "./radarHalfPlane";
 import { geodesicLineBuffer } from "./geodesicLineBuffer";
+import { loadPolygonGolden } from "./loadPolygonGolden";
 import type { GameAreaGeometry, LatLngTuple } from "./types";
 
 const gameArea: GameAreaGeometry = {
@@ -41,12 +41,10 @@ describe("extras wasm dispatch (halfPlane ready)", () => {
 
   it("mode wasm + halfPlane ready → calls WASM", async () => {
     vi.resetModules();
-    const wasmBuildHalfPlanePolygon = vi.fn(async () =>
-      buildHalfPlanePolygon(pointA, pointB, gameArea, "cold"),
-    );
-    const wasmBuildRadarShadedRegion = vi.fn(async () =>
-      buildRadarShadedRegion([51.45, -0.15], 400, gameArea, false),
-    );
+    const coldGolden = loadPolygonGolden("halfPlane", "cold.json");
+    const radarGolden = loadPolygonGolden("halfPlane", "radar-outside.json");
+    const wasmBuildHalfPlanePolygon = vi.fn(async () => coldGolden);
+    const wasmBuildRadarShadedRegion = vi.fn(async () => radarGolden);
 
     vi.doMock("./halfPlaneWasm", () => ({
       wasmBuildHalfPlanePolygon,
@@ -66,9 +64,7 @@ describe("extras wasm dispatch (halfPlane ready)", () => {
       "midpoint",
       "wasm",
     );
-    expect(half).toEqual(
-      buildHalfPlanePolygon(pointA, pointB, gameArea, "cold"),
-    );
+    expect(half).toEqual(coldGolden);
     expect(wasmBuildHalfPlanePolygon).toHaveBeenCalledOnce();
 
     const radar = await dispatchRadarShadedRegion(
@@ -78,9 +74,7 @@ describe("extras wasm dispatch (halfPlane ready)", () => {
       false,
       "wasm",
     );
-    expect(radar).toEqual(
-      buildRadarShadedRegion([51.45, -0.15], 400, gameArea, false),
-    );
+    expect(radar).toEqual(radarGolden);
     expect(wasmBuildRadarShadedRegion).toHaveBeenCalledOnce();
   });
 
@@ -117,5 +111,4 @@ describe("extras wasm dispatch (halfPlane ready)", () => {
     expect(result).toEqual(expected);
     expect(wasmGeodesicLineBuffer).not.toHaveBeenCalled();
   });
-
 });

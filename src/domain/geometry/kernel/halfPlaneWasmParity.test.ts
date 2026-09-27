@@ -3,7 +3,7 @@ import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 import { assertPolygonTopologyParity } from "./parity";
-import { buildHalfPlanePolygon, buildRadarShadedRegion } from "./radarHalfPlane";
+import { loadPolygonGolden } from "./loadPolygonGolden";
 import type { GameAreaGeometry, LatLngTuple } from "./types";
 
 const pkgEntry = path.resolve(
@@ -48,43 +48,37 @@ describe.skipIf(!wasmPkgReady)("half-plane wasm parity", () => {
     await wasmBuildHalfPlanePolygon(thermoA, thermoB, gameArea, "cold");
   }, 60_000);
 
-  it("matches TS topology on cold half-plane (thermo fixture)", async () => {
-    const ts = buildHalfPlanePolygon(thermoA, thermoB, gameArea, "cold");
+  it("matches golden topology on cold half-plane (thermo fixture)", async () => {
+    const golden = loadPolygonGolden("halfPlane", "cold.json");
     const wasm = await wasmBuildHalfPlanePolygon(
       thermoA,
       thermoB,
       gameArea,
       "cold",
     );
-    assertPolygonTopologyParity(wasm, ts, topologyBbox);
+    assertPolygonTopologyParity(wasm, golden, topologyBbox);
   });
 
-  it("matches TS topology on hot half-plane", async () => {
-    const ts = buildHalfPlanePolygon(thermoA, thermoB, gameArea, "hot");
+  it("matches golden topology on hot half-plane", async () => {
+    const golden = loadPolygonGolden("halfPlane", "hot.json");
     const wasm = await wasmBuildHalfPlanePolygon(
       thermoA,
       thermoB,
       gameArea,
       "hot",
     );
-    assertPolygonTopologyParity(wasm, ts, topologyBbox);
+    assertPolygonTopologyParity(wasm, golden, topologyBbox);
   });
 
-  it("matches TS topology on radar outside shaded region", async () => {
+  it("matches golden topology on radar outside shaded region", async () => {
     const center: LatLngTuple = [51.45, -0.15];
-    const ts = buildRadarShadedRegion(center, 400, gameArea, false);
+    const golden = loadPolygonGolden("halfPlane", "radar-outside.json");
     const wasm = await wasmBuildRadarShadedRegion(center, 400, gameArea, false);
-    assertPolygonTopologyParity(wasm, ts, topologyBbox);
+    assertPolygonTopologyParity(wasm, golden, topologyBbox);
   });
 
-  it("matches TS topology on cold half-plane with start divisionAnchor", async () => {
-    const ts = buildHalfPlanePolygon(
-      thermoA,
-      thermoB,
-      gameArea,
-      "cold",
-      "start",
-    );
+  it("matches golden topology on cold half-plane with start divisionAnchor", async () => {
+    const golden = loadPolygonGolden("halfPlane", "cold-start.json");
     const wasm = await wasmBuildHalfPlanePolygon(
       thermoA,
       thermoB,
@@ -92,14 +86,14 @@ describe.skipIf(!wasmPkgReady)("half-plane wasm parity", () => {
       "cold",
       "start",
     );
-    assertPolygonTopologyParity(wasm, ts, topologyBbox);
+    assertPolygonTopologyParity(wasm, golden, topologyBbox);
   });
 
-  it("matches TS topology on radar inside shaded region", async () => {
+  it("matches golden topology on radar inside shaded region", async () => {
     const center: LatLngTuple = [51.45, -0.15];
-    const ts = buildRadarShadedRegion(center, 400, gameArea, true);
+    const golden = loadPolygonGolden("halfPlane", "radar-inside.json");
     const wasm = await wasmBuildRadarShadedRegion(center, 400, gameArea, true);
-    assertPolygonTopologyParity(wasm, ts, topologyBbox);
+    assertPolygonTopologyParity(wasm, golden, topologyBbox);
   });
 });
 
