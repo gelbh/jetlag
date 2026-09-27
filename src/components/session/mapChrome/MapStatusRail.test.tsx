@@ -11,7 +11,7 @@ import {
 } from "./MapStatusRail";
 
 const { showEphemeral } = vi.hoisted(() => ({
-  showEphemeral: vi.fn(() => true),
+  showEphemeral: vi.fn((_input?: { title: string; message: string }) => true),
 }));
 
 vi.mock("../../ui/notifications/showEphemeralPlayerNotification", () => ({

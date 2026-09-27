@@ -26,6 +26,7 @@ import { HudToolIcon } from "../map/icons/ToolIcons";
 import { HiderPendingQuestionAnswer } from "./HiderPendingQuestionAnswer";
 import { EmptyState } from "../ui/feedback/EmptyState";
 import { PhotoAnswerPreview } from "./PhotoAnswerPreview";
+import { InlineError } from "../ui/banners/InlineError";
 
 interface GameChatTabProps {
   messages: readonly SessionMessageRecord[];

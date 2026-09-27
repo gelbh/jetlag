@@ -1,3 +1,4 @@
+import type { ButtonProps } from "@mantine/core";
 import type { CSSProperties } from "react";
 
 /**
