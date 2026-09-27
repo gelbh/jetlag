@@ -4,6 +4,9 @@
  * Auth: Bearer SESSION_OPS_MCP_AUTH_SECRET.
  * Binding: X-Jetlag-* headers minted at turn enqueue into mcpServers.headers
  * (never trust model-supplied sessionId/incidentId).
+ *
+ * Tool path mirrors the old sync turn loop:
+ * validate → host confirm (destructive) → consume tool cap → execute.
  */
 
 import { timingSafeEqual } from "node:crypto";
@@ -12,12 +15,24 @@ import {
   SESSION_OPS_TOOLS,
   SESSION_OPS_TOOL_JSON_SCHEMAS,
 } from "./sessionOpsTools.mjs";
-import { SESSION_OPS_UNKNOWN_TOOL } from "./sessionOpsValidate.mjs";
+import {
+  SESSION_OPS_HOST_CONFIRM_REQUIRED,
+  SESSION_OPS_UNKNOWN_TOOL,
+  validateSessionOpsTool,
+} from "./sessionOpsValidate.mjs";
+import {
+  SESSION_OPS_TOOL_CAP,
+  resolveSessionOpsCaps,
+  consumeSessionOpsTool,
+} from "./sessionOpsCaps.mjs";
+import { requestHostConfirm } from "./hostConfirm.mjs";
+import { appendSupportThreadMessage } from "./sessionOpsThread.mjs";
 
 export const SESSION_OPS_MCP_UNAUTHORIZED = "SESSION_OPS_MCP_UNAUTHORIZED";
 export const SESSION_OPS_MCP_HEADER_INCIDENT = "x-jetlag-incident-id";
 export const SESSION_OPS_MCP_HEADER_SESSION = "x-jetlag-session-id";
 export const SESSION_OPS_MCP_HEADER_ACTOR = "x-jetlag-actor-uid";
+export const SESSION_OPS_MCP_HEADER_SUMMON = "x-jetlag-summon-id";
 
 /**
  * @param {string} a
@@ -73,6 +88,7 @@ export function readSessionOpsMcpBinding(headers) {
     incidentId: headerValue(headers, SESSION_OPS_MCP_HEADER_INCIDENT),
     sessionId: headerValue(headers, SESSION_OPS_MCP_HEADER_SESSION),
     actorUid: headerValue(headers, SESSION_OPS_MCP_HEADER_ACTOR),
+    summonId: headerValue(headers, SESSION_OPS_MCP_HEADER_SUMMON),
   };
 }
 
@@ -101,6 +117,264 @@ function stripBindingArgs(args) {
 }
 
 /**
+ * @param {object} outcome
+ */
+function formatToolOutcomeText(outcome) {
+  if (outcome.status === "host_confirm_required") {
+    return `Waiting on session host to confirm “${outcome.tool}”.`;
+  }
+  if (outcome.status === "rejected") {
+    return `Could not run ${outcome.tool ?? "tool"} (${outcome.code ?? "rejected"}).`;
+  }
+  return `Ran ${outcome.tool}.`;
+}
+
+/**
+ * Validate → host confirm | consume tool cap → execute (bound session only).
+ *
+ * @param {{
+ *   incidentId: string,
+ *   sessionId: string,
+ *   actorUid: string,
+ *   summonId: string,
+ *   tool: string,
+ *   args: Record<string, unknown>,
+ * }} input
+ * @param {{
+ *   db?: object,
+ *   execute: Function,
+ *   requestConfirm?: Function,
+ *   consumeTool?: Function,
+ *   resolveCaps?: Function,
+ *   appendSupportMessage?: Function,
+ *   notify?: Function,
+ *   now?: () => Date,
+ *   generateId?: () => string,
+ *   loadIncident?: (incidentId: string) => Promise<object | null>,
+ *   loadSession?: (sessionId: string) => Promise<object | null>,
+ *   loadEntitlements?: (uid: string) => Promise<object | null>,
+ * }} deps
+ */
+export async function runSessionOpsMcpBoundTool(input, deps) {
+  const {
+    incidentId,
+    sessionId,
+    actorUid,
+    tool,
+    args,
+  } = input;
+  let summonId = typeof input.summonId === "string" ? input.summonId : "";
+
+  const now = deps.now ?? (() => new Date());
+  const generateId =
+    deps.generateId ?? (() => `id_${Math.random().toString(36).slice(2)}`);
+
+  const loadIncident =
+    deps.loadIncident ??
+    (async (id) => {
+      if (!deps.db) {
+        return null;
+      }
+      const snap = await deps.db.collection("incidents").doc(id).get();
+      return snap.exists ? (snap.data() ?? null) : null;
+    });
+
+  if (!summonId) {
+    const incident = await loadIncident(incidentId);
+    if (incident && typeof incident.activeSessionOpsSummonId === "string") {
+      summonId = incident.activeSessionOpsSummonId;
+    } else if (
+      incident?.supportAgentRun &&
+      typeof incident.supportAgentRun.summonId === "string"
+    ) {
+      summonId = incident.supportAgentRun.summonId;
+    }
+  }
+
+  const validation = validateSessionOpsTool({
+    tool,
+    args,
+    sessionId,
+    incidentSessionId: sessionId,
+    hostConfirmed: false,
+  });
+
+  if (!validation.ok && !validation.gate) {
+    return {
+      status: "rejected",
+      tool: validation.toolId ?? tool,
+      code: validation.code ?? SESSION_OPS_UNKNOWN_TOOL,
+      args,
+    };
+  }
+
+  const appendMessage =
+    deps.appendSupportMessage ??
+    (deps.db
+      ? (message) =>
+          appendSupportThreadMessage(deps.db, incidentId, message, generateId)
+      : null);
+
+  if (validation.gate) {
+    const requestConfirm = deps.requestConfirm ?? requestHostConfirm;
+    if (typeof requestConfirm !== "function") {
+      throw new Error("SESSION_OPS_MCP_CONFIRM_MISSING");
+    }
+    const confirm = await requestConfirm(
+      deps.db,
+      {
+        incidentId,
+        sessionId,
+        tool: validation.toolId,
+        args: validation.args,
+        requestedByUid: actorUid,
+      },
+      {
+        now,
+        generateId,
+        notify: deps.notify,
+      },
+    );
+    const outcome = {
+      status: "host_confirm_required",
+      tool: validation.toolId,
+      code: SESSION_OPS_HOST_CONFIRM_REQUIRED,
+      args: validation.args,
+      confirmId: confirm.confirmId,
+      expiresAt: confirm.expiresAt,
+    };
+    if (typeof appendMessage === "function") {
+      await appendMessage({
+        sender: "system",
+        senderUid: null,
+        kind: "host_confirm",
+        text: formatToolOutcomeText(outcome),
+        visibility: "support",
+        toolCall: {
+          name: validation.toolId,
+          args: validation.args,
+          status: outcome.status,
+          code: outcome.code,
+          confirmId: outcome.confirmId,
+        },
+        createdAt: now().toISOString(),
+      });
+    }
+    return outcome;
+  }
+
+  const loadSession =
+    deps.loadSession ??
+    (async (id) => {
+      if (!deps.db) {
+        return null;
+      }
+      const snap = await deps.db.collection("sessions").doc(id).get();
+      return snap.exists ? (snap.data() ?? null) : null;
+    });
+  const loadEntitlements =
+    deps.loadEntitlements ??
+    (async (uid) => {
+      if (!deps.db) {
+        return null;
+      }
+      const snap = await deps.db.collection("users").doc(uid).get();
+      return snap.exists ? (snap.data() ?? null) : null;
+    });
+
+  const resolveCaps = deps.resolveCaps ?? resolveSessionOpsCaps;
+  let caps;
+  if (deps.resolveCaps) {
+    caps = resolveCaps();
+  } else {
+    const incident = await loadIncident(incidentId);
+    const session = await loadSession(sessionId);
+    const entitlementsData = await loadEntitlements(
+      typeof incident?.reporterUid === "string" ? incident.reporterUid : actorUid,
+    );
+    caps = resolveCaps({
+      entitlementsData,
+      sessionTier: typeof session?.tier === "string" ? session.tier : null,
+    });
+  }
+
+  const consumeTool = deps.consumeTool ?? consumeSessionOpsTool;
+  const toolCap = await consumeTool(
+    deps.db,
+    {
+      incidentId,
+      summonId,
+      uid: actorUid,
+      caps,
+      nowMs: now().getTime(),
+    },
+    {},
+  );
+  if (!toolCap.ok) {
+    const outcome = {
+      status: "rejected",
+      tool: validation.toolId,
+      code: toolCap.code ?? SESSION_OPS_TOOL_CAP,
+      args: validation.args,
+    };
+    if (typeof appendMessage === "function") {
+      await appendMessage({
+        sender: "system",
+        senderUid: null,
+        kind: "tool_result",
+        text: formatToolOutcomeText(outcome),
+        visibility: "support",
+        toolCall: {
+          name: validation.toolId,
+          args: validation.args,
+          status: outcome.status,
+          code: outcome.code,
+        },
+        createdAt: now().toISOString(),
+      });
+    }
+    return outcome;
+  }
+
+  if (typeof deps.execute !== "function") {
+    throw new Error("SESSION_OPS_MCP_EXECUTE_MISSING");
+  }
+
+  const result = await deps.execute({
+    incidentId,
+    sessionId,
+    actorUid,
+    tool: validation.toolId,
+    args: validation.args,
+    hostConfirmed: false,
+  });
+
+  const outcome = {
+    status: result?.status ?? "accepted",
+    tool: validation.toolId,
+    args: validation.args,
+    result,
+  };
+  if (typeof appendMessage === "function") {
+    await appendMessage({
+      sender: "system",
+      senderUid: null,
+      kind: "tool_result",
+      text: formatToolOutcomeText(outcome),
+      visibility: "support",
+      toolCall: {
+        name: validation.toolId,
+        args: validation.args,
+        status: outcome.status,
+        code: null,
+      },
+      createdAt: now().toISOString(),
+    });
+  }
+  return outcome;
+}
+
+/**
  * Core JSON-RPC MCP handler (streamable-HTTP compatible request body).
  *
  * @param {{
@@ -109,13 +383,15 @@ function stripBindingArgs(args) {
  * }} request
  * @param {{
  *   authSecret: string,
- *   execute?: (input: {
- *     incidentId: string,
- *     sessionId: string,
- *     actorUid: string,
- *     tool: string,
- *     args: Record<string, unknown>,
- *   }) => Promise<unknown>,
+ *   db?: object,
+ *   execute?: Function,
+ *   requestConfirm?: Function,
+ *   consumeTool?: Function,
+ *   resolveCaps?: Function,
+ *   appendSupportMessage?: Function,
+ *   notify?: Function,
+ *   now?: () => Date,
+ *   generateId?: () => string,
  * }} deps
  * @returns {Promise<{ status: number, body: Record<string, unknown> }>}
  */
@@ -222,17 +498,17 @@ export async function handleSessionOpsMcpRequest(request, deps) {
 
     const args = stripBindingArgs(params.arguments);
     try {
-      const execute = deps.execute;
-      if (typeof execute !== "function") {
-        throw new Error("SESSION_OPS_MCP_EXECUTE_MISSING");
-      }
-      const outcome = await execute({
-        incidentId: binding.incidentId,
-        sessionId: binding.sessionId,
-        actorUid: binding.actorUid,
-        tool: toolName,
-        args,
-      });
+      const outcome = await runSessionOpsMcpBoundTool(
+        {
+          incidentId: binding.incidentId,
+          sessionId: binding.sessionId,
+          actorUid: binding.actorUid,
+          summonId: binding.summonId,
+          tool: toolName,
+          args,
+        },
+        deps,
+      );
       return {
         status: 200,
         body: {
