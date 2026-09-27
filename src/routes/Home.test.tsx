@@ -1,7 +1,9 @@
-import { act, fireEvent, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { MantineProvider } from "@mantine/core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Home } from "./Home";
+import { APP_VERSION } from "../domain/device/changelog";
+import { LEGAL_APP_NAME } from "../domain/legal/legalContact";
 import { LOCAL_SESSION_ID } from "../domain/map/annotations";
 import { renderWithRouter } from "../test/renderWithRouter";
 import { createTestRemoteSession, createTestSession } from "../test/fixtures/sessions";
@@ -187,6 +189,62 @@ describe("Home", () => {
     const main = screen.getByRole("main");
     expect(main.className).toContain("justify-center");
     expect(main.className).toContain("overflow-y-auto");
+  });
+
+  it("renders the brand mark and LEGAL_APP_NAME heading", () => {
+    renderHome();
+
+    expect(
+      screen.getByRole("heading", { level: 1, name: LEGAL_APP_NAME }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("img", { name: LEGAL_APP_NAME }),
+    ).toBeInTheDocument();
+  });
+
+  it("keeps the brand mark left of the title in a nowrap lockup", () => {
+    renderHome();
+
+    const heading = screen.getByRole("heading", {
+      level: 1,
+      name: LEGAL_APP_NAME,
+    });
+    const logo = screen.getByRole("img", { name: LEGAL_APP_NAME });
+    const lockup = heading.parentElement;
+
+    expect(lockup).not.toBeNull();
+    expect(lockup).toContainElement(logo);
+    expect(lockup!.style.getPropertyValue("--group-wrap").trim()).toBe(
+      "nowrap",
+    );
+    expect(
+      logo.compareDocumentPosition(heading) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    expect(String(logo.getAttribute("class") ?? "")).toContain("shrink-0");
+    expect(heading.style.minWidth).toMatch(/^0(px)?$/);
+  });
+
+  it("opens and closes the version changelog sheet", async () => {
+    renderHome();
+
+    const versionControl = screen.getByRole("button", {
+      name: `Version ${APP_VERSION}. Open changelog`,
+    });
+    expect(versionControl).toHaveTextContent(`v${APP_VERSION}`);
+    expect(screen.queryByRole("dialog", { name: "Changelog" })).not.toBeInTheDocument();
+
+    fireEvent.click(versionControl);
+
+    const changelog = await screen.findByRole("dialog", { name: "Changelog" });
+    expect(changelog).toBeInTheDocument();
+
+    fireEvent.click(within(changelog).getByRole("button", { name: "Close" }));
+
+    await waitFor(() => {
+      expect(
+        screen.queryByRole("dialog", { name: "Changelog" }),
+      ).not.toBeInTheDocument();
+    });
   });
 
   it("clears verifying when ensureFreshAnonymousUser times out", async () => {
