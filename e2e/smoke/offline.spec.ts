@@ -1,9 +1,4 @@
-import {
-  test,
-  expect,
-  clickMapCenter,
-  selectDrawTool,
-} from "../fixtures";
+import { test, expect, placePin } from "../fixtures";
 
 test("@smoke keeps the map usable while offline", async ({
   localMap,
@@ -13,9 +8,7 @@ test("@smoke keeps the map usable while offline", async ({
 
   await test.step("go offline and place a pin", async () => {
     await context.setOffline(true);
-    await selectDrawTool(localMap, "Pin");
-    await clickMapCenter(localMap);
-    await expect(localMap.getByText("Location pinned on the map.")).toBeVisible();
+    await placePin(localMap, "Offline pin");
   });
 
   await test.step("restore network; dock tools still reachable", async () => {

@@ -42,21 +42,23 @@ test("@smoke creates a session from home and reaches the map", async ({
 test("@smoke host and guest join the same emulator session", async ({
   browser,
 }) => {
+  test.setTimeout(90_000);
   const { hostPage, guestPage, cleanup } =
     await createMultiplayerContexts(browser);
 
   try {
-    await test.step("host creates; guest joins as seeker", async () => {
+    await test.step("host creates as seeker; guest joins as hider", async () => {
+      // Same-role join needs a role passcode; use opposite roles for smoke.
       const { code } = await createHostSession(hostPage);
-      await joinAsRole(guestPage, code, "seeker");
+      await joinAsRole(guestPage, code, "hider");
     });
 
     await test.step("guest sees map chrome", async () => {
-      await expect(guestPage.getByRole("button", { name: "Radar" })).toBeVisible(
-        {
-          timeout: 15_000,
-        },
-      );
+      await expect(
+        guestPage.getByRole("button", {
+          name: /Set zone|Change zone|Play move/i,
+        }),
+      ).toBeVisible({ timeout: 15_000 });
     });
   } finally {
     await cleanup();

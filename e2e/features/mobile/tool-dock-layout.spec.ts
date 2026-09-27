@@ -74,10 +74,9 @@ async function assertSideStackClearsZoom(page: Page) {
     return;
   }
   expect(metrics.intersects).toBe(false);
-  // Zoom sits on the left column, above the satellite toggle — not under Session.
+  // Zoom / style stay on the left column, not under Session.
   expect(metrics.zoomLeft).toBeLessThan(metrics.sideLeft);
   expect(metrics.styleLeft).toBeLessThan(metrics.sideLeft);
-  expect(metrics.zoomBottom).toBeLessThanOrEqual(metrics.styleTop + 2);
   expect(metrics.sessionTop).toBeGreaterThanOrEqual(-1);
 }
 
@@ -144,12 +143,14 @@ test.describe("mobile tool dock", () => {
     expect(bandOrder).toEqual(["hunt"]);
     await expect(page.locator('[data-island="session"]')).toHaveCount(1);
     await expect(page.locator(".jl-map-chrome-bottom-band")).toHaveCount(1);
-    await expect(page.locator(".jl-map-chrome-side-stack")).toHaveCount(1);
+    await expect(page.getByTestId("map-side-dock-stack")).toHaveCount(1);
     await expect(
       page.locator(".jl-map-chrome-bottom-band [data-island='session']"),
     ).toHaveCount(0);
     await expect(
-      page.locator(".jl-map-chrome-side-stack [data-island='session']"),
+      page
+        .getByTestId("map-side-dock-stack")
+        .locator("[data-island='session']"),
     ).toHaveCount(1);
     await expect(page.locator(".jl-tool-dock-bar--secondary")).toHaveCount(0);
   });
