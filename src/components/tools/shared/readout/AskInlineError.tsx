@@ -1,4 +1,6 @@
 /* eslint-disable react-refresh/only-export-components -- helpers share the Ask inline-error copy module with the component */
+import { Alert } from "@mantine/core";
+
 type AskInlineErrorProps = {
   message: string;
   id?: string;
@@ -59,47 +61,21 @@ export function isLocationInlineError(message: string): boolean {
 }
 
 /**
- * Soft iOS-style inline error for Ask sheets and related HUD panels.
- * Replaces bare `text-halt` paragraphs.
+ * Soft inline error for Ask sheets and related HUD panels (channel 3).
  */
 export function AskInlineError({ message, id }: AskInlineErrorProps) {
   const { title, detail } = askInlineErrorCopy(message);
 
   return (
-    <div
+    <Alert
       id={id}
       role="alert"
+      color="halt"
+      variant="light"
+      title={title}
       data-testid="ask-inline-error"
-      style={{
-        borderRadius: 14,
-        padding: "0.75rem 0.875rem",
-        backgroundColor: "oklch(from var(--color-canvas) l c h / 0.96)",
-        border: "0.33px solid oklch(from var(--color-halt) l c h / 0.4)",
-        backdropFilter: "blur(20px) saturate(1.25)",
-        WebkitBackdropFilter: "blur(20px) saturate(1.25)",
-        boxShadow: "0 4px 16px 0 oklch(0.12 0.04 25 / 0.18)",
-      }}
     >
-      <p
-        style={{
-          margin: 0,
-          fontSize: "0.875rem",
-          fontWeight: 650,
-          color: "var(--color-halt)",
-        }}
-      >
-        {title}
-      </p>
-      <p
-        style={{
-          margin: "0.25rem 0 0",
-          fontSize: "0.8125rem",
-          lineHeight: 1.35,
-          color: "var(--color-field-ink)",
-        }}
-      >
-        {detail}
-      </p>
-    </div>
+      {detail}
+    </Alert>
   );
 }

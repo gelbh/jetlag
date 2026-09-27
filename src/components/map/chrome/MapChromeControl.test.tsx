@@ -44,7 +44,7 @@ describe("MapChromeControl", () => {
   });
 
   it("exposes pressed state for toggle controls", () => {
-    render(
+    renderControl(
       <MapChromeControl
         aria-label="Switch to map view"
         pressed
@@ -58,7 +58,7 @@ describe("MapChromeControl", () => {
   });
 
   it("keeps legacy floating size classes via className", () => {
-    render(
+    renderControl(
       <MapChromeControl
         className="map-zoom-control__btn"
         aria-label="Zoom in"
@@ -128,7 +128,7 @@ describe("MapChromeControl", () => {
   });
 
   it("prefers children over icon/label slots", () => {
-    render(
+    renderControl(
       <MapChromeControl
         aria-label="Custom"
         icon={<span data-testid="fallback-icon">icon</span>}
@@ -145,7 +145,7 @@ describe("MapChromeControl", () => {
 
   it("honors disabled", () => {
     const onClick = vi.fn();
-    render(
+    renderControl(
       <MapChromeControl
         aria-label="Zoom out"
         disabled
@@ -161,16 +161,14 @@ describe("MapChromeControl", () => {
   });
 
   it("mounts Mantine slot chrome", () => {
-    render(
-      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
-        <MapChromeControl
-          variant="slot"
-          aria-label="Matching"
-          icon={<span data-testid="mantine-slot-icon">m</span>}
-          label="Match"
-          pressed
-        />
-      </MantineProvider>,
+    renderControl(
+      <MapChromeControl
+        variant="slot"
+        aria-label="Matching"
+        icon={<span data-testid="mantine-slot-icon">m</span>}
+        label="Match"
+        pressed
+      />,
     );
 
     const button = screen.getByRole("button", { name: "Matching" });
@@ -178,7 +176,7 @@ describe("MapChromeControl", () => {
     expect(button).not.toHaveClass("jl-tool-slot-active");
     expect(button).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByTestId("mantine-slot-icon")).toBeInTheDocument();
-    expect(screen.getByText("Match")).not.toHaveClass("jl-tool-slot-label");
+    expect(screen.getByText("Match")).toHaveClass("jl-tool-slot-label");
     expect(screen.getByText("Match").getAttribute("data-ios-tool-label")).toBe(
       "",
     );

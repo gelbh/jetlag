@@ -1,4 +1,5 @@
 import { useRef, type ReactNode, type RefObject } from "react";
+import { sheetHandleStyle } from "@/components/ui/entry/entryStyles";
 import type { SheetHandleProps } from "@/hooks/motion/useSheetGesture";
 
 interface MobileSheetProps {
@@ -49,10 +50,10 @@ export function MobileSheet({
       className="jl-sheet-drag-handle mx-auto mb-3 flex w-full justify-center py-1"
       {...handleProps}
     >
-      <span className="jl-sheet-handle" aria-hidden="true" />
+      <span style={sheetHandleStyle} aria-hidden="true" />
     </button>
   ) : variant === "overlay" ? (
-    <div className="jl-sheet-handle" aria-hidden="true" />
+    <div style={sheetHandleStyle} aria-hidden="true" />
   ) : null;
 
   const scrollClassName = scrollIdle ? "hud-sheet-scroll--idle" : "";
@@ -63,7 +64,7 @@ export function MobileSheet({
     const splitHandle =
       handle ??
       (variant === "nested" ? (
-        <div className="jl-sheet-handle" aria-hidden="true" />
+        <div style={sheetHandleStyle} aria-hidden="true" />
       ) : null);
     return (
       <div className={`${positionClass} hud-sheet ${className}`}>
