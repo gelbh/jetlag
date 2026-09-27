@@ -17,6 +17,17 @@ import {
 } from "../../fixtures";
 import type { Page } from "@playwright/test";
 
+/** Expand landscape map chrome when collapsed. Lives outside `test()` so conditionals stay off the rule. */
+async function ensureLandscapeMapChromeExpanded(page: Page) {
+  const show = page.getByRole("button", { name: /Show map controls/i });
+  if (await show.isVisible()) {
+    await show.click();
+  }
+  await expect(
+    page.getByRole("button", { name: /Show map controls|Hide map controls/i }),
+  ).toHaveAttribute("aria-expanded", "true");
+}
+
 async function assertSideStackClearsZoom(page: Page) {
   // Session dock (right) must clear the nav dock (left: sat / zoom / compass).
   const sideStack = page.locator("[data-chrome-side-stack='phone']");
@@ -479,10 +490,7 @@ test.describe("landscape map-dominant chrome", () => {
       name: /Show map controls|Hide map controls/i,
     });
     await expect(chip).toBeVisible();
-    if ((await chip.getAttribute("aria-expanded")) === "false") {
-      await chip.click();
-    }
-    await expect(chip).toHaveAttribute("aria-expanded", "true");
+    await ensureLandscapeMapChromeExpanded(page);
     await expect(
       page.locator('.map-chrome-hud[data-landscape-chrome="revealed"]'),
     ).toBeVisible();
