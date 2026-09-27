@@ -1,6 +1,5 @@
 import { Button, Group } from "@mantine/core";
 import { MapFirstRunSheet } from "../../components/session/mapChrome/MapFirstRunSheet";
-import { MapToolsHintBanner } from "../../components/session/mapChrome/MapToolsHintBanner";
 import { AskHudHost } from "../../components/tools/ask/AskHudHost";
 import { ToolFloatingPanel } from "../../components/tools/ToolFloatingPanel";
 import {
@@ -174,16 +173,6 @@ export function SeekerChromeOverlays({
 
   return (
     <>
-      <MapToolsHintBanner
-        hidden={
-          !timer.hasStarted ||
-          activeTool !== "none" ||
-          overlay.isSettingsOpen ||
-          Boolean(selectedAnnotation) ||
-          Boolean(geometryEditAnnotation && geometryDraft)
-        }
-      />
-
       {geometryEditAnnotation && geometryDraft ? (
         <div className="pointer-events-auto absolute inset-x-0 jl-panel-above-dock jl-panel-enter z-[var(--z-panel)] px-3">
           <Group
