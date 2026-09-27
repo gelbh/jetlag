@@ -3,10 +3,7 @@ import turfCircle from "@turf/circle";
 import { point as turfPoint } from "@turf/helpers";
 import type { Feature, LineString, Polygon as GeoPolygon } from "geojson";
 import { computeEliminationUnionInputTs } from "../adapter/eliminationMask";
-import {
-  buildEndGameMaskFromDisks,
-  buildMaskFromUnionInput,
-} from "../kernel/buildMask";
+import { clipMaskToGameArea } from "../kernel/clipMask";
 import {
   wasmBuildEndGameMaskFromDisks,
   wasmBuildMaskFromUnionInput,
@@ -24,7 +21,7 @@ import {
   type PolygonFeature,
 } from "../kernel/unionPolygonFeatures";
 import type { AnnotationRecord, GameArea } from "../../map/annotations";
-import type { LatLngTuple } from "../kernel/types";
+import type { GameAreaGeometry, LatLngTuple } from "../kernel/types";
 
 const runGeometryPerf = process.env.GEOMETRY_PERF === "1";
 
@@ -193,9 +190,13 @@ describe.skipIf(!runGeometryPerf)("geometry performance gates", () => {
       matchingAnnotation(`a-${index}`, -0.19 + index * 0.01),
     );
     const input = computeEliminationUnionInputTs(annotations, gameArea, []);
+    const area = gameArea as GameAreaGeometry;
 
     const martinezMs = measureMedianMs(() => {
-      buildMaskFromUnionInput(input, gameArea);
+      const unioned = unionEliminationParts(input);
+      if (unioned) {
+        clipMaskToGameArea(unioned, area);
+      }
     });
     const turfMs = measureMedianMs(() => {
       const features = annotations.map(
@@ -220,7 +221,7 @@ describe.skipIf(!runGeometryPerf)("geometry performance gates", () => {
     expect(circleUnionMs / turfMs).toBeLessThan(0.1);
   });
 
-  it("wasm_mask_8_polys median within 1.1x ts", async () => {
+  it("wasm_mask_8_polys median under 50ms", async () => {
     const input: EliminationUnionInput = {
       polygons: Array.from({ length: 8 }, (_, index) =>
         squareFeature(-0.19 + index * 0.01),
@@ -231,29 +232,23 @@ describe.skipIf(!runGeometryPerf)("geometry performance gates", () => {
     // Warm WASM once so init cost is outside the median window.
     await wasmBuildMaskFromUnionInput(input, gameArea);
 
-    const tsMs = measureMedianMs(() => {
-      buildMaskFromUnionInput(input, gameArea);
-    });
     const wasmMs = await measureMedianMsAsync(async () => {
       await wasmBuildMaskFromUnionInput(input, gameArea);
     });
 
-    expect(wasmMs / tsMs).toBeLessThanOrEqual(1.1);
+    expect(wasmMs).toBeLessThan(50);
   });
 
-  it("wasm_end_game_10_disks median within 1.1x ts", async () => {
+  it("wasm_end_game_10_disks median under 100ms", async () => {
     const disks = circleDisks(10);
 
     await wasmBuildEndGameMaskFromDisks(gameArea, disks);
 
-    const tsMs = measureMedianMs(() => {
-      buildEndGameMaskFromDisks(gameArea, disks);
-    });
     const wasmMs = await measureMedianMsAsync(async () => {
       await wasmBuildEndGameMaskFromDisks(gameArea, disks);
     });
 
-    expect(wasmMs / tsMs).toBeLessThanOrEqual(1.1);
+    expect(wasmMs).toBeLessThan(100);
   });
 
   // Direct WASM calls (bypass KERNEL_WASM_READY) — gates for future ready flip.
