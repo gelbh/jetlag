@@ -23,10 +23,6 @@ vi.mock("../../../hooks/forms/useCopyFeedback", () => ({
   }),
 }));
 
-vi.mock("../../../hooks/layout/useDesktopLayout", () => ({
-  useDesktopLayout: () => false,
-}));
-
 const gatedSession = createTestRemoteSession({
   id: "sess-1",
   memberUids: ["host-1"],
