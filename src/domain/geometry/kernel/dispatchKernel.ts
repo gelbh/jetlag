@@ -25,7 +25,7 @@ export type DispatchKernelSyncOptions<T> = {
 };
 
 /**
- * Sync TS-only path while entrypoint is not ready (or mode is ts).
+ * Sync TS-only path while entrypoint is not ready.
  * When WASM would run, throws — callers must use async {@link dispatchKernel}.
  */
 export function dispatchKernelSync<T>(
@@ -51,8 +51,6 @@ export async function dispatchKernel<T>(
   const useWasm = shouldUseWasm(mode, entrypoint);
 
   switch (mode) {
-    case "ts":
-      return runTs();
     case "wasm":
       if (!useWasm) {
         return runTs();

@@ -22,7 +22,6 @@ describe("shouldUseWasm", () => {
     expect(shouldUseWasm("wasm", "geodesicLineBuffer")).toBe(true);
     expect(shouldUseWasm("wasm", "maskFromUnionInput")).toBe(true);
     expect(shouldUseWasm("wasm", "nearRegionBatch")).toBe(true);
-    expect(shouldUseWasm("ts", "halfPlane")).toBe(false);
     expect(shouldUseWasm("dual", "halfPlane")).toBe(true);
     expect(shouldUseWasm("dual", "geodesicLineBuffer")).toBe(true);
     expect(shouldUseWasm("dual", "nearRegionBatch")).toBe(true);
