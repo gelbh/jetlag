@@ -10,6 +10,7 @@ import {
 import {
   getLocationPermissionUiSnapshot,
   hasPersistedLocationAccessConfirmed,
+  markLocationAccessConfirmed,
   persistLocationAccessConfirmed,
   resetLocationPermissionUiForTests,
 } from "./locationPermissionUi";
@@ -142,4 +143,36 @@ describe("geolocation permission gating", () => {
     expect(hasPersistedLocationAccessConfirmed()).toBe(false);
     expect(getLocationPermissionUiSnapshot().confirmEpoch).toBe(0);
   });
+
+  it("restoreLocationAccessIfPersisted skips without geolocation when already confirmed in session", async () => {
+    mockGeolocation(createMockGeolocationPosition(53.35, -6.26));
+    mockPermissions("prompt");
+    persistLocationAccessConfirmed();
+    markLocationAccessConfirmed();
+    const getCurrentPosition = vi.mocked(navigator.geolocation.getCurrentPosition);
+
+    await expect(restoreLocationAccessIfPersisted({ highAccuracy: false })).resolves.toBe(
+      "skipped",
+    );
+    expect(getCurrentPosition).not.toHaveBeenCalled();
+    expect(hasPersistedLocationAccessConfirmed()).toBe(true);
+  });
+
+  it.each([
+    { errorCode: 2 as const, label: "POSITION_UNAVAILABLE" },
+    { errorCode: 3 as const, label: "TIMEOUT" },
+  ])(
+    "restoreLocationAccessIfPersisted returns failed and keeps persist on $label",
+    async ({ errorCode }) => {
+      mockGeolocation(null, errorCode);
+      mockPermissions("prompt");
+      persistLocationAccessConfirmed();
+
+      await expect(restoreLocationAccessIfPersisted({ highAccuracy: false })).resolves.toBe(
+        "failed",
+      );
+      expect(hasPersistedLocationAccessConfirmed()).toBe(true);
+      expect(getLocationPermissionUiSnapshot().confirmEpoch).toBe(0);
+    },
+  );
 });
