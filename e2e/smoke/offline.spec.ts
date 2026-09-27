@@ -2,6 +2,7 @@ import { test, expect } from "../fixtures";
 import {
   clickMapAtLatLng,
   E2E_GEOLOCATION,
+  MAP_CONTAINER_SELECTOR,
   openMapWithLocalSession,
   selectDrawTool,
 } from "../fixtures";
@@ -9,6 +10,17 @@ import {
 test("@smoke keeps the map usable while offline", async ({ page, context }) => {
   test.setTimeout(60_000);
   await openMapWithLocalSession(page);
+
+  // Fail-closed: do not use waitForMapTilesLoaded (soft early-return if the
+  // container is missing). Map must be ready before setOffline cuts network.
+  const map = page.locator(MAP_CONTAINER_SELECTOR).first();
+  await expect(map).toBeVisible({ timeout: 15_000 });
+  await expect
+    .poll(async () => page.locator(".maplibregl-canvas").count(), {
+      timeout: 30_000,
+    })
+    .toBeGreaterThan(0);
+
   await context.setOffline(true);
 
   await selectDrawTool(page, "Pin");
