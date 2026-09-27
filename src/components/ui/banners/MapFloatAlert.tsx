@@ -38,7 +38,7 @@ export function MapFloatAlertPanel({
   role = "alert",
 }: MapFloatAlertPanelProps) {
   return (
-    <MapFloatSurface tone="halt" role={role} className={className}>
+    <MapFloatSurface tone="halt" role={role} className={className} actionRow>
       {children}
     </MapFloatSurface>
   );

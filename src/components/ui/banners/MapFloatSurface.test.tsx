@@ -72,4 +72,20 @@ describe("MapFloatAlert wrappers", () => {
     );
     expect(screen.getByRole("alert")).toHaveTextContent("Outside the zone");
   });
+
+  it("MapFloatAlertPanel keeps copy and actions in a flex action row", () => {
+    render(
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
+        <MapFloatAlertPanel>
+          <span>Outside the zone</span>
+          <button type="button">Dismiss</button>
+        </MapFloatAlertPanel>
+      </MantineProvider>,
+    );
+    const panel = screen.getByRole("alert");
+    const style = getComputedStyle(panel);
+    expect(style.display).toBe("flex");
+    expect(style.justifyContent).toBe("space-between");
+    expect(style.alignItems).toBe("center");
+  });
 });

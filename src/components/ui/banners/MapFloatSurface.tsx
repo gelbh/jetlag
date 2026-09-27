@@ -13,6 +13,8 @@ export type MapFloatSurfaceProps = {
   "aria-labelledby"?: string;
   "aria-describedby"?: string;
   className?: string;
+  /** Paper path: copy + actions side-by-side (MapFloatAlertPanel). */
+  actionRow?: boolean;
 };
 
 const toneAccent: Record<MapFloatTone, string> = {
@@ -58,6 +60,7 @@ export function MapFloatSurface({
   "aria-labelledby": ariaLabelledby,
   "aria-describedby": ariaDescribedby,
   className,
+  actionRow = false,
 }: MapFloatSurfaceProps) {
   const styles = floatToneStyles(tone);
   const a11y = {
@@ -74,7 +77,19 @@ export function MapFloatSurface({
         radius={jetlagBrand.controlRadius}
         p="sm"
         className={className}
-        styles={{ root: styles.root }}
+        styles={{
+          root: {
+            ...styles.root,
+            ...(actionRow
+              ? {
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: "0.75rem",
+                }
+              : null),
+          },
+        }}
         {...a11y}
       >
         {children}
