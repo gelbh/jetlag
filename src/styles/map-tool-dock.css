@@ -4,7 +4,7 @@
  * home-card-btn press scale. */
 @layer components {
   /* Narrow phone: shrink hunt/session tool slots (was pre-Mantine map-tool-dock). */
-  @media (max-width: 28rem) {
+  @media (width <= 28rem) {
     .jl-tool-slot {
       min-width: 2.125rem !important;
       padding-inline: 0.0625rem !important;
@@ -38,7 +38,7 @@
     border: none;
   }
 
-  html:not([data-motion="reduced"]):not([data-motion="static"]) .jl-panel-above-dock.jl-panel-chrome-hidden {
+  html:not([data-motion="reduced"], [data-motion="static"]) .jl-panel-above-dock.jl-panel-chrome-hidden {
     transition: none;
   }
 
@@ -112,7 +112,7 @@
     align-items: center;
     justify-content: center;
     border-radius: var(--radius-hud-md);
-    border: 1px solid oklch(from var(--color-border) l c h / 0.85);
+    border: 1px solid oklch(from var(--color-border) l c h / 85%);
     background: var(--color-surface-panel);
     color: var(--color-ink-muted);
     box-shadow: none;
@@ -125,12 +125,12 @@
   .wizard-step-nav-btn:hover:not(:disabled) {
     background: var(--color-surface-raised);
     color: var(--color-highlight);
-    border-color: oklch(from var(--color-highlight) l c h / 0.45);
+    border-color: oklch(from var(--color-highlight) l c h / 45%);
   }
 
   .wizard-step-nav-btn.is-ready {
     color: var(--color-highlight);
-    border-color: oklch(from var(--color-highlight) l c h / 0.55);
+    border-color: oklch(from var(--color-highlight) l c h / 55%);
   }
 
   .wizard-step-nav-btn:disabled {
@@ -149,7 +149,7 @@
     overscroll-behavior: contain;
   }
 
-  html:not([data-motion="reduced"]):not([data-motion="static"]) .jl-unread-badge-pulse {
+  html:not([data-motion="reduced"], [data-motion="static"]) .jl-unread-badge-pulse {
     animation: jl-unread-pulse 600ms var(--ease-out-quint) 1;
   }
 
@@ -165,13 +165,13 @@
     cursor: grabbing;
   }
 
-  html:not([data-motion="reduced"]):not([data-motion="static"]) .btn-primary,
-  html:not([data-motion="reduced"]):not([data-motion="static"]) .btn-secondary {
+  html:not([data-motion="reduced"], [data-motion="static"]) .btn-primary,
+  html:not([data-motion="reduced"], [data-motion="static"]) .btn-secondary {
     transition: transform var(--motion-instant) var(--ease-out-quint);
   }
 
-  html:not([data-motion="reduced"]):not([data-motion="static"]) .btn-primary:active:not(:disabled),
-  html:not([data-motion="reduced"]):not([data-motion="static"]) .btn-secondary:active:not(:disabled) {
+  html:not([data-motion="reduced"], [data-motion="static"]) .btn-primary:active:not(:disabled),
+  html:not([data-motion="reduced"], [data-motion="static"]) .btn-secondary:active:not(:disabled) {
     transform: scale(0.97);
   }
 
@@ -203,6 +203,6 @@
     margin: 0.375rem;
     border: 2px solid var(--color-border);
     border-top: 3px solid var(--color-highlight);
-    background: oklch(from var(--color-surface-deep) l c h / 0.96);
+    background: oklch(from var(--color-surface-deep) l c h / 96%);
   }
 }
