@@ -5,8 +5,14 @@ import {
   LOCATION_BLOCKED_MESSAGE,
   queryGeolocationPermission,
   requestLocationAccess,
+  restoreLocationAccessIfPersisted,
 } from "./geolocation";
-import { resetLocationPermissionUiForTests } from "./locationPermissionUi";
+import {
+  getLocationPermissionUiSnapshot,
+  hasPersistedLocationAccessConfirmed,
+  persistLocationAccessConfirmed,
+  resetLocationPermissionUiForTests,
+} from "./locationPermissionUi";
 import {
   createMockGeolocationPosition,
   mockGeolocation,
@@ -91,5 +97,49 @@ describe("geolocation permission gating", () => {
       lat: 53.35,
       lng: -6.26,
     });
+  });
+
+  it("confirmAndRequestLocationAccess persists the confirmation flag", async () => {
+    mockGeolocation(createMockGeolocationPosition(53.35, -6.26));
+    mockPermissions("prompt");
+
+    await confirmAndRequestLocationAccess({ highAccuracy: false });
+
+    expect(hasPersistedLocationAccessConfirmed()).toBe(true);
+    expect(getLocationPermissionUiSnapshot().confirmEpoch).toBeGreaterThan(0);
+  });
+
+  it("restoreLocationAccessIfPersisted is a no-op without the flag", async () => {
+    mockGeolocation(createMockGeolocationPosition(53.35, -6.26));
+    mockPermissions("prompt");
+    const getCurrentPosition = vi.mocked(navigator.geolocation.getCurrentPosition);
+
+    await expect(restoreLocationAccessIfPersisted()).resolves.toBe("skipped");
+    expect(getCurrentPosition).not.toHaveBeenCalled();
+    expect(getLocationPermissionUiSnapshot().confirmEpoch).toBe(0);
+  });
+
+  it("restoreLocationAccessIfPersisted quiet-reads and marks confirm when flag is set", async () => {
+    mockGeolocation(createMockGeolocationPosition(53.35, -6.26));
+    mockPermissions("prompt");
+    persistLocationAccessConfirmed();
+
+    await expect(restoreLocationAccessIfPersisted({ highAccuracy: false })).resolves.toBe(
+      "restored",
+    );
+    expect(navigator.geolocation.getCurrentPosition).toHaveBeenCalledOnce();
+    expect(getLocationPermissionUiSnapshot().confirmEpoch).toBeGreaterThan(0);
+  });
+
+  it("restoreLocationAccessIfPersisted clears the flag when location is blocked", async () => {
+    mockGeolocation(null);
+    mockPermissions("prompt");
+    persistLocationAccessConfirmed();
+
+    await expect(restoreLocationAccessIfPersisted({ highAccuracy: false })).resolves.toBe(
+      "denied",
+    );
+    expect(hasPersistedLocationAccessConfirmed()).toBe(false);
+    expect(getLocationPermissionUiSnapshot().confirmEpoch).toBe(0);
   });
 });
