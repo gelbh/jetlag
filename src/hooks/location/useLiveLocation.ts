@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } fr
 import { haversineMeters } from "../../domain/geometry/gameArea/distance";
 import {
   getCurrentPosition,
+  restoreLocationAccessIfPersisted,
   queryGeolocationPermission,
   requestLocationAccess,
   unknownGeolocationErrorMessage,
@@ -13,6 +14,7 @@ import {
   getLocationPermissionUiSnapshot,
   retainLocationPermissionDemand,
   subscribeLocationPermissionUi,
+  persistLocationAccessConfirmed,
 } from "../../services/core/location/locationPermissionUi";
 
 interface UseLiveLocationOptions {
@@ -163,6 +165,26 @@ export function useLiveLocation(
       }
 
       if (permission === "prompt") {
+        const restore = await restoreLocationAccessIfPersisted({
+          highAccuracy,
+          maximumAge,
+        });
+        if (cancelled) {
+          return;
+        }
+
+        if (restore === "restored") {
+          setNeedsPermissionPrompt(false);
+          startWatch();
+          return;
+        }
+
+        if (restore === "denied") {
+          setNeedsPermissionPrompt(false);
+          setError(LOCATION_BLOCKED_MESSAGE);
+          return;
+        }
+
         if (confirmEpoch === 0) {
           setNeedsPermissionPrompt(true);
           setError(null);
@@ -183,6 +205,7 @@ export function useLiveLocation(
           return;
         }
 
+        persistLocationAccessConfirmed();
         publishReading(initial, true);
       } catch (nextError) {
         if (cancelled) {
