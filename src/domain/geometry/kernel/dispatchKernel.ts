@@ -12,15 +12,28 @@ export type DispatchKernelOptions<T> = {
   mode: MaskKernelMode;
   entrypoint: KernelEntrypoint;
   label: string;
-  runTs: () => T;
+  /** Optional until G5i peels TS; required when wasm is not ready. */
+  runTs?: () => T;
   runWasm: () => Promise<T>;
 };
 
 export type DispatchKernelSyncOptions<T> = {
   mode: MaskKernelMode;
   entrypoint: KernelEntrypoint;
-  runTs: () => T;
+  runTs?: () => T;
 };
+
+function runTsOrThrow<T>(
+  entrypoint: KernelEntrypoint,
+  runTs: (() => T) | undefined,
+): T {
+  if (!runTs) {
+    throw new Error(
+      `[geometry] kernel entrypoint ${entrypoint} is not wasm-ready and has no TS fallback`,
+    );
+  }
+  return runTs();
+}
 
 /**
  * Sync TS-only path while entrypoint is not ready.
@@ -31,7 +44,7 @@ export function dispatchKernelSync<T>(
 ): T {
   const { mode, entrypoint, runTs } = options;
   if (!shouldUseWasm(mode, entrypoint)) {
-    return runTs();
+    return runTsOrThrow(entrypoint, runTs);
   }
   throw new Error(
     `[geometry] sync kernel path cannot use wasm for ${entrypoint}; use dispatchKernel`,
@@ -39,7 +52,7 @@ export function dispatchKernelSync<T>(
 }
 
 /**
- * Not-ready entrypoints always use TS.
+ * Not-ready entrypoints use TS when `runTs` is provided; otherwise throw.
  * wasm rethrows on failure (no silent TS fail-soft).
  */
 export async function dispatchKernel<T>(
@@ -51,7 +64,7 @@ export async function dispatchKernel<T>(
   switch (mode) {
     case "wasm":
       if (!useWasm) {
-        return runTs();
+        return runTsOrThrow(entrypoint, runTs);
       }
       try {
         return await runWasm();
