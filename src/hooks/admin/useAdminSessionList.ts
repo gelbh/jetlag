@@ -222,9 +222,7 @@ export function useAdminSessionList(enabled: boolean) {
       return;
     }
     const cached = readAdminSessionListCache();
-    /* eslint-disable react-hooks/set-state-in-effect -- initial session list load */
     void refresh(cached != null ? { background: true } : undefined);
-    /* eslint-enable react-hooks/set-state-in-effect */
   }, [enabled, refresh]);
 
   return {
