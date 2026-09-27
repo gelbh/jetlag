@@ -1,4 +1,11 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { useLatestRequest } from "../forms/useLatestRequest";
 import { useDebouncedValue } from "../forms/useDebouncedValue";
 import { TentacleHudBody } from "../../components/tools/ask/TentacleHudBody";
@@ -7,7 +14,10 @@ import {
   type TentacleMapPlacementPhase,
 } from "../../components/tools/ask/TentacleMapPlacementChrome";
 import { TentaclePanel } from "../../components/tools/TentaclePanel";
-import type { AskHudReadiness } from "@/domain/ask/askHudModes";
+import {
+  canCommit as askCanCommit,
+  type AskHudReadiness,
+} from "@/domain/ask/askHudModes";
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import {
   isActive,
@@ -138,8 +148,11 @@ export function useTentacleTool({
         ),
       )
     : 0;
-  const { label: costLabel, draw: cardDraw, keep: cardKeep } =
-    questionCostBreakdown("D4P2", tentacleUseCount);
+  const {
+    label: costLabel,
+    draw: cardDraw,
+    keep: cardKeep,
+  } = questionCostBreakdown("D4P2", tentacleUseCount);
   const [tentaclePois, setTentaclePois] = useState<TentaclePoi[]>([]);
   const [tentacleOutOfReach, setTentacleOutOfReach] = useState(false);
   const [selectedPoiId, setSelectedPoiId] = useState<string | null>(null);
@@ -177,16 +190,13 @@ export function useTentacleTool({
     pickNext: (usedOptions) =>
       firstAvailableTentacleCategoryIdForSession(sessionRules, usedOptions) ??
       "museum",
-    onUnavailable: useCallback(
-      (nextCategory: TentacleExtendedCategoryId) => {
-        setTentacleCategoryId(nextCategory);
-        setTentaclePois([]);
-        setTentacleOutOfReach(false);
-        setSelectedPoiId(null);
-        setTentacleError(null);
-      },
-      [],
-    ),
+    onUnavailable: useCallback((nextCategory: TentacleExtendedCategoryId) => {
+      setTentacleCategoryId(nextCategory);
+      setTentaclePois([]);
+      setTentacleOutOfReach(false);
+      setSelectedPoiId(null);
+      setTentacleError(null);
+    }, []),
   });
 
   const { beginRequest, cancelRequests, isLatestRequest } = useLatestRequest();
@@ -269,9 +279,7 @@ export function useTentacleTool({
           return;
         }
 
-        setTentacleError(
-          overpassErrorMessage(error, "Locations didn't load."),
-        );
+        setTentacleError(overpassErrorMessage(error, "Locations didn't load."));
       } finally {
         if (isLatestRequest(requestId)) {
           setTentacleLoading(false);
@@ -290,7 +298,12 @@ export function useTentacleTool({
   const debouncedTentacleCenter = useDebouncedValue(tentacleCenter, 400);
 
   useEffect(() => {
-    if (!active || !debouncedTentacleCenter || !tentacleCategoryChosen || !tentacleCategoryId) {
+    if (
+      !active ||
+      !debouncedTentacleCenter ||
+      !tentacleCategoryChosen ||
+      !tentacleCategoryId
+    ) {
       return;
     }
 
@@ -330,9 +343,7 @@ export function useTentacleTool({
       }
 
       const mapStyle = useMapStore.getState().mapStyle;
-      const categoryForTap = tentacleCategoryChosen
-        ? tentacleCategoryId
-        : null;
+      const categoryForTap = tentacleCategoryChosen ? tentacleCategoryId : null;
       const tapHit =
         categoryForTap != null
           ? previewBasemapPois({
@@ -424,7 +435,9 @@ export function useTentacleTool({
         selectedPoiId &&
         !confirmedPois.some((poi) => poi.id === selectedPoiId)
       ) {
-        setMapError("That place is still a map preview. Wait for confirmation.");
+        setMapError(
+          "That place is still a map preview. Wait for confirmation.",
+        );
         return;
       }
       await commitTentacle({
@@ -468,18 +481,21 @@ export function useTentacleTool({
     setTentacleError(null);
   };
 
-  const handleSelectPoi = useCallback((poiId: string) => {
-    const poi = tentaclePois.find((entry) => entry.id === poiId);
-    if (poi && !isConfirmedPoiLike(poi)) {
-      setTentacleError(
-        "Preview only — wait until places confirm before selecting.",
-      );
-      return;
-    }
-    setTentacleOutOfReach(false);
-    setTentacleError(null);
-    setSelectedPoiId(poiId);
-  }, [tentaclePois]);
+  const handleSelectPoi = useCallback(
+    (poiId: string) => {
+      const poi = tentaclePois.find((entry) => entry.id === poiId);
+      if (poi && !isConfirmedPoiLike(poi)) {
+        setTentacleError(
+          "Preview only — wait until places confirm before selecting.",
+        );
+        return;
+      }
+      setTentacleOutOfReach(false);
+      setTentacleError(null);
+      setSelectedPoiId(poiId);
+    },
+    [tentaclePois],
+  );
 
   const panel = (
     <TentaclePanel
@@ -539,12 +555,13 @@ export function useTentacleTool({
     tentacleCategoryId !== null &&
     isTentacleCategoryAvailableInSession(sessionRules, tentacleCategoryId);
   const hasRecordedAnswer = tentacleOutOfReach || selectedPoiId !== null;
+  const confirmedTentaclePois = filterConfirmedTentaclePois(tentaclePois);
 
   const readiness: AskHudReadiness = {
     surface: "tentacle",
     placementReady: tentacleCenter !== null,
     configureReady: tentacleCategoryChosen && categorySelectionAvailable,
-    resolveReady: tentaclePois.length > 0 && !tentacleLoading,
+    resolveReady: confirmedTentaclePois.length > 0 && !tentacleLoading,
     answerReady: awaitHiderAnswer || hasRecordedAnswer,
     awaitHiderAnswer,
     isSubmitting: session.isBusy,
@@ -648,15 +665,6 @@ export function useTentacleTool({
     setTentacleCenter(null);
   };
 
-  const canCommitTentacle =
-    tentacleCenter !== null &&
-    tentacleCategoryChosen &&
-    categorySelectionAvailable &&
-    !tentacleLoading &&
-    (awaitHiderAnswer || hasRecordedAnswer) &&
-    canSubmitQuestion &&
-    !session.isBusy;
-
   const statusTitle =
     placementPhase === "locating"
       ? "Getting your location"
@@ -684,35 +692,36 @@ export function useTentacleTool({
       : (tentacleError ?? mapError ?? gpsError ?? null),
     onCommit: () => void commit(),
     suppressSheet: mapPlacementActive,
-    mapOverlay: mapPlacementActive && tentacleCategoryId ? (
-      <TentacleMapPlacementChrome
-        categoryLabel={categoryLabel}
-        questionPrompt={questionPrompt}
-        costLabel={costLabel}
-        phase={placementPhase}
-        onUseGps={() => void handleUseGps()}
-        error={placementError}
-        awaitHiderAnswer={awaitHiderAnswer}
-        categoryId={tentacleCategoryId}
-        distanceUnit={distanceUnit}
-        searchRadiusMeters={searchRadiusMeters}
-        poiOptions={tentaclePois}
-        selectedPoiId={selectedPoiId}
-        outOfReach={tentacleOutOfReach}
-        onOutOfReachChange={(nextOutOfReach) => {
-          setTentacleOutOfReach(nextOutOfReach);
-          if (nextOutOfReach) {
-            setSelectedPoiId(null);
-          }
-        }}
-        canCommit={canCommitTentacle}
-        isSubmitting={session.isBusy}
-        onCommit={() => void commit()}
-        onChangeCategory={reopenCategoryPicker}
-        statusTitle={statusTitle}
-        statusBody={statusBody}
-      />
-    ) : null,
+    mapOverlay:
+      mapPlacementActive && tentacleCategoryId ? (
+        <TentacleMapPlacementChrome
+          categoryLabel={categoryLabel}
+          questionPrompt={questionPrompt}
+          costLabel={costLabel}
+          phase={placementPhase}
+          onUseGps={() => void handleUseGps()}
+          error={placementError}
+          awaitHiderAnswer={awaitHiderAnswer}
+          categoryId={tentacleCategoryId}
+          distanceUnit={distanceUnit}
+          searchRadiusMeters={searchRadiusMeters}
+          poiOptions={tentaclePois}
+          selectedPoiId={selectedPoiId}
+          outOfReach={tentacleOutOfReach}
+          onOutOfReachChange={(nextOutOfReach) => {
+            setTentacleOutOfReach(nextOutOfReach);
+            if (nextOutOfReach) {
+              setSelectedPoiId(null);
+            }
+          }}
+          canCommit={askCanCommit(readiness)}
+          isSubmitting={session.isBusy}
+          onCommit={() => void commit()}
+          onChangeCategory={reopenCategoryPicker}
+          statusTitle={statusTitle}
+          statusBody={statusBody}
+        />
+      ) : null,
     modeBody: mapPlacementActive ? null : (
       <TentacleHudBody
         gameSize={gameSize}
