@@ -10,7 +10,6 @@ import {
   dispatchRadarShadedRegion,
   type LatLngTuple,
 } from "../../domain/geometry/gameArea/geometry";
-import { resolveClientMaskKernelMode } from "../../domain/geometry/kernel/resolveClientMaskKernelMode";
 import { buildTentaclePoiAnswerEliminationRegion } from "../../domain/geometry/tentacle/tentacleGeometry";
 import type { PolygonLodPhase } from "../../domain/geometry/progressive/polygonLod";
 import { paintPolygonLod } from "../tools/framework/paintPolygonLod";
@@ -136,14 +135,13 @@ export async function buildMapDraftOverlays(
         style: { fillColor: c.radar },
       });
     } else {
-      const mode = resolveClientMaskKernelMode();
       pushElimination(
         await dispatchRadarShadedRegion(
           center,
           radiusMeters,
           gameArea,
           radarShadedInsideFromAnswer(answer),
-          mode,
+          "wasm",
         ),
       );
     }
@@ -254,7 +252,6 @@ export async function buildMapDraftOverlays(
     );
 
     if (thermoA && thermoB && answer) {
-      const mode = resolveClientMaskKernelMode();
       pushElimination(
         await dispatchHalfPlane(
           thermoA,
@@ -262,7 +259,7 @@ export async function buildMapDraftOverlays(
           gameArea,
           thermometerShadedSide(answer),
           "midpoint",
-          mode,
+          "wasm",
         ),
       );
     }

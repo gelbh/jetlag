@@ -11,7 +11,6 @@ import {
   dispatchHalfPlane,
   dispatchRadarShadedRegion,
 } from "../core/radarHalfPlane";
-import { resolveClientMaskKernelMode } from "../kernel";
 import {
   buildMeasuringEliminationPreview,
   type MeasuringRegionInput,
@@ -191,8 +190,6 @@ export async function eliminationFeatureForAnnotation(
     return measuringEliminationFromStoredMetadata(annotation, gameArea);
   }
 
-  const mode = resolveClientMaskKernelMode();
-
   if (
     annotation.type === "thermometer" &&
     annotation.geometry.geometry.type === "LineString" &&
@@ -211,7 +208,7 @@ export async function eliminationFeatureForAnnotation(
       gameArea,
       thermometerShadedSide(annotation.metadata.thermometerAnswer),
       "midpoint",
-      mode,
+      "wasm",
     );
   }
 
@@ -238,7 +235,7 @@ export async function eliminationFeatureForAnnotation(
       radiusMeters,
       gameArea,
       false,
-      mode,
+      "wasm",
     );
   }
 

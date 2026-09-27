@@ -58,5 +58,4 @@ export {
 } from "./nearRegionKernelRunner";
 export { wasmBuildNearRegion } from "./nearRegionWasm";
 export type { MaskKernelMode } from "./maskKernelMode";
-export { resolveClientMaskKernelMode } from "./resolveClientMaskKernelMode";
 export { KERNEL_WASM_READY, shouldUseWasm } from "./kernelWasmReady";

@@ -1,9 +1,6 @@
 import { LRUCache } from "lru-cache";
 import type { FeatureCollection } from "geojson";
-import {
-  resolveClientMaskKernelMode,
-  type MaskKernelMode,
-} from "../kernel";
+import type { MaskKernelMode } from "../kernel";
 import { runSpatialVoronoi } from "../kernel/voronoiKernelRunner";
 
 const VORONOI_CACHE_MAX = 8;
@@ -47,8 +44,7 @@ export async function getCachedVoronoiCellsAsync(
     properties: Record<string, unknown>;
   }>,
 ): Promise<FeatureCollection> {
-  const mode = resolveClientMaskKernelMode();
-  const key = cacheKey(fingerprint, mode);
+  const key = cacheKey(fingerprint, "wasm");
   const cached = voronoiCellCache.get(key);
   if (cached) {
     return cached;
@@ -59,7 +55,7 @@ export async function getCachedVoronoiCellsAsync(
     return existing;
   }
 
-  const pending = runSpatialVoronoi(sites, mode)
+  const pending = runSpatialVoronoi(sites, "wasm")
     .then((cells) => {
       voronoiCellCache.set(key, cells);
       return cells;

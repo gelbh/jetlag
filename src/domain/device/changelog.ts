@@ -17,7 +17,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       {
         title: "Technical",
         items: [
-          "Geometry kernel (G5): client `jl.geometry.maskKernel=dual` maps to wasm; emergency `ts` override remains; wasm dispatch failures rethrow instead of silent TypeScript fail-soft.",
+          "Geometry kernel (G5e): production always uses the WASM geometry kernel; client localStorage/env override removed. Wasm dispatch failures rethrow instead of silent TypeScript fail-soft.",
         ],
       },
     ],
@@ -191,8 +191,8 @@ export const CHANGELOG: ChangelogEntry[] = [
           "Privacy: name Nominatim, Esri, Open-Meteo, USGS, Transitland/TfL/CTA, Cloudflare, and Resend among third parties",
           "Privacy: name OpenFreeMap instead of CARTO for street map tiles",
           "Map settings: show Esri attribution when satellite basemap is selected",
-          "End-game disk elimination masks use the WASM geometry kernel when available (override with `jl.geometry.maskKernel=ts`)",
-          "Tentacle elimination shading now uses the Rust geometry kernel by default (override with `jl.geometry.maskKernel=ts`)",
+          "End-game disk elimination masks use the WASM geometry kernel when available",
+          "Tentacle elimination shading now uses the Rust geometry kernel by default",
         ],
       },
       {
@@ -353,8 +353,8 @@ export const CHANGELOG: ChangelogEntry[] = [
       {
         title: "Technical",
         items: [
-          "Map: elimination masks use the WASM geometry kernel by default; set `jl.geometry.maskKernel=ts` (or the env override) for emergency TypeScript only.",
-          "Enable the WASM geometry kernel for radar/half-plane shading (emergency override: `jl.geometry.maskKernel=ts` / env). Client `dual` maps to wasm.",
+          "Map: elimination masks use the WASM geometry kernel by default.",
+          "Enable the WASM geometry kernel for radar/half-plane shading.",
         ],
       }
     ],
