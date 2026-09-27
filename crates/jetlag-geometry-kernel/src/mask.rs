@@ -6,7 +6,8 @@ use serde_json::{json, Value};
 
 /// Steps for geodesic disk approximation (matches Turf `steps: 64`).
 const DISK_STEPS: usize = 64;
-/// WGS84 mean Earth radius in meters (Turf / geographiclib-ish).
+/// Turf `earthRadius` (6371008.8). Keep for disk/mask parity vs `@turf/circle`.
+/// Do not "align" to `geodesic.rs` `6_371_000` (hand-rolled TS); that breaks mask parity.
 const EARTH_RADIUS_M: f64 = 6_371_008.8;
 
 /// Disk center is `[lat, lng]` (matches TS `LatLngTuple`).

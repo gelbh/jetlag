@@ -1,6 +1,8 @@
-//! Geodesic helpers matching TS `geodesicPrimitives` (Earth radius 6_371_000).
+//! Geodesic helpers matching TS hand-rolled radius 6_371_000
+//! (`haversineMeters` / `destinationPoint`).
 
-/// Matches TS `geodesicPrimitives` / Turf-ish spherical earth.
+/// Hand-rolled TS radius (`haversineMeters` / `destinationPoint`). Intentional dual
+/// with `mask.rs` Turf `6_371_008.8`; naive unify breaks one parity surface.
 pub(crate) const EARTH_RADIUS_M: f64 = 6_371_000.0;
 
 /// Lat/lng tuple as in TS `LatLngTuple`.
