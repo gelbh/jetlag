@@ -12,7 +12,6 @@ import { around as geoflatbushAround } from "geoflatbush";
 import { unionPolygonFeaturesInSlices } from "../progressive/unionSlices";
 import type { GameArea } from "../../map/annotations";
 import { dispatchGeodesicLineBuffer } from "./geodesicLineBuffer";
-import { geodesicLineBuffer } from "../kernel/geodesicLineBuffer";
 import {
   dispatchNearRegionBatch,
   featureToGameAreaGeometry,
@@ -289,30 +288,7 @@ function combinePolygonFeatures(
   };
 }
 
-function unionBufferedFeatures(
-  features: Feature<Polygon | MultiPolygon>[],
-): Feature<Polygon | MultiPolygon> | null {
-  if (features.length === 0) {
-    return null;
-  }
-
-  if (features.length === 1) {
-    return features[0] ?? null;
-  }
-
-  try {
-    const united = unionPolygonFeatures(features);
-    if (united) {
-      return united;
-    }
-  } catch {
-    // Fall back to a MultiPolygon shell; point-in-region semantics match union.
-  }
-
-  return combinePolygonFeatures(features);
-}
-
-async function unionBufferedFeaturesInSlices(
+function unionBufferedFeaturesInSlices(
   features: Feature<Polygon | MultiPolygon>[],
 ): Promise<Feature<Polygon | MultiPolygon> | null> {
   if (features.length === 0) {
@@ -461,61 +437,6 @@ async function buildCoastlineNearRegionWithBuffer(
   }
 }
 
-/** Sync TS path for tests/bootstrap. Prefer {@link buildCoastlineNearRegion}. */
-export function buildCoastlineNearRegionTs(
-  segments: Feature<LineString>[],
-  distanceMeters: number,
-  gameArea: GameArea,
-): Feature<Polygon | MultiPolygon> | null {
-  if (segments.length === 0 || distanceMeters <= 0) {
-    return null;
-  }
-
-  const cacheKey = coastlineNearRegionCacheKey(
-    gameArea,
-    distanceMeters,
-    segments.length,
-    "sync",
-  );
-  const cached = getCachedCoastlineNearRegion(cacheKey);
-  if (cached) {
-    return cached;
-  }
-
-  try {
-    const bufferedFeatures: Feature<Polygon | MultiPolygon>[] = [];
-
-    for (const segment of segments) {
-      const buffered = geodesicLineBuffer(segment, distanceMeters);
-      if (buffered) {
-        bufferedFeatures.push(buffered);
-      }
-    }
-
-    if (bufferedFeatures.length === 0) {
-      return null;
-    }
-
-    const nearCoast = unionBufferedFeatures(bufferedFeatures);
-    if (!nearCoast) {
-      return null;
-    }
-
-    const result =
-      clipNearCoastToGameArea(nearCoast, gameArea) ??
-      clipBufferedSegmentsToGameArea(bufferedFeatures, gameArea);
-
-    if (!result) {
-      return null;
-    }
-
-    setCachedCoastlineNearRegion(cacheKey, result);
-    return result;
-  } catch {
-    return null;
-  }
-}
-
 export async function buildCoastlineNearRegion(
   segments: Feature<LineString>[],
   distanceMeters: number,
@@ -539,9 +460,6 @@ export async function buildCoastlineNearRegion(
         distanceMeters,
         disks: [],
         gameArea: featureToGameAreaGeometry(gameAreaToFeature(gameArea)),
-        // Sync runTs: dispatchKernel requires sync TS; WASM-fail skips cooperative yield.
-        runTs: () =>
-          buildCoastlineNearRegionTs(segments, distanceMeters, gameArea),
       },
       "wasm",
     );
@@ -605,8 +523,8 @@ export function buildLocationNearRegion(
   return clipped as Feature<Polygon | MultiPolygon>;
 }
 
-/** Sync TS multi-place path for tests/overlays. Prefer {@link buildMultiPlaceNearRegion}. */
-export function buildMultiPlaceNearRegionTs(
+/** Sync multi-place disks (Turf); used only when nearRegionBatch wasm is not ready. */
+function buildMultiPlaceNearRegionSync(
   places: readonly LatLngTuple[],
   distanceMeters: number,
   gameArea: GameArea,
@@ -666,12 +584,10 @@ export async function buildMultiPlaceNearRegion(
           radiusMeters: distanceMeters,
         })),
         gameArea: featureToGameAreaGeometry(gameAreaToFeature(gameArea)),
-        runTs: () =>
-          buildMultiPlaceNearRegionTs(places, distanceMeters, gameArea),
       },
       "wasm",
     );
   }
 
-  return buildMultiPlaceNearRegionTs(places, distanceMeters, gameArea);
+  return buildMultiPlaceNearRegionSync(places, distanceMeters, gameArea);
 }
