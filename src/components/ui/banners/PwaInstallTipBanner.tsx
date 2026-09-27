@@ -1,3 +1,4 @@
+import { Button, Group } from "@mantine/core";
 import { isAndroidDevice, isIosDevice } from "@/domain/device/pwa/detectMobilePlatform";
 import { PWA_INSTALL_TIP_DISMISS_KEY } from "@/domain/device/pwa/pwaInstallTipStorage";
 import { isStandalonePwa } from "@/domain/device/pwa/isStandalonePwa";
@@ -5,6 +6,7 @@ import { shouldOfferPwaInstallTip } from "@/domain/device/pwa/shouldOfferPwaInst
 import { usePersistedDismiss } from "@/hooks/forms/usePersistedDismiss";
 import { usePwaDeferredInstallPrompt } from "@/hooks/pwa/usePwaDeferredInstallPrompt";
 import { HudBanner } from "../hud/HudBanner";
+import { MapFloatSurface } from "./MapFloatSurface";
 
 export function PwaInstallTipBanner() {
   const { dismissed, dismiss } = usePersistedDismiss(PWA_INSTALL_TIP_DISMISS_KEY);
@@ -39,11 +41,12 @@ export function PwaInstallTipBanner() {
       visible
       className="pointer-events-none fixed inset-x-0 top-0 z-[var(--z-banner)] px-3 pt-[max(0.75rem,env(safe-area-inset-top))]"
     >
-      <div
-        className="pointer-events-auto hud-panel mx-auto flex max-w-md flex-col gap-2 px-3 py-2.5"
+      <MapFloatSurface
+        tone="default"
         role="dialog"
         aria-labelledby="pwa-install-tip-title"
         aria-describedby="pwa-install-tip-body"
+        className="pointer-events-auto mx-auto max-w-md"
       >
         <p
           id="pwa-install-tip-title"
@@ -57,18 +60,20 @@ export function PwaInstallTipBanner() {
         >
           {body}
         </p>
-        <div className="flex flex-wrap justify-end gap-2">
-          <button
+        <Group gap="sm" mt="sm" justify="flex-end" wrap="wrap">
+          <Button
             type="button"
-            className="btn-secondary min-h-11 px-4 text-xs"
+            variant="default"
+            size="md"
             onClick={dismiss}
           >
             Not now
-          </button>
+          </Button>
           {isAndroid && canDeferredPrompt ? (
-            <button
+            <Button
               type="button"
-              className="btn-primary min-h-11 px-4 text-xs"
+              variant="filled"
+              size="md"
               onClick={() => {
                 void promptInstall().then((accepted) => {
                   if (accepted) {
@@ -78,18 +83,19 @@ export function PwaInstallTipBanner() {
               }}
             >
               Install
-            </button>
+            </Button>
           ) : (
-            <button
+            <Button
               type="button"
-              className="btn-primary min-h-11 px-4 text-xs"
+              variant="filled"
+              size="md"
               onClick={dismiss}
             >
               OK
-            </button>
+            </Button>
           )}
-        </div>
-      </div>
+        </Group>
+      </MapFloatSurface>
     </HudBanner>
   );
 }

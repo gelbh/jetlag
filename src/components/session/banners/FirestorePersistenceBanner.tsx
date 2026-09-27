@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { isFirestorePersistenceUnavailable } from "@/services/core/firebase/firebase";
+import { MapFloatSurface } from "../../ui/banners/MapFloatSurface";
 
 const DISMISS_KEY = "jetlag-firestore-persistence-warning-dismissed";
 
@@ -22,10 +23,11 @@ export function FirestorePersistenceBanner() {
   }
 
   return (
-    <p
-      className="map-float-alert pointer-events-auto mx-3 mt-1.5 border-2 border-status-warning/40 bg-status-warning-surface px-3 py-2 text-center text-sm font-semibold text-pretty text-status-warning"
+    <MapFloatSurface
+      tone="warn"
       role="status"
       aria-live="polite"
+      className="pointer-events-auto mx-3 mt-1.5 text-center text-sm font-semibold text-pretty"
     >
       Offline cache unavailable on this device. Map data may not reload without
       signal.{" "}
@@ -39,6 +41,6 @@ export function FirestorePersistenceBanner() {
       >
         Dismiss
       </button>
-    </p>
+    </MapFloatSurface>
   );
 }

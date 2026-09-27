@@ -1,4 +1,6 @@
+import { Button, Group } from "@mantine/core";
 import type { IncidentNotice } from "../../services/firestore/firestoreIncidentNotices";
+import { MapFloatSurface } from "../ui/banners/MapFloatSurface";
 import { HudBanner } from "../ui/hud/HudBanner";
 
 interface IncidentResolvedBannerProps {
@@ -19,12 +21,13 @@ export function IncidentResolvedBanner({
       visible
       className="pointer-events-none fixed inset-x-0 top-0 z-[var(--z-banner)] px-3 pt-[max(0.75rem,env(safe-area-inset-top))]"
     >
-      <div
-        className="pointer-events-auto hud-panel mx-auto flex max-w-md flex-col gap-2 px-3 py-2.5"
+      <MapFloatSurface
+        tone="info"
         role="status"
         aria-live="polite"
         aria-labelledby="incident-resolved-title"
         aria-describedby="incident-resolved-body"
+        className="pointer-events-auto mx-auto max-w-md"
       >
         <p
           id="incident-resolved-title"
@@ -39,18 +42,19 @@ export function IncidentResolvedBanner({
           Your issue has been fixed. Refresh or update the app if you still see
           the problem.
         </p>
-        <div className="flex flex-wrap justify-end gap-2">
-          <button
+        <Group gap="sm" mt="sm" justify="flex-end" wrap="wrap">
+          <Button
             type="button"
-            className="btn-secondary min-h-11 px-4 text-xs"
+            variant="default"
+            size="md"
             onClick={() => {
               onDismiss(notice.incidentId);
             }}
           >
             Dismiss
-          </button>
-        </div>
-      </div>
+          </Button>
+        </Group>
+      </MapFloatSurface>
     </HudBanner>
   );
 }
