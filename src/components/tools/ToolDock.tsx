@@ -34,6 +34,7 @@ interface ToolDockProps {
   canRedo: boolean;
   onUndo: () => void;
   onRedo: () => void;
+  showHistory?: boolean;
   onOpenSettings: () => void;
   onOpenCodes?: () => void;
   onOpenReportProblem: () => void;
@@ -61,6 +62,7 @@ export function ToolDock({
   canRedo,
   onUndo,
   onRedo,
+  showHistory = true,
   onOpenSettings,
   onOpenCodes,
   onOpenReportProblem,
@@ -144,18 +146,22 @@ export function ToolDock({
             ref={mainGroupRef}
             className="justify-start gap-1 [&_.jl-tool-slot]:flex-none [&_.jl-tool-slot]:basis-auto [&_[data-hunt-question-strip]_.jl-tool-slot]:min-h-11 [&_[data-hunt-question-strip]_.jl-tool-slot]:min-w-0 [&_[data-hunt-question-strip]_.jl-tool-slot]:flex-1 [&_[data-hunt-question-strip]_.jl-tool-slot]:basis-0"
           >
-            <ToolDockHistorySlot
-              kind="undo"
-              canAct={canUndo}
-              onAct={onUndo}
-              inactive={inactive}
-            />
-            <ToolDockHistorySlot
-              kind="redo"
-              canAct={canRedo}
-              onAct={onRedo}
-              inactive={inactive}
-            />
+            {showHistory ? (
+              <>
+                <ToolDockHistorySlot
+                  kind="undo"
+                  canAct={canUndo}
+                  onAct={onUndo}
+                  inactive={inactive}
+                />
+                <ToolDockHistorySlot
+                  kind="redo"
+                  canAct={canRedo}
+                  onAct={onRedo}
+                  inactive={inactive}
+                />
+              </>
+            ) : null}
             <ToolDeckQuestionStrip askFirst={askFirst}>
               {visibleQuestionTools.map((toolId) => (
                 <ToolDockQuestionSlot
