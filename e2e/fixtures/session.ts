@@ -128,14 +128,10 @@ export async function joinAsRole(
 ) {
   await guestPage.goto("/join");
   const roleName = role === "hider" ? "Hider" : "Seeker";
-  // Mantine SegmentedControl: prefer radiogroup; fall back to visible label text.
+  // SegmentedControl radios are visually hidden; click the visible label.
   const side = guestPage.getByLabel("Player side");
-  const roleRadio = side.getByRole("radio", { name: roleName });
-  if ((await roleRadio.count()) > 0) {
-    await roleRadio.click();
-  } else {
-    await side.getByText(roleName, { exact: true }).click();
-  }
+  await expect(side).toBeVisible({ timeout: 15_000 });
+  await side.getByText(roleName, { exact: true }).click();
   await guestPage.getByPlaceholder("ABCD").fill(code);
   await guestPage.getByRole("button", { name: "Join session" }).click();
 

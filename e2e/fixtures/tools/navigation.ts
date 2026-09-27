@@ -39,11 +39,16 @@ export async function openSettings(page: Page) {
 }
 
 export async function closePanel(page: Page) {
+  const dialog = page.getByRole("dialog", { name: "Settings" });
   const close = page.getByRole("button", { name: "Close", exact: true });
   if (await close.isVisible().catch(() => false)) {
     await close.click();
     await expect(close).toBeHidden({ timeout: 10_000 }).catch(() => undefined);
     return;
   }
+  // Tip DrawerSheet uses withCloseButton={false}; Escape dismisses.
   await page.keyboard.press("Escape").catch(() => undefined);
+  if (await dialog.isVisible().catch(() => false)) {
+    await expect(dialog).toBeHidden({ timeout: 10_000 }).catch(() => undefined);
+  }
 }
