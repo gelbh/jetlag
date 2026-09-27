@@ -84,8 +84,50 @@ vi.mock("../sync/useFirebaseAuthReady", () => ({
   useFirebaseAuthReady: vi.fn(() => true),
 }));
 
+const ensureSessionMembershipMock = vi.fn();
+vi.mock("./useEnsureSessionMembership", () => ({
+  useEnsureSessionMembership: (...args: unknown[]) =>
+    ensureSessionMembershipMock(...args),
+}));
+
 describe("useSharedSessionScreen", () => {
+  it("heals membership for hider-anonymous auth mode", () => {
+    ensureSessionMembershipMock.mockClear();
+    ensureAnonymousUser.mockResolvedValue({ uid: "hider-uid" });
+
+    renderHook(() =>
+      useSharedSessionScreen({
+        isChatOpen: false,
+        notificationRole: "hider",
+        authMode: "hider-anonymous",
+      }),
+    );
+
+    expect(ensureSessionMembershipMock).toHaveBeenCalledWith({
+      enabled: true,
+    });
+  });
+
+  it("heals membership for seeker-remote auth mode", () => {
+    ensureSessionMembershipMock.mockClear();
+    ensureAnonymousUser.mockResolvedValue({ uid: "seeker-uid" });
+
+    renderHook(() =>
+      useSharedSessionScreen({
+        isChatOpen: false,
+        notificationRole: "seeker",
+        authMode: "seeker-remote",
+      }),
+    );
+
+    expect(ensureSessionMembershipMock).toHaveBeenCalledWith({
+      enabled: true,
+    });
+  });
+
   it("does not mint anonymous users in admin-permanent auth mode", async () => {
+    ensureSessionMembershipMock.mockClear();
+    ensureAnonymousUser.mockClear();
     waitForPermanentAuthReady.mockResolvedValue(undefined);
     getFirebaseAuth.mockReturnValue({
       currentUser: { uid: "admin-uid" },
@@ -104,6 +146,9 @@ describe("useSharedSessionScreen", () => {
       expect(waitForPermanentAuthReady).toHaveBeenCalled();
     });
     expect(ensureAnonymousUser).not.toHaveBeenCalled();
+    expect(ensureSessionMembershipMock).toHaveBeenCalledWith({
+      enabled: false,
+    });
   });
 
   it("resets admin sync gating when monitored session changes", async () => {

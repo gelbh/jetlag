@@ -25,6 +25,7 @@ import {
 import { waitForPermanentAuthReady } from "../../services/core/firebase/firebaseAuthReady";
 import { setPremiumApiContext } from "../../services/core/auth/premiumApiContext";
 import { useSessionStore } from "../../state/sessionStore";
+import { useEnsureSessionMembership } from "./useEnsureSessionMembership";
 
 export type SessionAuthMode =
   | "seeker-remote"
@@ -60,6 +61,8 @@ export function useSharedSessionScreen({
   useEffect(() => {
     setPremiumApiContext(session);
   }, [session]);
+
+  useEnsureSessionMembership({ enabled: authMode !== "admin-permanent" });
 
   useEffect(() => {
     if (authMode === "admin-permanent") {
