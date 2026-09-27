@@ -49,3 +49,6 @@ export const MAP_CAMERA_LARGE_JUMP_CENTER_FRACTION = 0.3;
 
 /** Extra bottom padding when framing tool placement (panel peek + dock). */
 export const MAP_PLACEMENT_FOCUS_BOTTOM_BIAS_PX = 120;
+
+/** Elimination/pending shade fill/line opacity transition; matches `--motion-fast`. */
+export const MOTION_MAP_SHADE_MS = 150;
