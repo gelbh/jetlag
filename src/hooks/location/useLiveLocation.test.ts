@@ -4,11 +4,12 @@ import {
   createMockGeolocationPosition,
   mockGeolocation,
 } from "../../test/mocks/geolocation";
-import { confirmAndRequestLocationAccess } from "../../services/core/location/geolocation";
+import * as geolocation from "../../services/core/location/geolocation";
 import {
-  persistLocationAccessConfirmed,
-  resetLocationPermissionUiForTests,
-} from "../../services/core/location/locationPermissionUi";
+  confirmAndRequestLocationAccess,
+  type GeolocationReading,
+} from "../../services/core/location/geolocation";
+import { resetLocationPermissionUiForTests } from "../../services/core/location/locationPermissionUi";
 import { useLiveLocation } from "./useLiveLocation";
 
 function mockPermissions(state: PermissionState): void {
@@ -111,7 +112,18 @@ describe("useLiveLocation", () => {
   it("publishes the restored reading before watching", async () => {
     mockGeolocation(createMockGeolocationPosition(53.35, -6.26));
     mockPermissions("prompt");
-    persistLocationAccessConfirmed();
+    const restoredReading: GeolocationReading = {
+      lat: 53.35,
+      lng: -6.26,
+      accuracy: 5,
+      heading: null,
+    };
+    const restoreSpy = vi
+      .spyOn(geolocation, "restoreLocationAccessIfPersisted")
+      .mockResolvedValue({
+        status: "restored",
+        reading: restoredReading,
+      });
     const getCurrentPosition = vi.mocked(navigator.geolocation.getCurrentPosition);
     const watchPosition = vi.mocked(navigator.geolocation.watchPosition);
     watchPosition.mockImplementation(() => 1);
@@ -128,8 +140,10 @@ describe("useLiveLocation", () => {
       });
     });
 
-    expect(getCurrentPosition).toHaveBeenCalled();
+    expect(getCurrentPosition).not.toHaveBeenCalled();
     expect(watchPosition).toHaveBeenCalled();
+
+    restoreSpy.mockRestore();
   });
 
   it("stores an error when permission is denied without watching", async () => {
