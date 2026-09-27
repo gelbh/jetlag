@@ -105,4 +105,22 @@ describe("AskCatalogRail", () => {
     fireEvent.click(screen.getByRole("button", { name: "Bus stop" }));
     expect(onSelect).toHaveBeenCalledWith("bus");
   });
+
+  it("does not call onSelect for disabled rows", () => {
+    const onSelect = vi.fn();
+    renderRail(
+      <AskCatalogRail
+        rows={[
+          { id: "park", label: "Park" },
+          { id: "landmass", label: "Landmass", disabled: true },
+        ]}
+        selectedId={null}
+        onSelect={onSelect}
+      />,
+    );
+    fireEvent.click(screen.getByText("Landmass"));
+    expect(onSelect).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByText("Park"));
+    expect(onSelect).toHaveBeenCalledWith("park");
+  });
 });
