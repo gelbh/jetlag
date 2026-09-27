@@ -3,7 +3,6 @@ import { LRUCache } from "lru-cache";
 import type { GameArea, TentaclePoi } from "../../map/annotations";
 import { gameAreaFingerprint } from "../core/gameAreaConvert";
 import type { LatLngTuple } from "../kernel/types";
-import { resolveClientMaskKernelMode } from "../kernel";
 import {
   dispatchTentacleEliminationRegion,
   dispatchTentaclePoiAnswerEliminationRegion,
@@ -52,7 +51,6 @@ export async function buildTentacleEliminationRegion(
   gameArea: GameArea,
 ): Promise<Feature<Polygon | MultiPolygon> | null> {
   const cells = await voronoiCellsForPois(pois);
-  const mode = resolveClientMaskKernelMode();
   return dispatchTentacleEliminationRegion(
     {
       anchor,
@@ -62,7 +60,7 @@ export async function buildTentacleEliminationRegion(
       gameArea,
       voronoiCells: cells,
     },
-    mode,
+    "wasm",
   );
 }
 
@@ -84,7 +82,6 @@ export async function buildTentaclePoiAnswerEliminationRegion(
   }
 
   const cells = await voronoiCellsForPois(pois);
-  const mode = resolveClientMaskKernelMode();
   const region = await dispatchTentaclePoiAnswerEliminationRegion(
     {
       anchor,
@@ -94,7 +91,7 @@ export async function buildTentaclePoiAnswerEliminationRegion(
       gameArea,
       voronoiCells: cells,
     },
-    mode,
+    "wasm",
   );
   if (region) {
     poiAnswerEliminationCache.set(cacheKey, region);

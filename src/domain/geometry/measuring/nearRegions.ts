@@ -16,7 +16,6 @@ import { geodesicLineBuffer } from "../kernel/geodesicLineBuffer";
 import {
   dispatchNearRegionBatch,
   featureToGameAreaGeometry,
-  resolveClientMaskKernelMode,
   shouldUseWasm,
   unionDiskSpecs,
   unionPolygonFeatures,
@@ -522,13 +521,12 @@ export async function buildCoastlineNearRegion(
   distanceMeters: number,
   gameArea: GameArea,
 ): Promise<Feature<Polygon | MultiPolygon> | null> {
-  const mode = resolveClientMaskKernelMode();
-  if (shouldUseWasm(mode, "nearRegionBatch")) {
+  if (shouldUseWasm("wasm", "nearRegionBatch")) {
     const cacheKey = coastlineNearRegionCacheKey(
       gameArea,
       distanceMeters,
       segments.length,
-      `batch:${mode}`,
+      "batch:wasm",
     );
     const cached = getCachedCoastlineNearRegion(cacheKey);
     if (cached) {
@@ -545,7 +543,7 @@ export async function buildCoastlineNearRegion(
         runTs: () =>
           buildCoastlineNearRegionTs(segments, distanceMeters, gameArea),
       },
-      mode,
+      "wasm",
     );
 
     if (result) {
@@ -559,7 +557,7 @@ export async function buildCoastlineNearRegion(
     distanceMeters,
     gameArea,
     (segment, meters) =>
-      dispatchGeodesicLineBuffer(segment, meters, undefined, mode),
+      dispatchGeodesicLineBuffer(segment, meters, undefined, "wasm"),
   );
 }
 
@@ -658,8 +656,7 @@ export async function buildMultiPlaceNearRegion(
   distanceMeters: number,
   gameArea: GameArea,
 ): Promise<Feature<Polygon | MultiPolygon> | null> {
-  const mode = resolveClientMaskKernelMode();
-  if (shouldUseWasm(mode, "nearRegionBatch")) {
+  if (shouldUseWasm("wasm", "nearRegionBatch")) {
     return dispatchNearRegionBatch(
       {
         segments: [],
@@ -672,7 +669,7 @@ export async function buildMultiPlaceNearRegion(
         runTs: () =>
           buildMultiPlaceNearRegionTs(places, distanceMeters, gameArea),
       },
-      mode,
+      "wasm",
     );
   }
 
