@@ -40,10 +40,11 @@ export async function openSettings(page: Page) {
 
 export async function closePanel(page: Page) {
   const close = page.getByRole("button", { name: "Close", exact: true });
-  if (await close.isVisible().catch(() => false)) {
+  const visible = await close.isVisible().catch(() => false);
+  if (visible) {
     await close.click();
-    await expect(close).toBeHidden({ timeout: 10_000 }).catch(() => undefined);
-    return;
+  } else {
+    await page.keyboard.press("Escape").catch(() => undefined);
   }
-  await page.keyboard.press("Escape").catch(() => undefined);
+  await expect(close).toBeHidden({ timeout: 10_000 });
 }

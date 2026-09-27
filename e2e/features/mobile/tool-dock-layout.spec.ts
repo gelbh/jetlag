@@ -479,9 +479,10 @@ test.describe("landscape map-dominant chrome", () => {
       name: /Show map controls|Hide map controls/i,
     });
     await expect(chip).toBeVisible();
-    if ((await chip.getAttribute("aria-expanded")) === "false") {
-      await chip.click();
-    }
+    await page
+      .getByRole("button", { name: /Show map controls/i })
+      .click({ timeout: 1000 })
+      .catch(() => undefined);
     await expect(chip).toHaveAttribute("aria-expanded", "true");
     await expect(
       page.locator('.map-chrome-hud[data-landscape-chrome="revealed"]'),
