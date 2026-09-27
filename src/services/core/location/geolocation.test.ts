@@ -115,7 +115,9 @@ describe("geolocation permission gating", () => {
     mockPermissions("prompt");
     const getCurrentPosition = vi.mocked(navigator.geolocation.getCurrentPosition);
 
-    await expect(restoreLocationAccessIfPersisted()).resolves.toBe("skipped");
+    await expect(restoreLocationAccessIfPersisted()).resolves.toEqual({
+      status: "skipped",
+    });
     expect(getCurrentPosition).not.toHaveBeenCalled();
     expect(getLocationPermissionUiSnapshot().confirmEpoch).toBe(0);
   });
@@ -125,8 +127,11 @@ describe("geolocation permission gating", () => {
     mockPermissions("prompt");
     persistLocationAccessConfirmed();
 
-    await expect(restoreLocationAccessIfPersisted({ highAccuracy: false })).resolves.toBe(
-      "restored",
+    await expect(restoreLocationAccessIfPersisted({ highAccuracy: false })).resolves.toMatchObject(
+      {
+        status: "restored",
+        reading: { lat: 53.35, lng: -6.26 },
+      },
     );
     expect(navigator.geolocation.getCurrentPosition).toHaveBeenCalledOnce();
     expect(getLocationPermissionUiSnapshot().confirmEpoch).toBeGreaterThan(0);
@@ -137,9 +142,9 @@ describe("geolocation permission gating", () => {
     mockPermissions("prompt");
     persistLocationAccessConfirmed();
 
-    await expect(restoreLocationAccessIfPersisted({ highAccuracy: false })).resolves.toBe(
-      "denied",
-    );
+    await expect(restoreLocationAccessIfPersisted({ highAccuracy: false })).resolves.toEqual({
+      status: "denied",
+    });
     expect(hasPersistedLocationAccessConfirmed()).toBe(false);
     expect(getLocationPermissionUiSnapshot().confirmEpoch).toBe(0);
   });
@@ -151,9 +156,9 @@ describe("geolocation permission gating", () => {
     markLocationAccessConfirmed();
     const getCurrentPosition = vi.mocked(navigator.geolocation.getCurrentPosition);
 
-    await expect(restoreLocationAccessIfPersisted({ highAccuracy: false })).resolves.toBe(
-      "skipped",
-    );
+    await expect(restoreLocationAccessIfPersisted({ highAccuracy: false })).resolves.toEqual({
+      status: "skipped",
+    });
     expect(getCurrentPosition).not.toHaveBeenCalled();
     expect(hasPersistedLocationAccessConfirmed()).toBe(true);
   });
@@ -168,11 +173,46 @@ describe("geolocation permission gating", () => {
       mockPermissions("prompt");
       persistLocationAccessConfirmed();
 
-      await expect(restoreLocationAccessIfPersisted({ highAccuracy: false })).resolves.toBe(
-        "failed",
-      );
+      await expect(restoreLocationAccessIfPersisted({ highAccuracy: false })).resolves.toEqual({
+        status: "failed",
+      });
       expect(hasPersistedLocationAccessConfirmed()).toBe(true);
       expect(getLocationPermissionUiSnapshot().confirmEpoch).toBe(0);
     },
   );
+
+  it("restoreLocationAccessIfPersisted shares one quiet read across concurrent callers", async () => {
+    const getCurrentPosition = vi.fn(
+      (success: PositionCallback, _error?: PositionErrorCallback) => {
+        success(createMockGeolocationPosition(53.35, -6.26));
+      },
+    );
+
+    vi.stubGlobal("navigator", {
+      ...navigator,
+      geolocation: {
+        getCurrentPosition,
+        watchPosition: vi.fn(),
+        clearWatch: vi.fn(),
+      },
+      permissions: {
+        query: vi.fn(async () => ({ state: "prompt" as PermissionState })),
+      },
+    });
+    persistLocationAccessConfirmed();
+
+    const first = restoreLocationAccessIfPersisted({ highAccuracy: false });
+    const second = restoreLocationAccessIfPersisted({ highAccuracy: false });
+
+    await expect(first).resolves.toMatchObject({
+      status: "restored",
+      reading: { lat: 53.35, lng: -6.26 },
+    });
+    await expect(second).resolves.toMatchObject({
+      status: "restored",
+      reading: { lat: 53.35, lng: -6.26 },
+    });
+    expect(getCurrentPosition).toHaveBeenCalledOnce();
+    expect(getLocationPermissionUiSnapshot().confirmEpoch).toBeGreaterThan(0);
+  });
 });

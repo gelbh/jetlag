@@ -65,6 +65,7 @@ describe("LocationPermissionPrompt", () => {
     mockGeolocation(createMockGeolocationPosition(53.35, -6.26));
     mockPermissions("prompt");
     const release = retainLocationPermissionDemand();
+    const getCurrentPosition = vi.mocked(navigator.geolocation.getCurrentPosition);
 
     render(
       <MemoryRouter initialEntries={["/map"]}>
@@ -75,6 +76,10 @@ describe("LocationPermissionPrompt", () => {
     fireEvent.click(
       await screen.findByRole("button", { name: /allow location/i }),
     );
+
+    await waitFor(() => {
+      expect(getCurrentPosition).toHaveBeenCalled();
+    });
 
     await waitFor(() => {
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
@@ -88,12 +93,17 @@ describe("LocationPermissionPrompt", () => {
     mockPermissions("prompt");
     persistLocationAccessConfirmed();
     const release = retainLocationPermissionDemand();
+    const getCurrentPosition = vi.mocked(navigator.geolocation.getCurrentPosition);
 
     render(
       <MemoryRouter initialEntries={["/map"]}>
         <LocationPermissionPrompt />
       </MemoryRouter>,
     );
+
+    await waitFor(() => {
+      expect(getCurrentPosition).toHaveBeenCalled();
+    });
 
     await waitFor(() => {
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
