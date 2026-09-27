@@ -61,10 +61,9 @@ export const jetlagBrand = {
   chromeGapBottom: "0.75rem",
   /** Matches `--dock-island-height` (phone hunt band; wide media bumps via CSS). */
   dockIslandHeight: "3.25rem",
-  /** Desktop ops contextual rail (was `desktop-ops.css`). */
+  /** Admin map shell rail widths (bridged to `--ops-rail-*` for map-shell.css). */
   opsRailWidth: "22rem",
   opsRailCollapsedWidth: "2.75rem",
-  opsToolRailWidth: "5rem",
   /** Ask HUD strip / rail height tokens (was `ask-hud.css`). ≥44px touch. */
   askHudStripHeight: "3rem",
   askHudRailMaxHeight: "40dvh",
@@ -285,11 +284,9 @@ export const jetlagCssVariablesResolver: CSSVariablesResolver = () => ({
     "--jl-dock-island-height": jetlagBrand.dockIslandHeight,
     "--jl-ops-rail-width": jetlagBrand.opsRailWidth,
     "--jl-ops-rail-collapsed-width": jetlagBrand.opsRailCollapsedWidth,
-    "--jl-ops-tool-rail-width": jetlagBrand.opsToolRailWidth,
-    /* Bridge names residual CSS / map-shell still reads until W5-E. */
+    /* Bridge names admin map-shell.css still reads. */
     "--ops-rail-width": jetlagBrand.opsRailWidth,
     "--ops-rail-collapsed-width": jetlagBrand.opsRailCollapsedWidth,
-    "--ops-tool-rail-width": jetlagBrand.opsToolRailWidth,
     "--ask-hud-strip-height": jetlagBrand.askHudStripHeight,
     "--ask-hud-rail-max-height": jetlagBrand.askHudRailMaxHeight,
     "--jl-ask-hud-strip-height": jetlagBrand.askHudStripHeight,

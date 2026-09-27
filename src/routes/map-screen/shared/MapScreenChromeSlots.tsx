@@ -5,20 +5,16 @@ import {
   mapLandscapeChromeToolbarCollapseClass,
 } from "@/components/session/mapChrome/mapLandscapeChromeClasses";
 
-export type MapScreenChromeSlotsLayout = "ops-or-hud" | "fragments";
+export type MapScreenChromeSlotsLayout = "hud" | "fragments";
 
 export type MapScreenChromeSlotsProps = {
   /** Status / header region (top HUD). */
   header: ReactNode;
   /** Tool dock / bottom actions. */
   toolbar?: ReactNode;
-  /** @deprecated Desktop ops map slot removed; map renders beside chrome. */
-  mapSlot?: ReactNode;
-  /** @deprecated Contextual rail removed with DesktopOpsShell. */
-  contextual?: ReactNode;
   chromeHudRef?: Ref<HTMLDivElement>;
   /**
-   * `ops-or-hud` — fixed HUD (phone dock layout).
+   * `hud` — fixed HUD (phone dock layout).
    * `fragments` — render header/toolbar/children as-is (admin compact overlays).
    */
   layout?: MapScreenChromeSlotsLayout;
@@ -33,7 +29,7 @@ export function MapScreenChromeSlots({
   header,
   toolbar = null,
   chromeHudRef,
-  layout = "ops-or-hud",
+  layout = "hud",
   children,
 }: MapScreenChromeSlotsProps) {
   const { mode: landscapeChromeMode, chip: landscapeChip } =
