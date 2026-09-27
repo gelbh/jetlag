@@ -25,6 +25,7 @@ import {
 import { waitForPermanentAuthReady } from "../../services/core/firebase/firebaseAuthReady";
 import { setPremiumApiContext } from "../../services/core/auth/premiumApiContext";
 import { useSessionStore } from "../../state/sessionStore";
+import { useEnsureSessionMembership } from "./useEnsureSessionMembership";
 
 export type SessionAuthMode =
   | "seeker-remote"
@@ -61,6 +62,8 @@ export function useSharedSessionScreen({
     setPremiumApiContext(session);
   }, [session]);
 
+  useEnsureSessionMembership({ enabled: authMode !== "admin-permanent" });
+
   useEffect(() => {
     if (authMode === "admin-permanent") {
       if (
@@ -71,14 +74,20 @@ export function useSharedSessionScreen({
         return;
       }
 
+      let cancelled = false;
       void waitForPermanentAuthReady().then(() => {
+        if (cancelled) {
+          return;
+        }
         const currentUser = getFirebaseAuth().currentUser;
         if (myUid && currentUser && currentUser.uid !== myUid) {
           setLastSyncError("No access to this session.");
         }
         setPermanentAuthSessionId(session.id);
       });
-      return;
+      return () => {
+        cancelled = true;
+      };
     }
 
     if (authMode === "seeker-remote") {
@@ -90,11 +99,18 @@ export function useSharedSessionScreen({
         return;
       }
 
+      let cancelled = false;
       void (async () => {
         try {
           const user = await ensureAnonymousUser();
+          if (cancelled) {
+            return;
+          }
           setAuthUid(user.uid);
         } catch (error) {
+          if (cancelled) {
+            return;
+          }
           setLastSyncError(
             error instanceof Error
               ? error.message
@@ -102,13 +118,22 @@ export function useSharedSessionScreen({
           );
         }
       })();
-      return;
+      return () => {
+        cancelled = true;
+      };
     }
 
+    let cancelled = false;
     void ensureAnonymousUser().then((user) => {
+      if (cancelled) {
+        return;
+      }
       setAuthUid(user.uid);
       setMyUid(user.uid);
     });
+    return () => {
+      cancelled = true;
+    };
   }, [authMode, myUid, session, session?.id, setLastSyncError, setMyUid]);
 
   const authReady =
