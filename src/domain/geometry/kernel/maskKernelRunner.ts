@@ -1,7 +1,3 @@
-import {
-  buildEndGameMaskFromDisks as buildEndGameMaskFromDisksTs,
-  buildMaskFromUnionInput as buildMaskFromUnionInputTs,
-} from "./buildMask";
 import { dispatchKernel } from "./dispatchKernel";
 import { createLazyWasmImport } from "./lazyWasmImport";
 import type { MaskKernelMode } from "./maskKernelMode";
@@ -23,7 +19,6 @@ export async function runMaskFromUnionInput(
     mode,
     entrypoint: "maskFromUnionInput",
     label: "buildMaskFromUnionInput",
-    runTs: () => buildMaskFromUnionInputTs(input, gameArea),
     runWasm: async () => {
       const wasm = await maskWasm.load();
       return wasm.wasmBuildMaskFromUnionInput(input, gameArea);
@@ -40,7 +35,6 @@ export async function runEndGameMaskFromDisks(
     mode,
     entrypoint: "endGameMaskFromDisks",
     label: "buildEndGameMaskFromDisks",
-    runTs: () => buildEndGameMaskFromDisksTs(gameArea, disks),
     runWasm: async () => {
       const wasm = await maskWasm.load();
       return wasm.wasmBuildEndGameMaskFromDisks(gameArea, disks);
