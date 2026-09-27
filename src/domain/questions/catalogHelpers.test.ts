@@ -140,4 +140,13 @@ describe("buildCatalogHelpers", () => {
     ]);
     expect(used).toEqual(new Set(["a"]));
   });
+
+  it("does not inflate useCount for cancelled-with-answer pending", () => {
+    expect(
+      helpers.optionUseCountFromPending(
+        [matchingPending("p1", "a", "cancelled", "yes")],
+        "a",
+      ),
+    ).toBe(0);
+  });
 });

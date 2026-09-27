@@ -114,6 +114,27 @@ export function firstAvailableThermometerDistanceMeters(
   return miles === null ? null : milesToMeters(miles);
 }
 
+export function firstAvailableThermometerDistanceMetersForSession(
+  session: SessionRulesInput,
+  usedOptions: ReadonlySet<ThermometerDistanceOptionMiles>,
+): number | null {
+  for (const preset of availableThermometerDistancePresetsForSession(session)) {
+    const miles = thermometerPresetMilesForMeters(preset);
+    if (miles !== null && !usedOptions.has(miles)) {
+      return preset;
+    }
+  }
+  return null;
+}
+
+export function isThermometerDistanceOptionUsed(
+  usedOptions: ReadonlySet<ThermometerDistanceOptionMiles>,
+  distanceMeters: number,
+): boolean {
+  const miles = thermometerPresetMilesForMeters(distanceMeters);
+  return miles !== null && usedOptions.has(miles);
+}
+
 export function isThermometerDistanceOptionAvailable(
   gameSizeOrUsedOptions: GameSize | ReadonlySet<ThermometerDistanceOptionMiles>,
   distanceMeters: number,

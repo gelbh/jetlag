@@ -81,6 +81,18 @@ describe("ThermometerHudBody", () => {
     expect(onDistanceChange).not.toHaveBeenCalled();
   });
 
+  it("disables the currently selected distance when it is already used", () => {
+    renderHud(
+      <ThermometerHudBody
+        {...baseProps}
+        distanceMeters={4828.032}
+        usedDistanceOptions={new Set([3])}
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: /^3 mi$/i })).toBeDisabled();
+  });
+
   it("shows walk banner without PhaseRail, CONTINUE, or END WALK in the body", () => {
     renderHud(
       <ThermometerHudBody

@@ -5,9 +5,11 @@ import { MAP_ANNOTATION_COLORS } from "@/domain/map/mapAnnotationColors";
 import type { DistanceUnit } from "@/domain/map/distance";
 import {
   hasOpenPendingQuestion,
+  isThermometerDistanceOptionUsed,
   thermometerHotterTowards,
   thermometerQuestionPrompt,
   type ThermometerAnswer,
+  type ThermometerDistanceOptionMiles,
 } from "@/domain/questions";
 import type { PendingQuestionRecord } from "@/domain/session/activity/sessionChat";
 import { hotterColderAnswerOptions } from "@/components/tools/shared/answers/binaryAnswerOptions";
@@ -33,6 +35,7 @@ export interface CommitThermometerManualInput {
   distanceUnit: DistanceUnit;
   cardDraw: number;
   cardKeep: number;
+  usedThermometerOptions?: ReadonlySet<ThermometerDistanceOptionMiles>;
   createAnnotation: (
     annotation: Omit<AnnotationRecord, "id" | "sessionId" | "status">,
   ) => Promise<AnnotationRecord>;
@@ -57,6 +60,7 @@ export async function commitThermometerManual(
     distanceUnit,
     cardDraw,
     cardKeep,
+    usedThermometerOptions = new Set(),
     createAnnotation,
     setMapError,
     onSuccess,
@@ -72,6 +76,11 @@ export async function commitThermometerManual(
     thermoTravelMeters + 1 < distanceMeters
   ) {
     setMapError("Movement is shorter than the selected distance.");
+    return;
+  }
+
+  if (isThermometerDistanceOptionUsed(usedThermometerOptions, distanceMeters)) {
+    setMapError("That thermometer distance was already used this session.");
     return;
   }
 

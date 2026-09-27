@@ -6,7 +6,10 @@ import {
   isPresetOptionAvailable,
   presetMetersForMiles,
 } from "../session/tools/toolSessionOptions";
-import { isUsedOptionPendingQuestion } from "./questionRules";
+import {
+  isCountablePendingQuestionStatus,
+  isUsedOptionPendingQuestion,
+} from "./questionRules";
 
 export {
   matchPresetMeters,
@@ -22,6 +25,9 @@ export interface PresetCatalogHelpersConfig<Option extends string | number> {
   readOptionFromPending?: (
     question: PendingQuestionRecord,
   ) => Option | null | undefined;
+  /** Sticky used-set membership (pending ∪ cancelled-with-answer). */
+  isPendingQuestionUsed?: (question: PendingQuestionRecord) => boolean;
+  /** Cost / useCount membership (open countable statuses only). */
   isPendingQuestionCountable?: (question: PendingQuestionRecord) => boolean;
 }
 
@@ -61,8 +67,9 @@ export function buildPresetCatalogHelpers<Option extends string | number>(
     toolType,
     readOptionFromAnnotation,
     readOptionFromPending,
+    isPendingQuestionUsed = isUsedOptionPendingQuestion,
     isPendingQuestionCountable = (question) =>
-      isUsedOptionPendingQuestion(question),
+      isCountablePendingQuestionStatus(question.status),
   } = config;
 
   function usedOptionsFromAnnotations(
@@ -92,7 +99,7 @@ export function buildPresetCatalogHelpers<Option extends string | number>(
       if (exceptQuestionId && question.id === exceptQuestionId) {
         continue;
       }
-      if (!isPendingQuestionCountable(question)) {
+      if (!isPendingQuestionUsed(question)) {
         continue;
       }
 

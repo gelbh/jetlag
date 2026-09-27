@@ -3,8 +3,10 @@ import type { DistanceUnit } from "@/domain/map/distance";
 import {
   hasOpenPendingQuestion,
   isThermometerDistanceOptionAvailableForSession,
+  isThermometerDistanceOptionUsed,
   LOCAL_THERMOMETER_WALK_ID,
   thermometerQuestionPrompt,
+  type ThermometerDistanceOptionMiles,
 } from "@/domain/questions";
 import type { PendingQuestionRecord } from "@/domain/session/activity/sessionChat";
 import type { SessionRulesInput } from "@/domain/session/rules";
@@ -33,6 +35,7 @@ export interface StartThermometerWalkInput {
   senderUid?: string | null;
   distanceUnit: DistanceUnit;
   distanceMeters: number;
+  usedThermometerOptions?: ReadonlySet<ThermometerDistanceOptionMiles>;
   setMapError: (message: string | null) => void;
   patchConfig: (patch: Partial<ThermometerSessionConfig>) => void;
 }
@@ -53,6 +56,7 @@ export async function startThermometerGpsWalk(
     senderUid,
     distanceUnit,
     distanceMeters,
+    usedThermometerOptions = new Set(),
     setMapError,
     patchConfig,
   } = input;
@@ -75,6 +79,13 @@ export async function startThermometerGpsWalk(
   ) {
     patchConfig({
       panelError: "That distance is not available for this game size.",
+    });
+    return;
+  }
+
+  if (isThermometerDistanceOptionUsed(usedThermometerOptions, distanceMeters)) {
+    patchConfig({
+      panelError: "That thermometer distance was already used this session.",
     });
     return;
   }

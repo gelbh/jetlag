@@ -99,9 +99,7 @@ export function ThermometerHudBody({
           ? `${formatPresetDistance(preset, distanceUnit)} · ${costLabel}`
           : formatPresetDistance(preset, distanceUnit),
       disabled:
-        presetMiles !== null &&
-        usedDistanceOptions.has(presetMiles) &&
-        preset !== distanceMeters,
+        presetMiles !== null && usedDistanceOptions.has(presetMiles),
       icon: (
         <Crosshair
           size={20}
