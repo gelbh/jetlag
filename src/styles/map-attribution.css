@@ -12,3 +12,40 @@
 .maplibregl-ctrl-attrib a {
   color: var(--color-ink);
 }
+
+/* Map-first Ask placement: clear bottom for GPS / tap chrome */
+html[data-ask-map-placement="1"] .maplibregl-ctrl-attrib,
+html[data-matching-map-placement="1"] .maplibregl-ctrl-attrib {
+  display: none !important;
+}
+
+/* Lift left map controls + side stack above map-first bottom chrome */
+html[data-ask-map-placement="1"],
+html[data-matching-map-placement="1"] {
+  --ask-map-placement-bottom-clearance: 11.5rem;
+  --matching-map-bottom-clearance: var(--ask-map-placement-bottom-clearance);
+  --map-left-stack-base-dock: calc(
+    var(--dock-total-height) + var(--chrome-gap-above-dock) +
+      var(--safe-area-bottom) + var(--ask-map-placement-bottom-clearance)
+  );
+  --map-left-stack-base-dock-narrow: calc(
+    var(--dock-total-height) + var(--chrome-gap-above-dock) +
+      var(--safe-area-bottom) + var(--ask-map-placement-bottom-clearance) + 1.5rem
+  );
+  --map-left-stack-base-chrome-hidden: calc(
+    var(--chrome-gap-bottom) + var(--safe-area-bottom) +
+      var(--ask-map-placement-bottom-clearance)
+  );
+  --map-left-stack-base-safe-area: calc(
+    max(0.75rem, env(safe-area-inset-bottom)) +
+      var(--ask-map-placement-bottom-clearance)
+  );
+}
+
+html[data-ask-map-placement="1"] [data-chrome-side-stack="phone"],
+html[data-matching-map-placement="1"] [data-chrome-side-stack="phone"] {
+  bottom: calc(
+    var(--dock-island-height) + var(--chrome-side-stack-gap) +
+      var(--chrome-side-stack-lift) + var(--ask-map-placement-bottom-clearance)
+  );
+}

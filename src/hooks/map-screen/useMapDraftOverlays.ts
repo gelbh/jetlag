@@ -65,6 +65,7 @@ export interface MapDraftOverlaySources {
     boundaryPreview: Feature<GeoPolygon | MultiPolygon> | null;
     eliminationPreview: Feature<GeoPolygon | MultiPolygon> | null;
     seekerResolving: boolean;
+    categoryId?: string | null;
   };
   matching: {
     seekerPoint: LatLngTuple | null;
@@ -72,8 +73,10 @@ export interface MapDraftOverlaySources {
     boundaryPreview: Feature<GeoPolygon | MultiPolygon> | null;
     eliminationPreview: Feature<GeoPolygon | MultiPolygon> | null;
     seekerResolving: boolean;
+    categoryId?: string | null;
   };
   zone: { vertices: LatLngTuple[] };
+  draw: { strokePoints: LatLngTuple[] };
 }
 
 export interface MapDraftOverlayResult {
@@ -217,10 +220,8 @@ export async function buildMapDraftOverlays(
           point: [poi.lat, poi.lng],
           popup: poi.name,
           style: {
-            color: selected ? c.highlight : c.strokeLight,
-            weight: selected ? 3 : 2,
-            fillColor: c.tentacle,
-            markerRadius: selected ? 7 : 6,
+            tentaclePoiSelected: selected,
+            tentacleCategoryId: poi.category,
           },
         });
       }
@@ -277,6 +278,7 @@ export async function buildMapDraftOverlays(
       boundaryPreview,
       eliminationPreview,
       seekerResolving,
+      categoryId,
     } = sources.measuring;
 
     if (siteRadiusMeters !== null) {
@@ -312,7 +314,10 @@ export async function buildMapDraftOverlays(
         kind: "marker",
         id: "measuring-draft-target",
         point: targetPoint,
-        style: { fillColor: c.pinAccent },
+        style: {
+          fillColor: c.pinAccent,
+          iconCategoryId: categoryId ?? undefined,
+        },
       });
     }
 
@@ -329,6 +334,7 @@ export async function buildMapDraftOverlays(
       boundaryPreview,
       eliminationPreview,
       seekerResolving,
+      categoryId,
     } = sources.matching;
 
     if (seekerPoint) {
@@ -336,7 +342,11 @@ export async function buildMapDraftOverlays(
         kind: "marker",
         id: "matching-draft-seeker",
         point: seekerPoint,
-        style: { fillColor: c.pin, pulsing: seekerResolving },
+        style: {
+          fillColor: c.pin,
+          pulsing: seekerResolving,
+          markerRadius: 7,
+        },
       });
     }
     if (nearestFeaturePoint) {
@@ -344,7 +354,10 @@ export async function buildMapDraftOverlays(
         kind: "marker",
         id: "matching-draft-nearest",
         point: nearestFeaturePoint,
-        style: { fillColor: c.pinAccent },
+        style: {
+          fillColor: c.pinAccent,
+          iconCategoryId: categoryId ?? undefined,
+        },
       });
     }
 
@@ -376,6 +389,15 @@ export async function buildMapDraftOverlays(
         style: { color: c.zoneDraft, weight: 2 },
       });
     }
+  }
+
+  if (activeTool === "draw" && sources.draw.strokePoints.length > 0) {
+    overlays.push({
+      kind: "polyline",
+      id: "draw-draft-stroke",
+      positions: sources.draw.strokePoints,
+      style: { color: c.drawDraft, weight: 3 },
+    });
   }
 
   return { overlays, eliminationFeatures, tentacleLodPhase: "complete" };
@@ -471,6 +493,7 @@ export function useMapDraftOverlays(
     matching.nearestFeaturePoint,
     matching.seekerPoint,
     matching.seekerResolving,
+    matching.categoryId,
     measuring.boundaryPreview,
     measuring.eliminationPreview,
     measuring.placePoints,
@@ -478,6 +501,7 @@ export function useMapDraftOverlays(
     measuring.seekerResolving,
     measuring.siteRadiusMeters,
     measuring.targetPoint,
+    measuring.categoryId,
     pin.point,
     radar.answer,
     radar.center,

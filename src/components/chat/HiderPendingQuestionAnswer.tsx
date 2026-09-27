@@ -1,3 +1,4 @@
+import { Box, Group, Stack, Text } from "@mantine/core";
 import {
   formatExpiredAnswerCountdown,
   formatPendingDrawPickSummary,
@@ -5,12 +6,17 @@ import {
 } from "../../domain/questions";
 import type { HiderTruthReferenceMode } from "../../domain/questions/hiderTruth/resolveHiderTruthReference";
 import type { HiderTruthResult } from "../../domain/questions/ui";
-import { mapToolDockShortLabel, isQuestionDockTool } from "../../domain/map/mapTools";
+import {
+  mapToolDockShortLabel,
+  isQuestionDockTool,
+  type DockableMapTool,
+} from "../../domain/map/mapTools";
 import type { SessionRulesInput } from "../../domain/session/rules";
 import type {
   PendingQuestionRecord,
   SessionMessageRecord,
 } from "../../domain/session/activity/sessionChat";
+import { HudToolIcon } from "../map/icons/ToolIcons";
 import { HiderAnswerPicker } from "./HiderAnswerPicker";
 import { PhotoAnswerUploader } from "./PhotoAnswerUploader";
 
@@ -32,6 +38,15 @@ export interface HiderPendingQuestionAnswerProps {
     deadlineExpired?: boolean,
   ) => Promise<void>;
 }
+
+const QUESTION_DOCK_IDS = [
+  "matching",
+  "measuring",
+  "thermometer",
+  "radar",
+  "tentacle",
+  "photo",
+] as const;
 
 export function HiderPendingQuestionAnswer({
   message,
@@ -72,39 +87,12 @@ export function HiderPendingQuestionAnswer({
     message.toolType && isQuestionDockTool(message.toolType)
       ? mapToolDockShortLabel(message.toolType)
       : (message.toolType ?? "Question");
+  const showToolIcon =
+    message.toolType != null &&
+    (QUESTION_DOCK_IDS as readonly string[]).includes(message.toolType);
 
-  return (
+  const answerControls = (
     <>
-      <p className="text-xs font-semibold uppercase tracking-wide text-brand-blue">
-        {toolLabel}
-      </p>
-      <p className="mt-1 text-sm text-ink">{message.promptText}</p>
-      {pending?.cardDraw != null && pending?.cardKeep != null ? (
-        <p className="mt-1 text-xs text-ink-dim">
-          {formatPendingDrawPickSummary(
-            pending.toolType,
-            pending.cardDraw,
-            pending.cardKeep,
-          )}
-        </p>
-      ) : null}
-      {walking ? (
-        <p className="mt-2 text-xs text-brand-gold">
-          Seeker is walking. Answer when the full question arrives.
-        </p>
-      ) : null}
-      {countdown ? (
-        <p
-          className={`mt-1 text-xs tabular-nums ${expired ? "text-status-warning" : "text-ink-dim"}`}
-        >
-          {countdown}
-        </p>
-      ) : null}
-      {pending?.answeredLate ? (
-        <p className="mt-1 text-xs text-status-warning">
-          Answered late. Card draw forfeited.
-        </p>
-      ) : null}
       {!closed && !walking && isPhotoQuestion && pending ? (
         <PhotoAnswerUploader
           sessionId={sessionId}
@@ -139,5 +127,70 @@ export function HiderPendingQuestionAnswer({
         />
       ) : null}
     </>
+  );
+
+  return (
+    <Stack gap={6}>
+      <Group gap={8} wrap="nowrap" align="flex-start">
+        {showToolIcon ? (
+          <Box
+            c="var(--color-flag)"
+            style={{
+              flexShrink: 0,
+              marginTop: 2,
+              width: 20,
+              height: 20,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+            aria-hidden
+          >
+            <HudToolIcon
+              tool={message.toolType as DockableMapTool}
+              width={16}
+              height={16}
+            />
+          </Box>
+        ) : null}
+        <Stack gap={4} style={{ flex: 1, minWidth: 0 }}>
+          <Text size="xs" fw={600} c="var(--color-flag)" lh={1.2}>
+            {toolLabel}
+          </Text>
+          <Text size="sm" c="var(--color-field-ink)" lh={1.35}>
+            {message.promptText}
+          </Text>
+          {pending?.cardDraw != null && pending?.cardKeep != null ? (
+            <Text size="xs" c="var(--color-field-ink-muted)">
+              {formatPendingDrawPickSummary(
+                pending.toolType,
+                pending.cardDraw,
+                pending.cardKeep,
+              )}
+            </Text>
+          ) : null}
+        </Stack>
+      </Group>
+      {walking ? (
+        <Text size="xs" c="var(--color-flag)">
+          Seeker is walking. Answer when the full question arrives.
+        </Text>
+      ) : null}
+      {countdown ? (
+        <Text
+          size="xs"
+          c={expired ? "var(--color-halt)" : "var(--color-field-ink-muted)"}
+          style={{ fontVariantNumeric: "tabular-nums" }}
+        >
+          {countdown}
+        </Text>
+      ) : null}
+      {pending?.answeredLate ? (
+        <Text size="xs" c="var(--color-halt)">
+          Answered late. Card draw forfeited.
+        </Text>
+      ) : null}
+      {answerControls}
+    </Stack>
   );
 }

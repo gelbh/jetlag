@@ -1,3 +1,4 @@
+import { Button, Group, SegmentedControl, Text } from "@mantine/core";
 import type { FramingMode } from "@/hooks/session/useGameAreaFraming";
 import type { GameArea } from "@/domain/map/annotations";
 import {
@@ -6,7 +7,10 @@ import {
   gameSizeLabel,
   recommendGameSize,
 } from "@/domain/session/size/gameSize";
-import { HudSegmentControl } from "../../ui/forms/HudSegmentControl";
+import {
+  compactFilledStyles,
+  grayStyles,
+} from "@/components/ui/entry/entryStyles";
 import { FRAMING_MODE_OPTIONS } from "./gameAreaFramingUi";
 
 interface FramingModeSegmentControlProps {
@@ -23,12 +27,33 @@ export function FramingModeSegmentControl({
   "aria-label": ariaLabel = "Play area shape",
 }: FramingModeSegmentControlProps) {
   return (
-    <HudSegmentControl
+    <SegmentedControl
+      fullWidth
       value={value}
-      options={FRAMING_MODE_OPTIONS}
-      onChange={onChange}
+      onChange={(next) => onChange(next as FramingMode)}
       disabled={disabled}
       aria-label={ariaLabel}
+      data={FRAMING_MODE_OPTIONS.map((option) => ({
+        value: option.value,
+        label: option.label,
+      }))}
+      styles={{
+        root: {
+          backgroundColor: "oklch(from var(--color-field-ink) l c h / 0.08)",
+          border: "0.33px solid oklch(from var(--color-field-ink) l c h / 0.12)",
+          borderRadius: 12,
+          padding: 2,
+        },
+        label: {
+          color: "var(--color-field-ink)",
+          fontWeight: 510,
+          fontSize: "0.875rem",
+        },
+        indicator: {
+          backgroundColor: "oklch(from var(--color-field-ink) l c h / 0.16)",
+          borderRadius: 10,
+        },
+      }}
     />
   );
 }
@@ -56,25 +81,38 @@ export function GameAreaFramingStats({
     recommended !== selectedGameSize;
 
   return (
-    <div
-      className={`flex flex-wrap items-center gap-x-3 gap-y-1 ${
-        compact ? "text-xs" : "text-sm"
-      }`}
+    <Group
+      gap={compact ? "sm" : "md"}
+      wrap="wrap"
       aria-live="polite"
+      style={{ rowGap: compact ? 4 : 6 }}
     >
-      <span className="font-mono text-xs tabular-nums text-ink">{summary}</span>
-      <span className="text-ink-secondary">
+      <Text
+        size={compact ? "xs" : "sm"}
+        ff="monospace"
+        c="var(--color-field-ink)"
+        style={{ fontVariantNumeric: "tabular-nums" }}
+      >
+        {summary}
+      </Text>
+      <Text size={compact ? "xs" : "sm"} c="var(--color-field-ink-muted)">
         Suggested{" "}
-        <span className="font-display font-semibold uppercase tracking-wide text-brand-blue">
+        <Text
+          span
+          fw={700}
+          tt="uppercase"
+          c="var(--color-signal)"
+          style={{ letterSpacing: "0.04em" }}
+        >
           {gameSizeLabel(recommended).label}
-        </span>
-      </span>
+        </Text>
+      </Text>
       {sizeMismatch ? (
-        <span className="text-status-warning text-xs">
+        <Text size="xs" c="var(--color-status-warning)">
           Differs from selected size
-        </span>
+        </Text>
       ) : null}
-    </div>
+    </Group>
   );
 }
 
@@ -89,29 +127,25 @@ export function GameAreaFramingPolygonActions({
   vertexCount,
   onClose,
   onReset,
-  layout = "dock",
 }: GameAreaFramingPolygonActionsProps) {
-  const gridClass =
-    layout === "inline" ? "grid grid-cols-2 gap-2" : "grid grid-cols-2 gap-2";
-
   return (
-    <div className={gridClass}>
-      <button
+    <Group grow gap="sm">
+      <Button
         type="button"
+        styles={compactFilledStyles}
         onClick={onClose}
         disabled={vertexCount < 3}
-        className="btn-primary min-h-11 disabled:opacity-50"
       >
         Close shape
-      </button>
-      <button
+      </Button>
+      <Button
         type="button"
+        styles={grayStyles}
         onClick={onReset}
         disabled={vertexCount === 0}
-        className="btn-secondary min-h-11 disabled:opacity-50"
       >
         Clear points
-      </button>
-    </div>
+      </Button>
+    </Group>
   );
 }

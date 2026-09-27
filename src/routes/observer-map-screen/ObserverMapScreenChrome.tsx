@@ -64,27 +64,29 @@ export function ObserverMapScreenChrome({
   const statusBar = (
     <div className={isDesktop ? "jl-status-rail--expanded" : undefined}>
       <MapStatusRail
-        sessionCode={session.code}
-        sessionId={session.id}
-        roleGates={session.roleGates}
-        sessionRules={session}
-        playerRole={roleConfig.statusPlayerRole}
-        activeTool="none"
-        syncStatus="synced"
-        queuedWrites={0}
-        timerState={timer.timerState}
-        timerRunning={timer.running}
-        timerHasStarted={timer.hasStarted}
-        canStartGame={false}
-        onStartGame={() => undefined}
-        onTimerStart={() => undefined}
-        onTimerPause={() => undefined}
-        onTimerReset={() => undefined}
-        timerControlsDisabled
-        moveInProgress={moveInProgress}
-        expanded={isDesktop}
-        myUid={myUid}
-        isHost={isHost}
+        model={{
+          sessionCode: session.code,
+          sessionId: session.id,
+          roleGates: session.roleGates,
+          sessionRules: session,
+          playerRole: roleConfig.statusPlayerRole,
+          activeTool: "none",
+          syncStatus: "synced",
+          queuedWrites: 0,
+          timerState: timer.timerState,
+          timerRunning: timer.running,
+          timerHasStarted: timer.hasStarted,
+          canStartGame: false,
+          onStartGame: () => undefined,
+          onTimerStart: () => undefined,
+          onTimerPause: () => undefined,
+          onTimerReset: () => undefined,
+          timerControlsDisabled: true,
+          moveInProgress,
+          expanded: isDesktop,
+          myUid,
+          isHost,
+        }}
         headerLeading={
           <button
             type="button"

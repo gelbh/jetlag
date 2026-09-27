@@ -7,9 +7,15 @@ import {
   type ReactElement,
   type ReactNode,
 } from "react";
+import { Button, Stack, Text, TextInput } from "@mantine/core";
 import { isSignInWithEmailLink } from "firebase/auth";
 import { LegalInlineLinks } from "../legal/LegalInlineLinks";
-import { InlineError } from "../ui/banners/InlineError";
+import {
+  ErrorCallout,
+  InsetGroup,
+  SectionLabel,
+} from "../ui/entry/entryChrome";
+import { filledStyles, grayStyles } from "../ui/entry/entryStyles";
 import { GoogleSignInButton } from "../billing/GoogleSignInButton";
 import {
   completeOAuthRedirectIfPending,
@@ -154,11 +160,19 @@ export function AccountSignInGate({
   };
 
   if (!authReady) {
-    return <p className="text-sm text-ink-muted">Checking sign-in…</p>;
+    return (
+      <Text size="sm" c="var(--color-field-ink-muted)">
+        Checking sign-in…
+      </Text>
+    );
   }
 
   if (completingEmailLink && !user) {
-    return <p className="text-sm text-ink-muted">Checking sign-in link…</p>;
+    return (
+      <Text size="sm" c="var(--color-field-ink-muted)">
+        Checking sign-in link…
+      </Text>
+    );
   }
 
   if (isPermanent) {
@@ -166,34 +180,50 @@ export function AccountSignInGate({
       user?.email ?? user?.displayName ?? "your account";
 
     return (
-      <div className="space-y-3">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <p className="text-sm text-ink-muted">
-            Signed in as {accountLabel}
-          </p>
-          <button
-            type="button"
-            disabled={signingOut}
-            onClick={() => void handleSignOut()}
-            className="home-feedback-link min-h-11 px-2 disabled:opacity-50"
-          >
-            {signingOut ? "Signing out…" : "Sign out"}
-          </button>
-        </div>
-        {signedInHint ? (
-          <p className="text-sm text-ink-secondary">{signedInHint}</p>
-        ) : null}
-        {error ? <InlineError>{error}</InlineError> : null}
+      <Stack gap="md">
+        <InsetGroup>
+          <Stack gap={6} px="md" py="md">
+            <Text size="sm" c="var(--color-field-ink-muted)">
+              Signed in as {accountLabel}
+            </Text>
+            {signedInHint ? (
+              <Text size="sm" c="var(--color-field-ink)">
+                {signedInHint}
+              </Text>
+            ) : null}
+          </Stack>
+        </InsetGroup>
+        <Button
+          type="button"
+          disabled={signingOut}
+          loading={signingOut}
+          onClick={() => void handleSignOut()}
+          styles={grayStyles}
+          fullWidth
+        >
+          {signingOut ? "Signing out…" : "Sign out"}
+        </Button>
+        {error ? <ErrorCallout>{error}</ErrorCallout> : null}
         {children ?? null}
-      </div>
+      </Stack>
     );
   }
 
   return (
-    <div className="desktop-entry-actions space-y-3">
-      <p className="text-sm leading-relaxed text-ink-muted">{description}</p>
+    <Stack gap={22}>
+      <Stack gap={8}>
+        <SectionLabel>Sign in</SectionLabel>
+        <Text
+          size="sm"
+          c="var(--color-field-ink-muted)"
+          style={{ lineHeight: 1.4, textWrap: "pretty" }}
+          px={4}
+        >
+          {description}
+        </Text>
+      </Stack>
 
-      <div className="oauth-sign-in-stack space-y-2">
+      <Stack gap="sm">
         <GoogleSignInButton
           disabled={oauthControlsDisabled}
           onSuccess={handleOAuthSignedIn}
@@ -205,16 +235,17 @@ export function AccountSignInGate({
               { disabled: oauthControlsDisabled },
             )
           : extraSignInProviders}
-      </div>
-      <LegalInlineLinks />
+        <LegalInlineLinks />
+      </Stack>
 
-      <div className="space-y-2">
-        <label className="field-label font-display text-xs uppercase tracking-[0.1em]">
-          Email magic link
-          <input
+      <Stack gap={8}>
+        <SectionLabel>Email magic link</SectionLabel>
+        <InsetGroup>
+          <TextInput
+            aria-label="Email"
             value={email}
             onChange={(event) => {
-              setEmail(event.target.value);
+              setEmail(event.currentTarget.value);
               setEmailLinkSent(false);
               setError(null);
             }}
@@ -223,29 +254,41 @@ export function AccountSignInGate({
             autoComplete="email"
             placeholder="you@example.com"
             disabled={busyAction !== null}
-            className="field-input"
+            styles={{
+              input: {
+                border: "none",
+                background: "transparent",
+                minHeight: "3.25rem",
+                color: "var(--color-field-ink)",
+                fontSize: "1.0625rem",
+                paddingInline: "1rem",
+              },
+            }}
           />
-        </label>
-        <button
+        </InsetGroup>
+        <Button
           type="button"
+          fullWidth
           disabled={busyAction !== null || email.trim().length === 0}
+          loading={busyAction === "email"}
           onClick={() => void handleEmailLink()}
-          className="home-card-btn home-card-btn-secondary w-full disabled:opacity-50"
+          styles={filledStyles}
         >
-          <span>Email me a sign-in link</span>
-          <span className="home-card-btn-hint">
-            {busyAction === "email" ? "Sending…" : "No password"}
-          </span>
-        </button>
+          {busyAction === "email" ? "Sending…" : "Email me a sign-in link"}
+        </Button>
         {emailLinkSent ? (
-          <p className="text-sm text-ink-secondary">
+          <Text size="sm" c="var(--color-signal)" px={4}>
             Check your inbox for a sign-in link. Open it on this device to
             continue.
-          </p>
-        ) : null}
-      </div>
+          </Text>
+        ) : (
+          <Text size="xs" c="var(--color-field-ink-muted)" px={4}>
+            No password required
+          </Text>
+        )}
+      </Stack>
 
-      {error ? <InlineError>{error}</InlineError> : null}
-    </div>
+      {error ? <ErrorCallout>{error}</ErrorCallout> : null}
+    </Stack>
   );
 }

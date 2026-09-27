@@ -21,20 +21,7 @@ export function normalizeUsername(raw: string): string {
   return raw.trim().toLowerCase();
 }
 
-export function validateUsername(raw: string): ValidateUsernameResult {
-  const username = raw.trim();
-
-  if (username.length === 0) {
-    return { ok: false, error: "Enter a username." };
-  }
-
-  if (username.length < USERNAME_MIN_LENGTH) {
-    return {
-      ok: false,
-      error: `Username must be at least ${USERNAME_MIN_LENGTH} characters.`,
-    };
-  }
-
+function checkUsernameShape(username: string): ValidateUsernameResult | null {
   if (username.length > USERNAME_MAX_LENGTH) {
     return {
       ok: false,
@@ -49,6 +36,28 @@ export function validateUsername(raw: string): ValidateUsernameResult {
     };
   }
 
+  return null;
+}
+
+export function validateUsername(raw: string): ValidateUsernameResult {
+  const username = raw.trim();
+
+  if (username.length === 0) {
+    return { ok: false, error: "Enter a username." };
+  }
+
+  if (username.length < USERNAME_MIN_LENGTH) {
+    return {
+      ok: false,
+      error: `Username must be at least ${USERNAME_MIN_LENGTH} characters.`,
+    };
+  }
+
+  const shapeError = checkUsernameShape(username);
+  if (shapeError) {
+    return shapeError;
+  }
+
   const normalized = normalizeUsername(username);
 
   if (RESERVED_USERNAMES.has(normalized)) {
@@ -56,4 +65,35 @@ export function validateUsername(raw: string): ValidateUsernameResult {
   }
 
   return { ok: true, username, normalized };
+}
+
+/** Prefix search for friends (server requires ≥2 chars). */
+export const FRIEND_SEARCH_MIN_LENGTH = 2;
+
+export function validateFriendSearchQuery(
+  raw: string,
+): ValidateUsernameResult {
+  const username = raw.trim();
+
+  if (username.length === 0) {
+    return { ok: false, error: "Enter a username to search." };
+  }
+
+  if (username.length < FRIEND_SEARCH_MIN_LENGTH) {
+    return {
+      ok: false,
+      error: `Enter at least ${FRIEND_SEARCH_MIN_LENGTH} characters to search.`,
+    };
+  }
+
+  const shapeError = checkUsernameShape(username);
+  if (shapeError) {
+    return shapeError;
+  }
+
+  return {
+    ok: true,
+    username,
+    normalized: normalizeUsername(username),
+  };
 }

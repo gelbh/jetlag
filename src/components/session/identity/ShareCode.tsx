@@ -1,10 +1,15 @@
 import { useState } from "react";
+import { Button, Stack, Text } from "@mantine/core";
 import { useCopyFeedback } from "@/hooks/forms/useCopyFeedback";
 import crawlPolicy from "@/domain/seo/seoCrawlPolicy.json";
 import {
   buildSessionInviteUrl,
   resolveSessionInviteOrigin,
 } from "@/services/session/sessionInviteUrl";
+import {
+  filledStyles,
+  grayStyles,
+} from "@/components/ui/entry/entryChrome";
 
 interface ShareCodeProps {
   code: string;
@@ -67,7 +72,6 @@ export function ShareCode({
         if (error instanceof DOMException && error.name === "AbortError") {
           return;
         }
-        // Fall through to clipboard when share is unavailable or fails.
       }
     }
 
@@ -80,11 +84,35 @@ export function ShareCode({
       <button
         type="button"
         onClick={() => void handleCopyCode()}
-        className="jl-stamp min-h-12 flex-1 justify-center text-center"
         aria-label={`Copy session code ${code}`}
+        className="min-h-12 flex-1 rounded-[12px] px-3 py-2 text-center"
+        style={{
+          backgroundColor: "oklch(from var(--color-field-ink) l c h / 0.08)",
+          border: "0.33px solid oklch(from var(--color-field-ink) l c h / 0.12)",
+        }}
       >
-        <span className="jl-stamp-label">Code</span>
-        <span className="jl-stamp-code text-lg">{code}</span>
+        <Text
+          size="xs"
+          fw={590}
+          tt="uppercase"
+          style={{
+            letterSpacing: "0.08em",
+            color: "var(--color-field-ink-muted)",
+          }}
+        >
+          Code
+        </Text>
+        <Text
+          className="jl-stamp-code"
+          style={{
+            marginTop: "0.15rem",
+            fontSize: "1.125rem",
+            letterSpacing: "0.2em",
+            color: "var(--color-field-ink)",
+          }}
+        >
+          {code}
+        </Text>
       </button>
     );
   }
@@ -103,40 +131,62 @@ export function ShareCode({
           : "Tap code to copy. Local-only session for solo play.";
 
   return (
-    <div className="space-y-3">
-      <div className="jl-stamp w-full items-center py-3 text-center">
-        <span className="jl-stamp-label">Session code</span>
-        <button
-          type="button"
-          onClick={() => void handleCopyCode()}
-          className="mt-0.5 w-full"
-          aria-label={`Copy session code ${code}`}
+    <Stack gap="sm">
+      <button
+        type="button"
+        onClick={() => void handleCopyCode()}
+        aria-label={`Copy session code ${code}`}
+        className="w-full rounded-[12px] px-4 py-3 text-center"
+        style={{
+          backgroundColor: "oklch(from var(--color-field-ink) l c h / 0.08)",
+          border: "0.33px solid oklch(from var(--color-field-ink) l c h / 0.12)",
+        }}
+      >
+        <Text
+          size="xs"
+          fw={590}
+          tt="uppercase"
+          style={{
+            letterSpacing: "0.08em",
+            color: "var(--color-field-ink-muted)",
+          }}
         >
-          <span className="jl-stamp-code text-3xl tracking-[0.35em]">{code}</span>
-        </button>
-        <p className="mt-2 text-xs text-ink-dim" role="status" aria-live="polite">
+          Session code
+        </Text>
+        <Text
+          className="jl-stamp-code"
+          style={{
+            marginTop: "0.35rem",
+            fontSize: "1.75rem",
+            letterSpacing: "0.28em",
+            color: "var(--color-field-ink)",
+          }}
+        >
+          {code}
+        </Text>
+        <Text
+          role="status"
+          aria-live="polite"
+          size="xs"
+          style={{
+            marginTop: "0.5rem",
+            color: "var(--color-field-ink-muted)",
+          }}
+        >
           {feedback}
-        </p>
-      </div>
+        </Text>
+      </button>
 
       {inviteUrl ? (
-        <div className="space-y-2">
-          <button
-            type="button"
-            onClick={() => void handleInvite()}
-            className="btn-primary w-full"
-          >
+        <Stack gap="xs">
+          <Button fullWidth styles={filledStyles} onClick={() => void handleInvite()}>
             Invite friends
-          </button>
-          <button
-            type="button"
-            onClick={() => void handleCopyLink()}
-            className="btn-secondary w-full"
-          >
+          </Button>
+          <Button fullWidth styles={grayStyles} onClick={() => void handleCopyLink()}>
             Copy join link
-          </button>
-        </div>
+          </Button>
+        </Stack>
       ) : null}
-    </div>
+    </Stack>
   );
 }

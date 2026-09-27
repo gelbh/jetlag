@@ -1,6 +1,9 @@
 :root {
-  --font-display: "Barlow Semi Condensed", "Source Sans 3", system-ui, sans-serif;
-  --font-body: "Source Sans 3", system-ui, -apple-system, blinkmacsystemfont, "Segoe UI", sans-serif;
+  /* iOS Mantine Operate: system stack matches jetlagTheme fontFamily */
+  --font-display: -apple-system, blinkmacsystemfont, "SF Pro Text", "Segoe UI",
+    system-ui, sans-serif;
+  --font-body: -apple-system, blinkmacsystemfont, "SF Pro Text", "Segoe UI",
+    system-ui, sans-serif;
   --font-mono: ui-monospace, sfmono-regular, menlo, monaco, consolas, monospace;
 
   color-scheme: dark;
@@ -18,14 +21,16 @@
   --chrome-gap-above-dock: 0.5rem;
   --chrome-gap-bottom: 0.75rem;
   --map-panel-bottom: calc(
-    var(--dock-total-height) + var(--chrome-gap-above-dock) + var(--safe-area-bottom)
+    var(--dock-total-height) + var(--chrome-gap-above-dock) +
+      var(--safe-area-bottom)
   );
   --map-panel-bottom-chrome-hidden: calc(
     var(--chrome-gap-bottom) + var(--safe-area-bottom)
   );
   --hider-panel-bottom: 0;
   --hider-wizard-bottom: calc(
-    var(--dock-total-height) + var(--chrome-gap-above-dock) + var(--safe-area-bottom)
+    var(--dock-total-height) + var(--chrome-gap-above-dock) +
+      var(--safe-area-bottom)
   );
   --z-dock: 1000;
   --z-banner: 1001;
@@ -65,10 +70,13 @@
 }
 
 html {
+  /* dvh last: -webkit-fill-available/stretch can resolve to content height in Chromium. */
   min-height: 100%;
-  min-height: 100dvh;
-  min-height: 100svh;
   min-height: -webkit-fill-available;
+  min-height: 100svh;
+  min-height: 100dvh;
+  height: 100%;
+  height: 100dvh;
   background: var(--color-surface-deep);
   text-size-adjust: 100%;
 }
@@ -76,15 +84,26 @@ html {
 body,
 #root {
   min-height: 100%;
-  min-height: 100dvh;
-  min-height: 100svh;
   min-height: -webkit-fill-available;
+  min-height: 100svh;
+  min-height: 100dvh;
+  height: 100%;
+  height: 100dvh;
   overflow: hidden;
   background: var(--color-surface-deep);
 }
 
+/*
+ * Unlayered body rules beat @layer mantine globals so residual CSS chrome
+ * keeps Jetlag typography/colors while MantineProvider stays always mounted.
+ */
 body {
   margin: 0;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--color-ink-secondary);
+  background: var(--color-surface-deep);
   overscroll-behavior: none;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
@@ -115,13 +134,15 @@ select,
 }
 
 .app-scroll-root {
-  min-height: 100vh;
-  min-height: 100dvh;
-  min-height: 100svh;
+  /* dvh last: see html/body note above. */
+  min-height: 100%;
   min-height: -webkit-fill-available;
-  height: 100dvh;
-  height: 100svh;
+  min-height: 100svh;
+  min-height: 100dvh;
+  height: 100%;
   height: -webkit-fill-available;
+  height: 100svh;
+  height: 100dvh;
   overflow-y: auto;
   overscroll-behavior: none;
   background: transparent;

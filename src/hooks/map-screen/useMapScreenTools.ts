@@ -18,10 +18,12 @@ import { useGeolocation } from "../location/useGeolocation";
 import { usePendingQuestionActions } from "../sync/usePendingQuestionActions";
 import { usePhotoTool } from "../tools/usePhotoTool";
 import { usePinTool } from "../tools/usePinTool";
+import { useDrawTool } from "../tools/useDrawTool";
 import { useRadarTool } from "../tools/useRadarTool";
 import { useThermometerTool } from "../tools/useThermometerTool";
 import { useZoneTool } from "../tools/useZoneTool";
 import type { MapTool } from "../../state/sessionStore";
+import type { HeavyToolHostModel } from "../../components/tools/HeavyToolHost";
 import { useHeavyMapToolsState } from "./useHeavyMapToolsState";
 import { useSeekerOptimisticPendingOverlays } from "./useSeekerOptimisticPendingOverlays";
 
@@ -248,6 +250,12 @@ export function useMapScreenTools({
     createAnnotation,
     finishPlacement,
   });
+  const drawTool = useDrawTool({
+    active: activeTool === "draw",
+    createAnnotation,
+    finishPlacement,
+    ensurePointInGameArea,
+  });
 
   const resetToolDrafts = useCallback(() => {
     measuringTool.resetDraft();
@@ -257,7 +265,9 @@ export function useMapScreenTools({
     tentacleTool.resetDraft();
     pinTool.resetDraft();
     zoneTool.resetDraft();
+    drawTool.resetDraft();
   }, [
+    drawTool,
     matchingTool,
     measuringTool,
     pinTool,
@@ -282,7 +292,7 @@ export function useMapScreenTools({
     [measuringTool.draft.measuringPlaces],
   );
 
-  const heavyMapToolsSlotProps = {
+  const heavyMapToolsSlotProps: HeavyToolHostModel = {
     activeTool,
     sessionRules,
     annotations,
@@ -332,6 +342,7 @@ export function useMapScreenTools({
     thermometerTool,
     pinTool,
     zoneTool,
+    drawTool,
     matchingTool,
     measuringTool,
     tentacleTool,

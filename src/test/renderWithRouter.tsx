@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, type RenderOptions } from "@testing-library/react";
 import { type ReactElement, type ReactNode } from "react";
 import { MemoryRouter, type MemoryRouterProps } from "react-router-dom";
+import { AppUiProvider } from "@/components/ui/providers/AppUiProvider";
 import { RouteTransitionTestProvider } from "./RouteTransitionTestProvider";
 import { resetAllStores } from "./helpers/storeReset";
 
@@ -37,11 +38,13 @@ export function renderWithRouter(
 
   function Wrapper({ children }: { children: ReactNode }) {
     return (
-      <QueryClientProvider client={queryClient}>
-        <MemoryRouter initialEntries={[route]} {...routerProps}>
-          <RouteTransitionTestProvider>{children}</RouteTransitionTestProvider>
-        </MemoryRouter>
-      </QueryClientProvider>
+      <AppUiProvider>
+        <QueryClientProvider client={queryClient}>
+          <MemoryRouter initialEntries={[route]} {...routerProps}>
+            <RouteTransitionTestProvider>{children}</RouteTransitionTestProvider>
+          </MemoryRouter>
+        </QueryClientProvider>
+      </AppUiProvider>
     );
   }
 

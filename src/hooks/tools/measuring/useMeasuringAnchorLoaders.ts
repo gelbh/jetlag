@@ -498,6 +498,13 @@ export function useMeasuringAnchorLoaders({
         return;
       }
 
+      if (
+        isMeasuringLinearLocation(measuringSubject, measuringLocationCategory)
+      ) {
+        void loadMeasuringLinearAt(seekerPoint);
+        return;
+      }
+
       if (measuringUsesAllPlacesInArea(measureFromKind)) {
         void loadAllPlacesAt(seekerPoint);
       }
@@ -505,8 +512,10 @@ export function useMeasuringAnchorLoaders({
     [
       loadAllPlacesAt,
       loadMeasuringCoastlineAt,
+      loadMeasuringLinearAt,
       loadSeaLevelContextAt,
       measureFromKind,
+      measuringLocationCategory,
       measuringSubject,
     ],
   );
@@ -566,6 +575,13 @@ export function useMeasuringAnchorLoaders({
         return;
       }
 
+      if (
+        isMeasuringLinearLocation(next.subject, next.locationCategory)
+      ) {
+        void loadMeasuringLinearAt(measuringSeekerPoint);
+        return;
+      }
+
       if (measuringUsesAllPlacesInArea(nextKind)) {
         void loadAllPlacesAt(measuringSeekerPoint, next.locationCategory);
       }
@@ -574,6 +590,7 @@ export function useMeasuringAnchorLoaders({
       clearSubjectDerivedState,
       loadAllPlacesAt,
       loadMeasuringCoastlineAt,
+      loadMeasuringLinearAt,
       loadSeaLevelContextAt,
       measuringSeekerPoint,
       setMeasuringLocationCategory,
@@ -687,6 +704,11 @@ export function useMeasuringAnchorLoaders({
         void loadMeasuringCoastlineAt(measuringSeekerPoint);
       } else if (next.subject === "sea_level" && measuringSeekerPoint) {
         void loadSeaLevelContextAt(measuringSeekerPoint);
+      } else if (
+        measuringSeekerPoint &&
+        isMeasuringLinearLocation(next.subject, next.locationCategory)
+      ) {
+        void loadMeasuringLinearAt(measuringSeekerPoint);
       } else if (measuringSeekerPoint && measuringUsesAllPlacesInArea(kind)) {
         void loadAllPlacesAt(measuringSeekerPoint, next.locationCategory);
       }
@@ -695,6 +717,7 @@ export function useMeasuringAnchorLoaders({
       clearSubjectDerivedState,
       loadAllPlacesAt,
       loadMeasuringCoastlineAt,
+      loadMeasuringLinearAt,
       loadSeaLevelContextAt,
       measuringSeekerPoint,
       setMeasuringLocationCategory,

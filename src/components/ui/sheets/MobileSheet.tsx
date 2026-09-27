@@ -39,7 +39,7 @@ export function MobileSheet({
 
   const positionClass =
     variant === "nested"
-      ? "relative shrink-0"
+      ? "relative min-h-0"
       : "pointer-events-auto fixed inset-x-0 bottom-0 z-[var(--z-dock)]";
 
   const handle = handleProps ? (
@@ -68,7 +68,7 @@ export function MobileSheet({
     return (
       <div className={`${positionClass} hud-sheet ${className}`}>
         <div
-          className={`mx-auto flex w-full max-w-xl flex-col ${maxHeightClassName}`}
+          className={`mx-auto flex h-full min-h-0 w-full max-w-xl flex-col ${maxHeightClassName}`}
         >
           <div className="shrink-0 bg-canvas px-4 pt-3">
             {splitHandle}
