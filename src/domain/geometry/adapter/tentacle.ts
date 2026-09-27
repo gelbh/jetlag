@@ -51,17 +51,14 @@ export async function buildTentacleEliminationRegion(
   gameArea: GameArea,
 ): Promise<Feature<Polygon | MultiPolygon> | null> {
   const cells = await voronoiCellsForPois(pois);
-  return dispatchTentacleEliminationRegion(
-    {
-      anchor,
-      radiusMeters,
-      sites: toTentacleSites(pois),
-      answeredSiteId: answeredPoiId,
-      gameArea,
-      voronoiCells: cells,
-    },
-    "wasm",
-  );
+  return dispatchTentacleEliminationRegion({
+    anchor,
+    radiusMeters,
+    sites: toTentacleSites(pois),
+    answeredSiteId: answeredPoiId,
+    gameArea,
+    voronoiCells: cells,
+  });
 }
 
 export async function buildTentaclePoiAnswerEliminationRegion(
@@ -82,17 +79,14 @@ export async function buildTentaclePoiAnswerEliminationRegion(
   }
 
   const cells = await voronoiCellsForPois(pois);
-  const region = await dispatchTentaclePoiAnswerEliminationRegion(
-    {
-      anchor,
-      radiusMeters,
-      sites: toTentacleSites(pois),
-      answeredSiteId: answeredPoiId,
-      gameArea,
-      voronoiCells: cells,
-    },
-    "wasm",
-  );
+  const region = await dispatchTentaclePoiAnswerEliminationRegion({
+    anchor,
+    radiusMeters,
+    sites: toTentacleSites(pois),
+    answeredSiteId: answeredPoiId,
+    gameArea,
+    voronoiCells: cells,
+  });
   if (region) {
     poiAnswerEliminationCache.set(cacheKey, region);
   }

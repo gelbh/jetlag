@@ -7,7 +7,6 @@ import {
   buildMultiPlaceEliminationRegion,
   buildMultiPlaceNearRegion,
 } from "./geometryMeasuring";
-import { buildMultiPlaceNearRegion } from "./nearRegions";
 import dublinCountyParksMeasuring from "./fixtures/dublinCountyParksMeasuring.json";
 
 const sampleGameArea: GameArea = {

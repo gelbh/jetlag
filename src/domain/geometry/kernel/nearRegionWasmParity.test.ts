@@ -120,15 +120,12 @@ describe("near-region batch wasm failure", () => {
     const { runNearRegionBatch } = await import("./nearRegionKernelRunner");
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
     await expect(
-      runNearRegionBatch(
-        {
-          segments: [segment],
-          distanceMeters: 200,
-          disks: [],
-          gameArea: sampleGameArea,
-        },
-        "wasm",
-      ),
+      runNearRegionBatch({
+        segments: [segment],
+        distanceMeters: 200,
+        disks: [],
+        gameArea: sampleGameArea,
+      }),
     ).rejects.toThrow("wasm boom");
     expect(warnSpy).toHaveBeenCalled();
     warnSpy.mockRestore();

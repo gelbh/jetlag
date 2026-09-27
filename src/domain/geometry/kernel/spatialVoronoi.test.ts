@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import area from "@turf/area";
 import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
-import { lineString, point as turfPoint } from "@turf/helpers";
+import { point as turfPoint } from "@turf/helpers";
 import type { Feature, MultiPolygon, Polygon } from "geojson";
 import { wasmBuildSpatialVoronoiFromSites } from "./voronoiWasm";
 import {

@@ -153,7 +153,6 @@ export async function obstacleFeaturesFromElements(
         line,
         WATERWAY_BUFFER_METERS,
         undefined,
-        "wasm",
       );
 
       if (buffered) {

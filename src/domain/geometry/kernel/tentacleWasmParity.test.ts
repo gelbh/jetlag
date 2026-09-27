@@ -160,17 +160,14 @@ describe("tentacle wasm failure", () => {
     );
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
     await expect(
-      runWithMock(
-        {
-          anchor,
-          radiusMeters: oneMileMeters,
-          sites: [westSite, eastSite],
-          answeredSiteId: "east",
-          gameArea,
-          voronoiCells: cells,
-        },
-        "wasm",
-      ),
+      runWithMock({
+        anchor,
+        radiusMeters: oneMileMeters,
+        sites: [westSite, eastSite],
+        answeredSiteId: "east",
+        gameArea,
+        voronoiCells: cells,
+      }),
     ).rejects.toThrow("wasm init failed");
     expect(warnSpy).toHaveBeenCalled();
     warnSpy.mockRestore();
