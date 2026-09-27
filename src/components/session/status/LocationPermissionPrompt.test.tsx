@@ -5,7 +5,11 @@ import {
   createMockGeolocationPosition,
   mockGeolocation,
 } from "@/test/mocks/geolocation";
-import { retainLocationPermissionDemand, resetLocationPermissionUiForTests } from "@/services/core/location/locationPermissionUi";
+import {
+  persistLocationAccessConfirmed,
+  retainLocationPermissionDemand,
+  resetLocationPermissionUiForTests,
+} from "@/services/core/location/locationPermissionUi";
 import { LocationPermissionPrompt } from "./LocationPermissionPrompt";
 
 function mockPermissions(state: PermissionState): void {
@@ -61,6 +65,7 @@ describe("LocationPermissionPrompt", () => {
     mockGeolocation(createMockGeolocationPosition(53.35, -6.26));
     mockPermissions("prompt");
     const release = retainLocationPermissionDemand();
+    const getCurrentPosition = vi.mocked(navigator.geolocation.getCurrentPosition);
 
     render(
       <MemoryRouter initialEntries={["/map"]}>
@@ -71,6 +76,34 @@ describe("LocationPermissionPrompt", () => {
     fireEvent.click(
       await screen.findByRole("button", { name: /allow location/i }),
     );
+
+    await waitFor(() => {
+      expect(getCurrentPosition).toHaveBeenCalled();
+    });
+
+    await waitFor(() => {
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    });
+
+    release();
+  });
+
+  it("hides when persisted confirmation quietly restores", async () => {
+    mockGeolocation(createMockGeolocationPosition(53.35, -6.26));
+    mockPermissions("prompt");
+    persistLocationAccessConfirmed();
+    const release = retainLocationPermissionDemand();
+    const getCurrentPosition = vi.mocked(navigator.geolocation.getCurrentPosition);
+
+    render(
+      <MemoryRouter initialEntries={["/map"]}>
+        <LocationPermissionPrompt />
+      </MemoryRouter>,
+    );
+
+    await waitFor(() => {
+      expect(getCurrentPosition).toHaveBeenCalled();
+    });
 
     await waitFor(() => {
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
@@ -112,6 +145,31 @@ describe("LocationPermissionPrompt", () => {
         <LocationPermissionPrompt />
       </MemoryRouter>,
     );
+
+    expect(
+      await screen.findByRole("dialog", { name: /location blocked/i }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /try again/i })).toBeInTheDocument();
+
+    release();
+  });
+
+  it("shows blocked guidance when quiet restore is denied under Permissions prompt", async () => {
+    mockGeolocation(null);
+    mockPermissions("prompt");
+    persistLocationAccessConfirmed();
+    const release = retainLocationPermissionDemand();
+    const getCurrentPosition = vi.mocked(navigator.geolocation.getCurrentPosition);
+
+    render(
+      <MemoryRouter initialEntries={["/map"]}>
+        <LocationPermissionPrompt />
+      </MemoryRouter>,
+    );
+
+    await waitFor(() => {
+      expect(getCurrentPosition).toHaveBeenCalled();
+    });
 
     expect(
       await screen.findByRole("dialog", { name: /location blocked/i }),

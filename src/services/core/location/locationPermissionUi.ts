@@ -48,10 +48,38 @@ export function markLocationAccessConfirmed(): void {
   emitLocationPermissionUi();
 }
 
+export const LOCATION_ACCESS_CONFIRMED_STORAGE_KEY =
+  "jetlag.locationAccessConfirmed";
+
+export function hasPersistedLocationAccessConfirmed(): boolean {
+  try {
+    return localStorage.getItem(LOCATION_ACCESS_CONFIRMED_STORAGE_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+export function persistLocationAccessConfirmed(): void {
+  try {
+    localStorage.setItem(LOCATION_ACCESS_CONFIRMED_STORAGE_KEY, "1");
+  } catch {
+    // private mode / blocked storage
+  }
+}
+
+export function clearPersistedLocationAccessConfirmed(): void {
+  try {
+    localStorage.removeItem(LOCATION_ACCESS_CONFIRMED_STORAGE_KEY);
+  } catch {
+    // private mode / blocked storage
+  }
+}
+
 /** Test-only reset for demand / confirm epoch. */
 export function resetLocationPermissionUiForTests(): void {
   locationPermissionDemand = 0;
   locationAccessConfirmEpoch = 0;
   locationPermissionUiSnapshot = { demand: 0, confirmEpoch: 0 };
   emitLocationPermissionUi();
+  clearPersistedLocationAccessConfirmed();
 }
