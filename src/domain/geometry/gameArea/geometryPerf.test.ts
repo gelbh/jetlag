@@ -141,7 +141,7 @@ function circleDisks(count: number): DiskSpec[] {
   }));
 }
 
-function legacyCircleUnion(disks: DiskSpec[]): PolygonFeature | null {
+function turfCircleUnion(disks: DiskSpec[]): PolygonFeature | null {
   const circles = disks.map((disk) =>
     turfCircle(turfPoint([disk.center[1], disk.center[0]]), disk.radiusMeters / 1000, {
       steps: 64,
@@ -213,11 +213,11 @@ describe.skipIf(!runGeometryPerf)("geometry performance gates", () => {
     const circleUnionMs = measureMedianMs(() => {
       unionDiskSpecs(disks);
     });
-    const legacyMs = measureMedianMs(() => {
-      legacyCircleUnion(disks);
+    const turfMs = measureMedianMs(() => {
+      turfCircleUnion(disks);
     });
 
-    expect(circleUnionMs / legacyMs).toBeLessThan(0.1);
+    expect(circleUnionMs / turfMs).toBeLessThan(0.1);
   });
 
   it("wasm_mask_8_polys median within 1.1x ts", async () => {
