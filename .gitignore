@@ -22,5 +22,5 @@ ui-debug.log
 docs/
 .lighthouseci
 target/
-crates/*/pkg/
+crates/*/pkg
 .stylelintcache
