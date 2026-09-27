@@ -2,6 +2,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type { Map as MapLibreMap } from "maplibre-gl";
 import {
   JL_ICON_USER_LOCATION,
+  JL_ICON_USER_LOCATION_PLAIN,
+  attachMapLibreMissingMarkerImageResolver,
   registerMapLibreMarkerImages,
   transitModeIconId,
   transitVehicleIconId,
@@ -16,17 +18,30 @@ type MockMap = {
   style: object | undefined;
   isStyleLoaded: () => boolean;
   _removed: boolean;
+  setMissingStyleImageResolver: (
+    resolver: ((id: string) => void | Promise<void>) | null,
+  ) => void;
+  missingResolver: ((id: string) => void | Promise<void>) | null;
 };
 
 function createMockMap(): MockMap {
   const images = new Set<string>();
   const addImageCalls: string[] = [];
-  const state = { duplicateAddAttempts: 0 };
+  const state = {
+    duplicateAddAttempts: 0,
+    missingResolver: null as ((id: string) => void | Promise<void>) | null,
+  };
   return {
     images,
     addImageCalls,
     get duplicateAddAttempts() {
       return state.duplicateAddAttempts;
+    },
+    get missingResolver() {
+      return state.missingResolver;
+    },
+    setMissingStyleImageResolver(resolver) {
+      state.missingResolver = resolver;
     },
     hasImage: (id) => images.has(id),
     addImage: (id) => {
@@ -193,5 +208,40 @@ describe("mapLibreIconRegistry", () => {
     });
     expect(hasImage).toHaveBeenCalled();
     expect(addImage).not.toHaveBeenCalled();
+  });
+
+  it("attachMapLibreMissingMarkerImageResolver installs a resolver", () => {
+    const mock = createMockMap();
+    const map = mock as unknown as MapLibreMap;
+    attachMapLibreMissingMarkerImageResolver(map);
+    expect(typeof mock.missingResolver).toBe("function");
+  });
+
+  it("resolver registers jl-icon-user-location-plain via registerMapLibreMarkerImages", async () => {
+    await withDelayedMockImage(async () => {
+      const mock = createMockMap();
+      const map = mock as unknown as MapLibreMap;
+      attachMapLibreMissingMarkerImageResolver(map);
+      await mock.missingResolver?.(JL_ICON_USER_LOCATION_PLAIN);
+      expect(mock.hasImage(JL_ICON_USER_LOCATION_PLAIN)).toBe(true);
+    });
+  });
+
+  it("resolver ignores non-jl-icon ids", async () => {
+    const mock = createMockMap();
+    const map = mock as unknown as MapLibreMap;
+    const addImage = vi.fn(mock.addImage.bind(mock));
+    mock.addImage = addImage;
+    attachMapLibreMissingMarkerImageResolver(map);
+    await mock.missingResolver?.("highway-shield-us-interstate");
+    expect(addImage).not.toHaveBeenCalled();
+  });
+
+  it("detach clears the missing-image resolver", () => {
+    const mock = createMockMap();
+    const map = mock as unknown as MapLibreMap;
+    const detach = attachMapLibreMissingMarkerImageResolver(map);
+    detach();
+    expect(mock.missingResolver).toBeNull();
   });
 });
