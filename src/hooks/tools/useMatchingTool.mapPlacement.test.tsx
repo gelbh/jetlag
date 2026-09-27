@@ -43,9 +43,7 @@ const resolveMatchingAnchor = vi.hoisted(() => {
     error: null as string | null,
   } satisfies ResolveMatchingAnchorResult;
   return vi.fn(
-    async (
-      ..._args: unknown[]
-    ): Promise<ResolveMatchingAnchorResult> => defaultResult,
+    async (): Promise<ResolveMatchingAnchorResult> => defaultResult,
   );
 });
 
@@ -54,9 +52,8 @@ vi.mock("./matching/resolveMatchingAnchor", async (importOriginal) => {
     await importOriginal<typeof import("./matching/resolveMatchingAnchor")>();
   return {
     ...actual,
-    resolveMatchingAnchor: (
-      ...args: Parameters<typeof actual.resolveMatchingAnchor>
-    ) => resolveMatchingAnchor(...args),
+    resolveMatchingAnchor: (() =>
+      resolveMatchingAnchor()) as typeof actual.resolveMatchingAnchor,
   };
 });
 
