@@ -33,7 +33,7 @@ describe("kernel dispatch ready", () => {
       { lng: -0.18, lat: 51.45, properties: { poiId: "west" } },
       { lng: -0.12, lat: 51.45, properties: { poiId: "east" } },
     ];
-    const result = await dispatchSpatialVoronoi(sites, "wasm");
+    const result = await dispatchSpatialVoronoi(sites);
     expect(result.type).toBe("FeatureCollection");
     expect(result.features).toHaveLength(2);
   });
@@ -63,7 +63,7 @@ describe("kernel dispatch ready", () => {
       params.gameArea,
       params.voronoiCells,
     );
-    const result = await runTentacleEliminationRegion(params, "wasm");
+    const result = await runTentacleEliminationRegion(params);
     expect(result).not.toBeNull();
     expect(result?.geometry.type).toMatch(/Polygon|MultiPolygon/);
 

@@ -111,13 +111,11 @@ describe("half-plane wasm failure", () => {
           ...actual.KERNEL_WASM_READY,
           halfPlane: true,
         },
-        shouldUseWasm: (mode: string, entrypoint: string) => {
+        shouldUseWasm: (entrypoint: string) => {
           if (entrypoint === "halfPlane") {
-            return mode === "wasm";
+            return true;
           }
-          return actual.shouldUseWasm(
-            mode as "wasm",
-            entrypoint as import("./kernelWasmReady").KernelEntrypoint,
+          return actual.shouldUseWasm(entrypoint as import("./kernelWasmReady").KernelEntrypoint,
           );
         },
       };
@@ -144,7 +142,6 @@ describe("half-plane wasm failure", () => {
         gameArea,
         "cold",
         "midpoint",
-        "wasm",
       ),
     ).rejects.toThrow("wasm init failed");
     expect(warnSpy).toHaveBeenCalled();

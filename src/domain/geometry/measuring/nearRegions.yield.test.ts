@@ -69,14 +69,11 @@ describe("buildCoastlineNearRegion cooperative yield", () => {
           ...actual.KERNEL_WASM_READY,
           nearRegionBatch: false,
         },
-        shouldUseWasm: (mode: string, entrypoint: string) => {
+        shouldUseWasm: (entrypoint: string) => {
           if (entrypoint === "nearRegionBatch") {
             return false;
           }
-          return actual.shouldUseWasm(
-            mode as "wasm",
-            entrypoint as never,
-          );
+          return actual.shouldUseWasm(entrypoint as never);
         },
       };
     });
@@ -119,14 +116,11 @@ describe("buildCoastlineNearRegion cooperative yield", () => {
           ...actual.KERNEL_WASM_READY,
           nearRegionBatch: true,
         },
-        shouldUseWasm: (mode: string, entrypoint: string) => {
+        shouldUseWasm: (entrypoint: string) => {
           if (entrypoint === "nearRegionBatch") {
-            return mode === "wasm";
+            return true;
           }
-          return actual.shouldUseWasm(
-            mode as "wasm",
-            entrypoint as never,
-          );
+          return actual.shouldUseWasm(entrypoint as never);
         },
       };
     });

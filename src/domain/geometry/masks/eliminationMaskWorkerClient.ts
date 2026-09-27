@@ -12,18 +12,15 @@ import type {
   EliminationUnionInput,
   PolygonFeature,
 } from "../kernel/types";
-import type { MaskKernelMode } from "../kernel";
 
 type EliminationMaskWorkerApi = {
   buildMaskFromUnionInput: (
     input: EliminationUnionInput,
     gameArea: GameArea,
-    mode?: MaskKernelMode,
   ) => Promise<PolygonFeature | null>;
   buildEndGameMaskFromDisks: (
     gameArea: GameArea,
     disks: readonly DiskSpec[],
-    mode?: MaskKernelMode,
   ) => Promise<PolygonFeature | null>;
 };
 
@@ -90,7 +87,6 @@ export async function requestCombinedEliminationMask(
         api.buildEndGameMaskFromDisks(
           gameArea,
           annotationsToEndGameDisks(endGameHidingZones),
-          "wasm",
         ),
         pendingFailure,
       ]);
@@ -102,7 +98,7 @@ export async function requestCombinedEliminationMask(
       draftFeatures,
     );
     return await Promise.race([
-      api.buildMaskFromUnionInput(input, gameArea, "wasm"),
+      api.buildMaskFromUnionInput(input, gameArea),
       pendingFailure,
     ]);
   } catch (error) {
