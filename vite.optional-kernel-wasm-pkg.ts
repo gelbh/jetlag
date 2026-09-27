@@ -26,7 +26,9 @@ function isKernelWasmPkgSpecifier(
   return false;
 }
 
-/** Stub gitignored pkg/ so Vite/Vitest can load the graph without wasm:build. */
+/** Stub the gitignored kernel wasm pkg dir so Vite/Vitest load without wasm:build.
+ *  Policy (G5j): never commit built pkg or worktree symlinks; CI and local
+ *  `npm run wasm:build` produce the real artifact. */
 export function optionalKernelWasmPkg(): Plugin {
   return {
     name: "optional-kernel-wasm-pkg",
