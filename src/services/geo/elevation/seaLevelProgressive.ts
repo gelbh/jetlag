@@ -213,7 +213,10 @@ async function hydratePackSeaLevelSeed(
   return sampling;
 }
 
-export function startSeaLevelBackgroundSampling(gameArea: GameArea): void {
+export function startSeaLevelBackgroundSampling(
+  gameArea: GameArea,
+  options?: SeaLevelSamplingOptions,
+): void {
   const gameAreaKey = gameAreaPreloadKey(gameArea);
   const cached = readSeaLevelSamplingCache(gameArea);
   if (cached?.complete === true) {
@@ -225,7 +228,23 @@ export function startSeaLevelBackgroundSampling(gameArea: GameArea): void {
     return;
   }
 
-  const job = runProgressiveSampling(gameArea).finally(() => {
+  const job = (async () => {
+    const seeded = await hydratePackSeaLevelSeed(
+      gameArea,
+      options?.regionPackId,
+    );
+    if (
+      seeded?.complete === true &&
+      countFiniteElevations(seeded.cellElevations) === seeded.cells.length
+    ) {
+      const fineDivisions = resolveFineSeaLevelDivisions(gameArea);
+      if (seeded.divisions >= fineDivisions) {
+        setSamplerPhase(gameAreaKey, "complete");
+        return;
+      }
+    }
+    await runProgressiveSampling(gameArea);
+  })().finally(() => {
     activeSamplers.delete(gameAreaKey);
   });
   activeSamplers.set(gameAreaKey, job);
@@ -255,7 +274,10 @@ export async function ensureSeaLevelSamplingComplete(
     }
   }
 
-  startSeaLevelBackgroundSampling(gameArea);
+  startSeaLevelBackgroundSampling(gameArea, {
+    regionPackId: options?.regionPackId,
+  });
+
 
   if (
     seeded &&
