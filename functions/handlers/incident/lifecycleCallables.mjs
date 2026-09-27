@@ -17,10 +17,7 @@ import { sendIncidentEmail } from "../../incident/sendIncidentEmail.mjs";
 import { postIncidentMessageHandler } from "../../incident/postIncidentMessage.mjs";
 import { applyIncidentMitigationHandler } from "../../incident/applyIncidentMitigation.mjs";
 import { updateIncidentStatusHandler } from "../../incident/updateIncidentStatus.mjs";
-import {
-  notifyReporterResolved,
-  sendReporterResolvedPush,
-} from "../../incident/notifyReporterResolved.mjs";
+import { notifyReporterResolved } from "../../incident/notifyReporterResolved.mjs";
 import { publishIncidentHotfixHandler } from "../../incident/publishIncidentHotfix.mjs";
 import { launchCursorHotfixForIncident } from "../../incident/launchCursorHotfix.mjs";
 import { launchIncidentCursorAgentHandler } from "../../incident/launchIncidentCursorAgent.mjs";
@@ -182,7 +179,6 @@ export const updateIncidentStatus = onCall(
                   audience,
                   to,
                 }),
-              sendPush: (payload) => sendReporterResolvedPush(db, payload),
               homeUrl,
             }),
         },

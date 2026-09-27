@@ -20,9 +20,6 @@ export {
 export {
   captureStartingLocations,
   finalizeGameResult,
-  notifyPendingQuestion,
-  notifySessionMessage,
-  notifySessionTimer,
   purgeStaleSessions,
   warmPremiumOverpassPreload,
 } from "./handlers/triggers.mjs";
