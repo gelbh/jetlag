@@ -206,6 +206,7 @@ export function RouteTransitionProvider({ children }: { children: ReactNode }) {
       const warmChunk = !isLazyRoute(targetPath) || isRouteImportWarm(targetPath);
       const warmReady = getSyncRouteReady(targetPath);
       const warmFastPath = isWarmFastPathEligible(targetPath);
+      // Keep RR viewTransition off: revealRouteTransition owns VT after warm/settle.
       const navigateOptions: RouteNavigateOptions = {
         replace: options?.replace,
         state: options?.state,
