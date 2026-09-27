@@ -46,10 +46,7 @@ export function PremiumSignInGate({
         description={`Sign in with Google${APPLE_SIGN_IN_ENABLED ? ", Apple" : ""}, or email so premium purchases and session credits follow your account across devices.`}
         extraSignInProviders={
           APPLE_SIGN_IN_ENABLED ? (
-            <AppleSignInButton
-              onSuccess={handleSignedIn}
-              onError={setError}
-            />
+            <AppleSignInButton onSuccess={handleSignedIn} onError={setError} />
           ) : null
         }
       >

@@ -84,7 +84,8 @@ export function PremiumTierCards({
   onStartTrial: () => void;
   onPortal: () => void;
 }) {
-  const bankedCreditsLabel = formatBankedPremiumSessionCreditsLabel(entitlements);
+  const bankedCreditsLabel =
+    formatBankedPremiumSessionCreditsLabel(entitlements);
   const packCreditsLabel = formatPremiumSessionCreditsLabel(entitlements);
   const createSessionHint =
     bankedCreditsLabel ?? packCreditsLabel ?? "Host a game";
@@ -95,7 +96,9 @@ export function PremiumTierCards({
       ? resolveDefaultCatalogTab(entitlements)
       : catalogTab;
 
-  const packOffers = PREMIUM_PRODUCT_OFFERS.filter((offer) => offer.kind === "pack");
+  const packOffers = PREMIUM_PRODUCT_OFFERS.filter(
+    (offer) => offer.kind === "pack",
+  );
   const subscriptionOffers = PREMIUM_PRODUCT_OFFERS.filter(
     (offer) => offer.kind === "subscription",
   );
