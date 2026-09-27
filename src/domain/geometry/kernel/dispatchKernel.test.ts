@@ -16,7 +16,7 @@ describe("dispatchKernel", () => {
         halfPlane: true,
         geodesicLineBuffer: false,
       },
-      shouldUseWasm: (mode: "ts" | "dual" | "wasm", entrypoint: string) => {
+      shouldUseWasm: (mode: "dual" | "wasm", entrypoint: string) => {
         if (entrypoint === "geodesicLineBuffer") {
           return false;
         }
@@ -110,7 +110,7 @@ describe("dispatchKernel", () => {
         halfPlane: true,
         geodesicLineBuffer: false,
       },
-      shouldUseWasm: (mode: "ts" | "dual" | "wasm", entrypoint: string) => {
+      shouldUseWasm: (mode: "dual" | "wasm", entrypoint: string) => {
         if (entrypoint === "geodesicLineBuffer") {
           return false;
         }
@@ -137,18 +137,6 @@ describe("dispatchKernel", () => {
 });
 
 describe("dispatchKernelSync", () => {
-  it("returns TS when mode is ts even if entrypoint is ready", () => {
-    const runTs = vi.fn(() => "ts");
-    expect(
-      dispatchKernelSync({
-        mode: "ts",
-        entrypoint: "halfPlane",
-        runTs,
-      }),
-    ).toBe("ts");
-    expect(runTs).toHaveBeenCalledOnce();
-  });
-
   it("throws when WASM would run for a ready entrypoint", () => {
     expect(() =>
       dispatchKernelSync({

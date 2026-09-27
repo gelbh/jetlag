@@ -74,7 +74,7 @@ describe("buildCoastlineNearRegion cooperative yield", () => {
             return false;
           }
           return actual.shouldUseWasm(
-            mode as "ts" | "wasm" | "dual",
+            mode as "wasm" | "dual",
             entrypoint as never,
           );
         },
@@ -124,7 +124,7 @@ describe("buildCoastlineNearRegion cooperative yield", () => {
             return mode === "wasm" || mode === "dual";
           }
           return actual.shouldUseWasm(
-            mode as "ts" | "wasm" | "dual",
+            mode as "wasm" | "dual",
             entrypoint as never,
           );
         },

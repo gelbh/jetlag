@@ -11,7 +11,7 @@ export type KernelEntrypoint =
 
 /**
  * Per-entrypoint WASM readiness after topology + perf gates.
- * False keeps TS via dispatchKernel (not-ready or mode ts).
+ * False keeps TS via dispatchKernel (not-ready path).
  */
 export const KERNEL_WASM_READY: Record<KernelEntrypoint, boolean> = {
   maskFromUnionInput: true,
