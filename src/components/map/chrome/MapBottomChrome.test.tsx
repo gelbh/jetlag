@@ -41,7 +41,6 @@ describe("MapBottomChrome", () => {
   it("renders provided islands and omits empty ones", () => {
     renderChrome(
       <MapBottomChrome
-        layout="phone"
         hunt={<button type="button">Radar</button>}
         session={<button type="button">Chat</button>}
         mapControls={<button type="button">Recenter map on play area</button>}
@@ -58,7 +57,7 @@ describe("MapBottomChrome", () => {
 
   it("omits history bookend islands (undo/redo live inside hunt)", () => {
     const { container } = renderChrome(
-      <MapBottomChrome layout="phone" hunt={<button type="button">Radar</button>} />,
+      <MapBottomChrome hunt={<button type="button">Radar</button>} />,
     );
     expect(container.querySelector('[data-island="history-start"]')).toBeNull();
     expect(container.querySelector('[data-island="history-end"]')).toBeNull();
@@ -67,7 +66,7 @@ describe("MapBottomChrome", () => {
 
   it("wraps phone chrome in OverlayHost with safe-area pad", () => {
     const { container } = renderChrome(
-      <MapBottomChrome layout="phone" hunt={<button type="button">Radar</button>} />,
+      <MapBottomChrome hunt={<button type="button">Radar</button>} />,
     );
     const host = container.querySelector("[data-overlay-host]");
     expect(host).not.toBeNull();
@@ -80,19 +79,9 @@ describe("MapBottomChrome", () => {
     expect(container.querySelector("[data-tool-deck]")).not.toBeNull();
   });
 
-  it("keeps jl-tool-dock--rail on desktop rail chrome", () => {
-    const { container } = renderChrome(
-      <MapBottomChrome layout="rail" hunt={<button type="button">Radar</button>} />,
-    );
-    expect(
-      container.querySelector(".jl-tool-dock.jl-tool-dock--rail"),
-    ).not.toBeNull();
-  });
-
   it("marks chrome inactive without leaving islands clickable via CSS class", () => {
     const { container } = renderChrome(
       <MapBottomChrome
-        layout="phone"
         inactive
         hunt={<button type="button">Radar</button>}
       />,
@@ -105,7 +94,6 @@ describe("MapBottomChrome", () => {
   it("puts hunt in the bottom band and session/map-controls in the side stack", () => {
     const { container } = renderChrome(
       <MapBottomChrome
-        layout="phone"
         hunt={<button type="button">Radar</button>}
         session={<button type="button">Chat</button>}
         mapControls={<button type="button">Recenter map on play area</button>}
@@ -129,30 +117,12 @@ describe("MapBottomChrome", () => {
 
   it("keeps an empty side stack when session and map-controls are absent", () => {
     const { container } = renderChrome(
-      <MapBottomChrome layout="phone" hunt={<button type="button">Radar</button>} />,
+      <MapBottomChrome hunt={<button type="button">Radar</button>} />,
     );
     const side = container.querySelector(".jl-map-chrome-side-stack");
     expect(side).not.toBeNull();
     expect(side?.childElementCount).toBe(0);
     expect(container.querySelector(".jl-map-chrome-bottom-band")).not.toBeNull();
-  });
-
-  it("uses the same band/side wrappers on rail so CSS can flatten them", () => {
-    const { container } = renderChrome(
-      <MapBottomChrome
-        layout="rail"
-        hunt={<button type="button">Radar</button>}
-        session={<button type="button">Chat</button>}
-      />,
-    );
-    expect(container.querySelector(".jl-map-bottom-chrome-host--rail")).not.toBeNull();
-    const bottom = container.querySelector(".jl-map-chrome-bottom-band");
-    const side = container.querySelector(".jl-map-chrome-side-stack");
-    expect(bottom).not.toBeNull();
-    expect(side).not.toBeNull();
-    expect(bottom?.querySelector('[data-island="hunt"]')).not.toBeNull();
-    expect(bottom?.querySelector('[data-island="session"]')).toBeNull();
-    expect(side?.querySelector('[data-island="session"]')).not.toBeNull();
   });
 
   it("keeps Session above the dock with shared left-stack tokens (no right portal)", () => {
@@ -166,7 +136,7 @@ describe("MapBottomChrome", () => {
 
   it("defaults hunt density to tools and omits sparse modifiers", () => {
     const { container } = renderChrome(
-      <MapBottomChrome layout="phone" hunt={<button type="button">Radar</button>} />,
+      <MapBottomChrome hunt={<button type="button">Radar</button>} />,
     );
     const chrome = container.querySelector(".jl-map-bottom-chrome");
     expect(chrome?.getAttribute("data-hunt-density")).toBe("tools");
@@ -179,7 +149,6 @@ describe("MapBottomChrome", () => {
   it("applies sparse hunt density modifiers", () => {
     const { container } = renderChrome(
       <MapBottomChrome
-        layout="phone"
         huntDensity="sparse"
         hunt={<button type="button">Set zone</button>}
       />,
@@ -197,7 +166,6 @@ describe("MapBottomChrome", () => {
   it("uses full-bleed hunt band without permanently reserving side-stack flex (choice a)", () => {
     const { container } = renderChrome(
       <MapBottomChrome
-        layout="phone"
         hunt={<button type="button">Radar</button>}
         session={<button type="button">Chat</button>}
       />,
@@ -222,7 +190,6 @@ describe("MapBottomChrome", () => {
     const { container } = renderChrome(
       <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
         <MapBottomChrome
-          layout="phone"
           hunt={<button type="button">Radar</button>}
           session={<button type="button">Chat</button>}
         />
@@ -247,7 +214,6 @@ describe("MapBottomChrome", () => {
     expect(chromeCss).toMatch(/jl-map-chrome-side-stack--fixed/);
     const { container } = renderChrome(
       <MapBottomChrome
-        layout="phone"
         hunt={
           <ToolDeckGroup>
             <button type="button" className="jl-tool-slot">
@@ -281,7 +247,6 @@ describe("MapBottomChrome Mantine", () => {
     const { container } = renderChrome(
       <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
         <MapBottomChrome
-          layout="phone"
           hunt={<button type="button">Radar</button>}
           session={<button type="button">Chat</button>}
         />
@@ -296,7 +261,6 @@ describe("MapBottomChrome Mantine", () => {
     const { container } = renderChrome(
       <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
         <MapBottomChrome
-          layout="phone"
           hunt={<button type="button">Radar</button>}
           session={<button type="button">Chat</button>}
         />
@@ -311,7 +275,6 @@ describe("MapBottomChrome Mantine", () => {
     const { container } = renderChrome(
       <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
         <MapBottomChrome
-          layout="phone"
           askFirst
           hunt={<button type="button">Radar</button>}
           session={<button type="button">Chat</button>}
@@ -332,7 +295,6 @@ describe("MapBottomChrome Mantine", () => {
     const { container } = renderChrome(
       <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
         <MapBottomChrome
-          layout="phone"
           hunt={<button type="button">Radar</button>}
         />
       </MantineProvider>,

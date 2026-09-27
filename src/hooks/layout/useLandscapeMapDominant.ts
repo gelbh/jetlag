@@ -1,10 +1,7 @@
-import { DESKTOP_LAYOUT_MIN_WIDTH_PX } from "./useDesktopLayout";
 import { useMediaQuery } from "./useMediaQuery";
+import { LANDSCAPE_MAP_DOMINANT_MEDIA } from "@/theme/phoneShell";
 
-/** Mobile/tablet landscape — map-dominant chrome (not desktop ops layout). */
-export const LANDSCAPE_MAP_DOMINANT_MEDIA = `(orientation: landscape) and (max-width: ${
-  DESKTOP_LAYOUT_MIN_WIDTH_PX - 1
-}px)`;
+export { LANDSCAPE_MAP_DOMINANT_MEDIA } from "@/theme/phoneShell";
 
 export function useLandscapeMapDominant(): boolean {
   return useMediaQuery(LANDSCAPE_MAP_DOMINANT_MEDIA);

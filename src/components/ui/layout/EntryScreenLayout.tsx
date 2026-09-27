@@ -40,15 +40,16 @@ export function EntryScreenLayout({
 
   const paddingClass = viewport ? "py-4" : justify === "start" ? "py-6" : "py-8";
 
+  /* Heights live in base.css (dvh + W5-G standalone lvh + phone-shell fill). */
   const viewportClass = viewport
     ? viewportLayout === "between"
-      ? "home-poster-viewport h-[100dvh] max-h-[100dvh] min-h-0 overflow-hidden justify-between gap-2"
+      ? "home-poster-viewport min-h-0 overflow-hidden justify-between gap-2"
       : viewportLayout === "center"
-        ? "home-poster-viewport jl-scroll h-[100dvh] max-h-[100dvh] min-h-0 overflow-y-auto overscroll-y-contain justify-center gap-6"
-        : "home-poster-viewport h-[100dvh] max-h-[100dvh] min-h-0 overflow-hidden justify-start gap-2"
+        ? "home-poster-viewport jl-scroll min-h-0 overflow-y-auto overscroll-y-contain justify-center gap-6"
+        : "home-poster-viewport min-h-0 overflow-hidden justify-start gap-2"
     : "";
 
-  const minHeightClass = viewport ? "min-h-0" : "min-h-[100dvh]";
+  const minHeightClass = viewport ? "min-h-0" : "entry-screen-layout-flow";
 
   const insetClass = flush
     ? "px-0 pt-0 pb-[max(1rem,env(safe-area-inset-bottom))]"

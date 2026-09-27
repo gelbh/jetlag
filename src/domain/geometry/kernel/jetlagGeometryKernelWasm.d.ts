@@ -20,7 +20,7 @@ declare module "*/jetlag_geometry_kernel.js" {
     gameAreaJson: string,
     shadedInside: boolean,
   ): unknown;
-  export function   geodesic_line_buffer_json(
+  export function geodesic_line_buffer_json(
     coordinatesJson: string,
     distanceMeters: number,
     sampleSpacingMeters?: number | null,

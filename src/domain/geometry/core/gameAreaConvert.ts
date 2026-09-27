@@ -30,7 +30,7 @@ export {
   normalizeBoundingBox,
 } from "../gameArea/gameAreaBounds";
 
-/** Null-island placeholder ring — never frame the camera on this alone. */
+/** Null-island placeholder ring: never frame the camera on this alone. */
 const ZERO_GAME_AREA_RING: number[][] = [
   [0, 0],
   [0, 0],
@@ -251,8 +251,6 @@ export {
   safeDifference,
 } from "./geodesicPrimitives";
 export {
-  buildHalfPlanePolygon,
-  buildRadarShadedRegion,
   isPointInGameArea,
 } from "./radarHalfPlane";
 export type { LatLngTuple } from "./types";

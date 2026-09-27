@@ -197,10 +197,6 @@
     right: auto;
   }
 
-  [data-overlay-host][data-layout="rail"] [data-tool-menu="draw"] {
-    inset: 0 auto auto calc(100% + 0.375rem);
-  }
-
   @media (height <= 720px) {
     .jl-wizard-panel-max-h {
       max-height: min(40dvh, 22rem);

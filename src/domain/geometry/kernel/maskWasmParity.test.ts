@@ -2,14 +2,8 @@ import { beforeAll, describe, expect, it, vi } from "vitest";
 import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
-import {
-  buildEndGameMaskFromDisks,
-  buildMaskFromUnionInput,
-} from "./buildMask";
-import {
-  runEndGameMaskFromDisks,
-  runMaskFromUnionInput,
-} from "./maskKernelRunner";
+import { runEndGameMaskFromDisks } from "./maskKernelRunner";
+import { loadPolygonGolden } from "./loadPolygonGolden";
 import { assertPolygonTopologyParity } from "./parity";
 import type { DiskSpec, GameAreaGeometry, PolygonFeature } from "./types";
 
@@ -82,49 +76,35 @@ describe.skipIf(!wasmPkgReady)("mask wasm parity", () => {
     await wasmBuildMaskFromUnionInput({ polygons: [], disks: [] }, gameArea);
   }, 60_000);
 
-  it("matches TS topology on overlapping square union (no disks)", async () => {
+  it("matches golden topology on overlapping square union (no disks)", async () => {
     const input = {
       polygons: [square(-0.19), square(-0.17), square(-0.15)],
       disks: [],
     };
-    const ts = buildMaskFromUnionInput(input, gameArea);
+    const golden = loadPolygonGolden("mask", "overlapping-squares.json");
     const wasm = await wasmBuildMaskFromUnionInput(input, gameArea);
-    assertPolygonTopologyParity(wasm, ts, topologyBbox);
+    assertPolygonTopologyParity(wasm, golden, topologyBbox);
   });
 
-  it("raw wasm matches TS on a single end-game disk", async () => {
+  it("raw wasm matches golden on a single end-game disk", async () => {
     const disks: DiskSpec[] = [
       { center: [51.45, -0.15], radiusMeters: 400 },
     ];
-    const ts = buildEndGameMaskFromDisks(gameArea, disks);
+    const golden = loadPolygonGolden("mask", "single-endgame-disk.json");
     const wasm = await wasmBuildEndGameMaskFromDisks(gameArea, disks);
-    assertPolygonTopologyParity(wasm, ts, topologyBbox);
+    assertPolygonTopologyParity(wasm, golden, topologyBbox);
   });
 
-  it("wasm mode matches TS topology for multi-disk end-game", async () => {
+  it("wasm mode matches golden topology for multi-disk end-game", async () => {
     const disks = overlappingEndGameDisks();
-    const ts = buildEndGameMaskFromDisks(gameArea, disks);
-    const result = await runEndGameMaskFromDisks(gameArea, disks, "wasm");
-    assertPolygonTopologyParity(result, ts, topologyBbox);
-  });
-
-  it("dual mode returns TS for multi-disk end-game", async () => {
-    const disks = overlappingEndGameDisks();
-    const ts = buildEndGameMaskFromDisks(gameArea, disks);
-    const dual = await runEndGameMaskFromDisks(gameArea, disks, "dual");
-    expect(dual).toEqual(ts);
-  });
-
-  it("dual mode returns TS for polygon-only union", async () => {
-    const input = { polygons: [square(-0.18)], disks: [] };
-    const ts = buildMaskFromUnionInput(input, gameArea);
-    const dual = await runMaskFromUnionInput(input, gameArea, "dual");
-    expect(dual).toEqual(ts);
+    const golden = loadPolygonGolden("mask", "multi-endgame-disks.json");
+    const result = await runEndGameMaskFromDisks(gameArea, disks);
+    assertPolygonTopologyParity(result, golden, topologyBbox);
   });
 });
 
-describe("mask wasm fallback", () => {
-  it("wasm init failure falls back to TS", async () => {
+describe("mask wasm failure", () => {
+  it("wasm init failure rethrows (no silent TS fail-soft)", async () => {
     vi.resetModules();
     vi.doMock("./maskWasm", () => ({
       wasmBuildMaskFromUnionInput: vi.fn(async () => {
@@ -139,12 +119,14 @@ describe("mask wasm fallback", () => {
     const { runMaskFromUnionInput: runWithMock } = await import(
       "./maskKernelRunner"
     );
-    const { buildMaskFromUnionInput: buildTs } = await import("./buildMask");
 
     const input = { polygons: [square(-0.18)], disks: [] };
-    const expected = buildTs(input, gameArea);
-    const result = await runWithMock(input, gameArea, "wasm");
-    expect(result).toEqual(expected);
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    await expect(runWithMock(input, gameArea)).rejects.toThrow(
+      "wasm init failed",
+    );
+    expect(warnSpy).toHaveBeenCalled();
+    warnSpy.mockRestore();
 
     vi.doUnmock("./maskWasm");
     vi.resetModules();
@@ -152,12 +134,8 @@ describe("mask wasm fallback", () => {
 
   it("wasm mode with disks uses wasm path when pkg is ready", async () => {
     vi.resetModules();
-    const wasmBuildEndGame = vi.fn(async () => {
-      const { buildEndGameMaskFromDisks: buildTs } = await import("./buildMask");
-      return buildTs(gameArea, [
-        { center: [51.45, -0.15], radiusMeters: 400 },
-      ]);
-    });
+    const golden = loadPolygonGolden("mask", "single-endgame-disk.json");
+    const wasmBuildEndGame = vi.fn(async () => golden);
     vi.doMock("./maskWasm", () => ({
       wasmBuildMaskFromUnionInput: vi.fn(),
       wasmBuildEndGameMaskFromDisks: wasmBuildEndGame,
@@ -171,7 +149,7 @@ describe("mask wasm fallback", () => {
     const disks: DiskSpec[] = [
       { center: [51.45, -0.15], radiusMeters: 400 },
     ];
-    await runWithMock(gameArea, disks, "wasm");
+    await runWithMock(gameArea, disks);
     expect(wasmBuildEndGame).toHaveBeenCalled();
 
     vi.doUnmock("./maskWasm");

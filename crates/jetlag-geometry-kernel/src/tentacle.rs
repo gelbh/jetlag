@@ -1,22 +1,15 @@
-//! Tentacle elimination regions (Wave-2). Voronoi cells from WASM spatial Voronoi or TS (d3-delaunay fallback).
+//! Tentacle elimination regions. Voronoi cells from WASM spatial Voronoi or TS (d3-delaunay fallback).
 
 use crate::mask::{
     disk_to_polygon, feature_to_multipolygon, fold_union, multipolygon_to_feature, DiskSpec,
     GameArea,
 };
-use crate::types::{GameAreaGeometry, PolygonFeature};
+use crate::types::{GameAreaGeometry, PolygonFeature, TentacleSiteJson};
 use geo::{BooleanOps, MultiPolygon, Polygon};
 use serde::Deserialize;
 use serde_json::Value;
 
 const POI_CELL_FALLBACK_RADIUS_M: f64 = 25.0;
-
-#[derive(Debug, Clone, Deserialize)]
-pub struct TentacleSiteJson {
-    pub id: String,
-    pub lat: f64,
-    pub lng: f64,
-}
 
 #[derive(Debug, Clone, Deserialize)]
 struct FeatureCollectionJson {
@@ -86,8 +79,7 @@ fn site_id_by_coordinates(cell: &PolygonFeature, sites: &[TentacleSiteJson]) -> 
 
 fn resolve_cell_site_id(cell: &PolygonFeature, sites: &[TentacleSiteJson]) -> Option<String> {
     let keys = ["poiId", "featureId"];
-    site_id_from_properties(&cell.properties, &keys)
-        .or_else(|| site_id_by_coordinates(cell, sites))
+    site_id_from_properties(&cell.properties, &keys).or_else(|| site_id_by_coordinates(cell, sites))
 }
 
 fn polygon_cells(features: &[PolygonFeature]) -> Vec<PolygonFeature> {
@@ -103,10 +95,7 @@ fn polygon_cells(features: &[PolygonFeature]) -> Vec<PolygonFeature> {
         .collect()
 }
 
-fn every_site_has_resolvable_cell(
-    features: &[PolygonFeature],
-    sites: &[TentacleSiteJson],
-) -> bool {
+fn every_site_has_resolvable_cell(features: &[PolygonFeature], sites: &[TentacleSiteJson]) -> bool {
     let mut resolved = std::collections::HashSet::new();
     for cell in features {
         if let Some(site_id) = resolve_cell_site_id(cell, sites) {
@@ -116,10 +105,7 @@ fn every_site_has_resolvable_cell(
     sites.iter().all(|site| resolved.contains(&site.id))
 }
 
-fn clip_to_game_area(
-    mp: MultiPolygon<f64>,
-    game_area: &GameArea,
-) -> Option<PolygonFeature> {
+fn clip_to_game_area(mp: MultiPolygon<f64>, game_area: &GameArea) -> Option<PolygonFeature> {
     let clipped = game_area.multipolygon.intersection(&mp);
     if clipped.0.is_empty() {
         None
@@ -194,10 +180,7 @@ fn build_elimination_via_wrong_cell_union(
 ) -> Option<PolygonFeature> {
     let wrong_mps: Vec<MultiPolygon<f64>> = cells
         .iter()
-        .filter(|cell| {
-            resolve_cell_site_id(cell, sites)
-                .is_some_and(|id| id != answered_site_id)
-        })
+        .filter(|cell| resolve_cell_site_id(cell, sites).is_some_and(|id| id != answered_site_id))
         .filter_map(feature_to_multipolygon)
         .collect();
 
@@ -336,8 +319,7 @@ pub fn parse_voronoi_cells(cells_json: &str) -> Result<Vec<PolygonFeature>, Stri
 }
 
 pub fn parse_anchor(anchor_json: &str) -> Result<[f64; 2], String> {
-    let parsed: [f64; 2] =
-        serde_json::from_str(anchor_json).map_err(|e| format!("anchor: {e}"))?;
+    let parsed: [f64; 2] = serde_json::from_str(anchor_json).map_err(|e| format!("anchor: {e}"))?;
     Ok(parsed)
 }
 

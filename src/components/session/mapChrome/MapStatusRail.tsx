@@ -18,7 +18,7 @@ import type { SessionRulesInput } from "@/domain/session/rules";
 import type { PlayerRole } from "@/domain/session/players/playerRole";
 import type { RoleGates } from "@/domain/session/players/roleGates";
 import { useLeaderJoinRequests } from "@/hooks/map-screen/useLeaderJoinRequests";
-import { desktopOpsStatusExpandedStyle } from "@/components/ui/entry/entryChrome";
+import { statusRailExpandedFlowStyle } from "@/components/ui/entry/entryChrome";
 import { EndGameAlert } from "../status/EndGameAlert";
 import { FoundHiderAlert } from "../status/FoundHiderAlert";
 import { HiderOutsideZoneAlert } from "../status/HiderOutsideZoneAlert";
@@ -70,7 +70,6 @@ function MapPlayerErrorChannel({
   );
 }
 
-/** Role-agnostic status/timer/sync bag for MapStatusRail (W4-A peel). */
 export type MapStatusRailModel = {
   sessionCode: string;
   sessionId?: string | null;
@@ -113,9 +112,8 @@ export type MapStatusRailModel = {
   terminalSessionError?:
     import("@/domain/device/feedback/userErrors").UserErrorDisplay | null;
   onReturnToJoin?: () => void;
-  /** In-flow status for DesktopOpsShell (vs absolute overlay on mobile). */
   expanded?: boolean;
-  /** Synced hiding-zone Move card — drives PHASE=MOVE in status chrome. */
+  /** Synced hiding-zone Move card: drives PHASE=MOVE in status chrome. */
   moveInProgress?: boolean;
 };
 
@@ -236,7 +234,7 @@ export function MapStatusRail({ model, headerLeading }: MapStatusRailProps) {
     <div
       ref={railRef}
       className={railClassName}
-      style={expanded ? desktopOpsStatusExpandedStyle : undefined}
+      style={expanded ? statusRailExpandedFlowStyle : undefined}
       data-testid="map-status-rail-mantine"
     >
       <div className="relative">

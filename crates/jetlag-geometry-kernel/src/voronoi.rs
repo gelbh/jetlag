@@ -1,4 +1,4 @@
-//! Spatial Voronoi (Wave-2). Local equirectangular planar frame + voronator
+//! Spatial Voronoi. Local equirectangular planar frame + voronator
 //! (d3-delaunay dual) clipped to a finite axis-aligned envelope.
 
 use serde_json::Value;
@@ -84,11 +84,13 @@ pub fn spatial_voronoi_rings_from_coords(coords: &[f64]) -> Result<Vec<f64>, Str
     if coords.is_empty() {
         return Ok(Vec::new());
     }
-    if coords.len() % 2 != 0 {
+    if !coords.len().is_multiple_of(2) {
         return Err("voronoi: coords length must be even (lng/lat pairs)".into());
     }
     let sites: Vec<SiteIn> = coords
-        .chunks_exact(2)
+        .as_chunks::<2>()
+        .0
+        .iter()
         .map(|pair| SiteIn {
             lng: pair[0],
             lat: pair[1],
@@ -143,7 +145,12 @@ fn spatial_voronoi_compute(sites: &[SiteIn]) -> Result<(Vec<Vec<PlanarPt>>, f64)
     let span_x = max_x - min_x;
     let span_y = max_y - min_y;
     let margin = span_x.max(span_y).max(MIN_EXTENT_MARGIN_METERS) * EXTENT_MARGIN_MULTIPLIER;
-    let clip = (min_x - margin, min_y - margin, max_x + margin, max_y + margin);
+    let clip = (
+        min_x - margin,
+        min_y - margin,
+        max_x + margin,
+        max_y + margin,
+    );
 
     let rings = voronoi_rings_for_points(&points, clip)?;
     Ok((rings, lng_scale))
@@ -373,9 +380,7 @@ mod tests {
 
     #[test]
     fn packed_rings_match_site_count() {
-        let coords = [
-            -0.18, 51.44, -0.12, 51.45, -0.15, 51.5, -0.2, 51.48,
-        ];
+        let coords = [-0.18, 51.44, -0.12, 51.45, -0.15, 51.5, -0.2, 51.48];
         let packed = spatial_voronoi_rings_from_coords(&coords).unwrap();
         let mut offset = 0usize;
         let mut cells = 0usize;

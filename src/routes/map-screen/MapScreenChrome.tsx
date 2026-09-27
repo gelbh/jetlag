@@ -1,13 +1,9 @@
-import type { ReactNode } from "react";
-import { useMemo } from "react";
 import {
   isEndGameActive,
   isFoundHiderPending,
 } from "../../domain/map/annotations";
-import { QUESTION_DOCK_TOOL_IDS } from "../../domain/map/mapTools";
-import { resolveToolDockEnabled } from "../../domain/session/rules";
+import { sessionHasHiders } from "../../domain/session/players/playerRole";
 import { ChatPanel } from "../../components/chat/ChatPanel";
-import { ContextualRailPanelProvider } from "../../components/map/chrome/ContextualRailContext";
 import { GameOverChrome } from "../../components/session/game-over/GameOverChrome";
 import { MapSettingsSheet } from "../../components/session/mapChrome/MapSettingsSheet";
 import { CurseReferenceSheet } from "../../components/expansion/CurseReferenceSheet";
@@ -16,8 +12,6 @@ import { SessionLog } from "../../components/session/log/SessionLog";
 import { AnnotationEditSheet } from "../../components/tools/AnnotationEditSheet";
 import { ToolDock } from "../../components/tools/ToolDock";
 import { useDevMockSessionFeed } from "../../hooks/dev/useDevMockSessionFeed";
-import { useDesktopLayout } from "../../hooks/layout/useDesktopLayout";
-import { useToolRailShortcuts } from "../../hooks/map/useToolRailShortcuts";
 import type { MapScreenController } from "./useMapScreenController";
 import { useMapTerminalSessionChrome } from "../../hooks/session/useMapTerminalSessionChrome";
 import { useGameOverActions } from "../../hooks/session/useGameOverActions";
@@ -27,7 +21,6 @@ import { MapScreenChromeSlots } from "./shared/MapScreenChromeSlots";
 import { getMapScreenRoleConfig } from "./shared/mapScreenRoleConfig";
 import { MapScreenRoleCodesSheet } from "./shared/MapScreenSharedSessionSheets";
 import { useMapScreenReportProblemSheet } from "./shared/useMapScreenReportProblemSheet";
-import { renderMapScreenContextualRail } from "./shared/mapScreenContextualRail";
 import { canOpenMapScreenRoleCodes } from "./shared/canOpenMapScreenRoleCodes";
 import { MapScreenChromeBanners } from "./shared/MapScreenChromeBanners";
 import {
@@ -37,11 +30,9 @@ import {
 
 export type MapScreenChromeProps = {
   controller: MapScreenController;
-  /** When set with desktop layout, map fills the ops shell center slot. */
-  mapSlot?: ReactNode;
 };
 
-export function MapScreenChrome({ controller, mapSlot }: MapScreenChromeProps) {
+export function MapScreenChrome({ controller }: MapScreenChromeProps) {
   const {
     session,
     gameArea,
@@ -171,8 +162,6 @@ export function MapScreenChrome({ controller, mapSlot }: MapScreenChromeProps) {
   const gameOverActions = useGameOverActions(session, {
     closeSheet: overlay.closeAllSheets,
   });
-  const isDesktop = useDesktopLayout();
-  const toolLayout = isDesktop ? "rail" : "dock";
   const roleConfig = getMapScreenRoleConfig("seeker");
   const { reportProblemSheet } = useMapScreenReportProblemSheet(
     overlay.isReportProblemOpen,
@@ -185,36 +174,6 @@ export function MapScreenChrome({ controller, mapSlot }: MapScreenChromeProps) {
     (state) => state.markAnnotationPulse,
   );
 
-  const visibleQuestionTools = useMemo(
-    () =>
-      QUESTION_DOCK_TOOL_IDS.filter((toolId) =>
-        resolveToolDockEnabled(session!, toolId, {
-          hasHiders: awaitHiderAnswer,
-        }),
-      ),
-    [session, awaitHiderAnswer],
-  );
-
-  useToolRailShortcuts({
-    enabled: isDesktop && overlay.sheet === "none" && !inactiveChrome,
-    activeTool,
-    onSelect: handleSelectTool,
-    toolOrder: visibleQuestionTools,
-  });
-
-  const contextualRail = renderMapScreenContextualRail({
-    enabled: isDesktop,
-    sheet: overlay.sheet,
-    sheetStack: overlay.sheetStack,
-    onClose: overlay.closeSheet,
-    actions: {
-      onOpenSettings: handleOpenSettings,
-      onOpenChat: handleOpenChat,
-      onOpenLog: handleOpenLog,
-      onOpenCodes: handleOpenCodes,
-    },
-  });
-
   const statusRail = (
     <MapStatusRail
       model={{
@@ -224,7 +183,7 @@ export function MapScreenChrome({ controller, mapSlot }: MapScreenChromeProps) {
         sessionRules: session!,
         playerRole: roleConfig.statusPlayerRole,
         showPreloadBanner: true,
-        expanded: isDesktop,
+        expanded: false,
         activeTool,
         syncStatus: syncStatus.status,
         queuedWrites: syncStatus.queuedWrites,
@@ -276,19 +235,21 @@ export function MapScreenChrome({ controller, mapSlot }: MapScreenChromeProps) {
     isHost,
   });
 
+  const showHistory = !sessionHasHiders(session?.memberRoles);
+
   const toolDock = (
     <ToolDock
-      layout={toolLayout}
       inactive={inactiveChrome}
       activeTool={activeTool}
       sessionRules={session!}
       gameSize={session!.gameSize ?? "medium"}
       hasHiders={awaitHiderAnswer}
       onSelect={handleSelectTool}
-      canUndo={canUndoLastTool}
-      canRedo={canRedoLastTool}
-      onUndo={handleUndoLastAnnotation}
-      onRedo={handleRedoLastAnnotation}
+      showHistory={showHistory}
+      canUndo={showHistory && canUndoLastTool}
+      canRedo={showHistory && canRedoLastTool}
+      onUndo={showHistory ? handleUndoLastAnnotation : () => {}}
+      onRedo={showHistory ? handleRedoLastAnnotation : () => {}}
       onOpenSettings={handleOpenSettings}
       onOpenCodes={canOpenCodes ? handleOpenCodes : undefined}
       onOpenReportProblem={openReportProblem}
@@ -345,14 +306,11 @@ export function MapScreenChrome({ controller, mapSlot }: MapScreenChromeProps) {
   );
 
   return (
-    <ContextualRailPanelProvider>
-      <MapScreenChromeSlots
-        chromeHudRef={chromeHudRef}
-        header={header}
-        toolbar={toolDock}
-        mapSlot={mapSlot}
-        contextual={contextualRail}
-      >
+    <MapScreenChromeSlots
+      chromeHudRef={chromeHudRef}
+      header={header}
+      toolbar={toolDock}
+    >
         <SeekerChromeOverlays
           timer={timer}
           activeTool={activeTool}
@@ -586,7 +544,6 @@ export function MapScreenChrome({ controller, mapSlot }: MapScreenChromeProps) {
             },
           }}
         />
-      </MapScreenChromeSlots>
-    </ContextualRailPanelProvider>
+    </MapScreenChromeSlots>
   );
 }

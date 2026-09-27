@@ -22,6 +22,7 @@ import {
   githubIdeasBrowseUrl,
   githubIdeaSubmitUrl,
 } from "@/domain/device/feedback/githubFeedback";
+import { PHONE_SHELL_MAX_WIDTH_PX } from "@/theme/phoneShell";
 
 export function Feedback() {
   const [reportProblemOpen, setReportProblemOpen] = useState(false);
@@ -33,7 +34,7 @@ export function Feedback() {
         size="xs"
         w="100%"
         px="md"
-        maw={390}
+        maw={PHONE_SHELL_MAX_WIDTH_PX}
         py="lg"
       >
         <Stack gap={22}>

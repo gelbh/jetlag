@@ -2,8 +2,8 @@ import { beforeAll, describe, expect, it } from "vitest";
 import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
-import { buildEndGameMaskFromDisks } from "./buildMask";
 import { wasmBuildEndGameMaskFromDisks } from "./maskWasm";
+import { loadPolygonGolden } from "./loadPolygonGolden";
 import { assertPolygonTopologyParity } from "./parity";
 import { type DiskSpec } from "./unionPolygonFeatures";
 import type { GameAreaGeometry } from "./types";
@@ -58,20 +58,6 @@ function circleDisks(count: number): DiskSpec[] {
   }));
 }
 
-function measureMedianMs(fn: () => void, iterations = 5): number {
-  const samples: number[] = [];
-  for (let index = 0; index <= iterations; index += 1) {
-    const start = performance.now();
-    fn();
-    const elapsed = performance.now() - start;
-    if (index > 0) {
-      samples.push(elapsed);
-    }
-  }
-  samples.sort((left, right) => left - right);
-  return samples[Math.floor(samples.length / 2)] ?? 0;
-}
-
 async function measureMedianMsAsync(
   fn: () => Promise<void>,
   iterations = 5,
@@ -94,18 +80,18 @@ describe.skipIf(!wasmPkgReady)("disk wasm advantage", () => {
     await wasmBuildEndGameMaskFromDisks(gameArea, overlappingEndGameDisks());
   }, 60_000);
 
-  it("matches TS topology on overlapping end-game disks", async () => {
+  it("matches golden topology on overlapping end-game disks", async () => {
     const disks = overlappingEndGameDisks();
-    const ts = buildEndGameMaskFromDisks(gameArea, disks);
+    const golden = loadPolygonGolden("mask", "multi-endgame-disks.json");
     const wasm = await wasmBuildEndGameMaskFromDisks(gameArea, disks);
-    assertPolygonTopologyParity(wasm, ts, topologyBbox);
+    assertPolygonTopologyParity(wasm, golden, topologyBbox);
   });
 
-  it("matches TS topology on ten end-game disks", async () => {
+  it("matches golden topology on ten end-game disks", async () => {
     const disks = circleDisks(10);
-    const ts = buildEndGameMaskFromDisks(gameArea, disks);
+    const golden = loadPolygonGolden("mask", "ten-endgame-disks.json");
     const wasm = await wasmBuildEndGameMaskFromDisks(gameArea, disks);
-    assertPolygonTopologyParity(wasm, ts, topologyBbox);
+    assertPolygonTopologyParity(wasm, golden, topologyBbox);
   });
 });
 
@@ -116,28 +102,20 @@ describe.skipIf(!wasmPkgReady || !runGeometryPerf)(
       await wasmBuildEndGameMaskFromDisks(gameArea, overlappingEndGameDisks());
     }, 60_000);
 
-    it("wasm overlapping end-game disks median within 1.0x ts", async () => {
+    it("wasm overlapping end-game disks median under 50ms", async () => {
       const disks = overlappingEndGameDisks();
-      const tsMs = measureMedianMs(() => {
-        buildEndGameMaskFromDisks(gameArea, disks);
-      });
       const wasmMs = await measureMedianMsAsync(async () => {
         await wasmBuildEndGameMaskFromDisks(gameArea, disks);
       });
-
-      expect(wasmMs / tsMs).toBeLessThanOrEqual(1.0);
+      expect(wasmMs).toBeLessThan(50);
     });
 
-    it("wasm ten end-game disks median within 1.0x ts", async () => {
+    it("wasm ten end-game disks median under 100ms", async () => {
       const disks = circleDisks(10);
-      const tsMs = measureMedianMs(() => {
-        buildEndGameMaskFromDisks(gameArea, disks);
-      });
       const wasmMs = await measureMedianMsAsync(async () => {
         await wasmBuildEndGameMaskFromDisks(gameArea, disks);
       });
-
-      expect(wasmMs / tsMs).toBeLessThanOrEqual(1.0);
+      expect(wasmMs).toBeLessThan(100);
     });
   },
 );

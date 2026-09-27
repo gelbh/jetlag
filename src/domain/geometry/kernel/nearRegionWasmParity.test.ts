@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 import path from "node:path";
 import type { Feature, LineString } from "geojson";
 import { assertPolygonTopologyParity } from "./parity";
-import { buildCoastlineNearRegionTs } from "../measuring/nearRegions";
+import { loadPolygonGolden } from "./loadPolygonGolden";
 import type { GameAreaGeometry } from "./types";
 
 const pkgEntry = path.resolve(
@@ -59,24 +59,23 @@ describe.skipIf(!wasmPkgReady)("near-region batch wasm parity", () => {
     });
   }, 60_000);
 
-  it("matches TS coastline topology on short segment + 200m", async () => {
-    const ts = buildCoastlineNearRegionTs([segment], 200, sampleGameArea);
+  it("matches golden coastline topology on short segment + 200m", async () => {
+    const golden = loadPolygonGolden("nearRegion", "coastline-200m.json");
     const wasm = await wasmBuildNearRegion({
       segments: [segment],
       distanceMeters: 200,
       disks: [],
       gameArea: sampleGameArea,
     });
-    assertPolygonTopologyParity(wasm, ts, topologyBbox);
+    assertPolygonTopologyParity(wasm, golden, topologyBbox);
   });
 
-  it("matches TS multi-place disks topology", async () => {
-    const { buildMultiPlaceNearRegionTs } = await import("../measuring/nearRegions");
+  it("matches golden multi-place disks topology", async () => {
     const places = [
       [51.45, -0.15] as [number, number],
       [51.46, -0.14] as [number, number],
     ];
-    const ts = buildMultiPlaceNearRegionTs(places, 400, sampleGameArea);
+    const golden = loadPolygonGolden("nearRegion", "multi-place-400m.json");
     const wasm = await wasmBuildNearRegion({
       segments: [],
       distanceMeters: 0,
@@ -86,12 +85,12 @@ describe.skipIf(!wasmPkgReady)("near-region batch wasm parity", () => {
       })),
       gameArea: sampleGameArea,
     });
-    assertPolygonTopologyParity(wasm, ts, topologyBbox);
+    assertPolygonTopologyParity(wasm, golden, topologyBbox);
   });
 });
 
-describe("near-region batch wasm fallback", () => {
-  it("wasm init failure falls back to TS when entrypoint forced ready", async () => {
+describe("near-region batch wasm failure", () => {
+  it("wasm init failure rethrows when entrypoint forced ready", async () => {
     vi.resetModules();
     vi.doMock("./kernelWasmReady", async () => {
       const actual =
@@ -104,14 +103,11 @@ describe("near-region batch wasm fallback", () => {
           ...actual.KERNEL_WASM_READY,
           nearRegionBatch: true,
         },
-        shouldUseWasm: (mode: string, entrypoint: string) => {
+        shouldUseWasm: (entrypoint: string) => {
           if (entrypoint === "nearRegionBatch") {
-            return mode === "wasm" || mode === "dual";
+            return true;
           }
-          return actual.shouldUseWasm(
-            mode as "ts" | "wasm" | "dual",
-            entrypoint as never,
-          );
+          return actual.shouldUseWasm(entrypoint as never);
         },
       };
     });
@@ -122,18 +118,17 @@ describe("near-region batch wasm fallback", () => {
     }));
 
     const { runNearRegionBatch } = await import("./nearRegionKernelRunner");
-    const ts = buildCoastlineNearRegionTs([segment], 200, sampleGameArea);
-    const result = await runNearRegionBatch(
-      {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    await expect(
+      runNearRegionBatch({
         segments: [segment],
         distanceMeters: 200,
         disks: [],
         gameArea: sampleGameArea,
-        runTs: () => ts,
-      },
-      "wasm",
-    );
-    expect(result).toEqual(ts);
+      }),
+    ).rejects.toThrow("wasm boom");
+    expect(warnSpy).toHaveBeenCalled();
+    warnSpy.mockRestore();
 
     vi.doUnmock("./kernelWasmReady");
     vi.doUnmock("./nearRegionWasm");
