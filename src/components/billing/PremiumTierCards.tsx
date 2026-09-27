@@ -1,5 +1,6 @@
 import {
   Button,
+  Group,
   SegmentedControl,
   SimpleGrid,
   Stack,
@@ -10,6 +11,7 @@ import { useState } from "react";
 import { AppLink } from "../navigation/AppLink";
 import {
   InsetGroup,
+  SectionLabel,
   filledStyles,
   grayStyles,
 } from "../ui/entry/entryChrome";
@@ -132,25 +134,28 @@ export function PremiumTierCards({
   ];
 
   return (
-    <Stack gap="md">
-      <SegmentedControl
-        fullWidth
-        value={activeCatalogTab}
-        onChange={(value) => {
-          setTabTouched(true);
-          setCatalogTab(value as PremiumCatalogTab);
-        }}
-        data={PREMIUM_CATALOG_TABS.map((tab) => ({
-          value: tab.value,
-          label: tab.label,
-        }))}
-        aria-label="Premium purchase options"
-        disabled={loading}
-        styles={segmentedStyles}
-      />
+    <Stack gap={18}>
+      <Stack gap={8}>
+        <SectionLabel>Choose plan</SectionLabel>
+        <SegmentedControl
+          fullWidth
+          value={activeCatalogTab}
+          onChange={(value) => {
+            setTabTouched(true);
+            setCatalogTab(value as PremiumCatalogTab);
+          }}
+          data={PREMIUM_CATALOG_TABS.map((tab) => ({
+            value: tab.value,
+            label: tab.label,
+          }))}
+          aria-label="Premium purchase options"
+          disabled={loading}
+          styles={segmentedStyles}
+        />
+      </Stack>
 
       {activeCatalogTab === "packs" ? (
-        <SimpleGrid cols={2} spacing="sm">
+        <SimpleGrid cols={3} spacing={8}>
           {packOffers.map((offer) => (
             <Button
               key={offer.key}
@@ -162,7 +167,7 @@ export function PremiumTierCards({
               aria-label={`${offer.label}, ${offer.priceLabel}`}
               style={{ height: "100%" }}
             >
-              <Stack gap={2} align="flex-start">
+              <Stack gap={1} align="flex-start">
                 <Text size="sm" fw={600} c="var(--color-field-ink)">
                   {offer.label}
                 </Text>
@@ -209,7 +214,7 @@ export function PremiumTierCards({
         </InsetGroup>
       )}
 
-      <Stack gap="sm">
+      <Stack gap={8}>
         {showManageSubscription ? (
           <Button
             type="button"
@@ -218,14 +223,14 @@ export function PremiumTierCards({
             disabled={portalLoading}
             onClick={onPortal}
           >
-            <Stack gap={2} align="flex-start">
+            <Group justify="space-between" wrap="nowrap" w="100%">
               <Text size="sm" fw={600} c="var(--color-field-ink)">
                 Manage subscription
               </Text>
               <Text size="xs" c="var(--color-field-ink-muted)">
                 {portalLoading ? "Opening…" : "Billing portal"}
               </Text>
-            </Stack>
+            </Group>
           </Button>
         ) : null}
 
@@ -237,14 +242,14 @@ export function PremiumTierCards({
             styles={filledStyles}
             aria-label="Create premium session"
           >
-            <Stack gap={2} align="flex-start">
+            <Group justify="space-between" wrap="nowrap" w="100%">
               <Text size="sm" fw={600} c="var(--color-ink)">
                 Create premium session
               </Text>
               <Text size="xs" c="oklch(from var(--color-ink) l c h / 0.72)">
                 {createSessionHint}
               </Text>
-            </Stack>
+            </Group>
           </Button>
         ) : null}
       </Stack>
