@@ -5,7 +5,6 @@ import {
 import { dispatchKernel } from "./dispatchKernel";
 import { createLazyWasmImport } from "./lazyWasmImport";
 import type { MaskKernelMode } from "./maskKernelMode";
-import { bboxFromGameArea, maskTopologyMatches } from "./maskTopology";
 import type {
   DiskSpec,
   EliminationUnionInput,
@@ -29,8 +28,6 @@ export async function runMaskFromUnionInput(
       const wasm = await maskWasm.load();
       return wasm.wasmBuildMaskFromUnionInput(input, gameArea);
     },
-    matches: (wasmResult, tsResult) =>
-      maskTopologyMatches(wasmResult, tsResult, bboxFromGameArea(gameArea)),
   });
 }
 
@@ -48,7 +45,5 @@ export async function runEndGameMaskFromDisks(
       const wasm = await maskWasm.load();
       return wasm.wasmBuildEndGameMaskFromDisks(gameArea, disks);
     },
-    matches: (wasmResult, tsResult) =>
-      maskTopologyMatches(wasmResult, tsResult, bboxFromGameArea(gameArea)),
   });
 }

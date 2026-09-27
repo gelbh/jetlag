@@ -1,7 +1,6 @@
 import { dispatchKernel } from "./dispatchKernel";
 import { createLazyWasmImport } from "./lazyWasmImport";
 import type { MaskKernelMode } from "./maskKernelMode";
-import { bboxFromGameArea, maskTopologyMatches } from "./maskTopology";
 import {
   buildHalfPlanePolygon,
   buildRadarShadedRegion,
@@ -40,8 +39,6 @@ export async function dispatchHalfPlane(
         divisionAnchor,
       );
     },
-    matches: (wasmResult, tsResult) =>
-      maskTopologyMatches(wasmResult, tsResult, bboxFromGameArea(gameArea)),
   });
 }
 
@@ -67,8 +64,6 @@ export async function dispatchRadarShadedRegion(
         shadedInside,
       );
     },
-    matches: (wasmResult, tsResult) =>
-      maskTopologyMatches(wasmResult, tsResult, bboxFromGameArea(gameArea)),
   });
 }
 
