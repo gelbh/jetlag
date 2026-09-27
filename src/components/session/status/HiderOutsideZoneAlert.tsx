@@ -1,11 +1,14 @@
-import { MapFloatAlert } from "../../ui/banners/MapFloatAlert";
+import { MapFloatSurface } from "../../ui/banners/MapFloatSurface";
 
 export function HiderOutsideZoneAlert() {
   return (
-    <MapFloatAlert
-      className="pointer-events-auto mx-3 mt-1.5 border-status-warning/40 bg-status-warning-surface normal-case tracking-normal text-status-warning"
+    <MapFloatSurface
+      tone="warn"
+      role="status"
+      aria-live="polite"
+      className="pointer-events-auto mx-3 mt-1.5 text-sm font-semibold"
     >
       You&apos;re outside your hiding zone. Use a move card to relocate.
-    </MapFloatAlert>
+    </MapFloatSurface>
   );
 }

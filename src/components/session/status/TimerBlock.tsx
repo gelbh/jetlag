@@ -34,6 +34,7 @@ export function TimerBlock({
 
   return (
     <div
+      // MFA holdout: timer dropdown chrome, not map-float inventory (ban allowlisted).
       className="hud-panel pointer-events-auto absolute inset-x-3 top-[calc(100%+0.375rem)] z-[var(--z-panel)] mx-auto max-w-md space-y-2 p-3 pt-10"
       role="menu"
       aria-label="Timer settings"

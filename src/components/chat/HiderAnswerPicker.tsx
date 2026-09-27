@@ -6,6 +6,7 @@ import {
   hiderTruthReferenceLabel,
   hiderTruthReferenceLoadingLabel,
 } from "../../domain/questions/hiderTruth/hiderTruthReferenceCopy";
+import { jetlagBrand } from "@/theme/theme";
 import { LoadingReadout } from "../tools/shared/readout/LoadingReadout";
 
 interface HiderAnswerPickerProps {
@@ -41,16 +42,16 @@ export function HiderAnswerPicker({
           {hiderTruthReferenceLoadingLabel(truthReferenceMode)}
         </LoadingReadout>
       ) : truth?.unavailable ? (
-        <Text size="xs" c="var(--color-halt)">
+        <Text size="xs" c={jetlagBrand.halt}>
           {truth.label}
         </Text>
       ) : truthAvailable ? (
-        <Text size="xs" c="var(--color-field-ink-muted)">
-          <Text span fw={600} c="var(--color-signal)">
+        <Text size="xs" c={jetlagBrand.fieldInkMuted}>
+          <Text span fw={600} c={jetlagBrand.signal}>
             {referenceLabel}
           </Text>
           {" · "}
-          <Text span c="var(--color-field-ink)">
+          <Text span c={jetlagBrand.fieldInk}>
             {truth.label}
           </Text>
         </Text>
@@ -78,14 +79,14 @@ export function HiderAnswerPicker({
                 root: {
                   minHeight: "2.75rem",
                   border: isRecommended
-                    ? "1px solid var(--color-flag)"
-                    : "1px solid var(--color-rule)",
+                    ? `1px solid ${jetlagBrand.flag}`
+                    : `1px solid ${jetlagBrand.rule}`,
                   backgroundColor: isRecommended
-                    ? "var(--color-flag)"
-                    : "var(--color-canvas)",
+                    ? jetlagBrand.flag
+                    : jetlagBrand.canvas,
                   color: isRecommended
-                    ? "var(--color-flag-ink)"
-                    : "var(--color-field-ink)",
+                    ? jetlagBrand.flagInk
+                    : jetlagBrand.fieldInk,
                   fontWeight: 600,
                   "&:disabled": { opacity: 0.5 },
                 },

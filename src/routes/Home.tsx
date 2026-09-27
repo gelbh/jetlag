@@ -2,13 +2,13 @@ import { useState } from "react";
 import {
   Alert,
   Anchor,
+  Badge,
   Button,
   Container,
   Group,
   Stack,
   Text,
   Title,
-  UnstyledButton,
 } from "@mantine/core";
 import {
   Crown,
@@ -65,9 +65,39 @@ export function Home() {
         maw={PHONE_SHELL_MAX_WIDTH_PX}
       >
         <Stack gap={28}>
-          <Stack gap={10}>
-            <Group gap="sm" align="center" wrap="nowrap">
-              <AppLogo variant="mark" size="md" className="shrink-0" />
+          <Group gap="sm" align="flex-start" wrap="nowrap">
+            <Stack gap={8} align="center" className="shrink-0">
+              <AppLogo variant="mark" size="md" />
+              <Badge
+                component="button"
+                type="button"
+                variant="light"
+                color="gray"
+                radius="xl"
+                size="sm"
+                onClick={() => setChangelogOpen(true)}
+                aria-label={`Version ${APP_VERSION}. Open changelog`}
+                style={{ minHeight: 44 }}
+                styles={{
+                  root: {
+                    cursor: "pointer",
+                    paddingInline: "0.75rem",
+                    fontFamily: "var(--mantine-font-family-monospace)",
+                    fontWeight: 700,
+                    letterSpacing: "0.04em",
+                    textTransform: "none",
+                    color: "var(--color-field-ink-muted)",
+                    "&:focus-visible": {
+                      outline: "2px solid var(--color-action)",
+                      outlineOffset: 1,
+                    },
+                  },
+                }}
+              >
+                v{APP_VERSION}
+              </Badge>
+            </Stack>
+            <Stack gap={6} style={{ minWidth: 0, flex: 1 }}>
               <Title
                 order={1}
                 c="var(--color-field-ink)"
@@ -81,43 +111,19 @@ export function Home() {
               >
                 {LEGAL_APP_NAME}
               </Title>
-            </Group>
-            <Text
-              c="var(--color-field-ink-muted)"
-              size="sm"
-              style={{ lineHeight: 1.35, textWrap: "pretty", maxWidth: "22rem" }}
-            >
-              Unofficial fan companion for Jet Lag: The Game.
-            </Text>
-            <UnstyledButton
-              type="button"
-              onClick={() => setChangelogOpen(true)}
-              aria-label={`Version ${APP_VERSION}. Open changelog`}
-              style={{
-                alignSelf: "flex-start",
-                display: "inline-flex",
-                alignItems: "center",
-                minHeight: 44,
-                paddingInline: "0.625rem",
-                fontFamily: "var(--mantine-font-family-monospace)",
-                fontSize: "0.75rem",
-                fontWeight: 700,
-                letterSpacing: "0.04em",
-                color: "var(--color-field-ink-muted)",
-                borderRadius: 8,
-              }}
-              styles={{
-                root: {
-                  "&:focus-visible": {
-                    outline: "2px solid var(--color-action)",
-                    outlineOffset: 1,
-                  },
-                },
-              }}
-            >
-              v{APP_VERSION}
-            </UnstyledButton>
-          </Stack>
+              <Text
+                c="var(--color-field-ink-muted)"
+                size="sm"
+                style={{
+                  lineHeight: 1.35,
+                  textWrap: "pretty",
+                  maxWidth: "22rem",
+                }}
+              >
+                Unofficial fan companion for Jet Lag: The Game.
+              </Text>
+            </Stack>
+          </Group>
 
           <Stack gap={22}>
             {session ? (
