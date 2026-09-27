@@ -1,4 +1,4 @@
-export const APP_VERSION = "0.13.0";
+export const APP_VERSION = "0.14.0";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,26 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "0.14.0",
+    date: "2026-09-27",
+    sections: [
+      {
+        title: "Fixes",
+        items: [
+          "Measuring: closer/further answers keep map shade after confirm in multiplayer, even when the region is too large to store as a polygon",
+        ],
+      },
+      {
+        title: "Improvements",
+        items: [
+          "Land Mantine player UI through Wave 4 (entry chrome, tool hosts, map islands).",
+          "Tentacles: recommended answers use the hiding-zone center unless the seeker is actually inside the zone",
+          "Map chrome: full-bleed hunt tool deck with even tool spacing and shared safe-area overlay padding.",
+        ],
+      }
+    ],
+  },
   {
     version: "0.13.0",
     date: "2026-08-16",

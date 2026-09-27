@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.14.0 - 2026-09-27
+
+### Fixes
+
+- Measuring: closer/further answers keep map shade after confirm in multiplayer, even when the region is too large to store as a polygon
+
+### Improvements
+
+- Land Mantine player UI through Wave 4 (entry chrome, tool hosts, map islands).
+- Tentacles: recommended answers use the hiding-zone center unless the seeker is actually inside the zone
+- Map chrome: full-bleed hunt tool deck with even tool spacing and shared safe-area overlay padding.
+
 ## 0.13.0 - 2026-08-16
 
 ### Fixes
