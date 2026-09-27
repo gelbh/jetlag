@@ -1,9 +1,10 @@
 import { useCallback, useState } from "react";
+import { Button } from "@mantine/core";
 import type { GameOutcome } from "@/domain/game/foundHider";
 import type { GameResultRecord } from "@/domain/game/gameResult";
 import type { PlayerRole } from "@/domain/session/players/playerRole";
 import { formatClockDurationFromMs } from "@/domain/time/formatClockDuration";
-import { AnimatedOverlay } from "../../ui/banners/AnimatedOverlay";
+import { SheetHost } from "../../ui/sheets/SheetHost";
 import { MapReplayLayer } from "./MapReplayLayer";
 
 interface GameOverSheetProps {
@@ -88,7 +89,7 @@ export function GameOverSheet({
   const playerWon = myPlayer?.won;
   const headline = outcomeHeadline(gameResult.outcome, playerWon);
   const heroMs =
-    playerRole === "hider" ? gameResult.hidingPhaseMs || gameResult.durationMs : gameResult.seekTimeMs;
+    playerRole === "hider" ? gameResult.hidingPhaseMs! : gameResult.seekTimeMs;
 
   const handleRematch = useCallback(() => {
     void Promise.resolve(onRematch()).catch(() => {
@@ -103,27 +104,24 @@ export function GameOverSheet({
           {rematchError}
         </p>
       ) : null}
-      <button
-        type="button"
+      <Button
+        fullWidth
+        variant="filled"
         onClick={handleRematch}
         disabled={rematchPending}
-        className="btn-primary min-h-11 w-full disabled:opacity-50"
+        className="min-h-11"
       >
         {rematchPending ? "Starting rematch…" : "Switch roles & rematch"}
-      </button>
-      <button
-        type="button"
-        onClick={onHome}
-        className="btn-secondary min-h-11 w-full"
-      >
+      </Button>
+      <Button fullWidth variant="default" onClick={onHome} className="min-h-11">
         Home
-      </button>
+      </Button>
     </div>
   );
 
   return (
     <>
-      <AnimatedOverlay
+      <SheetHost
         open={open && !replayOpen}
         onClose={() => {}}
         dismissible={false}
@@ -151,18 +149,14 @@ export function GameOverSheet({
               label="Total round"
               value={formatClockDurationFromMs(gameResult.durationMs)}
             />
-            {typeof gameResult.hidingPhaseMs === "number" ? (
-              <StatRow
-                label="Hiding phase"
-                value={formatClockDurationFromMs(gameResult.hidingPhaseMs)}
-              />
-            ) : null}
-            {typeof gameResult.seekPhaseMs === "number" ? (
-              <StatRow
-                label="Seek phase"
-                value={formatClockDurationFromMs(gameResult.seekPhaseMs)}
-              />
-            ) : null}
+            <StatRow
+              label="Hiding phase"
+              value={formatClockDurationFromMs(gameResult.hidingPhaseMs!)}
+            />
+            <StatRow
+              label="Seek phase"
+              value={formatClockDurationFromMs(gameResult.seekPhaseMs!)}
+            />
           </div>
 
           <button
@@ -187,7 +181,7 @@ export function GameOverSheet({
             </span>
           </button>
         </div>
-      </AnimatedOverlay>
+      </SheetHost>
 
       <MapReplayLayer
         open={replayOpen}
