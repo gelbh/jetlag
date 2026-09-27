@@ -1,5 +1,5 @@
 import { renderHook, waitFor } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { useSharedSessionScreen } from "./useSharedSessionScreen";
 
 const ensureAnonymousUser = vi.fn();
@@ -19,6 +19,11 @@ vi.mock("../../services/core/firebase/firebaseAuthReady", () => ({
 }));
 
 let mockSession = { id: "session-1", code: "ABCD" };
+let mockMyUid = "admin-uid";
+const setMyUid = vi.fn((uid: string | null) => {
+  mockMyUid = uid ?? "";
+});
+const setLastSyncError = vi.fn();
 
 vi.mock("../../state/sessionStore", () => ({
   useSessionStore: vi.fn(
@@ -26,15 +31,15 @@ vi.mock("../../state/sessionStore", () => ({
       selector: (state: {
         session: { id: string; code: string };
         myUid: string;
-        setMyUid: () => void;
+        setMyUid: (uid: string | null) => void;
         setLastSyncError: () => void;
       }) => unknown,
     ) =>
       selector({
         session: mockSession,
-        myUid: "admin-uid",
-        setMyUid: vi.fn(),
-        setLastSyncError: vi.fn(),
+        myUid: mockMyUid,
+        setMyUid,
+        setLastSyncError,
       }),
   ),
 }));
@@ -91,8 +96,16 @@ vi.mock("./useEnsureSessionMembership", () => ({
 }));
 
 describe("useSharedSessionScreen", () => {
-  it("heals membership for hider-anonymous auth mode", () => {
+  beforeEach(() => {
+    mockSession = { id: "session-1", code: "ABCD" };
+    mockMyUid = "admin-uid";
+    setMyUid.mockClear();
+    setLastSyncError.mockClear();
     ensureSessionMembershipMock.mockClear();
+    ensureAnonymousUser.mockReset();
+  });
+
+  it("heals membership for hider-anonymous auth mode", () => {
     ensureAnonymousUser.mockResolvedValue({ uid: "hider-uid" });
 
     renderHook(() =>
@@ -108,8 +121,46 @@ describe("useSharedSessionScreen", () => {
     });
   });
 
+  it("does not apply stale hider setMyUid after membership remint", async () => {
+    let resolveStaleAnon!: (user: { uid: string }) => void;
+    let anonCalls = 0;
+    ensureAnonymousUser.mockImplementation(() => {
+      anonCalls += 1;
+      if (anonCalls === 1) {
+        return new Promise<{ uid: string }>((resolve) => {
+          resolveStaleAnon = resolve;
+        });
+      }
+      return Promise.resolve({ uid: "new-uid" });
+    });
+
+    mockMyUid = "old-uid";
+
+    const { rerender } = renderHook(() =>
+      useSharedSessionScreen({
+        isChatOpen: false,
+        notificationRole: "hider",
+        authMode: "hider-anonymous",
+      }),
+    );
+
+    // Membership heal remints and updates store myUid before the first
+    // ensureAnonymousUser promise settles.
+    mockMyUid = "new-uid";
+    rerender();
+
+    await waitFor(() => {
+      expect(setMyUid).toHaveBeenCalledWith("new-uid");
+    });
+
+    resolveStaleAnon({ uid: "old-uid" });
+    await Promise.resolve();
+
+    expect(setMyUid).not.toHaveBeenCalledWith("old-uid");
+    expect(setMyUid).toHaveBeenLastCalledWith("new-uid");
+  });
+
   it("heals membership for seeker-remote auth mode", () => {
-    ensureSessionMembershipMock.mockClear();
     ensureAnonymousUser.mockResolvedValue({ uid: "seeker-uid" });
 
     renderHook(() =>
@@ -126,8 +177,6 @@ describe("useSharedSessionScreen", () => {
   });
 
   it("does not mint anonymous users in admin-permanent auth mode", async () => {
-    ensureSessionMembershipMock.mockClear();
-    ensureAnonymousUser.mockClear();
     waitForPermanentAuthReady.mockResolvedValue(undefined);
     getFirebaseAuth.mockReturnValue({
       currentUser: { uid: "admin-uid" },

@@ -1,9 +1,12 @@
-import { renderHook } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { renderHook, waitFor } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { useEnsureSessionMembership } from "./useEnsureSessionMembership";
 
 const ensureFreshAnonymousUser = vi.fn();
 const healSessionMembership = vi.fn();
+const sessionMembershipChanged = vi.fn(() => false);
+const setSession = vi.fn();
+const setLastSyncError = vi.fn();
 
 vi.mock("../../services/core/firebase/firebase", () => ({
   ensureFreshAnonymousUser: (...args: unknown[]) =>
@@ -13,7 +16,7 @@ vi.mock("../../services/core/firebase/firebase", () => ({
 
 vi.mock("../../services/firestore/sessionMembershipHeal", () => ({
   healSessionMembership: (...args: unknown[]) => healSessionMembership(...args),
-  sessionMembershipChanged: vi.fn(() => false),
+  sessionMembershipChanged: () => sessionMembershipChanged(),
 }));
 
 vi.mock("../../state/sessionStore", () => ({
@@ -32,8 +35,8 @@ vi.mock("../../state/sessionStore", () => ({
           session: { id: "session-1", code: "ABCD", memberUids: ["uid-1"] },
           myUid: "uid-1",
           myRole: "hider",
-          setSession: vi.fn(),
-          setLastSyncError: vi.fn(),
+          setSession,
+          setLastSyncError,
         }),
     ),
     {
@@ -47,13 +50,37 @@ vi.mock("../../state/sessionStore", () => ({
 }));
 
 describe("useEnsureSessionMembership", () => {
-  it("skips heal when enabled is false", () => {
-    ensureFreshAnonymousUser.mockClear();
-    healSessionMembership.mockClear();
+  beforeEach(() => {
+    ensureFreshAnonymousUser.mockReset();
+    healSessionMembership.mockReset();
+    sessionMembershipChanged.mockReset();
+    sessionMembershipChanged.mockReturnValue(false);
+    setSession.mockClear();
+    setLastSyncError.mockClear();
+  });
 
+  it("skips heal when enabled is false", () => {
     renderHook(() => useEnsureSessionMembership({ enabled: false }));
 
     expect(ensureFreshAnonymousUser).not.toHaveBeenCalled();
     expect(healSessionMembership).not.toHaveBeenCalled();
+  });
+
+  it("heals membership when enabled is true", async () => {
+    const session = { id: "session-1", code: "ABCD", memberUids: ["uid-1"] };
+    ensureFreshAnonymousUser.mockResolvedValue({ uid: "uid-1" });
+    healSessionMembership.mockResolvedValue(session);
+
+    renderHook(() => useEnsureSessionMembership({ enabled: true }));
+
+    await waitFor(() => {
+      expect(ensureFreshAnonymousUser).toHaveBeenCalled();
+      expect(healSessionMembership).toHaveBeenCalledWith(
+        session,
+        "uid-1",
+        "hider",
+        { returningMemberUid: "uid-1", persistedMyUid: "uid-1" },
+      );
+    });
   });
 });
