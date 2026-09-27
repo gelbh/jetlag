@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Alert,
   Anchor,
@@ -7,6 +8,7 @@ import {
   Stack,
   Text,
   Title,
+  UnstyledButton,
 } from "@mantine/core";
 import {
   Crown,
@@ -27,6 +29,8 @@ import { InsetRow } from "@/components/ui/entry/InsetRow";
 import { AppLogo } from "@/components/ui/brand/AppLogo";
 import { BootSplash } from "@/components/ui/feedback/BootSplash";
 import { EntryScreenLayout } from "@/components/ui/layout/EntryScreenLayout";
+import { VersionChangelogSheet } from "@/components/ui/sheets/VersionChangelogSheet";
+import { APP_VERSION } from "@/domain/device/changelog";
 import { LEGAL_APP_NAME } from "@/domain/legal/legalContact";
 import { playerRoleLabel } from "@/domain/session/players/playerRole";
 import { useAuthBootstrapReady } from "@/hooks/app/useAuthBootstrapReady";
@@ -41,6 +45,7 @@ export function Home() {
   const authBootstrapReady = useAuthBootstrapReady();
   const { phase: routeTransitionPhase } = useRouteTransition();
   const showPremium = isFirebaseConfigured();
+  const [changelogOpen, setChangelogOpen] = useState(false);
 
   if (
     isFirebaseConfigured() &&
@@ -51,6 +56,7 @@ export function Home() {
   }
 
   return (
+    <>
     <EntryScreenLayout viewport viewportLayout="center" skin="plain">
       <Container
         size="xs"
@@ -60,8 +66,8 @@ export function Home() {
       >
         <Stack gap={28}>
           <Stack gap={10}>
-            <Group gap="sm" align="center">
-              <AppLogo variant="mark" size="md" />
+            <Group gap="sm" align="center" wrap="nowrap">
+              <AppLogo variant="mark" size="md" className="shrink-0" />
               <Title
                 order={1}
                 c="var(--color-field-ink)"
@@ -70,6 +76,7 @@ export function Home() {
                   fontSize: "2.125rem",
                   lineHeight: 1.15,
                   letterSpacing: "-0.03em",
+                  minWidth: 0,
                 }}
               >
                 {LEGAL_APP_NAME}
@@ -82,6 +89,34 @@ export function Home() {
             >
               Unofficial fan companion for Jet Lag: The Game.
             </Text>
+            <UnstyledButton
+              type="button"
+              onClick={() => setChangelogOpen(true)}
+              aria-label={`Version ${APP_VERSION}. Open changelog`}
+              style={{
+                alignSelf: "flex-start",
+                display: "inline-flex",
+                alignItems: "center",
+                minHeight: 44,
+                paddingInline: "0.625rem",
+                fontFamily: "var(--mantine-font-family-monospace)",
+                fontSize: "0.75rem",
+                fontWeight: 700,
+                letterSpacing: "0.04em",
+                color: "var(--color-field-ink-muted)",
+                borderRadius: 8,
+              }}
+              styles={{
+                root: {
+                  "&:focus-visible": {
+                    outline: "2px solid var(--color-action)",
+                    outlineOffset: 1,
+                  },
+                },
+              }}
+            >
+              v{APP_VERSION}
+            </UnstyledButton>
           </Stack>
 
           <Stack gap={22}>
@@ -222,5 +257,10 @@ export function Home() {
         </Stack>
       </Container>
     </EntryScreenLayout>
+    <VersionChangelogSheet
+      open={changelogOpen}
+      onClose={() => setChangelogOpen(false)}
+    />
+    </>
   );
 }

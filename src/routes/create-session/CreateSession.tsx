@@ -60,7 +60,6 @@ export function CreateSession() {
       <Stack gap={0} className="flex min-h-0 flex-1 flex-col overflow-hidden">
         <CreateSessionMapPane
           mapStyle={session.mapStyle}
-          onMapStyleChange={session.setMapStyle}
           focusBounds={session.mapFocusBounds}
           previewGameArea={
             session.mapPreviewGameArea ?? session.previewGameArea
