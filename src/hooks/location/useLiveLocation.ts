@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } fr
 import { haversineMeters } from "../../domain/geometry/gameArea/distance";
 import {
   getCurrentPosition,
+  restoreLocationAccessIfPersisted,
   queryGeolocationPermission,
   requestLocationAccess,
   unknownGeolocationErrorMessage,
@@ -13,6 +14,7 @@ import {
   getLocationPermissionUiSnapshot,
   retainLocationPermissionDemand,
   subscribeLocationPermissionUi,
+  persistLocationAccessConfirmed,
 } from "../../services/core/location/locationPermissionUi";
 
 interface UseLiveLocationOptions {
@@ -66,11 +68,9 @@ export function useLiveLocation(
       return;
     }
 
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- disable cleanup
     setReading(null);
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setError(null);
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setNeedsPermissionPrompt(false);
   }, [enabled]);
 
@@ -163,6 +163,27 @@ export function useLiveLocation(
       }
 
       if (permission === "prompt") {
+        const restore = await restoreLocationAccessIfPersisted({
+          highAccuracy,
+          maximumAge,
+        });
+        if (cancelled) {
+          return;
+        }
+
+        if (restore.status === "restored") {
+          setNeedsPermissionPrompt(false);
+          publishReading(restore.reading, true);
+          startWatch();
+          return;
+        }
+
+        if (restore.status === "denied") {
+          setNeedsPermissionPrompt(false);
+          setError(LOCATION_BLOCKED_MESSAGE);
+          return;
+        }
+
         if (confirmEpoch === 0) {
           setNeedsPermissionPrompt(true);
           setError(null);
@@ -171,6 +192,29 @@ export function useLiveLocation(
 
         // Map Allow CTA already obtained a reading under a user gesture.
         setNeedsPermissionPrompt(false);
+        try {
+          const initial = await getCurrentPosition({
+            highAccuracy,
+            maximumAge,
+          });
+          if (cancelled) {
+            return;
+          }
+
+          publishReading(initial, true);
+        } catch (nextError) {
+          if (cancelled) {
+            return;
+          }
+
+          setError(unknownGeolocationErrorMessage(nextError));
+          return;
+        }
+
+        if (cancelled) {
+          return;
+        }
+
         startWatch();
         return;
       }
@@ -183,6 +227,7 @@ export function useLiveLocation(
           return;
         }
 
+        persistLocationAccessConfirmed();
         publishReading(initial, true);
       } catch (nextError) {
         if (cancelled) {
