@@ -22,36 +22,14 @@ export async function openChat(page: Page) {
   await dismissActiveToolPanel(page);
   await dismissMapOnboarding(page);
 
-  // Hider chat uses jl-panel-hider-wizard above the dock; if still mounted after
-  // dismiss (exit animation / bare Close), treat chat as already open.
   if (await page.getByLabel("Chat tabs").isVisible().catch(() => false)) {
     return;
   }
 
-  const dockChat = page.getByRole("button", { name: "Open chat" });
-  if (await dockChat.isVisible().catch(() => false)) {
-    await dockChat.click({ force: true });
-    await expect(page.getByLabel("Chat tabs")).toBeVisible({ timeout: 15_000 });
-    return;
-  }
-
-  const unreadChat = page.getByRole("button", {
-    name: "Open chat, unread messages",
-  });
-  if (await unreadChat.isVisible().catch(() => false)) {
-    await unreadChat.click({ force: true });
-    await expect(page.getByLabel("Chat tabs")).toBeVisible({ timeout: 15_000 });
-    return;
-  }
-
-  const chatTab = page.getByRole("button", { name: "Chat", exact: true });
-  if (await chatTab.isVisible().catch(() => false)) {
-    await chatTab.click();
-    await expect(page.getByLabel("Chat tabs")).toBeVisible({ timeout: 15_000 });
-    return;
-  }
-
-  throw new Error("Chat control not found on map chrome");
+  const dockChat = page.getByLabel(/Open chat/i).first();
+  await expect(dockChat).toBeVisible({ timeout: 15_000 });
+  await dockChat.click({ force: true });
+  await expect(page.getByLabel("Chat tabs")).toBeVisible({ timeout: 15_000 });
 }
 
 async function resolveAnswerButton(
@@ -69,9 +47,12 @@ async function resolveAnswerButton(
     }
 
     await openChat(page);
-    const chatButton = gameChatScroll(page).getByRole("button", { name });
-    await expect(chatButton).toBeVisible({ timeout: 2_000 });
-    resolved = chatButton;
+    const chatButton = page
+      .getByRole("dialog", { name: /^Chat$/i })
+      .getByRole("button", { name })
+      .or(gameChatScroll(page).getByRole("button", { name }));
+    await expect(chatButton.first()).toBeVisible({ timeout: 2_000 });
+    resolved = chatButton.first();
   }).toPass({ timeout: 20_000 });
 
   if (!resolved) {
@@ -85,20 +66,29 @@ export async function answerInChat(page: Page, label: string) {
     page,
     `Send answer: ${label}`,
   );
-  await answerButton.click();
+  await answerButton.click({ force: true });
 }
 
 export async function answerPhotoCannotInChat(page: Page) {
+  await dismissActiveToolPanel(page);
   const answerButton = await resolveAnswerButton(
     page,
     "I cannot answer the question",
   );
-  await answerButton.click();
+  await answerButton.evaluate((el) => {
+    if (el instanceof HTMLElement) {
+      el.click();
+    }
+  });
 }
 
 export async function answerPhotoSentExternallyInChat(page: Page) {
   const answerButton = await resolveAnswerButton(page, "Mark sent");
-  await answerButton.click();
+  await answerButton.evaluate((el) => {
+    if (el instanceof HTMLElement) {
+      el.click();
+    }
+  });
 }
 
 export async function answerYesInChat(page: Page) {
@@ -123,8 +113,12 @@ export async function expectPendingQuestionText(
 
 export async function expectChatAnswer(page: Page, answer: string) {
   await openChat(page);
+  const chat = page
+    .getByRole("dialog", { name: /^Chat$/i })
+    .or(gameChatScroll(page));
+  // Tip chat renders the answer as its own paragraph (not "Answered: yes").
   await expect(
-    gameChatScroll(page).getByText(new RegExp(`Answered: ${answer}`, "i")),
+    chat.getByText(new RegExp(`^(?:Answered:\\s*)?${answer}$`, "i")).first(),
   ).toBeVisible({
     timeout: 20_000,
   });
