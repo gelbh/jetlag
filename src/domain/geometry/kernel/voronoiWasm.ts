@@ -3,7 +3,7 @@ import {
   loadKernelWasm,
   resetKernelWasmForTests,
 } from "./kernelWasmPkg";
-import type { SpatialVoronoiSite } from "./spatialVoronoi";
+import type { SpatialVoronoiSite } from "./spatialVoronoiTypes";
 
 /** Reset lazy WASM module (tests). */
 export const resetVoronoiWasmForTests = resetKernelWasmForTests;

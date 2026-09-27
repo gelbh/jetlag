@@ -3,7 +3,7 @@ import area from "@turf/area";
 import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
 import { point as turfPoint } from "@turf/helpers";
 import type { Feature, MultiPolygon, Polygon } from "geojson";
-import { geoSpatialVoronoiFromSites } from "./spatialVoronoi";
+import { wasmBuildSpatialVoronoiFromSites } from "./voronoiWasm";
 import { dispatchSpatialVoronoi } from "./voronoiKernelRunner";
 import { buildTentacleEliminationRegion } from "./tentacleRegions";
 import { runTentacleEliminationRegion } from "./tentacleKernelRunner";
@@ -40,7 +40,7 @@ describe("kernel dispatch ready", () => {
 
   it("mode wasm + tentacleEliminationRegion ready → WASM via runner", async () => {
     const sites = [westSite, eastSite];
-    const cells = geoSpatialVoronoiFromSites(
+    const cells = await wasmBuildSpatialVoronoiFromSites(
       sites.map((s) => ({
         lng: s.lng,
         lat: s.lat,
@@ -79,7 +79,7 @@ describe("kernel dispatch ready", () => {
 
   it("tentacle runner parity: shaded disk excludes answered site cell", async () => {
     const sites = [westSite, eastSite];
-    const cells = geoSpatialVoronoiFromSites(
+    const cells = await wasmBuildSpatialVoronoiFromSites(
       sites.map((s) => ({
         lng: s.lng,
         lat: s.lat,
@@ -107,8 +107,8 @@ describe("kernel dispatch ready", () => {
 });
 
 describe("buildTentacleEliminationRegion kernel", () => {
-  it("returns null when fewer than two sites", () => {
-    const cells = geoSpatialVoronoiFromSites([
+  it("returns null when fewer than two sites", async () => {
+    const cells = await wasmBuildSpatialVoronoiFromSites([
       { lng: -0.18, lat: 51.45, properties: { poiId: "west" } },
     ]);
     expect(
@@ -123,9 +123,9 @@ describe("buildTentacleEliminationRegion kernel", () => {
     ).toBeNull();
   });
 
-  it("produces positive-area shading for two sites", () => {
+  it("produces positive-area shading for two sites", async () => {
     const sites = [westSite, eastSite];
-    const cells = geoSpatialVoronoiFromSites(
+    const cells = await wasmBuildSpatialVoronoiFromSites(
       sites.map((s) => ({
         lng: s.lng,
         lat: s.lat,
