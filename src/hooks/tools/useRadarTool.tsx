@@ -178,7 +178,7 @@ export function useRadarTool({
     [active, setAwaitingPlacement, setMapError],
   );
 
-  const handleUseGps = async () => {
+  const handleUseGps = useCallback(async () => {
     try {
       const reading = await refreshGps();
       const point: LatLngTuple = [reading.lat, reading.lng];
@@ -194,7 +194,7 @@ export function useRadarTool({
         error instanceof Error ? error.message : "GPS location unavailable.",
       );
     }
-  };
+  }, [ensurePointInGameArea, refreshGps, setAwaitingPlacement, setMapError]);
 
   const clearAfterCommit = useCallback(() => {
     setRadarCenter(null);

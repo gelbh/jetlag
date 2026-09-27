@@ -53,6 +53,7 @@ function MapPlayerErrorChannel({
       return;
     }
     showEphemeralPlayerNotification(error);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- notify on title/message text only
   }, [hasActions, error.title, error.message]);
 
   if (!hasActions) {
