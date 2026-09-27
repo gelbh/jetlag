@@ -14,10 +14,10 @@
   --chrome-side-stack-lift-landscape: 1rem;
 
   /* Extra space so bottom snaps clear the hunt dock. */
-  --chrome-side-stack-bottom-clearance: 1.5rem;
+  --chrome-side-stack-bottom-clearance: 1rem;
 
-  /* Top snaps sit below the status island (a bit lower than flush). */
-  --chrome-side-stack-top-clearance: 1.25rem;
+  /* Top snaps sit below the status island. */
+  --chrome-side-stack-top-clearance: 1rem;
 
   /* Continuous island radii; outer corner matches screen corners. */
   --chrome-side-island-radius: 1.125rem;
@@ -108,8 +108,14 @@
 @layer components {
   /*
    * Documented data-attr wrappers (D7) — legacy chassis selectors retired.
-   * OverlayHost owns safe-area pb — side stack must not re-add home-indicator inset.
+   * OverlayHost owns the float gap under the dock (map peeks through); side stack
+   * must not re-add home-indicator inset. Real CSS (not Tailwind).
    */
+  .jl-map-bottom-chrome-host:not(.jl-map-bottom-chrome-host--rail) {
+    padding-bottom: var(--dock-float-gap, 0.75rem);
+    background: transparent;
+  }
+
   [data-chrome-side-stack="phone"] {
     bottom: calc(
       var(--dock-island-height) + var(--chrome-side-stack-gap) +

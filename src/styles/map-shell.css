@@ -20,25 +20,23 @@
     background: var(--color-surface-deep);
   }
 
-  .map-screen-shell::before {
-    content: "";
-    position: fixed;
-    inset-inline: 0;
-    top: 0;
-    height: var(--safe-area-top);
-    background: var(--color-surface-deep);
-    z-index: var(--z-banner);
-    pointer-events: none;
+  /* Same WebKit standalone shortfall as html/body (W5-G). */
+  @media (display-mode: standalone) {
+    .map-screen-shell {
+      min-height: 100vh;
+      min-height: 100lvh;
+    }
+  }
+
+  html.jl-standalone-shell .map-screen-shell {
+    min-height: 100vh;
+    min-height: 100lvh;
   }
 
   .admin-monitor-pane .map-screen-shell {
     position: absolute;
     inset: 0;
     min-height: 0;
-  }
-
-  .admin-monitor-pane .map-screen-shell::before {
-    display: none;
   }
 
   .map-chrome-hud {
@@ -72,13 +70,27 @@
   }
 
   /*
-   * Safe-area inset must live in real CSS. Tailwind v4 omits utilities whose
-   * computed value collapses to 0 at build time (e.g. pt-[max(0px,env(...))]),
-   * which left the status rail under the iPhone PWA notch / Dynamic Island
-   * while .map-screen-shell::before still painted the safe-area band on top.
+   * Float inset must live in real CSS (Tailwind v4 omits env()-collapse utilities).
+   * Phone status island mirrors bottom --dock-float-gap; map full-bleeds under notch.
    */
   .jl-status-rail {
-    padding-top: env(safe-area-inset-top, 0);
+    padding-top: 0;
+  }
+
+  .jl-status-rail-float {
+    /* Clear notch/Dynamic Island via --safe-area-top, then match bottom float gap. */
+    padding-top: calc(
+      var(--safe-area-top, 0px) + var(--dock-float-gap, 0.75rem)
+    );
+    padding-left: max(
+      var(--dock-float-gap, 0.75rem),
+      env(safe-area-inset-left, 0px)
+    );
+    padding-right: max(
+      var(--dock-float-gap, 0.75rem),
+      env(safe-area-inset-right, 0px)
+    );
+    padding-bottom: 0.25rem;
   }
 
   .jl-status-bar {

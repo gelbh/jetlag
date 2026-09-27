@@ -13,7 +13,9 @@ import { cn } from "@/lib/cn";
 import {
   cycleMapChromeDockPlacement,
   legacyAnchorFromPlacement,
+  resolveSafeAreaTopPx,
   resolveStackedTops,
+  resolveUsableVerticalBand,
   sideFromPointX,
   topPxFromTopRatio,
   topRatioFromTopPx,
@@ -93,10 +95,11 @@ function clampDragPos(
 ): DragPos {
   const pad = edgePadPx();
   const maxLeft = Math.max(pad, window.innerWidth - width - pad);
-  const maxTop = Math.max(pad, window.innerHeight - height - pad);
+  const { minTop, maxBottom } = resolveUsableVerticalBand(window.innerHeight);
+  const maxTop = Math.max(minTop, maxBottom - height);
   return {
     left: Math.min(maxLeft, Math.max(pad, left)),
-    top: Math.min(maxTop, Math.max(pad, top)),
+    top: Math.min(maxTop, Math.max(minTop, top)),
   };
 }
 
@@ -299,10 +302,13 @@ export function MapDraggableFixedStack({
     }
   }, [dragging, dragPos, placement, stackHeight, children]);
 
+  const safeTop =
+    typeof window !== "undefined" ? resolveSafeAreaTopPx() : 0;
   const restTop = topPxFromTopRatio(
     placement.topRatio,
     stackHeight,
     typeof window !== "undefined" ? window.innerHeight : 800,
+    safeTop,
   );
 
   /** Capture pre-update rect when shared store changes (peer push). */
@@ -385,6 +391,7 @@ export function MapDraggableFixedStack({
         const from = node.getBoundingClientRect();
         const vw = window.innerWidth;
         const vh = window.innerHeight;
+        const safeTop = resolveSafeAreaTopPx();
         const side = sideFromPointX(session.lastX, vw);
         const height = Math.max(session.height, from.height);
         let moverTop = from.top;
@@ -409,6 +416,7 @@ export function MapDraggableFixedStack({
             preferAbove,
             viewportHeight: vh,
             gap: PEER_GAP_PX,
+            safeAreaTopPx: safeTop,
           });
           moverTop = stacked.moverTop;
           const peerId: MapChromeDockId =
@@ -420,11 +428,12 @@ export function MapDraggableFixedStack({
               stacked.peerTop,
               peerRect.height,
               vh,
+              safeTop,
             ),
           };
           const moverPlacement: MapChromeDockPlacement = {
             side,
-            topRatio: topRatioFromTopPx(moverTop, height, vh),
+            topRatio: topRatioFromTopPx(moverTop, height, vh, safeTop),
           };
           writeMapChromeDocksState({
             ...state,
@@ -440,7 +449,7 @@ export function MapDraggableFixedStack({
 
         const moverPlacement: MapChromeDockPlacement = {
           side,
-          topRatio: topRatioFromTopPx(moverTop, height, vh),
+          topRatio: topRatioFromTopPx(moverTop, height, vh, safeTop),
         };
         setPlacement(moverPlacement);
         setDragPos(null);
