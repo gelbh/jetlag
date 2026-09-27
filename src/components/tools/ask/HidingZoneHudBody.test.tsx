@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { jetlagTheme } from "@/theme/theme";
 import { AskHudHost } from "./AskHudHost";
 import { HidingZoneHudBody } from "./HidingZoneHudBody";
-import type { HidingZoneToolPanelState } from "@/components/hider/HidingZonePanel";
+import type { HidingZoneToolPanelState } from "@/components/hider/hidingZoneToolPanelState";
 
 beforeEach(() => {
   vi.stubGlobal("matchMedia", (query: string) => ({

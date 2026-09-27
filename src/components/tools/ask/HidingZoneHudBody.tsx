@@ -4,8 +4,8 @@
  */
 import { AskChipIsland } from "@/components/tools/ask/AskChipIsland";
 import { InlineError } from "@/components/ui/banners/InlineError";
-import type { HidingZoneToolPanelState } from "@/components/hider/HidingZonePanel";
 import type { HidingZoneStepId } from "@/components/hider/hidingZoneSteps";
+import type { HidingZoneToolPanelState } from "@/components/hider/hidingZoneToolPanelState";
 import { useEffect } from "react";
 
 export type HidingZoneHudBodyProps = {

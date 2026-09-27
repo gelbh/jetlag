@@ -11,8 +11,8 @@ import {
   askMapPlacementSendStyles,
 } from "@/components/tools/ask/AskMapPlacementChrome";
 import { mapChromeSurfaceStyles } from "@/components/ui/entry/entryChrome";
-import type { HidingZoneToolPanelState } from "@/components/hider/HidingZonePanel";
 import type { HidingZoneStepId } from "@/components/hider/hidingZoneSteps";
+import type { HidingZoneToolPanelState } from "@/components/hider/hidingZoneToolPanelState";
 
 export type HidingZoneMapPlacementChromeProps = {
   moveMode: boolean;

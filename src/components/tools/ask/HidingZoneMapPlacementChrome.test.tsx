@@ -3,7 +3,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { MantineProvider } from "@mantine/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { jetlagTheme } from "@/theme/theme";
-import type { HidingZoneToolPanelState } from "@/components/hider/HidingZonePanel";
+import type { HidingZoneToolPanelState } from "@/components/hider/hidingZoneToolPanelState";
 import { HidingZoneMapPlacementChrome } from "./HidingZoneMapPlacementChrome";
 
 beforeEach(() => {
