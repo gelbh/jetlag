@@ -88,8 +88,10 @@ export function GameOverSheet({
     : undefined;
   const playerWon = myPlayer?.won;
   const headline = outcomeHeadline(gameResult.outcome, playerWon);
+  const hidingPhaseMs = gameResult.hidingPhaseMs ?? 0;
+  const seekPhaseMs = gameResult.seekPhaseMs ?? 0;
   const heroMs =
-    playerRole === "hider" ? gameResult.hidingPhaseMs! : gameResult.seekTimeMs;
+    playerRole === "hider" ? hidingPhaseMs : gameResult.seekTimeMs;
 
   const handleRematch = useCallback(() => {
     void Promise.resolve(onRematch()).catch(() => {
@@ -151,11 +153,11 @@ export function GameOverSheet({
             />
             <StatRow
               label="Hiding phase"
-              value={formatClockDurationFromMs(gameResult.hidingPhaseMs!)}
+              value={formatClockDurationFromMs(hidingPhaseMs)}
             />
             <StatRow
               label="Seek phase"
-              value={formatClockDurationFromMs(gameResult.seekPhaseMs!)}
+              value={formatClockDurationFromMs(seekPhaseMs)}
             />
           </div>
 

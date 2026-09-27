@@ -260,16 +260,33 @@ export function deserializeGameResultFromFirestore(
 
   const hasHiding = typeof document.hidingPhaseMs === "number";
   const hasSeek = typeof document.seekPhaseMs === "number";
-  const derived =
-    !hasHiding || !hasSeek
-      ? splitRoundPhaseMs(durationMs, hidingPeriodMs(gameSize))
-      : null;
+  // Legacy docs without phase fields: period comes from gameSize defaults only.
+  // Custom session.hidingPeriodMinutes is not stored on gameResult (ceiling).
+  const periodMs =
+    typeof document.hidingPeriodMinutes === "number" &&
+    Number.isFinite(document.hidingPeriodMinutes)
+      ? Math.max(0, document.hidingPeriodMinutes) * 60_000
+      : hidingPeriodMs(gameSize);
 
-  const derivingPhases = !hasHiding || !hasSeek;
-  const hidingPhaseMs = hasHiding
-    ? document.hidingPhaseMs
-    : derived!.hidingPhaseMs;
-  const seekPhaseMs = hasSeek ? document.seekPhaseMs : derived!.seekPhaseMs;
+  let hidingPhaseMs: number;
+  let seekPhaseMs: number;
+  let derivingPhases = false;
+  if (hasHiding && hasSeek) {
+    hidingPhaseMs = document.hidingPhaseMs as number;
+    seekPhaseMs = document.seekPhaseMs as number;
+  } else if (hasHiding) {
+    derivingPhases = true;
+    hidingPhaseMs = document.hidingPhaseMs as number;
+    seekPhaseMs = Math.max(0, durationMs - hidingPhaseMs);
+  } else if (hasSeek) {
+    derivingPhases = true;
+    seekPhaseMs = document.seekPhaseMs as number;
+    hidingPhaseMs = Math.max(0, durationMs - seekPhaseMs);
+  } else {
+    derivingPhases = true;
+    ({ hidingPhaseMs, seekPhaseMs } = splitRoundPhaseMs(durationMs, periodMs));
+  }
+
   const seekTimeMs = derivingPhases
     ? seekPhaseMs
     : typeof document.seekTimeMs === "number"

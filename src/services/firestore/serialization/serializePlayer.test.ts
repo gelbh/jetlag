@@ -75,4 +75,34 @@ describe("serializePlayer", () => {
     expect(result.hidingPhaseMs).toBe(120_000);
     expect(result.seekPhaseMs).toBe(0);
   });
+
+  it("complements a lone hidingPhaseMs from duration remainder", () => {
+    const result = deserializeGameResultFromFirestore("result-1", "session-1", {
+      roundNumber: 1,
+      gameSize: "medium",
+      outcome: "found",
+      endedAt: "2026-05-14T02:00:00.000Z",
+      durationMs: 900_000,
+      hidingPhaseMs: 600_000,
+      players: [],
+    });
+    expect(result.hidingPhaseMs).toBe(600_000);
+    expect(result.seekPhaseMs).toBe(300_000);
+    expect(result.seekTimeMs).toBe(300_000);
+  });
+
+  it("uses hidingPeriodMinutes on the result doc when deriving both phases", () => {
+    const result = deserializeGameResultFromFirestore("result-1", "session-1", {
+      roundNumber: 1,
+      gameSize: "medium",
+      outcome: "found",
+      endedAt: "2026-05-14T02:00:00.000Z",
+      durationMs: 900_000,
+      hidingPeriodMinutes: 10,
+      players: [],
+    });
+    expect(result.hidingPhaseMs).toBe(600_000);
+    expect(result.seekPhaseMs).toBe(300_000);
+    expect(result.seekTimeMs).toBe(300_000);
+  });
 });
