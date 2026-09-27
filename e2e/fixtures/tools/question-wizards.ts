@@ -176,7 +176,8 @@ export async function completeRadarSolo(page: Page) {
   if (await gps.isVisible().catch(() => false)) {
     await gps.click();
   }
-  await expect(page.getByTestId("radar-map-placement-answer")).toBeVisible({
+  // Yes/No live in choices (mid strip). answer slot stays empty until Send arms.
+  await expect(page.getByTestId("radar-map-placement-choices")).toBeVisible({
     timeout: 20_000,
   });
   const yes = page
@@ -195,14 +196,17 @@ export async function completeRadarSolo(page: Page) {
 export async function sendRadarToHiders(page: Page) {
   await clickToolDockButton(page, "Radar");
   await expectAskHud(page);
-  await placeAskAnchor(page);
   await selectFirstRadarDistance(page);
-  await waitForSendToHiders(page);
-  await page.getByRole("button", { name: SEND_TO_HIDERS_BUTTON }).click();
-  await dismissActiveToolPanel(page);
-  await expect(page.getByTestId("ask-hud-host")).toBeHidden({
-    timeout: 15_000,
-  });
+  const placement = page.getByTestId("radar-map-placement");
+  await expect(placement).toBeVisible({ timeout: 15_000 });
+  const gps = placement.getByRole("button", { name: /Use my location/i });
+  if (await gps.isVisible().catch(() => false)) {
+    await gps.click();
+  }
+  const send = placement.getByRole("button", { name: /^Send to hiders$/ });
+  await expect(send).toBeEnabled({ timeout: 20_000 });
+  await send.click();
+  await expect(placement).toBeHidden({ timeout: 30_000 });
 }
 
 async function pickCatalogRow(page: Page, label: RegExp | string) {
