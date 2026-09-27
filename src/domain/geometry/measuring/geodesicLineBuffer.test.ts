@@ -2,10 +2,19 @@ import { describe, expect, it } from "vitest";
 import { lineString } from "@turf/helpers";
 import buffer from "@turf/buffer";
 import difference from "@turf/difference";
-import { geodesicLineBuffer } from "../kernel/geodesicLineBuffer";
+import { existsSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import path from "node:path";
+import { runGeodesicLineBuffer } from "../kernel/geodesicKernelRunner";
 
-describe("geodesicLineBuffer", () => {
-  it("splits a play area when subtracted from a vertical waterway", () => {
+const pkgEntry = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  "../../../../crates/jetlag-geometry-kernel/pkg/jetlag_geometry_kernel.js",
+);
+const wasmPkgReady = existsSync(pkgEntry);
+
+describe.skipIf(!wasmPkgReady)("geodesicLineBuffer", () => {
+  it("splits a play area when subtracted from a vertical waterway", async () => {
     const gameFeature = {
       type: "Feature" as const,
       properties: {},
@@ -26,7 +35,7 @@ describe("geodesicLineBuffer", () => {
       [-0.15, 51.4],
       [-0.15, 51.5],
     ]);
-    const buffered = geodesicLineBuffer(line, 2);
+    const buffered = await runGeodesicLineBuffer(line, 2);
     expect(buffered).not.toBeNull();
 
     const remaining = difference({
@@ -44,7 +53,7 @@ describe("geodesicLineBuffer", () => {
     expect(remaining?.geometry.type).toBe("MultiPolygon");
   });
 
-  it("rejects non-positive sample spacing", () => {
+  it("rejects non-positive sample spacing", async () => {
     const line = {
       type: "Feature" as const,
       properties: {},
@@ -56,7 +65,8 @@ describe("geodesicLineBuffer", () => {
         ],
       },
     };
-    expect(() => geodesicLineBuffer(line, 200, 0)).toThrow(RangeError);
+    await expect(runGeodesicLineBuffer(line, 200, 0)).rejects.toThrow(
+      RangeError,
+    );
   });
-
 });

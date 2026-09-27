@@ -1,6 +1,5 @@
 import type { Feature, LineString } from "geojson";
 import { dispatchKernel } from "./dispatchKernel";
-import { geodesicLineBuffer } from "./geodesicLineBuffer";
 import { createLazyWasmImport } from "./lazyWasmImport";
 import type { MaskKernelMode } from "./maskKernelMode";
 import type { PolygonFeature } from "./types";
@@ -17,8 +16,6 @@ export async function dispatchGeodesicLineBuffer(
     mode,
     entrypoint: "geodesicLineBuffer",
     label: "geodesicLineBuffer",
-    runTs: () =>
-      geodesicLineBuffer(segment, distanceMeters, sampleSpacingMeters),
     runWasm: async () => {
       const wasm = await geodesicWasm.load();
       return wasm.wasmGeodesicLineBuffer(

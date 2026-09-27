@@ -17,7 +17,6 @@ import {
   featureToGameAreaGeometry,
   shouldUseWasm,
   unionDiskSpecs,
-  unionPolygonFeatures,
 } from "../kernel";
 import {
   gameAreaFingerprint,

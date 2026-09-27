@@ -1,6 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { Feature, LineString } from "geojson";
-import { geodesicLineBuffer } from "./geodesicLineBuffer";
 import { loadPolygonGolden } from "./loadPolygonGolden";
 import type { GameAreaGeometry, LatLngTuple } from "./types";
 
@@ -78,7 +77,7 @@ describe("extras wasm dispatch (halfPlane ready)", () => {
     expect(wasmBuildRadarShadedRegion).toHaveBeenCalledOnce();
   });
 
-  it("mode wasm + geodesicLineBuffer not ready → TS result, WASM not called", async () => {
+  it("mode wasm + geodesicLineBuffer not ready → throws without runTs", async () => {
     vi.resetModules();
     vi.doMock("./kernelWasmReady", () => ({
       KERNEL_WASM_READY: {
@@ -101,14 +100,9 @@ describe("extras wasm dispatch (halfPlane ready)", () => {
     const { dispatchGeodesicLineBuffer } = await import(
       "./geodesicKernelRunner"
     );
-    const expected = geodesicLineBuffer(shortLine, 200);
-    const result = await dispatchGeodesicLineBuffer(
-      shortLine,
-      200,
-      undefined,
-      "wasm",
-    );
-    expect(result).toEqual(expected);
+    await expect(
+      dispatchGeodesicLineBuffer(shortLine, 200, undefined, "wasm"),
+    ).rejects.toThrow(/not wasm-ready and has no TS fallback/);
     expect(wasmGeodesicLineBuffer).not.toHaveBeenCalled();
   });
 });
