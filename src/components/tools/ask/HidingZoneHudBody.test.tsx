@@ -5,11 +5,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { jetlagTheme } from "@/theme/theme";
 import { AskHudHost } from "./AskHudHost";
 import { HidingZoneHudBody } from "./HidingZoneHudBody";
-import {
-  canCommit,
-  primedCommitLabel,
-  type AskHudReadiness,
-} from "@/domain/ask/askHudModes";
 import type { HidingZoneToolPanelState } from "@/components/hider/HidingZonePanel";
 
 beforeEach(() => {
@@ -32,7 +27,6 @@ function renderHud(ui: ReactElement) {
     </MantineProvider>,
   );
 }
-
 
 function baseZoneTool(
   overrides: Partial<HidingZoneToolPanelState> = {},
@@ -83,42 +77,20 @@ describe("HidingZoneHudBody", () => {
     expect(onSearchThisArea).not.toHaveBeenCalled();
   });
 
-  it("arms Confirm on PrimedCommitStrip only when placement ready", () => {
-    const readiness: AskHudReadiness = {
-      surface: "hiding-zone-create",
-      placementReady: true,
-      configureReady: true,
-      resolveReady: true,
-      answerReady: true,
-      awaitHiderAnswer: true,
-      isSubmitting: false,
-    };
-    expect(canCommit(readiness)).toBe(true);
-
-    const onCommit = vi.fn();
+  it("stays method-only in the sheet (no place/confirm panels)", () => {
     renderHud(
       <AskHudHost
-        cue="READY TO CONFIRM"
+        cue="CHOOSE METHOD"
         toolLabel="Hiding zone"
         showCostChip={false}
-        canCommit
-        commitLabel={primedCommitLabel({
-          kind: "confirm",
-          costLabel: null,
-          primed: true,
-          cue: "READY TO CONFIRM",
-        })}
-        onCommit={onCommit}
+        canCommit={false}
+        commitLabel="CONFIRM"
+        onCommit={vi.fn()}
         modeBody={
           <HidingZoneHudBody
             moveMode={false}
             radiusLabel="200 m"
-            zoneTool={baseZoneTool({
-              methodChosen: true,
-              manualMode: true,
-              hasPlacement: true,
-              manualCenter: [53.35, -6.26],
-            })}
+            zoneTool={baseZoneTool()}
             onStepChange={vi.fn()}
             onSearchThisArea={vi.fn()}
           />
@@ -126,62 +98,25 @@ describe("HidingZoneHudBody", () => {
       />,
     );
 
-    const strip = screen.getByTestId("ask-commit-strip").querySelector("button");
-    expect(strip).toHaveAttribute("data-armed", "true");
-    fireEvent.click(screen.getByRole("button", { name: /^CONFIRM$/i }));
-    expect(onCommit).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId("ask-hud-host")).toBeInTheDocument();
+    expect(screen.getByTestId("hiding-zone-hud-body")).toBeInTheDocument();
+    expect(screen.queryByText(/Tap the map inside the play area/i)).toBeNull();
+    expect(
+      screen.queryByRole("button", { name: /search stations in this area/i }),
+    ).toBeNull();
   });
 
-  it("searches stations only via frame-search control after Station method", () => {
-    const onSearchThisArea = vi.fn();
+  it("reports method step while chips are shown", () => {
+    const onStepChange = vi.fn();
     renderHud(
       <HidingZoneHudBody
         moveMode={false}
         radiusLabel="200 m"
-        zoneTool={baseZoneTool({
-          methodChosen: true,
-          manualMode: false,
-        })}
-        onStepChange={vi.fn()}
-        onSearchThisArea={onSearchThisArea}
-      />,
-    );
-
-    fireEvent.click(
-      screen.getByRole("button", { name: /search stations in this area/i }),
-    );
-    expect(onSearchThisArea).toHaveBeenCalledTimes(1);
-  });
-
-  it("lets confirm-step clear station to pick another", () => {
-    const clearStationSelection = vi.fn();
-    renderHud(
-      <HidingZoneHudBody
-        moveMode
-        radiusLabel="200 m"
-        zoneTool={baseZoneTool({
-          methodChosen: true,
-          manualMode: false,
-          hasPlacement: true,
-          selectedStation: {
-            id: "dublin-central",
-            name: "Dublin Central",
-            lat: 53.35,
-            lng: -6.26,
-          },
-          clearStationSelection,
-          error: "Move requires a different location.",
-        })}
-        onStepChange={vi.fn()}
+        zoneTool={baseZoneTool()}
+        onStepChange={onStepChange}
         onSearchThisArea={vi.fn()}
       />,
     );
-
-    fireEvent.click(
-      screen.getByRole("button", { name: /Choose different station/i }),
-    );
-    expect(clearStationSelection).toHaveBeenCalledTimes(1);
-    // Strip owns the confirm-step error — no duplicate InlineError alert.
-    expect(screen.queryByRole("alert")).toBeNull();
+    expect(onStepChange).toHaveBeenCalledWith("method");
   });
 });

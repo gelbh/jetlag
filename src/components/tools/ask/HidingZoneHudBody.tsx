@@ -1,11 +1,8 @@
-import { AskHudPanel } from "@/components/tools/ask/AskHudPanel";
 /**
- * Hider MethodChipIsland — station/map chips; place on map; Confirm on PrimedCommitStrip.
- * No PhaseRail / CONTINUE / mid-screen method card.
- * Spec: ask-surface-kit-design rev 2026-08-05b.
+ * Hider MethodChipIsland — station/map chips only (place/confirm live on map-first overlay).
+ * Spec: ask-surface-kit-design rev 2026-08-05b; map-first stream 2026-09-27.
  */
 import { AskChipIsland } from "@/components/tools/ask/AskChipIsland";
-import { TransitStationPicker } from "@/components/hider/TransitStationPicker";
 import { InlineError } from "@/components/ui/banners/InlineError";
 import type { HidingZoneToolPanelState } from "@/components/hider/HidingZonePanel";
 import type { HidingZoneStepId } from "@/components/hider/hidingZoneSteps";
@@ -34,22 +31,12 @@ function resolveStep(
   return hasPlacement ? "confirm" : "location";
 }
 
-function placementSummary(zoneTool: HidingZoneToolPanelState): string {
-  if (zoneTool.manualMode) {
-    if (zoneTool.manualCenter) {
-      return `Map · ${zoneTool.manualCenter[0].toFixed(5)}, ${zoneTool.manualCenter[1].toFixed(5)}`;
-    }
-    return "Map placement";
-  }
-  return zoneTool.selectedStation?.name ?? "No station selected";
-}
-
 export function HidingZoneHudBody({
   moveMode,
-  radiusLabel,
+  radiusLabel: _radiusLabel,
   zoneTool,
   onStepChange,
-  onSearchThisArea,
+  onSearchThisArea: _onSearchThisArea,
   onDismiss,
 }: HidingZoneHudBodyProps) {
   const step = resolveStep(
@@ -87,71 +74,7 @@ export function HidingZoneHudBody({
         />
       ) : null}
 
-      {step === "location" && zoneTool.manualMode ? (
-        <AskHudPanel className="space-y-2 p-3">
-          <p className="text-sm text-field-ink">
-            Tap the map inside the play area to set your zone center.
-          </p>
-          <p className="text-xs text-field-ink-muted">Radius: {radiusLabel}</p>
-        </AskHudPanel>
-      ) : null}
-
-      {step === "location" && !zoneTool.manualMode ? (
-        <AskHudPanel className="max-h-[min(40dvh,18rem)] overflow-hidden p-3">
-          <div className="jl-scroll max-h-full">
-            <TransitStationPicker
-              layout="flex"
-              labeled
-              query={zoneTool.query}
-              onQueryChange={zoneTool.setQuery}
-              stations={zoneTool.stations}
-              stationsLoading={zoneTool.stationsLoading}
-              stationsError={zoneTool.stationsError}
-              selectedStation={zoneTool.selectedStation}
-              onSelectStation={zoneTool.setSelectedStation}
-              onClearStation={zoneTool.clearStationSelection}
-              onSearchThisArea={onSearchThisArea}
-              searchDisabled={zoneTool.stationsLoading}
-            />
-          </div>
-          <p className="mt-2 text-xs text-field-ink-muted">Radius: {radiusLabel}</p>
-        </AskHudPanel>
-      ) : null}
-
-      {step === "confirm" ? (
-        <AskHudPanel className="space-y-2 p-3">
-          <p className="text-xs font-medium uppercase tracking-wide text-field-ink-muted">
-            Zone center
-          </p>
-          <p className="text-sm font-medium text-field-ink">
-            {placementSummary(zoneTool)}
-          </p>
-          <p className="text-xs text-field-ink-muted">Radius: {radiusLabel}</p>
-          {zoneTool.manualMode ? (
-            <p className="text-xs text-field-ink-muted">
-              Tap the map to adjust the center.
-            </p>
-          ) : (
-            <button
-              type="button"
-              className="btn-secondary w-full"
-              onClick={zoneTool.clearStationSelection}
-            >
-              Choose different station
-            </button>
-          )}
-          {moveMode ? (
-            <p className="text-xs text-status-warning">
-              Move must be at least 50 m from your previous zone.
-            </p>
-          ) : null}
-        </AskHudPanel>
-      ) : null}
-
-      {/* Commit-strip alert owns the error; avoid a second strict-mode duplicate. */}
-      {zoneTool.error && step !== "confirm" ? (
-        <InlineError>{zoneTool.error}</InlineError>
-      ) : null}
+      {zoneTool.error ? <InlineError>{zoneTool.error}</InlineError> : null}
 
       {onDismiss && !moveMode ? (
         <button

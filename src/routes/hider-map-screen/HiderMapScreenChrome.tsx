@@ -19,6 +19,7 @@ import type { useHiderZoneTool } from "../../hooks/session/useHiderZoneTool";
 import type { useTimeTrapTool } from "../../hooks/session/useTimeTrapTool";
 import { ChatPanel } from "../../components/chat/ChatPanel";
 import { HidingZoneHudBody } from "../../components/tools/ask/HidingZoneHudBody";
+import { HidingZoneMapPlacementChrome } from "../../components/tools/ask/HidingZoneMapPlacementChrome";
 import { AskHudHost } from "../../components/tools/ask/AskHudHost";
 import {
   activeModeCue,
@@ -29,6 +30,7 @@ import {
 import { useDevMockSessionFeed } from "../../hooks/dev/useDevMockSessionFeed";
 import { MapScreenChromeSlots } from "../map-screen/shared/MapScreenChromeSlots";
 import { getMapScreenRoleConfig } from "../map-screen/shared/mapScreenRoleConfig";
+import { isHidingZoneMapFirstEligible } from "./hidingZoneMapFirst";
 import { TimeTrapPanel } from "../../components/hider/TimeTrapPanel";
 import { ExpansionHiderMenu } from "../../components/hider/ExpansionHiderMenu";
 import { CurseReferenceSheet } from "../../components/expansion/CurseReferenceSheet";
@@ -396,6 +398,13 @@ export function HiderMapScreenChrome({
   });
   const hidingZoneCanCommit = canCommit(hidingZoneReadiness);
 
+  const mapFirstEligible = isHidingZoneMapFirstEligible({
+    wizardOpen: zoneTool.wizardOpen,
+    sheetBlocksWizard,
+    moveMode: zoneTool.moveMode,
+    methodChosen: hidingZonePanelTool.methodChosen,
+  });
+
   const toolDock = (
     <HiderToolDock
       zoneLabel={zoneLabel}
@@ -445,7 +454,23 @@ export function HiderMapScreenChrome({
           onAnswerQuestion={chat.onAnswerQuestion}
         />
 
-        {zoneTool.wizardOpen && !sheetBlocksWizard ? (
+        {mapFirstEligible ? (
+          <HidingZoneMapPlacementChrome
+            moveMode={zoneTool.moveMode}
+            radiusLabel={hidingZoneRadiusLabel}
+            zoneTool={hidingZonePanelTool}
+            onStepChange={onHidingZoneStepChange}
+            onSearchThisArea={onSearchThisArea}
+            onDismiss={zoneTool.moveMode ? undefined : zoneTool.closeWizard}
+            onBackToMethod={
+              zoneTool.moveMode
+                ? undefined
+                : () => {
+                    zoneTool.openWizard();
+                  }
+            }
+          />
+        ) : zoneTool.wizardOpen && !sheetBlocksWizard ? (
           <AskHudHost
             cue={hidingZoneCue}
             toolLabel={zoneTool.moveMode ? "Move zone" : "Hiding zone"}
