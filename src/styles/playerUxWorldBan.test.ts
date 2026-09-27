@@ -15,6 +15,10 @@ const SKIP_DIR_NAMES = new Set([
   ".wrangler",
 ]);
 
+/** Lines that only assert the banned marker is absent (residual scrub). */
+const ABSENCE_ASSERT =
+  /toHaveCount\(\s*0\s*\)|not\.toBeAttached|not\.toBeVisible/;
+
 function collectFiles(dir: string, out: string[]): void {
   for (const entry of readdirSync(dir)) {
     if (SKIP_DIR_NAMES.has(entry)) {
@@ -32,6 +36,22 @@ function collectFiles(dir: string, out: string[]): void {
   }
 }
 
+function lineMentionsNeedleWithoutAbsenceAssert(
+  text: string,
+  needle: string,
+): boolean {
+  for (const line of text.split("\n")) {
+    if (!line.includes(needle)) {
+      continue;
+    }
+    if (ABSENCE_ASSERT.test(line)) {
+      continue;
+    }
+    return true;
+  }
+  return false;
+}
+
 describe("Verify #5 player UX world purge", () => {
   it("bans data-player-ux-world and map-survey-chrome across the tree", () => {
     const files: string[] = [];
@@ -44,7 +64,7 @@ describe("Verify #5 player UX world purge", () => {
       }
       const text = readFileSync(file, "utf8");
       for (const needle of BANNED) {
-        if (text.includes(needle)) {
+        if (lineMentionsNeedleWithoutAbsenceAssert(text, needle)) {
           hits.push(`${relative(ROOT, file)}: ${needle}`);
         }
       }

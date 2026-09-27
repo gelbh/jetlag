@@ -187,7 +187,7 @@ export async function clickMapAboveAskHud(page: Page, xRatio = 0.5) {
 
 export async function waitForGeoLoadingIdle(page: Page) {
   const loadingPattern =
-    /Finding nearest feature|Finding division|Finding landmass|Loading locations within/;
+    /Finding nearest feature|Finding division|Finding landmass|Loading locations within|Confirming places|Searching within|Finding places|Getting your location|Waiting for GPS/;
   const loading = page.getByText(loadingPattern);
   if (await loading.count()) {
     await expect(loading).toHaveCount(0, { timeout: 60_000 });
@@ -481,6 +481,27 @@ export async function completeTentacleSolo(page: Page) {
   await dismissActiveToolPanel(page);
   await expectMapHasAnnotations(page);
   await expectEliminationMaskVisible(page);
+}
+
+export async function sendTentacleToHiders(page: Page) {
+  await clickToolDockButton(page, "Tentacles");
+  await expectAskHud(page);
+  await pickCatalogRow(page, /Museum|Transit|Park/i);
+  await placeAskAnchor(page);
+  await waitForGeoLoadingIdle(page);
+  // Enabled only after confirmed POIs (provisional previews keep Send disabled).
+  // Overpass confirm can exceed the default 15s Send arm used by other tools.
+  const send = sendToHidersButton(page);
+  await expect(send).toBeEnabled({ timeout: 60_000 });
+  await expect(send).toBeInViewport();
+  await clickSendToHiders(page);
+  await expect(page.getByTestId("tentacle-map-placement")).toBeHidden({
+    timeout: 15_000,
+  });
+  await dismissActiveToolPanel(page);
+  await expect(page.getByTestId("ask-hud-host")).toBeHidden({
+    timeout: 15_000,
+  });
 }
 
 export async function sendPhotoToHiders(page: Page) {
