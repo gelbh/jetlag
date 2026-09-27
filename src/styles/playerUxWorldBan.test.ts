@@ -15,9 +15,30 @@ const SKIP_DIR_NAMES = new Set([
   ".wrangler",
 ]);
 
-/** Lines that only assert the banned marker is absent (residual scrub). */
+/** Lines / nearby lines that only assert the banned marker is absent. */
 const ABSENCE_ASSERT =
-  /toHaveCount\(\s*0\s*\)|not\.toBeAttached|not\.toBeVisible/;
+  /toHaveCount\(\s*0\s*,?\s*\)|not\.toBeAttached|not\.toBeVisible/;
+
+/** How many following lines may still carry the absence assert after a wrap. */
+const ABSENCE_LOOKAHEAD_LINES = 3;
+
+export function mentionsNeedleWithoutAbsenceAssert(
+  text: string,
+  needle: string,
+): boolean {
+  const lines = text.split("\n");
+  for (let i = 0; i < lines.length; i++) {
+    if (!lines[i]!.includes(needle)) {
+      continue;
+    }
+    const window = lines.slice(i, i + ABSENCE_LOOKAHEAD_LINES + 1).join("\n");
+    if (ABSENCE_ASSERT.test(window)) {
+      continue;
+    }
+    return true;
+  }
+  return false;
+}
 
 function collectFiles(dir: string, out: string[]): void {
   for (const entry of readdirSync(dir)) {
@@ -36,21 +57,34 @@ function collectFiles(dir: string, out: string[]): void {
   }
 }
 
-function lineMentionsNeedleWithoutAbsenceAssert(
-  text: string,
-  needle: string,
-): boolean {
-  for (const line of text.split("\n")) {
-    if (!line.includes(needle)) {
-      continue;
-    }
-    if (ABSENCE_ASSERT.test(line)) {
-      continue;
-    }
-    return true;
-  }
-  return false;
-}
+describe("mentionsNeedleWithoutAbsenceAssert", () => {
+  it("allows same-line absence asserts", () => {
+    expect(
+      mentionsNeedleWithoutAbsenceAssert(
+        'await expect(page.locator("[data-player-ux-world]")).toHaveCount(0);',
+        "data-player-ux-world",
+      ),
+    ).toBe(false);
+  });
+
+  it("allows prettier-wrapped absence asserts within lookahead", () => {
+    const wrapped = `await expect(page.locator("[data-player-ux-world]")).toHaveCount(
+  0,
+);`;
+    expect(
+      mentionsNeedleWithoutAbsenceAssert(wrapped, "data-player-ux-world"),
+    ).toBe(false);
+  });
+
+  it("flags product uses without an absence assert nearby", () => {
+    expect(
+      mentionsNeedleWithoutAbsenceAssert(
+        'el.setAttribute("data-player-ux-world", "1");',
+        "data-player-ux-world",
+      ),
+    ).toBe(true);
+  });
+});
 
 describe("Verify #5 player UX world purge", () => {
   it("bans data-player-ux-world and map-survey-chrome across the tree", () => {
@@ -64,7 +98,7 @@ describe("Verify #5 player UX world purge", () => {
       }
       const text = readFileSync(file, "utf8");
       for (const needle of BANNED) {
-        if (lineMentionsNeedleWithoutAbsenceAssert(text, needle)) {
+        if (mentionsNeedleWithoutAbsenceAssert(text, needle)) {
           hits.push(`${relative(ROOT, file)}: ${needle}`);
         }
       }
