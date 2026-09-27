@@ -20,6 +20,9 @@
   --hider-action-bar-height: 3.75rem;
   --chrome-gap-above-dock: 0.5rem;
   --chrome-gap-bottom: 0.75rem;
+
+  /* Float inset so hunt dock corners track the device rounded rect. */
+  --dock-float-gap: 0.75rem;
   --map-panel-bottom: calc(
     var(--dock-total-height) + var(--chrome-gap-above-dock) +
       var(--safe-area-bottom)
@@ -93,6 +96,33 @@ body,
 }
 
 /*
+ * iOS installed PWA + viewport-fit=cover: WebKit can report svh/dvh /
+ * -webkit-fill-available short of the physical screen (WebKit 254868).
+ * vh/lvh match screen height in standalone; keep dvh for Safari tabs.
+ * html.jl-standalone-shell covers iOS when navigator.standalone is true
+ * but (display-mode: standalone) does not match.
+ */
+@media (display-mode: standalone) {
+  html,
+  body,
+  #root {
+    min-height: 100vh;
+    min-height: 100lvh;
+    height: 100vh;
+    height: 100lvh;
+  }
+}
+
+html.jl-standalone-shell,
+html.jl-standalone-shell body,
+html.jl-standalone-shell #root {
+  min-height: 100vh;
+  min-height: 100lvh;
+  height: 100vh;
+  height: 100lvh;
+}
+
+/*
  * Unlayered body rules beat @layer mantine globals so residual CSS chrome
  * keeps Jetlag typography/colors while MantineProvider stays always mounted.
  */
@@ -145,4 +175,20 @@ select,
   overflow-y: auto;
   overscroll-behavior: none;
   background: transparent;
+}
+
+@media (display-mode: standalone) {
+  .app-scroll-root {
+    min-height: 100vh;
+    min-height: 100lvh;
+    height: 100vh;
+    height: 100lvh;
+  }
+}
+
+html.jl-standalone-shell .app-scroll-root {
+  min-height: 100vh;
+  min-height: 100lvh;
+  height: 100vh;
+  height: 100lvh;
 }

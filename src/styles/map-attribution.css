@@ -1,23 +1,5 @@
-/* Compact MapLibre attribution — HUD styling for on-map credits */
-.maplibregl-ctrl-attrib {
-  display: block !important;
-  margin: 0 0 calc(var(--safe-area-bottom) + 0.25rem)
-    max(0.5rem, env(safe-area-inset-left));
-  max-width: min(14rem, calc(100vw - 6rem));
-  border-radius: var(--radius-hud-lg);
-  background: oklch(from var(--color-surface-deep) l c h / 82%);
-  color: var(--color-ink-secondary);
-}
-
-.maplibregl-ctrl-attrib a {
-  color: var(--color-ink);
-}
-
-/* Map-first Ask placement: clear bottom for GPS / tap chrome */
-html[data-ask-map-placement="1"] .maplibregl-ctrl-attrib,
-html[data-matching-map-placement="1"] .maplibregl-ctrl-attrib {
-  display: none !important;
-}
+/* On-map MapLibre (i) control is removed; credits live in Map settings.
+ * Ask/matching placement tokens below still lift left chrome above map-first HUD. */
 
 /* Lift left map controls + side stack above map-first bottom chrome */
 html[data-ask-map-placement="1"],
