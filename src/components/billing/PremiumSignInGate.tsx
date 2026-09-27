@@ -1,7 +1,8 @@
 import { useCallback, useState, type ReactNode } from "react";
+import { Stack } from "@mantine/core";
 import { AccountSignInGate } from "../auth/AccountSignInGate";
 import { AppleSignInButton } from "./AppleSignInButton";
-import { InlineError } from "../ui/banners/InlineError";
+import { ErrorCallout, SuccessCallout } from "../ui/entry/entryChrome";
 import { APPLE_SIGN_IN_ENABLED } from "../../services/core/auth/accountAuth";
 import { recoverPremiumEntitlements } from "../../services/billing/premiumBilling";
 
@@ -38,26 +39,21 @@ export function PremiumSignInGate({
   }, [onSignedIn]);
 
   return (
-    <div className="space-y-3">
+    <Stack gap="sm">
       <AccountSignInGate
         continuePath={continuePath}
         onSignedIn={handleSignedIn}
         description={`Sign in with Google${APPLE_SIGN_IN_ENABLED ? ", Apple" : ""}, or email so premium purchases and session credits follow your account across devices.`}
         extraSignInProviders={
           APPLE_SIGN_IN_ENABLED ? (
-            <AppleSignInButton
-              onSuccess={handleSignedIn}
-              onError={setError}
-            />
+            <AppleSignInButton onSuccess={handleSignedIn} onError={setError} />
           ) : null
         }
       >
         {children ?? null}
       </AccountSignInGate>
-      {recoveryNote ? (
-        <p className="text-sm text-ink-secondary">{recoveryNote}</p>
-      ) : null}
-      {error ? <InlineError>{error}</InlineError> : null}
-    </div>
+      {recoveryNote ? <SuccessCallout>{recoveryNote}</SuccessCallout> : null}
+      {error ? <ErrorCallout>{error}</ErrorCallout> : null}
+    </Stack>
   );
 }

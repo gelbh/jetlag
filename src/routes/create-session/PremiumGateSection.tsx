@@ -1,5 +1,15 @@
+import { Button, Stack, Text, TextInput } from "@mantine/core";
 import { AppLink } from "../../components/navigation/AppLink";
 import { PremiumSignInGate } from "../../components/billing/PremiumSignInGate";
+import {
+  ErrorCallout,
+  InsetGroup,
+} from "../../components/ui/entry/entryChrome";
+import {
+  filledStyles,
+  insetTextInputStyles,
+  plainStyles,
+} from "../../components/ui/entry/entryStyles";
 
 export interface PremiumGateSectionProps {
   requiresPremiumSignIn: boolean;
@@ -29,7 +39,7 @@ export function PremiumGateSection({
       <div
         className={`overflow-hidden motion-safe:transition-[max-height,opacity] motion-safe:duration-200 motion-safe:ease-[cubic-bezier(0.25,1,0.5,1)] motion-reduce:transition-none ${
           showPremiumUnlockPanel || requiresPremiumSignIn
-            ? "max-h-56 opacity-100"
+            ? "max-h-[120rem] opacity-100"
             : "max-h-0 opacity-0"
         }`}
       >
@@ -40,55 +50,65 @@ export function PremiumGateSection({
           />
         ) : null}
         {showPremiumUnlockPanel ? (
-          <div className="space-y-2">
-            <p className="text-sm leading-relaxed text-field-ink-muted">
+          <Stack gap="sm" pt={requiresPremiumSignIn ? "sm" : 0}>
+            <Text
+              size="sm"
+              c="var(--color-field-ink-muted)"
+              style={{ lineHeight: 1.4, textWrap: "pretty" }}
+            >
               Buy a session pack or subscription to host premium games.
-            </p>
-            <AppLink
+            </Text>
+            <Button
+              component={AppLink}
               to="/premium"
-              className="inline-flex min-h-11 items-center text-sm font-semibold text-signal"
+              fullWidth
+              styles={filledStyles}
             >
               View premium options
-            </AppLink>
-            <button
+            </Button>
+            <Button
               type="button"
               onClick={() => onAccessCodeExpandedChange(!accessCodeExpanded)}
-              className="block text-sm font-semibold text-field-ink-muted"
+              variant="subtle"
+              styles={plainStyles}
+              style={{ alignSelf: "flex-start" }}
             >
-              {accessCodeExpanded
-                ? "Hide access code"
-                : "Have an access code?"}
-            </button>
-          </div>
+              {accessCodeExpanded ? "Hide access code" : "Have an access code?"}
+            </Button>
+          </Stack>
         ) : null}
       </div>
 
       <div
         className={`overflow-hidden motion-safe:transition-[max-height,opacity] motion-safe:duration-200 motion-safe:ease-[cubic-bezier(0.25,1,0.5,1)] motion-reduce:transition-none ${
           showAccessCodeField
-            ? "max-h-40 opacity-100"
+            ? "max-h-[120rem] opacity-100"
             : "max-h-0 opacity-0"
         }`}
       >
-        <label className="field-label font-display text-xs uppercase tracking-[0.1em]">
-          Host access code
-          <input
-            value={accessCode}
-            onChange={(event) => onAccessCodeChange(event.target.value)}
-            type="password"
-            autoComplete="off"
-            autoCorrect="off"
-            spellCheck={false}
-            enterKeyHint="done"
-            className="field-input"
-          />
-        </label>
-        <p className="mt-1 text-xs text-field-ink-muted">
-          Enter once. Friends join with the game code only.
-        </p>
-        {accessCodeError ? (
-          <p className="text-error mt-2">{accessCodeError}</p>
-        ) : null}
+        <Stack gap={6} pt="sm">
+          <InsetGroup error={accessCodeError != null}>
+            <TextInput
+              label="Host access code"
+              value={accessCode}
+              onChange={(event) =>
+                onAccessCodeChange(event.currentTarget.value)
+              }
+              type="password"
+              autoComplete="off"
+              autoCorrect="off"
+              spellCheck={false}
+              enterKeyHint="done"
+              styles={insetTextInputStyles}
+            />
+          </InsetGroup>
+          <Text size="xs" c="var(--color-field-ink-muted)" px={4}>
+            Enter once. Friends join with the game code only.
+          </Text>
+          {accessCodeError ? (
+            <ErrorCallout>{accessCodeError}</ErrorCallout>
+          ) : null}
+        </Stack>
       </div>
     </>
   );

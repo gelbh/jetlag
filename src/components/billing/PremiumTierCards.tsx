@@ -1,21 +1,19 @@
+import {
+  Button,
+  SegmentedControl,
+  SimpleGrid,
+  Stack,
+  Text,
+  UnstyledButton,
+} from "@mantine/core";
 import { useState } from "react";
 import { AppLink } from "../navigation/AppLink";
-import { SegmentControl } from "../ui/forms/SegmentControl";
 import {
-  homeCardBtnHintPremiumSessionsStyle,
-  homeCardBtnHintPremiumStyle,
-  homeCardBtnHintStyle,
-  homeCardBtnStyle,
-  premiumAccountActionsStyle,
-  premiumOfferRowHintStyle,
-  premiumOfferRowLabelStyle,
-  premiumOfferRowStyle,
-  premiumPackCellLabelStyle,
-  premiumPackCellPriceStyle,
-  premiumPackCellStyle,
-  premiumPackGridStyle,
-  type HomeCardBtnVariant,
-} from "@/components/ui/entry/entryStyles";
+  InsetGroup,
+  SectionLabel,
+  filledStyles,
+  grayStyles,
+} from "../ui/entry/entryChrome";
 import {
   formatBankedPremiumSessionCreditsLabel,
   formatPremiumSessionCreditsLabel,
@@ -32,6 +30,25 @@ const PREMIUM_CATALOG_TABS = [
   { value: "unlimited" as const, label: "Unlimited" },
 ] as const;
 
+const segmentedStyles = {
+  root: {
+    backgroundColor: "oklch(from var(--color-field-ink) l c h / 0.08)",
+    border: "0.33px solid oklch(from var(--color-field-ink) l c h / 0.12)",
+    borderRadius: 12,
+    padding: 2,
+  },
+  label: {
+    color: "var(--color-field-ink)",
+    fontWeight: 510,
+    fontSize: "0.8125rem",
+    paddingInline: 8,
+  },
+  indicator: {
+    backgroundColor: "oklch(from var(--color-field-ink) l c h / 0.16)",
+    borderRadius: 10,
+  },
+} as const;
+
 function resolveDefaultCatalogTab(
   entitlements: PremiumEntitlements | null,
 ): PremiumCatalogTab {
@@ -44,30 +61,6 @@ function resolveDefaultCatalogTab(
   }
 
   return "unlimited";
-}
-
-function resolveCreatePremiumVariant(
-  entitlements: PremiumEntitlements | null,
-): HomeCardBtnVariant {
-  if (hasUnlimitedPremiumHosting(entitlements)) {
-    return "premium";
-  }
-
-  if ((entitlements?.premiumSessionCredits ?? 0) > 0) {
-    return "premiumSessions";
-  }
-
-  return "primary";
-}
-
-function createPremiumHintStyle(variant: HomeCardBtnVariant) {
-  if (variant === "premium") {
-    return homeCardBtnHintPremiumStyle;
-  }
-  if (variant === "premiumSessions") {
-    return homeCardBtnHintPremiumSessionsStyle;
-  }
-  return homeCardBtnHintStyle;
 }
 
 export function PremiumTierCards({
@@ -91,8 +84,9 @@ export function PremiumTierCards({
   onStartTrial: () => void;
   onPortal: () => void;
 }) {
+  const bankedCreditsLabel =
+    formatBankedPremiumSessionCreditsLabel(entitlements);
   const packCreditsLabel = formatPremiumSessionCreditsLabel(entitlements);
-  const bankedCreditsLabel = formatBankedPremiumSessionCreditsLabel(entitlements);
   const createSessionHint =
     bankedCreditsLabel ?? packCreditsLabel ?? "Host a game";
   const [catalogTab, setCatalogTab] = useState<PremiumCatalogTab>("unlimited");
@@ -102,7 +96,9 @@ export function PremiumTierCards({
       ? resolveDefaultCatalogTab(entitlements)
       : catalogTab;
 
-  const packOffers = PREMIUM_PRODUCT_OFFERS.filter((offer) => offer.kind === "pack");
+  const packOffers = PREMIUM_PRODUCT_OFFERS.filter(
+    (offer) => offer.kind === "pack",
+  );
   const subscriptionOffers = PREMIUM_PRODUCT_OFFERS.filter(
     (offer) => offer.kind === "subscription",
   );
@@ -114,132 +110,154 @@ export function PremiumTierCards({
   const showManageSubscription =
     entitlements?.subscription?.status === "active" ||
     entitlements?.subscription?.status === "trialing";
-  const createVariant = resolveCreatePremiumVariant(entitlements);
+  const unlimitedRows = [
+    ...(canStartTrial
+      ? [
+          {
+            key: "trial",
+            label: "7-day free trial",
+            hint: trialLoading ? "Starting…" : "No auto-renew",
+            disabled: actionsDisabled,
+            onClick: onStartTrial,
+          },
+        ]
+      : []),
+    ...subscriptionOffers.map((offer) => ({
+      key: offer.key,
+      label: offer.label,
+      hint: busyProduct === offer.key ? "Opening…" : offer.priceLabel,
+      disabled: actionsDisabled,
+      onClick: () => onCheckout(offer.key),
+    })),
+    ...lifetimeOffers.map((offer) => ({
+      key: offer.key,
+      label: offer.label,
+      hint: busyProduct === offer.key ? "Opening…" : offer.priceLabel,
+      disabled: actionsDisabled,
+      onClick: () => onCheckout(offer.key),
+    })),
+  ];
 
   return (
-    <>
-      <SegmentControl
-        value={activeCatalogTab}
-        options={PREMIUM_CATALOG_TABS}
-        onChange={(value) => {
-          setTabTouched(true);
-          setCatalogTab(value);
-        }}
-        aria-label="Premium purchase options"
-        disabled={loading}
-      />
+    <Stack gap={18}>
+      <Stack gap={8}>
+        <SectionLabel>Choose plan</SectionLabel>
+        <SegmentedControl
+          fullWidth
+          value={activeCatalogTab}
+          onChange={(value) => {
+            setTabTouched(true);
+            setCatalogTab(value as PremiumCatalogTab);
+          }}
+          data={PREMIUM_CATALOG_TABS.map((tab) => ({
+            value: tab.value,
+            label: tab.label,
+          }))}
+          aria-label="Premium purchase options"
+          disabled={loading}
+          styles={segmentedStyles}
+        />
+      </Stack>
 
       {activeCatalogTab === "packs" ? (
-        <div role="tabpanel" aria-label="Session packs" className="space-y-2">
-          <div style={premiumPackGridStyle}>
-            {packOffers.map((offer) => (
-              <button
-                key={offer.key}
-                type="button"
-                disabled={actionsDisabled}
-                onClick={() => onCheckout(offer.key)}
-                aria-label={`${offer.label}, ${offer.priceLabel}`}
-                data-feedback="tap"
-                style={premiumPackCellStyle}
-                className="disabled:opacity-50"
-              >
-                <span style={premiumPackCellLabelStyle}>{offer.label}</span>
-                <span style={premiumPackCellPriceStyle}>
+        <SimpleGrid cols={2} spacing={8}>
+          {packOffers.map((offer) => (
+            <Button
+              key={offer.key}
+              type="button"
+              fullWidth
+              styles={grayStyles}
+              disabled={actionsDisabled}
+              onClick={() => onCheckout(offer.key)}
+              aria-label={`${offer.label}, ${offer.priceLabel}`}
+              style={{ height: "100%" }}
+            >
+              <Stack gap={1} align="flex-start">
+                <Text size="sm" fw={600} c="var(--color-field-ink)">
+                  {offer.label}
+                </Text>
+                <Text size="xs" c="var(--color-field-ink-muted)">
                   {busyProduct === offer.key ? "Opening…" : offer.priceLabel}
-                </span>
-              </button>
-            ))}
-          </div>
-        </div>
+                </Text>
+              </Stack>
+            </Button>
+          ))}
+        </SimpleGrid>
       ) : (
-        <div
-          role="tabpanel"
-          aria-label="Unlimited hosting"
-          className="space-y-2"
-        >
-          {canStartTrial ? (
-            <button
-              type="button"
-              disabled={actionsDisabled}
-              onClick={onStartTrial}
-              data-feedback="tap"
-              style={premiumOfferRowStyle}
-              className="disabled:opacity-50"
-            >
-              <span style={premiumOfferRowLabelStyle}>7-day free trial</span>
-              <span style={premiumOfferRowHintStyle}>
-                {trialLoading ? "Starting…" : "No auto-renew"}
-              </span>
-            </button>
-          ) : null}
-
-          {subscriptionOffers.map((offer) => (
-            <button
-              key={offer.key}
-              type="button"
-              disabled={actionsDisabled}
-              onClick={() => onCheckout(offer.key)}
-              data-feedback="tap"
-              style={premiumOfferRowStyle}
-              className="disabled:opacity-50"
-            >
-              <span style={premiumOfferRowLabelStyle}>{offer.label}</span>
-              <span style={premiumOfferRowHintStyle}>
-                {busyProduct === offer.key ? "Opening…" : offer.priceLabel}
-              </span>
-            </button>
-          ))}
-
-          {lifetimeOffers.map((offer) => (
-            <button
-              key={offer.key}
-              type="button"
-              disabled={actionsDisabled}
-              onClick={() => onCheckout(offer.key)}
-              data-feedback="tap"
-              style={premiumOfferRowStyle}
-              className="disabled:opacity-50"
-            >
-              <span style={premiumOfferRowLabelStyle}>{offer.label}</span>
-              <span style={premiumOfferRowHintStyle}>
-                {busyProduct === offer.key ? "Opening…" : offer.priceLabel}
-              </span>
-            </button>
-          ))}
-        </div>
+        <InsetGroup>
+          <Stack gap={0}>
+            {unlimitedRows.map((row, index) => (
+              <UnstyledButton
+                key={row.key}
+                type="button"
+                disabled={row.disabled}
+                onClick={row.onClick}
+                style={{
+                  width: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: 12,
+                  padding: "0.875rem 1rem",
+                  textAlign: "left",
+                  opacity: row.disabled ? 0.5 : 1,
+                  borderTop:
+                    index === 0
+                      ? undefined
+                      : "0.33px solid oklch(from var(--color-field-ink) l c h / 0.12)",
+                }}
+              >
+                <Text size="sm" fw={600} c="var(--color-field-ink)">
+                  {row.label}
+                </Text>
+                <Text size="xs" c="var(--color-field-ink-muted)" ta="right">
+                  {row.hint}
+                </Text>
+              </UnstyledButton>
+            ))}
+          </Stack>
+        </InsetGroup>
       )}
 
-      <div style={premiumAccountActionsStyle}>
+      <Stack gap={8}>
         {showManageSubscription ? (
-          <button
+          <Button
             type="button"
+            fullWidth
+            styles={grayStyles}
             disabled={portalLoading}
             onClick={onPortal}
-            data-feedback="tap"
-            style={premiumOfferRowStyle}
-            className="disabled:opacity-50"
           >
-            <span style={premiumOfferRowLabelStyle}>Manage subscription</span>
-            <span style={premiumOfferRowHintStyle}>
-              {portalLoading ? "Opening…" : "Billing portal"}
-            </span>
-          </button>
+            <Stack gap={2} align="flex-start" w="100%">
+              <Text size="sm" fw={600} c="var(--color-field-ink)">
+                Manage subscription
+              </Text>
+              <Text size="xs" c="var(--color-field-ink-muted)">
+                {portalLoading ? "Opening…" : "Billing portal"}
+              </Text>
+            </Stack>
+          </Button>
         ) : null}
 
         {entitlements?.canCreatePremium ? (
-          <AppLink
+          <Button
+            component={AppLink}
             to="/create?tier=premium"
-            data-feedback="tap"
-            style={homeCardBtnStyle(createVariant)}
+            fullWidth
+            styles={filledStyles}
             aria-label="Create premium session"
           >
-            <span>Create premium session</span>
-            <span style={createPremiumHintStyle(createVariant)}>
-              {createSessionHint}
-            </span>
-          </AppLink>
+            <Stack gap={2} align="flex-start" w="100%">
+              <Text size="sm" fw={600} c="var(--color-ink)">
+                Create premium session
+              </Text>
+              <Text size="xs" c="oklch(from var(--color-ink) l c h / 0.72)">
+                {createSessionHint}
+              </Text>
+            </Stack>
+          </Button>
         ) : null}
-      </div>
-    </>
+      </Stack>
+    </Stack>
   );
 }
