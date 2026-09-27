@@ -1,3 +1,4 @@
+import { Box, Button, Group, Paper, Stack, Text, Title } from "@mantine/core";
 import { MapView } from "../../map/chrome/MapView";
 import { FramingPreviewLayers } from "../../map/layers/FramingPreviewLayers";
 import { GameAreaMask } from "../../map/layers/GameAreaMask";
@@ -20,7 +21,8 @@ import {
   GameAreaFramingStats,
 } from "./GameAreaFramingControls";
 import { framingModeHint } from "./gameAreaFramingUi";
-import { SheetHeader } from "../../ui/sheets/SheetHeader";
+import { filledStyles, grayStyles } from "@/components/ui/entry/entryStyles";
+import { JETLAG_MODAL_Z_INDEX } from "@/theme/theme";
 
 export interface GameAreaFramingController {
   framingMode: FramingMode;
@@ -51,6 +53,13 @@ interface GameAreaFramingModalProps {
   onConfirm: (result: GameAreaFramingResult) => void;
 }
 
+const framingPanelStyles = {
+  backgroundColor: "oklch(from var(--color-canvas) l c h / 0.92)",
+  border: "0.33px solid oklch(from var(--color-field-ink) l c h / 0.14)",
+  backdropFilter: "blur(20px) saturate(1.4)",
+  WebkitBackdropFilter: "blur(20px) saturate(1.4)",
+} as const;
+
 export function GameAreaFramingModal({
   open,
   mapStyle,
@@ -79,7 +88,7 @@ export function GameAreaFramingModal({
     ? framing.hasValidDraft
     : Boolean(
         effectiveGameArea &&
-          boundingBoxHasMinimumSpan(gameAreaToBoundingBox(effectiveGameArea)),
+        boundingBoxHasMinimumSpan(gameAreaToBoundingBox(effectiveGameArea)),
       );
 
   const handleConfirm = () => {
@@ -100,21 +109,30 @@ export function GameAreaFramingModal({
       : effectiveGameArea;
 
   return (
-    <div className="pointer-events-auto fixed inset-0 z-[var(--z-modal)] bg-surface-deep">
-      <div className="absolute inset-0">
+    <Box
+      className="pointer-events-auto fixed inset-0"
+      style={{
+        zIndex: JETLAG_MODAL_Z_INDEX,
+        backgroundColor: "var(--color-surface-deep)",
+      }}
+      data-testid="game-area-framing-modal"
+    >
+      <Box className="absolute inset-0">
         <MapView
-          mapStyle={mapStyle}
-          onMapStyleChange={onMapStyleChange}
-          zoom={10}
-          focusBounds={effectiveFocusBounds}
-          fitBoundsPadding={[56, 56]}
-          showZoomControl
-          zoomControlInset="safe-area"
-          mapStyleControlInset="safe-area"
-          onBoundsChange={framing.handleBoundsChange}
-          onUserViewportFramed={framing.handleUserViewportFramed}
-          onMapClick={framing.handleMapClick}
-          className="h-full w-full"
+          model={{
+            mapStyle,
+            onMapStyleChange,
+            zoom: 10,
+            focusBounds: effectiveFocusBounds,
+            fitBoundsPadding: [56, 56],
+            showZoomControl: true,
+            zoomControlInset: "safe-area",
+            mapStyleControlInset: "safe-area",
+            onBoundsChange: framing.handleBoundsChange,
+            onUserViewportFramed: framing.handleUserViewportFramed,
+            onMapClick: framing.handleMapClick,
+            className: "h-full w-full",
+          }}
         >
           {manualFramingActive ? (
             <FramingPreviewLayers
@@ -128,62 +146,86 @@ export function GameAreaFramingModal({
             <GameAreaMask gameArea={effectiveGameArea} framing />
           ) : null}
         </MapView>
-      </div>
+      </Box>
 
-      <div className="pointer-events-none absolute inset-x-0 top-0 z-[var(--z-panel)] px-3 pt-[max(0.75rem,env(safe-area-inset-top))]">
-        <div className="pointer-events-auto hud-panel mx-auto max-w-xl space-y-3 p-3 pt-4">
-          <SheetHeader
-            eyebrow="Play boundary"
-            title="Frame area"
-            titleSize="xl"
-            onClose={onClose}
-            flush
-            className="items-start"
-            trailing={
-              <div className="flex shrink-0 gap-2">
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="btn-secondary min-h-11 px-3 text-xs"
+      <Box
+        className="pointer-events-none absolute inset-x-0 top-0 px-3"
+        style={{
+          zIndex: JETLAG_MODAL_Z_INDEX + 1,
+          paddingTop: "max(0.75rem, env(safe-area-inset-top))",
+        }}
+      >
+        <Paper
+          className="pointer-events-auto mx-auto max-w-xl"
+          radius={16}
+          p="md"
+          style={framingPanelStyles}
+        >
+          <Stack gap="sm">
+            <Group justify="space-between" align="flex-start" wrap="nowrap">
+              <Box>
+                <Title
+                  order={2}
+                  size="h4"
+                  c="var(--color-field-ink)"
+                  style={{ letterSpacing: "-0.02em" }}
                 >
+                  Frame area
+                </Title>
+              </Box>
+              <Group gap="xs" wrap="nowrap" className="shrink-0">
+                <Button type="button" styles={grayStyles} onClick={onClose}>
                   Cancel
-                </button>
-                <button
+                </Button>
+                <Button
                   type="button"
+                  styles={filledStyles}
                   onClick={handleConfirm}
                   disabled={!hasValidDraft}
-                  className="btn-primary min-h-11 px-4 text-xs disabled:opacity-50"
                 >
                   Done
-                </button>
-              </div>
-            }
-          />
+                </Button>
+              </Group>
+            </Group>
 
-          <FramingModeSegmentControl
-            value={framing.framingMode}
-            onChange={framing.setFramingMode}
-          />
-        </div>
-      </div>
-
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[var(--z-panel)] px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
-        <div className="pointer-events-auto hud-panel mx-auto max-w-xl space-y-3 p-3 pt-4">
-          <p className="text-sm leading-snug text-ink-secondary">
-            {framingModeHint(framing.framingMode)}
-          </p>
-
-          {framing.framingMode === "polygon" ? (
-            <GameAreaFramingPolygonActions
-              vertexCount={framing.polygonVertices.length}
-              onClose={() => framing.closePolygon()}
-              onReset={() => framing.resetPolygonVertices()}
+            <FramingModeSegmentControl
+              value={framing.framingMode}
+              onChange={framing.setFramingMode}
             />
-          ) : null}
+          </Stack>
+        </Paper>
+      </Box>
 
-          <GameAreaFramingStats gameArea={effectiveGameArea} compact />
-        </div>
-      </div>
-    </div>
+      <Box
+        className="pointer-events-none absolute inset-x-0 bottom-0 px-3"
+        style={{
+          zIndex: JETLAG_MODAL_Z_INDEX + 1,
+          paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))",
+        }}
+      >
+        <Paper
+          className="pointer-events-auto mx-auto max-w-xl"
+          radius={16}
+          p="md"
+          style={framingPanelStyles}
+        >
+          <Stack gap="sm">
+            <Text size="sm" c="var(--color-field-ink-muted)" lh={1.35}>
+              {framingModeHint(framing.framingMode)}
+            </Text>
+
+            {framing.framingMode === "polygon" ? (
+              <GameAreaFramingPolygonActions
+                vertexCount={framing.polygonVertices.length}
+                onClose={() => framing.closePolygon()}
+                onReset={() => framing.resetPolygonVertices()}
+              />
+            ) : null}
+
+            <GameAreaFramingStats gameArea={effectiveGameArea} compact />
+          </Stack>
+        </Paper>
+      </Box>
+    </Box>
   );
 }

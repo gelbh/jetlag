@@ -6,8 +6,8 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/cn";
 
 /**
- * Compact Survey chip for docks, filters, and ask islands.
- * Variants mirror Button Survey roles; densify targets map chrome density.
+ * Compact dock/filter chip (allowed composite; not a UI kit).
+ * Prefer Mantine Chip / Button styles for new surfaces; densify targets map chrome.
  */
 const chipVariants = cva(
   "inline-flex items-center justify-center gap-1 whitespace-nowrap rounded-full text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-flag focus-visible:ring-offset-2 focus-visible:ring-offset-canvas disabled:opacity-50 aria-disabled:opacity-50",

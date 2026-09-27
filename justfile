@@ -38,7 +38,7 @@ audit-overpass:
 emulators:
   firebase emulators:start --project demo-jetlag --only auth,firestore,storage,functions
 
-# --- worker / cap ---
+# --- worker ---
 
 deploy-worker:
   npm run build && wrangler deploy
@@ -48,15 +48,6 @@ preview-worker:
 
 cf-typegen:
   wrangler types --env-file .dev.vars.example
-
-cap-sync:
-  npm run build && npx cap sync
-
-cap-android: cap-sync
-  npx cap open android
-
-cap-ios: cap-sync
-  npx cap open ios
 
 # --- release helpers ---
 

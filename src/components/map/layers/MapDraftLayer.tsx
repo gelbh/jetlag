@@ -3,6 +3,8 @@ import turfCircle from "@turf/circle";
 import type { Feature, LineString } from "geojson";
 import type { MapDraftOverlay } from "@/domain/map/mapDraftOverlay";
 import { MAP_ANNOTATION_COLORS } from "@/domain/map/mapAnnotationColors";
+import { tentacleDraftPoiIdFromOverlayId } from "@/domain/map/tentacleDraftOverlay";
+import type { TentacleExtendedCategoryId } from "@/domain/questions";
 import { featureHitId } from "../helpers/mapFeatureHitTest";
 import { cssPxDashToMapLibre } from "../helpers/cssPxDashToMapLibre";
 import { MapLibreFeaturePopup } from "../helpers/MapLibreFeaturePopup";
@@ -11,6 +13,8 @@ import { MapLibrePointMarkers } from "../helpers/MapLibrePointMarkers";
 import type { CircleMarkerProps } from "../helpers/mapMarkerFeatures";
 import { jlMarkerLayerId } from "../helpers/mapMarkerConstants";
 import { useMapFeatureHitTest } from "../helpers/MapFeatureHitTestContext";
+import { MatchingCategoryPinMarker } from "./MatchingCategoryPinMarker";
+import { TentaclePoiPinMarker } from "./TentaclePoiPinMarker";
 
 interface MapDraftLayerProps {
   overlays: readonly MapDraftOverlay[];
@@ -37,6 +41,12 @@ function draftPolylineFeature(
   };
 }
 
+function isTentaclePoiMarker(
+  overlay: Extract<MapDraftOverlay, { kind: "marker" }>,
+): boolean {
+  return tentacleDraftPoiIdFromOverlayId(overlay.id) !== null;
+}
+
 export const MapDraftLayer = memo(function MapDraftLayer({
   overlays,
   onMarkerActivate,
@@ -59,8 +69,36 @@ export const MapDraftLayer = memo(function MapDraftLayer({
     [overlays],
   );
 
+  const iconMarkers = useMemo(
+    () =>
+      markerOverlays.filter((overlay) => Boolean(overlay.style?.iconCategoryId)),
+    [markerOverlays],
+  );
+
+  const tentaclePoiMarkers = useMemo(
+    () => markerOverlays.filter(isTentaclePoiMarker),
+    [markerOverlays],
+  );
+
+  const tentacleHasSelection = useMemo(
+    () =>
+      tentaclePoiMarkers.some(
+        (overlay) => overlay.style?.tentaclePoiSelected === true,
+      ),
+    [tentaclePoiMarkers],
+  );
+
+  const circleMarkers = useMemo(
+    () =>
+      markerOverlays.filter(
+        (overlay) =>
+          !overlay.style?.iconCategoryId && !isTentaclePoiMarker(overlay),
+      ),
+    [markerOverlays],
+  );
+
   const draftMarkers = useMemo((): CircleMarkerProps[] => {
-    return markerOverlays.map((overlay) => {
+    return circleMarkers.map((overlay) => {
       const [lat, lng] = overlay.point;
       return {
         id: overlay.id,
@@ -74,7 +112,23 @@ export const MapDraftLayer = memo(function MapDraftLayer({
         hitKind: overlay.popup ? "draft-marker" : "draft-marker-no-popup",
       };
     });
-  }, [c.pin, c.strokeLight, markerOverlays]);
+  }, [c.pin, c.strokeLight, circleMarkers]);
+
+  const activateMarker = useCallback(
+    (overlayId: string) => {
+      const overlay = markerOverlays.find((item) => item.id === overlayId);
+      if (!overlay) {
+        return false;
+      }
+      const activated = onMarkerActivate?.(overlayId) === true;
+      if (overlay.popup) {
+        setOpenPopupId((current) => (current === overlayId ? null : overlayId));
+        return true;
+      }
+      return activated;
+    },
+    [markerOverlays, onMarkerActivate],
+  );
 
   useMapFeatureHitTest(
     DRAFT_HIT_PREFIX,
@@ -85,7 +139,7 @@ export const MapDraftLayer = memo(function MapDraftLayer({
           return false;
         }
         const overlay = markerOverlays.find((item) => item.id === hitId);
-        if (!overlay) {
+        if (!overlay || isTentaclePoiMarker(overlay)) {
           return false;
         }
         const activated = onMarkerActivate?.(hitId) === true;
@@ -180,6 +234,40 @@ export const MapDraftLayer = memo(function MapDraftLayer({
             return _exhaustive;
           }
         }
+      })}
+      {iconMarkers.map((overlay) => {
+        const categoryId = overlay.style?.iconCategoryId;
+        if (!categoryId) {
+          return null;
+        }
+        return (
+          <MatchingCategoryPinMarker
+            key={overlay.id}
+            latitude={overlay.point[0]}
+            longitude={overlay.point[1]}
+            categoryId={categoryId}
+            pulsing={overlay.style?.pulsing === true}
+          />
+        );
+      })}
+      {tentaclePoiMarkers.map((overlay) => {
+        const selected = overlay.style?.tentaclePoiSelected === true;
+        const categoryId = (overlay.style?.tentacleCategoryId ??
+          "museum") as TentacleExtendedCategoryId;
+        return (
+          <TentaclePoiPinMarker
+            key={overlay.id}
+            latitude={overlay.point[0]}
+            longitude={overlay.point[1]}
+            categoryId={categoryId}
+            selected={selected}
+            dimmed={tentacleHasSelection && !selected}
+            label={overlay.popup ?? "Place"}
+            onActivate={() => {
+              activateMarker(overlay.id);
+            }}
+          />
+        );
       })}
       <MapLibrePointMarkers
         id="draft"

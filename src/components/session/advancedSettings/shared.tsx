@@ -1,23 +1,79 @@
-import type { ReactNode } from "react";
+import { useId, useState, type ReactNode } from "react";
+import { Button, TextInput, UnstyledButton } from "@mantine/core";
+import { CaretDown } from "@phosphor-icons/react";
+import {
+  InsetGroup,
+  SectionLabel,
+  grayStyles,
+  insetTextInputStyles,
+} from "@/components/ui/entry/entryChrome";
+import { SettingsToggleRow } from "../settings/SettingsToggleRow";
 
-interface AdvancedSettingsSectionHeaderProps {
+interface AdvancedSettingsCategoryProps {
   title: string;
-  bordered?: boolean;
+  children: ReactNode;
+  /** Defaults to open so existing long forms stay scannable. */
+  defaultOpen?: boolean;
 }
 
+/** Collapsible category for Game advanced rules groups. */
+export function AdvancedSettingsCategory({
+  title,
+  children,
+  defaultOpen = true,
+}: AdvancedSettingsCategoryProps) {
+  const [open, setOpen] = useState(defaultOpen);
+  const panelId = useId();
+
+  return (
+    <div className="space-y-2">
+      <UnstyledButton
+        type="button"
+        aria-expanded={open}
+        aria-controls={panelId}
+        onClick={() => setOpen((current) => !current)}
+        styles={{
+          root: {
+            display: "flex",
+            width: "100%",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: "0.75rem",
+            minHeight: "2.5rem",
+            paddingInline: 4,
+            paddingBlock: 4,
+            borderRadius: 8,
+            color: "var(--color-field-ink-muted)",
+          },
+        }}
+      >
+        <SectionLabel>{title}</SectionLabel>
+        <CaretDown
+          size={14}
+          weight="bold"
+          aria-hidden
+          style={{
+            flexShrink: 0,
+            transform: open ? "rotate(180deg)" : "rotate(0deg)",
+            transition: "transform 160ms ease",
+          }}
+        />
+      </UnstyledButton>
+      <div id={panelId} hidden={!open} className="space-y-3">
+        {children}
+      </div>
+    </div>
+  );
+}
+
+/** @deprecated Prefer AdvancedSettingsCategory for Game rules. */
 export function AdvancedSettingsSectionHeader({
   title,
-  bordered = false,
-}: AdvancedSettingsSectionHeaderProps) {
-  return (
-    <p
-      className={`font-display text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-dim ${
-        bordered ? "border-t border-border pt-3" : ""
-      }`}
-    >
-      {title}
-    </p>
-  );
+}: {
+  title: string;
+  bordered?: boolean;
+}) {
+  return <SectionLabel>{title}</SectionLabel>;
 }
 
 interface AdvancedSettingsToggleProps {
@@ -25,7 +81,8 @@ interface AdvancedSettingsToggleProps {
   onChange: (checked: boolean) => void;
   disabled?: boolean;
   label: string;
-  description?: ReactNode;
+  description?: string;
+  showSeparator?: boolean;
 }
 
 export function AdvancedSettingsToggle({
@@ -34,25 +91,17 @@ export function AdvancedSettingsToggle({
   disabled = false,
   label,
   description,
+  showSeparator = false,
 }: AdvancedSettingsToggleProps) {
   return (
-    <label
-      className={`flex items-start gap-3 text-sm text-ink ${disabled ? "opacity-50" : ""}`}
-    >
-      <input
-        type="checkbox"
-        checked={checked}
-        disabled={disabled}
-        onChange={(event) => onChange(event.target.checked)}
-        className="mt-1"
-      />
-      <span>
-        <span className="block font-medium">{label}</span>
-        {description ? (
-          <span className="mt-0.5 block text-xs text-ink-muted">{description}</span>
-        ) : null}
-      </span>
-    </label>
+    <SettingsToggleRow
+      label={label}
+      description={description}
+      checked={checked}
+      onChange={onChange}
+      disabled={disabled}
+      showSeparator={showSeparator}
+    />
   );
 }
 
@@ -61,7 +110,7 @@ interface ToggleNumberWithPresetsProps {
   onEnabledChange: (enabled: boolean) => void;
   disabled?: boolean;
   toggleLabel: string;
-  toggleDescription?: ReactNode;
+  toggleDescription?: string;
   numberLabel: string;
   numberValue: number;
   onNumberChange: (value: number) => void;
@@ -88,7 +137,7 @@ export function ToggleNumberWithPresets({
   presets,
 }: ToggleNumberWithPresetsProps) {
   return (
-    <>
+    <InsetGroup>
       <AdvancedSettingsToggle
         checked={enabled}
         onChange={onEnabledChange}
@@ -97,32 +146,30 @@ export function ToggleNumberWithPresets({
         description={toggleDescription}
       />
       {enabled ? (
-        <div className="space-y-2">
-          <label className="field-label font-display text-xs uppercase tracking-[0.1em]">
-            {numberLabel}
-            <input
-              type="number"
-              min={min}
-              max={max}
-              step={step}
-              value={numberValue}
-              disabled={disabled}
-              onChange={(event) => {
-                const parsed =
-                  inputMode === "decimal"
-                    ? Number.parseFloat(event.target.value)
-                    : Number.parseInt(event.target.value, 10);
-                if (!Number.isFinite(parsed)) {
-                  return;
-                }
-                onNumberChange(parsed);
-              }}
-              className="field-input mt-2"
-              autoComplete="off"
-              inputMode={inputMode}
-            />
-          </label>
-          <div className="flex flex-wrap gap-2">
+        <div className="space-y-2 px-0 pb-3">
+          <TextInput
+            label={numberLabel}
+            type="number"
+            min={min}
+            max={max}
+            step={step}
+            value={numberValue}
+            disabled={disabled}
+            inputMode={inputMode}
+            autoComplete="off"
+            onChange={(event) => {
+              const parsed =
+                inputMode === "decimal"
+                  ? Number.parseFloat(event.currentTarget.value)
+                  : Number.parseInt(event.currentTarget.value, 10);
+              if (!Number.isFinite(parsed)) {
+                return;
+              }
+              onNumberChange(parsed);
+            }}
+            styles={insetTextInputStyles}
+          />
+          <div className="flex flex-wrap gap-2 px-4">
             {presets.map((preset) => (
               <PresetButton
                 key={preset.label}
@@ -134,12 +181,14 @@ export function ToggleNumberWithPresets({
           </div>
         </div>
       ) : null}
-    </>
+    </InsetGroup>
   );
 }
 
 export function SectionSummary({ text }: { text: string }) {
-  return <p className="text-xs text-ink-muted">{text}</p>;
+  return (
+    <p className="text-xs text-[var(--color-field-ink-muted)]">{text}</p>
+  );
 }
 
 export function PresetButton({
@@ -152,13 +201,19 @@ export function PresetButton({
   onClick: () => void;
 }) {
   return (
-    <button
+    <Button
       type="button"
+      size="compact-sm"
       disabled={disabled}
       onClick={onClick}
-      className="rounded-full border border-border px-3 py-1 text-xs font-semibold text-brand-blue disabled:opacity-50"
+      styles={grayStyles}
     >
       {label}
-    </button>
+    </Button>
   );
+}
+
+/** Wrap one or more toggle rows in the shared inset surface. */
+export function AdvancedSettingsInset({ children }: { children: ReactNode }) {
+  return <InsetGroup>{children}</InsetGroup>;
 }

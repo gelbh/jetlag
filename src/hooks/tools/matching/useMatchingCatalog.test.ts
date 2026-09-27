@@ -10,12 +10,19 @@ const buildSameNearestRegion = vi.hoisted(() => vi.fn());
 const buildCoarsePolygonFeature = vi.hoisted(() => vi.fn());
 const refinePolygonFeatureStep = vi.hoisted(() => vi.fn());
 
-vi.mock("@/domain/geometry/measuring/matchingGeometry", () => ({
-  buildMatchingEliminationRegion: (...args: unknown[]) =>
-    buildMatchingEliminationRegion(...args),
-  buildSameNearestRegion: (...args: unknown[]) =>
-    buildSameNearestRegion(...args),
-}));
+vi.mock("@/domain/geometry/measuring/matchingGeometry", async (importOriginal) => {
+  const actual =
+    await importOriginal<
+      typeof import("@/domain/geometry/measuring/matchingGeometry")
+    >();
+  return {
+    ...actual,
+    buildMatchingEliminationRegion: (...args: unknown[]) =>
+      buildMatchingEliminationRegion(...args),
+    buildSameNearestRegion: (...args: unknown[]) =>
+      buildSameNearestRegion(...args),
+  };
+});
 
 vi.mock("@/domain/geometry/progressive/polygonLod", async () => {
   const actual = await vi.importActual<
@@ -88,7 +95,8 @@ describe("useMatchingCatalog LOD", () => {
     buildSameNearestRegion.mockReset();
     buildCoarsePolygonFeature.mockReset();
     refinePolygonFeatureStep.mockReset();
-    buildSameNearestRegion.mockResolvedValue(samplePolygon());
+    // Keep boundary null so elim uses the coarse/full LOD path under test.
+    buildSameNearestRegion.mockResolvedValue(null);
     buildMatchingEliminationRegion.mockResolvedValue(samplePolygon());
     buildCoarsePolygonFeature.mockImplementation((feature) => feature);
     refinePolygonFeatureStep.mockImplementation((full) => ({
@@ -226,5 +234,49 @@ describe("useMatchingCatalog LOD", () => {
     const ids = prefix.map((feature) => feature.id);
     expect(ids).toContain("f-19");
     expect(ids).not.toContain("f-0");
+  });
+
+  it("derives yes/no elim from the boundary without rebuilding", async () => {
+    const boundary = samplePolygon();
+    buildSameNearestRegion.mockResolvedValue(boundary);
+    const features = [featureWithArea(0, 2), featureWithArea(1, 1)];
+    const { result, rerender } = renderHook(
+      ({ answer }: { answer: "yes" | "no" | null }) =>
+        useMatchingCatalog({
+          activeAnnotations: [],
+          pendingQuestions: [],
+          matchingCategoryId: "commercial_airport",
+          matchingFeatures: features,
+          matchingNearestFeatureId: "f-0",
+          matchingNullAnswer: false,
+          matchingAnswer: answer,
+          gameArea,
+        }),
+      { initialProps: { answer: "no" as "yes" | "no" | null } },
+    );
+
+    await waitFor(() => {
+      expect(result.current.matchingBoundaryPreview).toBe(boundary);
+      expect(result.current.matchingEliminationPreview).toBe(boundary);
+      expect(result.current.matchingLodPhase).toBe("complete");
+    });
+
+    const callsAfterBoundary = buildMatchingEliminationRegion.mock.calls.length;
+
+    rerender({ answer: "yes" });
+    expect(result.current.matchingEliminationPreview).not.toBeNull();
+    expect(result.current.matchingEliminationPreview).not.toBe(boundary);
+    expect(buildMatchingEliminationRegion.mock.calls.length).toBe(
+      callsAfterBoundary,
+    );
+
+    const yesElim = result.current.matchingEliminationPreview;
+    rerender({ answer: "no" });
+    expect(result.current.matchingEliminationPreview).toBe(boundary);
+    rerender({ answer: "yes" });
+    expect(result.current.matchingEliminationPreview).toBe(yesElim);
+    expect(buildMatchingEliminationRegion.mock.calls.length).toBe(
+      callsAfterBoundary,
+    );
   });
 });

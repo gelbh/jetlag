@@ -1,8 +1,14 @@
+import { TextInput } from "@mantine/core";
 import { formatHidingZoneRadiusLabel } from "@/domain/session/size/gameSize";
 import { milesToMeters } from "@/domain/map/distance";
 import { tentacleRadiusPresetMeters } from "@/domain/map/distancePresets";
 import { clampTentacleRadiusMeters } from "@/domain/session/rules";
-import { PresetButton, AdvancedSettingsToggle } from "./shared";
+import { insetTextInputStyles } from "@/components/ui/entry/entryChrome";
+import {
+  AdvancedSettingsInset,
+  AdvancedSettingsToggle,
+  PresetButton,
+} from "./shared";
 import type { AdvancedSettingsSectionProps } from "./types";
 
 export function TentaclesSection({
@@ -13,24 +19,24 @@ export function TentaclesSection({
   disabled,
 }: AdvancedSettingsSectionProps) {
   const tentacleRadiusPresets = tentacleRadiusPresetMeters(distanceUnit);
+  const unitLabel = distanceUnit === "metric" ? "meters" : "miles";
 
   return (
-    <>
-      <AdvancedSettingsToggle
-        checked={value.customTentacleMediumRadiusEnabled}
-        onChange={(customTentacleMediumRadiusEnabled) =>
-          onChange({ ...value, customTentacleMediumRadiusEnabled })
-        }
-        disabled={disabled}
-        label="Custom medium tentacle radius"
-        description="Museums, libraries, hospitals, etc."
-      />
-
-      {value.customTentacleMediumRadiusEnabled ? (
-        <div className="space-y-2">
-          <label className="field-label font-display text-xs uppercase tracking-[0.1em]">
-            Medium radius ({distanceUnit === "metric" ? "meters" : "miles"})
-            <input
+    <div className="space-y-3">
+      <AdvancedSettingsInset>
+        <AdvancedSettingsToggle
+          checked={value.customTentacleMediumRadiusEnabled}
+          onChange={(customTentacleMediumRadiusEnabled) =>
+            onChange({ ...value, customTentacleMediumRadiusEnabled })
+          }
+          disabled={disabled}
+          label="Custom medium tentacle radius"
+          description="Museums, libraries, hospitals, etc."
+        />
+        {value.customTentacleMediumRadiusEnabled ? (
+          <div className="space-y-2 pb-3">
+            <TextInput
+              label={`Medium radius (${unitLabel})`}
               type="number"
               min={distanceUnit === "metric" ? 200 : 0.1}
               max={distanceUnit === "metric" ? 50000 : 30}
@@ -45,8 +51,9 @@ export function TentaclesSection({
                     )
               }
               disabled={disabled}
+              inputMode="decimal"
               onChange={(event) => {
-                const parsed = Number.parseFloat(event.target.value);
+                const parsed = Number.parseFloat(event.currentTarget.value);
                 if (!Number.isFinite(parsed)) {
                   return;
                 }
@@ -56,33 +63,33 @@ export function TentaclesSection({
                     : parsed * milesToMeters(1);
                 onChange({
                   ...value,
-                  tentacleMediumRadiusMeters: clampTentacleRadiusMeters(meters),
+                  tentacleMediumRadiusMeters:
+                    clampTentacleRadiusMeters(meters),
                 });
               }}
-              className="field-input mt-2"
-              inputMode="decimal"
+              styles={insetTextInputStyles}
             />
-          </label>
-          <div className="flex flex-wrap gap-2">
-            {tentacleRadiusPresets.slice(0, 2).map((meters) => (
-              <PresetButton
-                key={meters}
-                label={formatHidingZoneRadiusLabel(meters, distanceUnit)}
-                disabled={disabled}
-                onClick={() =>
-                  onChange({
-                    ...value,
-                    tentacleMediumRadiusMeters: meters,
-                  })
-                }
-              />
-            ))}
+            <div className="flex flex-wrap gap-2 px-4">
+              {tentacleRadiusPresets.slice(0, 2).map((meters) => (
+                <PresetButton
+                  key={meters}
+                  label={formatHidingZoneRadiusLabel(meters, distanceUnit)}
+                  disabled={disabled}
+                  onClick={() =>
+                    onChange({
+                      ...value,
+                      tentacleMediumRadiusMeters: meters,
+                    })
+                  }
+                />
+              ))}
+            </div>
           </div>
-        </div>
-      ) : null}
+        ) : null}
+      </AdvancedSettingsInset>
 
       {gameSize === "large" ? (
-        <>
+        <AdvancedSettingsInset>
           <AdvancedSettingsToggle
             checked={value.customTentacleLargeRadiusEnabled}
             onChange={(customTentacleLargeRadiusEnabled) =>
@@ -92,46 +99,43 @@ export function TentaclesSection({
             label="Custom large tentacle radius"
             description="Metro lines, zoos, amusement parks, etc."
           />
-
           {value.customTentacleLargeRadiusEnabled ? (
-            <div className="space-y-2">
-              <label className="field-label font-display text-xs uppercase tracking-[0.1em]">
-                Large radius ({distanceUnit === "metric" ? "meters" : "miles"})
-                <input
-                  type="number"
-                  min={distanceUnit === "metric" ? 200 : 0.1}
-                  max={distanceUnit === "metric" ? 50000 : 30}
-                  step={distanceUnit === "metric" ? 100 : 0.1}
-                  value={
-                    distanceUnit === "metric"
-                      ? value.tentacleLargeRadiusMeters
-                      : Number(
-                          (
-                            value.tentacleLargeRadiusMeters / milesToMeters(1)
-                          ).toFixed(2),
-                        )
+            <div className="space-y-2 pb-3">
+              <TextInput
+                label={`Large radius (${unitLabel})`}
+                type="number"
+                min={distanceUnit === "metric" ? 200 : 0.1}
+                max={distanceUnit === "metric" ? 50000 : 30}
+                step={distanceUnit === "metric" ? 100 : 0.1}
+                value={
+                  distanceUnit === "metric"
+                    ? value.tentacleLargeRadiusMeters
+                    : Number(
+                        (
+                          value.tentacleLargeRadiusMeters / milesToMeters(1)
+                        ).toFixed(2),
+                      )
+                }
+                disabled={disabled}
+                inputMode="decimal"
+                onChange={(event) => {
+                  const parsed = Number.parseFloat(event.currentTarget.value);
+                  if (!Number.isFinite(parsed)) {
+                    return;
                   }
-                  disabled={disabled}
-                  onChange={(event) => {
-                    const parsed = Number.parseFloat(event.target.value);
-                    if (!Number.isFinite(parsed)) {
-                      return;
-                    }
-                    const meters =
-                      distanceUnit === "metric"
-                        ? parsed
-                        : parsed * milesToMeters(1);
-                    onChange({
-                      ...value,
-                      tentacleLargeRadiusMeters:
-                        clampTentacleRadiusMeters(meters),
-                    });
-                  }}
-                  className="field-input mt-2"
-                  inputMode="decimal"
-                />
-              </label>
-              <div className="flex flex-wrap gap-2">
+                  const meters =
+                    distanceUnit === "metric"
+                      ? parsed
+                      : parsed * milesToMeters(1);
+                  onChange({
+                    ...value,
+                    tentacleLargeRadiusMeters:
+                      clampTentacleRadiusMeters(meters),
+                  });
+                }}
+                styles={insetTextInputStyles}
+              />
+              <div className="flex flex-wrap gap-2 px-4">
                 {tentacleRadiusPresets.map((meters) => (
                   <PresetButton
                     key={meters}
@@ -148,8 +152,8 @@ export function TentaclesSection({
               </div>
             </div>
           ) : null}
-        </>
+        </AdvancedSettingsInset>
       ) : null}
-    </>
+    </div>
   );
 }

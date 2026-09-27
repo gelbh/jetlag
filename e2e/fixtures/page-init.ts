@@ -7,7 +7,6 @@ import {
 async function applyPageCaptureInit(page: Page) {
   await page.addInitScript(() => {
     localStorage.setItem("jetlag.mapFirstRunDismissed", "1");
-    localStorage.setItem("jetlag.mapToolsHintDismissed", "1");
     // Mobile projects use iPhone UA — dismiss install tip so onboarding stays stable.
     localStorage.setItem("jetlag:pwa-install-tip-dismissed", "1");
     // Prod preview shows AnalyticsConsentBanner when unset — keep CI e2e chrome stable.
@@ -46,22 +45,20 @@ export async function prepareE2EPage(
 }
 
 export async function openPlayHub(page: Page) {
-  await page
-    .getByRole("button", { name: /Play — create, join, or custom game/i })
-    .click();
-  await expect(page.getByRole("link", { name: "Create session" })).toBeVisible();
+  // Home waits on Firebase auth bootstrap (BootSplash "Starting…") before inset rows.
+  await expect(page.getByText("Starting…")).toBeHidden({ timeout: 45_000 });
+  // Wave home: InsetRow UnstyledButton+Link (accessible name = label text).
+  await expect(
+    page.getByRole("link", { name: "Create session" }),
+  ).toBeVisible({ timeout: 15_000 });
+  await expect(
+    page.getByRole("link", { name: "Join session" }),
+  ).toBeVisible({ timeout: 15_000 });
 }
 
 export async function dismissMapOnboarding(page: Page) {
   const gotIt = page.getByRole("button", { name: "Got it" });
   if (await gotIt.isVisible().catch(() => false)) {
     await gotIt.click();
-  }
-  const toolsHint = page.getByText(/Question tools are on the bottom bar/i);
-  if (await toolsHint.isVisible().catch(() => false)) {
-    const closeHint = page.getByRole("button", { name: "Close" });
-    if (await closeHint.isVisible().catch(() => false)) {
-      await closeHint.click();
-    }
   }
 }

@@ -1,14 +1,33 @@
-/* Compact MapLibre attribution — HUD styling for on-map credits */
-.maplibregl-ctrl-attrib {
-  display: block !important;
-  margin: 0 0 calc(var(--safe-area-bottom) + 0.25rem)
-    max(0.5rem, env(safe-area-inset-left));
-  max-width: min(14rem, calc(100vw - 6rem));
-  border-radius: var(--radius-hud-lg);
-  background: oklch(from var(--color-surface-deep) l c h / 82%);
-  color: var(--color-ink-secondary);
+/* On-map MapLibre (i) control is removed; credits live in Map settings.
+ * Ask/matching placement tokens below still lift left chrome above map-first HUD. */
+
+/* Lift left map controls + side stack above map-first bottom chrome */
+html[data-ask-map-placement="1"],
+html[data-matching-map-placement="1"] {
+  --ask-map-placement-bottom-clearance: 11.5rem;
+  --matching-map-bottom-clearance: var(--ask-map-placement-bottom-clearance);
+  --map-left-stack-base-dock: calc(
+    var(--dock-total-height) + var(--chrome-gap-above-dock) +
+      var(--safe-area-bottom) + var(--ask-map-placement-bottom-clearance)
+  );
+  --map-left-stack-base-dock-narrow: calc(
+    var(--dock-total-height) + var(--chrome-gap-above-dock) +
+      var(--safe-area-bottom) + var(--ask-map-placement-bottom-clearance) + 1.5rem
+  );
+  --map-left-stack-base-chrome-hidden: calc(
+    var(--chrome-gap-bottom) + var(--safe-area-bottom) +
+      var(--ask-map-placement-bottom-clearance)
+  );
+  --map-left-stack-base-safe-area: calc(
+    max(0.75rem, env(safe-area-inset-bottom)) +
+      var(--ask-map-placement-bottom-clearance)
+  );
 }
 
-.maplibregl-ctrl-attrib a {
-  color: var(--color-ink);
+html[data-ask-map-placement="1"] [data-chrome-side-stack="phone"],
+html[data-matching-map-placement="1"] [data-chrome-side-stack="phone"] {
+  bottom: calc(
+    var(--dock-island-height) + var(--chrome-side-stack-gap) +
+      var(--chrome-side-stack-lift) + var(--ask-map-placement-bottom-clearance)
+  );
 }

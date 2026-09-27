@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, screen } from "@testing-library/react";
+import { renderWithAppUi } from "../../test/renderWithAppUi";
 import type { DistanceUnit } from "../../domain/map/distance";
 import type { SessionRulesInput } from "../../domain/session/rules";
 import { ThermometerPanel } from "./ThermometerPanel";
@@ -30,13 +31,13 @@ const baseProps = {
 
 describe("ThermometerPanel place→configure→ask commit chrome", () => {
   it("enables Continue on Place once manual pins are ready", () => {
-    render(<ThermometerPanel {...baseProps} />);
+    renderWithAppUi(<ThermometerPanel {...baseProps} />);
 
     expect(screen.getByRole("button", { name: "Continue" })).toBeEnabled();
   });
 
   it("keeps Place Continue disabled when manual travel is shorter than distance", () => {
-    render(
+    renderWithAppUi(
       <ThermometerPanel
         {...baseProps}
         travelMeters={700}
@@ -51,7 +52,7 @@ describe("ThermometerPanel place→configure→ask commit chrome", () => {
   });
 
   it("exposes exactly one enabled Add thermometer control on ask", () => {
-    render(<ThermometerPanel {...baseProps} answer="hotter" />);
+    renderWithAppUi(<ThermometerPanel {...baseProps} answer="hotter" />);
 
     fireEvent.click(screen.getByRole("button", { name: "Continue" }));
     fireEvent.click(screen.getByRole("button", { name: "Continue" }));
@@ -62,7 +63,7 @@ describe("ThermometerPanel place→configure→ask commit chrome", () => {
   });
 
   it("exposes exactly one enabled Send to hiders control in multiplayer ask", () => {
-    render(
+    renderWithAppUi(
       <ThermometerPanel
         {...baseProps}
         awaitHiderAnswer

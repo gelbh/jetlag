@@ -1,22 +1,35 @@
+import { AskHudPanel } from "@/components/tools/ask/AskHudPanel";
 /**
  * Tentacle Ask HUD mode body — CatalogRail → map radius (+ locations / solo answer).
+ * Matching-style question header + catalog; map-first overlays after category.
  * SingleBottomChord: row tap advances; no PhaseRail / CONTINUE.
- * Spec: ask-surface-kit-design rev 2026-08-05b.
  */
 import { AskCatalogRail } from "@/components/tools/ask/AskCatalogRail";
+import { AskToolQuestionHeader } from "@/components/tools/ask/AskToolQuestionHeader";
 import { TentacleLocationsChord } from "@/components/tools/ask/TentacleLocationsChord";
+import { HudTentacleIcon } from "@/components/map/icons/ToolIcons";
 import { TentacleAnswerPicker } from "@/components/tools/shared/answers/TentacleAnswerPicker";
 import { AnchorControls } from "@/components/tools/shared/controls/AnchorControls";
+import { AskInlineError } from "@/components/tools/shared/readout/AskInlineError";
 import { LoadingReadout } from "@/components/tools/shared/readout/LoadingReadout";
 import { ResolvedReadout } from "@/components/tools/shared/readout/ResolvedReadout";
 import { QuestionTruthReferenceHint } from "@/components/tools/shared/QuestionTruthReferenceHint";
 import type { TentaclePoi } from "@/domain/map/annotations";
-import { formatPresetDistance, type DistanceUnit } from "@/domain/map/distance";
+import {
+  formatDistance,
+  formatPresetDistance,
+  type DistanceUnit,
+} from "@/domain/map/distance";
 import type { GameSize } from "@/domain/session/size/gameSize";
 import {
   tentacleCategoriesForGameSize,
+  tentacleQuestionPrompt,
   type TentacleExtendedCategoryId,
 } from "@/domain/questions";
+import { tentacleCategoryIcon } from "./tentacleCategoryIcons";
+
+const TENTACLE_QUESTION_INTRO_RULE =
+  "Pick a location type below. Search radius is fixed for this game size.";
 
 export type TentacleHudBodyProps = {
   gameSize: GameSize;
@@ -39,6 +52,8 @@ export type TentacleHudBodyProps = {
   onSelectPoi: (poiId: string) => void;
   onOutOfReachChange: (outOfReach: boolean) => void;
   awaitHiderAnswer?: boolean;
+  costLabel?: string | null;
+  toolLabel?: string;
 };
 
 export function TentacleHudBody({
@@ -62,21 +77,45 @@ export function TentacleHudBody({
   onSelectPoi,
   onOutOfReachChange,
   awaitHiderAnswer = false,
+  costLabel = null,
+  toolLabel = "Tentacle",
 }: TentacleHudBodyProps) {
   const availableCategories = tentacleCategoriesForGameSize(gameSize).filter(
     (category) =>
       !usedCategoryIds.has(category.id) || category.id === categoryId,
   );
 
-  const catalogRows = availableCategories.map((category) => ({
-    id: category.id,
-    label: category.label,
-  }));
+  const catalogRows = availableCategories.map((category) => {
+    const Icon = tentacleCategoryIcon(category.id);
+    return {
+      id: category.id,
+      label: category.label,
+      icon: (
+        <Icon size={20} weight="duotone" color="currentColor" aria-hidden />
+      ),
+    };
+  });
 
   const searchRadiusLabel =
     categoryId !== null
       ? formatPresetDistance(searchRadiusMeters, distanceUnit)
       : null;
+
+  const distanceLabel = formatDistance(searchRadiusMeters, distanceUnit);
+  const question =
+    categoryId != null
+      ? {
+          prompt: tentacleQuestionPrompt(
+            categoryId,
+            distanceUnit,
+            searchRadiusMeters,
+          ),
+          ruleSummary: TENTACLE_QUESTION_INTRO_RULE,
+        }
+      : {
+          prompt: `Within ${distanceLabel} of me, which [type] are you nearest to? (You must also be within ${distanceLabel})`,
+          ruleSummary: TENTACLE_QUESTION_INTRO_RULE,
+        };
 
   const chord: "types" | "place" | "locations" = !categoryChosen
     ? "types"
@@ -89,6 +128,15 @@ export function TentacleHudBody({
       data-testid="tentacle-hud-body"
       className="ask-hud-mode-body flex w-full flex-col gap-2"
     >
+      <AskToolQuestionHeader
+        toolLabel={toolLabel}
+        costLabel={costLabel}
+        icon={<HudTentacleIcon width={22} height={22} />}
+        prompt={question.prompt}
+        ruleSummary={question.ruleSummary}
+        mantine={true}
+      />
+
       {chord === "types" ? (
         <div className="space-y-2">
           {awaitHiderAnswer ? <QuestionTruthReferenceHint /> : null}
@@ -99,13 +147,14 @@ export function TentacleHudBody({
               onCategoryChange(id as TentacleExtendedCategoryId)
             }
             aria-label="Location type"
-            hint="Tap a row to set location types"
+            hint="Tap a type to continue"
+            columns={2}
           />
         </div>
       ) : null}
 
       {chord === "place" ? (
-        <div className="pointer-events-auto ask-hud-panel space-y-2 p-3">
+        <AskHudPanel className="space-y-2 p-3">
           <AnchorControls
             awaitingPlacement={awaitingPlacement}
             hasAnchor={hasCenter}
@@ -120,7 +169,7 @@ export function TentacleHudBody({
               Search radius is fixed at {searchRadiusLabel} from your anchor.
             </ResolvedReadout>
           ) : null}
-        </div>
+        </AskHudPanel>
       ) : null}
 
       {chord === "locations" ? (
@@ -155,17 +204,12 @@ export function TentacleHudBody({
                   No named locations were found within {searchRadiusLabel}.
                 </ResolvedReadout>
               )}
-              {error ? (
-                <p className="text-sm text-halt">{error}</p>
-              ) : null}
+              {error ? <AskInlineError message={error} /> : null}
             </>
           }
         >
           {!awaitHiderAnswer && categoryId && poiOptions.length > 0 ? (
             <TentacleAnswerPicker
-              categoryId={categoryId}
-              distanceUnit={distanceUnit}
-              searchRadiusMeters={searchRadiusMeters}
               poiOptions={poiOptions}
               selectedPoiId={selectedPoiId}
               outOfReach={outOfReach}

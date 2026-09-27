@@ -1,5 +1,12 @@
 import type { ButtonHTMLAttributes, ReactNode } from "react";
-import { MotionPressable } from "../../motion/MotionPressable";
+import { UnstyledButton } from "@mantine/core";
+import {
+  hudChromeStyles,
+  mapToolSlotIconStyle,
+  mapToolSlotLabelStyle,
+  mapToolSlotStyles,
+  type MapToolSlotTone,
+} from "@/components/ui/entry/entryChrome";
 
 export type MapChromeControlVariant = "floating" | "slot";
 
@@ -9,6 +16,8 @@ export interface MapChromeControlProps
   variant?: MapChromeControlVariant;
   /** Toggle / selected state (`aria-pressed` + active chrome class). */
   pressed?: boolean;
+  /** Slot visual weight: question tools vs undo/redo. */
+  tone?: MapToolSlotTone;
   icon?: ReactNode;
   /** Extra classes on the icon wrapper (e.g. unread badge host). */
   iconClassName?: string;
@@ -23,11 +32,7 @@ function controlClassName(
   className: string | undefined,
 ): string {
   if (variant === "slot") {
-    const parts = ["jl-tool-slot", className];
-    if (pressed) {
-      parts.splice(1, 0, "jl-tool-slot-active");
-    }
-    return parts.filter(Boolean).join(" ");
+    return ["jl-tool-slot", className].filter(Boolean).join(" ");
   }
 
   const parts = [
@@ -62,9 +67,19 @@ function ControlBody({
       .join(" ");
     return (
       <>
-        {icon != null ? <span className={iconClass}>{icon}</span> : null}
+        {icon != null ? (
+          <span className={iconClass} style={mapToolSlotIconStyle}>
+            {icon}
+          </span>
+        ) : null}
         {label != null ? (
-          <span className="jl-tool-slot-label">{label}</span>
+          <span
+            className="jl-tool-slot-label"
+            data-ios-tool-label=""
+            style={mapToolSlotLabelStyle}
+          >
+            {label}
+          </span>
         ) : null}
       </>
     );
@@ -90,6 +105,7 @@ function ControlBody({
 export function MapChromeControl({
   variant = "floating",
   pressed,
+  tone = "tool",
   disabled,
   className,
   icon,
@@ -115,31 +131,34 @@ export function MapChromeControl({
 
   if (variant === "slot") {
     return (
-      <MotionPressable
+      <UnstyledButton
         type={type}
         disabled={disabled}
         className={resolvedClassName}
+        styles={mapToolSlotStyles(Boolean(pressed), tone)}
+        data-ios-tool-tone={tone}
         aria-label={ariaLabel}
         aria-pressed={pressed}
         title={title ?? ariaLabel}
         {...rest}
       >
         {body}
-      </MotionPressable>
+      </UnstyledButton>
     );
   }
 
   return (
-    <button
+    <UnstyledButton
       type={type}
       disabled={disabled}
       className={resolvedClassName}
+      styles={hudChromeStyles(Boolean(pressed))}
       aria-label={ariaLabel}
       aria-pressed={pressed}
       title={title ?? ariaLabel}
       {...rest}
     >
       {body}
-    </button>
+    </UnstyledButton>
   );
 }

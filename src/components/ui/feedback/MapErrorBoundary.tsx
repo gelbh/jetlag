@@ -8,7 +8,6 @@ import {
 import { appUpdateCopy } from "@/domain/device/updates/appUpdateCopy";
 import { captureException } from "@/services/core/analytics/sentry";
 import { AppErrorPage } from "./AppErrorPage";
-import { MapFloatAlertPanel } from "../banners/MapFloatAlert";
 
 interface MapErrorBoundaryProps {
   children: ReactNode;
@@ -72,32 +71,24 @@ export class MapErrorBoundary extends Component<
 
       return (
         <AppErrorPage
-          title={appUpdateCopy.mapErrorTitle}
+          title={
+            deferredChunk
+              ? appUpdateCopy.deferredTitle
+              : appUpdateCopy.mapErrorTitle
+          }
           message={
             deferredChunk
-              ? `${appUpdateCopy.deferredTitle} — ${appUpdateCopy.chunkDeferredBody}`
-              : ""
+              ? appUpdateCopy.chunkDeferredBody
+              : this.errorMessage()
           }
-          // Nested MapFloatAlertPanel already uses role="alert"; keep outer assertive
-          // only for the deferred message path (no inner panel).
-          assertive={deferredChunk}
-          detail={
-            deferredChunk ? undefined : (
-              <MapFloatAlertPanel className="mx-auto max-w-md border-highlight/55 bg-surface-deep normal-case tracking-normal">
-                <p className="min-w-0 text-left text-sm text-ink">
-                  {this.errorMessage()}
-                </p>
-                {this.showReloadAction() ? (
-                  <button
-                    type="button"
-                    className="btn-primary min-h-11 shrink-0 px-4 text-xs"
-                    onClick={this.handleReload}
-                  >
-                    {appUpdateCopy.mapErrorReload}
-                  </button>
-                ) : null}
-              </MapFloatAlertPanel>
-            )
+          assertive
+          primaryAction={
+            this.showReloadAction()
+              ? {
+                  label: appUpdateCopy.mapErrorReload,
+                  onClick: this.handleReload,
+                }
+              : null
           }
           secondaryAction={{
             label: appUpdateCopy.mapErrorBackHome,

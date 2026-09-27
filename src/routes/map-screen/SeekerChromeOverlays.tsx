@@ -1,7 +1,11 @@
+import { Button, Group } from "@mantine/core";
 import { MapFirstRunSheet } from "../../components/session/mapChrome/MapFirstRunSheet";
-import { MapToolsHintBanner } from "../../components/session/mapChrome/MapToolsHintBanner";
 import { AskHudHost } from "../../components/tools/ask/AskHudHost";
 import { ToolFloatingPanel } from "../../components/tools/ToolFloatingPanel";
+import {
+  filledStyles,
+  grayStyles,
+} from "../../components/ui/entry/entryChrome";
 import {
   activeModeCue,
   canCommit,
@@ -21,7 +25,7 @@ type SeekerChromeOverlaysProps = {
   firstRunDismissed: MapScreenController["firstRunDismissed"];
   setFirstRunDismissed: MapScreenController["setFirstRunDismissed"];
   forceMapToolsGuide: boolean;
-  setForceMapToolsGuide: (open: boolean) => void;
+  onDismissMapToolsGuide: () => void;
   selectedAnnotation: MapScreenController["selectedAnnotation"];
   geometryEditAnnotation: MapScreenController["geometryEditAnnotation"];
   geometryDraft: MapScreenController["geometryDraft"];
@@ -41,6 +45,7 @@ type SeekerChromeOverlaysProps = {
     | "pinTool"
     | "zoneTool"
     | "tentacleTool"
+    | "drawTool"
   >;
 };
 
@@ -61,6 +66,8 @@ function renderToolPanel(
       return tools.measuringTool.panel;
     case "pin":
       return tools.pinTool.panel;
+    case "draw":
+      return tools.drawTool.panel;
     case "tentacle":
       return tools.tentacleTool.panel;
     case "photo":
@@ -108,7 +115,7 @@ export function SeekerChromeOverlays({
   firstRunDismissed,
   setFirstRunDismissed,
   forceMapToolsGuide,
-  setForceMapToolsGuide,
+  onDismissMapToolsGuide,
   selectedAnnotation,
   geometryEditAnnotation,
   geometryDraft,
@@ -166,34 +173,29 @@ export function SeekerChromeOverlays({
 
   return (
     <>
-      <MapToolsHintBanner
-        hidden={
-          !timer.hasStarted ||
-          activeTool !== "none" ||
-          overlay.isSettingsOpen ||
-          Boolean(selectedAnnotation) ||
-          Boolean(geometryEditAnnotation && geometryDraft)
-        }
-      />
-
       {geometryEditAnnotation && geometryDraft ? (
         <div className="pointer-events-auto absolute inset-x-0 jl-panel-above-dock jl-panel-enter z-[var(--z-panel)] px-3">
-          <div className="hud-panel mx-auto flex max-w-xl gap-2 p-3">
-            <button
-              type="button"
+          <Group
+            grow
+            gap="sm"
+            p="sm"
+            className="mx-auto max-w-xl"
+            style={{
+              borderRadius: 16,
+              backgroundColor: "oklch(from var(--color-canvas) l c h / 0.94)",
+              border: "0.33px solid oklch(from var(--color-field-ink) l c h / 0.12)",
+            }}
+          >
+            <Button
               onClick={() => void saveGeometryEdit()}
-              className="btn-primary min-h-12 flex-1"
+              styles={filledStyles}
             >
               Save shape
-            </button>
-            <button
-              type="button"
-              onClick={cancelGeometryEdit}
-              className="btn-secondary min-h-12 flex-1"
-            >
+            </Button>
+            <Button onClick={cancelGeometryEdit} styles={grayStyles}>
               Cancel
-            </button>
-          </div>
+            </Button>
+          </Group>
         </div>
       ) : null}
 
@@ -210,26 +212,51 @@ export function SeekerChromeOverlays({
         forceOpen={forceMapToolsGuide}
         onDismiss={() => {
           setFirstRunDismissed(true);
-          setForceMapToolsGuide(false);
+          onDismissMapToolsGuide();
         }}
       />
 
-      {askHudOwned && askSurface && toolHud ? (
-        <>
-          <AskHudHost
-            cue={askCue}
-            toolLabel={dockEntry?.name ?? activeTool}
-            costLabel={toolHud.costLabel}
-            canCommit={askCanCommit}
-            commitLabel={askCommitLabel}
-            onCommit={toolHud.onCommit}
-            isSubmitting={toolHud.readiness.isSubmitting}
-            error={toolHud.error}
-            modeBody={toolHud.modeBody}
-          />
-          {toolHud.sheets}
-        </>
+      {askHudOwned && askSurface && toolHud && !toolHud.suppressSheet ? (
+        <AskHudHost
+          cue={askCue}
+          toolLabel={dockEntry?.name ?? activeTool}
+          costLabel={toolHud.costLabel}
+          canCommit={askCanCommit}
+          commitLabel={askCommitLabel}
+          onCommit={toolHud.onCommit}
+          onDismiss={() => handleSelectTool("none")}
+          isSubmitting={toolHud.readiness.isSubmitting}
+          error={toolHud.suppressSheet ? null : toolHud.error}
+          modeBody={toolHud.modeBody}
+          showCue={
+            askSurface !== "matching" &&
+            askSurface !== "measuring" &&
+            askSurface !== "tentacle" &&
+            askSurface !== "photo" &&
+            askSurface !== "radar" &&
+            askSurface !== "thermometer"
+          }
+          showCostChip={
+            askSurface !== "matching" &&
+            askSurface !== "measuring" &&
+            askSurface !== "tentacle" &&
+            askSurface !== "photo" &&
+            askSurface !== "radar" &&
+            askSurface !== "thermometer"
+          }
+          showCommitStrip={
+            askSurface === "thermometer"
+              ? toolHud.commitKind === "endWalk"
+              : askSurface !== "matching" &&
+                askSurface !== "measuring" &&
+                askSurface !== "tentacle" &&
+                askSurface !== "photo" &&
+                askSurface !== "radar"
+          }
+        />
       ) : null}
+      {askHudOwned && toolHud?.mapOverlay ? toolHud.mapOverlay : null}
+      {askHudOwned && toolHud?.sheets ? toolHud.sheets : null}
 
       {showFloatingPanel ? (
         <ToolFloatingPanel

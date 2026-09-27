@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Stack } from "@mantine/core";
 import type { SessionRecord } from "@/domain/map/annotations";
 import {
   isSessionRoleGated,
@@ -11,6 +12,11 @@ import {
   regenerateRolePasscode,
   revealRolePasscode,
 } from "@/services/session/rolePasscodeLifecycle";
+import {
+  ErrorCallout,
+  SectionLabel,
+  SuccessCallout,
+} from "@/components/ui/entry/entryChrome";
 import { RoleCodeStamp } from "../identity/RoleCodeStamp";
 
 type RevealRole = "seeker" | "hider" | "observer";
@@ -123,18 +129,8 @@ export function RolePasscodeSettings({
   };
 
   return (
-    <div
-      className={
-        embedded
-          ? "space-y-3"
-          : "space-y-3 border-t-2 border-border pt-4"
-      }
-    >
-      {embedded ? null : (
-        <p className="font-display text-xs font-semibold uppercase tracking-[0.12em] text-ink-muted">
-          Role codes
-        </p>
-      )}
+    <Stack gap="sm">
+      {embedded ? null : <SectionLabel>Role codes</SectionLabel>}
       {rows.map((role) => (
         <RoleCodeStamp
           key={role}
@@ -147,9 +143,9 @@ export function RolePasscodeSettings({
         />
       ))}
       {copyStatus === "copied" ? (
-        <p className="text-xs text-ink-muted">Copied to clipboard.</p>
+        <SuccessCallout>Copied to clipboard.</SuccessCallout>
       ) : null}
-      {error ? <p className="text-xs text-status-error">{error}</p> : null}
-    </div>
+      <ErrorCallout>{error}</ErrorCallout>
+    </Stack>
   );
 }

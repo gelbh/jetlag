@@ -2,6 +2,7 @@ import type { MapViewportState } from "@/components/map/chrome/MapViewportTracke
 import type { MapStyle } from "@/domain/map/mapBasemaps";
 import type { LayerVisibility } from "@/state/sessionStore";
 import { LayerVisibilityGrid } from "@/components/session/mapChrome/LayerVisibilityGrid";
+import { toggleRowStyle } from "@/components/ui/entry/entryStyles";
 
 interface MapPanelProps {
   mapViewport: MapViewportState | null;
@@ -80,7 +81,7 @@ export function MapPanel({
             Satellite
           </button>
         </div>
-        <label className="jl-toggle-row mt-3 text-sm">
+        <label className="mt-3 text-sm" style={toggleRowStyle}>
           <span className="font-display text-xs font-semibold uppercase tracking-wide">
             Low power mode
           </span>

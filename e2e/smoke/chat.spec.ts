@@ -38,9 +38,8 @@ test("@smoke seeker asks via radar and hider answers in game chat", async ({
   await answerInChat(guestPage, "Yes");
 
   await openChat(guestPage);
-  await expect(
-    guestPage.getByRole("button", { name: "Close", exact: true }),
-  ).toBeVisible({
+  // Mobile ChatPanel has no Close button (desktop rail only); tabs prove the sheet is open.
+  await expect(guestPage.getByLabel("Chat tabs")).toBeVisible({
     timeout: 10_000,
   });
   await expectChatAnswer(guestPage, "yes");

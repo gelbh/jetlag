@@ -1,4 +1,5 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, screen } from "@testing-library/react";
+import { renderWithAppUi } from "../../../test/renderWithAppUi";
 import { describe, expect, it, vi } from "vitest";
 import { HiderHandSheet } from "./HiderHandSheet";
 import { createInitialBoardEconomyState } from "../../../domain/boardEconomy";
@@ -19,7 +20,7 @@ describe("HiderHandSheet", () => {
       hand: state.deck.slice(0, 2),
       deck: state.deck.slice(2),
     };
-    const { rerender } = render(
+    const { rerender } = renderWithAppUi(
       <HiderHandSheet
         open={false}
         onClose={() => {}}
@@ -43,7 +44,7 @@ describe("HiderHandSheet", () => {
         {...noopHandlers}
       />,
     );
-    expect(screen.getByLabelText("Hider hand")).toBeTruthy();
+    expect(screen.getAllByLabelText("Hider hand")[0]).toBeTruthy();
     expect(screen.getByText(/2 \/ 6 cards/)).toBeTruthy();
   });
 
@@ -55,7 +56,7 @@ describe("HiderHandSheet", () => {
       deck: state.deck.slice(7),
     };
     const onDiscard = vi.fn();
-    render(
+    renderWithAppUi(
       <HiderHandSheet
         open
         onClose={() => {}}

@@ -1,11 +1,14 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
+import { MantineProvider } from "@mantine/core";
+import type { ReactElement } from "react";
 import type { DistanceUnit } from "@/domain/map/distance";
 import {
   MATCHING_CATEGORIES,
   type MatchingAnswer,
   type MatchingCategoryId,
 } from "@/domain/questions";
+import { jetlagTheme } from "@/theme/theme";
 import { AskHudHost } from "./AskHudHost";
 import { MatchingHudBody } from "./MatchingHudBody";
 import {
@@ -38,10 +41,71 @@ const baseProps = {
   awaitHiderAnswer: true,
 };
 
+function renderMatching(ui: ReactElement) {
+  return render(
+    <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
+      {ui}
+    </MantineProvider>,
+  );
+}
+
+beforeEach(() => {
+  vi.stubGlobal("matchMedia", (query: string) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener() {},
+    removeListener() {},
+    addEventListener() {},
+    removeEventListener() {},
+    dispatchEvent: () => false,
+  }));
+});
+
 describe("MatchingHudBody", () => {
+  it("shows matching question prompt and category row icons", () => {
+    const { container } = renderMatching(
+      <MatchingHudBody {...baseProps} costLabel="D3P1" />,
+    );
+
+    expect(
+      screen.getByText(
+        "Is your nearest [place] the same as my nearest [place]?",
+      ),
+    ).toBeInTheDocument();
+    expect(screen.getByTestId("ask-cost-chip")).toHaveTextContent("D3P1");
+    expect(screen.queryByText("PICK CATEGORY")).toBeNull();
+
+    const airport = screen.getByRole("button", { name: /Commercial Airport/i });
+    expect(airport.querySelector("svg")).not.toBeNull();
+    expect(
+      container.querySelector(".ask-catalog-rail__grid"),
+    ).toBeInTheDocument();
+    expect(
+      container.querySelectorAll('[data-testid="ask-catalog-rail"] svg').length,
+    ).toBeGreaterThan(3);
+  });
+
+  it("shows the real category question once a category is chosen", () => {
+    renderMatching(
+      <MatchingHudBody
+        {...baseProps}
+        categoryChosen
+        categoryId="commercial_airport"
+        hasSeekerPoint
+      />,
+    );
+
+    expect(
+      screen.getByText(
+        "Is your nearest commercial airport the same as my nearest commercial airport?",
+      ),
+    ).toBeInTheDocument();
+  });
+
   it("shows catalog rail without PhaseRail or CONTINUE; row select advances", () => {
     const onCategoryChange = vi.fn();
-    render(
+    renderMatching(
       <MatchingHudBody {...baseProps} onCategoryChange={onCategoryChange} />,
     );
 
@@ -56,8 +120,45 @@ describe("MatchingHudBody", () => {
     expect(onCategoryChange).toHaveBeenCalledWith("commercial_airport");
   });
 
+  it("filters catalog rows by category group chip", () => {
+    renderMatching(<MatchingHudBody {...baseProps} />);
+
+    const filter = screen.getByRole("tablist", {
+      name: "Filter match categories",
+    });
+    expect(filter).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Commercial Airport/i })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("tab", { name: "Transit" }));
+    expect(screen.getByRole("button", { name: /Commercial Airport/i })).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /1st Administrative Division/i }),
+    ).toBeNull();
+
+    fireEvent.click(screen.getByRole("tab", { name: "Admin" }));
+    expect(screen.queryByRole("button", { name: /Commercial Airport/i })).toBeNull();
+    expect(
+      screen.getByRole("button", { name: /1st Administrative Division/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("renders GPS timeout with AskInlineError treatment", () => {
+    renderMatching(
+      <MatchingHudBody
+        {...baseProps}
+        categoryChosen
+        categoryId="commercial_airport"
+        hasSeekerPoint
+        error="Timed out while waiting for your location."
+      />,
+    );
+
+    expect(screen.getByTestId("ask-inline-error")).toBeInTheDocument();
+    expect(screen.getByText("Location timed out")).toBeInTheDocument();
+  });
+
   it("after category, shows resolve chord without CONTINUE strip sibling", () => {
-    render(
+    renderMatching(
       <MatchingHudBody
         {...baseProps}
         categoryChosen
@@ -68,6 +169,8 @@ describe("MatchingHudBody", () => {
 
     expect(screen.queryByTestId("ask-catalog-rail")).toBeNull();
     expect(screen.getByTestId("matching-hud-body")).toBeInTheDocument();
+    expect(screen.getByText("Commercial Airport")).toBeInTheDocument();
+    expect(screen.getByText("Category")).toBeInTheDocument();
     expect(
       screen.queryByRole("button", { name: "Continue" }),
     ).toBeNull();
@@ -92,7 +195,7 @@ describe("MatchingHudBody", () => {
     expect(cue).toBe("RESOLVE ON MAP");
     expect(canCommit(readiness)).toBe(false);
 
-    render(
+    renderMatching(
       <AskHudHost
         cue={cue}
         toolLabel="Matching"
@@ -119,9 +222,8 @@ describe("MatchingHudBody", () => {
     expect(screen.getByTestId("ask-mode-cue-ticker")).toHaveTextContent(
       "RESOLVE ON MAP",
     );
-    expect(
-      screen.getByRole("button", { name: "SEND — RESOLVE ON MAP" }),
-    ).toBeDisabled();
+    // Sheet path hides muted SEND footer; cue carries the next-step hint.
+    expect(screen.queryByTestId("ask-commit-strip")).toBeNull();
   });
 
   it("arms PrimedCommitStrip only when canCommit", () => {
@@ -143,7 +245,7 @@ describe("MatchingHudBody", () => {
     });
     const onCommit = vi.fn();
 
-    render(
+    renderMatching(
       <AskHudHost
         cue={cue}
         toolLabel="Matching"

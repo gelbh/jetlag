@@ -4,7 +4,6 @@ import {
   askHudCameraPaddingPx,
   askHudDefinition,
   askHudSurfaces,
-  ASK_HUD_CAMERA_PADDING_PX,
   ASK_HUD_CAMERA_PADDING_RAIL_PX,
   canCommit,
   commitKind,
@@ -50,12 +49,20 @@ describe("askHudModes", () => {
     );
   });
 
-  it("radar cue is verb-only and advances with placement + distance", () => {
+  it("radar cue is quiet on distance pick, then center → send", () => {
     expect(
       activeModeCue({
         surface: "radar",
         placementReady: false,
         configureReady: false,
+        resolveReady: true,
+      }),
+    ).toBe("");
+    expect(
+      activeModeCue({
+        surface: "radar",
+        placementReady: false,
+        configureReady: true,
         resolveReady: true,
       }),
     ).toBe("TAP MAP TO SET CENTER");
@@ -66,7 +73,7 @@ describe("askHudModes", () => {
         configureReady: false,
         resolveReady: true,
       }),
-    ).toBe("PICK A DISTANCE");
+    ).toBe("");
     const primed = activeModeCue({
       surface: "radar",
       placementReady: true,
@@ -276,11 +283,19 @@ describe("askHudModes", () => {
     expect(
       activeModeCue({
         surface: "measuring",
-        placementReady: true,
+        placementReady: false,
         configureReady: false,
         resolveReady: false,
       }),
     ).toBe("PICK A SOURCE");
+    expect(
+      activeModeCue({
+        surface: "measuring",
+        placementReady: false,
+        configureReady: true,
+        resolveReady: false,
+      }),
+    ).toBe("SET YOUR ANCHOR");
     expect(
       activeModeCue({
         surface: "measuring",
@@ -335,7 +350,7 @@ describe("askHudModes", () => {
   });
 
   it("catalog-rail tools get taller camera padding", () => {
-    expect(askHudCameraPaddingPx("radar")).toBe(ASK_HUD_CAMERA_PADDING_PX);
+    expect(askHudCameraPaddingPx("radar")).toBe(ASK_HUD_CAMERA_PADDING_RAIL_PX);
     expect(askHudCameraPaddingPx("matching")).toBe(
       ASK_HUD_CAMERA_PADDING_RAIL_PX,
     );

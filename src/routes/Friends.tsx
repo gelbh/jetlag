@@ -1,35 +1,59 @@
+import { Anchor, Text } from "@mantine/core";
 import { RequireUsername } from "../components/auth/RequireUsername";
-import { FriendsPanel } from "../components/friends/FriendsPanel";
-import { DesktopContentColumn } from "../components/ui/layout/DesktopContentColumn";
-import { EntryScreenLayout } from "../components/ui/layout/EntryScreenLayout";
+import { FriendsBody } from "../components/friends/FriendsBody";
+import { EntryRouteShell } from "@/components/ui/entry/EntryRouteShell";
 import {
-  ScreenHeader,
-  screenHeaderOffsetClassName,
-} from "../components/ui/layout/ScreenHeader";
+  isFriendsMockEnabled,
+  resetFriendsMock,
+} from "@/services/profile/friendsMock";
 
 export function Friends() {
-  return (
-    <EntryScreenLayout justify="start">
-      <ScreenHeader backTo="/" backLabel="Home" />
-      <DesktopContentColumn maxWidth="social">
-        <div className={`space-y-4 ${screenHeaderOffsetClassName}`}>
-          <div className="space-y-1">
-            <h1 className="font-display text-balance text-[clamp(2rem,10vw,3rem)] font-bold uppercase leading-[0.92] tracking-tight text-field-ink">
-              Friends
-            </h1>
-            <p className="max-w-sm text-pretty text-base leading-relaxed text-field-ink-muted">
-              Search by username, send requests, and keep your crew together.
-            </p>
-          </div>
+  const mockEnabled = isFriendsMockEnabled();
 
-          <RequireUsername
-            continuePath="/friends"
-            signInDescription="Sign in to add friends and see their stats on friends leaderboards."
+  return (
+    <EntryRouteShell title="Friends">
+      {mockEnabled ? (
+        <Text
+          size="xs"
+          c="var(--color-signal)"
+          mb="sm"
+          px={4}
+          style={{ lineHeight: 1.35 }}
+        >
+          Mock friends data on. Search{" "}
+          <Text span fw={590} c="var(--color-field-ink)">
+            bo
+          </Text>{" "}
+          for results. Friend sheet invites use session{" "}
+          <Text span fw={590} c="var(--color-field-ink)">
+            PLAY
+          </Text>
+          .{" "}
+          <Anchor
+            component="button"
+            type="button"
+            size="xs"
+            c="var(--color-flag)"
+            onClick={() => {
+              resetFriendsMock();
+              window.location.reload();
+            }}
           >
-            <FriendsPanel />
-          </RequireUsername>
-        </div>
-      </DesktopContentColumn>
-    </EntryScreenLayout>
+            Reset seed
+          </Anchor>
+        </Text>
+      ) : null}
+
+      {mockEnabled ? (
+        <FriendsBody />
+      ) : (
+        <RequireUsername
+          continuePath="/friends"
+          signInDescription="Sign in to add friends and see their stats on friends leaderboards."
+        >
+          <FriendsBody />
+        </RequireUsername>
+      )}
+    </EntryRouteShell>
   );
 }
