@@ -34,16 +34,40 @@ export async function openSettings(page: Page) {
   await expect(settings).toBeVisible();
   await settings.scrollIntoViewIfNeeded();
   await clickViaEvaluate(settings);
-  // Settings renders as a dialog with aria-label="Settings" (mobile/desktop)
   await expect(page.getByRole("dialog", { name: "Settings" })).toBeVisible();
 }
 
 export async function closePanel(page: Page) {
-  const close = page.getByRole("button", { name: "Close", exact: true });
-  if (await close.isVisible().catch(() => false)) {
-    await close.click();
-    await expect(close).toBeHidden({ timeout: 10_000 }).catch(() => undefined);
-    return;
+  // Mobile Drawer: Escape. Desktop contextual rail skips Escape while
+  // aria-modal Settings is open, so collapse the rail instead.
+  const dialog = page.getByRole("dialog", { name: "Settings" });
+  const collapseRail = page.getByRole("button", {
+    name: "Collapse map panels",
+  });
+  if ((await collapseRail.count()) > 0) {
+    await expect(collapseRail).toBeVisible();
+    await collapseRail.click();
+  } else {
+    await page.keyboard.press("Escape");
   }
-  await page.keyboard.press("Escape").catch(() => undefined);
+  await expect(dialog).toBeHidden({ timeout: 10_000 });
+}
+
+async function confirmSettingsReset(
+  page: Page,
+  confirmButtonName: "Reset board for everyone" | "Reset session progress",
+) {
+  page.once("dialog", (dialog) => dialog.accept());
+  await openSettings(page);
+  await page.getByRole("tab", { name: "Session" }).click();
+  await page.getByRole("button", { name: "Reset options" }).click();
+  await page.getByRole("button", { name: confirmButtonName }).click();
+}
+
+export async function resetBoardForEveryone(page: Page) {
+  await confirmSettingsReset(page, "Reset board for everyone");
+}
+
+export async function resetSessionProgress(page: Page) {
+  await confirmSettingsReset(page, "Reset session progress");
 }

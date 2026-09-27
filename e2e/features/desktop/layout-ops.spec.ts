@@ -34,13 +34,13 @@ test.describe("desktop layout @ 1280", () => {
 
   test("@smoke ops shell has tool nav and no bottom dock", async ({ page }) => {
     await openMapWithLocalSession(page);
+    const toolsNav = page.getByRole("navigation", { name: /Map tools/i });
+    await expect(toolsNav).toBeVisible();
     await expect(
-      page.getByRole("navigation", { name: /Map tools/i }),
+      page.getByRole("region", { name: "Map status" }),
     ).toBeVisible();
-    await expect(page.locator(".desktop-ops-shell")).toBeVisible();
-    const dock = page.locator(".jl-tool-dock.jl-tool-dock--rail");
-    await expect(dock).toBeVisible();
-    const box = await dock.boundingBox();
+
+    const box = await toolsNav.boundingBox();
     expect(box).not.toBeNull();
     // Left rail: narrow column on the left edge (not a full-width bottom dock).
     expect(box!.x).toBeLessThan(120);
@@ -57,7 +57,8 @@ test.describe("desktop layout @ 1280", () => {
       page.getByRole("complementary", { name: /Map panels/i }),
     ).toBeVisible();
     await expect(page.getByRole("heading", { name: "Settings" })).toBeVisible();
+    await expect(page.getByRole("dialog", { name: "Settings" })).toBeVisible();
+    // Tip desktop: settings live in the ops complementary rail, not a mobile sheet.
     await expect(page.locator(".hud-sheet.fixed")).toHaveCount(0);
   });
 });
-

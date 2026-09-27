@@ -35,13 +35,20 @@ async function assertSocialLayoutSmoke(page: Page, path: SocialLayoutPath) {
   await assertNoHorizontalOverflow(page);
   const viewportTarget = socialRouteViewportLocator(page, path);
   await assertInViewport(viewportTarget);
-  if (path === "/friends") {
-    await assertMinTapTargets(viewportTarget);
-  } else if (path === "/leaderboard") {
+  if (path === "/friends" || path === "/leaderboard") {
     await assertMinTapTargets(viewportTarget);
   }
   // /stats SegmentedControl is sticky chrome but shorter than 44px HIG.
   await assertNoSeriousAxeViolations(page);
+}
+
+async function assertCreateAreaReady(page: Page) {
+  await page.getByPlaceholder("Dublin, Ireland").fill("Dublin");
+  await page.getByRole("button", { name: "Find place" }).click();
+  await expect(page.getByText(/sq mi play area/i).first()).toBeVisible({
+    timeout: 10_000,
+  });
+  await expectCreatePageMapPreviewLoaded(page);
 }
 
 test.describe("layout regression @ default mobile", () => {
@@ -50,7 +57,7 @@ test.describe("layout regression @ default mobile", () => {
   }) => {
     await settleHome(page);
     await assertMinTapTargets(
-      page.getByRole("link", { name: /Join session|Create session/i })
+      page.getByRole("link", { name: /Join session|Create session/i }),
     );
     await assertLayoutSmoke(page);
   });
@@ -58,21 +65,14 @@ test.describe("layout regression @ default mobile", () => {
   test("@smoke join has no overflow", async ({ page }) => {
     await prepareE2EPage(page);
     await page.goto("/join");
-    await expect(
-      page.getByLabel("Session code"),
-    ).toBeVisible();
+    await expect(page.getByLabel("Session code")).toBeVisible();
     await assertLayoutSmoke(page);
   });
 
   test("@smoke create HUD has no overflow", async ({ page }) => {
     await prepareE2EPage(page);
     await page.goto("/create");
-    await page.getByPlaceholder("Dublin, Ireland").fill("Dublin");
-    await page.getByRole("button", { name: "Find place" }).click();
-    await expect(page.getByText(/sq mi play area/i).first()).toBeVisible({
-      timeout: 10_000,
-    });
-    await expectCreatePageMapPreviewLoaded(page);
+    await assertCreateAreaReady(page);
     await assertLayoutSmoke(page);
   });
 
@@ -81,21 +81,18 @@ test.describe("layout regression @ default mobile", () => {
   }) => {
     await prepareE2EPage(page);
     await page.goto("/create");
-    await page.getByPlaceholder("Dublin, Ireland").fill("Dublin");
-    await page.getByRole("button", { name: "Find place" }).click();
-    await expect(page.getByText(/sq mi play area/i).first()).toBeVisible({
-      timeout: 10_000,
-    });
-    await expectCreatePageMapPreviewLoaded(page);
+    await assertCreateAreaReady(page);
 
     const confirm = page.getByRole("button", { name: "Confirm game area" });
     await expect(confirm).toBeVisible();
+    // MobileSheet split layout: scroll body vs pinned footer (single-path chrome).
+    await expect(page.locator(".jl-create-session .hud-sheet")).toHaveCount(1);
 
     const relation = await page.evaluate(() => {
       const root = document.querySelector(".jl-create-session");
       const scroll = root?.querySelector(".hud-sheet .jl-scroll");
       const button = Array.from(root?.querySelectorAll("button") ?? []).find(
-        (el) => el.textContent?.trim() === "Confirm game area"
+        (el) => el.textContent?.trim() === "Confirm game area",
       );
       if (
         !(scroll instanceof HTMLElement) ||
@@ -104,11 +101,9 @@ test.describe("layout regression @ default mobile", () => {
         return { ok: false as const, reason: "missing nodes" };
       }
 
-      // Single scroll owner: form content's nearest overflow-y-auto ancestor
-      // must be the sheet scroller (fails if a nested overflow-y-auto returns).
-      const formMarker = Array.from(root.querySelectorAll("p")).find(
-        (el) => el.textContent?.trim() === "Game preset"
-      );
+      // Form content's nearest overflow-y-auto ancestor must be the sheet
+      // scroller (fails if a nested overflow-y-auto returns).
+      const formMarker = root.querySelector('[aria-label="Game preset"]');
       if (!(formMarker instanceof HTMLElement)) {
         return { ok: false as const, reason: "missing form marker" };
       }
@@ -162,46 +157,56 @@ test.describe("layout regression @ default mobile", () => {
 
   test("@smoke map dock chrome stays in viewport", async ({ page }) => {
     await openMapWithLocalSession(page);
-    const host = page.locator(".jl-map-bottom-chrome-host");
-    const hunt = page.locator('[data-island="hunt"]');
-    const session = page.locator('[data-island="session"]');
-    await expect(host).toBeVisible();
-    await expect(hunt).toBeVisible();
-    await expect(session).toBeVisible();
-    await expect(page.locator('[data-island="history-start"]')).toHaveCount(0);
-    await expect(page.locator('[data-island="history-end"]')).toHaveCount(0);
-    await expect(
-      hunt.getByRole("button", { name: "Undo last annotation" })
-    ).toBeVisible();
-    await expect(
-      session.getByRole("button", { name: "Draw on map" })
-    ).toBeVisible();
-    // All islands and their tool slots stay in viewport on mobile layouts.
-    await assertInViewport(host);
-    await assertInViewport(hunt);
-    await assertInViewport(session);
-    // Session island lives in the right-stack, not the bottom band.
-    await expect(page.locator(".jl-map-chrome-bottom-band")).toHaveCount(1);
-    await expect(page.getByTestId("map-side-dock-stack")).toHaveCount(1);
-    await expect(
-      page.getByTestId("map-side-dock-stack").locator("[data-island='session']"),
-    ).toHaveCount(1);
-    // Verify tap targets on session controls (side-stack slots: 2.75rem = 44px,
-    // borders may measure slightly under, so allow 40px minimum).
-    await assertMinTapTargets(
-      session.getByRole("button", { name: "Open settings" }),
-      40
-    );
-    // Leaflet markers + closed Mantine Drawer shells (aria-label on role-less divs)
-    // trip axe; layout smoke is chrome-only.
+
+    await test.step("single-path Mantine map chrome is present", async () => {
+      // Residual scrub: Survey-world marker must stay gone (absence assert only).
+      await expect(page.locator("[data-player-ux-world]")).toHaveCount(0);
+      await expect(page.locator(".map-survey-chrome")).toHaveCount(0);
+      await expect(page.locator(".map-chrome-hud")).toBeVisible();
+      await expect(page.locator(".jl-map-bottom-chrome-host")).toBeVisible();
+      await expect(page.locator('[data-island="hunt"]')).toBeVisible();
+      await expect(page.locator('[data-island="session"]')).toBeVisible();
+      await expect(page.locator('[data-island="history-start"]')).toHaveCount(
+        0,
+      );
+      await expect(page.locator('[data-island="history-end"]')).toHaveCount(0);
+    });
+
+    await test.step("hunt and session tool slots stay in viewport", async () => {
+      const host = page.locator(".jl-map-bottom-chrome-host");
+      const hunt = page.locator('[data-island="hunt"]');
+      const session = page.locator('[data-island="session"]');
+      await expect(
+        hunt.getByRole("button", { name: "Undo last annotation" }),
+      ).toBeVisible();
+      await expect(
+        session.getByRole("button", { name: "Draw on map" }),
+      ).toBeVisible();
+      await assertInViewport(host);
+      await assertInViewport(hunt);
+      await assertInViewport(session);
+      // Session island lives in the right-stack, not the bottom band.
+      await expect(page.locator(".jl-map-chrome-bottom-band")).toHaveCount(1);
+      await expect(page.getByTestId("map-side-dock-stack")).toHaveCount(1);
+      await expect(
+        page
+          .getByTestId("map-side-dock-stack")
+          .locator("[data-island='session']"),
+      ).toHaveCount(1);
+      // Side-stack slots: 2.75rem = 44px; borders may measure slightly under.
+      await assertMinTapTargets(
+        session.getByRole("button", { name: "Open settings" }),
+        40,
+      );
+    });
+
+    // Leaflet markers + closed Mantine Drawer shells trip axe; chrome-only.
     await assertLayoutSmoke(page, {
       exclude: [".maplibregl-map", ".mantine-Drawer-root"],
     });
   });
 
-  test("@smoke map chrome axe includes color-contrast", async ({
-    page,
-  }) => {
+  test("@smoke map chrome axe includes color-contrast", async ({ page }) => {
     await openMapWithLocalSession(page);
     await expect(page.locator(".map-chrome-hud")).toBeVisible();
     await assertNoHorizontalOverflow(page);
@@ -227,12 +232,14 @@ test.describe("layout regression @ default mobile", () => {
     // Mantine Drawer title is visual text; accessible name is often empty.
     const sheet = page.getByRole("dialog");
     await expect(sheet).toBeVisible();
-    await expect(sheet.getByText("Choose board", { exact: true })).toBeVisible();
+    await expect(
+      sheet.getByText("Choose board", { exact: true }),
+    ).toBeVisible();
   });
 
   for (const path of SOCIAL_LAYOUT_PATHS) {
     test(`@smoke ${path.slice(
-      1
+      1,
     )} has no overflow and chrome stays in viewport`, async ({ page }) => {
       await assertSocialLayoutSmoke(page, path);
     });
@@ -250,9 +257,7 @@ test.describe("layout regression @ 320px", () => {
   test("@smoke join reflows at 320 without overflow", async ({ page }) => {
     await prepareE2EPage(page);
     await page.goto("/join");
-    await expect(
-      page.getByLabel("Session code"),
-    ).toBeVisible();
+    await expect(page.getByLabel("Session code")).toBeVisible();
     await assertLayoutSmoke(page);
   });
 });
@@ -261,8 +266,9 @@ test.describe("layout regression social @ 320px", () => {
   test.use({ viewport: { width: 320, height: 568 } });
 
   for (const path of SOCIAL_LAYOUT_PATHS) {
+    // @layout-deep ownership is Band 0 / W7-D; keep membership until then.
     test(`@layout-deep ${path.slice(
-      1
+      1,
     )} reflows at 320 without overflow`, async ({ page }) => {
       await assertSocialLayoutSmoke(page, path);
     });

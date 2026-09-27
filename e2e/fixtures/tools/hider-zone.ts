@@ -5,8 +5,11 @@ export async function waitForHidingZoneWizard(page: Page) {
   await expect(page.getByTestId("ask-hud-host")).toBeAttached({
     timeout: 15_000,
   });
+  // Fresh Set zone shows method group; Play move may jump straight to stations.
   await expect(
-    page.getByRole("group", { name: "Hiding zone placement method" }),
+    page
+      .getByRole("group", { name: "Hiding zone placement method" })
+      .or(page.getByPlaceholder("Search stations…")),
   ).toBeVisible({ timeout: 15_000 });
 }
 
