@@ -35,35 +35,11 @@ export function ensureDatedVersionHeaders(content, date = todayUtc()) {
 }
 
 /**
- * Parse bullets from a ### section body (top-level `- ` only).
+ * Parse top-level `- ` bullets from a ### section body.
  * @param {string} body
  */
 function parseBullets(body) {
-  const bullets = [];
-  let current = null;
-  for (const line of body.split("\n")) {
-    if (/^- /.test(line)) {
-      if (current !== null) {
-        bullets.push(current);
-      }
-      current = line.slice(2).trimEnd();
-    } else if (current !== null && /^\s+\S/.test(line)) {
-      // Continuation under a bullet: treat as its own note if it looks like a prefixed line.
-      const cont = line.trim();
-      if (cont) {
-        bullets.push(current);
-        current = cont;
-      }
-    } else if (current !== null && line.trim() === "") {
-      // keep current open across blank? close on blank
-      bullets.push(current);
-      current = null;
-    }
-  }
-  if (current !== null) {
-    bullets.push(current);
-  }
-  return bullets;
+  return [...body.matchAll(/^- (.+)$/gm)].map((match) => match[1].trimEnd());
 }
 
 /**
@@ -100,12 +76,6 @@ export function normalizeChangelogSections(content) {
     const sectionBody = nl === -1 ? "" : part.slice(nl + 1);
     const bumpType = BUMP_HEADING_TO_TYPE[rawTitle];
     if (!bumpType) {
-      // Preserve already-normalized sections (Fixes/…) by re-collecting
-      if (SECTION_ORDER.includes(rawTitle)) {
-        for (const bullet of parseBullets(sectionBody)) {
-          bySection.get(rawTitle).push(bullet.trim());
-        }
-      }
       continue;
     }
     for (const bullet of parseBullets(sectionBody)) {
@@ -133,15 +103,7 @@ export function normalizeChangelogSections(content) {
   return `${preamble}${header}${newBody}${after.startsWith("##") ? after : after.replace(/^\n*/, "")}`;
 }
 
-function isCliMain() {
-  const entry = process.argv[1];
-  if (!entry) {
-    return false;
-  }
-  return resolve(entry) === resolve(import.meta.filename);
-}
-
-if (isCliMain()) {
+if (resolve(process.argv[1] ?? "") === resolve(import.meta.filename)) {
   const markdown = readFileSync(changelogPath, "utf8");
   const next = normalizeChangelogSections(markdown);
   writeFileSync(changelogPath, next);

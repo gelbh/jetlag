@@ -6,6 +6,7 @@
 
 import { readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { ensureDatedVersionHeaders } from "./normalize-changelog-sections.mjs";
 
 const projectRoot = resolve(import.meta.dirname, "..");
 const changelogMdPath = resolve(projectRoot, "CHANGELOG.md");
@@ -137,14 +138,6 @@ function readPackageVersion() {
     readFileSync(resolve(projectRoot, "package.json"), "utf8"),
   );
   return packageJson.version;
-}
-
-function ensureDatedVersionHeaders(content) {
-  const today = new Date().toISOString().slice(0, 10);
-  return content.replace(
-    /^## (\d+\.\d+\.\d+)[ \t]*$/gm,
-    `## $1 - ${today}`,
-  );
 }
 
 let markdown = readFileSync(changelogMdPath, "utf8");

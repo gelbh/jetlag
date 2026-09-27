@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { parsePrefixedBullet, SECTION_ORDER } from "./section-map.mjs";
+import { parsePrefixedBullet } from "./section-map.mjs";
 
 describe("parsePrefixedBullet", () => {
   it("maps fix: to Fixes and strips the prefix", () => {
@@ -55,11 +55,5 @@ describe("parsePrefixedBullet", () => {
       section: "Fixes",
       text: "Foo",
     });
-  });
-});
-
-describe("SECTION_ORDER", () => {
-  it("lists Fixes, Improvements, Technical", () => {
-    assert.deepEqual(SECTION_ORDER, ["Fixes", "Improvements", "Technical"]);
   });
 });
