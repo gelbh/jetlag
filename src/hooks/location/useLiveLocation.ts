@@ -173,36 +173,14 @@ export function useLiveLocation(
           return;
         }
 
-        if (restore === "restored") {
+        if (restore.status === "restored") {
           setNeedsPermissionPrompt(false);
-          try {
-            const initial = await getCurrentPosition({
-              highAccuracy,
-              maximumAge,
-            });
-            if (cancelled) {
-              return;
-            }
-
-            publishReading(initial, true);
-          } catch (nextError) {
-            if (cancelled) {
-              return;
-            }
-
-            setError(unknownGeolocationErrorMessage(nextError));
-            return;
-          }
-
-          if (cancelled) {
-            return;
-          }
-
+          publishReading(restore.reading, true);
           startWatch();
           return;
         }
 
-        if (restore === "denied") {
+        if (restore.status === "denied") {
           setNeedsPermissionPrompt(false);
           setError(LOCATION_BLOCKED_MESSAGE);
           return;
