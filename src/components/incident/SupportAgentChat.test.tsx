@@ -122,6 +122,44 @@ describe("SupportAgentChat", () => {
     ).toBeInTheDocument();
   });
 
+  it("shows working banner and disables composer while a run is in flight", () => {
+    renderWithRouter(
+      <SupportAgentChat
+        incidentId="inc-1"
+        incidentOverride={{
+          ...baseIncident,
+          activeSessionOpsSummonId: "sum-1",
+          sessionOpsSummonCount: 1,
+          supportAgentRun: {
+            runId: "run-1",
+            status: "working",
+            workingMessageId: "m-work",
+          },
+        }}
+        messagesOverride={[
+          {
+            id: "m-work",
+            incidentId: "inc-1",
+            threadId: "support",
+            sender: "ops_agent",
+            createdAt: "2026-07-25T12:02:00Z",
+            text: "Working on it…",
+            kind: "chat",
+            visibility: "support",
+            working: true,
+          },
+        ]}
+        summonIdOverride="sum-1"
+      />,
+    );
+
+    expect(
+      screen.getByText(/Fix agent is working on your last message/i),
+    ).toBeInTheDocument();
+    expect(screen.getByLabelText("Fix agent message")).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Working…" })).toBeDisabled();
+  });
+
   it("sends a turn from the composer when a summon is active", async () => {
     const onSend = vi.fn().mockResolvedValue(undefined);
 
