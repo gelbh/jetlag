@@ -18,7 +18,7 @@ export interface DrawerSheetProps {
   ariaLabel?: string;
   sheetClassName?: string;
   maxHeightClassName?: string;
-  /** Mantine Drawer padding; default `md`. Pass `sm`/`xs` for denser sheets. */
+  /** Horizontal body inset; default `md`. Pass `sm`/`xs` for denser sheets. */
   padding?: "xs" | "sm" | "md" | "lg" | "xl" | number;
   /**
    * `host` (default): one scroll region for children (session log).
@@ -41,6 +41,30 @@ const sheetChromeStyle: CSSProperties = {
   borderTopRightRadius: 24,
   borderTop: "0.33px solid oklch(from var(--color-field-ink) l c h / 0.14)",
 };
+
+/** Bottom safe-area on scroll/content so body can span to the phone bottom. */
+const SHEET_BODY_SAFE_BOTTOM = "max(1.25rem, env(safe-area-inset-bottom))";
+
+const DRAWER_PADDING_INLINE: Record<
+  Exclude<DrawerSheetProps["padding"], number | undefined>,
+  string
+> = {
+  xs: "0.625rem",
+  sm: "0.75rem",
+  md: "1rem",
+  lg: "1.25rem",
+  xl: "1.5rem",
+};
+
+/** Horizontal inset for scroll/body; named tokens stay non-zero (Verify #7). */
+function resolveDrawerBodyInlinePadding(
+  padding: NonNullable<DrawerSheetProps["padding"]>,
+): string {
+  if (typeof padding === "number") {
+    return `${Math.max(padding, 10)}px`;
+  }
+  return DRAWER_PADDING_INLINE[padding];
+}
 
 /**
  * Phone-shell sheet path: iOS bottom Drawer with grabber + safe-area.
@@ -80,6 +104,11 @@ export function DrawerSheet({
     gateStartOnScrollTop: false,
   });
   const transitionProps = resolveDrawerSheetTransitionProps(decorativeAnimate);
+  const bodyInlinePadding = resolveDrawerBodyInlinePadding(padding);
+  const bodyPadStyle: CSSProperties = {
+    paddingInline: bodyInlinePadding,
+    paddingBottom: SHEET_BODY_SAFE_BOTTOM,
+  };
 
   return (
     <Drawer
@@ -87,7 +116,8 @@ export function DrawerSheet({
       onClose={onClose}
       position="bottom"
       size="auto"
-      padding={padding}
+      // Body inset is owned by scroll/content (Verify #7–#8), not Drawer chrome.
+      padding={0}
       radius={0}
       withCloseButton={false}
       closeOnClickOutside={dismissible && !mapInteractive}
@@ -141,8 +171,7 @@ export function DrawerSheet({
         },
         body: {
           ...baseStyles.body,
-          paddingTop: 0,
-          paddingBottom: 0,
+          padding: 0,
           flex: 1,
           minHeight: 0,
           overflow: "hidden",
@@ -157,14 +186,18 @@ export function DrawerSheet({
         className="flex min-h-0 flex-1 flex-col gap-2"
         style={{
           ...sheetChromeStyle,
-          paddingBottom: "max(1.25rem, env(safe-area-inset-bottom))",
+          // No chrome-only bottom bar; safe-area lives on scroll/content.
           paddingTop: "0.5rem",
           ...contentStyle,
           ...sheetStyle,
         }}
       >
         <DrawerGrabber handleProps={gestureEnabled ? handleProps : undefined} />
-        {pinned ? <div className="shrink-0">{pinned}</div> : null}
+        {pinned ? (
+          <div className="shrink-0" style={{ paddingInline: bodyInlinePadding }}>
+            {pinned}
+          </div>
+        ) : null}
         <div
           ref={scrollRef}
           className={
@@ -172,6 +205,7 @@ export function DrawerSheet({
               ? "flex min-h-0 flex-1 flex-col overflow-hidden"
               : "jl-scroll min-h-0 flex-1 overflow-y-auto overscroll-contain"
           }
+          style={bodyPadStyle}
         >
           {children}
         </div>

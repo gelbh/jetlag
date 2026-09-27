@@ -362,7 +362,8 @@ export function DrawerGrabber({
       type="button"
       tabIndex={-1}
       aria-label="Drag sheet down to dismiss"
-      className="jl-sheet-drag-handle mx-auto flex w-full justify-center py-1"
+      // Full-width ≥44px hit strip; pill visual stays 36×5 inside.
+      className="jl-sheet-drag-handle flex min-h-11 w-full items-center justify-center"
       {...handleProps}
     >
       {bar}
