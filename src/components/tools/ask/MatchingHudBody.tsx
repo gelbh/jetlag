@@ -83,8 +83,10 @@ export type MatchingHudBodyProps = {
   categoryId: MatchingCategoryId | null;
   categoryChosen: boolean;
   usedCategoryIds: ReadonlySet<MatchingCategoryId>;
-  /** Forward-compat for empty play-area bounce (Task 4b); greys like used. */
+  /** Session-local empty play-area categories; greys like used. */
   unavailableCategoryIds?: ReadonlySet<MatchingCategoryId>;
+  /** Empty play-area reason shown above the catalog rail after bounce. */
+  catalogNotice?: string | null;
   catalogCategories?: readonly MatchingCategoryDefinition[];
   hasSeekerPoint: boolean;
   usesContainmentMatching: boolean;
@@ -114,6 +116,7 @@ export function MatchingHudBody({
   categoryChosen,
   usedCategoryIds,
   unavailableCategoryIds = new Set<MatchingCategoryId>(),
+  catalogNotice = null,
   catalogCategories = MATCHING_CATEGORIES,
   hasSeekerPoint,
   usesContainmentMatching,
@@ -257,6 +260,9 @@ export function MatchingHudBody({
       {chord === "category" ? (
         <div className="space-y-2">
           {awaitHiderAnswer ? <QuestionTruthReferenceHint /> : null}
+          {catalogNotice ? (
+            <ResolvedReadout variant="warning">{catalogNotice}</ResolvedReadout>
+          ) : null}
           {availableCategories.length === 0 ? (
             <AskHudPanel className="p-3">
               <CatalogExhaustedMessage message="Every match category has already been used on this map." />

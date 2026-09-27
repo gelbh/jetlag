@@ -157,6 +157,23 @@ describe("MatchingHudBody", () => {
     ).toBeDisabled();
   });
 
+  it("shows empty-area reason and disables that category on the sheet", () => {
+    renderMatching(
+      <MatchingHudBody
+        {...baseProps}
+        categoryChosen={false}
+        unavailableCategoryIds={new Set(["landmass"])}
+        catalogNotice="No landmass intersects the play area."
+      />,
+    );
+    expect(
+      screen.getByText("No landmass intersects the play area."),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /landmass/i }),
+    ).toBeDisabled();
+  });
+
   it("renders GPS timeout with AskInlineError treatment", () => {
     renderMatching(
       <MatchingHudBody

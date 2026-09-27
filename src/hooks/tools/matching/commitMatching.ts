@@ -82,6 +82,14 @@ export async function commitMatching(
     return "noop";
   }
 
+  // Empty play-area catalog must bounce, not send a null match.
+  if (
+    matchingNullAnswer &&
+    (input.matchingFeatureCount === 0 || input.matchingFeatures.length === 0)
+  ) {
+    return "noop";
+  }
+
   if (!matchingNullAnswer && !matchingNearestFeatureId) {
     return "noop";
   }

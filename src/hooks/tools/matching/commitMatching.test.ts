@@ -4,7 +4,11 @@ import type { GameArea } from "@/domain/map/annotations";
 import type { MatchingFeature } from "@/domain/geo/types";
 import * as persistSlim from "@/domain/geometry/progressive/persistSlim";
 import { POLYGON_PERSIST_OVER_BUDGET_MESSAGE } from "@/domain/geometry/progressive/persistSlim";
-import { performMatchingCommit, type CommitMatchingInput } from "./commitMatching";
+import {
+  commitMatching,
+  performMatchingCommit,
+  type CommitMatchingInput,
+} from "./commitMatching";
 
 const buildMatchingEliminationRegion = vi.hoisted(() => vi.fn());
 const buildSameNearestRegion = vi.hoisted(() => vi.fn());
@@ -88,6 +92,28 @@ function baseInput(
     ...overrides,
   };
 }
+
+describe("commitMatching empty play-area guard", () => {
+  it("refuses empty-catalog null-match commit", async () => {
+    const submitPendingQuestion = vi.fn();
+    const result = await commitMatching(
+      baseInput({
+        matchingNullAnswer: true,
+        matchingNearestFeatureId: null,
+        matchingNearestFeatureName: null,
+        matchingFeatureCount: 0,
+        matchingFeatures: [],
+        matchingAnswer: null,
+        awaitHiderAnswer: true,
+        submitPendingQuestion,
+        sessionId: "s1",
+        senderUid: "u1",
+      }),
+    );
+    expect(result).toBe("noop");
+    expect(submitPendingQuestion).not.toHaveBeenCalled();
+  });
+});
 
 describe("performMatchingCommit persist-slim", () => {
   it("persist-slims elim geometry before createAnnotation", async () => {
