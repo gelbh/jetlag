@@ -1,5 +1,6 @@
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
+import { renderWithAppUi } from "../../../test/renderWithAppUi";
 import { MapScreenChromeBanners } from "./MapScreenChromeBanners";
 import { selectMapRefineChip } from "./selectMapRefineChip";
 
@@ -17,7 +18,7 @@ vi.mock("../../../components/incident/HotfixGraceChip", () => ({
 
 describe("MapScreenChromeBanners", () => {
   it("renders the shared status-stack chips", () => {
-    render(<MapScreenChromeBanners />);
+    renderWithAppUi(<MapScreenChromeBanners />);
     expect(screen.getByText("persistence-banner")).toBeInTheDocument();
     expect(screen.getByText("app-update-chip")).toBeInTheDocument();
     expect(screen.getByText("hotspot-chip")).toBeInTheDocument();
@@ -25,7 +26,7 @@ describe("MapScreenChromeBanners", () => {
   });
 
   it("shows measuring refine copy when LOD is refining", () => {
-    render(
+    renderWithAppUi(
       <MapScreenChromeBanners
         refineChip={{
           visible: true,
@@ -41,7 +42,7 @@ describe("MapScreenChromeBanners", () => {
   });
 
   it("shows loading-places copy when catalog is hydrating", () => {
-    render(
+    renderWithAppUi(
       <MapScreenChromeBanners
         refineChip={{
           visible: true,
