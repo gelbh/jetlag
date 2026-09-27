@@ -1,6 +1,9 @@
 import { vi } from "vitest";
 
-export function mockGeolocation(position: GeolocationPosition | null): void {
+export function mockGeolocation(
+  position: GeolocationPosition | null,
+  errorCode: 1 | 2 | 3 = 1,
+): void {
   const getCurrentPosition = vi.fn(
     (success: PositionCallback, error?: PositionErrorCallback) => {
       if (position) {
@@ -8,9 +11,15 @@ export function mockGeolocation(position: GeolocationPosition | null): void {
         return;
       }
 
+      const messages: Record<1 | 2 | 3, string> = {
+        1: "Permission denied",
+        2: "Position unavailable",
+        3: "Timeout",
+      };
+
       error?.({
-        code: 1,
-        message: "Permission denied",
+        code: errorCode,
+        message: messages[errorCode],
         PERMISSION_DENIED: 1,
         POSITION_UNAVAILABLE: 2,
         TIMEOUT: 3,
