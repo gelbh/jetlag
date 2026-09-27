@@ -59,11 +59,18 @@ export async function expectAskHud(page: Page) {
   await expect(askHudSheet(page)).toBeVisible({ timeout: 15_000 });
 }
 
-/** Wait until PrimedCommitStrip is armed (terracotta / enabled). */
+/** Wait until PrimedCommitStrip is armed, or map-first Send is enabled. */
 export async function waitForPrimedCommit(page: Page) {
   const strip = page.getByTestId("ask-commit-strip").getByRole("button");
-  await expect(strip).toBeEnabled({ timeout: 60_000 });
-  await expect(strip).toHaveAttribute("data-armed", "true");
+  const send = primedAskSendButton(page);
+  // Poll either limb before choosing path (strip can mount a beat late).
+  await expect(strip.or(send).first()).toBeVisible({ timeout: 60_000 });
+  if (await strip.isVisible().catch(() => false)) {
+    await expect(strip).toBeEnabled({ timeout: 60_000 });
+    await expect(strip).toHaveAttribute("data-armed", "true");
+    return;
+  }
+  await expect(send).toBeEnabled({ timeout: 60_000 });
 }
 
 /** @deprecated Continue retired — waits for primed strip instead. */
@@ -85,9 +92,37 @@ export async function retreatWizard(page: Page) {
 
 /** Clicks an answer option and verifies the tap registered (aria-pressed). */
 export async function chooseAnswer(page: Page, name: string) {
-  const option = page.getByRole("button", { name, exact: true });
+  // Tentacle map-first: selection lives on POI pins (strip only mirrors status).
+  const tentaclePin = page.locator(
+    `[data-testid="tentacle-poi-pin"][aria-label="${name}"]`,
+  );
+  if ((await tentaclePin.count()) > 0) {
+    await expect(tentaclePin.first()).toBeVisible({ timeout: 15_000 });
+    await tentaclePin.first().evaluate((el) => {
+      if (el instanceof HTMLElement) {
+        el.click();
+      }
+    });
+    await expect(tentaclePin.first()).toHaveAttribute("aria-pressed", "true");
+    return;
+  }
+
+  const option = page
+    .getByRole("list", { name: /Tentacle answers/i })
+    .getByRole("button", { name, exact: true })
+    .or(
+      page
+        .getByRole("group", { name: /answer/i })
+        .getByRole("button", { name, exact: true }),
+    )
+    .or(page.getByRole("button", { name, exact: true }))
+    .first();
   await expect(option).toBeEnabled({ timeout: 15_000 });
-  await option.click();
+  await option.evaluate((el) => {
+    if (el instanceof HTMLElement) {
+      el.click();
+    }
+  });
   await expect(option).toHaveAttribute("aria-pressed", "true");
 }
 
@@ -101,7 +136,7 @@ export async function waitForMapPlacementCrosshair(page: Page) {
  * Ask HUD covers the lower map on mobile; geometric center clicks often miss.
  * Prefer mocked GPS ("Use my location") when AnchorControls / PlacementActions
  * is shown. Measuring/tentacle advance the chord after place (GPS control
- * unmounts); radar/matching keep "Location locked" in-panel.
+ * unmounts). Map-first multiplayer may already show Send with no Yes/No chord.
  */
 export async function placeAskAnchor(page: Page) {
   const gps = page.getByRole("button", { name: /Use my location/i });
@@ -118,8 +153,9 @@ export async function placeAskAnchor(page: Page) {
               .count()) > 0;
           if (locked) return true;
           return (
-            (await page.getByRole("button", { name: /Use my location/i }).count()) ===
-            0
+            (await page
+              .getByRole("button", { name: /Use my location/i })
+              .count()) === 0
           );
         },
         { timeout: 15_000 },
@@ -128,9 +164,18 @@ export async function placeAskAnchor(page: Page) {
     return;
   }
 
-  // Map-first / auto-center: placement chord may already show answers.
+  // Already placed / map-first: answers, send, or locked copy.
   await expect(
-    page.getByRole("button", { name: /Yes|No|Change distance/i }).first(),
+    page
+      .getByRole("button", {
+        name: /Yes|No|Closer|Further|Hotter|Colder|Send to hiders|^SEND(?: ·|$)|^Send$/i,
+      })
+      .or(
+        page.getByText(
+          /Location locked|pinned on the map|Anchor set|Anchor ·|Center pinned/i,
+        ),
+      )
+      .first(),
   ).toBeVisible({ timeout: 15_000 });
 }
 
@@ -149,28 +194,80 @@ export async function waitForGeoLoadingIdle(page: Page) {
   }
 }
 
-/** Primed multiplayer send (AskCommitStrip or map-first "Send to hiders"). */
-export const SEND_TO_HIDERS_BUTTON = /^(SEND · D\d+P\d+|Send to hiders)$/;
+/** Tip send cost suffix (`D2P1`). Shared source for primed / multiplayer / in-flight. */
+const SEND_COST = String.raw`D\d+P\d+`;
 
-export async function expectSendToHidersInViewport(page: Page) {
-  const sendButton = page.getByRole("button", { name: SEND_TO_HIDERS_BUTTON });
-  await expect(sendButton).toBeEnabled({ timeout: 15_000 });
+/**
+ * Primed AskCommitStrip or plain map-first Send (solo commit).
+ * Examples: `SEND · D2P1`, bare `SEND`, `Send`.
+ */
+export const PRIMED_ASK_SEND_BUTTON = new RegExp(
+  `^(SEND(?: · ${SEND_COST})?|Send)$`,
+);
+
+/**
+ * Multiplayer armed send labels:
+ * - AskCommitStrip primed: `SEND · DnPm`
+ * - Map-first chrome: `Send to hiders`
+ * - Panel commit: `Send to hiders (DnPm)`
+ */
+export const SEND_TO_HIDERS_BUTTON = new RegExp(
+  `^(SEND · ${SEND_COST}|Send to hiders(?: \\(${SEND_COST}\\))?)$`,
+);
+
+/**
+ * Any tip ask commit control (primed strip, plain Send, or multiplayer hiders).
+ * Use for "must not be armed" asserts.
+ */
+export const ASK_SEND_ARMED_BUTTON = new RegExp(
+  `^(SEND(?: · ${SEND_COST})?|Send(?: to hiders(?: \\(${SEND_COST}\\))?)?)$`,
+);
+
+/** Armed multiplayer send + in-flight `Sending…` (wait-until-gone after click). */
+export const SEND_TO_HIDERS_IN_FLIGHT_BUTTON = new RegExp(
+  `^(SEND · ${SEND_COST}|Send to hiders(?: \\(${SEND_COST}\\))?|Sending…)$`,
+);
+
+export function primedAskSendButton(page: Page) {
+  return page.getByRole("button", { name: PRIMED_ASK_SEND_BUTTON });
 }
 
-async function waitForSendToHiders(page: Page) {
-  await expectSendToHidersInViewport(page);
+export function sendToHidersButton(page: Page) {
+  return page.getByRole("button", { name: SEND_TO_HIDERS_BUTTON });
+}
+
+export async function expectSendToHidersInViewport(page: Page) {
+  const send = sendToHidersButton(page);
+  await expect(send).toBeEnabled({ timeout: 15_000 });
+  await expect(send).toBeInViewport();
+}
+
+async function clickSendToHiders(page: Page) {
+  const send = sendToHidersButton(page);
+  await expect(send).toBeEnabled({ timeout: 15_000 });
+  await send.scrollIntoViewIfNeeded();
+  // Map-first chrome can sit under markers; DOM click avoids pointer interception.
+  await send.evaluate((el) => {
+    if (el instanceof HTMLElement) {
+      el.click();
+    }
+  });
+  // While submitting, label becomes "Sending…" which would otherwise make the
+  // primed-send locator match count 0 and spuriously pass toBeHidden.
+  await expect(
+    page.getByRole("button", { name: SEND_TO_HIDERS_IN_FLIGHT_BUTTON }),
+  ).toHaveCount(0, { timeout: 30_000 });
 }
 
 async function clickPrimedAsk(page: Page) {
   const strip = page.getByTestId("ask-commit-strip").getByRole("button");
+  const send = primedAskSendButton(page);
+  await expect(strip.or(send).first()).toBeVisible({ timeout: 60_000 });
   if (await strip.isVisible().catch(() => false)) {
-    await waitForPrimedCommit(page);
+    await expect(strip).toBeEnabled({ timeout: 60_000 });
+    await expect(strip).toHaveAttribute("data-armed", "true");
     await strip.click();
   } else {
-    // Radar/map-first chrome uses a plain Send button, not AskCommitStrip.
-    const send = page.getByRole("button", {
-      name: /^Send$|^ASK(?: ·|$)/,
-    });
     await expect(send).toBeEnabled({ timeout: 60_000 });
     await send.click();
   }
@@ -186,7 +283,7 @@ export async function dismissActiveToolPanel(page: Page) {
 }
 
 export const PENDING_QUESTION_TEXT =
-  /Are you within|closer to or further|hotter or colder|nearest to|same as my nearest/i;
+  /Are you within|Within .+ of me|closer to or further|hotter or colder|nearest to|same as my nearest|Tentacle question|Matching question|Measuring question|Radar question|Thermometer question|Photo question/i;
 
 export async function selectFirstRadarDistance(page: Page) {
   // Prefer a mid-row preset — top chips can sit under AskCommitStrip on mobile.
@@ -221,8 +318,8 @@ export async function sendRadarToHiders(page: Page) {
   await expectAskHud(page);
   await selectFirstRadarDistance(page);
   await placeAskAnchor(page);
-  await waitForSendToHiders(page);
-  await page.getByRole("button", { name: SEND_TO_HIDERS_BUTTON }).click();
+  await expectSendToHidersInViewport(page);
+  await clickSendToHiders(page);
   await expect(page.getByTestId("radar-map-placement")).toBeHidden({
     timeout: 15_000,
   });
@@ -257,8 +354,8 @@ export async function sendMatchingToHiders(page: Page) {
   await pickCatalogRow(page, /Museum/i);
   await placeAskAnchor(page);
   await waitForGeoLoadingIdle(page);
-  await waitForSendToHiders(page);
-  await page.getByRole("button", { name: SEND_TO_HIDERS_BUTTON }).click();
+  await expectSendToHidersInViewport(page);
+  await clickSendToHiders(page);
   await dismissActiveToolPanel(page);
   await expect(page.getByTestId("ask-hud-host")).toBeHidden({
     timeout: 15_000,
@@ -268,12 +365,13 @@ export async function sendMatchingToHiders(page: Page) {
 export async function completeMeasuringSolo(page: Page) {
   await clickToolDockButton(page, "Measuring");
   await expectAskHud(page);
-  await placeAskAnchor(page);
+  // Tip catalog-first: pick what to measure, then place / GPS.
   await pickCatalogRow(page, /Museum/i);
+  await placeAskAnchor(page);
   await clickMapAboveAskHud(page, 0.72);
   await waitForGeoLoadingIdle(page);
   await expect(
-    askHudSheet(page).getByText(/\d+(\.\d+)?\s*(mi|km|m)\b/i),
+    page.getByText(/\d+(\.\d+)?\s*(mi|km|m)\b/i).first(),
   ).toBeVisible({ timeout: 30_000 });
   await chooseAnswer(page, "Closer");
   await clickPrimedAsk(page);
@@ -284,13 +382,13 @@ export async function completeMeasuringSolo(page: Page) {
 export async function sendMeasuringToHiders(page: Page) {
   await clickToolDockButton(page, "Measuring");
   await expectAskHud(page);
-  await placeAskAnchor(page);
   await pickCatalogRow(page, /Museum|Transit|Park/i);
+  await placeAskAnchor(page);
   await waitForGeoLoadingIdle(page);
   await clickMapAboveAskHud(page, 0.65);
   await waitForGeoLoadingIdle(page);
-  await waitForSendToHiders(page);
-  await page.getByRole("button", { name: SEND_TO_HIDERS_BUTTON }).click();
+  await expectSendToHidersInViewport(page);
+  await clickSendToHiders(page);
   await dismissActiveToolPanel(page);
   await expect(page.getByTestId("ask-hud-host")).toBeHidden({
     timeout: 15_000,
@@ -298,43 +396,61 @@ export async function sendMeasuringToHiders(page: Page) {
 }
 
 /**
- * Thermometer placement via GPS walk — Ask HUD blocks reliable MapLibre pin taps
- * under the chrome stack. In-page geolocation driver notifies watchers (CDP
- * override alone often leaves watchPosition quiet).
+ * Thermometer placement via GPS walk. Tip map-first chrome owns GPS track /
+ * Start track after a distance is armed (not the catalog drawer alone).
  */
 async function placeThermometerGpsWalk(page: Page) {
   await installE2eGeolocationDriver(page);
   await clickToolDockButton(page, "Thermometer");
   await expectAskHud(page);
-  const hud = askHudSheet(page);
-  const gpsChip = hud.getByRole("button", { name: /^GPS track$/i });
+
+  const distance = page
+    .getByRole("button", { name: /1\/2 mi|½ mi|0\.5 mi/i })
+    .first();
+  if (await distance.isVisible().catch(() => false)) {
+    await distance.click();
+  }
+
+  const gpsChip = page.getByRole("button", { name: /^GPS track$/i });
+  await expect(gpsChip).toBeVisible({ timeout: 20_000 });
   if ((await gpsChip.getAttribute("aria-pressed")) !== "true") {
     await gpsChip.click();
   }
-  await hud.getByRole("button", { name: /^Start track$/i }).click();
-  await expect(page.getByTestId("ask-walk-banner")).toBeVisible({
-    timeout: 20_000,
-  });
+  await page.getByRole("button", { name: /^Start track$/i }).click();
+  const walkBanner = page.getByTestId("ask-walk-banner");
+  await expect(walkBanner).toBeVisible({ timeout: 20_000 });
 
-  // Step north past the default ½ mi thermometer distance (≈804 m).
-  // Poll/throttle windows in useThermometerWalk are ~500–750ms.
+  // Step north past the default ½ mi target (≈804 m). useLiveLocation throttles
+  // ~750ms between samples; wait that window between steps, then poll completion.
   for (const lat of [53.355, 53.36, 53.365, 53.37]) {
+    const gatedAt = Date.now();
     await stepE2eGeolocation(page, { latitude: lat, longitude: -6.26 });
-    // eslint-disable-next-line playwright/no-wait-for-timeout -- cover ~500–750ms thermometer poll/throttle
-    await page.waitForTimeout(1_100);
+    await expect
+      .poll(() => Date.now() - gatedAt, {
+        timeout: 2_000,
+        intervals: [200],
+      })
+      .toBeGreaterThanOrEqual(800);
+    if (!(await walkBanner.isVisible().catch(() => false))) {
+      break;
+    }
   }
 
   const endWalk = page
     .getByTestId("ask-commit-strip")
-    .getByRole("button", { name: /^END WALK/i });
-  // Auto-stop may already have finished the walk once travel ≥ target.
-  if (await endWalk.isVisible().catch(() => false)) {
-    await expect(endWalk).toBeEnabled({ timeout: 20_000 });
-    await endWalk.click();
+    .getByRole("button", { name: /^END WALK/i })
+    .or(page.getByRole("button", { name: /^END WALK/i }));
+  // Auto-stop may already have finished once travel ≥ target.
+  if (
+    await endWalk
+      .first()
+      .isVisible()
+      .catch(() => false)
+  ) {
+    await expect(endWalk.first()).toBeEnabled({ timeout: 20_000 });
+    await endWalk.first().click();
   }
-  await expect(page.getByTestId("ask-walk-banner")).toBeHidden({
-    timeout: 30_000,
-  });
+  await expect(walkBanner).toBeHidden({ timeout: 30_000 });
 }
 
 export async function completeThermometerSolo(page: Page) {
@@ -367,27 +483,13 @@ export async function completeTentacleSolo(page: Page) {
   await expectEliminationMaskVisible(page);
 }
 
-export async function sendTentacleToHiders(page: Page) {
-  await clickToolDockButton(page, "Tentacles");
-  await expectAskHud(page);
-  await pickCatalogRow(page, /Museum|Transit|Park/i);
-  await placeAskAnchor(page);
-  await waitForGeoLoadingIdle(page);
-  await waitForSendToHiders(page);
-  await page.getByRole("button", { name: SEND_TO_HIDERS_BUTTON }).click();
-  await dismissActiveToolPanel(page);
-  await expect(page.getByTestId("ask-hud-host")).toBeHidden({
-    timeout: 15_000,
-  });
-}
-
 export async function sendPhotoToHiders(page: Page) {
   await clickToolDockButton(page, "Photo");
   await expectAskHud(page);
   // Catalog-first: pick a photo ask, then primed send appears.
   await pickCatalogRow(page, /Tree|Park|You|The Sky/i);
-  await waitForSendToHiders(page);
-  await page.getByRole("button", { name: SEND_TO_HIDERS_BUTTON }).click();
+  await expectSendToHidersInViewport(page);
+  await clickSendToHiders(page);
   await expect(page.getByTestId("photo-map-placement")).toBeHidden({
     timeout: 15_000,
   });
