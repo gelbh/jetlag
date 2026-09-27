@@ -29,11 +29,7 @@ import {
   homeFeedbackLinkStyle,
 } from "@/components/ui/entry/entryStyles";
 
-export function PremiumPageContent({
-  headerOffset = true,
-}: {
-  headerOffset?: boolean;
-} = {}) {
+export function PremiumPageContent() {
   const navigate = useAppNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const checkoutState = searchParams.get("checkout");
@@ -155,7 +151,6 @@ export function PremiumPageContent({
         <PremiumFeatureList
           entitlementSummary={null}
           checkoutNotice={null}
-          headerOffset={headerOffset}
         />
         <p className="max-w-sm text-sm text-field-ink-muted">
           Premium billing needs an online connection. Use a synced session to
@@ -170,7 +165,6 @@ export function PremiumPageContent({
       <PremiumFeatureList
         entitlementSummary={entitlementSummary}
         checkoutNotice={checkoutNotice}
-        headerOffset={headerOffset}
       />
 
       <PremiumSignInGate onSignedIn={() => void refreshEntitlementsWithError()}>
