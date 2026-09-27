@@ -10,7 +10,6 @@ import type {
 import type { LayerVisibility } from "../../state/sessionStore";
 import type { DistanceUnit } from "../../domain/map/distance";
 import type { MapStyle, StreetBasemap } from "../../domain/map/mapBasemaps";
-import type { NotificationPreferences } from "../../domain/device/chrome/notifications";
 import type { HidingZoneStepId } from "../../components/hider/hidingZoneSteps";
 import type { HiderTruthRevealState } from "../../components/session/banners/HiderTruthRevealBanner";
 import type { useMapOverlayState } from "../../hooks/map/useMapOverlayState";
@@ -189,11 +188,6 @@ export type HiderMapScreenController = {
     setMapStyle: (style: MapStyle) => void;
     streetBasemap: StreetBasemap;
     setStreetBasemap: (theme: StreetBasemap) => void;
-    notificationPreferences: NotificationPreferences;
-    updateNotificationPreferences: (
-      patch: Partial<NotificationPreferences>,
-    ) => void;
-    enableNotifications: () => Promise<boolean>;
     locationError?: string | null;
   };
   chat: {
@@ -598,10 +592,6 @@ export function HiderMapScreenChrome({
               onToggleTransit: () => undefined,
               onToggleLiveTransit: () => undefined,
               onTransitRouteFilterChange: () => undefined,
-              notificationPreferences: mapSettings.notificationPreferences,
-              onNotificationPreferencesChange:
-                mapSettings.updateNotificationPreferences,
-              onEnableNotifications: mapSettings.enableNotifications,
             }}
             layers={{
               layerVisibility: mapSettings.layerVisibility,

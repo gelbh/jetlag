@@ -66,7 +66,6 @@ export function MapScreenChrome({ controller, mapSlot }: MapScreenChromeProps) {
     setKeepScreenAwake,
     setLowPowerMode,
     setLayerVisibility,
-    notificationPreferences,
     transitEnabled,
     transitLiveEnabled,
     transitLiveSupported,
@@ -123,8 +122,6 @@ export function MapScreenChrome({ controller, mapSlot }: MapScreenChromeProps) {
     gameRulesEditable,
     draftAdvancedSettings,
     setDraftAdvancedSettings,
-    updateNotificationPreferences,
-    enableNotifications,
     deleteAnnotation,
     updateAnnotation,
     startGeometryEdit,
@@ -440,9 +437,6 @@ export function MapScreenChrome({ controller, mapSlot }: MapScreenChromeProps) {
               onToggleLiveTransit: () =>
                 setTransitLiveEnabled(!transitLiveEnabled),
               onTransitRouteFilterChange: setTransitRouteFilter,
-              notificationPreferences,
-              onNotificationPreferencesChange: updateNotificationPreferences,
-              onEnableNotifications: enableNotifications,
             }}
             layers={{
               layerVisibility,
