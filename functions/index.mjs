@@ -20,6 +20,7 @@ export {
 export {
   captureStartingLocations,
   finalizeGameResult,
+  pollSessionOpsAgentRuns,
   purgeStaleSessions,
   warmPremiumOverpassPreload,
 } from "./handlers/triggers.mjs";
