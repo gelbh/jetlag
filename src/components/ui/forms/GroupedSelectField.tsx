@@ -1,6 +1,7 @@
 export interface GroupedSelectOption {
   value: string;
   label: string;
+  disabled?: boolean;
 }
 
 export interface GroupedSelectGroup {
@@ -46,14 +47,22 @@ export function GroupedSelectField({
           {placeholder}
         </option>
         {ungroupedOptions.map((option) => (
-          <option key={option.value} value={option.value}>
+          <option
+            key={option.value}
+            value={option.value}
+            disabled={option.disabled}
+          >
             {option.label}
           </option>
         ))}
         {groups.map((group) => (
           <optgroup key={group.id} label={group.label}>
             {group.options.map((option) => (
-              <option key={option.value} value={option.value}>
+              <option
+                key={option.value}
+                value={option.value}
+                disabled={option.disabled}
+              >
                 {option.label}
               </option>
             ))}
@@ -99,7 +108,11 @@ export function SimpleSelectField({
           {placeholder}
         </option>
         {options.map((option) => (
-          <option key={option.value} value={option.value}>
+          <option
+            key={option.value}
+            value={option.value}
+            disabled={option.disabled}
+          >
             {option.label}
           </option>
         ))}
