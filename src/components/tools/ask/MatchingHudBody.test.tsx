@@ -142,6 +142,21 @@ describe("MatchingHudBody", () => {
     ).toBeInTheDocument();
   });
 
+  it("keeps used categories visible but disabled", () => {
+    renderMatching(
+      <MatchingHudBody
+        {...baseProps}
+        categoryChosen={false}
+        usedCategoryIds={new Set(["landmass"])}
+        unavailableCategoryIds={new Set()}
+      />,
+    );
+    expect(screen.getByText("Landmass")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /landmass/i }),
+    ).toBeDisabled();
+  });
+
   it("renders GPS timeout with AskInlineError treatment", () => {
     renderMatching(
       <MatchingHudBody
