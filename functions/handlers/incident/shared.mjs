@@ -65,20 +65,12 @@ import { CURSOR_HOTFIX_ALREADY_LAUNCHED } from "../../incident/launchIncidentCur
 
 export const sentryDsnSecret = getSentryDsnSecret();
 export const incidentEmailSecret = defineSecret("INCIDENT_EMAIL_SECRET");
-/** OpenAI-compatible API key for session-ops support agent (never client-side). */
-export const sessionOpsLlmApiKey = defineSecret("SESSION_OPS_LLM_API_KEY");
-/** Cursor Cloud Agents API key for clear-bug hotfix launches (never client-side). */
+/** Cursor Cloud Agents API key (hotfix + session-ops). Never client-side. */
 export const cursorApiKey = defineSecret("CURSOR_API_KEY");
 /** Shared secret for Cursor → Jetlag session-ops MCP Bearer auth. */
 export const sessionOpsMcpAuthSecret = defineSecret("SESSION_OPS_MCP_AUTH_SECRET");
 export const incidentWorkerBaseUrl = defineString("INCIDENT_WORKER_BASE_URL", {
   default: "https://jetlag.gelbhart.dev",
-});
-export const sessionOpsLlmBaseUrl = defineString("SESSION_OPS_LLM_BASE_URL", {
-  default: "https://api.openai.com/v1",
-});
-export const sessionOpsLlmModel = defineString("SESSION_OPS_LLM_MODEL", {
-  default: "gpt-4o-mini",
 });
 /** Public HTTPS URL of the sessionOpsMcp Cloud Function (Cursor mcpServers.url). */
 export const sessionOpsMcpUrl = defineString("SESSION_OPS_MCP_URL", {

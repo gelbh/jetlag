@@ -1,14 +1,16 @@
 /**
- * OpenAI-compatible Chat Completions adapter for the session-ops support agent.
+ * Session-ops dual-channel prompt builders (policy vs untrusted data).
+ *
+ * Production turns use Cursor Cloud Agents: flatten via
+ * `buildSessionOpsAgentPrompt`. `callSessionOpsLlm` remains for unit tests only
+ * (OpenAI-compatible `/chat/completions`); callables no longer bind
+ * `SESSION_OPS_LLM_*`.
  *
  * Dual-channel injection model (design § Dual-channel):
  * - **Policy** messages: server-assembled only (sessionId, incidentId, allowlist,
  *   role, tier). Never concatenate user/admin NL into these strings.
  * - **Data** messages: untrusted player/admin text, diagnostics, tool results.
  *   Labeled so the model may read them but they must not override policy.
- *
- * Secret (Functions): `SESSION_OPS_LLM_API_KEY` via `defineSecret` in the
- * callable handler. No client keys.
  */
 
 import {
