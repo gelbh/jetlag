@@ -4,7 +4,6 @@ import { MapAttentionRing } from "../components/map/chrome/MapAttentionRing";
 import { MapLandscapeChromeShell } from "../components/session/mapChrome/MapLandscapeChromeShell";
 import { useMapLandscapeChrome } from "../components/session/mapChrome/MapLandscapeChromeContext";
 import { resolveLandscapeMapControlInset } from "../components/session/mapChrome/resolveLandscapeMapControlInset";
-import { useDesktopLayout } from "../hooks/layout/useDesktopLayout";
 import { HeavyToolHost } from "./map-screen/lazyImports";
 import { MapScreenChrome } from "./map-screen/MapScreenChrome";
 import { MapScreenMapLayers } from "./map-screen/MapScreenMapLayers";
@@ -15,17 +14,15 @@ import {
 
 function SeekerMapScreenBody({
   controller,
-  isDesktop,
   inactiveChrome,
 }: {
   controller: MapScreenController;
-  isDesktop: boolean;
   inactiveChrome: boolean;
 }) {
   const landscape = useMapLandscapeChrome();
   const mapChromeControlInset = resolveLandscapeMapControlInset(
     controller.mapChromeControlInset,
-    isDesktop,
+    false,
     landscape,
   ) as typeof controller.mapChromeControlInset;
 
@@ -59,18 +56,14 @@ function SeekerMapScreenBody({
           <HeavyToolHost model={controller.heavyMapToolsSlotProps} />
         </Suspense>
       ) : null}
-      {isDesktop ? null : mapLayersContent}
-      <MapScreenChrome
-        controller={controller}
-        mapSlot={isDesktop ? mapLayersContent : undefined}
-      />
+      {mapLayersContent}
+      <MapScreenChrome controller={controller} />
     </div>
   );
 }
 
 export function SeekerMapScreen() {
   const controller = useMapScreenController();
-  const isDesktop = useDesktopLayout();
   const syncMessage =
     controller.syncStatus.remoteUpdateNotice ??
     controller.syncStatus.lastSyncError ??
@@ -89,7 +82,6 @@ export function SeekerMapScreen() {
     >
       <SeekerMapScreenBody
         controller={controller}
-        isDesktop={isDesktop}
         inactiveChrome={inactiveChrome}
       />
     </MapLandscapeChromeShell>

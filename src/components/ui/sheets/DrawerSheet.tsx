@@ -3,6 +3,7 @@ import type { CSSProperties, ReactNode } from "react";
 import { cn } from "@/lib/cn";
 import { DrawerGrabber } from "@/components/ui/entry/entryChrome";
 import { bottomDrawerStyles } from "@/components/ui/entry/entryStyles";
+import { usePlayerPhoneShellPortalTarget } from "@/components/ui/layout/PlayerPhoneShell";
 import { JETLAG_MODAL_Z_INDEX } from "@/theme/theme";
 
 export interface DrawerSheetProps {
@@ -31,8 +32,8 @@ export interface DrawerSheetProps {
 }
 
 /**
- * Mobile/overlay sheet path: iOS bottom Drawer with grabber + safe-area.
- * Desktop ContextualRail stays on SheetHost.
+ * Phone-shell sheet path: iOS bottom Drawer with grabber + safe-area.
+ * Portals into PlayerPhoneShell when mounted so overlays stay in the 390 column.
  */
 export function DrawerSheet({
   open,
@@ -50,6 +51,7 @@ export function DrawerSheet({
 }: DrawerSheetProps) {
   const childScroll = scrollMode === "child";
   const baseStyles = bottomDrawerStyles(false);
+  const portalTarget = usePlayerPhoneShellPortalTarget();
 
   return (
     <Drawer
@@ -64,6 +66,7 @@ export function DrawerSheet({
       closeOnEscape={dismissible}
       lockScroll
       withinPortal
+      portalProps={portalTarget ? { target: portalTarget } : undefined}
       keepMounted={false}
       zIndex={JETLAG_MODAL_Z_INDEX}
       title={ariaLabel}

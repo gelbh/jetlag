@@ -33,7 +33,6 @@ import {
 } from "./hider-map-screen/hiderBoardEconomyChrome";
 import { useTimeTrapTool } from "../hooks/session/useTimeTrapTool";
 import type { HiderTruthRevealState } from "../components/session/banners/HiderTruthRevealBanner";
-import { useDesktopLayout } from "../hooks/layout/useDesktopLayout";
 import { HiderMapScreenChrome } from "./hider-map-screen/HiderMapScreenChrome";
 import { useResolvedSessionRules } from "../hooks/session/useResolvedSessionRules";
 import {
@@ -805,7 +804,6 @@ export function HiderMapScreen() {
     ],
   );
 
-  const isDesktop = useDesktopLayout();
   const chromeHudRef = useRef<HTMLDivElement>(null);
 
   if (!session || !gameArea) {
@@ -825,7 +823,7 @@ export function HiderMapScreen() {
   const mapLayers = (
     <div className="absolute inset-0">
       <MapViewWithLandscapeInset
-        isDesktop={isDesktop}
+        isDesktop={false}
         key={session.id}
         model={{
           chromeHudRef,
@@ -970,9 +968,8 @@ export function HiderMapScreen() {
             className="pointer-events-none fixed inset-0 z-[calc(var(--z-banner)-1)] bg-surface-deep/30"
           />
         ) : null}
-        {isDesktop ? null : mapLayersContent}
+        {mapLayersContent}
         <HiderMapScreenChrome
-          mapSlot={isDesktop ? mapLayersContent : undefined}
           controller={{
             session,
             hasMyZone: Boolean(myZone),

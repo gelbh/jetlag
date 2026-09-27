@@ -1,4 +1,4 @@
-import type { ReactNode, RefObject } from "react";
+import type { RefObject } from "react";
 import type {
   AnnotationRecord,
   SessionRecord,
@@ -18,11 +18,6 @@ import type { useSessionTimer } from "../../hooks/session/useSessionTimer";
 import type { useHiderZoneTool } from "../../hooks/session/useHiderZoneTool";
 import type { useTimeTrapTool } from "../../hooks/session/useTimeTrapTool";
 import { ChatPanel } from "../../components/chat/ChatPanel";
-import { ContextualRail } from "../../components/map/chrome/ContextualRail";
-import {
-  ContextualRailPanelProvider,
-  type ContextualRailTab,
-} from "../../components/map/chrome/ContextualRailContext";
 import { HidingZoneHudBody } from "../../components/tools/ask/HidingZoneHudBody";
 import { AskHudHost } from "../../components/tools/ask/AskHudHost";
 import {
@@ -48,7 +43,6 @@ import { MapSettingsSheet } from "../../components/session/mapChrome/MapSettings
 import { RoleCodesSheet } from "../../components/session/settings/RoleCodesSheet";
 import { HiderTruthRevealBanner } from "../../components/session/banners/HiderTruthRevealBanner";
 import { QuestionAlertBanner } from "../../components/session/banners/QuestionAlertBanner";
-import { useDesktopLayout } from "../../hooks/layout/useDesktopLayout";
 import { useMapTerminalSessionChrome } from "../../hooks/session/useMapTerminalSessionChrome";
 import { HiderToolDock } from "../../components/tools/HiderToolDock";
 import { SessionLog } from "../../components/session/log/SessionLog";
@@ -212,13 +206,10 @@ export type HiderMapScreenController = {
 
 export type HiderMapScreenChromeProps = {
   controller: HiderMapScreenController;
-  /** When set with desktop layout, map fills the ops shell center slot. */
-  mapSlot?: ReactNode;
 };
 
 export function HiderMapScreenChrome({
   controller,
-  mapSlot,
 }: HiderMapScreenChromeProps) {
   const {
     session,
@@ -294,8 +285,6 @@ export function HiderMapScreenChrome({
   const gameOverActions = useGameOverActions(session, {
     closeSheet: overlay.closeAllSheets,
   });
-  const isDesktop = useDesktopLayout();
-  const toolLayout = isDesktop ? "rail" : "dock";
   const roleConfig = getMapScreenRoleConfig("hider");
   const setSelectedAnnotationId = useAnnotationStore(
     (state) => state.setSelectedAnnotationId,
@@ -303,46 +292,6 @@ export function HiderMapScreenChrome({
   const markAnnotationPulse = useAnnotationStore(
     (state) => state.markAnnotationPulse,
   );
-
-  const railActiveTab: ContextualRailTab | null =
-    overlay.sheet === "chat" ||
-    overlay.sheet === "settings" ||
-    overlay.sheet === "log" ||
-    overlay.sheet === "codes"
-      ? overlay.sheet
-      : overlay.settingsInStack
-        ? "settings"
-        : null;
-
-  const handleSelectRailTab = (tab: ContextualRailTab) => {
-    switch (tab) {
-      case "settings":
-        onOpenSettings();
-        return;
-      case "chat":
-        onOpenChat();
-        return;
-      case "log":
-        onOpenLog();
-        return;
-      case "codes":
-        onOpenCodes();
-        return;
-      default: {
-        const _exhaustive: never = tab;
-        return _exhaustive;
-      }
-    }
-  };
-
-  const contextualRail = isDesktop ? (
-    <ContextualRail
-      open={overlay.sheet !== "none" || overlay.sheetStack.length > 0}
-      activeTab={railActiveTab}
-      onClose={overlay.closeSheet}
-      onSelectTab={handleSelectRailTab}
-    />
-  ) : null;
 
   const statusRail = (
     <>
@@ -357,7 +306,7 @@ export function HiderMapScreenChrome({
           roleGates: session.roleGates,
           sessionRules: session,
           playerRole: roleConfig.statusPlayerRole,
-          expanded: isDesktop,
+          expanded: false,
           activeTool: "none",
           syncStatus: syncStatus.status,
           queuedWrites: syncStatus.queuedWrites,
@@ -449,7 +398,7 @@ export function HiderMapScreenChrome({
 
   const toolDock = (
     <HiderToolDock
-      layout={toolLayout}
+      layout="dock"
       zoneLabel={zoneLabel}
       onZoneAction={onZoneAction}
       zoneDisabled={!zoneTool.writesEnabled || inactiveChrome}
@@ -471,14 +420,11 @@ export function HiderMapScreenChrome({
   );
 
   return (
-    <ContextualRailPanelProvider>
-      <MapScreenChromeSlots
-        chromeHudRef={chromeHudRef}
-        header={statusRail}
-        toolbar={toolDock}
-        mapSlot={mapSlot}
-        contextual={contextualRail}
-      >
+    <MapScreenChromeSlots
+      chromeHudRef={chromeHudRef}
+      header={statusRail}
+      toolbar={toolDock}
+    >
         <GameOverChrome
           sessionId={session.id}
           playerRole={roleConfig.statusPlayerRole}
@@ -721,6 +667,5 @@ export function HiderMapScreenChrome({
           }}
         />
       </MapScreenChromeSlots>
-    </ContextualRailPanelProvider>
   );
 }

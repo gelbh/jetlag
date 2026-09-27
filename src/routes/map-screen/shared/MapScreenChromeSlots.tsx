@@ -1,25 +1,24 @@
 import type { ReactNode, Ref } from "react";
-import { DesktopOpsShell } from "@/components/map/chrome/DesktopOpsShell";
 import { useMapLandscapeChrome } from "@/components/session/mapChrome/MapLandscapeChromeContext";
 import {
   mapLandscapeChromeHeaderCollapseClass,
   mapLandscapeChromeToolbarCollapseClass,
 } from "@/components/session/mapChrome/mapLandscapeChromeClasses";
-import { useDesktopLayout } from "@/hooks/layout/useDesktopLayout";
 
 export type MapScreenChromeSlotsLayout = "ops-or-hud" | "fragments";
 
 export type MapScreenChromeSlotsProps = {
-  /** Status / header region (top HUD or DesktopOpsShell status). */
+  /** Status / header region (top HUD). */
   header: ReactNode;
-  /** Tool dock / bottom actions (DesktopOpsShell tools). */
+  /** Tool dock / bottom actions. */
   toolbar?: ReactNode;
-  /** When set with desktop layout + `ops-or-hud`, fills the ops shell map slot. */
+  /** @deprecated Desktop ops map slot removed; map renders beside chrome. */
   mapSlot?: ReactNode;
+  /** @deprecated Contextual rail removed with DesktopOpsShell. */
   contextual?: ReactNode;
   chromeHudRef?: Ref<HTMLDivElement>;
   /**
-   * `ops-or-hud` — DesktopOpsShell when desktop+mapSlot, else fixed HUD.
+   * `ops-or-hud` — fixed HUD (phone dock layout).
    * `fragments` — render header/toolbar/children as-is (admin compact overlays).
    */
   layout?: MapScreenChromeSlotsLayout;
@@ -33,19 +32,16 @@ export type MapScreenChromeSlotsProps = {
 export function MapScreenChromeSlots({
   header,
   toolbar = null,
-  mapSlot,
-  contextual,
   chromeHudRef,
   layout = "ops-or-hud",
   children,
 }: MapScreenChromeSlotsProps) {
-  const isDesktop = useDesktopLayout();
   const { mode: landscapeChromeMode, chip: landscapeChip } =
     useMapLandscapeChrome();
   if (layout === "fragments") {
     return (
       <div
-        className="map-chrome-hud map-chrome-hud--fragments group/map-chrome pointer-events-none fixed inset-0 z-[var(--z-dock)] overflow-visible"
+        className="map-chrome-hud map-chrome-hud--fragments group/map-chrome pointer-events-none absolute inset-0 z-[var(--z-dock)] overflow-visible"
         data-landscape-chrome={
           landscapeChromeMode === "portrait" ? undefined : landscapeChromeMode
         }
@@ -58,27 +54,12 @@ export function MapScreenChromeSlots({
     );
   }
 
-  if (isDesktop && mapSlot) {
-    return (
-      <>
-        <DesktopOpsShell
-          chromeHudRef={chromeHudRef}
-          status={header}
-          tools={toolbar}
-          map={mapSlot}
-          contextual={contextual}
-        />
-        {children}
-      </>
-    );
-  }
-
   return (
     <>
       <div
         ref={chromeHudRef}
         id="map-chrome-hud-controls"
-        className="map-chrome-hud group/map-chrome pointer-events-none fixed inset-0 z-[var(--z-dock)] overflow-visible"
+        className="map-chrome-hud group/map-chrome pointer-events-none absolute inset-0 z-[var(--z-dock)] overflow-visible"
         data-landscape-chrome={
           landscapeChromeMode === "portrait" ? undefined : landscapeChromeMode
         }

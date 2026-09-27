@@ -113,7 +113,7 @@ export type MapStatusRailModel = {
   terminalSessionError?:
     import("@/domain/device/feedback/userErrors").UserErrorDisplay | null;
   onReturnToJoin?: () => void;
-  /** In-flow status for DesktopOpsShell (vs absolute overlay on mobile). */
+  /** Expanded in-flow status (legacy ops shell); phone overlay keeps false. */
   expanded?: boolean;
   /** Synced hiding-zone Move card — drives PHASE=MOVE in status chrome. */
   moveInProgress?: boolean;

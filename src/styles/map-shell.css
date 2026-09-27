@@ -39,6 +39,14 @@
     min-height: 0;
   }
 
+  /* Phone shell column: keep map chrome inside the 390px host (not viewport-fixed). */
+  [data-player-phone-shell] .map-screen-shell {
+    position: absolute;
+    inset: 0;
+    min-height: 0;
+    width: 100%;
+  }
+
   .map-chrome-hud {
     overflow: visible;
   }

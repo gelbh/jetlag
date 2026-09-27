@@ -1,6 +1,7 @@
 import { MantineProvider } from "@mantine/core";
 import { Notifications } from "@mantine/notifications";
 import type { ReactNode } from "react";
+import { PHONE_SHELL_MAX_WIDTH_PX } from "@/theme/phoneShell";
 import {
   JETLAG_TOAST_Z_INDEX,
   jetlagCssVariablesResolver,
@@ -19,7 +20,7 @@ export function AppUiProvider({ children }: { children: ReactNode }) {
         position="top-center"
         autoClose={4200}
         limit={3}
-        containerWidth={420}
+        containerWidth={PHONE_SHELL_MAX_WIDTH_PX}
       />
       {children}
     </MantineProvider>
