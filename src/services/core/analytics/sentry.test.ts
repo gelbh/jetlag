@@ -8,15 +8,11 @@ const withScope = vi.hoisted(() =>
   }),
 );
 
-vi.mock("@sentry/capacitor", () => ({
+vi.mock("@sentry/react", () => ({
   addBreadcrumb,
   captureMessage,
   withScope,
   captureException: vi.fn(),
-  init: vi.fn(),
-}));
-
-vi.mock("@sentry/react", () => ({
   init: vi.fn(),
   browserTracingIntegration: vi.fn(),
   replayIntegration: vi.fn(),

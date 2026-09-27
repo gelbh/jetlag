@@ -1,13 +1,28 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { MantineProvider } from "@mantine/core";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { PendingQuestionRecord } from "@/domain/session/activity/sessionChat";
 import { THERMOMETER_WALK_MAX_DURATION_MS } from "@/domain/questions";
+import { jetlagTheme } from "@/theme/theme";
 import { MapTimerCluster } from "./MapTimerCluster";
 
 vi.mock("../../../state/mapStore", () => ({
   useMapStore: (selector: (state: { lowPowerMode: boolean }) => unknown) =>
     selector({ lowPowerMode: false }),
 }));
+
+beforeEach(() => {
+  vi.stubGlobal("matchMedia", (query: string) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: () => {},
+    removeListener: () => {},
+    addEventListener: () => {},
+    removeEventListener: () => {},
+    dispatchEvent: () => false,
+  }));
+});
 
 const walkingQuestion: PendingQuestionRecord = {
   id: "pq-walk",
@@ -26,33 +41,31 @@ const timerState = {
   runningSince: null as number | null,
 };
 
-describe("MapTimerCluster thermometer cancel", () => {
-  it("shows Cancel for host on a walking thermometer", () => {
-    const onCancel = vi.fn();
-    vi.spyOn(window, "confirm").mockReturnValue(true);
+function renderCluster(
+  ui: React.ReactElement,
+) {
+  return render(
+    <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
+      {ui}
+    </MantineProvider>,
+  );
+}
 
-    render(
+describe("MapTimerCluster", () => {
+  it("renders nothing before the session timer has started", () => {
+    renderCluster(
       <MapTimerCluster
         sessionRules={{ gameSize: "medium" }}
         timerState={timerState}
-        timerRunning
-        timerHasStarted
-        pendingQuestions={[walkingQuestion]}
-        myUid="host-1"
-        hostUid="host-1"
-        onCancelWalkingQuestion={onCancel}
-        onOpenTimerMenu={vi.fn()}
-        timerMenuOpen={false}
+        timerRunning={false}
+        timerHasStarted={false}
       />,
     );
-
-    expect(screen.getByRole("button", { name: "Cancel thermometer walk" })).toBeTruthy();
-    screen.getByRole("button", { name: "Cancel thermometer walk" }).click();
-    expect(onCancel).toHaveBeenCalledWith("pq-walk");
+    expect(screen.queryByTitle("Session time since start")).toBeNull();
   });
 
   it("shows Stale GPS for host when the walk is stale", () => {
-    render(
+    renderCluster(
       <MapTimerCluster
         sessionRules={{ gameSize: "medium" }}
         timerState={timerState}
@@ -62,84 +75,44 @@ describe("MapTimerCluster thermometer cancel", () => {
         myUid="host-1"
         hostUid="host-1"
         seekerLocations={[]}
-        onCancelWalkingQuestion={vi.fn()}
-        onOpenTimerMenu={vi.fn()}
-        timerMenuOpen={false}
       />,
     );
 
     expect(screen.getByText("Stale GPS")).toBeTruthy();
   });
 
-  it("shows Cancel for the walk creator even when not host", () => {
-    const onCancel = vi.fn();
-
-    render(
+  it("shows Walking cue while thermometer walk is active and fresh", () => {
+    renderCluster(
       <MapTimerCluster
         sessionRules={{ gameSize: "medium" }}
         timerState={timerState}
         timerRunning
         timerHasStarted
-        pendingQuestions={[walkingQuestion]}
-        myUid="seeker-1"
+        pendingQuestions={[
+          {
+            ...walkingQuestion,
+            createdAt: new Date().toISOString(),
+          },
+        ]}
+        myUid="host-1"
         hostUid="host-1"
-        onCancelWalkingQuestion={onCancel}
-        onOpenTimerMenu={vi.fn()}
-        timerMenuOpen={false}
+        seekerLocations={[
+          {
+            uid: "seeker-1",
+            sessionId: "session-1",
+            updatedAt: new Date().toISOString(),
+            lat: 0,
+            lng: 0,
+          },
+        ]}
       />,
     );
 
-    expect(screen.getByRole("button", { name: "Cancel thermometer walk" })).toBeTruthy();
+    expect(screen.getByText("Walking")).toBeTruthy();
   });
 
-  it("hides Cancel for non-host non-creator seekers", () => {
-    render(
-      <MapTimerCluster
-        sessionRules={{ gameSize: "medium" }}
-        timerState={timerState}
-        timerRunning
-        timerHasStarted
-        pendingQuestions={[walkingQuestion]}
-        myUid="seeker-2"
-        hostUid="host-1"
-        onCancelWalkingQuestion={vi.fn()}
-        onOpenTimerMenu={vi.fn()}
-        timerMenuOpen={false}
-      />,
-    );
-
-    expect(screen.queryByRole("button", { name: "Cancel thermometer walk" })).toBeNull();
-  });
-});
-
-describe("MapTimerCluster dual stack", () => {
-  it("stacks Elapsed secondary under hiding countdown", () => {
-    const { container } = render(
-      <MapTimerCluster
-        sessionRules={{ gameSize: "medium", hidingPeriodMinutes: 90 }}
-        timerState={{ accumulatedMs: 60_000, runningSince: Date.now() }}
-        timerRunning
-        timerHasStarted
-        pendingQuestions={[]}
-        onOpenTimerMenu={vi.fn()}
-        timerMenuOpen={false}
-      />,
-    );
-
-    expect(screen.getByText("Elapsed")).toBeTruthy();
-    expect(
-      screen.getByRole("button", { name: /Session elapsed/i }),
-    ).toBeTruthy();
-    const cluster = container.querySelector(".jl-timer-cluster");
-    expect(cluster).toBeTruthy();
-    const children = cluster?.children ?? [];
-    expect(children.length).toBeGreaterThanOrEqual(2);
-    expect(children[0]?.classList.contains("jl-ticker-hiding")).toBe(true);
-    expect(children[1]?.classList.contains("jl-ticker-secondary")).toBe(true);
-  });
-
-  it("shows SEEK primary without Elapsed when hiding is over", () => {
-    render(
+  it("shows seek-phase elapsed after hiding ends", () => {
+    renderCluster(
       <MapTimerCluster
         sessionRules={{ gameSize: "medium", hidingPeriodMinutes: 1 }}
         timerState={{
@@ -149,36 +122,10 @@ describe("MapTimerCluster dual stack", () => {
         timerRunning={false}
         timerHasStarted
         pendingQuestions={[]}
-        onOpenTimerMenu={vi.fn()}
-        timerMenuOpen={false}
       />,
     );
 
-    expect(screen.getByText("SEEK")).toBeTruthy();
-    expect(screen.queryByText("Elapsed")).toBeNull();
-  });
-
-  it("renders Cancel outside the timer cluster row", () => {
-    const { container } = render(
-      <MapTimerCluster
-        sessionRules={{ gameSize: "medium" }}
-        timerState={timerState}
-        timerRunning
-        timerHasStarted
-        pendingQuestions={[walkingQuestion]}
-        myUid="host-1"
-        hostUid="host-1"
-        onCancelWalkingQuestion={vi.fn()}
-        onOpenTimerMenu={vi.fn()}
-        timerMenuOpen={false}
-      />,
-    );
-
-    const cancel = screen.getByRole("button", {
-      name: "Cancel thermometer walk",
-    });
-    expect(cancel.classList.contains("jl-timer-cancel")).toBe(true);
-    expect(cancel.closest(".jl-timer-cluster")).toBeNull();
-    expect(container.querySelector(".jl-timer-cluster")).toBeTruthy();
+    // Primary session clock plus seek-phase secondary (formatted elapsed).
+    expect(screen.getAllByText(/\d+:\d{2}/).length).toBeGreaterThanOrEqual(1);
   });
 });

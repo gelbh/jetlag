@@ -101,6 +101,133 @@ export function sortActivityEventsDesc(
   );
 }
 
+/** Ask + resolve plate for the session log (oldest-first / messaging order). */
+export type SessionActivityLogEntry =
+  | { kind: "single"; event: SessionActivityEvent }
+  | {
+      kind: "pair";
+      asked: SessionActivityEvent;
+      resolved: SessionActivityEvent;
+    };
+
+function activityPendingId(event: SessionActivityEvent): string | undefined {
+  switch (event.type) {
+    case "question_asked":
+    case "question_answered":
+    case "question_cancelled":
+    case "thermometer_walk_started":
+    case "thermometer_walk_separated":
+    case "photo_asked":
+    case "photo_answered":
+      return event.payload.pendingQuestionId;
+    default:
+      return undefined;
+  }
+}
+
+function isAskEvent(event: SessionActivityEvent): boolean {
+  return (
+    event.type === "question_asked" ||
+    event.type === "photo_asked" ||
+    event.type === "thermometer_walk_started"
+  );
+}
+
+function isResolveEvent(event: SessionActivityEvent): boolean {
+  return (
+    event.type === "question_answered" ||
+    event.type === "question_cancelled" ||
+    event.type === "photo_answered" ||
+    event.type === "thermometer_walk_separated"
+  );
+}
+
+function askMatchesResolve(
+  asked: SessionActivityEvent,
+  resolved: SessionActivityEvent,
+): boolean {
+  const askPending = activityPendingId(asked);
+  const resolvePending = activityPendingId(resolved);
+  if (askPending && resolvePending && askPending === resolvePending) {
+    return true;
+  }
+
+  if (
+    asked.type === "question_asked" &&
+    (resolved.type === "question_answered" ||
+      resolved.type === "question_cancelled")
+  ) {
+    const askAnn = asked.payload.annotationId;
+    const resolveAnn =
+      resolved.type === "question_answered"
+        ? resolved.payload.annotationId
+        : undefined;
+    if (askAnn && resolveAnn && askAnn === resolveAnn) {
+      return true;
+    }
+    return (
+      asked.payload.toolType === resolved.payload.toolType &&
+      asked.payload.promptText === resolved.payload.promptText
+    );
+  }
+
+  if (asked.type === "photo_asked" && resolved.type === "photo_answered") {
+    return (
+      Boolean(askPending && resolvePending && askPending === resolvePending) ||
+      (Boolean(asked.payload.promptText) &&
+        asked.payload.promptText === resolved.payload.promptText)
+    );
+  }
+
+  if (
+    asked.type === "thermometer_walk_started" &&
+    resolved.type === "thermometer_walk_separated"
+  ) {
+    return Boolean(askPending && resolvePending && askPending === resolvePending);
+  }
+
+  return false;
+}
+
+/**
+ * Oldest-first log entries (messaging order): pair ask→resolve when they share
+ * a pending id (or matching prompt/tool), so the UI can show one plate.
+ */
+export function groupSessionActivityEntries(
+  events: readonly SessionActivityEvent[],
+): SessionActivityLogEntry[] {
+  const sorted = sortActivityEventsDesc(events);
+  const asks = sorted.filter(isAskEvent);
+  const consumed = new Set<string>();
+  const entries: SessionActivityLogEntry[] = [];
+
+  for (const event of sorted) {
+    if (consumed.has(event.id)) {
+      continue;
+    }
+
+    if (isResolveEvent(event)) {
+      const asked = asks.find(
+        (candidate) =>
+          !consumed.has(candidate.id) && askMatchesResolve(candidate, event),
+      );
+      if (asked) {
+        consumed.add(asked.id);
+        consumed.add(event.id);
+        entries.push({ kind: "pair", asked, resolved: event });
+        continue;
+      }
+    }
+
+    consumed.add(event.id);
+    entries.push({ kind: "single", event });
+  }
+
+  // Pair while newest-first, then reverse so the feed reads oldest → newest.
+  entries.reverse();
+  return entries;
+}
+
 /** Annotation id for map focus / edit when the event links to a live answer. */
 export function activityAnnotationId(
   event: SessionActivityEvent,
@@ -174,39 +301,39 @@ export function sessionActivitySummary(event: SessionActivityEvent): string {
     case "thermometer_walk_started":
       return "Thermometer walk started";
     case "thermometer_walk_separated":
-      return "Thermometer ready — awaiting answer";
+      return "Thermometer ready, awaiting answer";
     case "question_asked":
-      return `${activityToolLabel(event.payload.toolType)} asked — ${event.payload.promptText}`;
+      return `${activityToolLabel(event.payload.toolType)} asked: ${event.payload.promptText}`;
     case "question_answered": {
       const tool = activityToolLabel(event.payload.toolType);
       const { promptText, answerSummary } = event.payload;
       if (answerSummary) {
-        return `${tool} — ${promptText}: ${answerSummary}`;
+        return `${tool}: ${promptText}: ${answerSummary}`;
       }
-      return `${tool} — ${promptText}`;
+      return `${tool}: ${promptText}`;
     }
     case "question_cancelled":
-      return `${activityToolLabel(event.payload.toolType)} cancelled — ${event.payload.promptText}`;
+      return `${activityToolLabel(event.payload.toolType)} cancelled: ${event.payload.promptText}`;
     case "photo_asked":
       return event.payload.promptText
-        ? `Photo asked — ${event.payload.promptText}`
+        ? `Photo asked: ${event.payload.promptText}`
         : "Photo asked";
     case "photo_answered": {
       const { promptText, answerSummary } = event.payload;
       if (promptText && answerSummary) {
-        return `Photo answered — ${promptText}: ${answerSummary}`;
+        return `Photo answered: ${promptText}: ${answerSummary}`;
       }
       if (answerSummary) {
-        return `Photo answered — ${answerSummary}`;
+        return `Photo answered: ${answerSummary}`;
       }
       if (promptText) {
-        return `Photo answered — ${promptText}`;
+        return `Photo answered: ${promptText}`;
       }
       return "Photo answered";
     }
     case "game_ended":
       return event.payload.summary
-        ? `Game ended — ${event.payload.summary}`
+        ? `Game ended: ${event.payload.summary}`
         : "Game ended";
     default: {
       const _exhaustive: never = event;

@@ -124,9 +124,6 @@ export function useMapScreenCore(options: UseMapScreenCoreOptions = {}) {
   const keepScreenAwake = useMapStore((state) => state.keepScreenAwake);
   const setKeepScreenAwake = useMapStore((state) => state.setKeepScreenAwake);
   const setLowPowerMode = useMapStore((state) => state.setLowPowerMode);
-  const notificationPreferences = useMapStore(
-    (state) => state.notificationPreferences,
-  );
   const setLayerVisibility = useMapStore((state) => state.setLayerVisibility);
   const {
     createAnnotation,
@@ -177,14 +174,11 @@ export function useMapScreenCore(options: UseMapScreenCoreOptions = {}) {
     syncStatus,
     hasUnreadChat,
     unreadCount,
-    enableNotifications,
-    updateNotificationPreferences,
     authReady: firebaseAuthReady,
   } = useSharedSessionScreen({
     isChatOpen: overlay.isChatOpen,
     notificationRole: roleConfig.notificationRole,
     authMode: roleConfig.authMode,
-    liveActivityEnabled: roleConfig.liveActivityEnabled,
     exitPath: roleConfig.exitPath,
   });
 
@@ -363,7 +357,6 @@ export function useMapScreenCore(options: UseMapScreenCoreOptions = {}) {
     setLayerVisibility,
     keepScreenAwake,
     setKeepScreenAwake,
-    notificationPreferences,
     createAnnotation,
     deleteAnnotation,
     updateAnnotation,
@@ -390,8 +383,6 @@ export function useMapScreenCore(options: UseMapScreenCoreOptions = {}) {
     syncStatus,
     hasUnreadChat,
     unreadCount,
-    enableNotifications,
-    updateNotificationPreferences,
     firebaseAuthReady,
     gameRulesEditable,
     mapShellRef,

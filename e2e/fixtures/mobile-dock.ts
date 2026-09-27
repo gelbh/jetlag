@@ -65,12 +65,9 @@ export async function injectSimulatedSafeAreaBottom(
   await page.evaluate((bottomPx) => {
     const root = document.documentElement;
     root.style.setProperty("--safe-area-bottom", `${bottomPx}px`);
+    // Host float gap stays --dock-float-gap (not full home-indicator inset).
     const sheet = document.getElementById("jl-e2e-safe-area-bottom");
-    const css = `:root { --jl-e2e-safe-bottom: ${bottomPx}px; }
-.jl-map-bottom-chrome:not(.jl-map-bottom-chrome--rail),
-.jl-tool-dock:not(.jl-tool-dock--rail) {
-  padding-bottom: ${bottomPx}px !important;
-}`;
+    const css = `:root { --jl-e2e-safe-bottom: ${bottomPx}px; --safe-area-bottom: ${bottomPx}px; }`;
     if (sheet) {
       sheet.textContent = css;
       return;
@@ -91,9 +88,8 @@ export async function injectSimulatedSafeAreaTop(
     root.style.setProperty("--safe-area-top", `${topPx}px`);
     root.style.paddingTop = "0px";
     const sheet = document.getElementById("jl-e2e-safe-area-top");
-    const css = `:root { --jl-e2e-safe-top: ${topPx}px; }
-.jl-status-rail { padding-top: ${topPx}px !important; }
-.map-screen-shell::before { height: ${topPx}px !important; }`;
+    // One token owns CSS float pad and JS clamp (var(--safe-area-top)).
+    const css = `:root { --jl-e2e-safe-top: ${topPx}px; --safe-area-top: ${topPx}px; }`;
     if (sheet) {
       sheet.textContent = css;
       return;
@@ -106,6 +102,8 @@ export async function injectSimulatedSafeAreaTop(
 }
 
 export const SIMULATED_SAFE_AREA_BOTTOM_PX = 34;
+/** Matches --dock-float-gap (0.75rem) under OverlayHost. */
+export const DOCK_FLOAT_GAP_PX = 12;
 export const SIMULATED_SAFE_AREA_TOP_PX = 59;
 
 /** Emulate standalone PWA display mode for dock safe-area smoke. */
@@ -117,7 +115,10 @@ export async function injectStandaloneDisplayMode(page: Page) {
       get: () => true,
     });
     const apply = () => {
-      document.documentElement.classList.add("jl-e2e-standalone");
+      document.documentElement.classList.add(
+        "jl-e2e-standalone",
+        "jl-standalone-shell",
+      );
       if (document.getElementById("jl-e2e-standalone-mode")) return;
       const el = document.createElement("style");
       el.id = "jl-e2e-standalone-mode";
@@ -133,7 +134,10 @@ export async function injectStandaloneDisplayMode(page: Page) {
     else document.addEventListener("DOMContentLoaded", apply);
   });
   await page.evaluate(() => {
-    document.documentElement.classList.add("jl-e2e-standalone");
+    document.documentElement.classList.add(
+      "jl-e2e-standalone",
+      "jl-standalone-shell",
+    );
     const sheet = document.getElementById("jl-e2e-standalone-mode");
     const css = `@media (display-mode: standalone) {
   .jl-e2e-standalone .jl-map-bottom-chrome-host,

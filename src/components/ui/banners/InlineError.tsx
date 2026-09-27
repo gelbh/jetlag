@@ -1,4 +1,9 @@
 import type { ReactNode } from "react";
+import { Alert } from "@mantine/core";
+import {
+  askInlineErrorCopy,
+  isLocationInlineError,
+} from "@/components/tools/shared/readout/AskInlineError";
 
 interface InlineErrorProps {
   children: ReactNode;
@@ -6,14 +11,23 @@ interface InlineErrorProps {
   id?: string;
 }
 
+/** Channel-3 soft alert strip (GPS timeout gets title + detail). */
 export function InlineError({ children, className = "", id }: InlineErrorProps) {
+  const copy =
+    typeof children === "string" && isLocationInlineError(children)
+      ? askInlineErrorCopy(children)
+      : null;
+
   return (
-    <p
+    <Alert
       id={id}
       role="alert"
-      className={`jl-selectable text-sm text-status-error ${className}`.trim()}
+      color="halt"
+      variant="light"
+      className={["jl-selectable", className].filter(Boolean).join(" ")}
+      title={copy?.title}
     >
-      {children}
-    </p>
+      {copy ? copy.detail : children}
+    </Alert>
   );
 }

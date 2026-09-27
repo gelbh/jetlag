@@ -1,4 +1,3 @@
-import { useId, useState } from "react";
 import type { AdvancedSessionSettingsValue } from "@/domain/session/tools/advancedSessionSettings";
 import type { DistanceUnit } from "@/domain/map/distance";
 import type { GameSize } from "@/domain/session/size/gameSize";
@@ -9,7 +8,10 @@ import { CustomMeasureGeometrySettings } from "./CustomMeasureGeometrySettings";
 import { DeadlinesSection } from "../advancedSettings/DeadlinesSection";
 import { ExpansionPackSection } from "../advancedSettings/ExpansionPackSection";
 import { HidingZoneSection } from "../advancedSettings/HidingZoneSection";
-import { SectionSummary } from "../advancedSettings/shared";
+import {
+  AdvancedSettingsCategory,
+  SectionSummary,
+} from "../advancedSettings/shared";
 import { TentaclesSection } from "../advancedSettings/TentaclesSection";
 import { ThermometerSection } from "../advancedSettings/ThermometerSection";
 import { ToolsSection } from "../advancedSettings/ToolsSection";
@@ -34,9 +36,6 @@ export function AdvancedSessionSettings({
   disabled,
   collapsible = true,
 }: AdvancedSessionSettingsProps) {
-  const [open, setOpen] = useState(!collapsible);
-  const panelId = useId();
-
   const embedded = !collapsible;
 
   const sectionProps = {
@@ -75,16 +74,8 @@ export function AdvancedSessionSettings({
       : undefined,
   });
 
-  const panelClassName = embedded
-    ? "space-y-4"
-    : "space-y-4 border-2 border-border bg-surface-deep p-3";
-
-  const panel = (
-    <div
-      id={panelId}
-      hidden={collapsible ? !open : false}
-      className={panelClassName}
-    >
+  const body = (
+    <div className="space-y-4">
       {!embedded ? (
         <SectionSummary
           text={`Effective: ${effectiveSummary.hidingPeriodLabel} · ${effectiveSummary.hidingZoneLabel} · ${effectiveSummary.tentacleLabel} · ${effectiveSummary.thermometerMaxLabel}`}
@@ -95,59 +86,45 @@ export function AdvancedSessionSettings({
       <DeadlinesSection {...sectionProps} />
       <ToolsSection {...sectionProps} />
 
-      <div
-        className={
-          embedded
-            ? "space-y-3"
-            : "space-y-3 border-t border-border pt-3"
-        }
+      <AdvancedSettingsCategory
+        title="Thermometer and tentacles"
+        defaultOpen={false}
       >
-        {!embedded ? (
-          <p className="font-display text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-dim">
-            Thermometer and tentacles
-          </p>
-        ) : null}
         <ThermometerSection {...sectionProps} />
         <TentaclesSection {...sectionProps} />
-      </div>
+      </AdvancedSettingsCategory>
 
       <ExpansionPackSection {...sectionProps} />
 
-      <CustomMeasureGeometrySettings
-        value={value}
-        onChange={onChange}
-        disabled={disabled}
-      />
+      <AdvancedSettingsCategory
+        title="Custom measuring geometry"
+        defaultOpen={false}
+      >
+        <CustomMeasureGeometrySettings
+          value={value}
+          onChange={onChange}
+          disabled={disabled}
+        />
+      </AdvancedSettingsCategory>
 
-      <SessionCustomContentSettings
-        value={value}
-        onChange={onChange}
-        gameArea={gameArea}
-        disabled={disabled}
-      />
+      <AdvancedSettingsCategory title="Custom content" defaultOpen={false}>
+        <SessionCustomContentSettings
+          value={value}
+          onChange={onChange}
+          gameArea={gameArea}
+          disabled={disabled}
+        />
+      </AdvancedSettingsCategory>
     </div>
   );
 
   if (!collapsible) {
-    return <div className="space-y-2">{panel}</div>;
+    return body;
   }
 
   return (
-    <div className="space-y-2">
-      <button
-        type="button"
-        aria-expanded={open}
-        aria-controls={panelId}
-        disabled={disabled}
-        onClick={() => setOpen((current) => !current)}
-        className="flex min-h-11 w-full items-center justify-between border-2 border-border bg-surface-deep px-3 py-2 text-left disabled:opacity-50"
-      >
-        <span className="font-display text-xs font-semibold uppercase tracking-[0.1em] text-ink-dim">
-          Advanced
-        </span>
-        <span className="text-xs text-ink-muted">{open ? "Hide" : "Show"}</span>
-      </button>
-      {panel}
-    </div>
+    <AdvancedSettingsCategory title="Advanced" defaultOpen={false}>
+      {body}
+    </AdvancedSettingsCategory>
   );
 }

@@ -1,6 +1,19 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
 import { MeasuringRefineMapChip } from "./MeasuringRefineMapChip";
+
+beforeEach(() => {
+  vi.stubGlobal("matchMedia", (query: string) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener() {},
+    removeListener() {},
+    addEventListener() {},
+    removeEventListener() {},
+    dispatchEvent: () => false,
+  }));
+});
 
 describe("MeasuringRefineMapChip", () => {
   it("uses measuring copy by default", () => {
@@ -19,6 +32,18 @@ describe("MeasuringRefineMapChip", () => {
     );
     expect(screen.getByText("Loading places")).toBeTruthy();
     expect(screen.getByText("Adding remaining areas to the map…")).toBeTruthy();
+  });
+
+  it("uses frosted iOS chrome", () => {
+    render(
+      <MeasuringRefineMapChip
+        visible
+        title="Loading places"
+        body="Adding remaining areas to the map…"
+      />,
+    );
+    expect(screen.getByTestId("measuring-refine-chip")).toBeInTheDocument();
+    expect(screen.getByText("Loading places")).toBeTruthy();
   });
 
   it("hides when not refining", () => {

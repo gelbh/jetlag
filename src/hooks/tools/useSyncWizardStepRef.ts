@@ -60,7 +60,7 @@ export function getLatestWizardStepIdForTool(toolId: string): string | null {
  * see the place-phase step in the same commit as tool open/switch.
  */
 export function useSyncWizardStepRef(
-  wizardStepRef: RefObject<string> | undefined,
+  wizardStepRef: RefObject<string | null> | undefined,
   stepId: string,
   toolId?: string,
 ): void {

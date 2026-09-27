@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Button, Stack, Text } from "@mantine/core";
 import {
   PHOTO_CANNOT_ANSWER_LABEL,
   PHOTO_SENT_EXTERNALLY_LABEL,
@@ -10,6 +11,10 @@ import {
 } from "../../domain/questions";
 import type { DistanceUnit } from "../../domain/map/distance";
 import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
+import {
+  filledStyles,
+  grayStyles,
+} from "../ui/entry/entryChrome";
 
 interface PhotoAnswerUploaderProps {
   sessionId: string;
@@ -70,30 +75,47 @@ export function PhotoAnswerUploader({
   };
 
   return (
-    <div className="mt-3 space-y-2">
-      <p className="rounded-lg border border-status-warning/30 bg-status-warning/10 px-3 py-2 text-xs leading-snug text-ink">
+    <Stack gap={8} mt={8}>
+      <Text
+        size="xs"
+        c="var(--color-field-ink)"
+        lh={1.35}
+        px={10}
+        py={8}
+        style={{
+          borderRadius: 12,
+          border: "1px solid oklch(from var(--color-halt) l c h / 0.35)",
+          backgroundColor: "oklch(from var(--color-halt) l c h / 0.1)",
+        }}
+      >
         {PHOTO_UPLOAD_OUTAGE_NOTICE}
-      </p>
+      </Text>
       {ruleSummary ? (
-        <p className="text-xs leading-snug text-ink-dim">{ruleSummary}</p>
+        <Text size="xs" c="var(--color-field-ink-muted)" lh={1.35}>
+          {ruleSummary}
+        </Text>
       ) : null}
-      <button
-        type="button"
+      <Button
+        fullWidth
         disabled={busy}
         onClick={() => void submitAnswer({ kind: "sent_externally" })}
-        className="btn-primary min-h-11 w-full disabled:opacity-50"
+        styles={filledStyles}
       >
         {PHOTO_SENT_EXTERNALLY_LABEL}
-      </button>
-      <button
-        type="button"
+      </Button>
+      <Button
+        fullWidth
         disabled={busy}
         onClick={() => void submitAnswer({ kind: "cannot_answer" })}
-        className="btn-secondary min-h-11 w-full disabled:opacity-50"
+        styles={grayStyles}
       >
         {PHOTO_CANNOT_ANSWER_LABEL}
-      </button>
-      {error ? <p className="text-sm text-status-error">{error}</p> : null}
-    </div>
+      </Button>
+      {error ? (
+        <Text size="sm" c="var(--color-halt)" role="alert">
+          {error}
+        </Text>
+      ) : null}
+    </Stack>
   );
 }

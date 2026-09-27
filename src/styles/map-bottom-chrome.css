@@ -12,6 +12,16 @@
   --chrome-side-stack-gap: 0.75rem;
   --chrome-side-stack-lift: 0.5rem;
   --chrome-side-stack-lift-landscape: 1rem;
+
+  /* Extra space so bottom snaps clear the hunt dock. */
+  --chrome-side-stack-bottom-clearance: 1rem;
+
+  /* Top snaps sit below the status island. */
+  --chrome-side-stack-top-clearance: 1rem;
+
+  /* Continuous island radii; outer corner matches screen corners. */
+  --chrome-side-island-radius: 1.125rem;
+  --chrome-side-island-corner: 1.625rem;
   --map-chrome-side-width: 3.25rem;
   --dock-content-height: var(--dock-island-height);
   --dock-secondary-height: 0px;
@@ -20,6 +30,7 @@
 
   /* Left map chrome stack (sat → zoom → compass) — single token owner */
   --map-left-chrome-inset: max(0.75rem, env(safe-area-inset-left));
+  --map-right-chrome-inset: max(0.75rem, env(safe-area-inset-right));
   --map-left-chrome-gap: 0.5rem;
   --map-style-control-size: 2.75rem;
   --map-compass-control-size: var(--map-zoom-btn-size, 2.75rem);
@@ -97,13 +108,50 @@
 @layer components {
   /*
    * Documented data-attr wrappers (D7) — legacy chassis selectors retired.
-   * OverlayHost owns safe-area pb — side stack must not re-add home-indicator inset.
+   * OverlayHost owns the float gap under the dock (map peeks through); side stack
+   * must not re-add home-indicator inset. Real CSS (not Tailwind).
    */
+  .jl-map-bottom-chrome-host:not(.jl-map-bottom-chrome-host--rail) {
+    padding-bottom: var(--dock-float-gap, 0.75rem);
+    background: transparent;
+  }
+
   [data-chrome-side-stack="phone"] {
     bottom: calc(
       var(--dock-island-height) + var(--chrome-side-stack-gap) +
         var(--chrome-side-stack-lift)
     );
+  }
+
+  /*
+   * Mantine fixed stacks: continuous Y via inline top; snap X via data-side.
+   */
+  [data-chrome-side-stack="phone"].jl-map-chrome-side-stack--fixed,
+  [data-chrome-nav-stack="phone"].jl-map-chrome-side-stack--fixed {
+    position: fixed;
+    bottom: auto;
+    transform: none;
+  }
+
+  [data-chrome-side-stack="phone"][data-side="right"] .jl-map-island,
+  [data-chrome-nav-stack="phone"][data-side="right"] .jl-map-island {
+    border-radius: var(--chrome-side-island-corner)
+      var(--chrome-side-island-radius) var(--chrome-side-island-radius)
+      var(--chrome-side-island-corner);
+  }
+
+  [data-chrome-side-stack="phone"][data-side="left"] .jl-map-island,
+  [data-chrome-nav-stack="phone"][data-side="left"] .jl-map-island {
+    border-radius: var(--chrome-side-island-radius)
+      var(--chrome-side-island-corner) var(--chrome-side-island-corner)
+      var(--chrome-side-island-radius);
+  }
+
+  [data-chrome-side-stack="phone"][data-dragging="true"],
+  [data-chrome-nav-stack="phone"][data-dragging="true"] {
+    /* Inline left/top from JS while dragging; clear snap edges. */
+    right: auto !important;
+    bottom: auto !important;
   }
 
   @media (height <= 430px) and (orientation: landscape) {
@@ -132,12 +180,21 @@
   [data-overlay-host] [data-tool-menu="draw"] {
     position: absolute;
     right: calc(var(--map-chrome-side-width, 3.25rem) + 0.5rem);
+    left: auto;
     bottom: calc(
       var(--dock-island-height) + env(safe-area-inset-bottom) +
         var(--chrome-side-stack-gap) + var(--chrome-side-stack-lift)
     );
     z-index: calc(var(--z-panel) + 1);
     pointer-events: auto;
+  }
+
+  html[data-map-side-dock="left"] [data-overlay-host] [data-tool-menu="draw"],
+  html[data-map-side-dock="bottom-left"] [data-overlay-host] [data-tool-menu="draw"],
+  html[data-map-side-dock="mid-left"] [data-overlay-host] [data-tool-menu="draw"],
+  html[data-map-side-dock="top-left"] [data-overlay-host] [data-tool-menu="draw"] {
+    left: calc(var(--map-chrome-side-width, 3.25rem) + 0.5rem);
+    right: auto;
   }
 
   [data-overlay-host][data-layout="rail"] [data-tool-menu="draw"] {
@@ -252,4 +309,117 @@
         var(--map-left-chrome-gap)
     );
   }
+}
+
+/* Side dock on left corners → MapView chrome flips to the right edge. */
+html[data-map-side-dock="left"] .map-zoom-control,
+html[data-map-side-dock="left"] .map-style-control,
+html[data-map-side-dock="left"] .map-compass-control,
+html[data-map-side-dock="bottom-left"] .map-zoom-control,
+html[data-map-side-dock="bottom-left"] .map-style-control,
+html[data-map-side-dock="bottom-left"] .map-compass-control,
+html[data-map-side-dock="mid-left"] .map-zoom-control,
+html[data-map-side-dock="mid-left"] .map-style-control,
+html[data-map-side-dock="mid-left"] .map-compass-control,
+html[data-map-side-dock="top-left"] .map-zoom-control,
+html[data-map-side-dock="top-left"] .map-style-control,
+html[data-map-side-dock="top-left"] .map-compass-control {
+  left: auto;
+  right: var(--map-right-chrome-inset);
+}
+
+html[data-map-side-dock="left"] .map-zoom-control--admin-rail,
+html[data-map-side-dock="bottom-left"] .map-zoom-control--admin-rail,
+html[data-map-side-dock="mid-left"] .map-zoom-control--admin-rail,
+html[data-map-side-dock="top-left"] .map-zoom-control--admin-rail {
+  right: calc(
+    var(--map-right-chrome-inset) + var(--admin-map-control-inset-right, 0px)
+  );
+  left: auto;
+}
+
+[data-chrome-side-stack="phone"][data-dragging="true"],
+[data-chrome-nav-stack="phone"][data-dragging="true"] {
+  transition:
+    padding 160ms var(--ease-ios-emphasized, cubic-bezier(0.2, 0.9, 0.2, 1)),
+    background-color 160ms var(--ease-ios-emphasized, cubic-bezier(0.2, 0.9, 0.2, 1)),
+    border-color 160ms var(--ease-ios-emphasized, cubic-bezier(0.2, 0.9, 0.2, 1)),
+    box-shadow 160ms var(--ease-ios-emphasized, cubic-bezier(0.2, 0.9, 0.2, 1)),
+    backdrop-filter 160ms var(--ease-ios-emphasized, cubic-bezier(0.2, 0.9, 0.2, 1));
+  touch-action: none;
+  z-index: calc(var(--z-dock) + 4);
+  padding: 0.625rem;
+  gap: 0.5rem;
+  border-radius: 1.5rem;
+  border: 0.5px solid oklch(from var(--color-field-ink) l c h / 12%);
+  background:
+    linear-gradient(
+      165deg,
+      oklch(from var(--color-canvas) calc(l + 0.1) c h / 18%) 0%,
+      oklch(from var(--color-canvas) l c h / 9%) 55%,
+      oklch(from var(--color-canvas) calc(l - 0.02) c h / 6%) 100%
+    );
+  backdrop-filter: blur(4px) saturate(1.15);
+  box-shadow:
+    inset 0 1px 0 oklch(100% 0 0deg / 28%),
+    inset 0 -0.5px 0 oklch(from var(--color-field-ink) l c h / 4%),
+    0 2px 4px oklch(12% 0.04 265deg / 12%),
+    0 12px 28px oklch(10% 0.04 265deg / 28%),
+    0 28px 56px oklch(8% 0.03 265deg / 22%),
+    0 0 0 0.5px oklch(from var(--color-field-ink) l c h / 5%);
+}
+
+[data-chrome-side-stack="phone"][data-dragging="true"] .jl-map-island,
+[data-chrome-nav-stack="phone"][data-dragging="true"] .jl-map-nav-dock__zoom,
+/* stylelint-disable-next-line selector-class-pattern -- Mantine ActionIcon root class */
+[data-chrome-nav-stack="phone"][data-dragging="true"] .mantine-ActionIcon-root {
+  box-shadow: none;
+  background-color: oklch(from var(--color-canvas) l c h / 38%);
+  transition:
+    background-color 160ms var(--ease-ios-emphasized, cubic-bezier(0.2, 0.9, 0.2, 1)),
+    box-shadow 160ms var(--ease-ios-emphasized, cubic-bezier(0.2, 0.9, 0.2, 1));
+}
+
+[data-chrome-side-stack="phone"][data-settling="true"],
+[data-chrome-nav-stack="phone"][data-settling="true"] {
+  /* Settle is WAAPI transform only; keep glass exit soft. */
+  transition:
+    padding 220ms var(--ease-ios-emphasized, cubic-bezier(0.2, 0.9, 0.2, 1)),
+    background-color 220ms var(--ease-ios-emphasized, cubic-bezier(0.2, 0.9, 0.2, 1)),
+    border-color 220ms var(--ease-ios-emphasized, cubic-bezier(0.2, 0.9, 0.2, 1)),
+    box-shadow 220ms var(--ease-ios-emphasized, cubic-bezier(0.2, 0.9, 0.2, 1)),
+    backdrop-filter 220ms var(--ease-ios-emphasized, cubic-bezier(0.2, 0.9, 0.2, 1));
+  z-index: calc(var(--z-dock) + 3);
+}
+
+[data-chrome-side-stack="phone"]:not([data-dragging="true"], [data-settling="true"]),
+[data-chrome-nav-stack="phone"]:not([data-dragging="true"], [data-settling="true"]) {
+  /* No left/top/right transitions: FLIP owns spatial continuity. */
+  transition:
+    padding 220ms var(--ease-ios-emphasized, cubic-bezier(0.2, 0.9, 0.2, 1)),
+    background-color 220ms var(--ease-ios-emphasized, cubic-bezier(0.2, 0.9, 0.2, 1)),
+    box-shadow 220ms var(--ease-ios-emphasized, cubic-bezier(0.2, 0.9, 0.2, 1)),
+    border-color 220ms var(--ease-ios-emphasized, cubic-bezier(0.2, 0.9, 0.2, 1));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-chrome-side-stack="phone"],
+  [data-chrome-nav-stack="phone"] {
+    transition: none !important;
+  }
+}
+
+[data-chrome-side-stack="phone"],
+[data-chrome-nav-stack="phone"] {
+  touch-action: none;
+}
+
+.jl-map-nav-dock__inner[data-map-interacting="true"] {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.jl-map-nav-dock .map-style-control__preview {
+  height: 100%;
+  width: 100%;
 }

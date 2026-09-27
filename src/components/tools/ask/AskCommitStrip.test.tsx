@@ -1,11 +1,12 @@
 import { describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, screen } from "@testing-library/react";
+import { renderWithAppUi } from "../../../test/renderWithAppUi";
 import { AskCommitStrip } from "./AskCommitStrip";
 
 describe("AskCommitStrip", () => {
   it("stays muted and does not fire commit when !canCommit", () => {
     const onCommit = vi.fn();
-    render(
+    renderWithAppUi(
       <AskCommitStrip
         canCommit={false}
         label="SEND — SET CENTER FIRST"
@@ -18,7 +19,6 @@ describe("AskCommitStrip", () => {
     });
     expect(button).toBeDisabled();
     expect(button).toHaveAttribute("data-armed", "false");
-    expect(button.className.split(/\s+/)).not.toContain("bg-flag");
 
     fireEvent.click(button);
     expect(onCommit).not.toHaveBeenCalled();
@@ -26,7 +26,7 @@ describe("AskCommitStrip", () => {
 
   it("arms Survey flag primary and commits when canCommit", () => {
     const onCommit = vi.fn();
-    render(
+    renderWithAppUi(
       <AskCommitStrip
         canCommit
         label="SEND · D2P1"
@@ -37,14 +37,13 @@ describe("AskCommitStrip", () => {
     const button = screen.getByRole("button", { name: "SEND · D2P1" });
     expect(button).toBeEnabled();
     expect(button).toHaveAttribute("data-armed", "true");
-    expect(button.className.split(/\s+/)).toContain("bg-flag");
 
     fireEvent.click(button);
     expect(onCommit).toHaveBeenCalledTimes(1);
   });
 
   it("shows optional inline error without arming when muted", () => {
-    render(
+    renderWithAppUi(
       <AskCommitStrip
         canCommit={false}
         label="SEND"

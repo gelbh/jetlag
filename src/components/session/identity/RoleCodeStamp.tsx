@@ -1,3 +1,9 @@
+import { Button, Stack, Text, UnstyledButton } from "@mantine/core";
+import {
+  InsetGroup,
+  grayStyles,
+} from "@/components/ui/entry/entryChrome";
+
 export interface RoleCodeStampProps {
   roleLabel: string;
   code: string | null;
@@ -20,36 +26,65 @@ export function RoleCodeStamp({
   const revealed = code != null;
 
   return (
-    <div className="space-y-2">
-      <button
+    <Stack gap="xs">
+      <InsetGroup>
+        <UnstyledButton
+          type="button"
+          disabled={busy}
+          onClick={() => {
+            if (revealed) {
+              onCopy();
+              return;
+            }
+            onReveal();
+          }}
+          aria-label={revealed ? `Copy ${roleLabel}` : `Reveal ${roleLabel}`}
+          styles={{
+            root: {
+              display: "block",
+              width: "100%",
+              paddingInline: "1rem",
+              paddingBlock: "0.75rem",
+              textAlign: "center",
+              opacity: busy ? 0.5 : 1,
+              cursor: busy ? "not-allowed" : "pointer",
+            },
+          }}
+        >
+          <Text
+            size="xs"
+            fw={590}
+            tt="uppercase"
+            style={{
+              letterSpacing: "0.08em",
+              color: "var(--color-field-ink-muted)",
+            }}
+          >
+            {roleLabel}
+          </Text>
+          <Text
+            className="jl-stamp-code"
+            style={{
+              marginTop: "0.35rem",
+              fontSize: "1.5rem",
+              letterSpacing: "0.28em",
+              color: "var(--color-field-ink)",
+            }}
+          >
+            {revealed ? code : MASKED_CODE}
+          </Text>
+        </UnstyledButton>
+      </InsetGroup>
+      <Button
         type="button"
+        fullWidth
         disabled={busy}
-        onClick={() => {
-          if (revealed) {
-            onCopy();
-            return;
-          }
-          onReveal();
-        }}
-        className="jl-stamp w-full items-center py-2 text-center"
-        aria-label={
-          revealed ? `Copy ${roleLabel}` : `Reveal ${roleLabel}`
-        }
-      >
-        <span className="jl-stamp-label">{roleLabel}</span>
-        <span className="jl-stamp-code text-lg tracking-[0.2em]">
-          {revealed ? code : MASKED_CODE}
-        </span>
-      </button>
-      <button
-        type="button"
-        disabled={busy}
+        styles={grayStyles}
         onClick={onRegenerate}
-        className="btn-secondary min-h-11 w-full"
         aria-label={`Regenerate ${roleLabel}`}
       >
         Regenerate
-      </button>
-    </div>
+      </Button>
+    </Stack>
   );
 }

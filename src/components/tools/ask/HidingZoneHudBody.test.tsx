@@ -1,5 +1,8 @@
+import type { ReactElement } from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { MantineProvider } from "@mantine/core";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { jetlagTheme } from "@/theme/theme";
 import { AskHudHost } from "./AskHudHost";
 import { HidingZoneHudBody } from "./HidingZoneHudBody";
 import {
@@ -8,6 +11,28 @@ import {
   type AskHudReadiness,
 } from "@/domain/ask/askHudModes";
 import type { HidingZoneToolPanelState } from "@/components/hider/HidingZonePanel";
+
+beforeEach(() => {
+  vi.stubGlobal("matchMedia", (query: string) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener() {},
+    removeListener() {},
+    addEventListener() {},
+    removeEventListener() {},
+    dispatchEvent: () => false,
+  }));
+});
+
+function renderHud(ui: ReactElement) {
+  return render(
+    <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
+      {ui}
+    </MantineProvider>,
+  );
+}
+
 
 function baseZoneTool(
   overrides: Partial<HidingZoneToolPanelState> = {},
@@ -38,7 +63,7 @@ describe("HidingZoneHudBody", () => {
     const choosePlacementMethod = vi.fn();
     const onSearchThisArea = vi.fn();
 
-    render(
+    renderHud(
       <HidingZoneHudBody
         moveMode={false}
         radiusLabel="200 m"
@@ -71,7 +96,7 @@ describe("HidingZoneHudBody", () => {
     expect(canCommit(readiness)).toBe(true);
 
     const onCommit = vi.fn();
-    render(
+    renderHud(
       <AskHudHost
         cue="READY TO CONFIRM"
         toolLabel="Hiding zone"
@@ -109,7 +134,7 @@ describe("HidingZoneHudBody", () => {
 
   it("searches stations only via frame-search control after Station method", () => {
     const onSearchThisArea = vi.fn();
-    render(
+    renderHud(
       <HidingZoneHudBody
         moveMode={false}
         radiusLabel="200 m"
@@ -130,7 +155,7 @@ describe("HidingZoneHudBody", () => {
 
   it("lets confirm-step clear station to pick another", () => {
     const clearStationSelection = vi.fn();
-    render(
+    renderHud(
       <HidingZoneHudBody
         moveMode
         radiusLabel="200 m"

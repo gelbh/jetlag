@@ -1,4 +1,7 @@
 import type { ReactNode } from "react";
+import { Box, Text, UnstyledButton } from "@mantine/core";
+import { InsetGroup, SectionLabel } from "@/components/ui/entry/entryChrome";
+import { InsetHairline } from "@/components/ui/entry/InsetRow";
 
 interface RadioCardOption<Value extends string> {
   value: Value;
@@ -27,49 +30,82 @@ export function RadioCardGroup<Value extends string>({
 }: RadioCardGroupProps<Value>) {
   return (
     <div className="space-y-2">
-      {label ? (
-        <p className="font-display text-xs font-semibold uppercase tracking-[0.1em] text-field-ink-muted">
-          {label}
-        </p>
-      ) : null}
-      <div role="radiogroup" aria-label={ariaLabel} className="space-y-1.5">
-        {options.map((option) => {
-          const selected = value === option.value;
+      {label ? <SectionLabel>{label}</SectionLabel> : null}
+      <InsetGroup>
+        <div role="radiogroup" aria-label={ariaLabel}>
+          {options.map((option, index) => {
+            const selected = value === option.value;
 
-          return (
-            <button
-              key={option.value}
-              type="button"
-              role="radio"
-              aria-checked={selected}
-              disabled={disabled}
-              onClick={() => onChange(option.value)}
-              className={`min-h-12 w-full border-2 px-3 py-2 text-left disabled:opacity-50 ${
-                selected
-                  ? "border-flag bg-flag-soft text-flag"
-                  : "border-rule bg-canvas text-field-ink hover:border-signal"
-              }`}
-            >
-              <span className="flex items-center gap-2">
-                <span className="font-display text-sm font-semibold uppercase tracking-wide">
-                  {option.title}
-                </span>
-                {option.badge}
-              </span>
-              {option.description ? (
-                <span className="mt-0.5 block text-xs text-field-ink-muted">
-                  {option.description}
-                </span>
-              ) : null}
-              {option.footer ? (
-                <span className="mt-0.5 block text-xs text-field-ink-muted">
-                  {option.footer}
-                </span>
-              ) : null}
-            </button>
-          );
-        })}
-      </div>
+            return (
+              <Box key={option.value}>
+                {index > 0 ? <InsetHairline insetStart="1rem" /> : null}
+                <UnstyledButton
+                  type="button"
+                  role="radio"
+                  aria-checked={selected}
+                  disabled={disabled}
+                  onClick={() => onChange(option.value)}
+                  styles={{
+                    root: {
+                      display: "block",
+                      width: "100%",
+                      minHeight: "2.875rem",
+                      paddingInline: "1rem",
+                      paddingBlock: "0.7rem",
+                      textAlign: "left",
+                      opacity: disabled ? 0.5 : 1,
+                      cursor: disabled ? "not-allowed" : "pointer",
+                      backgroundColor: selected
+                        ? "oklch(from var(--color-flag) l c h / 0.12)"
+                        : "transparent",
+                    },
+                  }}
+                >
+                  <Box
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.5rem",
+                    }}
+                  >
+                    <Text
+                      size="sm"
+                      fw={selected ? 600 : 510}
+                      c={
+                        selected
+                          ? "var(--color-flag)"
+                          : "var(--color-field-ink)"
+                      }
+                    >
+                      {option.title}
+                    </Text>
+                    {option.badge}
+                  </Box>
+                  {option.description ? (
+                    <Text
+                      size="xs"
+                      mt={4}
+                      c="var(--color-field-ink-muted)"
+                      lh={1.35}
+                    >
+                      {option.description}
+                    </Text>
+                  ) : null}
+                  {option.footer ? (
+                    <Text
+                      size="xs"
+                      mt={2}
+                      c="var(--color-field-ink-muted)"
+                    >
+                      {option.footer}
+                    </Text>
+                  ) : null}
+                </UnstyledButton>
+              </Box>
+            );
+          })}
+        </div>
+      </InsetGroup>
     </div>
   );
 }

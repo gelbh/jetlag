@@ -1,5 +1,7 @@
 import { render, screen } from "@testing-library/react";
+import { MantineProvider } from "@mantine/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { jetlagTheme } from "@/theme/theme";
 import { ClientMinVersionGate } from "./ClientMinVersionGate";
 
 const subscribeMock = vi.fn();
@@ -40,6 +42,14 @@ vi.mock("@/services/firestore/clientMinVersion", () => ({
   },
 }));
 
+function renderGate(children: React.ReactNode) {
+  return render(
+    <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
+      <ClientMinVersionGate>{children}</ClientMinVersionGate>
+    </MantineProvider>,
+  );
+}
+
 describe("ClientMinVersionGate", () => {
   beforeEach(() => {
     subscribeMock.mockReset();
@@ -50,11 +60,7 @@ describe("ClientMinVersionGate", () => {
       onChange("0.11.0");
     });
 
-    render(
-      <ClientMinVersionGate>
-        <div>app-content</div>
-      </ClientMinVersionGate>,
-    );
+    renderGate(<div>app-content</div>);
 
     expect(screen.getByRole("alert")).toHaveTextContent(/Update required/i);
     expect(screen.queryByText("app-content")).toBeNull();
@@ -65,11 +71,7 @@ describe("ClientMinVersionGate", () => {
       onChange("0.10.0");
     });
 
-    render(
-      <ClientMinVersionGate>
-        <div>app-content</div>
-      </ClientMinVersionGate>,
-    );
+    renderGate(<div>app-content</div>);
 
     expect(screen.getByText("app-content")).toBeInTheDocument();
   });
@@ -79,11 +81,7 @@ describe("ClientMinVersionGate", () => {
       onChange(null);
     });
 
-    render(
-      <ClientMinVersionGate>
-        <div>app-content</div>
-      </ClientMinVersionGate>,
-    );
+    renderGate(<div>app-content</div>);
 
     expect(screen.getByText("app-content")).toBeInTheDocument();
   });
@@ -98,11 +96,7 @@ describe("ClientMinVersionGate", () => {
       },
     );
 
-    render(
-      <ClientMinVersionGate>
-        <div>app-content</div>
-      </ClientMinVersionGate>,
-    );
+    renderGate(<div>app-content</div>);
 
     expect(screen.getByText("app-content")).toBeInTheDocument();
   });

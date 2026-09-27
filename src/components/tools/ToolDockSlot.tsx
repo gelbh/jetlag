@@ -3,20 +3,14 @@ import {
   MAP_TOOL_DOCK_ENTRIES,
   QUESTION_DOCK_TOOL_IDS,
   mapToolDockMenuHint,
-  mapToolDockMenuLabel,
   mapToolDockShortLabel,
 } from "../../domain/map/mapTools";
-import { cn } from "../../lib/cn";
 import {
   HudDrawIcon,
   HudRedoIcon,
   HudUndoIcon,
 } from "../ui/brand/HudIcons";
-import {
-  HudPinIcon,
-  HudToolIcon,
-  HudZoneIcon,
-} from "../map/icons/ToolIcons";
+import { HudToolIcon } from "../map/icons/ToolIcons";
 import { MapChromeControl } from "../map/chrome/MapChromeControl";
 
 interface ToolDockQuestionSlotProps {
@@ -50,63 +44,12 @@ export function ToolDockQuestionSlot({
       aria-label={entry.name}
       title={
         blockedByOpenQuestion
-          ? "Preview only — finish the open question before sending"
+          ? "Preview only - finish the open question before sending"
           : (mapToolDockMenuHint(entry) ?? entry.name)
       }
       icon={<HudToolIcon tool={toolId} className="h-5 w-5 shrink-0" />}
       label={mapToolDockShortLabel(toolId)}
     />
-  );
-}
-
-interface ToolDockMarkupMenuItemProps {
-  tool: (typeof MAP_TOOL_DOCK_ENTRIES)[number];
-  activeTool: MapTool;
-  onSelect: (tool: MapTool) => void;
-}
-
-export function ToolDockMarkupMenuItem({
-  tool,
-  activeTool,
-  onSelect,
-}: ToolDockMarkupMenuItemProps) {
-  const hint = mapToolDockMenuHint(tool);
-  const active = activeTool === tool.id;
-  const icon =
-    tool.id === "zone" ? (
-      <HudZoneIcon className="h-5 w-5" />
-    ) : (
-      <HudPinIcon className="h-5 w-5" />
-    );
-
-  return (
-    <button
-      type="button"
-      role="menuitem"
-      disabled={!tool.enabled}
-      onClick={() => onSelect(tool.id)}
-      className={cn(
-        "jl-tool-menu-item disabled:opacity-40",
-        active ? "jl-tool-menu-item-active" : "jl-tool-menu-item-default",
-      )}
-    >
-      <span className="jl-tool-menu-item-icon">{icon}</span>
-      <span className="jl-tool-menu-item-body">
-        <span className="font-display text-sm font-semibold uppercase tracking-wide">
-          {mapToolDockMenuLabel(tool)}
-        </span>
-        {hint ? (
-          <span
-            className={cn(
-              "text-xs leading-snug",
-              active ? "text-action-ink/80" : "text-ink-muted",
-            )}
-          >
-            {hint}
-          </span>
-        ) : null}
-      </span>
-    </button>
   );
 }
 
@@ -141,6 +84,7 @@ export function ToolDockHistorySlot({
         )
       }
       label={isUndo ? "Undo" : "Redo"}
+      tone="history"
     />
   );
 }

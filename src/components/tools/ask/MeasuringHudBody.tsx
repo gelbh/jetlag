@@ -1,9 +1,23 @@
+import { AskHudPanel } from "@/components/tools/ask/AskHudPanel";
 /**
- * Measuring Ask HUD mode body — anchor / catalog rail / target / answer.
- * SingleBottomChord: one interactive surface at a time. No PhaseRail / CONTINUE.
- * Spec: ask-surface-kit-design rev 2026-08-05b.
+ * Measuring Ask HUD — Matching twin: question header + icon catalog, then map-first.
+ * Sheet path keeps anchor/target/answer chords when Mantine map-first is off.
  */
+import { useState, type ComponentType } from "react";
+import { UnstyledButton } from "@mantine/core";
+import {
+  Buildings,
+  Drop,
+  MapPinArea,
+  SquaresFour,
+  Train,
+  Tree,
+  type IconProps,
+} from "@phosphor-icons/react";
 import { AskCatalogRail } from "@/components/tools/ask/AskCatalogRail";
+import { AskToolQuestionHeader } from "@/components/tools/ask/AskToolQuestionHeader";
+import { measuringCategoryIcon } from "@/components/tools/ask/measuringCategoryIcons";
+import { HudMeasuringIcon } from "@/components/map/icons/ToolIcons";
 import { MeasuringAnchorStep } from "@/components/tools/shared/measuring/MeasuringAnchorStep";
 import {
   MeasuringAnswerSection,
@@ -14,16 +28,23 @@ import {
   type MeasuringSearchRole,
 } from "@/components/tools/shared/measuring/measuringPanelUtils";
 import { SearchResultsList } from "@/components/tools/shared/controls/SearchResultsList";
+import { CatalogExhaustedMessage } from "@/components/tools/shared/readout/CatalogExhaustedMessage";
 import { QuestionTruthReferenceHint } from "@/components/tools/shared/QuestionTruthReferenceHint";
+import {
+  filterChipStyles,
+  filterChipTrackStyle,
+} from "@/components/ui/entry/entryChrome";
 import {
   BASE_MEASURING_CATALOG,
   MEASURING_GROUPS,
+  measuringQuestionFor,
   measuringSupportsSearch,
   measuringTargetKind,
   measuringTargetLabel,
   type MeasuringAnswer,
   type MeasuringCatalogOption,
   type MeasuringFromKind,
+  type MeasuringGroupId,
   type MeasuringLocationCategory,
   type MeasuringSubject,
   type MeasuringTargetMode,
@@ -31,8 +52,33 @@ import {
 import type { DistanceUnit } from "@/domain/map/distance";
 import type { SeaLevelEdgeCase } from "@/domain/geometry/measuring/seaLevel";
 import type { GeocodedPlace } from "@/services/geo/geocoding";
+type GroupFilter = "all" | MeasuringGroupId;
 
-export type MeasuringHudBodyProps = {
+const GROUP_CHIP_LABEL: Record<MeasuringGroupId, string> = {
+  transit: "Transit",
+  borders: "Borders",
+  natural: "Natural",
+  poi: "Places",
+  public_utilities: "Utilities",
+};
+
+const GROUP_CHIP_ICON: Record<GroupFilter, ComponentType<IconProps>> = {
+  all: SquaresFour,
+  transit: Train,
+  borders: Buildings,
+  natural: Tree,
+  poi: MapPinArea,
+  public_utilities: Drop,
+};
+
+const MEASURING_QUESTION_INTRO = {
+  prompt: "Compared to me, are you closer to or further from [place]?",
+  ruleSummary:
+    "Pick what to measure below. Closer / further is relative to that place from your anchor.",
+};
+
+/** Flat measuring Ask HUD fields bag for MeasuringHudBody (W4-B peel). */
+export type MeasuringHudBodyModel = {
   distanceUnit: DistanceUnit;
   optionChosen: boolean;
   measureFrom: MeasuringFromKind;
@@ -75,80 +121,119 @@ export type MeasuringHudBodyProps = {
   awaitHiderAnswer?: boolean;
   costLabel?: string;
   isSubmitting?: boolean;
+  toolLabel?: string;
 };
 
-export function MeasuringHudBody({
-  distanceUnit,
-  optionChosen,
-  measureFrom,
-  usesAllPlacesInArea,
-  usedMeasuringFromKinds,
-  catalogOptions,
-  anchorLat = null,
-  anchorLng = null,
-  subject,
-  targetMode,
-  anchorAltitudeMeters,
-  hasSeekerPoint,
-  hasTargetPoint,
-  seekerPlaceName,
-  targetPlaceName,
-  distanceMeters,
-  loading,
-  gpsLoading,
-  searchQuery,
-  searchResults,
-  searchLoading,
-  searchRole,
-  answer,
-  seaLevelEdgeCase = null,
-  error = null,
-  onMeasureFromChange,
-  onTargetModeChange,
-  onSearchQueryChange,
-  onSearchSubmit,
-  onSearchResultSelect,
-  onUseGps,
-  onFindCoastline,
-  onRetrySeaLevel,
-  onFindLinearFeature,
-  onFindNearest,
-  onAnswerChange,
-  awaitHiderAnswer = false,
-  costLabel = "D3P1",
-  isSubmitting = false,
-}: MeasuringHudBodyProps) {
+export type MeasuringHudBodyProps = {
+  model: MeasuringHudBodyModel;
+};
+
+export function MeasuringHudBody({ model }: MeasuringHudBodyProps) {
+  const {
+    distanceUnit,
+    optionChosen,
+    measureFrom,
+    usesAllPlacesInArea,
+    usedMeasuringFromKinds,
+    catalogOptions,
+    anchorLat = null,
+    anchorLng = null,
+    subject,
+    targetMode,
+    anchorAltitudeMeters,
+    hasSeekerPoint,
+    hasTargetPoint,
+    seekerPlaceName,
+    targetPlaceName,
+    distanceMeters,
+    loading,
+    gpsLoading,
+    searchQuery,
+    searchResults,
+    searchLoading,
+    searchRole,
+    answer,
+    seaLevelEdgeCase = null,
+    error = null,
+    onMeasureFromChange,
+    onTargetModeChange,
+    onSearchQueryChange,
+    onSearchSubmit,
+    onSearchResultSelect,
+    onUseGps,
+    onFindCoastline,
+    onRetrySeaLevel,
+    onFindLinearFeature,
+    onFindNearest,
+    onAnswerChange,
+    awaitHiderAnswer = false,
+    costLabel = "D3P1",
+    isSubmitting = false,
+    toolLabel = "Measuring",
+  } = model;
+  const [groupFilter, setGroupFilter] = useState<GroupFilter>("all");
+
   const locationCategory: MeasuringLocationCategory | undefined =
-    subject === "location" ? (measureFrom as MeasuringLocationCategory) : undefined;
+    subject === "location"
+      ? (measureFrom as MeasuringLocationCategory)
+      : undefined;
   const targetLabel = measuringTargetLabel(subject, locationCategory);
   const targetKind = measuringTargetKind(measureFrom);
   const isCoastline = targetKind === "coastline";
   const isSeaLevel = targetKind === "sea_level";
   const allowsSearch = measuringSupportsSearch(measureFrom);
   const measureCatalog = catalogOptions ?? BASE_MEASURING_CATALOG;
-  const hasAvailableMeasureOptions = MEASURING_GROUPS.some((group) =>
-    measureCatalog.some(
-      (option) =>
-        option.groupId === group.id && !usedMeasuringFromKinds.has(option.id),
-    ),
+
+  const selectableOptions = measureCatalog.filter(
+    (option) =>
+      !usedMeasuringFromKinds.has(option.id) || option.id === measureFrom,
   );
+  const availableOptions = measureCatalog.filter(
+    (option) => !usedMeasuringFromKinds.has(option.id),
+  );
+  const hasAvailableMeasureOptions = availableOptions.length > 0;
+
+  const groupsWithRows = MEASURING_GROUPS.filter((group) =>
+    selectableOptions.some((option) => option.groupId === group.id),
+  );
+
+  const effectiveFilter: GroupFilter =
+    groupFilter === "all" ||
+    groupsWithRows.some((group) => group.id === groupFilter)
+      ? groupFilter
+      : "all";
+
+  const filteredOptions =
+    effectiveFilter === "all"
+      ? selectableOptions
+      : selectableOptions.filter(
+          (option) => option.groupId === effectiveFilter,
+        );
+
+  const catalogRows = MEASURING_GROUPS.flatMap((group) =>
+    filteredOptions
+      .filter((option) => option.groupId === group.id)
+      .map((option) => {
+        const Icon = measuringCategoryIcon(option.id);
+        return {
+          id: option.id,
+          label: option.label,
+          groupLabel: effectiveFilter === "all" ? group.label : undefined,
+          icon: (
+            <Icon size={20} weight="duotone" color="currentColor" aria-hidden />
+          ),
+        };
+      }),
+  );
+
+  const question = optionChosen
+    ? measuringQuestionFor(subject, locationCategory)
+    : MEASURING_QUESTION_INTRO;
 
   const anchorLoadingMessage = anchorResolveLoadingMessage(
     subject,
     measureFrom,
     locationCategory,
-  );
-
-  const catalogRows = MEASURING_GROUPS.flatMap((group) =>
-    measureCatalog
-      .filter(
-        (option) =>
-          option.groupId === group.id && !usedMeasuringFromKinds.has(option.id),
-      )
-      .map((option) => ({
-        id: option.id,
-        label: `${group.label}: ${option.label}`,
-      })),
   );
 
   const showAnswer =
@@ -158,21 +243,88 @@ export function MeasuringHudBody({
     distanceMeters !== null &&
     optionChosen;
 
-  const chord: "anchor" | "source" | "target" | "answer" = !hasSeekerPoint
-    ? "anchor"
-    : !optionChosen
-      ? "source"
+  const chord: "anchor" | "source" | "target" | "answer" = !optionChosen
+    ? "source"
+    : !hasSeekerPoint
+      ? "anchor"
       : showAnswer
         ? "answer"
         : "target";
+
+  const filterOptions: { value: GroupFilter; label: string }[] = [
+    { value: "all", label: "All" },
+    ...groupsWithRows.map((group) => ({
+      value: group.id as GroupFilter,
+      label: GROUP_CHIP_LABEL[group.id],
+    })),
+  ];
 
   return (
     <div
       data-testid="measuring-hud-body"
       className="ask-hud-mode-body flex w-full flex-col gap-2"
     >
+      <AskToolQuestionHeader
+        toolLabel={toolLabel}
+        costLabel={costLabel}
+        icon={<HudMeasuringIcon width={22} height={22} />}
+        prompt={question.prompt}
+        ruleSummary={question.ruleSummary}
+        mantine={true}
+      />
+
+      {chord === "source" ? (
+        <div className="space-y-2">
+          {awaitHiderAnswer ? <QuestionTruthReferenceHint /> : null}
+          {!hasAvailableMeasureOptions ? (
+            <AskHudPanel className="p-3">
+              <CatalogExhaustedMessage message="Every measure category has already been used on this map." />
+            </AskHudPanel>
+          ) : (
+            <>
+              <div
+                role="tablist"
+                aria-label="Filter measure categories"
+                className="jl-scroll"
+                style={filterChipTrackStyle}
+              >
+                {filterOptions.map((option) => {
+                  const selected = effectiveFilter === option.value;
+                  const Icon = GROUP_CHIP_ICON[option.value];
+                  return (
+                    <UnstyledButton
+                      key={option.value}
+                      type="button"
+                      role="tab"
+                      aria-selected={selected}
+                      onClick={() => setGroupFilter(option.value)}
+                      styles={filterChipStyles(selected)}
+                    >
+                      <Icon
+                        size={14}
+                        weight={selected ? "fill" : "regular"}
+                        aria-hidden
+                      />
+                      {option.label}
+                    </UnstyledButton>
+                  );
+                })}
+              </div>
+              <AskCatalogRail
+                rows={catalogRows}
+                selectedId={optionChosen ? measureFrom : null}
+                onSelect={(id) => onMeasureFromChange(id as MeasuringFromKind)}
+                aria-label="Measuring from"
+                hint=""
+                columns={2}
+              />
+            </>
+          )}
+        </div>
+      ) : null}
+
       {chord === "anchor" ? (
-        <div className="pointer-events-auto ask-hud-panel p-3">
+        <AskHudPanel className="p-3">
           <MeasuringAnchorStep
             hasSeekerPoint={hasSeekerPoint}
             gpsLoading={gpsLoading}
@@ -188,30 +340,11 @@ export function MeasuringHudBody({
             onSearchQueryChange={onSearchQueryChange}
             onSearchSubmit={() => onSearchSubmit("seeker")}
           />
-        </div>
-      ) : null}
-
-      {chord === "source" ? (
-        <div className="space-y-2">
-          {awaitHiderAnswer ? <QuestionTruthReferenceHint /> : null}
-          {!hasAvailableMeasureOptions ? (
-            <p className="pointer-events-auto ask-hud-panel p-3 text-sm text-field-ink-muted">
-              Every measure category has already been added to this session.
-            </p>
-          ) : (
-            <AskCatalogRail
-              rows={catalogRows}
-              selectedId={optionChosen ? measureFrom : null}
-              onSelect={(id) => onMeasureFromChange(id as MeasuringFromKind)}
-              aria-label="Measuring from"
-              hint="Tap a row to set what you measure"
-            />
-          )}
-        </div>
+        </AskHudPanel>
       ) : null}
 
       {chord === "target" ? (
-        <div className="pointer-events-auto ask-hud-panel space-y-2 p-3">
+        <AskHudPanel className="space-y-2 p-3">
           <MeasuringTargetSection
             subject={subject}
             measureFrom={measureFrom}
@@ -237,11 +370,11 @@ export function MeasuringHudBody({
             onFindLinearFeature={onFindLinearFeature}
             onFindNearest={onFindNearest}
           />
-        </div>
+        </AskHudPanel>
       ) : null}
 
       {chord === "answer" ? (
-        <div className="pointer-events-auto ask-hud-panel p-3">
+        <AskHudPanel className="p-3">
           <MeasuringAnswerSection
             step="ask"
             part="all"
@@ -264,16 +397,16 @@ export function MeasuringHudBody({
               /* Commit lives on AskCommitStrip. */
             }}
           />
-        </div>
+        </AskHudPanel>
       ) : null}
 
       {allowsSearch && searchResults.length > 0 && chord !== "answer" ? (
-        <div className="pointer-events-auto ask-hud-panel jl-scroll max-h-40 p-2">
+        <AskHudPanel className="jl-scroll max-h-40 p-2">
           <SearchResultsList
             results={searchResults}
             onSelect={(place) => onSearchResultSelect(place, searchRole)}
           />
-        </div>
+        </AskHudPanel>
       ) : null}
     </div>
   );

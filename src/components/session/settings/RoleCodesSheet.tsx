@@ -1,4 +1,3 @@
-import { SheetHeader } from "../../ui/sheets/SheetHeader";
 import { SheetHost } from "../../ui/sheets/SheetHost";
 import type { SessionRecord } from "@/domain/map/annotations";
 import { RolePasscodeSettings } from "./RolePasscodeSettings";
@@ -26,14 +25,9 @@ export function RoleCodesSheet({
       railTab="codes"
       maxHeightClassName="max-h-[min(85dvh,560px)]"
       pinned={
-        <SheetHeader
-          title="Role codes"
-          eyebrow="Access"
-          onClose={onClose}
-          titleSize="xl"
-          flush
-          className="jl-settings-header pb-3"
-        />
+        <h2 className="mb-1 text-[1.375rem] font-bold tracking-tight text-[var(--color-field-ink)]">
+          Role codes
+        </h2>
       }
     >
       <RolePasscodeSettings

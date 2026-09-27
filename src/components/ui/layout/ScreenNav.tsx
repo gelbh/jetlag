@@ -48,7 +48,7 @@ export function ScreenNav({
 
   const homeLinkClassName =
     placement === "inline"
-      ? "hud-chrome map-hud-home inline-flex min-h-11 min-w-11 items-center justify-center text-field-ink"
+      ? "hud-chrome map-hud-home jl-map-status-home inline-flex min-h-11 min-w-11 items-center justify-center"
       : "hud-chrome map-hud-home inline-flex h-full min-w-11 items-center justify-center text-field-ink";
 
   return (

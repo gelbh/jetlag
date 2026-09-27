@@ -31,6 +31,8 @@ export interface UsePlacementMapFocusOptions {
   panelMinimized: boolean;
   /** When set (Ask HUD), overrides floating-panel peek height for padding. */
   hudBottomPaddingPx?: number | null;
+  /** Top chrome height for asymmetric fitBounds (map-first Matching banner). */
+  hudTopPaddingPx?: number | null;
   selectedPoiId?: string | null;
   walkActive?: boolean;
   viewportFrame?: PlacementViewportFrame | null;
@@ -42,6 +44,7 @@ export interface UsePlacementMapFocusResult {
   focusMaxZoom?: number;
   placementRecenterToken: number;
   focusPaddingBias?: number;
+  focusPaddingTopBias?: number;
   /** True on forced reframes (phase transitions, Recenter) — tells `MapView`
    * to prefer the cinematic `flyTo` path even if the geometry delta is modest. */
   focusPreferFly: boolean;
@@ -87,6 +90,7 @@ export function usePlacementMapFocus({
   enabled,
   panelMinimized,
   hudBottomPaddingPx = null,
+  hudTopPaddingPx = null,
   selectedPoiId = null,
   walkActive = false,
   viewportFrame = null,
@@ -101,6 +105,8 @@ export function usePlacementMapFocus({
     hudBottomPaddingPx != null && hudBottomPaddingPx > 0
       ? hudBottomPaddingPx
       : resolvePanelPeekHeightPx(panelMinimized);
+  const panelTopPaddingPx =
+    hudTopPaddingPx != null && hudTopPaddingPx > 0 ? hudTopPaddingPx : 0;
   const phase = resolvePlacementPhase(activeTool, draft);
   const placementActive = enabled && activeTool !== "none";
 
@@ -113,6 +119,7 @@ export function usePlacementMapFocus({
       overlays,
       eliminationFeatures,
       panelPeekHeightPx,
+      panelTopPaddingPx,
       selectedPoiId,
       walkActive,
       // viewportFrame intentionally omitted — hysteresis only
@@ -124,6 +131,7 @@ export function usePlacementMapFocus({
       gameArea,
       overlays,
       panelPeekHeightPx,
+      panelTopPaddingPx,
       phase,
       selectedPoiId,
       walkActive,
@@ -255,6 +263,7 @@ export function usePlacementMapFocus({
     focusMaxZoom: cameraTarget?.maxZoom,
     placementRecenterToken,
     focusPaddingBias: cameraTarget?.paddingBiasPx,
+    focusPaddingTopBias: cameraTarget?.paddingTopBiasPx,
     focusPreferFly,
     requestPlacementRecenter,
   };

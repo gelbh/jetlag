@@ -62,7 +62,6 @@ describe("mapScreenRoleConfig", () => {
     expect(getMapScreenRoleConfig("observer")).toMatchObject({
       authMode: "hider-anonymous",
       notificationRole: "observer",
-      liveActivityEnabled: false,
     });
     expect(getMapScreenRoleConfig("admin")).toMatchObject({
       authMode: "admin-permanent",

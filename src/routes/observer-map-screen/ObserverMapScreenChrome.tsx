@@ -1,8 +1,10 @@
 import type { ReactNode } from "react";
+import { UnstyledButton } from "@mantine/core";
 import { AppLink } from "../../components/navigation/AppLink";
 import { ContextualRail } from "../../components/map/chrome/ContextualRail";
 import type { ContextualRailTab } from "../../components/map/chrome/ContextualRailContext";
 import { MapBottomChrome } from "../../components/map/chrome/MapBottomChrome";
+import { MapChromeControl } from "../../components/map/chrome/MapChromeControl";
 import { MapStatusRail } from "../../components/session/mapChrome/MapStatusRail";
 import { RoleCodesSheet } from "../../components/session/settings/RoleCodesSheet";
 import {
@@ -10,7 +12,12 @@ import {
   HudHomeIcon,
   HudStarIcon,
 } from "../../components/ui/brand/HudIcons";
-import { MotionPressable } from "../../components/motion/MotionPressable";
+import {
+  desktopOpsStatusExpandedStyle,
+  mapToolSlotIconStyle,
+  mapToolSlotLabelStyle,
+  mapToolSlotStyles,
+} from "@/components/ui/entry/entryChrome";
 import type { PlayerRole } from "../../domain/session/players/playerRole";
 import { visibleRoleCodeRoles } from "../../domain/session/players/roleGates";
 import type { SessionRecord } from "../../domain/map/annotations";
@@ -62,29 +69,31 @@ export function ObserverMapScreenChrome({
     }).length > 0;
 
   const statusBar = (
-    <div className={isDesktop ? "jl-status-rail--expanded" : undefined}>
+    <div style={isDesktop ? desktopOpsStatusExpandedStyle : undefined}>
       <MapStatusRail
-        sessionCode={session.code}
-        sessionId={session.id}
-        roleGates={session.roleGates}
-        sessionRules={session}
-        playerRole={roleConfig.statusPlayerRole}
-        activeTool="none"
-        syncStatus="synced"
-        queuedWrites={0}
-        timerState={timer.timerState}
-        timerRunning={timer.running}
-        timerHasStarted={timer.hasStarted}
-        canStartGame={false}
-        onStartGame={() => undefined}
-        onTimerStart={() => undefined}
-        onTimerPause={() => undefined}
-        onTimerReset={() => undefined}
-        timerControlsDisabled
-        moveInProgress={moveInProgress}
-        expanded={isDesktop}
-        myUid={myUid}
-        isHost={isHost}
+        model={{
+          sessionCode: session.code,
+          sessionId: session.id,
+          roleGates: session.roleGates,
+          sessionRules: session,
+          playerRole: roleConfig.statusPlayerRole,
+          activeTool: "none",
+          syncStatus: "synced",
+          queuedWrites: 0,
+          timerState: timer.timerState,
+          timerRunning: timer.running,
+          timerHasStarted: timer.hasStarted,
+          canStartGame: false,
+          onStartGame: () => undefined,
+          onTimerStart: () => undefined,
+          onTimerPause: () => undefined,
+          onTimerReset: () => undefined,
+          timerControlsDisabled: true,
+          moveInProgress,
+          expanded: isDesktop,
+          myUid,
+          isHost,
+        }}
         headerLeading={
           <button
             type="button"
@@ -102,54 +111,50 @@ export function ObserverMapScreenChrome({
   const sessionIsland = (
     <div className="jl-tool-dock-group jl-tool-dock-group-secondary flex w-full min-w-0 flex-col justify-start gap-1">
       {isAdmin ? (
-        <AppLink
+        <UnstyledButton
+          component={AppLink}
           to="/admin"
           className="jl-tool-slot no-underline"
+          styles={mapToolSlotStyles(false)}
           aria-label="Open admin"
         >
-          <span className="jl-tool-slot-icon">
+          <span className="jl-tool-slot-icon" style={mapToolSlotIconStyle}>
             <HudAdminIcon className="h-5 w-5 shrink-0" />
           </span>
-          <span className="jl-tool-slot-label">Admin</span>
-        </AppLink>
+          <span data-ios-tool-label="" style={mapToolSlotLabelStyle}>
+            Admin
+          </span>
+        </UnstyledButton>
       ) : null}
-      <MotionPressable
-        type="button"
-        className={`jl-tool-slot${overlay.isChatOpen ? " jl-tool-slot-active" : ""}`}
+      <MapChromeControl
+        variant="slot"
+        pressed={overlay.isChatOpen}
         aria-label="Open chat"
-        aria-pressed={overlay.isChatOpen}
+        label="Chat"
         onClick={() =>
           overlay.isChatOpen ? overlay.closeSheet() : overlay.openChat()
         }
-      >
-        <span className="jl-tool-slot-label">Chat</span>
-      </MotionPressable>
-      <MotionPressable
-        type="button"
-        className={`jl-tool-slot${overlay.isLogOpen ? " jl-tool-slot-active" : ""}`}
+      />
+      <MapChromeControl
+        variant="slot"
+        pressed={overlay.isLogOpen}
         aria-label="Open session log"
-        aria-pressed={overlay.isLogOpen}
+        label="Log"
         onClick={() =>
           overlay.isLogOpen ? overlay.closeSheet() : overlay.openLog()
         }
-      >
-        <span className="jl-tool-slot-label">Log</span>
-      </MotionPressable>
+      />
       {canOpenCodes ? (
-        <MotionPressable
-          type="button"
-          className={`jl-tool-slot${overlay.isCodesOpen ? " jl-tool-slot-active" : ""}`}
+        <MapChromeControl
+          variant="slot"
+          pressed={overlay.isCodesOpen}
           aria-label="Open role codes"
-          aria-pressed={overlay.isCodesOpen}
+          icon={<HudStarIcon className="h-5 w-5 shrink-0" />}
+          label="Codes"
           onClick={() =>
             overlay.isCodesOpen ? overlay.closeSheet() : overlay.openCodes()
           }
-        >
-          <span className="jl-tool-slot-icon">
-            <HudStarIcon className="h-5 w-5 shrink-0" />
-          </span>
-          <span className="jl-tool-slot-label">Codes</span>
-        </MotionPressable>
+        />
       ) : null}
     </div>
   );

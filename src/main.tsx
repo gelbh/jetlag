@@ -11,10 +11,13 @@ import { PWA_MARK_NAV, markPlayDay } from "./domain/device/perf/playDayMarks.ts"
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { installE2EBridgeIfConfigured } from "./test/e2eBridge";
+import { markStandaloneShellClass } from "./domain/device/pwa/markStandaloneShellClass";
+import "@mantine/core/styles.layer.css";
+import "@mantine/notifications/styles.layer.css";
 import "./index.css";
 
+markStandaloneShellClass();
 installE2EBridgeIfConfigured();
-
 function scheduleDeferredObservability(): void {
   scheduleAfterFirstPaint(() => {
     void import("./services/core/analytics/sentry.ts").then(

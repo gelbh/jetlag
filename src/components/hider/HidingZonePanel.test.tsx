@@ -1,4 +1,5 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, screen } from "@testing-library/react";
+import { renderWithAppUi } from "../../test/renderWithAppUi";
 import { describe, expect, it, vi } from "vitest";
 import { HidingZonePanel } from "./HidingZonePanel";
 
@@ -31,7 +32,7 @@ describe("HidingZonePanel", () => {
     const onSearchThisArea = vi.fn();
     const choosePlacementMethod = vi.fn();
 
-    render(
+    renderWithAppUi(
       <HidingZonePanel
         wizardOpen
         moveMode={false}
@@ -54,7 +55,7 @@ describe("HidingZonePanel", () => {
   it("searches only when the frame-search button is clicked", () => {
     const onSearchThisArea = vi.fn();
 
-    render(
+    renderWithAppUi(
       <HidingZonePanel
         wizardOpen
         moveMode={false}

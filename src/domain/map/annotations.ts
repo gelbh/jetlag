@@ -49,6 +49,7 @@ export type AnnotationType =
   | "measuring"
   | "zone"
   | "pin"
+  | "draw"
   | "tentacle"
   | "matching";
 
@@ -317,6 +318,8 @@ export function annotationSummary(
       return annotation.metadata.label?.trim() || "Eliminated zone";
     case "pin":
       return annotation.metadata.label?.trim() || "Map note";
+    case "draw":
+      return annotation.metadata.label?.trim() || "Freehand";
     case "tentacle":
       return tentacleAnnotationSummary(annotation, distanceUnit);
     case "matching": {

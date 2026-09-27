@@ -1,7 +1,16 @@
 import { useState } from "react";
+import { Box, Button, Stack, Text, TextInput } from "@mantine/core";
 import type { AdvancedSessionSettingsValue } from "@/domain/session/tools/advancedSessionSettings";
 import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
 import type { SessionCustomLocationPin } from "@/domain/session/catalog/sessionCustomContent";
+import {
+  InsetGroup,
+  SectionLabel,
+  compactDangerStyles,
+  filledStyles,
+  insetTextInputStyles,
+} from "@/components/ui/entry/entryChrome";
+import { InsetHairline } from "@/components/ui/entry/InsetRow";
 
 interface PinEditorProps {
   value: AdvancedSessionSettingsValue;
@@ -43,90 +52,108 @@ export function PinEditor({ value, onChange, disabled }: PinEditorProps) {
   };
 
   return (
-    <>
-      <p className="font-display text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-dim">
-        Manual location pins
-      </p>
-      <p className="text-xs text-ink-muted">
+    <Stack gap="xs">
+      <SectionLabel>Manual location pins</SectionLabel>
+      <Text size="xs" c="var(--color-field-ink-muted)" px={4}>
         Named points for Measuring and Tentacle when map data is missing.
-      </p>
+      </Text>
+
       {value.customLocationPins.length > 0 ? (
-        <ul className="space-y-1 text-sm text-ink">
-          {value.customLocationPins.map((pin) => (
-            <li
-              key={pin.id}
-              className="flex items-center justify-between gap-2 border border-border px-2 py-1"
-            >
-              <span>
-                {pin.name}
-                <span className="block text-xs text-ink-muted">
-                  {pin.point[0].toFixed(5)}, {pin.point[1].toFixed(5)}
-                </span>
-              </span>
-              <button
-                type="button"
-                disabled={disabled}
-                onClick={() =>
-                  onChange({
-                    ...value,
-                    customLocationPins: value.customLocationPins.filter(
-                      (item) => item.id !== pin.id,
-                    ),
-                  })
-                }
-                className="text-xs text-error"
+        <InsetGroup>
+          {value.customLocationPins.map((pin, index) => (
+            <Box key={pin.id}>
+              {index > 0 ? <InsetHairline insetStart="1rem" /> : null}
+              <Box
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.75rem",
+                  paddingInline: "1rem",
+                  paddingBlock: "0.65rem",
+                }}
               >
-                Remove
-              </button>
-            </li>
+                <Box style={{ flex: 1, minWidth: 0 }}>
+                  <Text size="sm" c="var(--color-field-ink)">
+                    {pin.name}
+                  </Text>
+                  <Text size="xs" c="var(--color-field-ink-muted)">
+                    {pin.point[0].toFixed(5)}, {pin.point[1].toFixed(5)}
+                  </Text>
+                </Box>
+                <Button
+                  type="button"
+                  size="compact-sm"
+                  disabled={disabled}
+                  styles={compactDangerStyles}
+                  onClick={() =>
+                    onChange({
+                      ...value,
+                      customLocationPins: value.customLocationPins.filter(
+                        (item) => item.id !== pin.id,
+                      ),
+                    })
+                  }
+                >
+                  Remove
+                </Button>
+              </Box>
+            </Box>
           ))}
-        </ul>
+        </InsetGroup>
       ) : null}
-      <div className="grid gap-2 sm:grid-cols-3">
-        <label className="field-label text-xs sm:col-span-1">
-          Name
-          <input
-            value={pinDraft.name}
-            disabled={disabled}
-            onChange={(event) =>
-              setPinDraft((current) => ({ ...current, name: event.target.value }))
-            }
-            className="field-input mt-1"
-          />
-        </label>
-        <label className="field-label text-xs">
-          Latitude
-          <input
-            value={pinDraft.lat}
-            disabled={disabled}
-            onChange={(event) =>
-              setPinDraft((current) => ({ ...current, lat: event.target.value }))
-            }
-            className="field-input mt-1"
-            inputMode="decimal"
-          />
-        </label>
-        <label className="field-label text-xs">
-          Longitude
-          <input
-            value={pinDraft.lng}
-            disabled={disabled}
-            onChange={(event) =>
-              setPinDraft((current) => ({ ...current, lng: event.target.value }))
-            }
-            className="field-input mt-1"
-            inputMode="decimal"
-          />
-        </label>
-      </div>
-      <button
+
+      <InsetGroup>
+        <TextInput
+          label="Name"
+          value={pinDraft.name}
+          disabled={disabled}
+          onChange={(event) =>
+            setPinDraft((current) => ({
+              ...current,
+              name: event.currentTarget.value,
+            }))
+          }
+          styles={insetTextInputStyles}
+        />
+        <InsetHairline insetStart="1rem" />
+        <TextInput
+          label="Latitude"
+          value={pinDraft.lat}
+          disabled={disabled}
+          inputMode="decimal"
+          onChange={(event) =>
+            setPinDraft((current) => ({
+              ...current,
+              lat: event.currentTarget.value,
+            }))
+          }
+          styles={insetTextInputStyles}
+        />
+        <InsetHairline insetStart="1rem" />
+        <TextInput
+          label="Longitude"
+          value={pinDraft.lng}
+          disabled={disabled}
+          inputMode="decimal"
+          onChange={(event) =>
+            setPinDraft((current) => ({
+              ...current,
+              lng: event.currentTarget.value,
+            }))
+          }
+          styles={insetTextInputStyles}
+        />
+      </InsetGroup>
+
+      <Button
         type="button"
+        fullWidth
         disabled={disabled}
+        styles={filledStyles}
         onClick={addPin}
-        className="rounded-full border border-border px-3 py-1 text-xs font-semibold text-brand-blue disabled:opacity-50"
       >
         Add pin
-      </button>
-    </>
+      </Button>
+    </Stack>
   );
 }

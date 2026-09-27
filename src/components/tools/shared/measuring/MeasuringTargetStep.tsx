@@ -149,16 +149,32 @@ export function MeasuringTargetSection(props: MeasuringTargetSectionProps) {
 
   if (isLinear) {
     return (
-      <button
-        type="button"
-        onClick={onFindLinearFeature}
-        disabled={!hasSeekerPoint || loading}
-        className="btn-secondary w-full disabled:opacity-40"
-      >
-        {loading
-          ? `Finding ${targetLabel.toLowerCase()}…`
-          : `Find ${targetLabel.toLowerCase()} in play area`}
-      </button>
+      <>
+        {loading ? (
+          <LoadingReadout>
+            Finding {targetLabel.toLowerCase()} in the play area…
+          </LoadingReadout>
+        ) : null}
+        {hasTargetPoint && distanceMeters !== null ? (
+          <ResolvedReadout>
+            Nearest {targetLabel.toLowerCase()} is{" "}
+            {formatDistance(distanceMeters, distanceUnit)} away.
+          </ResolvedReadout>
+        ) : (
+          <ResolvedReadout variant="dim">
+            Set your anchor to find the nearest {targetLabel.toLowerCase()}.
+          </ResolvedReadout>
+        )}
+        {error && hasSeekerPoint && !loading ? (
+          <button
+            type="button"
+            onClick={onFindLinearFeature}
+            className="btn-secondary w-full"
+          >
+            Retry
+          </button>
+        ) : null}
+      </>
     );
   }
 

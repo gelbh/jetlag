@@ -3,6 +3,7 @@ import globals from "globals";
 import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
 import jsxA11y from "eslint-plugin-jsx-a11y";
+import playwright from "eslint-plugin-playwright";
 import tseslint from "typescript-eslint";
 import { defineConfig, globalIgnores } from "eslint/config";
 
@@ -46,14 +47,21 @@ export default defineConfig([
       },
     },
   },
+  {
+    files: ["e2e/**/*.{ts,tsx}"],
+    extends: [playwright.configs["flat/recommended"]],
+    rules: {
+      // Sleeps must fail CI (recommended defaults to warn).
+      "playwright/no-wait-for-timeout": "error",
+    },
+  },
   // Wave 1: enable jsx-a11y recommended on kernel/flag surfaces only.
   // Expand this glob as later UX waves migrate chrome (avoid repo-wide debt gate).
   {
     files: [
-      "src/components/ui/sheets/RadixMotionSheet.tsx",
-      "src/components/ui/sheets/RadixMotionSheet.test.tsx",
       "src/components/ui/sheets/SheetHost.tsx",
       "src/components/ui/sheets/SheetHost.test.tsx",
+      "src/components/ui/sheets/MantineDrawerSheet.tsx",
       "src/components/ui/brand/JlIcon.tsx",
       "src/components/tools/ToolDockOverflowMenu.tsx",
       "src/hooks/feature/**/*.{ts,tsx}",

@@ -1,7 +1,23 @@
 import { fireEvent, render, screen } from "@testing-library/react";
+import { MantineProvider } from "@mantine/core";
 import { MemoryRouter } from "react-router-dom";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { jetlagTheme } from "@/theme/theme";
+import { RouteTransitionProvider } from "@/navigation/RouteTransitionContext";
 import { ContentBlockerErrorPage } from "./ContentBlockerErrorPage";
+
+beforeEach(() => {
+  vi.stubGlobal("matchMedia", (query: string) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener() {},
+    removeListener() {},
+    addEventListener() {},
+    removeEventListener() {},
+    dispatchEvent: () => false,
+  }));
+});
 
 describe("ContentBlockerErrorPage", () => {
   afterEach(() => {
@@ -13,9 +29,13 @@ describe("ContentBlockerErrorPage", () => {
     vi.stubGlobal("location", { ...window.location, host: "localhost", reload });
 
     render(
-      <MemoryRouter>
-        <ContentBlockerErrorPage />
-      </MemoryRouter>,
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
+        <MemoryRouter>
+          <RouteTransitionProvider>
+            <ContentBlockerErrorPage />
+          </RouteTransitionProvider>
+        </MemoryRouter>
+      </MantineProvider>,
     );
 
     expect(

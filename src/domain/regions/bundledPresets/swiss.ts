@@ -35,7 +35,7 @@ export function swissPresets(): BundledGamePresetDefinition[] {
       hierarchy: [
         ...europe,
         { id: "canton-zurich", category: "Canton", name: "Zürich" },
-        { id: "zurich-city", category: "City", name: "Zürich city" },
+        { id: "zurich-city", category: "City", name: "Zürich" },
       ],
       distanceUnit: "metric",
       advancedSettingsPatch: EXPANSION_OFF,
@@ -50,7 +50,7 @@ export function swissPresets(): BundledGamePresetDefinition[] {
       hierarchy: [
         ...europe,
         { id: "canton-lucerne", category: "Canton", name: "Lucerne" },
-        { id: "lucerne-metro", category: "Metro", name: "Lucerne" },
+        { id: "lucerne-metro", category: "City", name: "Lucerne" },
       ],
       distanceUnit: "metric",
       advancedSettingsPatch: EXPANSION_OFF,

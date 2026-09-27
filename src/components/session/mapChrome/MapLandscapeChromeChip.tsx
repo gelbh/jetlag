@@ -2,8 +2,10 @@ import type { SyncStatus } from "@/domain/device/sync/sync";
 import type { PendingQuestionRecord } from "@/domain/session/activity/sessionChat";
 import type { SessionRulesInput } from "@/domain/session/rules";
 import type { TimerState } from "@/domain/session/timer/timer";
+import { Paper } from "@mantine/core";
 import { CaretDown, CaretUp } from "@phosphor-icons/react";
 import { surveySyncShortLabel } from "@/domain/device/surveyStatusCopy";
+import { mapChromeSurfaceStyles } from "@/components/ui/entry/entryChrome";
 import { JlIcon } from "../../ui/brand/JlIcon";
 import { SyncStatusBeacon } from "../syncUi/SyncStatusDot";
 import { SYNC_TONE_CLASSES, syncRailDisplay } from "../status/syncRailDisplay";
@@ -43,20 +45,32 @@ export function MapLandscapeChromeChip({
   const syncTone =
     syncDisplay.inline?.tone ?? syncDisplay.banner?.tone;
 
+  const ariaLabel = collapsed
+    ? syncLabel
+      ? `Show map controls. Timer ${timer.value}. ${syncLabel}`
+      : `Show map controls. Timer ${timer.value}`
+    : "Hide map controls";
+
+  const chipClassName =
+    "jl-landscape-chrome-chip pointer-events-auto fixed inset-x-3 bottom-[max(0.5rem,env(safe-area-inset-bottom))] z-[calc(var(--z-dock)+2)] mx-auto flex min-h-11 w-fit max-w-[calc(100%-1.5rem)] items-center justify-center gap-2.5 px-3 py-1.5 font-display motion-safe:transition-[opacity,transform] motion-safe:duration-200 motion-reduce:transition-none";
+
   return (
-    <button
+    <Paper
+      component="button"
       type="button"
-      className="jl-landscape-chrome-chip pointer-events-auto fixed inset-x-3 bottom-[max(0.5rem,env(safe-area-inset-bottom))] z-[calc(var(--z-dock)+2)] mx-auto flex min-h-11 w-fit max-w-[calc(100%-1.5rem)] items-center justify-center gap-2.5 px-3 py-1.5 font-display motion-safe:transition-[opacity,transform] motion-safe:duration-200 motion-reduce:transition-none"
+      data-testid="map-landscape-chrome-chip-mantine"
+      className={chipClassName}
       onClick={onToggle}
       aria-expanded={!collapsed}
       aria-controls="map-chrome-hud-controls"
-      aria-label={
-        collapsed
-          ? syncLabel
-            ? `Show map controls. Timer ${timer.value}. ${syncLabel}`
-            : `Show map controls. Timer ${timer.value}`
-          : "Hide map controls"
-      }
+      aria-label={ariaLabel}
+      radius={22}
+      styles={{
+        root: {
+          ...mapChromeSurfaceStyles,
+          borderRadius: 22,
+        },
+      }}
     >
       <span className="inline-flex min-w-0 items-baseline gap-1.5 font-mono text-sm font-bold tabular-nums">
         <span className="jl-landscape-chrome-chip__phase font-display font-bold tracking-wider">
@@ -80,6 +94,6 @@ export function MapLandscapeChromeChip({
         weight="bold"
         className="shrink-0 text-[var(--color-flag)]"
       />
-    </button>
+    </Paper>
   );
 }

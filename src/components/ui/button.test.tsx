@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import { Button, buttonVariants } from "./button";
 
 describe("Button", () => {
-  it("maps default / flag / ghost variants to Survey class tokens", () => {
+  it("maps default / flag / ghost variants to brand class tokens", () => {
     expect(buttonVariants({ variant: "default" })).toContain("bg-canvas");
     expect(buttonVariants({ variant: "default" })).toContain("text-field-ink");
     expect(buttonVariants({ variant: "flag" })).toContain("bg-flag");

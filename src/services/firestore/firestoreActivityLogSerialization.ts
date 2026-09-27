@@ -14,6 +14,7 @@ const ACTIVITY_ANNOTATION_TYPES = [
   "measuring",
   "zone",
   "pin",
+  "draw",
   "tentacle",
   "matching",
 ] as const satisfies readonly AnnotationType[];

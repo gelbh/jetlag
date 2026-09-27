@@ -4,6 +4,15 @@ import {
   HudChevronRightIcon,
 } from "../../ui/brand/HudIcons";
 import {
+  contextualRailHeaderStyle,
+  contextualRailIconTabStyle,
+  contextualRailIconTabsStyle,
+  contextualRailPanelStyle,
+  contextualRailStyle,
+  contextualRailTabStyle,
+  contextualRailTabsStyle,
+} from "@/components/ui/entry/entryChrome";
+import {
   type ContextualRailTab,
 } from "./ContextualRailContext";
 import { useContextualRailPanel } from "../helpers/useContextualRailPanel";
@@ -81,8 +90,9 @@ export function ContextualRail({
       className={`contextual-rail${open ? " contextual-rail--open" : " contextual-rail--collapsed"}`}
       role="complementary"
       aria-label="Map panels"
+      style={contextualRailStyle(open)}
     >
-      <div className="contextual-rail__header">
+      <div className="contextual-rail__header" style={contextualRailHeaderStyle}>
         <button
           type="button"
           className="hud-chrome inline-flex min-h-11 min-w-11 items-center justify-center"
@@ -112,6 +122,7 @@ export function ContextualRail({
       {!open ? (
         <nav
           className="contextual-rail__icon-tabs"
+          style={contextualRailIconTabsStyle}
           aria-label="Map panel tabs"
         >
           {tabs.map((tab) => {
@@ -123,6 +134,7 @@ export function ContextualRail({
                 className={`contextual-rail__icon-tab${
                   activeTab === tab ? " contextual-rail__icon-tab--active" : ""
                 }`}
+                style={contextualRailIconTabStyle(activeTab === tab)}
                 aria-label={meta.label}
                 onClick={() => onSelectTab(tab)}
               >
@@ -135,6 +147,7 @@ export function ContextualRail({
         <>
           <div
             className="jl-scroll contextual-rail__tabs"
+            style={contextualRailTabsStyle}
             role="tablist"
             aria-label="Map panel sections"
           >
@@ -149,6 +162,7 @@ export function ContextualRail({
                   className={`contextual-rail__tab${
                     activeTab === tab ? " contextual-rail__tab--active" : ""
                   }`}
+                  style={contextualRailTabStyle(activeTab === tab)}
                   onClick={() => onSelectTab(tab)}
                 >
                   {meta.label}
@@ -159,6 +173,7 @@ export function ContextualRail({
           <div
             ref={setPanelNode}
             className="jl-scroll contextual-rail__panel"
+            style={contextualRailPanelStyle}
             role="tabpanel"
             aria-label={activeLabel}
             tabIndex={-1}

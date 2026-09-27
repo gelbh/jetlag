@@ -6,12 +6,77 @@ import { registerMapLibreMap } from "@/services/geo/maplibre/mapLibreMapRegistry
 import { useMapStore } from "@/state/mapStore";
 import * as previewBasemapPoisModule from "@/services/geo/maplibre/previewBasemapPois";
 import * as tentacleOverpassModule from "../../services/geo/overpass/tentacleOverpass";
+import { tentacleSearchRadiusMetersForSession } from "../../domain/questions";
 
 describe("useTentacleTool", () => {
   beforeEach(() => {
     useMapStore.setState({ mapStyle: "standard" });
     registerMapLibreMap(null);
     vi.restoreAllMocks();
+  });
+
+  it("resolves search radius before category and anchor are chosen", () => {
+    const mocks = createToolHookMocks();
+    const sessionRules = { gameSize: "medium" as const };
+    const { result } = renderHook(() =>
+      useTentacleTool({
+        active: true,
+        annotations: mocks.annotations,
+        gameArea: mocks.gameArea,
+        sessionRules,
+        createAnnotation: mocks.createAnnotation,
+        distanceUnit: mocks.distanceUnit,
+        finishPlacement: mocks.finishPlacement,
+        setMapError: mocks.setMapError,
+        mapError: mocks.mapError,
+        gpsLoading: mocks.gpsLoading,
+        awaitingPlacement: mocks.awaitingPlacement,
+        setAwaitingPlacement: mocks.setAwaitingPlacement,
+        refreshGps: mocks.refreshGps,
+        ensurePointInGameArea: mocks.ensurePointInGameArea,
+        armPlacement: mocks.armPlacement,
+      }),
+    );
+
+    expect(result.current.draft.tentacleCenter).toBeNull();
+    expect(result.current.draft.tentacleSearchRadiusMeters).toBe(
+      tentacleSearchRadiusMetersForSession(sessionRules, "museum"),
+    );
+    expect(result.current.draft.tentacleSearchRadiusMeters).toBeGreaterThan(0);
+  });
+
+  it("resolves search radius from category before an anchor is placed", () => {
+    const mocks = createToolHookMocks();
+    const sessionRules = { gameSize: "medium" as const };
+    const { result } = renderHook(() =>
+      useTentacleTool({
+        active: true,
+        annotations: mocks.annotations,
+        gameArea: mocks.gameArea,
+        sessionRules,
+        createAnnotation: mocks.createAnnotation,
+        distanceUnit: mocks.distanceUnit,
+        finishPlacement: mocks.finishPlacement,
+        setMapError: mocks.setMapError,
+        mapError: mocks.mapError,
+        gpsLoading: mocks.gpsLoading,
+        awaitingPlacement: mocks.awaitingPlacement,
+        setAwaitingPlacement: mocks.setAwaitingPlacement,
+        refreshGps: mocks.refreshGps,
+        ensurePointInGameArea: mocks.ensurePointInGameArea,
+        armPlacement: mocks.armPlacement,
+      }),
+    );
+
+    act(() => {
+      result.current.panel.props.model.onCategoryChange("museum");
+    });
+
+    expect(result.current.draft.tentacleCenter).toBeNull();
+    expect(result.current.draft.tentacleSearchRadiusMeters).toBe(
+      tentacleSearchRadiusMetersForSession(sessionRules, "museum"),
+    );
+    expect(result.current.draft.tentacleSearchRadiusMeters).toBeGreaterThan(0);
   });
 
   it("stores tentacle center from map taps", () => {
@@ -37,7 +102,7 @@ describe("useTentacleTool", () => {
     );
 
     act(() => {
-      result.current.panel.props.onCategoryChange("museum");
+      result.current.panel.props.model.onCategoryChange("museum");
     });
 
     act(() => {
@@ -85,7 +150,7 @@ describe("useTentacleTool", () => {
     );
 
     act(() => {
-      result.current.panel.props.onCategoryChange("museum");
+      result.current.panel.props.model.onCategoryChange("museum");
     });
 
     act(() => {
@@ -134,7 +199,7 @@ describe("useTentacleTool", () => {
     );
 
     act(() => {
-      result.current.panel.props.onCategoryChange("museum");
+      result.current.panel.props.model.onCategoryChange("museum");
     });
     act(() => {
       result.current.handleMapClick([53.35, -6.26]);
@@ -152,6 +217,7 @@ describe("useTentacleTool", () => {
     });
 
     expect(result.current.draft.tentacleSelectedPoiId).toBeNull();
-    expect(result.current.hud.error).toMatch(/Preview only/i);
+    // Map-first placement nulls hud.error; panel model still surfaces tentacleError.
+    expect(result.current.panel.props.model.error).toMatch(/Preview only/i);
   });
 });

@@ -1,27 +1,42 @@
-@import "tailwindcss";
+@layer theme, base, components, utilities;
+
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);
 @import "./styles/tokens.css";
 @import "./styles/base.css";
 @import "./styles/primitives.css";
 @import "./styles/scrollbars.css";
 @import "./styles/map-shell.css";
-@import "./styles/desktop-ops.css";
-@import "./styles/map-panels.css";
 @import "./styles/map-tool-dock.css";
-@import "./styles/map-wizard-attention.css";
-@import "./styles/home-entry.css";
-
-/* Survey entry/secondary under [data-player-ux-world="survey"]. */
-@import "./styles/entry-survey.css";
 @import "./styles/map-chrome-controls.css";
 @import "./styles/map-compass-control.css";
 
 /* After map-chrome-controls so left zoom stack + side clearance tokens win. */
 @import "./styles/map-bottom-chrome.css";
-
-/* Survey field-book skin under [data-player-ux-world="survey"]. */
-@import "./styles/map-survey-chrome.css";
-@import "./styles/ask-hud.css";
 @import "./styles/map-attribution.css";
 @import "./styles/motion.css";
 @import "./styles/route-transition.css";
 @import "./styles/motion-utilities.css";
+
+/*
+ * Border-only preflight: Tailwind width utilities (border-2, border-t-2, …)
+ * need border-style: solid. Full preflight is skipped so Mantine buttons stay opaque.
+ * Kept after @import so stylelint no-invalid-position-at-import-rule stays clean.
+ */
+@layer base {
+  *,
+  *::before,
+  *::after {
+    border: 0 solid;
+  }
+}
+
+/*
+ * Transparent bare buttons inside @layer mantine (not base): same-layer specificity
+ * lets classed Mantine Buttons keep fills; Survey link-buttons lose UA buttonface gray.
+ */
+@layer mantine {
+  button {
+    background-color: transparent;
+  }
+}

@@ -123,8 +123,10 @@ export async function expectPendingQuestionText(
 
 export async function expectChatAnswer(page: Page, answer: string) {
   await openChat(page);
+  // Wave GameChatTab shows the reply label in an Answer box (aria Answer: Yes),
+  // not the legacy "Answered: yes" prefix.
   await expect(
-    gameChatScroll(page).getByText(new RegExp(`Answered: ${answer}`, "i")),
+    page.getByLabel(new RegExp(`Answer:\\s*${answer}`, "i")),
   ).toBeVisible({
     timeout: 20_000,
   });

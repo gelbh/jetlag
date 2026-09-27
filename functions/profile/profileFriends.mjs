@@ -17,6 +17,7 @@ const RATE_LIMITS = {
   accept: { limit: 60, windowMs: 60_000 },
   decline: { limit: 60, windowMs: 60_000 },
   cancel: { limit: 60, windowMs: 60_000 },
+  remove: { limit: 60, windowMs: 60_000 },
   list: { limit: 60, windowMs: 60_000 },
 };
 
@@ -95,6 +96,8 @@ export async function profileFriendsHandler(db, auth, data) {
       return declineFriendRequest(db, uid, data.fromUid);
     case "cancel":
       return cancelFriendRequest(db, uid, data.toUid);
+    case "remove":
+      return removeFriend(db, uid, data.friendUid);
     case "list":
       return listFriends(db, uid);
     default: {
@@ -396,6 +399,30 @@ async function cancelFriendRequest(db, uid, toUidRaw) {
   await db.runTransaction(async (tx) => {
     tx.delete(outgoingRef);
     tx.delete(theirIncomingRef);
+  });
+
+  return { ok: true };
+}
+
+async function removeFriend(db, uid, friendUidRaw) {
+  await requireOwnUsername(db, uid);
+  const friendUid = typeof friendUidRaw === "string" ? friendUidRaw.trim() : "";
+  if (!friendUid) {
+    const err = new Error("Missing friend.");
+    err.code = FRIENDS_INVALID;
+    throw err;
+  }
+
+  const myFriendRef = db.collection("users").doc(uid).collection("friends").doc(friendUid);
+  const theirFriendRef = db
+    .collection("users")
+    .doc(friendUid)
+    .collection("friends")
+    .doc(uid);
+
+  await db.runTransaction(async (tx) => {
+    tx.delete(myFriendRef);
+    tx.delete(theirFriendRef);
   });
 
   return { ok: true };

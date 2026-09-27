@@ -1,7 +1,9 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { MantineProvider } from "@mantine/core";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { PhotoAnswerUploader } from "./PhotoAnswerUploader";
 import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
+import { jetlagTheme } from "../../theme/theme";
 
 const pendingQuestion: PendingQuestionRecord = {
   id: "pq-photo",
@@ -22,16 +24,47 @@ const pendingQuestion: PendingQuestionRecord = {
   answerableAt: "2026-01-01T00:00:00.000Z",
 };
 
-describe("PhotoAnswerUploader", () => {
-  it("shows outage notice and mark-sent action", () => {
-    render(
+function renderUploader(
+  onAnswerQuestion: (
+    pendingQuestionId: string,
+    messageId: string,
+    answer: unknown,
+    selectedReply: string,
+    deadlineExpired?: boolean,
+  ) => Promise<void> = vi.fn(),
+) {
+  return render(
+    <MantineProvider theme={jetlagTheme} forceColorScheme="light">
       <PhotoAnswerUploader
         sessionId="session-1"
         pendingQuestion={pendingQuestion}
         messageId="msg-1"
-        onAnswerQuestion={vi.fn()}
-      />,
-    );
+        onAnswerQuestion={onAnswerQuestion}
+      />
+    </MantineProvider>,
+  );
+}
+
+describe("PhotoAnswerUploader", () => {
+  beforeEach(() => {
+    Object.defineProperty(window, "matchMedia", {
+      writable: true,
+      configurable: true,
+      value: (query: string) => ({
+        matches: false,
+        media: query,
+        onchange: null,
+        addListener: () => {},
+        removeListener: () => {},
+        addEventListener: () => {},
+        removeEventListener: () => {},
+        dispatchEvent: () => false,
+      }),
+    });
+  });
+
+  it("shows outage notice and mark-sent action", () => {
+    renderUploader();
 
     expect(
       screen.getByText(/In-app photo upload is temporarily unavailable/i),
@@ -40,17 +73,22 @@ describe("PhotoAnswerUploader", () => {
     expect(document.querySelector('input[type="file"]')).toBeNull();
   });
 
+  it("uses iOS Mantine controls", () => {
+    renderUploader();
+
+    expect(screen.getByRole("button", { name: "Mark sent" })).toHaveClass(
+      "mantine-Button-root",
+    );
+    expect(
+      screen.getByRole("button", { name: "I cannot answer the question" }),
+    ).toHaveClass("mantine-Button-root");
+    expect(document.querySelector(".btn-primary")).toBeNull();
+    expect(document.querySelector(".btn-secondary")).toBeNull();
+  });
+
   it("submits mark-sent without storage calls", async () => {
     const onAnswerQuestion = vi.fn().mockResolvedValue(undefined);
-
-    render(
-      <PhotoAnswerUploader
-        sessionId="session-1"
-        pendingQuestion={pendingQuestion}
-        messageId="msg-1"
-        onAnswerQuestion={onAnswerQuestion}
-      />,
-    );
+    renderUploader(onAnswerQuestion);
 
     fireEvent.click(screen.getByRole("button", { name: "Mark sent" }));
 
@@ -67,15 +105,7 @@ describe("PhotoAnswerUploader", () => {
 
   it("submits cannot-answer", async () => {
     const onAnswerQuestion = vi.fn().mockResolvedValue(undefined);
-
-    render(
-      <PhotoAnswerUploader
-        sessionId="session-1"
-        pendingQuestion={pendingQuestion}
-        messageId="msg-1"
-        onAnswerQuestion={onAnswerQuestion}
-      />,
-    );
+    renderUploader(onAnswerQuestion);
 
     fireEvent.click(
       screen.getByRole("button", { name: "I cannot answer the question" }),
@@ -96,15 +126,7 @@ describe("PhotoAnswerUploader", () => {
     const onAnswerQuestion = vi
       .fn()
       .mockRejectedValue(new Error("Could not save your answer."));
-
-    render(
-      <PhotoAnswerUploader
-        sessionId="session-1"
-        pendingQuestion={pendingQuestion}
-        messageId="msg-1"
-        onAnswerQuestion={onAnswerQuestion}
-      />,
-    );
+    renderUploader(onAnswerQuestion);
 
     fireEvent.click(screen.getByRole("button", { name: "Mark sent" }));
 

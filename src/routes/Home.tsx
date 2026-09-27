@@ -1,89 +1,45 @@
-import { AppLink } from "../components/navigation/AppLink";
-import { useState } from "react";
-import { AppLogo } from "../components/ui/brand/AppLogo";
-import { BootSplash } from "../components/ui/feedback/BootSplash";
-import { DesktopContentColumn } from "../components/ui/layout/DesktopContentColumn";
-import { EntryScreenLayout } from "../components/ui/layout/EntryScreenLayout";
 import {
-  HudPlayIcon,
-  HudAdminIcon,
-  HudFriendsIcon,
-  HudLeaderboardIcon,
-} from "../components/ui/brand/HudIcons";
-import { InlineError } from "../components/ui/banners/InlineError";
-import { VersionChangelogSheet } from "../components/ui/sheets/VersionChangelogSheet";
-import { MotionPressable } from "../components/motion/MotionPressable";
-import { PlayHubSheet } from "../components/home/PlayHubSheet";
-import { IncidentResolvedBanner } from "../components/incident/IncidentResolvedBanner";
-import { ReportProblemSheet } from "../components/incident/ReportProblemSheet";
-import { APP_VERSION } from "../domain/device/changelog";
-import { useIncidentResolvedBanner } from "../hooks/incident/useIncidentResolvedBanner";
-import { LOCAL_SESSION_ID } from "../domain/map/annotations";
+  Alert,
+  Anchor,
+  Button,
+  Container,
+  Group,
+  Stack,
+  Text,
+  Title,
+} from "@mantine/core";
 import {
-  playerRoleLabel,
-  resolvePlayerRole,
-} from "../domain/session/players/playerRole";
-import { useSessionStore } from "../state/sessionStore";
+  Crown,
+  ChartBar,
+  PlusCircle,
+  SignIn,
+  SquaresFour,
+  Trophy,
+  UsersThree,
+} from "@phosphor-icons/react";
+import { Link } from "react-router-dom";
 import {
-  ensureFreshAnonymousUser,
-  isFirebaseConfigured,
-} from "../services/core/firebase/firebase";
-import { withTimeout } from "../services/core/withTimeout";
-import {
-  getRemoteSessionById,
-  healSessionMembership,
-  lookupRemoteSessionByCode,
-} from "../services/firestore/sessionMembershipHeal";
-import { isFirestorePermissionDenied } from "../services/firestore/firestoreAnnotations";
-import { useSessionExit } from "../hooks/session/useSessionExit";
-import { setPremiumApiContext } from "../services/core/auth/premiumApiContext";
-import { useAppNavigate } from "../hooks/navigation/useAppNavigate";
-import { useRouteTransition } from "../navigation/useRouteTransition";
-import { usePremiumEntitlements } from "../hooks/billing/usePremiumEntitlements";
-import { resolveHomePremiumButtonDisplay } from "../domain/billing/premiumProducts";
-import { useAuthBootstrapReady } from "../hooks/app/useAuthBootstrapReady";
-import { LEGAL_APP_NAME } from "../domain/legal/legalContact";
-import { useAdminAccessState } from "../hooks/admin/useAdminAccessState";
-import { useUserProfile } from "../hooks/profile/useUserProfile";
-
-const VERIFY_SESSION_TIMEOUT_MS = 15_000;
-const VERIFY_SESSION_TIMEOUT_MESSAGE =
-  "Couldn't verify the session. Check your connection and try again.";
+  InsetGroup,
+  SectionLabel,
+} from "@/components/ui/entry/entryChrome";
+import { filledStyles } from "@/components/ui/entry/entryStyles";
+import { InsetRow } from "@/components/ui/entry/InsetRow";
+import { AppLogo } from "@/components/ui/brand/AppLogo";
+import { BootSplash } from "@/components/ui/feedback/BootSplash";
+import { EntryScreenLayout } from "@/components/ui/layout/EntryScreenLayout";
+import { LEGAL_APP_NAME } from "@/domain/legal/legalContact";
+import { playerRoleLabel } from "@/domain/session/players/playerRole";
+import { useAuthBootstrapReady } from "@/hooks/app/useAuthBootstrapReady";
+import { useContinueActiveSession } from "@/hooks/session/useContinueActiveSession";
+import { useRouteTransition } from "@/navigation/useRouteTransition";
+import { isFirebaseConfigured } from "@/services/core/firebase/firebase";
 
 export function Home() {
-  const navigate = useAppNavigate();
-  const exitSession = useSessionExit();
-  const session = useSessionStore((state) => state.session);
-  const myRole = useSessionStore((state) => state.myRole);
-  const myUid = useSessionStore((state) => state.myUid);
-  const setSession = useSessionStore((state) => state.setSession);
-  const [continueError, setContinueError] = useState<string | null>(null);
-  const [continuing, setContinuing] = useState(false);
-  const [changelogOpen, setChangelogOpen] = useState(false);
-  const [playHubOpen, setPlayHubOpen] = useState(false);
-  const [reportProblemOpen, setReportProblemOpen] = useState(false);
-  const { entitlements: premiumEntitlements } = usePremiumEntitlements();
-  const {
-    state: adminAccessState,
-    user: permanentUser,
-    isPermanent,
-  } = useAdminAccessState();
-  const showAdminEntry = adminAccessState === "admin";
+  const { session, myRole, continueError, continuing, handleContinue } =
+    useContinueActiveSession();
   const authBootstrapReady = useAuthBootstrapReady();
   const { phase: routeTransitionPhase } = useRouteTransition();
-  const {
-    profile,
-    ready: profileReady,
-    error: profileError,
-  } = useUserProfile(
-    permanentUser?.uid,
-    isFirebaseConfigured() && isPermanent && permanentUser != null
-  );
-  const showUsernamePrompt =
-    isPermanent && profileReady && profileError == null && profile == null;
-  const premiumButton = resolveHomePremiumButtonDisplay(premiumEntitlements);
-  const { notice: incidentResolvedNotice, dismiss: dismissIncidentResolved } =
-    useIncidentResolvedBanner();
+  const showPremium = isFirebaseConfigured();
 
   if (
     isFirebaseConfigured() &&
@@ -93,338 +49,177 @@ export function Home() {
     return <BootSplash label="Starting…" />;
   }
 
-  const handleContinue = async () => {
-    if (!session) {
-      return;
-    }
-
-    setContinueError(null);
-    setContinuing(true);
-
-    try {
-      if (!isFirebaseConfigured() || session.id === LOCAL_SESSION_ID) {
-        navigate("/map");
-        return;
-      }
-
-      await withTimeout(
-        (async () => {
-          const user = await ensureFreshAnonymousUser();
-          let remoteSession = null;
-          try {
-            remoteSession = await getRemoteSessionById(session.id);
-          } catch (error) {
-            if (!isFirestorePermissionDenied(error)) {
-              throw error;
-            }
-          }
-
-          if (!remoteSession) {
-            const lookup = await lookupRemoteSessionByCode(session.code);
-            if (lookup.status === "missing") {
-              await exitSession({
-                reason: "reset",
-                sessionId: session.id,
-                animate: false,
-              });
-              setContinueError("That session no longer exists.");
-              return;
-            }
-            if (lookup.status === "ended") {
-              await exitSession({
-                reason: "reset",
-                sessionId: session.id,
-                animate: false,
-              });
-              setContinueError(
-                "That session has ended. Join or create a new one."
-              );
-              return;
-            }
-            remoteSession = lookup.session;
-          }
-
-          if (remoteSession.endedAt) {
-            await exitSession({
-              reason: "reset",
-              sessionId: session.id,
-              animate: false,
-            });
-            setContinueError(
-              "That session has ended. Join or create a new one."
-            );
-            return;
-          }
-
-          const resumeRole =
-            myRole ??
-            resolvePlayerRole(remoteSession.memberRoles, myUid ?? user.uid);
-          const activeSession = await healSessionMembership(
-            remoteSession,
-            user.uid,
-            resumeRole,
-            { returningMemberUid: myUid, persistedMyUid: myUid }
-          );
-
-          const role = resolvePlayerRole(activeSession.memberRoles, user.uid);
-          if (
-            myRole &&
-            activeSession.memberRoles &&
-            activeSession.memberRoles[user.uid] &&
-            myRole !== role
-          ) {
-            setContinueError(
-              "Your role changed for this session. Rejoin with a new code."
-            );
-            return;
-          }
-
-          setSession(activeSession, user.uid);
-          setPremiumApiContext(activeSession);
-          navigate("/map");
-        })(),
-        VERIFY_SESSION_TIMEOUT_MS,
-        VERIFY_SESSION_TIMEOUT_MESSAGE
-      );
-    } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : "Couldn't continue that session.";
-      if (
-        message === "That session no longer exists." ||
-        message === "That session has ended. Join or create a new one."
-      ) {
-        await exitSession({
-          reason: "reset",
-          sessionId: session.id,
-          animate: false,
-        });
-      }
-      setContinueError(message);
-    } finally {
-      setContinuing(false);
-    }
-  };
-
   return (
-    <>
-      <IncidentResolvedBanner
-        notice={incidentResolvedNotice}
-        onDismiss={(incidentId) => {
-          void dismissIncidentResolved(incidentId);
-        }}
-      />
-      <EntryScreenLayout viewport viewportLayout="center">
-        <DesktopContentColumn maxWidth="entry">
-          <div className="flex w-full flex-col gap-6">
-            <div className="shrink-0 space-y-4">
-              <div className="flex items-start justify-between gap-3">
-                <AppLogo variant="mark" size="lg" className="shrink-0" />
-                <div className="flex shrink-0 items-center gap-2">
-                  {showAdminEntry ? (
-                    <AppLink
-                      to="/admin"
-                      className="hud-chrome inline-flex size-[2.75rem] items-center justify-center text-field-ink-muted"
-                      aria-label="Admin — live sessions"
-                    >
-                      <HudAdminIcon className="size-5" />
-                    </AppLink>
-                  ) : null}
-                  <AppLink
-                    to="/friends"
-                    className="hud-chrome inline-flex size-[2.75rem] items-center justify-center text-field-ink-muted"
-                    aria-label="Friends"
-                  >
-                    <HudFriendsIcon className="size-5" />
-                  </AppLink>
-                  <AppLink
-                    to="/leaderboard"
-                    className="hud-chrome inline-flex size-[2.75rem] items-center justify-center text-field-ink-muted"
-                    aria-label="Leaderboard"
-                  >
-                    <HudLeaderboardIcon className="size-5" />
-                  </AppLink>
-                  <MotionPressable
-                    type="button"
-                    onClick={() => setChangelogOpen(true)}
-                    className="hud-chrome shrink-0 px-2.5 py-1.5 font-mono text-xs font-bold tracking-wide text-field-ink-muted"
-                    aria-label={`Version ${APP_VERSION}. Open changelog`}
-                  >
-                    v{APP_VERSION}
-                  </MotionPressable>
-                </div>
-              </div>
-              <div className="space-y-1">
-                <h1 className="font-display text-balance text-[clamp(1.75rem,7.5vw,3rem)] font-bold uppercase leading-[0.95] tracking-tight text-field-ink">
-                  {LEGAL_APP_NAME}
-                </h1>
-                <p className="font-display text-pretty text-[clamp(1.5rem,6vw,2.25rem)] font-bold uppercase leading-none tracking-tight text-signal">
-                  Hide + Seek
-                </p>
-              </div>
-              <p className="max-w-sm text-pretty text-base leading-relaxed text-field-ink-muted">
-                Unofficial fan companion for Jet Lag: The Game. Host or join
-                synced map sessions: seekers ask questions on the live map,
-                hiders answer and set hiding zones, and everyone stays on the
-                same board.
-              </p>
-              {showUsernamePrompt ? (
-                <div className="flex flex-wrap items-center justify-between gap-2 border-t-2 border-rule pt-3">
-                  <p className="text-sm text-field-ink-muted">
-                    Choose a username for friends and leaderboards.
-                  </p>
-                  <AppLink
-                    to="/friends"
-                    className="home-feedback-link min-h-11 px-2 font-display text-xs font-semibold uppercase tracking-[0.08em]"
-                  >
-                    Set username
-                  </AppLink>
-                </div>
-              ) : null}
-            </div>
+    <EntryScreenLayout viewport viewportLayout="center" skin="plain">
+      <Container
+        size="xs"
+        w="100%"
+        px={0}
+        maw={390}
+      >
+        <Stack gap={28}>
+          <Stack gap={10}>
+            <Group gap="sm" align="center">
+              <AppLogo variant="mark" size="md" />
+              <Title
+                order={1}
+                c="var(--color-field-ink)"
+                fw={700}
+                style={{
+                  fontSize: "2.125rem",
+                  lineHeight: 1.15,
+                  letterSpacing: "-0.03em",
+                }}
+              >
+                {LEGAL_APP_NAME}
+              </Title>
+            </Group>
+            <Text
+              c="var(--color-field-ink-muted)"
+              size="sm"
+              style={{ lineHeight: 1.35, textWrap: "pretty", maxWidth: "22rem" }}
+            >
+              Unofficial fan companion for Jet Lag: The Game.
+            </Text>
+          </Stack>
 
-            <div className="home-enter-actions space-y-2.5">
-              {session ? (
-                <MotionPressable
-                  type="button"
+          <Stack gap={22}>
+            {session ? (
+              <Stack gap={8}>
+                <Text
+                  size="xs"
+                  c="var(--color-field-ink-muted)"
+                  fw={590}
+                  style={{ letterSpacing: "-0.01em", paddingInline: 4 }}
+                >
+                  Active session
+                  {myRole ? ` · ${playerRoleLabel(myRole)}` : ""}
+                </Text>
+                <Button
+                  fullWidth
+                  loading={continuing}
                   onClick={() => void handleContinue()}
-                  disabled={continuing}
                   aria-busy={continuing}
                   aria-label={
                     continuing
                       ? `Verifying session ${session.code}`
                       : `Return to map for session ${session.code}`
                   }
-                  className="home-card-btn home-card-btn-primary disabled:opacity-50"
+                  styles={filledStyles}
                 >
-                  <span>
-                    <span className="home-card-btn-hint block">
-                      Active session
-                      {myRole ? ` · ${playerRoleLabel(myRole)}` : ""}
-                    </span>
-                    <span className="font-mono text-xl font-bold tracking-[0.22em] jl-view-transition-session-code">
-                      {session.code}
-                    </span>
-                  </span>
-                  <span className="flex items-center gap-1.5 text-sm">
-                    {continuing ? (
-                      "Verifying…"
-                    ) : (
-                      <>
-                        <HudPlayIcon className="h-4 w-4" />
-                        Map
-                      </>
-                    )}
-                  </span>
-                </MotionPressable>
-              ) : null}
-              <MotionPressable
-                type="button"
-                onClick={() => setPlayHubOpen(true)}
-                aria-label="Play — create, join, or custom game"
-                aria-haspopup="dialog"
-                aria-expanded={playHubOpen}
-                className={
-                  session
-                    ? "home-card-btn home-card-btn-secondary"
-                    : "home-card-btn home-card-btn-primary"
-                }
-              >
-                <span>Play</span>
-                <span className="home-card-btn-hint">
-                  Create, join, or custom
-                </span>
-              </MotionPressable>
-              {isFirebaseConfigured() ? (
-                <AppLink
-                  to="/premium"
-                  aria-label={
-                    premiumButton.planLabel
-                      ? `Premium, ${premiumButton.planLabel}. ${premiumButton.detailLabel}`
-                      : `Premium sessions and subscriptions. ${premiumButton.detailLabel}`
-                  }
-                  className={
-                    premiumButton.variant === "unlimited"
-                      ? "home-card-btn home-card-btn-premium"
-                      : premiumButton.variant === "sessions"
-                      ? "home-card-btn home-card-btn-premium-sessions"
-                      : "home-card-btn home-card-btn-secondary"
-                  }
+                  Continue
+                </Button>
+                <Text
+                  ta="center"
+                  size="sm"
+                  c="var(--color-field-ink-muted)"
+                  ff="monospace"
+                  style={{ letterSpacing: "0.16em" }}
                 >
-                  <span className="home-card-btn-text">
-                    <span>{premiumButton.primaryLabel}</span>
-                    {premiumButton.planLabel ? (
-                      <span className="home-card-btn-plan">
-                        {premiumButton.planLabel}
-                      </span>
-                    ) : null}
-                  </span>
-                  <span className="home-card-btn-hint">
-                    {premiumButton.detailLabel}
-                  </span>
-                </AppLink>
-              ) : null}
-              <nav
-                aria-label="Legal and feedback"
-                className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1"
-              >
-                <AppLink
-                  to="/privacy"
-                  aria-label="Privacy Policy"
-                  className="home-feedback-link !mt-0 !inline !px-1"
-                >
-                  Privacy
-                </AppLink>
-                <span className="text-field-ink-muted" aria-hidden="true">
-                  ·
-                </span>
-                <AppLink
-                  to="/terms"
-                  aria-label="Terms of Service"
-                  className="home-feedback-link !mt-0 !inline !px-1"
-                >
-                  Terms
-                </AppLink>
-                <span className="text-field-ink-muted" aria-hidden="true">
-                  ·
-                </span>
-                <AppLink
-                  to="/feedback"
-                  aria-label="Feedback and suggestions"
-                  className="home-feedback-link !mt-0 !inline !px-1"
-                >
-                  Feedback
-                </AppLink>
-                <span className="text-field-ink-muted" aria-hidden="true">
-                  ·
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setReportProblemOpen(true)}
-                  aria-label="Report a problem"
-                  className="home-feedback-link !mt-0 !inline !px-1"
-                >
-                  Report a problem
-                </button>
-              </nav>
-              {continueError ? (
-                <InlineError>{continueError}</InlineError>
-              ) : null}
-            </div>
-          </div>
-        </DesktopContentColumn>
-      </EntryScreenLayout>
+                  {session.code}
+                </Text>
+                {continueError ? (
+                  <Alert color="red" title="Could not continue" radius={14}>
+                    {continueError}
+                  </Alert>
+                ) : null}
+              </Stack>
+            ) : null}
 
-      <VersionChangelogSheet
-        open={changelogOpen}
-        onClose={() => setChangelogOpen(false)}
-      />
-      <PlayHubSheet open={playHubOpen} onClose={() => setPlayHubOpen(false)} />
-      <ReportProblemSheet
-        open={reportProblemOpen}
-        onClose={() => setReportProblemOpen(false)}
-      />
-    </>
+            <Stack gap={8}>
+              <SectionLabel>Play</SectionLabel>
+              <InsetGroup>
+                <InsetRow
+                  to="/join"
+                  label="Join session"
+                  icon={<SignIn size={22} weight="regular" />}
+                />
+                <InsetRow
+                  showSeparator
+                  to="/create"
+                  label="Create session"
+                  icon={<PlusCircle size={22} weight="regular" />}
+                />
+                <InsetRow
+                  showSeparator
+                  to="/presets"
+                  label="Browse presets"
+                  icon={<SquaresFour size={22} weight="regular" />}
+                />
+              </InsetGroup>
+            </Stack>
+
+            <Stack gap={8}>
+              <SectionLabel>More</SectionLabel>
+              <InsetGroup>
+                <InsetRow
+                  to="/friends"
+                  label="Friends"
+                  icon={<UsersThree size={22} weight="regular" />}
+                />
+                <InsetRow
+                  showSeparator
+                  to="/leaderboard"
+                  label="Leaderboard"
+                  icon={<Trophy size={22} weight="regular" />}
+                />
+                <InsetRow
+                  showSeparator
+                  to="/stats"
+                  label="Stats"
+                  icon={<ChartBar size={22} weight="regular" />}
+                />
+                {showPremium ? (
+                  <InsetRow
+                    showSeparator
+                    to="/premium"
+                    label="Premium"
+                    icon={<Crown size={22} weight="regular" />}
+                  />
+                ) : null}
+              </InsetGroup>
+            </Stack>
+
+            <Group
+              gap="xs"
+              justify="center"
+              component="nav"
+              aria-label="Legal and feedback"
+            >
+              <Anchor
+                component={Link}
+                to="/privacy"
+                size="sm"
+                aria-label="Privacy Policy"
+              >
+                Privacy
+              </Anchor>
+              <Text size="sm" c="dimmed" aria-hidden="true">
+                ·
+              </Text>
+              <Anchor
+                component={Link}
+                to="/terms"
+                size="sm"
+                aria-label="Terms of Service"
+              >
+                Terms
+              </Anchor>
+              <Text size="sm" c="dimmed" aria-hidden="true">
+                ·
+              </Text>
+              <Anchor
+                component={Link}
+                to="/feedback"
+                size="sm"
+                aria-label="Feedback and suggestions"
+              >
+                Feedback
+              </Anchor>
+            </Group>
+          </Stack>
+        </Stack>
+      </Container>
+    </EntryScreenLayout>
   );
 }

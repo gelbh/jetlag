@@ -1,7 +1,7 @@
 /**
  * Must stay in sync with client `POSTHOG_API_HOST` in `src/services/core/analytics/analytics.ts`.
  */
-export const POSTHOG_PROXY_PATH = "/ingest";
+export const POSTHOG_PROXY_PATH = "/ph";
 
 const API_HOST = "eu.i.posthog.com";
 const ASSET_HOST = "eu-assets.i.posthog.com";

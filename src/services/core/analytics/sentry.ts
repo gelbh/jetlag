@@ -1,5 +1,4 @@
-import * as Sentry from "@sentry/capacitor";
-import * as SentryReact from "@sentry/react";
+import * as Sentry from "@sentry/react";
 import { getClientEnv } from "@/config/env";
 import { APP_VERSION } from "@/domain/device/changelog";
 import type { StorageEstimateSnapshot } from "@/domain/device/pwa/pwaStorageBudget";
@@ -137,38 +136,28 @@ export function initSentry(): void {
     return;
   }
 
-  // Forward options into @sentry/react init so beforeSend stays on the browser client.
   // ignoreErrors belt shares CLIENT_SENTRY_IGNORE_ERRORS with drop matchers (not canaries).
-  Sentry.init(
-    {
-      dsn,
-      tunnel: "/api/sentry-tunnel",
-      environment: env.VITE_SENTRY_ENVIRONMENT || import.meta.env.MODE,
-      release: `jetlag@${APP_VERSION}`,
-      dist: env.VITE_SENTRY_RELEASE_DIST || undefined,
-      tracesSampleRate: import.meta.env.PROD ? 0.1 : 0,
-      ignoreErrors: CLIENT_SENTRY_IGNORE_ERRORS,
-      integrations: [
-        SentryReact.browserTracingIntegration({
-          enableInp: true,
-        }),
-        SentryReact.replayIntegration({
-          maskAllText: true,
-          blockAllMedia: true,
-        }),
-      ],
-      beforeSend: scrubEvent,
-    },
-    (browserOptions) => {
-      SentryReact.init({
-        ...browserOptions,
-        beforeSend: scrubEvent,
-        ignoreErrors: CLIENT_SENTRY_IGNORE_ERRORS,
-        replaysSessionSampleRate: import.meta.env.PROD ? 0.1 : 0,
-        replaysOnErrorSampleRate: 1.0,
-      });
-    },
-  );
+  Sentry.init({
+    dsn,
+    tunnel: "/api/sentry-tunnel",
+    environment: env.VITE_SENTRY_ENVIRONMENT || import.meta.env.MODE,
+    release: `jetlag@${APP_VERSION}`,
+    dist: env.VITE_SENTRY_RELEASE_DIST || undefined,
+    tracesSampleRate: import.meta.env.PROD ? 0.1 : 0,
+    ignoreErrors: CLIENT_SENTRY_IGNORE_ERRORS,
+    integrations: [
+      Sentry.browserTracingIntegration({
+        enableInp: true,
+      }),
+      Sentry.replayIntegration({
+        maskAllText: true,
+        blockAllMedia: true,
+      }),
+    ],
+    beforeSend: scrubEvent,
+    replaysSessionSampleRate: import.meta.env.PROD ? 0.1 : 0,
+    replaysOnErrorSampleRate: 1.0,
+  });
 }
 
 function withSentryScope(run: (scope: Sentry.Scope) => void): void {

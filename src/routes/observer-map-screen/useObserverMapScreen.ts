@@ -87,7 +87,6 @@ export function useObserverMapScreen() {
     isChatOpen: overlay.isChatOpen,
     notificationRole: roleConfig.notificationRole,
     authMode,
-    liveActivityEnabled: roleConfig.liveActivityEnabled,
     exitPath,
   });
 

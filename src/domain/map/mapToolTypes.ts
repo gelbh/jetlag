@@ -6,5 +6,6 @@ export type MapTool =
   | "matching"
   | "zone"
   | "pin"
+  | "draw"
   | "tentacle"
   | "photo";

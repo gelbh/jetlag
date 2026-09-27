@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import type { Polygon } from "geojson";
+import { MOTION_MAP_SHADE_MS } from "@/domain/device/motion/motionTokens";
 import { MAP_ANNOTATION_COLORS } from "@/domain/map/mapAnnotationColors";
 import { MapLibreGeoJsonOverlay } from "./MapLibreGeoJsonOverlay";
 import { polygonGeometryFeature } from "./polygonGeometryFeature";
@@ -36,15 +37,28 @@ vi.mock("react-map-gl/maplibre", async () => {
         ),
       );
     },
-    Layer: (props: { id?: string; source?: string; type?: string }) =>
+    Layer: (props: {
+      id?: string;
+      source?: string;
+      type?: string;
+      paint?: Record<string, unknown>;
+    }) =>
       React.createElement("div", {
         "data-testid": "maplibre-layer",
         "data-layer-id": props.id,
         "data-source": props.source ?? "",
         "data-type": props.type,
+        "data-paint": JSON.stringify(props.paint ?? {}),
       }),
   };
 });
+
+function layerPaint(layer: HTMLElement): Record<string, unknown> {
+  return JSON.parse(layer.getAttribute("data-paint") ?? "{}") as Record<
+    string,
+    unknown
+  >;
+}
 
 describe("MapLibreGeoJsonOverlay", () => {
   const geometry: Polygon = {
@@ -181,6 +195,93 @@ describe("MapLibreGeoJsonOverlay", () => {
     expect(screen.getByTestId("maplibre-source")).toHaveAttribute(
       "data-source-id",
       "overlay-b-src",
+    );
+  });
+
+  it("applies fill/line opacity transitions when paintTransitionMs is set", () => {
+    render(
+      <MapLibreGeoJsonOverlay
+        id="shade"
+        data={polygonGeometryFeature(geometry)}
+        fill={paint.fill}
+        line={paint.line}
+        paintTransitionMs={MOTION_MAP_SHADE_MS}
+      />,
+    );
+
+    const layers = screen.getAllByTestId("maplibre-layer");
+    const fillPaint = layerPaint(layers[0]!);
+    const linePaint = layerPaint(layers[1]!);
+
+    expect(fillPaint["fill-opacity-transition"]).toEqual({
+      duration: MOTION_MAP_SHADE_MS,
+    });
+    expect(linePaint["line-opacity-transition"]).toEqual({
+      duration: MOTION_MAP_SHADE_MS,
+    });
+  });
+
+  it("uses zero opacity transitions when paintTransitionMs is 0", () => {
+    render(
+      <MapLibreGeoJsonOverlay
+        id="shade"
+        data={polygonGeometryFeature(geometry)}
+        fill={paint.fill}
+        line={paint.line}
+        paintTransitionMs={0}
+      />,
+    );
+
+    const layers = screen.getAllByTestId("maplibre-layer");
+    expect(layerPaint(layers[0]!)["fill-opacity-transition"]).toEqual({
+      duration: 0,
+    });
+    expect(layerPaint(layers[1]!)["line-opacity-transition"]).toEqual({
+      duration: 0,
+    });
+  });
+
+  it("keeps Source id stable across data updates", () => {
+    const first = polygonGeometryFeature(geometry);
+    const second: Polygon = {
+      type: "Polygon",
+      coordinates: [
+        [
+          [0, 0],
+          [2, 0],
+          [2, 2],
+          [0, 0],
+        ],
+      ],
+    };
+    const { rerender } = render(
+      <MapLibreGeoJsonOverlay
+        id="combined-elimination"
+        data={first}
+        fill={paint.fill}
+        paintTransitionMs={MOTION_MAP_SHADE_MS}
+      />,
+    );
+
+    expect(screen.getByTestId("maplibre-source")).toHaveAttribute(
+      "data-source-id",
+      "combined-elimination-src",
+    );
+
+    expect(() => {
+      rerender(
+        <MapLibreGeoJsonOverlay
+          id="combined-elimination"
+          data={polygonGeometryFeature(second)}
+          fill={paint.fill}
+          paintTransitionMs={MOTION_MAP_SHADE_MS}
+        />,
+      );
+    }).not.toThrow();
+
+    expect(screen.getByTestId("maplibre-source")).toHaveAttribute(
+      "data-source-id",
+      "combined-elimination-src",
     );
   });
 });

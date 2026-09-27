@@ -10,7 +10,10 @@ import {
   type MatchingCategoryId,
 } from "../../domain/questions";
 import { resolveMatchingCategory } from "../../domain/session/catalog/sessionCustomCatalog";
-import { matchingFeatureCountLabel, matchingNullAnswerMessage } from "../../services/geo/matching";
+import {
+  matchingFeatureCountLabel,
+  matchingNullAnswerMessage,
+} from "../../services/geo/matching";
 import { formatDistance, type DistanceUnit } from "../../domain/map/distance";
 import { GroupedSelectField } from "../ui/forms/GroupedSelectField";
 import { yesNoAnswerOptions } from "./shared/answers/binaryAnswerOptions";
@@ -37,7 +40,8 @@ import {
 import { useToolWizard } from "../../hooks/wizard/useToolWizard";
 import { QuestionTruthReferenceHint } from "./shared/QuestionTruthReferenceHint";
 
-interface MatchingPanelProps {
+/** Flat matching wizard fields bag for MatchingPanel (W4-D peel). */
+export type MatchingPanelModel = {
   distanceUnit: DistanceUnit;
   categoryId: MatchingCategoryId | null;
   categoryChosen: boolean;
@@ -69,41 +73,46 @@ interface MatchingPanelProps {
   costLabel?: string;
   isSubmitting?: boolean;
   onRetry?: () => void;
-  wizardStepRef?: RefObject<string>;
-}
+  wizardStepRef?: RefObject<string | null>;
+};
 
-export function MatchingPanel({
-  distanceUnit,
-  categoryId,
-  categoryChosen,
-  usedCategoryIds,
-  catalogCategories = MATCHING_CATEGORIES,
-  anchorLat = null,
-  anchorLng = null,
-  usesContainmentMatching,
-  hasSeekerPoint,
-  nearestFeatureName,
-  distanceMeters,
-  featureCount,
-  inPlayAreaFeatureCount,
-  nearestOutsidePlayArea,
-  nullAnswer,
-  loading,
-  nearestProvisional = false,
-  satelliteBasemap = false,
-  gpsLoading,
-  answer,
-  error,
-  onCategoryChange,
-  onUseGps,
-  onAnswerChange,
-  onCommit,
-  awaitHiderAnswer = false,
-  costLabel = "D3P1",
-  isSubmitting = false,
-  onRetry,
-  wizardStepRef,
-}: MatchingPanelProps) {
+export type MatchingPanelProps = {
+  model: MatchingPanelModel;
+};
+
+export function MatchingPanel({ model }: MatchingPanelProps) {
+  const {
+    distanceUnit,
+    categoryId,
+    categoryChosen,
+    usedCategoryIds,
+    catalogCategories = MATCHING_CATEGORIES,
+    anchorLat = null,
+    anchorLng = null,
+    usesContainmentMatching,
+    hasSeekerPoint,
+    nearestFeatureName,
+    distanceMeters,
+    featureCount,
+    inPlayAreaFeatureCount,
+    nearestOutsidePlayArea,
+    nullAnswer,
+    loading,
+    nearestProvisional = false,
+    satelliteBasemap = false,
+    gpsLoading,
+    answer,
+    error,
+    onCategoryChange,
+    onUseGps,
+    onAnswerChange,
+    onCommit,
+    awaitHiderAnswer = false,
+    costLabel = "D3P1",
+    isSubmitting = false,
+    onRetry,
+    wizardStepRef,
+  } = model;
   const {
     phaseId,
     stepId,
@@ -146,8 +155,8 @@ export function MatchingPanel({
       })()
     : null;
   const category = categoryId
-    ? catalogCategories.find((item) => item.id === categoryId) ??
-      resolveMatchingCategory(categoryId)
+    ? (catalogCategories.find((item) => item.id === categoryId) ??
+      resolveMatchingCategory(categoryId))
     : null;
   const usesLandmassMatching = category?.resolver === "landmass";
   const categoryAvailable =
@@ -204,7 +213,9 @@ export function MatchingPanel({
 
   const nearestFeatureSummary = nearestFeatureName
     ? `${nearestFeatureName}${
-        !usesContainmentMatching && distanceMeters !== null && !nearestProvisional
+        !usesContainmentMatching &&
+        distanceMeters !== null &&
+        !nearestProvisional
           ? ` · ${formatDistance(distanceMeters, distanceUnit)} from you`
           : ""
       }${nearestOutsidePlayArea ? " · outside play area" : ""}`
@@ -262,9 +273,7 @@ export function MatchingPanel({
     <>
       {phaseId === "configure" && stepId === "category" ? (
         <ToolSection first compact status="active">
-          {awaitHiderAnswer ? (
-            <QuestionTruthReferenceHint />
-          ) : null}
+          {awaitHiderAnswer ? <QuestionTruthReferenceHint /> : null}
           {availableCategories.length === 0 ? (
             <CatalogExhaustedMessage message="Every match category has already been used on this map." />
           ) : (
@@ -303,7 +312,11 @@ export function MatchingPanel({
           {hasSeekerPoint &&
           typeof anchorLat === "number" &&
           typeof anchorLng === "number" ? (
-            <CoordinateCopyButton lat={anchorLat} lng={anchorLng} className="w-full" />
+            <CoordinateCopyButton
+              lat={anchorLat}
+              lng={anchorLng}
+              className="w-full"
+            />
           ) : null}
           {satelliteHint}
           {loading && hasSeekerPoint ? loadingIndicator : null}
@@ -340,8 +353,7 @@ export function MatchingPanel({
     </>
   );
 
-  const stickyFooterActions =
-    matchingAnswerStepActions ?? matchingSendActions;
+  const stickyFooterActions = matchingAnswerStepActions ?? matchingSendActions;
 
   const answerFooter = stickyFooterActions ? (
     <ToolSection first compact status="active">
@@ -357,8 +369,7 @@ export function MatchingPanel({
         <Stepper
           nav={{
             canGoBack:
-              phaseIndex > 0 ||
-              (phaseId === "configure" && configureIndex > 0),
+              phaseIndex > 0 || (phaseId === "configure" && configureIndex > 0),
             onBack: goBack,
             ...toolWizardPhasePrimaryNav({
               phaseId,

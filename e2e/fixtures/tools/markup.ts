@@ -1,7 +1,8 @@
 import { type Page, expect } from "@playwright/test";
 import {
   clickMapAt,
-  clickMapCenter,
+  clickMapAtLatLng,
+  E2E_GEOLOCATION,
   expectMapHasAnnotations,
   selectDrawTool,
 } from "../map";
@@ -10,8 +11,15 @@ import { dismissActiveToolPanel } from "./question-wizards";
 export async function placePin(page: Page, note = "Camp") {
   await dismissActiveToolPanel(page);
   await selectDrawTool(page, "Pin");
-  await clickMapCenter(page);
-  await expect(page.getByText("Location pinned on the map.")).toBeVisible();
+  // Canvas center clicks often miss MapLibre handlers under draw chrome.
+  await clickMapAtLatLng(
+    page,
+    E2E_GEOLOCATION.latitude,
+    E2E_GEOLOCATION.longitude,
+  );
+  await expect(
+    page.getByText(/Location pinned on the map/i),
+  ).toBeVisible({ timeout: 15_000 });
   await page.getByPlaceholder("Closer to the train station than us").fill(note);
   await page.getByRole("button", { name: "Add note" }).click();
   await expectMapHasAnnotations(page);

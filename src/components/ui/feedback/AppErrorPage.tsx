@@ -1,8 +1,12 @@
 import type { ReactNode } from "react";
+import { Button, Group, Stack, Text, Title } from "@mantine/core";
 import { AppLink } from "../../navigation/AppLink";
 import { AppLogo } from "../brand/AppLogo";
-import { Button } from "../button";
 import { EntryScreenLayout } from "../layout/EntryScreenLayout";
+import {
+  filledStyles,
+  grayStyles,
+} from "@/components/ui/entry/entryStyles";
 
 export type AppErrorPrimaryAction = {
   label: string;
@@ -33,39 +37,59 @@ export function AppErrorPage({
   assertive = false,
 }: AppErrorPageProps) {
   const body = (
-    <div className="mx-auto flex w-full max-w-md flex-col items-center gap-5 text-center">
+    <Stack
+      gap="lg"
+      align="center"
+      ta="center"
+      maw={420}
+      mx="auto"
+      w="100%"
+    >
       <AppLogo variant="lockup" size="md" className="justify-center" />
-      <div className="space-y-2">
-        <h1 className="font-display text-balance text-[clamp(1.75rem,7vw,2.5rem)] font-bold uppercase leading-[0.95] tracking-tight text-field-ink">
+      <Stack gap={8} align="center">
+        <Title
+          order={1}
+          c="var(--color-field-ink)"
+          fw={700}
+          style={{
+            fontSize: "clamp(1.75rem, 7vw, 2.5rem)",
+            lineHeight: 0.95,
+            letterSpacing: "-0.03em",
+            textWrap: "balance",
+          }}
+        >
           {title}
-        </h1>
+        </Title>
         {message ? (
-          <p className="text-pretty text-base leading-relaxed text-field-ink-muted">
+          <Text
+            c="var(--color-field-ink-muted)"
+            size="md"
+            style={{ lineHeight: 1.5, textWrap: "pretty" }}
+          >
             {message}
-          </p>
+          </Text>
         ) : null}
-      </div>
+      </Stack>
       {detail ? <div className="w-full">{detail}</div> : null}
       {primaryAction || secondaryAction ? (
-        <div className="flex flex-wrap items-center justify-center gap-3">
+        <Group gap="sm" justify="center" wrap="wrap">
           {primaryAction ? (
-            <Button
-              type="button"
-              variant="flag"
-              className="min-h-11 px-4 py-2 text-sm"
-              onClick={primaryAction.onClick}
-            >
+            <Button styles={filledStyles} onClick={primaryAction.onClick}>
               {primaryAction.label}
             </Button>
           ) : null}
           {secondaryAction ? (
-            <Button asChild variant="default" className="min-h-11 px-4 py-2 text-sm">
-              <AppLink to={secondaryAction.to}>{secondaryAction.label}</AppLink>
+            <Button
+              component={AppLink}
+              to={secondaryAction.to}
+              styles={grayStyles}
+            >
+              {secondaryAction.label}
             </Button>
           ) : null}
-        </div>
+        </Group>
       ) : null}
-    </div>
+    </Stack>
   );
 
   return (

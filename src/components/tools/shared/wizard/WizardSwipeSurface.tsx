@@ -68,7 +68,8 @@ export function WizardSwipeSurface({
   return (
     <div
       ref={containerRef}
-      className={`wizard-swipe-surface flex min-h-0 flex-1 flex-col overflow-hidden bg-transparent text-field-ink ${className}`.trim()}
+      className={`flex min-h-0 flex-1 flex-col overflow-hidden bg-transparent text-field-ink ${className}`.trim()}
+      style={{ touchAction: "pan-y" }}
       {...(swipeEnabled ? surfaceProps : undefined)}
     >
       <div
@@ -76,11 +77,11 @@ export function WizardSwipeSurface({
         className={`flex min-h-0 flex-1 flex-col overflow-hidden ${enterClass} motion-reduce:animate-none`.trim()}
         style={surfaceStyle}
       >
-        <div className="wizard-swipe-body flex min-h-0 flex-1 flex-col overflow-hidden">
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
           {children}
         </div>
         {footer ? (
-          <div className="wizard-swipe-footer shrink-0 pt-1">{footer}</div>
+          <div className="shrink-0 pt-1.5">{footer}</div>
         ) : null}
       </div>
     </div>

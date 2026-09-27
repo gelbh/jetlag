@@ -39,7 +39,7 @@ reviews:
     - "!**/worker/dist/**"
   instructions: |
     Jet Lag Hide+Seek map companion — React 19, Vite, TypeScript, Firebase
-    (Auth/Firestore/Storage/Functions), Cloudflare Worker, Capacitor, Vitest,
+    (Auth/Firestore/Storage/Functions), Cloudflare Worker, Vitest,
     Playwright.
 
     Conventions:
@@ -133,7 +133,10 @@ reviews:
       instructions: |
         Review changesets for:
         - Player-visible impact described accurately
+        - Bullet prefixes: fix: → Fixes; improve:/improvement: → Improvements; tech:/technical: → Technical
+        - Unprefixed defaults to Technical (patch) or Improvements (minor/major)
         - Wording matches eventual CHANGELOG.md bullets
+        - Never hand-edit src/domain/device/changelog.ts (generated)
     - path: "**/*.test.{ts,tsx}"
       instructions: |
         Review tests for:

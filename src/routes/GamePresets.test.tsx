@@ -1,4 +1,4 @@
-import { fireEvent, screen, within } from "@testing-library/react";
+import { fireEvent, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { GamePresetEditor, GamePresetList } from "./GamePresets";
 import { renderWithRouter } from "../test/renderWithRouter";
@@ -76,14 +76,14 @@ describe("GamePresetList", () => {
     renderWithRouter(<GamePresetList />, { resetStores: false });
 
     expect(screen.getByText("Weekly game")).toBeInTheDocument();
-    const weeklyCard = screen.getByText("Weekly game").closest("li");
-    expect(weeklyCard).not.toBeNull();
-    expect(
-      within(weeklyCard as HTMLElement).getByRole("link", { name: "Host" }),
-    ).toHaveAttribute("href", "/create?preset=preset-1");
-    expect(
-      within(weeklyCard as HTMLElement).getByRole("link", { name: "Edit" }),
-    ).toHaveAttribute("href", "/presets/preset-1/edit");
+    const weeklyHost = screen
+      .getAllByRole("link", { name: "Host" })
+      .find((link) => link.getAttribute("href") === "/create?preset=preset-1");
+    expect(weeklyHost).toBeTruthy();
+    const weeklyEdit = screen
+      .getAllByRole("link", { name: "Edit" })
+      .find((link) => link.getAttribute("href") === "/presets/preset-1/edit");
+    expect(weeklyEdit).toBeTruthy();
   });
 
   it("renders a search field with an accessible label", () => {
