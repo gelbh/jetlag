@@ -52,7 +52,7 @@ const STREET_BASEMAPS = {
 
 const SATELLITE_BASEMAP = {
   id: "satellite",
-  label: "Satellite",
+  label: "Sat",
   url: ESRI_WORLD_IMAGERY_TILE_URL,
   attribution: ESRI_ATTRIBUTION,
   maxZoom: 19,

@@ -16,6 +16,7 @@ import { AnalyticsConsentBanner } from "./components/ui/banners/AnalyticsConsent
 import { AppUpdateBanner } from "./components/ui/banners/AppUpdateBanner";
 import { PwaInstallTipBanner } from "./components/ui/banners/PwaInstallTipBanner";
 import { AppUpdateProvider } from "./components/ui/banners/AppUpdateProvider";
+import { AppUiProvider } from "./components/ui/providers/AppUiProvider";
 import { LowBatteryPrompt } from "./components/session/banners/LowBatteryPrompt";
 import { LocationPermissionPrompt } from "./components/session/status/LocationPermissionPrompt";
 import { MotionDatasetEffect } from "./components/motion/MotionDatasetEffect";
@@ -66,6 +67,23 @@ import {
   StatsLazy,
   TermsLazy,
 } from "./navigation/routePreloaders";
+import { lazyWithChunkRetry } from "./domain/device/updates/lazyWithChunkRetry";
+
+const StatusDockGalleryLazy = import.meta.env.DEV
+  ? lazyWithChunkRetry(() =>
+      import("./routes/dev/StatusDockGallery").then((m) => ({
+        default: m.StatusDockGallery,
+      })),
+    )
+  : null;
+
+const ChatLogGalleryLazy = import.meta.env.DEV
+  ? lazyWithChunkRetry(() =>
+      import("./routes/dev/ChatLogGallery").then((m) => ({
+        default: m.ChatLogGallery,
+      })),
+    )
+  : null;
 
 function RouteFallback() {
   return (
@@ -178,181 +196,206 @@ export default function App() {
 
   return (
     <QueryClientProvider client={appQueryClient}>
-    <BrowserRouter>
-      <RouteTransitionProvider>
-        <AppUpdateProvider>
-          <Sentry.ErrorBoundary fallback={<AppErrorFallback />}>
-            <AppCheckProbeGate>
-              {/* Outside min-version gate so waiting SW chip stays visible when blocked. */}
-              <AppUpdateBanner />
-              <ClientMinVersionGate>
-                <MotionDatasetEffect />
-                <RouteProgressChrome />
-                <AppGlobalActivity />
-                <RouteReadinessSensor />
-                <EdgeSwipeBackBinder />
-                <AnalyticsPageViewTracker />
-                <RouteSeoTracker />
-                <ChunkReloadContextBinder />
-                <LazyRouteQuiet>
-                  <AppResumeWatchdogLazy />
-                </LazyRouteQuiet>
-                <PwaInstallTipBanner />
-                <AnalyticsConsentBanner />
-                <AppEntryBackdrop />
-                <div className="jl-scroll app-scroll-root">
-                  <LowBatteryPrompt />
-                  <LocationPermissionPrompt />
-                  <Routes>
-                    <Route path="/" element={<Home />} />
-                    <Route
-                      path="/feedback"
-                      element={
-                        <LazyRoute>
-                          <FeedbackLazy />
-                        </LazyRoute>
-                      }
-                    />
-                    <Route
-                      path="/stats"
-                      element={
-                        <LazyRoute>
-                          <StatsLazy />
-                        </LazyRoute>
-                      }
-                    />
-                    <Route
-                      path="/friends"
-                      element={
-                        <LazyRoute>
-                          <FriendsLazy />
-                        </LazyRoute>
-                      }
-                    />
-                    <Route
-                      path="/leaderboard"
-                      element={
-                        <LazyRoute>
-                          <LeaderboardLazy />
-                        </LazyRoute>
-                      }
-                    />
-                    <Route
-                      path="/privacy"
-                      element={
-                        <LazyRoute>
-                          <PrivacyLazy />
-                        </LazyRoute>
-                      }
-                    />
-                    <Route
-                      path="/terms"
-                      element={
-                        <LazyRoute>
-                          <TermsLazy />
-                        </LazyRoute>
-                      }
-                    />
-                    <Route
-                      path="/premium"
-                      element={
-                        <LazyRoute>
-                          <PremiumLazy />
-                        </LazyRoute>
-                      }
-                    />
-                    <Route
-                      path="/create"
-                      element={
-                        <LazyRoute>
-                          <CreateSessionLazy />
-                        </LazyRoute>
-                      }
-                    />
-                    <Route path="/join" element={<JoinSession />} />
-                    <Route
-                      path="/admin"
-                      element={
-                        <LazyRoute>
-                          <AdminOpsDeskLazy />
-                        </LazyRoute>
-                      }
-                    />
-                    <Route
-                      path="/admin/incidents"
-                      element={
-                        <LazyRoute>
-                          <AdminOpsDeskLazy />
-                        </LazyRoute>
-                      }
-                    />
-                    <Route
-                      path="/admin/incidents/:incidentId"
-                      element={
-                        <LazyRoute>
-                          <AdminOpsDeskLazy />
-                        </LazyRoute>
-                      }
-                    />
-                    <Route
-                      path="/admin/preload-requests"
-                      element={
-                        <LazyRoute>
-                          <AdminPreloadRequestInboxLazy />
-                        </LazyRoute>
-                      }
-                    />
-                    <Route
-                      path="/presets"
-                      element={
-                        <LazyRoute>
-                          <GamePresetListLazy />
-                        </LazyRoute>
-                      }
-                    />
-                    <Route
-                      path="/presets/new"
-                      element={
-                        <LazyRoute>
-                          <GamePresetEditorLazy />
-                        </LazyRoute>
-                      }
-                    />
-                    <Route
-                      path="/presets/:id/edit"
-                      element={
-                        <LazyRoute>
-                          <GamePresetEditorLazy />
-                        </LazyRoute>
-                      }
-                    />
-                    <Route
-                      path="/map"
-                      element={
-                        <LazyRoute>
-                          <MapErrorBoundary>
-                            <MapScreenLazy />
-                          </MapErrorBoundary>
-                        </LazyRoute>
-                      }
-                    />
-                    <Route path="/tutorial" element={<Navigate to="/" replace />} />
-                    <Route
-                      path="*"
-                      element={
-                        <LazyRoute>
-                          <NotFoundLazy />
-                        </LazyRoute>
-                      }
-                    />
-                  </Routes>
-                </div>
-              </ClientMinVersionGate>
-            </AppCheckProbeGate>
-          </Sentry.ErrorBoundary>
-        </AppUpdateProvider>
-      </RouteTransitionProvider>
-    </BrowserRouter>
+      <AppUiProvider>
+        <BrowserRouter>
+          <RouteTransitionProvider>
+            <AppUpdateProvider>
+              <Sentry.ErrorBoundary fallback={<AppErrorFallback />}>
+                <AppCheckProbeGate>
+                  {/* Outside min-version gate so waiting SW chip stays visible when blocked. */}
+                  <AppUpdateBanner />
+                  <ClientMinVersionGate>
+                    <MotionDatasetEffect />
+                    <RouteProgressChrome />
+                    <AppGlobalActivity />
+                    <RouteReadinessSensor />
+                    <EdgeSwipeBackBinder />
+                    <AnalyticsPageViewTracker />
+                    <RouteSeoTracker />
+                    <ChunkReloadContextBinder />
+                    <LazyRouteQuiet>
+                      <AppResumeWatchdogLazy />
+                    </LazyRouteQuiet>
+                    <PwaInstallTipBanner />
+                    <AnalyticsConsentBanner />
+                    <AppEntryBackdrop />
+                    <div className="jl-scroll app-scroll-root">
+                      <LowBatteryPrompt />
+                      <LocationPermissionPrompt />
+                      <Routes>
+                        <Route path="/" element={<Home />} />
+                        <Route
+                          path="/feedback"
+                          element={
+                            <LazyRoute>
+                              <FeedbackLazy />
+                            </LazyRoute>
+                          }
+                        />
+                        <Route
+                          path="/stats"
+                          element={
+                            <LazyRoute>
+                              <StatsLazy />
+                            </LazyRoute>
+                          }
+                        />
+                        <Route
+                          path="/friends"
+                          element={
+                            <LazyRoute>
+                              <FriendsLazy />
+                            </LazyRoute>
+                          }
+                        />
+                        <Route
+                          path="/leaderboard"
+                          element={
+                            <LazyRoute>
+                              <LeaderboardLazy />
+                            </LazyRoute>
+                          }
+                        />
+                        <Route
+                          path="/privacy"
+                          element={
+                            <LazyRoute>
+                              <PrivacyLazy />
+                            </LazyRoute>
+                          }
+                        />
+                        <Route
+                          path="/terms"
+                          element={
+                            <LazyRoute>
+                              <TermsLazy />
+                            </LazyRoute>
+                          }
+                        />
+                        <Route
+                          path="/premium"
+                          element={
+                            <LazyRoute>
+                              <PremiumLazy />
+                            </LazyRoute>
+                          }
+                        />
+                        <Route
+                          path="/create"
+                          element={
+                            <LazyRoute>
+                              <CreateSessionLazy />
+                            </LazyRoute>
+                          }
+                        />
+                        <Route path="/join" element={<JoinSession />} />
+                        {StatusDockGalleryLazy ? (
+                          <Route
+                            path="/dev/status-dock"
+                            element={
+                              <LazyRoute>
+                                <StatusDockGalleryLazy />
+                              </LazyRoute>
+                            }
+                          />
+                        ) : null}
+                        {ChatLogGalleryLazy ? (
+                          <Route
+                            path="/dev/chat-log"
+                            element={
+                              <LazyRoute>
+                                <ChatLogGalleryLazy />
+                              </LazyRoute>
+                            }
+                          />
+                        ) : null}
+                        <Route
+                          path="/admin"
+                          element={
+                            <LazyRoute>
+                              <AdminOpsDeskLazy />
+                            </LazyRoute>
+                          }
+                        />
+                        <Route
+                          path="/admin/incidents"
+                          element={
+                            <LazyRoute>
+                              <AdminOpsDeskLazy />
+                            </LazyRoute>
+                          }
+                        />
+                        <Route
+                          path="/admin/incidents/:incidentId"
+                          element={
+                            <LazyRoute>
+                              <AdminOpsDeskLazy />
+                            </LazyRoute>
+                          }
+                        />
+                        <Route
+                          path="/admin/preload-requests"
+                          element={
+                            <LazyRoute>
+                              <AdminPreloadRequestInboxLazy />
+                            </LazyRoute>
+                          }
+                        />
+                        <Route
+                          path="/presets"
+                          element={
+                            <LazyRoute>
+                              <GamePresetListLazy />
+                            </LazyRoute>
+                          }
+                        />
+                        <Route
+                          path="/presets/new"
+                          element={
+                            <LazyRoute>
+                              <GamePresetEditorLazy />
+                            </LazyRoute>
+                          }
+                        />
+                        <Route
+                          path="/presets/:id/edit"
+                          element={
+                            <LazyRoute>
+                              <GamePresetEditorLazy />
+                            </LazyRoute>
+                          }
+                        />
+                        <Route
+                          path="/map"
+                          element={
+                            <LazyRoute>
+                              <MapErrorBoundary>
+                                <MapScreenLazy />
+                              </MapErrorBoundary>
+                            </LazyRoute>
+                          }
+                        />
+                        <Route
+                          path="/tutorial"
+                          element={<Navigate to="/" replace />}
+                        />
+                        <Route
+                          path="*"
+                          element={
+                            <LazyRoute>
+                              <NotFoundLazy />
+                            </LazyRoute>
+                          }
+                        />
+                      </Routes>
+                    </div>
+                  </ClientMinVersionGate>
+                </AppCheckProbeGate>
+              </Sentry.ErrorBoundary>
+            </AppUpdateProvider>
+          </RouteTransitionProvider>
+        </BrowserRouter>
+      </AppUiProvider>
     </QueryClientProvider>
   );
 }

@@ -1,6 +1,6 @@
 import { createPortal } from "react-dom";
-import { useRef, type ReactNode } from "react";
-import { RadixMotionSheet } from "./RadixMotionSheet";
+import { useRef, type CSSProperties, type ReactNode } from "react";
+import { DrawerSheet } from "./DrawerSheet";
 import { useDialogFocus } from "@/hooks/a11y/useDialogFocus";
 import { useDesktopLayout } from "@/hooks/layout/useDesktopLayout";
 import {
@@ -19,6 +19,17 @@ export interface SheetHostProps {
   dismissible?: boolean;
   sheetClassName?: string;
   maxHeightClassName?: string;
+  /** Forwarded to Mantine Drawer. */
+  padding?: "xs" | "sm" | "md" | "lg" | "xl" | number;
+  /**
+   * `host` (default): sheet scrolls children.
+   * `child`: sheet locks height; child owns scroll (chat).
+   */
+  scrollMode?: "host" | "child";
+  /** Forwarded to Mantine drawer body (e.g. keyboard inset). */
+  contentStyle?: CSSProperties;
+  /** Ask HUD: scrim stays visual; map taps pass through for placement. */
+  mapInteractive?: boolean;
 }
 
 function DesktopRailDialog({
@@ -28,6 +39,7 @@ function DesktopRailDialog({
   pinned,
   children,
   panelEl,
+  scrollMode = "host",
 }: {
   open: boolean;
   ariaLabel?: string;
@@ -35,9 +47,11 @@ function DesktopRailDialog({
   pinned?: ReactNode;
   children: ReactNode;
   panelEl: HTMLElement;
+  scrollMode?: "host" | "child";
 }) {
   const dialogRef = useRef<HTMLDivElement>(null);
   useDialogFocus(dialogRef, open);
+  const childScroll = scrollMode === "child";
 
   return createPortal(
     <div
@@ -46,10 +60,22 @@ function DesktopRailDialog({
       aria-modal="true"
       aria-label={ariaLabel}
       data-rail-tab={railTab}
-      className="contextual-rail__dialog"
+      className={
+        childScroll
+          ? "contextual-rail__dialog flex h-full min-h-0 flex-col"
+          : "contextual-rail__dialog"
+      }
     >
-      {pinned}
-      {children}
+      {pinned ? <div className="shrink-0">{pinned}</div> : null}
+      <div
+        className={
+          childScroll
+            ? "flex min-h-0 flex-1 flex-col overflow-hidden"
+            : undefined
+        }
+      >
+        {children}
+      </div>
     </div>,
     panelEl,
   );
@@ -58,8 +84,7 @@ function DesktopRailDialog({
 /**
  * Stable sheet host API for map chrome.
  * Desktop + railTab → ContextualRail portal.
- * Otherwise → RadixMotionSheet (Survey field-book sole path).
- * PostHog player-ux-world-v2 retired — archive the flag in PostHog UI when convenient.
+ * Mobile / non-rail → Mantine Drawer.
  */
 export function SheetHost({
   open,
@@ -71,11 +96,14 @@ export function SheetHost({
   dismissible = true,
   sheetClassName,
   maxHeightClassName,
+  padding,
+  scrollMode,
+  contentStyle,
+  mapInteractive = false,
 }: SheetHostProps) {
   const isDesktop = useDesktopLayout();
   const railPanel = useContextualRailPanel();
 
-  // Desktop ContextualRail when a rail tab is requested (wait for panel mount).
   if (isDesktop && railTab) {
     if (!open || !railPanel?.panelEl) {
       return null;
@@ -88,6 +116,7 @@ export function SheetHost({
         railTab={railTab}
         pinned={pinned}
         panelEl={railPanel.panelEl}
+        scrollMode={scrollMode}
       >
         {children}
       </DesktopRailDialog>
@@ -95,7 +124,7 @@ export function SheetHost({
   }
 
   return (
-    <RadixMotionSheet
+    <DrawerSheet
       open={open}
       onClose={onClose}
       ariaLabel={ariaLabel}
@@ -103,8 +132,12 @@ export function SheetHost({
       dismissible={dismissible}
       sheetClassName={sheetClassName}
       maxHeightClassName={maxHeightClassName}
+      padding={padding}
+      scrollMode={scrollMode}
+      contentStyle={contentStyle}
+      mapInteractive={mapInteractive}
     >
       {children}
-    </RadixMotionSheet>
+    </DrawerSheet>
   );
 }

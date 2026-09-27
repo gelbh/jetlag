@@ -3,7 +3,7 @@ import { usePermanentAuthUser } from "../../hooks/billing/usePermanentAuthUser";
 import { useUserProfile } from "../../hooks/profile/useUserProfile";
 import { isFirebaseConfigured } from "../../services/core/firebase/firebase";
 import { BootSplash } from "../ui/feedback/BootSplash";
-import { InlineError } from "../ui/banners/InlineError";
+import { ErrorCallout } from "../ui/entry/entryChrome";
 import { AccountSignInGate } from "./AccountSignInGate";
 import { UsernameSetupGate } from "./UsernameSetupGate";
 
@@ -45,17 +45,15 @@ export function RequireUsername({
 
   if (profileEnabled && error) {
     return (
-      <InlineError>
+      <ErrorCallout>
         Could not load your profile. Check your connection and try again.
-      </InlineError>
+      </ErrorCallout>
     );
   }
 
   if (profileEnabled && profile == null) {
     return (
-      <UsernameSetupGate
-        description="Pick a unique username before using friends, stats, and leaderboards."
-      />
+      <UsernameSetupGate description="Pick a unique username before using friends, stats, and leaderboards." />
     );
   }
 

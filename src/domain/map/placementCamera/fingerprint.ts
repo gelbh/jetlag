@@ -1,4 +1,4 @@
-import type { Feature, MultiPolygon, Polygon, Position } from "geojson";
+import type { Position } from "geojson";
 import type { LatLngTuple } from "../../geometry/gameArea/geometry";
 import { boundingBoxFromPositions } from "../../questions/overlays/draftOverlayBounds";
 import type { MapDraftOverlay } from "../mapDraftOverlay";
@@ -64,40 +64,48 @@ function overlayFingerprintEntry(overlay: MapDraftOverlay): Record<string, unkno
   }
 }
 
-function eliminationBboxHash(
-  positions: Position[],
+function eliminationQuickHash(
+  features: readonly { geometry: { type: string; coordinates?: unknown } }[],
 ): string | null {
-  if (positions.length === 0) {
+  if (features.length === 0) {
     return null;
   }
 
-  let minLng = Infinity;
-  let maxLng = -Infinity;
-  let minLat = Infinity;
-  let maxLat = -Infinity;
-
-  for (const [lng, lat] of positions) {
-    if (lng < minLng) minLng = lng;
-    if (lng > maxLng) maxLng = lng;
-    if (lat < minLat) minLat = lat;
-    if (lat > maxLat) maxLat = lat;
+  // Sample endpoints + vertex counts — do not walk every coordinate (yes-elim
+  // multipolygons can be tens of thousands of verts and block the click path).
+  const parts: string[] = [];
+  for (const feature of features) {
+    const geometry = feature.geometry;
+    if (geometry.type === "Polygon") {
+      const ring = (geometry.coordinates as Position[][] | undefined)?.[0];
+      const count = ring?.length ?? 0;
+      const first = ring?.[0];
+      const mid = count > 0 ? ring![Math.floor(count / 2)] : undefined;
+      parts.push(
+        `P:${count}:${first?.[0]?.toFixed(5) ?? ""}:${first?.[1]?.toFixed(5) ?? ""}:${mid?.[0]?.toFixed(5) ?? ""}:${mid?.[1]?.toFixed(5) ?? ""}`,
+      );
+    } else if (geometry.type === "MultiPolygon") {
+      const polygons = geometry.coordinates as Position[][][] | undefined;
+      const polyCount = polygons?.length ?? 0;
+      const firstRing = polygons?.[0]?.[0];
+      const count = firstRing?.length ?? 0;
+      const first = firstRing?.[0];
+      parts.push(
+        `M:${polyCount}:${count}:${first?.[0]?.toFixed(5) ?? ""}:${first?.[1]?.toFixed(5) ?? ""}`,
+      );
+    } else {
+      parts.push(geometry.type);
+    }
   }
 
-  const round = (value: number) => value.toFixed(6);
-
-  return [
-    round(minLng),
-    round(minLat),
-    round(maxLng),
-    round(maxLat),
-  ].join(",");
+  return parts.join("|");
 }
 
 export interface PlacementCameraFingerprintInput {
   tool: MapTool;
   phase: PlacementPhase;
   overlays: readonly MapDraftOverlay[];
-  eliminationFeatures: readonly { geometry: { type: string } }[];
+  eliminationFeatures: readonly { geometry: { type: string; coordinates?: unknown } }[];
   selectedPoiId?: string | null;
   seekerResolving?: boolean;
   eliminationPreview?: boolean;
@@ -112,27 +120,18 @@ export function placementCameraFingerprint(
     (overlay) => !isVolatileWalkOverlay(overlay),
   );
 
-  const eliminationPositions: Position[] = [];
-  if (input.phase === "answered" || input.seekerResolving || input.eliminationPreview) {
-    for (const feature of input.eliminationFeatures) {
-      if (feature.geometry.type === "Polygon") {
-        for (const ring of (feature as Feature<Polygon>).geometry.coordinates) {
-          for (const pos of ring) {
-            eliminationPositions.push(pos);
-          }
-        }
-      } else if (feature.geometry.type === "MultiPolygon") {
-        for (const polygon of (feature as Feature<MultiPolygon>).geometry
-          .coordinates) {
-          for (const ring of polygon) {
-            for (const pos of ring) {
-              eliminationPositions.push(pos);
-            }
-          }
-        }
-      }
-    }
-  }
+  // Matching yes/no are complements of the same cell — keep the camera fingerprint
+  // stable across flips so we do not flyTo on every tap.
+  const eliminationHash =
+    input.phase === "answered" ||
+    input.seekerResolving ||
+    input.eliminationPreview
+      ? input.tool === "matching"
+        ? input.eliminationFeatures.length > 0
+          ? `matching:${input.eliminationFeatures.length}`
+          : null
+        : eliminationQuickHash(input.eliminationFeatures)
+      : null;
 
   return JSON.stringify({
     overlays: structural.map(overlayFingerprintEntry),
@@ -143,6 +142,6 @@ export function placementCameraFingerprint(
     eliminationPreview: input.eliminationPreview ?? false,
     walkActive: input.walkActive ?? false,
     walkCurrentPoint: input.walkCurrentPoint ?? null,
-    eliminationHash: eliminationBboxHash(eliminationPositions),
+    eliminationHash,
   });
 }

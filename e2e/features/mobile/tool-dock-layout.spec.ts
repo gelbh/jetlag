@@ -9,57 +9,63 @@ import {
   injectSimulatedSafeAreaBottom,
   injectSimulatedSafeAreaTop,
   injectStandaloneDisplayMode,
+  DOCK_FLOAT_GAP_PX,
   SIMULATED_SAFE_AREA_BOTTOM_PX,
   SIMULATED_SAFE_AREA_TOP_PX,
   clickViaEvaluate,
   assertInViewport,
-  enablePlayerUxWorld,
 } from "../../fixtures";
 import type { Page } from "@playwright/test";
 
 async function assertSideStackClearsZoom(page: Page) {
-  const sideStack = page.locator(".jl-map-chrome-side-stack");
+  // Session dock (right) must clear the nav dock (left: sat / zoom / compass).
+  const sideStack = page.locator("[data-chrome-side-stack='phone']");
+  const navStack = page.locator("[data-chrome-nav-stack='phone']");
   const session = sideStack.locator("[data-island='session']");
-  const zoom = page.locator(".map-zoom-control");
-  const style = page.locator(".map-style-control");
+  const zoomIn = page.getByRole("button", { name: "Zoom in" });
+  const sat = page.getByRole("button", {
+    name: /Switch to satellite view|Switch to map view/i,
+  });
   await expect(sideStack).toHaveCount(1);
+  await expect(navStack).toHaveCount(1);
   await expect(sideStack).toBeVisible();
+  await expect(navStack).toBeVisible();
   await expect(session).toHaveCount(1);
   await expect(session).toBeVisible();
-  await expect(zoom).toBeVisible();
-  await expect(style).toBeVisible();
+  await expect(zoomIn).toBeVisible();
+  await expect(sat).toBeVisible();
   await assertInViewport(sideStack);
   await assertInViewport(session);
-  await assertInViewport(zoom);
+  await assertInViewport(navStack);
 
   const metrics = await page.evaluate(() => {
-    const side = document.querySelector(".jl-map-chrome-side-stack");
-    const zoomEl = document.querySelector(".map-zoom-control");
-    const styleEl = document.querySelector(".map-style-control");
-    const sessionEl = document.querySelector(
-      ".jl-map-chrome-side-stack [data-island='session']",
+    const side = document.querySelector("[data-chrome-side-stack='phone']");
+    const nav = document.querySelector("[data-chrome-nav-stack='phone']");
+    const zoomEl = document.querySelector(
+      "[data-chrome-nav-stack='phone'] .jl-map-nav-dock__zoom",
     );
-    if (!side || !zoomEl || !styleEl || !sessionEl) {
+    const sessionEl = document.querySelector(
+      "[data-chrome-side-stack='phone'] [data-island='session']",
+    );
+    if (!side || !nav || !zoomEl || !sessionEl) {
       return { missing: true as const };
     }
     const sideRect = side.getBoundingClientRect();
+    const navRect = nav.getBoundingClientRect();
     const zoomRect = zoomEl.getBoundingClientRect();
-    const styleRect = styleEl.getBoundingClientRect();
     const sessionRect = sessionEl.getBoundingClientRect();
     const overlapX =
-      Math.min(sideRect.right, zoomRect.right) -
-      Math.max(sideRect.left, zoomRect.left);
+      Math.min(sideRect.right, navRect.right) -
+      Math.max(sideRect.left, navRect.left);
     const overlapY =
-      Math.min(sideRect.bottom, zoomRect.bottom) -
-      Math.max(sideRect.top, zoomRect.top);
+      Math.min(sideRect.bottom, navRect.bottom) -
+      Math.max(sideRect.top, navRect.top);
     return {
       missing: false as const,
       intersects: overlapX > 1 && overlapY > 1,
       zoomLeft: zoomRect.left,
-      styleLeft: styleRect.left,
+      navLeft: navRect.left,
       sideLeft: sideRect.left,
-      zoomBottom: zoomRect.bottom,
-      styleTop: styleRect.top,
       sessionTop: sessionRect.top,
     };
   });
@@ -69,10 +75,9 @@ async function assertSideStackClearsZoom(page: Page) {
     return;
   }
   expect(metrics.intersects).toBe(false);
-  // Zoom sits on the left column, above the satellite toggle — not under Session.
+  // Nav dock (zoom column) sits on the left; session dock on the right.
   expect(metrics.zoomLeft).toBeLessThan(metrics.sideLeft);
-  expect(metrics.styleLeft).toBeLessThan(metrics.sideLeft);
-  expect(metrics.zoomBottom).toBeLessThanOrEqual(metrics.styleTop + 2);
+  expect(metrics.navLeft).toBeLessThan(metrics.sideLeft);
   expect(metrics.sessionTop).toBeGreaterThanOrEqual(-1);
 }
 
@@ -96,7 +101,7 @@ test.describe("mobile tool dock", () => {
       page.getByRole("button", { name: "More tools" }),
     ).toHaveCount(0);
 
-    const sessionTools = page.getByLabel("Session tools");
+    const sessionTools = page.locator('[data-island="session"]');
     await expect(sessionTools).toBeVisible();
     const drawButton = sessionTools.getByRole("button", { name: "Draw on map" });
     await expect(drawButton).toBeVisible();
@@ -137,12 +142,12 @@ test.describe("mobile tool dock", () => {
     expect(bandOrder).toEqual(["hunt"]);
     await expect(page.locator('[data-island="session"]')).toHaveCount(1);
     await expect(page.locator(".jl-map-chrome-bottom-band")).toHaveCount(1);
-    await expect(page.locator(".jl-map-chrome-side-stack")).toHaveCount(1);
+    await expect(page.locator("[data-chrome-side-stack='phone']")).toHaveCount(1);
     await expect(
       page.locator(".jl-map-chrome-bottom-band [data-island='session']"),
     ).toHaveCount(0);
     await expect(
-      page.locator(".jl-map-chrome-side-stack [data-island='session']"),
+      page.locator("[data-chrome-side-stack='phone'] [data-island='session']"),
     ).toHaveCount(1);
     await expect(page.locator(".jl-tool-dock-bar--secondary")).toHaveCount(0);
   });
@@ -265,7 +270,6 @@ test.describe("iPhone 13 PWA safe area", () => {
   }) => {
     const metrics = await page.evaluate(() => {
       const host = document.querySelector(".jl-map-bottom-chrome-host");
-      const chrome = document.querySelector(".jl-map-bottom-chrome");
       const hunt = document.querySelector(".jl-map-island--hunt");
       const map = document.querySelector(".maplibregl-map");
       const hostRect = host?.getBoundingClientRect();
@@ -279,7 +283,6 @@ test.describe("iPhone 13 PWA safe area", () => {
         0,
       );
       const hostStyle = host ? getComputedStyle(host) : null;
-      const chromeStyle = chrome ? getComputedStyle(chrome) : null;
       const huntStyle = hunt ? getComputedStyle(hunt) : null;
       return {
         viewportHeight: window.innerHeight,
@@ -287,8 +290,8 @@ test.describe("iPhone 13 PWA safe area", () => {
         barHeight: huntRect?.height ?? 0,
         barBottom: huntRect?.bottom ?? 0,
         mapBottom: mapRect?.bottom ?? 0,
-        dockPaddingBottom: chromeStyle
-          ? Number.parseFloat(chromeStyle.paddingBottom)
+        dockPaddingBottom: hostStyle
+          ? Number.parseFloat(hostStyle.paddingBottom)
           : 0,
         dockBottomOffset: hostStyle
           ? Number.parseFloat(hostStyle.bottom)
@@ -309,14 +312,17 @@ test.describe("iPhone 13 PWA safe area", () => {
 
     expect(metrics.backdropOnMap).toBeNull();
     expect(metrics.islandCount).toBeGreaterThanOrEqual(2);
-    // Host chassis: flush to physical bottom; chrome pad absorbs safe-area.
+    // Host chassis: flush to physical bottom; float gap under the dock island.
     expect(metrics.dockBottomOffset).toBeLessThanOrEqual(1);
     expect(metrics.gapBelowDock).toBeLessThanOrEqual(2);
     expect(
       Math.abs(metrics.dockBottom - metrics.viewportHeight),
     ).toBeLessThanOrEqual(2);
     expect(metrics.dockPaddingBottom).toBeGreaterThanOrEqual(
-      SIMULATED_SAFE_AREA_BOTTOM_PX - 2,
+      DOCK_FLOAT_GAP_PX - 2,
+    );
+    expect(metrics.dockPaddingBottom).toBeLessThanOrEqual(
+      DOCK_FLOAT_GAP_PX + 2,
     );
     // Forbidden: safe-area pad inside the bordered island (reverted stripe).
     expect(metrics.barPaddingBottom).toBeLessThanOrEqual(6);
@@ -337,14 +343,13 @@ test.describe("iPhone 13 PWA safe area", () => {
 
     const metrics = await page.evaluate(() => {
       const host = document.querySelector(".jl-map-bottom-chrome-host");
-      const chrome = document.querySelector(".jl-map-bottom-chrome");
       const hostRect = host?.getBoundingClientRect();
-      const chromeStyle = chrome ? getComputedStyle(chrome) : null;
+      const hostStyle = host ? getComputedStyle(host) : null;
       return {
         viewportHeight: window.innerHeight,
         dockBottom: hostRect?.bottom ?? 0,
-        dockPaddingBottom: chromeStyle
-          ? Number.parseFloat(chromeStyle.paddingBottom)
+        dockPaddingBottom: hostStyle
+          ? Number.parseFloat(hostStyle.paddingBottom)
           : 0,
       };
     });
@@ -353,34 +358,41 @@ test.describe("iPhone 13 PWA safe area", () => {
       2,
     );
     expect(metrics.dockPaddingBottom).toBeGreaterThanOrEqual(
-      SIMULATED_SAFE_AREA_BOTTOM_PX - 2,
+      DOCK_FLOAT_GAP_PX - 2,
+    );
+    expect(metrics.dockPaddingBottom).toBeLessThanOrEqual(
+      DOCK_FLOAT_GAP_PX + 2,
     );
   });
 
-  test("status bar clears the notch safe-area band", async ({ page }) => {
+  test("status island sits below the notch with float gap", async ({ page }) => {
     await injectSimulatedSafeAreaTop(page, SIMULATED_SAFE_AREA_TOP_PX);
 
     const metrics = await page.evaluate(() => {
+      const float = document.querySelector(".jl-status-rail-float");
       const rail = document.querySelector(".jl-status-rail");
-      const bar = document.querySelector(".jl-status-bar");
+      const island = document.querySelector(
+        '[data-testid="tool-status-block-mantine"]',
+      );
+      const floatRect = float?.getBoundingClientRect();
       const railRect = rail?.getBoundingClientRect();
-      const barRect = bar?.getBoundingClientRect();
+      const islandRect = island?.getBoundingClientRect();
       return {
-        railPaddingTop: rail
-          ? Number.parseFloat(getComputedStyle(rail).paddingTop)
+        floatPaddingTop: float
+          ? Number.parseFloat(getComputedStyle(float).paddingTop)
           : 0,
-        barTop: barRect?.top ?? 0,
+        islandTop: islandRect?.top ?? 0,
+        floatTop: floatRect?.top ?? 0,
         railTop: railRect?.top ?? 0,
       };
     });
 
-    expect(metrics.railPaddingTop).toBeGreaterThanOrEqual(
-      SIMULATED_SAFE_AREA_TOP_PX - 1,
-    );
-    expect(metrics.barTop).toBeGreaterThanOrEqual(
-      SIMULATED_SAFE_AREA_TOP_PX - 1,
-    );
+    const expectedTop = SIMULATED_SAFE_AREA_TOP_PX + DOCK_FLOAT_GAP_PX;
+    expect(metrics.floatPaddingTop).toBeGreaterThanOrEqual(expectedTop - 2);
+    expect(metrics.floatPaddingTop).toBeLessThanOrEqual(expectedTop + 2);
+    expect(metrics.islandTop).toBeGreaterThanOrEqual(expectedTop - 2);
     expect(metrics.railTop).toBeLessThanOrEqual(1);
+    expect(metrics.floatTop).toBeLessThanOrEqual(1);
   });
 });
 
@@ -389,22 +401,25 @@ test.describe("iPhone 13 PWA home safe area", () => {
     await prepareE2EPage(page);
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/");
-    await expect(
-      page.getByRole("button", { name: /Play — create, join, or custom game/i }),
-    ).toBeVisible();
+    // Home waits on auth bootstrap, then shows Create/Join inset rows.
+    await expect(page.getByText("Starting…")).toBeHidden({ timeout: 45_000 });
+    await expect(page.getByRole("link", { name: "Create session" })).toBeVisible({
+      timeout: 15_000,
+    });
     await injectSimulatedSafeAreaBottom(page, SIMULATED_SAFE_AREA_BOTTOM_PX);
   });
 
   test("global entry backdrop covers the viewport", async ({ page }) => {
     const metrics = await page.evaluate(() => {
-      const poster = document.querySelector(".home-poster");
-      const posterRect = poster?.getBoundingClientRect();
+      const main = document.querySelector("main");
+      const mainRect = main?.getBoundingClientRect();
       const backdrop = document.querySelector(".app-entry-backdrop");
       const backdropStyle = backdrop ? getComputedStyle(backdrop) : null;
       const bodyBg = getComputedStyle(document.body).backgroundColor;
       return {
         viewportHeight: window.innerHeight,
-        posterBottom: posterRect?.bottom ?? 0,
+        mainBottom: mainRect?.bottom ?? 0,
+        backdropExists: !!backdrop,
         backdropPosition: backdropStyle?.position ?? "",
         backdropTop: backdropStyle?.top ?? "",
         backdropBottom: backdropStyle?.bottom ?? "",
@@ -413,7 +428,8 @@ test.describe("iPhone 13 PWA home safe area", () => {
       };
     });
 
-    expect(metrics.posterBottom).toBeGreaterThanOrEqual(metrics.viewportHeight - 2);
+    expect(metrics.mainBottom).toBeGreaterThanOrEqual(metrics.viewportHeight - 2);
+    expect(metrics.backdropExists).toBe(true);
     expect(metrics.backdropPosition).toBe("fixed");
     expect(metrics.backdropTop).toBe("0px");
     expect(metrics.backdropBottom).toBe("0px");
@@ -458,8 +474,7 @@ test.describe("landscape map-dominant chrome", () => {
   test("distills secondary actions when landscape chrome is expanded", async ({
     page,
   }) => {
-    await enablePlayerUxWorld(page);
-    await expect(page.locator('[data-player-ux-world="survey"]')).toBeVisible();
+    await expect(page.locator(".map-chrome-hud")).toBeVisible();
     const chip = page.getByRole("button", {
       name: /Show map controls|Hide map controls/i,
     });
@@ -469,9 +484,7 @@ test.describe("landscape map-dominant chrome", () => {
     }
     await expect(chip).toHaveAttribute("aria-expanded", "true");
     await expect(
-      page.locator(
-        '[data-player-ux-world="survey"][data-landscape-chrome="revealed"]',
-      ),
+      page.locator('.map-chrome-hud[data-landscape-chrome="revealed"]'),
     ).toBeVisible();
     await expect(page.locator('[data-island="map-controls"]')).toBeHidden();
     await expect(
@@ -490,7 +503,7 @@ test.describe("iPhone 13 PWA join safe area", () => {
     await prepareE2EPage(page);
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/join");
-    await expect(page.getByRole("heading", { name: "Session code" })).toBeVisible();
+    await expect(page.getByLabel("Session code")).toBeVisible();
     await injectSimulatedSafeAreaBottom(page, SIMULATED_SAFE_AREA_BOTTOM_PX);
   });
 

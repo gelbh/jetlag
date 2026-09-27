@@ -8,6 +8,7 @@ import type {
   PremiumEntitlements,
   PremiumProductKey,
 } from "../../domain/billing/premiumProducts";
+import { clientEnvUsesFirebaseEmulator } from "../../config/env";
 import { ANALYTICS_EVENTS, track } from "../core/analytics/analytics";
 import { getFirebaseFunctions, isFirebaseConfigured } from "../core/firebase/firebase";
 import { serializeGameAreaForFirestore } from "../firestore/serialization/shared";
@@ -29,6 +30,12 @@ function mapCallableError(error: unknown, fallback: string): Error {
 
 export async function fetchPremiumEntitlements(): Promise<PremiumEntitlements | null> {
   if (!isFirebaseConfigured()) {
+    return null;
+  }
+
+  // Demo emulator stack often has no functions secrets loaded; skip the call
+  // so Auth/Firestore polish is not drowned in CORS spam.
+  if (clientEnvUsesFirebaseEmulator()) {
     return null;
   }
 

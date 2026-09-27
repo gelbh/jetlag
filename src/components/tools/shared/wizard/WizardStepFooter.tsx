@@ -11,7 +11,7 @@ export function WizardStepFooter({
 }: WizardStepFooterProps) {
   if (extra) {
     return (
-      <div className="wizard-step-footer-extra flex flex-col gap-2">
+      <div className="flex flex-col gap-2 pt-0.5">
         <div className="min-w-0 text-center">{extra}</div>
         <div className="flex justify-end">
           <WizardStepNav {...navProps} />

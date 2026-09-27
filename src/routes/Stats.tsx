@@ -1,65 +1,202 @@
-import { useState } from "react";
-import { RequireUsername } from "../components/auth/RequireUsername";
-import { DesktopContentColumn } from "../components/ui/layout/DesktopContentColumn";
-import { EntryScreenLayout } from "../components/ui/layout/EntryScreenLayout";
-import { EmptyState } from "../components/ui/feedback/EmptyState";
-import { SegmentControl } from "../components/ui/forms/SegmentControl";
+import { useMemo, useState } from "react";
+import { Box, Container, Group, SegmentedControl, Stack, Text } from "@mantine/core";
+import { RequireUsername } from "@/components/auth/RequireUsername";
 import {
-  ScreenHeader,
-  screenHeaderOffsetClassName,
-} from "../components/ui/layout/ScreenHeader";
-import type { LeaderboardRole } from "../domain/game/leaderboard";
-import { playerRoleLabel } from "../domain/session/players/playerRole";
+  InsetGroup,
+  SectionLabel,
+} from "@/components/ui/entry/entryChrome";
+import { EntryHeader } from "@/components/ui/entry/EntryHeader";
+import { EntryScreenLayout } from "@/components/ui/layout/EntryScreenLayout";
+import type { LeaderboardRole } from "@/domain/game/leaderboard";
+import { playerRoleLabel } from "@/domain/session/players/playerRole";
 
 const ROLE_TABS: Array<{ value: LeaderboardRole; label: string }> = [
   { value: "hider", label: playerRoleLabel("hider") },
   { value: "seeker", label: playerRoleLabel("seeker") },
 ];
 
-export function Stats() {
-  const [roleTab, setRoleTab] = useState<LeaderboardRole>("hider");
+const STATS_MOCK_STORAGE_KEY = "jl.stats.mock";
+
+type MockStatCell = { label: string; value: string };
+
+function isStatsMockEnabled(): boolean {
+  try {
+    return (
+      import.meta.env.DEV &&
+      localStorage.getItem(STATS_MOCK_STORAGE_KEY) === "1"
+    );
+  } catch {
+    return false;
+  }
+}
+
+function mockCellsForRole(role: LeaderboardRole): MockStatCell[] {
+  if (role === "hider") {
+    return [
+      { label: "Rounds", value: "14" },
+      { label: "Wins", value: "6" },
+      { label: "Hiding time", value: "18:40" },
+      { label: "Questions", value: "31" },
+    ];
+  }
+  return [
+    { label: "Rounds", value: "17" },
+    { label: "Wins", value: "8" },
+    { label: "Seek time", value: "22:05" },
+    { label: "Questions", value: "44" },
+  ];
+}
+
+const segmentedStyles = {
+  root: {
+    backgroundColor: "oklch(from var(--color-field-ink) l c h / 0.08)",
+    border: "0.33px solid oklch(from var(--color-field-ink) l c h / 0.12)",
+    borderRadius: 12,
+    padding: 2,
+  },
+  label: {
+    color: "var(--color-field-ink)",
+    fontWeight: 510,
+    fontSize: "0.8125rem",
+    paddingInline: 8,
+  },
+  indicator: {
+    backgroundColor: "oklch(from var(--color-field-ink) l c h / 0.16)",
+    borderRadius: 10,
+  },
+} as const;
+
+function StatsBody({ roleTab }: { roleTab: LeaderboardRole }) {
+  const mockEnabled = isStatsMockEnabled();
+  const cells = useMemo(
+    () => (mockEnabled ? mockCellsForRole(roleTab) : null),
+    [mockEnabled, roleTab],
+  );
 
   return (
-    <EntryScreenLayout justify="start">
-      <ScreenHeader backTo="/" backLabel="Home" />
-      <DesktopContentColumn maxWidth="social">
-        <div className={`space-y-4 ${screenHeaderOffsetClassName}`}>
-          <div className="space-y-1">
-            <h1 className="font-display text-balance text-[clamp(2rem,10vw,3rem)] font-bold uppercase leading-[0.92] tracking-tight text-field-ink">
-              Stats
-            </h1>
-            <p className="max-w-sm text-pretty text-base leading-relaxed text-field-ink-muted">
-              Personal round history and aggregates by role.
-            </p>
-          </div>
+    <Stack gap={14}>
+      <SectionLabel>
+        {`${playerRoleLabel(roleTab)} · All sizes`}
+      </SectionLabel>
 
-          <RequireUsername continuePath="/stats">
-            <>
-              <SegmentControl
-                value={roleTab}
-                options={ROLE_TABS}
-                onChange={setRoleTab}
-                aria-label="Stats role"
-              />
+      {cells ? (
+        <InsetGroup>
+          <Box
+            role="region"
+            aria-label={`${playerRoleLabel(roleTab)} stats`}
+            px="sm"
+            py="md"
+          >
+            <Group gap={0} wrap="wrap">
+              {cells.map((cell, index) => (
+                <Stack
+                  key={cell.label}
+                  gap={4}
+                  align="center"
+                  style={{
+                    flex: "1 1 45%",
+                    minWidth: "40%",
+                    paddingBlock: 10,
+                    borderInlineStart:
+                      index % 2 === 0
+                        ? undefined
+                        : "0.33px solid oklch(from var(--color-field-ink) l c h / 0.12)",
+                  }}
+                >
+                  <Text
+                    fw={700}
+                    c="var(--color-field-ink)"
+                    style={{
+                      fontSize: "1.25rem",
+                      letterSpacing: "-0.02em",
+                      fontVariantNumeric: "tabular-nums",
+                    }}
+                  >
+                    {cell.value}
+                  </Text>
+                  <Text size="xs" c="var(--color-field-ink-muted)">
+                    {cell.label}
+                  </Text>
+                </Stack>
+              ))}
+            </Group>
+          </Box>
+        </InsetGroup>
+      ) : (
+        <InsetGroup>
+          <Box
+            role="region"
+            aria-label={`${playerRoleLabel(roleTab)} stats`}
+            px="md"
+            py="xl"
+          >
+            <Text
+              size="sm"
+              ta="center"
+              c="var(--color-field-ink-muted)"
+              style={{ lineHeight: 1.4, textWrap: "pretty" }}
+            >
+              No completed rounds yet. Finish a synced session as{" "}
+              {playerRoleLabel(roleTab).toLowerCase()} to see distance, phase
+              time, and question stats here.
+            </Text>
+          </Box>
+        </InsetGroup>
+      )}
 
-              <div
-                role="tabpanel"
-                aria-label={`${playerRoleLabel(roleTab)} stats`}
-                className="space-y-3 border-t-2 border-rule pt-4"
-              >
-                <p className="font-display text-[0.8125rem] font-semibold uppercase tracking-[0.12em] text-field-ink-muted">
-                  {playerRoleLabel(roleTab)} · All sizes
-                </p>
-                <EmptyState>
-                  No completed rounds yet. Finish a synced session as{" "}
-                  {playerRoleLabel(roleTab).toLowerCase()} to see distance, phase
-                  time, and question stats here.
-                </EmptyState>
-              </div>
-            </>
-          </RequireUsername>
-        </div>
-      </DesktopContentColumn>
+      {mockEnabled ? (
+        <Text size="xs" c="var(--color-signal)" px={4}>
+          Mock stats on (`jl.stats.mock=1`).
+        </Text>
+      ) : null}
+    </Stack>
+  );
+}
+
+export function Stats() {
+  const [roleTab, setRoleTab] = useState<LeaderboardRole>("hider");
+  const mockEnabled = isStatsMockEnabled();
+
+  return (
+    <EntryScreenLayout justify="start" skin="plain" flush>
+      <EntryHeader title="Stats" />
+      <Container
+        size="xs"
+        w="100%"
+        px="md"
+        maw={390}
+        py="lg"
+      >
+        <Stack gap={18}>
+          <Text
+            size="sm"
+            c="var(--color-field-ink-muted)"
+            style={{ lineHeight: 1.4, textWrap: "pretty" }}
+          >
+            Personal round history and aggregates by role.
+          </Text>
+
+          <SegmentedControl
+            fullWidth
+            value={roleTab}
+            onChange={(value) => setRoleTab(value as LeaderboardRole)}
+            data={ROLE_TABS}
+            aria-label="Stats role"
+            styles={segmentedStyles}
+          />
+
+          {mockEnabled ? (
+            <StatsBody roleTab={roleTab} />
+          ) : (
+            <RequireUsername
+              continuePath="/stats"
+              signInDescription="Sign in with a username to save personal stats across sessions."
+            >
+              <StatsBody roleTab={roleTab} />
+            </RequireUsername>
+          )}
+        </Stack>
+      </Container>
     </EntryScreenLayout>
   );
 }

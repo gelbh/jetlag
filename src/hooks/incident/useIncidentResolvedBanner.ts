@@ -9,8 +9,6 @@ import {
   getFirebaseAuth,
   isFirebaseConfigured,
 } from "../../services/core/firebase/firebase";
-import { syncUserDeviceRegistration } from "../../services/core/native/notifications";
-import { useMapStore } from "../../state/mapStore";
 
 export function pickLatestNotice(
   notices: IncidentNotice[]
@@ -32,7 +30,6 @@ export function useIncidentResolvedBanner(): {
     isFirebaseConfigured() ? getFirebaseAuth().currentUser?.uid ?? null : null
   );
   const [notice, setNotice] = useState<IncidentNotice | null>(null);
-  const preferences = useMapStore((state) => state.notificationPreferences);
 
   useEffect(() => {
     if (!isFirebaseConfigured()) {
@@ -47,16 +44,6 @@ export function useIncidentResolvedBanner(): {
       }
     });
   }, []);
-
-  useEffect(() => {
-    if (!uid) {
-      return;
-    }
-
-    void syncUserDeviceRegistration({ uid, preferences }).catch(() => {
-      // Soft-fail: out-of-session FCM registration must not break Home.
-    });
-  }, [preferences, uid]);
 
   useEffect(() => {
     if (!uid || !isFirebaseConfigured()) {

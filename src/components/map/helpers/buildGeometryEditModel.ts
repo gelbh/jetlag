@@ -188,6 +188,7 @@ export function buildGeometryEditModel(
     }
     case "measuring":
     case "matching":
+    case "draw":
       return { kind: "empty" };
     default: {
       const exhaustive: never = annotation.type;

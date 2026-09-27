@@ -25,6 +25,10 @@ vi.mock("../core/firebase/firebase", () => ({
   getFirebaseFunctions: vi.fn(async () => ({})),
 }));
 
+vi.mock("../../config/env", () => ({
+  clientEnvUsesFirebaseEmulator: vi.fn(() => false),
+}));
+
 const track = vi.hoisted(() => vi.fn());
 
 vi.mock("../core/analytics/analytics", () => ({

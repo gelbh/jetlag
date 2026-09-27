@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
+  FRIEND_SEARCH_MIN_LENGTH,
   normalizeUsername,
   USERNAME_MAX_LENGTH,
   USERNAME_MIN_LENGTH,
+  validateFriendSearchQuery,
   validateUsername,
 } from "./playerProfile";
 
@@ -89,5 +91,34 @@ describe("validateUsername", () => {
         error: "That username is reserved. Try another.",
       });
     }
+  });
+});
+
+describe("validateFriendSearchQuery", () => {
+  it("accepts a 2-character prefix", () => {
+    const result = validateFriendSearchQuery("Bo");
+    expect(result).toEqual({
+      ok: true,
+      username: "Bo",
+      normalized: "bo",
+    });
+  });
+
+  it("rejects empty and too-short queries", () => {
+    expect(validateFriendSearchQuery("")).toEqual({
+      ok: false,
+      error: "Enter a username to search.",
+    });
+    expect(validateFriendSearchQuery("a")).toEqual({
+      ok: false,
+      error: `Enter at least ${FRIEND_SEARCH_MIN_LENGTH} characters to search.`,
+    });
+  });
+
+  it("rejects invalid characters", () => {
+    expect(validateFriendSearchQuery("bad name")).toEqual({
+      ok: false,
+      error: "Username can only use letters, numbers, and underscore.",
+    });
   });
 });

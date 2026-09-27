@@ -1,11 +1,11 @@
 import type { SVGProps } from "react";
 
 const COLORS = {
-  surfaceDeep: "#0E132C",
-  action: "#C55B40",
-  brandBlue: "#4378B1",
-  highlight: "#E4B352",
-  ink: "#F3F4F5",
+  surfaceDeep: "#1E2B3C",
+  action: "#E6783C",
+  brandBlue: "#F0B43C",
+  highlight: "#F0B43C",
+  ink: "#E6E6E6",
 } as const;
 
 const MARK_SIZES = { sm: 32, md: 48, lg: 64 } as const;

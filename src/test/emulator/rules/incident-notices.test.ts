@@ -113,33 +113,16 @@ describe("firestore.rules — incident notices & user devices", () => {
     );
   });
 
-  it("allows owner to upsert own device token", async () => {
+  it("rejects owner creating a device token (FCM retired)", async () => {
     const owner = rules.testEnv.authenticatedContext("owner-1");
-    const payload = devicePayload();
-
-    await assertSucceeds(
+    await assertFails(
       owner
         .firestore()
         .collection("users")
         .doc("owner-1")
         .collection("devices")
         .doc("ios")
-        .set(payload)
-    );
-
-    await assertSucceeds(
-      owner
-        .firestore()
-        .collection("users")
-        .doc("owner-1")
-        .collection("devices")
-        .doc("ios")
-        .set(
-          devicePayload({
-            token: "fcm-token-2",
-            updatedAt: "2026-01-02T00:00:00.000Z",
-          })
-        )
+        .set(devicePayload())
     );
   });
 
@@ -156,42 +139,26 @@ describe("firestore.rules — incident notices & user devices", () => {
     );
   });
 
-  it("rejects device doc id that does not match platform", async () => {
-    const owner = rules.testEnv.authenticatedContext("owner-1");
-    await assertFails(
-      owner
+  it("allows owner to delete own device doc", async () => {
+    await rules.testEnv.withSecurityRulesDisabled(async (ctx) => {
+      await ctx
         .firestore()
         .collection("users")
         .doc("owner-1")
         .collection("devices")
-        .doc("android")
-        .set(devicePayload({ platform: "ios" }))
-    );
-  });
+        .doc("ios")
+        .set(devicePayload());
+    });
 
-  it("rejects empty device token", async () => {
     const owner = rules.testEnv.authenticatedContext("owner-1");
-    await assertFails(
+    await assertSucceeds(
       owner
         .firestore()
         .collection("users")
         .doc("owner-1")
         .collection("devices")
         .doc("ios")
-        .set(devicePayload({ token: "" }))
-    );
-  });
-
-  it("rejects device write with extra keys", async () => {
-    const owner = rules.testEnv.authenticatedContext("owner-1");
-    await assertFails(
-      owner
-        .firestore()
-        .collection("users")
-        .doc("owner-1")
-        .collection("devices")
-        .doc("ios")
-        .set(devicePayload({ evil: true }))
+        .delete()
     );
   });
 });

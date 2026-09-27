@@ -1,4 +1,5 @@
 import { AppLink } from "../navigation/AppLink";
+import { homeCardBtnStyle } from "@/components/ui/entry/entryStyles";
 import {
   bundledPresetDefinition,
   isBundledPresetId,
@@ -17,7 +18,15 @@ export function PresetDetailPanel({
   const description = bundledPresetDefinition(preset.id)?.description;
 
   return (
-    <li className="home-card-btn home-card-btn-secondary flex-col items-stretch gap-3 !min-h-0 !h-auto py-3">
+    <li
+      className="flex-col items-stretch gap-3"
+      style={{
+        ...homeCardBtnStyle("secondary"),
+        minHeight: 0,
+        height: "auto",
+        paddingBlock: "0.75rem",
+      }}
+    >
       <div className="flex w-full items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="font-display text-base tracking-wide text-ink">

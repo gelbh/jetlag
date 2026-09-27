@@ -13,10 +13,8 @@ import {
 import { useRemoteSessionTimerSync } from "./useRemoteSessionTimerSync";
 import { useSeekingStartedActivity } from "./useSeekingStartedActivity";
 import { useSessionEndedRedirect } from "./useSessionEndedRedirect";
-import { useSessionNotifications } from "./useSessionNotifications";
 import { useSessionSync } from "./useSessionSync";
 import { useSessionTimer } from "./useSessionTimer";
-import { useLiveActivitySync } from "../sync/useLiveActivitySync";
 import { useSyncStatus } from "../sync/useSyncStatus";
 import { useFirebaseAuthReady } from "../sync/useFirebaseAuthReady";
 import {
@@ -37,7 +35,6 @@ export interface UseSharedSessionScreenOptions {
   isChatOpen: boolean;
   notificationRole: PlayerRole;
   authMode: SessionAuthMode;
-  liveActivityEnabled?: boolean;
   exitPath?: string;
 }
 
@@ -45,7 +42,6 @@ export function useSharedSessionScreen({
   isChatOpen,
   notificationRole,
   authMode,
-  liveActivityEnabled = true,
   exitPath = "/",
 }: UseSharedSessionScreenOptions) {
   const session = useSessionStore((state) => state.session);
@@ -185,26 +181,6 @@ export function useSharedSessionScreen({
     isChatOpen,
   });
 
-  const {
-    notificationPreferences: liveNotificationPreferences,
-    enableNotifications,
-    updateNotificationPreferences,
-  } = useSessionNotifications({
-    sessionId,
-    uid: uid ?? undefined,
-    role: notificationRole,
-  });
-
-  useLiveActivitySync({
-    enabled: liveActivityEnabled && Boolean(sessionId),
-    sessionId,
-    sessionRules: session ?? DEFAULT_SESSION_RULES,
-    timerState: timer.timerState,
-    timerHasStarted: timer.hasStarted,
-    pendingQuestions,
-    preferences: liveNotificationPreferences,
-  });
-
   return {
     session,
     sessionId,
@@ -227,8 +203,5 @@ export function useSharedSessionScreen({
     hasUnreadChat,
     unreadCount,
     acknowledgeFingerprints,
-    liveNotificationPreferences,
-    enableNotifications,
-    updateNotificationPreferences,
   };
 }

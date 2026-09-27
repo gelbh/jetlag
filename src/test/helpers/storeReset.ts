@@ -27,15 +27,6 @@ export function resetAllStores(): void {
     showAdminBoundaries: false,
     keepScreenAwake: false,
     lowPowerMode: false,
-    notificationPreferences: {
-      enabled: false,
-      newQuestions: true,
-      timerChanges: true,
-      chatMessages: false,
-      incidentHostConfirm: true,
-      incidentResolved: true,
-      liveActivities: true,
-    },
     distanceUnit: "imperial",
     mapStyle: "standard",
     streetBasemap: "light",
@@ -47,6 +38,7 @@ export function resetAllStores(): void {
       zone: true,
       pin: true,
       tentacle: true,
+      draw: true,
       transit: true,
     },
   });

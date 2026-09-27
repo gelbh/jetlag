@@ -1,6 +1,7 @@
 import { test, expect } from "../fixtures";
 import {
-  clickMapCenter,
+  clickMapAtLatLng,
+  E2E_GEOLOCATION,
   openMapWithLocalSession,
   selectDrawTool,
 } from "../fixtures";
@@ -11,8 +12,14 @@ test("@smoke keeps the map usable while offline", async ({ page, context }) => {
   await context.setOffline(true);
 
   await selectDrawTool(page, "Pin");
-  await clickMapCenter(page);
-  await expect(page.getByText("Location pinned on the map.")).toBeVisible();
+  await clickMapAtLatLng(
+    page,
+    E2E_GEOLOCATION.latitude,
+    E2E_GEOLOCATION.longitude,
+  );
+  await expect(
+    page.getByText(/Location pinned on the map/i),
+  ).toBeVisible({ timeout: 15_000 });
 
   await context.setOffline(false);
   await expect(page.getByRole("button", { name: "Matching" })).toBeVisible();

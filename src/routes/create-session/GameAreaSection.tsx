@@ -1,5 +1,6 @@
 import type { ReactNode, RefObject } from "react";
 import { Button } from "../../components/ui/button";
+import { fieldFrameStyle } from "@/components/ui/entry/entryStyles";
 import {
   FramingModeSegmentControl,
   GameAreaFramingPolygonActions,
@@ -15,7 +16,8 @@ import type { TransitMetro } from "../../domain/map/transit";
 
 type GameAreaFraming = ReturnType<typeof useGameAreaFraming>;
 
-export interface GameAreaSectionProps {
+/** Flat create-session framing fields bag for GameAreaSection (W4-E peel). */
+export type GameAreaSectionModel = {
   bundledPresetSelectGroups: BundledPresetSelectGroup[];
   favouritePresetSelectOptions: { presetId: string; name: string }[];
   userPresets: GamePreset[];
@@ -37,7 +39,9 @@ export interface GameAreaSectionProps {
   onPresetSelect: (presetId: string) => void;
   onSavePreset: () => void;
   onOpenFramingModal: () => void;
-  onFramingModeChange: (mode: Parameters<GameAreaFraming["setFramingMode"]>[0]) => void;
+  onFramingModeChange: (
+    mode: Parameters<GameAreaFraming["setFramingMode"]>[0],
+  ) => void;
   onRemoveSelectedArea: (index: number) => void;
   onLocationQueryChange: (value: string) => void;
   onSearch: () => void;
@@ -46,58 +50,76 @@ export interface GameAreaSectionProps {
   onApplyPlace: (place: GeocodedPlace) => void;
   onRequestLocationBias: () => void;
   onTransitMetroChange: (metroId: string) => void;
+};
+
+export type GameAreaSectionProps = {
+  model: GameAreaSectionModel;
   settingsSlot?: ReactNode;
+};
+
+function SectionLabel({ children }: { children: ReactNode }) {
+  return (
+    <p
+      className="text-[0.8125rem] font-semibold tracking-[0.04em] text-field-ink-muted uppercase"
+      style={{ margin: 0 }}
+    >
+      {children}
+    </p>
+  );
 }
 
-export function GameAreaSection({
-  bundledPresetSelectGroups,
-  favouritePresetSelectOptions,
-  userPresets,
-  loading,
-  verifyingAccess,
-  searchLoading,
-  importLoading,
-  importFileInputRef,
-  locationQuery,
-  searchResults,
-  selectedPlaceId,
-  selectedPlace,
-  selectedAreas,
-  previewGameArea,
-  manualFramingActive,
-  framing,
-  transitMetroId,
-  metros,
-  onPresetSelect,
-  onSavePreset,
-  onOpenFramingModal,
-  onFramingModeChange,
-  onRemoveSelectedArea,
-  onLocationQueryChange,
-  onSearch,
-  onAddCurrentArea,
-  onBoundaryImport,
-  onApplyPlace,
-  onRequestLocationBias,
-  onTransitMetroChange,
-  settingsSlot,
-}: GameAreaSectionProps) {
+export function GameAreaSection({ model, settingsSlot }: GameAreaSectionProps) {
+  const {
+    bundledPresetSelectGroups,
+    favouritePresetSelectOptions,
+    userPresets,
+    loading,
+    verifyingAccess,
+    searchLoading,
+    importLoading,
+    importFileInputRef,
+    locationQuery,
+    searchResults,
+    selectedPlaceId,
+    selectedPlace,
+    selectedAreas,
+    previewGameArea,
+    manualFramingActive,
+    framing,
+    transitMetroId,
+    metros,
+    onPresetSelect,
+    onSavePreset,
+    onOpenFramingModal,
+    onFramingModeChange,
+    onRemoveSelectedArea,
+    onLocationQueryChange,
+    onSearch,
+    onAddCurrentArea,
+    onBoundaryImport,
+    onApplyPlace,
+    onRequestLocationBias,
+    onTransitMetroChange,
+  } = model;
   return (
     <>
-      <p className="mt-4 font-display text-xs font-semibold uppercase tracking-[0.14em] text-signal">
-        New game
-      </p>
-      <h1 className="mt-1 font-display text-2xl font-bold uppercase leading-tight tracking-tight text-field-ink">
-        Frame the game area
-      </h1>
-      <p className="mt-2 text-pretty text-sm leading-relaxed text-field-ink">
-        Search or import a boundary, or draw the play area on the map below.
-      </p>
+      <div className="mt-4 space-y-2">
+        <h1
+          className="font-bold leading-tight text-field-ink"
+          style={{
+            fontSize: "1.75rem",
+            letterSpacing: "-0.03em",
+          }}
+        >
+          Frame the game area
+        </h1>
+        <p className="text-pretty text-sm leading-snug text-field-ink-muted">
+          Search or import a boundary, or draw the play area on the map.
+        </p>
+      </div>
 
       <div className="mt-4 space-y-2">
-        <p className="font-display text-xs font-semibold uppercase tracking-[0.1em] text-field-ink-muted">
-          Game preset
-        </p>
+        <SectionLabel>Game preset</SectionLabel>
         <div className="flex flex-wrap gap-2">
           <select
             disabled={loading || verifyingAccess}
@@ -141,18 +163,16 @@ export function GameAreaSection({
             type="button"
             disabled={loading || verifyingAccess}
             onClick={onSavePreset}
-            className="rounded-full border border-rule px-3 py-2 text-xs font-semibold text-signal disabled:opacity-50"
+            className="rounded-xl border border-rule bg-canvas/40 px-3 py-2 text-xs font-semibold text-field-ink disabled:opacity-50"
           >
             Save as preset
           </button>
         </div>
       </div>
 
-      <div className="jl-field-frame mt-4 space-y-3">
+      <div className="mt-4 space-y-3" style={fieldFrameStyle}>
         <div className="space-y-1">
-          <p className="font-display text-xs font-semibold uppercase tracking-[0.1em] text-field-ink-muted">
-            Draw on map
-          </p>
+          <SectionLabel>Draw on map</SectionLabel>
           <p className="text-xs leading-snug text-field-ink-muted">
             {framingModeHint(framing.framingMode)}
           </p>
@@ -199,8 +219,8 @@ export function GameAreaSection({
         </div>
       ) : null}
 
-      <div className="jl-field-frame mt-4 space-y-3">
-        <label className="field-label font-display text-xs uppercase tracking-[0.1em]">
+      <div className="mt-4 space-y-3" style={fieldFrameStyle}>
+        <label className="field-label text-[0.8125rem] font-semibold tracking-[0.04em] text-field-ink-muted uppercase">
           City, county, state, or country
           <input
             value={locationQuery}
@@ -270,15 +290,15 @@ export function GameAreaSection({
         </Button>
 
         {searchResults.length > 0 ? (
-          <div className="jl-scroll max-h-40 space-y-1 overflow-y-auto border-2 border-rule bg-canvas p-1.5">
+          <div className="jl-scroll max-h-40 space-y-1 overflow-y-auto rounded-xl border border-rule bg-canvas/40 p-1.5">
             {searchResults.map((place) => (
               <button
                 key={place.id}
                 type="button"
                 onClick={() => onApplyPlace(place)}
-                className={`min-h-11 w-full px-3 py-2 text-left text-sm ${
+                className={`min-h-11 w-full rounded-lg px-3 py-2 text-left text-sm ${
                   selectedPlaceId === place.id
-                    ? "bg-flag-soft font-display font-semibold uppercase tracking-wide text-flag"
+                    ? "bg-flag-soft font-semibold text-flag"
                     : "bg-transparent text-field-ink hover:bg-canvas"
                 }`}
               >
@@ -297,7 +317,7 @@ export function GameAreaSection({
           </p>
         ) : null}
 
-        <label className="field-label font-display text-xs uppercase tracking-[0.1em]">
+        <label className="field-label text-[0.8125rem] font-semibold tracking-[0.04em] text-field-ink-muted uppercase">
           Transit metro
           <select
             value={transitMetroId}
