@@ -16,7 +16,9 @@ import {
 } from "@/domain/map/distance";
 import {
   availableThermometerDistancePresetsForSession,
+  thermometerPresetMilesForMeters,
   type ThermometerAnswer,
+  type ThermometerDistanceOptionMiles,
 } from "@/domain/questions";
 import type { SessionRulesInput } from "@/domain/session/rules";
 type PlacementMode = "gps" | "manual";
@@ -37,6 +39,7 @@ export type ThermometerHudBodyProps = {
   placementMode: PlacementMode;
   walkingActive: boolean;
   presetUseCount: number;
+  usedDistanceOptions?: ReadonlySet<ThermometerDistanceOptionMiles>;
   costLabel: string;
   gpsLoading: boolean;
   canSubmitQuestion: boolean;
@@ -60,6 +63,7 @@ export function ThermometerHudBody({
   placementMode,
   walkingActive,
   presetUseCount,
+  usedDistanceOptions = new Set(),
   costLabel,
   canSubmitQuestion,
   error = null,
@@ -86,21 +90,28 @@ export function ThermometerHudBody({
       : formatPresetDistance(0, distanceUnit);
   const targetLabel = formatPresetDistance(distanceMeters, distanceUnit);
 
-  const distanceRows = availableDistancePresets.map((preset) => ({
-    id: String(preset),
-    label:
-      presetUseCount > 0 && preset === distanceMeters
-        ? `${formatPresetDistance(preset, distanceUnit)} · ${costLabel}`
-        : formatPresetDistance(preset, distanceUnit),
-    icon: (
-      <Crosshair
-        size={20}
-        weight="duotone"
-        color="currentColor"
-        aria-hidden
-      />
-    ),
-  }));
+  const distanceRows = availableDistancePresets.map((preset) => {
+    const presetMiles = thermometerPresetMilesForMeters(preset);
+    return {
+      id: String(preset),
+      label:
+        presetUseCount > 0 && preset === distanceMeters
+          ? `${formatPresetDistance(preset, distanceUnit)} · ${costLabel}`
+          : formatPresetDistance(preset, distanceUnit),
+      disabled:
+        presetMiles !== null &&
+        usedDistanceOptions.has(presetMiles) &&
+        preset !== distanceMeters,
+      icon: (
+        <Crosshair
+          size={20}
+          weight="duotone"
+          color="currentColor"
+          aria-hidden
+        />
+      ),
+    };
+  });
 
   const walkBanner =
     chord === "walking" ? (

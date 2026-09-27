@@ -90,6 +90,20 @@ export function usedThermometerDistanceOptions(
   );
 }
 
+export function usedThermometerDistanceOptionsForSession(
+  annotations: AnnotationRecord[],
+  pendingQuestions: readonly PendingQuestionRecord[],
+  exceptAnnotationId?: string,
+): Set<ThermometerDistanceOptionMiles> {
+  const used = usedThermometerDistanceOptions(annotations, exceptAnnotationId);
+  for (const id of thermometerPresetHelpers.usedOptionsFromPending(
+    pendingQuestions,
+  )) {
+    used.add(id);
+  }
+  return used;
+}
+
 export function firstAvailableThermometerDistanceMeters(
   usedOptions: ReadonlySet<ThermometerDistanceOptionMiles>,
 ): number | null {

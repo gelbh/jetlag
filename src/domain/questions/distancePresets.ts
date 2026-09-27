@@ -6,7 +6,7 @@ import {
   isPresetOptionAvailable,
   presetMetersForMiles,
 } from "../session/tools/toolSessionOptions";
-import { isCountablePendingQuestionStatus } from "./questionRules";
+import { isUsedOptionPendingQuestion } from "./questionRules";
 
 export {
   matchPresetMeters,
@@ -29,6 +29,10 @@ export interface PresetCatalogHelpers<Option extends string | number> {
   usedOptionsFromAnnotations: (
     annotations: readonly AnnotationRecord[],
     exceptAnnotationId?: string,
+  ) => Set<Option>;
+  usedOptionsFromPending: (
+    pendingQuestions: readonly PendingQuestionRecord[],
+    exceptQuestionId?: string,
   ) => Set<Option>;
   firstUnusedFromPresets: (
     presets: readonly Option[],
@@ -58,7 +62,7 @@ export function buildPresetCatalogHelpers<Option extends string | number>(
     readOptionFromAnnotation,
     readOptionFromPending,
     isPendingQuestionCountable = (question) =>
-      isCountablePendingQuestionStatus(question.status),
+      isUsedOptionPendingQuestion(question),
   } = config;
 
   function usedOptionsFromAnnotations(
@@ -70,6 +74,34 @@ export function buildPresetCatalogHelpers<Option extends string | number>(
       readOptionFromAnnotation,
       exceptAnnotationId,
     );
+  }
+
+  function usedOptionsFromPending(
+    pendingQuestions: readonly PendingQuestionRecord[],
+    exceptQuestionId?: string,
+  ): Set<Option> {
+    if (!readOptionFromPending) {
+      return new Set();
+    }
+
+    const used = new Set<Option>();
+    for (const question of pendingQuestions) {
+      if (question.toolType !== toolType) {
+        continue;
+      }
+      if (exceptQuestionId && question.id === exceptQuestionId) {
+        continue;
+      }
+      if (!isPendingQuestionCountable(question)) {
+        continue;
+      }
+
+      const option = readOptionFromPending(question);
+      if (option !== null && option !== undefined) {
+        used.add(option);
+      }
+    }
+    return used;
   }
 
   function firstUnusedFromPresets(
@@ -135,6 +167,7 @@ export function buildPresetCatalogHelpers<Option extends string | number>(
 
   return {
     usedOptionsFromAnnotations,
+    usedOptionsFromPending,
     firstUnusedFromPresets,
     isOptionAvailable,
     optionUseCountFromAnnotations,

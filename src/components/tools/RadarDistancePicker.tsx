@@ -1,9 +1,10 @@
 import { Text, UnstyledButton } from "@mantine/core";
 import {
   RADAR_CHOOSE_LABEL,
-  availableRadarDistancePresets,
   maxRadarCustomRadiusMeters,
   radarDistanceOptionLabel,
+  radarDistancePresetsForGameSize,
+  radarOptionKeyForPresetMeters,
   radarQuestionPrompt,
   type RadarDistanceOptionKey,
 } from "@/domain/questions";
@@ -80,23 +81,24 @@ export function RadarDistancePicker({
 }: RadarDistancePickerProps) {
   const resolvedRadius =
     parseDistanceInput(customRadius, distanceUnit) ?? radiusMeters;
-  const availablePresets = availableRadarDistancePresets(
-    gameSize,
-    distanceUnit,
-    usedDistanceOptions,
-  );
-  const chooseAvailable = !usedDistanceOptions.has("choose");
+  const allPresets = radarDistancePresetsForGameSize(gameSize, distanceUnit);
+  const chooseDisabled = usedDistanceOptions.has("choose");
   const maxCustomRadiusMeters = maxRadarCustomRadiusMeters(gameSize, distanceUnit);
   const parsedCustomRadius = parseDistanceInput(customRadius, distanceUnit);
   const customRadiusOverLimit =
     chooseCustom &&
     parsedCustomRadius !== null &&
     parsedCustomRadius > maxCustomRadiusMeters;
-  const exhausted = availablePresets.length === 0 && !chooseAvailable;
+  const exhausted =
+    allPresets.every((preset) =>
+      usedDistanceOptions.has(
+        radarOptionKeyForPresetMeters(preset, distanceUnit),
+      ),
+    ) && chooseDisabled;
 
   if (compact) {
     const unitShort = compactUnitShort(distanceUnit);
-    const tileRoot = (selected: boolean) => ({
+    const tileRoot = (selected: boolean, disabled = false) => ({
       ...choiceChipStyles(selected).root,
       width: "100%",
       minHeight: "2.5rem",
@@ -108,108 +110,117 @@ export function RadarDistancePicker({
       borderRadius: 11,
       justifyContent: "center",
       letterSpacing: "-0.01em",
+      ...(disabled ? { opacity: 0.4 } : null),
     });
 
     return (
       <div data-testid="radar-distance-picker">
         {exhausted ? (
           <CatalogExhaustedMessage message="Every radar distance option has already been used this session." />
-        ) : (
-          <div
-            className="grid grid-cols-4 gap-1.5"
-            role="list"
-            aria-label="Radar distances"
-          >
-            {availablePresets.map((preset) => {
-              const selected = !chooseCustom && radiusMeters === preset;
-              return (
-                <div key={preset} role="listitem" className="min-w-0">
-                  <UnstyledButton
-                    type="button"
-                    aria-pressed={selected}
-                    onClick={() => onPresetSelect(preset)}
-                    styles={{ root: tileRoot(selected) }}
-                  >
-                    {presetLabel(preset, distanceUnit)}
-                  </UnstyledButton>
-                </div>
-              );
-            })}
-            {chooseAvailable ? (
-              <div role="listitem" className="min-w-0">
-                {chooseCustom ? (
-                  <div
-                    role="button"
-                    aria-pressed
-                    aria-label={`Custom distance in ${distanceUnitLabel(distanceUnit)}`}
-                    style={tileRoot(true)}
-                    className="inline-flex items-center justify-center gap-0.5"
-                  >
-                    <input
-                      data-testid="radar-compact-choose-input"
-                      value={customRadius}
-                      onChange={(event) => {
-                        onCustomRadiusChange(
-                          sanitizeCompactRadarInput(event.currentTarget.value),
-                        );
-                      }}
-                      onKeyDown={(event) => {
-                        if (event.key !== "Enter") {
-                          return;
-                        }
-                        event.preventDefault();
-                        if (!customRadiusOverLimit && customRadius.trim()) {
-                          onCustomDistanceCommit?.();
-                        }
-                      }}
-                      inputMode="decimal"
-                      enterKeyHint="done"
-                      autoCorrect="off"
-                      spellCheck={false}
-                      placeholder="0"
-                      aria-invalid={customRadiusOverLimit || undefined}
-                      style={{
-                        width: "100%",
-                        minWidth: 0,
-                        border: "none",
-                        background: "transparent",
-                        textAlign: "right",
-                        font: "inherit",
-                        fontWeight: 650,
-                        color: customRadiusOverLimit
-                          ? "var(--color-halt)"
-                          : "inherit",
-                        outline: "none",
-                        padding: 0,
-                        caretColor: "var(--color-flag-ink)",
-                      }}
-                    />
-                    <span
-                      aria-hidden
-                      style={{
-                        flexShrink: 0,
-                        fontSize: "0.625rem",
-                        fontWeight: 650,
-                        opacity: 0.85,
-                      }}
-                    >
-                      {unitShort}
-                    </span>
-                  </div>
-                ) : (
-                  <UnstyledButton
-                    type="button"
-                    aria-pressed={false}
-                    onClick={onChooseSelect}
-                    styles={{ root: tileRoot(false) }}
-                  >
-                    Choose
-                  </UnstyledButton>
-                )}
+        ) : null}
+        <div
+          className="grid grid-cols-4 gap-1.5"
+          role="list"
+          aria-label="Radar distances"
+        >
+          {allPresets.map((preset) => {
+            const selected = !chooseCustom && radiusMeters === preset;
+            const disabled = usedDistanceOptions.has(
+              radarOptionKeyForPresetMeters(preset, distanceUnit),
+            );
+            return (
+              <div key={preset} role="listitem" className="min-w-0">
+                <UnstyledButton
+                  type="button"
+                  aria-pressed={selected}
+                  aria-disabled={disabled || undefined}
+                  disabled={disabled}
+                  onClick={() => {
+                    if (!disabled) onPresetSelect(preset);
+                  }}
+                  styles={{ root: tileRoot(selected, disabled) }}
+                >
+                  {presetLabel(preset, distanceUnit)}
+                </UnstyledButton>
               </div>
-            ) : null}
+            );
+          })}
+          <div role="listitem" className="min-w-0">
+            {chooseCustom && !chooseDisabled ? (
+              <div
+                role="button"
+                aria-pressed
+                aria-label={`Custom distance in ${distanceUnitLabel(distanceUnit)}`}
+                style={tileRoot(true)}
+                className="inline-flex items-center justify-center gap-0.5"
+              >
+                <input
+                  data-testid="radar-compact-choose-input"
+                  value={customRadius}
+                  onChange={(event) => {
+                    onCustomRadiusChange(
+                      sanitizeCompactRadarInput(event.currentTarget.value),
+                    );
+                  }}
+                  onKeyDown={(event) => {
+                    if (event.key !== "Enter") {
+                      return;
+                    }
+                    event.preventDefault();
+                    if (!customRadiusOverLimit && customRadius.trim()) {
+                      onCustomDistanceCommit?.();
+                    }
+                  }}
+                  inputMode="decimal"
+                  enterKeyHint="done"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  placeholder="0"
+                  aria-invalid={customRadiusOverLimit || undefined}
+                  style={{
+                    width: "100%",
+                    minWidth: 0,
+                    border: "none",
+                    background: "transparent",
+                    textAlign: "right",
+                    font: "inherit",
+                    fontWeight: 650,
+                    color: customRadiusOverLimit
+                      ? "var(--color-halt)"
+                      : "inherit",
+                    outline: "none",
+                    padding: 0,
+                    caretColor: "var(--color-flag-ink)",
+                  }}
+                />
+                <span
+                  aria-hidden
+                  style={{
+                    flexShrink: 0,
+                    fontSize: "0.625rem",
+                    fontWeight: 650,
+                    opacity: 0.85,
+                  }}
+                >
+                  {unitShort}
+                </span>
+              </div>
+            ) : (
+              <UnstyledButton
+                type="button"
+                aria-pressed={false}
+                aria-disabled={chooseDisabled || undefined}
+                disabled={chooseDisabled}
+                onClick={() => {
+                  if (!chooseDisabled) onChooseSelect();
+                }}
+                styles={{ root: tileRoot(false, chooseDisabled) }}
+              >
+                Choose
+              </UnstyledButton>
+            )}
           </div>
-        )}
+        </div>
         {chooseCustom && customRadiusOverLimit ? (
           <Text
             size="xs"
@@ -234,29 +245,34 @@ export function RadarDistancePicker({
       ) : null}
       {exhausted ? (
         <CatalogExhaustedMessage message="Every radar distance option has already been used this session." />
-      ) : (
-        <OptionChipRow>
-          {availablePresets.map((preset) => {
-            const selected = !chooseCustom && radiusMeters === preset;
+      ) : null}
+      <OptionChipRow>
+        {allPresets.map((preset) => {
+          const selected = !chooseCustom && radiusMeters === preset;
+          const disabled = usedDistanceOptions.has(
+            radarOptionKeyForPresetMeters(preset, distanceUnit),
+          );
 
-            return (
-              <OptionChip
-                key={preset}
-                selected={selected}
-                onClick={() => onPresetSelect(preset)}
-              >
-                {presetLabel(preset, distanceUnit)}
-              </OptionChip>
-            );
-          })}
-          {chooseAvailable ? (
-            <OptionChip selected={chooseCustom} onClick={onChooseSelect}>
-              {RADAR_CHOOSE_LABEL}
+          return (
+            <OptionChip
+              key={preset}
+              selected={selected}
+              disabled={disabled}
+              onClick={() => onPresetSelect(preset)}
+            >
+              {presetLabel(preset, distanceUnit)}
             </OptionChip>
-          ) : null}
-        </OptionChipRow>
-      )}
-      {chooseCustom && chooseAvailable ? (
+          );
+        })}
+        <OptionChip
+          selected={chooseCustom}
+          disabled={chooseDisabled}
+          onClick={onChooseSelect}
+        >
+          {RADAR_CHOOSE_LABEL}
+        </OptionChip>
+      </OptionChipRow>
+      {chooseCustom && !chooseDisabled ? (
         <label className="field-label">
           Custom {distanceUnitLabel(distanceUnit)} (max{" "}
           {formatDistance(maxCustomRadiusMeters, distanceUnit)})

@@ -16,6 +16,7 @@ import {
   thermometerDistanceOptionForAnnotation,
   thermometerPresetMilesForMeters,
   usedThermometerDistanceOptions,
+  usedThermometerDistanceOptionsForSession,
 } from "./thermometerQuestions";
 import { milesToMeters } from "../map/distance";
 
@@ -84,6 +85,27 @@ describe("thermometerQuestions", () => {
         usedThermometerDistanceOptions([thermometer]),
       ),
     ).toBe(halfMile);
+
+    const pending = {
+      id: "pq-thermo-3",
+      toolType: "thermometer",
+      status: "pending",
+      placement: {
+        metadata: { thermometerDistanceMeters: threeMiles },
+      },
+    } as never;
+    expect(usedThermometerDistanceOptionsForSession([], [pending])).toEqual(
+      new Set([3]),
+    );
+
+    const cancelled = {
+      ...pending,
+      status: "cancelled",
+      answer: "hotter",
+    };
+    expect(usedThermometerDistanceOptionsForSession([], [cancelled])).toEqual(
+      new Set([3]),
+    );
     expect(isThermometerDistanceOptionAvailable("large", threeMiles)).toBe(true);
     expect(availableThermometerDistancePresets("large")).toEqual(
       THERMOMETER_DISTANCE_PRESETS,

@@ -17,6 +17,7 @@ import {
   thermometerQuestionPrompt,
   thermometerUseCount,
   thermometerUseCountFromPending,
+  usedThermometerDistanceOptionsForSession,
 } from "../../domain/questions";
 import { formatPresetDistance } from "../../domain/map/distance";
 import { useLiveLocation } from "../location/useLiveLocation";
@@ -237,6 +238,14 @@ export function useThermometerTool({
       ? distanceBetweenPoints(thermoA, config.thermoB)
       : null;
 
+  const usedThermometerOptions = useMemo(
+    () =>
+      usedThermometerDistanceOptionsForSession(
+        activeAnnotations,
+        pendingQuestions,
+      ),
+    [activeAnnotations, pendingQuestions],
+  );
   const presetUseCount = Math.max(
     thermometerUseCount(activeAnnotations, activeDistanceMeters),
     thermometerUseCountFromPending(pendingQuestions, activeDistanceMeters),
@@ -507,6 +516,7 @@ export function useThermometerTool({
         placementMode={config.placementMode}
         walkingActive={walkingActive}
         presetUseCount={presetUseCount}
+        usedDistanceOptions={usedThermometerOptions}
         costLabel={costLabel}
         gpsLoading={gpsLoading}
         canSubmitQuestion={canSubmitQuestion}

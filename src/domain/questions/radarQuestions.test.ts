@@ -11,6 +11,7 @@ import {
   radarQuestionPrompt,
   radarShadedInsideFromAnswer,
   usedRadarDistanceOptions,
+  usedRadarDistanceOptionsForSession,
 } from "./radarQuestions";
 import { milesToMeters } from "../map/distance";
 import {
@@ -154,6 +155,30 @@ describe("radarQuestions", () => {
       chooseCustom: false,
       radiusMeters: milesToMeters(0.25),
     });
+
+    const pending = {
+      id: "pq-radar-3",
+      toolType: "radar",
+      status: "pending",
+      placement: {
+        metadata: {
+          radiusMeters: milesToMeters(3),
+          radarChooseCustom: false,
+        },
+      },
+    } as never;
+    expect(
+      usedRadarDistanceOptionsForSession([], [pending], "imperial"),
+    ).toEqual(new Set([3]));
+
+    const cancelled = {
+      ...pending,
+      status: "cancelled",
+      answer: "yes",
+    };
+    expect(
+      usedRadarDistanceOptionsForSession([], [cancelled], "imperial"),
+    ).toEqual(new Set([3]));
     expect(isRadarPresetMetersForGameSize("small", milesToMeters(5), "imperial")).toBe(
       true,
     );

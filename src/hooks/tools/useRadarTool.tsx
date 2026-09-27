@@ -19,7 +19,7 @@ import {
   radarDistanceUseCount,
   radarDistanceUseCountFromPending,
   type RadarAnswer,
-  usedRadarDistanceOptions,
+  usedRadarDistanceOptionsForSession,
   radarQuestionPrompt,
 } from "../../domain/questions";
 import { questionCostBreakdown } from "../../domain/questions";
@@ -104,8 +104,13 @@ export function useRadarTool({
     [annotations],
   );
   const usedRadarOptions = useMemo(
-    () => usedRadarDistanceOptions(activeAnnotations, distanceUnit),
-    [activeAnnotations, distanceUnit],
+    () =>
+      usedRadarDistanceOptionsForSession(
+        activeAnnotations,
+        pendingQuestions,
+        distanceUnit,
+      ),
+    [activeAnnotations, distanceUnit, pendingQuestions],
   );
   const defaultRadius = defaultRadarPresetMeters(distanceUnit);
   const [radarRadius, setRadarRadius] = useState<number | null>(null);
