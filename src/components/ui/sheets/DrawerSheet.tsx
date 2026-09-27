@@ -31,10 +31,7 @@ export interface DrawerSheetProps {
   mapInteractive?: boolean;
 }
 
-/**
- * Phone-shell sheet path: iOS bottom Drawer with grabber + safe-area.
- * Portals into PlayerPhoneShell when mounted so overlays stay in the 390 column.
- */
+/** iOS bottom Drawer; portals into PlayerPhoneShell so overlays stay in the 390 column. */
 export function DrawerSheet({
   open,
   onClose,

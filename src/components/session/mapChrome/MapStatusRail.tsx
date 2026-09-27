@@ -70,7 +70,6 @@ function MapPlayerErrorChannel({
   );
 }
 
-/** Role-agnostic status/timer/sync bag for MapStatusRail (W4-A peel). */
 export type MapStatusRailModel = {
   sessionCode: string;
   sessionId?: string | null;
@@ -113,9 +112,8 @@ export type MapStatusRailModel = {
   terminalSessionError?:
     import("@/domain/device/feedback/userErrors").UserErrorDisplay | null;
   onReturnToJoin?: () => void;
-  /** Expanded in-flow status (legacy ops shell); phone overlay keeps false. */
   expanded?: boolean;
-  /** Synced hiding-zone Move card — drives PHASE=MOVE in status chrome. */
+  /** Synced hiding-zone Move card: drives PHASE=MOVE in status chrome. */
   moveInProgress?: boolean;
 };
 

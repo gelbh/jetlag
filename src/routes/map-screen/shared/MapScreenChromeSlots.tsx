@@ -8,23 +8,17 @@ import {
 export type MapScreenChromeSlotsLayout = "hud" | "fragments";
 
 export type MapScreenChromeSlotsProps = {
-  /** Status / header region (top HUD). */
   header: ReactNode;
-  /** Tool dock / bottom actions. */
   toolbar?: ReactNode;
   chromeHudRef?: Ref<HTMLDivElement>;
   /**
-   * `hud` — fixed HUD (phone dock layout).
-   * `fragments` — render header/toolbar/children as-is (admin compact overlays).
+   * `hud`: fixed phone dock HUD.
+   * `fragments`: header/toolbar/children as-is (admin compact overlays).
    */
   layout?: MapScreenChromeSlotsLayout;
   children?: ReactNode;
 };
 
-/**
- * Shared chrome layout slots for seeker/hider/observer/admin map screens.
- * Role chromes own slot contents; this component only places them.
- */
 export function MapScreenChromeSlots({
   header,
   toolbar = null,

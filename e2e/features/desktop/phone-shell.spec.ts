@@ -29,16 +29,14 @@ test.describe("phone shell @ 1280", () => {
     expect(box).not.toBeNull();
     const viewport = page.viewportSize();
     expect(viewport).not.toBeNull();
-    // Bottom dock: near the viewport bottom, not a left rail (x < 120).
     expect(box!.x).toBeGreaterThan(120);
     expect(box!.y + box!.height).toBeGreaterThan(viewport!.height * 0.7);
     expect(box!.width).toBeGreaterThan(box!.height);
   });
 
   test("@smoke admin stays outside phone shell", async ({ page }) => {
-    // /admin is outside PlayerPhoneShellOutlet (lock 2A). No admin auth
-    // fixture exists in e2e; unsigned desk/sign-in gate is enough to assert
-    // the route is not wrapped by the player phone column.
+    // /admin is outside PlayerPhoneShell. No admin auth fixture in e2e;
+    // unsigned desk/sign-in gate is enough to assert the route is unwrapped.
     await prepareE2EPage(page);
     await page.goto("/admin");
     await expect(page.getByTestId("player-phone-shell")).toHaveCount(0);

@@ -13,7 +13,7 @@ export type MapBottomChromeIslandName = "hunt" | "session" | "map-controls";
 
 export interface MapBottomChromeProps {
   inactive?: boolean;
-  /** Default `tools` — full-width hunt shrink for many question chips. */
+  /** Default `tools`: full-width hunt shrink for many question chips. */
   huntDensity?: MapBottomChromeHuntDensity;
   /** Ask-owned tool: ToolDeck ask-first instrument cluster. */
   askFirst?: boolean;
@@ -70,10 +70,7 @@ function SideIsland({
   );
 }
 
-/**
- * Phone bottom chrome: OverlayHost + full-bleed ToolDeck hunt.
- * Side stack overlays trailing edge (choice a) — does not permanently steal hunt flex.
- */
+/** Side stack overlays the hunt trailing edge without permanently stealing hunt flex. */
 export const MapBottomChrome = forwardRef<HTMLDivElement, MapBottomChromeProps>(
   function MapBottomChrome(
     {

@@ -1,4 +1,4 @@
-/* map-shell.css — map shell and status chrome */
+/* map-shell.css: map shell and status chrome */
 @layer components {
   .jl-stamp-code,
   .admin-diag-row,
@@ -20,7 +20,7 @@
     background: var(--color-surface-deep);
   }
 
-  /* Same WebKit standalone shortfall as html/body (W5-G). */
+  /* Same WebKit standalone shortfall as html/body. */
   @media (display-mode: standalone) {
     .map-screen-shell {
       min-height: 100vh;
@@ -559,7 +559,7 @@
     }
   }
 
-  /* Admin map — mission-control layout (tablet/desktop) */
+  /* Admin map: mission-control layout (tablet/desktop) */
   .admin-dashboard-list-scroll {
     overscroll-behavior: contain;
     scrollbar-gutter: stable;

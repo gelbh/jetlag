@@ -1,4 +1,4 @@
-/** Centered player phone column max width (spec lock 1A). */
+/** Centered player phone column max width. */
 export const PHONE_SHELL_MAX_WIDTH_PX = 390;
 
 /**

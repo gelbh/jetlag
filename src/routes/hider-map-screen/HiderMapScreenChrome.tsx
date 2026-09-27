@@ -84,7 +84,7 @@ type HidingZonePanelTool = {
   error: string | null;
 };
 
-/** Chrome bag for hider map (W3-D2). Full `useHiderMapScreenController` deferred: extract ~800 LOC would blow jumbo soft-gate. */
+/** Chrome bag for hider map. Full `useHiderMapScreenController` deferred: extract ~800 LOC would blow jumbo soft-gate. */
 export type HiderMapScreenController = {
   session: SessionRecord;
   hasMyZone: boolean;
@@ -200,7 +200,7 @@ export type HiderMapScreenController = {
       deadlineExpired?: boolean,
     ) => Promise<void>;
   };
-  /** HUD root for pan-hide (`data-map-interacting`) — same as seeker. */
+  /** HUD root for pan-hide (`data-map-interacting`): same as seeker. */
   chromeHudRef?: RefObject<HTMLDivElement | null>;
 };
 

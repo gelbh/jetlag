@@ -12,23 +12,18 @@ export interface SheetHostProps {
   dismissible?: boolean;
   sheetClassName?: string;
   maxHeightClassName?: string;
-  /** Forwarded to Mantine Drawer. */
   padding?: "xs" | "sm" | "md" | "lg" | "xl" | number;
   /**
    * `host` (default): sheet scrolls children.
    * `child`: sheet locks height; child owns scroll (chat).
    */
   scrollMode?: "host" | "child";
-  /** Forwarded to Mantine drawer body (e.g. keyboard inset). */
+  /** e.g. keyboard inset on the drawer body. */
   contentStyle?: CSSProperties;
   /** Ask HUD: scrim stays visual; map taps pass through for placement. */
   mapInteractive?: boolean;
 }
 
-/**
- * Stable sheet host API for map chrome.
- * Always Mantine Drawer (phone shell path).
- */
 export function SheetHost({
   open,
   onClose,

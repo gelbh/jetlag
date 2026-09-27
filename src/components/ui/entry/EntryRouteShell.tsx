@@ -13,10 +13,6 @@ type EntryRouteShellProps = {
   centerBody?: boolean;
 };
 
-/**
- * Shared entry route chrome: plain flush layout + header + xs body column.
- * Used by Friends / Leaderboard / Legal / Presets / Join (and peers that match).
- */
 export function EntryRouteShell({
   title,
   backTo,

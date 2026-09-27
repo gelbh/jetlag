@@ -2,7 +2,7 @@ import { forwardRef, type CSSProperties, type ReactNode } from "react";
 import { cn } from "@/lib/cn";
 
 /**
- * Map-safe overlay chassis — fixed phone band.
+ * Map-safe overlay chassis: fixed phone band.
  * Horizontal padding = max(token, safe-area-inset-*) so hunt/ask share one content box.
  */
 export const OVERLAY_SAFE_PAD_X =

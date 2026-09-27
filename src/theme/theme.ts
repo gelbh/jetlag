@@ -24,9 +24,9 @@ const appleSystemSans =
   '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif';
 
 /**
- * Brand + chrome tokens for Wave 5 map-shell/dock migration.
+ * Brand + chrome tokens for map-shell/dock.
  * Prefer reading these via `theme.other` / CSS vars over new global CSS.
- * Dock / safe-area / z-index / spacing mirror `src/styles/base.css` (bridge until W5-E).
+ * Dock / safe-area / z-index / spacing mirror `src/styles/base.css`.
  */
 export const jetlagBrand = {
   canvas: "oklch(0.285 0.036 255)",
@@ -86,7 +86,7 @@ export const jetlagTheme: MantineThemeOverride = createTheme({
   primaryShade: { light: 6, dark: 5 },
   colors: {
     flag: colorsTuple(jetlagBrand.flag),
-    /** Error / dead-session role (W3-E halt); prefer over unthemed Mantine red. */
+    /** Error / dead-session role; prefer over unthemed Mantine red. */
     halt: colorsTuple(jetlagBrand.halt),
   },
   white: jetlagBrand.fieldInk,
@@ -266,7 +266,7 @@ export const jetlagTheme: MantineThemeOverride = createTheme({
   },
 });
 
-/** Bridges brand + chrome tokens onto `:root` for residual CSS until Wave 5 chrome kill. */
+/** Bridges brand + chrome tokens onto `:root` for residual CSS. */
 export const jetlagCssVariablesResolver: CSSVariablesResolver = () => ({
   variables: {
     "--jl-control-radius": `${jetlagBrand.controlRadius}px`,

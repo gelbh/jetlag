@@ -11,7 +11,6 @@ import { useVisualViewportBottomInset } from "../../hooks/layout/useVisualViewpo
 import { SheetHost } from "../ui/sheets/SheetHost";
 import { ChatPanelBody } from "./ChatPanelBody";
 
-/** Flat chat sheet fields bag for ChatPanel (W4-F peel). */
 export type ChatPanelModel = {
   open: boolean;
   onClose: () => void;
@@ -22,7 +21,7 @@ export type ChatPanelModel = {
   senderUid: string;
   senderRole: PlayerRole;
   isHider: boolean;
-  /** @deprecated Phone chat uses SheetHost; kept for call-site compatibility. */
+  /** @deprecated Ignored; kept for call-site compatibility. */
   bottomClassName?: string;
   questionTruths?: ReadonlyMap<string, HiderTruthResult>;
   truthsLoading?: boolean;
