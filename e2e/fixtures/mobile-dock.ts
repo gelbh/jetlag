@@ -52,7 +52,7 @@ export async function readToolDockOverflowMetrics(
     return {
       barRight: chromeRect?.right ?? 0,
       viewportWidth,
-      // Hunt no longer scrolls — any tool slot past the viewport is a layout bug.
+      // Hunt no longer scrolls: any tool slot past the viewport is a layout bug.
       overflowSlots: slots.filter((el) => {
         const rect = el.getBoundingClientRect();
         return rect.right > viewportWidth + 1 || rect.left < -1;
@@ -111,7 +111,6 @@ export async function injectSimulatedSafeAreaTop(
 export const SIMULATED_SAFE_AREA_BOTTOM_PX = 34;
 export const SIMULATED_SAFE_AREA_TOP_PX = 59;
 
-/** Emulate standalone PWA display mode for dock safe-area smoke. */
 export async function injectStandaloneDisplayMode(page: Page) {
   await page.emulateMedia({ media: "screen" });
   await page.addInitScript(() => {

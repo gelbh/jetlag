@@ -180,7 +180,7 @@ test.describe("mobile tool dock", () => {
     const overflowX = await hunt.evaluate(
       (el) => getComputedStyle(el).overflowX,
     );
-    // hidden/clip/visible all OK — we must not use overflow-x: auto/scroll.
+    // hidden/clip/visible all OK: we must not use overflow-x: auto/scroll.
     expect(["visible", "clip", "hidden"]).toContain(overflowX);
     const metrics = await readToolDockOverflowMetrics(page);
     expect(metrics.overflowSlots).toBe(0);

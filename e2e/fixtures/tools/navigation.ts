@@ -34,7 +34,6 @@ export async function openSettings(page: Page) {
   await expect(settings).toBeVisible();
   await settings.scrollIntoViewIfNeeded();
   await clickViaEvaluate(settings);
-  // Settings renders as a dialog with aria-label="Settings" (mobile/desktop)
   await expect(page.getByRole("dialog", { name: "Settings" })).toBeVisible();
 }
 

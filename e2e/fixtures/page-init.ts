@@ -8,11 +8,11 @@ async function applyPageCaptureInit(page: Page) {
   await page.addInitScript(() => {
     localStorage.setItem("jetlag.mapFirstRunDismissed", "1");
     localStorage.setItem("jetlag.mapToolsHintDismissed", "1");
-    // Mobile projects use iPhone UA — dismiss install tip so onboarding stays stable.
+    // Mobile projects use iPhone UA: dismiss install tip so onboarding stays stable.
     localStorage.setItem("jetlag:pwa-install-tip-dismissed", "1");
-    // Prod preview shows AnalyticsConsentBanner when unset — keep CI e2e chrome stable.
+    // Prod preview shows AnalyticsConsentBanner when unset: keep CI e2e chrome stable.
     localStorage.setItem("jl.analytics.consent", "denied");
-    // App Check / reCAPTCHA is blocked by e2e network stubs — skip the probe gate.
+    // App Check / reCAPTCHA is blocked by e2e network stubs: skip the probe gate.
     sessionStorage.setItem("jl.appCheckProbe.skip", "1");
     try {
       indexedDB.deleteDatabase("jetlag-geographic-cache");
