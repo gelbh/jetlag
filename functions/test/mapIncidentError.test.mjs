@@ -2,11 +2,11 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { HttpsError } from "firebase-functions/v2/https";
 import { mapIncidentError } from "../handlers/incident/shared.mjs";
-import { SUPPORT_AGENT_LLM_FAILED } from "../incident/supportAgentTurn.mjs";
+import { SESSION_OPS_AGENT_FAILED } from "../incident/supportAgentTurn.mjs";
 
-test("mapIncidentError maps LLM failure to expected support-agent unavailable", () => {
+test("mapIncidentError maps agent failure to support-agent unavailable", () => {
   assert.throws(
-    () => mapIncidentError(new Error(SUPPORT_AGENT_LLM_FAILED)),
+    () => mapIncidentError(new Error(SESSION_OPS_AGENT_FAILED)),
     (error) => {
       assert.ok(error instanceof HttpsError);
       assert.equal(error.code, "internal");

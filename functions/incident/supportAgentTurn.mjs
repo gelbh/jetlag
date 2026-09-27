@@ -1,16 +1,12 @@
 /**
- * Callable entry for one session-ops support-agent turn.
+ * Callable entry for one session-ops support-agent turn (async Cursor Agents).
  *
- * Flow: authZ → load incident → consume turn (caps) → dual-channel LLM →
- * validate/execute each tool with **policy** sessionId → persist NL.
- *
- * Dual-channel: user NL never enters policy strings; tool execution always
- * binds `sessionId` from the incident, ignoring model/user-supplied ids.
+ * Flow: authZ → caps → append user chat → ensure per-incident agent → enqueue
+ * run → write working placeholder → return. Poller finalizes NL/tools.
  */
 
 import { randomUUID } from "node:crypto";
 import { INCIDENT_RATE_LIMITED } from "./createIncident.mjs";
-import { requestHostConfirm } from "./hostConfirm.mjs";
 import {
   INCIDENT_FORBIDDEN,
   INCIDENT_INVALID_MESSAGE,
@@ -23,30 +19,39 @@ import {
   SESSION_OPS_TURN_CAP,
   SESSION_OPS_GLOBAL_TOOL_CAP,
   consumeSessionOpsSummon,
-  consumeSessionOpsTool,
   consumeSessionOpsTurn,
   resolveSessionOpsCapTier,
   resolveSessionOpsCaps,
 } from "./sessionOpsCaps.mjs";
-import { executeSessionOpsTool } from "./sessionOpsExecute.mjs";
-import {
-  SESSION_OPS_HOST_CONFIRM_REQUIRED,
-  SESSION_OPS_UNKNOWN_TOOL,
-  validateSessionOpsTool,
-} from "./sessionOpsValidate.mjs";
 import { SESSION_OPS_TOOL_IDS } from "./sessionOpsTools.mjs";
 import {
-  SESSION_OPS_LLM_FAILED,
   buildDataMessages,
   buildPolicyMessages,
-  buildSessionOpsOpenAiTools,
-  callSessionOpsLlm,
+  buildSessionOpsAgentPrompt,
 } from "./sessionOpsLlm.mjs";
+import {
+  SESSION_OPS_AGENT_BUSY,
+  SESSION_OPS_AGENT_FAILED,
+  SESSION_OPS_AGENT_MISCONFIGURED,
+  createSessionOpsAgent,
+  createSessionOpsRun,
+} from "./sessionOpsCursorAgent.mjs";
+import {
+  SESSION_OPS_MCP_HEADER_ACTOR,
+  SESSION_OPS_MCP_HEADER_INCIDENT,
+  SESSION_OPS_MCP_HEADER_SESSION,
+  SESSION_OPS_MCP_HEADER_SUMMON,
+} from "./sessionOpsMcp.mjs";
+import {
+  SUPPORT_AGENT_WORKING_TEXT,
+  appendSupportThreadMessage,
+} from "./sessionOpsThread.mjs";
 
 export const SUPPORT_AGENT_TURN_ROUTE = "postSupportAgentTurn";
 export const SUPPORT_AGENT_TURN_RATE_LIMIT = 20;
 export const SUPPORT_AGENT_TURN_RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
 export const SUPPORT_AGENT_MESSAGE_MAX_LENGTH = 2000;
+export { SUPPORT_AGENT_WORKING_TEXT };
 
 export const SUPPORT_AGENT_UNAUTHENTICATED = "SUPPORT_AGENT_UNAUTHENTICATED";
 export const SUPPORT_AGENT_NO_SESSION = "SUPPORT_AGENT_NO_SESSION";
@@ -55,12 +60,14 @@ export {
   INCIDENT_INVALID_MESSAGE as SUPPORT_AGENT_INVALID_MESSAGE,
   INCIDENT_NOT_FOUND as SUPPORT_AGENT_NOT_FOUND,
   INCIDENT_RATE_LIMITED as SUPPORT_AGENT_RATE_LIMITED,
-  SESSION_OPS_LLM_FAILED as SUPPORT_AGENT_LLM_FAILED,
   SESSION_OPS_SUMMON_CAP,
   SESSION_OPS_SUMMON_NOT_FOUND,
   SESSION_OPS_TOOL_CAP,
   SESSION_OPS_TURN_CAP,
   SESSION_OPS_GLOBAL_TOOL_CAP,
+  SESSION_OPS_AGENT_BUSY,
+  SESSION_OPS_AGENT_FAILED,
+  SESSION_OPS_AGENT_MISCONFIGURED,
 };
 
 /**
@@ -78,20 +85,16 @@ export {
  *   rateLimit?: (options: object) => Promise<{ allowed: boolean }>,
  *   fetch?: typeof fetch,
  *   apiKey?: string,
- *   llmBaseUrl?: string,
- *   llmModel?: string,
- *   callLlm?: typeof callSessionOpsLlm,
- *   execute?: typeof executeSessionOpsTool,
- *   requestConfirm?: typeof requestHostConfirm,
+ *   mcpUrl?: string,
+ *   mcpAuthSecret?: string,
+ *   createAgent?: typeof createSessionOpsAgent,
+ *   createRun?: typeof createSessionOpsRun,
  *   consumeSummon?: typeof consumeSessionOpsSummon,
  *   consumeTurn?: typeof consumeSessionOpsTurn,
- *   consumeTool?: typeof consumeSessionOpsTool,
  *   resolveCaps?: typeof resolveSessionOpsCaps,
  *   loadEntitlements?: (uid: string) => Promise<object | null>,
  *   loadHistory?: (incidentId: string) => Promise<Array<object>>,
  *   appendSupportMessage?: (message: object) => Promise<{ messageId: string }>,
- *   executeDeps?: object,
- *   notifyHostConfirm?: Function,
  * }}
  */
 export async function supportAgentTurnHandler(db, input, deps = {}) {
@@ -153,7 +156,6 @@ export async function supportAgentTurnHandler(db, input, deps = {}) {
   if (!isAdmin && !isReporter && !isHost && !isMember) {
     throw new Error(INCIDENT_FORBIDDEN);
   }
-  // Summon/chat: reporter, host, or admin (members may read; write = same set).
   if (!isAdmin && !isReporter && !isHost) {
     throw new Error(INCIDENT_FORBIDDEN);
   }
@@ -177,7 +179,6 @@ export async function supportAgentTurnHandler(db, input, deps = {}) {
 
   const consumeSummon = deps.consumeSummon ?? consumeSessionOpsSummon;
   const consumeTurn = deps.consumeTurn ?? consumeSessionOpsTurn;
-  const consumeTool = deps.consumeTool ?? consumeSessionOpsTool;
 
   let summonId =
     typeof input?.summonId === "string" && input.summonId
@@ -204,9 +205,16 @@ export async function supportAgentTurnHandler(db, input, deps = {}) {
     );
   }
 
-  const turned = await consumeTurn(db, { incidentId, summonId, caps });
-  if (!turned.ok) {
-    throw new Error(turned.code ?? SESSION_OPS_TURN_CAP);
+  const claimToken = generateId();
+  const claimed = await claimSupportAgentRunSlot(db, incidentId, {
+    claimToken,
+    summonId,
+    actorUid: uid,
+    now,
+    runTransaction: deps.runTransaction,
+  });
+  if (!claimed.ok) {
+    throw new Error(SESSION_OPS_AGENT_BUSY);
   }
 
   const appendMessage =
@@ -237,93 +245,115 @@ export async function supportAgentTurnHandler(db, input, deps = {}) {
     history,
     diagnostics: incident.diagnostics ?? null,
   });
+  const promptText = buildSessionOpsAgentPrompt(policyMessages, dataMessages);
 
-  const callLlm = deps.callLlm ?? callSessionOpsLlm;
-  const apiKey = typeof deps.apiKey === "string" ? deps.apiKey : "";
-  let llmResult;
+  const apiKey = typeof deps.apiKey === "string" ? deps.apiKey.trim() : "";
+  const mcpUrl = typeof deps.mcpUrl === "string" ? deps.mcpUrl.trim() : "";
+  const mcpAuthSecret =
+    typeof deps.mcpAuthSecret === "string" ? deps.mcpAuthSecret.trim() : "";
+  if (!apiKey || !mcpUrl || !mcpAuthSecret) {
+    await releaseSupportAgentRunSlot(db, incidentId, claimToken, { now });
+    throw new Error(SESSION_OPS_AGENT_MISCONFIGURED);
+  }
+
+  const mcpAuthHeader = `Bearer ${mcpAuthSecret}`;
+  const mcpExtraHeaders = {
+    [SESSION_OPS_MCP_HEADER_INCIDENT]: incidentId,
+    [SESSION_OPS_MCP_HEADER_SESSION]: policySessionId,
+    [SESSION_OPS_MCP_HEADER_ACTOR]: uid,
+    [SESSION_OPS_MCP_HEADER_SUMMON]: summonId,
+  };
+
+  const createAgent = deps.createAgent ?? createSessionOpsAgent;
+  const createRun = deps.createRun ?? createSessionOpsRun;
+  const fetchDeps = { fetch: deps.fetch };
+
+  let agentId =
+    typeof incident.cursorAgentId === "string" ? incident.cursorAgentId.trim() : "";
+  let runId = null;
+  let agentUrl = null;
+
   try {
-    llmResult = await callLlm(
-      {
-        apiKey,
-        policyMessages,
-        dataMessages,
-        tools: buildSessionOpsOpenAiTools(SESSION_OPS_TOOL_IDS),
-        baseUrl: deps.llmBaseUrl,
-        model: deps.llmModel,
-      },
-      { fetch: deps.fetch },
-    );
+    if (!agentId) {
+      const created = await createAgent(
+        {
+          apiKey,
+          promptText,
+          mcpUrl,
+          mcpAuthHeader,
+          mcpExtraHeaders,
+          name: `Incident ${incidentId.slice(0, 8)} session-ops`,
+        },
+        fetchDeps,
+      );
+      agentId = created.agentId;
+      runId = created.runId;
+      agentUrl = created.agentUrl;
+    } else {
+      const run = await createRun(
+        {
+          apiKey,
+          agentId,
+          promptText,
+          mcpUrl,
+          mcpAuthHeader,
+          mcpExtraHeaders,
+        },
+        fetchDeps,
+      );
+      runId = run.runId;
+    }
   } catch (error) {
-    if (error instanceof Error && error.message === SESSION_OPS_LLM_FAILED) {
+    await releaseSupportAgentRunSlot(db, incidentId, claimToken, { now });
+    if (
+      error instanceof Error &&
+      (error.message === SESSION_OPS_AGENT_BUSY ||
+        error.message === SESSION_OPS_AGENT_MISCONFIGURED ||
+        error.message === SESSION_OPS_AGENT_FAILED)
+    ) {
       throw error;
     }
-    throw new Error(SESSION_OPS_LLM_FAILED);
+    throw new Error(SESSION_OPS_AGENT_FAILED);
   }
 
-  const execute = deps.execute ?? executeSessionOpsTool;
-  const requestConfirm = deps.requestConfirm ?? requestHostConfirm;
-
-  /** @type {Array<object>} */
-  const toolOutcomes = [];
-
-  for (const toolCall of llmResult.toolCalls ?? []) {
-    const outcome = await runValidatedToolCall(db, {
-      incidentId,
-      policySessionId,
-      actorUid: uid,
-      summonId,
-      caps,
-      toolCall,
-      execute,
-      requestConfirm,
-      consumeTool,
-      notify: deps.notifyHostConfirm,
-      executeDeps: deps.executeDeps,
-      now,
-      generateId,
-    });
-    toolOutcomes.push(outcome);
-
-    await appendMessage({
-      sender: "system",
-      senderUid: null,
-      kind: outcome.status === "host_confirm_required" ? "host_confirm" : "tool_result",
-      text: formatToolOutcomeText(outcome),
-      visibility: "support",
-      toolCall: {
-        id: toolCall.id,
-        name: toolCall.name,
-        args: toolCall.args,
-        status: outcome.status,
-        code: outcome.code ?? null,
-        confirmId: outcome.confirmId ?? null,
-      },
-      createdAt: now().toISOString(),
-    });
+  if (!runId) {
+    await releaseSupportAgentRunSlot(db, incidentId, claimToken, { now });
+    throw new Error(SESSION_OPS_AGENT_FAILED);
   }
 
-  const assistantText =
-    typeof llmResult.content === "string" && llmResult.content.trim()
-      ? llmResult.content.trim()
-      : defaultAssistantText(toolOutcomes);
-
-  let assistantMessageId = null;
-  if (assistantText) {
-    const kind = looksLikeQuestion(assistantText) ? "question" : "status";
-    const appended = await appendMessage({
-      sender: "ops_agent",
-      senderUid: null,
-      kind,
-      text: assistantText,
-      visibility: "support",
-      createdAt: now().toISOString(),
-    });
-    assistantMessageId = appended?.messageId ?? null;
+  // Charge the turn only after a durable Cursor run exists.
+  const turned = await consumeTurn(db, { incidentId, summonId, caps });
+  if (!turned.ok) {
+    await releaseSupportAgentRunSlot(db, incidentId, claimToken, { now });
+    throw new Error(turned.code ?? SESSION_OPS_TURN_CAP);
   }
 
+  const working = await appendMessage({
+    sender: "ops_agent",
+    senderUid: null,
+    kind: "status",
+    text: SUPPORT_AGENT_WORKING_TEXT,
+    visibility: "support",
+    working: true,
+    createdAt: now().toISOString(),
+  });
+
+  const nowIso = now().toISOString();
   await incidentRef.set(
     {
-      updatedAt: now().toISOString(),
+      cursorAgentId: agentId,
+      ...(agentUrl ? { cursorAgentUrl: agentUrl } : {}),
+      supportAgentRun: {
+        runId,
+        agentId,
+        status: "working",
+        startedAt: nowIso,
+        workingMessageId: working?.messageId ?? null,
+        summonId,
+        actorUid: uid,
+        claimToken,
+      },
+      updatedAt: nowIso,
       ...(incident.status === "open" ? { status: "chatting" } : {}),
     },
     { merge: true },
@@ -331,205 +361,108 @@ export async function supportAgentTurnHandler(db, input, deps = {}) {
 
   return {
     summonId,
-    assistantMessageId,
-    content: assistantText,
-    toolOutcomes,
-  };
-}
-
-async function runValidatedToolCall(db, ctx) {
-  const { toolCall, policySessionId, incidentId, actorUid } = ctx;
-
-  // Policy session binding: never trust model/user sessionId in args.
-  const modelArgs =
-    toolCall.args && typeof toolCall.args === "object" ? { ...toolCall.args } : {};
-  delete modelArgs.sessionId;
-  delete modelArgs.incidentId;
-
-  const validation = validateSessionOpsTool({
-    tool: toolCall.name,
-    args: modelArgs,
-    sessionId: policySessionId,
-    incidentSessionId: policySessionId,
-    hostConfirmed: false,
-  });
-
-  if (!validation.ok && !validation.gate) {
-    // Still audit via executor when possible (unknown tool / bad args).
-    try {
-      await ctx.execute(
-        db,
-        {
-          incidentId,
-          sessionId: policySessionId,
-          actorUid,
-          tool: toolCall.name,
-          args: modelArgs,
-          hostConfirmed: false,
-        },
-        ctx.executeDeps,
-      );
-    } catch (error) {
-      return {
-        status: "rejected",
-        tool: toolCall.name,
-        code:
-          error instanceof Error
-            ? error.message
-            : validation.code ?? SESSION_OPS_UNKNOWN_TOOL,
-        args: modelArgs,
-      };
-    }
-    return {
-      status: "rejected",
-      tool: toolCall.name,
-      code: validation.code ?? SESSION_OPS_UNKNOWN_TOOL,
-      args: modelArgs,
-    };
-  }
-
-  if (validation.gate) {
-    const confirm = await ctx.requestConfirm(
-      db,
-      {
-        incidentId,
-        sessionId: policySessionId,
-        tool: validation.toolId,
-        args: validation.args,
-        requestedByUid: actorUid,
-      },
-      {
-        now: ctx.now,
-        generateId: ctx.generateId,
-        notify: ctx.notify,
-      },
-    );
-    return {
-      status: "host_confirm_required",
-      tool: validation.toolId,
-      code: SESSION_OPS_HOST_CONFIRM_REQUIRED,
-      args: validation.args,
-      confirmId: confirm.confirmId,
-      expiresAt: confirm.expiresAt,
-    };
-  }
-
-  const toolCap = await ctx.consumeTool(
-    db,
-    {
-      incidentId,
-      summonId: ctx.summonId,
-      uid: actorUid,
-      caps: ctx.caps,
-      nowMs: ctx.now().getTime(),
-    },
-    {},
-  );
-  if (!toolCap.ok) {
-    return {
-      status: "rejected",
-      tool: validation.toolId,
-      code: toolCap.code ?? SESSION_OPS_TOOL_CAP,
-      args: validation.args,
-    };
-  }
-
-  const result = await ctx.execute(
-    db,
-    {
-      incidentId,
-      sessionId: policySessionId,
-      actorUid,
-      tool: validation.toolId,
-      args: validation.args,
-      hostConfirmed: false,
-    },
-    ctx.executeDeps,
-  );
-
-  return {
-    status: result.status ?? "ok",
-    tool: validation.toolId,
-    args: validation.args,
-    result,
-    auditId: result.auditId ?? null,
-    code: result.code ?? null,
+    runId,
+    agentId,
+    status: "working",
+    workingMessageId: working?.messageId ?? null,
+    assistantMessageId: null,
+    content: null,
+    toolOutcomes: [],
   };
 }
 
 /**
- * Minimal support-thread write. Prefer `deps.appendSupportMessage` when a
- * dedicated helper exists (Task 6+).
+ * Claim a supportAgentRun slot before calling Cursor (prevents TOCTOU races).
  */
-export async function appendSupportThreadMessage(
+export async function claimSupportAgentRunSlot(db, incidentId, input) {
+  const claimToken = input.claimToken;
+  const summonId = input.summonId;
+  const actorUid = input.actorUid;
+  const now = input.now ?? (() => new Date());
+  const runTransaction =
+    input.runTransaction ?? ((fn) => db.runTransaction(fn));
+  const ref = db.collection("incidents").doc(incidentId);
+
+  return runTransaction(async (transaction) => {
+    const snap = await transaction.get(ref);
+    if (!snap.exists) {
+      return { ok: false, reason: "missing_incident" };
+    }
+    const data = snap.data() ?? {};
+    const run =
+      data.supportAgentRun && typeof data.supportAgentRun === "object"
+        ? data.supportAgentRun
+        : null;
+    const status = typeof run?.status === "string" ? run.status : "";
+    if (
+      status === "working" ||
+      status === "running" ||
+      status === "finalizing" ||
+      status === "claiming"
+    ) {
+      return { ok: false, reason: "busy" };
+    }
+    const nowIso = now().toISOString();
+    transaction.set(
+      ref,
+      {
+        supportAgentRun: {
+          status: "claiming",
+          claimToken,
+          summonId,
+          actorUid,
+          startedAt: nowIso,
+        },
+        updatedAt: nowIso,
+      },
+      { merge: true },
+    );
+    return { ok: true };
+  });
+}
+
+/**
+ * Clear a claim/working slot when Cursor enqueue fails (only if claimToken matches).
+ */
+export async function releaseSupportAgentRunSlot(
   db,
   incidentId,
-  message,
-  generateId = () => randomUUID(),
+  claimToken,
+  deps = {},
 ) {
-  const messageId = generateId();
-  const payload = {
-    id: messageId,
-    ...message,
-  };
+  const now = deps.now ?? (() => new Date());
+  const runTransaction =
+    deps.runTransaction ?? ((fn) => db.runTransaction(fn));
+  const ref = db.collection("incidents").doc(incidentId);
 
-  const threadRef = db
-    .collection("incidents")
-    .doc(incidentId)
-    .collection("threads")
-    .doc("support")
-    .collection("messages")
-    .doc(messageId);
-
-  await threadRef.set(payload);
-
-  // Desk v1 also lists top-level messages; mirror agent/system lines lightly.
-  if (
-    payload.sender === "ops_agent" ||
-    payload.sender === "system" ||
-    payload.kind === "chat"
-  ) {
-    await db
-      .collection("incidents")
-      .doc(incidentId)
-      .collection("messages")
-      .doc(messageId)
-      .set({
-        sender: payload.sender,
-        senderUid: payload.senderUid ?? null,
-        kind: payload.kind ?? "chat",
-        text: payload.text ?? "",
-        createdAt: payload.createdAt,
-        toolCall: payload.toolCall ?? null,
-      });
-  }
-
-  return { messageId };
+  return runTransaction(async (transaction) => {
+    const snap = await transaction.get(ref);
+    if (!snap.exists) {
+      return { ok: false };
+    }
+    const data = snap.data() ?? {};
+    const run =
+      data.supportAgentRun && typeof data.supportAgentRun === "object"
+        ? data.supportAgentRun
+        : null;
+    if (!run || run.claimToken !== claimToken) {
+      return { ok: false, reason: "token_mismatch" };
+    }
+    transaction.set(
+      ref,
+      {
+        supportAgentRun: {
+          status: "failed",
+          claimToken,
+          finishedAt: now().toISOString(),
+          terminalStatus: "RELEASED",
+        },
+        updatedAt: now().toISOString(),
+      },
+      { merge: true },
+    );
+    return { ok: true };
+  });
 }
 
-function formatToolOutcomeText(outcome) {
-  if (outcome.status === "host_confirm_required") {
-    return `Waiting on session host to confirm “${outcome.tool}”.`;
-  }
-  if (outcome.status === "rejected") {
-    return `Could not run ${outcome.tool ?? "tool"} (${outcome.code ?? "rejected"}).`;
-  }
-  return `Ran ${outcome.tool}.`;
-}
-
-function defaultAssistantText(toolOutcomes) {
-  if (!Array.isArray(toolOutcomes) || toolOutcomes.length === 0) {
-    return null;
-  }
-  if (toolOutcomes.some((o) => o.status === "host_confirm_required")) {
-    return "I need the session host to confirm a destructive change before I can proceed.";
-  }
-  if (toolOutcomes.every((o) => o.status === "ok" || o.status === "accepted")) {
-    return "I applied a session fix. Let me know if it looks better.";
-  }
-  return "I could not complete every requested fix. Share more detail if the issue continues.";
-}
-
-function looksLikeQuestion(text) {
-  return text.includes("?");
-}
+export { appendSupportThreadMessage };
