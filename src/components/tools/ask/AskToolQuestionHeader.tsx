@@ -4,7 +4,10 @@
  */
 import type { ReactNode } from "react";
 import { QuestionPromptBlock } from "@/components/tools/shared/controls/QuestionPromptBlock";
-import { askInsetSurfaceStyle } from "@/components/ui/entry/entryChrome";
+import {
+  askHudPanelStyle,
+  askInsetSurfaceStyle,
+} from "@/components/ui/entry/entryChrome";
 
 export type AskToolQuestionHeaderProps = {
   toolLabel: string;
@@ -12,7 +15,7 @@ export type AskToolQuestionHeaderProps = {
   icon: ReactNode;
   prompt: string;
   ruleSummary?: string | null;
-  /** When false, uses Survey ask-hud-panel chrome instead of iOS inset. */
+  /** When false, uses frosted ask panel chrome instead of iOS inset. */
   mantine?: boolean;
 };
 
@@ -26,12 +29,8 @@ export function AskToolQuestionHeader({
 }: AskToolQuestionHeaderProps) {
   return (
     <div
-      className={
-        mantine
-          ? "pointer-events-auto space-y-2 p-3"
-          : "pointer-events-auto ask-hud-panel space-y-2 p-3"
-      }
-      style={mantine ? askInsetSurfaceStyle : undefined}
+      className="pointer-events-auto space-y-2 p-3"
+      style={mantine ? askInsetSurfaceStyle : askHudPanelStyle}
     >
       <div className="flex items-start gap-3">
         <div

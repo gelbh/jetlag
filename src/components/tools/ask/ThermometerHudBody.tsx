@@ -106,7 +106,7 @@ export function ThermometerHudBody({
     chord === "walking" ? (
       <div
         data-testid="ask-walk-banner"
-        className="ask-walk-banner pointer-events-auto"
+        className="pointer-events-auto mx-auto flex max-w-md flex-col gap-1"
         role="status"
         aria-live="polite"
         style={{
@@ -115,13 +115,27 @@ export function ThermometerHudBody({
           padding: "0.85rem 1rem",
         }}
       >
-        <p className="ask-walk-banner__label text-xs">Walking</p>
-        <p className="ask-walk-banner__progress font-display text-xl">
+        <p
+          className="m-0 text-xs font-bold uppercase tracking-[0.1em]"
+          style={{ color: "var(--color-flag)" }}
+        >
+          Walking
+        </p>
+        <p
+          className="m-0 font-display text-xl font-bold leading-[1.15] tracking-wide tabular-nums"
+          style={{ color: "var(--color-field-ink)" }}
+        >
           {walkedLabel}
-          <span className="ask-walk-banner__sep"> / </span>
+          <span
+            className="font-medium"
+            style={{ color: "var(--color-field-ink-muted)" }}
+          >
+            {" "}
+            /{" "}
+          </span>
           {targetLabel}
         </p>
-        <p className="ask-walk-banner__hint text-xs text-field-ink-muted">
+        <p className="mt-1 text-xs text-field-ink-muted">
           Line updates live for hiders. End walk on the strip when ready.
         </p>
       </div>

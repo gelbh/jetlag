@@ -1,6 +1,7 @@
 import type { CSSProperties, Ref } from "react";
 import type { PanelHandleProps } from "@/hooks/motion/usePanelDrag";
 import { useMotionProfile } from "@/hooks/motion/useMotionProfile";
+import { sheetHandleStyle } from "@/components/ui/entry/entryStyles";
 import { PopupCloseButton } from "../../ui/brand/PopupCloseButton";
 
 type PeekHandleProps = PanelHandleProps & {
@@ -109,7 +110,7 @@ export function MapFloatingPanel({
             className="jl-panel-drag-handle absolute inset-x-0 top-0 flex justify-center py-2"
             {...dragHandleProps}
           >
-            <span className="jl-sheet-handle" aria-hidden="true" />
+            <span style={sheetHandleStyle} aria-hidden="true" />
           </button>
         ) : null}
         {!displayMinimized && onClose && closeLabel ? (

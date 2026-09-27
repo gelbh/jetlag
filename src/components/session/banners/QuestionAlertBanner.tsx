@@ -82,9 +82,7 @@ export function QuestionAlertBanner({
           aria-label="Open question"
         >
           {answerError ? (
-            <InlineError className="mb-2 rounded-lg border border-status-error/40 bg-status-error-surface px-3 py-2">
-              {answerError}
-            </InlineError>
+            <InlineError className="mb-2">{answerError}</InlineError>
           ) : null}
           <HiderPendingQuestionAnswer
             message={target.message}

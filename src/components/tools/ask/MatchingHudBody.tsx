@@ -1,3 +1,4 @@
+import { AskHudPanel } from "@/components/tools/ask/AskHudPanel";
 /**
  * Matching Ask HUD mode body — CatalogRail → map resolve (+ solo answer).
  * SingleBottomChord: row tap advances; no PhaseRail / CONTINUE.
@@ -252,9 +253,9 @@ export function MatchingHudBody({
         <div className="space-y-2">
           {awaitHiderAnswer ? <QuestionTruthReferenceHint /> : null}
           {availableCategories.length === 0 ? (
-            <div className="pointer-events-auto ask-hud-panel p-3">
+            <AskHudPanel className="p-3">
               <CatalogExhaustedMessage message="Every match category has already been used on this map." />
-            </div>
+            </AskHudPanel>
           ) : (
             <>
               <div

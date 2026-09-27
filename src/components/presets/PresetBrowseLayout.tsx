@@ -1,4 +1,5 @@
 import { AppLink } from "../navigation/AppLink";
+import { homeCardBtnStyle, homePosterStyle } from "@/components/ui/entry/entryStyles";
 import { DesktopContentColumn } from "../ui/layout/DesktopContentColumn";
 import {
   ScreenHeader,
@@ -53,7 +54,8 @@ export function PresetBrowseBody({
 
       <AppLink
         to="/presets/new"
-        className="home-card-btn home-card-btn-primary"
+        data-feedback="tap"
+        style={homeCardBtnStyle("primary")}
       >
         <span>New preset</span>
       </AppLink>
@@ -122,7 +124,7 @@ export function PresetBrowseBody({
 
 export function PresetBrowseLayout(props: PresetBrowseBodyProps) {
   return (
-    <main className="home-poster flex min-h-[100dvh] flex-col px-5 py-8">
+    <main className="flex min-h-[100dvh] flex-col px-5 py-8" style={homePosterStyle}>
       <ScreenHeader backTo="/" backLabel="Back" />
       <DesktopContentColumn maxWidth="social">
         <div

@@ -1,4 +1,8 @@
 import type { ReactNode } from "react";
+import {
+  homePosterStyle,
+  homeTerminalAccentBarStyle,
+} from "@/components/ui/entry/entryStyles";
 
 interface EntryScreenLayoutProps {
   children: ReactNode;
@@ -52,8 +56,10 @@ export function EntryScreenLayout({
 
   return (
     <main
-      className={`home-poster home-terminal-accent flex ${minHeightClass} flex-col ${viewport ? viewportClass : justifyClass} ${insetClass}`}
+      className={`flex ${minHeightClass} flex-col ${viewport ? viewportClass : justifyClass} ${insetClass}`}
+      style={homePosterStyle}
     >
+      <div aria-hidden style={homeTerminalAccentBarStyle} />
       {children}
     </main>
   );

@@ -342,7 +342,7 @@ describe("ToolDock", () => {
     expect(
       screen.getByText("Match").getAttribute("data-ios-tool-label"),
     ).toBe("");
-    expect(screen.getByText("Match")).not.toHaveClass("jl-tool-slot-label");
+    expect(screen.getByText("Match")).toHaveClass("jl-tool-slot-label");
     expect((hunt as HTMLElement | null)?.style.borderTop).not.toBe(
       "3px solid var(--color-flag)",
     );

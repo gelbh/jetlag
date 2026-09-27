@@ -1,8 +1,10 @@
-import { describe, expect, it, vi } from "vitest";
-import { screen } from "@testing-library/react";
-import { renderWithAppUi } from "../../../test/renderWithAppUi";
+import { describe, expect, it, vi, beforeEach } from "vitest";
+import { render, screen } from "@testing-library/react";
+import { MantineProvider } from "@mantine/core";
+import type { ReactElement } from "react";
 import type { DistanceUnit } from "@/domain/map/distance";
 import type { SessionRulesInput } from "@/domain/session/rules";
+import { jetlagTheme } from "@/theme/theme";
 import { AskHudHost } from "./AskHudHost";
 import { ThermometerHudBody } from "./ThermometerHudBody";
 import {
@@ -10,6 +12,27 @@ import {
   primedCommitLabel,
   type AskHudReadiness,
 } from "@/domain/ask/askHudModes";
+
+function renderHud(ui: ReactElement) {
+  return render(
+    <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
+      {ui}
+    </MantineProvider>,
+  );
+}
+
+beforeEach(() => {
+  vi.stubGlobal("matchMedia", (query: string) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener() {},
+    removeListener() {},
+    addEventListener() {},
+    removeEventListener() {},
+    dispatchEvent: () => false,
+  }));
+});
 
 const sessionRules = {
   gameSize: "medium",
@@ -40,7 +63,7 @@ const baseProps = {
 
 describe("ThermometerHudBody", () => {
   it("shows walk banner without PhaseRail, CONTINUE, or END WALK in the body", () => {
-    renderWithAppUi(
+    renderHud(
       <ThermometerHudBody
         {...baseProps}
         walkingActive
@@ -77,7 +100,7 @@ describe("ThermometerHudBody", () => {
     ).toBe(false);
 
     const onCommit = vi.fn();
-    renderWithAppUi(
+    renderHud(
       <AskHudHost
         cue=""
         toolLabel="Thermometer"

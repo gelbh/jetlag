@@ -6,6 +6,7 @@ import {
   Warning,
   WarningCircle,
 } from "@phosphor-icons/react";
+import { syncBeaconStyle } from "@/components/ui/entry/entryChrome";
 import { JlIcon, type PhosphorIcon } from "../../ui/brand/JlIcon";
 
 interface SyncStatusBeaconProps {
@@ -13,11 +14,6 @@ interface SyncStatusBeaconProps {
   size?: "sm" | "md";
   className?: string;
 }
-
-const SIZE_CLASS: Record<NonNullable<SyncStatusBeaconProps["size"]>, string> = {
-  sm: "jl-sync-beacon--sm",
-  md: "jl-sync-beacon--md",
-};
 
 const SURVEY_ICON: Record<SyncStatus, PhosphorIcon> = {
   synced: CheckCircle,
@@ -37,7 +33,8 @@ export function SyncStatusBeacon({
 
   return (
     <span
-      className={`jl-sync-beacon jl-sync-beacon--survey jl-sync-beacon--${status} ${SIZE_CLASS[size]} ${className}`.trim()}
+      className={`jl-sync-beacon jl-sync-beacon--${status} ${className}`.trim()}
+      style={syncBeaconStyle(status, size)}
       aria-hidden="true"
     >
       <JlIcon icon={SURVEY_ICON[status]} size={iconPx} weight="bold" />

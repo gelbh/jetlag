@@ -1,4 +1,5 @@
 import { Button } from "../../components/ui/button";
+import { InlineError } from "../../components/ui/banners/InlineError";
 
 export interface ConfirmFooterProps {
   confirmLabel: string;
@@ -24,11 +25,11 @@ export function ConfirmFooter({
         variant="flag"
         onClick={onConfirm}
         disabled={loading || verifyingAccess || requiresPremiumSignIn}
-        className="home-entry-action min-h-14 w-full"
+        className="min-h-14 w-full"
       >
         {confirmLabel}
       </Button>
-      {error ? <p className="mt-2 text-halt">{error}</p> : null}
+      {error ? <InlineError className="mt-2">{error}</InlineError> : null}
     </div>
   );
 }

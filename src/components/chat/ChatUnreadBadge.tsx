@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { chatUnreadBadgeStyle } from "@/components/ui/entry/entryChrome";
 
 interface ChatUnreadBadgeProps {
   count: number;
@@ -27,6 +28,7 @@ export function ChatUnreadBadge({ count }: ChatUnreadBadgeProps) {
     <span
       ref={ref}
       className="jl-unread-badge"
+      style={chatUnreadBadgeStyle}
       aria-label={`${count} unread chat messages`}
     >
       {label}

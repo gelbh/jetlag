@@ -1,3 +1,4 @@
+import { AskHudPanel } from "@/components/tools/ask/AskHudPanel";
 /**
  * Tentacle Ask HUD mode body — CatalogRail → map radius (+ locations / solo answer).
  * Matching-style question header + catalog; map-first overlays after category.
@@ -153,7 +154,7 @@ export function TentacleHudBody({
       ) : null}
 
       {chord === "place" ? (
-        <div className="pointer-events-auto ask-hud-panel space-y-2 p-3">
+        <AskHudPanel className="space-y-2 p-3">
           <AnchorControls
             awaitingPlacement={awaitingPlacement}
             hasAnchor={hasCenter}
@@ -168,7 +169,7 @@ export function TentacleHudBody({
               Search radius is fixed at {searchRadiusLabel} from your anchor.
             </ResolvedReadout>
           ) : null}
-        </div>
+        </AskHudPanel>
       ) : null}
 
       {chord === "locations" ? (

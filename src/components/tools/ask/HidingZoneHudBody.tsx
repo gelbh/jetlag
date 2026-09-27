@@ -1,3 +1,4 @@
+import { AskHudPanel } from "@/components/tools/ask/AskHudPanel";
 /**
  * Hider MethodChipIsland — station/map chips; place on map; Confirm on PrimedCommitStrip.
  * No PhaseRail / CONTINUE / mid-screen method card.
@@ -87,16 +88,16 @@ export function HidingZoneHudBody({
       ) : null}
 
       {step === "location" && zoneTool.manualMode ? (
-        <div className="pointer-events-auto ask-hud-panel space-y-2 p-3">
+        <AskHudPanel className="space-y-2 p-3">
           <p className="text-sm text-field-ink">
             Tap the map inside the play area to set your zone center.
           </p>
           <p className="text-xs text-field-ink-muted">Radius: {radiusLabel}</p>
-        </div>
+        </AskHudPanel>
       ) : null}
 
       {step === "location" && !zoneTool.manualMode ? (
-        <div className="pointer-events-auto ask-hud-panel max-h-[min(40dvh,18rem)] overflow-hidden p-3">
+        <AskHudPanel className="max-h-[min(40dvh,18rem)] overflow-hidden p-3">
           <div className="jl-scroll max-h-full">
             <TransitStationPicker
               layout="flex"
@@ -114,11 +115,11 @@ export function HidingZoneHudBody({
             />
           </div>
           <p className="mt-2 text-xs text-field-ink-muted">Radius: {radiusLabel}</p>
-        </div>
+        </AskHudPanel>
       ) : null}
 
       {step === "confirm" ? (
-        <div className="pointer-events-auto ask-hud-panel space-y-2 p-3">
+        <AskHudPanel className="space-y-2 p-3">
           <p className="text-xs font-medium uppercase tracking-wide text-field-ink-muted">
             Zone center
           </p>
@@ -144,7 +145,7 @@ export function HidingZoneHudBody({
               Move must be at least 50 m from your previous zone.
             </p>
           ) : null}
-        </div>
+        </AskHudPanel>
       ) : null}
 
       {/* Commit-strip alert owns the error; avoid a second strict-mode duplicate. */}

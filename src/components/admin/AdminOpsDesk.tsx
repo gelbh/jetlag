@@ -4,6 +4,7 @@ import { useLocation, useParams } from "react-router-dom";
 import { AppLink } from "../navigation/AppLink";
 import { PremiumSignInGate } from "../billing/PremiumSignInGate";
 import { EntryScreenLayout } from "../ui/layout/EntryScreenLayout";
+import { homeCardBtnStyle } from "@/components/ui/entry/entryStyles";
 import {
   ScreenHeader,
   screenHeaderOffsetClassName,
@@ -84,7 +85,8 @@ function AdminSessionSkeletonRows() {
       {[0, 1, 2].map((index) => (
         <div
           key={index}
-          className="home-card-btn home-card-btn-secondary h-[6.5rem] animate-pulse bg-surface-raised/40"
+          className="h-[6.5rem] animate-pulse bg-surface-raised/40"
+          style={homeCardBtnStyle("secondary")}
         />
       ))}
     </div>

@@ -1,3 +1,4 @@
+import { AskHudPanel } from "@/components/tools/ask/AskHudPanel";
 /**
  * Measuring Ask HUD — Matching twin: question header + icon catalog, then map-first.
  * Sheet path keeps anchor/target/answer chords when Mantine map-first is off.
@@ -276,9 +277,9 @@ export function MeasuringHudBody({ model }: MeasuringHudBodyProps) {
         <div className="space-y-2">
           {awaitHiderAnswer ? <QuestionTruthReferenceHint /> : null}
           {!hasAvailableMeasureOptions ? (
-            <div className="pointer-events-auto ask-hud-panel p-3">
+            <AskHudPanel className="p-3">
               <CatalogExhaustedMessage message="Every measure category has already been used on this map." />
-            </div>
+            </AskHudPanel>
           ) : (
             <>
               <div
@@ -323,7 +324,7 @@ export function MeasuringHudBody({ model }: MeasuringHudBodyProps) {
       ) : null}
 
       {chord === "anchor" ? (
-        <div className="pointer-events-auto ask-hud-panel p-3">
+        <AskHudPanel className="p-3">
           <MeasuringAnchorStep
             hasSeekerPoint={hasSeekerPoint}
             gpsLoading={gpsLoading}
@@ -339,11 +340,11 @@ export function MeasuringHudBody({ model }: MeasuringHudBodyProps) {
             onSearchQueryChange={onSearchQueryChange}
             onSearchSubmit={() => onSearchSubmit("seeker")}
           />
-        </div>
+        </AskHudPanel>
       ) : null}
 
       {chord === "target" ? (
-        <div className="pointer-events-auto ask-hud-panel space-y-2 p-3">
+        <AskHudPanel className="space-y-2 p-3">
           <MeasuringTargetSection
             subject={subject}
             measureFrom={measureFrom}
@@ -369,11 +370,11 @@ export function MeasuringHudBody({ model }: MeasuringHudBodyProps) {
             onFindLinearFeature={onFindLinearFeature}
             onFindNearest={onFindNearest}
           />
-        </div>
+        </AskHudPanel>
       ) : null}
 
       {chord === "answer" ? (
-        <div className="pointer-events-auto ask-hud-panel p-3">
+        <AskHudPanel className="p-3">
           <MeasuringAnswerSection
             step="ask"
             part="all"
@@ -396,16 +397,16 @@ export function MeasuringHudBody({ model }: MeasuringHudBodyProps) {
               /* Commit lives on AskCommitStrip. */
             }}
           />
-        </div>
+        </AskHudPanel>
       ) : null}
 
       {allowsSearch && searchResults.length > 0 && chord !== "answer" ? (
-        <div className="pointer-events-auto ask-hud-panel jl-scroll max-h-40 p-2">
+        <AskHudPanel className="jl-scroll max-h-40 p-2">
           <SearchResultsList
             results={searchResults}
             onSelect={(place) => onSearchResultSelect(place, searchRole)}
           />
-        </div>
+        </AskHudPanel>
       ) : null}
     </div>
   );

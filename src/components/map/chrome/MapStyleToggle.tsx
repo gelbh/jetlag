@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import {
   getMapBasemap,
@@ -21,6 +21,45 @@ interface MapStyleToggleProps {
   onMapStyleChange: (style: MapStyle) => void;
   inset?: MapChromeControlInset;
 }
+
+const previewStyle: CSSProperties = {
+  position: "relative",
+  display: "block",
+  height: "100%",
+  width: "100%",
+};
+
+const tilesStyle: CSSProperties = {
+  display: "grid",
+  height: "100%",
+  width: "100%",
+  gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+  gridTemplateRows: "repeat(2, minmax(0, 1fr))",
+  background: "var(--color-map-canvas)",
+};
+
+const tileStyle: CSSProperties = {
+  display: "block",
+  height: "100%",
+  width: "100%",
+  objectFit: "cover",
+};
+
+const labelStyle: CSSProperties = {
+  position: "absolute",
+  right: 0,
+  bottom: 0,
+  left: 0,
+  background: "oklch(from var(--color-canvas) l c h / 0.78)",
+  padding: "0.125rem 0.2rem",
+  textAlign: "center",
+  fontSize: "0.5rem",
+  fontWeight: 600,
+  letterSpacing: "0.04em",
+  lineHeight: 1.1,
+  textTransform: "uppercase",
+  color: "var(--color-field-ink)",
+};
 
 export function MapStyleToggle({
   enabled,
@@ -60,20 +99,18 @@ export function MapStyleToggle({
       data-map-interacting={interacting ? "true" : undefined}
     >
       <MapChromeControl
-        className={`map-style-control__btn${
-          satelliteActive ? " map-style-control__btn--active" : ""
-        }`}
+        className="map-style-control__btn"
         pressed={satelliteActive}
         onClick={() => onMapStyleChange(nextStyle)}
         aria-label={label}
         title={label}
       >
-        <span className="map-style-control__preview">
-          <span className="map-style-control__tiles" aria-hidden="true">
+        <span style={previewStyle}>
+          <span style={tilesStyle} aria-hidden="true">
             {previewTileUrls.map((url, index) => (
               <img
                 key={index}
-                className="map-style-control__tile"
+                style={tileStyle}
                 src={url}
                 alt=""
                 decoding="async"
@@ -81,9 +118,7 @@ export function MapStyleToggle({
               />
             ))}
           </span>
-          <span className="map-style-control__label">
-            {previewBasemap.label}
-          </span>
+          <span style={labelStyle}>{previewBasemap.label}</span>
         </span>
       </MapChromeControl>
     </div>,

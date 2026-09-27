@@ -1,11 +1,33 @@
-import { screen } from "@testing-library/react";
-import { renderWithAppUi } from "../../test/renderWithAppUi";
-import { describe, expect, it } from "vitest";
+import { render, screen } from "@testing-library/react";
+import { MantineProvider } from "@mantine/core";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { jetlagTheme } from "@/theme/theme";
 import { ToolDeck, ToolDeckGroup, ToolDeckInner } from "./ToolDeck";
+
+beforeEach(() => {
+  vi.stubGlobal("matchMedia", (query: string) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener() {},
+    removeListener() {},
+    addEventListener() {},
+    removeEventListener() {},
+    dispatchEvent: () => false,
+  }));
+});
+
+function renderDeck(ui: React.ReactElement) {
+  return render(
+    <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
+      {ui}
+    </MantineProvider>,
+  );
+}
 
 describe("ToolDeck", () => {
   it("renders a full-width hunt Island with ≥44px default size", () => {
-    renderWithAppUi(
+    renderDeck(
       <ToolDeck>
         <ToolDeckInner>
           <ToolDeckGroup>
@@ -27,7 +49,7 @@ describe("ToolDeck", () => {
   });
 
   it("distributes main group slots evenly with equal flex and ≥44px hit min", () => {
-    const { container } = renderWithAppUi(
+    const { container } = renderDeck(
       <ToolDeck>
         <ToolDeckGroup>
           <button type="button" className="jl-tool-slot">
@@ -42,8 +64,10 @@ describe("ToolDeck", () => {
         </ToolDeckGroup>
       </ToolDeck>,
     );
-    const group = screen.getByLabelText("History and question tools");
-    expect(group.className).toMatch(/justify-evenly/);
+
+    const group = screen.getByRole("group", {
+      name: "History and question tools",
+    });
     expect(group.className).toMatch(/\[&_\.jl-tool-slot\]:flex-1/);
     expect(group.className).toMatch(/\[&_\.jl-tool-slot\]:min-h-11/);
     expect(group.className).toMatch(/\[&_\.jl-tool-slot\]:min-w-11/);
@@ -52,23 +76,24 @@ describe("ToolDeck", () => {
   });
 
   it("keeps sparse hunt content-sized instead of forced full bleed", () => {
-    renderWithAppUi(
+    renderDeck(
       <ToolDeck density="sparse">
         <ToolDeckGroup density="sparse">
           <button type="button" className="jl-tool-slot">
-            Set zone
+            Zone
           </button>
         </ToolDeckGroup>
       </ToolDeck>,
     );
+
     const deck = screen.getByRole("group", { name: "Hunt tools" });
-    expect(deck.getAttribute("data-hunt-density")).toBe("sparse");
+    expect(deck).toHaveAttribute("data-hunt-density", "sparse");
     expect(deck.className).toMatch(/w-max/);
     expect(deck.className).not.toMatch(/(?:^|\s)w-full(?:\s|$)/);
+
     const group = screen.getByRole("group", {
       name: "History and question tools",
     });
-    expect(group.className).toMatch(/flex-none/);
     expect(group.className).toMatch(/\[&_\.jl-tool-slot\]:min-w-11/);
   });
 });

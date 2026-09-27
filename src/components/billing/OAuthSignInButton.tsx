@@ -1,4 +1,8 @@
 import { useState, type ReactNode } from "react";
+import {
+  oauthProviderButtonIconStyle,
+  oauthProviderButtonStyle,
+} from "@/components/ui/entry/entryStyles";
 import { isOAuthRedirectInProgress } from "../../services/core/auth/accountAuth";
 import { getFirebaseAuth } from "../../services/core/firebase/firebase";
 
@@ -54,9 +58,12 @@ export function OAuthSignInButton({
       type="button"
       disabled={disabled || busy}
       onClick={() => void handleClick()}
-      className={`oauth-provider-button oauth-provider-button-${provider} disabled:opacity-50`}
+      data-feedback="tap"
+      data-oauth-provider={provider}
+      style={oauthProviderButtonStyle}
+      className="disabled:opacity-50"
     >
-      <span className="oauth-provider-button-icon" aria-hidden="true">
+      <span style={oauthProviderButtonIconStyle} aria-hidden="true">
         {icon}
       </span>
       <span>{busy ? busyLabel : label}</span>

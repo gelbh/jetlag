@@ -1,4 +1,5 @@
 import { MapBottomChrome } from "../../components/map/chrome/MapBottomChrome";
+import { MapChromeControl } from "../../components/map/chrome/MapChromeControl";
 import { SessionTimerLabel } from "../../components/session/identity/SessionTimerLabel";
 import { SyncStatusBeacon } from "../../components/session/syncUi/SyncStatusDot";
 import { syncBeaconAriaLabel } from "../../components/session/status/syncRailDisplay";
@@ -176,32 +177,24 @@ export function AdminMapScreenChrome({
       layout="phone"
       session={
         <div className="jl-tool-dock-group jl-tool-dock-group-secondary flex w-full min-w-0 flex-col justify-start gap-1">
-          <button
-            type="button"
-            className={`jl-tool-slot${
-              overlay.isChatOpen ? " jl-tool-slot-active" : ""
-            }`}
+          <MapChromeControl
+            variant="slot"
+            pressed={overlay.isChatOpen}
             aria-label="Open chat"
-            aria-pressed={overlay.isChatOpen}
+            label="Chat"
             onClick={() =>
               overlay.isChatOpen ? overlay.closeSheet() : overlay.openChat()
             }
-          >
-            <span className="jl-tool-slot-label">Chat</span>
-          </button>
-          <button
-            type="button"
-            className={`jl-tool-slot${
-              overlay.isLogOpen ? " jl-tool-slot-active" : ""
-            }`}
+          />
+          <MapChromeControl
+            variant="slot"
+            pressed={overlay.isLogOpen}
             aria-label="Open session log"
-            aria-pressed={overlay.isLogOpen}
+            label="Log"
             onClick={() =>
               overlay.isLogOpen ? overlay.closeSheet() : overlay.openLog()
             }
-          >
-            <span className="jl-tool-slot-label">Log</span>
-          </button>
+          />
         </div>
       }
     />

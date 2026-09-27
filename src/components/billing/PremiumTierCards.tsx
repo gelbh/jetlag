@@ -2,6 +2,21 @@ import { useState } from "react";
 import { AppLink } from "../navigation/AppLink";
 import { SegmentControl } from "../ui/forms/SegmentControl";
 import {
+  homeCardBtnHintPremiumSessionsStyle,
+  homeCardBtnHintPremiumStyle,
+  homeCardBtnHintStyle,
+  homeCardBtnStyle,
+  premiumAccountActionsStyle,
+  premiumOfferRowHintStyle,
+  premiumOfferRowLabelStyle,
+  premiumOfferRowStyle,
+  premiumPackCellLabelStyle,
+  premiumPackCellPriceStyle,
+  premiumPackCellStyle,
+  premiumPackGridStyle,
+  type HomeCardBtnVariant,
+} from "@/components/ui/entry/entryStyles";
+import {
   formatBankedPremiumSessionCreditsLabel,
   formatPremiumSessionCreditsLabel,
   hasUnlimitedPremiumHosting,
@@ -31,18 +46,28 @@ function resolveDefaultCatalogTab(
   return "unlimited";
 }
 
-function resolveCreatePremiumButtonClass(
+function resolveCreatePremiumVariant(
   entitlements: PremiumEntitlements | null,
-): string {
+): HomeCardBtnVariant {
   if (hasUnlimitedPremiumHosting(entitlements)) {
-    return "home-card-btn home-card-btn-premium";
+    return "premium";
   }
 
   if ((entitlements?.premiumSessionCredits ?? 0) > 0) {
-    return "home-card-btn home-card-btn-premium-sessions";
+    return "premiumSessions";
   }
 
-  return "home-card-btn home-card-btn-primary";
+  return "primary";
+}
+
+function createPremiumHintStyle(variant: HomeCardBtnVariant) {
+  if (variant === "premium") {
+    return homeCardBtnHintPremiumStyle;
+  }
+  if (variant === "premiumSessions") {
+    return homeCardBtnHintPremiumSessionsStyle;
+  }
+  return homeCardBtnHintStyle;
 }
 
 export function PremiumTierCards({
@@ -89,6 +114,7 @@ export function PremiumTierCards({
   const showManageSubscription =
     entitlements?.subscription?.status === "active" ||
     entitlements?.subscription?.status === "trialing";
+  const createVariant = resolveCreatePremiumVariant(entitlements);
 
   return (
     <>
@@ -105,7 +131,7 @@ export function PremiumTierCards({
 
       {activeCatalogTab === "packs" ? (
         <div role="tabpanel" aria-label="Session packs" className="space-y-2">
-          <div className="premium-pack-grid">
+          <div style={premiumPackGridStyle}>
             {packOffers.map((offer) => (
               <button
                 key={offer.key}
@@ -113,10 +139,12 @@ export function PremiumTierCards({
                 disabled={actionsDisabled}
                 onClick={() => onCheckout(offer.key)}
                 aria-label={`${offer.label}, ${offer.priceLabel}`}
-                className="premium-pack-cell disabled:opacity-50"
+                data-feedback="tap"
+                style={premiumPackCellStyle}
+                className="disabled:opacity-50"
               >
-                <span className="premium-pack-cell-label">{offer.label}</span>
-                <span className="premium-pack-cell-price">
+                <span style={premiumPackCellLabelStyle}>{offer.label}</span>
+                <span style={premiumPackCellPriceStyle}>
                   {busyProduct === offer.key ? "Opening…" : offer.priceLabel}
                 </span>
               </button>
@@ -134,10 +162,12 @@ export function PremiumTierCards({
               type="button"
               disabled={actionsDisabled}
               onClick={onStartTrial}
-              className="premium-offer-row disabled:opacity-50"
+              data-feedback="tap"
+              style={premiumOfferRowStyle}
+              className="disabled:opacity-50"
             >
-              <span className="premium-offer-row-label">7-day free trial</span>
-              <span className="premium-offer-row-hint">
+              <span style={premiumOfferRowLabelStyle}>7-day free trial</span>
+              <span style={premiumOfferRowHintStyle}>
                 {trialLoading ? "Starting…" : "No auto-renew"}
               </span>
             </button>
@@ -149,10 +179,12 @@ export function PremiumTierCards({
               type="button"
               disabled={actionsDisabled}
               onClick={() => onCheckout(offer.key)}
-              className="premium-offer-row disabled:opacity-50"
+              data-feedback="tap"
+              style={premiumOfferRowStyle}
+              className="disabled:opacity-50"
             >
-              <span className="premium-offer-row-label">{offer.label}</span>
-              <span className="premium-offer-row-hint">
+              <span style={premiumOfferRowLabelStyle}>{offer.label}</span>
+              <span style={premiumOfferRowHintStyle}>
                 {busyProduct === offer.key ? "Opening…" : offer.priceLabel}
               </span>
             </button>
@@ -164,10 +196,12 @@ export function PremiumTierCards({
               type="button"
               disabled={actionsDisabled}
               onClick={() => onCheckout(offer.key)}
-              className="premium-offer-row disabled:opacity-50"
+              data-feedback="tap"
+              style={premiumOfferRowStyle}
+              className="disabled:opacity-50"
             >
-              <span className="premium-offer-row-label">{offer.label}</span>
-              <span className="premium-offer-row-hint">
+              <span style={premiumOfferRowLabelStyle}>{offer.label}</span>
+              <span style={premiumOfferRowHintStyle}>
                 {busyProduct === offer.key ? "Opening…" : offer.priceLabel}
               </span>
             </button>
@@ -175,16 +209,18 @@ export function PremiumTierCards({
         </div>
       )}
 
-      <div className="premium-account-actions">
+      <div style={premiumAccountActionsStyle}>
         {showManageSubscription ? (
           <button
             type="button"
             disabled={portalLoading}
             onClick={onPortal}
-            className="premium-offer-row disabled:opacity-50"
+            data-feedback="tap"
+            style={premiumOfferRowStyle}
+            className="disabled:opacity-50"
           >
-            <span className="premium-offer-row-label">Manage subscription</span>
-            <span className="premium-offer-row-hint">
+            <span style={premiumOfferRowLabelStyle}>Manage subscription</span>
+            <span style={premiumOfferRowHintStyle}>
               {portalLoading ? "Opening…" : "Billing portal"}
             </span>
           </button>
@@ -193,11 +229,14 @@ export function PremiumTierCards({
         {entitlements?.canCreatePremium ? (
           <AppLink
             to="/create?tier=premium"
-            className={resolveCreatePremiumButtonClass(entitlements)}
+            data-feedback="tap"
+            style={homeCardBtnStyle(createVariant)}
             aria-label="Create premium session"
           >
             <span>Create premium session</span>
-            <span className="home-card-btn-hint">{createSessionHint}</span>
+            <span style={createPremiumHintStyle(createVariant)}>
+              {createSessionHint}
+            </span>
           </AppLink>
         ) : null}
       </div>

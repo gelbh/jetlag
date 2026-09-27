@@ -108,7 +108,7 @@ export function AskCatalogRail({
         : "flex flex-col gap-2";
 
   const list = (
-    <div className="ask-catalog-rail__list jl-scroll" role="list">
+    <div className="ask-catalog-rail__list jl-scroll flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto" role="list">
       {sections.map((section, sectionIndex) => (
         <div
           key={section.groupLabel ?? `section-${sectionIndex}`}
@@ -266,7 +266,7 @@ export function AskCatalogRail({
   return (
     <Paper
       data-testid="ask-catalog-rail"
-      className="ask-catalog-rail pointer-events-auto"
+      className="ask-catalog-rail pointer-events-auto mx-auto flex max-h-[var(--ask-hud-rail-max-height,40dvh)] max-w-md flex-col gap-2 overflow-hidden"
       role="group"
       aria-label={ariaLabel}
       radius={16}
@@ -275,10 +275,9 @@ export function AskCatalogRail({
         root: {
           ...mapChromeSurfaceStyles,
           boxShadow: "none",
-          maxHeight: "var(--ask-hud-rail-max-height, 40dvh)",
-          overflow: "hidden",
           display: "flex",
           flexDirection: "column",
+          overflow: "hidden",
         },
       }}
     >

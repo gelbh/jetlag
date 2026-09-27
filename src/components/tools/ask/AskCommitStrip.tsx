@@ -32,7 +32,7 @@ export function AskCommitStrip({
   return (
     <div
       data-testid="ask-commit-strip"
-      className="ask-commit-strip pointer-events-auto"
+      className="pointer-events-auto flex flex-col gap-1.5"
     >
       <Button
         type="button"
@@ -42,7 +42,7 @@ export function AskCommitStrip({
         aria-busy={isSubmitting || undefined}
         aria-describedby={error ? errorId : undefined}
         onClick={onCommit}
-        className="ask-commit-strip__btn"
+        className="min-h-[var(--ask-hud-strip-height,3rem)]"
         styles={armed ? filledStyles : grayStyles}
       >
         {buttonLabel}
