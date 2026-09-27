@@ -1,30 +1,7 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { MapLandscapeChromeProvider } from "@/components/session/mapChrome/MapLandscapeChromeContext";
 import { MapScreenChromeSlots } from "./MapScreenChromeSlots";
-
-vi.mock("../../../hooks/layout/useDesktopLayout", () => ({
-  DESKTOP_LAYOUT_MIN_WIDTH_PX: 1024,
-  useDesktopLayout: () => false,
-}));
-
-vi.mock("../../../components/map/chrome/DesktopOpsShell", () => ({
-  DesktopOpsShell: ({
-    status,
-    tools,
-    map,
-  }: {
-    status: React.ReactNode;
-    tools: React.ReactNode;
-    map: React.ReactNode;
-  }) => (
-    <div data-testid="desktop-ops-shell">
-      <div data-testid="ops-status">{status}</div>
-      <div data-testid="ops-tools">{tools}</div>
-      <div data-testid="ops-map">{map}</div>
-    </div>
-  ),
-}));
 
 function renderWithLandscapeProvider(ui: React.ReactElement) {
   return render(
@@ -55,6 +32,7 @@ describe("MapScreenChromeSlots", () => {
     expect(screen.getByText("Toolbar slot")).toBeInTheDocument();
     expect(screen.getByText("Sheet child")).toBeInTheDocument();
     expect(document.querySelector(".map-chrome-hud")).not.toBeNull();
+    expect(document.querySelector("[data-testid='desktop-ops-shell']")).toBeNull();
   });
 
   it("passes fragments inside a HUD wrapper for landscape collapse hooks", () => {

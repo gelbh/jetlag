@@ -4,14 +4,12 @@ import { GameAreaMask } from "../components/map/layers/GameAreaMask";
 import { MapViewWithLandscapeInset } from "../components/map/MapViewWithLandscapeInset";
 import { MapViewportTracker } from "../components/map/chrome/MapViewportTracker";
 import { ChatPanel } from "../components/chat/ChatPanel";
-import { ContextualRailPanelProvider } from "../components/map/chrome/ContextualRailContext";
 import { SessionLog } from "../components/session/log/SessionLog";
 import { MapLandscapeChromeShell } from "../components/session/mapChrome/MapLandscapeChromeShell";
 import { InlineError } from "../components/ui/banners/InlineError";
 import { LOCAL_SESSION_ID } from "../domain/map/annotations";
 import { fallbackGameArea } from "../domain/geometry/gameArea/geometry";
 import { useAppNavigate } from "../hooks/navigation/useAppNavigate";
-import { useDesktopLayout } from "../hooks/layout/useDesktopLayout";
 import { clearSessionLocalArtifacts } from "../services/session/sessionCleanup";
 import { useAnnotationStore } from "../state/annotationStore";
 import { useSessionStore } from "../state/sessionStore";
@@ -21,7 +19,6 @@ import { SpectatorMapLayers } from "./spectator-map/SpectatorMapLayers";
 
 export function ObserverMapScreen() {
   const navigate = useAppNavigate();
-  const isDesktop = useDesktopLayout();
   const setSession = useSessionStore((state) => state.setSession);
   const controller = useObserverMapScreen();
   const setSelectedAnnotationId = useAnnotationStore(
@@ -73,7 +70,7 @@ export function ObserverMapScreen() {
   const mapLayers = (
     <div className="absolute inset-0">
       <MapViewWithLandscapeInset
-        isDesktop={isDesktop}
+        isDesktop={false}
         key={controller.session.id}
         model={{
           mapKey: controller.session.id,
@@ -110,8 +107,7 @@ export function ObserverMapScreen() {
   );
 
   return (
-    <ContextualRailPanelProvider>
-      <MapLandscapeChromeShell
+    <MapLandscapeChromeShell
         sessionRules={sessionRules}
         timerState={controller.timer.timerState}
         timerHasStarted={controller.timer.hasStarted}
@@ -121,7 +117,7 @@ export function ObserverMapScreen() {
         syncMessage={controller.syncStatus.lastSyncError}
       >
         <div className="map-screen-shell">
-          {isDesktop ? null : mapLayers}
+          {mapLayers}
 
           <ObserverMapScreenChrome
             session={controller.session}
@@ -134,7 +130,6 @@ export function ObserverMapScreen() {
             timer={controller.timer}
             overlay={controller.overlay}
             onLeave={() => void handleLeave()}
-            mapSlot={isDesktop ? mapLayers : undefined}
             moveInProgress={controller.hidingZones.some(
               (zone) => zone.moveInProgress === true,
             )}
@@ -184,6 +179,5 @@ export function ObserverMapScreen() {
           ) : null}
         </div>
       </MapLandscapeChromeShell>
-    </ContextualRailPanelProvider>
   );
 }

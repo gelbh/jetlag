@@ -1,6 +1,5 @@
 import { AppLink } from "../navigation/AppLink";
 import { homeCardBtnStyle, homePosterStyle } from "@/components/ui/entry/entryStyles";
-import { DesktopContentColumn } from "../ui/layout/DesktopContentColumn";
 import {
   ScreenHeader,
   screenHeaderOffsetClassName,
@@ -126,21 +125,19 @@ export function PresetBrowseLayout(props: PresetBrowseBodyProps) {
   return (
     <main className="flex min-h-[100dvh] flex-col px-5 py-8" style={homePosterStyle}>
       <ScreenHeader backTo="/" backLabel="Back" />
-      <DesktopContentColumn maxWidth="social">
-        <div
-          className={`space-y-4 ${screenHeaderOffsetClassName} pb-[max(1rem,env(safe-area-inset-bottom))]`}
-        >
-          <h1 className="font-display text-2xl font-bold uppercase tracking-tight text-ink">
-            Custom games
-          </h1>
-          <p className="text-sm text-ink-muted">
-            Saved templates pre-fill create session. Game area can be added when
-            hosting.
-          </p>
+      <div
+        className={`space-y-4 ${screenHeaderOffsetClassName} pb-[max(1rem,env(safe-area-inset-bottom))]`}
+      >
+        <h1 className="font-display text-2xl font-bold uppercase tracking-tight text-ink">
+          Custom games
+        </h1>
+        <p className="text-sm text-ink-muted">
+          Saved templates pre-fill create session. Game area can be added when
+          hosting.
+        </p>
 
-          <PresetBrowseBody {...props} />
-        </div>
-      </DesktopContentColumn>
+        <PresetBrowseBody {...props} />
+      </div>
     </main>
   );
 }

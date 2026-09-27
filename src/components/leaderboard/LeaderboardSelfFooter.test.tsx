@@ -27,9 +27,10 @@ describe("LeaderboardSelfFooter", () => {
         onJump={onJump}
       />,
     );
-    expect(screen.getByTestId("leaderboard-self-footer")).toHaveTextContent(
-      /#5 · YOU · 12/,
-    );
+    const footer = screen.getByTestId("leaderboard-self-footer");
+    expect(footer).toHaveTextContent(/#5 · YOU · 12/);
+    expect(footer.className).toMatch(/\babsolute\b/);
+    expect(footer.className).not.toMatch(/\bfixed\b/);
     fireEvent.click(screen.getByRole("button"));
     expect(onJump).toHaveBeenCalled();
   });

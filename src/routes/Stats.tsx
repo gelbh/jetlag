@@ -9,6 +9,7 @@ import { EntryHeader } from "@/components/ui/entry/EntryHeader";
 import { EntryScreenLayout } from "@/components/ui/layout/EntryScreenLayout";
 import type { LeaderboardRole } from "@/domain/game/leaderboard";
 import { playerRoleLabel } from "@/domain/session/players/playerRole";
+import { PHONE_SHELL_MAX_WIDTH_PX } from "@/theme/phoneShell";
 
 const ROLE_TABS: Array<{ value: LeaderboardRole; label: string }> = [
   { value: "hider", label: playerRoleLabel("hider") },
@@ -164,7 +165,7 @@ export function Stats() {
         size="xs"
         w="100%"
         px="md"
-        maw={390}
+        maw={PHONE_SHELL_MAX_WIDTH_PX}
         py="lg"
       >
         <Stack gap={18}>

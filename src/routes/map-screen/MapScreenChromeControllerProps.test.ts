@@ -4,12 +4,12 @@ import type { MapScreenMapLayersProps } from "./MapScreenMapLayers";
 import type { HiderMapScreenChromeProps } from "../hider-map-screen/HiderMapScreenChrome";
 
 describe("map chrome controller prop shapes (W3-D2)", () => {
-  it("MapScreenChrome accepts only controller + optional mapSlot", () => {
+  it("MapScreenChrome accepts only controller", () => {
     type Keys = keyof MapScreenChromeProps;
-    const keys: Keys[] = ["controller", "mapSlot"];
-    expect(keys).toEqual(["controller", "mapSlot"]);
+    const keys: Keys[] = ["controller"];
+    expect(keys).toEqual(["controller"]);
 
-    type Extra = Exclude<Keys, "controller" | "mapSlot">;
+    type Extra = Exclude<Keys, "controller">;
     const noExtra: Extra extends never ? true : false = true;
     expect(noExtra).toBe(true);
   });
@@ -24,12 +24,12 @@ describe("map chrome controller prop shapes (W3-D2)", () => {
     expect(noExtra).toBe(true);
   });
 
-  it("HiderMapScreenChrome accepts only controller + optional mapSlot", () => {
+  it("HiderMapScreenChrome accepts only controller", () => {
     type Keys = keyof HiderMapScreenChromeProps;
-    const keys: Keys[] = ["controller", "mapSlot"];
-    expect(keys).toEqual(["controller", "mapSlot"]);
+    const keys: Keys[] = ["controller"];
+    expect(keys).toEqual(["controller"]);
 
-    type Extra = Exclude<Keys, "controller" | "mapSlot">;
+    type Extra = Exclude<Keys, "controller">;
     const noExtra: Extra extends never ? true : false = true;
     expect(noExtra).toBe(true);
   });
