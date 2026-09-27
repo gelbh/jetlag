@@ -1,4 +1,10 @@
-import { markLocationAccessConfirmed } from "./locationPermissionUi";
+import {
+  clearPersistedLocationAccessConfirmed,
+  getLocationPermissionUiSnapshot,
+  hasPersistedLocationAccessConfirmed,
+  markLocationAccessConfirmed,
+  persistLocationAccessConfirmed,
+} from "./locationPermissionUi";
 
 export interface GeolocationReading {
   lat: number;
@@ -154,7 +160,34 @@ export async function confirmAndRequestLocationAccess(options?: {
     userGesture: true,
   });
   markLocationAccessConfirmed();
+  persistLocationAccessConfirmed();
   return reading;
+}
+
+export async function restoreLocationAccessIfPersisted(options?: {
+  highAccuracy?: boolean;
+  maximumAge?: number;
+}): Promise<"restored" | "skipped" | "denied" | "failed"> {
+  if (getLocationPermissionUiSnapshot().confirmEpoch > 0) {
+    return "skipped";
+  }
+  if (!hasPersistedLocationAccessConfirmed()) {
+    return "skipped";
+  }
+
+  try {
+    await getCurrentPosition(options);
+    markLocationAccessConfirmed();
+    return "restored";
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "GPS location unavailable.";
+    if (message === LOCATION_BLOCKED_MESSAGE) {
+      clearPersistedLocationAccessConfirmed();
+      return "denied";
+    }
+    return "failed";
+  }
 }
 
 export function watchPosition(
