@@ -77,4 +77,21 @@ describe("MeasuringPanel public props (AC #1)", () => {
 
     expect(screen.getByText("Measuring from")).toBeInTheDocument();
   });
+
+  it("shows empty-area notice and greys unavailable options on the sheet", () => {
+    render(
+      <MeasuringPanel
+        model={{
+          ...baseModel,
+          unavailableMeasuringFromKinds: new Set(["zoo"]),
+          catalogNotice: "No named zoo found in this play area.",
+        }}
+      />,
+    );
+
+    expect(
+      screen.getByText("No named zoo found in this play area."),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Measuring from")).toBeInTheDocument();
+  });
 });
