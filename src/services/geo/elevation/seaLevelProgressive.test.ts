@@ -1,6 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  resolveFineSeaLevelDivisions,
+  sampleGameAreaCells,
+} from "@/domain/geometry/measuring/seaLevel";
 import { DUBLIN_CITY_GAME_AREA } from "@/test/fixtures/dublinGameArea";
-import { clearGeographicFeatureCacheForTests } from "../cache";
+import {
+  clearGeographicFeatureCacheForTests,
+  writeSeaLevelSamplingCache,
+} from "../cache";
 import {
   clearSeaLevelProgressiveStateForTests,
   ensureSeaLevelSamplingComplete,
@@ -61,6 +68,27 @@ describe("seaLevelProgressive", () => {
     await ensureSeaLevelSamplingComplete(DUBLIN_CITY_GAME_AREA);
 
     expect(fetchMock.mock.calls.length).toBeGreaterThan(0);
+  });
+
+  it("resumes background crawl when cached complete lacks finite elevations", async () => {
+    const { fetchElevations } = await import("./index");
+    const fetchMock = vi.mocked(fetchElevations);
+    fetchMock.mockClear();
+
+    const divisions = resolveFineSeaLevelDivisions(DUBLIN_CITY_GAME_AREA);
+    const cells = sampleGameAreaCells(DUBLIN_CITY_GAME_AREA, divisions);
+    await writeSeaLevelSamplingCache(DUBLIN_CITY_GAME_AREA, {
+      cells,
+      cellElevations: cells.map(() => Number.NaN),
+      divisions,
+      complete: true,
+    });
+
+    startSeaLevelBackgroundSampling(DUBLIN_CITY_GAME_AREA);
+
+    await vi.waitFor(() => {
+      expect(fetchMock.mock.calls.length).toBeGreaterThan(0);
+    });
   });
 
   it("hydrates remapped pack seed without awaiting elevation when onEnrich is set", async () => {

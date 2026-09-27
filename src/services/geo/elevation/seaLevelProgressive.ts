@@ -49,6 +49,23 @@ function countFiniteElevations(elevations: number[]): number {
   return elevations.filter((value) => Number.isFinite(value)).length;
 }
 
+/** Complete cache/seed is only skippable when density and coverage match fine sampling. */
+function isDenseCompleteSampling(
+  sampling: CachedSeaLevelSampling,
+  gameArea: GameArea,
+): boolean {
+  if (sampling.complete !== true) {
+    return false;
+  }
+  if (
+    countFiniteElevations(sampling.cellElevations) !== sampling.cells.length
+  ) {
+    return false;
+  }
+  const fineDivisions = resolveFineSeaLevelDivisions(gameArea);
+  return sampling.divisions >= fineDivisions;
+}
+
 function setSamplerPhase(gameAreaKey: string, phase: SeaLevelSamplingPhase): void {
   samplerPhase.set(gameAreaKey, phase);
 }
@@ -219,7 +236,7 @@ export function startSeaLevelBackgroundSampling(
 ): void {
   const gameAreaKey = gameAreaPreloadKey(gameArea);
   const cached = readSeaLevelSamplingCache(gameArea);
-  if (cached?.complete === true) {
+  if (cached && isDenseCompleteSampling(cached, gameArea)) {
     setSamplerPhase(gameAreaKey, "complete");
     return;
   }
@@ -233,15 +250,9 @@ export function startSeaLevelBackgroundSampling(
       gameArea,
       options?.regionPackId,
     );
-    if (
-      seeded?.complete === true &&
-      countFiniteElevations(seeded.cellElevations) === seeded.cells.length
-    ) {
-      const fineDivisions = resolveFineSeaLevelDivisions(gameArea);
-      if (seeded.divisions >= fineDivisions) {
-        setSamplerPhase(gameAreaKey, "complete");
-        return;
-      }
+    if (seeded && isDenseCompleteSampling(seeded, gameArea)) {
+      setSamplerPhase(gameAreaKey, "complete");
+      return;
     }
     await runProgressiveSampling(gameArea);
   })().finally(() => {
@@ -263,21 +274,14 @@ export async function ensureSeaLevelSamplingComplete(
   );
 
   // Sufficient dense pack seed: skip blocking fine fetch / background crawl.
-  if (
-    seeded?.complete === true &&
-    countFiniteElevations(seeded.cellElevations) === seeded.cells.length
-  ) {
-    const fineDivisions = resolveFineSeaLevelDivisions(gameArea);
-    if (seeded.divisions >= fineDivisions) {
-      setSamplerPhase(gameAreaPreloadKey(gameArea), "complete");
-      return seeded;
-    }
+  if (seeded && isDenseCompleteSampling(seeded, gameArea)) {
+    setSamplerPhase(gameAreaPreloadKey(gameArea), "complete");
+    return seeded;
   }
 
   startSeaLevelBackgroundSampling(gameArea, {
     regionPackId: options?.regionPackId,
   });
-
 
   if (
     seeded &&
