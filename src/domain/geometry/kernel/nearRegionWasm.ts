@@ -1,20 +1,14 @@
-import type { Feature, LineString } from "geojson";
+import type { NearRegionBatchInput, PolygonFeature } from "./types";
 import {
   loadKernelWasm,
   parseWasmFeature,
   resetKernelWasmForTests,
 } from "./kernelWasmPkg";
-import type { DiskSpec, GameAreaGeometry, PolygonFeature } from "./types";
+
+export type { NearRegionBatchInput } from "./types";
 
 /** Reset lazy WASM module (tests). */
 export const resetNearRegionWasmForTests = resetKernelWasmForTests;
-
-export type NearRegionBatchInput = {
-  segments: readonly Feature<LineString>[];
-  distanceMeters: number;
-  disks: readonly DiskSpec[];
-  gameArea: GameAreaGeometry;
-};
 
 export async function wasmBuildNearRegion(
   input: NearRegionBatchInput,
