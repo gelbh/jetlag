@@ -141,7 +141,6 @@ export async function buildMapDraftOverlays(
           radiusMeters,
           gameArea,
           radarShadedInsideFromAnswer(answer),
-          "wasm",
         ),
       );
     }
@@ -259,7 +258,6 @@ export async function buildMapDraftOverlays(
           gameArea,
           thermometerShadedSide(answer),
           "midpoint",
-          "wasm",
         ),
       );
     }

@@ -86,17 +86,14 @@ describe("kernel dispatch ready", () => {
         properties: { poiId: s.id },
       })),
     );
-    const region = await runTentacleEliminationRegion(
-      {
-        anchor,
-        radiusMeters: oneMileMeters,
-        sites,
-        answeredSiteId: "east",
-        gameArea: sampleGameArea,
-        voronoiCells: cells,
-      },
-      "wasm",
-    );
+    const region = await runTentacleEliminationRegion({
+      anchor,
+      radiusMeters: oneMileMeters,
+      sites,
+      answeredSiteId: "east",
+      gameArea: sampleGameArea,
+      voronoiCells: cells,
+    });
 
     expect(region).not.toBeNull();
     const nearAnswered = turfPoint([-0.125, 51.45]);
