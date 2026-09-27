@@ -244,6 +244,87 @@ test("overlapping working run throws SESSION_OPS_AGENT_BUSY", async () => {
   );
 });
 
+test("Cursor failure releases claim without charging a turn", async () => {
+  const db = createInMemoryFirestore();
+  seedIncidentDb(db);
+  let id = 0;
+  let turnCharges = 0;
+
+  await assert.rejects(
+    () =>
+      supportAgentTurnHandler(
+        db,
+        {
+          incidentId: "inc-1",
+          uid: "reporter-1",
+          text: "please fail",
+        },
+        {
+          ...cursorDepsBase,
+          now: () => new Date("2026-07-26T00:00:00.000Z"),
+          generateId: () => `id-${(id += 1)}`,
+          consumeTurn: async () => {
+            turnCharges += 1;
+            return { ok: true };
+          },
+          createAgent: async () => {
+            throw new Error("network down");
+          },
+        },
+      ),
+    (error) => error.message === "SESSION_OPS_AGENT_FAILED",
+  );
+
+  assert.equal(turnCharges, 0);
+  assert.equal(
+    db.documents.get("incidents/inc-1").supportAgentRun.status,
+    "failed",
+  );
+  assert.equal(
+    db.documents.get("incidents/inc-1").supportAgentRun.terminalStatus,
+    "RELEASED",
+  );
+});
+
+test("second concurrent claim loses the busy race", async () => {
+  const db = createInMemoryFirestore();
+  seedIncidentDb(db);
+  let id = 0;
+  let createCalls = 0;
+
+  const deps = {
+    ...cursorDepsBase,
+    now: () => new Date("2026-07-26T00:00:00.000Z"),
+    generateId: () => `id-${(id += 1)}`,
+    createAgent: async () => {
+      createCalls += 1;
+      return {
+        agentId: "bc-1",
+        runId: `run-${createCalls}`,
+        agentUrl: "https://cursor.com/agents/bc-1",
+      };
+    },
+  };
+
+  const first = await supportAgentTurnHandler(
+    db,
+    { incidentId: "inc-1", uid: "reporter-1", text: "first" },
+    deps,
+  );
+  assert.equal(first.status, "working");
+
+  await assert.rejects(
+    () =>
+      supportAgentTurnHandler(
+        db,
+        { incidentId: "inc-1", uid: "reporter-1", text: "second" },
+        deps,
+      ),
+    (error) => error.message === SESSION_OPS_AGENT_BUSY,
+  );
+  assert.equal(createCalls, 1);
+});
+
 test("missing mcp config throws SESSION_OPS_AGENT_MISCONFIGURED", async () => {
   const db = createInMemoryFirestore();
   seedIncidentDb(db);

@@ -40,26 +40,26 @@ import {
   SESSION_OPS_MCP_HEADER_ACTOR,
   SESSION_OPS_MCP_HEADER_INCIDENT,
   SESSION_OPS_MCP_HEADER_SESSION,
+  SESSION_OPS_MCP_HEADER_SUMMON,
 } from "./sessionOpsMcp.mjs";
+import {
+  SUPPORT_AGENT_WORKING_TEXT,
+  appendSupportThreadMessage,
+} from "./sessionOpsThread.mjs";
 
 export const SUPPORT_AGENT_TURN_ROUTE = "postSupportAgentTurn";
 export const SUPPORT_AGENT_TURN_RATE_LIMIT = 20;
 export const SUPPORT_AGENT_TURN_RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
 export const SUPPORT_AGENT_MESSAGE_MAX_LENGTH = 2000;
-export const SUPPORT_AGENT_WORKING_TEXT =
-  "Working on your request… I will post an update here when ready.";
+export { SUPPORT_AGENT_WORKING_TEXT };
 
 export const SUPPORT_AGENT_UNAUTHENTICATED = "SUPPORT_AGENT_UNAUTHENTICATED";
 export const SUPPORT_AGENT_NO_SESSION = "SUPPORT_AGENT_NO_SESSION";
-/** @deprecated Prefer SESSION_OPS_AGENT_FAILED after Cursor cutover. */
-export const SESSION_OPS_LLM_FAILED = SESSION_OPS_AGENT_FAILED;
-
 export {
   INCIDENT_FORBIDDEN as SUPPORT_AGENT_FORBIDDEN,
   INCIDENT_INVALID_MESSAGE as SUPPORT_AGENT_INVALID_MESSAGE,
   INCIDENT_NOT_FOUND as SUPPORT_AGENT_NOT_FOUND,
   INCIDENT_RATE_LIMITED as SUPPORT_AGENT_RATE_LIMITED,
-  SESSION_OPS_AGENT_FAILED as SUPPORT_AGENT_LLM_FAILED,
   SESSION_OPS_SUMMON_CAP,
   SESSION_OPS_SUMMON_NOT_FOUND,
   SESSION_OPS_TOOL_CAP,
@@ -143,15 +143,6 @@ export async function supportAgentTurnHandler(db, input, deps = {}) {
     throw new Error(SUPPORT_AGENT_NO_SESSION);
   }
 
-  const existingRun = incident.supportAgentRun;
-  if (
-    existingRun &&
-    typeof existingRun === "object" &&
-    (existingRun.status === "working" || existingRun.status === "running")
-  ) {
-    throw new Error(SESSION_OPS_AGENT_BUSY);
-  }
-
   const sessionSnap = await db.collection("sessions").doc(policySessionId).get();
   const session = sessionSnap.exists ? (sessionSnap.data() ?? {}) : {};
   const hostUid = typeof session.hostUid === "string" ? session.hostUid : "";
@@ -214,9 +205,16 @@ export async function supportAgentTurnHandler(db, input, deps = {}) {
     );
   }
 
-  const turned = await consumeTurn(db, { incidentId, summonId, caps });
-  if (!turned.ok) {
-    throw new Error(turned.code ?? SESSION_OPS_TURN_CAP);
+  const claimToken = generateId();
+  const claimed = await claimSupportAgentRunSlot(db, incidentId, {
+    claimToken,
+    summonId,
+    actorUid: uid,
+    now,
+    runTransaction: deps.runTransaction,
+  });
+  if (!claimed.ok) {
+    throw new Error(SESSION_OPS_AGENT_BUSY);
   }
 
   const appendMessage =
@@ -254,6 +252,7 @@ export async function supportAgentTurnHandler(db, input, deps = {}) {
   const mcpAuthSecret =
     typeof deps.mcpAuthSecret === "string" ? deps.mcpAuthSecret.trim() : "";
   if (!apiKey || !mcpUrl || !mcpAuthSecret) {
+    await releaseSupportAgentRunSlot(db, incidentId, claimToken, { now });
     throw new Error(SESSION_OPS_AGENT_MISCONFIGURED);
   }
 
@@ -262,6 +261,7 @@ export async function supportAgentTurnHandler(db, input, deps = {}) {
     [SESSION_OPS_MCP_HEADER_INCIDENT]: incidentId,
     [SESSION_OPS_MCP_HEADER_SESSION]: policySessionId,
     [SESSION_OPS_MCP_HEADER_ACTOR]: uid,
+    [SESSION_OPS_MCP_HEADER_SUMMON]: summonId,
   };
 
   const createAgent = deps.createAgent ?? createSessionOpsAgent;
@@ -304,6 +304,7 @@ export async function supportAgentTurnHandler(db, input, deps = {}) {
       runId = run.runId;
     }
   } catch (error) {
+    await releaseSupportAgentRunSlot(db, incidentId, claimToken, { now });
     if (
       error instanceof Error &&
       (error.message === SESSION_OPS_AGENT_BUSY ||
@@ -316,7 +317,15 @@ export async function supportAgentTurnHandler(db, input, deps = {}) {
   }
 
   if (!runId) {
+    await releaseSupportAgentRunSlot(db, incidentId, claimToken, { now });
     throw new Error(SESSION_OPS_AGENT_FAILED);
+  }
+
+  // Charge the turn only after a durable Cursor run exists.
+  const turned = await consumeTurn(db, { incidentId, summonId, caps });
+  if (!turned.ok) {
+    await releaseSupportAgentRunSlot(db, incidentId, claimToken, { now });
+    throw new Error(turned.code ?? SESSION_OPS_TURN_CAP);
   }
 
   const working = await appendMessage({
@@ -342,6 +351,7 @@ export async function supportAgentTurnHandler(db, input, deps = {}) {
         workingMessageId: working?.messageId ?? null,
         summonId,
         actorUid: uid,
+        claimToken,
       },
       updatedAt: nowIso,
       ...(incident.status === "open" ? { status: "chatting" } : {}),
@@ -362,50 +372,97 @@ export async function supportAgentTurnHandler(db, input, deps = {}) {
 }
 
 /**
- * Minimal support-thread write.
+ * Claim a supportAgentRun slot before calling Cursor (prevents TOCTOU races).
  */
-export async function appendSupportThreadMessage(
+export async function claimSupportAgentRunSlot(db, incidentId, input) {
+  const claimToken = input.claimToken;
+  const summonId = input.summonId;
+  const actorUid = input.actorUid;
+  const now = input.now ?? (() => new Date());
+  const runTransaction =
+    input.runTransaction ?? ((fn) => db.runTransaction(fn));
+  const ref = db.collection("incidents").doc(incidentId);
+
+  return runTransaction(async (transaction) => {
+    const snap = await transaction.get(ref);
+    if (!snap.exists) {
+      return { ok: false, reason: "missing_incident" };
+    }
+    const data = snap.data() ?? {};
+    const run =
+      data.supportAgentRun && typeof data.supportAgentRun === "object"
+        ? data.supportAgentRun
+        : null;
+    const status = typeof run?.status === "string" ? run.status : "";
+    if (
+      status === "working" ||
+      status === "running" ||
+      status === "finalizing" ||
+      status === "claiming"
+    ) {
+      return { ok: false, reason: "busy" };
+    }
+    const nowIso = now().toISOString();
+    transaction.set(
+      ref,
+      {
+        supportAgentRun: {
+          status: "claiming",
+          claimToken,
+          summonId,
+          actorUid,
+          startedAt: nowIso,
+        },
+        updatedAt: nowIso,
+      },
+      { merge: true },
+    );
+    return { ok: true };
+  });
+}
+
+/**
+ * Clear a claim/working slot when Cursor enqueue fails (only if claimToken matches).
+ */
+export async function releaseSupportAgentRunSlot(
   db,
   incidentId,
-  message,
-  generateId = () => randomUUID(),
+  claimToken,
+  deps = {},
 ) {
-  const messageId = generateId();
-  const payload = {
-    id: messageId,
-    ...message,
-  };
+  const now = deps.now ?? (() => new Date());
+  const runTransaction =
+    deps.runTransaction ?? ((fn) => db.runTransaction(fn));
+  const ref = db.collection("incidents").doc(incidentId);
 
-  const threadRef = db
-    .collection("incidents")
-    .doc(incidentId)
-    .collection("threads")
-    .doc("support")
-    .collection("messages")
-    .doc(messageId);
-
-  await threadRef.set(payload);
-
-  if (
-    payload.sender === "ops_agent" ||
-    payload.sender === "system" ||
-    payload.kind === "chat"
-  ) {
-    await db
-      .collection("incidents")
-      .doc(incidentId)
-      .collection("messages")
-      .doc(messageId)
-      .set({
-        sender: payload.sender,
-        senderUid: payload.senderUid ?? null,
-        kind: payload.kind ?? "chat",
-        text: payload.text ?? "",
-        createdAt: payload.createdAt,
-        toolCall: payload.toolCall ?? null,
-        working: payload.working === true,
-      });
-  }
-
-  return { messageId };
+  return runTransaction(async (transaction) => {
+    const snap = await transaction.get(ref);
+    if (!snap.exists) {
+      return { ok: false };
+    }
+    const data = snap.data() ?? {};
+    const run =
+      data.supportAgentRun && typeof data.supportAgentRun === "object"
+        ? data.supportAgentRun
+        : null;
+    if (!run || run.claimToken !== claimToken) {
+      return { ok: false, reason: "token_mismatch" };
+    }
+    transaction.set(
+      ref,
+      {
+        supportAgentRun: {
+          status: "failed",
+          claimToken,
+          finishedAt: now().toISOString(),
+          terminalStatus: "RELEASED",
+        },
+        updatedAt: now().toISOString(),
+      },
+      { merge: true },
+    );
+    return { ok: true };
+  });
 }
+
+export { appendSupportThreadMessage };
