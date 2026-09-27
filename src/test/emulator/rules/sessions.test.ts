@@ -489,7 +489,7 @@ describe("firestore.rules — sessions", () => {
     expect(snapshot.data()?.hostUid).toBe("host-1");
   });
 
-  it("allows session members to register their own device token", async () => {
+  it("rejects session members registering device tokens (FCM retired)", async () => {
     const host = rules.testEnv.authenticatedContext("host-1");
     await host
       .firestore()
@@ -502,7 +502,7 @@ describe("firestore.rules — sessions", () => {
         }),
       );
 
-    await assertSucceeds(
+    await assertFails(
       host
         .firestore()
         .collection("sessions")
@@ -525,7 +525,7 @@ describe("firestore.rules — sessions", () => {
     );
 
     const hider = rules.testEnv.authenticatedContext("hider-1");
-    await assertSucceeds(
+    await assertFails(
       hider
         .firestore()
         .collection("sessions")
@@ -544,22 +544,6 @@ describe("firestore.rules — sessions", () => {
             chatMessages: false,
             liveActivities: true,
           },
-        }),
-    );
-
-    await assertFails(
-      hider
-        .firestore()
-        .collection("sessions")
-        .doc("session-1")
-        .collection("devices")
-        .doc("host-1")
-        .set({
-          token: "stolen-token",
-          platform: "android",
-          role: "seeker",
-          updatedAt: "2026-01-01T00:00:00.000Z",
-          preferences: { enabled: true },
         }),
     );
   });
