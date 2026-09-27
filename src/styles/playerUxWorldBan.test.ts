@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 
 const ROOT = join(import.meta.dirname, "../..");
 const COMPONENTS_ROOT = join(ROOT, "src/components");
+const STYLES_ROOT = join(ROOT, "src/styles");
 const BANNED = ["data-player-ux-world", "map-survey-chrome"] as const;
 const SKIP_DIR_NAMES = new Set([
   ".git",
@@ -20,6 +21,7 @@ const SKIP_DIR_NAMES = new Set([
 const MFA_HUD_PANEL_SCOPES = [
   "session/banners",
   "session/status",
+  "session/mapChrome",
   "ui/banners",
   "incident",
 ] as const;
@@ -83,17 +85,24 @@ describe("Verify #5 player UX world purge", () => {
     expect(hits).toEqual([]);
   });
 
-  it("bans map-float-alert under src/components production sources", () => {
+  it("bans map-float-alert under src/components production sources and src/styles", () => {
     const files: string[] = [];
     collectFiles(COMPONENTS_ROOT, files);
+    collectFiles(STYLES_ROOT, files);
     const hits: string[] = [];
     for (const file of files) {
-      if (!isProductionSource(file)) {
+      const rel = relative(ROOT, file);
+      if (rel.endsWith("playerUxWorldBan.test.ts")) {
+        continue;
+      }
+      const isTsProd = isProductionSource(file);
+      const isCss = file.endsWith(".css");
+      if (!isTsProd && !isCss) {
         continue;
       }
       const text = readFileSync(file, "utf8");
       if (text.includes("map-float-alert")) {
-        hits.push(relative(ROOT, file));
+        hits.push(rel);
       }
     }
     expect(hits).toEqual([]);

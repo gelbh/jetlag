@@ -26,7 +26,11 @@ import { RoleJoinRequestAlert } from "../status/RoleJoinRequestAlert";
 import { SyncBlock } from "../status/SyncBlock";
 import { TimerBlock } from "../status/TimerBlock";
 import { ToolStatusBlock } from "../status/ToolStatusBlock";
-import { syncRailDisplay, type SyncTone } from "../status/syncRailDisplay";
+import {
+  SYNC_TONE_CLASSES,
+  syncRailDisplay,
+  type SyncTone,
+} from "../status/syncRailDisplay";
 import {
   MapFloatSurface,
   type MapFloatTone,
@@ -334,7 +338,7 @@ export function MapStatusRail({ model, headerLeading }: MapStatusRailProps) {
               tone={SYNC_BANNER_TONE[sync.banner.tone]}
               role="status"
               aria-live="polite"
-              className="pointer-events-auto mx-3 mt-1.5 text-center text-sm font-semibold text-pretty"
+              className={`pointer-events-auto mx-3 mt-1.5 text-center text-sm font-semibold text-pretty ${SYNC_TONE_CLASSES[sync.banner.tone].text}`}
             >
               {sync.banner.label}
             </MapFloatSurface>
