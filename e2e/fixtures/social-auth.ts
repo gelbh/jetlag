@@ -6,9 +6,11 @@ export const E2E_LAYOUT_USERNAME = "e2e_layout_user";
 
 export const SOCIAL_LAYOUT_ROUTES = {
   "/leaderboard": {
-    // Metric tablist lives in the closed board sheet — use sticky filter chrome.
-    ready: (page: Page) => page.getByTestId("leaderboard-filters"),
-    viewportTarget: (page: Page) => page.getByTestId("leaderboard-filters"),
+    // Sticky Choose board chip (metric controls live in the board sheet).
+    ready: (page: Page) =>
+      page.getByRole("button", { name: /Choose board/i }),
+    viewportTarget: (page: Page) =>
+      page.getByRole("button", { name: /Choose board/i }),
   },
   "/friends": {
     ready: (page: Page) =>
@@ -17,9 +19,9 @@ export const SOCIAL_LAYOUT_ROUTES = {
       page.getByRole("textbox", { name: "Search username" }),
   },
   "/stats": {
-    ready: (page: Page) => page.getByRole("tablist", { name: "Stats role" }),
-    viewportTarget: (page: Page) =>
-      page.getByRole("tablist", { name: "Stats role" }),
+    // Mantine SegmentedControl is a radiogroup, not a tablist.
+    ready: (page: Page) => page.getByLabel("Stats role"),
+    viewportTarget: (page: Page) => page.getByLabel("Stats role"),
   },
 } as const;
 
