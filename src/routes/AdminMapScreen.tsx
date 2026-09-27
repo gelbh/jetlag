@@ -58,11 +58,7 @@ export function AdminMapScreen({
     }
     setSession(null);
     navigate("/admin");
-  }, [
-    controller.session?.id,
-    navigate,
-    setSession,
-  ]);
+  }, [controller.session?.id, navigate, setSession]);
 
   const handleModerationAction = useCallback(
     async (action: "end" | "resetBoard" | "cleanupCode") => {
@@ -143,17 +139,19 @@ export function AdminMapScreen({
   const mapLayers = (
     <MapView
       key={controller.session.id}
-      mapKey={controller.session.id}
-      mapStyle={controller.effectiveBasemapStyle}
-      onMapStyleChange={controller.handleMapStyleChange}
-      mapStyleControlInset={mapControlInset}
-      zoomControlInset={mapControlInset}
-      center={controller.center}
-      zoom={12}
-      focusBounds={controller.mapFocusBounds}
-      fitBoundsMode="once"
-      showZoomControl={false}
-      className="h-full w-full"
+      model={{
+        mapKey: controller.session.id,
+        mapStyle: controller.effectiveBasemapStyle,
+        onMapStyleChange: controller.handleMapStyleChange,
+        mapStyleControlInset: mapControlInset,
+        zoomControlInset: mapControlInset,
+        center: controller.center,
+        zoom: 12,
+        focusBounds: controller.mapFocusBounds,
+        fitBoundsMode: "once",
+        showZoomControl: false,
+        className: "h-full w-full",
+      }}
     >
       <MapViewportTracker onViewportChange={controller.setMapViewport} />
       {embeddedMonitor ? <AdminMonitorPlayerFocus /> : null}
@@ -259,18 +257,21 @@ export function AdminMapScreen({
 
           {controller.sessionId && controller.uid ? (
             <ChatPanel
-              open={controller.overlay.isChatOpen}
-              onClose={controller.overlay.closeSheet}
-              messages={controller.chatMessages}
-              pendingQuestions={controller.pendingQuestions}
-              sessionRules={sessionRules}
-              sessionId={controller.sessionId}
-              senderUid={controller.uid}
-              senderRole={chatDisplayRole}
-              isHider={false}
-              bottomClassName="bottom-[calc(7.75rem+env(safe-area-inset-bottom))]"
-              onAnswerQuestion={async () => undefined}
-              readOnly
+              model={{
+                open: controller.overlay.isChatOpen,
+                onClose: controller.overlay.closeSheet,
+                messages: controller.chatMessages,
+                pendingQuestions: controller.pendingQuestions,
+                sessionRules,
+                sessionId: controller.sessionId,
+                senderUid: controller.uid,
+                senderRole: chatDisplayRole,
+                isHider: false,
+                bottomClassName:
+                  "bottom-[calc(7.75rem+env(safe-area-inset-bottom))]",
+                onAnswerQuestion: async () => undefined,
+                readOnly: true,
+              }}
             />
           ) : null}
         </>

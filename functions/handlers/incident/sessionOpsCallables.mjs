@@ -8,7 +8,6 @@ import {
   denyHostConfirmHandler,
 } from "../../incident/hostConfirm.mjs";
 import { supportAgentTurnHandler, SUPPORT_AGENT_LLM_FAILED } from "../../incident/supportAgentTurn.mjs";
-import { sendSessionNotification } from "../../session/sessionNotificationTriggers.mjs";
 import {
   buildSessionOpsExecuteDeps,
   mapIncidentError,
@@ -114,7 +113,6 @@ export const postSupportAgentTurn = onCall(
           llmBaseUrl: llm.llmBaseUrl,
           llmModel: llm.llmModel,
           rateLimit: (options) => consumeRateLimit(db, options),
-          notifyHostConfirm: (payload) => sendSessionNotification(db, payload),
           executeDeps: buildSessionOpsExecuteDeps(db),
         },
       );

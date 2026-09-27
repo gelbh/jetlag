@@ -1,4 +1,5 @@
 import { memo, useEffect, useState, type ReactNode } from "react";
+import { Paper, Text } from "@mantine/core";
 import type { MapBounds, MapBoundsExpression } from "@/domain/map/mapBounds";
 import { MapView } from "../../map/chrome/MapView";
 import { FramingPreviewLayers } from "../../map/layers/FramingPreviewLayers";
@@ -7,11 +8,16 @@ import type { GameArea } from "@/domain/map/annotations";
 import type { MapStyle } from "@/domain/map/mapBasemaps";
 import type { FramingMode } from "@/hooks/session/useGameAreaFraming";
 import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
-import {
-  GameAreaFramingStats,
-} from "./GameAreaFramingControls";
+import { GameAreaFramingStats } from "./GameAreaFramingControls";
 import { framingModeHint } from "./gameAreaFramingUi";
 import { type GameSize } from "@/domain/session/size/gameSize";
+
+const mapHintPanelStyles = {
+  backgroundColor: "oklch(from var(--color-canvas) l c h / 0.92)",
+  border: "0.33px solid oklch(from var(--color-field-ink) l c h / 0.14)",
+  backdropFilter: "blur(20px) saturate(1.4)",
+  WebkitBackdropFilter: "blur(20px) saturate(1.4)",
+} as const;
 
 /** Shared outer shell so placeholder and live map keep identical layout (CLS). */
 export const CREATE_SESSION_MAP_SHELL_CLASS =
@@ -104,17 +110,19 @@ function CreateSessionMapPaneInner({
     <CreateSessionMapShell>
       <div className="absolute inset-0">
         <MapView
-          mapStyle={mapStyle}
-          onMapStyleChange={onMapStyleChange}
-          onBoundsChange={onBoundsChange}
-          onUserViewportFramed={onUserViewportFramed}
-          onMapClick={onMapClick}
-          zoom={10}
-          focusBounds={focusBounds}
-          fitBoundsMode="once"
-          fitBoundsPadding={[48, 48]}
-          zoomControlInset="container"
-          className="h-full w-full"
+          model={{
+            mapStyle,
+            onMapStyleChange,
+            onBoundsChange,
+            onUserViewportFramed,
+            onMapClick,
+            zoom: 10,
+            focusBounds,
+            fitBoundsMode: "once",
+            fitBoundsPadding: [48, 48],
+            zoomControlInset: "container",
+            className: "h-full w-full",
+          }}
         >
           {manualFramingActive ? (
             <FramingPreviewLayers
@@ -132,21 +140,33 @@ function CreateSessionMapPaneInner({
 
       <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[var(--z-banner)] flex justify-center px-3 pb-3">
         {previewGameArea ? (
-          <div className="hud-panel max-w-full px-3 py-2.5 pt-3.5">
+          <Paper
+            className="max-w-full"
+            radius={14}
+            px="sm"
+            py="xs"
+            style={mapHintPanelStyles}
+          >
             <GameAreaFramingStats
               gameArea={previewGameArea}
               selectedGameSize={selectedGameSize}
               compact
             />
-          </div>
+          </Paper>
         ) : (
-          <div className="hud-panel max-w-md px-3 py-2.5 pt-3.5">
-            <p className="text-xs leading-snug text-ink-secondary">
+          <Paper
+            className="max-w-md"
+            radius={14}
+            px="sm"
+            py="xs"
+            style={mapHintPanelStyles}
+          >
+            <Text size="xs" c="var(--color-field-ink-muted)" lh={1.35}>
               {manualFramingActive
                 ? framingModeHint(framingMode)
                 : "Search a place or draw on the map."}
-            </p>
-          </div>
+            </Text>
+          </Paper>
         )}
       </div>
     </CreateSessionMapShell>

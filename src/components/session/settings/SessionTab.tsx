@@ -1,24 +1,51 @@
-import { useState } from "react";
-import type { NotificationPreferences } from "@/domain/device/chrome/notifications";
-import { ShareCode } from "../identity/ShareCode";
+import { useState, type ReactNode } from "react";
+import { Button, Stack } from "@mantine/core";
+import {
+  BookOpen,
+  Export,
+  Scroll,
+  WarningCircle,
+} from "@phosphor-icons/react";
 import { SettingsToggleRow } from "../settings/SettingsToggleRow";
-import { NotificationPreferencesSection } from "./NotificationPreferencesSection";
-import { RolePasscodeSettings } from "./RolePasscodeSettings";
-import { type SessionRecord } from "@/domain/map/annotations";
+import {
+  InsetGroup,
+  SectionLabel,
+} from "@/components/ui/entry/entryChrome";
+import { InsetRow } from "@/components/ui/entry/InsetRow";
+
+const haltQuietRoot = {
+  minHeight: "2.875rem",
+  borderRadius: 14,
+  border: "none",
+  fontWeight: 590,
+  backgroundColor: "oklch(from var(--color-halt) l c h / 0.16)",
+  color: "var(--color-field-ink)",
+  "&:hover": {
+    backgroundColor: "oklch(from var(--color-halt) l c h / 0.22)",
+  },
+  "&:disabled": {
+    opacity: 0.45,
+  },
+} as const;
+
+const haltSolidRoot = {
+  minHeight: "2.875rem",
+  borderRadius: 14,
+  border: "none",
+  fontWeight: 590,
+  backgroundColor: "var(--color-halt)",
+  color: "var(--color-field-ink)",
+  "&:hover": {
+    backgroundColor: "oklch(from var(--color-halt) calc(l + 0.03) c h)",
+  },
+} as const;
 
 export interface MapSettingsSessionTabProps {
-  sessionCode: string;
   remoteSession: boolean;
   keepScreenAwake: boolean;
   onKeepScreenAwakeChange: (enabled: boolean) => void;
   lowPowerMode: boolean;
   onLowPowerModeChange: (enabled: boolean) => void;
-  notificationPreferences?: NotificationPreferences;
-  nativeNotificationsSupported?: boolean;
-  onNotificationPreferencesChange?: (
-    patch: Partial<NotificationPreferences>,
-  ) => void;
-  onEnableNotifications?: () => Promise<boolean>;
   onClearMap?: () => void;
   onExport?: () => void;
   isHost: boolean;
@@ -31,21 +58,14 @@ export interface MapSettingsSessionTabProps {
   onOpenCurseReference?: () => void;
   onReportProblem?: () => void;
   onReviewMapTools?: () => void;
-  session?: SessionRecord | null;
-  myUid?: string;
 }
 
 export function MapSettingsSessionTab({
-  sessionCode,
   remoteSession,
   keepScreenAwake,
   onKeepScreenAwakeChange,
   lowPowerMode,
   onLowPowerModeChange,
-  notificationPreferences,
-  nativeNotificationsSupported = false,
-  onNotificationPreferencesChange,
-  onEnableNotifications,
   onClearMap,
   onExport,
   isHost,
@@ -58,171 +78,188 @@ export function MapSettingsSessionTab({
   onOpenCurseReference,
   onReportProblem,
   onReviewMapTools,
-  session,
-  myUid,
 }: MapSettingsSessionTabProps) {
-  const [deviceSectionOpen, setDeviceSectionOpen] = useState(false);
   const [resetMenuOpen, setResetMenuOpen] = useState(false);
 
+  const helpItems: Array<{
+    key: string;
+    label: string;
+    icon: ReactNode;
+    onClick: () => void;
+    tone?: "default" | "halt";
+  }> = [];
+  if (onReviewMapTools) {
+    helpItems.push({
+      key: "guide",
+      label: "Map tools guide",
+      icon: <BookOpen size={20} weight="duotone" />,
+      onClick: onReviewMapTools,
+    });
+  }
+  if (onReportProblem) {
+    helpItems.push({
+      key: "report",
+      label: "Report a problem",
+      icon: <WarningCircle size={20} weight="duotone" />,
+      onClick: onReportProblem,
+    });
+  }
+  if (expansionPackEnabled && onOpenCurseReference) {
+    helpItems.push({
+      key: "curse",
+      label: "Expansion curse reference",
+      icon: <Scroll size={20} weight="duotone" />,
+      onClick: onOpenCurseReference,
+    });
+  }
+  if (onExport) {
+    helpItems.push({
+      key: "export",
+      label: "Export map",
+      icon: <Export size={20} weight="duotone" />,
+      onClick: onExport,
+    });
+  }
+
   return (
-    <div className="space-y-4">
-      <ShareCode code={sessionCode} remote={remoteSession} />
+    <Stack gap="lg">
+      <Stack gap="xs">
+        <SectionLabel>Device & alerts</SectionLabel>
+        <InsetGroup>
+          <SettingsToggleRow
+            label="Keep screen awake"
+            checked={keepScreenAwake}
+            onChange={onKeepScreenAwakeChange}
+          />
+          <SettingsToggleRow
+            showSeparator
+            label="Low power mode"
+            description="Reduces GPS polling, live transit, animations, and background downloads. Core session sync and tools stay available."
+            checked={lowPowerMode}
+            onChange={onLowPowerModeChange}
+          />
+        </InsetGroup>
+      </Stack>
 
-      {session && myUid ? (
-        <RolePasscodeSettings session={session} myUid={myUid} isHost={isHost} />
-      ) : null}
-
-      <div className="space-y-2 border-t-2 border-border pt-4">
-        <button
-          type="button"
-          onClick={() => setDeviceSectionOpen((open) => !open)}
-          aria-expanded={deviceSectionOpen}
-          className="btn-secondary w-full"
-        >
-          Device & alerts
-        </button>
-        {deviceSectionOpen ? (
-          <div className="space-y-3 border-l-2 border-border pl-3">
-            <SettingsToggleRow
-              label="Keep screen awake"
-              checked={keepScreenAwake}
-              onChange={onKeepScreenAwakeChange}
-            />
-            <SettingsToggleRow
-              label="Low power mode"
-              description="Reduces GPS polling, live transit, animations, and background downloads. Core session sync and tools stay available."
-              checked={lowPowerMode}
-              onChange={onLowPowerModeChange}
-            />
-            {nativeNotificationsSupported &&
-            notificationPreferences &&
-            onNotificationPreferencesChange ? (
-              <NotificationPreferencesSection
-                preferences={notificationPreferences}
-                onChange={onNotificationPreferencesChange}
-                onEnableNotifications={onEnableNotifications}
+      {helpItems.length > 0 ? (
+        <Stack gap="xs">
+          <SectionLabel>Help</SectionLabel>
+          <InsetGroup>
+            {helpItems.map((item, index) => (
+              <InsetRow
+                key={item.key}
+                label={item.label}
+                icon={item.icon}
+                onClick={item.onClick}
+                showSeparator={index > 0}
+                tone={item.tone}
               />
-            ) : null}
-          </div>
-        ) : null}
-      </div>
-
-      {onReviewMapTools ? (
-        <button
-          type="button"
-          onClick={onReviewMapTools}
-          className="btn-secondary w-full"
-        >
-          Map tools guide
-        </button>
+            ))}
+          </InsetGroup>
+        </Stack>
       ) : null}
 
-      {onReportProblem ? (
-        <button
-          type="button"
-          onClick={onReportProblem}
-          className="btn-secondary w-full"
-        >
-          Report a problem
-        </button>
-      ) : null}
-
-      {expansionPackEnabled && onOpenCurseReference ? (
-        <button
-          type="button"
-          onClick={onOpenCurseReference}
-          className="btn-secondary w-full"
-        >
-          Expansion curse reference
-        </button>
-      ) : null}
-
-      {onExport ? (
-        <button type="button" onClick={onExport} className="btn-secondary w-full">
-          Export map
-        </button>
-      ) : null}
-
-      <div className="space-y-2 border-t-2 border-border pt-4">
+      <Stack gap="xs">
+        <SectionLabel>Danger zone</SectionLabel>
         {endGameBlocked ? (
-          <p className="text-sm text-ink-muted">
+          <p className="px-1 text-sm text-[var(--color-field-ink-muted)]">
             Clear map and reset board are unavailable during end game.
           </p>
         ) : null}
-        {onClearMap ? (
-          <button
-            type="button"
-            onClick={onClearMap}
-            disabled={endGameBlocked}
-            className="btn-secondary w-full border-status-error/50 bg-status-error-surface text-status-error disabled:opacity-50"
-          >
-            Clear map
-          </button>
-        ) : null}
-
-        {isHost ? (
-          <>
-            <button
-              type="button"
-              onClick={() => setResetMenuOpen((open) => !open)}
-              aria-expanded={resetMenuOpen}
-              className="btn-secondary w-full border-status-warning/50 bg-status-warning-surface text-status-warning"
+        <Stack gap="sm">
+          {onClearMap ? (
+            <Button
+              fullWidth
+              styles={{ root: haltQuietRoot }}
+              disabled={endGameBlocked}
+              onClick={onClearMap}
             >
-              Reset…
-            </button>
-            {resetMenuOpen ? (
-              <div className="space-y-2 border-l-2 border-status-warning/40 pl-3">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setResetMenuOpen(false);
-                    onResetBoard?.();
-                  }}
-                  disabled={endGameBlocked}
-                  className="btn-secondary w-full border-status-warning/50 bg-status-warning-surface text-status-warning disabled:opacity-50"
-                >
-                  Reset board for everyone
-                </button>
-                {remoteSession && onResetSession ? (
-                  <>
-                    <button
-                      type="button"
+              Clear map
+            </Button>
+          ) : null}
+
+          {isHost ? (
+            <>
+              <Button
+                fullWidth
+                styles={{ root: haltQuietRoot }}
+                aria-expanded={resetMenuOpen}
+                onClick={() => setResetMenuOpen((open) => !open)}
+              >
+                {resetMenuOpen ? "Hide reset options" : "Reset options"}
+              </Button>
+              {resetMenuOpen ? (
+                <InsetGroup>
+                  <div className="flex flex-col gap-2 p-3">
+                    <Button
+                      fullWidth
+                      styles={{
+                        root: { ...haltQuietRoot, minHeight: "2.75rem" },
+                      }}
+                      disabled={endGameBlocked}
                       onClick={() => {
                         setResetMenuOpen(false);
-                        void onResetSession();
+                        onResetBoard?.();
                       }}
-                      className="btn-secondary w-full border-status-error/50 bg-status-error-surface text-status-error"
                     >
-                      Reset session progress
-                    </button>
-                    <p className="text-xs leading-relaxed text-ink-muted">
-                      Reset session keeps the code and roster. It clears timer,
-                      map, questions, chat, zones, traps, and end-game state.
-                    </p>
-                  </>
-                ) : null}
-              </div>
-            ) : null}
-            <button
-              type="button"
-              onClick={onEndSession}
-              className="btn-secondary w-full border-status-error/50 bg-status-error-surface text-status-error"
-            >
-              End session for everyone
-            </button>
-          </>
-        ) : null}
+                      Reset board for everyone
+                    </Button>
+                    {remoteSession && onResetSession ? (
+                      <>
+                        <Button
+                          fullWidth
+                          styles={{
+                            root: { ...haltSolidRoot, minHeight: "2.75rem" },
+                          }}
+                          onClick={() => {
+                            setResetMenuOpen(false);
+                            void onResetSession();
+                          }}
+                        >
+                          Reset session progress
+                        </Button>
+                        <p className="text-xs leading-relaxed text-[var(--color-field-ink-muted)]">
+                          Keeps the code and roster. Clears timer, map,
+                          questions, chat, zones, traps, and end-game state.
+                        </p>
+                      </>
+                    ) : null}
+                  </div>
+                </InsetGroup>
+              ) : null}
+              <Button
+                fullWidth
+                styles={{ root: haltSolidRoot }}
+                onClick={onEndSession}
+              >
+                End session for everyone
+              </Button>
+            </>
+          ) : null}
 
-        {onLeaveSession ? (
-          <button
-            type="button"
-            onClick={onLeaveSession}
-            className="btn-secondary w-full"
-          >
-            Leave session
-          </button>
-        ) : null}
-      </div>
-    </div>
+          {onLeaveSession ? (
+            <Button
+              fullWidth
+              styles={{
+                root: {
+                  minHeight: "2.875rem",
+                  borderRadius: 14,
+                  border: "none",
+                  fontWeight: 590,
+                  backgroundColor: "oklch(from var(--color-rule) l c h / 0.45)",
+                  color: "var(--color-field-ink)",
+                  "&:hover": {
+                    backgroundColor: "oklch(from var(--color-rule) l c h / 0.55)",
+                  },
+                },
+              }}
+              onClick={onLeaveSession}
+            >
+              Leave session
+            </Button>
+          ) : null}
+        </Stack>
+      </Stack>
+    </Stack>
   );
 }

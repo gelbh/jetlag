@@ -1,6 +1,8 @@
 import { fireEvent, screen, waitFor } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { MantineProvider } from "@mantine/core";
+import { describe, expect, it, vi, beforeEach } from "vitest";
 import { INCIDENT_NOTE_MAX_LENGTH } from "../../domain/incident/incidentTypes";
+import { jetlagTheme } from "@/theme/theme";
 import { renderWithRouter } from "../../test/renderWithRouter";
 import { ReportProblemSheet } from "./ReportProblemSheet";
 
@@ -33,14 +35,41 @@ vi.mock("../../hooks/incident/usePendingHostConfirm", () => ({
   }),
 }));
 
+function renderReport(ui: React.ReactNode) {
+  return renderWithRouter(
+    <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
+      {ui}
+    </MantineProvider>,
+  );
+}
+
 describe("ReportProblemSheet", () => {
-  it("renders probe copy, diagnostics rows, and 0/140 counter", () => {
-    renderWithRouter(
-      <ReportProblemSheet open onClose={() => {}} online />,
+  beforeEach(() => {
+    vi.stubGlobal("matchMedia", (query: string) => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: () => {},
+      removeListener: () => {},
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      dispatchEvent: () => false,
+    }));
+    vi.stubGlobal(
+      "ResizeObserver",
+      class {
+        observe() {}
+        unobserve() {}
+        disconnect() {}
+      },
     );
+  });
+
+  it("renders probe copy, diagnostics rows, and 0/140 counter", () => {
+    renderReport(<ReportProblemSheet open onClose={() => {}} online />);
 
     expect(
-      screen.getByRole("heading", { name: "REPORT PROBLEM" }),
+      screen.getByRole("heading", { name: "Report a problem" }),
     ).toBeInTheDocument();
     expect(
       screen.getByText("Help us resolve this quickly. Optional details below."),
@@ -55,10 +84,19 @@ describe("ReportProblemSheet", () => {
     expect(screen.getByRole("button", { name: "Cancel" })).toBeInTheDocument();
   });
 
+  it("uses SheetHost chassis (no dedicated Drawer chrome prop)", () => {
+    renderReport(<ReportProblemSheet open onClose={() => {}} online />);
+
+    expect(
+      screen.getByRole("heading", { name: "Report a problem" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Send report" }),
+    ).toBeInTheDocument();
+  });
+
   it("caps the note at 140 characters", () => {
-    renderWithRouter(
-      <ReportProblemSheet open onClose={() => {}} online />,
-    );
+    renderReport(<ReportProblemSheet open onClose={() => {}} online />);
 
     const note = screen.getByPlaceholderText("What happened?");
     const oversized = "x".repeat(INCIDENT_NOTE_MAX_LENGTH + 40);
@@ -73,9 +111,7 @@ describe("ReportProblemSheet", () => {
   });
 
   it("disables submit when offline", () => {
-    renderWithRouter(
-      <ReportProblemSheet open onClose={() => {}} online={false} />,
-    );
+    renderReport(<ReportProblemSheet open onClose={() => {}} online={false} />);
 
     expect(
       screen.getByRole("button", { name: "Send report" }),
@@ -91,7 +127,7 @@ describe("ReportProblemSheet", () => {
       status: "open",
     });
 
-    renderWithRouter(
+    renderReport(
       <ReportProblemSheet
         open
         onClose={() => {}}

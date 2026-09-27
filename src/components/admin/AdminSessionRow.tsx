@@ -2,6 +2,7 @@ import { formatFreshnessAge } from "../../domain/admin/formatAdminFreshness";
 import { resolveAdminSessionAreaLabel } from "../../domain/admin/adminSessionAreaLabel";
 import { adminSessionPhaseLabel } from "../../domain/admin/sessionPhase";
 import { useFreshnessClock } from "../../hooks/time/useFreshnessClock";
+import { homeCardBtnStyle } from "@/components/ui/entry/entryStyles";
 import type { AdminSessionSummary } from "../../services/admin/adminSessions";
 
 interface AdminSessionRowProps {
@@ -29,9 +30,11 @@ export function AdminSessionRow({
   return (
     <button
       type="button"
-      className={`admin-session-row admin-session-row-dense home-card-btn home-card-btn-secondary w-full items-start gap-2 px-3 py-2 text-left ${
+      className={`admin-session-row admin-session-row-dense w-full items-start gap-2 px-3 py-2 text-left ${
         selected ? "ring-2 ring-brand-blue/50" : ""
       }`}
+      style={homeCardBtnStyle("secondary")}
+      data-feedback="tap"
       disabled={monitorJoinPending}
       onClick={() => onMonitor(summary)}
     >

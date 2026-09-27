@@ -144,8 +144,16 @@ export async function createSessionFromCreatePage(page: Page) {
 }
 
 export async function readSessionCode(page: Page): Promise<string> {
-  const codeText = await page.locator(".jl-stamp-code").textContent();
+  // ShareCode lives under Settings → Game (not on the open map chrome).
+  const stamp = page.locator(".jl-stamp-code").first();
+  if (!(await stamp.isVisible().catch(() => false))) {
+    await page.getByRole("button", { name: "Open settings" }).click();
+    await page.getByRole("tab", { name: "Game" }).click();
+  }
+  await expect(stamp).toBeVisible({ timeout: 15_000 });
+  const codeText = await stamp.textContent();
   expect(codeText).toMatch(/^[A-Z]{4}$/);
+  await page.keyboard.press("Escape").catch(() => undefined);
   return codeText ?? "ABCD";
 }
 
@@ -156,8 +164,11 @@ export async function joinAsRole(
 ) {
   await guestPage.goto("/join");
   const roleName = role === "hider" ? "Hider" : "Seeker";
+  // Mantine SegmentedControl radios are visually hidden; click the label.
   await guestPage
-    .getByRole("radio", { name: new RegExp(`^${roleName}\\b`) })
+    .locator(".mantine-SegmentedControl-label", {
+      hasText: new RegExp(`^${roleName}$`),
+    })
     .click();
   await guestPage.getByPlaceholder("ABCD").fill(code);
   await guestPage.getByRole("button", { name: "Join session" }).click();

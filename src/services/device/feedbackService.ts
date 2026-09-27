@@ -1,11 +1,3 @@
-import { Capacitor } from "@capacitor/core";
-import {
-  Haptics,
-  ImpactStyle,
-  NotificationType,
-} from "@capacitor/haptics";
-import { impactLight } from "./hapticsService";
-
 export type FeedbackEvent =
   | "tap"
   | "selection"
@@ -32,53 +24,13 @@ function vibrateFallback(event: FeedbackEvent): void {
   }
 }
 
-async function nativeFeedback(event: FeedbackEvent): Promise<void> {
-  if (!Capacitor.isNativePlatform()) {
-    vibrateFallback(event);
-    return;
-  }
-
-  try {
-    switch (event) {
-      case "tap":
-      case "sheetSnap":
-        await Haptics.impact({ style: ImpactStyle.Light });
-        break;
-      case "selection":
-        await Haptics.selectionStart();
-        await Haptics.selectionEnd();
-        break;
-      case "success":
-        await Haptics.notification({ type: NotificationType.Success });
-        break;
-      case "error":
-        await Haptics.notification({ type: NotificationType.Error });
-        break;
-      default: {
-        const exhaustive: never = event;
-        return exhaustive;
-      }
-    }
-  } catch {
-    vibrateFallback(event);
-  }
-}
-
-/** Unified tactile feedback — Capacitor native with Vibration API fallback on web. */
+/** Unified tactile feedback using the Web Vibration API where available. */
 export async function feedback(event: FeedbackEvent): Promise<void> {
-  if (event === "tap") {
-    await impactLight();
-    if (!Capacitor.isNativePlatform()) {
-      vibrateFallback("tap");
-    }
-    return;
-  }
-
-  await nativeFeedback(event);
+  vibrateFallback(event === "tap" ? "tap" : event);
 }
 
 const DELEGATED_FEEDBACK_SELECTOR =
-  '[data-feedback="tap"], .hud-chrome, .home-card-btn, .btn-primary, .btn-secondary, .jl-tool-slot';
+  '[data-feedback="tap"], .hud-chrome, .btn-primary, .btn-secondary, .jl-tool-slot';
 
 /** One delegated listener for tap feedback on common HUD controls. */
 export function bindDelegatedTapFeedback(root: ParentNode = document): () => void {

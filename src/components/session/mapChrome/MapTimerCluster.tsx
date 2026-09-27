@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Stack, Text } from "@mantine/core";
 import type { SessionRulesInput } from "@/domain/session/rules";
 import { getPowerProfile } from "@/domain/device/power/powerProfile";
 import {
@@ -24,7 +25,7 @@ import {
 import { useMapStore } from "@/state/mapStore";
 import { useStaleWalkNowMs } from "@/hooks/sync/useStaleWalkNowMs";
 
-interface MapTimerClusterProps {
+export type MapTimerClusterProps = {
   sessionRules: SessionRulesInput;
   timerState: TimerState;
   timerRunning: boolean;
@@ -33,23 +34,30 @@ interface MapTimerClusterProps {
   myUid?: string | null;
   hostUid?: string | null;
   seekerLocations?: readonly PlayerLocationRecord[];
-  onCancelWalkingQuestion?: (pendingQuestionId: string) => void;
-  onOpenTimerMenu: () => void;
-  timerMenuOpen: boolean;
-}
+};
 
-function formatSeekPhaseTime(
-  sessionRules: SessionRulesInput,
-  timerState: TimerState,
-): string {
-  const elapsed = computeElapsedMs(timerState);
-  return formatElapsedTime(seekPhaseElapsedMs(sessionRules, elapsed));
-}
+const primaryStyle = {
+  letterSpacing: "-0.01em",
+  lineHeight: 1.15,
+  color: "var(--color-field-ink)",
+  fontVariantNumeric: "tabular-nums" as const,
+  fontSize: "0.9375rem",
+  fontWeight: 700,
+};
 
-function formatSessionElapsedDuringHiding(timerState: TimerState): string {
-  return formatElapsedTime(computeElapsedMs(timerState));
-}
+const secondaryStyle = {
+  color: "var(--color-field-ink-muted)",
+  lineHeight: 1.15,
+  fontSize: "0.6875rem",
+  fontWeight: 510,
+  fontVariantNumeric: "tabular-nums" as const,
+};
 
+/**
+ * View-only timer cluster:
+ * primary = session elapsed since Start
+ * secondary = phase / question / walk cue
+ */
 export function MapTimerCluster({
   sessionRules,
   timerState,
@@ -59,9 +67,6 @@ export function MapTimerCluster({
   myUid = null,
   hostUid = null,
   seekerLocations = [],
-  onCancelWalkingQuestion,
-  onOpenTimerMenu,
-  timerMenuOpen,
 }: MapTimerClusterProps) {
   const lowPowerMode = useMapStore((state) => state.lowPowerMode);
   const timerTickMs = getPowerProfile(lowPowerMode).timerTickMs;
@@ -88,13 +93,15 @@ export function MapTimerCluster({
   }
 
   const elapsed = computeElapsedMs(timerState);
+  const sessionLabel = formatElapsedTime(elapsed);
   const hidingActive = isHidingPeriodActive(sessionRules, elapsed);
-  const hidingRemaining = hidingPeriodRemainingMs(sessionRules, elapsed);
-  const hidingLabel = formatHidingPeriodCountdown(hidingRemaining);
+  const hidingLabel = formatHidingPeriodCountdown(
+    hidingPeriodRemainingMs(sessionRules, elapsed),
+  );
   const questionTimer = selectPrimaryQuestionTimer(pendingQuestions, sessionRules);
-  const tickerRunningClass = timerRunning
-    ? "jl-ticker-active"
-    : "jl-ticker-idle";
+
+  let secondaryLabel: string | null;
+  let secondaryColor = "var(--color-field-ink-muted)";
 
   if (questionTimer) {
     const primaryQuestion = pendingQuestions.find(
@@ -103,11 +110,6 @@ export function MapTimerCluster({
     const isWalkingThermometer =
       primaryQuestion?.toolType === "thermometer" &&
       primaryQuestion.status === "walking";
-    const canCancelWalk =
-      isWalkingThermometer &&
-      Boolean(onCancelWalkingQuestion) &&
-      myUid != null &&
-      (myUid === hostUid || myUid === primaryQuestion.createdByUid);
     const walkerLocationUpdatedAt =
       primaryQuestion == null
         ? null
@@ -123,95 +125,48 @@ export function MapTimerCluster({
         walkerLocationUpdatedAt,
         staleWalkNowMs,
       );
-    const countdownLabel = showStuckCue
-      ? "Stale GPS"
-      : questionTimer.countdownLabel;
 
-    return (
-      <>
-        <div className="jl-timer-cluster">
-          <p
-            className="jl-ticker jl-ticker-question jl-ticker-active"
-            aria-live="polite"
-          >
-            <span className="jl-ticker-phase">{questionTimer.toolLabel}</span>
-            <span className="jl-ticker-value tabular-nums">
-              {countdownLabel}
-            </span>
-          </p>
-          {hidingActive && hidingLabel ? (
-            <p className="jl-ticker jl-ticker-secondary tabular-nums">
-              <span className="jl-ticker-value">{hidingLabel}</span>
-            </p>
-          ) : (
-            <button
-              type="button"
-              onClick={onOpenTimerMenu}
-              className={`jl-ticker jl-ticker-secondary ${tickerRunningClass}`}
-              aria-label="Seek phase time. Open timer settings"
-              aria-expanded={timerMenuOpen}
-              aria-haspopup="menu"
-            >
-              <span className="jl-ticker-phase">SEEK</span>
-              <span className="jl-ticker-value tabular-nums">
-                {formatSeekPhaseTime(sessionRules, timerState)}
-              </span>
-            </button>
-          )}
-        </div>
-        {canCancelWalk ? (
-          <button
-            type="button"
-            onClick={() => onCancelWalkingQuestion?.(primaryQuestion.id)}
-            className="jl-timer-cancel"
-            aria-label="Cancel thermometer walk"
-          >
-            Cancel
-          </button>
-        ) : null}
-      </>
-    );
-  }
-
-  if (hidingActive && hidingLabel) {
-    return (
-      <div className="jl-timer-cluster">
-        <p className="jl-ticker jl-ticker-hiding jl-ticker-active" aria-live="polite">
-          <span className="jl-ticker-value tabular-nums">{hidingLabel}</span>
-        </p>
-        <button
-          type="button"
-          onClick={onOpenTimerMenu}
-          className={`jl-ticker jl-ticker-secondary ${tickerRunningClass}`}
-          aria-label="Session elapsed. Open timer settings"
-          aria-expanded={timerMenuOpen}
-          aria-haspopup="menu"
-        >
-          <span className="jl-ticker-phase">Elapsed</span>
-          <span className="jl-ticker-value tabular-nums">
-            {formatSessionElapsedDuringHiding(timerState)}
-          </span>
-        </button>
-      </div>
-    );
+    if (showStuckCue) {
+      secondaryLabel = "Stale GPS";
+      secondaryColor = "var(--color-halt)";
+    } else if (questionTimer.countdownLabel === "WALKING") {
+      secondaryLabel = "Walking";
+      secondaryColor = "var(--color-signal)";
+    } else {
+      secondaryLabel = `${questionTimer.toolLabel} ${questionTimer.countdownLabel}`;
+      secondaryColor = "var(--color-signal)";
+    }
+  } else if (hidingActive && hidingLabel) {
+    secondaryLabel = hidingLabel;
+  } else {
+    secondaryLabel = formatElapsedTime(seekPhaseElapsedMs(sessionRules, elapsed));
   }
 
   return (
-    <div className="jl-timer-cluster">
-      <button
-        type="button"
-        onClick={onOpenTimerMenu}
-        className={`jl-ticker ${tickerRunningClass}`}
-        aria-label="Seek phase time. Open timer settings"
-        aria-expanded={timerMenuOpen}
-        aria-haspopup="menu"
-        aria-live="polite"
+    <Stack
+      gap={0}
+      align="flex-end"
+      aria-live="polite"
+      style={{ opacity: timerRunning ? 1 : 0.72, minWidth: 0 }}
+    >
+      <Text
+        component="span"
+        ff="monospace"
+        style={primaryStyle}
+        title="Session time since start"
       >
-        <span className="jl-ticker-phase">SEEK</span>
-        <span className="jl-ticker-value tabular-nums">
-          {formatSeekPhaseTime(sessionRules, timerState)}
-        </span>
-      </button>
-    </div>
+        {sessionLabel}
+      </Text>
+      {secondaryLabel ? (
+        <Text
+          component="span"
+          ff="monospace"
+          style={{ ...secondaryStyle, color: secondaryColor }}
+          title="Phase or question timer"
+        >
+          {secondaryLabel}
+        </Text>
+      ) : null}
+    </Stack>
   );
 }

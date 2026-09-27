@@ -1,9 +1,19 @@
 import { useId, useState } from "react";
+import { Box, Button, Stack, Text, Textarea, TextInput } from "@mantine/core";
 import type { AdvancedSessionSettingsValue } from "@/domain/session/tools/advancedSessionSettings";
 import {
   createCustomMeasureGeometryId,
   type SessionCustomMeasureGeometry,
 } from "@/domain/session/catalog/customMeasureGeometry";
+import {
+  ErrorCallout,
+  InsetGroup,
+  compactDangerStyles,
+  filledStyles,
+  insetTextInputStyles,
+  insetTextareaStyles,
+} from "@/components/ui/entry/entryChrome";
+import { InsetHairline } from "@/components/ui/entry/InsetRow";
 
 interface CustomMeasureGeometrySettingsProps {
   value: AdvancedSessionSettingsValue;
@@ -62,8 +72,6 @@ export function CustomMeasureGeometrySettings({
   const [geoJson, setGeoJson] = useState("");
   const [error, setError] = useState<string | null>(null);
   const panelId = useId();
-  const labelInputId = useId();
-  const geoJsonId = useId();
   const customMeasureGeometries = value.customMeasureGeometries ?? [];
 
   const addGeometry = () => {
@@ -101,73 +109,94 @@ export function CustomMeasureGeometrySettings({
   };
 
   return (
-    <div className="space-y-3 rounded-[var(--radius-hud-md)] border border-border p-3">
-      <div>
-        <p id={panelId} className="text-sm font-semibold text-ink">
-          Custom measuring geometry
-        </p>
-        <p className="text-xs text-ink-muted">
-          Import a LineString or Polygon GeoJSON for coastline traces, HSR lines,
-          or other custom measuring targets.
-        </p>
-      </div>
+    <Stack gap="xs">
+      <Text
+        id={panelId}
+        size="xs"
+        c="var(--color-field-ink-muted)"
+        px={4}
+      >
+        Import a LineString or Polygon GeoJSON for coastline traces, HSR lines,
+        or other custom measuring targets.
+      </Text>
 
       {customMeasureGeometries.length > 0 ? (
-        <ul className="space-y-1">
-          {customMeasureGeometries.map((geometry) => (
-            <li
-              key={geometry.id}
-              className="flex items-center justify-between gap-2 rounded-[var(--radius-hud-md)] bg-surface-raised px-3 py-2 text-sm"
-            >
-              <span>
-                {geometry.label}{" "}
-                <span className="text-xs text-ink-muted">({geometry.kind})</span>
-              </span>
-              <button
-                type="button"
-                disabled={disabled}
-                onClick={() => removeGeometry(geometry.id)}
-                className="min-h-11 px-2 text-xs font-semibold text-status-error disabled:opacity-50"
+        <InsetGroup>
+          {customMeasureGeometries.map((geometry, index) => (
+            <Box key={geometry.id}>
+              {index > 0 ? <InsetHairline insetStart="1rem" /> : null}
+              <Box
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.75rem",
+                  paddingInline: "1rem",
+                  paddingBlock: "0.65rem",
+                }}
               >
-                Remove
-              </button>
-            </li>
+                <Box style={{ flex: 1, minWidth: 0 }}>
+                  <Text size="sm" c="var(--color-field-ink)">
+                    {geometry.label}
+                  </Text>
+                  <Text size="xs" c="var(--color-field-ink-muted)">
+                    {geometry.kind}
+                  </Text>
+                </Box>
+                <Button
+                  type="button"
+                  size="compact-sm"
+                  disabled={disabled}
+                  styles={compactDangerStyles}
+                  onClick={() => removeGeometry(geometry.id)}
+                >
+                  Remove
+                </Button>
+              </Box>
+            </Box>
           ))}
-        </ul>
+        </InsetGroup>
       ) : null}
 
-      <label htmlFor={labelInputId} className="field-label">
-        Label
-        <input
-          id={labelInputId}
+      <InsetGroup error={Boolean(error)}>
+        <TextInput
+          label="Label"
           value={label}
-          onChange={(event) => setLabel(event.target.value)}
           disabled={disabled}
-          className="field-input min-h-11 w-full"
           placeholder="South coast trace"
           aria-describedby={panelId}
+          onChange={(event) => setLabel(event.currentTarget.value)}
+          styles={insetTextInputStyles}
         />
-      </label>
-      <label htmlFor={geoJsonId} className="field-label">
-        GeoJSON
-        <textarea
-          id={geoJsonId}
+        <InsetHairline insetStart="1rem" />
+        <Textarea
+          label="GeoJSON"
           value={geoJson}
-          onChange={(event) => setGeoJson(event.target.value)}
           disabled={disabled}
-          className="field-input min-h-24 w-full font-mono text-base"
-          placeholder='Paste GeoJSON Feature or FeatureCollection…'
+          placeholder="Paste GeoJSON Feature or FeatureCollection…"
+          rows={5}
+          onChange={(event) => setGeoJson(event.currentTarget.value)}
+          styles={{
+            ...insetTextareaStyles,
+            input: {
+              ...insetTextareaStyles.input,
+              fontFamily: "var(--font-mono)",
+              fontSize: "0.8125rem",
+            },
+          }}
         />
-      </label>
-      {error ? <p className="text-sm text-status-error">{error}</p> : null}
-      <button
+      </InsetGroup>
+
+      <ErrorCallout>{error}</ErrorCallout>
+
+      <Button
         type="button"
+        fullWidth
         disabled={disabled || !label.trim() || !geoJson.trim()}
+        styles={filledStyles}
         onClick={addGeometry}
-        className="btn-secondary min-h-11 w-full disabled:opacity-50"
       >
         Add measuring geometry
-      </button>
-    </div>
+      </Button>
+    </Stack>
   );
 }

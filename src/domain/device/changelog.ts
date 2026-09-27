@@ -1,4 +1,4 @@
-export const APP_VERSION = "0.13.0";
+export const APP_VERSION = "0.14.0";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,7 +10,7 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
-  {
+{
     version: "Unreleased",
     date: "",
     sections: [
@@ -22,7 +22,27 @@ export const CHANGELOG: ChangelogEntry[] = [
       },
     ],
   },
-  {
+{
+    version: "0.14.0",
+    date: "2026-09-27",
+    sections: [
+      {
+        title: "Fixes",
+        items: [
+          "Measuring: closer/further answers keep map shade after confirm in multiplayer, even when the region is too large to store as a polygon",
+        ],
+      },
+      {
+        title: "Improvements",
+        items: [
+          "Land Mantine player UI through Wave 4 (entry chrome, tool hosts, map islands).",
+          "Tentacles: recommended answers use the hiding-zone center unless the seeker is actually inside the zone",
+          "Map chrome: full-bleed hunt tool deck with even tool spacing and shared safe-area overlay padding.",
+        ],
+      }
+    ],
+  },
+{
     version: "0.13.0",
     date: "2026-08-16",
     sections: [
@@ -38,10 +58,10 @@ export const CHANGELOG: ChangelogEntry[] = [
       {
         title: "Improvements",
         items: [
-          "Survey field-book is now the default player look on web and PWA. The old Broadcast HUD dual path and PostHog world flag are gone.",
+          "iOS Mantine is now the default player look on web and PWA. The old dual path and PostHog player-ux world flag are gone; stale jl.playerUi.mantine localStorage is ignored.",
           "Live map: clearer status strip and stake-plate tool islands outdoors (plain labels, sync text with icon, simpler landscape controls)",
-          "Live map: question ask HUD and map sheets use the Survey field-book look (plain labels, stake-plate sheets)",
-          "Home and secondary screens use the Survey field-book look, with a shared empty state for lists and recovery copy",
+          "Live map: question ask HUD and map sheets use the iOS Mantine player look (plain labels, stake-plate sheets)",
+          "Home and secondary screens use the iOS Mantine player look, with a shared empty state for lists and recovery copy",
           "Measuring: shows a quick outline of the shaded area, then adds detail, and no longer blocks with \"too complex\" on preview",
           "Matching: every island and admin area in the play area can be used, not a hidden 50-area cut",
           "Tentacle locations: keep the place list within the map rail so previews stay visible, and tap a confirmed place on the map to select it",
@@ -49,7 +69,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.12.0",
     date: "2026-08-16",
     sections: [
@@ -149,13 +169,13 @@ export const CHANGELOG: ChangelogEntry[] = [
       {
         title: "Technical",
         items: [
-          "Measuring near-regions (coastlines and multi-place disks) run on the WASM geometry kernel by default.",
-          "Spatial Voronoi runs on WASM by default.",
+          "Measuring near-regions (coastlines and multi-place disks) run on the WASM geometry kernel by default, with TypeScript fallback.",
+          "Spatial Voronoi runs on WASM by default (TS d3-delaunay fallback on failure)",
         ],
       }
     ],
   },
-  {
+{
     version: "0.11.0",
     date: "2026-08-02",
     sections: [
@@ -191,8 +211,8 @@ export const CHANGELOG: ChangelogEntry[] = [
           "Privacy: name Nominatim, Esri, Open-Meteo, USGS, Transitland/TfL/CTA, Cloudflare, and Resend among third parties",
           "Privacy: name OpenFreeMap instead of CARTO for street map tiles",
           "Map settings: show Esri attribution when satellite basemap is selected",
-          "End-game disk elimination masks use the WASM geometry kernel when available",
-          "Tentacle elimination shading now uses the Rust geometry kernel by default",
+          "End-game disk elimination masks use the WASM geometry kernel when available (override with `jl.geometry.maskKernel=ts`)",
+          "Tentacle elimination shading now uses the Rust geometry kernel by default (override with `jl.geometry.maskKernel=ts`)",
         ],
       },
       {
@@ -204,7 +224,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.10.8",
     date: "2026-07-27",
     sections: [
@@ -216,7 +236,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.10.7",
     date: "2026-07-27",
     sections: [
@@ -228,7 +248,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.10.6",
     date: "2026-07-27",
     sections: [
@@ -241,7 +261,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.10.5",
     date: "2026-07-27",
     sections: [
@@ -253,7 +273,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.10.4",
     date: "2026-07-26",
     sections: [
@@ -282,7 +302,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.10.3",
     date: "2026-07-26",
     sections: [
@@ -295,7 +315,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.10.2",
     date: "2026-07-26",
     sections: [
@@ -314,7 +334,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.10.1",
     date: "2026-07-26",
     sections: [
@@ -330,7 +350,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.10.0",
     date: "2026-07-26",
     sections: [
@@ -353,13 +373,13 @@ export const CHANGELOG: ChangelogEntry[] = [
       {
         title: "Technical",
         items: [
-          "Map: elimination masks use the WASM geometry kernel by default.",
-          "Enable the WASM geometry kernel for radar/half-plane shading.",
+          "Map: elimination masks use the WASM geometry kernel by default; set `jl.geometry.maskKernel=ts` (or the env override) to force TypeScript.",
+          "Enable the WASM geometry kernel for radar/half-plane shading (still overridable via `jl.geometry.maskKernel` / env). Measuring geodesic buffers stay on TypeScript until their ready flip.",
         ],
       }
     ],
   },
-  {
+{
     version: "0.9.5",
     date: "2026-07-25",
     sections: [
@@ -378,7 +398,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.9.4",
     date: "2026-07-25",
     sections: [
@@ -398,7 +418,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.9.3",
     date: "2026-07-25",
     sections: [
@@ -420,7 +440,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.9.2",
     date: "2026-07-24",
     sections: [
@@ -433,7 +453,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.9.1",
     date: "2026-07-19",
     sections: [
@@ -446,7 +466,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.9.0",
     date: "2026-07-19",
     sections: [
@@ -469,7 +489,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.8.2",
     date: "2026-07-19",
     sections: [
@@ -481,7 +501,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.8.1",
     date: "2026-07-17",
     sections: [
@@ -494,7 +514,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.8.0",
     date: "2026-07-16",
     sections: [
@@ -515,7 +535,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.7.2",
     date: "2026-07-15",
     sections: [
@@ -527,7 +547,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.7.1",
     date: "2026-07-14",
     sections: [
@@ -545,7 +565,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.7.0",
     date: "2026-07-14",
     sections: [
@@ -559,7 +579,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.6.3",
     date: "2026-07-14",
     sections: [
@@ -579,7 +599,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.6.2",
     date: "2026-07-14",
     sections: [
@@ -591,7 +611,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.6.1",
     date: "2026-07-14",
     sections: [
@@ -603,7 +623,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.6.0",
     date: "2026-07-13",
     sections: [
@@ -635,7 +655,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.5.14",
     date: "2026-07-13",
     sections: [
@@ -647,7 +667,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.5.13",
     date: "2026-07-13",
     sections: [
@@ -668,7 +688,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.5.12",
     date: "2026-07-13",
     sections: [
@@ -713,7 +733,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.5.11",
     date: "2026-07-12",
     sections: [
@@ -745,7 +765,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.5.10",
     date: "2026-07-12",
     sections: [
@@ -760,7 +780,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.5.9",
     date: "2026-07-12",
     sections: [
@@ -774,7 +794,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.5.8",
     date: "2026-07-12",
     sections: [
@@ -787,7 +807,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.5.7",
     date: "2026-07-12",
     sections: [
@@ -821,7 +841,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.5.6",
     date: "2026-07-12",
     sections: [
@@ -855,7 +875,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.5.5",
     date: "2026-07-12",
     sections: [
@@ -871,7 +891,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.5.4",
     date: "2026-07-12",
     sections: [
@@ -893,7 +913,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.5.3",
     date: "2026-07-12",
     sections: [
@@ -908,7 +928,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.5.2",
     date: "2026-07-12",
     sections: [
@@ -931,7 +951,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.5.1",
     date: "2026-07-12",
     sections: [
@@ -959,7 +979,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.5.0",
     date: "2026-07-12",
     sections: [
@@ -975,7 +995,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.4.8",
     date: "2026-07-12",
     sections: [
@@ -991,7 +1011,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.4.7",
     date: "2026-07-12",
     sections: [
@@ -1021,7 +1041,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.4.6",
     date: "2026-07-12",
     sections: [
@@ -1050,7 +1070,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.4.5",
     date: "2026-07-11",
     sections: [
@@ -1070,7 +1090,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.4.4",
     date: "2026-07-11",
     sections: [
@@ -1099,7 +1119,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.4.3",
     date: "2026-07-11",
     sections: [
@@ -1133,7 +1153,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.4.2",
     date: "2026-07-11",
     sections: [
@@ -1192,7 +1212,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.4.1",
     date: "2026-07-11",
     sections: [
@@ -1224,7 +1244,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.4.0",
     date: "2026-07-11",
     sections: [
@@ -1252,7 +1272,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.3.0",
     date: "2026-07-11",
     sections: [
@@ -1266,7 +1286,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.2.4",
     date: "2026-07-11",
     sections: [
@@ -1310,7 +1330,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.2.3",
     date: "2026-07-10",
     sections: [
@@ -1330,7 +1350,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.2.2",
     date: "2026-07-10",
     sections: [
@@ -1361,7 +1381,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.2.1",
     date: "2026-07-09",
     sections: [
@@ -1395,7 +1415,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.2.0",
     date: "2026-07-09",
     sections: [
@@ -1418,7 +1438,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.1.7",
     date: "2026-07-09",
     sections: [
@@ -1436,7 +1456,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.1.6",
     date: "2026-07-09",
     sections: [
@@ -1463,7 +1483,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.1.5",
     date: "2026-07-08",
     sections: [
@@ -1479,7 +1499,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.1.4",
     date: "2026-07-08",
     sections: [
@@ -1499,7 +1519,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.1.3",
     date: "2026-07-08",
     sections: [
@@ -1534,7 +1554,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.1.2",
     date: "2026-07-08",
     sections: [
@@ -1555,7 +1575,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.1.1",
     date: "2026-07-07",
     sections: [
@@ -1589,7 +1609,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.1.0",
     date: "2026-07-07",
     sections: [

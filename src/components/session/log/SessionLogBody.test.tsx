@@ -1,8 +1,19 @@
 import { fireEvent, render, screen, within } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { MantineProvider } from "@mantine/core";
+import type { ReactElement } from "react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { AnnotationRecord } from "@/domain/map/annotations";
 import type { SessionActivityEvent } from "@/domain/session/activity/sessionActivityLog";
+import { jetlagTheme } from "@/theme/theme";
 import { SessionLogBody } from "./SessionLogBody";
+
+function renderUi(ui: ReactElement) {
+  return render(
+    <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
+      {ui}
+    </MantineProvider>,
+  );
+}
 
 function annotation(id: string): AnnotationRecord {
   return {
@@ -31,8 +42,20 @@ function event(
 }
 
 describe("SessionLogBody", () => {
-  it("sorts by createdAt newest-first even when props are shuffled", () => {
-    render(
+  beforeEach(() => {
+    vi.stubGlobal("matchMedia", (query: string) => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    }));
+  });
+  it("sorts by createdAt oldest-first even when props are shuffled", () => {
+    renderUi(
       <SessionLogBody
         events={[
           event({
@@ -65,14 +88,14 @@ describe("SessionLogBody", () => {
       /^(Session started|Hiding timer started|Seeking started)$/,
     );
     expect(summaries.map((el) => el.textContent)).toEqual([
-      "Seeking started",
-      "Hiding timer started",
       "Session started",
+      "Hiding timer started",
+      "Seeking started",
     ]);
   });
 
   it("has no filter controls", () => {
-    render(
+    renderUi(
       <SessionLogBody
         events={[]}
         annotations={[]}
@@ -86,7 +109,7 @@ describe("SessionLogBody", () => {
   });
 
   it("shows empty copy when there is no activity", () => {
-    render(
+    renderUi(
       <SessionLogBody
         events={[]}
         annotations={[]}
@@ -99,7 +122,7 @@ describe("SessionLogBody", () => {
   });
 
   it("hides Edit/Delete when readOnly", () => {
-    render(
+    renderUi(
       <SessionLogBody
         events={[
           event({
@@ -130,7 +153,7 @@ describe("SessionLogBody", () => {
     const onEdit = vi.fn();
     const onDelete = vi.fn();
 
-    render(
+    renderUi(
       <SessionLogBody
         events={[
           event({
@@ -159,7 +182,7 @@ describe("SessionLogBody", () => {
   });
 
   it("keeps lifecycle rows read-only (no Edit/Delete)", () => {
-    render(
+    renderUi(
       <SessionLogBody
         events={[
           event({
@@ -182,7 +205,7 @@ describe("SessionLogBody", () => {
   it("calls onSelect with annotationId when a linked row is clicked", () => {
     const onSelect = vi.fn();
 
-    render(
+    renderUi(
       <SessionLogBody
         events={[
           event({
@@ -206,9 +229,55 @@ describe("SessionLogBody", () => {
     );
 
     const row = screen.getByRole("button", {
-      name: /answered/i,
+      name: /within range/i,
     });
     fireEvent.click(row);
+    expect(onSelect).toHaveBeenCalledWith("ann-1");
+  });
+
+  it("consolidates ask + answer into one selectable plate", () => {
+    const onSelect = vi.fn();
+
+    renderUi(
+      <SessionLogBody
+        events={[
+          event({
+            id: "ask",
+            type: "question_asked",
+            createdAt: "2026-07-25T12:00:00.000Z",
+            payload: {
+              toolType: "radar",
+              promptText: "Within range?",
+              pendingQuestionId: "pq-1",
+            },
+          }),
+          event({
+            id: "answered",
+            type: "question_answered",
+            createdAt: "2026-07-25T12:01:00.000Z",
+            payload: {
+              toolType: "radar",
+              promptText: "Within range?",
+              pendingQuestionId: "pq-1",
+              annotationId: "ann-1",
+              answerSummary: "Yes",
+            },
+          }),
+        ]}
+        annotations={[annotation("ann-1")]}
+        onDelete={vi.fn()}
+        onEdit={vi.fn()}
+        onSelect={onSelect}
+        readOnly
+      />,
+    );
+
+    expect(screen.getByText("Within range?")).toBeInTheDocument();
+    expect(screen.getByText("Yes")).toBeInTheDocument();
+    expect(screen.queryByText(/^asked$/i)).toBeNull();
+    expect(screen.queryByText(/^answered$/i)).toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: /within range/i }));
     expect(onSelect).toHaveBeenCalledWith("ann-1");
   });
 
@@ -216,7 +285,7 @@ describe("SessionLogBody", () => {
     const deleted = annotation("ann-1");
     deleted.status = "deleted";
 
-    const { container } = render(
+    const { container } = renderUi(
       <SessionLogBody
         events={[
           event({

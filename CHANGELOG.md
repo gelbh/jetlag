@@ -6,6 +6,18 @@
 
 - Geometry kernel (G5e): production always uses the WASM geometry kernel; client localStorage/env override removed. Wasm dispatch failures rethrow instead of silent TypeScript fail-soft.
 
+## 0.14.0 - 2026-09-27
+
+### Fixes
+
+- Measuring: closer/further answers keep map shade after confirm in multiplayer, even when the region is too large to store as a polygon
+
+### Improvements
+
+- Land Mantine player UI through Wave 4 (entry chrome, tool hosts, map islands).
+- Tentacles: recommended answers use the hiding-zone center unless the seeker is actually inside the zone
+- Map chrome: full-bleed hunt tool deck with even tool spacing and shared safe-area overlay padding.
+
 ## 0.13.0 - 2026-08-16
 
 ### Fixes
@@ -17,10 +29,10 @@
 
 ### Improvements
 
-- Survey field-book is now the default player look on web and PWA. The old Broadcast HUD dual path and PostHog world flag are gone.
+- iOS Mantine is now the default player look on web and PWA. The old dual path and PostHog player-ux world flag are gone; stale jl.playerUi.mantine localStorage is ignored.
 - Live map: clearer status strip and stake-plate tool islands outdoors (plain labels, sync text with icon, simpler landscape controls)
-- Live map: question ask HUD and map sheets use the Survey field-book look (plain labels, stake-plate sheets)
-- Home and secondary screens use the Survey field-book look, with a shared empty state for lists and recovery copy
+- Live map: question ask HUD and map sheets use the iOS Mantine player look (plain labels, stake-plate sheets)
+- Home and secondary screens use the iOS Mantine player look, with a shared empty state for lists and recovery copy
 - Measuring: shows a quick outline of the shaded area, then adds detail, and no longer blocks with "too complex" on preview
 - Matching: every island and admin area in the play area can be used, not a hidden 50-area cut
 - Tentacle locations: keep the place list within the map rail so previews stay visible, and tap a confirmed place on the map to select it
@@ -118,8 +130,8 @@
 
 ### Technical
 
-- Measuring near-regions (coastlines and multi-place disks) run on the WASM geometry kernel by default.
-- Spatial Voronoi runs on WASM by default.
+- Measuring near-regions (coastlines and multi-place disks) run on the WASM geometry kernel by default, with TypeScript fallback.
+- Spatial Voronoi runs on WASM by default (TS d3-delaunay fallback on failure)
 
 ## 0.11.0 - 2026-08-02
 
@@ -142,8 +154,8 @@
 - Privacy: name Nominatim, Esri, Open-Meteo, USGS, Transitland/TfL/CTA, Cloudflare, and Resend among third parties
 - Privacy: name OpenFreeMap instead of CARTO for street map tiles
 - Map settings: show Esri attribution when satellite basemap is selected
-- End-game disk elimination masks use the WASM geometry kernel when available
-- Tentacle elimination shading now uses the Rust geometry kernel by default
+- End-game disk elimination masks use the WASM geometry kernel when available (override with `jl.geometry.maskKernel=ts`)
+- Tentacle elimination shading now uses the Rust geometry kernel by default (override with `jl.geometry.maskKernel=ts`)
 
 ### Fixes
 
@@ -250,8 +262,8 @@
 
 ### Technical
 
-- Map: elimination masks use the WASM geometry kernel by default.
-- Enable the WASM geometry kernel for radar/half-plane shading.
+- Map: elimination masks use the WASM geometry kernel by default; set `jl.geometry.maskKernel=ts` (or the env override) to force TypeScript.
+- Enable the WASM geometry kernel for radar/half-plane shading (still overridable via `jl.geometry.maskKernel` / env). Measuring geodesic buffers stay on TypeScript until their ready flip.
 
 ## 0.9.5 - 2026-07-25
 

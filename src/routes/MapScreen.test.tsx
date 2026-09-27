@@ -14,6 +14,11 @@ vi.mock("../components/incident/HotfixGraceChip", () => ({
   HotfixGraceChip: () => null,
 }));
 
+vi.mock("../components/map/helpers/useMapLibreMap", () => ({
+  useMapLibreMap: () => ({ current: null }),
+  useMapLibreMapSafe: () => null,
+}));
+
 vi.mock("../components/map/chrome/MapView", () => ({
   MapView: ({ children }: { children?: React.ReactNode }) => (
     <div data-testid="map-screen-view">{children}</div>
@@ -54,25 +59,6 @@ vi.mock("../hooks/session/useSessionEndedRedirect", () => ({
 
 vi.mock("../hooks/location/useWakeLock", () => ({
   useWakeLock: () => undefined,
-}));
-
-vi.mock("../hooks/session/useSessionNotifications", () => ({
-  useSessionNotifications: () => ({
-    nativeSupported: false,
-    notificationPreferences: {
-      enabled: false,
-      newQuestions: true,
-      timerChanges: true,
-      chatMessages: false,
-      liveActivities: true,
-    },
-    enableNotifications: vi.fn(),
-    updateNotificationPreferences: vi.fn(),
-  }),
-}));
-
-vi.mock("../hooks/sync/useLiveActivitySync", () => ({
-  useLiveActivitySync: () => undefined,
 }));
 
 vi.mock("../services/geo/matching/resolveSessionMatchingAreas", async (importOriginal) => {

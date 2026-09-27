@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, screen } from "@testing-library/react";
+import { renderWithAppUi } from "../../test/renderWithAppUi";
 import type { DistanceUnit } from "../../domain/map/distance";
 import type { GameSize } from "../../domain/session/size/gameSize";
 import type { RadarDistanceOptionKey } from "../../domain/questions";
@@ -31,7 +32,7 @@ function advanceToAskPhase() {
 
 describe("RadarPanel ask-phase commit chrome", () => {
   it("exposes exactly one Add radar question control", () => {
-    render(
+    renderWithAppUi(
       <RadarPanel {...baseProps} answer="yes" />,
     );
 
@@ -43,7 +44,7 @@ describe("RadarPanel ask-phase commit chrome", () => {
   });
 
   it("exposes exactly one Send to hiders control in multiplayer ask", () => {
-    render(
+    renderWithAppUi(
       <RadarPanel
         {...baseProps}
         answer={null}

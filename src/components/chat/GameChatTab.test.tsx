@@ -1,4 +1,5 @@
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
+import { renderWithAppUi } from "../../test/renderWithAppUi";
 import { describe, expect, it, vi } from "vitest";
 import { GameChatTab } from "./GameChatTab";
 import type {
@@ -44,7 +45,7 @@ const questionMessage: SessionMessageRecord = {
 
 describe("GameChatTab", () => {
   it("shows draw and pick summary to hiders only", () => {
-    render(
+    renderWithAppUi(
       <GameChatTab
         messages={[questionMessage]}
         pendingQuestions={[pendingQuestion]}
@@ -60,7 +61,7 @@ describe("GameChatTab", () => {
   });
 
   it("hides draw and pick summary from seekers", () => {
-    render(
+    renderWithAppUi(
       <GameChatTab
         messages={[questionMessage]}
         pendingQuestions={[pendingQuestion]}
@@ -78,7 +79,7 @@ describe("GameChatTab", () => {
 
   it("shows dismiss for seekers on expired pending questions", () => {
     const onDismiss = vi.fn();
-    render(
+    renderWithAppUi(
       <GameChatTab
         messages={[questionMessage]}
         pendingQuestions={[
@@ -102,7 +103,7 @@ describe("GameChatTab", () => {
   });
 
   it("hides dismiss from hiders", () => {
-    render(
+    renderWithAppUi(
       <GameChatTab
         messages={[questionMessage]}
         pendingQuestions={[
@@ -126,7 +127,7 @@ describe("GameChatTab", () => {
   });
 
   it("hides waiting copy when the question was cancelled", () => {
-    render(
+    renderWithAppUi(
       <GameChatTab
         messages={[{ ...questionMessage, status: "cancelled" }]}
         pendingQuestions={[{ ...pendingQuestion, status: "cancelled" }]}
