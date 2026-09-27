@@ -1,6 +1,5 @@
 import {
   Button,
-  Group,
   SegmentedControl,
   SimpleGrid,
   Stack,
@@ -223,14 +222,14 @@ export function PremiumTierCards({
             disabled={portalLoading}
             onClick={onPortal}
           >
-            <Group justify="space-between" wrap="nowrap" w="100%">
+            <Stack gap={2} align="flex-start" w="100%">
               <Text size="sm" fw={600} c="var(--color-field-ink)">
                 Manage subscription
               </Text>
               <Text size="xs" c="var(--color-field-ink-muted)">
                 {portalLoading ? "Opening…" : "Billing portal"}
               </Text>
-            </Group>
+            </Stack>
           </Button>
         ) : null}
 
@@ -242,14 +241,14 @@ export function PremiumTierCards({
             styles={filledStyles}
             aria-label="Create premium session"
           >
-            <Group justify="space-between" wrap="nowrap" w="100%">
+            <Stack gap={2} align="flex-start" w="100%">
               <Text size="sm" fw={600} c="var(--color-ink)">
                 Create premium session
               </Text>
               <Text size="xs" c="oklch(from var(--color-ink) l c h / 0.72)">
                 {createSessionHint}
               </Text>
-            </Group>
+            </Stack>
           </Button>
         ) : null}
       </Stack>
