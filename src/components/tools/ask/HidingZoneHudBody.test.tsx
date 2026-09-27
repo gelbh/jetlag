@@ -1,4 +1,5 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, screen } from "@testing-library/react";
+import { renderWithAppUi } from "../../../test/renderWithAppUi";
 import { describe, expect, it, vi } from "vitest";
 import { AskHudHost } from "./AskHudHost";
 import { HidingZoneHudBody } from "./HidingZoneHudBody";
@@ -38,7 +39,7 @@ describe("HidingZoneHudBody", () => {
     const choosePlacementMethod = vi.fn();
     const onSearchThisArea = vi.fn();
 
-    render(
+    renderWithAppUi(
       <HidingZoneHudBody
         moveMode={false}
         radiusLabel="200 m"
@@ -71,7 +72,7 @@ describe("HidingZoneHudBody", () => {
     expect(canCommit(readiness)).toBe(true);
 
     const onCommit = vi.fn();
-    render(
+    renderWithAppUi(
       <AskHudHost
         cue="READY TO CONFIRM"
         toolLabel="Hiding zone"
@@ -109,7 +110,7 @@ describe("HidingZoneHudBody", () => {
 
   it("searches stations only via frame-search control after Station method", () => {
     const onSearchThisArea = vi.fn();
-    render(
+    renderWithAppUi(
       <HidingZoneHudBody
         moveMode={false}
         radiusLabel="200 m"
@@ -130,7 +131,7 @@ describe("HidingZoneHudBody", () => {
 
   it("lets confirm-step clear station to pick another", () => {
     const clearStationSelection = vi.fn();
-    render(
+    renderWithAppUi(
       <HidingZoneHudBody
         moveMode
         radiusLabel="200 m"

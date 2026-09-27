@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useMemo, useRef, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { ThermometerHudBody } from "../../components/tools/ask/ThermometerHudBody";
+import { ThermometerMapPlacementChrome } from "../../components/tools/ask/ThermometerMapPlacementChrome";
 import { ThermometerPanel } from "../../components/tools/ThermometerPanel";
 import type { AskHudReadiness } from "../../domain/ask/askHudModes";
 import type { AskToolHudBundle } from "../map-screen/heavyMapTools";
@@ -13,9 +14,11 @@ import {
   isThermometerWalkActive,
   parseThermometerStartPoint,
   questionCostBreakdown,
+  thermometerQuestionPrompt,
   thermometerUseCount,
   thermometerUseCountFromPending,
 } from "../../domain/questions";
+import { formatPresetDistance } from "../../domain/map/distance";
 import { useLiveLocation } from "../location/useLiveLocation";
 import { useThermometerWalk } from "./useThermometerWalk";
 import { useToolSession } from "./framework/useToolSession";
@@ -66,6 +69,7 @@ export function useThermometerTool({
   ensurePointInGameArea,
 }: UseThermometerToolParams) {
   const wizardStepRef = useRef("place");
+  const [editingSetup, setEditingSetup] = useState(true);
   const finishPlacementRef = useRef(finishPlacement);
   const resetAfterSuccessRef = useRef(() => undefined as void);
 
@@ -284,6 +288,7 @@ export function useThermometerTool({
   });
 
   const resetDraft = useCallback(() => {
+    setEditingSetup(true);
     walkTracker.cancelWalk();
     session.open();
   }, [session.open, walkTracker]);
@@ -409,18 +414,88 @@ export function useThermometerTool({
     void commit();
   };
 
+  /**
+   * Manual: leave the sheet after mode/distance so pins can be tapped on the map.
+   * GPS setup + live walk stay on the sheet; answer chrome only once pins exist.
+   */
+  /** After distance pick: map for GPS start or manual pins (Matching/Radar twin). */
+  const mapFirstEligible = !walkingActive && !editingSetup;
+  const mapPlacementActive = Boolean(mapFirstEligible);
+
+  const travelLabel =
+    liveTravelMeters !== null
+      ? formatPresetDistance(liveTravelMeters, distanceUnit)
+      : null;
+  const distanceLabel = formatPresetDistance(
+    activeDistanceMeters,
+    distanceUnit,
+  );
+
+  const canCommitThermo =
+    configureReady &&
+    pinsReady &&
+    canSubmitQuestion &&
+    !session.isBusy &&
+    (awaitHiderAnswer || config.answer !== null);
+
+  const reopenSetup = () => {
+    setEditingSetup(true);
+    patchConfig({ localThermoA: null, thermoB: null, answer: null });
+  };
+
+  const setPlacementMode = (placementMode: ThermometerSessionConfig["placementMode"]) => {
+    patchConfig({ placementMode });
+  };
+
+  const setDistanceMeters = (distanceMeters: number) => {
+    patchConfig({ distanceMeters });
+    setEditingSetup(false);
+  };
+
   const hud: AskToolHudBundle = {
     readiness,
     costLabel,
-    error:
-      config.panelError ?? session.error ?? gpsError ?? walkTracker.gpsError,
+    error: mapPlacementActive
+      ? null
+      : (config.panelError ??
+        session.error ??
+        gpsError ??
+        walkTracker.gpsError),
     onCommit: onHudCommit,
     commitKind: walkingActive
       ? "endWalk"
       : awaitHiderAnswer
         ? "send"
         : "ask",
-    modeBody: (
+    suppressSheet: mapPlacementActive,
+    mapOverlay: mapPlacementActive ? (
+      <ThermometerMapPlacementChrome
+        distanceLabel={distanceLabel}
+        questionPrompt={thermometerQuestionPrompt(
+          activeDistanceMeters,
+          distanceUnit,
+        )}
+        costLabel={costLabel}
+        pinStep={thermoStep === "walking" ? "b" : thermoStep === "ready" ? "ready" : thermoStep}
+        placementMode={config.placementMode}
+        onPlacementModeChange={setPlacementMode}
+        onStartWalk={startWalkLocked}
+        gpsLoading={gpsLoading}
+        canStartWalk={
+          distanceAvailable && canSubmitQuestion && !session.isBusy
+        }
+        travelLabel={travelLabel}
+        travelTooShort={travelTooShort}
+        awaitHiderAnswer={awaitHiderAnswer}
+        answer={config.answer}
+        onAnswerChange={(answer) => patchConfig({ answer })}
+        canCommit={canCommitThermo}
+        isSubmitting={session.isBusy}
+        onCommit={() => void commit()}
+        onChangeSetup={reopenSetup}
+      />
+    ) : null,
+    modeBody: mapPlacementActive ? null : (
       <ThermometerHudBody
         distanceUnit={distanceUnit}
         sessionRules={sessionRules}
@@ -438,14 +513,13 @@ export function useThermometerTool({
         error={
           config.panelError ?? session.error ?? gpsError ?? walkTracker.gpsError
         }
-        onPlacementModeChange={(placementMode) =>
-          patchConfig({ placementMode })
-        }
-        onDistanceChange={(distanceMeters) => patchConfig({ distanceMeters })}
+        onPlacementModeChange={setPlacementMode}
+        onDistanceChange={setDistanceMeters}
         onAnswerChange={(answer) => patchConfig({ answer })}
         onReset={resetDraft}
         onStartWalk={startWalkLocked}
         awaitHiderAnswer={awaitHiderAnswer}
+        toolLabel="Thermometer"
       />
     ),
     sheets: null as ReactNode,
@@ -476,10 +550,8 @@ export function useThermometerTool({
         costLabel={costLabel}
         placementMode={config.placementMode}
         walkingActive={thermoStep === "walking"}
-        onPlacementModeChange={(placementMode) =>
-          patchConfig({ placementMode })
-        }
-        onDistanceChange={(distanceMeters) => patchConfig({ distanceMeters })}
+        onPlacementModeChange={setPlacementMode}
+        onDistanceChange={setDistanceMeters}
         onAnswerChange={(answer) => patchConfig({ answer })}
         onReset={resetDraft}
         onStartWalk={startWalkLocked}

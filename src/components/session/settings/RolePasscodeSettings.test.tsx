@@ -1,4 +1,5 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, screen, waitFor } from "@testing-library/react";
+import { renderWithAppUi } from "../../../test/renderWithAppUi";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createTestRemoteSession } from "@/test/fixtures/sessions";
 import { RolePasscodeSettings } from "./RolePasscodeSettings";
@@ -44,7 +45,7 @@ describe("RolePasscodeSettings", () => {
   it("reveals into stamp then copies on stamp tap", async () => {
     revealRolePasscode.mockResolvedValue({ rolePasscode: "WXYZ" });
 
-    render(
+    renderWithAppUi(
       <RolePasscodeSettings
         session={gatedSession}
         myUid="host-1"

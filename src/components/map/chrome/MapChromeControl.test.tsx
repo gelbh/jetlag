@@ -1,11 +1,34 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { MantineProvider } from "@mantine/core";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { jetlagTheme } from "@/theme/theme";
 import { MapChromeControl } from "./MapChromeControl";
+
+beforeEach(() => {
+  vi.stubGlobal("matchMedia", (query: string) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener() {},
+    removeListener() {},
+    addEventListener() {},
+    removeEventListener() {},
+    dispatchEvent: () => false,
+  }));
+});
+
+function renderControl(ui: React.ReactElement) {
+  return render(
+    <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
+      {ui}
+    </MantineProvider>,
+  );
+}
 
 describe("MapChromeControl", () => {
   it("renders a floating chrome button with icon slot and fires click", () => {
     const onClick = vi.fn();
-    render(
+    renderControl(
       <MapChromeControl
         aria-label="Zoom in"
         icon={<span data-testid="icon">+</span>}
@@ -50,7 +73,7 @@ describe("MapChromeControl", () => {
   });
 
   it("renders a side-dock slot with icon and label", () => {
-    render(
+    renderControl(
       <MapChromeControl
         variant="slot"
         aria-label="Recenter map on play area"
@@ -65,12 +88,14 @@ describe("MapChromeControl", () => {
     expect(button).toHaveClass("jl-tool-slot");
     expect(button).not.toHaveClass("map-chrome-control");
     expect(screen.getByTestId("slot-icon")).toBeInTheDocument();
-    expect(screen.getByText("Recenter")).toHaveClass("jl-tool-slot-label");
+    expect(screen.getByText("Recenter").getAttribute("data-ios-tool-label")).toBe(
+      "",
+    );
   });
 
   it("fires clicks and honors disabled for side-dock slots", () => {
     const onClick = vi.fn();
-    const { rerender } = render(
+    const { rerender } = renderControl(
       <MapChromeControl
         variant="slot"
         aria-label="Open chat"
@@ -84,14 +109,16 @@ describe("MapChromeControl", () => {
     expect(onClick).toHaveBeenCalledTimes(1);
 
     rerender(
-      <MapChromeControl
-        variant="slot"
-        aria-label="Open chat"
-        icon={<span>chat</span>}
-        label="Chat"
-        disabled
-        onClick={onClick}
-      />,
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
+        <MapChromeControl
+          variant="slot"
+          aria-label="Open chat"
+          icon={<span>chat</span>}
+          label="Chat"
+          disabled
+          onClick={onClick}
+        />
+      </MantineProvider>,
     );
 
     const button = screen.getByRole("button", { name: "Open chat" });
@@ -131,5 +158,48 @@ describe("MapChromeControl", () => {
     expect(button).toBeDisabled();
     fireEvent.click(button);
     expect(onClick).not.toHaveBeenCalled();
+  });
+
+  it("mounts Mantine slot chrome", () => {
+    render(
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
+        <MapChromeControl
+          variant="slot"
+          aria-label="Matching"
+          icon={<span data-testid="mantine-slot-icon">m</span>}
+          label="Match"
+          pressed
+        />
+      </MantineProvider>,
+    );
+
+    const button = screen.getByRole("button", { name: "Matching" });
+    expect(button).toHaveClass("jl-tool-slot");
+    expect(button).not.toHaveClass("jl-tool-slot-active");
+    expect(button).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByTestId("mantine-slot-icon")).toBeInTheDocument();
+    expect(screen.getByText("Match")).not.toHaveClass("jl-tool-slot-label");
+    expect(screen.getByText("Match").getAttribute("data-ios-tool-label")).toBe(
+      "",
+    );
+    expect(button.getAttribute("data-ios-tool-tone")).toBe("tool");
+  });
+
+  it("marks history tone on undo-style slots", () => {
+    render(
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
+        <MapChromeControl
+          variant="slot"
+          tone="history"
+          aria-label="Undo last annotation"
+          icon={<span>u</span>}
+          label="Undo"
+        />
+      </MantineProvider>,
+    );
+
+    expect(
+      screen.getByRole("button", { name: "Undo last annotation" }),
+    ).toHaveAttribute("data-ios-tool-tone", "history");
   });
 });

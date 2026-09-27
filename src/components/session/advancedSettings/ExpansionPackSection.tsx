@@ -1,3 +1,8 @@
+import {
+  AdvancedSettingsCategory,
+  AdvancedSettingsInset,
+  AdvancedSettingsToggle,
+} from "./shared";
 import type { AdvancedSettingsSectionProps } from "./types";
 
 export function ExpansionPackSection({
@@ -6,110 +11,68 @@ export function ExpansionPackSection({
   disabled,
 }: AdvancedSettingsSectionProps) {
   return (
-    <fieldset
-      disabled={disabled}
-      className="space-y-3 rounded-[var(--radius-hud-md)] border border-border p-3 disabled:opacity-50"
+    <AdvancedSettingsCategory
+      title="Expansion & custom packs"
+      defaultOpen={false}
     >
-      <legend className="px-1 font-display text-xs font-semibold uppercase tracking-[0.1em] text-ink-dim">
-        Expansion & custom packs
-      </legend>
-      <label className="flex min-h-11 items-center gap-3">
-        <input
-          type="checkbox"
+      <AdvancedSettingsInset>
+        <AdvancedSettingsToggle
           checked={value.expansionPackEnabled}
           disabled={disabled}
-          onChange={(event) =>
-            onChange({
-              ...value,
-              expansionPackEnabled: event.target.checked,
-            })
+          label="Expansion Pack Vol. 1"
+          description="Time traps + curse reference"
+          onChange={(expansionPackEnabled) =>
+            onChange({ ...value, expansionPackEnabled })
           }
-          className="h-4 w-4"
         />
-        <span className="text-sm text-ink-secondary">
-          Expansion Pack Vol. 1 (time traps + curse reference)
-        </span>
-      </label>
-      <label className="flex min-h-11 items-center gap-3">
-        <input
-          type="checkbox"
+        <AdvancedSettingsToggle
           checked={value.boardEconomyEnabled}
           disabled={disabled}
-          onChange={(event) =>
-            onChange({
-              ...value,
-              boardEconomyEnabled: event.target.checked,
-            })
+          label="Simulate hider deck"
+          description="Hand, rewards, power-ups"
+          showSeparator
+          onChange={(boardEconomyEnabled) =>
+            onChange({ ...value, boardEconomyEnabled })
           }
-          className="h-4 w-4"
         />
-        <span className="text-sm text-ink-secondary">
-          Simulate hider deck (hand, rewards, power-ups)
-        </span>
-      </label>
-      {value.boardEconomyEnabled ? (
-        <div className="rounded-[var(--radius-hud-md)] border border-border bg-surface-raised px-3 py-2 text-xs text-ink-muted">
-          <p className="font-semibold text-ink-secondary">Board hand</p>
-          <p className="mt-1">
+        {value.boardEconomyEnabled ? (
+          <p className="px-4 pb-3 text-xs leading-snug text-[var(--color-field-ink-muted)]">
             Host can enable before the hide timer starts. Hiders draw and manage
             a physical-style hand after answering questions.
           </p>
-        </div>
-      ) : null}
-      <label className="flex min-h-11 items-center gap-3">
-        <input
-          type="checkbox"
+        ) : null}
+        <AdvancedSettingsToggle
           checked={value.customQuestionPackEnabled}
           disabled={disabled}
-          onChange={(event) =>
-            onChange({
-              ...value,
-              customQuestionPackEnabled: event.target.checked,
-            })
+          label="Custom question pack"
+          description="7-Eleven, letter zone, major city, etc."
+          showSeparator
+          onChange={(customQuestionPackEnabled) =>
+            onChange({ ...value, customQuestionPackEnabled })
           }
-          className="h-4 w-4"
         />
-        <span className="text-sm text-ink-secondary">
-          Custom question pack (7-Eleven, letter zone, major city, etc.)
-        </span>
-      </label>
-      <label className="flex min-h-11 items-center gap-3">
-        <input
-          type="checkbox"
+        <AdvancedSettingsToggle
           checked={value.previewQuestionBeforeSend}
           disabled={disabled}
-          onChange={(event) =>
-            onChange({
-              ...value,
-              previewQuestionBeforeSend: event.target.checked,
-            })
+          label="Preview question before send"
+          showSeparator
+          onChange={(previewQuestionBeforeSend) =>
+            onChange({ ...value, previewQuestionBeforeSend })
           }
-          className="h-4 w-4"
         />
-        <span className="text-sm text-ink-secondary">
-          Preview question before send
-        </span>
-      </label>
-      {value.expansionPackEnabled ? (
-        <div className="rounded-[var(--radius-hud-md)] border border-border bg-surface-raised px-3 py-2 text-xs text-ink-muted">
-          <p className="font-semibold text-ink-secondary">
-            Expansion Pack Vol. 1
-          </p>
-          <p className="mt-1">
+        {value.expansionPackEnabled ? (
+          <p className="px-4 pb-3 text-xs leading-snug text-[var(--color-field-ink-muted)]">
             Time traps on transit stations and a searchable curse reference (30
             curses, rules text only).
           </p>
-        </div>
-      ) : null}
-      {value.customQuestionPackEnabled ? (
-        <div className="rounded-[var(--radius-hud-md)] border border-border bg-surface-raised px-3 py-2 text-xs text-ink-muted">
-          <p className="font-semibold text-ink-secondary">Custom question pack</p>
-          <p className="mt-1">
+        ) : null}
+        {value.customQuestionPackEnabled ? (
+          <p className="px-4 pb-3 text-xs leading-snug text-[var(--color-field-ink-muted)]">
             Adds matching, measuring, and photo prompts such as 7-Eleven, letter
             zone, and major city.
           </p>
-        </div>
-      ) : null}
-    </fieldset>
+        ) : null}
+      </AdvancedSettingsInset>
+    </AdvancedSettingsCategory>
   );
 }

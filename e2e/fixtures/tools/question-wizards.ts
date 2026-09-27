@@ -33,7 +33,11 @@ export async function wizardNavFingerprint(page: Page): Promise<string> {
 }
 
 export async function expectAskHud(page: Page) {
-  await expect(page.getByTestId("ask-hud-host")).toBeVisible({
+  // AskHudHost is a zero-size wrapper; Mantine Drawer portals the dialog.
+  await expect(page.getByTestId("ask-hud-host")).toBeAttached({
+    timeout: 15_000,
+  });
+  await expect(page.getByRole("dialog").first()).toBeVisible({
     timeout: 15_000,
   });
 }
@@ -64,9 +68,8 @@ export async function retreatWizard(page: Page) {
 
 /** Clicks an answer option and verifies the tap registered (aria-pressed). */
 export async function chooseAnswer(page: Page, name: string) {
-  const option = page
-    .getByTestId("ask-hud-host")
-    .getByRole("button", { name, exact: true });
+  // Drawer portals out of ask-hud-host — scope to the open dialog / placement chrome.
+  const option = page.getByRole("button", { name, exact: true }).first();
   await expect(option).toBeEnabled({ timeout: 15_000 });
   await option.click();
   await expect(option).toHaveAttribute("aria-pressed", "true");
@@ -85,24 +88,22 @@ export async function waitForMapPlacementCrosshair(page: Page) {
  * unmounts); radar/matching keep "Location locked" in-panel.
  */
 export async function placeAskAnchor(page: Page) {
-  const hud = page.getByTestId("ask-hud-host");
-  await expect(hud).toBeVisible({ timeout: 15_000 });
-  const gps = hud.getByRole("button", { name: /Use my location/i });
+  const gps = page.getByRole("button", { name: /Use my location/i }).first();
   await expect(gps).toBeVisible({ timeout: 15_000 });
   await gps.click();
   await expect
     .poll(
       async () => {
         const locked =
-          (await hud
+          (await page
             .getByText(
-              /Location locked|pinned on the map|Anchor set|Anchor ·/i,
+              /Location locked|pinned on the map|Anchor set|Anchor ·|Center pinned/i,
             )
             .count()) > 0;
         if (locked) return true;
         // Chord advanced past placement (GPS control gone).
         return (
-          (await hud.getByRole("button", { name: /Use my location/i }).count()) ===
+          (await page.getByRole("button", { name: /Use my location/i }).count()) ===
           0
         );
       },
@@ -156,24 +157,38 @@ export const PENDING_QUESTION_TEXT =
   /Are you within|closer to or further|hotter or colder|nearest to|same as my nearest/i;
 
 export async function selectFirstRadarDistance(page: Page) {
-  const hud = page.getByTestId("ask-hud-host");
   // Prefer a mid-row preset — top chips can sit under AskCommitStrip on mobile.
-  const preset = hud.getByRole("button", { name: /^1 Mile$|^1\.6 km$/i });
+  const preset = page.getByRole("button", { name: /^1 Mile$|^1\.6 km$/i });
   await expect(preset).toBeVisible({ timeout: 15_000 });
   await preset.scrollIntoViewIfNeeded();
   await preset.click();
-  await expect(preset).toHaveAttribute("aria-pressed", "true", {
-    timeout: 10_000,
-  });
+  // Catalog-first radar suppresses the sheet as soon as a distance is armed.
 }
 
 export async function completeRadarSolo(page: Page) {
   await clickToolDockButton(page, "Radar");
   await expectAskHud(page);
-  await placeAskAnchor(page);
   await selectFirstRadarDistance(page);
-  await chooseAnswer(page, "Yes");
-  await clickPrimedAsk(page);
+  // Distance pick suppresses the sheet; map-first chrome owns place/answer/send.
+  const placement = page.getByTestId("radar-map-placement");
+  await expect(placement).toBeVisible({ timeout: 15_000 });
+  const gps = placement.getByRole("button", { name: /Use my location/i });
+  if (await gps.isVisible().catch(() => false)) {
+    await gps.click();
+  }
+  // Yes/No live in choices (mid strip). answer slot stays empty until Send arms.
+  await expect(page.getByTestId("radar-map-placement-choices")).toBeVisible({
+    timeout: 20_000,
+  });
+  const yes = page
+    .getByRole("group", { name: "Radar answer" })
+    .getByRole("button", { name: "Yes", exact: true });
+  await yes.click();
+  await expect(yes).toHaveAttribute("aria-pressed", "true");
+  const send = placement.getByRole("button", { name: /^Send$/ });
+  await expect(send).toBeEnabled({ timeout: 15_000 });
+  await send.click();
+  await expect(placement).toBeHidden({ timeout: 30_000 });
   await expectMapHasAnnotations(page);
   await expectEliminationMaskVisible(page);
 }
@@ -181,14 +196,17 @@ export async function completeRadarSolo(page: Page) {
 export async function sendRadarToHiders(page: Page) {
   await clickToolDockButton(page, "Radar");
   await expectAskHud(page);
-  await placeAskAnchor(page);
   await selectFirstRadarDistance(page);
-  await waitForSendToHiders(page);
-  await page.getByRole("button", { name: SEND_TO_HIDERS_BUTTON }).click();
-  await dismissActiveToolPanel(page);
-  await expect(page.getByTestId("ask-hud-host")).toBeHidden({
-    timeout: 15_000,
-  });
+  const placement = page.getByTestId("radar-map-placement");
+  await expect(placement).toBeVisible({ timeout: 15_000 });
+  const gps = placement.getByRole("button", { name: /Use my location/i });
+  if (await gps.isVisible().catch(() => false)) {
+    await gps.click();
+  }
+  const send = placement.getByRole("button", { name: /^Send to hiders$/ });
+  await expect(send).toBeEnabled({ timeout: 20_000 });
+  await send.click();
+  await expect(placement).toBeHidden({ timeout: 30_000 });
 }
 
 async function pickCatalogRow(page: Page, label: RegExp | string) {

@@ -1,8 +1,14 @@
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import { describe, expect, it, vi } from "vitest";
+import { MantineProvider } from "@mantine/core";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { RouteTransitionProvider } from "@/navigation/RouteTransitionContext";
-import { MapStatusRail } from "./MapStatusRail";
+import { jetlagTheme } from "@/theme/theme";
+import {
+  MapStatusRail,
+  type MapStatusRailModel,
+  type MapStatusRailProps,
+} from "./MapStatusRail";
 
 vi.mock("../../../state/mapStore", () => ({
   useMapStore: (selector: (state: { lowPowerMode: boolean }) => unknown) =>
@@ -23,101 +29,137 @@ vi.mock("../../../hooks/map-screen/useLeaderJoinRequests", () => ({
   }),
 }));
 
-describe("MapStatusRail header home", () => {
-  it("renders inline Home in the brand cell by default", () => {
-    render(
+const baseModel: MapStatusRailModel = {
+  sessionCode: "ABCD",
+  activeTool: "none",
+  syncStatus: "synced",
+  queuedWrites: 0,
+  timerState: { accumulatedMs: 0, runningSince: null },
+  timerRunning: false,
+  timerHasStarted: false,
+  canStartGame: false,
+  onStartGame: vi.fn(),
+  onTimerStart: vi.fn(),
+  onTimerPause: vi.fn(),
+  onTimerReset: vi.fn(),
+};
+
+function renderRail(
+  extra?: Partial<MapStatusRailModel> & {
+    headerLeading?: MapStatusRailProps["headerLeading"];
+  },
+) {
+  const { headerLeading, ...modelExtra } = extra ?? {};
+  return render(
+    <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
       <MemoryRouter>
         <RouteTransitionProvider>
           <MapStatusRail
-            sessionCode="ABCD"
-            activeTool="none"
-            syncStatus="synced"
-            queuedWrites={0}
-            timerState={{ accumulatedMs: 0, runningSince: null }}
-            timerRunning={false}
-            timerHasStarted={false}
-            canStartGame={false}
-            onStartGame={vi.fn()}
-            onTimerStart={vi.fn()}
-            onTimerPause={vi.fn()}
-            onTimerReset={vi.fn()}
+            model={{ ...baseModel, ...modelExtra }}
+            headerLeading={headerLeading}
           />
         </RouteTransitionProvider>
-      </MemoryRouter>,
+      </MemoryRouter>
+    </MantineProvider>,
+  );
+}
+
+beforeEach(() => {
+  vi.stubGlobal("matchMedia", (query: string) => ({
+    matches: typeof query === "string" && query.includes("min-width: 380"),
+    media: query,
+    onchange: null,
+    addListener() {},
+    removeListener() {},
+    addEventListener() {},
+    removeEventListener() {},
+    dispatchEvent: () => false,
+  }));
+});
+
+describe("MapStatusRail public props (AC #1)", () => {
+  it("accepts a single model options object plus optional headerLeading", () => {
+    const props: MapStatusRailProps = {
+      model: baseModel,
+    };
+    const keys = Object.keys(props) as Array<keyof MapStatusRailProps>;
+    expect(keys).toEqual(["model"]);
+    expect(keys.length).toBeLessThanOrEqual(10);
+
+    render(
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
+        <MemoryRouter>
+          <RouteTransitionProvider>
+            <MapStatusRail {...props} />
+          </RouteTransitionProvider>
+        </MemoryRouter>
+      </MantineProvider>,
     );
+
+    expect(screen.getByTestId("map-status-rail-mantine")).toBeInTheDocument();
+  });
+});
+
+describe("MapStatusRail header home", () => {
+  it("renders inline Home in the brand cell by default", () => {
+    renderRail();
 
     const home = screen.getByRole("link", { name: "Home" });
     expect(home.closest(".jl-status-header-brand")).toBeTruthy();
   });
+});
 
-  it("keeps ticker-band composition with stamp-code and below-bar sync", () => {
-    const { container } = render(
-      <MemoryRouter>
-        <RouteTransitionProvider>
-          <MapStatusRail
-            sessionCode="ABCD"
-            activeTool="none"
-            syncStatus="synced"
-            queuedWrites={0}
-            timerState={{ accumulatedMs: 0, runningSince: null }}
-            timerRunning={false}
-            timerHasStarted={false}
-            canStartGame
-            onStartGame={vi.fn()}
-            onTimerStart={vi.fn()}
-            onTimerPause={vi.fn()}
-            onTimerReset={vi.fn()}
-          />
-        </RouteTransitionProvider>
-      </MemoryRouter>,
-    );
-
-    expect(container.querySelector(".jl-status-header")).toBeTruthy();
-    expect(screen.getByText("ABCD").closest(".jl-stamp-code")).toBeTruthy();
-    expect(screen.getByRole("button", { name: /start/i }).className).toContain(
-      "jl-status-header-start",
-    );
-    expect(container.querySelector(".jl-sync-map-indicator")).toBeTruthy();
+describe("MapStatusRail Mantine", () => {
+  it("mounts Mantine rail chrome", () => {
+    const { container } = renderRail();
     expect(
-      container.querySelector(".jl-sync-map-indicator")?.closest(".jl-status-header"),
-    ).toBeNull();
+      container.querySelector('[data-testid="map-status-rail-mantine"]'),
+    ).toBeTruthy();
+  });
+
+  it("keeps frosted status bar + Start", () => {
+    const { container } = renderRail({ canStartGame: true });
+    const island = container.querySelector(
+      '[data-testid="tool-status-block-mantine"]',
+    );
+    expect(island).toBeTruthy();
+    expect(
+      island?.querySelector('[data-testid="sync-block-mantine"]'),
+    ).toBeTruthy();
+    expect(
+      island
+        ?.querySelector('[data-testid="sync-block-mantine"]')
+        ?.getAttribute("role"),
+    ).toBe("status");
+    expect(container.querySelector(".jl-status-header")).toBeNull();
+    expect(container.querySelector(".jl-status-bar")).toBeNull();
+    expect(container.querySelector(".jl-ticker")).toBeNull();
+    expect(screen.getByRole("button", { name: /start/i })).toBeInTheDocument();
+    expect(screen.getByText("Ready")).toBeInTheDocument();
+    expect(screen.getByText("ABCD")).toBeInTheDocument();
   });
 });
 
 describe("MapStatusRail inactive chrome", () => {
   it("shows retry and return to join for terminal session errors", () => {
-    render(
-      <MemoryRouter>
-        <RouteTransitionProvider>
-          <MapStatusRail
-            sessionCode="ABCD"
-            activeTool="none"
-            syncStatus="error"
-            queuedWrites={0}
-            message="That session no longer exists."
-            timerState={{ accumulatedMs: 120_000, runningSince: Date.now() - 60_000 }}
-            timerRunning
-            timerHasStarted
-            canStartGame={false}
-            onStartGame={vi.fn()}
-            onTimerStart={vi.fn()}
-            onTimerPause={vi.fn()}
-            onTimerReset={vi.fn()}
-            inactiveChrome
-            terminalSessionError={{
-              title: "Session gone",
-              message: "That session no longer exists.",
-              action: "retry",
-              actionLabel: "Retry",
-              secondaryAction: "rejoin",
-              secondaryActionLabel: "Return to join",
-            }}
-            onSyncErrorAction={vi.fn()}
-            onReturnToJoin={vi.fn()}
-          />
-        </RouteTransitionProvider>
-      </MemoryRouter>,
-    );
+    renderRail({
+      syncStatus: "error",
+      message: "That session no longer exists.",
+      timerState: { accumulatedMs: 120_000, runningSince: Date.now() - 60_000 },
+      timerRunning: true,
+      timerHasStarted: true,
+      inactiveChrome: true,
+      terminalSessionError: {
+        title: "Session gone",
+        message: "That session no longer exists.",
+        action: "retry",
+        actionLabel: "Retry",
+        secondaryAction: "rejoin",
+        secondaryActionLabel: "Return to join",
+      },
+      onSyncErrorAction: vi.fn(),
+      onReturnToJoin: vi.fn(),
+    });
 
     expect(screen.getByRole("button", { name: "Retry" })).toBeInTheDocument();
     expect(
