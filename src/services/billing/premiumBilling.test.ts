@@ -8,7 +8,6 @@ import {
   startPremiumTrial,
 } from "./premiumBilling";
 import { createTestSession } from "../../test/fixtures/sessions";
-import { AUTH_FAILURE_MESSAGE } from "../firestore/sessions/shared";
 
 const { callable, httpsCallable, isFirebaseConfigured } = vi.hoisted(() => {
   const callable = vi.fn();
@@ -198,9 +197,12 @@ describe("premiumBilling", () => {
     expect(callable).toHaveBeenCalledTimes(2);
   });
 
-  it("surfaces auth failure without mapping premium create errors", async () => {
+  it("preserves entitlement denial after auth refresh retry", async () => {
     callable.mockRejectedValue(
-      new FirebaseError("functions/permission-denied", "denied"),
+      new FirebaseError(
+        "functions/permission-denied",
+        "Premium unlock required. Buy a session or subscription first.",
+      ),
     );
 
     await expect(
@@ -214,7 +216,10 @@ describe("premiumBilling", () => {
         distanceUnit: "imperial",
         hostAppVersion: "0.4.0",
       }),
-    ).rejects.toThrow(AUTH_FAILURE_MESSAGE);
+    ).rejects.toThrow(
+      "Premium unlock required. Buy a session or subscription first.",
+    );
+    expect(forceRefreshIdToken).toHaveBeenCalledOnce();
   });
 
   it("creates a premium session from callable payload", async () => {

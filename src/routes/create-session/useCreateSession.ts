@@ -139,6 +139,7 @@ export function useCreateSession() {
   const [hostAuthReady, setHostAuthReady] = useState(
     () => !isFirebaseConfigured(),
   );
+  const [hostAuthError, setHostAuthError] = useState<string | null>(null);
   const { entitlements: premiumEntitlements, refresh: refreshPremiumEntitlements } =
     usePremiumEntitlements();
   const [accessCodeExpanded, setAccessCodeExpanded] = useState(false);
@@ -274,9 +275,27 @@ export function useCreateSession() {
       });
   }, []);
 
+  const bootstrapHostAuth = useCallback(async () => {
+    if (!isFirebaseConfigured()) {
+      return;
+    }
+
+    setHostAuthError(null);
+    try {
+      const user = await ensureAnonymousUser();
+      setHostHasAccessClaim(await hasAccessClaim(user));
+      setHostAuthReady(true);
+    } catch {
+      setHostHasAccessClaim(false);
+      setHostAuthReady(false);
+      setHostAuthError(
+        "Couldn't sign in to create a session. Tap Retry.",
+      );
+    }
+  }, []);
+
   useEffect(() => {
     if (!isFirebaseConfigured()) {
-      setHostAuthReady(true);
       return;
     }
 
@@ -291,10 +310,14 @@ export function useCreateSession() {
 
         setHostHasAccessClaim(await hasAccessClaim(user));
         setHostAuthReady(true);
+        setHostAuthError(null);
       } catch {
         if (!cancelled) {
           setHostHasAccessClaim(false);
           setHostAuthReady(false);
+          setHostAuthError(
+            "Couldn't sign in to create a session. Tap Retry.",
+          );
         }
       }
     })();
@@ -303,6 +326,10 @@ export function useCreateSession() {
       cancelled = true;
     };
   }, []);
+
+  const retryHostAuth = useCallback(() => {
+    void bootstrapHostAuth();
+  }, [bootstrapHostAuth]);
 
   const inferredTransitMetroId = useMemo(() => {
     const gameArea =
@@ -849,6 +876,8 @@ export function useCreateSession() {
     error,
     confirmLabel,
     hostAuthReady,
+    hostAuthError,
+    retryHostAuth,
     resolvedSessionTier,
     visibleTierOptions,
     packCreditsLabel,

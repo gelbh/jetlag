@@ -7,6 +7,14 @@ const getDoc = vi.hoisted(() => vi.fn());
 const setDoc = vi.hoisted(() => vi.fn(async () => undefined));
 const updateDoc = vi.hoisted(() => vi.fn(async () => undefined));
 const deleteDoc = vi.hoisted(() => vi.fn(async () => undefined));
+const batchSet = vi.hoisted(() => vi.fn());
+const batchCommit = vi.hoisted(() => vi.fn(async () => undefined));
+const writeBatch = vi.hoisted(() =>
+  vi.fn(() => ({
+    set: batchSet,
+    commit: batchCommit,
+  })),
+);
 const initSessionRoleGates = vi.hoisted(() => vi.fn());
 const clientEnvUsesFirebaseEmulator = vi.hoisted(() => vi.fn(() => false));
 const forceRefreshIdToken = vi.hoisted(() => vi.fn(async () => undefined));
@@ -17,6 +25,7 @@ vi.mock("../../config/env", () => ({
 
 vi.mock("../core/firebase/firebase", () => ({
   getFirestoreDb: () => ({}),
+  getFirebaseAuth: () => ({ currentUser: null }),
 }));
 
 vi.mock("../session/rolePasscodeLifecycle", () => ({
@@ -45,7 +54,7 @@ vi.mock("firebase/firestore", () => ({
   serverTimestamp: vi.fn(() => ({ __serverTimestamp: true })),
   setDoc,
   updateDoc,
-  writeBatch: vi.fn(),
+  writeBatch,
 }));
 
 import { createRemoteSession } from "./firestoreSessions";
@@ -69,6 +78,7 @@ describe("createRemoteSession role-gate bootstrap", () => {
     clientEnvUsesFirebaseEmulator.mockReturnValue(false);
     getDoc.mockResolvedValue({ exists: () => false });
     setDoc.mockResolvedValue(undefined);
+    batchCommit.mockResolvedValue(undefined);
     forceRefreshIdToken.mockClear();
     initSessionRoleGates.mockResolvedValue({
       observerPasscode: "OBSV",
@@ -83,7 +93,7 @@ describe("createRemoteSession role-gate bootstrap", () => {
 
     expect(initSessionRoleGates).not.toHaveBeenCalled();
     expect(session.roleGates).toBeUndefined();
-    expect(setDoc).toHaveBeenCalled();
+    expect(batchCommit).toHaveBeenCalled();
   });
 
   it("stamps roleGates after successful init outside emulator", async () => {
@@ -97,7 +107,7 @@ describe("createRemoteSession role-gate bootstrap", () => {
   });
 
   it("refreshes auth and retries create writes after permission-denied", async () => {
-    setDoc
+    batchCommit
       .mockRejectedValueOnce(
         new FirebaseError("permission-denied", "Missing or insufficient permissions."),
       )
@@ -108,11 +118,11 @@ describe("createRemoteSession role-gate bootstrap", () => {
     });
 
     expect(forceRefreshIdToken).toHaveBeenCalledOnce();
-    expect(setDoc).toHaveBeenCalledTimes(3);
+    expect(batchCommit).toHaveBeenCalledTimes(2);
   });
 
   it("throws auth failure when create writes stay permission-denied", async () => {
-    setDoc.mockRejectedValue(
+    batchCommit.mockRejectedValue(
       new FirebaseError("permission-denied", "Missing or insufficient permissions."),
     );
 
