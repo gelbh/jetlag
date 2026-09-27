@@ -26,7 +26,17 @@ import { RoleJoinRequestAlert } from "../status/RoleJoinRequestAlert";
 import { SyncBlock } from "../status/SyncBlock";
 import { TimerBlock } from "../status/TimerBlock";
 import { ToolStatusBlock } from "../status/ToolStatusBlock";
-import { SYNC_TONE_CLASSES, syncRailDisplay } from "../status/syncRailDisplay";
+import { syncRailDisplay, type SyncTone } from "../status/syncRailDisplay";
+import {
+  MapFloatSurface,
+  type MapFloatTone,
+} from "../../ui/banners/MapFloatSurface";
+
+const SYNC_BANNER_TONE: Record<SyncTone, MapFloatTone> = {
+  error: "halt",
+  warning: "warn",
+  info: "info",
+};
 
 /** Spec: action / secondaryAction fields → sticky; only toast when action-free. */
 function errorHasActions(error: UserErrorDisplay): boolean {
@@ -320,13 +330,14 @@ export function MapStatusRail({ model, headerLeading }: MapStatusRailProps) {
               onAction={onSyncErrorAction}
             />
           ) : (
-            <p
-              className={`map-float-alert pointer-events-auto mx-3 mt-1.5 border-2 px-3 py-2 text-center text-sm font-semibold text-pretty ${SYNC_TONE_CLASSES[sync.banner.tone].surface} ${SYNC_TONE_CLASSES[sync.banner.tone].border} ${SYNC_TONE_CLASSES[sync.banner.tone].text}`}
+            <MapFloatSurface
+              tone={SYNC_BANNER_TONE[sync.banner.tone]}
               role="status"
               aria-live="polite"
+              className="pointer-events-auto mx-3 mt-1.5 text-center text-sm font-semibold text-pretty"
             >
               {sync.banner.label}
-            </p>
+            </MapFloatSurface>
           )
         ) : null}
 

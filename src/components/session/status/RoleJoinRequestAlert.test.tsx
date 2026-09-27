@@ -1,6 +1,7 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import type { RoleJoinRequest } from "@/domain/session/players/joinRequest";
+import { renderWithAppUi } from "../../../test/renderWithAppUi";
 import { RoleJoinRequestAlert } from "./RoleJoinRequestAlert";
 
 function pendingRequest(
@@ -24,7 +25,7 @@ describe("RoleJoinRequestAlert", () => {
     const onAccept = vi.fn();
     const onDecline = vi.fn();
 
-    render(
+    const { container } = renderWithAppUi(
       <RoleJoinRequestAlert
         request={pendingRequest()}
         onAccept={onAccept}
@@ -41,10 +42,11 @@ describe("RoleJoinRequestAlert", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Decline" }));
     expect(onDecline).toHaveBeenCalledTimes(1);
+    expect(container.innerHTML).not.toMatch(/map-float-alert|btn-primary|btn-secondary/);
   });
 
   it("is hidden when there is no pending request", () => {
-    const { container } = render(
+    renderWithAppUi(
       <RoleJoinRequestAlert
         request={null}
         onAccept={vi.fn()}
@@ -52,11 +54,11 @@ describe("RoleJoinRequestAlert", () => {
       />,
     );
 
-    expect(container).toBeEmptyDOMElement();
+    expect(screen.queryByRole("button", { name: "Accept" })).toBeNull();
   });
 
   it("disables actions while busy", () => {
-    render(
+    renderWithAppUi(
       <RoleJoinRequestAlert
         request={pendingRequest({ role: "hider", identityLabel: "bob" })}
         onAccept={vi.fn()}
@@ -71,7 +73,7 @@ describe("RoleJoinRequestAlert", () => {
   });
 
   it("shows resolve error for the leader", () => {
-    render(
+    renderWithAppUi(
       <RoleJoinRequestAlert
         request={pendingRequest()}
         onAccept={vi.fn()}
