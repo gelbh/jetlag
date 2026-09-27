@@ -18,19 +18,12 @@ const sampleFeature = {
 
 const buildMaskFromUnionInput = vi.fn(async () => sampleFeature);
 const buildEndGameMaskFromDisks = vi.fn(async () => sampleFeature);
-const getClientEnv = vi.fn(() => ({
-  VITE_GEOMETRY_MASK_KERNEL: undefined as string | undefined,
-}));
 
 vi.mock("comlink", () => ({
   wrap: vi.fn(() => ({
     buildMaskFromUnionInput,
     buildEndGameMaskFromDisks,
   })),
-}));
-
-vi.mock("@/config/env", () => ({
-  getClientEnv: () => getClientEnv(),
 }));
 
 import * as workerClient from "./eliminationMaskWorkerClient";
@@ -58,11 +51,6 @@ describe("eliminationMaskWorkerClient", () => {
     onMessageErrorHandler = null;
     buildMaskFromUnionInput.mockClear();
     buildEndGameMaskFromDisks.mockClear();
-    getClientEnv.mockReset();
-    getClientEnv.mockReturnValue({
-      VITE_GEOMETRY_MASK_KERNEL: undefined,
-    });
-    localStorage.removeItem("jl.geometry.maskKernel");
 
     class MockWorker {
       terminate = terminateSpy;
@@ -80,12 +68,9 @@ describe("eliminationMaskWorkerClient", () => {
     vi.stubGlobal("Worker", MockWorker);
     workerClient.resetEliminationMaskWorkerForTests();
     vi.clearAllMocks();
-    getClientEnv.mockReturnValue({
-      VITE_GEOMETRY_MASK_KERNEL: undefined,
-    });
   });
 
-  it("requests combined elimination mask from the worker", async () => {
+  it("requests combined elimination mask from the worker with wasm mode", async () => {
     const result = await workerClient.requestCombinedEliminationMask(
       [],
       gameArea,
@@ -105,39 +90,7 @@ describe("eliminationMaskWorkerClient", () => {
     expect(buildEndGameMaskFromDisks).not.toHaveBeenCalled();
   });
 
-  it("passes env mask kernel mode to the worker", async () => {
-    getClientEnv.mockReturnValue({
-      VITE_GEOMETRY_MASK_KERNEL: "wasm",
-    });
-
-    await workerClient.requestCombinedEliminationMask([], gameArea, [], []);
-
-    expect(buildMaskFromUnionInput).toHaveBeenCalledWith(
-      expect.any(Object),
-      gameArea,
-      "wasm",
-    );
-  });
-
-  it("maps localStorage dual to wasm for the worker", async () => {
-    getClientEnv.mockReturnValue({
-      VITE_GEOMETRY_MASK_KERNEL: "ts",
-    });
-    localStorage.setItem("jl.geometry.maskKernel", "dual");
-
-    await workerClient.requestCombinedEliminationMask([], gameArea, [], []);
-
-    expect(buildMaskFromUnionInput).toHaveBeenCalledWith(
-      expect.any(Object),
-      gameArea,
-      "wasm",
-    );
-  });
-
-  it("passes resolved mode to end-game worker calls", async () => {
-    getClientEnv.mockReturnValue({
-      VITE_GEOMETRY_MASK_KERNEL: "wasm",
-    });
+  it("passes wasm mode to end-game worker calls", async () => {
     const endGameHidingZones = [
       {
         hiderUid: "hider",
