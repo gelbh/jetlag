@@ -966,7 +966,7 @@ export const mapToolSlotIconStyle: CSSProperties = {
 };
 
 /** Expanded map status rail sits in-flow (clears absolute overlay inset). */
-export const desktopOpsStatusExpandedStyle: CSSProperties = {
+export const statusRailExpandedFlowStyle: CSSProperties = {
   position: "relative",
   inset: "auto",
   top: "auto",

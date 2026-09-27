@@ -18,7 +18,7 @@ import type { SessionRulesInput } from "@/domain/session/rules";
 import type { PlayerRole } from "@/domain/session/players/playerRole";
 import type { RoleGates } from "@/domain/session/players/roleGates";
 import { useLeaderJoinRequests } from "@/hooks/map-screen/useLeaderJoinRequests";
-import { desktopOpsStatusExpandedStyle } from "@/components/ui/entry/entryChrome";
+import { statusRailExpandedFlowStyle } from "@/components/ui/entry/entryChrome";
 import { EndGameAlert } from "../status/EndGameAlert";
 import { FoundHiderAlert } from "../status/FoundHiderAlert";
 import { HiderOutsideZoneAlert } from "../status/HiderOutsideZoneAlert";
@@ -234,7 +234,7 @@ export function MapStatusRail({ model, headerLeading }: MapStatusRailProps) {
     <div
       ref={railRef}
       className={railClassName}
-      style={expanded ? desktopOpsStatusExpandedStyle : undefined}
+      style={expanded ? statusRailExpandedFlowStyle : undefined}
       data-testid="map-status-rail-mantine"
     >
       <div className="relative">
