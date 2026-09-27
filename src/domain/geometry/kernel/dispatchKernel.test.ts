@@ -7,7 +7,7 @@ describe("dispatchKernel", () => {
     vi.resetModules();
   });
 
-  it("returns TS when entrypoint is not ready even in wasm mode", async () => {
+  it("returns TS when entrypoint is not ready and runTs is provided", async () => {
     vi.resetModules();
     vi.doMock("./kernelWasmReady", () => ({
       KERNEL_WASM_READY: {
@@ -38,6 +38,37 @@ describe("dispatchKernel", () => {
 
     expect(result).toBe("ts");
     expect(runTs).toHaveBeenCalledOnce();
+    expect(runWasm).not.toHaveBeenCalled();
+  });
+
+  it("throws when entrypoint is not ready and runTs is omitted", async () => {
+    vi.resetModules();
+    vi.doMock("./kernelWasmReady", () => ({
+      KERNEL_WASM_READY: {
+        maskFromUnionInput: true,
+        endGameMaskFromDisks: true,
+        halfPlane: true,
+        geodesicLineBuffer: false,
+      },
+      shouldUseWasm: (mode: "wasm", entrypoint: string) => {
+        if (entrypoint === "geodesicLineBuffer") {
+          return false;
+        }
+        return mode === "wasm";
+      },
+    }));
+
+    const { dispatchKernel: dispatch } = await import("./dispatchKernel");
+    const runWasm = vi.fn(async () => "wasm");
+
+    await expect(
+      dispatch({
+        mode: "wasm",
+        entrypoint: "geodesicLineBuffer",
+        label: "geodesic",
+        runWasm,
+      }),
+    ).rejects.toThrow(/not wasm-ready and has no TS fallback/);
     expect(runWasm).not.toHaveBeenCalled();
   });
 
