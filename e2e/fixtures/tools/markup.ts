@@ -37,7 +37,9 @@ export async function drawZone(page: Page, label = "Search zone") {
   await clickMapAtLatLng(page, lat, lng);
   await clickMapAtLatLng(page, lat, lng + 0.002);
   await clickMapAtLatLng(page, lat - 0.002, lng + 0.001);
-  await expect(page.getByText(/Vertices:\s*3/i)).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByText(/Vertices:\s*3/i)).toBeVisible({
+    timeout: 15_000,
+  });
   await page.getByPlaceholder("Optional zone label").fill(label);
   await page.getByRole("button", { name: "Close zone", exact: true }).click();
   await expectMapHasAnnotations(page);

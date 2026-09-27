@@ -25,26 +25,32 @@ test.describe("settings", () => {
       await expect(lowPowerToggle).not.toBeChecked();
     });
 
-    await test.step("set satellite and hide transit on Map", async () => {
+    await test.step("set satellite and hide transit layer on Map", async () => {
       await page.getByRole("tab", { name: "Map" }).click();
       const settingsPanel = page.getByRole("tabpanel");
       await settingsPanel
         .getByRole("group", { name: "Map style" })
         .getByRole("button", { name: "Satellite" })
         .click();
-      await clickViaEvaluate(settingsPanel.getByLabel("Transit overlay"));
+      // Annotation-layers Transit (not Transit overlay under the Transit section).
+      const transitLayer = settingsPanel.getByLabel("Transit", { exact: true });
+      await expect(transitLayer).toBeChecked();
+      await clickViaEvaluate(transitLayer);
       await closePanel(page);
     });
 
-    await test.step("basemap choice persists", async () => {
+    await test.step("basemap and transit layer persist", async () => {
       await openSettings(page);
       await page.getByRole("tab", { name: "Map" }).click();
+      const settingsPanel = page.getByRole("tabpanel");
       await expect(
-        page
-          .getByRole("tabpanel")
+        settingsPanel
           .getByRole("group", { name: "Map style" })
           .getByRole("button", { name: "Satellite" }),
-      ).toBeVisible();
+      ).toHaveAttribute("aria-pressed", "true");
+      await expect(
+        settingsPanel.getByLabel("Transit", { exact: true }),
+      ).not.toBeChecked();
       await closePanel(page);
     });
   });
@@ -71,7 +77,7 @@ test.describe("settings", () => {
           .getByRole("tabpanel")
           .getByRole("group", { name: "Distance unit" })
           .getByRole("button", { name: "Metric (km)" }),
-      ).toBeVisible();
+      ).toHaveAttribute("aria-pressed", "true");
       await closePanel(page);
     });
   });

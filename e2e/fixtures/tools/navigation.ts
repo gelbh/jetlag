@@ -45,10 +45,30 @@ export async function closePanel(page: Page) {
   const collapseRail = page.getByRole("button", {
     name: "Collapse map panels",
   });
-  if (await collapseRail.isVisible().catch(() => false)) {
+  if ((await collapseRail.count()) > 0) {
+    await expect(collapseRail).toBeVisible();
     await collapseRail.click();
   } else {
     await page.keyboard.press("Escape");
   }
   await expect(dialog).toBeHidden({ timeout: 10_000 });
+}
+
+async function confirmSettingsReset(
+  page: Page,
+  confirmButtonName: "Reset board for everyone" | "Reset session progress",
+) {
+  page.once("dialog", (dialog) => dialog.accept());
+  await openSettings(page);
+  await page.getByRole("tab", { name: "Session" }).click();
+  await page.getByRole("button", { name: "Reset options" }).click();
+  await page.getByRole("button", { name: confirmButtonName }).click();
+}
+
+export async function resetBoardForEveryone(page: Page) {
+  await confirmSettingsReset(page, "Reset board for everyone");
+}
+
+export async function resetSessionProgress(page: Page) {
+  await confirmSettingsReset(page, "Reset session progress");
 }

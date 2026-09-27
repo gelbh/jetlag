@@ -5,8 +5,9 @@ import {
   createHostSession,
   createMultiplayerContexts,
   joinAsRole,
-  openSettings,
   placePin,
+  resetBoardForEveryone,
+  resetSessionProgress,
   sessionElapsedLocator,
   startSessionTimer,
 } from "../../fixtures";
@@ -77,19 +78,15 @@ test.describe("cross-device sync", () => {
     await placePin(hostPage, "Temporary");
 
     await expect(async () => {
-      expect(await countMapAnnotations(guestPage)).toBeGreaterThan(baselineCount);
+      expect(await countMapAnnotations(guestPage)).toBeGreaterThan(
+        baselineCount,
+      );
     }).toPass({ timeout: 30_000 });
 
     const afterPinCount = await countMapAnnotations(guestPage);
 
     await test.step("host resets board for everyone", async () => {
-      hostPage.once("dialog", (dialog) => dialog.accept());
-      await openSettings(hostPage);
-      await hostPage.getByRole("tab", { name: "Session" }).click();
-      await hostPage.getByRole("button", { name: "Reset options" }).click();
-      await hostPage
-        .getByRole("button", { name: "Reset board for everyone" })
-        .click();
+      await resetBoardForEveryone(hostPage);
     });
 
     await expect(async () => {
@@ -126,13 +123,7 @@ test.describe("cross-device sync", () => {
     const afterPinCount = await countMapAnnotations(guestPage);
 
     await test.step("host resets session progress", async () => {
-      hostPage.once("dialog", (dialog) => dialog.accept());
-      await openSettings(hostPage);
-      await hostPage.getByRole("tab", { name: "Session" }).click();
-      await hostPage.getByRole("button", { name: "Reset options" }).click();
-      await hostPage
-        .getByRole("button", { name: "Reset session progress" })
-        .click();
+      await resetSessionProgress(hostPage);
     });
 
     await expect(hostPage.getByRole("button", { name: "Start" })).toBeVisible({
@@ -140,7 +131,13 @@ test.describe("cross-device sync", () => {
     });
 
     // Tip status copy: full "Waiting" or compact "Wait" on narrow chrome.
-    await expect(guestPage.getByText(/^(Waiting|Wait)$/)).toBeVisible({
+    // Scope to the status island so short tokens do not match chat/copy elsewhere.
+    // Features project is mobile (no desktop "Map status" region).
+    await expect(
+      guestPage
+        .getByTestId("tool-status-block-mantine")
+        .getByText(/^(Waiting|Wait)$/),
+    ).toBeVisible({
       timeout: 45_000,
     });
 
