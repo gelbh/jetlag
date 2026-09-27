@@ -13,8 +13,9 @@ import {
   assertInViewport,
   assertMinTapTargets,
   assertNoSeriousAxeViolations,
-  assertMapChromeAxe,
-  assertEntryAxe,
+  assertSurveyMapChromeAxe,
+  assertSurveyEntryAxe,
+  enablePlayerUxWorld,
   expectCreatePageMapPreviewLoaded,
 } from "../../fixtures";
 
@@ -201,24 +202,28 @@ test.describe("layout regression @ default mobile", () => {
     await assertLayoutSmoke(page, { exclude: [".maplibregl-map"] });
   });
 
-  test("@smoke map chrome axe includes color-contrast", async ({
+  test("@smoke survey map chrome axe includes color-contrast", async ({
     page,
   }) => {
+    await enablePlayerUxWorld(page);
     await openMapWithLocalSession(page);
-    await expect(page.locator(".map-chrome-hud")).toBeVisible();
+    await expect(page.locator('[data-player-ux-world="survey"]')).toBeVisible();
     await assertNoHorizontalOverflow(page);
-    await assertMapChromeAxe(page);
+    await assertSurveyMapChromeAxe(page);
   });
 
-  test("@smoke home axe includes color-contrast", async ({ page }) => {
+  test("@smoke survey home axe includes color-contrast", async ({ page }) => {
+    await enablePlayerUxWorld(page);
     await prepareE2EPage(page);
     await page.goto("/");
     await expect(
       page.getByRole("button", { name: /Play — create, join, or custom game/i })
     ).toBeVisible();
-    await expect(page.locator("main.home-poster").first()).toBeVisible();
+    await expect(
+      page.locator('[data-player-ux-world="survey"]').first()
+    ).toBeVisible();
     await assertNoHorizontalOverflow(page);
-    await assertEntryAxe(page);
+    await assertSurveyEntryAxe(page);
   });
 
   test("@smoke leaderboard board sheet opens", async ({ page }) => {

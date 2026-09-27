@@ -46,97 +46,6 @@ export async function clickMapAt(
   });
 }
 
-/**
- * Fire a MapLibre map click at a WGS84 point. Prefer this under Ask HUD /
- * Mantine Drawer stacking — Playwright canvas clicks often never reach
- * MapLibre's own click handlers.
- */
-export async function clickMapAtLatLng(
-  page: Page,
-  latitude: number,
-  longitude: number,
-) {
-  await page.locator(`${MAP_CONTAINER_SELECTOR} canvas`).first().waitFor({
-    state: "visible",
-    timeout: 15_000,
-  });
-  const fired = await page.evaluate(
-    ({ sel, latitude: lat, longitude: lng }) => {
-      const root = document.querySelector(sel) as HTMLElement | null;
-      if (!root) {
-        return false;
-      }
-      type AnyRec = Record<string, unknown>;
-      const seen = new Set<unknown>();
-      let map: {
-        fire: (type: string, ev: unknown) => void;
-        project: (lngLat: [number, number]) => { x: number; y: number };
-      } | null = null;
-      const visit = (node: unknown, depth: number) => {
-        if (!node || depth > 14 || seen.has(node) || typeof node !== "object") {
-          return;
-        }
-        seen.add(node);
-        const rec = node as AnyRec;
-        if (
-          typeof rec.fire === "function" &&
-          typeof rec.project === "function" &&
-          typeof rec.on === "function"
-        ) {
-          map = rec as typeof map;
-          return;
-        }
-        for (const key of Object.getOwnPropertyNames(rec)) {
-          if (map) {
-            return;
-          }
-          if (
-            key.startsWith("__react") ||
-            key === "stateNode" ||
-            key === "child" ||
-            key === "memoizedState" ||
-            key === "memoizedProps" ||
-            key === "return" ||
-            key === "sibling" ||
-            key === "current" ||
-            key === "map" ||
-            key === "_map" ||
-            key === "deps" ||
-            key === "next" ||
-            key === "queue"
-          ) {
-            try {
-              visit(rec[key], depth + 1);
-            } catch {
-              /* ignore cyclic / revoked */
-            }
-          }
-        }
-      };
-      const fiberKey = Object.keys(root).find((k) =>
-        k.startsWith("__reactFiber"),
-      );
-      if (fiberKey) {
-        visit((root as AnyRec)[fiberKey], 0);
-      }
-      if (!map) {
-        return false;
-      }
-      const point = map.project([lng, lat]);
-      map.fire("click", {
-        lngLat: { lng, lat },
-        point,
-        originalEvent: new MouseEvent("click"),
-      });
-      return true;
-    },
-    { sel: MAP_CONTAINER_SELECTOR, latitude, longitude },
-  );
-  if (!fired) {
-    throw new Error("MapLibre map instance not found for clickMapAtLatLng.");
-  }
-}
-
 async function countPersistedActiveAnnotations(page: Page): Promise<number> {
   return page.evaluate(() => {
     try {
@@ -218,12 +127,9 @@ export async function waitForMapTilesLoaded(page: Page) {
 }
 
 export async function clickToolDockButton(page: Page, name: string) {
-  // Ask-first hunt re-labels the strip to "Question tool switcher" once an Ask
-  // tool is active; match both so post-click aria-pressed checks still resolve.
-  const questionTools = page.getByLabel(
-    /Question tools|Question tool switcher/,
-  );
-  const button = questionTools.getByRole("button", { name, exact: true });
+  const button = page
+    .getByLabel("Question tools")
+    .getByRole("button", { name, exact: true });
   await expect(button).toBeVisible();
   const isPreviewOnly =
     (await button.getAttribute("title"))?.includes("Preview only") ?? false;
@@ -235,42 +141,20 @@ export async function clickToolDockButton(page: Page, name: string) {
   });
   // Tool becomes active: for normal selection, aria-pressed="true".
   // Preview-only (open question): aria-pressed stays false — wait for HUD.
-  // Ask-first unmounts the hunt strip and portals the sheet, so the dock
-  // button may disappear and ask-hud-host may be attached but zero-size.
-  const hud = page.getByTestId("ask-hud-host");
-  const toolDialog = page.getByRole("dialog", { name, exact: true });
+  // If the tool was already open, the click toggled it off; open again.
   if (!isPreviewOnly) {
-    await expect
-      .poll(
-        async () => {
-          if ((await hud.count()) > 0 || (await toolDialog.count()) > 0) {
-            return "hud";
-          }
-          if ((await button.count()) === 0) {
-            return "gone";
-          }
-          return (await button.getAttribute("aria-pressed")) === "true"
-            ? "pressed"
-            : "idle";
-        },
-        { timeout: 15_000 },
-      )
-      .toMatch(/^(hud|pressed)$/);
+    await expect(button).toHaveAttribute("aria-pressed", "true");
     return;
   }
-  if ((await hud.count()) === 0 && (await toolDialog.count()) === 0) {
+  const hud = page.getByTestId("ask-hud-host");
+  if (!(await hud.isVisible().catch(() => false))) {
     await button.evaluate((el) => {
       if (el instanceof HTMLElement) {
         el.click();
       }
     });
   }
-  await expect
-    .poll(
-      async () => (await hud.count()) > 0 || (await toolDialog.count()) > 0,
-      { timeout: 15_000 },
-    )
-    .toBe(true);
+  await expect(hud).toBeVisible({ timeout: 15_000 });
 }
 
 export async function selectDrawTool(page: Page, toolName: "Pin" | "Zone") {

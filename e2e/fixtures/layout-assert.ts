@@ -56,10 +56,10 @@ export async function assertNoSeriousAxeViolations(
   expect(blocking, JSON.stringify(blocking, null, 2)).toEqual([]);
 }
 
-/** Axe map chrome with color-contrast re-enabled (Wave 3). */
-export async function assertMapChromeAxe(page: Page) {
+/** Axe map Survey field-book chrome with color-contrast re-enabled (Wave 3). */
+export async function assertSurveyMapChromeAxe(page: Page) {
   const builder = new AxeBuilder({ page })
-    .include(".map-chrome-hud")
+    .include('[data-player-ux-world="survey"]')
     .withTags(["wcag2a", "wcag2aa"])
     .exclude(".maplibregl-map");
   const results = await builder.analyze();
@@ -69,10 +69,10 @@ export async function assertMapChromeAxe(page: Page) {
   expect(blocking, JSON.stringify(blocking, null, 2)).toEqual([]);
 }
 
-/** Axe entry/secondary roots with color-contrast (Wave 5). */
-export async function assertEntryAxe(page: Page) {
+/** Axe Survey entry/secondary roots with color-contrast (Wave 5). */
+export async function assertSurveyEntryAxe(page: Page) {
   const builder = new AxeBuilder({ page })
-    .include("main.home-poster")
+    .include('[data-player-ux-world="survey"]')
     .withTags(["wcag2a", "wcag2aa"]);
   const results = await builder.analyze();
   const blocking = results.violations.filter(
