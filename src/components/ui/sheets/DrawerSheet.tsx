@@ -18,14 +18,23 @@ export interface DrawerSheetProps {
   ariaLabel?: string;
   sheetClassName?: string;
   maxHeightClassName?: string;
-  /** Horizontal body inset; default `md`. Pass `sm`/`xs` for denser sheets. */
+  /**
+   * Horizontal inset on scroll/pinned body only (not Mantine all-sides padding).
+   * Named tokens map to rem; numeric values are floored at 10px so children stay
+   * off the sheet edge (use named denser tokens for tighter chrome).
+   */
   padding?: "xs" | "sm" | "md" | "lg" | "xl" | number;
   /**
    * `host` (default): one scroll region for children (session log).
    * `child`: host locks height; child owns scroll (chat tabs + list).
    */
   scrollMode?: "host" | "child";
-  /** Extra styles on the inner body wrapper (e.g. keyboard inset). */
+  /**
+   * Extra styles on the gesture wrapper, except `paddingBottom`: that key is
+   * the keyboard (or custom) bottom inset applied on the scroll/body and
+   * replaces safe-area there so insets do not stack. Omit or set 0 to use
+   * safe-area bottom on the scroll/body instead.
+   */
   contentStyle?: CSSProperties;
   /**
    * Ask placement: keep the dim scrim but let map taps pass through.
@@ -56,7 +65,7 @@ const DRAWER_PADDING_INLINE: Record<
   xl: "1.5rem",
 };
 
-/** Horizontal inset for scroll/body; named tokens stay non-zero (Verify #7). */
+/** Horizontal inset for scroll/body; named tokens stay non-zero. */
 function resolveDrawerBodyInlinePadding(
   padding: NonNullable<DrawerSheetProps["padding"]>,
 ): string {
@@ -67,15 +76,25 @@ function resolveDrawerBodyInlinePadding(
 }
 
 /**
- * One bottom inset for scroll/body: keyboard pad replaces safe-area (no stack).
- * ChatPanel passes paddingBottom when the visual viewport keyboard inset > 0.
+ * One bottom inset for scroll/body: keyboard/custom pad replaces safe-area.
+ * ChatPanel passes contentStyle.paddingBottom when the soft keyboard is up.
+ * Accepts numbers, px strings, and CSS expressions (calc/env) that parseFloat
+ * cannot treat as a positive length.
  */
 function resolveDrawerBodyBottomPadding(
   contentStyle: CSSProperties | undefined,
 ): string | number {
   const raw = contentStyle?.paddingBottom;
-  if (typeof raw === "number" && raw > 0) return raw;
-  if (typeof raw === "string" && Number.parseFloat(raw) > 0) return raw;
+  if (typeof raw === "number") {
+    return raw > 0 ? raw : SHEET_BODY_SAFE_BOTTOM;
+  }
+  if (typeof raw === "string") {
+    const trimmed = raw.trim();
+    if (trimmed === "" || trimmed === "0" || trimmed === "0px") {
+      return SHEET_BODY_SAFE_BOTTOM;
+    }
+    return raw;
+  }
   return SHEET_BODY_SAFE_BOTTOM;
 }
 
@@ -84,7 +103,8 @@ function stripPaddingBottom(
   style: CSSProperties | undefined,
 ): CSSProperties | undefined {
   if (style == null || style.paddingBottom === undefined) return style;
-  const { paddingBottom: _paddingBottom, ...rest } = style;
+  const rest = { ...style };
+  delete rest.paddingBottom;
   return rest;
 }
 
@@ -139,7 +159,7 @@ export function DrawerSheet({
       onClose={onClose}
       position="bottom"
       size="auto"
-      // Body inset is owned by scroll/content (Verify #7–#8), not Drawer chrome.
+      // Body inset is owned by scroll/content, not Drawer chrome.
       padding={0}
       radius={0}
       withCloseButton={false}

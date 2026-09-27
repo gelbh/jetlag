@@ -286,4 +286,54 @@ describe("DrawerSheet", () => {
     expect(scroll!.style.paddingBottom).toBe("120px");
     expect(scroll!.style.paddingBottom).not.toContain("safe-area-inset-bottom");
   });
+
+  it("applies calc() contentStyle paddingBottom on scroll (keyboard CSS expression)", () => {
+    render(
+      withAppUi(
+        <DrawerSheet
+          open
+          onClose={() => {}}
+          ariaLabel="Chat"
+          contentStyle={{ paddingBottom: "calc(120px + env(safe-area-inset-bottom))" }}
+        >
+          <p>body</p>
+        </DrawerSheet>,
+      ),
+    );
+
+    const scroll = screen
+      .getByTestId("mantine-drawer-sheet")
+      .querySelector(".jl-scroll") as HTMLElement | null;
+    expect(scroll).toBeTruthy();
+    expect(scroll!.style.paddingBottom).toBe(
+      "calc(120px + env(safe-area-inset-bottom))",
+    );
+  });
+
+  it("applies keyboard paddingBottom on child scrollMode body (Chat path)", () => {
+    render(
+      withAppUi(
+        <DrawerSheet
+          open
+          onClose={() => {}}
+          ariaLabel="Chat"
+          scrollMode="child"
+          contentStyle={{ paddingBottom: 96 }}
+        >
+          <p>body</p>
+        </DrawerSheet>,
+      ),
+    );
+
+    const sheet = screen.getByTestId("mantine-drawer-sheet");
+    expect(sheet.style.paddingBottom).toBe("");
+    expect(sheet.querySelector(".jl-scroll")).toBeNull();
+
+    const body = sheet.querySelector(
+      ".flex.min-h-0.flex-1.flex-col.overflow-hidden",
+    ) as HTMLElement | null;
+    expect(body).toBeTruthy();
+    expect(body!.style.paddingBottom).toBe("96px");
+    expect(body!.style.paddingBottom).not.toContain("safe-area-inset-bottom");
+  });
 });

@@ -95,14 +95,24 @@ export function Home() {
               aria-label={`Version ${APP_VERSION}. Open changelog`}
               style={{
                 alignSelf: "flex-start",
+                display: "inline-flex",
+                alignItems: "center",
+                minHeight: 44,
                 paddingInline: "0.625rem",
-                paddingBlock: "0.375rem",
                 fontFamily: "var(--mantine-font-family-monospace)",
                 fontSize: "0.75rem",
                 fontWeight: 700,
                 letterSpacing: "0.04em",
                 color: "var(--color-field-ink-muted)",
                 borderRadius: 8,
+              }}
+              styles={{
+                root: {
+                  "&:focus-visible": {
+                    outline: "2px solid var(--color-action)",
+                    outlineOffset: 1,
+                  },
+                },
               }}
             >
               v{APP_VERSION}
