@@ -5,10 +5,7 @@ import type { DistanceUnit } from "@/domain/map/distance";
 import type { MapStyle, StreetBasemap } from "@/domain/map/mapBasemaps";
 import { effectiveMapStyle } from "@/domain/device/power/powerProfile";
 import { SegmentControl } from "../../ui/forms/SegmentControl";
-import {
-  InsetGroup,
-  SectionLabel,
-} from "@/components/ui/entry/entryChrome";
+import { InsetGroup, SectionLabel } from "@/components/ui/entry/entryChrome";
 import { SettingsToggleRow } from "../settings/SettingsToggleRow";
 import { LayerVisibilityGrid } from "../mapChrome/LayerVisibilityGrid";
 import type { LayerVisibility } from "@/state/sessionStore";
@@ -113,7 +110,9 @@ export function MapSettingsGeneralTab({ model }: MapSettingsGeneralTabProps) {
           />
         </InsetGroup>
         {locationError ? (
-          <p className="px-1 text-sm text-[var(--color-halt)]">{locationError}</p>
+          <p className="px-1 text-sm text-[var(--color-halt)]">
+            {locationError}
+          </p>
         ) : null}
       </Stack>
 

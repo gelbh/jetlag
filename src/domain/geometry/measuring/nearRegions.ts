@@ -9,24 +9,21 @@ import nearestPointOnLine from "@turf/nearest-point-on-line";
 import simplify from "@turf/simplify";
 import Flatbush from "flatbush";
 import { around as geoflatbushAround } from "geoflatbush";
-import {
-  unionDiskSpecs,
-  unionPolygonFeatures,
-} from "../masks/unionPolygonFeatures";
 import { unionPolygonFeaturesInSlices } from "../progressive/unionSlices";
 import type { GameArea } from "../../map/annotations";
 import { dispatchGeodesicLineBuffer } from "./geodesicLineBuffer";
-import { featureToGameAreaGeometry } from "../kernel/featureConvert";
-import { shouldUseWasm } from "../kernel/kernelWasmReady";
-import { dispatchNearRegionBatch } from "../kernel/nearRegionKernelRunner";
-import { resolveClientMaskKernelMode } from "../kernel/resolveClientMaskKernelMode";
+import {
+  dispatchNearRegionBatch,
+  featureToGameAreaGeometry,
+  shouldUseWasm,
+  unionDiskSpecs,
+} from "../kernel";
 import {
   gameAreaFingerprint,
   gameAreaToFeature,
   gameAreaToPolygon,
   type LatLngTuple,
 } from "../gameArea/geometryCore";
-import { geodesicLineBuffer } from "../kernel/geodesicLineBuffer";
 
 type SegmentBoundingBox = {
   south: number;
@@ -196,7 +193,7 @@ function coastlineNearRegionCacheKey(
   gameArea: GameArea,
   distanceMeters: number,
   segmentCount: number,
-  kernelMode: string = "ts",
+  kernelMode: string = "sync",
 ): string {
   return `${gameAreaFingerprint(gameArea)}:${distanceMeters}:${segmentCount}:${kernelMode}`;
 }
@@ -288,29 +285,6 @@ function combinePolygonFeatures(
       coordinates: multiCoordinates,
     },
   };
-}
-
-function unionBufferedFeatures(
-  features: Feature<Polygon | MultiPolygon>[],
-): Feature<Polygon | MultiPolygon> | null {
-  if (features.length === 0) {
-    return null;
-  }
-
-  if (features.length === 1) {
-    return features[0] ?? null;
-  }
-
-  try {
-    const united = unionPolygonFeatures(features);
-    if (united) {
-      return united;
-    }
-  } catch {
-    // Fall back to a MultiPolygon shell; point-in-region semantics match union.
-  }
-
-  return combinePolygonFeatures(features);
 }
 
 async function unionBufferedFeaturesInSlices(
@@ -462,75 +436,17 @@ async function buildCoastlineNearRegionWithBuffer(
   }
 }
 
-/** Sync TS path for tests/bootstrap. Prefer {@link buildCoastlineNearRegion}. */
-export function buildCoastlineNearRegionTs(
-  segments: Feature<LineString>[],
-  distanceMeters: number,
-  gameArea: GameArea,
-): Feature<Polygon | MultiPolygon> | null {
-  // Sync wrapper: geodesicLineBuffer is sync; Promise.resolve unused.
-  // Keep API sync for existing tests by inlining the sync buffer loop.
-  if (segments.length === 0 || distanceMeters <= 0) {
-    return null;
-  }
-
-  const cacheKey = coastlineNearRegionCacheKey(
-    gameArea,
-    distanceMeters,
-    segments.length,
-    "ts",
-  );
-  const cached = getCachedCoastlineNearRegion(cacheKey);
-  if (cached) {
-    return cached;
-  }
-
-  try {
-    const bufferedFeatures: Feature<Polygon | MultiPolygon>[] = [];
-
-    for (const segment of segments) {
-      const buffered = geodesicLineBuffer(segment, distanceMeters);
-      if (buffered) {
-        bufferedFeatures.push(buffered);
-      }
-    }
-
-    if (bufferedFeatures.length === 0) {
-      return null;
-    }
-
-    const nearCoast = unionBufferedFeatures(bufferedFeatures);
-    if (!nearCoast) {
-      return null;
-    }
-
-    const result =
-      clipNearCoastToGameArea(nearCoast, gameArea) ??
-      clipBufferedSegmentsToGameArea(bufferedFeatures, gameArea);
-
-    if (!result) {
-      return null;
-    }
-
-    setCachedCoastlineNearRegion(cacheKey, result);
-    return result;
-  } catch {
-    return null;
-  }
-}
-
 export async function buildCoastlineNearRegion(
   segments: Feature<LineString>[],
   distanceMeters: number,
   gameArea: GameArea,
 ): Promise<Feature<Polygon | MultiPolygon> | null> {
-  const mode = resolveClientMaskKernelMode();
-  if (shouldUseWasm(mode, "nearRegionBatch")) {
+  if (shouldUseWasm("nearRegionBatch")) {
     const cacheKey = coastlineNearRegionCacheKey(
       gameArea,
       distanceMeters,
       segments.length,
-      `batch:${mode}`,
+      "batch:wasm",
     );
     const cached = getCachedCoastlineNearRegion(cacheKey);
     if (cached) {
@@ -543,11 +459,7 @@ export async function buildCoastlineNearRegion(
         distanceMeters,
         disks: [],
         gameArea: featureToGameAreaGeometry(gameAreaToFeature(gameArea)),
-        // Sync runTs: dispatchKernel requires sync TS; WASM-fail skips cooperative yield.
-        runTs: () =>
-          buildCoastlineNearRegionTs(segments, distanceMeters, gameArea),
-      },
-      mode,
+      }
     );
 
     if (result) {
@@ -561,24 +473,13 @@ export async function buildCoastlineNearRegion(
     distanceMeters,
     gameArea,
     (segment, meters) =>
-      dispatchGeodesicLineBuffer(segment, meters, undefined, mode),
+      dispatchGeodesicLineBuffer(segment, meters, undefined),
   );
 }
 
-export function distanceBetweenPoints(
-  from: LatLngTuple,
-  to: LatLngTuple,
-): number {
-  return turfDistance(
-    turfPoint([from[1], from[0]]),
-    turfPoint([to[1], to[0]]),
-    {
-      units: "meters",
-    },
-  );
-}
+export { distanceBetweenPoints } from "../gameArea/distance";
 
-/** Match radar / elimination / hiding-zone disks — coarse steps undersize near chords. */
+/** Match radar / elimination / hiding-zone disks; coarse steps undersize near chords. */
 const NEAR_REGION_DISK_STEPS = 64;
 
 export function buildLocationNearRegion(
@@ -620,8 +521,8 @@ export function buildLocationNearRegion(
   return clipped as Feature<Polygon | MultiPolygon>;
 }
 
-/** Sync TS multi-place path for tests/overlays. Prefer {@link buildMultiPlaceNearRegion}. */
-export function buildMultiPlaceNearRegionTs(
+/** Sync multi-place disks (Turf); used only when nearRegionBatch wasm is not ready. */
+function buildMultiPlaceNearRegionSync(
   places: readonly LatLngTuple[],
   distanceMeters: number,
   gameArea: GameArea,
@@ -666,14 +567,12 @@ export function buildMultiPlaceNearRegionTs(
   return clipped as Feature<Polygon | MultiPolygon>;
 }
 
-/** Union of equal-radius buffers around every site (e.g. all airports in the play area). */
 export async function buildMultiPlaceNearRegion(
   places: readonly LatLngTuple[],
   distanceMeters: number,
   gameArea: GameArea,
 ): Promise<Feature<Polygon | MultiPolygon> | null> {
-  const mode = resolveClientMaskKernelMode();
-  if (shouldUseWasm(mode, "nearRegionBatch")) {
+  if (shouldUseWasm("nearRegionBatch")) {
     return dispatchNearRegionBatch(
       {
         segments: [],
@@ -683,12 +582,9 @@ export async function buildMultiPlaceNearRegion(
           radiusMeters: distanceMeters,
         })),
         gameArea: featureToGameAreaGeometry(gameAreaToFeature(gameArea)),
-        runTs: () =>
-          buildMultiPlaceNearRegionTs(places, distanceMeters, gameArea),
-      },
-      mode,
+      }
     );
   }
 
-  return buildMultiPlaceNearRegionTs(places, distanceMeters, gameArea);
+  return buildMultiPlaceNearRegionSync(places, distanceMeters, gameArea);
 }

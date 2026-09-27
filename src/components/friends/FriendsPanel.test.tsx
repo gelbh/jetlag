@@ -1,13 +1,9 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { MantineProvider } from "@mantine/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { jetlagTheme } from "@/theme/theme";
 import { FriendsPanel } from "./FriendsPanel";
 import { searchFriends } from "../../services/profile/profileFriends";
-
-const useDesktopLayout = vi.fn();
-vi.mock("../../hooks/layout/useDesktopLayout", () => ({
-  DESKTOP_LAYOUT_MIN_WIDTH_PX: 1024,
-  useDesktopLayout: () => useDesktopLayout(),
-}));
 
 vi.mock("../../services/profile/profileFriends", () => ({
   listFriends: vi.fn(async () => ({
@@ -22,15 +18,21 @@ vi.mock("../../services/profile/profileFriends", () => ({
   cancelFriendRequest: vi.fn(async () => ({ ok: true })),
 }));
 
+function renderPanel() {
+  return render(
+    <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
+      <FriendsPanel />
+    </MantineProvider>,
+  );
+}
+
 describe("FriendsPanel", () => {
   beforeEach(() => {
-    useDesktopLayout.mockReset();
     vi.clearAllMocks();
   });
 
-  it("keeps stacked sections under 1024", async () => {
-    useDesktopLayout.mockReturnValue(false);
-    render(<FriendsPanel />);
+  it("keeps stacked sections (phone shell)", async () => {
+    renderPanel();
 
     await waitFor(() => {
       expect(screen.getByText("seeker_one")).toBeInTheDocument();
@@ -42,26 +44,8 @@ describe("FriendsPanel", () => {
     expect(screen.getByText("Cancel")).toBeInTheDocument();
   });
 
-  it("renders master–detail with 14rem list on desktop", async () => {
-    useDesktopLayout.mockReturnValue(true);
-    render(<FriendsPanel />);
-
-    await waitFor(() => {
-      expect(screen.getByTestId("friends-master-list")).toBeInTheDocument();
-    });
-
-    const list = screen.getByTestId("friends-master-list");
-    expect(list.className).toMatch(/w-\[14rem\]/);
-    expect(screen.getByRole("complementary", { name: /Friend detail/i })).toBeInTheDocument();
-    expect(
-      screen.getByText(/Select a friend or request to see details/i),
-    ).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Accept" })).not.toBeInTheDocument();
-  });
-
   it("blocks search and shows an error for short queries", async () => {
-    useDesktopLayout.mockReturnValue(false);
-    render(<FriendsPanel />);
+    renderPanel();
 
     await waitFor(() => {
       expect(screen.getByText("seeker_one")).toBeInTheDocument();

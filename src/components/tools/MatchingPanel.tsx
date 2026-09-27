@@ -10,7 +10,10 @@ import {
   type MatchingCategoryId,
 } from "../../domain/questions";
 import { resolveMatchingCategory } from "../../domain/session/catalog/sessionCustomCatalog";
-import { matchingFeatureCountLabel, matchingNullAnswerMessage } from "../../services/geo/matching";
+import {
+  matchingFeatureCountLabel,
+  matchingNullAnswerMessage,
+} from "../../services/geo/matching";
 import { formatDistance, type DistanceUnit } from "../../domain/map/distance";
 import { GroupedSelectField } from "../ui/forms/GroupedSelectField";
 import { yesNoAnswerOptions } from "./shared/answers/binaryAnswerOptions";
@@ -70,7 +73,7 @@ export type MatchingPanelModel = {
   costLabel?: string;
   isSubmitting?: boolean;
   onRetry?: () => void;
-  wizardStepRef?: RefObject<string>;
+  wizardStepRef?: RefObject<string | null>;
 };
 
 export type MatchingPanelProps = {
@@ -152,8 +155,8 @@ export function MatchingPanel({ model }: MatchingPanelProps) {
       })()
     : null;
   const category = categoryId
-    ? catalogCategories.find((item) => item.id === categoryId) ??
-      resolveMatchingCategory(categoryId)
+    ? (catalogCategories.find((item) => item.id === categoryId) ??
+      resolveMatchingCategory(categoryId))
     : null;
   const usesLandmassMatching = category?.resolver === "landmass";
   const categoryAvailable =
@@ -210,7 +213,9 @@ export function MatchingPanel({ model }: MatchingPanelProps) {
 
   const nearestFeatureSummary = nearestFeatureName
     ? `${nearestFeatureName}${
-        !usesContainmentMatching && distanceMeters !== null && !nearestProvisional
+        !usesContainmentMatching &&
+        distanceMeters !== null &&
+        !nearestProvisional
           ? ` · ${formatDistance(distanceMeters, distanceUnit)} from you`
           : ""
       }${nearestOutsidePlayArea ? " · outside play area" : ""}`
@@ -268,9 +273,7 @@ export function MatchingPanel({ model }: MatchingPanelProps) {
     <>
       {phaseId === "configure" && stepId === "category" ? (
         <ToolSection first compact status="active">
-          {awaitHiderAnswer ? (
-            <QuestionTruthReferenceHint />
-          ) : null}
+          {awaitHiderAnswer ? <QuestionTruthReferenceHint /> : null}
           {availableCategories.length === 0 ? (
             <CatalogExhaustedMessage message="Every match category has already been used on this map." />
           ) : (
@@ -309,7 +312,11 @@ export function MatchingPanel({ model }: MatchingPanelProps) {
           {hasSeekerPoint &&
           typeof anchorLat === "number" &&
           typeof anchorLng === "number" ? (
-            <CoordinateCopyButton lat={anchorLat} lng={anchorLng} className="w-full" />
+            <CoordinateCopyButton
+              lat={anchorLat}
+              lng={anchorLng}
+              className="w-full"
+            />
           ) : null}
           {satelliteHint}
           {loading && hasSeekerPoint ? loadingIndicator : null}
@@ -346,8 +353,7 @@ export function MatchingPanel({ model }: MatchingPanelProps) {
     </>
   );
 
-  const stickyFooterActions =
-    matchingAnswerStepActions ?? matchingSendActions;
+  const stickyFooterActions = matchingAnswerStepActions ?? matchingSendActions;
 
   const answerFooter = stickyFooterActions ? (
     <ToolSection first compact status="active">
@@ -363,8 +369,7 @@ export function MatchingPanel({ model }: MatchingPanelProps) {
         <Stepper
           nav={{
             canGoBack:
-              phaseIndex > 0 ||
-              (phaseId === "configure" && configureIndex > 0),
+              phaseIndex > 0 || (phaseId === "configure" && configureIndex > 0),
             onBack: goBack,
             ...toolWizardPhasePrimaryNav({
               phaseId,

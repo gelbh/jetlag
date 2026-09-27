@@ -1,4 +1,4 @@
-/* map-shell.css — map shell and status chrome */
+/* map-shell.css: map shell and status chrome */
 @layer components {
   .jl-stamp-code,
   .admin-diag-row,
@@ -6,7 +6,6 @@
   .jl-game-chat-scroll,
   .jl-sync-detail-panel__detail {
     user-select: text;
-    -webkit-user-select: text;
     -webkit-touch-callout: default;
   }
 
@@ -21,15 +20,17 @@
     background: var(--color-surface-deep);
   }
 
-  .map-screen-shell::before {
-    content: "";
-    position: fixed;
-    inset-inline: 0;
-    top: 0;
-    height: var(--safe-area-top);
-    background: var(--color-surface-deep);
-    z-index: var(--z-banner);
-    pointer-events: none;
+  /* Same WebKit standalone shortfall as html/body. */
+  @media (display-mode: standalone) {
+    .map-screen-shell {
+      min-height: 100vh;
+      min-height: 100lvh;
+    }
+  }
+
+  html.jl-standalone-shell .map-screen-shell {
+    min-height: 100vh;
+    min-height: 100lvh;
   }
 
   .admin-monitor-pane .map-screen-shell {
@@ -38,15 +39,32 @@
     min-height: 0;
   }
 
-  .admin-monitor-pane .map-screen-shell::before {
-    display: none;
+  /* Phone shell column: keep map chrome inside the 390px host (not viewport-fixed). */
+  [data-player-phone-shell] .map-screen-shell {
+    position: absolute;
+    inset: 0;
+    min-height: 0;
+    width: 100%;
+  }
+
+  /* W5-G: restore shell-relative floor under standalone (do not leave bare min-height:0 over 100lvh). */
+  @media (display-mode: standalone) {
+    [data-player-phone-shell] .map-screen-shell {
+      min-height: 100%;
+      height: 100%;
+    }
+  }
+
+  html.jl-standalone-shell [data-player-phone-shell] .map-screen-shell {
+    min-height: 100%;
+    height: 100%;
   }
 
   .map-chrome-hud {
     overflow: visible;
   }
 
-  html:not([data-motion="reduced"]):not([data-motion="static"]) .map-chrome-hud {
+  html:not([data-motion="reduced"], [data-motion="static"]) .map-chrome-hud {
     transition: opacity var(--motion-base) var(--ease-out-quint);
   }
 
@@ -56,8 +74,8 @@
     align-items: center;
     justify-content: center;
     border-radius: var(--radius-hud-md);
-    border: 2px dashed oklch(from var(--color-border) l c h / 0.85);
-    background: oklch(from var(--color-surface-base) l c h / 0.65);
+    border: 2px dashed oklch(from var(--color-border) l c h / 85%);
+    background: oklch(from var(--color-surface-base) l c h / 65%);
     padding-inline: 0.75rem;
     font-size: 0.8125rem;
     font-weight: 600;
@@ -73,13 +91,21 @@
   }
 
   /*
-   * Safe-area inset must live in real CSS. Tailwind v4 omits utilities whose
-   * computed value collapses to 0 at build time (e.g. pt-[max(0px,env(...))]),
-   * which left the status rail under the iPhone PWA notch / Dynamic Island
-   * while .map-screen-shell::before still painted the safe-area band on top.
+   * Float inset must live in real CSS (Tailwind v4 omits env()-collapse utilities).
+   * Phone status island mirrors bottom --dock-float-gap; map full-bleeds under notch.
    */
   .jl-status-rail {
-    padding-top: env(safe-area-inset-top, 0px);
+    padding-top: 0;
+  }
+
+  .jl-status-rail-float {
+    /* Clear notch/Dynamic Island via --safe-area-top, then match bottom float gap. */
+    padding: calc(
+        var(--safe-area-top, 0px) + var(--dock-float-gap, 0.75rem)
+      )
+      max(var(--dock-float-gap, 0.75rem), env(safe-area-inset-right, 0px))
+      0.25rem
+      max(var(--dock-float-gap, 0.75rem), env(safe-area-inset-left, 0px));
   }
 
   .jl-status-bar {
@@ -88,12 +114,13 @@
     width: 100%;
     border-bottom: 2px solid var(--color-highlight);
     background: var(--color-surface-deep);
-    box-shadow: 0 4px 24px oklch(0.06 0.04 265 / 0.65);
+    box-shadow: 0 4px 24px oklch(6% 0.04 265deg / 65%);
   }
 
   .jl-status-header {
     box-sizing: border-box;
     display: grid;
+
     /* Probe B ticker band: compress OPERATION/PHASE, hero timer column */
     grid-template-columns: minmax(0, 1fr) minmax(0, 0.7fr) minmax(0, 0.65fr) minmax(0, 1.65fr);
     align-items: stretch;
@@ -167,7 +194,7 @@
     gap: 0.08rem;
     padding-inline: 0.22rem;
     overflow: hidden;
-    border-left: 1px solid oklch(from var(--color-border) l c h / 0.85);
+    border-left: 1px solid oklch(from var(--color-border) l c h / 85%);
   }
 
   .jl-status-header-col--timer {
@@ -279,7 +306,7 @@
     z-index: calc(var(--z-banner) + 1);
     min-height: 2.75rem;
     padding-inline: 0.75rem;
-    border: 1px solid oklch(from var(--color-highlight) l c h / 0.55);
+    border: 1px solid oklch(from var(--color-highlight) l c h / 55%);
     background: var(--color-surface-panel);
     font-family: var(--font-display);
     font-size: 0.75rem;
@@ -429,7 +456,7 @@
     flex-direction: column;
     justify-content: center;
     border: 2px solid var(--color-brand-blue);
-    background: oklch(from var(--color-brand-blue) l c h / 0.12);
+    background: oklch(from var(--color-brand-blue) l c h / 12%);
     padding: 0.125rem 0.5rem;
     line-height: 1.1;
   }
@@ -472,7 +499,7 @@
     flex-shrink: 0;
     justify-content: center;
     min-height: 2.5rem;
-    border: 2px solid oklch(from var(--color-highlight) l c h / 0.65);
+    border: 2px solid oklch(from var(--color-highlight) l c h / 65%);
     background: var(--color-highlight);
     padding-inline: 0.625rem;
     font-family: var(--font-mono);
@@ -504,12 +531,12 @@
   }
 
   .jl-ticker-hiding {
-    border-color: oklch(from var(--color-highlight) l c h / 0.85);
-    background: oklch(from var(--color-highlight) l c h / 0.92);
+    border-color: oklch(from var(--color-highlight) l c h / 85%);
+    background: oklch(from var(--color-highlight) l c h / 92%);
   }
 
   .jl-ticker-question {
-    border-color: oklch(from var(--color-status-warning) l c h / 0.65);
+    border-color: oklch(from var(--color-status-warning) l c h / 65%);
     background: var(--color-status-warning);
     color: var(--color-surface-deep);
   }
@@ -529,7 +556,7 @@
   }
 
   @media (prefers-reduced-motion: no-preference) {
-    html:not([data-motion="reduced"]):not([data-motion="static"]) .jl-ticker-active {
+    html:not([data-motion="reduced"], [data-motion="static"]) .jl-ticker-active {
       animation: jl-ticker-glow 2s ease-in-out infinite;
     }
   }
@@ -538,14 +565,14 @@
     bottom: calc(var(--dock-height) + max(0.5rem, env(safe-area-inset-bottom)));
   }
 
-  @media (max-width: 380px) {
+  @media (width <= 380px) {
     .jl-app-update-chip .map-float-alert {
       flex-direction: column;
       align-items: stretch;
     }
   }
 
-  /* Admin map — mission-control layout (tablet/desktop) */
+  /* Admin map: mission-control layout (tablet/desktop) */
   .admin-dashboard-list-scroll {
     overscroll-behavior: contain;
     scrollbar-gutter: stable;
@@ -564,7 +591,7 @@
     container-name: admin-monitor;
   }
 
-  @media (min-width: 1024px) {
+  @media (width >= 1024px) {
     .admin-monitor-pane {
       height: 100%;
       min-height: 0;
@@ -588,11 +615,13 @@
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, var(--admin-rail-width));
     grid-template-rows: auto minmax(0, 1fr);
+
     --admin-map-control-inset-right: var(--admin-rail-width);
   }
 
   .admin-map-shell--wide.admin-map-shell--rail-collapsed {
     grid-template-columns: minmax(0, 1fr) minmax(0, var(--admin-rail-collapsed-width));
+
     --admin-map-control-inset-right: var(--admin-rail-collapsed-width);
   }
 
@@ -632,7 +661,7 @@
     border-bottom: 2px solid var(--color-highlight);
     background: var(--color-surface-deep);
     padding: 0.25rem 0.625rem;
-    box-shadow: 0 4px 24px oklch(0.06 0.04 265 / 0.65);
+    box-shadow: 0 4px 24px oklch(6% 0.04 265deg / 65%);
   }
 
   .admin-monitor-rail {

@@ -1,5 +1,36 @@
 # Changelog
 
+## Unreleased
+
+### Technical
+
+- Geometry kernel (G5e): production always uses the WASM geometry kernel; client localStorage/env override removed. Wasm dispatch failures rethrow instead of silent TypeScript fail-soft.
+
+## 0.15.0 - 2026-09-27
+
+### Fixes
+
+- iPhone standalone PWA map paints full-bleed under notch and home indicator
+
+### Improvements
+
+- Mantine Wave 5: player chrome CSS prune and error surfaces on Mantine.
+- Smoother placement map camera reframes (ease/fly from shared motion tokens)
+- Softer elimination shade opacity transitions under reduced-motion rules
+- Drop the redundant map tools HUD coach toast; first-run Map tools guide remains
+
+## 0.14.0 - 2026-09-27
+
+### Fixes
+
+- Measuring: closer/further answers keep map shade after confirm in multiplayer, even when the region is too large to store as a polygon
+
+### Improvements
+
+- Land Mantine player UI through Wave 4 (entry chrome, tool hosts, map islands).
+- Tentacles: recommended answers use the hiding-zone center unless the seeker is actually inside the zone
+- Map chrome: full-bleed hunt tool deck with even tool spacing and shared safe-area overlay padding.
+
 ## 0.13.0 - 2026-08-16
 
 ### Fixes

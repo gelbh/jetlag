@@ -8,7 +8,6 @@ import {
 interface ChoiceButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   selected?: boolean;
   activeClassName?: string;
-  inactiveClassName?: string;
   fullWidth?: boolean;
   align?: "left" | "center";
   children: ReactNode;
@@ -27,7 +26,6 @@ function toneFromActiveClass(activeClassName: string): ChoiceTone {
 export function ChoiceButton({
   selected = false,
   activeClassName = "bg-flag text-flag-ink",
-  inactiveClassName = "bg-canvas text-field-ink",
   fullWidth = false,
   align,
   className = "",

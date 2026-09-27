@@ -14,11 +14,7 @@ import {
 } from "./MatchingToolPanel";
 
 vi.mock("@/components/tools/MatchingPanel", () => ({
-  MatchingPanel: ({
-    model,
-  }: {
-    model: { categoryChosen: boolean };
-  }) => (
+  MatchingPanel: ({ model }: { model: { categoryChosen: boolean } }) => (
     <div data-testid="matching-panel-stub">
       {model.categoryChosen ? "category-chosen" : "Match category stub"}
     </div>

@@ -1,20 +1,8 @@
 import type { Feature, MultiPolygon, Polygon } from "geojson";
 import type { MapBounds } from "../../map/mapBounds";
 import difference from "@turf/difference";
+import { haversineMeters } from "./haversine";
 import type { LatLngTuple } from "./types";
-
-function geodesicMeters(a: LatLngTuple, b: LatLngTuple): number {
-  const earthRadius = 6_371_000;
-  const latDelta = ((b[0] - a[0]) * Math.PI) / 180;
-  const lngDelta = ((b[1] - a[1]) * Math.PI) / 180;
-  const lat1 = (a[0] * Math.PI) / 180;
-  const lat2 = (b[0] * Math.PI) / 180;
-  const h =
-    Math.sin(latDelta / 2) ** 2 +
-    Math.cos(lat1) * Math.cos(lat2) * Math.sin(lngDelta / 2) ** 2;
-
-  return 2 * earthRadius * Math.asin(Math.sqrt(h));
-}
 
 /** Geodesic distance from center to the nearest viewport edge. */
 export function centerToViewportEdgeRadiusMeters(
@@ -30,10 +18,10 @@ export function centerToViewportEdgeRadiusMeters(
   const [lat, lng] = center;
 
   return Math.min(
-    geodesicMeters(center, [south, lng]),
-    geodesicMeters(center, [north, lng]),
-    geodesicMeters(center, [lat, west]),
-    geodesicMeters(center, [lat, east]),
+    haversineMeters(center, [south, lng]),
+    haversineMeters(center, [north, lng]),
+    haversineMeters(center, [lat, west]),
+    haversineMeters(center, [lat, east]),
   );
 }
 

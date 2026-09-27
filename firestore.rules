@@ -965,16 +965,10 @@ service cloud.firestore {
         allow delete: if false;
       }
 
+      // Client device-token registration retired with native FCM (web-only).
       match /devices/{deviceUid} {
         allow read: if isSessionMember(sessionId) && request.auth.uid == deviceUid;
-        allow create, update: if isSessionMember(sessionId)
-          && request.auth.uid == deviceUid
-          && request.resource.data.token is string
-          && request.resource.data.platform in ['ios', 'android', 'web']
-          && request.resource.data.role in ['seeker', 'hider']
-          && request.resource.data.updatedAt is string
-          && request.resource.data.preferences is map
-          && request.resource.data.preferences.enabled is bool;
+        allow create, update: if false;
         allow delete: if isSessionMember(sessionId) && request.auth.uid == deviceUid;
       }
 
@@ -1155,19 +1149,10 @@ service cloud.firestore {
           && request.resource.data.bannerDismissedAt is string;
       }
 
+      // Client device-token registration retired with native FCM (web-only).
       match /devices/{deviceId} {
         allow get, list: if isSignedIn() && request.auth.uid == uid;
-        allow create, update: if isSignedIn()
-          && request.auth.uid == uid
-          && deviceId == request.resource.data.platform
-          && request.resource.data.keys().hasOnly(['token', 'platform', 'updatedAt', 'preferences'])
-          && request.resource.data.token is string
-          && request.resource.data.token.size() > 0
-          && request.resource.data.token.size() <= 4096
-          && request.resource.data.platform in ['ios', 'android', 'web']
-          && request.resource.data.updatedAt is string
-          && request.resource.data.preferences is map
-          && request.resource.data.preferences.enabled is bool;
+        allow create, update: if false;
         allow delete: if isSignedIn() && request.auth.uid == uid;
       }
     }

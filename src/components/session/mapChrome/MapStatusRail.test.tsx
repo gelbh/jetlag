@@ -11,7 +11,9 @@ import {
 } from "./MapStatusRail";
 
 const { showEphemeral } = vi.hoisted(() => ({
-  showEphemeral: vi.fn(() => true),
+  showEphemeral: vi
+    .fn<(input: { title: string; message: string }) => boolean>()
+    .mockReturnValue(true),
 }));
 
 vi.mock("../../ui/notifications/showEphemeralPlayerNotification", () => ({
@@ -108,9 +110,7 @@ describe("MapStatusRail public props (AC #1)", () => {
       </MantineProvider>,
     );
 
-    expect(
-      screen.getByTestId("map-status-rail-mantine"),
-    ).toBeInTheDocument();
+    expect(screen.getByTestId("map-status-rail-mantine")).toBeInTheDocument();
   });
 });
 
@@ -126,20 +126,24 @@ describe("MapStatusRail header home", () => {
 describe("MapStatusRail Mantine", () => {
   it("mounts Mantine rail chrome", () => {
     const { container } = renderRail();
-    expect(container.querySelector('[data-testid="map-status-rail-mantine"]')).toBeTruthy();
+    expect(
+      container.querySelector('[data-testid="map-status-rail-mantine"]'),
+    ).toBeTruthy();
   });
 
   it("keeps frosted status bar + Start", () => {
     const { container } = renderRail({ canStartGame: true });
-    const island = container.querySelector('[data-testid="tool-status-block-mantine"]');
+    const island = container.querySelector(
+      '[data-testid="tool-status-block-mantine"]',
+    );
     expect(island).toBeTruthy();
     expect(
       island?.querySelector('[data-testid="sync-block-mantine"]'),
     ).toBeTruthy();
     expect(
-      island?.querySelector('[data-testid="sync-block-mantine"]')?.getAttribute(
-        "role",
-      ),
+      island
+        ?.querySelector('[data-testid="sync-block-mantine"]')
+        ?.getAttribute("role"),
     ).toBe("status");
     expect(container.querySelector(".jl-status-header")).toBeNull();
     expect(container.querySelector(".jl-status-bar")).toBeNull();
@@ -197,19 +201,37 @@ describe("MapStatusRail error channels (W5-F2)", () => {
     expect(showEphemeral).not.toHaveBeenCalled();
   });
 
-  it("routes action-free sync errors to ephemeral toast", () => {
+  it("keeps actionful sync errors sticky when retry callback is missing", () => {
     const { container } = renderRail({
       syncStatus: "error",
       message: "Sync failed · permission denied",
     });
 
+    expect(screen.getByText("Sync failed")).toBeInTheDocument();
+    expect(container.querySelector(".mantine-Alert-root")).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Retry" })).toBeNull();
+    expect(showEphemeral).not.toHaveBeenCalled();
+  });
+
+  it("routes action-free errors to ephemeral toast", () => {
+    const { container } = renderRail({
+      syncStatus: "error",
+      message: "Sync failed · permission denied",
+      inactiveChrome: true,
+      terminalSessionError: {
+        title: "Heads up",
+        message: "Session paused briefly.",
+      },
+      onSyncErrorAction: vi.fn(),
+      onReturnToJoin: vi.fn(),
+    });
+
     expect(showEphemeral).toHaveBeenCalledWith(
       expect.objectContaining({
-        title: "Sync failed",
-        message: "Sync failed · permission denied",
+        title: "Heads up",
+        message: "Session paused briefly.",
       }),
     );
-    expect(screen.queryByRole("button", { name: "Retry" })).toBeNull();
     expect(container.querySelector(".mantine-Alert-root")).toBeNull();
   });
 });

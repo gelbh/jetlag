@@ -20,7 +20,7 @@ describe("resolveStackedTops", () => {
       gap: 14,
     });
     expect(next.moverTop + 180 + 14).toBeLessThanOrEqual(next.peerTop + 0.01);
-    expect(next.moverTop).toBeGreaterThanOrEqual(8);
+    expect(next.moverTop).toBeGreaterThanOrEqual(72);
   });
 
   it("parks the mover below the peer", () => {
@@ -71,7 +71,8 @@ describe("separateFromPeerRect", () => {
       bottom: 400,
       height: 200,
     });
-    expect(next).toEqual({ left: 40, top: 40 });
+    // Vertical clamp keeps stacks clear of status chrome (minTop = 72).
+    expect(next).toEqual({ left: 40, top: 72 });
   });
 
   it("falls back below when left/right/above are clipped into the peer", () => {

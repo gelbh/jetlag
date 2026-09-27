@@ -1,4 +1,11 @@
-import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { AppNavigate } from "../navigation/AppNavigate";
 import { MapLibreGeoJsonOverlay } from "../components/map/helpers/MapLibreGeoJsonOverlay";
 import { cssPxDashToMapLibre } from "../components/map/helpers/cssPxDashToMapLibre";
@@ -15,9 +22,7 @@ import {
   type MapViewportState,
 } from "../components/map/chrome/MapViewportTracker";
 import type { HidingZoneStepId } from "../components/hider/hidingZoneSteps";
-import {
-  isWizardPlacePhaseStep,
-} from "../domain/wizard/phaseToSheetSnap";
+import { isWizardPlacePhaseStep } from "../domain/wizard/phaseToSheetSnap";
 import { timeTrapForHider } from "../domain/expansion/timeTraps";
 import { useTimeTrapsSync } from "../hooks/session/useTimeTrapsSync";
 import { useBoardEconomy } from "../hooks/session/useBoardEconomy";
@@ -28,7 +33,6 @@ import {
 } from "./hider-map-screen/hiderBoardEconomyChrome";
 import { useTimeTrapTool } from "../hooks/session/useTimeTrapTool";
 import type { HiderTruthRevealState } from "../components/session/banners/HiderTruthRevealBanner";
-import { useDesktopLayout } from "../hooks/layout/useDesktopLayout";
 import { HiderMapScreenChrome } from "./hider-map-screen/HiderMapScreenChrome";
 import { useResolvedSessionRules } from "../hooks/session/useResolvedSessionRules";
 import {
@@ -52,7 +56,10 @@ import {
   type LatLngTuple,
 } from "../domain/geometry/gameArea/geometry";
 import type { MapViewportBounds } from "../domain/map/transitViewport";
-import { effectiveMapStyle, applyMapStylePreferenceChange } from "../domain/device/power/powerProfile";
+import {
+  effectiveMapStyle,
+  applyMapStylePreferenceChange,
+} from "../domain/device/power/powerProfile";
 import { messageFingerprint } from "../domain/device/chrome/chatUnread";
 import { computeHiderTruthReplyAsync } from "../domain/questions/ui";
 import { resolvePendingQuestionTruthReference } from "../domain/questions/hiderTruth/resolveHiderTruthReference";
@@ -74,7 +81,12 @@ import { useLiveLocation } from "../hooks/location/useLiveLocation";
 import { useWakeLock } from "../hooks/location/useWakeLock";
 import { getPowerProfile } from "../domain/device/power/powerProfile";
 import { useSessionDistanceUnit } from "../hooks/session/useSessionDistanceUnit";
-import { isEndGameActive, isEndGamePending, isFoundHiderPending, LOCAL_SESSION_ID } from "../domain/map/annotations";
+import {
+  isEndGameActive,
+  isEndGamePending,
+  isFoundHiderPending,
+  LOCAL_SESSION_ID,
+} from "../domain/map/annotations";
 import {
   clearEndGameRequestSession,
   confirmFoundHiderSession,
@@ -82,7 +94,10 @@ import {
   resetFoundHiderSession,
   ensureRemoteSessionWriteAccess,
 } from "../services/firestore/firestoreAnnotations";
-import { ensureAnonymousUser, isFirebaseConfigured } from "../services/core/firebase/firebase";
+import {
+  ensureAnonymousUser,
+  isFirebaseConfigured,
+} from "../services/core/firebase/firebase";
 import { emitGameEndedActivity } from "../services/session/emitSessionActivity";
 import { useSessionAnnotations } from "../hooks/map/useSessionAnnotations";
 import { useAnnotations } from "../hooks/map/useAnnotations";
@@ -110,11 +125,7 @@ export function HiderMapScreen() {
   );
   const { sessionRules, gameArea } = useResolvedSessionRules(session);
   const { features: adminBoundaryFeatures, loading: adminBoundaryLoading } =
-    useAdminBoundaryFeatures(
-    gameArea,
-    sessionRules,
-    showAdminBoundaries,
-  );
+    useAdminBoundaryFeatures(gameArea, sessionRules, showAdminBoundaries);
   const distanceUnit = useSessionDistanceUnit();
   const setMapStyle = useMapStore((state) => state.setMapStyle);
   const streetBasemap = useMapStore((state) => state.streetBasemap);
@@ -132,9 +143,6 @@ export function HiderMapScreen() {
       });
     },
     [lowPowerMode, setLowPowerMode, setMapStyle],
-  );
-  const notificationPreferences = useMapStore(
-    (state) => state.notificationPreferences,
   );
 
   const overlay = useMapOverlayState();
@@ -156,8 +164,6 @@ export function HiderMapScreen() {
     acknowledgeFingerprints,
     authReady,
     isRemote,
-    enableNotifications,
-    updateNotificationPreferences,
   } = useSharedSessionScreen({
     isChatOpen: overlay.isChatOpen,
     notificationRole: "hider",
@@ -189,9 +195,7 @@ export function HiderMapScreen() {
     () => new Set(optimisticAnswers.keys()),
     [optimisticAnswers],
   );
-  const [mapViewport, setMapViewport] = useState<MapViewportState | null>(
-    null,
-  );
+  const [mapViewport, setMapViewport] = useState<MapViewportState | null>(null);
 
   const handleMapViewportChange = useCallback(
     (viewport: MapViewportState | null) => {
@@ -217,8 +221,7 @@ export function HiderMapScreen() {
   );
   const mapShellRef = useRef<HTMLDivElement>(null);
   const exportLegendRef = useRef<HTMLDivElement>(null);
-  const endGameBlocked =
-    isEndGameActive(session) || isEndGamePending(session);
+  const endGameBlocked = isEndGameActive(session) || isEndGamePending(session);
   const {
     handleClearMap,
     handleResetBoard,
@@ -264,10 +267,7 @@ export function HiderMapScreen() {
     () => resolveMyHidingZone(hidingZones, uid, session?.memberUids),
     [hidingZones, session?.memberUids, uid],
   );
-  const stationCenter = useMemo(
-    () => hiderStationCenter(myZone),
-    [myZone],
-  );
+  const stationCenter = useMemo(() => hiderStationCenter(myZone), [myZone]);
   const liveLocationProfile = getPowerProfile(lowPowerMode).liveLocation;
   const needsTruthLocation = pendingQuestions.some(
     (question) => question.status === "pending",
@@ -289,10 +289,7 @@ export function HiderMapScreen() {
   const seekerPlacesByUid = useMemo(() => {
     const places: Record<string, LatLngTuple> = {};
     for (const location of seekerLocations) {
-      if (
-        Number.isFinite(location.lat) &&
-        Number.isFinite(location.lng)
-      ) {
+      if (Number.isFinite(location.lat) && Number.isFinite(location.lng)) {
         places[location.uid] = [location.lat, location.lng];
       }
     }
@@ -352,7 +349,8 @@ export function HiderMapScreen() {
     timerState: timer.timerState,
   });
   useWakeLock(keepScreenAwake || (timer.running && !lowPowerMode));
-  const { answerPendingQuestion, postSystemMessage } = usePendingQuestionActions();
+  const { answerPendingQuestion, postSystemMessage } =
+    usePendingQuestionActions();
 
   useEffect(() => {
     /* eslint-disable react-hooks/set-state-in-effect -- prune optimistic answers once remote status catches up */
@@ -532,10 +530,16 @@ export function HiderMapScreen() {
 
   const ensureHiderWriteAccess = useCallback(async () => {
     if (!session || !uid) {
-      throw new Error("Sign in and rejoin the session as Hider, then try again.");
+      throw new Error(
+        "Sign in and rejoin the session as Hider, then try again.",
+      );
     }
 
-    const updatedSession = await ensureRemoteSessionWriteAccess(session, uid, "hider");
+    const updatedSession = await ensureRemoteSessionWriteAccess(
+      session,
+      uid,
+      "hider",
+    );
     if (updatedSession !== session) {
       setSession(updatedSession, uid);
     }
@@ -574,7 +578,9 @@ export function HiderMapScreen() {
     try {
       await confirmFoundHiderSession(session.id, uid);
     } catch {
-      window.alert("Could not confirm found hider. Check your connection and try again.");
+      window.alert(
+        "Could not confirm found hider. Check your connection and try again.",
+      );
     }
   }, [session, setSession, uid]);
 
@@ -606,7 +612,9 @@ export function HiderMapScreen() {
         uid,
       );
     } catch {
-      window.alert("Could not clear found hider request. Check your connection and try again.");
+      window.alert(
+        "Could not clear found hider request. Check your connection and try again.",
+      );
     }
   }, [session, setSession, uid]);
 
@@ -674,7 +682,10 @@ export function HiderMapScreen() {
   });
 
   const searchViewportBounds = useCallback((): MapViewportBounds => {
-    return mapViewport?.bounds ?? gameAreaToBoundingBox(gameArea ?? fallbackGameArea());
+    return (
+      mapViewport?.bounds ??
+      gameAreaToBoundingBox(gameArea ?? fallbackGameArea())
+    );
   }, [gameArea, mapViewport?.bounds]);
 
   const handleHidingZoneStepChange = useCallback((stepId: HidingZoneStepId) => {
@@ -793,7 +804,6 @@ export function HiderMapScreen() {
     ],
   );
 
-  const isDesktop = useDesktopLayout();
   const chromeHudRef = useRef<HTMLDivElement>(null);
 
   if (!session || !gameArea) {
@@ -811,121 +821,122 @@ export function HiderMapScreen() {
     timeTrapSheetOpen;
 
   const mapLayers = (
-      <div className="absolute inset-0">
-        <MapViewWithLandscapeInset
-          isDesktop={isDesktop}
-          key={session.id}
-          model={{
-            chromeHudRef,
-            mapKey: session.id,
-            mapStyle: effectiveBasemapStyle,
-            streetBasemap,
-            onMapStyleChange: handleMapStyleChange,
-            center,
-            zoom: 12,
-            focusBounds: mapFocusBounds,
-            fitBoundsMode: "once",
-            recenterToken,
-            showCompassControl: true,
-            onRecenter: () => setRecenterToken((value) => value + 1),
-            onMapClick: handleMapClick,
-            className: "h-full w-full",
-          }}
-        >
-          <MapViewportTracker
-            onViewportChange={handleMapViewportChange}
+    <div className="absolute inset-0">
+      <MapViewWithLandscapeInset
+        isDesktop={false}
+        key={session.id}
+        model={{
+          chromeHudRef,
+          mapKey: session.id,
+          mapStyle: effectiveBasemapStyle,
+          streetBasemap,
+          onMapStyleChange: handleMapStyleChange,
+          center,
+          zoom: 12,
+          focusBounds: mapFocusBounds,
+          fitBoundsMode: "once",
+          recenterToken,
+          showCompassControl: true,
+          onRecenter: () => setRecenterToken((value) => value + 1),
+          onMapClick: handleMapClick,
+          className: "h-full w-full",
+        }}
+      >
+        <MapViewportTracker onViewportChange={handleMapViewportChange} />
+        <GameAreaMask gameArea={gameArea} />
+        <AnnotationLayer
+          annotations={annotations}
+          gameArea={gameArea}
+          selectedAnnotationId={selectedAnnotationId}
+          layerVisibility={layerVisibility}
+          draftEliminationFeatures={previewEliminationFeatures}
+          session={session}
+          hidingZones={confirmedHidingZones}
+        />
+        <HidingZonesLayer
+          zones={hidingZones}
+          myUid={uid}
+          memberUids={session?.memberUids}
+          session={session}
+        />
+        {zoneTool.wizardOpen &&
+        (hidingZoneStepId === "location" ||
+          hidingZoneStepId === "confirm") &&
+        !zoneTool.manualMode ? (
+          <HidingZoneStationsLayer
+            stations={zoneTool.stations}
+            selectedStation={zoneTool.selectedStation}
+            onSelectStation={zoneTool.setSelectedStation}
           />
-          <GameAreaMask gameArea={gameArea} />
-          <AnnotationLayer
-            annotations={annotations}
-            gameArea={gameArea}
-            selectedAnnotationId={selectedAnnotationId}
-            layerVisibility={layerVisibility}
-            draftEliminationFeatures={previewEliminationFeatures}
-            session={session}
-            hidingZones={confirmedHidingZones}
+        ) : null}
+        {timeTrapSheetOpen && !myTrap ? (
+          <HidingZoneStationsLayer
+            stations={timeTrapTool.stations}
+            selectedStation={timeTrapTool.selectedStation}
+            onSelectStation={timeTrapTool.setSelectedStation}
           />
-          <HidingZonesLayer
-            zones={hidingZones}
-            myUid={uid}
-            memberUids={session?.memberUids}
-            session={session}
-          />
-          {zoneTool.wizardOpen &&
-          hidingZoneStepId === "location" &&
-          !zoneTool.manualMode ? (
-            <HidingZoneStationsLayer
-              stations={zoneTool.stations}
-              selectedStation={zoneTool.selectedStation}
-              onSelectStation={zoneTool.setSelectedStation}
-            />
-          ) : null}
-          {timeTrapSheetOpen && !myTrap ? (
-            <HidingZoneStationsLayer
-              stations={timeTrapTool.stations}
-              selectedStation={timeTrapTool.selectedStation}
-              onSelectStation={timeTrapTool.setSelectedStation}
-            />
-          ) : null}
-          {previewRing.length > 0 ? (
-            <MapLibreGeoJsonOverlay
-              id="hider-zone-preview"
-              data={{
-                type: "Feature",
-                properties: {},
-                geometry: {
-                  type: "Polygon",
-                  coordinates: [
-                    [
-                      ...previewRing.map(([lat, lng]) => [lng, lat] as [number, number]),
-                      [previewRing[0]![1], previewRing[0]![0]],
-                    ],
+        ) : null}
+        {previewRing.length > 0 ? (
+          <MapLibreGeoJsonOverlay
+            id="hider-zone-preview"
+            data={{
+              type: "Feature",
+              properties: {},
+              geometry: {
+                type: "Polygon",
+                coordinates: [
+                  [
+                    ...previewRing.map(
+                      ([lat, lng]) => [lng, lat] as [number, number],
+                    ),
+                    [previewRing[0]![1], previewRing[0]![0]],
                   ],
-                },
-              }}
-              fill={{
-                fillColor: MAP_ANNOTATION_COLORS.hidingZoneOwn,
-                fillOpacity: 0.12,
-              }}
-              line={{
-                color: MAP_ANNOTATION_COLORS.hidingZoneOwn,
-                width: 2,
-                dashArray: cssPxDashToMapLibre("6 6", 2),
-              }}
+                ],
+              },
+            }}
+            fill={{
+              fillColor: MAP_ANNOTATION_COLORS.hidingZoneOwn,
+              fillOpacity: 0.12,
+            }}
+            line={{
+              color: MAP_ANNOTATION_COLORS.hidingZoneOwn,
+              width: 2,
+              dashArray: cssPxDashToMapLibre("6 6", 2),
+            }}
+          />
+        ) : null}
+        <LiveSeekerLocationsLayer locations={seekerLocations} myUid={uid} />
+        <LiveHiderLocationsLayer locations={hiderLocations} myUid={uid} />
+        <ActiveThermometerWalkLayer
+          start={activeThermometerWalk.start}
+          livePoint={activeThermometerWalk.livePoint}
+          targetDistanceMeters={activeThermometerWalk.targetDistanceMeters}
+          mapStyle={effectiveBasemapStyle}
+          distanceUnit={distanceUnit}
+        />
+        <PendingQuestionLayer
+          pendingQuestions={pendingQuestions}
+          gameArea={gameArea}
+          sessionRules={session}
+          mapStyle={effectiveBasemapStyle}
+          streetBasemap={streetBasemap}
+        />
+        {showAdminBoundaries && !adminBoundaryLoading ? (
+          <Suspense fallback={null}>
+            <AdminBoundariesLayer
+              features={adminBoundaryFeatures}
+              mapStyle={effectiveBasemapStyle}
+              streetBasemap={streetBasemap}
             />
-          ) : null}
-          <LiveSeekerLocationsLayer locations={seekerLocations} myUid={uid} />
-          <LiveHiderLocationsLayer locations={hiderLocations} myUid={uid} />
-          <ActiveThermometerWalkLayer
-            start={activeThermometerWalk.start}
-            livePoint={activeThermometerWalk.livePoint}
-            targetDistanceMeters={activeThermometerWalk.targetDistanceMeters}
-            mapStyle={effectiveBasemapStyle}
-            distanceUnit={distanceUnit}
-          />
-          <PendingQuestionLayer
-            pendingQuestions={pendingQuestions}
-            gameArea={gameArea}
-            sessionRules={session}
-            mapStyle={effectiveBasemapStyle}
-            streetBasemap={streetBasemap}
-          />
-          {showAdminBoundaries && !adminBoundaryLoading ? (
-            <Suspense fallback={null}>
-              <AdminBoundariesLayer
-                features={adminBoundaryFeatures}
-                mapStyle={effectiveBasemapStyle}
-                streetBasemap={streetBasemap}
-              />
-            </Suspense>
-          ) : null}
-          <LiveUserLocationLayer
-            enabled={showCurrentLocation}
-            lowPowerMode={lowPowerMode}
-            onError={handleLiveLocationError}
-          />
-        </MapViewWithLandscapeInset>
-      </div>
+          </Suspense>
+        ) : null}
+        <LiveUserLocationLayer
+          enabled={showCurrentLocation}
+          lowPowerMode={lowPowerMode}
+          onError={handleLiveLocationError}
+        />
+      </MapViewWithLandscapeInset>
+    </div>
   );
 
   const syncMessage = syncStatus.remoteUpdateNotice ?? syncStatus.lastSyncError;
@@ -947,142 +958,140 @@ export function HiderMapScreen() {
       queuedWrites={syncStatus.queuedWrites}
       syncMessage={syncMessage}
     >
-    <div
-      className="map-screen-shell"
-      data-map-attention={mapAttentionActive ? "true" : undefined}
-    >
-      <MapAttentionRing active={mapAttentionActive} />
-      {inactiveChrome ? (
-        <div
-          aria-hidden
-          className="pointer-events-none fixed inset-0 z-[calc(var(--z-banner)-1)] bg-surface-deep/30"
+      <div
+        className="map-screen-shell"
+        data-map-attention={mapAttentionActive ? "true" : undefined}
+      >
+        <MapAttentionRing active={mapAttentionActive} />
+        {inactiveChrome ? (
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 z-[calc(var(--z-banner)-1)] bg-surface-deep/30"
+          />
+        ) : null}
+        {mapLayersContent}
+        <HiderMapScreenChrome
+          controller={{
+            session,
+            hasMyZone: Boolean(myZone),
+            uid,
+            isHost,
+            chromeHudRef,
+            annotations,
+            pendingQuestions,
+            messages,
+            overlay,
+            syncStatus,
+            timer,
+            timerSyncing,
+            canControlTimer,
+            moveInProgress: hidingZones.some(
+              (zone) => zone.moveInProgress === true,
+            ),
+            isRemote,
+            hasUnreadChat,
+            unreadCount,
+            hiderOutsideZone,
+            truthReveal,
+            onDismissTruthReveal: dismissTruthReveal,
+            onResetEndGame: handleResetEndGame,
+            onAcceptFoundHider: handleAcceptFoundHider,
+            onDeclineFoundHider: handleDeclineFoundHider,
+            onOpenLog: openLogExclusive,
+            zoneTool: {
+              wizardOpen: zoneTool.wizardOpen,
+              hasZone: zoneTool.hasZone,
+              moveMode: zoneTool.moveMode,
+              writesEnabled: zoneTool.writesEnabled,
+              openWizard: zoneTool.openWizard,
+              closeWizard: zoneTool.closeWizard,
+              startMove: zoneTool.startMove,
+            },
+            hidingZonePanelTool,
+            hidingZoneRadiusLabel,
+            onHidingZoneStepChange: handleHidingZoneStepChange,
+            onSearchThisArea: handleSearchThisArea,
+            sheetBlocksWizard,
+            onOpenWizard: openWizardExclusive,
+            onOpenChat: openChatExclusive,
+            onOpenSettings: openSettingsExclusive,
+            onOpenCodes: openCodesExclusive,
+            ...(boardEconomyEnabled
+              ? {
+                  ...hiderBoardEconomyDockProps(boardEconomy.state),
+                  onOpenHand: boardEconomy.state
+                    ? () => setHandSheetOpen(true)
+                    : undefined,
+                  boardEconomyEnabled: true,
+                }
+              : {}),
+            expansionPackEnabled,
+            expansionMenuOpen,
+            onExpansionMenuOpenChange: setExpansionMenuOpen,
+            timeTrapSheetOpen,
+            onTimeTrapSheetOpenChange: setTimeTrapSheetOpen,
+            timeTrapPeeked,
+            onTimeTrapPeekedChange: setTimeTrapPeeked,
+            timeTrapTool: {
+              query: timeTrapTool.query,
+              setQuery: timeTrapTool.setQuery,
+              stations: timeTrapTool.stations,
+              stationsLoading: timeTrapTool.stationsLoading,
+              stationsError: timeTrapTool.stationsError,
+              selectedStation: timeTrapTool.selectedStation,
+              setSelectedStation: timeTrapTool.setSelectedStation,
+              confirmTrap: timeTrapTool.confirmTrap,
+              saving: timeTrapTool.saving,
+              error: timeTrapTool.error,
+            },
+            myTrap,
+            onTimeTrapSearchThisArea: handleTimeTrapSearchThisArea,
+            curseSheetOpen,
+            onCurseSheetOpenChange: setCurseSheetOpen,
+            onClearMap: isHost ? handleClearMap : undefined,
+            onResetBoard: isHost ? handleResetBoard : undefined,
+            onResetSession: isHost ? handleResetSession : undefined,
+            onEndSession: isHost ? handleEndSession : undefined,
+            onLeaveSession: handleLeaveSession,
+            mapSettings: {
+              showCurrentLocation,
+              setShowCurrentLocation,
+              showAdminBoundaries,
+              setShowAdminBoundaries,
+              keepScreenAwake,
+              setKeepScreenAwake,
+              lowPowerMode,
+              setLowPowerMode,
+              layerVisibility,
+              setLayerVisibility,
+              distanceUnit,
+              mapStyle: effectiveBasemapStyle,
+              setMapStyle: handleMapStyleChange,
+              streetBasemap,
+              setStreetBasemap,
+              locationError,
+            },
+            chat: {
+              sessionId: sessionId ?? "",
+              questionTruths,
+              truthsLoading,
+              truthReferenceModes,
+              answerError: chatAnswerError,
+              answerSubmitting,
+              answeredPendingIds,
+              onAnswerQuestion: submitHiderAnswer,
+            },
+          }}
         />
-      ) : null}
-      {isDesktop ? null : mapLayersContent}
-      <HiderMapScreenChrome
-        mapSlot={isDesktop ? mapLayersContent : undefined}
-        controller={{
-          session,
-          hasMyZone: Boolean(myZone),
-          uid,
-          isHost,
-          chromeHudRef,
-          annotations,
-          pendingQuestions,
-          messages,
-          overlay,
-          syncStatus,
-          timer,
-          timerSyncing,
-          canControlTimer,
-          moveInProgress: hidingZones.some((zone) => zone.moveInProgress === true),
-          isRemote,
-          hasUnreadChat,
-          unreadCount,
-          hiderOutsideZone,
-          truthReveal,
-          onDismissTruthReveal: dismissTruthReveal,
-          onResetEndGame: handleResetEndGame,
-          onAcceptFoundHider: handleAcceptFoundHider,
-          onDeclineFoundHider: handleDeclineFoundHider,
-          onOpenLog: openLogExclusive,
-          zoneTool: {
-            wizardOpen: zoneTool.wizardOpen,
-            hasZone: zoneTool.hasZone,
-            moveMode: zoneTool.moveMode,
-            writesEnabled: zoneTool.writesEnabled,
-            openWizard: zoneTool.openWizard,
-            closeWizard: zoneTool.closeWizard,
-            startMove: zoneTool.startMove,
-          },
-          hidingZonePanelTool,
-          hidingZoneRadiusLabel,
-          onHidingZoneStepChange: handleHidingZoneStepChange,
-          onSearchThisArea: handleSearchThisArea,
-          sheetBlocksWizard,
-          onOpenWizard: openWizardExclusive,
-          onOpenChat: openChatExclusive,
-          onOpenSettings: openSettingsExclusive,
-          onOpenCodes: openCodesExclusive,
-          ...(boardEconomyEnabled
-            ? {
-                ...hiderBoardEconomyDockProps(boardEconomy.state),
-                onOpenHand: boardEconomy.state
-                  ? () => setHandSheetOpen(true)
-                  : undefined,
-                boardEconomyEnabled: true,
-              }
-            : {}),
-          expansionPackEnabled,
-          expansionMenuOpen,
-          onExpansionMenuOpenChange: setExpansionMenuOpen,
-          timeTrapSheetOpen,
-          onTimeTrapSheetOpenChange: setTimeTrapSheetOpen,
-          timeTrapPeeked,
-          onTimeTrapPeekedChange: setTimeTrapPeeked,
-          timeTrapTool: {
-            query: timeTrapTool.query,
-            setQuery: timeTrapTool.setQuery,
-            stations: timeTrapTool.stations,
-            stationsLoading: timeTrapTool.stationsLoading,
-            stationsError: timeTrapTool.stationsError,
-            selectedStation: timeTrapTool.selectedStation,
-            setSelectedStation: timeTrapTool.setSelectedStation,
-            confirmTrap: timeTrapTool.confirmTrap,
-            saving: timeTrapTool.saving,
-            error: timeTrapTool.error,
-          },
-          myTrap,
-          onTimeTrapSearchThisArea: handleTimeTrapSearchThisArea,
-          curseSheetOpen,
-          onCurseSheetOpenChange: setCurseSheetOpen,
-          onClearMap: isHost ? handleClearMap : undefined,
-          onResetBoard: isHost ? handleResetBoard : undefined,
-          onResetSession: isHost ? handleResetSession : undefined,
-          onEndSession: isHost ? handleEndSession : undefined,
-          onLeaveSession: handleLeaveSession,
-          mapSettings: {
-            showCurrentLocation,
-            setShowCurrentLocation,
-            showAdminBoundaries,
-            setShowAdminBoundaries,
-            keepScreenAwake,
-            setKeepScreenAwake,
-            lowPowerMode,
-            setLowPowerMode,
-            layerVisibility,
-            setLayerVisibility,
-            distanceUnit,
-            mapStyle: effectiveBasemapStyle,
-            setMapStyle: handleMapStyleChange,
-            streetBasemap,
-            setStreetBasemap,
-            notificationPreferences,
-            updateNotificationPreferences,
-            enableNotifications,
-            locationError,
-          },
-          chat: {
-            sessionId: sessionId ?? "",
-            questionTruths,
-            truthsLoading,
-            truthReferenceModes,
-            answerError: chatAnswerError,
-            answerSubmitting,
-            answeredPendingIds,
-            onAnswerQuestion: submitHiderAnswer,
-          },
-        }}
-      />
-      {boardEconomyEnabled ? (
-        <HiderBoardEconomySheets
-          economy={boardEconomy}
-          gameSize={session?.gameSize ?? "medium"}
-          handSheetOpen={handSheetOpen}
-          onHandSheetOpenChange={setHandSheetOpen}
-        />
-      ) : null}
-    </div>
+        {boardEconomyEnabled ? (
+          <HiderBoardEconomySheets
+            economy={boardEconomy}
+            gameSize={session?.gameSize ?? "medium"}
+            handSheetOpen={handSheetOpen}
+            onHandSheetOpenChange={setHandSheetOpen}
+          />
+        ) : null}
+      </div>
     </MapLandscapeChromeShell>
   );
 }

@@ -1,14 +1,16 @@
 :root {
   /* iOS Mantine Operate: system stack matches jetlagTheme fontFamily */
-  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI",
+  --font-display: -apple-system, blinkmacsystemfont, "SF Pro Text", "Segoe UI",
     system-ui, sans-serif;
-  --font-body: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI",
+  --font-body: -apple-system, blinkmacsystemfont, "SF Pro Text", "Segoe UI",
     system-ui, sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --font-mono: ui-monospace, sfmono-regular, menlo, monaco, consolas, monospace;
+
   color-scheme: dark;
   font-family: var(--font-body);
   background: var(--color-surface-deep);
   color: var(--color-ink-secondary);
+
   --dock-height: 4.25rem;
   --dock-content-height: 2.75rem;
   --safe-area-top: env(safe-area-inset-top, 0px);
@@ -18,6 +20,9 @@
   --hider-action-bar-height: 3.75rem;
   --chrome-gap-above-dock: 0.5rem;
   --chrome-gap-bottom: 0.75rem;
+
+  /* Float inset so hunt dock corners track the device rounded rect. */
+  --dock-float-gap: 0.75rem;
   --map-panel-bottom: calc(
     var(--dock-total-height) + var(--chrome-gap-above-dock) +
       var(--safe-area-bottom)
@@ -54,13 +59,13 @@
   --jl-sync-beacon-inset-left: max(0.625rem, env(safe-area-inset-left, 0px));
 }
 
-@media (min-width: 28.01rem) {
+@media (width >= 28.01rem) {
   :root {
     --dock-content-height: var(--dock-height);
   }
 }
 
-@media (max-width: 639px) {
+@media (width <= 639px) {
   :root {
     --hider-action-bar-height: 6.5rem;
   }
@@ -75,7 +80,6 @@ html {
   height: 100%;
   height: 100dvh;
   background: var(--color-surface-deep);
-  -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
 }
 
@@ -89,6 +93,33 @@ body,
   height: 100dvh;
   overflow: hidden;
   background: var(--color-surface-deep);
+}
+
+/*
+ * iOS installed PWA + viewport-fit=cover: WebKit can report svh/dvh /
+ * -webkit-fill-available short of the physical screen (WebKit 254868).
+ * vh/lvh match screen height in standalone; keep dvh for Safari tabs.
+ * html.jl-standalone-shell covers iOS when navigator.standalone is true
+ * but (display-mode: standalone) does not match.
+ */
+@media (display-mode: standalone) {
+  html,
+  body,
+  #root {
+    min-height: 100vh;
+    min-height: 100lvh;
+    height: 100vh;
+    height: 100lvh;
+  }
+}
+
+html.jl-standalone-shell,
+html.jl-standalone-shell body,
+html.jl-standalone-shell #root {
+  min-height: 100vh;
+  min-height: 100lvh;
+  height: 100vh;
+  height: 100lvh;
 }
 
 /*
@@ -106,7 +137,6 @@ body {
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
   user-select: none;
-  -webkit-user-select: none;
   -webkit-touch-callout: none;
 }
 
@@ -129,7 +159,6 @@ textarea,
 select,
 [contenteditable="true"] {
   user-select: text;
-  -webkit-user-select: text;
   -webkit-touch-callout: default;
 }
 
@@ -146,4 +175,93 @@ select,
   overflow-y: auto;
   overscroll-behavior: none;
   background: transparent;
+}
+
+@media (display-mode: standalone) {
+  .app-scroll-root {
+    min-height: 100vh;
+    min-height: 100lvh;
+    height: 100vh;
+    height: 100lvh;
+  }
+}
+
+html.jl-standalone-shell .app-scroll-root {
+  min-height: 100vh;
+  min-height: 100lvh;
+  height: 100vh;
+  height: 100lvh;
+}
+
+/*
+ * Entry viewport / flow height: dvh in browser tabs; lvh in standalone (W5-G).
+ * Inside PlayerPhoneShell, fill the column so letterbox + shell height stay coherent.
+ */
+.home-poster-viewport {
+  height: 100dvh;
+  max-height: 100dvh;
+}
+
+.entry-screen-layout-flow {
+  min-height: 100dvh;
+}
+
+@media (display-mode: standalone) {
+  .home-poster-viewport {
+    height: 100vh;
+    height: 100lvh;
+    max-height: 100vh;
+    max-height: 100lvh;
+  }
+
+  .entry-screen-layout-flow {
+    min-height: 100vh;
+    min-height: 100lvh;
+  }
+}
+
+html.jl-standalone-shell .home-poster-viewport {
+  height: 100vh;
+  height: 100lvh;
+  max-height: 100vh;
+  max-height: 100lvh;
+}
+
+html.jl-standalone-shell .entry-screen-layout-flow {
+  min-height: 100vh;
+  min-height: 100lvh;
+}
+
+[data-player-phone-shell] .home-poster-viewport {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: auto;
+  max-height: none;
+}
+
+[data-player-phone-shell] .entry-screen-layout-flow {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+@media (display-mode: standalone) {
+  [data-player-phone-shell] .home-poster-viewport {
+    min-height: 100%;
+    height: 100%;
+    max-height: none;
+  }
+
+  [data-player-phone-shell] .entry-screen-layout-flow {
+    min-height: 100%;
+  }
+}
+
+html.jl-standalone-shell [data-player-phone-shell] .home-poster-viewport {
+  min-height: 100%;
+  height: 100%;
+  max-height: none;
+}
+
+html.jl-standalone-shell [data-player-phone-shell] .entry-screen-layout-flow {
+  min-height: 100%;
 }

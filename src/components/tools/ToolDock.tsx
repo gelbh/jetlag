@@ -24,8 +24,6 @@ import {
   useToolDockMenus,
 } from "./useToolDockState";
 
-export type ToolDockLayout = "dock" | "rail";
-
 interface ToolDockProps {
   activeTool: MapTool;
   sessionRules?: SessionRulesInput;
@@ -36,6 +34,7 @@ interface ToolDockProps {
   canRedo: boolean;
   onUndo: () => void;
   onRedo: () => void;
+  showHistory?: boolean;
   onOpenSettings: () => void;
   onOpenCodes?: () => void;
   onOpenReportProblem: () => void;
@@ -49,8 +48,6 @@ interface ToolDockProps {
   canRequestFoundHider?: boolean;
   onRequestFoundHider?: () => void;
   canSubmitQuestion?: boolean;
-  /** Bottom dock (default) or vertical left rail inside DesktopOpsShell. */
-  layout?: ToolDockLayout;
   /** Block tool activation when the session is gone. */
   inactive?: boolean;
 }
@@ -65,6 +62,7 @@ export function ToolDock({
   canRedo,
   onUndo,
   onRedo,
+  showHistory = true,
   onOpenSettings,
   onOpenCodes,
   onOpenReportProblem,
@@ -78,13 +76,11 @@ export function ToolDock({
   canRequestFoundHider = false,
   onRequestFoundHider,
   canSubmitQuestion = true,
-  layout = "dock",
   inactive = false,
 }: ToolDockProps) {
   const dockRef = useRef<HTMLDivElement>(null);
   const mainGroupRef = useRef<HTMLDivElement>(null);
-  const isRail = layout === "rail";
-  const viewportBottomInset = useVisualViewportBottomInset(!isRail);
+  const viewportBottomInset = useVisualViewportBottomInset(true);
   const { drawMenuOpen, setDrawMenuOpen, closeMenus } =
     useToolDockMenus(dockRef);
 
@@ -122,11 +118,10 @@ export function ToolDock({
   return (
     <MapBottomChrome
       ref={dockRef}
-      layout={isRail ? "rail" : "phone"}
       inactive={inactive}
       askFirst={askFirst}
       style={
-        !isRail && viewportBottomInset > 0
+        viewportBottomInset > 0
           ? { bottom: `${viewportBottomInset}px` }
           : undefined
       }
@@ -151,18 +146,22 @@ export function ToolDock({
             ref={mainGroupRef}
             className="justify-start gap-1 [&_.jl-tool-slot]:flex-none [&_.jl-tool-slot]:basis-auto [&_[data-hunt-question-strip]_.jl-tool-slot]:min-h-11 [&_[data-hunt-question-strip]_.jl-tool-slot]:min-w-0 [&_[data-hunt-question-strip]_.jl-tool-slot]:flex-1 [&_[data-hunt-question-strip]_.jl-tool-slot]:basis-0"
           >
-            <ToolDockHistorySlot
-              kind="undo"
-              canAct={canUndo}
-              onAct={onUndo}
-              inactive={inactive}
-            />
-            <ToolDockHistorySlot
-              kind="redo"
-              canAct={canRedo}
-              onAct={onRedo}
-              inactive={inactive}
-            />
+            {showHistory ? (
+              <>
+                <ToolDockHistorySlot
+                  kind="undo"
+                  canAct={canUndo}
+                  onAct={onUndo}
+                  inactive={inactive}
+                />
+                <ToolDockHistorySlot
+                  kind="redo"
+                  canAct={canRedo}
+                  onAct={onRedo}
+                  inactive={inactive}
+                />
+              </>
+            ) : null}
             <ToolDeckQuestionStrip askFirst={askFirst}>
               {visibleQuestionTools.map((toolId) => (
                 <ToolDockQuestionSlot

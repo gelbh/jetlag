@@ -9,9 +9,11 @@ import { isEndGameActive } from "@/domain/map/annotations";
 import type { HidingZoneRecord } from "@/domain/session/hiding/hidingZone";
 import { annotationHasEliminationFeature } from "@/domain/geometry/masks/combinedEliminationMask";
 import { EMPTY_GEOJSON_FEATURES } from "@/domain/geometry/masks/emptyFeatures";
+import { MOTION_MAP_SHADE_MS } from "@/domain/device/motion/motionTokens";
 import { MAP_ANNOTATION_COLORS } from "@/domain/map/mapAnnotationColors";
 import { getEliminationOverlayLayers } from "@/domain/map/mapEliminationOverlayStyle";
 import { useCombinedEliminationMask } from "@/hooks/map/useCombinedEliminationMask";
+import { useMotionProfile } from "@/hooks/motion/useMotionProfile";
 import { useMapStore } from "@/state/sessionStore";
 import { MapLibreGeoJsonOverlay } from "../helpers/MapLibreGeoJsonOverlay";
 import { pathOptionsToMapLibrePaint } from "../helpers/pathOptionsToMapLibrePaint";
@@ -37,6 +39,7 @@ export const CombinedEliminationLayer = memo(function CombinedEliminationLayer({
 }: CombinedEliminationLayerProps) {
   const mapStyle = useMapStore((state) => state.mapStyle);
   const streetBasemap = useMapStore((state) => state.streetBasemap);
+  const { decorativeAnimate } = useMotionProfile();
   const overlayLayers = useMemo(
     () => getEliminationOverlayLayers(mapStyle, streetBasemap),
     [mapStyle, streetBasemap],
@@ -64,9 +67,9 @@ export const CombinedEliminationLayer = memo(function CombinedEliminationLayer({
   const pulsing = useMemo(
     () =>
       annotations.some((annotation) =>
-        annotationHasEliminationFeature(annotation, gameArea, pulsingIds),
+        annotationHasEliminationFeature(annotation, pulsingIds),
       ),
-    [annotations, gameArea, pulsingIds],
+    [annotations, pulsingIds],
   );
 
   if (hidden || !combinedMask) {
@@ -77,6 +80,7 @@ export const CombinedEliminationLayer = memo(function CombinedEliminationLayer({
     <MapLibreGeoJsonOverlay
       id="combined-elimination"
       data={combinedMask}
+      paintTransitionMs={decorativeAnimate ? MOTION_MAP_SHADE_MS : 0}
       layers={[
         ...overlayLayers.map((layer, layerIndex) => {
           const paint = pathOptionsToMapLibrePaint(layer);

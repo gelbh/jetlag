@@ -25,7 +25,13 @@ const pendingQuestion: PendingQuestionRecord = {
 };
 
 function renderUploader(
-  onAnswerQuestion: ReturnType<typeof vi.fn> = vi.fn(),
+  onAnswerQuestion: (
+    pendingQuestionId: string,
+    messageId: string,
+    answer: unknown,
+    selectedReply: string,
+    deadlineExpired?: boolean,
+  ) => Promise<void> = vi.fn(),
 ) {
   return render(
     <MantineProvider theme={jetlagTheme} forceColorScheme="light">

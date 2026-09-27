@@ -1,4 +1,5 @@
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
+import { renderWithAppUi } from "../../../test/renderWithAppUi";
 import { describe, expect, it, vi } from "vitest";
 import type {
   PendingQuestionRecord,
@@ -58,7 +59,7 @@ const walkingMessage: SessionMessageRecord = {
 
 describe("QuestionAlertBanner", () => {
   it("shows prompt and answer controls for primary pending question", () => {
-    render(
+    renderWithAppUi(
       <QuestionAlertBanner
         pendingQuestions={[radarPending]}
         messages={[radarMessage]}
@@ -75,7 +76,7 @@ describe("QuestionAlertBanner", () => {
   });
 
   it("does not render a dismiss control while open", () => {
-    render(
+    renderWithAppUi(
       <QuestionAlertBanner
         pendingQuestions={[radarPending]}
         messages={[radarMessage]}
@@ -89,7 +90,7 @@ describe("QuestionAlertBanner", () => {
   });
 
   it("anchors below the status rail with map-banner-top", () => {
-    const { container } = render(
+    const { container } = renderWithAppUi(
       <QuestionAlertBanner
         pendingQuestions={[radarPending]}
         messages={[radarMessage]}
@@ -103,7 +104,7 @@ describe("QuestionAlertBanner", () => {
   });
 
   it("hides when the question was answered optimistically", () => {
-    render(
+    renderWithAppUi(
       <QuestionAlertBanner
         pendingQuestions={[radarPending]}
         messages={[radarMessage]}
@@ -119,7 +120,7 @@ describe("QuestionAlertBanner", () => {
   });
 
   it("shows walking status without answer buttons", () => {
-    render(
+    renderWithAppUi(
       <QuestionAlertBanner
         pendingQuestions={[walkingPending]}
         messages={[walkingMessage]}

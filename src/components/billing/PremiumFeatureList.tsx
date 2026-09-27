@@ -1,51 +1,34 @@
-import { Badge, Stack, Text } from "@mantine/core";
-import { SuccessCallout } from "@/components/ui/entry/entryChrome";
+import { premiumEntitlementPillStyle } from "@/components/ui/entry/entryStyles";
+import { screenHeaderOffsetClassName } from "../ui/layout/ScreenHeader";
 
 export function PremiumFeatureList({
   entitlementSummary,
   checkoutNotice,
+  headerOffset = true,
 }: {
   entitlementSummary: string | null;
   checkoutNotice: string | null;
+  /** When false, skip fixed ScreenHeader offset (Mantine shells). */
+  headerOffset?: boolean;
 }) {
-  const successNotice =
-    checkoutNotice && /payment received|unlock is ready/i.test(checkoutNotice)
-      ? checkoutNotice
-      : null;
-  const mutedNotice = checkoutNotice && !successNotice ? checkoutNotice : null;
-
   return (
-    <Stack gap="sm">
-      <Text
-        size="sm"
-        c="var(--color-field-ink-muted)"
-        style={{ lineHeight: 1.4, textWrap: "pretty" }}
-      >
+    <div
+      className={`space-y-2 ${headerOffset ? screenHeaderOffsetClassName : ""}`}
+    >
+      <h1 className="font-display text-2xl font-bold uppercase leading-none tracking-tight text-ink">
+        Premium
+      </h1>
+      <p className="max-w-sm text-sm leading-snug text-ink-muted">
         Live transit and faster map loads for hosted sessions.
-      </Text>
+      </p>
       {entitlementSummary ? (
-        <Badge
-          variant="light"
-          size="lg"
-          radius="sm"
-          data-testid="premium-entitlement-summary"
-          styles={{
-            root: {
-              alignSelf: "flex-start",
-              textTransform: "none",
-              fontWeight: 510,
-            },
-          }}
-        >
+        <p data-testid="premium-entitlement-pill" style={premiumEntitlementPillStyle}>
           {entitlementSummary}
-        </Badge>
+        </p>
       ) : null}
-      {successNotice ? <SuccessCallout>{successNotice}</SuccessCallout> : null}
-      {mutedNotice ? (
-        <Text size="sm" c="var(--color-field-ink-muted)">
-          {mutedNotice}
-        </Text>
+      {checkoutNotice ? (
+        <p className="text-sm text-ink-secondary">{checkoutNotice}</p>
       ) : null}
-    </Stack>
+    </div>
   );
 }

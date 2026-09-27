@@ -1,6 +1,5 @@
 import { useCallback, useDeferredValue, useEffect, useMemo, useState } from "react";
 import type { MapChromeControlInset } from "../../components/map/helpers/mapChromeControlInset";
-import { useDesktopLayout } from "../../hooks/layout/useDesktopLayout";
 import { useMapScreenTools } from "../../hooks/map-screen/useMapScreenTools";
 import { useMapSessionActions } from "../../hooks/map-screen/useMapSessionActions";
 import { useMapOverlayActions } from "../../hooks/map-screen/useMapOverlayActions";
@@ -72,7 +71,6 @@ export function useMapScreenController() {
     setLayerVisibility,
     keepScreenAwake,
     setKeepScreenAwake,
-    notificationPreferences,
     createAnnotation,
     deleteAnnotation,
     updateAnnotation,
@@ -99,8 +97,6 @@ export function useMapScreenController() {
     syncStatus,
     hasUnreadChat,
     unreadCount,
-    enableNotifications,
-    updateNotificationPreferences,
     gameRulesEditable,
     mapShellRef,
     chromeHudRef,
@@ -337,13 +333,8 @@ export function useMapScreenController() {
     sheetSnap:
       activeTool !== "none" && isQuestionDockTool(activeTool) ? sheetSnap : "mid",
   });
-  const isDesktopLayout = useDesktopLayout();
   const mapChromeControlInset: MapChromeControlInset =
-    panelMinimized || mapPanning
-      ? "chrome-hidden"
-      : isDesktopLayout
-        ? "safe-area"
-        : "dock";
+    panelMinimized || mapPanning ? "chrome-hidden" : "dock";
 
   const placementCameraDraft = useMemo(
     () =>
@@ -387,11 +378,14 @@ export function useMapScreenController() {
               : activeTool === "photo"
                 ? photoTool.hud
                 : null;
-  const askMapFirst = Boolean(activeAskHud?.suppressSheet);
+  const askHudBundle = activeAskHud as
+    | import("../../hooks/map-screen/heavyMapTools").AskToolHudBundle
+    | null;
+  const askMapFirst = Boolean(askHudBundle?.suppressSheet);
   const mapFirstBottomPx =
-    activeAskHud?.mapFirstCameraBottomPx ?? MAP_FIRST_CAMERA_BOTTOM_PX;
+    askHudBundle?.mapFirstCameraBottomPx ?? MAP_FIRST_CAMERA_BOTTOM_PX;
   const mapFirstTopPx =
-    activeAskHud?.mapFirstCameraTopPx ?? MAP_FIRST_CAMERA_TOP_PX;
+    askHudBundle?.mapFirstCameraTopPx ?? MAP_FIRST_CAMERA_TOP_PX;
   const panelPeekHeightPx = askMapFirst
     ? mapFirstBottomPx
     : isAskHudOwnedTool(activeTool)
@@ -527,7 +521,6 @@ export function useMapScreenController() {
     setKeepScreenAwake,
     setLowPowerMode,
     setLayerVisibility,
-    notificationPreferences,
     ...transit,
     mapViewport,
     mapShellRef,
@@ -608,8 +601,6 @@ export function useMapScreenController() {
     gameRulesEditable,
     draftAdvancedSettings: sessionActions.draftAdvancedSettings,
     setDraftAdvancedSettings: sessionActions.setDraftAdvancedSettings,
-    updateNotificationPreferences,
-    enableNotifications,
     deleteAnnotation,
     updateAnnotation,
     startGeometryEdit,

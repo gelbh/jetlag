@@ -26,15 +26,14 @@
 .jl-map-feature-popup .maplibregl-popup-content {
   margin: 0;
   padding: 0;
-  background: oklch(from var(--color-canvas) l c h / 0.92);
+  background: oklch(from var(--color-canvas) l c h / 92%);
   color: var(--color-field-ink);
-  border: 0.33px solid oklch(from var(--color-rule) l c h / 0.7);
+  border: 0.33px solid oklch(from var(--color-rule) l c h / 70%);
   border-radius: 14px;
   box-shadow:
-    0 10px 28px 0 oklch(0.1 0.04 265 / 0.34),
-    0 1px 0 0 oklch(1 0 0 / 0.12) inset;
+    0 10px 28px 0 oklch(10% 0.04 265deg / 34%),
+    0 1px 0 0 oklch(100% 0 0deg / 12%) inset;
   backdrop-filter: blur(24px) saturate(1.35);
-  -webkit-backdrop-filter: blur(24px) saturate(1.35);
   overflow: hidden;
 }
 
@@ -70,7 +69,7 @@
   padding: 0;
   border: none;
   border-radius: 999px;
-  background: oklch(from var(--color-field-ink) l c h / 0.08);
+  background: oklch(from var(--color-field-ink) l c h / 8%);
   color: var(--color-field-ink-muted);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
@@ -78,11 +77,11 @@
 
 .jl-map-feature-popup__close:hover,
 .jl-map-feature-popup__close:focus-visible {
-  background: oklch(from var(--color-field-ink) l c h / 0.14);
+  background: oklch(from var(--color-field-ink) l c h / 14%);
   color: var(--color-field-ink);
   outline: none;
 }
 
 .jl-map-feature-popup__close:active {
-  background: oklch(from var(--color-field-ink) l c h / 0.18);
+  background: oklch(from var(--color-field-ink) l c h / 18%);
 }

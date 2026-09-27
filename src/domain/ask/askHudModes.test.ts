@@ -4,7 +4,6 @@ import {
   askHudCameraPaddingPx,
   askHudDefinition,
   askHudSurfaces,
-  ASK_HUD_CAMERA_PADDING_PX,
   ASK_HUD_CAMERA_PADDING_RAIL_PX,
   canCommit,
   commitKind,

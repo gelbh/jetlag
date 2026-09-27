@@ -5,8 +5,6 @@ import { MapChromeControl } from "../map/chrome/MapChromeControl";
 import { SessionIslandSlots } from "../map/chrome/SessionIslandSlots";
 import { ToolDeckGroup } from "./ToolDeck";
 
-import type { ToolDockLayout } from "./ToolDock";
-
 interface HiderToolDockProps {
   zoneLabel: string;
   onZoneAction: () => void;
@@ -24,8 +22,6 @@ interface HiderToolDockProps {
   onOpenLog?: () => void;
   hasUnreadChat?: boolean;
   unreadCount?: number;
-  /** Bottom dock (default) or vertical left rail inside DesktopOpsShell. */
-  layout?: ToolDockLayout;
   inactive?: boolean;
 }
 
@@ -45,14 +41,10 @@ export function HiderToolDock({
   onOpenLog,
   hasUnreadChat = false,
   unreadCount = 0,
-  layout = "dock",
   inactive = false,
 }: HiderToolDockProps) {
-  const isRail = layout === "rail";
-
   return (
     <MapBottomChrome
-      layout={isRail ? "rail" : "phone"}
       inactive={inactive}
       huntDensity="sparse"
       hunt={

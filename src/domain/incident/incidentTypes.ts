@@ -134,6 +134,22 @@ export interface IncidentRecord {
   activeSessionOpsSummonId?: string | null;
   /** Summons consumed on this incident (free/premium capped). */
   sessionOpsSummonCount?: number;
+  /** Durable Cursor Cloud Agent id for session-ops (one per incident). */
+  cursorAgentId?: string | null;
+  cursorAgentUrl?: string | null;
+  /** In-flight or last session-ops Cloud Agent run metadata. */
+  supportAgentRun?: {
+    runId?: string | null;
+    agentId?: string | null;
+    status?: string | null;
+    startedAt?: string | null;
+    finishedAt?: string | null;
+    workingMessageId?: string | null;
+    summonId?: string | null;
+    actorUid?: string | null;
+    terminalStatus?: string | null;
+    assistantMessageId?: string | null;
+  } | null;
 }
 
 export interface IncidentMessageRecord {

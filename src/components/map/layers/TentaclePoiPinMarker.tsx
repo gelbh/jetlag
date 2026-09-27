@@ -1,6 +1,7 @@
 /**
  * Tentacle place candidate: frosted iOS disc with category glyph; selected lifts into a pin.
  */
+import { createElement } from "react";
 import { Marker } from "react-map-gl/maplibre";
 import { tentacleCategoryIcon } from "@/components/tools/ask/tentacleCategoryIcons";
 import { MAP_ANNOTATION_COLORS } from "@/domain/map/mapAnnotationColors";
@@ -30,7 +31,6 @@ export function TentaclePoiPinMarker({
   const greenSoft = MAP_ANNOTATION_COLORS.tentacleAccent;
   // Selection reads via fill + stem, not bulk; keep disc near idle size.
   const size = selected ? 34 : 30;
-  const Icon = tentacleCategoryIcon(categoryId);
 
   return (
     <Marker
@@ -86,7 +86,11 @@ export function TentaclePoiPinMarker({
               "width 160ms cubic-bezier(0.22, 1, 0.36, 1), height 160ms cubic-bezier(0.22, 1, 0.36, 1), opacity 160ms ease-out, box-shadow 160ms ease-out",
           }}
         >
-          <Icon size={selected ? 16 : 14} weight="fill" aria-hidden />
+          {createElement(tentacleCategoryIcon(categoryId), {
+            size: selected ? 16 : 14,
+            weight: "fill",
+            "aria-hidden": true,
+          })}
         </span>
         {selected ? (
           <span

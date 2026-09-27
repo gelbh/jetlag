@@ -1,4 +1,3 @@
-import { Capacitor } from "@capacitor/core";
 import { Box, Button, Stack, Text, Textarea } from "@mantine/core";
 import { useEffect, useId, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
@@ -150,7 +149,7 @@ function ReportProblemSheetContent({
       playerRole: myRole,
       uid,
       userAgent: typeof navigator === "undefined" ? "" : navigator.userAgent,
-      platform: Capacitor.isNativePlatform() ? "capacitor" : "web",
+      platform: "web",
       online,
       visibilityState:
         typeof document === "undefined" ? "visible" : document.visibilityState,

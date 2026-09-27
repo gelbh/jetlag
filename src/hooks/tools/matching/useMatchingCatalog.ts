@@ -42,10 +42,10 @@ import { usePreloadStore } from "@/state/preloadStore";
 /** Temporary Voronoi/elim prefix — LOD step, not a catalog cap. */
 export const MATCHING_CATALOG_COARSE_PREFIX = 16;
 
-type MatchingElimYesCache = {
-  boundary: Feature<GeoPolygon | MultiPolygon>;
-  yes: Feature<GeoPolygon | MultiPolygon>;
-};
+const yesElimWeakCache = new WeakMap<
+  Feature<GeoPolygon | MultiPolygon>,
+  Feature<GeoPolygon | MultiPolygon>
+>();
 
 function matchingFeatureArea(feature: MatchingFeature): number {
   if (!feature.boundary) {
@@ -79,19 +79,19 @@ export function matchingCoarseCatalogPrefix(
 }
 
 function yesElimFromBoundary(
-  cacheRef: { current: MatchingElimYesCache | null },
   boundary: Feature<GeoPolygon | MultiPolygon>,
   gameArea: GameArea,
 ): Feature<GeoPolygon | MultiPolygon> {
-  if (cacheRef.current?.boundary === boundary) {
-    return cacheRef.current.yes;
+  const cached = yesElimWeakCache.get(boundary);
+  if (cached) {
+    return cached;
   }
   const yes = matchingEliminationFromSameNearestRegion(
     boundary,
     gameArea,
     "yes",
   );
-  cacheRef.current = { boundary, yes };
+  yesElimWeakCache.set(boundary, yes);
   return yes;
 }
 
@@ -182,9 +182,10 @@ export function useMatchingCatalog(input: {
     sessionRules ?? { gameSize: "medium" },
   );
 
-  const [matchingBoundaryPreview, setMatchingBoundaryPreview] = useState<
-    Feature<GeoPolygon | MultiPolygon> | null
-  >(null);
+  const [eligibleBoundaryPreview, setEligibleBoundaryPreview] = useState<{
+    nearestFeatureId: string;
+    region: Feature<GeoPolygon | MultiPolygon>;
+  } | null>(null);
   const [lodEliminationPreview, setLodEliminationPreview] = useState<
     Feature<GeoPolygon | MultiPolygon> | null
   >(null);
@@ -192,37 +193,44 @@ export function useMatchingCatalog(input: {
     useState<PolygonLodPhase>("complete");
   const elimGenerationRef = useRef(0);
   const elimLodCancelRef = useRef<(() => void) | null>(null);
-  const yesElimCacheRef = useRef<MatchingElimYesCache | null>(null);
 
   const boundaryEligible =
     !matchingNullAnswer &&
     Boolean(matchingNearestFeatureId) &&
     matchingFeatures.length > 0;
+  const matchingBoundaryPreview =
+    boundaryEligible &&
+    matchingNearestFeatureId &&
+    eligibleBoundaryPreview?.nearestFeatureId === matchingNearestFeatureId
+      ? eligibleBoundaryPreview.region
+      : null;
   const eliminationEligible =
     boundaryEligible && matchingAnswer !== null;
 
   useEffect(() => {
     if (!boundaryEligible || !matchingNearestFeatureId) {
-      setMatchingBoundaryPreview(null);
-      yesElimCacheRef.current = null;
       return;
     }
+    const nearestFeatureId = matchingNearestFeatureId;
     let cancelled = false;
     void buildSameNearestRegion(
       matchingFeatures,
-      matchingNearestFeatureId,
+      nearestFeatureId,
       gameArea,
     )
       .then((region) => {
-        if (!cancelled) {
-          yesElimCacheRef.current = null;
-          setMatchingBoundaryPreview(region);
+        if (cancelled) {
+          return;
         }
+        if (!region) {
+          setEligibleBoundaryPreview(null);
+          return;
+        }
+        setEligibleBoundaryPreview({ nearestFeatureId, region });
       })
       .catch(() => {
         if (!cancelled) {
-          yesElimCacheRef.current = null;
-          setMatchingBoundaryPreview(null);
+          setEligibleBoundaryPreview(null);
         }
       });
 
@@ -243,7 +251,7 @@ export function useMatchingCatalog(input: {
     }
     const boundary = matchingBoundaryPreview;
     const timer = window.setTimeout(() => {
-      yesElimFromBoundary(yesElimCacheRef, boundary, gameArea);
+      yesElimFromBoundary(boundary, gameArea);
     }, 0);
     return () => window.clearTimeout(timer);
   }, [gameArea, matchingBoundaryPreview]);
@@ -256,11 +264,7 @@ export function useMatchingCatalog(input: {
     if (matchingAnswer === "no") {
       return matchingBoundaryPreview;
     }
-    return yesElimFromBoundary(
-      yesElimCacheRef,
-      matchingBoundaryPreview,
-      gameArea,
-    );
+    return yesElimFromBoundary(matchingBoundaryPreview, gameArea);
   }, [
     eliminationEligible,
     gameArea,
@@ -279,8 +283,10 @@ export function useMatchingCatalog(input: {
       elimLodCancelRef.current?.();
       elimLodCancelRef.current = null;
       if (matchingBoundaryPreview || !eliminationEligible) {
-        setLodEliminationPreview(null);
-        setMatchingLodPhase("complete");
+        queueMicrotask(() => {
+          setLodEliminationPreview(null);
+          setMatchingLodPhase("complete");
+        });
       }
       return;
     }

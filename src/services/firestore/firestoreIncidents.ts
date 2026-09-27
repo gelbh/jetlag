@@ -262,6 +262,27 @@ export function deserializeIncidentFromFirestore(
       Math.floor(data.sessionOpsSummonCount),
     );
   }
+  if ("cursorAgentId" in data) {
+    record.cursorAgentId = asNullableString(data.cursorAgentId);
+  }
+  if ("cursorAgentUrl" in data) {
+    record.cursorAgentUrl = asNullableString(data.cursorAgentUrl);
+  }
+  if (data.supportAgentRun && typeof data.supportAgentRun === "object") {
+    const run = data.supportAgentRun as Record<string, unknown>;
+    record.supportAgentRun = {
+      runId: asNullableString(run.runId),
+      agentId: asNullableString(run.agentId),
+      status: asNullableString(run.status),
+      startedAt: asNullableString(run.startedAt),
+      finishedAt: asNullableString(run.finishedAt),
+      workingMessageId: asNullableString(run.workingMessageId),
+      summonId: asNullableString(run.summonId),
+      actorUid: asNullableString(run.actorUid),
+      terminalStatus: asNullableString(run.terminalStatus),
+      assistantMessageId: asNullableString(run.assistantMessageId),
+    };
+  }
   return record;
 }
 

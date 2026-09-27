@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components -- placement chrome exports shared CTA/Send styles with the host */
 /**
  * Shared map-first Ask placement chrome: GPS phases, frosted banner, Send slot.
  * Tool adapters supply answer/mid slots and labels.

@@ -8,7 +8,6 @@ export type MapScreenRoleConfig = {
   role: MapScreenRole;
   authMode: SessionAuthMode;
   notificationRole: PlayerRole;
-  liveActivityEnabled: boolean;
   exitPath: string;
   /** Status rail / game-over playerRole prop. */
   statusPlayerRole: PlayerRole;
@@ -58,7 +57,6 @@ export const MAP_SCREEN_ROLE_CONFIGS: Record<MapScreenRole, MapScreenRoleConfig>
       role: "seeker",
       authMode: "seeker-remote",
       notificationRole: "seeker",
-      liveActivityEnabled: true,
       exitPath: "/",
       statusPlayerRole: "seeker",
       showQuestionTools: true,
@@ -67,7 +65,6 @@ export const MAP_SCREEN_ROLE_CONFIGS: Record<MapScreenRole, MapScreenRoleConfig>
       role: "hider",
       authMode: "hider-anonymous",
       notificationRole: "hider",
-      liveActivityEnabled: true,
       exitPath: "/",
       statusPlayerRole: "hider",
       showQuestionTools: false,
@@ -76,7 +73,6 @@ export const MAP_SCREEN_ROLE_CONFIGS: Record<MapScreenRole, MapScreenRoleConfig>
       role: "observer",
       authMode: "hider-anonymous",
       notificationRole: "observer",
-      liveActivityEnabled: false,
       exitPath: "/",
       statusPlayerRole: "observer",
       showQuestionTools: false,
@@ -85,7 +81,6 @@ export const MAP_SCREEN_ROLE_CONFIGS: Record<MapScreenRole, MapScreenRoleConfig>
       role: "admin",
       authMode: "admin-permanent",
       notificationRole: "admin",
-      liveActivityEnabled: false,
       exitPath: "/admin",
       statusPlayerRole: "admin",
       showQuestionTools: false,

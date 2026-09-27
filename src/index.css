@@ -1,4 +1,5 @@
 @layer theme, base, components, utilities;
+
 @import "tailwindcss/theme.css" layer(theme);
 @import "tailwindcss/utilities.css" layer(utilities);
 @import "./styles/tokens.css";
@@ -9,6 +10,7 @@
 @import "./styles/map-tool-dock.css";
 @import "./styles/map-chrome-controls.css";
 @import "./styles/map-compass-control.css";
+
 /* After map-chrome-controls so left zoom stack + side clearance tokens win. */
 @import "./styles/map-bottom-chrome.css";
 @import "./styles/map-attribution.css";

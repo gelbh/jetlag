@@ -17,12 +17,11 @@ describe("showEphemeralPlayerNotification", () => {
   });
 
   it("calls notifications.show", () => {
-    const shown = showEphemeralPlayerNotification({
+    showEphemeralPlayerNotification({
       title: "Offline",
       message: "Changes will sync when you reconnect.",
     });
 
-    expect(shown).toBe(true);
     expect(show).toHaveBeenCalledWith(
       expect.objectContaining({
         title: "Offline",

@@ -1,0 +1,6 @@
+# Local wrangler dev / typegen only. Copy to .dev.vars and fill real values.
+# Production secrets: wrangler secret put (never commit values).
+RESEND_API_KEY=re_replace_me
+INCIDENT_EMAIL_SECRET=replace_me
+INCIDENT_ADMIN_EMAIL=admin@example.com
+INCIDENT_EMAIL_FROM=Jet Lag Incidents <incidents@example.com>

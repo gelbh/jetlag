@@ -388,6 +388,8 @@ export function computePlacementCameraTarget(
       return computeMatchingTarget(ctx);
     case "zone":
       return computeZoneTarget(ctx);
+    case "draw":
+      return null;
     default: {
       const unreachable: never = ctx.tool;
       return unreachable;

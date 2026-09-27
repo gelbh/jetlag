@@ -52,9 +52,9 @@ describe("useTentacleTool map-first", () => {
     act(() => {
       (
         result.current.panel as {
-          props: { onCategoryChange: (id: string) => void };
+          props: { model: { onCategoryChange: (id: string) => void } };
         }
-      ).props.onCategoryChange("train_station");
+      ).props.model.onCategoryChange("train_station");
     });
 
     await waitFor(() => {

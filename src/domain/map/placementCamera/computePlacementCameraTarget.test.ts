@@ -60,6 +60,7 @@ const emptySources: MapDraftOverlaySources = {
     seekerResolving: false,
   },
   zone: { vertices: [] },
+  draw: { strokePoints: [] },
 };
 
 async function buildContext(sources: MapDraftOverlaySources) {

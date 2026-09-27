@@ -21,10 +21,7 @@ import {
   GameAreaFramingStats,
 } from "./GameAreaFramingControls";
 import { framingModeHint } from "./gameAreaFramingUi";
-import {
-  filledStyles,
-  grayStyles,
-} from "@/components/ui/entry/entryStyles";
+import { filledStyles, grayStyles } from "@/components/ui/entry/entryStyles";
 import { JETLAG_MODAL_Z_INDEX } from "@/theme/theme";
 
 export interface GameAreaFramingController {
@@ -91,7 +88,7 @@ export function GameAreaFramingModal({
     ? framing.hasValidDraft
     : Boolean(
         effectiveGameArea &&
-          boundingBoxHasMinimumSpan(gameAreaToBoundingBox(effectiveGameArea)),
+        boundingBoxHasMinimumSpan(gameAreaToBoundingBox(effectiveGameArea)),
       );
 
   const handleConfirm = () => {

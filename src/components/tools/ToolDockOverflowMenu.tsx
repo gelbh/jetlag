@@ -50,6 +50,9 @@ export function ToolDockDrawMenu({
         {markupTools.map((tool) => {
           const hint = mapToolDockMenuHint(tool);
           const active = activeTool === tool.id;
+          if (!isMarkupDockTool(tool.id)) {
+            return null;
+          }
           const Icon = MARKUP_ICONS[tool.id];
 
           return (

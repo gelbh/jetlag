@@ -6,6 +6,7 @@
 
 import { readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { ensureDatedVersionHeaders } from "./normalize-changelog-sections.mjs";
 
 const projectRoot = resolve(import.meta.dirname, "..");
 const changelogMdPath = resolve(projectRoot, "CHANGELOG.md");
@@ -139,7 +140,13 @@ function readPackageVersion() {
   return packageJson.version;
 }
 
-const markdown = readFileSync(changelogMdPath, "utf8");
+let markdown = readFileSync(changelogMdPath, "utf8");
+const datedMarkdown = ensureDatedVersionHeaders(markdown);
+if (datedMarkdown !== markdown) {
+  writeFileSync(changelogMdPath, datedMarkdown);
+  markdown = datedMarkdown;
+  console.info("Stamped undated CHANGELOG.md version headers with today's UTC date.");
+}
 const entries = parseChangelogMarkdown(markdown);
 const packageVersion = readPackageVersion();
 

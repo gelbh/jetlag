@@ -41,7 +41,7 @@ export const MEASURING_LINEAR_OVER_BUDGET_MESSAGE =
 export const MEASURING_OUTPUT_OVER_BUDGET_MESSAGE =
   "This measure is too complex for this play area. Try a shorter distance or a smaller area.";
 
-/** Persist soft-fail — storage ceiling, not play-area complexity. */
+/** Persist soft-fail: storage ceiling, not play-area complexity. */
 export const MEASURING_PERSIST_OVER_BUDGET_MESSAGE =
   "Couldn't save this measure — geometry is too large to store. Try a shorter distance.";
 
@@ -123,9 +123,7 @@ export function assertMeasuringOutputComplexityBudget(
   return { ok: true };
 }
 
-/**
- * Persist path — slim toward Firestore ceiling; storage-oriented fail copy only.
- */
+/** Slim toward Firestore ceiling; fail copy is storage-oriented only. */
 export function persistSlimMeasuringGeometry(
   feature: Feature<Polygon | MultiPolygon>,
 ): MeasuringOutputSoftenResult {
@@ -145,7 +143,6 @@ export function softenMeasuringOutputToBudget(
   return persistSlimMeasuringGeometry(feature);
 }
 
-/** Preview/commit/resolve gate for multi-place and linear measuring. */
 export function assertMeasuringGeometryBudget(input: {
   measuringSubject: MeasuringSubject;
   measuringLocationCategory: MeasuringLocationCategory | null;
