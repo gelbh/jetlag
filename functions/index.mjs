@@ -20,6 +20,7 @@ export {
 export {
   captureStartingLocations,
   finalizeGameResult,
+  pollSessionOpsAgentRuns,
   purgeStaleSessions,
   warmPremiumOverpassPreload,
 } from "./handlers/triggers.mjs";
@@ -51,6 +52,7 @@ export {
   postIncidentMessage,
   postSupportAgentTurn,
   publishIncidentHotfix,
+  sessionOpsMcp,
   updateIncidentStatus,
 } from "./handlers/incident.mjs";
 
