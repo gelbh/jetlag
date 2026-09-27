@@ -104,13 +104,12 @@ describe("DrawerSheet", () => {
       ),
     );
 
-    const handle = screen.queryByRole("button", {
-      name: "Drag sheet down to dismiss",
-    });
-    if (handle) {
-      dragGrabberDown(handle, 120);
-    }
-
+    // Decorative-only grabber bar remains; interactive dismiss button stays off.
+    expect(
+      screen.queryByRole("button", {
+        name: "Drag sheet down to dismiss",
+      }),
+    ).toBeNull();
     expect(onClose).not.toHaveBeenCalled();
   });
 
