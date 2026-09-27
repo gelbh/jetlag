@@ -18,12 +18,10 @@ export type PersistSlimPolygonResult =
   | { ok: true; feature: Feature<Polygon | MultiPolygon> }
   | { ok: false; message: string };
 
-/** Escalating Turf simplify tolerances — slim toward the persist cap, then gate. */
+/** Escalating Turf simplify tolerances: slim toward the persist cap, then gate. */
 const PERSIST_SIMPLIFY_TOLERANCES = [0.000012, 0.00005, 0.0002, 0.001] as const;
 
-/**
- * Persist path — slim toward Firestore ceiling; storage-oriented fail copy only.
- */
+/** Slim toward Firestore ceiling; storage-oriented fail copy only. */
 export function persistSlimPolygonFeature(
   feature: Feature<Polygon | MultiPolygon>,
 ): PersistSlimPolygonResult {
@@ -49,7 +47,7 @@ export function persistSlimPolygonFeature(
           current = simplified;
         }
       } catch {
-        // Keep last successful geometry and try the next tolerance / decimate.
+        /* Turf can throw on dense rings */
       }
       if (assertPolygonPersistBudget(current).ok) {
         return { ok: true, feature: current };
