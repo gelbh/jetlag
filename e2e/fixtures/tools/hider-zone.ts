@@ -1,9 +1,13 @@
 import { type Page, expect } from "@playwright/test";
 
 export async function waitForHidingZoneWizard(page: Page) {
-  await expect(page.getByTestId("ask-hud-host")).toBeVisible({
+  // AskHudHost is a zero-size portal wrapper; assert the drawer dialog.
+  await expect(page.getByTestId("ask-hud-host")).toBeAttached({
     timeout: 15_000,
   });
+  await expect(
+    page.getByRole("dialog", { name: /Hiding zone|Move zone/i }),
+  ).toBeVisible({ timeout: 15_000 });
   const methodGroup = page.getByRole("group", {
     name: "Hiding zone placement method",
   });
