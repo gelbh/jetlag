@@ -33,4 +33,7 @@ jobs:
           # action's exact-version matcher; npm run release creates the Release body.
           publish-script: npm run release
           create-github-releases: false
+          # Conventional title so lint-pr-title passes (default "Version Packages" fails).
+          pr-title: "chore(release): version packages"
+          commit-message: "chore(release): version packages"
           github-token: ${{ secrets.GITHUB_TOKEN }}
