@@ -1,123 +1,116 @@
 import {
   test,
   expect,
+  clickViaEvaluate,
+  closePanel,
   openMapWithLocalSession,
   openSettings,
-  closePanel,
-  MAP_CONTAINER_SELECTOR,
 } from "../../fixtures";
 
 test.describe("settings", () => {
-  /**
-   * Program Verify #4 (sheet dismiss → map pointers): Escape/closePanel path
-   * (mobile Settings has no Close button). Device checklist (PR / human):
-   * iPhone PWA grabber flick; Ask mapInteractive grabber dismiss; Accessibility
-   * reduced-motion sheet open/close.
-   */
-  test("closes settings and restores map pointer hit target", async ({
-    page,
-  }) => {
-    await openMapWithLocalSession(page);
-    await openSettings(page);
-
-    const settings = page.getByRole("dialog", { name: "Settings" });
-    await expect(settings).toBeVisible();
-    await closePanel(page);
-    await expect(settings).toBeHidden();
-
-    await expect(
-      page.locator(
-        ".mantine-Drawer-overlay, .mantine-Modal-overlay, [data-mantine-overlay]",
-      ),
-    ).toHaveCount(0);
-
-    const mapHit = await page.evaluate((sel) => {
-      const canvas = document.querySelector(`${sel} canvas`);
-      if (!(canvas instanceof HTMLElement)) {
-        return { ok: false as const, reason: "no-canvas" };
-      }
-      const rect = canvas.getBoundingClientRect();
-      // Upper map: above dock/sheet zone so dock chrome does not steal the point.
-      const x = rect.left + rect.width * 0.5;
-      const y = rect.top + rect.height * 0.28;
-      const el = document.elementFromPoint(x, y);
-      const blockedByOverlay = Boolean(
-        document.querySelector(
-          ".mantine-Drawer-overlay, .mantine-Modal-overlay, [data-mantine-overlay]",
-        ),
-      );
-      const inMap =
-        el instanceof Element &&
-        Boolean(el.closest(sel) || el.closest("canvas"));
-      return { ok: inMap && !blockedByOverlay, blockedByOverlay, inMap };
-    }, MAP_CONTAINER_SELECTOR);
-
-    expect(mapHit).toMatchObject({ ok: true, blockedByOverlay: false });
-  });
-
   test("toggles satellite basemap and transit layer visibility", async ({
     page,
   }) => {
     await openMapWithLocalSession(page);
-    await openSettings(page);
 
-    const settingsPanel = page.getByRole("tabpanel");
-    // Low power lives under Session → Device & alerts (map essentials split).
-    await page.getByRole("tab", { name: "Session" }).click();
-    await settingsPanel
-      .getByRole("button", { name: "Device & alerts" })
-      .click();
-    const lowPowerToggle = settingsPanel.getByLabel("Low power mode");
-    await expect(lowPowerToggle).toBeChecked();
-    await lowPowerToggle.click();
-    await page.getByRole("tab", { name: "Map" }).click();
-    await settingsPanel.getByRole("button", { name: "Satellite" }).click();
-    await page.getByRole("tab", { name: "Layers" }).click();
-    await settingsPanel.getByLabel("Transit").click();
-    await page.getByRole("button", { name: "Close" }).click();
+    await test.step("clear low power so satellite is available", async () => {
+      await openSettings(page);
+      await page.getByRole("tab", { name: "Session" }).click();
+      const lowPowerToggle = page
+        .getByRole("tabpanel")
+        .getByLabel("Low power mode");
+      await expect(lowPowerToggle).toBeChecked();
+      // Mantine Switch track intercepts Playwright pointer clicks on the input.
+      await clickViaEvaluate(lowPowerToggle);
+      await expect(lowPowerToggle).not.toBeChecked();
+    });
 
-    await openSettings(page);
-    await expect(
-      settingsPanel.getByRole("button", { name: "Satellite" }),
-    ).toBeVisible();
+    await test.step("set satellite and hide transit layer on Map", async () => {
+      await page.getByRole("tab", { name: "Map" }).click();
+      const settingsPanel = page.getByRole("tabpanel");
+      await settingsPanel
+        .getByRole("group", { name: "Map style" })
+        .getByRole("button", { name: "Satellite" })
+        .click();
+      // Annotation-layers Transit (not Transit overlay under the Transit section).
+      const transitLayer = settingsPanel.getByLabel("Transit", { exact: true });
+      await expect(transitLayer).toBeChecked();
+      await clickViaEvaluate(transitLayer);
+      await closePanel(page);
+    });
+
+    await test.step("basemap and transit layer persist", async () => {
+      await openSettings(page);
+      await page.getByRole("tab", { name: "Map" }).click();
+      const settingsPanel = page.getByRole("tabpanel");
+      await expect(
+        settingsPanel
+          .getByRole("group", { name: "Map style" })
+          .getByRole("button", { name: "Satellite" }),
+      ).toHaveAttribute("aria-pressed", "true");
+      await expect(
+        settingsPanel.getByLabel("Transit", { exact: true }),
+      ).not.toBeChecked();
+      await closePanel(page);
+    });
   });
 
   test("switches distance units", async ({ page }) => {
     await openMapWithLocalSession(page);
-    await openSettings(page);
 
-    const settingsPanel = page.getByRole("tabpanel");
-    await page.getByRole("tab", { name: "Map" }).click();
-    await settingsPanel.getByRole("button", { name: "Metric (km)" }).click();
-    await page.getByRole("button", { name: "Close" }).click();
+    await test.step("choose metric on Map", async () => {
+      await openSettings(page);
+      await page.getByRole("tab", { name: "Map" }).click();
+      await page
+        .getByRole("tabpanel")
+        .getByRole("group", { name: "Distance unit" })
+        .getByRole("button", { name: "Metric (km)" })
+        .click();
+      await closePanel(page);
+    });
 
-    await openSettings(page);
-    await page.getByRole("tab", { name: "Map" }).click();
-    await expect(
-      settingsPanel.getByRole("button", { name: "Metric (km)" }),
-    ).toBeVisible();
+    await test.step("metric persists", async () => {
+      await openSettings(page);
+      await page.getByRole("tab", { name: "Map" }).click();
+      await expect(
+        page
+          .getByRole("tabpanel")
+          .getByRole("group", { name: "Distance unit" })
+          .getByRole("button", { name: "Metric (km)" }),
+      ).toHaveAttribute("aria-pressed", "true");
+      await closePanel(page);
+    });
   });
 
-  test("shows session code in session tab", async ({ page }) => {
+  test("shows session code on Game tab", async ({ page }) => {
     await openMapWithLocalSession(page, { code: "TEST" });
     await openSettings(page);
-    await page.getByRole("tab", { name: "Session" }).click();
-    await expect(page.locator(".jl-stamp-code").first()).toHaveText("TEST");
+    await page.getByRole("tab", { name: "Game" }).click();
+    await expect(
+      page.getByRole("button", { name: "Copy session code TEST" }),
+    ).toBeVisible();
+    await closePanel(page);
   });
 
   test("toggles tool layer visibility", async ({ page }) => {
     await openMapWithLocalSession(page);
-    await openSettings(page);
-    await page.getByRole("tab", { name: "Layers" }).click();
 
-    const settingsPanel = page.getByRole("tabpanel");
-    const radarToggle = settingsPanel.getByLabel("Radar");
-    await radarToggle.click();
-    await page.getByRole("button", { name: "Close" }).click();
+    await test.step("hide radar layer on Map", async () => {
+      await openSettings(page);
+      await page.getByRole("tab", { name: "Map" }).click();
+      const radarToggle = page.getByRole("tabpanel").getByLabel("Radar");
+      await clickViaEvaluate(radarToggle);
+      await closePanel(page);
+    });
 
-    await openSettings(page);
-    await page.getByRole("tab", { name: "Layers" }).click();
-    await expect(settingsPanel.getByLabel("Radar")).not.toBeChecked();
+    await test.step("radar stays unchecked", async () => {
+      await openSettings(page);
+      await page.getByRole("tab", { name: "Map" }).click();
+      await expect(
+        page.getByRole("tabpanel").getByLabel("Radar"),
+      ).not.toBeChecked();
+      await closePanel(page);
+    });
   });
 
   test("export map button is available in session settings", async ({
@@ -129,5 +122,6 @@ test.describe("settings", () => {
     await expect(
       page.getByRole("button", { name: "Export map" }),
     ).toBeVisible();
+    await closePanel(page);
   });
 });

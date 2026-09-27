@@ -1,6 +1,5 @@
 import {
   test,
-  expect,
   createHostSession,
   createMultiplayerContexts,
   completeRadarSolo,
@@ -26,11 +25,13 @@ test.describe("multiplayer question tools", () => {
   }) => {
     const { hostPage } = hostHider;
 
-    await clickToolDockButton(hostPage, "Radar");
-    await expectAskHud(hostPage);
-    await placeAskAnchor(hostPage);
-    await selectFirstRadarDistance(hostPage);
-    await expectSendToHidersInViewport(hostPage);
+    await test.step("place radar and arm send", async () => {
+      await clickToolDockButton(hostPage, "Radar");
+      await expectAskHud(hostPage);
+      await selectFirstRadarDistance(hostPage);
+      await placeAskAnchor(hostPage);
+      await expectSendToHidersInViewport(hostPage);
+    });
   });
 
   test("radar question syncs answers through chat", async ({ browser }) => {
@@ -45,18 +46,22 @@ test.describe("multiplayer question tools", () => {
     await runHiderAnswerFlow(browser, sendMeasuringToHiders, "Closer");
   });
 
-  test("thermometer question syncs answers through chat", async ({ browser }) => {
+  test("thermometer question syncs answers through chat", async ({
+    browser,
+  }) => {
     await runHiderAnswerFlow(browser, sendThermometerToHiders, "Hotter");
   });
 
   test("tentacle question reaches hider chat", async ({ hostHider }) => {
     const { hostPage, guestPage } = hostHider;
 
-    await sendTentacleToHiders(hostPage);
+    await test.step("send tentacle map-first to hiders", async () => {
+      await sendTentacleToHiders(hostPage);
+    });
 
-    await expect(async () => {
-      await expectPendingQuestionText(guestPage);
-    }).toPass({ timeout: 30_000 });
+    await test.step("guest sees pending tentacle in chat", async () => {
+      await expectPendingQuestionText(guestPage, /Tentacle|nearest|Museum/i);
+    });
   });
 });
 

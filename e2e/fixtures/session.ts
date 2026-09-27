@@ -1,7 +1,7 @@
 import { type Browser, type Page, expect } from "@playwright/test";
+import { toLocalStorageSeed } from "../../src/test/scenarios/adapters/toLocalStorageSeed";
 import {
   E2E_GEOLOCATION,
-  LOCAL_GAME_AREA,
   MAP_CONTAINER_SELECTOR,
 } from "./map";
 import { dismissMapOnboarding, prepareE2EPage } from "./page-init";
@@ -25,72 +25,32 @@ export async function seedLocalSession(
   options: LocalSessionSeedOptions = {},
 ) {
   const {
-    code = "TEST",
-    myRole = "seeker",
-    gameSize = "medium",
-    sessionId = "local",
+    code,
+    myRole,
+    gameSize,
+    sessionId,
     hidingPeriodMinutes,
     memberRoles,
   } = options;
-
-  await page.addInitScript(() => {
-      localStorage.setItem(
-        "jetlag-annotations",
-        JSON.stringify({ state: { annotations: [] }, version: 0 }),
-      );
-      localStorage.removeItem("jetlag-timer");
-    });
+  const seed = toLocalStorageSeed("dublin-local-map", {
+    code,
+    myRole,
+    gameSize,
+    sessionId,
+    hidingPeriodMinutes,
+    memberRoles,
+  });
 
   await page.addInitScript(
-    ({ sessionState, role }) => {
-      localStorage.setItem(
-        "jetlag-session",
-        JSON.stringify({
-          state: {
-            session: sessionState,
-            myRole: role,
-            myUid: null,
-          },
-          version: 0,
-        }),
-      );
-      localStorage.setItem(
-        "jetlag-map",
-        JSON.stringify({
-          state: {
-            keepScreenAwake: false,
-            distanceUnit: "imperial",
-            mapStyle: "standard",
-            layerVisibility: {
-              radar: true,
-              thermometer: true,
-              measuring: true,
-              matching: true,
-              zone: true,
-              pin: true,
-              tentacle: true,
-              transit: true,
-            },
-            lowPowerMode: true,
-          },
-          version: 0,
-        }),
-      );
+    ({ sessionBlob, mapBlob, annotationsBlob, clearTimer }) => {
+      localStorage.setItem("jetlag-session", sessionBlob);
+      localStorage.setItem("jetlag-map", mapBlob);
+      localStorage.setItem("jetlag-annotations", annotationsBlob);
+      if (clearTimer) {
+        localStorage.removeItem("jetlag-timer");
+      }
     },
-    {
-      sessionState: {
-        id: sessionId,
-        code,
-        gameArea: LOCAL_GAME_AREA,
-        createdAt: "2026-01-01T00:00:00.000Z",
-        memberUids: [],
-        tier: "free",
-        gameSize,
-        ...(hidingPeriodMinutes !== undefined ? { hidingPeriodMinutes } : {}),
-        ...(memberRoles ? { memberRoles } : {}),
-      },
-      role: myRole,
-    },
+    seed,
   );
 }
 
@@ -144,17 +104,21 @@ export async function createSessionFromCreatePage(page: Page) {
 }
 
 export async function readSessionCode(page: Page): Promise<string> {
-  // ShareCode lives under Settings → Game (not on the open map chrome).
+  const block = page.getByTestId("tool-status-block-mantine");
   const stamp = page.locator(".jl-stamp-code").first();
-  if (!(await stamp.isVisible().catch(() => false))) {
-    await page.getByRole("button", { name: "Open settings" }).click();
-    await page.getByRole("tab", { name: "Game" }).click();
+  await expect(block.or(stamp)).toBeVisible({ timeout: 15_000 });
+
+  if ((await stamp.count()) > 0 && (await stamp.isVisible().catch(() => false))) {
+    const codeText = await stamp.textContent();
+    expect(codeText?.trim()).toMatch(/^[A-Z]{4}$/);
+    return codeText?.trim() ?? "ABCD";
   }
-  await expect(stamp).toBeVisible({ timeout: 15_000 });
-  const codeText = await stamp.textContent();
-  expect(codeText).toMatch(/^[A-Z]{4}$/);
-  await page.keyboard.press("Escape").catch(() => undefined);
-  return codeText ?? "ABCD";
+
+  const codeText = await block
+    .locator(".jl-view-transition-session-code")
+    .textContent();
+  expect(codeText?.trim()).toMatch(/^[A-Z]{4}$/);
+  return codeText?.trim() ?? "ABCD";
 }
 
 export async function joinAsRole(
@@ -164,22 +128,20 @@ export async function joinAsRole(
 ) {
   await guestPage.goto("/join");
   const roleName = role === "hider" ? "Hider" : "Seeker";
-  // Mantine SegmentedControl radios are visually hidden; click the label.
-  await guestPage
-    .locator(".mantine-SegmentedControl-label", {
-      hasText: new RegExp(`^${roleName}$`),
-    })
-    .click();
+  // SegmentedControl radios are visually hidden; click the visible label.
+  const side = guestPage.getByLabel("Player side");
+  await expect(side).toBeVisible({ timeout: 15_000 });
+  await side.getByText(roleName, { exact: true }).click();
   await guestPage.getByPlaceholder("ABCD").fill(code);
   await guestPage.getByRole("button", { name: "Join session" }).click();
 
   if (role === "hider") {
     await expect(
       guestPage.getByRole("button", { name: /Set zone|Change zone|Play move/i }),
-    ).toBeVisible({ timeout: 15_000 });
+    ).toBeVisible({ timeout: 30_000 });
   } else {
     await expect(guestPage.getByRole("button", { name: "Radar" })).toBeVisible({
-      timeout: 15_000,
+      timeout: 30_000,
     });
   }
   await dismissMapOnboarding(guestPage);

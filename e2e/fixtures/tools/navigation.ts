@@ -34,7 +34,6 @@ export async function openSettings(page: Page) {
   await expect(settings).toBeVisible();
   await settings.scrollIntoViewIfNeeded();
   await clickViaEvaluate(settings);
-  // Settings renders as a dialog with aria-label="Settings" (mobile/desktop)
   await expect(page.getByRole("dialog", { name: "Settings" })).toBeVisible();
 }
 
@@ -46,7 +45,43 @@ export async function closePanel(page: Page) {
     await expect(close).toBeHidden({ timeout: 10_000 });
     return;
   }
-  // Mobile chat has no Close; Escape dismisses. Assert sheet gone (not Close, which was never shown).
+
+  // Settings may be a Drawer (Escape) or rail (collapse). Prefer collapse when present.
+  const settings = page.getByRole("dialog", { name: "Settings" });
+  if (await settings.isVisible().catch(() => false)) {
+    const collapseRail = page.getByRole("button", {
+      name: "Collapse map panels",
+    });
+    if ((await collapseRail.count()) > 0) {
+      await expect(collapseRail).toBeVisible();
+      await collapseRail.click();
+    } else {
+      await page.keyboard.press("Escape");
+    }
+    await expect(settings).toBeHidden({ timeout: 10_000 });
+    return;
+  }
+
+  // Mobile chat has no Close; Escape dismisses.
   await page.keyboard.press("Escape");
   await expect(page.getByLabel("Chat tabs")).toBeHidden({ timeout: 10_000 });
+}
+
+async function confirmSettingsReset(
+  page: Page,
+  confirmButtonName: "Reset board for everyone" | "Reset session progress",
+) {
+  page.once("dialog", (dialog) => dialog.accept());
+  await openSettings(page);
+  await page.getByRole("tab", { name: "Session" }).click();
+  await page.getByRole("button", { name: "Reset options" }).click();
+  await page.getByRole("button", { name: confirmButtonName }).click();
+}
+
+export async function resetBoardForEveryone(page: Page) {
+  await confirmSettingsReset(page, "Reset board for everyone");
+}
+
+export async function resetSessionProgress(page: Page) {
+  await confirmSettingsReset(page, "Reset session progress");
 }

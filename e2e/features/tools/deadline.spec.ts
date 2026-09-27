@@ -8,6 +8,7 @@ import {
   patchPendingQuestionAnswerableAt,
   readPersistedSessionId,
   sendRadarToHiders,
+  startSessionTimer,
 } from "../../fixtures";
 
 test.setTimeout(120_000);
@@ -17,28 +18,34 @@ test("@smoke enforces answer deadlines with a system message and timer pause", a
 }) => {
   const { hostPage, guestPage } = hostHider;
 
-  await hostPage.getByRole("button", { name: "Start" }).click();
-  await sendRadarToHiders(hostPage);
-
-  const sessionId = await readPersistedSessionId(hostPage);
-  await expect(async () => {
-    const questionIds = await listPendingQuestionIds(hostPage, sessionId);
-    expect(questionIds.length).toBeGreaterThan(0);
-  }).toPass({ timeout: 20_000 });
-
-  const [questionId] = await listPendingQuestionIds(hostPage, sessionId);
-  await patchPendingQuestionAnswerableAt(
-    hostPage,
-    sessionId,
-    questionId,
-    new Date(Date.now() - 10 * 60 * 1000).toISOString(),
-  );
-
-  await openChat(hostPage);
-  await expect(hostPage.getByText(/Answer deadline passed/i)).toBeVisible({
-    timeout: 30_000,
+  await test.step("start timer and send radar", async () => {
+    await startSessionTimer(hostPage);
+    await sendRadarToHiders(hostPage);
   });
 
-  await answerInChat(guestPage, "Yes");
-  await expectChatAnswer(guestPage, "yes");
+  await test.step("backdate answerableAt so deadline has passed", async () => {
+    const sessionId = await readPersistedSessionId(hostPage);
+    await expect(async () => {
+      const questionIds = await listPendingQuestionIds(hostPage, sessionId);
+      expect(questionIds.length).toBeGreaterThan(0);
+    }).toPass({ timeout: 20_000 });
+
+    const [questionId] = await listPendingQuestionIds(hostPage, sessionId);
+    await patchPendingQuestionAnswerableAt(
+      hostPage,
+      sessionId,
+      questionId,
+      new Date(Date.now() - 10 * 60 * 1000).toISOString(),
+    );
+  });
+
+  await test.step("host sees deadline system message; late answer still records", async () => {
+    await openChat(hostPage);
+    await expect(hostPage.getByText(/Answer deadline passed/i)).toBeVisible({
+      timeout: 30_000,
+    });
+
+    await answerInChat(guestPage, "Yes");
+    await expectChatAnswer(guestPage, "yes");
+  });
 });
