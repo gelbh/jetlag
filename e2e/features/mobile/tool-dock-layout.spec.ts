@@ -13,7 +13,6 @@ import {
   SIMULATED_SAFE_AREA_TOP_PX,
   clickViaEvaluate,
   assertInViewport,
-  enablePlayerUxWorld,
 } from "../../fixtures";
 import type { Page } from "@playwright/test";
 
@@ -458,8 +457,7 @@ test.describe("landscape map-dominant chrome", () => {
   test("distills secondary actions when landscape chrome is expanded", async ({
     page,
   }) => {
-    await enablePlayerUxWorld(page);
-    await expect(page.locator('[data-player-ux-world="survey"]')).toBeVisible();
+    await expect(page.locator(".map-chrome-hud")).toBeVisible();
     const chip = page.getByRole("button", {
       name: /Show map controls|Hide map controls/i,
     });
@@ -469,9 +467,7 @@ test.describe("landscape map-dominant chrome", () => {
     }
     await expect(chip).toHaveAttribute("aria-expanded", "true");
     await expect(
-      page.locator(
-        '[data-player-ux-world="survey"][data-landscape-chrome="revealed"]',
-      ),
+      page.locator('.map-chrome-hud[data-landscape-chrome="revealed"]'),
     ).toBeVisible();
     await expect(page.locator('[data-island="map-controls"]')).toBeHidden();
     await expect(
