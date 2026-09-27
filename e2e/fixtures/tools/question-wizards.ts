@@ -215,9 +215,12 @@ export function sendToHidersButton(page: Page) {
   return page.getByRole("button", { name: SEND_TO_HIDERS_BUTTON });
 }
 
-export async function expectSendToHidersInViewport(page: Page) {
+export async function expectSendToHidersInViewport(
+  page: Page,
+  options?: { timeout?: number },
+) {
   const send = sendToHidersButton(page);
-  await expect(send).toBeEnabled({ timeout: 15_000 });
+  await expect(send).toBeEnabled({ timeout: options?.timeout ?? 15_000 });
   await expect(send).toBeInViewport();
 }
 
@@ -465,14 +468,12 @@ export async function completeTentacleSolo(page: Page) {
 export async function sendTentacleToHiders(page: Page) {
   await clickToolDockButton(page, "Tentacles");
   await expectAskHud(page);
-  await pickCatalogRow(page, /Museum|Transit|Park/i);
+  await pickCatalogRow(page, /^Museum$/i);
   await placeAskAnchor(page);
   await waitForGeoLoadingIdle(page);
   // Enabled only after confirmed POIs (provisional previews keep Send disabled).
   // Overpass confirm can exceed the default 15s Send arm used by other tools.
-  const send = sendToHidersButton(page);
-  await expect(send).toBeEnabled({ timeout: 60_000 });
-  await expect(send).toBeInViewport();
+  await expectSendToHidersInViewport(page, { timeout: 60_000 });
   await clickSendToHiders(page);
   await expect(page.getByTestId("tentacle-map-placement")).toBeHidden({
     timeout: 15_000,
