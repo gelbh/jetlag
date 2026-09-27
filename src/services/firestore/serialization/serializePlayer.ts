@@ -1,4 +1,6 @@
 import type { GameOutcome } from "@/domain/game/foundHider";
+import { splitRoundPhaseMs } from "@/domain/game/splitRoundPhaseMs";
+import { hidingPeriodMs } from "@/domain/session/size/gameSizeRules";
 import type { GameResultPlayer, GameResultRecord } from "@/domain/game/gameResult";
 import type {
   PendingQuestionRecord,
@@ -253,6 +255,23 @@ export function deserializeGameResultFromFirestore(
         .filter((player): player is GameResultPlayer => player !== null)
     : [];
 
+  const durationMs =
+    typeof document.durationMs === "number" ? document.durationMs : 0;
+
+  const hasHiding = typeof document.hidingPhaseMs === "number";
+  const hasSeek = typeof document.seekPhaseMs === "number";
+  const derived =
+    !hasHiding || !hasSeek
+      ? splitRoundPhaseMs(durationMs, hidingPeriodMs(gameSize))
+      : null;
+
+  const hidingPhaseMs = hasHiding
+    ? document.hidingPhaseMs
+    : derived!.hidingPhaseMs;
+  const seekPhaseMs = hasSeek ? document.seekPhaseMs : derived!.seekPhaseMs;
+  const seekTimeMs =
+    typeof document.seekTimeMs === "number" ? document.seekTimeMs : seekPhaseMs;
+
   return {
     sessionId:
       typeof document.sessionId === "string" ? document.sessionId : sessionId,
@@ -264,18 +283,10 @@ export function deserializeGameResultFromFirestore(
       typeof document.endedAt === "string"
         ? document.endedAt
         : new Date().toISOString(),
-    durationMs:
-      typeof document.durationMs === "number" ? document.durationMs : 0,
-    hidingPhaseMs:
-      typeof document.hidingPhaseMs === "number" ? document.hidingPhaseMs : 0,
-    seekPhaseMs:
-      typeof document.seekPhaseMs === "number" ? document.seekPhaseMs : 0,
-    seekTimeMs:
-      typeof document.seekTimeMs === "number"
-        ? document.seekTimeMs
-        : typeof document.durationMs === "number"
-          ? document.durationMs
-          : 0,
+    durationMs,
+    hidingPhaseMs,
+    seekPhaseMs,
+    seekTimeMs,
     players,
   };
 }

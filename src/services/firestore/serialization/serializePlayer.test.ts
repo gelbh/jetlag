@@ -30,4 +30,34 @@ describe("serializePlayer", () => {
     expect(result.players[0]?.won).toBe(true);
     expect(result.seekTimeMs).toBe(2_400_000);
   });
+
+  it("derives missing phase fields from duration and gameSize", () => {
+    const result = deserializeGameResultFromFirestore("result-1", "session-1", {
+      roundNumber: 1,
+      gameSize: "medium",
+      outcome: "found",
+      endedAt: "2026-05-14T02:00:00.000Z",
+      durationMs: 3_900_000,
+      players: [],
+    });
+    expect(result.hidingPhaseMs).toBe(3_600_000);
+    expect(result.seekPhaseMs).toBe(300_000);
+    expect(result.seekTimeMs).toBe(300_000);
+  });
+
+  it("keeps explicit zero seek phase when written", () => {
+    const result = deserializeGameResultFromFirestore("result-1", "session-1", {
+      roundNumber: 1,
+      gameSize: "medium",
+      outcome: "found",
+      endedAt: "2026-05-14T02:00:00.000Z",
+      durationMs: 120_000,
+      hidingPhaseMs: 120_000,
+      seekPhaseMs: 0,
+      seekTimeMs: 0,
+      players: [],
+    });
+    expect(result.hidingPhaseMs).toBe(120_000);
+    expect(result.seekPhaseMs).toBe(0);
+  });
 });
