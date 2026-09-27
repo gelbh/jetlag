@@ -16,6 +16,8 @@ export type MatchingToolPanelModel = {
   categoryId: MatchingCategoryId | null;
   categoryChosen: boolean;
   usedCategoryIds: ReadonlySet<MatchingCategoryId>;
+  unavailableCategoryIds?: ReadonlySet<MatchingCategoryId>;
+  catalogNotice?: string | null;
   catalogCategories: MatchingCategoryDefinition[];
   matchingSeekerPoint: LatLngTuple | null;
   matchingUsesContainment: boolean;
@@ -56,6 +58,8 @@ export function MatchingToolPanel({ model }: MatchingToolPanelProps) {
     categoryId,
     categoryChosen,
     usedCategoryIds,
+    unavailableCategoryIds,
+    catalogNotice,
     catalogCategories,
     matchingSeekerPoint,
     matchingUsesContainment,
@@ -94,6 +98,8 @@ export function MatchingToolPanel({ model }: MatchingToolPanelProps) {
           categoryId,
           categoryChosen,
           usedCategoryIds,
+          unavailableCategoryIds,
+          catalogNotice,
           catalogCategories,
           anchorLat: matchingSeekerPoint?.[0] ?? null,
           anchorLng: matchingSeekerPoint?.[1] ?? null,

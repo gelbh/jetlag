@@ -11,8 +11,8 @@ import {
 } from "../../domain/questions";
 import { resolveMatchingCategory } from "../../domain/session/catalog/sessionCustomCatalog";
 import {
+  matchingEmptyPlayAreaMessage,
   matchingFeatureCountLabel,
-  matchingNullAnswerMessage,
 } from "../../services/geo/matching";
 import { formatDistance, type DistanceUnit } from "../../domain/map/distance";
 import { GroupedSelectField } from "../ui/forms/GroupedSelectField";
@@ -46,8 +46,10 @@ export type MatchingPanelModel = {
   categoryId: MatchingCategoryId | null;
   categoryChosen: boolean;
   usedCategoryIds: ReadonlySet<MatchingCategoryId>;
-  /** Forward-compat for empty play-area bounce (Task 4b); greys like used. */
+  /** Empty play-area bounce; greys like used. */
   unavailableCategoryIds?: ReadonlySet<MatchingCategoryId>;
+  /** Session notice after empty play-area bounce. */
+  catalogNotice?: string | null;
   catalogCategories?: readonly MatchingCategoryDefinition[];
   anchorLat?: number | null;
   anchorLng?: number | null;
@@ -89,6 +91,7 @@ export function MatchingPanel({ model }: MatchingPanelProps) {
     categoryChosen,
     usedCategoryIds,
     unavailableCategoryIds = new Set<MatchingCategoryId>(),
+    catalogNotice = null,
     catalogCategories = MATCHING_CATEGORIES,
     anchorLat = null,
     anchorLng = null,
@@ -275,6 +278,9 @@ export function MatchingPanel({ model }: MatchingPanelProps) {
       {phaseId === "configure" && stepId === "category" ? (
         <ToolSection first compact status="active">
           {awaitHiderAnswer ? <QuestionTruthReferenceHint /> : null}
+          {catalogNotice ? (
+            <ResolvedReadout variant="warning">{catalogNotice}</ResolvedReadout>
+          ) : null}
           {availableCategories.length === 0 ? (
             <CatalogExhaustedMessage message="Every match category has already been used on this map." />
           ) : null}
@@ -335,7 +341,7 @@ export function MatchingPanel({ model }: MatchingPanelProps) {
           {loadingIndicator}
           {nullAnswer && categoryId ? (
             <ResolvedReadout variant="warning">
-              {matchingNullAnswerMessage(categoryId)}
+              {matchingEmptyPlayAreaMessage(categoryId)}
             </ResolvedReadout>
           ) : nearestFeatureSummary ? (
             <ResolvedReadout caption={featureCountLabel}>

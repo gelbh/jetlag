@@ -30,7 +30,6 @@ import {
 import {
   matchingEmptyPlayAreaMessage,
   matchingFeatureCountLabel,
-  matchingNullAnswerMessage,
 } from "../../services/geo/matching";
 import { isAdminDivisionCategoryAvailable } from "../../services/geo/overpass/adminDivisionAvailability";
 import { poiCandidateToMatchingFeature } from "@/domain/geo/poiCandidateAdapters";
@@ -43,7 +42,6 @@ import {
   performMatchingCommit,
   type CommitMatchingInput,
 } from "./matching/commitMatching";
-import { isMatchingEmptyPlayAreaCatalog } from "./matching/emptyPlayAreaBounce";
 import { MatchingToolPanel } from "./matching/MatchingToolPanel";
 import {
   buildResolveMatchingAnchorResult,
@@ -262,7 +260,7 @@ export function useMatchingTool({
 
       // Empty play-area catalog: grey the option and reopen the sheet.
       // Pin miss with features still present must not bounce.
-      if (isMatchingEmptyPlayAreaCatalog(result)) {
+      if (result.nullAnswer === true && result.featureCount === 0) {
         const notice = matchingEmptyPlayAreaMessage(categoryId);
         setUnavailableMatchingCategories((prev) => {
           const next = new Map(prev);
@@ -551,6 +549,8 @@ export function useMatchingTool({
         categoryId: matchingCategoryId,
         categoryChosen: matchingCategoryChosen,
         usedCategoryIds: usedMatchingCategories,
+        unavailableCategoryIds,
+        catalogNotice,
         catalogCategories: catalog.matchingCatalog,
         matchingSeekerPoint,
         matchingUsesContainment: catalog.matchingUsesContainment,
@@ -760,7 +760,7 @@ export function useMatchingTool({
         nearestSummary={answerNearestSummary}
         nullAnswerMessage={
           matchingNullAnswer && matchingCategoryId
-            ? matchingNullAnswerMessage(matchingCategoryId)
+            ? matchingEmptyPlayAreaMessage(matchingCategoryId)
             : null
         }
         answer={matchingAnswer}

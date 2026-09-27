@@ -115,6 +115,32 @@ describe("commitMatching empty play-area guard", () => {
   });
 });
 
+describe("performMatchingCommit empty play-area guard", () => {
+  it("refuses empty-catalog null-match when called directly", async () => {
+    const submitPendingQuestion = vi.fn();
+    const createAnnotation = vi.fn();
+
+    await performMatchingCommit(
+      baseInput({
+        matchingNullAnswer: true,
+        matchingNearestFeatureId: null,
+        matchingNearestFeatureName: null,
+        matchingFeatureCount: 0,
+        matchingFeatures: [],
+        matchingAnswer: null,
+        awaitHiderAnswer: true,
+        submitPendingQuestion,
+        sessionId: "s1",
+        senderUid: "u1",
+        createAnnotation,
+      }),
+    );
+
+    expect(submitPendingQuestion).not.toHaveBeenCalled();
+    expect(createAnnotation).not.toHaveBeenCalled();
+  });
+});
+
 describe("performMatchingCommit persist-slim", () => {
   it("persist-slims elim geometry before createAnnotation", async () => {
     const elim = samplePolygon();

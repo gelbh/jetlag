@@ -46,7 +46,7 @@ import {
 } from "@/domain/questions";
 import {
   matchingFeatureCountLabel,
-  matchingNullAnswerMessage,
+  matchingEmptyPlayAreaMessage,
 } from "@/services/geo/matching";
 import { matchingCategoryIcon } from "./matchingCategoryIcons";
 
@@ -358,7 +358,7 @@ export function MatchingHudBody({
           ) : null}
           {nullAnswer && categoryId ? (
             <ResolvedReadout variant="warning">
-              {matchingNullAnswerMessage(categoryId)}
+              {matchingEmptyPlayAreaMessage(categoryId)}
             </ResolvedReadout>
           ) : nearestFeatureSummary ? (
             <div

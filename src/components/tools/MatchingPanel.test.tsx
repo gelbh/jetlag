@@ -79,4 +79,21 @@ describe("MatchingPanel public props (AC #1)", () => {
       screen.getByRole("option", { name: "Commercial Airport" }),
     ).not.toBeDisabled();
   });
+
+  it("greys unavailable categories and shows catalog notice", () => {
+    render(
+      <MatchingPanel
+        model={{
+          ...baseModel,
+          unavailableCategoryIds: new Set(["landmass"]),
+          catalogNotice: "No landmass intersects the play area.",
+        }}
+      />,
+    );
+
+    expect(screen.getByRole("option", { name: "Landmass" })).toBeDisabled();
+    expect(
+      screen.getByText("No landmass intersects the play area."),
+    ).toBeInTheDocument();
+  });
 });

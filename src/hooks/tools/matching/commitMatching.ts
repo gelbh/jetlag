@@ -136,6 +136,15 @@ export async function performMatchingCommit(
     return;
   }
 
+  // Empty play-area catalog must bounce, not send a null match (preview path
+  // calls this directly and must not bypass the outer commitMatching guard).
+  if (
+    matchingNullAnswer &&
+    (matchingFeatureCount === 0 || matchingFeatures.length === 0)
+  ) {
+    return;
+  }
+
   const question = matchingQuestionFor(matchingCategoryId, customCategories);
 
   if (awaitHiderAnswer && submitPendingQuestion && sessionId && senderUid) {
