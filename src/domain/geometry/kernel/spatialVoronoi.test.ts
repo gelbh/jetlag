@@ -8,7 +8,6 @@ import {
   resolveVoronoiCellSiteId,
   voronoiCellSiteId,
 } from "./voronoiCellSiteId";
-import { geodesicLineBuffer } from "./geodesicLineBuffer";
 
 /** Finite clip cells can reach ~1e10–1e11 m²; planet-scale was ≫1e14. */
 const MAX_PLAUSIBLE_CELL_AREA_M2 = 1e12;
@@ -119,19 +118,6 @@ describe("geoSpatialVoronoiFromSites — Dublin-like grid", () => {
       expect(cellArea).toBeGreaterThan(0);
       expect(cellArea).toBeLessThan(MAX_PLAUSIBLE_CELL_AREA_M2);
     }
-  });
-});
-
-describe("geodesicLineBuffer", () => {
-  it("builds a polygon buffer around a short line", () => {
-    const segment = lineString([
-      [-0.12, 51.5],
-      [-0.119, 51.501],
-    ]);
-    const buffered = geodesicLineBuffer(segment, 200);
-
-    expect(buffered?.geometry.type).toBe("Polygon");
-    expect(area(buffered!)).toBeGreaterThan(0);
   });
 });
 

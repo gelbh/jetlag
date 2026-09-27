@@ -10,7 +10,6 @@ import {
 } from "../kernel/maskWasm";
 import { wasmBuildHalfPlanePolygon } from "../kernel/halfPlaneWasm";
 import { wasmGeodesicLineBuffer } from "../kernel/geodesicWasm";
-import { geodesicLineBuffer } from "../kernel/geodesicLineBuffer";
 import {
   unionDiskSpecs,
   unionEliminationParts,
@@ -275,7 +274,7 @@ describe.skipIf(!runGeometryPerf)("geometry performance gates", () => {
     expect(wasmMs).toBeLessThan(20);
   });
 
-  it("wasm_geodesic_10_vertex median within 1.2x ts", async () => {
+  it("wasm_geodesic_10_vertex median under 20ms", async () => {
     const line = tenVertexLine();
     await wasmGeodesicLineBuffer(line, 200);
     const wasmPkg = await import(
@@ -283,19 +282,11 @@ describe.skipIf(!runGeometryPerf)("geometry performance gates", () => {
     );
     const coordinatesJson = JSON.stringify(line.geometry.coordinates);
 
-    const tsMs = measureMedianMs(() => {
-      geodesicLineBuffer(line, 200);
-    });
     const wasmMs = measureMedianMs(() => {
       wasmPkg.geodesic_line_buffer_json(coordinatesJson, 200, null);
     });
 
-    if (tsMs === 0) {
-      expect(wasmMs).toBe(0);
-    } else {
-      // CI runners show ~1.15x noise on this short path; keep a tight but stable gate.
-      expect(wasmMs / tsMs).toBeLessThanOrEqual(1.2);
-    }
+    expect(wasmMs).toBeLessThan(20);
   });
 });
 
