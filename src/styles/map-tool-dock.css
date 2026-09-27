@@ -14,16 +14,19 @@
     align-items: center;
     justify-content: center;
     gap: 0.125rem;
-    border-radius: var(--radius-hud-md);
+    border-radius: 0.875rem;
     border: 2px solid transparent;
     background: transparent;
     padding: 0.25rem 0.125rem;
     color: var(--color-ink-secondary);
+    -webkit-tap-highlight-color: transparent;
   }
 
   html:not([data-motion="reduced"], [data-motion="static"]) .jl-tool-slot {
     transition:
       color var(--motion-fast) var(--ease-out-quint),
+      background-color var(--motion-fast) var(--ease-out-quint),
+      border-color var(--motion-fast) var(--ease-out-quint),
       opacity var(--motion-fast) var(--ease-out-quint);
   }
 
@@ -32,8 +35,15 @@
   }
 
   .jl-tool-slot:hover:not(:disabled) {
-    background: var(--color-surface-raised);
-    border-color: var(--color-border);
+    background: oklch(from var(--color-surface-raised) l c h / 92%);
+    border-color: oklch(from var(--color-border) l c h / 85%);
+    color: var(--color-ink);
+  }
+
+  .jl-tool-slot:active:not(:disabled) {
+    background: var(--color-highlight-soft);
+    border-color: oklch(from var(--color-highlight) l c h / 50%);
+    color: var(--color-highlight);
   }
 
   .jl-tool-slot:disabled {
@@ -44,6 +54,13 @@
   .jl-tool-slot-active {
     border-color: var(--color-highlight);
     background: var(--color-highlight-soft);
+    color: var(--color-highlight);
+  }
+
+  .jl-tool-slot-active:hover:not(:disabled),
+  .jl-tool-slot-active:active:not(:disabled) {
+    border-color: oklch(from var(--color-highlight) l c h / 75%);
+    background: oklch(from var(--color-highlight) l c h / 22%);
     color: var(--color-highlight);
   }
 

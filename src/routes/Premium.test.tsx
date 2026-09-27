@@ -1,6 +1,8 @@
 import { fireEvent, screen, waitFor } from "@testing-library/react";
+import { MantineProvider } from "@mantine/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Premium } from "./Premium";
+import { jetlagTheme } from "@/theme/theme";
 import { renderWithRouter } from "../test/renderWithRouter";
 import type { PremiumEntitlements } from "../domain/billing/premiumProducts";
 
@@ -49,6 +51,14 @@ vi.mock("../services/core/firebase/firebase", () => ({
   getFirebaseAuth: () => mockAuth,
 }));
 
+function renderPremium() {
+  return renderWithRouter(
+    <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
+      <Premium />
+    </MantineProvider>,
+  );
+}
+
 vi.mock("../services/core/auth/accountAuth", () => ({
   APPLE_SIGN_IN_ENABLED: false,
   isPermanentUser,
@@ -94,6 +104,7 @@ vi.mock("../services/billing/premiumBilling", () => ({
 
 describe("Premium", () => {
   beforeEach(() => {
+    isFirebaseConfigured.mockReturnValue(false);
     isPermanentUser.mockReturnValue(true);
     mockUsePremiumEntitlements.mockReturnValue({
       entitlements: null,
@@ -102,10 +113,20 @@ describe("Premium", () => {
       refresh: vi.fn(),
       setEntitlements: vi.fn(),
     });
+    vi.stubGlobal("matchMedia", (query: string) => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: () => {},
+      removeListener: () => {},
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      dispatchEvent: () => false,
+    }));
   });
 
   it("shows offline billing message when Firebase is not configured", () => {
-    renderWithRouter(<Premium />);
+    renderPremium();
 
     expect(screen.getByRole("heading", { name: "Premium" })).toBeInTheDocument();
     expect(
@@ -131,7 +152,7 @@ describe("Premium", () => {
       setEntitlements: vi.fn(),
     });
 
-    renderWithRouter(<Premium />);
+    renderPremium();
 
     await waitFor(() => {
       expect(
@@ -163,7 +184,7 @@ describe("Premium", () => {
       setEntitlements: vi.fn(),
     });
 
-    renderWithRouter(<Premium />);
+    renderPremium();
 
     await waitFor(() => {
       expect(screen.getByRole("button", { name: /1 session/i })).toBeVisible();
@@ -190,7 +211,7 @@ describe("Premium", () => {
       setEntitlements: vi.fn(),
     });
 
-    renderWithRouter(<Premium />);
+    renderPremium();
 
     await waitFor(() => {
       expect(screen.getByRole("button", { name: /1 session/i })).toBeEnabled();
@@ -229,7 +250,7 @@ describe("Premium", () => {
       setEntitlements: vi.fn(),
     });
 
-    renderWithRouter(<Premium />);
+    renderPremium();
 
     await waitFor(() => {
       expect(
@@ -264,7 +285,7 @@ describe("Premium", () => {
       value: { assign: assignSpy },
     });
 
-    renderWithRouter(<Premium />);
+    renderPremium();
 
     await waitFor(() => {
       expect(screen.getByRole("tab", { name: "Session packs" })).toBeEnabled();

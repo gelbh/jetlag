@@ -1,10 +1,11 @@
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
+import { renderWithAppUi } from "../../test/renderWithAppUi";
 import { describe, expect, it } from "vitest";
 import { ToolDeck, ToolDeckGroup, ToolDeckInner } from "./ToolDeck";
 
 describe("ToolDeck", () => {
   it("renders a full-width hunt Island with ≥44px default size", () => {
-    render(
+    renderWithAppUi(
       <ToolDeck>
         <ToolDeckInner>
           <ToolDeckGroup>
@@ -21,13 +22,12 @@ describe("ToolDeck", () => {
     const deck = screen.getByRole("group", { name: "Hunt tools" });
     expect(deck).toHaveAttribute("data-tool-deck");
     expect(deck).toHaveAttribute("data-island", "hunt");
-    expect(deck).toHaveAttribute("data-slot", "island");
     expect(deck.className).toMatch(/w-full/);
     expect(deck.className).toMatch(/min-h-11/);
   });
 
   it("distributes main group slots evenly with equal flex and ≥44px hit min", () => {
-    const { container } = render(
+    const { container } = renderWithAppUi(
       <ToolDeck>
         <ToolDeckGroup>
           <button type="button" className="jl-tool-slot">
@@ -52,7 +52,7 @@ describe("ToolDeck", () => {
   });
 
   it("keeps sparse hunt content-sized instead of forced full bleed", () => {
-    render(
+    renderWithAppUi(
       <ToolDeck density="sparse">
         <ToolDeckGroup density="sparse">
           <button type="button" className="jl-tool-slot">

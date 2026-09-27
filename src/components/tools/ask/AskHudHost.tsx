@@ -1,13 +1,9 @@
 /**
- * Ask Map HUD host — map overlay chrome (no scrim, no floating panel).
- * Pointer-events none except HUD interactive nodes; clears dock via
- * `--dock-content-height` / `jl-panel-above-dock`.
- * Content width matches OverlayHost / ToolDeck (shared safe-area pad).
- * Spec: ask-surface-kit-design rev 2026-08-05b.
+ * Ask Map HUD host — iOS entry SheetHost (Mantine bottom Drawer), same chassis as Chat.
  */
 import type { ReactNode } from "react";
-import { OVERLAY_SAFE_PAD_X } from "@/components/map/chrome/OverlayHost";
-import { cn } from "@/lib/cn";
+import { Stack } from "@mantine/core";
+import { SheetHost } from "@/components/ui/sheets/SheetHost";
 import { AskCommitStrip } from "./AskCommitStrip";
 import { AskCostChip } from "./AskCostChip";
 import { AskModeCueTicker } from "./AskModeCueTicker";
@@ -19,12 +15,16 @@ export type AskHudHostProps = {
   canCommit: boolean;
   commitLabel: string;
   onCommit: () => void;
+  /** Sheet dismiss (clears active ask tool). */
+  onDismiss?: () => void;
   isSubmitting?: boolean;
   error?: string | null;
   /** ONE OF chips island | catalog rail | walk banner — or null scaffold. */
   modeBody?: ReactNode | null;
   showCommitStrip?: boolean;
   showCostChip?: boolean;
+  /** Hide GlanceVerb ticker (Matching embeds cost in the question box). */
+  showCue?: boolean;
 };
 
 export function AskHudHost({
@@ -34,61 +34,64 @@ export function AskHudHost({
   canCommit,
   commitLabel,
   onCommit,
+  onDismiss,
   isSubmitting = false,
   error = null,
   modeBody = null,
   showCommitStrip = true,
   showCostChip = true,
+  showCue = true,
 }: AskHudHostProps) {
+  const cueTicker = showCue ? <AskModeCueTicker cue={cue} /> : null;
+
+  const costChip =
+    showCostChip ? (
+      <div className="flex justify-start">
+        <AskCostChip toolLabel={toolLabel} costLabel={costLabel} />
+      </div>
+    ) : null;
+
+  // Sheet path: hide muted "SEND/ASK — …" footer; cue already states the next step.
+  const sheetShowCommit =
+    showCommitStrip && (canCommit || Boolean(error) || isSubmitting);
+
+  const sheetCommit =
+    sheetShowCommit ? (
+      <AskCommitStrip
+        canCommit={canCommit}
+        label={commitLabel}
+        onCommit={onCommit}
+        isSubmitting={isSubmitting}
+        error={error}
+      />
+    ) : null;
+
+  const pinned =
+    cueTicker || costChip ? (
+      <Stack gap={8}>
+        {cueTicker}
+        {costChip}
+      </Stack>
+    ) : null;
+
   return (
     <div
       data-testid="ask-hud-host"
-      data-survey="true"
-      className="ask-hud-host pointer-events-none absolute inset-0 z-[var(--z-panel)]"
+      data-ask-composition="ask-first"
     >
-      <div
-        className={cn(
-          "ask-hud-host__top pointer-events-none absolute inset-x-0 top-[var(--map-banner-top)] z-[1] flex flex-col items-stretch gap-2",
-          OVERLAY_SAFE_PAD_X,
-        )}
+      <SheetHost
+        open
+        onClose={onDismiss ?? (() => undefined)}
+        ariaLabel={toolLabel}
+        maxHeightClassName="max-h-[min(72dvh,640px)]"
+        padding="sm"
+        pinned={pinned}
       >
-        <AskModeCueTicker cue={cue} />
-        {showCostChip ? (
-          <div className="flex justify-start">
-            <AskCostChip toolLabel={toolLabel} costLabel={costLabel} />
-          </div>
-        ) : null}
-      </div>
-
-      {modeBody ? (
-        <div
-          className={cn(
-            "ask-hud-host__body pointer-events-none absolute inset-x-0 bottom-[calc(var(--map-panel-bottom)+var(--ask-hud-strip-height,3rem)+0.5rem)] z-[1]",
-            OVERLAY_SAFE_PAD_X,
-          )}
-        >
+        <Stack gap="md" pb="xs">
           {modeBody}
-        </div>
-      ) : null}
-
-      {showCommitStrip ? (
-        <div
-          className={cn(
-            "ask-hud-host__strip pointer-events-none absolute inset-x-0 jl-panel-above-dock z-[2]",
-            OVERLAY_SAFE_PAD_X,
-          )}
-        >
-          <div className="w-full">
-            <AskCommitStrip
-              canCommit={canCommit}
-              label={commitLabel}
-              onCommit={onCommit}
-              isSubmitting={isSubmitting}
-              error={error}
-            />
-          </div>
-        </div>
-      ) : null}
+          {sheetCommit}
+        </Stack>
+      </SheetHost>
     </div>
   );
 }

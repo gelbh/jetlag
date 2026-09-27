@@ -18,7 +18,8 @@ import {
   type TentacleToolApi,
 } from "../../hooks/map-screen/heavyMapTools";
 
-export interface HeavyToolHostProps {
+/** Flat heavy-tool host fields bag for HeavyToolHost (W4-F peel). */
+export type HeavyToolHostModel = {
   activeTool: MapTool;
   sessionRules: SessionRulesInput;
   annotations: AnnotationRecord[];
@@ -50,7 +51,11 @@ export interface HeavyToolHostProps {
   senderUid?: string | null;
   onToolsChange: (tools: HeavyMapToolsApi) => void;
   canSubmitQuestion?: boolean;
-}
+};
+
+export type HeavyToolHostProps = {
+  model: HeavyToolHostModel;
+};
 
 const idleTools = createIdleHeavyMapTools();
 
@@ -163,7 +168,7 @@ const HEAVY_TOOL_HOOKS: {
   tentacle: useTentacleTool,
 };
 
-interface HeavyToolRunnerProps extends Omit<HeavyToolHostProps, "activeTool"> {
+interface HeavyToolRunnerProps extends Omit<HeavyToolHostModel, "activeTool"> {
   toolName: HeavyToolName;
 }
 
@@ -193,7 +198,8 @@ function HeavyToolRunner({
 
 /** Mounts one heavy seeker tool at a time and publishes its API to the map controller.
  * Tool hooks share the useToolSession open/submit/close machine; registry API is unchanged. */
-export function HeavyToolHost({ activeTool, ...sharedProps }: HeavyToolHostProps) {
+export function HeavyToolHost({ model }: HeavyToolHostProps) {
+  const { activeTool, ...sharedProps } = model;
   if (
     activeTool !== "matching" &&
     activeTool !== "measuring" &&

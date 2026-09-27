@@ -1,4 +1,5 @@
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
+import { renderWithAppUi } from "../../test/renderWithAppUi";
 import { describe, expect, it, vi } from "vitest";
 import type {
   PendingQuestionRecord,
@@ -65,7 +66,7 @@ const thermoMessage: SessionMessageRecord = {
 
 describe("HiderPendingQuestionAnswer", () => {
   it("renders answer picker options for an open radar question", () => {
-    render(
+    renderWithAppUi(
       <HiderPendingQuestionAnswer
         message={radarMessage}
         pending={radarPending}
@@ -84,7 +85,7 @@ describe("HiderPendingQuestionAnswer", () => {
   });
 
   it("hides answer controls while walking", () => {
-    render(
+    renderWithAppUi(
       <HiderPendingQuestionAnswer
         message={thermoMessage}
         pending={thermoPending}

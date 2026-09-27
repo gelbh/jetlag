@@ -1,4 +1,5 @@
 import { Popup as MapLibrePopup } from "react-map-gl/maplibre";
+import { X } from "@phosphor-icons/react";
 import type { ReactNode } from "react";
 
 interface MapLibreFeaturePopupProps {
@@ -24,10 +25,24 @@ export function MapLibreFeaturePopup({
       latitude={latitude}
       longitude={longitude}
       anchor={anchor}
+      offset={16}
+      maxWidth="17.5rem"
       closeOnClick={closeOnClick}
       onClose={onClose}
+      className="jl-map-feature-popup"
+      closeButton={false}
     >
-      {children}
+      <div className="jl-map-feature-popup__body">
+        <button
+          type="button"
+          className="jl-map-feature-popup__close"
+          aria-label="Close"
+          onClick={onClose}
+        >
+          <X size={14} weight="bold" aria-hidden />
+        </button>
+        {children}
+      </div>
     </MapLibrePopup>
   );
 }

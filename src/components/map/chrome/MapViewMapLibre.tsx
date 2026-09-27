@@ -1,8 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import Map, {
-  AttributionControl,
-  type MapRef,
-} from "react-map-gl/maplibre";
+import Map, { AttributionControl, type MapRef } from "react-map-gl/maplibre";
 import { setWorkerUrl, type Map as MapLibreMap } from "maplibre-gl";
 import {
   createMapBounds,
@@ -13,10 +10,7 @@ import {
 import "maplibre-gl/dist/maplibre-gl.css";
 import "@/styles/map-touch-gestures.css";
 import mapLibreWorkerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
-import {
-  getBasemapSurface,
-  getMapLibreStyle,
-} from "@/domain/map/mapBasemaps";
+import { getBasemapSurface, getMapLibreStyle } from "@/domain/map/mapBasemaps";
 import {
   DEFAULT_MAP_CENTER,
   DEFAULT_MAP_LNGLAT,
@@ -44,9 +38,7 @@ import {
 import { useMapLibreMarkerImages } from "../helpers/mapLibreIconRegistry";
 import { registerMapLibreMap } from "@/services/geo/maplibre/mapLibreMapRegistry";
 import { MapChromeListener } from "./MapChromeListener";
-import { MapCompassControl } from "./MapCompassControl";
-import { MapStyleToggle } from "./MapStyleToggle";
-import { MapZoomControl } from "./MapZoomControl";
+import { MapNavControlStack } from "./MapNavControlStack";
 import type { MapViewMapLibreProps } from "./mapViewTypes";
 
 setWorkerUrl(mapLibreWorkerUrl);
@@ -100,6 +92,7 @@ function MapFocus({
   orientationResetToken = 0,
   fitBoundsPadding: fitBoundsPaddingProp,
   focusPaddingBias,
+  focusPaddingTopBias,
   preferFly = false,
 }: {
   focusBounds: MapBoundsExpression | null;
@@ -111,6 +104,7 @@ function MapFocus({
   orientationResetToken?: number;
   fitBoundsPadding?: [number, number];
   focusPaddingBias?: number;
+  focusPaddingTopBias?: number;
   preferFly?: boolean;
 }) {
   const mapRef = useMapLibreMap();
@@ -121,6 +115,7 @@ function MapFocus({
   const preferFlyRef = useRef(preferFly);
   const focusBoundsRef = useRef(focusBounds);
   const focusPaddingBiasRef = useRef(focusPaddingBias);
+  const focusPaddingTopBiasRef = useRef(focusPaddingTopBias);
   const focusMinZoomRef = useRef(focusMinZoom);
   const focusMaxZoomRef = useRef(focusMaxZoom);
   const animate = !prefersReducedMotion && !lowPowerMode;
@@ -131,6 +126,7 @@ function MapFocus({
     animate,
     focusBounds,
     focusPaddingBias,
+    focusPaddingTopBias,
     focusMaxZoom,
     focusMinZoom,
     padX,
@@ -142,12 +138,14 @@ function MapFocus({
     preferFlyRef.current = preferFly;
     focusBoundsRef.current = focusBounds;
     focusPaddingBiasRef.current = focusPaddingBias;
+    focusPaddingTopBiasRef.current = focusPaddingTopBias;
     focusMinZoomRef.current = focusMinZoom;
     focusMaxZoomRef.current = focusMaxZoom;
   }, [
     preferFly,
     focusBounds,
     focusPaddingBias,
+    focusPaddingTopBias,
     focusMinZoom,
     focusMaxZoom,
   ]);
@@ -215,11 +213,12 @@ function MapFocus({
     map.resize();
 
     const paddingBias = focusPaddingBiasRef.current ?? 0;
+    const paddingTopBias = focusPaddingTopBiasRef.current ?? 0;
     const minZoom = focusMinZoomRef.current;
     const maxZoom = focusMaxZoomRef.current;
 
     const padding = {
-      top: padY,
+      top: padY + paddingTopBias,
       left: padX,
       right: padX,
       bottom: padY + paddingBias,
@@ -269,9 +268,7 @@ function MapFocus({
       };
     }
 
-    if (
-      isLargeCameraJumpMapLibre(map, center, zoom, preferFlyRef.current)
-    ) {
+    if (isLargeCameraJumpMapLibre(map, center, zoom, preferFlyRef.current)) {
       map.flyTo({
         center,
         zoom,
@@ -300,35 +297,36 @@ function MapFocus({
 /**
  * MapLibre shell: basemap + chrome + click/bounds + camera/focus parity.
  */
-export function MapViewMapLibre({
-  center = DEFAULT_MAP_CENTER,
-  zoom = 13,
-  className,
-  mapStyle = "standard",
-  streetBasemap = "light",
-  onBoundsChange,
-  onUserViewportFramed,
-  onMapClick,
-  interactive = true,
-  children,
-  mapKey,
-  chromeHudRef,
-  focusBounds = null,
-  focusMinZoom,
-  focusMaxZoom,
-  fitBoundsMode = "always",
-  fitBoundsPadding,
-  focusPaddingBias,
-  focusPreferFly,
-  recenterToken = 0,
-  showZoomControl,
-  zoomControlInset = "dock",
-  onMapStyleChange,
-  showMapStyleToggle,
-  mapStyleControlInset,
-  showCompassControl,
-  onRecenter,
-}: MapViewMapLibreProps) {
+export function MapViewMapLibre({ model, children }: MapViewMapLibreProps) {
+  const {
+    center = DEFAULT_MAP_CENTER,
+    zoom = 13,
+    className,
+    mapStyle = "standard",
+    streetBasemap = "light",
+    onBoundsChange,
+    onUserViewportFramed,
+    onMapClick,
+    interactive = true,
+    mapKey,
+    chromeHudRef,
+    focusBounds = null,
+    focusMinZoom,
+    focusMaxZoom,
+    fitBoundsMode = "always",
+    fitBoundsPadding,
+    focusPaddingBias,
+    focusPaddingTopBias,
+    focusPreferFly,
+    recenterToken = 0,
+    showZoomControl,
+    onMapStyleChange,
+    showMapStyleToggle,
+    showCompassControl,
+    onRecenter,
+  } = model;
+  // zoomControlInset / mapStyleControlInset stay on MapViewModel for call-site
+  // parity; MapNavControlStack owns nav layout now.
   const mapRef = useRef<MapRef>(null);
   const onBoundsChangeRef = useRef(onBoundsChange);
   const onUserViewportFramedRef = useRef(onUserViewportFramed);
@@ -348,9 +346,7 @@ export function MapViewMapLibre({
   const compassControlEnabled = showCompassControl ?? false;
   const [fallbackRecenterToken, setFallbackRecenterToken] = useState(0);
   const [orientationResetToken, setOrientationResetToken] = useState(0);
-  const focusRecenterToken = onRecenter
-    ? recenterToken
-    : fallbackRecenterToken;
+  const focusRecenterToken = onRecenter ? recenterToken : fallbackRecenterToken;
   const handleCompassReset = useCallback(() => {
     // Orientation signal is compass-only; pan/zoom home uses recenter token.
     setOrientationResetToken((value) => value + 1);
@@ -363,7 +359,6 @@ export function MapViewMapLibre({
   const mapStyleToggleEnabled =
     (showMapStyleToggle ?? Boolean(onMapStyleChange)) &&
     Boolean(onMapStyleChange);
-  const styleControlInset = mapStyleControlInset ?? zoomControlInset;
   const { lowPowerMode } = useMotionProfile();
   const maxPitchDegrees = resolveMapPitchDegrees(lowPowerMode);
   const pitchGesturesEnabled = interactive && maxPitchDegrees > 0;
@@ -512,30 +507,22 @@ export function MapViewMapLibre({
               orientationResetToken={orientationResetToken}
               fitBoundsPadding={fitBoundsPadding}
               focusPaddingBias={focusPaddingBias}
+              focusPaddingTopBias={focusPaddingTopBias}
               preferFly={focusPreferFly}
             />
             {chromeHudRef ? (
               <MapChromeListener chromeHudRef={chromeHudRef} />
             ) : null}
-            <MapCompassControl
-              enabled={compassControlEnabled}
-              inset={zoomControlInset}
+            <MapNavControlStack
+              zoomEnabled={zoomControlEnabled}
+              compassEnabled={compassControlEnabled}
+              styleEnabled={mapStyleToggleEnabled}
+              mapStyle={mapStyle}
+              streetBasemap={streetBasemap}
+              onMapStyleChange={onMapStyleChange}
               onResetCamera={handleCompassReset}
             />
-            <MapZoomControl
-              enabled={zoomControlEnabled}
-              inset={zoomControlInset}
-            />
             <AttributionControl compact position="bottom-left" />
-            {onMapStyleChange ? (
-              <MapStyleToggle
-                enabled={mapStyleToggleEnabled}
-                mapStyle={mapStyle}
-                streetBasemap={streetBasemap}
-                onMapStyleChange={onMapStyleChange}
-                inset={styleControlInset}
-              />
-            ) : null}
             {children}
           </MapFeatureHitTestProvider>
         </Map>

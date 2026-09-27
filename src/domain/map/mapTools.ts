@@ -22,6 +22,7 @@ export const MAP_TOOL_DOCK_ENTRIES: readonly MapToolDockEntry[] = [
   { id: "photo", name: "Photo", cost: "D1P1", enabled: true },
   { id: "zone", name: "Zone", enabled: true },
   { id: "pin", name: "Pin", enabled: true },
+  { id: "draw", name: "Freehand", enabled: true },
 ];
 
 export function mapToolDockLabel(entry: MapToolDockEntry): string {
@@ -54,6 +55,7 @@ const OVERFLOW_TOOL_HINTS: Partial<Record<DockableMapTool, string>> = {
 const MARKUP_TOOL_HINTS: Partial<Record<DockableMapTool, string>> = {
   zone: "Draw a play boundary",
   pin: "Mark a point on the map",
+  draw: "Scribble a freehand line",
 };
 
 export function mapToolDockMenuHint(entry: MapToolDockEntry): string | null {
@@ -71,7 +73,7 @@ export const QUESTION_DOCK_TOOL_IDS = [
   "photo",
 ] as const satisfies readonly DockableMapTool[];
 
-export const MARKUP_DOCK_TOOL_IDS = ["zone", "pin"] as const satisfies readonly DockableMapTool[];
+export const MARKUP_DOCK_TOOL_IDS = ["zone", "pin", "draw"] as const satisfies readonly DockableMapTool[];
 
 export const WIZARD_DOCK_TOOL_IDS = [
   "matching",

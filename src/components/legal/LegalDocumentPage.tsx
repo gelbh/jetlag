@@ -16,6 +16,8 @@ interface LegalDocumentPageProps {
   title: string;
   sections: LegalSection[];
   crossLink: "privacy" | "terms";
+  /** `page` = Survey EntryScreenLayout chrome; `content` = article only for Mantine shells. */
+  layout?: "page" | "content";
 }
 
 const externalLinkProps = {
@@ -23,70 +25,105 @@ const externalLinkProps = {
   rel: "noopener noreferrer",
 };
 
-export function LegalDocumentPage({
+function LegalDocumentBody({
   title,
   sections,
   crossLink,
-}: LegalDocumentPageProps) {
+  withHeaderOffset,
+}: {
+  title: string;
+  sections: LegalSection[];
+  crossLink: "privacy" | "terms";
+  withHeaderOffset: boolean;
+}) {
   const otherPath =
     crossLink === "privacy" ? LEGAL_TERMS_PATH : LEGAL_PRIVACY_PATH;
   const otherLabel = crossLink === "privacy" ? "Terms of Service" : "Privacy Policy";
 
   return (
+    <article
+      className={`jl-selectable mx-auto w-full max-w-prose space-y-6 pb-[max(1rem,env(safe-area-inset-bottom))] ${
+        withHeaderOffset ? screenHeaderOffsetClassName : ""
+      }`}
+    >
+      <header className="space-y-2">
+        <h1 className="font-display text-balance text-[clamp(2rem,10vw,3rem)] font-bold uppercase leading-[0.92] tracking-tight text-ink">
+          {title}
+        </h1>
+        <p className="text-pretty text-sm text-ink-muted">
+          Last updated {LEGAL_EFFECTIVE_DATE}
+        </p>
+      </header>
+
+      {sections.map((section) => (
+        <section key={section.id} className="space-y-2">
+          <h2 className="font-display text-base font-semibold uppercase tracking-[0.06em] text-ink">
+            {section.title}
+          </h2>
+          {section.paragraphs.map((paragraph) => (
+            <p
+              key={paragraph}
+              className="text-pretty text-base leading-relaxed text-ink-secondary"
+            >
+              {paragraph}
+            </p>
+          ))}
+        </section>
+      ))}
+
+      <footer className="space-y-3 border-t-2 border-border pt-4">
+        <p className="text-pretty text-sm leading-relaxed text-ink-secondary">
+          Questions or privacy requests?{" "}
+          <a
+            href={LEGAL_FEEDBACK_URL}
+            {...externalLinkProps}
+            className="text-highlight underline-offset-2 hover:underline"
+          >
+            Open a GitHub issue
+          </a>
+          .
+        </p>
+        <p className="text-sm text-ink-muted">
+          See also{" "}
+          <AppLink
+            to={otherPath}
+            className="text-highlight underline-offset-2 hover:underline"
+          >
+            {otherLabel}
+          </AppLink>
+          .
+        </p>
+      </footer>
+    </article>
+  );
+}
+
+export function LegalDocumentPage({
+  title,
+  sections,
+  crossLink,
+  layout = "page",
+}: LegalDocumentPageProps) {
+  if (layout === "content") {
+    return (
+      <LegalDocumentBody
+        title={title}
+        sections={sections}
+        crossLink={crossLink}
+        withHeaderOffset={false}
+      />
+    );
+  }
+
+  return (
     <EntryScreenLayout justify="center">
       <ScreenHeader backTo="/" backLabel="Back" />
-      <article
-        className={`jl-selectable mx-auto w-full max-w-prose space-y-6 pb-[max(1rem,env(safe-area-inset-bottom))] ${screenHeaderOffsetClassName}`}
-      >
-        <header className="space-y-2">
-          <h1 className="font-display text-balance text-[clamp(2rem,10vw,3rem)] font-bold uppercase leading-[0.92] tracking-tight text-ink">
-            {title}
-          </h1>
-          <p className="text-pretty text-sm text-ink-muted">
-            Last updated {LEGAL_EFFECTIVE_DATE}
-          </p>
-        </header>
-
-        {sections.map((section) => (
-          <section key={section.id} className="space-y-2">
-            <h2 className="font-display text-base font-semibold uppercase tracking-[0.06em] text-ink">
-              {section.title}
-            </h2>
-            {section.paragraphs.map((paragraph) => (
-              <p
-                key={paragraph}
-                className="text-pretty text-base leading-relaxed text-ink-secondary"
-              >
-                {paragraph}
-              </p>
-            ))}
-          </section>
-        ))}
-
-        <footer className="space-y-3 border-t-2 border-border pt-4">
-          <p className="text-pretty text-sm leading-relaxed text-ink-secondary">
-            Questions or privacy requests?{" "}
-            <a
-              href={LEGAL_FEEDBACK_URL}
-              {...externalLinkProps}
-              className="text-highlight underline-offset-2 hover:underline"
-            >
-              Open a GitHub issue
-            </a>
-            .
-          </p>
-          <p className="text-sm text-ink-muted">
-            See also{" "}
-            <AppLink
-              to={otherPath}
-              className="text-highlight underline-offset-2 hover:underline"
-            >
-              {otherLabel}
-            </AppLink>
-            .
-          </p>
-        </footer>
-      </article>
+      <LegalDocumentBody
+        title={title}
+        sections={sections}
+        crossLink={crossLink}
+        withHeaderOffset
+      />
     </EntryScreenLayout>
   );
 }

@@ -46,10 +46,15 @@ export async function prepareE2EPage(
 }
 
 export async function openPlayHub(page: Page) {
-  await page
-    .getByRole("button", { name: /Play — create, join, or custom game/i })
-    .click();
-  await expect(page.getByRole("link", { name: "Create session" })).toBeVisible();
+  // Home waits on Firebase auth bootstrap (BootSplash "Starting…") before inset rows.
+  await expect(page.getByText("Starting…")).toBeHidden({ timeout: 45_000 });
+  // Wave home: InsetRow UnstyledButton+Link (accessible name = label text).
+  await expect(
+    page.getByRole("link", { name: "Create session" }),
+  ).toBeVisible({ timeout: 15_000 });
+  await expect(
+    page.getByRole("link", { name: "Join session" }),
+  ).toBeVisible({ timeout: 15_000 });
 }
 
 export async function dismissMapOnboarding(page: Page) {

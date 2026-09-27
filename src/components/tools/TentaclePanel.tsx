@@ -1,6 +1,9 @@
 import { type RefObject } from "react";
 import type { TentaclePoi } from "../../domain/map/annotations";
-import { formatPresetDistance, type DistanceUnit } from "../../domain/map/distance";
+import {
+  formatPresetDistance,
+  type DistanceUnit,
+} from "../../domain/map/distance";
 import type { GameSize } from "../../domain/session/size/gameSize";
 import {
   isTentacleCategoryAvailable,
@@ -28,7 +31,8 @@ import {
 import { useToolWizard } from "../../hooks/wizard/useToolWizard";
 import { QuestionTruthReferenceHint } from "./shared/QuestionTruthReferenceHint";
 
-interface TentaclePanelProps {
+/** Flat tentacle wizard fields bag for TentaclePanel (W4-F peel). */
+export type TentaclePanelModel = {
   gameSize: GameSize;
   categoryId: TentacleExtendedCategoryId | null;
   categoryChosen: boolean;
@@ -54,34 +58,39 @@ interface TentaclePanelProps {
   isSubmitting?: boolean;
   onRetry?: () => void;
   wizardStepRef?: RefObject<string>;
-}
+};
 
-export function TentaclePanel({
-  gameSize,
-  categoryId,
-  categoryChosen,
-  searchRadiusMeters,
-  distanceUnit,
-  poiOptions,
-  selectedPoiId,
-  outOfReach,
-  loading,
-  awaitingPlacement,
-  hasCenter,
-  gpsLoading = false,
-  error,
-  onCategoryChange,
-  onUseGps,
-  onPlaceAtMapTap,
-  onSelectPoi,
-  onOutOfReachChange,
-  onCommit,
-  awaitHiderAnswer = false,
-  costLabel = "D4P2",
-  isSubmitting = false,
-  onRetry,
-  wizardStepRef,
-}: TentaclePanelProps) {
+export type TentaclePanelProps = {
+  model: TentaclePanelModel;
+};
+
+export function TentaclePanel({ model }: TentaclePanelProps) {
+  const {
+    gameSize,
+    categoryId,
+    categoryChosen,
+    searchRadiusMeters,
+    distanceUnit,
+    poiOptions,
+    selectedPoiId,
+    outOfReach,
+    loading,
+    awaitingPlacement,
+    hasCenter,
+    gpsLoading = false,
+    error,
+    onCategoryChange,
+    onUseGps,
+    onPlaceAtMapTap,
+    onSelectPoi,
+    onOutOfReachChange,
+    onCommit,
+    awaitHiderAnswer = false,
+    costLabel = "D4P2",
+    isSubmitting = false,
+    onRetry,
+    wizardStepRef,
+  } = model;
   const {
     phaseId,
     stepId,
@@ -153,9 +162,7 @@ export function TentaclePanel({
     <>
       {phaseId === "configure" && stepId === "category" ? (
         <ToolSection first compact status="active">
-          {awaitHiderAnswer ? (
-            <QuestionTruthReferenceHint />
-          ) : null}
+          {awaitHiderAnswer ? <QuestionTruthReferenceHint /> : null}
           <QuestionPromptBlock
             prompt={prompt}
             ruleSummary={
@@ -173,7 +180,9 @@ export function TentaclePanel({
                 if (!value) {
                   return;
                 }
-                onCategoryChange(event.target.value as TentacleExtendedCategoryId);
+                onCategoryChange(
+                  event.target.value as TentacleExtendedCategoryId,
+                );
               }}
               className="field-input"
             >
@@ -233,9 +242,6 @@ export function TentaclePanel({
       {phaseId === "ask" && !awaitHiderAnswer && categoryId ? (
         <TentacleLocationsChord className="ask-scroll-chord">
           <TentacleAnswerPicker
-            categoryId={categoryId}
-            distanceUnit={distanceUnit}
-            searchRadiusMeters={searchRadiusMeters}
             poiOptions={poiOptions}
             selectedPoiId={selectedPoiId}
             outOfReach={outOfReach}
@@ -263,8 +269,7 @@ export function TentaclePanel({
         <Stepper
           nav={{
             canGoBack:
-              phaseIndex > 0 ||
-              (phaseId === "configure" && configureIndex > 0),
+              phaseIndex > 0 || (phaseId === "configure" && configureIndex > 0),
             onBack: goBack,
             ...toolWizardPhasePrimaryNav({
               phaseId,

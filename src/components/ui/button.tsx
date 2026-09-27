@@ -6,8 +6,8 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/cn";
 
 /**
- * Survey field-book button — shadcn Slot + cva on Radix.
- * Prefer Survey roles (flag / field-ink / canvas); do not introduce new jl-* CSS.
+ * Density button for map/ask islands (allowed composite; not a UI kit).
+ * Prefer Mantine Button + entryStyles for form chrome; keep this for residual CVA slots.
  */
 const buttonVariants = cva(
   "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-flag focus-visible:ring-offset-2 focus-visible:ring-offset-canvas disabled:opacity-50 aria-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",

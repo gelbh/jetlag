@@ -13,6 +13,7 @@ export function mapFocusApplyDependencyKeys(args: {
   animate: boolean;
   focusBounds: MapBoundsExpression | null;
   focusPaddingBias?: number;
+  focusPaddingTopBias?: number;
   focusMaxZoom?: number;
   focusMinZoom?: number;
   padX: number;
@@ -25,6 +26,8 @@ export function mapFocusApplyDependencyKeys(args: {
       : args.focusBounds != null;
   const focusPaddingBiasDep =
     args.fitBoundsMode === "always" ? args.focusPaddingBias : null;
+  const focusPaddingTopBiasDep =
+    args.fitBoundsMode === "always" ? args.focusPaddingTopBias : null;
   const focusMaxZoomDep =
     args.fitBoundsMode === "always" ? args.focusMaxZoom : null;
   const focusMinZoomDep =
@@ -34,6 +37,7 @@ export function mapFocusApplyDependencyKeys(args: {
     args.animate,
     focusBoundsDep,
     focusPaddingBiasDep,
+    focusPaddingTopBiasDep,
     focusMaxZoomDep,
     focusMinZoomDep,
     args.fitBoundsMode,

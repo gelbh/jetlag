@@ -7,11 +7,5 @@ export function AppEntryBackdrop() {
     return null;
   }
 
-  return (
-    <div
-      aria-hidden
-      className="app-entry-backdrop"
-      data-player-ux-world="survey"
-    />
-  );
+  return <div aria-hidden className="app-entry-backdrop" />;
 }

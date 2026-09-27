@@ -77,10 +77,39 @@ export type FirebaseClientConfig = {
   appId: string;
 };
 
+/** Demo project used by Playwright + local `npm run emulators:start`. */
+const DEMO_FIREBASE_EMULATOR_ENV = {
+  VITE_USE_FIREBASE_EMULATOR: "true",
+  VITE_FIREBASE_API_KEY: "demo-api-key",
+  VITE_FIREBASE_AUTH_DOMAIN: "demo-jetlag.firebaseapp.com",
+  VITE_FIREBASE_PROJECT_ID: "demo-jetlag",
+  VITE_FIREBASE_STORAGE_BUCKET: "demo-jetlag.appspot.com",
+  VITE_FIREBASE_MESSAGING_SENDER_ID: "1234567890",
+  VITE_FIREBASE_APP_ID: "1:1234567890:web:demo",
+} as const;
+
 let cachedClientEnv: ClientEnv | null = null;
+let loggedDemoEmulatorNotice = false;
+
+function hasCompleteFirebaseKeys(raw: Record<string, unknown>): boolean {
+  return (
+    typeof raw.VITE_FIREBASE_API_KEY === "string" &&
+    raw.VITE_FIREBASE_API_KEY.trim().length > 0 &&
+    typeof raw.VITE_FIREBASE_AUTH_DOMAIN === "string" &&
+    raw.VITE_FIREBASE_AUTH_DOMAIN.trim().length > 0 &&
+    typeof raw.VITE_FIREBASE_PROJECT_ID === "string" &&
+    raw.VITE_FIREBASE_PROJECT_ID.trim().length > 0 &&
+    typeof raw.VITE_FIREBASE_STORAGE_BUCKET === "string" &&
+    raw.VITE_FIREBASE_STORAGE_BUCKET.trim().length > 0 &&
+    typeof raw.VITE_FIREBASE_MESSAGING_SENDER_ID === "string" &&
+    raw.VITE_FIREBASE_MESSAGING_SENDER_ID.trim().length > 0 &&
+    typeof raw.VITE_FIREBASE_APP_ID === "string" &&
+    raw.VITE_FIREBASE_APP_ID.trim().length > 0
+  );
+}
 
 function readRawClientEnv(): Record<string, unknown> {
-  return {
+  const raw: Record<string, unknown> = {
     VITE_USE_FIREBASE_EMULATOR: import.meta.env.VITE_USE_FIREBASE_EMULATOR,
     VITE_FIREBASE_API_KEY: import.meta.env.VITE_FIREBASE_API_KEY,
     VITE_FIREBASE_AUTH_DOMAIN: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -102,6 +131,19 @@ function readRawClientEnv(): Record<string, unknown> {
     VITE_POSTHOG_KEY: import.meta.env.VITE_POSTHOG_KEY,
     VITE_GEOMETRY_MASK_KERNEL: import.meta.env.VITE_GEOMETRY_MASK_KERNEL,
   };
+
+  // DEV without Doppler/.env: use demo-jetlag + emulator so local polish works.
+  if (import.meta.env.DEV && !hasCompleteFirebaseKeys(raw)) {
+    if (!loggedDemoEmulatorNotice) {
+      loggedDemoEmulatorNotice = true;
+      console.info(
+        "[firebase] Using demo emulator config. Run `npm run emulators:start` in another terminal.",
+      );
+    }
+    return { ...raw, ...DEMO_FIREBASE_EMULATOR_ENV };
+  }
+
+  return raw;
 }
 
 export function parseClientEnv(

@@ -38,6 +38,7 @@ export function resetAllStores(): void {
       zone: true,
       pin: true,
       tentacle: true,
+      draw: true,
       transit: true,
     },
   });

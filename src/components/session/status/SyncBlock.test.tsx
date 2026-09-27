@@ -1,11 +1,10 @@
-import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { screen } from "@testing-library/react";
+import { renderWithAppUi } from "../../../test/renderWithAppUi";
+import { describe, expect, it } from "vitest";
 import { SyncBlock } from "./SyncBlock";
 
 const baseProps = {
   queuedWrites: 0,
-  menuOpen: false,
-  onMenuOpenChange: vi.fn(),
 };
 
 describe("SyncBlock unhealthy sync text", () => {
@@ -14,37 +13,32 @@ describe("SyncBlock unhealthy sync text", () => {
     ["error", "Sync issue"],
     ["degraded", "Unstable"],
   ] as const)("shows plain text for %s status", (syncStatus, label) => {
-    render(<SyncBlock {...baseProps} syncStatus={syncStatus} />);
+    renderWithAppUi(<SyncBlock {...baseProps} syncStatus={syncStatus} />);
 
-    expect(
-      screen.getByRole("button", { name: new RegExp(label, "i") }),
-    ).toBeInTheDocument();
+    expect(screen.getByTestId("sync-block-mantine")).toBeInTheDocument();
+    expect(screen.getByRole("status", { name: new RegExp(label, "i") })).toBeInTheDocument();
     expect(screen.getByText(label)).toBeVisible();
   });
 
   it("shows queued count in offline label when writes are pending", () => {
-    render(
+    renderWithAppUi(
       <SyncBlock {...baseProps} syncStatus="offline" queuedWrites={2} />,
     );
 
     expect(screen.getByText("Offline · 2 queued")).toBeVisible();
   });
 
-  it("keeps Synced label on the control when healthy", () => {
-    render(<SyncBlock {...baseProps} syncStatus="synced" />);
+  it("keeps Synced label on the status when healthy", () => {
+    renderWithAppUi(<SyncBlock {...baseProps} syncStatus="synced" />);
 
     expect(screen.queryByText(/Offline|Sync issue|Unstable/i)).toBeNull();
     expect(screen.getByText("Synced")).toBeVisible();
-    expect(
-      screen.getByRole("button", { name: /Synced\. Show sync details/i }),
-    ).toHaveClass("jl-sync-map-indicator__btn--labeled");
+    expect(screen.getByRole("status", { name: /Synced/i })).toBeInTheDocument();
   });
 
-  it("uses labeled hit target class when unhealthy", () => {
-    render(<SyncBlock {...baseProps} syncStatus="offline" />);
+  it("exposes status role when unhealthy", () => {
+    renderWithAppUi(<SyncBlock {...baseProps} syncStatus="offline" />);
 
-    expect(
-      screen.getByRole("button", { name: /Offline/i }),
-    ).toHaveClass("jl-sync-map-indicator__btn--labeled");
+    expect(screen.getByRole("status", { name: /Offline/i })).toBeInTheDocument();
   });
 });

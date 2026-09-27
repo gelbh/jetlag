@@ -57,6 +57,31 @@ describe("bundledPresetHierarchy", () => {
     expect(names).toEqual(expect.arrayContaining(["North America", "Asia"]));
   });
 
+  it("keeps country dropdowns but collapses unary provinces beneath them", () => {
+    const tree = buildBundledPresetTree(BUNDLED_GAME_PRESET_DEFINITIONS);
+    const northAmerica = tree.find(
+      (node): node is Extract<(typeof tree)[number], { kind: "group" }> =>
+        node.kind === "group" && node.name === "North America",
+    );
+    expect(northAmerica).toBeTruthy();
+    const canada = northAmerica!.children.find(
+      (node): node is Extract<(typeof tree)[number], { kind: "group" }> =>
+        node.kind === "group" && node.name === "Canada",
+    );
+    expect(canada).toBeTruthy();
+    expect(
+      canada!.children.some(
+        (node) =>
+          node.kind === "preset" && node.presetId === "bundled:prince-rupert",
+      ),
+    ).toBe(true);
+    expect(
+      canada!.children.some(
+        (node) => node.kind === "group" && node.name === "British Columbia",
+      ),
+    ).toBe(false);
+  });
+
   it("starts with every group collapsed", () => {
     const tree = buildBundledPresetTree(BUNDLED_GAME_PRESET_DEFINITIONS);
     const europe = tree.find(

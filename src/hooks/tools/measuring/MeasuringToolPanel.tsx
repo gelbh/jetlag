@@ -88,65 +88,67 @@ export function MeasuringToolPanel({
   return (
     <>
       <MeasuringPanel
-        distanceUnit={distanceUnit}
-        optionChosen={measuringOptionChosen}
-        usedMeasuringFromKinds={usedMeasuringFromKindsSet}
-        catalogOptions={measuringCatalog}
-        anchorLat={measuringSeekerPoint?.[0] ?? null}
-        anchorLng={measuringSeekerPoint?.[1] ?? null}
-        measureFrom={measuringFromKind(
-          measuringSubject,
-          measuringLocationCategory,
-        )}
-        subject={measuringSubject}
-        targetMode={measuringTargetMode}
-        usesAllPlacesInArea={usesAllPlacesInArea}
-        hasSeekerPoint={measuringSeekerPoint !== null}
-        hasTargetPoint={hasMeasuringTarget}
-        anchorAltitudeMeters={measuringAnchorElevationMeters}
-        seekerPlaceName={measuringSeekerPlaceName}
-        targetPlaceName={measuringTargetPlaceName}
-        distanceMeters={measuringDistanceMeters}
-        loading={measuringLoading}
-        gpsLoading={gpsLoading}
-        searchQuery={measuringSearchQuery}
-        searchResults={measuringSearchResults}
-        searchLoading={measuringSearchLoading}
-        searchRole={measuringSearchRole}
-        answer={measuringAnswer}
-        seaLevelEdgeCase={measuringSeaLevelEdgeCase}
-        seaLevelNote={measuringSeaLevelNote}
-        error={measuringError ?? gpsError ?? mapError}
-        onMeasureFromChange={handleMeasureFromChange}
-        onTargetModeChange={handleTargetModeChange}
-        onSearchQueryChange={setMeasuringSearchQuery}
-        onSearchSubmit={(role) => void handleSearch(role)}
-        onSearchResultSelect={applySearchResult}
-        onUseGps={() => void handleGps()}
-        onFindCoastline={() => {
-          if (measuringSeekerPoint) {
-            void loadMeasuringCoastlineAt(measuringSeekerPoint);
-          }
+        model={{
+          distanceUnit,
+          optionChosen: measuringOptionChosen,
+          usedMeasuringFromKinds: usedMeasuringFromKindsSet,
+          catalogOptions: measuringCatalog,
+          anchorLat: measuringSeekerPoint?.[0] ?? null,
+          anchorLng: measuringSeekerPoint?.[1] ?? null,
+          measureFrom: measuringFromKind(
+            measuringSubject,
+            measuringLocationCategory,
+          ),
+          subject: measuringSubject,
+          targetMode: measuringTargetMode,
+          usesAllPlacesInArea,
+          hasSeekerPoint: measuringSeekerPoint !== null,
+          hasTargetPoint: hasMeasuringTarget,
+          anchorAltitudeMeters: measuringAnchorElevationMeters,
+          seekerPlaceName: measuringSeekerPlaceName,
+          targetPlaceName: measuringTargetPlaceName,
+          distanceMeters: measuringDistanceMeters,
+          loading: measuringLoading,
+          gpsLoading,
+          searchQuery: measuringSearchQuery,
+          searchResults: measuringSearchResults,
+          searchLoading: measuringSearchLoading,
+          searchRole: measuringSearchRole,
+          answer: measuringAnswer,
+          seaLevelEdgeCase: measuringSeaLevelEdgeCase,
+          seaLevelNote: measuringSeaLevelNote,
+          error: measuringError ?? gpsError ?? mapError,
+          onMeasureFromChange: handleMeasureFromChange,
+          onTargetModeChange: handleTargetModeChange,
+          onSearchQueryChange: setMeasuringSearchQuery,
+          onSearchSubmit: (role) => void handleSearch(role),
+          onSearchResultSelect: applySearchResult,
+          onUseGps: () => void handleGps(),
+          onFindCoastline: () => {
+            if (measuringSeekerPoint) {
+              void loadMeasuringCoastlineAt(measuringSeekerPoint);
+            }
+          },
+          onRetrySeaLevel: () => {
+            if (measuringSeekerPoint) {
+              void loadSeaLevelContextAt(measuringSeekerPoint);
+            }
+          },
+          onFindLinearFeature: () => {
+            if (measuringSeekerPoint) {
+              void loadMeasuringLinearAt(measuringSeekerPoint);
+            }
+          },
+          onFindNearest: () => void loadNearest(),
+          onAnswerChange: (answer: MeasuringAnswer) => {
+            startTransition(() => setMeasuringAnswer(answer));
+          },
+          onCommit,
+          awaitHiderAnswer,
+          costLabel,
+          isSubmitting,
+          wizardStepRef,
         }}
-        onRetrySeaLevel={() => {
-          if (measuringSeekerPoint) {
-            void loadSeaLevelContextAt(measuringSeekerPoint);
-          }
-        }}
-        onFindLinearFeature={() => {
-          if (measuringSeekerPoint) {
-            void loadMeasuringLinearAt(measuringSeekerPoint);
-          }
-        }}
-        onFindNearest={() => void loadNearest()}
-        onAnswerChange={(answer: MeasuringAnswer) => {
-          startTransition(() => setMeasuringAnswer(answer));
-        }}
-        onCommit={onCommit}
-        awaitHiderAnswer={awaitHiderAnswer}
-        costLabel={costLabel}
-        isSubmitting={isSubmitting}
-        wizardStepRef={wizardStepRef}
       />
       <QuestionPreviewSheet
         open={previewOpen}

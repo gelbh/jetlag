@@ -1,8 +1,12 @@
 import { fireEvent, screen, within } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { MantineProvider } from "@mantine/core";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { jetlagTheme } from "@/theme/theme";
 import { ToolDock } from "./ToolDock";
 import { HiderToolDock } from "./HiderToolDock";
 import { renderWithRouter } from "../../test/renderWithRouter";
+
+const DOCK_LABEL = "[data-ios-tool-label]";
 
 const dockBase = {
   activeTool: "none" as const,
@@ -16,9 +20,35 @@ const dockBase = {
   onOpenLog: vi.fn(),
 };
 
+beforeEach(() => {
+  dockBase.onSelect.mockClear();
+  vi.stubGlobal("matchMedia", (query: string) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener() {},
+    removeListener() {},
+    addEventListener() {},
+    removeEventListener() {},
+    dispatchEvent: () => false,
+  }));
+});
+
+function wrapDock(ui: React.ReactElement) {
+  return (
+    <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
+      {ui}
+    </MantineProvider>
+  );
+}
+
+function renderDock(ui: React.ReactElement) {
+  return renderWithRouter(wrapDock(ui));
+}
+
 describe("ToolDock", () => {
-  it("exposes question tools on the dock and markup tools in Draw", () => {
-    renderWithRouter(<ToolDock {...dockBase} />);
+  it("exposes question tools on the dock and markup tools in Draw", async () => {
+    renderDock(<ToolDock {...dockBase} />);
 
     expect(screen.getByRole("button", { name: "Matching" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Measuring" })).toBeInTheDocument();
@@ -27,7 +57,9 @@ describe("ToolDock", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Draw on map" }));
 
-    expect(screen.getByRole("menuitemradio", { name: /Pin/i })).toBeInTheDocument();
+    expect(
+      await screen.findByRole("menuitemradio", { name: /Pin/i }),
+    ).toBeInTheDocument();
     expect(screen.getByRole("menuitemradio", { name: /Zone/i })).toBeInTheDocument();
   });
 
@@ -38,7 +70,7 @@ describe("ToolDock", () => {
     const onOpenChat = vi.fn();
     const onOpenLog = vi.fn();
 
-    renderWithRouter(
+    renderDock(
       <ToolDock
         {...dockBase}
         onOpenReportProblem={onOpenReportProblem}
@@ -74,7 +106,7 @@ describe("ToolDock", () => {
   });
 
   it("omits Codes from session island when onOpenCodes is omitted", () => {
-    renderWithRouter(<ToolDock {...dockBase} onOpenChat={vi.fn()} />);
+    renderDock(<ToolDock {...dockBase} onOpenChat={vi.fn()} />);
 
     const sessionTools = screen.getByLabelText("Session tools");
     expect(
@@ -83,12 +115,12 @@ describe("ToolDock", () => {
   });
 
   it("keeps Chat, Settings, and Draw off the hunt island", () => {
-    renderWithRouter(<ToolDock {...dockBase} onOpenChat={vi.fn()} />);
+    renderDock(<ToolDock {...dockBase} onOpenChat={vi.fn()} />);
 
     const hunt = document.querySelector('[data-island="hunt"]');
     expect(hunt).not.toBeNull();
     const huntLabels = [
-      ...(hunt?.querySelectorAll(".jl-tool-slot-label") ?? []),
+      ...(hunt?.querySelectorAll(DOCK_LABEL) ?? []),
     ].map((node) => node.textContent?.trim() ?? "");
     expect(huntLabels).not.toContain("Chat");
     expect(huntLabels).not.toContain("Settings");
@@ -99,7 +131,7 @@ describe("ToolDock", () => {
   });
 
   it("shows unread badge on session chat only when hasUnreadChat is true", () => {
-    renderWithRouter(
+    renderDock(
       <ToolDock
         {...dockBase}
         onOpenChat={vi.fn()}
@@ -116,7 +148,7 @@ describe("ToolDock", () => {
   });
 
   it("hides unread badge when hasUnreadChat is false", () => {
-    renderWithRouter(
+    renderDock(
       <ToolDock {...dockBase} onOpenChat={vi.fn()} hasUnreadChat={false} />,
     );
 
@@ -126,7 +158,7 @@ describe("ToolDock", () => {
   });
 
   it("omits Found and End unless eligible", () => {
-    const { rerender } = renderWithRouter(<ToolDock {...dockBase} onOpenChat={vi.fn()} />);
+    const { rerender } = renderDock(<ToolDock {...dockBase} onOpenChat={vi.fn()} />);
     expect(
       screen.queryByRole("button", { name: "Declare found hider" }),
     ).not.toBeInTheDocument();
@@ -137,14 +169,16 @@ describe("ToolDock", () => {
     ).not.toBeInTheDocument();
 
     rerender(
-      <ToolDock
-        {...dockBase}
-        onOpenChat={vi.fn()}
-        canRequestFoundHider
-        onRequestFoundHider={vi.fn()}
-        canStartEndGame
-        onStartEndGame={vi.fn()}
-      />,
+      wrapDock(
+        <ToolDock
+          {...dockBase}
+          onOpenChat={vi.fn()}
+          canRequestFoundHider
+          onRequestFoundHider={vi.fn()}
+          canStartEndGame
+          onStartEndGame={vi.fn()}
+        />,
+      ),
     );
     expect(
       screen.getByRole("button", { name: "Declare found hider" }),
@@ -157,9 +191,9 @@ describe("ToolDock", () => {
   });
 
   it("renders short plain labels on every dock slot", () => {
-    renderWithRouter(<ToolDock {...dockBase} onOpenChat={vi.fn()} />);
+    renderDock(<ToolDock {...dockBase} onOpenChat={vi.fn()} />);
 
-    const labels = [...document.querySelectorAll(".jl-tool-slot-label")].map(
+    const labels = [...document.querySelectorAll(DOCK_LABEL)].map(
       (node) => node.textContent?.trim() ?? "",
     );
 
@@ -186,7 +220,7 @@ describe("ToolDock", () => {
   });
 
   it("applies rail layout class when layout is rail", () => {
-    const { container } = renderWithRouter(
+    const { container } = renderDock(
       <ToolDock {...dockBase} layout="rail" />,
     );
 
@@ -196,7 +230,7 @@ describe("ToolDock", () => {
   });
 
   it("does not render the dual-row secondary bar", () => {
-    renderWithRouter(<ToolDock {...dockBase} onOpenChat={vi.fn()} />);
+    renderDock(<ToolDock {...dockBase} onOpenChat={vi.fn()} />);
     expect(document.querySelector(".jl-tool-dock-bar--secondary")).toBeNull();
     expect(document.querySelector('[data-island="session"]')).not.toBeNull();
   });
@@ -204,7 +238,7 @@ describe("ToolDock", () => {
   it("places Undo and Redo with question tools in hunt and Draw on the session dock", () => {
     const onUndo = vi.fn();
     const onRedo = vi.fn();
-    renderWithRouter(
+    renderDock(
       <ToolDock
         {...dockBase}
         canUndo
@@ -241,7 +275,7 @@ describe("ToolDock", () => {
     ).toBeInTheDocument();
 
     const huntLabels = [
-      ...(hunt?.querySelectorAll(".jl-tool-slot-label") ?? []),
+      ...(hunt?.querySelectorAll(DOCK_LABEL) ?? []),
     ].map((node) => node.textContent?.trim() ?? "");
     expect(huntLabels.slice(0, 2)).toEqual(["Undo", "Redo"]);
 
@@ -252,24 +286,73 @@ describe("ToolDock", () => {
   });
 
   it("disables unavailable and inactive history slots", () => {
-    const { rerender } = renderWithRouter(
+    const { rerender } = renderDock(
       <ToolDock {...dockBase} canUndo={false} canRedo={false} />,
     );
     expect(screen.getByRole("button", { name: "Undo last annotation" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Redo last annotation" })).toBeDisabled();
 
     rerender(
-      <ToolDock {...dockBase} canUndo canRedo inactive />,
+      wrapDock(<ToolDock {...dockBase} canUndo canRedo inactive />),
     );
     expect(screen.getByRole("button", { name: "Undo last annotation" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Redo last annotation" })).toBeDisabled();
+  });
+
+  it("selects question tools and shows hunt highlight", () => {
+    const onSelect = vi.fn();
+    const { rerender } = renderDock(
+      <ToolDock {...dockBase} onSelect={onSelect} onOpenChat={vi.fn()} />,
+    );
+
+    const matching = screen.getByRole("button", { name: "Matching" });
+    fireEvent.click(matching);
+    expect(onSelect).toHaveBeenCalledWith("matching");
+
+    rerender(
+      wrapDock(
+        <ToolDock
+          {...dockBase}
+          activeTool="matching"
+          onSelect={onSelect}
+          onOpenChat={vi.fn()}
+        />,
+      ),
+    );
+
+    expect(document.querySelector('[data-island="hunt"]')).toBeNull();
+    expect(document.querySelector('[data-island="session"]')).toBeNull();
+    expect(
+      document.querySelector('[data-overlay-chrome][data-ask-first="true"]'),
+    ).not.toBeNull();
+  });
+
+  it("keeps idle Mantine hunt without ask-first until a question tool is active", () => {
+    renderDock(
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
+        <ToolDock {...dockBase} onOpenChat={vi.fn()} />
+      </MantineProvider>,
+    );
+
+    const hunt = document.querySelector('[data-island="hunt"]');
+    expect(hunt).not.toBeNull();
+    expect(hunt?.getAttribute("data-ask-first")).toBeNull();
+    expect(document.querySelector("[data-hunt-question-strip]")).not.toBeNull();
+    expect(document.querySelector('[data-island="session"]')).not.toBeNull();
+    expect(
+      screen.getByText("Match").getAttribute("data-ios-tool-label"),
+    ).toBe("");
+    expect(screen.getByText("Match")).not.toHaveClass("jl-tool-slot-label");
+    expect((hunt as HTMLElement | null)?.style.borderTop).not.toBe(
+      "3px solid var(--color-flag)",
+    );
   });
 });
 
 describe("HiderToolDock", () => {
   it("keeps session tools on the session island without a bottom Recenter chip", () => {
     const onOpenReportProblem = vi.fn();
-    renderWithRouter(
+    renderDock(
       <HiderToolDock
         zoneLabel="Set zone"
         onZoneAction={vi.fn()}
@@ -284,7 +367,7 @@ describe("HiderToolDock", () => {
 
     const hunt = document.querySelector('[data-island="hunt"]');
     const huntLabels = [
-      ...(hunt?.querySelectorAll(".jl-tool-slot-label") ?? []),
+      ...(hunt?.querySelectorAll(DOCK_LABEL) ?? []),
     ].map((node) => node.textContent?.trim() ?? "");
     expect(huntLabels).toEqual(["Set zone"]);
     expect(huntLabels).not.toContain("Chat");
@@ -316,7 +399,7 @@ describe("HiderToolDock", () => {
   });
 
   it("uses sparse hunt density with full Set zone and Expansion labels", () => {
-    renderWithRouter(
+    renderDock(
       <HiderToolDock
         zoneLabel="Set zone"
         onZoneAction={vi.fn()}
@@ -338,7 +421,7 @@ describe("HiderToolDock", () => {
     const hunt = document.querySelector('[data-island="hunt"]');
     expect(hunt?.getAttribute("data-hunt-density")).toBe("sparse");
     const huntLabels = [
-      ...(hunt?.querySelectorAll(".jl-tool-slot-label") ?? []),
+      ...(hunt?.querySelectorAll(DOCK_LABEL) ?? []),
     ].map((node) => node.textContent?.trim() ?? "");
     expect(huntLabels).toEqual(["Set zone", "Expansion"]);
     expect(screen.getByRole("button", { name: "Set zone" })).toBeInTheDocument();
@@ -347,7 +430,7 @@ describe("HiderToolDock", () => {
 
   it("places Hand next to Set zone when hand props are provided", () => {
     const onOpenHand = vi.fn();
-    renderWithRouter(
+    renderDock(
       <HiderToolDock
         zoneLabel="Set zone"
         onZoneAction={vi.fn()}
@@ -364,7 +447,7 @@ describe("HiderToolDock", () => {
 
     const hunt = document.querySelector('[data-island="hunt"]');
     const huntLabels = [
-      ...(hunt?.querySelectorAll(".jl-tool-slot-label") ?? []),
+      ...(hunt?.querySelectorAll(DOCK_LABEL) ?? []),
     ].map((node) => node.textContent?.trim() ?? "");
     expect(huntLabels).toEqual(["Set zone", "Hand 2/6"]);
     fireEvent.click(screen.getByRole("button", { name: "Hand 2/6" }));

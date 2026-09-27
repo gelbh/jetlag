@@ -83,6 +83,8 @@ export function resolvePlacementPhase(
     }
     case "zone":
       return draft.zone.vertices.length > 0 ? "pick_center" : "idle";
+    case "draw":
+      return "idle";
     default: {
       const unreachable: never = tool;
       return unreachable;

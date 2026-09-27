@@ -283,12 +283,14 @@ export const MATCHING_CATEGORIES = [
     label: "Foreign Consulate",
     promptNoun: "foreign consulate",
     ruleSummary:
-      "Foreign consulates only; exclude honorary consulates. Measure distance from the map icon.",
+      "Foreign consulates and embassies; exclude honorary missions. Measure distance from the map icon.",
     phase: 1,
     resolver: "overpassPoint",
     overpassSelectors: [
       "[office=diplomatic][diplomatic=consulate]",
-      "[amenity=embassy][embassy=consulate]",
+      "[office=diplomatic][diplomatic=embassy]",
+      "[amenity=embassy]",
+      "[amenity=consulate]",
     ],
   },
 ] as const satisfies readonly MatchingCategoryDefinition[];

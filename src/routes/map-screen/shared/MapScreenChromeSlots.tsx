@@ -46,7 +46,6 @@ export function MapScreenChromeSlots({
     return (
       <div
         className="map-chrome-hud map-chrome-hud--fragments group/map-chrome pointer-events-none fixed inset-0 z-[var(--z-dock)] overflow-visible"
-        data-player-ux-world="survey"
         data-landscape-chrome={
           landscapeChromeMode === "portrait" ? undefined : landscapeChromeMode
         }
@@ -80,7 +79,6 @@ export function MapScreenChromeSlots({
         ref={chromeHudRef}
         id="map-chrome-hud-controls"
         className="map-chrome-hud group/map-chrome pointer-events-none fixed inset-0 z-[var(--z-dock)] overflow-visible"
-        data-player-ux-world="survey"
         data-landscape-chrome={
           landscapeChromeMode === "portrait" ? undefined : landscapeChromeMode
         }

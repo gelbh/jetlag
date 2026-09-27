@@ -3,6 +3,7 @@ import {
   FIXED_ACTIVITY_EVENT_IDS,
   activityAnnotationId,
   createActivityEventId,
+  groupSessionActivityEntries,
   phaseActivityEventId,
   sessionActivitySummary,
   sessionActivityTypeLabel,
@@ -92,7 +93,7 @@ describe("sessionActivityLog", () => {
           payload: { pendingQuestionId: "pq-1" },
         }),
       ),
-    ).toBe("Thermometer ready — awaiting answer");
+    ).toBe("Thermometer ready, awaiting answer");
 
     expect(
       sessionActivitySummary(
@@ -108,7 +109,7 @@ describe("sessionActivityLog", () => {
           },
         }),
       ),
-    ).toBe("Thermometer — Hotter or colder?: Hotter");
+    ).toBe("Thermometer: Hotter or colder?: Hotter");
   });
 
   it("creates random activity event ids", () => {
@@ -159,5 +160,49 @@ describe("sessionActivityLog", () => {
   it("labels activity types for the timeline", () => {
     expect(sessionActivityTypeLabel("thermometer_walk_started")).toBe("Walk");
     expect(sessionActivityTypeLabel("question_answered")).toBe("Answered");
+  });
+
+  it("pairs ask and answer sharing a pendingQuestionId into one entry", () => {
+    const entries = groupSessionActivityEntries([
+      baseEvent({
+        id: "ask",
+        type: "question_asked",
+        createdAt: "2026-07-25T12:00:00.000Z",
+        payload: {
+          toolType: "radar",
+          promptText: "Within range?",
+          pendingQuestionId: "pq-1",
+        },
+      }),
+      baseEvent({
+        id: "ans",
+        type: "question_answered",
+        createdAt: "2026-07-25T12:01:00.000Z",
+        payload: {
+          toolType: "radar",
+          promptText: "Within range?",
+          pendingQuestionId: "pq-1",
+          annotationId: "ann-1",
+          answerSummary: "Yes",
+        },
+      }),
+      baseEvent({
+        id: "seek",
+        type: "seeking_started",
+        createdAt: "2026-07-25T11:00:00.000Z",
+        payload: {},
+      }),
+    ]);
+
+    expect(entries).toHaveLength(2);
+    expect(entries[0]).toMatchObject({
+      kind: "single",
+      event: { id: "seek" },
+    });
+    expect(entries[1]).toMatchObject({
+      kind: "pair",
+      asked: { id: "ask" },
+      resolved: { id: "ans" },
+    });
   });
 });

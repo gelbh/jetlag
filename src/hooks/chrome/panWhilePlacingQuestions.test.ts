@@ -40,9 +40,7 @@ describe("pan while placing questions", () => {
       thermo.result.current.panel.props.onPlacementModeChange("manual");
     });
     act(() => {
-      expect(
-        thermo.result.current.handleMapClick([53.35, -6.26]),
-      ).toBe(true);
+      expect(thermo.result.current.handleMapClick([53.35, -6.26])).toBe(true);
     });
 
     act(() => {
@@ -57,18 +55,14 @@ describe("pan while placing questions", () => {
     expect(chrome.result.current.userMinimized).toBe(true);
 
     act(() => {
-      expect(
-        thermo.result.current.handleMapClick([53.36, -6.25]),
-      ).toBe(true);
+      expect(thermo.result.current.handleMapClick([53.36, -6.25])).toBe(true);
     });
 
     expect(thermo.result.current.draft.thermoA).toEqual([53.35, -6.26]);
     expect(thermo.result.current.draft.thermoB).toEqual([53.36, -6.25]);
     expect(mocks.finishPlacement).not.toHaveBeenCalled();
     // HUD: both pins → ask chord (map taps no longer place).
-    expect(thermo.result.current.panel.props.wizardStepRef.current).toBe(
-      "ask",
-    );
+    expect(thermo.result.current.panel.props.wizardStepRef.current).toBe("ask");
   });
 
   it("radar: pan mid-place then tap still places and does not close tool", () => {
@@ -142,7 +136,9 @@ describe("pan while placing questions", () => {
     });
 
     act(() => {
-      matching.result.current.panel.props.onCategoryChange("commercial_airport");
+      matching.result.current.panel.props.model.onCategoryChange(
+        "commercial_airport",
+      );
     });
 
     act(() => {
@@ -152,9 +148,7 @@ describe("pan while placing questions", () => {
     expect(chrome.result.current.mapPanning).toBe(false);
 
     act(() => {
-      expect(
-        matching.result.current.handleMapClick([53.35, -6.26]),
-      ).toBe(true);
+      expect(matching.result.current.handleMapClick([53.35, -6.26])).toBe(true);
     });
 
     expect(matching.result.current.draft.matchingSeekerPoint).toEqual([

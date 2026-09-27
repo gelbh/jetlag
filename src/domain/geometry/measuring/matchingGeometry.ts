@@ -148,19 +148,31 @@ export async function buildMatchingEliminationRegion(
     return null;
   }
 
-  const gameFeature = gameAreaToPolygon(gameArea);
+  return matchingEliminationFromSameNearestRegion(
+    sameNearestRegion,
+    gameArea,
+    answer,
+  );
+}
 
+const EMPTY_MATCHING_ELIMINATION: Feature<MultiPolygon> = {
+  type: "Feature",
+  properties: {},
+  geometry: { type: "MultiPolygon", coordinates: [] },
+};
+
+/** Yes/no elim is a complement of the same-nearest cell — derive without re-Voronoi. */
+export function matchingEliminationFromSameNearestRegion(
+  sameNearestRegion: Feature<Polygon | MultiPolygon>,
+  gameArea: GameArea,
+  answer: MatchingAnswer,
+): Feature<Polygon | MultiPolygon> {
   if (answer === "no") {
     return sameNearestRegion;
   }
 
-  // Sole in-area site: same-nearest is the whole play area, so outside-the-cell
-  // difference is empty — still a valid yes elimination (nothing to shade).
   return (
-    safeDifference(gameFeature, sameNearestRegion) ?? {
-      type: "Feature",
-      properties: {},
-      geometry: { type: "MultiPolygon", coordinates: [] },
-    }
+    safeDifference(gameAreaToPolygon(gameArea), sameNearestRegion) ??
+    EMPTY_MATCHING_ELIMINATION
   );
 }

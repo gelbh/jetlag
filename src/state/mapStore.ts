@@ -15,6 +15,7 @@ const DEFAULT_LAYER_VISIBILITY: LayerVisibility = {
   matching: true,
   zone: true,
   pin: true,
+  draw: true,
   tentacle: true,
   transit: true,
 };

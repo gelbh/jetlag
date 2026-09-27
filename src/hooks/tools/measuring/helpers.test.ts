@@ -1,6 +1,21 @@
 import type { MeasuringPlace } from "@/domain/geo/types";
 import { describe, expect, it } from "vitest";
-import { buildStoredMeasuringRegionInput } from "./helpers";
+import {
+  buildStoredMeasuringRegionInput,
+  usesDebouncedSeekerResolve,
+} from "./helpers";
+
+describe("usesDebouncedSeekerResolve", () => {
+  it("auto-resolves linear measures like coastline and all-places", () => {
+    expect(usesDebouncedSeekerResolve("coastline", "coastline")).toBe(true);
+    expect(usesDebouncedSeekerResolve("sea_level", "sea_level")).toBe(true);
+    expect(usesDebouncedSeekerResolve("location", "museum")).toBe(true);
+    expect(
+      usesDebouncedSeekerResolve("location", "high_speed_rail_line"),
+    ).toBe(true);
+    expect(usesDebouncedSeekerResolve("location", "custom_place")).toBe(false);
+  });
+});
 
 describe("buildStoredMeasuringRegionInput", () => {
   it("omits gameArea and clears duplicated all-places list", () => {

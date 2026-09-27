@@ -14,6 +14,11 @@ vi.mock("../components/incident/HotfixGraceChip", () => ({
   HotfixGraceChip: () => null,
 }));
 
+vi.mock("../components/map/helpers/useMapLibreMap", () => ({
+  useMapLibreMap: () => ({ current: null }),
+  useMapLibreMapSafe: () => null,
+}));
+
 vi.mock("../components/map/chrome/MapView", () => ({
   MapView: ({ children }: { children?: React.ReactNode }) => (
     <div data-testid="map-screen-view">{children}</div>

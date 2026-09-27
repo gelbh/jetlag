@@ -1,5 +1,7 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, beforeEach, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
+import { MantineProvider } from "@mantine/core";
+import { jetlagTheme } from "@/theme/theme";
 import { AskCatalogRail } from "./AskCatalogRail";
 
 const ROWS = [
@@ -8,15 +10,32 @@ const ROWS = [
   { id: "museum", label: "Museum" },
 ] as const;
 
+beforeEach(() => {
+  vi.stubGlobal("matchMedia", (query: string) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener() {},
+    removeListener() {},
+    addEventListener() {},
+    removeEventListener() {},
+    dispatchEvent: () => false,
+  }));
+});
+
+function renderRail(ui: React.ReactElement) {
+  return render(
+    <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
+      {ui}
+    </MantineProvider>,
+  );
+}
+
 describe("AskCatalogRail", () => {
   it("advances via row select and has no CONTINUE sibling control", () => {
     const onSelect = vi.fn();
-    render(
-      <AskCatalogRail
-        rows={ROWS}
-        selectedId={null}
-        onSelect={onSelect}
-      />,
+    renderRail(
+      <AskCatalogRail rows={ROWS} selectedId={null} onSelect={onSelect} />,
     );
 
     expect(
@@ -29,12 +48,8 @@ describe("AskCatalogRail", () => {
 
   it("marks the selected row without requiring a second CTA", () => {
     const onSelect = vi.fn();
-    const { container } = render(
-      <AskCatalogRail
-        rows={ROWS}
-        selectedId="park"
-        onSelect={onSelect}
-      />,
+    const { container } = renderRail(
+      <AskCatalogRail rows={ROWS} selectedId="park" onSelect={onSelect} />,
     );
 
     expect(screen.getByRole("button", { name: "Park" })).toHaveAttribute(
@@ -44,9 +59,50 @@ describe("AskCatalogRail", () => {
     expect(
       screen.queryByRole("button", { name: /continue/i }),
     ).not.toBeInTheDocument();
-    // No sibling CONTINUE strip under the rail.
     expect(
       container.querySelector("[data-testid='ask-commit-strip']"),
     ).not.toBeInTheDocument();
+  });
+
+  it("mounts Mantine catalog shell and advances under flag", () => {
+    const onSelect = vi.fn();
+    render(
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
+        <AskCatalogRail rows={ROWS} selectedId={null} onSelect={onSelect} />
+      </MantineProvider>,
+    );
+
+    const rail = screen.getByTestId("ask-catalog-rail");
+    expect(rail).toBeInTheDocument();
+    const row = screen.getByRole("button", { name: "Museum" });
+    fireEvent.click(row);
+    expect(onSelect).toHaveBeenCalledWith("museum");
+  });
+
+  it("renders group headings once per section without prefixing row labels", () => {
+    const onSelect = vi.fn();
+    renderRail(
+      <AskCatalogRail
+        columns={2}
+        rows={[
+          { id: "bus", label: "Bus stop", groupLabel: "Transit" },
+          { id: "rail", label: "Rail station", groupLabel: "Transit" },
+          { id: "park", label: "Park", groupLabel: "Nature" },
+        ]}
+        selectedId={null}
+        onSelect={onSelect}
+      />,
+    );
+
+    expect(screen.getAllByText("Transit")).toHaveLength(1);
+    expect(screen.getByText("Nature")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /Transit:/i }),
+    ).not.toBeInTheDocument();
+    expect(
+      document.querySelector(".ask-catalog-rail__grid"),
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Bus stop" }));
+    expect(onSelect).toHaveBeenCalledWith("bus");
   });
 });

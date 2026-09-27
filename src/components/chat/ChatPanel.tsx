@@ -1,3 +1,4 @@
+import { Button, Group, Stack } from "@mantine/core";
 import type { SessionRulesInput } from "../../domain/session/rules";
 import type { HiderTruthReferenceMode } from "../../domain/questions/hiderTruth/resolveHiderTruthReference";
 import type { HiderTruthResult } from "../../domain/questions/ui";
@@ -8,11 +9,12 @@ import type {
 import type { PlayerRole } from "../../domain/session/players/playerRole";
 import { useDesktopLayout } from "../../hooks/layout/useDesktopLayout";
 import { useVisualViewportBottomInset } from "../../hooks/layout/useVisualViewportBottomInset";
-import { useAnimatedPresence } from "../../hooks/motion/useAnimatedPresence";
+import { grayStyles } from "../ui/entry/entryChrome";
 import { SheetHost } from "../ui/sheets/SheetHost";
 import { ChatPanelBody } from "./ChatPanelBody";
 
-interface ChatPanelProps {
+/** Flat chat sheet fields bag for ChatPanel (W4-F peel). */
+export type ChatPanelModel = {
   open: boolean;
   onClose: () => void;
   messages: readonly SessionMessageRecord[];
@@ -22,6 +24,7 @@ interface ChatPanelProps {
   senderUid: string;
   senderRole: PlayerRole;
   isHider: boolean;
+  /** @deprecated Phone chat uses SheetHost; kept for call-site compatibility. */
   bottomClassName?: string;
   questionTruths?: ReadonlyMap<string, HiderTruthResult>;
   truthsLoading?: boolean;
@@ -41,38 +44,35 @@ interface ChatPanelProps {
     messageId: string,
   ) => Promise<void>;
   readOnly?: boolean;
-}
+};
 
-export function ChatPanel({
-  open,
-  onClose,
-  messages,
-  pendingQuestions = [],
-  sessionRules = { gameSize: "medium" },
-  sessionId,
-  senderUid,
-  senderRole,
-  isHider,
-  bottomClassName = "jl-panel-above-dock",
-  questionTruths,
-  truthsLoading = false,
-  truthReferenceModes,
-  answerError = null,
-  answerSubmitting = false,
-  answeredPendingIds,
-  onAnswerQuestion,
-  onDismissExpiredQuestion,
-  readOnly = false,
-}: ChatPanelProps) {
+export type ChatPanelProps = {
+  model: ChatPanelModel;
+};
+
+export function ChatPanel({ model }: ChatPanelProps) {
+  const {
+    open,
+    onClose,
+    messages,
+    pendingQuestions = [],
+    sessionRules = { gameSize: "medium" },
+    sessionId,
+    senderUid,
+    senderRole,
+    isHider,
+    questionTruths,
+    truthsLoading = false,
+    truthReferenceModes,
+    answerError = null,
+    answerSubmitting = false,
+    answeredPendingIds,
+    onAnswerQuestion,
+    onDismissExpiredQuestion,
+    readOnly = false,
+  } = model;
   const isDesktop = useDesktopLayout();
   const keyboardInset = useVisualViewportBottomInset(open && !isDesktop);
-  const { mounted, animClass, setAnimNode } = useAnimatedPresence({
-    open: open && !isDesktop,
-    onClose,
-    enterClass: "jl-panel-enter",
-    exitClass: "jl-panel-exit",
-    durationMs: 200,
-  });
 
   const body = (
     <ChatPanelBody
@@ -95,49 +95,28 @@ export function ChatPanel({
     />
   );
 
-  if (isDesktop) {
-    return (
-      <SheetHost open={open} onClose={onClose} ariaLabel="Chat" railTab="chat">
-        <div className="mb-3 flex shrink-0 items-center justify-end gap-2">
-          <button
-            type="button"
-            onClick={onClose}
-            className="btn-secondary flex min-h-11 min-w-11 items-center justify-center px-3"
-          >
-            Close
-          </button>
-        </div>
-        {body}
-      </SheetHost>
-    );
-  }
-
-  if (!mounted) {
-    return null;
-  }
-
   return (
-    <div
-      ref={setAnimNode}
-      className={`jl-chat-keyboard-inset pointer-events-auto absolute inset-x-0 z-[var(--z-panel)] px-3 ${animClass} ${bottomClassName}`}
-      style={
-        keyboardInset > 0
-          ? { transform: `translateY(-${keyboardInset}px)` }
-          : undefined
+    <SheetHost
+      open={open}
+      onClose={onClose}
+      ariaLabel="Chat"
+      railTab={isDesktop ? "chat" : undefined}
+      maxHeightClassName="max-h-[min(72dvh,640px)]"
+      scrollMode="child"
+      contentStyle={
+        keyboardInset > 0 ? { paddingBottom: keyboardInset } : undefined
       }
     >
-      <div className="tool-panel-compact hud-panel mx-auto flex min-h-0 max-h-[min(50dvh,420px)] max-w-xl flex-col overflow-hidden p-3">
-        <div className="mb-3 flex shrink-0 items-center justify-end gap-2">
-          <button
-            type="button"
-            onClick={onClose}
-            className="btn-secondary flex min-h-11 min-w-11 items-center justify-center px-3"
-          >
-            Close
-          </button>
-        </div>
+      <Stack gap={8} style={{ flex: 1, minHeight: 0, height: "100%" }}>
+        {isDesktop ? (
+          <Group justify="flex-end" className="shrink-0">
+            <Button onClick={onClose} styles={grayStyles}>
+              Close
+            </Button>
+          </Group>
+        ) : null}
         {body}
-      </div>
-    </div>
+      </Stack>
+    </SheetHost>
   );
 }

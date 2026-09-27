@@ -504,6 +504,16 @@ describe("matching features", () => {
           lat: 51.45,
           lon: -0.18,
         },
+        {
+          id: 4,
+          tags: {
+            name: "French Embassy",
+            office: "diplomatic",
+            diplomatic: "embassy",
+          },
+          lat: 51.45,
+          lon: -0.19,
+        },
       ],
       sampleGameArea,
       "foreign_consulate",
@@ -514,6 +524,12 @@ describe("matching features", () => {
         id: "3",
         name: "US Consulate",
         point: [51.45, -0.18],
+        inPlayArea: true,
+      },
+      {
+        id: "4",
+        name: "French Embassy",
+        point: [51.45, -0.19],
         inPlayArea: true,
       },
     ]);

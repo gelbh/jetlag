@@ -1,8 +1,7 @@
 import { useCallback } from "react";
-import {
-  ScreenHeader,
-  screenHeaderShellClassName,
-} from "../../components/ui/layout/ScreenHeader";
+import { Box, Button, Stack, Text } from "@mantine/core";
+import { EntryHeader } from "@/components/ui/entry/EntryHeader";
+import { filledStyles } from "@/components/ui/entry/entryStyles";
 import { CreateSessionMapPane } from "../../components/session/framing/CreateSessionMapPane";
 import { GameAreaFramingModal } from "../../components/session/framing/GameAreaFramingModal";
 import { MobileSheet } from "../../components/ui/sheets/MobileSheet";
@@ -11,7 +10,6 @@ import {
   createSessionDraftToGamePreset,
 } from "../../domain/session/presets/gamePreset";
 import { useGamePresetStore } from "../../state/gamePresetStore";
-import { ConfirmFooter } from "./ConfirmFooter";
 import { GameAreaSection } from "./GameAreaSection";
 import { PremiumGateSection } from "./PremiumGateSection";
 import { SessionSettingsSection } from "./SessionSettingsSection";
@@ -25,7 +23,7 @@ export function CreateSession() {
     (presetId: string) => {
       session.navigate(`/create?preset=${presetId}`);
     },
-    [session]
+    [session],
   );
 
   const handleSavePreset = useCallback(() => {
@@ -48,139 +46,162 @@ export function CreateSession() {
           subregionId: session.regionPackSubregionId,
           transitMetroId: session.transitMetroId || undefined,
         }),
-        name.trim()
-      )
+        name.trim(),
+      ),
     );
   }, [savePreset, session]);
 
+  const confirmBusy = session.loading || session.verifyingAccess;
+
   return (
-    <div
-      className="jl-create-session flex h-full min-h-[100dvh] flex-col bg-canvas"
-      data-player-ux-world="survey"
-    >
-      <div className={`${screenHeaderShellClassName} px-4`}>
-        <ScreenHeader backTo="/" backLabel="Back" placement="inline" />
-      </div>
+    <Box className="jl-create-session flex h-full min-h-0 max-h-full flex-col overflow-hidden">
+      <EntryHeader title="Create" />
 
-      <CreateSessionMapPane
-        mapStyle={session.mapStyle}
-        onMapStyleChange={session.setMapStyle}
-        focusBounds={session.mapFocusBounds}
-        previewGameArea={session.mapPreviewGameArea ?? session.previewGameArea}
-        selectedGameSize={session.gameSize}
-        manualFramingActive={session.manualFramingActive}
-        framingMode={session.framing.framingMode}
-        circleCenter={session.framing.circleCenter}
-        circleRadiusMeters={session.framing.circleRadiusMeters}
-        polygonVertices={session.framing.polygonVertices}
-        onBoundsChange={session.framing.handleBoundsChange}
-        onUserViewportFramed={session.handleUserViewportFramed}
-        onMapClick={
-          session.manualFramingActive &&
-          (session.framing.framingMode === "circle" ||
-            session.framing.framingMode === "polygon")
-            ? session.framing.handleMapClick
-            : undefined
-        }
-      />
-
-      <GameAreaFramingModal
-        open={session.framingModalOpen}
-        mapStyle={session.mapStyle}
-        onMapStyleChange={session.setMapStyle}
-        framing={session.framing}
-        referenceGameArea={
-          !session.manualFramingActive ? session.previewGameArea : null
-        }
-        referenceFocusBounds={
-          !session.manualFramingActive ? session.mapFocusBounds : null
-        }
-        onClose={() => session.setFramingModalOpen(false)}
-        onConfirm={session.handleFramingModalConfirm}
-      />
-
-      <MobileSheet
-        variant="nested"
-        layout="split"
-        maxHeightClassName="max-h-[min(58dvh,640px)]"
-        className="flex min-h-0 flex-1 flex-col"
-        footer={
-          <ConfirmFooter
-            confirmLabel={session.confirmLabel}
-            loading={session.loading}
-            verifyingAccess={session.verifyingAccess}
-            requiresPremiumSignIn={session.requiresPremiumSignIn}
-            error={session.error}
-            onConfirm={() => void session.handleConfirm()}
-          />
-        }
-      >
-        <GameAreaSection
-          bundledPresetSelectGroups={session.bundledPresetSelectGroups}
-          favouritePresetSelectOptions={session.favouritePresetSelectOptions}
-          userPresets={session.userPresets}
-          loading={session.loading}
-          verifyingAccess={session.verifyingAccess}
-          searchLoading={session.searchLoading}
-          importLoading={session.importLoading}
-          importFileInputRef={session.importFileInputRef}
-          locationQuery={session.locationQuery}
-          searchResults={session.searchResults}
-          selectedPlaceId={session.selectedPlaceId}
-          selectedPlace={session.selectedPlace}
-          selectedAreas={session.selectedAreas}
-          previewGameArea={session.previewGameArea}
+      <Stack gap={0} className="flex min-h-0 flex-1 flex-col overflow-hidden">
+        <CreateSessionMapPane
+          mapStyle={session.mapStyle}
+          onMapStyleChange={session.setMapStyle}
+          focusBounds={session.mapFocusBounds}
+          previewGameArea={
+            session.mapPreviewGameArea ?? session.previewGameArea
+          }
+          selectedGameSize={session.gameSize}
           manualFramingActive={session.manualFramingActive}
-          framing={session.framing}
-          transitMetroId={session.transitMetroId}
-          metros={session.metros}
-          onPresetSelect={handlePresetSelect}
-          onSavePreset={handleSavePreset}
-          onOpenFramingModal={() => session.setFramingModalOpen(true)}
-          onFramingModeChange={session.handleFramingModeChange}
-          onRemoveSelectedArea={session.removeSelectedArea}
-          onLocationQueryChange={session.handleLocationQueryChange}
-          onSearch={() => void session.handleSearch()}
-          onAddCurrentArea={session.addCurrentArea}
-          onBoundaryImport={(event) => void session.handleBoundaryImport(event)}
-          onApplyPlace={session.applyPlace}
-          onRequestLocationBias={session.requestLocationBias}
-          onTransitMetroChange={session.setTransitMetroOverride}
-          settingsSlot={
-            <SessionSettingsSection
-              loading={session.loading}
-              verifyingAccess={session.verifyingAccess}
-              previewGameArea={session.previewGameArea}
-              playerRole={session.playerRole}
-              onPlayerRoleChange={session.handlePlayerRoleChange}
-              gameSize={session.gameSize}
-              distanceUnit={session.distanceUnit}
-              advancedSettings={session.advancedSettings}
-              onAdvancedSettingsChange={session.setAdvancedSettings}
-              onGameSizeChange={session.handleGameSizeChange}
-              onDistanceUnitChange={session.handleDistanceUnitChange}
-              resolvedSessionTier={session.resolvedSessionTier}
-              visibleTierOptions={session.visibleTierOptions}
-              premiumEntitlements={session.premiumEntitlements}
-              onSessionTierChange={session.handleSessionTierChange}
-              packCreditsLabel={session.packCreditsLabel}
-              packPremiumFlow={session.packPremiumFlow}
-            />
+          framingMode={session.framing.framingMode}
+          circleCenter={session.framing.circleCenter}
+          circleRadiusMeters={session.framing.circleRadiusMeters}
+          polygonVertices={session.framing.polygonVertices}
+          onBoundsChange={session.framing.handleBoundsChange}
+          onUserViewportFramed={session.handleUserViewportFramed}
+          onMapClick={
+            session.manualFramingActive &&
+            (session.framing.framingMode === "circle" ||
+              session.framing.framingMode === "polygon")
+              ? session.framing.handleMapClick
+              : undefined
           }
         />
 
-        <PremiumGateSection
-          requiresPremiumSignIn={session.requiresPremiumSignIn}
-          showPremiumUnlockPanel={session.showPremiumUnlockPanel}
-          showAccessCodeField={session.showAccessCodeField}
-          accessCode={session.accessCode}
-          accessCodeError={session.accessCodeError}
-          accessCodeExpanded={session.accessCodeExpanded}
-          onAccessCodeChange={session.handleAccessCodeChange}
-          onAccessCodeExpandedChange={session.setAccessCodeExpanded}
-          onPremiumSignedIn={session.handlePremiumSignedIn}
+        <GameAreaFramingModal
+          open={session.framingModalOpen}
+          mapStyle={session.mapStyle}
+          onMapStyleChange={session.setMapStyle}
+          framing={session.framing}
+          referenceGameArea={
+            !session.manualFramingActive ? session.previewGameArea : null
+          }
+          referenceFocusBounds={
+            !session.manualFramingActive ? session.mapFocusBounds : null
+          }
+          onClose={() => session.setFramingModalOpen(false)}
+          onConfirm={session.handleFramingModalConfirm}
         />
-      </MobileSheet>
-    </div>
+
+        <MobileSheet
+          variant="nested"
+          layout="split"
+          maxHeightClassName="max-h-[min(58dvh,640px)]"
+          className="flex min-h-0 flex-1 flex-col"
+          footer={
+            <Box
+              className="shrink-0 px-4 pt-3 pb-[max(0.25rem,env(safe-area-inset-bottom))]"
+              style={{
+                backgroundColor: "oklch(from var(--color-canvas) l c h / 0.88)",
+                borderTop:
+                  "0.33px solid oklch(from var(--color-field-ink) l c h / 0.12)",
+                backdropFilter: "blur(20px) saturate(1.4)",
+                WebkitBackdropFilter: "blur(20px) saturate(1.4)",
+              }}
+            >
+              <Button
+                type="button"
+                fullWidth
+                styles={filledStyles}
+                onClick={() => void session.handleConfirm()}
+                disabled={confirmBusy || session.requiresPremiumSignIn}
+                loading={confirmBusy}
+              >
+                {session.confirmLabel}
+              </Button>
+              {session.error ? (
+                <Text c="var(--color-halt)" size="sm" mt={8}>
+                  {session.error}
+                </Text>
+              ) : null}
+            </Box>
+          }
+        >
+          <GameAreaSection
+            model={{
+              bundledPresetSelectGroups: session.bundledPresetSelectGroups,
+              favouritePresetSelectOptions:
+                session.favouritePresetSelectOptions,
+              userPresets: session.userPresets,
+              loading: session.loading,
+              verifyingAccess: session.verifyingAccess,
+              searchLoading: session.searchLoading,
+              importLoading: session.importLoading,
+              importFileInputRef: session.importFileInputRef,
+              locationQuery: session.locationQuery,
+              searchResults: session.searchResults,
+              selectedPlaceId: session.selectedPlaceId,
+              selectedPlace: session.selectedPlace,
+              selectedAreas: session.selectedAreas,
+              previewGameArea: session.previewGameArea,
+              manualFramingActive: session.manualFramingActive,
+              framing: session.framing,
+              transitMetroId: session.transitMetroId,
+              metros: session.metros,
+              onPresetSelect: handlePresetSelect,
+              onSavePreset: handleSavePreset,
+              onOpenFramingModal: () => session.setFramingModalOpen(true),
+              onFramingModeChange: session.handleFramingModeChange,
+              onRemoveSelectedArea: session.removeSelectedArea,
+              onLocationQueryChange: session.handleLocationQueryChange,
+              onSearch: () => void session.handleSearch(),
+              onAddCurrentArea: session.addCurrentArea,
+              onBoundaryImport: (event) =>
+                void session.handleBoundaryImport(event),
+              onApplyPlace: session.applyPlace,
+              onRequestLocationBias: session.requestLocationBias,
+              onTransitMetroChange: session.setTransitMetroOverride,
+            }}
+            settingsSlot={
+              <SessionSettingsSection
+                loading={session.loading}
+                verifyingAccess={session.verifyingAccess}
+                previewGameArea={session.previewGameArea}
+                playerRole={session.playerRole}
+                onPlayerRoleChange={session.handlePlayerRoleChange}
+                gameSize={session.gameSize}
+                distanceUnit={session.distanceUnit}
+                advancedSettings={session.advancedSettings}
+                onAdvancedSettingsChange={session.setAdvancedSettings}
+                onGameSizeChange={session.handleGameSizeChange}
+                onDistanceUnitChange={session.handleDistanceUnitChange}
+                resolvedSessionTier={session.resolvedSessionTier}
+                visibleTierOptions={session.visibleTierOptions}
+                premiumEntitlements={session.premiumEntitlements}
+                onSessionTierChange={session.handleSessionTierChange}
+                packCreditsLabel={session.packCreditsLabel}
+                packPremiumFlow={session.packPremiumFlow}
+              />
+            }
+          />
+
+          <PremiumGateSection
+            requiresPremiumSignIn={session.requiresPremiumSignIn}
+            showPremiumUnlockPanel={session.showPremiumUnlockPanel}
+            showAccessCodeField={session.showAccessCodeField}
+            accessCode={session.accessCode}
+            accessCodeError={session.accessCodeError}
+            accessCodeExpanded={session.accessCodeExpanded}
+            onAccessCodeChange={session.handleAccessCodeChange}
+            onAccessCodeExpandedChange={session.setAccessCodeExpanded}
+            onPremiumSignedIn={session.handlePremiumSignedIn}
+          />
+        </MobileSheet>
+      </Stack>
+    </Box>
   );
 }

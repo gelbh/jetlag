@@ -10,7 +10,8 @@ import type {
   MatchingQuestionDefinition,
 } from "@/domain/questions";
 
-interface MatchingToolPanelProps {
+/** Flat matching tool panel fields bag for MatchingToolPanel (W4-D peel). */
+export type MatchingToolPanelModel = {
   distanceUnit: DistanceUnit;
   categoryId: MatchingCategoryId | null;
   categoryChosen: boolean;
@@ -35,7 +36,7 @@ interface MatchingToolPanelProps {
   isSubmitting: boolean;
   previewOpen: boolean;
   previewQuestion: MatchingQuestionDefinition | null;
-  wizardStepRef: RefObject<string>;
+  wizardStepRef: RefObject<string | null>;
   onCategoryChange: (categoryId: MatchingCategoryId) => void;
   onUseGps: () => void;
   onAnswerChange: (answer: MatchingAnswer | null) => void;
@@ -43,75 +44,83 @@ interface MatchingToolPanelProps {
   onRetry?: () => void;
   onPreviewConfirm: () => void;
   onPreviewCancel: () => void;
-}
+};
 
-export function MatchingToolPanel({
-  distanceUnit,
-  categoryId,
-  categoryChosen,
-  usedCategoryIds,
-  catalogCategories,
-  matchingSeekerPoint,
-  matchingUsesContainment,
-  matchingNearestFeatureName,
-  matchingDistanceMeters,
-  matchingFeatureCount,
-  matchingInPlayAreaFeatureCount,
-  matchingNearestOutsidePlayArea,
-  matchingNullAnswer,
-  matchingLoading,
-  nearestProvisional = false,
-  satelliteBasemap = false,
-  gpsLoading,
-  matchingAnswer,
-  error,
-  awaitHiderAnswer,
-  costLabel,
-  isSubmitting,
-  previewOpen,
-  previewQuestion,
-  wizardStepRef,
-  onCategoryChange,
-  onUseGps,
-  onAnswerChange,
-  onCommit,
-  onRetry,
-  onPreviewConfirm,
-  onPreviewCancel,
-}: MatchingToolPanelProps) {
+export type MatchingToolPanelProps = {
+  model: MatchingToolPanelModel;
+};
+
+export function MatchingToolPanel({ model }: MatchingToolPanelProps) {
+  const {
+    distanceUnit,
+    categoryId,
+    categoryChosen,
+    usedCategoryIds,
+    catalogCategories,
+    matchingSeekerPoint,
+    matchingUsesContainment,
+    matchingNearestFeatureName,
+    matchingDistanceMeters,
+    matchingFeatureCount,
+    matchingInPlayAreaFeatureCount,
+    matchingNearestOutsidePlayArea,
+    matchingNullAnswer,
+    matchingLoading,
+    nearestProvisional = false,
+    satelliteBasemap = false,
+    gpsLoading,
+    matchingAnswer,
+    error,
+    awaitHiderAnswer,
+    costLabel,
+    isSubmitting,
+    previewOpen,
+    previewQuestion,
+    wizardStepRef,
+    onCategoryChange,
+    onUseGps,
+    onAnswerChange,
+    onCommit,
+    onRetry,
+    onPreviewConfirm,
+    onPreviewCancel,
+  } = model;
+
   return (
     <>
       <MatchingPanel
-        distanceUnit={distanceUnit}
-        categoryId={categoryId}
-        categoryChosen={categoryChosen}
-        usedCategoryIds={usedCategoryIds}
-        catalogCategories={catalogCategories}
-        anchorLat={matchingSeekerPoint?.[0] ?? null}
-        anchorLng={matchingSeekerPoint?.[1] ?? null}
-        usesContainmentMatching={matchingUsesContainment}
-        hasSeekerPoint={matchingSeekerPoint !== null}
-        nearestFeatureName={matchingNearestFeatureName}
-        distanceMeters={matchingDistanceMeters}
-        featureCount={matchingFeatureCount}
-        inPlayAreaFeatureCount={matchingInPlayAreaFeatureCount}
-        nearestOutsidePlayArea={matchingNearestOutsidePlayArea}
-        nullAnswer={matchingNullAnswer}
-        loading={matchingLoading}
-        nearestProvisional={nearestProvisional}
-        satelliteBasemap={satelliteBasemap}
-        gpsLoading={gpsLoading}
-        answer={matchingAnswer}
-        error={error}
-        onCategoryChange={onCategoryChange}
-        onUseGps={onUseGps}
-        onAnswerChange={onAnswerChange}
-        onCommit={onCommit}
-        awaitHiderAnswer={awaitHiderAnswer}
-        costLabel={costLabel}
-        isSubmitting={isSubmitting}
-        onRetry={onRetry}
-        wizardStepRef={wizardStepRef}
+        model={{
+          distanceUnit,
+          categoryId,
+          categoryChosen,
+          usedCategoryIds,
+          catalogCategories,
+          anchorLat: matchingSeekerPoint?.[0] ?? null,
+          anchorLng: matchingSeekerPoint?.[1] ?? null,
+          usesContainmentMatching: matchingUsesContainment,
+          hasSeekerPoint: matchingSeekerPoint !== null,
+          nearestFeatureName: matchingNearestFeatureName,
+          distanceMeters: matchingDistanceMeters,
+          featureCount: matchingFeatureCount,
+          inPlayAreaFeatureCount: matchingInPlayAreaFeatureCount,
+          nearestOutsidePlayArea: matchingNearestOutsidePlayArea,
+          nullAnswer: matchingNullAnswer,
+          loading: matchingLoading,
+          nearestProvisional,
+          satelliteBasemap,
+          gpsLoading,
+          answer: matchingAnswer,
+          error,
+          onCategoryChange,
+          onUseGps,
+          onAnswerChange,
+          onCommit,
+          awaitHiderAnswer,
+          costLabel,
+          isSubmitting,
+          onRetry,
+          wizardStepRef,
+        }}
       />
       <QuestionPreviewSheet
         open={previewOpen}

@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import { Chip, chipVariants } from "./chip";
 
 describe("Chip", () => {
-  it("maps default / flag / ghost variants to Survey class tokens", () => {
+  it("maps default / flag / ghost variants to brand class tokens", () => {
     expect(chipVariants({ variant: "default" })).toContain("rounded-full");
     expect(chipVariants({ variant: "default" })).toContain("bg-canvas");
     expect(chipVariants({ variant: "flag" })).toContain("bg-flag");

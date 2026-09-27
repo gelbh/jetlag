@@ -1,4 +1,4 @@
-/* ask-hud.css — Ask Map HUD kit on Survey roles (canvas / field-ink / flag / rule / halt) */
+/* ask-hud.css — Ask Map HUD on iOS Mantine brand roles (canvas / field-ink / flag / rule / halt) */
 @layer components {
   :root {
     --ask-hud-strip-height: 3rem; /* ≥44px touch */
@@ -6,7 +6,7 @@
     --ask-hud-camera-padding-bottom: 0px;
   }
 
-  /* Ask path panel — Survey canvas; do not use Broadcast hud-panel / surface-* */
+  /* Ask path panel — frosted canvas; Wave 5 may fold into Mantine Paper */
   .ask-hud-panel {
     position: relative;
     overflow: hidden;
@@ -18,7 +18,7 @@
   }
 
   .ask-mode-cue-ticker {
-    /* layout only — Island owns Survey skin */
+    /* layout only; Island owns surface skin */
     width: 100%;
     max-width: 28rem;
     margin-inline: auto;
@@ -40,7 +40,7 @@
   }
 
   .ask-cost-chip {
-    /* chipVariants owns Survey skin; keep display label density */
+    /* chipVariants owns surface skin; keep display label density */
     max-width: 100%;
     letter-spacing: 0.06em;
   }

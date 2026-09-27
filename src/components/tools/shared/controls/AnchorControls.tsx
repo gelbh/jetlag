@@ -1,3 +1,10 @@
+import { Button } from "@mantine/core";
+import { Crosshair, MapPin } from "@phosphor-icons/react";
+import {
+  filledStyles,
+  grayStyles,
+} from "@/components/ui/entry/entryChrome";
+
 interface AnchorControlsProps {
   gpsLoading: boolean;
   hasAnchor: boolean;
@@ -25,49 +32,67 @@ export function AnchorControls({
   const gpsStatus = gpsLoading
     ? gpsLoadingLabel
     : hasAnchor
-      ? anchorPlaceName ?? "Location locked"
+      ? (anchorPlaceName ?? "Location locked")
       : "Tap to use GPS";
+
+  const GpsGlyph = hasAnchor ? MapPin : Crosshair;
+
+  const gpsBody = (
+    <>
+      <span
+        className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px]"
+        aria-hidden="true"
+        style={{
+          backgroundColor: hasAnchor
+            ? "oklch(from var(--color-canvas) l c h / 0.35)"
+            : "oklch(from var(--color-canvas) l c h / 0.22)",
+        }}
+      >
+        <GpsGlyph size={18} weight={hasAnchor ? "fill" : "bold"} />
+      </span>
+      <span className="flex min-w-0 flex-col items-start text-left leading-tight">
+        <span className="text-sm font-semibold">
+          {gpsLoading ? gpsLoadingLabel : gpsLabel}
+        </span>
+        {!gpsLoading ? (
+          <span className="text-xs font-normal opacity-90">{gpsStatus}</span>
+        ) : null}
+      </span>
+    </>
+  );
 
   return (
     <div className="space-y-2">
-      <button
+      <Button
         type="button"
+        fullWidth
         onClick={onUseGps}
         disabled={gpsLoading}
-        aria-busy={gpsLoading}
-        className="btn-primary flex min-h-12 w-full items-center justify-center gap-2 disabled:opacity-40"
+        aria-busy={gpsLoading || undefined}
+        styles={hasAnchor && !gpsLoading ? grayStyles : filledStyles}
+        className="flex min-h-12 items-center justify-start gap-2.5 px-3"
       >
-        <span
-          className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-current text-[0.625rem] font-bold"
-          aria-hidden="true"
-        >
-          ●
-        </span>
-        <span className="flex min-w-0 flex-col items-start text-left leading-tight">
-          <span className="text-sm font-semibold">
-            {gpsLoading ? gpsLoadingLabel : gpsLabel}
-          </span>
-          {!gpsLoading ? (
-            <span className="text-xs font-normal opacity-90">{gpsStatus}</span>
-          ) : null}
-        </span>
-      </button>
+        {gpsBody}
+      </Button>
 
       {passiveMap ? (
-        <p className="text-center text-xs text-field-ink-muted">
+        <p
+          className="text-center text-xs text-field-ink-muted"
+          style={{ margin: 0, lineHeight: 1.35, paddingInline: 4 }}
+        >
           {hasAnchor ? (
             <>
               {anchorPlaceName ? (
                 <>
                   Anchor ·{" "}
-                  <span className="font-medium text-field-ink">{anchorPlaceName}</span>
+                  <span className="font-medium text-field-ink">
+                    {anchorPlaceName}
+                  </span>
                 </>
               ) : (
                 "Anchor set on the map"
               )}
-              {!hasAnchor ? null : (
-                <span className="mt-1 block">{anchorHint}</span>
-              )}
+              <span className="mt-1 block">{anchorHint}</span>
             </>
           ) : (
             "Or tap anywhere on the map to set your anchor."
@@ -75,17 +100,14 @@ export function AnchorControls({
         </p>
       ) : (
         <>
-          <button
+          <Button
             type="button"
+            fullWidth
             onClick={onPlaceAtMapTap}
-            className={`min-h-11 w-full rounded-md border px-3 text-sm font-medium ${
-              awaitingPlacement
-                ? "border-flag bg-flag-soft text-flag"
-                : "border-rule bg-canvas text-field-ink-muted"
-            }`}
+            styles={awaitingPlacement ? filledStyles : grayStyles}
           >
             {awaitingPlacement ? "Tap the map" : "Place at map tap"}
-          </button>
+          </Button>
           {hasAnchor ? (
             <p className="text-xs text-field-ink-muted">{anchorHint}</p>
           ) : null}

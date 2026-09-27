@@ -39,6 +39,8 @@ export function createMapScreenRailTabHandler(
 export type MapScreenContextualRailProps = {
   enabled: boolean;
   sheet: string;
+  /** When provided, rail stays open under nested sheets and keeps primary tab active. */
+  sheetStack?: readonly string[];
   onClose: () => void;
   actions: MapScreenRailTabActions;
   /** Limit visible tabs (observer desktop omits settings). */
@@ -49,6 +51,8 @@ export type MapScreenContextualRailProps = {
   activeTab?: ContextualRailTab | null;
 };
 
+const RAIL_TABS = new Set<string>(["chat", "settings", "log", "codes"]);
+
 /**
  * Desktop contextual rail for map role shells.
  * Returns null when disabled (phone) so callers can assign into chrome slots.
@@ -56,6 +60,7 @@ export type MapScreenContextualRailProps = {
 export function renderMapScreenContextualRail({
   enabled,
   sheet,
+  sheetStack,
   onClose,
   actions,
   tabs,
@@ -66,13 +71,17 @@ export function renderMapScreenContextualRail({
     return null;
   }
 
-  const railOpen = open ?? sheet !== "none";
+  const stack = sheetStack ?? (sheet === "none" ? [] : [sheet]);
+  const primaryInStack = stack.find((entry) => RAIL_TABS.has(entry));
+  const railOpen = open ?? stack.length > 0;
   const railActiveTab: ContextualRailTab | null =
     activeTab !== undefined
       ? activeTab
-      : sheet === "none"
-        ? null
-        : (sheet as ContextualRailTab);
+      : primaryInStack
+        ? (primaryInStack as ContextualRailTab)
+        : sheet !== "none" && RAIL_TABS.has(sheet)
+          ? (sheet as ContextualRailTab)
+          : null;
 
   return createElement(ContextualRail, {
     open: railOpen,

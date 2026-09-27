@@ -27,7 +27,7 @@ const SURVEY_ICON: Record<SyncStatus, PhosphorIcon> = {
   error: WarningCircle,
 };
 
-/** Survey field-book sync indicator for the map chrome. */
+/** Sync indicator for the map chrome status strip. */
 export function SyncStatusBeacon({
   status,
   size = "md",

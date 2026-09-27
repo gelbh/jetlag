@@ -51,6 +51,7 @@ const emptyDraft = placementCameraDraftFromOverlaySources({
     seekerResolving: false,
   },
   zone: { vertices: [] },
+  draw: { strokePoints: [] },
 });
 
 const pinSources = {
@@ -93,6 +94,7 @@ const pinSources = {
     seekerResolving: false,
   },
   zone: { vertices: [] },
+  draw: { strokePoints: [] },
 };
 
 const pinDraft = placementCameraDraftFromOverlaySources({

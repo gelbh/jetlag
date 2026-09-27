@@ -7,7 +7,7 @@ import {
   hidingZoneRadiusMeters,
 } from "@/domain/session/size/gameSize";
 import {
-  AdvancedSettingsSectionHeader,
+  AdvancedSettingsCategory,
   ToggleNumberWithPresets,
 } from "./shared";
 import type { AdvancedSettingsSectionProps } from "./types";
@@ -22,9 +22,7 @@ export function HidingZoneSection({
   const defaultRadius = hidingZoneRadiusMeters(gameSize, distanceUnit);
 
   return (
-    <div className="space-y-3">
-      <AdvancedSettingsSectionHeader title="Hiding zone" />
-
+    <AdvancedSettingsCategory title="Hiding zone">
       <ToggleNumberWithPresets
         enabled={value.customHidingZoneRadiusEnabled}
         onEnabledChange={(customHidingZoneRadiusEnabled) =>
@@ -32,13 +30,7 @@ export function HidingZoneSection({
         }
         disabled={disabled}
         toggleLabel="Custom hiding zone radius"
-        toggleDescription={
-          <>
-            Default for {gameSize} games:{" "}
-            {formatHidingZoneRadiusLabel(defaultRadius, "metric")} (
-            {formatHidingZoneRadiusLabel(defaultRadius)}).
-          </>
-        }
+        toggleDescription={`Default for ${gameSize} games: ${formatHidingZoneRadiusLabel(defaultRadius, "metric")} (${formatHidingZoneRadiusLabel(defaultRadius)}).`}
         numberLabel="Radius (meters)"
         numberValue={value.hidingZoneRadiusMeters}
         onNumberChange={(parsed) =>
@@ -58,6 +50,6 @@ export function HidingZoneSection({
           { label: "Game size default", value: defaultRadius },
         ]}
       />
-    </div>
+    </AdvancedSettingsCategory>
   );
 }

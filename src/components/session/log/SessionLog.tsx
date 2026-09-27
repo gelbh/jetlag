@@ -1,6 +1,6 @@
+import { Text } from "@mantine/core";
 import { type AnnotationRecord } from "@/domain/map/annotations";
 import { useSessionActivityLog } from "@/hooks/session/useSessionActivityLog";
-import { SheetHeader } from "../../ui/sheets/SheetHeader";
 import { SheetHost } from "../../ui/sheets/SheetHost";
 import { SessionLogBody } from "./SessionLogBody";
 
@@ -33,16 +33,25 @@ export function SessionLog({
       onClose={onClose}
       ariaLabel="Session log"
       railTab="log"
-      maxHeightClassName="max-h-[min(85dvh,720px)]"
+      padding="sm"
+      maxHeightClassName="max-h-[min(85dvh,40rem)]"
+      pinned={
+        <Text
+          component="h2"
+          size="md"
+          fw={600}
+          mb={2}
+          lh={1.2}
+          c="var(--color-field-ink)"
+          style={{
+            fontFamily: "var(--font-display)",
+            letterSpacing: "0.04em",
+          }}
+        >
+          Session log
+        </Text>
+      }
     >
-      <SheetHeader
-        title="Session log"
-        onClose={onClose}
-        closeVariant="raised"
-        flush
-        className="shrink-0"
-      />
-
       <SessionLogBody
         events={events}
         annotations={annotations}
@@ -50,6 +59,7 @@ export function SessionLog({
         onEdit={onEdit}
         onSelect={onSelect}
         readOnly={readOnly}
+        compact
       />
     </SheetHost>
   );

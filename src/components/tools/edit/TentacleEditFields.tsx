@@ -9,7 +9,6 @@ import { tentacleEliminationJsonForAnswer } from "@/domain/geometry/tentacle/ten
 import {
   tentacleCategoryIdForAnnotation,
   tentacleQuestionPrompt,
-  type TentacleExtendedCategoryId,
 } from "@/domain/questions";
 import { QuestionPromptBlock } from "../shared/controls/QuestionPromptBlock";
 import { TentacleAnswerPicker } from "../shared/answers/TentacleAnswerPicker";
@@ -100,14 +99,6 @@ export function TentacleEditFields({
         />
       </ToolSection>
       <TentacleAnswerPicker
-        categoryId={
-          (tentacleCategoryIdForAnnotation(annotation) ??
-            "museum") as TentacleExtendedCategoryId
-        }
-        distanceUnit={distanceUnit}
-        searchRadiusMeters={
-          annotation.metadata.radiusMeters ?? DEFAULT_RADIUS_METERS
-        }
         poiOptions={annotation.metadata.pois ?? []}
         selectedPoiId={tentacleAnswerPoiId}
         outOfReach={tentacleOutOfReach}

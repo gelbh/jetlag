@@ -2,9 +2,11 @@ import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { MantineProvider } from "@mantine/core";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { MapBottomChrome } from "./MapBottomChrome";
 import { ToolDeckGroup } from "@/components/tools/ToolDeck";
+import { jetlagTheme } from "@/theme/theme";
 
 const chromeCss = readFileSync(
   resolve(dirname(fileURLToPath(import.meta.url)), "../../../styles/map-bottom-chrome.css"),
@@ -18,9 +20,26 @@ const controlsCss = readFileSync(
   "utf8",
 );
 
+beforeEach(() => {
+  vi.stubGlobal("matchMedia", (query: string) => ({
+    matches: false, media: query, onchange: null,
+    addListener() {}, removeListener() {},
+    addEventListener() {}, removeEventListener() {},
+    dispatchEvent: () => false,
+  }));
+});
+
+function renderChrome(ui: React.ReactElement) {
+  return render(
+    <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
+      {ui}
+    </MantineProvider>,
+  );
+}
+
 describe("MapBottomChrome", () => {
   it("renders provided islands and omits empty ones", () => {
-    render(
+    renderChrome(
       <MapBottomChrome
         layout="phone"
         hunt={<button type="button">Radar</button>}
@@ -38,7 +57,7 @@ describe("MapBottomChrome", () => {
   });
 
   it("omits history bookend islands (undo/redo live inside hunt)", () => {
-    const { container } = render(
+    const { container } = renderChrome(
       <MapBottomChrome layout="phone" hunt={<button type="button">Radar</button>} />,
     );
     expect(container.querySelector('[data-island="history-start"]')).toBeNull();
@@ -47,7 +66,7 @@ describe("MapBottomChrome", () => {
   });
 
   it("wraps phone chrome in OverlayHost with safe-area pad", () => {
-    const { container } = render(
+    const { container } = renderChrome(
       <MapBottomChrome layout="phone" hunt={<button type="button">Radar</button>} />,
     );
     const host = container.querySelector("[data-overlay-host]");
@@ -62,7 +81,7 @@ describe("MapBottomChrome", () => {
   });
 
   it("keeps jl-tool-dock--rail on desktop rail chrome", () => {
-    const { container } = render(
+    const { container } = renderChrome(
       <MapBottomChrome layout="rail" hunt={<button type="button">Radar</button>} />,
     );
     expect(
@@ -71,7 +90,7 @@ describe("MapBottomChrome", () => {
   });
 
   it("marks chrome inactive without leaving islands clickable via CSS class", () => {
-    const { container } = render(
+    const { container } = renderChrome(
       <MapBottomChrome
         layout="phone"
         inactive
@@ -84,7 +103,7 @@ describe("MapBottomChrome", () => {
   });
 
   it("puts hunt in the bottom band and session/map-controls in the side stack", () => {
-    const { container } = render(
+    const { container } = renderChrome(
       <MapBottomChrome
         layout="phone"
         hunt={<button type="button">Radar</button>}
@@ -109,7 +128,7 @@ describe("MapBottomChrome", () => {
   });
 
   it("keeps an empty side stack when session and map-controls are absent", () => {
-    const { container } = render(
+    const { container } = renderChrome(
       <MapBottomChrome layout="phone" hunt={<button type="button">Radar</button>} />,
     );
     const side = container.querySelector(".jl-map-chrome-side-stack");
@@ -119,7 +138,7 @@ describe("MapBottomChrome", () => {
   });
 
   it("uses the same band/side wrappers on rail so CSS can flatten them", () => {
-    const { container } = render(
+    const { container } = renderChrome(
       <MapBottomChrome
         layout="rail"
         hunt={<button type="button">Radar</button>}
@@ -146,7 +165,7 @@ describe("MapBottomChrome", () => {
   });
 
   it("defaults hunt density to tools and omits sparse modifiers", () => {
-    const { container } = render(
+    const { container } = renderChrome(
       <MapBottomChrome layout="phone" hunt={<button type="button">Radar</button>} />,
     );
     const chrome = container.querySelector(".jl-map-bottom-chrome");
@@ -158,7 +177,7 @@ describe("MapBottomChrome", () => {
   });
 
   it("applies sparse hunt density modifiers", () => {
-    const { container } = render(
+    const { container } = renderChrome(
       <MapBottomChrome
         layout="phone"
         huntDensity="sparse"
@@ -176,7 +195,7 @@ describe("MapBottomChrome", () => {
   });
 
   it("uses full-bleed hunt band without permanently reserving side-stack flex (choice a)", () => {
-    const { container } = render(
+    const { container } = renderChrome(
       <MapBottomChrome
         layout="phone"
         hunt={<button type="button">Radar</button>}
@@ -189,27 +208,44 @@ describe("MapBottomChrome", () => {
     expect(chromeCss).not.toMatch(
       /\.jl-map-chrome-bottom-band\s*\{[^}]*padding-right:\s*calc\(\s*var\(--map-chrome-side-width/s,
     );
-    const side = container.querySelector(".jl-map-chrome-side-stack");
-    expect(side?.className).toMatch(/absolute/);
+    const side = container.querySelector('[data-testid="map-side-dock-stack"]');
+    expect(side).not.toBeNull();
     expect(side?.className).toMatch(/jl-map-chrome-side-stack--phone/);
-    expect(side?.className).toMatch(/right-0/);
-    expect(side?.getAttribute("data-chrome-side-stack")).toBe("phone");
-    expect(chromeCss).toMatch(
-      /\[data-chrome-side-stack="phone"\]\s*\{[^}]*bottom:\s*calc\(\s*var\(--dock-island-height\)/s,
-    );
-    expect(chromeCss).not.toMatch(
-      /\[data-chrome-side-stack="phone"\]\s*\{[^}]*safe-area-inset-bottom/s,
-    );
+    expect(side?.className).toMatch(/jl-map-chrome-side-stack--fixed/);
+    expect(side?.getAttribute("data-side")).toBe("right");
     const hunt = container.querySelector("[data-tool-deck]");
     expect(hunt?.className).toMatch(/w-full/);
     expect(hunt?.className).toMatch(/min-h-11/);
   });
 
+  it("uses a draggable L/R side stack under Mantine and flips map chrome CSS", () => {
+    const { container } = renderChrome(
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
+        <MapBottomChrome
+          layout="phone"
+          hunt={<button type="button">Radar</button>}
+          session={<button type="button">Chat</button>}
+        />
+      </MantineProvider>,
+    );
+    const side = container.querySelector('[data-testid="map-side-dock-stack"]');
+    expect(side).not.toBeNull();
+    expect(side?.getAttribute("data-side")).toBe("right");
+    expect(side?.getAttribute("data-anchor")).toBe("bottom-right");
+    expect(side?.getAttribute("data-chrome-side-stack")).toBe("phone");
+    expect(chromeCss).toMatch(
+      /html\[data-map-side-dock="bottom-left"\]\s*\.map-zoom-control/,
+    );
+    expect(chromeCss).toMatch(/--map-right-chrome-inset/);
+    expect(chromeCss).toMatch(/\[data-side="left"\]/);
+  });
+
   it("sizes hunt chips as equal flex without edge history islands", () => {
-    expect(chromeCss).not.toMatch(/jl-map-|jl-tool-dock/);
+    expect(chromeCss).not.toMatch(/jl-tool-dock(?!-)/);
     expect(chromeCss).not.toMatch(/\.jl-map-island--history-start/);
     expect(chromeCss).not.toMatch(/\.jl-map-island--history-end/);
-    const { container } = render(
+    expect(chromeCss).toMatch(/jl-map-chrome-side-stack--fixed/);
+    const { container } = renderChrome(
       <MapBottomChrome
         layout="phone"
         hunt={
@@ -237,5 +273,72 @@ describe("MapBottomChrome", () => {
     expect(controlsCss).not.toMatch(
       /\.map-zoom-control--container[^}]*bottom:\s*4\.25rem/s,
     );
+  });
+});
+
+describe("MapBottomChrome Mantine", () => {
+  it("mounts Mantine chrome and keeps OverlayHost pointer-events-none", () => {
+    const { container } = renderChrome(
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
+        <MapBottomChrome
+          layout="phone"
+          hunt={<button type="button">Radar</button>}
+          session={<button type="button">Chat</button>}
+        />
+      </MantineProvider>,
+    );
+    expect(container.querySelector('[data-testid="map-bottom-chrome-mantine"]')).not.toBeNull();
+    const host = container.querySelector("[data-overlay-host]");
+    expect(host?.className).toMatch(/pointer-events-none/);
+  });
+
+  it("keeps Mantine side islands clickable under pointer-events-none chrome", () => {
+    const { container } = renderChrome(
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
+        <MapBottomChrome
+          layout="phone"
+          hunt={<button type="button">Radar</button>}
+          session={<button type="button">Chat</button>}
+        />
+      </MantineProvider>,
+    );
+    const sessionIsland = container.querySelector('[data-island="session"]');
+    expect(sessionIsland?.className).toMatch(/pointer-events-auto/);
+    expect(screen.getByRole("button", { name: "Chat" })).toBeInTheDocument();
+  });
+
+  it("hides hunt and side docks when ask-first is active", () => {
+    const { container } = renderChrome(
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
+        <MapBottomChrome
+          layout="phone"
+          askFirst
+          hunt={<button type="button">Radar</button>}
+          session={<button type="button">Chat</button>}
+          mapControls={<button type="button">Zoom</button>}
+        />
+      </MantineProvider>,
+    );
+    expect(container.querySelector('[data-island="hunt"]')).toBeNull();
+    expect(container.querySelector('[data-island="session"]')).toBeNull();
+    expect(container.querySelector('[data-island="map-controls"]')).toBeNull();
+    expect(container.querySelector(".jl-map-chrome-side-stack")).toBeNull();
+    expect(
+      container.querySelector('[data-overlay-chrome][data-ask-first="true"]'),
+    ).not.toBeNull();
+  });
+
+  it("keeps Mantine hunt ToolDeck clickable under pointer-events-none chrome", () => {
+    const { container } = renderChrome(
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
+        <MapBottomChrome
+          layout="phone"
+          hunt={<button type="button">Radar</button>}
+        />
+      </MantineProvider>,
+    );
+    const hunt = container.querySelector('[data-tool-deck][data-island="hunt"]');
+    expect(hunt?.className).toMatch(/pointer-events-auto/);
+    expect(screen.getByRole("button", { name: "Radar" })).toBeInTheDocument();
   });
 });

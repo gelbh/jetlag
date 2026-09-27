@@ -1,9 +1,12 @@
+import { Group, Paper, Text } from "@mantine/core";
 import type { SyncStatus } from "@/domain/device/sync/sync";
-import { userErrorFromSyncMessage } from "@/domain/device/feedback/userErrors";
-import { surveySyncShortLabel } from "@/domain/device/surveyStatusCopy";
+import {
+  surveySyncSegmentLabel,
+  surveySyncShortLabel,
+} from "@/domain/device/surveyStatusCopy";
+import { mapChromeSurfaceStyles } from "@/components/ui/entry/entryChrome";
+import { useMinWidth } from "@/hooks/layout/useMinWidth";
 import { SyncStatusBeacon } from "../syncUi/SyncStatusDot";
-import { SyncStatusDetailPanel } from "../syncUi/SyncStatusDetailPanel";
-import { syncDetailContent } from "../syncUi/syncStatusDetailContent";
 import {
   SYNC_TONE_CLASSES,
   type SyncTone,
@@ -14,9 +17,20 @@ interface SyncBlockProps {
   syncStatus: SyncStatus;
   queuedWrites: number;
   message?: string | null;
-  menuOpen: boolean;
-  onMenuOpenChange: (open: boolean) => void;
+  /** @deprecated Detail modal removed; ignored. */
+  menuOpen?: boolean;
+  /** @deprecated Detail modal removed; ignored. */
+  onMenuOpenChange?: (open: boolean) => void;
+  /** @deprecated Detail modal removed; ignored. */
   onSyncErrorAction?: () => void;
+  /**
+   * overlay: absolute under status bar
+   * inline: floating sibling Paper
+   * segment: control only inside the single status island
+   */
+  placement?: "overlay" | "inline" | "segment";
+  /** Hide segment text (beacon only); also used by narrow gallery frames. */
+  compact?: boolean;
 }
 
 function surveyShortLabelTone(status: SyncStatus): SyncTone | null {
@@ -37,72 +51,103 @@ function surveyShortLabelTone(status: SyncStatus): SyncTone | null {
   }
 }
 
+/** Live sync beacon in the status rail (display only; no detail modal). */
 export function SyncBlock({
   syncStatus,
   queuedWrites,
-  message,
-  menuOpen,
-  onMenuOpenChange,
-  onSyncErrorAction,
+  placement = "overlay",
+  compact = false,
 }: SyncBlockProps) {
-  const syncErrorDisplay = userErrorFromSyncMessage(message);
+  const comfortableWidth = useMinWidth(380) && !compact;
   const shortLabel = surveySyncShortLabel(syncStatus, queuedWrites);
+  const segmentLabel = comfortableWidth
+    ? surveySyncSegmentLabel(syncStatus, queuedWrites)
+    : null;
   const shortLabelTone = surveyShortLabelTone(syncStatus);
-  const syncDetail = syncDetailContent(
-    syncStatus,
-    queuedWrites,
-    message,
-    syncErrorDisplay,
-  );
-  const syncActionLabel =
-    syncErrorDisplay?.actionLabel ??
-    (syncStatus === "offline" ||
-    syncStatus === "degraded" ||
-    syncStatus === "error"
-      ? "Retry"
-      : null);
+  const statusAria = shortLabel ?? syncBeaconAriaLabel(syncStatus);
 
-  return (
-    <div className="jl-sync-map-indicator">
-      <button
-        type="button"
-        className={`jl-sync-map-indicator__btn inline-flex min-h-11 min-w-11 items-center justify-center border border-rule bg-canvas text-field-ink shadow-none${menuOpen ? " jl-sync-map-indicator__btn--open" : ""}${shortLabel ? " jl-sync-map-indicator__btn--labeled gap-1.5 px-2.5" : ""}`}
-        onClick={() => onMenuOpenChange(!menuOpen)}
-        aria-expanded={menuOpen}
-        aria-haspopup="dialog"
-        aria-label={
-          shortLabel
-            ? `${shortLabel}. Show sync details`
-            : syncBeaconAriaLabel(syncStatus)
-        }
-      >
-        {shortLabel ? (
-          <span
-            className={`max-w-[7.5rem] text-pretty text-xs font-semibold leading-tight${shortLabelTone ? ` ${SYNC_TONE_CLASSES[shortLabelTone].text}` : ""}`}
-          >
-            {shortLabel}
-          </span>
-        ) : null}
-        <SyncStatusBeacon status={syncStatus} size="md" />
-      </button>
-
-      {menuOpen ? (
-        <SyncStatusDetailPanel
-          status={syncStatus}
-          title={syncDetail.title}
-          body={syncDetail.body}
-          actionLabel={syncActionLabel}
-          onAction={
-            syncActionLabel && onSyncErrorAction
-              ? () => {
-                  onSyncErrorAction();
-                  onMenuOpenChange(false);
-                }
-              : undefined
+  const beaconRow = (
+    <Group gap={6} wrap="nowrap" justify="center">
+      {shortLabel ? (
+        <Text
+          size="xs"
+          fw={590}
+          className={
+            shortLabelTone ? SYNC_TONE_CLASSES[shortLabelTone].text : undefined
           }
-          onClose={() => onMenuOpenChange(false)}
-        />
+          style={{ maxWidth: "6.5rem", lineHeight: 1.25 }}
+        >
+          {shortLabel}
+        </Text>
       ) : null}
+      <SyncStatusBeacon status={syncStatus} size="md" />
+    </Group>
+  );
+
+  if (placement === "segment") {
+    return (
+      <div
+        className="relative inline-flex min-h-11 min-w-11 max-w-full items-center justify-center overflow-visible rounded-xl px-1"
+        data-testid="sync-block-mantine"
+        role="status"
+        aria-label={statusAria}
+      >
+        <Group gap={4} wrap="nowrap" justify="center" style={{ minWidth: 0 }}>
+          {segmentLabel ? (
+            <Text
+              size="xs"
+              fw={590}
+              className={
+                shortLabelTone
+                  ? SYNC_TONE_CLASSES[shortLabelTone].text
+                  : undefined
+              }
+              style={{
+                maxWidth: "4.75rem",
+                lineHeight: 1.2,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {segmentLabel}
+            </Text>
+          ) : null}
+          <SyncStatusBeacon status={syncStatus} size="md" />
+        </Group>
+      </div>
+    );
+  }
+
+  const inline = placement === "inline";
+  return (
+    <div
+      className={
+        inline
+          ? "pointer-events-auto relative shrink-0"
+          : "jl-sync-map-indicator"
+      }
+      data-testid="sync-block-mantine"
+    >
+      <Paper
+        radius={shortLabel ? 14 : "xl"}
+        className="pointer-events-none inline-flex min-h-11 items-center justify-center"
+        px={shortLabel ? "sm" : 0}
+        role="status"
+        aria-label={statusAria}
+        styles={{
+          root: {
+            ...mapChromeSurfaceStyles,
+            width: shortLabel ? "auto" : "2.75rem",
+            height: "2.75rem",
+            minWidth: "2.75rem",
+            borderRadius: shortLabel ? 14 : 999,
+            cursor: "default",
+          },
+        }}
+      >
+        {beaconRow}
+      </Paper>
     </div>
   );
 }

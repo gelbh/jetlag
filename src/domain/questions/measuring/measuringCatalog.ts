@@ -353,6 +353,8 @@ export const BASE_MEASURING_CATALOG = [
     targetKind: "point",
     overpassSelectors: [
       '["office"="diplomatic"]["diplomatic"="consulate"]',
+      '["office"="diplomatic"]["diplomatic"="embassy"]',
+      '["amenity"="embassy"]',
       '["amenity"="consulate"]',
     ],
     linearSelectors: [],

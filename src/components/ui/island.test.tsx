@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { Island, islandVariants } from "./island";
 
 describe("Island", () => {
-  it("maps default / flag / ghost variants to Survey class tokens", () => {
+  it("maps default / flag / ghost variants to brand class tokens", () => {
     expect(islandVariants({ variant: "default" })).toContain("bg-canvas");
     expect(islandVariants({ variant: "default" })).toContain("border-rule");
     expect(islandVariants({ variant: "flag" })).toContain("bg-flag-soft");

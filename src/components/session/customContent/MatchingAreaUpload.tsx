@@ -1,8 +1,17 @@
 import { useRef, useState } from "react";
+import { Box, Button, Stack, Text } from "@mantine/core";
 import type { AdvancedSessionSettingsValue } from "@/domain/session/tools/advancedSessionSettings";
 import type { MatchingAdminLevel } from "@/domain/session/catalog/sessionCustomContent";
 import { parseMatchingAreaGeoJson } from "@/services/geo/matching/matchingAreaGeoJson";
 import type { GameArea } from "@/domain/map/annotations";
+import {
+  ErrorCallout,
+  InsetGroup,
+  SectionLabel,
+  compactDangerStyles,
+  compactGrayStyles,
+} from "@/components/ui/entry/entryChrome";
+import { InsetHairline } from "@/components/ui/entry/InsetRow";
 
 const ADMIN_LEVEL_LABELS: Record<MatchingAdminLevel, string> = {
   4: "1st division (admin level 4)",
@@ -58,72 +67,97 @@ export function MatchingAreaUpload({
   };
 
   return (
-    <>
-      <p className="font-display text-[10px] font-semibold uppercase tracking-[0.12em] text-ink-dim">
-        Custom matching areas
-      </p>
-      <p className="text-xs text-ink-muted">
+    <Stack gap="xs">
+      <SectionLabel>Custom matching areas</SectionLabel>
+      <Text size="xs" c="var(--color-field-ink-muted)" px={4}>
         Upload GeoJSON FeatureCollections to replace OpenStreetMap admin
         boundaries for a division level in this session.
-      </p>
+      </Text>
       {!gameArea ? (
-        <p className="text-xs text-status-warning">
+        <Text size="xs" c="var(--color-signal)" px={4}>
           Frame a play area to validate imported boundaries.
-        </p>
+        </Text>
       ) : null}
-      <div className="space-y-2">
-        {([4, 6, 8, 9] as const).map((level) => {
+      <InsetGroup>
+        {([4, 6, 8, 9] as const).map((level, index) => {
           const uploaded = Boolean(value.customMatchingAreas[level]);
 
           return (
-            <div
-              key={level}
-              className="flex flex-wrap items-center gap-2 text-sm text-ink"
-            >
-              <span className="min-w-0 flex-1">{ADMIN_LEVEL_LABELS[level]}</span>
-              <input
-                ref={(element) => {
-                  fileInputRefs.current[level] = element;
+            <Box key={level}>
+              {index > 0 ? <InsetHairline insetStart="1rem" /> : null}
+              <Box
+                style={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  alignItems: "center",
+                  gap: "0.5rem",
+                  paddingInline: "1rem",
+                  paddingBlock: "0.65rem",
+                  minHeight: "2.875rem",
                 }}
-                type="file"
-                accept=".json,.geojson,application/geo+json,application/json"
-                className="hidden"
-                disabled={disabled}
-                onChange={(event) => {
-                  const file = event.target.files?.[0];
-                  if (file) {
-                    void handleMatchingAreaUpload(level, file);
-                  }
-                  event.target.value = "";
-                }}
-              />
-              <button
-                type="button"
-                disabled={disabled}
-                onClick={() => fileInputRefs.current[level]?.click()}
-                className="rounded-full border border-border px-3 py-1 text-xs font-semibold text-brand-blue disabled:opacity-50"
               >
-                {uploaded ? "Replace file" : "Upload GeoJSON"}
-              </button>
-              {uploaded ? (
-                <button
-                  type="button"
-                  disabled={disabled}
-                  onClick={() => {
-                    const next = { ...value.customMatchingAreas };
-                    delete next[level];
-                    onChange({ ...value, customMatchingAreas: next });
-                  }}
-                  className="text-xs text-error"
+                <Text
+                  size="sm"
+                  style={{ flex: 1, minWidth: "8rem", color: "var(--color-field-ink)" }}
                 >
-                  Remove
-                </button>
-              ) : null}
-            </div>
+                  {ADMIN_LEVEL_LABELS[level]}
+                  {uploaded ? (
+                    <Text
+                      span
+                      size="xs"
+                      c="var(--color-field-ink-muted)"
+                      ml={6}
+                    >
+                      Uploaded
+                    </Text>
+                  ) : null}
+                </Text>
+                <input
+                  ref={(element) => {
+                    fileInputRefs.current[level] = element;
+                  }}
+                  type="file"
+                  accept=".json,.geojson,application/geo+json,application/json"
+                  className="hidden"
+                  disabled={disabled}
+                  onChange={(event) => {
+                    const file = event.target.files?.[0];
+                    if (file) {
+                      void handleMatchingAreaUpload(level, file);
+                    }
+                    event.target.value = "";
+                  }}
+                />
+                <Button
+                  type="button"
+                  size="compact-sm"
+                  disabled={disabled}
+                  styles={compactGrayStyles}
+                  onClick={() => fileInputRefs.current[level]?.click()}
+                >
+                  {uploaded ? "Replace" : "Upload"}
+                </Button>
+                {uploaded ? (
+                  <Button
+                    type="button"
+                    size="compact-sm"
+                    disabled={disabled}
+                    styles={compactDangerStyles}
+                    onClick={() => {
+                      const next = { ...value.customMatchingAreas };
+                      delete next[level];
+                      onChange({ ...value, customMatchingAreas: next });
+                    }}
+                  >
+                    Remove
+                  </Button>
+                ) : null}
+              </Box>
+            </Box>
           );
         })}
-      </div>
-      {uploadError ? <p className="text-error text-sm">{uploadError}</p> : null}
-    </>
+      </InsetGroup>
+      <ErrorCallout>{uploadError}</ErrorCallout>
+    </Stack>
   );
 }

@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
+import { renderWithAppUi } from "../../../test/renderWithAppUi";
 import type { DistanceUnit } from "@/domain/map/distance";
 import type { SessionRulesInput } from "@/domain/session/rules";
 import { AskHudHost } from "./AskHudHost";
@@ -39,7 +40,7 @@ const baseProps = {
 
 describe("ThermometerHudBody", () => {
   it("shows walk banner without PhaseRail, CONTINUE, or END WALK in the body", () => {
-    render(
+    renderWithAppUi(
       <ThermometerHudBody
         {...baseProps}
         walkingActive
@@ -76,7 +77,7 @@ describe("ThermometerHudBody", () => {
     ).toBe(false);
 
     const onCommit = vi.fn();
-    render(
+    renderWithAppUi(
       <AskHudHost
         cue=""
         toolLabel="Thermometer"

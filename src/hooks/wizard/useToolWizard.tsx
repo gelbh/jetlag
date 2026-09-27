@@ -22,7 +22,7 @@ import {
 } from "./toolWizardPhaseNav";
 
 interface UseToolWizardOptions {
-  wizardStepRef?: RefObject<string>;
+  wizardStepRef?: RefObject<string | null>;
   initialStepId?: string;
   syncStep?: boolean;
   awaitHiderAnswer?: boolean;

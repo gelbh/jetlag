@@ -5,7 +5,8 @@ import {
   type ConfigurableMapTool,
 } from "@/domain/session/rules";
 import {
-  AdvancedSettingsSectionHeader,
+  AdvancedSettingsCategory,
+  AdvancedSettingsInset,
   AdvancedSettingsToggle,
 } from "./shared";
 import type { AdvancedSettingsSectionProps } from "./types";
@@ -17,49 +18,45 @@ export function ToolsSection({
   disabled,
 }: AdvancedSettingsSectionProps) {
   return (
-    <div className="space-y-3 border-t border-border pt-3">
-      <AdvancedSettingsSectionHeader title="Tools" />
-
+    <AdvancedSettingsCategory title="Tools" defaultOpen={false}>
       {gameSize === "small" ? (
-        <AdvancedSettingsToggle
-          checked={value.tentaclesEnabledOverride}
-          onChange={(tentaclesEnabledOverride) =>
-            onChange({ ...value, tentaclesEnabledOverride })
-          }
-          disabled={disabled}
-          label="Enable tentacles on small games"
-        />
+        <AdvancedSettingsInset>
+          <AdvancedSettingsToggle
+            checked={value.tentaclesEnabledOverride}
+            onChange={(tentaclesEnabledOverride) =>
+              onChange({ ...value, tentaclesEnabledOverride })
+            }
+            disabled={disabled}
+            label="Enable tentacles on small games"
+          />
+        </AdvancedSettingsInset>
       ) : null}
 
-      <div className="grid gap-2 sm:grid-cols-2">
-        {ALL_CONFIGURABLE_TOOLS.map((toolId) => {
+      <AdvancedSettingsInset>
+        {ALL_CONFIGURABLE_TOOLS.map((toolId, index) => {
           const entry = MAP_TOOL_DOCK_ENTRIES.find((item) => item.id === toolId);
           const enabled = !value.disabledTools.includes(toolId);
 
           return (
-            <label
+            <AdvancedSettingsToggle
               key={toolId}
-              className="flex items-center gap-2 text-sm text-ink"
-            >
-              <input
-                type="checkbox"
-                checked={enabled}
-                disabled={disabled}
-                onChange={(event) =>
-                  onChange(
-                    toggleToolInSettings(
-                      value,
-                      toolId as ConfigurableMapTool,
-                      event.target.checked,
-                    ),
-                  )
-                }
-              />
-              <span>{entry?.name ?? toolId}</span>
-            </label>
+              checked={enabled}
+              disabled={disabled}
+              label={entry?.name ?? toolId}
+              showSeparator={index > 0}
+              onChange={(checked) =>
+                onChange(
+                  toggleToolInSettings(
+                    value,
+                    toolId as ConfigurableMapTool,
+                    checked,
+                  ),
+                )
+              }
+            />
           );
         })}
-      </div>
-    </div>
+      </AdvancedSettingsInset>
+    </AdvancedSettingsCategory>
   );
 }

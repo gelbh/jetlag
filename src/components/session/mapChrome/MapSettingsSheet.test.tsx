@@ -1,7 +1,18 @@
 import { fireEvent, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { MantineProvider } from "@mantine/core";
+import type { ReactElement } from "react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { MapSettingsSheet } from "./MapSettingsSheet";
 import { renderWithRouter } from "@/test/renderWithRouter";
+import { jetlagTheme } from "@/theme/theme";
+
+function renderSettings(ui: ReactElement) {
+  return renderWithRouter(
+    <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
+      {ui}
+    </MantineProvider>,
+  );
+}
 
 const baseProps = {
   open: true,
@@ -44,6 +55,7 @@ const baseProps = {
       matching: true,
       zone: true,
       pin: true,
+      draw: true,
       tentacle: true,
       transit: true,
     },
@@ -58,10 +70,22 @@ const baseProps = {
 };
 
 describe("MapSettingsSheet", () => {
+  beforeEach(() => {
+    vi.stubGlobal("matchMedia", (query: string) => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    }));
+  });
   it("switches settings tabs and toggles basemap", () => {
     const onMapStyleChange = vi.fn();
 
-    renderWithRouter(
+    renderSettings(
       <MapSettingsSheet
         {...baseProps}
         general={{
@@ -77,13 +101,13 @@ describe("MapSettingsSheet", () => {
   });
 
   it("shows OpenFreeMap attribution for street basemap and Esri for satellite", () => {
-    renderWithRouter(<MapSettingsSheet {...baseProps} />);
+    renderSettings(<MapSettingsSheet {...baseProps} />);
 
     expect(
       screen.getByText(/OpenStreetMap contributors \(openstreetmap\.org\/copyright\)/),
     ).toBeInTheDocument();
 
-    renderWithRouter(
+    renderSettings(
       <MapSettingsSheet
         {...baseProps}
         general={{ ...baseProps.general, mapStyle: "satellite" }}
@@ -93,17 +117,31 @@ describe("MapSettingsSheet", () => {
     expect(screen.getByText(/Tiles © Esri/)).toBeInTheDocument();
   });
 
-  it("keeps session admin off the default map essentials tab", () => {
-    renderWithRouter(<MapSettingsSheet {...baseProps} />);
+  it("merges layers into Map and keeps session admin off the default tab", () => {
+    renderSettings(<MapSettingsSheet {...baseProps} />);
 
     expect(screen.getByText("Show my location")).toBeInTheDocument();
+    expect(screen.getByText("Annotation layers")).toBeInTheDocument();
+    expect(screen.getByText("Freehand")).toBeInTheDocument();
+    expect(screen.queryByRole("tab", { name: "Layers" })).not.toBeInTheDocument();
     expect(screen.queryByText("Keep screen awake")).not.toBeInTheDocument();
-    expect(screen.queryByText("Low power mode")).not.toBeInTheDocument();
     expect(screen.queryByText("Leave session")).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("tab", { name: "Session" }));
 
-    expect(screen.getByRole("button", { name: "Device & alerts" })).toBeInTheDocument();
+    expect(screen.getByText("Keep screen awake")).toBeInTheDocument();
+    expect(screen.getByText("Low power mode")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Leave session" })).toBeInTheDocument();
+  });
+
+  it("puts join code under Game", () => {
+    renderSettings(<MapSettingsSheet {...baseProps} />);
+
+    expect(screen.queryByText("ABCD")).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("tab", { name: "Game" }));
+
+    expect(screen.getByText("ABCD")).toBeInTheDocument();
+    expect(screen.getByText("Game rules")).toBeInTheDocument();
   });
 });

@@ -31,6 +31,7 @@ export interface MapViewMapLibreChromeProps {
   fitBoundsMode?: "once" | "always";
   fitBoundsPadding?: [number, number];
   focusPaddingBias?: number;
+  focusPaddingTopBias?: number;
   focusPreferFly?: boolean;
   recenterToken?: number;
   showZoomControl?: boolean;
@@ -44,6 +45,15 @@ export interface MapViewMapLibreChromeProps {
   onRecenter?: () => void;
 }
 
-export type MapViewMapLibreProps = MapViewCoreProps & MapViewMapLibreChromeProps;
+/** Flat map surface + chrome bag (children stay a React slot on the props type). */
+export type MapViewModel = Omit<
+  MapViewCoreProps & MapViewMapLibreChromeProps,
+  "children"
+>;
+
+export type MapViewMapLibreProps = {
+  model: MapViewModel;
+  children?: React.ReactNode;
+};
 
 export type MapViewProps = MapViewMapLibreProps;

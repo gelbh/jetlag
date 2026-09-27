@@ -1,3 +1,6 @@
+import { UnstyledButton } from "@mantine/core";
+import { choiceChipStyles } from "@/components/ui/entry/entryChrome";
+
 interface SegmentOption<Value extends string> {
   value: Value;
   label: string;
@@ -80,28 +83,25 @@ export function SegmentControl<Value extends string>({
     return (
       <div
         className="grid gap-2"
-        style={{ gridTemplateColumns: `repeat(${options.length}, minmax(0, 1fr))` }}
+        style={{
+          gridTemplateColumns: `repeat(${options.length}, minmax(0, 1fr))`,
+        }}
         role="group"
         aria-label={ariaLabel}
       >
         {options.map((option) => {
           const selected = value === option.value;
-
           return (
-            <button
+            <UnstyledButton
               key={option.value}
               type="button"
               onClick={() => onChange(option.value)}
               disabled={disabled || option.disabled}
               aria-pressed={selected}
-              className={`min-h-12 rounded-[var(--radius-hud-md)] px-2 text-sm font-medium disabled:opacity-50 ${
-                selected
-                  ? "bg-flag text-flag-ink"
-                  : "bg-canvas text-field-ink"
-              }`}
+              styles={choiceChipStyles(selected, "default")}
             >
               {option.label}
-            </button>
+            </UnstyledButton>
           );
         })}
       </div>

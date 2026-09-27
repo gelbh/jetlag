@@ -39,7 +39,8 @@ import {
 import { useToolWizard } from "../../hooks/wizard/useToolWizard";
 import { QuestionTruthReferenceHint } from "./shared/QuestionTruthReferenceHint";
 
-interface MeasuringPanelProps {
+/** Flat measuring wizard fields bag for MeasuringPanel (W4-B peel). */
+export type MeasuringPanelModel = {
   distanceUnit: DistanceUnit;
   optionChosen: boolean;
   measureFrom: MeasuringFromKind;
@@ -85,51 +86,56 @@ interface MeasuringPanelProps {
   costLabel?: string;
   isSubmitting?: boolean;
   wizardStepRef?: RefObject<string>;
-}
+};
 
-export function MeasuringPanel({
-  distanceUnit,
-  optionChosen,
-  measureFrom,
-  usesAllPlacesInArea,
-  usedMeasuringFromKinds,
-  catalogOptions,
-  anchorLat = null,
-  anchorLng = null,
-  subject,
-  targetMode,
-  anchorAltitudeMeters,
-  hasSeekerPoint,
-  hasTargetPoint,
-  seekerPlaceName,
-  targetPlaceName,
-  distanceMeters,
-  loading,
-  gpsLoading,
-  searchQuery,
-  searchResults,
-  searchLoading,
-  searchRole,
-  answer,
-  seaLevelEdgeCase = null,
-  error,
-  onMeasureFromChange,
-  onTargetModeChange,
-  onSearchQueryChange,
-  onSearchSubmit,
-  onSearchResultSelect,
-  onUseGps,
-  onFindCoastline,
-  onRetrySeaLevel,
-  onFindLinearFeature,
-  onFindNearest,
-  onAnswerChange,
-  onCommit,
-  awaitHiderAnswer = false,
-  costLabel = "D3P1",
-  isSubmitting = false,
-  wizardStepRef,
-}: MeasuringPanelProps) {
+export type MeasuringPanelProps = {
+  model: MeasuringPanelModel;
+};
+
+export function MeasuringPanel({ model }: MeasuringPanelProps) {
+  const {
+    distanceUnit,
+    optionChosen,
+    measureFrom,
+    usesAllPlacesInArea,
+    usedMeasuringFromKinds,
+    catalogOptions,
+    anchorLat = null,
+    anchorLng = null,
+    subject,
+    targetMode,
+    anchorAltitudeMeters,
+    hasSeekerPoint,
+    hasTargetPoint,
+    seekerPlaceName,
+    targetPlaceName,
+    distanceMeters,
+    loading,
+    gpsLoading,
+    searchQuery,
+    searchResults,
+    searchLoading,
+    searchRole,
+    answer,
+    seaLevelEdgeCase = null,
+    error,
+    onMeasureFromChange,
+    onTargetModeChange,
+    onSearchQueryChange,
+    onSearchSubmit,
+    onSearchResultSelect,
+    onUseGps,
+    onFindCoastline,
+    onRetrySeaLevel,
+    onFindLinearFeature,
+    onFindNearest,
+    onAnswerChange,
+    onCommit,
+    awaitHiderAnswer = false,
+    costLabel = "D3P1",
+    isSubmitting = false,
+    wizardStepRef,
+  } = model;
   const {
     phaseId,
     stepId,
@@ -190,9 +196,7 @@ export function MeasuringPanel({
       stepId === "source" &&
       optionChosen &&
       hasAvailableMeasureOptions) ||
-    (phaseId === "configure" &&
-      stepId === "target" &&
-      canAdvanceFromTarget);
+    (phaseId === "configure" && stepId === "target" && canAdvanceFromTarget);
   const canCommit =
     hasAvailableMeasureOptions &&
     hasSeekerPoint &&
@@ -201,132 +205,129 @@ export function MeasuringPanel({
     !isSubmitting;
   const canSwipeNext = toolWizardSwipeNext(canGoNext, phaseIndex, phaseCount);
   const showMeasuringAnswer =
-    canPreviewAnswer &&
-    (stepId === "target" || phaseId === "ask");
+    canPreviewAnswer && (stepId === "target" || phaseId === "ask");
 
   const panelBody = (
     <>
-        {phaseId === "configure" && stepId === "source" ? (
-          <>
-            {awaitHiderAnswer ? (
-              <QuestionTruthReferenceHint />
-            ) : null}
-            <MeasuringSourceStep
-              measureFrom={measureFrom}
-              optionChosen={optionChosen}
-              usedMeasuringFromKinds={usedMeasuringFromKinds}
-              catalogOptions={catalogOptions}
-              subject={subject}
-              locationCategory={locationCategory}
-              onMeasureFromChange={onMeasureFromChange}
-            />
-          </>
-        ) : null}
+      {phaseId === "configure" && stepId === "source" ? (
+        <>
+          {awaitHiderAnswer ? <QuestionTruthReferenceHint /> : null}
+          <MeasuringSourceStep
+            measureFrom={measureFrom}
+            optionChosen={optionChosen}
+            usedMeasuringFromKinds={usedMeasuringFromKinds}
+            catalogOptions={catalogOptions}
+            subject={subject}
+            locationCategory={locationCategory}
+            onMeasureFromChange={onMeasureFromChange}
+          />
+        </>
+      ) : null}
 
-        {phaseId === "place" ? (
-          <MeasuringAnchorStep
+      {phaseId === "place" ? (
+        <MeasuringAnchorStep
+          hasSeekerPoint={hasSeekerPoint}
+          gpsLoading={gpsLoading}
+          seekerPlaceName={seekerPlaceName}
+          anchorLat={anchorLat}
+          anchorLng={anchorLng}
+          loading={loading}
+          anchorLoadingMessage={anchorLoadingMessage}
+          allowsSearch={allowsSearch}
+          searchQuery={searchQuery}
+          searchLoading={searchLoading}
+          onUseGps={onUseGps}
+          onSearchQueryChange={onSearchQueryChange}
+          onSearchSubmit={() => onSearchSubmit("seeker")}
+        />
+      ) : null}
+
+      {phaseId === "configure" && stepId === "target" ? (
+        <ToolSection first compact status="active">
+          <MeasuringTargetSection
+            subject={subject}
+            measureFrom={measureFrom}
+            locationCategory={locationCategory}
+            usesAllPlacesInArea={usesAllPlacesInArea}
+            targetMode={targetMode}
             hasSeekerPoint={hasSeekerPoint}
-            gpsLoading={gpsLoading}
-            seekerPlaceName={seekerPlaceName}
-            anchorLat={anchorLat}
-            anchorLng={anchorLng}
+            hasTargetPoint={hasTargetPoint}
+            targetPlaceName={targetPlaceName}
+            distanceMeters={distanceMeters}
+            anchorAltitudeMeters={anchorAltitudeMeters}
             loading={loading}
-            anchorLoadingMessage={anchorLoadingMessage}
-            allowsSearch={allowsSearch}
             searchQuery={searchQuery}
             searchLoading={searchLoading}
-            onUseGps={onUseGps}
-            onSearchQueryChange={onSearchQueryChange}
-            onSearchSubmit={() => onSearchSubmit("seeker")}
-          />
-        ) : null}
-
-        {phaseId === "configure" && stepId === "target" ? (
-          <ToolSection first compact status="active">
-            <MeasuringTargetSection
-              subject={subject}
-              measureFrom={measureFrom}
-              locationCategory={locationCategory}
-              usesAllPlacesInArea={usesAllPlacesInArea}
-              targetMode={targetMode}
-              hasSeekerPoint={hasSeekerPoint}
-              hasTargetPoint={hasTargetPoint}
-              targetPlaceName={targetPlaceName}
-              distanceMeters={distanceMeters}
-              anchorAltitudeMeters={anchorAltitudeMeters}
-              loading={loading}
-              searchQuery={searchQuery}
-              searchLoading={searchLoading}
-              distanceUnit={distanceUnit}
-              error={error}
-              anchorLoadingMessage={anchorLoadingMessage}
-              onTargetModeChange={onTargetModeChange}
-              onSearchQueryChange={onSearchQueryChange}
-              onSearchSubmit={() => onSearchSubmit("target")}
-              onFindCoastline={onFindCoastline}
-              onRetrySeaLevel={onRetrySeaLevel}
-              onFindLinearFeature={onFindLinearFeature}
-              onFindNearest={onFindNearest}
-            />
-          </ToolSection>
-        ) : null}
-
-        {showMeasuringAnswer ? (
-          <MeasuringAnswerSection
-            step={stepId}
-            part="readout"
-            isSeaLevel={isSeaLevel}
-            isCoastline={isCoastline}
-            hasTargetPoint={hasTargetPoint}
-            distanceMeters={distanceMeters}
-            targetPlaceName={targetPlaceName}
-            targetLabel={targetLabel}
             distanceUnit={distanceUnit}
-            awaitHiderAnswer={awaitHiderAnswer}
-            costLabel={costLabel}
-            isSubmitting={isSubmitting}
-            hasAvailableMeasureOptions={hasAvailableMeasureOptions}
-            hasSeekerPoint={hasSeekerPoint}
-            answer={answer}
-            seaLevelEdgeCase={seaLevelEdgeCase}
-            onAnswerChange={onAnswerChange}
-            onCommit={onCommit}
+            error={error}
+            anchorLoadingMessage={anchorLoadingMessage}
+            onTargetModeChange={onTargetModeChange}
+            onSearchQueryChange={onSearchQueryChange}
+            onSearchSubmit={() => onSearchSubmit("target")}
+            onFindCoastline={onFindCoastline}
+            onRetrySeaLevel={onRetrySeaLevel}
+            onFindLinearFeature={onFindLinearFeature}
+            onFindNearest={onFindNearest}
           />
-        ) : null}
+        </ToolSection>
+      ) : null}
 
-        {allowsSearch && searchResults.length > 0 && phaseId !== "ask" ? (
-          <div className="jl-scroll jl-wizard-search-results">
-            <SearchResultsList
-              results={searchResults}
-              onSelect={(place) => onSearchResultSelect(place, searchRole)}
-            />
-          </div>
-        ) : null}
+      {showMeasuringAnswer ? (
+        <MeasuringAnswerSection
+          step={stepId}
+          part="readout"
+          isSeaLevel={isSeaLevel}
+          isCoastline={isCoastline}
+          hasTargetPoint={hasTargetPoint}
+          distanceMeters={distanceMeters}
+          targetPlaceName={targetPlaceName}
+          targetLabel={targetLabel}
+          distanceUnit={distanceUnit}
+          awaitHiderAnswer={awaitHiderAnswer}
+          costLabel={costLabel}
+          isSubmitting={isSubmitting}
+          hasAvailableMeasureOptions={hasAvailableMeasureOptions}
+          hasSeekerPoint={hasSeekerPoint}
+          answer={answer}
+          seaLevelEdgeCase={seaLevelEdgeCase}
+          onAnswerChange={onAnswerChange}
+          onCommit={onCommit}
+        />
+      ) : null}
+
+      {allowsSearch && searchResults.length > 0 && phaseId !== "ask" ? (
+        <div className="jl-scroll jl-wizard-search-results">
+          <SearchResultsList
+            results={searchResults}
+            onSelect={(place) => onSearchResultSelect(place, searchRole)}
+          />
+        </div>
+      ) : null}
     </>
   );
 
   const answerFooter = showMeasuringAnswer ? (
-      <MeasuringAnswerSection
-        step={stepId}
-        part="actions"
-        isSeaLevel={isSeaLevel}
-        isCoastline={isCoastline}
-        hasTargetPoint={hasTargetPoint}
-        distanceMeters={distanceMeters}
-        targetPlaceName={targetPlaceName}
-        targetLabel={targetLabel}
-        distanceUnit={distanceUnit}
-        awaitHiderAnswer={awaitHiderAnswer}
-        costLabel={costLabel}
-        isSubmitting={isSubmitting}
-        hasAvailableMeasureOptions={hasAvailableMeasureOptions}
-        hasSeekerPoint={hasSeekerPoint}
-        answer={answer}
-        seaLevelEdgeCase={seaLevelEdgeCase}
-        onAnswerChange={onAnswerChange}
-        onCommit={onCommit}
-      />
-    ) : undefined;
+    <MeasuringAnswerSection
+      step={stepId}
+      part="actions"
+      isSeaLevel={isSeaLevel}
+      isCoastline={isCoastline}
+      hasTargetPoint={hasTargetPoint}
+      distanceMeters={distanceMeters}
+      targetPlaceName={targetPlaceName}
+      targetLabel={targetLabel}
+      distanceUnit={distanceUnit}
+      awaitHiderAnswer={awaitHiderAnswer}
+      costLabel={costLabel}
+      isSubmitting={isSubmitting}
+      hasAvailableMeasureOptions={hasAvailableMeasureOptions}
+      hasSeekerPoint={hasSeekerPoint}
+      answer={answer}
+      seaLevelEdgeCase={seaLevelEdgeCase}
+      onAnswerChange={onAnswerChange}
+      onCommit={onCommit}
+    />
+  ) : undefined;
 
   return (
     <ToolPanelShell
@@ -336,8 +337,7 @@ export function MeasuringPanel({
         <Stepper
           nav={{
             canGoBack:
-              phaseIndex > 0 ||
-              (phaseId === "configure" && configureIndex > 0),
+              phaseIndex > 0 || (phaseId === "configure" && configureIndex > 0),
             onBack: goBack,
             ...toolWizardPhasePrimaryNav({
               phaseId,

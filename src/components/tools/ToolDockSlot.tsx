@@ -141,6 +141,7 @@ export function ToolDockHistorySlot({
         )
       }
       label={isUndo ? "Undo" : "Redo"}
+      tone="history"
     />
   );
 }

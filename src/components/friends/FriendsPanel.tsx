@@ -1,162 +1,40 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDesktopLayout } from "../../hooks/layout/useDesktopLayout";
-import { useLatestRequest } from "../../hooks/forms/useLatestRequest";
-import {
-  acceptFriendRequest,
-  cancelFriendRequest,
-  declineFriendRequest,
-  listFriends,
-  requestFriend,
-  searchFriends,
-  type FriendListEntry,
-} from "../../services/profile/profileFriends";
+import type { FriendListEntry } from "../../services/profile/profileFriends";
 import { InlineError } from "../ui/banners/InlineError";
 import { EmptyState } from "../ui/feedback/EmptyState";
 import { SearchField } from "../ui/forms/SearchField";
-
-type FriendRelation = "incoming" | "outgoing" | "friend";
-
-interface SelectableFriend extends FriendListEntry {
-  relation: FriendRelation;
-}
-
-function relationLabel(relation: FriendRelation): string {
-  switch (relation) {
-    case "incoming":
-      return "Incoming request";
-    case "outgoing":
-      return "Outgoing request";
-    case "friend":
-      return "Friend";
-    default: {
-      const _exhaustive: never = relation;
-      return _exhaustive;
-    }
-  }
-}
+import {
+  relationLabel,
+  useFriendsPanelModel,
+  type FriendRelation,
+  type SelectableFriend,
+} from "./useFriendsPanelModel";
 
 export function FriendsPanel() {
   const isDesktop = useDesktopLayout();
-  const [query, setQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<FriendListEntry[]>([]);
-  const [friends, setFriends] = useState<FriendListEntry[]>([]);
-  const [incoming, setIncoming] = useState<FriendListEntry[]>([]);
-  const [outgoing, setOutgoing] = useState<FriendListEntry[]>([]);
-  const [loadingList, setLoadingList] = useState(true);
-  const [searching, setSearching] = useState(false);
-  const [busyUid, setBusyUid] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [selectedUid, setSelectedUid] = useState<string | null>(null);
-  const cancelledRef = useRef(false);
-  const { beginRequest, isLatestRequest } = useLatestRequest();
-
-  const refresh = useCallback(async () => {
-    setLoadingList(true);
-    setError(null);
-    try {
-      const next = await listFriends();
-      if (cancelledRef.current) {
-        return;
-      }
-      setFriends(next.friends);
-      setIncoming(next.incoming);
-      setOutgoing(next.outgoing);
-    } catch (nextError) {
-      if (cancelledRef.current) {
-        return;
-      }
-      setError(
-        nextError instanceof Error ? nextError.message : "Could not load friends.",
-      );
-    } finally {
-      if (!cancelledRef.current) {
-        setLoadingList(false);
-      }
-    }
-  }, []);
-
-  useEffect(() => {
-    cancelledRef.current = false;
-    /* eslint-disable react-hooks/set-state-in-effect -- initial friends list load */
-    void refresh();
-    /* eslint-enable react-hooks/set-state-in-effect */
-    return () => {
-      cancelledRef.current = true;
-    };
-  }, [refresh]);
-
-  const handleSearch = async () => {
-    if (searching) {
-      return;
-    }
-    const requestId = beginRequest();
-    setSearching(true);
-    setError(null);
-    try {
-      const next = await searchFriends(query);
-      if (!isLatestRequest(requestId) || cancelledRef.current) {
-        return;
-      }
-      setSearchResults(next.results);
-    } catch (nextError) {
-      if (!isLatestRequest(requestId) || cancelledRef.current) {
-        return;
-      }
-      setSearchResults([]);
-      setError(
-        nextError instanceof Error ? nextError.message : "Search failed.",
-      );
-    } finally {
-      if (isLatestRequest(requestId) && !cancelledRef.current) {
-        setSearching(false);
-      }
-    }
-  };
-
-  const runAction = async (uid: string, action: () => Promise<unknown>) => {
-    setBusyUid(uid);
-    setError(null);
-    try {
-      await action();
-      await refresh();
-      setSearchResults((prev) => prev.filter((entry) => entry.uid !== uid));
-    } catch (nextError) {
-      setError(
-        nextError instanceof Error ? nextError.message : "Action failed.",
-      );
-    } finally {
-      setBusyUid(null);
-    }
-  };
-
-  const relationshipUids = new Set(
-    [...friends, ...incoming, ...outgoing].map((entry) => entry.uid),
-  );
-  const requestableResults = loadingList
-    ? []
-    : searchResults.filter((entry) => !relationshipUids.has(entry.uid));
-
-  const selectableEntries = useMemo((): SelectableFriend[] => {
-    return [
-      ...incoming.map((entry) => ({ ...entry, relation: "incoming" as const })),
-      ...outgoing.map((entry) => ({ ...entry, relation: "outgoing" as const })),
-      ...friends.map((entry) => ({ ...entry, relation: "friend" as const })),
-    ];
-  }, [friends, incoming, outgoing]);
-
-  const selectedEntry =
-    selectableEntries.find((entry) => entry.uid === selectedUid) ?? null;
-
-  useEffect(() => {
-    if (selectedUid == null) {
-      return;
-    }
-    if (!selectableEntries.some((entry) => entry.uid === selectedUid)) {
-      /* eslint-disable react-hooks/set-state-in-effect -- clear selection when the uid leaves the list */
-      setSelectedUid(null);
-      /* eslint-enable react-hooks/set-state-in-effect */
-    }
-  }, [selectableEntries, selectedUid]);
+  const model = useFriendsPanelModel();
+  const {
+    query,
+    queryError,
+    onQueryChange,
+    handleSearch,
+    hasSearched,
+    requestableResults,
+    friends,
+    incoming,
+    outgoing,
+    loadingList,
+    searching,
+    busyUid,
+    error,
+    selectedUid,
+    setSelectedUid,
+    selectedEntry,
+    requestFriend,
+    acceptFriend,
+    declineFriend,
+    cancelFriend,
+  } = model;
 
   const addFriendsSection = (
     <div className="space-y-2">
@@ -166,12 +44,16 @@ export function FriendsPanel() {
       <SearchField
         label="Search username"
         value={query}
-        onChange={setQuery}
+        onChange={onQueryChange}
         onSubmit={() => void handleSearch()}
         submitLabel="Search"
         loading={searching || loadingList}
         placeholder="seeker_one"
       />
+      {queryError ? <InlineError>{queryError}</InlineError> : null}
+      {hasSearched && !searching && requestableResults.length === 0 && !error ? (
+        <EmptyState>No users found for that username.</EmptyState>
+      ) : null}
       {requestableResults.length > 0 ? (
         <ul className="m-0 list-none space-y-2 p-0">
           {requestableResults.map((entry) => (
@@ -185,9 +67,7 @@ export function FriendsPanel() {
               <button
                 type="button"
                 disabled={busyUid === entry.uid}
-                onClick={() =>
-                  void runAction(entry.uid, () => requestFriend(entry.uid))
-                }
+                onClick={() => void requestFriend(entry.uid)}
                 className="btn-secondary min-h-11 shrink-0 px-3 disabled:opacity-50"
               >
                 {busyUid === entry.uid ? "Sending…" : "Request"}
@@ -250,21 +130,10 @@ export function FriendsPanel() {
               <FriendDetail
                 entry={selectedEntry}
                 busyUid={busyUid}
-                onAccept={() =>
-                  void runAction(selectedEntry.uid, () =>
-                    acceptFriendRequest(selectedEntry.uid),
-                  )
-                }
-                onDecline={() =>
-                  void runAction(selectedEntry.uid, () =>
-                    declineFriendRequest(selectedEntry.uid),
-                  )
-                }
-                onCancel={() =>
-                  void runAction(selectedEntry.uid, () =>
-                    cancelFriendRequest(selectedEntry.uid),
-                  )
-                }
+                onAccept={() => void acceptFriend(selectedEntry.uid)}
+                onDecline={() => void declineFriend(selectedEntry.uid)}
+                onCancel={() => void cancelFriend(selectedEntry.uid)}
+                onRequest={() => void requestFriend(selectedEntry.uid)}
               />
             ) : (
               <p className="text-sm leading-relaxed text-ink-muted">
@@ -305,11 +174,7 @@ export function FriendsPanel() {
                   <button
                     type="button"
                     disabled={busyUid === entry.uid}
-                    onClick={() =>
-                      void runAction(entry.uid, () =>
-                        acceptFriendRequest(entry.uid),
-                      )
-                    }
+                    onClick={() => void acceptFriend(entry.uid)}
                     className="btn-primary min-h-11 px-3 disabled:opacity-50"
                   >
                     Accept
@@ -317,11 +182,7 @@ export function FriendsPanel() {
                   <button
                     type="button"
                     disabled={busyUid === entry.uid}
-                    onClick={() =>
-                      void runAction(entry.uid, () =>
-                        declineFriendRequest(entry.uid),
-                      )
-                    }
+                    onClick={() => void declineFriend(entry.uid)}
                     className="btn-secondary min-h-11 px-3 disabled:opacity-50"
                   >
                     Decline
@@ -352,11 +213,7 @@ export function FriendsPanel() {
                 <button
                   type="button"
                   disabled={busyUid === entry.uid}
-                  onClick={() =>
-                    void runAction(entry.uid, () =>
-                      cancelFriendRequest(entry.uid),
-                    )
-                  }
+                  onClick={() => void cancelFriend(entry.uid)}
                   className="btn-secondary min-h-11 px-3 disabled:opacity-50"
                 >
                   Cancel
@@ -457,12 +314,14 @@ function FriendDetail({
   onAccept,
   onDecline,
   onCancel,
+  onRequest,
 }: {
   entry: SelectableFriend;
   busyUid: string | null;
   onAccept: () => void;
   onDecline: () => void;
   onCancel: () => void;
+  onRequest: () => void;
 }) {
   const busy = busyUid === entry.uid;
 
@@ -511,6 +370,16 @@ function FriendDetail({
           Connected. You’ll see each other on friends leaderboards when opted
           in.
         </p>
+      ) : null}
+      {entry.relation === "search" ? (
+        <button
+          type="button"
+          disabled={busy}
+          onClick={onRequest}
+          className="btn-secondary min-h-11 px-3 disabled:opacity-50"
+        >
+          {busy ? "Sending…" : "Request"}
+        </button>
       ) : null}
     </div>
   );

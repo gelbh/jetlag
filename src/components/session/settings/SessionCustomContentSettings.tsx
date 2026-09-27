@@ -21,7 +21,7 @@ export function SessionCustomContentSettings({
   const panelId = useId();
 
   return (
-    <div id={panelId} className="space-y-4 border-t border-border pt-3">
+    <div id={panelId} className="space-y-4">
       <MatchingAreaUpload
         value={value}
         onChange={onChange}
