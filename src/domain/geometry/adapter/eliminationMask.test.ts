@@ -6,6 +6,7 @@ import { MAP_ANNOTATION_COLORS } from "../../map/mapAnnotationColors";
 import {
   computeEliminationUnionInput,
   computeEliminationUnionInputTs,
+  eliminationFeatureForAnnotation,
   eliminationFeatureForAnnotationTs,
 } from "./eliminationMask";
 
@@ -81,12 +82,12 @@ function radarAnnotation(
 describe("adapter/eliminationMask", () => {
   it("does not shade exterior when radar inside is undefined", () => {
     expect(
-      eliminationFeatureForAnnotationTs(radarAnnotation(undefined), gameArea),
+      eliminationFeatureForAnnotationTs(radarAnnotation(undefined)),
     ).toBeNull();
   });
 
-  it("yes (hider inside): eliminates outside the radar disk, not the disk", () => {
-    const input = computeEliminationUnionInputTs(
+  it("yes (hider inside): eliminates outside the radar disk, not the disk", async () => {
+    const input = await computeEliminationUnionInput(
       [radarAnnotation(true)],
       gameArea,
     );
@@ -145,7 +146,7 @@ describe("adapter/eliminationMask", () => {
     expect(input.disks).toEqual([]);
   });
 
-  it("rebuilds measuring shade from stored region input when geometry is a point", () => {
+  it("rebuilds measuring shade from stored region input when geometry is a point", async () => {
     const annotation: AnnotationRecord = {
       id: "measuring-deferred",
       sessionId: "session",
@@ -172,7 +173,7 @@ describe("adapter/eliminationMask", () => {
       },
     };
 
-    const shade = eliminationFeatureForAnnotationTs(annotation, gameArea);
+    const shade = await eliminationFeatureForAnnotation(annotation, gameArea);
     expect(shade?.geometry.type).toMatch(/Polygon/);
     expect(
       booleanPointInPolygon(turfPoint([-0.14, 51.44]), shade!),
