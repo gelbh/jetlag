@@ -153,4 +153,29 @@ describe("LocationPermissionPrompt", () => {
 
     release();
   });
+
+  it("shows blocked guidance when quiet restore is denied under Permissions prompt", async () => {
+    mockGeolocation(null);
+    mockPermissions("prompt");
+    persistLocationAccessConfirmed();
+    const release = retainLocationPermissionDemand();
+    const getCurrentPosition = vi.mocked(navigator.geolocation.getCurrentPosition);
+
+    render(
+      <MemoryRouter initialEntries={["/map"]}>
+        <LocationPermissionPrompt />
+      </MemoryRouter>,
+    );
+
+    await waitFor(() => {
+      expect(getCurrentPosition).toHaveBeenCalled();
+    });
+
+    expect(
+      await screen.findByRole("dialog", { name: /location blocked/i }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /try again/i })).toBeInTheDocument();
+
+    release();
+  });
 });
