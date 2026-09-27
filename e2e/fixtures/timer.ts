@@ -15,21 +15,35 @@ export function parseClockToSeconds(text: string): number {
   throw new Error(`Unexpected timer format: ${text}`);
 }
 
+/** Tip MapTimerCluster primary readout (view-only; not a button). */
+export function sessionElapsedLocator(page: Page) {
+  return page.getByTitle("Session time since start");
+}
+
 export async function readSessionElapsedSeconds(page: Page): Promise<number> {
-  const sessionButton = page.getByRole("button", {
-    name: /Session elapsed|Seek phase time/i,
-  });
-  await expect(sessionButton).toBeVisible({ timeout: 15_000 });
-  const text =
-    (await sessionButton.locator(".jl-ticker-value").textContent()) ?? "";
+  const elapsed = sessionElapsedLocator(page);
+  await expect(elapsed).toBeVisible({ timeout: 15_000 });
+  const text = (await elapsed.textContent()) ?? "";
   return parseClockToSeconds(text);
+}
+
+/** Poll until the live ticker has advanced at least `minSeconds` (no fixed sleep). */
+export async function waitForSessionElapsedAtLeast(
+  page: Page,
+  minSeconds: number,
+  options?: { timeout?: number },
+): Promise<number> {
+  let elapsed = 0;
+  await expect(async () => {
+    elapsed = await readSessionElapsedSeconds(page);
+    expect(elapsed).toBeGreaterThanOrEqual(minSeconds);
+  }).toPass({ timeout: options?.timeout ?? 15_000 });
+  return elapsed;
 }
 
 export async function startSessionTimer(page: Page) {
   await page.getByRole("button", { name: "Start" }).click();
-  await expect(
-    page.getByRole("button", { name: /Session elapsed|Seek phase time/i }),
-  ).toBeVisible({ timeout: 15_000 });
+  await expect(sessionElapsedLocator(page)).toBeVisible({ timeout: 15_000 });
 }
 
 export async function goHomeFromMap(page: Page) {
@@ -47,9 +61,13 @@ export async function returnToMapFromHome(page: Page) {
   await dismissMapOnboarding(page);
 }
 
+/** Tip status island exposes Pause/Resume inline (no timer-settings menu). */
+export async function pauseSessionTimer(page: Page) {
+  await page.getByRole("button", { name: "Pause timer" }).click();
+  await expect(page.getByRole("button", { name: "Resume timer" })).toBeVisible();
+}
+
+/** @deprecated Prefer pauseSessionTimer; tip chrome has no separate settings open. */
 export async function openTimerSettings(page: Page) {
-  await page
-    .getByRole("button", { name: /Seek phase time|Session elapsed/i })
-    .click();
-  await expect(page.getByRole("button", { name: "Pause" })).toBeVisible();
+  await pauseSessionTimer(page);
 }

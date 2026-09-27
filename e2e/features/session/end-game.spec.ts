@@ -17,22 +17,27 @@ test("found station starts end game immediately; cancel and reset work", async (
 }) => {
   const { hostPage, guestPage } = hostHider;
 
-  await confirmInitialHidingZoneAtStation(guestPage, "Dublin Central");
-  await dismissMapOnboarding(guestPage);
+  await test.step("hider confirms zone; host starts timer", async () => {
+    await confirmInitialHidingZoneAtStation(guestPage, "Dublin Central");
+    await dismissMapOnboarding(guestPage);
+    await startSessionTimer(hostPage);
+    await dismissMapOnboarding(hostPage);
+  });
 
-  await startSessionTimer(hostPage);
-  await dismissMapOnboarding(hostPage);
+  await test.step("found station starts end game for both roles", async () => {
+    await startEndGameFromFoundStation(hostPage);
+    await expectEndGameStarted(hostPage, guestPage);
 
-  await startEndGameFromFoundStation(hostPage);
-  await expectEndGameStarted(hostPage, guestPage);
+    await expect(
+      guestPage.getByRole("button", { name: "Accept" }),
+    ).toBeHidden();
+    await expect(
+      guestPage.getByText("Seekers requested end game"),
+    ).toBeHidden();
+  });
 
-  await expect(
-    guestPage.getByRole("button", { name: "Accept" }),
-  ).toBeHidden();
-  await expect(
-    guestPage.getByText("Seekers requested end game"),
-  ).toBeHidden();
-
-  await expectEndGameRestrictions(hostPage);
-  await cancelEndGame(hostPage);
+  await test.step("restrictions apply; cancel clears end game", async () => {
+    await expectEndGameRestrictions(hostPage);
+    await cancelEndGame(hostPage);
+  });
 });
