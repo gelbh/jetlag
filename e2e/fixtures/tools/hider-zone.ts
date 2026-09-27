@@ -1,16 +1,19 @@
 import { type Page, expect } from "@playwright/test";
 
 export async function waitForHidingZoneWizard(page: Page) {
-  // Hiding zone uses AskHudHost portal (Drawer); host wrapper is zero-box.
-  await expect(page.getByTestId("ask-hud-host")).toBeAttached({
+  // Method sheet (AskHudHost) or map-first placement overlay.
+  const methodDialog = page.getByRole("dialog", {
+    name: /Hiding zone|Move zone/i,
+  });
+  const mapFirst = page.getByTestId("hiding-zone-map-placement");
+  await expect(methodDialog.or(mapFirst)).toBeVisible({ timeout: 15_000 });
+  const methodGroup = page.getByRole("group", {
+    name: "Hiding zone placement method",
+  });
+  const locationSearch = page.getByPlaceholder("Search stations…");
+  await expect(methodGroup.or(locationSearch).or(mapFirst)).toBeVisible({
     timeout: 15_000,
   });
-  // Fresh Set zone shows method group; Play move may jump straight to stations.
-  await expect(
-    page
-      .getByRole("group", { name: "Hiding zone placement method" })
-      .or(page.getByPlaceholder("Search stations…")),
-  ).toBeVisible({ timeout: 15_000 });
 }
 
 export async function searchStationsInArea(page: Page) {
@@ -30,8 +33,15 @@ export async function advanceHidingZoneWizardToLocation(page: Page) {
     name: "Hiding zone placement method",
   });
   if (await methodGroup.isVisible().catch(() => false)) {
-    await page.getByRole("button", { name: "Station" }).click();
+    // Map-first method chips: "Transit stop" / "Tap map" (legacy: "Station").
+    const transitChip = page.getByRole("button", {
+      name: /^Transit stop$|^Station$/i,
+    });
+    await transitChip.click();
   }
+  await expect(page.getByTestId("hiding-zone-map-placement")).toBeVisible({
+    timeout: 15_000,
+  });
   await expect(page.getByPlaceholder("Search stations…")).toBeVisible({
     timeout: 15_000,
   });
@@ -53,9 +63,12 @@ export async function selectTransitStation(page: Page, name: string | RegExp) {
 }
 
 export async function confirmHidingZone(page: Page) {
-  const confirm = page.getByTestId("ask-commit-strip").getByRole("button");
+  const mapFirstConfirm = page
+    .getByTestId("hiding-zone-map-placement")
+    .getByRole("button", { name: /^Confirm$/i });
+  const sheetConfirm = page.getByTestId("ask-commit-strip").getByRole("button");
+  const confirm = mapFirstConfirm.or(sheetConfirm);
   await expect(confirm).toBeEnabled({ timeout: 10_000 });
-  await expect(confirm).toHaveAttribute("data-armed", "true");
   await confirm.click();
   await expect(page.getByText(/PERMISSION_DENIED/i)).toBeHidden({
     timeout: 5_000,
