@@ -1,5 +1,6 @@
 import type { ReactNode, RefObject } from "react";
 import { Button } from "../../components/ui/button";
+import { fieldFrameStyle } from "@/components/ui/entry/entryStyles";
 import {
   FramingModeSegmentControl,
   GameAreaFramingPolygonActions,
@@ -169,7 +170,7 @@ export function GameAreaSection({ model, settingsSlot }: GameAreaSectionProps) {
         </div>
       </div>
 
-      <div className="jl-field-frame mt-4 space-y-3">
+      <div className="mt-4 space-y-3" style={fieldFrameStyle}>
         <div className="space-y-1">
           <SectionLabel>Draw on map</SectionLabel>
           <p className="text-xs leading-snug text-field-ink-muted">
@@ -218,7 +219,7 @@ export function GameAreaSection({ model, settingsSlot }: GameAreaSectionProps) {
         </div>
       ) : null}
 
-      <div className="jl-field-frame mt-4 space-y-3">
+      <div className="mt-4 space-y-3" style={fieldFrameStyle}>
         <label className="field-label text-[0.8125rem] font-semibold tracking-[0.04em] text-field-ink-muted uppercase">
           City, county, state, or country
           <input

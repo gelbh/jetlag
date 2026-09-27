@@ -1,6 +1,8 @@
+import { Progress, Text } from "@mantine/core";
 import { HudRefreshIcon } from "../../ui/brand/HudIcons";
 import { HudDetailPanel } from "../../ui/hud/HudDetailPanel";
 import { loadingSpinnerClass } from "../../ui/feedback/loadingSpinnerClass";
+import { preloadBeaconStyle } from "@/components/ui/entry/entryChrome";
 
 interface GameAreaPreloadDetailPanelProps {
   loading: boolean;
@@ -28,6 +30,11 @@ export function GameAreaPreloadDetailPanel({
   const statusClass = failed
     ? "jl-preload-detail-panel--failed"
     : "jl-preload-detail-panel--loading";
+  const titleColor = failed
+    ? "var(--color-flag)"
+    : loading
+      ? "var(--color-signal)"
+      : "var(--color-field-ink)";
 
   return (
     <HudDetailPanel
@@ -35,52 +42,84 @@ export function GameAreaPreloadDetailPanel({
       ariaLabel={title}
       leading={
         <span
-          className={`jl-preload-beacon jl-preload-beacon--sm ${
-            failed ? "jl-preload-beacon--failed" : "jl-preload-beacon--loading"
-          }`}
+          className="jl-preload-beacon"
+          style={preloadBeaconStyle(failed ? "failed" : "loading", "sm")}
           aria-hidden="true"
         >
           <HudRefreshIcon
-            className={`jl-preload-beacon__icon stroke-[2.5] ${loadingSpinnerClass(loading)}`}
+            className={`stroke-[2.5] ${loadingSpinnerClass(loading)}`}
+            style={{ width: "0.875rem", height: "0.875rem" }}
           />
         </span>
       }
-      title={title}
-      titleClassName="jl-preload-detail-panel__title"
+      title={<span style={{ color: titleColor }}>{title}</span>}
       onClose={onClose}
       closeLabel="Close map preload details"
       actionLabel={failed && onDismiss ? "Dismiss" : undefined}
       onAction={onDismiss}
     >
       {loading ? (
-        <div className="jl-preload-detail-panel__progress">
-          <div className="jl-preload-detail-panel__progress-meta">
-            <span className="jl-preload-detail-panel__progress-label">
+        <div style={{ marginTop: "0.375rem", paddingLeft: "1.625rem" }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "baseline",
+              justifyContent: "space-between",
+              gap: "0.5rem",
+              marginBottom: "0.25rem",
+            }}
+          >
+            <Text
+              component="span"
+              size="xs"
+              fw={600}
+              tt="uppercase"
+              style={{
+                letterSpacing: "0.08em",
+                color: "var(--color-field-ink-muted)",
+              }}
+            >
               Progress
-            </span>
-            <span
-              className="jl-preload-detail-panel__progress-count tabular-nums"
+            </Text>
+            <Text
+              component="span"
+              size="xs"
+              fw={700}
+              ff="monospace"
+              style={{ color: "var(--color-highlight)" }}
               aria-live="polite"
             >
               {completedJobs}/{totalJobs}
-            </span>
+            </Text>
           </div>
-          <div
-            className="jl-preload-detail-panel__progress-track"
-            role="progressbar"
-            aria-valuemin={0}
-            aria-valuemax={totalJobs}
-            aria-valuenow={completedJobs}
+          <Progress
+            value={progress}
+            size={4}
+            radius="xl"
             aria-label={`Map preload progress, ${completedJobs} of ${totalJobs}`}
-          >
-            <span
-              className="jl-preload-detail-panel__progress-fill"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
+            styles={{
+              root: {
+                backgroundColor: "oklch(from var(--color-field-ink) l c h / 0.1)",
+              },
+              section: {
+                backgroundColor: "var(--color-signal)",
+              },
+            }}
+          />
         </div>
       ) : null}
-      <p className="jl-preload-detail-panel__body">{body}</p>
+      <Text
+        component="p"
+        size="sm"
+        mt="xs"
+        style={{
+          paddingLeft: "1.625rem",
+          color: "var(--color-field-ink-muted)",
+          marginBottom: 0,
+        }}
+      >
+        {body}
+      </Text>
     </HudDetailPanel>
   );
 }

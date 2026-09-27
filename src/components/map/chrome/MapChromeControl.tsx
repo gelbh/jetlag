@@ -1,6 +1,8 @@
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 import { UnstyledButton } from "@mantine/core";
 import {
+  hudChromeStyles,
+  mapToolSlotIconStyle,
   mapToolSlotLabelStyle,
   mapToolSlotStyles,
   type MapToolSlotTone,
@@ -65,9 +67,17 @@ function ControlBody({
       .join(" ");
     return (
       <>
-        {icon != null ? <span className={iconClass}>{icon}</span> : null}
+        {icon != null ? (
+          <span className={iconClass} style={mapToolSlotIconStyle}>
+            {icon}
+          </span>
+        ) : null}
         {label != null ? (
-          <span data-ios-tool-label="" style={mapToolSlotLabelStyle}>
+          <span
+            className="jl-tool-slot-label"
+            data-ios-tool-label=""
+            style={mapToolSlotLabelStyle}
+          >
             {label}
           </span>
         ) : null}
@@ -138,16 +148,17 @@ export function MapChromeControl({
   }
 
   return (
-    <button
+    <UnstyledButton
       type={type}
       disabled={disabled}
       className={resolvedClassName}
+      styles={hudChromeStyles(Boolean(pressed))}
       aria-label={ariaLabel}
       aria-pressed={pressed}
       title={title ?? ariaLabel}
       {...rest}
     >
       {body}
-    </button>
+    </UnstyledButton>
   );
 }

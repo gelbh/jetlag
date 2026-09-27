@@ -8,12 +8,17 @@ import type {
 } from "@/domain/session/activity/sessionChat";
 import { ScreenNav } from "../../ui/layout/ScreenNav";
 import { GameAreaPreloadBeacon } from "../preload/GameAreaPreloadBeacon";
-import { HudErrorBanner } from "../../ui/banners/HudErrorBanner";
-import { userErrorFromSyncMessage } from "@/domain/device/feedback/userErrors";
+import { PlayerStickyErrorAlert } from "../../ui/feedback/PlayerStickyErrorAlert";
+import { showEphemeralPlayerNotification } from "../../ui/notifications/showEphemeralPlayerNotification";
+import {
+  userErrorFromSyncMessage,
+  type UserErrorDisplay,
+} from "@/domain/device/feedback/userErrors";
 import type { SessionRulesInput } from "@/domain/session/rules";
 import type { PlayerRole } from "@/domain/session/players/playerRole";
 import type { RoleGates } from "@/domain/session/players/roleGates";
 import { useLeaderJoinRequests } from "@/hooks/map-screen/useLeaderJoinRequests";
+import { desktopOpsStatusExpandedStyle } from "@/components/ui/entry/entryChrome";
 import { EndGameAlert } from "../status/EndGameAlert";
 import { FoundHiderAlert } from "../status/FoundHiderAlert";
 import { HiderOutsideZoneAlert } from "../status/HiderOutsideZoneAlert";
@@ -22,6 +27,48 @@ import { SyncBlock } from "../status/SyncBlock";
 import { TimerBlock } from "../status/TimerBlock";
 import { ToolStatusBlock } from "../status/ToolStatusBlock";
 import { SYNC_TONE_CLASSES, syncRailDisplay } from "../status/syncRailDisplay";
+
+/** Spec: action / secondaryAction fields → sticky; only toast when action-free. */
+function errorHasActions(error: UserErrorDisplay): boolean {
+  return Boolean(
+    (error.action && error.actionLabel) ||
+      (error.secondaryAction && error.secondaryActionLabel),
+  );
+}
+
+/** Channel 1 vs 2: actionful → sticky Alert; action-free → ephemeral toast. */
+function MapPlayerErrorChannel({
+  error,
+  onAction,
+  onSecondaryAction,
+}: {
+  error: UserErrorDisplay;
+  onAction?: () => void;
+  onSecondaryAction?: () => void;
+}) {
+  const hasActions = errorHasActions(error);
+
+  useEffect(() => {
+    if (hasActions) {
+      return;
+    }
+    showEphemeralPlayerNotification(error);
+  }, [hasActions, error.title, error.message]);
+
+  if (!hasActions) {
+    return null;
+  }
+
+  return (
+    <div className="pointer-events-auto mx-3 mt-1.5">
+      <PlayerStickyErrorAlert
+        error={error}
+        onAction={onAction}
+        onSecondaryAction={onSecondaryAction}
+      />
+    </div>
+  );
+}
 
 /** Role-agnostic status/timer/sync bag for MapStatusRail (W4-A peel). */
 export type MapStatusRailModel = {
@@ -178,7 +225,7 @@ export function MapStatusRail({ model, headerLeading }: MapStatusRailProps) {
   }, [showPreloadMenu, showTimerMenu]);
 
   const railClassName = `jl-status-rail pointer-events-none z-[var(--z-banner)]${
-    expanded ? " jl-status-rail--expanded" : " absolute inset-x-0 top-0"
+    expanded ? "" : " absolute inset-x-0 top-0"
   }${
     inactiveChrome
       ? " [&_.jl-status-header-col--timer_.jl-ticker]:pointer-events-none [&_.jl-status-header-col--timer_.jl-ticker]:opacity-55 [&_.jl-status-header-col--timer_button]:pointer-events-none [&_.jl-status-header-col--timer_button]:opacity-55"
@@ -189,6 +236,7 @@ export function MapStatusRail({ model, headerLeading }: MapStatusRailProps) {
     <div
       ref={railRef}
       className={railClassName}
+      style={expanded ? desktopOpsStatusExpandedStyle : undefined}
       data-testid="map-status-rail-mantine"
     >
       <div className="relative">
@@ -269,14 +317,14 @@ export function MapStatusRail({ model, headerLeading }: MapStatusRailProps) {
         ) : null}
 
         {showTerminalBanner ? (
-          <HudErrorBanner
+          <MapPlayerErrorChannel
             error={terminalSessionError}
             onAction={onSyncErrorAction}
             onSecondaryAction={onReturnToJoin}
           />
         ) : sync.banner?.visible ? (
-          syncErrorDisplay && onSyncErrorAction ? (
-            <HudErrorBanner
+          syncErrorDisplay ? (
+            <MapPlayerErrorChannel
               error={syncErrorDisplay}
               onAction={onSyncErrorAction}
             />

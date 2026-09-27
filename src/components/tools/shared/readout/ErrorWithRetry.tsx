@@ -1,3 +1,4 @@
+import { Button, Stack } from "@mantine/core";
 import { AskInlineError } from "@/components/tools/shared/readout/AskInlineError";
 
 interface ErrorWithRetryProps {
@@ -7,13 +8,13 @@ interface ErrorWithRetryProps {
 
 export function ErrorWithRetry({ error, onRetry }: ErrorWithRetryProps) {
   return (
-    <div className="jl-selectable space-y-2">
+    <Stack gap="sm" className="jl-selectable">
       <AskInlineError message={error} />
       {onRetry ? (
-        <button type="button" onClick={onRetry} className="btn-secondary text-sm">
+        <Button variant="default" size="compact-md" onClick={onRetry}>
           Retry
-        </button>
+        </Button>
       ) : null}
-    </div>
+    </Stack>
   );
 }
