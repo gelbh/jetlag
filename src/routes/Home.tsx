@@ -33,6 +33,7 @@ import { useAuthBootstrapReady } from "@/hooks/app/useAuthBootstrapReady";
 import { useContinueActiveSession } from "@/hooks/session/useContinueActiveSession";
 import { useRouteTransition } from "@/navigation/useRouteTransition";
 import { isFirebaseConfigured } from "@/services/core/firebase/firebase";
+import { PHONE_SHELL_MAX_WIDTH_PX } from "@/theme/phoneShell";
 
 export function Home() {
   const { session, myRole, continueError, continuing, handleContinue } =
@@ -55,7 +56,7 @@ export function Home() {
         size="xs"
         w="100%"
         px={0}
-        maw={390}
+        maw={PHONE_SHELL_MAX_WIDTH_PX}
       >
         <Stack gap={28}>
           <Stack gap={10}>

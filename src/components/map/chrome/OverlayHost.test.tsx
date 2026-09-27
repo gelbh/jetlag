@@ -11,7 +11,7 @@ describe("OverlayHost", () => {
 
   it("wraps phone chrome as a fixed overlay host with horizontal safe-area classes", () => {
     const { container } = render(
-      <OverlayHost layout="phone">
+      <OverlayHost>
         <div data-testid="child">x</div>
       </OverlayHost>,
     );
@@ -24,20 +24,5 @@ describe("OverlayHost", () => {
     // Bottom inset lives in map-bottom-chrome.css (real CSS), not Tailwind.
     expect(host?.className).not.toMatch(/safe-area-inset-bottom/);
     expect(host?.classList.contains("jl-map-bottom-chrome-host")).toBe(true);
-  });
-
-  it("uses relative fill for rail layout without fixed phone pad", () => {
-    const { container } = render(
-      <OverlayHost layout="rail">
-        <div>rail</div>
-      </OverlayHost>,
-    );
-    const host = container.querySelector("[data-overlay-host]");
-    expect(host?.getAttribute("data-layout")).toBe("rail");
-    expect(host?.classList.contains("jl-map-bottom-chrome-host--rail")).toBe(
-      true,
-    );
-    expect(host?.className).toMatch(/relative/);
-    expect(host?.className).not.toMatch(/fixed/);
   });
 });
