@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { AnnotationRecord } from "../map/annotations";
+import type { PendingQuestionRecord } from "../session/activity/sessionChat";
 import {
   firstAvailableMatchingCategoryId,
   isMatchingCategoryAvailable,
@@ -68,7 +69,7 @@ describe("matchingQuestions", () => {
       toolType: "matching",
       status: "pending",
       placement: { metadata: { matchingCategory: "landmass" } },
-    } as never;
+    } as unknown as PendingQuestionRecord;
     expect(usedMatchingCategoryIdsForSession([], [pending])).toEqual(
       new Set(["landmass"]),
     );
@@ -77,7 +78,7 @@ describe("matchingQuestions", () => {
       ...pending,
       status: "cancelled",
       answer: "yes",
-    };
+    } as unknown as PendingQuestionRecord;
     expect(usedMatchingCategoryIdsForSession([], [cancelled])).toEqual(
       new Set(["landmass"]),
     );

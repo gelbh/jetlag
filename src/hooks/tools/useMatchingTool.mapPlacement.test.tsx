@@ -5,6 +5,7 @@ import { matchingEmptyPlayAreaMessage } from "@/services/geo/matching";
 import { jetlagTheme } from "@/theme/theme";
 import { useMatchingTool } from "./useMatchingTool";
 import { createToolHookMocks } from "../../test/helpers/toolHookMocks";
+import type { ResolveMatchingAnchorResult } from "./matching/resolveMatchingAnchor";
 
 vi.mock("../forms/useDebouncedValue", () => ({
   useDebouncedValue: <T,>(value: T) => value,
@@ -21,8 +22,8 @@ vi.mock("../../services/core/location/geolocation", async (importOriginal) => {
   };
 });
 
-const resolveMatchingAnchor = vi.hoisted(() =>
-  vi.fn(async () => ({
+const resolveMatchingAnchor = vi.hoisted(() => {
+  const defaultResult = {
     features: [
       {
         id: "f-0",
@@ -33,23 +34,29 @@ const resolveMatchingAnchor = vi.hoisted(() =>
     ],
     featureCount: 1,
     inPlayAreaFeatureCount: 1,
-    nearestFeatureId: "f-0",
-    nearestFeatureName: "Dublin Airport",
-    nearestFeaturePoint: [53.42, -6.27] as [number, number],
-    distanceMeters: 1200,
+    nearestFeatureId: "f-0" as string | null,
+    nearestFeatureName: "Dublin Airport" as string | null,
+    nearestFeaturePoint: [53.42, -6.27] as [number, number] | null,
+    distanceMeters: 1200 as number | null,
     nearestOutsidePlayArea: false,
     nullAnswer: false,
-    error: null,
-  })),
-);
+    error: null as string | null,
+  } satisfies ResolveMatchingAnchorResult;
+  return vi.fn(
+    async (
+      ..._args: unknown[]
+    ): Promise<ResolveMatchingAnchorResult> => defaultResult,
+  );
+});
 
 vi.mock("./matching/resolveMatchingAnchor", async (importOriginal) => {
   const actual =
     await importOriginal<typeof import("./matching/resolveMatchingAnchor")>();
   return {
     ...actual,
-    resolveMatchingAnchor: (...args: unknown[]) =>
-      resolveMatchingAnchor(...args),
+    resolveMatchingAnchor: (
+      ...args: Parameters<typeof actual.resolveMatchingAnchor>
+    ) => resolveMatchingAnchor(...args),
   };
 });
 

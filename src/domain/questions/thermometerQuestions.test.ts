@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { annotationSummary } from "../map/annotations";
+import type { PendingQuestionRecord } from "../session/activity/sessionChat";
 import {
   DEFAULT_THERMOMETER_DISTANCE_METERS,
   THERMOMETER_DISTANCE_PRESETS,
@@ -93,7 +94,7 @@ describe("thermometerQuestions", () => {
       placement: {
         metadata: { thermometerDistanceMeters: threeMiles },
       },
-    } as never;
+    } as unknown as PendingQuestionRecord;
     expect(usedThermometerDistanceOptionsForSession([], [pending])).toEqual(
       new Set([3]),
     );
@@ -102,7 +103,7 @@ describe("thermometerQuestions", () => {
       ...pending,
       status: "cancelled",
       answer: "hotter",
-    };
+    } as unknown as PendingQuestionRecord;
     expect(usedThermometerDistanceOptionsForSession([], [cancelled])).toEqual(
       new Set([3]),
     );

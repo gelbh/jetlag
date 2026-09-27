@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { AnnotationRecord } from "../map/annotations";
+import type { PendingQuestionRecord } from "../session/activity/sessionChat";
 import {
   RADAR_RADIUS_PRESET_METERS,
   availableRadarDistancePresets,
@@ -166,7 +167,7 @@ describe("radarQuestions", () => {
           radarChooseCustom: false,
         },
       },
-    } as never;
+    } as unknown as PendingQuestionRecord;
     expect(
       usedRadarDistanceOptionsForSession([], [pending], "imperial"),
     ).toEqual(new Set([3]));
@@ -175,7 +176,7 @@ describe("radarQuestions", () => {
       ...pending,
       status: "cancelled",
       answer: "yes",
-    };
+    } as unknown as PendingQuestionRecord;
     expect(
       usedRadarDistanceOptionsForSession([], [cancelled], "imperial"),
     ).toEqual(new Set([3]));

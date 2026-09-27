@@ -190,11 +190,13 @@ export function AskCatalogRail({
                             role: "button",
                             tabIndex: disabled ? -1 : 0,
                             "aria-label": row.label,
+                            "aria-disabled": disabled || undefined,
                           }
-                        : { type: "button" as const })}
+                        : {
+                            type: "button" as const,
+                            disabled,
+                          })}
                       aria-pressed={selected}
-                      aria-disabled={disabled || undefined}
-                      disabled={disabled}
                       onClick={selectRow}
                       styles={{ root: tileRoot }}
                     >

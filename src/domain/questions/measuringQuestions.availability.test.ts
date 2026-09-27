@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { AnnotationRecord } from "../map/annotations";
+import type { PendingQuestionRecord } from "../session/activity/sessionChat";
 import {
   firstAvailableMeasuringFromKind,
   usedMeasuringFromKinds,
@@ -80,7 +81,7 @@ describe("measuring availability", () => {
           measuringLocationCategory: "zoo",
         },
       },
-    } as never;
+    } as unknown as PendingQuestionRecord;
     expect(usedMeasuringFromKindsForSession([], [pending])).toEqual(
       new Set(["zoo"]),
     );
@@ -89,7 +90,7 @@ describe("measuring availability", () => {
       ...pending,
       status: "cancelled",
       answer: "closer",
-    };
+    } as unknown as PendingQuestionRecord;
     expect(usedMeasuringFromKindsForSession([], [cancelled])).toEqual(
       new Set(["zoo"]),
     );

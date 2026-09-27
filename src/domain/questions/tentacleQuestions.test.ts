@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { AnnotationRecord } from "../map/annotations";
+import type { PendingQuestionRecord } from "../session/activity/sessionChat";
 import type { SessionRulesInput } from "../session/rules";
 import {
   defaultTentacleCategoryId,
@@ -87,7 +88,7 @@ describe("tentacleQuestions", () => {
       toolType: "tentacle",
       status: "pending",
       placement: { metadata: { tentacleCategoryId: "museum" } },
-    } as never;
+    } as unknown as PendingQuestionRecord;
     expect(usedTentacleCategoryIdsForSession([], [pending])).toEqual(
       new Set(["museum"]),
     );
@@ -96,7 +97,7 @@ describe("tentacleQuestions", () => {
       ...pending,
       status: "cancelled",
       answer: "City Museum",
-    };
+    } as unknown as PendingQuestionRecord;
     expect(usedTentacleCategoryIdsForSession([], [cancelled])).toEqual(
       new Set(["museum"]),
     );
