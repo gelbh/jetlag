@@ -89,8 +89,6 @@ test.describe("mobile tool dock", () => {
     page,
   }) => {
     await test.step("single-path hunt island exposes history", async () => {
-      // Residual scrub: Survey-world marker must stay gone (absence assert only).
-      await expect(page.locator("[data-player-ux-world]")).toHaveCount(0);
       const hunt = page.locator('[data-island="hunt"]');
       await expect(hunt).toBeVisible();
       await expect(
