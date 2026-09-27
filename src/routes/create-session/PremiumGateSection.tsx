@@ -39,7 +39,7 @@ export function PremiumGateSection({
       <div
         className={`overflow-hidden motion-safe:transition-[max-height,opacity] motion-safe:duration-200 motion-safe:ease-[cubic-bezier(0.25,1,0.5,1)] motion-reduce:transition-none ${
           showPremiumUnlockPanel || requiresPremiumSignIn
-            ? "max-h-56 opacity-100"
+            ? "max-h-[120rem] opacity-100"
             : "max-h-0 opacity-0"
         }`}
       >
@@ -73,9 +73,7 @@ export function PremiumGateSection({
               styles={plainStyles}
               style={{ alignSelf: "flex-start" }}
             >
-              {accessCodeExpanded
-                ? "Hide access code"
-                : "Have an access code?"}
+              {accessCodeExpanded ? "Hide access code" : "Have an access code?"}
             </Button>
           </Stack>
         ) : null}
@@ -84,7 +82,7 @@ export function PremiumGateSection({
       <div
         className={`overflow-hidden motion-safe:transition-[max-height,opacity] motion-safe:duration-200 motion-safe:ease-[cubic-bezier(0.25,1,0.5,1)] motion-reduce:transition-none ${
           showAccessCodeField
-            ? "max-h-40 opacity-100"
+            ? "max-h-[120rem] opacity-100"
             : "max-h-0 opacity-0"
         }`}
       >
@@ -93,7 +91,9 @@ export function PremiumGateSection({
             <TextInput
               label="Host access code"
               value={accessCode}
-              onChange={(event) => onAccessCodeChange(event.currentTarget.value)}
+              onChange={(event) =>
+                onAccessCodeChange(event.currentTarget.value)
+              }
               type="password"
               autoComplete="off"
               autoCorrect="off"
@@ -105,7 +105,9 @@ export function PremiumGateSection({
           <Text size="xs" c="var(--color-field-ink-muted)" px={4}>
             Enter once. Friends join with the game code only.
           </Text>
-          {accessCodeError ? <ErrorCallout>{accessCodeError}</ErrorCallout> : null}
+          {accessCodeError ? (
+            <ErrorCallout>{accessCodeError}</ErrorCallout>
+          ) : null}
         </Stack>
       </div>
     </>

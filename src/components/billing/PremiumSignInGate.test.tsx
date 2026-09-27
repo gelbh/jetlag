@@ -22,7 +22,10 @@ let mockUser: {
 let mockAuthReady = true;
 
 vi.mock("../../services/core/auth/accountAuth", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("../../services/core/auth/accountAuth")>();
+  const actual =
+    await importOriginal<
+      typeof import("../../services/core/auth/accountAuth")
+    >();
   return {
     ...actual,
     completePremiumEmailSignInLink: (...args: unknown[]) =>
@@ -84,7 +87,10 @@ describe("PremiumSignInGate", () => {
       email: "player@example.com",
     };
     mockAuthReady = true;
-    mockEnsureAnonymousUser.mockResolvedValue({ uid: "anon-1", isAnonymous: true });
+    mockEnsureAnonymousUser.mockResolvedValue({
+      uid: "anon-1",
+      isAnonymous: true,
+    });
     mockCompletePremiumEmailSignInLink.mockResolvedValue(null);
     mockCompleteOAuthRedirectIfPending.mockResolvedValue(null);
     mockRecoverPremiumEntitlements.mockResolvedValue(false);
@@ -99,8 +105,12 @@ describe("PremiumSignInGate", () => {
       </PremiumSignInGate>,
     );
 
-    expect(screen.getByText(/Signed in as player@example.com/i)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Sign out" })).toBeInTheDocument();
+    expect(
+      screen.getByText(/Signed in as player@example.com/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Sign out" }),
+    ).toBeInTheDocument();
     expect(screen.getByText("Premium content")).toBeInTheDocument();
   });
 
@@ -127,7 +137,9 @@ describe("PremiumSignInGate", () => {
     );
 
     expect(screen.queryByText("Premium content")).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Continue with Google/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /Continue with Google/i }),
+    ).toBeInTheDocument();
   });
 
   it("shows a recovery success callout after sign-in restores premium entitlements", async () => {
@@ -136,7 +148,9 @@ describe("PremiumSignInGate", () => {
 
     renderPremiumSignInGate(<PremiumSignInGate />);
 
-    fireEvent.click(screen.getByRole("button", { name: /Continue with Google/i }));
+    fireEvent.click(
+      screen.getByRole("button", { name: /Continue with Google/i }),
+    );
 
     await waitFor(() => {
       expect(mockRecoverPremiumEntitlements).toHaveBeenCalledTimes(1);
@@ -154,7 +168,9 @@ describe("PremiumSignInGate", () => {
 
     renderPremiumSignInGate(<PremiumSignInGate onSignedIn={onSignedIn} />);
 
-    fireEvent.click(screen.getByRole("button", { name: /Continue with Google/i }));
+    fireEvent.click(
+      screen.getByRole("button", { name: /Continue with Google/i }),
+    );
 
     await waitFor(() => {
       expect(mockRecoverPremiumEntitlements).toHaveBeenCalledTimes(1);

@@ -28,6 +28,7 @@ export function PremiumFeatureList({
           variant="light"
           size="lg"
           radius="sm"
+          data-testid="premium-entitlement-summary"
           styles={{
             root: {
               alignSelf: "flex-start",

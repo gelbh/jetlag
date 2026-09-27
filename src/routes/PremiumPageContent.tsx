@@ -5,19 +5,13 @@ import { useAppNavigate } from "../hooks/navigation/useAppNavigate";
 import { PremiumSignInGate } from "../components/billing/PremiumSignInGate";
 import { PremiumFeatureList } from "../components/billing/PremiumFeatureList";
 import { PremiumTierCards } from "../components/billing/PremiumTierCards";
-import {
-  ErrorCallout,
-  plainStyles,
-} from "@/components/ui/entry/entryChrome";
+import { ErrorCallout, plainStyles } from "@/components/ui/entry/entryChrome";
 import {
   canStartPremiumTrial,
   formatEntitlementSummary,
   type PremiumProductKey,
 } from "../domain/billing/premiumProducts";
-import {
-  ANALYTICS_EVENTS,
-  track,
-} from "../services/core/analytics/analytics";
+import { ANALYTICS_EVENTS, track } from "../services/core/analytics/analytics";
 import {
   ensureAnonymousUser,
   isFirebaseConfigured,
@@ -148,10 +142,7 @@ export function PremiumPageContent() {
   if (!isFirebaseConfigured()) {
     return (
       <Stack gap={18}>
-        <PremiumFeatureList
-          entitlementSummary={null}
-          checkoutNotice={null}
-        />
+        <PremiumFeatureList entitlementSummary={null} checkoutNotice={null} />
         <Text size="sm" c="var(--color-field-ink-muted)">
           Premium billing needs an online connection. Use a synced session to
           unlock live transit.
