@@ -284,10 +284,13 @@ jobs:
         env:
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
         run: |
-          doppler run --config prd -- bash -c 'test -n "${VITE_FIREBASE_APP_CHECK_SITE_KEY:-}"' || {
+          set -euo pipefail
+          site_key="$(doppler secrets get VITE_FIREBASE_APP_CHECK_SITE_KEY --plain --config prd)"
+          echo "::add-mask::${site_key}"
+          if [ -z "${site_key}" ]; then
             echo "::error::VITE_FIREBASE_APP_CHECK_SITE_KEY is required for production builds."
             exit 1
-          }
+          fi
       - name: Install Playwright Chromium
         if: steps.changes.outputs.frontend == 'true'
         run: npx playwright install --with-deps chromium
@@ -311,9 +314,17 @@ jobs:
           if ! grep -qiE 'uploaded|source maps' build.log; then
             echo "::warning::Sentry source map upload was not confirmed in build output."
           fi
-      # doppler run injects CLOUDFLARE_* for this step only; avoid GITHUB_ENV catalog dump.
+      # Allowlist CLOUDFLARE_* only; mask before wrangler (no full-catalog doppler run / GITHUB_ENV dump).
       - name: Deploy to Cloudflare
         if: steps.changes.outputs.frontend == 'true'
         env:
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
-        run: doppler run --config prd -- npx wrangler deploy
+        run: |
+          set -euo pipefail
+          token="$(doppler secrets get CLOUDFLARE_API_TOKEN --plain --config prd)"
+          account_id="$(doppler secrets get CLOUDFLARE_ACCOUNT_ID --plain --config prd)"
+          echo "::add-mask::${token}"
+          echo "::add-mask::${account_id}"
+          export CLOUDFLARE_API_TOKEN="${token}"
+          export CLOUDFLARE_ACCOUNT_ID="${account_id}"
+          npx wrangler deploy
