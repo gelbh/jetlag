@@ -1,6 +1,7 @@
 import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { MantineProvider } from "@mantine/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { screenHeaderOffsetClassName } from "../components/ui/layout/ScreenHeader";
 import { Premium } from "./Premium";
 import { jetlagTheme } from "@/theme/theme";
 import { renderWithRouter } from "../test/renderWithRouter";
@@ -132,6 +133,12 @@ describe("Premium", () => {
     expect(within(banner).getByRole("heading", { name: "Premium" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Back" })).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Back" })).toHaveAttribute("href", "/");
+    const bodyPremium = screen
+      .getAllByRole("heading", { name: "Premium" })
+      .find((el) => !banner.contains(el));
+    expect(bodyPremium?.parentElement?.className ?? "").not.toContain(
+      screenHeaderOffsetClassName,
+    );
   });
 
   it("shows offline billing message when Firebase is not configured", () => {
