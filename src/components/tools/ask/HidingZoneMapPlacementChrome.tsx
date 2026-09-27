@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { Button } from "@mantine/core";
 import { Check } from "@phosphor-icons/react";
 import { HudZoneIcon } from "@/components/map/icons/ToolIcons";
+import { TransitStationPicker } from "@/components/hider/TransitStationPicker";
 import {
   AskMapPlacementChrome,
   askMapPlacementSendStyles,
@@ -62,6 +63,8 @@ export function HidingZoneMapPlacementChrome({
     zoneTool.methodChosen,
     zoneTool.hasPlacement,
   );
+  const showStationPicker =
+    !zoneTool.manualMode && (step === "location" || step === "confirm");
 
   useEffect(() => {
     onStepChange?.(step);
@@ -87,9 +90,36 @@ export function HidingZoneMapPlacementChrome({
         color: "var(--color-field-ink)",
       }}
     >
-      {step === "confirm" ? (
+      {showStationPicker ? (
         <>
-          <p className="m-0 text-xs font-medium uppercase tracking-wide"
+          {moveMode ? (
+            <p
+              className="m-0 mb-2 text-xs"
+              style={{ color: "var(--color-field-ink-muted)" }}
+            >
+              Timer paused while you relocate.
+            </p>
+          ) : null}
+          <div className="pointer-events-auto jl-scroll max-h-[min(36dvh,16rem)] overflow-y-auto">
+            <TransitStationPicker
+              layout="compact"
+              query={zoneTool.query}
+              onQueryChange={zoneTool.setQuery}
+              stations={zoneTool.stations}
+              stationsLoading={zoneTool.stationsLoading}
+              stationsError={zoneTool.stationsError}
+              selectedStation={zoneTool.selectedStation}
+              onSelectStation={zoneTool.setSelectedStation}
+              onClearStation={zoneTool.clearStationSelection}
+              onSearchThisArea={onSearchThisArea}
+              searchDisabled={zoneTool.stationsLoading}
+            />
+          </div>
+        </>
+      ) : step === "confirm" ? (
+        <>
+          <p
+            className="m-0 text-xs font-medium uppercase tracking-wide"
             style={{ color: "var(--color-field-ink-muted)" }}
           >
             Zone center
@@ -114,24 +144,6 @@ export function HidingZoneMapPlacementChrome({
         >
           Move must be at least 50 m from your previous zone.
         </p>
-      ) : null}
-      {!zoneTool.manualMode && step === "location" ? (
-        <button
-          type="button"
-          className="pointer-events-auto mt-2 w-full text-xs font-semibold underline-offset-2"
-          style={{
-            background: "none",
-            border: "none",
-            padding: 0,
-            color: "var(--color-flag)",
-            textAlign: "left",
-            textDecoration: "underline",
-            cursor: "pointer",
-          }}
-          onClick={onSearchThisArea}
-        >
-          Search stations in this area
-        </button>
       ) : null}
     </div>
   );

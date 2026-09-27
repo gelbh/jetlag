@@ -149,4 +149,65 @@ describe("HidingZoneMapPlacementChrome", () => {
     );
     expect(onBackToMethod).toHaveBeenCalledTimes(1);
   });
+
+  it("shows station picker in map-first chrome when station method chosen", () => {
+    const onSearchThisArea = vi.fn();
+    renderHud(
+      <HidingZoneMapPlacementChrome
+        moveMode={false}
+        radiusLabel="200 m"
+        zoneTool={baseZoneTool({
+          methodChosen: true,
+          manualMode: false,
+          selectedStation: null,
+          hasPlacement: false,
+        })}
+        onSearchThisArea={onSearchThisArea}
+      />,
+    );
+
+    expect(screen.getByTestId("hiding-zone-map-placement")).toBeInTheDocument();
+    expect(screen.queryByTestId("hiding-zone-hud-body")).toBeNull();
+    expect(screen.queryByTestId("ask-hud-host")).toBeNull();
+    // Live TransitStationPicker uses a plain text input (placeholder), not role=searchbox.
+    expect(
+      screen.getByPlaceholderText(/search stations/i),
+    ).toBeInTheDocument();
+    fireEvent.click(
+      screen.getByRole("button", { name: /search stations in this area/i }),
+    );
+    expect(onSearchThisArea).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole("button", { name: /^Confirm$/i })).toBeDisabled();
+  });
+
+  it("keeps move-mode copy, 50 m warning, and gated confirm without Cancel", () => {
+    renderHud(
+      <HidingZoneMapPlacementChrome
+        moveMode
+        radiusLabel="200 m"
+        zoneTool={baseZoneTool({
+          methodChosen: true,
+          manualMode: false,
+          selectedStation: null,
+          hasPlacement: false,
+        })}
+        onSearchThisArea={vi.fn()}
+        onDismiss={vi.fn()}
+      />,
+    );
+
+    expect(
+      screen.getByRole("status", { name: /Move zone placement/i }),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/Move zone/)).toBeInTheDocument();
+    expect(screen.getByText(/timer paused/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/at least 50 m from your previous zone/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByPlaceholderText(/search stations/i),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^Confirm$/i })).toBeDisabled();
+    expect(screen.queryByRole("button", { name: /^Cancel$/i })).toBeNull();
+  });
 });
