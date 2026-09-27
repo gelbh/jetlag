@@ -1,10 +1,5 @@
-import {
-  buildEndGameMaskFromDisks as buildEndGameMaskFromDisksTs,
-  buildMaskFromUnionInput as buildMaskFromUnionInputTs,
-} from "./buildMask";
 import { dispatchKernel } from "./dispatchKernel";
-import type { MaskKernelMode } from "./maskKernelMode";
-import { bboxFromGameArea, maskTopologyMatches } from "./maskTopology";
+import { createLazyWasmImport } from "./lazyWasmImport";
 import type {
   DiskSpec,
   EliminationUnionInput,
@@ -12,56 +7,32 @@ import type {
   PolygonFeature,
 } from "./types";
 
-type MaskWasmApi = typeof import("./maskWasm");
-
-let maskWasmModulePromise: Promise<MaskWasmApi> | null = null;
-
-function loadMaskWasmModule(): Promise<MaskWasmApi> {
-  if (!maskWasmModulePromise) {
-    // Lazy chunk: ts mode never executes this; Vite still emits an async chunk,
-    // with optionalKernelWasmPkg stubbing when gitignored pkg/ is missing.
-    maskWasmModulePromise = import("./maskWasm").catch((error) => {
-      maskWasmModulePromise = null;
-      throw error;
-    });
-  }
-  return maskWasmModulePromise;
-}
+const maskWasm = createLazyWasmImport(() => import("./maskWasm"));
 
 export async function runMaskFromUnionInput(
   input: EliminationUnionInput,
-  gameArea: GameAreaGeometry,
-  mode: MaskKernelMode = "ts",
+  gameArea: GameAreaGeometry
 ): Promise<PolygonFeature | null> {
   return dispatchKernel({
-    mode,
     entrypoint: "maskFromUnionInput",
     label: "buildMaskFromUnionInput",
-    runTs: () => buildMaskFromUnionInputTs(input, gameArea),
     runWasm: async () => {
-      const wasm = await loadMaskWasmModule();
+      const wasm = await maskWasm.load();
       return wasm.wasmBuildMaskFromUnionInput(input, gameArea);
     },
-    matches: (wasmResult, tsResult) =>
-      maskTopologyMatches(wasmResult, tsResult, bboxFromGameArea(gameArea)),
   });
 }
 
 export async function runEndGameMaskFromDisks(
   gameArea: GameAreaGeometry,
-  disks: readonly DiskSpec[],
-  mode: MaskKernelMode = "ts",
+  disks: readonly DiskSpec[]
 ): Promise<PolygonFeature | null> {
   return dispatchKernel({
-    mode,
     entrypoint: "endGameMaskFromDisks",
     label: "buildEndGameMaskFromDisks",
-    runTs: () => buildEndGameMaskFromDisksTs(gameArea, disks),
     runWasm: async () => {
-      const wasm = await loadMaskWasmModule();
+      const wasm = await maskWasm.load();
       return wasm.wasmBuildEndGameMaskFromDisks(gameArea, disks);
     },
-    matches: (wasmResult, tsResult) =>
-      maskTopologyMatches(wasmResult, tsResult, bboxFromGameArea(gameArea)),
   });
 }

@@ -7,7 +7,6 @@ import {
   buildMultiPlaceEliminationRegion,
   buildMultiPlaceNearRegion,
 } from "./geometryMeasuring";
-import { buildMultiPlaceNearRegionTs } from "./nearRegions";
 import dublinCountyParksMeasuring from "./fixtures/dublinCountyParksMeasuring.json";
 
 const sampleGameArea: GameArea = {
@@ -99,7 +98,7 @@ describe("multi-place measuring geometry", () => {
     expect(booleanPointInPolygon(besideWestAirport, eliminated!)).toBe(false);
   });
 
-  it("unions County Dublin parks fixture without exploding", () => {
+  it("unions County Dublin parks fixture without exploding", async () => {
     const places = dublinCountyParksMeasuring.places as [number, number][];
     const gameArea = dublinCountyParksMeasuring.gameArea as GameArea;
     const distanceMeters = dublinCountyParksMeasuring.distanceMeters;
@@ -107,7 +106,7 @@ describe("multi-place measuring geometry", () => {
     expect(places).toHaveLength(107);
 
     const started = performance.now();
-    const nearRegion = buildMultiPlaceNearRegionTs(
+    const nearRegion = await buildMultiPlaceNearRegion(
       places,
       distanceMeters,
       gameArea,

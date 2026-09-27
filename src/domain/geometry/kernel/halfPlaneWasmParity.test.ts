@@ -3,7 +3,7 @@ import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 import { assertPolygonTopologyParity } from "./parity";
-import { buildHalfPlanePolygon, buildRadarShadedRegion } from "./radarHalfPlane";
+import { loadPolygonGolden } from "./loadPolygonGolden";
 import type { GameAreaGeometry, LatLngTuple } from "./types";
 
 const pkgEntry = path.resolve(
@@ -48,43 +48,37 @@ describe.skipIf(!wasmPkgReady)("half-plane wasm parity", () => {
     await wasmBuildHalfPlanePolygon(thermoA, thermoB, gameArea, "cold");
   }, 60_000);
 
-  it("matches TS topology on cold half-plane (thermo fixture)", async () => {
-    const ts = buildHalfPlanePolygon(thermoA, thermoB, gameArea, "cold");
+  it("matches golden topology on cold half-plane (thermo fixture)", async () => {
+    const golden = loadPolygonGolden("halfPlane", "cold.json");
     const wasm = await wasmBuildHalfPlanePolygon(
       thermoA,
       thermoB,
       gameArea,
       "cold",
     );
-    assertPolygonTopologyParity(wasm, ts, topologyBbox);
+    assertPolygonTopologyParity(wasm, golden, topologyBbox);
   });
 
-  it("matches TS topology on hot half-plane", async () => {
-    const ts = buildHalfPlanePolygon(thermoA, thermoB, gameArea, "hot");
+  it("matches golden topology on hot half-plane", async () => {
+    const golden = loadPolygonGolden("halfPlane", "hot.json");
     const wasm = await wasmBuildHalfPlanePolygon(
       thermoA,
       thermoB,
       gameArea,
       "hot",
     );
-    assertPolygonTopologyParity(wasm, ts, topologyBbox);
+    assertPolygonTopologyParity(wasm, golden, topologyBbox);
   });
 
-  it("matches TS topology on radar outside shaded region", async () => {
+  it("matches golden topology on radar outside shaded region", async () => {
     const center: LatLngTuple = [51.45, -0.15];
-    const ts = buildRadarShadedRegion(center, 400, gameArea, false);
+    const golden = loadPolygonGolden("halfPlane", "radar-outside.json");
     const wasm = await wasmBuildRadarShadedRegion(center, 400, gameArea, false);
-    assertPolygonTopologyParity(wasm, ts, topologyBbox);
+    assertPolygonTopologyParity(wasm, golden, topologyBbox);
   });
 
-  it("matches TS topology on cold half-plane with start divisionAnchor", async () => {
-    const ts = buildHalfPlanePolygon(
-      thermoA,
-      thermoB,
-      gameArea,
-      "cold",
-      "start",
-    );
+  it("matches golden topology on cold half-plane with start divisionAnchor", async () => {
+    const golden = loadPolygonGolden("halfPlane", "cold-start.json");
     const wasm = await wasmBuildHalfPlanePolygon(
       thermoA,
       thermoB,
@@ -92,23 +86,19 @@ describe.skipIf(!wasmPkgReady)("half-plane wasm parity", () => {
       "cold",
       "start",
     );
-    assertPolygonTopologyParity(wasm, ts, topologyBbox);
+    assertPolygonTopologyParity(wasm, golden, topologyBbox);
   });
 
-  it("matches TS topology on radar inside shaded region", async () => {
+  it("matches golden topology on radar inside shaded region", async () => {
     const center: LatLngTuple = [51.45, -0.15];
-    const ts = buildRadarShadedRegion(center, 400, gameArea, true);
+    const golden = loadPolygonGolden("halfPlane", "radar-inside.json");
     const wasm = await wasmBuildRadarShadedRegion(center, 400, gameArea, true);
-    assertPolygonTopologyParity(wasm, ts, topologyBbox);
+    assertPolygonTopologyParity(wasm, golden, topologyBbox);
   });
 });
 
-describe("half-plane wasm fallback", () => {
-  it("wasm init failure falls back to TS when ready (dispatch path)", async () => {
-    // Registry keeps halfPlane not ready today; force ready via shouldUseWasm mock
-    // would be Task 6. Fallback is covered by dispatchKernel + mask tests.
-    // Here: when WASM throws after a future flip, runner falls back — exercise
-    // by temporarily stubbing KERNEL_WASM_READY through shouldUseWasm.
+describe("half-plane wasm failure", () => {
+  it("wasm init failure rethrows when ready (dispatch path)", async () => {
     vi.resetModules();
     vi.doMock("./kernelWasmReady", async () => {
       const actual =
@@ -121,13 +111,11 @@ describe("half-plane wasm fallback", () => {
           ...actual.KERNEL_WASM_READY,
           halfPlane: true,
         },
-        shouldUseWasm: (mode: string, entrypoint: string) => {
+        shouldUseWasm: (entrypoint: string) => {
           if (entrypoint === "halfPlane") {
-            return mode === "wasm" || mode === "dual";
+            return true;
           }
-          return actual.shouldUseWasm(
-            mode as "ts" | "dual" | "wasm",
-            entrypoint as import("./kernelWasmReady").KernelEntrypoint,
+          return actual.shouldUseWasm(entrypoint as import("./kernelWasmReady").KernelEntrypoint,
           );
         },
       };
@@ -145,19 +133,17 @@ describe("half-plane wasm fallback", () => {
     const { dispatchHalfPlane: runWithMock } = await import(
       "./halfPlaneKernelRunner"
     );
-    const { buildHalfPlanePolygon: buildTs } = await import("./radarHalfPlane");
 
-    const expected = buildTs(thermoA, thermoB, gameArea, "cold");
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
-    const result = await runWithMock(
-      thermoA,
-      thermoB,
-      gameArea,
-      "cold",
-      "midpoint",
-      "wasm",
-    );
-    expect(result).toEqual(expected);
+    await expect(
+      runWithMock(
+        thermoA,
+        thermoB,
+        gameArea,
+        "cold",
+        "midpoint",
+      ),
+    ).rejects.toThrow("wasm init failed");
     expect(warnSpy).toHaveBeenCalled();
     warnSpy.mockRestore();
 
