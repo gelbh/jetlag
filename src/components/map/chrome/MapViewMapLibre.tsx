@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import Map, { AttributionControl, type MapRef } from "react-map-gl/maplibre";
+import Map, { type MapRef } from "react-map-gl/maplibre";
 import { setWorkerUrl, type Map as MapLibreMap } from "maplibre-gl";
 import {
   createMapBounds,
@@ -522,7 +522,6 @@ export function MapViewMapLibre({ model, children }: MapViewMapLibreProps) {
               onMapStyleChange={onMapStyleChange}
               onResetCamera={handleCompassReset}
             />
-            <AttributionControl compact position="bottom-left" />
             {children}
           </MapFeatureHitTestProvider>
         </Map>

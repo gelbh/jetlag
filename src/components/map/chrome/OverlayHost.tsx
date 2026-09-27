@@ -6,7 +6,7 @@ import { cn } from "@/lib/cn";
  * Horizontal padding = max(token, safe-area-inset-*) so hunt/ask share one content box.
  */
 export const OVERLAY_SAFE_PAD_X =
-  "ps-[max(0.5rem,env(safe-area-inset-left))] pe-[max(0.5rem,env(safe-area-inset-right))]";
+  "ps-[max(0.75rem,env(safe-area-inset-left))] pe-[max(0.75rem,env(safe-area-inset-right))]";
 
 export type OverlayHostLayout = "phone" | "rail";
 
@@ -35,7 +35,8 @@ export const OverlayHost = forwardRef<HTMLDivElement, OverlayHostProps>(
             : cn(
                 "pointer-events-none fixed inset-x-0 bottom-0 z-[var(--z-dock)]",
                 OVERLAY_SAFE_PAD_X,
-                "pb-[max(0.375rem,env(safe-area-inset-bottom))] pt-1.5",
+                /* Bottom float gap: real CSS --dock-float-gap on host */
+                "pt-1.5",
               ),
           className,
         )}
