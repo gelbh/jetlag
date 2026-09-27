@@ -20,6 +20,7 @@
   --hider-action-bar-height: 3.75rem;
   --chrome-gap-above-dock: 0.5rem;
   --chrome-gap-bottom: 0.75rem;
+
   /* Float inset so hunt dock corners track the device rounded rect. */
   --dock-float-gap: 0.75rem;
   --map-panel-bottom: calc(
