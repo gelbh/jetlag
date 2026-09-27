@@ -2,11 +2,7 @@ import type { Feature, FeatureCollection, MultiPolygon, Polygon } from "geojson"
 import { dispatchKernel } from "./dispatchKernel";
 import { createLazyWasmImport } from "./lazyWasmImport";
 import type { MaskKernelMode } from "./maskKernelMode";
-import {
-  buildTentacleEliminationRegion,
-  buildTentaclePoiAnswerEliminationRegion,
-  type TentacleSite,
-} from "./tentacleRegions";
+import type { TentacleSite } from "./tentacleTypes";
 import type { GameAreaGeometry, LatLngTuple } from "./types";
 
 export type { TentacleSite };
@@ -32,15 +28,6 @@ export async function dispatchTentacleEliminationRegion(
     mode,
     entrypoint: "tentacleEliminationRegion",
     label: "buildTentacleEliminationRegion",
-    runTs: () =>
-      buildTentacleEliminationRegion(
-        anchor,
-        radiusMeters,
-        sites,
-        answeredSiteId,
-        gameArea,
-        voronoiCells,
-      ),
     runWasm: async () => {
       const wasm = await tentacleWasm.load();
       return wasm.wasmBuildTentacleEliminationRegion(
@@ -65,15 +52,6 @@ export async function dispatchTentaclePoiAnswerEliminationRegion(
     mode,
     entrypoint: "tentacleEliminationRegion",
     label: "buildTentaclePoiAnswerEliminationRegion",
-    runTs: () =>
-      buildTentaclePoiAnswerEliminationRegion(
-        anchor,
-        radiusMeters,
-        sites,
-        answeredSiteId,
-        gameArea,
-        voronoiCells,
-      ),
     runWasm: async () => {
       const wasm = await tentacleWasm.load();
       return wasm.wasmBuildTentaclePoiAnswerEliminationRegion(

@@ -6,7 +6,7 @@ import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
 import { point as turfPoint } from "@turf/helpers";
 import { assertPolygonTopologyParity } from "./parity";
 import { wasmBuildSpatialVoronoiFromSites } from "./voronoiWasm";
-import { buildTentacleEliminationRegion } from "./tentacleRegions";
+import { loadPolygonGolden } from "./loadPolygonGolden";
 import type { GameAreaGeometry, LatLngTuple } from "./types";
 
 const pkgEntry = path.resolve(
@@ -76,14 +76,7 @@ describe.skipIf(!wasmPkgReady)("tentacle wasm parity", () => {
         properties: { poiId: s.id },
       })),
     );
-    const ts = buildTentacleEliminationRegion(
-      anchor,
-      oneMileMeters,
-      sites,
-      "east",
-      gameArea,
-      cells,
-    );
+    const ts = loadPolygonGolden("tentacle", "two-site-elim.json");
     const wasm = await wasmBuildTentacleEliminationRegion(
       anchor,
       oneMileMeters,
@@ -110,17 +103,7 @@ describe.skipIf(!wasmPkgReady)("tentacle wasm parity", () => {
         properties: { poiId: s.id },
       })),
     );
-    const { buildTentaclePoiAnswerEliminationRegion } = await import(
-      "./tentacleRegions"
-    );
-    const ts = buildTentaclePoiAnswerEliminationRegion(
-      anchor,
-      oneMileMeters,
-      sites,
-      "east",
-      gameArea,
-      cells,
-    );
+    const ts = loadPolygonGolden("tentacle", "poi-answer-elim.json");
     const wasm = await wasmBuildTentaclePoiAnswerEliminationRegion(
       anchor,
       oneMileMeters,
