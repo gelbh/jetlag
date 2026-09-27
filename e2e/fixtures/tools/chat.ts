@@ -15,14 +15,24 @@ export function gameChatScroll(page: Page): Locator {
 }
 
 export async function openChat(page: Page) {
-  if (await page.getByLabel("Chat tabs").isVisible().catch(() => false)) {
+  if (
+    await page
+      .getByLabel("Chat tabs")
+      .isVisible()
+      .catch(() => false)
+  ) {
     return;
   }
 
   await dismissActiveToolPanel(page);
   await dismissMapOnboarding(page);
 
-  if (await page.getByLabel("Chat tabs").isVisible().catch(() => false)) {
+  if (
+    await page
+      .getByLabel("Chat tabs")
+      .isVisible()
+      .catch(() => false)
+  ) {
     return;
   }
 
@@ -62,10 +72,7 @@ async function resolveAnswerButton(
 }
 
 export async function answerInChat(page: Page, label: string) {
-  const answerButton = await resolveAnswerButton(
-    page,
-    `Send answer: ${label}`,
-  );
+  const answerButton = await resolveAnswerButton(page, `Send answer: ${label}`);
   await answerButton.click({ force: true });
 }
 
@@ -100,15 +107,30 @@ export async function expectPendingQuestionText(
   pattern: RegExp = PENDING_QUESTION_TEXT,
 ) {
   const banner = questionAlertBanner(page);
-  if (await banner.isVisible().catch(() => false)) {
-    await expect(banner.getByText(pattern)).toBeVisible({ timeout: 20_000 });
-    return;
-  }
-
-  await openChat(page);
-  await expect(gameChatScroll(page).getByText(pattern)).toBeVisible({
-    timeout: 20_000,
-  });
+  const status = page.getByRole("status").filter({ hasText: pattern });
+  await expect(async () => {
+    if (
+      await status
+        .first()
+        .isVisible()
+        .catch(() => false)
+    ) {
+      return;
+    }
+    if (await banner.isVisible().catch(() => false)) {
+      const bannerText = (await banner.innerText().catch(() => "")) || "";
+      if (
+        pattern.test(bannerText) ||
+        (await banner.getByText(pattern).count()) > 0
+      ) {
+        return;
+      }
+    }
+    await openChat(page);
+    await expect(gameChatScroll(page).getByText(pattern).first()).toBeVisible({
+      timeout: 2_000,
+    });
+  }).toPass({ timeout: 20_000 });
 }
 
 export async function expectChatAnswer(page: Page, answer: string) {
@@ -116,10 +138,21 @@ export async function expectChatAnswer(page: Page, answer: string) {
   const chat = page
     .getByRole("dialog", { name: /^Chat$/i })
     .or(gameChatScroll(page));
-  // Tip chat renders the answer as its own paragraph (not "Answered: yes").
-  await expect(
-    chat.getByText(new RegExp(`^(?:Answered:\\s*)?${answer}$`, "i")).first(),
-  ).toBeVisible({
+  const escaped = answer.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  // Wait until answer action controls are gone, then match AnswerBox aria-label
+  // (photo decline label equals the committed answer string).
+  await expect(chat.getByText(/Waiting for hider/i)).toBeHidden({
     timeout: 20_000,
   });
+  await expect(
+    chat.getByRole("button", {
+      name: new RegExp(
+        `^(Send answer:\\s*${escaped}|${escaped}|Mark sent)$`,
+        "i",
+      ),
+    }),
+  ).toHaveCount(0, { timeout: 20_000 });
+  await expect(
+    chat.getByLabel(new RegExp(`Answer:\\s*${escaped}\\s*$`, "i")),
+  ).toBeVisible({ timeout: 20_000 });
 }
