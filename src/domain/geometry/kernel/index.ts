@@ -23,7 +23,7 @@ export {
   voronoiCellSiteId,
   type VoronoiSiteRef,
 } from "./voronoiCellSiteId";
-export type { TentacleSite } from "./tentacleRegions";
+export type { TentacleSite } from "./tentacleTypes";
 export {
   dispatchSpatialVoronoi,
   runSpatialVoronoi,

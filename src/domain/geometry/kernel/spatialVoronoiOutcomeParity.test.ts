@@ -4,7 +4,7 @@ import { point as turfPoint } from "@turf/helpers";
 import type { Feature, FeatureCollection, MultiPolygon, Polygon } from "geojson";
 import intersect from "@turf/intersect";
 import simplify from "@turf/simplify";
-import { buildTentacleEliminationRegion } from "./tentacleRegions";
+import { wasmBuildTentacleEliminationRegion } from "./tentacleWasm";
 import { wasmBuildSpatialVoronoiFromSites } from "./voronoiWasm";
 import { maskTopologyMatches, bboxFromGameArea } from "./maskTopology";
 import type { GameAreaGeometry, LatLngTuple } from "./types";
@@ -89,7 +89,7 @@ describe("spatialVoronoiOutcomeParity", () => {
     const tsCells = await wasmBuildSpatialVoronoiFromSites(siteInputs);
     const wasmCells = await wasmBuildSpatialVoronoiFromSites(siteInputs);
 
-    const tsRegion = buildTentacleEliminationRegion(
+    const tsRegion = await wasmBuildTentacleEliminationRegion(
       anchor,
       oneMileMeters,
       sites,
@@ -97,7 +97,7 @@ describe("spatialVoronoiOutcomeParity", () => {
       sampleGameArea,
       tsCells,
     );
-    const wasmRegion = buildTentacleEliminationRegion(
+    const wasmRegion = await wasmBuildTentacleEliminationRegion(
       anchor,
       oneMileMeters,
       sites,
