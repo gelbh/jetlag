@@ -32,9 +32,6 @@ import {
 } from "../measuringToolResolvers";
 import { ANCHOR_RESOLVE_DEBOUNCE_MS } from "./constants";
 import { usesDebouncedSeekerResolve } from "./helpers";
-import {
-  markMeasuringFromKindUnavailable,
-} from "./emptyPlayAreaBounce";
 import type { MeasuringDraftState } from "./useMeasuringDraftState";
 
 interface UseMeasuringAnchorLoadersParams {
@@ -139,9 +136,9 @@ export function useMeasuringAnchorLoaders({
         const notice = measuringPlaceNotFoundMessage(category);
         const kind = measuringFromKind("location", category);
         setUnavailableMeasuringFromKinds((prev) => {
-          const { unavailableMeasuringFromKinds } =
-            markMeasuringFromKindUnavailable(prev, kind, notice);
-          return unavailableMeasuringFromKinds;
+          const next = new Map(prev);
+          next.set(kind, notice);
+          return next;
         });
         setCatalogNotice(notice);
         setMeasuringLoading(false);
