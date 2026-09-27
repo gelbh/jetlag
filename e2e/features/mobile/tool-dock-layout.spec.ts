@@ -20,7 +20,9 @@ async function assertSideStackClearsZoom(page: Page) {
   const sideStack = page.getByTestId("map-side-dock-stack");
   const session = sideStack.locator("[data-island='session']");
   const zoom = page.getByRole("button", { name: "Zoom in" });
-  const style = page.getByRole("button", { name: /Switch to (satellite|standard) view/i });
+  const style = page.getByRole("button", {
+    name: /Switch to (satellite|standard) view/i,
+  });
   await expect(sideStack).toHaveCount(1);
   await expect(sideStack).toBeVisible();
   await expect(session).toHaveCount(1);
@@ -32,9 +34,7 @@ async function assertSideStackClearsZoom(page: Page) {
   await assertInViewport(zoom);
 
   const metrics = await page.evaluate(() => {
-    const side = document.querySelector(
-      '[data-testid="map-side-dock-stack"]',
-    );
+    const side = document.querySelector('[data-testid="map-side-dock-stack"]');
     const zoomEl = document.querySelector(
       'button[aria-label="Zoom in"], .map-zoom-control',
     );
@@ -89,6 +89,7 @@ test.describe("mobile tool dock", () => {
     page,
   }) => {
     await test.step("single-path hunt island exposes history", async () => {
+      // Residual scrub: Survey-world marker must stay gone (absence assert only).
       await expect(page.locator("[data-player-ux-world]")).toHaveCount(0);
       const hunt = page.locator('[data-island="hunt"]');
       await expect(hunt).toBeVisible();
@@ -148,7 +149,9 @@ test.describe("mobile tool dock", () => {
     });
 
     await test.step("hunt stays in bottom band; session in side stack", async () => {
-      await expect(page.locator('[data-island="history-start"]')).toHaveCount(0);
+      await expect(page.locator('[data-island="history-start"]')).toHaveCount(
+        0,
+      );
       await expect(page.locator('[data-island="history-end"]')).toHaveCount(0);
       await expect(page.locator('[data-island="hunt"]')).toHaveCount(1);
       const bandOrder = await page
@@ -174,7 +177,9 @@ test.describe("mobile tool dock", () => {
 
   test("hunt island does not use horizontal scroll", async ({ page }) => {
     const hunt = page.locator('[data-island="hunt"]');
-    const overflowX = await hunt.evaluate((el) => getComputedStyle(el).overflowX);
+    const overflowX = await hunt.evaluate(
+      (el) => getComputedStyle(el).overflowX,
+    );
     // hidden/clip/visible all OK — we must not use overflow-x: auto/scroll.
     expect(["visible", "clip", "hidden"]).toContain(overflowX);
     const metrics = await readToolDockOverflowMetrics(page);
@@ -270,7 +275,9 @@ test.describe("iPhone 14 Pro Max tool dock", () => {
     expect(metrics.dockBottom).toBeLessThanOrEqual(metrics.viewportHeight + 1);
   });
 
-  test("dock fits without clipping question tools at 430px", async ({ page }) => {
+  test("dock fits without clipping question tools at 430px", async ({
+    page,
+  }) => {
     const metrics = await readToolDockOverflowMetrics(page);
 
     expect(metrics.overflowSlots).toBe(0);
@@ -315,9 +322,7 @@ test.describe("iPhone 13 PWA safe area", () => {
         dockPaddingBottom: chromeStyle
           ? Number.parseFloat(chromeStyle.paddingBottom)
           : 0,
-        dockBottomOffset: hostStyle
-          ? Number.parseFloat(hostStyle.bottom)
-          : 0,
+        dockBottomOffset: hostStyle ? Number.parseFloat(hostStyle.bottom) : 0,
         barPaddingBottom: huntStyle
           ? Number.parseFloat(huntStyle.paddingBottom)
           : 0,
@@ -345,9 +350,9 @@ test.describe("iPhone 13 PWA safe area", () => {
     );
     // Forbidden: safe-area pad inside the bordered island (reverted stripe).
     expect(metrics.barPaddingBottom).toBeLessThanOrEqual(6);
-    expect(Math.abs(metrics.mapBottom - metrics.viewportHeight)).toBeLessThanOrEqual(
-      2,
-    );
+    expect(
+      Math.abs(metrics.mapBottom - metrics.viewportHeight),
+    ).toBeLessThanOrEqual(2);
     expect(metrics.barHeight).toBeLessThanOrEqual(72);
     expect(metrics.deadSpaceBelowIcons).toBeLessThanOrEqual(8);
   });
@@ -374,9 +379,9 @@ test.describe("iPhone 13 PWA safe area", () => {
       };
     });
 
-    expect(Math.abs(metrics.dockBottom - metrics.viewportHeight)).toBeLessThanOrEqual(
-      2,
-    );
+    expect(
+      Math.abs(metrics.dockBottom - metrics.viewportHeight),
+    ).toBeLessThanOrEqual(2);
     expect(metrics.dockPaddingBottom).toBeGreaterThanOrEqual(
       SIMULATED_SAFE_AREA_BOTTOM_PX - 2,
     );
@@ -443,7 +448,9 @@ test.describe("iPhone 13 PWA home safe area", () => {
       };
     });
 
-    expect(metrics.posterBottom).toBeGreaterThanOrEqual(metrics.viewportHeight - 2);
+    expect(metrics.posterBottom).toBeGreaterThanOrEqual(
+      metrics.viewportHeight - 2,
+    );
     expect(metrics.backdropPosition).toBe("fixed");
     expect(metrics.backdropTop).toBe("0px");
     expect(metrics.backdropBottom).toBe("0px");
@@ -520,7 +527,9 @@ test.describe("iPhone 13 PWA join safe area", () => {
     await injectSimulatedSafeAreaBottom(page, SIMULATED_SAFE_AREA_BOTTOM_PX);
   });
 
-  test("join screen keeps gradient backdrop in safe area band", async ({ page }) => {
+  test("join screen keeps gradient backdrop in safe area band", async ({
+    page,
+  }) => {
     const metrics = await page.evaluate(() => {
       const backdrop = document.querySelector(".app-entry-backdrop");
       const backdropStyle = backdrop ? getComputedStyle(backdrop) : null;

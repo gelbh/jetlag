@@ -159,13 +159,16 @@ test.describe("layout regression @ default mobile", () => {
     await openMapWithLocalSession(page);
 
     await test.step("single-path Mantine map chrome is present", async () => {
+      // Residual scrub: Survey-world marker must stay gone (absence assert only).
       await expect(page.locator("[data-player-ux-world]")).toHaveCount(0);
       await expect(page.locator(".map-survey-chrome")).toHaveCount(0);
       await expect(page.locator(".map-chrome-hud")).toBeVisible();
       await expect(page.locator(".jl-map-bottom-chrome-host")).toBeVisible();
       await expect(page.locator('[data-island="hunt"]')).toBeVisible();
       await expect(page.locator('[data-island="session"]')).toBeVisible();
-      await expect(page.locator('[data-island="history-start"]')).toHaveCount(0);
+      await expect(page.locator('[data-island="history-start"]')).toHaveCount(
+        0,
+      );
       await expect(page.locator('[data-island="history-end"]')).toHaveCount(0);
     });
 
@@ -229,7 +232,9 @@ test.describe("layout regression @ default mobile", () => {
     // Mantine Drawer title is visual text; accessible name is often empty.
     const sheet = page.getByRole("dialog");
     await expect(sheet).toBeVisible();
-    await expect(sheet.getByText("Choose board", { exact: true })).toBeVisible();
+    await expect(
+      sheet.getByText("Choose board", { exact: true }),
+    ).toBeVisible();
   });
 
   for (const path of SOCIAL_LAYOUT_PATHS) {
