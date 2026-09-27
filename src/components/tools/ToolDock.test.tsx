@@ -219,16 +219,6 @@ describe("ToolDock", () => {
     }
   });
 
-  it("applies rail layout class when layout is rail", () => {
-    const { container } = renderDock(
-      <ToolDock {...dockBase} layout="rail" />,
-    );
-
-    expect(container.querySelector(".jl-tool-dock--rail")).not.toBeNull();
-    expect(screen.getByRole("button", { name: "Radar" })).toBeInTheDocument();
-    expect(screen.getByLabelText("Session tools")).toBeInTheDocument();
-  });
-
   it("does not render the dual-row secondary bar", () => {
     renderDock(<ToolDock {...dockBase} onOpenChat={vi.fn()} />);
     expect(document.querySelector(".jl-tool-dock-bar--secondary")).toBeNull();

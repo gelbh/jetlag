@@ -24,8 +24,6 @@ import {
   useToolDockMenus,
 } from "./useToolDockState";
 
-export type ToolDockLayout = "dock" | "rail";
-
 interface ToolDockProps {
   activeTool: MapTool;
   sessionRules?: SessionRulesInput;
@@ -49,8 +47,6 @@ interface ToolDockProps {
   canRequestFoundHider?: boolean;
   onRequestFoundHider?: () => void;
   canSubmitQuestion?: boolean;
-  /** Bottom dock (default) or vertical left rail inside DesktopOpsShell. */
-  layout?: ToolDockLayout;
   /** Block tool activation when the session is gone. */
   inactive?: boolean;
 }
@@ -78,13 +74,11 @@ export function ToolDock({
   canRequestFoundHider = false,
   onRequestFoundHider,
   canSubmitQuestion = true,
-  layout = "dock",
   inactive = false,
 }: ToolDockProps) {
   const dockRef = useRef<HTMLDivElement>(null);
   const mainGroupRef = useRef<HTMLDivElement>(null);
-  const isRail = layout === "rail";
-  const viewportBottomInset = useVisualViewportBottomInset(!isRail);
+  const viewportBottomInset = useVisualViewportBottomInset(true);
   const { drawMenuOpen, setDrawMenuOpen, closeMenus } =
     useToolDockMenus(dockRef);
 
@@ -122,11 +116,10 @@ export function ToolDock({
   return (
     <MapBottomChrome
       ref={dockRef}
-      layout={isRail ? "rail" : "phone"}
       inactive={inactive}
       askFirst={askFirst}
       style={
-        !isRail && viewportBottomInset > 0
+        viewportBottomInset > 0
           ? { bottom: `${viewportBottomInset}px` }
           : undefined
       }

@@ -8,6 +8,7 @@ import {
 } from "react";
 import { Box } from "@mantine/core";
 import { PHONE_SHELL_MAX_WIDTH_PX } from "@/theme/phoneShell";
+import { setPlayerPhoneShellPortalHost } from "./playerPhoneShellPortalHost";
 
 const PlayerPhoneShellPortalContext = createContext<HTMLElement | null>(null);
 
@@ -21,7 +22,12 @@ export function PlayerPhoneShell({ children }: { children: ReactNode }) {
   const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null);
 
   useLayoutEffect(() => {
-    setPortalTarget(shellRef.current);
+    const el = shellRef.current;
+    setPortalTarget(el);
+    setPlayerPhoneShellPortalHost(el);
+    return () => {
+      setPlayerPhoneShellPortalHost(null);
+    };
   }, []);
 
   return (
@@ -36,7 +42,12 @@ export function PlayerPhoneShell({ children }: { children: ReactNode }) {
         h="100%"
         mih="100%"
         pos="relative"
-        style={{ display: "flex", flexDirection: "column" }}
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          /* Containing block for position:fixed Mantine Drawer/Notifications. */
+          transform: "translateZ(0)",
+        }}
       >
         {children}
       </Box>

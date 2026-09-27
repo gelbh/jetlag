@@ -236,7 +236,6 @@ export function MapScreenChrome({ controller }: MapScreenChromeProps) {
 
   const toolDock = (
     <ToolDock
-      layout="dock"
       inactive={inactiveChrome}
       activeTool={activeTool}
       sessionRules={session!}

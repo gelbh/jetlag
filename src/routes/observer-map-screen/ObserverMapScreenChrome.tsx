@@ -151,7 +151,7 @@ export function ObserverMapScreenChrome({
   );
 
   const toolChrome = (
-    <MapBottomChrome layout="phone" session={sessionIsland} />
+    <MapBottomChrome session={sessionIsland} />
   );
 
   const codesSheet =

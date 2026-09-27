@@ -52,6 +52,11 @@ export function DrawerSheet({
   const childScroll = scrollMode === "child";
   const baseStyles = bottomDrawerStyles(false);
   const portalTarget = usePlayerPhoneShellPortalTarget();
+  const shellContained = portalTarget != null;
+  /* Fixed → absolute when portaled into the shell (portal alone is not enough). */
+  const shellPositionStyles = shellContained
+    ? ({ position: "absolute" } as const)
+    : undefined;
 
   return (
     <Drawer
@@ -66,7 +71,7 @@ export function DrawerSheet({
       closeOnEscape={dismissible}
       lockScroll
       withinPortal
-      portalProps={portalTarget ? { target: portalTarget } : undefined}
+      portalProps={shellContained ? { target: portalTarget } : undefined}
       keepMounted={false}
       zIndex={JETLAG_MODAL_Z_INDEX}
       title={ariaLabel}
@@ -91,6 +96,11 @@ export function DrawerSheet({
       }}
       styles={{
         ...baseStyles,
+        overlay: shellPositionStyles,
+        inner: {
+          ...baseStyles.inner,
+          ...shellPositionStyles,
+        },
         content: {
           ...baseStyles.content,
           overflow: "hidden",

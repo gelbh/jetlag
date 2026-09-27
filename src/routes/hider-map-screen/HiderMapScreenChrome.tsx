@@ -398,7 +398,6 @@ export function HiderMapScreenChrome({
 
   const toolDock = (
     <HiderToolDock
-      layout="dock"
       zoneLabel={zoneLabel}
       onZoneAction={onZoneAction}
       zoneDisabled={!zoneTool.writesEnabled || inactiveChrome}
