@@ -36,6 +36,7 @@ const parityTests = [
   "src/domain/geometry/kernel/nearRegionWasmParity.test.ts",
   "src/domain/geometry/kernel/tentacleWasmParity.test.ts",
   "src/domain/geometry/kernel/voronoiWasmParity.test.ts",
+  "src/domain/geometry/kernel/spatialVoronoiOutcomeParity.test.ts",
 ];
 
 run("npm", ["run", "wasm:build"]);
