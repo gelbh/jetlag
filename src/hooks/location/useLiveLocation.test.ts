@@ -5,7 +5,10 @@ import {
   mockGeolocation,
 } from "../../test/mocks/geolocation";
 import { confirmAndRequestLocationAccess } from "../../services/core/location/geolocation";
-import { resetLocationPermissionUiForTests } from "../../services/core/location/locationPermissionUi";
+import {
+  persistLocationAccessConfirmed,
+  resetLocationPermissionUiForTests,
+} from "../../services/core/location/locationPermissionUi";
 import { useLiveLocation } from "./useLiveLocation";
 
 function mockPermissions(state: PermissionState): void {
@@ -103,6 +106,24 @@ describe("useLiveLocation", () => {
     });
     expect(getCurrentPosition).toHaveBeenCalled();
     expect(watchPosition).toHaveBeenCalled();
+  });
+
+  it("restores from persisted confirmation without showing the prompt", async () => {
+    mockGeolocation(createMockGeolocationPosition(53.35, -6.26));
+    mockPermissions("prompt");
+    persistLocationAccessConfirmed();
+    const getCurrentPosition = vi.mocked(navigator.geolocation.getCurrentPosition);
+    const watchPosition = vi.mocked(navigator.geolocation.watchPosition);
+
+    const { result } = renderHook(() => useLiveLocation(true));
+
+    await waitFor(() => {
+      expect(result.current.needsPermissionPrompt).toBe(false);
+    });
+
+    expect(getCurrentPosition).toHaveBeenCalled();
+    expect(watchPosition).toHaveBeenCalled();
+    expect(result.current.reading).not.toBeNull();
   });
 
   it("stores an error when permission is denied without watching", async () => {
