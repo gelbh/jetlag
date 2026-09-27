@@ -90,7 +90,7 @@ export function isFirestorePermissionDenied(error: unknown): boolean {
 export const AUTH_FAILURE_MESSAGE =
   "Couldn't authenticate with the server. Try again. If it keeps failing, sign out and back in.";
 
-/** @deprecated alias — same string */
+/** @deprecated alias - same string */
 export const JOIN_AUTH_FAILURE_MESSAGE = AUTH_FAILURE_MESSAGE;
 
 export function isPermissionDeniedForAuthRetry(error: unknown): boolean {
