@@ -10,7 +10,6 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
-<<<<<<< HEAD
 {
     version: "Unreleased",
     date: "",
@@ -23,10 +22,6 @@ export const CHANGELOG: ChangelogEntry[] = [
       },
     ],
   },
-{
-||||||| c7bede73
-  {
-=======
   {
     version: "0.15.0",
     date: "2026-09-27",
@@ -49,7 +44,6 @@ export const CHANGELOG: ChangelogEntry[] = [
     ],
   },
   {
->>>>>>> origin/main
     version: "0.14.0",
     date: "2026-09-27",
     sections: [
