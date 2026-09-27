@@ -101,10 +101,8 @@ export function DrawerSheet({
       overlayProps={{
         backgroundOpacity: 0.4,
         blur: 3,
-        style: {
-          ...(mapInteractive ? { pointerEvents: "none" as const } : {}),
-          ...gesture.scrimStyle,
-        },
+        // Overlay Transition owns opacity; drag drives sheet translate + dismiss only.
+        style: mapInteractive ? { pointerEvents: "none" as const } : undefined,
       }}
       classNames={{
         content: cn(
@@ -131,7 +129,6 @@ export function DrawerSheet({
           overflow: "hidden",
           display: "flex",
           flexDirection: "column",
-          ...gesture.sheetStyle,
         },
         body: {
           ...baseStyles.body,
@@ -147,7 +144,7 @@ export function DrawerSheet({
         ref={gesture.sheetRef}
         data-testid="mantine-drawer-sheet"
         className="flex min-h-0 flex-1 flex-col gap-2"
-        style={contentStyle}
+        style={{ ...contentStyle, ...gesture.sheetStyle }}
       >
         <DrawerGrabber
           handleProps={gestureEnabled ? gesture.handleProps : undefined}

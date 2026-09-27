@@ -45,12 +45,50 @@ function dragGrabberDown(handle: HTMLElement, deltaY: number) {
   });
 }
 
+/** Flush drag offset updates that schedule via rAF. */
+function stubSyncRaf() {
+  vi.stubGlobal("requestAnimationFrame", (cb: FrameRequestCallback) => {
+    cb(0);
+    return 1;
+  });
+  vi.stubGlobal("cancelAnimationFrame", () => {});
+}
+
 describe("DrawerSheet", () => {
   beforeEach(() => {
     resetAllStores();
     stubMatchMedia(false);
+    stubSyncRaf();
     Element.prototype.setPointerCapture = vi.fn();
     Element.prototype.releasePointerCapture = vi.fn();
+  });
+
+  it("applies translateY on the sheet wrapper while dragging (Verify #1 live follow)", () => {
+    const onClose = vi.fn();
+    render(
+      withAppUi(
+        <DrawerSheet open onClose={onClose} ariaLabel="Settings">
+          <p>body</p>
+        </DrawerSheet>,
+      ),
+    );
+
+    const handle = screen.getByRole("button", {
+      name: "Drag sheet down to dismiss",
+    });
+    fireEvent.pointerDown(handle, {
+      pointerId: 1,
+      button: 0,
+      clientY: 100,
+    });
+    fireEvent.pointerMove(handle, {
+      pointerId: 1,
+      clientY: 160,
+    });
+
+    const sheet = screen.getByTestId("mantine-drawer-sheet");
+    expect(sheet.style.transform).toContain("translateY(60px)");
+    expect(onClose).not.toHaveBeenCalled();
   });
 
   it("dismisses when grabber is dragged past the sheet fraction (Verify #1)", () => {
