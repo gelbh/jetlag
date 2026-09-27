@@ -9,7 +9,7 @@ import {
 } from "../../incident/hostConfirm.mjs";
 import {
   supportAgentTurnHandler,
-  SUPPORT_AGENT_LLM_FAILED,
+  SESSION_OPS_AGENT_FAILED,
 } from "../../incident/supportAgentTurn.mjs";
 import {
   buildSessionOpsExecuteDeps,
@@ -31,7 +31,7 @@ function readSupportAgentCursorConfig() {
       mcpAuthSecret: sessionOpsMcpAuthSecret.value(),
     };
   } catch {
-    throw new Error(SUPPORT_AGENT_LLM_FAILED);
+    throw new Error(SESSION_OPS_AGENT_FAILED);
   }
 }
 

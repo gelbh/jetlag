@@ -44,7 +44,6 @@ import {
   softDeleteAnnotationInSession,
 } from "../../incident/sessionOpsExecute.mjs";
 import {
-  SUPPORT_AGENT_LLM_FAILED,
   SUPPORT_AGENT_NO_SESSION,
   SUPPORT_AGENT_UNAUTHENTICATED,
   SESSION_OPS_GLOBAL_TOOL_CAP,
@@ -178,7 +177,6 @@ export function mapIncidentError(error) {
         "failed-precondition",
         "Incident has no linked session.",
       );
-    case SUPPORT_AGENT_LLM_FAILED:
     case SESSION_OPS_AGENT_FAILED:
       throw new HttpsError(
         "internal",
