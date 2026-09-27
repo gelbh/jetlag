@@ -131,6 +131,20 @@ export function usedMatchingCategoryIds(
   );
 }
 
+export function usedMatchingCategoryIdsForSession(
+  annotations: AnnotationRecord[],
+  pendingQuestions: readonly PendingQuestionRecord[],
+  exceptAnnotationId?: string,
+): Set<MatchingCategoryId> {
+  const used = usedMatchingCategoryIds(annotations, exceptAnnotationId);
+  for (const id of matchingCatalogHelpers.usedOptionsFromPending(
+    pendingQuestions,
+  )) {
+    used.add(id);
+  }
+  return used;
+}
+
 export function firstAvailableMatchingCategoryId(
   usedCategories: ReadonlySet<MatchingCategoryId>,
 ): MatchingCategoryId | null {

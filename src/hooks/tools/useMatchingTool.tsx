@@ -19,7 +19,7 @@ import {
   isMatchingCategoryAvailable,
   isMatchingCategoryEnabled,
   matchingQuestionFor,
-  usedMatchingCategoryIds,
+  usedMatchingCategoryIdsForSession,
   type MatchingAnswer,
   type MatchingCategoryId,
 } from "../../domain/questions";
@@ -126,8 +126,9 @@ export function useMatchingTool({
     [annotations],
   );
   const usedMatchingCategories = useMemo(
-    () => usedMatchingCategoryIds(activeAnnotations),
-    [activeAnnotations],
+    () =>
+      usedMatchingCategoryIdsForSession(activeAnnotations, pendingQuestions),
+    [activeAnnotations, pendingQuestions],
   );
 
   const catalog = useMatchingCatalog({
