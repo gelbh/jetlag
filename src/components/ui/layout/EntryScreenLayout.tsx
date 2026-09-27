@@ -55,10 +55,6 @@ export function EntryScreenLayout({
     ? "px-0 pt-0 pb-[max(1rem,env(safe-area-inset-bottom))]"
     : `px-5 ${paddingClass} pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(1.25rem,calc(env(safe-area-inset-top,0px)+0.75rem))]`;
 
-  const insetClass = flush
-    ? "px-0 pt-0 pb-[max(1rem,env(safe-area-inset-bottom))]"
-    : `px-5 ${paddingClass} pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(1.25rem,calc(env(safe-area-inset-top,0px)+0.75rem))]`;
-
   return (
     <main
       className={`flex ${minHeightClass} flex-col ${viewport ? viewportClass : justifyClass} ${insetClass}`}
