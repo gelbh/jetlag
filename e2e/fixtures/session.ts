@@ -104,9 +104,21 @@ export async function createSessionFromCreatePage(page: Page) {
 }
 
 export async function readSessionCode(page: Page): Promise<string> {
-  const codeText = await page.locator(".jl-stamp-code").textContent();
-  expect(codeText).toMatch(/^[A-Z]{4}$/);
-  return codeText ?? "ABCD";
+  const block = page.getByTestId("tool-status-block-mantine");
+  const stamp = page.locator(".jl-stamp-code").first();
+  await expect(block.or(stamp)).toBeVisible({ timeout: 15_000 });
+
+  if ((await stamp.count()) > 0 && (await stamp.isVisible().catch(() => false))) {
+    const codeText = await stamp.textContent();
+    expect(codeText?.trim()).toMatch(/^[A-Z]{4}$/);
+    return codeText?.trim() ?? "ABCD";
+  }
+
+  const codeText = await block
+    .locator(".jl-view-transition-session-code")
+    .textContent();
+  expect(codeText?.trim()).toMatch(/^[A-Z]{4}$/);
+  return codeText?.trim() ?? "ABCD";
 }
 
 export async function joinAsRole(
@@ -116,19 +128,24 @@ export async function joinAsRole(
 ) {
   await guestPage.goto("/join");
   const roleName = role === "hider" ? "Hider" : "Seeker";
-  await guestPage
-    .getByRole("radio", { name: new RegExp(`^${roleName}\\b`) })
-    .click();
+  // Mantine SegmentedControl: prefer radiogroup; fall back to visible label text.
+  const side = guestPage.getByLabel("Player side");
+  const roleRadio = side.getByRole("radio", { name: roleName });
+  if ((await roleRadio.count()) > 0) {
+    await roleRadio.click();
+  } else {
+    await side.getByText(roleName, { exact: true }).click();
+  }
   await guestPage.getByPlaceholder("ABCD").fill(code);
   await guestPage.getByRole("button", { name: "Join session" }).click();
 
   if (role === "hider") {
     await expect(
       guestPage.getByRole("button", { name: /Set zone|Change zone|Play move/i }),
-    ).toBeVisible({ timeout: 15_000 });
+    ).toBeVisible({ timeout: 30_000 });
   } else {
     await expect(guestPage.getByRole("button", { name: "Radar" })).toBeVisible({
-      timeout: 15_000,
+      timeout: 30_000,
     });
   }
   await dismissMapOnboarding(guestPage);

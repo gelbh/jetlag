@@ -46,19 +46,12 @@ export async function prepareE2EPage(
 }
 
 export async function openPlayHub(page: Page) {
-  // Wave 1+ home shows Play links inline; older builds used a Play sheet button.
+  // Current home shows Play links inline. Auth bootstrap can leave BootSplash up
+  // briefly; wait for the links rather than a one-shot isVisible() that races.
   const create = page.getByRole("link", { name: "Create session" });
   const join = page.getByRole("link", { name: "Join session" });
-  if (await create.isVisible().catch(() => false)) {
-    await expect(create).toBeVisible();
-    await expect(join).toBeVisible();
-    return;
-  }
-
-  await page
-    .getByRole("button", { name: /Play .{1,3} create, join, or custom game/i })
-    .click();
-  await expect(create).toBeVisible();
+  await expect(create).toBeVisible({ timeout: 30_000 });
+  await expect(join).toBeVisible();
 }
 
 export async function dismissMapOnboarding(page: Page) {

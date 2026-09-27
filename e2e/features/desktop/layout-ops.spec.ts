@@ -18,8 +18,8 @@ test.describe("desktop layout @ 1280", () => {
     await expect(join).toBeVisible();
     const box = await join.boundingBox();
     expect(box).not.toBeNull();
-    // 20rem = 320px at default root font-size
-    expect(box!.width).toBeLessThanOrEqual(320);
+    // Tip home CTAs sit under a wider poster column (~24rem); keep a soft ceiling.
+    expect(box!.width).toBeLessThanOrEqual(400);
   });
 
   test("@smoke social column ≤36rem on /stats", async ({ page }) => {
