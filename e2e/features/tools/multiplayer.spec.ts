@@ -3,10 +3,12 @@ import {
   createHostSession,
   createMultiplayerContexts,
   completeRadarSolo,
+  expectPendingQuestionText,
   runHiderAnswerFlow,
   sendMatchingToHiders,
   sendMeasuringToHiders,
   sendRadarToHiders,
+  sendTentacleToHiders,
   sendThermometerToHiders,
   clickToolDockButton,
   expectAskHud,
@@ -50,21 +52,16 @@ test.describe("multiplayer question tools", () => {
     await runHiderAnswerFlow(browser, sendThermometerToHiders, "Hotter");
   });
 
-  test("tentacle map-first arms send to hiders", async ({ hostHider }) => {
-    const { hostPage } = hostHider;
+  test("tentacle question reaches hider chat", async ({ hostHider }) => {
+    const { hostPage, guestPage } = hostHider;
 
-    await test.step("pick category and arm send", async () => {
-      await clickToolDockButton(hostPage, "Tentacles");
-      await expectAskHud(hostPage);
-      await hostPage
-        .getByRole("button", { name: /Museum/i })
-        .first()
-        .click();
-      await expectSendToHidersInViewport(hostPage);
+    await test.step("send tentacle map-first to hiders", async () => {
+      await sendTentacleToHiders(hostPage);
     });
-    // ponytail: tip tentacle map-first commit no-ops under Playwright clicks
-    // (Send stays visible after force/DOM click). Full guest-chat sync parked
-    // for Band F / tip soft-gate once commit path is fixed.
+
+    await test.step("guest sees pending tentacle in chat", async () => {
+      await expectPendingQuestionText(guestPage, /Tentacle|nearest|Museum/i);
+    });
   });
 });
 

@@ -56,7 +56,6 @@ export async function assertNoSeriousAxeViolations(
   expect(blocking, JSON.stringify(blocking, null, 2)).toEqual([]);
 }
 
-/** Axe map chrome with color-contrast re-enabled. */
 export async function assertMapChromeAxe(page: Page) {
   const builder = new AxeBuilder({ page })
     .include(".map-chrome-hud")
@@ -69,7 +68,6 @@ export async function assertMapChromeAxe(page: Page) {
   expect(blocking, JSON.stringify(blocking, null, 2)).toEqual([]);
 }
 
-/** Axe entry/secondary roots with color-contrast. */
 export async function assertEntryAxe(page: Page) {
   const builder = new AxeBuilder({ page })
     .include("main.home-poster-viewport, main.home-poster")
@@ -80,4 +78,3 @@ export async function assertEntryAxe(page: Page) {
   );
   expect(blocking, JSON.stringify(blocking, null, 2)).toEqual([]);
 }
-

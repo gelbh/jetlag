@@ -1,6 +1,3 @@
-/**
- * Ask HUD map-first Photo + Thermometer (and Matching sanity).
- */
 import type { Page } from "@playwright/test";
 import {
   test,

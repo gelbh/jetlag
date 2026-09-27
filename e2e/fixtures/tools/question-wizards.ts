@@ -40,14 +40,13 @@ export function askHudSheet(page: Page) {
     .first();
 }
 
-/** Cue ticker fingerprint (verb-only GlanceVerb). */
 export async function askHudCueFingerprint(page: Page): Promise<string> {
   const cue = page.getByTestId("ask-mode-cue-ticker");
   await expect(cue).toBeVisible({ timeout: 15_000 });
   return (await cue.innerText()).trim();
 }
 
-/** @deprecated Prefer askHudCueFingerprint — phase rail retired for asks. */
+/** @deprecated Prefer askHudCueFingerprint; phase rail retired for asks. */
 export async function wizardNavFingerprint(page: Page): Promise<string> {
   return askHudCueFingerprint(page);
 }
@@ -59,7 +58,6 @@ export async function expectAskHud(page: Page) {
   await expect(askHudSheet(page)).toBeVisible({ timeout: 15_000 });
 }
 
-/** Wait until PrimedCommitStrip is armed, or map-first Send is enabled. */
 export async function waitForPrimedCommit(page: Page) {
   const strip = page.getByTestId("ask-commit-strip").getByRole("button");
   const send = primedAskSendButton(page);
@@ -73,24 +71,21 @@ export async function waitForPrimedCommit(page: Page) {
   await expect(send).toBeEnabled({ timeout: 60_000 });
 }
 
-/** @deprecated Continue retired — waits for primed strip instead. */
+/** @deprecated Continue retired; waits for primed strip instead. */
 export async function waitForWizardNext(page: Page) {
   await waitForPrimedCommit(page);
 }
 
-/** @deprecated No CONTINUE — no-op when HUD advances via map/chips/rows. */
+/** @deprecated No CONTINUE; no-op when HUD advances via map/chips/rows. */
 export async function advanceWizard(page: Page) {
   void page;
-  // Ask HUD mid-steps advance via map place, chip, or catalog row — not CONTINUE.
 }
 
 /** @deprecated Phase retreat retired for Ask HUD. */
 export async function retreatWizard(page: Page) {
   void page;
-  // no-op
 }
 
-/** Clicks an answer option and verifies the tap registered (aria-pressed). */
 export async function chooseAnswer(page: Page, name: string) {
   // Tentacle map-first: selection lives on POI pins (strip only mirrors status).
   const tentaclePin = page.locator(
@@ -132,12 +127,7 @@ export async function waitForMapPlacementCrosshair(page: Page) {
   });
 }
 
-/**
- * Ask HUD covers the lower map on mobile; geometric center clicks often miss.
- * Prefer mocked GPS ("Use my location") when AnchorControls / PlacementActions
- * is shown. Measuring/tentacle advance the chord after place (GPS control
- * unmounts). Map-first multiplayer may already show Send with no Yes/No chord.
- */
+/** Prefer GPS place under Ask HUD; center clicks often miss the lower map. */
 export async function placeAskAnchor(page: Page) {
   const gps = page.getByRole("button", { name: /Use my location/i });
   if (await gps.isVisible().catch(() => false)) {
@@ -181,13 +171,13 @@ export async function placeAskAnchor(page: Page) {
 
 /** Map tap in the upper visible band above Ask HUD chrome (fallback / second pin). */
 export async function clickMapAboveAskHud(page: Page, xRatio = 0.5) {
-  // Stay in the upper-mid band — very top hits chrome; mid-map clears the HUD.
+  // Stay in the upper-mid band: very top hits chrome; mid-map clears the HUD.
   await clickMapAt(page, xRatio, 0.32);
 }
 
 export async function waitForGeoLoadingIdle(page: Page) {
   const loadingPattern =
-    /Finding nearest feature|Finding division|Finding landmass|Loading locations within/;
+    /Finding nearest feature|Finding division|Finding landmass|Loading locations within|Confirming places|Searching within|Finding places|Getting your location|Waiting for GPS/;
   const loading = page.getByText(loadingPattern);
   if (await loading.count()) {
     await expect(loading).toHaveCount(0, { timeout: 60_000 });
@@ -197,28 +187,17 @@ export async function waitForGeoLoadingIdle(page: Page) {
 /** Tip send cost suffix (`D2P1`). Shared source for primed / multiplayer / in-flight. */
 const SEND_COST = String.raw`D\d+P\d+`;
 
-/**
- * Primed AskCommitStrip or plain map-first Send (solo commit).
- * Examples: `SEND · D2P1`, bare `SEND`, `Send`.
- */
+/** Solo primed strip or plain map-first Send (`SEND · D2P1`, `SEND`, `Send`). */
 export const PRIMED_ASK_SEND_BUTTON = new RegExp(
   `^(SEND(?: · ${SEND_COST})?|Send)$`,
 );
 
-/**
- * Multiplayer armed send labels:
- * - AskCommitStrip primed: `SEND · DnPm`
- * - Map-first chrome: `Send to hiders`
- * - Panel commit: `Send to hiders (DnPm)`
- */
+/** Multiplayer armed send (`SEND · DnPm`, `Send to hiders`, cost suffix variant). */
 export const SEND_TO_HIDERS_BUTTON = new RegExp(
   `^(SEND · ${SEND_COST}|Send to hiders(?: \\(${SEND_COST}\\))?)$`,
 );
 
-/**
- * Any tip ask commit control (primed strip, plain Send, or multiplayer hiders).
- * Use for "must not be armed" asserts.
- */
+/** Any tip ask commit control; use for "must not be armed" asserts. */
 export const ASK_SEND_ARMED_BUTTON = new RegExp(
   `^(SEND(?: · ${SEND_COST})?|Send(?: to hiders(?: \\(${SEND_COST}\\))?)?)$`,
 );
@@ -236,9 +215,12 @@ export function sendToHidersButton(page: Page) {
   return page.getByRole("button", { name: SEND_TO_HIDERS_BUTTON });
 }
 
-export async function expectSendToHidersInViewport(page: Page) {
+export async function expectSendToHidersInViewport(
+  page: Page,
+  options?: { timeout?: number },
+) {
   const send = sendToHidersButton(page);
-  await expect(send).toBeEnabled({ timeout: 15_000 });
+  await expect(send).toBeEnabled({ timeout: options?.timeout ?? 15_000 });
   await expect(send).toBeInViewport();
 }
 
@@ -286,7 +268,7 @@ export const PENDING_QUESTION_TEXT =
   /Are you within|Within .+ of me|closer to or further|hotter or colder|nearest to|same as my nearest|Tentacle question|Matching question|Measuring question|Radar question|Thermometer question|Photo question/i;
 
 export async function selectFirstRadarDistance(page: Page) {
-  // Prefer a mid-row preset — top chips can sit under AskCommitStrip on mobile.
+  // Prefer a mid-row preset: top chips can sit under AskCommitStrip on mobile.
   const preset = page.getByRole("button", { name: /^1 Mile$|^1\.6 km$/i });
   await expect(preset).toBeVisible({ timeout: 15_000 });
   await preset.scrollIntoViewIfNeeded();
@@ -481,6 +463,25 @@ export async function completeTentacleSolo(page: Page) {
   await dismissActiveToolPanel(page);
   await expectMapHasAnnotations(page);
   await expectEliminationMaskVisible(page);
+}
+
+export async function sendTentacleToHiders(page: Page) {
+  await clickToolDockButton(page, "Tentacles");
+  await expectAskHud(page);
+  await pickCatalogRow(page, /^Museum$/i);
+  await placeAskAnchor(page);
+  await waitForGeoLoadingIdle(page);
+  // Enabled only after confirmed POIs (provisional previews keep Send disabled).
+  // Overpass confirm can exceed the default 15s Send arm used by other tools.
+  await expectSendToHidersInViewport(page, { timeout: 60_000 });
+  await clickSendToHiders(page);
+  await expect(page.getByTestId("tentacle-map-placement")).toBeHidden({
+    timeout: 15_000,
+  });
+  await dismissActiveToolPanel(page);
+  await expect(page.getByTestId("ask-hud-host")).toBeHidden({
+    timeout: 15_000,
+  });
 }
 
 export async function sendPhotoToHiders(page: Page) {
