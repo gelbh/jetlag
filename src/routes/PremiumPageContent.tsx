@@ -147,7 +147,7 @@ export function PremiumPageContent() {
 
   if (!isFirebaseConfigured()) {
     return (
-      <Stack gap="md">
+      <Stack gap={18}>
         <PremiumFeatureList
           entitlementSummary={null}
           checkoutNotice={null}
@@ -161,7 +161,7 @@ export function PremiumPageContent() {
   }
 
   return (
-    <Stack gap="md">
+    <Stack gap={18}>
       <PremiumFeatureList
         entitlementSummary={entitlementSummary}
         checkoutNotice={checkoutNotice}

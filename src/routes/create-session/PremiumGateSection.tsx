@@ -50,7 +50,7 @@ export function PremiumGateSection({
           />
         ) : null}
         {showPremiumUnlockPanel ? (
-          <Stack gap="xs" pt={requiresPremiumSignIn ? "sm" : 0}>
+          <Stack gap="sm" pt={requiresPremiumSignIn ? "sm" : 0}>
             <Text
               size="sm"
               c="var(--color-field-ink-muted)"
@@ -92,7 +92,7 @@ export function PremiumGateSection({
           <InsetGroup error={accessCodeError != null}>
             <TextInput
               label="Host access code"
-            value={accessCode}
+              value={accessCode}
               onChange={(event) => onAccessCodeChange(event.currentTarget.value)}
               type="password"
               autoComplete="off"
@@ -103,7 +103,7 @@ export function PremiumGateSection({
             />
           </InsetGroup>
           <Text size="xs" c="var(--color-field-ink-muted)" px={4}>
-          Enter once. Friends join with the game code only.
+            Enter once. Friends join with the game code only.
           </Text>
           {accessCodeError ? <ErrorCallout>{accessCodeError}</ErrorCallout> : null}
         </Stack>
