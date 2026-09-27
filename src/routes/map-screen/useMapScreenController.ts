@@ -230,6 +230,7 @@ export function useMapScreenController() {
       tentacleTool.selectDraftPoi(poiId);
       return true;
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- selectDraftPoi is the stable method bind
     [tentacleTool.selectDraftPoi],
   );
 

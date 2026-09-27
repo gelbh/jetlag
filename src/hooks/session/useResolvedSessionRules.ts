@@ -68,29 +68,33 @@ export function useResolvedSessionRules(
     [sessionRulesKey],
   );
 
+  const regionPackId = session?.regionPackId;
+  const regionPackSubregionId = session?.regionPackSubregionId;
+  const customMatchingArea8 = session?.customMatchingAreas?.[8];
+  const customMatchingArea9 = session?.customMatchingAreas?.[9];
+  const hasCustomMatchingPair = Boolean(
+    customMatchingArea8 && customMatchingArea9,
+  );
+  const hasSession = session != null;
+
   const areasCacheKey = useMemo(
     () =>
-      session
+      hasSession
         ? matchingAreasCacheKey(
-            session.regionPackId,
-            session.regionPackSubregionId,
-            Boolean(session.customMatchingAreas?.[8] && session.customMatchingAreas?.[9]),
+            regionPackId,
+            regionPackSubregionId,
+            hasCustomMatchingPair,
           )
         : "",
-    [
-      session?.regionPackId,
-      session?.regionPackSubregionId,
-      session?.customMatchingAreas?.[8],
-      session?.customMatchingAreas?.[9],
-    ],
+    [hasSession, regionPackId, regionPackSubregionId, hasCustomMatchingPair],
   );
 
   const playAreaCacheKeyValue = useMemo(
     () =>
-      session
-        ? playAreaCacheKey(session.regionPackId, session.regionPackSubregionId)
+      hasSession
+        ? playAreaCacheKey(regionPackId, regionPackSubregionId)
         : "",
-    [session?.regionPackId, session?.regionPackSubregionId],
+    [hasSession, regionPackId, regionPackSubregionId],
   );
 
   const needsAsyncResolve = sessionNeedsAsyncMatchingAreas(session);

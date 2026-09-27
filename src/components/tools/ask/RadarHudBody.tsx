@@ -121,11 +121,11 @@ export function RadarHudBody({
 }: RadarHudBodyProps) {
   const chooseInputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
-    if (!chooseCustom || !true) {
+    if (!chooseCustom) {
       return;
     }
     chooseInputRef.current?.focus();
-  }, [chooseCustom, true]);
+  }, [chooseCustom]);
   const resolvedRadius = chooseCustom
     ? (parseDistanceInput(customRadius, distanceUnit) ?? radiusMeters)
     : radiusMeters;

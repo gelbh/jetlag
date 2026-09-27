@@ -87,23 +87,26 @@ export function useSessionSync({ syncEnabled = true }: UseSessionSyncOptions = {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- resubscribe on session id only
   }, [myUid, session?.id, setLastSyncError, setSession, syncEnabled]);
 
+  const endGameSessionId = session?.id;
+  const endGameMemberRoles = session?.memberRoles;
+
   useEffect(() => {
     if (
       !syncEnabled ||
-      !session ||
-      session.id === LOCAL_SESSION_ID ||
+      endGameSessionId == null ||
+      endGameSessionId === LOCAL_SESSION_ID ||
       !isFirebaseConfigured() ||
       !myUid
     ) {
       return;
     }
 
-    const role = resolvePlayerRole(session.memberRoles, myUid);
+    const role = resolvePlayerRole(endGameMemberRoles, myUid);
     if (!canReadEndGameTruthAnchors(role)) {
       return;
     }
 
-    const sessionId = session.id;
+    const sessionId = endGameSessionId;
     const unsubscribe = subscribeToEndGameTruthAnchors(
       sessionId,
       (anchors) => {
@@ -133,8 +136,8 @@ export function useSessionSync({ syncEnabled = true }: UseSessionSyncOptions = {
     return unsubscribe;
   }, [
     myUid,
-    session?.id,
-    session?.memberRoles,
+    endGameSessionId,
+    endGameMemberRoles,
     setLastSyncError,
     setSession,
     syncEnabled,

@@ -53,6 +53,31 @@ export default defineConfig([
     rules: {
       // Sleeps must fail CI (recommended defaults to warn).
       "playwright/no-wait-for-timeout": "error",
+      "playwright/expect-expect": [
+        "error",
+        {
+          // eslint-plugin-playwright@2.x: wildcards live in assertFunctionPatterns
+          // (assertFunctionNames is exact-match only). Prefer tight prefixes / concrete
+          // multiplayer helpers over broad ^run / ^send.
+          assertFunctionPatterns: [
+            "^assert",
+            "^complete",
+            "^confirm",
+            "^draw",
+            "^expect",
+            "^place",
+            "^redo",
+            "^undo",
+            "^waitFor",
+            "^runHiderAnswerFlow$",
+            "^sendRadarToHiders$",
+            "^sendMatchingToHiders$",
+            "^sendMeasuringToHiders$",
+            "^sendThermometerToHiders$",
+            "^sendTentacleToHiders$",
+          ],
+        },
+      ],
     },
   },
   // Wave 1: enable jsx-a11y recommended on kernel/flag surfaces only.
