@@ -46,18 +46,15 @@ export async function prepareE2EPage(
 }
 
 export async function openPlayHub(page: Page) {
-  // Wave home lists Create/Join as inset links; no Play sheet opener.
-  const create = page.getByRole("link", { name: "Create session" });
-  const join = page.getByRole("link", { name: "Join session" });
-  if (await create.isVisible().catch(() => false)) {
-    await expect(join).toBeVisible();
-    return;
-  }
-  await page
-    .getByRole("button", { name: /Play/i })
-    .click();
-  await expect(create).toBeVisible();
-  await expect(join).toBeVisible();
+  // Home waits on Firebase auth bootstrap (BootSplash "Starting…") before inset rows.
+  await expect(page.getByText("Starting…")).toBeHidden({ timeout: 45_000 });
+  // Wave home: InsetRow UnstyledButton+Link (accessible name = label text).
+  await expect(
+    page.getByRole("link", { name: "Create session" }),
+  ).toBeVisible({ timeout: 15_000 });
+  await expect(
+    page.getByRole("link", { name: "Join session" }),
+  ).toBeVisible({ timeout: 15_000 });
 }
 
 export async function dismissMapOnboarding(page: Page) {

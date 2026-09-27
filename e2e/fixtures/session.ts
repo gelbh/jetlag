@@ -144,10 +144,16 @@ export async function createSessionFromCreatePage(page: Page) {
 }
 
 export async function readSessionCode(page: Page): Promise<string> {
+  // ShareCode lives under Settings → Game (not on the open map chrome).
   const stamp = page.locator(".jl-stamp-code").first();
+  if (!(await stamp.isVisible().catch(() => false))) {
+    await page.getByRole("button", { name: "Open settings" }).click();
+    await page.getByRole("tab", { name: "Game" }).click();
+  }
   await expect(stamp).toBeVisible({ timeout: 15_000 });
   const codeText = await stamp.textContent();
   expect(codeText).toMatch(/^[A-Z]{4}$/);
+  await page.keyboard.press("Escape").catch(() => undefined);
   return codeText ?? "ABCD";
 }
 
