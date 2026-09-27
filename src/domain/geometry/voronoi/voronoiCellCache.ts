@@ -62,3 +62,8 @@ export async function getCachedVoronoiCellsAsync(
   voronoiInFlight.set(key, pending);
   return pending;
 }
+
+export function clearVoronoiCellCacheForTests(): void {
+  voronoiCellCache.clear();
+  voronoiInFlight.clear();
+}

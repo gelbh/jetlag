@@ -90,44 +90,46 @@ describe("geometry helpers", () => {
     expect(gameArea.east - gameArea.west).toBeGreaterThan(0);
   });
 
-  it("returns a clipped polygon for thermometer shading", async () => {
-    if (!wasmPkgReady) {
-      return;
-    }
-    const colderSide = await runHalfPlane(
-      [51.45, -0.18],
-      [51.46, -0.12],
-      featureToGameAreaGeometry(gameAreaToFeature(sampleGameArea)),
-    );
-    expect(colderSide?.geometry.type).toBe("Polygon");
-  });
+  it.skipIf(!wasmPkgReady)(
+    "returns a clipped polygon for thermometer shading",
+    async () => {
+      const colderSide = await runHalfPlane(
+        [51.45, -0.18],
+        [51.46, -0.12],
+        featureToGameAreaGeometry(gameAreaToFeature(sampleGameArea)),
+      );
+      expect(colderSide?.geometry.type).toBe("Polygon");
+    },
+  );
 
-  it("shades opposite halves for hotter and colder answers", async () => {
-    if (!wasmPkgReady) {
-      return;
-    }
-    const pointA: [number, number] = [51.45, -0.18];
-    const pointB: [number, number] = [51.46, -0.12];
-    const geometry = featureToGameAreaGeometry(gameAreaToFeature(sampleGameArea));
-    const colderAnswerSide = await runHalfPlane(
-      pointA,
-      pointB,
-      geometry,
-      "cold",
-    );
-    const hotterAnswerSide = await runHalfPlane(
-      pointA,
-      pointB,
-      geometry,
-      "hot",
-    );
+  it.skipIf(!wasmPkgReady)(
+    "shades opposite halves for hotter and colder answers",
+    async () => {
+      const pointA: [number, number] = [51.45, -0.18];
+      const pointB: [number, number] = [51.46, -0.12];
+      const geometry = featureToGameAreaGeometry(
+        gameAreaToFeature(sampleGameArea),
+      );
+      const colderAnswerSide = await runHalfPlane(
+        pointA,
+        pointB,
+        geometry,
+        "cold",
+      );
+      const hotterAnswerSide = await runHalfPlane(
+        pointA,
+        pointB,
+        geometry,
+        "hot",
+      );
 
-    expect(colderAnswerSide?.geometry.type).toBe("Polygon");
-    expect(hotterAnswerSide?.geometry.type).toBe("Polygon");
-    expect(colderAnswerSide?.geometry.coordinates).not.toEqual(
-      hotterAnswerSide?.geometry.coordinates,
-    );
-  });
+      expect(colderAnswerSide?.geometry.type).toBe("Polygon");
+      expect(hotterAnswerSide?.geometry.type).toBe("Polygon");
+      expect(colderAnswerSide?.geometry.coordinates).not.toEqual(
+        hotterAnswerSide?.geometry.coordinates,
+      );
+    },
+  );
 
   it("subtracts an inner polygon safely", () => {
     const outer = bboxPolygon([-0.2, 51.4, -0.1, 51.5]);

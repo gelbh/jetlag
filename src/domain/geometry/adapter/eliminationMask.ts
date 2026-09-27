@@ -208,7 +208,6 @@ export async function eliminationFeatureForAnnotation(
       gameArea,
       thermometerShadedSide(annotation.metadata.thermometerAnswer),
       "midpoint",
-      "wasm",
     );
   }
 
@@ -235,7 +234,6 @@ export async function eliminationFeatureForAnnotation(
       radiusMeters,
       gameArea,
       false,
-      "wasm",
     );
   }
 
@@ -245,7 +243,7 @@ export async function eliminationFeatureForAnnotation(
 /** Sync union input for tests/parity only (non-kernel polygons + disks). */
 export function computeEliminationUnionInputTs(
   annotations: readonly AnnotationRecord[],
-  gameArea: GameArea,
+  _gameArea: GameArea,
   draftFeatures: readonly PolygonFeature[] = [],
 ): EliminationUnionInput {
   const polygons: PolygonFeature[] = [...draftFeatures];

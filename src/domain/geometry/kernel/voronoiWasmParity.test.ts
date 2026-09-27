@@ -17,7 +17,8 @@ describe("voronoiWasmParity", () => {
           if (entrypoint === "spatialVoronoi") {
             return true;
           }
-          return actual.shouldUseWasm(entrypoint as import("./kernelWasmReady").KernelEntrypoint,
+          return actual.shouldUseWasm(
+            entrypoint as import("./kernelWasmReady").KernelEntrypoint,
           );
         },
       };
@@ -29,7 +30,9 @@ describe("voronoiWasmParity", () => {
       resetVoronoiWasmForTests: vi.fn(),
     }));
 
-    const { runSpatialVoronoi: runWithMock } = await import("./voronoiKernelRunner");
+    const { runSpatialVoronoi: runWithMock } = await import(
+      "./voronoiKernelRunner"
+    );
 
     const sites = [
       { lng: -0.18, lat: 51.45, properties: { poiId: "west" } },
