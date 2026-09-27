@@ -49,7 +49,7 @@ test.describe("hider flows", () => {
     await guestPage.getByRole("button", { name: "Play move" }).click();
     await waitForHidingZoneWizard(guestPage);
     await expect(
-      guestPage.getByTestId("ask-mode-cue-ticker"),
+      guestPage.getByTestId("hiding-zone-map-placement"),
     ).toBeVisible({ timeout: 15_000 });
     await expect(guestPage.getByPlaceholder("Search stations…")).toBeVisible({
       timeout: 15_000,
@@ -57,12 +57,10 @@ test.describe("hider flows", () => {
     await selectTransitStation(guestPage, "Dublin Central");
     await confirmHidingZone(guestPage);
     await expect(
-      guestPage.getByTestId("ask-commit-strip").getByRole("alert"),
-    ).toContainText(/different location/i);
+      guestPage.getByTestId("hiding-zone-map-placement").getByRole("alert"),
+    ).toContainText(/different location|50 m|at least/i);
 
-    await guestPage
-      .getByRole("button", { name: /Choose different station/i })
-      .click();
+    await guestPage.getByRole("button", { name: /Clear station|Clear/i }).click();
     await selectTransitStation(guestPage, "North Station");
     await confirmHidingZone(guestPage);
 
