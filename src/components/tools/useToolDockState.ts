@@ -11,9 +11,27 @@ export function useToolDockMenus(dockRef: RefObject<HTMLDivElement | null>) {
     }
 
     const handlePointerDown = (event: PointerEvent) => {
-      if (dockRef.current && !dockRef.current.contains(event.target as Node)) {
-        setDrawMenuOpen(false);
+      const target = event.target;
+      if (!(target instanceof Node)) {
+        return;
       }
+      // Clicks on the dock itself (including the Draw toggle) stay local.
+      if (dockRef.current?.contains(target)) {
+        return;
+      }
+      // Draw menu SheetHost portals outside the dock. Closing on pointerdown
+      // unmounts the sheet before click when Drawer transition duration is 0
+      // (reduced motion / low power), so Pin/Zone never select. SheetHost owns
+      // overlay / Escape dismiss.
+      if (
+        target instanceof Element &&
+        target.closest(
+          '.mantine-Drawer-content, .mantine-Drawer-inner, [data-testid="mantine-drawer-sheet"], [role="dialog"]',
+        )
+      ) {
+        return;
+      }
+      setDrawMenuOpen(false);
     };
 
     const handleKeyDown = (event: KeyboardEvent) => {

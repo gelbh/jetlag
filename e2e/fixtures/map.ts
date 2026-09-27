@@ -282,5 +282,8 @@ export async function selectDrawTool(page: Page, toolName: "Pin" | "Zone") {
       el.click();
     }
   });
-  await page.getByRole("menuitemradio", { name: toolName }).click();
+  const item = page.getByRole("menuitemradio", { name: toolName });
+  await expect(item).toBeVisible({ timeout: 15_000 });
+  await item.click();
+  await expect(item).toBeHidden({ timeout: 15_000 });
 }
