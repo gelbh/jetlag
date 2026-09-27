@@ -175,6 +175,29 @@ export function useLiveLocation(
 
         if (restore === "restored") {
           setNeedsPermissionPrompt(false);
+          try {
+            const initial = await getCurrentPosition({
+              highAccuracy,
+              maximumAge,
+            });
+            if (cancelled) {
+              return;
+            }
+
+            publishReading(initial, true);
+          } catch (nextError) {
+            if (cancelled) {
+              return;
+            }
+
+            setError(unknownGeolocationErrorMessage(nextError));
+            return;
+          }
+
+          if (cancelled) {
+            return;
+          }
+
           startWatch();
           return;
         }
@@ -193,6 +216,29 @@ export function useLiveLocation(
 
         // Map Allow CTA already obtained a reading under a user gesture.
         setNeedsPermissionPrompt(false);
+        try {
+          const initial = await getCurrentPosition({
+            highAccuracy,
+            maximumAge,
+          });
+          if (cancelled) {
+            return;
+          }
+
+          publishReading(initial, true);
+        } catch (nextError) {
+          if (cancelled) {
+            return;
+          }
+
+          setError(unknownGeolocationErrorMessage(nextError));
+          return;
+        }
+
+        if (cancelled) {
+          return;
+        }
+
         startWatch();
         return;
       }

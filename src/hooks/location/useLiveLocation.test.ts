@@ -108,22 +108,28 @@ describe("useLiveLocation", () => {
     expect(watchPosition).toHaveBeenCalled();
   });
 
-  it("restores from persisted confirmation without showing the prompt", async () => {
+  it("publishes the restored reading before watching", async () => {
     mockGeolocation(createMockGeolocationPosition(53.35, -6.26));
     mockPermissions("prompt");
     persistLocationAccessConfirmed();
     const getCurrentPosition = vi.mocked(navigator.geolocation.getCurrentPosition);
     const watchPosition = vi.mocked(navigator.geolocation.watchPosition);
+    watchPosition.mockImplementation(() => 1);
 
     const { result } = renderHook(() => useLiveLocation(true));
 
     await waitFor(() => {
       expect(result.current.needsPermissionPrompt).toBe(false);
+      expect(result.current.reading).toEqual({
+        lat: 53.35,
+        lng: -6.26,
+        accuracy: 5,
+        heading: null,
+      });
     });
 
     expect(getCurrentPosition).toHaveBeenCalled();
     expect(watchPosition).toHaveBeenCalled();
-    expect(result.current.reading).not.toBeNull();
   });
 
   it("stores an error when permission is denied without watching", async () => {
