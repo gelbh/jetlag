@@ -9,12 +9,39 @@ import {
   formatSequentialDrawPickSummary,
   hasOpenPendingQuestion,
   isQuestionAnswerDeadlineExpired,
+  isUsedOptionPendingQuestion,
   questionAnswerDeadlineMs,
   questionCostBreakdown,
   questionCostLabel,
 } from "./questionRules";
 import { answerDeadlineMs } from "../session/size/gameSizeRules";
 import type { PendingQuestionRecord } from "../session/activity/sessionChat";
+
+describe("isUsedOptionPendingQuestion", () => {
+  it("counts pending and resolved", () => {
+    expect(
+      isUsedOptionPendingQuestion({ status: "pending" } as never),
+    ).toBe(true);
+    expect(
+      isUsedOptionPendingQuestion({ status: "resolved" } as never),
+    ).toBe(true);
+  });
+
+  it("counts cancelled only when an answer is present", () => {
+    expect(
+      isUsedOptionPendingQuestion({
+        status: "cancelled",
+        answer: "yes",
+      } as never),
+    ).toBe(true);
+    expect(
+      isUsedOptionPendingQuestion({
+        status: "cancelled",
+        answer: null,
+      } as never),
+    ).toBe(false);
+  });
+});
 
 describe("questionRules", () => {
   it("scales card costs by reuse count", () => {

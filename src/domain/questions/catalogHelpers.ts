@@ -4,7 +4,7 @@ import {
   collectUsedAnnotationOptions,
   firstUnusedCatalogOption,
 } from "../session/tools/toolSessionOptions";
-import { isCountablePendingQuestionStatus } from "./questionRules";
+import { isUsedOptionPendingQuestion } from "./questionRules";
 
 export interface CatalogHelpersConfig<Option> {
   toolType: string;
@@ -57,7 +57,7 @@ export function buildCatalogHelpers<Option>(
     readOptionFromAnnotation,
     readOptionFromPending,
     isPendingQuestionCountable = (question) =>
-      isCountablePendingQuestionStatus(question.status),
+      isUsedOptionPendingQuestion(question),
   } = config;
 
   function usedOptionsFromAnnotations(

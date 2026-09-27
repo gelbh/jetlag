@@ -42,11 +42,13 @@ function matchingPending(
   id: string,
   category: TestOption,
   status: PendingQuestionRecord["status"] = "pending",
+  answer?: string | null,
 ): PendingQuestionRecord {
   return {
     id,
     toolType: "matching",
     status,
+    answer,
     placement: { metadata: { matchingCategory: category } },
   } as unknown as PendingQuestionRecord;
 }
@@ -130,5 +132,12 @@ describe("buildCatalogHelpers", () => {
         "a",
       ),
     ).toBe(1);
+  });
+
+  it("treats cancelled-with-answer pending as used", () => {
+    const used = helpers.usedOptionsFromPending([
+      matchingPending("p1", "a", "cancelled", "yes"),
+    ]);
+    expect(used).toEqual(new Set(["a"]));
   });
 });
