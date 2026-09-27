@@ -9,7 +9,7 @@ export function questionAlertBanner(page: Page): Locator {
   return page.getByTestId("question-alert-banner");
 }
 
-/** Game-chat message list — excludes the sticky map answer banner. */
+/** Game-chat message list; excludes the sticky map answer banner. */
 export function gameChatScroll(page: Page): Locator {
   return page.locator(".jl-game-chat-scroll");
 }

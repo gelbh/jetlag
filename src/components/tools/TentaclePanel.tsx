@@ -1,6 +1,10 @@
 import { type RefObject } from "react";
 import type { TentaclePoi } from "../../domain/map/annotations";
-import { formatPresetDistance, type DistanceUnit } from "../../domain/map/distance";
+import { filterConfirmedTentaclePois } from "../../domain/geo/poiCandidateAdapters";
+import {
+  formatPresetDistance,
+  type DistanceUnit,
+} from "../../domain/map/distance";
 import type { GameSize } from "../../domain/session/size/gameSize";
 import {
   isTentacleCategoryAvailable,
@@ -117,12 +121,13 @@ export function TentaclePanel({ model }: TentaclePanelProps) {
   const categorySelectionAvailable =
     categoryId !== null && isTentacleCategoryAvailable(gameSize, categoryId);
   const hasRecordedAnswer = outOfReach || selectedPoiId !== null;
-  const locationsReady = poiOptions.length > 0 || (!loading && hasCenter);
+  const confirmedPois = filterConfirmedTentaclePois(poiOptions);
+  const locationsReady = confirmedPois.length > 0 || (!loading && hasCenter);
   const canCommit =
     categoryChosen &&
     categoryId !== null &&
     hasCenter &&
-    poiOptions.length > 0 &&
+    confirmedPois.length > 0 &&
     (awaitHiderAnswer || hasRecordedAnswer) &&
     categorySelectionAvailable &&
     !isSubmitting;
@@ -144,7 +149,7 @@ export function TentaclePanel({ model }: TentaclePanelProps) {
     awaitHiderAnswer &&
     locationsReady &&
     !loading &&
-    poiOptions.length > 0 ? (
+    confirmedPois.length > 0 ? (
       <SendToHidersButton
         costLabel={costLabel}
         isSubmitting={isSubmitting}
@@ -159,9 +164,7 @@ export function TentaclePanel({ model }: TentaclePanelProps) {
     <>
       {phaseId === "configure" && stepId === "category" ? (
         <ToolSection first compact status="active">
-          {awaitHiderAnswer ? (
-            <QuestionTruthReferenceHint />
-          ) : null}
+          {awaitHiderAnswer ? <QuestionTruthReferenceHint /> : null}
           <QuestionPromptBlock
             prompt={prompt}
             ruleSummary={
@@ -179,7 +182,9 @@ export function TentaclePanel({ model }: TentaclePanelProps) {
                 if (!value) {
                   return;
                 }
-                onCategoryChange(event.target.value as TentacleExtendedCategoryId);
+                onCategoryChange(
+                  event.target.value as TentacleExtendedCategoryId,
+                );
               }}
               className="field-input"
             >
@@ -266,8 +271,7 @@ export function TentaclePanel({ model }: TentaclePanelProps) {
         <Stepper
           nav={{
             canGoBack:
-              phaseIndex > 0 ||
-              (phaseId === "configure" && configureIndex > 0),
+              phaseIndex > 0 || (phaseId === "configure" && configureIndex > 0),
             onBack: goBack,
             ...toolWizardPhasePrimaryNav({
               phaseId,
