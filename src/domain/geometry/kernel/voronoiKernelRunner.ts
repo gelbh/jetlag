@@ -2,10 +2,7 @@ import type { FeatureCollection } from "geojson";
 import { dispatchKernel } from "./dispatchKernel";
 import { createLazyWasmImport } from "./lazyWasmImport";
 import type { MaskKernelMode } from "./maskKernelMode";
-import {
-  geoSpatialVoronoiFromSites,
-  type SpatialVoronoiSite,
-} from "./spatialVoronoi";
+import type { SpatialVoronoiSite } from "./spatialVoronoiTypes";
 
 const voronoiWasm = createLazyWasmImport(() => import("./voronoiWasm"));
 
@@ -19,7 +16,6 @@ export async function dispatchSpatialVoronoi<
     mode,
     entrypoint: "spatialVoronoi",
     label: "spatialVoronoi",
-    runTs: () => geoSpatialVoronoiFromSites(sites),
     runWasm: async () => {
       const wasm = await voronoiWasm.load();
       return wasm.wasmBuildSpatialVoronoiFromSites(sites);

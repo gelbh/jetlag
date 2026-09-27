@@ -5,7 +5,6 @@ import type { Feature, FeatureCollection, MultiPolygon, Polygon } from "geojson"
 import intersect from "@turf/intersect";
 import simplify from "@turf/simplify";
 import { buildTentacleEliminationRegion } from "./tentacleRegions";
-import { geoSpatialVoronoiFromSites } from "./spatialVoronoi";
 import { wasmBuildSpatialVoronoiFromSites } from "./voronoiWasm";
 import { maskTopologyMatches, bboxFromGameArea } from "./maskTopology";
 import type { GameAreaGeometry, LatLngTuple } from "./types";
@@ -87,7 +86,7 @@ describe("spatialVoronoiOutcomeParity", () => {
       lat: s.lat,
       properties: { poiId: s.id },
     }));
-    const tsCells = geoSpatialVoronoiFromSites(siteInputs);
+    const tsCells = await wasmBuildSpatialVoronoiFromSites(siteInputs);
     const wasmCells = await wasmBuildSpatialVoronoiFromSites(siteInputs);
 
     const tsRegion = buildTentacleEliminationRegion(
@@ -139,7 +138,7 @@ describe("spatialVoronoiOutcomeParity", () => {
         properties: { featureId: "north" },
       },
     ];
-    const tsCells = geoSpatialVoronoiFromSites(siteInputs);
+    const tsCells = await wasmBuildSpatialVoronoiFromSites(siteInputs);
     const wasmCells = await wasmBuildSpatialVoronoiFromSites(siteInputs);
 
     const tsRegion = sameNearestFromCells("west", sampleGameArea, tsCells);

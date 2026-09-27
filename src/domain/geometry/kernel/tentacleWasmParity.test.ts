@@ -5,7 +5,7 @@ import path from "node:path";
 import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
 import { point as turfPoint } from "@turf/helpers";
 import { assertPolygonTopologyParity } from "./parity";
-import { geoSpatialVoronoiFromSites } from "./spatialVoronoi";
+import { wasmBuildSpatialVoronoiFromSites } from "./voronoiWasm";
 import { buildTentacleEliminationRegion } from "./tentacleRegions";
 import type { GameAreaGeometry, LatLngTuple } from "./types";
 
@@ -50,7 +50,7 @@ describe.skipIf(!wasmPkgReady)("tentacle wasm parity", () => {
     wasmBuildTentaclePoiAnswerEliminationRegion =
       wasm.wasmBuildTentaclePoiAnswerEliminationRegion;
     const sites = [westSite, eastSite];
-    const cells = geoSpatialVoronoiFromSites(
+    const cells = await wasmBuildSpatialVoronoiFromSites(
       sites.map((s) => ({
         lng: s.lng,
         lat: s.lat,
@@ -69,7 +69,7 @@ describe.skipIf(!wasmPkgReady)("tentacle wasm parity", () => {
 
   it("matches TS topology on two-site tentacle elimination", async () => {
     const sites = [westSite, eastSite];
-    const cells = geoSpatialVoronoiFromSites(
+    const cells = await wasmBuildSpatialVoronoiFromSites(
       sites.map((s) => ({
         lng: s.lng,
         lat: s.lat,
@@ -103,7 +103,7 @@ describe.skipIf(!wasmPkgReady)("tentacle wasm parity", () => {
 
   it("matches TS topology on POI-answer tentacle elimination", async () => {
     const sites = [westSite, eastSite];
-    const cells = geoSpatialVoronoiFromSites(
+    const cells = await wasmBuildSpatialVoronoiFromSites(
       sites.map((s) => ({
         lng: s.lng,
         lat: s.lat,
@@ -170,7 +170,7 @@ describe("tentacle wasm failure", () => {
     const { runTentacleEliminationRegion: runWithMock } = await import(
       "./tentacleKernelRunner"
     );
-    const cells = geoSpatialVoronoiFromSites(
+    const cells = await wasmBuildSpatialVoronoiFromSites(
       [westSite, eastSite].map((s) => ({
         lng: s.lng,
         lat: s.lat,

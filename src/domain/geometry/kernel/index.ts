@@ -16,7 +16,7 @@ export {
   unionPolygonFeatures,
 } from "./unionPolygonFeatures";
 export { isPointInGameArea } from "./isPointInGameArea";
-export type { SpatialVoronoiSite } from "./spatialVoronoi";
+export type { SpatialVoronoiSite } from "./spatialVoronoiTypes";
 export {
   resolveVoronoiCellPoiId,
   resolveVoronoiCellSiteId,
