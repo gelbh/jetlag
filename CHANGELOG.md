@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.15.0 - 2026-09-27
+
+### Fixes
+
+- iPhone standalone PWA map paints full-bleed under notch and home indicator
+
+### Improvements
+
+- Mantine Wave 5: player chrome CSS prune and error surfaces on Mantine.
+- Smoother placement map camera reframes (ease/fly from shared motion tokens)
+- Softer elimination shade opacity transitions under reduced-motion rules
+- Drop the redundant map tools HUD coach toast; first-run Map tools guide remains
+
 ## 0.14.0 - 2026-09-27
 
 ### Fixes
