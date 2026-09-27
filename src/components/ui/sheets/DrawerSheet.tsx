@@ -1,9 +1,12 @@
 import { Drawer } from "@mantine/core";
-import type { CSSProperties, ReactNode } from "react";
+import { useRef, type CSSProperties, type ReactNode } from "react";
 import { cn } from "@/lib/cn";
 import { DrawerGrabber } from "@/components/ui/entry/entryChrome";
 import { bottomDrawerStyles } from "@/components/ui/entry/entryStyles";
 import { usePlayerPhoneShellPortalTarget } from "@/components/ui/layout/PlayerPhoneShellPortalContext";
+import { MOTION_SHEET_PRESENT_MS } from "@/domain/device/motion/motionTokens";
+import { useMotionProfile } from "@/hooks/motion/useMotionProfile";
+import { useSheetGesture } from "@/hooks/motion/useSheetGesture";
 import { JETLAG_MODAL_Z_INDEX } from "@/theme/theme";
 
 export interface DrawerSheetProps {
@@ -31,7 +34,18 @@ export interface DrawerSheetProps {
   mapInteractive?: boolean;
 }
 
-/** iOS bottom Drawer; portals into PlayerPhoneShell so overlays stay in the 390 column. */
+/** Mantine Drawer enter/exit mapped to sheet motion tokens (Verify #4). */
+export function resolveDrawerSheetTransitionProps(decorativeAnimate: boolean) {
+  return {
+    duration: decorativeAnimate ? MOTION_SHEET_PRESENT_MS : 0,
+    timingFunction: "var(--ease-ios-standard)",
+  } as const;
+}
+
+/**
+ * Phone-shell sheet path: iOS bottom Drawer with grabber + safe-area.
+ * Portals into PlayerPhoneShell when mounted so overlays stay in the 390 column.
+ */
 export function DrawerSheet({
   open,
   onClose,
@@ -55,6 +69,16 @@ export function DrawerSheet({
     ? ({ position: "absolute" } as const)
     : undefined;
 
+  const { decorativeAnimate } = useMotionProfile();
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const gestureEnabled = dismissible && decorativeAnimate;
+  const gesture = useSheetGesture({
+    enabled: gestureEnabled,
+    onDismiss: onClose,
+    scrollRef,
+  });
+  const transitionProps = resolveDrawerSheetTransitionProps(decorativeAnimate);
+
   return (
     <Drawer
       opened={open}
@@ -73,10 +97,14 @@ export function DrawerSheet({
       zIndex={JETLAG_MODAL_Z_INDEX}
       title={ariaLabel}
       aria-label={ariaLabel}
+      transitionProps={transitionProps}
       overlayProps={{
         backgroundOpacity: 0.4,
         blur: 3,
-        ...(mapInteractive ? { style: { pointerEvents: "none" } } : {}),
+        style: {
+          ...(mapInteractive ? { pointerEvents: "none" as const } : {}),
+          ...gesture.scrimStyle,
+        },
       }}
       classNames={{
         content: cn(
@@ -103,6 +131,7 @@ export function DrawerSheet({
           overflow: "hidden",
           display: "flex",
           flexDirection: "column",
+          ...gesture.sheetStyle,
         },
         body: {
           ...baseStyles.body,
@@ -115,13 +144,17 @@ export function DrawerSheet({
       }}
     >
       <div
+        ref={gesture.sheetRef}
         data-testid="mantine-drawer-sheet"
         className="flex min-h-0 flex-1 flex-col gap-2"
         style={contentStyle}
       >
-        <DrawerGrabber />
+        <DrawerGrabber
+          handleProps={gestureEnabled ? gesture.handleProps : undefined}
+        />
         {pinned ? <div className="shrink-0">{pinned}</div> : null}
         <div
+          ref={scrollRef}
           className={
             childScroll
               ? "flex min-h-0 flex-1 flex-col overflow-hidden"

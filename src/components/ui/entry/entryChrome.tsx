@@ -1,6 +1,7 @@
 /* eslint-disable react-refresh/only-export-components -- entry chrome pairs surface components with shared style tokens */
 import { Box } from "@mantine/core";
 import type { ReactNode } from "react";
+import type { SheetHandleProps } from "@/hooks/motion/useSheetGesture";
 import {
   askHudPanelStyle,
   bottomDrawerStyles,
@@ -330,8 +331,12 @@ export const mapHuntAskFirstQuestionStripStyles = {
 } as const;
 
 /** Drag affordance for iOS bottom drawers. */
-export function DrawerGrabber() {
-  return (
+export function DrawerGrabber({
+  handleProps,
+}: {
+  handleProps?: SheetHandleProps;
+} = {}) {
+  const bar = (
     <Box
       aria-hidden
       mx="auto"
@@ -342,5 +347,20 @@ export function DrawerGrabber() {
         backgroundColor: "oklch(from var(--color-field-ink) l c h / 0.28)",
       }}
     />
+  );
+
+  if (!handleProps) {
+    return bar;
+  }
+
+  return (
+    <button
+      type="button"
+      aria-label="Drag sheet down to dismiss"
+      className="jl-sheet-drag-handle mx-auto flex w-full justify-center py-1"
+      {...handleProps}
+    >
+      {bar}
+    </button>
   );
 }
