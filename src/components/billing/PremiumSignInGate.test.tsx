@@ -1,6 +1,9 @@
 import { fireEvent, screen, waitFor } from "@testing-library/react";
+import { MantineProvider } from "@mantine/core";
+import type { ReactElement } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { PremiumSignInGate } from "./PremiumSignInGate";
+import { jetlagTheme } from "@/theme/theme";
 import { renderWithRouter } from "../../test/renderWithRouter";
 
 const mockSignOutToAnonymous = vi.fn();
@@ -8,6 +11,7 @@ const mockCompletePremiumEmailSignInLink = vi.fn();
 const mockCompleteOAuthRedirectIfPending = vi.fn();
 const mockEnsureAnonymousUser = vi.fn();
 const mockRecoverPremiumEntitlements = vi.fn();
+const mockSignInWithGoogle = vi.fn();
 
 let mockUser: {
   uid: string;
@@ -25,6 +29,7 @@ vi.mock("../../services/core/auth/accountAuth", async (importOriginal) => {
       mockCompletePremiumEmailSignInLink(...args),
     completeOAuthRedirectIfPending: (...args: unknown[]) =>
       mockCompleteOAuthRedirectIfPending(...args),
+    signInWithGoogle: (...args: unknown[]) => mockSignInWithGoogle(...args),
     signOutToAnonymous: (...args: unknown[]) => mockSignOutToAnonymous(...args),
   };
 });
@@ -52,9 +57,27 @@ vi.mock("firebase/auth", () => ({
   isSignInWithEmailLink: () => false,
 }));
 
+function renderPremiumSignInGate(ui: ReactElement) {
+  return renderWithRouter(
+    <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
+      {ui}
+    </MantineProvider>,
+  );
+}
+
 describe("PremiumSignInGate", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.stubGlobal("matchMedia", (query: string) => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: () => {},
+      removeListener: () => {},
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      dispatchEvent: () => false,
+    }));
     mockUser = {
       uid: "permanent-1",
       isAnonymous: false,
@@ -65,11 +88,12 @@ describe("PremiumSignInGate", () => {
     mockCompletePremiumEmailSignInLink.mockResolvedValue(null);
     mockCompleteOAuthRedirectIfPending.mockResolvedValue(null);
     mockRecoverPremiumEntitlements.mockResolvedValue(false);
+    mockSignInWithGoogle.mockResolvedValue(undefined);
     mockSignOutToAnonymous.mockResolvedValue(undefined);
   });
 
   it("shows the signed-in account strip and children for permanent users", () => {
-    renderWithRouter(
+    renderPremiumSignInGate(
       <PremiumSignInGate>
         <p>Premium content</p>
       </PremiumSignInGate>,
@@ -81,7 +105,7 @@ describe("PremiumSignInGate", () => {
   });
 
   it("signs out to anonymous and hides children after sign out", async () => {
-    const { rerender } = renderWithRouter(
+    const { rerender } = renderPremiumSignInGate(
       <PremiumSignInGate>
         <p>Premium content</p>
       </PremiumSignInGate>,
@@ -95,12 +119,50 @@ describe("PremiumSignInGate", () => {
 
     mockUser = { uid: "anon-1", isAnonymous: true };
     rerender(
-      <PremiumSignInGate>
-        <p>Premium content</p>
-      </PremiumSignInGate>,
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
+        <PremiumSignInGate>
+          <p>Premium content</p>
+        </PremiumSignInGate>
+      </MantineProvider>,
     );
 
     expect(screen.queryByText("Premium content")).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Continue with Google/i })).toBeInTheDocument();
+  });
+
+  it("shows a recovery success callout after sign-in restores premium entitlements", async () => {
+    mockUser = { uid: "anon-1", isAnonymous: true };
+    mockRecoverPremiumEntitlements.mockResolvedValue(true);
+
+    renderPremiumSignInGate(<PremiumSignInGate />);
+
+    fireEvent.click(screen.getByRole("button", { name: /Continue with Google/i }));
+
+    await waitFor(() => {
+      expect(mockRecoverPremiumEntitlements).toHaveBeenCalledTimes(1);
+    });
+
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Premium credits from a previous device or account were moved to this sign-in.",
+    );
+  });
+
+  it("shows a recovery error callout but still finishes sign-in", async () => {
+    const onSignedIn = vi.fn();
+    mockUser = { uid: "anon-1", isAnonymous: true };
+    mockRecoverPremiumEntitlements.mockRejectedValue(new Error("boom"));
+
+    renderPremiumSignInGate(<PremiumSignInGate onSignedIn={onSignedIn} />);
+
+    fireEvent.click(screen.getByRole("button", { name: /Continue with Google/i }));
+
+    await waitFor(() => {
+      expect(mockRecoverPremiumEntitlements).toHaveBeenCalledTimes(1);
+      expect(onSignedIn).toHaveBeenCalledTimes(1);
+    });
+
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Couldn't restore purchases. Try again from Premium.",
+    );
   });
 });
