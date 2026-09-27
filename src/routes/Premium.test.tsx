@@ -1,4 +1,4 @@
-import { fireEvent, screen, waitFor } from "@testing-library/react";
+import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { MantineProvider } from "@mantine/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Premium } from "./Premium";
@@ -125,10 +125,20 @@ describe("Premium", () => {
     }));
   });
 
+  it("uses entry shell layout like Feedback", () => {
+    renderPremium();
+    const banner = screen.getByRole("banner", { name: "Screen header" });
+    expect(banner).toBeInTheDocument();
+    expect(within(banner).getByRole("heading", { name: "Premium" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Back" })).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Back" })).toHaveAttribute("href", "/");
+  });
+
   it("shows offline billing message when Firebase is not configured", () => {
     renderPremium();
 
-    expect(screen.getByRole("heading", { name: "Premium" })).toBeInTheDocument();
+    const banner = screen.getByRole("banner", { name: "Screen header" });
+    expect(within(banner).getByRole("heading", { name: "Premium" })).toBeInTheDocument();
     expect(
       screen.getByText(/Premium billing needs an online connection/i),
     ).toBeInTheDocument();
