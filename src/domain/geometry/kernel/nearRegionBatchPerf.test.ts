@@ -1,11 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { Feature, LineString } from "geojson";
-import {
-  buildCoastlineNearRegionTs,
-  clearCoastlineNearRegionCacheForTests,
-} from "../measuring/nearRegions";
+import { clearCoastlineNearRegionCacheForTests } from "../measuring/nearRegions";
 import type { GameAreaGeometry } from "./types";
-import { KERNEL_WASM_READY } from "./kernelWasmReady";
 
 const runGeometryPerf = process.env.GEOMETRY_PERF === "1";
 
@@ -33,7 +29,7 @@ const sampleGameArea: GameAreaGeometry = {
   ],
 };
 
-/** Enough segments that the TS path would cooperative-yield. */
+/** Enough segments that the former TS path would cooperative-yield. */
 function coastSegments(count: number): Feature<LineString>[] {
   return Array.from({ length: count }, (_, index) => {
     const offset = index * 0.008;
@@ -56,7 +52,7 @@ describe("nearRegionBatchPerf", () => {
     expect(runGeometryPerf || true).toBe(true);
   });
 
-  it("wasm_near_region_batch median within 1.1x ts (required before ready flip)", async () => {
+  it("wasm_near_region_batch median under 50ms", async () => {
     if (!runGeometryPerf) {
       return;
     }
@@ -75,22 +71,11 @@ describe("nearRegionBatchPerf", () => {
     );
     wasmPkg.build_near_region_json(inputJson);
     clearCoastlineNearRegionCacheForTests();
-    buildCoastlineNearRegionTs(segments, distanceMeters, sampleGameArea);
-    clearCoastlineNearRegionCacheForTests();
 
-    const tsMs = measureMedianMs(() => {
-      clearCoastlineNearRegionCacheForTests();
-      buildCoastlineNearRegionTs(segments, distanceMeters, sampleGameArea);
-    });
     const wasmMs = measureMedianMs(() => {
       wasmPkg.build_near_region_json(inputJson);
     });
 
-    const ratio = tsMs === 0 ? 0 : wasmMs / tsMs;
-    if (KERNEL_WASM_READY.nearRegionBatch) {
-      expect(ratio).toBeLessThanOrEqual(1.1);
-    } else {
-      expect(ratio).toBeGreaterThan(0);
-    }
+    expect(wasmMs).toBeLessThan(50);
   });
 });

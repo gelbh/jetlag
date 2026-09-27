@@ -8,7 +8,6 @@ import {
   unionDiskSpecs,
   unionEliminationParts,
   unionPolygonFeatures,
-  unionPolygonFeaturesLegacy,
   type DiskSpec,
   type PolygonFeature,
 } from "./unionPolygonFeatures";
@@ -48,7 +47,7 @@ function assertMaskParity(
   });
 }
 
-function legacyDiskUnion(disks: DiskSpec[]): PolygonFeature | null {
+function turfDiskUnion(disks: DiskSpec[]): PolygonFeature | null {
   const circles = disks.map((disk) =>
     turfCircle(turfPoint([disk.center[1], disk.center[0]]), disk.radiusMeters / 1000, {
       steps: 64,
@@ -56,29 +55,35 @@ function legacyDiskUnion(disks: DiskSpec[]): PolygonFeature | null {
     }),
   ) as PolygonFeature[];
 
-  return unionPolygonFeaturesLegacy(circles);
+  return unionEliminationParts({ polygons: circles, disks: [] }, "turf");
 }
 
 describe("unionPolygonFeatures parity", () => {
-  it("matches legacy turf union for overlapping squares", () => {
+  it("matches turf engine union for overlapping squares", () => {
     const features = [squareFeature(-0.19), squareFeature(-0.16)];
     const candidate = unionPolygonFeatures(features);
-    const baseline = unionPolygonFeaturesLegacy(features);
+    const baseline = unionEliminationParts(
+      { polygons: features, disks: [] },
+      "turf",
+    );
 
     assertMaskParity(candidate, baseline, -0.2, -0.1, 51.4, 51.5);
   });
 
-  it("matches legacy turf union for ten mixed polygons", () => {
+  it("matches turf engine union for ten mixed polygons", () => {
     const features = Array.from({ length: 10 }, (_, index) =>
       squareFeature(-0.19 + index * 0.008),
     );
     const candidate = unionPolygonFeatures(features);
-    const baseline = unionPolygonFeaturesLegacy(features);
+    const baseline = unionEliminationParts(
+      { polygons: features, disks: [] },
+      "turf",
+    );
 
     assertMaskParity(candidate, baseline, -0.2, -0.1, 51.4, 51.5);
   });
 
-  it("matches legacy union for mixed disks and polygons", () => {
+  it("matches turf engine union for mixed disks and polygons", () => {
     const disks: DiskSpec[] = [
       { center: [51.45, -0.18], radiusMeters: 800 },
       { center: [51.46, -0.14], radiusMeters: 600 },
@@ -86,16 +91,22 @@ describe("unionPolygonFeatures parity", () => {
     const polygons = [squareFeature(-0.17), squareFeature(-0.13)];
 
     const candidate = unionEliminationParts({ polygons, disks });
-    const baseline = unionPolygonFeaturesLegacy([
-      ...polygons,
-      ...(disks.map((disk) =>
-        turfCircle(
-          turfPoint([disk.center[1], disk.center[0]]),
-          disk.radiusMeters / 1000,
-          { steps: 64, units: "kilometers" },
-        ),
-      ) as PolygonFeature[]),
-    ]);
+    const baseline = unionEliminationParts(
+      {
+        polygons: [
+          ...polygons,
+          ...(disks.map((disk) =>
+            turfCircle(
+              turfPoint([disk.center[1], disk.center[0]]),
+              disk.radiusMeters / 1000,
+              { steps: 64, units: "kilometers" },
+            ),
+          ) as PolygonFeature[]),
+        ],
+        disks: [],
+      },
+      "turf",
+    );
 
     assertMaskParity(candidate, baseline, -0.2, -0.1, 51.4, 51.5);
   });
@@ -110,7 +121,7 @@ describe("unionPolygonFeatures parity", () => {
     }));
 
     const candidate = unionDiskSpecs(disks);
-    const baseline = legacyDiskUnion(disks);
+    const baseline = turfDiskUnion(disks);
 
     assertMaskParity(candidate, baseline, -0.2, -0.1, 51.4, 51.5);
   });

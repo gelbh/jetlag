@@ -4,11 +4,9 @@ import type { LatLngTuple } from "../gameArea/geometry";
 import {
   buildCoastlineEliminationRegion,
   buildCoastlineNearRegion,
-  buildCoastlineNearRegionTs,
   buildLocationEliminationRegion,
   buildLocationNearRegion,
   buildMultiPlaceNearRegion,
-  buildMultiPlaceNearRegionTs,
 } from "./geometryMeasuring";
 import { buildMeasuringEliminationRegion } from "./eliminationRegions";
 import {
@@ -185,125 +183,4 @@ export async function buildMeasuringEliminationPreview(
   input: MeasuringRegionInput,
 ): Promise<Feature<GeoPolygon | MultiPolygon> | null> {
   return (await buildMeasuringRegions(input))?.elimination ?? null;
-}
-
-/** Sync TS coastline path for pending-question overlays / tests. */
-function buildMeasuringNearRegionTs(
-  input: Omit<MeasuringRegionInput, "measuringAnswer">,
-): Feature<GeoPolygon | MultiPolygon> | null {
-  const {
-    gameArea,
-    measuringSubject,
-    measuringLocationCategory,
-    measuringDistanceMeters,
-    measuringTargetPoint,
-    measuringPlaces,
-    measuringCoastSegments,
-    measuringSeaLevelNearRegion,
-    usesAllPlacesInArea,
-  } = input;
-
-  if (measuringDistanceMeters === null) {
-    return null;
-  }
-
-  if (
-    measuringSubject === "coastline" ||
-    isMeasuringLinearLocation(
-      measuringSubject,
-      measuringLocationCategory ?? undefined,
-    )
-  ) {
-    if (measuringCoastSegments.length === 0) {
-      return null;
-    }
-
-    return buildCoastlineNearRegionTs(
-      measuringCoastSegments,
-      measuringDistanceMeters,
-      gameArea,
-    );
-  }
-
-  if (measuringSubject === "sea_level") {
-    return measuringSeaLevelNearRegion;
-  }
-
-  if (usesAllPlacesInArea) {
-    if (measuringPlaces.length === 0) {
-      return null;
-    }
-
-    return buildMultiPlaceNearRegionTs(
-      measuringPlaces.map((place) => place.point),
-      measuringDistanceMeters,
-      gameArea,
-    );
-  }
-
-  if (!measuringTargetPoint) {
-    return null;
-  }
-
-  return buildLocationNearRegion(
-    measuringTargetPoint,
-    measuringDistanceMeters,
-    gameArea,
-  );
-}
-
-export function buildMeasuringBoundaryPreviewTs(
-  input: Omit<MeasuringRegionInput, "measuringAnswer">,
-): Feature<GeoPolygon | MultiPolygon> | null {
-  return buildMeasuringNearRegionTs(input);
-}
-
-export function buildMeasuringEliminationPreviewTs(
-  input: MeasuringRegionInput,
-): Feature<GeoPolygon | MultiPolygon> | null {
-  const near = input.precomputedNearRegion ?? buildMeasuringNearRegionTs(input);
-  if (!near || input.measuringDistanceMeters === null || !input.measuringAnswer) {
-    return null;
-  }
-
-  if (
-    input.measuringSubject === "coastline" ||
-    isMeasuringLinearLocation(
-      input.measuringSubject,
-      input.measuringLocationCategory ?? undefined,
-    )
-  ) {
-    return buildMeasuringEliminationRegion(
-      near,
-      input.gameArea,
-      input.measuringAnswer,
-    );
-  }
-
-  if (input.measuringSubject === "sea_level") {
-    return buildSeaLevelEliminationRegion(
-      near,
-      input.gameArea,
-      input.measuringAnswer,
-    );
-  }
-
-  if (input.usesAllPlacesInArea) {
-    return buildMeasuringEliminationRegion(
-      near,
-      input.gameArea,
-      input.measuringAnswer,
-    );
-  }
-
-  if (!input.measuringTargetPoint) {
-    return null;
-  }
-
-  return buildLocationEliminationRegion(
-    input.measuringTargetPoint,
-    input.measuringDistanceMeters,
-    input.gameArea,
-    input.measuringAnswer,
-  );
 }

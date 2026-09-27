@@ -1,12 +1,12 @@
-import { beforeAll, describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it, vi } from "vitest";
 import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
 import { point as turfPoint } from "@turf/helpers";
 import { assertPolygonTopologyParity } from "./parity";
-import { geoSpatialVoronoiFromSites } from "./spatialVoronoi";
-import { buildTentacleEliminationRegion } from "./tentacleRegions";
+import { wasmBuildSpatialVoronoiFromSites } from "./voronoiWasm";
+import { loadPolygonGolden } from "./loadPolygonGolden";
 import type { GameAreaGeometry, LatLngTuple } from "./types";
 
 const pkgEntry = path.resolve(
@@ -50,7 +50,7 @@ describe.skipIf(!wasmPkgReady)("tentacle wasm parity", () => {
     wasmBuildTentaclePoiAnswerEliminationRegion =
       wasm.wasmBuildTentaclePoiAnswerEliminationRegion;
     const sites = [westSite, eastSite];
-    const cells = geoSpatialVoronoiFromSites(
+    const cells = await wasmBuildSpatialVoronoiFromSites(
       sites.map((s) => ({
         lng: s.lng,
         lat: s.lat,
@@ -69,21 +69,14 @@ describe.skipIf(!wasmPkgReady)("tentacle wasm parity", () => {
 
   it("matches TS topology on two-site tentacle elimination", async () => {
     const sites = [westSite, eastSite];
-    const cells = geoSpatialVoronoiFromSites(
+    const cells = await wasmBuildSpatialVoronoiFromSites(
       sites.map((s) => ({
         lng: s.lng,
         lat: s.lat,
         properties: { poiId: s.id },
       })),
     );
-    const ts = buildTentacleEliminationRegion(
-      anchor,
-      oneMileMeters,
-      sites,
-      "east",
-      gameArea,
-      cells,
-    );
+    const ts = loadPolygonGolden("tentacle", "two-site-elim.json");
     const wasm = await wasmBuildTentacleEliminationRegion(
       anchor,
       oneMileMeters,
@@ -103,24 +96,14 @@ describe.skipIf(!wasmPkgReady)("tentacle wasm parity", () => {
 
   it("matches TS topology on POI-answer tentacle elimination", async () => {
     const sites = [westSite, eastSite];
-    const cells = geoSpatialVoronoiFromSites(
+    const cells = await wasmBuildSpatialVoronoiFromSites(
       sites.map((s) => ({
         lng: s.lng,
         lat: s.lat,
         properties: { poiId: s.id },
       })),
     );
-    const { buildTentaclePoiAnswerEliminationRegion } = await import(
-      "./tentacleRegions"
-    );
-    const ts = buildTentaclePoiAnswerEliminationRegion(
-      anchor,
-      oneMileMeters,
-      sites,
-      "east",
-      gameArea,
-      cells,
-    );
+    const ts = loadPolygonGolden("tentacle", "poi-answer-elim.json");
     const wasm = await wasmBuildTentaclePoiAnswerEliminationRegion(
       anchor,
       oneMileMeters,
@@ -130,5 +113,67 @@ describe.skipIf(!wasmPkgReady)("tentacle wasm parity", () => {
       cells,
     );
     assertPolygonTopologyParity(wasm, ts, topologyBbox);
+  });
+});
+
+describe("tentacle wasm failure", () => {
+  it("wasm init failure rethrows when entrypoint is ready", async () => {
+    vi.resetModules();
+    vi.doMock("./kernelWasmReady", async () => {
+      const actual = await vi.importActual<typeof import("./kernelWasmReady")>(
+        "./kernelWasmReady",
+      );
+      return {
+        ...actual,
+        KERNEL_WASM_READY: {
+          ...actual.KERNEL_WASM_READY,
+          tentacleEliminationRegion: true,
+        },
+        shouldUseWasm: (entrypoint: string) => {
+          if (entrypoint === "tentacleEliminationRegion") {
+            return true;
+          }
+          return actual.shouldUseWasm(entrypoint as import("./kernelWasmReady").KernelEntrypoint,
+          );
+        },
+      };
+    });
+    vi.doMock("./tentacleWasm", () => ({
+      wasmBuildTentacleEliminationRegion: vi.fn(async () => {
+        throw new Error("wasm init failed");
+      }),
+      wasmBuildTentaclePoiAnswerEliminationRegion: vi.fn(async () => {
+        throw new Error("wasm init failed");
+      }),
+      resetTentacleWasmForTests: vi.fn(),
+    }));
+
+    const { runTentacleEliminationRegion: runWithMock } = await import(
+      "./tentacleKernelRunner"
+    );
+    const cells = await wasmBuildSpatialVoronoiFromSites(
+      [westSite, eastSite].map((s) => ({
+        lng: s.lng,
+        lat: s.lat,
+        properties: { poiId: s.id },
+      })),
+    );
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    await expect(
+      runWithMock({
+        anchor,
+        radiusMeters: oneMileMeters,
+        sites: [westSite, eastSite],
+        answeredSiteId: "east",
+        gameArea,
+        voronoiCells: cells,
+      }),
+    ).rejects.toThrow("wasm init failed");
+    expect(warnSpy).toHaveBeenCalled();
+    warnSpy.mockRestore();
+
+    vi.doUnmock("./tentacleWasm");
+    vi.doUnmock("./kernelWasmReady");
+    vi.resetModules();
   });
 });

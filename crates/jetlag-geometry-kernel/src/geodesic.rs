@@ -1,6 +1,8 @@
-//! Geodesic helpers matching TS `geodesicPrimitives` (Earth radius 6_371_000).
+//! Geodesic helpers matching TS hand-rolled radius 6_371_000
+//! (`haversineMeters` / `destinationPoint`).
 
-/// Matches TS `geodesicPrimitives` / Turf-ish spherical earth.
+/// Hand-rolled TS radius (`haversineMeters` / `destinationPoint`). Intentional dual
+/// with `mask.rs` Turf `6_371_008.8`; naive unify breaks one parity surface.
 pub(crate) const EARTH_RADIUS_M: f64 = 6_371_000.0;
 
 /// Lat/lng tuple as in TS `LatLngTuple`.
@@ -27,8 +29,7 @@ pub(crate) fn destination_point(origin: LatLng, distance_m: f64, bearing_deg: f6
 
     let sin_φ2 = φ1.sin() * δ.cos() + φ1.cos() * δ.sin() * θ.cos();
     let φ2 = sin_φ2.asin();
-    let λ2 = λ1
-        + (θ.sin() * δ.sin() * φ1.cos()).atan2(δ.cos() - φ1.sin() * sin_φ2);
+    let λ2 = λ1 + (θ.sin() * δ.sin() * φ1.cos()).atan2(δ.cos() - φ1.sin() * sin_φ2);
 
     (φ2.to_degrees(), λ2.to_degrees())
 }
@@ -39,7 +40,7 @@ pub(crate) fn haversine_meters(a: LatLng, b: LatLng) -> f64 {
     let lng_delta = (b.1 - a.1).to_radians();
     let lat1 = a.0.to_radians();
     let lat2 = b.0.to_radians();
-    let h = (lat_delta / 2.0).sin().powi(2)
-        + lat1.cos() * lat2.cos() * (lng_delta / 2.0).sin().powi(2);
+    let h =
+        (lat_delta / 2.0).sin().powi(2) + lat1.cos() * lat2.cos() * (lng_delta / 2.0).sin().powi(2);
     2.0 * EARTH_RADIUS_M * h.sqrt().asin()
 }

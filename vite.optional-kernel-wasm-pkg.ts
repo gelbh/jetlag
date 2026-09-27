@@ -26,7 +26,7 @@ function isKernelWasmPkgSpecifier(
   return false;
 }
 
-/** Stub gitignored pkg/ so Vite/Vitest can load the graph without wasm:build. */
+/** Stub gitignored pkg so Vite/Vitest can load the graph without wasm:build. */
 export function optionalKernelWasmPkg(): Plugin {
   return {
     name: "optional-kernel-wasm-pkg",

@@ -5,7 +5,7 @@ import {
   resetKernelWasmForTests,
 } from "./kernelWasmPkg";
 import type { GameAreaGeometry, LatLngTuple, PolygonFeature } from "./types";
-import type { TentacleSite } from "./tentacleRegions";
+import type { TentacleSite } from "./tentacleTypes";
 
 /** Reset lazy WASM module (tests). */
 export const resetTentacleWasmForTests = resetKernelWasmForTests;

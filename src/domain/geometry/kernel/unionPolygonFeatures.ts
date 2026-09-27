@@ -238,13 +238,6 @@ function divideAndConquerUnion(
   return layer[0] ?? null;
 }
 
-/** Turf-only divide-and-conquer union for parity baselines in tests. */
-export function unionPolygonFeaturesLegacy(
-  features: readonly PolygonFeature[],
-): PolygonFeature | null {
-  return divideAndConquerUnion(features, "turf");
-}
-
 export function unionDiskSpecs(disks: readonly DiskSpec[]): PolygonFeature | null {
   if (disks.length === 0) {
     return null;
@@ -295,7 +288,6 @@ function mergeUnionResults(
   return unionPair(left, right, engine) ?? concatPolygonFeatures(left, right);
 }
 
-/** Unions polygon features using martinez with turf fallback. */
 export function unionPolygonFeatures(
   features: readonly PolygonFeature[],
 ): PolygonFeature | null {
@@ -309,10 +301,4 @@ export function unionEliminationParts(
   const polyResult = divideAndConquerUnion(input.polygons, engine);
   const diskResult = unionDiskSpecs(input.disks);
   return mergeUnionResults(diskResult, polyResult, engine);
-}
-
-export function unionEliminationPartsLegacy(
-  input: EliminationUnionInput,
-): PolygonFeature | null {
-  return unionEliminationParts(input, "turf");
 }

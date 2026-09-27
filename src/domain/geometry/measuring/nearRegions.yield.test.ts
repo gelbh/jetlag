@@ -1,12 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { Feature, LineString } from "geojson";
 import type { GameArea } from "../../map/annotations";
-import {
-  buildCoastlineNearRegion,
-  clearCoastlineNearRegionCacheForTests,
-  COASTLINE_NEAR_REGION_YIELD_EVERY,
-  setCoastlineNearRegionYieldHookForTests,
-} from "./nearRegions";
 
 vi.mock("./geodesicLineBuffer", () => ({
   dispatchGeodesicLineBuffer: vi.fn(async () => ({
@@ -25,10 +19,6 @@ vi.mock("./geodesicLineBuffer", () => ({
       ],
     },
   })),
-}));
-
-vi.mock("../kernel/resolveClientMaskKernelMode", () => ({
-  resolveClientMaskKernelMode: () => "ts" as const,
 }));
 
 const sampleGameArea: GameArea = {
@@ -61,12 +51,40 @@ function lineSegment(index: number): Feature<LineString> {
 
 describe("buildCoastlineNearRegion cooperative yield", () => {
   afterEach(() => {
-    clearCoastlineNearRegionCacheForTests();
-    setCoastlineNearRegionYieldHookForTests(null);
     vi.resetModules();
+    vi.doUnmock("../kernel/kernelWasmReady");
+    vi.doUnmock("../kernel/nearRegionKernelRunner");
   });
 
   it("yields to the event loop when segment count exceeds the interval", async () => {
+    vi.resetModules();
+    vi.doMock("../kernel/kernelWasmReady", async () => {
+      const actual =
+        await vi.importActual<typeof import("../kernel/kernelWasmReady")>(
+          "../kernel/kernelWasmReady",
+        );
+      return {
+        ...actual,
+        KERNEL_WASM_READY: {
+          ...actual.KERNEL_WASM_READY,
+          nearRegionBatch: false,
+        },
+        shouldUseWasm: (entrypoint: string) => {
+          if (entrypoint === "nearRegionBatch") {
+            return false;
+          }
+          return actual.shouldUseWasm(entrypoint as never);
+        },
+      };
+    });
+
+    const {
+      buildCoastlineNearRegion,
+      clearCoastlineNearRegionCacheForTests,
+      COASTLINE_NEAR_REGION_YIELD_EVERY,
+      setCoastlineNearRegionYieldHookForTests,
+    } = await import("./nearRegions");
+
     let yieldCount = 0;
     setCoastlineNearRegionYieldHookForTests(async () => {
       yieldCount += 1;
@@ -80,13 +98,13 @@ describe("buildCoastlineNearRegion cooperative yield", () => {
     await buildCoastlineNearRegion(segments, 5_000, sampleGameArea);
 
     expect(yieldCount).toBeGreaterThanOrEqual(1);
+
+    clearCoastlineNearRegionCacheForTests();
+    setCoastlineNearRegionYieldHookForTests(null);
   });
 
   it("skips cooperative yield when nearRegionBatch wasm path is used", async () => {
     vi.resetModules();
-    vi.doMock("../kernel/resolveClientMaskKernelMode", () => ({
-      resolveClientMaskKernelMode: () => "wasm" as const,
-    }));
     vi.doMock("../kernel/kernelWasmReady", async () => {
       const actual =
         await vi.importActual<typeof import("../kernel/kernelWasmReady")>(
@@ -98,14 +116,11 @@ describe("buildCoastlineNearRegion cooperative yield", () => {
           ...actual.KERNEL_WASM_READY,
           nearRegionBatch: true,
         },
-        shouldUseWasm: (mode: string, entrypoint: string) => {
+        shouldUseWasm: (entrypoint: string) => {
           if (entrypoint === "nearRegionBatch") {
-            return mode === "wasm" || mode === "dual";
+            return true;
           }
-          return actual.shouldUseWasm(
-            mode as "ts" | "wasm" | "dual",
-            entrypoint as never,
-          );
+          return actual.shouldUseWasm(entrypoint as never);
         },
       };
     });
@@ -128,32 +143,27 @@ describe("buildCoastlineNearRegion cooperative yield", () => {
       })),
     }));
 
-    const { buildCoastlineNearRegion: buildCoastline } = await import(
-      "./nearRegions"
-    );
     const {
-      setCoastlineNearRegionYieldHookForTests: setYield,
-      clearCoastlineNearRegionCacheForTests: clearCache,
-      COASTLINE_NEAR_REGION_YIELD_EVERY: yieldEvery,
+      buildCoastlineNearRegion,
+      clearCoastlineNearRegionCacheForTests,
+      COASTLINE_NEAR_REGION_YIELD_EVERY,
+      setCoastlineNearRegionYieldHookForTests,
     } = await import("./nearRegions");
 
     let yieldCount = 0;
-    setYield(async () => {
+    setCoastlineNearRegionYieldHookForTests(async () => {
       yieldCount += 1;
     });
 
     const segments = Array.from(
-      { length: yieldEvery + 1 },
+      { length: COASTLINE_NEAR_REGION_YIELD_EVERY + 1 },
       (_, index) => lineSegment(index),
     );
 
-    await buildCoastline(segments, 5_000, sampleGameArea);
+    await buildCoastlineNearRegion(segments, 5_000, sampleGameArea);
     expect(yieldCount).toBe(0);
 
-    clearCache();
-    setYield(null);
-    vi.doUnmock("../kernel/resolveClientMaskKernelMode");
-    vi.doUnmock("../kernel/kernelWasmReady");
-    vi.doUnmock("../kernel/nearRegionKernelRunner");
+    clearCoastlineNearRegionCacheForTests();
+    setCoastlineNearRegionYieldHookForTests(null);
   });
 });

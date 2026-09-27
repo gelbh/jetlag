@@ -1,10 +1,10 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Feature, MultiPolygon, Polygon as GeoPolygon } from "geojson";
-import { buildCombinedEliminationMask } from "../../domain/geometry/masks/combinedEliminationMask";
 import { EMPTY_GEOJSON_FEATURES } from "../../domain/geometry/masks/emptyFeatures";
 import { requestCombinedEliminationMask } from "../../domain/geometry/masks/eliminationMaskWorkerClient";
 import type { AnnotationRecord, GameArea } from "../../domain/map/annotations";
 import type { HidingZoneRecord } from "../../domain/session/hiding/hidingZone";
+import type { PolygonFeature } from "../../domain/geometry/kernel/types";
 
 interface UseCombinedEliminationMaskOptions {
   annotations: readonly AnnotationRecord[];
@@ -21,23 +21,8 @@ export function useCombinedEliminationMask({
   endGameHidingZones = [],
   hidden = false,
 }: UseCombinedEliminationMaskOptions) {
-  const [mask, setMask] = useState<ReturnType<
-    typeof buildCombinedEliminationMask
-  > | null>(null);
+  const [mask, setMask] = useState<PolygonFeature | null>(null);
   const generationRef = useRef(0);
-
-  const committedBootstrap = useMemo(() => {
-    if (hidden) {
-      return null;
-    }
-
-    return buildCombinedEliminationMask(
-      annotations,
-      gameArea,
-      EMPTY_GEOJSON_FEATURES,
-      endGameHidingZones,
-    );
-  }, [annotations, endGameHidingZones, gameArea, hidden]);
 
   useEffect(() => {
     if (hidden) {
@@ -60,14 +45,8 @@ export function useCombinedEliminationMask({
         }
       })
       .catch(() => {
-        const fallback = buildCombinedEliminationMask(
-          annotations,
-          gameArea,
-          draftFeatures,
-          endGameHidingZones,
-        );
         if (generation === generationRef.current) {
-          setMask(fallback);
+          setMask(null);
         }
       });
   }, [annotations, draftFeatures, endGameHidingZones, gameArea, hidden]);
@@ -76,5 +55,5 @@ export function useCombinedEliminationMask({
     return null;
   }
 
-  return mask ?? committedBootstrap;
+  return mask;
 }

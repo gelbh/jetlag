@@ -3,29 +3,23 @@ import turfCircle from "@turf/circle";
 import { point as turfPoint } from "@turf/helpers";
 import type { Feature, LineString, Polygon as GeoPolygon } from "geojson";
 import { computeEliminationUnionInputTs } from "../adapter/eliminationMask";
-import {
-  buildEndGameMaskFromDisks,
-  buildMaskFromUnionInput,
-} from "../kernel/buildMask";
+import { clipMaskToGameArea } from "../kernel/clipMask";
 import {
   wasmBuildEndGameMaskFromDisks,
   wasmBuildMaskFromUnionInput,
 } from "../kernel/maskWasm";
 import { wasmBuildHalfPlanePolygon } from "../kernel/halfPlaneWasm";
 import { wasmGeodesicLineBuffer } from "../kernel/geodesicWasm";
-import { buildHalfPlanePolygon } from "../kernel/radarHalfPlane";
-import { geodesicLineBuffer } from "../kernel/geodesicLineBuffer";
 import {
   unionDiskSpecs,
   unionEliminationParts,
   unionPolygonFeatures,
-  unionPolygonFeaturesLegacy,
   type DiskSpec,
   type EliminationUnionInput,
   type PolygonFeature,
 } from "../kernel/unionPolygonFeatures";
 import type { AnnotationRecord, GameArea } from "../../map/annotations";
-import type { LatLngTuple } from "../kernel/types";
+import type { GameAreaGeometry, LatLngTuple } from "../kernel/types";
 
 const runGeometryPerf = process.env.GEOMETRY_PERF === "1";
 
@@ -142,7 +136,7 @@ function circleDisks(count: number): DiskSpec[] {
   }));
 }
 
-function legacyCircleUnion(disks: DiskSpec[]): PolygonFeature | null {
+function turfCircleUnion(disks: DiskSpec[]): PolygonFeature | null {
   const circles = disks.map((disk) =>
     turfCircle(turfPoint([disk.center[1], disk.center[0]]), disk.radiusMeters / 1000, {
       steps: 64,
@@ -150,11 +144,11 @@ function legacyCircleUnion(disks: DiskSpec[]): PolygonFeature | null {
     }),
   ) as PolygonFeature[];
 
-  return unionPolygonFeaturesLegacy(circles);
+  return unionEliminationParts({ polygons: circles, disks: [] }, "turf");
 }
 
 describe.skipIf(!runGeometryPerf)("geometry performance gates", () => {
-  it("union_10_circles is at least 2x faster than legacy turf union", () => {
+  it("union_10_circles is at least 2x faster than turf engine union", () => {
     const disks = circleDisks(10);
     const circles = disks.map((disk) =>
       turfCircle(turfPoint([disk.center[1], disk.center[0]]), disk.radiusMeters / 1000, {
@@ -166,14 +160,14 @@ describe.skipIf(!runGeometryPerf)("geometry performance gates", () => {
     const martinezMs = measureMedianMs(() => {
       unionPolygonFeatures(circles);
     });
-    const legacyMs = measureMedianMs(() => {
-      unionPolygonFeaturesLegacy(circles);
+    const turfMs = measureMedianMs(() => {
+      unionEliminationParts({ polygons: circles, disks: [] }, "turf");
     });
 
-    expect(martinezMs / legacyMs).toBeLessThan(0.5);
+    expect(martinezMs / turfMs).toBeLessThan(0.5);
   });
 
-  it("union_10_mixed_polys is faster than legacy turf union", () => {
+  it("union_10_mixed_polys is faster than turf engine union", () => {
     const features = Array.from({ length: 10 }, (_, index) =>
       squareFeature(-0.19 + index * 0.008),
     );
@@ -182,30 +176,34 @@ describe.skipIf(!runGeometryPerf)("geometry performance gates", () => {
     const martinezMs = measureMedianMs(() => {
       unionEliminationParts(input);
     });
-    const legacyMs = measureMedianMs(() => {
-      unionPolygonFeaturesLegacy(features);
+    const turfMs = measureMedianMs(() => {
+      unionEliminationParts(input, "turf");
     });
 
-    expect(martinezMs / legacyMs).toBeLessThan(0.6);
+    expect(martinezMs / turfMs).toBeLessThan(0.6);
   });
 
-  it("elimination_mask_8_annotations is faster than legacy union path", () => {
+  it("elimination_mask_8_annotations is faster than turf engine union path", () => {
     const annotations = Array.from({ length: 8 }, (_, index) =>
       matchingAnnotation(`a-${index}`, -0.19 + index * 0.01),
     );
     const input = computeEliminationUnionInputTs(annotations, gameArea, []);
+    const area = gameArea as GameAreaGeometry;
 
     const martinezMs = measureMedianMs(() => {
-      buildMaskFromUnionInput(input, gameArea);
+      const unioned = unionEliminationParts(input);
+      if (unioned) {
+        clipMaskToGameArea(unioned, area);
+      }
     });
-    const legacyMs = measureMedianMs(() => {
+    const turfMs = measureMedianMs(() => {
       const features = annotations.map(
         (annotation) => annotation.geometry as PolygonFeature,
       );
-      unionPolygonFeaturesLegacy(features);
+      unionEliminationParts({ polygons: features, disks: [] }, "turf");
     });
 
-    expect(martinezMs / legacyMs).toBeLessThan(0.6);
+    expect(martinezMs / turfMs).toBeLessThan(0.6);
   });
 
   it("circle_union_20_disks is much faster than turf-circle plus union", () => {
@@ -214,14 +212,14 @@ describe.skipIf(!runGeometryPerf)("geometry performance gates", () => {
     const circleUnionMs = measureMedianMs(() => {
       unionDiskSpecs(disks);
     });
-    const legacyMs = measureMedianMs(() => {
-      legacyCircleUnion(disks);
+    const turfMs = measureMedianMs(() => {
+      turfCircleUnion(disks);
     });
 
-    expect(circleUnionMs / legacyMs).toBeLessThan(0.1);
+    expect(circleUnionMs / turfMs).toBeLessThan(0.1);
   });
 
-  it("wasm_mask_8_polys median within 1.1x ts", async () => {
+  it("wasm_mask_8_polys median under 50ms", async () => {
     const input: EliminationUnionInput = {
       polygons: Array.from({ length: 8 }, (_, index) =>
         squareFeature(-0.19 + index * 0.01),
@@ -232,35 +230,29 @@ describe.skipIf(!runGeometryPerf)("geometry performance gates", () => {
     // Warm WASM once so init cost is outside the median window.
     await wasmBuildMaskFromUnionInput(input, gameArea);
 
-    const tsMs = measureMedianMs(() => {
-      buildMaskFromUnionInput(input, gameArea);
-    });
     const wasmMs = await measureMedianMsAsync(async () => {
       await wasmBuildMaskFromUnionInput(input, gameArea);
     });
 
-    expect(wasmMs / tsMs).toBeLessThanOrEqual(1.1);
+    expect(wasmMs).toBeLessThan(50);
   });
 
-  it("wasm_end_game_10_disks median within 1.1x ts", async () => {
+  it("wasm_end_game_10_disks median under 100ms", async () => {
     const disks = circleDisks(10);
 
     await wasmBuildEndGameMaskFromDisks(gameArea, disks);
 
-    const tsMs = measureMedianMs(() => {
-      buildEndGameMaskFromDisks(gameArea, disks);
-    });
     const wasmMs = await measureMedianMsAsync(async () => {
       await wasmBuildEndGameMaskFromDisks(gameArea, disks);
     });
 
-    expect(wasmMs / tsMs).toBeLessThanOrEqual(1.1);
+    expect(wasmMs).toBeLessThan(100);
   });
 
   // Direct WASM calls (bypass KERNEL_WASM_READY) — gates for future ready flip.
   // Measure sync pkg exports after warm-up so Promise microtasks don't dominate
   // sub-millisecond entrypoints (geodesic especially).
-  it("wasm_half_plane_thermo median within 1.1x ts", async () => {
+  it("wasm_half_plane_thermo median under 20ms", async () => {
     await wasmBuildHalfPlanePolygon(thermoA, thermoB, gameArea, "cold");
     const wasmPkg = await import(
       "../../../../crates/jetlag-geometry-kernel/pkg/jetlag_geometry_kernel.js"
@@ -269,9 +261,6 @@ describe.skipIf(!runGeometryPerf)("geometry performance gates", () => {
     const pointBJson = JSON.stringify(thermoB);
     const gameAreaJson = JSON.stringify(gameArea);
 
-    const tsMs = measureMedianMs(() => {
-      buildHalfPlanePolygon(thermoA, thermoB, gameArea, "cold");
-    });
     const wasmMs = measureMedianMs(() => {
       wasmPkg.build_half_plane_polygon_json(
         pointAJson,
@@ -282,14 +271,10 @@ describe.skipIf(!runGeometryPerf)("geometry performance gates", () => {
       );
     });
 
-    if (tsMs === 0) {
-      expect(wasmMs).toBe(0);
-    } else {
-      expect(wasmMs / tsMs).toBeLessThanOrEqual(1.1);
-    }
+    expect(wasmMs).toBeLessThan(20);
   });
 
-  it("wasm_geodesic_10_vertex median within 1.2x ts", async () => {
+  it("wasm_geodesic_10_vertex median under 20ms", async () => {
     const line = tenVertexLine();
     await wasmGeodesicLineBuffer(line, 200);
     const wasmPkg = await import(
@@ -297,19 +282,11 @@ describe.skipIf(!runGeometryPerf)("geometry performance gates", () => {
     );
     const coordinatesJson = JSON.stringify(line.geometry.coordinates);
 
-    const tsMs = measureMedianMs(() => {
-      geodesicLineBuffer(line, 200);
-    });
     const wasmMs = measureMedianMs(() => {
       wasmPkg.geodesic_line_buffer_json(coordinatesJson, 200, null);
     });
 
-    if (tsMs === 0) {
-      expect(wasmMs).toBe(0);
-    } else {
-      // CI runners show ~1.15x noise on this short path; keep a tight but stable gate.
-      expect(wasmMs / tsMs).toBeLessThanOrEqual(1.2);
-    }
+    expect(wasmMs).toBeLessThan(20);
   });
 });
 

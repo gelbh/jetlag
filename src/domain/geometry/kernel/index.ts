@@ -11,43 +11,26 @@ export {
 } from "./featureConvert";
 export { clipMaskToGameArea } from "./clipMask";
 export {
-  buildEndGameMaskFromDisks,
-  buildMaskFromUnionInput,
-} from "./buildMask";
-export {
   unionDiskSpecs,
   unionEliminationParts,
-  unionEliminationPartsLegacy,
   unionPolygonFeatures,
-  unionPolygonFeaturesLegacy,
 } from "./unionPolygonFeatures";
-export {
-  buildHalfPlanePolygon,
-  buildRadarShadedRegion,
-  isPointInGameArea,
-} from "./radarHalfPlane";
-export { geodesicLineBuffer } from "./geodesicLineBuffer";
-export {
-  geoSpatialVoronoi,
-  geoSpatialVoronoiFromSites,
-  type SpatialVoronoiSite,
-} from "./spatialVoronoi";
+export { isPointInGameArea } from "./isPointInGameArea";
+export type { SpatialVoronoiSite } from "./spatialVoronoiTypes";
 export {
   resolveVoronoiCellPoiId,
   resolveVoronoiCellSiteId,
   voronoiCellSiteId,
   type VoronoiSiteRef,
 } from "./voronoiCellSiteId";
-export {
-  buildTentacleEliminationRegion,
-  buildTentaclePoiAnswerEliminationRegion,
-  type TentacleSite,
-} from "./tentacleRegions";
+export type { TentacleSite } from "./tentacleTypes";
 export {
   dispatchSpatialVoronoi,
   runSpatialVoronoi,
 } from "./voronoiKernelRunner";
 export {
+  dispatchTentacleEliminationRegion,
+  dispatchTentaclePoiAnswerEliminationRegion,
   runTentacleEliminationRegion,
   runTentaclePoiAnswerEliminationRegion,
   type TentacleEliminationParams,
@@ -72,3 +55,4 @@ export {
   runNearRegionBatch,
 } from "./nearRegionKernelRunner";
 export { wasmBuildNearRegion } from "./nearRegionWasm";
+export { KERNEL_WASM_READY, shouldUseWasm } from "./kernelWasmReady";

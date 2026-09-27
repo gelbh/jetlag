@@ -1,1 +1,1 @@
-export type LatLngTuple = [number, number];
+export type { LatLngTuple } from "../kernel/types";

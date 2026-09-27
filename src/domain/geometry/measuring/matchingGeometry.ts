@@ -7,7 +7,7 @@ import {
   getCachedVoronoiCellsAsync,
   matchingSitesFingerprint,
 } from "../voronoi/voronoiCellCache";
-import { voronoiCellSiteId } from "../kernel/voronoiCellSiteId";
+import { voronoiCellSiteId } from "../voronoi/voronoiCellSiteId";
 import {
   gameAreaToPolygon,
   safeDifference,
@@ -161,7 +161,7 @@ const EMPTY_MATCHING_ELIMINATION: Feature<MultiPolygon> = {
   geometry: { type: "MultiPolygon", coordinates: [] },
 };
 
-/** Yes/no elim is a complement of the same-nearest cell — derive without re-Voronoi. */
+/** Yes/no elim is a complement of the same-nearest cell - derive without re-Voronoi. */
 export function matchingEliminationFromSameNearestRegion(
   sameNearestRegion: Feature<Polygon | MultiPolygon>,
   gameArea: GameArea,
@@ -171,6 +171,8 @@ export function matchingEliminationFromSameNearestRegion(
     return sameNearestRegion;
   }
 
+  // Sole in-area site: same-nearest is the whole play area, so outside-the-cell
+  // difference is empty (valid yes elimination, nothing to shade).
   return (
     safeDifference(gameAreaToPolygon(gameArea), sameNearestRegion) ??
     EMPTY_MATCHING_ELIMINATION

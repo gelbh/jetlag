@@ -6,11 +6,13 @@ import type {
 } from "@/domain/session/catalog/sessionCustomContent";
 import {
   gameAreaToBoundingBox,
+  type LatLngTuple,
+} from "@/domain/geometry/gameArea/geometry";
+import {
   nearestPointToCoastlines,
   prepareMeasuringLineSegments,
-  type LatLngTuple,
   type PreparedLinearSegments,
-} from "@/domain/geometry/gameArea/geometry";
+} from "@/domain/geometry/measuring/geometryMeasuring";
 import {
   measuringLinearOverpassSelectors,
   measuringLocationLabel,

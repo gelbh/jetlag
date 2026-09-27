@@ -24,5 +24,6 @@ DESIGN.md
 PRODUCT.md
 .lighthouseci
 target/
-crates/*/pkg/
+# No trailing slash: also ignore worktree pkg symlinks (dir form alone missed them).
+crates/*/pkg
 .stylelintcache

@@ -33,17 +33,6 @@ const clientEnvSchema = firebaseEnvSchema
     VITE_SENTRY_ENVIRONMENT: optionalNonEmptyString,
     VITE_SENTRY_RELEASE_DIST: optionalNonEmptyString,
     VITE_POSTHOG_KEY: optionalNonEmptyString,
-    // Empty/invalid → omit (unset → resolveMaskKernelMode defaults to "wasm").
-    VITE_GEOMETRY_MASK_KERNEL: z.preprocess((value) => {
-      if (typeof value !== "string") {
-        return undefined;
-      }
-      const trimmed = value.trim();
-      if (trimmed === "ts" || trimmed === "dual" || trimmed === "wasm") {
-        return trimmed;
-      }
-      return undefined;
-    }, z.enum(["ts", "dual", "wasm"]).optional()),
   })
   .superRefine((env, ctx) => {
     const firebaseFields = [
@@ -129,7 +118,6 @@ function readRawClientEnv(): Record<string, unknown> {
     VITE_SENTRY_ENVIRONMENT: import.meta.env.VITE_SENTRY_ENVIRONMENT,
     VITE_SENTRY_RELEASE_DIST: import.meta.env.VITE_SENTRY_RELEASE_DIST,
     VITE_POSTHOG_KEY: import.meta.env.VITE_POSTHOG_KEY,
-    VITE_GEOMETRY_MASK_KERNEL: import.meta.env.VITE_GEOMETRY_MASK_KERNEL,
   };
 
   // DEV without Doppler/.env: use demo-jetlag + emulator so local polish works.

@@ -27,13 +27,15 @@ function run(command, args) {
 }
 
 const parityTests = [
-  "src/domain/geometry/kernel/dualGoldenParity.test.ts",
   "src/domain/geometry/kernel/geodesicWasmParity.test.ts",
   "src/domain/geometry/kernel/dispatchKernel.test.ts",
   "src/domain/geometry/kernel/extrasWasmDispatch.test.ts",
   "src/domain/geometry/kernel/maskWasmParity.test.ts",
   "src/domain/geometry/kernel/halfPlaneWasmParity.test.ts",
   "src/domain/geometry/kernel/nearRegionWasmParity.test.ts",
+  "src/domain/geometry/kernel/tentacleWasmParity.test.ts",
+  "src/domain/geometry/kernel/voronoiWasmParity.test.ts",
+  "src/domain/geometry/kernel/spatialVoronoiOutcomeParity.test.ts",
 ];
 
 run("npm", ["run", "wasm:build"]);

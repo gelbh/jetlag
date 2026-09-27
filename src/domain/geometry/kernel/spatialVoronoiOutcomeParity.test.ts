@@ -4,10 +4,8 @@ import { point as turfPoint } from "@turf/helpers";
 import type { Feature, FeatureCollection, MultiPolygon, Polygon } from "geojson";
 import intersect from "@turf/intersect";
 import simplify from "@turf/simplify";
-import { buildTentacleEliminationRegion } from "./tentacleRegions";
-import { geoSpatialVoronoiFromSites } from "./spatialVoronoi";
+import { wasmBuildTentacleEliminationRegion } from "./tentacleWasm";
 import { wasmBuildSpatialVoronoiFromSites } from "./voronoiWasm";
-import { maskTopologyMatches, bboxFromGameArea } from "./maskTopology";
 import type { GameAreaGeometry, LatLngTuple } from "./types";
 import { voronoiCellSiteId } from "./voronoiCellSiteId";
 
@@ -80,49 +78,31 @@ function sameNearestFromCells(
 }
 
 describe("spatialVoronoiOutcomeParity", () => {
-  it("tentacle elimination outcomes stay topology-close vs TS Voronoi cells", async () => {
+  it("tentacle elimination keeps west-of-bisector for east answer", async () => {
     const sites = [westSite, eastSite, northSite];
-    const siteInputs = sites.map((s) => ({
-      lng: s.lng,
-      lat: s.lat,
-      properties: { poiId: s.id },
-    }));
-    const tsCells = geoSpatialVoronoiFromSites(siteInputs);
-    const wasmCells = await wasmBuildSpatialVoronoiFromSites(siteInputs);
-
-    const tsRegion = buildTentacleEliminationRegion(
+    const cells = await wasmBuildSpatialVoronoiFromSites(
+      sites.map((s) => ({
+        lng: s.lng,
+        lat: s.lat,
+        properties: { poiId: s.id },
+      })),
+    );
+    const region = await wasmBuildTentacleEliminationRegion(
       anchor,
       oneMileMeters,
       sites,
       "east",
       sampleGameArea,
-      tsCells,
-    );
-    const wasmRegion = buildTentacleEliminationRegion(
-      anchor,
-      oneMileMeters,
-      sites,
-      "east",
-      sampleGameArea,
-      wasmCells,
+      cells,
     );
 
-    expect(tsRegion).not.toBeNull();
-    expect(wasmRegion).not.toBeNull();
-    expect(
-      maskTopologyMatches(
-        wasmRegion as Feature<Polygon | MultiPolygon>,
-        tsRegion as Feature<Polygon | MultiPolygon>,
-        bboxFromGameArea(sampleGameArea),
-      ),
-    ).toBe(true);
-
+    expect(region).not.toBeNull();
     const westOfBisector = turfPoint([-0.17, 51.45]);
-    expect(booleanPointInPolygon(westOfBisector, wasmRegion!)).toBe(true);
+    expect(booleanPointInPolygon(westOfBisector, region!)).toBe(true);
   });
 
-  it("matching same-nearest outcomes stay topology-close vs TS Voronoi cells", async () => {
-    const siteInputs = [
+  it("matching same-nearest clips seeker cell into the game area", async () => {
+    const cells = await wasmBuildSpatialVoronoiFromSites([
       {
         lng: -0.18,
         lat: 51.44,
@@ -138,21 +118,12 @@ describe("spatialVoronoiOutcomeParity", () => {
         lat: 51.5,
         properties: { featureId: "north" },
       },
-    ];
-    const tsCells = geoSpatialVoronoiFromSites(siteInputs);
-    const wasmCells = await wasmBuildSpatialVoronoiFromSites(siteInputs);
+    ]);
+    const region = sameNearestFromCells("west", sampleGameArea, cells);
 
-    const tsRegion = sameNearestFromCells("west", sampleGameArea, tsCells);
-    const wasmRegion = sameNearestFromCells("west", sampleGameArea, wasmCells);
-
-    expect(tsRegion).not.toBeNull();
-    expect(wasmRegion).not.toBeNull();
+    expect(region).not.toBeNull();
     expect(
-      maskTopologyMatches(
-        wasmRegion!,
-        tsRegion!,
-        bboxFromGameArea(sampleGameArea),
-      ),
+      booleanPointInPolygon(turfPoint([westSite.lng, westSite.lat]), region!),
     ).toBe(true);
   });
 });
