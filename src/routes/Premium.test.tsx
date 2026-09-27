@@ -1,7 +1,6 @@
 import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { MantineProvider } from "@mantine/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { screenHeaderOffsetClassName } from "../components/ui/layout/ScreenHeader";
 import { Premium } from "./Premium";
 import { jetlagTheme } from "@/theme/theme";
 import { renderWithRouter } from "../test/renderWithRouter";
@@ -124,6 +123,14 @@ describe("Premium", () => {
       removeEventListener: () => {},
       dispatchEvent: () => false,
     }));
+    vi.stubGlobal(
+      "ResizeObserver",
+      class {
+        observe() {}
+        unobserve() {}
+        disconnect() {}
+      },
+    );
   });
 
   it("uses entry shell layout like Feedback", () => {
@@ -131,14 +138,10 @@ describe("Premium", () => {
     const banner = screen.getByRole("banner", { name: "Screen header" });
     expect(banner).toBeInTheDocument();
     expect(within(banner).getByRole("heading", { name: "Premium" })).toBeInTheDocument();
+    expect(screen.getAllByRole("heading", { name: "Premium" })).toHaveLength(1);
     expect(screen.queryByRole("button", { name: "Back" })).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Back" })).toHaveAttribute("href", "/");
-    const bodyPremium = screen
-      .getAllByRole("heading", { name: "Premium" })
-      .find((el) => !banner.contains(el));
-    expect(bodyPremium?.parentElement?.className ?? "").not.toContain(
-      screenHeaderOffsetClassName,
-    );
+    expect(screen.queryByText("Live transit and faster map loads for hosted sessions.")).toBeInTheDocument();
   });
 
   it("shows offline billing message when Firebase is not configured", () => {
@@ -172,11 +175,7 @@ describe("Premium", () => {
     renderPremium();
 
     await waitFor(() => {
-      expect(
-        screen.getByText("2 premium sessions left", {
-          selector: '[data-testid="premium-entitlement-pill"]',
-        }),
-      ).toBeInTheDocument();
+      expect(screen.getByText("2 premium sessions left")).toBeInTheDocument();
       expect(screen.getByRole("button", { name: /1 session/i })).toBeInTheDocument();
     });
 
@@ -236,13 +235,10 @@ describe("Premium", () => {
       expect(screen.getByRole("button", { name: /1 session/i })).toBeEnabled();
     });
 
-    fireEvent.click(screen.getByRole("tab", { name: "Unlimited" }));
+    fireEvent.click(screen.getByRole("radio", { name: "Unlimited" }));
 
     await waitFor(() => {
-      expect(screen.getByRole("tab", { name: "Unlimited" })).toHaveAttribute(
-        "aria-selected",
-        "true",
-      );
+      expect(screen.getByRole("radio", { name: "Unlimited" })).toBeChecked();
     });
 
     expect(screen.getByRole("button", { name: /Monthly unlimited/i })).toBeInTheDocument();
@@ -307,10 +303,10 @@ describe("Premium", () => {
     renderPremium();
 
     await waitFor(() => {
-      expect(screen.getByRole("tab", { name: "Session packs" })).toBeEnabled();
+      expect(screen.getByRole("radio", { name: "Session packs" })).toBeEnabled();
     });
 
-    fireEvent.click(screen.getByRole("tab", { name: "Session packs" }));
+    fireEvent.click(screen.getByRole("radio", { name: "Session packs" }));
 
     await waitFor(() => {
       expect(screen.getByRole("button", { name: /3 sessions/i })).toBeEnabled();
