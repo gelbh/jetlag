@@ -175,7 +175,10 @@ describe("Premium", () => {
     renderPremium();
 
     await waitFor(() => {
-      expect(screen.getByText("2 premium sessions left")).toBeInTheDocument();
+      // Badge + create CTA hint can both show the pack-credits label.
+      expect(
+        screen.getAllByText("2 premium sessions left").length,
+      ).toBeGreaterThanOrEqual(1);
       expect(screen.getByRole("button", { name: /1 session/i })).toBeInTheDocument();
     });
 
