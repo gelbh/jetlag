@@ -13,6 +13,10 @@ export interface GeolocationReading {
   heading: number | null;
 }
 
+export type RestoreLocationAccessIfPersistedResult =
+  | { status: "restored"; reading: GeolocationReading }
+  | { status: "skipped" | "denied" | "failed" };
+
 export type GeolocationPermissionState =
   | "prompt"
   | "granted"
@@ -33,6 +37,10 @@ export class GeolocationPermissionRequiredError extends Error {
     this.name = "GeolocationPermissionRequiredError";
   }
 }
+
+let restoreLocationAccessInFlight:
+  | Promise<RestoreLocationAccessIfPersistedResult>
+  | null = null;
 
 function readPosition(position: GeolocationPosition): GeolocationReading {
   const { latitude, longitude, accuracy, heading } = position.coords;
@@ -167,26 +175,41 @@ export async function confirmAndRequestLocationAccess(options?: {
 export async function restoreLocationAccessIfPersisted(options?: {
   highAccuracy?: boolean;
   maximumAge?: number;
-}): Promise<"restored" | "skipped" | "denied" | "failed"> {
-  if (getLocationPermissionUiSnapshot().confirmEpoch > 0) {
-    return "skipped";
-  }
-  if (!hasPersistedLocationAccessConfirmed()) {
-    return "skipped";
+}): Promise<RestoreLocationAccessIfPersistedResult> {
+  if (restoreLocationAccessInFlight) {
+    return restoreLocationAccessInFlight;
   }
 
-  try {
-    await getCurrentPosition(options);
-    markLocationAccessConfirmed();
-    return "restored";
-  } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "GPS location unavailable.";
-    if (message === LOCATION_BLOCKED_MESSAGE) {
-      clearPersistedLocationAccessConfirmed();
-      return "denied";
+  if (getLocationPermissionUiSnapshot().confirmEpoch > 0) {
+    return { status: "skipped" };
+  }
+  if (!hasPersistedLocationAccessConfirmed()) {
+    return { status: "skipped" };
+  }
+
+  const inFlight = (async () => {
+    try {
+      const reading = await getCurrentPosition(options);
+      markLocationAccessConfirmed();
+      return { status: "restored", reading } as const;
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "GPS location unavailable.";
+      if (message === LOCATION_BLOCKED_MESSAGE) {
+        clearPersistedLocationAccessConfirmed();
+        return { status: "denied" } as const;
+      }
+      return { status: "failed" } as const;
     }
-    return "failed";
+  })();
+
+  restoreLocationAccessInFlight = inFlight;
+  try {
+    return await inFlight;
+  } finally {
+    if (restoreLocationAccessInFlight === inFlight) {
+      restoreLocationAccessInFlight = null;
+    }
   }
 }
 
