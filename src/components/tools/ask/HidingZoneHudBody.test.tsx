@@ -72,9 +72,12 @@ describe("HidingZoneHudBody", () => {
     expect(screen.queryByRole("list", { name: "Wizard phases" })).toBeNull();
     expect(screen.queryByRole("button", { name: /continue/i })).toBeNull();
 
-    fireEvent.click(screen.getByRole("button", { name: /^Station$/i }));
+    fireEvent.click(screen.getByRole("button", { name: /^Transit stop$/i }));
     expect(choosePlacementMethod).toHaveBeenCalledWith(false);
     expect(onSearchThisArea).not.toHaveBeenCalled();
+    expect(
+      screen.getByText(/Snap to a stop, or tap any point/i),
+    ).toBeInTheDocument();
   });
 
   it("stays method-only in the sheet (no place/confirm panels)", () => {

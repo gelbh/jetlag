@@ -39,14 +39,22 @@ function resolveStep(
   return hasPlacement ? "confirm" : "location";
 }
 
-function placementSummary(zoneTool: HidingZoneToolPanelState): string {
+function placementSummary(zoneTool: HidingZoneToolPanelState): {
+  label: string;
+  detail?: string;
+} {
   if (zoneTool.manualMode) {
     if (zoneTool.manualCenter) {
-      return `Map · ${zoneTool.manualCenter[0].toFixed(5)}, ${zoneTool.manualCenter[1].toFixed(5)}`;
+      return {
+        label: "Dropped on the map",
+        detail: `${zoneTool.manualCenter[0].toFixed(5)}, ${zoneTool.manualCenter[1].toFixed(5)}`,
+      };
     }
-    return "Map placement";
+    return { label: "Map placement" };
   }
-  return zoneTool.selectedStation?.name ?? "No station selected";
+  return {
+    label: zoneTool.selectedStation?.name ?? "No station selected",
+  };
 }
 
 export function HidingZoneMapPlacementChrome({
@@ -79,44 +87,53 @@ export function HidingZoneMapPlacementChrome({
       ? "Confirm your station, or pick another on the map."
       : "Tap a transit station on the map to place your zone.";
 
-  const midSlot = (
+  // Banner already owns questionPrompt + radius (configureLabel). Mid is
+  // placement artifact only: station picker, manual confirm summary, or move cues.
+  const summary =
+    step === "confirm" && !showStationPicker
+      ? placementSummary(zoneTool)
+      : null;
+  const showMoveCues = moveMode;
+  const showMid =
+    showStationPicker || summary !== null || showMoveCues;
+
+  const midSlot = showMid ? (
     <div
       data-testid="hiding-zone-map-placement-mid"
       className="mx-auto w-full max-w-[22rem]"
       style={{
         ...mapChromeSurfaceStyles,
         borderRadius: 16,
-        padding: "0.7rem 0.85rem",
+        padding: "0.55rem",
         color: "var(--color-field-ink)",
       }}
     >
+      {showMoveCues ? (
+        <p
+          className="m-0 mb-2 text-xs"
+          style={{ color: "var(--color-field-ink-muted)" }}
+        >
+          Timer paused while you relocate.
+        </p>
+      ) : null}
       {showStationPicker ? (
-        <>
-          {moveMode ? (
-            <p
-              className="m-0 mb-2 text-xs"
-              style={{ color: "var(--color-field-ink-muted)" }}
-            >
-              Timer paused while you relocate.
-            </p>
-          ) : null}
-          <div className="pointer-events-auto jl-scroll max-h-[min(36dvh,16rem)] overflow-y-auto">
-            <TransitStationPicker
-              layout="compact"
-              query={zoneTool.query}
-              onQueryChange={zoneTool.setQuery}
-              stations={zoneTool.stations}
-              stationsLoading={zoneTool.stationsLoading}
-              stationsError={zoneTool.stationsError}
-              selectedStation={zoneTool.selectedStation}
-              onSelectStation={zoneTool.setSelectedStation}
-              onClearStation={zoneTool.clearStationSelection}
-              onSearchThisArea={onSearchThisArea}
-              searchDisabled={zoneTool.stationsLoading}
-            />
-          </div>
-        </>
-      ) : step === "confirm" ? (
+        <div className="pointer-events-auto jl-scroll max-h-[min(36dvh,16rem)] overflow-y-auto">
+          <TransitStationPicker
+            layout="compact"
+            query={zoneTool.query}
+            onQueryChange={zoneTool.setQuery}
+            stations={zoneTool.stations}
+            stationsLoading={zoneTool.stationsLoading}
+            stationsError={zoneTool.stationsError}
+            selectedStation={zoneTool.selectedStation}
+            onSelectStation={zoneTool.setSelectedStation}
+            onClearStation={zoneTool.clearStationSelection}
+            onSearchThisArea={onSearchThisArea}
+            searchDisabled={zoneTool.stationsLoading}
+          />
+        </div>
+      ) : null}
+      {summary ? (
         <>
           <p
             className="m-0 text-xs font-medium uppercase tracking-wide"
@@ -124,20 +141,15 @@ export function HidingZoneMapPlacementChrome({
           >
             Zone center
           </p>
-          <p className="m-0 mt-1 text-sm font-medium">
-            {placementSummary(zoneTool)}
+          <p
+            className="m-0 mt-1 text-sm font-medium"
+            title={summary.detail}
+          >
+            {summary.label}
           </p>
         </>
-      ) : (
-        <p className="m-0 text-sm">{questionPrompt}</p>
-      )}
-      <p
-        className="m-0 mt-1.5 text-xs"
-        style={{ color: "var(--color-field-ink-muted)" }}
-      >
-        Radius: {radiusLabel}
-      </p>
-      {moveMode ? (
+      ) : null}
+      {showMoveCues ? (
         <p
           className="m-0 mt-1.5 text-xs"
           style={{ color: "var(--color-status-warning, var(--color-flag))" }}
@@ -146,7 +158,7 @@ export function HidingZoneMapPlacementChrome({
         </p>
       ) : null}
     </div>
-  );
+  ) : undefined;
 
   const answerSlot = (
     <div
@@ -224,7 +236,7 @@ export function HidingZoneMapPlacementChrome({
       changeConfigureAriaLabel="Change placement method"
       midSlot={midSlot}
       answerSlot={answerSlot}
-      answerTall={false}
+      answerTall={showStationPicker}
     />
   );
 }

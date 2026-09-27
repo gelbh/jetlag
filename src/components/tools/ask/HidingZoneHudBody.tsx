@@ -61,17 +61,25 @@ export function HidingZoneHudBody({
       className="ask-hud-mode-body flex w-full flex-col gap-2"
     >
       {!moveMode ? (
-        <AskChipIsland
-          aria-label="Hiding zone placement method"
-          chips={[
-            { id: "station", label: "Station" },
-            { id: "map", label: "Map" },
-          ]}
-          selectedId={methodSelectedId}
-          onSelect={(id) => {
-            zoneTool.choosePlacementMethod(id === "map");
-          }}
-        />
+        <>
+          <AskChipIsland
+            aria-label="Hiding zone placement method"
+            chips={[
+              { id: "station", label: "Transit stop" },
+              { id: "map", label: "Tap map" },
+            ]}
+            selectedId={methodSelectedId}
+            onSelect={(id) => {
+              zoneTool.choosePlacementMethod(id === "map");
+            }}
+          />
+          <p
+            className="m-0 px-1 text-center text-xs leading-snug"
+            style={{ color: "var(--color-ink-dim)" }}
+          >
+            Snap to a stop, or tap any point in the play area.
+          </p>
+        </>
       ) : null}
 
       {zoneTool.error ? <InlineError>{zoneTool.error}</InlineError> : null}

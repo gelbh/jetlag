@@ -107,8 +107,30 @@ describe("HidingZoneMapPlacementChrome", () => {
       />,
     );
 
+    expect(screen.getByText(/Dropped on the map/i)).toBeInTheDocument();
+    expect(screen.queryByText(/Map ·/)).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: /^Confirm$/i }));
     expect(confirmZone).toHaveBeenCalledTimes(1);
+  });
+
+  it("omits mid prompt on manual place so the banner owns the verb", () => {
+    renderHud(
+      <HidingZoneMapPlacementChrome
+        moveMode={false}
+        radiusLabel="200 m"
+        zoneTool={baseZoneTool({
+          methodChosen: true,
+          manualMode: true,
+          hasPlacement: false,
+        })}
+        onSearchThisArea={vi.fn()}
+      />,
+    );
+    expect(screen.queryByTestId("hiding-zone-map-placement-mid")).toBeNull();
+    expect(
+      screen.getByText(/Tap the map inside the play area/i),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/^Radius:/i)).toBeNull();
   });
 
   it("reports place/confirm step so map picks stay live", () => {
