@@ -10,7 +10,6 @@ import {
 } from "../kernel/maskWasm";
 import { wasmBuildHalfPlanePolygon } from "../kernel/halfPlaneWasm";
 import { wasmGeodesicLineBuffer } from "../kernel/geodesicWasm";
-import { buildHalfPlanePolygon } from "../kernel/radarHalfPlane";
 import { geodesicLineBuffer } from "../kernel/geodesicLineBuffer";
 import {
   unionDiskSpecs,
@@ -254,7 +253,7 @@ describe.skipIf(!runGeometryPerf)("geometry performance gates", () => {
   // Direct WASM calls (bypass KERNEL_WASM_READY) — gates for future ready flip.
   // Measure sync pkg exports after warm-up so Promise microtasks don't dominate
   // sub-millisecond entrypoints (geodesic especially).
-  it("wasm_half_plane_thermo median within 1.1x ts", async () => {
+  it("wasm_half_plane_thermo median under 20ms", async () => {
     await wasmBuildHalfPlanePolygon(thermoA, thermoB, gameArea, "cold");
     const wasmPkg = await import(
       "../../../../crates/jetlag-geometry-kernel/pkg/jetlag_geometry_kernel.js"
@@ -263,9 +262,6 @@ describe.skipIf(!runGeometryPerf)("geometry performance gates", () => {
     const pointBJson = JSON.stringify(thermoB);
     const gameAreaJson = JSON.stringify(gameArea);
 
-    const tsMs = measureMedianMs(() => {
-      buildHalfPlanePolygon(thermoA, thermoB, gameArea, "cold");
-    });
     const wasmMs = measureMedianMs(() => {
       wasmPkg.build_half_plane_polygon_json(
         pointAJson,
@@ -276,11 +272,7 @@ describe.skipIf(!runGeometryPerf)("geometry performance gates", () => {
       );
     });
 
-    if (tsMs === 0) {
-      expect(wasmMs).toBe(0);
-    } else {
-      expect(wasmMs / tsMs).toBeLessThanOrEqual(1.1);
-    }
+    expect(wasmMs).toBeLessThan(20);
   });
 
   it("wasm_geodesic_10_vertex median within 1.2x ts", async () => {

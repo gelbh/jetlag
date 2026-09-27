@@ -1,4 +1,4 @@
-export { isPointInGameArea } from "../kernel/radarHalfPlane";
+export { isPointInGameArea } from "../kernel/isPointInGameArea";
 export {
   dispatchHalfPlane,
   dispatchRadarShadedRegion,

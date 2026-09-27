@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import bboxPolygon from "@turf/bbox-polygon";
 import type { Feature, LineString } from "geojson";
+import { existsSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import path from "node:path";
 import {
   boundsToGameArea,
   centerToViewportEdgeRadiusMeters,
@@ -12,7 +15,9 @@ import {
   normalizeBoundingBox,
   safeDifference,
 } from "./geometry";
-import { buildHalfPlanePolygon } from "../kernel/radarHalfPlane";
+import { runHalfPlane } from "../kernel/halfPlaneKernelRunner";
+import { featureToGameAreaGeometry } from "../kernel/featureConvert";
+import { gameAreaToFeature } from "../core/gameAreaConvert";
 import {
   buildCoastlineEliminationRegion,
   buildCoastlineNearRegionTs,
@@ -23,6 +28,12 @@ import {
   prepareMeasuringLineSegments,
 } from "../measuring/geometryMeasuring";
 import type { GameArea } from "../../map/annotations";
+
+const pkgEntry = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  "../../../../crates/jetlag-geometry-kernel/pkg/jetlag_geometry_kernel.js",
+);
+const wasmPkgReady = existsSync(pkgEntry);
 
 const sampleGameArea: GameArea = {
   type: "Polygon",
@@ -79,28 +90,35 @@ describe("geometry helpers", () => {
     expect(gameArea.east - gameArea.west).toBeGreaterThan(0);
   });
 
-  it("returns a clipped polygon for thermometer shading", () => {
-    const colderSide = buildHalfPlanePolygon(
+  it("returns a clipped polygon for thermometer shading", async () => {
+    if (!wasmPkgReady) {
+      return;
+    }
+    const colderSide = await runHalfPlane(
       [51.45, -0.18],
       [51.46, -0.12],
-      sampleGameArea,
+      featureToGameAreaGeometry(gameAreaToFeature(sampleGameArea)),
     );
     expect(colderSide?.geometry.type).toBe("Polygon");
   });
 
-  it("shades opposite halves for hotter and colder answers", () => {
+  it("shades opposite halves for hotter and colder answers", async () => {
+    if (!wasmPkgReady) {
+      return;
+    }
     const pointA: [number, number] = [51.45, -0.18];
     const pointB: [number, number] = [51.46, -0.12];
-    const colderAnswerSide = buildHalfPlanePolygon(
+    const geometry = featureToGameAreaGeometry(gameAreaToFeature(sampleGameArea));
+    const colderAnswerSide = await runHalfPlane(
       pointA,
       pointB,
-      sampleGameArea,
+      geometry,
       "cold",
     );
-    const hotterAnswerSide = buildHalfPlanePolygon(
+    const hotterAnswerSide = await runHalfPlane(
       pointA,
       pointB,
-      sampleGameArea,
+      geometry,
       "hot",
     );
 

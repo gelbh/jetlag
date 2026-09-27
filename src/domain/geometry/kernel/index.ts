@@ -15,7 +15,7 @@ export {
   unionEliminationParts,
   unionPolygonFeatures,
 } from "./unionPolygonFeatures";
-export { isPointInGameArea } from "./radarHalfPlane";
+export { isPointInGameArea } from "./isPointInGameArea";
 export type { SpatialVoronoiSite } from "./spatialVoronoi";
 export {
   resolveVoronoiCellPoiId,
