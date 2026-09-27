@@ -12,7 +12,6 @@ export type NearRegionBatchParams = {
   distanceMeters: number;
   disks: readonly DiskSpec[];
   gameArea: GameAreaGeometry;
-  runTs: () => PolygonFeature | null;
 };
 
 export async function dispatchNearRegionBatch(
@@ -30,7 +29,6 @@ export async function dispatchNearRegionBatch(
     mode,
     entrypoint: "nearRegionBatch",
     label: "nearRegionBatch",
-    runTs: params.runTs,
     runWasm: async () => {
       const wasm = await nearRegionWasm.load();
       return wasm.wasmBuildNearRegion(input);

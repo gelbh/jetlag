@@ -20,7 +20,7 @@ import { featureToGameAreaGeometry } from "../kernel/featureConvert";
 import { gameAreaToFeature } from "../core/gameAreaConvert";
 import {
   buildCoastlineEliminationRegion,
-  buildCoastlineNearRegionTs,
+  buildCoastlineNearRegion,
   buildLocationEliminationRegion,
   buildLocationNearRegion,
   clearCoastlineNearRegionCacheForTests,
@@ -211,7 +211,11 @@ describe("geometry helpers", () => {
         ],
       },
     };
-    const nearCoast = buildCoastlineNearRegionTs([coast], 5_000, sampleGameArea);
+    const nearCoast = await buildCoastlineNearRegion(
+      [coast],
+      5_000,
+      sampleGameArea,
+    );
     const eliminated = await buildCoastlineEliminationRegion(
       [coast],
       5_000,
@@ -237,7 +241,11 @@ describe("geometry helpers", () => {
         ],
       },
     };
-    const nearCoast = buildCoastlineNearRegionTs([coast], 5_000, sampleGameArea);
+    const nearCoast = await buildCoastlineNearRegion(
+      [coast],
+      5_000,
+      sampleGameArea,
+    );
     const eliminated = await buildCoastlineEliminationRegion(
       [coast],
       5_000,
@@ -249,7 +257,7 @@ describe("geometry helpers", () => {
     expect(eliminated).toEqual(nearCoast);
   });
 
-  it("reuses cached coastline near regions for identical inputs", () => {
+  it("reuses cached coastline near regions for identical inputs", async () => {
     clearCoastlineNearRegionCacheForTests();
 
     const coast: Feature<LineString> = {
@@ -264,8 +272,12 @@ describe("geometry helpers", () => {
       },
     };
 
-    const first = buildCoastlineNearRegionTs([coast], 5_000, sampleGameArea);
-    const second = buildCoastlineNearRegionTs([coast], 5_000, sampleGameArea);
+    const first = await buildCoastlineNearRegion([coast], 5_000, sampleGameArea);
+    const second = await buildCoastlineNearRegion(
+      [coast],
+      5_000,
+      sampleGameArea,
+    );
 
     expect(first).toBe(second);
   });
