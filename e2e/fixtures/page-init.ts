@@ -46,10 +46,18 @@ export async function prepareE2EPage(
 }
 
 export async function openPlayHub(page: Page) {
+  // Wave home lists Create/Join as inset links; no Play sheet opener.
+  const create = page.getByRole("link", { name: "Create session" });
+  const join = page.getByRole("link", { name: "Join session" });
+  if (await create.isVisible().catch(() => false)) {
+    await expect(join).toBeVisible();
+    return;
+  }
   await page
-    .getByRole("button", { name: /Play — create, join, or custom game/i })
+    .getByRole("button", { name: /Play/i })
     .click();
-  await expect(page.getByRole("link", { name: "Create session" })).toBeVisible();
+  await expect(create).toBeVisible();
+  await expect(join).toBeVisible();
 }
 
 export async function dismissMapOnboarding(page: Page) {

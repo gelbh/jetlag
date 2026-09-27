@@ -144,7 +144,9 @@ export async function createSessionFromCreatePage(page: Page) {
 }
 
 export async function readSessionCode(page: Page): Promise<string> {
-  const codeText = await page.locator(".jl-stamp-code").textContent();
+  const stamp = page.locator(".jl-stamp-code").first();
+  await expect(stamp).toBeVisible({ timeout: 15_000 });
+  const codeText = await stamp.textContent();
   expect(codeText).toMatch(/^[A-Z]{4}$/);
   return codeText ?? "ABCD";
 }
