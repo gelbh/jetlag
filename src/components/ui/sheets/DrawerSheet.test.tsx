@@ -2,7 +2,8 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { ReactNode } from "react";
 import { MantineProvider } from "@mantine/core";
-import { DrawerSheet, resolveDrawerSheetTransitionProps } from "./DrawerSheet";
+import { DrawerSheet } from "./DrawerSheet";
+import { resolveDrawerSheetTransitionProps } from "./drawerSheetTransition";
 import { jetlagTheme } from "@/theme/theme";
 import { resetAllStores } from "@/test/helpers/storeReset";
 import { useMapStore } from "@/state/mapStore";
@@ -63,7 +64,7 @@ describe("DrawerSheet", () => {
     Element.prototype.releasePointerCapture = vi.fn();
   });
 
-  it("applies translateY on the sheet wrapper while dragging (Verify #1 live follow)", () => {
+  it("applies translateY on the chrome wrapper while dragging (Verify #1 live follow)", () => {
     const onClose = vi.fn();
     render(
       withAppUi(
@@ -88,6 +89,8 @@ describe("DrawerSheet", () => {
 
     const sheet = screen.getByTestId("mantine-drawer-sheet");
     expect(sheet.style.transform).toContain("translateY(60px)");
+    expect(sheet.style.backgroundColor).toBe("var(--color-canvas)");
+    expect(sheet.style.borderTopLeftRadius).toBe("24px");
     expect(onClose).not.toHaveBeenCalled();
   });
 
@@ -107,6 +110,31 @@ describe("DrawerSheet", () => {
     // Default sheetHeight in useSheetGesture is 320; 0.28 * 320 ≈ 90.
     dragGrabberDown(handle, 120);
 
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it("dismisses from grabber even when the host body is scrolled", () => {
+    const onClose = vi.fn();
+    render(
+      withAppUi(
+        <DrawerSheet open onClose={onClose} ariaLabel="Settings">
+          <p>body</p>
+        </DrawerSheet>,
+      ),
+    );
+
+    const sheet = screen.getByTestId("mantine-drawer-sheet");
+    const scroll = sheet.querySelector(".jl-scroll");
+    expect(scroll).toBeTruthy();
+    Object.defineProperty(scroll, "scrollTop", {
+      configurable: true,
+      value: 80,
+    });
+
+    const handle = screen.getByRole("button", {
+      name: "Drag sheet down to dismiss",
+    });
+    dragGrabberDown(handle, 120);
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
@@ -155,12 +183,7 @@ describe("DrawerSheet", () => {
     const onClose = vi.fn();
     render(
       withAppUi(
-        <DrawerSheet
-          open
-          onClose={onClose}
-          ariaLabel="Ask"
-          mapInteractive
-        >
+        <DrawerSheet open onClose={onClose} ariaLabel="Ask" mapInteractive>
           <p>body</p>
         </DrawerSheet>,
       ),

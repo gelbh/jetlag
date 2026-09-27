@@ -4,9 +4,9 @@ import { cn } from "@/lib/cn";
 import { DrawerGrabber } from "@/components/ui/entry/entryChrome";
 import { bottomDrawerStyles } from "@/components/ui/entry/entryStyles";
 import { usePlayerPhoneShellPortalTarget } from "@/components/ui/layout/PlayerPhoneShellPortalContext";
-import { MOTION_SHEET_PRESENT_MS } from "@/domain/device/motion/motionTokens";
 import { useMotionProfile } from "@/hooks/motion/useMotionProfile";
 import { useSheetGesture } from "@/hooks/motion/useSheetGesture";
+import { resolveDrawerSheetTransitionProps } from "@/components/ui/sheets/drawerSheetTransition";
 import { JETLAG_MODAL_Z_INDEX } from "@/theme/theme";
 
 export interface DrawerSheetProps {
@@ -34,13 +34,13 @@ export interface DrawerSheetProps {
   mapInteractive?: boolean;
 }
 
-/** Mantine Drawer enter/exit mapped to sheet motion tokens (Verify #4). */
-export function resolveDrawerSheetTransitionProps(decorativeAnimate: boolean) {
-  return {
-    duration: decorativeAnimate ? MOTION_SHEET_PRESENT_MS : 0,
-    timingFunction: "var(--ease-ios-standard)",
-  } as const;
-}
+/** Chrome lives on the gesture wrapper so translateY moves radius/bg with the finger. */
+const sheetChromeStyle: CSSProperties = {
+  backgroundColor: "var(--color-canvas)",
+  borderTopLeftRadius: 24,
+  borderTopRightRadius: 24,
+  borderTop: "0.33px solid oklch(from var(--color-field-ink) l c h / 0.14)",
+};
 
 /**
  * Phone-shell sheet path: iOS bottom Drawer with grabber + safe-area.
@@ -72,10 +72,12 @@ export function DrawerSheet({
   const { decorativeAnimate } = useMotionProfile();
   const scrollRef = useRef<HTMLDivElement>(null);
   const gestureEnabled = dismissible && decorativeAnimate;
-  const gesture = useSheetGesture({
+  const { sheetRef, sheetStyle, handleProps } = useSheetGesture({
     enabled: gestureEnabled,
     onDismiss: onClose,
     scrollRef,
+    // Grabber sits outside the scroll body; do not block after scroll.
+    gateStartOnScrollTop: false,
   });
   const transitionProps = resolveDrawerSheetTransitionProps(decorativeAnimate);
 
@@ -86,7 +88,7 @@ export function DrawerSheet({
       position="bottom"
       size="auto"
       padding={padding}
-      radius={24}
+      radius={0}
       withCloseButton={false}
       closeOnClickOutside={dismissible && !mapInteractive}
       closeOnEscape={dismissible}
@@ -126,12 +128,21 @@ export function DrawerSheet({
         },
         content: {
           ...baseStyles.content,
+          // Neutralize theme/Drawer chrome; gesture wrapper owns radius + fill.
+          backgroundColor: "transparent",
+          border: "none",
+          borderRadius: 0,
+          boxShadow: "none",
+          backdropFilter: "none",
+          WebkitBackdropFilter: "none",
           overflow: "hidden",
           display: "flex",
           flexDirection: "column",
         },
         body: {
           ...baseStyles.body,
+          paddingTop: 0,
+          paddingBottom: 0,
           flex: 1,
           minHeight: 0,
           overflow: "hidden",
@@ -141,14 +152,18 @@ export function DrawerSheet({
       }}
     >
       <div
-        ref={gesture.sheetRef}
+        ref={sheetRef}
         data-testid="mantine-drawer-sheet"
         className="flex min-h-0 flex-1 flex-col gap-2"
-        style={{ ...contentStyle, ...gesture.sheetStyle }}
+        style={{
+          ...sheetChromeStyle,
+          paddingBottom: "max(1.25rem, env(safe-area-inset-bottom))",
+          paddingTop: "0.5rem",
+          ...contentStyle,
+          ...sheetStyle,
+        }}
       >
-        <DrawerGrabber
-          handleProps={gestureEnabled ? gesture.handleProps : undefined}
-        />
+        <DrawerGrabber handleProps={gestureEnabled ? handleProps : undefined} />
         {pinned ? <div className="shrink-0">{pinned}</div> : null}
         <div
           ref={scrollRef}

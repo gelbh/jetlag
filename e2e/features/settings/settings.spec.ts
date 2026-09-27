@@ -64,7 +64,9 @@ test.describe("settings", () => {
     const settingsPanel = page.getByRole("tabpanel");
     // Low power lives under Session → Device & alerts (map essentials split).
     await page.getByRole("tab", { name: "Session" }).click();
-    await settingsPanel.getByRole("button", { name: "Device & alerts" }).click();
+    await settingsPanel
+      .getByRole("button", { name: "Device & alerts" })
+      .click();
     const lowPowerToggle = settingsPanel.getByLabel("Low power mode");
     await expect(lowPowerToggle).toBeChecked();
     await lowPowerToggle.click();
@@ -118,10 +120,14 @@ test.describe("settings", () => {
     await expect(settingsPanel.getByLabel("Radar")).not.toBeChecked();
   });
 
-  test("export map button is available in session settings", async ({ page }) => {
+  test("export map button is available in session settings", async ({
+    page,
+  }) => {
     await openMapWithLocalSession(page);
     await openSettings(page);
     await page.getByRole("tab", { name: "Session" }).click();
-    await expect(page.getByRole("button", { name: "Export map" })).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Export map" }),
+    ).toBeVisible();
   });
 });

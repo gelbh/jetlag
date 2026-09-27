@@ -130,7 +130,12 @@ export {
   syncBeaconStyle,
   toggleRowStyle,
 };
-export type { ChoiceTone, HomeCardBtnVariant, MapToolSlotTone, SyncBeaconStatus };
+export type {
+  ChoiceTone,
+  HomeCardBtnVariant,
+  MapToolSlotTone,
+  SyncBeaconStatus,
+};
 
 /** Frosted inset grouped list / form surface. */
 export function InsetGroup({
@@ -154,8 +159,7 @@ export function InsetGroup({
           : "0.33px solid oklch(from var(--color-field-ink) l c h / 0.12)",
         backdropFilter: "blur(20px) saturate(1.4)",
         WebkitBackdropFilter: "blur(20px) saturate(1.4)",
-        transition:
-          "background-color 160ms ease, border-color 160ms ease",
+        transition: "background-color 160ms ease, border-color 160ms ease",
       }}
     >
       {children}
@@ -356,6 +360,7 @@ export function DrawerGrabber({
   return (
     <button
       type="button"
+      tabIndex={-1}
       aria-label="Drag sheet down to dismiss"
       className="jl-sheet-drag-handle mx-auto flex w-full justify-center py-1"
       {...handleProps}
