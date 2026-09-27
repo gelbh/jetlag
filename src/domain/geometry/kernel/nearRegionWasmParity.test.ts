@@ -109,7 +109,7 @@ describe("near-region batch wasm failure", () => {
             return mode === "wasm" || mode === "dual";
           }
           return actual.shouldUseWasm(
-            mode as "ts" | "wasm" | "dual",
+            mode as "wasm" | "dual",
             entrypoint as never,
           );
         },

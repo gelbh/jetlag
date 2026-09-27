@@ -149,29 +149,4 @@ describe("extras wasm dispatch (halfPlane ready)", () => {
     expect(wasmGeodesicLineBuffer).not.toHaveBeenCalled();
   });
 
-  it("mode ts → never calls WASM for halfPlane", async () => {
-    vi.resetModules();
-    const wasmBuildHalfPlanePolygon = vi.fn(async () => {
-      throw new Error("should not call half-plane wasm");
-    });
-
-    vi.doMock("./halfPlaneWasm", () => ({
-      wasmBuildHalfPlanePolygon,
-      wasmBuildRadarShadedRegion: vi.fn(),
-      resetHalfPlaneWasmForTests: vi.fn(),
-    }));
-
-    const { dispatchHalfPlane } = await import("./halfPlaneKernelRunner");
-
-    await dispatchHalfPlane(
-      pointA,
-      pointB,
-      gameArea,
-      "cold",
-      "midpoint",
-      "ts",
-    );
-
-    expect(wasmBuildHalfPlanePolygon).not.toHaveBeenCalled();
-  });
 });
