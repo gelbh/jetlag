@@ -14,8 +14,6 @@ export type DispatchKernelOptions<T> = {
   label: string;
   runTs: () => T;
   runWasm: () => Promise<T>;
-  /** Dual-mode topology compare; omit to skip mismatch logging. */
-  matches?: (wasm: T, ts: T) => boolean;
 };
 
 export type DispatchKernelSyncOptions<T> = {
@@ -41,13 +39,13 @@ export function dispatchKernelSync<T>(
 }
 
 /**
- * Not-ready entrypoints always use TS (even for wasm/dual).
- * wasm rethrows on failure (no silent TS fail-soft); dual compares then returns TS.
+ * Not-ready entrypoints always use TS.
+ * wasm rethrows on failure (no silent TS fail-soft).
  */
 export async function dispatchKernel<T>(
   options: DispatchKernelOptions<T>,
 ): Promise<T> {
-  const { mode, entrypoint, label, runTs, runWasm, matches } = options;
+  const { mode, entrypoint, label, runTs, runWasm } = options;
   const useWasm = shouldUseWasm(mode, entrypoint);
 
   switch (mode) {
@@ -61,23 +59,6 @@ export async function dispatchKernel<T>(
         console.warn(`[geometry] kernel wasm failed (${label})`, error);
         throw error;
       }
-    case "dual": {
-      const tsResult = runTs();
-      if (useWasm) {
-        try {
-          const wasmResult = await runWasm();
-          if (matches && !matches(wasmResult, tsResult)) {
-            console.warn(`[geometry] kernel dual mismatch (${label})`);
-          }
-        } catch (error) {
-          console.warn(
-            `[geometry] kernel dual wasm failed (${label})`,
-            error,
-          );
-        }
-      }
-      return tsResult;
-    }
     default:
       return assertNever(mode);
   }

@@ -3,21 +3,9 @@ import { dispatchKernel } from "./dispatchKernel";
 import { geodesicLineBuffer } from "./geodesicLineBuffer";
 import { createLazyWasmImport } from "./lazyWasmImport";
 import type { MaskKernelMode } from "./maskKernelMode";
-import { bboxFromGameArea, maskTopologyMatches } from "./maskTopology";
 import type { PolygonFeature } from "./types";
 
 const geodesicWasm = createLazyWasmImport(() => import("./geodesicWasm"));
-
-function topologyBboxFromResults(
-  wasmResult: PolygonFeature | null,
-  tsResult: PolygonFeature | null,
-): { west: number; east: number; south: number; north: number } {
-  const feature = tsResult ?? wasmResult;
-  if (!feature) {
-    return { west: 0, east: 0, south: 0, north: 0 };
-  }
-  return bboxFromGameArea(feature.geometry);
-}
 
 export async function dispatchGeodesicLineBuffer(
   segment: Feature<LineString>,
@@ -39,12 +27,6 @@ export async function dispatchGeodesicLineBuffer(
         sampleSpacingMeters,
       );
     },
-    matches: (wasmResult, tsResult) =>
-      maskTopologyMatches(
-        wasmResult,
-        tsResult,
-        topologyBboxFromResults(wasmResult, tsResult),
-      ),
   });
 }
 
