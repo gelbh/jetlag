@@ -12,7 +12,7 @@
     "wasm:build": "wasm-pack build crates/jetlag-geometry-kernel --target bundler --out-dir pkg --release",
     "build": "node scripts/run-build.mjs",
     "preview": "vite preview",
-    "lint": "eslint .",
+    "lint": "eslint . --max-warnings 0",
     "lint:css": "stylelint --cache --report-needless-disables --report-invalid-scope-disables \"src/**/*.css\" \"public/**/*.css\"",
     "lint:pr-title": "bash scripts/lint-pr-title.sh",
     "typecheck": "tsc -b --noEmit",

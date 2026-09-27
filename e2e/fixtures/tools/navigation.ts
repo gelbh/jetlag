@@ -38,19 +38,33 @@ export async function openSettings(page: Page) {
 }
 
 export async function closePanel(page: Page) {
-  // Mobile Drawer: Escape. Desktop contextual rail skips Escape while
-  // aria-modal Settings is open, so collapse the rail instead.
-  const dialog = page.getByRole("dialog", { name: "Settings" });
-  const collapseRail = page.getByRole("button", {
-    name: "Collapse map panels",
-  });
-  if ((await collapseRail.count()) > 0) {
-    await expect(collapseRail).toBeVisible();
-    await collapseRail.click();
-  } else {
-    await page.keyboard.press("Escape");
+  const close = page.getByRole("button", { name: "Close", exact: true });
+  const visible = await close.isVisible().catch(() => false);
+  if (visible) {
+    await close.click();
+    await expect(close).toBeHidden({ timeout: 10_000 });
+    return;
   }
-  await expect(dialog).toBeHidden({ timeout: 10_000 });
+
+  // Settings may be a Drawer (Escape) or rail (collapse). Prefer collapse when present.
+  const settings = page.getByRole("dialog", { name: "Settings" });
+  if (await settings.isVisible().catch(() => false)) {
+    const collapseRail = page.getByRole("button", {
+      name: "Collapse map panels",
+    });
+    if ((await collapseRail.count()) > 0) {
+      await expect(collapseRail).toBeVisible();
+      await collapseRail.click();
+    } else {
+      await page.keyboard.press("Escape");
+    }
+    await expect(settings).toBeHidden({ timeout: 10_000 });
+    return;
+  }
+
+  // Mobile chat has no Close; Escape dismisses.
+  await page.keyboard.press("Escape");
+  await expect(page.getByLabel("Chat tabs")).toBeHidden({ timeout: 10_000 });
 }
 
 async function confirmSettingsReset(

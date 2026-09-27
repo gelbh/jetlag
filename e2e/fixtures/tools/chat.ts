@@ -9,37 +9,51 @@ export function questionAlertBanner(page: Page): Locator {
   return page.getByTestId("question-alert-banner");
 }
 
-/** Game-chat message list; excludes the sticky map answer banner. */
+/** Game-chat message list — excludes the sticky map answer banner. */
 export function gameChatScroll(page: Page): Locator {
   return page.locator(".jl-game-chat-scroll");
 }
 
 export async function openChat(page: Page) {
-  if (
-    await page
-      .getByLabel("Chat tabs")
-      .isVisible()
-      .catch(() => false)
-  ) {
+  if (await page.getByLabel("Chat tabs").isVisible().catch(() => false)) {
     return;
   }
 
   await dismissActiveToolPanel(page);
   await dismissMapOnboarding(page);
 
-  if (
-    await page
-      .getByLabel("Chat tabs")
-      .isVisible()
-      .catch(() => false)
-  ) {
+  // Hider chat uses jl-panel-hider-wizard above the dock; if still mounted after
+  // dismiss (exit animation / bare Close), treat chat as already open.
+  if (await page.getByLabel("Chat tabs").isVisible().catch(() => false)) {
     return;
   }
 
-  const dockChat = page.getByLabel(/Open chat/i).first();
-  await expect(dockChat).toBeVisible({ timeout: 15_000 });
-  await dockChat.click({ force: true });
-  await expect(page.getByLabel("Chat tabs")).toBeVisible({ timeout: 15_000 });
+  const dockChat = page.getByRole("button", { name: "Open chat" });
+  if (await dockChat.isVisible().catch(() => false)) {
+    // eslint-disable-next-line playwright/no-force-option -- dock / wizard overlay stacking
+    await dockChat.click({ force: true });
+    await expect(page.getByLabel("Chat tabs")).toBeVisible({ timeout: 15_000 });
+    return;
+  }
+
+  const unreadChat = page.getByRole("button", {
+    name: "Open chat, unread messages",
+  });
+  if (await unreadChat.isVisible().catch(() => false)) {
+    // eslint-disable-next-line playwright/no-force-option -- dock / wizard overlay stacking
+    await unreadChat.click({ force: true });
+    await expect(page.getByLabel("Chat tabs")).toBeVisible({ timeout: 15_000 });
+    return;
+  }
+
+  const chatTab = page.getByRole("button", { name: "Chat", exact: true });
+  if (await chatTab.isVisible().catch(() => false)) {
+    await chatTab.click();
+    await expect(page.getByLabel("Chat tabs")).toBeVisible({ timeout: 15_000 });
+    return;
+  }
+
+  throw new Error("Chat control not found on map chrome");
 }
 
 async function resolveAnswerButton(
@@ -57,12 +71,9 @@ async function resolveAnswerButton(
     }
 
     await openChat(page);
-    const chatButton = page
-      .getByRole("dialog", { name: /^Chat$/i })
-      .getByRole("button", { name })
-      .or(gameChatScroll(page).getByRole("button", { name }));
-    await expect(chatButton.first()).toBeVisible({ timeout: 2_000 });
-    resolved = chatButton.first();
+    const chatButton = gameChatScroll(page).getByRole("button", { name });
+    await expect(chatButton).toBeVisible({ timeout: 2_000 });
+    resolved = chatButton;
   }).toPass({ timeout: 20_000 });
 
   if (!resolved) {
@@ -72,30 +83,24 @@ async function resolveAnswerButton(
 }
 
 export async function answerInChat(page: Page, label: string) {
-  const answerButton = await resolveAnswerButton(page, `Send answer: ${label}`);
-  await answerButton.click({ force: true });
+  const answerButton = await resolveAnswerButton(
+    page,
+    `Send answer: ${label}`,
+  );
+  await answerButton.click();
 }
 
 export async function answerPhotoCannotInChat(page: Page) {
-  await dismissActiveToolPanel(page);
   const answerButton = await resolveAnswerButton(
     page,
     "I cannot answer the question",
   );
-  await answerButton.evaluate((el) => {
-    if (el instanceof HTMLElement) {
-      el.click();
-    }
-  });
+  await answerButton.click();
 }
 
 export async function answerPhotoSentExternallyInChat(page: Page) {
   const answerButton = await resolveAnswerButton(page, "Mark sent");
-  await answerButton.evaluate((el) => {
-    if (el instanceof HTMLElement) {
-      el.click();
-    }
-  });
+  await answerButton.click();
 }
 
 export async function answerYesInChat(page: Page) {
@@ -107,52 +112,24 @@ export async function expectPendingQuestionText(
   pattern: RegExp = PENDING_QUESTION_TEXT,
 ) {
   const banner = questionAlertBanner(page);
-  const status = page.getByRole("status").filter({ hasText: pattern });
-  await expect(async () => {
-    if (
-      await status
-        .first()
-        .isVisible()
-        .catch(() => false)
-    ) {
-      return;
-    }
-    if (await banner.isVisible().catch(() => false)) {
-      const bannerText = (await banner.innerText().catch(() => "")) || "";
-      if (
-        pattern.test(bannerText) ||
-        (await banner.getByText(pattern).count()) > 0
-      ) {
-        return;
-      }
-    }
-    await openChat(page);
-    await expect(gameChatScroll(page).getByText(pattern).first()).toBeVisible({
-      timeout: 2_000,
-    });
-  }).toPass({ timeout: 20_000 });
+  if (await banner.isVisible().catch(() => false)) {
+    await expect(banner.getByText(pattern)).toBeVisible({ timeout: 20_000 });
+    return;
+  }
+
+  await openChat(page);
+  await expect(gameChatScroll(page).getByText(pattern)).toBeVisible({
+    timeout: 20_000,
+  });
 }
 
 export async function expectChatAnswer(page: Page, answer: string) {
   await openChat(page);
-  const chat = page
-    .getByRole("dialog", { name: /^Chat$/i })
-    .or(gameChatScroll(page));
-  const escaped = answer.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  // Wait until answer action controls are gone, then match AnswerBox aria-label
-  // (photo decline label equals the committed answer string).
-  await expect(chat.getByText(/Waiting for hider/i)).toBeHidden({
+  // Wave GameChatTab shows the reply label in an Answer box (aria Answer: Yes),
+  // not the legacy "Answered: yes" prefix.
+  await expect(
+    page.getByLabel(new RegExp(`Answer:\\s*${answer}`, "i")),
+  ).toBeVisible({
     timeout: 20_000,
   });
-  await expect(
-    chat.getByRole("button", {
-      name: new RegExp(
-        `^(Send answer:\\s*${escaped}|${escaped}|Mark sent)$`,
-        "i",
-      ),
-    }),
-  ).toHaveCount(0, { timeout: 20_000 });
-  await expect(
-    chat.getByLabel(new RegExp(`Answer:\\s*${escaped}\\s*$`, "i")),
-  ).toBeVisible({ timeout: 20_000 });
 }

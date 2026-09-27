@@ -54,20 +54,27 @@ export default defineConfig([
       // Sleeps must fail CI (recommended defaults to warn).
       "playwright/no-wait-for-timeout": "error",
       "playwright/expect-expect": [
-        "warn",
+        "error",
         {
-          assertFunctionNames: [
-            "completeRadarSolo",
-            "completeMatchingSolo",
-            "completeMeasuringSolo",
-            "placePin",
-            "drawZone",
-            "expectRedoEnabled",
-            "expectMapHasAnnotations",
-            "expectEliminationMaskVisible",
-            "expectChatAnswer",
-            "expectPendingQuestionText",
-            "expectCreatePageMapPreviewLoaded",
+          // eslint-plugin-playwright@2.x: wildcards live in assertFunctionPatterns
+          // (assertFunctionNames is exact-match only). Prefer tight prefixes / concrete
+          // multiplayer helpers over broad ^run / ^send.
+          assertFunctionPatterns: [
+            "^assert",
+            "^complete",
+            "^confirm",
+            "^draw",
+            "^expect",
+            "^place",
+            "^redo",
+            "^undo",
+            "^waitFor",
+            "^runHiderAnswerFlow$",
+            "^sendRadarToHiders$",
+            "^sendMatchingToHiders$",
+            "^sendMeasuringToHiders$",
+            "^sendThermometerToHiders$",
+            "^sendTentacleToHiders$",
           ],
         },
       ],

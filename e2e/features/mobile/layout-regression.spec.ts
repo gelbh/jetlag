@@ -144,13 +144,15 @@ test.describe("layout regression @ default mobile", () => {
       };
     });
 
-    expect(relation.ok).toBe(true);
-    if (relation.ok) {
-      expect(relation.footerOutside).toBe(true);
-      expect(relation.moved).toBe(true);
-      expect(relation.formScrollOwnerIsSheet).toBe(true);
-      expect(relation.singleFormScrollport).toBe(true);
-    }
+    expect(relation).toEqual(
+      expect.objectContaining({
+        ok: true,
+        footerOutside: true,
+        moved: true,
+        formScrollOwnerIsSheet: true,
+        singleFormScrollport: true,
+      }),
+    );
 
     await assertLayoutSmoke(page);
   });

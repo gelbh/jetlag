@@ -377,7 +377,7 @@ export function useTentacleTool({
     ],
   );
 
-  const handleUseGps = async () => {
+  const handleUseGps = useCallback(async () => {
     try {
       const reading = await refreshGps();
       const point: LatLngTuple = [reading.lat, reading.lng];
@@ -399,7 +399,13 @@ export function useTentacleTool({
         error instanceof Error ? error.message : "GPS location unavailable.",
       );
     }
-  };
+  }, [
+    cancelRequests,
+    ensurePointInGameArea,
+    refreshGps,
+    setAwaitingPlacement,
+    setMapError,
+  ]);
 
   const clearAfterCommit = useCallback(() => {
     cancelRequests();
