@@ -45,7 +45,6 @@ function CreateSessionMapShell({ children }: { children?: ReactNode }) {
 
 function CreateSessionMapPaneInner({
   mapStyle,
-  onMapStyleChange,
   focusBounds,
   previewGameArea,
   selectedGameSize,
@@ -112,7 +111,6 @@ function CreateSessionMapPaneInner({
         <MapView
           model={{
             mapStyle,
-            onMapStyleChange,
             onBoundsChange,
             onUserViewportFramed,
             onMapClick,
@@ -121,6 +119,9 @@ function CreateSessionMapPaneInner({
             fitBoundsMode: "once",
             fitBoundsPadding: [48, 48],
             zoomControlInset: "container",
+            showZoomControl: false,
+            showMapStyleToggle: false,
+            showCompassControl: false,
             className: "h-full w-full",
           }}
         >
