@@ -1,7 +1,7 @@
 import { Button, Group } from "@mantine/core";
 import type { RoleJoinRequest } from "@/domain/session/players/joinRequest";
 import { playerRoleLabel } from "@/domain/session/players/playerRole";
-import { MapFloatAlertPanel } from "../../ui/banners/MapFloatAlert";
+import { MapFloatSurface } from "../../ui/banners/MapFloatSurface";
 
 interface RoleJoinRequestAlertProps {
   request: RoleJoinRequest | null;
@@ -23,7 +23,13 @@ export function RoleJoinRequestAlert({
   }
 
   return (
-    <MapFloatAlertPanel className="pointer-events-auto mx-3 mt-1.5">
+    <MapFloatSurface
+      tone="default"
+      role="alert"
+      actionRow
+      className="pointer-events-auto mx-3 mt-1.5"
+      data-testid="role-join-request-alert"
+    >
       <div className="min-w-0">
         <p className="text-sm font-semibold text-ink">
           {request.identityLabel} wants to join as {playerRoleLabel(request.role)}
@@ -34,7 +40,7 @@ export function RoleJoinRequestAlert({
         <Button
           type="button"
           variant="default"
-          size="compact-md"
+          size="md"
           disabled={busy}
           onClick={onDecline}
         >
@@ -43,13 +49,13 @@ export function RoleJoinRequestAlert({
         <Button
           type="button"
           variant="filled"
-          size="compact-md"
+          size="md"
           disabled={busy}
           onClick={onAccept}
         >
           Accept
         </Button>
       </Group>
-    </MapFloatAlertPanel>
+    </MapFloatSurface>
   );
 }

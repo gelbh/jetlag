@@ -1,6 +1,7 @@
 import { Button } from "@mantine/core";
 import type { PlayerRole } from "@/domain/session/players/playerRole";
-import { MapFloatAlert, MapFloatAlertPanel } from "../../ui/banners/MapFloatAlert";
+import { MapFloatAlert } from "../../ui/banners/MapFloatAlert";
+import { MapFloatSurface } from "../../ui/banners/MapFloatSurface";
 
 interface EndGameAlertProps {
   endGameActive: boolean;
@@ -22,17 +23,23 @@ export function EndGameAlert({
 
   if (isHost && playerRole !== "hider" && onResetEndGame) {
     return (
-      <MapFloatAlertPanel className="pointer-events-auto mx-3 mt-1.5">
+      <MapFloatSurface
+        tone="default"
+        role="alert"
+        actionRow
+        className="pointer-events-auto mx-3 mt-1.5"
+        data-testid="end-game-alert-panel"
+      >
         <p className="text-sm font-semibold text-ink">End game started</p>
         <Button
           type="button"
           variant="default"
-          size="compact-md"
+          size="md"
           onClick={onResetEndGame}
         >
           End end game
         </Button>
-      </MapFloatAlertPanel>
+      </MapFloatSurface>
     );
   }
 

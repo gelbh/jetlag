@@ -43,6 +43,9 @@ describe("RoleJoinRequestAlert", () => {
     fireEvent.click(screen.getByRole("button", { name: "Decline" }));
     expect(onDecline).toHaveBeenCalledTimes(1);
     expect(container.innerHTML).not.toMatch(/map-float-alert|btn-primary|btn-secondary/);
+    const panel = screen.getByTestId("role-join-request-alert");
+    expect(panel.getAttribute("data-map-float-surface")).toBe("true");
+    expect(panel.className).not.toMatch(/mantine-Alert-root/);
   });
 
   it("is hidden when there is no pending request", () => {

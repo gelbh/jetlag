@@ -31,7 +31,7 @@ export function FoundHiderAlert({
   if (playerRole === "hider" && onAcceptFoundHider) {
     return (
       <MapFloatSurface
-        tone="flag"
+        tone="info"
         role="alert"
         actionRow
         className={foundHiderPanelClassName}
@@ -44,7 +44,7 @@ export function FoundHiderAlert({
             <Button
               type="button"
               variant="default"
-              size="compact-md"
+              size="md"
               onClick={onDeclineFoundHider}
             >
               Decline
@@ -53,7 +53,7 @@ export function FoundHiderAlert({
           <Button
             type="button"
             variant="filled"
-            size="compact-md"
+            size="md"
             onClick={onAcceptFoundHider}
           >
             Accept
@@ -66,7 +66,7 @@ export function FoundHiderAlert({
   if (myUid && foundRequestedByUid === myUid && onDeclineFoundHider) {
     return (
       <MapFloatSurface
-        tone="flag"
+        tone="info"
         role="alert"
         actionRow
         className={foundHiderPanelClassName}
@@ -77,7 +77,7 @@ export function FoundHiderAlert({
         <Button
           type="button"
           variant="default"
-          size="compact-md"
+          size="md"
           onClick={onDeclineFoundHider}
         >
           Cancel request
@@ -89,7 +89,7 @@ export function FoundHiderAlert({
   if (isHost && onDeclineFoundHider) {
     return (
       <MapFloatSurface
-        tone="flag"
+        tone="info"
         role="alert"
         actionRow
         className={foundHiderPanelClassName}
@@ -100,7 +100,7 @@ export function FoundHiderAlert({
         <Button
           type="button"
           variant="default"
-          size="compact-md"
+          size="md"
           onClick={onDeclineFoundHider}
         >
           Cancel found hider

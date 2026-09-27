@@ -44,6 +44,10 @@ describe("EndGameAlert", () => {
     expect(onResetEndGame).toHaveBeenCalledTimes(1);
     expect(container.innerHTML).not.toMatch(/map-float-alert/);
     expect(container.innerHTML).not.toMatch(/btn-secondary/);
+    const panel = screen.getByTestId("end-game-alert-panel");
+    expect(panel.getAttribute("data-map-float-surface")).toBe("true");
+    // Non-halt kit chrome (MapFloatAlertPanel would force halt error surface).
+    expect(panel.className).not.toMatch(/mantine-Alert-root/);
   });
 
   it("shows banner only for a non-host seeker", () => {
