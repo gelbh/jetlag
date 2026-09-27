@@ -74,7 +74,7 @@ export const incidentWorkerBaseUrl = defineString("INCIDENT_WORKER_BASE_URL", {
 });
 /** Public HTTPS URL of the sessionOpsMcp Cloud Function (Cursor mcpServers.url). */
 export const sessionOpsMcpUrl = defineString("SESSION_OPS_MCP_URL", {
-  default: "https://sessionopsmcp-npaqlsv32q-uc.a.run.app",
+  default: "https://us-central1-jet-lag-map-companion.cloudfunctions.net/sessionOpsMcp",
 });
 export const cursorHotfixRepoUrl = defineString("CURSOR_HOTFIX_REPO_URL", {
   default: "https://github.com/gelbh/jetlag",
