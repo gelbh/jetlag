@@ -47,6 +47,19 @@
     width: 100%;
   }
 
+  /* W5-G: restore shell-relative floor under standalone (do not leave bare min-height:0 over 100lvh). */
+  @media (display-mode: standalone) {
+    [data-player-phone-shell] .map-screen-shell {
+      min-height: 100%;
+      height: 100%;
+    }
+  }
+
+  html.jl-standalone-shell [data-player-phone-shell] .map-screen-shell {
+    min-height: 100%;
+    height: 100%;
+  }
+
   .map-chrome-hud {
     overflow: visible;
   }

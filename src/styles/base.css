@@ -243,3 +243,25 @@ html.jl-standalone-shell .entry-screen-layout-flow {
   flex: 1 1 auto;
   min-height: 0;
 }
+
+@media (display-mode: standalone) {
+  [data-player-phone-shell] .home-poster-viewport {
+    min-height: 100%;
+    height: 100%;
+    max-height: none;
+  }
+
+  [data-player-phone-shell] .entry-screen-layout-flow {
+    min-height: 100%;
+  }
+}
+
+html.jl-standalone-shell [data-player-phone-shell] .home-poster-viewport {
+  min-height: 100%;
+  height: 100%;
+  max-height: none;
+}
+
+html.jl-standalone-shell [data-player-phone-shell] .entry-screen-layout-flow {
+  min-height: 100%;
+}

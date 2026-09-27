@@ -965,7 +965,7 @@ export function HiderMapScreen() {
         {inactiveChrome ? (
           <div
             aria-hidden
-            className="pointer-events-none fixed inset-0 z-[calc(var(--z-banner)-1)] bg-surface-deep/30"
+            className="pointer-events-none absolute inset-0 z-[calc(var(--z-banner)-1)] bg-surface-deep/30"
           />
         ) : null}
         {mapLayersContent}
