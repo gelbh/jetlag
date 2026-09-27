@@ -54,6 +54,19 @@ describe("PhotoHudBody", () => {
     expect(screen.queryByRole("button", { name: /continue/i })).toBeNull();
   });
 
+  it("keeps used categories visible but disabled", () => {
+    renderPhoto(
+      <PhotoHudBody
+        {...baseProps}
+        usedCategoryIds={new Set(["tree"])}
+      />,
+    );
+    expect(screen.getByText("Tree")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Tree" }),
+    ).toBeDisabled();
+  });
+
   it("arms PrimedCommitStrip only when configureReady via AskHudHost", () => {
     const muted: AskHudReadiness = {
       surface: "photo",

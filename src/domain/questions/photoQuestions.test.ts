@@ -101,6 +101,15 @@ describe("photoQuestions", () => {
     );
   });
 
+  it("marks tree used from cancelled-with-answer", () => {
+    const cancelled = photoPending({
+      id: "pq-cancelled",
+      status: "cancelled",
+      answer: "sent_externally",
+    });
+    expect(usedPhotoCategoryIds([cancelled])).toEqual(new Set(["tree"]));
+  });
+
   it("parses photo answers", () => {
     expect(parsePhotoAnswer({ kind: "cannot_answer" })).toEqual({
       kind: "cannot_answer",

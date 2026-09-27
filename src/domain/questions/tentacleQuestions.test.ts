@@ -19,6 +19,7 @@ import {
   tentacleSearchRadiusMeters,
   type TentacleExtendedCategoryId,
   usedTentacleCategoryIds,
+  usedTentacleCategoryIdsForSession,
 } from "./tentacleQuestions";
 
 function tentacleAnnotation(
@@ -77,6 +78,27 @@ describe("tentacleQuestions", () => {
     );
     expect(usedTentacleCategoryIds([museum, zoo], "t-1")).toEqual(
       new Set(["zoo"]),
+    );
+  });
+
+  it("marks museum used from pending and cancelled-with-answer", () => {
+    const pending = {
+      id: "pq-museum",
+      toolType: "tentacle",
+      status: "pending",
+      placement: { metadata: { tentacleCategoryId: "museum" } },
+    } as never;
+    expect(usedTentacleCategoryIdsForSession([], [pending])).toEqual(
+      new Set(["museum"]),
+    );
+
+    const cancelled = {
+      ...pending,
+      status: "cancelled",
+      answer: "City Museum",
+    };
+    expect(usedTentacleCategoryIdsForSession([], [cancelled])).toEqual(
+      new Set(["museum"]),
     );
   });
 

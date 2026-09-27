@@ -1,7 +1,6 @@
 import { type RefObject } from "react";
 import {
   BASE_MEASURING_CATALOG,
-  MEASURING_GROUPS,
   measuringSupportsSearch,
   measuringTargetKind,
   measuringTargetLabel,
@@ -164,11 +163,8 @@ export function MeasuringPanel({ model }: MeasuringPanelProps) {
   const isSeaLevel = targetKind === "sea_level";
   const allowsSearch = measuringSupportsSearch(measureFrom);
   const measureCatalog = catalogOptions ?? BASE_MEASURING_CATALOG;
-  const hasAvailableMeasureOptions = MEASURING_GROUPS.some((group) =>
-    measureCatalog.some(
-      (option) =>
-        option.groupId === group.id && !usedMeasuringFromKinds.has(option.id),
-    ),
+  const hasAvailableMeasureOptions = measureCatalog.some(
+    (option) => !usedMeasuringFromKinds.has(option.id),
   );
 
   const needsAutoResolve = measuringUsesDebouncedSeekerResolve(

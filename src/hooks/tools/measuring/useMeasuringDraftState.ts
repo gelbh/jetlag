@@ -8,13 +8,14 @@ import {
   firstAvailableMeasuringFromKind,
   measuringFromKind,
   measuringUsesAllPlacesInArea,
-  usedMeasuringFromKinds,
+  usedMeasuringFromKindsForSession,
   type MeasuringAnswer,
   type MeasuringFromKind,
   type MeasuringLocationCategory,
   type MeasuringSubject,
   type MeasuringTargetMode,
 } from "@/domain/questions";
+import type { PendingQuestionRecord } from "@/domain/session/activity/sessionChat";
 import type { SessionRulesInput } from "@/domain/session/rules";
 import { adminBorderKindAvailability } from "@/services/geo/overpass/adminDivisionAvailability";
 import { usePreloadStore } from "@/state/preloadStore";
@@ -25,6 +26,7 @@ import type { SeaLevelEdgeCase } from "@/domain/geometry/measuring/seaLevel";
 
 export function useMeasuringDraftState(
   annotations: AnnotationRecord[],
+  pendingQuestions: readonly PendingQuestionRecord[] = [],
   sessionRules?: SessionRulesInput,
 ) {
   const wizardStepRef = useRef("place");
@@ -37,8 +39,12 @@ export function useMeasuringDraftState(
   const placesRequestIdRef = useRef(0);
 
   const usedMeasuringFromKindsSet = useMemo(
-    () => usedMeasuringFromKinds(annotations.filter(isActive)),
-    [annotations],
+    () =>
+      usedMeasuringFromKindsForSession(
+        annotations.filter(isActive),
+        pendingQuestions,
+      ),
+    [annotations, pendingQuestions],
   );
 
   const [measuringSeekerPoint, setMeasuringSeekerPoint] =
@@ -88,6 +94,9 @@ export function useMeasuringDraftState(
   const [measuringPlaces, setMeasuringPlaces] = useState<MeasuringPlace[]>([]);
   const [measuringOptionChosen, setMeasuringOptionChosen] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [unavailableMeasuringFromKinds, setUnavailableMeasuringFromKinds] =
+    useState<Map<MeasuringFromKind, string>>(() => new Map());
+  const [catalogNotice, setCatalogNotice] = useState<string | null>(null);
 
   const customMeasureGeometries = sessionRules?.customMeasureGeometries ?? [];
   const customMatchingAreas = sessionRules?.customMatchingAreas;
@@ -170,9 +179,19 @@ export function useMeasuringDraftState(
       setMeasuringError(null);
       setMeasuringPlaces([]);
       setMeasuringOptionChosen(false);
+      setUnavailableMeasuringFromKinds(new Map());
+      setCatalogNotice(null);
     },
     [measuringCatalog, usedMeasuringFromKindsSet],
   );
+
+  const reopenCatalog = useCallback(() => {
+    setMeasuringLoading(false);
+    setMeasuringOptionChosen(false);
+    setMeasuringSeekerPoint(null);
+    setMeasuringSeekerPlaceName(null);
+    clearSubjectDerivedState();
+  }, [clearSubjectDerivedState]);
 
   return {
     wizardStepRef,
@@ -182,6 +201,10 @@ export function useMeasuringDraftState(
     linearRequestIdRef,
     placesRequestIdRef,
     usedMeasuringFromKindsSet,
+    unavailableMeasuringFromKinds,
+    setUnavailableMeasuringFromKinds,
+    catalogNotice,
+    setCatalogNotice,
     measuringSeekerPoint,
     setMeasuringSeekerPoint,
     measuringTargetPoint,
@@ -240,6 +263,7 @@ export function useMeasuringDraftState(
     usesAllPlacesInArea,
     clearSubjectDerivedState,
     resetDraft,
+    reopenCatalog,
   };
 }
 

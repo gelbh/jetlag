@@ -73,7 +73,11 @@ export function useMeasuringTool({
     () => annotations.filter(isActive),
     [annotations],
   );
-  const draft = useMeasuringDraftState(annotations, sessionRules);
+  const draft = useMeasuringDraftState(
+    annotations,
+    pendingQuestions,
+    sessionRules,
+  );
   const previews = useMeasuringPreviews(gameArea, draft);
 
   const loaders = useMeasuringAnchorLoaders({
@@ -335,10 +339,7 @@ export function useMeasuringTool({
   );
 
   const reopenCatalog = () => {
-    draft.setMeasuringOptionChosen(false);
-    draft.clearSubjectDerivedState();
-    draft.setMeasuringSeekerPoint(null);
-    draft.setMeasuringSeekerPlaceName(null);
+    draft.reopenCatalog();
   };
 
   const canCommitMeasuring =
@@ -482,6 +483,10 @@ export function useMeasuringTool({
           distanceUnit,
           optionChosen: draft.measuringOptionChosen,
           usedMeasuringFromKinds: draft.usedMeasuringFromKindsSet,
+          unavailableMeasuringFromKinds: new Set(
+            draft.unavailableMeasuringFromKinds.keys(),
+          ),
+          catalogNotice: draft.catalogNotice,
           catalogOptions: draft.measuringCatalog,
           anchorLat: draft.measuringSeekerPoint?.[0] ?? null,
           anchorLng: draft.measuringSeekerPoint?.[1] ?? null,

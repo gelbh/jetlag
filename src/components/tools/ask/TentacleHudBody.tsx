@@ -80,22 +80,21 @@ export function TentacleHudBody({
   costLabel = null,
   toolLabel = "Tentacle",
 }: TentacleHudBodyProps) {
-  const availableCategories = tentacleCategoriesForGameSize(gameSize).filter(
-    (category) =>
-      !usedCategoryIds.has(category.id) || category.id === categoryId,
+  const catalogRows = tentacleCategoriesForGameSize(gameSize).map(
+    (category) => {
+      const Icon = tentacleCategoryIcon(category.id);
+      return {
+        id: category.id,
+        label: category.label,
+        disabled:
+          usedCategoryIds.has(category.id) &&
+          !(categoryChosen && category.id === categoryId),
+        icon: (
+          <Icon size={20} weight="duotone" color="currentColor" aria-hidden />
+        ),
+      };
+    },
   );
-
-  const catalogRows = availableCategories.map((category) => {
-    const Icon = tentacleCategoryIcon(category.id);
-    return {
-      id: category.id,
-      label: category.label,
-      icon: (
-        <Icon size={20} weight="duotone" color="currentColor" aria-hidden />
-      ),
-    };
-  });
-
   const searchRadiusLabel =
     categoryId !== null
       ? formatPresetDistance(searchRadiusMeters, distanceUnit)

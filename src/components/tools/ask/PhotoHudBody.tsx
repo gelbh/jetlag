@@ -52,8 +52,11 @@ export function PhotoHudBody({
   costLabel = null,
   toolLabel = "Photo",
 }: PhotoHudBodyProps) {
-  const availableCategories = photoCategoriesForGameSize(gameSize).filter(
-    (category) => !usedCategoryIds.has(category.id),
+  const catalogCategories = photoCategoriesForGameSize(gameSize);
+  const availableCategories = catalogCategories.filter(
+    (category) =>
+      !usedCategoryIds.has(category.id) ||
+      (categoryChosen && category.id === categoryId),
   );
   /** Flag-off keeps prior always-selected catalog; Mantine waits for an explicit tap. */
   const showAsChosen = categoryChosen || !true;
@@ -65,7 +68,14 @@ export function PhotoHudBody({
     isPhotoCategoryAvailableForGameSize(gameSize, categoryId) &&
     !usedCategoryIds.has(categoryId);
 
-  const useRail = availableCategories.length > CHIP_ISLAND_MAX;
+  const useRail = catalogCategories.length > CHIP_ISLAND_MAX;
+  const catalogItems = catalogCategories.map((category) => ({
+    id: category.id,
+    label: photoCategoryLabelForUnit(category.id, distanceUnit),
+    disabled:
+      usedCategoryIds.has(category.id) &&
+      !(categoryChosen && category.id === categoryId),
+  }));
 
   return (
     <div
@@ -137,12 +147,10 @@ export function PhotoHudBody({
             <AskHudPanel className="p-3">
               <CatalogExhaustedMessage message="Every photo question has already been used this session." />
             </AskHudPanel>
-          ) : useRail ? (
+          ) : null}
+          {useRail ? (
             <AskCatalogRail
-              rows={availableCategories.map((category) => ({
-                id: category.id,
-                label: photoCategoryLabelForUnit(category.id, distanceUnit),
-              }))}
+              rows={catalogItems}
               selectedId={categoryReady && showAsChosen ? categoryId : null}
               onSelect={(id) => onCategoryChange(id as PhotoCategoryId)}
               aria-label="Photo question"
@@ -151,10 +159,7 @@ export function PhotoHudBody({
           ) : (
             <div className="pointer-events-auto space-y-2">
               <AskChipIsland
-                chips={availableCategories.map((category) => ({
-                  id: category.id,
-                  label: photoCategoryLabelForUnit(category.id, distanceUnit),
-                }))}
+                chips={catalogItems}
                 selectedId={categoryReady && showAsChosen ? categoryId : null}
                 onSelect={(id) => onCategoryChange(id as PhotoCategoryId)}
                 aria-label="Photo question"

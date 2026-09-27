@@ -29,6 +29,7 @@ import {
 } from "@/components/tools/shared/measuring/measuringPanelUtils";
 import { SearchResultsList } from "@/components/tools/shared/controls/SearchResultsList";
 import { CatalogExhaustedMessage } from "@/components/tools/shared/readout/CatalogExhaustedMessage";
+import { ResolvedReadout } from "@/components/tools/shared/readout/ResolvedReadout";
 import { QuestionTruthReferenceHint } from "@/components/tools/shared/QuestionTruthReferenceHint";
 import {
   filterChipStyles,
@@ -84,6 +85,8 @@ export type MeasuringHudBodyModel = {
   measureFrom: MeasuringFromKind;
   usesAllPlacesInArea: boolean;
   usedMeasuringFromKinds: ReadonlySet<MeasuringFromKind>;
+  unavailableMeasuringFromKinds?: ReadonlySet<MeasuringFromKind>;
+  catalogNotice?: string | null;
   catalogOptions?: readonly MeasuringCatalogOption[];
   anchorLat?: number | null;
   anchorLng?: number | null;
@@ -135,6 +138,8 @@ export function MeasuringHudBody({ model }: MeasuringHudBodyProps) {
     measureFrom,
     usesAllPlacesInArea,
     usedMeasuringFromKinds,
+    unavailableMeasuringFromKinds = new Set<MeasuringFromKind>(),
+    catalogNotice = null,
     catalogOptions,
     anchorLat = null,
     anchorLng = null,
@@ -184,17 +189,15 @@ export function MeasuringHudBody({ model }: MeasuringHudBodyProps) {
   const allowsSearch = measuringSupportsSearch(measureFrom);
   const measureCatalog = catalogOptions ?? BASE_MEASURING_CATALOG;
 
-  const selectableOptions = measureCatalog.filter(
-    (option) =>
-      !usedMeasuringFromKinds.has(option.id) || option.id === measureFrom,
-  );
   const availableOptions = measureCatalog.filter(
-    (option) => !usedMeasuringFromKinds.has(option.id),
+    (option) =>
+      !usedMeasuringFromKinds.has(option.id) &&
+      !unavailableMeasuringFromKinds.has(option.id),
   );
   const hasAvailableMeasureOptions = availableOptions.length > 0;
 
   const groupsWithRows = MEASURING_GROUPS.filter((group) =>
-    selectableOptions.some((option) => option.groupId === group.id),
+    measureCatalog.some((option) => option.groupId === group.id),
   );
 
   const effectiveFilter: GroupFilter =
@@ -205,10 +208,8 @@ export function MeasuringHudBody({ model }: MeasuringHudBodyProps) {
 
   const filteredOptions =
     effectiveFilter === "all"
-      ? selectableOptions
-      : selectableOptions.filter(
-          (option) => option.groupId === effectiveFilter,
-        );
+      ? measureCatalog
+      : measureCatalog.filter((option) => option.groupId === effectiveFilter);
 
   const catalogRows = MEASURING_GROUPS.flatMap((group) =>
     filteredOptions
@@ -219,6 +220,10 @@ export function MeasuringHudBody({ model }: MeasuringHudBodyProps) {
           id: option.id,
           label: option.label,
           groupLabel: effectiveFilter === "all" ? group.label : undefined,
+          disabled:
+            (usedMeasuringFromKinds.has(option.id) ||
+              unavailableMeasuringFromKinds.has(option.id)) &&
+            !(optionChosen && option.id === measureFrom),
           icon: (
             <Icon size={20} weight="duotone" color="currentColor" aria-hidden />
           ),
@@ -276,50 +281,50 @@ export function MeasuringHudBody({ model }: MeasuringHudBodyProps) {
       {chord === "source" ? (
         <div className="space-y-2">
           {awaitHiderAnswer ? <QuestionTruthReferenceHint /> : null}
+          {catalogNotice ? (
+            <ResolvedReadout variant="warning">{catalogNotice}</ResolvedReadout>
+          ) : null}
           {!hasAvailableMeasureOptions ? (
             <AskHudPanel className="p-3">
               <CatalogExhaustedMessage message="Every measure category has already been used on this map." />
             </AskHudPanel>
-          ) : (
-            <>
-              <div
-                role="tablist"
-                aria-label="Filter measure categories"
-                className="jl-scroll"
-                style={filterChipTrackStyle}
-              >
-                {filterOptions.map((option) => {
-                  const selected = effectiveFilter === option.value;
-                  const Icon = GROUP_CHIP_ICON[option.value];
-                  return (
-                    <UnstyledButton
-                      key={option.value}
-                      type="button"
-                      role="tab"
-                      aria-selected={selected}
-                      onClick={() => setGroupFilter(option.value)}
-                      styles={filterChipStyles(selected)}
-                    >
-                      <Icon
-                        size={14}
-                        weight={selected ? "fill" : "regular"}
-                        aria-hidden
-                      />
-                      {option.label}
-                    </UnstyledButton>
-                  );
-                })}
-              </div>
-              <AskCatalogRail
-                rows={catalogRows}
-                selectedId={optionChosen ? measureFrom : null}
-                onSelect={(id) => onMeasureFromChange(id as MeasuringFromKind)}
-                aria-label="Measuring from"
-                hint=""
-                columns={2}
-              />
-            </>
-          )}
+          ) : null}
+          <div
+            role="tablist"
+            aria-label="Filter measure categories"
+            className="jl-scroll"
+            style={filterChipTrackStyle}
+          >
+            {filterOptions.map((option) => {
+              const selected = effectiveFilter === option.value;
+              const Icon = GROUP_CHIP_ICON[option.value];
+              return (
+                <UnstyledButton
+                  key={option.value}
+                  type="button"
+                  role="tab"
+                  aria-selected={selected}
+                  onClick={() => setGroupFilter(option.value)}
+                  styles={filterChipStyles(selected)}
+                >
+                  <Icon
+                    size={14}
+                    weight={selected ? "fill" : "regular"}
+                    aria-hidden
+                  />
+                  {option.label}
+                </UnstyledButton>
+              );
+            })}
+          </div>
+          <AskCatalogRail
+            rows={catalogRows}
+            selectedId={optionChosen ? measureFrom : null}
+            onSelect={(id) => onMeasureFromChange(id as MeasuringFromKind)}
+            aria-label="Measuring from"
+            hint=""
+            columns={2}
+          />
         </div>
       ) : null}
 

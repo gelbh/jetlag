@@ -90,6 +90,19 @@ describe("TentacleHudBody", () => {
     expect(onCategoryChange).toHaveBeenCalledWith("museum");
   });
 
+  it("keeps used categories visible but disabled", () => {
+    renderHud(
+      <TentacleHudBody
+        {...baseProps}
+        usedCategoryIds={new Set(["museum"])}
+      />,
+    );
+    expect(screen.getByText("Museum")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /Museum/i }),
+    ).toBeDisabled();
+  });
+
   it("after types, shows map-radius place chord without CONTINUE", () => {
     renderHud(
       <TentacleHudBody
