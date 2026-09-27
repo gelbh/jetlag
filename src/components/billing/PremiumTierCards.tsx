@@ -16,6 +16,7 @@ import {
 } from "../ui/entry/entryChrome";
 import {
   formatBankedPremiumSessionCreditsLabel,
+  formatPremiumSessionCreditsLabel,
   hasUnlimitedPremiumHosting,
   PREMIUM_PRODUCT_OFFERS,
   type PremiumEntitlements,
@@ -84,7 +85,9 @@ export function PremiumTierCards({
   onPortal: () => void;
 }) {
   const bankedCreditsLabel = formatBankedPremiumSessionCreditsLabel(entitlements);
-  const createSessionHint = bankedCreditsLabel ?? "Host a game";
+  const packCreditsLabel = formatPremiumSessionCreditsLabel(entitlements);
+  const createSessionHint =
+    bankedCreditsLabel ?? packCreditsLabel ?? "Host a game";
   const [catalogTab, setCatalogTab] = useState<PremiumCatalogTab>("unlimited");
   const [tabTouched, setTabTouched] = useState(false);
   const activeCatalogTab =
@@ -154,7 +157,7 @@ export function PremiumTierCards({
       </Stack>
 
       {activeCatalogTab === "packs" ? (
-        <SimpleGrid cols={3} spacing={8}>
+        <SimpleGrid cols={2} spacing={8}>
           {packOffers.map((offer) => (
             <Button
               key={offer.key}
