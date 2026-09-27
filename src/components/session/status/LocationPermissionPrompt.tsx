@@ -35,15 +35,22 @@ export function LocationPermissionPrompt() {
 
   useEffect(() => {
     if (!onMap || ui.demand === 0) {
-      setHydrating(false);
       return;
     }
 
     let cancelled = false;
-    setHydrating(true);
     void (async () => {
+      setHydrating(true);
       try {
-        await restoreLocationAccessIfPersisted({ highAccuracy: false });
+        const restore = await restoreLocationAccessIfPersisted({
+          highAccuracy: false,
+        });
+        if (cancelled) {
+          return;
+        }
+        if (restore.status === "denied") {
+          setForceDenied(true);
+        }
         const next = await queryGeolocationPermission();
         if (!cancelled) {
           setPermission(next);
