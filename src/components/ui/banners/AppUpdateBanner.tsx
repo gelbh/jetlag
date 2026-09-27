@@ -1,9 +1,10 @@
+import { Button } from "@mantine/core";
 import { useLocation } from "react-router-dom";
 import { appUpdateCopy } from "@/domain/device/updates/appUpdateCopy";
 import { isStandalonePwa } from "@/domain/device/pwa/isStandalonePwa";
 import { useAppUpdateState } from "@/hooks/app/useAppUpdateState";
 import { HudBanner } from "../hud/HudBanner";
-import { MapFloatAlertPanel } from "./MapFloatAlert";
+import { MapFloatSurface } from "./MapFloatSurface";
 
 export function AppUpdateBanner() {
   const location = useLocation();
@@ -21,18 +22,19 @@ export function AppUpdateBanner() {
           : "pointer-events-auto fixed inset-x-0 top-0 z-[var(--z-toast)] px-3 pt-[max(0.5rem,env(safe-area-inset-top))]"
       }
     >
-      <MapFloatAlertPanel className="mx-auto max-w-[min(calc(100%-1.5rem),24rem)] border-highlight/55 bg-surface-deep normal-case tracking-normal">
+      <MapFloatSurface
+        tone="default"
+        role="status"
+        actionRow
+        className="mx-auto max-w-[min(calc(100%-1.5rem),24rem)]"
+      >
         <p className="min-w-0 font-display text-xs font-semibold uppercase tracking-[0.08em] text-highlight">
           {appUpdateCopy.readyTitle}
         </p>
-        <button
-          type="button"
-          className="btn-primary min-h-11 shrink-0 px-4 text-xs"
-          onClick={applyUpdate}
-        >
+        <Button type="button" variant="filled" size="md" onClick={applyUpdate}>
           {appUpdateCopy.readyAction}
-        </button>
-      </MapFloatAlertPanel>
+        </Button>
+      </MapFloatSurface>
     </HudBanner>
   );
 }

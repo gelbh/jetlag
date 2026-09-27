@@ -1,6 +1,7 @@
+import { Button, Group } from "@mantine/core";
 import type { RoleJoinRequest } from "@/domain/session/players/joinRequest";
 import { playerRoleLabel } from "@/domain/session/players/playerRole";
-import { MapFloatAlertPanel } from "../../ui/banners/MapFloatAlert";
+import { MapFloatSurface } from "../../ui/banners/MapFloatSurface";
 
 interface RoleJoinRequestAlertProps {
   request: RoleJoinRequest | null;
@@ -9,9 +10,6 @@ interface RoleJoinRequestAlertProps {
   busy?: boolean;
   error?: string | null;
 }
-
-const joinRequestPanelClassName =
-  "pointer-events-auto mx-3 mt-1.5 border-highlight/55 bg-surface-deep";
 
 export function RoleJoinRequestAlert({
   request,
@@ -25,29 +23,39 @@ export function RoleJoinRequestAlert({
   }
 
   return (
-    <MapFloatAlertPanel className={joinRequestPanelClassName}>
-      <p className="text-sm font-semibold text-ink">
-        {request.identityLabel} wants to join as {playerRoleLabel(request.role)}
-      </p>
-      {error ? <p className="text-sm text-status-error">{error}</p> : null}
-      <div className="flex shrink-0 gap-2">
-        <button
+    <MapFloatSurface
+      tone="default"
+      role="alert"
+      actionRow
+      className="pointer-events-auto mx-3 mt-1.5"
+      data-testid="role-join-request-alert"
+    >
+      <div className="min-w-0">
+        <p className="text-sm font-semibold text-ink">
+          {request.identityLabel} wants to join as {playerRoleLabel(request.role)}
+        </p>
+        {error ? <p className="text-sm text-status-error">{error}</p> : null}
+      </div>
+      <Group gap="sm" wrap="nowrap">
+        <Button
           type="button"
+          variant="default"
+          size="md"
           disabled={busy}
           onClick={onDecline}
-          className="btn-secondary min-h-10 px-3 text-xs"
         >
           Decline
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
+          variant="filled"
+          size="md"
           disabled={busy}
           onClick={onAccept}
-          className="btn-primary min-h-10 shrink-0 px-3 text-xs"
         >
           Accept
-        </button>
-      </div>
-    </MapFloatAlertPanel>
+        </Button>
+      </Group>
+    </MapFloatSurface>
   );
 }

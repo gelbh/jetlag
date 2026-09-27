@@ -14,6 +14,7 @@ import {
   type HiderPendingQuestionAnswerProps,
 } from "../../chat/HiderPendingQuestionAnswer";
 import { InlineError } from "../../ui/banners/InlineError";
+import { MapFloatSurface } from "../../ui/banners/MapFloatSurface";
 import { HudBanner } from "../../ui/hud/HudBanner";
 
 interface QuestionAlertBannerProps {
@@ -75,9 +76,10 @@ export function QuestionAlertBanner({
       className="pointer-events-auto absolute inset-x-3 top-[var(--map-banner-top)] z-[var(--z-banner)]"
     >
       {target && visible ? (
-        <div
+        <MapFloatSurface
+          tone="flag"
           data-testid="question-alert-banner"
-          className="jl-scroll max-h-[40vh] overflow-y-auto rounded-xl border-2 border-highlight bg-surface-deep px-3 py-3 text-left shadow-lg"
+          className="jl-scroll max-h-[40vh] overflow-y-auto text-left"
           role="region"
           aria-label="Open question"
         >
@@ -103,7 +105,7 @@ export function QuestionAlertBanner({
             }
             onAnswerQuestion={onAnswerQuestion}
           />
-        </div>
+        </MapFloatSurface>
       ) : null}
     </HudBanner>
   );

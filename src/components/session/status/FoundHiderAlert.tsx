@@ -1,5 +1,7 @@
+import { Button, Group } from "@mantine/core";
 import type { PlayerRole } from "@/domain/session/players/playerRole";
-import { MapFloatAlert, MapFloatAlertPanel } from "../../ui/banners/MapFloatAlert";
+import { MapFloatAlert } from "../../ui/banners/MapFloatAlert";
+import { MapFloatSurface } from "../../ui/banners/MapFloatSurface";
 
 interface FoundHiderAlertProps {
   foundHiderPending: boolean;
@@ -11,11 +13,7 @@ interface FoundHiderAlertProps {
   onDeclineFoundHider?: () => void;
 }
 
-const foundHiderPanelClassName =
-  "pointer-events-auto mx-3 mt-1.5 border-status-success/40 bg-status-success-surface";
-
-const foundHiderBannerClassName =
-  "pointer-events-auto mx-3 mt-1.5 normal-case tracking-normal border-status-success/40 bg-status-success-surface text-ink";
+const foundHiderPanelClassName = "pointer-events-auto mx-3 mt-1.5";
 
 export function FoundHiderAlert({
   foundHiderPending,
@@ -32,68 +30,87 @@ export function FoundHiderAlert({
 
   if (playerRole === "hider" && onAcceptFoundHider) {
     return (
-      <MapFloatAlertPanel className={foundHiderPanelClassName}>
+      <MapFloatSurface
+        tone="info"
+        role="alert"
+        actionRow
+        className={foundHiderPanelClassName}
+      >
         <p className="text-sm font-semibold text-ink">
           Seekers say you&apos;re found
         </p>
-        <div className="flex shrink-0 gap-2">
+        <Group gap="sm" wrap="nowrap">
           {onDeclineFoundHider ? (
-            <button
+            <Button
               type="button"
+              variant="default"
+              size="md"
               onClick={onDeclineFoundHider}
-              className="btn-secondary min-h-10 px-3 text-xs"
             >
               Decline
-            </button>
+            </Button>
           ) : null}
-          <button
+          <Button
             type="button"
+            variant="filled"
+            size="md"
             onClick={onAcceptFoundHider}
-            className="btn-primary min-h-10 shrink-0 px-3 text-xs"
           >
             Accept
-          </button>
-        </div>
-      </MapFloatAlertPanel>
+          </Button>
+        </Group>
+      </MapFloatSurface>
     );
   }
 
   if (myUid && foundRequestedByUid === myUid && onDeclineFoundHider) {
     return (
-      <MapFloatAlertPanel className={foundHiderPanelClassName}>
+      <MapFloatSurface
+        tone="info"
+        role="alert"
+        actionRow
+        className={foundHiderPanelClassName}
+      >
         <p className="text-sm font-semibold text-ink">
           Waiting for hider to confirm found hider
         </p>
-        <button
+        <Button
           type="button"
+          variant="default"
+          size="md"
           onClick={onDeclineFoundHider}
-          className="btn-secondary min-h-10 shrink-0 px-3 text-xs"
         >
           Cancel request
-        </button>
-      </MapFloatAlertPanel>
+        </Button>
+      </MapFloatSurface>
     );
   }
 
   if (isHost && onDeclineFoundHider) {
     return (
-      <MapFloatAlertPanel className={foundHiderPanelClassName}>
+      <MapFloatSurface
+        tone="info"
+        role="alert"
+        actionRow
+        className={foundHiderPanelClassName}
+      >
         <p className="text-sm font-semibold text-ink">
           Found hider pending hider confirmation
         </p>
-        <button
+        <Button
           type="button"
+          variant="default"
+          size="md"
           onClick={onDeclineFoundHider}
-          className="btn-secondary min-h-10 shrink-0 px-3 text-xs"
         >
           Cancel found hider
-        </button>
-      </MapFloatAlertPanel>
+        </Button>
+      </MapFloatSurface>
     );
   }
 
   return (
-    <MapFloatAlert className={foundHiderBannerClassName}>
+    <MapFloatAlert className={foundHiderPanelClassName}>
       Waiting for hider to confirm found hider
     </MapFloatAlert>
   );

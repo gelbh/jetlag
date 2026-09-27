@@ -1,5 +1,6 @@
 import { useShallow } from "zustand/react/shallow";
 import { selectPreloadBanner, usePreloadStore } from "@/state/preloadStore";
+import { MapFloatSurface } from "../../ui/banners/MapFloatSurface";
 
 /** @deprecated Use GameAreaPreloadBeacon on the map HUD instead. */
 export function GameAreaPreloadBanner() {
@@ -11,13 +12,10 @@ export function GameAreaPreloadBanner() {
   }
 
   return (
-    <div
-      className={`map-float-alert pointer-events-auto mx-3 mt-2 border px-3 py-2 text-sm ${
-        banner.failed
-          ? "border-status-warning/40 bg-status-warning-surface text-status-warning"
-          : "border-status-info/40 bg-status-info-surface text-status-info"
-      }`}
+    <MapFloatSurface
+      tone={banner.failed ? "warn" : "info"}
       role="status"
+      className="pointer-events-auto mx-3 mt-2 text-sm"
     >
       <div className="flex items-start justify-between gap-3">
         <div>
@@ -34,6 +32,6 @@ export function GameAreaPreloadBanner() {
           </button>
         ) : null}
       </div>
-    </div>
+    </MapFloatSurface>
   );
 }

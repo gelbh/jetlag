@@ -1,4 +1,5 @@
 import { useAppUpdateState } from "../../hooks/app/useAppUpdateState";
+import { MapFloatSurface } from "../ui/banners/MapFloatSurface";
 import { HudBanner } from "../ui/hud/HudBanner";
 
 export function HotfixGraceChip() {
@@ -13,10 +14,11 @@ export function HotfixGraceChip() {
       visible={hotfixGraceActive && seconds !== null}
       className="jl-hotfix-grace-chip pointer-events-auto fixed inset-x-0 z-[var(--z-panel)] px-3"
     >
-      <div
-        className="map-float-alert mx-auto max-w-[min(calc(100%-1.5rem),24rem)] border-2 border-action bg-surface-deep px-3 py-2 normal-case tracking-normal"
+      <MapFloatSurface
+        tone="halt"
         role="status"
         aria-live="polite"
+        className="mx-auto max-w-[min(calc(100%-1.5rem),24rem)]"
       >
         <p className="font-display text-xs font-semibold uppercase tracking-[0.08em] text-action">
           Update required
@@ -24,9 +26,9 @@ export function HotfixGraceChip() {
         <p className="text-sm text-ink">
           {seconds === null
             ? "Refreshing…"
-            : `Update required — refreshing in ${seconds}s`}
+            : `Update required - refreshing in ${seconds}s`}
         </p>
-      </div>
+      </MapFloatSurface>
     </HudBanner>
   );
 }
