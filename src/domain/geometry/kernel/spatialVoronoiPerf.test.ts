@@ -37,7 +37,6 @@ describe("spatialVoronoiPerf", () => {
     const wasmMs = await measureMedianMsAsync(async () => {
       await wasmBuildSpatialVoronoiFromSites(sites);
     });
-    // G5j measured median ~0.01ms (arm64); keep 50ms for CI headroom.
     expect(wasmMs).toBeLessThan(50);
   });
 });
