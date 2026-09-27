@@ -15,12 +15,24 @@ const SKIP_DIR_NAMES = new Set([
   ".wrangler",
 ]);
 
-/** Lines / nearby lines that only assert the banned marker is absent. */
-const ABSENCE_ASSERT =
-  /toHaveCount\(\s*0\s*,?\s*\)|not\.toBeAttached|not\.toBeVisible/;
+/** Expect chains that prove the banned marker is gone from the DOM. */
+const ABSENCE_EXPECT =
+  /expect\(([\s\S]*?)\)\s*\.\s*(?:toHaveCount\(\s*0\s*,?\s*\)|not\.toBeAttached)/g;
 
 /** How many following lines may still carry the absence assert after a wrap. */
 const ABSENCE_LOOKAHEAD_LINES = 3;
+
+function windowHasAbsenceAssertForNeedle(
+  window: string,
+  needle: string,
+): boolean {
+  for (const match of window.matchAll(ABSENCE_EXPECT)) {
+    if (match[1]?.includes(needle)) {
+      return true;
+    }
+  }
+  return false;
+}
 
 export function mentionsNeedleWithoutAbsenceAssert(
   text: string,
@@ -32,7 +44,7 @@ export function mentionsNeedleWithoutAbsenceAssert(
       continue;
     }
     const window = lines.slice(i, i + ABSENCE_LOOKAHEAD_LINES + 1).join("\n");
-    if (ABSENCE_ASSERT.test(window)) {
+    if (windowHasAbsenceAssertForNeedle(window, needle)) {
       continue;
     }
     return true;
@@ -82,6 +94,23 @@ describe("mentionsNeedleWithoutAbsenceAssert", () => {
         'el.setAttribute("data-player-ux-world", "1");',
         "data-player-ux-world",
       ),
+    ).toBe(true);
+  });
+
+  it("does not treat not.toBeVisible as absence", () => {
+    expect(
+      mentionsNeedleWithoutAbsenceAssert(
+        'await expect(page.locator("[data-player-ux-world]")).not.toBeVisible();',
+        "data-player-ux-world",
+      ),
+    ).toBe(true);
+  });
+
+  it("does not exempt a banned marker via an unrelated nearby absence assert", () => {
+    const unrelated = `el.setAttribute("data-player-ux-world", "1");
+await expect(page.getByRole("button", { name: "Send" })).toHaveCount(0);`;
+    expect(
+      mentionsNeedleWithoutAbsenceAssert(unrelated, "data-player-ux-world"),
     ).toBe(true);
   });
 });
