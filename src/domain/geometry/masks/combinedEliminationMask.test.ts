@@ -8,7 +8,7 @@ import {
   buildEndGameEliminationMask,
   eliminationFeatureForAnnotationTs,
 } from "./combinedEliminationMask";
-import { unionEliminationPartsLegacy } from "./unionPolygonFeatures";
+import { unionEliminationParts } from "./unionPolygonFeatures";
 
 const gameArea: GameArea = {
   type: "Polygon",
@@ -59,7 +59,7 @@ function matchingAnnotation(
 }
 
 describe("combinedEliminationMask parity", () => {
-  it("matches legacy union for mixed committed annotations", () => {
+  it("matches turf engine union for mixed committed annotations", () => {
     const annotations = [
       matchingAnnotation("a", -0.19),
       matchingAnnotation("b", -0.16),
@@ -67,12 +67,15 @@ describe("combinedEliminationMask parity", () => {
     ];
 
     const candidate = buildCombinedEliminationMask(annotations, gameArea);
-    const baseline = unionEliminationPartsLegacy({
-      polygons: annotations.map(
-        (annotation) => eliminationFeatureForAnnotationTs(annotation)!,
-      ),
-      disks: [],
-    });
+    const baseline = unionEliminationParts(
+      {
+        polygons: annotations.map(
+          (annotation) => eliminationFeatureForAnnotationTs(annotation)!,
+        ),
+        disks: [],
+      },
+      "turf",
+    );
 
     expect(candidate).not.toBeNull();
     expect(baseline).not.toBeNull();

@@ -4,7 +4,6 @@ import { assertPolygonTopologyParity } from "./parity";
 import type { GameAreaGeometry, PolygonFeature } from "./types";
 import {
   unionEliminationParts,
-  unionEliminationPartsLegacy,
   type EliminationUnionInput,
 } from "./unionPolygonFeatures";
 
@@ -41,14 +40,14 @@ function square(west: number): PolygonFeature {
 }
 
 describe("kernel parity", () => {
-  it("martinez union matches turf legacy on sample grid", () => {
+  it("martinez union matches turf engine on sample grid", () => {
     const input: EliminationUnionInput = {
       polygons: [square(-0.18), square(-0.16)],
       disks: [],
     };
     assertPolygonTopologyParity(
       unionEliminationParts(input),
-      unionEliminationPartsLegacy(input),
+      unionEliminationParts(input, "turf"),
       { west: -0.2, east: -0.1, south: 51.4, north: 51.5 },
     );
   });

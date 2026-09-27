@@ -13,9 +13,7 @@ export { clipMaskToGameArea } from "./clipMask";
 export {
   unionDiskSpecs,
   unionEliminationParts,
-  unionEliminationPartsLegacy,
   unionPolygonFeatures,
-  unionPolygonFeaturesLegacy,
 } from "./unionPolygonFeatures";
 export { isPointInGameArea } from "./radarHalfPlane";
 export type { SpatialVoronoiSite } from "./spatialVoronoi";

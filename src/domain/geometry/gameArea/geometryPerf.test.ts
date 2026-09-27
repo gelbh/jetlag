@@ -19,7 +19,6 @@ import {
   unionDiskSpecs,
   unionEliminationParts,
   unionPolygonFeatures,
-  unionPolygonFeaturesLegacy,
   type DiskSpec,
   type EliminationUnionInput,
   type PolygonFeature,
@@ -150,11 +149,11 @@ function legacyCircleUnion(disks: DiskSpec[]): PolygonFeature | null {
     }),
   ) as PolygonFeature[];
 
-  return unionPolygonFeaturesLegacy(circles);
+  return unionEliminationParts({ polygons: circles, disks: [] }, "turf");
 }
 
 describe.skipIf(!runGeometryPerf)("geometry performance gates", () => {
-  it("union_10_circles is at least 2x faster than legacy turf union", () => {
+  it("union_10_circles is at least 2x faster than turf engine union", () => {
     const disks = circleDisks(10);
     const circles = disks.map((disk) =>
       turfCircle(turfPoint([disk.center[1], disk.center[0]]), disk.radiusMeters / 1000, {
@@ -166,14 +165,14 @@ describe.skipIf(!runGeometryPerf)("geometry performance gates", () => {
     const martinezMs = measureMedianMs(() => {
       unionPolygonFeatures(circles);
     });
-    const legacyMs = measureMedianMs(() => {
-      unionPolygonFeaturesLegacy(circles);
+    const turfMs = measureMedianMs(() => {
+      unionEliminationParts({ polygons: circles, disks: [] }, "turf");
     });
 
-    expect(martinezMs / legacyMs).toBeLessThan(0.5);
+    expect(martinezMs / turfMs).toBeLessThan(0.5);
   });
 
-  it("union_10_mixed_polys is faster than legacy turf union", () => {
+  it("union_10_mixed_polys is faster than turf engine union", () => {
     const features = Array.from({ length: 10 }, (_, index) =>
       squareFeature(-0.19 + index * 0.008),
     );
@@ -182,14 +181,14 @@ describe.skipIf(!runGeometryPerf)("geometry performance gates", () => {
     const martinezMs = measureMedianMs(() => {
       unionEliminationParts(input);
     });
-    const legacyMs = measureMedianMs(() => {
-      unionPolygonFeaturesLegacy(features);
+    const turfMs = measureMedianMs(() => {
+      unionEliminationParts(input, "turf");
     });
 
-    expect(martinezMs / legacyMs).toBeLessThan(0.6);
+    expect(martinezMs / turfMs).toBeLessThan(0.6);
   });
 
-  it("elimination_mask_8_annotations is faster than legacy union path", () => {
+  it("elimination_mask_8_annotations is faster than turf engine union path", () => {
     const annotations = Array.from({ length: 8 }, (_, index) =>
       matchingAnnotation(`a-${index}`, -0.19 + index * 0.01),
     );
@@ -198,14 +197,14 @@ describe.skipIf(!runGeometryPerf)("geometry performance gates", () => {
     const martinezMs = measureMedianMs(() => {
       buildMaskFromUnionInput(input, gameArea);
     });
-    const legacyMs = measureMedianMs(() => {
+    const turfMs = measureMedianMs(() => {
       const features = annotations.map(
         (annotation) => annotation.geometry as PolygonFeature,
       );
-      unionPolygonFeaturesLegacy(features);
+      unionEliminationParts({ polygons: features, disks: [] }, "turf");
     });
 
-    expect(martinezMs / legacyMs).toBeLessThan(0.6);
+    expect(martinezMs / turfMs).toBeLessThan(0.6);
   });
 
   it("circle_union_20_disks is much faster than turf-circle plus union", () => {
