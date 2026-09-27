@@ -2,7 +2,10 @@ import { type Page, expect } from "@playwright/test";
 import { dismissMapOnboarding } from "./page-init";
 
 export function parseClockToSeconds(text: string): number {
-  const parts = text.trim().split(":").map((part) => Number.parseInt(part, 10));
+  const parts = text
+    .trim()
+    .split(":")
+    .map((part) => Number.parseInt(part, 10));
   if (parts.some((part) => Number.isNaN(part))) {
     throw new Error(`Could not parse timer text: ${text}`);
   }
@@ -63,7 +66,9 @@ export async function returnToMapFromHome(page: Page) {
 /** Tip status island exposes Pause/Resume inline (no timer-settings menu). */
 export async function pauseSessionTimer(page: Page) {
   await page.getByRole("button", { name: "Pause timer" }).click();
-  await expect(page.getByRole("button", { name: "Resume timer" })).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Resume timer" }),
+  ).toBeVisible();
 }
 
 /** @deprecated Prefer pauseSessionTimer; tip chrome has no separate settings open. */
