@@ -1,3 +1,4 @@
+import { Button, Group } from "@mantine/core";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useLocation } from "react-router-dom";
 import {
@@ -12,6 +13,7 @@ import {
   getLocationPermissionUiSnapshot,
   subscribeLocationPermissionUi,
 } from "@/services/core/location/locationPermissionUi";
+import { MapFloatSurface } from "../../ui/banners/MapFloatSurface";
 import { HudBanner } from "../../ui/hud/HudBanner";
 
 const EMPTY_LOCATION_PERMISSION_UI = { demand: 0, confirmEpoch: 0 };
@@ -129,57 +131,61 @@ export function LocationPermissionPrompt() {
       animated={false}
       className="pointer-events-auto fixed inset-x-3 top-[var(--map-banner-top)] z-[var(--z-panel)]"
     >
-      <div
-        ref={dialogRef}
-        tabIndex={-1}
-        className="map-float-alert mx-auto max-w-xl border border-flag/40 bg-canvas px-3 py-3 text-field-ink outline-none"
-        role="dialog"
-        aria-labelledby="location-permission-prompt-title"
-        aria-describedby="location-permission-prompt-body"
-      >
-        <p
-          id="location-permission-prompt-title"
-          className="font-display text-xs font-semibold tracking-wide text-field-ink"
+      <div ref={dialogRef} tabIndex={-1} className="mx-auto max-w-xl outline-none">
+        <MapFloatSurface
+          tone="flag"
+          role="dialog"
+          aria-labelledby="location-permission-prompt-title"
+          aria-describedby="location-permission-prompt-body"
         >
-          {title}
-        </p>
-        <p
-          id="location-permission-prompt-body"
-          className="mt-1 text-pretty text-sm leading-snug text-field-ink-muted"
-        >
-          {body}
-        </p>
-        {actionError && !denied ? (
-          <p className="mt-2 text-sm text-status-error">{actionError}</p>
-        ) : null}
-        {denied || unavailable ? (
-          <div className="mt-3 flex flex-wrap gap-2">
-            <button
-              type="button"
-              disabled={busy || unavailable}
-              onClick={() => {
-                setForceDenied(false);
-                void onAllow();
-              }}
-              className="btn-secondary min-h-10 flex-1 px-4 text-xs"
-            >
-              Try again
-            </button>
-          </div>
-        ) : (
-          <div className="mt-3 flex flex-wrap gap-2">
-            <button
-              type="button"
-              disabled={busy}
-              onClick={() => {
-                void onAllow();
-              }}
-              className="btn-primary min-h-10 flex-1 px-4 text-xs"
-            >
-              {busy ? "Requesting…" : "Allow location"}
-            </button>
-          </div>
-        )}
+          <p
+            id="location-permission-prompt-title"
+            className="font-display text-xs font-semibold tracking-wide text-field-ink"
+          >
+            {title}
+          </p>
+          <p
+            id="location-permission-prompt-body"
+            className="mt-1 text-pretty text-sm leading-snug text-field-ink-muted"
+          >
+            {body}
+          </p>
+          {actionError && !denied ? (
+            <p className="mt-2 text-sm text-status-error">{actionError}</p>
+          ) : null}
+          {denied || unavailable ? (
+            <Group gap="sm" mt="sm" wrap="wrap">
+              <Button
+                type="button"
+                variant="default"
+                size="compact-md"
+                flex={1}
+                disabled={busy || unavailable}
+                onClick={() => {
+                  setForceDenied(false);
+                  void onAllow();
+                }}
+              >
+                Try again
+              </Button>
+            </Group>
+          ) : (
+            <Group gap="sm" mt="sm" wrap="wrap">
+              <Button
+                type="button"
+                variant="filled"
+                size="compact-md"
+                flex={1}
+                disabled={busy}
+                onClick={() => {
+                  void onAllow();
+                }}
+              >
+                {busy ? "Requesting…" : "Allow location"}
+              </Button>
+            </Group>
+          )}
+        </MapFloatSurface>
       </div>
     </HudBanner>
   );

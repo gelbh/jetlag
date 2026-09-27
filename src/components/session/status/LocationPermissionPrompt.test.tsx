@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
@@ -11,6 +11,7 @@ import {
   resetLocationPermissionUiForTests,
 } from "@/services/core/location/locationPermissionUi";
 import { LocationPermissionPrompt } from "./LocationPermissionPrompt";
+import { renderWithAppUi } from "../../../test/renderWithAppUi";
 
 function mockPermissions(state: PermissionState): void {
   Object.defineProperty(navigator, "permissions", {
@@ -32,7 +33,7 @@ describe("LocationPermissionPrompt", () => {
     mockPermissions("prompt");
     const release = retainLocationPermissionDemand();
 
-    render(
+    renderWithAppUi(
       <MemoryRouter initialEntries={["/map"]}>
         <LocationPermissionPrompt />
       </MemoryRouter>,
@@ -52,7 +53,7 @@ describe("LocationPermissionPrompt", () => {
     mockGeolocation(createMockGeolocationPosition(53.35, -6.26));
     mockPermissions("prompt");
 
-    render(
+    renderWithAppUi(
       <MemoryRouter initialEntries={["/map"]}>
         <LocationPermissionPrompt />
       </MemoryRouter>,
@@ -67,7 +68,7 @@ describe("LocationPermissionPrompt", () => {
     const release = retainLocationPermissionDemand();
     const getCurrentPosition = vi.mocked(navigator.geolocation.getCurrentPosition);
 
-    render(
+    renderWithAppUi(
       <MemoryRouter initialEntries={["/map"]}>
         <LocationPermissionPrompt />
       </MemoryRouter>,
@@ -95,7 +96,7 @@ describe("LocationPermissionPrompt", () => {
     const release = retainLocationPermissionDemand();
     const getCurrentPosition = vi.mocked(navigator.geolocation.getCurrentPosition);
 
-    render(
+    renderWithAppUi(
       <MemoryRouter initialEntries={["/map"]}>
         <LocationPermissionPrompt />
       </MemoryRouter>,
@@ -118,7 +119,7 @@ describe("LocationPermissionPrompt", () => {
     const release = retainLocationPermissionDemand();
     const getCurrentPosition = vi.mocked(navigator.geolocation.getCurrentPosition);
 
-    render(
+    renderWithAppUi(
       <MemoryRouter initialEntries={["/map"]}>
         <LocationPermissionPrompt />
       </MemoryRouter>,
@@ -140,7 +141,7 @@ describe("LocationPermissionPrompt", () => {
     mockPermissions("denied");
     const release = retainLocationPermissionDemand();
 
-    render(
+    renderWithAppUi(
       <MemoryRouter initialEntries={["/map"]}>
         <LocationPermissionPrompt />
       </MemoryRouter>,
@@ -161,7 +162,7 @@ describe("LocationPermissionPrompt", () => {
     const release = retainLocationPermissionDemand();
     const getCurrentPosition = vi.mocked(navigator.geolocation.getCurrentPosition);
 
-    render(
+    renderWithAppUi(
       <MemoryRouter initialEntries={["/map"]}>
         <LocationPermissionPrompt />
       </MemoryRouter>,

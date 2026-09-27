@@ -8,10 +8,12 @@ export type MapFloatSurfaceProps = {
   tone: MapFloatTone;
   title?: ReactNode;
   children: ReactNode;
-  role?: "status" | "alert" | "dialog";
+  role?: "status" | "alert" | "dialog" | "region";
   "aria-live"?: "polite" | "assertive" | "off";
+  "aria-label"?: string;
   "aria-labelledby"?: string;
   "aria-describedby"?: string;
+  "data-testid"?: string;
   className?: string;
   /** Paper path: copy + actions side-by-side (MapFloatAlertPanel). */
   actionRow?: boolean;
@@ -57,8 +59,10 @@ export function MapFloatSurface({
   children,
   role,
   "aria-live": ariaLive,
+  "aria-label": ariaLabel,
   "aria-labelledby": ariaLabelledby,
   "aria-describedby": ariaDescribedby,
+  "data-testid": dataTestId,
   className,
   actionRow = false,
 }: MapFloatSurfaceProps) {
@@ -66,8 +70,10 @@ export function MapFloatSurface({
   const a11y = {
     role,
     "aria-live": ariaLive,
+    "aria-label": ariaLabel,
     "aria-labelledby": ariaLabelledby,
     "aria-describedby": ariaDescribedby,
+    "data-testid": dataTestId,
   };
 
   // Paper when callers need unconstrained children (no title → panel / card body).

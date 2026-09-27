@@ -1,9 +1,10 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { MemoryRouter } from "react-router-dom";
 import { LowBatteryPrompt } from "./LowBatteryPrompt";
 import { useMapStore } from "@/state/mapStore";
 import { resetAllStores } from "@/test/helpers/storeReset";
+import { renderWithAppUi } from "../../../test/renderWithAppUi";
 
 const batteryStatus = {
   supported: true,
@@ -25,7 +26,7 @@ describe("LowBatteryPrompt", () => {
   });
 
   it("prompts on the map when battery is low", () => {
-    render(
+    const { container } = renderWithAppUi(
       <MemoryRouter initialEntries={["/map"]}>
         <LowBatteryPrompt />
       </MemoryRouter>,
@@ -33,10 +34,11 @@ describe("LowBatteryPrompt", () => {
 
     expect(screen.getByRole("dialog")).toBeInTheDocument();
     expect(screen.getByText(/Battery low \(15%\)/)).toBeInTheDocument();
+    expect(container.innerHTML).not.toMatch(/map-float-alert|btn-primary/);
   });
 
   it("does not prompt off the map route", () => {
-    render(
+    renderWithAppUi(
       <MemoryRouter initialEntries={["/"]}>
         <LowBatteryPrompt />
       </MemoryRouter>,
@@ -46,7 +48,7 @@ describe("LowBatteryPrompt", () => {
   });
 
   it("enables low power mode when accepted", () => {
-    render(
+    renderWithAppUi(
       <MemoryRouter initialEntries={["/map"]}>
         <LowBatteryPrompt />
       </MemoryRouter>,
@@ -59,7 +61,7 @@ describe("LowBatteryPrompt", () => {
   });
 
   it("dismisses for the session when declined", () => {
-    render(
+    renderWithAppUi(
       <MemoryRouter initialEntries={["/map"]}>
         <LowBatteryPrompt />
       </MemoryRouter>,

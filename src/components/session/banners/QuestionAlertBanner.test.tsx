@@ -73,6 +73,12 @@ describe("QuestionAlertBanner", () => {
     expect(
       screen.getByRole("button", { name: /Send answer: Yes/i }),
     ).toBeInTheDocument();
+    expect(
+      screen.getByTestId("question-alert-banner").className,
+    ).not.toMatch(/map-float-alert/);
+    expect(
+      screen.getByTestId("question-alert-banner").className,
+    ).not.toMatch(/border-highlight/);
   });
 
   it("does not render a dismiss control while open", () => {
