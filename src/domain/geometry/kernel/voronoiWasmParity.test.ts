@@ -13,13 +13,11 @@ describe("voronoiWasmParity", () => {
           ...actual.KERNEL_WASM_READY,
           spatialVoronoi: true,
         },
-        shouldUseWasm: (mode: string, entrypoint: string) => {
+        shouldUseWasm: (entrypoint: string) => {
           if (entrypoint === "spatialVoronoi") {
-            return mode === "wasm";
+            return true;
           }
-          return actual.shouldUseWasm(
-            mode as "wasm",
-            entrypoint as import("./kernelWasmReady").KernelEntrypoint,
+          return actual.shouldUseWasm(entrypoint as import("./kernelWasmReady").KernelEntrypoint,
           );
         },
       };
@@ -38,7 +36,7 @@ describe("voronoiWasmParity", () => {
       { lng: -0.12, lat: 51.45, properties: { poiId: "east" } },
     ];
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
-    await expect(runWithMock(sites, "wasm")).rejects.toThrow("wasm init failed");
+    await expect(runWithMock(sites)).rejects.toThrow("wasm init failed");
     expect(warnSpy).toHaveBeenCalled();
     warnSpy.mockRestore();
 

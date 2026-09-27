@@ -1,7 +1,6 @@
 import type { Feature, LineString } from "geojson";
 import { dispatchKernel } from "./dispatchKernel";
 import { createLazyWasmImport } from "./lazyWasmImport";
-import type { MaskKernelMode } from "./maskKernelMode";
 import type { DiskSpec, GameAreaGeometry, PolygonFeature } from "./types";
 import type { NearRegionBatchInput } from "./nearRegionWasm";
 
@@ -15,8 +14,7 @@ export type NearRegionBatchParams = {
 };
 
 export async function dispatchNearRegionBatch(
-  params: NearRegionBatchParams,
-  mode: MaskKernelMode = "wasm",
+  params: NearRegionBatchParams
 ): Promise<PolygonFeature | null> {
   const input: NearRegionBatchInput = {
     segments: params.segments,
@@ -26,7 +24,6 @@ export async function dispatchNearRegionBatch(
   };
 
   return dispatchKernel({
-    mode,
     entrypoint: "nearRegionBatch",
     label: "nearRegionBatch",
     runWasm: async () => {

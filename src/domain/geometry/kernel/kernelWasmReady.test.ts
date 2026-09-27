@@ -2,14 +2,11 @@ import { describe, expect, it } from "vitest";
 import { KERNEL_WASM_READY, shouldUseWasm } from "./kernelWasmReady";
 
 describe("KERNEL_WASM_READY", () => {
-  it("marks wave-1 entrypoints including geodesic ready", () => {
+  it("marks all entrypoints ready", () => {
     expect(KERNEL_WASM_READY.maskFromUnionInput).toBe(true);
     expect(KERNEL_WASM_READY.endGameMaskFromDisks).toBe(true);
     expect(KERNEL_WASM_READY.halfPlane).toBe(true);
     expect(KERNEL_WASM_READY.geodesicLineBuffer).toBe(true);
-  });
-
-  it("marks spatial voronoi, tentacle, and near-region batch ready", () => {
     expect(KERNEL_WASM_READY.spatialVoronoi).toBe(true);
     expect(KERNEL_WASM_READY.nearRegionBatch).toBe(true);
     expect(KERNEL_WASM_READY.tentacleEliminationRegion).toBe(true);
@@ -17,16 +14,12 @@ describe("KERNEL_WASM_READY", () => {
 });
 
 describe("shouldUseWasm", () => {
-  it("honors mode for ready entrypoints", () => {
-    expect(shouldUseWasm("wasm", "halfPlane")).toBe(true);
-    expect(shouldUseWasm("wasm", "geodesicLineBuffer")).toBe(true);
-    expect(shouldUseWasm("wasm", "maskFromUnionInput")).toBe(true);
-    expect(shouldUseWasm("wasm", "nearRegionBatch")).toBe(true);
-  });
-
-  it("returns true for spatialVoronoi, tentacle, and nearRegionBatch when ready", () => {
-    expect(shouldUseWasm("wasm", "spatialVoronoi")).toBe(true);
-    expect(shouldUseWasm("wasm", "nearRegionBatch")).toBe(true);
-    expect(shouldUseWasm("wasm", "tentacleEliminationRegion")).toBe(true);
+  it("returns true for ready entrypoints", () => {
+    expect(shouldUseWasm("halfPlane")).toBe(true);
+    expect(shouldUseWasm("geodesicLineBuffer")).toBe(true);
+    expect(shouldUseWasm("maskFromUnionInput")).toBe(true);
+    expect(shouldUseWasm("nearRegionBatch")).toBe(true);
+    expect(shouldUseWasm("spatialVoronoi")).toBe(true);
+    expect(shouldUseWasm("tentacleEliminationRegion")).toBe(true);
   });
 });
