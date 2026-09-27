@@ -76,7 +76,6 @@ describe("nearRegionBatchPerf", () => {
       wasmPkg.build_near_region_json(inputJson);
     });
 
-    // G5j measured median ~0.75ms (arm64); keep 50ms for CI headroom.
     expect(wasmMs).toBeLessThan(50);
   });
 });
