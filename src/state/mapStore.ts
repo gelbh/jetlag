@@ -4,8 +4,6 @@ import type { AnnotationType } from "../domain/map/annotations";
 import type { DistanceUnit } from "../domain/map/distance";
 import type { MapTool } from "../domain/map/mapToolTypes";
 import type { TransitRouteFilter } from "../domain/map/transit";
-import type { NotificationPreferences } from "../domain/device/chrome/notifications";
-import { DEFAULT_NOTIFICATION_PREFERENCES } from "../domain/device/chrome/notifications";
 import type { MapStyle, StreetBasemap } from "../domain/map/mapBasemaps";
 
 export type LayerVisibility = Record<AnnotationType | "transit", boolean>;
@@ -30,7 +28,6 @@ export const useMapStore = create<{
   showAdminBoundaries: boolean,
   keepScreenAwake: boolean,
   lowPowerMode: boolean,
-  notificationPreferences: NotificationPreferences,
   distanceUnit: DistanceUnit,
   mapStyle: MapStyle,
   streetBasemap: StreetBasemap,
@@ -43,7 +40,6 @@ export const useMapStore = create<{
   setShowAdminBoundaries: (enabled: boolean) => void,
   setKeepScreenAwake: (enabled: boolean) => void,
   setLowPowerMode: (enabled: boolean) => void,
-  setNotificationPreferences: (preferences: NotificationPreferences) => void,
   setDistanceUnit: (unit: DistanceUnit) => void,
   setMapStyle: (style: MapStyle) => void,
   setStreetBasemap: (streetBasemap: StreetBasemap) => void,
@@ -59,7 +55,6 @@ export const useMapStore = create<{
       showAdminBoundaries: false,
       keepScreenAwake: false,
       lowPowerMode: false,
-      notificationPreferences: DEFAULT_NOTIFICATION_PREFERENCES,
       distanceUnit: "imperial",
       mapStyle: "standard",
       streetBasemap: "light",
@@ -76,8 +71,6 @@ export const useMapStore = create<{
         set({ showAdminBoundaries }),
       setKeepScreenAwake: (keepScreenAwake) => set({ keepScreenAwake }),
       setLowPowerMode: (lowPowerMode) => set({ lowPowerMode }),
-      setNotificationPreferences: (notificationPreferences) =>
-        set({ notificationPreferences }),
       setDistanceUnit: (distanceUnit) => set({ distanceUnit }),
       setMapStyle: (mapStyle) => set({ mapStyle }),
       setStreetBasemap: (streetBasemap) => set({ streetBasemap }),
@@ -115,7 +108,6 @@ export const useMapStore = create<{
       partialize: (state) => ({
         keepScreenAwake: state.keepScreenAwake,
         lowPowerMode: state.lowPowerMode,
-        notificationPreferences: state.notificationPreferences,
         distanceUnit: state.distanceUnit,
         mapStyle: state.mapStyle,
         streetBasemap: state.streetBasemap,
