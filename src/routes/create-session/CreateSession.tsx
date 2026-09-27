@@ -1,7 +1,7 @@
 import { useCallback } from "react";
-import { Box, Button, Stack, Text } from "@mantine/core";
+import { Box, Stack } from "@mantine/core";
 import { EntryHeader } from "@/components/ui/entry/EntryHeader";
-import { filledStyles } from "@/components/ui/entry/entryStyles";
+import { ConfirmFooter } from "./ConfirmFooter";
 import { CreateSessionMapPane } from "../../components/session/framing/CreateSessionMapPane";
 import { GameAreaFramingModal } from "../../components/session/framing/GameAreaFramingModal";
 import { MobileSheet } from "../../components/ui/sheets/MobileSheet";
@@ -50,8 +50,6 @@ export function CreateSession() {
       ),
     );
   }, [savePreset, session]);
-
-  const confirmBusy = session.loading || session.verifyingAccess;
 
   return (
     <Box className="jl-create-session flex h-full min-h-0 max-h-full flex-col overflow-hidden">
@@ -102,32 +100,15 @@ export function CreateSession() {
           maxHeightClassName="max-h-[min(58dvh,640px)]"
           className="flex min-h-0 flex-1 flex-col"
           footer={
-            <Box
-              className="shrink-0 px-4 pt-3 pb-[max(0.25rem,env(safe-area-inset-bottom))]"
-              style={{
-                backgroundColor: "oklch(from var(--color-canvas) l c h / 0.88)",
-                borderTop:
-                  "0.33px solid oklch(from var(--color-field-ink) l c h / 0.12)",
-                backdropFilter: "blur(20px) saturate(1.4)",
-                WebkitBackdropFilter: "blur(20px) saturate(1.4)",
-              }}
-            >
-              <Button
-                type="button"
-                fullWidth
-                styles={filledStyles}
-                onClick={() => void session.handleConfirm()}
-                disabled={confirmBusy || session.requiresPremiumSignIn}
-                loading={confirmBusy}
-              >
-                {session.confirmLabel}
-              </Button>
-              {session.error ? (
-                <Text c="var(--color-halt)" size="sm" mt={8}>
-                  {session.error}
-                </Text>
-              ) : null}
-            </Box>
+            <ConfirmFooter
+              confirmLabel={session.confirmLabel}
+              loading={session.loading}
+              verifyingAccess={session.verifyingAccess}
+              requiresPremiumSignIn={session.requiresPremiumSignIn}
+              hostAuthReady={session.hostAuthReady}
+              error={session.error}
+              onConfirm={() => void session.handleConfirm()}
+            />
           }
         >
           <GameAreaSection

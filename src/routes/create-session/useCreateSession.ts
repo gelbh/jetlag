@@ -136,6 +136,9 @@ export function useCreateSession() {
     string | undefined
   >();
   const [hostHasAccessClaim, setHostHasAccessClaim] = useState(false);
+  const [hostAuthReady, setHostAuthReady] = useState(
+    () => !isFirebaseConfigured(),
+  );
   const { entitlements: premiumEntitlements, refresh: refreshPremiumEntitlements } =
     usePremiumEntitlements();
   const [accessCodeExpanded, setAccessCodeExpanded] = useState(false);
@@ -273,6 +276,7 @@ export function useCreateSession() {
 
   useEffect(() => {
     if (!isFirebaseConfigured()) {
+      setHostAuthReady(true);
       return;
     }
 
@@ -286,9 +290,11 @@ export function useCreateSession() {
         }
 
         setHostHasAccessClaim(await hasAccessClaim(user));
+        setHostAuthReady(true);
       } catch {
         if (!cancelled) {
           setHostHasAccessClaim(false);
+          setHostAuthReady(false);
         }
       }
     })();
@@ -842,6 +848,7 @@ export function useCreateSession() {
     setAccessCodeExpanded,
     error,
     confirmLabel,
+    hostAuthReady,
     resolvedSessionTier,
     visibleTierOptions,
     packCreditsLabel,

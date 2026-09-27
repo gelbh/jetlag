@@ -6,6 +6,7 @@ export interface ConfirmFooterProps {
   loading: boolean;
   verifyingAccess: boolean;
   requiresPremiumSignIn: boolean;
+  hostAuthReady: boolean;
   error: string | null;
   onConfirm: () => void;
 }
@@ -15,6 +16,7 @@ export function ConfirmFooter({
   loading,
   verifyingAccess,
   requiresPremiumSignIn,
+  hostAuthReady,
   error,
   onConfirm,
 }: ConfirmFooterProps) {
@@ -24,7 +26,9 @@ export function ConfirmFooter({
         type="button"
         variant="flag"
         onClick={onConfirm}
-        disabled={loading || verifyingAccess || requiresPremiumSignIn}
+        disabled={
+          loading || verifyingAccess || requiresPremiumSignIn || !hostAuthReady
+        }
         className="min-h-14 w-full"
       >
         {confirmLabel}
