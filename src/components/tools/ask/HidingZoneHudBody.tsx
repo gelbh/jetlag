@@ -10,44 +10,21 @@ import { useEffect } from "react";
 
 export type HidingZoneHudBodyProps = {
   moveMode: boolean;
-  radiusLabel: string;
   zoneTool: HidingZoneToolPanelState;
   onStepChange: (stepId: HidingZoneStepId) => void;
-  onSearchThisArea: () => void;
   onDismiss?: () => void;
 };
 
-function resolveStep(
-  moveMode: boolean,
-  methodChosen: boolean,
-  hasPlacement: boolean,
-): HidingZoneStepId {
-  if (moveMode) {
-    return hasPlacement ? "confirm" : "location";
-  }
-  if (!methodChosen) {
-    return "method";
-  }
-  return hasPlacement ? "confirm" : "location";
-}
-
 export function HidingZoneHudBody({
   moveMode,
-  radiusLabel: _radiusLabel,
   zoneTool,
   onStepChange,
-  onSearchThisArea: _onSearchThisArea,
   onDismiss,
 }: HidingZoneHudBodyProps) {
-  const step = resolveStep(
-    moveMode,
-    zoneTool.methodChosen,
-    zoneTool.hasPlacement,
-  );
-
+  // Method sheet only: always report "method" while mounted.
   useEffect(() => {
-    onStepChange(step);
-  }, [onStepChange, step]);
+    onStepChange("method");
+  }, [onStepChange]);
 
   const methodSelectedId = !zoneTool.methodChosen
     ? null
@@ -70,6 +47,9 @@ export function HidingZoneHudBody({
             ]}
             selectedId={methodSelectedId}
             onSelect={(id) => {
+              // Sync step before methodChosen flips the host to map-first overlay,
+              // so mapPickEnabled is true on the first overlay frame (no useEffect lag).
+              onStepChange("location");
               zoneTool.choosePlacementMethod(id === "map");
             }}
           />

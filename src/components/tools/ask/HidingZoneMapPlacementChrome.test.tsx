@@ -151,6 +151,49 @@ describe("HidingZoneMapPlacementChrome", () => {
     expect(onStepChange).toHaveBeenCalledWith("location");
   });
 
+  it("disables Confirm when writesEnabled is false", () => {
+    const confirmZone = vi.fn();
+    renderHud(
+      <HidingZoneMapPlacementChrome
+        moveMode={false}
+        radiusLabel="200 m"
+        zoneTool={baseZoneTool({
+          methodChosen: true,
+          manualMode: true,
+          manualCenter: [53.35, -6.26],
+          hasPlacement: true,
+          confirmZone,
+        })}
+        writesEnabled={false}
+        onSearchThisArea={vi.fn()}
+      />,
+    );
+
+    const confirm = screen.getByRole("button", { name: /^Confirm$/i });
+    expect(confirm).toBeDisabled();
+    fireEvent.click(confirm);
+    expect(confirmZone).not.toHaveBeenCalled();
+  });
+
+  it("reports confirm step when placement already exists (move/handoff)", () => {
+    const onStepChange = vi.fn();
+    renderHud(
+      <HidingZoneMapPlacementChrome
+        moveMode
+        radiusLabel="200 m"
+        zoneTool={baseZoneTool({
+          methodChosen: true,
+          manualMode: true,
+          hasPlacement: true,
+          manualCenter: [53.3, -6.2],
+        })}
+        onStepChange={onStepChange}
+        onSearchThisArea={vi.fn()}
+      />,
+    );
+    expect(onStepChange).toHaveBeenCalledWith("confirm");
+  });
+
   it("backs to method via change-configure when not moveMode", () => {
     const onBackToMethod = vi.fn();
     renderHud(

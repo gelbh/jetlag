@@ -55,15 +55,12 @@ function baseZoneTool(
 describe("HidingZoneHudBody", () => {
   it("shows method chips without PhaseRail or CONTINUE", () => {
     const choosePlacementMethod = vi.fn();
-    const onSearchThisArea = vi.fn();
 
     renderHud(
       <HidingZoneHudBody
         moveMode={false}
-        radiusLabel="200 m"
         zoneTool={baseZoneTool({ choosePlacementMethod })}
         onStepChange={vi.fn()}
-        onSearchThisArea={onSearchThisArea}
       />,
     );
 
@@ -74,10 +71,33 @@ describe("HidingZoneHudBody", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /^Transit stop$/i }));
     expect(choosePlacementMethod).toHaveBeenCalledWith(false);
-    expect(onSearchThisArea).not.toHaveBeenCalled();
     expect(
       screen.getByText(/Snap to a stop, or tap any point/i),
     ).toBeInTheDocument();
+  });
+
+  it("advances step to location synchronously when a method is chosen", () => {
+    const onStepChange = vi.fn();
+    const choosePlacementMethod = vi.fn();
+
+    renderHud(
+      <HidingZoneHudBody
+        moveMode={false}
+        zoneTool={baseZoneTool({ choosePlacementMethod })}
+        onStepChange={onStepChange}
+      />,
+    );
+
+    onStepChange.mockClear();
+    fireEvent.click(screen.getByRole("button", { name: /^Tap map$/i }));
+    expect(onStepChange).toHaveBeenCalledWith("location");
+    expect(choosePlacementMethod).toHaveBeenCalledWith(true);
+    const locationIdx = onStepChange.mock.calls.findIndex(
+      (c) => c[0] === "location",
+    );
+    const methodCallAfter = choosePlacementMethod.mock.invocationCallOrder[0];
+    const locationCallOrder = onStepChange.mock.invocationCallOrder[locationIdx];
+    expect(locationCallOrder).toBeLessThan(methodCallAfter);
   });
 
   it("stays method-only in the sheet (no place/confirm panels)", () => {
@@ -92,10 +112,8 @@ describe("HidingZoneHudBody", () => {
         modeBody={
           <HidingZoneHudBody
             moveMode={false}
-            radiusLabel="200 m"
             zoneTool={baseZoneTool()}
             onStepChange={vi.fn()}
-            onSearchThisArea={vi.fn()}
           />
         }
       />,
@@ -114,10 +132,8 @@ describe("HidingZoneHudBody", () => {
     renderHud(
       <HidingZoneHudBody
         moveMode={false}
-        radiusLabel="200 m"
         zoneTool={baseZoneTool()}
         onStepChange={onStepChange}
-        onSearchThisArea={vi.fn()}
       />,
     );
     expect(onStepChange).toHaveBeenCalledWith("method");

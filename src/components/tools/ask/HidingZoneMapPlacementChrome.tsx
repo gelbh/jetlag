@@ -1,7 +1,7 @@
 /**
  * Map-first hiding-zone chrome: shared placement shell + place/confirm slots (no GPS).
  */
-import { useEffect } from "react";
+import { useLayoutEffect } from "react";
 import { Button } from "@mantine/core";
 import { Check } from "@phosphor-icons/react";
 import { HudZoneIcon } from "@/components/map/icons/ToolIcons";
@@ -23,6 +23,8 @@ export type HidingZoneMapPlacementChromeProps = {
   onDismiss?: () => void;
   /** Re-open method chips (create flow only). */
   onBackToMethod?: () => void;
+  /** Mirror sheet viewOnly: false disables Confirm. */
+  writesEnabled?: boolean;
 };
 
 function resolveStep(
@@ -65,6 +67,7 @@ export function HidingZoneMapPlacementChrome({
   onStepChange,
   onDismiss,
   onBackToMethod,
+  writesEnabled = true,
 }: HidingZoneMapPlacementChromeProps) {
   const step = resolveStep(
     moveMode,
@@ -74,7 +77,8 @@ export function HidingZoneMapPlacementChrome({
   const showStationPicker =
     !zoneTool.manualMode && (step === "location" || step === "confirm");
 
-  useEffect(() => {
+  // Layout: sync step before paint so mapPickEnabled / stations layer match overlay.
+  useLayoutEffect(() => {
     onStepChange?.(step);
   }, [onStepChange, step]);
 
@@ -186,7 +190,9 @@ export function HidingZoneMapPlacementChrome({
         onClick={() => {
           void zoneTool.confirmZone();
         }}
-        disabled={!zoneTool.hasPlacement || zoneTool.saving}
+        disabled={
+          !writesEnabled || !zoneTool.hasPlacement || zoneTool.saving
+        }
         aria-busy={zoneTool.saving || undefined}
         leftSection={
           zoneTool.saving ? undefined : (

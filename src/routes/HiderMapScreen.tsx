@@ -860,7 +860,8 @@ export function HiderMapScreen() {
           session={session}
         />
         {zoneTool.wizardOpen &&
-        hidingZoneStepId === "location" &&
+        (hidingZoneStepId === "location" ||
+          hidingZoneStepId === "confirm") &&
         !zoneTool.manualMode ? (
           <HidingZoneStationsLayer
             stations={zoneTool.stations}
