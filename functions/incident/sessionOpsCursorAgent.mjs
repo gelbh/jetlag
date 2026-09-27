@@ -29,6 +29,7 @@ function resolveBaseUrl(baseUrl) {
  *   promptText?: string,
  *   mcpUrl?: string,
  *   mcpAuthHeader?: string,
+ *   mcpExtraHeaders?: Record<string, string>,
  * }} input
  */
 function requireAgentInputs(input) {
@@ -47,20 +48,34 @@ function requireAgentInputs(input) {
   if (!mcpUrl || !mcpAuthHeader) {
     throw new Error(SESSION_OPS_AGENT_MISCONFIGURED);
   }
-  return { apiKey, promptText, mcpUrl, mcpAuthHeader };
+  const mcpExtraHeaders =
+    input?.mcpExtraHeaders && typeof input.mcpExtraHeaders === "object"
+      ? input.mcpExtraHeaders
+      : undefined;
+  return { apiKey, promptText, mcpUrl, mcpAuthHeader, mcpExtraHeaders };
 }
 
 /**
  * @param {string} mcpUrl
  * @param {string} mcpAuthHeader
+ * @param {Record<string, string> | undefined} extraHeaders
  */
-function buildMcpServers(mcpUrl, mcpAuthHeader) {
+function buildMcpServers(mcpUrl, mcpAuthHeader, extraHeaders) {
+  /** @type {Record<string, string>} */
+  const headers = { Authorization: mcpAuthHeader };
+  if (extraHeaders && typeof extraHeaders === "object") {
+    for (const [key, value] of Object.entries(extraHeaders)) {
+      if (typeof key === "string" && typeof value === "string" && value.trim()) {
+        headers[key] = value.trim();
+      }
+    }
+  }
   return [
     {
       name: SESSION_OPS_MCP_SERVER_NAME,
       type: "http",
       url: mcpUrl,
-      headers: { Authorization: mcpAuthHeader },
+      headers,
     },
   ];
 }
@@ -105,7 +120,8 @@ function throwForFailedResponse(response, payload) {
  * @returns {Promise<{ agentId: string, runId: string | null, agentUrl: string | null, raw: unknown }>}
  */
 export async function createSessionOpsAgent(input, deps = {}) {
-  const { apiKey, promptText, mcpUrl, mcpAuthHeader } = requireAgentInputs(input);
+  const { apiKey, promptText, mcpUrl, mcpAuthHeader, mcpExtraHeaders } =
+    requireAgentInputs(input);
   const baseUrl = resolveBaseUrl(input.baseUrl);
   const fetchImpl = deps.fetch ?? globalThis.fetch;
   if (typeof fetchImpl !== "function") {
@@ -115,7 +131,7 @@ export async function createSessionOpsAgent(input, deps = {}) {
   /** @type {Record<string, unknown>} */
   const body = {
     prompt: { text: promptText },
-    mcpServers: buildMcpServers(mcpUrl, mcpAuthHeader),
+    mcpServers: buildMcpServers(mcpUrl, mcpAuthHeader, mcpExtraHeaders),
     mode: "agent",
   };
   if (typeof input?.name === "string" && input.name.trim()) {
@@ -189,7 +205,8 @@ export async function createSessionOpsAgent(input, deps = {}) {
  * @returns {Promise<{ runId: string, raw: unknown }>}
  */
 export async function createSessionOpsRun(input, deps = {}) {
-  const { apiKey, promptText, mcpUrl, mcpAuthHeader } = requireAgentInputs(input);
+  const { apiKey, promptText, mcpUrl, mcpAuthHeader, mcpExtraHeaders } =
+    requireAgentInputs(input);
   const agentId = typeof input?.agentId === "string" ? input.agentId.trim() : "";
   if (!agentId) {
     throw new Error(SESSION_OPS_AGENT_MISCONFIGURED);
@@ -203,7 +220,7 @@ export async function createSessionOpsRun(input, deps = {}) {
 
   const body = {
     prompt: { text: promptText },
-    mcpServers: buildMcpServers(mcpUrl, mcpAuthHeader),
+    mcpServers: buildMcpServers(mcpUrl, mcpAuthHeader, mcpExtraHeaders),
     mode: "agent",
   };
 

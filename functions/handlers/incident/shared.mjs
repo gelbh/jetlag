@@ -66,6 +66,8 @@ export const incidentEmailSecret = defineSecret("INCIDENT_EMAIL_SECRET");
 export const sessionOpsLlmApiKey = defineSecret("SESSION_OPS_LLM_API_KEY");
 /** Cursor Cloud Agents API key for clear-bug hotfix launches (never client-side). */
 export const cursorApiKey = defineSecret("CURSOR_API_KEY");
+/** Shared secret for Cursor → Jetlag session-ops MCP Bearer auth. */
+export const sessionOpsMcpAuthSecret = defineSecret("SESSION_OPS_MCP_AUTH_SECRET");
 export const incidentWorkerBaseUrl = defineString("INCIDENT_WORKER_BASE_URL", {
   default: "https://jetlag.gelbhart.dev",
 });
@@ -74,6 +76,10 @@ export const sessionOpsLlmBaseUrl = defineString("SESSION_OPS_LLM_BASE_URL", {
 });
 export const sessionOpsLlmModel = defineString("SESSION_OPS_LLM_MODEL", {
   default: "gpt-4o-mini",
+});
+/** Public HTTPS URL of the sessionOpsMcp Cloud Function (Cursor mcpServers.url). */
+export const sessionOpsMcpUrl = defineString("SESSION_OPS_MCP_URL", {
+  default: "",
 });
 export const cursorHotfixRepoUrl = defineString("CURSOR_HOTFIX_REPO_URL", {
   default: "https://github.com/gelbh/jetlag",

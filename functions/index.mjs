@@ -51,6 +51,7 @@ export {
   postIncidentMessage,
   postSupportAgentTurn,
   publishIncidentHotfix,
+  sessionOpsMcp,
   updateIncidentStatus,
 } from "./handlers/incident.mjs";
 
