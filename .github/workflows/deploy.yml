@@ -167,16 +167,27 @@ jobs:
         with:
           doppler-token: ${{ secrets.DOPPLER_TOKEN }}
           verify-doppler-config: false
-      - name: Load Doppler secrets
+      # Narrow allowlist only: never dump the full Doppler catalog into GITHUB_ENV
+      # (unmasked job env shows up in later step logs).
+      - name: Resolve GCP auth inputs
+        id: gcp_auth
         if: steps.changes.outputs.backend == 'true'
-        run: doppler secrets download --no-file --format docker >> "$GITHUB_ENV"
         env:
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
+        run: |
+          provider="$(doppler secrets get GCP_WORKLOAD_IDENTITY_PROVIDER --plain --config prd)"
+          service_account="$(doppler secrets get GCP_SERVICE_ACCOUNT --plain --config prd)"
+          echo "::add-mask::${provider}"
+          echo "::add-mask::${service_account}"
+          {
+            echo "provider=${provider}"
+            echo "service_account=${service_account}"
+          } >> "$GITHUB_OUTPUT"
       - uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
         if: steps.changes.outputs.backend == 'true'
         with:
-          workload_identity_provider: ${{ env.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-          service_account: ${{ env.GCP_SERVICE_ACCOUNT }}
+          workload_identity_provider: ${{ steps.gcp_auth.outputs.provider }}
+          service_account: ${{ steps.gcp_auth.outputs.service_account }}
       - uses: google-github-actions/setup-gcloud@e427ad8a34f8676edf47cf7d7925499adf3eb74f # v2
         if: steps.changes.outputs.backend == 'true'
       - name: Deploy Firestore and Functions
@@ -256,16 +267,6 @@ jobs:
         with:
           doppler-token: ${{ secrets.DOPPLER_TOKEN }}
           verify-doppler-config: false
-      - name: Load Doppler secrets
-        if: steps.changes.outputs.frontend == 'true'
-        run: doppler secrets download --no-file --format docker >> "$GITHUB_ENV"
-        env:
-          DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
-      - name: Set CI-only env
-        if: steps.changes.outputs.frontend == 'true'
-        env:
-          COMMIT_SHA: ${{ github.sha }}
-        run: echo "VITE_SENTRY_RELEASE_DIST=$COMMIT_SHA" >> "$GITHUB_ENV"
       - name: Require functions deploy when callables changed
         if: steps.changes.outputs.frontend == 'true'
         env:
@@ -280,8 +281,13 @@ jobs:
           fi
       - name: Require App Check site key
         if: steps.changes.outputs.frontend == 'true'
+        env:
+          DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
         run: |
-          if [ -z "${VITE_FIREBASE_APP_CHECK_SITE_KEY}" ]; then
+          set -euo pipefail
+          site_key="$(doppler secrets get VITE_FIREBASE_APP_CHECK_SITE_KEY --plain --config prd)"
+          echo "::add-mask::${site_key}"
+          if [ -z "${site_key}" ]; then
             echo "::error::VITE_FIREBASE_APP_CHECK_SITE_KEY is required for production builds."
             exit 1
           fi
@@ -293,6 +299,7 @@ jobs:
         run: doppler run --config prd -- npm run build 2>&1 | tee build.log
         env:
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
+          VITE_SENTRY_RELEASE_DIST: ${{ github.sha }}
       - name: Verify source maps are not shipped
         if: steps.changes.outputs.frontend == 'true'
         run: |
@@ -307,9 +314,17 @@ jobs:
           if ! grep -qiE 'uploaded|source maps' build.log; then
             echo "::warning::Sentry source map upload was not confirmed in build output."
           fi
-      - uses: cloudflare/wrangler-action@9acf94ace14e7dc412b076f2c5c20b8ce93c79cd # v3
+      # Allowlist CLOUDFLARE_* only; mask before wrangler (no full-catalog doppler run / GITHUB_ENV dump).
+      - name: Deploy to Cloudflare
         if: steps.changes.outputs.frontend == 'true'
-        with:
-          apiToken: ${{ env.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ env.CLOUDFLARE_ACCOUNT_ID }}
-          command: deploy
+        env:
+          DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
+        run: |
+          set -euo pipefail
+          token="$(doppler secrets get CLOUDFLARE_API_TOKEN --plain --config prd)"
+          account_id="$(doppler secrets get CLOUDFLARE_ACCOUNT_ID --plain --config prd)"
+          echo "::add-mask::${token}"
+          echo "::add-mask::${account_id}"
+          export CLOUDFLARE_API_TOKEN="${token}"
+          export CLOUDFLARE_ACCOUNT_ID="${account_id}"
+          npx wrangler deploy
