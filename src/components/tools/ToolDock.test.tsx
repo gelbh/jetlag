@@ -63,6 +63,22 @@ describe("ToolDock", () => {
     expect(screen.getByRole("menuitemradio", { name: /Zone/i })).toBeInTheDocument();
   });
 
+  it("selects Pin after pointerdown inside the portaled Draw sheet", async () => {
+    const onSelect = vi.fn();
+    renderDock(<ToolDock {...dockBase} onSelect={onSelect} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Draw on map" }));
+    const pin = await screen.findByRole("menuitemradio", { name: /Pin/i });
+
+    // Document outside-click listener must not close the sheet on pointerdown
+    // inside the portaled Drawer (duration-0 unmount would swallow the click).
+    fireEvent.pointerDown(pin);
+    expect(screen.getByRole("menuitemradio", { name: /Pin/i })).toBeInTheDocument();
+    fireEvent.click(pin);
+
+    expect(onSelect).toHaveBeenCalledWith("pin");
+  });
+
   it("renders session island tools including Log", () => {
     const onOpenReportProblem = vi.fn();
     const onOpenSettings = vi.fn();
