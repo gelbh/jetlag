@@ -265,12 +265,16 @@ export function deserializeGameResultFromFirestore(
       ? splitRoundPhaseMs(durationMs, hidingPeriodMs(gameSize))
       : null;
 
+  const derivingPhases = !hasHiding || !hasSeek;
   const hidingPhaseMs = hasHiding
     ? document.hidingPhaseMs
     : derived!.hidingPhaseMs;
   const seekPhaseMs = hasSeek ? document.seekPhaseMs : derived!.seekPhaseMs;
-  const seekTimeMs =
-    typeof document.seekTimeMs === "number" ? document.seekTimeMs : seekPhaseMs;
+  const seekTimeMs = derivingPhases
+    ? seekPhaseMs
+    : typeof document.seekTimeMs === "number"
+      ? document.seekTimeMs
+      : seekPhaseMs;
 
   return {
     sessionId:
