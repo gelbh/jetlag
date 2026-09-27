@@ -43,8 +43,10 @@ export async function closePanel(page: Page) {
   const visible = await close.isVisible().catch(() => false);
   if (visible) {
     await close.click();
-  } else {
-    await page.keyboard.press("Escape").catch(() => undefined);
+    await expect(close).toBeHidden({ timeout: 10_000 });
+    return;
   }
-  await expect(close).toBeHidden({ timeout: 10_000 });
+  // Mobile chat has no Close; Escape dismisses. Assert sheet gone (not Close, which was never shown).
+  await page.keyboard.press("Escape");
+  await expect(page.getByLabel("Chat tabs")).toBeHidden({ timeout: 10_000 });
 }

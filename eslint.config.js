@@ -57,7 +57,8 @@ export default defineConfig([
         "error",
         {
           // eslint-plugin-playwright@2.x: wildcards live in assertFunctionPatterns
-          // (assertFunctionNames is exact-match only). Same helper prefixes as planned.
+          // (assertFunctionNames is exact-match only). Prefer tight prefixes / concrete
+          // multiplayer helpers over broad ^run / ^send.
           assertFunctionPatterns: [
             "^assert",
             "^complete",
@@ -66,10 +67,14 @@ export default defineConfig([
             "^expect",
             "^place",
             "^redo",
-            "^run",
-            "^send",
             "^undo",
             "^waitFor",
+            "^runHiderAnswerFlow$",
+            "^sendRadarToHiders$",
+            "^sendMatchingToHiders$",
+            "^sendMeasuringToHiders$",
+            "^sendThermometerToHiders$",
+            "^sendTentacleToHiders$",
           ],
         },
       ],
