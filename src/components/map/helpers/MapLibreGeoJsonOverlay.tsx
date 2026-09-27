@@ -84,6 +84,15 @@ function asFeatureCollection(
   };
 }
 
+function opacityTransition(
+  paintTransitionMs: number | undefined,
+): { duration: number } | undefined {
+  if (paintTransitionMs == null) {
+    return undefined;
+  }
+  return { duration: paintTransitionMs };
+}
+
 /**
  * Layers must be *direct* Source children. react-map-gl clones each child with
  * `source={id}`; Fragments swallow that prop and fill/line layers never paint.
@@ -91,8 +100,10 @@ function asFeatureCollection(
 function paintLayersForSpec(
   spec: MapLibreGeoJsonLayerSpec,
   beforeId?: string,
+  paintTransitionMs?: number,
 ): ReactElement[] {
   const layers: ReactElement[] = [];
+  const opacityTransitionSpec = opacityTransition(paintTransitionMs);
   if (spec.fill) {
     layers.push(
       <Layer
@@ -105,6 +116,9 @@ function paintLayersForSpec(
           "fill-opacity": spec.fill.fillOpacity ?? 0.35,
           ...(spec.fill.fillOutlineColor
             ? { "fill-outline-color": spec.fill.fillOutlineColor }
+            : {}),
+          ...(opacityTransitionSpec
+            ? { "fill-opacity-transition": opacityTransitionSpec }
             : {}),
         }}
       />,
@@ -123,6 +137,9 @@ function paintLayersForSpec(
           "line-opacity": spec.line.opacity ?? 1,
           ...(spec.line.dashArray
             ? { "line-dasharray": spec.line.dashArray }
+            : {}),
+          ...(opacityTransitionSpec
+            ? { "line-opacity-transition": opacityTransitionSpec }
             : {}),
         }}
         layout={{ "line-join": "round", "line-cap": "round" }}
@@ -214,6 +231,7 @@ export function MapLibreGeoJsonOverlay({
   symbol,
   layers,
   beforeId,
+  paintTransitionMs,
 }: {
   id: string;
   data: Feature | FeatureCollection | Geometry | null | undefined;
@@ -224,6 +242,8 @@ export function MapLibreGeoJsonOverlay({
   /** Multiple fill/line/circle/symbol pairs on one Source (same geometry). */
   layers?: readonly MapLibreGeoJsonLayerSpec[];
   beforeId?: string;
+  /** MapLibre fill/line opacity transition; omit for MapLibre defaults. */
+  paintTransitionMs?: number;
 }) {
   const collection = useMemo(
     () => (data ? asFeatureCollection(data) : null),
@@ -254,7 +274,9 @@ export function MapLibreGeoJsonOverlay({
 
   return (
     <Source key={sourceId} id={sourceId} type="geojson" data={collection}>
-      {resolvedLayers.flatMap((spec) => paintLayersForSpec(spec, beforeId))}
+      {resolvedLayers.flatMap((spec) =>
+        paintLayersForSpec(spec, beforeId, paintTransitionMs),
+      )}
     </Source>
   );
 }
