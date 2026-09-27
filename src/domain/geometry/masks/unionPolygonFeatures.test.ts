@@ -47,7 +47,7 @@ function assertMaskParity(
   });
 }
 
-function legacyDiskUnion(disks: DiskSpec[]): PolygonFeature | null {
+function turfDiskUnion(disks: DiskSpec[]): PolygonFeature | null {
   const circles = disks.map((disk) =>
     turfCircle(turfPoint([disk.center[1], disk.center[0]]), disk.radiusMeters / 1000, {
       steps: 64,
@@ -121,7 +121,7 @@ describe("unionPolygonFeatures parity", () => {
     }));
 
     const candidate = unionDiskSpecs(disks);
-    const baseline = legacyDiskUnion(disks);
+    const baseline = turfDiskUnion(disks);
 
     assertMaskParity(candidate, baseline, -0.2, -0.1, 51.4, 51.5);
   });
