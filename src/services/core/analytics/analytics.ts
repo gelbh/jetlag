@@ -10,6 +10,7 @@ import {
   type AnalyticsEventProps,
   type SessionEndedReason,
 } from "./analyticsEvents";
+import { filterPosthogException } from "./posthogExceptionPolicy";
 
 export {
   ANALYTICS_EVENTS,
@@ -25,19 +26,10 @@ const ASSET_PAGEVIEW_PATH =
  * First-party Worker reverse proxy path.
  * Must stay in sync with `POSTHOG_PROXY_PATH` in `worker/posthogProxy.ts`.
  */
-export const POSTHOG_API_HOST = "/ingest";
+export const POSTHOG_API_HOST = "/ph";
 export const POSTHOG_UI_HOST = "https://eu.posthog.com";
 
 function resolvePosthogApiHost(): string {
-  try {
-    const cap = (globalThis as { Capacitor?: { isNativePlatform?: () => boolean } })
-      .Capacitor;
-    if (cap?.isNativePlatform?.()) {
-      return "https://eu.i.posthog.com";
-    }
-  } catch {
-    // ignore
-  }
   return POSTHOG_API_HOST;
 }
 
@@ -170,9 +162,10 @@ export function initAnalytics(): void {
       capture_pageleave: true,
       capture_performance: true,
       disable_session_recording: true,
-      disable_external_dependency_loading: false,
+      disable_external_dependency_loading: true,
       disable_surveys: true,
       person_profiles: "identified_only",
+      before_send: filterPosthogException,
     });
     // IP is personal data; PostHog's `ip: false` is a no-op — disable GeoIP enrichment.
     posthog.register({ $geoip_disable: true });

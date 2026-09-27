@@ -52,7 +52,7 @@ const baseModel: GameAreaSectionModel = {
     setFramingMode: vi.fn(),
     closePolygon: vi.fn(),
     resetPolygonVertices: vi.fn(),
-  } as GameAreaSectionModel["framing"],
+  } as unknown as GameAreaSectionModel["framing"],
   transitMetroId: "",
   metros: [],
   onPresetSelect: vi.fn(),

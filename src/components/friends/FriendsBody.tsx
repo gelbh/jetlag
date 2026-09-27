@@ -360,9 +360,8 @@ function PullToRefresh({
           height: 36,
           opacity: pull || refreshing ? 1 : 0,
           transform: `translateY(${Math.max(pull - 36, refreshing ? 0 : -8)}px)`,
-          transition: pulling.current
-            ? "none"
-            : "opacity 160ms ease, transform 160ms ease",
+          transition:
+            pull > 0 ? "none" : "opacity 160ms ease, transform 160ms ease",
           color: "var(--color-field-ink-muted)",
           pointerEvents: "none",
           zIndex: 2,
@@ -378,7 +377,12 @@ function PullToRefresh({
           {refreshing ? "Refreshing…" : pull >= 84 ? "Release to refresh" : "Pull to refresh"}
         </Text>
       </Group>
-      <Box style={{ transform: `translateY(${refreshing ? 40 : Math.max(0, pull * 0.35)}px)`, transition: pulling.current ? "none" : "transform 160ms ease" }}>
+      <Box
+        style={{
+          transform: `translateY(${refreshing ? 40 : Math.max(0, pull * 0.35)}px)`,
+          transition: pull > 0 ? "none" : "transform 160ms ease",
+        }}
+      >
         {children}
       </Box>
     </Box>

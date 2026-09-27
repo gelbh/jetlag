@@ -7,30 +7,31 @@ import {
   approveHostConfirmHandler,
   denyHostConfirmHandler,
 } from "../../incident/hostConfirm.mjs";
-import { supportAgentTurnHandler, SUPPORT_AGENT_LLM_FAILED } from "../../incident/supportAgentTurn.mjs";
-import { sendSessionNotification } from "../../session/sessionNotificationTriggers.mjs";
+import {
+  supportAgentTurnHandler,
+  SESSION_OPS_AGENT_FAILED,
+} from "../../incident/supportAgentTurn.mjs";
 import {
   buildSessionOpsExecuteDeps,
+  cursorApiKey,
   mapIncidentError,
   sentryDsnSecret,
-  sessionOpsLlmApiKey,
-  sessionOpsLlmBaseUrl,
-  sessionOpsLlmModel,
+  sessionOpsMcpAuthSecret,
+  sessionOpsMcpUrl,
 } from "./shared.mjs";
 
 /**
- * Read LLM secrets/params; map missing/misconfigured secrets to the expected
- * support-agent unavailable sentinel (avoids raw uncaught 500s).
+ * Read Cursor + MCP config; map missing secrets to unavailable sentinel.
  */
-function readSupportAgentLlmConfig() {
+function readSupportAgentCursorConfig() {
   try {
     return {
-      apiKey: sessionOpsLlmApiKey.value(),
-      llmBaseUrl: sessionOpsLlmBaseUrl.value(),
-      llmModel: sessionOpsLlmModel.value(),
+      apiKey: cursorApiKey.value(),
+      mcpUrl: sessionOpsMcpUrl.value(),
+      mcpAuthSecret: sessionOpsMcpAuthSecret.value(),
     };
   } catch {
-    throw new Error(SUPPORT_AGENT_LLM_FAILED);
+    throw new Error(SESSION_OPS_AGENT_FAILED);
   }
 }
 
@@ -84,12 +85,12 @@ export const denyHostConfirm = onCall(
 );
 
 /**
- * Player/admin session-ops LLM turn (dual-channel). Secret:
- * SESSION_OPS_LLM_API_KEY (OpenAI-compatible Chat Completions).
+ * Player/admin session-ops turn (async Cursor Cloud Agents + HTTP MCP).
+ * Secrets: CURSOR_API_KEY, SESSION_OPS_MCP_AUTH_SECRET.
  */
 export const postSupportAgentTurn = onCall(
   {
-    secrets: [sentryDsnSecret, sessionOpsLlmApiKey],
+    secrets: [sentryDsnSecret, cursorApiKey, sessionOpsMcpAuthSecret],
     enforceAppCheck: true,
   },
   withSentryEventHandler(async (request) => {
@@ -99,7 +100,7 @@ export const postSupportAgentTurn = onCall(
 
     const db = getFirestore();
     try {
-      const llm = readSupportAgentLlmConfig();
+      const cursor = readSupportAgentCursorConfig();
       return await supportAgentTurnHandler(
         db,
         {
@@ -110,12 +111,10 @@ export const postSupportAgentTurn = onCall(
           summonId: request.data?.summonId ?? null,
         },
         {
-          apiKey: llm.apiKey,
-          llmBaseUrl: llm.llmBaseUrl,
-          llmModel: llm.llmModel,
+          apiKey: cursor.apiKey,
+          mcpUrl: cursor.mcpUrl,
+          mcpAuthSecret: cursor.mcpAuthSecret,
           rateLimit: (options) => consumeRateLimit(db, options),
-          notifyHostConfirm: (payload) => sendSessionNotification(db, payload),
-          executeDeps: buildSessionOpsExecuteDeps(db),
         },
       );
     } catch (error) {

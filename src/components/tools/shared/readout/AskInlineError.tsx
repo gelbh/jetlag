@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components -- helpers share the Ask inline-error copy module with the component */
 import { Alert } from "@mantine/core";
 
 type AskInlineErrorProps = {

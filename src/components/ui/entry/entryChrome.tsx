@@ -1,5 +1,7 @@
+/* eslint-disable react-refresh/only-export-components -- entry chrome pairs surface components with shared style tokens */
 import { Box } from "@mantine/core";
 import type { ReactNode } from "react";
+import type { SheetHandleProps } from "@/hooks/motion/useSheetGesture";
 import {
   askHudPanelStyle,
   bottomDrawerStyles,
@@ -11,19 +13,7 @@ import {
   compactDangerStyles,
   compactFilledStyles,
   compactGrayStyles,
-  contextualRailHeaderStyle,
-  contextualRailIconTabStyle,
-  contextualRailIconTabsStyle,
-  contextualRailPanelStyle,
-  contextualRailStyle,
-  contextualRailTabStyle,
-  contextualRailTabsStyle,
-  desktopOpsShellContextualStyle,
-  desktopOpsShellMapStyle,
-  desktopOpsShellStatusStyle,
-  desktopOpsShellStyle,
-  desktopOpsShellToolsStyle,
-  desktopOpsStatusExpandedStyle,
+  statusRailExpandedFlowStyle,
   entryBackdropStyle,
   fieldFrameStyle,
   filledStyles,
@@ -91,19 +81,7 @@ export {
   compactDangerStyles,
   compactFilledStyles,
   compactGrayStyles,
-  contextualRailHeaderStyle,
-  contextualRailIconTabStyle,
-  contextualRailIconTabsStyle,
-  contextualRailPanelStyle,
-  contextualRailStyle,
-  contextualRailTabStyle,
-  contextualRailTabsStyle,
-  desktopOpsShellContextualStyle,
-  desktopOpsShellMapStyle,
-  desktopOpsShellStatusStyle,
-  desktopOpsShellStyle,
-  desktopOpsShellToolsStyle,
-  desktopOpsStatusExpandedStyle,
+  statusRailExpandedFlowStyle,
   entryBackdropStyle,
   fieldFrameStyle,
   filledStyles,
@@ -152,7 +130,12 @@ export {
   syncBeaconStyle,
   toggleRowStyle,
 };
-export type { ChoiceTone, HomeCardBtnVariant, MapToolSlotTone, SyncBeaconStatus };
+export type {
+  ChoiceTone,
+  HomeCardBtnVariant,
+  MapToolSlotTone,
+  SyncBeaconStatus,
+};
 
 /** Frosted inset grouped list / form surface. */
 export function InsetGroup({
@@ -176,8 +159,7 @@ export function InsetGroup({
           : "0.33px solid oklch(from var(--color-field-ink) l c h / 0.12)",
         backdropFilter: "blur(20px) saturate(1.4)",
         WebkitBackdropFilter: "blur(20px) saturate(1.4)",
-        transition:
-          "background-color 160ms ease, border-color 160ms ease",
+        transition: "background-color 160ms ease, border-color 160ms ease",
       }}
     >
       {children}
@@ -353,8 +335,12 @@ export const mapHuntAskFirstQuestionStripStyles = {
 } as const;
 
 /** Drag affordance for iOS bottom drawers. */
-export function DrawerGrabber() {
-  return (
+export function DrawerGrabber({
+  handleProps,
+}: {
+  handleProps?: SheetHandleProps;
+} = {}) {
+  const bar = (
     <Box
       aria-hidden
       mx="auto"
@@ -365,5 +351,21 @@ export function DrawerGrabber() {
         backgroundColor: "oklch(from var(--color-field-ink) l c h / 0.28)",
       }}
     />
+  );
+
+  if (!handleProps) {
+    return bar;
+  }
+
+  return (
+    <button
+      type="button"
+      tabIndex={-1}
+      aria-label="Drag sheet down to dismiss"
+      className="jl-sheet-drag-handle mx-auto flex w-full justify-center py-1"
+      {...handleProps}
+    >
+      {bar}
+    </button>
   );
 }

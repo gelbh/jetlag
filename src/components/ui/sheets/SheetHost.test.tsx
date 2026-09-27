@@ -1,38 +1,9 @@
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { useEffect, useState, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { MantineProvider } from "@mantine/core";
 import { SheetHost } from "./SheetHost";
-import {
-  ContextualRailPanelProvider,
-} from "../../map/chrome/ContextualRailContext";
-import { useContextualRailPanel } from "../../map/helpers/useContextualRailPanel";
 import { jetlagTheme } from "@/theme/theme";
-
-const useDesktopLayout = vi.fn();
-vi.mock("../../../hooks/layout/useDesktopLayout", () => ({
-  DESKTOP_LAYOUT_MIN_WIDTH_PX: 1024,
-  useDesktopLayout: () => useDesktopLayout(),
-}));
-
-function RailPanelMount({ children }: { children: ReactNode }) {
-  const rail = useContextualRailPanel();
-  const setPanelEl = rail?.setPanelEl;
-  useEffect(() => {
-    if (!setPanelEl) {
-      return;
-    }
-    const el = document.createElement("div");
-    el.setAttribute("data-testid", "rail-panel");
-    document.body.appendChild(el);
-    setPanelEl(el);
-    return () => {
-      setPanelEl(null);
-      el.remove();
-    };
-  }, [setPanelEl]);
-  return <>{children}</>;
-}
 
 function withAppUi(ui: ReactNode) {
   return (
@@ -44,7 +15,6 @@ function withAppUi(ui: ReactNode) {
 
 describe("SheetHost", () => {
   beforeEach(() => {
-    useDesktopLayout.mockReset();
     vi.stubGlobal("matchMedia", (query: string) => ({
       matches: false,
       media: query,
@@ -57,104 +27,41 @@ describe("SheetHost", () => {
     }));
   });
 
-  it("uses Mantine Drawer under 1024", () => {
-    useDesktopLayout.mockReturnValue(false);
+  it("uses Mantine Drawer for open sheets", () => {
     render(
       withAppUi(
-        <SheetHost open onClose={() => {}} ariaLabel="Settings" railTab="settings">
+        <SheetHost open onClose={() => {}} ariaLabel="Settings">
           <p>mantine body</p>
         </SheetHost>,
       ),
     );
-    expect(screen.queryByTestId("radix-motion-sheet")).not.toBeInTheDocument();
     expect(screen.getByRole("dialog", { name: "Settings" })).toBeInTheDocument();
     expect(screen.getByText("mantine body")).toBeInTheDocument();
     expect(screen.getByTestId("mantine-drawer-sheet")).toBeInTheDocument();
   });
 
-  it("portals into contextual rail on desktop even when flag on", async () => {
-    useDesktopLayout.mockReturnValue(true);
+  it("ignores deprecated railTab and still uses Drawer", () => {
     render(
       withAppUi(
-        <ContextualRailPanelProvider>
-          <RailPanelMount>
-            <SheetHost
-              open
-              onClose={() => {}}
-              ariaLabel="Settings"
-              railTab="settings"
-            >
-              <p>rail body</p>
-            </SheetHost>
-          </RailPanelMount>
-        </ContextualRailPanelProvider>,
+        <SheetHost
+          open
+          onClose={() => {}}
+          ariaLabel="Settings"
+          railTab="settings"
+        >
+          <p>drawer body</p>
+        </SheetHost>,
       ),
     );
-    await waitFor(() => {
-      expect(screen.getByRole("dialog", { name: "Settings" })).toBeInTheDocument();
-    });
-    expect(screen.queryByTestId("radix-motion-sheet")).not.toBeInTheDocument();
-    expect(screen.queryByTestId("mantine-drawer-sheet")).not.toBeInTheDocument();
-    expect(screen.getByText("rail body")).toBeInTheDocument();
-    expect(
-      screen.getByTestId("rail-panel").contains(screen.getByText("rail body")),
-    ).toBe(true);
-  });
-
-  it("portals into contextual rail on desktop", async () => {
-    useDesktopLayout.mockReturnValue(true);
-    render(
-      <ContextualRailPanelProvider>
-        <RailPanelMount>
-          <SheetHost
-            open
-            onClose={() => {}}
-            ariaLabel="Settings"
-            railTab="settings"
-          >
-            <p>rail body</p>
-          </SheetHost>
-        </RailPanelMount>
-      </ContextualRailPanelProvider>,
-    );
-    await waitFor(() => {
-      expect(screen.getByRole("dialog", { name: "Settings" })).toBeInTheDocument();
-    });
-    expect(screen.queryByTestId("radix-motion-sheet")).not.toBeInTheDocument();
-    expect(screen.getByText("rail body")).toBeInTheDocument();
-    expect(
-      screen.getByTestId("rail-panel").contains(screen.getByText("rail body")),
-    ).toBe(true);
-  });
-
-  it("renders nothing on desktop when closed", async () => {
-    useDesktopLayout.mockReturnValue(true);
-    render(
-      <ContextualRailPanelProvider>
-        <RailPanelMount>
-          <SheetHost
-            open={false}
-            onClose={() => {}}
-            ariaLabel="Settings"
-            railTab="settings"
-          >
-            <p>hidden</p>
-          </SheetHost>
-        </RailPanelMount>
-      </ContextualRailPanelProvider>,
-    );
-    await waitFor(() => {
-      expect(screen.getByTestId("rail-panel")).toBeInTheDocument();
-    });
-    expect(screen.queryByText("hidden")).not.toBeInTheDocument();
+    expect(screen.getByTestId("mantine-drawer-sheet")).toBeInTheDocument();
+    expect(screen.getByText("drawer body")).toBeInTheDocument();
   });
 
   it("closes via overlay when sheet requests close", () => {
-    useDesktopLayout.mockReturnValue(false);
     const onClose = vi.fn();
     render(
       withAppUi(
-        <SheetHost open onClose={onClose} ariaLabel="Settings" railTab="settings">
+        <SheetHost open onClose={onClose} ariaLabel="Settings">
           <p>body</p>
         </SheetHost>,
       ),
@@ -166,53 +73,7 @@ describe("SheetHost", () => {
     expect(onClose).toHaveBeenCalled();
   });
 
-  it("uses overlay path on desktop when railTab is omitted", () => {
-    useDesktopLayout.mockReturnValue(true);
-    render(
-      withAppUi(
-        <SheetHost open onClose={() => {}} ariaLabel="Map tools guide">
-          <p>first-run</p>
-        </SheetHost>,
-      ),
-    );
-    expect(screen.queryByTestId("radix-motion-sheet")).not.toBeInTheDocument();
-    expect(screen.getByTestId("mantine-drawer-sheet")).toBeInTheDocument();
-    expect(screen.getByText("first-run")).toBeInTheDocument();
-  });
-
-  it("uses Mantine Drawer on desktop overlay when railTab omitted", () => {
-    useDesktopLayout.mockReturnValue(true);
-    render(
-      withAppUi(
-        <SheetHost open onClose={() => {}} ariaLabel="Map tools guide">
-          <p>first-run</p>
-        </SheetHost>,
-      ),
-    );
-    expect(screen.queryByTestId("radix-motion-sheet")).not.toBeInTheDocument();
-    expect(screen.getByTestId("mantine-drawer-sheet")).toBeInTheDocument();
-    expect(screen.getByText("first-run")).toBeInTheDocument();
-  });
-
-  it("waits for rail panel on desktop when railTab is set", () => {
-    useDesktopLayout.mockReturnValue(true);
-    render(
-      <ContextualRailPanelProvider>
-        <SheetHost open onClose={() => {}} ariaLabel="Settings" railTab="settings">
-          <p>pending rail</p>
-        </SheetHost>
-      </ContextualRailPanelProvider>,
-    );
-    expect(screen.queryByText("pending rail")).not.toBeInTheDocument();
-    expect(screen.queryByTestId("radix-motion-sheet")).not.toBeInTheDocument();
-  });
-
-  /**
-   * Program Verify #4: after closing MapSettings/MapFirstRun-style sheet under
-   * flag on, map pointer events must still reach a map target (no leftover overlay).
-   */
   it("restores map pointer events after Mantine Drawer closes (Verify #4)", async () => {
-    useDesktopLayout.mockReturnValue(false);
     const mapHit = vi.fn();
 
     function Harness() {
@@ -261,7 +122,6 @@ describe("SheetHost", () => {
   });
 
   it("applies consumer maxHeightClassName on Mantine Drawer content", () => {
-    useDesktopLayout.mockReturnValue(false);
     render(
       withAppUi(
         <SheetHost

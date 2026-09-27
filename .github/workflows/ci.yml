@@ -63,6 +63,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run release:check
+      - run: npm run test:changeset-map
 
   unit:
     runs-on: ubuntu-latest
@@ -73,6 +74,8 @@ jobs:
         with:
           persist-credentials: false
       - uses: ./.github/actions/setup-rust-wasm
+      - run: cargo fmt --all -- --check
+      - run: cargo clippy --locked -p jetlag-geometry-kernel -- -D warnings
       - run: cargo test --locked -p jetlag-geometry-kernel
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
@@ -84,6 +87,7 @@ jobs:
       - run: npm run lint:css
       - run: npm run typecheck
       - run: npm run release:check
+      - run: npm run test:changeset-map
       - run: npm run test:coverage
       - uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v3
         id: geometry
@@ -100,7 +104,12 @@ jobs:
               - 'package.json'
               - 'vite.optional-kernel-wasm-pkg.ts'
               - 'vite.config.ts'
+              - 'vite.chunk-groups.ts'
+              - 'vite.sentry.ts'
+              - 'vite.pwa.ts'
+              - 'vite.resolve-shared.ts'
               - 'vitest.config.ts'
+              - 'vitest.shared.ts'
               - '.github/actions/setup-rust-wasm/action.yml'
       - name: Geometry perf gates
         if: steps.geometry.outputs.geometry == 'true'
@@ -156,7 +165,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [changes, unit]
     if: ${{ needs.changes.outputs.code == 'true' }}
-    # Playwright+emulators has hung >30m with no progress; fail closed.
+    # Gate-smoke only on PR CI; full features suite is too hang-prone under emulators.
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -180,7 +189,7 @@ jobs:
           key: firebase-emulators-${{ runner.os }}-${{ hashFiles('firebase.json', 'package-lock.json') }}
           restore-keys: |
             firebase-emulators-${{ runner.os }}-
-      - run: npx firebase emulators:exec --project demo-jetlag --only auth,firestore,storage "npm run test:e2e"
+      - run: npx firebase emulators:exec --project demo-jetlag --only auth,firestore,storage "npm run test:e2e:gate-smoke"
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: failure()
         with:

@@ -5,10 +5,12 @@ import {
   assembleChatMessages,
   buildDataMessages,
   buildPolicyMessages,
+} from "../incident/sessionOpsLlm.mjs";
+import {
   buildSessionOpsOpenAiTools,
   callSessionOpsLlm,
   parseChatCompletion,
-} from "../incident/sessionOpsLlm.mjs";
+} from "./helpers/sessionOpsOpenAiClient.mjs";
 
 test("buildPolicyMessages binds session/incident and never includes user NL", () => {
   const userText =

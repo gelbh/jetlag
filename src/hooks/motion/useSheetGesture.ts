@@ -17,13 +17,27 @@ export interface UseSheetGestureOptions {
   enabled: boolean;
   onDismiss: () => void;
   scrollRef?: RefObject<HTMLElement | null>;
+  /**
+   * When true (default), pointer starts only if scrollRef.scrollTop <= 0.
+   * Set false when handleProps are only on a grabber outside the scroll body
+   * so a scrolled sheet still dismisses from the grabber.
+   */
+  gateStartOnScrollTop?: boolean;
 }
 
 export interface SheetHandleProps {
-  onPointerDown: ReturnType<typeof useInteractiveDragY>["bindings"]["onPointerDown"];
-  onPointerMove: ReturnType<typeof useInteractiveDragY>["bindings"]["onPointerMove"];
-  onPointerUp: ReturnType<typeof useInteractiveDragY>["bindings"]["onPointerUp"];
-  onPointerCancel: ReturnType<typeof useInteractiveDragY>["bindings"]["onPointerCancel"];
+  onPointerDown: ReturnType<
+    typeof useInteractiveDragY
+  >["bindings"]["onPointerDown"];
+  onPointerMove: ReturnType<
+    typeof useInteractiveDragY
+  >["bindings"]["onPointerMove"];
+  onPointerUp: ReturnType<
+    typeof useInteractiveDragY
+  >["bindings"]["onPointerUp"];
+  onPointerCancel: ReturnType<
+    typeof useInteractiveDragY
+  >["bindings"]["onPointerCancel"];
 }
 
 export interface UseSheetGestureResult {
@@ -38,14 +52,18 @@ export function useSheetGesture({
   enabled,
   onDismiss,
   scrollRef,
+  gateStartOnScrollTop = true,
 }: UseSheetGestureOptions): UseSheetGestureResult {
   const sheetRef = useRef<HTMLDivElement>(null);
   const [sheetHeight, setSheetHeight] = useState(320);
 
   const canStartDrag = useCallback(() => {
+    if (!gateStartOnScrollTop) {
+      return true;
+    }
     const scrollTop = scrollRef?.current?.scrollTop ?? 0;
     return scrollTop <= 0;
-  }, [scrollRef]);
+  }, [gateStartOnScrollTop, scrollRef]);
 
   const measureSheetHeight = useCallback(() => {
     const height = sheetRef.current?.offsetHeight;
@@ -68,7 +86,7 @@ export function useSheetGesture({
         velocityY > SHEET_VELOCITY_DISMISS_PX_MS;
 
       if (shouldDismiss && enabled) {
-        reset();
+        // Keep translate until unmount so Mantine exit does not snap home first.
         onDismiss();
         return;
       }

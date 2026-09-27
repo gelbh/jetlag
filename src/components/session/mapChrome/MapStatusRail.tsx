@@ -18,7 +18,7 @@ import type { SessionRulesInput } from "@/domain/session/rules";
 import type { PlayerRole } from "@/domain/session/players/playerRole";
 import type { RoleGates } from "@/domain/session/players/roleGates";
 import { useLeaderJoinRequests } from "@/hooks/map-screen/useLeaderJoinRequests";
-import { desktopOpsStatusExpandedStyle } from "@/components/ui/entry/entryChrome";
+import { statusRailExpandedFlowStyle } from "@/components/ui/entry/entryChrome";
 import { EndGameAlert } from "../status/EndGameAlert";
 import { FoundHiderAlert } from "../status/FoundHiderAlert";
 import { HiderOutsideZoneAlert } from "../status/HiderOutsideZoneAlert";
@@ -28,16 +28,12 @@ import { TimerBlock } from "../status/TimerBlock";
 import { ToolStatusBlock } from "../status/ToolStatusBlock";
 import { SYNC_TONE_CLASSES, syncRailDisplay } from "../status/syncRailDisplay";
 
-function errorHasActions(
-  error: UserErrorDisplay,
-  onAction?: () => void,
-  onSecondaryAction?: () => void,
-): boolean {
-  const showPrimary = Boolean(error.action && onAction && error.actionLabel);
-  const showSecondary = Boolean(
-    error.secondaryAction && onSecondaryAction && error.secondaryActionLabel,
+/** Spec: action / secondaryAction fields → sticky; only toast when action-free. */
+function errorHasActions(error: UserErrorDisplay): boolean {
+  return Boolean(
+    (error.action && error.actionLabel) ||
+      (error.secondaryAction && error.secondaryActionLabel),
   );
-  return showPrimary || showSecondary;
 }
 
 /** Channel 1 vs 2: actionful → sticky Alert; action-free → ephemeral toast. */
@@ -50,7 +46,7 @@ function MapPlayerErrorChannel({
   onAction?: () => void;
   onSecondaryAction?: () => void;
 }) {
-  const hasActions = errorHasActions(error, onAction, onSecondaryAction);
+  const hasActions = errorHasActions(error);
 
   useEffect(() => {
     if (hasActions) {
@@ -74,7 +70,6 @@ function MapPlayerErrorChannel({
   );
 }
 
-/** Role-agnostic status/timer/sync bag for MapStatusRail (W4-A peel). */
 export type MapStatusRailModel = {
   sessionCode: string;
   sessionId?: string | null;
@@ -114,11 +109,11 @@ export type MapStatusRailModel = {
   onSyncErrorAction?: () => void;
   /** Dim chrome and block tool/timer interaction when the session is gone. */
   inactiveChrome?: boolean;
-  terminalSessionError?: import("@/domain/device/feedback/userErrors").UserErrorDisplay | null;
+  terminalSessionError?:
+    import("@/domain/device/feedback/userErrors").UserErrorDisplay | null;
   onReturnToJoin?: () => void;
-  /** In-flow status for DesktopOpsShell (vs absolute overlay on mobile). */
   expanded?: boolean;
-  /** Synced hiding-zone Move card — drives PHASE=MOVE in status chrome. */
+  /** Synced hiding-zone Move card: drives PHASE=MOVE in status chrome. */
   moveInProgress?: boolean;
 };
 
@@ -128,10 +123,7 @@ export type MapStatusRailProps = {
   headerLeading?: ReactNode;
 };
 
-export function MapStatusRail({
-  model,
-  headerLeading,
-}: MapStatusRailProps) {
+export function MapStatusRail({ model, headerLeading }: MapStatusRailProps) {
   const {
     sessionCode,
     sessionId = null,
@@ -242,7 +234,7 @@ export function MapStatusRail({
     <div
       ref={railRef}
       className={railClassName}
-      style={expanded ? desktopOpsStatusExpandedStyle : undefined}
+      style={expanded ? statusRailExpandedFlowStyle : undefined}
       data-testid="map-status-rail-mantine"
     >
       <div className="relative">
@@ -259,15 +251,7 @@ export function MapStatusRail({
           disabled={timerControlsDisabled || inactiveChrome}
         />
 
-        <div
-          className="w-full"
-          style={{
-            paddingTop: "max(0.5rem, env(safe-area-inset-top))",
-            paddingLeft: "max(0.75rem, env(safe-area-inset-left))",
-            paddingRight: "max(0.75rem, env(safe-area-inset-right))",
-            paddingBottom: "0.25rem",
-          }}
-        >
+        <div className="jl-status-rail-float w-full">
           <ToolStatusBlock
             sessionCode={sessionCode}
             playerRole={playerRole}
@@ -286,14 +270,11 @@ export function MapStatusRail({
             onCancelWalkingQuestion={onCancelWalkingQuestion}
             timerMenuOpen={showTimerMenu}
             moveInProgress={moveInProgress}
-            expanded={expanded}
             onTimerPause={onTimerPause}
             onTimerResume={onTimerStart}
             timerControlsDisabled={timerControlsDisabled || inactiveChrome}
             headerLeading={
-              headerLeading ?? (
-                <ScreenNav variant="home" placement="inline" />
-              )
+              headerLeading ?? <ScreenNav variant="home" placement="inline" />
             }
             syncSlot={
               <SyncBlock

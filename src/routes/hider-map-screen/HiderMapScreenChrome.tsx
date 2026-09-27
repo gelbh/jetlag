@@ -1,5 +1,8 @@
-import type { ReactNode, RefObject } from "react";
-import type { AnnotationRecord, SessionRecord } from "../../domain/map/annotations";
+import type { RefObject } from "react";
+import type {
+  AnnotationRecord,
+  SessionRecord,
+} from "../../domain/map/annotations";
 import type {
   PendingQuestionRecord,
   SessionMessageRecord,
@@ -7,7 +10,6 @@ import type {
 import type { LayerVisibility } from "../../state/sessionStore";
 import type { DistanceUnit } from "../../domain/map/distance";
 import type { MapStyle, StreetBasemap } from "../../domain/map/mapBasemaps";
-import type { NotificationPreferences } from "../../domain/device/chrome/notifications";
 import type { HidingZoneStepId } from "../../components/hider/hidingZoneSteps";
 import type { HiderTruthRevealState } from "../../components/session/banners/HiderTruthRevealBanner";
 import type { useMapOverlayState } from "../../hooks/map/useMapOverlayState";
@@ -16,22 +18,15 @@ import type { useSessionTimer } from "../../hooks/session/useSessionTimer";
 import type { useHiderZoneTool } from "../../hooks/session/useHiderZoneTool";
 import type { useTimeTrapTool } from "../../hooks/session/useTimeTrapTool";
 import { ChatPanel } from "../../components/chat/ChatPanel";
-import { ContextualRail } from "../../components/map/chrome/ContextualRail";
-import {
-  ContextualRailPanelProvider,
-  type ContextualRailTab,
-} from "../../components/map/chrome/ContextualRailContext";
 import { HidingZoneHudBody } from "../../components/tools/ask/HidingZoneHudBody";
+import { HidingZoneMapPlacementChrome } from "../../components/tools/ask/HidingZoneMapPlacementChrome";
 import { AskHudHost } from "../../components/tools/ask/AskHudHost";
-import {
-  activeModeCue,
-  canCommit,
-  primedCommitLabel,
-  type AskHudReadiness,
-} from "../../domain/ask/askHudModes";
+import { activeModeCue } from "../../domain/ask/askHudModes";
 import { useDevMockSessionFeed } from "../../hooks/dev/useDevMockSessionFeed";
 import { MapScreenChromeSlots } from "../map-screen/shared/MapScreenChromeSlots";
 import { getMapScreenRoleConfig } from "../map-screen/shared/mapScreenRoleConfig";
+// ponytail yagni waiver: keep named helper + matrix tests (1 call site, readiness-reviewed).
+import { isHidingZoneMapFirstEligible } from "./hidingZoneMapFirst";
 import { TimeTrapPanel } from "../../components/hider/TimeTrapPanel";
 import { ExpansionHiderMenu } from "../../components/hider/ExpansionHiderMenu";
 import { CurseReferenceSheet } from "../../components/expansion/CurseReferenceSheet";
@@ -44,15 +39,15 @@ import { FirestorePersistenceBanner } from "../../components/session/banners/Fir
 import { MapStatusRail } from "../../components/session/mapChrome/MapStatusRail";
 import { MapSettingsSheet } from "../../components/session/mapChrome/MapSettingsSheet";
 import { RoleCodesSheet } from "../../components/session/settings/RoleCodesSheet";
-import {
-  HiderTruthRevealBanner,
-} from "../../components/session/banners/HiderTruthRevealBanner";
+import { HiderTruthRevealBanner } from "../../components/session/banners/HiderTruthRevealBanner";
 import { QuestionAlertBanner } from "../../components/session/banners/QuestionAlertBanner";
-import { useDesktopLayout } from "../../hooks/layout/useDesktopLayout";
 import { useMapTerminalSessionChrome } from "../../hooks/session/useMapTerminalSessionChrome";
 import { HiderToolDock } from "../../components/tools/HiderToolDock";
 import { SessionLog } from "../../components/session/log/SessionLog";
-import { isEndGameActive, isFoundHiderPending } from "../../domain/map/annotations";
+import {
+  isEndGameActive,
+  isFoundHiderPending,
+} from "../../domain/map/annotations";
 import { GameOverChrome } from "../../components/session/game-over/GameOverChrome";
 import { useGameOverActions } from "../../hooks/session/useGameOverActions";
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
@@ -87,7 +82,7 @@ type HidingZonePanelTool = {
   error: string | null;
 };
 
-/** Chrome bag for hider map (W3-D2). Full `useHiderMapScreenController` deferred: extract ~800 LOC would blow jumbo soft-gate. */
+/** Chrome bag for hider map. Full `useHiderMapScreenController` deferred: extract ~800 LOC would blow jumbo soft-gate. */
 export type HiderMapScreenController = {
   session: SessionRecord;
   hasMyZone: boolean;
@@ -185,11 +180,6 @@ export type HiderMapScreenController = {
     setMapStyle: (style: MapStyle) => void;
     streetBasemap: StreetBasemap;
     setStreetBasemap: (theme: StreetBasemap) => void;
-    notificationPreferences: NotificationPreferences;
-    updateNotificationPreferences: (
-      patch: Partial<NotificationPreferences>,
-    ) => void;
-    enableNotifications: () => Promise<boolean>;
     locationError?: string | null;
   };
   chat: {
@@ -208,19 +198,16 @@ export type HiderMapScreenController = {
       deadlineExpired?: boolean,
     ) => Promise<void>;
   };
-  /** HUD root for pan-hide (`data-map-interacting`) — same as seeker. */
+  /** HUD root for pan-hide (`data-map-interacting`): same as seeker. */
   chromeHudRef?: RefObject<HTMLDivElement | null>;
 };
 
 export type HiderMapScreenChromeProps = {
   controller: HiderMapScreenController;
-  /** When set with desktop layout, map fills the ops shell center slot. */
-  mapSlot?: ReactNode;
 };
 
 export function HiderMapScreenChrome({
   controller,
-  mapSlot,
 }: HiderMapScreenChromeProps) {
   const {
     session,
@@ -286,22 +273,16 @@ export function HiderMapScreenChrome({
     pendingQuestions: displayPendingQuestions,
   } = useDevMockSessionFeed(session.id, messages, pendingQuestions);
   const syncMessage = syncStatus.remoteUpdateNotice ?? syncStatus.lastSyncError;
-  const {
-    inactiveChrome,
-    terminalSessionError,
-    onReturnToJoin,
-    onSyncRetry,
-  } = useMapTerminalSessionChrome({
-    syncMessage,
-    sessionId: session.id,
-    closeOverlays: overlay.closeSheet,
-  });
+  const { inactiveChrome, terminalSessionError, onReturnToJoin, onSyncRetry } =
+    useMapTerminalSessionChrome({
+      syncMessage,
+      sessionId: session.id,
+      closeOverlays: overlay.closeSheet,
+    });
   const onSyncErrorAction = onSyncRetry;
   const gameOverActions = useGameOverActions(session, {
     closeSheet: overlay.closeAllSheets,
   });
-  const isDesktop = useDesktopLayout();
-  const toolLayout = isDesktop ? "rail" : "dock";
   const roleConfig = getMapScreenRoleConfig("hider");
   const setSelectedAnnotationId = useAnnotationStore(
     (state) => state.setSelectedAnnotationId,
@@ -309,46 +290,6 @@ export function HiderMapScreenChrome({
   const markAnnotationPulse = useAnnotationStore(
     (state) => state.markAnnotationPulse,
   );
-
-  const railActiveTab: ContextualRailTab | null =
-    overlay.sheet === "chat" ||
-    overlay.sheet === "settings" ||
-    overlay.sheet === "log" ||
-    overlay.sheet === "codes"
-      ? overlay.sheet
-      : overlay.settingsInStack
-        ? "settings"
-        : null;
-
-  const handleSelectRailTab = (tab: ContextualRailTab) => {
-    switch (tab) {
-      case "settings":
-        onOpenSettings();
-        return;
-      case "chat":
-        onOpenChat();
-        return;
-      case "log":
-        onOpenLog();
-        return;
-      case "codes":
-        onOpenCodes();
-        return;
-      default: {
-        const _exhaustive: never = tab;
-        return _exhaustive;
-      }
-    }
-  };
-
-  const contextualRail = isDesktop ? (
-    <ContextualRail
-      open={overlay.sheet !== "none" || overlay.sheetStack.length > 0}
-      activeTab={railActiveTab}
-      onClose={overlay.closeSheet}
-      onSelectTab={handleSelectRailTab}
-    />
-  ) : null;
 
   const statusRail = (
     <>
@@ -363,7 +304,7 @@ export function HiderMapScreenChrome({
           roleGates: session.roleGates,
           sessionRules: session,
           playerRole: roleConfig.statusPlayerRole,
-          expanded: isDesktop,
+          expanded: false,
           activeTool: "none",
           syncStatus: syncStatus.status,
           queuedWrites: syncStatus.queuedWrites,
@@ -435,27 +376,22 @@ export function HiderMapScreenChrome({
   const hidingZoneSurface = zoneTool.moveMode
     ? ("hiding-zone-move" as const)
     : ("hiding-zone-create" as const);
-  const hidingZoneReadiness: AskHudReadiness = {
+  const hidingZoneCue = activeModeCue({
     surface: hidingZoneSurface,
     placementReady: hidingZonePanelTool.hasPlacement,
     configureReady: zoneTool.moveMode || hidingZonePanelTool.methodChosen,
     resolveReady: true,
-    answerReady: true,
-    awaitHiderAnswer: true,
-    isSubmitting: hidingZonePanelTool.saving,
-    viewOnly: !zoneTool.writesEnabled,
-  };
-  const hidingZoneCue = activeModeCue({
-    surface: hidingZoneSurface,
-    placementReady: hidingZoneReadiness.placementReady,
-    configureReady: hidingZoneReadiness.configureReady,
-    resolveReady: true,
   });
-  const hidingZoneCanCommit = canCommit(hidingZoneReadiness);
+
+  const mapFirstEligible = isHidingZoneMapFirstEligible({
+    wizardOpen: zoneTool.wizardOpen,
+    sheetBlocksWizard,
+    moveMode: zoneTool.moveMode,
+    methodChosen: hidingZonePanelTool.methodChosen,
+  });
 
   const toolDock = (
     <HiderToolDock
-      layout={toolLayout}
       zoneLabel={zoneLabel}
       onZoneAction={onZoneAction}
       zoneDisabled={!zoneTool.writesEnabled || inactiveChrome}
@@ -477,14 +413,11 @@ export function HiderMapScreenChrome({
   );
 
   return (
-    <ContextualRailPanelProvider>
-      <MapScreenChromeSlots
-        chromeHudRef={chromeHudRef}
-        header={statusRail}
-        toolbar={toolDock}
-        mapSlot={mapSlot}
-        contextual={contextualRail}
-      >
+    <MapScreenChromeSlots
+      chromeHudRef={chromeHudRef}
+      header={statusRail}
+      toolbar={toolDock}
+    >
         <GameOverChrome
           sessionId={session.id}
           playerRole={roleConfig.statusPlayerRole}
@@ -506,34 +439,40 @@ export function HiderMapScreenChrome({
           onAnswerQuestion={chat.onAnswerQuestion}
         />
 
-        {zoneTool.wizardOpen && !sheetBlocksWizard ? (
+        {mapFirstEligible ? (
+          <HidingZoneMapPlacementChrome
+            moveMode={zoneTool.moveMode}
+            radiusLabel={hidingZoneRadiusLabel}
+            zoneTool={hidingZonePanelTool}
+            onStepChange={onHidingZoneStepChange}
+            onSearchThisArea={onSearchThisArea}
+            writesEnabled={zoneTool.writesEnabled}
+            onDismiss={zoneTool.moveMode ? undefined : zoneTool.closeWizard}
+            onBackToMethod={
+              zoneTool.moveMode
+                ? undefined
+                : () => {
+                    zoneTool.openWizard();
+                  }
+            }
+          />
+        ) : zoneTool.wizardOpen && !sheetBlocksWizard ? (
           <AskHudHost
             cue={hidingZoneCue}
             toolLabel={zoneTool.moveMode ? "Move zone" : "Hiding zone"}
             costLabel={null}
             showCostChip={false}
-            canCommit={hidingZoneCanCommit}
-            commitLabel={primedCommitLabel({
-              kind: "confirm",
-              costLabel: null,
-              primed: hidingZoneCanCommit,
-              cue: hidingZoneCue,
-            })}
-            onCommit={() => {
-              void hidingZonePanelTool.confirmZone();
-            }}
-            isSubmitting={hidingZonePanelTool.saving}
+            canCommit={false}
+            commitLabel="CONFIRM"
+            onCommit={() => undefined}
+            isSubmitting={false}
             error={hidingZonePanelTool.error}
             modeBody={
               <HidingZoneHudBody
                 moveMode={zoneTool.moveMode}
-                radiusLabel={hidingZoneRadiusLabel}
                 zoneTool={hidingZonePanelTool}
                 onStepChange={onHidingZoneStepChange}
-                onSearchThisArea={onSearchThisArea}
-                onDismiss={
-                  zoneTool.moveMode ? undefined : zoneTool.closeWizard
-                }
+                onDismiss={zoneTool.moveMode ? undefined : zoneTool.closeWizard}
               />
             }
           />
@@ -600,10 +539,6 @@ export function HiderMapScreenChrome({
               onToggleTransit: () => undefined,
               onToggleLiveTransit: () => undefined,
               onTransitRouteFilterChange: () => undefined,
-              notificationPreferences: mapSettings.notificationPreferences,
-              onNotificationPreferencesChange:
-                mapSettings.updateNotificationPreferences,
-              onEnableNotifications: mapSettings.enableNotifications,
             }}
             layers={{
               layerVisibility: mapSettings.layerVisibility,
@@ -624,7 +559,9 @@ export function HiderMapScreenChrome({
               onResetSession: onResetSession
                 ? () => void onResetSession()
                 : undefined,
-              onEndSession: onEndSession ? () => void onEndSession() : undefined,
+              onEndSession: onEndSession
+                ? () => void onEndSession()
+                : undefined,
               onLeaveSession: onLeaveSession
                 ? () => void onLeaveSession()
                 : undefined,
@@ -695,7 +632,9 @@ export function HiderMapScreenChrome({
               searchDisabled={timeTrapTool.stationsLoading}
               existingTrapStationName={myTrap?.stationName ?? null}
               onConfirm={() =>
-                void timeTrapTool.confirmTrap().then(() => onTimeTrapSheetOpenChange(false))
+                void timeTrapTool
+                  .confirmTrap()
+                  .then(() => onTimeTrapSheetOpenChange(false))
               }
               saving={timeTrapTool.saving}
               error={timeTrapTool.error}
@@ -729,6 +668,5 @@ export function HiderMapScreenChrome({
           }}
         />
       </MapScreenChromeSlots>
-    </ContextualRailPanelProvider>
   );
 }

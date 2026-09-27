@@ -17,7 +17,9 @@ pub struct PolygonFeature {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "type")]
 pub enum GameAreaGeometry {
-    Polygon { coordinates: Vec<Vec<Vec<f64>>> },
+    Polygon {
+        coordinates: Vec<Vec<Vec<f64>>>,
+    },
     MultiPolygon {
         coordinates: Vec<Vec<Vec<Vec<f64>>>>,
     },
@@ -42,10 +44,19 @@ pub struct EliminationUnionInputJson {
 pub struct NearRegionInputJson {
     #[serde(default)]
     pub segments: Vec<Vec<[f64; 2]>>,
+    /// Soft on the wire; TS `NearRegionBatchInput` always sends a finite `distanceMeters`.
     #[serde(default, rename = "distanceMeters")]
     pub distance_meters: Option<f64>,
     #[serde(default)]
     pub disks: Vec<DiskSpecJson>,
     #[serde(rename = "gameArea")]
     pub game_area: GameAreaGeometry,
+}
+
+/// Tentacle / Voronoi site on the JSON boundary (`id` + lat/lng degrees).
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct TentacleSiteJson {
+    pub id: String,
+    pub lat: f64,
+    pub lng: f64,
 }

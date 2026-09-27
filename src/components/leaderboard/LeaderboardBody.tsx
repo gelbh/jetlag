@@ -53,7 +53,6 @@ import {
   leaderboardScopeLabel,
   type LeaderboardEntry,
   type LeaderboardMetric,
-  type LeaderboardRole,
   type LeaderboardScope,
 } from "@/domain/game/leaderboard";
 import {
@@ -274,7 +273,7 @@ function PullToRefresh({
       <Box
         style={{
           transform: `translateY(${refreshing ? 40 : Math.max(0, pull * 0.35)}px)`,
-          transition: pulling.current ? "none" : "transform 160ms ease",
+          transition: pull > 0 ? "none" : "transform 160ms ease",
         }}
       >
         {children}

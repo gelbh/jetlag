@@ -94,7 +94,7 @@ export function RadarDistancePicker({
     parsedCustomRadius > maxCustomRadiusMeters;
   const exhausted = availablePresets.length === 0 && !chooseAvailable;
 
-  if (true && compact) {
+  if (compact) {
     const unitShort = compactUnitShort(distanceUnit);
     const tileRoot = (selected: boolean) => ({
       ...choiceChipStyles(selected).root,

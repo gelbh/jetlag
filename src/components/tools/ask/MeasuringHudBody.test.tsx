@@ -107,9 +107,7 @@ describe("MeasuringHudBody", () => {
         commitLabel="SEND"
         onCommit={() => {}}
         modeBody={
-          <MeasuringHudBody
-            model={{ ...baseModel, costLabel: "D3P1" }}
-          />
+          <MeasuringHudBody model={{ ...baseModel, costLabel: "D3P1" }} />
         }
         showCue={false}
         showCostChip={false}

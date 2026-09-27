@@ -77,7 +77,7 @@ export function AskToolQuestionHeader({
           >
             {toolLabel}
           </p>
-          <QuestionPromptBlock prompt={prompt} ruleSummary={ruleSummary} />
+          <QuestionPromptBlock prompt={prompt} ruleSummary={ruleSummary ?? undefined} />
         </div>
       </div>
     </div>

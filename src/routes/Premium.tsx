@@ -1,15 +1,26 @@
-import { Container } from "@mantine/core";
-import { EntryHeader } from "@/components/ui/entry/EntryHeader";
-import { EntryScreenLayout } from "@/components/ui/layout/EntryScreenLayout";
+import { Anchor, Container, Stack } from "@mantine/core";
+import { useAppNavigate } from "../hooks/navigation/useAppNavigate";
 import { PremiumPageContent } from "./PremiumPageContent";
 
 export function Premium() {
+  const navigate = useAppNavigate();
+
   return (
-    <EntryScreenLayout justify="start" skin="plain" flush>
-      <EntryHeader title="Premium" />
-      <Container size="xs" w="100%" px="md" maw={390} py="lg">
-        <PremiumPageContent />
-      </Container>
-    </EntryScreenLayout>
+    <Container size="sm" py="xl">
+      <Stack gap="md">
+        <Anchor
+          component="button"
+          type="button"
+          size="sm"
+          onClick={() => navigate("/")}
+          style={{ alignSelf: "flex-start", background: "none", border: 0 }}
+        >
+          Back
+        </Anchor>
+        <div className="flex flex-col gap-4">
+          <PremiumPageContent headerOffset={false} />
+        </div>
+      </Stack>
+    </Container>
   );
 }

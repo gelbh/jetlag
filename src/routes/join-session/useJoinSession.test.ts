@@ -34,12 +34,12 @@ vi.mock("@/state/sessionStore", () => ({
 vi.mock("@/services/core/firebase/firebase", () => ({
   isFirebaseConfigured: () => mockIsFirebaseConfigured(),
   ensureFreshAnonymousUser: (...args: unknown[]) =>
-    mockEnsureFreshAnonymousUser(...args),
+    mockEnsureFreshAnonymousUser(...(args as [])),
 }));
 
 vi.mock("@/services/firestore/firestoreAnnotations", () => ({
   joinRemoteSessionByCode: (...args: unknown[]) =>
-    mockJoinRemoteSessionByCode(...args),
+    mockJoinRemoteSessionByCode(...(args as [])),
   waitForServerHiderRole: vi.fn(),
   getRemoteSessionByIdFromServer: vi.fn(),
   lookupRemoteSessionByCode: vi.fn(),
@@ -47,7 +47,7 @@ vi.mock("@/services/firestore/firestoreAnnotations", () => ({
 
 vi.mock("@/hooks/session/useJoinSessionPreview", () => ({
   useJoinSessionPreview: (...args: unknown[]) =>
-    mockUseJoinSessionPreview(...args),
+    mockUseJoinSessionPreview(...(args as [])),
 }));
 
 vi.mock("@/services/session/rolePasscodeLifecycle", async () => {
@@ -56,15 +56,16 @@ vi.mock("@/services/session/rolePasscodeLifecycle", async () => {
   >("@/services/session/rolePasscodeLifecycle");
   return {
     ...actual,
-    requestRoleJoin: (...args: unknown[]) => mockRequestRoleJoin(...args),
+    requestRoleJoin: (...args: unknown[]) =>
+      mockRequestRoleJoin(...(args as [])),
     cancelRoleJoinRequest: (...args: unknown[]) =>
-      mockCancelRoleJoinRequest(...args),
+      mockCancelRoleJoinRequest(...(args as [])),
   };
 });
 
 vi.mock("@/services/session/joinRequestListen", () => ({
   listenOwnJoinRequest: (...args: unknown[]) =>
-    mockListenOwnJoinRequest(...args),
+    mockListenOwnJoinRequest(...(args as [])),
 }));
 
 vi.mock("@/platform/copyToClipboard", () => ({
@@ -173,7 +174,7 @@ describe("useJoinSession", () => {
       previewPremium: false,
       lookupLoading: false,
       existingRole: null,
-    });
+    } as never);
     mockRequestRoleJoin.mockResolvedValue({
       requestId: "req-1",
       expiresAt: new Date(Date.now() + 60_000).toISOString(),

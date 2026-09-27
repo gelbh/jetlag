@@ -73,7 +73,11 @@ function ControlBody({
           </span>
         ) : null}
         {label != null ? (
-          <span data-ios-tool-label="" style={mapToolSlotLabelStyle}>
+          <span
+            className="jl-tool-slot-label"
+            data-ios-tool-label=""
+            style={mapToolSlotLabelStyle}
+          >
             {label}
           </span>
         ) : null}

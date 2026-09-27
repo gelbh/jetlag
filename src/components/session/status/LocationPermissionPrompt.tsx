@@ -5,6 +5,7 @@ import {
   LOCATION_BLOCKED_MESSAGE,
   LOCATION_PERMISSION_REQUIRED_MESSAGE,
   queryGeolocationPermission,
+  restoreLocationAccessIfPersisted,
   type GeolocationPermissionState,
 } from "@/services/core/location/geolocation";
 import {
@@ -23,6 +24,7 @@ export function LocationPermissionPrompt() {
     getLocationPermissionUiSnapshot,
     () => EMPTY_LOCATION_PERMISSION_UI,
   );
+  const [hydrating, setHydrating] = useState(() => onMap && ui.demand > 0);
   const [permission, setPermission] =
     useState<GeolocationPermissionState | null>(null);
   const [busy, setBusy] = useState(false);
@@ -37,11 +39,28 @@ export function LocationPermissionPrompt() {
     }
 
     let cancelled = false;
-    void queryGeolocationPermission().then((next) => {
-      if (!cancelled) {
-        setPermission(next);
+    void (async () => {
+      setHydrating(true);
+      try {
+        const restore = await restoreLocationAccessIfPersisted({
+          highAccuracy: false,
+        });
+        if (cancelled) {
+          return;
+        }
+        if (restore.status === "denied") {
+          setForceDenied(true);
+        }
+        const next = await queryGeolocationPermission();
+        if (!cancelled) {
+          setPermission(next);
+        }
+      } finally {
+        if (!cancelled) {
+          setHydrating(false);
+        }
       }
-    });
+    })();
 
     return () => {
       cancelled = true;
@@ -54,6 +73,7 @@ export function LocationPermissionPrompt() {
   const visible =
     onMap &&
     ui.demand > 0 &&
+    !hydrating &&
     permission !== null &&
     permission !== "granted" &&
     !confirmedLiveAccess;

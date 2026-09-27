@@ -25,7 +25,6 @@ import { useWakeLock } from "@/hooks/location/useWakeLock";
 import { useAnnotations } from "@/hooks/map/useAnnotations";
 import { useMapOverlayState } from "@/hooks/map/useMapOverlayState";
 import { useSessionAnnotations } from "@/hooks/map/useSessionAnnotations";
-import { useEnsureSessionMembership } from "@/hooks/session/useEnsureSessionMembership";
 import { useResolvedSessionRules } from "@/hooks/session/useResolvedSessionRules";
 import { useSessionDistanceUnit } from "@/hooks/session/useSessionDistanceUnit";
 import { useSharedSessionScreen } from "@/hooks/session/useSharedSessionScreen";
@@ -124,9 +123,6 @@ export function useMapScreenCore(options: UseMapScreenCoreOptions = {}) {
   const keepScreenAwake = useMapStore((state) => state.keepScreenAwake);
   const setKeepScreenAwake = useMapStore((state) => state.setKeepScreenAwake);
   const setLowPowerMode = useMapStore((state) => state.setLowPowerMode);
-  const notificationPreferences = useMapStore(
-    (state) => state.notificationPreferences,
-  );
   const setLayerVisibility = useMapStore((state) => state.setLayerVisibility);
   const {
     createAnnotation,
@@ -177,14 +173,11 @@ export function useMapScreenCore(options: UseMapScreenCoreOptions = {}) {
     syncStatus,
     hasUnreadChat,
     unreadCount,
-    enableNotifications,
-    updateNotificationPreferences,
     authReady: firebaseAuthReady,
   } = useSharedSessionScreen({
     isChatOpen: overlay.isChatOpen,
     notificationRole: roleConfig.notificationRole,
     authMode: roleConfig.authMode,
-    liveActivityEnabled: roleConfig.liveActivityEnabled,
     exitPath: roleConfig.exitPath,
   });
 
@@ -270,8 +263,6 @@ export function useMapScreenCore(options: UseMapScreenCoreOptions = {}) {
     session,
     sessionRules.customMatchingAreas,
   ]);
-
-  useEnsureSessionMembership();
 
   useEffect(() => {
     markMapResumeStart();
@@ -363,7 +354,6 @@ export function useMapScreenCore(options: UseMapScreenCoreOptions = {}) {
     setLayerVisibility,
     keepScreenAwake,
     setKeepScreenAwake,
-    notificationPreferences,
     createAnnotation,
     deleteAnnotation,
     updateAnnotation,
@@ -390,8 +380,6 @@ export function useMapScreenCore(options: UseMapScreenCoreOptions = {}) {
     syncStatus,
     hasUnreadChat,
     unreadCount,
-    enableNotifications,
-    updateNotificationPreferences,
     firebaseAuthReady,
     gameRulesEditable,
     mapShellRef,

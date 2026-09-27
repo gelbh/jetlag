@@ -195,12 +195,12 @@
 }
 
 .jl-incident-queue-row:hover {
-  border-color: oklch(from var(--color-highlight) l c h / 0.55);
+  border-color: oklch(from var(--color-highlight) l c h / 55%);
 }
 
 .jl-incident-queue-row--active {
   border-color: var(--color-action);
-  background: oklch(from var(--color-action) l c h / 0.08);
+  background: oklch(from var(--color-action) l c h / 8%);
 }
 
 html[data-motion="reduced"] .jl-incident-queue-row,
@@ -251,25 +251,25 @@ html[data-motion="static"] .jl-incident-queue-row {
 }
 
 .jl-incident-chip--open {
-  border-color: oklch(from var(--color-action) l c h / 0.65);
-  background: oklch(from var(--color-action) l c h / 0.14);
+  border-color: oklch(from var(--color-action) l c h / 65%);
+  background: oklch(from var(--color-action) l c h / 14%);
   color: var(--color-action);
 }
 
 .jl-incident-chip--active {
-  border-color: oklch(from var(--color-brand-blue) l c h / 0.55);
-  background: oklch(from var(--color-brand-blue) l c h / 0.14);
+  border-color: oklch(from var(--color-brand-blue) l c h / 55%);
+  background: oklch(from var(--color-brand-blue) l c h / 14%);
   color: var(--color-brand-blue);
 }
 
 .jl-incident-chip--warning {
-  border-color: oklch(from var(--color-status-warning) l c h / 0.55);
+  border-color: oklch(from var(--color-status-warning) l c h / 55%);
   background: var(--color-status-warning-surface);
   color: var(--color-status-warning);
 }
 
 .jl-incident-chip--critical {
-  border-color: oklch(from var(--color-status-error) l c h / 0.55);
+  border-color: oklch(from var(--color-status-error) l c h / 55%);
   background: var(--color-status-error-surface);
   color: var(--color-status-error);
 }
@@ -362,8 +362,8 @@ html[data-motion="static"] .jl-incident-tab {
   max-height: 40%;
   overflow-y: auto;
   overscroll-behavior: contain;
-  border: 2px solid oklch(from var(--color-highlight) l c h / 0.75);
-  background: oklch(from var(--color-highlight) l c h / 0.08);
+  border: 2px solid oklch(from var(--color-highlight) l c h / 75%);
+  background: oklch(from var(--color-highlight) l c h / 8%);
   padding: 0.5rem 0.625rem;
 }
 
@@ -411,8 +411,8 @@ html[data-motion="static"] .jl-incident-tab {
 }
 
 .jl-incident-msg--player {
-  border-color: oklch(from var(--color-highlight) l c h / 0.35);
-  background: var(--color-highlight-soft, oklch(from var(--color-highlight) l c h / 0.12));
+  border-color: oklch(from var(--color-highlight) l c h / 35%);
+  background: var(--color-highlight-soft, oklch(from var(--color-highlight) l c h / 12%));
 }
 
 .jl-incident-msg--system {

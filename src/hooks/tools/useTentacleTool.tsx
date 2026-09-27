@@ -14,10 +14,7 @@ import {
   type TentacleMapPlacementPhase,
 } from "../../components/tools/ask/TentacleMapPlacementChrome";
 import { TentaclePanel } from "../../components/tools/TentaclePanel";
-import {
-  canCommit as askCanCommit,
-  type AskHudReadiness,
-} from "@/domain/ask/askHudModes";
+import type { AskHudReadiness } from "@/domain/ask/askHudModes";
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import {
   isActive,
@@ -555,13 +552,12 @@ export function useTentacleTool({
     tentacleCategoryId !== null &&
     isTentacleCategoryAvailableInSession(sessionRules, tentacleCategoryId);
   const hasRecordedAnswer = tentacleOutOfReach || selectedPoiId !== null;
-  const confirmedTentaclePois = filterConfirmedTentaclePois(tentaclePois);
 
   const readiness: AskHudReadiness = {
     surface: "tentacle",
     placementReady: tentacleCenter !== null,
     configureReady: tentacleCategoryChosen && categorySelectionAvailable,
-    resolveReady: confirmedTentaclePois.length > 0 && !tentacleLoading,
+    resolveReady: tentaclePois.length > 0 && !tentacleLoading,
     answerReady: awaitHiderAnswer || hasRecordedAnswer,
     awaitHiderAnswer,
     isSubmitting: session.isBusy,
@@ -574,16 +570,19 @@ export function useTentacleTool({
     tentacleCategoryId !== null &&
     categorySelectionAvailable;
 
-  const [placementGeo, setPlacementGeo] = useState<
+  const [eligiblePlacementGeo, setEligiblePlacementGeo] = useState<
     GeolocationPermissionState | "checking"
   >("checking");
   const autoGpsForCategoryRef = useRef<TentacleExtendedCategoryId | null>(null);
   const handleUseGpsRef = useRef(handleUseGps);
-  handleUseGpsRef.current = handleUseGps;
+  const placementGeo = mapFirstEligible ? eligiblePlacementGeo : "checking";
+
+  useEffect(() => {
+    handleUseGpsRef.current = handleUseGps;
+  }, [handleUseGps]);
 
   useEffect(() => {
     if (!mapFirstEligible) {
-      setPlacementGeo("checking");
       autoGpsForCategoryRef.current = null;
       return;
     }
@@ -594,7 +593,7 @@ export function useTentacleTool({
       if (cancelled) {
         return;
       }
-      setPlacementGeo(permission);
+      setEligiblePlacementGeo(permission);
       if (
         permission === "granted" &&
         tentacleCenter === null &&
@@ -665,6 +664,15 @@ export function useTentacleTool({
     setTentacleCenter(null);
   };
 
+  const canCommitTentacle =
+    tentacleCenter !== null &&
+    tentacleCategoryChosen &&
+    categorySelectionAvailable &&
+    !tentacleLoading &&
+    (awaitHiderAnswer || hasRecordedAnswer) &&
+    canSubmitQuestion &&
+    !session.isBusy;
+
   const statusTitle =
     placementPhase === "locating"
       ? "Getting your location"
@@ -714,7 +722,7 @@ export function useTentacleTool({
               setSelectedPoiId(null);
             }
           }}
-          canCommit={askCanCommit(readiness)}
+          canCommit={canCommitTentacle}
           isSubmitting={session.isBusy}
           onCommit={() => void commit()}
           onChangeCategory={reopenCategoryPicker}

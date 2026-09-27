@@ -7,9 +7,7 @@ import {
 import { QuestionPreviewSheet } from "@/components/tools/shared/controls/QuestionPreviewSheet";
 import { MeasuringTargetSection } from "@/components/tools/shared/measuring/MeasuringTargetStep";
 import { SearchResultsList } from "@/components/tools/shared/controls/SearchResultsList";
-import {
-  anchorResolveLoadingMessage,
-} from "@/components/tools/shared/measuring/measuringPanelUtils";
+import { anchorResolveLoadingMessage } from "@/components/tools/shared/measuring/measuringPanelUtils";
 import type { AskHudReadiness } from "@/domain/ask/askHudModes";
 import { isActive } from "../../domain/map/annotations";
 import {
@@ -236,21 +234,25 @@ export function useMeasuringTool({
 
   const mapFirstEligible = draft.measuringOptionChosen;
 
-  const [placementGeo, setPlacementGeo] = useState<
-    GeolocationPermissionState | "checking"
-  >("checking");
   const autoGpsForOptionRef = useRef<string | null>(null);
   const handleGpsRef = useRef(interactions.handleGps);
-  handleGpsRef.current = interactions.handleGps;
+
+  useEffect(() => {
+    handleGpsRef.current = interactions.handleGps;
+  }, [interactions.handleGps]);
 
   const measureFromKey = measuringFromKind(
     draft.measuringSubject,
     draft.measuringLocationCategory,
   );
 
+  const [eligiblePlacementGeo, setEligiblePlacementGeo] = useState<
+    GeolocationPermissionState | "checking"
+  >("checking");
+  const placementGeo = mapFirstEligible ? eligiblePlacementGeo : "checking";
+
   useEffect(() => {
     if (!mapFirstEligible) {
-      setPlacementGeo("checking");
       autoGpsForOptionRef.current = null;
       return;
     }
@@ -261,7 +263,7 @@ export function useMeasuringTool({
       if (cancelled) {
         return;
       }
-      setPlacementGeo(permission);
+      setEligiblePlacementGeo(permission);
       if (
         permission === "granted" &&
         draft.measuringSeekerPoint === null &&
@@ -314,8 +316,7 @@ export function useMeasuringTool({
       placementGeo === "denied" ||
       placementGeo === "unavailable")
   ) {
-    placementPhase =
-      placementGeo === "prompt" ? "needs_permission" : "failed";
+    placementPhase = placementGeo === "prompt" ? "needs_permission" : "failed";
   } else {
     placementPhase = "locating";
   }
@@ -365,12 +366,12 @@ export function useMeasuringTool({
     placementPhase === "locating"
       ? "Waiting for GPS…"
       : placementPhase === "resolving"
-        ? draft.measuringTargetPlaceName ??
+        ? (draft.measuringTargetPlaceName ??
           anchorResolveLoadingMessage(
             draft.measuringSubject,
             measureFromKey,
             locationCategory,
-          )
+          ))
         : configureLabel;
 
   const midSlot =
@@ -444,7 +445,9 @@ export function useMeasuringTool({
   const hud = {
     readiness,
     costLabel: questionCost.label,
-    error: mapPlacementActive ? null : (draft.measuringError ?? gpsError ?? mapError ?? null),
+    error: mapPlacementActive
+      ? null
+      : (draft.measuringError ?? gpsError ?? mapError ?? null),
     onCommit: () => void commit(),
     suppressSheet: mapPlacementActive,
     mapOverlay: mapPlacementActive ? (
@@ -469,7 +472,7 @@ export function useMeasuringTool({
         distanceMeters={draft.measuringDistanceMeters}
         distanceUnit={distanceUnit}
         statusTitle={statusTitle}
-        statusBody={statusBody}
+        statusBody={statusBody ?? ""}
         midSlot={midSlot}
       />
     ) : null,

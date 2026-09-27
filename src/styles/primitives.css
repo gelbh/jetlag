@@ -24,21 +24,20 @@
     align-items: center;
     justify-content: center;
     border-radius: var(--jl-control-radius, 14px);
-    border: var(--jl-hairline, 0.33px) solid oklch(from var(--color-rule) l c h / 0.65);
-    background: oklch(from var(--color-canvas) l c h / 0.88);
+    border: var(--jl-hairline, 0.33px) solid oklch(from var(--color-rule) l c h / 65%);
+    background: oklch(from var(--color-canvas) l c h / 88%);
     color: var(--color-field-ink);
-    box-shadow: var(--jl-float-shadow, 0 4px 14px 0 oklch(0.1 0.04 265 / 0.28));
+    box-shadow: var(--jl-float-shadow, 0 4px 14px 0 oklch(10% 0.04 265deg / 28%));
     backdrop-filter: var(--jl-frost-blur, blur(20px) saturate(1.4));
-    -webkit-backdrop-filter: var(--jl-frost-blur, blur(20px) saturate(1.4));
   }
 
-  html:not([data-motion="reduced"]):not([data-motion="static"]) .hud-chrome {
+  html:not([data-motion="reduced"], [data-motion="static"]) .hud-chrome {
     transition:
       background var(--motion-instant) ease,
       transform var(--motion-instant) var(--ease-out-quint);
   }
 
-  html:not([data-motion="reduced"]):not([data-motion="static"]) .hud-chrome:active:not(:disabled) {
+  html:not([data-motion="reduced"], [data-motion="static"]) .hud-chrome:active:not(:disabled) {
     transform: scale(0.97);
   }
 
@@ -52,7 +51,7 @@
   }
 
   .hud-chrome:hover:not(:disabled) {
-    background: oklch(from var(--color-canvas) l c h / 0.96);
+    background: oklch(from var(--color-canvas) l c h / 96%);
   }
 
   .hud-chrome:disabled {
@@ -71,12 +70,12 @@
   }
 
   .map-hud-home:hover:not(:disabled) {
-    background: oklch(from var(--color-canvas) l c h / 0.72);
+    background: oklch(from var(--color-canvas) l c h / 72%);
   }
 
   .hud-chrome-active {
-    border-color: oklch(from var(--color-highlight) l c h / 0.55);
-    background: oklch(from var(--color-highlight) l c h / 0.22);
+    border-color: oklch(from var(--color-highlight) l c h / 55%);
+    background: oklch(from var(--color-highlight) l c h / 22%);
     color: var(--color-highlight);
   }
 
@@ -84,22 +83,21 @@
     position: relative;
     overflow: hidden;
     border-radius: 16px;
-    border: var(--jl-hairline, 0.33px) solid oklch(from var(--color-rule) l c h / 0.65);
-    background: oklch(from var(--color-canvas) l c h / 0.92);
-    box-shadow: 0 8px 24px 0 oklch(0.1 0.04 265 / 0.35);
+    border: var(--jl-hairline, 0.33px) solid oklch(from var(--color-rule) l c h / 65%);
+    background: oklch(from var(--color-canvas) l c h / 92%);
+    box-shadow: 0 8px 24px 0 oklch(10% 0.04 265deg / 35%);
     backdrop-filter: var(--jl-frost-blur, blur(20px) saturate(1.4));
-    -webkit-backdrop-filter: var(--jl-frost-blur, blur(20px) saturate(1.4));
     color: var(--color-field-ink);
   }
 
   .hud-sheet {
     border-top: 3px solid var(--color-flag);
-    background: oklch(from var(--color-canvas) l c h / 0.96);
-    box-shadow: 0 -12px 40px oklch(0.08 0.04 265 / 0.55);
+    background: oklch(from var(--color-canvas) l c h / 96%);
+    box-shadow: 0 -12px 40px oklch(8% 0.04 265deg / 55%);
   }
 
   .hud-scrim {
-    background: oklch(from var(--color-canvas) l c h / 0.88);
+    background: oklch(from var(--color-canvas) l c h / 88%);
   }
 
   .font-display {
@@ -114,7 +112,7 @@
     align-items: center;
     justify-content: center;
     border-radius: var(--jl-control-radius, 14px);
-    border: 2px solid oklch(from var(--color-flag) l c h / 0.85);
+    border: 2px solid oklch(from var(--color-flag) l c h / 85%);
     background: var(--color-flag);
     padding-inline: 1rem;
     letter-spacing: 0.06em;
@@ -144,7 +142,7 @@
     justify-content: center;
     border-radius: var(--jl-control-radius, 14px);
     border: 2px solid var(--color-rule);
-    background: oklch(from var(--color-rule) l c h / 0.45);
+    background: oklch(from var(--color-rule) l c h / 45%);
     padding-inline: 1rem;
     letter-spacing: 0.05em;
     color: var(--color-field-ink);
@@ -152,7 +150,7 @@
   }
 
   .btn-secondary:hover:not(:disabled) {
-    background: oklch(from var(--color-rule) l c h / 0.55);
+    background: oklch(from var(--color-rule) l c h / 55%);
   }
 
   .btn-secondary:disabled {
@@ -210,7 +208,6 @@
 
   .jl-selectable {
     user-select: text;
-    -webkit-user-select: text;
     -webkit-touch-callout: default;
   }
 }

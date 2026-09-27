@@ -1,3 +1,4 @@
+import { UnstyledButton } from "@mantine/core";
 import { sheetIconCloseStyle } from "@/components/ui/entry/entryChrome";
 import { Button } from "../button";
 
@@ -16,12 +17,20 @@ export function SheetCloseButton({
 }: SheetCloseButtonProps) {
   if (variant === "icon") {
     return (
-      <button
+      <UnstyledButton
         type="button"
         onClick={onClick}
-        className={className.trim()}
+        className={className.trim() || undefined}
         style={sheetIconCloseStyle}
         aria-label={label}
+        styles={{
+          root: {
+            "&:focus-visible": {
+              outline: "2px solid var(--color-action)",
+              outlineOffset: 1,
+            },
+          },
+        }}
       >
         <svg
           aria-hidden="true"
@@ -33,7 +42,7 @@ export function SheetCloseButton({
         >
           <path strokeLinecap="round" d="M6 6l12 12M18 6 6 18" />
         </svg>
-      </button>
+      </UnstyledButton>
     );
   }
 

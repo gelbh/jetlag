@@ -1,17 +1,19 @@
-import { Button, Stack, Text } from "@mantine/core";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useAppNavigate } from "../hooks/navigation/useAppNavigate";
+import { InlineError } from "../components/ui/banners/InlineError";
 import { PremiumSignInGate } from "../components/billing/PremiumSignInGate";
 import { PremiumFeatureList } from "../components/billing/PremiumFeatureList";
 import { PremiumTierCards } from "../components/billing/PremiumTierCards";
-import { ErrorCallout, plainStyles } from "@/components/ui/entry/entryChrome";
 import {
   canStartPremiumTrial,
   formatEntitlementSummary,
   type PremiumProductKey,
 } from "../domain/billing/premiumProducts";
-import { ANALYTICS_EVENTS, track } from "../services/core/analytics/analytics";
+import {
+  ANALYTICS_EVENTS,
+  track,
+} from "../services/core/analytics/analytics";
 import {
   ensureAnonymousUser,
   isFirebaseConfigured,
@@ -22,8 +24,16 @@ import {
   startPremiumTrial,
 } from "../services/billing/premiumBilling";
 import { usePremiumEntitlements } from "../hooks/billing/usePremiumEntitlements";
+import {
+  homeEnterActionsStyle,
+  homeFeedbackLinkStyle,
+} from "@/components/ui/entry/entryStyles";
 
-export function PremiumPageContent() {
+export function PremiumPageContent({
+  headerOffset = true,
+}: {
+  headerOffset?: boolean;
+} = {}) {
   const navigate = useAppNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const checkoutState = searchParams.get("checkout");
@@ -141,25 +151,30 @@ export function PremiumPageContent() {
 
   if (!isFirebaseConfigured()) {
     return (
-      <Stack gap={18}>
-        <PremiumFeatureList entitlementSummary={null} checkoutNotice={null} />
-        <Text size="sm" c="var(--color-field-ink-muted)">
+      <>
+        <PremiumFeatureList
+          entitlementSummary={null}
+          checkoutNotice={null}
+          headerOffset={headerOffset}
+        />
+        <p className="max-w-sm text-sm text-field-ink-muted">
           Premium billing needs an online connection. Use a synced session to
           unlock live transit.
-        </Text>
-      </Stack>
+        </p>
+      </>
     );
   }
 
   return (
-    <Stack gap={18}>
+    <>
       <PremiumFeatureList
         entitlementSummary={entitlementSummary}
         checkoutNotice={checkoutNotice}
+        headerOffset={headerOffset}
       />
 
       <PremiumSignInGate onSignedIn={() => void refreshEntitlementsWithError()}>
-        <Stack gap="sm">
+        <div className="home-enter-actions space-y-3" style={homeEnterActionsStyle}>
           <PremiumTierCards
             entitlements={entitlements}
             loading={loading}
@@ -177,17 +192,17 @@ export function PremiumPageContent() {
               void handlePortal();
             }}
           />
-          {error ? <ErrorCallout>{error}</ErrorCallout> : null}
-        </Stack>
+          {error ? <InlineError>{error}</InlineError> : null}
+        </div>
       </PremiumSignInGate>
 
-      <Button
-        variant="subtle"
-        styles={plainStyles}
+      <button
+        type="button"
         onClick={() => navigate("/create")}
+        style={homeFeedbackLinkStyle}
       >
         Back to create session
-      </Button>
-    </Stack>
+      </button>
+    </>
   );
 }

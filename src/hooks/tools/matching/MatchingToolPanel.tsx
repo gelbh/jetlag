@@ -36,7 +36,7 @@ export type MatchingToolPanelModel = {
   isSubmitting: boolean;
   previewOpen: boolean;
   previewQuestion: MatchingQuestionDefinition | null;
-  wizardStepRef: RefObject<string>;
+  wizardStepRef: RefObject<string | null>;
   onCategoryChange: (categoryId: MatchingCategoryId) => void;
   onUseGps: () => void;
   onAnswerChange: (answer: MatchingAnswer | null) => void;

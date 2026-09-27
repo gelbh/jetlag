@@ -1,8 +1,15 @@
-import type { ButtonProps } from "@mantine/core";
 import type { CSSProperties } from "react";
 
+/**
+ * Concrete Mantine `styles` object (not the function form).
+ * Keeps `.root` accessible when callers spread/override shared chrome styles.
+ */
+export type EntryButtonStyles = {
+  root: CSSProperties & Record<string, unknown>;
+};
+
 /** iOS filled tint control (logo orange). */
-export const filledStyles: ButtonProps["styles"] = {
+export const filledStyles: EntryButtonStyles = {
   root: {
     minHeight: "3.125rem",
     borderRadius: 14,
@@ -17,7 +24,7 @@ export const filledStyles: ButtonProps["styles"] = {
 };
 
 /** iOS gray / secondary filled control. */
-export const grayStyles: ButtonProps["styles"] = {
+export const grayStyles: EntryButtonStyles = {
   root: {
     minHeight: "3.125rem",
     borderRadius: 14,
@@ -32,7 +39,7 @@ export const grayStyles: ButtonProps["styles"] = {
 };
 
 /** iOS plain tinted text control. */
-export const plainStyles: ButtonProps["styles"] = {
+export const plainStyles: EntryButtonStyles = {
   root: {
     minHeight: "2.75rem",
     borderRadius: 14,
@@ -47,7 +54,7 @@ export const plainStyles: ButtonProps["styles"] = {
 };
 
 /** Compact flag control for inset list rows (friends, presets). */
-export const compactFilledStyles: ButtonProps["styles"] = {
+export const compactFilledStyles: EntryButtonStyles = {
   root: {
     minHeight: "2.5rem",
     borderRadius: 10,
@@ -65,7 +72,7 @@ export const compactFilledStyles: ButtonProps["styles"] = {
 
 
 /** Island-height Start (matches quiet timer column, not full iOS form CTA). */
-export const mapIslandFilledStyles: ButtonProps["styles"] = {
+export const mapIslandFilledStyles: EntryButtonStyles = {
   root: {
     minHeight: "2.25rem",
     height: "2.25rem",
@@ -103,7 +110,7 @@ export const mapToolSlotLabelStyle = {
 export function mapToolSlotStyles(
   pressed: boolean,
   tone: MapToolSlotTone = "tool",
-): ButtonProps["styles"] {
+): EntryButtonStyles {
   const history = tone === "history";
   return {
     root: {
@@ -158,7 +165,7 @@ export type ChoiceTone = "default" | "success" | "danger";
 export function choiceChipStyles(
   selected: boolean,
   tone: ChoiceTone = "default",
-): ButtonProps["styles"] {
+): EntryButtonStyles {
   const selectedBg =
     tone === "success"
       ? "var(--color-status-success, var(--color-trail))"
@@ -215,7 +222,7 @@ export const filterChipTrackStyle = {
  * Compact filter pill (Photos / Music style) for category selectors.
  * Selected = elevated white segment on the frosted track.
  */
-export function filterChipStyles(selected: boolean): ButtonProps["styles"] {
+export function filterChipStyles(selected: boolean): EntryButtonStyles {
   return {
     root: {
       flex: "0 0 auto",
@@ -257,7 +264,7 @@ export function filterChipStyles(selected: boolean): ButtonProps["styles"] {
  * Quiet 2-col catalog tile (Matching categories). Soft inset, no drop shadow.
  * Selected uses a light flag wash + hairline, not a solid flag brick.
  */
-export function catalogTileStyles(selected: boolean): ButtonProps["styles"] {
+export function catalogTileStyles(selected: boolean): EntryButtonStyles {
   return {
     root: {
       width: "100%",
@@ -305,7 +312,7 @@ export const askInsetSurfaceStyle = {
 } as const;
 
 /** Island-height icon control (pause / resume beside the clock). */
-export const mapIslandIconStyles: ButtonProps["styles"] = {
+export const mapIslandIconStyles: EntryButtonStyles = {
   root: {
     minHeight: "2.5rem",
     height: "2.5rem",
@@ -329,7 +336,7 @@ export const mapIslandIconStyles: ButtonProps["styles"] = {
 };
 
 /** Compact gray / secondary control for inset list rows. */
-export const compactGrayStyles: ButtonProps["styles"] = {
+export const compactGrayStyles: EntryButtonStyles = {
   root: {
     minHeight: "2.5rem",
     borderRadius: 10,
@@ -346,7 +353,7 @@ export const compactGrayStyles: ButtonProps["styles"] = {
 };
 
 /** Compact halt-tinted control for destructive row actions. */
-export const compactDangerStyles: ButtonProps["styles"] = {
+export const compactDangerStyles: EntryButtonStyles = {
   root: {
     minHeight: "2.5rem",
     borderRadius: 10,
@@ -762,7 +769,7 @@ export const homeEnterActionsStyle: CSSProperties = {
 };
 
 /** Frosted map floating control (zoom / style / recenter). Was `.hud-chrome`. */
-export function hudChromeStyles(pressed = false): ButtonProps["styles"] {
+export function hudChromeStyles(pressed = false): EntryButtonStyles {
   return {
     root: {
       display: "inline-flex",
@@ -958,144 +965,13 @@ export const mapToolSlotIconStyle: CSSProperties = {
   justifyContent: "center",
 };
 
-/** Desktop ops absolute grid shell (was `.desktop-ops-shell`). */
-export const desktopOpsShellStyle: CSSProperties = {
-  position: "absolute",
-  inset: 0,
-  display: "grid",
-  gridTemplateColumns:
-    "var(--ops-tool-rail-width, 5rem) minmax(0, 1fr) auto",
-  gridTemplateRows: "auto minmax(0, 1fr)",
-  minHeight: 0,
-  height: "100%",
-};
-
-export const desktopOpsShellStatusStyle: CSSProperties = {
-  gridColumn: "1 / -1",
-  gridRow: 1,
-  position: "relative",
-  zIndex: "var(--z-banner)",
-  pointerEvents: "none",
-};
-
-export const desktopOpsShellToolsStyle: CSSProperties = {
-  gridColumn: 1,
-  gridRow: 2,
-  position: "relative",
-  zIndex: "var(--z-dock)",
-  minHeight: 0,
-  pointerEvents: "none",
-};
-
-export const desktopOpsShellMapStyle: CSSProperties = {
-  gridColumn: 2,
-  gridRow: 2,
-  position: "relative",
-  minWidth: 0,
-  minHeight: 0,
-  overflow: "hidden",
-};
-
-export const desktopOpsShellContextualStyle: CSSProperties = {
-  gridColumn: 3,
-  gridRow: 2,
-  position: "relative",
-  zIndex: "var(--z-dock)",
-  minHeight: 0,
-};
-
-/** Expanded status sits in-flow in the ops status row. */
-export const desktopOpsStatusExpandedStyle: CSSProperties = {
+/** Expanded map status rail sits in-flow (clears absolute overlay inset). */
+export const statusRailExpandedFlowStyle: CSSProperties = {
   position: "relative",
   inset: "auto",
   top: "auto",
   right: "auto",
   left: "auto",
-};
-
-/** Desktop contextual rail host (was `.contextual-rail`). */
-export function contextualRailStyle(open: boolean): CSSProperties {
-  return {
-    display: "flex",
-    height: "100%",
-    flexDirection: "column",
-    width: open
-      ? "var(--ops-rail-width, 22rem)"
-      : "var(--ops-rail-collapsed-width, 2.75rem)",
-    borderInlineStart: "2px solid var(--color-border)",
-    background: "var(--color-surface-panel)",
-    pointerEvents: "auto",
-    transition: "width 180ms ease",
-  };
-}
-
-export const contextualRailHeaderStyle: CSSProperties = {
-  display: "flex",
-  minHeight: "2.75rem",
-  flexShrink: 0,
-  alignItems: "center",
-  gap: "0.5rem",
-  borderBottom: "1px solid var(--color-border)",
-  padding: "0.25rem 0.5rem",
-};
-
-export const contextualRailIconTabsStyle: CSSProperties = {
-  display: "flex",
-  flex: 1,
-  flexDirection: "column",
-  gap: "0.25rem",
-  padding: "0.375rem 0.25rem",
-};
-
-export function contextualRailIconTabStyle(active: boolean): CSSProperties {
-  return {
-    display: "flex",
-    minHeight: "2.75rem",
-    width: "100%",
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: "var(--radius-hud-md)",
-    fontSize: "0.625rem",
-    fontWeight: 700,
-    letterSpacing: "0.04em",
-    textTransform: "uppercase",
-    color: active ? "var(--color-ink)" : "var(--color-ink-muted)",
-    background: active ? "var(--color-surface-raised)" : "transparent",
-  };
-}
-
-export const contextualRailTabsStyle: CSSProperties = {
-  display: "flex",
-  flexShrink: 0,
-  gap: "0.125rem",
-  overflowX: "auto",
-  borderBottom: "1px solid var(--color-border)",
-  padding: "0.375rem 0.5rem",
-};
-
-export function contextualRailTabStyle(active: boolean): CSSProperties {
-  return {
-    minHeight: "2.75rem",
-    flexShrink: 0,
-    borderRadius: "var(--radius-hud-md)",
-    padding: "0 0.625rem",
-    fontFamily: "var(--font-display)",
-    fontSize: "0.75rem",
-    fontWeight: 600,
-    letterSpacing: "0.04em",
-    textTransform: "uppercase",
-    color: active ? "var(--color-action-ink)" : "var(--color-ink-muted)",
-    background: active ? "var(--color-action)" : "transparent",
-    transition: "background-color 150ms ease, color 150ms ease",
-  };
-}
-
-export const contextualRailPanelStyle: CSSProperties = {
-  minHeight: 0,
-  flex: 1,
-  overflowY: "auto",
-  overscrollBehavior: "contain",
-  padding: "0.75rem",
 };
 
 /** Chat unread pip on session dock slots (was `.jl-unread-badge`). */

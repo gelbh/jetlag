@@ -22,7 +22,10 @@ export function MapDrawStrokeCapture({
   const map = useMapLibreMap();
   const drawingRef = useRef(false);
   const handlersRef = useRef({ onBegin, onExtend, onEnd });
-  handlersRef.current = { onBegin, onExtend, onEnd };
+
+  useEffect(() => {
+    handlersRef.current = { onBegin, onExtend, onEnd };
+  }, [onBegin, onExtend, onEnd]);
 
   useEffect(() => {
     if (!enabled) {

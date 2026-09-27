@@ -1,4 +1,4 @@
-export const APP_VERSION = "0.13.0";
+export const APP_VERSION = "0.15.0";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,7 +10,60 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+{
+    version: "Unreleased",
+    date: "",
+    sections: [
+      {
+        title: "Technical",
+        items: [
+          "Geometry kernel (G5e): production always uses the WASM geometry kernel; client localStorage/env override removed. Wasm dispatch failures rethrow instead of silent TypeScript fail-soft.",
+        ],
+      },
+    ],
+  },
   {
+    version: "0.15.0",
+    date: "2026-09-27",
+    sections: [
+      {
+        title: "Fixes",
+        items: [
+          "iPhone standalone PWA map paints full-bleed under notch and home indicator",
+        ],
+      },
+      {
+        title: "Improvements",
+        items: [
+          "Mantine Wave 5: player chrome CSS prune and error surfaces on Mantine.",
+          "Smoother placement map camera reframes (ease/fly from shared motion tokens)",
+          "Softer elimination shade opacity transitions under reduced-motion rules",
+          "Drop the redundant map tools HUD coach toast; first-run Map tools guide remains",
+        ],
+      }
+    ],
+  },
+  {
+    version: "0.14.0",
+    date: "2026-09-27",
+    sections: [
+      {
+        title: "Fixes",
+        items: [
+          "Measuring: closer/further answers keep map shade after confirm in multiplayer, even when the region is too large to store as a polygon",
+        ],
+      },
+      {
+        title: "Improvements",
+        items: [
+          "Land Mantine player UI through Wave 4 (entry chrome, tool hosts, map islands).",
+          "Tentacles: recommended answers use the hiding-zone center unless the seeker is actually inside the zone",
+          "Map chrome: full-bleed hunt tool deck with even tool spacing and shared safe-area overlay padding.",
+        ],
+      }
+    ],
+  },
+{
     version: "0.13.0",
     date: "2026-08-16",
     sections: [
@@ -37,7 +90,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.12.0",
     date: "2026-08-16",
     sections: [
@@ -143,7 +196,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.11.0",
     date: "2026-08-02",
     sections: [
@@ -192,7 +245,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.10.8",
     date: "2026-07-27",
     sections: [
@@ -204,7 +257,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.10.7",
     date: "2026-07-27",
     sections: [
@@ -216,7 +269,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.10.6",
     date: "2026-07-27",
     sections: [
@@ -229,7 +282,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.10.5",
     date: "2026-07-27",
     sections: [
@@ -241,7 +294,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.10.4",
     date: "2026-07-26",
     sections: [
@@ -270,7 +323,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.10.3",
     date: "2026-07-26",
     sections: [
@@ -283,7 +336,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.10.2",
     date: "2026-07-26",
     sections: [
@@ -302,7 +355,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.10.1",
     date: "2026-07-26",
     sections: [
@@ -318,7 +371,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.10.0",
     date: "2026-07-26",
     sections: [
@@ -347,7 +400,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.9.5",
     date: "2026-07-25",
     sections: [
@@ -366,7 +419,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.9.4",
     date: "2026-07-25",
     sections: [
@@ -386,7 +439,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.9.3",
     date: "2026-07-25",
     sections: [
@@ -408,7 +461,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.9.2",
     date: "2026-07-24",
     sections: [
@@ -421,7 +474,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.9.1",
     date: "2026-07-19",
     sections: [
@@ -434,7 +487,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.9.0",
     date: "2026-07-19",
     sections: [
@@ -457,7 +510,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.8.2",
     date: "2026-07-19",
     sections: [
@@ -469,7 +522,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.8.1",
     date: "2026-07-17",
     sections: [
@@ -482,7 +535,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.8.0",
     date: "2026-07-16",
     sections: [
@@ -503,7 +556,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.7.2",
     date: "2026-07-15",
     sections: [
@@ -515,7 +568,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.7.1",
     date: "2026-07-14",
     sections: [
@@ -533,7 +586,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.7.0",
     date: "2026-07-14",
     sections: [
@@ -547,7 +600,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.6.3",
     date: "2026-07-14",
     sections: [
@@ -567,7 +620,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.6.2",
     date: "2026-07-14",
     sections: [
@@ -579,7 +632,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.6.1",
     date: "2026-07-14",
     sections: [
@@ -591,7 +644,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.6.0",
     date: "2026-07-13",
     sections: [
@@ -623,7 +676,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.5.14",
     date: "2026-07-13",
     sections: [
@@ -635,7 +688,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.5.13",
     date: "2026-07-13",
     sections: [
@@ -656,7 +709,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.5.12",
     date: "2026-07-13",
     sections: [
@@ -701,7 +754,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.5.11",
     date: "2026-07-12",
     sections: [
@@ -733,7 +786,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.5.10",
     date: "2026-07-12",
     sections: [
@@ -748,7 +801,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.5.9",
     date: "2026-07-12",
     sections: [
@@ -762,7 +815,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.5.8",
     date: "2026-07-12",
     sections: [
@@ -775,7 +828,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.5.7",
     date: "2026-07-12",
     sections: [
@@ -809,7 +862,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.5.6",
     date: "2026-07-12",
     sections: [
@@ -843,7 +896,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.5.5",
     date: "2026-07-12",
     sections: [
@@ -859,7 +912,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.5.4",
     date: "2026-07-12",
     sections: [
@@ -881,7 +934,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.5.3",
     date: "2026-07-12",
     sections: [
@@ -896,7 +949,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.5.2",
     date: "2026-07-12",
     sections: [
@@ -919,7 +972,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.5.1",
     date: "2026-07-12",
     sections: [
@@ -947,7 +1000,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.5.0",
     date: "2026-07-12",
     sections: [
@@ -963,7 +1016,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.4.8",
     date: "2026-07-12",
     sections: [
@@ -979,7 +1032,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.4.7",
     date: "2026-07-12",
     sections: [
@@ -1009,7 +1062,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.4.6",
     date: "2026-07-12",
     sections: [
@@ -1038,7 +1091,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.4.5",
     date: "2026-07-11",
     sections: [
@@ -1058,7 +1111,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.4.4",
     date: "2026-07-11",
     sections: [
@@ -1087,7 +1140,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.4.3",
     date: "2026-07-11",
     sections: [
@@ -1121,7 +1174,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.4.2",
     date: "2026-07-11",
     sections: [
@@ -1180,7 +1233,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.4.1",
     date: "2026-07-11",
     sections: [
@@ -1212,7 +1265,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.4.0",
     date: "2026-07-11",
     sections: [
@@ -1240,7 +1293,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.3.0",
     date: "2026-07-11",
     sections: [
@@ -1254,7 +1307,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.2.4",
     date: "2026-07-11",
     sections: [
@@ -1298,7 +1351,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.2.3",
     date: "2026-07-10",
     sections: [
@@ -1318,7 +1371,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.2.2",
     date: "2026-07-10",
     sections: [
@@ -1349,7 +1402,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.2.1",
     date: "2026-07-09",
     sections: [
@@ -1383,7 +1436,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.2.0",
     date: "2026-07-09",
     sections: [
@@ -1406,7 +1459,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.1.7",
     date: "2026-07-09",
     sections: [
@@ -1424,7 +1477,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.1.6",
     date: "2026-07-09",
     sections: [
@@ -1451,7 +1504,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.1.5",
     date: "2026-07-08",
     sections: [
@@ -1467,7 +1520,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.1.4",
     date: "2026-07-08",
     sections: [
@@ -1487,7 +1540,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.1.3",
     date: "2026-07-08",
     sections: [
@@ -1522,7 +1575,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.1.2",
     date: "2026-07-08",
     sections: [
@@ -1543,7 +1596,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.1.1",
     date: "2026-07-07",
     sections: [
@@ -1577,7 +1630,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       }
     ],
   },
-  {
+{
     version: "0.1.0",
     date: "2026-07-07",
     sections: [

@@ -39,7 +39,9 @@ export type GameAreaSectionModel = {
   onPresetSelect: (presetId: string) => void;
   onSavePreset: () => void;
   onOpenFramingModal: () => void;
-  onFramingModeChange: (mode: Parameters<GameAreaFraming["setFramingMode"]>[0]) => void;
+  onFramingModeChange: (
+    mode: Parameters<GameAreaFraming["setFramingMode"]>[0],
+  ) => void;
   onRemoveSelectedArea: (index: number) => void;
   onLocationQueryChange: (value: string) => void;
   onSearch: () => void;

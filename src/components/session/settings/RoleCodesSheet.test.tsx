@@ -1,4 +1,5 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, screen, waitFor } from "@testing-library/react";
+import { renderWithAppUi } from "../../../test/renderWithAppUi";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createTestRemoteSession } from "@/test/fixtures/sessions";
 import { RoleCodesSheet } from "./RoleCodesSheet";
@@ -22,10 +23,6 @@ vi.mock("../../../hooks/forms/useCopyFeedback", () => ({
   }),
 }));
 
-vi.mock("../../../hooks/layout/useDesktopLayout", () => ({
-  useDesktopLayout: () => false,
-}));
-
 const gatedSession = createTestRemoteSession({
   id: "sess-1",
   memberUids: ["host-1"],
@@ -47,7 +44,7 @@ describe("RoleCodesSheet", () => {
   it("renders stamp rows and reveals on tap", async () => {
     revealRolePasscode.mockResolvedValue({ rolePasscode: "WXYZ" });
 
-    render(
+    renderWithAppUi(
       <RoleCodesSheet
         open
         onClose={vi.fn()}

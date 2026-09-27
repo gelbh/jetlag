@@ -24,9 +24,9 @@ const appleSystemSans =
   '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif';
 
 /**
- * Brand + chrome tokens for Wave 5 map-shell/dock migration.
+ * Brand + chrome tokens for map-shell/dock.
  * Prefer reading these via `theme.other` / CSS vars over new global CSS.
- * Dock / safe-area / z-index / spacing mirror `src/styles/base.css` (bridge until W5-E).
+ * Dock / safe-area / z-index / spacing mirror `src/styles/base.css`.
  */
 export const jetlagBrand = {
   canvas: "oklch(0.285 0.036 255)",
@@ -61,10 +61,9 @@ export const jetlagBrand = {
   chromeGapBottom: "0.75rem",
   /** Matches `--dock-island-height` (phone hunt band; wide media bumps via CSS). */
   dockIslandHeight: "3.25rem",
-  /** Desktop ops contextual rail (was `desktop-ops.css`). */
+  /** Admin map shell rail widths (bridged to `--ops-rail-*` for map-shell.css). */
   opsRailWidth: "22rem",
   opsRailCollapsedWidth: "2.75rem",
-  opsToolRailWidth: "5rem",
   /** Ask HUD strip / rail height tokens (was `ask-hud.css`). ≥44px touch. */
   askHudStripHeight: "3rem",
   askHudRailMaxHeight: "40dvh",
@@ -87,7 +86,7 @@ export const jetlagTheme: MantineThemeOverride = createTheme({
   primaryShade: { light: 6, dark: 5 },
   colors: {
     flag: colorsTuple(jetlagBrand.flag),
-    /** Error / dead-session role (W3-E halt); prefer over unthemed Mantine red. */
+    /** Error / dead-session role; prefer over unthemed Mantine red. */
     halt: colorsTuple(jetlagBrand.halt),
   },
   white: jetlagBrand.fieldInk,
@@ -238,13 +237,10 @@ export const jetlagTheme: MantineThemeOverride = createTheme({
       styles: {
         root: {
           fontFamily: appleSystemSans,
-          backgroundColor: `oklch(from ${jetlagBrand.halt} l c h / 0.12)`,
-          border: `${jetlagBrand.hairline} solid oklch(from ${jetlagBrand.halt} l c h / 0.35)`,
         },
         title: {
           fontWeight: 590,
           letterSpacing: "-0.01em",
-          color: jetlagBrand.halt,
         },
         message: {
           color: jetlagBrand.fieldInk,
@@ -270,7 +266,7 @@ export const jetlagTheme: MantineThemeOverride = createTheme({
   },
 });
 
-/** Bridges brand + chrome tokens onto `:root` for residual CSS until Wave 5 chrome kill. */
+/** Bridges brand + chrome tokens onto `:root` for residual CSS. */
 export const jetlagCssVariablesResolver: CSSVariablesResolver = () => ({
   variables: {
     "--jl-control-radius": `${jetlagBrand.controlRadius}px`,
@@ -288,11 +284,9 @@ export const jetlagCssVariablesResolver: CSSVariablesResolver = () => ({
     "--jl-dock-island-height": jetlagBrand.dockIslandHeight,
     "--jl-ops-rail-width": jetlagBrand.opsRailWidth,
     "--jl-ops-rail-collapsed-width": jetlagBrand.opsRailCollapsedWidth,
-    "--jl-ops-tool-rail-width": jetlagBrand.opsToolRailWidth,
-    /* Bridge names residual CSS / map-shell still reads until W5-E. */
+    /* Bridge names admin map-shell.css still reads. */
     "--ops-rail-width": jetlagBrand.opsRailWidth,
     "--ops-rail-collapsed-width": jetlagBrand.opsRailCollapsedWidth,
-    "--ops-tool-rail-width": jetlagBrand.opsToolRailWidth,
     "--ask-hud-strip-height": jetlagBrand.askHudStripHeight,
     "--ask-hud-rail-max-height": jetlagBrand.askHudRailMaxHeight,
     "--jl-ask-hud-strip-height": jetlagBrand.askHudStripHeight,

@@ -24,8 +24,15 @@ export const MAP_CHROME_DOCKS_CHANGE_EVENT = "jl:map-chrome-docks";
 export const MAP_SIDE_DOCK_STORAGE_KEY = "jl.mapChrome.sideDock";
 export const MAP_NAV_DOCK_STORAGE_KEY = "jl.mapChrome.navDock";
 
-const EDGE_PAD_PX = 8;
 const PEER_GAP_PX = 14;
+/** Matches --dock-float-gap (0.75rem). */
+const FLOAT_GAP_PX = 12;
+/** ToolStatusBlock island (~2.75rem min-height). */
+const STATUS_ISLAND_PX = 44;
+/** --dock-island-height (3.25rem). */
+const HUNT_DOCK_PX = 52;
+/** Air between side stack and top/bottom docks. */
+export const SIDE_DOCK_CLEARANCE_PX = 16;
 
 export const DEFAULT_SIDE_PLACEMENT: MapChromeDockPlacement = {
   side: "right",
@@ -87,26 +94,57 @@ export function legacyAnchorFromPlacement(
   return `${band}-${placement.side}` as MapSideDockAnchor;
 }
 
-export function usableVerticalBand(viewportHeight: number): {
+export function usableVerticalBand(
+  viewportHeight: number,
+  safeAreaTopPx = 0,
+): {
   minTop: number;
   maxBottom: number;
 } {
+  // Status island: safe-area + float gap + island height, then clearance.
   const minTop =
-    EDGE_PAD_PX +
-    Math.min(72, viewportHeight * 0.12) +
-    20; /* status island clearance */
+    Math.max(0, safeAreaTopPx) +
+    FLOAT_GAP_PX +
+    STATUS_ISLAND_PX +
+    SIDE_DOCK_CLEARANCE_PX;
+  // Hunt dock: float gap + island height from physical bottom, then clearance.
   const maxBottom =
-    viewportHeight -
-    Math.min(160, viewportHeight * 0.22); /* above hunt dock */
+    viewportHeight - (FLOAT_GAP_PX + HUNT_DOCK_PX + SIDE_DOCK_CLEARANCE_PX);
   return { minTop, maxBottom: Math.max(minTop + 48, maxBottom) };
+}
+
+/** Resolve safe-area top from computed env() inset (not the raw CSS token text). */
+export function resolveSafeAreaTopPx(): number {
+  if (typeof document === "undefined") {
+    return 0;
+  }
+  const probe = document.createElement("div");
+  // Measure computed length of --safe-area-top (resolves env() on device; e2e can override the var).
+  probe.style.cssText =
+    "position:fixed;visibility:hidden;pointer-events:none;top:0;left:0;height:0;padding-top:var(--safe-area-top,0px)";
+  document.documentElement.appendChild(probe);
+  const px = Number.parseFloat(getComputedStyle(probe).paddingTop);
+  probe.remove();
+  return Number.isFinite(px) ? px : 0;
+}
+
+export function resolveUsableVerticalBand(viewportHeight: number): {
+  minTop: number;
+  maxBottom: number;
+} {
+  return usableVerticalBand(viewportHeight, resolveSafeAreaTopPx());
 }
 
 export function clampTopPx(
   top: number,
   height: number,
   viewportHeight: number,
+  safeAreaTopPx = 0,
 ): number {
-  const { minTop, maxBottom } = usableVerticalBand(viewportHeight);
+  const { minTop, maxBottom } = usableVerticalBand(
+    viewportHeight,
+    safeAreaTopPx,
+  );
   const maxTop = Math.max(minTop, maxBottom - height);
   return Math.min(maxTop, Math.max(minTop, top));
 }
@@ -115,10 +153,14 @@ export function topRatioFromTopPx(
   top: number,
   height: number,
   viewportHeight: number,
+  safeAreaTopPx = 0,
 ): number {
-  const { minTop, maxBottom } = usableVerticalBand(viewportHeight);
+  const { minTop, maxBottom } = usableVerticalBand(
+    viewportHeight,
+    safeAreaTopPx,
+  );
   const span = Math.max(1, maxBottom - height - minTop);
-  const clamped = clampTopPx(top, height, viewportHeight);
+  const clamped = clampTopPx(top, height, viewportHeight, safeAreaTopPx);
   return Math.min(1, Math.max(0, (clamped - minTop) / span));
 }
 
@@ -126,11 +168,20 @@ export function topPxFromTopRatio(
   topRatio: number,
   height: number,
   viewportHeight: number,
+  safeAreaTopPx = 0,
 ): number {
-  const { minTop, maxBottom } = usableVerticalBand(viewportHeight);
+  const { minTop, maxBottom } = usableVerticalBand(
+    viewportHeight,
+    safeAreaTopPx,
+  );
   const span = Math.max(1, maxBottom - height - minTop);
   const ratio = Math.min(1, Math.max(0, topRatio));
-  return clampTopPx(minTop + ratio * span, height, viewportHeight);
+  return clampTopPx(
+    minTop + ratio * span,
+    height,
+    viewportHeight,
+    safeAreaTopPx,
+  );
 }
 
 /**
@@ -145,9 +196,14 @@ export function resolveStackedTops(input: {
   preferAbove: boolean;
   viewportHeight: number;
   gap?: number;
+  safeAreaTopPx?: number;
 }): { moverTop: number; peerTop: number } {
   const gap = input.gap ?? PEER_GAP_PX;
-  const { minTop, maxBottom } = usableVerticalBand(input.viewportHeight);
+  const safeTop = input.safeAreaTopPx ?? 0;
+  const { minTop, maxBottom } = usableVerticalBand(
+    input.viewportHeight,
+    safeTop,
+  );
   let moverTop = input.moverTop;
   let peerTop = input.peerTop;
   const { moverHeight, peerHeight } = input;
@@ -158,8 +214,13 @@ export function resolveStackedTops(input: {
 
   if (!overlaps) {
     return {
-      moverTop: clampTopPx(moverTop, moverHeight, input.viewportHeight),
-      peerTop: clampTopPx(peerTop, peerHeight, input.viewportHeight),
+      moverTop: clampTopPx(
+        moverTop,
+        moverHeight,
+        input.viewportHeight,
+        safeTop,
+      ),
+      peerTop: clampTopPx(peerTop, peerHeight, input.viewportHeight, safeTop),
     };
   }
 
@@ -196,8 +257,8 @@ export function resolveStackedTops(input: {
   }
 
   return {
-    moverTop: clampTopPx(moverTop, moverHeight, input.viewportHeight),
-    peerTop: clampTopPx(peerTop, peerHeight, input.viewportHeight),
+    moverTop: clampTopPx(moverTop, moverHeight, input.viewportHeight, safeTop),
+    peerTop: clampTopPx(peerTop, peerHeight, input.viewportHeight, safeTop),
   };
 }
 

@@ -141,7 +141,7 @@ test("isExpectedFunctionsError matches session-already-ended HttpsError", () => 
   );
 });
 
-test("isExpectedFunctionsError matches support agent LLM unavailable HttpsError", () => {
+test("isExpectedFunctionsError matches support agent unavailable HttpsError", () => {
   assert.equal(
     isExpectedFunctionsError(
       new HttpsError(
@@ -408,7 +408,7 @@ test("isExpectedFunctionsError ignores unrelated HttpsErrors and plain Errors", 
   );
   assert.equal(isExpectedFunctionsError(new Error("LEAVE_NOT_HOST")), false);
   assert.equal(
-    isExpectedFunctionsError(new Error("SESSION_OPS_LLM_FAILED")),
+    isExpectedFunctionsError(new Error("SESSION_OPS_AGENT_FAILED")),
     false,
   );
   assert.equal(isExpectedFunctionsError(null), false);

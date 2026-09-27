@@ -6,9 +6,7 @@ import {
   Scroll,
   WarningCircle,
 } from "@phosphor-icons/react";
-import type { NotificationPreferences } from "@/domain/device/chrome/notifications";
 import { SettingsToggleRow } from "../settings/SettingsToggleRow";
-import { NotificationPreferencesSection } from "./NotificationPreferencesSection";
 import {
   InsetGroup,
   SectionLabel,
@@ -48,12 +46,6 @@ export interface MapSettingsSessionTabProps {
   onKeepScreenAwakeChange: (enabled: boolean) => void;
   lowPowerMode: boolean;
   onLowPowerModeChange: (enabled: boolean) => void;
-  notificationPreferences?: NotificationPreferences;
-  nativeNotificationsSupported?: boolean;
-  onNotificationPreferencesChange?: (
-    patch: Partial<NotificationPreferences>,
-  ) => void;
-  onEnableNotifications?: () => Promise<boolean>;
   onClearMap?: () => void;
   onExport?: () => void;
   isHost: boolean;
@@ -74,10 +66,6 @@ export function MapSettingsSessionTab({
   onKeepScreenAwakeChange,
   lowPowerMode,
   onLowPowerModeChange,
-  notificationPreferences,
-  nativeNotificationsSupported = false,
-  onNotificationPreferencesChange,
-  onEnableNotifications,
   onClearMap,
   onExport,
   isHost,
@@ -151,15 +139,6 @@ export function MapSettingsSessionTab({
             onChange={onLowPowerModeChange}
           />
         </InsetGroup>
-        {nativeNotificationsSupported &&
-        notificationPreferences &&
-        onNotificationPreferencesChange ? (
-          <NotificationPreferencesSection
-            preferences={notificationPreferences}
-            onChange={onNotificationPreferencesChange}
-            onEnableNotifications={onEnableNotifications}
-          />
-        ) : null}
       </Stack>
 
       {helpItems.length > 0 ? (

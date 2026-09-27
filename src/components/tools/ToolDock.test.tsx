@@ -63,6 +63,22 @@ describe("ToolDock", () => {
     expect(screen.getByRole("menuitemradio", { name: /Zone/i })).toBeInTheDocument();
   });
 
+  it("selects Pin after pointerdown inside the portaled Draw sheet", async () => {
+    const onSelect = vi.fn();
+    renderDock(<ToolDock {...dockBase} onSelect={onSelect} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Draw on map" }));
+    const pin = await screen.findByRole("menuitemradio", { name: /Pin/i });
+
+    // Document outside-click listener must not close the sheet on pointerdown
+    // inside the portaled Drawer (duration-0 unmount would swallow the click).
+    fireEvent.pointerDown(pin);
+    expect(screen.getByRole("menuitemradio", { name: /Pin/i })).toBeInTheDocument();
+    fireEvent.click(pin);
+
+    expect(onSelect).toHaveBeenCalledWith("pin");
+  });
+
   it("renders session island tools including Log", () => {
     const onOpenReportProblem = vi.fn();
     const onOpenSettings = vi.fn();
@@ -219,16 +235,6 @@ describe("ToolDock", () => {
     }
   });
 
-  it("applies rail layout class when layout is rail", () => {
-    const { container } = renderDock(
-      <ToolDock {...dockBase} layout="rail" />,
-    );
-
-    expect(container.querySelector(".jl-tool-dock--rail")).not.toBeNull();
-    expect(screen.getByRole("button", { name: "Radar" })).toBeInTheDocument();
-    expect(screen.getByLabelText("Session tools")).toBeInTheDocument();
-  });
-
   it("does not render the dual-row secondary bar", () => {
     renderDock(<ToolDock {...dockBase} onOpenChat={vi.fn()} />);
     expect(document.querySelector(".jl-tool-dock-bar--secondary")).toBeNull();
@@ -283,6 +289,25 @@ describe("ToolDock", () => {
     fireEvent.click(redo);
     expect(onUndo).toHaveBeenCalledTimes(1);
     expect(onRedo).toHaveBeenCalledTimes(1);
+  });
+
+  it("omits Undo and Redo when showHistory is false", () => {
+    renderDock(
+      <ToolDock {...dockBase} showHistory={false} canUndo canRedo />,
+    );
+    expect(
+      screen.queryByRole("button", { name: "Undo last annotation" }),
+    ).toBeNull();
+    expect(
+      screen.queryByRole("button", { name: "Redo last annotation" }),
+    ).toBeNull();
+  });
+
+  it("keeps Undo and Redo when showHistory is true (default)", () => {
+    renderDock(<ToolDock {...dockBase} canUndo canRedo />);
+    expect(
+      screen.getByRole("button", { name: "Undo last annotation" }),
+    ).toBeInTheDocument();
   });
 
   it("disables unavailable and inactive history slots", () => {
@@ -342,8 +367,10 @@ describe("ToolDock", () => {
     expect(
       screen.getByText("Match").getAttribute("data-ios-tool-label"),
     ).toBe("");
-    expect(screen.getByText("Match")).not.toHaveClass("jl-tool-slot-label");
-    expect(hunt?.style.borderTop).not.toBe("3px solid var(--color-flag)");
+    expect(screen.getByText("Match")).toHaveClass("jl-tool-slot-label");
+    expect((hunt as HTMLElement | null)?.style.borderTop).not.toBe(
+      "3px solid var(--color-flag)",
+    );
   });
 });
 

@@ -475,7 +475,7 @@ describe("worker fetch", () => {
     expect(body).toMatch(/<script nonce="[^"]+" src="\/boot-recovery\.js"><\/script>/);
     expect(response.headers.get("Content-Security-Policy")).toBeNull();
   });
-  it("routes /ingest/e/ through PostHog proxy without hitting assets", async () => {
+  it("routes /ph/e/ through PostHog proxy without hitting assets", async () => {
     const fetchMock = vi.fn(async () => new Response("ok", { status: 200 }));
     vi.stubGlobal("fetch", fetchMock);
     try {
@@ -486,7 +486,7 @@ describe("worker fetch", () => {
       } as Env;
 
       const response = await worker.fetch(
-        new Request("https://jetlag.gelbhart.dev/ingest/e/", {
+        new Request("https://jetlag.gelbhart.dev/ph/e/", {
           method: "POST",
           body: "{}",
         }),
@@ -501,7 +501,7 @@ describe("worker fetch", () => {
     }
   });
 
-  it("does not proxy /ingest-anything prefix boundary paths", async () => {
+  it("does not proxy /ph-anything prefix boundary paths", async () => {
     const assetResponse = new Response("missing", { status: 404 });
     const env = {
       ASSETS: {
@@ -510,7 +510,7 @@ describe("worker fetch", () => {
     } as Env;
 
     await worker.fetch(
-      new Request("https://jetlag.gelbhart.dev/ingest-anything"),
+      new Request("https://jetlag.gelbhart.dev/ph-anything"),
       env,
     );
 
@@ -610,10 +610,10 @@ describe("handleSentryTunnelRequest", () => {
 });
 
 describe("posthogProxy", () => {
-  it("shouldHandlePosthogProxy matches /ingest prefix", () => {
-    expect(shouldHandlePosthogProxy("/ingest")).toBe(true);
-    expect(shouldHandlePosthogProxy("/ingest/e/")).toBe(true);
-    expect(shouldHandlePosthogProxy("/ingest/static/foo.js")).toBe(true);
+  it("shouldHandlePosthogProxy matches /ph prefix", () => {
+    expect(shouldHandlePosthogProxy("/ph")).toBe(true);
+    expect(shouldHandlePosthogProxy("/ph/e/")).toBe(true);
+    expect(shouldHandlePosthogProxy("/ph/static/foo.js")).toBe(true);
     expect(shouldHandlePosthogProxy("/api/sentry-tunnel")).toBe(false);
   });
 
@@ -630,7 +630,7 @@ describe("posthogProxy", () => {
     );
 
     const response = await handlePosthogProxyRequest(
-      new Request("https://jetlag.gelbhart.dev/ingest/e/?ip=0", {
+      new Request("https://jetlag.gelbhart.dev/ph/e/?ip=0", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -655,13 +655,13 @@ describe("posthogProxy", () => {
     });
 
     await handlePosthogProxyRequest(
-      new Request("https://jetlag.gelbhart.dev/ingest/static/banana.js", {
+      new Request("https://jetlag.gelbhart.dev/ph/static/banana.js", {
         method: "GET",
       }),
       fetchImpl,
     );
     await handlePosthogProxyRequest(
-      new Request("https://jetlag.gelbhart.dev/ingest/array/config.json", {
+      new Request("https://jetlag.gelbhart.dev/ph/array/config.json", {
         method: "GET",
       }),
       fetchImpl,
