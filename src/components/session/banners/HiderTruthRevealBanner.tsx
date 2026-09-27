@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import type { HiderTruthResult } from "@/domain/questions/ui";
+import { MapFloatSurface } from "../../ui/banners/MapFloatSurface";
 import { HudBanner } from "../../ui/hud/HudBanner";
 
 export interface HiderTruthRevealState {
@@ -39,17 +40,19 @@ export function HiderTruthRevealBanner({
           type="button"
           onClick={onDismiss}
           data-testid="hider-truth-reveal-banner"
-          className="map-float-alert w-auto border border-status-info/40 bg-status-info-surface px-3 py-2.5 text-left"
+          className="w-auto border-0 bg-transparent p-0 text-left"
         >
-          <p className="text-xs font-semibold uppercase tracking-wide text-brand-blue">
-            Bluff sent
-          </p>
-          <p className="mt-1 text-sm text-ink">
-            Sent: {reveal.selectedLabel}, answer truth was {reveal.truth.label}
-          </p>
-          <p className="mt-1.5 inline-flex rounded-md bg-status-warning-surface px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-status-warning">
-            Does not match
-          </p>
+          <MapFloatSurface tone="info">
+            <p className="text-xs font-semibold uppercase tracking-wide text-brand-blue">
+              Bluff sent
+            </p>
+            <p className="mt-1 text-sm text-ink">
+              Sent: {reveal.selectedLabel}, answer truth was {reveal.truth.label}
+            </p>
+            <p className="mt-1.5 inline-flex rounded-md bg-status-warning-surface px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-status-warning">
+              Does not match
+            </p>
+          </MapFloatSurface>
         </button>
       ) : null}
     </HudBanner>

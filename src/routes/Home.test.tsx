@@ -210,17 +210,30 @@ describe("Home", () => {
       name: LEGAL_APP_NAME,
     });
     const logo = screen.getByRole("img", { name: LEGAL_APP_NAME });
-    const lockup = heading.parentElement;
+    const tagline = screen.getByText(
+      "Unofficial fan companion for Jet Lag: The Game.",
+    );
+    const versionControl = screen.getByRole("button", {
+      name: `Version ${APP_VERSION}. Open changelog`,
+    });
+    const titleColumn = heading.parentElement;
+    const logoColumn = logo.parentElement;
+    const lockup = titleColumn?.parentElement;
 
+    expect(titleColumn).toContainElement(tagline);
+    expect(logoColumn).toContainElement(versionControl);
     expect(lockup).not.toBeNull();
     expect(lockup).toContainElement(logo);
+    expect(lockup).toContainElement(heading);
     expect(lockup!.style.getPropertyValue("--group-wrap").trim()).toBe(
       "nowrap",
     );
     expect(
       logo.compareDocumentPosition(heading) & Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy();
-    expect(String(logo.getAttribute("class") ?? "")).toContain("shrink-0");
+    expect(String(logoColumn?.getAttribute("class") ?? "")).toContain(
+      "shrink-0",
+    );
     expect(heading.style.minWidth).toMatch(/^0(px)?$/);
   });
 

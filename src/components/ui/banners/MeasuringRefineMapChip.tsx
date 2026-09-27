@@ -1,5 +1,6 @@
+import { jetlagBrand } from "@/theme/theme";
+import { MapFloatSurface } from "./MapFloatSurface";
 import { HudBanner } from "../hud/HudBanner";
-import { mapChromeSurfaceStyles } from "@/components/ui/entry/entryChrome";
 
 const DEFAULT_TITLE = "Refining measure";
 const DEFAULT_BODY = "Adding detail to the shaded area…";
@@ -18,14 +19,10 @@ export function MeasuringRefineMapChip({
       visible={visible}
       className="jl-app-update-chip jl-measuring-refine-chip pointer-events-auto fixed inset-x-0 z-[var(--z-panel)] px-3"
     >
-      <div
+      <MapFloatSurface
+        tone="info"
         data-testid="measuring-refine-chip"
-        className="mx-auto flex max-w-[min(calc(100%-1.5rem),22rem)] items-center gap-2.5 px-3 py-2.5"
-        style={{
-          ...mapChromeSurfaceStyles,
-          borderRadius: 14,
-          color: "var(--color-field-ink)",
-        }}
+        className="mx-auto flex max-w-[min(calc(100%-1.5rem),22rem)] items-center gap-2.5"
         role="status"
         aria-live="polite"
       >
@@ -36,21 +33,21 @@ export function MeasuringRefineMapChip({
             height: 16,
             flexShrink: 0,
             borderRadius: "50%",
-            border: "2px solid oklch(from var(--color-flag) l c h / 0.25)",
-            borderTopColor: "var(--color-flag)",
+            border: `2px solid oklch(from ${jetlagBrand.flag} l c h / 0.25)`,
+            borderTopColor: jetlagBrand.flag,
             animation: "jl-refine-spin 0.7s linear infinite",
           }}
         />
         <div className="min-w-0 flex-1">
           <p
             className="m-0 text-[0.6875rem] font-semibold leading-none"
-            style={{ color: "var(--color-field-ink-muted)" }}
+            style={{ color: jetlagBrand.fieldInkMuted }}
           >
             {title}
           </p>
           <p
             className="m-0 mt-1 text-sm font-medium leading-snug"
-            style={{ color: "var(--color-field-ink)" }}
+            style={{ color: jetlagBrand.fieldInk }}
           >
             {body}
           </p>
@@ -60,7 +57,7 @@ export function MeasuringRefineMapChip({
             to { transform: rotate(360deg); }
           }
         `}</style>
-      </div>
+      </MapFloatSurface>
     </HudBanner>
   );
 }
