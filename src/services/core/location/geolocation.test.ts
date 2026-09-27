@@ -182,11 +182,9 @@ describe("geolocation permission gating", () => {
   );
 
   it("restoreLocationAccessIfPersisted shares one quiet read across concurrent callers", async () => {
-    const getCurrentPosition = vi.fn(
-      (success: PositionCallback, _error?: PositionErrorCallback) => {
-        success(createMockGeolocationPosition(53.35, -6.26));
-      },
-    );
+    const getCurrentPosition = vi.fn((success: PositionCallback) => {
+      success(createMockGeolocationPosition(53.35, -6.26));
+    });
 
     vi.stubGlobal("navigator", {
       ...navigator,

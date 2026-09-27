@@ -68,11 +68,9 @@ export function useLiveLocation(
       return;
     }
 
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- disable cleanup
     setReading(null);
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setError(null);
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setNeedsPermissionPrompt(false);
   }, [enabled]);
 
