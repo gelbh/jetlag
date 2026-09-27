@@ -192,6 +192,26 @@ async function registerMapLibreMarkerImagesOnce(
   );
 }
 
+const JL_ICON_PREFIX = "jl-icon-";
+
+/**
+ * On-demand path for marker sprites when a symbol layer paints before
+ * eager register finishes (or after setStyle cleared images).
+ */
+export function attachMapLibreMissingMarkerImageResolver(
+  map: MapLibreMap,
+): () => void {
+  map.setMissingStyleImageResolver(async (id) => {
+    if (!id.startsWith(JL_ICON_PREFIX)) {
+      return;
+    }
+    await registerMapLibreMarkerImages(map);
+  });
+  return () => {
+    map.setMissingStyleImageResolver(null);
+  };
+}
+
 /** Load shared marker images into the MapLibre map (idempotent per style). */
 export async function registerMapLibreMarkerImages(
   map: MapLibreMap,
@@ -220,6 +240,7 @@ export function useMapLibreMarkerImages(): void {
   useEffect(() => {
     const map = mapRef.getMap();
     let cancelled = false;
+    const detachMissing = attachMapLibreMissingMarkerImageResolver(map);
 
     const register = () => {
       if (cancelled) {
@@ -234,6 +255,7 @@ export function useMapLibreMarkerImages(): void {
     return () => {
       cancelled = true;
       map.off("style.load", register);
+      detachMissing();
     };
   }, [mapRef]);
 }
