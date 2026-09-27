@@ -5,7 +5,7 @@ import { point as turfPoint } from "@turf/helpers";
 import type { Feature, MultiPolygon, Polygon } from "geojson";
 import { wasmBuildSpatialVoronoiFromSites } from "./voronoiWasm";
 import { dispatchSpatialVoronoi } from "./voronoiKernelRunner";
-import { buildTentacleEliminationRegion } from "./tentacleRegions";
+import { wasmBuildTentacleEliminationRegion } from "./tentacleWasm";
 import { runTentacleEliminationRegion } from "./tentacleKernelRunner";
 import type { GameAreaGeometry, LatLngTuple } from "./types";
 
@@ -55,7 +55,7 @@ describe("kernel dispatch ready", () => {
       gameArea: sampleGameArea,
       voronoiCells: cells,
     };
-    const expected = buildTentacleEliminationRegion(
+    const expected = await wasmBuildTentacleEliminationRegion(
       params.anchor,
       params.radiusMeters,
       params.sites,
@@ -106,13 +106,13 @@ describe("kernel dispatch ready", () => {
   });
 });
 
-describe("buildTentacleEliminationRegion kernel", () => {
+describe("wasmBuildTentacleEliminationRegion kernel", () => {
   it("returns null when fewer than two sites", async () => {
     const cells = await wasmBuildSpatialVoronoiFromSites([
       { lng: -0.18, lat: 51.45, properties: { poiId: "west" } },
     ]);
     expect(
-      buildTentacleEliminationRegion(
+      await wasmBuildTentacleEliminationRegion(
         anchor,
         oneMileMeters,
         [westSite],
@@ -132,7 +132,7 @@ describe("buildTentacleEliminationRegion kernel", () => {
         properties: { poiId: s.id },
       })),
     );
-    const region = buildTentacleEliminationRegion(
+    const region = await wasmBuildTentacleEliminationRegion(
       anchor,
       oneMileMeters,
       sites,
