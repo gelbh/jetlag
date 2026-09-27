@@ -16,8 +16,11 @@ export async function readVisibleToolDockLabelMetrics(
   page: Page,
 ): Promise<ToolDockVisibleLabelMetrics[]> {
   return page.evaluate(() => {
+    // Mantine slot labels use data-ios-tool-label (jl-tool-slot-label retired).
     const labels = [
-      ...document.querySelectorAll(".jl-map-island .jl-tool-slot-label"),
+      ...document.querySelectorAll(
+        ".jl-map-island .jl-tool-slot [data-ios-tool-label]",
+      ),
     ];
     return labels
       .map((label) => {
