@@ -13,6 +13,10 @@ import { ANALYTICS_EVENTS, track } from "../core/analytics/analytics";
 import { getFirebaseFunctions, isFirebaseConfigured } from "../core/firebase/firebase";
 import { serializeGameAreaForFirestore } from "../firestore/serialization/shared";
 import { deserializeSessionFromFirestore } from "../firestore/serialization/serializeSession";
+import {
+  AUTH_FAILURE_MESSAGE,
+  withPermissionDeniedAuthRetry,
+} from "../firestore/sessions/shared";
 
 function billingUnavailable(): never {
   throw new Error("Premium billing is not available offline.");
@@ -180,19 +184,27 @@ export async function createPremiumRemoteSession(
   >(functions, "createPremiumSession");
 
   try {
-    const result = await callable({
-      gameArea: serializedArea,
-      transitMetroId: input.transitMetroId,
-      hostRole: input.hostRole,
-      gameSize: input.gameSize,
-      distanceUnit: input.distanceUnit ?? "imperial",
-      hostAppVersion: input.hostAppVersion,
-      rulesPatch: input.rulesPatch,
+    const result = await withPermissionDeniedAuthRetry(async () => {
+      return await callable({
+        gameArea: serializedArea,
+        transitMetroId: input.transitMetroId,
+        hostRole: input.hostRole,
+        gameSize: input.gameSize,
+        distanceUnit: input.distanceUnit ?? "imperial",
+        hostAppVersion: input.hostAppVersion,
+        rulesPatch: input.rulesPatch,
+      });
     });
 
     const raw = result.data.session;
     return deserializeSessionFromFirestore(raw.id, raw);
   } catch (error) {
+    if (
+      error instanceof Error &&
+      error.message === AUTH_FAILURE_MESSAGE
+    ) {
+      throw error;
+    }
     throw mapCallableError(error, "Could not create premium session.");
   }
 }

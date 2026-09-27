@@ -1,5 +1,7 @@
+import { FirebaseError } from "firebase/app";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { GameArea } from "../../domain/map/annotations";
+import { AUTH_FAILURE_MESSAGE } from "./sessions/shared";
 
 const getDoc = vi.hoisted(() => vi.fn());
 const setDoc = vi.hoisted(() => vi.fn(async () => undefined));
@@ -7,6 +9,7 @@ const updateDoc = vi.hoisted(() => vi.fn(async () => undefined));
 const deleteDoc = vi.hoisted(() => vi.fn(async () => undefined));
 const initSessionRoleGates = vi.hoisted(() => vi.fn());
 const clientEnvUsesFirebaseEmulator = vi.hoisted(() => vi.fn(() => false));
+const forceRefreshIdToken = vi.hoisted(() => vi.fn(async () => undefined));
 
 vi.mock("../../config/env", () => ({
   clientEnvUsesFirebaseEmulator,
@@ -18,6 +21,10 @@ vi.mock("../core/firebase/firebase", () => ({
 
 vi.mock("../session/rolePasscodeLifecycle", () => ({
   initSessionRoleGates,
+}));
+
+vi.mock("../core/auth/forceRefreshIdToken", () => ({
+  forceRefreshIdToken,
 }));
 
 vi.mock("firebase/firestore", () => ({
@@ -62,6 +69,7 @@ describe("createRemoteSession role-gate bootstrap", () => {
     clientEnvUsesFirebaseEmulator.mockReturnValue(false);
     getDoc.mockResolvedValue({ exists: () => false });
     setDoc.mockResolvedValue(undefined);
+    forceRefreshIdToken.mockClear();
     initSessionRoleGates.mockResolvedValue({
       observerPasscode: "OBSV",
       rolePasscode: "ROLE",
@@ -86,6 +94,32 @@ describe("createRemoteSession role-gate bootstrap", () => {
       version: 1,
       leaders: { seeker: "host-1" },
     });
+  });
+
+  it("refreshes auth and retries create writes after permission-denied", async () => {
+    setDoc
+      .mockRejectedValueOnce(
+        new FirebaseError("permission-denied", "Missing or insufficient permissions."),
+      )
+      .mockResolvedValue(undefined);
+
+    await expect(createRemoteSession(AREA, "host-1")).resolves.toMatchObject({
+      hostUid: "host-1",
+    });
+
+    expect(forceRefreshIdToken).toHaveBeenCalledOnce();
+    expect(setDoc).toHaveBeenCalledTimes(3);
+  });
+
+  it("throws auth failure when create writes stay permission-denied", async () => {
+    setDoc.mockRejectedValue(
+      new FirebaseError("permission-denied", "Missing or insufficient permissions."),
+    );
+
+    await expect(createRemoteSession(AREA, "host-1")).rejects.toThrow(
+      AUTH_FAILURE_MESSAGE,
+    );
+    expect(initSessionRoleGates).not.toHaveBeenCalled();
   });
 
   it("rolls back session docs when init fails outside emulator", async () => {

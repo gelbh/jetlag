@@ -27,6 +27,7 @@ import {
   sessionCodeDoc,
   rollbackCreatedRemoteSession,
   isFirestorePermissionDenied,
+  withPermissionDeniedAuthRetry,
 } from "./shared";
 import {
   getRemoteSessionByIdFromServer,
@@ -161,30 +162,32 @@ export async function createRemoteSession(
     ...rulesPatch,
   };
 
-  await setDoc(sessionRef, {
-    ...buildSessionDocument(
-      code,
-      gameArea,
-      hostUid,
-      createdAt,
-      tier,
-      transitMetroId,
-      hostRole,
-      gameSize,
-      rulesPatch,
-      distanceUnit ?? "imperial",
-      hostAppVersion,
-    ),
-    createdAtServer: serverTimestamp(),
-  });
+  await withPermissionDeniedAuthRetry(async () => {
+    await setDoc(sessionRef, {
+      ...buildSessionDocument(
+        code,
+        gameArea,
+        hostUid,
+        createdAt,
+        tier,
+        transitMetroId,
+        hostRole,
+        gameSize,
+        rulesPatch,
+        distanceUnit ?? "imperial",
+        hostAppVersion,
+      ),
+      createdAtServer: serverTimestamp(),
+    });
 
-  await setDoc(sessionCodeDoc(code), {
-    sessionId: sessionRef.id,
-    hostUid,
-    hostAppVersion,
-    tier,
-    status: "active",
-    createdAt,
+    await setDoc(sessionCodeDoc(code), {
+      sessionId: sessionRef.id,
+      hostUid,
+      hostAppVersion,
+      tier,
+      status: "active",
+      createdAt,
+    });
   });
 
   // CI e2e / local emulator run auth+firestore+storage only — no Functions.

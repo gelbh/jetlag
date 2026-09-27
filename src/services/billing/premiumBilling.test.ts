@@ -8,6 +8,7 @@ import {
   startPremiumTrial,
 } from "./premiumBilling";
 import { createTestSession } from "../../test/fixtures/sessions";
+import { AUTH_FAILURE_MESSAGE } from "../firestore/sessions/shared";
 
 const { callable, httpsCallable, isFirebaseConfigured } = vi.hoisted(() => {
   const callable = vi.fn();
@@ -30,6 +31,11 @@ vi.mock("../../config/env", () => ({
 }));
 
 const track = vi.hoisted(() => vi.fn());
+const forceRefreshIdToken = vi.hoisted(() => vi.fn(async () => undefined));
+
+vi.mock("../core/auth/forceRefreshIdToken", () => ({
+  forceRefreshIdToken,
+}));
 
 vi.mock("../core/analytics/analytics", () => ({
   ANALYTICS_EVENTS: {
@@ -153,6 +159,62 @@ describe("premiumBilling", () => {
     callable.mockResolvedValueOnce({ data: { url: "https://portal.test" } });
 
     await expect(openPremiumBillingPortal()).resolves.toBe("https://portal.test");
+  });
+
+  it("refreshes auth and retries premium create after permission-denied", async () => {
+    const session = createTestSession({ id: "session-premium", code: "PREM" });
+    callable
+      .mockRejectedValueOnce(
+        new FirebaseError("functions/permission-denied", "denied"),
+      )
+      .mockResolvedValueOnce({
+        data: {
+          session: {
+            id: session.id,
+            code: session.code,
+            gameArea: session.gameArea,
+            createdAt: session.createdAt,
+            memberUids: session.memberUids,
+            status: session.status,
+            tier: "premium",
+          },
+        },
+      });
+
+    await expect(
+      createPremiumRemoteSession({
+        gameArea: session.gameArea,
+        hostUid: "host-uid",
+        tier: "premium",
+        hostRole: "seeker",
+        gameSize: "medium",
+        rulesPatch: {},
+        distanceUnit: "imperial",
+        hostAppVersion: "0.4.0",
+      }),
+    ).resolves.toMatchObject({ id: "session-premium" });
+
+    expect(forceRefreshIdToken).toHaveBeenCalledOnce();
+    expect(callable).toHaveBeenCalledTimes(2);
+  });
+
+  it("surfaces auth failure without mapping premium create errors", async () => {
+    callable.mockRejectedValue(
+      new FirebaseError("functions/permission-denied", "denied"),
+    );
+
+    await expect(
+      createPremiumRemoteSession({
+        gameArea: createTestSession().gameArea,
+        hostUid: "host-uid",
+        tier: "premium",
+        hostRole: "seeker",
+        gameSize: "medium",
+        rulesPatch: {},
+        distanceUnit: "imperial",
+        hostAppVersion: "0.4.0",
+      }),
+    ).rejects.toThrow(AUTH_FAILURE_MESSAGE);
   });
 
   it("creates a premium session from callable payload", async () => {
