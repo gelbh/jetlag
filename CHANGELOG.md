@@ -6,6 +6,27 @@
 
 - Geometry kernel (G5e): production always uses the WASM geometry kernel; client localStorage/env override removed. Wasm dispatch failures rethrow instead of silent TypeScript fail-soft.
 
+## 0.16.0 - 2026-09-27
+
+### Fixes
+
+- Persist location Allow so Safari map reloads skip the banner when Permissions stays masked as prompt
+
+### Improvements
+
+- Hider set/move zone uses map-first placement (method chips, then map overlay)
+- Hide Undo/Redo on the hider tool dock in multiplayer sessions
+- Player UI runs in a fixed phone-width shell; desktop ops layout removed
+- Map chrome, drawers, and entry routes stay inside the phone column
+- Session support agent shows a working state while Cursor Cloud Agents finishes the reply
+- Player bottom sheets support drag-to-dismiss with iOS-style open/close motion
+
+### Technical
+
+- Run session-ops turns on Cursor agents with HTTP MCP instead of OpenAI chat-completions
+- Gate CI on zero ESLint warnings and clear existing lint debt
+- Geometry kernel production path is WASM-only (G0–G5j); client override and TypeScript dual-path removed for shipped ops
+
 ## 0.15.0 - 2026-09-27
 
 ### Fixes
