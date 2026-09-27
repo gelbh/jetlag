@@ -64,7 +64,7 @@ export function PwaInstallTipBanner() {
           <Button
             type="button"
             variant="default"
-            size="compact-md"
+            size="md"
             onClick={dismiss}
           >
             Not now
@@ -73,7 +73,7 @@ export function PwaInstallTipBanner() {
             <Button
               type="button"
               variant="filled"
-              size="compact-md"
+              size="md"
               onClick={() => {
                 void promptInstall().then((accepted) => {
                   if (accepted) {
@@ -88,7 +88,7 @@ export function PwaInstallTipBanner() {
             <Button
               type="button"
               variant="filled"
-              size="compact-md"
+              size="md"
               onClick={dismiss}
             >
               OK

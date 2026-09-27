@@ -559,6 +559,14 @@
     bottom: calc(var(--dock-height) + max(0.5rem, env(safe-area-inset-bottom)));
   }
 
+  /* Narrow phones: stack update chip copy above action (replaces Survey float stack). */
+  @media (width <= 380px) {
+    .jl-app-update-chip [data-map-float-surface="true"] {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  }
+
   /* Admin map: mission-control layout (tablet/desktop) */
   .admin-dashboard-list-scroll {
     overscroll-behavior: contain;

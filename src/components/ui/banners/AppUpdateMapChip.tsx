@@ -28,7 +28,7 @@ export function AppUpdateMapChip() {
         <Button
           type="button"
           variant="default"
-          size="compact-md"
+          size="md"
           onClick={dismissDeferred}
         >
           {appUpdateCopy.deferredDismiss}

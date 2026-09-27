@@ -74,6 +74,7 @@ export function MapFloatSurface({
     "aria-labelledby": ariaLabelledby,
     "aria-describedby": ariaDescribedby,
     "data-testid": dataTestId,
+    "data-map-float-surface": "true",
   };
 
   // Paper when callers need unconstrained children (no title → panel / card body).

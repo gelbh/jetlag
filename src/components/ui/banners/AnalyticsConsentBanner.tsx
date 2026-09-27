@@ -53,7 +53,7 @@ export function AnalyticsConsentBanner() {
           <Button
             type="button"
             variant="default"
-            size="compact-md"
+            size="md"
             onClick={() => {
               denyAnalyticsConsent();
               setConsent("denied");
@@ -64,7 +64,7 @@ export function AnalyticsConsentBanner() {
           <Button
             type="button"
             variant="filled"
-            size="compact-md"
+            size="md"
             onClick={() => {
               grantAnalyticsConsent();
               setConsent("granted");

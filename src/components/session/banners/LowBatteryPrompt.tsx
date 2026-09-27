@@ -78,7 +78,7 @@ export function LowBatteryPrompt() {
           <Button
             type="button"
             variant="filled"
-            size="compact-md"
+            size="md"
             flex={1}
             onClick={enableLowPowerMode}
           >
@@ -87,7 +87,7 @@ export function LowBatteryPrompt() {
           <Button
             type="button"
             variant="default"
-            size="compact-md"
+            size="md"
             flex={1}
             onClick={dismiss}
           >

@@ -46,7 +46,7 @@ export function IncidentResolvedBanner({
           <Button
             type="button"
             variant="default"
-            size="compact-md"
+            size="md"
             onClick={() => {
               onDismiss(notice.incidentId);
             }}

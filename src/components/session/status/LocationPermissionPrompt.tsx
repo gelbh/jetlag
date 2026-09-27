@@ -160,7 +160,7 @@ export function LocationPermissionPrompt() {
               <Button
                 type="button"
                 variant="default"
-                size="compact-md"
+                size="md"
                 flex={1}
                 disabled={busy || unavailable}
                 onClick={() => {
@@ -176,7 +176,7 @@ export function LocationPermissionPrompt() {
               <Button
                 type="button"
                 variant="filled"
-                size="compact-md"
+                size="md"
                 flex={1}
                 disabled={busy}
                 onClick={() => {
