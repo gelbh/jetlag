@@ -27,7 +27,6 @@ export async function readSessionElapsedSeconds(page: Page): Promise<number> {
   return parseClockToSeconds(text);
 }
 
-/** Poll until the live ticker has advanced at least `minSeconds` (no fixed sleep). */
 export async function waitForSessionElapsedAtLeast(
   page: Page,
   minSeconds: number,
