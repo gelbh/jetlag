@@ -9,7 +9,8 @@
  * @returns {string | null} body under that version heading, or null if missing
  */
 export function extractChangelogReleaseBody(markdown, version) {
-  const escaped = version.replace(/\./g, "\\.");
+  // Escape all regex metachars (CodeQL: incomplete sanitization if only `.` is escaped).
+  const escaped = version.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   const headerRe = new RegExp(
     `^## ${escaped}(?:[ \\t]*-[ \\t]*\\d{4}-\\d{2}-\\d{2})?[ \\t]*$`,
     "m",

@@ -53,4 +53,17 @@ describe("extractChangelogReleaseBody", () => {
       null,
     );
   });
+
+  it("treats regex metacharacters in version as literals", () => {
+    const md = `## 1.0.0+build.1
+
+- a
+
+## 1.0.0
+
+- b
+`;
+    assert.equal(extractChangelogReleaseBody(md, "1.0.0+build.1"), "- a");
+    assert.equal(extractChangelogReleaseBody(md, "1.0.0"), "- b");
+  });
 });
