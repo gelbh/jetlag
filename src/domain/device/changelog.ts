@@ -1,4 +1,4 @@
-export const APP_VERSION = "0.14.0";
+export const APP_VERSION = "0.15.0";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,7 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+<<<<<<< HEAD
 {
     version: "Unreleased",
     date: "",
@@ -23,6 +24,32 @@ export const CHANGELOG: ChangelogEntry[] = [
     ],
   },
 {
+||||||| c7bede73
+  {
+=======
+  {
+    version: "0.15.0",
+    date: "2026-09-27",
+    sections: [
+      {
+        title: "Fixes",
+        items: [
+          "iPhone standalone PWA map paints full-bleed under notch and home indicator",
+        ],
+      },
+      {
+        title: "Improvements",
+        items: [
+          "Mantine Wave 5: player chrome CSS prune and error surfaces on Mantine.",
+          "Smoother placement map camera reframes (ease/fly from shared motion tokens)",
+          "Softer elimination shade opacity transitions under reduced-motion rules",
+          "Drop the redundant map tools HUD coach toast; first-run Map tools guide remains",
+        ],
+      }
+    ],
+  },
+  {
+>>>>>>> origin/main
     version: "0.14.0",
     date: "2026-09-27",
     sections: [

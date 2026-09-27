@@ -1,11 +1,28 @@
 # Changelog
 
+<<<<<<< HEAD
 ## Unreleased
 
 ### Technical
 
 - Geometry kernel (G5e): production always uses the WASM geometry kernel; client localStorage/env override removed. Wasm dispatch failures rethrow instead of silent TypeScript fail-soft.
 
+||||||| c7bede73
+=======
+## 0.15.0 - 2026-09-27
+
+### Fixes
+
+- iPhone standalone PWA map paints full-bleed under notch and home indicator
+
+### Improvements
+
+- Mantine Wave 5: player chrome CSS prune and error surfaces on Mantine.
+- Smoother placement map camera reframes (ease/fly from shared motion tokens)
+- Softer elimination shade opacity transitions under reduced-motion rules
+- Drop the redundant map tools HUD coach toast; first-run Map tools guide remains
+
+>>>>>>> origin/main
 ## 0.14.0 - 2026-09-27
 
 ### Fixes
