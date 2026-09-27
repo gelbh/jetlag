@@ -197,6 +197,32 @@ export function assembleChatMessages(policyMessages, dataMessages) {
 }
 
 /**
+ * Flatten dual-channel messages into a single Cloud Agents prompt.text.
+ * Policy blocks first; data blocks after (with untrusted prefix already applied).
+ *
+ * @param policyMessages
+ * @param dataMessages
+ * @returns {string}
+ */
+export function buildSessionOpsAgentPrompt(policyMessages, dataMessages) {
+  const parts = [];
+  for (const message of assembleChatMessages(policyMessages, dataMessages)) {
+    if (typeof message?.content !== "string" || !message.content.trim()) {
+      continue;
+    }
+    const role = typeof message.role === "string" ? message.role : "message";
+    parts.push(`## ${role}\n${message.content.trim()}`);
+  }
+  parts.push(
+    "",
+    "## Tools",
+    "Use the jetlag-session-ops MCP tools for session mutations.",
+    "Never invent sessionId or incidentId arguments; the server binds those.",
+  );
+  return parts.join("\n\n");
+}
+
+/**
  * OpenAI tools array from the closed session-ops allowlist.
  *
  * @param allowlist {readonly string[] | undefined}

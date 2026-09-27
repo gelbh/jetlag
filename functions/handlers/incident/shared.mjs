@@ -52,6 +52,9 @@ import {
   SESSION_OPS_SUMMON_NOT_FOUND,
   SESSION_OPS_TOOL_CAP,
   SESSION_OPS_TURN_CAP,
+  SESSION_OPS_AGENT_BUSY,
+  SESSION_OPS_AGENT_FAILED,
+  SESSION_OPS_AGENT_MISCONFIGURED,
 } from "../../incident/supportAgentTurn.mjs";
 import {
   CURSOR_HOTFIX_FAILED,
@@ -184,9 +187,20 @@ export function mapIncidentError(error) {
         "Incident has no linked session.",
       );
     case SUPPORT_AGENT_LLM_FAILED:
+    case SESSION_OPS_AGENT_FAILED:
       throw new HttpsError(
         "internal",
         "Support agent is temporarily unavailable.",
+      );
+    case SESSION_OPS_AGENT_MISCONFIGURED:
+      throw new HttpsError(
+        "failed-precondition",
+        "Support agent is not configured.",
+      );
+    case SESSION_OPS_AGENT_BUSY:
+      throw new HttpsError(
+        "resource-exhausted",
+        "Support agent is still working on a previous request. Try again shortly.",
       );
     case SESSION_OPS_SUMMON_CAP:
     case SESSION_OPS_TURN_CAP:
