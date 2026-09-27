@@ -107,6 +107,7 @@ describe.skipIf(!wasmPkgReady || !runGeometryPerf)(
       const wasmMs = await measureMedianMsAsync(async () => {
         await wasmBuildEndGameMaskFromDisks(gameArea, disks);
       });
+      // G5j measured median ~0.5ms (arm64); keep 50ms for CI headroom.
       expect(wasmMs).toBeLessThan(50);
     });
 
@@ -115,6 +116,7 @@ describe.skipIf(!wasmPkgReady || !runGeometryPerf)(
       const wasmMs = await measureMedianMsAsync(async () => {
         await wasmBuildEndGameMaskFromDisks(gameArea, disks);
       });
+      // G5j measured median ~0.4ms (arm64); keep 100ms for CI headroom.
       expect(wasmMs).toBeLessThan(100);
     });
   },
