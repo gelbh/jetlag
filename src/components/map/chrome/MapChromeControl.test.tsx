@@ -176,7 +176,7 @@ describe("MapChromeControl", () => {
     expect(button).not.toHaveClass("jl-tool-slot-active");
     expect(button).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByTestId("mantine-slot-icon")).toBeInTheDocument();
-    expect(screen.getByText("Match")).not.toHaveClass("jl-tool-slot-label");
+    expect(screen.getByText("Match")).toHaveClass("jl-tool-slot-label");
     expect(screen.getByText("Match").getAttribute("data-ios-tool-label")).toBe(
       "",
     );
