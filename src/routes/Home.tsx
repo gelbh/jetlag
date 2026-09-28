@@ -75,6 +75,7 @@ export function Home() {
                 color="gray"
                 radius="xl"
                 size="xs"
+                mih={24}
                 onClick={() => setChangelogOpen(true)}
                 aria-label={`Version ${APP_VERSION}. Open changelog`}
                 styles={{
