@@ -87,14 +87,48 @@ export function isFirestorePermissionDenied(error: unknown): boolean {
   return error instanceof FirebaseError && error.code === "permission-denied";
 }
 
-export const JOIN_AUTH_FAILURE_MESSAGE =
+export const AUTH_FAILURE_MESSAGE =
   "Couldn't authenticate with the server. Try again. If it keeps failing, sign out and back in.";
+
+/** @deprecated alias - same string */
+export const JOIN_AUTH_FAILURE_MESSAGE = AUTH_FAILURE_MESSAGE;
+
+export function isPermissionDeniedForAuthRetry(error: unknown): boolean {
+  if (error instanceof FirebaseError) {
+    return (
+      error.code === "permission-denied" ||
+      error.code === "functions/permission-denied"
+    );
+  }
+  return false;
+}
+
+export async function withPermissionDeniedAuthRetry<T>(
+  operation: () => Promise<T>,
+): Promise<T> {
+  try {
+    return await operation();
+  } catch (error) {
+    if (!isPermissionDeniedForAuthRetry(error)) {
+      throw error;
+    }
+    try {
+      await forceRefreshIdToken();
+      return await operation();
+    } catch (retryError) {
+      if (isPermissionDeniedForAuthRetry(retryError)) {
+        throw new Error(AUTH_FAILURE_MESSAGE, { cause: retryError });
+      }
+      throw retryError;
+    }
+  }
+}
 
 export async function withJoinPermissionRetry<T>(operation: () => Promise<T>): Promise<T> {
   try {
     return await operation();
   } catch (error) {
-    if (!isFirestorePermissionDenied(error)) {
+    if (!isPermissionDeniedForAuthRetry(error)) {
       throw error;
     }
 
@@ -103,9 +137,9 @@ export async function withJoinPermissionRetry<T>(operation: () => Promise<T>): P
       await forceRefreshIdToken();
       return await operation();
     } catch (retryError) {
-      if (isFirestorePermissionDenied(retryError)) {
+      if (isPermissionDeniedForAuthRetry(retryError)) {
         reportJoinPermissionDenied("retry");
-        throw new Error(JOIN_AUTH_FAILURE_MESSAGE, { cause: retryError });
+        throw new Error(AUTH_FAILURE_MESSAGE, { cause: retryError });
       }
       throw retryError;
     }
