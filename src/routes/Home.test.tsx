@@ -293,6 +293,6 @@ describe("Home", () => {
         "Couldn't verify the session. Check your connection and try again.",
       ),
     ).toBeInTheDocument();
-    expect(continueButton).toHaveAttribute("aria-busy", "false");
+    expect(continueButton).not.toHaveAttribute("aria-busy");
   });
 });

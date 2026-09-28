@@ -3,7 +3,6 @@ import {
   Alert,
   Anchor,
   Badge,
-  Button,
   Container,
   Group,
   Stack,
@@ -24,6 +23,7 @@ import {
   InsetGroup,
   SectionLabel,
 } from "@/components/ui/entry/entryChrome";
+import { EntryAsyncButton } from "@/components/ui/entry/EntryAsyncButton";
 import { filledStyles } from "@/components/ui/entry/entryStyles";
 import { InsetRow } from "@/components/ui/entry/InsetRow";
 import { AppLogo } from "@/components/ui/brand/AppLogo";
@@ -137,20 +137,20 @@ export function Home() {
                   Active session
                   {myRole ? ` · ${playerRoleLabel(myRole)}` : ""}
                 </Text>
-                <Button
+                <EntryAsyncButton
                   fullWidth
-                  loading={continuing}
-                  onClick={() => void handleContinue()}
-                  aria-busy={continuing}
+                  busy={continuing}
+                  idleLabel="Continue"
+                  busyLabel="Verifying…"
+                  statusMessage={`Verifying session ${session.code}`}
                   aria-label={
                     continuing
                       ? `Verifying session ${session.code}`
                       : `Return to map for session ${session.code}`
                   }
                   styles={filledStyles}
-                >
-                  Continue
-                </Button>
+                  onClick={() => void handleContinue()}
+                />
                 <Text
                   ta="center"
                   size="sm"

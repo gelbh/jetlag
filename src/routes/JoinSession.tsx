@@ -1,6 +1,5 @@
 import {
   Box,
-  Button,
   SegmentedControl,
   Stack,
   Text,
@@ -9,6 +8,7 @@ import {
 import { useForm } from "@mantine/form";
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { EntryAsyncButton } from "@/components/ui/entry/EntryAsyncButton";
 import { EntryRouteShell } from "@/components/ui/entry/EntryRouteShell";
 import {
   ErrorCallout,
@@ -169,15 +169,16 @@ export function JoinSession() {
                 </Text>
               </Box>
             </InsetGroup>
-            <Button
+            <EntryAsyncButton
+              type="button"
               styles={grayStyles}
               onClick={() => void handleCancelRequest()}
-              disabled={requestBusy || loading}
-              loading={requestBusy}
+              busy={requestBusy}
+              unavailable={loading}
+              idleLabel="Cancel request"
+              busyLabel="Cancelling…"
               fullWidth
-            >
-              {requestBusy ? "Cancelling…" : "Cancel request"}
-            </Button>
+            />
             {error ? <ErrorCallout>{error}</ErrorCallout> : null}
           </Stack>
         ) : (
@@ -325,27 +326,27 @@ export function JoinSession() {
               ) : null}
 
               <Stack gap="sm">
-                <Button
+                <EntryAsyncButton
                   type="submit"
                   fullWidth
-                  disabled={formBusy}
-                  loading={joinBusy}
+                  busy={joinBusy}
+                  unavailable={requestBusy}
+                  idleLabel="Join session"
+                  busyLabel="Joining…"
                   styles={filledStyles}
-                >
-                  {joinBusy ? "Joining…" : "Join session"}
-                </Button>
+                />
 
                 {canRequestAccess ? (
-                  <Button
+                  <EntryAsyncButton
                     type="button"
                     fullWidth
                     styles={grayStyles}
                     onClick={() => void handleRequestAccess()}
-                    disabled={formBusy}
-                    loading={requestBusy}
-                  >
-                    {requestBusy ? "Requesting…" : "Request access"}
-                  </Button>
+                    busy={requestBusy}
+                    unavailable={joinBusy}
+                    idleLabel="Request access"
+                    busyLabel="Requesting…"
+                  />
                 ) : null}
 
                 <ErrorCallout>{error}</ErrorCallout>
