@@ -117,11 +117,30 @@ export function CreateSession() {
                 fullWidth
                 styles={filledStyles}
                 onClick={() => void session.handleConfirm()}
-                disabled={confirmBusy || session.requiresPremiumSignIn}
+                disabled={
+                  confirmBusy ||
+                  session.requiresPremiumSignIn ||
+                  !session.hostAuthReady
+                }
                 loading={confirmBusy}
               >
                 {session.confirmLabel}
               </Button>
+              {session.hostAuthError ? (
+                <Stack gap={6} mt={8}>
+                  <Text c="var(--color-halt)" size="sm">
+                    {session.hostAuthError}
+                  </Text>
+                  <Button
+                    type="button"
+                    variant="subtle"
+                    size="compact-sm"
+                    onClick={() => session.retryHostAuth()}
+                  >
+                    Retry
+                  </Button>
+                </Stack>
+              ) : null}
               {session.error ? (
                 <Text c="var(--color-halt)" size="sm" mt={8}>
                   {session.error}

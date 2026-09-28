@@ -3,7 +3,7 @@ import {
   doc,
   getDoc,
   serverTimestamp,
-  setDoc,
+  writeBatch,
 } from "firebase/firestore";
 import type {
   GameArea,
@@ -18,6 +18,7 @@ import {
 } from "@/domain/session/players/playerRole";
 import { APP_VERSION } from "@/domain/device/changelog";
 import { clientEnvUsesFirebaseEmulator } from "@/config/env";
+import { getFirestoreDb } from "@/services/core/firebase/firebase";
 import { buildSessionDocument } from "../serialization/serializeSession";
 import { generateSessionCode } from "@/services/session/sessionCodes";
 import { buildRoleGatesForHost } from "@/domain/session/players/roleGates";
@@ -27,6 +28,7 @@ import {
   sessionCodeDoc,
   rollbackCreatedRemoteSession,
   isFirestorePermissionDenied,
+  withPermissionDeniedAuthRetry,
 } from "./shared";
 import {
   getRemoteSessionByIdFromServer,
@@ -138,53 +140,60 @@ export async function createRemoteSession(
     }
   }
 
-  const sessionRef = doc(sessionsCollection());
-  const createdAt = new Date().toISOString();
+  const unit = distanceUnit ?? "imperial";
   const radiusMeters =
     typeof rulesPatch.hidingZoneRadiusMeters === "number"
       ? rulesPatch.hidingZoneRadiusMeters
-      : hidingZoneRadiusMeters(gameSize, distanceUnit ?? "imperial");
-  const session: SessionRecord = {
-    id: sessionRef.id,
-    code,
-    gameArea,
-    hostUid,
-    createdAt,
-    memberUids: [hostUid],
-    memberRoles: { [hostUid]: hostRole },
-    gameSize,
-    distanceUnit: distanceUnit ?? "imperial",
-    hidingZoneRadiusMeters: radiusMeters,
-    tier,
-    transitMetroId,
-    hostAppVersion,
-    ...rulesPatch,
-  };
+      : hidingZoneRadiusMeters(gameSize, unit);
 
-  await setDoc(sessionRef, {
-    ...buildSessionDocument(
+  // New session id per attempt so a denied retry never updates an orphaned doc.
+  const session = await withPermissionDeniedAuthRetry(async () => {
+    const sessionRef = doc(sessionsCollection());
+    const createdAt = new Date().toISOString();
+    const record: SessionRecord = {
+      id: sessionRef.id,
       code,
       gameArea,
       hostUid,
       createdAt,
+      memberUids: [hostUid],
+      memberRoles: { [hostUid]: hostRole },
+      gameSize,
+      distanceUnit: unit,
+      hidingZoneRadiusMeters: radiusMeters,
       tier,
       transitMetroId,
-      hostRole,
-      gameSize,
-      rulesPatch,
-      distanceUnit ?? "imperial",
       hostAppVersion,
-    ),
-    createdAtServer: serverTimestamp(),
-  });
+      ...rulesPatch,
+    };
 
-  await setDoc(sessionCodeDoc(code), {
-    sessionId: sessionRef.id,
-    hostUid,
-    hostAppVersion,
-    tier,
-    status: "active",
-    createdAt,
+    const batch = writeBatch(getFirestoreDb());
+    batch.set(sessionRef, {
+      ...buildSessionDocument(
+        code,
+        gameArea,
+        hostUid,
+        createdAt,
+        tier,
+        transitMetroId,
+        hostRole,
+        gameSize,
+        rulesPatch,
+        unit,
+        hostAppVersion,
+      ),
+      createdAtServer: serverTimestamp(),
+    });
+    batch.set(sessionCodeDoc(code), {
+      sessionId: sessionRef.id,
+      hostUid,
+      hostAppVersion,
+      tier,
+      status: "active",
+      createdAt,
+    });
+    await batch.commit();
+    return record;
   });
 
   // CI e2e / local emulator run auth+firestore+storage only — no Functions.
@@ -195,9 +204,9 @@ export async function createRemoteSession(
 
   // Stamp roleGates + secrets together via callable (do not gate without secrets).
   try {
-    await initSessionRoleGates(sessionRef.id);
+    await initSessionRoleGates(session.id);
   } catch (error) {
-    await rollbackCreatedRemoteSession(sessionRef.id, code);
+    await rollbackCreatedRemoteSession(session.id, code);
     throw new Error(
       "Couldn't set up role codes for this session. Try creating again.",
       { cause: error },
