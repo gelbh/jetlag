@@ -84,6 +84,6 @@ describe("EntryAsyncButton", () => {
     expect(
       screen.getByRole("button", { name: "Confirm game area" }),
     ).toBeDisabled();
-    expect(screen.getByRole("status")).toHaveTextContent("");
+    expect(screen.queryByRole("status")).toBeNull();
   });
 });
