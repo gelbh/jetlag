@@ -15,6 +15,7 @@ test.describe("phone shell @ 1280", () => {
     await expect(shell).toBeVisible();
     const box = await shell.boundingBox();
     expect(box).not.toBeNull();
+    expect(box!.width).toBeGreaterThanOrEqual(430);
     expect(box!.width).toBeLessThanOrEqual(440 + 1);
   });
 
@@ -24,7 +25,7 @@ test.describe("phone shell @ 1280", () => {
     await page.goto("/");
     const box = await page.getByTestId("player-phone-shell").boundingBox();
     expect(box).not.toBeNull();
-    expect(box!.width).toBeGreaterThan(389);
+    expect(box!.width).toBeGreaterThan(430);
     expect(box!.width).toBeLessThanOrEqual(440 + 1);
   });
 
