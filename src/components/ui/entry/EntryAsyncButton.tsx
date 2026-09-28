@@ -99,9 +99,11 @@ export function EntryAsyncButton({
       >
         {label}
       </Button>
-      <span id={statusId} role="status" aria-live="polite" className="sr-only">
-        {statusText}
-      </span>
+      {busy ? (
+        <span id={statusId} role="status" aria-live="polite" className="sr-only">
+          {statusText}
+        </span>
+      ) : null}
     </>
   );
 }
