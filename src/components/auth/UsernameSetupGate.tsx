@@ -1,5 +1,6 @@
 import { useEffect, useId, useState } from "react";
-import { Button, Stack, Text, TextInput } from "@mantine/core";
+import { Stack, Text, TextInput } from "@mantine/core";
+import { EntryAsyncButton } from "@/components/ui/entry/EntryAsyncButton";
 import {
   USERNAME_MAX_LENGTH,
   validateUsername,
@@ -32,6 +33,10 @@ export function UsernameSetupGate({
   }, []);
 
   const handleClaim = async () => {
+    if (busy) {
+      return;
+    }
+
     const validated = validateUsername(value);
     if (!validated.ok) {
       setError(validated.error);
@@ -109,15 +114,15 @@ export function UsernameSetupGate({
             permanent
           </Text>
         </Stack>
-        <Button
+        <EntryAsyncButton
           type="submit"
           fullWidth
-          disabled={busy || value.trim().length === 0}
-          loading={busy}
+          busy={busy}
+          unavailable={value.trim().length === 0}
+          idleLabel="Claim username"
+          busyLabel="Claiming…"
           styles={filledStyles}
-        >
-          {busy ? "Claiming…" : "Claim username"}
-        </Button>
+        />
       </Stack>
     </form>
   );

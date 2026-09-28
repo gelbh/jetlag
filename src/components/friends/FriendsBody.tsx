@@ -44,6 +44,7 @@ import {
   grayStyles,
   plainStyles,
 } from "@/components/ui/entry/entryChrome";
+import { EntryAsyncButton } from "@/components/ui/entry/EntryAsyncButton";
 import { InsetRow } from "@/components/ui/entry/InsetRow";
 import { USERNAME_MAX_LENGTH } from "@/domain/game/playerProfile";
 import crawlPolicy from "@/domain/seo/seoCrawlPolicy.json";
@@ -535,7 +536,11 @@ function FriendDetailDrawer({
   const [inviting, setInviting] = useState(false);
   const [inviteNote, setInviteNote] = useState<string | null>(null);
   const [confirmRemove, setConfirmRemove] = useState(false);
+  const [pendingAction, setPendingAction] = useState<
+    "accept" | "decline" | "cancel" | "request" | null
+  >(null);
   const isFriend = entry.relation === "friend" && !isSearchHit;
+  const activeAction = busy ? pendingAction : null;
   const profile = getFriendSheetProfile(entry.uid);
   const subtitle = sheetSubtitle(entry.relation, isSearchHit, profile);
   const pillLabel = isSearchHit
@@ -641,15 +646,19 @@ function FriendDetailDrawer({
               <Text size="sm" c="var(--color-field-ink-muted)" ta="center" px={4}>
                 They'll need to accept before you can invite them to a game.
               </Text>
-              <Button
+              <EntryAsyncButton
                 fullWidth
-                loading={busy}
+                busy={activeAction === "request"}
+                unavailable={busy && activeAction !== "request"}
+                idleLabel="Send request"
+                busyLabel="Requesting…"
                 leftSection={<UserPlus size={18} weight="bold" />}
-                onClick={onRequest}
+                onClick={() => {
+                  setPendingAction("request");
+                  onRequest();
+                }}
                 styles={filledStyles}
-              >
-                Send request
-              </Button>
+              />
             </>
           ) : null}
 
@@ -657,15 +666,15 @@ function FriendDetailDrawer({
             <>
               {inviteSessionCode ? (
                 <>
-                  <Button
+                  <EntryAsyncButton
                     fullWidth
-                    loading={inviting}
+                    busy={inviting}
+                    idleLabel={`Invite to ${inviteSessionCode}`}
+                    busyLabel="Inviting…"
                     leftSection={<PaperPlaneTilt size={18} weight="bold" />}
                     onClick={() => void inviteToSession()}
                     styles={filledStyles}
-                  >
-                    {`Invite to ${inviteSessionCode}`}
-                  </Button>
+                  />
                   <Button
                     fullWidth
                     leftSection={<GameController size={18} weight="bold" />}
@@ -712,23 +721,31 @@ function FriendDetailDrawer({
 
           {entry.relation === "incoming" && !isSearchHit ? (
             <>
-              <Button
+              <EntryAsyncButton
                 fullWidth
-                loading={busy}
-                onClick={onAccept}
+                busy={activeAction === "accept"}
+                unavailable={busy && activeAction !== "accept"}
+                idleLabel="Accept request"
+                busyLabel="Accepting…"
+                onClick={() => {
+                  setPendingAction("accept");
+                  onAccept();
+                }}
                 leftSection={<Check size={18} weight="bold" />}
                 styles={filledStyles}
-              >
-                Accept request
-              </Button>
-              <Button
+              />
+              <EntryAsyncButton
                 fullWidth
-                loading={busy}
-                onClick={onDecline}
+                busy={activeAction === "decline"}
+                unavailable={busy && activeAction !== "decline"}
+                idleLabel="Decline"
+                busyLabel="Declining…"
+                onClick={() => {
+                  setPendingAction("decline");
+                  onDecline();
+                }}
                 styles={plainHaltStyles}
-              >
-                Decline
-              </Button>
+              />
             </>
           ) : null}
 
@@ -737,15 +754,19 @@ function FriendDetailDrawer({
               <Text size="sm" c="var(--color-field-ink-muted)" ta="center" px={4}>
                 Waiting for them to accept.
               </Text>
-              <Button
+              <EntryAsyncButton
                 fullWidth
-                loading={busy}
-                onClick={onCancel}
+                busy={activeAction === "cancel"}
+                unavailable={busy && activeAction !== "cancel"}
+                idleLabel="Cancel request"
+                busyLabel="Cancelling…"
+                onClick={() => {
+                  setPendingAction("cancel");
+                  onCancel();
+                }}
                 leftSection={<UserMinus size={16} weight="bold" />}
                 styles={grayStyles}
-              >
-                Cancel request
-              </Button>
+              />
             </>
           ) : null}
         </Stack>

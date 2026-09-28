@@ -1,5 +1,6 @@
 import { useCallback } from "react";
 import { Box, Button, Stack, Text } from "@mantine/core";
+import { EntryAsyncButton } from "@/components/ui/entry/EntryAsyncButton";
 import { EntryHeader } from "@/components/ui/entry/EntryHeader";
 import { filledStyles } from "@/components/ui/entry/entryStyles";
 import { CreateSessionMapPane } from "../../components/session/framing/CreateSessionMapPane";
@@ -112,20 +113,18 @@ export function CreateSession() {
                 WebkitBackdropFilter: "blur(20px) saturate(1.4)",
               }}
             >
-              <Button
+              <EntryAsyncButton
                 type="button"
                 fullWidth
                 styles={filledStyles}
-                onClick={() => void session.handleConfirm()}
-                disabled={
-                  confirmBusy ||
-                  session.requiresPremiumSignIn ||
-                  !session.hostAuthReady
+                busy={confirmBusy}
+                unavailable={
+                  session.requiresPremiumSignIn || !session.hostAuthReady
                 }
-                loading={confirmBusy}
-              >
-                {session.confirmLabel}
-              </Button>
+                idleLabel="Confirm game area"
+                busyLabel={session.confirmLabel}
+                onClick={() => void session.handleConfirm()}
+              />
               {session.hostAuthError ? (
                 <Stack gap={6} mt={8}>
                   <Text c="var(--color-halt)" size="sm">
