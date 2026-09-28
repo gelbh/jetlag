@@ -251,7 +251,7 @@ export function useMapScreenCore(options: UseMapScreenCoreOptions = {}) {
         regionPackId,
         tier,
       );
-      startSeaLevelBackgroundSampling(area);
+      startSeaLevelBackgroundSampling(area, { regionPackId });
     });
   }, [
     firebaseAuthReady,

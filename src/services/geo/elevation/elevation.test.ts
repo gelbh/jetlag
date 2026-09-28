@@ -170,6 +170,27 @@ describe("elevation", () => {
     expect(fetchMock.mock.calls.length).toBeLessThanOrEqual(9);
   });
 
+  it(
+    "stops retrying Open-Meteo after the circuit breaker opens",
+    async () => {
+      const fetchMock = vi.fn().mockResolvedValue({
+        ok: false,
+        status: 429,
+        headers: new Headers(),
+        json: async () => ({}),
+      });
+      vi.stubGlobal("fetch", fetchMock);
+
+      await expect(
+        fetchElevations([dublinPoint], { profile: "foreground" }),
+      ).rejects.toThrow(/rate-limited/i);
+
+      // Threshold 3 opens circuit; without abort, foreground would attempt up to 7.
+      expect(fetchMock.mock.calls.length).toBeLessThanOrEqual(3);
+    },
+    30_000,
+  );
+
   it("skips network calls while the circuit breaker is open", async () => {
     openElevationCircuitForTests();
     const fetchMock = vi.fn();
