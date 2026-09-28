@@ -2,6 +2,7 @@ import {
   useEffect,
   useId,
   useRef,
+  type ComponentPropsWithoutRef,
   type MouseEventHandler,
   type ReactNode,
 } from "react";
@@ -9,7 +10,7 @@ import { Button, type ButtonProps } from "@mantine/core";
 import { LoadingSpinnerRing } from "@/components/ui/feedback/LoadingSpinner";
 
 export type EntryAsyncButtonProps = Omit<
-  ButtonProps,
+  ButtonProps & ComponentPropsWithoutRef<"button">,
   "loading" | "children" | "disabled"
 > & {
   busy: boolean;
