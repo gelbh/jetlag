@@ -220,4 +220,117 @@ describe("useTentacleTool", () => {
     // Map-first placement nulls hud.error; panel model still surfaces tentacleError.
     expect(result.current.panel.props.model.error).toMatch(/Preview only/i);
   });
+
+  it("keeps map-first Send disabled until POIs are confirmed (multiplayer)", async () => {
+    vi.spyOn(previewBasemapPoisModule, "previewBasemapPois").mockReturnValue(
+      [],
+    );
+    vi.spyOn(tentacleOverpassModule, "fetchTentaclePois").mockResolvedValue([
+      {
+        id: "prov-1",
+        name: "Preview Museum",
+        lat: 53.35,
+        lng: -6.26,
+        category: "museum",
+        confirmStatus: "provisional",
+        source: "tile",
+      },
+    ]);
+
+    const mocks = createToolHookMocks();
+    const { result } = renderHook(() =>
+      useTentacleTool({
+        active: true,
+        annotations: mocks.annotations,
+        gameArea: mocks.gameArea,
+        sessionRules: { gameSize: "medium" },
+        createAnnotation: mocks.createAnnotation,
+        distanceUnit: mocks.distanceUnit,
+        finishPlacement: mocks.finishPlacement,
+        setMapError: mocks.setMapError,
+        mapError: mocks.mapError,
+        gpsLoading: mocks.gpsLoading,
+        awaitingPlacement: mocks.awaitingPlacement,
+        setAwaitingPlacement: mocks.setAwaitingPlacement,
+        refreshGps: mocks.refreshGps,
+        ensurePointInGameArea: mocks.ensurePointInGameArea,
+        armPlacement: mocks.armPlacement,
+        awaitHiderAnswer: true,
+      }),
+    );
+
+    act(() => {
+      result.current.panel.props.model.onCategoryChange("museum");
+    });
+    act(() => {
+      result.current.handleMapClick([53.35, -6.26]);
+    });
+
+    await waitFor(() => {
+      expect(result.current.draft.tentaclePois.length).toBeGreaterThan(0);
+      expect(result.current.draft.seekerResolving).toBe(false);
+    });
+
+    const overlay = result.current.hud.mapOverlay as {
+      props: { canCommit: boolean };
+    } | null;
+    expect(overlay).not.toBeNull();
+    // Submit filters provisional POIs out; Send must stay disabled instead of no-op.
+    expect(overlay!.props.canCommit).toBe(false);
+    expect(result.current.hud.readiness.resolveReady).toBe(false);
+  });
+
+  it("arms map-first Send when Overpass POIs are confirmed (multiplayer)", async () => {
+    vi.spyOn(previewBasemapPoisModule, "previewBasemapPois").mockReturnValue(
+      [],
+    );
+    vi.spyOn(tentacleOverpassModule, "fetchTentaclePois").mockResolvedValue([
+      {
+        id: "osm-1",
+        name: "City Museum",
+        lat: 53.35,
+        lng: -6.26,
+        category: "museum",
+        confirmStatus: "confirmed",
+        source: "overpass",
+      },
+    ]);
+
+    const mocks = createToolHookMocks();
+    const { result } = renderHook(() =>
+      useTentacleTool({
+        active: true,
+        annotations: mocks.annotations,
+        gameArea: mocks.gameArea,
+        sessionRules: { gameSize: "medium" },
+        createAnnotation: mocks.createAnnotation,
+        distanceUnit: mocks.distanceUnit,
+        finishPlacement: mocks.finishPlacement,
+        setMapError: mocks.setMapError,
+        mapError: mocks.mapError,
+        gpsLoading: mocks.gpsLoading,
+        awaitingPlacement: mocks.awaitingPlacement,
+        setAwaitingPlacement: mocks.setAwaitingPlacement,
+        refreshGps: mocks.refreshGps,
+        ensurePointInGameArea: mocks.ensurePointInGameArea,
+        armPlacement: mocks.armPlacement,
+        awaitHiderAnswer: true,
+      }),
+    );
+
+    act(() => {
+      result.current.panel.props.model.onCategoryChange("museum");
+    });
+    act(() => {
+      result.current.handleMapClick([53.35, -6.26]);
+    });
+
+    await waitFor(() => {
+      expect(result.current.hud.readiness.resolveReady).toBe(true);
+      const overlay = result.current.hud.mapOverlay as {
+        props: { canCommit: boolean };
+      } | null;
+      expect(overlay?.props.canCommit).toBe(true);
+    });
+  });
 });

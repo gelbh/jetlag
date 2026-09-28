@@ -14,7 +14,10 @@ import {
   type TentacleMapPlacementPhase,
 } from "../../components/tools/ask/TentacleMapPlacementChrome";
 import { TentaclePanel } from "../../components/tools/TentaclePanel";
-import type { AskHudReadiness } from "@/domain/ask/askHudModes";
+import {
+  canCommit as askCanCommit,
+  type AskHudReadiness,
+} from "@/domain/ask/askHudModes";
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import {
   isActive,
@@ -559,12 +562,13 @@ export function useTentacleTool({
     tentacleCategoryId !== null &&
     isTentacleCategoryAvailableInSession(sessionRules, tentacleCategoryId);
   const hasRecordedAnswer = tentacleOutOfReach || selectedPoiId !== null;
+  const confirmedTentaclePois = filterConfirmedTentaclePois(tentaclePois);
 
   const readiness: AskHudReadiness = {
     surface: "tentacle",
     placementReady: tentacleCenter !== null,
     configureReady: tentacleCategoryChosen && categorySelectionAvailable,
-    resolveReady: tentaclePois.length > 0 && !tentacleLoading,
+    resolveReady: confirmedTentaclePois.length > 0 && !tentacleLoading,
     answerReady: awaitHiderAnswer || hasRecordedAnswer,
     awaitHiderAnswer,
     isSubmitting: session.isBusy,
@@ -671,15 +675,6 @@ export function useTentacleTool({
     setTentacleCenter(null);
   };
 
-  const canCommitTentacle =
-    tentacleCenter !== null &&
-    tentacleCategoryChosen &&
-    categorySelectionAvailable &&
-    !tentacleLoading &&
-    (awaitHiderAnswer || hasRecordedAnswer) &&
-    canSubmitQuestion &&
-    !session.isBusy;
-
   const statusTitle =
     placementPhase === "locating"
       ? "Getting your location"
@@ -729,7 +724,7 @@ export function useTentacleTool({
               setSelectedPoiId(null);
             }
           }}
-          canCommit={canCommitTentacle}
+          canCommit={askCanCommit(readiness)}
           isSubmitting={session.isBusy}
           onCommit={() => void commit()}
           onChangeCategory={reopenCategoryPicker}
