@@ -1,5 +1,6 @@
 import { type RefObject } from "react";
 import type { TentaclePoi } from "../../domain/map/annotations";
+import { filterConfirmedTentaclePois } from "../../domain/geo/poiCandidateAdapters";
 import {
   formatPresetDistance,
   type DistanceUnit,
@@ -120,12 +121,13 @@ export function TentaclePanel({ model }: TentaclePanelProps) {
   const categorySelectionAvailable =
     categoryId !== null && isTentacleCategoryAvailable(gameSize, categoryId);
   const hasRecordedAnswer = outOfReach || selectedPoiId !== null;
-  const locationsReady = poiOptions.length > 0 || (!loading && hasCenter);
+  const confirmedPois = filterConfirmedTentaclePois(poiOptions);
+  const locationsReady = confirmedPois.length > 0 || (!loading && hasCenter);
   const canCommit =
     categoryChosen &&
     categoryId !== null &&
     hasCenter &&
-    poiOptions.length > 0 &&
+    confirmedPois.length > 0 &&
     (awaitHiderAnswer || hasRecordedAnswer) &&
     categorySelectionAvailable &&
     !isSubmitting;
@@ -147,7 +149,7 @@ export function TentaclePanel({ model }: TentaclePanelProps) {
     awaitHiderAnswer &&
     locationsReady &&
     !loading &&
-    poiOptions.length > 0 ? (
+    confirmedPois.length > 0 ? (
       <SendToHidersButton
         costLabel={costLabel}
         isSubmitting={isSubmitting}
