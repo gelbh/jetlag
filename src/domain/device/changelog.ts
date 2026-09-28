@@ -1,4 +1,4 @@
-export const APP_VERSION = "0.16.0";
+export const APP_VERSION = "0.17.0";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,51 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "0.17.0",
+    date: "2026-09-28",
+    sections: [
+      {
+        title: "Fixes",
+        items: [
+          "Creating a session no longer fails with a one-off permissions error while auth is still settling",
+          "Game-over results show hide/seek phase times for local, sparse, and legacy docs",
+          "Sync status chip text tracks connection tone again",
+          "User-location and transit map icons resolve when the pin paints before sprites finish registering",
+          "Pack map boot no longer floods Open-Meteo elevation when a dense sea-level seed is present",
+          "Chat keyboard inset no longer stacks on top of sheet safe-area padding",
+        ],
+      },
+      {
+        title: "Improvements",
+        items: [
+          "Scenario kit and `/dev/scenarios` for local/emulator fixture worlds",
+          "Playwright e2e bands 4–F and related fixtures land with Wave 6",
+          "W1-P player UX work that lived only on Wave 6 reaches main",
+          "Home version chip uses denser Mantine sizing with a 24px hit floor",
+          "Game-over, leaderboard board, and host-confirm sheets use SheetHost drawers",
+          "Map banners and chips use the shared Mantine float surface (tones, touch targets, narrow layout)",
+          "Home tagline sits under the title; version opens changelog from a pill under the logo",
+          "Player phone column max width raised to 440 for Pro Max-class screens",
+          "Premium uses the shared sticky entry header and Back link like Friends and Stats",
+          "Premium checkout catalog, packs, and unlimited CTAs restored after the Wave 6 absorb regression",
+          "Home shows the brand mark beside the title and opens What’s new from the version chip",
+          "Create-session framing map hides zoom, compass, and sat/map chrome",
+          "Bottom sheets use a larger drag handle, edge padding, and fill to the phone bottom",
+        ],
+      },
+      {
+        title: "Technical",
+        items: [
+          "EntryAsyncButton busy feedback for async entry CTAs.",
+          "Remove AnimatedOverlay and MotionSheet; ban reintroduction in vitest",
+          "Phone-shell e2e letterbox and fill smokes cover the 440 host",
+          "Refresh player README with screenshots and contributing guide.",
+          "Route page-transition reveal gates covered by unit tests",
+        ],
+      }
+    ],
+  },
   {
     version: "0.16.0",
     date: "2026-09-27",
