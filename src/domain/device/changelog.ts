@@ -1,4 +1,4 @@
-export const APP_VERSION = "0.17.0";
+export const APP_VERSION = "0.17.1";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,19 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "0.17.1",
+    date: "2026-09-28",
+    sections: [
+      {
+        title: "Technical",
+        items: [
+          "Heal deleted Stripe customers before Checkout and billing portal.",
+          "Restore tentacle Send gate until a POI is confirmed.",
+        ],
+      }
+    ],
+  },
   {
     version: "0.17.0",
     date: "2026-09-28",
