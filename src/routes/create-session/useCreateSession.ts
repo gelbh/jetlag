@@ -755,7 +755,7 @@ export function useCreateSession() {
           regionPackId,
           tier,
         );
-        startSeaLevelBackgroundSampling(gameArea);
+        startSeaLevelBackgroundSampling(gameArea, { regionPackId });
         void preloadCriticalGameAreaCaches(
           gameArea,
           matchingAreas,
