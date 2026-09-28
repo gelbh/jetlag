@@ -17,12 +17,54 @@ Seekers ask questions on the live map. Hiders answer, set hiding zones, and watc
 **[Open the app →](https://jetlag.gelbhart.dev)**
 
 <p align="center">
-  <img src="docs/screenshots/readme/home.png" width="280" alt="Home screen with an active seeker session" />
-  &nbsp;&nbsp;&nbsp;&nbsp;
-  <img src="docs/screenshots/readme/live-map.png" width="280" alt="Live map ready to start with question tools on the bottom bar" />
-  &nbsp;&nbsp;&nbsp;&nbsp;
-  <img src="docs/screenshots/readme/ask-tool.png" width="280" alt="Matching question on the map ready to send to hiders" />
+  <img src="docs/screenshots/readme/home.png" width="240" alt="Home screen with an active seeker session" />
+  &nbsp;
+  <img src="docs/screenshots/entry/create-game-area-dublin.png" width="240" alt="Host framing the play area on the map before sharing a session code" />
+  &nbsp;
+  <img src="docs/screenshots/readme/live-map.png" width="240" alt="Live map ready to start with question tools on the bottom bar" />
+  &nbsp;
+  <img src="docs/screenshots/map/ask-tools/tentacles-museum-pins.png" width="240" alt="Tentacles museum question with pins on the map ready to send" />
+  &nbsp;
 </p>
+
+<details>
+  <summary>🗺️ Live map & session</summary>
+  <p align="center">
+    <img src="docs/screenshots/map/session/map-set-zone-confirm.png" width="240" alt="Hider confirming a 500 m hiding zone on the map" />
+    &nbsp;
+    <img src="docs/screenshots/map/session/map-hiding-play-move.png" width="240" alt="Hiding phase in progress with Play and Move controls on the map" />
+    &nbsp;
+    <img src="docs/screenshots/map/chrome/map-chat-game-feed.png" width="240" alt="Live game feed showing Matching, Measuring, and Radar answers" />
+    &nbsp;
+    <img src="docs/screenshots/map/chrome/map-role-codes.png" width="240" alt="Session role codes sheet for seekers and hiders" />
+  </p>
+</details>
+
+<details>
+  <summary>🎯 Ask tools</summary>
+  <p align="center">
+    <img src="docs/screenshots/readme/ask-tool.png" width="240" alt="Matching question on the map ready to send to hiders" />
+    &nbsp;
+    <img src="docs/screenshots/map/ask-tools/measuring-park-preview.png" width="240" alt="Measuring question preview with a park target on the map" />
+    &nbsp;
+    <img src="docs/screenshots/map/ask-tools/photo-ask-picker.png" width="240" alt="Photo ask tool picker for a visual question to hiders" />
+    &nbsp;
+    <img src="docs/screenshots/map/ask-tools/radar-distance-picker.png" width="240" alt="Radar tool distance picker for an inside-or-outside question" />
+  </p>
+</details>
+
+<details>
+  <summary>👥 Social & presets</summary>
+  <p align="center">
+    <img src="docs/screenshots/social/friends/friends-list.png" width="240" alt="Friends list with online status and pending requests" />
+    &nbsp;
+    <img src="docs/screenshots/social/leaderboard/leaderboard-global-podium.png" width="240" alt="Global leaderboard podium ranked by hiding time" />
+    &nbsp;
+    <img src="docs/screenshots/social/stats/stats-hider.png" width="240" alt="Hider stats with hiding time and game history" />
+    &nbsp;
+    <img src="docs/screenshots/presets/custom-games-list.png" width="240" alt="Custom game presets list for quick session setup" />
+  </p>
+</details>
 
 ## How to play
 
