@@ -18,7 +18,9 @@ Seekers ask questions on the live map. Hiders answer, set hiding zones, and watc
 
 <p align="center">
   <img src="docs/screenshots/readme/home.png" width="280" alt="Home screen with an active seeker session" />
+  &nbsp;&nbsp;&nbsp;&nbsp;
   <img src="docs/screenshots/readme/live-map.png" width="280" alt="Live map ready to start with question tools on the bottom bar" />
+  &nbsp;&nbsp;&nbsp;&nbsp;
   <img src="docs/screenshots/readme/ask-tool.png" width="280" alt="Matching question on the map ready to send to hiders" />
 </p>
 
