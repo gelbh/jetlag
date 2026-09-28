@@ -8,6 +8,7 @@
 
 <p align="center">
   <a href="https://jetlag.gelbhart.dev"><img src="https://img.shields.io/website?url=https%3A%2F%2Fjetlag.gelbhart.dev&label=jetlag.gelbhart.dev&color=0E132C" alt="Live app" /></a>
+  <a href="https://github.com/gelbh/jetlag/releases"><img src="https://img.shields.io/github/v/release/gelbh/jetlag?display_name=tag&sort=semver&color=C55B40" alt="Latest release" /></a>
   <a href="https://github.com/gelbh/jetlag"><img src="https://img.shields.io/github/stars/gelbh/jetlag?style=flat-square&color=C55B40" alt="GitHub stars" /></a>
 </p>
 
@@ -15,9 +16,13 @@ Seekers ask questions on the live map. Hiders answer, set hiding zones, and watc
 
 **[Open the app →](https://jetlag.gelbhart.dev)**
 
-Built for players on the move. Big touch targets, readable outdoors, one-handed use. Add it to your home screen for a full-screen map (PWA).
+<p align="center">
+  <img src="docs/screenshots/readme/home.png" width="280" alt="Home screen with an active seeker session" />
+  <img src="docs/screenshots/readme/live-map.png" width="280" alt="Live map ready to start with question tools on the bottom bar" />
+  <img src="docs/screenshots/readme/ask-tool.png" width="280" alt="Matching question on the map ready to send to hiders" />
+</p>
 
-## How it works
+## How to play
 
 1. A host creates a session, frames the play area, and shares the 4-letter code.
 2. Seekers and hiders join on their phones and pick a role.
@@ -38,6 +43,10 @@ Markup tools live under **Draw**:
 - **Zone.** Draw a play boundary.
 - **Pin.** Mark a point on the map.
 
+## On your phone
+
+Built for players on the move. Big touch targets, readable outdoors, one-handed use. Add it to your home screen for a full-screen map (PWA).
+
 ## About
 
 Unofficial fan companion for [Jet Lag: The Game](https://jetlagthegame.com/). Not affiliated with the show, board game, or Nebula.
@@ -48,6 +57,6 @@ Unofficial fan companion for [Jet Lag: The Game](https://jetlagthegame.com/). No
 - [Hide + Seek board game (Nebula Store)](https://store.nebula.tv/products/jet-lag-the-game-hide-and-seek-transit-game)
 - [Expansion rules reference](https://rules.jetlagthegame.com/expansion/)
 
-## Contributor tooling
+## Contributing
 
-CI and hooks use `npm run <script>` contracts in `package.json`. Day-to-day maintainer recipes live in the root `justfile` (`brew install just`, then `just --list`).
+Want to fix a bug or land a small improvement? See [CONTRIBUTING.md](CONTRIBUTING.md) for Node version, Doppler/`just` setup, tests, and changesets.
