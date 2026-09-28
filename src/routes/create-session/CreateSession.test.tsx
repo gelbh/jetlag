@@ -6,7 +6,7 @@ import { CreateSession } from "./CreateSession";
 import { jetlagTheme } from "@/theme/theme";
 
 const ensureAnonymousUser = vi.hoisted(() =>
-  vi.fn(async (..._args: unknown[]) => ({ uid: "host-1" })),
+  vi.fn(async () => ({ uid: "host-1" })),
 );
 const isFirebaseConfigured = vi.hoisted(() => vi.fn(() => false));
 
@@ -24,7 +24,7 @@ vi.mock("@/components/map/layers/GameAreaMask", () => ({
 
 vi.mock("@/services/core/firebase/firebase", () => ({
   isFirebaseConfigured: () => isFirebaseConfigured(),
-  ensureAnonymousUser: (...args: unknown[]) => ensureAnonymousUser(...args),
+  ensureAnonymousUser: () => ensureAnonymousUser(),
   getFirebaseAuth: () => ({ currentUser: null }),
   waitForAuthStateReady: vi.fn(async () => undefined),
   isAuthBootstrapReady: () => true,
