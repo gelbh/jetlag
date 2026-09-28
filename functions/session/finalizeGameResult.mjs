@@ -108,9 +108,31 @@ export function buildGameResultPlayers(memberRoles, outcome) {
   return players;
 }
 
+function resolveHidingPeriodMs(session) {
+  if (typeof session.hidingPeriodMinutes === "number") {
+    return session.hidingPeriodMinutes * 60_000;
+  }
+  if (session.gameSize === "small") return 30 * 60_000;
+  if (session.gameSize === "large") return 180 * 60_000;
+  return 60 * 60_000;
+}
+
+function splitRoundPhaseMs(durationMs, hidingPeriodMs) {
+  const duration = Math.max(0, durationMs);
+  const period = Math.max(0, hidingPeriodMs);
+  return {
+    hidingPhaseMs: Math.min(duration, period),
+    seekPhaseMs: Math.max(0, duration - period),
+  };
+}
+
 export function buildGameResultDocument(sessionId, session) {
   const endedAt = resolveEndedAt(session);
   const durationMs = computeDurationMs(session, endedAt);
+  const { hidingPhaseMs, seekPhaseMs } = splitRoundPhaseMs(
+    durationMs,
+    resolveHidingPeriodMs(session),
+  );
   const outcome = resolveOutcome(session);
   const roundNumber =
     typeof session.roundNumber === "number" ? session.roundNumber : 0;
@@ -128,7 +150,9 @@ export function buildGameResultDocument(sessionId, session) {
     outcome,
     endedAt,
     durationMs,
-    seekTimeMs: durationMs,
+    hidingPhaseMs,
+    seekPhaseMs,
+    seekTimeMs: seekPhaseMs,
     players: buildGameResultPlayers(session.memberRoles, outcome),
   };
 }
