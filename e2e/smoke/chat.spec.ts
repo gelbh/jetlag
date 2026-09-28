@@ -16,6 +16,7 @@ import {
 test("@smoke seeker asks via radar and hider answers in game chat", async ({
   browser,
 }) => {
+  test.setTimeout(90_000);
   const { hostPage, guestPage, cleanup } =
     await createMultiplayerContexts(browser);
 

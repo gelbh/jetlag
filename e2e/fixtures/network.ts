@@ -28,7 +28,7 @@ function extractOverpassQuery(postData: string): string {
       return decodeURIComponent(data);
     }
   } catch {
-    // Fall back to the raw POST body below.
+    /* malformed querystring; use raw body */
   }
 
   return postData;
@@ -52,7 +52,7 @@ function isMapTileHost(hostname: string): boolean {
 }
 
 /**
- * E2E runs auth/firestore/storage only — not the functions emulator.
+ * E2E runs auth/firestore/storage only, not the functions emulator.
  * Non-host Play Move pauses the timer via `controlSessionTimerForMove`; stub
  * the callable so startMove does not roll back the wizard when :5001 is down.
  */

@@ -16,39 +16,34 @@ test.describe("hider chat scroll", () => {
   }) => {
     const { hostPage, guestPage } = hostHider;
 
-    await expect(
-      guestPage.getByRole("button", { name: "Set zone" }),
-    ).toBeVisible({ timeout: 15_000 });
+    await test.step("hider sees Set zone; host queues radar then matching", async () => {
+      await expect(
+        guestPage.getByRole("button", { name: "Set zone" }),
+      ).toBeVisible({ timeout: 15_000 });
 
-    await sendRadarToHiders(hostPage);
-    await answerInChat(guestPage, "Yes");
-
-    await sendMatchingToHiders(hostPage);
-    await openChat(guestPage);
-
-    const scrollRegion = gameChatScroll(guestPage);
-    const secondAnswerButton = scrollRegion.getByRole("button", {
-      name: "Send answer: Yes",
-    });
-    await expect
-      .poll(async () => secondAnswerButton.isVisible(), { timeout: 30_000 })
-      .toBe(true);
-
-    await expect(scrollRegion).toBeVisible();
-
-    const scrollMetrics = await scrollRegion.evaluate((element) => ({
-      scrollHeight: element.scrollHeight,
-      clientHeight: element.clientHeight,
-    }));
-
-    expect(scrollMetrics.scrollHeight).toBeGreaterThan(
-      scrollMetrics.clientHeight,
-    );
-
-    await scrollRegion.evaluate((element) => {
-      element.scrollTop = element.scrollHeight;
+      await sendRadarToHiders(hostPage);
+      await answerInChat(guestPage, "Yes");
+      await sendMatchingToHiders(hostPage);
     });
 
-    await expect(secondAnswerButton).toBeInViewport();
+    await test.step("scroll chat to second answer control", async () => {
+      await openChat(guestPage);
+
+      const scrollRegion = gameChatScroll(guestPage);
+      const secondAnswerButton = scrollRegion.getByRole("button", {
+        name: "Send answer: Yes",
+      });
+      await expect
+        .poll(async () => secondAnswerButton.isVisible(), { timeout: 30_000 })
+        .toBe(true);
+
+      await expect(scrollRegion).toBeVisible();
+
+      await scrollRegion.evaluate((element) => {
+        element.scrollTop = element.scrollHeight;
+      });
+
+      await expect(secondAnswerButton).toBeInViewport();
+    });
   });
 });

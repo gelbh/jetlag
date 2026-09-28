@@ -26,7 +26,9 @@ test.describe("hider flows", () => {
     ).toBeVisible();
   });
 
-  test("loads bus stops by ref in the station picker", async ({ hostHider }) => {
+  test("loads bus stops by ref in the station picker", async ({
+    hostHider,
+  }) => {
     const { guestPage } = hostHider;
 
     await openHidingZoneWizard(guestPage);
@@ -43,35 +45,40 @@ test.describe("hider flows", () => {
     test.setTimeout(90_000);
     const { hostPage, guestPage } = hostHider;
 
-    await confirmInitialHidingZoneAtStation(guestPage, "Dublin Central");
-
-    guestPage.once("dialog", (dialog) => dialog.accept());
-    await guestPage.getByRole("button", { name: "Play move" }).click();
-    await waitForHidingZoneWizard(guestPage);
-    await expect(
-      guestPage.getByTestId("hiding-zone-map-placement"),
-    ).toBeVisible({ timeout: 15_000 });
-    await expect(guestPage.getByPlaceholder("Search stations…")).toBeVisible({
-      timeout: 15_000,
+    await test.step("confirm initial zone at Dublin Central", async () => {
+      await confirmInitialHidingZoneAtStation(guestPage, "Dublin Central");
     });
-    await selectTransitStation(guestPage, "Dublin Central");
-    await confirmHidingZone(guestPage);
-    await expect(
-      guestPage.getByTestId("hiding-zone-map-placement").getByRole("alert"),
-    ).toContainText(/different location|50 m|at least/i);
 
-    await guestPage.getByRole("button", { name: /Clear station|Clear/i }).click();
-    await selectTransitStation(guestPage, "North Station");
-    await confirmHidingZone(guestPage);
-
-    await openChat(hostPage);
-    await expect(
-      hostPage.getByText(/relocated from Dublin Central/i),
-    ).toBeHidden({
-      timeout: 5_000,
+    await test.step("same station is rejected on Play move", async () => {
+      guestPage.once("dialog", (dialog) => dialog.accept());
+      await guestPage.getByRole("button", { name: "Play move" }).click();
+      await waitForHidingZoneWizard(guestPage);
+      await expect(guestPage.getByPlaceholder("Search stations…")).toBeVisible({
+        timeout: 15_000,
+      });
+      await selectTransitStation(guestPage, "Dublin Central");
+      await confirmHidingZone(guestPage);
+      await expect(
+        guestPage.getByTestId("ask-commit-strip").getByRole("alert"),
+      ).toContainText(/different location/i);
     });
-    await expect(hostPage.getByText(/Move card played/i)).toBeVisible({
-      timeout: 15_000,
+
+    await test.step("different station publishes move card", async () => {
+      await guestPage
+        .getByRole("button", { name: /Choose different station/i })
+        .click();
+      await selectTransitStation(guestPage, "North Station");
+      await confirmHidingZone(guestPage);
+
+      await openChat(hostPage);
+      await expect(
+        hostPage.getByText(/relocated from Dublin Central/i),
+      ).toBeHidden({
+        timeout: 5_000,
+      });
+      await expect(hostPage.getByText(/Move card played/i)).toBeVisible({
+        timeout: 15_000,
+      });
     });
   });
 });

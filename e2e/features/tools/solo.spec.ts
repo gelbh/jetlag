@@ -11,6 +11,7 @@ import {
   expectEliminationMaskVisible,
   expectMapHasAnnotations,
   placeAskAnchor,
+  primedAskSendButton,
   selectFirstRadarDistance,
   waitForPrimedCommit,
 } from "../../fixtures";
@@ -23,15 +24,20 @@ test.describe("solo question tools", () => {
   test("radar ask strip arms after distance and answer", async ({
     localMap: page,
   }) => {
-    await clickToolDockButton(page, "Radar");
-    await expectAskHud(page);
-    await placeAskAnchor(page);
-    await selectFirstRadarDistance(page);
-    await chooseAnswer(page, "Yes");
-    await waitForPrimedCommit(page);
-    await page.getByRole("button", { name: /^ASK(?: ·|$)/ }).click();
-    await expectMapHasAnnotations(page);
-    await expectEliminationMaskVisible(page);
+    await test.step("pick distance, place, answer Yes", async () => {
+      await clickToolDockButton(page, "Radar");
+      await expectAskHud(page);
+      await selectFirstRadarDistance(page);
+      await placeAskAnchor(page);
+      await chooseAnswer(page, "Yes");
+      await waitForPrimedCommit(page);
+    });
+
+    await test.step("primed SEND commits annotation and elimination", async () => {
+      await primedAskSendButton(page).click();
+      await expectMapHasAnnotations(page);
+      await expectEliminationMaskVisible(page);
+    });
   });
 
   test("completes matching", async ({ localMap }) => {
