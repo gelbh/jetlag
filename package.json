@@ -83,10 +83,10 @@
     "jszip": "^3.10.2",
     "kdbush": "^4.1.0",
     "lru-cache": "^11.5.2",
-    "maplibre-gl": "^6.11.1",
+    "maplibre-gl": "^6.11.2",
     "martinez-polygon-clipping": "^0.8.1",
-    "motion": "^13.4.2",
-    "posthog-js": "^1.434.12",
+    "motion": "^13.4.3",
+    "posthog-js": "^1.434.13",
     "rbush": "^4.0.1",
     "react": "^19.3.0",
     "react-aria-components": "^1.21.1",
@@ -153,9 +153,9 @@
     "wrangler": "^4.139.0"
   },
   "optionalDependencies": {
-    "@rolldown/binding-darwin-arm64": "1.2.10",
-    "@rolldown/binding-darwin-x64": "1.2.10",
-    "@rolldown/binding-linux-x64-gnu": "1.2.10"
+    "@rolldown/binding-darwin-arm64": "1.2.11",
+    "@rolldown/binding-darwin-x64": "1.2.11",
+    "@rolldown/binding-linux-x64-gnu": "1.2.11"
   },
   "overrides": {
     "node-fetch": {
