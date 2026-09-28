@@ -8,14 +8,25 @@ import {
 test.describe("phone shell @ 1280", () => {
   test.use({ viewport: { width: 1280, height: 800 } });
 
-  test("@smoke player shell max width 390", async ({ page }) => {
+  test("@smoke player shell max width 440", async ({ page }) => {
     await prepareE2EPage(page);
     await page.goto("/");
     const shell = page.getByTestId("player-phone-shell");
     await expect(shell).toBeVisible();
     const box = await shell.boundingBox();
     expect(box).not.toBeNull();
-    expect(box!.width).toBeLessThanOrEqual(390 + 1);
+    expect(box!.width).toBeGreaterThanOrEqual(430);
+    expect(box!.width).toBeLessThanOrEqual(440 + 1);
+  });
+
+  test("@smoke shell fills phone viewport up to max", async ({ page }) => {
+    await page.setViewportSize({ width: 440, height: 956 });
+    await prepareE2EPage(page);
+    await page.goto("/");
+    const box = await page.getByTestId("player-phone-shell").boundingBox();
+    expect(box).not.toBeNull();
+    expect(box!.width).toBeGreaterThan(430);
+    expect(box!.width).toBeLessThanOrEqual(440 + 1);
   });
 
   test("@smoke map uses bottom dock not ops shell", async ({ page }) => {

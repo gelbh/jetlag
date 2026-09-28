@@ -110,7 +110,7 @@ function stripPaddingBottom(
 
 /**
  * Phone-shell sheet path: iOS bottom Drawer with grabber + safe-area.
- * Portals into PlayerPhoneShell when mounted so overlays stay in the 390 column.
+ * Portals into PlayerPhoneShell when mounted so overlays stay in the 440 column.
  */
 export function DrawerSheet({
   open,
