@@ -6,7 +6,7 @@ import { CreateSession } from "./CreateSession";
 import { jetlagTheme } from "@/theme/theme";
 
 const ensureAnonymousUser = vi.hoisted(() =>
-  vi.fn(async () => ({ uid: "host-1" })),
+  vi.fn(async (..._args: unknown[]) => ({ uid: "host-1" })),
 );
 const isFirebaseConfigured = vi.hoisted(() => vi.fn(() => false));
 
