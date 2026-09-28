@@ -6,6 +6,13 @@
 
 - Geometry kernel (G5e): production always uses the WASM geometry kernel; client localStorage/env override removed. Wasm dispatch failures rethrow instead of silent TypeScript fail-soft.
 
+## 0.17.1 - 2026-09-28
+
+### Technical
+
+- Heal deleted Stripe customers before Checkout and billing portal.
+- Restore tentacle Send gate until a POI is confirmed.
+
 ## 0.17.0 - 2026-09-28
 
 ### Fixes
