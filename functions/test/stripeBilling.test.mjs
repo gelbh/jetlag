@@ -100,6 +100,15 @@ describe("stripeBilling", () => {
       isStaleStripeCustomerError({
         type: "StripeInvalidRequestError",
         code: "resource_missing",
+        message: "No such customer: 'cus_x'",
+        param: "customer",
+      }),
+      true,
+    );
+    assert.equal(
+      isStaleStripeCustomerError({
+        type: "StripeInvalidRequestError",
+        code: "resource_missing",
       }),
       false,
     );
@@ -164,6 +173,30 @@ describe("stripeBilling", () => {
     assert.equal(db.documents["users/host-1"]?.subscription, undefined);
   });
 
+  it("replaces a deleted Stripe customer and updates Firestore", async () => {
+    const db = createMockDb({
+      "users/host-1": {
+        stripeCustomerId: "cus_deleted",
+        subscription: { status: "active", plan: "monthly" },
+      },
+    });
+    const stripe = createMockStripe({
+      retrieve: async () => ({ id: "cus_deleted", deleted: true }),
+      create: async () => ({ id: "cus_live_replacement" }),
+    });
+
+    const customerId = await ensureStripeCustomer(
+      stripe,
+      db,
+      "host-1",
+      "host@example.com",
+    );
+
+    assert.equal(customerId, "cus_live_replacement");
+    assert.equal(db.documents["users/host-1"]?.stripeCustomerId, "cus_live_replacement");
+    assert.equal(db.documents["users/host-1"]?.subscription, undefined);
+  });
+
   it("starts checkout after replacing a stale customer", async () => {
     process.env.STRIPE_PRICE_PACK_1 = "price_test_pack_1";
     const db = createMockDb({
@@ -173,6 +206,28 @@ describe("stripeBilling", () => {
       retrieve: async () => {
         throw staleCustomerError();
       },
+      create: async () => ({ id: "cus_live_replacement" }),
+    });
+
+    const result = await createCheckoutSessionHandler(
+      stripe,
+      db,
+      "host-1",
+      "host@example.com",
+      "pack_1",
+    );
+
+    assert.equal(result.url, "https://checkout.stripe.test/session");
+    assert.equal(db.documents["users/host-1"]?.stripeCustomerId, "cus_live_replacement");
+  });
+
+  it("starts checkout after replacing a deleted customer", async () => {
+    process.env.STRIPE_PRICE_PACK_1 = "price_test_pack_1";
+    const db = createMockDb({
+      "users/host-1": { stripeCustomerId: "cus_deleted" },
+    });
+    const stripe = createMockStripe({
+      retrieve: async () => ({ id: "cus_deleted", deleted: true }),
       create: async () => ({ id: "cus_live_replacement" }),
     });
 

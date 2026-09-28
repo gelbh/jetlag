@@ -39,7 +39,7 @@ export function isStaleStripeCustomerError(error) {
     return false;
   }
 
-  const stripeError = /** @type {{ type?: string; code?: string; message?: string }} */ (
+  const stripeError = /** @type {{ type?: string; code?: string; message?: string; param?: string }} */ (
     error
   );
 
@@ -47,6 +47,13 @@ export function isStaleStripeCustomerError(error) {
   if (
     message.includes("exists in test mode, but a live mode key") ||
     message.includes("exists in live mode, but a test mode key")
+  ) {
+    return true;
+  }
+
+  if (
+    stripeError.code === "resource_missing" &&
+    (message.includes("No such customer") || stripeError.param === "customer")
   ) {
     return true;
   }
@@ -98,8 +105,19 @@ export async function ensureStripeCustomer(stripe, db, uid, email) {
 
   if (existingCustomerId) {
     try {
-      await stripe.customers.retrieve(existingCustomerId);
-      return existingCustomerId;
+      const existing = await stripe.customers.retrieve(existingCustomerId);
+      if (
+        existing &&
+        typeof existing === "object" &&
+        "deleted" in existing &&
+        existing.deleted === true
+      ) {
+        console.warn(
+          `Replacing deleted Stripe customer ${existingCustomerId} for uid ${uid}.`,
+        );
+      } else {
+        return existingCustomerId;
+      }
     } catch (error) {
       if (!isStaleStripeCustomerError(error)) {
         throw mapStripeBillingError(error, "checkout");
