@@ -1,5 +1,5 @@
-/** Centered player phone column max width. */
-export const PHONE_SHELL_MAX_WIDTH_PX = 390;
+/** Centered player phone column max width (CSS px; iPhone 16/17 Pro Max class). */
+export const PHONE_SHELL_MAX_WIDTH_PX = 440;
 
 /**
  * Phone-class landscape: map-dominant chrome (not wide desktop letterbox).

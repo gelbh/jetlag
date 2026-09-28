@@ -12,6 +12,10 @@ afterEach(() => {
 });
 
 describe("PlayerPhoneShell", () => {
+  it("uses the locked phone shell max width", () => {
+    expect(PHONE_SHELL_MAX_WIDTH_PX).toBe(440);
+  });
+
   it("constrains children to phone max width", () => {
     render(
       <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
@@ -21,7 +25,7 @@ describe("PlayerPhoneShell", () => {
       </MantineProvider>,
     );
     const shell = screen.getByTestId("player-phone-shell");
-    // Mantine rem-scales maw={390} → 24.375rem.
+    // Mantine rem-scales maw={PHONE_SHELL_MAX_WIDTH_PX} via the token.
     expect(shell).toHaveStyle({
       maxWidth: `calc(${PHONE_SHELL_MAX_WIDTH_PX / 16}rem * var(--mantine-scale))`,
     });
