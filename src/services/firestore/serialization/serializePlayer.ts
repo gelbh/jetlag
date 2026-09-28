@@ -1,4 +1,6 @@
 import type { GameOutcome } from "@/domain/game/foundHider";
+import { splitRoundPhaseMs } from "@/domain/game/splitRoundPhaseMs";
+import { hidingPeriodMs } from "@/domain/session/size/gameSizeRules";
 import type { GameResultPlayer, GameResultRecord } from "@/domain/game/gameResult";
 import type {
   PendingQuestionRecord,
@@ -253,6 +255,44 @@ export function deserializeGameResultFromFirestore(
         .filter((player): player is GameResultPlayer => player !== null)
     : [];
 
+  const durationMs =
+    typeof document.durationMs === "number" ? document.durationMs : 0;
+
+  const hasHiding = typeof document.hidingPhaseMs === "number";
+  const hasSeek = typeof document.seekPhaseMs === "number";
+  // Legacy docs without phase fields: period comes from gameSize defaults only.
+  // Custom session.hidingPeriodMinutes is not stored on gameResult (ceiling).
+  const periodMs =
+    typeof document.hidingPeriodMinutes === "number" &&
+    Number.isFinite(document.hidingPeriodMinutes)
+      ? Math.max(0, document.hidingPeriodMinutes) * 60_000
+      : hidingPeriodMs(gameSize);
+
+  let hidingPhaseMs: number;
+  let seekPhaseMs: number;
+  let derivingPhases = false;
+  if (hasHiding && hasSeek) {
+    hidingPhaseMs = document.hidingPhaseMs as number;
+    seekPhaseMs = document.seekPhaseMs as number;
+  } else if (hasHiding) {
+    derivingPhases = true;
+    hidingPhaseMs = document.hidingPhaseMs as number;
+    seekPhaseMs = Math.max(0, durationMs - hidingPhaseMs);
+  } else if (hasSeek) {
+    derivingPhases = true;
+    seekPhaseMs = document.seekPhaseMs as number;
+    hidingPhaseMs = Math.max(0, durationMs - seekPhaseMs);
+  } else {
+    derivingPhases = true;
+    ({ hidingPhaseMs, seekPhaseMs } = splitRoundPhaseMs(durationMs, periodMs));
+  }
+
+  const seekTimeMs = derivingPhases
+    ? seekPhaseMs
+    : typeof document.seekTimeMs === "number"
+      ? document.seekTimeMs
+      : seekPhaseMs;
+
   return {
     sessionId:
       typeof document.sessionId === "string" ? document.sessionId : sessionId,
@@ -264,18 +304,10 @@ export function deserializeGameResultFromFirestore(
       typeof document.endedAt === "string"
         ? document.endedAt
         : new Date().toISOString(),
-    durationMs:
-      typeof document.durationMs === "number" ? document.durationMs : 0,
-    hidingPhaseMs:
-      typeof document.hidingPhaseMs === "number" ? document.hidingPhaseMs : 0,
-    seekPhaseMs:
-      typeof document.seekPhaseMs === "number" ? document.seekPhaseMs : 0,
-    seekTimeMs:
-      typeof document.seekTimeMs === "number"
-        ? document.seekTimeMs
-        : typeof document.durationMs === "number"
-          ? document.durationMs
-          : 0,
+    durationMs,
+    hidingPhaseMs,
+    seekPhaseMs,
+    seekTimeMs,
     players,
   };
 }

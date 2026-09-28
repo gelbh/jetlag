@@ -1,12 +1,12 @@
 import { useState } from "react";
+import { Button, Group, Stack, Text } from "@mantine/core";
 import type { HostConfirmRecord } from "../../domain/incident/incidentTypes";
 import {
   approveHostConfirm,
   denyHostConfirm,
 } from "../../services/incident/incidentApi";
-import { MotionSheet } from "../motion/MotionSheet";
 import { SheetHeader } from "../ui/sheets/SheetHeader";
-import "./HostConfirmSheet.css";
+import { SheetHost } from "../ui/sheets/SheetHost";
 
 function formatToolLabel(tool: string): string {
   return tool.replaceAll("_", " ");
@@ -34,13 +34,6 @@ export function HostConfirmSheet({
 }: HostConfirmSheetProps) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const handleClose = () => {
-    if (busy) {
-      return;
-    }
-    onClose();
-  };
 
   const handleApprove = async () => {
     if (!confirm || busy) {
@@ -83,16 +76,18 @@ export function HostConfirmSheet({
   };
 
   return (
-    <MotionSheet
+    <SheetHost
       open={open}
-      onClose={handleClose}
+      onClose={() => {
+        void handleDeny();
+      }}
       ariaLabel="Host confirmation"
-      sheetClassName="mx-auto max-w-lg jl-host-confirm-host"
+      sheetClassName="mx-auto max-w-lg"
       maxHeightClassName="max-h-[min(70dvh,520px)]"
       dismissible={!busy}
     >
       {open && confirm ? (
-        <div className="jl-host-confirm-sheet">
+        <Stack gap="md" className="px-4 pb-5">
           <SheetHeader
             title="Confirm change"
             eyebrow="Host"
@@ -101,42 +96,54 @@ export function HostConfirmSheet({
             }}
             closeLabel="Not now"
           />
-          <p className="jl-host-confirm-helper">
+          <Text size="sm" c="var(--color-ink-muted)" style={{ lineHeight: 1.4 }}>
             A fix agent wants to run{" "}
-            <span className="jl-host-confirm-tool">
+            <Text
+              span
+              fw={600}
+              tt="uppercase"
+              c="var(--color-ink)"
+              style={{
+                fontFamily: "var(--font-display)",
+                letterSpacing: "0.04em",
+              }}
+            >
               {formatToolLabel(confirm.tool)}
-            </span>{" "}
+            </Text>{" "}
             on this session. Only you (the host) can approve.
-          </p>
+          </Text>
           {error ? (
-            <p className="jl-host-confirm-error" role="alert">
+            <Text
+              size="sm"
+              c="var(--color-danger, #b42318)"
+              role="alert"
+              style={{ fontSize: "0.8125rem" }}
+            >
               {error}
-            </p>
+            </Text>
           ) : null}
-          <div className="jl-host-confirm-actions">
-            <button
-              type="button"
-              className="btn btn-secondary"
+          <Group justify="flex-end" gap="md" wrap="wrap">
+            <Button
+              variant="default"
               disabled={busy}
               onClick={() => {
                 void handleDeny();
               }}
             >
               Not now
-            </button>
-            <button
-              type="button"
-              className="btn btn-primary"
+            </Button>
+            <Button
+              variant="filled"
               disabled={busy}
               onClick={() => {
                 void handleApprove();
               }}
             >
               {busy ? "Working…" : "Approve"}
-            </button>
-          </div>
-        </div>
+            </Button>
+          </Group>
+        </Stack>
       ) : null}
-    </MotionSheet>
+    </SheetHost>
   );
 }
