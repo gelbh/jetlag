@@ -1,3 +1,4 @@
+import { Center, Loader, Stack, Text } from "@mantine/core";
 import type { GameResultRecord } from "@/domain/game/gameResult";
 import type { PlayerRole } from "@/domain/session/players/playerRole";
 import { GameOverSheet } from "./GameOverSheet";
@@ -31,12 +32,19 @@ export function GameOverChrome({
   if (gameOver.loading) {
     return (
       <div
-        className="fixed inset-0 z-[var(--z-modal)] flex items-center justify-center bg-surface-deep/80 px-6"
+        className="fixed inset-0 z-[var(--z-modal)] bg-surface-deep/80 px-6"
         role="status"
         aria-live="polite"
         aria-label="Loading game results"
       >
-        <p className="text-sm text-ink-muted">Loading results…</p>
+        <Center h="100%">
+          <Stack align="center" gap="sm">
+            <Loader />
+            <Text size="sm" c="dimmed">
+              Loading results…
+            </Text>
+          </Stack>
+        </Center>
       </div>
     );
   }

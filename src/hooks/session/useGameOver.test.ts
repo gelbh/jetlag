@@ -1,7 +1,7 @@
 import { act, renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { GameResultRecord } from "../../domain/game/gameResult";
-import { createTestRemoteSession } from "../../test/fixtures/sessions";
+import { createTestRemoteSession, createTestSession } from "../../test/fixtures/sessions";
 import { useGameOver } from "./useGameOver";
 
 const isFirebaseConfigured = vi.hoisted(() => vi.fn(() => true));
@@ -76,5 +76,26 @@ describe("useGameOver", () => {
     });
 
     expect(result.current.result).toBeNull();
+  });
+
+  it("splits hide and seek phases for local offline results", () => {
+    isFirebaseConfigured.mockReturnValue(false);
+    const { result } = renderHook(() =>
+      useGameOver(
+        createTestSession({
+          foundConfirmedAt: "2026-01-01T01:05:00.000Z",
+          gameOutcome: "found",
+          gameSize: "medium",
+          timerAccumulatedMs: 3_900_000,
+        }),
+      ),
+    );
+
+    expect(result.current.result).toMatchObject({
+      durationMs: 3_900_000,
+      hidingPhaseMs: 3_600_000,
+      seekPhaseMs: 300_000,
+      seekTimeMs: 300_000,
+    });
   });
 });
