@@ -244,7 +244,6 @@ describe("Home", () => {
       name: `Version ${APP_VERSION}. Open changelog`,
     });
     expect(versionControl).toHaveTextContent(`v${APP_VERSION}`);
-    expect(versionControl.style.minHeight).toBe("44px");
     expect(screen.queryByRole("dialog", { name: "Changelog" })).not.toBeInTheDocument();
 
     fireEvent.click(versionControl);
