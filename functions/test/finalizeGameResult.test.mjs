@@ -176,8 +176,42 @@ test("buildGameResultDocument builds basic round summary", () => {
   assert.equal(result.gameSize, "large");
   assert.equal(result.outcome, "ended_early");
   assert.equal(result.durationMs, 120_000);
+  assert.equal(result.hidingPhaseMs, 120_000);
+  assert.equal(result.seekPhaseMs, 0);
+  assert.equal(result.seekTimeMs, 0);
   assert.equal(result.players.length, 2);
   assert.equal(result.players.find((player) => player.uid === "hider-1")?.won, true);
+});
+
+test("buildGameResultDocument splits hide and seek phases", () => {
+  const result = buildGameResultDocument("session-1", {
+    roundNumber: 1,
+    gameSize: "medium", // 60 min
+    gameOutcome: "found",
+    foundConfirmedAt: "2026-01-01T01:05:00.000Z",
+    timerAccumulatedMs: 3_900_000,
+    timerRunningSince: null,
+    memberRoles: { "seeker-1": "seeker", "hider-1": "hider" },
+  });
+  assert.equal(result.durationMs, 3_900_000);
+  assert.equal(result.hidingPhaseMs, 3_600_000);
+  assert.equal(result.seekPhaseMs, 300_000);
+  assert.equal(result.seekTimeMs, 300_000);
+});
+
+test("buildGameResultDocument prefers hidingPeriodMinutes override", () => {
+  const result = buildGameResultDocument("session-1", {
+    gameSize: "medium",
+    hidingPeriodMinutes: 10,
+    gameOutcome: "found",
+    foundConfirmedAt: "2026-01-01T00:20:00.000Z",
+    timerAccumulatedMs: 900_000,
+    timerRunningSince: null,
+    memberRoles: { s: "seeker", h: "hider" },
+  });
+  assert.equal(result.hidingPhaseMs, 600_000);
+  assert.equal(result.seekPhaseMs, 300_000);
+  assert.equal(result.seekTimeMs, 300_000);
 });
 
 test("finalizeGameResultForSession writes gameResult and session gameResultId", async () => {

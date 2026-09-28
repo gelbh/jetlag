@@ -1,4 +1,4 @@
-import { AnimatedOverlay } from "../../ui/banners/AnimatedOverlay";
+import { SheetHost } from "../../ui/sheets/SheetHost";
 import { PopupCloseButton } from "../../ui/brand/PopupCloseButton";
 
 interface MapReplayLayerProps {
@@ -9,7 +9,7 @@ interface MapReplayLayerProps {
 
 export function MapReplayLayer({ open, sessionId, onClose }: MapReplayLayerProps) {
   return (
-    <AnimatedOverlay
+    <SheetHost
       open={open}
       onClose={onClose}
       dismissible
@@ -37,6 +37,6 @@ export function MapReplayLayer({ open, sessionId, onClose }: MapReplayLayerProps
           and hiding zones in a later phase.
         </p>
       </div>
-    </AnimatedOverlay>
+    </SheetHost>
   );
 }

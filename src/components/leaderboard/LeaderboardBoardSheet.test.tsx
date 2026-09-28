@@ -1,6 +1,7 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import type { LeaderboardBoardSelection } from "../../domain/game/leaderboardBoardPrefs";
+import { renderWithAppUi } from "../../test/renderWithAppUi";
 import { LeaderboardBoardSheet } from "./LeaderboardBoardSheet";
 
 const selection: LeaderboardBoardSelection = {
@@ -13,7 +14,7 @@ const selection: LeaderboardBoardSelection = {
 describe("LeaderboardBoardSheet", () => {
   it("calls onChange when a metric option is selected", () => {
     const onChange = vi.fn();
-    render(
+    renderWithAppUi(
       <LeaderboardBoardSheet
         open
         onClose={vi.fn()}
@@ -34,7 +35,7 @@ describe("LeaderboardBoardSheet", () => {
 
   it("calls onChange when game size changes", () => {
     const onChange = vi.fn();
-    render(
+    renderWithAppUi(
       <LeaderboardBoardSheet
         open
         onClose={vi.fn()}
@@ -53,7 +54,7 @@ describe("LeaderboardBoardSheet", () => {
 
   it("calls onChange when role changes", () => {
     const onChange = vi.fn();
-    render(
+    renderWithAppUi(
       <LeaderboardBoardSheet
         open
         onClose={vi.fn()}
@@ -72,7 +73,7 @@ describe("LeaderboardBoardSheet", () => {
 
   it("updates metric labels when role selection changes", () => {
     const onChange = vi.fn();
-    const { rerender } = render(
+    const { rerender } = renderWithAppUi(
       <LeaderboardBoardSheet
         open
         onClose={vi.fn()}

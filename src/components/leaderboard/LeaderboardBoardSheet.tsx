@@ -6,9 +6,9 @@ import {
 import type { LeaderboardBoardSelection } from "../../domain/game/leaderboardBoardPrefs";
 import { GAME_SIZE_OPTIONS, gameSizeLabel } from "../../domain/session/size/gameSize";
 import { playerRoleLabel } from "../../domain/session/players/playerRole";
-import { MotionSheet } from "../motion/MotionSheet";
 import { SegmentControl } from "../ui/forms/SegmentControl";
 import { SheetHeader } from "../ui/sheets/SheetHeader";
+import { SheetHost } from "../ui/sheets/SheetHost";
 
 interface LeaderboardBoardSheetProps {
   open: boolean;
@@ -24,7 +24,7 @@ export function LeaderboardBoardSheet({
   onChange,
 }: LeaderboardBoardSheetProps) {
   return (
-    <MotionSheet
+    <SheetHost
       open={open}
       onClose={onClose}
       ariaLabel="Choose board"
@@ -63,6 +63,6 @@ export function LeaderboardBoardSheet({
           aria-label="Leaderboard metric"
         />
       </div>
-    </MotionSheet>
+    </SheetHost>
   );
 }

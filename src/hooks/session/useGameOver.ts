@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import type { GameResultRecord } from "../../domain/game/gameResult";
+import { splitRoundPhaseMs } from "../../domain/game/splitRoundPhaseMs";
 import {
   LOCAL_SESSION_ID,
   isRoundComplete,
   type SessionRecord,
 } from "../../domain/map/annotations";
+import { resolveHidingPeriodMs } from "../../domain/session/rules/deadlines";
 import { isFirebaseConfigured } from "../../services/core/firebase/firebase";
 import { subscribeToGameResult } from "../../services/firestore/firestoreGameResult";
 
@@ -17,15 +19,22 @@ function buildLocalGameResult(session: SessionRecord): GameResultRecord {
     typeof session.timerAccumulatedMs === "number"
       ? session.timerAccumulatedMs
       : 0;
+  const gameSize = session.gameSize ?? "medium";
+  const { hidingPhaseMs, seekPhaseMs } = splitRoundPhaseMs(
+    durationMs,
+    resolveHidingPeriodMs(session),
+  );
 
   return {
     sessionId: session.id,
     roundNumber: session.roundNumber ?? 0,
-    gameSize: session.gameSize ?? "medium",
+    gameSize,
     outcome: session.gameOutcome ?? "found",
     endedAt,
     durationMs,
-    seekTimeMs: durationMs,
+    hidingPhaseMs,
+    seekPhaseMs,
+    seekTimeMs: seekPhaseMs,
     players: [],
   };
 }
