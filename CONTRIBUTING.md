@@ -1,5 +1,10 @@
 # Contributing
 
+[![CI](https://img.shields.io/github/actions/workflow/status/gelbh/jetlag/ci.yml?branch=main&label=CI)](https://github.com/gelbh/jetlag/actions/workflows/ci.yml)
+[![Node](https://img.shields.io/badge/node-%3E%3D24-brightgreen)](https://github.com/gelbh/jetlag/blob/main/package.json)
+[![npm](https://img.shields.io/badge/npm-11.16.0-CB3837)](https://github.com/gelbh/jetlag/blob/main/package.json)
+[![Release](https://img.shields.io/github/v/release/gelbh/jetlag?display_name=tag&sort=semver)](https://github.com/gelbh/jetlag/releases)
+
 ## Prerequisites
 
 - Node.js `>=24` (see `package.json` `engines`)
