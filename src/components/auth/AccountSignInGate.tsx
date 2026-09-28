@@ -7,7 +7,8 @@ import {
   type ReactElement,
   type ReactNode,
 } from "react";
-import { Button, Stack, Text, TextInput } from "@mantine/core";
+import { Stack, Text, TextInput } from "@mantine/core";
+import { EntryAsyncButton } from "@/components/ui/entry/EntryAsyncButton";
 import { isSignInWithEmailLink } from "firebase/auth";
 import { LegalInlineLinks } from "../legal/LegalInlineLinks";
 import {
@@ -193,16 +194,15 @@ export function AccountSignInGate({
             ) : null}
           </Stack>
         </InsetGroup>
-        <Button
+        <EntryAsyncButton
           type="button"
-          disabled={signingOut}
-          loading={signingOut}
+          fullWidth
+          busy={signingOut}
+          idleLabel="Sign out"
+          busyLabel="Signing out…"
           onClick={() => void handleSignOut()}
           styles={grayStyles}
-          fullWidth
-        >
-          {signingOut ? "Signing out…" : "Sign out"}
-        </Button>
+        />
         {error ? <ErrorCallout>{error}</ErrorCallout> : null}
         {children ?? null}
       </Stack>
@@ -266,16 +266,19 @@ export function AccountSignInGate({
             }}
           />
         </InsetGroup>
-        <Button
+        <EntryAsyncButton
           type="button"
           fullWidth
-          disabled={busyAction !== null || email.trim().length === 0}
-          loading={busyAction === "email"}
+          busy={busyAction === "email"}
+          unavailable={
+            (busyAction !== null && busyAction !== "email") ||
+            email.trim().length === 0
+          }
+          idleLabel="Email me a sign-in link"
+          busyLabel="Sending…"
           onClick={() => void handleEmailLink()}
           styles={filledStyles}
-        >
-          {busyAction === "email" ? "Sending…" : "Email me a sign-in link"}
-        </Button>
+        />
         {emailLinkSent ? (
           <Text size="sm" c="var(--color-signal)" px={4}>
             Check your inbox for a sign-in link. Open it on this device to
