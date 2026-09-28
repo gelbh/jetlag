@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
+import { renderWithAppUi } from "../../../test/renderWithAppUi";
 import { MeasuringRefineMapChip } from "./MeasuringRefineMapChip";
 
 beforeEach(() => {
@@ -17,13 +18,13 @@ beforeEach(() => {
 
 describe("MeasuringRefineMapChip", () => {
   it("uses measuring copy by default", () => {
-    render(<MeasuringRefineMapChip visible />);
+    renderWithAppUi(<MeasuringRefineMapChip visible />);
     expect(screen.getByText("Refining measure")).toBeTruthy();
     expect(screen.getByText("Adding detail to the shaded area…")).toBeTruthy();
   });
 
   it("renders catalog hydrate copy when provided", () => {
-    render(
+    renderWithAppUi(
       <MeasuringRefineMapChip
         visible
         title="Loading places"
@@ -34,20 +35,24 @@ describe("MeasuringRefineMapChip", () => {
     expect(screen.getByText("Adding remaining areas to the map…")).toBeTruthy();
   });
 
-  it("uses frosted iOS chrome", () => {
-    render(
+  it("uses MapFloatSurface without Survey float chrome", () => {
+    renderWithAppUi(
       <MeasuringRefineMapChip
         visible
         title="Loading places"
         body="Adding remaining areas to the map…"
       />,
     );
-    expect(screen.getByTestId("measuring-refine-chip")).toBeInTheDocument();
+    const chip = screen.getByTestId("measuring-refine-chip");
+    expect(chip).toBeInTheDocument();
+    expect(chip.className).not.toMatch(/map-float-alert/);
     expect(screen.getByText("Loading places")).toBeTruthy();
   });
 
   it("hides when not refining", () => {
-    const { container } = render(<MeasuringRefineMapChip visible={false} />);
+    const { container } = renderWithAppUi(
+      <MeasuringRefineMapChip visible={false} />,
+    );
     expect(container.querySelector("[role='status']")).toBeNull();
   });
 });

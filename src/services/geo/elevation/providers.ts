@@ -10,6 +10,7 @@ import {
 } from "./constants";
 import {
   elevationCacheKey,
+  isElevationCircuitOpen,
   markElevationRequestCompleted,
   maxRetriesForProfile,
   record429Response,
@@ -71,11 +72,14 @@ async function fetchOpenMeteoElevationBatch(
       return payload.elevation;
     }
 
-    if (response.status === 429 && attempt < maxRetries) {
+    if (response.status === 429) {
       record429Response();
       lastError = new Error(
         "Elevation lookup is temporarily rate-limited. Try again in a moment.",
       );
+      if (isElevationCircuitOpen() || attempt >= maxRetries) {
+        throw lastError;
+      }
       await sleep(
         Math.max(
           ELEVATION_MIN_429_BACKOFF_MS,
@@ -83,13 +87,6 @@ async function fetchOpenMeteoElevationBatch(
         ),
       );
       continue;
-    }
-
-    if (response.status === 429) {
-      record429Response();
-      throw new Error(
-        "Elevation lookup is temporarily rate-limited. Try again in a moment.",
-      );
     }
 
     throw new Error("Elevation lookup failed.");
@@ -127,11 +124,14 @@ async function fetchUsgsElevation(
       return elevation;
     }
 
-    if (response.status === 429 && attempt < maxRetries) {
+    if (response.status === 429) {
       record429Response();
       lastError = new Error(
         "Elevation lookup is temporarily rate-limited. Try again in a moment.",
       );
+      if (isElevationCircuitOpen() || attempt >= maxRetries) {
+        throw lastError;
+      }
       await sleep(
         Math.max(
           ELEVATION_MIN_429_BACKOFF_MS,
@@ -139,13 +139,6 @@ async function fetchUsgsElevation(
         ),
       );
       continue;
-    }
-
-    if (response.status === 429) {
-      record429Response();
-      throw new Error(
-        "Elevation lookup is temporarily rate-limited. Try again in a moment.",
-      );
     }
 
     throw new Error("Elevation lookup failed.");

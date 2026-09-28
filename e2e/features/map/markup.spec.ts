@@ -20,9 +20,19 @@ test.describe("markup tools", () => {
 
   test("supports undo and redo", async ({ page }) => {
     await openMapWithLocalSession(page);
-    await placePin(page);
-    await undoAnnotation(page);
-    await redoAnnotation(page);
+
+    await test.step("place pin", async () => {
+      await placePin(page);
+    });
+
+    await test.step("undo", async () => {
+      await undoAnnotation(page);
+    });
+
+    await test.step("redo", async () => {
+      await redoAnnotation(page);
+    });
+
     await expectMapHasAnnotations(page);
   });
 });

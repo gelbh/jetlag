@@ -5,8 +5,11 @@ import {
   createHostSession,
   createMultiplayerContexts,
   joinAsRole,
-  openSettings,
   placePin,
+  resetBoardForEveryone,
+  resetSessionProgress,
+  sessionElapsedLocator,
+  startSessionTimer,
 } from "../../fixtures";
 
 test.describe("cross-device sync", () => {
@@ -14,10 +17,11 @@ test.describe("cross-device sync", () => {
     const { hostPage, guestPage, cleanup } =
       await createMultiplayerContexts(browser);
 
-    const { code } = await createHostSession(hostPage);
-    await joinAsRole(guestPage, code, "seeker");
-
-    await placePin(hostPage, "Shared pin");
+    await test.step("host places shared pin", async () => {
+      const { code } = await createHostSession(hostPage);
+      await joinAsRole(guestPage, code, "seeker");
+      await placePin(hostPage, "Shared pin");
+    });
 
     await expect(async () => {
       expect(await countMapAnnotations(guestPage)).toBeGreaterThan(0);
@@ -30,12 +34,13 @@ test.describe("cross-device sync", () => {
     const { hostPage, guestPage, hostContext, cleanup } =
       await createMultiplayerContexts(browser);
 
-    const { code } = await createHostSession(hostPage);
-    await joinAsRole(guestPage, code, "seeker");
-
-    await hostContext.setOffline(true);
-    await placePin(hostPage, "Offline pin");
-    await hostContext.setOffline(false);
+    await test.step("queue pin while offline", async () => {
+      const { code } = await createHostSession(hostPage);
+      await joinAsRole(guestPage, code, "seeker");
+      await hostContext.setOffline(true);
+      await placePin(hostPage, "Offline pin");
+      await hostContext.setOffline(false);
+    });
 
     await expect(async () => {
       expect(await countMapAnnotations(guestPage)).toBeGreaterThan(0);
@@ -48,12 +53,13 @@ test.describe("cross-device sync", () => {
     const { hostPage, guestPage, cleanup } =
       await createMultiplayerContexts(browser);
 
-    const { code } = await createHostSession(hostPage);
-    await joinAsRole(guestPage, code, "seeker");
+    await test.step("host starts session timer", async () => {
+      const { code } = await createHostSession(hostPage);
+      await joinAsRole(guestPage, code, "seeker");
+      await startSessionTimer(hostPage);
+    });
 
-    await hostPage.getByRole("button", { name: "Start" }).click();
-
-    await expect(guestPage.getByText(/\d{2}:\d{2}/).first()).toBeVisible({
+    await expect(sessionElapsedLocator(guestPage)).toBeVisible({
       timeout: 15_000,
     });
 
@@ -72,18 +78,16 @@ test.describe("cross-device sync", () => {
     await placePin(hostPage, "Temporary");
 
     await expect(async () => {
-      expect(await countMapAnnotations(guestPage)).toBeGreaterThan(baselineCount);
+      expect(await countMapAnnotations(guestPage)).toBeGreaterThan(
+        baselineCount,
+      );
     }).toPass({ timeout: 30_000 });
 
     const afterPinCount = await countMapAnnotations(guestPage);
 
-    hostPage.once("dialog", (dialog) => dialog.accept());
-    await openSettings(hostPage);
-    await hostPage.getByRole("tab", { name: "Session" }).click();
-    await hostPage.getByRole("button", { name: "Reset…" }).click();
-    await hostPage
-      .getByRole("button", { name: "Reset board for everyone" })
-      .click();
+    await test.step("host resets board for everyone", async () => {
+      await resetBoardForEveryone(hostPage);
+    });
 
     await expect(async () => {
       expect(await countMapAnnotations(guestPage)).toBeLessThan(afterPinCount);
@@ -103,36 +107,41 @@ test.describe("cross-device sync", () => {
 
     const baselineCount = await countMapAnnotations(guestPage);
 
-    await placePin(hostPage, "Before reset");
-    await hostPage.getByRole("button", { name: "Start" }).click();
-
-    await expect(guestPage.getByText(/\d{2}:\d{2}/).first()).toBeVisible({
-      timeout: 15_000,
+    await test.step("start timer and place pin", async () => {
+      await placePin(hostPage, "Before reset");
+      await startSessionTimer(hostPage);
+      await expect(sessionElapsedLocator(guestPage)).toBeVisible({
+        timeout: 15_000,
+      });
+      await expect(async () => {
+        expect(await countMapAnnotations(guestPage)).toBeGreaterThan(
+          baselineCount,
+        );
+      }).toPass({ timeout: 30_000 });
     });
-
-    await expect(async () => {
-      expect(await countMapAnnotations(guestPage)).toBeGreaterThan(baselineCount);
-    }).toPass({ timeout: 30_000 });
 
     const afterPinCount = await countMapAnnotations(guestPage);
 
-    hostPage.once("dialog", (dialog) => dialog.accept());
-    await openSettings(hostPage);
-    await hostPage.getByRole("tab", { name: "Session" }).click();
-    await hostPage.getByRole("button", { name: "Reset…" }).click();
-    await hostPage
-      .getByRole("button", { name: "Reset session progress" })
-      .click();
+    await test.step("host resets session progress", async () => {
+      await resetSessionProgress(hostPage);
+    });
 
     await expect(hostPage.getByRole("button", { name: "Start" })).toBeVisible({
       timeout: 45_000,
     });
 
-    await expect(guestPage.getByText("WAITING")).toBeVisible({
+    // Tip status copy: full "Waiting" or compact "Wait" on narrow chrome.
+    // Scope to the status island so short tokens do not match chat/copy elsewhere.
+    // Features project is mobile (no desktop "Map status" region).
+    await expect(
+      guestPage
+        .getByTestId("tool-status-block-mantine")
+        .getByText(/^(Waiting|Wait)$/),
+    ).toBeVisible({
       timeout: 45_000,
     });
 
-    await expect(guestPage.getByText(/\d{2}:\d{2}/)).toBeHidden({
+    await expect(sessionElapsedLocator(guestPage)).toBeHidden({
       timeout: 45_000,
     });
 

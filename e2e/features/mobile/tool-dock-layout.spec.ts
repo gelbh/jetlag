@@ -9,7 +9,6 @@ import {
   injectSimulatedSafeAreaBottom,
   injectSimulatedSafeAreaTop,
   injectStandaloneDisplayMode,
-  DOCK_FLOAT_GAP_PX,
   SIMULATED_SAFE_AREA_BOTTOM_PX,
   SIMULATED_SAFE_AREA_TOP_PX,
   clickViaEvaluate,
@@ -29,54 +28,54 @@ async function ensureLandscapeMapChromeExpanded(page: Page) {
 }
 
 async function assertSideStackClearsZoom(page: Page) {
-  // Session dock (right) must clear the nav dock (left: sat / zoom / compass).
-  const sideStack = page.locator("[data-chrome-side-stack='phone']");
-  const navStack = page.locator("[data-chrome-nav-stack='phone']");
+  const sideStack = page.getByTestId("map-side-dock-stack");
   const session = sideStack.locator("[data-island='session']");
-  const zoomIn = page.getByRole("button", { name: "Zoom in" });
-  const sat = page.getByRole("button", {
-    name: /Switch to satellite view|Switch to map view/i,
+  const zoom = page.getByRole("button", { name: "Zoom in" });
+  const style = page.getByRole("button", {
+    name: /Switch to (satellite|standard) view/i,
   });
   await expect(sideStack).toHaveCount(1);
-  await expect(navStack).toHaveCount(1);
   await expect(sideStack).toBeVisible();
-  await expect(navStack).toBeVisible();
   await expect(session).toHaveCount(1);
   await expect(session).toBeVisible();
-  await expect(zoomIn).toBeVisible();
-  await expect(sat).toBeVisible();
+  await expect(zoom).toBeVisible();
+  await expect(style).toBeVisible();
   await assertInViewport(sideStack);
   await assertInViewport(session);
-  await assertInViewport(navStack);
+  await assertInViewport(zoom);
 
   const metrics = await page.evaluate(() => {
-    const side = document.querySelector("[data-chrome-side-stack='phone']");
-    const nav = document.querySelector("[data-chrome-nav-stack='phone']");
+    const side = document.querySelector('[data-testid="map-side-dock-stack"]');
     const zoomEl = document.querySelector(
-      "[data-chrome-nav-stack='phone'] .jl-map-nav-dock__zoom",
+      'button[aria-label="Zoom in"], .map-zoom-control',
+    );
+    const styleEl = document.querySelector(
+      'button[aria-label*="satellite"], button[aria-label*="standard"], .map-style-control',
     );
     const sessionEl = document.querySelector(
-      "[data-chrome-side-stack='phone'] [data-island='session']",
+      '[data-testid="map-side-dock-stack"] [data-island="session"]',
     );
-    if (!side || !nav || !zoomEl || !sessionEl) {
+    if (!side || !zoomEl || !styleEl || !sessionEl) {
       return { missing: true as const };
     }
     const sideRect = side.getBoundingClientRect();
-    const navRect = nav.getBoundingClientRect();
     const zoomRect = zoomEl.getBoundingClientRect();
+    const styleRect = styleEl.getBoundingClientRect();
     const sessionRect = sessionEl.getBoundingClientRect();
     const overlapX =
-      Math.min(sideRect.right, navRect.right) -
-      Math.max(sideRect.left, navRect.left);
+      Math.min(sideRect.right, zoomRect.right) -
+      Math.max(sideRect.left, zoomRect.left);
     const overlapY =
-      Math.min(sideRect.bottom, navRect.bottom) -
-      Math.max(sideRect.top, navRect.top);
+      Math.min(sideRect.bottom, zoomRect.bottom) -
+      Math.max(sideRect.top, zoomRect.top);
     return {
       missing: false as const,
       intersects: overlapX > 1 && overlapY > 1,
       zoomLeft: zoomRect.left,
-      navLeft: navRect.left,
+      styleLeft: styleRect.left,
       sideLeft: sideRect.left,
+      zoomBottom: zoomRect.bottom,
+      styleTop: styleRect.top,
       sessionTop: sessionRect.top,
     };
   });
@@ -86,9 +85,9 @@ async function assertSideStackClearsZoom(page: Page) {
     return;
   }
   expect(metrics.intersects).toBe(false);
-  // Nav dock (zoom column) sits on the left; session dock on the right.
+  // Zoom / style stay on the left column, not under Session.
   expect(metrics.zoomLeft).toBeLessThan(metrics.sideLeft);
-  expect(metrics.navLeft).toBeLessThan(metrics.sideLeft);
+  expect(metrics.styleLeft).toBeLessThan(metrics.sideLeft);
   expect(metrics.sessionTop).toBeGreaterThanOrEqual(-1);
 }
 
@@ -100,73 +99,97 @@ test.describe("mobile tool dock", () => {
   test("@smoke exposes history in hunt, draw on session, without a More sheet", async ({
     page,
   }) => {
-    const hunt = page.locator('[data-island="hunt"]');
-    await expect(hunt).toBeVisible();
-    await expect(
-      hunt.getByRole("button", { name: "Undo last annotation" }),
-    ).toBeVisible();
-    await expect(
-      hunt.getByRole("button", { name: "Redo last annotation" }),
-    ).toBeVisible();
-    await expect(
-      page.getByRole("button", { name: "More tools" }),
-    ).toHaveCount(0);
+    await test.step("single-path hunt island exposes history", async () => {
+      const hunt = page.locator('[data-island="hunt"]');
+      await expect(hunt).toBeVisible();
+      await expect(
+        hunt.getByRole("button", { name: "Undo last annotation" }),
+      ).toBeVisible();
+      await expect(
+        hunt.getByRole("button", { name: "Redo last annotation" }),
+      ).toBeVisible();
+      await expect(
+        page.getByRole("button", { name: "More tools" }),
+      ).toHaveCount(0);
+    });
 
-    const sessionTools = page.locator('[data-island="session"]');
-    await expect(sessionTools).toBeVisible();
-    const drawButton = sessionTools.getByRole("button", { name: "Draw on map" });
-    await expect(drawButton).toBeVisible();
-    await clickViaEvaluate(drawButton);
-    const drawMenu = page.getByRole("menu", { name: "Draw on map" });
-    await expect(drawMenu).toBeVisible();
-    await expect(drawMenu.getByRole("menuitemradio", { name: /Pin/i })).toBeVisible();
-    await expect(drawMenu.getByRole("menuitemradio", { name: /Zone/i })).toBeVisible();
+    const sessionTools = page
+      .getByTestId("map-side-dock-stack")
+      .getByRole("group", { name: "Session tools" });
 
-    await page.keyboard.press("Escape");
-    await expect(drawMenu).toBeHidden();
+    await test.step("session side stack opens draw menu", async () => {
+      await expect(sessionTools).toBeVisible();
+      const drawButton = sessionTools.getByRole("button", {
+        name: "Draw on map",
+      });
+      await expect(drawButton).toBeVisible();
+      await clickViaEvaluate(drawButton);
+      const drawMenu = page.getByRole("menu", { name: "Draw on map" });
+      await expect(drawMenu).toBeVisible();
+      await expect(
+        drawMenu.getByRole("menuitemradio", { name: /Pin/i }),
+      ).toBeVisible();
+      await expect(
+        drawMenu.getByRole("menuitemradio", { name: /Zone/i }),
+      ).toBeVisible();
+      await page.keyboard.press("Escape");
+      await expect(drawMenu).toBeHidden();
+    });
 
-    await expect(
-      sessionTools.getByRole("button", { name: "Open settings" }),
-    ).toBeVisible();
-    await expect(
-      sessionTools.getByRole("button", { name: /^Open chat/ }),
-    ).toBeVisible();
-    await expect(
-      sessionTools.getByRole("button", { name: "Open session log" }),
-    ).toBeVisible();
-    await expect(
-      sessionTools.getByRole("button", { name: "Report a problem" }),
-    ).toBeVisible();
-    await sessionTools.getByRole("button", { name: "Report a problem" }).click();
-    await expect(
-      page.getByRole("dialog", { name: "Report problem" }),
-    ).toBeVisible();
+    await test.step("session tools open report dialog", async () => {
+      await expect(
+        sessionTools.getByRole("button", { name: "Open settings" }),
+      ).toBeVisible();
+      await expect(
+        sessionTools.getByRole("button", { name: /^Open chat/ }),
+      ).toBeVisible();
+      await expect(
+        sessionTools.getByRole("button", { name: "Open session log" }),
+      ).toBeVisible();
+      await expect(
+        sessionTools.getByRole("button", { name: "Report a problem" }),
+      ).toBeVisible();
+      await sessionTools
+        .getByRole("button", { name: "Report a problem" })
+        .click();
+      await expect(
+        page.getByRole("dialog", { name: "Report problem" }),
+      ).toBeVisible();
+    });
 
-    await expect(page.locator('[data-island="history-start"]')).toHaveCount(0);
-    await expect(page.locator('[data-island="history-end"]')).toHaveCount(0);
-    await expect(page.locator('[data-island="hunt"]')).toHaveCount(1);
-    const bandOrder = await page
-      .locator(".jl-map-chrome-bottom-band [data-island]")
-      .evaluateAll((nodes) =>
-        nodes.map((node) => node.getAttribute("data-island")),
+    await test.step("hunt stays in bottom band; session in side stack", async () => {
+      await expect(page.locator('[data-island="history-start"]')).toHaveCount(
+        0,
       );
-    expect(bandOrder).toEqual(["hunt"]);
-    await expect(page.locator('[data-island="session"]')).toHaveCount(1);
-    await expect(page.locator(".jl-map-chrome-bottom-band")).toHaveCount(1);
-    await expect(page.locator("[data-chrome-side-stack='phone']")).toHaveCount(1);
-    await expect(
-      page.locator(".jl-map-chrome-bottom-band [data-island='session']"),
-    ).toHaveCount(0);
-    await expect(
-      page.locator("[data-chrome-side-stack='phone'] [data-island='session']"),
-    ).toHaveCount(1);
-    await expect(page.locator(".jl-tool-dock-bar--secondary")).toHaveCount(0);
+      await expect(page.locator('[data-island="history-end"]')).toHaveCount(0);
+      await expect(page.locator('[data-island="hunt"]')).toHaveCount(1);
+      const bandOrder = await page
+        .locator(".jl-map-chrome-bottom-band [data-island]")
+        .evaluateAll((nodes) =>
+          nodes.map((node) => node.getAttribute("data-island")),
+        );
+      expect(bandOrder).toEqual(["hunt"]);
+      await expect(page.locator('[data-island="session"]')).toHaveCount(1);
+      await expect(page.locator(".jl-map-chrome-bottom-band")).toHaveCount(1);
+      await expect(page.getByTestId("map-side-dock-stack")).toHaveCount(1);
+      await expect(
+        page.locator(".jl-map-chrome-bottom-band [data-island='session']"),
+      ).toHaveCount(0);
+      await expect(
+        page
+          .getByTestId("map-side-dock-stack")
+          .locator("[data-island='session']"),
+      ).toHaveCount(1);
+      await expect(page.locator(".jl-tool-dock-bar--secondary")).toHaveCount(0);
+    });
   });
 
   test("hunt island does not use horizontal scroll", async ({ page }) => {
     const hunt = page.locator('[data-island="hunt"]');
-    const overflowX = await hunt.evaluate((el) => getComputedStyle(el).overflowX);
-    // hidden/clip/visible all OK — we must not use overflow-x: auto/scroll.
+    const overflowX = await hunt.evaluate(
+      (el) => getComputedStyle(el).overflowX,
+    );
+    // hidden/clip/visible all OK: we must not use overflow-x: auto/scroll.
     expect(["visible", "clip", "hidden"]).toContain(overflowX);
     const metrics = await readToolDockOverflowMetrics(page);
     expect(metrics.overflowSlots).toBe(0);
@@ -261,7 +284,9 @@ test.describe("iPhone 14 Pro Max tool dock", () => {
     expect(metrics.dockBottom).toBeLessThanOrEqual(metrics.viewportHeight + 1);
   });
 
-  test("dock fits without clipping question tools at 430px", async ({ page }) => {
+  test("dock fits without clipping question tools at 430px", async ({
+    page,
+  }) => {
     const metrics = await readToolDockOverflowMetrics(page);
 
     expect(metrics.overflowSlots).toBe(0);
@@ -281,6 +306,7 @@ test.describe("iPhone 13 PWA safe area", () => {
   }) => {
     const metrics = await page.evaluate(() => {
       const host = document.querySelector(".jl-map-bottom-chrome-host");
+      const chrome = document.querySelector(".jl-map-bottom-chrome");
       const hunt = document.querySelector(".jl-map-island--hunt");
       const map = document.querySelector(".maplibregl-map");
       const hostRect = host?.getBoundingClientRect();
@@ -294,6 +320,7 @@ test.describe("iPhone 13 PWA safe area", () => {
         0,
       );
       const hostStyle = host ? getComputedStyle(host) : null;
+      const chromeStyle = chrome ? getComputedStyle(chrome) : null;
       const huntStyle = hunt ? getComputedStyle(hunt) : null;
       return {
         viewportHeight: window.innerHeight,
@@ -301,12 +328,10 @@ test.describe("iPhone 13 PWA safe area", () => {
         barHeight: huntRect?.height ?? 0,
         barBottom: huntRect?.bottom ?? 0,
         mapBottom: mapRect?.bottom ?? 0,
-        dockPaddingBottom: hostStyle
-          ? Number.parseFloat(hostStyle.paddingBottom)
+        dockPaddingBottom: chromeStyle
+          ? Number.parseFloat(chromeStyle.paddingBottom)
           : 0,
-        dockBottomOffset: hostStyle
-          ? Number.parseFloat(hostStyle.bottom)
-          : 0,
+        dockBottomOffset: hostStyle ? Number.parseFloat(hostStyle.bottom) : 0,
         barPaddingBottom: huntStyle
           ? Number.parseFloat(huntStyle.paddingBottom)
           : 0,
@@ -323,23 +348,20 @@ test.describe("iPhone 13 PWA safe area", () => {
 
     expect(metrics.backdropOnMap).toBeNull();
     expect(metrics.islandCount).toBeGreaterThanOrEqual(2);
-    // Host chassis: flush to physical bottom; float gap under the dock island.
+    // Host chassis: flush to physical bottom; chrome pad absorbs safe-area.
     expect(metrics.dockBottomOffset).toBeLessThanOrEqual(1);
     expect(metrics.gapBelowDock).toBeLessThanOrEqual(2);
     expect(
       Math.abs(metrics.dockBottom - metrics.viewportHeight),
     ).toBeLessThanOrEqual(2);
     expect(metrics.dockPaddingBottom).toBeGreaterThanOrEqual(
-      DOCK_FLOAT_GAP_PX - 2,
-    );
-    expect(metrics.dockPaddingBottom).toBeLessThanOrEqual(
-      DOCK_FLOAT_GAP_PX + 2,
+      SIMULATED_SAFE_AREA_BOTTOM_PX - 2,
     );
     // Forbidden: safe-area pad inside the bordered island (reverted stripe).
     expect(metrics.barPaddingBottom).toBeLessThanOrEqual(6);
-    expect(Math.abs(metrics.mapBottom - metrics.viewportHeight)).toBeLessThanOrEqual(
-      2,
-    );
+    expect(
+      Math.abs(metrics.mapBottom - metrics.viewportHeight),
+    ).toBeLessThanOrEqual(2);
     expect(metrics.barHeight).toBeLessThanOrEqual(72);
     expect(metrics.deadSpaceBelowIcons).toBeLessThanOrEqual(8);
   });
@@ -354,56 +376,53 @@ test.describe("iPhone 13 PWA safe area", () => {
 
     const metrics = await page.evaluate(() => {
       const host = document.querySelector(".jl-map-bottom-chrome-host");
+      const chrome = document.querySelector(".jl-map-bottom-chrome");
       const hostRect = host?.getBoundingClientRect();
-      const hostStyle = host ? getComputedStyle(host) : null;
+      const chromeStyle = chrome ? getComputedStyle(chrome) : null;
       return {
         viewportHeight: window.innerHeight,
         dockBottom: hostRect?.bottom ?? 0,
-        dockPaddingBottom: hostStyle
-          ? Number.parseFloat(hostStyle.paddingBottom)
+        dockPaddingBottom: chromeStyle
+          ? Number.parseFloat(chromeStyle.paddingBottom)
           : 0,
       };
     });
 
-    expect(Math.abs(metrics.dockBottom - metrics.viewportHeight)).toBeLessThanOrEqual(
-      2,
-    );
+    expect(
+      Math.abs(metrics.dockBottom - metrics.viewportHeight),
+    ).toBeLessThanOrEqual(2);
     expect(metrics.dockPaddingBottom).toBeGreaterThanOrEqual(
-      DOCK_FLOAT_GAP_PX - 2,
-    );
-    expect(metrics.dockPaddingBottom).toBeLessThanOrEqual(
-      DOCK_FLOAT_GAP_PX + 2,
+      SIMULATED_SAFE_AREA_BOTTOM_PX - 2,
     );
   });
 
-  test("status island sits below the notch with float gap", async ({ page }) => {
+  test("status rail clears the notch safe-area band", async ({ page }) => {
     await injectSimulatedSafeAreaTop(page, SIMULATED_SAFE_AREA_TOP_PX);
 
     const metrics = await page.evaluate(() => {
-      const float = document.querySelector(".jl-status-rail-float");
-      const rail = document.querySelector(".jl-status-rail");
-      const island = document.querySelector(
-        '[data-testid="tool-status-block-mantine"]',
+      const rail = document.querySelector(
+        '[data-testid="map-status-rail-mantine"]',
       );
-      const floatRect = float?.getBoundingClientRect();
+      // Inner padded header row (Mantine path; .jl-status-bar retired).
+      const header = rail?.querySelector(":scope > .relative > div");
       const railRect = rail?.getBoundingClientRect();
-      const islandRect = island?.getBoundingClientRect();
+      const headerRect = header?.getBoundingClientRect();
       return {
-        floatPaddingTop: float
-          ? Number.parseFloat(getComputedStyle(float).paddingTop)
+        railPaddingTop: rail
+          ? Number.parseFloat(getComputedStyle(rail).paddingTop)
           : 0,
-        islandTop: islandRect?.top ?? 0,
-        floatTop: floatRect?.top ?? 0,
+        headerTop: headerRect?.top ?? 0,
         railTop: railRect?.top ?? 0,
       };
     });
 
-    const expectedTop = SIMULATED_SAFE_AREA_TOP_PX + DOCK_FLOAT_GAP_PX;
-    expect(metrics.floatPaddingTop).toBeGreaterThanOrEqual(expectedTop - 2);
-    expect(metrics.floatPaddingTop).toBeLessThanOrEqual(expectedTop + 2);
-    expect(metrics.islandTop).toBeGreaterThanOrEqual(expectedTop - 2);
+    expect(metrics.railPaddingTop).toBeGreaterThanOrEqual(
+      SIMULATED_SAFE_AREA_TOP_PX - 1,
+    );
+    expect(metrics.headerTop).toBeGreaterThanOrEqual(
+      SIMULATED_SAFE_AREA_TOP_PX - 1,
+    );
     expect(metrics.railTop).toBeLessThanOrEqual(1);
-    expect(metrics.floatTop).toBeLessThanOrEqual(1);
   });
 });
 
@@ -412,25 +431,24 @@ test.describe("iPhone 13 PWA home safe area", () => {
     await prepareE2EPage(page);
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/");
-    // Home waits on auth bootstrap, then shows Create/Join inset rows.
-    await expect(page.getByText("Starting…")).toBeHidden({ timeout: 45_000 });
-    await expect(page.getByRole("link", { name: "Create session" })).toBeVisible({
-      timeout: 15_000,
-    });
+    await expect(
+      page.getByRole("link", { name: "Create session" }),
+    ).toBeVisible();
     await injectSimulatedSafeAreaBottom(page, SIMULATED_SAFE_AREA_BOTTOM_PX);
   });
 
   test("global entry backdrop covers the viewport", async ({ page }) => {
     const metrics = await page.evaluate(() => {
-      const main = document.querySelector("main");
-      const mainRect = main?.getBoundingClientRect();
+      const poster = document.querySelector(
+        "main.home-poster-viewport, main.home-poster, .home-poster",
+      );
+      const posterRect = poster?.getBoundingClientRect();
       const backdrop = document.querySelector(".app-entry-backdrop");
       const backdropStyle = backdrop ? getComputedStyle(backdrop) : null;
       const bodyBg = getComputedStyle(document.body).backgroundColor;
       return {
         viewportHeight: window.innerHeight,
-        mainBottom: mainRect?.bottom ?? 0,
-        backdropExists: !!backdrop,
+        posterBottom: posterRect?.bottom ?? 0,
         backdropPosition: backdropStyle?.position ?? "",
         backdropTop: backdropStyle?.top ?? "",
         backdropBottom: backdropStyle?.bottom ?? "",
@@ -439,8 +457,9 @@ test.describe("iPhone 13 PWA home safe area", () => {
       };
     });
 
-    expect(metrics.mainBottom).toBeGreaterThanOrEqual(metrics.viewportHeight - 2);
-    expect(metrics.backdropExists).toBe(true);
+    expect(metrics.posterBottom).toBeGreaterThanOrEqual(
+      metrics.viewportHeight - 2,
+    );
     expect(metrics.backdropPosition).toBe("fixed");
     expect(metrics.backdropTop).toBe("0px");
     expect(metrics.backdropBottom).toBe("0px");
@@ -495,10 +514,9 @@ test.describe("landscape map-dominant chrome", () => {
       page.locator('.map-chrome-hud[data-landscape-chrome="revealed"]'),
     ).toBeVisible();
     await expect(page.locator('[data-island="map-controls"]')).toBeHidden();
+    // Landscape distill hides secondary session actions; keep settings.
     await expect(
-      page.locator(
-        '[data-survey-priority="secondary"][aria-label="Report a problem"]',
-      ),
+      page.getByRole("button", { name: "Report a problem" }),
     ).toBeHidden();
     await expect(
       page.getByRole("button", { name: "Open settings" }),
@@ -515,7 +533,9 @@ test.describe("iPhone 13 PWA join safe area", () => {
     await injectSimulatedSafeAreaBottom(page, SIMULATED_SAFE_AREA_BOTTOM_PX);
   });
 
-  test("join screen keeps gradient backdrop in safe area band", async ({ page }) => {
+  test("join screen keeps gradient backdrop in safe area band", async ({
+    page,
+  }) => {
     const metrics = await page.evaluate(() => {
       const backdrop = document.querySelector(".app-entry-backdrop");
       const backdropStyle = backdrop ? getComputedStyle(backdrop) : null;

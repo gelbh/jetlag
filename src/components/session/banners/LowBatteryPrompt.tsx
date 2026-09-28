@@ -1,3 +1,4 @@
+import { Button, Group } from "@mantine/core";
 import { useState } from "react";
 import { useLocation } from "react-router-dom";
 import {
@@ -7,6 +8,7 @@ import {
 } from "@/domain/device/power/batteryPrompt";
 import { useBatteryStatus } from "@/hooks/location/useBatteryStatus";
 import { useMapStore } from "@/state/mapStore";
+import { MapFloatSurface } from "../../ui/banners/MapFloatSurface";
 import { HudBanner } from "../../ui/hud/HudBanner";
 
 export function LowBatteryPrompt() {
@@ -52,15 +54,16 @@ export function LowBatteryPrompt() {
       animated={false}
       className="pointer-events-auto fixed inset-x-3 top-[var(--map-banner-top)] z-[var(--z-panel)]"
     >
-      <div
-        className="map-float-alert mx-auto max-w-xl border-2 border-status-warning/40 bg-status-warning-surface px-3 py-3"
+      <MapFloatSurface
+        tone="warn"
         role="dialog"
         aria-labelledby="low-battery-prompt-title"
         aria-describedby="low-battery-prompt-body"
+        className="mx-auto max-w-xl"
       >
         <p
           id="low-battery-prompt-title"
-          className="font-display text-xs font-semibold uppercase tracking-wide text-status-warning"
+          className="font-display text-xs font-semibold uppercase tracking-wide"
         >
           Battery low ({percent}%)
         </p>
@@ -71,23 +74,27 @@ export function LowBatteryPrompt() {
           Switch to low power mode to reduce GPS polling, live transit, and
           background downloads while keeping core game sync.
         </p>
-        <div className="mt-3 flex flex-wrap gap-2">
-          <button
+        <Group gap="sm" mt="sm" wrap="wrap">
+          <Button
             type="button"
+            variant="filled"
+            size="md"
+            flex={1}
             onClick={enableLowPowerMode}
-            className="btn-primary min-h-10 flex-1 px-4 text-xs"
           >
             Enable low power
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
+            variant="default"
+            size="md"
+            flex={1}
             onClick={dismiss}
-            className="btn-secondary min-h-10 flex-1 px-4 text-xs"
           >
             Not now
-          </button>
-        </div>
-      </div>
+          </Button>
+        </Group>
+      </MapFloatSurface>
     </HudBanner>
   );
 }
