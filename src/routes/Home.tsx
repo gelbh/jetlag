@@ -74,14 +74,14 @@ export function Home() {
                 variant="light"
                 color="gray"
                 radius="xl"
-                size="sm"
+                size="xs"
+                mih={24}
                 onClick={() => setChangelogOpen(true)}
                 aria-label={`Version ${APP_VERSION}. Open changelog`}
-                style={{ minHeight: 44 }}
                 styles={{
                   root: {
                     cursor: "pointer",
-                    paddingInline: "0.75rem",
+                    paddingInline: "0.5rem",
                     fontFamily: "var(--mantine-font-family-monospace)",
                     fontWeight: 700,
                     letterSpacing: "0.04em",
@@ -102,8 +102,8 @@ export function Home() {
                 order={1}
                 c="var(--color-field-ink)"
                 fw={700}
+                fz="1.875rem"
                 style={{
-                  fontSize: "2.125rem",
                   lineHeight: 1.15,
                   letterSpacing: "-0.03em",
                   minWidth: 0,

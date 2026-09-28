@@ -244,7 +244,8 @@ describe("Home", () => {
       name: `Version ${APP_VERSION}. Open changelog`,
     });
     expect(versionControl).toHaveTextContent(`v${APP_VERSION}`);
-    expect(versionControl.style.minHeight).toBe("44px");
+    // Mantine maps mih={24} → calc(1.5rem * var(--mantine-scale))
+    expect(versionControl.style.minHeight).toContain(`${24 / 16}rem`);
     expect(screen.queryByRole("dialog", { name: "Changelog" })).not.toBeInTheDocument();
 
     fireEvent.click(versionControl);
