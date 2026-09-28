@@ -1,19 +1,18 @@
+import { Button, Stack, Text } from "@mantine/core";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useAppNavigate } from "../hooks/navigation/useAppNavigate";
-import { InlineError } from "../components/ui/banners/InlineError";
 import { PremiumSignInGate } from "../components/billing/PremiumSignInGate";
 import { PremiumFeatureList } from "../components/billing/PremiumFeatureList";
+import type { PremiumCheckoutNotice } from "../components/billing/PremiumFeatureList";
 import { PremiumTierCards } from "../components/billing/PremiumTierCards";
+import { ErrorCallout, plainStyles } from "@/components/ui/entry/entryChrome";
 import {
   canStartPremiumTrial,
   formatEntitlementSummary,
   type PremiumProductKey,
 } from "../domain/billing/premiumProducts";
-import {
-  ANALYTICS_EVENTS,
-  track,
-} from "../services/core/analytics/analytics";
+import { ANALYTICS_EVENTS, track } from "../services/core/analytics/analytics";
 import {
   ensureAnonymousUser,
   isFirebaseConfigured,
@@ -24,16 +23,8 @@ import {
   startPremiumTrial,
 } from "../services/billing/premiumBilling";
 import { usePremiumEntitlements } from "../hooks/billing/usePremiumEntitlements";
-import {
-  homeEnterActionsStyle,
-  homeFeedbackLinkStyle,
-} from "@/components/ui/entry/entryStyles";
 
-export function PremiumPageContent({
-  headerOffset = true,
-}: {
-  headerOffset?: boolean;
-} = {}) {
+export function PremiumPageContent() {
   const navigate = useAppNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const checkoutState = searchParams.get("checkout");
@@ -49,7 +40,8 @@ export function PremiumPageContent({
   const [portalLoading, setPortalLoading] = useState(false);
   const [trialLoading, setTrialLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [checkoutNotice, setCheckoutNotice] = useState<string | null>(null);
+  const [checkoutNotice, setCheckoutNotice] =
+    useState<PremiumCheckoutNotice | null>(null);
 
   const refreshEntitlementsWithError = useCallback(async () => {
     if (!isFirebaseConfigured()) {
@@ -76,8 +68,11 @@ export function PremiumPageContent({
     /* eslint-disable react-hooks/set-state-in-effect -- snapshot Stripe redirect notice before clearing query */
     setCheckoutNotice(
       checkoutState === "success"
-        ? "Payment received. Premium unlock is ready."
-        : "Checkout canceled.",
+        ? {
+            kind: "success",
+            message: "Payment received. Premium unlock is ready.",
+          }
+        : { kind: "muted", message: "Checkout canceled." },
     );
     /* eslint-enable react-hooks/set-state-in-effect */
     if (checkoutState === "success") {
@@ -151,30 +146,25 @@ export function PremiumPageContent({
 
   if (!isFirebaseConfigured()) {
     return (
-      <>
-        <PremiumFeatureList
-          entitlementSummary={null}
-          checkoutNotice={null}
-          headerOffset={headerOffset}
-        />
-        <p className="max-w-sm text-sm text-field-ink-muted">
+      <Stack gap={22}>
+        <PremiumFeatureList entitlementSummary={null} checkoutNotice={null} />
+        <Text size="sm" c="var(--color-field-ink-muted)">
           Premium billing needs an online connection. Use a synced session to
           unlock live transit.
-        </p>
-      </>
+        </Text>
+      </Stack>
     );
   }
 
   return (
-    <>
+    <Stack gap={22}>
       <PremiumFeatureList
         entitlementSummary={entitlementSummary}
         checkoutNotice={checkoutNotice}
-        headerOffset={headerOffset}
       />
 
       <PremiumSignInGate onSignedIn={() => void refreshEntitlementsWithError()}>
-        <div className="home-enter-actions space-y-3" style={homeEnterActionsStyle}>
+        <Stack gap="sm">
           <PremiumTierCards
             entitlements={entitlements}
             loading={loading}
@@ -192,17 +182,17 @@ export function PremiumPageContent({
               void handlePortal();
             }}
           />
-          {error ? <InlineError>{error}</InlineError> : null}
-        </div>
+          {error ? <ErrorCallout>{error}</ErrorCallout> : null}
+        </Stack>
       </PremiumSignInGate>
 
-      <button
-        type="button"
+      <Button
+        variant="subtle"
+        styles={plainStyles}
         onClick={() => navigate("/create")}
-        style={homeFeedbackLinkStyle}
       >
         Back to create session
-      </button>
-    </>
+      </Button>
+    </Stack>
   );
 }
