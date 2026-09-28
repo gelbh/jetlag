@@ -140,6 +140,29 @@ export function usedRadarDistanceOptions(
   );
 }
 
+export function usedRadarDistanceOptionsForSession(
+  annotations: AnnotationRecord[],
+  pendingQuestions: readonly PendingQuestionRecord[],
+  unit: DistanceUnit = "imperial",
+  exceptAnnotationId?: string,
+): Set<RadarDistanceOptionKey> {
+  const used = usedRadarDistanceOptions(annotations, unit, exceptAnnotationId);
+  for (const id of radarPresetHelpersForUnit(unit).usedOptionsFromPending(
+    pendingQuestions,
+  )) {
+    used.add(id);
+  }
+  return used;
+}
+
+/** Full radar distance presets for game size (does not filter used). */
+export function radarDistancePresetsForGameSize(
+  gameSize: GameSize,
+  unit: DistanceUnit,
+): number[] {
+  return radarPresetsMetersForGameSizeAndUnit(gameSize, unit);
+}
+
 export function isRadarRadiusAllowedForGameSize(
   gameSize: GameSize,
   distanceMeters: number,

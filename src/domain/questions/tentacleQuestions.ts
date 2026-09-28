@@ -256,6 +256,20 @@ export function usedTentacleCategoryIds(
   );
 }
 
+export function usedTentacleCategoryIdsForSession(
+  annotations: AnnotationRecord[],
+  pendingQuestions: readonly PendingQuestionRecord[],
+  exceptAnnotationId?: string,
+): Set<TentacleExtendedCategoryId> {
+  const used = usedTentacleCategoryIds(annotations, exceptAnnotationId);
+  for (const id of tentacleCatalogHelpers.usedOptionsFromPending(
+    pendingQuestions,
+  )) {
+    used.add(id);
+  }
+  return used;
+}
+
 export function firstAvailableTentacleCategoryId(
   gameSize: GameSize,
   usedCategories: ReadonlySet<TentacleExtendedCategoryId> = new Set(),

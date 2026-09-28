@@ -7,6 +7,7 @@ interface ListSelectRowProps {
   onClick: () => void;
   children: ReactNode;
   align?: "left" | "center";
+  disabled?: boolean;
 }
 
 export function ListSelectRow({
@@ -14,12 +15,14 @@ export function ListSelectRow({
   onClick,
   children,
   align = "left",
+  disabled = false,
 }: ListSelectRowProps) {
   return (
     <ChoiceButton
       selected={selected}
       activeClassName={HUD_BINARY_YES}
       onClick={onClick}
+      disabled={disabled}
       fullWidth
       align={align}
     >

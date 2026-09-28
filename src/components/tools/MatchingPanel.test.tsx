@@ -62,4 +62,38 @@ describe("MatchingPanel public props (AC #1)", () => {
 
     expect(screen.getByText("Match category")).toBeInTheDocument();
   });
+
+  it("keeps used categories visible but disabled", () => {
+    render(
+      <MatchingPanel
+        model={{
+          ...baseModel,
+          usedCategoryIds: new Set(["landmass"]),
+          unavailableCategoryIds: new Set(),
+        }}
+      />,
+    );
+
+    expect(screen.getByRole("option", { name: "Landmass" })).toBeDisabled();
+    expect(
+      screen.getByRole("option", { name: "Commercial Airport" }),
+    ).not.toBeDisabled();
+  });
+
+  it("greys unavailable categories and shows catalog notice", () => {
+    render(
+      <MatchingPanel
+        model={{
+          ...baseModel,
+          unavailableCategoryIds: new Set(["landmass"]),
+          catalogNotice: "No landmass intersects the play area.",
+        }}
+      />,
+    );
+
+    expect(screen.getByRole("option", { name: "Landmass" })).toBeDisabled();
+    expect(
+      screen.getByText("No landmass intersects the play area."),
+    ).toBeInTheDocument();
+  });
 });

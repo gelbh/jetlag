@@ -80,4 +80,24 @@ describe("ThermometerPanel place→configure→ask commit chrome", () => {
     expect(send).toHaveLength(1);
     expect(send[0]).toBeEnabled();
   });
+
+  it("keeps used walk distances visible but disabled", () => {
+    const onDistanceChange = vi.fn();
+    renderWithAppUi(
+      <ThermometerPanel
+        {...baseProps}
+        distanceMeters={804.672}
+        usedDistanceOptions={new Set([3])}
+        onDistanceChange={onDistanceChange}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+
+    const used = screen.getByRole("button", { name: /^3 mi$/i });
+    expect(used).toBeInTheDocument();
+    expect(used).toBeDisabled();
+    fireEvent.click(used);
+    expect(onDistanceChange).not.toHaveBeenCalled();
+  });
 });

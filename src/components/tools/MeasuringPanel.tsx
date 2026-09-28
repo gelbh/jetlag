@@ -1,7 +1,6 @@
 import { type RefObject } from "react";
 import {
   BASE_MEASURING_CATALOG,
-  MEASURING_GROUPS,
   measuringSupportsSearch,
   measuringTargetKind,
   measuringTargetLabel,
@@ -29,6 +28,7 @@ import {
 import { SearchResultsList } from "./shared/controls/SearchResultsList";
 import { ToolPanelShell } from "./shared/panels/ToolPanelShell";
 import { ToolSection } from "./shared/panels/ToolSection";
+import { ResolvedReadout } from "./shared/readout/ResolvedReadout";
 import { WizardPanelFrame } from "./shared/wizard/WizardPanelFrame";
 import { WizardSwipeSurface } from "./shared/wizard/WizardSwipeSurface";
 import { MEASURING_WIZARD } from "./shared/wizard/toolStepUtils";
@@ -46,6 +46,9 @@ export type MeasuringPanelModel = {
   measureFrom: MeasuringFromKind;
   usesAllPlacesInArea: boolean;
   usedMeasuringFromKinds: ReadonlySet<MeasuringFromKind>;
+  /** Empty play-area bounce; greys like used (Matching twin). */
+  unavailableMeasuringFromKinds?: ReadonlySet<MeasuringFromKind>;
+  catalogNotice?: string | null;
   catalogOptions?: readonly MeasuringCatalogOption[];
   anchorLat?: number | null;
   anchorLng?: number | null;
@@ -99,6 +102,8 @@ export function MeasuringPanel({ model }: MeasuringPanelProps) {
     measureFrom,
     usesAllPlacesInArea,
     usedMeasuringFromKinds,
+    unavailableMeasuringFromKinds = new Set<MeasuringFromKind>(),
+    catalogNotice = null,
     catalogOptions,
     anchorLat = null,
     anchorLng = null,
@@ -164,11 +169,10 @@ export function MeasuringPanel({ model }: MeasuringPanelProps) {
   const isSeaLevel = targetKind === "sea_level";
   const allowsSearch = measuringSupportsSearch(measureFrom);
   const measureCatalog = catalogOptions ?? BASE_MEASURING_CATALOG;
-  const hasAvailableMeasureOptions = MEASURING_GROUPS.some((group) =>
-    measureCatalog.some(
-      (option) =>
-        option.groupId === group.id && !usedMeasuringFromKinds.has(option.id),
-    ),
+  const hasAvailableMeasureOptions = measureCatalog.some(
+    (option) =>
+      !usedMeasuringFromKinds.has(option.id) &&
+      !unavailableMeasuringFromKinds.has(option.id),
   );
 
   const needsAutoResolve = measuringUsesDebouncedSeekerResolve(
@@ -212,10 +216,14 @@ export function MeasuringPanel({ model }: MeasuringPanelProps) {
       {phaseId === "configure" && stepId === "source" ? (
         <>
           {awaitHiderAnswer ? <QuestionTruthReferenceHint /> : null}
+          {catalogNotice ? (
+            <ResolvedReadout variant="warning">{catalogNotice}</ResolvedReadout>
+          ) : null}
           <MeasuringSourceStep
             measureFrom={measureFrom}
             optionChosen={optionChosen}
             usedMeasuringFromKinds={usedMeasuringFromKinds}
+            unavailableMeasuringFromKinds={unavailableMeasuringFromKinds}
             catalogOptions={catalogOptions}
             subject={subject}
             locationCategory={locationCategory}

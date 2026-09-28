@@ -82,6 +82,14 @@ export async function commitMatching(
     return "noop";
   }
 
+  // Empty play-area catalog must bounce, not send a null match.
+  if (
+    matchingNullAnswer &&
+    (input.matchingFeatureCount === 0 || input.matchingFeatures.length === 0)
+  ) {
+    return "noop";
+  }
+
   if (!matchingNullAnswer && !matchingNearestFeatureId) {
     return "noop";
   }
@@ -125,6 +133,15 @@ export async function performMatchingCommit(
   } = input;
 
   if (!matchingSeekerPoint || !matchingCategoryId) {
+    return;
+  }
+
+  // Empty play-area catalog must bounce, not send a null match (preview path
+  // calls this directly and must not bypass the outer commitMatching guard).
+  if (
+    matchingNullAnswer &&
+    (matchingFeatureCount === 0 || matchingFeatures.length === 0)
+  ) {
     return;
   }
 

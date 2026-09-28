@@ -41,7 +41,8 @@ export function PhotoPanel({
   canSubmitQuestion = true,
   hasOpenQuestion = false,
 }: PhotoPanelProps) {
-  const availableCategories = photoCategoriesForGameSize(gameSize).filter(
+  const catalogCategories = photoCategoriesForGameSize(gameSize);
+  const availableCategories = catalogCategories.filter(
     (category) => !usedCategoryIds.has(category.id),
   );
   const question = photoQuestionFor(categoryId, distanceUnit);
@@ -65,24 +66,30 @@ export function PhotoPanel({
       <ToolSection first compact status="active">
         {availableCategories.length === 0 ? (
           <CatalogExhaustedMessage message="Every photo question has already been used this session." />
-        ) : (
-          <label className="field-label">
-            Photo question
-            <select
-              value={categoryId}
-              onChange={(event) =>
-                onCategoryChange(event.target.value as PhotoCategoryId)
-              }
-              className="field-input"
-            >
-              {availableCategories.map((category) => (
-                <option key={category.id} value={category.id}>
-                  {photoCategoryLabelForUnit(category.id, distanceUnit)}
-                </option>
-              ))}
-            </select>
-          </label>
-        )}
+        ) : null}
+        <label className="field-label">
+          Photo question
+          <select
+            value={
+              usedCategoryIds.has(categoryId) ? "" : categoryId
+            }
+            onChange={(event) =>
+              onCategoryChange(event.target.value as PhotoCategoryId)
+            }
+            className="field-input"
+            disabled={availableCategories.length === 0}
+          >
+            {catalogCategories.map((category) => (
+              <option
+                key={category.id}
+                value={category.id}
+                disabled={usedCategoryIds.has(category.id)}
+              >
+                {photoCategoryLabelForUnit(category.id, distanceUnit)}
+              </option>
+            ))}
+          </select>
+        </label>
         <QuestionPromptBlock
           prompt={question.prompt}
           ruleSummary={question.ruleSummary}

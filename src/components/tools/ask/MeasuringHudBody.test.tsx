@@ -183,4 +183,37 @@ describe("MeasuringHudBody", () => {
     };
     expect(canCommit(readiness)).toBe(true);
   });
+
+  it("keeps used categories visible but disabled", () => {
+    renderHud(
+      <MeasuringHudBody
+        model={{
+          ...baseModel,
+          usedMeasuringFromKinds: new Set(["zoo"]),
+        }}
+      />,
+    );
+    expect(screen.getByText("Zoo")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /Zoo/i }),
+    ).toBeDisabled();
+  });
+
+  it("shows empty-area reason and disables that category on the sheet", () => {
+    renderHud(
+      <MeasuringHudBody
+        model={{
+          ...baseModel,
+          unavailableMeasuringFromKinds: new Set(["zoo"]),
+          catalogNotice: "No named zoo found in this play area.",
+        }}
+      />,
+    );
+    expect(
+      screen.getByText("No named zoo found in this play area."),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /Zoo/i }),
+    ).toBeDisabled();
+  });
 });

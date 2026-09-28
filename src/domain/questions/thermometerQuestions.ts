@@ -90,6 +90,20 @@ export function usedThermometerDistanceOptions(
   );
 }
 
+export function usedThermometerDistanceOptionsForSession(
+  annotations: AnnotationRecord[],
+  pendingQuestions: readonly PendingQuestionRecord[],
+  exceptAnnotationId?: string,
+): Set<ThermometerDistanceOptionMiles> {
+  const used = usedThermometerDistanceOptions(annotations, exceptAnnotationId);
+  for (const id of thermometerPresetHelpers.usedOptionsFromPending(
+    pendingQuestions,
+  )) {
+    used.add(id);
+  }
+  return used;
+}
+
 export function firstAvailableThermometerDistanceMeters(
   usedOptions: ReadonlySet<ThermometerDistanceOptionMiles>,
 ): number | null {
@@ -98,6 +112,27 @@ export function firstAvailableThermometerDistanceMeters(
     usedOptions,
   );
   return miles === null ? null : milesToMeters(miles);
+}
+
+export function firstAvailableThermometerDistanceMetersForSession(
+  session: SessionRulesInput,
+  usedOptions: ReadonlySet<ThermometerDistanceOptionMiles>,
+): number | null {
+  for (const preset of availableThermometerDistancePresetsForSession(session)) {
+    const miles = thermometerPresetMilesForMeters(preset);
+    if (miles !== null && !usedOptions.has(miles)) {
+      return preset;
+    }
+  }
+  return null;
+}
+
+export function isThermometerDistanceOptionUsed(
+  usedOptions: ReadonlySet<ThermometerDistanceOptionMiles>,
+  distanceMeters: number,
+): boolean {
+  const miles = thermometerPresetMilesForMeters(distanceMeters);
+  return miles !== null && usedOptions.has(miles);
 }
 
 export function isThermometerDistanceOptionAvailable(

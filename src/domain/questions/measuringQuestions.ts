@@ -276,6 +276,20 @@ export function usedMeasuringFromKinds(
   );
 }
 
+export function usedMeasuringFromKindsForSession(
+  annotations: readonly AnnotationRecord[],
+  pendingQuestions: readonly PendingQuestionRecord[],
+  exceptAnnotationId?: string,
+): Set<MeasuringFromKind> {
+  const used = usedMeasuringFromKinds(annotations, exceptAnnotationId);
+  for (const id of measuringCatalogHelpers.usedOptionsFromPending(
+    pendingQuestions,
+  )) {
+    used.add(id);
+  }
+  return used;
+}
+
 export function firstAvailableMeasuringFromKind(
   usedKinds: ReadonlySet<MeasuringFromKind>,
   catalog: readonly MeasuringCatalogOption[] = BASE_MEASURING_CATALOG,

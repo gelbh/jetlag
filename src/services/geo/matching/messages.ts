@@ -40,26 +40,36 @@ export function matchingFeatureNotFoundMessage(
   return `No named ${label} found in this play area.`;
 }
 
-export function matchingNullAnswerMessage(
-  categoryId: MatchingCategoryId,
-): string {
+function matchingEmptyCatalogBody(categoryId: MatchingCategoryId): string {
   const category = getMatchingCategory(categoryId);
   const label = matchingCategoryLabel(categoryId).toLowerCase();
-  const nullSuffix = " You can still answer Yes or No as a null match.";
 
   if (category.resolver === "landmass") {
-    return `No landmass intersects the play area.${nullSuffix}`;
+    return "No landmass intersects the play area.";
   }
 
   if (category.resolver === "reverseGeocodeAdmin") {
-    return `No ${label} intersects the play area.${nullSuffix}`;
+    return `No ${label} intersects the play area.`;
   }
 
   if (categoryId === "commercial_airport") {
-    return `No commercial airport with a flight code was found in this play area.${nullSuffix}`;
+    return "No commercial airport with a flight code was found in this play area.";
   }
 
-  return `No named ${label} found in this play area.${nullSuffix}`;
+  return `No named ${label} found in this play area.`;
+}
+
+/** Empty play-area catalog reason shown on bounce (no null-match offer). */
+export function matchingEmptyPlayAreaMessage(
+  categoryId: MatchingCategoryId,
+): string {
+  return matchingEmptyCatalogBody(categoryId);
+}
+
+export function matchingNullAnswerMessage(
+  categoryId: MatchingCategoryId,
+): string {
+  return `${matchingEmptyCatalogBody(categoryId)} You can still answer Yes or No as a null match.`;
 }
 
 export function matchingResolveFailureMessage(

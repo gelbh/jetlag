@@ -1,9 +1,10 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { MantineProvider } from "@mantine/core";
 import type { ReactElement } from "react";
 import type { DistanceUnit } from "@/domain/map/distance";
 import type { SessionRulesInput } from "@/domain/session/rules";
+import type { ThermometerDistanceOptionMiles } from "@/domain/questions";
 import { jetlagTheme } from "@/theme/theme";
 import { AskHudHost } from "./AskHudHost";
 import { ThermometerHudBody } from "./ThermometerHudBody";
@@ -49,6 +50,7 @@ const baseProps = {
   placementMode: "gps" as const,
   walkingActive: false,
   presetUseCount: 0,
+  usedDistanceOptions: new Set<ThermometerDistanceOptionMiles>(),
   costLabel: "D2P1",
   gpsLoading: false,
   canSubmitQuestion: true,
@@ -62,6 +64,35 @@ const baseProps = {
 };
 
 describe("ThermometerHudBody", () => {
+  it("keeps used walk distances visible but disabled", () => {
+    const onDistanceChange = vi.fn();
+    renderHud(
+      <ThermometerHudBody
+        {...baseProps}
+        usedDistanceOptions={new Set([3])}
+        onDistanceChange={onDistanceChange}
+      />,
+    );
+
+    const used = screen.getByRole("button", { name: /^3 mi$/i });
+    expect(used).toBeInTheDocument();
+    expect(used).toBeDisabled();
+    fireEvent.click(used);
+    expect(onDistanceChange).not.toHaveBeenCalled();
+  });
+
+  it("disables the currently selected distance when it is already used", () => {
+    renderHud(
+      <ThermometerHudBody
+        {...baseProps}
+        distanceMeters={4828.032}
+        usedDistanceOptions={new Set([3])}
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: /^3 mi$/i })).toBeDisabled();
+  });
+
   it("shows walk banner without PhaseRail, CONTINUE, or END WALK in the body", () => {
     renderHud(
       <ThermometerHudBody

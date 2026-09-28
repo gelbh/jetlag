@@ -10,13 +10,18 @@ import { isActive } from "../../domain/map/annotations";
 import {
   DEFAULT_THERMOMETER_DISTANCE_METERS,
   availableThermometerDistancePresetsForSession,
+  firstAvailableThermometerDistanceMetersForSession,
+  isThermometerDistanceOptionAvailable,
   isThermometerDistanceOptionAvailableForSession,
   isThermometerWalkActive,
   parseThermometerStartPoint,
   questionCostBreakdown,
+  thermometerPresetMilesForMeters,
   thermometerQuestionPrompt,
   thermometerUseCount,
   thermometerUseCountFromPending,
+  usedThermometerDistanceOptionsForSession,
+  type ThermometerDistanceOptionMiles,
 } from "../../domain/questions";
 import { formatPresetDistance } from "../../domain/map/distance";
 import { useLiveLocation } from "../location/useLiveLocation";
@@ -34,6 +39,7 @@ export type { UseThermometerToolParams } from "./thermometer/types";
 
 function createThermometerConfig(
   sessionRules: UseThermometerToolParams["sessionRules"],
+  usedOptions: ReadonlySet<ThermometerDistanceOptionMiles> = new Set(),
 ): ThermometerSessionConfig {
   return {
     placementMode: "gps",
@@ -41,6 +47,10 @@ function createThermometerConfig(
     thermoB: null,
     localWalkingQuestionId: null,
     distanceMeters:
+      firstAvailableThermometerDistanceMetersForSession(
+        sessionRules,
+        usedOptions,
+      ) ??
       availableThermometerDistancePresetsForSession(sessionRules)[0] ??
       DEFAULT_THERMOMETER_DISTANCE_METERS,
     answer: null,
@@ -129,9 +139,22 @@ export function useThermometerTool({
     pendingQuestionsRef.current = pendingQuestions;
   }, [pendingQuestions]);
 
+  const usedThermometerOptions = useMemo(
+    () =>
+      usedThermometerDistanceOptionsForSession(
+        activeAnnotations,
+        pendingQuestions,
+      ),
+    [activeAnnotations, pendingQuestions],
+  );
+  const usedThermometerOptionsRef = useRef(usedThermometerOptions);
+  useEffect(() => {
+    usedThermometerOptionsRef.current = usedThermometerOptions;
+  }, [usedThermometerOptions]);
+
   const createInitialConfig = useCallback(
-    () => createThermometerConfig(sessionRules),
-    [sessionRules],
+    () => createThermometerConfig(sessionRules, usedThermometerOptions),
+    [sessionRules, usedThermometerOptions],
   );
 
   const session = useToolSession<ThermometerSessionConfig>({
@@ -186,6 +209,7 @@ export function useThermometerTool({
         distanceUnit,
         cardDraw,
         cardKeep,
+        usedThermometerOptions: usedThermometerOptionsRef.current,
         createAnnotation,
         setMapError,
         onSuccess: () => {
@@ -309,6 +333,7 @@ export function useThermometerTool({
       senderUid,
       distanceUnit,
       distanceMeters: activeDistanceMeters,
+      usedThermometerOptions,
       setMapError,
       patchConfig,
     });
@@ -328,6 +353,31 @@ export function useThermometerTool({
     sessionRules,
     setMapError,
     submitPendingQuestion,
+    usedThermometerOptions,
+  ]);
+
+  useEffect(() => {
+    if (!active || walkingQuestionId !== null) {
+      return;
+    }
+    const miles = thermometerPresetMilesForMeters(config.distanceMeters);
+    if (miles === null || !usedThermometerOptions.has(miles)) {
+      return;
+    }
+    const next = firstAvailableThermometerDistanceMetersForSession(
+      sessionRules,
+      usedThermometerOptions,
+    );
+    if (next !== null && next !== config.distanceMeters) {
+      patchConfig({ distanceMeters: next });
+    }
+  }, [
+    active,
+    config.distanceMeters,
+    patchConfig,
+    sessionRules,
+    usedThermometerOptions,
+    walkingQuestionId,
   ]);
 
   const handleMapClick = useCallback(
@@ -361,10 +411,15 @@ export function useThermometerTool({
 
   const walkingActive = thermoStep === "walking";
   const pinsReady = thermoStep === "ready";
-  const distanceAvailable = isThermometerDistanceOptionAvailableForSession(
-    sessionRules,
-    activeDistanceMeters,
-  );
+  const distanceAvailable =
+    isThermometerDistanceOptionAvailableForSession(
+      sessionRules,
+      activeDistanceMeters,
+    ) &&
+    isThermometerDistanceOptionAvailable(
+      usedThermometerOptions,
+      activeDistanceMeters,
+    );
   const liveTravelMeters =
     walkTracker.distanceTraveledMeters ?? thermoTravelMeters;
   const travelTooShort =
@@ -507,6 +562,7 @@ export function useThermometerTool({
         placementMode={config.placementMode}
         walkingActive={walkingActive}
         presetUseCount={presetUseCount}
+        usedDistanceOptions={usedThermometerOptions}
         costLabel={costLabel}
         gpsLoading={gpsLoading}
         canSubmitQuestion={canSubmitQuestion}
@@ -548,6 +604,7 @@ export function useThermometerTool({
         answer={config.answer}
         step={thermoStep === "walking" ? "b" : thermoStep}
         presetUseCount={presetUseCount}
+        usedDistanceOptions={usedThermometerOptions}
         costLabel={costLabel}
         placementMode={config.placementMode}
         walkingActive={thermoStep === "walking"}

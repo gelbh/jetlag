@@ -51,6 +51,8 @@ export function MeasuringToolPanel({
   const {
     wizardStepRef,
     usedMeasuringFromKindsSet,
+    unavailableMeasuringFromKinds,
+    catalogNotice,
     measuringCatalog,
     measuringOptionChosen,
     measuringSeekerPoint,
@@ -92,6 +94,10 @@ export function MeasuringToolPanel({
           distanceUnit,
           optionChosen: measuringOptionChosen,
           usedMeasuringFromKinds: usedMeasuringFromKindsSet,
+          unavailableMeasuringFromKinds: new Set(
+            unavailableMeasuringFromKinds.keys(),
+          ),
+          catalogNotice,
           catalogOptions: measuringCatalog,
           anchorLat: measuringSeekerPoint?.[0] ?? null,
           anchorLng: measuringSeekerPoint?.[1] ?? null,

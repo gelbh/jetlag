@@ -6,7 +6,10 @@ import {
   isPresetOptionAvailable,
   presetMetersForMiles,
 } from "../session/tools/toolSessionOptions";
-import { isCountablePendingQuestionStatus } from "./questionRules";
+import {
+  isCountablePendingQuestionStatus,
+  isUsedOptionPendingQuestion,
+} from "./questionRules";
 
 export {
   matchPresetMeters,
@@ -22,6 +25,9 @@ export interface PresetCatalogHelpersConfig<Option extends string | number> {
   readOptionFromPending?: (
     question: PendingQuestionRecord,
   ) => Option | null | undefined;
+  /** Sticky used-set membership (pending ∪ cancelled-with-answer). */
+  isPendingQuestionUsed?: (question: PendingQuestionRecord) => boolean;
+  /** Cost / useCount membership (open countable statuses only). */
   isPendingQuestionCountable?: (question: PendingQuestionRecord) => boolean;
 }
 
@@ -29,6 +35,10 @@ export interface PresetCatalogHelpers<Option extends string | number> {
   usedOptionsFromAnnotations: (
     annotations: readonly AnnotationRecord[],
     exceptAnnotationId?: string,
+  ) => Set<Option>;
+  usedOptionsFromPending: (
+    pendingQuestions: readonly PendingQuestionRecord[],
+    exceptQuestionId?: string,
   ) => Set<Option>;
   firstUnusedFromPresets: (
     presets: readonly Option[],
@@ -57,6 +67,7 @@ export function buildPresetCatalogHelpers<Option extends string | number>(
     toolType,
     readOptionFromAnnotation,
     readOptionFromPending,
+    isPendingQuestionUsed = isUsedOptionPendingQuestion,
     isPendingQuestionCountable = (question) =>
       isCountablePendingQuestionStatus(question.status),
   } = config;
@@ -70,6 +81,34 @@ export function buildPresetCatalogHelpers<Option extends string | number>(
       readOptionFromAnnotation,
       exceptAnnotationId,
     );
+  }
+
+  function usedOptionsFromPending(
+    pendingQuestions: readonly PendingQuestionRecord[],
+    exceptQuestionId?: string,
+  ): Set<Option> {
+    if (!readOptionFromPending) {
+      return new Set();
+    }
+
+    const used = new Set<Option>();
+    for (const question of pendingQuestions) {
+      if (question.toolType !== toolType) {
+        continue;
+      }
+      if (exceptQuestionId && question.id === exceptQuestionId) {
+        continue;
+      }
+      if (!isPendingQuestionUsed(question)) {
+        continue;
+      }
+
+      const option = readOptionFromPending(question);
+      if (option !== null && option !== undefined) {
+        used.add(option);
+      }
+    }
+    return used;
   }
 
   function firstUnusedFromPresets(
@@ -135,6 +174,7 @@ export function buildPresetCatalogHelpers<Option extends string | number>(
 
   return {
     usedOptionsFromAnnotations,
+    usedOptionsFromPending,
     firstUnusedFromPresets,
     isOptionAvailable,
     optionUseCountFromAnnotations,

@@ -36,6 +36,7 @@ export {
 } from "./fetch";
 
 export {
+  matchingEmptyPlayAreaMessage,
   matchingFeatureCountLabel,
   matchingFeatureNotFoundMessage,
   matchingNullAnswerMessage,

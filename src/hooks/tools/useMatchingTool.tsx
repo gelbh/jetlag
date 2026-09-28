@@ -19,7 +19,7 @@ import {
   isMatchingCategoryAvailable,
   isMatchingCategoryEnabled,
   matchingQuestionFor,
-  usedMatchingCategoryIds,
+  usedMatchingCategoryIdsForSession,
   type MatchingAnswer,
   type MatchingCategoryId,
 } from "../../domain/questions";
@@ -28,8 +28,8 @@ import {
   type GeolocationPermissionState,
 } from "../../services/core/location/geolocation";
 import {
+  matchingEmptyPlayAreaMessage,
   matchingFeatureCountLabel,
-  matchingNullAnswerMessage,
 } from "../../services/geo/matching";
 import { isAdminDivisionCategoryAvailable } from "../../services/geo/overpass/adminDivisionAvailability";
 import { poiCandidateToMatchingFeature } from "@/domain/geo/poiCandidateAdapters";
@@ -102,6 +102,10 @@ export function useMatchingTool({
     matchingLoading,
     matchingError,
     previewOpen,
+    unavailableMatchingCategories,
+    catalogNotice,
+    setUnavailableMatchingCategories,
+    setCatalogNotice,
     setMatchingFeatures,
     setMatchingNearestFeatureId,
     setMatchingNearestFeatureName,
@@ -121,13 +125,19 @@ export function useMatchingTool({
     reopenCategoryPicker,
   } = draft;
 
+  const unavailableCategoryIds = useMemo(
+    () => new Set(unavailableMatchingCategories.keys()),
+    [unavailableMatchingCategories],
+  );
+
   const activeAnnotations = useMemo(
     () => annotations.filter(isActive),
     [annotations],
   );
   const usedMatchingCategories = useMemo(
-    () => usedMatchingCategoryIds(activeAnnotations),
-    [activeAnnotations],
+    () =>
+      usedMatchingCategoryIdsForSession(activeAnnotations, pendingQuestions),
+    [activeAnnotations, pendingQuestions],
   );
 
   const catalog = useMatchingCatalog({
@@ -209,6 +219,7 @@ export function useMatchingTool({
       requestId: number,
       result: Awaited<ReturnType<typeof resolveMatchingAnchor>>,
       phase: 0 | 1,
+      categoryId: MatchingCategoryId,
     ) => {
       if (!isLatestRequest(requestId)) {
         return;
@@ -247,6 +258,21 @@ export function useMatchingTool({
         return;
       }
 
+      // Empty play-area catalog: grey the option and reopen the sheet.
+      // Pin miss with features still present must not bounce.
+      if (result.nullAnswer === true && result.featureCount === 0) {
+        const notice = matchingEmptyPlayAreaMessage(categoryId);
+        setUnavailableMatchingCategories((prev) => {
+          const next = new Map(prev);
+          next.set(categoryId, notice);
+          return next;
+        });
+        setCatalogNotice(notice);
+        setMatchingLoading(false);
+        reopenCategoryPicker();
+        return;
+      }
+
       matchingNearestFeatureIdRef.current = result.nearestFeatureId;
       matchingNearestFeatureNameRef.current = result.nearestFeatureName;
       setMatchingFeatures(result.features);
@@ -262,16 +288,20 @@ export function useMatchingTool({
     },
     [
       isLatestRequest,
+      reopenCategoryPicker,
+      setCatalogNotice,
       setMatchingDistanceMeters,
       setMatchingError,
       setMatchingFeatureCount,
       setMatchingFeatures,
       setMatchingInPlayAreaFeatureCount,
+      setMatchingLoading,
       setMatchingNearestFeatureId,
       setMatchingNearestFeatureName,
       setMatchingNearestFeaturePoint,
       setMatchingNearestOutsidePlayArea,
       setMatchingNullAnswer,
+      setUnavailableMatchingCategories,
     ],
   );
 
@@ -298,6 +328,7 @@ export function useMatchingTool({
               tilePreview,
             ),
             0,
+            categoryId,
           );
         }
       }
@@ -308,11 +339,11 @@ export function useMatchingTool({
         gameArea,
         matchingFetchOptions: catalog.matchingFetchOptions,
         onEnrich: (enriched) => {
-          applyResolveResult(requestId, enriched, 1);
+          applyResolveResult(requestId, enriched, 1, categoryId);
         },
       });
 
-      applyResolveResult(requestId, result, 0);
+      applyResolveResult(requestId, result, 0, categoryId);
       if (isLatestRequest(requestId)) {
         setMatchingLoading(false);
       }
@@ -492,7 +523,9 @@ export function useMatchingTool({
   const handleCategoryChange = (categoryId: MatchingCategoryId) => {
     if (
       !isMatchingCategoryEnabled(categoryId) ||
-      !isMatchingCategoryAvailable(categoryId)
+      !isMatchingCategoryAvailable(categoryId) ||
+      unavailableCategoryIds.has(categoryId) ||
+      usedMatchingCategories.has(categoryId)
     ) {
       return;
     }
@@ -516,6 +549,8 @@ export function useMatchingTool({
         categoryId: matchingCategoryId,
         categoryChosen: matchingCategoryChosen,
         usedCategoryIds: usedMatchingCategories,
+        unavailableCategoryIds,
+        catalogNotice,
         catalogCategories: catalog.matchingCatalog,
         matchingSeekerPoint,
         matchingUsesContainment: catalog.matchingUsesContainment,
@@ -725,7 +760,7 @@ export function useMatchingTool({
         nearestSummary={answerNearestSummary}
         nullAnswerMessage={
           matchingNullAnswer && matchingCategoryId
-            ? matchingNullAnswerMessage(matchingCategoryId)
+            ? matchingEmptyPlayAreaMessage(matchingCategoryId)
             : null
         }
         answer={matchingAnswer}
@@ -742,6 +777,8 @@ export function useMatchingTool({
         categoryId={matchingCategoryId}
         categoryChosen={matchingCategoryChosen}
         usedCategoryIds={usedMatchingCategories}
+        unavailableCategoryIds={unavailableCategoryIds}
+        catalogNotice={catalogNotice}
         catalogCategories={catalog.matchingCatalog}
         hasSeekerPoint={matchingSeekerPoint !== null}
         usesContainmentMatching={catalog.matchingUsesContainment}

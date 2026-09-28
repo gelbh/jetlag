@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { AnnotationRecord } from "../map/annotations";
+import type { PendingQuestionRecord } from "../session/activity/sessionChat";
 import type { SessionRulesInput } from "../session/rules";
 import {
   defaultTentacleCategoryId,
@@ -19,6 +20,7 @@ import {
   tentacleSearchRadiusMeters,
   type TentacleExtendedCategoryId,
   usedTentacleCategoryIds,
+  usedTentacleCategoryIdsForSession,
 } from "./tentacleQuestions";
 
 function tentacleAnnotation(
@@ -77,6 +79,27 @@ describe("tentacleQuestions", () => {
     );
     expect(usedTentacleCategoryIds([museum, zoo], "t-1")).toEqual(
       new Set(["zoo"]),
+    );
+  });
+
+  it("marks museum used from pending and cancelled-with-answer", () => {
+    const pending = {
+      id: "pq-museum",
+      toolType: "tentacle",
+      status: "pending",
+      placement: { metadata: { tentacleCategoryId: "museum" } },
+    } as unknown as PendingQuestionRecord;
+    expect(usedTentacleCategoryIdsForSession([], [pending])).toEqual(
+      new Set(["museum"]),
+    );
+
+    const cancelled = {
+      ...pending,
+      status: "cancelled",
+      answer: "City Museum",
+    } as unknown as PendingQuestionRecord;
+    expect(usedTentacleCategoryIdsForSession([], [cancelled])).toEqual(
+      new Set(["museum"]),
     );
   });
 

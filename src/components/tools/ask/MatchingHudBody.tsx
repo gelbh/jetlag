@@ -46,7 +46,7 @@ import {
 } from "@/domain/questions";
 import {
   matchingFeatureCountLabel,
-  matchingNullAnswerMessage,
+  matchingEmptyPlayAreaMessage,
 } from "@/services/geo/matching";
 import { matchingCategoryIcon } from "./matchingCategoryIcons";
 
@@ -83,6 +83,10 @@ export type MatchingHudBodyProps = {
   categoryId: MatchingCategoryId | null;
   categoryChosen: boolean;
   usedCategoryIds: ReadonlySet<MatchingCategoryId>;
+  /** Session-local empty play-area categories; greys like used. */
+  unavailableCategoryIds?: ReadonlySet<MatchingCategoryId>;
+  /** Empty play-area reason shown above the catalog rail after bounce. */
+  catalogNotice?: string | null;
   catalogCategories?: readonly MatchingCategoryDefinition[];
   hasSeekerPoint: boolean;
   usesContainmentMatching: boolean;
@@ -111,6 +115,8 @@ export function MatchingHudBody({
   categoryId,
   categoryChosen,
   usedCategoryIds,
+  unavailableCategoryIds = new Set<MatchingCategoryId>(),
+  catalogNotice = null,
   catalogCategories = MATCHING_CATEGORIES,
   hasSeekerPoint,
   usesContainmentMatching,
@@ -134,18 +140,16 @@ export function MatchingHudBody({
 }: MatchingHudBodyProps) {
   const [groupFilter, setGroupFilter] = useState<GroupFilter>("all");
 
-  const selectableCategories = catalogCategories.filter(
-    (item) =>
-      isMatchingCategoryEnabled(item.id) &&
-      (!usedCategoryIds.has(item.id) || item.id === categoryId),
+  const catalogForRail = catalogCategories.filter((item) =>
+    isMatchingCategoryEnabled(item.id),
   );
-  const availableCategories = catalogCategories.filter(
+  const availableCategories = catalogForRail.filter(
     (item) =>
-      isMatchingCategoryEnabled(item.id) && !usedCategoryIds.has(item.id),
+      !usedCategoryIds.has(item.id) && !unavailableCategoryIds.has(item.id),
   );
 
   const groupsWithRows = MATCHING_CATEGORY_GROUPS.filter((group) =>
-    selectableCategories.some((cat) => cat.groupId === group.id),
+    catalogForRail.some((cat) => cat.groupId === group.id),
   );
 
   const effectiveFilter: GroupFilter =
@@ -156,8 +160,8 @@ export function MatchingHudBody({
 
   const filteredCategories =
     effectiveFilter === "all"
-      ? selectableCategories
-      : selectableCategories.filter((cat) => cat.groupId === effectiveFilter);
+      ? catalogForRail
+      : catalogForRail.filter((cat) => cat.groupId === effectiveFilter);
 
   const catalogRows = MATCHING_CATEGORY_GROUPS.flatMap((group) =>
     filteredCategories
@@ -168,6 +172,10 @@ export function MatchingHudBody({
           id: cat.id,
           label: cat.label,
           groupLabel: effectiveFilter === "all" ? group.label : undefined,
+          disabled:
+            (usedCategoryIds.has(cat.id) ||
+              unavailableCategoryIds.has(cat.id)) &&
+            cat.id !== categoryId,
           icon: (
             <Icon
               size={20}
@@ -252,55 +260,55 @@ export function MatchingHudBody({
       {chord === "category" ? (
         <div className="space-y-2">
           {awaitHiderAnswer ? <QuestionTruthReferenceHint /> : null}
+          {catalogNotice ? (
+            <ResolvedReadout variant="warning">{catalogNotice}</ResolvedReadout>
+          ) : null}
           {availableCategories.length === 0 ? (
             <AskHudPanel className="p-3">
               <CatalogExhaustedMessage message="Every match category has already been used on this map." />
             </AskHudPanel>
-          ) : (
-            <>
-              <div
-                role="tablist"
-                aria-label="Filter match categories"
-                className="jl-scroll"
-                style={filterChipTrackStyle}
-              >
-                {filterOptions.map((option) => {
-                  const selected = effectiveFilter === option.value;
-                  const Icon = GROUP_CHIP_ICON[option.value];
-                  return (
-                    <UnstyledButton
-                      key={option.value}
-                      type="button"
-                      role="tab"
-                      aria-selected={selected}
-                      onClick={() => setGroupFilter(option.value)}
-                      styles={filterChipStyles(selected)}
-                    >
-                      <Icon
-                        size={14}
-                        weight={selected ? "fill" : "regular"}
-                        aria-hidden
-                      />
-                      {option.label}
-                    </UnstyledButton>
-                  );
-                })}
-              </div>
-              <AskCatalogRail
-                rows={catalogRows}
-                selectedId={categoryChosen ? categoryId : null}
-                onSelect={(id) => {
-                  if (!isMatchingCategoryAvailable(id as MatchingCategoryId)) {
-                    return;
-                  }
-                  onCategoryChange(id as MatchingCategoryId);
-                }}
-                aria-label="Match category"
-                hint=""
-                columns={2}
-              />
-            </>
-          )}
+          ) : null}
+          <div
+            role="tablist"
+            aria-label="Filter match categories"
+            className="jl-scroll"
+            style={filterChipTrackStyle}
+          >
+            {filterOptions.map((option) => {
+              const selected = effectiveFilter === option.value;
+              const Icon = GROUP_CHIP_ICON[option.value];
+              return (
+                <UnstyledButton
+                  key={option.value}
+                  type="button"
+                  role="tab"
+                  aria-selected={selected}
+                  onClick={() => setGroupFilter(option.value)}
+                  styles={filterChipStyles(selected)}
+                >
+                  <Icon
+                    size={14}
+                    weight={selected ? "fill" : "regular"}
+                    aria-hidden
+                  />
+                  {option.label}
+                </UnstyledButton>
+              );
+            })}
+          </div>
+          <AskCatalogRail
+            rows={catalogRows}
+            selectedId={categoryChosen ? categoryId : null}
+            onSelect={(id) => {
+              if (!isMatchingCategoryAvailable(id as MatchingCategoryId)) {
+                return;
+              }
+              onCategoryChange(id as MatchingCategoryId);
+            }}
+            aria-label="Match category"
+            hint=""
+            columns={2}
+          />
         </div>
       ) : null}
 
@@ -350,7 +358,7 @@ export function MatchingHudBody({
           ) : null}
           {nullAnswer && categoryId ? (
             <ResolvedReadout variant="warning">
-              {matchingNullAnswerMessage(categoryId)}
+              {matchingEmptyPlayAreaMessage(categoryId)}
             </ResolvedReadout>
           ) : nearestFeatureSummary ? (
             <div

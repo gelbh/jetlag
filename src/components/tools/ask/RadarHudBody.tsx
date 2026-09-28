@@ -23,10 +23,11 @@ import {
   type DistanceUnit,
 } from "@/domain/map/distance";
 import {
-  availableRadarDistancePresets,
   isRadarRadiusAllowedForGameSize,
   maxRadarCustomRadiusMeters,
   radarDistanceOptionLabel,
+  radarDistancePresetsForGameSize,
+  radarOptionKeyForPresetMeters,
   radarQuestionPrompt,
   type RadarAnswer,
   type RadarDistanceOptionKey,
@@ -143,13 +144,14 @@ export function RadarHudBody({
     hasCenter &&
     distanceSelectionAvailable;
 
-  const availablePresets = availableRadarDistancePresets(
-    gameSize,
-    distanceUnit,
-    usedDistanceOptions,
-  );
-  const chooseAvailable = !usedDistanceOptions.has("choose");
-  const exhausted = availablePresets.length === 0 && !chooseAvailable;
+  const allPresets = radarDistancePresetsForGameSize(gameSize, distanceUnit);
+  const chooseDisabled = usedDistanceOptions.has("choose");
+  const exhausted =
+    allPresets.every((preset) =>
+      usedDistanceOptions.has(
+        radarOptionKeyForPresetMeters(preset, distanceUnit),
+      ),
+    ) && chooseDisabled;
   const maxCustomRadiusMeters = maxRadarCustomRadiusMeters(
     gameSize,
     distanceUnit,
@@ -177,144 +179,143 @@ export function RadarHudBody({
     chooseCustom &&
     distanceSelectionAvailable &&
     !customRadiusOverLimit;
+  const chooseLabel = `Choose custom distance (${unitShort})`;
   const catalogRows = [
-    ...availablePresets.map((preset) => ({
-      id: String(preset),
-      label: presetLabel(preset, distanceUnit),
+    ...allPresets.map((preset) => {
+      const optionKey = radarOptionKeyForPresetMeters(preset, distanceUnit);
+      return {
+        id: String(preset),
+        label: presetLabel(preset, distanceUnit),
+        disabled: usedDistanceOptions.has(optionKey),
+        icon: (
+          <Crosshair
+            size={20}
+            weight="duotone"
+            color="currentColor"
+            aria-hidden
+          />
+        ),
+      };
+    }),
+    {
+      id: CHOOSE_ROW_ID,
+      label: chooseLabel,
+      disabled: chooseDisabled,
       icon: (
-        <Crosshair
+        <PencilSimple
           size={20}
           weight="duotone"
           color="currentColor"
           aria-hidden
         />
       ),
-    })),
-    ...(chooseAvailable
-      ? [
-          {
-            id: CHOOSE_ROW_ID,
-            label: `Choose custom distance (${unitShort})`,
-            icon: (
-              <PencilSimple
-                size={20}
-                weight="duotone"
-                color="currentColor"
-                aria-hidden
-              />
-            ),
-            content: (
-              <span
-                className="inline-flex w-full min-w-0 items-center justify-center gap-0.5 px-0.5"
-                onClick={(event) => event.stopPropagation()}
+      content:
+        chooseCustom && !chooseDisabled ? (
+          <span
+            className="inline-flex w-full min-w-0 items-center justify-center gap-0.5 px-0.5"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <input
+              ref={chooseInputRef}
+              data-testid="radar-choose-distance-input"
+              value={customRadius}
+              onChange={(event) => {
+                const next = sanitizeRadarCustomRadiusInput(
+                  event.currentTarget.value,
+                );
+                if (!chooseCustom) {
+                  onChooseSelect();
+                }
+                onCustomRadiusChange(next);
+              }}
+              onFocus={() => {
+                if (!chooseCustom) {
+                  onChooseSelect();
+                }
+              }}
+              onKeyDown={(event) => {
+                event.stopPropagation();
+                if (event.key !== "Enter") {
+                  return;
+                }
+                event.preventDefault();
+                if (distanceSelectionAvailable && !customRadiusOverLimit) {
+                  onCustomDistanceCommit?.();
+                }
+              }}
+              inputMode="decimal"
+              enterKeyHint="done"
+              autoCorrect="off"
+              spellCheck={false}
+              placeholder="0"
+              aria-label={`Custom distance in ${distanceUnitLabel(distanceUnit)}`}
+              aria-invalid={customRadiusOverLimit || undefined}
+              style={{
+                width: "100%",
+                minWidth: 0,
+                border: "none",
+                background: "transparent",
+                textAlign: "right",
+                font: "inherit",
+                fontWeight: 650,
+                fontSize: "0.8125rem",
+                lineHeight: 1.1,
+                color: customRadiusOverLimit
+                  ? "var(--color-halt)"
+                  : "var(--color-field-ink)",
+                outline: "none",
+                padding: 0,
+                caretColor: "var(--color-flag)",
+              }}
+            />
+            <span
+              aria-hidden
+              style={{
+                flexShrink: 0,
+                fontSize: "0.6875rem",
+                fontWeight: 650,
+                letterSpacing: "0.02em",
+                color: "var(--color-field-ink-muted)",
+                lineHeight: 1,
+              }}
+            >
+              {unitShort}
+            </span>
+            {canCommitCustom ? (
+              <button
+                type="button"
+                data-testid="radar-choose-distance-commit"
+                aria-label="Use this distance"
+                onMouseDown={(event) => {
+                  // Keep focus until click so blur does not double-commit.
+                  event.preventDefault();
+                }}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  onCustomDistanceCommit?.();
+                }}
+                style={{
+                  flexShrink: 0,
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: 28,
+                  height: 28,
+                  marginLeft: 2,
+                  border: "none",
+                  borderRadius: 9,
+                  backgroundColor: "oklch(from var(--color-flag) l c h / 0.2)",
+                  color: "var(--color-flag)",
+                  padding: 0,
+                  cursor: "pointer",
+                }}
               >
-                <input
-                  ref={chooseInputRef}
-                  data-testid="radar-choose-distance-input"
-                  value={customRadius}
-                  onChange={(event) => {
-                    const next = sanitizeRadarCustomRadiusInput(
-                      event.currentTarget.value,
-                    );
-                    if (!chooseCustom) {
-                      onChooseSelect();
-                    }
-                    onCustomRadiusChange(next);
-                  }}
-                  onFocus={() => {
-                    if (!chooseCustom) {
-                      onChooseSelect();
-                    }
-                  }}
-                  onKeyDown={(event) => {
-                    event.stopPropagation();
-                    if (event.key !== "Enter") {
-                      return;
-                    }
-                    event.preventDefault();
-                    if (
-                      distanceSelectionAvailable &&
-                      !customRadiusOverLimit
-                    ) {
-                      onCustomDistanceCommit?.();
-                    }
-                  }}
-                  inputMode="decimal"
-                  enterKeyHint="done"
-                  autoCorrect="off"
-                  spellCheck={false}
-                  placeholder="0"
-                  aria-label={`Custom distance in ${distanceUnitLabel(distanceUnit)}`}
-                  aria-invalid={customRadiusOverLimit || undefined}
-                  style={{
-                    width: "100%",
-                    minWidth: 0,
-                    border: "none",
-                    background: "transparent",
-                    textAlign: "right",
-                    font: "inherit",
-                    fontWeight: 650,
-                    fontSize: "0.8125rem",
-                    lineHeight: 1.1,
-                    color: customRadiusOverLimit
-                      ? "var(--color-halt)"
-                      : "var(--color-field-ink)",
-                    outline: "none",
-                    padding: 0,
-                    caretColor: "var(--color-flag)",
-                  }}
-                />
-                <span
-                  aria-hidden
-                  style={{
-                    flexShrink: 0,
-                    fontSize: "0.6875rem",
-                    fontWeight: 650,
-                    letterSpacing: "0.02em",
-                    color: "var(--color-field-ink-muted)",
-                    lineHeight: 1,
-                  }}
-                >
-                  {unitShort}
-                </span>
-                {canCommitCustom ? (
-                  <button
-                    type="button"
-                    data-testid="radar-choose-distance-commit"
-                    aria-label="Use this distance"
-                    onMouseDown={(event) => {
-                      // Keep focus until click so blur does not double-commit.
-                      event.preventDefault();
-                    }}
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      onCustomDistanceCommit?.();
-                    }}
-                    style={{
-                      flexShrink: 0,
-                      display: "inline-flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      width: 28,
-                      height: 28,
-                      marginLeft: 2,
-                      border: "none",
-                      borderRadius: 9,
-                      backgroundColor:
-                        "oklch(from var(--color-flag) l c h / 0.2)",
-                      color: "var(--color-flag)",
-                      padding: 0,
-                      cursor: "pointer",
-                    }}
-                  >
-                    <Check size={16} weight="bold" aria-hidden />
-                  </button>
-                ) : null}
-              </span>
-            ),
-          },
-        ]
-      : []),
+                <Check size={16} weight="bold" aria-hidden />
+              </button>
+            ) : null}
+          </span>
+        ) : undefined,
+    },
   ];
 
   const selectedCatalogId = chooseCustom
@@ -349,41 +350,38 @@ export function RadarHudBody({
             <AskHudPanel className="p-3">
               <CatalogExhaustedMessage message="Every radar distance option has already been used this session." />
             </AskHudPanel>
-          ) : (
-            <>
-              <AskCatalogRail
-                rows={catalogRows}
-                selectedId={selectedCatalogId}
-                onSelect={(id) => {
-                  if (id === CHOOSE_ROW_ID) {
-                    if (canCommitCustom) {
-                      onCustomDistanceCommit?.();
-                      return;
-                    }
-                    onChooseSelect();
-                    chooseInputRef.current?.focus();
-                    return;
-                  }
-                  const meters = Number(id);
-                  if (Number.isFinite(meters)) {
-                    onPresetSelect(meters);
-                  }
-                }}
-                aria-label="Radar distance"
-                hint="Tap a distance, or type a custom one"
-                columns={3}
-              />
-              {chooseCustom && customRadiusOverLimit ? (
-                <Text
-                  size="xs"
-                  style={{ color: "var(--color-halt)", paddingInline: 4 }}
-                >
-                  Max {formatDistance(maxCustomRadiusMeters, distanceUnit)}{" "}
-                  for this game size.
-                </Text>
-              ) : null}
-            </>
-          )}
+          ) : null}
+          <AskCatalogRail
+            rows={catalogRows}
+            selectedId={selectedCatalogId}
+            onSelect={(id) => {
+              if (id === CHOOSE_ROW_ID) {
+                if (canCommitCustom) {
+                  onCustomDistanceCommit?.();
+                  return;
+                }
+                onChooseSelect();
+                chooseInputRef.current?.focus();
+                return;
+              }
+              const meters = Number(id);
+              if (Number.isFinite(meters)) {
+                onPresetSelect(meters);
+              }
+            }}
+            aria-label="Radar distance"
+            hint="Tap a distance, or type a custom one"
+            columns={3}
+          />
+          {chooseCustom && customRadiusOverLimit ? (
+            <Text
+              size="xs"
+              style={{ color: "var(--color-halt)", paddingInline: 4 }}
+            >
+              Max {formatDistance(maxCustomRadiusMeters, distanceUnit)} for
+              this game size.
+            </Text>
+          ) : null}
         </div>
       ) : null}
 

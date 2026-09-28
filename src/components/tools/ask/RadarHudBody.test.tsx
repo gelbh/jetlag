@@ -117,6 +117,36 @@ describe("RadarHudBody", () => {
     ).toBeNull();
   });
 
+  it("keeps used presets and choose visible but disabled", () => {
+    const onPresetSelect = vi.fn();
+    const onChooseSelect = vi.fn();
+    render(
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
+        <RadarHudBody
+          {...baseBodyProps}
+          usedDistanceOptions={new Set([3, "choose"])}
+          onPresetSelect={onPresetSelect}
+          onChooseSelect={onChooseSelect}
+        />
+      </MantineProvider>,
+    );
+
+    const usedPreset = screen.getByRole("button", { name: /3 Miles/i });
+    expect(usedPreset).toBeInTheDocument();
+    expect(usedPreset).toBeDisabled();
+
+    const choose = screen.getByRole("button", {
+      name: /Choose custom distance/i,
+    });
+    expect(choose).toBeInTheDocument();
+    expect(choose).toBeDisabled();
+
+    fireEvent.click(usedPreset);
+    fireEvent.click(choose);
+    expect(onPresetSelect).not.toHaveBeenCalled();
+    expect(onChooseSelect).not.toHaveBeenCalled();
+  });
+
   it("wires GlanceVerb cue + primed strip via AskHudHost readiness", () => {
     const readiness: AskHudReadiness = {
       surface: "radar",

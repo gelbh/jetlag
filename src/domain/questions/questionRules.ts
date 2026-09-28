@@ -115,6 +115,19 @@ export function isCountablePendingQuestionStatus(
   );
 }
 
+export function isUsedOptionPendingQuestion(
+  question: PendingQuestionRecord,
+): boolean {
+  if (isCountablePendingQuestionStatus(question.status)) {
+    return true;
+  }
+  if (question.status !== "cancelled") {
+    return false;
+  }
+  const answer = question.answer;
+  return answer !== null && answer !== undefined && String(answer).length > 0;
+}
+
 export function hasOpenPendingQuestion(
   pendingQuestions: readonly PendingQuestionRecord[],
 ): boolean {

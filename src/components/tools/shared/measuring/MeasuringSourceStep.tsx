@@ -16,6 +16,7 @@ interface MeasuringSourceStepProps {
   measureFrom: MeasuringFromKind;
   optionChosen: boolean;
   usedMeasuringFromKinds: ReadonlySet<MeasuringFromKind>;
+  unavailableMeasuringFromKinds?: ReadonlySet<MeasuringFromKind>;
   catalogOptions?: readonly MeasuringCatalogOption[];
   subject: MeasuringSubject;
   locationCategory?: MeasuringLocationCategory;
@@ -26,6 +27,7 @@ export function MeasuringSourceStep({
   measureFrom,
   optionChosen,
   usedMeasuringFromKinds,
+  unavailableMeasuringFromKinds = new Set<MeasuringFromKind>(),
   catalogOptions,
   subject,
   locationCategory,
@@ -36,13 +38,21 @@ export function MeasuringSourceStep({
     id: group.id,
     label: group.label,
     options: measureCatalog
-      .filter(
-        (option) =>
-          option.groupId === group.id && !usedMeasuringFromKinds.has(option.id),
-      )
-      .map((option) => ({ value: option.id, label: option.label })),
+      .filter((option) => option.groupId === group.id)
+      .map((option) => ({
+        value: option.id,
+        label: option.label,
+        disabled:
+          (usedMeasuringFromKinds.has(option.id) ||
+            unavailableMeasuringFromKinds.has(option.id)) &&
+          !(optionChosen && option.id === measureFrom),
+      })),
   })).filter((group) => group.options.length > 0);
-  const hasAvailableMeasureOptions = availableGroups.length > 0;
+  const hasAvailableMeasureOptions = measureCatalog.some(
+    (option) =>
+      !usedMeasuringFromKinds.has(option.id) &&
+      !unavailableMeasuringFromKinds.has(option.id),
+  );
   const question =
     optionChosen && locationCategory
       ? measuringQuestionFor(subject, locationCategory)
@@ -50,6 +60,9 @@ export function MeasuringSourceStep({
 
   return (
     <ToolSection first compact status="active">
+      {hasAvailableMeasureOptions ? null : (
+        <CatalogExhaustedMessage message="Every measure category has already been added to this session." />
+      )}
       <GroupedSelectField
         label="Measuring from"
         value={optionChosen ? measureFrom : ""}
@@ -58,9 +71,6 @@ export function MeasuringSourceStep({
         onChange={(value) => onMeasureFromChange(value as MeasuringFromKind)}
         disabled={!hasAvailableMeasureOptions}
       />
-      {!hasAvailableMeasureOptions ? (
-        <CatalogExhaustedMessage message="Every measure category has already been added to this session." />
-      ) : null}
       {question ? (
         <QuestionPromptBlock
           prompt={question.prompt}

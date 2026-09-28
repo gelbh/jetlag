@@ -40,6 +40,9 @@ export function useMatchingDraftState() {
   const [matchingLoading, setMatchingLoading] = useState(false);
   const [matchingError, setMatchingError] = useState<string | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [unavailableMatchingCategories, setUnavailableMatchingCategories] =
+    useState<Map<MatchingCategoryId, string>>(() => new Map());
+  const [catalogNotice, setCatalogNotice] = useState<string | null>(null);
 
   const clearResolvedFields = useCallback(() => {
     setMatchingFeatures([]);
@@ -73,12 +76,15 @@ export function useMatchingDraftState() {
     setMatchingCategoryChosen(false);
     clearResolvedFields();
     setPreviewOpen(false);
+    setUnavailableMatchingCategories(new Map());
+    setCatalogNotice(null);
   }, [clearResolvedFields]);
 
   const selectCategory = useCallback(
     (categoryId: MatchingCategoryId) => {
       setMatchingCategoryChosen(true);
       setMatchingCategoryId(categoryId);
+      setCatalogNotice(null);
       clearResolvedFields();
     },
     [clearResolvedFields],
@@ -111,6 +117,10 @@ export function useMatchingDraftState() {
     matchingLoading,
     matchingError,
     previewOpen,
+    unavailableMatchingCategories,
+    catalogNotice,
+    setUnavailableMatchingCategories,
+    setCatalogNotice,
     setMatchingCategoryId,
     setMatchingFeatures,
     setMatchingNearestFeatureId,

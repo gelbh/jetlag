@@ -62,6 +62,8 @@ export function useMeasuringAnchorLoaders({
     measuringAnswer,
     customMeasureGeometries,
     customMatchingAreas,
+    usedMeasuringFromKindsSet,
+    unavailableMeasuringFromKinds,
     setMeasuringLoading,
     setMeasuringError,
     setMeasuringPlaces,
@@ -82,6 +84,9 @@ export function useMeasuringAnchorLoaders({
     setMeasuringSeekerPoint,
     setMeasuringSeekerPlaceName,
     clearSubjectDerivedState,
+    setUnavailableMeasuringFromKinds,
+    setCatalogNotice,
+    reopenCatalog,
   } = draft;
 
   const measuringAnswerRef = useRef(measuringAnswer);
@@ -128,10 +133,16 @@ export function useMeasuringAnchorLoaders({
       }
 
       if (places.length === 0) {
-        setMeasuringPlaces([]);
-        setMeasuringDistanceMeters(null);
-        setMeasuringTargetPlaceName(null);
-        setMeasuringError(measuringPlaceNotFoundMessage(category));
+        const notice = measuringPlaceNotFoundMessage(category);
+        const kind = measuringFromKind("location", category);
+        setUnavailableMeasuringFromKinds((prev) => {
+          const next = new Map(prev);
+          next.set(kind, notice);
+          return next;
+        });
+        setCatalogNotice(notice);
+        setMeasuringLoading(false);
+        reopenCatalog();
         return;
       }
 
@@ -157,12 +168,16 @@ export function useMeasuringAnchorLoaders({
     [
       measureFromKind,
       placesRequestIdRef,
+      reopenCatalog,
       sessionRules,
+      setCatalogNotice,
       setMeasuringDistanceMeters,
       setMeasuringError,
+      setMeasuringLoading,
       setMeasuringPlaces,
       setMeasuringTargetPlaceName,
       setMeasuringTargetPoint,
+      setUnavailableMeasuringFromKinds,
     ],
   );
 
@@ -694,6 +709,13 @@ export function useMeasuringAnchorLoaders({
 
   const handleMeasureFromChange = useCallback(
     (kind: MeasuringFromKind) => {
+      if (
+        usedMeasuringFromKindsSet.has(kind) ||
+        unavailableMeasuringFromKinds.has(kind)
+      ) {
+        return;
+      }
+      setCatalogNotice(null);
       setMeasuringOptionChosen(true);
       const next = applyMeasuringFromKind(kind);
       setMeasuringSubject(next.subject);
@@ -720,9 +742,12 @@ export function useMeasuringAnchorLoaders({
       loadMeasuringLinearAt,
       loadSeaLevelContextAt,
       measuringSeekerPoint,
+      setCatalogNotice,
       setMeasuringLocationCategory,
       setMeasuringOptionChosen,
       setMeasuringSubject,
+      unavailableMeasuringFromKinds,
+      usedMeasuringFromKindsSet,
     ],
   );
 

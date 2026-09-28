@@ -341,22 +341,10 @@ export function readPhotoCategoryId(
   return categoryId as PhotoCategoryId;
 }
 
-function isPhotoPendingQuestionCountable(
-  question: PendingQuestionRecord,
-): boolean {
-  return (
-    question.status === "resolved" ||
-    question.status === "answered" ||
-    question.status === "pending" ||
-    question.status === "walking"
-  );
-}
-
 const photoCatalogHelpers = buildCatalogHelpers<PhotoCategoryId>({
   toolType: "photo",
   readOptionFromAnnotation: () => null,
   readOptionFromPending: readPhotoCategoryId,
-  isPendingQuestionCountable: isPhotoPendingQuestionCountable,
 });
 
 export function usedPhotoCategoryIds(

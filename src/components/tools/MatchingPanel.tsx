@@ -11,8 +11,8 @@ import {
 } from "../../domain/questions";
 import { resolveMatchingCategory } from "../../domain/session/catalog/sessionCustomCatalog";
 import {
+  matchingEmptyPlayAreaMessage,
   matchingFeatureCountLabel,
-  matchingNullAnswerMessage,
 } from "../../services/geo/matching";
 import { formatDistance, type DistanceUnit } from "../../domain/map/distance";
 import { GroupedSelectField } from "../ui/forms/GroupedSelectField";
@@ -46,6 +46,10 @@ export type MatchingPanelModel = {
   categoryId: MatchingCategoryId | null;
   categoryChosen: boolean;
   usedCategoryIds: ReadonlySet<MatchingCategoryId>;
+  /** Empty play-area bounce; greys like used. */
+  unavailableCategoryIds?: ReadonlySet<MatchingCategoryId>;
+  /** Session notice after empty play-area bounce. */
+  catalogNotice?: string | null;
   catalogCategories?: readonly MatchingCategoryDefinition[];
   anchorLat?: number | null;
   anchorLng?: number | null;
@@ -86,6 +90,8 @@ export function MatchingPanel({ model }: MatchingPanelProps) {
     categoryId,
     categoryChosen,
     usedCategoryIds,
+    unavailableCategoryIds = new Set<MatchingCategoryId>(),
+    catalogNotice = null,
     catalogCategories = MATCHING_CATEGORIES,
     anchorLat = null,
     anchorLng = null,
@@ -169,14 +175,12 @@ export function MatchingPanel({ model }: MatchingPanelProps) {
     categoryAvailable &&
     !loading &&
     !isSubmitting;
-  const selectableCategories = catalogCategories.filter(
-    (item) =>
-      isMatchingCategoryEnabled(item.id) &&
-      (!usedCategoryIds.has(item.id) || item.id === categoryId),
+  const catalogForSelect = catalogCategories.filter((item) =>
+    isMatchingCategoryEnabled(item.id),
   );
-  const availableCategories = catalogCategories.filter(
+  const availableCategories = catalogForSelect.filter(
     (item) =>
-      isMatchingCategoryEnabled(item.id) && !usedCategoryIds.has(item.id),
+      !usedCategoryIds.has(item.id) && !unavailableCategoryIds.has(item.id),
   );
 
   const loadingMessage = loading
@@ -274,25 +278,34 @@ export function MatchingPanel({ model }: MatchingPanelProps) {
       {phaseId === "configure" && stepId === "category" ? (
         <ToolSection first compact status="active">
           {awaitHiderAnswer ? <QuestionTruthReferenceHint /> : null}
+          {catalogNotice ? (
+            <ResolvedReadout variant="warning">{catalogNotice}</ResolvedReadout>
+          ) : null}
           {availableCategories.length === 0 ? (
             <CatalogExhaustedMessage message="Every match category has already been used on this map." />
-          ) : (
-            <GroupedSelectField
-              label="Match category"
-              value={categoryChosen && categoryId ? categoryId : ""}
-              placeholder="Choose a category"
-              groups={MATCHING_CATEGORY_GROUPS.map((group) => ({
-                id: group.id,
-                label: group.label,
-                options: selectableCategories
-                  .filter((cat) => cat.groupId === group.id)
-                  .map((cat) => ({ value: cat.id, label: cat.label })),
-              })).filter((group) => group.options.length > 0)}
-              onChange={(value) =>
-                handleCategoryChange(value as MatchingCategoryId)
-              }
-            />
-          )}
+          ) : null}
+          <GroupedSelectField
+            label="Match category"
+            value={categoryChosen && categoryId ? categoryId : ""}
+            placeholder="Choose a category"
+            groups={MATCHING_CATEGORY_GROUPS.map((group) => ({
+              id: group.id,
+              label: group.label,
+              options: catalogForSelect
+                .filter((cat) => cat.groupId === group.id)
+                .map((cat) => ({
+                  value: cat.id,
+                  label: cat.label,
+                  disabled:
+                    (usedCategoryIds.has(cat.id) ||
+                      unavailableCategoryIds.has(cat.id)) &&
+                    cat.id !== categoryId,
+                })),
+            })).filter((group) => group.options.length > 0)}
+            onChange={(value) =>
+              handleCategoryChange(value as MatchingCategoryId)
+            }
+          />
           {question ? (
             <QuestionPromptBlock
               prompt={question.prompt}
@@ -328,7 +341,7 @@ export function MatchingPanel({ model }: MatchingPanelProps) {
           {loadingIndicator}
           {nullAnswer && categoryId ? (
             <ResolvedReadout variant="warning">
-              {matchingNullAnswerMessage(categoryId)}
+              {matchingEmptyPlayAreaMessage(categoryId)}
             </ResolvedReadout>
           ) : nearestFeatureSummary ? (
             <ResolvedReadout caption={featureCountLabel}>

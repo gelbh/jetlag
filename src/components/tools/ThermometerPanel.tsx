@@ -5,9 +5,12 @@ import {
 } from "../../domain/map/distance";
 import {
   availableThermometerDistancePresetsForSession,
+  isThermometerDistanceOptionAvailable,
   isThermometerDistanceOptionAvailableForSession,
+  thermometerPresetMilesForMeters,
   thermometerQuestionPrompt,
   type ThermometerAnswer,
+  type ThermometerDistanceOptionMiles,
 } from "../../domain/questions";
 import type { SessionRulesInput } from "../../domain/session/rules";
 import { hotterColderAnswerOptions } from "./shared/answers/binaryAnswerOptions";
@@ -38,6 +41,7 @@ interface ThermometerPanelProps {
   answer: ThermometerAnswer | null;
   step: "a" | "b" | "ready";
   presetUseCount: number;
+  usedDistanceOptions?: ReadonlySet<ThermometerDistanceOptionMiles>;
   costLabel: string;
   placementMode: PlacementMode;
   walkingActive: boolean;
@@ -85,6 +89,7 @@ export function ThermometerPanel({
   answer,
   step: mapStep,
   presetUseCount,
+  usedDistanceOptions = new Set(),
   costLabel,
   placementMode,
   walkingActive,
@@ -123,10 +128,12 @@ export function ThermometerPanel({
     travelMeters !== null && travelMeters + 1 < distanceMeters;
   const availableDistancePresets =
     availableThermometerDistancePresetsForSession(sessionRules);
-  const distanceAvailable = isThermometerDistanceOptionAvailableForSession(
-    sessionRules,
-    distanceMeters,
-  );
+  const distanceAvailable =
+    isThermometerDistanceOptionAvailableForSession(
+      sessionRules,
+      distanceMeters,
+    ) &&
+    isThermometerDistanceOptionAvailable(usedDistanceOptions, distanceMeters);
   const pinsReady = mapStep === "ready";
   const canCommit =
     pinsReady &&
@@ -260,6 +267,9 @@ export function ThermometerPanel({
             </p>
             <OptionChipRow>
               {availableDistancePresets.map((preset) => {
+                const presetMiles = thermometerPresetMilesForMeters(preset);
+                const used =
+                  presetMiles !== null && usedDistanceOptions.has(presetMiles);
                 const reuse =
                   presetUseCount > 0 && preset === distanceMeters
                     ? costLabel
@@ -268,6 +278,7 @@ export function ThermometerPanel({
                   <OptionChip
                     key={preset}
                     selected={distanceMeters === preset}
+                    disabled={used}
                     onClick={() => onDistanceChange(preset)}
                   >
                     {formatPresetDistance(preset, distanceUnit)}

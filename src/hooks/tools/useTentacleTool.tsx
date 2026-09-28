@@ -33,7 +33,7 @@ import {
   tentacleCategoryUseCountFromPending,
   tentacleQuestionPrompt,
   tentacleSearchRadiusMetersForSession,
-  usedTentacleCategoryIds,
+  usedTentacleCategoryIdsForSession,
   type TentacleExtendedCategoryId,
 } from "../../domain/questions";
 import { questionCostBreakdown } from "../../domain/questions";
@@ -127,8 +127,9 @@ export function useTentacleTool({
     [annotations],
   );
   const usedTentacleCategories = useMemo(
-    () => usedTentacleCategoryIds(activeAnnotations),
-    [activeAnnotations],
+    () =>
+      usedTentacleCategoryIdsForSession(activeAnnotations, pendingQuestions),
+    [activeAnnotations, pendingQuestions],
   );
   const [tentacleCenter, setTentacleCenter] = useState<LatLngTuple | null>(
     null,

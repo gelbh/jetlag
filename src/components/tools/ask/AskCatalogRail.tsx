@@ -24,6 +24,8 @@ export type AskCatalogRailRow = {
    * Tile uses a non-button host so nested inputs stay valid HTML.
    */
   content?: ReactNode;
+  /** Greyed / non-interactive (e.g. already used ask option). */
+  disabled?: boolean;
 };
 
 type AskCatalogRailProps = {
@@ -143,6 +145,11 @@ export function AskCatalogRail({
           <div className={gridClass}>
             {section.items.map((row) => {
               const selected = selectedId === row.id;
+              const disabled = Boolean(row.disabled);
+              const selectRow = () => {
+                if (disabled) return;
+                onSelect(row.id);
+              };
               const tileBody = (
                 <>
                   {row.icon && multiCol ? (
@@ -172,6 +179,7 @@ export function AskCatalogRail({
                         fontSize: "0.75rem",
                       }
                     : null),
+                  ...(disabled ? { opacity: 0.4 } : null),
                 };
                 return (
                   <div key={row.id} role="listitem" className="min-w-0">
@@ -180,12 +188,16 @@ export function AskCatalogRail({
                         ? {
                             component: "div" as const,
                             role: "button",
-                            tabIndex: 0,
+                            tabIndex: disabled ? -1 : 0,
                             "aria-label": row.label,
+                            "aria-disabled": disabled || undefined,
                           }
-                        : { type: "button" as const })}
+                        : {
+                            type: "button" as const,
+                            disabled,
+                          })}
                       aria-pressed={selected}
-                      onClick={() => onSelect(row.id)}
+                      onClick={selectRow}
                       styles={{ root: tileRoot }}
                     >
                       {tileBody}
@@ -197,7 +209,8 @@ export function AskCatalogRail({
                 <div key={row.id} role="listitem" className="min-w-0">
                   <ListSelectRow
                     selected={selected}
-                    onClick={() => onSelect(row.id)}
+                    disabled={disabled}
+                    onClick={selectRow}
                     align={multiCol ? "center" : "left"}
                   >
                     {row.content ? (

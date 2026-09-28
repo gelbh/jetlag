@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { AnnotationRecord } from "../map/annotations";
+import type { PendingQuestionRecord } from "../session/activity/sessionChat";
 import {
   RADAR_RADIUS_PRESET_METERS,
   availableRadarDistancePresets,
@@ -11,6 +12,7 @@ import {
   radarQuestionPrompt,
   radarShadedInsideFromAnswer,
   usedRadarDistanceOptions,
+  usedRadarDistanceOptionsForSession,
 } from "./radarQuestions";
 import { milesToMeters } from "../map/distance";
 import {
@@ -154,6 +156,30 @@ describe("radarQuestions", () => {
       chooseCustom: false,
       radiusMeters: milesToMeters(0.25),
     });
+
+    const pending = {
+      id: "pq-radar-3",
+      toolType: "radar",
+      status: "pending",
+      placement: {
+        metadata: {
+          radiusMeters: milesToMeters(3),
+          radarChooseCustom: false,
+        },
+      },
+    } as unknown as PendingQuestionRecord;
+    expect(
+      usedRadarDistanceOptionsForSession([], [pending], "imperial"),
+    ).toEqual(new Set([3]));
+
+    const cancelled = {
+      ...pending,
+      status: "cancelled",
+      answer: "yes",
+    } as unknown as PendingQuestionRecord;
+    expect(
+      usedRadarDistanceOptionsForSession([], [cancelled], "imperial"),
+    ).toEqual(new Set([3]));
     expect(isRadarPresetMetersForGameSize("small", milesToMeters(5), "imperial")).toBe(
       true,
     );

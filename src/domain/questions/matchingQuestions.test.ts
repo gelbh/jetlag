@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
 import type { AnnotationRecord } from "../map/annotations";
+import type { PendingQuestionRecord } from "../session/activity/sessionChat";
 import {
   firstAvailableMatchingCategoryId,
   isMatchingCategoryAvailable,
   usedMatchingCategoryIds,
+  usedMatchingCategoryIdsForSession,
 } from "./matchingQuestions";
 
 function matchingAnnotation(
@@ -59,5 +61,26 @@ describe("matchingQuestions", () => {
     expect(firstAvailableMatchingCategoryId(used)).toBe("station_name_length");
     expect(isMatchingCategoryAvailable("commercial_airport")).toBe(true);
     expect(isMatchingCategoryAvailable("station_name_length")).toBe(true);
+  });
+
+  it("marks landmass used from pending and cancelled-with-answer", () => {
+    const pending = {
+      id: "pq-land",
+      toolType: "matching",
+      status: "pending",
+      placement: { metadata: { matchingCategory: "landmass" } },
+    } as unknown as PendingQuestionRecord;
+    expect(usedMatchingCategoryIdsForSession([], [pending])).toEqual(
+      new Set(["landmass"]),
+    );
+
+    const cancelled = {
+      ...pending,
+      status: "cancelled",
+      answer: "yes",
+    } as unknown as PendingQuestionRecord;
+    expect(usedMatchingCategoryIdsForSession([], [cancelled])).toEqual(
+      new Set(["landmass"]),
+    );
   });
 });
