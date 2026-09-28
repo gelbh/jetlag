@@ -2,15 +2,14 @@ import {
   useEffect,
   useId,
   useRef,
-  type ComponentPropsWithoutRef,
   type MouseEventHandler,
   type ReactNode,
 } from "react";
-import { Button } from "@mantine/core";
+import { Button, type ButtonProps } from "@mantine/core";
 import { LoadingSpinnerRing } from "@/components/ui/feedback/LoadingSpinner";
 
 export type EntryAsyncButtonProps = Omit<
-  ComponentPropsWithoutRef<typeof Button>,
+  ButtonProps,
   "loading" | "children" | "disabled"
 > & {
   busy: boolean;
