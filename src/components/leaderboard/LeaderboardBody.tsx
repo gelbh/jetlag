@@ -1544,7 +1544,7 @@ export function LeaderboardBody() {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))",
+                paddingBottom: "max(0.75rem, var(--safe-area-bottom))",
                 paddingTop: "0.75rem",
                 backgroundColor:
                   "oklch(from var(--color-canvas) l c h / 0.92)",

@@ -68,9 +68,9 @@ export const jetlagBrand = {
   askHudStripHeight: "3rem",
   askHudRailMaxHeight: "40dvh",
   /** Matches `--safe-area-top` / env bridge (Cap AC may keep env until proven). */
-  safeAreaTop: "env(safe-area-inset-top, 0px)",
+  safeAreaTop: "var(--safe-area-top)",
   /** Matches `--safe-area-bottom`. */
-  safeAreaBottom: "env(safe-area-inset-bottom, 0px)",
+  safeAreaBottom: "var(--safe-area-bottom)",
   zDock: JETLAG_DOCK_Z_INDEX,
   zBanner: JETLAG_BANNER_Z_INDEX,
   zPanel: JETLAG_PANEL_Z_INDEX,

@@ -39,7 +39,7 @@ export function PwaInstallTipBanner() {
   return (
     <HudBanner
       visible
-      className="pointer-events-none fixed inset-x-0 top-0 z-[var(--z-banner)] px-3 pt-[max(0.75rem,env(safe-area-inset-top))]"
+      className="pointer-events-none fixed inset-x-0 top-0 z-[var(--z-banner)] px-3 pt-[max(0.75rem,var(--safe-area-top))]"
     >
       <MapFloatSurface
         tone="default"

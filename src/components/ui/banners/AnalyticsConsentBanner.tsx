@@ -1,6 +1,7 @@
 import { Button, Group } from "@mantine/core";
 import { useState } from "react";
 import { readAnalyticsConsent } from "@/domain/device/consent/analyticsConsent";
+import { isEmbedMode } from "@/domain/device/embed/embedMode";
 import {
   denyAnalyticsConsent,
   grantAnalyticsConsent,
@@ -17,14 +18,14 @@ export function AnalyticsConsentBanner() {
     prod: import.meta.env.PROD,
     mode: import.meta.env.MODE,
   });
-  if (!analyticsUiEnabled || consent !== "unset") {
+  if (!analyticsUiEnabled || isEmbedMode() || consent !== "unset") {
     return null;
   }
 
   return (
     <HudBanner
       visible
-      className="pointer-events-none fixed inset-x-0 bottom-0 z-[var(--z-banner)] px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]"
+      className="pointer-events-none fixed inset-x-0 bottom-0 z-[var(--z-banner)] px-3 pb-[max(0.75rem,var(--safe-area-bottom))]"
     >
       <MapFloatSurface
         tone="default"
