@@ -17,8 +17,8 @@ vi.mock("@/hooks/billing/usePermanentAuthUser", () => ({
   }),
 }));
 
-vi.mock("../components/friends/FriendsPanel", () => ({
-  FriendsPanel: () => <div data-testid="friends-panel">Friends panel</div>,
+vi.mock("../components/friends/FriendsBody", () => ({
+  FriendsBody: () => <div data-testid="friends-body">Friends body</div>,
 }));
 
 vi.mock("../components/friends/FriendsBody", () => ({
