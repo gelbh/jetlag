@@ -17,10 +17,6 @@ vi.mock("@/hooks/billing/usePermanentAuthUser", () => ({
   }),
 }));
 
-vi.mock("./LeaderboardBoard", () => ({
-  LeaderboardBoard: () => <div data-testid="leaderboard-board">Board</div>,
-}));
-
 vi.mock("../components/leaderboard/LeaderboardBody", () => ({
   LeaderboardBody: () => <div data-testid="leaderboard-body">Board</div>,
 }));
