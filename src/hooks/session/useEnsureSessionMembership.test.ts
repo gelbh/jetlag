@@ -7,6 +7,9 @@ const healSessionMembership = vi.fn();
 const sessionMembershipChanged = vi.fn(() => false);
 const setSession = vi.fn();
 const setLastSyncError = vi.fn();
+const storeState = vi.hoisted(() => ({
+  networkReachable: null as boolean | null,
+}));
 
 vi.mock("../../services/core/firebase/firebase", () => ({
   ensureFreshAnonymousUser: (...args: unknown[]) =>
@@ -44,6 +47,7 @@ vi.mock("../../state/sessionStore", () => ({
         session: { id: "session-1", code: "ABCD", memberUids: ["uid-1"] },
         myUid: "uid-1",
         myRole: "hider",
+        networkReachable: storeState.networkReachable,
       }),
     },
   ),
@@ -57,6 +61,8 @@ describe("useEnsureSessionMembership", () => {
     sessionMembershipChanged.mockReturnValue(false);
     setSession.mockClear();
     setLastSyncError.mockClear();
+    storeState.networkReachable = null;
+    vi.spyOn(navigator, "onLine", "get").mockReturnValue(true);
   });
 
   it("skips heal when enabled is false", () => {
@@ -81,6 +87,41 @@ describe("useEnsureSessionMembership", () => {
         "hider",
         { returningMemberUid: "uid-1", persistedMyUid: "uid-1" },
       );
+    });
+  });
+
+  it("forces a token refresh while online", async () => {
+    ensureFreshAnonymousUser.mockResolvedValue({ uid: "uid-1" });
+    healSessionMembership.mockResolvedValue({
+      id: "session-1",
+      code: "ABCD",
+      memberUids: ["uid-1"],
+    });
+
+    renderHook(() => useEnsureSessionMembership({ enabled: true }));
+
+    await waitFor(() => {
+      expect(ensureFreshAnonymousUser).toHaveBeenCalledWith({
+        forceRefresh: true,
+      });
+    });
+  });
+
+  it("skips the forced token refresh while effectively offline", async () => {
+    storeState.networkReachable = false;
+    ensureFreshAnonymousUser.mockResolvedValue({ uid: "uid-1" });
+    healSessionMembership.mockResolvedValue({
+      id: "session-1",
+      code: "ABCD",
+      memberUids: ["uid-1"],
+    });
+
+    renderHook(() => useEnsureSessionMembership({ enabled: true }));
+
+    await waitFor(() => {
+      expect(ensureFreshAnonymousUser).toHaveBeenCalledWith({
+        forceRefresh: false,
+      });
     });
   });
 });
