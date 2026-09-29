@@ -52,7 +52,7 @@ const sheetChromeStyle: CSSProperties = {
 };
 
 /** Bottom safe-area on scroll/content so body can span to the phone bottom. */
-const SHEET_BODY_SAFE_BOTTOM = "max(1.25rem, env(safe-area-inset-bottom))";
+const SHEET_BODY_SAFE_BOTTOM = "max(1.25rem, var(--safe-area-bottom))";
 
 const DRAWER_PADDING_INLINE: Record<
   Exclude<DrawerSheetProps["padding"], number | undefined>,

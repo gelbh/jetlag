@@ -438,7 +438,7 @@ export function bottomDrawerStyles(
     body: {
       width: "100%",
       paddingTop: "0.5rem",
-      paddingBottom: "max(1.25rem, env(safe-area-inset-bottom))",
+      paddingBottom: "max(1.25rem, var(--safe-area-bottom))",
     },
   };
 }
@@ -466,7 +466,7 @@ export const homePosterStyle: CSSProperties = {
 /** Top signal→flag accent bar (replaces `.home-terminal-accent::after`). */
 export const homeTerminalAccentBarStyle: CSSProperties = {
   position: "fixed",
-  top: "env(safe-area-inset-top, 0)",
+  top: "var(--safe-area-top)",
   left: 0,
   right: 0,
   zIndex: 0,

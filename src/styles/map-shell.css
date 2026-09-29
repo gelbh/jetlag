@@ -556,7 +556,7 @@
   }
 
   .jl-app-update-chip {
-    bottom: calc(var(--dock-height) + max(0.5rem, env(safe-area-inset-bottom)));
+    bottom: calc(var(--dock-height) + max(0.5rem, var(--safe-area-bottom)));
   }
 
   /* Narrow phones: stack update chip copy above action (replaces Survey float stack). */

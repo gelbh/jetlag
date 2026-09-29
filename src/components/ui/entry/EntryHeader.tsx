@@ -66,7 +66,7 @@ export function EntryHeader({
         top: 0,
         zIndex: 40,
         width: "100%",
-        paddingTop: "max(0.5rem, env(safe-area-inset-top, 0px))",
+        paddingTop: "max(0.5rem, var(--safe-area-top))",
         backgroundColor: "oklch(from var(--color-canvas) l c h / 0.78)",
         borderBottom:
           "0.33px solid oklch(from var(--color-field-ink) l c h / 0.12)",

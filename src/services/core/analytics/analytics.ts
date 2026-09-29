@@ -4,6 +4,7 @@ import {
   readAnalyticsConsent,
   writeAnalyticsConsent,
 } from "@/domain/device/consent/analyticsConsent";
+import { isEmbedMode } from "@/domain/device/embed/embedMode";
 import {
   ANALYTICS_EVENTS,
   type AnalyticsEventName,
@@ -110,10 +111,13 @@ export function scrubAnalyticsProperties(
 }
 
 function runtimeEnabled(): boolean {
-  return shouldEnableAnalytics({
-    prod: import.meta.env.PROD,
-    mode: import.meta.env.MODE,
-  });
+  return (
+    !isEmbedMode() &&
+    shouldEnableAnalytics({
+      prod: import.meta.env.PROD,
+      mode: import.meta.env.MODE,
+    })
+  );
 }
 
 function applyIdentity(user: AnalyticsIdentity | null): void {

@@ -8,6 +8,7 @@ import {
   writeAnalyticsConsent,
 } from "@/domain/device/consent/analyticsConsent";
 import { resetAnalyticsForTests } from "@/services/core/analytics/analytics";
+import { resetEmbedModeForTests } from "@/domain/device/embed/embedMode";
 import { renderWithAppUi } from "../../../test/renderWithAppUi";
 
 vi.mock("posthog-js", () => ({
@@ -51,8 +52,19 @@ describe("AnalyticsConsentBanner", () => {
 
   afterEach(() => {
     vi.unstubAllEnvs();
+    vi.restoreAllMocks();
     localStorage.clear();
+    sessionStorage.clear();
+    window.history.replaceState(null, "", "/");
     resetAnalyticsForTests();
+    resetEmbedModeForTests();
+  });
+
+  it("stays hidden in embed mode (framed with ?embed=1)", () => {
+    vi.spyOn(window, "top", "get").mockReturnValue({} as Window);
+    window.history.replaceState(null, "", "/?embed=1");
+    const { container } = renderBanner();
+    expect(container.querySelector("#analytics-consent-title")).toBeNull();
   });
 
   it("shows Accept and Decline when consent is unset in production", () => {

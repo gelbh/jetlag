@@ -8,14 +8,14 @@ export const screenBackLinkClassName =
 
 /** Clears the OS status bar on header shells (safe area + gap, with a 44px floor). */
 export const screenHeaderInsetTopClassName =
-  "pt-[max(2.75rem,calc(env(safe-area-inset-top,0px)+0.625rem))]";
+  "pt-[max(2.75rem,calc(var(--safe-area-top)+0.625rem))]";
 
 /** Shared chrome for inline header wrappers (border, bg, bottom padding). */
 export const screenHeaderShellClassName = `shrink-0 border-b-2 border-rule bg-canvas pb-2 ${screenHeaderInsetTopClassName}`;
 
 /** Top padding for page content below a fixed ScreenHeader. */
 export const screenHeaderOffsetClassName =
-  "pt-[max(6rem,calc(env(safe-area-inset-top,0px)+3.875rem))]";
+  "pt-[max(6rem,calc(var(--safe-area-top)+3.875rem))]";
 
 interface ScreenHeaderProps {
   backTo?: string;

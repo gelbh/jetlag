@@ -19,7 +19,7 @@ html[data-matching-map-placement="1"] {
       var(--ask-map-placement-bottom-clearance)
   );
   --map-left-stack-base-safe-area: calc(
-    max(0.75rem, env(safe-area-inset-bottom)) +
+    max(0.75rem, var(--safe-area-bottom)) +
       var(--ask-map-placement-bottom-clearance)
   );
 }

@@ -44,7 +44,7 @@ export function LeaderboardSelfFooter({
           : "YOU";
 
   const sharedClassName =
-    "absolute inset-x-0 bottom-0 z-[var(--z-banner)] border-t-2 border-highlight bg-surface-panel px-5 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 transition-opacity duration-200 motion-reduce:transition-none";
+    "absolute inset-x-0 bottom-0 z-[var(--z-banner)] border-t-2 border-highlight bg-surface-panel px-5 pb-[max(0.75rem,var(--safe-area-bottom))] pt-3 transition-opacity duration-200 motion-reduce:transition-none";
 
   if (interactive) {
     return (

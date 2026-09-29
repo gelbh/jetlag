@@ -272,7 +272,7 @@ export function AskMapPlacementChrome({
           OVERLAY_SAFE_PAD_X,
         )}
         style={{
-          bottom: "max(0.75rem, env(safe-area-inset-bottom))",
+          bottom: "max(0.75rem, var(--safe-area-bottom))",
         }}
       >
         {showStatus ? (

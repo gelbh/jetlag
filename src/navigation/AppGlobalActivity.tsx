@@ -6,7 +6,7 @@ export function AppGlobalActivity() {
   const pendingWrites = useSessionStore((state) => state.pendingWrites);
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-0 z-[var(--z-banner)] flex justify-center px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+    <div className="pointer-events-none fixed inset-x-0 bottom-0 z-[var(--z-banner)] flex justify-center px-3 pb-[max(0.75rem,var(--safe-area-bottom))]">
       <GlobalActivity
         pendingWrites={pendingWrites}
         className="pointer-events-auto"

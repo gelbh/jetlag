@@ -257,11 +257,11 @@ describe("DrawerSheet", () => {
     );
 
     const sheet = screen.getByTestId("mantine-drawer-sheet");
-    expect(sheet.style.paddingBottom).not.toContain("safe-area-inset-bottom");
+    expect(sheet.style.paddingBottom).not.toContain("--safe-area-bottom");
 
     const scroll = sheet.querySelector(".jl-scroll") as HTMLElement | null;
     expect(scroll).toBeTruthy();
-    expect(scroll!.style.paddingBottom).toContain("safe-area-inset-bottom");
+    expect(scroll!.style.paddingBottom).toContain("--safe-area-bottom");
   });
 
   it("uses contentStyle paddingBottom on scroll and skips safe-area stack (keyboard)", () => {
@@ -284,7 +284,7 @@ describe("DrawerSheet", () => {
     const scroll = sheet.querySelector(".jl-scroll") as HTMLElement | null;
     expect(scroll).toBeTruthy();
     expect(scroll!.style.paddingBottom).toBe("120px");
-    expect(scroll!.style.paddingBottom).not.toContain("safe-area-inset-bottom");
+    expect(scroll!.style.paddingBottom).not.toContain("--safe-area-bottom");
   });
 
   it("applies calc() contentStyle paddingBottom on scroll (keyboard CSS expression)", () => {
@@ -334,6 +334,6 @@ describe("DrawerSheet", () => {
     ) as HTMLElement | null;
     expect(body).toBeTruthy();
     expect(body!.style.paddingBottom).toBe("96px");
-    expect(body!.style.paddingBottom).not.toContain("safe-area-inset-bottom");
+    expect(body!.style.paddingBottom).not.toContain("--safe-area-bottom");
   });
 });

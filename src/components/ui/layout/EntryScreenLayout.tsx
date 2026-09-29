@@ -52,8 +52,8 @@ export function EntryScreenLayout({
   const minHeightClass = viewport ? "min-h-0" : "entry-screen-layout-flow";
 
   const insetClass = flush
-    ? "px-0 pt-0 pb-[max(1rem,env(safe-area-inset-bottom))]"
-    : `px-5 ${paddingClass} pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(1.25rem,calc(env(safe-area-inset-top,0px)+0.75rem))]`;
+    ? "px-0 pt-0 pb-[max(1rem,var(--safe-area-bottom))]"
+    : `px-5 ${paddingClass} pb-[max(1rem,var(--safe-area-bottom))] pt-[max(1.25rem,calc(var(--safe-area-top)+0.75rem))]`;
 
   return (
     <main

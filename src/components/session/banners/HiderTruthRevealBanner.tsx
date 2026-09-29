@@ -33,7 +33,7 @@ export function HiderTruthRevealBanner({
     <HudBanner
       visible={Boolean(reveal)}
       onDismiss={onDismiss}
-      className="pointer-events-auto absolute inset-x-3 top-[calc(env(safe-area-inset-top)+var(--status-bar-height)+0.75rem)] z-[var(--z-banner)]"
+      className="pointer-events-auto absolute inset-x-3 top-[calc(var(--safe-area-top)+var(--status-bar-height)+0.75rem)] z-[var(--z-banner)]"
     >
       {reveal ? (
         <button

@@ -58,7 +58,7 @@
 
 .map-zoom-control--safe-area,
 .map-style-control--safe-area {
-  bottom: max(0.75rem, env(safe-area-inset-bottom));
+  bottom: max(0.75rem, var(--safe-area-bottom));
 }
 
 .map-zoom-control--container,

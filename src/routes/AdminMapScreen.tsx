@@ -268,7 +268,7 @@ export function AdminMapScreen({
                 senderRole: chatDisplayRole,
                 isHider: false,
                 bottomClassName:
-                  "bottom-[calc(7.75rem+env(safe-area-inset-bottom))]",
+                  "bottom-[calc(7.75rem+var(--safe-area-bottom))]",
                 onAnswerQuestion: async () => undefined,
                 readOnly: true,
               }}
