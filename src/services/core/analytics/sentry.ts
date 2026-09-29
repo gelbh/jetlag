@@ -481,6 +481,19 @@ export function captureResumeShellUnresponsive(
   });
 }
 
+export function addWriteRejectedBreadcrumb(label: string, error: unknown): void {
+  if (import.meta.env.MODE === "test") {
+    return;
+  }
+
+  Sentry.addBreadcrumb({
+    category: "firestore.write",
+    level: "warning",
+    message: `write rejected: ${label}`,
+    data: { code: (error as { code?: string } | null)?.code ?? null },
+  });
+}
+
 export function addIdbDeleteFailureBreadcrumb(error: unknown): void {
   if (import.meta.env.MODE === "test") {
     return;
