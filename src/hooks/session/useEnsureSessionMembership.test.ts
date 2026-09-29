@@ -124,4 +124,22 @@ describe("useEnsureSessionMembership", () => {
       });
     });
   });
+
+  it("skips the forced token refresh while the browser is offline", async () => {
+    vi.spyOn(navigator, "onLine", "get").mockReturnValue(false);
+    ensureFreshAnonymousUser.mockResolvedValue({ uid: "uid-1" });
+    healSessionMembership.mockResolvedValue({
+      id: "session-1",
+      code: "ABCD",
+      memberUids: ["uid-1"],
+    });
+
+    renderHook(() => useEnsureSessionMembership({ enabled: true }));
+
+    await waitFor(() => {
+      expect(ensureFreshAnonymousUser).toHaveBeenCalledWith({
+        forceRefresh: false,
+      });
+    });
+  });
 });

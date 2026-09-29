@@ -1,8 +1,14 @@
 import { FirebaseError } from "firebase/app";
 
-/** Codes where the cached user can never mint a valid token again. */
+/**
+ * Codes where the cached user can never mint a valid token again. Token
+ * refresh reports revoked / deleted / expired users as `user-token-expired`;
+ * a corrupt persisted refresh token surfaces as `invalid-refresh-token`. The
+ * remaining codes come from accounts endpoints and are kept defensively.
+ */
 const DEFINITIVE_AUTH_CODES = new Set([
   "auth/user-token-expired",
+  "auth/invalid-refresh-token",
   "auth/user-disabled",
   "auth/user-not-found",
   "auth/invalid-user-token",

@@ -345,7 +345,11 @@ export async function ensureAnonymousUser(): Promise<User> {
 
 /**
  * Ensure a signed-in user, optionally forcing an ID token refresh (join/heal).
- * Network failures keep the cached user; only definitive auth failures reset.
+ *
+ * Never throws for transient refresh failures (network, quota, internal): the
+ * cached user is returned and downstream Firestore / callable requests surface
+ * (and retry) their own errors. Only definitive auth failures sign out and mint
+ * a new anonymous user — that path can still throw if re-sign-in fails.
  */
 export async function ensureFreshAnonymousUser(
   options: { forceRefresh?: boolean } = {},
