@@ -1,8 +1,8 @@
 import { fireEvent, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { AdminPanel } from "./AdminPanel";
-import { renderWithRouter } from "../test/renderWithRouter";
-import type { AdminSessionSummary } from "../services/admin/adminSessions";
+import { AdminOpsDesk } from "./AdminOpsDesk";
+import { renderWithRouter } from "../../test/renderWithRouter";
+import type { AdminSessionSummary } from "../../services/admin/adminSessions";
 
 const SEEKER_HIDER_META = /1S \/ 1H/i;
 
@@ -24,21 +24,21 @@ const sessionListState = vi.hoisted(() => ({
   loadMore: vi.fn(),
 }));
 
-vi.mock("../hooks/admin/useAdminAccessState", () => ({
+vi.mock("../../hooks/admin/useAdminAccessState", () => ({
   useAdminAccessState: () => authState,
 }));
 
-vi.mock("../hooks/admin/useAdminSessionList", () => ({
+vi.mock("../../hooks/admin/useAdminSessionList", () => ({
   useAdminSessionList: () => sessionListState,
 }));
 
-vi.mock("../components/billing/PremiumSignInGate", () => ({
+vi.mock("../billing/PremiumSignInGate", () => ({
   PremiumSignInGate: ({ continuePath }: { continuePath: string }) => (
     <div data-testid="premium-sign-in-gate">{continuePath}</div>
   ),
 }));
 
-vi.mock("../services/admin/adminIncidents", () => ({
+vi.mock("../../services/admin/adminIncidents", () => ({
   subscribeIncidentList: (onNext: (incidents: unknown[]) => void) => {
     onNext([]);
     return () => undefined;
@@ -46,19 +46,19 @@ vi.mock("../services/admin/adminIncidents", () => ({
   countOpenIncidents: () => 0,
 }));
 
-vi.mock("../services/core/firebase/firebase", () => ({
+vi.mock("../../services/core/firebase/firebase", () => ({
   isFirebaseConfigured: () => true,
   getFirebaseAuth: () => ({}),
   ensureAnonymousUser: vi.fn(async () => ({ uid: "anon-test" })),
 }));
 
-vi.mock("../services/core/firebase", () => ({
+vi.mock("../../services/core/firebase", () => ({
   isFirebaseConfigured: () => true,
   getFirebaseAuth: () => ({}),
   ensureAnonymousUser: vi.fn(async () => ({ uid: "anon-test" })),
 }));
 
-vi.mock("../hooks/admin/useAdminJoinSession", () => ({
+vi.mock("../../hooks/admin/useAdminJoinSession", () => ({
   useAdminJoinSession: () => ({
     joinSession: vi.fn(),
     joiningCode: null,
@@ -79,7 +79,7 @@ vi.mock("react-grid-layout", () => ({
   verticalCompactor: {},
 }));
 
-describe("AdminPanel", () => {
+describe("AdminOpsDesk", () => {
   const originalMatchMedia = window.matchMedia;
 
   afterEach(() => {
@@ -93,7 +93,7 @@ describe("AdminPanel", () => {
     authState.state = "loading";
     authState.authReady = false;
     authState.user = null;
-    renderWithRouter(<AdminPanel />);
+    renderWithRouter(<AdminOpsDesk />);
 
     expect(document.querySelector(".animate-pulse")).toBeInTheDocument();
   });
@@ -104,7 +104,7 @@ describe("AdminPanel", () => {
     authState.user = null;
     sessionListState.sessions = [];
 
-    renderWithRouter(<AdminPanel />);
+    renderWithRouter(<AdminOpsDesk />);
 
     expect(
       screen.getByText(/Sign in with your Google account/i),
@@ -117,7 +117,7 @@ describe("AdminPanel", () => {
     authState.authReady = true;
     authState.user = { email: "player@example.com", emailVerified: true };
 
-    renderWithRouter(<AdminPanel />);
+    renderWithRouter(<AdminOpsDesk />);
 
     expect(screen.getByRole("heading", { name: "Access denied" })).toBeInTheDocument();
   });
@@ -129,7 +129,7 @@ describe("AdminPanel", () => {
     sessionListState.loading = false;
     sessionListState.sessions = [];
 
-    renderWithRouter(<AdminPanel />);
+    renderWithRouter(<AdminOpsDesk />);
 
     expect(screen.getByText("No live sessions")).toBeInTheDocument();
   });
@@ -169,7 +169,7 @@ describe("AdminPanel", () => {
       },
     ];
 
-    renderWithRouter(<AdminPanel />);
+    renderWithRouter(<AdminOpsDesk />);
 
     expect(screen.getByText("ABCD")).toBeInTheDocument();
     expect(screen.getByText("Dublin")).toBeInTheDocument();
@@ -226,7 +226,7 @@ describe("AdminPanel", () => {
       })),
     });
 
-    renderWithRouter(<AdminPanel />);
+    renderWithRouter(<AdminOpsDesk />);
 
     expect(document.querySelector(".admin-dashboard-list-scroll")).toBeInTheDocument();
     expect(document.querySelector(".home-poster-viewport")).toBeInTheDocument();
@@ -262,7 +262,7 @@ describe("AdminPanel", () => {
       })),
     });
 
-    renderWithRouter(<AdminPanel />);
+    renderWithRouter(<AdminOpsDesk />);
 
     expect(screen.getByTestId("admin-ops-desk")).toHaveAttribute(
       "data-layout",
@@ -315,7 +315,7 @@ describe("AdminPanel", () => {
       },
     ];
 
-    renderWithRouter(<AdminPanel />);
+    renderWithRouter(<AdminOpsDesk />);
 
     fireEvent.click(screen.getByRole("button", { name: "Load more sessions" }));
     expect(sessionListState.loadMore).toHaveBeenCalledTimes(1);
@@ -358,7 +358,7 @@ describe("AdminPanel", () => {
       },
     ];
 
-    renderWithRouter(<AdminPanel />);
+    renderWithRouter(<AdminOpsDesk />);
 
     fireEvent.click(screen.getByRole("button", { name: "Live" }));
 
