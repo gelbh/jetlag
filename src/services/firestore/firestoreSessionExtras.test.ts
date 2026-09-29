@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { FirebaseError } from "firebase/app";
+import { onSnapshot } from "firebase/firestore";
 import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
 import {
   buildPendingQuestionDocument,
@@ -71,6 +72,7 @@ import {
   cancelWalkingThermometersAfterIdentityHeal,
   deletePendingQuestion,
   deletePlayerLocation,
+  subscribeToSessionMessages,
   updatePendingQuestion,
   writePendingQuestion,
   writePlayerLocation,
@@ -416,5 +418,62 @@ describe("firestoreSessionExtras writes", () => {
     );
 
     expect(mockCaptureException).toHaveBeenCalledWith(expect.any(Error));
+  });
+});
+
+describe("subscribeToSessionMessages metadata", () => {
+  type FakeSnapshot = {
+    docs: Array<{
+      id: string;
+      data: () => Record<string, unknown>;
+      metadata: { hasPendingWrites: boolean };
+    }>;
+    docChanges: () => unknown[];
+  };
+
+  function fakeSnapshot(
+    hasPendingWrites: boolean,
+    changes: number,
+  ): FakeSnapshot {
+    return {
+      docs: [
+        {
+          id: "m1",
+          data: () => ({
+            channel: "social",
+            senderUid: "u1",
+            senderRole: "seeker",
+            createdAt: "2026-01-01T00:00:00.000Z",
+            text: "hi",
+          }),
+          metadata: { hasPendingWrites },
+        },
+      ],
+      docChanges: () => Array.from({ length: changes }),
+    };
+  }
+
+  function subscribeAndCapture() {
+    const onChange = vi.fn();
+    vi.mocked(onSnapshot).mockClear();
+    subscribeToSessionMessages("s1", onChange, vi.fn());
+    const call = vi.mocked(onSnapshot).mock.calls[0] as unknown[];
+    expect(call[1]).toEqual({ includeMetadataChanges: true });
+    return { onChange, emit: call[2] as (snap: FakeSnapshot) => void };
+  }
+
+  it("maps hasPendingWrites to pendingSync and clears it on ack", () => {
+    const { onChange, emit } = subscribeAndCapture();
+    emit(fakeSnapshot(true, 1));
+    expect(onChange.mock.calls[0]?.[0][0]).toMatchObject({ pendingSync: true });
+    emit(fakeSnapshot(false, 1));
+    expect(onChange.mock.calls[1]?.[0][0]).not.toHaveProperty("pendingSync");
+  });
+
+  it("skips metadata-only snapshots with no doc changes after the first emit", () => {
+    const { onChange, emit } = subscribeAndCapture();
+    emit(fakeSnapshot(false, 0));
+    emit(fakeSnapshot(false, 0));
+    expect(onChange).toHaveBeenCalledTimes(1);
   });
 });

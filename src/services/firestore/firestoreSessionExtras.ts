@@ -252,6 +252,35 @@ export function subscribeToHiderPlayerLocations(
   );
 }
 
+/**
+ * Listeners opened with `includeMetadataChanges` also fire on query-level
+ * `fromCache` flips that change no document; skip those (after the first
+ * emit, which must go out even for an empty collection) to avoid re-renders.
+ */
+function createMetadataSnapshotGate(): (snapshot: {
+  docChanges: (options: { includeMetadataChanges: boolean }) => unknown[];
+}) => boolean {
+  let emitted = false;
+  return (snapshot) => {
+    if (
+      emitted &&
+      snapshot.docChanges({ includeMetadataChanges: true }).length === 0
+    ) {
+      return false;
+    }
+    emitted = true;
+    return true;
+  };
+}
+
+/** View-only flag for "Waiting to send" badges; never serialized. */
+function withPendingSync<T extends { pendingSync?: boolean }>(
+  record: T,
+  hasPendingWrites: boolean,
+): T {
+  return hasPendingWrites ? { ...record, pendingSync: true } : record;
+}
+
 export async function writeSessionMessage(
   sessionId: string,
   message: SessionMessageRecord,
@@ -267,14 +296,22 @@ export function subscribeToSessionMessages(
   onChange: (messages: SessionMessageRecord[]) => void,
   onError: (error: Error) => void,
 ): Unsubscribe {
+  const shouldEmit = createMetadataSnapshotGate();
   return onSnapshot(
     query(messagesCollection(sessionId), orderBy("createdAt", "asc")),
+    { includeMetadataChanges: true },
     (snapshot) => {
+      if (!shouldEmit(snapshot)) {
+        return;
+      }
       const messages = snapshot.docs.map((messageDoc) =>
-        deserializeSessionMessageFromFirestore(
-          messageDoc.id,
-          sessionId,
-          messageDoc.data() as Record<string, unknown>,
+        withPendingSync(
+          deserializeSessionMessageFromFirestore(
+            messageDoc.id,
+            sessionId,
+            messageDoc.data() as Record<string, unknown>,
+          ),
+          messageDoc.metadata.hasPendingWrites,
         ),
       );
       onChange(messages);
@@ -471,14 +508,22 @@ export function subscribeToPendingQuestions(
   onChange: (questions: PendingQuestionRecord[]) => void,
   onError: (error: Error) => void,
 ): Unsubscribe {
+  const shouldEmit = createMetadataSnapshotGate();
   return onSnapshot(
     pendingQuestionsCollection(sessionId),
+    { includeMetadataChanges: true },
     (snapshot) => {
+      if (!shouldEmit(snapshot)) {
+        return;
+      }
       const questions = snapshot.docs.map((questionDoc) =>
-        deserializePendingQuestionFromFirestore(
-          questionDoc.id,
-          sessionId,
-          questionDoc.data() as Record<string, unknown>,
+        withPendingSync(
+          deserializePendingQuestionFromFirestore(
+            questionDoc.id,
+            sessionId,
+            questionDoc.data() as Record<string, unknown>,
+          ),
+          questionDoc.metadata.hasPendingWrites,
         ),
       );
       onChange(questions);

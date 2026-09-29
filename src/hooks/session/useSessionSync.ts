@@ -81,9 +81,14 @@ export function useSessionSync({ syncEnabled = true }: UseSessionSyncOptions = {
           error instanceof Error ? error.message : "Session sync failed.",
         );
       },
+      (metadata) =>
+        useSessionStore.getState().setSessionFromCache(metadata.fromCache),
     );
 
-    return unsubscribe;
+    return () => {
+      unsubscribe();
+      useSessionStore.getState().setSessionFromCache(false);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- resubscribe on session id only
   }, [myUid, session?.id, setLastSyncError, setSession, syncEnabled]);
 

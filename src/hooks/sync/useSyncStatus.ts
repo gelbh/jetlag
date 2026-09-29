@@ -5,6 +5,10 @@ import { resolveSyncStatus, type SyncStatus } from "../../domain/device/sync/syn
 import { useReachability } from "../location/useReachability";
 import { useMapStore } from "../../state/mapStore";
 import { useSessionStore } from "../../state/sessionStore";
+import {
+  selectPendingCount,
+  useWriteLedgerStore,
+} from "@/state/writeLedgerStore";
 
 export function useSyncStatus(): {
   status: SyncStatus;
@@ -16,6 +20,8 @@ export function useSyncStatus(): {
   const pendingWrites = useSessionStore((state) => state.pendingWrites);
   const syncInFlight = useSessionStore((state) => state.syncInFlight);
   const lastSyncError = useSessionStore((state) => state.lastSyncError);
+  const fromCache = useSessionStore((state) => state.sessionFromCache);
+  const ledgerPending = useWriteLedgerStore(selectPendingCount);
   const remoteUpdateNotice = useSessionStore(
     (state) => state.remoteUpdateNotice,
   );
@@ -53,9 +59,12 @@ export function useSyncStatus(): {
       reachable,
       inFlightWrites: syncInFlight,
       queuedWrites: pendingWrites,
+      ledgerPending,
+      fromCache,
       lastSyncError,
     }),
-    queuedWrites: pendingWrites,
+    // "Offline · N queued" counts every un-acked action, not just annotations.
+    queuedWrites: pendingWrites + ledgerPending,
     lastSyncError,
     remoteUpdateNotice,
   };

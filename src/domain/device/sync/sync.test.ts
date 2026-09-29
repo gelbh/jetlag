@@ -9,6 +9,8 @@ describe("resolveSyncStatus", () => {
         reachable: true,
         inFlightWrites: 2,
         queuedWrites: 3,
+        ledgerPending: 0,
+        fromCache: false,
         lastSyncError: "Write failed",
       }),
     ).toBe("error");
@@ -21,6 +23,8 @@ describe("resolveSyncStatus", () => {
         reachable: true,
         inFlightWrites: 1,
         queuedWrites: 0,
+        ledgerPending: 0,
+        fromCache: false,
         lastSyncError: null,
       }),
     ).toBe("saving");
@@ -33,6 +37,8 @@ describe("resolveSyncStatus", () => {
         reachable: false,
         inFlightWrites: 0,
         queuedWrites: 0,
+        ledgerPending: 0,
+        fromCache: false,
         lastSyncError: null,
       }),
     ).toBe("offline");
@@ -43,6 +49,8 @@ describe("resolveSyncStatus", () => {
         reachable: true,
         inFlightWrites: 0,
         queuedWrites: 2,
+        ledgerPending: 0,
+        fromCache: false,
         lastSyncError: null,
       }),
     ).toBe("offline");
@@ -55,6 +63,8 @@ describe("resolveSyncStatus", () => {
         reachable: false,
         inFlightWrites: 0,
         queuedWrites: 0,
+        ledgerPending: 0,
+        fromCache: false,
         lastSyncError: null,
       }),
     ).toBe("degraded");
@@ -67,9 +77,81 @@ describe("resolveSyncStatus", () => {
         reachable: true,
         inFlightWrites: 0,
         queuedWrites: 0,
+        ledgerPending: 0,
+        fromCache: false,
         lastSyncError: null,
       }),
     ).toBe("synced");
+  });
+
+  it("counts ledger pending as offline-queued when unreachable", () => {
+    expect(
+      resolveSyncStatus({
+        online: true,
+        reachable: false,
+        inFlightWrites: 0,
+        queuedWrites: 0,
+        ledgerPending: 2,
+        fromCache: false,
+        lastSyncError: null,
+      }),
+    ).toBe("offline");
+  });
+
+  it("reports offline (not saving) when the browser is offline mid-write", () => {
+    expect(
+      resolveSyncStatus({
+        online: false,
+        reachable: null,
+        inFlightWrites: 1,
+        queuedWrites: 0,
+        ledgerPending: 1,
+        fromCache: true,
+        lastSyncError: null,
+      }),
+    ).toBe("offline");
+  });
+
+  it("shows saving while ledger pending and reachable", () => {
+    expect(
+      resolveSyncStatus({
+        online: true,
+        reachable: true,
+        inFlightWrites: 0,
+        queuedWrites: 0,
+        ledgerPending: 1,
+        fromCache: false,
+        lastSyncError: null,
+      }),
+    ).toBe("saving");
+  });
+
+  it("shows stale when data is from cache and nothing pending", () => {
+    expect(
+      resolveSyncStatus({
+        online: true,
+        reachable: null,
+        inFlightWrites: 0,
+        queuedWrites: 0,
+        ledgerPending: 0,
+        fromCache: true,
+        lastSyncError: null,
+      }),
+    ).toBe("stale");
+  });
+
+  it("prefers degraded over stale when the probe failed", () => {
+    expect(
+      resolveSyncStatus({
+        online: true,
+        reachable: false,
+        inFlightWrites: 0,
+        queuedWrites: 0,
+        ledgerPending: 0,
+        fromCache: true,
+        lastSyncError: null,
+      }),
+    ).toBe("degraded");
   });
 });
 

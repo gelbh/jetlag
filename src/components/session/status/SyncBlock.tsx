@@ -39,6 +39,7 @@ function surveyShortLabelTone(status: SyncStatus): SyncTone | null {
       return "error";
     case "offline":
     case "degraded":
+    case "stale":
       return "warning";
     case "saving":
       return "info";

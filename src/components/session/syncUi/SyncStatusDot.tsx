@@ -1,5 +1,12 @@
 import type { SyncStatus } from "@/domain/device/sync/sync";
-import { ArrowsClockwiseIcon, CheckCircleIcon, CloudSlashIcon, WarningIcon, WarningCircleIcon } from "@phosphor-icons/react";
+import {
+  ArrowsClockwiseIcon,
+  CheckCircleIcon,
+  ClockCounterClockwiseIcon,
+  CloudSlashIcon,
+  WarningIcon,
+  WarningCircleIcon,
+} from "@phosphor-icons/react";
 import { syncBeaconStyle } from "@/components/ui/entry/entryChrome";
 import { JlIcon, type PhosphorIcon } from "../../ui/brand/JlIcon";
 
@@ -14,6 +21,7 @@ const SURVEY_ICON: Record<SyncStatus, PhosphorIcon> = {
   saving: ArrowsClockwiseIcon,
   offline: CloudSlashIcon,
   degraded: WarningIcon,
+  stale: ClockCounterClockwiseIcon,
   error: WarningCircleIcon,
 };
 

@@ -743,6 +743,7 @@ export type SyncBeaconStatus =
   | "saving"
   | "offline"
   | "degraded"
+  | "stale"
   | "error";
 
 const syncBeaconTone: Record<
@@ -766,6 +767,12 @@ const syncBeaconTone: Record<
     dashed: true,
   },
   degraded: {
+    border: "oklch(from var(--color-flag) l c h / 0.6)",
+    background: "oklch(from var(--color-flag) l c h / 0.1)",
+    color: "var(--color-flag)",
+    dashed: true,
+  },
+  stale: {
     border: "oklch(from var(--color-flag) l c h / 0.6)",
     background: "oklch(from var(--color-flag) l c h / 0.1)",
     color: "var(--color-flag)",

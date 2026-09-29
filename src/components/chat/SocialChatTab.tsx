@@ -14,6 +14,7 @@ import type { PlayerRole } from "../../domain/session/players/playerRole";
 import { useStickScrollToBottom } from "../../hooks/ui/useStickScrollToBottom";
 import { postSocialMessage } from "../../services/firestore/firestoreSessionExtras";
 import { EmptyState } from "../ui/feedback/EmptyState";
+import { PendingSyncBadge } from "./PendingSyncBadge";
 
 interface SocialChatTabProps {
   messages: readonly SessionMessageRecord[];
@@ -126,6 +127,7 @@ export function SocialChatTab({
                 >
                   {message.text}
                 </Box>
+                {message.pendingSync ? <PendingSyncBadge /> : null}
               </Stack>
             );
           })

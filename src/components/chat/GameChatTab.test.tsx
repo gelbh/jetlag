@@ -144,4 +144,36 @@ describe("GameChatTab", () => {
       screen.queryByRole("button", { name: "Dismiss question" }),
     ).not.toBeInTheDocument();
   });
+
+  it("marks question rows waiting for server ack", () => {
+    renderWithAppUi(
+      <GameChatTab
+        messages={[{ ...questionMessage, pendingSync: true }]}
+        pendingQuestions={[pendingQuestion]}
+        sessionRules={{ gameSize: "medium" }}
+        sessionId="session-1"
+        isHider={false}
+        senderUid="seeker-1"
+        onAnswerQuestion={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText("Waiting to send")).toBeInTheDocument();
+  });
+
+  it("omits the pending badge once acked", () => {
+    renderWithAppUi(
+      <GameChatTab
+        messages={[questionMessage]}
+        pendingQuestions={[pendingQuestion]}
+        sessionRules={{ gameSize: "medium" }}
+        sessionId="session-1"
+        isHider={false}
+        senderUid="seeker-1"
+        onAnswerQuestion={vi.fn()}
+      />,
+    );
+
+    expect(screen.queryByText("Waiting to send")).not.toBeInTheDocument();
+  });
 });

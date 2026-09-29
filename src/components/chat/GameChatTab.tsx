@@ -27,6 +27,7 @@ import { HiderPendingQuestionAnswer } from "./HiderPendingQuestionAnswer";
 import { EmptyState } from "../ui/feedback/EmptyState";
 import { PhotoAnswerPreview } from "./PhotoAnswerPreview";
 import { InlineError } from "../ui/banners/InlineError";
+import { PendingSyncBadge } from "./PendingSyncBadge";
 
 interface GameChatTabProps {
   messages: readonly SessionMessageRecord[];
@@ -464,6 +465,11 @@ export function GameChatTab({
                   >
                     Dismiss question
                   </Button>
+                ) : null}
+                {message.pendingSync || pending?.pendingSync ? (
+                  <Box mt={6}>
+                    <PendingSyncBadge />
+                  </Box>
                 ) : null}
                 {message.senderUid === senderUid ? null : null}
               </StakePlate>
