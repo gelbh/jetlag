@@ -8,16 +8,16 @@ import type {
 } from "../../domain/incident/incidentTypes";
 import { renderWithRouter } from "../../test/renderWithRouter";
 import { AdminIncidentDetail } from "./AdminIncidentDetail";
-import { AdminIncidentDesk } from "./AdminIncidentDesk";
+import { AdminOpsDesk } from "./AdminOpsDesk";
 import { AdminIncidentActions } from "./AdminIncidentActions";
 
 function renderDesk(route: string) {
   return renderWithRouter(
     <Routes>
-      <Route path="/admin/incidents" element={<AdminIncidentDesk />} />
+      <Route path="/admin/incidents" element={<AdminOpsDesk />} />
       <Route
         path="/admin/incidents/:incidentId"
-        element={<AdminIncidentDesk />}
+        element={<AdminOpsDesk />}
       />
     </Routes>,
     { route },
@@ -351,7 +351,7 @@ describe("AdminIncidentActions", () => {
   });
 });
 
-describe("AdminIncidentDesk gate + mobile stack", () => {
+describe("AdminOpsDesk gate + mobile stack", () => {
   const originalMatchMedia = window.matchMedia;
 
   beforeEach(() => {
