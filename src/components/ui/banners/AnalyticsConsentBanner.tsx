@@ -1,6 +1,7 @@
 import { Button, Group } from "@mantine/core";
 import { useState } from "react";
 import { readAnalyticsConsent } from "@/domain/device/consent/analyticsConsent";
+import { isEmbedMode } from "@/domain/device/embed/embedMode";
 import {
   denyAnalyticsConsent,
   grantAnalyticsConsent,
@@ -17,7 +18,7 @@ export function AnalyticsConsentBanner() {
     prod: import.meta.env.PROD,
     mode: import.meta.env.MODE,
   });
-  if (!analyticsUiEnabled || consent !== "unset") {
+  if (!analyticsUiEnabled || isEmbedMode() || consent !== "unset") {
     return null;
   }
 

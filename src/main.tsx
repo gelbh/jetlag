@@ -12,11 +12,13 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { installE2EBridgeIfConfigured } from "./test/e2eBridge";
 import { markStandaloneShellClass } from "./domain/device/pwa/markStandaloneShellClass";
+import { markEmbedShellAttribute } from "./domain/device/embed/embedMode";
 import "@mantine/core/styles.layer.css";
 import "@mantine/notifications/styles.layer.css";
 import "./index.css";
 
 markStandaloneShellClass();
+markEmbedShellAttribute();
 installE2EBridgeIfConfigured();
 function scheduleDeferredObservability(): void {
   scheduleAfterFirstPaint(() => {

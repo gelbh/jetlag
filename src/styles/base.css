@@ -59,6 +59,13 @@
   --jl-sync-beacon-inset-left: max(0.625rem, env(safe-area-inset-left, 0px));
 }
 
+/* Embed mode (framed with ?embed=1): iframes report zero safe-area insets, so
+   stand in iPhone 15 portrait values to clear the host page's device bezel. */
+:root[data-embed="iphone"] {
+  --safe-area-top: 59px;
+  --safe-area-bottom: 34px;
+}
+
 @media (width >= 28.01rem) {
   :root {
     --dock-content-height: var(--dock-height);
