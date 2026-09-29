@@ -95,7 +95,7 @@ export function AdminMapScreenChrome({
 
   const header = (
     <>
-      <div className="pointer-events-none absolute inset-x-0 top-0 z-[var(--z-dock)] px-3 pt-[max(0.75rem,env(safe-area-inset-top))]">
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-[var(--z-dock)] px-3 pt-[max(0.75rem,var(--safe-area-top))]">
         <div className="pointer-events-auto jl-status-bar mx-auto flex max-w-xl items-center justify-between gap-2 px-2.5 py-1.5">
           <div className="min-w-0">
             <p className="font-mono text-xs font-bold tracking-[0.18em] text-ink">
@@ -119,7 +119,7 @@ export function AdminMapScreenChrome({
         </div>
       </div>
 
-      <div className="pointer-events-none absolute inset-x-0 top-[calc(4.75rem+env(safe-area-inset-top))] z-[var(--z-dock)] px-3">
+      <div className="pointer-events-none absolute inset-x-0 top-[calc(4.75rem+var(--safe-area-top))] z-[var(--z-dock)] px-3">
         <div className="pointer-events-auto mx-auto flex max-w-xl flex-col gap-2">
           <div className="rounded-xl border border-border bg-surface-panel/95 p-2 shadow-hud-float backdrop-blur-sm">
             <div className="flex flex-wrap gap-2">

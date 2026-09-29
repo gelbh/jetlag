@@ -24,7 +24,7 @@ export function AnalyticsConsentBanner() {
   return (
     <HudBanner
       visible
-      className="pointer-events-none fixed inset-x-0 bottom-0 z-[var(--z-banner)] px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]"
+      className="pointer-events-none fixed inset-x-0 bottom-0 z-[var(--z-banner)] px-3 pb-[max(0.75rem,var(--safe-area-bottom))]"
     >
       <MapFloatSurface
         tone="default"

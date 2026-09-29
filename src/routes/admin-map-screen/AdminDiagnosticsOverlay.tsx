@@ -41,7 +41,7 @@ export function AdminDiagnosticsOverlay({
   ];
 
   return (
-    <div className="pointer-events-none absolute inset-x-0 top-[calc(4.75rem+env(safe-area-inset-top))] z-[var(--z-panel)] px-3">
+    <div className="pointer-events-none absolute inset-x-0 top-[calc(4.75rem+var(--safe-area-top))] z-[var(--z-panel)] px-3">
       <section
         className="pointer-events-auto mx-auto max-w-xl rounded-xl border border-border bg-surface-panel p-3 shadow-hud-float"
         aria-label="Session diagnostics"

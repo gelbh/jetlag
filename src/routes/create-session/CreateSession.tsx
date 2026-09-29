@@ -104,7 +104,7 @@ export function CreateSession() {
           className="flex min-h-0 flex-1 flex-col"
           footer={
             <Box
-              className="shrink-0 px-4 pt-3 pb-[max(0.25rem,env(safe-area-inset-bottom))]"
+              className="shrink-0 px-4 pt-3 pb-[max(0.25rem,var(--safe-area-bottom))]"
               style={{
                 backgroundColor: "oklch(from var(--color-canvas) l c h / 0.88)",
                 borderTop:
