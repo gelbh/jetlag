@@ -1,8 +1,14 @@
 import { renderHook, waitFor } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { resetServerClockForTests } from "@/services/core/time/serverClock";
 import { useReachability } from "./useReachability";
 
 describe("useReachability", () => {
+  beforeEach(() => {
+    localStorage.clear();
+    resetServerClockForTests();
+  });
+
   afterEach(() => {
     vi.useRealTimers();
     vi.unstubAllGlobals();

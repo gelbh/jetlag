@@ -11,8 +11,8 @@ const SKEW_MS = 300_000;
 
 describe("serverClock", () => {
   beforeEach(() => {
-    resetServerClockForTests();
     localStorage.clear();
+    resetServerClockForTests();
   });
 
   afterEach(() => {
@@ -69,6 +69,72 @@ describe("serverClock", () => {
     );
 
     await expect(probeServerTime()).resolves.toEqual({ ok: false });
+  });
+
+  it("restores the persisted offset on startup", () => {
+    localStorage.setItem(
+      "jetlag:server-clock-offset",
+      JSON.stringify({ offsetMs: 60_000, savedAtMs: Date.now() - 1_000 }),
+    );
+    resetServerClockForTests();
+    expect(Math.abs(serverNow() - (Date.now() + 60_000))).toBeLessThan(50);
+  });
+
+  it.each([
+    ["garbage", "not json"],
+    ["legacy number", "60000"],
+    [
+      "implausible",
+      JSON.stringify({
+        offsetMs: 3 * 24 * 60 * 60 * 1000,
+        savedAtMs: Date.now(),
+      }),
+    ],
+    [
+      "stale",
+      JSON.stringify({
+        offsetMs: 60_000,
+        savedAtMs: Date.now() - 4 * 24 * 60 * 60 * 1000,
+      }),
+    ],
+    [
+      "saved in the future",
+      JSON.stringify({
+        offsetMs: 60_000,
+        savedAtMs: Date.now() + 60 * 60 * 1000,
+      }),
+    ],
+  ])("ignores a %s persisted offset", (_label, raw) => {
+    localStorage.setItem("jetlag:server-clock-offset", raw);
+    resetServerClockForTests();
+    expect(Math.abs(serverNow() - Date.now())).toBeLessThan(50);
+  });
+
+  it("drops older samples after a device clock jump", () => {
+    const t = Date.now();
+    // Fast sample: offset 10_000, rtt 20.
+    recordClockSample({
+      sentAtMs: t,
+      receivedAtMs: t + 20,
+      serverMs: t + 10_010,
+    });
+    // Device clock corrected by +10s: slower sample now implies offset ~0.
+    recordClockSample({
+      sentAtMs: t + 10_000,
+      receivedAtMs: t + 10_400,
+      serverMs: t + 10_200,
+    });
+    expect(Math.abs(serverNow() - Date.now())).toBeLessThan(50);
+  });
+
+  it("rejects a sample implying implausible skew", () => {
+    const t = Date.now();
+    recordClockSample({
+      sentAtMs: t,
+      receivedAtMs: t,
+      serverMs: t + 2 * 24 * 60 * 60 * 1000,
+    });
+    expect(Math.abs(serverNow() - Date.now())).toBeLessThan(50);
   });
 
   it("formats serverNowIso from serverNow", () => {

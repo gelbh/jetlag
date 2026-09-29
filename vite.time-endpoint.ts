@@ -1,9 +1,11 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 import type { Plugin } from "vite";
+import { handleTimeRequest, TIME_ENDPOINT_PATH } from "./worker/timeEndpoint";
 
-const TIME_ENDPOINT_PATH = "/api/time";
-
-/** Mirrors worker/timeEndpoint.ts for `vite dev` / `vite preview` (e2e). */
+/**
+ * Serves the Worker's `/api/time` handler from `vite dev` / `vite preview`
+ * (e2e) through a thin Node → Fetch adapter, so both share one implementation.
+ */
 export function timeEndpointPlugin(): Plugin {
   const handler = (
     req: IncomingMessage,
@@ -14,22 +16,21 @@ export function timeEndpointPlugin(): Plugin {
       next();
       return;
     }
-    const now = Date.now();
-    res.setHeader("cache-control", "no-store");
-    res.setHeader("x-server-time", String(now));
-    if (req.method === "HEAD") {
-      res.statusCode = 204;
-      res.end();
-      return;
-    }
-    if (req.method !== "GET") {
-      res.statusCode = 405;
-      res.setHeader("allow", "GET, HEAD");
-      res.end();
-      return;
-    }
-    res.setHeader("content-type", "application/json");
-    res.end(JSON.stringify({ now }));
+    const response = handleTimeRequest(
+      new Request(`http://localhost${req.url}`, { method: req.method }),
+    );
+    res.statusCode = response.status;
+    response.headers.forEach((value, key) => {
+      res.setHeader(key, value);
+    });
+    void response.arrayBuffer().then(
+      (body) => {
+        res.end(Buffer.from(body));
+      },
+      () => {
+        res.end();
+      },
+    );
   };
   return {
     name: "jetlag-time-endpoint",

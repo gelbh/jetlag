@@ -3,7 +3,10 @@ import { handleTimeRequest } from "./timeEndpoint";
 
 describe("handleTimeRequest", () => {
   it("returns server epoch ms, no-store", async () => {
-    const res = handleTimeRequest(new Request("https://x/api/time"), () => 1234);
+    const res = handleTimeRequest(
+      new Request("https://x/api/time"),
+      () => 1234,
+    );
     expect(res.headers.get("cache-control")).toBe("no-store");
     expect(await res.json()).toEqual({ now: 1234 });
   });

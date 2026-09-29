@@ -4,6 +4,10 @@ import { probeServerTime } from "@/services/core/time/serverClock";
 const PROBE_TIMEOUT_MS = 5_000;
 const UNREACHABLE_FAILURE_THRESHOLD = 2;
 
+/**
+ * Polls `/api/time` for reachability. Each probe also feeds the server clock
+ * offset (`serverNow()`), so clock sync runs only while this hook is enabled.
+ */
 export function useReachability(
   enabled: boolean,
   probeIntervalMs = 15_000,
