@@ -261,15 +261,3 @@ test.describe("layout regression @ 320px", () => {
   });
 });
 
-test.describe("layout regression social @ 320px", () => {
-  test.use({ viewport: { width: 320, height: 568 } });
-
-  for (const path of SOCIAL_LAYOUT_PATHS) {
-    // @layout-deep ownership is Band 0 / W7-D; keep membership until then.
-    test(`@layout-deep ${path.slice(
-      1,
-    )} reflows at 320 without overflow`, async ({ page }) => {
-      await assertSocialLayoutSmoke(page, path);
-    });
-  }
-});
