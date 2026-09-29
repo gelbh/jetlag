@@ -1,26 +1,8 @@
 import { useEffect, useState } from "react";
-import { fetchWithTimeout } from "../../services/core/network/fetchWithTimeout";
+import { probeServerTime } from "@/services/core/time/serverClock";
 
 const PROBE_TIMEOUT_MS = 5_000;
-const PROBE_URL = "/health";
 const UNREACHABLE_FAILURE_THRESHOLD = 2;
-
-async function probeReachability(): Promise<boolean> {
-  try {
-    const response = await fetchWithTimeout(
-      PROBE_URL,
-      {
-        method: "HEAD",
-        cache: "no-store",
-      },
-      PROBE_TIMEOUT_MS,
-    );
-
-    return response.ok;
-  } catch {
-    return false;
-  }
-}
 
 export function useReachability(
   enabled: boolean,
@@ -41,7 +23,7 @@ export function useReachability(
     let consecutiveFailures = 0;
 
     const runProbe = async () => {
-      const ok = await probeReachability();
+      const { ok } = await probeServerTime(PROBE_TIMEOUT_MS);
       if (cancelled) {
         return;
       }
