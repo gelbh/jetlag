@@ -202,7 +202,7 @@ describe("CreateSession", () => {
 
     await waitFor(() => {
       expect(startSeaLevelBackgroundSampling).toHaveBeenCalledWith(
-        expect.objectContaining({ type: "Polygon" }),
+        IMPORTED_AREA,
         { regionPackId: undefined },
       );
     });
