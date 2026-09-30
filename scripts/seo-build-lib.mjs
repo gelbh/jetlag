@@ -38,3 +38,84 @@ export function rewritePrerenderPreviewUrls(html, previewOrigin) {
   }
   return html.split(origin).join("");
 }
+
+const HEAD_ASSET_LINK_RELS = new Set(["modulepreload", "stylesheet", "preload"]);
+const HEAD_ASSET_TAG_RE =
+  /<link\b[^>]*>|<script\b[^>]*>[\s\S]*?<\/script(?=[\s/>])[^>]*>/gi;
+
+function attr(tag, name) {
+  const match = tag.match(
+    new RegExp(`\\s${name}\\s*=\\s*(?:"([^"]*)"|'([^']*)'|([^\\s"'>]+))`, "i"),
+  );
+  return match ? (match[1] ?? match[2] ?? match[3]) : undefined;
+}
+
+/** `modulepreload:/assets/x.js` style key, or null when the tag is not a loaded asset. */
+function headAssetKey(tag) {
+  if (/^<link\b/i.test(tag)) {
+    const rel = attr(tag, "rel")?.toLowerCase();
+    const href = attr(tag, "href");
+    return rel && href && HEAD_ASSET_LINK_RELS.has(rel) ? `${rel}:${href}` : null;
+  }
+  const src = attr(tag, "src");
+  return src && attr(tag, "type")?.toLowerCase() === "module"
+    ? `module:${src}`
+    : null;
+}
+
+function splitHead(html) {
+  const start = html.search(/<head\b[^>]*>/i);
+  const end = html.search(/<\/head>/i);
+  if (start < 0 || end < start) {
+    throw new Error("HTML is missing a <head> element");
+  }
+  return { start, end };
+}
+
+function headAssetTags(html) {
+  const { start, end } = splitHead(html);
+  const head = html.slice(start, end);
+  const tags = [];
+  for (const match of head.matchAll(HEAD_ASSET_TAG_RE)) {
+    const key = headAssetKey(match[0]);
+    if (key) tags.push({ key, tag: match[0], index: start + match.index });
+  }
+  return tags;
+}
+
+/**
+ * Loaded-asset tags in `<head>` (`<script type="module" src>`, `<link rel=modulepreload|stylesheet|preload>`)
+ * as `kind:href` keys in document order.
+ */
+export function extractHeadAssetKeys(html) {
+  return headAssetTags(html).map((t) => t.key);
+}
+
+/**
+ * Playwright serializes the live DOM, which includes `<link rel="modulepreload">` (and lazy CSS)
+ * that Vite's `__vitePreload` injected while loading lazy route chunks. Shipping those makes every
+ * visitor fetch the whole app graph before first paint. Replace the snapshot's head asset tags with
+ * the built SPA shell's exact tags so prerendered pages boot the same way `dist/index.html` does.
+ */
+export function restoreTemplateHeadAssets(snapshotHtml, templateHtml) {
+  const templateTags = headAssetTags(templateHtml).map((t) => t.tag);
+  const snapshotTags = headAssetTags(snapshotHtml);
+  const insertAt = snapshotTags[0]?.index ?? splitHead(snapshotHtml).end;
+  if (snapshotTags.length === 0) {
+    return (
+      snapshotHtml.slice(0, insertAt) +
+      templateTags.join("\n    ") +
+      snapshotHtml.slice(insertAt)
+    );
+  }
+  let out = "";
+  let cursor = 0;
+  for (const { tag, index } of snapshotTags) {
+    const gap = snapshotHtml.slice(cursor, index);
+    // Drop indentation left behind between consecutive removed tags.
+    if (index === insertAt || gap.trim()) out += gap;
+    if (index === insertAt) out += templateTags.join("\n    ");
+    cursor = index + tag.length;
+  }
+  return out + snapshotHtml.slice(cursor);
+}
