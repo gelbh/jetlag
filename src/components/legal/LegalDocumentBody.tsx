@@ -1,5 +1,5 @@
 import { Box, Stack, Text } from "@mantine/core";
-import { FileText, Shield } from "@phosphor-icons/react";
+import { FileTextIcon, ShieldIcon } from "@phosphor-icons/react";
 import {
   InsetGroup,
   SectionLabel,
@@ -29,9 +29,9 @@ export function LegalDocumentBody({
     crossLink === "privacy" ? "Terms of Service" : "Privacy Policy";
   const otherIcon =
     crossLink === "privacy" ? (
-      <FileText size={22} weight="regular" />
+      <FileTextIcon size={22} weight="regular" />
     ) : (
-      <Shield size={22} weight="regular" />
+      <ShieldIcon size={22} weight="regular" />
     );
 
   return (
@@ -88,7 +88,7 @@ export function LegalDocumentBody({
             showSeparator
             href={LEGAL_FEEDBACK_URL}
             label="Open a GitHub issue"
-            icon={<FileText size={22} weight="regular" />}
+            icon={<FileTextIcon size={22} weight="regular" />}
           />
         </InsetGroup>
         <Text size="xs" c="var(--color-field-ink-muted)" px={4}>
