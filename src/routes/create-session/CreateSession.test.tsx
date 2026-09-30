@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { MantineProvider } from "@mantine/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -57,11 +57,42 @@ vi.mock("@/services/session/gameAreaPreload", () => ({
   preloadCriticalGameAreaCaches: vi.fn(async () => undefined),
 }));
 
+const startSeaLevelBackgroundSampling = vi.hoisted(() => vi.fn());
 vi.mock("@/services/geo/elevation/seaLevelProgressive", () => ({
-  startSeaLevelBackgroundSampling: vi.fn(),
+  startSeaLevelBackgroundSampling,
 }));
 
+const parseBoundaryFile = vi.hoisted(() => vi.fn());
+vi.mock("@/services/core/capture/kmzImport", () => ({
+  parseBoundaryFile,
+}));
+
+const IMPORTED_AREA = {
+  type: "Polygon" as const,
+  coordinates: [
+    [
+      [-6.3, 53.3],
+      [-6.2, 53.3],
+      [-6.2, 53.4],
+      [-6.3, 53.4],
+      [-6.3, 53.3],
+    ],
+  ],
+};
+
+function importBoundaryFile() {
+  const input = document.querySelector<HTMLInputElement>('input[type="file"]');
+  expect(input).toBeTruthy();
+  const file = new File(["<kml/>"], "dublin.kml", {
+    type: "application/vnd.google-earth.kml+xml",
+  });
+  fireEvent.change(input!, { target: { files: [file] } });
+  return file;
+}
+
 beforeEach(() => {
+  startSeaLevelBackgroundSampling.mockReset();
+  parseBoundaryFile.mockReset();
   isFirebaseConfigured.mockReturnValue(false);
   ensureAnonymousUser.mockResolvedValue({ uid: "host-1" });
   vi.stubGlobal("matchMedia", (query: string) => ({
@@ -153,5 +184,42 @@ describe("CreateSession", () => {
     expect(
       screen.getByRole("button", { name: /confirm game area/i }),
     ).toBeDisabled();
+  });
+
+  it("lazy-loads the boundary parser and starts sea-level sampling on confirm", async () => {
+    parseBoundaryFile.mockResolvedValue(IMPORTED_AREA);
+    renderCreateSession();
+
+    const file = importBoundaryFile();
+    await waitFor(() => {
+      expect(parseBoundaryFile).toHaveBeenCalledWith(file);
+    });
+    await waitFor(() => {
+      expect(screen.getByDisplayValue("dublin.kml")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: /confirm game area/i }));
+
+    await waitFor(() => {
+      expect(startSeaLevelBackgroundSampling).toHaveBeenCalledWith(
+        IMPORTED_AREA,
+        { regionPackId: undefined },
+      );
+    });
+  });
+
+  it("shows friendly copy when the boundary importer chunk fails to load", async () => {
+    parseBoundaryFile.mockRejectedValue(
+      new TypeError(
+        "Failed to fetch dynamically imported module: /assets/kmzImport-x.js",
+      ),
+    );
+    renderCreateSession();
+
+    importBoundaryFile();
+
+    expect(
+      await screen.findByText(/couldn't load the importer/i),
+    ).toBeInTheDocument();
   });
 });
