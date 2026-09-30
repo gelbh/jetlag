@@ -17,6 +17,9 @@ export const mapShellWarmers = {
 export const importCreateSession = () =>
   import("../routes/CreateSession").then((m) => ({ default: m.CreateSession }));
 
+export const importJoinSession = () =>
+  import("../routes/JoinSession").then((m) => ({ default: m.JoinSession }));
+
 export const importGamePresetList = () =>
   import("../routes/GamePresets").then((m) => ({ default: m.GamePresetList }));
 
@@ -65,6 +68,7 @@ export const importAppResumeWatchdog = () =>
 export const routeImporter = {
   importMapScreen,
   importCreateSession,
+  importJoinSession,
   importGamePresetList,
   importGamePresetEditor,
   importStats,
@@ -81,6 +85,7 @@ export const routeImporter = {
 
 export const MapScreenLazy = lazyWithChunkRetry(importMapScreen);
 export const CreateSessionLazy = lazyWithChunkRetry(importCreateSession);
+export const JoinSessionLazy = lazyWithChunkRetry(importJoinSession);
 export const GamePresetListLazy = lazyWithChunkRetry(importGamePresetList);
 export const GamePresetEditorLazy = lazyWithChunkRetry(importGamePresetEditor);
 export const StatsLazy = lazyWithChunkRetry(importStats);

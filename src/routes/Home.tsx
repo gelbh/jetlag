@@ -27,33 +27,20 @@ import { EntryAsyncButton } from "@/components/ui/entry/EntryAsyncButton";
 import { filledStyles } from "@/components/ui/entry/entryStyles";
 import { InsetRow } from "@/components/ui/entry/InsetRow";
 import { AppLogo } from "@/components/ui/brand/AppLogo";
-import { BootSplash } from "@/components/ui/feedback/BootSplash";
 import { EntryScreenLayout } from "@/components/ui/layout/EntryScreenLayout";
 import { VersionChangelogSheet } from "@/components/ui/sheets/VersionChangelogSheet";
 import { APP_VERSION } from "@/domain/device/changelog";
 import { LEGAL_APP_NAME } from "@/domain/legal/legalContact";
 import { playerRoleLabel } from "@/domain/session/players/playerRole";
-import { useAuthBootstrapReady } from "@/hooks/app/useAuthBootstrapReady";
 import { useContinueActiveSession } from "@/hooks/session/useContinueActiveSession";
-import { useRouteTransition } from "@/navigation/useRouteTransition";
-import { isFirebaseConfigured } from "@/services/core/firebase/firebase";
+import { isFirebaseConfigured } from "@/services/core/firebase/authBootstrapState";
 import { PHONE_SHELL_MAX_WIDTH_PX } from "@/theme/phoneShell";
 
 export function Home() {
   const { session, myRole, continueError, continuing, handleContinue } =
     useContinueActiveSession();
-  const authBootstrapReady = useAuthBootstrapReady();
-  const { phase: routeTransitionPhase } = useRouteTransition();
   const showPremium = isFirebaseConfigured();
   const [changelogOpen, setChangelogOpen] = useState(false);
-
-  if (
-    isFirebaseConfigured() &&
-    !authBootstrapReady &&
-    routeTransitionPhase === "idle"
-  ) {
-    return <BootSplash label="Starting…" />;
-  }
 
   return (
     <>
