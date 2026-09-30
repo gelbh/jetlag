@@ -7,7 +7,7 @@ interface AppErrorBoundaryProps {
 }
 
 interface AppErrorBoundaryState {
-  error: Error | null;
+  hasError: boolean;
 }
 
 /**
@@ -18,10 +18,11 @@ export class AppErrorBoundary extends Component<
   AppErrorBoundaryProps,
   AppErrorBoundaryState
 > {
-  state: AppErrorBoundaryState = { error: null };
+  state: AppErrorBoundaryState = { hasError: false };
 
-  static getDerivedStateFromError(error: Error): AppErrorBoundaryState {
-    return { error };
+  // Flag, not the thrown value: a thrown `undefined`/`null` must still show the fallback.
+  static getDerivedStateFromError(): AppErrorBoundaryState {
+    return { hasError: true };
   }
 
   componentDidCatch(error: Error, info: ErrorInfo): void {
@@ -29,7 +30,7 @@ export class AppErrorBoundary extends Component<
   }
 
   render(): ReactNode {
-    if (this.state.error) {
+    if (this.state.hasError) {
       return this.props.fallback;
     }
     return this.props.children;

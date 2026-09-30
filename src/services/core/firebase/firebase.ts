@@ -28,7 +28,6 @@ import {
 import {
   clientEnvUsesFirebaseEmulator,
   getClientEnv,
-  isFirebaseConfiguredFromEnv,
   readFirebaseConfigFromEnv,
 } from "@/config/env";
 import {
@@ -39,12 +38,14 @@ import {
 } from "../analytics/lazyTelemetry";
 import { isRecaptchaAlreadyRenderedError } from "./appCheckErrors";
 import {
+  isFirebaseConfigured,
   markAuthBootstrapReady,
   resetAuthBootstrapStateForTests,
 } from "./authBootstrapState";
 
 export {
   isAuthBootstrapReady,
+  isFirebaseConfigured,
   subscribeAuthBootstrapReady,
 } from "./authBootstrapState";
 
@@ -79,10 +80,6 @@ export function isFirestorePersistenceUnavailable(): boolean {
 
 function readConfig() {
   return readFirebaseConfigFromEnv();
-}
-
-export function isFirebaseConfigured(): boolean {
-  return isFirebaseConfiguredFromEnv();
 }
 
 let authEmulatorConnected = false;

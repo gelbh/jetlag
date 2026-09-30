@@ -19,12 +19,19 @@ let analyticsModule: Promise<typeof import("./analytics")> | undefined;
 let sentryModule: Promise<typeof import("./sentry")> | undefined;
 
 function loadAnalytics(): Promise<typeof import("./analytics")> {
-  analyticsModule ??= import("./analytics");
+  analyticsModule ??= import("./analytics").catch((error: unknown) => {
+    // Let a later call retry after a transient chunk-load failure.
+    analyticsModule = undefined;
+    throw error;
+  });
   return analyticsModule;
 }
 
 function loadSentry(): Promise<typeof import("./sentry")> {
-  sentryModule ??= import("./sentry");
+  sentryModule ??= import("./sentry").catch((error: unknown) => {
+    sentryModule = undefined;
+    throw error;
+  });
   return sentryModule;
 }
 

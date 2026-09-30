@@ -25,10 +25,15 @@ function loadPermanentAuthDeps(): Promise<PermanentAuthDeps> {
       waitForPermanentAuthReady: authReady.waitForPermanentAuthReady,
     };
     return loadedDeps;
+  }).catch((error: unknown) => {
+    // Don't cache a transient chunk-load failure: the next mount retries.
+    depsPromise = null;
+    throw error;
   });
   return depsPromise;
 }
 
+// Local copy of accountAuth.isPermanentUser: that module statically imports firebase/auth.
 function isPermanentUser(user: User | null): boolean {
   return user != null && !user.isAnonymous;
 }
@@ -70,7 +75,12 @@ export function usePermanentAuthUser(): {
           setUser(nextUser);
         });
       })
-      .catch(() => {});
+      .catch(() => {
+        // Fail open like waitForPermanentAuthReady's timeout: never hang readiness.
+        if (!cancelled) {
+          setAuthReady(true);
+        }
+      });
 
     return () => {
       cancelled = true;

@@ -349,8 +349,11 @@ describe("routeLoadingSteps", () => {
     ]);
   });
 
-  it("uses a single open step for join", () => {
-    expect(resolveLoadingSteps("/join")).toEqual(["open-screen"]);
+  it("downloads the lazy join chunk before opening it", () => {
+    expect(resolveLoadingSteps("/join")).toEqual([
+      "download-screen",
+      "open-screen",
+    ]);
   });
 
   it("opens Home without waiting on sign-in", () => {

@@ -141,8 +141,9 @@ function main() {
     console.log(
       `  CSS total ${cssKb.toFixed(1)} KB (limit ${limits.cssKb} KB)`,
     );
+    // Fail closed: a moved/renamed App.tsx must not silently drop the App walk.
     if (!appChecked)
-      console.warn(`  (no ${APP_CHUNK_KEY} chunk in manifest; App walk skipped)`);
+      violations.push(`no ${APP_CHUNK_KEY} chunk in manifest; App walk skipped`);
     if (violations.length) {
       console.error("Entry budget violations:");
       for (const v of violations) console.error(`  - ${v}`);

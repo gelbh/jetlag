@@ -52,9 +52,7 @@ export function RouteReadinessSensor() {
       {kind === "admin-auth" ? <AdminAuthReadiness /> : null}
       {kind === "premium" ? <PremiumReadiness /> : null}
       {kind === "layout" ? <ScreenReadyReporter ready /> : null}
-      {kind === "premium" || isPublicShellPath(pathname) ? null : (
-        <PremiumEntitlementsSync />
-      )}
+      {isPublicShellPath(pathname) ? null : <PremiumEntitlementsSync />}
     </>
   );
 }

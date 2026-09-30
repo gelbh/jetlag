@@ -69,7 +69,7 @@ function startDeferredAuthBootstrap(appRendered: Promise<void>): void {
   // first App paint, `load`, and idle. First-need callers (ensureAnonymousUser,
   // waitForAuthStateReady) still start it early.
   if (isPublicShellPath(window.location.pathname)) {
-    void appRendered.finally(() => {
+    void appRendered.catch(() => {}).finally(() => {
       scheduleAfterFirstPaint(() => {
         scheduleWhenIdleAfterLoad(start);
       });

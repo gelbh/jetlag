@@ -76,7 +76,7 @@ function baseStepsForPath(normalizedPath: string): RouteLoadingStepId[] {
     case "/create":
       return ["download-screen", "open-screen"];
     case "/join":
-      return ["open-screen"];
+      return ["download-screen", "open-screen"];
     case "/presets":
     case "/presets/new":
     case "/presets/:id/edit":
