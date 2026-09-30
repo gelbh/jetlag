@@ -65,6 +65,7 @@ import {
 import { setPremiumApiContext } from "../../services/core/auth/premiumApiContext";
 import { emitSessionStartedActivity } from "../../services/session/emitSessionActivity";
 import { unionGameAreas } from "../../domain/geometry/masks/unionGameAreas";
+import { isChunkLoadError } from "../../domain/device/updates/chunkLoadRecovery";
 import { gamePresetToCreateSessionDraft } from "../../domain/session/presets/gamePreset";
 import { useGamePresetStore } from "../../state/gamePresetStore";
 import {
@@ -504,7 +505,7 @@ export function useCreateSession() {
     setError(null);
 
     try {
-      // Dynamic: boundary import libs (~60 KB gz) stay off the /create route chunk.
+      // Dynamic: jszip / @xmldom/xmldom / @tmcw/togeojson stay off the /create route chunk.
       const { parseBoundaryFile } = await import(
         "../../services/core/capture/kmzImport"
       );
@@ -512,9 +513,11 @@ export function useCreateSession() {
       applyImportedBoundary(gameArea, file.name);
     } catch (nextError) {
       setError(
-        nextError instanceof Error
-          ? nextError.message
-          : "Could not import boundary file.",
+        isChunkLoadError(nextError)
+          ? "Couldn't load the importer. Check your connection and try again."
+          : nextError instanceof Error
+            ? nextError.message
+            : "Could not import boundary file.",
       );
     } finally {
       setImportLoading(false);
@@ -763,7 +766,7 @@ export function useCreateSession() {
             startSeaLevelBackgroundSampling(gameArea, { regionPackId });
           })
           .catch(() => {
-            // Best-effort background sampling; /map resamples on demand.
+            // Head start only; /map restarts sampling on mount (deduped).
           });
         void preloadCriticalGameAreaCaches(
           gameArea,
