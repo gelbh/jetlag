@@ -21,8 +21,6 @@ export function clearRouteWarmStateForTests(): void {
 
 export function getSyncRouteReady(pathname: string): boolean {
   switch (routeReadinessKind(pathname)) {
-    case "auth-bootstrap":
-      return !isFirebaseConfigured() || isAuthBootstrapReady();
     case "play-area":
       return isPlayAreaReadySync(useSessionStore.getState().session);
     case "admin-auth":

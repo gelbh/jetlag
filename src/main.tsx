@@ -8,6 +8,8 @@ import {
   scheduleAfterFirstPaint,
 } from "./domain/device/perf/scheduleAfterFirstPaint.ts";
 import { PWA_MARK_NAV, markPlayDay } from "./domain/device/perf/playDayMarks.ts";
+import { isPublicShellPath } from "./domain/device/perf/publicShellPaths.ts";
+import { scheduleWhenIdleAfterLoad } from "./domain/device/perf/scheduleWhenIdleAfterLoad.ts";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { markStandaloneShellClass } from "./domain/device/pwa/markStandaloneShellClass";
@@ -40,9 +42,9 @@ function scheduleDeferredObservability(): void {
   });
 }
 
-function renderApp() {
+function renderApp(): Promise<void> {
   markPlayDay(PWA_MARK_NAV);
-  void import("./App.tsx").then(({ default: App }) => {
+  return import("./App.tsx").then(({ default: App }) => {
     createRoot(document.getElementById("root")!).render(
       <StrictMode>
         <App />
@@ -51,14 +53,30 @@ function renderApp() {
   });
 }
 
-function startDeferredAuthBootstrap(): void {
-  void import("./services/core/firebase/firebase.ts").then(
-    ({ isFirebaseConfigured, startAuthBootstrap }) => {
-      if (isFirebaseConfigured()) {
-        startAuthBootstrap();
-      }
-    },
-  );
+function startDeferredAuthBootstrap(appRendered: Promise<void>): void {
+  const start = () => {
+    void import("./services/core/firebase/firebase.ts").then(
+      ({ isFirebaseConfigured, startAuthBootstrap }) => {
+        if (isFirebaseConfigured()) {
+          startAuthBootstrap();
+        }
+      },
+    );
+  };
+
+  // Public shells need no auth to render; starting Firebase Auth there pulls
+  // the gapi iframe + App Check reCAPTCHA onto the LCP path, so wait for the
+  // first App paint, `load`, and idle. First-need callers (ensureAnonymousUser,
+  // waitForAuthStateReady) still start it early.
+  if (isPublicShellPath(window.location.pathname)) {
+    void appRendered.finally(() => {
+      scheduleAfterFirstPaint(() => {
+        scheduleWhenIdleAfterLoad(start);
+      });
+    });
+    return;
+  }
+  start();
 }
 
 void unregisterDevServiceWorkers().then((cleared) => {
@@ -67,7 +85,6 @@ void unregisterDevServiceWorkers().then((cleared) => {
     return;
   }
 
-  renderApp();
-  startDeferredAuthBootstrap();
+  startDeferredAuthBootstrap(renderApp());
   scheduleDeferredObservability();
 });

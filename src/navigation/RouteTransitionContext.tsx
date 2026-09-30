@@ -62,8 +62,6 @@ function toRevealDirection(
 
 function loadingReasonForPath(pathname: string): RouteLoadingReason {
   switch (routeReadinessKind(pathname)) {
-    case "auth-bootstrap":
-      return "sign-in";
     case "play-area":
       return "map";
     case "admin-auth":

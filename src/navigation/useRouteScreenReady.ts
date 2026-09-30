@@ -1,11 +1,9 @@
 import { usePremiumEntitlements } from "../hooks/billing/usePremiumEntitlements";
 import { usePermanentAuthUser } from "../hooks/billing/usePermanentAuthUser";
-import { useAuthBootstrapReady } from "../hooks/app/useAuthBootstrapReady";
 import { usePlayAreaReady } from "../hooks/session/usePlayAreaReady";
 import { useSessionStore } from "../state/sessionStore";
 
 export type RouteReadinessKind =
-  | "auth-bootstrap"
   | "play-area"
   | "admin-auth"
   | "premium"
@@ -13,8 +11,6 @@ export type RouteReadinessKind =
 
 export function routeReadinessKind(pathname: string): RouteReadinessKind {
   switch (pathname) {
-    case "/":
-      return "auth-bootstrap";
     case "/map":
       return "play-area";
     case "/admin":
@@ -26,23 +22,19 @@ export function routeReadinessKind(pathname: string): RouteReadinessKind {
   }
 }
 
-export function useRouteScreenReady(pathname: string): boolean {
-  const authBootstrapReady = useAuthBootstrapReady();
-  const session = useSessionStore((state) => state.session);
-  const playAreaReady = usePlayAreaReady(session);
-  const { authReady } = usePermanentAuthUser();
-  const { loading: premiumLoading } = usePremiumEntitlements();
+// One hook per readiness kind: RouteReadinessSensor mounts only the current
+// kind's hook, so auth/entitlement hooks (which start Firebase Auth) do not
+// run on public shells like `/`.
 
-  switch (routeReadinessKind(pathname)) {
-    case "auth-bootstrap":
-      return authBootstrapReady;
-    case "play-area":
-      return playAreaReady;
-    case "admin-auth":
-      return authReady;
-    case "premium":
-      return !premiumLoading;
-    case "layout":
-      return true;
-  }
+export function usePlayAreaScreenReady(): boolean {
+  const session = useSessionStore((state) => state.session);
+  return usePlayAreaReady(session);
+}
+
+export function useAdminAuthScreenReady(): boolean {
+  return usePermanentAuthUser().authReady;
+}
+
+export function usePremiumScreenReady(): boolean {
+  return !usePremiumEntitlements().loading;
 }

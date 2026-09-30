@@ -22,6 +22,7 @@ import {
 import { setServiceWorkerChunkReloadContext } from "@/domain/device/updates/lazyWithChunkRetry";
 import { tryUpdateServiceWorker } from "@/domain/device/updates/serviceWorkerUpdate";
 import { compareAppVersions } from "@/domain/session/meta/sessionVersion";
+import { useAuthBootstrapReady } from "@/hooks/app/useAuthBootstrapReady";
 import { useHotfixGraceReload } from "@/hooks/app/useHotfixGraceReload";
 import { isFirebaseConfigured } from "@/services/core/firebase/authBootstrapState";
 import { DEFAULT_HOTFIX_GRACE_SECONDS } from "@/services/firestore/appConfigRuntimeDefaults";
@@ -69,8 +70,13 @@ export function AppUpdateProvider({ children }: { children: ReactNode }) {
     pathname: location.pathname,
   });
 
+  // Wait for auth bootstrap: a restored user is attached before the appConfig
+  // read (rules need sign-in), and Firestore stays off the boot path on public
+  // shells, where main.tsx starts auth only once the page is idle.
+  const authBootstrapReady = useAuthBootstrapReady();
+
   useEffect(() => {
-    if (!isFirebaseConfigured()) {
+    if (!isFirebaseConfigured() || !authBootstrapReady) {
       return;
     }
 
@@ -96,7 +102,7 @@ export function AppUpdateProvider({ children }: { children: ReactNode }) {
       cancelled = true;
       unsubscribe?.();
     };
-  }, []);
+  }, [authBootstrapReady]);
 
   const effectiveRuntimeConfig = isFirebaseConfigured() ? runtimeConfig : null;
 

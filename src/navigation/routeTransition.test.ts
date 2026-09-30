@@ -155,13 +155,13 @@ describe("preloadRoute", () => {
 
 describe("routeReadinessKind", () => {
   it("maps primary screens to readiness signals", () => {
-    expect(routeReadinessKind("/")).toBe("auth-bootstrap");
     expect(routeReadinessKind("/map")).toBe("play-area");
     expect(routeReadinessKind("/admin")).toBe("admin-auth");
     expect(routeReadinessKind("/premium")).toBe("premium");
   });
 
   it("uses layout readiness for secondary routes", () => {
+    expect(routeReadinessKind("/")).toBe("layout");
     expect(routeReadinessKind("/join")).toBe("layout");
     expect(routeReadinessKind("/create")).toBe("layout");
     expect(routeReadinessKind("/presets")).toBe("layout");
@@ -240,12 +240,9 @@ describe("getSyncRouteReady", () => {
     });
   });
 
-  it("mirrors useRouteScreenReady for auth-bootstrap and layout routes", () => {
+  it("treats Home and layout routes as ready before auth bootstrap", () => {
     vi.spyOn(firebase, "isFirebaseConfigured").mockReturnValue(true);
     vi.spyOn(firebase, "isAuthBootstrapReady").mockReturnValue(false);
-    expect(getSyncRouteReady("/")).toBe(false);
-
-    vi.spyOn(firebase, "isAuthBootstrapReady").mockReturnValue(true);
     expect(getSyncRouteReady("/")).toBe(true);
     expect(getSyncRouteReady("/create")).toBe(true);
   });
@@ -354,6 +351,10 @@ describe("routeLoadingSteps", () => {
 
   it("uses a single open step for join", () => {
     expect(resolveLoadingSteps("/join")).toEqual(["open-screen"]);
+  });
+
+  it("opens Home without waiting on sign-in", () => {
+    expect(resolveLoadingSteps("/")).toEqual(["open-screen"]);
   });
 
   it("computes progress from the first incomplete step", () => {
