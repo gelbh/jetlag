@@ -86,7 +86,7 @@ describe("firestoreAnnotations emulator", () => {
       "medium",
       {},
       "imperial",
-      "0.99.0",
+      "99.0.0",
     );
 
     await teardownEmulatorsForTests();
