@@ -19,7 +19,7 @@ const message: SessionMessageRecord = {
 };
 
 describe("SocialChatTab", () => {
-  it("shows Waiting to send on messages not yet acked", () => {
+  it("shows Waiting to send on messages not yet acked", async () => {
     renderWithAppUi(
       <SocialChatTab
         messages={[{ ...message, pendingSync: true }]}
@@ -30,7 +30,10 @@ describe("SocialChatTab", () => {
     );
 
     expect(screen.getByText("On the tram")).toBeInTheDocument();
-    expect(screen.getByText("Waiting to send")).toBeInTheDocument();
+    expect(screen.queryByText("Waiting to send")).not.toBeInTheDocument();
+    expect(
+      await screen.findByText("Waiting to send", {}, { timeout: 2000 }),
+    ).toBeInTheDocument();
   });
 
   it("hides the badge for acked messages", () => {

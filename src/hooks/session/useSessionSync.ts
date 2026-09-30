@@ -23,6 +23,9 @@ import { resolvePlayerRole } from "../../domain/session/players/playerRole";
 import { trackRestoredWrites } from "@/services/firestore/commitWrite";
 
 
+/** How long a cache-served session doc may stand before the rail says "last known state". */
+export const SESSION_STALE_GRACE_MS = 1500;
+
 export interface UseSessionSyncOptions {
   syncEnabled?: boolean;
 }
@@ -59,6 +62,8 @@ export function useSessionSync({ syncEnabled = true }: UseSessionSyncOptions = {
       return;
     }
 
+    const setSessionFromCache = useSessionStore.getState().setSessionFromCache;
+    let staleTimer: ReturnType<typeof setTimeout> | undefined;
     const unsubscribe = subscribeToSession(
       session.id,
       (remoteSession) => {
@@ -82,13 +87,26 @@ export function useSessionSync({ syncEnabled = true }: UseSessionSyncOptions = {
           error instanceof Error ? error.message : "Session sync failed.",
         );
       },
-      (metadata) =>
-        useSessionStore.getState().setSessionFromCache(metadata.fromCache),
+      (metadata) => {
+        // Cold start / resume always serves the cache first; only call it
+        // stale if the server snapshot hasn't replaced it within the grace.
+        if (!metadata.fromCache) {
+          clearTimeout(staleTimer);
+          staleTimer = undefined;
+          setSessionFromCache(false);
+        } else if (staleTimer === undefined) {
+          staleTimer = setTimeout(
+            () => setSessionFromCache(true),
+            SESSION_STALE_GRACE_MS,
+          );
+        }
+      },
     );
 
     return () => {
+      clearTimeout(staleTimer);
       unsubscribe();
-      useSessionStore.getState().setSessionFromCache(false);
+      setSessionFromCache(false);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- resubscribe on session id only
   }, [myUid, session?.id, setLastSyncError, setSession, syncEnabled]);

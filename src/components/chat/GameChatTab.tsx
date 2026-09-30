@@ -271,6 +271,9 @@ export function GameChatTab({
                 answeredPendingIds?.has(message.pendingQuestionId)
               );
 
+            const rowPendingSync = Boolean(
+              message.pendingSync || pending?.pendingSync,
+            );
             const answerText = answerDisplayText(message);
             const showAnswerBox = closed && answerText != null;
 
@@ -438,7 +441,7 @@ export function GameChatTab({
                         Answered late. Card draw forfeited.
                       </Text>
                     ) : null}
-                    {!isHider && !walking ? (
+                    {!isHider && !walking && !rowPendingSync ? (
                       <Text size="xs" c="var(--color-field-ink)">
                         Waiting for hider…
                       </Text>
@@ -466,7 +469,7 @@ export function GameChatTab({
                     Dismiss question
                   </Button>
                 ) : null}
-                {message.pendingSync || pending?.pendingSync ? (
+                {rowPendingSync ? (
                   <Box mt={6}>
                     <PendingSyncBadge />
                   </Box>

@@ -31,7 +31,9 @@ export function SyncPanel({
           ? "Offline"
           : status === "degraded"
             ? "Unstable"
-            : "OK",
+            : status === "stale"
+              ? "Cached"
+              : "OK",
     },
     { label: "Last error", value: lastSyncError ?? "—" },
     { label: "Remote notice", value: remoteUpdateNotice ?? "—" },

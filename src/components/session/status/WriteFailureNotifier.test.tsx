@@ -42,4 +42,19 @@ describe("WriteFailureNotifier", () => {
     );
     expect(Object.values(useWriteLedgerStore.getState().entries)).toHaveLength(1);
   });
+
+  it("collapses several rejections into one toast", () => {
+    render(<WriteFailureNotifier />);
+    act(() => {
+      const { begin, fail } = useWriteLedgerStore.getState();
+      fail(begin("chat.send"), "a");
+      fail(begin("question.ask"), "b");
+    });
+
+    expect(showEphemeralPlayerNotification).toHaveBeenCalledTimes(1);
+    expect(showEphemeralPlayerNotification).toHaveBeenCalledWith(
+      expect.objectContaining({ title: "2 changes didn't sync" }),
+    );
+    expect(useWriteLedgerStore.getState().entries).toEqual({});
+  });
 });

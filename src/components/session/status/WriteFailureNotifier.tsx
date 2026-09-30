@@ -11,11 +11,11 @@ const LABEL_COPY: Record<WriteLabel, string> = {
   "chat.send": "Your message",
   "question.ask": "Your question",
   "question.answer": "Your answer",
-  "question.cancel": "Question cancel",
-  "endgame.start": "End Game start",
-  "found.request": "Found-hider request",
-  "found.confirm": "Found-hider confirmation",
-  "found.decline": "Found-hider decline",
+  "question.cancel": "Cancelling your question",
+  "endgame.start": "Starting the End Game",
+  "found.request": "Your found request",
+  "found.confirm": "Confirming the find",
+  "found.decline": "Declining the find",
   "timetrap.place": "Time trap",
   "economy.update": "Card change",
   "session.end": "Ending the game",
@@ -32,13 +32,20 @@ export function WriteFailureNotifier() {
   const remove = useWriteLedgerStore((state) => state.remove);
 
   useEffect(() => {
+    if (failed.length === 0) {
+      return;
+    }
+    // A reconnect can reject several queued writes at once: one toast, not a stack.
+    const [first] = failed;
+    showEphemeralPlayerNotification({
+      id: `write-failed:${first!.id}`,
+      title:
+        failed.length === 1
+          ? `${LABEL_COPY[first!.label]} didn't sync`
+          : `${failed.length} changes didn't sync`,
+      message: "The game didn't accept it. Check the current state and try again.",
+    });
     for (const entry of failed) {
-      showEphemeralPlayerNotification({
-        id: `write-failed:${entry.id}`,
-        title: `${LABEL_COPY[entry.label]} didn't sync`,
-        message:
-          "The game rejected it after reconnecting. Check the current state and try again.",
-      });
       remove(entry.id);
     }
   }, [failed, remove]);

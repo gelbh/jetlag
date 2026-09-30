@@ -145,7 +145,7 @@ describe("GameChatTab", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("marks question rows waiting for server ack", () => {
+  it("marks question rows waiting for server ack (and drops Waiting for hider)", async () => {
     renderWithAppUi(
       <GameChatTab
         messages={[{ ...questionMessage, pendingSync: true }]}
@@ -158,7 +158,11 @@ describe("GameChatTab", () => {
       />,
     );
 
-    expect(screen.getByText("Waiting to send")).toBeInTheDocument();
+    expect(screen.queryByText("Waiting to send")).not.toBeInTheDocument();
+    expect(
+      await screen.findByText("Waiting to send", {}, { timeout: 2000 }),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("Waiting for hider…")).not.toBeInTheDocument();
   });
 
   it("omits the pending badge once acked", () => {
