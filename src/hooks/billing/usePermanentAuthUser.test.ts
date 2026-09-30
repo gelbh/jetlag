@@ -54,3 +54,34 @@ describe("usePermanentAuthUser", () => {
     expect(result.current.user).toMatchObject({ uid: "google-1" });
   });
 });
+
+describe("usePermanentAuthUser lazy deps failure", () => {
+  it("fails open and retries the dependency load on the next mount", async () => {
+    vi.resetModules();
+    let failLoad = true;
+    vi.doMock("../../services/core/firebase/firebaseAuthReady", () => {
+      if (failLoad) {
+        throw new Error("chunk load failed");
+      }
+      return { waitForPermanentAuthReady };
+    });
+    const { usePermanentAuthUser: freshHook } = await import(
+      "./usePermanentAuthUser"
+    );
+
+    const first = renderHook(() => freshHook());
+    await waitFor(() => {
+      expect(first.result.current.authReady).toBe(true);
+    });
+    expect(first.result.current.user).toBeNull();
+    first.unmount();
+
+    failLoad = false;
+    const second = renderHook(() => freshHook());
+    await waitFor(() => {
+      expect(second.result.current.user).toMatchObject({ uid: "google-1" });
+    });
+    expect(waitForPermanentAuthReady).toHaveBeenCalled();
+    vi.doUnmock("../../services/core/firebase/firebaseAuthReady");
+  });
+});

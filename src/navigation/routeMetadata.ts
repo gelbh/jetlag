@@ -4,6 +4,7 @@ const ADMIN_PATH_RE = /^\/admin(?:\/|$)/;
 const LAZY_ROUTE_PATHS = new Set([
   "/map",
   "/create",
+  "/join",
   "/presets",
   "/presets/new",
   "/presets/:id/edit",
@@ -38,6 +39,7 @@ export function isLazyRoute(path: string): boolean {
 export type LazyRouteLoaderKey =
   | "importMapScreen"
   | "importCreateSession"
+  | "importJoinSession"
   | "importGamePresetList"
   | "importGamePresetEditor"
   | "importAdminOpsDesk"
@@ -59,6 +61,8 @@ export function lazyRouteLoaderKey(path: string): LazyRouteLoaderKey | undefined
       return "importMapScreen";
     case "/create":
       return "importCreateSession";
+    case "/join":
+      return "importJoinSession";
     case "/presets":
       return "importGamePresetList";
     case "/presets/new":

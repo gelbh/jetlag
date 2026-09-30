@@ -22,13 +22,11 @@ import {
 import { setServiceWorkerChunkReloadContext } from "@/domain/device/updates/lazyWithChunkRetry";
 import { tryUpdateServiceWorker } from "@/domain/device/updates/serviceWorkerUpdate";
 import { compareAppVersions } from "@/domain/session/meta/sessionVersion";
+import { useAuthBootstrapReady } from "@/hooks/app/useAuthBootstrapReady";
 import { useHotfixGraceReload } from "@/hooks/app/useHotfixGraceReload";
-import { isFirebaseConfigured } from "@/services/core/firebase/firebase";
-import {
-  DEFAULT_HOTFIX_GRACE_SECONDS,
-  subscribeAppConfigRuntime,
-  type AppConfigRuntime,
-} from "@/services/firestore/firestoreIncidents";
+import { isFirebaseConfigured } from "@/services/core/firebase/authBootstrapState";
+import { DEFAULT_HOTFIX_GRACE_SECONDS } from "@/services/firestore/appConfigRuntimeDefaults";
+import type { AppConfigRuntime } from "@/services/firestore/firestoreIncidents";
 import { useSessionStore } from "@/state/sessionStore";
 import {
   AppUpdateContext,
@@ -72,15 +70,39 @@ export function AppUpdateProvider({ children }: { children: ReactNode }) {
     pathname: location.pathname,
   });
 
+  // Wait for auth bootstrap: a restored user is attached before the appConfig
+  // read (rules need sign-in), and Firestore stays off the boot path on public
+  // shells, where main.tsx starts auth only once the page is idle.
+  const authBootstrapReady = useAuthBootstrapReady();
+
   useEffect(() => {
-    if (!isFirebaseConfigured()) {
+    if (!isFirebaseConfigured() || !authBootstrapReady) {
       return;
     }
 
-    return subscribeAppConfigRuntime(setRuntimeConfig, () => {
-      setRuntimeConfig(null);
-    });
-  }, []);
+    let cancelled = false;
+    let unsubscribe: (() => void) | undefined;
+    // Dynamic: keeps firestore off the App chunk's static graph.
+    void import("@/services/firestore/firestoreIncidents")
+      .then(({ subscribeAppConfigRuntime }) => {
+        if (cancelled) {
+          return;
+        }
+        unsubscribe = subscribeAppConfigRuntime(setRuntimeConfig, () => {
+          setRuntimeConfig(null);
+        });
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setRuntimeConfig(null);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+      unsubscribe?.();
+    };
+  }, [authBootstrapReady]);
 
   const effectiveRuntimeConfig = isFirebaseConfigured() ? runtimeConfig : null;
 

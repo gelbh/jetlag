@@ -2,8 +2,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { APP_VERSION } from "@/domain/device/changelog";
 import { isBelowClientMinVersion } from "@/domain/device/clientMinVersion";
 import { useAuthBootstrapReady } from "@/hooks/app/useAuthBootstrapReady";
-import { isFirebaseConfigured } from "@/services/core/firebase/firebase";
-import { subscribeClientMinVersion } from "@/services/firestore/clientMinVersion";
+import { isFirebaseConfigured } from "@/services/core/firebase/authBootstrapState";
 import { ClientUpdateRequiredPage } from "./ClientUpdateRequiredPage";
 
 /**
@@ -24,23 +23,37 @@ export function ClientMinVersionGate({ children }: { children: ReactNode }) {
     }
 
     let cancelled = false;
-    const unsubscribe = subscribeClientMinVersion(
-      (next) => {
-        if (!cancelled) {
-          setMinVersion(next);
+    let unsubscribe: (() => void) | undefined;
+    // Dynamic: keeps firestore off the App chunk's static graph.
+    void import("@/services/firestore/clientMinVersion")
+      .then(({ subscribeClientMinVersion }) => {
+        if (cancelled) {
+          return;
         }
-      },
-      () => {
-        // Fail-open on read errors when we cannot confirm a floor.
+        unsubscribe = subscribeClientMinVersion(
+          (next) => {
+            if (!cancelled) {
+              setMinVersion(next);
+            }
+          },
+          () => {
+            // Fail-open on read errors when we cannot confirm a floor.
+            if (!cancelled) {
+              setMinVersion(null);
+            }
+          },
+        );
+      })
+      .catch(() => {
+        // Fail-open when the listener chunk cannot load.
         if (!cancelled) {
           setMinVersion(null);
         }
-      },
-    );
+      });
 
     return () => {
       cancelled = true;
-      unsubscribe();
+      unsubscribe?.();
     };
   }, [authReady, firebaseReady]);
 
