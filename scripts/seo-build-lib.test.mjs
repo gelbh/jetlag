@@ -129,3 +129,10 @@ test("quoted `>` inside attributes does not split a tag", () => {
   assert.deepEqual(extractHeadAssetKeys(out), extractHeadAssetKeys(template));
   assert.ok(!out.includes("600px"));
 });
+
+test("inline module bodies with src-like text are kept", () => {
+  const inline = `<script type="module">document.body.insertAdjacentHTML("beforeend", '<img src="/x.png">')</script>`;
+  const html = `<head>${inline}<link rel="modulepreload" href="/x.js"></head>`;
+  assert.deepEqual(extractHeadAssetKeys(html), ["modulepreload:/x.js"]);
+  assert.ok(restoreTemplateHeadAssets(html, template).includes(inline));
+});

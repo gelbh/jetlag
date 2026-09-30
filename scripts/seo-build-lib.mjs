@@ -64,7 +64,9 @@ function attr(tag, name) {
 }
 
 /** `modulepreload:/assets/x.js` style key, or null when the tag is not a loaded asset. */
-function headAssetKey(tag) {
+function headAssetKey(fullTag) {
+  // Read attributes from the opening tag only, never from an inline script body.
+  const tag = fullTag.match(new RegExp(String.raw`^<\w+${TAG_ATTRS}>`))[0];
   if (/^<link\b/i.test(tag)) {
     const rel = attr(tag, "rel")?.toLowerCase();
     const href = attr(tag, "href");
