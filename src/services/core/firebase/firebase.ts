@@ -32,12 +32,12 @@ import {
   readFirebaseConfigFromEnv,
 } from "@/config/env";
 import {
-  captureAuthBootstrapFailure,
-  captureAuthPersistenceFallback,
-  setBootstrapTag,
-} from "../analytics/sentry";
+  captureAuthBootstrapFailureLazy,
+  captureAuthPersistenceFallbackLazy,
+  setBootstrapTagLazy,
+  syncAnalyticsIdentityLazy,
+} from "../analytics/lazyTelemetry";
 import { isRecaptchaAlreadyRenderedError } from "./appCheckErrors";
-import { syncAnalyticsIdentity } from "../analytics/analytics";
 
 export async function getFirebaseStorage(): Promise<
   import("firebase/storage").FirebaseStorage
@@ -274,12 +274,12 @@ async function configureAuthPersistence(
     try {
       await setPersistence(firebaseAuth, attempt.persistence);
       if (index > 0 && attempt.mode !== "local") {
-        captureAuthPersistenceFallback(attempt.mode);
+        captureAuthPersistenceFallbackLazy(attempt.mode);
       }
       return attempt.mode;
     } catch (error) {
       if (index === attempts.length - 1) {
-        captureAuthPersistenceFallback("memory", error);
+        captureAuthPersistenceFallbackLazy("memory", error);
         throw error;
       }
     }
@@ -290,10 +290,10 @@ async function configureAuthPersistence(
 
 async function bootstrapAuthState(): Promise<void> {
   const firebaseAuth = getFirebaseAuth();
-  setBootstrapTag("auth_start");
+  setBootstrapTagLazy("auth_start");
 
   const persistenceMode = await configureAuthPersistence(firebaseAuth);
-  setBootstrapTag(`auth_persistence_${persistenceMode}`);
+  setBootstrapTagLazy(`auth_persistence_${persistenceMode}`);
 
   const { completeOAuthRedirectIfPending } = await import("../auth/accountAuth");
 
@@ -305,7 +305,7 @@ async function bootstrapAuthState(): Promise<void> {
     sleep(AUTH_BOOTSTRAP_TIMEOUT_MS),
   ]);
 
-  setBootstrapTag("auth_ready");
+  setBootstrapTagLazy("auth_ready");
 }
 
 let authAnalyticsUnsubscribe: (() => void) | null = null;
@@ -313,7 +313,7 @@ let authAnalyticsUnsubscribe: (() => void) | null = null;
 function getAuthBootstrapPromise(): Promise<void> {
   authStateReadyPromise ??= bootstrapAuthState()
     .catch((error) => {
-      captureAuthBootstrapFailure(error);
+      captureAuthBootstrapFailureLazy(error);
     })
     .finally(() => {
       markAuthBootstrapReady();
@@ -328,7 +328,7 @@ export function startAuthBootstrap(): void {
   }
 
   authAnalyticsUnsubscribe ??= onAuthStateChanged(getFirebaseAuth(), (user) => {
-    syncAnalyticsIdentity(
+    syncAnalyticsIdentityLazy(
       user ? { uid: user.uid, isAnonymous: user.isAnonymous } : null,
     );
   });
