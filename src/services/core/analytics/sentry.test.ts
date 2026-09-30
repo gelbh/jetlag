@@ -8,7 +8,17 @@ const withScope = vi.hoisted(() =>
   }),
 );
 
+const init = vi.hoisted(() => vi.fn());
 const captureReactException = vi.hoisted(() => vi.fn());
+const addIntegration = vi.hoisted(() => vi.fn());
+const browserTracingIntegration = vi.hoisted(() =>
+  vi.fn(() => ({ name: "BrowserTracing" })),
+);
+const replayIntegration = vi.hoisted(() => vi.fn(() => ({ name: "Replay" })));
+const getClientEnv = vi.hoisted(() =>
+  vi.fn((): Record<string, string> => ({})),
+);
+const idleCallbacks = vi.hoisted((): Array<() => void> => []);
 
 vi.mock("@sentry/react", () => ({
   addBreadcrumb,
@@ -16,20 +26,81 @@ vi.mock("@sentry/react", () => ({
   withScope,
   captureException: vi.fn(),
   captureReactException,
-  init: vi.fn(),
-  browserTracingIntegration: vi.fn(),
-  replayIntegration: vi.fn(),
+  init,
+  addIntegration,
+  browserTracingIntegration,
+  replayIntegration,
 }));
 
 vi.mock("../../../config/env", () => ({
-  getClientEnv: vi.fn(() => ({})),
+  getClientEnv,
+}));
+
+vi.mock("@/domain/device/perf/scheduleAfterFirstPaint", () => ({
+  scheduleIdleBootWork: vi.fn((callback: () => void) => {
+    idleCallbacks.push(callback);
+    return () => undefined;
+  }),
 }));
 
 import {
   captureErrorBoundaryException,
+  initSentry,
   reportJoinPermissionDenied,
   reportFirestoreListenPermissionDenied,
 } from "./sentry";
+
+describe("initSentry", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    getClientEnv.mockReset();
+    getClientEnv.mockReturnValue({});
+    idleCallbacks.length = 0;
+  });
+
+  it("skips init and replay scheduling without a DSN", () => {
+    vi.stubEnv("MODE", "production");
+    vi.stubEnv("DEV", false);
+
+    initSentry();
+
+    expect(init).not.toHaveBeenCalled();
+    expect(idleCallbacks).toHaveLength(0);
+  });
+
+  it("inits without replay, then adds replay once on idle", () => {
+    vi.stubEnv("MODE", "production");
+    vi.stubEnv("DEV", false);
+    getClientEnv.mockReturnValue({ VITE_SENTRY_DSN: "https://key@example.invalid/1" });
+
+    initSentry();
+
+    expect(init).toHaveBeenCalledOnce();
+    const options = init.mock.calls[0]?.[0] as {
+      integrations: unknown[];
+      replaysSessionSampleRate: number;
+      replaysOnErrorSampleRate: number;
+    };
+    expect(options.integrations).toEqual([{ name: "BrowserTracing" }]);
+    expect(browserTracingIntegration).toHaveBeenCalledWith({ enableInp: true });
+    expect(replayIntegration).not.toHaveBeenCalled();
+    expect(options.replaysOnErrorSampleRate).toBe(1.0);
+    expect(options).toHaveProperty("replaysSessionSampleRate");
+    expect(addIntegration).not.toHaveBeenCalled();
+    expect(idleCallbacks).toHaveLength(1);
+
+    idleCallbacks[0]?.();
+    expect(addIntegration).toHaveBeenCalledOnce();
+    expect(replayIntegration).toHaveBeenCalledExactlyOnceWith({
+      maskAllText: true,
+      blockAllMedia: true,
+    });
+    expect(addIntegration).toHaveBeenCalledWith({ name: "Replay" });
+
+    initSentry();
+    expect(idleCallbacks).toHaveLength(1);
+  });
+});
 
 describe("reportJoinPermissionDenied", () => {
   afterEach(() => {
