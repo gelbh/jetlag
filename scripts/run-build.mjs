@@ -35,3 +35,4 @@ run("node", ["scripts/write-sitemap.mjs"]);
 run("node", ["scripts/write-robots.mjs"]);
 run("node", ["scripts/prerender-marketing.mjs"]);
 run("node", ["scripts/check-prerender-seo.mjs"]);
+run("node", ["scripts/check-entry-budget.mjs"]);

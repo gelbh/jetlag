@@ -40,6 +40,7 @@ export default defineConfig(({ mode }) => ({
   // es2022: enough for module workers + modern Safari; avoid global `esnext`
   // (undownleveled main bundle). Worker wasm still loads via vite-plugin-wasm.
   build: {
+    manifest: true,
     target: "es2022",
     sourcemap: mode === "production" ? "hidden" : true,
     rolldownOptions: {
