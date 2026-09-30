@@ -12,8 +12,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { markStandaloneShellClass } from "./domain/device/pwa/markStandaloneShellClass";
 import { markEmbedShellAttribute } from "./domain/device/embed/embedMode";
-import "@mantine/core/styles.layer.css";
-import "@mantine/notifications/styles.layer.css";
+import "./theme/mantineShellStyles";
 import "./index.css";
 
 markStandaloneShellClass();
