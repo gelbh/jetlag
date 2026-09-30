@@ -1,9 +1,15 @@
 import { type Page } from "@playwright/test";
 
+/** The bridge installs via dynamic import after boot, so wait before evaluating. */
+async function waitForE2EBridge(page: Page): Promise<void> {
+  await page.waitForFunction(() => window.__JETLAG_E2E__ != null);
+}
+
 export async function listPendingQuestionIds(
   page: Page,
   sessionId: string,
 ): Promise<string[]> {
+  await waitForE2EBridge(page);
   return page.evaluate(async (id) => {
     const bridge = window.__JETLAG_E2E__;
     if (!bridge?.listPendingQuestionIds) {
@@ -19,6 +25,7 @@ export async function patchPendingQuestionAnswerableAt(
   questionId: string,
   answerableAt: string,
 ): Promise<void> {
+  await waitForE2EBridge(page);
   await page.evaluate(
     async ({ id, questionId: pendingQuestionId, answerableAt: nextAnswerableAt }) => {
       const bridge = window.__JETLAG_E2E__;
@@ -86,6 +93,7 @@ export async function endSessionInEmulator(
   page: Page,
   sessionId: string,
 ): Promise<void> {
+  await waitForE2EBridge(page);
   await page.evaluate(async (id) => {
     const bridge = window.__JETLAG_E2E__;
     if (!bridge?.endRemoteSession) {
@@ -96,6 +104,7 @@ export async function endSessionInEmulator(
 }
 
 export async function rotateAnonymousAuth(page: Page): Promise<string> {
+  await waitForE2EBridge(page);
   return page.evaluate(async () => {
     const bridge = window.__JETLAG_E2E__;
     if (!bridge?.rotateAnonymousAuth) {
@@ -110,6 +119,7 @@ export async function advanceRemoteSessionTimerInEmulator(
   sessionId: string,
   elapsedMs: number,
 ): Promise<void> {
+  await waitForE2EBridge(page);
   await page.evaluate(
     async ({ id, ms }) => {
       const bridge = window.__JETLAG_E2E__;
