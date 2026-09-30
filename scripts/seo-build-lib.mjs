@@ -42,6 +42,14 @@ export function rewritePrerenderPreviewUrls(html, previewOrigin) {
 const HEAD_ASSET_LINK_RELS = new Set(["modulepreload", "stylesheet", "preload"]);
 const HEAD_ASSET_TAG_RE = /<link\b[^>]*>|<script\b[^>]*>[\s\S]*?<\/script\s*>/gi;
 const HEAD_TAG_JOINER = "\n    ";
+// Inert markup whose `<link>`/`<script>` text must not count as loaded assets.
+const INERT_SPAN_RE =
+  /<!--[\s\S]*?-->|<(noscript|template|style)\b[^>]*>[\s\S]*?<\/\1\s*>/gi;
+
+/** Same-length copy with inert spans blanked, so match indices still address the original. */
+function maskInert(html) {
+  return html.replace(INERT_SPAN_RE, (m) => " ".repeat(m.length));
+}
 
 function attr(tag, name) {
   const match = tag.match(
@@ -64,8 +72,9 @@ function headAssetKey(tag) {
 }
 
 function headBounds(html) {
-  const start = html.search(/<head\b[^>]*>/i);
-  const end = html.search(/<\/head>/i);
+  const masked = maskInert(html);
+  const start = masked.search(/<head\b[^>]*>/i);
+  const end = masked.search(/<\/head>/i);
   if (start < 0 || end < start) {
     throw new Error("HTML is missing a <head> element");
   }
@@ -74,7 +83,7 @@ function headBounds(html) {
 
 function headAssetTags(html) {
   const { start, end } = headBounds(html);
-  const head = html.slice(start, end);
+  const head = maskInert(html.slice(start, end));
   const tags = [];
   for (const match of head.matchAll(HEAD_ASSET_TAG_RE)) {
     const key = headAssetKey(match[0]);

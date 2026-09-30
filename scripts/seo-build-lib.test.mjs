@@ -113,3 +113,11 @@ test("diffHeadAssetKeys flags extra, missing, reordered and duplicated keys", ()
   assert.equal(diffHeadAssetKeys(shell, [...shell].reverse()).matches, false);
   assert.equal(diffHeadAssetKeys(shell, [...shell, "module:/i.js"]).matches, false);
 });
+
+test("head asset tags inside comments, noscript and template are ignored", () => {
+  const html = `<head><!-- <link rel="modulepreload" href="/c.js"> --><noscript><link rel="stylesheet" href="/n.css"></noscript><template><script type="module" src="/t.js"></script></template><link rel="modulepreload" href="/real.js"></head>`;
+  assert.deepEqual(extractHeadAssetKeys(html), ["modulepreload:/real.js"]);
+  const out = restoreTemplateHeadAssets(html, template);
+  assert.deepEqual(extractHeadAssetKeys(out), extractHeadAssetKeys(template));
+  assert.ok(out.includes('<noscript><link rel="stylesheet" href="/n.css"></noscript>'));
+});
