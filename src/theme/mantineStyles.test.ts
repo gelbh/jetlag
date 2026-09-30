@@ -80,6 +80,11 @@ describe("Mantine per-component CSS", () => {
     expect(styled.filter((n) => !listed.has(n)).sort()).toEqual([]);
   });
 
+  it("follows Mantine internal deps (guards the dep walk itself)", () => {
+    expect(withInternalDeps(["Button"])).toContain("UnstyledButton");
+    expect(withInternalDeps(["Drawer"])).toContain("ModalBase");
+  });
+
   it("imports only existing, non-duplicated layer CSS files", () => {
     const imports = listedCssImports("mantineShellStyles.ts");
     expect(imports.filter((n) => !existsSync(cssFor(n)))).toEqual([]);
