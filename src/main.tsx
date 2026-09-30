@@ -10,7 +10,6 @@ import {
 import { PWA_MARK_NAV, markPlayDay } from "./domain/device/perf/playDayMarks.ts";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { installE2EBridgeIfConfigured } from "./test/e2eBridge";
 import { markStandaloneShellClass } from "./domain/device/pwa/markStandaloneShellClass";
 import { markEmbedShellAttribute } from "./domain/device/embed/embedMode";
 import "@mantine/core/styles.layer.css";
@@ -19,7 +18,15 @@ import "./index.css";
 
 markStandaloneShellClass();
 markEmbedShellAttribute();
-installE2EBridgeIfConfigured();
+// Gate here (not only inside the bridge) so production never fetches the
+// bridge chunk, which pulls Firebase into the boot path.
+if (import.meta.env.VITE_USE_FIREBASE_EMULATOR === "true") {
+  void import("./test/e2eBridge")
+    .then((m) => m.installE2EBridgeIfConfigured())
+    .catch((error: unknown) => {
+      console.error("E2E bridge failed to load", error);
+    });
+}
 function scheduleDeferredObservability(): void {
   scheduleAfterFirstPaint(() => {
     void import("./services/core/analytics/sentry.ts").then(
