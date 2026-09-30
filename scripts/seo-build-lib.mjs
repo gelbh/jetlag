@@ -40,8 +40,8 @@ export function rewritePrerenderPreviewUrls(html, previewOrigin) {
 }
 
 const HEAD_ASSET_LINK_RELS = new Set(["modulepreload", "stylesheet", "preload"]);
-const HEAD_ASSET_TAG_RE =
-  /<link\b[^>]*>|<script\b[^>]*>[\s\S]*?<\/script(?=[\s/>])[^>]*>/gi;
+const HEAD_ASSET_TAG_RE = /<link\b[^>]*>|<script\b[^>]*>[\s\S]*?<\/script\s*>/gi;
+const HEAD_TAG_JOINER = "\n    ";
 
 function attr(tag, name) {
   const match = tag.match(
@@ -63,7 +63,7 @@ function headAssetKey(tag) {
     : null;
 }
 
-function splitHead(html) {
+function headBounds(html) {
   const start = html.search(/<head\b[^>]*>/i);
   const end = html.search(/<\/head>/i);
   if (start < 0 || end < start) {
@@ -73,7 +73,7 @@ function splitHead(html) {
 }
 
 function headAssetTags(html) {
-  const { start, end } = splitHead(html);
+  const { start, end } = headBounds(html);
   const head = html.slice(start, end);
   const tags = [];
   for (const match of head.matchAll(HEAD_ASSET_TAG_RE)) {
@@ -85,10 +85,20 @@ function headAssetTags(html) {
 
 /**
  * Loaded-asset tags in `<head>` (`<script type="module" src>`, `<link rel=modulepreload|stylesheet|preload>`)
- * as `kind:href` keys in document order.
+ * as `kind:href` keys in document order. Keys ignore other attributes because the serialized DOM
+ * rewrites them (`crossorigin` → `crossorigin=""`) relative to Vite's source text.
  */
 export function extractHeadAssetKeys(html) {
   return headAssetTags(html).map((t) => t.key);
+}
+
+/** Compare a prerendered page's head asset keys to the SPA shell's (order and duplicates matter). */
+export function diffHeadAssetKeys(shellKeys, pageKeys) {
+  return {
+    matches: shellKeys.join("\n") === pageKeys.join("\n"),
+    extra: pageKeys.filter((k) => !shellKeys.includes(k)),
+    missing: shellKeys.filter((k) => !pageKeys.includes(k)),
+  };
 }
 
 /**
@@ -98,23 +108,17 @@ export function extractHeadAssetKeys(html) {
  * the built SPA shell's exact tags so prerendered pages boot the same way `dist/index.html` does.
  */
 export function restoreTemplateHeadAssets(snapshotHtml, templateHtml) {
-  const templateTags = headAssetTags(templateHtml).map((t) => t.tag);
+  const templateTags = headAssetTags(templateHtml)
+    .map((t) => t.tag)
+    .join(HEAD_TAG_JOINER);
   const snapshotTags = headAssetTags(snapshotHtml);
-  const insertAt = snapshotTags[0]?.index ?? splitHead(snapshotHtml).end;
-  if (snapshotTags.length === 0) {
-    return (
-      snapshotHtml.slice(0, insertAt) +
-      templateTags.join("\n    ") +
-      snapshotHtml.slice(insertAt)
-    );
-  }
-  let out = "";
-  let cursor = 0;
+  const insertAt = snapshotTags[0]?.index ?? headBounds(snapshotHtml).end;
+  let out = snapshotHtml.slice(0, insertAt) + templateTags;
+  let cursor = insertAt;
   for (const { tag, index } of snapshotTags) {
     const gap = snapshotHtml.slice(cursor, index);
     // Drop indentation left behind between consecutive removed tags.
-    if (index === insertAt || gap.trim()) out += gap;
-    if (index === insertAt) out += templateTags.join("\n    ");
+    if (gap.trim()) out += gap;
     cursor = index + tag.length;
   }
   return out + snapshotHtml.slice(cursor);

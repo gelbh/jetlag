@@ -4,6 +4,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   absoluteUrl,
+  diffHeadAssetKeys,
   distHtmlPath,
   extractHeadAssetKeys,
   loadCrawlPolicy,
@@ -76,13 +77,15 @@ for (const urlPath of policy.indexablePaths) {
 
   if (shellAssetKeys) {
     const keys = extractHeadAssetKeys(html);
-    const extra = keys.filter((k) => !shellAssetKeys.includes(k));
-    const missing = shellAssetKeys.filter((k) => !keys.includes(k));
-    if (extra.length || missing.length || keys.length !== shellAssetKeys.length) {
+    const { matches, extra, missing } = diffHeadAssetKeys(shellAssetKeys, keys);
+    if (!matches) {
+      const list = (xs) => xs.slice(0, 5).join(", ") || "none";
       console.error(
-        `${urlPath}: <head> asset tags differ from dist/index.html (${keys.length} vs ${shellAssetKeys.length}; ` +
-          `extra: ${extra.slice(0, 5).join(", ") || "none"}; missing: ${missing.slice(0, 5).join(", ") || "none"}). ` +
-          "Runtime-injected modulepreloads leaked into the prerender snapshot.",
+        `${urlPath}: <head> asset tags differ from dist/index.html ` +
+          `(${keys.length} vs ${shellAssetKeys.length}; extra: ${list(extra)}; missing: ${list(missing)}).` +
+          (extra.length
+            ? " Runtime-injected tags leaked into the prerender snapshot; see restoreTemplateHeadAssets in scripts/prerender-marketing.mjs."
+            : " Order or duplicates differ from the shell."),
       );
       failed = true;
     }

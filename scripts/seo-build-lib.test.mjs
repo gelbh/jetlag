@@ -2,6 +2,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
+  diffHeadAssetKeys,
   extractHeadAssetKeys,
   restoreTemplateHeadAssets,
   rewritePrerenderPreviewUrls,
@@ -92,4 +93,23 @@ test("restoreTemplateHeadAssets inserts template tags before </head> when the sn
   const out = restoreTemplateHeadAssets(bare, template);
   assert.deepEqual(extractHeadAssetKeys(out), extractHeadAssetKeys(template));
   assert.ok(out.indexOf("index-A.js") < out.indexOf("</head>"));
+});
+
+test("extractHeadAssetKeys parses single-quoted and unquoted attrs; keeps inline modules", () => {
+  const html = `<head><LINK REL=MODULEPRELOAD HREF=/a.js><link rel='stylesheet' href='/b.css'><script type="module">import("/c.js")</script></head>`;
+  assert.deepEqual(extractHeadAssetKeys(html), ["modulepreload:/a.js", "stylesheet:/b.css"]);
+  assert.throws(() => extractHeadAssetKeys("<body></body>"), /missing a <head>/);
+});
+
+test("diffHeadAssetKeys flags extra, missing, reordered and duplicated keys", () => {
+  const shell = ["module:/i.js", "modulepreload:/r.js"];
+  assert.deepEqual(diffHeadAssetKeys(shell, [...shell]), { matches: true, extra: [], missing: [] });
+  assert.deepEqual(diffHeadAssetKeys(shell, [...shell, "modulepreload:/App.js"]), {
+    matches: false,
+    extra: ["modulepreload:/App.js"],
+    missing: [],
+  });
+  assert.deepEqual(diffHeadAssetKeys(shell, ["module:/i.js"]).missing, ["modulepreload:/r.js"]);
+  assert.equal(diffHeadAssetKeys(shell, [...shell].reverse()).matches, false);
+  assert.equal(diffHeadAssetKeys(shell, [...shell, "module:/i.js"]).matches, false);
 });

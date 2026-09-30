@@ -2,4 +2,4 @@
 "jetlag": patch
 ---
 
-fix: Home screen loads faster.
+fix: Home and info pages load faster.
