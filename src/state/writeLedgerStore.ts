@@ -18,20 +18,18 @@ export type WriteLabel =
   | "timer.update"
   | "restored";
 
-export type LedgerEntry = {
-  id: string;
-  label: WriteLabel;
-  startedAt: number;
-  status: "pending" | "failed";
-  error?: string;
-};
+type LedgerEntryBase = { id: string; label: WriteLabel; startedAt: number };
+
+export type LedgerEntry =
+  | (LedgerEntryBase & { status: "pending" })
+  | (LedgerEntryBase & { status: "failed"; error: string });
 
 interface WriteLedgerState {
   entries: Record<string, LedgerEntry>;
   begin: (label: WriteLabel) => string;
-  settle: (id: string) => void;
+  /** Drop an entry: on server ack, or once a failure has been surfaced. */
+  remove: (id: string) => void;
   fail: (id: string, message: string) => void;
-  dismiss: (id: string) => void;
 }
 
 let seq = 0;
@@ -58,7 +56,7 @@ export const useWriteLedgerStore = create<WriteLedgerState>()((set) => ({
     }));
     return id;
   },
-  settle: (id) =>
+  remove: (id) =>
     set((s) => (s.entries[id] ? { entries: withoutEntry(s.entries, id) } : s)),
   fail: (id, message) =>
     set((s) => {
@@ -73,8 +71,6 @@ export const useWriteLedgerStore = create<WriteLedgerState>()((set) => ({
         },
       };
     }),
-  dismiss: (id) =>
-    set((s) => (s.entries[id] ? { entries: withoutEntry(s.entries, id) } : s)),
 }));
 
 type LedgerSnapshot = Pick<WriteLedgerState, "entries">;
@@ -89,6 +85,7 @@ export function selectPendingCount(state: LedgerSnapshot): number {
   return count;
 }
 
+/** Consumed by the pending-age escalation (plan Task 5). */
 export function selectOldestPendingAgeMs(
   state: LedgerSnapshot,
   now = Date.now(),

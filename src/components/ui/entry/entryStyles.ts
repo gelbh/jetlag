@@ -1,4 +1,5 @@
 import type { CSSProperties } from "react";
+import type { SyncStatus } from "@/domain/device/sync/sync";
 
 /**
  * Concrete Mantine `styles` object (not the function form).
@@ -738,13 +739,7 @@ export const sheetIconCloseStyle: CSSProperties = {
   cursor: "pointer",
 };
 
-export type SyncBeaconStatus =
-  | "synced"
-  | "saving"
-  | "offline"
-  | "degraded"
-  | "stale"
-  | "error";
+export type SyncBeaconStatus = SyncStatus;
 
 const syncBeaconTone: Record<
   SyncBeaconStatus,

@@ -203,16 +203,11 @@ function createFirestoreDb(): Firestore {
   }
 
   try {
-    const firestore = initializeFirestore(firebaseApp, {
+    return initializeFirestore(firebaseApp, {
       localCache: persistentLocalCache({
         tabManager: persistentMultipleTabManager(),
       }),
     });
-    // Dynamic import: commitWrite imports the Sentry/store graph; keep it off this module's static deps.
-    void import("@/services/firestore/commitWrite")
-      .then((m) => m.trackRestoredWrites(firestore))
-      .catch(() => {});
-    return firestore;
   } catch {
     persistenceUnavailable = true;
     return initializeFirestore(firebaseApp, {

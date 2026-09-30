@@ -7,6 +7,7 @@ import {
 import { mapChromeSurfaceStyles } from "@/components/ui/entry/entryChrome";
 import { useMinWidth } from "@/hooks/layout/useMinWidth";
 import { SyncStatusBeacon } from "../syncUi/SyncStatusDot";
+import { syncToneForStatus } from "../syncUi/syncStatusDetailContent";
 import {
   SYNC_TONE_CLASSES,
   type SyncTone,
@@ -34,22 +35,7 @@ interface SyncBlockProps {
 }
 
 function surveyShortLabelTone(status: SyncStatus): SyncTone | null {
-  switch (status) {
-    case "error":
-      return "error";
-    case "offline":
-    case "degraded":
-    case "stale":
-      return "warning";
-    case "saving":
-      return "info";
-    case "synced":
-      return null;
-    default: {
-      const exhaustive: never = status;
-      return exhaustive;
-    }
-  }
+  return status === "synced" ? null : syncToneForStatus(status);
 }
 
 /** Live sync beacon in the status rail (display only; no detail modal). */

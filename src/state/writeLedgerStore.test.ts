@@ -10,30 +10,29 @@ describe("writeLedgerStore", () => {
   beforeEach(() => useWriteLedgerStore.setState({ entries: {} }));
 
   it("counts pending and drops settled", () => {
-    const { begin, settle } = useWriteLedgerStore.getState();
+    const { begin, remove } = useWriteLedgerStore.getState();
     const a = begin("chat.send");
     begin("question.ask");
     expect(selectPendingCount(useWriteLedgerStore.getState())).toBe(2);
-    settle(a);
+    remove(a);
     expect(selectPendingCount(useWriteLedgerStore.getState())).toBe(1);
   });
 
   it("keeps failures until dismissed", () => {
-    const { begin, fail, dismiss } = useWriteLedgerStore.getState();
+    const { begin, fail, remove } = useWriteLedgerStore.getState();
     const id = begin("found.confirm");
     fail(id, "permission-denied");
     expect(selectFailedEntries(useWriteLedgerStore.getState())).toHaveLength(1);
     expect(selectPendingCount(useWriteLedgerStore.getState())).toBe(0);
-    dismiss(id);
+    remove(id);
     expect(selectFailedEntries(useWriteLedgerStore.getState())).toHaveLength(0);
   });
 
-  it("ignores settle/fail/dismiss for unknown ids without changing state", () => {
+  it("ignores remove/fail for unknown ids without changing state", () => {
     const before = useWriteLedgerStore.getState().entries;
-    const { settle, fail, dismiss } = useWriteLedgerStore.getState();
-    settle("missing");
+    const { remove, fail } = useWriteLedgerStore.getState();
+    remove("missing");
     fail("missing", "x");
-    dismiss("missing");
     expect(useWriteLedgerStore.getState().entries).toBe(before);
   });
 
@@ -41,7 +40,7 @@ describe("writeLedgerStore", () => {
     useWriteLedgerStore.setState({
       entries: {
         x: { id: "x", label: "chat.send", startedAt: 1000, status: "pending" },
-        y: { id: "y", label: "chat.send", startedAt: 500, status: "failed" },
+        y: { id: "y", label: "chat.send", startedAt: 500, status: "failed", error: "x" },
       },
     });
     expect(selectOldestPendingAgeMs(useWriteLedgerStore.getState(), 9000)).toBe(

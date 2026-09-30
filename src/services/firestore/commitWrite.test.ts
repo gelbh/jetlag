@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { FirebaseError } from "firebase/app";
 import type { Firestore } from "firebase/firestore";
 import {
@@ -7,7 +7,11 @@ import {
   useWriteLedgerStore,
 } from "@/state/writeLedgerStore";
 import { addWriteRejectedBreadcrumb } from "@/services/core/analytics/sentry";
-import { commitWrite, trackRestoredWrites } from "./commitWrite";
+import {
+  RESTORED_WRITES_GRACE_MS,
+  commitWrite,
+  trackRestoredWrites,
+} from "./commitWrite";
 
 vi.mock("@/services/core/analytics/sentry", () => ({
   addWriteRejectedBreadcrumb: vi.fn(),
@@ -60,7 +64,11 @@ describe("commitWrite", () => {
 });
 
 describe("trackRestoredWrites", () => {
-  beforeEach(() => useWriteLedgerStore.setState({ entries: {} }));
+  beforeEach(() => {
+    useWriteLedgerStore.setState({ entries: {} });
+    vi.useFakeTimers();
+  });
+  afterEach(() => vi.useRealTimers());
 
   it("holds one pending entry until the SDK queue drains", async () => {
     let drain!: () => void;
@@ -70,18 +78,36 @@ describe("trackRestoredWrites", () => {
       }),
     );
     trackRestoredWrites({} as Firestore);
+    expect(selectPendingCount(useWriteLedgerStore.getState())).toBe(0);
+    vi.advanceTimersByTime(RESTORED_WRITES_GRACE_MS);
     expect(selectPendingCount(useWriteLedgerStore.getState())).toBe(1);
     drain();
-    await Promise.resolve();
-    await Promise.resolve();
+    await vi.runAllTimersAsync();
     expect(selectPendingCount(useWriteLedgerStore.getState())).toBe(0);
   });
 
-  it("settles (never fails) when waiting rejects", async () => {
+  it("adds nothing when the queue is already empty", async () => {
+    waitForPendingWrites.mockReturnValueOnce(Promise.resolve());
+    trackRestoredWrites({} as Firestore);
+    await vi.runAllTimersAsync();
+    expect(useWriteLedgerStore.getState().entries).toEqual({});
+  });
+
+  it("clears (never fails) when waiting rejects", async () => {
     waitForPendingWrites.mockReturnValueOnce(Promise.reject(new Error("x")));
     trackRestoredWrites({} as Firestore);
-    await Promise.resolve();
-    await Promise.resolve();
+    await vi.runAllTimersAsync();
     expect(useWriteLedgerStore.getState().entries).toEqual({});
+  });
+
+  it("tracks each Firestore instance once and never throws", () => {
+    const db = {} as Firestore;
+    waitForPendingWrites.mockReset();
+    waitForPendingWrites.mockImplementationOnce(() => {
+      throw new Error("not a Firestore");
+    });
+    expect(() => trackRestoredWrites(db)).not.toThrow();
+    trackRestoredWrites(db);
+    expect(waitForPendingWrites).toHaveBeenCalledTimes(1);
   });
 });

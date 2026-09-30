@@ -23,7 +23,7 @@ export function commitWrite(
     pending = Promise.reject(error);
   }
   const acknowledged = pending.then(
-    () => useWriteLedgerStore.getState().settle(id),
+    () => useWriteLedgerStore.getState().remove(id),
     (error: unknown) => {
       const message = error instanceof Error ? error.message : String(error);
       useWriteLedgerStore.getState().fail(id, message);
@@ -35,13 +35,45 @@ export function commitWrite(
   return { acknowledged };
 }
 
+/** Only show the restored entry if the SDK queue has not drained by then (avoids a boot "Saving…" flash). */
+export const RESTORED_WRITES_GRACE_MS = 250;
+
+const trackedDbs = new WeakSet<Firestore>();
+
 /**
- * Writes queued by a previous page load have no promise to track; represent
- * them as one ledger entry that settles when the SDK drains its queue.
- * `waitForPendingWrites` resolves immediately when nothing was queued.
+ * Writes queued by a previous page load have no promise to track. Represent
+ * them as ONE ledger entry (the SDK does not expose a count, so N restored
+ * writes read as 1) that clears when the SDK drains its queue.
+ * `waitForPendingWrites` resolves immediately when nothing was queued, so the
+ * entry only appears when restored writes are actually outstanding. Idempotent
+ * per Firestore instance; never throws.
  */
 export function trackRestoredWrites(db: Firestore): void {
-  const id = useWriteLedgerStore.getState().begin("restored");
-  const settle = () => useWriteLedgerStore.getState().settle(id);
-  waitForPendingWrites(db).then(settle, settle);
+  if (trackedDbs.has(db)) {
+    return;
+  }
+  trackedDbs.add(db);
+
+  let drained: Promise<void>;
+  try {
+    drained = waitForPendingWrites(db);
+  } catch {
+    return;
+  }
+
+  let id: string | null = null;
+  let settled = false;
+  const timer = setTimeout(() => {
+    if (!settled) {
+      id = useWriteLedgerStore.getState().begin("restored");
+    }
+  }, RESTORED_WRITES_GRACE_MS);
+  const settle = () => {
+    settled = true;
+    clearTimeout(timer);
+    if (id) {
+      useWriteLedgerStore.getState().remove(id);
+    }
+  };
+  drained.then(settle, settle);
 }

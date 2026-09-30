@@ -490,7 +490,16 @@ export function addWriteRejectedBreadcrumb(label: string, error: unknown): void 
     category: "firestore.write",
     level: "warning",
     message: `write rejected: ${label}`,
-    data: { code: (error as { code?: string } | null)?.code ?? null },
+    // Structural check: importing FirebaseError here would pull firebase/app into the boot chunk.
+    data: {
+      code:
+        typeof error === "object" &&
+        error !== null &&
+        "code" in error &&
+        typeof error.code === "string"
+          ? error.code
+          : null,
+    },
   });
 }
 

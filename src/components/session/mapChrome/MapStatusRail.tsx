@@ -26,7 +26,6 @@ import { RoleJoinRequestAlert } from "../status/RoleJoinRequestAlert";
 import { SyncBlock } from "../status/SyncBlock";
 import { TimerBlock } from "../status/TimerBlock";
 import { ToolStatusBlock } from "../status/ToolStatusBlock";
-import { WriteFailureNotifier } from "../status/WriteFailureNotifier";
 import {
   SYNC_TONE_CLASSES,
   syncRailDisplay,
@@ -253,7 +252,6 @@ export function MapStatusRail({ model, headerLeading }: MapStatusRailProps) {
       style={expanded ? statusRailExpandedFlowStyle : undefined}
       data-testid="map-status-rail-mantine"
     >
-      <WriteFailureNotifier />
       <div className="relative">
         <TimerBlock
           open={showTimerMenu}

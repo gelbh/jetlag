@@ -13,6 +13,7 @@ import {
   where,
   writeBatch,
   addDoc,
+  type QuerySnapshot,
   type Unsubscribe,
 } from "firebase/firestore";
 import { FirebaseError } from "firebase/app";
@@ -257,9 +258,9 @@ export function subscribeToHiderPlayerLocations(
  * `fromCache` flips that change no document; skip those (after the first
  * emit, which must go out even for an empty collection) to avoid re-renders.
  */
-function createMetadataSnapshotGate(): (snapshot: {
-  docChanges: (options: { includeMetadataChanges: boolean }) => unknown[];
-}) => boolean {
+function createMetadataSnapshotGate(): (
+  snapshot: Pick<QuerySnapshot, "docChanges">,
+) => boolean {
   let emitted = false;
   return (snapshot) => {
     if (

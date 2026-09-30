@@ -20,6 +20,7 @@ import { addPwaStoragePressureBreadcrumb } from "../../services/core/analytics/s
 import { flushOfflineQueue } from "../../services/session/flushOfflineQueue";
 import { bindOfflineQueueResumeFlush } from "../../services/session/sessionResumeFlush";
 import { resolvePlayerRole } from "../../domain/session/players/playerRole";
+import { trackRestoredWrites } from "@/services/firestore/commitWrite";
 
 
 export interface UseSessionSyncOptions {
@@ -163,7 +164,7 @@ export function useSessionSync({ syncEnabled = true }: UseSessionSyncOptions = {
 
     replaceAnnotations([]);
 
-    getFirestoreDb();
+    trackRestoredWrites(getFirestoreDb());
     if (isFirestorePersistenceUnavailable()) {
       setLastSyncError(
         "Offline cache unavailable in this browser tab. Sync may be less reliable until you reload.",

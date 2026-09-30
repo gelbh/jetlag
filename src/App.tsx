@@ -24,6 +24,7 @@ import { AppUpdateProvider } from "./components/ui/banners/AppUpdateProvider";
 import { AppUiProvider } from "./components/ui/providers/AppUiProvider";
 import { LowBatteryPrompt } from "./components/session/banners/LowBatteryPrompt";
 import { LocationPermissionPrompt } from "./components/session/status/LocationPermissionPrompt";
+import { WriteFailureNotifier } from "./components/session/status/WriteFailureNotifier";
 import { MotionDatasetEffect } from "./components/motion/MotionDatasetEffect";
 import { AppCheckProbeGate } from "./components/ui/feedback/AppCheckProbeGate";
 import { ClientMinVersionGate } from "./components/ui/feedback/ClientMinVersionGate";
@@ -251,6 +252,7 @@ export default function App() {
                     <div className="jl-scroll app-scroll-root">
                       <LowBatteryPrompt />
                       <LocationPermissionPrompt />
+                      <WriteFailureNotifier />
                       <Routes>
                         <Route element={<PlayerPhoneShellOutlet />}>
                           <Route path="/" element={<Home />} />

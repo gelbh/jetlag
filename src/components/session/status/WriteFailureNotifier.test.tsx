@@ -28,7 +28,7 @@ describe("WriteFailureNotifier", () => {
     expect(useWriteLedgerStore.getState().entries).toEqual({});
   });
 
-  it("uses generic copy for unlabelled writes and ignores pending ones", () => {
+  it("ignores pending writes", () => {
     render(<WriteFailureNotifier />);
     act(() => {
       const { begin, fail } = useWriteLedgerStore.getState();
@@ -38,7 +38,7 @@ describe("WriteFailureNotifier", () => {
 
     expect(showEphemeralPlayerNotification).toHaveBeenCalledTimes(1);
     expect(showEphemeralPlayerNotification).toHaveBeenCalledWith(
-      expect.objectContaining({ title: "A change didn't sync" }),
+      expect.objectContaining({ title: "Card change didn't sync" }),
     );
     expect(Object.values(useWriteLedgerStore.getState().entries)).toHaveLength(1);
   });
