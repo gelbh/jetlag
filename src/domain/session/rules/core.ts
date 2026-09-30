@@ -3,7 +3,7 @@ import { PRESET_MATCH_TOLERANCE_METERS } from "../../map/distancePresets";
 import {
   effectiveHidingZoneRadiusMeters,
   hidingZoneRadiusMeters,
-} from "../size/gameSize";
+} from "../size/hidingZoneRadius";
 import { gameSizeRulesSummary, hidingPeriodMs } from "../size/gameSizeRules";
 import { sessionDistanceUnit } from "../meta/sessionDistanceUnit";
 import { resolveHidingPeriodMinutes } from "./deadlines";

@@ -6,7 +6,7 @@ import {
   wasChunkReloadDeferred,
 } from "@/domain/device/updates/chunkLoadRecovery";
 import { appUpdateCopy } from "@/domain/device/updates/appUpdateCopy";
-import { captureException } from "@/services/core/analytics/sentry";
+import { captureExceptionLazy } from "@/services/core/analytics/lazyTelemetry";
 import { AppErrorPage } from "./AppErrorPage";
 
 interface MapErrorBoundaryProps {
@@ -28,7 +28,7 @@ export class MapErrorBoundary extends Component<
   }
 
   componentDidCatch(error: Error, info: ErrorInfo): void {
-    captureException(error);
+    captureExceptionLazy(error);
     console.error("Map screen crashed:", error, info.componentStack);
   }
 

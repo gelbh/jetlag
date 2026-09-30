@@ -5,12 +5,16 @@ import type { DistanceUnit } from "../../map/distance";
 import { milesToMeters } from "../../map/distance";
 import {
   GAME_SIZE_THRESHOLDS_SQ_KM,
-  hidingZoneDefaultRadiusMeters,
   resolveDistanceUnit,
 } from "../../map/distancePresets";
 import { gameAreaToBoundingBox } from "../../geometry/gameArea/gameAreaBounds";
 
 export type GameSize = "small" | "medium" | "large";
+
+export {
+  effectiveHidingZoneRadiusMeters,
+  hidingZoneRadiusMeters,
+} from "./hidingZoneRadius";
 
 export const HIDING_ZONE_RADIUS_MIN_METERS = 100;
 export const HIDING_ZONE_RADIUS_MAX_METERS = 1000;
@@ -114,32 +118,10 @@ export function recommendGameSizeFromPlayAreaSquareMiles(
   return "small";
 }
 
-export function hidingZoneRadiusMeters(
-  gameSize: GameSize,
-  unit: DistanceUnit = "imperial",
-): number {
-  return hidingZoneDefaultRadiusMeters(gameSize, resolveDistanceUnit(unit));
-}
-
 export function clampHidingZoneRadiusMeters(radiusMeters: number): number {
   return Math.min(
     HIDING_ZONE_RADIUS_MAX_METERS,
     Math.max(HIDING_ZONE_RADIUS_MIN_METERS, radiusMeters),
-  );
-}
-
-export function effectiveHidingZoneRadiusMeters(session: {
-  gameSize?: GameSize;
-  hidingZoneRadiusMeters?: number;
-  distanceUnit?: DistanceUnit;
-}): number {
-  if (typeof session.hidingZoneRadiusMeters === "number") {
-    return session.hidingZoneRadiusMeters;
-  }
-
-  return hidingZoneRadiusMeters(
-    session.gameSize ?? "medium",
-    session.distanceUnit,
   );
 }
 

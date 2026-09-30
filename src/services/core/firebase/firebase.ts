@@ -28,7 +28,6 @@ import {
 import {
   clientEnvUsesFirebaseEmulator,
   getClientEnv,
-  isFirebaseConfiguredFromEnv,
   readFirebaseConfigFromEnv,
 } from "@/config/env";
 import {
@@ -38,6 +37,17 @@ import {
   syncAnalyticsIdentityLazy,
 } from "../analytics/lazyTelemetry";
 import { isRecaptchaAlreadyRenderedError } from "./appCheckErrors";
+import {
+  isFirebaseConfigured,
+  markAuthBootstrapReady,
+  resetAuthBootstrapStateForTests,
+} from "./authBootstrapState";
+
+export {
+  isAuthBootstrapReady,
+  isFirebaseConfigured,
+  subscribeAuthBootstrapReady,
+} from "./authBootstrapState";
 
 export async function getFirebaseStorage(): Promise<
   import("firebase/storage").FirebaseStorage
@@ -70,10 +80,6 @@ export function isFirestorePersistenceUnavailable(): boolean {
 
 function readConfig() {
   return readFirebaseConfigFromEnv();
-}
-
-export function isFirebaseConfigured(): boolean {
-  return isFirebaseConfiguredFromEnv();
 }
 
 let authEmulatorConnected = false;
@@ -219,8 +225,6 @@ export function getFirestoreDb(): Firestore {
 
 let anonymousSignInPromise: Promise<User> | null = null;
 let authStateReadyPromise: Promise<void> | null = null;
-let authBootstrapReady = false;
-const authBootstrapListeners = new Set<() => void>();
 
 const AUTH_BOOTSTRAP_TIMEOUT_MS = 10_000;
 
@@ -228,32 +232,6 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => {
     setTimeout(resolve, ms);
   });
-}
-
-function markAuthBootstrapReady(): void {
-  if (authBootstrapReady) {
-    return;
-  }
-
-  authBootstrapReady = true;
-  for (const listener of authBootstrapListeners) {
-    listener();
-  }
-}
-
-export function isAuthBootstrapReady(): boolean {
-  if (!isFirebaseConfigured()) {
-    return true;
-  }
-
-  return authBootstrapReady;
-}
-
-export function subscribeAuthBootstrapReady(listener: () => void): () => void {
-  authBootstrapListeners.add(listener);
-  return () => {
-    authBootstrapListeners.delete(listener);
-  };
 }
 
 async function configureAuthPersistence(
@@ -396,7 +374,6 @@ export async function resetFirebaseForTests(): Promise<void> {
   resetFirebaseStorageForTests();
   anonymousSignInPromise = null;
   authStateReadyPromise = null;
-  authBootstrapReady = false;
-  authBootstrapListeners.clear();
+  resetAuthBootstrapStateForTests();
 }
 

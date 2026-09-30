@@ -1,5 +1,5 @@
-import { isAuthBootstrapReady, isFirebaseConfigured } from "../services/core/firebase/firebase";
-import { isPlayAreaReadySync } from "../services/geo/matching/resolveSessionMatchingAreas";
+import { isAuthBootstrapReady, isFirebaseConfigured } from "@/services/core/firebase/authBootstrapState";
+import { isPlayAreaReadySync } from "@/services/geo/matching/playAreaReadiness";
 import { usePremiumEntitlementsStore } from "../state/premiumEntitlementsStore";
 import { useSessionStore } from "../state/sessionStore";
 import { isLazyRoute, normalizeRoutePath } from "./routeMetadata";
@@ -9,7 +9,6 @@ export type RouteLoadingStepId =
   | "download-screen"
   | "load-boundaries"
   | "prepare-map"
-  | "check-sign-in"
   | "load-premium"
   | "verify-admin"
   | "open-screen";
@@ -57,8 +56,6 @@ export function labelForStep(
       return "Loading game boundaries…";
     case "prepare-map":
       return "Preparing map…";
-    case "check-sign-in":
-      return "Checking sign-in…";
     case "load-premium":
       return "Loading subscription…";
     case "verify-admin":
@@ -76,12 +73,10 @@ function baseStepsForPath(normalizedPath: string): RouteLoadingStepId[] {
   switch (normalizedPath) {
     case "/map":
       return ["download-screen", "load-boundaries", "prepare-map"];
-    case "/":
-      return ["check-sign-in"];
     case "/create":
       return ["download-screen", "open-screen"];
     case "/join":
-      return ["open-screen"];
+      return ["download-screen", "open-screen"];
     case "/presets":
     case "/presets/new":
     case "/presets/:id/edit":
@@ -108,8 +103,6 @@ export function isLoadingStepComplete(
       return isPlayAreaReadySync(useSessionStore.getState().session);
     case "prepare-map":
       return screenReady;
-    case "check-sign-in":
-      return !isFirebaseConfigured() || isAuthBootstrapReady();
     case "load-premium":
       return usePremiumEntitlementsStore.getState().hydrated;
     case "verify-admin":

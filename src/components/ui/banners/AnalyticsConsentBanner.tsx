@@ -2,11 +2,11 @@ import { Button, Group } from "@mantine/core";
 import { useState } from "react";
 import { readAnalyticsConsent } from "@/domain/device/consent/analyticsConsent";
 import { isEmbedMode } from "@/domain/device/embed/embedMode";
+import { shouldEnableAnalytics } from "@/services/core/analytics/analyticsEnabled";
 import {
-  denyAnalyticsConsent,
-  grantAnalyticsConsent,
-  shouldEnableAnalytics,
-} from "@/services/core/analytics/analytics";
+  denyAnalyticsConsentLazy,
+  grantAnalyticsConsentLazy,
+} from "@/services/core/analytics/lazyTelemetry";
 import { AppLink } from "../../navigation/AppLink";
 import { HudBanner } from "../hud/HudBanner";
 import { MapFloatSurface } from "./MapFloatSurface";
@@ -56,7 +56,7 @@ export function AnalyticsConsentBanner() {
             variant="default"
             size="md"
             onClick={() => {
-              denyAnalyticsConsent();
+              denyAnalyticsConsentLazy();
               setConsent("denied");
             }}
           >
@@ -67,7 +67,7 @@ export function AnalyticsConsentBanner() {
             variant="filled"
             size="md"
             onClick={() => {
-              grantAnalyticsConsent();
+              grantAnalyticsConsentLazy();
               setConsent("granted");
             }}
           >

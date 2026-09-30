@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import { MantineProvider } from "@mantine/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { jetlagTheme } from "@/theme/theme";
@@ -10,7 +10,7 @@ vi.mock("@/hooks/app/useAuthBootstrapReady", () => ({
   useAuthBootstrapReady: () => true,
 }));
 
-vi.mock("@/services/core/firebase/firebase", () => ({
+vi.mock("@/services/core/firebase/authBootstrapState", () => ({
   isFirebaseConfigured: () => true,
 }));
 
@@ -55,38 +55,42 @@ describe("ClientMinVersionGate", () => {
     subscribeMock.mockReset();
   });
 
-  it("blocks with update-required UI when below global min", () => {
+  it("blocks with update-required UI when below global min", async () => {
     subscribeMock.mockImplementation((onChange: (min: string | null) => void) => {
       onChange("0.11.0");
     });
 
     renderGate(<div>app-content</div>);
 
-    expect(screen.getByRole("alert")).toHaveTextContent(/Update required/i);
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      /Update required/i,
+    );
     expect(screen.queryByText("app-content")).toBeNull();
   });
 
-  it("renders children when at or above min", () => {
+  it("renders children when at or above min", async () => {
     subscribeMock.mockImplementation((onChange: (min: string | null) => void) => {
       onChange("0.10.0");
     });
 
     renderGate(<div>app-content</div>);
 
+    await waitFor(() => expect(subscribeMock).toHaveBeenCalled());
     expect(screen.getByText("app-content")).toBeInTheDocument();
   });
 
-  it("fail-opens when min doc is missing", () => {
+  it("fail-opens when min doc is missing", async () => {
     subscribeMock.mockImplementation((onChange: (min: string | null) => void) => {
       onChange(null);
     });
 
     renderGate(<div>app-content</div>);
 
+    await waitFor(() => expect(subscribeMock).toHaveBeenCalled());
     expect(screen.getByText("app-content")).toBeInTheDocument();
   });
 
-  it("fail-opens when the min-version listener errors", () => {
+  it("fail-opens when the min-version listener errors", async () => {
     subscribeMock.mockImplementation(
       (
         _onChange: (min: string | null) => void,
@@ -98,6 +102,15 @@ describe("ClientMinVersionGate", () => {
 
     renderGate(<div>app-content</div>);
 
+    await waitFor(() => expect(subscribeMock).toHaveBeenCalled());
     expect(screen.getByText("app-content")).toBeInTheDocument();
+  });
+
+  it("does not subscribe when unmounted before the listener module loads", async () => {
+    const { unmount } = renderGate(<div>app-content</div>);
+    unmount();
+
+    await vi.dynamicImportSettled();
+    expect(subscribeMock).not.toHaveBeenCalled();
   });
 });

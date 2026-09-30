@@ -1,6 +1,7 @@
 import * as Sentry from "@sentry/react";
 import { getClientEnv } from "@/config/env";
 import { APP_VERSION } from "@/domain/device/changelog";
+import { scheduleIdleBootWork } from "@/domain/device/perf/scheduleAfterFirstPaint";
 import type { StorageEstimateSnapshot } from "@/domain/device/pwa/pwaStorageBudget";
 import {
   applyClientSentryDisposition,
@@ -149,14 +150,36 @@ export function initSentry(): void {
       Sentry.browserTracingIntegration({
         enableInp: true,
       }),
-      Sentry.replayIntegration({
-        maskAllText: true,
-        blockAllMedia: true,
-      }),
     ],
     beforeSend: scrubEvent,
     replaysSessionSampleRate: import.meta.env.PROD ? 0.1 : 0,
     replaysOnErrorSampleRate: 1.0,
+  });
+
+  scheduleLazyReplay();
+}
+
+let replayScheduled = false;
+
+/**
+ * Adds Session Replay after init on idle so its setup stays off the boot critical path.
+ * Replay reads replays*SampleRate from the client options set in initSentry.
+ * Static import on purpose: a same-package dynamic import does not split Replay
+ * into its own chunk, and lazyLoadIntegration fetches from Sentry's CDN.
+ */
+function scheduleLazyReplay(): void {
+  if (replayScheduled) {
+    return;
+  }
+  replayScheduled = true;
+
+  scheduleIdleBootWork(() => {
+    Sentry.addIntegration(
+      Sentry.replayIntegration({
+        maskAllText: true,
+        blockAllMedia: true,
+      }),
+    );
   });
 }
 
@@ -249,6 +272,22 @@ export function captureAppCheckTokenFailure(
     });
     Sentry.captureException(error);
   });
+}
+
+/** Same capture shape as `Sentry.ErrorBoundary` (component stack + react mechanism). */
+export function captureErrorBoundaryException(
+  error: unknown,
+  componentStack: string | null | undefined,
+): void {
+  Sentry.captureReactException(
+    error,
+    { componentStack: componentStack ?? "" },
+    { mechanism: { handled: true, type: "auto.function.react.error_boundary" } },
+  );
+}
+
+export function setTransactionName(name: string): void {
+  Sentry.getCurrentScope().setTransactionName(name);
 }
 
 export function captureException(error: unknown): void {

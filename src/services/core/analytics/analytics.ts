@@ -11,6 +11,7 @@ import {
   type AnalyticsEventProps,
   type SessionEndedReason,
 } from "./analyticsEvents";
+import { shouldEnableAnalytics } from "./analyticsEnabled";
 import { filterPosthogException } from "./posthogExceptionPolicy";
 
 export {
@@ -70,12 +71,7 @@ export type AnalyticsIdentity = {
   isAnonymous: boolean;
 };
 
-export function shouldEnableAnalytics(env: {
-  prod: boolean;
-  mode: string;
-}): boolean {
-  return env.prod && env.mode !== "test";
-}
+export { shouldEnableAnalytics };
 
 export function scrubAnalyticsProperties(
   props: Record<string, unknown> | undefined,

@@ -19,7 +19,7 @@ import {
   labelForStep,
   resolveLoadingSteps,
 } from "./routeLoadingSteps";
-import * as firebase from "../services/core/firebase/firebase";
+import * as firebase from "../services/core/firebase/authBootstrapState";
 import {
   clearResolvedMatchingAreasCacheForTests,
   isPlayAreaReadySync,
@@ -112,11 +112,11 @@ describe("isLazyRoute", () => {
     expect(isLazyRoute("/stats")).toBe(true);
     expect(isLazyRoute("/friends")).toBe(true);
     expect(isLazyRoute("/leaderboard")).toBe(true);
+    expect(isLazyRoute("/join")).toBe(true);
   });
 
   it("marks eager routes as not lazy", () => {
     expect(isLazyRoute("/")).toBe(false);
-    expect(isLazyRoute("/join")).toBe(false);
   });
 
   it("keeps nested admin paths distinct in normalizeRoutePath", () => {
@@ -130,7 +130,7 @@ describe("isLazyRoute", () => {
 
 describe("preloadRoute", () => {
   it("resolves immediately for eager routes", async () => {
-    await expect(preloadRoute("/join")).resolves.toBeUndefined();
+    await expect(preloadRoute("/")).resolves.toBeUndefined();
   });
 
   it("loads lazy route modules without throwing", async () => {
@@ -155,13 +155,13 @@ describe("preloadRoute", () => {
 
 describe("routeReadinessKind", () => {
   it("maps primary screens to readiness signals", () => {
-    expect(routeReadinessKind("/")).toBe("auth-bootstrap");
     expect(routeReadinessKind("/map")).toBe("play-area");
     expect(routeReadinessKind("/admin")).toBe("admin-auth");
     expect(routeReadinessKind("/premium")).toBe("premium");
   });
 
   it("uses layout readiness for secondary routes", () => {
+    expect(routeReadinessKind("/")).toBe("layout");
     expect(routeReadinessKind("/join")).toBe("layout");
     expect(routeReadinessKind("/create")).toBe("layout");
     expect(routeReadinessKind("/presets")).toBe("layout");
@@ -192,7 +192,7 @@ describe("routeWarmState", () => {
   it("treats eager routes as warm fast-path eligible when readiness is sync-true", () => {
     vi.spyOn(firebase, "isFirebaseConfigured").mockReturnValue(false);
 
-    expect(isWarmFastPathEligible("/join")).toBe(true);
+    expect(isWarmFastPathEligible("/")).toBe(true);
   });
 
   it("requires warm chunk and sync readiness for lazy routes", async () => {
@@ -240,12 +240,9 @@ describe("getSyncRouteReady", () => {
     });
   });
 
-  it("mirrors useRouteScreenReady for auth-bootstrap and layout routes", () => {
+  it("treats Home and layout routes as ready before auth bootstrap", () => {
     vi.spyOn(firebase, "isFirebaseConfigured").mockReturnValue(true);
     vi.spyOn(firebase, "isAuthBootstrapReady").mockReturnValue(false);
-    expect(getSyncRouteReady("/")).toBe(false);
-
-    vi.spyOn(firebase, "isAuthBootstrapReady").mockReturnValue(true);
     expect(getSyncRouteReady("/")).toBe(true);
     expect(getSyncRouteReady("/create")).toBe(true);
   });
@@ -352,8 +349,15 @@ describe("routeLoadingSteps", () => {
     ]);
   });
 
-  it("uses a single open step for eager join", () => {
-    expect(resolveLoadingSteps("/join")).toEqual(["open-screen"]);
+  it("downloads the lazy join chunk before opening it", () => {
+    expect(resolveLoadingSteps("/join")).toEqual([
+      "download-screen",
+      "open-screen",
+    ]);
+  });
+
+  it("opens Home without waiting on sign-in", () => {
+    expect(resolveLoadingSteps("/")).toEqual(["open-screen"]);
   });
 
   it("computes progress from the first incomplete step", () => {

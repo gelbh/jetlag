@@ -1,5 +1,4 @@
 import { Suspense, useEffect, useLayoutEffect, type ReactNode } from "react";
-import * as Sentry from "@sentry/react";
 import { QueryClientProvider } from "@tanstack/react-query";
 import {
   BrowserRouter,
@@ -10,8 +9,12 @@ import {
   useLocation,
 } from "react-router-dom";
 import { appQueryClient } from "./lib/queryClient";
-import { trackPageView } from "./services/core/analytics/analytics";
+import {
+  setTransactionNameLazy,
+  trackPageViewLazy,
+} from "./services/core/analytics/lazyTelemetry";
 import { MapErrorBoundary } from "./components/ui/feedback/MapErrorBoundary";
+import { AppErrorBoundary } from "./components/ui/feedback/AppErrorBoundary";
 import { AppEntryBackdrop } from "./components/ui/layout/AppEntryBackdrop";
 import { PlayerPhoneShell } from "./components/ui/layout/PlayerPhoneShell";
 import { AnalyticsConsentBanner } from "./components/ui/banners/AnalyticsConsentBanner";
@@ -26,7 +29,6 @@ import { AppCheckProbeGate } from "./components/ui/feedback/AppCheckProbeGate";
 import { ClientMinVersionGate } from "./components/ui/feedback/ClientMinVersionGate";
 import { AppErrorPage } from "./components/ui/feedback/AppErrorPage";
 import { Home } from "./routes/Home";
-import { JoinSession } from "./routes/JoinSession";
 import { scheduleIdleBootWork } from "./domain/device/perf/scheduleAfterFirstPaint";
 import {
   CHUNK_RELOAD_CLEAR_MS,
@@ -46,7 +48,6 @@ import {
 import { notifyAppNeedRefresh } from "./domain/device/updates/serviceWorkerRefresh";
 import { useEdgeSwipeBack } from "./hooks/navigation/useEdgeSwipeBack";
 import { useRouteSeo } from "./hooks/navigation/useRouteSeo";
-import { pruneStaleTimerSessions } from "./services/session/sessionCleanup";
 import { useSessionStore } from "./state/sessionStore";
 import { RouteReadinessSensor } from "./navigation/RouteReadinessSensor";
 import { RouteProgressChrome } from "./navigation/RouteProgressChrome";
@@ -61,6 +62,7 @@ import {
   FriendsLazy,
   GamePresetEditorLazy,
   GamePresetListLazy,
+  JoinSessionLazy,
   LeaderboardLazy,
   MapScreenLazy,
   NotFoundLazy,
@@ -120,8 +122,8 @@ function AnalyticsPageViewTracker() {
 
   useEffect(() => {
     const path = `${location.pathname}${location.search}`;
-    trackPageView(path);
-    Sentry.getCurrentScope().setTransactionName(location.pathname);
+    trackPageViewLazy(path);
+    setTransactionNameLazy(location.pathname);
   }, [location]);
 
   return null;
@@ -194,9 +196,20 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    return scheduleIdleBootWork(() => {
-      pruneStaleTimerSessions();
+    let cancelled = false;
+    const cancelIdle = scheduleIdleBootWork(() => {
+      void import("./services/session/sessionCleanup")
+        .then(({ pruneStaleTimerSessions }) => {
+          if (!cancelled) {
+            pruneStaleTimerSessions();
+          }
+        })
+        .catch(() => {});
     });
+    return () => {
+      cancelled = true;
+      cancelIdle();
+    };
   }, []);
 
   useEffect(() => {
@@ -216,7 +229,7 @@ export default function App() {
         <BrowserRouter>
           <RouteTransitionProvider>
             <AppUpdateProvider>
-              <Sentry.ErrorBoundary fallback={<AppErrorFallback />}>
+              <AppErrorBoundary fallback={<AppErrorFallback />}>
                 <AppCheckProbeGate>
                   {/* Outside min-version gate so waiting SW chip stays visible when blocked. */}
                   <AppUpdateBanner />
@@ -305,7 +318,14 @@ export default function App() {
                               </LazyRoute>
                             }
                           />
-                          <Route path="/join" element={<JoinSession />} />
+                          <Route
+                            path="/join"
+                            element={
+                              <LazyRoute>
+                                <JoinSessionLazy />
+                              </LazyRoute>
+                            }
+                          />
                           {StatusDockGalleryLazy ? (
                             <Route
                               path="/dev/status-dock"
@@ -417,7 +437,7 @@ export default function App() {
                     </div>
                   </ClientMinVersionGate>
                 </AppCheckProbeGate>
-              </Sentry.ErrorBoundary>
+              </AppErrorBoundary>
             </AppUpdateProvider>
           </RouteTransitionProvider>
         </BrowserRouter>

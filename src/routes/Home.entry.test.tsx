@@ -5,8 +5,9 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Home } from "./Home";
 import { jetlagTheme } from "@/theme/theme";
 
-const { isFirebaseConfigured } = vi.hoisted(() => ({
+const { isFirebaseConfigured, isAuthBootstrapReady } = vi.hoisted(() => ({
   isFirebaseConfigured: vi.fn(() => false),
+  isAuthBootstrapReady: vi.fn(() => true),
 }));
 
 vi.mock("@/hooks/session/useContinueActiveSession", () => ({
@@ -19,12 +20,14 @@ vi.mock("@/hooks/session/useContinueActiveSession", () => ({
   }),
 }));
 
-vi.mock("@/hooks/app/useAuthBootstrapReady", () => ({
-  useAuthBootstrapReady: () => true,
-}));
-
 vi.mock("@/navigation/useRouteTransition", () => ({
   useRouteTransition: () => ({ phase: "idle" }),
+}));
+
+vi.mock("@/services/core/firebase/authBootstrapState", () => ({
+  isFirebaseConfigured,
+  isAuthBootstrapReady,
+  subscribeAuthBootstrapReady: () => () => undefined,
 }));
 
 vi.mock("@/services/core/firebase/firebase", () => ({
@@ -33,6 +36,7 @@ vi.mock("@/services/core/firebase/firebase", () => ({
 
 beforeEach(() => {
   isFirebaseConfigured.mockReturnValue(false);
+  isAuthBootstrapReady.mockReturnValue(true);
   vi.stubGlobal("matchMedia", (query: string) => ({
     matches: false,
     media: query,
@@ -115,6 +119,20 @@ describe("Home", () => {
       "href",
       "/premium",
     );
+  });
+
+  it("renders entries before Firebase auth bootstrap settles", () => {
+    isFirebaseConfigured.mockReturnValue(true);
+    isAuthBootstrapReady.mockReturnValue(false);
+    render(
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
+        <MemoryRouter>
+          <Home />
+        </MemoryRouter>
+      </MantineProvider>
+    );
+    expect(screen.queryByText(/Starting…/)).toBeNull();
+    expect(screen.getByRole("link", { name: /Join session/i })).toBeInTheDocument();
   });
 
   it("links to privacy, terms, and feedback", () => {

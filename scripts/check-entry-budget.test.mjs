@@ -70,3 +70,47 @@ test("forbidden chunk via static import fails (src and name)", () => {
     assert.match(r.violations[0], /forbidden/);
   }
 });
+
+test("forbidden chunk statically reachable from the App chunk fails", () => {
+  const withApp = () => {
+    const m = base();
+    m["index.html"].dynamicImports.push("src/App.tsx");
+    m["src/App.tsx"] = {
+      file: "app.js",
+      name: "App",
+      src: "src/App.tsx",
+      isDynamicEntry: true,
+      imports: ["a.js", "mid.js"],
+      dynamicImports: ["lazy.js"],
+    };
+    m["mid.js"] = { file: "mid.js", name: "analyticsConsent" };
+    m["lazy.js"] = { file: "lazy.js", name: "sentry", imports: ["fb.js"] };
+    return m;
+  };
+
+  const clean = evaluateEntryBudget({ manifest: withApp(), sizeOf, limits });
+  assert.deepEqual(clean.violations, [], "dynamic imports are not walked");
+  assert.equal(clean.appChecked, true);
+  assert.equal(clean.jsKb, 50, "App walk does not count toward entry size");
+
+  for (const patch of [
+    { name: "vendor-firebase" },
+    { name: "vendor-turf" },
+    { name: "sentry" },
+    { name: "analytics" },
+    { src: "node_modules/@sentry/core/index.js" },
+    { src: "node_modules/posthog-js/dist/module.js" },
+  ]) {
+    const m = withApp();
+    m["mid.js"] = { file: "mid.js", imports: ["bad.js"] };
+    m["bad.js"] = { file: "bad.js", ...patch };
+    const r = evaluateEntryBudget({ manifest: m, sizeOf, limits });
+    assert.equal(r.violations.length, 1, JSON.stringify(patch));
+    assert.match(r.violations[0], /App static path \(app\.js\)/);
+  }
+});
+
+test("App walk is skipped when the manifest has no App chunk", () => {
+  const r = evaluateEntryBudget({ manifest: base(), sizeOf, limits });
+  assert.equal(r.appChecked, false);
+});

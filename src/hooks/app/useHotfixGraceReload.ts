@@ -7,7 +7,7 @@ import {
 } from "../../domain/device/updates/reloadAcknowledgements";
 import { applyServiceWorkerUpdate } from "../../domain/device/updates/serviceWorkerRefresh";
 import { compareAppVersions } from "../../domain/session/meta/sessionVersion";
-import { DEFAULT_HOTFIX_GRACE_SECONDS } from "../../services/firestore/firestoreIncidents";
+import { DEFAULT_HOTFIX_GRACE_SECONDS } from "@/services/firestore/appConfigRuntimeDefaults";
 
 export interface UseHotfixGraceReloadOptions {
   /** Required minimum app version from session and/or `appConfig/runtime`. */

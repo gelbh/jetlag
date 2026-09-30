@@ -4,7 +4,7 @@ import type { RouteLoadingProgress } from "./routeLoadingSteps";
 
 export type RouteTransitionPhase = "idle" | "settling";
 
-export type RouteLoadingReason = "page" | "map" | "sign-in" | "premium" | "admin";
+export type RouteLoadingReason = "page" | "map" | "premium" | "admin";
 
 export type BeginTransitionOptions = NavigateOptions & {
   direction?: "forward" | "back" | "replace";
