@@ -13,8 +13,9 @@ import { gzipSync } from "node:zlib";
 
 // Measured 71.9 KB gz + ~10% headroom (target ceiling stays 130 KB gz).
 export const JS_LIMIT_KB = 80;
-// The Mantine CSS split (follow-up) lowers this to 30 KB.
-export const CSS_LIMIT_KB = 57;
+// Measured 33.0 KB gz after the Mantine per-component CSS split + ~10% headroom
+// (the rest is app CSS: map chrome, motion, Tailwind utilities, fonts).
+export const CSS_LIMIT_KB = 36;
 
 const FORBIDDEN_SRC =
   /node_modules\/(firebase|posthog-js|@sentry|@turf|maplibre-gl)\//;
