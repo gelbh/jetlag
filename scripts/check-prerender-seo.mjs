@@ -4,7 +4,9 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   absoluteUrl,
+  diffHeadAssetKeys,
   distHtmlPath,
+  extractHeadAssetKeys,
   loadCrawlPolicy,
   MIN_ROOT_TEXT_CHARS,
   spaShellPath,
@@ -14,10 +16,13 @@ const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const policy = loadCrawlPolicy(root);
 
 let failed = false;
+/** @type {string[] | null} */
+let shellAssetKeys = null;
 
 const spaShell = spaShellPath(root);
 try {
   const shellHtml = readFileSync(spaShell, "utf8");
+  shellAssetKeys = extractHeadAssetKeys(shellHtml);
   if (!shellHtml.includes('content="noindex,nofollow"')) {
     console.error("dist/index.html SPA shell must keep robots noindex,nofollow");
     failed = true;
@@ -68,6 +73,22 @@ for (const urlPath of policy.indexablePaths) {
       `${urlPath}: prerender HTML still contains preview-origin absolute URLs`,
     );
     failed = true;
+  }
+
+  if (shellAssetKeys) {
+    const keys = extractHeadAssetKeys(html);
+    const { matches, extra, missing } = diffHeadAssetKeys(shellAssetKeys, keys);
+    if (!matches) {
+      const list = (xs) => xs.slice(0, 5).join(", ") || "none";
+      console.error(
+        `${urlPath}: <head> asset tags differ from dist/index.html ` +
+          `(${keys.length} vs ${shellAssetKeys.length}; extra: ${list(extra)}; missing: ${list(missing)}).` +
+          (extra.length
+            ? " Runtime-injected tags leaked into the prerender snapshot; see restoreTemplateHeadAssets in scripts/prerender-marketing.mjs."
+            : " Order or duplicates differ from the shell."),
+      );
+      failed = true;
+    }
   }
 
   const rootOpen = html.search(/id=["']root["']/i);

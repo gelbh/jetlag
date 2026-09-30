@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawn } from "node:child_process";
@@ -8,11 +8,14 @@ import {
   distHtmlPath,
   loadCrawlPolicy,
   MIN_ROOT_TEXT_CHARS,
+  restoreTemplateHeadAssets,
   rewritePrerenderPreviewUrls,
+  spaShellPath,
 } from "./seo-build-lib.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const policy = loadCrawlPolicy(root);
+const shellHtml = readFileSync(spaShellPath(root), "utf8");
 const PORT = 4179;
 const BASE = `http://127.0.0.1:${PORT}`;
 
@@ -104,7 +107,10 @@ try {
     await page.waitForFunction(() => document.title.trim().length > 0, {
       timeout: 30_000,
     });
-    const html = rewritePrerenderPreviewUrls(await page.content(), BASE);
+    const html = restoreTemplateHeadAssets(
+      rewritePrerenderPreviewUrls(await page.content(), BASE),
+      shellHtml,
+    );
     const out = distHtmlPath(root, urlPath);
     mkdirSync(dirname(out), { recursive: true });
     writeFileSync(out, html);
