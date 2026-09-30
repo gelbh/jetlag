@@ -251,6 +251,22 @@ export function captureAppCheckTokenFailure(
   });
 }
 
+/** Same capture shape as `Sentry.ErrorBoundary` (component stack + react mechanism). */
+export function captureErrorBoundaryException(
+  error: unknown,
+  componentStack: string | null | undefined,
+): void {
+  Sentry.captureReactException(
+    error,
+    { componentStack: componentStack ?? "" },
+    { mechanism: { handled: true, type: "auto.function.react.error_boundary" } },
+  );
+}
+
+export function setTransactionName(name: string): void {
+  Sentry.getCurrentScope().setTransactionName(name);
+}
+
 export function captureException(error: unknown): void {
   Sentry.captureException(error);
 }

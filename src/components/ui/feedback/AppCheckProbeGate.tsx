@@ -1,9 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { useAuthBootstrapReady } from "@/hooks/app/useAuthBootstrapReady";
-import {
-  probeAppCheckAvailability,
-  type AppCheckProbeResult,
-} from "@/services/core/firebase/appCheckProbe";
+import type { AppCheckProbeResult } from "@/services/core/firebase/appCheckProbe";
 import { ContentBlockerErrorPage } from "./ContentBlockerErrorPage";
 
 /**
@@ -20,11 +17,14 @@ export function AppCheckProbeGate({ children }: { children: ReactNode }) {
     }
 
     let cancelled = false;
-    void probeAppCheckAvailability().then((result) => {
-      if (!cancelled) {
-        setProbe(result);
-      }
-    });
+    // Dynamic: keeps firebase/app-check off the App chunk's static graph.
+    void import("@/services/core/firebase/appCheckProbe")
+      .then(({ probeAppCheckAvailability }) => probeAppCheckAvailability())
+      .then((result) => {
+        if (!cancelled) {
+          setProbe(result);
+        }
+      });
 
     return () => {
       cancelled = true;

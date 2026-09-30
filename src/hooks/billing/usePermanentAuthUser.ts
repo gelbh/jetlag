@@ -1,11 +1,37 @@
 import { useEffect, useState } from "react";
-import { onAuthStateChanged, type User } from "firebase/auth";
-import { isPermanentUser } from "../../services/core/auth/accountAuth";
-import {
-  getFirebaseAuth,
-  isFirebaseConfigured,
-} from "../../services/core/firebase/firebase";
-import { waitForPermanentAuthReady } from "../../services/core/firebase/firebaseAuthReady";
+import type { User } from "firebase/auth";
+import { isFirebaseConfigured } from "@/services/core/firebase/authBootstrapState";
+
+type PermanentAuthDeps = {
+  getFirebaseAuth: typeof import("@/services/core/firebase/firebase").getFirebaseAuth;
+  onAuthStateChanged: typeof import("firebase/auth").onAuthStateChanged;
+  waitForPermanentAuthReady: typeof import("@/services/core/firebase/firebaseAuthReady").waitForPermanentAuthReady;
+};
+
+// Dynamic so RouteReadinessSensor (App boot path) does not pull firebase/auth
+// into the App chunk. Once loaded, later mounts read currentUser synchronously.
+let loadedDeps: PermanentAuthDeps | null = null;
+let depsPromise: Promise<PermanentAuthDeps> | null = null;
+
+function loadPermanentAuthDeps(): Promise<PermanentAuthDeps> {
+  depsPromise ??= Promise.all([
+    import("firebase/auth"),
+    import("@/services/core/firebase/firebase"),
+    import("@/services/core/firebase/firebaseAuthReady"),
+  ]).then(([authSdk, firebase, authReady]) => {
+    loadedDeps = {
+      getFirebaseAuth: firebase.getFirebaseAuth,
+      onAuthStateChanged: authSdk.onAuthStateChanged,
+      waitForPermanentAuthReady: authReady.waitForPermanentAuthReady,
+    };
+    return loadedDeps;
+  });
+  return depsPromise;
+}
+
+function isPermanentUser(user: User | null): boolean {
+  return user != null && !user.isAnonymous;
+}
 
 export function usePermanentAuthUser(): {
   user: User | null;
@@ -13,7 +39,9 @@ export function usePermanentAuthUser(): {
   authReady: boolean;
 } {
   const [user, setUser] = useState<User | null>(() =>
-    isFirebaseConfigured() ? getFirebaseAuth().currentUser : null,
+    isFirebaseConfigured() && loadedDeps
+      ? loadedDeps.getFirebaseAuth().currentUser
+      : null,
   );
   const [authReady, setAuthReady] = useState(() => !isFirebaseConfigured());
 
@@ -23,21 +51,30 @@ export function usePermanentAuthUser(): {
     }
 
     let cancelled = false;
+    let unsubscribe: (() => void) | undefined;
 
-    void waitForPermanentAuthReady().then(() => {
-      if (!cancelled) {
-        setAuthReady(true);
-        setUser(getFirebaseAuth().currentUser);
-      }
-    });
+    void loadPermanentAuthDeps()
+      .then((deps) => {
+        if (cancelled) {
+          return;
+        }
 
-    const unsubscribe = onAuthStateChanged(getFirebaseAuth(), (nextUser) => {
-      setUser(nextUser);
-    });
+        void deps.waitForPermanentAuthReady().then(() => {
+          if (!cancelled) {
+            setAuthReady(true);
+            setUser(deps.getFirebaseAuth().currentUser);
+          }
+        });
+
+        unsubscribe = deps.onAuthStateChanged(deps.getFirebaseAuth(), (nextUser) => {
+          setUser(nextUser);
+        });
+      })
+      .catch(() => {});
 
     return () => {
       cancelled = true;
-      unsubscribe();
+      unsubscribe?.();
     };
   }, []);
 

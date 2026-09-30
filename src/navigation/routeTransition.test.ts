@@ -19,7 +19,7 @@ import {
   labelForStep,
   resolveLoadingSteps,
 } from "./routeLoadingSteps";
-import * as firebase from "../services/core/firebase/firebase";
+import * as firebase from "../services/core/firebase/authBootstrapState";
 import {
   clearResolvedMatchingAreasCacheForTests,
   isPlayAreaReadySync,
@@ -112,11 +112,11 @@ describe("isLazyRoute", () => {
     expect(isLazyRoute("/stats")).toBe(true);
     expect(isLazyRoute("/friends")).toBe(true);
     expect(isLazyRoute("/leaderboard")).toBe(true);
+    expect(isLazyRoute("/join")).toBe(true);
   });
 
   it("marks eager routes as not lazy", () => {
     expect(isLazyRoute("/")).toBe(false);
-    expect(isLazyRoute("/join")).toBe(false);
   });
 
   it("keeps nested admin paths distinct in normalizeRoutePath", () => {
@@ -130,7 +130,7 @@ describe("isLazyRoute", () => {
 
 describe("preloadRoute", () => {
   it("resolves immediately for eager routes", async () => {
-    await expect(preloadRoute("/join")).resolves.toBeUndefined();
+    await expect(preloadRoute("/")).resolves.toBeUndefined();
   });
 
   it("loads lazy route modules without throwing", async () => {
@@ -192,7 +192,7 @@ describe("routeWarmState", () => {
   it("treats eager routes as warm fast-path eligible when readiness is sync-true", () => {
     vi.spyOn(firebase, "isFirebaseConfigured").mockReturnValue(false);
 
-    expect(isWarmFastPathEligible("/join")).toBe(true);
+    expect(isWarmFastPathEligible("/")).toBe(true);
   });
 
   it("requires warm chunk and sync readiness for lazy routes", async () => {
@@ -352,7 +352,7 @@ describe("routeLoadingSteps", () => {
     ]);
   });
 
-  it("uses a single open step for eager join", () => {
+  it("uses a single open step for join", () => {
     expect(resolveLoadingSteps("/join")).toEqual(["open-screen"]);
   });
 

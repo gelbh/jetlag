@@ -8,11 +8,14 @@ const withScope = vi.hoisted(() =>
   }),
 );
 
+const captureReactException = vi.hoisted(() => vi.fn());
+
 vi.mock("@sentry/react", () => ({
   addBreadcrumb,
   captureMessage,
   withScope,
   captureException: vi.fn(),
+  captureReactException,
   init: vi.fn(),
   browserTracingIntegration: vi.fn(),
   replayIntegration: vi.fn(),
@@ -22,7 +25,11 @@ vi.mock("../../../config/env", () => ({
   getClientEnv: vi.fn(() => ({})),
 }));
 
-import { reportJoinPermissionDenied, reportFirestoreListenPermissionDenied } from "./sentry";
+import {
+  captureErrorBoundaryException,
+  reportJoinPermissionDenied,
+  reportFirestoreListenPermissionDenied,
+} from "./sentry";
 
 describe("reportJoinPermissionDenied", () => {
   afterEach(() => {
@@ -90,5 +97,22 @@ describe("reportFirestoreListenPermissionDenied", () => {
     reportFirestoreListenPermissionDenied();
 
     expect(addBreadcrumb).not.toHaveBeenCalled();
+  });
+});
+
+describe("captureErrorBoundaryException", () => {
+  it("captures like Sentry.ErrorBoundary with the component stack", () => {
+    const error = new Error("boom");
+    captureErrorBoundaryException(error, "\n    at Boom");
+    expect(captureReactException).toHaveBeenCalledWith(
+      error,
+      { componentStack: "\n    at Boom" },
+      {
+        mechanism: {
+          handled: true,
+          type: "auto.function.react.error_boundary",
+        },
+      },
+    );
   });
 });

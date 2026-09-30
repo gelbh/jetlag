@@ -3,11 +3,16 @@
  * posthog and @sentry into the entry critical path; dynamic import defers them.
  * Calls to one module resolve in call order (same import promise).
  */
-import type { syncAnalyticsIdentity } from "./analytics";
+import { writeAnalyticsConsent } from "@/domain/device/consent/analyticsConsent";
+import type { syncAnalyticsIdentity, trackPageView } from "./analytics";
 import type {
   captureAuthBootstrapFailure,
   captureAuthPersistenceFallback,
+  captureErrorBoundaryException,
+  captureException,
+  reportSlowRouteTransition,
   setBootstrapTag,
+  setTransactionName,
 } from "./sentry";
 
 let analyticsModule: Promise<typeof import("./analytics")> | undefined;
@@ -52,5 +57,58 @@ export function captureAuthPersistenceFallbackLazy(
 ): void {
   void loadSentry()
     .then((m) => m.captureAuthPersistenceFallback(...args))
+    .catch(() => {});
+}
+
+export function trackPageViewLazy(...args: Parameters<typeof trackPageView>): void {
+  void loadAnalytics()
+    .then((m) => m.trackPageView(...args))
+    .catch(() => {});
+}
+
+export function captureExceptionLazy(
+  ...args: Parameters<typeof captureException>
+): void {
+  void loadSentry()
+    .then((m) => m.captureException(...args))
+    .catch(() => {});
+}
+
+export function setTransactionNameLazy(
+  ...args: Parameters<typeof setTransactionName>
+): void {
+  void loadSentry()
+    .then((m) => m.setTransactionName(...args))
+    .catch(() => {});
+}
+
+export function captureErrorBoundaryExceptionLazy(
+  ...args: Parameters<typeof captureErrorBoundaryException>
+): void {
+  void loadSentry()
+    .then((m) => m.captureErrorBoundaryException(...args))
+    .catch(() => {});
+}
+
+export function reportSlowRouteTransitionLazy(
+  ...args: Parameters<typeof reportSlowRouteTransition>
+): void {
+  void loadSentry()
+    .then((m) => m.reportSlowRouteTransition(...args))
+    .catch(() => {});
+}
+
+/** Persists consent synchronously; posthog init/opt-out follows once loaded. */
+export function grantAnalyticsConsentLazy(): void {
+  writeAnalyticsConsent("granted");
+  void loadAnalytics()
+    .then((m) => m.grantAnalyticsConsent())
+    .catch(() => {});
+}
+
+export function denyAnalyticsConsentLazy(): void {
+  writeAnalyticsConsent("denied");
+  void loadAnalytics()
+    .then((m) => m.denyAnalyticsConsent())
     .catch(() => {});
 }

@@ -27,6 +27,12 @@ vi.mock("@/navigation/useRouteTransition", () => ({
   useRouteTransition: () => ({ phase: "idle" }),
 }));
 
+vi.mock("@/services/core/firebase/authBootstrapState", () => ({
+  isFirebaseConfigured,
+  isAuthBootstrapReady: () => true,
+  subscribeAuthBootstrapReady: () => () => undefined,
+}));
+
 vi.mock("@/services/core/firebase/firebase", () => ({
   isFirebaseConfigured,
 }));

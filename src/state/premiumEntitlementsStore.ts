@@ -1,10 +1,6 @@
 import { create } from "zustand";
 import type { PremiumEntitlements } from "../domain/billing/premiumProducts";
-import {
-  ensureAnonymousUser,
-  isFirebaseConfigured,
-} from "../services/core/firebase/firebase";
-import { fetchPremiumEntitlements } from "../services/billing/premiumBilling";
+import { isFirebaseConfigured } from "@/services/core/firebase/authBootstrapState";
 
 const STORAGE_KEY = "jetlag-premium-entitlements-v1";
 const SOFT_STALE_MS = 10 * 60 * 1000;
@@ -113,6 +109,10 @@ export const usePremiumEntitlementsStore = create<PremiumEntitlementsState>(
         return null;
       }
 
+      // Dynamic: keeps firebase off the App chunk (route loading steps read this store).
+      const { ensureAnonymousUser } = await import(
+        "@/services/core/firebase/firebase"
+      );
       const user = await ensureAnonymousUser();
       if (!user?.uid) {
         set({ entitlements: null, loading: false, hydrated: true, softStale: false });
@@ -130,6 +130,9 @@ export const usePremiumEntitlementsStore = create<PremiumEntitlementsState>(
 
       inflightRefresh = (async () => {
         try {
+          const { fetchPremiumEntitlements } = await import(
+            "@/services/billing/premiumBilling"
+          );
           const next = await fetchPremiumEntitlements();
           if (get().uid === user.uid && get().generation === generation) {
             set({

@@ -34,6 +34,12 @@ vi.mock("../services/core/firebase/firebase", () => ({
   getFirebaseAuth: () => ({ currentUser: null, onAuthStateChanged: () => () => undefined }),
 }));
 
+vi.mock("../services/core/firebase/authBootstrapState", () => ({
+  isFirebaseConfigured: () => mockIsFirebaseConfigured(),
+  isAuthBootstrapReady: () => true,
+  subscribeAuthBootstrapReady: () => () => undefined,
+}));
+
 vi.mock("../services/core/firebase/firebaseAuthReady", () => ({
   waitForPermanentAuthReady: vi.fn().mockResolvedValue(undefined),
 }));

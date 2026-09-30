@@ -36,7 +36,7 @@ import { playerRoleLabel } from "@/domain/session/players/playerRole";
 import { useAuthBootstrapReady } from "@/hooks/app/useAuthBootstrapReady";
 import { useContinueActiveSession } from "@/hooks/session/useContinueActiveSession";
 import { useRouteTransition } from "@/navigation/useRouteTransition";
-import { isFirebaseConfigured } from "@/services/core/firebase/firebase";
+import { isFirebaseConfigured } from "@/services/core/firebase/authBootstrapState";
 import { PHONE_SHELL_MAX_WIDTH_PX } from "@/theme/phoneShell";
 
 export function Home() {

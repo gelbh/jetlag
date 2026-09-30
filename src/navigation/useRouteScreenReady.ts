@@ -1,7 +1,7 @@
 import { usePremiumEntitlements } from "../hooks/billing/usePremiumEntitlements";
 import { usePermanentAuthUser } from "../hooks/billing/usePermanentAuthUser";
 import { useAuthBootstrapReady } from "../hooks/app/useAuthBootstrapReady";
-import { useResolvedSessionRules } from "../hooks/session/useResolvedSessionRules";
+import { usePlayAreaReady } from "../hooks/session/usePlayAreaReady";
 import { useSessionStore } from "../state/sessionStore";
 
 export type RouteReadinessKind =
@@ -29,7 +29,7 @@ export function routeReadinessKind(pathname: string): RouteReadinessKind {
 export function useRouteScreenReady(pathname: string): boolean {
   const authBootstrapReady = useAuthBootstrapReady();
   const session = useSessionStore((state) => state.session);
-  const { playAreaReady } = useResolvedSessionRules(session);
+  const playAreaReady = usePlayAreaReady(session);
   const { authReady } = usePermanentAuthUser();
   const { loading: premiumLoading } = usePremiumEntitlements();
 

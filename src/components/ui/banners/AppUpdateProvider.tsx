@@ -23,12 +23,9 @@ import { setServiceWorkerChunkReloadContext } from "@/domain/device/updates/lazy
 import { tryUpdateServiceWorker } from "@/domain/device/updates/serviceWorkerUpdate";
 import { compareAppVersions } from "@/domain/session/meta/sessionVersion";
 import { useHotfixGraceReload } from "@/hooks/app/useHotfixGraceReload";
-import { isFirebaseConfigured } from "@/services/core/firebase/firebase";
-import {
-  DEFAULT_HOTFIX_GRACE_SECONDS,
-  subscribeAppConfigRuntime,
-  type AppConfigRuntime,
-} from "@/services/firestore/firestoreIncidents";
+import { isFirebaseConfigured } from "@/services/core/firebase/authBootstrapState";
+import { DEFAULT_HOTFIX_GRACE_SECONDS } from "@/services/firestore/appConfigRuntimeDefaults";
+import type { AppConfigRuntime } from "@/services/firestore/firestoreIncidents";
 import { useSessionStore } from "@/state/sessionStore";
 import {
   AppUpdateContext,
@@ -77,9 +74,28 @@ export function AppUpdateProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    return subscribeAppConfigRuntime(setRuntimeConfig, () => {
-      setRuntimeConfig(null);
-    });
+    let cancelled = false;
+    let unsubscribe: (() => void) | undefined;
+    // Dynamic: keeps firestore off the App chunk's static graph.
+    void import("@/services/firestore/firestoreIncidents")
+      .then(({ subscribeAppConfigRuntime }) => {
+        if (cancelled) {
+          return;
+        }
+        unsubscribe = subscribeAppConfigRuntime(setRuntimeConfig, () => {
+          setRuntimeConfig(null);
+        });
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setRuntimeConfig(null);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+      unsubscribe?.();
+    };
   }, []);
 
   const effectiveRuntimeConfig = isFirebaseConfigured() ? runtimeConfig : null;
