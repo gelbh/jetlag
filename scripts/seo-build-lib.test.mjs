@@ -121,3 +121,11 @@ test("head asset tags inside comments, noscript and template are ignored", () =>
   assert.deepEqual(extractHeadAssetKeys(out), extractHeadAssetKeys(template));
   assert.ok(out.includes('<noscript><link rel="stylesheet" href="/n.css"></noscript>'));
 });
+
+test("quoted `>` inside attributes does not split a tag", () => {
+  const html = `<head><link rel="stylesheet" media="(width > 600px)" href="/wide.css"><link rel="modulepreload" href="/x.js"></head>`;
+  assert.deepEqual(extractHeadAssetKeys(html), ["stylesheet:/wide.css", "modulepreload:/x.js"]);
+  const out = restoreTemplateHeadAssets(html, template);
+  assert.deepEqual(extractHeadAssetKeys(out), extractHeadAssetKeys(template));
+  assert.ok(!out.includes("600px"));
+});

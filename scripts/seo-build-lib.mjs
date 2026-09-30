@@ -40,7 +40,12 @@ export function rewritePrerenderPreviewUrls(html, previewOrigin) {
 }
 
 const HEAD_ASSET_LINK_RELS = new Set(["modulepreload", "stylesheet", "preload"]);
-const HEAD_ASSET_TAG_RE = /<link\b[^>]*>|<script\b[^>]*>[\s\S]*?<\/script\s*>/gi;
+// Attribute runs may contain `>` inside quotes (e.g. `media="(width > 600px)"`).
+const TAG_ATTRS = String.raw`(?:[^>"']|"[^"]*"|'[^']*')*`;
+const HEAD_ASSET_TAG_RE = new RegExp(
+  String.raw`<link\b${TAG_ATTRS}>|<script\b${TAG_ATTRS}>[\s\S]*?<\/script\s*>`,
+  "gi",
+);
 const HEAD_TAG_JOINER = "\n    ";
 // Inert markup whose `<link>`/`<script>` text must not count as loaded assets.
 const INERT_SPAN_RE =
