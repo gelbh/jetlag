@@ -2,6 +2,7 @@ import { act, renderHook } from "@testing-library/react";
 import type { Map as MapLibreMap } from "maplibre-gl";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
+  CreateSessionMapMountAbortedError,
   CreateSessionMapMountTimeoutError,
   useCreateSessionMapMount,
 } from "./useCreateSessionMapMount";
@@ -112,12 +113,30 @@ describe("useCreateSessionMapMount", () => {
 
     let settled = false;
     act(() => {
-      void result.current.ensureMapMounted().then(() => {
-        settled = true;
-      });
+      void result.current.ensureMapMounted().then(
+        () => {
+          settled = true;
+        },
+        () => undefined,
+      );
     });
     await act(async () => {});
 
     expect(settled).toBe(false);
+  });
+
+  it("rejects pending waiters when the create screen unmounts", async () => {
+    const { result, unmount } = renderHook(() => useCreateSessionMapMount());
+    let pending!: Promise<MapLibreMap>;
+
+    act(() => {
+      pending = result.current.ensureMapMounted();
+    });
+    const assertion = expect(pending).rejects.toBeInstanceOf(
+      CreateSessionMapMountAbortedError,
+    );
+    unmount();
+
+    await assertion;
   });
 });

@@ -152,14 +152,34 @@ describe("CreateSessionMapPane", () => {
     expect(screen.queryByTestId("create-session-map")).not.toBeInTheDocument();
   });
 
-  it("keeps a loading plate over the map until it reports a viewport", () => {
+  it("keeps a busy plate over the map until it reports a viewport", () => {
     renderPane({ mapRequested: true, mapMounted: false });
 
     expect(screen.getByTestId("create-session-map")).toBeInTheDocument();
     expect(screen.getByRole("status")).toHaveTextContent("Loading map…");
+    const plate = screen.getByRole("button", { name: "Loading map…" });
+    expect(plate).toHaveAttribute("aria-busy", "true");
+    expect(plate).toHaveAttribute("aria-disabled", "true");
     expect(
       screen.queryByRole("button", { name: "Open map" }),
     ).not.toBeInTheDocument();
+  });
+
+  it("drops the busy plate when the map never reports a viewport", () => {
+    vi.useFakeTimers();
+    try {
+      renderPane({ mapRequested: true, mapMounted: false });
+
+      act(() => {
+        vi.advanceTimersByTime(10_000);
+      });
+
+      expect(
+        screen.queryByTestId("create-session-map-facade"),
+      ).not.toBeInTheDocument();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("signals mount once MapLibre exists and has reported its first bounds", () => {
@@ -182,17 +202,7 @@ describe("CreateSessionMapPane", () => {
     expect(props.onMapMounted).toHaveBeenCalledTimes(1);
   });
 
-  it("moves focus into the map after keyboard activation of the facade", () => {
-    const { props, rerender } = renderPane({
-      mapRequested: false,
-      mapMounted: false,
-    });
-
-    // detail 0 = keyboard-initiated click (Enter / Space).
-    fireEvent.click(screen.getByRole("button", { name: "Open map" }), {
-      detail: 0,
-    });
-
+  function requestThenLoad(props: PaneProps, rerender: (ui: React.ReactElement) => void) {
     rerender(
       <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
         <CreateSessionMapPane {...props} mapRequested mapMounted={false} />
@@ -201,7 +211,32 @@ describe("CreateSessionMapPane", () => {
     act(() => {
       lastMapViewModel?.onBoundsChange?.(usableBounds);
     });
+  }
 
+  it("keeps the focused facade mounted while busy, then hands focus to the map", () => {
+    const { props, rerender } = renderPane({
+      mapRequested: false,
+      mapMounted: false,
+    });
+    const facade = screen.getByRole("button", { name: "Open map" });
+    facade.focus();
+    fireEvent.click(facade);
+
+    requestThenLoad(props, rerender);
+
+    // Same element survives the request (focus not dropped to <body>).
+    expect(screen.getByTestId("create-session-map-facade")).toBe(facade);
     expect(fakeCanvas.focus).toHaveBeenCalledTimes(1);
+  });
+
+  it("leaves focus alone when the facade was not focused at mount", () => {
+    const { props, rerender } = renderPane({
+      mapRequested: false,
+      mapMounted: false,
+    });
+
+    requestThenLoad(props, rerender);
+
+    expect(fakeCanvas.focus).not.toHaveBeenCalled();
   });
 });

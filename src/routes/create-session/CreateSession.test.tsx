@@ -282,7 +282,7 @@ describe("CreateSession", () => {
     expect(screen.queryByText("Loading map…")).not.toBeInTheDocument();
   });
 
-  it("mounts the map on search intent", async () => {
+  it("mounts the map on search intent", () => {
     renderCreateSession();
 
     fireEvent.change(screen.getByPlaceholderText("Dublin, Ireland"), {
@@ -312,5 +312,41 @@ describe("CreateSession", () => {
     });
     const [gameArea] = startSeaLevelBackgroundSampling.mock.calls[0]!;
     expect(gameArea).toMatchObject({ type: "Polygon" });
+  });
+
+  it("mounts the map on boundary import intent", () => {
+    parseBoundaryFile.mockReturnValue(new Promise(() => {}));
+    renderCreateSession();
+
+    importBoundaryFile();
+
+    expect(screen.getByTestId("create-map")).toBeInTheDocument();
+  });
+
+  it("mounts the map on framing-mode change (circle needs map taps)", () => {
+    renderCreateSession();
+
+    fireEvent.click(screen.getByRole("radio", { name: "Circle" }));
+
+    expect(screen.getByTestId("create-map")).toBeInTheDocument();
+  });
+
+  it("Confirm reports a map load failure instead of blaming the player", async () => {
+    vi.useFakeTimers();
+    try {
+      renderCreateSession();
+
+      fireEvent.click(
+        screen.getByRole("button", { name: /confirm game area/i }),
+      );
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(10_000);
+      });
+
+      expect(screen.getByText(/the map couldn't load/i)).toBeInTheDocument();
+      expect(startSeaLevelBackgroundSampling).not.toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });
