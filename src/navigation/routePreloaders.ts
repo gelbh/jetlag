@@ -1,5 +1,8 @@
 import type { To } from "react-router-dom";
-import { lazyWithChunkRetry } from "../domain/device/updates/lazyWithChunkRetry";
+import {
+  lazyWithChunkRetry,
+  type LazyRouteComponent,
+} from "../domain/device/updates/lazyWithChunkRetry";
 import {
   lazyRouteLoaderKey,
   normalizeRoutePath,
@@ -102,10 +105,9 @@ export const TermsLazy = lazyWithChunkRetry(importTerms);
 export const NotFoundLazy = lazyWithChunkRetry(importNotFound);
 export const AppResumeWatchdogLazy = lazyWithChunkRetry(importAppResumeWatchdog);
 
-const lazyRouteByLoaderKey: Record<
-  LazyRouteLoaderKey,
-  { preload: () => Promise<void> }
-> = {
+// Hover/intent warmers (`preloadRoute`) keep using `routeImporter`; only hydration needs the
+// lazy component itself resolved.
+const lazyRouteByLoaderKey: Record<LazyRouteLoaderKey, LazyRouteComponent> = {
   importMapScreen: MapScreenLazy,
   importCreateSession: CreateSessionLazy,
   importJoinSession: JoinSessionLazy,
@@ -126,7 +128,8 @@ const lazyRouteByLoaderKey: Record<
  * hydrates the route in the first pass instead of leaving it dehydrated.
  */
 export async function preloadLazyRouteComponent(path: string): Promise<void> {
-  const loaderKey = lazyRouteLoaderKey(path);
+  // Assets also serve `/join/` from dist/join/index.html.
+  const loaderKey = lazyRouteLoaderKey(path.length > 1 ? path.replace(/\/$/, "") : path);
   if (loaderKey) {
     await lazyRouteByLoaderKey[loaderKey].preload();
   }

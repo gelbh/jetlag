@@ -51,11 +51,19 @@ export function lazyWithChunkRetry(
   getReloadContext?: () => ChunkReloadContext,
 ) {
   let loaded: LazyModule | undefined;
+  let pending: Promise<LazyModule> | undefined;
+  // Shared in-flight load: a preload racing the first render must not import twice.
   const load = () =>
-    importFn().then((module) => {
-      loaded = module;
-      return module;
-    });
+    (pending ??= importFn().then(
+      (module) => {
+        loaded = module;
+        return module;
+      },
+      (error: unknown) => {
+        pending = undefined;
+        throw error;
+      },
+    ));
 
   const component = lazy(() =>
     loaded ? resolvedThenable(loaded) : load().catch((error) => {
@@ -90,3 +98,5 @@ export function lazyWithChunkRetry(
 
   return Object.assign(component, { preload });
 }
+
+export type LazyRouteComponent = ReturnType<typeof lazyWithChunkRetry>;

@@ -144,9 +144,9 @@ test("@smoke prerendered join fills the invite code after hydrating", async ({
   page,
 }) => {
   await prepareE2EPage(page);
-  await openPrerendered(page, "/join?code=ABCD");
+  await openPrerendered(page, "/join?code=WXYZ");
 
-  await expect(page.getByPlaceholder("ABCD")).toHaveValue("ABCD");
+  await expect(page.getByPlaceholder("ABCD")).toHaveValue("WXYZ");
   await expectCleanHydration(page);
 });
 

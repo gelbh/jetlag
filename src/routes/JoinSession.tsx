@@ -15,6 +15,7 @@ import {
   type JoinSessionFormValues,
   joinSessionFormSchema,
 } from "@/domain/session/join/joinSessionForm";
+import { useHydrated } from "@/hooks/app/useHydrated";
 import type { PlayerRole } from "@/domain/session/players/playerRole";
 import { playerRoleLabel } from "@/domain/session/players/playerRole";
 import { normalizeRolePasscode } from "@/domain/session/players/rolePasscode";
@@ -25,7 +26,6 @@ import {
 } from "@/services/session/sessionCodes";
 import { parseSessionInviteCode } from "@/services/session/sessionInviteUrl";
 import { useJoinSession } from "./join-session/useJoinSession";
-import { useHydrated } from "@/hooks/app/useHydrated";
 
 const JOIN_ROLE_OPTIONS: Array<{ value: PlayerRole; label: string }> = [
   { value: "seeker", label: playerRoleLabel("seeker") },
@@ -51,8 +51,8 @@ function validateJoinForm(values: JoinSessionFormValues) {
 export function JoinSession() {
   const [searchParams] = useSearchParams();
   // The prerendered /join has no query. Read `?code` only after hydration so the first render
-  // matches it; the change-detection below then fills the field (React does not write input
-  // values while hydrating).
+  // matches it; the `prevCodeFromQuery` sync below then fills the field (React does not write
+  // input values while hydrating).
   const hydrated = useHydrated();
   const codeFromQuery = hydrated ? searchParams.get("code") : null;
 

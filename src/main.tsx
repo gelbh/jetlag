@@ -3,7 +3,7 @@ import "@fontsource/source-sans-3/500.css";
 import "@fontsource/source-sans-3/600.css";
 import "@fontsource/barlow-semi-condensed/600.css";
 import "@fontsource/barlow-semi-condensed/700.css";
-import { type ErrorInfo, StrictMode } from "react";
+import { type ComponentType, type ErrorInfo, type ReactNode, StrictMode } from "react";
 import { createRoot, hydrateRoot } from "react-dom/client";
 import { markEmbedShellAttribute } from "./domain/device/embed/embedMode";
 import { markPlayDay, PWA_MARK_NAV } from "./domain/device/perf/playDayMarks.ts";
@@ -52,6 +52,14 @@ function onRecoverableError(error: unknown, errorInfo: ErrorInfo): void {
     .catch(() => {});
 }
 
+function appTree(App: ComponentType): ReactNode {
+  return (
+    <StrictMode>
+      <App />
+    </StrictMode>
+  );
+}
+
 function renderApp(): Promise<void> {
   markPlayDay(PWA_MARK_NAV);
   const rootEl = document.getElementById("root")!;
@@ -59,28 +67,19 @@ function renderApp(): Promise<void> {
   // (and its LCP element) instead of replacing it. The SPA shell has no marker.
   if (rootEl.dataset.prerendered !== "true") {
     return import("./App.tsx").then(({ default: App }) => {
-      createRoot(rootEl).render(
-        <StrictMode>
-          <App />
-        </StrictMode>,
-      );
+      createRoot(rootEl).render(appTree(App));
     });
   }
-  return Promise.all([
-    import("./App.tsx"),
-    import("./navigation/routePreloaders.ts"),
-  ]).then(async ([{ default: App }, { preloadLazyRouteComponent }]) => {
-    // A lazy route still loading when hydration starts stays dehydrated, and the first ancestor
-    // re-render then client-renders it, discarding the prerendered DOM. A failed load hydrates
-    // anyway; the lazy route's own chunk retry takes over.
-    await preloadLazyRouteComponent(window.location.pathname).catch(() => {});
-    hydrateRoot(
-      rootEl,
-      <StrictMode>
-        <App />
-      </StrictMode>,
-      { onRecoverableError },
-    );
+  // A lazy route still loading when hydration starts stays dehydrated, and the first ancestor
+  // re-render then client-renders it, discarding the prerendered DOM. Load it alongside App;
+  // a failed load hydrates anyway and the lazy route's own chunk retry takes over.
+  const routeReady = import("./navigation/routePreloaders.ts")
+    .then(({ preloadLazyRouteComponent }) =>
+      preloadLazyRouteComponent(window.location.pathname),
+    )
+    .catch(() => {});
+  return Promise.all([import("./App.tsx"), routeReady]).then(([{ default: App }]) => {
+    hydrateRoot(rootEl, appTree(App), { onRecoverableError });
   });
 }
 

@@ -170,6 +170,7 @@ function openTagWithIdRe(id) {
 
 const ROOT_OPEN_TAG_RE = openTagWithIdRe("root");
 const BOOT_SPLASH_OPEN_TAG_RE = openTagWithIdRe("boot-splash");
+const META_TAG_RE = new RegExp(String.raw`<meta\b${TAG_ATTRS}>`, "gi");
 
 /** True when the `#root` opening tag carries `data-prerendered="true"` (the hydrate marker). */
 export function hasPrerenderedRootMarker(html) {
@@ -185,7 +186,7 @@ export function hasBootSplashElement(html) {
 /** `content` of `<meta name="robots">`, or undefined. */
 export function robotsMetaContent(html) {
   const masked = maskInert(html);
-  for (const match of masked.matchAll(new RegExp(String.raw`<meta\b${TAG_ATTRS}>`, "gi"))) {
+  for (const match of masked.matchAll(META_TAG_RE)) {
     if (attr(match[0], "name")?.toLowerCase() === "robots") {
       return attr(match[0], "content");
     }
