@@ -1,8 +1,13 @@
 import { Alert, Paper } from "@mantine/core";
 import type { ReactNode } from "react";
 import { jetlagBrand } from "@/theme/theme";
+import {
+  floatToneStyles,
+  toneAlertColor,
+  type MapFloatTone,
+} from "./mapFloatToneStyles";
 
-export type MapFloatTone = "default" | "flag" | "halt" | "warn" | "info";
+export type { MapFloatTone };
 
 export type MapFloatSurfaceProps = {
   tone: MapFloatTone;
@@ -18,36 +23,6 @@ export type MapFloatSurfaceProps = {
   /** Paper path: copy + actions side-by-side (MapFloatAlertPanel). */
   actionRow?: boolean;
 };
-
-const toneAccent: Record<MapFloatTone, string> = {
-  default: jetlagBrand.highlight,
-  flag: jetlagBrand.flag,
-  halt: jetlagBrand.halt,
-  warn: jetlagBrand.signal,
-  info: jetlagBrand.trail,
-};
-
-const toneAlertColor: Record<MapFloatTone, string> = {
-  default: "gray",
-  flag: "flag",
-  halt: "halt",
-  warn: "yellow",
-  info: "teal",
-};
-
-function floatToneStyles(tone: MapFloatTone) {
-  const accent = toneAccent[tone];
-  return {
-    root: {
-      backgroundColor: `oklch(from ${accent} l c h / 0.12)`,
-      border: `${jetlagBrand.hairline} solid oklch(from ${accent} l c h / 0.35)`,
-      boxShadow: jetlagBrand.floatShadow,
-    },
-    title: {
-      color: accent,
-    },
-  } as const;
-}
 
 /**
  * Shared Mantine float chrome for map / HudBanner surfaces.
