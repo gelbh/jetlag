@@ -3,7 +3,7 @@
  * Reuses Matching icons for shared POI types; metro/custom/pin are Tentacle-only.
  */
 import type { ComponentType } from "react";
-import { MapPin, Tag, Train, type IconProps } from "@phosphor-icons/react";
+import { MapPinIcon, TagIcon, TrainIcon, type IconProps } from "@phosphor-icons/react";
 import type {
   MatchingCategoryId,
   TentacleExtendedCategoryId,
@@ -15,13 +15,13 @@ export function tentacleCategoryIcon(
   categoryId: TentacleExtendedCategoryId,
 ): ComponentType<IconProps> {
   if (categoryId === "metro_line") {
-    return Train;
+    return TrainIcon;
   }
   if (categoryId.startsWith("pin:")) {
-    return MapPin;
+    return MapPinIcon;
   }
   if (categoryId.startsWith("custom:")) {
-    return Tag;
+    return TagIcon;
   }
   return matchingCategoryIcon(categoryId as MatchingCategoryId);
 }

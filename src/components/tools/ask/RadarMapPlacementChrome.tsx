@@ -2,7 +2,7 @@
  * Map-first Radar chrome: shared placement shell + Yes/No + distance mid-strip.
  */
 import { Button, UnstyledButton } from "@mantine/core";
-import { Check, PaperPlaneTilt, X } from "@phosphor-icons/react";
+import { CheckIcon, PaperPlaneTiltIcon, XIcon } from "@phosphor-icons/react";
 import { HudRadarIcon } from "@/components/map/icons/ToolIcons";
 import {
   AskMapPlacementChrome,
@@ -172,7 +172,7 @@ export function RadarMapPlacementChrome({
               const tone = option.activeClassName.includes("status-success")
                 ? "success"
                 : "danger";
-              const Icon = option.value === "yes" ? Check : X;
+              const Icon = option.value === "yes" ? CheckIcon : XIcon;
               return (
                 <UnstyledButton
                   key={option.value}
@@ -225,7 +225,7 @@ export function RadarMapPlacementChrome({
               aria-busy={isSubmitting || undefined}
               leftSection={
                 isSubmitting ? undefined : (
-                  <PaperPlaneTilt size={16} weight="fill" aria-hidden />
+                  <PaperPlaneTiltIcon size={16} weight="fill" aria-hidden />
                 )
               }
               styles={askMapPlacementSendStyles}

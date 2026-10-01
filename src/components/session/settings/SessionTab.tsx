@@ -1,11 +1,6 @@
 import { useState, type ReactNode } from "react";
 import { Button, Stack } from "@mantine/core";
-import {
-  BookOpen,
-  Export,
-  Scroll,
-  WarningCircle,
-} from "@phosphor-icons/react";
+import { BookOpenIcon, ExportIcon, ScrollIcon, WarningCircleIcon } from "@phosphor-icons/react";
 import { SettingsToggleRow } from "../settings/SettingsToggleRow";
 import {
   InsetGroup,
@@ -92,7 +87,7 @@ export function MapSettingsSessionTab({
     helpItems.push({
       key: "guide",
       label: "Map tools guide",
-      icon: <BookOpen size={20} weight="duotone" />,
+      icon: <BookOpenIcon size={20} weight="duotone" />,
       onClick: onReviewMapTools,
     });
   }
@@ -100,7 +95,7 @@ export function MapSettingsSessionTab({
     helpItems.push({
       key: "report",
       label: "Report a problem",
-      icon: <WarningCircle size={20} weight="duotone" />,
+      icon: <WarningCircleIcon size={20} weight="duotone" />,
       onClick: onReportProblem,
     });
   }
@@ -108,15 +103,15 @@ export function MapSettingsSessionTab({
     helpItems.push({
       key: "curse",
       label: "Expansion curse reference",
-      icon: <Scroll size={20} weight="duotone" />,
+      icon: <ScrollIcon size={20} weight="duotone" />,
       onClick: onOpenCurseReference,
     });
   }
   if (onExport) {
     helpItems.push({
       key: "export",
-      label: "Export map",
-      icon: <Export size={20} weight="duotone" />,
+      label: "ExportIcon map",
+      icon: <ExportIcon size={20} weight="duotone" />,
       onClick: onExport,
     });
   }

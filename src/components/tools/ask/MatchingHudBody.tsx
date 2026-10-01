@@ -6,15 +6,7 @@ import { AskHudPanel } from "@/components/tools/ask/AskHudPanel";
  */
 import { createElement, useState, type ComponentType } from "react";
 import { UnstyledButton } from "@mantine/core";
-import {
-  Buildings,
-  MapPinArea,
-  SquaresFour,
-  Train,
-  Tree,
-  Wrench,
-  type IconProps,
-} from "@phosphor-icons/react";
+import { BuildingsIcon, MapPinAreaIcon, SquaresFourIcon, TrainIcon, TreeIcon, WrenchIcon, type IconProps } from "@phosphor-icons/react";
 import { AskCatalogRail } from "@/components/tools/ask/AskCatalogRail";
 import { AskToolQuestionHeader } from "@/components/tools/ask/AskToolQuestionHeader";
 import { HudMatchingIcon } from "@/components/map/icons/ToolIcons";
@@ -64,12 +56,12 @@ const GROUP_CHIP_ICON: Record<
   GroupFilter,
   ComponentType<IconProps>
 > = {
-  all: SquaresFour,
-  transit: Train,
-  administrative_divisions: Buildings,
-  natural: Tree,
-  places_of_interest: MapPinArea,
-  public_utilities: Wrench,
+  all: SquaresFourIcon,
+  transit: TrainIcon,
+  administrative_divisions: BuildingsIcon,
+  natural: TreeIcon,
+  places_of_interest: MapPinAreaIcon,
+  public_utilities: WrenchIcon,
 };
 
 const MATCHING_QUESTION_INTRO = {

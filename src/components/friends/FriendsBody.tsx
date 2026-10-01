@@ -10,20 +10,7 @@ import {
   TextInput,
   UnstyledButton,
 } from "@mantine/core";
-import {
-  ArrowsClockwise,
-  CaretRight,
-  Check,
-  CircleNotch,
-  GameController,
-  MagnifyingGlass,
-  PaperPlaneTilt,
-  Trophy,
-  UserMinus,
-  UserPlus,
-  UsersThree,
-  X,
-} from "@phosphor-icons/react";
+import { ArrowsClockwiseIcon, CaretRightIcon, CheckIcon, CircleNotchIcon, GameControllerIcon, MagnifyingGlassIcon, PaperPlaneTiltIcon, TrophyIcon, UserMinusIcon, UserPlusIcon, UsersThreeIcon, XIcon } from "@phosphor-icons/react";
 import {
   useRef,
   useState,
@@ -180,7 +167,7 @@ function RowChevron() {
       style={{ display: "inline-flex", flexShrink: 0 }}
       aria-hidden
     >
-      <CaretRight size={16} weight="bold" />
+      <CaretRightIcon size={16} weight="bold" />
     </Box>
   );
 }
@@ -369,7 +356,7 @@ function PullToRefresh({
         }}
         aria-hidden={!refreshing && pull === 0}
       >
-        <ArrowsClockwise
+        <ArrowsClockwiseIcon
           size={16}
           weight="bold"
           className={refreshing ? "loading-spinner" : undefined}
@@ -652,7 +639,7 @@ function FriendDetailDrawer({
                 unavailable={busy && activeAction !== "request"}
                 idleLabel="Send request"
                 busyLabel="Requesting…"
-                leftSection={<UserPlus size={18} weight="bold" />}
+                leftSection={<UserPlusIcon size={18} weight="bold" />}
                 onClick={() => {
                   setPendingAction("request");
                   onRequest();
@@ -671,13 +658,13 @@ function FriendDetailDrawer({
                     busy={inviting}
                     idleLabel={`Invite to ${inviteSessionCode}`}
                     busyLabel="Inviting…"
-                    leftSection={<PaperPlaneTilt size={18} weight="bold" />}
+                    leftSection={<PaperPlaneTiltIcon size={18} weight="bold" />}
                     onClick={() => void inviteToSession()}
                     styles={filledStyles}
                   />
                   <Button
                     fullWidth
-                    leftSection={<GameController size={18} weight="bold" />}
+                    leftSection={<GameControllerIcon size={18} weight="bold" />}
                     onClick={startNewGame}
                     styles={grayStyles}
                   >
@@ -687,7 +674,7 @@ function FriendDetailDrawer({
               ) : (
                 <Button
                   fullWidth
-                  leftSection={<GameController size={18} weight="bold" />}
+                  leftSection={<GameControllerIcon size={18} weight="bold" />}
                   onClick={startNewGame}
                   styles={filledStyles}
                 >
@@ -699,12 +686,12 @@ function FriendDetailDrawer({
                 <InsetRow
                   to={`/leaderboard?user=${encodeURIComponent(entry.username)}`}
                   label="View on leaderboard"
-                  icon={<Trophy size={22} weight="regular" />}
+                  icon={<TrophyIcon size={22} weight="regular" />}
                 />
                 <InsetRow
                   showSeparator
                   label={confirmRemove ? "Confirm remove" : "Remove friend"}
-                  icon={<UserMinus size={22} weight="regular" />}
+                  icon={<UserMinusIcon size={22} weight="regular" />}
                   tone="halt"
                   showChevron={false}
                   onClick={() => {
@@ -731,7 +718,7 @@ function FriendDetailDrawer({
                   setPendingAction("accept");
                   onAccept();
                 }}
-                leftSection={<Check size={18} weight="bold" />}
+                leftSection={<CheckIcon size={18} weight="bold" />}
                 styles={filledStyles}
               />
               <EntryAsyncButton
@@ -764,7 +751,7 @@ function FriendDetailDrawer({
                   setPendingAction("cancel");
                   onCancel();
                 }}
-                leftSection={<UserMinus size={16} weight="bold" />}
+                leftSection={<UserMinusIcon size={16} weight="bold" />}
                 styles={grayStyles}
               />
             </>
@@ -817,9 +804,9 @@ export function FriendsBody() {
 
   const tabEmptyIcon =
     model.listTab === "friends" ? (
-      <UsersThree size={28} weight="regular" />
+      <UsersThreeIcon size={28} weight="regular" />
     ) : (
-      <PaperPlaneTilt size={28} weight="regular" />
+      <PaperPlaneTiltIcon size={28} weight="regular" />
     );
 
   const tabSubtitle =
@@ -919,7 +906,7 @@ export function FriendsBody() {
                             },
                           }}
                         >
-                          <X size={14} weight="bold" />
+                          <XIcon size={14} weight="bold" />
                         </ActionIcon>
                       ) : null
                     }
@@ -957,7 +944,7 @@ export function FriendsBody() {
                   },
                 }}
               >
-                <MagnifyingGlass size={22} weight="bold" aria-hidden />
+                <MagnifyingGlassIcon size={22} weight="bold" aria-hidden />
               </ActionIcon>
             </Group>
             <FieldError>{model.queryError}</FieldError>
@@ -971,7 +958,7 @@ export function FriendsBody() {
         {model.error ? <ErrorCallout>{model.error}</ErrorCallout> : null}
 
         {showSearchEmpty ? (
-          <EmptyInset icon={<MagnifyingGlass size={28} weight="regular" />}>
+          <EmptyInset icon={<MagnifyingGlassIcon size={28} weight="regular" />}>
             No users found for that username.
           </EmptyInset>
         ) : null}
@@ -994,7 +981,7 @@ export function FriendsBody() {
                         aria-label={`Request ${entry.username}`}
                         leftSection={
                           model.busyUid === entry.uid ? undefined : (
-                            <UserPlus size={14} weight="bold" aria-hidden />
+                            <UserPlusIcon size={14} weight="bold" aria-hidden />
                           )
                         }
                         onClick={() => void model.requestFriend(entry.uid)}
@@ -1026,7 +1013,7 @@ export function FriendsBody() {
           {model.loadingList ? (
             <InsetGroup>
               <Group gap={10} px="md" py="md" c="var(--color-field-ink-muted)">
-                <CircleNotch
+                <CircleNotchIcon
                   size={18}
                   weight="bold"
                   className="loading-spinner"
@@ -1113,14 +1100,14 @@ function FriendTabRow({
             <>
               <FriendSwipeAction
                 label="Decline"
-                icon={<X size={20} weight="bold" />}
+                icon={<XIcon size={20} weight="bold" />}
                 tone="halt"
                 disabled={busy}
                 onClick={onDecline}
               />
               <FriendSwipeAction
                 label="Accept"
-                icon={<Check size={20} weight="bold" />}
+                icon={<CheckIcon size={20} weight="bold" />}
                 tone="flag"
                 disabled={busy}
                 primary
@@ -1149,7 +1136,7 @@ function FriendTabRow({
           actions={
             <FriendSwipeAction
               label="Cancel"
-              icon={<UserMinus size={20} weight="bold" />}
+              icon={<UserMinusIcon size={20} weight="bold" />}
               tone="halt"
               disabled={busy}
               primary

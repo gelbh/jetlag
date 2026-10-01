@@ -1,5 +1,5 @@
 import { Box, Text, UnstyledButton } from "@mantine/core";
-import { CaretRight } from "@phosphor-icons/react";
+import { CaretRightIcon } from "@phosphor-icons/react";
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 
@@ -66,7 +66,7 @@ export function InsetRow({
           style={{ display: "inline-flex", flexShrink: 0 }}
           aria-hidden
         >
-          <CaretRight size={16} weight="bold" />
+          <CaretRightIcon size={16} weight="bold" />
         </Box>
       ) : null}
     </>

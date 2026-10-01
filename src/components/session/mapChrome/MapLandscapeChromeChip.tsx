@@ -3,7 +3,7 @@ import type { PendingQuestionRecord } from "@/domain/session/activity/sessionCha
 import type { SessionRulesInput } from "@/domain/session/rules";
 import type { TimerState } from "@/domain/session/timer/timer";
 import { Paper } from "@mantine/core";
-import { CaretDown, CaretUp } from "@phosphor-icons/react";
+import { CaretDownIcon, CaretUpIcon } from "@phosphor-icons/react";
 import { surveySyncShortLabel } from "@/domain/device/surveyStatusCopy";
 import { mapChromeSurfaceStyles } from "@/components/ui/entry/entryChrome";
 import { JlIcon } from "../../ui/brand/JlIcon";
@@ -89,7 +89,7 @@ export function MapLandscapeChromeChip({
         </span>
       ) : null}
       <JlIcon
-        icon={collapsed ? CaretUp : CaretDown}
+        icon={collapsed ? CaretUpIcon : CaretDownIcon}
         size={14}
         weight="bold"
         className="shrink-0 text-[var(--color-flag)]"

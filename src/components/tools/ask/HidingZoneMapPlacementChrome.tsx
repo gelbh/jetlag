@@ -3,7 +3,7 @@
  */
 import { useLayoutEffect } from "react";
 import { Button } from "@mantine/core";
-import { Check } from "@phosphor-icons/react";
+import { CheckIcon } from "@phosphor-icons/react";
 import { HudZoneIcon } from "@/components/map/icons/ToolIcons";
 import { TransitStationPicker } from "@/components/hider/TransitStationPicker";
 import {
@@ -196,7 +196,7 @@ export function HidingZoneMapPlacementChrome({
         aria-busy={zoneTool.saving || undefined}
         leftSection={
           zoneTool.saving ? undefined : (
-            <Check size={16} weight="bold" aria-hidden />
+            <CheckIcon size={16} weight="bold" aria-hidden />
           )
         }
         styles={askMapPlacementSendStyles}

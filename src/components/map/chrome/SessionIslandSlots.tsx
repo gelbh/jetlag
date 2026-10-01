@@ -1,13 +1,5 @@
 import type { ReactNode } from "react";
-import {
-  ChatCircle,
-  CheckFat,
-  GearSix,
-  Notebook,
-  SealWarning,
-  Star,
-  WarningCircle,
-} from "@phosphor-icons/react";
+import { ChatCircleIcon, CheckFatIcon, GearSixIcon, NotebookIcon, SealWarningIcon, StarIcon, WarningCircleIcon } from "@phosphor-icons/react";
 import { ChatUnreadBadge } from "../../chat/ChatUnreadBadge";
 import { JlIcon } from "../../ui/brand/JlIcon";
 import { MapChromeControl } from "./MapChromeControl";
@@ -52,7 +44,7 @@ export function SessionIslandSlots({
           disabled={inactive}
           onClick={onOpenSettings}
           aria-label="Open settings"
-          icon={<JlIcon icon={GearSix} size={20} weight="regular" />}
+          icon={<JlIcon icon={GearSixIcon} size={20} weight="regular" />}
           label="Settings"
         />
       ) : null}
@@ -70,7 +62,7 @@ export function SessionIslandSlots({
           iconClassName="jl-unread-badge-host relative"
           icon={
             <>
-              <JlIcon icon={ChatCircle} size={20} weight="regular" />
+              <JlIcon icon={ChatCircleIcon} size={20} weight="regular" />
               {hasUnreadChat ? <ChatUnreadBadge count={unreadCount} /> : null}
             </>
           }
@@ -84,7 +76,7 @@ export function SessionIslandSlots({
           disabled={inactive}
           onClick={onOpenLog}
           aria-label="Open session log"
-          icon={<JlIcon icon={Notebook} size={20} weight="regular" />}
+          icon={<JlIcon icon={NotebookIcon} size={20} weight="regular" />}
           label="Log"
         />
       ) : null}
@@ -96,7 +88,7 @@ export function SessionIslandSlots({
           onClick={onOpenReportProblem}
           aria-label="Report a problem"
           data-survey-priority="secondary"
-          icon={<JlIcon icon={WarningCircle} size={20} weight="regular" />}
+          icon={<JlIcon icon={WarningCircleIcon} size={20} weight="regular" />}
           label="Report"
         />
       ) : null}
@@ -108,7 +100,7 @@ export function SessionIslandSlots({
           onClick={onOpenCodes}
           aria-label="Open role codes"
           data-survey-priority="secondary"
-          icon={<JlIcon icon={Star} size={20} weight="regular" />}
+          icon={<JlIcon icon={StarIcon} size={20} weight="regular" />}
           label="Codes"
         />
       ) : null}
@@ -120,7 +112,7 @@ export function SessionIslandSlots({
           onClick={onRequestFoundHider}
           aria-label="Declare found hider"
           data-survey-priority="secondary"
-          icon={<JlIcon icon={CheckFat} size={20} weight="bold" />}
+          icon={<JlIcon icon={CheckFatIcon} size={20} weight="bold" />}
           label="Found"
         />
       ) : null}
@@ -132,7 +124,7 @@ export function SessionIslandSlots({
           onClick={onStartEndGame}
           aria-label="Declare found hiding-zone station / start end game"
           data-survey-priority="secondary"
-          icon={<JlIcon icon={SealWarning} size={20} weight="bold" />}
+          icon={<JlIcon icon={SealWarningIcon} size={20} weight="bold" />}
           label="Station"
         />
       ) : null}

@@ -7,7 +7,7 @@ import {
   Text,
   TextInput,
 } from "@mantine/core";
-import { PaperPlaneTilt } from "@phosphor-icons/react";
+import { PaperPlaneTiltIcon } from "@phosphor-icons/react";
 import type { SessionMessageRecord } from "../../domain/session/activity/sessionChat";
 import { createMessageId } from "../../domain/session/activity/sessionChat";
 import type { PlayerRole } from "../../domain/session/players/playerRole";
@@ -179,7 +179,7 @@ export function SocialChatTab({
               },
             }}
           >
-            <PaperPlaneTilt size={18} weight="fill" aria-hidden />
+            <PaperPlaneTiltIcon size={18} weight="fill" aria-hidden />
           </ActionIcon>
         </Group>
       )}

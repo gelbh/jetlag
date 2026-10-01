@@ -1,5 +1,5 @@
 import { Popup as MapLibrePopup } from "react-map-gl/maplibre";
-import { X } from "@phosphor-icons/react";
+import { XIcon } from "@phosphor-icons/react";
 import type { ReactNode } from "react";
 
 interface MapLibreFeaturePopupProps {
@@ -39,7 +39,7 @@ export function MapLibreFeaturePopup({
           aria-label="Close"
           onClick={onClose}
         >
-          <X size={14} weight="bold" aria-hidden />
+          <XIcon size={14} weight="bold" aria-hidden />
         </button>
         {children}
       </div>

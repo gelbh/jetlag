@@ -2,7 +2,7 @@
  * Map-first Tentacle chrome: shared placement shell + map-primary answer strip.
  */
 import { Button } from "@mantine/core";
-import { PaperPlaneTilt } from "@phosphor-icons/react";
+import { PaperPlaneTiltIcon } from "@phosphor-icons/react";
 import { HudTentacleIcon } from "@/components/map/icons/ToolIcons";
 import {
   AskMapPlacementChrome,
@@ -102,7 +102,7 @@ export function TentacleMapPlacementChrome({
               aria-busy={isSubmitting || undefined}
               leftSection={
                 isSubmitting ? undefined : (
-                  <PaperPlaneTilt size={16} weight="fill" aria-hidden />
+                  <PaperPlaneTiltIcon size={16} weight="fill" aria-hidden />
                 )
               }
               styles={askMapPlacementSendStyles}

@@ -1,12 +1,6 @@
 import { useState } from "react";
 import { Button, Container, Stack, Text } from "@mantine/core";
-import {
-  Bug,
-  ChatCircleDots,
-  Lightbulb,
-  MagnifyingGlass,
-  WarningCircle,
-} from "@phosphor-icons/react";
+import { BugIcon, ChatCircleDotsIcon, LightbulbIcon, MagnifyingGlassIcon, WarningCircleIcon } from "@phosphor-icons/react";
 import { ReportProblemSheet } from "@/components/incident/ReportProblemSheet";
 import {
   InsetGroup,
@@ -51,7 +45,7 @@ export function Feedback() {
             <SectionLabel>Live support</SectionLabel>
             <Button
               fullWidth
-              leftSection={<WarningCircle size={18} weight="bold" />}
+              leftSection={<WarningCircleIcon size={18} weight="bold" />}
               onClick={() => setReportProblemOpen(true)}
               aria-label="Report a problem"
               styles={filledStyles}
@@ -66,33 +60,33 @@ export function Feedback() {
               <InsetRow
                 href={githubIdeasBrowseUrl()}
                 label="Browse ideas"
-                icon={<MagnifyingGlass size={22} weight="regular" />}
+                icon={<MagnifyingGlassIcon size={22} weight="regular" />}
                 aria-label="Browse improvement ideas on GitHub"
               />
               <InsetRow
                 showSeparator
                 href={githubIdeaSubmitUrl()}
                 label="Suggest improvement"
-                icon={<Lightbulb size={22} weight="regular" />}
+                icon={<LightbulbIcon size={22} weight="regular" />}
                 aria-label="Suggest an improvement on GitHub"
               />
             </InsetGroup>
           </Stack>
 
           <Stack gap={8}>
-            <SectionLabel>Bug reports</SectionLabel>
+            <SectionLabel>BugIcon reports</SectionLabel>
             <InsetGroup>
               <InsetRow
                 href={githubBugsBrowseUrl()}
                 label="Browse bugs"
-                icon={<ChatCircleDots size={22} weight="regular" />}
+                icon={<ChatCircleDotsIcon size={22} weight="regular" />}
                 aria-label="Browse bug reports on GitHub"
               />
               <InsetRow
                 showSeparator
                 href={githubBugReportUrl()}
                 label="Report a bug"
-                icon={<Bug size={22} weight="regular" />}
+                icon={<BugIcon size={22} weight="regular" />}
                 aria-label="Report a bug on GitHub"
               />
             </InsetGroup>

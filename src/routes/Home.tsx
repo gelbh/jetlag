@@ -9,15 +9,7 @@ import {
   Text,
   Title,
 } from "@mantine/core";
-import {
-  Crown,
-  ChartBar,
-  PlusCircle,
-  SignIn,
-  SquaresFour,
-  Trophy,
-  UsersThree,
-} from "@phosphor-icons/react";
+import { CrownIcon, ChartBarIcon, PlusCircleIcon, SignInIcon, SquaresFourIcon, TrophyIcon, UsersThreeIcon } from "@phosphor-icons/react";
 import { Link } from "react-router-dom";
 import {
   InsetGroup,
@@ -161,19 +153,19 @@ export function Home() {
                 <InsetRow
                   to="/join"
                   label="Join session"
-                  icon={<SignIn size={22} weight="regular" />}
+                  icon={<SignInIcon size={22} weight="regular" />}
                 />
                 <InsetRow
                   showSeparator
                   to="/create"
                   label="Create session"
-                  icon={<PlusCircle size={22} weight="regular" />}
+                  icon={<PlusCircleIcon size={22} weight="regular" />}
                 />
                 <InsetRow
                   showSeparator
                   to="/presets"
                   label="Browse presets"
-                  icon={<SquaresFour size={22} weight="regular" />}
+                  icon={<SquaresFourIcon size={22} weight="regular" />}
                 />
               </InsetGroup>
             </Stack>
@@ -184,26 +176,26 @@ export function Home() {
                 <InsetRow
                   to="/friends"
                   label="Friends"
-                  icon={<UsersThree size={22} weight="regular" />}
+                  icon={<UsersThreeIcon size={22} weight="regular" />}
                 />
                 <InsetRow
                   showSeparator
                   to="/leaderboard"
                   label="Leaderboard"
-                  icon={<Trophy size={22} weight="regular" />}
+                  icon={<TrophyIcon size={22} weight="regular" />}
                 />
                 <InsetRow
                   showSeparator
                   to="/stats"
                   label="Stats"
-                  icon={<ChartBar size={22} weight="regular" />}
+                  icon={<ChartBarIcon size={22} weight="regular" />}
                 />
                 {showPremium ? (
                   <InsetRow
                     showSeparator
                     to="/premium"
                     label="Premium"
-                    icon={<Crown size={22} weight="regular" />}
+                    icon={<CrownIcon size={22} weight="regular" />}
                   />
                 ) : null}
               </InsetGroup>

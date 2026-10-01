@@ -3,7 +3,7 @@
  */
 import type { ReactNode } from "react";
 import { Button, UnstyledButton } from "@mantine/core";
-import { PaperPlaneTilt } from "@phosphor-icons/react";
+import { PaperPlaneTiltIcon } from "@phosphor-icons/react";
 import { HudMeasuringIcon } from "@/components/map/icons/ToolIcons";
 import {
   AskMapPlacementChrome,
@@ -218,7 +218,7 @@ export function MeasuringMapPlacementChrome({
               aria-busy={isSubmitting || undefined}
               leftSection={
                 isSubmitting ? undefined : (
-                  <PaperPlaneTilt size={16} weight="fill" aria-hidden />
+                  <PaperPlaneTiltIcon size={16} weight="fill" aria-hidden />
                 )
               }
               styles={askMapPlacementSendStyles}

@@ -1,58 +1,33 @@
 import type { ComponentType } from "react";
-import {
-  AirplaneTilt,
-  Bank,
-  BookOpen,
-  Buildings,
-  City,
-  Confetti,
-  Drop,
-  FilmSlate,
-  FirstAid,
-  Fish,
-  Flag,
-  Golf,
-  GlobeHemisphereWest,
-  House,
-  Island,
-  MapTrifold,
-  Mountains,
-  Path,
-  PawPrint,
-  Tag,
-  Train,
-  Tree,
-  Waves,
-  type IconProps,
-} from "@phosphor-icons/react";
+import { AirplaneTiltIcon, BankIcon, BookOpenIcon, BuildingsIcon, CityIcon, ConfettiIcon, DropIcon, FilmSlateIcon, FirstAidIcon, FishIcon, FlagIcon, GolfIcon, GlobeHemisphereWestIcon, HouseIcon, IslandIcon, MapTrifoldIcon, MountainsIcon, PathIcon, PawPrintIcon, TagIcon, TrainIcon, TreeIcon, WavesIcon, type IconProps } from "@phosphor-icons/react";
 import type { MeasuringFromKind } from "@/domain/questions";
 
 const BUILTIN_ICONS: Partial<
   Record<MeasuringFromKind, ComponentType<IconProps>>
 > = {
-  commercial_airport: AirplaneTilt,
-  high_speed_rail_line: Train,
-  rail_station: Train,
-  international_border: GlobeHemisphereWest,
-  admin1_border: MapTrifold,
-  admin2_border: Buildings,
-  admin3_border: City,
-  admin4_border: House,
-  sea_level: Drop,
-  body_of_water: Waves,
-  coastline: Island,
-  mountain: Mountains,
-  park: Tree,
-  amusement_park: Confetti,
-  zoo: PawPrint,
-  aquarium: Fish,
-  golf_course: Golf,
-  museum: Bank,
-  movie_theater: FilmSlate,
-  hospital: FirstAid,
-  library: BookOpen,
-  foreign_consulate: Flag,
-  custom_place: Path,
+  commercial_airport: AirplaneTiltIcon,
+  high_speed_rail_line: TrainIcon,
+  rail_station: TrainIcon,
+  international_border: GlobeHemisphereWestIcon,
+  admin1_border: MapTrifoldIcon,
+  admin2_border: BuildingsIcon,
+  admin3_border: CityIcon,
+  admin4_border: HouseIcon,
+  sea_level: DropIcon,
+  body_of_water: WavesIcon,
+  coastline: IslandIcon,
+  mountain: MountainsIcon,
+  park: TreeIcon,
+  amusement_park: ConfettiIcon,
+  zoo: PawPrintIcon,
+  aquarium: FishIcon,
+  golf_course: GolfIcon,
+  museum: BankIcon,
+  movie_theater: FilmSlateIcon,
+  hospital: FirstAidIcon,
+  library: BookOpenIcon,
+  foreign_consulate: FlagIcon,
+  custom_place: PathIcon,
 };
 
 export function hasMeasuringCategoryIcon(kind: string): boolean {
@@ -64,7 +39,7 @@ export function hasMeasuringCategoryIcon(kind: string): boolean {
   );
 }
 
-/** Phosphor icon for a Measuring catalog option (custom/pack → Tag). */
+/** Phosphor icon for a Measuring catalog option (custom/pack → TagIcon). */
 export function measuringCategoryIcon(
   kind: MeasuringFromKind,
 ): ComponentType<IconProps> {
@@ -73,7 +48,7 @@ export function measuringCategoryIcon(
     kind.startsWith("pack:") ||
     kind.startsWith("custom_geo:")
   ) {
-    return Tag;
+    return TagIcon;
   }
-  return BUILTIN_ICONS[kind] ?? Tag;
+  return BUILTIN_ICONS[kind] ?? TagIcon;
 }

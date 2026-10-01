@@ -1,4 +1,4 @@
-import { PencilSimple, BoundingBox, MapPin } from "@phosphor-icons/react";
+import { PencilSimpleIcon, BoundingBoxIcon, MapPinIcon } from "@phosphor-icons/react";
 import type { MapTool } from "../../state/sessionStore";
 import {
   MAP_TOOL_DOCK_ENTRIES,
@@ -15,9 +15,9 @@ const markupTools = MAP_TOOL_DOCK_ENTRIES.filter((tool) =>
 );
 
 const MARKUP_ICONS = {
-  zone: BoundingBox,
-  pin: MapPin,
-  draw: PencilSimple,
+  zone: BoundingBoxIcon,
+  pin: MapPinIcon,
+  draw: PencilSimpleIcon,
 } as const;
 
 interface ToolDockDrawMenuProps {

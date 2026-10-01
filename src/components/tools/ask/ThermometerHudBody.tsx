@@ -2,7 +2,7 @@
  * Thermometer Ask HUD — Matching twin: question header + distance catalog, then map-first.
  * Spec: ask-surface-kit-design rev 2026-08-05b.
  */
-import { Crosshair } from "@phosphor-icons/react";
+import { CrosshairIcon } from "@phosphor-icons/react";
 import { AskCatalogRail } from "@/components/tools/ask/AskCatalogRail";
 import { AskToolQuestionHeader } from "@/components/tools/ask/AskToolQuestionHeader";
 import { HudThermometerIcon } from "@/components/map/icons/ToolIcons";
@@ -101,7 +101,7 @@ export function ThermometerHudBody({
       disabled:
         presetMiles !== null && usedDistanceOptions.has(presetMiles),
       icon: (
-        <Crosshair
+        <CrosshairIcon
           size={20}
           weight="duotone"
           color="currentColor"
