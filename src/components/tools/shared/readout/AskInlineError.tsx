@@ -1,5 +1,6 @@
 /* eslint-disable react-refresh/only-export-components -- helpers share the Ask inline-error copy module with the component */
 import { Alert } from "@mantine/core";
+import { floatToneStyles } from "@/components/ui/banners/mapFloatToneStyles";
 
 type AskInlineErrorProps = {
   message: string;
@@ -73,6 +74,7 @@ export function AskInlineError({ message, id }: AskInlineErrorProps) {
       color="halt"
       variant="light"
       title={title}
+      styles={floatToneStyles("halt")}
       data-testid="ask-inline-error"
     >
       {detail}

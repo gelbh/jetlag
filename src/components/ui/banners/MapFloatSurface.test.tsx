@@ -1,9 +1,10 @@
 import { render, screen } from "@testing-library/react";
 import { MantineProvider } from "@mantine/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { jetlagTheme } from "@/theme/theme";
+import { jetlagBrand, jetlagTheme } from "@/theme/theme";
 import { MapFloatSurface } from "./MapFloatSurface";
 import { MapFloatAlert, MapFloatAlertPanel } from "./MapFloatAlert";
+import { floatToneStyles } from "./mapFloatToneStyles";
 
 beforeEach(() => {
   vi.stubGlobal("matchMedia", (query: string) => ({
@@ -16,6 +17,17 @@ beforeEach(() => {
     removeEventListener() {},
     dispatchEvent: () => false,
   }));
+});
+
+describe("floatToneStyles", () => {
+  it("uses frosted canvas fill, not accent-at-0.12 wash", () => {
+    const styles = floatToneStyles("halt");
+    expect(styles.root.backgroundColor).toContain(jetlagBrand.canvas);
+    expect(styles.root.backgroundColor).toMatch(/\/ 0\.92\)/);
+    expect(styles.root.backgroundColor).not.toMatch(/\/ 0\.12\)/);
+    expect(styles.message.color).toBe(jetlagBrand.fieldInk);
+    expect(styles.title.color).toBe(jetlagBrand.halt);
+  });
 });
 
 describe("MapFloatSurface", () => {
