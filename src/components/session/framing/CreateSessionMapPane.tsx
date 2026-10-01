@@ -1,7 +1,17 @@
-import { memo, useEffect, useState, type ReactNode } from "react";
+import {
+  memo,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { Paper, Text } from "@mantine/core";
+import type { Map as MapLibreMap } from "maplibre-gl";
 import type { MapBounds, MapBoundsExpression } from "@/domain/map/mapBounds";
+import { scheduleWhenIdleAfterLoad } from "@/domain/device/perf/scheduleWhenIdleAfterLoad";
 import { MapView } from "../../map/chrome/MapView";
+import { useMapLibreMap } from "../../map/helpers/useMapLibreMap";
 import { FramingPreviewLayers } from "../../map/layers/FramingPreviewLayers";
 import { GameAreaMask } from "../../map/layers/GameAreaMask";
 import type { GameArea } from "@/domain/map/annotations";
@@ -11,6 +21,8 @@ import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
 import { GameAreaFramingStats } from "./GameAreaFramingControls";
 import { framingModeHint } from "./gameAreaFramingUi";
 import { type GameSize } from "@/domain/session/size/gameSize";
+import { CreateSessionMapFacade } from "./CreateSessionMapFacade";
+import { prefetchCreateSessionMap } from "./prefetchCreateSessionMap";
 
 const mapHintPanelStyles = {
   backgroundColor: "oklch(from var(--color-canvas) l c h / 0.92)",
@@ -18,6 +30,9 @@ const mapHintPanelStyles = {
   backdropFilter: "blur(20px) saturate(1.4)",
   WebkitBackdropFilter: "blur(20px) saturate(1.4)",
 } as const;
+
+/** Matches the ensureMapMounted() timeout in useCreateSessionMapMount. */
+const LOADING_PLATE_TIMEOUT_MS = 10_000;
 
 /** Shared outer shell so placeholder and live map keep identical layout (CLS). */
 export const CREATE_SESSION_MAP_SHELL_CLASS =
@@ -33,6 +48,12 @@ interface CreateSessionMapPaneProps {
   circleCenter: LatLngTuple | null;
   circleRadiusMeters: number | null;
   polygonVertices: readonly LatLngTuple[];
+  /** Some intent asked for the live map; until then a static facade stands in. */
+  mapRequested: boolean;
+  /** MapLibre loaded and reported its first viewport. */
+  mapMounted: boolean;
+  onRequestMap: () => void;
+  onMapMounted: (map: MapLibreMap | null) => void;
   onBoundsChange: (bounds: MapBounds) => void;
   onUserViewportFramed: () => void;
   onMapClick?: (lat: number, lng: number) => void;
@@ -40,6 +61,25 @@ interface CreateSessionMapPaneProps {
 
 function CreateSessionMapShell({ children }: { children?: ReactNode }) {
   return <div className={CREATE_SESSION_MAP_SHELL_CLASS}>{children}</div>;
+}
+
+function CreateSessionMapMountSignal({
+  onMapInstance,
+}: {
+  onMapInstance: (map: MapLibreMap | null) => void;
+}) {
+  const mapRef = useMapLibreMap();
+  const onMapInstanceRef = useRef(onMapInstance);
+  useEffect(() => {
+    onMapInstanceRef.current = onMapInstance;
+  }, [onMapInstance]);
+  // Keyed on the MapRef only: a callback identity change must not read as an
+  // unmount (that would drop the first-viewport signal).
+  useEffect(() => {
+    onMapInstanceRef.current(mapRef.getMap());
+    return () => onMapInstanceRef.current(null);
+  }, [mapRef]);
+  return null;
 }
 
 function CreateSessionMapPaneInner({
@@ -52,123 +92,174 @@ function CreateSessionMapPaneInner({
   circleCenter,
   circleRadiusMeters,
   polygonVertices,
+  mapRequested,
+  mapMounted,
+  onRequestMap,
+  onMapMounted,
   onBoundsChange,
   onUserViewportFramed,
   onMapClick,
 }: CreateSessionMapPaneProps) {
-  const [mapReady, setMapReady] = useState(false);
+  const mapInstanceRef = useRef<MapLibreMap | null>(null);
+  const boundsSeenRef = useRef(false);
+  const facadeRef = useRef<HTMLButtonElement>(null);
+  const [loadingPlateExpired, setLoadingPlateExpired] = useState(false);
 
   useEffect(() => {
-    let cancelled = false;
-    let outerRaf = 0;
-    let innerRaf = 0;
-    let idleId: number | undefined;
-    let timeoutId: ReturnType<typeof setTimeout> | undefined;
-
-    outerRaf = requestAnimationFrame(() => {
-      innerRaf = requestAnimationFrame(() => {
-        if (cancelled) {
-          return;
-        }
-        const markReady = () => {
-          if (!cancelled) {
-            setMapReady(true);
-          }
-        };
-        if (typeof requestIdleCallback === "function") {
-          idleId = requestIdleCallback(markReady, { timeout: 500 });
-          return;
-        }
-        timeoutId = setTimeout(markReady, 0);
-      });
+    if (mapRequested) {
+      return;
+    }
+    return scheduleWhenIdleAfterLoad(() => {
+      void prefetchCreateSessionMap();
     });
+  }, [mapRequested]);
 
-    return () => {
-      cancelled = true;
-      cancelAnimationFrame(outerRaf);
-      cancelAnimationFrame(innerRaf);
-      if (idleId !== undefined && typeof cancelIdleCallback === "function") {
-        cancelIdleCallback(idleId);
+  // A map that never reports a viewport (no WebGL, style fetch failed) must not
+  // stay hidden behind the busy plate forever.
+  useEffect(() => {
+    if (!mapRequested || mapMounted) {
+      return;
+    }
+    const timeoutId = setTimeout(
+      () => setLoadingPlateExpired(true),
+      LOADING_PLATE_TIMEOUT_MS,
+    );
+    return () => clearTimeout(timeoutId);
+  }, [mapMounted, mapRequested]);
+
+  // Mounted = MapLibre instance exists AND it has reported its first viewport,
+  // so ensureMapMounted() waiters see the framed rectangle in the same commit.
+  // Load and first bounds can arrive in either order.
+  const signalMountedIfReady = useCallback(() => {
+    const map = mapInstanceRef.current;
+    if (!map || !boundsSeenRef.current) {
+      return;
+    }
+    // The facade unmounts on this signal; keep focus in the map, not <body>.
+    const facadeHadFocus =
+      facadeRef.current !== null &&
+      document.activeElement === facadeRef.current;
+    onMapMounted(map);
+    if (facadeHadFocus) {
+      map.getCanvas().focus();
+    }
+  }, [onMapMounted]);
+
+  const handleMapInstance = useCallback(
+    (map: MapLibreMap | null) => {
+      mapInstanceRef.current = map;
+      if (map) {
+        signalMountedIfReady();
+        return;
       }
-      if (timeoutId !== undefined) {
-        clearTimeout(timeoutId);
+      boundsSeenRef.current = false;
+      onMapMounted(null);
+    },
+    [onMapMounted, signalMountedIfReady],
+  );
+
+  const handleBoundsChange = useCallback(
+    (bounds: MapBounds) => {
+      onBoundsChange(bounds);
+      if (boundsSeenRef.current) {
+        return;
       }
-    };
+      boundsSeenRef.current = true;
+      signalMountedIfReady();
+    },
+    [onBoundsChange, signalMountedIfReady],
+  );
+
+  const handlePrefetchIntent = useCallback(() => {
+    void prefetchCreateSessionMap();
   }, []);
 
-  if (!mapReady) {
-    return (
-      <CreateSessionMapShell>
-        <div className="absolute inset-0 bg-surface-raised" aria-hidden />
-      </CreateSessionMapShell>
-    );
-  }
+  const loading = mapRequested && !mapMounted;
 
   return (
     <CreateSessionMapShell>
-      <div className="absolute inset-0">
-        <MapView
-          model={{
-            mapStyle,
-            onBoundsChange,
-            onUserViewportFramed,
-            onMapClick,
-            zoom: 10,
-            focusBounds,
-            fitBoundsMode: "once",
-            fitBoundsPadding: [48, 48],
-            zoomControlInset: "container",
-            showZoomControl: false,
-            showMapStyleToggle: false,
-            showCompassControl: false,
-            className: "h-full w-full",
-          }}
-        >
-          {manualFramingActive ? (
-            <FramingPreviewLayers
-              gameArea={previewGameArea}
-              framingMode={framingMode}
-              circleCenter={circleCenter}
-              circleRadiusMeters={circleRadiusMeters}
-              polygonVertices={polygonVertices}
-            />
-          ) : previewGameArea ? (
-            <GameAreaMask gameArea={previewGameArea} framing />
-          ) : null}
-        </MapView>
-      </div>
+      {mapRequested ? (
+        <div className="absolute inset-0">
+          <MapView
+            model={{
+              mapStyle,
+              onBoundsChange: handleBoundsChange,
+              onUserViewportFramed,
+              onMapClick,
+              zoom: 10,
+              focusBounds,
+              fitBoundsMode: "once",
+              fitBoundsPadding: [48, 48],
+              zoomControlInset: "container",
+              showZoomControl: false,
+              showMapStyleToggle: false,
+              showCompassControl: false,
+              className: "h-full w-full",
+            }}
+          >
+            <CreateSessionMapMountSignal onMapInstance={handleMapInstance} />
+            {manualFramingActive ? (
+              <FramingPreviewLayers
+                gameArea={previewGameArea}
+                framingMode={framingMode}
+                circleCenter={circleCenter}
+                circleRadiusMeters={circleRadiusMeters}
+                polygonVertices={polygonVertices}
+              />
+            ) : previewGameArea ? (
+              <GameAreaMask gameArea={previewGameArea} framing />
+            ) : null}
+          </MapView>
+        </div>
+      ) : null}
 
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[var(--z-banner)] flex justify-center px-3 pb-3">
-        {previewGameArea ? (
-          <Paper
-            className="max-w-full"
-            radius={14}
-            px="sm"
-            py="xs"
-            style={mapHintPanelStyles}
-          >
-            <GameAreaFramingStats
-              gameArea={previewGameArea}
-              selectedGameSize={selectedGameSize}
-              compact
-            />
-          </Paper>
-        ) : (
-          <Paper
-            className="max-w-md"
-            radius={14}
-            px="sm"
-            py="xs"
-            style={mapHintPanelStyles}
-          >
-            <Text size="xs" c="var(--color-field-ink-muted)" lh={1.35}>
-              {manualFramingActive
-                ? framingModeHint(framingMode)
-                : "Search a place or draw on the map."}
-            </Text>
-          </Paper>
-        )}
-      </div>
+      {/* Same slot before and after intent, so a focused facade stays mounted while busy. */}
+      {!mapMounted && !(loading && loadingPlateExpired) ? (
+        <CreateSessionMapFacade
+          ref={facadeRef}
+          loading={loading}
+          onActivate={onRequestMap}
+          onPrefetchIntent={handlePrefetchIntent}
+        />
+      ) : null}
+
+      <span role="status" aria-live="polite" className="sr-only">
+        {loading ? "Loading map…" : ""}
+      </span>
+
+      {mapRequested ? (
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[var(--z-banner)] flex justify-center px-3 pb-3">
+          {previewGameArea ? (
+            <Paper
+              className="max-w-full"
+              radius={14}
+              px="sm"
+              py="xs"
+              style={mapHintPanelStyles}
+            >
+              <GameAreaFramingStats
+                gameArea={previewGameArea}
+                selectedGameSize={selectedGameSize}
+                compact
+              />
+            </Paper>
+          ) : mapMounted ? (
+            <Paper
+              className="max-w-md"
+              radius={14}
+              px="sm"
+              py="xs"
+              style={mapHintPanelStyles}
+            >
+              <Text size="xs" c="var(--color-field-ink-muted)" lh={1.35}>
+                {manualFramingActive
+                  ? framingModeHint(framingMode)
+                  : "Search a place or draw on the map."}
+              </Text>
+            </Paper>
+          ) : null}
+        </div>
+      ) : null}
     </CreateSessionMapShell>
   );
 }
