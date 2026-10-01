@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { spawn } from "node:child_process";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { createServer } from "node:net";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { chromium } from "playwright";
@@ -16,13 +17,33 @@ import {
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const policy = loadCrawlPolicy(root);
 const shellHtml = readFileSync(spaShellPath(root), "utf8");
-const PORT = 4179;
+
+/**
+ * An OS-assigned free port. A fixed port let a sibling worktree's preview answer
+ * `waitForServer`, so the snapshot silently captured another checkout's build.
+ */
+function freePort() {
+  return new Promise((resolve, reject) => {
+    const server = createServer();
+    server.unref();
+    server.once("error", reject);
+    server.listen(0, "127.0.0.1", () => {
+      const { port } = server.address();
+      server.close(() => resolve(port));
+    });
+  });
+}
+
+const PORT = await freePort();
 const BASE = `http://127.0.0.1:${PORT}`;
 
-function waitForServer(url, timeoutMs = 60_000) {
+function waitForServer(url, child, timeoutMs = 60_000) {
   const start = Date.now();
   return (async () => {
     while (Date.now() - start < timeoutMs) {
+      if (child.exitCode !== null) {
+        throw new Error(`Preview server exited (code ${child.exitCode}) before ${url} answered`);
+      }
       try {
         const res = await fetch(url);
         if (res.ok || res.status === 404) return;
@@ -79,7 +100,7 @@ preview.stderr.on("data", (c) => {
 let browser;
 let exitCode = 0;
 try {
-  await waitForServer(BASE);
+  await waitForServer(BASE, preview);
   try {
     browser = await chromium.launch();
   } catch (error) {
