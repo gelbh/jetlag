@@ -272,6 +272,37 @@ export function captureErrorBoundaryException(
   );
 }
 
+export interface RecoverableErrorDetails {
+  message: string;
+  componentStack?: string;
+  pathname: string;
+}
+
+/**
+ * React `onRecoverableError` (hydration mismatch → client re-render). Breadcrumb only: the page
+ * still works, so it should explain later issues, not raise its own. Written to the isolation
+ * scope directly because it fires before `initSentry`, and `Sentry.addBreadcrumb` drops
+ * breadcrumbs while no client exists.
+ */
+export function addRecoverableErrorBreadcrumb(
+  details: RecoverableErrorDetails,
+): void {
+  if (import.meta.env.MODE === "test") {
+    return;
+  }
+
+  Sentry.getIsolationScope().addBreadcrumb({
+    category: "react.recoverable",
+    message: details.message.slice(0, 300),
+    level: "warning",
+    timestamp: Date.now() / 1000,
+    data: {
+      pathname: details.pathname,
+      componentStack: details.componentStack?.slice(0, 1000),
+    },
+  });
+}
+
 export function setTransactionName(name: string): void {
   Sentry.getCurrentScope().setTransactionName(name);
 }

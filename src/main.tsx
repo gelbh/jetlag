@@ -3,10 +3,11 @@ import "@fontsource/source-sans-3/500.css";
 import "@fontsource/source-sans-3/600.css";
 import "@fontsource/barlow-semi-condensed/600.css";
 import "@fontsource/barlow-semi-condensed/700.css";
-import { StrictMode } from "react";
-import { createRoot } from "react-dom/client";
+import { type ErrorInfo, StrictMode } from "react";
+import { createRoot, hydrateRoot } from "react-dom/client";
 import { markEmbedShellAttribute } from "./domain/device/embed/embedMode";
 import { markPlayDay, PWA_MARK_NAV } from "./domain/device/perf/playDayMarks.ts";
+import { countRecoverableError } from "./domain/device/perf/recoverableErrors.ts";
 import { isPublicShellPath } from "./domain/device/perf/publicShellPaths.ts";
 import { scheduleAfterFirstPaint } from "./domain/device/perf/scheduleAfterFirstPaint.ts";
 import { scheduleWhenIdleAfterLoad } from "./domain/device/perf/scheduleWhenIdleAfterLoad.ts";
@@ -38,14 +39,49 @@ function scheduleDeferredObservability(): void {
   });
 }
 
+function errorMessage(error: unknown): string {
+  if (!(error instanceof Error)) {
+    return String(error);
+  }
+  // Hydration errors wrap the concrete mismatch in `cause`.
+  return error.cause instanceof Error
+    ? `${error.message} (cause: ${error.cause.message})`
+    : error.message;
+}
+
+/** Hydration mismatch: React already re-rendered on the client, so only leave a trace. */
+function onRecoverableError(error: unknown, errorInfo: ErrorInfo): void {
+  countRecoverableError();
+  if (import.meta.env.DEV) {
+    console.error("Recoverable React error", error, errorInfo.componentStack);
+  }
+  void import("./services/core/analytics/lazyTelemetry.ts")
+    .then(({ addRecoverableErrorBreadcrumbLazy }) => {
+      addRecoverableErrorBreadcrumbLazy({
+        message: errorMessage(error),
+        componentStack: errorInfo.componentStack,
+        pathname: window.location.pathname,
+      });
+    })
+    .catch(() => {});
+}
+
 function renderApp(): Promise<void> {
   markPlayDay(PWA_MARK_NAV);
   return import("./App.tsx").then(({ default: App }) => {
-    createRoot(document.getElementById("root")!).render(
+    const rootEl = document.getElementById("root")!;
+    const tree = (
       <StrictMode>
         <App />
-      </StrictMode>,
+      </StrictMode>
     );
+    // scripts/prerender-marketing.mjs marks real-HTML shells; hydrating keeps that first paint
+    // (and its LCP element) instead of replacing it. The SPA shell has no marker.
+    if (rootEl.dataset.prerendered === "true") {
+      hydrateRoot(rootEl, tree, { onRecoverableError });
+      return;
+    }
+    createRoot(rootEl).render(tree);
   });
 }
 

@@ -3,6 +3,7 @@ import { isAndroidDevice, isIosDevice } from "@/domain/device/pwa/detectMobilePl
 import { isStandalonePwa } from "@/domain/device/pwa/isStandalonePwa";
 import { PWA_INSTALL_TIP_DISMISS_KEY } from "@/domain/device/pwa/pwaInstallTipStorage";
 import { shouldOfferPwaInstallTip } from "@/domain/device/pwa/shouldOfferPwaInstallTip";
+import { useHydrated } from "@/hooks/app/useHydrated";
 import { usePersistedDismiss } from "@/hooks/forms/usePersistedDismiss";
 import { usePwaDeferredInstallPrompt } from "@/hooks/pwa/usePwaDeferredInstallPrompt";
 import { HudBanner } from "../hud/HudBanner";
@@ -11,12 +12,15 @@ import { MapFloatSurface } from "./MapFloatSurface";
 export function PwaInstallTipBanner() {
   const { dismissed, dismiss } = usePersistedDismiss(PWA_INSTALL_TIP_DISMISS_KEY);
   const { canDeferredPrompt, promptInstall } = usePwaDeferredInstallPrompt();
+  // Device sniffing: the prerender snapshot is a desktop browser with no tip.
+  const hydrated = useHydrated();
 
   const standalone = isStandalonePwa();
   const isIos = isIosDevice();
   const isAndroid = isAndroidDevice();
 
   const visible =
+    hydrated &&
     !dismissed &&
     shouldOfferPwaInstallTip({
       standalone,

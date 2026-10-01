@@ -22,6 +22,7 @@ const browserTracingIntegration = vi.hoisted(() => vi.fn(() => ({ name: "Browser
 const replayIntegration = vi.hoisted(() => vi.fn(() => ({ name: "Replay" })));
 const getClientEnv = vi.hoisted(() => vi.fn((): Record<string, string> => ({})));
 const idleCallbacks = vi.hoisted((): Array<() => void> => []);
+const isolationScopeAddBreadcrumb = vi.hoisted(() => vi.fn());
 
 vi.mock("@sentry/react", () => ({
   addBreadcrumb,
@@ -33,6 +34,7 @@ vi.mock("@sentry/react", () => ({
   addIntegration,
   browserTracingIntegration,
   replayIntegration,
+  getIsolationScope: () => ({ addBreadcrumb: isolationScopeAddBreadcrumb }),
 }));
 
 vi.mock("../../../config/env", () => ({
@@ -47,6 +49,7 @@ vi.mock("@/domain/device/perf/scheduleAfterFirstPaint", () => ({
 }));
 
 import {
+  addRecoverableErrorBreadcrumb,
   captureErrorBoundaryException,
   initSentry,
   reportFirestoreListenPermissionDenied,
@@ -171,6 +174,43 @@ describe("reportFirestoreListenPermissionDenied", () => {
     reportFirestoreListenPermissionDenied();
 
     expect(addBreadcrumb).not.toHaveBeenCalled();
+  });
+});
+
+describe("addRecoverableErrorBreadcrumb", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    addBreadcrumb.mockClear();
+    isolationScopeAddBreadcrumb.mockClear();
+  });
+
+  it("writes to the isolation scope so it survives until initSentry", () => {
+    vi.stubEnv("MODE", "production");
+
+    addRecoverableErrorBreadcrumb({
+      message: "x".repeat(400),
+      componentStack: "\n    at Home",
+      pathname: "/join",
+    });
+
+    expect(addBreadcrumb).not.toHaveBeenCalled();
+    expect(isolationScopeAddBreadcrumb).toHaveBeenCalledExactlyOnceWith(
+      expect.objectContaining({
+        category: "react.recoverable",
+        message: "x".repeat(300),
+        level: "warning",
+        timestamp: expect.any(Number),
+        data: { pathname: "/join", componentStack: "\n    at Home" },
+      }),
+    );
+  });
+
+  it("no-ops in test mode", () => {
+    vi.stubEnv("MODE", "test");
+
+    addRecoverableErrorBreadcrumb({ message: "x", pathname: "/" });
+
+    expect(isolationScopeAddBreadcrumb).not.toHaveBeenCalled();
   });
 });
 
