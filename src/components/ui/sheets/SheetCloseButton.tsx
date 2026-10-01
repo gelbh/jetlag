@@ -1,6 +1,6 @@
-import { UnstyledButton } from "@mantine/core";
+import { Button, UnstyledButton } from "@mantine/core";
 import { sheetIconCloseStyle } from "@/components/ui/entry/entryChrome";
-import { Button } from "../button";
+import { grayStyles, plainStyles } from "@/components/ui/entry/entryStyles";
 
 interface SheetCloseButtonProps {
   onClick: () => void;
@@ -49,9 +49,9 @@ export function SheetCloseButton({
   return (
     <Button
       type="button"
-      variant={variant === "raised" ? "default" : "ghost"}
       onClick={onClick}
-      className={`min-h-11 ${className}`.trim()}
+      className={className.trim() || undefined}
+      styles={variant === "raised" ? grayStyles : plainStyles}
     >
       {label}
     </Button>
