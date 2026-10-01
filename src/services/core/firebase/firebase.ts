@@ -42,14 +42,13 @@ import {
   markAuthBootstrapReady,
   resetAuthBootstrapStateForTests,
 } from "./authBootstrapState";
+import { isDefinitiveAuthFailure } from "./authRecovery";
 
 export {
   isAuthBootstrapReady,
   isFirebaseConfigured,
   subscribeAuthBootstrapReady,
 } from "./authBootstrapState";
-
-import { isDefinitiveAuthFailure } from "./authRecovery";
 
 export async function getFirebaseStorage(): Promise<
   import("firebase/storage").FirebaseStorage
