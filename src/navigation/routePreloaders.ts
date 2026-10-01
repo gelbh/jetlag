@@ -1,6 +1,10 @@
 import type { To } from "react-router-dom";
 import { lazyWithChunkRetry } from "../domain/device/updates/lazyWithChunkRetry";
-import { lazyRouteLoaderKey, normalizeRoutePath } from "./routeMetadata";
+import {
+  lazyRouteLoaderKey,
+  normalizeRoutePath,
+  type LazyRouteLoaderKey,
+} from "./routeMetadata";
 import { markRouteImportWarm } from "./routeWarmState";
 
 export const importMapScreen = () =>
@@ -97,6 +101,36 @@ export const PremiumLazy = lazyWithChunkRetry(importPremium);
 export const TermsLazy = lazyWithChunkRetry(importTerms);
 export const NotFoundLazy = lazyWithChunkRetry(importNotFound);
 export const AppResumeWatchdogLazy = lazyWithChunkRetry(importAppResumeWatchdog);
+
+const lazyRouteByLoaderKey: Record<
+  LazyRouteLoaderKey,
+  { preload: () => Promise<void> }
+> = {
+  importMapScreen: MapScreenLazy,
+  importCreateSession: CreateSessionLazy,
+  importJoinSession: JoinSessionLazy,
+  importGamePresetList: GamePresetListLazy,
+  importGamePresetEditor: GamePresetEditorLazy,
+  importAdminOpsDesk: AdminOpsDeskLazy,
+  importFeedback: FeedbackLazy,
+  importPrivacy: PrivacyLazy,
+  importPremium: PremiumLazy,
+  importTerms: TermsLazy,
+  importStats: StatsLazy,
+  importFriends: FriendsLazy,
+  importLeaderboard: LeaderboardLazy,
+};
+
+/**
+ * Resolve the route's `React.lazy` component (not just its chunk) so a prerendered shell
+ * hydrates the route in the first pass instead of leaving it dehydrated.
+ */
+export async function preloadLazyRouteComponent(path: string): Promise<void> {
+  const loaderKey = lazyRouteLoaderKey(path);
+  if (loaderKey) {
+    await lazyRouteByLoaderKey[loaderKey].preload();
+  }
+}
 
 export { isLazyRoute, normalizeRoutePath } from "./routeMetadata";
 

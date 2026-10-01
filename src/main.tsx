@@ -39,16 +39,6 @@ function scheduleDeferredObservability(): void {
   });
 }
 
-function errorMessage(error: unknown): string {
-  if (!(error instanceof Error)) {
-    return String(error);
-  }
-  // Hydration errors wrap the concrete mismatch in `cause`.
-  return error.cause instanceof Error
-    ? `${error.message} (cause: ${error.cause.message})`
-    : error.message;
-}
-
 /** Hydration mismatch: React already re-rendered on the client, so only leave a trace. */
 function onRecoverableError(error: unknown, errorInfo: ErrorInfo): void {
   countRecoverableError();
@@ -57,31 +47,40 @@ function onRecoverableError(error: unknown, errorInfo: ErrorInfo): void {
   }
   void import("./services/core/analytics/lazyTelemetry.ts")
     .then(({ addRecoverableErrorBreadcrumbLazy }) => {
-      addRecoverableErrorBreadcrumbLazy({
-        message: errorMessage(error),
-        componentStack: errorInfo.componentStack,
-        pathname: window.location.pathname,
-      });
+      addRecoverableErrorBreadcrumbLazy(error, errorInfo.componentStack);
     })
     .catch(() => {});
 }
 
 function renderApp(): Promise<void> {
   markPlayDay(PWA_MARK_NAV);
-  return import("./App.tsx").then(({ default: App }) => {
-    const rootEl = document.getElementById("root")!;
-    const tree = (
+  const rootEl = document.getElementById("root")!;
+  // scripts/prerender-marketing.mjs marks real-HTML shells; hydrating keeps that first paint
+  // (and its LCP element) instead of replacing it. The SPA shell has no marker.
+  if (rootEl.dataset.prerendered !== "true") {
+    return import("./App.tsx").then(({ default: App }) => {
+      createRoot(rootEl).render(
+        <StrictMode>
+          <App />
+        </StrictMode>,
+      );
+    });
+  }
+  return Promise.all([
+    import("./App.tsx"),
+    import("./navigation/routePreloaders.ts"),
+  ]).then(async ([{ default: App }, { preloadLazyRouteComponent }]) => {
+    // A lazy route still loading when hydration starts stays dehydrated, and the first ancestor
+    // re-render then client-renders it, discarding the prerendered DOM. A failed load hydrates
+    // anyway; the lazy route's own chunk retry takes over.
+    await preloadLazyRouteComponent(window.location.pathname).catch(() => {});
+    hydrateRoot(
+      rootEl,
       <StrictMode>
         <App />
-      </StrictMode>
+      </StrictMode>,
+      { onRecoverableError },
     );
-    // scripts/prerender-marketing.mjs marks real-HTML shells; hydrating keeps that first paint
-    // (and its LCP element) instead of replacing it. The SPA shell has no marker.
-    if (rootEl.dataset.prerendered === "true") {
-      hydrateRoot(rootEl, tree, { onRecoverableError });
-      return;
-    }
-    createRoot(rootEl).render(tree);
   });
 }
 

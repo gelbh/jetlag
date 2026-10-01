@@ -272,10 +272,14 @@ export function captureErrorBoundaryException(
   );
 }
 
-export interface RecoverableErrorDetails {
-  message: string;
-  componentStack?: string;
-  pathname: string;
+function recoverableErrorMessage(error: unknown): string {
+  if (!(error instanceof Error)) {
+    return String(error);
+  }
+  // Hydration errors wrap the concrete mismatch in `cause`.
+  return error.cause instanceof Error
+    ? `${error.message} (cause: ${error.cause.message})`
+    : error.message;
 }
 
 /**
@@ -285,7 +289,8 @@ export interface RecoverableErrorDetails {
  * breadcrumbs while no client exists.
  */
 export function addRecoverableErrorBreadcrumb(
-  details: RecoverableErrorDetails,
+  error: unknown,
+  componentStack?: string,
 ): void {
   if (import.meta.env.MODE === "test") {
     return;
@@ -293,12 +298,12 @@ export function addRecoverableErrorBreadcrumb(
 
   Sentry.getIsolationScope().addBreadcrumb({
     category: "react.recoverable",
-    message: details.message.slice(0, 300),
+    message: recoverableErrorMessage(error).slice(0, 300),
     level: "warning",
     timestamp: Date.now() / 1000,
     data: {
-      pathname: details.pathname,
-      componentStack: details.componentStack?.slice(0, 1000),
+      pathname: window.location.pathname,
+      componentStack: componentStack?.slice(0, 1000),
     },
   });
 }

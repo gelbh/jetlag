@@ -119,14 +119,15 @@ describe("lazyTelemetry", () => {
   });
 
   it("forwards recoverable-error breadcrumbs without throwing", async () => {
-    const details = {
-      message: "Hydration failed",
-      componentStack: "\n    at Home",
-      pathname: "/join",
-    };
-    expect(() => addRecoverableErrorBreadcrumbLazy(details)).not.toThrow();
+    const err = new Error("Hydration failed");
+    expect(() =>
+      addRecoverableErrorBreadcrumbLazy(err, "\n    at Home"),
+    ).not.toThrow();
     await vi.waitFor(() => {
-      expect(mocks.addRecoverableErrorBreadcrumb).toHaveBeenCalledWith(details);
+      expect(mocks.addRecoverableErrorBreadcrumb).toHaveBeenCalledWith(
+        err,
+        "\n    at Home",
+      );
     });
   });
 

@@ -5,6 +5,7 @@ const subscribe = () => () => {};
 // Stays false while the prerender script snapshots the page, so the snapshot equals the
 // hydration-time render.
 const getClientSnapshot = () => !isPrerenderCapture();
+const getServerSnapshot = () => false;
 
 /**
  * `false` only while React hydrates a prerendered shell (`hydrateRoot` uses the server snapshot),
@@ -19,6 +20,6 @@ export function useHydrated(): boolean {
   return useSyncExternalStore(
     subscribe,
     getClientSnapshot,
-    () => false,
+    getServerSnapshot,
   );
 }

@@ -4,9 +4,8 @@
  */
 let recoverableErrorCount = 0;
 
-export function countRecoverableError(): number {
+export function countRecoverableError(): void {
   recoverableErrorCount += 1;
-  return recoverableErrorCount;
 }
 
 export function getRecoverableErrorCount(): number {

@@ -1,10 +1,5 @@
 import type { Page } from "@playwright/test";
-import {
-  test,
-  expect,
-  prepareE2EPage,
-  seedLocalSession,
-} from "../fixtures";
+import { test, expect, prepareE2EPage, seedLocalSession } from "../fixtures";
 
 /**
  * Prod Worker serves exact `/` from dist/prerender/home/ and `/join` from dist/join/; plain
@@ -13,6 +8,9 @@ import {
 const PRERENDERED_DOCUMENTS: Record<string, string> = {
   "/": "/prerender/home/index.html",
   "/join": "/join/index.html",
+  "/premium": "/premium/index.html",
+  "/privacy": "/privacy/index.html",
+  "/terms": "/terms/index.html",
 };
 
 async function servePrerenderedDocuments(page: Page): Promise<void> {
@@ -31,30 +29,29 @@ async function servePrerenderedDocuments(page: Page): Promise<void> {
   );
 }
 
-/** Root children removed after load = React threw the prerendered DOM away. */
+/** Probe state written by the init script below. */
+type HydrationProbeWindow = Window & {
+  __cls: number;
+  __prerenderedNodes: Element[];
+};
+
+/** Records CLS and every prerendered `#root` element before any app script runs. */
 async function watchHydrationSignals(page: Page): Promise<void> {
   await page.addInitScript(() => {
-    const w = window as unknown as { __cls: number; __rootReplaced: number };
+    const w = window as unknown as HydrationProbeWindow;
     w.__cls = 0;
-    w.__rootReplaced = 0;
+    w.__prerenderedNodes = [];
     new PerformanceObserver((list) => {
-      for (const entry of list.getEntries() as PerformanceEntry[] & {
-        value: number;
-        hadRecentInput: boolean;
-      }[]) {
+      for (const entry of list.getEntries() as PerformanceEntry[] &
+        {
+          value: number;
+          hadRecentInput: boolean;
+        }[]) {
         if (!entry.hadRecentInput) w.__cls += entry.value;
       }
     }).observe({ type: "layout-shift", buffered: true });
     document.addEventListener("DOMContentLoaded", () => {
-      const root = document.getElementById("root");
-      if (!root) return;
-      new MutationObserver((records) => {
-        for (const record of records) {
-          for (const node of record.removedNodes) {
-            if (node.nodeType === Node.ELEMENT_NODE) w.__rootReplaced += 1;
-          }
-        }
-      }).observe(root, { childList: true });
+      w.__prerenderedNodes = [...document.querySelectorAll("#root *")];
     });
   });
 }
@@ -70,20 +67,35 @@ async function openPrerendered(page: Page, path: string): Promise<void> {
   test.skip(prerendered !== "true", "No prerendered build output (dev server)");
 }
 
-async function expectCleanHydration(page: Page): Promise<void> {
+/**
+ * Call before navigating away. `keepsPrerenderedNodes: false` for pages whose client-only state
+ * (a saved session) legitimately swaps prerendered UI right after hydration.
+ */
+async function expectCleanHydration(
+  page: Page,
+  { keepsPrerenderedNodes = true } = {},
+): Promise<void> {
+  // App's layout effect sets this after the hydration commit (the snapshot no longer carries it).
   await page.waitForFunction(
-    () => typeof window.__JETLAG_E2E__?.recoverableErrorCount === "function",
+    () =>
+      document.documentElement.dataset.bootComplete === "true" &&
+      typeof window.__JETLAG_E2E__?.recoverableErrorCount === "function",
   );
   const signals = await page.evaluate(() => {
-    const w = window as unknown as { __cls: number; __rootReplaced: number };
+    const w = window as unknown as HydrationProbeWindow;
     return {
       recoverableErrors: window.__JETLAG_E2E__!.recoverableErrorCount(),
-      rootReplaced: w.__rootReplaced,
+      prerendered: w.__prerenderedNodes.length,
+      discarded: w.__prerenderedNodes.filter((node) => !node.isConnected)
+        .length,
       cls: w.__cls,
     };
   });
+  expect(signals.prerendered).toBeGreaterThan(0);
   expect(signals.recoverableErrors).toBe(0);
-  expect(signals.rootReplaced).toBe(0);
+  if (keepsPrerenderedNodes) {
+    expect(signals.discarded).toBe(0);
+  }
   expect(signals.cls).toBeLessThan(0.01);
 }
 
@@ -92,6 +104,7 @@ test("@smoke prerendered home hydrates without recoverable errors", async ({
 }) => {
   await prepareE2EPage(page);
   await openPrerendered(page, "/");
+  await expectCleanHydration(page);
 
   // Client-side navigation only works once hydration attached React's handlers.
   const documents: string[] = [];
@@ -107,8 +120,6 @@ test("@smoke prerendered home hydrates without recoverable errors", async ({
     page.getByRole("button", { name: "Join session" }),
   ).toBeVisible();
   expect(documents).toEqual([]);
-
-  await expectCleanHydration(page);
 });
 
 test("@smoke prerendered join hydrates without recoverable errors", async ({
@@ -116,20 +127,39 @@ test("@smoke prerendered join hydrates without recoverable errors", async ({
 }) => {
   await prepareE2EPage(page);
   await openPrerendered(page, "/join");
+  await expectCleanHydration(page);
 
-  const hider = page
+  // Run after the App mount: clicks before the app boots are not replayed. Hider is the
+  // default; a native label click checks the radio even without React, but Mantine's
+  // `data-active` only moves once the route boundary has hydrated.
+  const seeker = page
     .getByRole("radiogroup", { name: "Player side" })
     .locator("label")
-    .filter({ hasText: /^Hider$/ });
-  await hider.click();
-  await expect(
-    page.getByRole("radiogroup", { name: "Player side" }).getByRole("radio", {
-      name: "Hider",
-    }),
-  ).toBeChecked();
+    .filter({ hasText: /^Seeker$/ });
+  await seeker.click();
+  await expect(seeker).toHaveAttribute("data-active", "true");
+});
 
+test("@smoke prerendered join fills the invite code after hydrating", async ({
+  page,
+}) => {
+  await prepareE2EPage(page);
+  await openPrerendered(page, "/join?code=ABCD");
+
+  await expect(page.getByPlaceholder("ABCD")).toHaveValue("ABCD");
   await expectCleanHydration(page);
 });
+
+for (const path of ["/premium", "/privacy", "/terms"]) {
+  test(`@smoke prerendered ${path} hydrates without recoverable errors`, async ({
+    page,
+  }) => {
+    await prepareE2EPage(page);
+    await openPrerendered(page, path);
+    await expect(page.getByRole("heading", { level: 1 }).first()).toBeVisible();
+    await expectCleanHydration(page);
+  });
+}
 
 test("@smoke prerendered home hydrates with a saved local session", async ({
   page,
@@ -143,5 +173,5 @@ test("@smoke prerendered home hydrates with a saved local session", async ({
     page.getByRole("button", { name: /Return to map/i }),
   ).toBeVisible();
 
-  await expectCleanHydration(page);
+  await expectCleanHydration(page, { keepsPrerenderedNodes: false });
 });

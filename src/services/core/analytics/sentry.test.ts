@@ -186,12 +186,12 @@ describe("addRecoverableErrorBreadcrumb", () => {
 
   it("writes to the isolation scope so it survives until initSentry", () => {
     vi.stubEnv("MODE", "production");
+    window.history.replaceState(null, "", "/join");
 
-    addRecoverableErrorBreadcrumb({
-      message: "x".repeat(400),
-      componentStack: "\n    at Home",
-      pathname: "/join",
-    });
+    addRecoverableErrorBreadcrumb(
+      new Error("x".repeat(400), { cause: new Error("text differs") }),
+      "\n    at Home",
+    );
 
     expect(addBreadcrumb).not.toHaveBeenCalled();
     expect(isolationScopeAddBreadcrumb).toHaveBeenCalledExactlyOnceWith(
@@ -205,10 +205,24 @@ describe("addRecoverableErrorBreadcrumb", () => {
     );
   });
 
+  it("keeps the hydration cause in the message", () => {
+    vi.stubEnv("MODE", "production");
+
+    addRecoverableErrorBreadcrumb(
+      new Error("Hydration failed", { cause: new Error("text differs") }),
+    );
+
+    expect(isolationScopeAddBreadcrumb).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: "Hydration failed (cause: text differs)",
+      }),
+    );
+  });
+
   it("no-ops in test mode", () => {
     vi.stubEnv("MODE", "test");
 
-    addRecoverableErrorBreadcrumb({ message: "x", pathname: "/" });
+    addRecoverableErrorBreadcrumb(new Error("x"));
 
     expect(isolationScopeAddBreadcrumb).not.toHaveBeenCalled();
   });
