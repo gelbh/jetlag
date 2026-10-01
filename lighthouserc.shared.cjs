@@ -13,8 +13,8 @@ function createLhciConfig({ homeJoinPerf, createPerf, outputDir, collectSettings
           "http://127.0.0.1:4173/join",
           "http://127.0.0.1:4173/create",
         ],
-        startServerCommand:
-          "npm run preview -- --host 127.0.0.1 --port 4173 --strictPort",
+        // `/` is remapped to the prerendered home like prod; see scripts/lhci-preview-server.mjs.
+        startServerCommand: "npm run preview:lhci",
         startServerReadyPattern: "Local:",
         numberOfRuns: 3,
         settings: {
@@ -35,8 +35,7 @@ function createLhciConfig({ homeJoinPerf, createPerf, outputDir, collectSettings
             },
           },
           {
-            // Vite preview serves SPA shell at `/` (noindex). SEO gate uses prerendered
-            // `/premium` (index,follow); production `/` is Worker-remapped to prerender home.
+            // SEO gate uses prerendered `/premium` (index,follow).
             matchingUrlPattern: "http://127\\.0\\.0\\.1:4173/premium/?$",
             assertions: {
               "categories:seo": ["error", { minScore: 0.9 }],
