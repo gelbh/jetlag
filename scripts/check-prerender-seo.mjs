@@ -7,13 +7,18 @@ import {
   diffHeadAssetKeys,
   distHtmlPath,
   extractHeadAssetKeys,
+  hasBootSplashElement,
+  hasPrerenderedRootMarker,
   loadCrawlPolicy,
   MIN_ROOT_TEXT_CHARS,
+  prerenderTargets,
+  robotsMetaContent,
   spaShellPath,
 } from "./seo-build-lib.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const policy = loadCrawlPolicy(root);
+const targets = prerenderTargets(policy);
 
 let failed = false;
 /** @type {string[] | null} */
@@ -31,12 +36,26 @@ try {
     console.error("dist/index.html SPA shell must not be overwritten with index,follow");
     failed = true;
   }
+  if (hasPrerenderedRootMarker(shellHtml)) {
+    console.error(
+      "dist/index.html SPA shell must not carry #root[data-prerendered]; every SPA-fallback route would try to hydrate it",
+    );
+    failed = true;
+  }
 } catch {
   console.error(`Missing SPA shell: ${spaShell}`);
   failed = true;
 }
 
-for (const urlPath of policy.indexablePaths) {
+let sitemap = "";
+try {
+  sitemap = readFileSync(join(root, "dist/sitemap.xml"), "utf8");
+} catch {
+  console.error("Missing dist/sitemap.xml");
+  failed = true;
+}
+
+for (const { path: urlPath, indexable } of targets) {
   const file = distHtmlPath(root, urlPath);
   let html;
   try {
@@ -54,14 +73,37 @@ for (const urlPath of policy.indexablePaths) {
     failed = true;
   }
 
-  const canonical = absoluteUrl(policy.siteOrigin, urlPath);
-  if (!html.includes(`rel="canonical"`) || !html.includes(canonical)) {
-    console.error(`${urlPath}: missing canonical ${canonical}`);
+  if (indexable) {
+    const canonical = absoluteUrl(policy.siteOrigin, urlPath);
+    if (!html.includes(`rel="canonical"`) || !html.includes(canonical)) {
+      console.error(`${urlPath}: missing canonical ${canonical}`);
+      failed = true;
+    }
+
+    if (!html.includes('content="index,follow"')) {
+      console.error(`${urlPath}: missing robots index,follow`);
+      failed = true;
+    }
+  } else {
+    // Perf-only prerender: real HTML first paint, still hidden from search.
+    const robots = robotsMetaContent(html) ?? "";
+    if (!/\bnoindex\b/i.test(robots)) {
+      console.error(`${urlPath}: perf-only prerender must keep robots noindex (got "${robots}")`);
+      failed = true;
+    }
+    if (sitemap.includes(absoluteUrl(policy.siteOrigin, urlPath))) {
+      console.error(`${urlPath}: perf-only prerender must stay off the sitemap`);
+      failed = true;
+    }
+  }
+
+  if (!hasPrerenderedRootMarker(html)) {
+    console.error(`${urlPath}: #root is missing data-prerendered="true" (src/main.tsx hydrate switch)`);
     failed = true;
   }
 
-  if (!html.includes('content="index,follow"')) {
-    console.error(`${urlPath}: missing robots index,follow`);
+  if (hasBootSplashElement(html)) {
+    console.error(`${urlPath}: prerender HTML must not contain #boot-splash`);
     failed = true;
   }
 
@@ -109,4 +151,6 @@ if (failed) {
   process.exit(1);
 }
 
-console.log(`Prerender SEO check passed for ${policy.indexablePaths.length} routes`);
+console.log(
+  `Prerender SEO check passed for ${targets.length} routes (${policy.indexablePaths.length} indexable)`,
+);

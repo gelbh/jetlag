@@ -7,15 +7,17 @@ import { fileURLToPath } from "node:url";
 import { chromium } from "playwright";
 import {
   distHtmlPath,
+  finalizePrerenderDom,
   loadCrawlPolicy,
   MIN_ROOT_TEXT_CHARS,
+  prerenderTargets,
   restoreTemplateHeadAssets,
   rewritePrerenderPreviewUrls,
   spaShellPath,
 } from "./seo-build-lib.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
-const policy = loadCrawlPolicy(root);
+const targets = prerenderTargets(loadCrawlPolicy(root));
 const shellHtml = readFileSync(spaShellPath(root), "utf8");
 
 /**
@@ -54,6 +56,17 @@ function waitForServer(url, child, timeoutMs = 60_000) {
     }
     throw new Error(`Preview server did not start: ${url}`);
   })();
+}
+
+/** Wait for every Suspense boundary to resolve, then add the hydration markers (once). */
+async function finalizeWhenSettled(page, urlPath, timeoutMs = 30_000) {
+  const start = Date.now();
+  while (Date.now() - start < timeoutMs) {
+    const result = await page.evaluate(finalizePrerenderDom);
+    if (result.ready) return;
+    await new Promise((r) => setTimeout(r, 100));
+  }
+  throw new Error(`${urlPath}: Suspense boundaries never resolved for prerender`);
 }
 
 function stopPreview(child) {
@@ -110,8 +123,12 @@ try {
     throw error;
   }
   const page = await browser.newPage();
+  // src/domain/device/perf/prerenderCapture.ts: keeps device/storage-driven UI out of snapshots.
+  await page.addInitScript(() => {
+    window.__JETLAG_PRERENDER__ = true;
+  });
 
-  for (const urlPath of policy.indexablePaths) {
+  for (const { path: urlPath } of targets) {
     const target = `${BASE}${urlPath === "/" ? "/" : urlPath}`;
     // "load" avoids hanging on long-lived analytics / SW connections that block networkidle.
     await page.goto(target, { waitUntil: "load", timeout: 120_000 });
@@ -126,6 +143,7 @@ try {
     await page.waitForFunction(() => document.title.trim().length > 0, {
       timeout: 30_000,
     });
+    await finalizeWhenSettled(page, urlPath);
     const html = restoreTemplateHeadAssets(
       rewritePrerenderPreviewUrls(await page.content(), BASE),
       shellHtml,

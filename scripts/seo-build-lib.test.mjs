@@ -4,8 +4,13 @@ import { test } from "node:test";
 import {
   diffHeadAssetKeys,
   extractHeadAssetKeys,
+  hasBootSplashElement,
+  hasPrerenderedRootMarker,
+  PERF_PRERENDER_PATHS,
+  prerenderTargets,
   restoreTemplateHeadAssets,
   rewritePrerenderPreviewUrls,
+  robotsMetaContent,
 } from "./seo-build-lib.mjs";
 
 test("rewritePrerenderPreviewUrls strips the preview origin", () => {
@@ -141,4 +146,73 @@ test("inline module bodies with src-like text are kept", () => {
   const html = `<head>${inline}<link rel="modulepreload" href="/x.js"></head>`;
   assert.deepEqual(extractHeadAssetKeys(html), ["modulepreload:/x.js"]);
   assert.ok(restoreTemplateHeadAssets(html, template).includes(inline));
+});
+
+const policy = {
+  indexablePaths: ["/", "/premium"],
+  disallowPaths: ["/join", "/create"],
+};
+
+test("prerenderTargets keeps perf-only paths separate from the index list", () => {
+  assert.deepEqual(PERF_PRERENDER_PATHS, ["/join"]);
+  assert.deepEqual(prerenderTargets(policy), [
+    { path: "/", indexable: true },
+    { path: "/premium", indexable: true },
+    { path: "/join", indexable: false },
+  ]);
+});
+
+test("prerenderTargets rejects a perf path that is indexable or crawlable", () => {
+  assert.throws(
+    () => prerenderTargets(policy, ["/premium"]),
+    /both indexablePaths and PERF_PRERENDER_PATHS/,
+  );
+  assert.throws(
+    () => prerenderTargets(policy, ["/stats"]),
+    /must be in disallowPaths/,
+  );
+});
+
+test("hasPrerenderedRootMarker reads the #root opening tag only", () => {
+  assert.equal(
+    hasPrerenderedRootMarker('<div id="root" data-prerendered="true"><p>x</p></div>'),
+    true,
+  );
+  assert.equal(
+    hasPrerenderedRootMarker('<div data-prerendered="true" id="root"></div>'),
+    true,
+  );
+  assert.equal(hasPrerenderedRootMarker('<div id="root"></div>'), false);
+  assert.equal(
+    hasPrerenderedRootMarker(
+      '<!-- <div id="root" data-prerendered="true"> --><div id="root"></div>',
+    ),
+    false,
+  );
+  assert.equal(
+    hasPrerenderedRootMarker('<div id="root"><p data-prerendered="true"></p></div>'),
+    false,
+  );
+});
+
+test("hasBootSplashElement ignores inert markup", () => {
+  assert.equal(hasBootSplashElement('<div id="boot-splash" role="status"></div>'), true);
+  assert.equal(hasBootSplashElement("<section class='x' id='boot-splash'>"), true);
+  assert.equal(
+    hasBootSplashElement('<link rel="stylesheet" href="/boot-splash.css"><div id="boot-splash-mark">'),
+    false,
+  );
+  assert.equal(hasBootSplashElement('<!-- <div id="boot-splash"> -->'), false);
+});
+
+test("robotsMetaContent finds the robots meta regardless of attribute order", () => {
+  assert.equal(
+    robotsMetaContent('<meta content="noindex,nofollow" name="robots">'),
+    "noindex,nofollow",
+  );
+  assert.equal(
+    robotsMetaContent('<meta name="description" content="x"><meta name="ROBOTS" content="index,follow">'),
+    "index,follow",
+  );
+  assert.equal(robotsMetaContent('<meta name="description" content="x">'), undefined);
 });
