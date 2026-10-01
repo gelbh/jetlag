@@ -1,6 +1,6 @@
 import { useId, useState, type ReactNode } from "react";
 import { Button, TextInput, UnstyledButton } from "@mantine/core";
-import { CaretDown } from "@phosphor-icons/react";
+import { CaretDownIcon } from "@phosphor-icons/react";
 import {
   InsetGroup,
   SectionLabel,
@@ -48,7 +48,7 @@ export function AdvancedSettingsCategory({
         }}
       >
         <SectionLabel>{title}</SectionLabel>
-        <CaretDown
+        <CaretDownIcon
           size={14}
           weight="bold"
           aria-hidden

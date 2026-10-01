@@ -1,5 +1,5 @@
 import { Button } from "@mantine/core";
-import { Crosshair, MapPin } from "@phosphor-icons/react";
+import { CrosshairIcon, MapPinIcon } from "@phosphor-icons/react";
 import {
   filledStyles,
   grayStyles,
@@ -35,7 +35,7 @@ export function AnchorControls({
       ? (anchorPlaceName ?? "Location locked")
       : "Tap to use GPS";
 
-  const GpsGlyph = hasAnchor ? MapPin : Crosshair;
+  const GpsGlyph = hasAnchor ? MapPinIcon : CrosshairIcon;
 
   const gpsBody = (
     <>

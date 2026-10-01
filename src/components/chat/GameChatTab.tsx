@@ -6,7 +6,7 @@ import {
   Stack,
   Text,
 } from "@mantine/core";
-import { ArrowRight } from "@phosphor-icons/react";
+import { ArrowRightIcon } from "@phosphor-icons/react";
 import type { SessionRulesInput } from "../../domain/session/rules";
 import {
   formatExpiredAnswerCountdown,
@@ -354,7 +354,7 @@ export function GameChatTab({
                         color: "var(--color-trail)",
                       }}
                     >
-                      <ArrowRight size={14} weight="bold" />
+                      <ArrowRightIcon size={14} weight="bold" />
                     </Box>
 
                     <AnswerBox tone={cancelled ? "halt" : "trail"}>

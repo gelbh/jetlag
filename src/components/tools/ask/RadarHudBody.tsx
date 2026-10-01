@@ -4,7 +4,7 @@ import { AskHudPanel } from "@/components/tools/ask/AskHudPanel";
  */
 import { Text } from "@mantine/core";
 import { useEffect, useRef } from "react";
-import { Check, Crosshair, PencilSimple } from "@phosphor-icons/react";
+import { CheckIcon, CrosshairIcon, PencilSimpleIcon } from "@phosphor-icons/react";
 import { AskCatalogRail } from "@/components/tools/ask/AskCatalogRail";
 import { AskToolQuestionHeader } from "@/components/tools/ask/AskToolQuestionHeader";
 import { HudRadarIcon } from "@/components/map/icons/ToolIcons";
@@ -188,7 +188,7 @@ export function RadarHudBody({
         label: presetLabel(preset, distanceUnit),
         disabled: usedDistanceOptions.has(optionKey),
         icon: (
-          <Crosshair
+          <CrosshairIcon
             size={20}
             weight="duotone"
             color="currentColor"
@@ -202,7 +202,7 @@ export function RadarHudBody({
       label: chooseLabel,
       disabled: chooseDisabled,
       icon: (
-        <PencilSimple
+        <PencilSimpleIcon
           size={20}
           weight="duotone"
           color="currentColor"
@@ -310,7 +310,7 @@ export function RadarHudBody({
                   cursor: "pointer",
                 }}
               >
-                <Check size={16} weight="bold" aria-hidden />
+                <CheckIcon size={16} weight="bold" aria-hidden />
               </button>
             ) : null}
           </span>
