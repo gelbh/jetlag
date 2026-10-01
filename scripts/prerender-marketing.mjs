@@ -7,7 +7,6 @@ import { fileURLToPath } from "node:url";
 import { chromium } from "playwright";
 import {
   distHtmlPath,
-  finalizePrerenderDom,
   loadCrawlPolicy,
   MIN_ROOT_TEXT_CHARS,
   prerenderTargets,
@@ -15,6 +14,7 @@ import {
   rewritePrerenderPreviewUrls,
   spaShellPath,
 } from "./seo-build-lib.mjs";
+import { finalizePrerenderDom } from "./prerender-hydration-markers.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const targets = prerenderTargets(loadCrawlPolicy(root));
@@ -58,12 +58,15 @@ function waitForServer(url, child, timeoutMs = 60_000) {
   })();
 }
 
-/** Wait for every Suspense boundary to resolve, then add the hydration markers (once). */
+/**
+ * Wait for every Suspense boundary to resolve, then add the hydration markers (once) and return
+ * the serialized document from that same evaluate.
+ */
 async function finalizeWhenSettled(page, urlPath, timeoutMs = 30_000) {
   const start = Date.now();
   while (Date.now() - start < timeoutMs) {
     const result = await page.evaluate(finalizePrerenderDom);
-    if (result.ready) return;
+    if (result.ready) return result.html;
     await new Promise((r) => setTimeout(r, 100));
   }
   throw new Error(`${urlPath}: Suspense boundaries never resolved for prerender`);
@@ -143,9 +146,9 @@ try {
     await page.waitForFunction(() => document.title.trim().length > 0, {
       timeout: 30_000,
     });
-    await finalizeWhenSettled(page, urlPath);
+    const snapshot = await finalizeWhenSettled(page, urlPath);
     const html = restoreTemplateHeadAssets(
-      rewritePrerenderPreviewUrls(await page.content(), BASE),
+      rewritePrerenderPreviewUrls(snapshot, BASE),
       shellHtml,
     );
     const out = distHtmlPath(root, urlPath);

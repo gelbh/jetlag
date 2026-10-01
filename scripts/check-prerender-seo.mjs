@@ -28,12 +28,8 @@ const spaShell = spaShellPath(root);
 try {
   const shellHtml = readFileSync(spaShell, "utf8");
   shellAssetKeys = extractHeadAssetKeys(shellHtml);
-  if (!shellHtml.includes('content="noindex,nofollow"')) {
+  if (robotsMetaContent(shellHtml) !== "noindex,nofollow") {
     console.error("dist/index.html SPA shell must keep robots noindex,nofollow");
-    failed = true;
-  }
-  if (shellHtml.includes('content="index,follow"')) {
-    console.error("dist/index.html SPA shell must not be overwritten with index,follow");
     failed = true;
   }
   if (hasPrerenderedRootMarker(shellHtml)) {
@@ -80,7 +76,7 @@ for (const { path: urlPath, indexable } of targets) {
       failed = true;
     }
 
-    if (!html.includes('content="index,follow"')) {
+    if (robotsMetaContent(html) !== "index,follow") {
       console.error(`${urlPath}: missing robots index,follow`);
       failed = true;
     }

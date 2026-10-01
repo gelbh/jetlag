@@ -163,7 +163,13 @@ export function restoreTemplateHeadAssets(snapshotHtml, templateHtml) {
   return out + snapshotHtml.slice(cursor);
 }
 
-const ROOT_OPEN_TAG_RE = /<div\b(?:[^>"']|"[^"]*"|'[^']*')*\bid=["']root["'](?:[^>"']|"[^"]*"|'[^']*')*>/i;
+/** Opening tag of the element whose `id` is exactly `id`. */
+function openTagWithIdRe(id) {
+  return new RegExp(String.raw`<[a-z][\w-]*\b${TAG_ATTRS}\sid=["']${id}["']${TAG_ATTRS}>`, "i");
+}
+
+const ROOT_OPEN_TAG_RE = openTagWithIdRe("root");
+const BOOT_SPLASH_OPEN_TAG_RE = openTagWithIdRe("boot-splash");
 
 /** True when the `#root` opening tag carries `data-prerendered="true"` (the hydrate marker). */
 export function hasPrerenderedRootMarker(html) {
@@ -173,110 +179,16 @@ export function hasPrerenderedRootMarker(html) {
 
 /** True when live markup (not comments / noscript) still contains the `#boot-splash` element. */
 export function hasBootSplashElement(html) {
-  return /<[a-z][\w-]*\b(?:[^>"']|"[^"]*"|'[^']*')*\bid=["']boot-splash["']/i.test(
-    maskInert(html),
-  );
+  return BOOT_SPLASH_OPEN_TAG_RE.test(maskInert(html));
 }
 
 /** `content` of `<meta name="robots">`, or undefined. */
 export function robotsMetaContent(html) {
   const masked = maskInert(html);
-  for (const match of masked.matchAll(/<meta\b(?:[^>"']|"[^"]*"|'[^']*')*>/gi)) {
+  for (const match of masked.matchAll(new RegExp(String.raw`<meta\b${TAG_ATTRS}>`, "gi"))) {
     if (attr(match[0], "name")?.toLowerCase() === "robots") {
       return attr(match[0], "content");
     }
   }
   return undefined;
-}
-
-/**
- * Runs inside the prerender page (serialized by Playwright, so it must stay self-contained).
- * A client-rendered DOM lacks the markers `hydrateRoot` needs, so this adds what React's server
- * renderer would have written:
- * - `<!--$-->…<!--/$-->` around every resolved `<Suspense>` boundary (hydration throws a
- *   mismatch when a boundary has no marker),
- * - `<!-- -->` between adjacent text nodes (serialization merges them into one),
- * - `data-prerendered="true"` on `#root` (the `src/main.tsx` hydrate switch),
- * and drops `#boot-splash`, which must never be part of a hydrated document.
- * Returns `{ ready: false }` while any boundary still shows its fallback.
- */
-export function finalizePrerenderDom() {
-  const SUSPENSE = 13;
-  const HOST_COMPONENT = 5;
-  const HOST_TEXT = 6;
-  const HOST_PORTAL = 4;
-  const HOST_ROOT = 3;
-  const OFFSCREEN = 22;
-  const rootEl = document.getElementById("root");
-  if (!rootEl) throw new Error("#root missing");
-  const containerKey = Object.keys(rootEl).find((k) => k.startsWith("__reactContainer$"));
-  if (!containerKey) throw new Error("#root is not a React root");
-  const hostRoot = rootEl[containerKey].stateNode.current;
-
-  const boundaries = [];
-  const visit = (fiber) => {
-    for (let f = fiber; f; f = f.sibling) {
-      if (f.tag === HOST_PORTAL) continue;
-      if (f.tag === SUSPENSE) boundaries.push(f);
-      if (f.child) visit(f.child);
-    }
-  };
-  visit(hostRoot.child);
-  if (boundaries.some((b) => b.memoizedState !== null)) {
-    return { ready: false };
-  }
-
-  /** Top-level host nodes of a fiber subtree, in order (portals excluded). */
-  const hostNodes = (fiber, out) => {
-    for (let f = fiber; f; f = f.sibling) {
-      if (f.tag === HOST_PORTAL) continue;
-      if (f.tag === OFFSCREEN && f.memoizedState !== null) continue;
-      if (f.tag === HOST_COMPONENT || f.tag === HOST_TEXT) out.push(f.stateNode);
-      else if (f.child) hostNodes(f.child, out);
-    }
-    return out;
-  };
-  /** Where an empty boundary sits: before the next host node, else at its host parent's end. */
-  const insertionPoint = (fiber) => {
-    for (let f = fiber; f && f.tag !== HOST_COMPONENT && f.tag !== HOST_ROOT; f = f.return) {
-      for (let s = f.sibling; s; s = s.sibling) {
-        const [next] = hostNodes(s, []);
-        if (next) return { parent: next.parentNode, before: next };
-      }
-    }
-    let parent = fiber.return;
-    while (parent && parent.tag !== HOST_COMPONENT && parent.tag !== HOST_ROOT) {
-      parent = parent.return;
-    }
-    return { parent: parent?.tag === HOST_COMPONENT ? parent.stateNode : rootEl, before: null };
-  };
-
-  for (const boundary of boundaries) {
-    const nodes = hostNodes(boundary.child, []);
-    const start = document.createComment("$");
-    const end = document.createComment("/$");
-    if (nodes.length === 0) {
-      const { parent, before } = insertionPoint(boundary);
-      parent.insertBefore(start, before);
-      parent.insertBefore(end, before);
-      continue;
-    }
-    const first = nodes[0];
-    const last = nodes[nodes.length - 1];
-    first.parentNode.insertBefore(start, first);
-    last.parentNode.insertBefore(end, last.nextSibling);
-  }
-
-  const walker = document.createTreeWalker(rootEl, NodeFilter.SHOW_TEXT);
-  const texts = [];
-  for (let n = walker.nextNode(); n; n = walker.nextNode()) texts.push(n);
-  for (const text of texts) {
-    if (text.nextSibling && text.nextSibling.nodeType === Node.TEXT_NODE) {
-      text.parentNode.insertBefore(document.createComment(" "), text.nextSibling);
-    }
-  }
-
-  document.getElementById("boot-splash")?.remove();
-  rootEl.setAttribute("data-prerendered", "true");
-  return { ready: true, boundaries: boundaries.length };
 }
