@@ -1,7 +1,7 @@
 import mapLibreWorkerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
 import { mapShellWarmers } from "@/navigation/routePreloaders";
 
-let shellPrefetch: Promise<unknown> | null = null;
+let shellPrefetch: Promise<void> | null = null;
 let workerPrefetched = false;
 
 function prefetchMapLibreWorker() {
@@ -20,12 +20,15 @@ function prefetchMapLibreWorker() {
  * map, so the facade's first intent only pays for map construction. Safe to
  * call repeatedly; a failed chunk fetch clears the memo so the next intent retries.
  */
-export function prefetchCreateSessionMap(): Promise<unknown> {
+export function prefetchCreateSessionMap(): Promise<void> {
   prefetchMapLibreWorker();
   if (!shellPrefetch) {
-    shellPrefetch = mapShellWarmers.importMapViewMapLibre().catch(() => {
-      shellPrefetch = null;
-    });
+    shellPrefetch = mapShellWarmers.importMapViewMapLibre().then(
+      () => undefined,
+      () => {
+        shellPrefetch = null;
+      },
+    );
   }
   return shellPrefetch;
 }

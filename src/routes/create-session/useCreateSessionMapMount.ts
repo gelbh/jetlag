@@ -11,6 +11,13 @@ export class CreateSessionMapMountTimeoutError extends Error {
   }
 }
 
+export class CreateSessionMapMountAbortedError extends Error {
+  constructor() {
+    super("The create screen closed before the map loaded.");
+    this.name = "CreateSessionMapMountAbortedError";
+  }
+}
+
 interface PendingMount {
   resolve: (map: MapLibreMap) => void;
   reject: (error: Error) => void;
@@ -70,13 +77,14 @@ export function useCreateSessionMapMount({
   }, [timeoutMs]);
 
   const handleMapMounted = useCallback((map: MapLibreMap | null) => {
-    mountedMapRef.current = map;
     setMountedMap(map);
   }, []);
 
-  // Resolve after commit, not inside handleMapMounted: the map's first
-  // onBoundsChange is batched into the same render, and waiters read it next.
+  // Publish + resolve after commit, not inside handleMapMounted: the map's
+  // first onBoundsChange is batched into the same render, and waiters (or a
+  // Confirm tap landing before that commit) must read the post-mount state.
   useEffect(() => {
+    mountedMapRef.current = mountedMap;
     if (!mountedMap) {
       return;
     }
@@ -92,6 +100,7 @@ export function useCreateSessionMapMount({
     () => () => {
       for (const entry of pendingRef.current) {
         clearTimeout(entry.timeoutId);
+        entry.reject(new CreateSessionMapMountAbortedError());
       }
       pendingRef.current = [];
     },

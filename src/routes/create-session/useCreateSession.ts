@@ -83,7 +83,15 @@ import { buildFavouritePresetSelectOptions } from "../../domain/session/presets/
 import { placeToFocusBounds } from "./utils";
 import { useLatestRequest } from "../../hooks/forms/useLatestRequest";
 import { useSubmitLock } from "../../hooks/forms/useSubmitLock";
-import { useCreateSessionMapMount } from "./useCreateSessionMapMount";
+import {
+  CreateSessionMapMountAbortedError,
+  useCreateSessionMapMount,
+} from "./useCreateSessionMapMount";
+
+const MISSING_GAME_AREA_ERROR =
+  "Search for a place, import a boundary, or move the map until the play area is framed.";
+const MAP_LOAD_FAILED_ERROR =
+  "The map couldn't load. Search for a place or import a boundary instead.";
 
 export function useCreateSession() {
   const navigate = useAppNavigate();
@@ -461,6 +469,7 @@ export function useCreateSession() {
       return;
     }
 
+    requestMap();
     setSelectedAreas((current) => [...current, previewGameArea]);
     setImportedGameArea(null);
     setSelectedPlaceId(null);
@@ -582,10 +591,14 @@ export function useCreateSession() {
     }
   };
 
+  const hasExplicitGameArea = Boolean(
+    importedGameArea || framing.manualGameArea || selectedPlace,
+  );
+
   const confirmSession = async () => {
-    if (!importedGameArea && !framing.manualGameArea && !selectedPlace) {
+    if (!hasExplicitGameArea) {
       setError(
-        "Search for a place, import a boundary, or move the map until the play area is framed.",
+        MISSING_GAME_AREA_ERROR,
       );
       return;
     }
@@ -624,7 +637,7 @@ export function useCreateSession() {
 
       if (!gameArea) {
         setError(
-          "Search for a place, import a boundary, or move the map until the play area is framed.",
+          MISSING_GAME_AREA_ERROR,
         );
         return;
       }
@@ -805,14 +818,15 @@ export function useCreateSession() {
 
   const handleConfirm = () =>
     void runLocked(async () => {
-      const needsLiveViewport =
-        !importedGameArea && !framing.manualGameArea && !selectedPlace;
-      if (needsLiveViewport) {
+      if (!hasExplicitGameArea) {
         try {
           // Rectangle framing reads the live viewport (default view included).
           await mapMount.ensureMapMounted();
-        } catch {
-          // Map never loaded; confirmSession reports the missing area.
+        } catch (mountError) {
+          if (!(mountError instanceof CreateSessionMapMountAbortedError)) {
+            setError(MAP_LOAD_FAILED_ERROR);
+          }
+          return;
         }
       }
       await confirmSessionRef.current();
@@ -840,6 +854,7 @@ export function useCreateSession() {
   };
 
   const handleFramingModalConfirm = (result: Parameters<typeof framing.loadFramingResult>[0]) => {
+    requestMap();
     if (framing.userFramed) {
       setImportedGameArea(null);
       setSelectedPlaceId(null);
@@ -900,13 +915,11 @@ export function useCreateSession() {
     selectedAreas,
     previewGameArea,
     manualFramingActive,
-    mapRequested:
-      mapMount.mapRequested ||
-      previewGameArea !== null ||
-      selectedAreas.length > 0,
+    // Latched: every path that produces an area calls requestMap(), so the map
+    // never tears down back to the facade when an area is cleared.
+    mapRequested: mapMount.mapRequested,
     mapMounted: mapMount.mapMounted,
     requestMap,
-    ensureMapMounted: mapMount.ensureMapMounted,
     handleMapMounted: mapMount.handleMapMounted,
     mapFocusBounds,
     mapPreviewGameArea,
