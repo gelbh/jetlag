@@ -463,6 +463,28 @@ export function captureResumeShellUnresponsive(
   });
 }
 
+export function addWriteRejectedBreadcrumb(label: string, error: unknown): void {
+  if (import.meta.env.MODE === "test") {
+    return;
+  }
+
+  Sentry.addBreadcrumb({
+    category: "firestore.write",
+    level: "warning",
+    message: `write rejected: ${label}`,
+    // Structural check: importing FirebaseError here would pull firebase/app into the boot chunk.
+    data: {
+      code:
+        typeof error === "object" &&
+        error !== null &&
+        "code" in error &&
+        typeof error.code === "string"
+          ? error.code
+          : null,
+    },
+  });
+}
+
 export function addIdbDeleteFailureBreadcrumb(error: unknown): void {
   if (import.meta.env.MODE === "test") {
     return;

@@ -23,7 +23,14 @@ export function SyncPanel({
     { label: "Queued writes", value: String(queuedWrites) },
     {
       label: "Reachability",
-      value: status === "offline" ? "Offline" : status === "degraded" ? "Unstable" : "OK",
+      value:
+        status === "offline"
+          ? "Offline"
+          : status === "degraded"
+            ? "Unstable"
+            : status === "stale"
+              ? "Cached"
+              : "OK",
     },
     { label: "Last error", value: lastSyncError ?? "—" },
     { label: "Remote notice", value: remoteUpdateNotice ?? "—" },
