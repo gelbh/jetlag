@@ -1,32 +1,21 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   computeHiderTruthReplyAsync,
   type HiderTruthResult,
 } from "../../domain/questions/ui";
+import { buildHiderTruthFetchKey } from "../../domain/questions/hiderTruth/hiderTruthFetchKey";
+import { reuseHiderTruthMapIfEqual } from "../../domain/questions/hiderTruth/hiderTruthMapReuse";
 import {
   resolvePendingQuestionTruthReference,
   type HiderQuestionTruthContextInput,
   type HiderTruthReferenceMode,
 } from "../../domain/questions/hiderTruth/resolveHiderTruthReference";
 import type { GameArea } from "../../domain/map/annotations";
-import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
 import { useLatestRequest } from "../forms/useLatestRequest";
 
 const EMPTY_TRUTHS = new Map<string, HiderTruthResult>();
 const EMPTY_MODES = new Map<string, HiderTruthReferenceMode>();
-
-function seekerPlacesKey(
-  places: Readonly<Record<string, LatLngTuple>> | null | undefined,
-): string {
-  if (!places) {
-    return "none";
-  }
-  return Object.keys(places)
-    .sort()
-    .map((uid) => `${uid}:${places[uid]?.join(",") ?? ""}`)
-    .join(";");
-}
 
 function openPendingQuestions(
   pendingQuestions: readonly PendingQuestionRecord[],
@@ -59,26 +48,21 @@ export function useHiderQuestionTruths(
     () => openPendingQuestions(pendingQuestions),
     [pendingQuestions],
   );
+  const openQuestionsRef = useRef(openQuestions);
+  const truthContextRef = useRef(truthContext);
 
-  const contextKey = truthContext
-    ? [
-        truthContext.hiderUid,
-        truthContext.zoneCenter?.join(",") ?? "none",
-        truthContext.hidingPlace?.join(",") ?? "none",
-        String(truthContext.zoneRadiusMeters ?? "none"),
-        truthContext.session?.endGameStartedAt ?? "none",
-        seekerPlacesKey(truthContext.seekerPlacesByUid),
-      ].join("|")
-    : "none";
+  useEffect(() => {
+    openQuestionsRef.current = openQuestions;
+  }, [openQuestions]);
 
-  const openQuestionKey = useMemo(
-    () =>
-      openQuestions
-        .map((question) => question.id)
-        .sort()
-        .join(","),
-    [openQuestions],
-  );
+  useEffect(() => {
+    truthContextRef.current = truthContext;
+  }, [truthContext]);
+
+  const fetchKey =
+    truthContext && openQuestions.length > 0
+      ? buildHiderTruthFetchKey(openQuestions, truthContext)
+      : "none";
 
   const truthReferenceModes = useMemo(() => {
     if (!truthContext || openQuestions.length === 0) {
@@ -93,24 +77,24 @@ export function useHiderQuestionTruths(
     }
     return modes;
   }, [openQuestions, truthContext]);
-
-  const fetchKey = `${openQuestionKey}|${contextKey}`;
   const truthReferenceReady = options?.truthReferenceReady ?? true;
   const loading =
     openQuestions.length > 0 &&
     (!truthReferenceReady || resolvedFetchKey !== fetchKey);
 
   useEffect(() => {
-    if (openQuestions.length === 0 || !truthReferenceReady || !truthContext) {
+    const open = openQuestionsRef.current;
+    const context = truthContextRef.current;
+
+    if (open.length === 0 || !truthReferenceReady || !context) {
       return;
     }
 
     const requestId = beginRequest();
-    const context = truthContext;
 
     void (async () => {
       const entries = await Promise.all(
-        openQuestions.map(async (question) => {
+        open.map(async (question) => {
           const reference = resolvePendingQuestionTruthReference(
             question,
             context,
@@ -135,18 +119,12 @@ export function useHiderQuestionTruths(
         }
       }
 
-      setQuestionTruths(nextTruths);
+      setQuestionTruths((previous) =>
+        reuseHiderTruthMapIfEqual(previous, nextTruths),
+      );
       setResolvedFetchKey(fetchKey);
     })();
-  }, [
-    fetchKey,
-    beginRequest,
-    isLatestRequest,
-    openQuestions,
-    truthContext,
-    gameArea,
-    truthReferenceReady,
-  ]);
+  }, [fetchKey, beginRequest, isLatestRequest, gameArea, truthReferenceReady]);
 
   return {
     questionTruths: openQuestions.length === 0 ? EMPTY_TRUTHS : questionTruths,

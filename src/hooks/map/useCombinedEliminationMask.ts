@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { Feature, MultiPolygon, Polygon as GeoPolygon } from "geojson";
 import { EMPTY_GEOJSON_FEATURES } from "../../domain/geometry/masks/emptyFeatures";
 import { requestCombinedEliminationMask } from "../../domain/geometry/masks/eliminationMaskWorkerClient";
+import { previewEliminationFeaturesFingerprint } from "../../domain/questions/overlays/previewEliminationFeaturesFingerprint";
 import type { AnnotationRecord, GameArea } from "../../domain/map/annotations";
 import type { HidingZoneRecord } from "../../domain/session/hiding/hidingZone";
 import type { PolygonFeature } from "../../domain/geometry/kernel/types";
@@ -23,6 +24,16 @@ export function useCombinedEliminationMask({
 }: UseCombinedEliminationMaskOptions) {
   const [mask, setMask] = useState<PolygonFeature | null>(null);
   const generationRef = useRef(0);
+  const draftFeaturesRef = useRef(draftFeatures);
+
+  useEffect(() => {
+    draftFeaturesRef.current = draftFeatures;
+  }, [draftFeatures]);
+
+  const draftFingerprint = useMemo(
+    () => previewEliminationFeaturesFingerprint(draftFeatures),
+    [draftFeatures],
+  );
 
   useEffect(() => {
     if (hidden) {
@@ -36,7 +47,7 @@ export function useCombinedEliminationMask({
     void requestCombinedEliminationMask(
       annotations,
       gameArea,
-      draftFeatures,
+      draftFeaturesRef.current,
       endGameHidingZones,
     )
       .then((result) => {
@@ -49,7 +60,7 @@ export function useCombinedEliminationMask({
           setMask(null);
         }
       });
-  }, [annotations, draftFeatures, endGameHidingZones, gameArea, hidden]);
+  }, [annotations, draftFingerprint, endGameHidingZones, gameArea, hidden]);
 
   if (hidden) {
     return null;
