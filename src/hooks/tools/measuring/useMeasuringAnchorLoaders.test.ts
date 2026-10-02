@@ -196,4 +196,67 @@ describe("useMeasuringAnchorLoaders coastline pack seed", () => {
     ]);
     expect(result.current.draft.measuringLoading).toBe(false);
   });
+
+  it("clears stale coastline geometry as soon as re-resolve starts", async () => {
+    resolveCoastlineCacheMock.mockReturnValue(null);
+    let resolveFetch!: (value: {
+      ok: true;
+      coastPoint: [number, number];
+      distanceMeters: number;
+      segments: Feature<LineString>[];
+    }) => void;
+    fetchCoastlineMock.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolveFetch = resolve;
+        }),
+    );
+
+    const { result } = renderHook(() => {
+      const draft = useMeasuringDraftState([]);
+      const loaders = useMeasuringAnchorLoaders({
+        active: true,
+        gameArea: dublinishArea as never,
+        setMapError: vi.fn(),
+        draft,
+        sessionRules: { regionPackId: "dublin" } as never,
+      });
+      return { draft, loaders };
+    });
+
+    act(() => {
+      result.current.draft.setMeasuringSubject("coastline");
+      result.current.draft.setMeasuringOptionChosen(true);
+      result.current.draft.setMeasuringTargetPoint([53.33, -6.34]);
+      result.current.draft.setMeasuringDistanceMeters(1_200);
+      result.current.draft.setMeasuringCoastSegments([packCoastSegment]);
+    });
+
+    let loadPromise!: Promise<void>;
+    act(() => {
+      loadPromise = result.current.loaders.loadMeasuringCoastlineAt([
+        53.35, -6.26,
+      ]);
+    });
+
+    expect(result.current.draft.measuringLoading).toBe(true);
+    expect(result.current.draft.measuringTargetPoint).toBeNull();
+    expect(result.current.draft.measuringDistanceMeters).toBeNull();
+    expect(result.current.draft.measuringCoastSegments).toEqual([]);
+
+    await act(async () => {
+      resolveFetch({
+        ok: true,
+        coastPoint: [53.34, -6.3],
+        distanceMeters: 800,
+        segments: [packCoastSegment],
+      });
+      await loadPromise;
+    });
+
+    expect(result.current.draft.measuringLoading).toBe(false);
+    expect(result.current.draft.measuringCoastSegments).toEqual([
+      packCoastSegment,
+    ]);
+  });
 });

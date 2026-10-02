@@ -345,6 +345,9 @@ export function useMeasuringAnchorLoaders({
       const requestId = ++coastlineRequestIdRef.current;
       setMeasuringLoading(true);
       setMeasuringError(null);
+      setMeasuringTargetPoint(null);
+      setMeasuringDistanceMeters(null);
+      setMeasuringCoastSegments([]);
 
       const syncResult = resolveCoastlineContextFromCache(seekerPoint, gameArea);
       if (syncResult) {
@@ -356,8 +359,8 @@ export function useMeasuringAnchorLoaders({
           setMeasuringTargetPoint(syncResult.coastPoint);
           setMeasuringDistanceMeters(syncResult.distanceMeters);
           setMeasuringCoastSegments(syncResult.segments);
+          setMeasuringLoading(false);
         });
-        setMeasuringLoading(false);
         return;
       }
 
@@ -375,6 +378,7 @@ export function useMeasuringAnchorLoaders({
             setMeasuringDistanceMeters(result.distanceMeters);
             setMeasuringCoastSegments(result.segments);
             setCoastlineContextVersion((version) => version + 1);
+            setMeasuringLoading(false);
           });
         };
 
