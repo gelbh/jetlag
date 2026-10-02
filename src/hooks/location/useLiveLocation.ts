@@ -16,6 +16,10 @@ import {
   subscribeLocationPermissionUi,
   persistLocationAccessConfirmed,
 } from "../../services/core/location/locationPermissionUi";
+import {
+  clearLiveLocationReading,
+  publishLiveLocationReading,
+} from "../../services/core/location/liveLocationReading";
 
 interface UseLiveLocationOptions {
   highAccuracy?: boolean;
@@ -72,6 +76,7 @@ export function useLiveLocation(
     setReading(null);
     setError(null);
     setNeedsPermissionPrompt(false);
+    clearLiveLocationReading();
   }, [enabled]);
 
   useEffect(() => {
@@ -102,6 +107,7 @@ export function useLiveLocation(
       lastPublishRef.current = { at: now, reading: next };
       setReading(next);
       setError(null);
+      publishLiveLocationReading(next);
     };
 
     const startWatch = () => {
@@ -153,12 +159,14 @@ export function useLiveLocation(
       if (permission === "unavailable") {
         setNeedsPermissionPrompt(false);
         setError("Geolocation is not available on this device.");
+        clearLiveLocationReading();
         return;
       }
 
       if (permission === "denied") {
         setNeedsPermissionPrompt(false);
         setError(LOCATION_BLOCKED_MESSAGE);
+        clearLiveLocationReading();
         return;
       }
 
@@ -181,6 +189,7 @@ export function useLiveLocation(
         if (restore.status === "denied") {
           setNeedsPermissionPrompt(false);
           setError(LOCATION_BLOCKED_MESSAGE);
+          clearLiveLocationReading();
           return;
         }
 
