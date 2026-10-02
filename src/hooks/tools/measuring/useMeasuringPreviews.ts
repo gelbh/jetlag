@@ -23,7 +23,6 @@ export function useMeasuringPreviews(gameArea: GameArea, draft: MeasuringDraftSt
     measuringSeaLevelNearRegion,
     usesAllPlacesInArea,
     measuringSeaLevelEdgeCase,
-    coastlineContextVersion,
     setMeasuringError,
   } = draft;
 

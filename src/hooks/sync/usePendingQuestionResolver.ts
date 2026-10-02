@@ -267,6 +267,7 @@ export function usePendingQuestionResolver({
     deleteAnnotation,
     enabled,
     gameArea,
+    knownAnnotationIdsKey,
     pendingQuestions,
     sessionId,
     sessionResetAt,

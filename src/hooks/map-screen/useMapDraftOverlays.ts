@@ -400,20 +400,6 @@ export function useMapDraftOverlays(
   sources: MapDraftOverlaySources,
   extraEliminationFeatures: readonly Feature<GeoPolygon | MultiPolygon>[] = EMPTY_GEOJSON_FEATURES,
 ): MapDraftOverlayResult {
-  const {
-    activeTool,
-    gameArea,
-    mapStyle,
-    streetBasemap = "light",
-    radar,
-    pin,
-    tentacle,
-    thermometer,
-    measuring,
-    matching,
-    zone,
-  } = sources;
-
   const [built, setBuilt] = useState<MapDraftOverlayResult>(EMPTY_DRAFT_RESULT);
   const [tentacleDisplayElim, setTentacleDisplayElim] = useState<Feature<
     GeoPolygon | MultiPolygon

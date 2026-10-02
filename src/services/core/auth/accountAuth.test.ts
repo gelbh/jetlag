@@ -46,15 +46,21 @@ vi.mock("firebase/auth", () => ({
   EmailAuthProvider: {
     credentialWithLink: (...args: unknown[]) => credentialWithLink(...args),
   },
-  GoogleAuthProvider: class {
-    static credential = vi.fn(() => ({
-      providerId: "google.com",
-      token: "id-token",
-    }));
-  },
-  OAuthProvider: class {
-    static credentialFromError = (...args: unknown[]) => credentialFromError(...args);
-  },
+  GoogleAuthProvider: Object.assign(
+    vi.fn(function GoogleAuthProvider() {}),
+    {
+      credential: vi.fn(() => ({
+        providerId: "google.com",
+        token: "id-token",
+      })),
+    },
+  ),
+  OAuthProvider: Object.assign(
+    vi.fn(function OAuthProvider(_providerId: string) {}),
+    {
+      credentialFromError: (...args: unknown[]) => credentialFromError(...args),
+    },
+  ),
   getRedirectResult: (...args: unknown[]) => getRedirectResult(...args),
   isSignInWithEmailLink: (...args: unknown[]) => isSignInWithEmailLink(...args),
   linkWithCredential: (...args: unknown[]) => linkWithCredential(...args),
