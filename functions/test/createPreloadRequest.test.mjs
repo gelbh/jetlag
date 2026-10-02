@@ -1,5 +1,5 @@
-import test from "node:test";
 import assert from "node:assert/strict";
+import test from "node:test";
 import {
   createPreloadRequestHandler,
   PRELOAD_INVALID_SNAPSHOT,
@@ -145,11 +145,7 @@ test("createPreloadRequestHandler rejects missing auth", async () => {
 test("createPreloadRequestHandler rejects anonymous auth", async () => {
   const db = mockDb();
   await assert.rejects(
-    createPreloadRequestHandler(
-      db,
-      baseInput({ signInProvider: "anonymous" }),
-      baseDeps(),
-    ),
+    createPreloadRequestHandler(db, baseInput({ signInProvider: "anonymous" }), baseDeps()),
     (error) => error.message === PRELOAD_PERMANENT_AUTH_REQUIRED,
   );
   assert.equal(db._docs.size, 0);
@@ -190,11 +186,7 @@ test("createPreloadRequestHandler rejects oversized snapshot", async () => {
 
 test("createPreloadRequestHandler clamps the note to 140 characters", async () => {
   const db = mockDb();
-  await createPreloadRequestHandler(
-    db,
-    baseInput({ note: "a".repeat(200) }),
-    baseDeps(),
-  );
+  await createPreloadRequestHandler(db, baseInput({ note: "a".repeat(200) }), baseDeps());
   const doc = db._docs.get("id-1");
   assert.equal(doc.note.length, 140);
 });

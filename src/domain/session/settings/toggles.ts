@@ -1,10 +1,7 @@
 import type { DistanceUnit } from "../../map/distance";
+import { ALL_CONFIGURABLE_TOOLS, type ConfigurableMapTool } from "../rules";
 import type { GameSize } from "../size/gameSize";
 import { thermometerPresetsMetersForGameSize } from "../size/gameSizeRules";
-import {
-  ALL_CONFIGURABLE_TOOLS,
-  type ConfigurableMapTool,
-} from "../rules";
 import type { AdvancedSessionSettingsValue } from "./types";
 
 export function isToolDisabledInSettings(
@@ -48,9 +45,7 @@ export function toggleThermometerPresetInSettings(
     if (current.size <= 1) {
       return settings;
     }
-    const next = [...current].filter(
-      (value) => Math.abs(value - presetMeters) >= 5,
-    );
+    const next = [...current].filter((value) => Math.abs(value - presetMeters) >= 5);
     return {
       ...settings,
       customThermometerPresetsEnabled: true,

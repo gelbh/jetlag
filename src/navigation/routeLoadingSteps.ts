@@ -1,4 +1,7 @@
-import { isAuthBootstrapReady, isFirebaseConfigured } from "@/services/core/firebase/authBootstrapState";
+import {
+  isAuthBootstrapReady,
+  isFirebaseConfigured,
+} from "@/services/core/firebase/authBootstrapState";
 import { isPlayAreaReadySync } from "@/services/geo/matching/playAreaReadiness";
 import { usePremiumEntitlementsStore } from "../state/premiumEntitlementsStore";
 import { useSessionStore } from "../state/sessionStore";
@@ -45,10 +48,7 @@ export function destinationTitleForPath(path: string): string {
   }
 }
 
-export function labelForStep(
-  stepId: RouteLoadingStepId,
-  destinationTitle: string,
-): string {
+export function labelForStep(stepId: RouteLoadingStepId, destinationTitle: string): string {
   switch (stepId) {
     case "download-screen":
       return "Downloading screen…";
@@ -131,10 +131,7 @@ export function resolveLoadingSteps(path: string): RouteLoadingStepId[] {
   });
 }
 
-export function computeLoadingProgress(
-  path: string,
-  screenReady: boolean,
-): RouteLoadingProgress {
+export function computeLoadingProgress(path: string, screenReady: boolean): RouteLoadingProgress {
   const destinationTitle = destinationTitleForPath(path);
   const steps = resolveLoadingSteps(path);
 

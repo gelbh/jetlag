@@ -1,38 +1,33 @@
-import {
-  isEndGameActive,
-  isFoundHiderPending,
-} from "../../domain/map/annotations";
-import { sessionHasHiders } from "../../domain/session/players/playerRole";
 import { ChatPanel } from "../../components/chat/ChatPanel";
-import { GameOverChrome } from "../../components/session/game-over/GameOverChrome";
-import { MapSettingsSheet } from "../../components/session/mapChrome/MapSettingsSheet";
 import { CurseReferenceSheet } from "../../components/expansion/CurseReferenceSheet";
-import { MapStatusRail } from "../../components/session/mapChrome/MapStatusRail";
+import { GameOverChrome } from "../../components/session/game-over/GameOverChrome";
 import { SessionLog } from "../../components/session/log/SessionLog";
+import { MapSettingsSheet } from "../../components/session/mapChrome/MapSettingsSheet";
+import { MapStatusRail } from "../../components/session/mapChrome/MapStatusRail";
 import { AnnotationEditSheet } from "../../components/tools/AnnotationEditSheet";
 import { ToolDock } from "../../components/tools/ToolDock";
+import { isEndGameActive, isFoundHiderPending } from "../../domain/map/annotations";
+import { sessionHasHiders } from "../../domain/session/players/playerRole";
 import { useDevMockSessionFeed } from "../../hooks/dev/useDevMockSessionFeed";
-import type { MapScreenController } from "./useMapScreenController";
-import { useMapTerminalSessionChrome } from "../../hooks/session/useMapTerminalSessionChrome";
 import { useGameOverActions } from "../../hooks/session/useGameOverActions";
+import { useMapTerminalSessionChrome } from "../../hooks/session/useMapTerminalSessionChrome";
 import { useAnnotationStore } from "../../state/annotationStore";
 import { SeekerChromeOverlays } from "./SeekerChromeOverlays";
-import { MapScreenChromeSlots } from "./shared/MapScreenChromeSlots";
-import { getMapScreenRoleConfig } from "./shared/mapScreenRoleConfig";
-import { MapScreenRoleCodesSheet } from "./shared/MapScreenSharedSessionSheets";
-import { useMapScreenReportProblemSheet } from "./shared/useMapScreenReportProblemSheet";
 import { canOpenMapScreenRoleCodes } from "./shared/canOpenMapScreenRoleCodes";
 import { MapScreenChromeBanners } from "./shared/MapScreenChromeBanners";
-import {
-  selectMapRefineChip,
-  type MapRefineChipCopy,
-} from "./shared/selectMapRefineChip";
+import { MapScreenChromeSlots } from "./shared/MapScreenChromeSlots";
+import { MapScreenRoleCodesSheet } from "./shared/MapScreenSharedSessionSheets";
+import { getMapScreenRoleConfig } from "./shared/mapScreenRoleConfig";
+import { type MapRefineChipCopy, selectMapRefineChip } from "./shared/selectMapRefineChip";
+import { useMapScreenReportProblemSheet } from "./shared/useMapScreenReportProblemSheet";
+import type { MapScreenController } from "./useMapScreenController";
 
 export type MapScreenChromeProps = {
   controller: MapScreenController;
 };
 
 export function MapScreenChrome({ controller }: MapScreenChromeProps) {
+  "use memo";
   const {
     session,
     gameArea,
@@ -144,14 +139,10 @@ export function MapScreenChrome({ controller }: MapScreenChromeProps) {
     setActiveTool,
     setAwaitingPlacement,
   } = controller;
-  const {
-    messages: displayChatMessages,
-    pendingQuestions: displayPendingQuestions,
-  } = useDevMockSessionFeed(session?.id, chatMessages, pendingQuestions);
+  const { messages: displayChatMessages, pendingQuestions: displayPendingQuestions } =
+    useDevMockSessionFeed(session?.id, chatMessages, pendingQuestions);
   const syncMessage =
-    syncStatus.remoteUpdateNotice ??
-    syncStatus.lastSyncError ??
-    matchingAreasError;
+    syncStatus.remoteUpdateNotice ?? syncStatus.lastSyncError ?? matchingAreasError;
   const { inactiveChrome, terminalSessionError, onReturnToJoin, onSyncRetry } =
     useMapTerminalSessionChrome({
       syncMessage,
@@ -170,9 +161,7 @@ export function MapScreenChrome({ controller }: MapScreenChromeProps) {
   const openReportProblem = () => {
     overlay.pushSheet("report-problem");
   };
-  const markAnnotationPulse = useAnnotationStore(
-    (state) => state.markAnnotationPulse,
-  );
+  const markAnnotationPulse = useAnnotationStore((state) => state.markAnnotationPulse);
 
   const statusRail = (
     <MapStatusRail
@@ -210,9 +199,7 @@ export function MapScreenChrome({ controller }: MapScreenChromeProps) {
         onTimerPause: timer.pause,
         onTimerReset: timer.reset,
         timerControlsDisabled: !canControlTimer || inactiveChrome,
-        moveInProgress: confirmedHidingZones.some(
-          (zone) => zone.moveInProgress === true,
-        ),
+        moveInProgress: confirmedHidingZones.some((zone) => zone.moveInProgress === true),
         onOpenLog: handleOpenLog,
         pendingQuestions: displayPendingQuestions,
         closeTimerMenu:
@@ -267,35 +254,29 @@ export function MapScreenChrome({ controller }: MapScreenChromeProps) {
   );
 
   const measuringLodRefining =
-    measuringTool.measuringLodPhase === "coarse" ||
-    measuringTool.measuringLodPhase === "refining";
+    measuringTool.measuringLodPhase === "coarse" || measuringTool.measuringLodPhase === "refining";
   const matchingLodRefining =
-    matchingTool.matchingLodPhase === "coarse" ||
-    matchingTool.matchingLodPhase === "refining";
+    matchingTool.matchingLodPhase === "coarse" || matchingTool.matchingLodPhase === "refining";
   const tentacleLodRefining =
-    tentacleTool.tentacleLodPhase === "coarse" ||
-    tentacleTool.tentacleLodPhase === "refining";
+    tentacleTool.tentacleLodPhase === "coarse" || tentacleTool.tentacleLodPhase === "refining";
   const catalogHydrating =
     activeTool === "matching" &&
     !matchingTool.matchingCatalogComplete &&
     !matchingTool.hud.suppressSheet;
   const askMapFirst = Boolean(
     (activeTool === "matching" && matchingTool.hud.suppressSheet) ||
-    (activeTool === "radar" && radarTool.hud.suppressSheet) ||
-    (activeTool === "tentacle" && tentacleTool.hud.suppressSheet) ||
-    (activeTool === "measuring" && measuringTool.hud.suppressSheet) ||
-    (activeTool === "photo" && photoTool.hud?.suppressSheet) ||
-    (activeTool === "thermometer" && thermometerTool.hud.suppressSheet),
+      (activeTool === "radar" && radarTool.hud.suppressSheet) ||
+      (activeTool === "tentacle" && tentacleTool.hud.suppressSheet) ||
+      (activeTool === "measuring" && measuringTool.hud.suppressSheet) ||
+      (activeTool === "photo" && photoTool.hud?.suppressSheet) ||
+      (activeTool === "thermometer" && thermometerTool.hud.suppressSheet),
   );
 
   const refineChip: MapRefineChipCopy = selectMapRefineChip({
     catalogHydrating,
-    measuringActiveAndRefining:
-      measuringLodRefining && activeTool === "measuring",
+    measuringActiveAndRefining: measuringLodRefining && activeTool === "measuring",
     shadeRefining:
-      (!askMapFirst && matchingLodRefining) ||
-      measuringLodRefining ||
-      tentacleLodRefining,
+      (!askMapFirst && matchingLodRefining) || measuringLodRefining || tentacleLodRefining,
   });
 
   const header = (
@@ -306,244 +287,235 @@ export function MapScreenChrome({ controller }: MapScreenChromeProps) {
   );
 
   return (
-    <MapScreenChromeSlots
-      chromeHudRef={chromeHudRef}
-      header={header}
-      toolbar={toolDock}
-    >
-        <SeekerChromeOverlays
-          timer={timer}
-          activeTool={activeTool}
-          overlay={overlay}
-          firstRunDismissed={firstRunDismissed}
-          setFirstRunDismissed={setFirstRunDismissed}
-          forceMapToolsGuide={overlay.isMapToolsGuideOpen}
-          onDismissMapToolsGuide={() => {
-            if (overlay.isMapToolsGuideOpen) {
-              overlay.closeSheet();
-            }
-          }}
-          selectedAnnotation={selectedAnnotation}
-          geometryEditAnnotation={geometryEditAnnotation}
-          geometryDraft={geometryDraft}
-          mapPanning={mapPanning}
-          userMinimized={userMinimized}
-          setUserMinimized={setUserMinimized}
-          handleSelectTool={handleSelectTool}
-          cancelGeometryEdit={cancelGeometryEdit}
-          saveGeometryEdit={saveGeometryEdit}
-          tools={{
-            radarTool,
-            photoTool,
-            thermometerTool,
-            matchingTool,
-            measuringTool,
-            pinTool,
-            zoneTool,
-            tentacleTool,
-            drawTool,
-          }}
-        />
-
-        <GameOverChrome
-          sessionId={session!.id}
-          playerRole={roleConfig.statusPlayerRole}
-          myUid={uid ?? undefined}
-          actions={gameOverActions}
-        />
-
-        {overlay.settingsInStack ? (
-          <MapSettingsSheet
-            open={overlay.isSettingsOpen}
-            onClose={overlay.closeSheet}
-            pendingWrites={pendingWrites}
-            general={{
-              showCurrentLocation,
-              onShowCurrentLocationChange: setShowCurrentLocation,
-              showAdminBoundaries,
-              onShowAdminBoundariesChange: setShowAdminBoundaries,
-              keepScreenAwake,
-              onKeepScreenAwakeChange: setKeepScreenAwake,
-              lowPowerMode,
-              onLowPowerModeChange: setLowPowerMode,
-              distanceUnit,
-              onDistanceUnitChange: (unit) => {
-                void handleDistanceUnitChange(unit);
-              },
-              distanceUnitEditable: gameRulesEditable,
-              mapStyle: effectiveBasemapStyle,
-              onMapStyleChange: handleMapStyleChange,
-              streetBasemap,
-              onStreetBasemapChange: setStreetBasemap,
-              locationError: liveLocationError,
-              transitEnabled,
-              transitLiveEnabled,
-              transitLiveSupported,
-              sessionIsPremium,
-              transitRouteFilter,
-              metroLabel: transitMetro?.label ?? null,
-              loadingStatic: transitLoadingStatic,
-              loadingLive: transitLoadingLive,
-              liveDataStale: transitLiveDataStale,
-              stopCount: transitStaticData?.stops.length ?? 0,
-              routeCount: transitStaticData?.routes.length ?? 0,
-              vehicleCount: transitLiveData?.vehicles.length ?? 0,
-              lastUpdated:
-                transitLiveData?.fetchedAt ?? transitStaticData?.fetchedAt,
-              transitError,
-              onToggleTransit: () => setTransitEnabled(!transitEnabled),
-              onToggleLiveTransit: () =>
-                setTransitLiveEnabled(!transitLiveEnabled),
-              onTransitRouteFilterChange: setTransitRouteFilter,
-            }}
-            layers={{
-              layerVisibility,
-              onLayerVisibilityChange: setLayerVisibility,
-            }}
-            rules={
-              draftAdvancedSettings
-                ? {
-                    gameRulesEditable: gameRulesEditable && isHost,
-                    gameSize: session!.gameSize ?? "medium",
-                    advancedSettings: draftAdvancedSettings,
-                    onAdvancedSettingsChange: setDraftAdvancedSettings,
-                    onSaveGameRules: handleSaveGameRules,
-                  }
-                : undefined
-            }
-            session={{
-              sessionCode: session!.code,
-              remoteSession: isRemote,
-              session: session!,
-              myUid: uid ?? undefined,
-              onClearMap: handleClearMap,
-              endGameBlocked,
-              onExport: () => {
-                overlay.closeAllSheets();
-                void exportMap();
-              },
-              isHost,
-              onResetBoard: handleResetBoard,
-              onResetSession: () => void handleResetSession(),
-              onEndSession: () => void handleEndSession(),
-              onLeaveSession: () => void handleLeaveSession(),
-              expansionPackEnabled: session!.expansionPackEnabled === true,
-              onReviewMapTools: () => {
-                overlay.pushSheet("map-tools-guide");
-              },
-              onOpenCurseReference: () => {
-                overlay.pushSheet("curse-reference");
-              },
-            }}
-            onReportProblem={openReportProblem}
-          />
-        ) : null}
-
-        <CurseReferenceSheet
-          open={overlay.isCurseReferenceOpen}
-          onClose={overlay.closeSheet}
-        />
-
-        <MapScreenRoleCodesSheet
-          session={session!}
-          uid={uid}
-          isHost={isHost}
-          isCodesOpen={overlay.isCodesOpen}
-          onCloseSheet={overlay.closeSheet}
-          canOpenCodes={canOpenCodes}
-        />
-        {reportProblemSheet}
-
-        {selectedAnnotation ? (
-          <AnnotationEditSheet
-            annotation={selectedAnnotation}
-            gameArea={gameArea!}
-            onClose={() => setSelectedAnnotationId(null)}
-            onSave={(annotation) => {
-              void updateAnnotation(annotation);
-              setSelectedAnnotationId(null);
-            }}
-            onDelete={(id) => {
-              void deleteAnnotation(id);
-              setSelectedAnnotationId(null);
-            }}
-            onEditOnMap={() => startGeometryEdit(selectedAnnotation.id)}
-          />
-        ) : null}
-
-        <SessionLog
-          open={overlay.isLogOpen}
-          sessionId={session!.id}
-          annotations={annotations}
-          onClose={overlay.closeSheet}
-          onDelete={(id) => void deleteAnnotation(id)}
-          onEdit={(id) => {
+    <MapScreenChromeSlots chromeHudRef={chromeHudRef} header={header} toolbar={toolDock}>
+      <SeekerChromeOverlays
+        timer={timer}
+        activeTool={activeTool}
+        overlay={overlay}
+        firstRunDismissed={firstRunDismissed}
+        setFirstRunDismissed={setFirstRunDismissed}
+        forceMapToolsGuide={overlay.isMapToolsGuideOpen}
+        onDismissMapToolsGuide={() => {
+          if (overlay.isMapToolsGuideOpen) {
             overlay.closeSheet();
-            setActiveTool("none");
-            setAwaitingPlacement(false);
-            setSelectedAnnotationId(id);
-          }}
-          onSelect={(id) => {
-            overlay.closeSheet();
-            setActiveTool("none");
-            setAwaitingPlacement(false);
-            setSelectedAnnotationId(id);
-            markAnnotationPulse(id);
-          }}
-        />
+          }
+        }}
+        selectedAnnotation={selectedAnnotation}
+        geometryEditAnnotation={geometryEditAnnotation}
+        geometryDraft={geometryDraft}
+        mapPanning={mapPanning}
+        userMinimized={userMinimized}
+        setUserMinimized={setUserMinimized}
+        handleSelectTool={handleSelectTool}
+        cancelGeometryEdit={cancelGeometryEdit}
+        saveGeometryEdit={saveGeometryEdit}
+        tools={{
+          radarTool,
+          photoTool,
+          thermometerTool,
+          matchingTool,
+          measuringTool,
+          pinTool,
+          zoneTool,
+          tentacleTool,
+          drawTool,
+        }}
+      />
 
-        <ChatPanel
-          model={{
-            open: overlay.isChatOpen,
-            onClose: overlay.closeSheet,
-            messages: displayChatMessages,
-            pendingQuestions: displayPendingQuestions,
-            sessionRules: session!,
-            sessionId: session!.id,
-            senderUid: uid ?? "",
-            senderRole: "seeker",
-            isHider: false,
-            onAnswerQuestion: async (
+      <GameOverChrome
+        sessionId={session!.id}
+        playerRole={roleConfig.statusPlayerRole}
+        myUid={uid ?? undefined}
+        actions={gameOverActions}
+      />
+
+      {overlay.settingsInStack ? (
+        <MapSettingsSheet
+          open={overlay.isSettingsOpen}
+          onClose={overlay.closeSheet}
+          pendingWrites={pendingWrites}
+          general={{
+            showCurrentLocation,
+            onShowCurrentLocationChange: setShowCurrentLocation,
+            showAdminBoundaries,
+            onShowAdminBoundariesChange: setShowAdminBoundaries,
+            keepScreenAwake,
+            onKeepScreenAwakeChange: setKeepScreenAwake,
+            lowPowerMode,
+            onLowPowerModeChange: setLowPowerMode,
+            distanceUnit,
+            onDistanceUnitChange: (unit) => {
+              void handleDistanceUnitChange(unit);
+            },
+            distanceUnitEditable: gameRulesEditable,
+            mapStyle: effectiveBasemapStyle,
+            onMapStyleChange: handleMapStyleChange,
+            streetBasemap,
+            onStreetBasemapChange: setStreetBasemap,
+            locationError: liveLocationError,
+            transitEnabled,
+            transitLiveEnabled,
+            transitLiveSupported,
+            sessionIsPremium,
+            transitRouteFilter,
+            metroLabel: transitMetro?.label ?? null,
+            loadingStatic: transitLoadingStatic,
+            loadingLive: transitLoadingLive,
+            liveDataStale: transitLiveDataStale,
+            stopCount: transitStaticData?.stops.length ?? 0,
+            routeCount: transitStaticData?.routes.length ?? 0,
+            vehicleCount: transitLiveData?.vehicles.length ?? 0,
+            lastUpdated: transitLiveData?.fetchedAt ?? transitStaticData?.fetchedAt,
+            transitError,
+            onToggleTransit: () => setTransitEnabled(!transitEnabled),
+            onToggleLiveTransit: () => setTransitLiveEnabled(!transitLiveEnabled),
+            onTransitRouteFilterChange: setTransitRouteFilter,
+          }}
+          layers={{
+            layerVisibility,
+            onLayerVisibilityChange: setLayerVisibility,
+          }}
+          rules={
+            draftAdvancedSettings
+              ? {
+                  gameRulesEditable: gameRulesEditable && isHost,
+                  gameSize: session!.gameSize ?? "medium",
+                  advancedSettings: draftAdvancedSettings,
+                  onAdvancedSettingsChange: setDraftAdvancedSettings,
+                  onSaveGameRules: handleSaveGameRules,
+                }
+              : undefined
+          }
+          session={{
+            sessionCode: session!.code,
+            remoteSession: isRemote,
+            session: session!,
+            myUid: uid ?? undefined,
+            onClearMap: handleClearMap,
+            endGameBlocked,
+            onExport: () => {
+              overlay.closeAllSheets();
+              void exportMap();
+            },
+            isHost,
+            onResetBoard: handleResetBoard,
+            onResetSession: () => void handleResetSession(),
+            onEndSession: () => void handleEndSession(),
+            onLeaveSession: () => void handleLeaveSession(),
+            expansionPackEnabled: session!.expansionPackEnabled === true,
+            onReviewMapTools: () => {
+              overlay.pushSheet("map-tools-guide");
+            },
+            onOpenCurseReference: () => {
+              overlay.pushSheet("curse-reference");
+            },
+          }}
+          onReportProblem={openReportProblem}
+        />
+      ) : null}
+
+      <CurseReferenceSheet open={overlay.isCurseReferenceOpen} onClose={overlay.closeSheet} />
+
+      <MapScreenRoleCodesSheet
+        session={session!}
+        uid={uid}
+        isHost={isHost}
+        isCodesOpen={overlay.isCodesOpen}
+        onCloseSheet={overlay.closeSheet}
+        canOpenCodes={canOpenCodes}
+      />
+      {reportProblemSheet}
+
+      {selectedAnnotation ? (
+        <AnnotationEditSheet
+          annotation={selectedAnnotation}
+          gameArea={gameArea!}
+          onClose={() => setSelectedAnnotationId(null)}
+          onSave={(annotation) => {
+            void updateAnnotation(annotation);
+            setSelectedAnnotationId(null);
+          }}
+          onDelete={(id) => {
+            void deleteAnnotation(id);
+            setSelectedAnnotationId(null);
+          }}
+          onEditOnMap={() => startGeometryEdit(selectedAnnotation.id)}
+        />
+      ) : null}
+
+      <SessionLog
+        open={overlay.isLogOpen}
+        sessionId={session!.id}
+        annotations={annotations}
+        onClose={overlay.closeSheet}
+        onDelete={(id) => void deleteAnnotation(id)}
+        onEdit={(id) => {
+          overlay.closeSheet();
+          setActiveTool("none");
+          setAwaitingPlacement(false);
+          setSelectedAnnotationId(id);
+        }}
+        onSelect={(id) => {
+          overlay.closeSheet();
+          setActiveTool("none");
+          setAwaitingPlacement(false);
+          setSelectedAnnotationId(id);
+          markAnnotationPulse(id);
+        }}
+      />
+
+      <ChatPanel
+        model={{
+          open: overlay.isChatOpen,
+          onClose: overlay.closeSheet,
+          messages: displayChatMessages,
+          pendingQuestions: displayPendingQuestions,
+          sessionRules: session!,
+          sessionId: session!.id,
+          senderUid: uid ?? "",
+          senderRole: "seeker",
+          isHider: false,
+          onAnswerQuestion: async (
+            pendingQuestionId,
+            messageId,
+            answer,
+            selectedReply,
+            deadlineExpired,
+          ) => {
+            await answerPendingQuestion(
+              session!.id,
               pendingQuestionId,
               messageId,
               answer,
               selectedReply,
-              deadlineExpired,
-            ) => {
-              await answerPendingQuestion(
-                session!.id,
-                pendingQuestionId,
-                messageId,
-                answer,
-                selectedReply,
-                deadlineExpired
-                  ? {
-                      deadlineExpired: true,
-                      senderUid: uid ?? "",
-                      senderRole: "seeker",
-                    }
-                  : undefined,
-              );
-            },
-            onDismissExpiredQuestion: async (pendingQuestionId, messageId) => {
-              const pending = displayPendingQuestions.find(
-                (question) => question.id === pendingQuestionId,
-              );
-              if (!pending) {
-                return;
-              }
-              await dismissExpiredPendingQuestion({
-                sessionId: session!.id,
-                pendingQuestionId,
-                messageId,
-                senderUid: uid ?? "",
-                senderRole: "seeker",
-                toolType: pending.toolType,
-                promptText: pending.promptText,
-              });
-            },
-          }}
-        />
+              deadlineExpired
+                ? {
+                    deadlineExpired: true,
+                    senderUid: uid ?? "",
+                    senderRole: "seeker",
+                  }
+                : undefined,
+            );
+          },
+          onDismissExpiredQuestion: async (pendingQuestionId, messageId) => {
+            const pending = displayPendingQuestions.find(
+              (question) => question.id === pendingQuestionId,
+            );
+            if (!pending) {
+              return;
+            }
+            await dismissExpiredPendingQuestion({
+              sessionId: session!.id,
+              pendingQuestionId,
+              messageId,
+              senderUid: uid ?? "",
+              senderRole: "seeker",
+              toolType: pending.toolType,
+              promptText: pending.promptText,
+            });
+          },
+        }}
+      />
     </MapScreenChromeSlots>
   );
 }

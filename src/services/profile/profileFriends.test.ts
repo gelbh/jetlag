@@ -10,9 +10,11 @@ import {
 } from "./profileFriends";
 
 const callable = vi.hoisted(() =>
-  vi.fn(async (): Promise<{ data: unknown }> => ({
-    data: { results: [{ uid: "u2", username: "bob" }] },
-  })),
+  vi.fn(
+    async (): Promise<{ data: unknown }> => ({
+      data: { results: [{ uid: "u2", username: "bob" }] },
+    }),
+  ),
 );
 const httpsCallable = vi.hoisted(() => vi.fn(() => callable));
 const getFirebaseFunctions = vi.hoisted(() => vi.fn(async () => ({})));

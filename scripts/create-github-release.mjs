@@ -22,25 +22,22 @@ function isCliMain() {
 }
 
 async function createGithubRelease({ owner, repo, tag, name, body, token }) {
-  const response = await fetch(
-    `https://api.github.com/repos/${owner}/${repo}/releases`,
-    {
-      method: "POST",
-      headers: {
-        Accept: "application/vnd.github+json",
-        Authorization: `Bearer ${token}`,
-        "X-GitHub-Api-Version": "2022-11-28",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        tag_name: tag,
-        name,
-        body,
-        draft: false,
-        prerelease: false,
-      }),
+  const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/releases`, {
+    method: "POST",
+    headers: {
+      Accept: "application/vnd.github+json",
+      Authorization: `Bearer ${token}`,
+      "X-GitHub-Api-Version": "2022-11-28",
+      "Content-Type": "application/json",
     },
-  );
+    body: JSON.stringify({
+      tag_name: tag,
+      name,
+      body,
+      draft: false,
+      prerelease: false,
+    }),
+  });
 
   if (response.status === 422) {
     const payload = await response.json().catch(() => ({}));
@@ -53,9 +50,7 @@ async function createGithubRelease({ owner, repo, tag, name, body, token }) {
 
   if (!response.ok) {
     const text = await response.text();
-    throw new Error(
-      `Failed to create GitHub Release ${tag}: ${response.status} ${text}`,
-    );
+    throw new Error(`Failed to create GitHub Release ${tag}: ${response.status} ${text}`);
   }
 
   console.info(`Created GitHub Release ${tag}.`);
@@ -76,17 +71,13 @@ async function main() {
     throw new Error(`Invalid GITHUB_REPOSITORY: ${repository}`);
   }
 
-  const packageJson = JSON.parse(
-    readFileSync(resolve(projectRoot, "package.json"), "utf8"),
-  );
+  const packageJson = JSON.parse(readFileSync(resolve(projectRoot, "package.json"), "utf8"));
   const version = packageJson.version;
   const tag = `v${version}`;
   const markdown = readFileSync(resolve(projectRoot, "CHANGELOG.md"), "utf8");
   const body = extractChangelogReleaseBody(markdown, version);
   if (!body) {
-    throw new Error(
-      `No CHANGELOG.md section found for ${version} (dated or undated ## heading).`,
-    );
+    throw new Error(`No CHANGELOG.md section found for ${version} (dated or undated ## heading).`);
   }
 
   await createGithubRelease({

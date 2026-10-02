@@ -1,7 +1,13 @@
-import type { GameArea } from "@/domain/map/annotations";
 import type { PreparedLinearSegments } from "@/domain/geometry/measuring/geometryMeasuring";
 import type { ElevationSampleCell } from "@/domain/geometry/measuring/seaLevel";
-import { clearPersistedCacheForTests, readPersistedEntry, readPersistedEntryIgnoringExpiry, writePersistedEntry } from "./indexedDb";
+import type { GameArea } from "@/domain/map/annotations";
+import {
+  clearPersistedCacheForTests,
+  readPersistedEntry,
+  readPersistedEntryIgnoringExpiry,
+  writePersistedEntry,
+} from "./indexedDb";
+import { coastlineSegmentsCacheKey, seaLevelSamplingCacheKey } from "./keys";
 import {
   inFlight,
   memoryCache,
@@ -9,11 +15,8 @@ import {
   staleServedKeys,
   writeMemoryEntry,
 } from "./memory";
-import {
-  coastlineSegmentsCacheKey,
-  seaLevelSamplingCacheKey,
-} from "./keys";
 
+export type { GeoCacheLayer } from "../shared/cacheInterface";
 export {
   adminDivisionCacheKey,
   coastlineSegmentsCacheKey,
@@ -31,7 +34,6 @@ export {
   readCachedMemoryEntry,
   staleCacheCaptionForKey,
 } from "./memory";
-export type { GeoCacheLayer } from "../shared/cacheInterface";
 
 interface CacheOptions {
   persistEmpty?: boolean;
@@ -45,11 +47,7 @@ async function writeCachedValue<T>(
   const persistEmpty = options.persistEmpty ?? true;
   writeMemoryEntry(key, value);
 
-  if (
-    !persistEmpty &&
-    Array.isArray(value) &&
-    (value as unknown[]).length === 0
-  ) {
+  if (!persistEmpty && Array.isArray(value) && (value as unknown[]).length === 0) {
     return;
   }
 
@@ -106,12 +104,8 @@ export interface CachedSeaLevelSampling {
   complete: boolean;
 }
 
-export function readSeaLevelSamplingCache(
-  gameArea: GameArea,
-): CachedSeaLevelSampling | undefined {
-  return readCachedMemoryEntry<CachedSeaLevelSampling>(
-    seaLevelSamplingCacheKey(gameArea),
-  );
+export function readSeaLevelSamplingCache(gameArea: GameArea): CachedSeaLevelSampling | undefined {
+  return readCachedMemoryEntry<CachedSeaLevelSampling>(seaLevelSamplingCacheKey(gameArea));
 }
 
 export async function readSeaLevelSamplingCacheAsync(
@@ -122,9 +116,7 @@ export async function readSeaLevelSamplingCacheAsync(
     return memoryValue;
   }
 
-  return readPersistedEntry<CachedSeaLevelSampling>(
-    seaLevelSamplingCacheKey(gameArea),
-  );
+  return readPersistedEntry<CachedSeaLevelSampling>(seaLevelSamplingCacheKey(gameArea));
 }
 
 export async function writeSeaLevelSamplingCache(

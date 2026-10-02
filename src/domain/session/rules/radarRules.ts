@@ -1,16 +1,13 @@
+import { sessionDistanceUnit } from "../meta/sessionDistanceUnit";
 import {
   isRadarCustomRadiusAllowedForGameSize,
   isRadarPresetAvailableForGameSize,
   radarPresetsMetersForGameSize,
 } from "../size/gameSizeRules";
-import { sessionDistanceUnit } from "../meta/sessionDistanceUnit";
-import { sessionGameSize, type SessionRulesInput } from "./types";
+import { type SessionRulesInput, sessionGameSize } from "./types";
 
 export function resolveRadarPresetsMeters(session: SessionRulesInput): number[] {
-  return radarPresetsMetersForGameSize(
-    sessionGameSize(session),
-    sessionDistanceUnit(session),
-  );
+  return radarPresetsMetersForGameSize(sessionGameSize(session), sessionDistanceUnit(session));
 }
 
 export function resolveIsRadarPresetAvailable(
@@ -33,11 +30,7 @@ export function resolveIsRadarRadiusAllowed(
   const unit = sessionDistanceUnit(session);
 
   if (chooseCustom) {
-    return isRadarCustomRadiusAllowedForGameSize(
-      gameSize,
-      distanceMeters,
-      unit,
-    );
+    return isRadarCustomRadiusAllowedForGameSize(gameSize, distanceMeters, unit);
   }
 
   return resolveIsRadarPresetAvailable(session, distanceMeters);

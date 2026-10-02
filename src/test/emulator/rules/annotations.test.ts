@@ -1,24 +1,13 @@
-import {
-  assertFails,
-  assertSucceeds,
-} from "@firebase/rules-unit-testing";
+import { assertFails, assertSucceeds } from "@firebase/rules-unit-testing";
 import { describe, it } from "vitest";
-import {
-  bindRulesTestEnv,
-  sessionPayload,
-  annotationPayload,
-} from "./helpers";
+import { annotationPayload, bindRulesTestEnv, sessionPayload } from "./helpers";
 
 describe("firestore.rules — annotations", () => {
   const rules = bindRulesTestEnv();
 
   it("allows seeker members to read and write annotations", async () => {
     const host = rules.testEnv.authenticatedContext("host-1");
-    await host
-      .firestore()
-      .collection("sessions")
-      .doc("session-1")
-      .set(sessionPayload("host-1"));
+    await host.firestore().collection("sessions").doc("session-1").set(sessionPayload("host-1"));
 
     const guest = rules.testEnv.authenticatedContext("guest-1");
     await host
@@ -43,11 +32,7 @@ describe("firestore.rules — annotations", () => {
 
   it("denies annotation writes from hiders", async () => {
     const host = rules.testEnv.authenticatedContext("host-1");
-    await host
-      .firestore()
-      .collection("sessions")
-      .doc("session-1")
-      .set(sessionPayload("host-1"));
+    await host.firestore().collection("sessions").doc("session-1").set(sessionPayload("host-1"));
 
     const hider = rules.testEnv.authenticatedContext("hider-1");
     await host
@@ -70,14 +55,9 @@ describe("firestore.rules — annotations", () => {
     );
   });
 
-
   it("denies annotation writes from non-members", async () => {
     const host = rules.testEnv.authenticatedContext("host-1");
-    await host
-      .firestore()
-      .collection("sessions")
-      .doc("session-1")
-      .set(sessionPayload("host-1"));
+    await host.firestore().collection("sessions").doc("session-1").set(sessionPayload("host-1"));
 
     const outsider = rules.testEnv.authenticatedContext("outsider-1");
     await assertFails(
@@ -91,14 +71,9 @@ describe("firestore.rules — annotations", () => {
     );
   });
 
-
   it("rejects invalid annotation types", async () => {
     const host = rules.testEnv.authenticatedContext("host-1");
-    await host
-      .firestore()
-      .collection("sessions")
-      .doc("session-1")
-      .set(sessionPayload("host-1"));
+    await host.firestore().collection("sessions").doc("session-1").set(sessionPayload("host-1"));
 
     await assertFails(
       host
@@ -113,5 +88,4 @@ describe("firestore.rules — annotations", () => {
         }),
     );
   });
-
 });

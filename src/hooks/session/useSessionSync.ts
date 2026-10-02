@@ -1,27 +1,26 @@
 import { useEffect } from "react";
-import { LOCAL_SESSION_ID, migrateAnnotations } from "../../domain/map/annotations";
 import { getPowerProfile } from "../../domain/device/power/powerProfile";
+import { reportStoragePressureIfHigh } from "../../domain/device/pwa/pwaStorageBudget";
+import { LOCAL_SESSION_ID, migrateAnnotations } from "../../domain/map/annotations";
 import { filterAnnotationsAfterReset } from "../../domain/session/meta/sessionReset";
-import { useAnnotationStore, useMapStore, useSessionStore } from "../../state/sessionStore";
+import { resolvePlayerRole } from "../../domain/session/players/playerRole";
+import { addPwaStoragePressureBreadcrumb } from "../../services/core/analytics/sentry";
 import {
   getFirestoreDb,
   isFirebaseConfigured,
   isFirestorePersistenceUnavailable,
 } from "../../services/core/firebase/firebase";
 import {
+  subscribeToEndGameTruthAnchors,
   subscribeToRemoteAnnotations,
   subscribeToSession,
-  subscribeToEndGameTruthAnchors,
 } from "../../services/firestore/firestoreAnnotations";
 import { ANNOTATION_SYNC_MESSAGE_TYPE } from "../../services/session/backgroundSync";
-import { readOfflineQueueForSession } from "../../services/session/offlineQueue";
-import { reportStoragePressureIfHigh } from "../../domain/device/pwa/pwaStorageBudget";
-import { addPwaStoragePressureBreadcrumb } from "../../services/core/analytics/sentry";
 import { flushOfflineQueue } from "../../services/session/flushOfflineQueue";
+import { readOfflineQueueForSession } from "../../services/session/offlineQueue";
 import { bindOfflineQueueResumeFlush } from "../../services/session/sessionResumeFlush";
-import { resolvePlayerRole } from "../../domain/session/players/playerRole";
 import { trackRestoredWrites } from "@/services/firestore/commitWrite";
-
+import { useAnnotationStore, useMapStore, useSessionStore } from "../../state/sessionStore";
 
 /** How long a cache-served session doc may stand before the rail says "last known state". */
 export const SESSION_STALE_GRACE_MS = 1500;
@@ -41,24 +40,13 @@ export function useSessionSync({ syncEnabled = true }: UseSessionSyncOptions = {
   const myUid = useSessionStore((state) => state.myUid);
   const setSession = useSessionStore((state) => state.setSession);
   const setPendingWrites = useSessionStore((state) => state.setPendingWrites);
-  const setRemoteUpdateNotice = useSessionStore(
-    (state) => state.setRemoteUpdateNotice,
-  );
+  const setRemoteUpdateNotice = useSessionStore((state) => state.setRemoteUpdateNotice);
   const setLastSyncError = useSessionStore((state) => state.setLastSyncError);
-  const replaceAnnotations = useAnnotationStore(
-    (state) => state.setAnnotations,
-  );
-  const markAnnotationPulse = useAnnotationStore(
-    (state) => state.markAnnotationPulse,
-  );
+  const replaceAnnotations = useAnnotationStore((state) => state.setAnnotations);
+  const markAnnotationPulse = useAnnotationStore((state) => state.markAnnotationPulse);
 
   useEffect(() => {
-    if (
-      !syncEnabled ||
-      !session ||
-      session.id === LOCAL_SESSION_ID ||
-      !isFirebaseConfigured()
-    ) {
+    if (!syncEnabled || !session || session.id === LOCAL_SESSION_ID || !isFirebaseConfigured()) {
       return;
     }
 
@@ -83,9 +71,7 @@ export function useSessionSync({ syncEnabled = true }: UseSessionSyncOptions = {
         );
       },
       (error) => {
-        setLastSyncError(
-          error instanceof Error ? error.message : "Session sync failed.",
-        );
+        setLastSyncError(error instanceof Error ? error.message : "Session sync failed.");
       },
       (metadata) => {
         // Cold start / resume always serves the cache first; only call it
@@ -149,31 +135,15 @@ export function useSessionSync({ syncEnabled = true }: UseSessionSyncOptions = {
         setSession({ ...current, endGameTruthAnchors: anchors }, myUid);
       },
       (error) => {
-        setLastSyncError(
-          error instanceof Error
-            ? error.message
-            : "End-game truth sync failed.",
-        );
+        setLastSyncError(error instanceof Error ? error.message : "End-game truth sync failed.");
       },
     );
 
     return unsubscribe;
-  }, [
-    myUid,
-    endGameSessionId,
-    endGameMemberRoles,
-    setLastSyncError,
-    setSession,
-    syncEnabled,
-  ]);
+  }, [myUid, endGameSessionId, endGameMemberRoles, setLastSyncError, setSession, syncEnabled]);
 
   useEffect(() => {
-    if (
-      !syncEnabled ||
-      !session ||
-      session.id === LOCAL_SESSION_ID ||
-      !isFirebaseConfigured()
-    ) {
+    if (!syncEnabled || !session || session.id === LOCAL_SESSION_ID || !isFirebaseConfigured()) {
       return;
     }
 
@@ -192,16 +162,10 @@ export function useSessionSync({ syncEnabled = true }: UseSessionSyncOptions = {
     const unsubscribe = subscribeToRemoteAnnotations(
       sessionId,
       (annotations) => {
-        const sessionResetAt =
-          useSessionStore.getState().session?.sessionResetAt;
-        const filtered = filterAnnotationsAfterReset(
-          annotations,
-          sessionResetAt,
-        );
+        const sessionResetAt = useSessionStore.getState().session?.sessionResetAt;
+        const filtered = filterAnnotationsAfterReset(annotations, sessionResetAt);
         const previous = useAnnotationStore.getState().annotations;
-        const previousById = new Map(
-          previous.map((annotation) => [annotation.id, annotation]),
-        );
+        const previousById = new Map(previous.map((annotation) => [annotation.id, annotation]));
 
         if (!hasBaseline) {
           hasBaseline = true;
@@ -223,32 +187,22 @@ export function useSessionSync({ syncEnabled = true }: UseSessionSyncOptions = {
           }
         }
 
-        const previousIds = new Set(
-          previous.map((annotation) => annotation.id),
-        );
+        const previousIds = new Set(previous.map((annotation) => annotation.id));
 
         replaceAnnotations(migrateAnnotations(filtered));
 
         filtered.forEach((annotation) => {
-          if (
-            !previousIds.has(annotation.id) &&
-            annotation.status === "active"
-          ) {
+          if (!previousIds.has(annotation.id) && annotation.status === "active") {
             markAnnotationPulse(annotation.id);
           }
         });
       },
       (error) => {
-        setLastSyncError(
-          error instanceof Error
-            ? error.message
-            : "Annotation sync failed.",
-        );
+        setLastSyncError(error instanceof Error ? error.message : "Annotation sync failed.");
       },
     );
 
     return unsubscribe;
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- resubscribe on session id only
   }, [
     markAnnotationPulse,
     replaceAnnotations,
@@ -268,12 +222,7 @@ export function useSessionSync({ syncEnabled = true }: UseSessionSyncOptions = {
   }, [session?.sessionResetAt, replaceAnnotations]);
 
   useEffect(() => {
-    if (
-      !syncEnabled ||
-      !session ||
-      session.id === LOCAL_SESSION_ID ||
-      !isFirebaseConfigured()
-    ) {
+    if (!syncEnabled || !session || session.id === LOCAL_SESSION_ID || !isFirebaseConfigured()) {
       return;
     }
 
@@ -325,10 +274,7 @@ export function useSessionSync({ syncEnabled = true }: UseSessionSyncOptions = {
 
     window.addEventListener("online", handleOnline);
     if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.addEventListener(
-        "message",
-        handleServiceWorkerMessage,
-      );
+      navigator.serviceWorker.addEventListener("message", handleServiceWorkerMessage);
     }
     void flushQueue();
 
@@ -341,14 +287,10 @@ export function useSessionSync({ syncEnabled = true }: UseSessionSyncOptions = {
       unbindResumeFlush();
       window.removeEventListener("online", handleOnline);
       if ("serviceWorker" in navigator) {
-        navigator.serviceWorker.removeEventListener(
-          "message",
-          handleServiceWorkerMessage,
-        );
+        navigator.serviceWorker.removeEventListener("message", handleServiceWorkerMessage);
       }
       window.clearInterval(intervalId);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- resubscribe on session id only
   }, [queueFlushMs, session?.id, setLastSyncError, setPendingWrites, syncEnabled]);
 
   useEffect(() => {

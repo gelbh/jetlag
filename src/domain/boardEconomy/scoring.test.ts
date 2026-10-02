@@ -14,10 +14,7 @@ function timeCard(
 
 describe("time bonus scoring", () => {
   it("sums medium-size minutes from hand", () => {
-    const hand = [
-      timeCard("a", [2, 3, 5]),
-      timeCard("b", [4, 6, 10]),
-    ];
+    const hand = [timeCard("a", [2, 3, 5]), timeCard("b", [4, 6, 10])];
     expect(sumTimeBonusMinutesInHand(hand, "medium")).toBe(9);
   });
 

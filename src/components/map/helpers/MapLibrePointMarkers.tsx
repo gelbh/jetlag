@@ -1,11 +1,8 @@
-import { useMemo } from "react";
 import type { ExpressionSpecification } from "maplibre-gl";
+import { useMemo } from "react";
 import { MapLibreGeoJsonOverlay } from "./MapLibreGeoJsonOverlay";
-import {
-  circleMarkerCollection,
-  type CircleMarkerProps,
-} from "./mapMarkerFeatures";
 import { jlMarkerLayerId } from "./mapMarkerConstants";
+import { type CircleMarkerProps, circleMarkerCollection } from "./mapMarkerFeatures";
 
 const DATA_CIRCLE_PAINT = {
   radius: ["get", "radiusPx"],

@@ -1,19 +1,5 @@
-import {
-  Button,
-  SegmentedControl,
-  SimpleGrid,
-  Stack,
-  Text,
-  UnstyledButton,
-} from "@mantine/core";
+import { Button, SegmentedControl, SimpleGrid, Stack, Text, UnstyledButton } from "@mantine/core";
 import { useState } from "react";
-import { AppLink } from "../navigation/AppLink";
-import {
-  InsetGroup,
-  SectionLabel,
-  filledStyles,
-  grayStyles,
-} from "../ui/entry/entryChrome";
 import {
   formatBankedPremiumSessionCreditsLabel,
   formatPremiumSessionCreditsLabel,
@@ -22,6 +8,8 @@ import {
   type PremiumEntitlements,
   type PremiumProductKey,
 } from "../../domain/billing/premiumProducts";
+import { AppLink } from "../navigation/AppLink";
+import { filledStyles, grayStyles, InsetGroup, SectionLabel } from "../ui/entry/entryChrome";
 
 type PremiumCatalogTab = "packs" | "unlimited";
 
@@ -49,9 +37,7 @@ const segmentedStyles = {
   },
 } as const;
 
-function resolveDefaultCatalogTab(
-  entitlements: PremiumEntitlements | null,
-): PremiumCatalogTab {
+function resolveDefaultCatalogTab(entitlements: PremiumEntitlements | null): PremiumCatalogTab {
   if (
     entitlements &&
     entitlements.premiumSessionCredits > 0 &&
@@ -84,27 +70,19 @@ export function PremiumTierCards({
   onStartTrial: () => void;
   onPortal: () => void;
 }) {
-  const bankedCreditsLabel =
-    formatBankedPremiumSessionCreditsLabel(entitlements);
+  const bankedCreditsLabel = formatBankedPremiumSessionCreditsLabel(entitlements);
   const packCreditsLabel = formatPremiumSessionCreditsLabel(entitlements);
-  const createSessionHint =
-    bankedCreditsLabel ?? packCreditsLabel ?? "Host a game";
+  const createSessionHint = bankedCreditsLabel ?? packCreditsLabel ?? "Host a game";
   const [catalogTab, setCatalogTab] = useState<PremiumCatalogTab>("unlimited");
   const [tabTouched, setTabTouched] = useState(false);
   const activeCatalogTab =
-    !tabTouched && entitlements !== null
-      ? resolveDefaultCatalogTab(entitlements)
-      : catalogTab;
+    !tabTouched && entitlements !== null ? resolveDefaultCatalogTab(entitlements) : catalogTab;
 
-  const packOffers = PREMIUM_PRODUCT_OFFERS.filter(
-    (offer) => offer.kind === "pack",
-  );
+  const packOffers = PREMIUM_PRODUCT_OFFERS.filter((offer) => offer.kind === "pack");
   const subscriptionOffers = PREMIUM_PRODUCT_OFFERS.filter(
     (offer) => offer.kind === "subscription",
   );
-  const lifetimeOffers = PREMIUM_PRODUCT_OFFERS.filter(
-    (offer) => offer.kind === "lifetime",
-  );
+  const lifetimeOffers = PREMIUM_PRODUCT_OFFERS.filter((offer) => offer.kind === "lifetime");
 
   const actionsDisabled = loading || busyProduct !== null || trialLoading;
   const showManageSubscription =
@@ -251,10 +229,7 @@ export function PremiumTierCards({
               <Text size="sm" fw={600} c="var(--color-flag-ink)">
                 Create premium session
               </Text>
-              <Text
-                size="xs"
-                c="oklch(from var(--color-flag-ink) l c h / 0.72)"
-              >
+              <Text size="xs" c="oklch(from var(--color-flag-ink) l c h / 0.72)">
                 {createSessionHint}
               </Text>
             </Stack>

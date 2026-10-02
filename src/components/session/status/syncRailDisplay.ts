@@ -56,10 +56,7 @@ export function syncRailDisplay(
     return {
       inline: {
         visible: true,
-        label:
-          queuedWrites > 0
-            ? `Offline · ${queuedWrites} queued`
-            : "Offline",
+        label: queuedWrites > 0 ? `Offline · ${queuedWrites} queued` : "Offline",
         tone: "warning",
       },
       banner: null,
@@ -70,10 +67,7 @@ export function syncRailDisplay(
     return {
       inline: {
         visible: true,
-        label:
-          queuedWrites > 0
-            ? `Unstable · ${queuedWrites} queued`
-            : "Unstable",
+        label: queuedWrites > 0 ? `Unstable · ${queuedWrites} queued` : "Unstable",
         tone: "warning",
       },
       banner: null,

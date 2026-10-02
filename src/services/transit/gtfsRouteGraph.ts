@@ -1,13 +1,13 @@
-import KDBush from "kdbush";
 import * as geokdbush from "geokdbush";
-import type { GameArea } from "../../domain/map/annotations";
+import KDBush from "kdbush";
+import type { BoundingBox } from "../../domain/geometry/gameArea/gameAreaBounds";
 import {
   distanceBetweenPoints,
   gameAreaToBoundingBox,
   isPointInGameArea,
   type LatLngTuple,
 } from "../../domain/geometry/gameArea/geometry";
-import type { BoundingBox } from "../../domain/geometry/gameArea/gameAreaBounds";
+import type { GameArea } from "../../domain/map/annotations";
 import type { GtfsBundleStop, GtfsStaticBundle } from "./gtfsBundle";
 import { GTFS_BUNDLE_MANIFEST_PATH } from "./gtfsBundle";
 
@@ -77,10 +77,7 @@ export function stationIdentity(stopId: string, bundle: GtfsStaticBundle): strin
   return stop?.parentStationId ?? stopId;
 }
 
-export function routeIdsForStop(
-  stopId: string,
-  bundle: GtfsStaticBundle,
-): string[] {
+export function routeIdsForStop(stopId: string, bundle: GtfsStaticBundle): string[] {
   return bundle.stopRouteIds[stopId] ?? [];
 }
 
@@ -198,15 +195,11 @@ async function loadManifest(): Promise<Map<string, string>> {
     metros?: Array<{ id: string; bundlePath: string }>;
   };
 
-  manifestCache = new Map(
-    (payload.metros ?? []).map((entry) => [entry.id, entry.bundlePath]),
-  );
+  manifestCache = new Map((payload.metros ?? []).map((entry) => [entry.id, entry.bundlePath]));
   return manifestCache;
 }
 
-export async function loadGtfsBundle(
-  metroId: string,
-): Promise<GtfsStaticBundle | null> {
+export async function loadGtfsBundle(metroId: string): Promise<GtfsStaticBundle | null> {
   const cached = bundleCache.get(metroId);
   if (cached) {
     return cached;
@@ -241,18 +234,8 @@ export async function resolveTransitLineMatch(
   bundle: GtfsStaticBundle,
   gameArea: GameArea,
 ): Promise<boolean> {
-  const seekerStop = nearestGtfsStopInGameArea(
-    seekerPoint,
-    bundle,
-    gameArea,
-    bundle.metroId,
-  );
-  const hiderStop = nearestGtfsStopInGameArea(
-    hiderPoint,
-    bundle,
-    gameArea,
-    bundle.metroId,
-  );
+  const seekerStop = nearestGtfsStopInGameArea(seekerPoint, bundle, gameArea, bundle.metroId);
+  const hiderStop = nearestGtfsStopInGameArea(hiderPoint, bundle, gameArea, bundle.metroId);
 
   if (!seekerStop || !hiderStop) {
     return false;

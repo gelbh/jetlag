@@ -1,26 +1,23 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { MapViewportState } from "@/components/map/chrome/MapViewportTracker";
 import {
-  findLastRedoableAnnotation,
-  findLastUndoableAnnotation,
-} from "@/domain/map/mapTools";
+  markMapResumeStart,
+  markMapUsableAndMeasureReturn,
+} from "@/domain/device/perf/playDayMarks";
+import { scheduleIdleBootWork } from "@/domain/device/perf/scheduleAfterFirstPaint";
 import {
-  LOCAL_SESSION_ID,
-  isPremiumSession,
-} from "@/domain/map/annotations";
+  applyMapStylePreferenceChange,
+  effectiveMapStyle,
+} from "@/domain/device/power/powerProfile";
 import {
   fallbackGameArea,
   gameAreaCenter,
   gameAreaToBoundsExpression,
   type LatLngTuple,
 } from "@/domain/geometry/gameArea/geometry";
-import {
-  markMapResumeStart,
-  markMapUsableAndMeasureReturn,
-} from "@/domain/device/perf/playDayMarks";
-import { scheduleIdleBootWork } from "@/domain/device/perf/scheduleAfterFirstPaint";
+import { isPremiumSession, LOCAL_SESSION_ID } from "@/domain/map/annotations";
 import { DEFAULT_MAP_CENTER } from "@/domain/map/defaultMapCenter";
-import { effectiveMapStyle, applyMapStylePreferenceChange } from "@/domain/device/power/powerProfile";
+import { findLastRedoableAnnotation, findLastUndoableAnnotation } from "@/domain/map/mapTools";
 import { useWakeLock } from "@/hooks/location/useWakeLock";
 import { useAnnotations } from "@/hooks/map/useAnnotations";
 import { useMapOverlayState } from "@/hooks/map/useMapOverlayState";
@@ -28,20 +25,10 @@ import { useSessionAnnotations } from "@/hooks/map/useSessionAnnotations";
 import { useResolvedSessionRules } from "@/hooks/session/useResolvedSessionRules";
 import { useSessionDistanceUnit } from "@/hooks/session/useSessionDistanceUnit";
 import { useSharedSessionScreen } from "@/hooks/session/useSharedSessionScreen";
-import {
-  preloadGameAreaCachesAsync,
-  gameAreaPreloadKey,
-} from "@/services/session/gameAreaPreload";
 import { startSeaLevelBackgroundSampling } from "@/services/geo/elevation/seaLevelProgressive";
-import {
-  useAnnotationStore,
-  useMapStore,
-  useSessionStore,
-} from "@/state/sessionStore";
-import {
-  getMapScreenRoleConfig,
-  type MapScreenRole,
-} from "./mapScreenRoleConfig";
+import { gameAreaPreloadKey, preloadGameAreaCachesAsync } from "@/services/session/gameAreaPreload";
+import { useAnnotationStore, useMapStore, useSessionStore } from "@/state/sessionStore";
+import { getMapScreenRoleConfig, type MapScreenRole } from "./mapScreenRoleConfig";
 
 export type UseMapScreenCoreOptions = {
   role?: MapScreenRole;
@@ -61,13 +48,9 @@ export function useMapScreenCore(options: UseMapScreenCoreOptions = {}) {
   const activeTool = useMapStore((state) => state.activeTool);
   const setActiveTool = useMapStore((state) => state.setActiveTool);
   const showCurrentLocation = useMapStore((state) => state.showCurrentLocation);
-  const setShowCurrentLocation = useMapStore(
-    (state) => state.setShowCurrentLocation,
-  );
+  const setShowCurrentLocation = useMapStore((state) => state.setShowCurrentLocation);
   const showAdminBoundaries = useMapStore((state) => state.showAdminBoundaries);
-  const setShowAdminBoundaries = useMapStore(
-    (state) => state.setShowAdminBoundaries,
-  );
+  const setShowAdminBoundaries = useMapStore((state) => state.setShowAdminBoundaries);
   const distanceUnit = useSessionDistanceUnit();
   const mapStyle = useMapStore((state) => state.mapStyle);
   const setMapStyle = useMapStore((state) => state.setMapStyle);
@@ -81,17 +64,11 @@ export function useMapScreenCore(options: UseMapScreenCoreOptions = {}) {
   const sessionId = session?.id;
   const annotations = useSessionAnnotations(sessionId);
   const undoTargetTool = activeTool !== "none" ? activeTool : undefined;
-  const redoAnnotationIds = useAnnotationStore(
-    (state) => state.redoAnnotationIds,
-  );
+  const redoAnnotationIds = useAnnotationStore((state) => state.redoAnnotationIds);
   const canUndoLastTool = useMemo(
     () =>
       sessionId
-        ? findLastUndoableAnnotation(
-            allAnnotations,
-            sessionId,
-            undoTargetTool,
-          ) !== null
+        ? findLastUndoableAnnotation(allAnnotations, sessionId, undoTargetTool) !== null
         : false,
     [allAnnotations, sessionId, undoTargetTool],
   );
@@ -107,18 +84,10 @@ export function useMapScreenCore(options: UseMapScreenCoreOptions = {}) {
         : false,
     [allAnnotations, redoAnnotationIds, sessionId, undoTargetTool],
   );
-  const clearAnnotationPulse = useAnnotationStore(
-    (state) => state.clearAnnotationPulse,
-  );
-  const pulsingAnnotationIds = useAnnotationStore(
-    (state) => state.pulsingAnnotationIds,
-  );
-  const selectedAnnotationId = useAnnotationStore(
-    (state) => state.selectedAnnotationId,
-  );
-  const setSelectedAnnotationId = useAnnotationStore(
-    (state) => state.setSelectedAnnotationId,
-  );
+  const clearAnnotationPulse = useAnnotationStore((state) => state.clearAnnotationPulse);
+  const pulsingAnnotationIds = useAnnotationStore((state) => state.pulsingAnnotationIds);
+  const selectedAnnotationId = useAnnotationStore((state) => state.selectedAnnotationId);
+  const setSelectedAnnotationId = useAnnotationStore((state) => state.setSelectedAnnotationId);
   const layerVisibility = useMapStore((state) => state.layerVisibility);
   const keepScreenAwake = useMapStore((state) => state.keepScreenAwake);
   const setKeepScreenAwake = useMapStore((state) => state.setKeepScreenAwake);
@@ -132,12 +101,8 @@ export function useMapScreenCore(options: UseMapScreenCoreOptions = {}) {
     redoLastAnnotation,
     clearAllAnnotations,
   } = useAnnotations();
-  const [liveLocationError, setLiveLocationError] = useState<string | null>(
-    null,
-  );
-  const [mapViewport, setMapViewport] = useState<MapViewportState | null>(
-    null,
-  );
+  const [liveLocationError, setLiveLocationError] = useState<string | null>(null);
+  const [mapViewport, setMapViewport] = useState<MapViewportState | null>(null);
   const [mapShellSize, setMapShellSize] = useState({ width: 0, height: 0 });
   const handleLiveLocationError = useCallback((error: string | null) => {
     setLiveLocationError(error);
@@ -152,12 +117,9 @@ export function useMapScreenCore(options: UseMapScreenCoreOptions = {}) {
     },
     [lowPowerMode, setLowPowerMode, setMapStyle],
   );
-  const handleMapViewportChange = useCallback(
-    (viewport: MapViewportState | null) => {
-      setMapViewport(viewport);
-    },
-    [],
-  );
+  const handleMapViewportChange = useCallback((viewport: MapViewportState | null) => {
+    setMapViewport(viewport);
+  }, []);
   const overlay = useMapOverlayState();
   const {
     uid,
@@ -181,12 +143,9 @@ export function useMapScreenCore(options: UseMapScreenCoreOptions = {}) {
     exitPath: roleConfig.exitPath,
   });
 
-  const preloadGameAreaKey = gameArea
-    ? gameAreaPreloadKey(gameArea)
-    : null;
+  const preloadGameAreaKey = gameArea ? gameAreaPreloadKey(gameArea) : null;
 
-  const gameRulesEditable =
-    (isHost || session?.id === LOCAL_SESSION_ID) && !timer.hasStarted;
+  const gameRulesEditable = (isHost || session?.id === LOCAL_SESSION_ID) && !timer.hasStarted;
   const mapShellRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -200,19 +159,14 @@ export function useMapScreenCore(options: UseMapScreenCoreOptions = {}) {
       const width = Math.round(rect.width);
       const height = Math.round(rect.height);
       setMapShellSize((previous) =>
-        previous.width === width && previous.height === height
-          ? previous
-          : { width, height },
+        previous.width === width && previous.height === height ? previous : { width, height },
       );
     };
 
     updateSize();
     window.addEventListener("resize", updateSize);
 
-    const observer =
-      typeof ResizeObserver !== "undefined"
-        ? new ResizeObserver(updateSize)
-        : null;
+    const observer = typeof ResizeObserver !== "undefined" ? new ResizeObserver(updateSize) : null;
     if (observer) {
       observer.observe(shell);
     }
@@ -245,12 +199,7 @@ export function useMapScreenCore(options: UseMapScreenCoreOptions = {}) {
 
     // Keep map-usable chrome free of geo preload / elevation sampling work.
     return scheduleIdleBootWork(() => {
-      void preloadGameAreaCachesAsync(
-        area,
-        customMatchingAreas,
-        regionPackId,
-        tier,
-      );
+      void preloadGameAreaCachesAsync(area, customMatchingAreas, regionPackId, tier);
       startSeaLevelBackgroundSampling(area, { regionPackId });
     });
   }, [
@@ -309,10 +258,7 @@ export function useMapScreenCore(options: UseMapScreenCoreOptions = {}) {
   }, [gameArea]);
 
   const selectedAnnotation = useMemo(
-    () =>
-      annotations.find(
-        (annotation) => annotation.id === selectedAnnotationId,
-      ) ?? null,
+    () => annotations.find((annotation) => annotation.id === selectedAnnotationId) ?? null,
     [annotations, selectedAnnotationId],
   );
 

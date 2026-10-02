@@ -1,7 +1,4 @@
-import {
-  assertFails,
-  assertSucceeds,
-} from "@firebase/rules-unit-testing";
+import { assertFails, assertSucceeds } from "@firebase/rules-unit-testing";
 import { describe, it } from "vitest";
 import { bindRulesTestEnv } from "./helpers";
 
@@ -17,15 +14,9 @@ describe("firestore.rules — ops/clientMinVersion", () => {
     });
 
     const player = rules.testEnv.authenticatedContext("player-1");
-    await assertSucceeds(
-      player.firestore().collection("ops").doc("clientMinVersion").get(),
-    );
+    await assertSucceeds(player.firestore().collection("ops").doc("clientMinVersion").get());
     await assertFails(
-      player
-        .firestore()
-        .collection("ops")
-        .doc("clientMinVersion")
-        .set({ minVersion: "9.9.9" }),
+      player.firestore().collection("ops").doc("clientMinVersion").set({ minVersion: "9.9.9" }),
     );
 
     const admin = rules.testEnv.authenticatedContext("admin-1", {
@@ -33,20 +24,14 @@ describe("firestore.rules — ops/clientMinVersion", () => {
       email_verified: true,
     });
     await assertSucceeds(
-      admin
-        .firestore()
-        .collection("ops")
-        .doc("clientMinVersion")
-        .set({
-          minVersion: "0.11.0",
-          updatedAt: "2026-08-15T12:00:00.000Z",
-        }),
+      admin.firestore().collection("ops").doc("clientMinVersion").set({
+        minVersion: "0.11.0",
+        updatedAt: "2026-08-15T12:00:00.000Z",
+      }),
     );
 
     const unauth = rules.testEnv.unauthenticatedContext();
-    await assertFails(
-      unauth.firestore().collection("ops").doc("clientMinVersion").get(),
-    );
+    await assertFails(unauth.firestore().collection("ops").doc("clientMinVersion").get());
   });
 
   it("allows admin create/update/delete; denies player and unauth writes", async () => {
@@ -61,29 +46,21 @@ describe("firestore.rules — ops/clientMinVersion", () => {
       updatedAt: "2026-08-15T12:00:00.000Z",
     };
 
+    await assertSucceeds(admin.firestore().collection("ops").doc("clientMinVersion").set(payload));
     await assertSucceeds(
-      admin.firestore().collection("ops").doc("clientMinVersion").set(payload),
+      admin
+        .firestore()
+        .collection("ops")
+        .doc("clientMinVersion")
+        .set({
+          ...payload,
+          minVersion: "0.12.0",
+        }),
     );
-    await assertSucceeds(
-      admin.firestore().collection("ops").doc("clientMinVersion").set({
-        ...payload,
-        minVersion: "0.12.0",
-      }),
-    );
-    await assertFails(
-      player.firestore().collection("ops").doc("clientMinVersion").set(payload),
-    );
-    await assertFails(
-      unauth.firestore().collection("ops").doc("clientMinVersion").set(payload),
-    );
-    await assertFails(
-      player.firestore().collection("ops").doc("clientMinVersion").delete(),
-    );
-    await assertSucceeds(
-      admin.firestore().collection("ops").doc("clientMinVersion").delete(),
-    );
-    await assertFails(
-      unauth.firestore().collection("ops").doc("clientMinVersion").delete(),
-    );
+    await assertFails(player.firestore().collection("ops").doc("clientMinVersion").set(payload));
+    await assertFails(unauth.firestore().collection("ops").doc("clientMinVersion").set(payload));
+    await assertFails(player.firestore().collection("ops").doc("clientMinVersion").delete());
+    await assertSucceeds(admin.firestore().collection("ops").doc("clientMinVersion").delete());
+    await assertFails(unauth.firestore().collection("ops").doc("clientMinVersion").delete());
   });
 });

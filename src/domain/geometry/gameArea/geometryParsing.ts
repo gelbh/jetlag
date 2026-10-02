@@ -22,9 +22,7 @@ function isLineStringCoordinates(value: unknown): value is [number, number][] {
   );
 }
 
-function isGeometryFeature(
-  value: unknown,
-): value is Feature<Point | LineString> {
+function isGeometryFeature(value: unknown): value is Feature<Point | LineString> {
   if (!value || typeof value !== "object") {
     return false;
   }
@@ -45,9 +43,7 @@ function isGeometryFeature(
   return false;
 }
 
-export function parseGeometryJson(
-  geometryJson: string,
-): Feature<Point | LineString> | null {
+export function parseGeometryJson(geometryJson: string): Feature<Point | LineString> | null {
   try {
     const parsed: unknown = JSON.parse(geometryJson);
     return isGeometryFeature(parsed) ? parsed : null;
@@ -78,9 +74,7 @@ export function parseLineEndpoints(geometryJson: string): {
   return lineEndpointsFromFeature(geometry as Feature<LineString>);
 }
 
-export function pointFromGeometryFeature(
-  feature: Feature<Point | LineString>,
-): LatLngTuple | null {
+export function pointFromGeometryFeature(feature: Feature<Point | LineString>): LatLngTuple | null {
   const geom = feature.geometry;
   if (!geom) {
     return null;

@@ -1,21 +1,18 @@
-import { describe, expect, it } from "vitest";
 import type { Feature, Polygon } from "geojson";
-import { toMapBounds } from "../mapBounds";
+import { describe, expect, it } from "vitest";
 import {
   buildMapDraftOverlays,
   type MapDraftOverlaySources,
 } from "@/hooks/map-screen/useMapDraftOverlays";
-import {
-  gameAreaToPolygon,
-  safeDifference,
-} from "../../geometry/gameArea/geometry";
 import { DUBLIN_CITY_GAME_AREA } from "@/test/fixtures/dublinGameArea";
+import { gameAreaToPolygon, safeDifference } from "../../geometry/gameArea/geometry";
+import { toMapBounds } from "../mapBounds";
 import {
+  type CameraTarget,
   computePlacementCameraTarget,
+  MAX_ZOOM_PIN,
   placementCameraDraftFromOverlaySources,
   resolvePlacementPhase,
-  MAX_ZOOM_PIN,
-  type CameraTarget,
 } from "./index";
 
 const dublinCenter: [number, number] = [53.35, -6.26];

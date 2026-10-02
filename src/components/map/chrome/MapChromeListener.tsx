@@ -1,4 +1,4 @@
-import { useEffect, useRef, type MutableRefObject } from "react";
+import { type MutableRefObject, useEffect, useRef } from "react";
 import { useMapLibreMap } from "../helpers/useMapLibreMap";
 
 interface MapChromeListenerProps {
@@ -17,9 +17,7 @@ function setHudInteracting(hud: HTMLElement | null, interacting: boolean): void 
   }
 }
 
-export function MapChromeListener({
-  chromeHudRef,
-}: MapChromeListenerProps) {
+export function MapChromeListener({ chromeHudRef }: MapChromeListenerProps) {
   const map = useMapLibreMap();
   const countRef = useRef(0);
 

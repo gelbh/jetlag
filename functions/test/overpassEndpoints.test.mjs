@@ -1,8 +1,8 @@
-import { describe, it } from "node:test";
 import assert from "node:assert/strict";
+import { describe, it } from "node:test";
 import {
-  OVERPASS_ENDPOINTS,
   buildOverpassEndpointList,
+  OVERPASS_ENDPOINTS,
   OVERPASS_USER_AGENT,
   overpassEndpointHost,
 } from "../proxies/overpassEndpoints.mjs";
@@ -27,14 +27,9 @@ describe("overpassEndpoints", () => {
     const withKey = buildOverpassEndpointList({
       GEOFABRIK_OVERPASS_API_KEY: "test-key",
     });
-    const geofabrikUrl = withKey.find(
-      (u) => overpassEndpointHost(u) === "overpass.geofabrik.de",
-    );
+    const geofabrikUrl = withKey.find((u) => overpassEndpointHost(u) === "overpass.geofabrik.de");
     assert.ok(geofabrikUrl);
-    assert.equal(
-      geofabrikUrl,
-      "https://overpass.geofabrik.de/test-key/api/interpreter",
-    );
+    assert.equal(geofabrikUrl, "https://overpass.geofabrik.de/test-key/api/interpreter");
   });
 
   it("uses a stable user agent", () => {
@@ -43,9 +38,7 @@ describe("overpassEndpoints", () => {
 
   it("redacts paid URL to host for logs", () => {
     assert.equal(
-      overpassEndpointHost(
-        "https://overpass.geofabrik.de/test-key/api/interpreter",
-      ),
+      overpassEndpointHost("https://overpass.geofabrik.de/test-key/api/interpreter"),
       "overpass.geofabrik.de",
     );
   });

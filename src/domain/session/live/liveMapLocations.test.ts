@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import type { PlayerLocationRecord } from "../activity/sessionChat";
 import {
   clusterNearbyPoints,
   clusterTooltipLabel,
@@ -7,7 +8,6 @@ import {
   LIVE_LOCATION_DEDUPE_METERS,
   locationClusterStableKey,
 } from "./liveMapLocations";
-import type { PlayerLocationRecord } from "../activity/sessionChat";
 
 function location(
   uid: string,
@@ -49,10 +49,7 @@ describe("liveMapLocations", () => {
 
   it("uses the configured dedupe radius", () => {
     const clusters = clusterNearbyPoints(
-      [
-        location("seeker-1", 53.35, -6.26),
-        location("seeker-2", 53.3502, -6.2602),
-      ],
+      [location("seeker-1", 53.35, -6.26), location("seeker-2", 53.3502, -6.2602)],
       LIVE_LOCATION_DEDUPE_METERS,
     );
 
@@ -109,8 +106,6 @@ describe("liveMapLocations", () => {
       members: [location("seeker-b", 53.35, -6.26)],
     };
 
-    expect(locationClusterStableKey(clusterA)).not.toBe(
-      locationClusterStableKey(clusterB),
-    );
+    expect(locationClusterStableKey(clusterA)).not.toBe(locationClusterStableKey(clusterB));
   });
 });

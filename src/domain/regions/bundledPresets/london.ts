@@ -1,6 +1,6 @@
-import { attachPlayArea } from "./attachPlayArea";
-import { EXPANSION_OFF, type BundledGamePresetDefinition } from "./shared";
 import { LONDON_REGION_PACK_ID } from "../londonRegionPack";
+import { attachPlayArea } from "./attachPlayArea";
+import { type BundledGamePresetDefinition, EXPANSION_OFF } from "./shared";
 
 const LONDON_BOROUGHS = [
   { id: "camden", name: "Camden" },

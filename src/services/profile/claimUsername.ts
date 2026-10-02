@@ -12,9 +12,7 @@ function mapCallableError(error: unknown, fallback: string): Error {
   return error instanceof Error ? error : new Error(fallback);
 }
 
-export async function claimUsername(
-  username: string,
-): Promise<{ username: string }> {
+export async function claimUsername(username: string): Promise<{ username: string }> {
   if (!isFirebaseConfigured()) {
     throw new Error("Firebase is not configured.");
   }

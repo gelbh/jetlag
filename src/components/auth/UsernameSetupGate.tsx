@@ -1,16 +1,9 @@
-import { useEffect, useId, useState } from "react";
 import { Stack, Text, TextInput } from "@mantine/core";
+import { useEffect, useId, useState } from "react";
 import { EntryAsyncButton } from "@/components/ui/entry/EntryAsyncButton";
-import {
-  USERNAME_MAX_LENGTH,
-  validateUsername,
-} from "../../domain/game/playerProfile";
+import { USERNAME_MAX_LENGTH, validateUsername } from "../../domain/game/playerProfile";
 import { claimUsername } from "../../services/profile/claimUsername";
-import {
-  FieldError,
-  InsetGroup,
-  SectionLabel,
-} from "../ui/entry/entryChrome";
+import { FieldError, InsetGroup, SectionLabel } from "../ui/entry/entryChrome";
 import { filledStyles } from "../ui/entry/entryStyles";
 
 interface UsernameSetupGateProps {
@@ -49,11 +42,7 @@ export function UsernameSetupGate({
       const result = await claimUsername(validated.username);
       onClaimed?.(result.username);
     } catch (nextError) {
-      setError(
-        nextError instanceof Error
-          ? nextError.message
-          : "Could not claim username.",
-      );
+      setError(nextError instanceof Error ? nextError.message : "Could not claim username.");
     } finally {
       setBusy(false);
     }
@@ -110,8 +99,7 @@ export function UsernameSetupGate({
           </InsetGroup>
           <FieldError id={errorId}>{error}</FieldError>
           <Text size="xs" c="var(--color-field-ink-muted)" px={4}>
-            Letters, numbers, underscore · 3–{USERNAME_MAX_LENGTH} characters ·
-            permanent
+            Letters, numbers, underscore · 3–{USERNAME_MAX_LENGTH} characters · permanent
           </Text>
         </Stack>
         <EntryAsyncButton

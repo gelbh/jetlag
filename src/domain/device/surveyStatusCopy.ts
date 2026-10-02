@@ -1,12 +1,9 @@
 import type { SyncStatus } from "@/domain/device/sync/sync";
-import {
-  computeElapsedMs,
-  type TimerState,
-} from "@/domain/session/timer/timer";
+import { selectPrimaryQuestionTimer } from "@/domain/questions";
+import type { PendingQuestionRecord } from "@/domain/session/activity/sessionChat";
 import { isHidingPeriodActive } from "@/domain/session/hiding/hidingPeriod";
 import type { SessionRulesInput } from "@/domain/session/rules";
-import type { PendingQuestionRecord } from "@/domain/session/activity/sessionChat";
-import { selectPrimaryQuestionTimer } from "@/domain/questions";
+import { computeElapsedMs, type TimerState } from "@/domain/session/timer/timer";
 
 /** Plain-language phase for the map status strip (jargon stays secondary). */
 export function surveyPhaseLabel(
@@ -106,23 +103,16 @@ export function mapIslandStatusIsLive(status: string): boolean {
 }
 
 /** Always-paired sync short label (never color-only under survey chrome). */
-export function surveySyncShortLabel(
-  status: SyncStatus,
-  queuedWrites: number,
-): string {
+export function surveySyncShortLabel(status: SyncStatus, queuedWrites: number): string {
   switch (status) {
     case "synced":
       return "Synced";
     case "saving":
       return "Saving…";
     case "offline":
-      return queuedWrites > 0
-        ? `Offline · ${queuedWrites} queued`
-        : "Offline";
+      return queuedWrites > 0 ? `Offline · ${queuedWrites} queued` : "Offline";
     case "degraded":
-      return queuedWrites > 0
-        ? `Unstable · ${queuedWrites} queued`
-        : "Unstable";
+      return queuedWrites > 0 ? `Unstable · ${queuedWrites} queued` : "Unstable";
     case "stale":
       return "Last known state";
     case "error":
@@ -138,10 +128,7 @@ export function surveySyncShortLabel(
  * Compact sync copy for the status-island segment.
  * Synced is beacon-only; other states stay short enough for phones.
  */
-export function surveySyncSegmentLabel(
-  status: SyncStatus,
-  queuedWrites: number,
-): string | null {
+export function surveySyncSegmentLabel(status: SyncStatus, queuedWrites: number): string | null {
   switch (status) {
     case "synced":
       return null;

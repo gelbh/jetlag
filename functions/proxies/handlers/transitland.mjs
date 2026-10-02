@@ -1,10 +1,7 @@
 import { defineSecret } from "firebase-functions/params";
-import { fetchTransitlandVehicles } from "../transitlandProxy.mjs";
-import {
-  parseBoundingBoxQuery,
-  parseTransitlandFeedQuery,
-} from "../proxyValidation.mjs";
 import { createProxyHandler } from "../createProxyHandler.mjs";
+import { parseBoundingBoxQuery, parseTransitlandFeedQuery } from "../proxyValidation.mjs";
+import { fetchTransitlandVehicles } from "../transitlandProxy.mjs";
 
 export const transitlandApiKeySecret = defineSecret("TRANSITLAND_API_KEY");
 

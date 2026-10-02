@@ -66,23 +66,13 @@ describe("validateUsername", () => {
       const result = validateUsername(raw);
       expect(result.ok).toBe(false);
       if (!result.ok) {
-        expect(result.error).toBe(
-          "Username can only use letters, numbers, and underscore.",
-        );
+        expect(result.error).toBe("Username can only use letters, numbers, and underscore.");
       }
     }
   });
 
   it("rejects reserved usernames regardless of case", () => {
-    const reserved = [
-      "admin",
-      "Jetlag",
-      "OFFICIAL",
-      "support",
-      "System",
-      "null",
-      "undefined",
-    ];
+    const reserved = ["admin", "Jetlag", "OFFICIAL", "support", "System", "null", "undefined"];
 
     for (const raw of reserved) {
       const result = validateUsername(raw);

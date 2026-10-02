@@ -7,19 +7,19 @@ import {
   INCIDENT_NOTE_MAX_LENGTH,
   type IncidentClientError,
 } from "../../domain/incident/incidentTypes";
+import { getFirebaseAuth, isFirebaseConfigured } from "../../services/core/firebase/firebase";
 import {
-  createIncident,
   type CreateIncidentInput,
   type CreateIncidentResult,
+  createIncident,
 } from "../../services/incident/incidentApi";
-import { getFirebaseAuth, isFirebaseConfigured } from "../../services/core/firebase/firebase";
 import { useSessionStore } from "../../state/sessionStore";
 import {
   ErrorCallout,
-  InsetGroup,
-  SectionLabel,
   filledStyles,
+  InsetGroup,
   plainStyles,
+  SectionLabel,
 } from "../ui/entry/entryChrome";
 import { SheetHost } from "../ui/sheets/SheetHost";
 import { IncidentChatPanel } from "./IncidentChatPanel";
@@ -34,11 +34,10 @@ export interface ReportProblemSheetProps {
   /** Injectable online flag for tests; defaults to `navigator.onLine`. */
   online?: boolean;
   /** Injectable create call for tests. */
-  createIncidentFn?: (
-    input: CreateIncidentInput,
-  ) => Promise<CreateIncidentResult>;
+  createIncidentFn?: (input: CreateIncidentInput) => Promise<CreateIncidentResult>;
   /** Optional pre-seeded client errors (otherwise empty until a ring buffer lands). */
-  lastClientErrors?: readonly IncidentClientError[];}
+  lastClientErrors?: readonly IncidentClientError[];
+}
 
 function formatErrorAt(iso: string): string {
   const date = new Date(iso);
@@ -58,13 +57,8 @@ function formatErrorAt(iso: string): string {
 
 function useOnlineStatus(override?: boolean): boolean {
   const isControlled = typeof override === "boolean";
-  const [online, setOnline] = useState(
-    () =>
-      isControlled
-        ? override
-        : typeof navigator === "undefined"
-          ? true
-          : navigator.onLine,
+  const [online, setOnline] = useState(() =>
+    isControlled ? override : typeof navigator === "undefined" ? true : navigator.onLine,
   );
 
   useEffect(() => {
@@ -117,9 +111,7 @@ function ReportProblemSheetContent({
   onClose,
 }: {
   onlineOverride?: boolean;
-  createIncidentFn: (
-    input: CreateIncidentInput,
-  ) => Promise<CreateIncidentResult>;
+  createIncidentFn: (input: CreateIncidentInput) => Promise<CreateIncidentResult>;
   lastClientErrors: readonly IncidentClientError[];
   onClose: () => void;
 }) {
@@ -138,9 +130,7 @@ function ReportProblemSheetContent({
 
   const diagnosticsPreview = useMemo(() => {
     const uid =
-      myUid ??
-      (isFirebaseConfigured() ? getFirebaseAuth().currentUser?.uid : null) ??
-      null;
+      myUid ?? (isFirebaseConfigured() ? getFirebaseAuth().currentUser?.uid : null) ?? null;
     return collectIncidentDiagnostics({
       appVersion: APP_VERSION,
       route: location.pathname,
@@ -151,19 +141,10 @@ function ReportProblemSheetContent({
       userAgent: typeof navigator === "undefined" ? "" : navigator.userAgent,
       platform: "web",
       online,
-      visibilityState:
-        typeof document === "undefined" ? "visible" : document.visibilityState,
+      visibilityState: typeof document === "undefined" ? "visible" : document.visibilityState,
       lastClientErrors,
     });
-  }, [
-    lastClientErrors,
-    location.pathname,
-    myRole,
-    myUid,
-    online,
-    session?.code,
-    session?.id,
-  ]);
+  }, [lastClientErrors, location.pathname, myRole, myUid, online, session?.code, session?.id]);
 
   const lastError = diagnosticsPreview.lastClientErrors.at(-1) ?? null;
   const sessionCode = diagnosticsPreview.sessionCode;
@@ -184,9 +165,7 @@ function ReportProblemSheetContent({
       });
       setIncidentId(result.incidentId);
     } catch (err) {
-      setSubmitError(
-        err instanceof Error ? err.message : "Could not submit the report.",
-      );
+      setSubmitError(err instanceof Error ? err.message : "Could not submit the report.");
     } finally {
       setSubmitting(false);
     }
@@ -195,11 +174,7 @@ function ReportProblemSheetContent({
   if (incidentId) {
     return (
       <div className="jl-report-sheet jl-report-post" data-testid="report-post">
-        <div
-          className="jl-report-post-tabs"
-          role="tablist"
-          aria-label="After report"
-        >
+        <div className="jl-report-post-tabs" role="tablist" aria-label="After report">
           {(
             [
               ["agent", "Fix agent"],
@@ -299,11 +274,7 @@ function ReportProblemSheetContent({
           <Box px="md" py="sm">
             <Text
               fw={sessionCode ? 700 : 500}
-              c={
-                sessionCode
-                  ? "var(--color-field-ink)"
-                  : "var(--color-field-ink-muted)"
-              }
+              c={sessionCode ? "var(--color-field-ink)" : "var(--color-field-ink-muted)"}
               style={{
                 fontFamily: sessionCode ? "var(--font-mono)" : undefined,
                 letterSpacing: sessionCode ? "0.06em" : undefined,

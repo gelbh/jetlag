@@ -12,10 +12,7 @@ interface PreloadStoreState {
   recordSuccess: (gameAreaKey: string) => void;
   recordFailure: (gameAreaKey: string) => void;
   dismiss: () => void;
-  setAdminDivisionCounts: (
-    gameAreaKey: string,
-    counts: AdminDivisionCounts,
-  ) => void;
+  setAdminDivisionCounts: (gameAreaKey: string, counts: AdminDivisionCounts) => void;
 }
 
 export const usePreloadStore = create<PreloadStoreState>((set, get) => ({
@@ -72,11 +69,7 @@ export function selectPreloadBanner(state: PreloadStoreState): {
   title: string;
   body: string;
 } {
-  if (
-    !state.activeGameAreaKey ||
-    state.dismissed ||
-    state.totalJobs === 0
-  ) {
+  if (!state.activeGameAreaKey || state.dismissed || state.totalJobs === 0) {
     return {
       visible: false,
       loading: false,

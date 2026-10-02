@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import { LoadingSpinnerRing } from "@/components/ui/feedback/LoadingSpinner";
 
 type LoadingReadoutVariant = "default" | "dim";
@@ -15,16 +15,11 @@ const VARIANT_COLOR: Record<LoadingReadoutVariant, string> = {
 
 const STALE_LOADING_MS = 10_000;
 
-export function LoadingReadout({
-  children,
-  variant = "dim",
-}: LoadingReadoutProps) {
+export function LoadingReadout({ children, variant = "dim" }: LoadingReadoutProps) {
   const [stale, setStale] = useState(false);
 
   useEffect(() => {
-    /* eslint-disable react-hooks/set-state-in-effect -- reset stale timer when loading copy changes */
     setStale(false);
-    /* eslint-enable react-hooks/set-state-in-effect */
     const timerId = window.setTimeout(() => setStale(true), STALE_LOADING_MS);
     return () => window.clearTimeout(timerId);
   }, [children]);
@@ -53,8 +48,7 @@ export function LoadingReadout({
             color: "var(--color-field-ink-muted)",
           }}
         >
-          Map data is still loading. This can take up to a minute on slow
-          connections.
+          Map data is still loading. This can take up to a minute on slow connections.
         </p>
       ) : null}
     </div>

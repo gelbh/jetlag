@@ -83,11 +83,7 @@ export async function listActiveSessionIds(db, deps = {}) {
   return [...new Set(sessionIds)];
 }
 
-async function fanOutRequiredMinVersion(
-  db,
-  sessionIds,
-  { toVersion, graceSeconds, nowIso },
-) {
+async function fanOutRequiredMinVersion(db, sessionIds, { toVersion, graceSeconds, nowIso }) {
   const patch = {
     requiredMinAppVersion: toVersion,
     requiredMinAppVersionSetAt: nowIso,
@@ -119,8 +115,7 @@ export async function publishIncidentHotfixHandler(db, input, deps = {}) {
     throw new Error(INCIDENT_NOT_FOUND);
   }
 
-  const toVersion =
-    typeof input.toVersion === "string" ? input.toVersion.trim() : "";
+  const toVersion = typeof input.toVersion === "string" ? input.toVersion.trim() : "";
   if (!FOUR_SEGMENT_VERSION.test(toVersion)) {
     throw new Error(INCIDENT_INVALID_HOTFIX_VERSION);
   }
@@ -160,19 +155,16 @@ export async function publishIncidentHotfixHandler(db, input, deps = {}) {
     publishedAt: nowIso,
   };
 
-  await db
-    .collection("appConfig")
-    .doc("runtime")
-    .set(
-      {
-        requiredMinAppVersion: toVersion,
-        hotfixGraceSeconds: graceSeconds,
-        updatedAt: nowIso,
-        updatedByUid: uid,
-        incidentId,
-      },
-      { merge: true },
-    );
+  await db.collection("appConfig").doc("runtime").set(
+    {
+      requiredMinAppVersion: toVersion,
+      hotfixGraceSeconds: graceSeconds,
+      updatedAt: nowIso,
+      updatedByUid: uid,
+      incidentId,
+    },
+    { merge: true },
+  );
 
   const sessionIds = await listIds(db);
   await fanOutRequiredMinVersion(db, sessionIds, {
@@ -181,12 +173,15 @@ export async function publishIncidentHotfixHandler(db, input, deps = {}) {
     nowIso,
   });
 
-  await incidentRef.collection("messages").doc(generateId()).set({
-    sender: "system",
-    kind: "hotfix",
-    text: `Published hotfix ${toVersion} (grace ${graceSeconds}s)`,
-    createdAt: nowIso,
-  });
+  await incidentRef
+    .collection("messages")
+    .doc(generateId())
+    .set({
+      sender: "system",
+      kind: "hotfix",
+      text: `Published hotfix ${toVersion} (grace ${graceSeconds}s)`,
+      createdAt: nowIso,
+    });
 
   await incidentRef.update({
     status: "hotfix_pending",

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { effectiveMapStyle, getPowerProfile, applyMapStylePreferenceChange } from "./powerProfile";
+import { applyMapStylePreferenceChange, effectiveMapStyle, getPowerProfile } from "./powerProfile";
 
 describe("powerProfile", () => {
   it("returns throttled intervals in low power mode", () => {

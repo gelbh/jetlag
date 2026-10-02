@@ -1,11 +1,11 @@
+import type { FeatureCollection, LineString } from "geojson";
 import { useMemo } from "react";
-import type { GameArea } from "@/domain/map/annotations";
+import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
 import {
   gameAreaExteriorStrokeRings,
   gameAreaOutsideMask,
 } from "@/domain/geometry/gameArea/geometry";
-import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
-import type { FeatureCollection, LineString } from "geojson";
+import type { GameArea } from "@/domain/map/annotations";
 import { MAP_ANNOTATION_COLORS } from "@/domain/map/mapAnnotationColors";
 import { cssPxDashToMapLibre } from "../helpers/cssPxDashToMapLibre";
 import { MapLibreGeoJsonOverlay } from "../helpers/MapLibreGeoJsonOverlay";
@@ -30,9 +30,7 @@ const FRAMING_BASE_WEIGHT = 3;
 const PLAY_BASE_WEIGHT = 2;
 const FRAMING_DASH = "8 6";
 
-function exteriorStrokeFeatureCollection(
-  rings: LatLngTuple[][],
-): FeatureCollection<LineString> {
+function exteriorStrokeFeatureCollection(rings: LatLngTuple[][]): FeatureCollection<LineString> {
   return {
     type: "FeatureCollection",
     features: rings.map((ring) => ({
@@ -46,15 +44,9 @@ function exteriorStrokeFeatureCollection(
   };
 }
 
-export function GameAreaMask({
-  gameArea,
-  framing = false,
-}: GameAreaMaskProps) {
+export function GameAreaMask({ gameArea, framing = false }: GameAreaMaskProps) {
   const outsideMask = useMemo(() => gameAreaOutsideMask(gameArea), [gameArea]);
-  const exteriorStrokeRings = useMemo(
-    () => gameAreaExteriorStrokeRings(gameArea),
-    [gameArea],
-  );
+  const exteriorStrokeRings = useMemo(() => gameAreaExteriorStrokeRings(gameArea), [gameArea]);
   const exteriorStroke = useMemo(
     () => exteriorStrokeFeatureCollection(exteriorStrokeRings),
     [exteriorStrokeRings],
@@ -81,9 +73,7 @@ export function GameAreaMask({
           color: MAP_ANNOTATION_COLORS.playArea,
           width: baseWeight,
           opacity: 1,
-          dashArray: framing
-            ? cssPxDashToMapLibre(FRAMING_DASH, baseWeight)
-            : undefined,
+          dashArray: framing ? cssPxDashToMapLibre(FRAMING_DASH, baseWeight) : undefined,
         }}
       />
     </>

@@ -9,13 +9,10 @@ export interface HiderTruthResult {
   unavailableReason?: string;
 }
 
-export const UNAVAILABLE_NO_ZONE =
-  "Truth unavailable. Set your hiding zone first.";
+export const UNAVAILABLE_NO_ZONE = "Truth unavailable. Set your hiding zone first.";
 export const UNAVAILABLE_GENERIC = "Truth unavailable. Cannot compute.";
 
-export function truthUnavailable(
-  reason = UNAVAILABLE_GENERIC,
-): HiderTruthResult {
+export function truthUnavailable(reason = UNAVAILABLE_GENERIC): HiderTruthResult {
   return {
     replyId: "",
     label: reason,
@@ -35,16 +32,9 @@ export function resultFromReplyId(
   };
 }
 
-export function parseMatchingAnchor(
-  metadata: Record<string, unknown>,
-): LatLngTuple | null {
+export function parseMatchingAnchor(metadata: Record<string, unknown>): LatLngTuple | null {
   const anchor = metadata.matchingAnchor;
-  if (
-    typeof anchor !== "object" ||
-    anchor === null ||
-    !("lat" in anchor) ||
-    !("lng" in anchor)
-  ) {
+  if (typeof anchor !== "object" || anchor === null || !("lat" in anchor) || !("lng" in anchor)) {
     return null;
   }
 
@@ -56,9 +46,7 @@ export function parseMatchingAnchor(
   return [lat, lng];
 }
 
-export function seekerAnchorFromMetadata(
-  metadata: Record<string, unknown>,
-): LatLngTuple | null {
+export function seekerAnchorFromMetadata(metadata: Record<string, unknown>): LatLngTuple | null {
   const anchor = metadata.measuringAnchor;
   if (
     anchor &&
@@ -82,7 +70,5 @@ export function minDistanceToPlaces(
     return null;
   }
 
-  return Math.min(
-    ...places.map((place) => distanceBetweenPoints(point, place.point)),
-  );
+  return Math.min(...places.map((place) => distanceBetweenPoints(point, place.point)));
 }

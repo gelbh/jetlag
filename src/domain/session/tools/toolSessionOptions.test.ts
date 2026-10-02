@@ -1,9 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { AnnotationRecord } from "../../map/annotations";
-import {
-  collectUsedAnnotationOptions,
-  firstUnusedCatalogOption,
-} from "./toolSessionOptions";
+import { collectUsedAnnotationOptions, firstUnusedCatalogOption } from "./toolSessionOptions";
 
 describe("toolSessionOptions", () => {
   it("collects active annotation options while excluding one annotation", () => {

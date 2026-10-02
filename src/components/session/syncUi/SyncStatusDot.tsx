@@ -1,13 +1,13 @@
-import type { SyncStatus } from "@/domain/device/sync/sync";
 import {
   ArrowsClockwiseIcon,
   CheckCircleIcon,
   ClockCounterClockwiseIcon,
   CloudSlashIcon,
-  WarningIcon,
   WarningCircleIcon,
+  WarningIcon,
 } from "@phosphor-icons/react";
 import { syncBeaconStyle } from "@/components/ui/entry/entryChrome";
+import type { SyncStatus } from "@/domain/device/sync/sync";
 import { JlIcon, type PhosphorIcon } from "../../ui/brand/JlIcon";
 
 interface SyncStatusBeaconProps {
@@ -26,11 +26,7 @@ const SURVEY_ICON: Record<SyncStatus, PhosphorIcon> = {
 };
 
 /** Sync indicator for the map chrome status strip. */
-export function SyncStatusBeacon({
-  status,
-  size = "md",
-  className = "",
-}: SyncStatusBeaconProps) {
+export function SyncStatusBeacon({ status, size = "md", className = "" }: SyncStatusBeaconProps) {
   const iconPx = size === "sm" ? 14 : 18;
 
   return (

@@ -1,8 +1,5 @@
+import { initializeTestEnvironment, type RulesTestEnvironment } from "@firebase/rules-unit-testing";
 import { normalizeUsername } from "../../../domain/game/playerProfile";
-import {
-  initializeTestEnvironment,
-  type RulesTestEnvironment,
-} from "@firebase/rules-unit-testing";
 
 const PROJECT_ID = "demo-jetlag";
 
@@ -31,10 +28,7 @@ async function getRulesTestEnvironment(): Promise<RulesTestEnvironment> {
 }
 
 /** Seeds claim-shaped username docs with rules disabled (client writes are Functions-only). */
-export async function seedUsernameProfileDocs(
-  uid: string,
-  username: string,
-): Promise<void> {
+export async function seedUsernameProfileDocs(uid: string, username: string): Promise<void> {
   const trimmed = username.trim();
   const normalized = normalizeUsername(trimmed);
   const env = await getRulesTestEnvironment();
@@ -46,19 +40,14 @@ export async function seedUsernameProfileDocs(
       username: trimmed,
       claimedAt: new Date().toISOString(),
     });
-    await db
-      .collection("users")
-      .doc(uid)
-      .collection("profile")
-      .doc("main")
-      .set(
-        {
-          username: trimmed,
-          usernameNormalized: normalized,
-          displayName: trimmed,
-          leaderboardOptIn: false,
-        },
-        { merge: true },
-      );
+    await db.collection("users").doc(uid).collection("profile").doc("main").set(
+      {
+        username: trimmed,
+        usernameNormalized: normalized,
+        displayName: trimmed,
+        leaderboardOptIn: false,
+      },
+      { merge: true },
+    );
   });
 }

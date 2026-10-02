@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { buildPremiumProxyHeaders } from "./accessControl";
 import { captureAppCheckTokenFailure } from "../analytics/sentry";
+import { buildPremiumProxyHeaders } from "./accessControl";
 
 vi.mock("../firebase/firebase", () => ({
   getFirebaseAuth: () => ({

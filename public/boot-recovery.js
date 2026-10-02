@@ -1,4 +1,4 @@
-(function () {
+(() => {
   var KEY = "jetlag:boot-reload";
   var reloaded = false;
 
@@ -13,7 +13,7 @@
 
   window.addEventListener(
     "error",
-    function (event) {
+    (event) => {
       if (reloaded) {
         return;
       }

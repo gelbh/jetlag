@@ -1,5 +1,5 @@
-import test from "node:test";
 import assert from "node:assert/strict";
+import test from "node:test";
 import {
   autoEndIdleSession,
   computeIdleCutoffIso,
@@ -35,10 +35,7 @@ test("isIdleActiveSession ignores ended sessions", () => {
   const cutoff = "2026-06-01T00:00:00.000Z";
 
   assert.equal(
-    isIdleActiveSession(
-      { status: "active", lastActiveAt: "2026-05-01T00:00:00.000Z" },
-      cutoff,
-    ),
+    isIdleActiveSession({ status: "active", lastActiveAt: "2026-05-01T00:00:00.000Z" }, cutoff),
     true,
   );
   assert.equal(
@@ -56,10 +53,7 @@ test("isIdleActiveSession ignores ended sessions", () => {
 
 test("computeIdleCutoffIso subtracts idle hours", () => {
   const now = Date.parse("2026-07-10T12:00:00.000Z");
-  assert.equal(
-    computeIdleCutoffIso(now, 24),
-    "2026-07-09T12:00:00.000Z",
-  );
+  assert.equal(computeIdleCutoffIso(now, 24), "2026-07-09T12:00:00.000Z");
 });
 
 test("selectIdleActiveSessions deduplicates indexed and legacy candidates", () => {

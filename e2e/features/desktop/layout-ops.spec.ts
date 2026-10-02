@@ -1,10 +1,10 @@
 import {
-  test,
   expect,
-  prepareE2EPage,
-  openPlayHub,
   openMapWithLocalSession,
+  openPlayHub,
   openSettings,
+  prepareE2EPage,
+  test,
 } from "../../fixtures";
 
 test.describe("desktop layout @ 1280", () => {
@@ -36,9 +36,7 @@ test.describe("desktop layout @ 1280", () => {
     await openMapWithLocalSession(page);
     const toolsNav = page.getByRole("navigation", { name: /Map tools/i });
     await expect(toolsNav).toBeVisible();
-    await expect(
-      page.getByRole("region", { name: "Map status" }),
-    ).toBeVisible();
+    await expect(page.getByRole("region", { name: "Map status" })).toBeVisible();
 
     const box = await toolsNav.boundingBox();
     expect(box).not.toBeNull();
@@ -48,14 +46,10 @@ test.describe("desktop layout @ 1280", () => {
     expect(box!.height).toBeGreaterThan(box!.width);
   });
 
-  test("@smoke settings opens in contextual rail not bottom sheet", async ({
-    page,
-  }) => {
+  test("@smoke settings opens in contextual rail not bottom sheet", async ({ page }) => {
     await openMapWithLocalSession(page);
     await openSettings(page);
-    await expect(
-      page.getByRole("complementary", { name: /Map panels/i }),
-    ).toBeVisible();
+    await expect(page.getByRole("complementary", { name: /Map panels/i })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Settings" })).toBeVisible();
     await expect(page.getByRole("dialog", { name: "Settings" })).toBeVisible();
     // Tip desktop: settings live in the ops complementary rail, not a mobile sheet.

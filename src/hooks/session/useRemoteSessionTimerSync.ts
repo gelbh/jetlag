@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from "react";
 import { LOCAL_SESSION_ID } from "../../domain/map/annotations";
-import { timerStateFromRemote, type TimerState } from "../../domain/session/timer/timer";
+import { type TimerState, timerStateFromRemote } from "../../domain/session/timer/timer";
 import { isFirebaseConfigured } from "../../services/core/firebase/firebase";
 import {
   isFirestorePermissionDenied,
@@ -8,14 +8,9 @@ import {
 } from "../../services/firestore/firestoreAnnotations";
 import { useSessionStore } from "../../state/sessionStore";
 
-export function useRemoteSessionTimerSync(
-  sessionId: string | undefined,
-  isHost: boolean,
-) {
+export function useRemoteSessionTimerSync(sessionId: string | undefined, isHost: boolean) {
   const session = useSessionStore((state) => state.session);
-  const isRemote = Boolean(
-    sessionId && sessionId !== LOCAL_SESSION_ID && isFirebaseConfigured(),
-  );
+  const isRemote = Boolean(sessionId && sessionId !== LOCAL_SESSION_ID && isFirebaseConfigured());
   const sessionMatches = session?.id === sessionId;
 
   const onControl = useCallback(
@@ -45,8 +40,7 @@ export function useRemoteSessionTimerSync(
     [isRemote, sessionMatches, timerAccumulatedMs, timerRunningSince],
   );
 
-  const remoteState =
-    isRemote && !isHost ? remoteSnapshot : null;
+  const remoteState = isRemote && !isHost ? remoteSnapshot : null;
 
   const timerSyncing = isRemote && !isHost && remoteSnapshot === undefined;
 

@@ -1,10 +1,10 @@
-import { beforeAll, describe, expect, it, vi } from "vitest";
 import { existsSync } from "node:fs";
-import { fileURLToPath } from "node:url";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import type { Feature, LineString } from "geojson";
-import { assertPolygonTopologyParity } from "./parity";
+import { beforeAll, describe, expect, it, vi } from "vitest";
 import { loadPolygonGolden } from "./loadPolygonGolden";
+import { assertPolygonTopologyParity } from "./parity";
 
 const pkgEntry = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -50,9 +50,7 @@ describe.skipIf(!wasmPkgReady)("geodesic wasm parity", () => {
   it.each([0, -1, Number.NaN, Number.POSITIVE_INFINITY])(
     "rejects invalid sampleSpacingMeters (%s) with RangeError",
     async (spacing) => {
-      await expect(
-        wasmGeodesicLineBuffer(shortLine, 200, spacing),
-      ).rejects.toThrow(RangeError);
+      await expect(wasmGeodesicLineBuffer(shortLine, 200, spacing)).rejects.toThrow(RangeError);
     },
   );
 });
@@ -61,10 +59,7 @@ describe("geodesic wasm failure", () => {
   it("wasm init failure rethrows when entrypoint forced ready", async () => {
     vi.resetModules();
     vi.doMock("./kernelWasmReady", async () => {
-      const actual =
-        await vi.importActual<typeof import("./kernelWasmReady")>(
-          "./kernelWasmReady",
-        );
+      const actual = await vi.importActual<typeof import("./kernelWasmReady")>("./kernelWasmReady");
       return {
         ...actual,
         KERNEL_WASM_READY: {
@@ -75,8 +70,7 @@ describe("geodesic wasm failure", () => {
           if (entrypoint === "geodesicLineBuffer") {
             return true;
           }
-          return actual.shouldUseWasm(entrypoint as import("./kernelWasmReady").KernelEntrypoint,
-          );
+          return actual.shouldUseWasm(entrypoint as import("./kernelWasmReady").KernelEntrypoint);
         },
       };
     });
@@ -87,14 +81,10 @@ describe("geodesic wasm failure", () => {
       resetGeodesicWasmForTests: vi.fn(),
     }));
 
-    const { dispatchGeodesicLineBuffer: runWithMock } = await import(
-      "./geodesicKernelRunner"
-    );
+    const { dispatchGeodesicLineBuffer: runWithMock } = await import("./geodesicKernelRunner");
 
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
-    await expect(
-      runWithMock(shortLine, 200, undefined),
-    ).rejects.toThrow("wasm init failed");
+    await expect(runWithMock(shortLine, 200, undefined)).rejects.toThrow("wasm init failed");
     expect(warnSpy).toHaveBeenCalled();
     warnSpy.mockRestore();
 

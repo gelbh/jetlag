@@ -1,11 +1,11 @@
 import { Anchor, Text } from "@mantine/core";
-import { RequireUsername } from "../components/auth/RequireUsername";
-import { LeaderboardBody } from "../components/leaderboard/LeaderboardBody";
 import { EntryRouteShell } from "@/components/ui/entry/EntryRouteShell";
 import {
   isLeaderboardMockEnabled,
   setLeaderboardMockEnabled,
 } from "@/services/profile/leaderboardMock";
+import { RequireUsername } from "../components/auth/RequireUsername";
+import { LeaderboardBody } from "../components/leaderboard/LeaderboardBody";
 
 export function Leaderboard() {
   const mockEnabled = isLeaderboardMockEnabled();
@@ -13,13 +13,7 @@ export function Leaderboard() {
   return (
     <EntryRouteShell title="Leaderboard">
       {mockEnabled ? (
-        <Text
-          size="xs"
-          c="var(--color-signal)"
-          mb="sm"
-          px={4}
-          style={{ lineHeight: 1.35 }}
-        >
+        <Text size="xs" c="var(--color-signal)" mb="sm" px={4} style={{ lineHeight: 1.35 }}>
           Mock leaderboard on. You are{" "}
           <Text span fw={590} c="var(--color-field-ink)">
             you_local

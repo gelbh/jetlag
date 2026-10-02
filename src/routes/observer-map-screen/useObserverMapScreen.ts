@@ -1,20 +1,23 @@
 import { useCallback, useMemo, useState } from "react";
 import type { MapViewportState } from "../../components/map/chrome/MapViewportTracker";
 import {
+  applyMapStylePreferenceChange,
+  effectiveMapStyle,
+} from "../../domain/device/power/powerProfile";
+import {
   gameAreaCenter,
   gameAreaToBoundsExpression,
   type LatLngTuple,
 } from "../../domain/geometry/gameArea/geometry";
-import { effectiveMapStyle, applyMapStylePreferenceChange } from "../../domain/device/power/powerProfile";
+import { DEFAULT_MAP_CENTER } from "../../domain/map/defaultMapCenter";
+import { isPlaceholderGameArea } from "../../domain/session/join/joinPreviewGameArea";
 import { resolveSpectatorLayers } from "../../domain/session/players/observerPerspective";
 import { useActiveThermometerWalk } from "../../hooks/location/useActiveThermometerWalk";
 import { useMapOverlayState } from "../../hooks/map/useMapOverlayState";
-import { useResolvedSessionRules } from "../../hooks/session/useResolvedSessionRules";
-import { useSharedSessionScreen } from "../../hooks/session/useSharedSessionScreen";
-import { useSessionDistanceUnit } from "../../hooks/session/useSessionDistanceUnit";
 import { useSessionAnnotations } from "../../hooks/map/useSessionAnnotations";
-import { isPlaceholderGameArea } from "../../domain/session/join/joinPreviewGameArea";
-import { DEFAULT_MAP_CENTER } from "../../domain/map/defaultMapCenter";
+import { useResolvedSessionRules } from "../../hooks/session/useResolvedSessionRules";
+import { useSessionDistanceUnit } from "../../hooks/session/useSessionDistanceUnit";
+import { useSharedSessionScreen } from "../../hooks/session/useSharedSessionScreen";
 import { useMapStore, useSessionStore } from "../../state/sessionStore";
 import { getMapScreenRoleConfig } from "../map-screen/shared/mapScreenRoleConfig";
 
@@ -35,14 +38,15 @@ export function useObserverMapScreen() {
   const authMode = roleConfig.authMode;
   const exitPath = roleConfig.exitPath;
 
-  const { gameArea, sessionRules, playAreaReady: resolvedPlayAreaReady } =
-    useResolvedSessionRules(session);
+  const {
+    gameArea,
+    sessionRules,
+    playAreaReady: resolvedPlayAreaReady,
+  } = useResolvedSessionRules(session);
   const resolvedGameArea = gameArea ?? session?.gameArea ?? null;
   // Join-preview / zero areas must not frame the camera (fitBoundsMode="once").
   const displayGameArea =
-    resolvedPlayAreaReady &&
-    resolvedGameArea != null &&
-    !isPlaceholderGameArea(resolvedGameArea)
+    resolvedPlayAreaReady && resolvedGameArea != null && !isPlaceholderGameArea(resolvedGameArea)
       ? resolvedGameArea
       : null;
   const playAreaReady = displayGameArea != null;

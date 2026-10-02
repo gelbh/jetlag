@@ -1,23 +1,27 @@
-import { MATCHING_CATEGORIES } from "../../questions/matchingQuestions";
-import {
-  BASE_MEASURING_CATALOG,
-  CUSTOM_PACK_GATED_MEASURING,
-  isCustomPackGatedMeasuringId,
-} from "../../questions/measuringQuestions";
 import {
   CUSTOM_QUESTION_PACK_MATCHING,
   CUSTOM_QUESTION_PACK_MEASURING,
   isCustomQuestionPackCategoryId,
 } from "../../questions/customQuestionPack";
 import type { MatchingCategoryDefinition } from "../../questions/matchingQuestions";
+import {
+  customCategoryToMatchingDefinition,
+  MATCHING_CATEGORIES,
+} from "../../questions/matchingQuestions";
 import type { MeasuringCatalogOption } from "../../questions/measuringQuestions";
-import { customCategoryToMatchingDefinition } from "../../questions/matchingQuestions";
-import { customCategoryToMeasuringOption } from "./sessionCustomCatalog";
+import {
+  BASE_MEASURING_CATALOG,
+  CUSTOM_PACK_GATED_MEASURING,
+  isCustomPackGatedMeasuringId,
+} from "../../questions/measuringQuestions";
+import {
+  applyRegionPackMatchingLabels,
+  applyRegionPackMeasuringLabels,
+} from "../../regions/regionPackLabels";
+import type { SessionRulesInput } from "../rules";
 import type { SessionCustomMeasureGeometry } from "./customMeasureGeometry";
 import { customMeasureGeometryToMeasuringOption } from "./customMeasureGeometryCatalog";
-import { applyRegionPackMatchingLabels } from "../../regions/regionPackLabels";
-import { applyRegionPackMeasuringLabels } from "../../regions/regionPackLabels";
-import type { SessionRulesInput } from "../rules";
+import { customCategoryToMeasuringOption } from "./sessionCustomCatalog";
 
 function withRegionPackMatchingLabels(
   categories: MatchingCategoryDefinition[],
@@ -32,29 +36,21 @@ function withRegionPackMeasuringLabels(
   options: MeasuringCatalogOption[],
   session: SessionRulesInput,
 ): MeasuringCatalogOption[] {
-  return options.map((option) =>
-    applyRegionPackMeasuringLabels(option, session.regionPackId),
-  );
+  return options.map((option) => applyRegionPackMeasuringLabels(option, session.regionPackId));
 }
 
 export const BASE_MATCHING_CATEGORY_COUNT = 20;
 export const BASE_MEASURING_CATALOG_COUNT = 20;
 
-export function isExpansionPackEnabled(
-  session: SessionRulesInput,
-): boolean {
+export function isExpansionPackEnabled(session: SessionRulesInput): boolean {
   return session.expansionPackEnabled === true;
 }
 
-export function isCustomQuestionPackEnabled(
-  session: SessionRulesInput,
-): boolean {
+export function isCustomQuestionPackEnabled(session: SessionRulesInput): boolean {
   return session.customQuestionPackEnabled === true;
 }
 
-export function isPreviewQuestionBeforeSendEnabled(
-  session: SessionRulesInput,
-): boolean {
+export function isPreviewQuestionBeforeSendEnabled(session: SessionRulesInput): boolean {
   return session.previewQuestionBeforeSend === true;
 }
 
@@ -70,37 +66,23 @@ export function availableMatchingCategories(
   session: SessionRulesInput,
 ): MatchingCategoryDefinition[] {
   const base = [...baseMatchingCategories()];
-  const pack = isCustomQuestionPackEnabled(session)
-    ? [...CUSTOM_QUESTION_PACK_MATCHING]
-    : [];
-  const hostCustom = (session.customCategories ?? []).map(
-    customCategoryToMatchingDefinition,
-  );
+  const pack = isCustomQuestionPackEnabled(session) ? [...CUSTOM_QUESTION_PACK_MATCHING] : [];
+  const hostCustom = (session.customCategories ?? []).map(customCategoryToMatchingDefinition);
 
-  return withRegionPackMatchingLabels(
-    [...base, ...pack, ...hostCustom],
-    session,
-  );
+  return withRegionPackMatchingLabels([...base, ...pack, ...hostCustom], session);
 }
 
-export function availableMeasuringCatalog(
-  session: SessionRulesInput,
-): MeasuringCatalogOption[] {
+export function availableMeasuringCatalog(session: SessionRulesInput): MeasuringCatalogOption[] {
   const base = [...baseMeasuringCatalog()];
   const pack = isCustomQuestionPackEnabled(session)
     ? [...CUSTOM_PACK_GATED_MEASURING, ...CUSTOM_QUESTION_PACK_MEASURING]
     : [];
-  const hostCustom = (session.customCategories ?? []).map(
-    customCategoryToMeasuringOption,
-  );
+  const hostCustom = (session.customCategories ?? []).map(customCategoryToMeasuringOption);
   const customGeo = (session.customMeasureGeometries ?? []).map(
     customMeasureGeometryToMeasuringOption,
   );
 
-  return withRegionPackMeasuringLabels(
-    [...base, ...pack, ...hostCustom, ...customGeo],
-    session,
-  );
+  return withRegionPackMeasuringLabels([...base, ...pack, ...hostCustom, ...customGeo], session);
 }
 
 export function resolveAvailableMatchingCategory(
@@ -108,9 +90,7 @@ export function resolveAvailableMatchingCategory(
   session: SessionRulesInput,
 ): MatchingCategoryDefinition | null {
   return (
-    availableMatchingCategories(session).find(
-      (category) => category.id === categoryId,
-    ) ?? null
+    availableMatchingCategories(session).find((category) => category.id === categoryId) ?? null
   );
 }
 
@@ -118,16 +98,10 @@ export function resolveAvailableMeasuringOption(
   kind: string,
   session: SessionRulesInput,
 ): MeasuringCatalogOption | null {
-  return (
-    availableMeasuringCatalog(session).find((option) => option.id === kind) ??
-    null
-  );
+  return availableMeasuringCatalog(session).find((option) => option.id === kind) ?? null;
 }
 
-export function isCategoryInDefaultPicker(
-  categoryId: string,
-  session: SessionRulesInput,
-): boolean {
+export function isCategoryInDefaultPicker(categoryId: string, session: SessionRulesInput): boolean {
   if (isCustomQuestionPackCategoryId(categoryId)) {
     return isCustomQuestionPackEnabled(session);
   }
@@ -137,15 +111,11 @@ export function isCategoryInDefaultPicker(
   }
 
   if (categoryId.startsWith("custom:")) {
-    return (session.customCategories ?? []).some(
-      (category) => category.id === categoryId,
-    );
+    return (session.customCategories ?? []).some((category) => category.id === categoryId);
   }
 
   if (categoryId.startsWith("custom_geo:")) {
-    return (session.customMeasureGeometries ?? []).some(
-      (geometry) => geometry.id === categoryId,
-    );
+    return (session.customMeasureGeometries ?? []).some((geometry) => geometry.id === categoryId);
   }
 
   return (

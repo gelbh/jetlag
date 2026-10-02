@@ -1,15 +1,13 @@
+import { MantineProvider } from "@mantine/core";
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import { MantineProvider } from "@mantine/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { CreateSession } from "./CreateSession";
-import { jetlagTheme } from "@/theme/theme";
 import type { MapViewModel } from "@/components/map/chrome/mapViewTypes";
 import { createMapBounds } from "@/domain/map/mapBounds";
+import { jetlagTheme } from "@/theme/theme";
+import { CreateSession } from "./CreateSession";
 
-const ensureAnonymousUser = vi.hoisted(() =>
-  vi.fn(async () => ({ uid: "host-1" })),
-);
+const ensureAnonymousUser = vi.hoisted(() => vi.fn(async () => ({ uid: "host-1" })));
 const isFirebaseConfigured = vi.hoisted(() => vi.fn(() => false));
 
 vi.mock("@/hooks/navigation/useAppNavigate", () => ({
@@ -18,13 +16,7 @@ vi.mock("@/hooks/navigation/useAppNavigate", () => ({
 
 const mapView = vi.hoisted(() => ({ model: null as MapViewModel | null }));
 vi.mock("@/components/map/chrome/MapView", () => ({
-  MapView: ({
-    model,
-    children,
-  }: {
-    model: MapViewModel;
-    children?: React.ReactNode;
-  }) => {
+  MapView: ({ model, children }: { model: MapViewModel; children?: React.ReactNode }) => {
     mapView.model = model;
     return <div data-testid="create-map">{children}</div>;
   },
@@ -179,15 +171,9 @@ describe("CreateSession", () => {
     renderCreateSession();
 
     expect(screen.getByRole("link", { name: /^back$/i })).toBeInTheDocument();
-    expect(
-      screen.getByRole("heading", { name: /^create$/i }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("heading", { name: /frame the game area/i }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: /confirm game area/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /^create$/i })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /frame the game area/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /confirm game area/i })).toBeInTheDocument();
     const root = document.querySelector(".jl-create-session");
     expect(root).toBeTruthy();
   });
@@ -220,14 +206,10 @@ describe("CreateSession", () => {
     renderCreateSession();
 
     await waitFor(() => {
-      expect(
-        screen.getByText(/couldn't sign in to create a session/i),
-      ).toBeInTheDocument();
+      expect(screen.getByText(/couldn't sign in to create a session/i)).toBeInTheDocument();
     });
     expect(screen.getByRole("button", { name: /^retry$/i })).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: /confirm game area/i }),
-    ).toBeDisabled();
+    expect(screen.getByRole("button", { name: /confirm game area/i })).toBeDisabled();
   });
 
   it("lazy-loads the boundary parser and starts sea-level sampling on confirm", async () => {
@@ -245,26 +227,21 @@ describe("CreateSession", () => {
     fireEvent.click(screen.getByRole("button", { name: /confirm game area/i }));
 
     await waitFor(() => {
-      expect(startSeaLevelBackgroundSampling).toHaveBeenCalledWith(
-        IMPORTED_AREA,
-        { regionPackId: undefined },
-      );
+      expect(startSeaLevelBackgroundSampling).toHaveBeenCalledWith(IMPORTED_AREA, {
+        regionPackId: undefined,
+      });
     });
   });
 
   it("shows friendly copy when the boundary importer chunk fails to load", async () => {
     parseBoundaryFile.mockRejectedValue(
-      new TypeError(
-        "Failed to fetch dynamically imported module: /assets/kmzImport-x.js",
-      ),
+      new TypeError("Failed to fetch dynamically imported module: /assets/kmzImport-x.js"),
     );
     renderCreateSession();
 
     importBoundaryFile();
 
-    expect(
-      await screen.findByText(/couldn't load the importer/i),
-    ).toBeInTheDocument();
+    expect(await screen.findByText(/couldn't load the importer/i)).toBeInTheDocument();
   });
 
   it("shows a map facade instead of constructing MapLibre on load", () => {
@@ -336,9 +313,7 @@ describe("CreateSession", () => {
     try {
       renderCreateSession();
 
-      fireEvent.click(
-        screen.getByRole("button", { name: /confirm game area/i }),
-      );
+      fireEvent.click(screen.getByRole("button", { name: /confirm game area/i }));
       await act(async () => {
         await vi.advanceTimersByTimeAsync(10_000);
       });

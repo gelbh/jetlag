@@ -1,13 +1,13 @@
-import { fireEvent, render, screen } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { ReactNode } from "react";
 import { MantineProvider } from "@mantine/core";
+import { fireEvent, render, screen } from "@testing-library/react";
+import type { ReactNode } from "react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { MOTION_SHEET_PRESENT_MS } from "@/domain/device/motion/motionTokens";
+import { useMapStore } from "@/state/mapStore";
+import { resetAllStores } from "@/test/helpers/storeReset";
+import { jetlagTheme } from "@/theme/theme";
 import { DrawerSheet } from "./DrawerSheet";
 import { resolveDrawerSheetTransitionProps } from "./drawerSheetTransition";
-import { jetlagTheme } from "@/theme/theme";
-import { resetAllStores } from "@/test/helpers/storeReset";
-import { useMapStore } from "@/state/mapStore";
-import { MOTION_SHEET_PRESENT_MS } from "@/domain/device/motion/motionTokens";
 
 function withAppUi(ui: ReactNode) {
   return (
@@ -142,20 +142,13 @@ describe("DrawerSheet", () => {
     const onClose = vi.fn();
     render(
       withAppUi(
-        <DrawerSheet
-          open
-          onClose={onClose}
-          ariaLabel="Forced"
-          dismissible={false}
-        >
+        <DrawerSheet open onClose={onClose} ariaLabel="Forced" dismissible={false}>
           <p>body</p>
         </DrawerSheet>,
       ),
     );
 
-    expect(
-      screen.queryByRole("button", { name: "Drag sheet down to dismiss" }),
-    ).toBeNull();
+    expect(screen.queryByRole("button", { name: "Drag sheet down to dismiss" })).toBeNull();
     expect(onClose).not.toHaveBeenCalled();
   });
 
@@ -267,12 +260,7 @@ describe("DrawerSheet", () => {
   it("uses contentStyle paddingBottom on scroll and skips safe-area stack (keyboard)", () => {
     render(
       withAppUi(
-        <DrawerSheet
-          open
-          onClose={() => {}}
-          ariaLabel="Chat"
-          contentStyle={{ paddingBottom: 120 }}
-        >
+        <DrawerSheet open onClose={() => {}} ariaLabel="Chat" contentStyle={{ paddingBottom: 120 }}>
           <p>body</p>
         </DrawerSheet>,
       ),
@@ -305,9 +293,7 @@ describe("DrawerSheet", () => {
       .getByTestId("mantine-drawer-sheet")
       .querySelector(".jl-scroll") as HTMLElement | null;
     expect(scroll).toBeTruthy();
-    expect(scroll!.style.paddingBottom).toBe(
-      "calc(120px + env(safe-area-inset-bottom))",
-    );
+    expect(scroll!.style.paddingBottom).toBe("calc(120px + env(safe-area-inset-bottom))");
   });
 
   it("applies keyboard paddingBottom on child scrollMode body (Chat path)", () => {

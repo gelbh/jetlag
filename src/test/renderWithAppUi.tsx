@@ -1,4 +1,4 @@
-import { render, type RenderOptions } from "@testing-library/react";
+import { type RenderOptions, render } from "@testing-library/react";
 import type { ReactElement, ReactNode } from "react";
 import { AppUiProvider } from "@/components/ui/providers/AppUiProvider";
 
@@ -11,11 +11,7 @@ export function renderWithAppUi(
   { wrapper: UserWrapper, ...options }: RenderWithAppUiOptions = {},
 ) {
   function Wrapper({ children }: { children: ReactNode }) {
-    const body = UserWrapper ? (
-      <UserWrapper>{children}</UserWrapper>
-    ) : (
-      children
-    );
+    const body = UserWrapper ? <UserWrapper>{children}</UserWrapper> : children;
     return <AppUiProvider>{body}</AppUiProvider>;
   }
 

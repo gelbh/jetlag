@@ -1,10 +1,7 @@
+import { hotterColderAnswerOptions } from "@/components/tools/shared/answers/binaryAnswerOptions";
 import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
 import type { DistanceUnit } from "@/domain/map/distance";
-import {
-  isLocalThermometerWalkId,
-  thermometerQuestionPrompt,
-} from "@/domain/questions";
-import { hotterColderAnswerOptions } from "@/components/tools/shared/answers/binaryAnswerOptions";
+import { isLocalThermometerWalkId, thermometerQuestionPrompt } from "@/domain/questions";
 import { emitThermometerWalkSeparatedActivity } from "@/services/session/emitSessionActivity";
 import type { ThermometerSessionConfig } from "./types";
 
@@ -93,9 +90,7 @@ export async function completeThermometerWalkStep(
   } catch (error) {
     patchConfig({
       panelError:
-        error instanceof Error
-          ? error.message
-          : "Thermometer walk could not finish. Try again.",
+        error instanceof Error ? error.message : "Thermometer walk could not finish. Try again.",
     });
     return;
   }

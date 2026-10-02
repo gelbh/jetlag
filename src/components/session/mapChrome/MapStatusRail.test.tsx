@@ -1,14 +1,10 @@
+import { MantineProvider } from "@mantine/core";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import { MantineProvider } from "@mantine/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { RouteTransitionProvider } from "@/navigation/RouteTransitionContext";
 import { jetlagTheme } from "@/theme/theme";
-import {
-  MapStatusRail,
-  type MapStatusRailModel,
-  type MapStatusRailProps,
-} from "./MapStatusRail";
+import { MapStatusRail, type MapStatusRailModel, type MapStatusRailProps } from "./MapStatusRail";
 
 const { showEphemeral } = vi.hoisted(() => ({
   showEphemeral: vi
@@ -17,9 +13,8 @@ const { showEphemeral } = vi.hoisted(() => ({
 }));
 
 vi.mock("../../ui/notifications/showEphemeralPlayerNotification", () => ({
-  showEphemeralPlayerNotification: (
-    input: { title: string; message: string },
-  ) => showEphemeral(input),
+  showEphemeralPlayerNotification: (input: { title: string; message: string }) =>
+    showEphemeral(input),
 }));
 
 vi.mock("../../../state/mapStore", () => ({
@@ -66,10 +61,7 @@ function renderRail(
     <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
       <MemoryRouter>
         <RouteTransitionProvider>
-          <MapStatusRail
-            model={{ ...baseModel, ...modelExtra }}
-            headerLeading={headerLeading}
-          />
+          <MapStatusRail model={{ ...baseModel, ...modelExtra }} headerLeading={headerLeading} />
         </RouteTransitionProvider>
       </MemoryRouter>
     </MantineProvider>,
@@ -126,25 +118,17 @@ describe("MapStatusRail header home", () => {
 describe("MapStatusRail Mantine", () => {
   it("mounts Mantine rail chrome", () => {
     const { container } = renderRail();
-    expect(
-      container.querySelector('[data-testid="map-status-rail-mantine"]'),
-    ).toBeTruthy();
+    expect(container.querySelector('[data-testid="map-status-rail-mantine"]')).toBeTruthy();
   });
 
   it("keeps frosted status bar + Start", () => {
     const { container } = renderRail({ canStartGame: true });
-    const island = container.querySelector(
-      '[data-testid="tool-status-block-mantine"]',
-    );
+    const island = container.querySelector('[data-testid="tool-status-block-mantine"]');
     expect(island).toBeTruthy();
-    expect(
-      island?.querySelector('[data-testid="sync-block-mantine"]'),
-    ).toBeTruthy();
-    expect(
-      island
-        ?.querySelector('[data-testid="sync-block-mantine"]')
-        ?.getAttribute("role"),
-    ).toBe("status");
+    expect(island?.querySelector('[data-testid="sync-block-mantine"]')).toBeTruthy();
+    expect(island?.querySelector('[data-testid="sync-block-mantine"]')?.getAttribute("role")).toBe(
+      "status",
+    );
     expect(container.querySelector(".jl-status-header")).toBeNull();
     expect(container.querySelector(".jl-status-bar")).toBeNull();
     expect(container.querySelector(".jl-ticker")).toBeNull();

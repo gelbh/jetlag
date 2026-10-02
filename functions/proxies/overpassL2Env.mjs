@@ -13,6 +13,4 @@ export const OVERPASS_L2_ENV_KEYS = Object.freeze({
 });
 
 /** Ordered list for `envConfigured()` completeness checks. */
-export const OVERPASS_L2_ENV_KEY_LIST = Object.freeze(
-  Object.values(OVERPASS_L2_ENV_KEYS),
-);
+export const OVERPASS_L2_ENV_KEY_LIST = Object.freeze(Object.values(OVERPASS_L2_ENV_KEYS));

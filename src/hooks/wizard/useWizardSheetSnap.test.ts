@@ -1,19 +1,12 @@
 import { act, renderHook } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import type { MapTool } from "../../domain/map/mapToolTypes";
-import {
-  publishWizardStep,
-  useSyncWizardStepRef,
-} from "../tools/useSyncWizardStepRef";
+import { publishWizardStep, useSyncWizardStepRef } from "../tools/useSyncWizardStepRef";
 import { useWizardSheetSnap } from "./useWizardSheetSnap";
 
 /** Mirrors panel (child) sync + map chrome (parent) sheet snap in one tree. */
 function usePanelAndSheetSnap(tool: MapTool, stepId: string) {
-  useSyncWizardStepRef(
-    undefined,
-    stepId,
-    tool === "none" ? undefined : tool,
-  );
+  useSyncWizardStepRef(undefined, stepId, tool === "none" ? undefined : tool);
   return useWizardSheetSnap(tool);
 }
 
@@ -31,8 +24,7 @@ describe("useWizardSheetSnap", () => {
 
   it("seeds peek when the panel publishes in the same commit as tool open", () => {
     const { result, rerender } = renderHook(
-      ({ tool, stepId }: { tool: MapTool; stepId: string }) =>
-        usePanelAndSheetSnap(tool, stepId),
+      ({ tool, stepId }: { tool: MapTool; stepId: string }) => usePanelAndSheetSnap(tool, stepId),
       { initialProps: { tool: "none" as MapTool, stepId: "place" } },
     );
 
@@ -52,8 +44,7 @@ describe("useWizardSheetSnap", () => {
     }
 
     const { result, rerender } = renderHook(
-      ({ tool, stepId }: { tool: MapTool; stepId: string }) =>
-        useLegacyPanelAndSheet(tool, stepId),
+      ({ tool, stepId }: { tool: MapTool; stepId: string }) => useLegacyPanelAndSheet(tool, stepId),
       { initialProps: { tool: "none" as MapTool, stepId: "place" } },
     );
 
@@ -65,8 +56,7 @@ describe("useWizardSheetSnap", () => {
 
   it("keeps place peek when switching between question tools", () => {
     const { result, rerender } = renderHook(
-      ({ tool, stepId }: { tool: MapTool; stepId: string }) =>
-        usePanelAndSheetSnap(tool, stepId),
+      ({ tool, stepId }: { tool: MapTool; stepId: string }) => usePanelAndSheetSnap(tool, stepId),
       { initialProps: { tool: "radar" as MapTool, stepId: "distance" } },
     );
 

@@ -14,6 +14,8 @@
 
 CI and husky call `npm run <script>` contracts in `package.json`. Day-to-day recipes live in the root `justfile` (`just --list`).
 
+JS/TS lint and format use Biome (`npm run lint` / `npm run format`); CSS remains Stylelint (`npm run lint:css`).
+
 ## Setup
 
 ```bash
@@ -21,6 +23,14 @@ npm ci
 just env-pull
 # or: doppler secrets download --no-file --format env > .env.local
 ```
+
+## React memoization
+
+This app uses React Compiler in annotation mode (`"use memo"` opt-in; expanding later).
+
+- Prefer the Compiler over new `useMemo` / `useCallback` / `React.memo`.
+- Keep or add hand memo only for effect-dependency precision, or for domain identity contracts (see hider elimination-mask thrash work).
+- Do not mass-delete existing memos until full Compiler coverage is trusted.
 
 ## Run the app
 

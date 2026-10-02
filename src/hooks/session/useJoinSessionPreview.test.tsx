@@ -2,19 +2,16 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { useJoinSessionPreview } from "./useJoinSessionPreview";
 import { JOIN_PREVIEW_DEBOUNCE_MS } from "../../services/session/joinSessionPreviewCache";
 import { createTestRemoteSession } from "../../test/fixtures/sessions";
+import { useJoinSessionPreview } from "./useJoinSessionPreview";
 
-const {
-  mockIsFirebaseConfigured,
-  mockEnsureAnonymousUser,
-  mockLookupRemoteSessionByCode,
-} = vi.hoisted(() => ({
-  mockIsFirebaseConfigured: vi.fn(() => true),
-  mockEnsureAnonymousUser: vi.fn(async () => ({ uid: "user-1" })),
-  mockLookupRemoteSessionByCode: vi.fn(),
-}));
+const { mockIsFirebaseConfigured, mockEnsureAnonymousUser, mockLookupRemoteSessionByCode } =
+  vi.hoisted(() => ({
+    mockIsFirebaseConfigured: vi.fn(() => true),
+    mockEnsureAnonymousUser: vi.fn(async () => ({ uid: "user-1" })),
+    mockLookupRemoteSessionByCode: vi.fn(),
+  }));
 
 vi.mock("../../services/core/firebase/firebase", () => ({
   isFirebaseConfigured: () => mockIsFirebaseConfigured(),
@@ -22,8 +19,7 @@ vi.mock("../../services/core/firebase/firebase", () => ({
 }));
 
 vi.mock("../../services/firestore/firestoreAnnotations", () => ({
-  lookupRemoteSessionByCode: (code: string) =>
-    mockLookupRemoteSessionByCode(code),
+  lookupRemoteSessionByCode: (code: string) => mockLookupRemoteSessionByCode(code),
 }));
 
 function createWrapper() {
@@ -31,9 +27,7 @@ function createWrapper() {
     defaultOptions: { queries: { retry: false, gcTime: Infinity } },
   });
   return function Wrapper({ children }: { children: ReactNode }) {
-    return (
-      <QueryClientProvider client={client}>{children}</QueryClientProvider>
-    );
+    return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
   };
 }
 

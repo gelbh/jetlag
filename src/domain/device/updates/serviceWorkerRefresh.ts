@@ -5,10 +5,7 @@ const RELOAD_FALLBACK_MS = 1500;
 
 let appNeedRefreshHandler: (() => void) | undefined;
 
-export function isSafeToReloadApp(options: {
-  session: unknown;
-  pathname: string;
-}): boolean {
+export function isSafeToReloadApp(options: { session: unknown; pathname: string }): boolean {
   return !options.session || options.pathname !== "/map";
 }
 

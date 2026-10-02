@@ -1,5 +1,5 @@
-import { SheetHost } from "../../ui/sheets/SheetHost";
 import type { SessionRecord } from "@/domain/map/annotations";
+import { SheetHost } from "../../ui/sheets/SheetHost";
 import { RolePasscodeSettings } from "./RolePasscodeSettings";
 
 export interface RoleCodesSheetProps {
@@ -10,13 +10,7 @@ export interface RoleCodesSheetProps {
   isHost: boolean;
 }
 
-export function RoleCodesSheet({
-  open,
-  onClose,
-  session,
-  myUid,
-  isHost,
-}: RoleCodesSheetProps) {
+export function RoleCodesSheet({ open, onClose, session, myUid, isHost }: RoleCodesSheetProps) {
   return (
     <SheetHost
       open={open}
@@ -30,12 +24,7 @@ export function RoleCodesSheet({
         </h2>
       }
     >
-      <RolePasscodeSettings
-        session={session}
-        myUid={myUid}
-        isHost={isHost}
-        embedded
-      />
+      <RolePasscodeSettings session={session} myUid={myUid} isHost={isHost} embedded />
     </SheetHost>
   );
 }

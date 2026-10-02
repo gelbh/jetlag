@@ -1,6 +1,5 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
 import { FirebaseError } from "firebase/app";
-import { onSnapshot } from "firebase/firestore";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
 import {
   buildPendingQuestionDocument,
@@ -65,11 +64,12 @@ vi.mock("../core/analytics/sentry", () => ({
   reportFirestoreListenPermissionDenied: vi.fn(),
 }));
 
+import { onSnapshot } from "firebase/firestore";
 import {
   appendPlayerTrailPoint,
   cancelWalkingThermometerQuestions,
-  cancelWalkingThermometersAndAnnounce,
   cancelWalkingThermometersAfterIdentityHeal,
+  cancelWalkingThermometersAndAnnounce,
   deletePendingQuestion,
   deletePlayerLocation,
   subscribeToSessionMessages,
@@ -387,12 +387,7 @@ describe("firestoreSessionExtras writes", () => {
       ],
     });
 
-    await cancelWalkingThermometersAfterIdentityHeal(
-      "session-1",
-      "old-uid",
-      "new-uid",
-      "seeker",
-    );
+    await cancelWalkingThermometersAfterIdentityHeal("session-1", "old-uid", "new-uid", "seeker");
 
     expect(firestoreMocks.batchUpdate).toHaveBeenCalledWith(
       expect.objectContaining({ path: expect.stringContaining("pq-walk") }),
@@ -410,12 +405,7 @@ describe("firestoreSessionExtras writes", () => {
   it("captures exceptions from identity-heal cancel", async () => {
     firestoreMocks.getDocs.mockRejectedValueOnce(new Error("boom"));
 
-    await cancelWalkingThermometersAfterIdentityHeal(
-      "session-1",
-      "old-uid",
-      "new-uid",
-      "seeker",
-    );
+    await cancelWalkingThermometersAfterIdentityHeal("session-1", "old-uid", "new-uid", "seeker");
 
     expect(mockCaptureException).toHaveBeenCalledWith(expect.any(Error));
   });

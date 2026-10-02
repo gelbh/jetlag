@@ -5,7 +5,7 @@ import {
   parseEndGameTruthAnchors,
 } from "../serialization/serializeSession";
 import { handleFirestoreListenError } from "./listenError";
-import { sessionsCollection, endGameTruthAnchorsDoc } from "./shared";
+import { endGameTruthAnchorsDoc, sessionsCollection } from "./shared";
 
 export function subscribeToSession(
   sessionId: string,
@@ -25,10 +25,7 @@ export function subscribeToSession(
       }
 
       onChange(
-        deserializeSessionFromFirestore(
-          snapshot.id,
-          snapshot.data() as Record<string, unknown>,
-        ),
+        deserializeSessionFromFirestore(snapshot.id, snapshot.data() as Record<string, unknown>),
       );
     },
     (error) => handleFirestoreListenError(error, onError),
@@ -38,9 +35,7 @@ export function subscribeToSession(
 /** Hider/observer/admin-only freeze points (not on the seeker-readable session doc). */
 export function subscribeToEndGameTruthAnchors(
   sessionId: string,
-  onChange: (
-    anchors: SessionRecord["endGameTruthAnchors"] | undefined,
-  ) => void,
+  onChange: (anchors: SessionRecord["endGameTruthAnchors"] | undefined) => void,
   onError: (error: Error) => void,
 ): Unsubscribe {
   return onSnapshot(
@@ -56,4 +51,3 @@ export function subscribeToEndGameTruthAnchors(
     (error) => handleFirestoreListenError(error, onError),
   );
 }
-

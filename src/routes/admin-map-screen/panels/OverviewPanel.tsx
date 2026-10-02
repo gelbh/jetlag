@@ -1,5 +1,5 @@
-import type { SessionRecord } from "@/domain/map/annotations";
 import { APP_VERSION } from "@/domain/device/changelog";
+import type { SessionRecord } from "@/domain/map/annotations";
 import type { TimerState } from "@/domain/session/timer/timer";
 
 function formatTimestamp(value: string | undefined): string {

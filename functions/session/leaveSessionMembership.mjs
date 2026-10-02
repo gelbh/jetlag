@@ -1,9 +1,5 @@
 import { applyEndSessionInTx } from "./endSessionCanonical.mjs";
-import {
-  LEAVE_ALREADY_ENDED,
-  LEAVE_NOT_HOST,
-  LEAVE_SESSION_NOT_FOUND,
-} from "./hostLeave.mjs";
+import { LEAVE_ALREADY_ENDED, LEAVE_NOT_HOST, LEAVE_SESSION_NOT_FOUND } from "./hostLeave.mjs";
 import { pickHostPromotee } from "./pickHostPromotee.mjs";
 import {
   isRoleGatedSession,
@@ -37,13 +33,7 @@ function applyRoleLeaderPromotionOnLeave(uid, role, roleGates, memberUids, membe
     return { roleGates, clearSecretRole: null };
   }
 
-  const promoted = promoteOrClearRoleLeader(
-    roleGates,
-    memberUids,
-    memberRoles,
-    role,
-    uid,
-  );
+  const promoted = promoteOrClearRoleLeader(roleGates, memberUids, memberRoles, role, uid);
 
   return {
     roleGates: promoted.roleGates,
@@ -55,13 +45,8 @@ function applyRoleLeaderPromotionOnLeave(uid, role, roleGates, memberUids, membe
  * Shared remove-member → promote role leader → optional secret clear.
  * Callers must read session + secrets before invoking, then write once.
  */
-export function applyGatedMemberRemoval({
-  uid,
-  data,
-  secrets,
-}) {
-  const { memberUids, memberRoles, memberAppVersions, hostUid } =
-    readMembershipFields(data);
+export function applyGatedMemberRemoval({ uid, data, secrets }) {
+  const { memberUids, memberRoles, memberAppVersions, hostUid } = readMembershipFields(data);
   if (!memberUids.includes(uid)) {
     throw new Error(LEAVE_MEMBERSHIP_NOT_MEMBER);
   }
@@ -71,12 +56,7 @@ export function applyGatedMemberRemoval({
     version: 1,
     leaders: { ...(data.roleGates?.leaders ?? {}) },
   };
-  const withoutMember = removeMemberFromMaps(
-    memberUids,
-    memberRoles,
-    memberAppVersions,
-    uid,
-  );
+  const withoutMember = removeMemberFromMaps(memberUids, memberRoles, memberAppVersions, uid);
 
   const leaderUpdate = applyRoleLeaderPromotionOnLeave(
     uid,

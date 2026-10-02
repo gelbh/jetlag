@@ -43,9 +43,7 @@ export function acknowledgeSoftReload(mitigationId: string): boolean {
   return writeSessionFlag(softReloadKey(mitigationId));
 }
 
-export function hasHotfixReloadBeenAcknowledged(
-  requiredMinAppVersion: string,
-): boolean {
+export function hasHotfixReloadBeenAcknowledged(requiredMinAppVersion: string): boolean {
   return readSessionFlag(hotfixReloadKey(requiredMinAppVersion)) === true;
 }
 

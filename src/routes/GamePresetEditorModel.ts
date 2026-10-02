@@ -1,32 +1,29 @@
 import { useCallback, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
-import { useAppNavigate } from "../hooks/navigation/useAppNavigate";
-import type { MapBoundsExpression } from "../domain/map/mapBounds";
-import {
-  gameAreaToBoundingBox,
-  placeToGameArea,
-} from "../domain/geometry/gameArea/geometry";
-import {
-  defaultAdvancedSessionSettings,
-  type AdvancedSessionSettingsValue,
-} from "../domain/session/tools/advancedSessionSettings";
-import type { DistanceUnit } from "../domain/map/distance";
-import type { GameArea } from "../domain/map/annotations";
 import type { BoundingBox } from "../domain/geometry/gameArea/gameAreaBounds";
-import type { GameSize } from "../domain/session/size/gameSize";
+import { gameAreaToBoundingBox, placeToGameArea } from "../domain/geometry/gameArea/geometry";
+import type { GameArea } from "../domain/map/annotations";
+import type { DistanceUnit } from "../domain/map/distance";
+import type { MapBoundsExpression } from "../domain/map/mapBounds";
+import { isBundledPresetId } from "../domain/regions/bundledGamePresets";
 import {
+  type CreateSessionDraft,
   createGamePresetId,
   createSessionDraftToGamePreset,
   migrateGamePreset,
-  type CreateSessionDraft,
 } from "../domain/session/presets/gamePreset";
+import type { GameSize } from "../domain/session/size/gameSize";
+import {
+  type AdvancedSessionSettingsValue,
+  defaultAdvancedSessionSettings,
+} from "../domain/session/tools/advancedSessionSettings";
+import { useAppNavigate } from "../hooks/navigation/useAppNavigate";
 import { useGameAreaFraming } from "../hooks/session/useGameAreaFraming";
-import { usePlaceAreaSearch } from "../hooks/session/usePlaceAreaSearch";
-import { useGamePresetStore } from "../state/gamePresetStore";
-import { isBundledPresetId } from "../domain/regions/bundledGamePresets";
 import { usePackAttachChrome } from "../hooks/session/usePackAttachChrome";
-import { useMapStore } from "../state/sessionStore";
+import { usePlaceAreaSearch } from "../hooks/session/usePlaceAreaSearch";
 import type { GeocodedPlace } from "../services/geo/geocoding";
+import { useGamePresetStore } from "../state/gamePresetStore";
+import { useMapStore } from "../state/sessionStore";
 
 export function useGamePresetEditorModel() {
   const navigate = useAppNavigate();
@@ -45,21 +42,16 @@ export function useGamePresetEditorModel() {
     () => (existing ? migrateGamePreset(existing) : undefined),
     [existing],
   );
-  const needsMigrationReview =
-    migratedExisting?.migrationStatus === "manual_required";
+  const needsMigrationReview = migratedExisting?.migrationStatus === "manual_required";
 
   const framing = useGameAreaFraming({
     initialGameArea: existing?.gameArea ?? null,
     initialFocusBounds: existing?.focusBounds ?? null,
   });
   const [framingModalOpen, setFramingModalOpen] = useState(false);
-  const [gameArea, setGameArea] = useState<GameArea | null>(
-    existing?.gameArea ?? null,
-  );
+  const [gameArea, setGameArea] = useState<GameArea | null>(existing?.gameArea ?? null);
   const [placeLabel, setPlaceLabel] = useState(existing?.placeLabel ?? "");
-  const [focusBounds, setFocusBounds] = useState<BoundingBox | null>(
-    existing?.focusBounds ?? null,
-  );
+  const [focusBounds, setFocusBounds] = useState<BoundingBox | null>(existing?.focusBounds ?? null);
   const applyPlaceToPreset = useCallback(
     (place: GeocodedPlace) => {
       const area = placeToGameArea(place);
@@ -80,12 +72,9 @@ export function useGamePresetEditorModel() {
   const [distanceUnit, setDistanceUnit] = useState<DistanceUnit>(
     existing?.distanceUnit ?? "imperial",
   );
-  const [advancedSettings, setAdvancedSettings] =
-    useState<AdvancedSessionSettingsValue>(
-      () =>
-        existing?.advancedSettings ??
-        defaultAdvancedSessionSettings("medium", "imperial"),
-    );
+  const [advancedSettings, setAdvancedSettings] = useState<AdvancedSessionSettingsValue>(
+    () => existing?.advancedSettings ?? defaultAdvancedSessionSettings("medium", "imperial"),
+  );
   const [error, setError] = useState<string | null>(null);
   const packAttach = usePackAttachChrome({
     gameArea,

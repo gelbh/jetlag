@@ -1,10 +1,10 @@
 import type { Page } from "@playwright/test";
 import {
-  test,
-  expect,
   clickMapAtLatLng,
   clickToolDockButton,
+  expect,
   openMapWithLocalSession,
+  test,
 } from "../../fixtures";
 
 async function pickRow(page: Page, label: RegExp) {
@@ -29,9 +29,7 @@ test.describe("ask map-first smoke", () => {
       });
       await expect(page.getByTestId("ask-hud-host")).toHaveCount(0);
       // Ask-first empties MapBottomChrome (min-h-0); attribute marks the mode.
-      await expect(
-        page.locator('[data-overlay-chrome][data-ask-first="true"]'),
-      ).toHaveCount(1);
+      await expect(page.locator('[data-overlay-chrome][data-ask-first="true"]')).toHaveCount(1);
     });
   });
 
@@ -45,10 +43,7 @@ test.describe("ask map-first smoke", () => {
       await expect(page.getByTestId("photo-hud-body")).toBeVisible();
       await expect(page.getByTestId("ask-mode-cue-ticker")).toHaveCount(0);
 
-      const chipOrRow = page
-        .getByTestId("photo-hud-body")
-        .getByRole("button")
-        .first();
+      const chipOrRow = page.getByTestId("photo-hud-body").getByRole("button").first();
       await expect(chipOrRow).toBeVisible({ timeout: 10_000 });
       await chipOrRow.click();
 
@@ -56,9 +51,7 @@ test.describe("ask map-first smoke", () => {
         timeout: 15_000,
       });
       await expect(page.getByTestId("ask-hud-host")).toHaveCount(0);
-      await expect(
-        page.getByRole("button", { name: /Send to hiders/i }),
-      ).toBeVisible();
+      await expect(page.getByRole("button", { name: /Send to hiders/i })).toBeVisible();
     });
   });
 
@@ -85,9 +78,9 @@ test.describe("ask map-first smoke", () => {
       });
       await clickMapAtLatLng(page, 53.36, -6.25);
 
-      await expect(
-        page.getByTestId("thermometer-map-placement-choices"),
-      ).toBeVisible({ timeout: 15_000 });
+      await expect(page.getByTestId("thermometer-map-placement-choices")).toBeVisible({
+        timeout: 15_000,
+      });
     });
   });
 });

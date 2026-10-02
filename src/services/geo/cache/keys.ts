@@ -26,10 +26,7 @@ export function coastlineSegmentsCacheKey(gameArea: GameArea): string {
   return geographicCacheKey(gameArea, "coastline:segments");
 }
 
-export function linearSegmentsCacheKey(
-  gameArea: GameArea,
-  kind: string,
-): string {
+export function linearSegmentsCacheKey(gameArea: GameArea, kind: string): string {
   return geographicCacheKey(gameArea, `linear:${kind}`);
 }
 
@@ -37,27 +34,18 @@ export function seaLevelSamplingCacheKey(gameArea: GameArea): string {
   return geographicCacheKey(gameArea, "sea_level:sampling");
 }
 
-export function adminDivisionCacheKey(
-  gameArea: GameArea,
-  adminLevel: number,
-): string {
+export function adminDivisionCacheKey(gameArea: GameArea, adminLevel: number): string {
   // v2: query no longer uses empty `area.searchArea` (zero-result bug).
   return geographicCacheKey(gameArea, `admin:v2:${adminLevel}`);
 }
 
-export function landmassCacheKey(
-  gameArea: GameArea,
-  regionPackId?: RegionPackId,
-): string {
+export function landmassCacheKey(gameArea: GameArea, regionPackId?: RegionPackId): string {
   // v3: skip Overpass for bundled metro packs; bbox + out geom from v2.
   const packSuffix = regionPackId ? `:${regionPackId}` : "";
   return geographicCacheKey(gameArea, `landmass:v3${packSuffix}`);
 }
 
-export function measuringPlacesCacheKey(
-  gameArea: GameArea,
-  category: string,
-): string {
+export function measuringPlacesCacheKey(gameArea: GameArea, category: string): string {
   // v2: cache Overpass-only; callers merge bundled POI outside the cache.
   return geographicCacheKey(gameArea, `measuring:v2:${category}`);
 }

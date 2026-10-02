@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
+import { DUBLIN_CITY_GAME_AREA } from "@/test/fixtures/dublinGameArea";
 import {
   buildOverpassAuditCases,
   formatOverpassAuditReport,
-  summarizeOverpassAuditRuns,
   type OverpassAuditRunResult,
+  summarizeOverpassAuditRuns,
 } from "./overpassAudit";
-import { DUBLIN_CITY_GAME_AREA } from "@/test/fixtures/dublinGameArea";
 
 describe("overpassAudit", () => {
   it("builds audit cases for admin, landmass, measuring, and transit", () => {

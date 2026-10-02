@@ -1,10 +1,7 @@
-import { useState } from "react";
 import { Button, Group, Stack, Text } from "@mantine/core";
+import { useState } from "react";
 import type { HostConfirmRecord } from "../../domain/incident/incidentTypes";
-import {
-  approveHostConfirm,
-  denyHostConfirm,
-} from "../../services/incident/incidentApi";
+import { approveHostConfirm, denyHostConfirm } from "../../services/incident/incidentApi";
 import { SheetHeader } from "../ui/sheets/SheetHeader";
 import { SheetHost } from "../ui/sheets/SheetHost";
 
@@ -45,11 +42,7 @@ export function HostConfirmSheet({
       await approveFn(confirm.incidentId, confirm.id);
       onClose();
     } catch (nextError) {
-      setError(
-        nextError instanceof Error
-          ? nextError.message
-          : "Could not approve the change.",
-      );
+      setError(nextError instanceof Error ? nextError.message : "Could not approve the change.");
     } finally {
       setBusy(false);
     }
@@ -66,9 +59,7 @@ export function HostConfirmSheet({
       onClose();
     } catch (nextError) {
       setError(
-        nextError instanceof Error
-          ? nextError.message
-          : "Could not dismiss the confirmation.",
+        nextError instanceof Error ? nextError.message : "Could not dismiss the confirmation.",
       );
     } finally {
       setBusy(false);

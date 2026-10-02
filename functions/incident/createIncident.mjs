@@ -43,17 +43,10 @@ function clampNote(note) {
 }
 
 function assertValidDiagnostics(diagnostics) {
-  if (
-    typeof diagnostics !== "object" ||
-    diagnostics === null ||
-    Array.isArray(diagnostics)
-  ) {
+  if (typeof diagnostics !== "object" || diagnostics === null || Array.isArray(diagnostics)) {
     throw new Error(INCIDENT_INVALID_DIAGNOSTICS);
   }
-  if (
-    typeof diagnostics.appVersion !== "string" ||
-    typeof diagnostics.route !== "string"
-  ) {
+  if (typeof diagnostics.appVersion !== "string" || typeof diagnostics.route !== "string") {
     throw new Error(INCIDENT_INVALID_DIAGNOSTICS);
   }
   const serialized = JSON.stringify(diagnostics);
@@ -66,7 +59,7 @@ function assertValidDiagnostics(diagnostics) {
 function sanitizeDiagnostics(diagnostics) {
   const out = {};
   for (const key of DIAGNOSTICS_ALLOWED_KEYS) {
-    if (Object.prototype.hasOwnProperty.call(diagnostics, key)) {
+    if (Object.hasOwn(diagnostics, key)) {
       out[key] = diagnostics[key];
     }
   }
@@ -162,9 +155,7 @@ export async function createIncidentHandler(db, input, deps) {
   let email = { error: "not_sent" };
   if (typeof deps.sendEmail === "function") {
     try {
-      const subject = `Jet Lag incident ${incidentId}${
-        sessionCode ? ` — ${sessionCode}` : ""
-      }`;
+      const subject = `Jet Lag incident ${incidentId}${sessionCode ? ` — ${sessionCode}` : ""}`;
       const text = `${adminPrompt}\n\nOpen incident: ${incidentUrl}`;
       const result = await deps.sendEmail({ subject, text, incidentUrl });
       email = {
@@ -182,10 +173,7 @@ export async function createIncidentHandler(db, input, deps) {
   // Clear-bug → private hotfix coding agent (best-effort; never fail create).
   // Sole create-path launch: call `deps.launchCursorHotfix` at most once here.
   // Idempotency for retries lives in `launchCursorHotfixForIncident` (already_launched).
-  if (
-    triage.outcome === "agent" &&
-    typeof deps.launchCursorHotfix === "function"
-  ) {
+  if (triage.outcome === "agent" && typeof deps.launchCursorHotfix === "function") {
     try {
       await deps.launchCursorHotfix({
         incidentId,

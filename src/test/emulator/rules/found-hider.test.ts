@@ -1,13 +1,7 @@
+import { assertFails, assertSucceeds } from "@firebase/rules-unit-testing";
 import { deleteField } from "firebase/firestore";
-import {
-  assertFails,
-  assertSucceeds,
-} from "@firebase/rules-unit-testing";
 import { describe, it } from "vitest";
-import {
-  bindRulesTestEnv,
-  sessionPayload,
-} from "./helpers";
+import { bindRulesTestEnv, sessionPayload } from "./helpers";
 
 describe("firestore.rules — found hider", () => {
   const rules = bindRulesTestEnv();
@@ -299,14 +293,18 @@ describe("firestore.rules — found hider", () => {
 
   it("denies found request after the session has ended", async () => {
     await rules.testEnv.withSecurityRulesDisabled(async (context) => {
-      await context.firestore().collection("sessions").doc("session-1").set(
-        sessionPayload("host-1", {
-          memberUids: ["host-1", "hider-1"],
-          memberRoles: { "host-1": "seeker", "hider-1": "hider" },
-          status: "ended",
-          endedAt: "2026-01-01T02:00:00.000Z",
-        }),
-      );
+      await context
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .set(
+          sessionPayload("host-1", {
+            memberUids: ["host-1", "hider-1"],
+            memberRoles: { "host-1": "seeker", "hider-1": "hider" },
+            status: "ended",
+            endedAt: "2026-01-01T02:00:00.000Z",
+          }),
+        );
     });
 
     const seeker = rules.testEnv.authenticatedContext("host-1");
@@ -317,5 +315,4 @@ describe("firestore.rules — found hider", () => {
       }),
     );
   });
-
 });

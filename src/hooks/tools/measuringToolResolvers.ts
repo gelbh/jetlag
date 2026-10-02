@@ -1,38 +1,30 @@
-import type {
-  Feature,
-  LineString,
-  Polygon as GeoPolygon,
-  MultiPolygon,
-} from "geojson";
-import type { GameArea } from "../../domain/map/annotations";
+import type { Feature, Polygon as GeoPolygon, LineString, MultiPolygon } from "geojson";
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import { nearestPointToCoastlines } from "../../domain/geometry/measuring/geometryMeasuring";
 import type { SeaLevelEdgeCase } from "../../domain/geometry/measuring/seaLevel";
+import type { GameArea } from "../../domain/map/annotations";
 import {
   isMeasuringLinearLocation,
-  measuringFromKind,
   type MeasuringLocationCategory,
   type MeasuringSubject,
+  measuringFromKind,
 } from "../../domain/questions";
+import type { RegionPackId } from "../../domain/regions/regionPack";
+import type { SessionCustomMeasureGeometry } from "../../domain/session/catalog/customMeasureGeometry";
+import { isCustomMeasureGeometryId } from "../../domain/session/catalog/customMeasureGeometry";
+import type { CustomMatchingAreasByLevel } from "../../domain/session/catalog/sessionCustomContent";
+import { loadSeaLevelContext, type SeaLevelContext } from "../../services/geo/elevation/seaLevel";
 import { loadCoastlineContext } from "../../services/geo/overpass/coastline";
-import {
-  findNearestMeasuringPlace,
-  measuringPlaceNotFoundMessage,
-  MEASURING_MAP_SNAP_RADIUS_METERS,
-} from "../../services/geo/overpass/measuringPlaces";
+import { loadCustomMeasureGeometryContext } from "../../services/geo/overpass/customMeasureGeometryFeatures";
 import {
   loadMeasuringLinearContext,
   measuringLinearNotFoundMessage,
 } from "../../services/geo/overpass/measuringLinearFeatures";
-import { loadCustomMeasureGeometryContext } from "../../services/geo/overpass/customMeasureGeometryFeatures";
-import { isCustomMeasureGeometryId } from "../../domain/session/catalog/customMeasureGeometry";
-import type { SessionCustomMeasureGeometry } from "../../domain/session/catalog/customMeasureGeometry";
-import type { CustomMatchingAreasByLevel } from "../../domain/session/catalog/sessionCustomContent";
-import type { RegionPackId } from "../../domain/regions/regionPack";
 import {
-  loadSeaLevelContext,
-  type SeaLevelContext,
-} from "../../services/geo/elevation/seaLevel";
+  findNearestMeasuringPlace,
+  MEASURING_MAP_SNAP_RADIUS_METERS,
+  measuringPlaceNotFoundMessage,
+} from "../../services/geo/overpass/measuringPlaces";
 
 const SEA_LEVEL_LOWEST_MESSAGE =
   'You\'re at the lowest elevation in this play area. A "closer" answer may be impossible.';
@@ -49,13 +41,9 @@ export type MeasuringSeaLevelOk = {
   note: string | null;
 };
 
-export type MeasuringSeaLevelResult =
-  | MeasuringSeaLevelOk
-  | { ok: false; message: string };
+export type MeasuringSeaLevelResult = MeasuringSeaLevelOk | { ok: false; message: string };
 
-function toMeasuringSeaLevelResult(
-  result: SeaLevelContext,
-): MeasuringSeaLevelOk {
+function toMeasuringSeaLevelResult(result: SeaLevelContext): MeasuringSeaLevelOk {
   return {
     ok: true,
     seekerElevationMeters: result.seekerElevationMeters,
@@ -66,9 +54,7 @@ function toMeasuringSeaLevelResult(
   };
 }
 
-function toMeasuringSeaLevelFailure(
-  reason: "lowest" | "build_failed",
-): MeasuringSeaLevelResult {
+function toMeasuringSeaLevelFailure(reason: "lowest" | "build_failed"): MeasuringSeaLevelResult {
   return {
     ok: false,
     message:
@@ -102,8 +88,7 @@ export async function fetchMeasuringSeaLevelContext(
   if (!result) {
     return {
       ok: false,
-      message:
-        "Couldn't read elevation at your anchor. Try a nearby point or retry.",
+      message: "Couldn't read elevation at your anchor. Try a nearby point or retry.",
     };
   }
 
@@ -124,6 +109,7 @@ export async function fetchMeasuringCoastlineContext(
     onEnrich?: (result: {
       coastPoint: LatLngTuple;
       distanceMeters: number;
+      segments: Feature<LineString>[];
     }) => void;
   },
 ) {
@@ -131,17 +117,14 @@ export async function fetchMeasuringCoastlineContext(
     regionPackId: options?.regionPackId,
     onEnrich: options?.onEnrich
       ? (prepared) => {
-          const nearest = nearestPointToCoastlines(
-            seekerPoint,
-            prepared.segments,
-            prepared,
-          );
+          const nearest = nearestPointToCoastlines(seekerPoint, prepared.segments, prepared);
           if (!nearest) {
             return;
           }
           options.onEnrich?.({
             coastPoint: nearest.point,
             distanceMeters: nearest.distanceMeters,
+            segments: prepared.segments,
           });
         }
       : undefined,
@@ -159,6 +142,7 @@ export async function fetchMeasuringCoastlineContext(
     ok: true as const,
     coastPoint: result.coastPoint,
     distanceMeters: result.distanceMeters,
+    segments: result.segments,
   };
 }
 
@@ -188,11 +172,7 @@ export async function fetchMeasuringLinearContext(
       };
     }
 
-    const result = await loadCustomMeasureGeometryContext(
-      seekerPoint,
-      gameArea,
-      geometry,
-    );
+    const result = await loadCustomMeasureGeometryContext(seekerPoint, gameArea, geometry);
     if (!result) {
       return {
         ok: false as const,
@@ -235,12 +215,9 @@ export async function fetchMeasuringMapTarget(
   gameArea: GameArea,
   locationCategory: MeasuringLocationCategory,
 ) {
-  const nearest = await findNearestMeasuringPlace(
-    point,
-    gameArea,
-    locationCategory,
-    { maxDistanceMeters: MEASURING_MAP_SNAP_RADIUS_METERS },
-  );
+  const nearest = await findNearestMeasuringPlace(point, gameArea, locationCategory, {
+    maxDistanceMeters: MEASURING_MAP_SNAP_RADIUS_METERS,
+  });
 
   if (!nearest) {
     return {
@@ -261,11 +238,7 @@ export async function fetchNearestMeasuringPlace(
   gameArea: GameArea,
   locationCategory: MeasuringLocationCategory,
 ) {
-  const nearest = await findNearestMeasuringPlace(
-    seekerPoint,
-    gameArea,
-    locationCategory,
-  );
+  const nearest = await findNearestMeasuringPlace(seekerPoint, gameArea, locationCategory);
 
   if (!nearest) {
     return {

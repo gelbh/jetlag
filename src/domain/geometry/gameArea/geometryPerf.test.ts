@@ -1,25 +1,22 @@
-import { describe, expect, it } from "vitest";
 import turfCircle from "@turf/circle";
 import { point as turfPoint } from "@turf/helpers";
-import type { Feature, LineString, Polygon as GeoPolygon } from "geojson";
+import type { Feature, Polygon as GeoPolygon, LineString } from "geojson";
+import { describe, expect, it } from "vitest";
+import type { AnnotationRecord, GameArea } from "../../map/annotations";
 import { computeEliminationUnionInputTs } from "../adapter/eliminationMask";
 import { clipMaskToGameArea } from "../kernel/clipMask";
-import {
-  wasmBuildEndGameMaskFromDisks,
-  wasmBuildMaskFromUnionInput,
-} from "../kernel/maskWasm";
-import { wasmBuildHalfPlanePolygon } from "../kernel/halfPlaneWasm";
 import { wasmGeodesicLineBuffer } from "../kernel/geodesicWasm";
+import { wasmBuildHalfPlanePolygon } from "../kernel/halfPlaneWasm";
+import { wasmBuildEndGameMaskFromDisks, wasmBuildMaskFromUnionInput } from "../kernel/maskWasm";
+import type { GameAreaGeometry, LatLngTuple } from "../kernel/types";
 import {
-  unionDiskSpecs,
-  unionEliminationParts,
-  unionPolygonFeatures,
   type DiskSpec,
   type EliminationUnionInput,
   type PolygonFeature,
+  unionDiskSpecs,
+  unionEliminationParts,
+  unionPolygonFeatures,
 } from "../kernel/unionPolygonFeatures";
-import type { AnnotationRecord, GameArea } from "../../map/annotations";
-import type { GameAreaGeometry, LatLngTuple } from "../kernel/types";
 
 const runGeometryPerf = process.env.GEOMETRY_PERF === "1";
 
@@ -106,10 +103,7 @@ function measureMedianMs(fn: () => void, iterations = 5): number {
   return samples[Math.floor(samples.length / 2)] ?? 0;
 }
 
-async function measureMedianMsAsync(
-  fn: () => Promise<void>,
-  iterations = 5,
-): Promise<number> {
+async function measureMedianMsAsync(fn: () => Promise<void>, iterations = 5): Promise<number> {
   const samples: number[] = [];
 
   for (let index = 0; index <= iterations; index += 1) {
@@ -168,9 +162,7 @@ describe.skipIf(!runGeometryPerf)("geometry performance gates", () => {
   });
 
   it("union_10_mixed_polys is faster than turf engine union", () => {
-    const features = Array.from({ length: 10 }, (_, index) =>
-      squareFeature(-0.19 + index * 0.008),
-    );
+    const features = Array.from({ length: 10 }, (_, index) => squareFeature(-0.19 + index * 0.008));
     const input: EliminationUnionInput = { polygons: features, disks: [] };
 
     const martinezMs = measureMedianMs(() => {
@@ -197,9 +189,7 @@ describe.skipIf(!runGeometryPerf)("geometry performance gates", () => {
       }
     });
     const turfMs = measureMedianMs(() => {
-      const features = annotations.map(
-        (annotation) => annotation.geometry as PolygonFeature,
-      );
+      const features = annotations.map((annotation) => annotation.geometry as PolygonFeature);
       unionEliminationParts({ polygons: features, disks: [] }, "turf");
     });
 
@@ -221,9 +211,7 @@ describe.skipIf(!runGeometryPerf)("geometry performance gates", () => {
 
   it("wasm_mask_8_polys median under 50ms", async () => {
     const input: EliminationUnionInput = {
-      polygons: Array.from({ length: 8 }, (_, index) =>
-        squareFeature(-0.19 + index * 0.01),
-      ),
+      polygons: Array.from({ length: 8 }, (_, index) => squareFeature(-0.19 + index * 0.01)),
       disks: [],
     };
 

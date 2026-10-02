@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
 import type { Feature, LineString } from "geojson";
+import { describe, expect, it } from "vitest";
 import { clearCoastlineNearRegionCacheForTests } from "../measuring/nearRegions";
 import type { GameAreaGeometry } from "./types";
 

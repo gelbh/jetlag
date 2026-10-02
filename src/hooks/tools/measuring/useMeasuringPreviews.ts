@@ -1,20 +1,17 @@
+import type { Feature, Polygon as GeoPolygon, MultiPolygon } from "geojson";
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
-import type { Feature, MultiPolygon, Polygon as GeoPolygon } from "geojson";
-import type { GameArea } from "@/domain/map/annotations";
 import type { MeasuringLodPhase } from "@/domain/geometry/measuring/measuringLod";
 import {
   buildMeasuringBoundaryPreview,
   buildMeasuringEliminationPreview,
 } from "@/domain/geometry/measuring/measuringRegions";
 import { previewGeometryFingerprint } from "@/domain/geometry/measuring/previewGeometryFingerprint";
+import type { GameArea } from "@/domain/map/annotations";
 import { paintPolygonLod } from "@/hooks/tools/framework/paintPolygonLod";
 import { getCachedPreparedCoastlineSegments } from "@/services/geo/overpass/coastline";
 import type { MeasuringDraftState } from "./useMeasuringDraftState";
 
-export function useMeasuringPreviews(
-  gameArea: GameArea,
-  draft: MeasuringDraftState,
-) {
+export function useMeasuringPreviews(gameArea: GameArea, draft: MeasuringDraftState) {
   const {
     measuringSubject,
     measuringLocationCategory,
@@ -32,17 +29,11 @@ export function useMeasuringPreviews(
 
   const resolvedCoastSegments = useMemo(() => {
     if (measuringSubject === "coastline") {
-      return getCachedPreparedCoastlineSegments(gameArea)?.segments ?? [];
+      return getCachedPreparedCoastlineSegments(gameArea)?.segments ?? measuringCoastSegments;
     }
 
     return measuringCoastSegments;
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- coastlineContextVersion busts coastline cache
-  }, [
-    coastlineContextVersion,
-    gameArea,
-    measuringCoastSegments,
-    measuringSubject,
-  ]);
+  }, [coastlineContextVersion, gameArea, measuringCoastSegments, measuringSubject]);
 
   const measuringRegionInput = useMemo(
     () => ({
@@ -86,10 +77,10 @@ export function useMeasuringPreviews(
   const [measuringNearRegion, setMeasuringNearRegion] = useState<Feature<
     GeoPolygon | MultiPolygon
   > | null>(null);
-  const [measuringEliminationPreview, setMeasuringEliminationPreview] =
-    useState<Feature<GeoPolygon | MultiPolygon> | null>(null);
-  const [measuringLodPhase, setMeasuringLodPhase] =
-    useState<MeasuringLodPhase>("complete");
+  const [measuringEliminationPreview, setMeasuringEliminationPreview] = useState<Feature<
+    GeoPolygon | MultiPolygon
+  > | null>(null);
+  const [measuringLodPhase, setMeasuringLodPhase] = useState<MeasuringLodPhase>("complete");
   const generationRef = useRef(0);
   const nearLodCancelRef = useRef<(() => void) | null>(null);
   const elimLodCancelRef = useRef<(() => void) | null>(null);
@@ -107,10 +98,7 @@ export function useMeasuringPreviews(
         setMeasuringLodPhase(phase);
         return;
       }
-      if (
-        nearLodCancelRef.current === null &&
-        elimLodCancelRef.current === null
-      ) {
+      if (nearLodCancelRef.current === null && elimLodCancelRef.current === null) {
         setMeasuringLodPhase("complete");
         return;
       }
@@ -192,10 +180,7 @@ export function useMeasuringPreviews(
   }, [previewRegionInput, setMeasuringError]);
 
   const measuringBoundaryPreview = useMemo(() => {
-    if (
-      measuringSubject === "sea_level" &&
-      measuringSeaLevelEdgeCase === "highest"
-    ) {
+    if (measuringSubject === "sea_level" && measuringSeaLevelEdgeCase === "highest") {
       return null;
     }
 
@@ -271,9 +256,7 @@ export function useMeasuringPublishSignature(
         measuringPlaces.length,
         measuringCoastSegments.length,
         coastlineContextVersion,
-        measuringBoundaryPreview
-          ? previewGeometryFingerprint(measuringBoundaryPreview)
-          : null,
+        measuringBoundaryPreview ? previewGeometryFingerprint(measuringBoundaryPreview) : null,
         measuringEliminationPreview
           ? previewGeometryFingerprint(measuringEliminationPreview)
           : null,
@@ -319,20 +302,14 @@ export function useHasMeasuringTarget(draft: MeasuringDraftState) {
     measuringTargetPoint,
   } = draft;
 
-  return (
-    measuringSubject === "sea_level"
-      ? measuringAnchorElevationMeters !== null &&
-          measuringSeaLevelNearRegion !== null
-      : usesAllPlacesInArea
-        ? measuringPlaces.length > 0 && measuringDistanceMeters !== null
-        : measuringTargetPoint !== null
-  );
+  return measuringSubject === "sea_level"
+    ? measuringAnchorElevationMeters !== null && measuringSeaLevelNearRegion !== null
+    : usesAllPlacesInArea
+      ? measuringPlaces.length > 0 && measuringDistanceMeters !== null
+      : measuringTargetPoint !== null;
 }
 
-export function useMeasuringPlacementCrosshair(
-  active: boolean,
-  draft: MeasuringDraftState,
-) {
+export function useMeasuringPlacementCrosshair(active: boolean, draft: MeasuringDraftState) {
   const {
     measuringSeekerPoint,
     measuringSubject,

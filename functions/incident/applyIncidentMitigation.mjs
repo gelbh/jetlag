@@ -68,9 +68,7 @@ export async function applyIncidentMitigationHandler(db, input, deps = {}) {
   const session = sessionSnap.data() ?? {};
   const reporterUid = incident.reporterUid;
   if (typeof reporterUid === "string" && reporterUid.length > 0) {
-    const memberUids = Array.isArray(session.memberUids)
-      ? session.memberUids
-      : [];
+    const memberUids = Array.isArray(session.memberUids) ? session.memberUids : [];
     if (!memberUids.includes(reporterUid)) {
       throw new Error(INCIDENT_REPORTER_NOT_MEMBER);
     }
@@ -102,12 +100,15 @@ export async function applyIncidentMitigationHandler(db, input, deps = {}) {
   }
   await db.collection("sessions").doc(sessionId).update({ opsMitigation });
 
-  await incidentRef.collection("messages").doc(generateId()).set({
-    sender: "system",
-    kind: "mitigation",
-    text: `${MITIGATION_LABELS[type]}${note ? ` — ${note}` : ""}`,
-    createdAt: nowIso,
-  });
+  await incidentRef
+    .collection("messages")
+    .doc(generateId())
+    .set({
+      sender: "system",
+      kind: "mitigation",
+      text: `${MITIGATION_LABELS[type]}${note ? ` — ${note}` : ""}`,
+      createdAt: nowIso,
+    });
 
   const incidentUpdate = {
     updatedAt: nowIso,

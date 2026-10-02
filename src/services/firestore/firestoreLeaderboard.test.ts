@@ -29,11 +29,7 @@ vi.mock("firebase/firestore", () => ({
 describe("parseLeaderboardEntry", () => {
   it("parses finite numeric values and prefers username", () => {
     expect(
-      parseLeaderboardEntry(
-        "doc",
-        { uid: "u1", username: "Alice", value: 3.5, rank: 2 },
-        0,
-      ),
+      parseLeaderboardEntry("doc", { uid: "u1", username: "Alice", value: 3.5, rank: 2 }, 0),
     ).toEqual({
       uid: "u1",
       displayName: "Alice",
@@ -43,15 +39,9 @@ describe("parseLeaderboardEntry", () => {
   });
 
   it("rejects non-number and non-finite values", () => {
-    expect(
-      parseLeaderboardEntry("doc", { uid: "u1", value: "0" }, 0),
-    ).toBeNull();
-    expect(
-      parseLeaderboardEntry("doc", { uid: "u1", value: Number.NaN }, 0),
-    ).toBeNull();
-    expect(
-      parseLeaderboardEntry("doc", { uid: "u1", value: null }, 0),
-    ).toBeNull();
+    expect(parseLeaderboardEntry("doc", { uid: "u1", value: "0" }, 0)).toBeNull();
+    expect(parseLeaderboardEntry("doc", { uid: "u1", value: Number.NaN }, 0)).toBeNull();
+    expect(parseLeaderboardEntry("doc", { uid: "u1", value: null }, 0)).toBeNull();
   });
 
   it("falls back to doc id and index rank", () => {
@@ -93,13 +83,7 @@ describe("getLeaderboardSelfEntry", () => {
       data: () => ({ uid: "me", username: "Nova", value: 18.2, rank: 12 }),
     });
     await expect(
-      getLeaderboardSelfEntry(
-        "global",
-        "medium",
-        "seeker",
-        "distance_traveled",
-        "me",
-      ),
+      getLeaderboardSelfEntry("global", "medium", "seeker", "distance_traveled", "me"),
     ).resolves.toEqual({
       uid: "me",
       displayName: "Nova",
@@ -165,14 +149,7 @@ describe("subscribeLeaderboardBoard", () => {
 
   it("orders avg_answer_time ascending", () => {
     onSnapshot.mockImplementation(() => () => undefined);
-    subscribeLeaderboardBoard(
-      "global",
-      "medium",
-      "seeker",
-      "avg_answer_time",
-      vi.fn(),
-      vi.fn(),
-    );
+    subscribeLeaderboardBoard("global", "medium", "seeker", "avg_answer_time", vi.fn(), vi.fn());
     expect(orderBy).toHaveBeenCalledWith("value", "asc");
   });
 
@@ -199,14 +176,7 @@ describe("subscribeLeaderboardBoard", () => {
       return () => undefined;
     });
     const onError = vi.fn();
-    subscribeLeaderboardBoard(
-      "global",
-      "medium",
-      "seeker",
-      "wins",
-      vi.fn(),
-      onError,
-    );
+    subscribeLeaderboardBoard("global", "medium", "seeker", "wins", vi.fn(), onError);
     expect(onError).toHaveBeenCalledWith(boom);
   });
 });

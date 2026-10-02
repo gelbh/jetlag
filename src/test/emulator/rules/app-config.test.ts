@@ -1,7 +1,4 @@
-import {
-  assertFails,
-  assertSucceeds,
-} from "@firebase/rules-unit-testing";
+import { assertFails, assertSucceeds } from "@firebase/rules-unit-testing";
 import { describe, it } from "vitest";
 import { bindRulesTestEnv } from "./helpers";
 
@@ -18,9 +15,7 @@ describe("firestore.rules — appConfig", () => {
     });
 
     const client = rules.testEnv.authenticatedContext("player-1");
-    await assertSucceeds(
-      client.firestore().collection("appConfig").doc("runtime").get(),
-    );
+    await assertSucceeds(client.firestore().collection("appConfig").doc("runtime").get());
     await assertFails(
       client
         .firestore()

@@ -1,5 +1,5 @@
-import { BUNDLED_PRESET_FLAG_ASSETS } from "./bundledPresetFlagAssets.generated";
 import { bundledPresetDefinition } from "./bundledGamePresets";
+import { BUNDLED_PRESET_FLAG_ASSETS } from "./bundledPresetFlagAssets.generated";
 
 export type RegionFlagMark = {
   kind: "image";
@@ -11,18 +11,14 @@ export type RegionFlagMark = {
 };
 
 function assetFor(segmentId: string) {
-  return BUNDLED_PRESET_FLAG_ASSETS[
-    segmentId as keyof typeof BUNDLED_PRESET_FLAG_ASSETS
-  ];
+  return BUNDLED_PRESET_FLAG_ASSETS[segmentId as keyof typeof BUNDLED_PRESET_FLAG_ASSETS];
 }
 
 export function flagIdentityForSegmentId(segmentId: string): string | null {
   return assetFor(segmentId)?.identity ?? null;
 }
 
-export function flagMarkForHierarchySegmentId(
-  segmentId: string,
-): RegionFlagMark | null {
+export function flagMarkForHierarchySegmentId(segmentId: string): RegionFlagMark | null {
   const asset = assetFor(segmentId);
   if (!asset) {
     return null;
@@ -32,10 +28,7 @@ export function flagMarkForHierarchySegmentId(
     src: asset.src,
     alt: asset.alt,
     identity: asset.identity,
-    presentation:
-      "presentation" in asset && asset.presentation === "cutout"
-        ? "cutout"
-        : "flag",
+    presentation: "presentation" in asset && asset.presentation === "cutout" ? "cutout" : "flag",
   };
 }
 
@@ -63,19 +56,14 @@ export function flagMarkForSegmentRow(
  * Leaf rows: prefer subregion mark (ward / council) when present, else the
  * deepest hierarchy segment. Same-identity ancestors still suppress.
  */
-export function flagMarkForBundledPresetId(
-  presetId: string,
-): RegionFlagMark | null {
+export function flagMarkForBundledPresetId(presetId: string): RegionFlagMark | null {
   const definition = bundledPresetDefinition(presetId);
   if (!definition || definition.hierarchy.length === 0) {
     return null;
   }
   const hierarchyIds = definition.hierarchy.map((segment) => segment.id);
   if (definition.subregionId) {
-    const bySubregion = flagMarkForSegmentRow(
-      definition.subregionId,
-      hierarchyIds,
-    );
+    const bySubregion = flagMarkForSegmentRow(definition.subregionId, hierarchyIds);
     if (bySubregion) {
       return bySubregion;
     }

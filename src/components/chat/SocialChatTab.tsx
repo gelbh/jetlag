@@ -1,13 +1,6 @@
-import { useMemo, useState } from "react";
-import {
-  ActionIcon,
-  Box,
-  Group,
-  Stack,
-  Text,
-  TextInput,
-} from "@mantine/core";
+import { ActionIcon, Box, Group, Stack, Text, TextInput } from "@mantine/core";
 import { PaperPlaneTiltIcon } from "@phosphor-icons/react";
+import { useMemo, useState } from "react";
 import type { SessionMessageRecord } from "../../domain/session/activity/sessionChat";
 import { createMessageId } from "../../domain/session/activity/sessionChat";
 import type { PlayerRole } from "../../domain/session/players/playerRole";
@@ -54,13 +47,7 @@ export function SocialChatTab({
 
     setSending(true);
     try {
-      await postSocialMessage(
-        sessionId,
-        senderUid,
-        senderRole,
-        text,
-        createMessageId(),
-      );
+      await postSocialMessage(sessionId, senderUid, senderRole, text, createMessageId());
       setDraft("");
     } finally {
       setSending(false);
@@ -86,24 +73,12 @@ export function SocialChatTab({
             const mine = message.senderUid === senderUid;
             const prev = socialMessages[index - 1];
             const showRole =
-              !mine &&
-              (!prev ||
-                prev.senderUid !== message.senderUid ||
-                prev.kind === "system");
+              !mine && (!prev || prev.senderUid !== message.senderUid || prev.kind === "system");
 
             return (
-              <Stack
-                key={message.id}
-                gap={2}
-                align={mine ? "flex-end" : "flex-start"}
-              >
+              <Stack key={message.id} gap={2} align={mine ? "flex-end" : "flex-start"}>
                 {showRole ? (
-                  <Text
-                    size="xs"
-                    px={8}
-                    c="var(--color-field-ink-muted)"
-                    fw={500}
-                  >
+                  <Text size="xs" px={8} c="var(--color-field-ink-muted)" fw={500}>
                     {roleLabel(message.senderRole)}
                   </Text>
                 ) : null}
@@ -112,15 +87,11 @@ export function SocialChatTab({
                   py={6}
                   maw="78%"
                   style={{
-                    borderRadius: mine
-                      ? "18px 18px 4px 18px"
-                      : "18px 18px 18px 4px",
+                    borderRadius: mine ? "18px 18px 4px 18px" : "18px 18px 18px 4px",
                     backgroundColor: mine
                       ? "var(--color-flag)"
                       : "color-mix(in oklab, var(--color-field-ink) 10%, transparent)",
-                    color: mine
-                      ? "var(--color-flag-ink)"
-                      : "var(--color-field-ink)",
+                    color: mine ? "var(--color-flag-ink)" : "var(--color-field-ink)",
                     fontSize: "0.9375rem",
                     lineHeight: 1.35,
                   }}

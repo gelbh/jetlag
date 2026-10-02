@@ -84,9 +84,7 @@ describe("production GTFS bundles", () => {
     const times = stops.find((stop) => stop.name === "Times Sq-42 St");
     expect(penn).toBeDefined();
     expect(times).toBeDefined();
-    expect(
-      gtfsStopsShareStationOrRoute(penn!.id, times!.id, bundle!),
-    ).toBe(true);
+    expect(gtfsStopsShareStationOrRoute(penn!.id, times!.id, bundle!)).toBe(true);
 
     const match = await resolveTransitLineMatch(
       [40.7504, -73.991],
@@ -105,12 +103,8 @@ describe("production GTFS bundles", () => {
     const stops = filterGtfsStopsForGameArea(bundle!, CENTRAL_LONDON);
     expect(stops.length).toBeGreaterThan(10);
 
-    const kingsCross = stops.find((stop) =>
-      stop.name.includes("King's Cross St. Pancras"),
-    );
-    const euston = stops.find((stop) =>
-      stop.name === "Euston Underground Station",
-    );
+    const kingsCross = stops.find((stop) => stop.name.includes("King's Cross St. Pancras"));
+    const euston = stops.find((stop) => stop.name === "Euston Underground Station");
     expect(kingsCross).toBeDefined();
     expect(euston).toBeDefined();
   });

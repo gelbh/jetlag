@@ -17,12 +17,9 @@ export function isRematchRoundComplete(session) {
 
 export function isRematchIdle(session) {
   const timerStopped =
-    session?.timerRunningSince == null ||
-    session?.timerRunningSince === undefined;
+    session?.timerRunningSince == null || session?.timerRunningSince === undefined;
   const accumulated =
-    typeof session?.timerAccumulatedMs === "number"
-      ? session.timerAccumulatedMs
-      : 0;
+    typeof session?.timerAccumulatedMs === "number" ? session.timerAccumulatedMs : 0;
   return (
     !isRematchRoundComplete(session) &&
     typeof session?.sessionResetAt === "string" &&
@@ -51,20 +48,13 @@ function swapSeekerHiderRoles(memberRoles) {
 
 /** Move role-gate leaders with the people who held them (secrets stay role-keyed). */
 export function swapRoleGateLeaders(roleGates) {
-  if (
-    !roleGates ||
-    roleGates.version !== 1 ||
-    !roleGates.leaders ||
-    typeof roleGates.leaders !== "object"
-  ) {
+  if (roleGates?.version !== 1 || !roleGates.leaders || typeof roleGates.leaders !== "object") {
     return roleGates ?? null;
   }
 
   const leaders = roleGates.leaders;
-  const seekerLeader =
-    typeof leaders.seeker === "string" ? leaders.seeker : undefined;
-  const hiderLeader =
-    typeof leaders.hider === "string" ? leaders.hider : undefined;
+  const seekerLeader = typeof leaders.seeker === "string" ? leaders.seeker : undefined;
+  const hiderLeader = typeof leaders.hider === "string" ? leaders.hider : undefined;
   const nextLeaders = {};
 
   if (hiderLeader) {
@@ -110,16 +100,12 @@ async function runRematchSessionTransaction(db, uid, sessionId) {
       throw new Error(REMATCH_NOT_OVER);
     }
 
-    const roundNumber =
-      typeof session.roundNumber === "number" ? session.roundNumber : 0;
-    const gameResultId =
-      typeof session.gameResultId === "string" ? session.gameResultId : null;
+    const roundNumber = typeof session.roundNumber === "number" ? session.roundNumber : 0;
+    const gameResultId = typeof session.gameResultId === "string" ? session.gameResultId : null;
     const gameResultRef = gameResultId
       ? sessionRef.collection("gameResult").doc(gameResultId)
       : null;
-    const gameResultSnap = gameResultRef
-      ? await transaction.get(gameResultRef)
-      : null;
+    const gameResultSnap = gameResultRef ? await transaction.get(gameResultRef) : null;
     const anchorsSnap = await transaction.get(anchorsRef);
 
     const swappedRoles = swapSeekerHiderRoles(session.memberRoles ?? {});

@@ -1,9 +1,9 @@
 import {
-  test,
   expect,
   openMapWithLocalSession,
   pauseSessionTimer,
   startSessionTimer,
+  test,
 } from "../../fixtures";
 
 test("starts, pauses, and resumes the session timer", async ({ page }) => {

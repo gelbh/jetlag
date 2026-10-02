@@ -12,12 +12,7 @@ interface LeaderboardSelfFooterProps {
   onJump?: () => void;
 }
 
-export function LeaderboardSelfFooter({
-  mode,
-  entry,
-  metric,
-  onJump,
-}: LeaderboardSelfFooterProps) {
+export function LeaderboardSelfFooter({ mode, entry, metric, onJump }: LeaderboardSelfFooterProps) {
   switch (mode) {
     case "hidden":
       return null;

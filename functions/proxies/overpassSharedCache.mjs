@@ -1,8 +1,5 @@
 import { createHash, createHmac } from "node:crypto";
-import {
-  OVERPASS_L2_ENV_KEYS as K,
-  OVERPASS_L2_ENV_KEY_LIST,
-} from "./overpassL2Env.mjs";
+import { OVERPASS_L2_ENV_KEYS as K, OVERPASS_L2_ENV_KEY_LIST } from "./overpassL2Env.mjs";
 
 /** Match L1 TTL in overpassProxyCore.mjs */
 const OVERPASS_L2_TTL_MS = 60 * 60 * 1000;
@@ -77,17 +74,14 @@ function createCloudflareL2Backend() {
     },
     async kvPut(key, value) {
       const ttlSeconds = Math.max(60, Math.floor(OVERPASS_L2_TTL_MS / 1000));
-      const response = await fetch(
-        `${kvUrl(key)}?expiration_ttl=${ttlSeconds}`,
-        {
-          method: "PUT",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "text/plain",
-          },
-          body: value,
+      const response = await fetch(`${kvUrl(key)}?expiration_ttl=${ttlSeconds}`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "text/plain",
         },
-      );
+        body: value,
+      });
       if (!response.ok) {
         throw new Error(`KV put failed: ${response.status}`);
       }
@@ -174,15 +168,10 @@ async function signR2Request(method, objectKey, body = "", contentType = "applic
     sha256Hex(canonicalRequest),
   ].join("\n");
   const signingKey = hmac(
-    hmac(
-      hmac(hmac(`AWS4${secretAccessKey}`, dateStamp), region),
-      service,
-    ),
+    hmac(hmac(hmac(`AWS4${secretAccessKey}`, dateStamp), region), service),
     "aws4_request",
   );
-  const signature = createHmac("sha256", signingKey)
-    .update(stringToSign, "utf8")
-    .digest("hex");
+  const signature = createHmac("sha256", signingKey).update(stringToSign, "utf8").digest("hex");
   const authorization =
     `AWS4-HMAC-SHA256 Credential=${accessKeyId}/${credentialScope}, ` +
     `SignedHeaders=${signedHeaders}, Signature=${signature}`;

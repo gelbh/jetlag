@@ -8,9 +8,7 @@ const zoneCenter: [number, number] = [51.5, -0.12];
 const outsideAsk: [number, number] = [51.6, -0.12]; // far from zone
 const insideAsk: [number, number] = [51.5001, -0.1201];
 
-function radarPending(
-  overrides: Partial<PendingQuestionRecord> = {},
-): PendingQuestionRecord {
+function radarPending(overrides: Partial<PendingQuestionRecord> = {}): PendingQuestionRecord {
   return {
     id: "pq-1",
     sessionId: "s1",
@@ -55,14 +53,8 @@ function baseContext(
 describe("buildHiderTruthFetchKey", () => {
   it("omits hidingPlace when open radar ask is outside the zone", () => {
     const open = [radarPending()];
-    const a = buildHiderTruthFetchKey(
-      open,
-      baseContext({ hidingPlace: [51.5, -0.12] }),
-    );
-    const b = buildHiderTruthFetchKey(
-      open,
-      baseContext({ hidingPlace: [51.501, -0.121] }),
-    );
+    const a = buildHiderTruthFetchKey(open, baseContext({ hidingPlace: [51.5, -0.12] }));
+    const b = buildHiderTruthFetchKey(open, baseContext({ hidingPlace: [51.501, -0.121] }));
     expect(a).toBe(b);
   });
 
@@ -82,14 +74,8 @@ describe("buildHiderTruthFetchKey", () => {
         },
       }),
     ];
-    const a = buildHiderTruthFetchKey(
-      open,
-      baseContext({ hidingPlace: [51.5, -0.12] }),
-    );
-    const b = buildHiderTruthFetchKey(
-      open,
-      baseContext({ hidingPlace: [51.501, -0.121] }),
-    );
+    const a = buildHiderTruthFetchKey(open, baseContext({ hidingPlace: [51.5, -0.12] }));
+    const b = buildHiderTruthFetchKey(open, baseContext({ hidingPlace: [51.501, -0.121] }));
     expect(a).not.toBe(b);
   });
 
@@ -119,10 +105,7 @@ describe("buildHiderTruthFetchKey", () => {
         },
       },
     };
-    const a = buildHiderTruthFetchKey(
-      open,
-      baseContext({ hidingPlace: [51.5, -0.12], session }),
-    );
+    const a = buildHiderTruthFetchKey(open, baseContext({ hidingPlace: [51.5, -0.12], session }));
     const b = buildHiderTruthFetchKey(
       open,
       baseContext({ hidingPlace: [51.501, -0.121], session }),
@@ -147,14 +130,8 @@ describe("buildHiderTruthFetchKey", () => {
         },
       }),
     ];
-    const without = buildHiderTruthFetchKey(
-      open,
-      baseContext({ hidingPlace: null }),
-    );
-    const withPlace = buildHiderTruthFetchKey(
-      open,
-      baseContext({ hidingPlace: [51.5, -0.12] }),
-    );
+    const without = buildHiderTruthFetchKey(open, baseContext({ hidingPlace: null }));
+    const withPlace = buildHiderTruthFetchKey(open, baseContext({ hidingPlace: [51.5, -0.12] }));
     expect(without).not.toBe(withPlace);
   });
 

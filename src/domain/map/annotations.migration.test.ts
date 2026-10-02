@@ -1,9 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  migrateAnnotationRecord,
-  migrateAnnotations,
-  type AnnotationRecord,
-} from "./annotations";
+import { type AnnotationRecord, migrateAnnotationRecord, migrateAnnotations } from "./annotations";
 
 const baseAnnotation = {
   id: "ann-1",
@@ -83,9 +79,6 @@ describe("annotation migration", () => {
       },
     ]);
 
-    expect(migrated.map((annotation) => annotation.type)).toEqual([
-      "measuring",
-      "thermometer",
-    ]);
+    expect(migrated.map((annotation) => annotation.type)).toEqual(["measuring", "thermometer"]);
   });
 });

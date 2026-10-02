@@ -7,8 +7,7 @@ export const DUBLIN_REGION_PACK_ID = "dublin" satisfies RegionPackId;
 export const DUBLIN_GEO_ASSETS = {
   councils: "/geo/dublin/councils.geojson",
   leas: "/geo/dublin/leas.geojson",
-  leasByCouncil: (councilId: DublinCouncilFilter) =>
-    `/geo/dublin/leas/${councilId}.geojson`,
+  leasByCouncil: (councilId: DublinCouncilFilter) => `/geo/dublin/leas/${councilId}.geojson`,
 } as const;
 
 export const DUBLIN_MATCHING_LABEL_OVERRIDES: Partial<
@@ -17,14 +16,12 @@ export const DUBLIN_MATCHING_LABEL_OVERRIDES: Partial<
   admin_division_3: {
     label: "Local Authority",
     promptNoun: "local authority",
-    ruleSummary:
-      "One of the four Dublin local authorities (city or county council).",
+    ruleSummary: "One of the four Dublin local authorities (city or county council).",
   },
   admin_division_4: {
     label: "Local Electoral Area",
     promptNoun: "local electoral area",
-    ruleSummary:
-      "A local electoral area (LEA) within the framed Dublin play area.",
+    ruleSummary: "A local electoral area (LEA) within the framed Dublin play area.",
   },
 };
 
@@ -41,8 +38,6 @@ export const DUBLIN_MEASURING_LABEL_OVERRIDES: Partial<
   },
 };
 
-export function isDublinRegionPack(
-  regionPackId: RegionPackId | undefined,
-): boolean {
+export function isDublinRegionPack(regionPackId: RegionPackId | undefined): boolean {
   return regionPackId === DUBLIN_REGION_PACK_ID;
 }

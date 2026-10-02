@@ -75,15 +75,11 @@ describe("gtfsRouteGraph", () => {
   });
 
   it("treats parent and child stops as the same station", () => {
-    expect(
-      gtfsStopsShareStationOrRoute("nyc:union", "nyc:union-n", NYC_BUNDLE),
-    ).toBe(true);
+    expect(gtfsStopsShareStationOrRoute("nyc:union", "nyc:union-n", NYC_BUNDLE)).toBe(true);
   });
 
   it("treats stops on a shared route as a match", () => {
-    expect(
-      gtfsStopsShareStationOrRoute("nyc:penn", "nyc:times", NYC_BUNDLE),
-    ).toBe(true);
+    expect(gtfsStopsShareStationOrRoute("nyc:penn", "nyc:times", NYC_BUNDLE)).toBe(true);
   });
 
   it("rejects stops on unrelated routes", () => {
@@ -104,9 +100,7 @@ describe("gtfsRouteGraph", () => {
       ],
     };
 
-    expect(
-      gtfsStopsShareStationOrRoute("nyc:penn", "nyc:grand", bundle),
-    ).toBe(false);
+    expect(gtfsStopsShareStationOrRoute("nyc:penn", "nyc:grand", bundle)).toBe(false);
   });
 
   it("filters stops to the play-area bounding box", () => {
@@ -147,11 +141,7 @@ describe("gtfsRouteGraph", () => {
       ],
     };
 
-    const nearest = nearestGtfsStopInGameArea(
-      [40.7354, -73.9901],
-      NYC_BUNDLE,
-      downtownGameArea,
-    );
+    const nearest = nearestGtfsStopInGameArea([40.7354, -73.9901], NYC_BUNDLE, downtownGameArea);
     expect(nearest?.id).toBe("nyc:union-n");
   });
 });

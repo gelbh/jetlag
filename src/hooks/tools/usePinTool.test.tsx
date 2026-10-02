@@ -1,7 +1,7 @@
 import { act, renderHook } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { usePinTool } from "./usePinTool";
 import { createToolHookMocks } from "../../test/helpers/toolHookMocks";
+import { usePinTool } from "./usePinTool";
 
 describe("usePinTool", () => {
   it("stores the tapped map point in draft state", () => {

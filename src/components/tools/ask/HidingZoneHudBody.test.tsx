@@ -1,11 +1,11 @@
-import type { ReactElement } from "react";
-import { fireEvent, render, screen } from "@testing-library/react";
 import { MantineProvider } from "@mantine/core";
+import { fireEvent, render, screen } from "@testing-library/react";
+import type { ReactElement } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { HidingZoneToolPanelState } from "@/components/hider/hidingZoneToolPanelState";
 import { jetlagTheme } from "@/theme/theme";
 import { AskHudHost } from "./AskHudHost";
 import { HidingZoneHudBody } from "./HidingZoneHudBody";
-import type { HidingZoneToolPanelState } from "@/components/hider/hidingZoneToolPanelState";
 
 beforeEach(() => {
   vi.stubGlobal("matchMedia", (query: string) => ({
@@ -28,9 +28,7 @@ function renderHud(ui: ReactElement) {
   );
 }
 
-function baseZoneTool(
-  overrides: Partial<HidingZoneToolPanelState> = {},
-): HidingZoneToolPanelState {
+function baseZoneTool(overrides: Partial<HidingZoneToolPanelState> = {}): HidingZoneToolPanelState {
   return {
     query: "",
     setQuery: vi.fn(),
@@ -71,9 +69,7 @@ describe("HidingZoneHudBody", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /^Transit stop$/i }));
     expect(choosePlacementMethod).toHaveBeenCalledWith(false);
-    expect(
-      screen.getByText(/Snap to a stop, or tap any point/i),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/Snap to a stop, or tap any point/i)).toBeInTheDocument();
   });
 
   it("advances step to location synchronously when a method is chosen", () => {
@@ -92,9 +88,7 @@ describe("HidingZoneHudBody", () => {
     fireEvent.click(screen.getByRole("button", { name: /^Tap map$/i }));
     expect(onStepChange).toHaveBeenCalledWith("location");
     expect(choosePlacementMethod).toHaveBeenCalledWith(true);
-    const locationIdx = onStepChange.mock.calls.findIndex(
-      (c) => c[0] === "location",
-    );
+    const locationIdx = onStepChange.mock.calls.findIndex((c) => c[0] === "location");
     const methodCallAfter = choosePlacementMethod.mock.invocationCallOrder[0];
     const locationCallOrder = onStepChange.mock.invocationCallOrder[locationIdx];
     expect(locationCallOrder).toBeLessThan(methodCallAfter);
@@ -110,11 +104,7 @@ describe("HidingZoneHudBody", () => {
         commitLabel="CONFIRM"
         onCommit={vi.fn()}
         modeBody={
-          <HidingZoneHudBody
-            moveMode={false}
-            zoneTool={baseZoneTool()}
-            onStepChange={vi.fn()}
-          />
+          <HidingZoneHudBody moveMode={false} zoneTool={baseZoneTool()} onStepChange={vi.fn()} />
         }
       />,
     );
@@ -122,19 +112,13 @@ describe("HidingZoneHudBody", () => {
     expect(screen.getByTestId("ask-hud-host")).toBeInTheDocument();
     expect(screen.getByTestId("hiding-zone-hud-body")).toBeInTheDocument();
     expect(screen.queryByText(/Tap the map inside the play area/i)).toBeNull();
-    expect(
-      screen.queryByRole("button", { name: /search stations in this area/i }),
-    ).toBeNull();
+    expect(screen.queryByRole("button", { name: /search stations in this area/i })).toBeNull();
   });
 
   it("reports method step while chips are shown", () => {
     const onStepChange = vi.fn();
     renderHud(
-      <HidingZoneHudBody
-        moveMode={false}
-        zoneTool={baseZoneTool()}
-        onStepChange={onStepChange}
-      />,
+      <HidingZoneHudBody moveMode={false} zoneTool={baseZoneTool()} onStepChange={onStepChange} />,
     );
     expect(onStepChange).toHaveBeenCalledWith("method");
   });

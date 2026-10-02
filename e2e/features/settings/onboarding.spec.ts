@@ -1,10 +1,10 @@
 import {
-  test,
-  expect,
   blockExternalAssets,
-  seedLocalSession,
-  openSettings,
   closePanel,
+  expect,
+  openSettings,
+  seedLocalSession,
+  test,
 } from "../../fixtures";
 
 async function seedMapFirstRun(page: Parameters<typeof seedLocalSession>[0]) {
@@ -28,31 +28,27 @@ test.describe("onboarding", () => {
     await seedMapFirstRun(page);
 
     const guide = mapToolsGuide(page);
-    await expect(
-      guide.getByRole("heading", { name: "Map tools", exact: true }),
-    ).toBeVisible({ timeout: 10_000 });
+    await expect(guide.getByRole("heading", { name: "Map tools", exact: true })).toBeVisible({
+      timeout: 10_000,
+    });
     await guide.getByRole("button", { name: "Got it" }).click();
     await expect(guide).toBeHidden();
   });
 
-  test("map tools guide reopens from settings after dismiss", async ({
-    page,
-  }) => {
+  test("map tools guide reopens from settings after dismiss", async ({ page }) => {
     await seedMapFirstRun(page);
 
     const guide = mapToolsGuide(page);
-    await expect(
-      guide.getByRole("heading", { name: "Map tools", exact: true }),
-    ).toBeVisible({ timeout: 10_000 });
+    await expect(guide.getByRole("heading", { name: "Map tools", exact: true })).toBeVisible({
+      timeout: 10_000,
+    });
     await guide.getByRole("button", { name: "Got it" }).click();
     await expect(guide).toBeHidden();
 
     await openSettings(page);
     await page.getByRole("tab", { name: "Session" }).click();
     await page.getByRole("button", { name: "Map tools guide" }).click();
-    await expect(
-      guide.getByRole("heading", { name: "Map tools", exact: true }),
-    ).toBeVisible();
+    await expect(guide.getByRole("heading", { name: "Map tools", exact: true })).toBeVisible();
     await guide.getByRole("button", { name: "Done" }).click();
     await expect(guide).toBeHidden();
     await closePanel(page);

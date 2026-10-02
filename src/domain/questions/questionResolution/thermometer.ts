@@ -1,19 +1,14 @@
 import type { Feature, LineString } from "geojson";
 import type { AnnotationRecord } from "../../map/annotations";
 import { MAP_ANNOTATION_COLORS } from "../../map/mapAnnotationColors";
-import {
-  thermometerHotterTowards,
-  type ThermometerAnswer,
-} from "../thermometerQuestions";
 import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
+import { type ThermometerAnswer, thermometerHotterTowards } from "../thermometerQuestions";
 
 export function resolveThermometerPendingQuestion(
   pending: PendingQuestionRecord,
   answer: ThermometerAnswer,
 ): Omit<AnnotationRecord, "id" | "sessionId" | "status"> {
-  const geometry = JSON.parse(
-    pending.placement.geometryJson,
-  ) as Feature<LineString>;
+  const geometry = JSON.parse(pending.placement.geometryJson) as Feature<LineString>;
   const metadata = pending.placement.metadata;
 
   return {
@@ -29,9 +24,7 @@ export function resolveThermometerPendingQuestion(
   };
 }
 
-export function thermometerAnswerFromReplyId(
-  replyId: string,
-): ThermometerAnswer | null {
+export function thermometerAnswerFromReplyId(replyId: string): ThermometerAnswer | null {
   if (replyId === "hotter" || replyId === "colder") {
     return replyId;
   }

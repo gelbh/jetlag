@@ -5,13 +5,7 @@ import { deserializeGameResultFromFirestore } from "./serialization/serializePla
 import { handleFirestoreListenError } from "./sessions/listenError";
 
 function gameResultDoc(sessionId: string, gameResultId: string) {
-  return doc(
-    getFirestoreDb(),
-    "sessions",
-    sessionId,
-    "gameResult",
-    gameResultId,
-  );
+  return doc(getFirestoreDb(), "sessions", sessionId, "gameResult", gameResultId);
 }
 
 export function subscribeToGameResult(

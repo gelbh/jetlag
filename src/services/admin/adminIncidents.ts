@@ -4,14 +4,18 @@ import type {
   IncidentStatus,
 } from "../../domain/incident/incidentTypes";
 import {
+  DEFAULT_HOTFIX_GRACE_SECONDS,
   subscribeIncident,
   subscribeIncidentList,
   subscribeIncidentMessages,
-  DEFAULT_HOTFIX_GRACE_SECONDS,
 } from "../firestore/firestoreIncidents";
 
-export { subscribeIncident, subscribeIncidentList, subscribeIncidentMessages };
-export { DEFAULT_HOTFIX_GRACE_SECONDS };
+export {
+  DEFAULT_HOTFIX_GRACE_SECONDS,
+  subscribeIncident,
+  subscribeIncidentList,
+  subscribeIncidentMessages,
+};
 
 /** Compact uppercase label for queue / detail status chips. */
 export function incidentStatusChipLabel(status: IncidentStatus): string {
@@ -35,16 +39,9 @@ export function incidentStatusChipLabel(status: IncidentStatus): string {
   }
 }
 
-export type IncidentStatusChipTone =
-  | "open"
-  | "active"
-  | "warning"
-  | "critical"
-  | "muted";
+export type IncidentStatusChipTone = "open" | "active" | "warning" | "critical" | "muted";
 
-export function incidentStatusChipTone(
-  status: IncidentStatus,
-): IncidentStatusChipTone {
+export function incidentStatusChipTone(status: IncidentStatus): IncidentStatusChipTone {
   switch (status) {
     case "open":
       return "open";

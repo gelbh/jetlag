@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
+import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
 import {
   connectEmulatorsForTests,
   teardownEmulatorsForTests,
@@ -10,7 +11,6 @@ import {
   updatePendingQuestion,
   writePendingQuestion,
 } from "./firestoreSessionExtras";
-import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
 
 function samplePendingQuestion(
   sessionId: string,

@@ -1,18 +1,18 @@
-import test from "node:test";
 import assert from "node:assert/strict";
+import test from "node:test";
 import { HttpsError } from "firebase-functions/v2/https";
 import { requireAdminAuth } from "../admin/adminAccess.mjs";
-import { INCIDENT_RATE_LIMITED } from "../incident/createIncident.mjs";
-import {
-  INCIDENT_FORBIDDEN,
-  postIncidentMessageHandler,
-} from "../incident/postIncidentMessage.mjs";
 import {
   applyIncidentMitigationHandler,
   INCIDENT_INVALID_MITIGATION,
   INCIDENT_NO_SESSION,
   INCIDENT_REPORTER_NOT_MEMBER,
 } from "../incident/applyIncidentMitigation.mjs";
+import { INCIDENT_RATE_LIMITED } from "../incident/createIncident.mjs";
+import {
+  INCIDENT_FORBIDDEN,
+  postIncidentMessageHandler,
+} from "../incident/postIncidentMessage.mjs";
 import {
   compareAppVersions,
   publishIncidentHotfixHandler,
@@ -51,12 +51,8 @@ function mockOpsDb({
   },
 } = {}) {
   const incidents = new Map([["inc-1", { ...incident }]]);
-  const sessionDocs = new Map(
-    Object.entries(sessions).map(([id, data]) => [id, { ...data }]),
-  );
-  const codeDocs = new Map(
-    Object.entries(activeCodes).map(([id, data]) => [id, { ...data }]),
-  );
+  const sessionDocs = new Map(Object.entries(sessions).map(([id, data]) => [id, { ...data }]));
+  const codeDocs = new Map(Object.entries(activeCodes).map(([id, data]) => [id, { ...data }]));
   const appConfig = new Map();
   const messages = [];
   const batchOps = [];
@@ -117,10 +113,7 @@ function mockOpsDb({
           doc: (id) => ({
             set: async (data, options) => {
               const current = appConfig.get(id) ?? {};
-              appConfig.set(
-                id,
-                options?.merge ? { ...current, ...data } : { ...data },
-              );
+              appConfig.set(id, options?.merge ? { ...current, ...data } : { ...data });
             },
             get: async () => ({
               exists: appConfig.has(id),
@@ -306,9 +299,7 @@ test("applyIncidentMitigationHandler reset_board delegates to moderate", async (
     }),
   );
 
-  assert.deepEqual(moderated, [
-    { sessionId: "sess-1", action: "resetBoard", adminUid: "admin-1" },
-  ]);
+  assert.deepEqual(moderated, [{ sessionId: "sess-1", action: "resetBoard", adminUid: "admin-1" }]);
   assert.equal(db._incidents.get("inc-1").status, "mitigating");
   assert.equal(db._sessions.get("sess-1").opsMitigation.type, "reset_board");
 });

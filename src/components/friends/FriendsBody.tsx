@@ -10,52 +10,56 @@ import {
   TextInput,
   UnstyledButton,
 } from "@mantine/core";
-import { ArrowsClockwiseIcon, CaretRightIcon, CheckIcon, CircleNotchIcon, GameControllerIcon, MagnifyingGlassIcon, PaperPlaneTiltIcon, TrophyIcon, UserMinusIcon, UserPlusIcon, UsersThreeIcon, XIcon } from "@phosphor-icons/react";
 import {
-  useRef,
-  useState,
-  type PointerEvent as ReactPointerEvent,
-  type ReactNode,
-} from "react";
+  ArrowsClockwiseIcon,
+  CaretRightIcon,
+  CheckIcon,
+  CircleNotchIcon,
+  GameControllerIcon,
+  MagnifyingGlassIcon,
+  PaperPlaneTiltIcon,
+  TrophyIcon,
+  UserMinusIcon,
+  UserPlusIcon,
+  UsersThreeIcon,
+  XIcon,
+} from "@phosphor-icons/react";
+import { type ReactNode, type PointerEvent as ReactPointerEvent, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { EntryAsyncButton } from "@/components/ui/entry/EntryAsyncButton";
 import {
-  ErrorCallout,
-  FieldError,
-  InsetGroup,
-  SectionLabel,
-  SuccessCallout,
-  DrawerGrabber,
   bottomDrawerStyles,
   compactFilledStyles,
+  DrawerGrabber,
+  ErrorCallout,
+  FieldError,
   filledStyles,
   grayStyles,
+  InsetGroup,
   plainStyles,
+  SectionLabel,
+  SuccessCallout,
 } from "@/components/ui/entry/entryChrome";
-import { EntryAsyncButton } from "@/components/ui/entry/EntryAsyncButton";
 import { InsetRow } from "@/components/ui/entry/InsetRow";
 import { USERNAME_MAX_LENGTH } from "@/domain/game/playerProfile";
 import crawlPolicy from "@/domain/seo/seoCrawlPolicy.json";
 import { copyToClipboard } from "@/platform/copyToClipboard";
 import {
+  type FriendSheetProfile,
   getFriendSheetProfile,
   getFriendsMockSessionCode,
-  type FriendSheetProfile,
 } from "@/services/profile/friendsMock";
+import type { FriendListEntry } from "@/services/profile/profileFriends";
 import {
   buildSessionInviteUrl,
   resolveSessionInviteOrigin,
 } from "@/services/session/sessionInviteUrl";
-import type { FriendListEntry } from "@/services/profile/profileFriends";
 import { useSessionStore } from "@/state/sessionStore";
+import { FriendSwipeAction, FriendSwipeRegistry, FriendSwipeRow } from "./FriendSwipeRow";
 import {
-  FriendSwipeAction,
-  FriendSwipeRegistry,
-  FriendSwipeRow,
-} from "./FriendSwipeRow";
-import {
-  useFriendsPanelModel,
   type FriendsListTab,
   type SelectableFriend,
+  useFriendsPanelModel,
 } from "./useFriendsPanelModel";
 
 const insetInputStyles = {
@@ -116,13 +120,7 @@ function monogramInitials(username: string): string {
   return "?";
 }
 
-function FriendMonogram({
-  username,
-  size = 36,
-}: {
-  username: string;
-  size?: number;
-}) {
+function FriendMonogram({ username, size = 36 }: { username: string; size?: number }) {
   return (
     <Box
       aria-hidden
@@ -246,20 +244,12 @@ function FriendRowFace({
       ) : (
         identity
       )}
-      {trailing ? (
-        <Box style={{ flexShrink: 0, display: "inline-flex" }}>{trailing}</Box>
-      ) : null}
+      {trailing ? <Box style={{ flexShrink: 0, display: "inline-flex" }}>{trailing}</Box> : null}
     </Group>
   );
 }
 
-function EmptyInset({
-  icon,
-  children,
-}: {
-  icon: ReactNode;
-  children: ReactNode;
-}) {
+function EmptyInset({ icon, children }: { icon: ReactNode; children: ReactNode }) {
   return (
     <InsetGroup>
       <Stack gap={8} align="center" px="md" py="xl">
@@ -348,8 +338,7 @@ function PullToRefresh({
           height: 36,
           opacity: pull || refreshing ? 1 : 0,
           transform: `translateY(${Math.max(pull - 36, refreshing ? 0 : -8)}px)`,
-          transition:
-            pull > 0 ? "none" : "opacity 160ms ease, transform 160ms ease",
+          transition: pull > 0 ? "none" : "opacity 160ms ease, transform 160ms ease",
           color: "var(--color-field-ink-muted)",
           pointerEvents: "none",
           zIndex: 2,
@@ -414,11 +403,7 @@ function sheetSubtitle(
   return null;
 }
 
-function RelationPill({
-  label,
-}: {
-  label: string;
-}) {
+function RelationPill({ label }: { label: string }) {
   return (
     <Text
       component="span"
@@ -545,10 +530,7 @@ function FriendDetailDrawer({
     setInviting(true);
     setInviteNote(null);
     try {
-      const origin = resolveSessionInviteOrigin(
-        window.location.origin,
-        crawlPolicy.siteOrigin,
-      );
+      const origin = resolveSessionInviteOrigin(window.location.origin, crawlPolicy.siteOrigin);
       const url = buildSessionInviteUrl(origin, inviteSessionCode);
       if (!url) {
         return;
@@ -783,10 +765,7 @@ export function FriendsBody() {
   const sessionCode = useSessionStore((state) => state.session?.code ?? null);
   const inviteSessionCode = sessionCode ?? getFriendsMockSessionCode();
   const showSearchEmpty =
-    model.hasSearched &&
-    !model.searching &&
-    model.requestableResults.length === 0 &&
-    !model.error;
+    model.hasSearched && !model.searching && model.requestableResults.length === 0 && !model.error;
 
   const tabEntries =
     model.listTab === "incoming"
@@ -819,13 +798,11 @@ export function FriendsBody() {
   const selectedSearchHit =
     model.selectedUid == null
       ? null
-      : model.requestableResults.find((entry) => entry.uid === model.selectedUid) ??
-        null;
+      : (model.requestableResults.find((entry) => entry.uid === model.selectedUid) ?? null);
   const selectedListed =
     model.selectedUid == null
       ? null
-      : model.selectableEntries.find((entry) => entry.uid === model.selectedUid) ??
-        null;
+      : (model.selectableEntries.find((entry) => entry.uid === model.selectedUid) ?? null);
   const drawerEntry: SelectableFriend | null = selectedSearchHit
     ? { ...selectedSearchHit, relation: "friend" }
     : selectedListed;
@@ -833,32 +810,20 @@ export function FriendsBody() {
   const segmentData: Array<{ value: FriendsListTab; label: string }> = [
     {
       value: "friends",
-      label:
-        model.friends.length > 0
-          ? `Friends (${model.friends.length})`
-          : "Friends",
+      label: model.friends.length > 0 ? `Friends (${model.friends.length})` : "Friends",
     },
     {
       value: "incoming",
-      label:
-        model.incoming.length > 0
-          ? `Incoming (${model.incoming.length})`
-          : "Incoming",
+      label: model.incoming.length > 0 ? `Incoming (${model.incoming.length})` : "Incoming",
     },
     {
       value: "outgoing",
-      label:
-        model.outgoing.length > 0
-          ? `Outgoing (${model.outgoing.length})`
-          : "Outgoing",
+      label: model.outgoing.length > 0 ? `Outgoing (${model.outgoing.length})` : "Outgoing",
     },
   ];
 
   return (
-    <PullToRefresh
-      refreshing={model.refreshing}
-      onRefresh={() => void model.pullRefresh()}
-    >
+    <PullToRefresh refreshing={model.refreshing} onRefresh={() => void model.pullRefresh()}>
       <Stack gap={22}>
         <form
           onSubmit={(event) => {
@@ -876,9 +841,7 @@ export function FriendsBody() {
                     aria-label="Search username"
                     aria-invalid={Boolean(model.queryError)}
                     value={model.query}
-                    onChange={(event) =>
-                      model.onQueryChange(event.currentTarget.value)
-                    }
+                    onChange={(event) => model.onQueryChange(event.currentTarget.value)}
                     placeholder="Username"
                     autoComplete="off"
                     autoCorrect="off"
@@ -900,8 +863,7 @@ export function FriendsBody() {
                             root: {
                               color: "var(--color-field-ink-muted)",
                               "&:hover": {
-                                backgroundColor:
-                                  "oklch(from var(--color-field-ink) l c h / 0.1)",
+                                backgroundColor: "oklch(from var(--color-field-ink) l c h / 0.1)",
                               },
                             },
                           }}
@@ -938,8 +900,7 @@ export function FriendsBody() {
                     backgroundColor: "var(--color-flag)",
                     color: "var(--color-flag-ink)",
                     "&:hover": {
-                      backgroundColor:
-                        "oklch(from var(--color-flag) calc(l + 0.03) c h)",
+                      backgroundColor: "oklch(from var(--color-flag) calc(l + 0.03) c h)",
                     },
                   },
                 }}
@@ -991,9 +952,7 @@ export function FriendsBody() {
                       </Button>
                     }
                   />
-                  {index < model.requestableResults.length - 1 ? (
-                    <InsetHairline />
-                  ) : null}
+                  {index < model.requestableResults.length - 1 ? <InsetHairline /> : null}
                 </Box>
               ))}
             </InsetGroup>
@@ -1013,12 +972,7 @@ export function FriendsBody() {
           {model.loadingList ? (
             <InsetGroup>
               <Group gap={10} px="md" py="md" c="var(--color-field-ink-muted)">
-                <CircleNotchIcon
-                  size={18}
-                  weight="bold"
-                  className="loading-spinner"
-                  aria-hidden
-                />
+                <CircleNotchIcon size={18} weight="bold" className="loading-spinner" aria-hidden />
                 <Text size="sm">Loading…</Text>
               </Group>
             </InsetGroup>
@@ -1116,10 +1070,7 @@ function FriendTabRow({
             </>
           }
         >
-          <FriendRowFace
-            username={entry.username}
-            subtitle={subtitle}
-          />
+          <FriendRowFace username={entry.username} subtitle={subtitle} />
         </FriendSwipeRow>
         {showDivider ? <InsetHairline /> : null}
       </Box>
@@ -1144,10 +1095,7 @@ function FriendTabRow({
             />
           }
         >
-          <FriendRowFace
-            username={entry.username}
-            subtitle={subtitle}
-          />
+          <FriendRowFace username={entry.username} subtitle={subtitle} />
         </FriendSwipeRow>
         {showDivider ? <InsetHairline /> : null}
       </Box>

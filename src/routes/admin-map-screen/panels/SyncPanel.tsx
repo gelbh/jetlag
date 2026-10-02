@@ -1,8 +1,5 @@
+import { SYNC_TONE_CLASSES, syncRailDisplay } from "@/components/session/status/syncRailDisplay";
 import type { SyncStatus } from "@/domain/device/sync/sync";
-import {
-  SYNC_TONE_CLASSES,
-  syncRailDisplay,
-} from "@/components/session/status/syncRailDisplay";
 
 interface SyncPanelProps {
   status: SyncStatus;

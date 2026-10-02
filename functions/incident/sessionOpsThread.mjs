@@ -37,11 +37,7 @@ export async function appendSupportThreadMessage(
 
   await threadRef.set(payload);
 
-  if (
-    payload.sender === "ops_agent" ||
-    payload.sender === "system" ||
-    payload.kind === "chat"
-  ) {
+  if (payload.sender === "ops_agent" || payload.sender === "system" || payload.kind === "chat") {
     await db
       .collection("incidents")
       .doc(incidentId)

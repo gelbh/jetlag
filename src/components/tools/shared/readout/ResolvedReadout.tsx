@@ -14,11 +14,7 @@ const VARIANT_COLOR: Record<ResolvedReadoutVariant, string> = {
   dim: "var(--color-field-ink-muted)",
 };
 
-export function ResolvedReadout({
-  children,
-  caption,
-  variant = "default",
-}: ResolvedReadoutProps) {
+export function ResolvedReadout({ children, caption, variant = "default" }: ResolvedReadoutProps) {
   return (
     <div className="space-y-1">
       <p

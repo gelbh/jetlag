@@ -33,11 +33,7 @@ export function TentaclePoiPinMarker({
   const size = selected ? 34 : 30;
 
   return (
-    <Marker
-      longitude={longitude}
-      latitude={latitude}
-      anchor={selected ? "bottom" : "center"}
-    >
+    <Marker longitude={longitude} latitude={latitude} anchor={selected ? "bottom" : "center"}>
       <button
         type="button"
         data-testid="tentacle-poi-pin"
@@ -68,9 +64,7 @@ export function TentaclePoiPinMarker({
             width: size,
             height: size,
             borderRadius: "50%",
-            backgroundColor: selected
-              ? green
-              : "oklch(from var(--color-canvas) l c h / 0.96)",
+            backgroundColor: selected ? green : "oklch(from var(--color-canvas) l c h / 0.96)",
             border: selected
               ? "1.25px solid oklch(1 0 0 / 0.92)"
               : "0.5px solid oklch(from var(--color-field-ink) l c h / 0.12)",
@@ -79,9 +73,7 @@ export function TentaclePoiPinMarker({
               : "0 5px 12px 0 oklch(0.15 0.04 265 / 0.2), 0 1px 0 0 oklch(1 0 0 / 0.4) inset",
             color: selected ? "oklch(1 0 0 / 0.96)" : green,
             backdropFilter: selected ? undefined : "blur(18px) saturate(1.35)",
-            WebkitBackdropFilter: selected
-              ? undefined
-              : "blur(18px) saturate(1.35)",
+            WebkitBackdropFilter: selected ? undefined : "blur(18px) saturate(1.35)",
             transition:
               "width 160ms cubic-bezier(0.22, 1, 0.36, 1), height 160ms cubic-bezier(0.22, 1, 0.36, 1), opacity 160ms ease-out, box-shadow 160ms ease-out",
           }}

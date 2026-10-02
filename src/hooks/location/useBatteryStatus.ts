@@ -1,12 +1,10 @@
 import { useEffect, useState } from "react";
 import {
-  LOW_BATTERY_RECOVERY_LEVEL,
   clearLowBatteryPromptDismissal,
+  LOW_BATTERY_RECOVERY_LEVEL,
 } from "../../domain/device/power/batteryPrompt";
 
-function supportsBatteryEvents(
-  battery: BatteryManagerLike,
-): battery is BatteryManagerLike {
+function supportsBatteryEvents(battery: BatteryManagerLike): battery is BatteryManagerLike {
   return (
     typeof battery.addEventListener === "function" &&
     typeof battery.removeEventListener === "function"
@@ -16,14 +14,8 @@ function supportsBatteryEvents(
 interface BatteryManagerLike {
   level: number;
   charging: boolean;
-  addEventListener: (
-    type: "levelchange" | "chargingchange",
-    listener: () => void,
-  ) => void;
-  removeEventListener: (
-    type: "levelchange" | "chargingchange",
-    listener: () => void,
-  ) => void;
+  addEventListener: (type: "levelchange" | "chargingchange", listener: () => void) => void;
+  removeEventListener: (type: "levelchange" | "chargingchange", listener: () => void) => void;
 }
 
 type NavigatorWithBattery = Navigator & {
@@ -76,23 +68,26 @@ export function useBatteryStatus(): BatteryStatus {
       }
     };
 
-    void navigatorWithBattery.getBattery()?.then((nextBattery) => {
-      if (cancelled || !nextBattery) {
-        return;
-      }
+    void navigatorWithBattery
+      .getBattery()
+      ?.then((nextBattery) => {
+        if (cancelled || !nextBattery) {
+          return;
+        }
 
-      battery = nextBattery;
-      publish(nextBattery);
+        battery = nextBattery;
+        publish(nextBattery);
 
-      if (!supportsBatteryEvents(nextBattery)) {
-        return;
-      }
+        if (!supportsBatteryEvents(nextBattery)) {
+          return;
+        }
 
-      nextBattery.addEventListener("levelchange", handleChange);
-      nextBattery.addEventListener("chargingchange", handleChange);
-    }).catch(() => {
-      /* Battery API unavailable or rejected */
-    });
+        nextBattery.addEventListener("levelchange", handleChange);
+        nextBattery.addEventListener("chargingchange", handleChange);
+      })
+      .catch(() => {
+        /* Battery API unavailable or rejected */
+      });
 
     return () => {
       cancelled = true;

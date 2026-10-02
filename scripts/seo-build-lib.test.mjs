@@ -82,7 +82,13 @@ test("restoreTemplateHeadAssets drops runtime-injected preloads and keeps the te
   ]) {
     assert.ok(out.includes(kept), `missing ${kept}`);
   }
-  for (const dropped of ["App-E.js", "vendor-firebase-F.js", "HomeRoute-G.css", "font-H.woff2", "virtual_pwa-register-I.js"]) {
+  for (const dropped of [
+    "App-E.js",
+    "vendor-firebase-F.js",
+    "HomeRoute-G.css",
+    "font-H.woff2",
+    "virtual_pwa-register-I.js",
+  ]) {
     assert.ok(!out.includes(dropped), `still has ${dropped}`);
   }
   assert.equal(restoreTemplateHeadAssets(out, template), out, "idempotent");

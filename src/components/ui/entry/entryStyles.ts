@@ -71,7 +71,6 @@ export const compactFilledStyles: EntryButtonStyles = {
   },
 };
 
-
 /** Island-height Start (matches quiet timer column, not full iOS form CTA). */
 export const mapIslandFilledStyles: EntryButtonStyles = {
   root: {
@@ -147,9 +146,7 @@ export function mapToolSlotStyles(
         borderColor: pressed
           ? "oklch(from var(--color-highlight) l c h / 0.85)"
           : "oklch(from var(--color-field-ink) l c h / 0.14)",
-        color: pressed
-          ? "var(--color-highlight)"
-          : "var(--color-field-ink)",
+        color: pressed ? "var(--color-highlight)" : "var(--color-field-ink)",
         opacity: 1,
       },
       "&:disabled": {
@@ -190,14 +187,10 @@ export function choiceChipStyles(
       paddingInline: "0.75rem",
       display: "inline-flex",
       alignItems: "center",
-      backgroundColor: selected
-        ? selectedBg
-        : "oklch(from var(--color-rule) l c h / 0.45)",
+      backgroundColor: selected ? selectedBg : "oklch(from var(--color-rule) l c h / 0.45)",
       color: selected ? selectedFg : "var(--color-field-ink)",
       "&:hover:not(:disabled)": {
-        backgroundColor: selected
-          ? selectedBg
-          : "oklch(from var(--color-rule) l c h / 0.55)",
+        backgroundColor: selected ? selectedBg : "oklch(from var(--color-rule) l c h / 0.55)",
       },
       "&:disabled": {
         opacity: 0.4,
@@ -241,14 +234,11 @@ export function filterChipStyles(selected: boolean): EntryButtonStyles {
       lineHeight: 1,
       whiteSpace: "nowrap",
       color: "var(--color-field-ink)",
-      backgroundColor: selected
-        ? "oklch(from var(--color-canvas) l c h / 0.96)"
-        : "transparent",
+      backgroundColor: selected ? "oklch(from var(--color-canvas) l c h / 0.96)" : "transparent",
       boxShadow: selected
         ? "0 1px 2px oklch(from var(--color-field-ink) l c h / 0.14), 0 0 0 0.33px oklch(from var(--color-field-ink) l c h / 0.08)"
         : "none",
-      transition:
-        "background-color 140ms ease, box-shadow 140ms ease, color 140ms ease",
+      transition: "background-color 140ms ease, box-shadow 140ms ease, color 140ms ease",
       "&:hover:not(:disabled)": {
         backgroundColor: selected
           ? "oklch(from var(--color-canvas) l c h / 0.96)"
@@ -290,8 +280,7 @@ export function catalogTileStyles(selected: boolean): EntryButtonStyles {
       letterSpacing: "-0.015em",
       lineHeight: 1.25,
       boxShadow: "none",
-      transition:
-        "background-color 140ms ease, border-color 140ms ease, transform 120ms ease",
+      transition: "background-color 140ms ease, border-color 140ms ease, transform 120ms ease",
       "&:hover:not(:disabled)": {
         backgroundColor: selected
           ? "oklch(from var(--color-flag) l c h / 0.16)"
@@ -415,9 +404,7 @@ export const insetTextareaStyles = {
 } as const;
 
 /** Full-bleed bottom Drawer chassis (Friends / Leaderboard / report sheets). */
-export function bottomDrawerStyles(
-  maxHeight: string | false = "min(70dvh, 34rem)",
-) {
+export function bottomDrawerStyles(maxHeight: string | false = "min(70dvh, 34rem)") {
   return {
     inner: {
       width: "100%",
@@ -500,9 +487,7 @@ const homeCardBtnBase: CSSProperties = {
 };
 
 /** Frosted home / play-hub row control (was `.home-card-btn*`). */
-export function homeCardBtnStyle(
-  variant: HomeCardBtnVariant = "secondary",
-): CSSProperties {
+export function homeCardBtnStyle(variant: HomeCardBtnVariant = "secondary"): CSSProperties {
   switch (variant) {
     case "primary":
       return {
@@ -627,9 +612,7 @@ export function segmentBtnStyle(selected: boolean): CSSProperties {
     minHeight: "2.75rem",
     minWidth: 0,
     borderRadius: "var(--radius-hud-sm)",
-    border: selected
-      ? "2px solid var(--color-flag)"
-      : "2px solid transparent",
+    border: selected ? "2px solid var(--color-flag)" : "2px solid transparent",
     background: selected ? "var(--color-flag-soft)" : "transparent",
     fontFamily: "var(--font-body)",
     fontSize: "0.8125rem",
@@ -781,10 +764,7 @@ const syncBeaconTone: Record<
 };
 
 /** Sync status beacon (was `.jl-sync-beacon*`). */
-export function syncBeaconStyle(
-  status: SyncBeaconStatus,
-  size: "sm" | "md" = "md",
-): CSSProperties {
+export function syncBeaconStyle(status: SyncBeaconStatus, size: "sm" | "md" = "md"): CSSProperties {
   const tone = syncBeaconTone[status];
   const dim = size === "sm" ? "1.25rem" : "1.625rem";
   return {
@@ -808,8 +788,7 @@ export function preloadBeaconStyle(
   size: "sm" | "md" = "sm",
 ): CSSProperties {
   const dim = size === "sm" ? "1.25rem" : "1.625rem";
-  const color =
-    tone === "failed" ? "var(--color-flag)" : "var(--color-signal)";
+  const color = tone === "failed" ? "var(--color-flag)" : "var(--color-signal)";
   return {
     display: "inline-flex",
     flexShrink: 0,

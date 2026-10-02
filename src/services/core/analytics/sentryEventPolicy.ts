@@ -2,6 +2,9 @@
  * Client Sentry drop / keep / meter policy.
  * Retuned or newly added denylist entries require a production message fixture in tests.
  */
+
+import { isExpectedSessionLeaveMessage } from "../../session/sessionLeaveErrors";
+import { isHtml2CanvasUnsupportedColorMessage } from "../capture/html2canvasErrors";
 import {
   isAppCheckSoftFailureMessage,
   isBrowserExtensionNoiseMessage,
@@ -13,15 +16,12 @@ import {
   isRecaptchaOtTypeErrorMessage,
   isRecaptchaTimeoutMessage,
 } from "../network/clientNoiseErrors";
-import { isHtml2CanvasUnsupportedColorMessage } from "../capture/html2canvasErrors";
-import { isExpectedSessionLeaveMessage } from "../../session/sessionLeaveErrors";
 
 export const QUOTA_SAMPLE_RATE = 0.05;
 
 /** Chrome: "…exceeded the quota."; Firefox/WebKit often "quota has been exceeded". */
 const STORAGE_QUOTA_EXCEEDED = /exceeded the quota|quota has been exceeded/i;
-const FIRESTORE_PERMISSION_DENIED =
-  /missing or insufficient permissions/i;
+const FIRESTORE_PERMISSION_DENIED = /missing or insufficient permissions/i;
 const AUTH_NETWORK_FAILED = /auth\/network-request-failed/i;
 const LEAFLET_POS_ERROR = /_leaflet_pos/i;
 const LEAFLET_CLASSLIST_ERROR = /evaluating 'e\.classList'/i;
@@ -113,9 +113,7 @@ function isGenericClientNoiseMessage(message: string): boolean {
 }
 
 /** True when any exception is Firebase permission-denied (for breadcrumb side effect). */
-export function isFirestorePermissionDeniedEvent(
-  event: SentryEventLike,
-): boolean {
+export function isFirestorePermissionDeniedEvent(event: SentryEventLike): boolean {
   for (const exception of event.exception?.values ?? []) {
     if (
       exception.type === "FirebaseError" &&
@@ -132,9 +130,7 @@ export function isFirestorePermissionDeniedEvent(
  * Classify whether a client Sentry event should drop, send, or meter quota.
  * Does not filter module-script import failures or WebKit "Load failed" canaries.
  */
-export function classifyClientSentryEvent(
-  event: SentryEventLike,
-): ClientSentryDisposition {
+export function classifyClientSentryEvent(event: SentryEventLike): ClientSentryDisposition {
   if (event.type === "transaction") {
     const hasOverpassSpan = event.spans?.some((span) =>
       span.description?.includes("proxy/overpass"),
@@ -150,20 +146,14 @@ export function classifyClientSentryEvent(
       continue;
     }
 
-    if (
-      exception.type === "QuotaExceededError" &&
-      STORAGE_QUOTA_EXCEEDED.test(value)
-    ) {
+    if (exception.type === "QuotaExceededError" && STORAGE_QUOTA_EXCEEDED.test(value)) {
       return "meter_quota";
     }
 
     // Firestore permissions + storage/unauthorized: reopened (send) — not expected-only UX.
     // Narrow expected join UX messages are dropped via isExpectedJoinUxMessage below.
 
-    if (
-      exception.type === "FirebaseError" &&
-      AUTH_NETWORK_FAILED.test(value)
-    ) {
+    if (exception.type === "FirebaseError" && AUTH_NETWORK_FAILED.test(value)) {
       return "drop";
     }
 
@@ -171,10 +161,7 @@ export function classifyClientSentryEvent(
       return "drop";
     }
 
-    if (
-      exception.type === "ReferenceError" &&
-      /window is not defined/i.test(value)
-    ) {
+    if (exception.type === "ReferenceError" && /window is not defined/i.test(value)) {
       return "drop";
     }
 
@@ -188,18 +175,12 @@ export function classifyClientSentryEvent(
       return "drop";
     }
 
-    if (
-      exception.type === "Error" &&
-      APP_CHECK_INVALID_SESSION.test(value)
-    ) {
+    if (exception.type === "Error" && APP_CHECK_INVALID_SESSION.test(value)) {
       return "drop";
     }
 
     // Firefox IDB: type NS_ERROR_FAILURE, value "No error message" (JETLAG-3Z).
-    if (
-      exception.type === "NS_ERROR_FAILURE" &&
-      /^No error message$/i.test(value)
-    ) {
+    if (exception.type === "NS_ERROR_FAILURE" && /^No error message$/i.test(value)) {
       return "drop";
     }
 

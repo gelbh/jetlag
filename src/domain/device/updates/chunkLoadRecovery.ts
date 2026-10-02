@@ -35,12 +35,7 @@ function removeSessionFlag(): void {
 }
 
 export function isChunkLoadError(error: unknown): boolean {
-  const message =
-    error instanceof Error
-      ? error.message
-      : typeof error === "string"
-        ? error
-        : "";
+  const message = error instanceof Error ? error.message : typeof error === "string" ? error : "";
 
   if (!message) {
     return false;

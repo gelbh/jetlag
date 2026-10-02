@@ -3,12 +3,12 @@
  * Do not import from Functions handlers.
  */
 
+import { assembleChatMessages } from "../../incident/sessionOpsLlm.mjs";
 import {
   SESSION_OPS_TOOL_IDS,
   SESSION_OPS_TOOL_JSON_SCHEMAS,
   SESSION_OPS_TOOLS,
 } from "../../incident/sessionOpsTools.mjs";
-import { assembleChatMessages } from "../../incident/sessionOpsLlm.mjs";
 
 export const SESSION_OPS_LLM_DEFAULT_BASE_URL = "https://api.openai.com/v1";
 export const SESSION_OPS_LLM_DEFAULT_MODEL = "gpt-4o-mini";
@@ -39,25 +39,17 @@ export function buildSessionOpsOpenAiTools(allowlist = SESSION_OPS_TOOL_IDS) {
  */
 export function parseChatCompletion(body) {
   const choice =
-    body &&
-    typeof body === "object" &&
-    Array.isArray(body.choices) &&
-    body.choices.length > 0
+    body && typeof body === "object" && Array.isArray(body.choices) && body.choices.length > 0
       ? body.choices[0]
       : null;
-  const message =
-    choice && typeof choice === "object" && choice.message
-      ? choice.message
-      : null;
+  const message = choice && typeof choice === "object" && choice.message ? choice.message : null;
 
   if (!message || typeof message !== "object") {
     return { content: null, toolCalls: [], rawMessage: null };
   }
 
   const content =
-    typeof message.content === "string" && message.content.trim()
-      ? message.content.trim()
-      : null;
+    typeof message.content === "string" && message.content.trim() ? message.content.trim() : null;
 
   /** @type {Array<{ id: string, name: string, args: Record<string, unknown> }>} */
   const toolCalls = [];
@@ -84,11 +76,7 @@ export function parseChatCompletion(body) {
       } catch {
         args = {};
       }
-    } else if (
-      fn.arguments &&
-      typeof fn.arguments === "object" &&
-      !Array.isArray(fn.arguments)
-    ) {
+    } else if (fn.arguments && typeof fn.arguments === "object" && !Array.isArray(fn.arguments)) {
       args = fn.arguments;
     }
     toolCalls.push({
@@ -130,12 +118,8 @@ export async function callSessionOpsLlm(input, deps = {}) {
       ? input.model.trim()
       : SESSION_OPS_LLM_DEFAULT_MODEL;
 
-  const messages = assembleChatMessages(
-    input.policyMessages,
-    input.dataMessages,
-  );
-  const tools =
-    input.tools ?? buildSessionOpsOpenAiTools(SESSION_OPS_TOOL_IDS);
+  const messages = assembleChatMessages(input.policyMessages, input.dataMessages);
+  const tools = input.tools ?? buildSessionOpsOpenAiTools(SESSION_OPS_TOOL_IDS);
 
   const response = await fetchImpl(`${baseUrl}/chat/completions`, {
     method: "POST",
@@ -148,8 +132,7 @@ export async function callSessionOpsLlm(input, deps = {}) {
       messages,
       tools,
       tool_choice: "auto",
-      temperature:
-        typeof input.temperature === "number" ? input.temperature : 0.2,
+      temperature: typeof input.temperature === "number" ? input.temperature : 0.2,
     }),
   });
 

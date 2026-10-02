@@ -2,10 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { MapDraftOverlay } from "../mapDraftOverlay";
 import { placementCameraFingerprint } from "./fingerprint";
 
-const markerOverlay = (
-  id: string,
-  point: [number, number],
-): MapDraftOverlay => ({
+const markerOverlay = (id: string, point: [number, number]): MapDraftOverlay => ({
   kind: "marker",
   id,
   point,

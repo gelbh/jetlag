@@ -1,8 +1,5 @@
 import { Button, Stack, Text, UnstyledButton } from "@mantine/core";
-import {
-  InsetGroup,
-  grayStyles,
-} from "@/components/ui/entry/entryChrome";
+import { grayStyles, InsetGroup } from "@/components/ui/entry/entryChrome";
 
 export interface RoleCodeStampProps {
   roleLabel: string;

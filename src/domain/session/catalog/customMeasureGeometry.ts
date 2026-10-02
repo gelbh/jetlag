@@ -9,9 +9,7 @@ export interface SessionCustomMeasureGeometry {
   geometryJson: string;
 }
 
-export function isCustomMeasureGeometryId(
-  id: string,
-): id is `custom_geo:${string}` {
+export function isCustomMeasureGeometryId(id: string): id is `custom_geo:${string}` {
   return id.startsWith("custom_geo:");
 }
 
@@ -69,13 +67,9 @@ export function parseCustomMeasureGeometries(
   return parsed.length > 0 ? parsed : undefined;
 }
 
-function inferCustomMeasureGeometryKind(
-  geometryJson: string,
-): CustomMeasureGeometryKind | null {
+function inferCustomMeasureGeometryKind(geometryJson: string): CustomMeasureGeometryKind | null {
   try {
-    const feature = JSON.parse(geometryJson) as Feature<
-      LineString | Polygon
-    >;
+    const feature = JSON.parse(geometryJson) as Feature<LineString | Polygon>;
     if (feature.geometry?.type === "Polygon") {
       return "polygon";
     }
@@ -93,13 +87,8 @@ export function parseCustomMeasureGeometryFeature(
   geometry: SessionCustomMeasureGeometry,
 ): Feature<LineString | Polygon> | null {
   try {
-    const feature = JSON.parse(geometry.geometryJson) as Feature<
-      LineString | Polygon
-    >;
-    if (
-      feature.geometry?.type !== "LineString" &&
-      feature.geometry?.type !== "Polygon"
-    ) {
+    const feature = JSON.parse(geometry.geometryJson) as Feature<LineString | Polygon>;
+    if (feature.geometry?.type !== "LineString" && feature.geometry?.type !== "Polygon") {
       return null;
     }
 

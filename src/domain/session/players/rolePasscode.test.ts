@@ -1,9 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  generateRolePasscode,
-  normalizeRolePasscode,
-  ROLE_PASSCODE_LENGTH,
-} from "./rolePasscode";
+import { generateRolePasscode, normalizeRolePasscode, ROLE_PASSCODE_LENGTH } from "./rolePasscode";
 
 describe("normalizeRolePasscode", () => {
   it("uppercases and strips whitespace", () => {

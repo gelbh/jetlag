@@ -6,19 +6,14 @@ describe("mapRematchError", () => {
   it("surfaces membership permission-denied from the callable", () => {
     expect(
       mapRematchError(
-        new FirebaseError(
-          "functions/permission-denied",
-          "Session membership required.",
-        ),
+        new FirebaseError("functions/permission-denied", "Session membership required."),
       ),
     ).toBe("Session membership required.");
   });
 
   it("maps bare PERMISSION_DENIED to rejoin copy", () => {
     expect(
-      mapRematchError(
-        new FirebaseError("functions/permission-denied", "PERMISSION_DENIED"),
-      ),
+      mapRematchError(new FirebaseError("functions/permission-denied", "PERMISSION_DENIED")),
     ).toMatch(/rejoin/i);
   });
 
@@ -35,33 +30,28 @@ describe("mapRematchError", () => {
 
   it("maps round-not-over failed-precondition", () => {
     expect(
-      mapRematchError(
-        new FirebaseError("functions/failed-precondition", "Round is not over."),
-      ),
+      mapRematchError(new FirebaseError("functions/failed-precondition", "Round is not over.")),
     ).toBe("Finish this round before rematching.");
   });
 
   it("maps App Check unauthenticated to blocker guidance", () => {
     expect(
       mapRematchError(
-        new FirebaseError(
-          "functions/unauthenticated",
-          "App Check token is invalid.",
-        ),
+        new FirebaseError("functions/unauthenticated", "App Check token is invalid."),
       ),
     ).toMatch(/content blockers/i);
   });
 
   it("maps network unavailability", () => {
-    expect(
-      mapRematchError(new FirebaseError("functions/unavailable", "UNAVAILABLE")),
-    ).toMatch(/network/i);
+    expect(mapRematchError(new FirebaseError("functions/unavailable", "UNAVAILABLE"))).toMatch(
+      /network/i,
+    );
   });
 
   it("does not leak internal or bare Error messages", () => {
-    expect(
-      mapRematchError(new FirebaseError("functions/internal", "INTERNAL")),
-    ).toBe("Could not start rematch. Try again.");
+    expect(mapRematchError(new FirebaseError("functions/internal", "INTERNAL"))).toBe(
+      "Could not start rematch. Try again.",
+    );
     expect(
       mapRematchError(
         new FirebaseError(

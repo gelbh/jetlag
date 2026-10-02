@@ -1,6 +1,6 @@
 import { screen } from "@testing-library/react";
-import { renderWithAppUi } from "../../../test/renderWithAppUi";
 import { describe, expect, it } from "vitest";
+import { renderWithAppUi } from "../../../test/renderWithAppUi";
 import { SyncBlock } from "./SyncBlock";
 
 const baseProps = {
@@ -21,9 +21,7 @@ describe("SyncBlock unhealthy sync text", () => {
   });
 
   it("shows queued count in offline label when writes are pending", () => {
-    renderWithAppUi(
-      <SyncBlock {...baseProps} syncStatus="offline" queuedWrites={2} />,
-    );
+    renderWithAppUi(<SyncBlock {...baseProps} syncStatus="offline" queuedWrites={2} />);
 
     expect(screen.getByText("Offline · 2 queued")).toBeVisible();
   });

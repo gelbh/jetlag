@@ -1,26 +1,24 @@
 import {
-  test,
-  expect,
   answerPhotoCannotInChat,
   answerPhotoSentExternallyInChat,
+  expect,
   expectChatAnswer,
   expectPendingQuestionText,
   gameChatScroll,
   openChat,
   sendPhotoToHiders,
+  test,
 } from "../../fixtures";
 
 test.setTimeout(120_000);
 
-test("@smoke photo question syncs cannot-answer replies through chat", async ({
-  hostHider,
-}) => {
+test("@smoke photo question syncs cannot-answer replies through chat", async ({ hostHider }) => {
   const { hostPage, guestPage } = hostHider;
 
   await test.step("send photo ask once hider is ready", async () => {
-    await expect(
-      guestPage.getByRole("button", { name: "Set zone" }),
-    ).toBeVisible({ timeout: 15_000 });
+    await expect(guestPage.getByRole("button", { name: "Set zone" })).toBeVisible({
+      timeout: 15_000,
+    });
     await sendPhotoToHiders(hostPage);
     await expect(async () => {
       await expectPendingQuestionText(guestPage, /Send me a photo of/i);
@@ -35,9 +33,7 @@ test("@smoke photo question syncs cannot-answer replies through chat", async ({
   });
 });
 
-test("photo question accepts mark-sent external answer", async ({
-  hostHider,
-}) => {
+test("photo question accepts mark-sent external answer", async ({ hostHider }) => {
   const { hostPage, guestPage } = hostHider;
 
   await test.step("send photo ask", async () => {
@@ -50,13 +46,13 @@ test("photo question accepts mark-sent external answer", async ({
   await test.step("mark sent outside app appears in both chats", async () => {
     await answerPhotoSentExternallyInChat(guestPage);
     await openChat(guestPage);
-    await expect(
-      gameChatScroll(guestPage).getByText(/Photo sent outside the app/i),
-    ).toBeVisible({ timeout: 30_000 });
+    await expect(gameChatScroll(guestPage).getByText(/Photo sent outside the app/i)).toBeVisible({
+      timeout: 30_000,
+    });
 
     await openChat(hostPage);
-    await expect(
-      gameChatScroll(hostPage).getByText(/Photo sent outside the app/i),
-    ).toBeVisible({ timeout: 30_000 });
+    await expect(gameChatScroll(hostPage).getByText(/Photo sent outside the app/i)).toBeVisible({
+      timeout: 30_000,
+    });
   });
 });

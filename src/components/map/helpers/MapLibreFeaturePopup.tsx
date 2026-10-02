@@ -1,6 +1,6 @@
-import { Popup as MapLibrePopup } from "react-map-gl/maplibre";
 import { XIcon } from "@phosphor-icons/react";
 import type { ReactNode } from "react";
+import { Popup as MapLibrePopup } from "react-map-gl/maplibre";
 
 interface MapLibreFeaturePopupProps {
   latitude: number;

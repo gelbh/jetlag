@@ -25,10 +25,7 @@ async function patchPendingQuestionAnswerableAt(
   await updatePendingQuestion(sessionId, questionId, { answerableAt });
 }
 
-async function patchSessionTimer(
-  sessionId: string,
-  elapsedMs: number,
-): Promise<void> {
+async function patchSessionTimer(sessionId: string, elapsedMs: number): Promise<void> {
   await updateDoc(doc(getFirestoreDb(), "sessions", sessionId), {
     timerAccumulatedMs: elapsedMs,
     timerRunningSince: null,
@@ -77,10 +74,7 @@ async function signInPermanentUserForCapture(): Promise<string> {
       E2E_PREMIUM_CAPTURE_PASSWORD,
     );
   } catch (error) {
-    const code =
-      error && typeof error === "object" && "code" in error
-        ? String(error.code)
-        : null;
+    const code = error && typeof error === "object" && "code" in error ? String(error.code) : null;
     if (code === "auth/email-already-in-use") {
       await signInWithEmailAndPassword(
         auth,

@@ -1,1 +1,13 @@
-{"category":"commercial_airport","source":"wikidata","bbox":{"south":51.28,"west":-0.51,"north":51.7,"east":0.33},"places":[{"id":"Q8691","name":"London Heathrow Airport","lat":51.4775,"lng":-0.461389},{"id":"Q8982","name":"London City Airport","lat":51.505278,"lng":0.055278},{"id":"Q106119","name":"RAF Northolt","lat":51.553055555,"lng":-0.418333333},{"id":"Q1431914","name":"Croydon Airport","lat":51.356361111,"lng":-0.116822222},{"id":"Q1431935","name":"London Biggin Hill Airport","lat":51.330833333,"lng":0.0325},{"id":"Q20450210","name":"Leavesden Airport","lat":51.691868,"lng":-0.416197}]}
+{
+  "category": "commercial_airport",
+  "source": "wikidata",
+  "bbox": { "south": 51.28, "west": -0.51, "north": 51.7, "east": 0.33 },
+  "places": [
+    { "id": "Q8691", "name": "London Heathrow Airport", "lat": 51.4775, "lng": -0.461389 },
+    { "id": "Q8982", "name": "London City Airport", "lat": 51.505278, "lng": 0.055278 },
+    { "id": "Q106119", "name": "RAF Northolt", "lat": 51.553055555, "lng": -0.418333333 },
+    { "id": "Q1431914", "name": "Croydon Airport", "lat": 51.356361111, "lng": -0.116822222 },
+    { "id": "Q1431935", "name": "London Biggin Hill Airport", "lat": 51.330833333, "lng": 0.0325 },
+    { "id": "Q20450210", "name": "Leavesden Airport", "lat": 51.691868, "lng": -0.416197 }
+  ]
+}

@@ -1,27 +1,23 @@
-import { FirebaseError } from "firebase/app";
 import { act, renderHook, waitFor } from "@testing-library/react";
+import { FirebaseError } from "firebase/app";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { AnnotationRecord } from "../../domain/map/annotations";
 import { LOCAL_SESSION_ID } from "../../domain/map/annotations";
 import { useMapSessionChrome } from "./useMapSessionChrome";
 
 const exitSession = vi.hoisted(() => vi.fn(async () => undefined));
-const mockResetRemoteSession = vi.hoisted(() =>
-  vi.fn(async () => "2026-01-02T00:00:00.000Z"),
-);
-const mockClearLiveLocationOnLeave = vi.hoisted(() =>
-  vi.fn(async () => undefined),
-);
+const mockResetRemoteSession = vi.hoisted(() => vi.fn(async () => "2026-01-02T00:00:00.000Z"));
+const mockClearLiveLocationOnLeave = vi.hoisted(() => vi.fn(async () => undefined));
 const mockCaptureException = vi.hoisted(() => vi.fn());
 const mockTrackSessionEnded = vi.hoisted(() => vi.fn());
 const mockLeaveHostSession = vi.hoisted(() =>
-  vi.fn(async (): Promise<
-    { action: "ended" } | { action: "promoted"; newHostUid: string }
-  > => ({ action: "ended" })),
+  vi.fn(
+    async (): Promise<{ action: "ended" } | { action: "promoted"; newHostUid: string }> => ({
+      action: "ended",
+    }),
+  ),
 );
-const mockLeaveSessionMembership = vi.hoisted(() =>
-  vi.fn(async () => undefined),
-);
+const mockLeaveSessionMembership = vi.hoisted(() => vi.fn(async () => undefined));
 const mockEndSession = vi.hoisted(() =>
   vi.fn(async () => {
     mockTrackSessionEnded("host_end");
@@ -70,9 +66,9 @@ vi.mock("../../services/session/clearLiveLocationOnLeave", () => ({
 }));
 
 vi.mock("../../services/session/sessionCleanup", async () => {
-  const actual = await vi.importActual<
-    typeof import("../../services/session/sessionCleanup")
-  >("../../services/session/sessionCleanup");
+  const actual = await vi.importActual<typeof import("../../services/session/sessionCleanup")>(
+    "../../services/session/sessionCleanup",
+  );
   return {
     ...actual,
     clearSessionLocalArtifacts: vi.fn(async () => undefined),
@@ -235,11 +231,7 @@ describe("useMapSessionChrome", () => {
     });
 
     await waitFor(() => {
-      expect(mockResetRemoteSession).toHaveBeenCalledWith(
-        "session-remote",
-        "host-1",
-        "seeker",
-      );
+      expect(mockResetRemoteSession).toHaveBeenCalledWith("session-remote", "host-1", "seeker");
     });
     expect(resetTimer).toHaveBeenCalled();
     expect(clearAllAnnotations).toHaveBeenCalled();
@@ -313,9 +305,7 @@ describe("useMapSessionChrome", () => {
       sessionId: "session-remote",
       uid: "host-1",
       role: "seeker",
-      pendingQuestions: expect.arrayContaining([
-        expect.objectContaining({ id: "pq-walk" }),
-      ]),
+      pendingQuestions: expect.arrayContaining([expect.objectContaining({ id: "pq-walk" })]),
     });
     expect(exitSession).toHaveBeenCalledWith(
       expect.objectContaining({ reason: "leave", sessionId: "session-remote" }),
@@ -558,10 +548,7 @@ describe("useMapSessionChrome", () => {
     vi.spyOn(window, "confirm").mockReturnValue(true);
     const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => undefined);
     mockLeaveHostSession.mockRejectedValueOnce(
-      new FirebaseError(
-        "functions/permission-denied",
-        "Only the host can do that.",
-      ),
+      new FirebaseError("functions/permission-denied", "Only the host can do that."),
     );
 
     const { result } = renderHook(() =>
@@ -597,10 +584,7 @@ describe("useMapSessionChrome", () => {
   it("continues local end on expected session-already-ended without capturing", async () => {
     vi.spyOn(window, "confirm").mockReturnValue(true);
     mockEndSession.mockRejectedValueOnce(
-      new FirebaseError(
-        "functions/failed-precondition",
-        "Session already ended.",
-      ),
+      new FirebaseError("functions/failed-precondition", "Session already ended."),
     );
 
     const { result } = renderHook(() =>

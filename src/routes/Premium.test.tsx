@@ -1,10 +1,10 @@
-import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { MantineProvider } from "@mantine/core";
+import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { Premium } from "./Premium";
 import { jetlagTheme } from "@/theme/theme";
-import { renderWithRouter } from "../test/renderWithRouter";
 import type { PremiumEntitlements } from "../domain/billing/premiumProducts";
+import { renderWithRouter } from "../test/renderWithRouter";
+import { Premium } from "./Premium";
 
 const {
   fetchPremiumEntitlements,
@@ -147,21 +147,12 @@ describe("Premium", () => {
     renderPremium();
     const banner = screen.getByRole("banner", { name: "Screen header" });
     expect(banner).toBeInTheDocument();
-    expect(
-      within(banner).getByRole("heading", { name: "Premium" }),
-    ).toBeInTheDocument();
+    expect(within(banner).getByRole("heading", { name: "Premium" })).toBeInTheDocument();
     expect(screen.getAllByRole("heading", { name: "Premium" })).toHaveLength(1);
+    expect(screen.queryByRole("button", { name: "Back" })).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Back" })).toHaveAttribute("href", "/");
     expect(
-      screen.queryByRole("button", { name: "Back" }),
-    ).not.toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Back" })).toHaveAttribute(
-      "href",
-      "/",
-    );
-    expect(
-      screen.queryByText(
-        "Live transit and faster map loads for hosted sessions.",
-      ),
+      screen.queryByText("Live transit and faster map loads for hosted sessions."),
     ).toBeInTheDocument();
   });
 
@@ -169,18 +160,10 @@ describe("Premium", () => {
     renderPremium();
 
     const banner = screen.getByRole("banner", { name: "Screen header" });
-    expect(
-      within(banner).getByRole("heading", { name: "Premium" }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText(/Premium billing needs an online connection/i),
-    ).toBeInTheDocument();
-    expect(
-      screen.queryByRole("button", { name: /1 session/i }),
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByRole("button", { name: /Monthly unlimited/i }),
-    ).not.toBeInTheDocument();
+    expect(within(banner).getByRole("heading", { name: "Premium" })).toBeInTheDocument();
+    expect(screen.getByText(/Premium billing needs an online connection/i)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /1 session/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Monthly unlimited/i })).not.toBeInTheDocument();
     expect(
       screen.queryByRole("radio", { name: /Session packs|Unlimited/i }),
     ).not.toBeInTheDocument();
@@ -212,13 +195,9 @@ describe("Premium", () => {
     );
 
     await waitFor(() => {
-      expect(
-        screen.getByText(/Payment received\. Premium unlock is ready\./i),
-      ).toBeInTheDocument();
+      expect(screen.getByText(/Payment received\. Premium unlock is ready\./i)).toBeInTheDocument();
     });
-    expect(
-      screen.queryByTestId("premium-checkout-notice-muted"),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId("premium-checkout-notice-muted")).not.toBeInTheDocument();
   });
 
   it("shows muted checkout cancel notice from query param", async () => {
@@ -247,9 +226,9 @@ describe("Premium", () => {
     );
 
     await waitFor(() => {
-      expect(
-        screen.getByTestId("premium-checkout-notice-muted"),
-      ).toHaveTextContent(/Checkout canceled\./i);
+      expect(screen.getByTestId("premium-checkout-notice-muted")).toHaveTextContent(
+        /Checkout canceled\./i,
+      );
     });
   });
 
@@ -279,14 +258,13 @@ describe("Premium", () => {
           "2 premium sessions left",
         ),
       ).toBeInTheDocument();
-      expect(
-        screen.getByRole("button", { name: /1 session/i }),
-      ).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /1 session/i })).toBeInTheDocument();
     });
 
-    expect(
-      screen.getByRole("link", { name: "Create premium session" }),
-    ).toHaveAttribute("href", "/create?tier=premium");
+    expect(screen.getByRole("link", { name: "Create premium session" })).toHaveAttribute(
+      "href",
+      "/create?tier=premium",
+    );
   });
 
   it("hides manage subscription when there is no active subscription", async () => {
@@ -310,14 +288,10 @@ describe("Premium", () => {
     renderPremium();
 
     await waitFor(() => {
-      expect(
-        screen.getByRole("radio", { name: "Session packs" }),
-      ).toBeEnabled();
+      expect(screen.getByRole("radio", { name: "Session packs" })).toBeEnabled();
     });
 
-    expect(
-      screen.queryByRole("button", { name: /Manage subscription/i }),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Manage subscription/i })).not.toBeInTheDocument();
   });
 
   it("shows manage subscription when subscription is active", async () => {
@@ -345,9 +319,7 @@ describe("Premium", () => {
     renderPremium();
 
     await waitFor(() => {
-      expect(
-        screen.getByRole("button", { name: /Manage subscription/i }),
-      ).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /Manage subscription/i })).toBeInTheDocument();
     });
   });
 
@@ -375,9 +347,7 @@ describe("Premium", () => {
       expect(screen.getByRole("button", { name: /1 session/i })).toBeVisible();
     });
 
-    expect(
-      screen.queryByRole("button", { name: /Monthly unlimited/i }),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Monthly unlimited/i })).not.toBeInTheDocument();
   });
 
   it("shows unlimited offers on the unlimited tab", async () => {
@@ -410,15 +380,9 @@ describe("Premium", () => {
       expect(screen.getByRole("radio", { name: "Unlimited" })).toBeChecked();
     });
 
-    expect(
-      screen.getByRole("button", { name: /Monthly unlimited/i }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: /Yearly unlimited/i }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: /Lifetime/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Monthly unlimited/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Yearly unlimited/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Lifetime/i })).toBeInTheDocument();
   });
 
   it("shows sign-in gate before checkout when user is anonymous", async () => {
@@ -443,14 +407,10 @@ describe("Premium", () => {
     renderPremium();
 
     await waitFor(() => {
-      expect(
-        screen.getByRole("button", { name: /Continue with Google/i }),
-      ).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /Continue with Google/i })).toBeInTheDocument();
     });
 
-    expect(
-      screen.queryByRole("button", { name: /3 sessions/i }),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /3 sessions/i })).not.toBeInTheDocument();
   });
 
   it("starts checkout when a pack is selected", async () => {
@@ -480,9 +440,7 @@ describe("Premium", () => {
     renderPremium();
 
     await waitFor(() => {
-      expect(
-        screen.getByRole("radio", { name: "Session packs" }),
-      ).toBeEnabled();
+      expect(screen.getByRole("radio", { name: "Session packs" })).toBeEnabled();
     });
 
     fireEvent.click(screen.getByRole("radio", { name: "Session packs" }));
@@ -532,9 +490,7 @@ describe("Premium", () => {
     fireEvent.click(screen.getByRole("radio", { name: "Unlimited" }));
 
     await waitFor(() => {
-      expect(
-        screen.getByRole("button", { name: /Monthly unlimited/i }),
-      ).toBeEnabled();
+      expect(screen.getByRole("button", { name: /Monthly unlimited/i })).toBeEnabled();
     });
 
     fireEvent.click(screen.getByRole("button", { name: /Monthly unlimited/i }));
@@ -589,9 +545,7 @@ describe("Premium", () => {
     fireEvent.click(screen.getByRole("radio", { name: "Unlimited" }));
 
     await waitFor(() => {
-      expect(
-        screen.getByRole("button", { name: /7-day free trial/i }),
-      ).toBeEnabled();
+      expect(screen.getByRole("button", { name: /7-day free trial/i })).toBeEnabled();
     });
 
     fireEvent.click(screen.getByRole("button", { name: /7-day free trial/i }));

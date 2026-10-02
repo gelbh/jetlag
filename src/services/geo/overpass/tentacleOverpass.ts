@@ -1,29 +1,23 @@
 import { distanceBetweenPoints, type LatLngTuple } from "@/domain/geometry/gameArea/geometry";
 import type { TentaclePoi } from "@/domain/map/annotations";
-import type {
-  SessionCustomCategory,
-  SessionCustomLocationPin,
-} from "@/domain/session/catalog/sessionCustomContent";
+import {
+  type TentacleExtendedCategoryId,
+  tentacleCategoryOverpassSelectors,
+} from "@/domain/questions";
+import type { RegionPackId } from "@/domain/regions/regionPack";
 import {
   manualPinsWithinRadius,
   tentacleOverpassSelectorsForCategory,
 } from "@/domain/session/catalog/sessionCustomCatalog";
-import {
-  tentacleCategoryOverpassSelectors,
-  type TentacleExtendedCategoryId,
-} from "@/domain/questions";
+import type {
+  SessionCustomCategory,
+  SessionCustomLocationPin,
+} from "@/domain/session/catalog/sessionCustomContent";
 import { queryOverpass } from "../../core/overpass/overpassClient";
-import { buildAroundTaggedQuery, overpassQueryTemplate } from "./queryHelpers";
-import {
-  fetchBundledTentaclePois,
-  mergeTentaclePois,
-} from "./regionPackPoi";
+import { getOrFetchCached, tentaclePoisCacheKey } from "../cache";
 import { isEligibleBundledPoi } from "./bundledPoiHygiene";
-import type { RegionPackId } from "@/domain/regions/regionPack";
-import {
-  getOrFetchCached,
-  tentaclePoisCacheKey,
-} from "../cache";
+import { buildAroundTaggedQuery, overpassQueryTemplate } from "./queryHelpers";
+import { fetchBundledTentaclePois, mergeTentaclePois } from "./regionPackPoi";
 
 type OverpassElement = {
   id: number;
@@ -60,9 +54,7 @@ export function buildTentacleOverpassQuery(
   );
 }
 
-function isActiveTentaclePoi(
-  tags: Record<string, string> | undefined,
-): boolean {
+function isActiveTentaclePoi(tags: Record<string, string> | undefined): boolean {
   if (!tags) {
     return false;
   }
@@ -79,10 +71,7 @@ function isActiveTentaclePoi(
   return true;
 }
 
-function matchesSelector(
-  tags: Record<string, string>,
-  selector: string,
-): boolean {
+function matchesSelector(tags: Record<string, string>, selector: string): boolean {
   const filter = selectorToFilter(selector);
   const [key, value] = filter.split("=");
   if (!key || value === undefined) {
@@ -98,12 +87,7 @@ export function tentacleCategoryForTags(
 ): TentacleExtendedCategoryId | null {
   if (categoryId === "metro_line") {
     const route = tags.route;
-    if (
-      route === "subway" ||
-      route === "light_rail" ||
-      route === "tram" ||
-      route === "monorail"
-    ) {
+    if (route === "subway" || route === "light_rail" || route === "tram" || route === "monorail") {
       return "metro_line";
     }
     return null;
@@ -180,8 +164,7 @@ export function nearestTentaclePoi(
     if (
       !nearest ||
       distanceMeters < nearest.distanceMeters ||
-      (distanceMeters === nearest.distanceMeters &&
-        poi.id.localeCompare(nearest.poiId) < 0)
+      (distanceMeters === nearest.distanceMeters && poi.id.localeCompare(nearest.poiId) < 0)
     ) {
       nearest = { poiId: poi.id, distanceMeters };
     }
@@ -197,10 +180,7 @@ export type FetchTentaclePoisOptions = {
   onEnrich?: (pois: TentaclePoi[]) => void;
 };
 
-function withManualPins(
-  mergedOverpass: TentaclePoi[],
-  pinPois: TentaclePoi[],
-): TentaclePoi[] {
+function withManualPins(mergedOverpass: TentaclePoi[], pinPois: TentaclePoi[]): TentaclePoi[] {
   const seen = new Set(mergedOverpass.map((poi) => poi.id));
   return [...mergedOverpass, ...pinPois.filter((poi) => !seen.has(poi.id))];
 }
@@ -212,21 +192,13 @@ async function fetchOverpassTentaclePois(
   customCategories: readonly SessionCustomCategory[],
   cacheScope: string,
 ): Promise<TentaclePoi[]> {
-  return getOrFetchCached(
-    tentaclePoisCacheKey(center, radiusMeters, cacheScope),
-    async () => {
-      const payload = await queryOverpass<{ elements: OverpassElement[] }>(
-        buildTentacleOverpassQuery(
-          center,
-          radiusMeters,
-          categoryId,
-          customCategories,
-        ),
-      );
+  return getOrFetchCached(tentaclePoisCacheKey(center, radiusMeters, cacheScope), async () => {
+    const payload = await queryOverpass<{ elements: OverpassElement[] }>(
+      buildTentacleOverpassQuery(center, radiusMeters, categoryId, customCategories),
+    );
 
-      return parseTentaclePois(payload.elements, categoryId);
-    },
-  );
+    return parseTentaclePois(payload.elements, categoryId);
+  });
 }
 
 export async function fetchTentaclePois(
@@ -236,9 +208,7 @@ export async function fetchTentaclePois(
   options?: FetchTentaclePoisOptions,
 ): Promise<TentaclePoi[]> {
   const customCategories = options?.customCategories ?? [];
-  const cacheScope = options?.regionPackId
-    ? `${categoryId}:${options.regionPackId}`
-    : categoryId;
+  const cacheScope = options?.regionPackId ? `${categoryId}:${options.regionPackId}` : categoryId;
 
   const pinPois = manualPinsWithinRadius(
     options?.customLocationPins ?? [],

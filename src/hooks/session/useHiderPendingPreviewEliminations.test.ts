@@ -7,19 +7,16 @@ import { useHiderPendingPreviewEliminations } from "./useHiderPendingPreviewElim
 
 const buildPendingPreviewEliminationFeatures = vi.hoisted(() => vi.fn());
 
-vi.mock(
-  "../../domain/questions/overlays/pendingPreviewElimination",
-  async () => {
-    const actual = await vi.importActual<
-      typeof import("../../domain/questions/overlays/pendingPreviewElimination")
-    >("../../domain/questions/overlays/pendingPreviewElimination");
-    return {
-      ...actual,
-      buildPendingPreviewEliminationFeatures: (...args: unknown[]) =>
-        buildPendingPreviewEliminationFeatures(...args),
-    };
-  },
-);
+vi.mock("../../domain/questions/overlays/pendingPreviewElimination", async () => {
+  const actual = await vi.importActual<
+    typeof import("../../domain/questions/overlays/pendingPreviewElimination")
+  >("../../domain/questions/overlays/pendingPreviewElimination");
+  return {
+    ...actual,
+    buildPendingPreviewEliminationFeatures: (...args: unknown[]) =>
+      buildPendingPreviewEliminationFeatures(...args),
+  };
+});
 
 const gameArea: GameArea = {
   type: "Polygon",
@@ -58,9 +55,7 @@ function pendingQuestion(): PendingQuestionRecord {
   };
 }
 
-function pendingQuestionWithGeometry(
-  coordinates: [number, number],
-): PendingQuestionRecord {
+function pendingQuestionWithGeometry(coordinates: [number, number]): PendingQuestionRecord {
   return {
     ...pendingQuestion(),
     placement: {
@@ -77,15 +72,11 @@ function pendingQuestionWithGeometry(
 describe("useHiderPendingPreviewEliminations", () => {
   beforeEach(() => {
     buildPendingPreviewEliminationFeatures.mockReset();
-    buildPendingPreviewEliminationFeatures.mockReturnValue(
-      new Promise(() => {}),
-    );
+    buildPendingPreviewEliminationFeatures.mockReturnValue(new Promise(() => {}));
   });
 
   it("does not rebuild when questionTruths Map identity changes but replies match", async () => {
-    const truthsA = new Map<string, HiderTruthResult>([
-      ["pq-1", { replyId: "no", label: "No" }],
-    ]);
+    const truthsA = new Map<string, HiderTruthResult>([["pq-1", { replyId: "no", label: "No" }]]);
 
     const { rerender } = renderHook(
       ({ truths }) =>
@@ -103,9 +94,7 @@ describe("useHiderPendingPreviewEliminations", () => {
       expect(buildPendingPreviewEliminationFeatures).toHaveBeenCalledTimes(1);
     });
 
-    const truthsB = new Map<string, HiderTruthResult>([
-      ["pq-1", { replyId: "no", label: "No" }],
-    ]);
+    const truthsB = new Map<string, HiderTruthResult>([["pq-1", { replyId: "no", label: "No" }]]);
 
     rerender({ truths: truthsB });
 
@@ -113,9 +102,7 @@ describe("useHiderPendingPreviewEliminations", () => {
   });
 
   it("rebuilds when pending placement geometry changes with the same ids", async () => {
-    const truths = new Map<string, HiderTruthResult>([
-      ["pq-1", { replyId: "no", label: "No" }],
-    ]);
+    const truths = new Map<string, HiderTruthResult>([["pq-1", { replyId: "no", label: "No" }]]);
 
     const { rerender } = renderHook(
       ({ pendingQuestions }) =>

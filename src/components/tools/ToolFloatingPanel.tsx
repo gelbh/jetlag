@@ -1,10 +1,10 @@
 import { useRef } from "react";
-import { usePanelDrag } from "../../hooks/motion/usePanelDrag";
 import {
+  type DockableMapTool,
   isQuestionDockTool,
   mapToolPlacingLabel,
-  type DockableMapTool,
 } from "../../domain/map/mapTools";
+import { usePanelDrag } from "../../hooks/motion/usePanelDrag";
 import { MapFloatingPanel } from "../map/chrome/MapFloatingPanel";
 
 interface ToolFloatingPanelProps {
@@ -25,13 +25,12 @@ export function ToolFloatingPanel({
   children,
 }: ToolFloatingPanelProps) {
   const panelRef = useRef<HTMLDivElement>(null);
-  const { panelStyle, handleProps, peekHandleProps, displayMinimized, isDragging } =
-    usePanelDrag({
-      userMinimized,
-      mapPanning,
-      onMinimizedChange,
-      panelRef,
-    });
+  const { panelStyle, handleProps, peekHandleProps, displayMinimized, isDragging } = usePanelDrag({
+    userMinimized,
+    mapPanning,
+    onMinimizedChange,
+    panelRef,
+  });
 
   const isWizardTool = isQuestionDockTool(toolId);
 
@@ -45,9 +44,7 @@ export function ToolFloatingPanel({
       peekLabel={mapToolPlacingLabel(toolId)}
       onClose={onClose}
       closeLabel={`Close ${mapToolPlacingLabel(toolId)}`}
-      maxHeightClassName={
-        isWizardTool ? "jl-wizard-panel-max-h" : "max-h-[min(30dvh,280px)]"
-      }
+      maxHeightClassName={isWizardTool ? "jl-wizard-panel-max-h" : "max-h-[min(30dvh,280px)]"}
       bodyScrollable={!isWizardTool}
       panelLayout={isWizardTool ? "wizard" : "default"}
       outerRef={panelRef}

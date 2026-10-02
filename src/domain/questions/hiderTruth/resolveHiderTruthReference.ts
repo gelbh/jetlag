@@ -1,5 +1,5 @@
-import type { LatLngTuple } from "../../geometry/gameArea/geometry";
 import { haversineMeters } from "../../geometry/gameArea/distance";
+import type { LatLngTuple } from "../../geometry/gameArea/geometry";
 import {
   parseGeometryJson,
   pointFromGeometryFeature,
@@ -10,7 +10,10 @@ import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
 export type { EndGameTruthAnchor } from "../../session/hiding/endGameTruthAnchors";
 
 export type HiderTruthReferenceMode =
-  "hidingPlace" | "hidingZoneCenter" | "endGameFreeze" | "unavailable";
+  | "hidingPlace"
+  | "hidingZoneCenter"
+  | "endGameFreeze"
+  | "unavailable";
 
 export interface ResolveHiderTruthReferenceInput {
   hiderUid: string;
@@ -28,10 +31,7 @@ export interface ResolveHiderTruthReferenceInput {
    * not switch truth to hider GPS (LMTS).
    */
   seekerPlacesByUid?: Readonly<Record<string, LatLngTuple>> | null;
-  session:
-    | Pick<SessionRecord, "endGameStartedAt" | "endGameTruthAnchors">
-    | null
-    | undefined;
+  session: Pick<SessionRecord, "endGameStartedAt" | "endGameTruthAnchors"> | null | undefined;
 }
 
 export interface HiderTruthReference {
@@ -48,9 +48,7 @@ function isUsableLatLng(lat: unknown, lng: unknown): lat is number {
   );
 }
 
-function isUsablePoint(
-  point: LatLngTuple | null | undefined,
-): point is LatLngTuple {
+function isUsablePoint(point: LatLngTuple | null | undefined): point is LatLngTuple {
   return point != null && isUsableLatLng(point[0], point[1]);
 }
 
@@ -72,12 +70,7 @@ export function isAskOriginInsideHidingZone(
   return haversineMeters(askOrigin, zoneCenter) <= zoneRadiusMeters;
 }
 
-const MAP_PIN_TRUTH_TOOLS = new Set([
-  "tentacle",
-  "matching",
-  "measuring",
-  "thermometer",
-]);
+const MAP_PIN_TRUTH_TOOLS = new Set(["tentacle", "matching", "measuring", "thermometer"]);
 
 export function isMapPinTruthTool(toolType: string): boolean {
   return MAP_PIN_TRUTH_TOOLS.has(toolType);
@@ -111,10 +104,7 @@ export function resolvePendingQuestionTruthReference(
 ): HiderTruthReference {
   return resolveHiderTruthReference({
     ...context,
-    askOrigin: askOriginFromPendingQuestion(
-      question,
-      context.seekerPlacesByUid,
-    ),
+    askOrigin: askOriginFromPendingQuestion(question, context.seekerPlacesByUid),
   });
 }
 
@@ -140,8 +130,7 @@ export function resolveHiderTruthReference({
   }
 
   const insideZone =
-    originInsideZone ??
-    isAskOriginInsideHidingZone(askOrigin, zoneCenter, zoneRadiusMeters);
+    originInsideZone ?? isAskOriginInsideHidingZone(askOrigin, zoneCenter, zoneRadiusMeters);
 
   if (insideZone && isUsablePoint(hidingPlace)) {
     return { point: hidingPlace, mode: "hidingPlace" };

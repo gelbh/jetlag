@@ -1,9 +1,9 @@
 import turfCircle from "@turf/circle";
 import type { Feature, Polygon } from "geojson";
-import type { GameArea } from "../../map/annotations";
+import { haversineMeters } from "../../geometry/gameArea/distance";
 import type { LatLngTuple } from "../../geometry/gameArea/geometry";
 import { isPointInGameArea } from "../../geometry/gameArea/geometry";
-import { haversineMeters } from "../../geometry/gameArea/distance";
+import type { GameArea } from "../../map/annotations";
 
 export interface TransitStation {
   id: string;
@@ -32,10 +32,7 @@ export interface HidingZoneRecord {
   moveInProgress?: boolean;
 }
 
-export function buildHidingZoneCircle(
-  center: LatLngTuple,
-  radiusMeters: number,
-): Feature<Polygon> {
+export function buildHidingZoneCircle(center: LatLngTuple, radiusMeters: number): Feature<Polygon> {
   return turfCircle([center[1], center[0]], radiusMeters / 1000, {
     steps: 64,
     units: "kilometers",
@@ -46,10 +43,7 @@ export function stationToLatLng(station: TransitStation): LatLngTuple {
   return [station.lat, station.lng];
 }
 
-export function isValidHidingStation(
-  station: TransitStation,
-  gameArea: GameArea,
-): boolean {
+export function isValidHidingStation(station: TransitStation, gameArea: GameArea): boolean {
   return isPointInGameArea([station.lat, station.lng], gameArea);
 }
 
@@ -102,10 +96,8 @@ export function dedupeTransitStations(
     for (const station of bucket) {
       const duplicate = kept.find(
         (existing) =>
-          haversineMeters(
-            [existing.lat, existing.lng],
-            [station.lat, station.lng],
-          ) <= proximityMeters,
+          haversineMeters([existing.lat, existing.lng], [station.lat, station.lng]) <=
+          proximityMeters,
       );
 
       if (!duplicate) {
@@ -142,9 +134,7 @@ export function shortPlayerLabel(uid: string): string {
   return uid.slice(0, 4).toUpperCase();
 }
 
-export function hiderStationCenter(
-  zone: HidingZoneRecord | null | undefined,
-): LatLngTuple | null {
+export function hiderStationCenter(zone: HidingZoneRecord | null | undefined): LatLngTuple | null {
   if (!zone) {
     return null;
   }
@@ -167,20 +157,13 @@ export function resolveMyHidingZone(
   }
 
   const memberSet = new Set(memberUids ?? []);
-  const memberZones = confirmedZones.filter((zone) =>
-    memberSet.has(zone.hiderUid),
-  );
+  const memberZones = confirmedZones.filter((zone) => memberSet.has(zone.hiderUid));
 
   if (memberZones.length === 1) {
     return memberZones[0] ?? null;
   }
 
-  if (
-    confirmedZones.length === 1 &&
-    uid &&
-    memberSet.has(uid) &&
-    memberSet.size <= 2
-  ) {
+  if (confirmedZones.length === 1 && uid && memberSet.has(uid) && memberSet.size <= 2) {
     return confirmedZones[0] ?? null;
   }
 
@@ -194,7 +177,5 @@ export function hidingZonePreviewPositions(
     return [];
   }
 
-  return previewCircle.geometry.coordinates[0].map(
-    ([lng, lat]) => [lat, lng] as [number, number],
-  );
+  return previewCircle.geometry.coordinates[0].map(([lng, lat]) => [lat, lng] as [number, number]);
 }

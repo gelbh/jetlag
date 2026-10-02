@@ -1,8 +1,7 @@
 import { FetchTimeoutError, fetchWithTimeout } from "../lib/fetchWithTimeout.mjs";
 import { OVERPASS_USER_AGENT } from "./overpassEndpoints.mjs";
 
-export const POSTPASS_ENDPOINT =
-  "https://postpass.geofabrik.de/api/0.2/interpreter";
+export const POSTPASS_ENDPOINT = "https://postpass.geofabrik.de/api/0.2/interpreter";
 
 export const POSTPASS_FETCH_TIMEOUT_MS = 25_000;
 

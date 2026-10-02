@@ -1,15 +1,8 @@
-import Stripe from "stripe";
-import { HttpsError } from "firebase-functions/v2/https";
 import { FieldValue } from "firebase-admin/firestore";
-import {
-  PREMIUM_PRODUCTS,
-  PREMIUM_PRODUCT_KEYS,
-  resolveStripePriceId,
-  stripeCheckoutCancelUrl,
-  stripeCheckoutSuccessUrl,
-  stripePortalReturnUrl,
-  stripeSecretKey,
-} from "./stripeConfig.mjs";
+import { HttpsError } from "firebase-functions/v2/https";
+import Stripe from "stripe";
+import { buildInitialRoleSecrets } from "../session/roleGateShared.mjs";
+import { generateSessionCode } from "../session/sessionCodes.mjs";
 import {
   canCreatePaidPremiumSession,
   consumePremiumSessionCredit,
@@ -23,10 +16,14 @@ import {
   buildPremiumSessionFirestoreDocument,
   parseCreatePremiumSessionInput,
 } from "./premiumSessionDocument.mjs";
-import { generateSessionCode } from "../session/sessionCodes.mjs";
 import {
-  buildInitialRoleSecrets,
-} from "../session/roleGateShared.mjs";
+  PREMIUM_PRODUCT_KEYS,
+  PREMIUM_PRODUCTS,
+  resolveStripePriceId,
+  stripeCheckoutCancelUrl,
+  stripeCheckoutSuccessUrl,
+  stripePortalReturnUrl,
+} from "./stripeConfig.mjs";
 
 const CHECKOUT_BILLING_ERROR_MESSAGE = "Couldn't start checkout. Try again.";
 const PORTAL_BILLING_ERROR_MESSAGE = "Couldn't open billing portal. Try again.";
@@ -39,9 +36,8 @@ export function isStaleStripeCustomerError(error) {
     return false;
   }
 
-  const stripeError = /** @type {{ type?: string; code?: string; message?: string; param?: string }} */ (
-    error
-  );
+  const stripeError =
+    /** @type {{ type?: string; code?: string; message?: string; param?: string }} */ (error);
 
   const message = stripeError.message ?? "";
   if (
@@ -71,9 +67,7 @@ export function mapStripeBillingError(error, context) {
   }
 
   const message =
-    context === "portal"
-      ? PORTAL_BILLING_ERROR_MESSAGE
-      : CHECKOUT_BILLING_ERROR_MESSAGE;
+    context === "portal" ? PORTAL_BILLING_ERROR_MESSAGE : CHECKOUT_BILLING_ERROR_MESSAGE;
 
   console.error(`Stripe billing error (${context}):`, error);
   return new HttpsError("failed-precondition", message);
@@ -99,9 +93,7 @@ export async function ensureStripeCustomer(stripe, db, uid, email) {
   const userRef = userEntitlementsRef(db, uid);
   const snapshot = await userRef.get();
   const existingCustomerId =
-    typeof snapshot.data()?.stripeCustomerId === "string"
-      ? snapshot.data().stripeCustomerId
-      : null;
+    typeof snapshot.data()?.stripeCustomerId === "string" ? snapshot.data().stripeCustomerId : null;
 
   if (existingCustomerId) {
     try {
@@ -112,9 +104,7 @@ export async function ensureStripeCustomer(stripe, db, uid, email) {
         "deleted" in existing &&
         existing.deleted === true
       ) {
-        console.warn(
-          `Replacing deleted Stripe customer ${existingCustomerId} for uid ${uid}.`,
-        );
+        console.warn(`Replacing deleted Stripe customer ${existingCustomerId} for uid ${uid}.`);
       } else {
         return existingCustomerId;
       }
@@ -123,9 +113,7 @@ export async function ensureStripeCustomer(stripe, db, uid, email) {
         throw mapStripeBillingError(error, "checkout");
       }
 
-      console.warn(
-        `Replacing stale Stripe customer ${existingCustomerId} for uid ${uid}.`,
-      );
+      console.warn(`Replacing stale Stripe customer ${existingCustomerId} for uid ${uid}.`);
     }
   }
 
@@ -163,13 +151,7 @@ export async function getPremiumEntitlementsHandler(db, uid) {
  * @param {string | null | undefined} email
  * @param {string} productKey
  */
-export async function createCheckoutSessionHandler(
-  stripe,
-  db,
-  uid,
-  email,
-  productKey,
-) {
+export async function createCheckoutSessionHandler(stripe, db, uid, email, productKey) {
   if (!PREMIUM_PRODUCT_KEYS.includes(productKey)) {
     throw new HttpsError("invalid-argument", "Unknown premium product.");
   }
@@ -228,12 +210,7 @@ export async function createCheckoutSessionHandler(
  * @param {string} uid
  * @param {string | null | undefined} email
  */
-export async function createBillingPortalSessionHandler(
-  stripe,
-  db,
-  uid,
-  email,
-) {
+export async function createBillingPortalSessionHandler(stripe, db, uid, email) {
   try {
     const customerId = await ensureStripeCustomer(stripe, db, uid, email);
     const session = await stripe.billingPortal.sessions.create({
@@ -290,21 +267,13 @@ export async function createPremiumSessionHandler(db, uid, rawInput) {
     }
 
     if (!codeRef) {
-      throw new HttpsError(
-        "resource-exhausted",
-        "Could not allocate session code.",
-      );
+      throw new HttpsError("resource-exhausted", "Could not allocate session code.");
     }
 
     consumePremiumSessionCredit(transaction, userRef, userData);
 
     const createdAt = new Date().toISOString();
-    sessionPayload = buildPremiumSessionFirestoreDocument(
-      input,
-      code,
-      uid,
-      createdAt,
-    );
+    sessionPayload = buildPremiumSessionFirestoreDocument(input, code, uid, createdAt);
     const sessionRef = db.collection("sessions").doc();
     sessionId = sessionRef.id;
 
@@ -340,10 +309,7 @@ export async function createPremiumSessionHandler(db, uid, rawInput) {
  * @param {Stripe.Checkout.Session} session
  */
 export async function applyCheckoutSessionCompleted(db, session) {
-  const uid =
-    session.metadata?.firebaseUid ??
-    session.client_reference_id ??
-    null;
+  const uid = session.metadata?.firebaseUid ?? session.client_reference_id ?? null;
   const productKey = session.metadata?.productKey;
 
   if (!uid || typeof productKey !== "string") {
@@ -358,8 +324,7 @@ export async function applyCheckoutSessionCompleted(db, session) {
   if (product.lifetime) {
     await mergeUserEntitlements(db, uid, {
       lifetimePremium: true,
-      stripeCustomerId:
-        typeof session.customer === "string" ? session.customer : undefined,
+      stripeCustomerId: typeof session.customer === "string" ? session.customer : undefined,
     });
     return;
   }
@@ -395,21 +360,15 @@ export async function syncSubscriptionEntitlements(db, subscription) {
     return;
   }
 
-  const plan =
-    subscription.metadata?.plan === "yearly" ? "yearly" : "monthly";
+  const plan = subscription.metadata?.plan === "yearly" ? "yearly" : "monthly";
   const status = subscription.status;
   const patch = {
-    stripeCustomerId:
-      typeof subscription.customer === "string"
-        ? subscription.customer
-        : undefined,
+    stripeCustomerId: typeof subscription.customer === "string" ? subscription.customer : undefined,
     subscription: {
       status,
       plan,
       stripeSubscriptionId: subscription.id,
-      currentPeriodEnd: stripeTimestampToFirestore(
-        subscription.current_period_end,
-      ),
+      currentPeriodEnd: stripeTimestampToFirestore(subscription.current_period_end),
     },
     updatedAt: FieldValue.serverTimestamp(),
   };
@@ -423,9 +382,7 @@ export async function syncSubscriptionEntitlements(db, subscription) {
       status: "canceled",
       plan,
       stripeSubscriptionId: subscription.id,
-      currentPeriodEnd: stripeTimestampToFirestore(
-        subscription.current_period_end,
-      ),
+      currentPeriodEnd: stripeTimestampToFirestore(subscription.current_period_end),
     };
   }
 

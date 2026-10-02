@@ -1,11 +1,11 @@
-import type { GameArea } from "@/domain/map/annotations";
 import { gameAreaToBoundingBox } from "@/domain/geometry/gameArea/gameAreaBounds";
+import type { GameArea } from "@/domain/map/annotations";
 import {
   MEASURING_CATALOG,
-  measuringLinearOverpassSelectors,
-  measuringLocationOverpassSelectors,
   type MeasuringFromKind,
   type MeasuringLocationCategory,
+  measuringLinearOverpassSelectors,
+  measuringLocationOverpassSelectors,
 } from "@/domain/questions";
 import {
   formatOverpassBboxFromGameArea,
@@ -17,10 +17,7 @@ import {
 // Do not import those modules here — they pull leaflet via geometry and break
 // @vitest-environment node audit harnesses.
 
-export function auditAdminDivisionQuery(
-  gameArea: GameArea,
-  adminLevel: number,
-): string {
+export function auditAdminDivisionQuery(gameArea: GameArea, adminLevel: number): string {
   const { south, west, north, east } = gameAreaToBoundingBox(gameArea);
   const bbox = `${south},${west},${north},${east}`;
 
@@ -74,10 +71,7 @@ export function auditMeasuringPlacesQuery(
   `);
 }
 
-export function auditLinearFeaturesQuery(
-  gameArea: GameArea,
-  selectors: readonly string[],
-): string {
+export function auditLinearFeaturesQuery(gameArea: GameArea, selectors: readonly string[]): string {
   const { south, west, north, east } = gameAreaToBoundingBox(gameArea);
   const bbox = `${south},${west},${north},${east}`;
   const clauses = selectors.map((selector) => `way${selector}(${bbox});`);
@@ -167,9 +161,7 @@ export function buildOverpassAuditCases(gameArea: GameArea): OverpassAuditCase[]
       continue;
     }
 
-    const selectors = measuringLocationOverpassSelectors(
-      option.id as MeasuringLocationCategory,
-    );
+    const selectors = measuringLocationOverpassSelectors(option.id as MeasuringLocationCategory);
     if (selectors.length === 0) {
       continue;
     }

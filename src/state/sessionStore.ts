@@ -13,12 +13,7 @@ function structuredFieldEqual<T>(left: T, right: T): boolean {
     return true;
   }
 
-  if (
-    left === null ||
-    right === null ||
-    typeof left === "object" ||
-    typeof right === "object"
-  ) {
+  if (left === null || right === null || typeof left === "object" || typeof right === "object") {
     return JSON.stringify(left) === JSON.stringify(right);
   }
 
@@ -42,8 +37,7 @@ const SESSION_RECORD_STRUCTURED_KEYS = [
   "endGameTruthAnchors",
 ] as const satisfies readonly (keyof SessionRecord)[];
 
-type SessionRecordStructuredKey =
-  (typeof SESSION_RECORD_STRUCTURED_KEYS)[number];
+type SessionRecordStructuredKey = (typeof SESSION_RECORD_STRUCTURED_KEYS)[number];
 
 const SESSION_RECORD_SCALAR_KEYS = [
   "id",
@@ -94,23 +88,15 @@ const SESSION_RECORD_SCALAR_KEYS = [
 
 type SessionRecordScalarKey = (typeof SESSION_RECORD_SCALAR_KEYS)[number];
 
-type SessionRecordComparedKey =
-  | SessionRecordStructuredKey
-  | SessionRecordScalarKey;
+type SessionRecordComparedKey = SessionRecordStructuredKey | SessionRecordScalarKey;
 
 type _AssertSessionRecordEqualityComplete =
-  Exclude<keyof SessionRecord, SessionRecordComparedKey> extends never
-    ? true
-    : never;
+  Exclude<keyof SessionRecord, SessionRecordComparedKey> extends never ? true : never;
 
-const _sessionRecordEqualityComplete: _AssertSessionRecordEqualityComplete =
-  true;
+const _sessionRecordEqualityComplete: _AssertSessionRecordEqualityComplete = true;
 void _sessionRecordEqualityComplete;
 
-function sessionRecordsEqual(
-  left: SessionRecord | null,
-  right: SessionRecord | null,
-): boolean {
+function sessionRecordsEqual(left: SessionRecord | null, right: SessionRecord | null): boolean {
   if (left === right) {
     return true;
   }
@@ -134,10 +120,10 @@ function sessionRecordsEqual(
   return true;
 }
 
+export type { MapStyle } from "../domain/map/mapBasemaps";
 export type { MapTool } from "../domain/map/mapToolTypes";
 export { useAnnotationStore } from "./annotationStore";
-export { useMapStore, type LayerVisibility } from "./mapStore";
-export type { MapStyle } from "../domain/map/mapBasemaps";
+export { type LayerVisibility, useMapStore } from "./mapStore";
 
 interface SessionState {
   session: SessionRecord | null;
@@ -196,10 +182,7 @@ export const useSessionStore = create<SessionState>()(
             nextSession = { ...session, endGameTruthAnchors: undefined };
           }
 
-          if (
-            sessionRecordsEqual(nextSession, state.session) &&
-            uid === state.myUid
-          ) {
+          if (sessionRecordsEqual(nextSession, state.session) && uid === state.myUid) {
             return state;
           }
 
@@ -210,13 +193,8 @@ export const useSessionStore = create<SessionState>()(
           return {
             session: nextSession,
             myUid: uid,
-            myRole:
-              nextSession && uid
-                ? resolvePlayerRole(nextSession.memberRoles, uid)
-                : null,
-            ...(sessionChanged
-              ? { remoteUpdateNotice: null, lastSyncError: null }
-              : {}),
+            myRole: nextSession && uid ? resolvePlayerRole(nextSession.memberRoles, uid) : null,
+            ...(sessionChanged ? { remoteUpdateNotice: null, lastSyncError: null } : {}),
           };
         }),
       setMyUid: (myUid) =>
@@ -239,21 +217,18 @@ export const useSessionStore = create<SessionState>()(
             : state,
         ),
       setPendingWrites: (pendingWrites) => set({ pendingWrites }),
-      incrementPendingWrites: () =>
-        set((state) => ({ pendingWrites: state.pendingWrites + 1 })),
+      incrementPendingWrites: () => set((state) => ({ pendingWrites: state.pendingWrites + 1 })),
       decrementPendingWrites: () =>
         set((state) => ({
           pendingWrites: Math.max(0, state.pendingWrites - 1),
         })),
-      incrementSyncInFlight: () =>
-        set((state) => ({ syncInFlight: state.syncInFlight + 1 })),
+      incrementSyncInFlight: () => set((state) => ({ syncInFlight: state.syncInFlight + 1 })),
       decrementSyncInFlight: () =>
         set((state) => ({
           syncInFlight: Math.max(0, state.syncInFlight - 1),
         })),
       setLastSyncError: (lastSyncError) => set({ lastSyncError }),
-      setRemoteUpdateNotice: (remoteUpdateNotice) =>
-        set({ remoteUpdateNotice }),
+      setRemoteUpdateNotice: (remoteUpdateNotice) => set({ remoteUpdateNotice }),
       setNetworkReachable: (networkReachable) => set({ networkReachable }),
       setSessionFromCache: (sessionFromCache) =>
         set((state) =>

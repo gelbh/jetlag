@@ -1,6 +1,5 @@
-import type { GameArea } from "@/domain/map/annotations";
-import type { AnnotationRecord } from "@/domain/map/annotations";
 import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
+import type { AnnotationRecord, GameArea } from "@/domain/map/annotations";
 import type { DistanceUnit } from "@/domain/map/distance";
 import type { PendingQuestionRecord } from "@/domain/session/activity/sessionChat";
 import type { SessionRulesInput } from "@/domain/session/rules";
@@ -16,10 +15,7 @@ export interface UseMatchingToolParams {
   ) => Promise<AnnotationRecord>;
   awaitHiderAnswer?: boolean;
   submitPendingQuestion?: (
-    input: Omit<
-      SubmitPendingQuestionInput,
-      "sessionId" | "senderUid" | "senderRole" | "toolType"
-    >,
+    input: Omit<SubmitPendingQuestionInput, "sessionId" | "senderUid" | "senderRole" | "toolType">,
   ) => Promise<void>;
   sessionId?: string;
   senderUid?: string | null;

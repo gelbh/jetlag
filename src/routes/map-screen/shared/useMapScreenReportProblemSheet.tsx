@@ -12,8 +12,6 @@ export function useMapScreenReportProblemSheet(
   reportProblemSheet: ReactElement;
 } {
   return {
-    reportProblemSheet: (
-      <ReportProblemSheet open={isOpen} onClose={onClose} />
-    ),
+    reportProblemSheet: <ReportProblemSheet open={isOpen} onClose={onClose} />,
   };
 }

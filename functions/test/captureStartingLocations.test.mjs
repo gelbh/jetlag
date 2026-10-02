@@ -1,5 +1,5 @@
-import test from "node:test";
 import assert from "node:assert/strict";
+import test from "node:test";
 import {
   captureStartingLocationsForSession,
   handleCaptureStartingLocationsWrite,
@@ -21,7 +21,7 @@ function createCaptureMockDb({ session = {}, playerLocations = [] } = {}) {
     collection(name) {
       assert.equal(name, "sessions");
       return {
-        doc(sessionId) {
+        doc(_sessionId) {
           return {
             async get() {
               return {

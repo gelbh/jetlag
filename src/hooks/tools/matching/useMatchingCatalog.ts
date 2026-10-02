@@ -1,8 +1,6 @@
-import { useEffect, useMemo, useRef, useState } from "react";
 import area from "@turf/area";
-import type { Feature, MultiPolygon, Polygon as GeoPolygon } from "geojson";
-import type { GameArea } from "@/domain/map/annotations";
-import type { AnnotationRecord } from "@/domain/map/annotations";
+import type { Feature, Polygon as GeoPolygon, MultiPolygon } from "geojson";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   buildMatchingEliminationRegion,
   buildSameNearestRegion,
@@ -12,30 +10,28 @@ import {
   buildCoarsePolygonFeature,
   type PolygonLodPhase,
 } from "@/domain/geometry/progressive/polygonLod";
-import { paintPolygonLod } from "@/hooks/tools/framework/paintPolygonLod";
+import type { AnnotationRecord, GameArea } from "@/domain/map/annotations";
 import {
   getMatchingCategory,
+  type MatchingAnswer,
+  type MatchingCategoryId,
   matchingCategoryUseCount,
   matchingCategoryUseCountFromPending,
   questionCostBreakdown,
-  type MatchingAnswer,
-  type MatchingCategoryId,
 } from "@/domain/questions";
-import {
-  resolveMatchingCategory,
-  sessionCustomContentFromRules,
-} from "@/domain/session/catalog/sessionCustomCatalog";
+import type { PendingQuestionRecord } from "@/domain/session/activity/sessionChat";
 import {
   availableMatchingCategories,
   isPreviewQuestionBeforeSendEnabled,
 } from "@/domain/session/catalog/sessionCatalogAvailability";
-import type { PendingQuestionRecord } from "@/domain/session/activity/sessionChat";
+import {
+  resolveMatchingCategory,
+  sessionCustomContentFromRules,
+} from "@/domain/session/catalog/sessionCustomCatalog";
 import type { SessionRulesInput } from "@/domain/session/rules";
+import { paintPolygonLod } from "@/hooks/tools/framework/paintPolygonLod";
+import type { MatchingFeature, MatchingFetchOptions } from "@/services/geo/matching";
 import { isAdminDivisionCategoryAvailable } from "@/services/geo/overpass/adminDivisionAvailability";
-import type {
-  MatchingFeature,
-  MatchingFetchOptions,
-} from "@/services/geo/matching";
 import { inferTransitMetroId } from "@/services/transit/transitCatalog";
 import { usePreloadStore } from "@/state/preloadStore";
 
@@ -86,11 +82,7 @@ function yesElimFromBoundary(
   if (cached) {
     return cached;
   }
-  const yes = matchingEliminationFromSameNearestRegion(
-    boundary,
-    gameArea,
-    "yes",
-  );
+  const yes = matchingEliminationFromSameNearestRegion(boundary, gameArea, "yes");
   yesElimWeakCache.set(boundary, yes);
   return yes;
 }
@@ -121,10 +113,7 @@ export function useMatchingCatalog(input: {
   const matchingUseCount = matchingCategoryId
     ? Math.max(
         matchingCategoryUseCount(activeAnnotations, matchingCategoryId),
-        matchingCategoryUseCountFromPending(
-          pendingQuestions,
-          matchingCategoryId,
-        ),
+        matchingCategoryUseCountFromPending(pendingQuestions, matchingCategoryId),
       )
     : 0;
   const cost = questionCostBreakdown("D3P1", matchingUseCount);
@@ -145,10 +134,7 @@ export function useMatchingCatalog(input: {
   }, [sessionRules]);
 
   const matchingTransitMetroId = useMemo(
-    () =>
-      matchingCategoryId === "transit_line"
-        ? inferTransitMetroId(gameArea)
-        : null,
+    () => (matchingCategoryId === "transit_line" ? inferTransitMetroId(gameArea) : null),
     [matchingCategoryId, gameArea],
   );
 
@@ -170,11 +156,7 @@ export function useMatchingCatalog(input: {
       ? availableMatchingCategories(sessionRules)
       : availableMatchingCategories({ gameSize: "medium" });
     return categories.filter((category) =>
-      isAdminDivisionCategoryAvailable(
-        category.id,
-        adminDivisionCounts,
-        regionPackId,
-      ),
+      isAdminDivisionCategoryAvailable(category.id, adminDivisionCounts, regionPackId),
     );
   }, [adminDivisionCounts, regionPackId, sessionRules]);
 
@@ -186,26 +168,22 @@ export function useMatchingCatalog(input: {
     nearestFeatureId: string;
     region: Feature<GeoPolygon | MultiPolygon>;
   } | null>(null);
-  const [lodEliminationPreview, setLodEliminationPreview] = useState<
-    Feature<GeoPolygon | MultiPolygon> | null
-  >(null);
-  const [matchingLodPhase, setMatchingLodPhase] =
-    useState<PolygonLodPhase>("complete");
+  const [lodEliminationPreview, setLodEliminationPreview] = useState<Feature<
+    GeoPolygon | MultiPolygon
+  > | null>(null);
+  const [matchingLodPhase, setMatchingLodPhase] = useState<PolygonLodPhase>("complete");
   const elimGenerationRef = useRef(0);
   const elimLodCancelRef = useRef<(() => void) | null>(null);
 
   const boundaryEligible =
-    !matchingNullAnswer &&
-    Boolean(matchingNearestFeatureId) &&
-    matchingFeatures.length > 0;
+    !matchingNullAnswer && Boolean(matchingNearestFeatureId) && matchingFeatures.length > 0;
   const matchingBoundaryPreview =
     boundaryEligible &&
     matchingNearestFeatureId &&
     eligibleBoundaryPreview?.nearestFeatureId === matchingNearestFeatureId
       ? eligibleBoundaryPreview.region
       : null;
-  const eliminationEligible =
-    boundaryEligible && matchingAnswer !== null;
+  const eliminationEligible = boundaryEligible && matchingAnswer !== null;
 
   useEffect(() => {
     if (!boundaryEligible || !matchingNearestFeatureId) {
@@ -213,11 +191,7 @@ export function useMatchingCatalog(input: {
     }
     const nearestFeatureId = matchingNearestFeatureId;
     let cancelled = false;
-    void buildSameNearestRegion(
-      matchingFeatures,
-      nearestFeatureId,
-      gameArea,
-    )
+    void buildSameNearestRegion(matchingFeatures, nearestFeatureId, gameArea)
       .then((region) => {
         if (cancelled) {
           return;
@@ -237,12 +211,7 @@ export function useMatchingCatalog(input: {
     return () => {
       cancelled = true;
     };
-  }, [
-    boundaryEligible,
-    gameArea,
-    matchingFeatures,
-    matchingNearestFeatureId,
-  ]);
+  }, [boundaryEligible, gameArea, matchingFeatures, matchingNearestFeatureId]);
 
   // Warm the yes complement after boundary lands (keeps the yes tap off the critical path).
   useEffect(() => {
@@ -265,12 +234,7 @@ export function useMatchingCatalog(input: {
       return matchingBoundaryPreview;
     }
     return yesElimFromBoundary(matchingBoundaryPreview, gameArea);
-  }, [
-    eliminationEligible,
-    gameArea,
-    matchingAnswer,
-    matchingBoundaryPreview,
-  ]);
+  }, [eliminationEligible, gameArea, matchingAnswer, matchingBoundaryPreview]);
 
   // LOD only while the boundary is still building.
   useEffect(() => {
@@ -302,10 +266,7 @@ export function useMatchingCatalog(input: {
       setMatchingLodPhase("coarse");
     });
 
-    const prefixFeatures = matchingCoarseCatalogPrefix(
-      matchingFeatures,
-      matchingNearestFeatureId,
-    );
+    const prefixFeatures = matchingCoarseCatalogPrefix(matchingFeatures, matchingNearestFeatureId);
 
     void (async () => {
       try {
@@ -318,8 +279,7 @@ export function useMatchingCatalog(input: {
         if (generation !== elimGenerationRef.current) {
           return;
         }
-        const prefixIsFull =
-          prefixFeatures.length === matchingFeatures.length;
+        const prefixIsFull = prefixFeatures.length === matchingFeatures.length;
         if (prefixRegion && prefixIsFull) {
           paintPolygonLod(
             prefixRegion,
@@ -405,13 +365,9 @@ export function useMatchingCatalog(input: {
     regionPackId,
     matchingCatalog,
     previewBeforeSend,
-    matchingBoundaryPreview: boundaryEligible
-      ? matchingBoundaryPreview
-      : null,
+    matchingBoundaryPreview: boundaryEligible ? matchingBoundaryPreview : null,
     matchingEliminationPreview,
     matchingLodPhase:
-      eliminationEligible && !matchingBoundaryPreview
-        ? matchingLodPhase
-        : "complete",
+      eliminationEligible && !matchingBoundaryPreview ? matchingLodPhase : "complete",
   };
 }

@@ -1,9 +1,9 @@
-import type { Feature, MultiPolygon, Polygon } from "geojson";
 import intersect from "@turf/intersect";
+import type { Feature, MultiPolygon, Polygon } from "geojson";
+import type { AdminDivisionFeature } from "../../geo/types";
 import type { GameArea } from "../../map/annotations";
 import type { MatchingAnswer } from "../../questions/matchingQuestions";
 import { gameAreaToPolygon, safeDifference } from "./geometry";
-import type { AdminDivisionFeature } from "../../geo/types";
 
 function clipDivisionToGameArea(
   division: AdminDivisionFeature,
@@ -11,16 +11,12 @@ function clipDivisionToGameArea(
 ): Feature<Polygon | MultiPolygon> | null {
   const clipped = intersect({
     type: "FeatureCollection",
-    features: [
-      gameAreaToPolygon(gameArea),
-      gameAreaToPolygon(division.boundary),
-    ],
+    features: [gameAreaToPolygon(gameArea), gameAreaToPolygon(division.boundary)],
   });
 
   if (
     !clipped ||
-    (clipped.geometry.type !== "Polygon" &&
-      clipped.geometry.type !== "MultiPolygon")
+    (clipped.geometry.type !== "Polygon" && clipped.geometry.type !== "MultiPolygon")
   ) {
     return null;
   }

@@ -25,11 +25,7 @@ export function AdminBoundariesLayer({
   return (
     <>
       {features.map((entry) => {
-        const style = getAdminBoundaryStrokeStyle(
-          entry.adminLevel,
-          mapStyle,
-          streetBasemap,
-        );
+        const style = getAdminBoundaryStrokeStyle(entry.adminLevel, mapStyle, streetBasemap);
         const paint = pathOptionsToMapLibrePaint({
           ...style,
           opacity: style.opacity ?? 0.5,
