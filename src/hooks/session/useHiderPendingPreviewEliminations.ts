@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Feature, MultiPolygon, Polygon } from "geojson";
 import type { AnnotationRecord, GameArea } from "../../domain/map/annotations";
+import { previewGeometryFingerprint } from "../../domain/geometry/measuring/previewGeometryFingerprint";
 import type { HiderTruthResult } from "../../domain/questions/hiderTruth";
 import {
   buildPendingPreviewEliminationFeatures,
@@ -61,6 +62,38 @@ function buildReplyIdMap(
   return replyIds;
 }
 
+function gameAreaContentKey(gameArea: GameArea | null | undefined): string {
+  return (
+    previewGeometryFingerprint(
+      gameArea
+        ? {
+            type: "Feature",
+            properties: {},
+            geometry: gameArea,
+          }
+        : null,
+    ) ?? "null"
+  );
+}
+
+function pendingPlacementValueKey(value: unknown): string {
+  if (Array.isArray(value)) {
+    return `[${value.map((item) => pendingPlacementValueKey(item)).join(",")}]`;
+  }
+
+  if (value && typeof value === "object") {
+    return `{${Object.entries(value)
+      .sort(([left], [right]) => left.localeCompare(right))
+      .map(
+        ([key, nestedValue]) =>
+          `${JSON.stringify(key)}:${pendingPlacementValueKey(nestedValue)}`,
+      )
+      .join(",")}}`;
+  }
+
+  return JSON.stringify(value) ?? "null";
+}
+
 export function useHiderPendingPreviewEliminations({
   pendingQuestions,
   questionTruths,
@@ -74,6 +107,10 @@ export function useHiderPendingPreviewEliminations({
     Feature<Polygon | MultiPolygon>[]
   >(() => []);
   const generationRef = useRef(0);
+  const pendingQuestionsRef = useRef(pendingQuestions);
+  const replyIdByQuestionIdRef = useRef<ReadonlyMap<string, string>>(new Map());
+  const annotationsRef = useRef(annotations);
+  const gameAreaRef = useRef(gameArea);
 
   const replyIdByQuestionId = useMemo(
     () =>
@@ -95,12 +132,20 @@ export function useHiderPendingPreviewEliminations({
     [replyIdByQuestionId],
   );
 
+  const gameAreaKey = useMemo(() => gameAreaContentKey(gameArea), [gameArea]);
+
   const pendingKey = useMemo(
     () =>
       pendingQuestions
-        .map(
-          (question) =>
-            `${question.id}:${question.status}:${question.resolvedAnnotationId ?? ""}`,
+        .map((question) =>
+          [
+            question.id,
+            question.status,
+            question.resolvedAnnotationId ?? "",
+            question.toolType,
+            question.placement.geometryJson,
+            pendingPlacementValueKey(question.placement.metadata),
+          ].join(":"),
         )
         .join(","),
     [pendingQuestions],
@@ -120,18 +165,35 @@ export function useHiderPendingPreviewEliminations({
     Boolean(gameArea) && replyIdByQuestionId.size > 0;
 
   useEffect(() => {
+    pendingQuestionsRef.current = pendingQuestions;
+  }, [pendingQuestions]);
+
+  useEffect(() => {
+    replyIdByQuestionIdRef.current = replyIdByQuestionId;
+  }, [replyIdByQuestionId]);
+
+  useEffect(() => {
+    annotationsRef.current = annotations;
+  }, [annotations]);
+
+  useEffect(() => {
+    gameAreaRef.current = gameArea;
+  }, [gameArea]);
+
+  useEffect(() => {
     const generation = generationRef.current + 1;
     generationRef.current = generation;
 
-    if (!shouldComputePreview || !gameArea) {
+    const currentGameArea = gameAreaRef.current;
+    if (!shouldComputePreview || !currentGameArea) {
       return;
     }
 
     void buildPendingPreviewEliminationFeatures(
-      pendingQuestions,
-      replyIdByQuestionId,
-      gameArea,
-      annotations,
+      pendingQuestionsRef.current,
+      replyIdByQuestionIdRef.current,
+      currentGameArea,
+      annotationsRef.current,
     )
       .then((features) => {
         if (generation === generationRef.current) {
@@ -143,16 +205,7 @@ export function useHiderPendingPreviewEliminations({
           setPreviewEliminationFeatures([]);
         }
       });
-  }, [
-    annotations,
-    gameArea,
-    pendingKey,
-    pendingQuestions,
-    replyIdByQuestionId,
-    replyKey,
-    annotationKey,
-    shouldComputePreview,
-  ]);
+  }, [gameAreaKey, pendingKey, replyKey, annotationKey, shouldComputePreview]);
 
   return {
     previewEliminationFeatures: shouldComputePreview
