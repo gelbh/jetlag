@@ -4,19 +4,13 @@ import {
   parseGeometryJson,
   pointFromGeometryFeature,
 } from "../../geometry/gameArea/geometryParsing";
-import {
-  isEndGameActive,
-  type SessionRecord,
-} from "../../map/annotations";
+import { isEndGameActive, type SessionRecord } from "../../map/annotations";
 import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
 
 export type { EndGameTruthAnchor } from "../../session/hiding/endGameTruthAnchors";
 
 export type HiderTruthReferenceMode =
-  | "hidingPlace"
-  | "hidingZoneCenter"
-  | "endGameFreeze"
-  | "unavailable";
+  "hidingPlace" | "hidingZoneCenter" | "endGameFreeze" | "unavailable";
 
 export interface ResolveHiderTruthReferenceInput {
   hiderUid: string;
@@ -54,7 +48,9 @@ function isUsableLatLng(lat: unknown, lng: unknown): lat is number {
   );
 }
 
-function isUsablePoint(point: LatLngTuple | null | undefined): point is LatLngTuple {
+function isUsablePoint(
+  point: LatLngTuple | null | undefined,
+): point is LatLngTuple {
   return point != null && isUsableLatLng(point[0], point[1]);
 }
 
@@ -83,11 +79,15 @@ const MAP_PIN_TRUTH_TOOLS = new Set([
   "thermometer",
 ]);
 
+export function isMapPinTruthTool(toolType: string): boolean {
+  return MAP_PIN_TRUTH_TOOLS.has(toolType);
+}
+
 export function askOriginFromPendingQuestion(
   question: PendingQuestionRecord,
   seekerPlacesByUid?: Readonly<Record<string, LatLngTuple>> | null,
 ): LatLngTuple | null {
-  if (MAP_PIN_TRUTH_TOOLS.has(question.toolType)) {
+  if (isMapPinTruthTool(question.toolType)) {
     const seekerPlace = question.createdByUid
       ? seekerPlacesByUid?.[question.createdByUid]
       : undefined;
