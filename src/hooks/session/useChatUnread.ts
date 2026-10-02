@@ -88,9 +88,7 @@ export function useChatUnread({
 
     const baseline = new Set(baselineAcknowledgedFingerprints(messages, viewerUid));
     baselinedRef.current = true;
-    /* eslint-disable react-hooks/set-state-in-effect -- baseline historical messages on first snapshot */
     setAcknowledged(baseline);
-    /* eslint-enable react-hooks/set-state-in-effect */
     saveAcknowledgedFingerprints(storageKey, baseline);
   }, [acknowledged.size, messages, storageKey, viewerUid]);
 
@@ -100,9 +98,7 @@ export function useChatUnread({
     }
 
     const nextAcknowledged = new Set(allMessageFingerprints(messages));
-    /* eslint-disable react-hooks/set-state-in-effect -- mark messages read when chat opens */
     setAcknowledged(nextAcknowledged);
-    /* eslint-enable react-hooks/set-state-in-effect */
     saveAcknowledgedFingerprints(storageKey, nextAcknowledged);
   }, [isChatOpen, messages, storageKey]);
 

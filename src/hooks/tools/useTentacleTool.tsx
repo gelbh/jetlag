@@ -555,7 +555,6 @@ export function useTentacleTool({
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- category entry only
   }, [mapFirstEligible, tentacleCategoryId, tentacleCenter]);
 
   useEffect(() => {

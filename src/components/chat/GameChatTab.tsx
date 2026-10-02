@@ -155,9 +155,7 @@ export function GameChatTab({
   const bottomRef = useStickScrollToBottom(gameMessages.length);
 
   useEffect(() => {
-    /* eslint-disable react-hooks/set-state-in-effect -- initialize countdown clock */
     setNowMs(Date.now());
-    /* eslint-enable react-hooks/set-state-in-effect */
     const interval = window.setInterval(() => {
       setNowMs(Date.now());
     }, 1000);

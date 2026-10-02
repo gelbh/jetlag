@@ -104,9 +104,7 @@ export function useFriendsPanelModel() {
 
   useEffect(() => {
     cancelledRef.current = false;
-    /* eslint-disable react-hooks/set-state-in-effect -- initial friends list load */
     void refresh();
-    /* eslint-enable react-hooks/set-state-in-effect */
     return () => {
       cancelledRef.current = true;
     };
@@ -185,12 +183,10 @@ export function useFriendsPanelModel() {
   useEffect(() => {
     const trimmed = debouncedQuery.trim();
     if (trimmed.length === 0) {
-      /* eslint-disable react-hooks/set-state-in-effect -- invalidate in-flight search on clear */
       beginRequest();
       setSearchResults([]);
       setHasSearched(false);
       setSearching(false);
-      /* eslint-enable react-hooks/set-state-in-effect */
       return;
     }
     const validated = validateFriendSearchQuery(debouncedQuery);
@@ -270,9 +266,7 @@ export function useFriendsPanelModel() {
       selectableEntries.some((entry) => entry.uid === selectedUid) ||
       requestableResults.some((entry) => entry.uid === selectedUid);
     if (!stillListed) {
-      /* eslint-disable react-hooks/set-state-in-effect -- clear selection when the uid leaves the list */
       setSelectedUid(null);
-      /* eslint-enable react-hooks/set-state-in-effect */
     }
   }, [selectableEntries, requestableResults, selectedUid]);
 

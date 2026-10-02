@@ -100,7 +100,6 @@ export function usePanelDrag({
     if (userMinimized) {
       setOffsetPx(collapsed);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- align state with initial minimized prop on mount only
   }, [userMinimized, peekHeightPx, panelRef?.current?.offsetHeight]);
 
   const beginSettle = useCallback(
@@ -205,7 +204,6 @@ export function usePanelDrag({
     const panEnded = !mapPanning && wasPanning;
 
     if (panStarted) {
-      /* eslint-disable react-hooks/set-state-in-effect -- map-pan collapse is driven by external map gesture */
       // Interrupt an in-flight settle so a quick pan cannot lose pan-end restore.
       pendingMinimizedRef.current = null;
       settleShouldPersistRef.current = true;
@@ -217,7 +215,6 @@ export function usePanelDrag({
         setDisplayMinimized(false);
         beginSettle(collapsedPx, true, { persistMinimized: false });
       }
-      /* eslint-enable react-hooks/set-state-in-effect */
     } else if (panEnded && !userMinimized) {
       beginSettle(0, false);
     }

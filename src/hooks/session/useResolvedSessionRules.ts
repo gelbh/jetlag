@@ -56,11 +56,7 @@ export function useResolvedSessionRules(
   session: SessionRecord | null | undefined,
 ): ResolvedSessionRulesState {
   const _sessionRulesKey = sessionRulesSnapshot(session);
-  const baseRules = useMemo(
-    () => sessionRulesFromRecord(session),
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- sessionRulesKey tracks rule fields
-    [session],
-  );
+  const baseRules = useMemo(() => sessionRulesFromRecord(session), [session]);
 
   const regionPackId = session?.regionPackId;
   const regionPackSubregionId = session?.regionPackSubregionId;
@@ -94,7 +90,6 @@ export function useResolvedSessionRules(
 
   useEffect(() => {
     if (!needsAsyncResolve || !playAreaCacheKeyValue) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- reset when resolve not needed
       setResolvedAreas(undefined);
       setMatchingAreasError(null);
       return;
@@ -135,7 +130,6 @@ export function useResolvedSessionRules(
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- pack-key only; session churn must not cancel
   }, [
     areasCacheKey,
     needsAsyncResolve,
@@ -146,7 +140,6 @@ export function useResolvedSessionRules(
 
   useEffect(() => {
     if (!needsPlayAreaResolve || !playAreaCacheKeyValue) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- reset when resolve not needed
       setResolvedGameArea(undefined);
       return;
     }
@@ -183,7 +176,6 @@ export function useResolvedSessionRules(
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- pack-key only; session churn must not cancel
   }, [needsPlayAreaResolve, playAreaCacheKeyValue, session]);
 
   const sessionRules = useMemo(

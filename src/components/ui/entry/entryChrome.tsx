@@ -1,4 +1,3 @@
-/* eslint-disable react-refresh/only-export-components -- entry chrome pairs surface components with shared style tokens */
 import { Box } from "@mantine/core";
 import type { ReactNode } from "react";
 import type {

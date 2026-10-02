@@ -24,7 +24,6 @@ export function AppNavigate({ to, replace, state }: NavigateProps) {
 
     navigate(to, { replace, state, viewTransition: false });
     // Redirect once on mount; during an active gate, follow the chain in-place.
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- mount-only redirect
   }, [state, navigate, to, replace, phase, beginTransition]);
 
   return null;

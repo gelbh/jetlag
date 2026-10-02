@@ -37,7 +37,6 @@ export async function openChat(page: Page) {
 
   const dockChat = page.getByRole("button", { name: "Open chat" });
   if (await dockChat.isVisible().catch(() => false)) {
-    // eslint-disable-next-line playwright/no-force-option -- dock / wizard overlay stacking
     await dockChat.click({ force: true });
     await expect(page.getByLabel("Chat tabs")).toBeVisible({ timeout: 15_000 });
     return;
@@ -47,7 +46,6 @@ export async function openChat(page: Page) {
     name: "Open chat, unread messages",
   });
   if (await unreadChat.isVisible().catch(() => false)) {
-    // eslint-disable-next-line playwright/no-force-option -- dock / wizard overlay stacking
     await unreadChat.click({ force: true });
     await expect(page.getByLabel("Chat tabs")).toBeVisible({ timeout: 15_000 });
     return;

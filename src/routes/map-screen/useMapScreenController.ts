@@ -199,7 +199,6 @@ export function useMapScreenController() {
     setActiveTool("none");
     setAwaitingPlacement(false);
     overlay.closeSheet();
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- only overlay.closeSheet invoked
   }, [overlay.closeSheet, selectedAnnotationId, setActiveTool, setAwaitingPlacement]);
 
   const { handleMapClick } = useMapToolInteraction({
@@ -226,7 +225,6 @@ export function useMapScreenController() {
       tentacleTool.selectDraftPoi(poiId);
       return true;
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- selectDraftPoi is the stable method bind
     [tentacleTool.selectDraftPoi],
   );
 
@@ -438,7 +436,6 @@ export function useMapScreenController() {
     setSelectedAnnotationId(null);
     cancelGeometryEdit();
     setAwaitingPlacement(false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- only overlay.closeSheet invoked
   }, [cancelGeometryEdit, overlay.closeSheet, setSelectedAnnotationId, setAwaitingPlacement]);
 
   const handleSelectTool = useCallback(

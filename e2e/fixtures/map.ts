@@ -28,7 +28,6 @@ export async function clickMapAt(page: Page, xRatio: number, yRatio: number) {
       y: Math.floor(box.height * yRatio),
     },
     // MapLibre canvas under chrome overlays: Playwright hit-target misses without force.
-    // eslint-disable-next-line playwright/no-force-option -- canvas under overlay stacking
     force: true,
   });
 }

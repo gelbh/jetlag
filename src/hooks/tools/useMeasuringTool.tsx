@@ -250,7 +250,6 @@ export function useMeasuringTool({
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- option entry only
   }, [mapFirstEligible, measureFromKey, draft.measuringSeekerPoint]);
 
   useEffect(() => {

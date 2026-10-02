@@ -253,7 +253,6 @@ function MapFocus({
       stopMapCameraEase(map);
       map.off("moveend", onMoveEnd);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- keys from mapFocusApplyDependencyKeys
   }, [
     ...applyDependencyKeys,
     mapRef,

@@ -15,11 +15,9 @@ export function useLeaderboardSelfEntry(
 
   useEffect(() => {
     if (!uid || skip) {
-      /* eslint-disable react-hooks/set-state-in-effect -- clear self-entry when board/uid/skip changes */
       setEntry(null);
       setError(false);
       setLoading(false);
-      /* eslint-enable react-hooks/set-state-in-effect */
       return;
     }
     let cancelled = false;

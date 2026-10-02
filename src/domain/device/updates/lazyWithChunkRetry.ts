@@ -31,7 +31,6 @@ export function getServiceWorkerChunkReloadContext(): Pick<
 
 export function lazyWithChunkRetry(
   // React.lazy needs a wide component type across named-export modules.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- lazy route modules use incompatible prop shapes
   importFn: () => Promise<{ default: ComponentType<any> }>,
   getReloadContext?: () => ChunkReloadContext,
 ) {

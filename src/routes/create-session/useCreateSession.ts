@@ -241,7 +241,6 @@ export function useCreateSession() {
     };
 
     void applyPreset();
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- apply preset once per preset id; framing stable via hook
   }, [framing.applyFocusToGameArea, presets, requestMap, searchParams]);
 
   const requestLocationBias = useCallback(() => {
@@ -324,10 +323,8 @@ export function useCreateSession() {
 
   useEffect(() => {
     if (inferredTransitMetroId !== transitMetroInferenceSeed) {
-      /* eslint-disable react-hooks/set-state-in-effect -- reset metro override when inference changes */
       setTransitMetroInferenceSeed(inferredTransitMetroId);
       setTransitMetroOverride(null);
-      /* eslint-enable react-hooks/set-state-in-effect */
     }
   }, [inferredTransitMetroId, transitMetroInferenceSeed]);
 

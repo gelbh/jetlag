@@ -289,7 +289,6 @@ export function useThermometerTool({
     setEditingSetup(true);
     walkTracker.cancelWalk();
     session.open();
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- session.open identity is the bind we need
   }, [session.open, walkTracker]);
 
   const startGpsWalk = useCallback(async () => {

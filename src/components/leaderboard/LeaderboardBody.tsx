@@ -1100,10 +1100,8 @@ export function LeaderboardBody() {
   }, [selection]);
 
   useEffect(() => {
-    /* eslint-disable react-hooks/set-state-in-effect -- board subscription resets */
     setBoardLoading(true);
     setBoardError(null);
-    /* eslint-enable react-hooks/set-state-in-effect */
 
     if (mockEnabled) {
       return subscribeMockLeaderboardBoard(
@@ -1169,7 +1167,6 @@ export function LeaderboardBody() {
     if (!match) {
       return;
     }
-    /* eslint-disable react-hooks/set-state-in-effect -- deep-link opens player sheet once */
     setSelectedUid(match.uid);
     setSearchParams(
       (prev) => {
@@ -1179,7 +1176,6 @@ export function LeaderboardBody() {
       },
       { replace: true },
     );
-    /* eslint-enable react-hooks/set-state-in-effect */
   }, [userParam, boardLoading, entries, setSearchParams]);
 
   const searchActive = query.trim().length > 0;

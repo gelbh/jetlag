@@ -1,4 +1,3 @@
-/* eslint-disable react-refresh/only-export-components -- registry exports render helper alongside layer components */
 import turfCircle from "@turf/circle";
 import type { Feature, Polygon as GeoPolygon } from "geojson";
 import { useCallback } from "react";

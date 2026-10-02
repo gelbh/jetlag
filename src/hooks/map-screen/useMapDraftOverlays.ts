@@ -466,7 +466,6 @@ export function useMapDraftOverlays(
       tentacleLodCancelRef.current?.();
       tentacleLodCancelRef.current = null;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- field deps cover `sources` inputs
   }, [sources.activeTool, sources]);
 
   return useMemo(() => {

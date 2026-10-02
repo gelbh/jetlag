@@ -310,7 +310,6 @@ export function HiderMapScreen() {
   const { answerPendingQuestion, postSystemMessage } = usePendingQuestionActions();
 
   useEffect(() => {
-    /* eslint-disable react-hooks/set-state-in-effect -- prune optimistic answers once remote status catches up */
     setOptimisticAnswers((previous) => {
       if (previous.size === 0) {
         return previous;
@@ -332,7 +331,6 @@ export function HiderMapScreen() {
       }
       return changed ? next : previous;
     });
-    /* eslint-enable react-hooks/set-state-in-effect */
   }, [pendingQuestions]);
 
   const submitHiderAnswer = useCallback(
@@ -618,7 +616,6 @@ export function HiderMapScreen() {
 
   const handleSearchThisArea = useCallback(() => {
     void zoneTool.searchStationsInArea(searchViewportBounds());
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- searchStationsInArea is the only zoneTool method used
   }, [searchViewportBounds, zoneTool.searchStationsInArea]);
 
   const myTrap = uid ? timeTrapForHider(timeTraps, uid) : null;
@@ -659,7 +656,6 @@ export function HiderMapScreen() {
   const openWizardExclusive = useCallback(() => {
     overlay.closeSheet();
     zoneTool.openWizard();
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- only closeSheet and openWizard methods used
   }, [overlay.closeSheet, zoneTool.openWizard]);
 
   const openChatExclusive = useCallback(() => {
@@ -669,7 +665,6 @@ export function HiderMapScreen() {
     zoneTool.closeWizard();
     setChatAnswerError(null);
     overlay.openChat();
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- moveMode gates sheet openers during Play Move
   }, [overlay.openChat, zoneTool.closeWizard, zoneTool.moveMode]);
 
   const dismissTruthReveal = useCallback(() => {
@@ -682,7 +677,6 @@ export function HiderMapScreen() {
     }
     zoneTool.closeWizard();
     overlay.openSettings();
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- moveMode gates sheet openers during Play Move
   }, [overlay.openSettings, zoneTool.closeWizard, zoneTool.moveMode]);
 
   const openCodesExclusive = useCallback(() => {
@@ -691,7 +685,6 @@ export function HiderMapScreen() {
     }
     zoneTool.closeWizard();
     overlay.openCodes();
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- moveMode gates sheet openers during Play Move
   }, [overlay.openCodes, zoneTool.closeWizard, zoneTool.moveMode]);
 
   const openLogExclusive = useCallback(() => {
@@ -700,7 +693,6 @@ export function HiderMapScreen() {
     }
     zoneTool.closeWizard();
     overlay.openLog();
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- moveMode gates sheet openers during Play Move
   }, [overlay.openLog, zoneTool.closeWizard, zoneTool.moveMode]);
 
   const handleMapClick = useCallback(
@@ -715,7 +707,6 @@ export function HiderMapScreen() {
 
       zoneTool.handleMapClick([lat, lng]);
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- timeTrapTool.stations/setSelectedStation listed; full object not needed
     [myTrap, timeTrapSheetOpen, timeTrapTool.setSelectedStation, timeTrapTool.stations, zoneTool],
   );
 

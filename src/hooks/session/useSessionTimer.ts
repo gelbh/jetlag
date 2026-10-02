@@ -71,9 +71,7 @@ export function useSessionTimer(
     if (!sessionId) {
       lastSessionIdRef.current = undefined;
       lastSessionResetAtRef.current = undefined;
-      /* eslint-disable react-hooks/set-state-in-effect -- reset when leaving a session */
       setTimerStateInternal(INITIAL_TIMER_STATE);
-      /* eslint-enable react-hooks/set-state-in-effect */
       return;
     }
 
@@ -107,9 +105,7 @@ export function useSessionTimer(
       return;
     }
 
-    /* eslint-disable react-hooks/set-state-in-effect -- mirror host timer from Firestore */
     setTimerStateInternal(remoteState);
-    /* eslint-enable react-hooks/set-state-in-effect */
     timerStateRef.current = remoteState;
 
     if (sessionId) {

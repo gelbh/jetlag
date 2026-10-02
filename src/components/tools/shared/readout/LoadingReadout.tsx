@@ -19,9 +19,7 @@ export function LoadingReadout({ children, variant = "dim" }: LoadingReadoutProp
   const [stale, setStale] = useState(false);
 
   useEffect(() => {
-    /* eslint-disable react-hooks/set-state-in-effect -- reset stale timer when loading copy changes */
     setStale(false);
-    /* eslint-enable react-hooks/set-state-in-effect */
     const timerId = window.setTimeout(() => setStale(true), STALE_LOADING_MS);
     return () => window.clearTimeout(timerId);
   }, []);

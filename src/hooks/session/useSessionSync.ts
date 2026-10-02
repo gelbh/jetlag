@@ -70,7 +70,6 @@ export function useSessionSync({ syncEnabled = true }: UseSessionSyncOptions = {
     );
 
     return unsubscribe;
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- resubscribe on session id only
   }, [myUid, session?.id, setLastSyncError, setSession, syncEnabled, session]);
 
   const endGameSessionId = session?.id;
@@ -179,7 +178,6 @@ export function useSessionSync({ syncEnabled = true }: UseSessionSyncOptions = {
     );
 
     return unsubscribe;
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- resubscribe on session id only
   }, [
     markAnnotationPulse,
     replaceAnnotations,
@@ -269,7 +267,6 @@ export function useSessionSync({ syncEnabled = true }: UseSessionSyncOptions = {
       }
       window.clearInterval(intervalId);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- resubscribe on session id only
   }, [queueFlushMs, session?.id, setLastSyncError, setPendingWrites, syncEnabled, session]);
 
   useEffect(() => {

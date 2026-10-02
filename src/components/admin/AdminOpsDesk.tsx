@@ -247,7 +247,6 @@ export function AdminOpsDesk() {
     const key = `${location.pathname}:${uid ?? "anon"}`;
     if (deepLinkKey === key) return;
 
-    /* eslint-disable react-hooks/set-state-in-effect -- deep-link ensure-visible + Scratch preset flip from route */
     setStore((prev) => {
       const current = resolvePresetLayout(prev.activePresetId, prev.customLayout, prev.userPresets);
       const ensured = ensureIncidentPanelsVisible(current);
@@ -270,7 +269,6 @@ export function AdminOpsDesk() {
       return next;
     });
     setDeepLinkKey(key);
-    /* eslint-enable react-hooks/set-state-in-effect */
   }, [deepLinkKey, enabled, location.pathname, onIncidentsRoute, selectedIncidentId, uid]);
 
   const visibleIncidents = enabled ? incidents : EMPTY_INCIDENTS;

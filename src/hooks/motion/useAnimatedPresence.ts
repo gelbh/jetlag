@@ -67,14 +67,12 @@ export function useAnimatedPresence({
 
   useEffect(() => {
     if (open) {
-      /* eslint-disable react-hooks/set-state-in-effect -- sync mount phase to open prop */
       setPhase((current) => {
         if (current === "closed") {
           return decorativeAnimate ? "entering" : "open";
         }
         return current;
       });
-      /* eslint-enable react-hooks/set-state-in-effect */
       return;
     }
 

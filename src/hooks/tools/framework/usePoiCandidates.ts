@@ -78,7 +78,6 @@ export function usePoiCandidates({
   }, []);
 
   useEffect(() => {
-    /* eslint-disable react-hooks/set-state-in-effect -- sync tile preview + confirm fetch to map/category */
     if (!enabled) {
       requestIdRef.current += 1;
       setProvisional([]);
@@ -136,7 +135,6 @@ export function usePoiCandidates({
     return () => {
       cancelled = true;
     };
-    /* eslint-enable react-hooks/set-state-in-effect */
   }, [categoryId, enabled, map, mapStyle]);
 
   const candidates = mergePoiCandidates(provisional, confirmed);

@@ -1,4 +1,3 @@
-/* eslint-disable react-refresh/only-export-components -- context module pairs provider with hooks */
 import { createContext, type ReactNode, useContext } from "react";
 import type { SyncStatus } from "@/domain/device/sync/sync";
 import type { PendingQuestionRecord } from "@/domain/session/activity/sessionChat";

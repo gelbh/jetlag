@@ -36,9 +36,7 @@ export function useSessionActivityLog(sessionId: string | undefined): SessionAct
 
   useEffect(() => {
     if (!sessionId || sessionId === LOCAL_SESSION_ID || !isFirebaseConfigured()) {
-      /* eslint-disable react-hooks/set-state-in-effect -- clear remote when leaving remote session */
       setRemoteEvents(EMPTY_EVENTS);
-      /* eslint-enable react-hooks/set-state-in-effect */
       return;
     }
 

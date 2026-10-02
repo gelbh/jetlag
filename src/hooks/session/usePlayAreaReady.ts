@@ -35,7 +35,6 @@ export function usePlayAreaReady(session: SessionRecord | null | undefined): boo
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- pack-key only; session churn must not cancel
   }, [packKey, readySync, session]);
 
   return readySync || (packKey !== "" && settledKey === packKey);

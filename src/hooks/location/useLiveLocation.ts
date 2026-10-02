@@ -74,7 +74,6 @@ export function useLiveLocation(enabled: boolean, options: UseLiveLocationOption
       return;
     }
 
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- disable cleanup
     setReading(null);
     setError(null);
     setNeedsPermissionPrompt(false);

@@ -141,13 +141,11 @@ export function useRadarTool({
   }, []);
 
   useEffect(() => {
-    /* eslint-disable react-hooks/set-state-in-effect -- reset draft when tool closes */
     if (active) {
       return;
     }
 
     resetDraft();
-    /* eslint-enable react-hooks/set-state-in-effect */
   }, [active, resetDraft]);
 
   const handleMapClick = useCallback(
@@ -316,7 +314,6 @@ export function useRadarTool({
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- distance entry only
   }, [mapFirstEligible, resolvedForReady, radarCenter]);
 
   useEffect(() => {

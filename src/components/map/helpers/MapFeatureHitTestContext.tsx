@@ -1,4 +1,3 @@
-/* eslint-disable react-refresh/only-export-components -- context module pairs provider with hooks */
 import {
   createContext,
   type ReactNode,

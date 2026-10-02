@@ -1,4 +1,3 @@
-/* eslint-disable react-refresh/only-export-components -- dock stack exports peer-separation helper used by unit tests */
 import {
   type CSSProperties,
   type ReactNode,

@@ -60,9 +60,7 @@ export function useMapSessionActions({
   const _currentSessionId = session?.id ?? null;
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- reset draft when switching sessions only
     setDraftAdvancedSettings(session ? advancedSettingsFromSession(session) : null);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- reset draft when switching sessions only
   }, [session]);
 
   const confirmedHidingZones = useMemo(

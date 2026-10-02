@@ -33,7 +33,6 @@ export function useMeasuringPreviews(gameArea: GameArea, draft: MeasuringDraftSt
     }
 
     return measuringCoastSegments;
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- coastlineContextVersion busts coastline cache
   }, [gameArea, measuringCoastSegments, measuringSubject]);
 
   const measuringRegionInput = useMemo(

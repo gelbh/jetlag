@@ -612,7 +612,6 @@ export function useMatchingTool({
       cancelled = true;
     };
     // matchingSeekerPoint intentionally omitted: only gate auto-GPS at entry
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- category entry only
   }, [mapFirstEligible, matchingCategoryId, matchingSeekerPoint]);
 
   useEffect(() => {

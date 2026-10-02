@@ -55,7 +55,6 @@ export function PremiumPageContent() {
     if (checkoutState !== "success" && checkoutState !== "cancel") {
       return;
     }
-    /* eslint-disable react-hooks/set-state-in-effect -- snapshot Stripe redirect notice before clearing query */
     setCheckoutNotice(
       checkoutState === "success"
         ? {
@@ -64,7 +63,6 @@ export function PremiumPageContent() {
           }
         : { kind: "muted", message: "Checkout canceled." },
     );
-    /* eslint-enable react-hooks/set-state-in-effect */
     if (checkoutState === "success") {
       track(ANALYTICS_EVENTS.premium_purchase_completed, {});
       void refreshEntitlementsWithError();
