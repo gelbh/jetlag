@@ -9,6 +9,15 @@ import {
   loadRegionPackMatchingAreas,
   loadRegionPackPlayArea,
 } from "./regionPackBoundaries";
+import {
+  failedPlayAreaKeys,
+  isPlayAreaReadySync,
+  playAreaCacheKey,
+  resolvedPlayAreaCache,
+  type SessionPlayAreaInput,
+} from "./playAreaReadiness";
+
+export { isPlayAreaReadySync, playAreaCacheKey };
 
 const MATCHING_ADMIN_LEVELS = [8, 9] as const;
 
@@ -29,10 +38,7 @@ function bundledGeoRevisionIsCurrent(
 }
 
 const resolvedMatchingAreasCache = new Map<string, CustomMatchingAreasByLevel>();
-const resolvedPlayAreaCache = new Map<string, GameArea>();
 const inFlightPlayAreaLoads = new Map<string, Promise<GameArea>>();
-/** Pack keys that failed to load — ready for settle, but no geometry cached. */
-const failedPlayAreaKeys = new Set<string>();
 
 export function matchingAreasCacheKey(
   regionPackId: RegionPackId | undefined,
@@ -44,17 +50,6 @@ export function matchingAreasCacheKey(
     regionPackId ?? "",
     regionPackSubregionId ?? "",
     hasSessionCustomAreas ? "custom" : "",
-  ].join(":");
-}
-
-export function playAreaCacheKey(
-  regionPackId: RegionPackId | undefined,
-  regionPackSubregionId: string | undefined,
-): string {
-  return [
-    String(BUNDLED_REGION_PACK_GEO_REVISION),
-    regionPackId ?? "",
-    regionPackSubregionId ?? "",
   ].join(":");
 }
 
@@ -73,10 +68,7 @@ export type SessionMatchingAreasInput = Pick<
   | "bundledGeoRevision"
 >;
 
-export type SessionPlayAreaInput = Pick<
-  SessionRecord,
-  "gameArea" | "regionPackId" | "regionPackSubregionId"
->;
+export type { SessionPlayAreaInput };
 
 export async function resolveSessionMatchingAreas(
   session: SessionMatchingAreasInput,
@@ -109,24 +101,6 @@ export async function resolveSessionMatchingAreas(
   );
   resolvedMatchingAreasCache.set(cacheKey, areas);
   return areas;
-}
-
-export function isPlayAreaReadySync(
-  session: SessionPlayAreaInput | null | undefined,
-): boolean {
-  if (!session) {
-    return true;
-  }
-
-  const packId = session.regionPackId;
-  if (!isKnownRegionPack(packId)) {
-    return true;
-  }
-
-  const cacheKey = playAreaCacheKey(packId, session.regionPackSubregionId);
-  return (
-    resolvedPlayAreaCache.has(cacheKey) || failedPlayAreaKeys.has(cacheKey)
-  );
 }
 
 export function peekResolvedPlayArea(

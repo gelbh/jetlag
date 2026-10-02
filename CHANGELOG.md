@@ -6,6 +6,17 @@
 
 - Geometry kernel (G5e): production always uses the WASM geometry kernel; client localStorage/env override removed. Wasm dispatch failures rethrow instead of silent TypeScript fail-soft.
 
+## 1.0.0 - 2026-09-30
+
+### Improvements
+
+- Mantine/iOS is the player UI (program close)
+- Survey dual path removed after the Mantine migration
+
+### Technical
+
+- Wave 7 dead-code purge (routes, components, fixtures, deps, package.json policy)
+
 ## 0.17.1 - 2026-09-28
 
 ### Technical

@@ -126,7 +126,7 @@ export function PresetBrowseLayout(props: PresetBrowseBodyProps) {
     <main className="flex min-h-[100dvh] flex-col px-5 py-8" style={homePosterStyle}>
       <ScreenHeader backTo="/" backLabel="Back" />
       <div
-        className={`space-y-4 ${screenHeaderOffsetClassName} pb-[max(1rem,env(safe-area-inset-bottom))]`}
+        className={`space-y-4 ${screenHeaderOffsetClassName} pb-[max(1rem,var(--safe-area-bottom))]`}
       >
         <h1 className="font-display text-2xl font-bold uppercase tracking-tight text-ink">
           Custom games

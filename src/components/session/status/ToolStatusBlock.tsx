@@ -8,7 +8,7 @@ import type {
 import type { SessionRulesInput } from "@/domain/session/rules";
 import { type TimerState } from "@/domain/session/timer/timer";
 import type { PlayerRole } from "@/domain/session/players/playerRole";
-import { Play, Pause } from "@phosphor-icons/react";
+import { PlayIcon, PauseIcon } from "@phosphor-icons/react";
 import {
   mapIslandSessionStatus,
   mapIslandSessionStatusCompact,
@@ -72,7 +72,7 @@ function SegmentRule() {
 }
 
 /**
- * One continuous status island (Home / Start / Pause / Sync):
+ * One continuous status island (Home / Start / PauseIcon / Sync):
  * Home | CODE + session status | session+phase timers | sync (display only)
 
  */
@@ -125,7 +125,7 @@ export function ToolStatusBlock({
           type="button"
           size="compact-md"
           onClick={onStartGame}
-          leftSection={<JlIcon icon={Play} size={14} weight="bold" />}
+          leftSection={<JlIcon icon={PlayIcon} size={14} weight="bold" />}
           styles={mapIslandFilledStyles}
           className="jl-map-chrome-press"
         >
@@ -156,7 +156,7 @@ export function ToolStatusBlock({
           <Button
             type="button"
             size="compact-md"
-            aria-label={timerRunning ? "Pause timer" : "Resume timer"}
+            aria-label={timerRunning ? "PauseIcon timer" : "Resume timer"}
             disabled={pauseResumeDisabled}
             onClick={() => {
               if (timerRunning) {
@@ -170,7 +170,7 @@ export function ToolStatusBlock({
             ml={4}
           >
             <JlIcon
-              icon={timerRunning ? Pause : Play}
+              icon={timerRunning ? PauseIcon : PlayIcon}
               size={16}
               weight="bold"
             />

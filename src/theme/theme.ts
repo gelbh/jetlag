@@ -68,9 +68,9 @@ export const jetlagBrand = {
   askHudStripHeight: "3rem",
   askHudRailMaxHeight: "40dvh",
   /** Matches `--safe-area-top` / env bridge (Cap AC may keep env until proven). */
-  safeAreaTop: "env(safe-area-inset-top, 0px)",
+  safeAreaTop: "var(--safe-area-top)",
   /** Matches `--safe-area-bottom`. */
-  safeAreaBottom: "env(safe-area-inset-bottom, 0px)",
+  safeAreaBottom: "var(--safe-area-bottom)",
   zDock: JETLAG_DOCK_Z_INDEX,
   zBanner: JETLAG_BANNER_Z_INDEX,
   zPanel: JETLAG_PANEL_Z_INDEX,
@@ -222,9 +222,10 @@ export const jetlagTheme: MantineThemeOverride = createTheme({
         title: {
           fontWeight: 590,
           letterSpacing: "-0.01em",
+          color: jetlagBrand.fieldInk,
         },
         description: {
-          color: jetlagBrand.fieldInkMuted,
+          color: jetlagBrand.fieldInk,
         },
       },
     },
@@ -237,6 +238,11 @@ export const jetlagTheme: MantineThemeOverride = createTheme({
       styles: {
         root: {
           fontFamily: appleSystemSans,
+          backgroundColor: `oklch(from ${jetlagBrand.canvas} l c h / 0.92)`,
+          border: `${jetlagBrand.hairline} solid oklch(from ${jetlagBrand.halt} l c h / 0.45)`,
+          backdropFilter: jetlagBrand.frostBlur,
+          WebkitBackdropFilter: jetlagBrand.frostBlur,
+          boxShadow: jetlagBrand.floatShadow,
         },
         title: {
           fontWeight: 590,

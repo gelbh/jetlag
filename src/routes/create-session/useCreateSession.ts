@@ -5,6 +5,7 @@ import {
   useState,
   useEffect,
   useCallback,
+  useLayoutEffect,
 } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useAppNavigate } from "../../hooks/navigation/useAppNavigate";
@@ -46,7 +47,6 @@ import {
   preloadGameAreaCaches,
 } from "../../services/session/gameAreaPreload";
 import { resolveSessionMatchingAreas } from "../../services/geo/matching/resolveSessionMatchingAreas";
-import { startSeaLevelBackgroundSampling } from "../../services/geo/elevation/seaLevelProgressive";
 import { retryAsync } from "../../services/core/network/retryAsync";
 import {
   inferTransitMetroId,
@@ -66,7 +66,7 @@ import {
 import { setPremiumApiContext } from "../../services/core/auth/premiumApiContext";
 import { emitSessionStartedActivity } from "../../services/session/emitSessionActivity";
 import { unionGameAreas } from "../../domain/geometry/masks/unionGameAreas";
-import { parseBoundaryFile } from "../../services/core/capture/kmzImport";
+import { isChunkLoadError } from "../../domain/device/updates/chunkLoadRecovery";
 import { gamePresetToCreateSessionDraft } from "../../domain/session/presets/gamePreset";
 import { useGamePresetStore } from "../../state/gamePresetStore";
 import {
@@ -83,6 +83,15 @@ import { buildFavouritePresetSelectOptions } from "../../domain/session/presets/
 import { placeToFocusBounds } from "./utils";
 import { useLatestRequest } from "../../hooks/forms/useLatestRequest";
 import { useSubmitLock } from "../../hooks/forms/useSubmitLock";
+import {
+  CreateSessionMapMountAbortedError,
+  useCreateSessionMapMount,
+} from "./useCreateSessionMapMount";
+
+const MISSING_GAME_AREA_ERROR =
+  "Search for a place, import a boundary, or move the map until the play area is framed.";
+const MAP_LOAD_FAILED_ERROR =
+  "The map couldn't load. Search for a place or import a boundary instead.";
 
 export function useCreateSession() {
   const navigate = useAppNavigate();
@@ -110,6 +119,8 @@ export function useCreateSession() {
   const setMapStyle = useMapStore((state) => state.setMapStyle);
   const lowPowerMode = useMapStore((state) => state.lowPowerMode);
   const framing = useGameAreaFraming();
+  const mapMount = useCreateSessionMapMount();
+  const { requestMap } = mapMount;
   const [framingModalOpen, setFramingModalOpen] = useState(false);
   const [locationQuery, setLocationQuery] = useState("");
   const [searchResults, setSearchResults] = useState<GeocodedPlace[]>([]);
@@ -190,6 +201,7 @@ export function useCreateSession() {
     const applyGeneration = ++presetApplyGenerationRef.current;
     const draft = gamePresetToCreateSessionDraft(preset);
     const applyPreset = async () => {
+      requestMap();
       let customMatchingAreas =
         draft.customMatchingAreas ?? draft.advancedSettings.customMatchingAreas;
       let gameArea = draft.gameArea ?? null;
@@ -263,7 +275,7 @@ export function useCreateSession() {
 
     void applyPreset();
     // eslint-disable-next-line react-hooks/exhaustive-deps -- apply preset once per preset id; framing stable via hook
-  }, [framing.applyFocusToGameArea, presets, searchParams]);
+  }, [framing.applyFocusToGameArea, presets, requestMap, searchParams]);
 
   const requestLocationBias = useCallback(() => {
     void requestLocationAccess({ highAccuracy: false, userGesture: true })
@@ -457,6 +469,7 @@ export function useCreateSession() {
       return;
     }
 
+    requestMap();
     setSelectedAreas((current) => [...current, previewGameArea]);
     setImportedGameArea(null);
     setSelectedPlaceId(null);
@@ -472,6 +485,7 @@ export function useCreateSession() {
   };
 
   const applyImportedBoundary = (gameArea: GameArea, filename: string) => {
+    requestMap();
     setImportedGameArea(gameArea);
     setSelectedPlaceId(null);
     setSelectedPlace(null);
@@ -483,6 +497,7 @@ export function useCreateSession() {
   };
 
   const applyPlace = (place: GeocodedPlace) => {
+    requestMap();
     setImportedGameArea(null);
     setSelectedPlaceId(place.id);
     setSelectedPlace(place);
@@ -502,17 +517,25 @@ export function useCreateSession() {
       return;
     }
 
+    // Start constructing the map while the importer chunk and file parse run.
+    requestMap();
     setImportLoading(true);
     setError(null);
 
     try {
+      // Dynamic: jszip / @xmldom/xmldom / @tmcw/togeojson stay off the /create route chunk.
+      const { parseBoundaryFile } = await import(
+        "../../services/core/capture/kmzImport"
+      );
       const gameArea = await parseBoundaryFile(file);
       applyImportedBoundary(gameArea, file.name);
     } catch (nextError) {
       setError(
-        nextError instanceof Error
-          ? nextError.message
-          : "Could not import boundary file.",
+        isChunkLoadError(nextError)
+          ? "Couldn't load the importer. Check your connection and try again."
+          : nextError instanceof Error
+            ? nextError.message
+            : "Could not import boundary file.",
       );
     } finally {
       setImportLoading(false);
@@ -526,6 +549,8 @@ export function useCreateSession() {
       return;
     }
 
+    // Start constructing the map in parallel with the geocoder round trip.
+    requestMap();
     const requestId = beginRequest();
     setSearchLoading(true);
     setError(null);
@@ -566,11 +591,14 @@ export function useCreateSession() {
     }
   };
 
-  const handleConfirm = () =>
-    void runLocked(async () => {
-    if (!importedGameArea && !framing.manualGameArea && !selectedPlace) {
+  const hasExplicitGameArea = Boolean(
+    importedGameArea || framing.manualGameArea || selectedPlace,
+  );
+
+  const confirmSession = async () => {
+    if (!hasExplicitGameArea) {
       setError(
-        "Search for a place, import a boundary, or move the map until the play area is framed.",
+        MISSING_GAME_AREA_ERROR,
       );
       return;
     }
@@ -609,7 +637,7 @@ export function useCreateSession() {
 
       if (!gameArea) {
         setError(
-          "Search for a place, import a boundary, or move the map until the play area is framed.",
+          MISSING_GAME_AREA_ERROR,
         );
         return;
       }
@@ -755,7 +783,14 @@ export function useCreateSession() {
           regionPackId,
           tier,
         );
-        startSeaLevelBackgroundSampling(gameArea, { regionPackId });
+        // Dynamic: submit-only sea-level sampling stays off the /create route chunk.
+        void import("../../services/geo/elevation/seaLevelProgressive")
+          .then(({ startSeaLevelBackgroundSampling }) => {
+            startSeaLevelBackgroundSampling(gameArea, { regionPackId });
+          })
+          .catch(() => {
+            // Head start only; /map restarts sampling on mount (deduped).
+          });
         void preloadCriticalGameAreaCaches(
           gameArea,
           matchingAreas,
@@ -772,7 +807,30 @@ export function useCreateSession() {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Confirm may await map mount; the continuation must read the post-mount
+  // render's framing state, not this render's closure.
+  const confirmSessionRef = useRef(confirmSession);
+  useLayoutEffect(() => {
+    confirmSessionRef.current = confirmSession;
   });
+
+  const handleConfirm = () =>
+    void runLocked(async () => {
+      if (!hasExplicitGameArea) {
+        try {
+          // Rectangle framing reads the live viewport (default view included).
+          await mapMount.ensureMapMounted();
+        } catch (mountError) {
+          if (!(mountError instanceof CreateSessionMapMountAbortedError)) {
+            setError(MAP_LOAD_FAILED_ERROR);
+          }
+          return;
+        }
+      }
+      await confirmSessionRef.current();
+    });
 
   const confirmBusy = loading || isSubmitting;
   const confirmLabel = verifyingAccess
@@ -789,11 +847,14 @@ export function useCreateSession() {
   };
 
   const handleFramingModeChange = (mode: Parameters<typeof framing.setFramingMode>[0]) => {
+    // Circle / polygon framing is driven by taps on the live map.
+    requestMap();
     setImportedGameArea(null);
     framing.setFramingMode(mode);
   };
 
   const handleFramingModalConfirm = (result: Parameters<typeof framing.loadFramingResult>[0]) => {
+    requestMap();
     if (framing.userFramed) {
       setImportedGameArea(null);
       setSelectedPlaceId(null);
@@ -854,6 +915,12 @@ export function useCreateSession() {
     selectedAreas,
     previewGameArea,
     manualFramingActive,
+    // Latched: every path that produces an area calls requestMap(), so the map
+    // never tears down back to the facade when an area is cleared.
+    mapRequested: mapMount.mapRequested,
+    mapMounted: mapMount.mapMounted,
+    requestMap,
+    handleMapMounted: mapMount.handleMapMounted,
     mapFocusBounds,
     mapPreviewGameArea,
     transitMetroId,

@@ -10,18 +10,7 @@ import {
   TextInput,
   UnstyledButton,
 } from "@mantine/core";
-import {
-  ArrowsClockwise,
-  CaretDown,
-  CaretRight,
-  Check,
-  CircleNotch,
-  Crown,
-  MagnifyingGlass,
-  Trophy,
-  UserPlus,
-  X,
-} from "@phosphor-icons/react";
+import { ArrowsClockwiseIcon, CaretDownIcon, CaretRightIcon, CheckIcon, CircleNotchIcon, CrownIcon, MagnifyingGlassIcon, TrophyIcon, UserPlusIcon, XIcon } from "@phosphor-icons/react";
 import {
   useCallback,
   useEffect,
@@ -261,7 +250,7 @@ function PullToRefresh({
           color: "var(--color-field-ink-muted)",
         }}
       >
-        <ArrowsClockwise size={16} weight="bold" />
+        <ArrowsClockwiseIcon size={16} weight="bold" />
         <Text size="xs" fw={590}>
           {refreshing
             ? "Refreshing…"
@@ -340,7 +329,7 @@ function BoardFilterCard({
           <Text size="sm" fw={590}>
             Edit
           </Text>
-          <CaretDown size={14} weight="bold" />
+          <CaretDownIcon size={14} weight="bold" />
         </Group>
       </Group>
 
@@ -515,7 +504,7 @@ function LeaderboardPodium({
                 <Stack gap={6} align="center" style={{ width: "100%" }}>
                   {entry.rank === 1 ? (
                     <Box c="var(--color-flag)" style={{ lineHeight: 0 }}>
-                      <Crown size={18} weight="fill" aria-hidden />
+                      <CrownIcon size={18} weight="fill" aria-hidden />
                     </Box>
                   ) : (
                     <Box h={18} aria-hidden />
@@ -810,7 +799,7 @@ function BoardPickerDrawer({
                           style={{ display: "inline-flex", lineHeight: 0 }}
                           aria-hidden
                         >
-                          <Check size={18} weight="bold" />
+                          <CheckIcon size={18} weight="bold" />
                         </Box>
                       ) : (
                         <Box w={18} aria-hidden />
@@ -950,7 +939,7 @@ function PlayerDetailDrawer({
           {!isYou ? (
             <Button
               fullWidth
-              leftSection={<UserPlus size={18} weight="bold" />}
+              leftSection={<UserPlusIcon size={18} weight="bold" />}
               onClick={onAddFriend}
               styles={filledStyles}
             >
@@ -981,10 +970,10 @@ function PlayerDetailDrawer({
               }}
             >
               <Box c="var(--color-flag)" style={{ display: "inline-flex" }}>
-                <Trophy size={22} weight="regular" />
+                <TrophyIcon size={22} weight="regular" />
               </Box>
               <Text style={{ flex: 1 }}>Open friends</Text>
-              <CaretRight size={16} weight="bold" />
+              <CaretRightIcon size={16} weight="bold" />
             </UnstyledButton>
           </InsetGroup>
         </Stack>
@@ -1094,7 +1083,7 @@ function RankRow({
           {formatLeaderboardValue(metric, entry.value)}
         </Text>
         <Box c="var(--color-field-ink-muted)" style={{ display: "inline-flex" }}>
-          <CaretRight size={14} weight="bold" />
+          <CaretRightIcon size={14} weight="bold" />
         </Box>
       </UnstyledButton>
       {showDivider ? <InsetHairline insetStart="5.5rem" /> : null}
@@ -1361,7 +1350,7 @@ export function LeaderboardBody() {
                             root: { color: "var(--color-field-ink-muted)" },
                           }}
                         >
-                          <X size={14} weight="bold" />
+                          <XIcon size={14} weight="bold" />
                         </ActionIcon>
                       ) : null
                     }
@@ -1388,7 +1377,7 @@ export function LeaderboardBody() {
                   },
                 }}
               >
-                <MagnifyingGlass size={22} weight="bold" aria-hidden />
+                <MagnifyingGlassIcon size={22} weight="bold" aria-hidden />
               </ActionIcon>
             </Group>
           </form>
@@ -1443,7 +1432,7 @@ export function LeaderboardBody() {
         {boardLoading ? (
           <InsetGroup>
             <Group gap={10} px="md" py="md" c="var(--color-field-ink-muted)">
-              <CircleNotch
+              <CircleNotchIcon
                 size={18}
                 weight="bold"
                 className="loading-spinner"
@@ -1455,7 +1444,7 @@ export function LeaderboardBody() {
         ) : null}
 
         {!boardLoading && !boardError && entries.length === 0 ? (
-          <EmptyInset icon={<Trophy size={28} weight="regular" />}>
+          <EmptyInset icon={<TrophyIcon size={28} weight="regular" />}>
             {EMPTY_BOARD_MESSAGE}
           </EmptyInset>
         ) : null}
@@ -1544,7 +1533,7 @@ export function LeaderboardBody() {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))",
+                paddingBottom: "max(0.75rem, var(--safe-area-bottom))",
                 paddingTop: "0.75rem",
                 backgroundColor:
                   "oklch(from var(--color-canvas) l c h / 0.92)",

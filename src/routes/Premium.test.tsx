@@ -46,6 +46,12 @@ const {
   };
 });
 
+vi.mock("../services/core/firebase/authBootstrapState", () => ({
+  isFirebaseConfigured,
+  isAuthBootstrapReady: () => true,
+  subscribeAuthBootstrapReady: () => () => undefined,
+}));
+
 vi.mock("../services/core/firebase/firebase", () => ({
   isFirebaseConfigured,
   ensureAnonymousUser,
@@ -83,6 +89,15 @@ vi.mock("../components/billing/AppleSignInButton", () => ({
       Continue with Apple
     </button>
   ),
+}));
+
+// Hook loads firebase/auth dynamically; drive `isPermanent` from the mock directly.
+vi.mock("../hooks/billing/usePermanentAuthUser", () => ({
+  usePermanentAuthUser: () => ({
+    user: null,
+    isPermanent: isPermanentUser(),
+    authReady: true,
+  }),
 }));
 
 vi.mock("../hooks/billing/usePremiumEntitlements", () => ({

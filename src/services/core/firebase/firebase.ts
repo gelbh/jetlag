@@ -28,16 +28,26 @@ import {
 import {
   clientEnvUsesFirebaseEmulator,
   getClientEnv,
-  isFirebaseConfiguredFromEnv,
   readFirebaseConfigFromEnv,
 } from "@/config/env";
 import {
-  captureAuthBootstrapFailure,
-  captureAuthPersistenceFallback,
-  setBootstrapTag,
-} from "../analytics/sentry";
+  captureAuthBootstrapFailureLazy,
+  captureAuthPersistenceFallbackLazy,
+  setBootstrapTagLazy,
+  syncAnalyticsIdentityLazy,
+} from "../analytics/lazyTelemetry";
 import { isRecaptchaAlreadyRenderedError } from "./appCheckErrors";
-import { syncAnalyticsIdentity } from "../analytics/analytics";
+import {
+  isFirebaseConfigured,
+  markAuthBootstrapReady,
+  resetAuthBootstrapStateForTests,
+} from "./authBootstrapState";
+
+export {
+  isAuthBootstrapReady,
+  isFirebaseConfigured,
+  subscribeAuthBootstrapReady,
+} from "./authBootstrapState";
 
 export async function getFirebaseStorage(): Promise<
   import("firebase/storage").FirebaseStorage
@@ -70,10 +80,6 @@ export function isFirestorePersistenceUnavailable(): boolean {
 
 function readConfig() {
   return readFirebaseConfigFromEnv();
-}
-
-export function isFirebaseConfigured(): boolean {
-  return isFirebaseConfiguredFromEnv();
 }
 
 let authEmulatorConnected = false;
@@ -219,8 +225,6 @@ export function getFirestoreDb(): Firestore {
 
 let anonymousSignInPromise: Promise<User> | null = null;
 let authStateReadyPromise: Promise<void> | null = null;
-let authBootstrapReady = false;
-const authBootstrapListeners = new Set<() => void>();
 
 const AUTH_BOOTSTRAP_TIMEOUT_MS = 10_000;
 
@@ -228,32 +232,6 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => {
     setTimeout(resolve, ms);
   });
-}
-
-function markAuthBootstrapReady(): void {
-  if (authBootstrapReady) {
-    return;
-  }
-
-  authBootstrapReady = true;
-  for (const listener of authBootstrapListeners) {
-    listener();
-  }
-}
-
-export function isAuthBootstrapReady(): boolean {
-  if (!isFirebaseConfigured()) {
-    return true;
-  }
-
-  return authBootstrapReady;
-}
-
-export function subscribeAuthBootstrapReady(listener: () => void): () => void {
-  authBootstrapListeners.add(listener);
-  return () => {
-    authBootstrapListeners.delete(listener);
-  };
 }
 
 async function configureAuthPersistence(
@@ -274,12 +252,12 @@ async function configureAuthPersistence(
     try {
       await setPersistence(firebaseAuth, attempt.persistence);
       if (index > 0 && attempt.mode !== "local") {
-        captureAuthPersistenceFallback(attempt.mode);
+        captureAuthPersistenceFallbackLazy(attempt.mode);
       }
       return attempt.mode;
     } catch (error) {
       if (index === attempts.length - 1) {
-        captureAuthPersistenceFallback("memory", error);
+        captureAuthPersistenceFallbackLazy("memory", error);
         throw error;
       }
     }
@@ -290,10 +268,10 @@ async function configureAuthPersistence(
 
 async function bootstrapAuthState(): Promise<void> {
   const firebaseAuth = getFirebaseAuth();
-  setBootstrapTag("auth_start");
+  setBootstrapTagLazy("auth_start");
 
   const persistenceMode = await configureAuthPersistence(firebaseAuth);
-  setBootstrapTag(`auth_persistence_${persistenceMode}`);
+  setBootstrapTagLazy(`auth_persistence_${persistenceMode}`);
 
   const { completeOAuthRedirectIfPending } = await import("../auth/accountAuth");
 
@@ -305,7 +283,7 @@ async function bootstrapAuthState(): Promise<void> {
     sleep(AUTH_BOOTSTRAP_TIMEOUT_MS),
   ]);
 
-  setBootstrapTag("auth_ready");
+  setBootstrapTagLazy("auth_ready");
 }
 
 let authAnalyticsUnsubscribe: (() => void) | null = null;
@@ -313,7 +291,7 @@ let authAnalyticsUnsubscribe: (() => void) | null = null;
 function getAuthBootstrapPromise(): Promise<void> {
   authStateReadyPromise ??= bootstrapAuthState()
     .catch((error) => {
-      captureAuthBootstrapFailure(error);
+      captureAuthBootstrapFailureLazy(error);
     })
     .finally(() => {
       markAuthBootstrapReady();
@@ -328,7 +306,7 @@ export function startAuthBootstrap(): void {
   }
 
   authAnalyticsUnsubscribe ??= onAuthStateChanged(getFirebaseAuth(), (user) => {
-    syncAnalyticsIdentity(
+    syncAnalyticsIdentityLazy(
       user ? { uid: user.uid, isAnonymous: user.isAnonymous } : null,
     );
   });
@@ -396,7 +374,6 @@ export async function resetFirebaseForTests(): Promise<void> {
   resetFirebaseStorageForTests();
   anonymousSignInPromise = null;
   authStateReadyPromise = null;
-  authBootstrapReady = false;
-  authBootstrapListeners.clear();
+  resetAuthBootstrapStateForTests();
 }
 

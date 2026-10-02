@@ -7,14 +7,7 @@ import {
   Text,
   UnstyledButton,
 } from "@mantine/core";
-import {
-  ArrowRight,
-  Flag,
-  FlagCheckered,
-  MagnifyingGlass,
-  PencilSimple,
-  Timer,
-} from "@phosphor-icons/react";
+import { ArrowRightIcon, FlagIcon, FlagCheckeredIcon, MagnifyingGlassIcon, PencilSimpleIcon, TimerIcon } from "@phosphor-icons/react";
 import { isActive, type AnnotationRecord } from "@/domain/map/annotations";
 import type { DockableMapTool } from "@/domain/map/mapTools";
 import {
@@ -115,20 +108,20 @@ function EventGlyph({
   const tool = activityDockTool(event);
   if (tool) {
     const icon = <HudToolIcon tool={tool} width={size} height={size} />;
-    return icon ?? <PencilSimple size={size} weight="bold" aria-hidden />;
+    return icon ?? <PencilSimpleIcon size={size} weight="bold" aria-hidden />;
   }
 
   switch (event.type) {
     case "session_started":
-      return <Flag size={size} weight="bold" aria-hidden />;
+      return <FlagIcon size={size} weight="bold" aria-hidden />;
     case "hiding_timer_started":
-      return <Timer size={size} weight="bold" aria-hidden />;
+      return <TimerIcon size={size} weight="bold" aria-hidden />;
     case "seeking_started":
-      return <MagnifyingGlass size={size} weight="bold" aria-hidden />;
+      return <MagnifyingGlassIcon size={size} weight="bold" aria-hidden />;
     case "game_ended":
-      return <FlagCheckered size={size} weight="bold" aria-hidden />;
+      return <FlagCheckeredIcon size={size} weight="bold" aria-hidden />;
     default:
-      return <PencilSimple size={size} weight="bold" aria-hidden />;
+      return <PencilSimpleIcon size={size} weight="bold" aria-hidden />;
   }
 }
 
@@ -278,7 +271,7 @@ export function SessionLogBody({
                   color: "var(--color-trail)",
                 }}
               >
-                <ArrowRight size={14} weight="bold" />
+                <ArrowRightIcon size={14} weight="bold" />
               </Box>
 
               <Box

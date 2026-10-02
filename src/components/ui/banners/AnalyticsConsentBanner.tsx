@@ -1,11 +1,12 @@
 import { Button, Group } from "@mantine/core";
 import { useState } from "react";
 import { readAnalyticsConsent } from "@/domain/device/consent/analyticsConsent";
+import { isEmbedMode } from "@/domain/device/embed/embedMode";
+import { shouldEnableAnalytics } from "@/services/core/analytics/analyticsEnabled";
 import {
-  denyAnalyticsConsent,
-  grantAnalyticsConsent,
-  shouldEnableAnalytics,
-} from "@/services/core/analytics/analytics";
+  denyAnalyticsConsentLazy,
+  grantAnalyticsConsentLazy,
+} from "@/services/core/analytics/lazyTelemetry";
 import { AppLink } from "../../navigation/AppLink";
 import { HudBanner } from "../hud/HudBanner";
 import { MapFloatSurface } from "./MapFloatSurface";
@@ -17,14 +18,14 @@ export function AnalyticsConsentBanner() {
     prod: import.meta.env.PROD,
     mode: import.meta.env.MODE,
   });
-  if (!analyticsUiEnabled || consent !== "unset") {
+  if (!analyticsUiEnabled || isEmbedMode() || consent !== "unset") {
     return null;
   }
 
   return (
     <HudBanner
       visible
-      className="pointer-events-none fixed inset-x-0 bottom-0 z-[var(--z-banner)] px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]"
+      className="pointer-events-none fixed inset-x-0 bottom-0 z-[var(--z-banner)] px-3 pb-[max(0.75rem,var(--safe-area-bottom))]"
     >
       <MapFloatSurface
         tone="default"
@@ -55,7 +56,7 @@ export function AnalyticsConsentBanner() {
             variant="default"
             size="md"
             onClick={() => {
-              denyAnalyticsConsent();
+              denyAnalyticsConsentLazy();
               setConsent("denied");
             }}
           >
@@ -66,7 +67,7 @@ export function AnalyticsConsentBanner() {
             variant="filled"
             size="md"
             onClick={() => {
-              grantAnalyticsConsent();
+              grantAnalyticsConsentLazy();
               setConsent("granted");
             }}
           >
