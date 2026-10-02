@@ -49,7 +49,14 @@
       "includes": ["scripts/**/*.mjs"],
       "javascript": { "globals": ["exports"] }
     },
-    { "includes": ["src/test/**/*.{ts,tsx}"], "linter": { "rules": {} } },
+    {
+      "includes": ["src/test/**/*.{ts,tsx}"],
+      "linter": {
+        "rules": {
+          "style": { "useComponentExportOnlyModules": "off" }
+        }
+      }
+    },
     {
       "includes": ["**/*.{ts,tsx}", "!worker/**/*.ts"],
       "linter": {
@@ -197,7 +204,8 @@
           "correctness": {
             "useExhaustiveDependencies": "warn",
             "useHookAtTopLevel": "error"
-          }
+          },
+          "style": { "useComponentExportOnlyModules": "warn" }
         }
       }
     },
@@ -340,9 +348,18 @@
     {
       "includes": ["e2e/**/*.{ts,tsx}"],
       "javascript": { "globals": [] },
-      "linter": { "rules": { "correctness": { "noEmptyPattern": "off" } } }
+      "linter": {
+        "domains": { "playwright": "recommended" },
+        "rules": {
+          "correctness": { "noEmptyPattern": "off" },
+          "nursery": {
+            "useExpect": "off",
+            "noPlaywrightWaitForTimeout": "error",
+            "noPlaywrightForceOption": "warn"
+          }
+        }
+      }
     },
-    { "includes": ["e2e/**/*.{ts,tsx}"], "linter": { "rules": {} } },
     {
       "includes": [
         "src/components/ui/sheets/SheetHost.tsx",
@@ -576,7 +593,32 @@
     },
     {
       "includes": ["src/domain/geometry/kernel/**/*.{ts,tsx}"],
-      "linter": { "rules": { "style": { "noRestrictedImports": "error" } } }
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "paths": {
+                  "leaflet": "geometry kernel must stay Leaflet-free",
+                  "react": "geometry kernel must stay React-free",
+                  "firebase/app": "geometry kernel must stay Firebase-free"
+                },
+                "patterns": [
+                  {
+                    "group": ["**/map/annotations", "**/map/annotations.*"],
+                    "message": "geometry kernel must not import AnnotationRecord/GameArea module; use GameAreaGeometry"
+                  },
+                  {
+                    "group": ["**/session/hidingZone", "**/session/hidingZone.*"],
+                    "message": "geometry kernel must not import session records"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
     }
   ],
   "assist": {
