@@ -42,6 +42,12 @@ const workerFeature = {
   },
 };
 
+const draftFeature = {
+  type: "Feature" as const,
+  properties: { source: "draft" },
+  geometry: workerFeature.geometry,
+};
+
 function annotation(id: string): AnnotationRecord {
   return {
     id,
@@ -219,5 +225,95 @@ describe("useCombinedEliminationMask", () => {
     });
 
     expect(result.current?.properties?.source).toBe("second");
+  });
+
+  it("does not re-request the worker when draft features keep the same array reference", async () => {
+    requestCombinedEliminationMask.mockResolvedValue(workerFeature);
+
+    const annotations = [annotation("ann-1")];
+    const draftFeatures = [draftFeature];
+    const endGameHidingZones: [] = [];
+
+    const { rerender } = renderHook(
+      ({
+        currentAnnotations,
+        currentDraftFeatures,
+      }: {
+        currentAnnotations: AnnotationRecord[];
+        currentDraftFeatures: typeof draftFeatures;
+      }) =>
+        useCombinedEliminationMask({
+          annotations: currentAnnotations,
+          gameArea,
+          draftFeatures: currentDraftFeatures,
+          endGameHidingZones,
+        }),
+      {
+        initialProps: {
+          currentAnnotations: annotations,
+          currentDraftFeatures: draftFeatures,
+        },
+      },
+    );
+
+    await waitFor(() => {
+      expect(requestCombinedEliminationMask).toHaveBeenCalled();
+    });
+    requestCombinedEliminationMask.mockClear();
+
+    await act(async () => {
+      rerender({
+        currentAnnotations: annotations,
+        currentDraftFeatures: draftFeatures,
+      });
+    });
+
+    expect(requestCombinedEliminationMask).not.toHaveBeenCalled();
+  });
+
+  it("re-requests the worker when draft features move to a fresh array with identical geometry", async () => {
+    requestCombinedEliminationMask.mockResolvedValue(workerFeature);
+
+    const annotations = [annotation("ann-1")];
+    const initialDraftFeatures = [draftFeature];
+    const endGameHidingZones: [] = [];
+
+    const { rerender } = renderHook(
+      ({
+        currentAnnotations,
+        currentDraftFeatures,
+      }: {
+        currentAnnotations: AnnotationRecord[];
+        currentDraftFeatures: typeof initialDraftFeatures;
+      }) =>
+        useCombinedEliminationMask({
+          annotations: currentAnnotations,
+          gameArea,
+          draftFeatures: currentDraftFeatures,
+          endGameHidingZones,
+        }),
+      {
+        initialProps: {
+          currentAnnotations: annotations,
+          currentDraftFeatures: initialDraftFeatures,
+        },
+      },
+    );
+
+    await waitFor(() => {
+      expect(requestCombinedEliminationMask).toHaveBeenCalled();
+    });
+    requestCombinedEliminationMask.mockClear();
+
+    await act(async () => {
+      rerender({
+        currentAnnotations: annotations,
+        currentDraftFeatures: [draftFeature],
+      });
+    });
+
+    await waitFor(() => {
+      expect(requestCombinedEliminationMask).toHaveBeenCalledTimes(1);
+    });
   });
 });
