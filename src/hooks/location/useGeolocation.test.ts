@@ -1,12 +1,12 @@
 import { act, renderHook } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { createMockGeolocationPosition, mockGeolocation } from "../../test/mocks/geolocation";
 import {
   LIVE_LOCATION_FRESH_MS,
   publishLiveLocationReading,
   resetLiveLocationReadingForTests,
 } from "../../services/core/location/liveLocationReading";
 import { resetLocationPermissionUiForTests } from "../../services/core/location/locationPermissionUi";
+import { createMockGeolocationPosition, mockGeolocation } from "../../test/mocks/geolocation";
 import { useGeolocation } from "./useGeolocation";
 
 function mockPermissions(state: PermissionState): void {
