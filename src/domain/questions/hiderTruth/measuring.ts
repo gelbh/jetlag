@@ -1,7 +1,11 @@
 import { fetchElevations } from "@/services/geo/elevation";
 import { distanceBetweenPoints, type LatLngTuple } from "../../geometry/gameArea/geometry";
-import { nearestPointToCoastlines } from "../../geometry/measuring/geometryMeasuring";
+import {
+  nearestPointToCoastlines,
+  prepareMeasuringLineSegments,
+} from "../../geometry/measuring/geometryMeasuring";
 import type { MeasuringRegionInput } from "../../geometry/measuring/measuringRegions";
+import type { GameArea } from "../../map/annotations";
 import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
 import { measuringPlacesFromMetadata } from "../measuringPlacesFromMetadata";
 import { isMeasuringLinearLocation } from "../measuringQuestions";
@@ -29,9 +33,23 @@ function closerFurtherFromCoastDistances(
   return "further";
 }
 
+function resolvedMeasuringGameArea(
+  sessionGameArea: GameArea | undefined,
+  embedded: GameArea | undefined,
+): GameArea | undefined {
+  if (sessionGameArea?.coordinates[0]?.length) {
+    return sessionGameArea;
+  }
+  if (embedded?.coordinates[0]?.length) {
+    return embedded;
+  }
+  return undefined;
+}
+
 export function truthMeasuringSync(
   pending: PendingQuestionRecord,
   stationCenter: LatLngTuple,
+  gameArea?: GameArea,
 ): HiderTruthResult | null {
   const metadata = pending.placement.metadata;
   const regionInputJson = metadata.measuringRegionInputJson;
@@ -63,13 +81,24 @@ export function truthMeasuringSync(
     measuringSubject === "coastline" ||
     isMeasuringLinearLocation(measuringSubject, measuringLocationCategory ?? undefined)
   ) {
+    const effectiveGameArea = resolvedMeasuringGameArea(gameArea, regionInput.gameArea);
+    if (!effectiveGameArea) {
+      return truthUnavailable();
+    }
+
+    const prepared = prepareMeasuringLineSegments(
+      regionInput.measuringCoastSegments,
+      effectiveGameArea,
+    );
     const coastNearestStation = nearestPointToCoastlines(
       stationCenter,
-      regionInput.measuringCoastSegments,
+      prepared.segments,
+      prepared,
     );
     const coastNearestSeeker = nearestPointToCoastlines(
       seekerAnchor,
-      regionInput.measuringCoastSegments,
+      prepared.segments,
+      prepared,
     );
 
     if (!coastNearestStation || !coastNearestSeeker) {
