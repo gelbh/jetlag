@@ -162,6 +162,7 @@ export async function requestLocationAccess(options?: {
  */
 export async function confirmAndRequestLocationAccess(options?: {
   highAccuracy?: boolean;
+  maximumAge?: number;
 }): Promise<GeolocationReading> {
   const reading = await requestLocationAccess({
     ...options,

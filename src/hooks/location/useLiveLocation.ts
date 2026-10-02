@@ -16,6 +16,12 @@ import {
   subscribeLocationPermissionUi,
   persistLocationAccessConfirmed,
 } from "../../services/core/location/locationPermissionUi";
+import {
+  clearLiveLocationReading,
+  publishLiveLocationReading,
+  releaseLiveLocationReading,
+  retainLiveLocationReading,
+} from "../../services/core/location/liveLocationReading";
 
 interface UseLiveLocationOptions {
   highAccuracy?: boolean;
@@ -58,7 +64,12 @@ export function useLiveLocation(
     if (!enabled) {
       return;
     }
-    return retainLocationPermissionDemand();
+    retainLiveLocationReading();
+    const releasePermission = retainLocationPermissionDemand();
+    return () => {
+      releasePermission();
+      releaseLiveLocationReading();
+    };
   }, [enabled]);
 
   // Reset state when location tracking is disabled. This is a necessary cleanup
@@ -102,6 +113,7 @@ export function useLiveLocation(
       lastPublishRef.current = { at: now, reading: next };
       setReading(next);
       setError(null);
+      publishLiveLocationReading(next);
     };
 
     const startWatch = () => {
@@ -153,12 +165,14 @@ export function useLiveLocation(
       if (permission === "unavailable") {
         setNeedsPermissionPrompt(false);
         setError("Geolocation is not available on this device.");
+        clearLiveLocationReading();
         return;
       }
 
       if (permission === "denied") {
         setNeedsPermissionPrompt(false);
         setError(LOCATION_BLOCKED_MESSAGE);
+        clearLiveLocationReading();
         return;
       }
 
@@ -181,6 +195,7 @@ export function useLiveLocation(
         if (restore.status === "denied") {
           setNeedsPermissionPrompt(false);
           setError(LOCATION_BLOCKED_MESSAGE);
+          clearLiveLocationReading();
           return;
         }
 
