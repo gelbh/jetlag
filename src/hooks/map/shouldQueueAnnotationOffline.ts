@@ -1,9 +1,5 @@
-import { isEffectivelyOffline } from "../../domain/device/sync/sync";
-import { useSessionStore } from "../../state/sessionStore";
+import { isEffectivelyOfflineNow } from "@/hooks/sync/isEffectivelyOfflineNow";
 
 export function shouldQueueAnnotationOffline(): boolean {
-  const networkReachable = useSessionStore.getState().networkReachable;
-  const online = typeof navigator === "undefined" ? true : navigator.onLine;
-
-  return isEffectivelyOffline({ online, reachable: networkReachable });
+  return isEffectivelyOfflineNow();
 }
