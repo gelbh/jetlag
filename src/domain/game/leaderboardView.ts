@@ -1,10 +1,10 @@
-import { gameSizeLabel, type GameSize } from "../session/size/gameSize";
 import { playerRoleLabel } from "../session/players/playerRole";
+import { type GameSize, gameSizeLabel } from "../session/size/gameSize";
 import {
-  leaderboardMetricLabel,
   type LeaderboardEntry,
   type LeaderboardMetric,
   type LeaderboardRole,
+  leaderboardMetricLabel,
 } from "./leaderboard";
 
 export function leaderboardBoardSummaryLabel(selection: {
@@ -25,12 +25,7 @@ export function splitLeadPack(entries: LeaderboardEntry[]): {
   };
 }
 
-export type SelfFooterMode =
-  | "hidden"
-  | "pinned"
-  | "off_list"
-  | "unranked"
-  | "error";
+export type SelfFooterMode = "hidden" | "pinned" | "off_list" | "unranked" | "error";
 
 export function resolveSelfFooterMode(input: {
   viewerUid: string | null | undefined;

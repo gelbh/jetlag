@@ -1,5 +1,5 @@
-import type { Feature, MultiPolygon, Polygon } from "geojson";
 import simplify from "@turf/simplify";
+import type { Feature, MultiPolygon, Polygon } from "geojson";
 import { decimatePolygonFeature } from "./decimatePolygon";
 import { countPolygonVertices } from "./polygonMetrics";
 
@@ -23,10 +23,7 @@ function simplifyAtTolerance(
       tolerance,
       highQuality: false,
     }) as Feature<Polygon | MultiPolygon>;
-    if (
-      simplified.geometry.type === "Polygon" ||
-      simplified.geometry.type === "MultiPolygon"
-    ) {
+    if (simplified.geometry.type === "Polygon" || simplified.geometry.type === "MultiPolygon") {
       return simplified;
     }
   } catch {

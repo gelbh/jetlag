@@ -14,8 +14,7 @@ vi.mock("../../services/core/firebase/firebase", () => ({
 }));
 
 vi.mock("../../services/core/firebase/firebaseAuthReady", () => ({
-  waitForPermanentAuthReady: (...args: unknown[]) =>
-    waitForPermanentAuthReady(...args),
+  waitForPermanentAuthReady: (...args: unknown[]) => waitForPermanentAuthReady(...args),
 }));
 
 let mockSession = { id: "session-1", code: "ABCD" };
@@ -91,8 +90,7 @@ vi.mock("../sync/useFirebaseAuthReady", () => ({
 
 const ensureSessionMembershipMock = vi.fn();
 vi.mock("./useEnsureSessionMembership", () => ({
-  useEnsureSessionMembership: (...args: unknown[]) =>
-    ensureSessionMembershipMock(...args),
+  useEnsureSessionMembership: (...args: unknown[]) => ensureSessionMembershipMock(...args),
 }));
 
 describe("useSharedSessionScreen", () => {

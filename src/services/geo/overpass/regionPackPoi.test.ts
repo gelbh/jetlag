@@ -1,12 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
-import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
 import type { MeasuringPlace } from "@/domain/geo/types";
+import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
 import type { TentaclePoi } from "@/domain/map/annotations";
-import {
-  fetchBundledTentaclePois,
-  mergeMeasuringPlaces,
-  mergeTentaclePois,
-} from "./regionPackPoi";
+import { fetchBundledTentaclePois, mergeMeasuringPlaces, mergeTentaclePois } from "./regionPackPoi";
 
 const sampleGameArea = {
   type: "Polygon" as const,
@@ -40,8 +36,9 @@ describe("regionPackPoi", () => {
   });
 
   it("loads NYC museum bundle when present", async () => {
-    const { fetchBundledMeasuringPlaces, clearBundledPoiCacheForTests } =
-      await import("./regionPackPoi");
+    const { fetchBundledMeasuringPlaces, clearBundledPoiCacheForTests } = await import(
+      "./regionPackPoi"
+    );
 
     clearBundledPoiCacheForTests();
 
@@ -72,11 +69,7 @@ describe("regionPackPoi", () => {
       }),
     );
 
-    const places = await fetchBundledMeasuringPlaces(
-      sampleGameArea,
-      "museum",
-      "nyc",
-    );
+    const places = await fetchBundledMeasuringPlaces(sampleGameArea, "museum", "nyc");
 
     expect(places).toEqual([
       {
@@ -119,15 +112,13 @@ describe("regionPackPoi", () => {
 
     const merged = mergeTentaclePois(overpass, bundled);
     expect(merged).toHaveLength(2);
-    expect(merged.map((poi) => poi.name)).toEqual([
-      "British Museum",
-      "Wellcome Collection",
-    ]);
+    expect(merged.map((poi) => poi.name)).toEqual(["British Museum", "Wellcome Collection"]);
   });
 
   it("loads portland-maine park bundle when present", async () => {
-    const { fetchBundledMeasuringPlaces, clearBundledPoiCacheForTests } =
-      await import("./regionPackPoi");
+    const { fetchBundledMeasuringPlaces, clearBundledPoiCacheForTests } = await import(
+      "./regionPackPoi"
+    );
 
     clearBundledPoiCacheForTests();
 
@@ -171,11 +162,7 @@ describe("regionPackPoi", () => {
       ],
     };
 
-    const places = await fetchBundledMeasuringPlaces(
-      portlandGameArea,
-      "park",
-      "portland-maine",
-    );
+    const places = await fetchBundledMeasuringPlaces(portlandGameArea, "park", "portland-maine");
 
     expect(places).toEqual([
       {
@@ -228,12 +215,7 @@ describe("regionPackPoi", () => {
     );
 
     const center: LatLngTuple = [51.5194, -0.127];
-    const pois = await fetchBundledTentaclePois(
-      center,
-      500,
-      "museum",
-      "london",
-    );
+    const pois = await fetchBundledTentaclePois(center, 500, "museum", "london");
 
     expect(pois).toEqual([
       {
@@ -250,8 +232,9 @@ describe("regionPackPoi", () => {
   });
 
   it("loads prince-rupert museum bundle when present", async () => {
-    const { fetchBundledMeasuringPlaces, clearBundledPoiCacheForTests } =
-      await import("./regionPackPoi");
+    const { fetchBundledMeasuringPlaces, clearBundledPoiCacheForTests } = await import(
+      "./regionPackPoi"
+    );
 
     clearBundledPoiCacheForTests();
 

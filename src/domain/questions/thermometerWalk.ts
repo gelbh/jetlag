@@ -1,16 +1,16 @@
 import type { Feature, LineString, Point } from "geojson";
-import type { LatLngTuple } from "../geometry/gameArea/geometry";
 import { haversineMeters } from "../geometry/gameArea/distance";
-import type { PendingQuestionPlacement } from "../session/activity/sessionChat";
-import type { PendingQuestionRecord } from "../session/activity/sessionChat";
+import type { LatLngTuple } from "../geometry/gameArea/geometry";
+import type {
+  PendingQuestionPlacement,
+  PendingQuestionRecord,
+} from "../session/activity/sessionChat";
 
 export function parseThermometerStartPoint(
   placement: PendingQuestionPlacement,
 ): LatLngTuple | null {
   try {
-    const geometry = JSON.parse(placement.geometryJson) as Feature<
-      Point | LineString
-    >;
+    const geometry = JSON.parse(placement.geometryJson) as Feature<Point | LineString>;
     const geom = geometry.geometry;
     if (geom.type === "Point") {
       return [geom.coordinates[1], geom.coordinates[0]];
@@ -25,9 +25,7 @@ export function parseThermometerStartPoint(
   return null;
 }
 
-export function isThermometerWalkActive(
-  question: PendingQuestionRecord,
-): boolean {
+export function isThermometerWalkActive(question: PendingQuestionRecord): boolean {
   return question.toolType === "thermometer" && question.status === "walking";
 }
 
@@ -60,14 +58,9 @@ export function listOrphanWalkingThermometerQuestionIds(
 ): string[] {
   const members = new Set(memberUids);
   return questions
-    .filter(
-      (question) =>
-        isThermometerWalkActive(question) &&
-        !members.has(question.createdByUid),
-    )
+    .filter((question) => isThermometerWalkActive(question) && !members.has(question.createdByUid))
     .map((question) => question.id);
 }
-
 
 export function listStaleWalkingThermometerQuestionIds(
   questions: readonly PendingQuestionRecord[],
@@ -116,9 +109,7 @@ export function isStaleThermometerWalk(
 /** Client-only walk id when tracking a solo GPS walk without Firestore. */
 export const LOCAL_THERMOMETER_WALK_ID = "__local_thermometer_walk__";
 
-export function isLocalThermometerWalkId(
-  questionId: string | null | undefined,
-): boolean {
+export function isLocalThermometerWalkId(questionId: string | null | undefined): boolean {
   return questionId === LOCAL_THERMOMETER_WALK_ID;
 }
 
@@ -126,10 +117,7 @@ export function crowFliesDistanceMeters(a: LatLngTuple, b: LatLngTuple): number 
   return haversineMeters(a, b);
 }
 
-export function buildThermometerLineGeometry(
-  a: LatLngTuple,
-  b: LatLngTuple,
-): Feature<LineString> {
+export function buildThermometerLineGeometry(a: LatLngTuple, b: LatLngTuple): Feature<LineString> {
   return {
     type: "Feature",
     properties: {},
@@ -143,9 +131,7 @@ export function buildThermometerLineGeometry(
   };
 }
 
-export function buildThermometerStartPointGeometry(
-  a: LatLngTuple,
-): Feature<Point> {
+export function buildThermometerStartPointGeometry(a: LatLngTuple): Feature<Point> {
   return {
     type: "Feature",
     properties: {},

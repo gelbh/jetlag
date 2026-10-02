@@ -1,4 +1,20 @@
-import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import * as firebase from "../services/core/firebase/authBootstrapState";
+import * as regionPackBoundaries from "../services/geo/matching/regionPackBoundaries";
+import {
+  clearResolvedMatchingAreasCacheForTests,
+  isPlayAreaReadySync,
+  resolveSessionPlayArea,
+} from "../services/geo/matching/resolveSessionMatchingAreas";
+import { usePremiumEntitlementsStore } from "../state/premiumEntitlementsStore";
+import { useSessionStore } from "../state/sessionStore";
+import { createTestSession } from "../test/fixtures/sessions";
+import {
+  computeLoadingProgress,
+  destinationTitleForPath,
+  labelForStep,
+  resolveLoadingSteps,
+} from "./routeLoadingSteps";
 import * as routePreloaders from "./routePreloaders";
 import {
   isLazyRoute,
@@ -6,37 +22,19 @@ import {
   preloadRoute,
   resolveNavigateDestinationKey,
 } from "./routePreloaders";
-import { routeReadinessKind } from "./useRouteScreenReady";
 import {
   clearRouteWarmStateForTests,
   getSyncRouteReady,
   isRouteImportWarm,
   isWarmFastPathEligible,
 } from "./routeWarmState";
-import {
-  computeLoadingProgress,
-  destinationTitleForPath,
-  labelForStep,
-  resolveLoadingSteps,
-} from "./routeLoadingSteps";
-import * as firebase from "../services/core/firebase/authBootstrapState";
-import {
-  clearResolvedMatchingAreasCacheForTests,
-  isPlayAreaReadySync,
-  resolveSessionPlayArea,
-} from "../services/geo/matching/resolveSessionMatchingAreas";
-import * as regionPackBoundaries from "../services/geo/matching/regionPackBoundaries";
-import { usePremiumEntitlementsStore } from "../state/premiumEntitlementsStore";
-import { useSessionStore } from "../state/sessionStore";
-import { createTestSession } from "../test/fixtures/sessions";
+import { routeReadinessKind } from "./useRouteScreenReady";
 
 beforeEach(() => {
   // Avoid pulling MapLibre worker URL into Vitest when /map preload warms the shell.
-  vi.spyOn(routePreloaders.mapShellWarmers, "importMapViewMapLibre").mockResolvedValue(
-    {
-      default: {} as never,
-    },
-  );
+  vi.spyOn(routePreloaders.mapShellWarmers, "importMapViewMapLibre").mockResolvedValue({
+    default: {} as never,
+  });
 });
 
 afterEach(() => {
@@ -50,9 +48,7 @@ describe("normalizeRoutePath", () => {
   });
 
   it("normalizes preset edit paths", () => {
-    expect(normalizeRoutePath("/presets/abc123/edit")).toBe(
-      "/presets/:id/edit",
-    );
+    expect(normalizeRoutePath("/presets/abc123/edit")).toBe("/presets/:id/edit");
     expect(normalizeRoutePath("/presets/new")).toBe("/presets/new");
   });
 
@@ -63,15 +59,9 @@ describe("normalizeRoutePath", () => {
 
 describe("resolveNavigateDestinationKey", () => {
   it("preserves query strings and hashes for deduplication", () => {
-    expect(resolveNavigateDestinationKey("/map?session=abc")).toBe(
-      "/map?session=abc",
-    );
-    expect(resolveNavigateDestinationKey("/create#step-2")).toBe(
-      "/create#step-2",
-    );
-    expect(resolveNavigateDestinationKey("/map?session=abc#panel")).toBe(
-      "/map?session=abc#panel",
-    );
+    expect(resolveNavigateDestinationKey("/map?session=abc")).toBe("/map?session=abc");
+    expect(resolveNavigateDestinationKey("/create#step-2")).toBe("/create#step-2");
+    expect(resolveNavigateDestinationKey("/map?session=abc#panel")).toBe("/map?session=abc#panel");
   });
 
   it("preserves object search and hash", () => {
@@ -89,9 +79,9 @@ describe("resolveNavigateDestinationKey", () => {
   });
 
   it("normalizes preset edit paths while preserving query and hash", () => {
-    expect(
-      resolveNavigateDestinationKey("/presets/abc123/edit?tab=rules#top"),
-    ).toBe("/presets/:id/edit?tab=rules#top");
+    expect(resolveNavigateDestinationKey("/presets/abc123/edit?tab=rules#top")).toBe(
+      "/presets/:id/edit?tab=rules#top",
+    );
   });
 });
 
@@ -122,9 +112,7 @@ describe("isLazyRoute", () => {
   it("keeps nested admin paths distinct in normalizeRoutePath", () => {
     expect(normalizeRoutePath("/admin")).toBe("/admin");
     expect(normalizeRoutePath("/admin/incidents")).toBe("/admin/incidents");
-    expect(normalizeRoutePath("/admin/incidents/abc")).toBe(
-      "/admin/incidents/abc",
-    );
+    expect(normalizeRoutePath("/admin/incidents/abc")).toBe("/admin/incidents/abc");
   });
 });
 
@@ -273,9 +261,7 @@ describe("getSyncRouteReady", () => {
     expect(getSyncRouteReady("/map")).toBe(false);
     expect(isPlayAreaReadySync(session)).toBe(false);
 
-    vi.spyOn(regionPackBoundaries, "loadRegionPackPlayArea").mockResolvedValue(
-      session.gameArea,
-    );
+    vi.spyOn(regionPackBoundaries, "loadRegionPackPlayArea").mockResolvedValue(session.gameArea);
     await resolveSessionPlayArea(session);
 
     expect(isPlayAreaReadySync(session)).toBe(true);
@@ -298,9 +284,7 @@ describe("routeLoadingSteps", () => {
 
   it("labels loading steps for player-facing copy", () => {
     expect(labelForStep("download-screen", "Map")).toBe("Downloading screen…");
-    expect(labelForStep("open-screen", "Create session")).toBe(
-      "Opening Create session…",
-    );
+    expect(labelForStep("open-screen", "Create session")).toBe("Opening Create session…");
   });
 
   it("lists cold map steps in order", () => {
@@ -325,10 +309,7 @@ describe("routeLoadingSteps", () => {
     useSessionStore.getState().setSession(session);
     await preloadRoute("/map");
 
-    expect(resolveLoadingSteps("/map")).toEqual([
-      "load-boundaries",
-      "prepare-map",
-    ]);
+    expect(resolveLoadingSteps("/map")).toEqual(["load-boundaries", "prepare-map"]);
   }, 20000);
 
   it("skips boundaries when the play area is already cached", async () => {
@@ -338,22 +319,14 @@ describe("routeLoadingSteps", () => {
     });
     useSessionStore.getState().setSession(session);
 
-    vi.spyOn(regionPackBoundaries, "loadRegionPackPlayArea").mockResolvedValue(
-      session.gameArea,
-    );
+    vi.spyOn(regionPackBoundaries, "loadRegionPackPlayArea").mockResolvedValue(session.gameArea);
     await resolveSessionPlayArea(session);
 
-    expect(resolveLoadingSteps("/map")).toEqual([
-      "download-screen",
-      "prepare-map",
-    ]);
+    expect(resolveLoadingSteps("/map")).toEqual(["download-screen", "prepare-map"]);
   });
 
   it("downloads the lazy join chunk before opening it", () => {
-    expect(resolveLoadingSteps("/join")).toEqual([
-      "download-screen",
-      "open-screen",
-    ]);
+    expect(resolveLoadingSteps("/join")).toEqual(["download-screen", "open-screen"]);
   });
 
   it("opens Home without waiting on sign-in", () => {

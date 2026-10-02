@@ -1,8 +1,8 @@
-import { describe, expect, it, vi } from "vitest";
 import { screen } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
+import type { AskHudCommitKind, AskHudReadiness } from "@/domain/ask/askHudModes";
 import { renderWithAppUi } from "../../test/renderWithAppUi";
 import { SeekerChromeOverlays } from "./SeekerChromeOverlays";
-import type { AskHudCommitKind, AskHudReadiness } from "@/domain/ask/askHudModes";
 
 function stubTimer() {
   return { hasStarted: true };
@@ -13,13 +13,7 @@ function stubOverlay() {
 }
 
 function emptyHud(
-  surface:
-    | "radar"
-    | "measuring"
-    | "matching"
-    | "tentacle"
-    | "thermometer"
-    | "photo",
+  surface: "radar" | "measuring" | "matching" | "tentacle" | "thermometer" | "photo",
   overrides?: Partial<AskHudReadiness>,
 ) {
   const readiness: AskHudReadiness = {
@@ -58,20 +52,12 @@ function emptyHud(
     onCommit: vi.fn(),
     modeBody: <div data-testid={bodyId} />,
     sheets: null,
-    ...(surface === "thermometer"
-      ? { commitKind: "send" as AskHudCommitKind }
-      : {}),
+    ...(surface === "thermometer" ? { commitKind: "send" as AskHudCommitKind } : {}),
   };
 }
 
 function stubTools(
-  active:
-    | "radar"
-    | "measuring"
-    | "matching"
-    | "tentacle"
-    | "thermometer"
-    | "photo",
+  active: "radar" | "measuring" | "matching" | "tentacle" | "thermometer" | "photo",
 ) {
   return {
     radarTool: {

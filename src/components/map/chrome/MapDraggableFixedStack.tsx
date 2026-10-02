@@ -1,32 +1,31 @@
-/* eslint-disable react-refresh/only-export-components -- dock stack exports peer-separation helper used by unit tests */
 import {
+  type CSSProperties,
+  type ReactNode,
+  type PointerEvent as ReactPointerEvent,
   useCallback,
   useEffect,
   useLayoutEffect,
   useRef,
   useState,
-  type CSSProperties,
-  type PointerEvent as ReactPointerEvent,
-  type ReactNode,
 } from "react";
-import { cn } from "@/lib/cn";
+import {
+  MAP_CHROME_DOCKS_CHANGE_EVENT,
+  type MapChromeDockId,
+  readMapChromeDocksState,
+  writeMapChromeDocksState,
+} from "@/hooks/map/mapChromeDockPlacement";
 import {
   cycleMapChromeDockPlacement,
   legacyAnchorFromPlacement,
+  type MapChromeDockPlacement,
   resolveSafeAreaTopPx,
   resolveStackedTops,
   resolveUsableVerticalBand,
   sideFromPointX,
   topPxFromTopRatio,
   topRatioFromTopPx,
-  type MapChromeDockPlacement,
 } from "@/hooks/map/useMapSideDockSide";
-import {
-  MAP_CHROME_DOCKS_CHANGE_EVENT,
-  readMapChromeDocksState,
-  writeMapChromeDocksState,
-  type MapChromeDockId,
-} from "@/hooks/map/mapChromeDockPlacement";
+import { cn } from "@/lib/cn";
 
 /** Move distance before a press becomes a dock drag (keeps taps working). */
 const DRAG_THRESHOLD_PX = 12;
@@ -87,12 +86,7 @@ function suppressNextClick(): void {
   }, 500);
 }
 
-function clampDragPos(
-  left: number,
-  top: number,
-  width: number,
-  height: number,
-): DragPos {
+function clampDragPos(left: number, top: number, width: number, height: number): DragPos {
   const pad = edgePadPx();
   const maxLeft = Math.max(pad, window.innerWidth - width - pad);
   const { minTop, maxBottom } = resolveUsableVerticalBand(window.innerHeight);
@@ -154,15 +148,10 @@ export function separateFromPeerRect(
   let best: DragPos | null = null;
   let bestDist = Infinity;
   for (const candidate of candidates) {
-    if (
-      rectsOverlap(candidate.left, candidate.top, width, height, peer, gap)
-    ) {
+    if (rectsOverlap(candidate.left, candidate.top, width, height, peer, gap)) {
       continue;
     }
-    const dist = Math.hypot(
-      candidate.left - desired.left,
-      candidate.top - desired.top,
-    );
+    const dist = Math.hypot(candidate.left - desired.left, candidate.top - desired.top);
     if (dist < bestDist) {
       bestDist = dist;
       best = candidate;
@@ -206,18 +195,13 @@ function peerStackEl(self: HTMLElement | null): HTMLElement | null {
 }
 
 function cancelElementAnimations(el: HTMLElement): void {
-  const animations =
-    typeof el.getAnimations === "function" ? el.getAnimations() : [];
+  const animations = typeof el.getAnimations === "function" ? el.getAnimations() : [];
   for (const running of animations) {
     running.cancel();
   }
 }
 
-function playSettleFlip(
-  el: HTMLElement,
-  from: SettleFrame,
-  onDone: () => void,
-): Animation | null {
+function playSettleFlip(el: HTMLElement, from: SettleFrame, onDone: () => void): Animation | null {
   const to = el.getBoundingClientRect();
   const dx = from.left - to.left;
   const dy = from.top - to.top;
@@ -276,9 +260,7 @@ export function MapDraggableFixedStack({
   const [dragging, setDragging] = useState(false);
   const [settling, setSettling] = useState(false);
   const [stackHeight, setStackHeight] = useState(200);
-  const [edgePad] = useState(() =>
-    typeof window !== "undefined" ? edgePadPx() : EDGE_PAD_PX,
-  );
+  const [edgePad] = useState(() => (typeof window !== "undefined" ? edgePadPx() : EDGE_PAD_PX));
   const sessionRef = useRef<DragSession | null>(null);
   const rootRef = useRef<HTMLDivElement | null>(null);
   const settleFromRef = useRef<SettleFrame | null>(null);
@@ -302,8 +284,7 @@ export function MapDraggableFixedStack({
     }
   }, [dragging, dragPos, placement, stackHeight, children]);
 
-  const safeTop =
-    typeof window !== "undefined" ? resolveSafeAreaTopPx() : 0;
+  const safeTop = typeof window !== "undefined" ? resolveSafeAreaTopPx() : 0;
   const restTop = topPxFromTopRatio(
     placement.topRatio,
     stackHeight,
@@ -315,20 +296,12 @@ export function MapDraggableFixedStack({
   useEffect(() => {
     const capture = () => {
       const el = rootRef.current;
-      if (
-        !el ||
-        draggingRef.current ||
-        sessionRef.current?.armed ||
-        settleFromRef.current
-      ) {
+      if (!el || draggingRef.current || sessionRef.current?.armed || settleFromRef.current) {
         return;
       }
       const next = readMapChromeDocksState()[chromeRole];
       const cur = placementRef.current;
-      if (
-        next.side === cur.side &&
-        Math.abs(next.topRatio - cur.topRatio) < 0.0001
-      ) {
+      if (next.side === cur.side && Math.abs(next.topRatio - cur.topRatio) < 0.0001) {
         return;
       }
       const rect = el.getBoundingClientRect();
@@ -406,8 +379,7 @@ export function MapDraggableFixedStack({
         };
 
         if (peerRect && peerSide === side) {
-          const preferAbove =
-            from.top + from.height / 2 <= (peerRect.top + peerRect.bottom) / 2;
+          const preferAbove = from.top + from.height / 2 <= (peerRect.top + peerRect.bottom) / 2;
           const stacked = resolveStackedTops({
             moverTop,
             moverHeight: height,
@@ -419,17 +391,11 @@ export function MapDraggableFixedStack({
             safeAreaTopPx: safeTop,
           });
           moverTop = stacked.moverTop;
-          const peerId: MapChromeDockId =
-            chromeRole === "side" ? "nav" : "side";
+          const peerId: MapChromeDockId = chromeRole === "side" ? "nav" : "side";
           const state = readMapChromeDocksState();
           const peerPlacement: MapChromeDockPlacement = {
             side,
-            topRatio: topRatioFromTopPx(
-              stacked.peerTop,
-              peerRect.height,
-              vh,
-              safeTop,
-            ),
+            topRatio: topRatioFromTopPx(stacked.peerTop, peerRect.height, vh, safeTop),
           };
           const moverPlacement: MapChromeDockPlacement = {
             side,
@@ -574,9 +540,7 @@ export function MapDraggableFixedStack({
     bottom: "auto",
     transform: "none",
     touchAction: "none",
-    ...(placement.side === "left"
-      ? { left: pad, right: "auto" }
-      : { right: pad, left: "auto" }),
+    ...(placement.side === "left" ? { left: pad, right: "auto" } : { right: pad, left: "auto" }),
   };
 
   const dragStyle: CSSProperties | undefined = dragPos
@@ -592,8 +556,7 @@ export function MapDraggableFixedStack({
       }
     : restStyle;
 
-  const chromeAttr =
-    chromeRole === "nav" ? "data-chrome-nav-stack" : "data-chrome-side-stack";
+  const chromeAttr = chromeRole === "nav" ? "data-chrome-nav-stack" : "data-chrome-side-stack";
   const anchor = legacyAnchorFromPlacement(placement);
 
   return (

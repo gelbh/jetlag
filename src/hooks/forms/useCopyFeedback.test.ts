@@ -1,7 +1,7 @@
 import { act, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { useCopyFeedback } from "./useCopyFeedback";
 import { copyToClipboard } from "../../platform/copyToClipboard";
+import { useCopyFeedback } from "./useCopyFeedback";
 
 vi.mock("../../platform/copyToClipboard", () => ({
   copyToClipboard: vi.fn(),

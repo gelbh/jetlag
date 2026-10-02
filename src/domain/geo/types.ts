@@ -1,9 +1,6 @@
-import type { GameArea } from "../map/annotations";
 import type { LatLngTuple } from "../geometry/gameArea/geometry";
-import type {
-  PoiCandidateSource,
-  PoiConfirmStatus,
-} from "./poiCandidate";
+import type { GameArea } from "../map/annotations";
+import type { PoiCandidateSource, PoiConfirmStatus } from "./poiCandidate";
 
 export interface MeasuringPlace {
   id: string;

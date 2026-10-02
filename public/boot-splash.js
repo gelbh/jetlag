@@ -1,4 +1,4 @@
-(function () {
+(() => {
   var TIMEOUT_MS = 15000;
   var timeoutId = window.setTimeout(showErrorIfStillBooting, TIMEOUT_MS);
 
@@ -61,7 +61,7 @@
   });
 
   var splash = document.getElementById("boot-splash");
-  if (splash && splash.parentNode) {
+  if (splash?.parentNode) {
     new MutationObserver(watchBootComplete).observe(splash.parentNode, {
       childList: true,
     });
@@ -69,7 +69,7 @@
 
   var retryButton = document.getElementById("boot-splash-retry");
   if (retryButton) {
-    retryButton.addEventListener("click", function () {
+    retryButton.addEventListener("click", () => {
       window.location.reload();
     });
   }

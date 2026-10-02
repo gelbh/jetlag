@@ -1,10 +1,33 @@
+import {
+  AirplaneTiltIcon,
+  BankIcon,
+  BookOpenIcon,
+  BuildingsIcon,
+  CityIcon,
+  ConfettiIcon,
+  DropIcon,
+  FilmSlateIcon,
+  FirstAidIcon,
+  FishIcon,
+  FlagIcon,
+  GlobeHemisphereWestIcon,
+  GolfIcon,
+  HouseIcon,
+  type IconProps,
+  IslandIcon,
+  MapTrifoldIcon,
+  MountainsIcon,
+  PathIcon,
+  PawPrintIcon,
+  TagIcon,
+  TrainIcon,
+  TreeIcon,
+  WavesIcon,
+} from "@phosphor-icons/react";
 import type { ComponentType } from "react";
-import { AirplaneTiltIcon, BankIcon, BookOpenIcon, BuildingsIcon, CityIcon, ConfettiIcon, DropIcon, FilmSlateIcon, FirstAidIcon, FishIcon, FlagIcon, GolfIcon, GlobeHemisphereWestIcon, HouseIcon, IslandIcon, MapTrifoldIcon, MountainsIcon, PathIcon, PawPrintIcon, TagIcon, TrainIcon, TreeIcon, WavesIcon, type IconProps } from "@phosphor-icons/react";
 import type { MeasuringFromKind } from "@/domain/questions";
 
-const BUILTIN_ICONS: Partial<
-  Record<MeasuringFromKind, ComponentType<IconProps>>
-> = {
+const BUILTIN_ICONS: Partial<Record<MeasuringFromKind, ComponentType<IconProps>>> = {
   commercial_airport: AirplaneTiltIcon,
   high_speed_rail_line: TrainIcon,
   rail_station: TrainIcon,
@@ -40,14 +63,8 @@ export function hasMeasuringCategoryIcon(kind: string): boolean {
 }
 
 /** Phosphor icon for a Measuring catalog option (custom/pack → TagIcon). */
-export function measuringCategoryIcon(
-  kind: MeasuringFromKind,
-): ComponentType<IconProps> {
-  if (
-    kind.startsWith("custom:") ||
-    kind.startsWith("pack:") ||
-    kind.startsWith("custom_geo:")
-  ) {
+export function measuringCategoryIcon(kind: MeasuringFromKind): ComponentType<IconProps> {
+  if (kind.startsWith("custom:") || kind.startsWith("pack:") || kind.startsWith("custom_geo:")) {
     return TagIcon;
   }
   return BUILTIN_ICONS[kind] ?? TagIcon;

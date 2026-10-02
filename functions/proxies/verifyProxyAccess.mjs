@@ -9,9 +9,7 @@ function readBearerToken(req) {
 
 function readSessionId(req) {
   const sessionId = req.headers["x-session-id"];
-  return typeof sessionId === "string" && sessionId.length > 0
-    ? sessionId
-    : null;
+  return typeof sessionId === "string" && sessionId.length > 0 ? sessionId : null;
 }
 
 export function hasPremiumAccessClaim(decodedToken) {
@@ -27,9 +25,7 @@ export function isPremiumSessionMember(sessionData, uid) {
 }
 
 export function isSessionMember(sessionData, uid) {
-  return (
-    Array.isArray(sessionData?.memberUids) && sessionData.memberUids.includes(uid)
-  );
+  return Array.isArray(sessionData?.memberUids) && sessionData.memberUids.includes(uid);
 }
 
 /**

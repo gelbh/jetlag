@@ -1,6 +1,6 @@
-import { describe, expect, it, beforeEach, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
 import { MantineProvider } from "@mantine/core";
+import { render, screen } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { jetlagTheme } from "@/theme/theme";
 import { AskInlineError, askInlineErrorCopy } from "./AskInlineError";
 
@@ -19,9 +19,7 @@ beforeEach(() => {
 
 describe("askInlineErrorCopy", () => {
   it("rewrites GPS timeout into actionable copy", () => {
-    const copy = askInlineErrorCopy(
-      "Timed out while waiting for your location.",
-    );
+    const copy = askInlineErrorCopy("Timed out while waiting for your location.");
     expect(copy.title).toBe("Location timed out");
     expect(copy.detail.toLowerCase()).toContain("tap the map");
   });

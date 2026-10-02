@@ -19,8 +19,7 @@ export function pickHostPromotee(
     return null;
   }
 
-  const roles =
-    memberRoles && typeof memberRoles === "object" ? memberRoles : {};
+  const roles = memberRoles && typeof memberRoles === "object" ? memberRoles : {};
 
   const seekers = candidates
     .filter((uid) => roles[uid] === "seeker")

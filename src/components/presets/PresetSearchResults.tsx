@@ -1,10 +1,10 @@
-import { AppLink } from "../navigation/AppLink";
 import {
   bundledPresetDefinition,
   isBundledPresetId,
 } from "../../domain/regions/bundledGamePresets";
 import { formatBundledPresetLocation } from "../../domain/regions/bundledPresetHierarchy";
 import { migrateGamePreset } from "../../domain/session/presets/gamePreset";
+import { AppLink } from "../navigation/AppLink";
 import { EmptyState } from "../ui/feedback/EmptyState";
 import { PresetCard } from "./PresetCard";
 import { PresetFavouriteButton } from "./PresetFavouriteButton";
@@ -21,9 +21,7 @@ function PresetSearchResultCard({
   const bundled = isBundledPresetId(preset.id);
   const definition = bundled ? bundledPresetDefinition(preset.id) : undefined;
   const description = definition?.description;
-  const location = definition
-    ? formatBundledPresetLocation(definition)
-    : undefined;
+  const location = definition ? formatBundledPresetLocation(definition) : undefined;
 
   return (
     <PresetCard

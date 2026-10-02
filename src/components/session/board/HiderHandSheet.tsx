@@ -1,11 +1,8 @@
 import { useId, useState } from "react";
-import { SheetHost } from "../../ui/sheets/SheetHost";
-import { SheetHeader } from "../../ui/sheets/SheetHeader";
-import type {
-  BoardEconomyState,
-  PowerUpId,
-} from "../../../domain/boardEconomy";
+import type { BoardEconomyState, PowerUpId } from "../../../domain/boardEconomy";
 import type { GameSize } from "../../../domain/session/size/gameSize";
+import { SheetHeader } from "../../ui/sheets/SheetHeader";
+import { SheetHost } from "../../ui/sheets/SheetHost";
 import { boardCardLabel } from "./boardCardLabels";
 
 function discardNeed(id: PowerUpId): number | null {
@@ -78,9 +75,7 @@ function HiderHandSheetOpen({
 
   const toggleSelect = (instanceId: string) => {
     setSelectedIds((prev) =>
-      prev.includes(instanceId)
-        ? prev.filter((id) => id !== instanceId)
-        : [...prev, instanceId],
+      prev.includes(instanceId) ? prev.filter((id) => id !== instanceId) : [...prev, instanceId],
     );
   };
 
@@ -96,23 +91,17 @@ function HiderHandSheetOpen({
       <div className="space-y-3">
         <p className="text-sm text-ink-secondary">
           {state.hand.length} / {state.handLimit} cards
-          {mustDiscard > 0
-            ? ` — discard or play ${mustDiscard} more`
-            : ""}
+          {mustDiscard > 0 ? ` — discard or play ${mustDiscard} more` : ""}
         </p>
         {pendingDiscardDraw ? (
           <p className="text-sm text-ink-secondary" role="status">
             Select {pendingDiscardDraw.need} card
-            {pendingDiscardDraw.need === 1 ? "" : "s"} to discard (
-            {selectedIds.length}/{pendingDiscardDraw.need}), then confirm.
+            {pendingDiscardDraw.need === 1 ? "" : "s"} to discard ({selectedIds.length}/
+            {pendingDiscardDraw.need}), then confirm.
           </p>
         ) : null}
         {actionError ? (
-          <p
-            id={errorId}
-            role="alert"
-            className="text-sm text-status-error"
-          >
+          <p id={errorId} role="alert" className="text-sm text-status-error">
             {actionError}
           </p>
         ) : null}
@@ -123,13 +112,10 @@ function HiderHandSheetOpen({
               (card.def.id === "expandHand1" || card.def.id === "expandHand2")
                 ? (card.def.id as Extract<PowerUpId, "expandHand1" | "expandHand2">)
                 : null;
-            const discardNeedCount =
-              card.def.kind === "powerUp" ? discardNeed(card.def.id) : null;
+            const discardNeedCount = card.def.kind === "powerUp" ? discardNeed(card.def.id) : null;
             const selecting = pendingDiscardDraw !== null;
-            const isPowerUpBeingPlayed =
-              pendingDiscardDraw?.powerUpInstanceId === card.instanceId;
-            const selectable =
-              selecting && !isPowerUpBeingPlayed;
+            const isPowerUpBeingPlayed = pendingDiscardDraw?.powerUpInstanceId === card.instanceId;
+            const selectable = selecting && !isPowerUpBeingPlayed;
             const selected = selectedIds.includes(card.instanceId);
 
             return (

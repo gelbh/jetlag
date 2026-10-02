@@ -1,11 +1,6 @@
 export const UPDATE_PRELOAD_REQUEST_STATUS_ROUTE = "updatePreloadRequestStatus";
 
-export const PRELOAD_STATUS_TARGETS = new Set([
-  "accepted",
-  "declined",
-  "shipped",
-  "open",
-]);
+export const PRELOAD_STATUS_TARGETS = new Set(["accepted", "declined", "shipped", "open"]);
 
 export const PRELOAD_REQUEST_NOT_FOUND = "PRELOAD_REQUEST_NOT_FOUND";
 export const PRELOAD_INVALID_STATUS = "PRELOAD_INVALID_STATUS";
@@ -31,11 +26,7 @@ export async function updatePreloadRequestStatusHandler(db, input, deps = {}) {
   if (!PRELOAD_STATUS_TARGETS.has(status)) {
     throw new Error(PRELOAD_INVALID_STATUS);
   }
-  if (
-    typeof requestId !== "string" ||
-    requestId.length === 0 ||
-    requestId.includes("/")
-  ) {
+  if (typeof requestId !== "string" || requestId.length === 0 || requestId.includes("/")) {
     throw new Error(PRELOAD_REQUEST_NOT_FOUND);
   }
 

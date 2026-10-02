@@ -1,7 +1,7 @@
 import { Button, Group } from "@mantine/core";
 import { isAndroidDevice, isIosDevice } from "@/domain/device/pwa/detectMobilePlatform";
-import { PWA_INSTALL_TIP_DISMISS_KEY } from "@/domain/device/pwa/pwaInstallTipStorage";
 import { isStandalonePwa } from "@/domain/device/pwa/isStandalonePwa";
+import { PWA_INSTALL_TIP_DISMISS_KEY } from "@/domain/device/pwa/pwaInstallTipStorage";
 import { shouldOfferPwaInstallTip } from "@/domain/device/pwa/shouldOfferPwaInstallTip";
 import { usePersistedDismiss } from "@/hooks/forms/usePersistedDismiss";
 import { usePwaDeferredInstallPrompt } from "@/hooks/pwa/usePwaDeferredInstallPrompt";
@@ -54,19 +54,11 @@ export function PwaInstallTipBanner() {
         >
           {title}
         </p>
-        <p
-          id="pwa-install-tip-body"
-          className="text-pretty text-sm leading-snug text-ink-muted"
-        >
+        <p id="pwa-install-tip-body" className="text-pretty text-sm leading-snug text-ink-muted">
           {body}
         </p>
         <Group gap="sm" mt="sm" justify="flex-end" wrap="wrap">
-          <Button
-            type="button"
-            variant="default"
-            size="md"
-            onClick={dismiss}
-          >
+          <Button type="button" variant="default" size="md" onClick={dismiss}>
             Not now
           </Button>
           {isAndroid && canDeferredPrompt ? (
@@ -85,12 +77,7 @@ export function PwaInstallTipBanner() {
               Install
             </Button>
           ) : (
-            <Button
-              type="button"
-              variant="filled"
-              size="md"
-              onClick={dismiss}
-            >
+            <Button type="button" variant="filled" size="md" onClick={dismiss}>
               OK
             </Button>
           )}

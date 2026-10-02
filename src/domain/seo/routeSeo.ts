@@ -50,11 +50,7 @@ function titleFor(page: string): string {
   return `${page} · ${LEGAL_APP_NAME}`;
 }
 
-function webPageJsonLd(
-  path: string,
-  title: string,
-  description: string,
-): Record<string, unknown> {
+function webPageJsonLd(path: string, title: string, description: string): Record<string, unknown> {
   return {
     "@context": "https://schema.org",
     "@type": "WebPage",
@@ -88,8 +84,7 @@ function normalizeSeoPath(pathname: string): string {
 }
 
 const PREMIUM_TITLE = titleFor("Premium");
-const PREMIUM_DESCRIPTION =
-  "Unlock premium map companion tools for Jet Lag Hide + Seek sessions.";
+const PREMIUM_DESCRIPTION = "Unlock premium map companion tools for Jet Lag Hide + Seek sessions.";
 const PRIVACY_TITLE = titleFor("Privacy");
 const PRIVACY_DESCRIPTION = `Privacy policy for ${LEGAL_APP_NAME}, an unofficial fan companion for Jet Lag Hide + Seek.`;
 const TERMS_TITLE = titleFor("Terms");
@@ -236,8 +231,6 @@ export function getRouteSeo(pathname: string): RouteSeo {
   }
   return {
     ...entry,
-    robots: INDEXABLE_PATHS.has(normalized)
-      ? "index,follow"
-      : "noindex,nofollow",
+    robots: INDEXABLE_PATHS.has(normalized) ? "index,follow" : "noindex,nofollow",
   };
 }

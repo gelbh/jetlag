@@ -51,16 +51,12 @@ describe("geometryParsing", () => {
 
   it("returns null for non-Feature wrappers", () => {
     expect(
-      parseGeometryJson(
-        JSON.stringify({ type: "Point", coordinates: [-0.15, 51.45] }),
-      ),
+      parseGeometryJson(JSON.stringify({ type: "Point", coordinates: [-0.15, 51.45] })),
     ).toBeNull();
   });
 
   it("does not throw when feature.geometry is missing", () => {
-    expect(
-      pointFromGeometryFeature({} as never),
-    ).toBeNull();
+    expect(pointFromGeometryFeature({} as never)).toBeNull();
   });
 
   it("parses a Point Feature", () => {

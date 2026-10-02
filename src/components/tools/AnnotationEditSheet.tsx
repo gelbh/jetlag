@@ -1,19 +1,16 @@
 import { useCallback, useMemo, useState } from "react";
 import {
-  annotationSummary,
-  isActive,
   type AnnotationRecord,
+  annotationSummary,
   type GameArea,
+  isActive,
 } from "../../domain/map/annotations";
-import {
-  usedRadarDistanceOptions,
-  usedThermometerDistanceOptions,
-} from "../../domain/questions";
-import { useAnnotationStore, useSessionStore } from "../../state/sessionStore";
+import { usedRadarDistanceOptions, usedThermometerDistanceOptions } from "../../domain/questions";
 import { useSessionDistanceUnit } from "../../hooks/session/useSessionDistanceUnit";
-import { EditSheetFrame } from "./shared/panels/EditSheetFrame";
+import { useAnnotationStore, useSessionStore } from "../../state/sessionStore";
 import { annotationEditFields } from "./edit/annotationEditFields";
 import type { EditSavePayload } from "./edit/types";
+import { EditSheetFrame } from "./shared/panels/EditSheetFrame";
 
 interface AnnotationEditSheetProps {
   annotation: AnnotationRecord;

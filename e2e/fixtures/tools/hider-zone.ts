@@ -1,4 +1,4 @@
-import { type Page, expect } from "@playwright/test";
+import { expect, type Page } from "@playwright/test";
 
 export async function waitForHidingZoneWizard(page: Page) {
   // Method sheet (AskHudHost) or map-first placement overlay.
@@ -75,10 +75,7 @@ export async function confirmHidingZone(page: Page) {
   });
 }
 
-export async function confirmInitialHidingZoneAtStation(
-  page: Page,
-  stationName: string | RegExp,
-) {
+export async function confirmInitialHidingZoneAtStation(page: Page, stationName: string | RegExp) {
   await openHidingZoneWizard(page);
   await advanceHidingZoneWizardToLocation(page);
   await selectTransitStation(page, stationName);

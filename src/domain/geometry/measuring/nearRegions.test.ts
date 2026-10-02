@@ -1,8 +1,8 @@
-import { describe, expect, it } from "vitest";
 import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
 import turfCircle from "@turf/circle";
 import turfDestination from "@turf/destination";
 import { point as turfPoint } from "@turf/helpers";
+import { describe, expect, it } from "vitest";
 import type { GameArea } from "../../map/annotations";
 import { buildLocationNearRegion, distanceBetweenPoints } from "./nearRegions";
 
@@ -26,7 +26,7 @@ describe("buildLocationNearRegion disk steps", () => {
     const center = turfPoint([-0.15, 51.45]);
 
     // Midway between two vertices of a regular n-gon; chords cut inside the true circle.
-    const bearingMidChordDegrees = (360 / 16) / 2;
+    const bearingMidChordDegrees = 360 / 16 / 2;
     const coarseChordFraction = Math.cos(Math.PI / 16);
     const probeFraction = (coarseChordFraction + Math.cos(Math.PI / 64)) / 2;
     const probe = turfDestination(
@@ -46,11 +46,7 @@ describe("buildLocationNearRegion disk steps", () => {
     });
     expect(booleanPointInPolygon(probe, coarseDisk)).toBe(false);
 
-    const nearRegion = buildLocationNearRegion(
-      target,
-      distanceMeters,
-      sampleGameArea,
-    );
+    const nearRegion = buildLocationNearRegion(target, distanceMeters, sampleGameArea);
     expect(nearRegion).not.toBeNull();
     expect(booleanPointInPolygon(probe, nearRegion!)).toBe(true);
   });

@@ -1,9 +1,9 @@
+import { MantineProvider } from "@mantine/core";
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import { MantineProvider } from "@mantine/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { Stats } from "./Stats";
 import { jetlagTheme } from "@/theme/theme";
+import { Stats } from "./Stats";
 
 vi.mock("@/services/core/firebase/firebase", () => ({
   isFirebaseConfigured: () => false,

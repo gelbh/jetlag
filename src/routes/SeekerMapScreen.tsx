@@ -1,15 +1,15 @@
 import { Suspense } from "react";
-import { isTerminalSessionSyncMessage } from "../domain/device/sync/terminalSessionMessage";
 import { MapAttentionRing } from "../components/map/chrome/MapAttentionRing";
-import { MapLandscapeChromeShell } from "../components/session/mapChrome/MapLandscapeChromeShell";
 import { useMapLandscapeChrome } from "../components/session/mapChrome/MapLandscapeChromeContext";
+import { MapLandscapeChromeShell } from "../components/session/mapChrome/MapLandscapeChromeShell";
 import { resolveLandscapeMapControlInset } from "../components/session/mapChrome/resolveLandscapeMapControlInset";
+import { isTerminalSessionSyncMessage } from "../domain/device/sync/terminalSessionMessage";
 import { HeavyToolHost } from "./map-screen/lazyImports";
 import { MapScreenChrome } from "./map-screen/MapScreenChrome";
 import { MapScreenMapLayers } from "./map-screen/MapScreenMapLayers";
 import {
-  useMapScreenController,
   type MapScreenController,
+  useMapScreenController,
 } from "./map-screen/useMapScreenController";
 
 function SeekerMapScreenBody({
@@ -82,10 +82,7 @@ export function SeekerMapScreen() {
       queuedWrites={controller.syncStatus.queuedWrites}
       syncMessage={syncMessage}
     >
-      <SeekerMapScreenBody
-        controller={controller}
-        inactiveChrome={inactiveChrome}
-      />
+      <SeekerMapScreenBody controller={controller} inactiveChrome={inactiveChrome} />
     </MapLandscapeChromeShell>
   );
 }

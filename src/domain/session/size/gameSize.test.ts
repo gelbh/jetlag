@@ -1,15 +1,15 @@
 import { describe, expect, it } from "vitest";
 import { DUBLIN_CITY_GAME_AREA } from "@/test/fixtures/dublinGameArea";
+import { milesToMeters } from "../../map/distance";
 import {
   clampHidingZoneRadiusMeters,
   effectiveHidingZoneRadiusMeters,
   formatHidingZoneRadiusLabel,
   gameAreaSquareMiles,
   HIDING_ZONE_RADIUS_BUS_PRESET_METERS,
-  recommendGameSize,
   hidingZoneRadiusMeters,
+  recommendGameSize,
 } from "./gameSize";
-import { milesToMeters } from "../../map/distance";
 
 describe("gameSize", () => {
   it("recommends small for compact play areas", () => {

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { useMapStore } from "./mapStore";
 import { resetAllStores } from "../test/helpers/storeReset";
+import { useMapStore } from "./mapStore";
 
 describe("mapStore", () => {
   beforeEach(() => {

@@ -1,29 +1,26 @@
-import { useMemo } from "react";
+import { Box, Button, Group, Stack, Text, UnstyledButton } from "@mantine/core";
 import {
-  Box,
-  Button,
-  Group,
-  Stack,
-  Text,
-  UnstyledButton,
-} from "@mantine/core";
-import { ArrowRightIcon, FlagIcon, FlagCheckeredIcon, MagnifyingGlassIcon, PencilSimpleIcon, TimerIcon } from "@phosphor-icons/react";
-import { isActive, type AnnotationRecord } from "@/domain/map/annotations";
+  ArrowRightIcon,
+  FlagCheckeredIcon,
+  FlagIcon,
+  MagnifyingGlassIcon,
+  PencilSimpleIcon,
+  TimerIcon,
+} from "@phosphor-icons/react";
+import { useMemo } from "react";
+import { HudToolIcon } from "@/components/map/icons/ToolIcons";
+import { compactDangerStyles, compactGrayStyles } from "@/components/ui/entry/entryChrome";
+import { EmptyState } from "@/components/ui/feedback/EmptyState";
+import { type AnnotationRecord, isActive } from "@/domain/map/annotations";
 import type { DockableMapTool } from "@/domain/map/mapTools";
 import {
   activityAnnotationId,
   groupSessionActivityEntries,
-  sessionActivitySummary,
   type SessionActivityEvent,
   type SessionActivityLogEntry,
   type SessionActivityType,
+  sessionActivitySummary,
 } from "@/domain/session/activity/sessionActivityLog";
-import { HudToolIcon } from "@/components/map/icons/ToolIcons";
-import {
-  compactDangerStyles,
-  compactGrayStyles,
-} from "@/components/ui/entry/entryChrome";
-import { EmptyState } from "@/components/ui/feedback/EmptyState";
 import { useStickScrollToBottom } from "@/hooks/ui/useStickScrollToBottom";
 
 interface SessionLogBodyProps {
@@ -51,9 +48,7 @@ function asDockTool(value: string | undefined): DockableMapTool | null {
   if (!value) {
     return null;
   }
-  return DOCK_ICON_TOOLS.has(value as DockableMapTool)
-    ? (value as DockableMapTool)
-    : null;
+  return DOCK_ICON_TOOLS.has(value as DockableMapTool) ? (value as DockableMapTool) : null;
 }
 
 function activityDockTool(event: SessionActivityEvent): DockableMapTool | null {
@@ -98,13 +93,7 @@ function markColor(type: SessionActivityType): string {
   }
 }
 
-function EventGlyph({
-  event,
-  size = 16,
-}: {
-  event: SessionActivityEvent;
-  size?: number;
-}) {
+function EventGlyph({ event, size = 16 }: { event: SessionActivityEvent; size?: number }) {
   const tool = activityDockTool(event);
   if (tool) {
     const icon = <HudToolIcon tool={tool} width={size} height={size} />;
@@ -141,9 +130,7 @@ function entryFocusEvent(entry: SessionActivityLogEntry): SessionActivityEvent {
 }
 
 function entryKey(entry: SessionActivityLogEntry): string {
-  return entry.kind === "pair"
-    ? `${entry.asked.id}:${entry.resolved.id}`
-    : entry.event.id;
+  return entry.kind === "pair" ? `${entry.asked.id}:${entry.resolved.id}` : entry.event.id;
 }
 
 function askPrompt(event: SessionActivityEvent): string {
@@ -226,16 +213,13 @@ export function SessionLogBody({
       {entries.map((entry) => {
         const focus = entryFocusEvent(entry);
         const linkedId = activityAnnotationId(focus);
-        const liveId =
-          linkedId && activeById.has(linkedId) ? linkedId : undefined;
+        const liveId = linkedId && activeById.has(linkedId) ? linkedId : undefined;
         const showActions = Boolean(liveId) && !readOnly;
         const selectable = Boolean(liveId && onSelect);
         const markEvent = entry.kind === "pair" ? entry.resolved : entry.event;
         const color = markColor(markEvent.type);
         const late =
-          entry.kind === "pair"
-            ? answeredLate(entry.resolved)
-            : answeredLate(entry.event);
+          entry.kind === "pair" ? answeredLate(entry.resolved) : answeredLate(entry.event);
 
         const content =
           entry.kind === "pair" ? (
@@ -397,11 +381,7 @@ export function SessionLogBody({
 
             {showActions && liveId ? (
               <Stack gap={4} style={{ flexShrink: 0 }}>
-                <Button
-                  size="compact-xs"
-                  onClick={() => onEdit(liveId)}
-                  styles={compactGrayStyles}
-                >
+                <Button size="compact-xs" onClick={() => onEdit(liveId)} styles={compactGrayStyles}>
                   Edit
                 </Button>
                 <Button

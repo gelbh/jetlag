@@ -1,5 +1,5 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
 import { FirebaseError } from "firebase/app";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const authMocks = vi.hoisted(() => ({
   signOut: vi.fn(async () => undefined),
@@ -72,10 +72,7 @@ describe("ensureFreshAnonymousUser", () => {
 
   it("keeps the cached user when token refresh fails on the network", async () => {
     const user = fakeUser("uid-cached", async () => {
-      throw new FirebaseError(
-        "auth/network-request-failed",
-        "network-request-failed",
-      );
+      throw new FirebaseError("auth/network-request-failed", "network-request-failed");
     });
     installAuth(user);
     const { ensureFreshAnonymousUser } = await import("./firebase");
@@ -92,9 +89,7 @@ describe("ensureFreshAnonymousUser", () => {
     installAuth(user);
     const { ensureFreshAnonymousUser } = await import("./firebase");
 
-    await expect(
-      ensureFreshAnonymousUser({ forceRefresh: false }),
-    ).resolves.toBe(user);
+    await expect(ensureFreshAnonymousUser({ forceRefresh: false })).resolves.toBe(user);
 
     expect(user.getIdToken).toHaveBeenCalledWith(false);
   });

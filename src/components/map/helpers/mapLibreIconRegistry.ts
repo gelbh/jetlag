@@ -1,5 +1,5 @@
-import { useEffect } from "react";
 import type { Map as MapLibreMap } from "maplibre-gl";
+import { useEffect } from "react";
 import { MAP_ANNOTATION_COLORS } from "@/domain/map/mapAnnotationColors";
 import type { TransitRouteMode } from "@/domain/map/transit";
 import { transitStopDivIcon } from "../icons/transitStopIcons";
@@ -22,14 +22,7 @@ const TRANSIT_ICON_IDS: Record<TransitRouteMode, string> = {
   other: "jl-icon-transit-other",
 };
 
-const TRANSIT_MODES: TransitRouteMode[] = [
-  "rail",
-  "metro",
-  "tram",
-  "bus",
-  "ferry",
-  "other",
-];
+const TRANSIT_MODES: TransitRouteMode[] = ["rail", "metro", "tram", "bus", "ferry", "other"];
 
 /** Serialize overlapping register() across mount + style.load per map. */
 const registerInFlight = new WeakMap<MapLibreMap, Promise<void>>();
@@ -77,11 +70,7 @@ function safeHasImage(map: MapLibreMap, imageId: string): boolean {
  * Add only when style images API is still live. Do not call addImage after a
  * swallowed hasImage failure — that race is what threw in production.
  */
-function safeAddImage(
-  map: MapLibreMap,
-  imageId: string,
-  image: HTMLImageElement,
-): boolean {
+function safeAddImage(map: MapLibreMap, imageId: string, image: HTMLImageElement): boolean {
   if (!canMutateMapImages(map)) {
     return false;
   }
@@ -138,9 +127,7 @@ function userLocationFallbackSvg(): string {
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><circle cx="12" cy="12" r="8" fill="#4285F4" stroke="#fff" stroke-width="3"/></svg>`;
 }
 
-async function registerMapLibreMarkerImagesOnce(
-  map: MapLibreMap,
-): Promise<void> {
+async function registerMapLibreMarkerImagesOnce(map: MapLibreMap): Promise<void> {
   if (!canMutateMapImages(map)) {
     return;
   }
@@ -154,33 +141,15 @@ async function registerMapLibreMarkerImagesOnce(
       48,
       48,
     ),
-    loadSvgImage(
-      map,
-      JL_ICON_USER_LOCATION_PLAIN,
-      userLocationIconHtml(null),
-      48,
-      48,
-    ),
+    loadSvgImage(map, JL_ICON_USER_LOCATION_PLAIN, userLocationIconHtml(null), 48, 48),
   ]);
   if (userLoads.some((ok) => !ok)) {
-    await loadSvgImage(
-      map,
-      JL_ICON_USER_LOCATION_FALLBACK,
-      userLocationFallbackSvg(),
-      24,
-      24,
-    );
+    await loadSvgImage(map, JL_ICON_USER_LOCATION_FALLBACK, userLocationFallbackSvg(), 24, 24);
   }
 
   await Promise.all(
     TRANSIT_MODES.flatMap((mode) => [
-      loadSvgImage(
-        map,
-        TRANSIT_ICON_IDS[mode],
-        transitStopDivIcon(mode),
-        20,
-        20,
-      ),
+      loadSvgImage(map, TRANSIT_ICON_IDS[mode], transitStopDivIcon(mode), 20, 20),
       loadSvgImage(
         map,
         transitVehicleIconId(mode),
@@ -198,9 +167,7 @@ const JL_ICON_PREFIX = "jl-icon-";
  * On-demand path for marker sprites when a symbol layer paints before
  * eager register finishes (or after setStyle cleared images).
  */
-export function attachMapLibreMissingMarkerImageResolver(
-  map: MapLibreMap,
-): () => void {
+export function attachMapLibreMissingMarkerImageResolver(map: MapLibreMap): () => void {
   map.setMissingStyleImageResolver(async (id) => {
     if (!id.startsWith(JL_ICON_PREFIX)) {
       return;
@@ -213,13 +180,9 @@ export function attachMapLibreMissingMarkerImageResolver(
 }
 
 /** Load shared marker images into the MapLibre map (idempotent per style). */
-export async function registerMapLibreMarkerImages(
-  map: MapLibreMap,
-): Promise<void> {
+export async function registerMapLibreMarkerImages(map: MapLibreMap): Promise<void> {
   const previous = registerInFlight.get(map) ?? Promise.resolve();
-  const next = previous
-    .catch(() => undefined)
-    .then(() => registerMapLibreMarkerImagesOnce(map));
+  const next = previous.catch(() => undefined).then(() => registerMapLibreMarkerImagesOnce(map));
   registerInFlight.set(
     map,
     next.finally(() => {

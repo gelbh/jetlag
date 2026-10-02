@@ -1,8 +1,5 @@
+import type { PendingQuestionRecord, SessionMessageRecord } from "../session/activity/sessionChat";
 import type { SessionRulesInput } from "../session/rules";
-import type {
-  PendingQuestionRecord,
-  SessionMessageRecord,
-} from "../session/activity/sessionChat";
 import { selectPrimaryQuestionTimer } from "./questionTimerDisplay";
 
 export interface PrimaryHiderAnswerTarget {
@@ -16,18 +13,12 @@ export function selectPrimaryHiderAnswerTarget(
   sessionRules: SessionRulesInput,
   nowMs: number = Date.now(),
 ): PrimaryHiderAnswerTarget | null {
-  const primary = selectPrimaryQuestionTimer(
-    pendingQuestions,
-    sessionRules,
-    nowMs,
-  );
+  const primary = selectPrimaryQuestionTimer(pendingQuestions, sessionRules, nowMs);
   if (!primary) {
     return null;
   }
 
-  const pending = pendingQuestions.find(
-    (question) => question.id === primary.pendingQuestionId,
-  );
+  const pending = pendingQuestions.find((question) => question.id === primary.pendingQuestionId);
   if (!pending) {
     return null;
   }

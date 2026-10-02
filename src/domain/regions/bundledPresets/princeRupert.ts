@@ -1,6 +1,6 @@
-import { attachPlayArea } from "./attachPlayArea";
-import { EXPANSION_OFF, type BundledGamePresetDefinition } from "./shared";
 import { PRINCE_RUPERT_REGION_PACK_ID } from "../princeRupertRegionPack";
+import { attachPlayArea } from "./attachPlayArea";
+import { type BundledGamePresetDefinition, EXPANSION_OFF } from "./shared";
 
 export function princeRupertPresets(): BundledGamePresetDefinition[] {
   const baseHierarchy = [

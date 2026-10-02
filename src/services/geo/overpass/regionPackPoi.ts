@@ -1,19 +1,19 @@
-import type { GameArea } from "@/domain/map/annotations";
-import { distanceBetweenPoints, isPointInGameArea, type LatLngTuple } from "@/domain/geometry/gameArea/geometry";
-import type { MeasuringLocationCategory } from "@/domain/questions";
-import type { TentacleExtendedCategoryId } from "@/domain/questions";
-import type { TentaclePoi } from "@/domain/map/annotations";
-import type { RegionPackId } from "@/domain/regions/regionPack";
+import {
+  distanceBetweenPoints,
+  isPointInGameArea,
+  type LatLngTuple,
+} from "@/domain/geometry/gameArea/geometry";
+import type { GameArea, TentaclePoi } from "@/domain/map/annotations";
+import type { MeasuringLocationCategory, TentacleExtendedCategoryId } from "@/domain/questions";
 import {
   isPackGeoPointCategory,
   isPackGeoTentacleCategory,
   PACK_GEO_PACK_IDS,
   packGeoPoiUrl,
 } from "@/domain/regions/packGeoManifest";
+import type { RegionPackId } from "@/domain/regions/regionPack";
+import { sanitizeBundledPoiPlaces } from "./bundledPoiHygiene";
 import type { MeasuringPlace } from "./measuringPlaces";
-import {
-  sanitizeBundledPoiPlaces,
-} from "./bundledPoiHygiene";
 
 export interface BundledPoiPlace {
   id: string;
@@ -81,9 +81,7 @@ export function mergeTentaclePois(
   overpassPois: TentaclePoi[],
   bundledPois: TentaclePoi[],
 ): TentaclePoi[] {
-  const seenNames = new Set(
-    overpassPois.map((poi) => normalizePlaceName(poi.name)),
-  );
+  const seenNames = new Set(overpassPois.map((poi) => normalizePlaceName(poi.name)));
   const seenIds = new Set(overpassPois.map((poi) => poi.id));
   const merged = [...overpassPois];
 
@@ -150,9 +148,7 @@ export function mergeMeasuringPlaces(
   overpassPlaces: MeasuringPlace[],
   bundledPlaces: MeasuringPlace[],
 ): MeasuringPlace[] {
-  const seenNames = new Set(
-    overpassPlaces.map((place) => normalizePlaceName(place.name)),
-  );
+  const seenNames = new Set(overpassPlaces.map((place) => normalizePlaceName(place.name)));
   const seenIds = new Set(overpassPlaces.map((place) => place.id));
   const merged = [...overpassPlaces];
 

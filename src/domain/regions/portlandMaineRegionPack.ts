@@ -1,10 +1,8 @@
 import type { MatchingCategoryId } from "../questions/matchingQuestions";
 import type { MeasuringFromKind } from "../questions/measuringQuestions";
-import type { RegionPackId } from "./regionPack";
-import type { RegionPackLabelOverride } from "./regionPack";
+import type { RegionPackId, RegionPackLabelOverride } from "./regionPack";
 
-export const PORTLAND_MAINE_REGION_PACK_ID =
-  "portland-maine" satisfies RegionPackId;
+export const PORTLAND_MAINE_REGION_PACK_ID = "portland-maine" satisfies RegionPackId;
 
 export const PORTLAND_MAINE_GEO_ASSETS = {
   municipalities: "/geo/portland-maine/municipalities.geojson",
@@ -26,8 +24,7 @@ export const PORTLAND_MAINE_MATCHING_LABEL_OVERRIDES: Partial<
   admin_division_4: {
     label: "Neighborhood",
     promptNoun: "neighborhood",
-    ruleSummary:
-      "A recognized neighborhood within the framed Portland play area.",
+    ruleSummary: "A recognized neighborhood within the framed Portland play area.",
   },
 };
 
@@ -44,8 +41,6 @@ export const PORTLAND_MAINE_MEASURING_LABEL_OVERRIDES: Partial<
   },
 };
 
-export function isPortlandMaineRegionPack(
-  regionPackId: RegionPackId | undefined,
-): boolean {
+export function isPortlandMaineRegionPack(regionPackId: RegionPackId | undefined): boolean {
   return regionPackId === PORTLAND_MAINE_REGION_PACK_ID;
 }

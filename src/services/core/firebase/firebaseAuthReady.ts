@@ -29,9 +29,7 @@ export async function waitForRestoredFirebaseAuth(): Promise<boolean> {
 /**
  * Game and map paths: wait for auth restore, then create anonymous only after restore settles.
  */
-export async function waitForFirebaseAuth(
-  maxWaitMs = DEFAULT_GAME_AUTH_WAIT_MS,
-): Promise<boolean> {
+export async function waitForFirebaseAuth(maxWaitMs = DEFAULT_GAME_AUTH_WAIT_MS): Promise<boolean> {
   if (!isFirebaseConfigured()) {
     return true;
   }

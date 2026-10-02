@@ -1,22 +1,16 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
 import type { Polygon } from "geojson";
+import { describe, expect, it, vi } from "vitest";
 import { MOTION_MAP_SHADE_MS } from "@/domain/device/motion/motionTokens";
 import { MAP_ANNOTATION_COLORS } from "@/domain/map/mapAnnotationColors";
 import { MapLibreGeoJsonOverlay } from "./MapLibreGeoJsonOverlay";
-import { polygonGeometryFeature } from "./polygonGeometryFeature";
 import { circleMarkerCollection } from "./mapMarkerFeatures";
+import { polygonGeometryFeature } from "./polygonGeometryFeature";
 
 vi.mock("react-map-gl/maplibre", async () => {
   const React = await import("react");
   return {
-    Source: ({
-      id,
-      children,
-    }: {
-      id?: string;
-      children?: React.ReactNode;
-    }) => {
+    Source: ({ id, children }: { id?: string; children?: React.ReactNode }) => {
       // Mirror react-map-gl: Source id must not change on a live instance.
       const mountedId = React.useRef<string | undefined>(undefined);
       if (mountedId.current === undefined) {
@@ -29,10 +23,7 @@ vi.mock("react-map-gl/maplibre", async () => {
         { "data-testid": "maplibre-source", "data-source-id": id },
         React.Children.map(children, (child) =>
           child && React.isValidElement(child)
-            ? React.cloneElement(
-                child as React.ReactElement<{ source?: string }>,
-                { source: id },
-              )
+            ? React.cloneElement(child as React.ReactElement<{ source?: string }>, { source: id })
             : child,
         ),
       );
@@ -54,10 +45,7 @@ vi.mock("react-map-gl/maplibre", async () => {
 });
 
 function layerPaint(layer: HTMLElement): Record<string, unknown> {
-  return JSON.parse(layer.getAttribute("data-paint") ?? "{}") as Record<
-    string,
-    unknown
-  >;
+  return JSON.parse(layer.getAttribute("data-paint") ?? "{}") as Record<string, unknown>;
 }
 
 describe("MapLibreGeoJsonOverlay", () => {
@@ -107,14 +95,8 @@ describe("MapLibreGeoJsonOverlay", () => {
     for (const layer of layers) {
       expect(layer).toHaveAttribute("data-source", "game-area-outside-src");
     }
-    expect(layers[0]).toHaveAttribute(
-      "data-layer-id",
-      "game-area-outside-fill",
-    );
-    expect(layers[1]).toHaveAttribute(
-      "data-layer-id",
-      "game-area-outside-line",
-    );
+    expect(layers[0]).toHaveAttribute("data-layer-id", "game-area-outside-fill");
+    expect(layers[1]).toHaveAttribute("data-layer-id", "game-area-outside-line");
   });
 
   it("renders circle and symbol layers from specs", () => {
@@ -147,19 +129,13 @@ describe("MapLibreGeoJsonOverlay", () => {
     );
 
     const layers = screen.getAllByTestId("maplibre-layer");
-    expect(layers.some((layer) => layer.getAttribute("data-type") === "circle")).toBe(
-      true,
-    );
-    expect(layers.some((layer) => layer.getAttribute("data-type") === "symbol")).toBe(
-      true,
-    );
+    expect(layers.some((layer) => layer.getAttribute("data-type") === "circle")).toBe(true);
+    expect(layers.some((layer) => layer.getAttribute("data-type") === "symbol")).toBe(true);
   });
 
   it("remounts Source when overlay id changes (JETLAG-3A)", () => {
     const data = polygonGeometryFeature(geometry);
-    const { rerender } = render(
-      <MapLibreGeoJsonOverlay id="overlay-a" data={data} {...paint} />,
-    );
+    const { rerender } = render(<MapLibreGeoJsonOverlay id="overlay-a" data={data} {...paint} />);
 
     expect(screen.getByTestId("maplibre-source")).toHaveAttribute(
       "data-source-id",
@@ -181,9 +157,7 @@ describe("MapLibreGeoJsonOverlay", () => {
 
   it("unmounts Source on empty data so a later id change does not reuse it", () => {
     const data = polygonGeometryFeature(geometry);
-    const { rerender } = render(
-      <MapLibreGeoJsonOverlay id="overlay-a" data={data} {...paint} />,
-    );
+    const { rerender } = render(<MapLibreGeoJsonOverlay id="overlay-a" data={data} {...paint} />);
 
     rerender(<MapLibreGeoJsonOverlay id="overlay-a" data={null} {...paint} />);
     expect(screen.queryByTestId("maplibre-source")).toBeNull();

@@ -1,11 +1,11 @@
-import type { Feature, MultiPolygon, Polygon } from "geojson";
 import simplify from "@turf/simplify";
+import type { Feature, MultiPolygon, Polygon } from "geojson";
 import { decimatePolygonFeature } from "./decimatePolygon";
 import {
-  POLYGON_PERSIST_MAX_VERTICES,
-  POLYGON_PERSIST_OVER_BUDGET_MESSAGE,
   assertPolygonPersistBudget,
   countPolygonVertices,
+  POLYGON_PERSIST_MAX_VERTICES,
+  POLYGON_PERSIST_OVER_BUDGET_MESSAGE,
 } from "./polygonMetrics";
 
 export {
@@ -40,10 +40,7 @@ export function persistSlimPolygonFeature(
           tolerance,
           highQuality: false,
         }) as Feature<Polygon | MultiPolygon>;
-        if (
-          simplified.geometry.type === "Polygon" ||
-          simplified.geometry.type === "MultiPolygon"
-        ) {
+        if (simplified.geometry.type === "Polygon" || simplified.geometry.type === "MultiPolygon") {
           current = simplified;
         }
       } catch {

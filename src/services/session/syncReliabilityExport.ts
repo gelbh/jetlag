@@ -1,7 +1,7 @@
 import { isEffectivelyOffline } from "../../domain/device/sync/sync";
+import { useSessionStore } from "../../state/sessionStore";
 import { isFirestorePersistenceUnavailable } from "../core/firebase/firebase";
 import { countOfflineQueueForSession } from "./offlineQueue";
-import { useSessionStore } from "../../state/sessionStore";
 
 export interface SyncReliabilitySnapshot {
   capturedAt: string;
@@ -17,12 +17,7 @@ export interface SyncReliabilitySnapshot {
 }
 
 export async function captureSyncReliabilitySnapshot(): Promise<SyncReliabilitySnapshot> {
-  const {
-    session,
-    pendingWrites,
-    lastSyncError,
-    networkReachable,
-  } = useSessionStore.getState();
+  const { session, pendingWrites, lastSyncError, networkReachable } = useSessionStore.getState();
   const online = typeof navigator === "undefined" ? true : navigator.onLine;
   const sessionId = session?.id ?? null;
 
@@ -36,8 +31,7 @@ export async function captureSyncReliabilitySnapshot(): Promise<SyncReliabilityS
     firestorePersistenceUnavailable: isFirestorePersistenceUnavailable(),
     online,
     platform: typeof navigator === "undefined" ? null : navigator.userAgent,
-    queuedAnnotationWrites:
-      sessionId === null ? 0 : await countOfflineQueueForSession(sessionId),
+    queuedAnnotationWrites: sessionId === null ? 0 : await countOfflineQueueForSession(sessionId),
   };
 }
 

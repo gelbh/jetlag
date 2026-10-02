@@ -1,9 +1,6 @@
 import { create } from "zustand";
-import { persist, createJSONStorage } from "zustand/middleware";
-import {
-  INITIAL_TIMER_STATE,
-  type TimerState,
-} from "../domain/session/timer/timer";
+import { createJSONStorage, persist } from "zustand/middleware";
+import { INITIAL_TIMER_STATE, type TimerState } from "../domain/session/timer/timer";
 
 interface TimerStoreState {
   bySessionId: Record<string, TimerState>;
@@ -16,8 +13,7 @@ export const useTimerStore = create<TimerStoreState>()(
   persist(
     (set, get) => ({
       bySessionId: {},
-      getTimer: (sessionId) =>
-        get().bySessionId[sessionId] ?? INITIAL_TIMER_STATE,
+      getTimer: (sessionId) => get().bySessionId[sessionId] ?? INITIAL_TIMER_STATE,
       setTimer: (sessionId, state) =>
         set((current) => ({
           bySessionId: {

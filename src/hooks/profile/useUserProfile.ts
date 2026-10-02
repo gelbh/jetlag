@@ -1,8 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  subscribeUserProfile,
-  type UserProfile,
-} from "../../services/firestore/firestoreProfile";
+import { subscribeUserProfile, type UserProfile } from "../../services/firestore/firestoreProfile";
 
 export function useUserProfile(
   uid: string | null | undefined,
@@ -13,7 +10,6 @@ export function useUserProfile(
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    /* eslint-disable react-hooks/set-state-in-effect -- clear subscription state when disabled */
     if (!enabled || !uid) {
       setProfile(null);
       setError(null);
@@ -23,8 +19,6 @@ export function useUserProfile(
 
     setReady(false);
     setError(null);
-    /* eslint-enable react-hooks/set-state-in-effect */
-
     return subscribeUserProfile(
       uid,
       (nextProfile) => {

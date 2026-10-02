@@ -24,9 +24,7 @@ describe("HIDER_DECK_TEMPLATE", () => {
   });
 
   it("does not invent expansion-only power-ups in the base multiset", () => {
-    const ids = HIDER_DECK_TEMPLATE.filter((c) => c.kind === "powerUp").map(
-      (c) => c.id,
-    );
+    const ids = HIDER_DECK_TEMPLATE.filter((c) => c.kind === "powerUp").map((c) => c.id);
     expect(ids).not.toContain("discard3Draw4");
     expect(ids).not.toContain("expandHand2");
   });

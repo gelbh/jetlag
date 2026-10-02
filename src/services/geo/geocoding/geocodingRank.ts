@@ -1,7 +1,7 @@
-import { formatPlayAreaSummary, gameAreaSquareMiles } from "@/domain/session/size/gameSize";
+import { haversineMeters } from "@/domain/geometry/gameArea/distance";
 import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
 import { isPointInGameArea, placeToGameArea } from "@/domain/geometry/gameArea/geometryCore";
-import { haversineMeters } from "@/domain/geometry/gameArea/distance";
+import { formatPlayAreaSummary, gameAreaSquareMiles } from "@/domain/session/size/gameSize";
 import type { GeocodedPlace } from "./normalize";
 
 const SETTLEMENT_CATEGORIES = new Set([
@@ -69,10 +69,7 @@ export function computeApproximateAreaSqMi(
 }
 
 export function formatPlaceSearchSubtitle(place: GeocodedPlace): string {
-  const areaLabel = formatPlayAreaSummary(place.approximateAreaSqMi).replace(
-    " play area",
-    "",
-  );
+  const areaLabel = formatPlayAreaSummary(place.approximateAreaSqMi).replace(" play area", "");
 
   return `${place.placeCategory} · ${areaLabel}`;
 }
@@ -122,11 +119,8 @@ export interface RankedGeocodedPlaceCandidate {
 
 const BOUNDS_FINGERPRINT_PRECISION = 3;
 
-export function placeBoundsFingerprint(
-  place: Pick<GeocodedPlace, "bounds">,
-): string {
-  const round = (value: number) =>
-    Number(value.toFixed(BOUNDS_FINGERPRINT_PRECISION));
+export function placeBoundsFingerprint(place: Pick<GeocodedPlace, "bounds">): string {
+  const round = (value: number) => Number(value.toFixed(BOUNDS_FINGERPRINT_PRECISION));
   const { south, west, north, east } = place.bounds;
   return `${round(south)}|${round(west)}|${round(north)}|${round(east)}`;
 }
@@ -149,8 +143,7 @@ export function mergeRankedGeocodedPlaceCandidates(
   left: RankedGeocodedPlaceCandidate,
   right: RankedGeocodedPlaceCandidate,
 ): RankedGeocodedPlaceCandidate {
-  const winner =
-    candidateQualityScore(right) > candidateQualityScore(left) ? right : left;
+  const winner = candidateQualityScore(right) > candidateQualityScore(left) ? right : left;
 
   return {
     place: winner.place,
@@ -206,10 +199,7 @@ function scoreGeocodedCandidate(
   };
 }
 
-function compareGeocodingRankScores(
-  left: GeocodingRankScores,
-  right: GeocodingRankScores,
-): number {
+function compareGeocodingRankScores(left: GeocodingRankScores, right: GeocodingRankScores): number {
   const nameDelta = right.nameScore - left.nameScore;
   if (nameDelta !== 0) {
     return nameDelta;
@@ -252,8 +242,6 @@ export function rankGeocodedPlaceCandidates(
       candidate,
       scores: scoreGeocodedCandidate(candidate, query, near),
     }))
-    .sort((left, right) =>
-      compareGeocodingRankScores(left.scores, right.scores),
-    )
+    .sort((left, right) => compareGeocodingRankScores(left.scores, right.scores))
     .map(({ candidate }) => candidate.place);
 }

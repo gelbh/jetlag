@@ -1,10 +1,10 @@
 import {
-  test,
   drawZone,
   expectMapHasAnnotations,
   openMapWithLocalSession,
   placePin,
   redoAnnotation,
+  test,
   undoAnnotation,
 } from "../../fixtures";
 

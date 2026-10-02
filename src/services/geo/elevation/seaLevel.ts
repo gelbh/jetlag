@@ -1,19 +1,19 @@
-import type { GameArea } from "@/domain/map/annotations";
+import type { Feature, MultiPolygon, Polygon } from "geojson";
+import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
 import {
   buildSeaLevelNearRegionFromSamples,
   buildSeaLevelNearRegionWithLocalRefine,
   distanceFromSeaLevelMeters,
+  type ElevationSampleCell,
   MAX_SEA_LEVEL_REFINE_SAMPLES,
   SEA_LEVEL_REFINE_SUBDIVISIONS,
+  type SeaLevelEdgeCase,
   selectAmbiguousSeaLevelCells,
   subdivideElevationSampleCell,
-  type ElevationSampleCell,
-  type SeaLevelEdgeCase,
 } from "@/domain/geometry/measuring/seaLevel";
-import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
-import type { Feature, MultiPolygon, Polygon } from "geojson";
-import { fetchElevations } from "./index";
+import type { GameArea } from "@/domain/map/annotations";
 import type { CachedSeaLevelSampling } from "../cache";
+import { fetchElevations } from "./index";
 import {
   ensureSeaLevelSamplingComplete,
   type SeaLevelSamplingOptions,
@@ -44,9 +44,7 @@ export function buildSeaLevelContextFromSampling(
   sampling: CachedSeaLevelSampling,
   gameArea: GameArea,
 ): SeaLevelContext | SeaLevelContextFailure {
-  const distanceFromSeaLevel = distanceFromSeaLevelMeters(
-    seekerElevationMeters,
-  );
+  const distanceFromSeaLevel = distanceFromSeaLevelMeters(seekerElevationMeters);
   const { region: nearRegion, edgeCase } = buildSeaLevelNearRegionFromSamples(
     sampling.cells,
     sampling.cellElevations,
@@ -74,9 +72,7 @@ async function refineSeaLevelContextLocally(
   sampling: CachedSeaLevelSampling,
   gameArea: GameArea,
 ): Promise<SeaLevelContext | SeaLevelContextFailure> {
-  const distanceFromSeaLevel = distanceFromSeaLevelMeters(
-    seekerElevationMeters,
-  );
+  const distanceFromSeaLevel = distanceFromSeaLevelMeters(seekerElevationMeters);
   const ambiguous = selectAmbiguousSeaLevelCells(
     sampling.cells,
     sampling.cellElevations,
@@ -84,19 +80,15 @@ async function refineSeaLevelContextLocally(
   );
 
   if (ambiguous.length === 0) {
-    return buildSeaLevelContextFromSampling(
-      seekerElevationMeters,
-      sampling,
-      gameArea,
-    );
+    return buildSeaLevelContextFromSampling(seekerElevationMeters, sampling, gameArea);
   }
 
   const refineEntries = ambiguous.flatMap((parent) => {
     const parentKey = `${parent.row}:${parent.col}`;
-    return subdivideElevationSampleCell(
-      parent,
-      SEA_LEVEL_REFINE_SUBDIVISIONS,
-    ).map((cell) => ({ cell, parentKey }));
+    return subdivideElevationSampleCell(parent, SEA_LEVEL_REFINE_SUBDIVISIONS).map((cell) => ({
+      cell,
+      parentKey,
+    }));
   });
   const capped = refineEntries.slice(0, MAX_SEA_LEVEL_REFINE_SAMPLES);
   const refineCells = capped.map((entry) => entry.cell);
@@ -107,16 +99,15 @@ async function refineSeaLevelContextLocally(
     { profile: "foreground" },
   );
 
-  const { region: nearRegion, edgeCase } =
-    buildSeaLevelNearRegionWithLocalRefine({
-      cells: sampling.cells,
-      elevations: sampling.cellElevations,
-      seekerDistanceFromSeaLevelMeters: distanceFromSeaLevel,
-      gameArea,
-      refineCells,
-      refineParentKeys,
-      refineElevations,
-    });
+  const { region: nearRegion, edgeCase } = buildSeaLevelNearRegionWithLocalRefine({
+    cells: sampling.cells,
+    elevations: sampling.cellElevations,
+    seekerDistanceFromSeaLevelMeters: distanceFromSeaLevel,
+    gameArea,
+    refineCells,
+    refineParentKeys,
+    refineElevations,
+  });
 
   if (edgeCase === "lowest" || !nearRegion) {
     return { reason: "lowest" };
@@ -149,11 +140,7 @@ export async function loadSeaLevelContext(
     onEnrich: options?.onEnrich
       ? (enriched) => {
           options.onEnrich?.(
-            buildSeaLevelContextFromSampling(
-              seekerElevationMeters,
-              enriched,
-              gameArea,
-            ),
+            buildSeaLevelContextFromSampling(seekerElevationMeters, enriched, gameArea),
           );
         }
       : undefined,
@@ -161,18 +148,10 @@ export async function loadSeaLevelContext(
 
   // Dense complete pack seed: trust the grid. Freehand / incomplete: local refine.
   if (sampling.complete === true && options?.regionPackId) {
-    return buildSeaLevelContextFromSampling(
-      seekerElevationMeters,
-      sampling,
-      gameArea,
-    );
+    return buildSeaLevelContextFromSampling(seekerElevationMeters, sampling, gameArea);
   }
 
-  return refineSeaLevelContextLocally(
-    seekerElevationMeters,
-    sampling,
-    gameArea,
-  );
+  return refineSeaLevelContextLocally(seekerElevationMeters, sampling, gameArea);
 }
 
 export type { CachedSeaLevelSampling };

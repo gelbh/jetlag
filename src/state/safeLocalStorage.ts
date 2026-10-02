@@ -30,9 +30,8 @@ export function readSessionIdFromLocalStorage(
     if (!raw) {
       return undefined;
     }
-    const sessionId = (
-      JSON.parse(raw) as { state?: { session?: { id?: unknown } } }
-    ).state?.session?.id;
+    const sessionId = (JSON.parse(raw) as { state?: { session?: { id?: unknown } } }).state?.session
+      ?.id;
     return typeof sessionId === "string" ? sessionId : undefined;
   } catch {
     return undefined;
@@ -97,11 +96,7 @@ export function keepSessionAnnotations(
   return serializeAnnotationsPayload(parsed, annotations);
 }
 
-function trySetItem(
-  storage: Storage,
-  name: string,
-  value: string,
-): "ok" | "quota" | "error" {
+function trySetItem(storage: Storage, name: string, value: string): "ok" | "quota" | "error" {
   try {
     storage.setItem(name, value);
     return "ok";
@@ -121,11 +116,7 @@ function clearStorageItem(storage: Storage, name: string): void {
   }
 }
 
-export function safeSetItemForAnnotations(
-  storage: Storage,
-  name: string,
-  value: string,
-): void {
+export function safeSetItemForAnnotations(storage: Storage, name: string, value: string): void {
   if (trySetItem(storage, name, value) === "ok") {
     return;
   }
@@ -136,10 +127,7 @@ export function safeSetItemForAnnotations(
   }
 
   const base = withoutDeleted !== value ? withoutDeleted : value;
-  const sessionScoped = keepSessionAnnotations(
-    base,
-    readSessionIdFromLocalStorage(storage),
-  );
+  const sessionScoped = keepSessionAnnotations(base, readSessionIdFromLocalStorage(storage));
   if (sessionScoped !== base && trySetItem(storage, name, sessionScoped) === "ok") {
     return;
   }

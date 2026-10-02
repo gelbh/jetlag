@@ -1,32 +1,22 @@
 import turfCircle from "@turf/circle";
 import { point as turfPoint } from "@turf/helpers";
-import type { AnnotationRecord, GameArea } from "../../map/annotations";
 import { isActive } from "../../map/annotationActive";
+import type { AnnotationRecord, GameArea } from "../../map/annotations";
 import { DEFAULT_RADIUS_METERS } from "../../map/distance";
 import { MAP_ANNOTATION_COLORS } from "../../map/mapAnnotationColors";
-import { thermometerShadedSide } from "../../questions/thermometerQuestions";
 import { measuringPlacesFromMetadata } from "../../questions/measuringPlacesFromMetadata";
+import { thermometerShadedSide } from "../../questions/thermometerQuestions";
 import type { HidingZoneRecord } from "../../session/hiding/hidingZone";
-import {
-  dispatchHalfPlane,
-  dispatchRadarShadedRegion,
-} from "../core/radarHalfPlane";
+import { dispatchHalfPlane, dispatchRadarShadedRegion } from "../core/radarHalfPlane";
+import type { DiskSpec, EliminationUnionInput, LatLngTuple, PolygonFeature } from "../kernel/types";
 import {
   buildMeasuringEliminationPreview,
   type MeasuringRegionInput,
 } from "../measuring/measuringRegions";
-import type {
-  DiskSpec,
-  EliminationUnionInput,
-  LatLngTuple,
-  PolygonFeature,
-} from "../kernel/types";
 
 export const ELIMINATION_FILL_COLOR = MAP_ANNOTATION_COLORS.elimination;
 
-export function eliminationDiskForAnnotation(
-  annotation: AnnotationRecord,
-): DiskSpec | null {
+export function eliminationDiskForAnnotation(annotation: AnnotationRecord): DiskSpec | null {
   if (!isActive(annotation)) {
     return null;
   }
@@ -62,8 +52,7 @@ export function eliminationDiskForAnnotation(
     }
 
     const center: LatLngTuple = [geometry.coordinates[1], geometry.coordinates[0]];
-    const radiusMeters =
-      annotation.metadata.radiusMeters ?? DEFAULT_RADIUS_METERS;
+    const radiusMeters = annotation.metadata.radiusMeters ?? DEFAULT_RADIUS_METERS;
 
     return { center, radiusMeters };
   }
@@ -97,8 +86,7 @@ async function measuringEliminationFromStoredMetadata(
     });
     if (
       feature &&
-      (feature.geometry.type === "Polygon" ||
-        feature.geometry.type === "MultiPolygon")
+      (feature.geometry.type === "Polygon" || feature.geometry.type === "MultiPolygon")
     ) {
       return feature as PolygonFeature;
     }
@@ -109,20 +97,17 @@ async function measuringEliminationFromStoredMetadata(
   return null;
 }
 
-function eliminationFeatureFromNonKernel(
-  annotation: AnnotationRecord,
-): PolygonFeature | null {
+function eliminationFeatureFromNonKernel(annotation: AnnotationRecord): PolygonFeature | null {
   if (!isActive(annotation)) {
     return null;
   }
 
   const disk = eliminationDiskForAnnotation(annotation);
   if (disk) {
-    return turfCircle(
-      turfPoint([disk.center[1], disk.center[0]]),
-      disk.radiusMeters / 1000,
-      { steps: 64, units: "kilometers" },
-    ) as PolygonFeature;
+    return turfCircle(turfPoint([disk.center[1], disk.center[0]]), disk.radiusMeters / 1000, {
+      steps: 64,
+      units: "kilometers",
+    }) as PolygonFeature;
   }
 
   if (annotation.type === "matching") {
@@ -144,9 +129,7 @@ function eliminationFeatureFromNonKernel(
   if (annotation.type === "tentacle") {
     if (annotation.metadata.tentacleEliminationJson) {
       try {
-        return JSON.parse(
-          annotation.metadata.tentacleEliminationJson,
-        ) as PolygonFeature;
+        return JSON.parse(annotation.metadata.tentacleEliminationJson) as PolygonFeature;
       } catch {
         return null;
       }
@@ -229,12 +212,7 @@ export async function eliminationFeatureForAnnotation(
       return null;
     }
 
-    return dispatchRadarShadedRegion(
-      center,
-      radiusMeters,
-      gameArea,
-      false,
-    );
+    return dispatchRadarShadedRegion(center, radiusMeters, gameArea, false);
   }
 
   return null;
@@ -289,18 +267,14 @@ export async function computeEliminationUnionInput(
   return { polygons, disks };
 }
 
-export function annotationsToEndGameDisks(
-  hidingZones: readonly HidingZoneRecord[],
-): DiskSpec[] {
+export function annotationsToEndGameDisks(hidingZones: readonly HidingZoneRecord[]): DiskSpec[] {
   return hidingZones.map((zone) => ({
     center: [zone.center.lat, zone.center.lng],
     radiusMeters: zone.radiusMeters,
   }));
 }
 
-function annotationLikelyHasEliminationFeature(
-  annotation: AnnotationRecord,
-): boolean {
+function annotationLikelyHasEliminationFeature(annotation: AnnotationRecord): boolean {
   if (eliminationDiskForAnnotation(annotation) !== null) {
     return true;
   }

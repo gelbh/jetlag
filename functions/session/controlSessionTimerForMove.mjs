@@ -15,12 +15,7 @@ export const MOVE_TIMER_INVALID_ACTION = "MOVE_TIMER_INVALID_ACTION";
  * shared timer. That matches Move card trust (hider already controls zone
  * writes). Do not widen to seekers/observers without stronger authz.
  */
-export async function controlSessionTimerForMoveHandler(
-  db,
-  uid,
-  sessionId,
-  action,
-) {
+export async function controlSessionTimerForMoveHandler(db, uid, sessionId, action) {
   if (action !== "pause" && action !== "resume") {
     throw new Error(MOVE_TIMER_INVALID_ACTION);
   }
@@ -44,13 +39,11 @@ export async function controlSessionTimerForMoveHandler(
     }
 
     const accumulatedMs =
-      typeof data.timerAccumulatedMs === "number" &&
-      Number.isFinite(data.timerAccumulatedMs)
+      typeof data.timerAccumulatedMs === "number" && Number.isFinite(data.timerAccumulatedMs)
         ? Math.max(0, data.timerAccumulatedMs)
         : 0;
     const runningSinceRaw = data.timerRunningSince;
-    const runningSinceMs =
-      typeof runningSinceRaw === "string" ? Date.parse(runningSinceRaw) : NaN;
+    const runningSinceMs = typeof runningSinceRaw === "string" ? Date.parse(runningSinceRaw) : NaN;
     const isRunning = Number.isFinite(runningSinceMs);
 
     if (action === "pause") {

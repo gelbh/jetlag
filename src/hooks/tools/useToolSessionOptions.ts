@@ -4,10 +4,7 @@ interface UseToolSessionOptionsParams<Option> {
   active: boolean;
   usedOptions: ReadonlySet<Option>;
   currentOption: Option;
-  isAvailable: (
-    usedOptions: ReadonlySet<Option>,
-    currentOption: Option,
-  ) => boolean;
+  isAvailable: (usedOptions: ReadonlySet<Option>, currentOption: Option) => boolean;
   pickNext: (usedOptions: ReadonlySet<Option>) => Option | null;
   onUnavailable: (next: Option) => void;
 }
@@ -33,12 +30,5 @@ export function useToolSessionOptions<Option>({
     if (next !== null) {
       onUnavailable(next);
     }
-  }, [
-    active,
-    currentOption,
-    isAvailable,
-    onUnavailable,
-    pickNext,
-    usedOptions,
-  ]);
+  }, [active, currentOption, isAvailable, onUnavailable, pickNext, usedOptions]);
 }

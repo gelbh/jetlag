@@ -1,19 +1,16 @@
 import { useMemo } from "react";
 import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
-import { MAP_ANNOTATION_COLORS } from "@/domain/map/mapAnnotationColors";
-import {
-  formatThermometerWalkProgress,
-  type DistanceUnit,
-} from "@/domain/map/distance";
 import { distanceBetweenPoints } from "@/domain/geometry/gameArea/geometry";
+import { type DistanceUnit, formatThermometerWalkProgress } from "@/domain/map/distance";
+import { MAP_ANNOTATION_COLORS } from "@/domain/map/mapAnnotationColors";
 import { getBasemapSurface } from "@/domain/map/mapBasemaps";
 import { cssPxDashToMapLibre } from "../helpers/cssPxDashToMapLibre";
 import { MapLibreGeoJsonOverlay } from "../helpers/MapLibreGeoJsonOverlay";
 import { MapLibrePointMarkers } from "../helpers/MapLibrePointMarkers";
 import {
-  symbolMarkerCollection,
   type CircleMarkerProps,
   type SymbolMarkerProps,
+  symbolMarkerCollection,
 } from "../helpers/mapMarkerFeatures";
 
 interface ActiveThermometerWalkLayerProps {
@@ -43,10 +40,7 @@ export function ActiveThermometerWalkLayer({
       return null;
     }
     const walkDistanceMeters = distanceBetweenPoints(start, livePoint);
-    const midpoint: LatLngTuple = [
-      (start[0] + livePoint[0]) / 2,
-      (start[1] + livePoint[1]) / 2,
-    ];
+    const midpoint: LatLngTuple = [(start[0] + livePoint[0]) / 2, (start[1] + livePoint[1]) / 2];
     const axisColor =
       mapStyle === "satellite"
         ? MAP_ANNOTATION_COLORS.strokeLight

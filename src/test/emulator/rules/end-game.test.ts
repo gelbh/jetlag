@@ -1,13 +1,7 @@
+import { assertFails, assertSucceeds } from "@firebase/rules-unit-testing";
 import { deleteField } from "firebase/firestore";
-import {
-  assertFails,
-  assertSucceeds,
-} from "@firebase/rules-unit-testing";
 import { describe, expect, it } from "vitest";
-import {
-  bindRulesTestEnv,
-  sessionPayload,
-} from "./helpers";
+import { bindRulesTestEnv, sessionPayload } from "./helpers";
 
 describe("firestore.rules — end game", () => {
   const rules = bindRulesTestEnv();
@@ -402,19 +396,23 @@ describe("firestore.rules — end game", () => {
     );
 
     await assertFails(
-      host.firestore().collection("sessions").doc("session-1").update({
-        endGameStartedAt: "2026-01-01T00:01:00.000Z",
-        endGameStartedByUid: "host-1",
-        endGameTruthAnchors: {
-          "hider-1": {
-            lat: 53.35,
-            lng: -6.26,
-            frozenAt: "2026-01-01T00:01:00.000Z",
+      host
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .update({
+          endGameStartedAt: "2026-01-01T00:01:00.000Z",
+          endGameStartedByUid: "host-1",
+          endGameTruthAnchors: {
+            "hider-1": {
+              lat: 53.35,
+              lng: -6.26,
+              frozenAt: "2026-01-01T00:01:00.000Z",
+            },
           },
-        },
-        endGameRequestedAt: deleteField(),
-        endGameRequestedByUid: deleteField(),
-      }),
+          endGameRequestedAt: deleteField(),
+          endGameRequestedByUid: deleteField(),
+        }),
     );
   });
 
@@ -448,11 +446,7 @@ describe("firestore.rules — end game", () => {
 
   it("rejects session reset from non-host members", async () => {
     const host = rules.testEnv.authenticatedContext("host-1");
-    await host
-      .firestore()
-      .collection("sessions")
-      .doc("session-1")
-      .set(sessionPayload("host-1"));
+    await host.firestore().collection("sessions").doc("session-1").set(sessionPayload("host-1"));
 
     const seeker = rules.testEnv.authenticatedContext("seeker-1");
     await assertFails(
@@ -463,5 +457,4 @@ describe("firestore.rules — end game", () => {
       }),
     );
   });
-
 });

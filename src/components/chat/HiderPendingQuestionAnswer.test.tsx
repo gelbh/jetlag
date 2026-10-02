@@ -1,10 +1,10 @@
 import { screen } from "@testing-library/react";
-import { renderWithAppUi } from "../../test/renderWithAppUi";
 import { describe, expect, it, vi } from "vitest";
 import type {
   PendingQuestionRecord,
   SessionMessageRecord,
 } from "../../domain/session/activity/sessionChat";
+import { renderWithAppUi } from "../../test/renderWithAppUi";
 import { HiderPendingQuestionAnswer } from "./HiderPendingQuestionAnswer";
 
 const radarPending: PendingQuestionRecord = {
@@ -79,9 +79,7 @@ describe("HiderPendingQuestionAnswer", () => {
         onAnswerQuestion={vi.fn()}
       />,
     );
-    expect(
-      screen.getByRole("button", { name: /Send answer: Yes/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Send answer: Yes/i })).toBeInTheDocument();
   });
 
   it("hides answer controls while walking", () => {

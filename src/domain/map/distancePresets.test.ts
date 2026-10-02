@@ -1,19 +1,19 @@
 import { describe, expect, it } from "vitest";
 import {
-  defaultRadarPresetMeters,
-  hidingZoneDefaultRadiusMeters,
-  METRIC_RADAR_PRESET_METERS,
-  METRIC_THERMOMETER_PRESET_METERS,
-  radarPresetsMetersForGameSizeAndUnit,
-  radarPresetMetersForUnit,
-  thermometerPresetsMetersForGameSizeAndUnit,
-} from "./distancePresets";
-import { milesToMeters } from "./distance";
-import {
   createSessionDraftToGamePreset,
   gamePresetToCreateSessionDraft,
 } from "../session/presets/gamePreset";
 import { defaultAdvancedSessionSettings } from "../session/tools/advancedSessionSettings";
+import { milesToMeters } from "./distance";
+import {
+  defaultRadarPresetMeters,
+  hidingZoneDefaultRadiusMeters,
+  METRIC_RADAR_PRESET_METERS,
+  METRIC_THERMOMETER_PRESET_METERS,
+  radarPresetMetersForUnit,
+  radarPresetsMetersForGameSizeAndUnit,
+  thermometerPresetsMetersForGameSizeAndUnit,
+} from "./distancePresets";
 
 describe("distancePresets", () => {
   it("uses native metric radar presets", () => {
@@ -33,9 +33,7 @@ describe("distancePresets", () => {
     ]);
     expect(METRIC_RADAR_PRESET_METERS).toHaveLength(9);
     expect(METRIC_RADAR_PRESET_METERS.at(-1)).toBe(160_000);
-    expect(METRIC_THERMOMETER_PRESET_METERS).toEqual([
-      1000, 5000, 15_000, 75_000,
-    ]);
+    expect(METRIC_THERMOMETER_PRESET_METERS).toEqual([1000, 5000, 15_000, 75_000]);
   });
 
   it("gates radar presets by game size", () => {
@@ -51,9 +49,7 @@ describe("distancePresets", () => {
   });
 
   it("gates thermometer presets by game size in metric edition", () => {
-    expect(thermometerPresetsMetersForGameSizeAndUnit("small", "metric")).toEqual([
-      1000, 5000,
-    ]);
+    expect(thermometerPresetsMetersForGameSizeAndUnit("small", "metric")).toEqual([1000, 5000]);
     expect(thermometerPresetsMetersForGameSizeAndUnit("medium", "metric")).toEqual([
       1000, 5000, 15_000,
     ]);

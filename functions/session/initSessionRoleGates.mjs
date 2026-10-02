@@ -33,10 +33,7 @@ export async function initSessionRoleGatesHandler(db, uid, sessionId) {
 
     const hostRole = data.memberRoles?.[uid];
     if (hostRole !== "seeker" && hostRole !== "hider") {
-      throw new HttpsError(
-        "failed-precondition",
-        "Host player role must be seeker or hider.",
-      );
+      throw new HttpsError("failed-precondition", "Host player role must be seeker or hider.");
     }
 
     const roleGates = isRoleGatedSession(data)

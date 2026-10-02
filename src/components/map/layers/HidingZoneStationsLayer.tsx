@@ -1,11 +1,11 @@
 import { useCallback, useMemo } from "react";
-import type { TransitStation } from "@/domain/session/hiding/hidingZone";
 import { MAP_ANNOTATION_COLORS } from "@/domain/map/mapAnnotationColors";
-import { featureHitId } from "../helpers/mapFeatureHitTest";
-import { MapLibrePointMarkers } from "../helpers/MapLibrePointMarkers";
-import type { CircleMarkerProps } from "../helpers/mapMarkerFeatures";
-import { jlMarkerLayerId } from "../helpers/mapMarkerConstants";
+import type { TransitStation } from "@/domain/session/hiding/hidingZone";
 import { useMapFeatureHitTest } from "../helpers/MapFeatureHitTestContext";
+import { MapLibrePointMarkers } from "../helpers/MapLibrePointMarkers";
+import { featureHitId } from "../helpers/mapFeatureHitTest";
+import { jlMarkerLayerId } from "../helpers/mapMarkerConstants";
+import type { CircleMarkerProps } from "../helpers/mapMarkerFeatures";
 
 interface HidingZoneStationsLayerProps {
   stations: readonly TransitStation[];
@@ -66,7 +66,5 @@ export function HidingZoneStationsLayer({
     ),
   );
 
-  return (
-    <MapLibrePointMarkers id="hiding-stations" interactive markers={markers} />
-  );
+  return <MapLibrePointMarkers id="hiding-stations" interactive markers={markers} />;
 }

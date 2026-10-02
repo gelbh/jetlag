@@ -7,11 +7,7 @@ import {
 import { getFirestoreDb, isFirebaseConfigured } from "../core/firebase/firebase";
 
 function clientMinVersionDoc() {
-  return doc(
-    getFirestoreDb(),
-    CLIENT_MIN_VERSION_COLLECTION,
-    CLIENT_MIN_VERSION_DOC_ID,
-  );
+  return doc(getFirestoreDb(), CLIENT_MIN_VERSION_COLLECTION, CLIENT_MIN_VERSION_DOC_ID);
 }
 
 /** One-shot read for boot / before-join checks. */

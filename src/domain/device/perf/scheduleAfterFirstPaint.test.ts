@@ -1,8 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import {
-  scheduleAfterFirstPaint,
-  scheduleIdleBootWork,
-} from "./scheduleAfterFirstPaint";
+import { scheduleAfterFirstPaint, scheduleIdleBootWork } from "./scheduleAfterFirstPaint";
 
 describe("scheduleAfterFirstPaint", () => {
   beforeEach(() => {

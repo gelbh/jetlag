@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
 import { BankIcon, BookOpenIcon, TrainIcon } from "@phosphor-icons/react";
+import { describe, expect, it } from "vitest";
 import { tentacleCategoryIcon } from "./tentacleCategoryIcons";
 
 describe("tentacleCategoryIcon", () => {

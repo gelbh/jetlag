@@ -3,17 +3,15 @@ import "@fontsource/source-sans-3/500.css";
 import "@fontsource/source-sans-3/600.css";
 import "@fontsource/barlow-semi-condensed/600.css";
 import "@fontsource/barlow-semi-condensed/700.css";
-import { unregisterDevServiceWorkers } from "./domain/device/updates/unregisterDevServiceWorkers.ts";
-import {
-  scheduleAfterFirstPaint,
-} from "./domain/device/perf/scheduleAfterFirstPaint.ts";
-import { PWA_MARK_NAV, markPlayDay } from "./domain/device/perf/playDayMarks.ts";
-import { isPublicShellPath } from "./domain/device/perf/publicShellPaths.ts";
-import { scheduleWhenIdleAfterLoad } from "./domain/device/perf/scheduleWhenIdleAfterLoad.ts";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { markStandaloneShellClass } from "./domain/device/pwa/markStandaloneShellClass";
 import { markEmbedShellAttribute } from "./domain/device/embed/embedMode";
+import { markPlayDay, PWA_MARK_NAV } from "./domain/device/perf/playDayMarks.ts";
+import { isPublicShellPath } from "./domain/device/perf/publicShellPaths.ts";
+import { scheduleAfterFirstPaint } from "./domain/device/perf/scheduleAfterFirstPaint.ts";
+import { scheduleWhenIdleAfterLoad } from "./domain/device/perf/scheduleWhenIdleAfterLoad.ts";
+import { markStandaloneShellClass } from "./domain/device/pwa/markStandaloneShellClass";
+import { unregisterDevServiceWorkers } from "./domain/device/updates/unregisterDevServiceWorkers.ts";
 import "./theme/mantineShellStyles";
 import "./index.css";
 
@@ -30,12 +28,10 @@ if (import.meta.env.VITE_USE_FIREBASE_EMULATOR === "true") {
 }
 function scheduleDeferredObservability(): void {
   scheduleAfterFirstPaint(() => {
-    void import("./services/core/analytics/sentry.ts").then(
-      ({ initSentry, setBootstrapTag }) => {
-        setBootstrapTag("render");
-        initSentry();
-      },
-    );
+    void import("./services/core/analytics/sentry.ts").then(({ initSentry, setBootstrapTag }) => {
+      setBootstrapTag("render");
+      initSentry();
+    });
     void import("./services/core/analytics/analytics.ts").then(({ initAnalytics }) => {
       initAnalytics();
     });
@@ -69,11 +65,13 @@ function startDeferredAuthBootstrap(appRendered: Promise<void>): void {
   // first App paint, `load`, and idle. First-need callers (ensureAnonymousUser,
   // waitForAuthStateReady) still start it early.
   if (isPublicShellPath(window.location.pathname)) {
-    void appRendered.catch(() => {}).finally(() => {
-      scheduleAfterFirstPaint(() => {
-        scheduleWhenIdleAfterLoad(start);
+    void appRendered
+      .catch(() => {})
+      .finally(() => {
+        scheduleAfterFirstPaint(() => {
+          scheduleWhenIdleAfterLoad(start);
+        });
       });
-    });
     return;
   }
   start();

@@ -4,11 +4,8 @@
  * Spec: ask-surface-kit-design rev 2026-08-05b.
  */
 import { Button } from "@mantine/core";
-import {
-  filledStyles,
-  grayStyles,
-} from "@/components/ui/entry/entryChrome";
 import { AskInlineError } from "@/components/tools/shared/readout/AskInlineError";
+import { filledStyles, grayStyles } from "@/components/ui/entry/entryChrome";
 
 type AskCommitStripProps = {
   canCommit: boolean;
@@ -30,10 +27,7 @@ export function AskCommitStrip({
   const buttonLabel = isSubmitting ? "Sending…" : label;
 
   return (
-    <div
-      data-testid="ask-commit-strip"
-      className="pointer-events-auto flex flex-col gap-1.5"
-    >
+    <div data-testid="ask-commit-strip" className="pointer-events-auto flex flex-col gap-1.5">
       <Button
         type="button"
         fullWidth

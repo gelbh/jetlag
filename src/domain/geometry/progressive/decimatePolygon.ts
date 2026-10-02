@@ -34,9 +34,7 @@ export function decimatePolygonFeature(
       ...feature,
       geometry: {
         type: "Polygon",
-        coordinates: feature.geometry.coordinates.map((ring) =>
-          decimateRing(ring, stride),
-        ),
+        coordinates: feature.geometry.coordinates.map((ring) => decimateRing(ring, stride)),
       },
     };
   }

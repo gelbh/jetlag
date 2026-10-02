@@ -14,10 +14,7 @@ export interface TimeTrapRecord {
   placedAt: string;
 }
 
-export function isValidTimeTrapStation(
-  station: TransitStation,
-  gameArea: GameArea,
-): boolean {
+export function isValidTimeTrapStation(station: TransitStation, gameArea: GameArea): boolean {
   return isValidHidingStation(station, gameArea);
 }
 

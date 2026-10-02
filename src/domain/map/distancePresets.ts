@@ -1,12 +1,9 @@
+import type { GameSize } from "../session/size/gameSize";
 import type { DistanceUnit } from "./distance";
 import { milesToMeters } from "./distance";
-import type { GameSize } from "../session/size/gameSize";
 
 /** Official metric edition hiding zone radii (m). */
-export const METRIC_HIDING_ZONE_RADIUS_METERS: Record<
-  "smallMedium" | "large",
-  number
-> = {
+export const METRIC_HIDING_ZONE_RADIUS_METERS: Record<"smallMedium" | "large", number> = {
   smallMedium: 500,
   large: 1000,
 };
@@ -17,9 +14,7 @@ export const METRIC_RADAR_PRESET_METERS = [
 ] as const;
 
 /** Official metric edition thermometer presets (m). */
-export const METRIC_THERMOMETER_PRESET_METERS = [
-  1000, 5000, 15_000, 75_000,
-] as const;
+export const METRIC_THERMOMETER_PRESET_METERS = [1000, 5000, 15_000, 75_000] as const;
 
 /** Official metric edition tentacle radii (m). */
 export const METRIC_TENTACLE_MEDIUM_RADIUS_METERS = 2000;
@@ -31,9 +26,7 @@ export const METRIC_TENTACLE_RADIUS_PRESET_METERS = [
   METRIC_TENTACLE_LARGE_RADIUS_METERS,
 ] as const;
 
-export const IMPERIAL_RADAR_PRESET_MILES = [
-  0.25, 0.5, 1, 3, 5, 10, 25, 50, 100,
-] as const;
+export const IMPERIAL_RADAR_PRESET_MILES = [0.25, 0.5, 1, 3, 5, 10, 25, 50, 100] as const;
 
 export const IMPERIAL_THERMOMETER_PRESET_MILES = [0.5, 3, 10, 50] as const;
 
@@ -60,9 +53,7 @@ const THERMOMETER_PRESET_COUNT_BY_GAME_SIZE: Record<GameSize, number> = {
   large: METRIC_THERMOMETER_PRESET_METERS.length,
 };
 
-export function resolveDistanceUnit(
-  unit: DistanceUnit | null | undefined,
-): DistanceUnit {
+export function resolveDistanceUnit(unit: DistanceUnit | null | undefined): DistanceUnit {
   return unit === "metric" ? "metric" : "imperial";
 }
 
@@ -96,10 +87,7 @@ export function radarPresetsMetersForGameSizeAndUnit(
   return radarPresetMetersForUnit(unit).slice(0, count);
 }
 
-export function maxRadarPresetMetersForGameSize(
-  gameSize: GameSize,
-  unit: DistanceUnit,
-): number {
+export function maxRadarPresetMetersForGameSize(gameSize: GameSize, unit: DistanceUnit): number {
   const presets = radarPresetsMetersForGameSizeAndUnit(gameSize, unit);
   return presets[presets.length - 1] ?? 0;
 }
@@ -110,8 +98,7 @@ export function isRadarPresetMetersForGameSize(
   unit: DistanceUnit,
 ): boolean {
   return radarPresetsMetersForGameSizeAndUnit(gameSize, unit).some(
-    (preset) =>
-      Math.abs(preset - distanceMeters) < PRESET_MATCH_TOLERANCE_METERS,
+    (preset) => Math.abs(preset - distanceMeters) < PRESET_MATCH_TOLERANCE_METERS,
   );
 }
 
@@ -137,9 +124,7 @@ export function defaultRadarPresetMeters(unit: DistanceUnit): number {
   return presets[Math.min(2, presets.length - 1)] ?? milesToMeters(1);
 }
 
-export function thermometerAllPresetMeters(
-  unit: DistanceUnit,
-): readonly number[] {
+export function thermometerAllPresetMeters(unit: DistanceUnit): readonly number[] {
   if (unit === "metric") {
     return METRIC_THERMOMETER_PRESET_METERS;
   }
@@ -150,10 +135,7 @@ export function thermometerAllPresetMeters(
 export function thermometerPresetsMilesForGameSize(
   gameSize: GameSize,
 ): readonly (typeof IMPERIAL_THERMOMETER_PRESET_MILES)[number][] {
-  return IMPERIAL_THERMOMETER_PRESET_MILES.slice(
-    0,
-    thermometerPresetCountForGameSize(gameSize),
-  );
+  return IMPERIAL_THERMOMETER_PRESET_MILES.slice(0, thermometerPresetCountForGameSize(gameSize));
 }
 
 export function thermometerPresetsMetersForGameSizeAndUnit(
@@ -164,10 +146,7 @@ export function thermometerPresetsMetersForGameSizeAndUnit(
   return thermometerAllPresetMeters(unit).slice(0, count);
 }
 
-export function hidingZoneDefaultRadiusMeters(
-  gameSize: GameSize,
-  unit: DistanceUnit,
-): number {
+export function hidingZoneDefaultRadiusMeters(gameSize: GameSize, unit: DistanceUnit): number {
   if (unit === "metric") {
     return gameSize === "large"
       ? METRIC_HIDING_ZONE_RADIUS_METERS.large
@@ -178,15 +157,11 @@ export function hidingZoneDefaultRadiusMeters(
 }
 
 export function tentacleMediumRadiusMeters(unit: DistanceUnit): number {
-  return unit === "metric"
-    ? METRIC_TENTACLE_MEDIUM_RADIUS_METERS
-    : milesToMeters(1);
+  return unit === "metric" ? METRIC_TENTACLE_MEDIUM_RADIUS_METERS : milesToMeters(1);
 }
 
 export function tentacleLargeRadiusMeters(unit: DistanceUnit): number {
-  return unit === "metric"
-    ? METRIC_TENTACLE_LARGE_RADIUS_METERS
-    : milesToMeters(15);
+  return unit === "metric" ? METRIC_TENTACLE_LARGE_RADIUS_METERS : milesToMeters(15);
 }
 
 export function tentacleRadiusPresetMeters(unit: DistanceUnit): readonly number[] {

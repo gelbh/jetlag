@@ -1,7 +1,8 @@
-import { describe, it } from "node:test";
 import assert from "node:assert/strict";
+import { describe, it } from "node:test";
 import { Timestamp } from "firebase-admin/firestore";
 import { HttpsError } from "firebase-functions/v2/https";
+import { isAdminAuth, requireAdminAuth } from "../admin/adminAccess.mjs";
 import {
   compareSessionsByLastActivity,
   computeIsLive,
@@ -12,10 +13,6 @@ import {
   resolveSessionLastActivityMs,
   summarizeSession,
 } from "../admin/listActiveSessions.mjs";
-import {
-  isAdminAuth,
-  requireAdminAuth,
-} from "../admin/adminAccess.mjs";
 
 describe("adminAccess", () => {
   it("accepts verified admin email", () => {
@@ -170,9 +167,7 @@ describe("listActiveSessions helpers", () => {
       Date.parse("2026-01-01T12:00:00.000Z"),
     );
     assert.equal(
-      parseFirestoreTimestampMs(
-        Timestamp.fromMillis(Date.parse("2026-01-02T00:00:00.000Z")),
-      ),
+      parseFirestoreTimestampMs(Timestamp.fromMillis(Date.parse("2026-01-02T00:00:00.000Z"))),
       Date.parse("2026-01-02T00:00:00.000Z"),
     );
     assert.equal(
@@ -228,12 +223,7 @@ describe("listActiveSessions helpers", () => {
     const sorted = [...sessions].sort(compareSessionsByLastActivity);
     assert.deepEqual(
       sorted.map((session) => session.sessionId),
-      [
-        "tie-activity-newer-created",
-        "newer-activity",
-        "older-activity",
-        "missing-activity",
-      ],
+      ["tie-activity-newer-created", "newer-activity", "older-activity", "missing-activity"],
     );
   });
 

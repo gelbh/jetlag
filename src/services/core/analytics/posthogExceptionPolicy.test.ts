@@ -32,14 +32,10 @@ describe("filterPosthogException", () => {
 
   it("drops exceptions the shared client policy classifies as noise", () => {
     expect(
-      filterPosthogException(
-        exceptionCapture("AbortError", "This operation was aborted"),
-      ),
+      filterPosthogException(exceptionCapture("AbortError", "This operation was aborted")),
     ).toBeNull();
     expect(
-      filterPosthogException(
-        exceptionCapture("FirebaseError", "Session already ended."),
-      ),
+      filterPosthogException(exceptionCapture("FirebaseError", "Session already ended.")),
     ).toBeNull();
     expect(
       filterPosthogException(
@@ -52,32 +48,23 @@ describe("filterPosthogException", () => {
   });
 
   it("keeps Firestore permission-denied (Sentry policy sends it too)", () => {
-    const capture = exceptionCapture(
-      "FirebaseError",
-      "Missing or insufficient permissions.",
-    );
+    const capture = exceptionCapture("FirebaseError", "Missing or insufficient permissions.");
     expect(filterPosthogException(capture)).toBe(capture);
   });
 
   it("keeps real errors untouched", () => {
-    const capture = exceptionCapture(
-      "TypeError",
-      "Importing a module script failed.",
-    );
+    const capture = exceptionCapture("TypeError", "Importing a module script failed.");
     expect(filterPosthogException(capture)).toBe(capture);
     expect(capture.properties.$exception_fingerprint).toBeUndefined();
   });
 
   it("samples storage quota and groups kept events", () => {
-    const quota = () =>
-      exceptionCapture("QuotaExceededError", "The quota has been exceeded.");
+    const quota = () => exceptionCapture("QuotaExceededError", "The quota has been exceeded.");
 
     expect(filterPosthogException(quota(), () => QUOTA_SAMPLE_RATE)).toBeNull();
 
     const kept = filterPosthogException(quota(), () => 0);
-    expect(kept?.properties.$exception_fingerprint).toBe(
-      "storage-quota-exceeded",
-    );
+    expect(kept?.properties.$exception_fingerprint).toBe("storage-quota-exceeded");
     expect(kept?.properties.$exception_level).toBe("warning");
   });
 

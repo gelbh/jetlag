@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
 import { Box, SegmentedControl, Stack, Text, Title } from "@mantine/core";
+import { useEffect, useMemo, useState } from "react";
 import { ChatPanelBody } from "@/components/chat/ChatPanelBody";
 import { SessionLogBody } from "@/components/session/log/SessionLogBody";
 import {
@@ -46,11 +46,8 @@ export function ChatLogGallery() {
   const [view, setView] = useState<"seeker" | "hider">("hider");
   const [answerBusy, setAnswerBusy] = useState(false);
   const [messages, setMessages] = useState<SessionMessageRecord[]>(SEED_MESSAGES);
-  const [pending, setPending] =
-    useState<PendingQuestionRecord[]>(SEED_PENDING);
-  const [answeredIds, setAnsweredIds] = useState<ReadonlySet<string>>(
-    () => new Set(),
-  );
+  const [pending, setPending] = useState<PendingQuestionRecord[]>(SEED_PENDING);
+  const [answeredIds, setAnsweredIds] = useState<ReadonlySet<string>>(() => new Set());
 
   useEffect(() => {
     setDevMockSessionFeedEnabled(true);
@@ -64,9 +61,7 @@ export function ChatLogGallery() {
     () =>
       pending.filter(
         (item) =>
-          item.status === "pending" &&
-          item.toolType !== "photo" &&
-          !answeredIds.has(item.id),
+          item.status === "pending" && item.toolType !== "photo" && !answeredIds.has(item.id),
       ).length,
     [answeredIds, pending],
   );
@@ -87,8 +82,7 @@ export function ChatLogGallery() {
           Chat / Log gallery
         </Title>
         <Text size="sm" c="var(--color-field-ink-muted)">
-          Mock feed for polish. Switch to Hider to answer open questions (
-          {openAnswerCount} open).
+          Mock feed for polish. Switch to Hider to answer open questions ({openAnswerCount} open).
         </Text>
         <SegmentedControl
           fullWidth
@@ -133,12 +127,7 @@ export function ChatLogGallery() {
               questionTruths={MOCK_TRUTHS}
               answerSubmitting={answerBusy}
               answeredPendingIds={answeredIds}
-              onAnswerQuestion={async (
-                pendingQuestionId,
-                messageId,
-                _answer,
-                selectedReply,
-              ) => {
+              onAnswerQuestion={async (pendingQuestionId, messageId, _answer, selectedReply) => {
                 setAnswerBusy(true);
                 await new Promise((resolve) => setTimeout(resolve, 350));
                 setMessages((prev) =>
@@ -169,16 +158,12 @@ export function ChatLogGallery() {
               onDismissExpiredQuestion={async (pendingQuestionId, messageId) => {
                 setMessages((prev) =>
                   prev.map((message) =>
-                    message.id === messageId
-                      ? { ...message, status: "cancelled" }
-                      : message,
+                    message.id === messageId ? { ...message, status: "cancelled" } : message,
                   ),
                 );
                 setPending((prev) =>
                   prev.map((item) =>
-                    item.id === pendingQuestionId
-                      ? { ...item, status: "cancelled" }
-                      : item,
+                    item.id === pendingQuestionId ? { ...item, status: "cancelled" } : item,
                   ),
                 );
               }}

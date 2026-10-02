@@ -1,12 +1,12 @@
 import type { Map as MapLibreMap } from "maplibre-gl";
-import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
-import { haversineMeters } from "@/domain/geometry/gameArea/distance";
-import type { MapStyle } from "@/domain/map/mapBasemaps";
 import type { PoiCandidate } from "@/domain/geo/poiCandidate";
+import { haversineMeters } from "@/domain/geometry/gameArea/distance";
+import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
+import type { MapStyle } from "@/domain/map/mapBasemaps";
 import {
   isBasemapPoiQueryAvailable,
-  queryBasemapPois,
   type QueryBasemapPoisOptions,
+  queryBasemapPois,
 } from "@/services/geo/maplibre/basemapPoiQuery";
 import { getRegisteredMapLibreMap } from "@/services/geo/maplibre/mapLibreMapRegistry";
 
@@ -20,9 +20,7 @@ export interface PreviewBasemapPoisOptions extends QueryBasemapPoisOptions {
 /**
  * Street-only tile preview. Satellite / missing map → []. Never scored SoT.
  */
-export function previewBasemapPois(
-  opts: PreviewBasemapPoisOptions,
-): PoiCandidate[] {
+export function previewBasemapPois(opts: PreviewBasemapPoisOptions): PoiCandidate[] {
   if (!isBasemapPoiQueryAvailable(opts.mapStyle)) {
     return [];
   }
@@ -41,9 +39,7 @@ export function previewBasemapPois(
     if (opts.maxDistanceMeters != null && opts.point) {
       const origin = opts.point;
       const max = opts.maxDistanceMeters;
-      candidates = candidates.filter(
-        (c) => haversineMeters(origin, c.point) <= max,
-      );
+      candidates = candidates.filter((c) => haversineMeters(origin, c.point) <= max);
     }
 
     return candidates;

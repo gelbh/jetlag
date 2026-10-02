@@ -1,21 +1,20 @@
+import type { BoundingBox } from "../../geometry/gameArea/gameAreaBounds";
+import { gameAreaToBoundingBox } from "../../geometry/gameArea/gameAreaBounds";
+import type { GameArea, SessionTier } from "../../map/annotations";
 import type { DistanceUnit } from "../../map/distance";
-import {
-  defaultAdvancedSessionSettings,
-  sessionRulesPatchFromAdvancedSettings,
-  type AdvancedSessionSettingsValue,
-  type SessionRulesPatch,
-} from "../tools/advancedSessionSettings";
+import type { DublinCouncilFilter, RegionPackId } from "../../regions/regionPack";
 import type {
   CustomMatchingAreasByLevel,
   SessionCustomCategory,
   SessionCustomLocationPin,
 } from "../catalog/sessionCustomContent";
-import type { GameArea, SessionTier } from "../../map/annotations";
-import type { BoundingBox } from "../../geometry/gameArea/gameAreaBounds";
-import { gameAreaToBoundingBox } from "../../geometry/gameArea/gameAreaBounds";
 import type { GameSize } from "../size/gameSize";
-import type { RegionPackId } from "../../regions/regionPack";
-import type { DublinCouncilFilter } from "../../regions/regionPack";
+import {
+  type AdvancedSessionSettingsValue,
+  defaultAdvancedSessionSettings,
+  type SessionRulesPatch,
+  sessionRulesPatchFromAdvancedSettings,
+} from "../tools/advancedSessionSettings";
 
 export const GAME_PRESET_SCHEMA_VERSION = 1;
 
@@ -124,10 +123,7 @@ function mergeAdvancedSettings(
   }
 
   if (rootCustom.customCategories?.length) {
-    merged.customCategories = [
-      ...(merged.customCategories ?? []),
-      ...rootCustom.customCategories,
-    ];
+    merged.customCategories = [...(merged.customCategories ?? []), ...rootCustom.customCategories];
   }
 
   if (rootCustom.customLocationPins?.length) {
@@ -146,8 +142,7 @@ export function migrateGamePreset(raw: unknown): GamePreset {
   }
 
   const input = raw as Record<string, unknown>;
-  const schemaVersion =
-    typeof input.schemaVersion === "number" ? input.schemaVersion : 0;
+  const schemaVersion = typeof input.schemaVersion === "number" ? input.schemaVersion : 0;
 
   if (schemaVersion > GAME_PRESET_SCHEMA_VERSION) {
     return {
@@ -157,29 +152,19 @@ export function migrateGamePreset(raw: unknown): GamePreset {
       updatedAt: String(input.updatedAt ?? new Date().toISOString()),
       schemaVersion,
       gameSize: isGameSize(input.gameSize) ? input.gameSize : "medium",
-      distanceUnit: isDistanceUnit(input.distanceUnit)
-        ? input.distanceUnit
-        : "imperial",
+      distanceUnit: isDistanceUnit(input.distanceUnit) ? input.distanceUnit : "imperial",
       advancedSettings: defaultAdvancedSessionSettings("medium", "imperial"),
       migrationStatus: "manual_required",
     };
   }
 
   const gameSize = isGameSize(input.gameSize) ? input.gameSize : "medium";
-  const distanceUnit = isDistanceUnit(input.distanceUnit)
-    ? input.distanceUnit
-    : "imperial";
+  const distanceUnit = isDistanceUnit(input.distanceUnit) ? input.distanceUnit : "imperial";
 
   const rootCustom = {
-    customMatchingAreas: input.customMatchingAreas as
-      | CustomMatchingAreasByLevel
-      | undefined,
-    customCategories: input.customCategories as
-      | readonly SessionCustomCategory[]
-      | undefined,
-    customLocationPins: input.customLocationPins as
-      | readonly SessionCustomLocationPin[]
-      | undefined,
+    customMatchingAreas: input.customMatchingAreas as CustomMatchingAreasByLevel | undefined,
+    customCategories: input.customCategories as readonly SessionCustomCategory[] | undefined,
+    customLocationPins: input.customLocationPins as readonly SessionCustomLocationPin[] | undefined,
   };
 
   const advancedRaw =
@@ -187,12 +172,7 @@ export function migrateGamePreset(raw: unknown): GamePreset {
       ? (input.advancedSettings as Record<string, unknown>)
       : undefined;
 
-  const advancedSettings = mergeAdvancedSettings(
-    advancedRaw,
-    gameSize,
-    distanceUnit,
-    rootCustom,
-  );
+  const advancedSettings = mergeAdvancedSettings(advancedRaw, gameSize, distanceUnit, rootCustom);
 
   return {
     id: String(input.id ?? createGamePresetId()),
@@ -204,8 +184,7 @@ export function migrateGamePreset(raw: unknown): GamePreset {
     distanceUnit,
     advancedSettings,
     gameArea: input.gameArea as GameArea | undefined,
-    placeLabel:
-      typeof input.placeLabel === "string" ? input.placeLabel : undefined,
+    placeLabel: typeof input.placeLabel === "string" ? input.placeLabel : undefined,
     focusBounds: input.focusBounds as BoundingBox | undefined,
     sessionTier:
       input.sessionTier === "free" || input.sessionTier === "premium"
@@ -215,9 +194,7 @@ export function migrateGamePreset(raw: unknown): GamePreset {
     customCategories: advancedSettings.customCategories,
     customLocationPins: advancedSettings.customLocationPins,
     regionPackId:
-      typeof input.regionPackId === "string"
-        ? (input.regionPackId as RegionPackId)
-        : undefined,
+      typeof input.regionPackId === "string" ? (input.regionPackId as RegionPackId) : undefined,
     subregionId:
       typeof input.subregionId === "string"
         ? input.subregionId
@@ -228,8 +205,7 @@ export function migrateGamePreset(raw: unknown): GamePreset {
       typeof input.councilFilter === "string"
         ? (input.councilFilter as DublinCouncilFilter)
         : undefined,
-    transitMetroId:
-      typeof input.transitMetroId === "string" ? input.transitMetroId : undefined,
+    transitMetroId: typeof input.transitMetroId === "string" ? input.transitMetroId : undefined,
     bundled: input.bundled === true,
     migrationStatus: "ok",
   };
@@ -295,9 +271,7 @@ export function createSessionDraftToGamePreset(
   };
 }
 
-export function gamePresetToCreateSessionDraft(
-  preset: GamePreset,
-): CreateSessionDraft {
+export function gamePresetToCreateSessionDraft(preset: GamePreset): CreateSessionDraft {
   const migrated = migrateGamePreset(preset);
   return {
     gameSize: migrated.gameSize,
@@ -317,9 +291,7 @@ export function gamePresetToCreateSessionDraft(
   };
 }
 
-export function sessionRulesPatchFromPreset(
-  preset: GamePreset,
-): SessionRulesPatch {
+export function sessionRulesPatchFromPreset(preset: GamePreset): SessionRulesPatch {
   const migrated = migrateGamePreset(preset);
   return sessionRulesPatchFromAdvancedSettings(
     migrated.gameSize,

@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { PreloadRequest } from "../../domain/preloadRequest/preloadRequestTypes";
-import type { PreloadRequestStatus } from "../../domain/preloadRequest/preloadRequestTypes";
-import {
-  canTransitionPreloadRequestStatus,
-} from "../../domain/preloadRequest/preloadRequestAdmin";
-import { useAdminAccessState } from "../../hooks/admin/useAdminAccessState";
 import { formatFreshnessAge } from "../../domain/admin/formatAdminFreshness";
+import { canTransitionPreloadRequestStatus } from "../../domain/preloadRequest/preloadRequestAdmin";
+import type {
+  PreloadRequest,
+  PreloadRequestStatus,
+} from "../../domain/preloadRequest/preloadRequestTypes";
+import { useAdminAccessState } from "../../hooks/admin/useAdminAccessState";
 import {
   countOpenPreloadRequests,
   preloadRequestStatusChipLabel,
@@ -91,9 +91,7 @@ export function AdminPreloadRequestInbox() {
     try {
       await updatePreloadRequestStatus(requestId, status);
     } catch (err) {
-      setActionError(
-        err instanceof Error ? err.message : "Could not update status.",
-      );
+      setActionError(err instanceof Error ? err.message : "Could not update status.");
     } finally {
       busyRef.current = false;
       setBusyId(null);
@@ -169,22 +167,15 @@ export function AdminPreloadRequestInbox() {
                       type="button"
                       aria-current={selectedRow ? "true" : undefined}
                       className={
-                        selectedRow
-                          ? "jl-incident-queue-row is-selected"
-                          : "jl-incident-queue-row"
+                        selectedRow ? "jl-incident-queue-row is-selected" : "jl-incident-queue-row"
                       }
                       onClick={() => setSelectedId(request.id)}
                     >
                       <span className="jl-incident-queue-id">
                         {request.id.slice(0, 10).toUpperCase()}
                       </span>
-                      <span className="jl-incident-queue-title">
-                        {request.presetSnapshot.name}
-                      </span>
-                      <span
-                        className={`jl-incident-status-chip tone-${tone}`}
-                        data-tone={tone}
-                      >
+                      <span className="jl-incident-queue-title">{request.presetSnapshot.name}</span>
+                      <span className={`jl-incident-status-chip tone-${tone}`} data-tone={tone}>
                         {preloadRequestStatusChipLabel(request.status)}
                       </span>
                       <span className="jl-incident-queue-age">
@@ -198,18 +189,13 @@ export function AdminPreloadRequestInbox() {
           )}
         </section>
 
-        <section
-          className="jl-incident-detail"
-          aria-label="Preload request detail"
-        >
+        <section className="jl-incident-detail" aria-label="Preload request detail">
           {!selected ? (
             <p className="jl-incident-empty">Select a request.</p>
           ) : (
             <>
               <div className="jl-incident-pane-header">
-                <h2 className="jl-incident-pane-title">
-                  {selected.presetSnapshot.name}
-                </h2>
+                <h2 className="jl-incident-pane-title">{selected.presetSnapshot.name}</h2>
                 <span
                   className={`jl-incident-status-chip tone-${preloadRequestStatusChipTone(selected.status)}`}
                 >
@@ -225,8 +211,7 @@ export function AdminPreloadRequestInbox() {
                 <div>
                   <dt>Size / units</dt>
                   <dd>
-                    {selected.presetSnapshot.gameSize} ·{" "}
-                    {selected.presetSnapshot.distanceUnit}
+                    {selected.presetSnapshot.gameSize} · {selected.presetSnapshot.distanceUnit}
                   </dd>
                 </div>
                 <div>
@@ -265,9 +250,7 @@ export function AdminPreloadRequestInbox() {
                   <div>
                     <dt>Focus bounds</dt>
                     <dd>
-                      <code>
-                        {JSON.stringify(selected.presetSnapshot.focusBounds)}
-                      </code>
+                      <code>{JSON.stringify(selected.presetSnapshot.focusBounds)}</code>
                     </dd>
                   </div>
                 ) : null}

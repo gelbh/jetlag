@@ -1,14 +1,8 @@
+import type { Feature, Polygon as GeoPolygon, LineString, MultiPolygon, Point } from "geojson";
 import { useCallback, useMemo, useState } from "react";
-import type {
-  Feature,
-  LineString,
-  MultiPolygon,
-  Point,
-  Polygon as GeoPolygon,
-} from "geojson";
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
-import type { AnnotationRecord, GameArea } from "../../domain/map/annotations";
 import { tentacleEliminationJsonForAnswer } from "../../domain/geometry/tentacle/tentacleGeometry";
+import type { AnnotationRecord, GameArea } from "../../domain/map/annotations";
 import { DEFAULT_RADIUS_METERS } from "../../domain/map/distance";
 import { useAnnotationStore, useMapStore } from "../../state/sessionStore";
 
@@ -27,13 +21,9 @@ export function useMapGeometryEdit({
   setMapError,
   updateAnnotation,
 }: UseMapGeometryEditParams) {
-  const setSelectedAnnotationId = useAnnotationStore(
-    (state) => state.setSelectedAnnotationId,
-  );
+  const setSelectedAnnotationId = useAnnotationStore((state) => state.setSelectedAnnotationId);
   const setActiveTool = useMapStore((state) => state.setActiveTool);
-  const geometryEditAnnotationId = useAnnotationStore(
-    (state) => state.geometryEditAnnotationId,
-  );
+  const geometryEditAnnotationId = useAnnotationStore((state) => state.geometryEditAnnotationId);
   const setGeometryEditAnnotationId = useAnnotationStore(
     (state) => state.setGeometryEditAnnotationId,
   );
@@ -43,10 +33,7 @@ export function useMapGeometryEdit({
   const [thermoEditStep, setThermoEditStep] = useState<"a" | "b">("a");
 
   const geometryEditAnnotation = useMemo(
-    () =>
-      annotations.find(
-        (annotation) => annotation.id === geometryEditAnnotationId,
-      ) ?? null,
+    () => annotations.find((annotation) => annotation.id === geometryEditAnnotationId) ?? null,
     [annotations, geometryEditAnnotationId],
   );
 
@@ -64,13 +51,7 @@ export function useMapGeometryEdit({
       setThermoEditStep("a");
       setMapError(null);
     },
-    [
-      annotations,
-      setActiveTool,
-      setGeometryEditAnnotationId,
-      setMapError,
-      setSelectedAnnotationId,
-    ],
+    [annotations, setActiveTool, setGeometryEditAnnotationId, setMapError, setSelectedAnnotationId],
   );
 
   const cancelGeometryEdit = useCallback(() => {
@@ -117,13 +98,7 @@ export function useMapGeometryEdit({
 
     await updateAnnotation(record);
     cancelGeometryEdit();
-  }, [
-    cancelGeometryEdit,
-    gameArea,
-    geometryDraft,
-    geometryEditAnnotation,
-    updateAnnotation,
-  ]);
+  }, [cancelGeometryEdit, gameArea, geometryDraft, geometryEditAnnotation, updateAnnotation]);
 
   const handleGeometryEditClick = useCallback(
     (point: LatLngTuple) => {
@@ -152,8 +127,7 @@ export function useMapGeometryEdit({
 
       if (geometryEditAnnotation.type === "thermometer") {
         const line = geometryDraft.geometry as LineString;
-        const next =
-          thermoEditStep === "a" ? [point[1], point[0]] : line.coordinates[0];
+        const next = thermoEditStep === "a" ? [point[1], point[0]] : line.coordinates[0];
         const end =
           thermoEditStep === "b"
             ? [point[1], point[0]]
@@ -188,12 +162,7 @@ export function useMapGeometryEdit({
 
       return true;
     },
-    [
-      ensurePointInGameArea,
-      geometryDraft,
-      geometryEditAnnotation,
-      thermoEditStep,
-    ],
+    [ensurePointInGameArea, geometryDraft, geometryEditAnnotation, thermoEditStep],
   );
 
   return {

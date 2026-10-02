@@ -1,4 +1,4 @@
-import { useEffect, useState, type RefObject } from "react";
+import { type RefObject, useEffect, useState } from "react";
 import { useMinWidth } from "../layout/useMinWidth";
 
 const VIEWPORT_WIDE_PX = 768;
@@ -27,8 +27,7 @@ function useContainerMinWidth(
         return;
       }
 
-      const width =
-        entry.contentBoxSize?.[0]?.inlineSize ?? entry.contentRect.width;
+      const width = entry.contentBoxSize?.[0]?.inlineSize ?? entry.contentRect.width;
       setMeasuredWide(width >= minWidthPx);
     });
 
@@ -44,11 +43,7 @@ export function useAdminMapWideLayout(
   options?: { embedded?: boolean; ready?: boolean },
 ): boolean {
   const viewportWide = useMinWidth(VIEWPORT_WIDE_PX);
-  const containerWide = useContainerMinWidth(
-    shellRef,
-    CONTAINER_WIDE_PX,
-    options?.ready ?? true,
-  );
+  const containerWide = useContainerMinWidth(shellRef, CONTAINER_WIDE_PX, options?.ready ?? true);
 
   if (options?.embedded) {
     return containerWide;

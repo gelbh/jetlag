@@ -7,17 +7,12 @@ const API_HOST = "eu.i.posthog.com";
 const ASSET_HOST = "eu-assets.i.posthog.com";
 
 export function shouldHandlePosthogProxy(pathname: string): boolean {
-  return (
-    pathname === POSTHOG_PROXY_PATH ||
-    pathname.startsWith(`${POSTHOG_PROXY_PATH}/`)
-  );
+  return pathname === POSTHOG_PROXY_PATH || pathname.startsWith(`${POSTHOG_PROXY_PATH}/`);
 }
 
 function upstreamPath(pathname: string, search: string): string {
   const stripped =
-    pathname === POSTHOG_PROXY_PATH
-      ? "/"
-      : pathname.slice(POSTHOG_PROXY_PATH.length);
+    pathname === POSTHOG_PROXY_PATH ? "/" : pathname.slice(POSTHOG_PROXY_PATH.length);
   return `${stripped}${search}`;
 }
 
@@ -31,9 +26,7 @@ export async function handlePosthogProxyRequest(
   }
 
   const pathWithSearch = upstreamPath(url.pathname, url.search);
-  const isAsset =
-    pathWithSearch.startsWith("/static/") ||
-    pathWithSearch.startsWith("/array/");
+  const isAsset = pathWithSearch.startsWith("/static/") || pathWithSearch.startsWith("/array/");
   const host = isAsset ? ASSET_HOST : API_HOST;
 
   const headers = new Headers();

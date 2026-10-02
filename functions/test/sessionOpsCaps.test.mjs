@@ -1,12 +1,7 @@
-import test from "node:test";
 import assert from "node:assert/strict";
+import test from "node:test";
 import { Timestamp } from "firebase-admin/firestore";
 import {
-  SESSION_OPS_CAPS,
-  SESSION_OPS_GLOBAL_TOOL_CAP,
-  SESSION_OPS_SUMMON_CAP,
-  SESSION_OPS_TOOL_CAP,
-  SESSION_OPS_TURN_CAP,
   canConsumeTool,
   canConsumeTurn,
   canSummon,
@@ -18,8 +13,13 @@ import {
   consumeTurn,
   getSessionOpsCaps,
   isSessionOpsPremium,
-  resolveSessionOpsCapTier,
   resolveSessionOpsCaps,
+  resolveSessionOpsCapTier,
+  SESSION_OPS_CAPS,
+  SESSION_OPS_GLOBAL_TOOL_CAP,
+  SESSION_OPS_SUMMON_CAP,
+  SESSION_OPS_TOOL_CAP,
+  SESSION_OPS_TURN_CAP,
 } from "../incident/sessionOpsCaps.mjs";
 
 function createInMemoryFirestore() {
@@ -81,9 +81,7 @@ function createInMemoryFirestore() {
         set(ref, data, options = {}) {
           const base = options.merge
             ? {
-                ...(pendingWrites.get(ref.path) ??
-                  documents.get(ref.path) ??
-                  {}),
+                ...(pendingWrites.get(ref.path) ?? documents.get(ref.path) ?? {}),
                 ...data,
               }
             : { ...data };
@@ -134,10 +132,7 @@ test("isSessionOpsPremium uses entitlements and session tier", () => {
     true,
   );
   const future = Timestamp.fromMillis(Date.now() + 86_400_000);
-  assert.equal(
-    isSessionOpsPremium({ entitlementsData: { trialEndsAt: future } }),
-    true,
-  );
+  assert.equal(isSessionOpsPremium({ entitlementsData: { trialEndsAt: future } }), true);
   assert.equal(
     isSessionOpsPremium({
       entitlementsData: {},
@@ -152,10 +147,7 @@ test("isSessionOpsPremium uses entitlements and session tier", () => {
     }),
     false,
   );
-  assert.equal(
-    resolveSessionOpsCapTier({ sessionTier: "premium" }),
-    "premium",
-  );
+  assert.equal(resolveSessionOpsCapTier({ sessionTier: "premium" }), "premium");
   assert.deepEqual(
     resolveSessionOpsCaps({ entitlementsData: { lifetimePremium: true } }),
     SESSION_OPS_CAPS.premium,
@@ -218,10 +210,7 @@ test("Firestore consumeSummon / consumeTurn / consumeTool persist counters", asy
   });
   assert.equal(summoned.ok, true);
   assert.equal(summoned.usage.summonCount, 1);
-  assert.equal(
-    db.documents.get("incidents/inc-1").sessionOpsSummonCount,
-    1,
-  );
+  assert.equal(db.documents.get("incidents/inc-1").sessionOpsSummonCount, 1);
   assert.deepEqual(db.documents.get("incidents/inc-1/summons/sum-1"), {
     uid: "uid-1",
     agentTurnCount: 0,
@@ -246,10 +235,7 @@ test("Firestore consumeSummon / consumeTurn / consumeTool persist counters", asy
   });
   assert.equal(turn.ok, true);
   assert.equal(turn.usage.agentTurnCount, 1);
-  assert.equal(
-    db.documents.get("incidents/inc-1/summons/sum-1").agentTurnCount,
-    1,
-  );
+  assert.equal(db.documents.get("incidents/inc-1/summons/sum-1").agentTurnCount, 1);
 
   const tool = await consumeSessionOpsTool(
     db,
@@ -266,10 +252,7 @@ test("Firestore consumeSummon / consumeTurn / consumeTool persist counters", asy
   );
   assert.equal(tool.ok, true);
   assert.equal(tool.usage.toolExecutionCount, 1);
-  assert.equal(
-    db.documents.get("incidents/inc-1/summons/sum-1").toolExecutionCount,
-    1,
-  );
+  assert.equal(db.documents.get("incidents/inc-1/summons/sum-1").toolExecutionCount, 1);
 
   // Host confirm approval consumes again — does not reset prior counts.
   const afterConfirm = await consumeSessionOpsTool(
@@ -287,10 +270,7 @@ test("Firestore consumeSummon / consumeTurn / consumeTool persist counters", asy
   );
   assert.equal(afterConfirm.ok, true);
   assert.equal(afterConfirm.usage.toolExecutionCount, 2);
-  assert.equal(
-    db.documents.get("incidents/inc-1/summons/sum-1").agentTurnCount,
-    1,
-  );
+  assert.equal(db.documents.get("incidents/inc-1/summons/sum-1").agentTurnCount, 1);
 });
 
 test("consumeSessionOpsTool rolls back summon counter when global cap hits", async () => {
@@ -324,10 +304,7 @@ test("consumeSessionOpsTool rolls back summon counter when global cap hits", asy
   assert.equal(denied.ok, false);
   assert.equal(denied.code, SESSION_OPS_GLOBAL_TOOL_CAP);
   assert.equal(denied.retryAfterMs, 3_000);
-  assert.equal(
-    db.documents.get("incidents/inc-1/summons/sum-1").toolExecutionCount,
-    0,
-  );
+  assert.equal(db.documents.get("incidents/inc-1/summons/sum-1").toolExecutionCount, 0);
 });
 
 test("premium summons allow more than free", async () => {

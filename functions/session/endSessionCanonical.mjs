@@ -16,9 +16,7 @@ export function applyEndSessionInTx(tx, db, sessionRef, data, gameOutcome) {
   }
 
   const code = typeof data.code === "string" ? data.code : null;
-  const outcome = TERMINAL_OUTCOMES.has(data.gameOutcome)
-    ? data.gameOutcome
-    : gameOutcome;
+  const outcome = TERMINAL_OUTCOMES.has(data.gameOutcome) ? data.gameOutcome : gameOutcome;
 
   tx.update(sessionRef, {
     endedAt: new Date().toISOString(),

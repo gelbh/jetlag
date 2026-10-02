@@ -7,18 +7,15 @@ import type {
   IncidentRecord,
 } from "../../domain/incident/incidentTypes";
 import { renderWithRouter } from "../../test/renderWithRouter";
+import { AdminIncidentActions } from "./AdminIncidentActions";
 import { AdminIncidentDetail } from "./AdminIncidentDetail";
 import { AdminOpsDesk } from "./AdminOpsDesk";
-import { AdminIncidentActions } from "./AdminIncidentActions";
 
 function renderDesk(route: string) {
   return renderWithRouter(
     <Routes>
       <Route path="/admin/incidents" element={<AdminOpsDesk />} />
-      <Route
-        path="/admin/incidents/:incidentId"
-        element={<AdminOpsDesk />}
-      />
+      <Route path="/admin/incidents/:incidentId" element={<AdminOpsDesk />} />
     </Routes>,
     { route },
   );
@@ -46,9 +43,7 @@ const diagnostics: IncidentDiagnostics = {
   reportedAt: "2026-07-25T12:00:00Z",
 };
 
-function makeIncident(
-  overrides: Partial<IncidentRecord> = {},
-): IncidentRecord {
+function makeIncident(overrides: Partial<IncidentRecord> = {}): IncidentRecord {
   return {
     id: "inc-abc12345",
     status: "open",
@@ -98,9 +93,9 @@ vi.mock("../../services/core/firebase/firebase", () => ({
 }));
 
 vi.mock("../../services/admin/adminIncidents", async () => {
-  const actual = await vi.importActual<
-    typeof import("../../services/admin/adminIncidents")
-  >("../../services/admin/adminIncidents");
+  const actual = await vi.importActual<typeof import("../../services/admin/adminIncidents")>(
+    "../../services/admin/adminIncidents",
+  );
   return {
     ...actual,
     subscribeIncidentList: (
@@ -174,9 +169,7 @@ describe("AdminIncidentDetail", () => {
     renderWithRouter(<AdminIncidentDetail incidentId={null} />);
 
     expect(screen.getByText("Select an incident")).toBeInTheDocument();
-    expect(
-      screen.getByText(/Choose a report from the queue/i),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/Choose a report from the queue/i)).toBeInTheDocument();
   });
 
   it("shows error state when the incident fails to load", () => {
@@ -214,17 +207,10 @@ describe("AdminIncidentDetail", () => {
 
     expect(screen.getByText("inc-abc12345")).toBeInTheDocument();
     expect(screen.getByText("OPEN")).toBeInTheDocument();
-    expect(
-      screen.getByText(/Pinned prompt for admins/i),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/Pinned prompt for admins/i)).toBeInTheDocument();
     expect(screen.getByText("Still stuck on the map")).toBeInTheDocument();
-    expect(screen.getByRole("tab", { name: "Chat" })).toHaveAttribute(
-      "aria-selected",
-      "true",
-    );
-    expect(
-      screen.getByRole("button", { name: "Send" }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "Chat" })).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByRole("button", { name: "Send" })).toBeInTheDocument();
   });
 
   it("switches to support, hotfix, diagnostics, and timeline tabs", () => {
@@ -290,15 +276,10 @@ describe("AdminIncidentActions", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Launch Cursor agent" }));
     expect(launchCursorAgentFn).toHaveBeenCalledWith("inc-1");
-    expect(
-      await screen.findByRole("button", { name: "Open Cursor agent" }),
-    ).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: "Open Cursor agent" })).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Apply mitigation" }));
-    expect(applyMitigationFn).toHaveBeenCalledWith(
-      "inc-1",
-      "soft_reload",
-    );
+    expect(applyMitigationFn).toHaveBeenCalledWith("inc-1", "soft_reload");
 
     fireEvent.change(screen.getByLabelText("Hotfix target version"), {
       target: { value: "0.9.5.1" },
@@ -322,9 +303,7 @@ describe("AdminIncidentActions", () => {
     );
 
     fireEvent.click(screen.getByRole("button", { name: "Open Cursor agent" }));
-    expect(openExternalUrlFn).toHaveBeenCalledWith(
-      "https://cursor.com/agents/bc-live",
-    );
+    expect(openExternalUrlFn).toHaveBeenCalledWith("https://cursor.com/agents/bc-live");
   });
 
   it("shows Retry launch when misconfigured", async () => {
@@ -345,9 +324,7 @@ describe("AdminIncidentActions", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Retry launch" }));
     expect(launchCursorAgentFn).toHaveBeenCalledWith("inc-1");
-    expect(
-      await screen.findByRole("button", { name: "Open Cursor agent" }),
-    ).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: "Open Cursor agent" })).toBeInTheDocument();
   });
 });
 
@@ -374,12 +351,8 @@ describe("AdminOpsDesk gate + mobile stack", () => {
     stubMatchMedia(true);
     renderDesk("/admin/incidents");
 
-    expect(
-      screen.getByText(/Sign in with your Google account/i),
-    ).toBeInTheDocument();
-    expect(screen.getByTestId("premium-sign-in-gate")).toHaveTextContent(
-      "/admin/incidents",
-    );
+    expect(screen.getByText(/Sign in with your Google account/i)).toBeInTheDocument();
+    expect(screen.getByTestId("premium-sign-in-gate")).toHaveTextContent("/admin/incidents");
   });
 
   it("shows access denied for non-admin users", () => {
@@ -390,9 +363,7 @@ describe("AdminOpsDesk gate + mobile stack", () => {
 
     renderDesk("/admin/incidents");
 
-    expect(
-      screen.getByRole("heading", { name: "Access denied" }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Access denied" })).toBeInTheDocument();
   });
 
   it("shows empty queue for admin with no incidents", () => {
@@ -429,15 +400,9 @@ describe("AdminOpsDesk gate + mobile stack", () => {
 
     renderDesk("/admin/incidents/inc-abc12345");
 
-    expect(screen.getByTestId("admin-ops-desk")).toHaveAttribute(
-      "data-layout",
-      "mobile",
-    );
+    expect(screen.getByTestId("admin-ops-desk")).toHaveAttribute("data-layout", "mobile");
     expect(screen.getByTestId("admin-ops-mobile")).toBeInTheDocument();
-    expect(screen.getByRole("tab", { name: "Detail" })).toHaveAttribute(
-      "aria-selected",
-      "true",
-    );
+    expect(screen.getByRole("tab", { name: "Detail" })).toHaveAttribute("aria-selected", "true");
     expect(screen.queryByLabelText("Incident queue")).not.toBeInTheDocument();
   });
 });

@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useRef, useState } from "react";
 import type { Feature, MultiPolygon, Polygon } from "geojson";
-import type { AnnotationRecord, GameArea } from "../../domain/map/annotations";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { previewGeometryFingerprint } from "../../domain/geometry/measuring/previewGeometryFingerprint";
+import type { AnnotationRecord, GameArea } from "../../domain/map/annotations";
 import type { HiderTruthResult } from "../../domain/questions/hiderTruth";
 import {
   buildPendingPreviewEliminationFeatures,
@@ -85,8 +85,7 @@ function pendingPlacementValueKey(value: unknown): string {
     return `{${Object.entries(value)
       .sort(([left], [right]) => left.localeCompare(right))
       .map(
-        ([key, nestedValue]) =>
-          `${JSON.stringify(key)}:${pendingPlacementValueKey(nestedValue)}`,
+        ([key, nestedValue]) => `${JSON.stringify(key)}:${pendingPlacementValueKey(nestedValue)}`,
       )
       .join(",")}}`;
   }
@@ -113,13 +112,7 @@ export function useHiderPendingPreviewEliminations({
   const gameAreaRef = useRef(gameArea);
 
   const replyIdByQuestionId = useMemo(
-    () =>
-      buildReplyIdMap(
-        pendingQuestions,
-        questionTruths,
-        optimisticAnswers,
-        annotations,
-      ),
+    () => buildReplyIdMap(pendingQuestions, questionTruths, optimisticAnswers, annotations),
     [annotations, optimisticAnswers, pendingQuestions, questionTruths],
   );
 
@@ -161,8 +154,7 @@ export function useHiderPendingPreviewEliminations({
     [annotations],
   );
 
-  const shouldComputePreview =
-    Boolean(gameArea) && replyIdByQuestionId.size > 0;
+  const shouldComputePreview = Boolean(gameArea) && replyIdByQuestionId.size > 0;
 
   useEffect(() => {
     pendingQuestionsRef.current = pendingQuestions;
@@ -208,8 +200,6 @@ export function useHiderPendingPreviewEliminations({
   }, [gameAreaKey, pendingKey, replyKey, annotationKey, shouldComputePreview]);
 
   return {
-    previewEliminationFeatures: shouldComputePreview
-      ? previewEliminationFeatures
-      : [],
+    previewEliminationFeatures: shouldComputePreview ? previewEliminationFeatures : [],
   };
 }

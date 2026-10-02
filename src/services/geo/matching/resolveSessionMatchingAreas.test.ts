@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { GameArea } from "@/domain/map/annotations";
 import { BUNDLED_REGION_PACK_GEO_REVISION } from "@/domain/regions/regionPack";
 import { createTestSession } from "@/test/fixtures/sessions";
+import * as regionPackBoundaries from "./regionPackBoundaries";
 import {
   clearResolvedMatchingAreasCacheForTests,
   isPlayAreaReadySync,
@@ -10,7 +11,6 @@ import {
   resolveSessionMatchingAreas,
   resolveSessionPlayArea,
 } from "./resolveSessionMatchingAreas";
-import * as regionPackBoundaries from "./regionPackBoundaries";
 
 vi.mock("./regionPackBoundaries", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./regionPackBoundaries")>();
@@ -50,10 +50,7 @@ describe("resolveSessionMatchingAreas", () => {
   });
 
   it("reloads bundled matching areas when session revision is stale", async () => {
-    vi.spyOn(
-      regionPackBoundaries,
-      "loadRegionPackMatchingAreas",
-    ).mockResolvedValue(bundledAreas);
+    vi.spyOn(regionPackBoundaries, "loadRegionPackMatchingAreas").mockResolvedValue(bundledAreas);
 
     const sessionAreas = {
       8: "stale-primary",
@@ -75,10 +72,7 @@ describe("resolveSessionMatchingAreas", () => {
   });
 
   it("loads bundled matching areas from the region pack when session areas are missing", async () => {
-    vi.spyOn(
-      regionPackBoundaries,
-      "loadRegionPackMatchingAreas",
-    ).mockResolvedValue(bundledAreas);
+    vi.spyOn(regionPackBoundaries, "loadRegionPackMatchingAreas").mockResolvedValue(bundledAreas);
 
     const areas = await resolveSessionMatchingAreas({
       regionPackId: "dublin",
@@ -93,10 +87,7 @@ describe("resolveSessionMatchingAreas", () => {
   });
 
   it("reuses cached bundled matching areas for the same pack and subregion", async () => {
-    vi.spyOn(
-      regionPackBoundaries,
-      "loadRegionPackMatchingAreas",
-    ).mockResolvedValue(bundledAreas);
+    vi.spyOn(regionPackBoundaries, "loadRegionPackMatchingAreas").mockResolvedValue(bundledAreas);
 
     const input = {
       regionPackId: "london" as const,
@@ -107,9 +98,9 @@ describe("resolveSessionMatchingAreas", () => {
     const second = await resolveSessionMatchingAreas(input);
 
     expect(first).toBe(second);
-    expect(
-      matchingAreasCacheKey("london", "camden", false),
-    ).toBe(`${BUNDLED_REGION_PACK_GEO_REVISION}:london:camden:`);
+    expect(matchingAreasCacheKey("london", "camden", false)).toBe(
+      `${BUNDLED_REGION_PACK_GEO_REVISION}:london:camden:`,
+    );
   });
 });
 
@@ -128,9 +119,7 @@ describe("resolveSessionPlayArea", () => {
 
     expect(peekResolvedPlayArea(session)).toBeUndefined();
 
-    vi.mocked(regionPackBoundaries.loadRegionPackPlayArea).mockResolvedValue(
-      loadedArea,
-    );
+    vi.mocked(regionPackBoundaries.loadRegionPackPlayArea).mockResolvedValue(loadedArea);
     await resolveSessionPlayArea(session);
 
     expect(peekResolvedPlayArea(session)).toBe(loadedArea);
@@ -141,9 +130,7 @@ describe("resolveSessionPlayArea", () => {
     const delayed = new Promise<GameArea>((resolve) => {
       release = resolve;
     });
-    vi.mocked(regionPackBoundaries.loadRegionPackPlayArea).mockReturnValue(
-      delayed,
-    );
+    vi.mocked(regionPackBoundaries.loadRegionPackPlayArea).mockReturnValue(delayed);
 
     const session = createTestSession({
       regionPackId: "london",

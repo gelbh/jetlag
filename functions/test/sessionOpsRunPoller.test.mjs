@@ -1,9 +1,9 @@
-import test from "node:test";
 import assert from "node:assert/strict";
+import test from "node:test";
 import {
-  SESSION_OPS_RUN_FAILURE_TEXT,
   finalizeSessionOpsRunIfReady,
   pollSessionOpsRuns,
+  SESSION_OPS_RUN_FAILURE_TEXT,
 } from "../incident/sessionOpsRunPoller.mjs";
 import { SUPPORT_AGENT_WORKING_TEXT } from "../incident/sessionOpsThread.mjs";
 
@@ -98,14 +98,8 @@ test("finalizeSessionOpsRunIfReady persists FINISHED text and clears working", a
   assert.equal(result.status, "FINISHED");
   const incident = db.documents.get("incidents/inc-1");
   assert.equal(incident.supportAgentRun.status, "finished");
-  assert.equal(
-    db.documents.get("incidents/inc-1/threads/support/messages/work-1").working,
-    false,
-  );
-  assert.equal(
-    db.documents.get("incidents/inc-1/messages/work-1").working,
-    false,
-  );
+  assert.equal(db.documents.get("incidents/inc-1/threads/support/messages/work-1").working, false);
+  assert.equal(db.documents.get("incidents/inc-1/messages/work-1").working, false);
   assert.ok(
     [...db.documents.values()].some(
       (data) =>
@@ -129,24 +123,15 @@ test("finalizeSessionOpsRunIfReady writes canned failure on ERROR", async () => 
     },
   });
   let id = 0;
-  await finalizeSessionOpsRunIfReady(
-    db,
-    "inc-1",
-    db.documents.get("incidents/inc-1"),
-    {
-      apiKey: "k",
-      now: () => new Date("2026-07-26T01:00:00.000Z"),
-      generateId: () => `msg-${(id += 1)}`,
-      getRun: async () => ({ status: "ERROR", text: null }),
-    },
-  );
+  await finalizeSessionOpsRunIfReady(db, "inc-1", db.documents.get("incidents/inc-1"), {
+    apiKey: "k",
+    now: () => new Date("2026-07-26T01:00:00.000Z"),
+    generateId: () => `msg-${(id += 1)}`,
+    getRun: async () => ({ status: "ERROR", text: null }),
+  });
   const incident = db.documents.get("incidents/inc-1");
   assert.equal(incident.supportAgentRun.status, "failed");
-  assert.ok(
-    [...db.documents.values()].some(
-      (data) => data?.text === SESSION_OPS_RUN_FAILURE_TEXT,
-    ),
-  );
+  assert.ok([...db.documents.values()].some((data) => data?.text === SESSION_OPS_RUN_FAILURE_TEXT));
 });
 
 test("finalizeSessionOpsRunIfReady noops while still running", async () => {
@@ -216,14 +201,8 @@ test("finalizeSessionOpsRunIfReady refuses stale runId after claim", async () =>
   );
   assert.equal(result.handled, false);
   assert.equal(result.reason, "stale_run");
-  assert.equal(
-    db.documents.get("incidents/inc-1").supportAgentRun.runId,
-    "run-new",
-  );
-  assert.equal(
-    db.documents.get("incidents/inc-1").supportAgentRun.status,
-    "working",
-  );
+  assert.equal(db.documents.get("incidents/inc-1").supportAgentRun.runId, "run-new");
+  assert.equal(db.documents.get("incidents/inc-1").supportAgentRun.status, "working");
 });
 
 test("finalizeSessionOpsRunIfReady second tick is noop after claim", async () => {
@@ -260,9 +239,7 @@ test("finalizeSessionOpsRunIfReady second tick is noop after claim", async () =>
   assert.equal(second.handled, false);
   assert.equal(second.reason, "not_active");
   const threadFinals = [...db.documents.entries()].filter(
-    ([path, data]) =>
-      path.includes("/threads/support/messages/") &&
-      data?.text === "Done once.",
+    ([path, data]) => path.includes("/threads/support/messages/") && data?.text === "Done once.",
   );
   assert.equal(threadFinals.length, 1);
 });
@@ -293,10 +270,7 @@ test("finalizeSessionOpsRunIfReady ages out stuck runs", async () => {
   );
   assert.equal(result.handled, true);
   assert.equal(result.status, "EXPIRED");
-  assert.equal(
-    db.documents.get("incidents/inc-1").supportAgentRun.status,
-    "failed",
-  );
+  assert.equal(db.documents.get("incidents/inc-1").supportAgentRun.status, "failed");
 });
 
 test("pollSessionOpsRuns walks listed active incidents", async () => {

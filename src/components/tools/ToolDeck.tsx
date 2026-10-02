@@ -1,12 +1,12 @@
-import { forwardRef, type ReactNode } from "react";
 import { Box, Paper } from "@mantine/core";
-import { cn } from "@/lib/cn";
+import { forwardRef, type ReactNode } from "react";
 import {
   mapHuntAskFirstQuestionStripStyles,
   mapHuntAskFirstSurfaceStyles,
   mapHuntQuestionStripStyles,
   mapHuntSurfaceStyles,
 } from "@/components/ui/entry/entryChrome";
+import { cn } from "@/lib/cn";
 
 /** Seeker multi-tool Hunt (`tools`) vs hider 1–2 chip content-sized island (`sparse`). */
 export type ToolDeckDensity = "tools" | "sparse";
@@ -33,9 +33,7 @@ export function ToolDeck({
   const askFirstActive = askFirst;
   const deckClassName = cn(
     "jl-map-island jl-map-island--hunt relative min-w-0 justify-center overflow-visible p-1",
-    sparse
-      ? "jl-map-island--hunt-sparse mx-auto w-max max-w-full flex-none"
-      : "w-full flex-1",
+    sparse ? "jl-map-island--hunt-sparse mx-auto w-max max-w-full flex-none" : "w-full flex-1",
     className,
   );
 
@@ -50,15 +48,10 @@ export function ToolDeck({
       radius={22}
       p={askFirstActive ? 3 : 4}
       // OverlayHost / chrome are pointer-events-none; Island baked this in.
-      className={cn(
-        deckClassName,
-        "pointer-events-auto flex min-h-11 items-center",
-      )}
+      className={cn(deckClassName, "pointer-events-auto flex min-h-11 items-center")}
       styles={{
         root: {
-          ...(askFirstActive
-            ? mapHuntAskFirstSurfaceStyles
-            : mapHuntSurfaceStyles),
+          ...(askFirstActive ? mapHuntAskFirstSurfaceStyles : mapHuntSurfaceStyles),
           borderRadius: 22,
         },
       }}
@@ -77,35 +70,33 @@ export interface ToolDeckGroupProps {
 }
 
 /** Main hunt group — equal flex slots, even distribution, ≥44px min height. */
-export const ToolDeckGroup = forwardRef<HTMLDivElement, ToolDeckGroupProps>(
-  function ToolDeckGroup(
-    {
-      density = "tools",
-      className,
-      "aria-label": ariaLabel = "History and question tools",
-      children,
-    },
-    ref,
-  ) {
-    const sparse = density === "sparse";
-    return (
-      <div
-        ref={ref}
-        className={cn(
-          "jl-tool-dock-group jl-tool-dock-group-main relative z-[1] flex min-w-0 items-stretch gap-0.5",
-          sparse
-            ? "flex-none justify-start [&_.jl-tool-slot]:min-h-11 [&_.jl-tool-slot]:min-w-11 [&_.jl-tool-slot]:flex-none"
-            : "flex-1 justify-evenly [&_.jl-tool-slot]:min-h-11 [&_.jl-tool-slot]:min-w-11 [&_.jl-tool-slot]:flex-1 [&_.jl-tool-slot]:basis-0",
-          className,
-        )}
-        role="group"
-        aria-label={ariaLabel}
-      >
-        {children}
-      </div>
-    );
+export const ToolDeckGroup = forwardRef<HTMLDivElement, ToolDeckGroupProps>(function ToolDeckGroup(
+  {
+    density = "tools",
+    className,
+    "aria-label": ariaLabel = "History and question tools",
+    children,
   },
-);
+  ref,
+) {
+  const sparse = density === "sparse";
+  return (
+    <div
+      ref={ref}
+      className={cn(
+        "jl-tool-dock-group jl-tool-dock-group-main relative z-[1] flex min-w-0 items-stretch gap-0.5",
+        sparse
+          ? "flex-none justify-start [&_.jl-tool-slot]:min-h-11 [&_.jl-tool-slot]:min-w-11 [&_.jl-tool-slot]:flex-none"
+          : "flex-1 justify-evenly [&_.jl-tool-slot]:min-h-11 [&_.jl-tool-slot]:min-w-11 [&_.jl-tool-slot]:flex-1 [&_.jl-tool-slot]:basis-0",
+        className,
+      )}
+      role="group"
+      aria-label={ariaLabel}
+    >
+      {children}
+    </div>
+  );
+});
 
 /** Inset strip for question tools (history stays outside). */
 export function ToolDeckQuestionStrip({
@@ -127,11 +118,7 @@ export function ToolDeckQuestionStrip({
           "[&_.jl-tool-slot:not([aria-pressed='true'])]:opacity-55 [&_[data-ios-tool-label]]:text-[0.5625rem] [&_[data-ios-tool-label]]:leading-tight",
         className,
       )}
-      style={
-        askFirst
-          ? mapHuntAskFirstQuestionStripStyles
-          : mapHuntQuestionStripStyles
-      }
+      style={askFirst ? mapHuntAskFirstQuestionStripStyles : mapHuntQuestionStripStyles}
       role="group"
       aria-label={askFirst ? "Question tool switcher" : "Question tools"}
     >

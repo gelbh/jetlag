@@ -1,12 +1,12 @@
 import { Button, SimpleGrid, Stack, Text } from "@mantine/core";
-import type { HiderTruthReferenceMode } from "../../domain/questions/hiderTruth/resolveHiderTruthReference";
-import type { HiderTruthResult } from "../../domain/questions/ui";
-import type { GameReplyOption } from "../../domain/session/activity/sessionChat";
+import { jetlagBrand } from "@/theme/theme";
 import {
   hiderTruthReferenceLabel,
   hiderTruthReferenceLoadingLabel,
 } from "../../domain/questions/hiderTruth/hiderTruthReferenceCopy";
-import { jetlagBrand } from "@/theme/theme";
+import type { HiderTruthReferenceMode } from "../../domain/questions/hiderTruth/resolveHiderTruthReference";
+import type { HiderTruthResult } from "../../domain/questions/ui";
+import type { GameReplyOption } from "../../domain/session/activity/sessionChat";
 import { LoadingReadout } from "../tools/shared/readout/LoadingReadout";
 
 interface HiderAnswerPickerProps {
@@ -30,17 +30,14 @@ export function HiderAnswerPicker({
   disabled = false,
   onSelect,
 }: HiderAnswerPickerProps) {
-  const truthAvailable =
-    truth !== null && !truth.unavailable && truth.replyId.length > 0;
+  const truthAvailable = truth !== null && !truth.unavailable && truth.replyId.length > 0;
   const cols = replyOptions.length > 2 ? 1 : 2;
   const referenceLabel = hiderTruthReferenceLabel(truthReferenceMode);
 
   return (
     <Stack gap={8} mt={8}>
       {loading ? (
-        <LoadingReadout>
-          {hiderTruthReferenceLoadingLabel(truthReferenceMode)}
-        </LoadingReadout>
+        <LoadingReadout>{hiderTruthReferenceLoadingLabel(truthReferenceMode)}</LoadingReadout>
       ) : truth?.unavailable ? (
         <Text size="xs" c={jetlagBrand.halt}>
           {truth.label}
@@ -59,8 +56,7 @@ export function HiderAnswerPicker({
 
       <SimpleGrid cols={cols} spacing={8}>
         {replyOptions.map((option) => {
-          const isRecommended =
-            truthAvailable && option.id === truth.replyId;
+          const isRecommended = truthAvailable && option.id === truth.replyId;
           const buttonLabel = sendAnswerLabel(option.label);
 
           return (
@@ -81,12 +77,8 @@ export function HiderAnswerPicker({
                   border: isRecommended
                     ? `1px solid ${jetlagBrand.flag}`
                     : `1px solid ${jetlagBrand.rule}`,
-                  backgroundColor: isRecommended
-                    ? jetlagBrand.flag
-                    : jetlagBrand.canvas,
-                  color: isRecommended
-                    ? jetlagBrand.flagInk
-                    : jetlagBrand.fieldInk,
+                  backgroundColor: isRecommended ? jetlagBrand.flag : jetlagBrand.canvas,
+                  color: isRecommended ? jetlagBrand.flagInk : jetlagBrand.fieldInk,
                   fontWeight: 600,
                   "&:disabled": { opacity: 0.5 },
                 },

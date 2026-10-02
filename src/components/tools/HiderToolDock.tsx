@@ -1,8 +1,8 @@
-import { HudLayersIcon, HudPlusIcon } from "../ui/brand/HudIcons";
-import { HudPinIcon } from "../map/icons/ToolIcons";
 import { MapBottomChrome } from "../map/chrome/MapBottomChrome";
 import { MapChromeControl } from "../map/chrome/MapChromeControl";
 import { SessionIslandSlots } from "../map/chrome/SessionIslandSlots";
+import { HudPinIcon } from "../map/icons/ToolIcons";
+import { HudLayersIcon, HudPlusIcon } from "../ui/brand/HudIcons";
 import { ToolDeckGroup } from "./ToolDeck";
 
 interface HiderToolDockProps {

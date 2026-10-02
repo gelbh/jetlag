@@ -33,9 +33,7 @@ describe("usePremiumEntitlementsStore", () => {
   });
 
   it("commits entitlements after uid changes during refresh", async () => {
-    const { usePremiumEntitlementsStore } = await import(
-      "./premiumEntitlementsStore"
-    );
+    const { usePremiumEntitlementsStore } = await import("./premiumEntitlementsStore");
     usePremiumEntitlementsStore.setState({
       uid: null,
       entitlements: null,
@@ -52,9 +50,7 @@ describe("usePremiumEntitlementsStore", () => {
 
     expect(entitlements?.premiumSessionCredits).toBe(1);
     expect(usePremiumEntitlementsStore.getState().uid).toBe("user-1");
-    expect(
-      usePremiumEntitlementsStore.getState().entitlements?.premiumSessionCredits,
-    ).toBe(1);
+    expect(usePremiumEntitlementsStore.getState().entitlements?.premiumSessionCredits).toBe(1);
   });
 
   it("hydrates last-good entitlements for matching uid", async () => {
@@ -66,9 +62,7 @@ describe("usePremiumEntitlementsStore", () => {
         fetchedAt: Date.now(),
       }),
     );
-    const { usePremiumEntitlementsStore } = await import(
-      "./premiumEntitlementsStore"
-    );
+    const { usePremiumEntitlementsStore } = await import("./premiumEntitlementsStore");
     usePremiumEntitlementsStore.setState({
       uid: null,
       entitlements: null,
@@ -78,9 +72,7 @@ describe("usePremiumEntitlementsStore", () => {
       generation: 0,
     });
     usePremiumEntitlementsStore.getState().setUid("u1");
-    expect(usePremiumEntitlementsStore.getState().entitlements).toEqual(
-      sampleEntitlements,
-    );
+    expect(usePremiumEntitlementsStore.getState().entitlements).toEqual(sampleEntitlements);
   });
 
   it("does not leak another uid snapshot when refresh fails", async () => {
@@ -96,9 +88,7 @@ describe("usePremiumEntitlementsStore", () => {
         fetchedAt: Date.now(),
       }),
     );
-    const { usePremiumEntitlementsStore } = await import(
-      "./premiumEntitlementsStore"
-    );
+    const { usePremiumEntitlementsStore } = await import("./premiumEntitlementsStore");
     usePremiumEntitlementsStore.setState({
       uid: null,
       entitlements: null,
@@ -127,9 +117,7 @@ describe("usePremiumEntitlementsStore", () => {
         fetchedAt: Date.now(),
       }),
     );
-    const { usePremiumEntitlementsStore } = await import(
-      "./premiumEntitlementsStore"
-    );
+    const { usePremiumEntitlementsStore } = await import("./premiumEntitlementsStore");
     usePremiumEntitlementsStore.setState({
       uid: null,
       entitlements: null,
@@ -146,9 +134,7 @@ describe("usePremiumEntitlementsStore", () => {
     const result = await usePremiumEntitlementsStore.getState().refresh();
 
     expect(result?.premiumSessionCredits).toBe(1);
-    expect(usePremiumEntitlementsStore.getState().entitlements).toEqual(
-      sampleEntitlements,
-    );
+    expect(usePremiumEntitlementsStore.getState().entitlements).toEqual(sampleEntitlements);
     expect(usePremiumEntitlementsStore.getState().softStale).toBe(true);
   });
 });

@@ -1,26 +1,27 @@
 import { Text, UnstyledButton } from "@mantine/core";
+import { choiceChipStyles } from "@/components/ui/entry/entryChrome";
 import {
-  RADAR_CHOOSE_LABEL,
-  maxRadarCustomRadiusMeters,
-  radarDistanceOptionLabel,
-  radarDistancePresetsForGameSize,
-  radarOptionKeyForPresetMeters,
-  radarQuestionPrompt,
-  type RadarDistanceOptionKey,
-} from "@/domain/questions";
-import {
+  type DistanceUnit,
   distanceUnitLabel,
   formatDistance,
   milesToMeters,
   parseDistanceInput,
-  type DistanceUnit,
 } from "@/domain/map/distance";
+import {
+  maxRadarCustomRadiusMeters,
+  RADAR_CHOOSE_LABEL,
+  type RadarDistanceOptionKey,
+  radarDistanceOptionLabel,
+  radarDistancePresetsForGameSize,
+  radarOptionKeyForPresetMeters,
+  radarQuestionPrompt,
+} from "@/domain/questions";
 import type { GameSize } from "@/domain/session/size/gameSize";
-import { CatalogExhaustedMessage } from "./shared/readout/CatalogExhaustedMessage";
 import { OptionChip, OptionChipRow } from "./shared/controls/OptionChip";
 import { QuestionPromptBlock } from "./shared/controls/QuestionPromptBlock";
 import { ToolSection } from "./shared/panels/ToolSection";
-import { choiceChipStyles } from "@/components/ui/entry/entryChrome";
+import { CatalogExhaustedMessage } from "./shared/readout/CatalogExhaustedMessage";
+
 interface RadarDistancePickerProps {
   radiusMeters: number;
   chooseCustom: boolean;
@@ -37,7 +38,6 @@ interface RadarDistancePickerProps {
   /** Compact chip strip for map-first mid chrome (Mantine). */
   compact?: boolean;
 }
-
 
 function sanitizeCompactRadarInput(raw: string): string {
   let out = "";
@@ -79,21 +79,16 @@ export function RadarDistancePicker({
   showPrompt = true,
   compact = false,
 }: RadarDistancePickerProps) {
-  const resolvedRadius =
-    parseDistanceInput(customRadius, distanceUnit) ?? radiusMeters;
+  const resolvedRadius = parseDistanceInput(customRadius, distanceUnit) ?? radiusMeters;
   const allPresets = radarDistancePresetsForGameSize(gameSize, distanceUnit);
   const chooseDisabled = usedDistanceOptions.has("choose");
   const maxCustomRadiusMeters = maxRadarCustomRadiusMeters(gameSize, distanceUnit);
   const parsedCustomRadius = parseDistanceInput(customRadius, distanceUnit);
   const customRadiusOverLimit =
-    chooseCustom &&
-    parsedCustomRadius !== null &&
-    parsedCustomRadius > maxCustomRadiusMeters;
+    chooseCustom && parsedCustomRadius !== null && parsedCustomRadius > maxCustomRadiusMeters;
   const exhausted =
     allPresets.every((preset) =>
-      usedDistanceOptions.has(
-        radarOptionKeyForPresetMeters(preset, distanceUnit),
-      ),
+      usedDistanceOptions.has(radarOptionKeyForPresetMeters(preset, distanceUnit)),
     ) && chooseDisabled;
 
   if (compact) {
@@ -118,11 +113,7 @@ export function RadarDistancePicker({
         {exhausted ? (
           <CatalogExhaustedMessage message="Every radar distance option has already been used this session." />
         ) : null}
-        <div
-          className="grid grid-cols-4 gap-1.5"
-          role="list"
-          aria-label="Radar distances"
-        >
+        <div className="grid grid-cols-4 gap-1.5" role="list" aria-label="Radar distances">
           {allPresets.map((preset) => {
             const selected = !chooseCustom && radiusMeters === preset;
             const disabled = usedDistanceOptions.has(
@@ -158,9 +149,7 @@ export function RadarDistancePicker({
                   data-testid="radar-compact-choose-input"
                   value={customRadius}
                   onChange={(event) => {
-                    onCustomRadiusChange(
-                      sanitizeCompactRadarInput(event.currentTarget.value),
-                    );
+                    onCustomRadiusChange(sanitizeCompactRadarInput(event.currentTarget.value));
                   }}
                   onKeyDown={(event) => {
                     if (event.key !== "Enter") {
@@ -185,9 +174,7 @@ export function RadarDistancePicker({
                     textAlign: "right",
                     font: "inherit",
                     fontWeight: 650,
-                    color: customRadiusOverLimit
-                      ? "var(--color-halt)"
-                      : "inherit",
+                    color: customRadiusOverLimit ? "var(--color-halt)" : "inherit",
                     outline: "none",
                     padding: 0,
                     caretColor: "var(--color-flag-ink)",
@@ -222,26 +209,18 @@ export function RadarDistancePicker({
           </div>
         </div>
         {chooseCustom && customRadiusOverLimit ? (
-          <Text
-            size="xs"
-            mt={6}
-            style={{ color: "var(--color-halt)", paddingInline: 2 }}
-          >
-            Max {formatDistance(maxCustomRadiusMeters, distanceUnit)} for this
-            game size.
+          <Text size="xs" mt={6} style={{ color: "var(--color-halt)", paddingInline: 2 }}>
+            Max {formatDistance(maxCustomRadiusMeters, distanceUnit)} for this game size.
           </Text>
         ) : null}
       </div>
     );
   }
 
-
   return (
     <ToolSection title="Distance" first status="active">
       {showPrompt ? (
-        <QuestionPromptBlock
-          prompt={radarQuestionPrompt(resolvedRadius, distanceUnit)}
-        />
+        <QuestionPromptBlock prompt={radarQuestionPrompt(resolvedRadius, distanceUnit)} />
       ) : null}
       {exhausted ? (
         <CatalogExhaustedMessage message="Every radar distance option has already been used this session." />
@@ -264,11 +243,7 @@ export function RadarDistancePicker({
             </OptionChip>
           );
         })}
-        <OptionChip
-          selected={chooseCustom}
-          disabled={chooseDisabled}
-          onClick={onChooseSelect}
-        >
+        <OptionChip selected={chooseCustom} disabled={chooseDisabled} onClick={onChooseSelect}>
           {RADAR_CHOOSE_LABEL}
         </OptionChip>
       </OptionChipRow>
@@ -287,8 +262,7 @@ export function RadarDistancePicker({
           />
           {customRadiusOverLimit ? (
             <span className="text-xs text-highlight">
-              Max {formatDistance(maxCustomRadiusMeters, distanceUnit)} for this
-              game size.
+              Max {formatDistance(maxCustomRadiusMeters, distanceUnit)} for this game size.
             </span>
           ) : null}
         </label>

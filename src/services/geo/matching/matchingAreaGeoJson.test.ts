@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
 import type { FeatureCollection, Polygon } from "geojson";
+import { describe, expect, it } from "vitest";
 import type { GameArea } from "@/domain/map/annotations";
 import { parseMatchingAreaGeoJson } from "./matchingAreaGeoJson";
 
@@ -43,11 +43,7 @@ describe("parseMatchingAreaGeoJson", () => {
       features: Array.from({ length: 51 }, (_, i) => namedSquare(i)),
     };
 
-    const divisions = parseMatchingAreaGeoJson(
-      JSON.stringify(collection),
-      playArea,
-      8,
-    );
+    const divisions = parseMatchingAreaGeoJson(JSON.stringify(collection), playArea, 8);
     expect(divisions).toHaveLength(51);
   });
 });

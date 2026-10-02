@@ -2,9 +2,9 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import type { GameArea } from "../../map/annotations";
-import { unionGameAreas } from "./unionGameAreas";
 import { gameAreaToBoundingBox } from "../gameArea/gameAreaBounds";
 import { gameAreaWithoutInteriorRings } from "../gameArea/geometryCore";
+import { unionGameAreas } from "./unionGameAreas";
 
 const ROOT = resolve(import.meta.dirname, "../../../..");
 
@@ -51,10 +51,7 @@ describe("unionGameAreas", () => {
 
   it("drops interior rings created when unioning adjacent admin polygons", () => {
     const municipalities = JSON.parse(
-      readFileSync(
-        resolve(ROOT, "public/geo/portland-maine/municipalities.geojson"),
-        "utf8",
-      ),
+      readFileSync(resolve(ROOT, "public/geo/portland-maine/municipalities.geojson"), "utf8"),
     );
 
     const areas = municipalities.features.map(

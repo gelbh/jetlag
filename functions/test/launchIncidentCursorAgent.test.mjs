@@ -1,11 +1,11 @@
-import test from "node:test";
 import assert from "node:assert/strict";
-import { INCIDENT_NOT_FOUND } from "../incident/postIncidentMessage.mjs";
+import test from "node:test";
+import { CURSOR_HOTFIX_MISCONFIGURED } from "../incident/launchCursorHotfix.mjs";
 import {
   CURSOR_HOTFIX_ALREADY_LAUNCHED,
   launchIncidentCursorAgentHandler,
 } from "../incident/launchIncidentCursorAgent.mjs";
-import { CURSOR_HOTFIX_MISCONFIGURED } from "../incident/launchCursorHotfix.mjs";
+import { INCIDENT_NOT_FOUND } from "../incident/postIncidentMessage.mjs";
 
 test("launchIncidentCursorAgentHandler rejects empty incidentId", async () => {
   await assert.rejects(

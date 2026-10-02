@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { isCustomQuestionPackCategoryId } from "../../questions/customQuestionPack";
 import {
   assertBaseCatalogIntegrity,
   availableMatchingCategories,
@@ -8,7 +9,6 @@ import {
   isCategoryInDefaultPicker,
   resolveAvailableMeasuringOption,
 } from "./sessionCatalogAvailability";
-import { isCustomQuestionPackCategoryId } from "../../questions/customQuestionPack";
 
 describe("sessionCatalogAvailability", () => {
   it("keeps base catalog counts aligned with official defaults", () => {
@@ -19,19 +19,11 @@ describe("sessionCatalogAvailability", () => {
 
   it("excludes custom pack categories from default sessions", () => {
     const defaultSession = { gameSize: "medium" as const };
-    const matchingIds = availableMatchingCategories(defaultSession).map(
-      (category) => category.id,
-    );
-    const measuringIds = availableMeasuringCatalog(defaultSession).map(
-      (option) => option.id,
-    );
+    const matchingIds = availableMatchingCategories(defaultSession).map((category) => category.id);
+    const measuringIds = availableMeasuringCatalog(defaultSession).map((option) => option.id);
 
-    expect(matchingIds.some((id) => isCustomQuestionPackCategoryId(id))).toBe(
-      false,
-    );
-    expect(measuringIds.some((id) => isCustomQuestionPackCategoryId(id))).toBe(
-      false,
-    );
+    expect(matchingIds.some((id) => isCustomQuestionPackCategoryId(id))).toBe(false);
+    expect(measuringIds.some((id) => isCustomQuestionPackCategoryId(id))).toBe(false);
     expect(measuringIds).toHaveLength(BASE_MEASURING_CATALOG_COUNT);
     expect(measuringIds).not.toContain("admin3_border");
     expect(measuringIds).not.toContain("admin4_border");
@@ -49,12 +41,8 @@ describe("sessionCatalogAvailability", () => {
         isCustomQuestionPackCategoryId(category.id),
       ),
     ).toBe(true);
-    const measuringIds = availableMeasuringCatalog(session).map(
-      (option) => option.id,
-    );
-    expect(measuringIds.some((id) => isCustomQuestionPackCategoryId(id))).toBe(
-      true,
-    );
+    const measuringIds = availableMeasuringCatalog(session).map((option) => option.id);
+    expect(measuringIds.some((id) => isCustomQuestionPackCategoryId(id))).toBe(true);
     expect(measuringIds).toContain("admin3_border");
     expect(measuringIds).toContain("admin4_border");
     expect(measuringIds).toContain("custom_place");
@@ -62,21 +50,15 @@ describe("sessionCatalogAvailability", () => {
   });
 
   it("gates pack categories in the default picker helper", () => {
-    expect(
-      isCategoryInDefaultPicker("pack:seven_eleven", { gameSize: "medium" }),
-    ).toBe(false);
+    expect(isCategoryInDefaultPicker("pack:seven_eleven", { gameSize: "medium" })).toBe(false);
     expect(
       isCategoryInDefaultPicker("pack:seven_eleven", {
         gameSize: "medium",
         customQuestionPackEnabled: true,
       }),
     ).toBe(true);
-    expect(
-      isCategoryInDefaultPicker("commercial_airport", { gameSize: "medium" }),
-    ).toBe(true);
-    expect(
-      isCategoryInDefaultPicker("custom_place", { gameSize: "medium" }),
-    ).toBe(false);
+    expect(isCategoryInDefaultPicker("commercial_airport", { gameSize: "medium" })).toBe(true);
+    expect(isCategoryInDefaultPicker("custom_place", { gameSize: "medium" })).toBe(false);
     expect(
       isCategoryInDefaultPicker("custom_place", {
         gameSize: "medium",
@@ -86,9 +68,7 @@ describe("sessionCatalogAvailability", () => {
   });
 
   it("resolves measuring options only from the available catalog", () => {
-    expect(
-      resolveAvailableMeasuringOption("custom_place", { gameSize: "medium" }),
-    ).toBeNull();
+    expect(resolveAvailableMeasuringOption("custom_place", { gameSize: "medium" })).toBeNull();
     expect(
       resolveAvailableMeasuringOption("custom_place", {
         gameSize: "medium",

@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 import type { AnnotationRecord } from "@/domain/map/annotations";
-import { assertNoNestedArrays } from "./shared";
 import {
   deserializeAnnotationFromFirestore,
   serializeAnnotationForFirestore,
 } from "./serializeAnnotation";
+import { assertNoNestedArrays } from "./shared";
 
 describe("serializeAnnotation", () => {
   it("omits undefined metadata fields from Firestore payloads", () => {
@@ -71,8 +71,7 @@ describe("serializeAnnotation", () => {
         matchingFeatureCount: 2,
         matchingNullAnswer: false,
         matchingBoundaryJson: '{"type":"Feature"}',
-        matchingFeaturesJson:
-          '[{"id":"123","name":"Dublin Airport","point":[53.35,-6.26]}]',
+        matchingFeaturesJson: '[{"id":"123","name":"Dublin Airport","point":[53.35,-6.26]}]',
         color: "#ef4444",
       },
       status: "active",
@@ -106,16 +105,10 @@ describe("serializeAnnotation", () => {
     };
 
     const serialized = serializeAnnotationForFirestore(annotation);
-    expect(serialized.geometryJson).toEqual(
-      JSON.stringify(annotation.geometry),
-    );
+    expect(serialized.geometryJson).toEqual(JSON.stringify(annotation.geometry));
     expect(serialized).not.toHaveProperty("geometry");
 
-    const restored = deserializeAnnotationFromFirestore(
-      "session-1",
-      "ann-1",
-      serialized,
-    );
+    const restored = deserializeAnnotationFromFirestore("session-1", "ann-1", serialized);
 
     expect(restored).toEqual(annotation);
   });
@@ -136,14 +129,8 @@ describe("serializeAnnotation", () => {
       updatedAt: { seconds: 1_715_686_400, nanoseconds: 0 },
     };
 
-    const restored = deserializeAnnotationFromFirestore(
-      "session-1",
-      "ann-1",
-      annotation,
-    );
+    const restored = deserializeAnnotationFromFirestore("session-1", "ann-1", annotation);
 
-    expect(restored.updatedAt).toBe(
-      new Date(1_715_686_400 * 1000).toISOString(),
-    );
+    expect(restored.updatedAt).toBe(new Date(1_715_686_400 * 1000).toISOString());
   });
 });

@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { RequestPreloadSection } from "./RequestPreloadSection";
 
 const authState = {
@@ -42,10 +42,9 @@ describe("RequestPreloadSection", () => {
       />,
     );
 
-    fireEvent.change(
-      screen.getByPlaceholderText("Anything helpful about this area?"),
-      { target: { value: "Coastal play" } },
-    );
+    fireEvent.change(screen.getByPlaceholderText("Anything helpful about this area?"), {
+      target: { value: "Coastal play" },
+    });
     fireEvent.click(screen.getByRole("button", { name: "Request preload" }));
 
     await waitFor(() => {
@@ -56,44 +55,28 @@ describe("RequestPreloadSection", () => {
       });
     });
 
-    expect(
-      screen.getByText("Request submitted. We will review it manually."),
-    ).toBeInTheDocument();
+    expect(screen.getByText("Request submitted. We will review it manually.")).toBeInTheDocument();
   });
 
   it("prompts for sign-in when the user is not permanent", () => {
     authState.isPermanent = false;
 
     render(
-      <RequestPreloadSection
-        getSnapshot={() => baseSnapshot}
-        createPreloadRequestFn={vi.fn()}
-      />,
+      <RequestPreloadSection getSnapshot={() => baseSnapshot} createPreloadRequestFn={vi.fn()} />,
     );
 
     expect(
-      screen.getByText(
-        "Sign in with Google or email to submit a preload request.",
-      ),
+      screen.getByText("Sign in with Google or email to submit a preload request."),
     ).toBeInTheDocument();
-    expect(
-      screen.queryByRole("button", { name: "Request preload" }),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Request preload" })).not.toBeInTheDocument();
   });
 
   it("mentions manual review in the helper copy", () => {
     render(
-      <RequestPreloadSection
-        getSnapshot={() => baseSnapshot}
-        createPreloadRequestFn={vi.fn()}
-      />,
+      <RequestPreloadSection getSnapshot={() => baseSnapshot} createPreloadRequestFn={vi.fn()} />,
     );
 
-    expect(
-      screen.getByText(/reviewed manually and are not instant/i),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText("Request a custom location pack"),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/reviewed manually and are not instant/i)).toBeInTheDocument();
+    expect(screen.getByText("Request a custom location pack")).toBeInTheDocument();
   });
 });

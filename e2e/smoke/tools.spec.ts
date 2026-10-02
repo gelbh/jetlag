@@ -1,10 +1,4 @@
-import {
-  test,
-  completeRadarSolo,
-  expectRedoEnabled,
-  placePin,
-  undoAnnotation,
-} from "../fixtures";
+import { completeRadarSolo, expectRedoEnabled, placePin, test, undoAnnotation } from "../fixtures";
 
 test("@smoke completes a solo radar question", async ({ localMap }) => {
   await test.step("ask and commit radar", async () => {

@@ -1,9 +1,6 @@
-import { describe, expect, it, vi } from "vitest";
 import type { Map as MapLibreMap } from "maplibre-gl";
-import {
-  previewBasemapPois,
-  satelliteBasemapPoiUnavailableMessage,
-} from "./previewBasemapPois";
+import { describe, expect, it, vi } from "vitest";
+import { previewBasemapPois, satelliteBasemapPoiUnavailableMessage } from "./previewBasemapPois";
 
 describe("previewBasemapPois", () => {
   it("returns empty on satellite without querying the map", () => {

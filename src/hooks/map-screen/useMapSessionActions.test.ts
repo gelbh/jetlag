@@ -1,9 +1,6 @@
 import { act, renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import {
-  LOCAL_SESSION_ID,
-  type SessionRecord,
-} from "../../domain/map/annotations";
+import { LOCAL_SESSION_ID, type SessionRecord } from "../../domain/map/annotations";
 import { useMapSessionActions } from "./useMapSessionActions";
 
 vi.mock("../../services/core/firebase/firebase", () => ({
@@ -156,11 +153,7 @@ describe("useMapSessionActions", () => {
 
     const next = setSession.mock.calls[0]?.[0] as SessionRecord;
     expect(Object.keys(next).sort()).toEqual(
-      expect.arrayContaining([
-        "endGameStartedAt",
-        "endGameStartedByUid",
-        "endGameTruthAnchors",
-      ]),
+      expect.arrayContaining(["endGameStartedAt", "endGameStartedByUid", "endGameTruthAnchors"]),
     );
     expect(next).not.toHaveProperty("annotations");
   });
@@ -308,10 +301,7 @@ describe("useMapSessionActions", () => {
       await result.current.handleConfirmFoundHider();
     });
 
-    expect(confirmFoundHiderSessionMock).toHaveBeenCalledWith(
-      "remote-session-1",
-      "hider-1",
-    );
+    expect(confirmFoundHiderSessionMock).toHaveBeenCalledWith("remote-session-1", "hider-1");
     expect(alertSpy).toHaveBeenCalledWith(
       "Could not confirm found hider. Check your connection and try again.",
     );

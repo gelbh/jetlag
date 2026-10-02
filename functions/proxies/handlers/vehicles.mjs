@@ -1,18 +1,13 @@
 import { defineSecret } from "firebase-functions/params";
 import { fetchWithTimeoutAndRetry } from "../../lib/fetchWithTimeout.mjs";
 import { createMemoryCache } from "../../lib/memoryCache.mjs";
-import { normalizeTflPayload } from "../tflNormalize.mjs";
-import { fetchCtaVehicles } from "../ctaProxy.mjs";
-import {
-  parseBoundingBoxQuery,
-  parseVehiclesMetroQuery,
-} from "../proxyValidation.mjs";
 import { createProxyHandler } from "../createProxyHandler.mjs";
+import { fetchCtaVehicles } from "../ctaProxy.mjs";
+import { parseBoundingBoxQuery, parseVehiclesMetroQuery } from "../proxyValidation.mjs";
+import { normalizeTflPayload } from "../tflNormalize.mjs";
 
 export const ctaBusTrackerApiKeySecret = defineSecret("CTA_BUS_TRACKER_API_KEY");
-export const ctaTrainTrackerApiKeySecret = defineSecret(
-  "CTA_TRAIN_TRACKER_API_KEY",
-);
+export const ctaTrainTrackerApiKeySecret = defineSecret("CTA_TRAIN_TRACKER_API_KEY");
 
 const FEEDS = {
   london: "https://api.tfl.gov.uk/vehicle/vehiclepositions",

@@ -13,9 +13,7 @@ export function MotionDatasetEffect() {
       document.documentElement.dataset.motion = "css";
     }
 
-    document.documentElement.dataset.motionDecorative = decorativeAnimate
-      ? "on"
-      : "off";
+    document.documentElement.dataset.motionDecorative = decorativeAnimate ? "on" : "off";
   }, [decorativeAnimate, prefersReducedMotion]);
 
   useEffect(() => {

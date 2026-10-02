@@ -3,8 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import { MapScreenRoleCodesSheet } from "./MapScreenSharedSessionSheets";
 
 vi.mock("../../../components/session/settings/RoleCodesSheet", () => ({
-  RoleCodesSheet: ({ open }: { open: boolean }) =>
-    open ? <div>role-codes-sheet</div> : null,
+  RoleCodesSheet: ({ open }: { open: boolean }) => (open ? <div>role-codes-sheet</div> : null),
 }));
 
 const session = {

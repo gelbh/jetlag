@@ -19,14 +19,7 @@ describe("LeaderboardSelfFooter", () => {
 
   it("shows pinned rank and jumps on click", () => {
     const onJump = vi.fn();
-    render(
-      <LeaderboardSelfFooter
-        mode="pinned"
-        entry={entry}
-        metric="wins"
-        onJump={onJump}
-      />,
-    );
+    render(<LeaderboardSelfFooter mode="pinned" entry={entry} metric="wins" onJump={onJump} />);
     const footer = screen.getByTestId("leaderboard-self-footer");
     expect(footer).toHaveTextContent(/#5 · YOU · 12/);
     expect(footer.className).toMatch(/\babsolute\b/);
@@ -36,31 +29,19 @@ describe("LeaderboardSelfFooter", () => {
   });
 
   it("shows off_list copy", () => {
-    render(
-      <LeaderboardSelfFooter
-        mode="off_list"
-        entry={{ ...entry, rank: 80 }}
-        metric="wins"
-      />,
-    );
-    expect(screen.getByTestId("leaderboard-self-footer")).toHaveTextContent(
-      /#80 · YOU · 12/,
-    );
+    render(<LeaderboardSelfFooter mode="off_list" entry={{ ...entry, rank: 80 }} metric="wins" />);
+    expect(screen.getByTestId("leaderboard-self-footer")).toHaveTextContent(/#80 · YOU · 12/);
   });
 
   it("shows unranked copy", () => {
-    render(
-      <LeaderboardSelfFooter mode="unranked" entry={null} metric="wins" />,
-    );
+    render(<LeaderboardSelfFooter mode="unranked" entry={null} metric="wins" />);
     expect(screen.getByTestId("leaderboard-self-footer")).toHaveTextContent(
       "Not ranked on this board",
     );
   });
 
   it("shows error copy", () => {
-    render(
-      <LeaderboardSelfFooter mode="error" entry={null} metric="wins" />,
-    );
+    render(<LeaderboardSelfFooter mode="error" entry={null} metric="wins" />);
     expect(screen.getByTestId("leaderboard-self-footer")).toHaveTextContent(
       "Couldn't load your rank",
     );

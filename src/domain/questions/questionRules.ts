@@ -1,28 +1,25 @@
 import type { AnnotationRecord, SessionRecord } from "../map/annotations";
 import type { QuestionCardCost } from "../map/mapTools";
-import type { GameSize } from "../session/size/gameSize";
 import type {
   PendingQuestionRecord,
   PendingQuestionStatus,
   PendingQuestionToolType,
 } from "../session/activity/sessionChat";
 import { resolveAnswerDeadlineMs } from "../session/rules";
-import {
-  formatRemainingCountdownFromMs,
-} from "../time/formatClockDuration";
+import type { GameSize } from "../session/size/gameSize";
+import { formatRemainingCountdownFromMs } from "../time/formatClockDuration";
 
 export type QuestionToolType = Extract<
   PendingQuestionToolType,
   "matching" | "measuring" | "radar" | "thermometer" | "tentacle" | "photo"
 >;
 
-const BASE_COST_MULTIPLIERS: Record<QuestionCardCost, { draw: number; keep: number }> =
-  {
-    D3P1: { draw: 3, keep: 1 },
-    D2P1: { draw: 2, keep: 1 },
-    D4P2: { draw: 4, keep: 2 },
-    D1P1: { draw: 1, keep: 1 },
-  };
+const BASE_COST_MULTIPLIERS: Record<QuestionCardCost, { draw: number; keep: number }> = {
+  D3P1: { draw: 3, keep: 1 },
+  D2P1: { draw: 2, keep: 1 },
+  D4P2: { draw: 4, keep: 2 },
+  D1P1: { draw: 1, keep: 1 },
+};
 
 export interface QuestionCostBreakdown {
   label: string;
@@ -47,10 +44,7 @@ export function questionCostBreakdown(
   };
 }
 
-export function questionCostLabel(
-  baseCost: QuestionCardCost,
-  useCount: number,
-): string {
+export function questionCostLabel(baseCost: QuestionCardCost, useCount: number): string {
   return questionCostBreakdown(baseCost, useCount).label;
 }
 
@@ -70,9 +64,7 @@ export function formatSequentialDrawPickSummary(
   return times === 1 ? baseSummary : `${baseSummary} × ${times}`;
 }
 
-const QUESTION_TOOL_BASE_COST: Partial<
-  Record<PendingQuestionToolType, QuestionCardCost>
-> = {
+const QUESTION_TOOL_BASE_COST: Partial<Record<PendingQuestionToolType, QuestionCardCost>> = {
   matching: "D3P1",
   measuring: "D3P1",
   radar: "D2P1",
@@ -104,20 +96,13 @@ export function formatPendingDrawPickSummary(
   return formatSequentialDrawPickSummary(baseCost, times - 1);
 }
 
-export function isCountablePendingQuestionStatus(
-  status: PendingQuestionStatus,
-): boolean {
+export function isCountablePendingQuestionStatus(status: PendingQuestionStatus): boolean {
   return (
-    status === "pending" ||
-    status === "answered" ||
-    status === "resolved" ||
-    status === "walking"
+    status === "pending" || status === "answered" || status === "resolved" || status === "walking"
   );
 }
 
-export function isUsedOptionPendingQuestion(
-  question: PendingQuestionRecord,
-): boolean {
+export function isUsedOptionPendingQuestion(question: PendingQuestionRecord): boolean {
   if (isCountablePendingQuestionStatus(question.status)) {
     return true;
   }
@@ -138,12 +123,12 @@ export function hasOpenPendingQuestion(
 
 export function questionAnswerDeadlineMs(
   toolType: PendingQuestionToolType,
-  sessionOrGameSize: Pick<
-    SessionRecord,
-    | "gameSize"
-    | "photoAnswerDeadlineMinutes"
-    | "questionAnswerDeadlineMinutes"
-  > | GameSize,
+  sessionOrGameSize:
+    | Pick<
+        SessionRecord,
+        "gameSize" | "photoAnswerDeadlineMinutes" | "questionAnswerDeadlineMinutes"
+      >
+    | GameSize,
 ): number {
   if (typeof sessionOrGameSize === "string") {
     return resolveAnswerDeadlineMs({ gameSize: sessionOrGameSize }, toolType);

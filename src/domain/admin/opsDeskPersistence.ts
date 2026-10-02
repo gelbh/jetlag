@@ -1,23 +1,23 @@
 import {
   CUSTOM_PRESET_ID,
+  clampMonitorLayoutToCols,
   DEFAULT_COLS,
   DEFAULT_ROW_HEIGHT,
-  FORMER_BUILTIN_IDS,
-  clampMonitorLayoutToCols,
+  type DeskLayout,
+  type DeskPreset,
   defaultMonitorLayout,
   defaultScratchLayout,
+  FORMER_BUILTIN_IDS,
+  type GridStack,
   isFormerBuiltinId,
   isMonitorPanelId,
   isPanelId,
   layoutForFormerBuiltinId,
-  type DeskLayout,
-  type DeskPreset,
-  type GridStack,
   type MonitorLayout,
   type MonitorPanelId,
   type MonitorStack,
-  type PanelId,
   migrateLayoutToCols,
+  type PanelId,
 } from "./opsDeskLayout";
 
 export const OPS_DESK_STORAGE_PREFIX = "jetlag.adminOpsDesk.v1";
@@ -71,12 +71,8 @@ function sanitizeStack(raw: unknown): GridStack | null {
   if (panelIds.length === 0) return null;
 
   const preferredId =
-    typeof preferredActive === "string" && isPanelId(preferredActive)
-      ? preferredActive
-      : null;
-  const resolvedIndex = preferredId
-    ? panelIds.indexOf(preferredId)
-    : -1;
+    typeof preferredActive === "string" && isPanelId(preferredActive) ? preferredActive : null;
+  const resolvedIndex = preferredId ? panelIds.indexOf(preferredId) : -1;
   const activeIndex = resolvedIndex >= 0 ? resolvedIndex : 0;
 
   const num = (v: unknown, fallback: number) =>
@@ -137,9 +133,7 @@ export function sanitizeMonitorLayout(raw: unknown): MonitorLayout {
   }
   const obj = raw as Record<string, unknown>;
   const stacks = Array.isArray(obj.stacks)
-    ? obj.stacks
-        .map(sanitizeMonitorStack)
-        .filter((s): s is MonitorStack => s !== null)
+    ? obj.stacks.map(sanitizeMonitorStack).filter((s): s is MonitorStack => s !== null)
     : [];
 
   const hiddenPanelIds = Array.isArray(obj.hiddenPanelIds)
@@ -151,9 +145,7 @@ export function sanitizeMonitorLayout(raw: unknown): MonitorLayout {
   }
 
   const colsRaw =
-    typeof obj.cols === "number" && Number.isFinite(obj.cols)
-      ? Math.floor(obj.cols)
-      : DEFAULT_COLS;
+    typeof obj.cols === "number" && Number.isFinite(obj.cols) ? Math.floor(obj.cols) : DEFAULT_COLS;
   const cols = colsRaw > 0 ? colsRaw : DEFAULT_COLS;
   const rowHeightRaw =
     typeof obj.rowHeight === "number" && Number.isFinite(obj.rowHeight)
@@ -209,9 +201,7 @@ export function sanitizeDeskLayout(raw: unknown): DeskLayout {
   }
 
   const colsRaw =
-    typeof obj.cols === "number" && Number.isFinite(obj.cols)
-      ? Math.floor(obj.cols)
-      : DEFAULT_COLS;
+    typeof obj.cols === "number" && Number.isFinite(obj.cols) ? Math.floor(obj.cols) : DEFAULT_COLS;
   const cols = colsRaw > 0 ? colsRaw : DEFAULT_COLS;
   const rowHeightRaw =
     typeof obj.rowHeight === "number" && Number.isFinite(obj.rowHeight)
@@ -229,8 +219,7 @@ export function sanitizeDeskLayout(raw: unknown): DeskLayout {
     DEFAULT_COLS,
   );
 
-  layout.monitor =
-    "monitor" in obj ? sanitizeMonitorLayout(obj.monitor) : defaultMonitorLayout();
+  layout.monitor = "monitor" in obj ? sanitizeMonitorLayout(obj.monitor) : defaultMonitorLayout();
   return layout;
 }
 
@@ -249,10 +238,7 @@ function sanitizeUserPreset(raw: unknown): DeskPreset | null {
   };
 }
 
-function sanitizePresetOrder(
-  raw: unknown,
-  userPresets: DeskPreset[],
-): string[] {
+function sanitizePresetOrder(raw: unknown, userPresets: DeskPreset[]): string[] {
   const known = knownPresetIds(userPresets);
   const fallback = buildPresetOrder(userPresets);
   if (!Array.isArray(raw)) return fallback;
@@ -281,14 +267,12 @@ function sanitizeStore(raw: unknown): OpsDeskStoreV1 {
   const reservedIds = new Set<string>([CUSTOM_PRESET_ID, ...FORMER_BUILTIN_IDS]);
   const seenUserIds = new Set<string>();
   const userPresets = Array.isArray(obj.userPresets)
-    ? obj.userPresets
-        .map(sanitizeUserPreset)
-        .filter((p): p is DeskPreset => {
-          if (p === null) return false;
-          if (reservedIds.has(p.id) || seenUserIds.has(p.id)) return false;
-          seenUserIds.add(p.id);
-          return true;
-        })
+    ? obj.userPresets.map(sanitizeUserPreset).filter((p): p is DeskPreset => {
+        if (p === null) return false;
+        if (reservedIds.has(p.id) || seenUserIds.has(p.id)) return false;
+        seenUserIds.add(p.id);
+        return true;
+      })
     : [];
 
   const knownIds = knownPresetIds(userPresets);
@@ -323,9 +307,7 @@ function sanitizeStore(raw: unknown): OpsDeskStoreV1 {
     defaultPresetId = CUSTOM_PRESET_ID;
   }
 
-  const lastMobilePanelId = isPanelId(obj.lastMobilePanelId)
-    ? obj.lastMobilePanelId
-    : undefined;
+  const lastMobilePanelId = isPanelId(obj.lastMobilePanelId) ? obj.lastMobilePanelId : undefined;
 
   return {
     version: 1,
@@ -354,10 +336,7 @@ export function coldStartOpsDeskStore(uid: string | null): OpsDeskStoreV1 {
   return { ...loaded, activePresetId: loaded.defaultPresetId };
 }
 
-export function saveOpsDeskStore(
-  uid: string | null,
-  store: OpsDeskStoreV1,
-): void {
+export function saveOpsDeskStore(uid: string | null, store: OpsDeskStoreV1): void {
   try {
     const sanitized = sanitizeStore(store);
     localStorage.setItem(storageKey(uid), JSON.stringify(sanitized));

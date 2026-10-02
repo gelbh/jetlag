@@ -1,13 +1,9 @@
-import { describe, expect, it, vi } from "vitest";
 import { render } from "@testing-library/react";
-import type { DistanceUnit } from "@/domain/map/distance";
+import { describe, expect, it, vi } from "vitest";
 import type { GameArea } from "@/domain/map/annotations";
+import type { DistanceUnit } from "@/domain/map/distance";
 import type { MapTool } from "@/state/sessionStore";
-import {
-  HeavyToolHost,
-  type HeavyToolHostModel,
-  type HeavyToolHostProps,
-} from "./HeavyToolHost";
+import { HeavyToolHost, type HeavyToolHostModel, type HeavyToolHostProps } from "./HeavyToolHost";
 
 vi.mock("../../hooks/tools/useMatchingTool", () => ({
   useMatchingTool: () => ({

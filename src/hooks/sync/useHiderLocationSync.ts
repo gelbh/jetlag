@@ -1,13 +1,13 @@
 import { useEffect } from "react";
-import { LOCAL_SESSION_ID } from "../../domain/map/annotations";
 import { getPowerProfile } from "../../domain/device/power/powerProfile";
+import { LOCAL_SESSION_ID } from "../../domain/map/annotations";
 import type { PlayerLocationRecord } from "../../domain/session/activity/sessionChat";
-import { useMapStore } from "../../state/mapStore";
-import { useLiveLocation } from "../location/useLiveLocation";
 import { isFirebaseConfigured } from "../../services/core/firebase/firebase";
 import { isFirestorePermissionDenied } from "../../services/firestore/firestoreAnnotations";
-import { arePlayerLocationPublishesBlocked } from "../../services/session/playerLocationPublishGate";
 import { writePlayerLocation } from "../../services/firestore/firestoreSessionExtras";
+import { arePlayerLocationPublishesBlocked } from "../../services/session/playerLocationPublishGate";
+import { useMapStore } from "../../state/mapStore";
+import { useLiveLocation } from "../location/useLiveLocation";
 import { maybeAppendPlayerTrailPoint } from "./appendPlayerTrailPoint";
 
 interface UseHiderLocationSyncParams {
@@ -16,11 +16,7 @@ interface UseHiderLocationSyncParams {
   enabled: boolean;
 }
 
-export function useHiderLocationSync({
-  sessionId,
-  uid,
-  enabled,
-}: UseHiderLocationSyncParams) {
+export function useHiderLocationSync({ sessionId, uid, enabled }: UseHiderLocationSyncParams) {
   const lowPowerMode = useMapStore((state) => state.lowPowerMode);
   const profile = getPowerProfile(lowPowerMode).hiderLocationSync;
   const { reading, error } = useLiveLocation(enabled, profile);

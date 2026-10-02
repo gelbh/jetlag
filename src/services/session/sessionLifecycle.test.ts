@@ -1,9 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { endSession, leaveHostSession, repairGhostHost } from "./sessionLifecycle";
 
-const callable = vi.hoisted(() =>
-  vi.fn(async () => ({ data: { action: "ended" as const } })),
-);
+const callable = vi.hoisted(() => vi.fn(async () => ({ data: { action: "ended" as const } })));
 const httpsCallable = vi.hoisted(() => vi.fn(() => callable));
 const getFirebaseFunctions = vi.hoisted(() => vi.fn(async () => ({})));
 const isFirebaseConfigured = vi.hoisted(() => vi.fn(() => true));
@@ -80,8 +78,6 @@ describe("sessionLifecycle", () => {
   it("throws when Firebase is not configured", async () => {
     isFirebaseConfigured.mockReturnValueOnce(false);
 
-    await expect(leaveHostSession("session-42")).rejects.toThrow(
-      "Firebase is not configured.",
-    );
+    await expect(leaveHostSession("session-42")).rejects.toThrow("Firebase is not configured.");
   });
 });

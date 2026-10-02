@@ -1,19 +1,13 @@
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ReactNode,
-} from "react";
-import {
-  useLocation,
-  useNavigate,
-  type NavigateOptions,
-  type To,
-} from "react-router-dom";
-import { useMotionProfile } from "../hooks/motion/useMotionProfile";
+import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { type NavigateOptions, type To, useLocation, useNavigate } from "react-router-dom";
 import { reportSlowRouteTransitionLazy } from "@/services/core/analytics/lazyTelemetry";
+import { useMotionProfile } from "../hooks/motion/useMotionProfile";
+import {
+  type NavRevealDirection,
+  revealRouteTransition,
+  setNavDirection,
+} from "./revealRouteTransition";
+import { computeLoadingProgress, type RouteLoadingProgress } from "./routeLoadingSteps";
 import {
   isLazyRoute,
   preloadRoute,
@@ -21,22 +15,12 @@ import {
   resolveNavigatePath,
 } from "./routePreloaders";
 import {
-  revealRouteTransition,
-  setNavDirection,
-  type NavRevealDirection,
-} from "./revealRouteTransition";
-import {
-  RouteTransitionContext,
   type BeginTransitionOptions,
   type RouteLoadingReason,
+  RouteTransitionContext,
   type RouteTransitionPhase,
 } from "./routeTransitionContextInstance";
-import { computeLoadingProgress, type RouteLoadingProgress } from "./routeLoadingSteps";
-import {
-  getSyncRouteReady,
-  isRouteImportWarm,
-  isWarmFastPathEligible,
-} from "./routeWarmState";
+import { getSyncRouteReady, isRouteImportWarm, isWarmFastPathEligible } from "./routeWarmState";
 import { routeReadinessKind } from "./useRouteScreenReady";
 
 export type { BeginTransitionOptions, RouteTransitionPhase };
@@ -48,9 +32,7 @@ type RouteNavigateOptions = NavigateOptions & {
   viewTransition: false;
 };
 
-function toRevealDirection(
-  direction: BeginTransitionOptions["direction"],
-): NavRevealDirection {
+function toRevealDirection(direction: BeginTransitionOptions["direction"]): NavRevealDirection {
   if (direction === "back") {
     return "back";
   }
@@ -84,12 +66,8 @@ export function RouteTransitionProvider({ children }: { children: ReactNode }) {
   const location = useLocation();
   const { decorativeAnimate } = useMotionProfile();
   const [phase, setPhase] = useState<RouteTransitionPhase>("idle");
-  const [loadingReason, setLoadingReason] = useState<RouteLoadingReason | null>(
-    null,
-  );
-  const [loadingProgress, setLoadingProgress] = useState<RouteLoadingProgress | null>(
-    null,
-  );
+  const [loadingReason, setLoadingReason] = useState<RouteLoadingReason | null>(null);
+  const [loadingProgress, setLoadingProgress] = useState<RouteLoadingProgress | null>(null);
 
   const phaseRef = useRef(phase);
   const screenReadyRef = useRef(true);
@@ -136,9 +114,7 @@ export function RouteTransitionProvider({ children }: { children: ReactNode }) {
       }
 
       if (targetPath) {
-        setLoadingProgress(
-          computeLoadingProgress(targetPath, screenReadyRef.current),
-        );
+        setLoadingProgress(computeLoadingProgress(targetPath, screenReadyRef.current));
       }
 
       if (screenReadyRef.current) {
@@ -169,10 +145,8 @@ export function RouteTransitionProvider({ children }: { children: ReactNode }) {
       }
 
       try {
-        await revealRouteTransition(
-          revealDirectionRef.current,
-          decorativeAnimate,
-          () => navigate(to, navigateOptions),
+        await revealRouteTransition(revealDirectionRef.current, decorativeAnimate, () =>
+          navigate(to, navigateOptions),
         );
       } catch {
         // Navigation succeeded; a failed reveal should not block the route.
@@ -213,10 +187,7 @@ export function RouteTransitionProvider({ children }: { children: ReactNode }) {
         viewTransition: false,
       };
 
-      if (
-        phaseRef.current !== "idle" &&
-        loadingTargetRef.current === destinationKey
-      ) {
+      if (phaseRef.current !== "idle" && loadingTargetRef.current === destinationKey) {
         return;
       }
 
@@ -259,9 +230,7 @@ export function RouteTransitionProvider({ children }: { children: ReactNode }) {
       loadingTargetPathRef.current = targetPath;
       screenReadyRef.current = getSyncRouteReady(targetPath);
       setLoadingReason(loadingReasonForPath(targetPath));
-      setLoadingProgress(
-        computeLoadingProgress(targetPath, screenReadyRef.current),
-      );
+      setLoadingProgress(computeLoadingProgress(targetPath, screenReadyRef.current));
       phaseRef.current = "settling";
       setPhase("settling");
 
@@ -278,18 +247,14 @@ export function RouteTransitionProvider({ children }: { children: ReactNode }) {
           return;
         }
 
-        setLoadingProgress(
-          computeLoadingProgress(targetPath, screenReadyRef.current),
-        );
+        setLoadingProgress(computeLoadingProgress(targetPath, screenReadyRef.current));
 
         // Navigate immediately — destination shell/skeleton mounts while
         // readiness settles in-shell (no full-bleed load overlay).
         setNavDirection(revealDirectionRef.current);
         try {
-          await revealRouteTransition(
-            revealDirectionRef.current,
-            decorativeAnimate,
-            () => navigate(to, navigateOptions),
+          await revealRouteTransition(revealDirectionRef.current, decorativeAnimate, () =>
+            navigate(to, navigateOptions),
           );
         } catch {
           navigate(to, navigateOptions);
@@ -301,9 +266,7 @@ export function RouteTransitionProvider({ children }: { children: ReactNode }) {
           return;
         }
 
-        setLoadingProgress(
-          computeLoadingProgress(targetPath, screenReadyRef.current),
-        );
+        setLoadingProgress(computeLoadingProgress(targetPath, screenReadyRef.current));
 
         reportSlowRouteTransitionLazy({
           preload_ms: preloadMs,
@@ -349,8 +312,6 @@ export function RouteTransitionProvider({ children }: { children: ReactNode }) {
   );
 
   return (
-    <RouteTransitionContext.Provider value={value}>
-      {children}
-    </RouteTransitionContext.Provider>
+    <RouteTransitionContext.Provider value={value}>{children}</RouteTransitionContext.Provider>
   );
 }

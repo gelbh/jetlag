@@ -58,9 +58,7 @@ export interface SessionOpsSummonUsage {
   toolExecutionCount: number;
 }
 
-export type CapConsumeResult<T> =
-  | { ok: true; usage: T }
-  | { ok: false; code: SessionOpsCapCode };
+export type CapConsumeResult<T> = { ok: true; usage: T } | { ok: false; code: SessionOpsCapCode };
 
 /**
  * Premium when the reporter has unlimited premium entitlement, or the
@@ -70,9 +68,7 @@ export function isSessionOpsPremiumTier(input: {
   hasUnlimitedPremium?: boolean;
   sessionTier?: string | null;
 }): boolean {
-  return (
-    input.hasUnlimitedPremium === true || input.sessionTier === "premium"
-  );
+  return input.hasUnlimitedPremium === true || input.sessionTier === "premium";
 }
 
 export function resolveSessionOpsCapTier(input: {
@@ -87,9 +83,7 @@ export function getSessionOpsCaps(tier: SessionOpsCapTier): SessionOpsCaps {
 }
 
 function nonNegativeInt(value: unknown): number {
-  return typeof value === "number" && Number.isFinite(value) && value > 0
-    ? Math.floor(value)
-    : 0;
+  return typeof value === "number" && Number.isFinite(value) && value > 0 ? Math.floor(value) : 0;
 }
 
 export function readIncidentUsage(
@@ -109,45 +103,27 @@ export function readSummonUsage(
   };
 }
 
-export function remainingSummons(
-  usage: SessionOpsIncidentUsage,
-  caps: SessionOpsCaps,
-): number {
+export function remainingSummons(usage: SessionOpsIncidentUsage, caps: SessionOpsCaps): number {
   return Math.max(0, caps.summonsPerSession - usage.summonCount);
 }
 
-export function remainingTurns(
-  usage: SessionOpsSummonUsage,
-  caps: SessionOpsCaps,
-): number {
+export function remainingTurns(usage: SessionOpsSummonUsage, caps: SessionOpsCaps): number {
   return Math.max(0, caps.agentTurnsPerSummon - usage.agentTurnCount);
 }
 
-export function remainingTools(
-  usage: SessionOpsSummonUsage,
-  caps: SessionOpsCaps,
-): number {
+export function remainingTools(usage: SessionOpsSummonUsage, caps: SessionOpsCaps): number {
   return Math.max(0, caps.toolExecutionsPerSummon - usage.toolExecutionCount);
 }
 
-export function canSummon(
-  usage: SessionOpsIncidentUsage,
-  caps: SessionOpsCaps,
-): boolean {
+export function canSummon(usage: SessionOpsIncidentUsage, caps: SessionOpsCaps): boolean {
   return remainingSummons(usage, caps) > 0;
 }
 
-export function canConsumeTurn(
-  usage: SessionOpsSummonUsage,
-  caps: SessionOpsCaps,
-): boolean {
+export function canConsumeTurn(usage: SessionOpsSummonUsage, caps: SessionOpsCaps): boolean {
   return remainingTurns(usage, caps) > 0;
 }
 
-export function canConsumeTool(
-  usage: SessionOpsSummonUsage,
-  caps: SessionOpsCaps,
-): boolean {
+export function canConsumeTool(usage: SessionOpsSummonUsage, caps: SessionOpsCaps): boolean {
   return remainingTools(usage, caps) > 0;
 }
 

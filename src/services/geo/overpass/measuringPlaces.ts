@@ -1,30 +1,18 @@
-import type { GameArea } from "@/domain/map/annotations";
-import type { RegionPackId } from "@/domain/regions/regionPack";
 import {
   distanceBetweenPoints,
   isPointInGameArea,
   type LatLngTuple,
 } from "@/domain/geometry/gameArea/geometry";
-import type { SessionCustomCategory } from "@/domain/session/catalog/sessionCustomContent";
+import type { GameArea } from "@/domain/map/annotations";
+import { type MeasuringLocationCategory, measuringLocationLabel } from "@/domain/questions";
+import type { RegionPackId } from "@/domain/regions/regionPack";
 import { measuringOverpassSelectorsForKind } from "@/domain/session/catalog/sessionCustomCatalog";
-import {
-  measuringLocationLabel,
-  type MeasuringLocationCategory,
-} from "@/domain/questions";
+import type { SessionCustomCategory } from "@/domain/session/catalog/sessionCustomContent";
 import { queryOverpass } from "../../core/overpass/overpassClient";
-import {
-  getOrFetchCached,
-  measuringPlacesCacheKey,
-} from "../cache";
-import {
-  buildTaggedBboxOverpassQuery,
-  formatOverpassBboxFromGameArea,
-} from "./queryHelpers";
-import {
-  fetchBundledMeasuringPlaces,
-  mergeMeasuringPlaces,
-} from "./regionPackPoi";
+import { getOrFetchCached, measuringPlacesCacheKey } from "../cache";
 import { isEligibleBundledPoi } from "./bundledPoiHygiene";
+import { buildTaggedBboxOverpassQuery, formatOverpassBboxFromGameArea } from "./queryHelpers";
+import { fetchBundledMeasuringPlaces, mergeMeasuringPlaces } from "./regionPackPoi";
 
 const HYGIENE_MEASURING_CATEGORIES = new Set<MeasuringLocationCategory>([
   "commercial_airport",
@@ -80,16 +68,11 @@ export function buildMeasuringPlacesQuery(
   gameArea: GameArea,
   selectors: readonly string[],
 ): string {
-  return buildTaggedBboxOverpassQuery(
-    formatOverpassBboxFromGameArea(gameArea),
-    selectors,
-  );
+  return buildTaggedBboxOverpassQuery(formatOverpassBboxFromGameArea(gameArea), selectors);
 }
 
 function isSwimmingPool(tags: Record<string, string>): boolean {
-  return (
-    tags.leisure === "swimming_pool" || tags.amenity === "swimming_pool"
-  );
+  return tags.leisure === "swimming_pool" || tags.amenity === "swimming_pool";
 }
 
 function isActiveMeasuringPlace(
@@ -163,19 +146,16 @@ async function fetchOverpassMeasuringPlaces(
   selectors: readonly string[],
   cacheScope: string,
 ): Promise<MeasuringPlace[]> {
-  return getOrFetchCached(
-    measuringPlacesCacheKey(gameArea, cacheScope),
-    async () => {
-      const payload = await queryOverpass<{ elements: OverpassElement[] }>(
-        buildMeasuringPlacesQuery(gameArea, selectors),
-      );
+  return getOrFetchCached(measuringPlacesCacheKey(gameArea, cacheScope), async () => {
+    const payload = await queryOverpass<{ elements: OverpassElement[] }>(
+      buildMeasuringPlacesQuery(gameArea, selectors),
+    );
 
-      return filterHygieneMeasuringPlaces(
-        parseMeasuringPlaces(payload.elements, gameArea, category),
-        category,
-      );
-    },
-  );
+    return filterHygieneMeasuringPlaces(
+      parseMeasuringPlaces(payload.elements, gameArea, category),
+      category,
+    );
+  });
 }
 
 export async function fetchMeasuringPlacesInArea(
@@ -195,11 +175,7 @@ export async function fetchMeasuringPlacesInArea(
       ? `${category}:custom:${regionPackId ?? "global"}`
       : `${category}:${regionPackId ?? "global"}`;
 
-  const bundledPlaces = await fetchBundledMeasuringPlaces(
-    gameArea,
-    category,
-    regionPackId,
-  );
+  const bundledPlaces = await fetchBundledMeasuringPlaces(gameArea, category, regionPackId);
 
   const mergeWithOverpass = async (): Promise<MeasuringPlace[]> => {
     const overpassPlaces = await fetchOverpassMeasuringPlaces(
@@ -236,10 +212,7 @@ export async function findNearestMeasuringPlace(
 
   for (const place of places) {
     const distanceMeters = distanceBetweenPoints(seeker, place.point);
-    if (
-      options?.maxDistanceMeters !== undefined &&
-      distanceMeters > options.maxDistanceMeters
-    ) {
+    if (options?.maxDistanceMeters !== undefined && distanceMeters > options.maxDistanceMeters) {
       continue;
     }
 

@@ -21,10 +21,10 @@ export async function adminModerateSession(
   }
 
   const functions = await getFirebaseFunctions();
-  const callable = httpsCallable<
-    AdminModerateSessionRequest,
-    AdminModerateSessionResponse
-  >(functions, "adminModerateSession");
+  const callable = httpsCallable<AdminModerateSessionRequest, AdminModerateSessionResponse>(
+    functions,
+    "adminModerateSession",
+  );
 
   await callable({ sessionId, action });
 }

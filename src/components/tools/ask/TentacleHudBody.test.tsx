@@ -1,20 +1,20 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
-import { fireEvent, render, screen } from "@testing-library/react";
 import { MantineProvider } from "@mantine/core";
+import { fireEvent, render, screen } from "@testing-library/react";
 import type { ReactElement } from "react";
-import type { DistanceUnit } from "@/domain/map/distance";
-import type { TentaclePoi } from "@/domain/map/annotations";
-import type { GameSize } from "@/domain/session/size/gameSize";
-import type { TentacleExtendedCategoryId } from "@/domain/questions";
-import { jetlagTheme } from "@/theme/theme";
-import { AskHudHost } from "./AskHudHost";
-import { TentacleHudBody } from "./TentacleHudBody";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
+  type AskHudReadiness,
   activeModeCue,
   canCommit,
   primedCommitLabel,
-  type AskHudReadiness,
 } from "@/domain/ask/askHudModes";
+import type { TentaclePoi } from "@/domain/map/annotations";
+import type { DistanceUnit } from "@/domain/map/distance";
+import type { TentacleExtendedCategoryId } from "@/domain/questions";
+import type { GameSize } from "@/domain/session/size/gameSize";
+import { jetlagTheme } from "@/theme/theme";
+import { AskHudHost } from "./AskHudHost";
+import { TentacleHudBody } from "./TentacleHudBody";
 
 function renderHud(ui: ReactElement) {
   return render(
@@ -61,9 +61,7 @@ const baseProps = {
 
 describe("TentacleHudBody", () => {
   it("shows Matching-style question header with cost on catalog", () => {
-    renderHud(
-      <TentacleHudBody {...baseProps} costLabel="D4P2" toolLabel="Tentacle" />,
-    );
+    renderHud(<TentacleHudBody {...baseProps} costLabel="D4P2" toolLabel="Tentacle" />);
 
     expect(screen.getByText("Tentacle")).toBeInTheDocument();
     expect(screen.getByTestId("ask-cost-chip")).toHaveTextContent("D4P2");
@@ -75,49 +73,31 @@ describe("TentacleHudBody", () => {
 
   it("shows catalog rail without PhaseRail or CONTINUE; row select advances", () => {
     const onCategoryChange = vi.fn();
-    renderHud(
-      <TentacleHudBody {...baseProps} onCategoryChange={onCategoryChange} />,
-    );
+    renderHud(<TentacleHudBody {...baseProps} onCategoryChange={onCategoryChange} />);
 
     expect(screen.getByTestId("tentacle-hud-body")).toBeInTheDocument();
     expect(screen.getByTestId("ask-catalog-rail")).toBeInTheDocument();
     expect(screen.queryByRole("list", { name: "Wizard phases" })).toBeNull();
-    expect(
-      screen.queryByRole("button", { name: "Continue" }),
-    ).toBeNull();
+    expect(screen.queryByRole("button", { name: "Continue" })).toBeNull();
 
     fireEvent.click(screen.getByRole("button", { name: /Museum/i }));
     expect(onCategoryChange).toHaveBeenCalledWith("museum");
   });
 
   it("keeps used categories visible but disabled", () => {
-    renderHud(
-      <TentacleHudBody
-        {...baseProps}
-        usedCategoryIds={new Set(["museum"])}
-      />,
-    );
+    renderHud(<TentacleHudBody {...baseProps} usedCategoryIds={new Set(["museum"])} />);
     expect(screen.getByText("Museum")).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: /Museum/i }),
-    ).toBeDisabled();
+    expect(screen.getByRole("button", { name: /Museum/i })).toBeDisabled();
   });
 
   it("after types, shows map-radius place chord without CONTINUE", () => {
     renderHud(
-      <TentacleHudBody
-        {...baseProps}
-        categoryChosen
-        categoryId="museum"
-        awaitingPlacement
-      />,
+      <TentacleHudBody {...baseProps} categoryChosen categoryId="museum" awaitingPlacement />,
     );
 
     expect(screen.queryByTestId("ask-catalog-rail")).toBeNull();
     expect(screen.getByTestId("tentacle-hud-body")).toBeInTheDocument();
-    expect(
-      screen.queryByRole("button", { name: "Continue" }),
-    ).toBeNull();
+    expect(screen.queryByRole("button", { name: "Continue" })).toBeNull();
   });
 
   it("wires cue ticker and muted strip until canCommit", () => {
@@ -152,19 +132,11 @@ describe("TentacleHudBody", () => {
           cue,
         })}
         onCommit={() => {}}
-        modeBody={
-          <TentacleHudBody
-            {...baseProps}
-            categoryChosen
-            categoryId="museum"
-          />
-        }
+        modeBody={<TentacleHudBody {...baseProps} categoryChosen categoryId="museum" />}
       />,
     );
 
-    expect(screen.getByTestId("ask-mode-cue-ticker")).toHaveTextContent(
-      "SET CENTER ON MAP",
-    );
+    expect(screen.getByTestId("ask-mode-cue-ticker")).toHaveTextContent("SET CENTER ON MAP");
     // Sheet path: muted SEND footer stays hidden until canCommit / error / submit.
     expect(screen.queryByTestId("ask-commit-strip")).toBeNull();
   });
@@ -223,9 +195,7 @@ describe("TentacleHudBody", () => {
       />,
     );
 
-    expect(screen.getByTestId("ask-mode-cue-ticker")).toHaveTextContent(
-      "READY TO SEND",
-    );
+    expect(screen.getByTestId("ask-mode-cue-ticker")).toHaveTextContent("READY TO SEND");
     const strip = screen.getByRole("button", { name: "SEND · D4P2" });
     expect(strip).toHaveAttribute("data-armed", "true");
     fireEvent.click(strip);

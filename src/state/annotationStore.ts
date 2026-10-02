@@ -2,14 +2,11 @@ import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import type { AnnotationRecord } from "../domain/map/annotations";
 import {
-  LOCAL_SESSION_ID,
   createAnnotationId,
+  LOCAL_SESSION_ID,
   migrateAnnotations,
 } from "../domain/map/annotations";
-import {
-  createSafeLocalStorage,
-  readSessionIdFromLocalStorage,
-} from "./safeLocalStorage";
+import { createSafeLocalStorage, readSessionIdFromLocalStorage } from "./safeLocalStorage";
 
 interface AnnotationState {
   annotations: AnnotationRecord[];
@@ -45,13 +42,10 @@ export const useAnnotationStore = create<AnnotationState>()(
       selectedAnnotationId: null,
       geometryEditAnnotationId: null,
       pulsingAnnotationIds: [],
-      setAnnotations: (annotations) =>
-        set({ annotations: migrateAnnotations(annotations) }),
+      setAnnotations: (annotations) => set({ annotations: migrateAnnotations(annotations) }),
       upsertAnnotation: (annotation) =>
         set((state) => {
-          const existingIndex = state.annotations.findIndex(
-            (item) => item.id === annotation.id,
-          );
+          const existingIndex = state.annotations.findIndex((item) => item.id === annotation.id);
 
           if (existingIndex === -1) {
             return { annotations: [...state.annotations, annotation] };
@@ -80,9 +74,7 @@ export const useAnnotationStore = create<AnnotationState>()(
       softDeleteAnnotation: (id) =>
         set((state) => ({
           annotations: state.annotations.map((annotation) =>
-            annotation.id === id
-              ? { ...annotation, status: "deleted" as const }
-              : annotation,
+            annotation.id === id ? { ...annotation, status: "deleted" as const } : annotation,
           ),
         })),
       softDeleteAllForSession: (sessionId) =>
@@ -101,9 +93,7 @@ export const useAnnotationStore = create<AnnotationState>()(
         })),
       removeRedoAnnotationId: (id) =>
         set((state) => ({
-          redoAnnotationIds: state.redoAnnotationIds.filter(
-            (annotationId) => annotationId !== id,
-          ),
+          redoAnnotationIds: state.redoAnnotationIds.filter((annotationId) => annotationId !== id),
         })),
       clearRedoStack: () => set({ redoAnnotationIds: [] }),
       undoLastAnnotation: () => {
@@ -117,10 +107,8 @@ export const useAnnotationStore = create<AnnotationState>()(
 
         get().softDeleteAnnotation(active.id);
       },
-      setSelectedAnnotationId: (selectedAnnotationId) =>
-        set({ selectedAnnotationId }),
-      setGeometryEditAnnotationId: (geometryEditAnnotationId) =>
-        set({ geometryEditAnnotationId }),
+      setSelectedAnnotationId: (selectedAnnotationId) => set({ selectedAnnotationId }),
+      setGeometryEditAnnotationId: (geometryEditAnnotationId) => set({ geometryEditAnnotationId }),
       markAnnotationPulse: (id) =>
         set((state) => ({
           pulsingAnnotationIds: state.pulsingAnnotationIds.includes(id)
@@ -142,9 +130,7 @@ export const useAnnotationStore = create<AnnotationState>()(
         const annotations =
           sessionId === undefined
             ? state.annotations
-            : state.annotations.filter(
-                (annotation) => annotation.sessionId === sessionId,
-              );
+            : state.annotations.filter((annotation) => annotation.sessionId === sessionId);
 
         return { annotations };
       },
@@ -152,8 +138,7 @@ export const useAnnotationStore = create<AnnotationState>()(
         ...currentState,
         ...((persistedState as AnnotationState | undefined) ?? {}),
         annotations: migrateAnnotations(
-          (persistedState as AnnotationState | undefined)?.annotations ??
-            currentState.annotations,
+          (persistedState as AnnotationState | undefined)?.annotations ?? currentState.annotations,
         ),
       }),
     },

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { HIDER_DECK_SIZE } from "./deckComposition";
 import {
   advanceUntilInteractivePick,
   applySequentialRewards,
@@ -12,7 +13,6 @@ import {
   resolveDrawKeep,
   rewardForQuestion,
 } from "./engine";
-import { HIDER_DECK_SIZE } from "./deckComposition";
 
 describe("board economy engine", () => {
   it("shuffles deterministically from seed and keeps full multiset", () => {

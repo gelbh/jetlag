@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
 import type { Feature, MultiPolygon, Polygon } from "geojson";
+import { describe, expect, it } from "vitest";
 import { previewGeometryFingerprint } from "./previewGeometryFingerprint";
 
 function samplePolygon(): Feature<Polygon> {

@@ -1,10 +1,10 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
 import type { LngLatLike, Map as MapLibreMap } from "maplibre-gl";
-import { isLargeCameraJumpMapLibre } from "./isLargeCameraJumpMapLibre";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   MAP_CAMERA_LARGE_JUMP_CENTER_FRACTION,
   MAP_CAMERA_LARGE_JUMP_ZOOM_DELTA,
 } from "../device/motion/motionTokens";
+import { isLargeCameraJumpMapLibre } from "./isLargeCameraJumpMapLibre";
 
 const VIEWPORT_WIDTH_PX = 800;
 const VIEWPORT_HEIGHT_PX = 600;
@@ -78,16 +78,9 @@ describe("isLargeCameraJumpMapLibre", () => {
     const belowLng = center.lng + (thresholdPx - 30) / VIEWPORT_WIDTH_PX;
     const atLng = center.lng + (thresholdPx + 20) / VIEWPORT_WIDTH_PX;
 
-    expect(
-      isLargeCameraJumpMapLibre(
-        map,
-        { lng: belowLng, lat: center.lat },
-        12,
-        false,
-      ),
-    ).toBe(false);
-    expect(
-      isLargeCameraJumpMapLibre(map, { lng: atLng, lat: center.lat }, 12, false),
-    ).toBe(true);
+    expect(isLargeCameraJumpMapLibre(map, { lng: belowLng, lat: center.lat }, 12, false)).toBe(
+      false,
+    );
+    expect(isLargeCameraJumpMapLibre(map, { lng: atLng, lat: center.lat }, 12, false)).toBe(true);
   });
 });

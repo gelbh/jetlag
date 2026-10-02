@@ -2,10 +2,7 @@ import { endSessionCanonical } from "./endSessionCanonical.mjs";
 
 export const IDLE_SESSION_HOURS = 24;
 
-export function computeIdleCutoffIso(
-  now = Date.now(),
-  hours = IDLE_SESSION_HOURS,
-) {
+export function computeIdleCutoffIso(now = Date.now(), hours = IDLE_SESSION_HOURS) {
   return new Date(now - hours * 60 * 60 * 1000).toISOString();
 }
 
@@ -27,9 +24,7 @@ export function isIdleActiveSession(data, idleCutoffIso) {
   }
 
   const effectiveLastActive = getEffectiveLastActiveAt(data);
-  return (
-    effectiveLastActive != null && effectiveLastActive < idleCutoffIso
-  );
+  return effectiveLastActive != null && effectiveLastActive < idleCutoffIso;
 }
 
 export function selectIdleActiveSessions(

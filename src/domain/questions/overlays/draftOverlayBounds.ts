@@ -1,12 +1,12 @@
 import type { Position } from "geojson";
-import type { LatLngTuple } from "../../geometry/gameArea/geometry";
-import type { MapBoundsExpression } from "../../map/mapBounds";
-import { boundingBoxToBoundsExpression } from "../../map/mapBounds";
 import {
   type BoundingBox,
   expandBoundingBox,
   normalizeBoundingBox,
 } from "../../geometry/gameArea/gameAreaBounds";
+import type { LatLngTuple } from "../../geometry/gameArea/geometry";
+import type { MapBoundsExpression } from "../../map/mapBounds";
+import { boundingBoxToBoundsExpression } from "../../map/mapBounds";
 import type { MapDraftOverlay } from "../../map/mapDraftOverlay";
 
 export function unionBoundingBoxes(a: BoundingBox, b: BoundingBox): BoundingBox {
@@ -18,9 +18,7 @@ export function unionBoundingBoxes(a: BoundingBox, b: BoundingBox): BoundingBox 
   });
 }
 
-export function boundingBoxFromPositions(
-  positions: LatLngTuple[],
-): BoundingBox | null {
+export function boundingBoxFromPositions(positions: LatLngTuple[]): BoundingBox | null {
   if (positions.length === 0) {
     return null;
   }

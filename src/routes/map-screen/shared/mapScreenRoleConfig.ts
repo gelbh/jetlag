@@ -48,44 +48,42 @@ export const MAP_SCREEN_CONTROLLER_CORE_KEYS = [
   "layerVisibility",
 ] as const;
 
-export type MapScreenControllerCoreKey =
-  (typeof MAP_SCREEN_CONTROLLER_CORE_KEYS)[number];
+export type MapScreenControllerCoreKey = (typeof MAP_SCREEN_CONTROLLER_CORE_KEYS)[number];
 
-export const MAP_SCREEN_ROLE_CONFIGS: Record<MapScreenRole, MapScreenRoleConfig> =
-  {
-    seeker: {
-      role: "seeker",
-      authMode: "seeker-remote",
-      notificationRole: "seeker",
-      exitPath: "/",
-      statusPlayerRole: "seeker",
-      showQuestionTools: true,
-    },
-    hider: {
-      role: "hider",
-      authMode: "hider-anonymous",
-      notificationRole: "hider",
-      exitPath: "/",
-      statusPlayerRole: "hider",
-      showQuestionTools: false,
-    },
-    observer: {
-      role: "observer",
-      authMode: "hider-anonymous",
-      notificationRole: "observer",
-      exitPath: "/",
-      statusPlayerRole: "observer",
-      showQuestionTools: false,
-    },
-    admin: {
-      role: "admin",
-      authMode: "admin-permanent",
-      notificationRole: "admin",
-      exitPath: "/admin",
-      statusPlayerRole: "admin",
-      showQuestionTools: false,
-    },
-  };
+export const MAP_SCREEN_ROLE_CONFIGS: Record<MapScreenRole, MapScreenRoleConfig> = {
+  seeker: {
+    role: "seeker",
+    authMode: "seeker-remote",
+    notificationRole: "seeker",
+    exitPath: "/",
+    statusPlayerRole: "seeker",
+    showQuestionTools: true,
+  },
+  hider: {
+    role: "hider",
+    authMode: "hider-anonymous",
+    notificationRole: "hider",
+    exitPath: "/",
+    statusPlayerRole: "hider",
+    showQuestionTools: false,
+  },
+  observer: {
+    role: "observer",
+    authMode: "hider-anonymous",
+    notificationRole: "observer",
+    exitPath: "/",
+    statusPlayerRole: "observer",
+    showQuestionTools: false,
+  },
+  admin: {
+    role: "admin",
+    authMode: "admin-permanent",
+    notificationRole: "admin",
+    exitPath: "/admin",
+    statusPlayerRole: "admin",
+    showQuestionTools: false,
+  },
+};
 
 export function getMapScreenRoleConfig(role: MapScreenRole): MapScreenRoleConfig {
   return MAP_SCREEN_ROLE_CONFIGS[role];

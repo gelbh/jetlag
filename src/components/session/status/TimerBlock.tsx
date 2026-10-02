@@ -1,6 +1,6 @@
 import type { TimerState } from "@/domain/session/timer/timer";
-import { PopupCloseButton } from "../../ui/brand/PopupCloseButton";
 import { TimerActions } from "../../tools/TimerActions";
+import { PopupCloseButton } from "../../ui/brand/PopupCloseButton";
 import { SessionTimerLabel } from "../identity/SessionTimerLabel";
 
 interface TimerBlockProps {

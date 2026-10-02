@@ -1,5 +1,5 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AppCheckProbeGate } from "./feedback/AppCheckProbeGate";
 
 vi.mock("../../hooks/app/useAuthBootstrapReady", () => ({
@@ -9,8 +9,7 @@ vi.mock("../../hooks/app/useAuthBootstrapReady", () => ({
 const probeAppCheckAvailability = vi.fn();
 
 vi.mock("../../services/core/firebase/appCheckProbe", () => ({
-  probeAppCheckAvailability: (...args: unknown[]) =>
-    probeAppCheckAvailability(...args),
+  probeAppCheckAvailability: (...args: unknown[]) => probeAppCheckAvailability(...args),
 }));
 
 describe("AppCheckProbeGate", () => {

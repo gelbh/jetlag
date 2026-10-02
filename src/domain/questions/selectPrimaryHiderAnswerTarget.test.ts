@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type {
-  PendingQuestionRecord,
-  SessionMessageRecord,
-} from "../session/activity/sessionChat";
+import type { PendingQuestionRecord, SessionMessageRecord } from "../session/activity/sessionChat";
 import type { SessionRulesInput } from "../session/rules";
 import { selectPrimaryHiderAnswerTarget } from "./selectPrimaryHiderAnswerTarget";
 
@@ -55,9 +52,7 @@ function questionMessage(
 
 describe("selectPrimaryHiderAnswerTarget", () => {
   it("returns null when no open pending questions", () => {
-    expect(
-      selectPrimaryHiderAnswerTarget([], [], sessionRules, NOW),
-    ).toBeNull();
+    expect(selectPrimaryHiderAnswerTarget([], [], sessionRules, NOW)).toBeNull();
   });
 
   it("pairs primary walking question with its game message", () => {
@@ -88,12 +83,7 @@ describe("selectPrimaryHiderAnswerTarget", () => {
 
   it("returns null when primary pending has no linked question message", () => {
     expect(
-      selectPrimaryHiderAnswerTarget(
-        [pending({ id: "orphan" })],
-        [],
-        sessionRules,
-        NOW,
-      ),
+      selectPrimaryHiderAnswerTarget([pending({ id: "orphan" })], [], sessionRules, NOW),
     ).toBeNull();
   });
 

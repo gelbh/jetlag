@@ -1,6 +1,6 @@
+import { act, renderHook } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { useSubmitLock } from "./useSubmitLock";
-import { renderHook, act } from "@testing-library/react";
 
 describe("useSubmitLock", () => {
   it("ignores overlapping runs while a submit is in flight", async () => {

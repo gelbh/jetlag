@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { resetClientEnvForTests } from "@/config/env";
 import {
   ANALYTICS_CONSENT_KEY,
   writeAnalyticsConsent,
@@ -17,7 +18,6 @@ import {
   trackSessionEnded,
 } from "./analytics";
 import { filterPosthogException } from "./posthogExceptionPolicy";
-import { resetClientEnvForTests } from "@/config/env";
 
 const {
   posthogInit,
@@ -50,9 +50,7 @@ vi.mock("posthog-js", () => ({
 }));
 
 vi.mock("../../../config/env", async () => {
-  const actual = await vi.importActual<typeof import("@/config/env")>(
-    "../../../config/env",
-  );
+  const actual = await vi.importActual<typeof import("@/config/env")>("../../../config/env");
   return {
     ...actual,
     getClientEnv: vi.fn(() => ({
@@ -63,12 +61,8 @@ vi.mock("../../../config/env", async () => {
 
 describe("shouldEnableAnalytics", () => {
   it("enables only in production builds", () => {
-    expect(shouldEnableAnalytics({ prod: true, mode: "production" })).toBe(
-      true,
-    );
-    expect(shouldEnableAnalytics({ prod: false, mode: "development" })).toBe(
-      false,
-    );
+    expect(shouldEnableAnalytics({ prod: true, mode: "production" })).toBe(true);
+    expect(shouldEnableAnalytics({ prod: false, mode: "development" })).toBe(false);
     expect(shouldEnableAnalytics({ prod: true, mode: "test" })).toBe(false);
     expect(shouldEnableAnalytics({ prod: false, mode: "test" })).toBe(false);
   });
@@ -203,9 +197,7 @@ describe("analytics facade", () => {
       configurable: true,
       get: () => "https://www.google.com/search?q=jetlag",
     });
-    trackPageView(
-      "/?utm_source=newsletter&utm_medium=email&utm_campaign=launch",
-    );
+    trackPageView("/?utm_source=newsletter&utm_medium=email&utm_campaign=launch");
 
     expect(posthogCapture).toHaveBeenCalledWith("$pageview", {
       path: "/",
@@ -264,14 +256,11 @@ describe("analytics facade", () => {
     writeAnalyticsConsent("granted");
     resetAnalyticsForTests({ initialized: true });
 
-    track(
-      ANALYTICS_EVENTS.map_tool_used,
-      {
-        tool: "radar",
-        sessionCode: "ABCD",
-        coordinates: [1, 2],
-      } as never,
-    );
+    track(ANALYTICS_EVENTS.map_tool_used, {
+      tool: "radar",
+      sessionCode: "ABCD",
+      coordinates: [1, 2],
+    } as never);
 
     expect(posthogCapture).toHaveBeenCalledWith("map_tool_used", {
       tool: "radar",

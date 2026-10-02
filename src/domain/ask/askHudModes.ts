@@ -122,13 +122,8 @@ export function askHudSurfaces(): readonly AskHudSurface[] {
  * Verb-only GlanceVerb ticker. Must never include DnPm / cost tokens.
  */
 export function activeModeCue(
-  input: Pick<
-    AskHudReadiness,
-    "surface" | "placementReady" | "configureReady" | "resolveReady"
-  > &
-    Partial<
-      Pick<AskHudReadiness, "resolving" | "answerReady" | "awaitHiderAnswer">
-    >,
+  input: Pick<AskHudReadiness, "surface" | "placementReady" | "configureReady" | "resolveReady"> &
+    Partial<Pick<AskHudReadiness, "resolving" | "answerReady" | "awaitHiderAnswer">>,
 ): string {
   const def = DEFINITIONS[input.surface];
   switch (input.surface) {
@@ -175,10 +170,7 @@ export function activeModeCue(
   }
 }
 
-export function commitKind(
-  surface: AskHudSurface,
-  awaitHiderAnswer: boolean,
-): AskHudCommitKind {
+export function commitKind(surface: AskHudSurface, awaitHiderAnswer: boolean): AskHudCommitKind {
   const def = DEFINITIONS[surface];
   if (def.commitKind === "confirm" || def.commitKind === "endWalk") {
     return def.commitKind;
@@ -212,11 +204,7 @@ export function canCommit(readiness: AskHudReadiness): boolean {
     case "tentacle":
     case "measuring":
     case "thermometer":
-      return (
-        readiness.placementReady &&
-        readiness.configureReady &&
-        readiness.resolveReady
-      );
+      return readiness.placementReady && readiness.configureReady && readiness.resolveReady;
     case "hiding-zone-create":
       return readiness.configureReady && readiness.placementReady;
     case "hiding-zone-move":
@@ -347,10 +335,7 @@ export const MATCHING_MAP_FIRST_CAMERA_TOP_PX = MAP_FIRST_CAMERA_TOP_PX;
 export const MATCHING_MAP_FIRST_CAMERA_BOTTOM_PX = MAP_FIRST_CAMERA_BOTTOM_PX;
 
 export function askHudCameraPaddingPx(tool: string): number {
-  return tool === "matching" ||
-    tool === "tentacle" ||
-    tool === "measuring" ||
-    tool === "radar"
+  return tool === "matching" || tool === "tentacle" || tool === "measuring" || tool === "radar"
     ? ASK_HUD_CAMERA_PADDING_RAIL_PX
     : ASK_HUD_CAMERA_PADDING_PX;
 }

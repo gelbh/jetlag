@@ -1,19 +1,19 @@
-import type { GameArea } from "@/domain/map/annotations";
 import {
+  type ElevationSampleCell,
   resolveCoarseSeaLevelDivisions,
   resolveFineSeaLevelDivisions,
   sampleGameAreaCells,
-  type ElevationSampleCell,
 } from "@/domain/geometry/measuring/seaLevel";
+import type { GameArea } from "@/domain/map/annotations";
 import type { RegionPackId } from "@/domain/regions/regionPack";
-import { fetchElevations, type ElevationFetchProfile } from "./index";
+import { gameAreaPreloadKey } from "../../session/gameAreaPreload";
 import {
+  type CachedSeaLevelSampling,
   readSeaLevelSamplingCache,
   readSeaLevelSamplingCacheAsync,
   writeSeaLevelSamplingCache,
-  type CachedSeaLevelSampling,
 } from "../cache";
-import { gameAreaPreloadKey } from "../../session/gameAreaPreload";
+import { type ElevationFetchProfile, fetchElevations } from "./index";
 import {
   loadBundledSeaLevelSeed,
   remapBundledSeaLevelSeedToGameArea,
@@ -50,16 +50,11 @@ function countFiniteElevations(elevations: number[]): number {
 }
 
 /** Complete cache/seed is only skippable when density and coverage match fine sampling. */
-function isDenseCompleteSampling(
-  sampling: CachedSeaLevelSampling,
-  gameArea: GameArea,
-): boolean {
+function isDenseCompleteSampling(sampling: CachedSeaLevelSampling, gameArea: GameArea): boolean {
   if (sampling.complete !== true) {
     return false;
   }
-  if (
-    countFiniteElevations(sampling.cellElevations) !== sampling.cells.length
-  ) {
+  if (countFiniteElevations(sampling.cellElevations) !== sampling.cells.length) {
     return false;
   }
   const fineDivisions = resolveFineSeaLevelDivisions(gameArea);
@@ -70,15 +65,10 @@ function setSamplerPhase(gameAreaKey: string, phase: SeaLevelSamplingPhase): voi
   samplerPhase.set(gameAreaKey, phase);
 }
 
-export function getSeaLevelSamplingProgress(
-  gameArea: GameArea,
-): SeaLevelSamplingProgress {
+export function getSeaLevelSamplingProgress(gameArea: GameArea): SeaLevelSamplingProgress {
   const gameAreaKey = gameAreaPreloadKey(gameArea);
   const cached = readSeaLevelSamplingCache(gameArea);
-  const targetCells = sampleGameAreaCells(
-    gameArea,
-    resolveFineSeaLevelDivisions(gameArea),
-  ).length;
+  const targetCells = sampleGameAreaCells(gameArea, resolveFineSeaLevelDivisions(gameArea)).length;
   const phase =
     samplerPhase.get(gameAreaKey) ??
     (cached?.complete === true ? "complete" : cached ? "fine" : "idle");
@@ -108,10 +98,7 @@ async function fetchSamplingElevations(
 
     await onBatchComplete([...cellElevations]);
 
-    if (
-      profile === "background" &&
-      batchEnd < cells.length
-    ) {
+    if (profile === "background" && batchEnd < cells.length) {
       await sleep(BACKGROUND_BATCH_GAP_MS);
     }
   }
@@ -146,13 +133,7 @@ async function fetchAndPersistSampling(
     cells,
     profile,
     async (partialElevations) => {
-      await persistSampling(
-        gameArea,
-        cells,
-        partialElevations,
-        divisions,
-        false,
-      );
+      await persistSampling(gameArea, cells, partialElevations, divisions, false);
     },
   );
 
@@ -163,13 +144,7 @@ async function fetchAndPersistSampling(
     complete: completeWhenDone,
   };
 
-  await persistSampling(
-    gameArea,
-    cells,
-    cellElevations,
-    divisions,
-    completeWhenDone,
-  );
+  await persistSampling(gameArea, cells, cellElevations, divisions, completeWhenDone);
 
   return sampling;
 }
@@ -194,12 +169,7 @@ async function runProgressiveSampling(gameArea: GameArea): Promise<void> {
 
   await sleep(BACKGROUND_PHASE_GAP_MS);
   setSamplerPhase(gameAreaKey, "fine");
-  await fetchAndPersistSampling(
-    gameArea,
-    fineDivisions,
-    "background",
-    true,
-  );
+  await fetchAndPersistSampling(gameArea, fineDivisions, "background", true);
   setSamplerPhase(gameAreaKey, "complete");
 }
 
@@ -246,10 +216,7 @@ export function startSeaLevelBackgroundSampling(
   }
 
   const job = (async () => {
-    const seeded = await hydratePackSeaLevelSeed(
-      gameArea,
-      options?.regionPackId,
-    );
+    const seeded = await hydratePackSeaLevelSeed(gameArea, options?.regionPackId);
     if (seeded && isDenseCompleteSampling(seeded, gameArea)) {
       setSamplerPhase(gameAreaKey, "complete");
       return;
@@ -268,10 +235,7 @@ export async function ensureSeaLevelSamplingComplete(
   gameArea: GameArea,
   options?: SeaLevelSamplingOptions,
 ): Promise<CachedSeaLevelSampling> {
-  const seeded = await hydratePackSeaLevelSeed(
-    gameArea,
-    options?.regionPackId,
-  );
+  const seeded = await hydratePackSeaLevelSeed(gameArea, options?.regionPackId);
 
   // Sufficient dense pack seed: skip blocking fine fetch / background crawl.
   if (seeded && isDenseCompleteSampling(seeded, gameArea)) {
@@ -283,11 +247,7 @@ export async function ensureSeaLevelSamplingComplete(
     regionPackId: options?.regionPackId,
   });
 
-  if (
-    seeded &&
-    options?.onEnrich &&
-    countFiniteElevations(seeded.cellElevations) > 0
-  ) {
+  if (seeded && options?.onEnrich && countFiniteElevations(seeded.cellElevations) > 0) {
     const gameAreaKey = gameAreaPreloadKey(gameArea);
     const activeJob = activeSamplers.get(gameAreaKey);
     if (activeJob) {

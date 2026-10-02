@@ -16,13 +16,9 @@ export interface SessionCustomLocationPin {
   point: LatLngTuple;
 }
 
-export type CustomMatchingAreasByLevel = Partial<
-  Record<MatchingAdminLevel, string>
->;
+export type CustomMatchingAreasByLevel = Partial<Record<MatchingAdminLevel, string>>;
 
-export function isSessionCustomCategoryId(
-  id: string,
-): id is `custom:${string}` {
+export function isSessionCustomCategoryId(id: string): id is `custom:${string}` {
   return id.startsWith("custom:");
 }
 
@@ -36,15 +32,11 @@ export function createSessionCustomCategoryId(label: string): string {
   return `custom:${slug || "category"}`;
 }
 
-export function customCategoryAsMatchingId(
-  category: SessionCustomCategory,
-): MatchingCategoryId {
+export function customCategoryAsMatchingId(category: SessionCustomCategory): MatchingCategoryId {
   return category.id as MatchingCategoryId;
 }
 
-export function parseCustomMatchingAreas(
-  value: unknown,
-): CustomMatchingAreasByLevel | undefined {
+export function parseCustomMatchingAreas(value: unknown): CustomMatchingAreasByLevel | undefined {
   if (!value || typeof value !== "object") {
     return undefined;
   }
@@ -61,9 +53,7 @@ export function parseCustomMatchingAreas(
   return Object.keys(parsed).length > 0 ? parsed : undefined;
 }
 
-export function parseCustomCategories(
-  value: unknown,
-): SessionCustomCategory[] | undefined {
+export function parseCustomCategories(value: unknown): SessionCustomCategory[] | undefined {
   if (!Array.isArray(value)) {
     return undefined;
   }
@@ -74,14 +64,9 @@ export function parseCustomCategories(
     }
     const record = item as Record<string, unknown>;
     const label = typeof record.label === "string" ? record.label.trim() : "";
-    const promptNoun =
-      typeof record.promptNoun === "string" ? record.promptNoun.trim() : "";
+    const promptNoun = typeof record.promptNoun === "string" ? record.promptNoun.trim() : "";
     const id =
-      typeof record.id === "string"
-        ? record.id
-        : label
-          ? createSessionCustomCategoryId(label)
-          : "";
+      typeof record.id === "string" ? record.id : label ? createSessionCustomCategoryId(label) : "";
     const selectors = Array.isArray(record.overpassSelectors)
       ? record.overpassSelectors.filter(
           (selector): selector is string => typeof selector === "string",
@@ -105,9 +90,7 @@ export function parseCustomCategories(
   return categories.length > 0 ? categories : undefined;
 }
 
-export function parseCustomLocationPins(
-  value: unknown,
-): SessionCustomLocationPin[] | undefined {
+export function parseCustomLocationPins(value: unknown): SessionCustomLocationPin[] | undefined {
   if (!Array.isArray(value)) {
     return undefined;
   }
@@ -118,8 +101,7 @@ export function parseCustomLocationPins(
     }
     const record = item as Record<string, unknown>;
     const name = typeof record.name === "string" ? record.name.trim() : "";
-    const id =
-      typeof record.id === "string" ? record.id : `custom-pin:${index + 1}`;
+    const id = typeof record.id === "string" ? record.id : `custom-pin:${index + 1}`;
     const point = record.point;
     if (
       !name ||

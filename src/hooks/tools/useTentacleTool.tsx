@@ -1,63 +1,53 @@
+import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { type AskHudReadiness, canCommit as askCanCommit } from "@/domain/ask/askHudModes";
 import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ReactNode,
-} from "react";
-import { useLatestRequest } from "../forms/useLatestRequest";
-import { useDebouncedValue } from "../forms/useDebouncedValue";
+  filterConfirmedTentaclePois,
+  isConfirmedPoiLike,
+  poiCandidateToTentaclePoi,
+} from "@/domain/geo/poiCandidateAdapters";
+import { previewBasemapPois } from "@/services/geo/maplibre/previewBasemapPois";
+import { useMapStore } from "@/state/mapStore";
 import { TentacleHudBody } from "../../components/tools/ask/TentacleHudBody";
 import {
   TentacleMapPlacementChrome,
   type TentacleMapPlacementPhase,
 } from "../../components/tools/ask/TentacleMapPlacementChrome";
 import { TentaclePanel } from "../../components/tools/TentaclePanel";
-import {
-  canCommit as askCanCommit,
-  type AskHudReadiness,
-} from "@/domain/ask/askHudModes";
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import {
-  isActive,
   type AnnotationRecord,
   type GameArea,
+  isActive,
   type TentaclePoi,
 } from "../../domain/map/annotations";
-import { formatDistance, type DistanceUnit } from "../../domain/map/distance";
-import type { SessionRulesInput } from "../../domain/session/rules";
-import { sessionGameSize } from "../../domain/session/rules";
+import { type DistanceUnit, formatDistance } from "../../domain/map/distance";
 import {
   firstAvailableTentacleCategoryIdForSession,
   isTentacleCategoryAvailableInSession,
+  questionCostBreakdown,
+  type TentacleExtendedCategoryId,
   tentacleCategoriesForGameSize,
   tentacleCategoryUseCount,
   tentacleCategoryUseCountFromPending,
   tentacleQuestionPrompt,
   tentacleSearchRadiusMetersForSession,
   usedTentacleCategoryIdsForSession,
-  type TentacleExtendedCategoryId,
 } from "../../domain/questions";
-import { questionCostBreakdown } from "../../domain/questions";
 import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
+import type { SessionRulesInput } from "../../domain/session/rules";
+import { sessionGameSize } from "../../domain/session/rules";
 import type { SubmitPendingQuestionInput } from "../../hooks/sync/usePendingQuestionActions";
-import { fetchTentaclePois } from "../../services/geo/overpass/tentacleOverpass";
-import { overpassErrorMessage } from "../../services/core/overpass/overpassClient";
-import { previewBasemapPois } from "@/services/geo/maplibre/previewBasemapPois";
 import {
-  filterConfirmedTentaclePois,
-  isConfirmedPoiLike,
-  poiCandidateToTentaclePoi,
-} from "@/domain/geo/poiCandidateAdapters";
-import { useMapStore } from "@/state/mapStore";
-import {
-  queryGeolocationPermission,
   type GeolocationPermissionState,
+  queryGeolocationPermission,
 } from "../../services/core/location/geolocation";
+import { overpassErrorMessage } from "../../services/core/overpass/overpassClient";
+import { fetchTentaclePois } from "../../services/geo/overpass/tentacleOverpass";
+import { useDebouncedValue } from "../forms/useDebouncedValue";
+import { useLatestRequest } from "../forms/useLatestRequest";
 import { useToolSession } from "./framework/useToolSession";
-import { useToolSessionOptions } from "./useToolSessionOptions";
 import { commitTentacle } from "./tentacle/commitTentacle";
+import { useToolSessionOptions } from "./useToolSessionOptions";
 
 interface TentacleSessionConfig {
   /** Marker config — draft state stays in local React state for this adapter. */
@@ -75,10 +65,7 @@ interface UseTentacleToolParams {
   ) => Promise<AnnotationRecord>;
   awaitHiderAnswer?: boolean;
   submitPendingQuestion?: (
-    input: Omit<
-      SubmitPendingQuestionInput,
-      "sessionId" | "senderUid" | "senderRole" | "toolType"
-    >,
+    input: Omit<SubmitPendingQuestionInput, "sessionId" | "senderUid" | "senderRole" | "toolType">,
   ) => Promise<void>;
   sessionId?: string;
   senderUid?: string | null;
@@ -125,28 +112,20 @@ export function useTentacleTool({
   useEffect(() => {
     finishPlacementRef.current = finishPlacement;
   }, [finishPlacement]);
-  const activeAnnotations = useMemo(
-    () => annotations.filter(isActive),
-    [annotations],
-  );
+  const activeAnnotations = useMemo(() => annotations.filter(isActive), [annotations]);
   const usedTentacleCategories = useMemo(
-    () =>
-      usedTentacleCategoryIdsForSession(activeAnnotations, pendingQuestions),
+    () => usedTentacleCategoryIdsForSession(activeAnnotations, pendingQuestions),
     [activeAnnotations, pendingQuestions],
   );
-  const [tentacleCenter, setTentacleCenter] = useState<LatLngTuple | null>(
+  const [tentacleCenter, setTentacleCenter] = useState<LatLngTuple | null>(null);
+  const [tentacleCategoryId, setTentacleCategoryId] = useState<TentacleExtendedCategoryId | null>(
     null,
   );
-  const [tentacleCategoryId, setTentacleCategoryId] =
-    useState<TentacleExtendedCategoryId | null>(null);
   const [tentacleCategoryChosen, setTentacleCategoryChosen] = useState(false);
   const tentacleUseCount = tentacleCategoryId
     ? Math.max(
         tentacleCategoryUseCount(activeAnnotations, tentacleCategoryId),
-        tentacleCategoryUseCountFromPending(
-          pendingQuestions,
-          tentacleCategoryId,
-        ),
+        tentacleCategoryUseCountFromPending(pendingQuestions, tentacleCategoryId),
       )
     : 0;
   const {
@@ -167,17 +146,11 @@ export function useTentacleTool({
   const previewTentacleCategoryId =
     tentacleCategoryId ??
     (tentacleCenter
-      ? firstAvailableTentacleCategoryIdForSession(
-          sessionRules,
-          usedTentacleCategories,
-        )
+      ? firstAvailableTentacleCategoryIdForSession(sessionRules, usedTentacleCategories)
       : null);
   const radiusCategoryId =
     previewTentacleCategoryId ??
-    firstAvailableTentacleCategoryIdForSession(
-      sessionRules,
-      usedTentacleCategories,
-    );
+    firstAvailableTentacleCategoryIdForSession(sessionRules, usedTentacleCategories);
   const searchRadiusMeters = radiusCategoryId
     ? tentacleSearchRadiusMetersForSession(sessionRules, radiusCategoryId)
     : 0;
@@ -189,8 +162,7 @@ export function useTentacleTool({
     isAvailable: (_usedOptions, currentOption) =>
       isTentacleCategoryAvailableInSession(sessionRules, currentOption),
     pickNext: (usedOptions) =>
-      firstAvailableTentacleCategoryIdForSession(sessionRules, usedOptions) ??
-      "museum",
+      firstAvailableTentacleCategoryIdForSession(sessionRules, usedOptions) ?? "museum",
     onUnavailable: useCallback((nextCategory: TentacleExtendedCategoryId) => {
       setTentacleCategoryId(nextCategory);
       setTentaclePois([]);
@@ -205,11 +177,7 @@ export function useTentacleTool({
   const tentacleApplyPhaseRef = useRef(new Map<number, number>());
 
   const applyTentaclePoisResult = useCallback(
-    (
-      requestId: number,
-      pois: Awaited<ReturnType<typeof fetchTentaclePois>>,
-      phase: 0 | 1,
-    ) => {
+    (requestId: number, pois: Awaited<ReturnType<typeof fetchTentaclePois>>, phase: 0 | 1) => {
       if (!isLatestRequest(requestId)) {
         return;
       }
@@ -260,19 +228,14 @@ export function useTentacleTool({
       }
 
       try {
-        const pois = await fetchTentaclePois(
-          center,
-          searchRadiusMeters,
-          categoryId,
-          {
-            customCategories: sessionRules.customCategories,
-            customLocationPins: sessionRules.customLocationPins,
-            regionPackId: sessionRules.regionPackId,
-            onEnrich: (enrichedPois) => {
-              applyTentaclePoisResult(requestId, enrichedPois, 1);
-            },
+        const pois = await fetchTentaclePois(center, searchRadiusMeters, categoryId, {
+          customCategories: sessionRules.customCategories,
+          customLocationPins: sessionRules.customLocationPins,
+          regionPackId: sessionRules.regionPackId,
+          onEnrich: (enrichedPois) => {
+            applyTentaclePoisResult(requestId, enrichedPois, 1);
           },
-        );
+        });
 
         applyTentaclePoisResult(requestId, pois, 0);
       } catch (error) {
@@ -287,24 +250,13 @@ export function useTentacleTool({
         }
       }
     },
-    [
-      applyTentaclePoisResult,
-      beginRequest,
-      isLatestRequest,
-      searchRadiusMeters,
-      sessionRules,
-    ],
+    [applyTentaclePoisResult, beginRequest, isLatestRequest, searchRadiusMeters, sessionRules],
   );
 
   const debouncedTentacleCenter = useDebouncedValue(tentacleCenter, 400);
 
   useEffect(() => {
-    if (
-      !active ||
-      !debouncedTentacleCenter ||
-      !tentacleCategoryChosen ||
-      !tentacleCategoryId
-    ) {
+    if (!active || !debouncedTentacleCenter || !tentacleCategoryChosen || !tentacleCategoryId) {
       return;
     }
 
@@ -399,17 +351,9 @@ export function useTentacleTool({
       setMapError(null);
       setTentacleError(null);
     } catch (error) {
-      setMapError(
-        error instanceof Error ? error.message : "GPS location unavailable.",
-      );
+      setMapError(error instanceof Error ? error.message : "GPS location unavailable.");
     }
-  }, [
-    cancelRequests,
-    ensurePointInGameArea,
-    refreshGps,
-    setAwaitingPlacement,
-    setMapError,
-  ]);
+  }, [cancelRequests, ensurePointInGameArea, refreshGps, setAwaitingPlacement, setMapError]);
 
   const clearAfterCommit = useCallback(() => {
     cancelRequests();
@@ -442,9 +386,7 @@ export function useTentacleTool({
         selectedPoiId &&
         !confirmedPois.some((poi) => poi.id === selectedPoiId)
       ) {
-        setMapError(
-          "That place is still a map preview. Wait for confirmation.",
-        );
+        setMapError("That place is still a map preview. Wait for confirmation.");
         return;
       }
       await commitTentacle({
@@ -474,8 +416,7 @@ export function useTentacleTool({
 
   const commit = () => session.submit();
 
-  const placementCrosshair =
-    active && (awaitingPlacement || tentacleCenter === null);
+  const placementCrosshair = active && (awaitingPlacement || tentacleCenter === null);
 
   const handleCategoryChange = (nextCategory: TentacleExtendedCategoryId) => {
     cancelRequests();
@@ -492,9 +433,7 @@ export function useTentacleTool({
     (poiId: string) => {
       const poi = tentaclePois.find((entry) => entry.id === poiId);
       if (poi && !isConfirmedPoiLike(poi)) {
-        setTentacleError(
-          "Preview only — wait until places confirm before selecting.",
-        );
+        setTentacleError("Preview only — wait until places confirm before selecting.");
         return;
       }
       setTentacleOutOfReach(false);
@@ -577,9 +516,7 @@ export function useTentacleTool({
   };
 
   const mapFirstEligible =
-    tentacleCategoryChosen &&
-    tentacleCategoryId !== null &&
-    categorySelectionAvailable;
+    tentacleCategoryChosen && tentacleCategoryId !== null && categorySelectionAvailable;
 
   const [eligiblePlacementGeo, setEligiblePlacementGeo] = useState<
     GeolocationPermissionState | "checking"
@@ -618,7 +555,6 @@ export function useTentacleTool({
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- category entry only
   }, [mapFirstEligible, tentacleCategoryId]);
 
   useEffect(() => {
@@ -627,10 +563,7 @@ export function useTentacleTool({
 
   const mapPlacementActive = Boolean(mapFirstEligible);
   const placementError =
-    tentacleError ??
-    (tentacleCenter === null ? gpsError : null) ??
-    mapError ??
-    null;
+    tentacleError ?? (tentacleCenter === null ? gpsError : null) ?? mapError ?? null;
 
   let placementPhase: TentacleMapPlacementPhase;
   if (tentacleCenter !== null && !tentacleLoading) {
@@ -649,18 +582,13 @@ export function useTentacleTool({
 
   const categoryLabel =
     tentacleCategoryId !== null
-      ? (tentacleCategoriesForGameSize(gameSize).find(
-          (c) => c.id === tentacleCategoryId,
-        )?.label ?? tentacleCategoryId)
+      ? (tentacleCategoriesForGameSize(gameSize).find((c) => c.id === tentacleCategoryId)?.label ??
+        tentacleCategoryId)
       : "";
 
   const questionPrompt =
     tentacleCategoryId !== null
-      ? tentacleQuestionPrompt(
-          tentacleCategoryId,
-          distanceUnit,
-          searchRadiusMeters,
-        )
+      ? tentacleQuestionPrompt(tentacleCategoryId, distanceUnit, searchRadiusMeters)
       : "Pick a location type";
 
   const reopenCategoryPicker = () => {
@@ -688,18 +616,14 @@ export function useTentacleTool({
       ? "Waiting for GPS…"
       : placementPhase === "resolving"
         ? tentaclePois.length > 0
-          ? `Confirming ${tentaclePois.length} preview${
-              tentaclePois.length === 1 ? "" : "s"
-            }…`
+          ? `Confirming ${tentaclePois.length} preview${tentaclePois.length === 1 ? "" : "s"}…`
           : `Searching within ${formatDistance(searchRadiusMeters, distanceUnit)}…`
         : categoryLabel;
 
   const hud = {
     readiness,
     costLabel,
-    error: mapPlacementActive
-      ? null
-      : (tentacleError ?? mapError ?? gpsError ?? null),
+    error: mapPlacementActive ? null : (tentacleError ?? mapError ?? gpsError ?? null),
     onCommit: () => void commit(),
     suppressSheet: mapPlacementActive,
     mapOverlay:

@@ -16,10 +16,7 @@ interface HiderTruthRevealBannerProps {
 
 const AUTO_DISMISS_MS = 4000;
 
-export function HiderTruthRevealBanner({
-  reveal,
-  onDismiss,
-}: HiderTruthRevealBannerProps) {
+export function HiderTruthRevealBanner({ reveal, onDismiss }: HiderTruthRevealBannerProps) {
   useEffect(() => {
     if (!reveal) {
       return;

@@ -1,9 +1,9 @@
 import {
+  type ClockSample,
   estimateOffset,
   indicatesClockJump,
   isPlausibleOffset,
   sampleOffset,
-  type ClockSample,
 } from "@/domain/time/clockOffset";
 import { fetchWithTimeout } from "@/services/core/network/fetchWithTimeout";
 
@@ -33,11 +33,7 @@ function readPersistedOffset(): number {
     const { offsetMs: saved, savedAtMs } = parsed;
     if (typeof saved !== "number" || typeof savedAtMs !== "number") return 0;
     const ageMs = Date.now() - savedAtMs;
-    if (
-      !isPlausibleOffset(saved) ||
-      ageMs < 0 ||
-      ageMs > MAX_PERSISTED_AGE_MS
-    ) {
+    if (!isPlausibleOffset(saved) || ageMs < 0 || ageMs > MAX_PERSISTED_AGE_MS) {
       return 0;
     }
     return saved;
@@ -92,9 +88,7 @@ export function serverNowIso(): string {
 }
 
 /** One probe = reachability answer + a clock sample. */
-export async function probeServerTime(
-  timeoutMs = 5_000,
-): Promise<{ ok: boolean }> {
+export async function probeServerTime(timeoutMs = 5_000): Promise<{ ok: boolean }> {
   const sentAtMs = Date.now();
   try {
     const res = await fetchWithTimeout(

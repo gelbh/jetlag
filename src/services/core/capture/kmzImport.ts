@@ -1,20 +1,18 @@
 import { kml } from "@tmcw/togeojson";
-import { DOMParser } from "@xmldom/xmldom";
-import JSZip from "jszip";
-import union from "@turf/union";
 import { featureCollection } from "@turf/helpers";
+import union from "@turf/union";
+import { DOMParser } from "@xmldom/xmldom";
 import type { Feature, FeatureCollection, MultiPolygon, Polygon } from "geojson";
-import type { GameArea } from "@/domain/map/annotations";
+import JSZip from "jszip";
 import {
   boundingBoxHasMinimumSpan,
   featureToGameArea,
   gameAreaToBoundingBox,
   simplifyGameArea,
 } from "@/domain/geometry/gameArea/geometry";
+import type { GameArea } from "@/domain/map/annotations";
 
-function isPolygonFeature(
-  feature: Feature,
-): feature is Feature<Polygon | MultiPolygon> {
+function isPolygonFeature(feature: Feature): feature is Feature<Polygon | MultiPolygon> {
   const { type } = feature.geometry;
   return type === "Polygon" || type === "MultiPolygon";
 }
@@ -47,8 +45,7 @@ function unionPolygonFeatures(
       const merged = union(featureCollection([combined, next]));
       if (
         merged &&
-        (merged.geometry.type === "Polygon" ||
-          merged.geometry.type === "MultiPolygon")
+        (merged.geometry.type === "Polygon" || merged.geometry.type === "MultiPolygon")
       ) {
         combined = merged as Feature<Polygon | MultiPolygon>;
         continue;

@@ -1,34 +1,24 @@
-import {
-  formatPresetDistance,
-  milesToMeters,
-  type DistanceUnit,
-} from "../map/distance";
 import type { AnnotationRecord } from "../map/annotations";
+import { type DistanceUnit, formatPresetDistance, milesToMeters } from "../map/distance";
 import type { PendingQuestionRecord } from "../session/activity/sessionChat";
-import type { GameSize } from "../session/size/gameSize";
-import { thermometerPresetsMetersForGameSize } from "../session/size/gameSizeRules";
 import {
   resolveIsThermometerPresetAvailable,
   resolveThermometerPresetsMeters,
   type SessionRulesInput,
 } from "../session/rules";
-import {
-  buildPresetCatalogHelpers,
-  presetMilesForDistanceMeters,
-} from "./distancePresets";
+import type { GameSize } from "../session/size/gameSize";
+import { thermometerPresetsMetersForGameSize } from "../session/size/gameSizeRules";
+import { buildPresetCatalogHelpers, presetMilesForDistanceMeters } from "./distancePresets";
 
 export type ThermometerAnswer = "hotter" | "colder";
 
 export const THERMOMETER_DISTANCE_PRESETS_MILES = [0.5, 3, 10, 50] as const;
 
-export type ThermometerDistanceOptionMiles =
-  (typeof THERMOMETER_DISTANCE_PRESETS_MILES)[number];
+export type ThermometerDistanceOptionMiles = (typeof THERMOMETER_DISTANCE_PRESETS_MILES)[number];
 
-export const THERMOMETER_DISTANCE_PRESETS =
-  THERMOMETER_DISTANCE_PRESETS_MILES.map(milesToMeters);
+export const THERMOMETER_DISTANCE_PRESETS = THERMOMETER_DISTANCE_PRESETS_MILES.map(milesToMeters);
 
-export const DEFAULT_THERMOMETER_DISTANCE_METERS =
-  THERMOMETER_DISTANCE_PRESETS[0];
+export const DEFAULT_THERMOMETER_DISTANCE_METERS = THERMOMETER_DISTANCE_PRESETS[0];
 
 const THERMOMETER_PRESET_MATCH_TOLERANCE_METERS = 1;
 
@@ -53,9 +43,7 @@ export function thermometerDistanceOptionForAnnotation(
     return null;
   }
 
-  return thermometerPresetMilesForMeters(
-    annotation.metadata.thermometerDistanceMeters,
-  );
+  return thermometerPresetMilesForMeters(annotation.metadata.thermometerDistanceMeters);
 }
 
 function thermometerDistanceOptionForPending(
@@ -73,21 +61,17 @@ function thermometerDistanceOptionForPending(
   return thermometerPresetMilesForMeters(pendingDistance);
 }
 
-const thermometerPresetHelpers =
-  buildPresetCatalogHelpers<ThermometerDistanceOptionMiles>({
-    toolType: "thermometer",
-    readOptionFromAnnotation: thermometerDistanceOptionForAnnotation,
-    readOptionFromPending: thermometerDistanceOptionForPending,
-  });
+const thermometerPresetHelpers = buildPresetCatalogHelpers<ThermometerDistanceOptionMiles>({
+  toolType: "thermometer",
+  readOptionFromAnnotation: thermometerDistanceOptionForAnnotation,
+  readOptionFromPending: thermometerDistanceOptionForPending,
+});
 
 export function usedThermometerDistanceOptions(
   annotations: AnnotationRecord[],
   exceptAnnotationId?: string,
 ): Set<ThermometerDistanceOptionMiles> {
-  return thermometerPresetHelpers.usedOptionsFromAnnotations(
-    annotations,
-    exceptAnnotationId,
-  );
+  return thermometerPresetHelpers.usedOptionsFromAnnotations(annotations, exceptAnnotationId);
 }
 
 export function usedThermometerDistanceOptionsForSession(
@@ -96,9 +80,7 @@ export function usedThermometerDistanceOptionsForSession(
   exceptAnnotationId?: string,
 ): Set<ThermometerDistanceOptionMiles> {
   const used = usedThermometerDistanceOptions(annotations, exceptAnnotationId);
-  for (const id of thermometerPresetHelpers.usedOptionsFromPending(
-    pendingQuestions,
-  )) {
+  for (const id of thermometerPresetHelpers.usedOptionsFromPending(pendingQuestions)) {
     used.add(id);
   }
   return used;
@@ -141,17 +123,12 @@ export function isThermometerDistanceOptionAvailable(
 ): boolean {
   if (typeof gameSizeOrUsedOptions === "string") {
     return availableThermometerDistancePresets(gameSizeOrUsedOptions).some(
-      (preset) =>
-        Math.abs(preset - distanceMeters) <
-        THERMOMETER_PRESET_MATCH_TOLERANCE_METERS,
+      (preset) => Math.abs(preset - distanceMeters) < THERMOMETER_PRESET_MATCH_TOLERANCE_METERS,
     );
   }
 
   const presetMiles = thermometerPresetMilesForMeters(distanceMeters);
-  return thermometerPresetHelpers.isOptionAvailable(
-    presetMiles,
-    gameSizeOrUsedOptions,
-  );
+  return thermometerPresetHelpers.isOptionAvailable(presetMiles, gameSizeOrUsedOptions);
 }
 
 export function availableThermometerDistancePresets(

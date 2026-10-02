@@ -1,48 +1,44 @@
-import type { GameArea } from "@/domain/map/annotations";
-import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
-import { isPointInGameArea } from "@/domain/geometry/gameArea/geometry";
-import type { MatchingFeature } from "@/domain/geo/types";
-import {
-  adminLevelForMatchingCategory,
-  getMatchingCategory,
-  type MatchingCategoryId,
-  type MeasuringLocationCategory,
-} from "@/domain/questions";
-import {
-  matchingOverpassSelectorsForCategory,
-  resolveMatchingCategory,
-} from "@/domain/session/catalog/sessionCustomCatalog";
-import type { CustomMatchingAreasByLevel } from "@/domain/session/catalog/sessionCustomContent";
-import type { SessionCustomCategory } from "@/domain/session/catalog/sessionCustomContent";
-import type { RegionPackId } from "@/domain/regions/regionPack";
 import {
   adminDivisionToMatchingFeature,
   matchingFeaturesToAdminDivisions,
   matchingFeaturesToBoundedRegions,
   pickNearestMatchingFeature,
 } from "@/domain/geo/matchingAdapters";
+import type { MatchingFeature } from "@/domain/geo/types";
+import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
+import { isPointInGameArea } from "@/domain/geometry/gameArea/geometry";
+import type { GameArea } from "@/domain/map/annotations";
+import {
+  adminLevelForMatchingCategory,
+  getMatchingCategory,
+  type MatchingCategoryId,
+  type MeasuringLocationCategory,
+} from "@/domain/questions";
+import type { RegionPackId } from "@/domain/regions/regionPack";
+import {
+  matchingOverpassSelectorsForCategory,
+  resolveMatchingCategory,
+} from "@/domain/session/catalog/sessionCustomCatalog";
+import type {
+  CustomMatchingAreasByLevel,
+  SessionCustomCategory,
+} from "@/domain/session/catalog/sessionCustomContent";
+import { queryOverpass } from "../../core/overpass/overpassClient";
+import { getOrFetchCached } from "../cache";
 import {
   classifyAdminDivisionAtPoint,
   fetchAdminDivisionFeaturesInArea,
 } from "../overpass/adminDivisionBoundaries";
+import { isEligibleBundledPoi } from "../overpass/bundledPoiHygiene";
 import {
   classifyLandmassAtPoint,
   fetchLandmassFeaturesInArea,
   landmassToMatchingFeature,
 } from "../overpass/landmassFeatures";
-import { queryOverpass } from "../../core/overpass/overpassClient";
-import { getOrFetchCached } from "../cache";
-import { isEligibleBundledPoi } from "../overpass/bundledPoiHygiene";
 import type { MeasuringPlace } from "../overpass/measuringPlaces";
-import {
-  fetchBundledMeasuringPlaces,
-  mergeMeasuringPlaces,
-} from "../overpass/regionPackPoi";
-import {
-  buildMatchingFeaturesQuery,
-  matchingFeaturesCacheKey,
-} from "./query";
+import { fetchBundledMeasuringPlaces, mergeMeasuringPlaces } from "../overpass/regionPackPoi";
 import { parseMatchingFeatures } from "./parse";
+import { buildMatchingFeaturesQuery, matchingFeaturesCacheKey } from "./query";
 import {
   buildLetterZoneFeatures,
   buildStationFirstLetterFeatures,
@@ -93,9 +89,7 @@ function measuringPlacesToMatchingFeatures(
   }));
 }
 
-function matchingFeaturesToMeasuringPlaces(
-  features: MatchingFeature[],
-): MeasuringPlace[] {
+function matchingFeaturesToMeasuringPlaces(features: MatchingFeature[]): MeasuringPlace[] {
   return features.map((feature) => ({
     id: feature.id,
     name: feature.name,
@@ -108,10 +102,7 @@ function filterHygieneMatchingFeatures(
   categoryId: MatchingCategoryId,
 ): MatchingFeature[] {
   const measuringCategory = asBundledMeasuringCategory(categoryId);
-  if (
-    measuringCategory === null ||
-    !HYGIENE_MATCHING_CATEGORIES.has(measuringCategory)
-  ) {
+  if (measuringCategory === null || !HYGIENE_MATCHING_CATEGORIES.has(measuringCategory)) {
     return features;
   }
 
@@ -134,10 +125,7 @@ async function fetchOverpassMatchingFeaturesCached(
   customCategories: readonly SessionCustomCategory[],
   options?: MatchingFetchOptions,
 ): Promise<MatchingFeature[]> {
-  const selectors = matchingOverpassSelectorsForCategory(
-    categoryId,
-    customCategories,
-  );
+  const selectors = matchingOverpassSelectorsForCategory(categoryId, customCategories);
   if (selectors.length === 0) {
     return [];
   }
@@ -146,20 +134,10 @@ async function fetchOverpassMatchingFeaturesCached(
     matchingFeaturesCacheKey(gameArea, categoryId, options),
     async () => {
       const payload = await queryOverpass<{ elements: OverpassElement[] }>(
-        buildMatchingFeaturesQuery(
-          gameArea,
-          categoryId,
-          selectors,
-          customCategories,
-        ),
+        buildMatchingFeaturesQuery(gameArea, categoryId, selectors, customCategories),
       );
 
-      return parseMatchingFeatures(
-        payload.elements,
-        gameArea,
-        categoryId,
-        customCategories,
-      );
+      return parseMatchingFeatures(payload.elements, gameArea, categoryId, customCategories);
     },
     { persistEmpty: false },
   );
@@ -175,24 +153,12 @@ async function fetchOverpassPointMatchingFeaturesInArea(
   const bundledPlaces =
     measuringCategory === null
       ? []
-      : await fetchBundledMeasuringPlaces(
-          gameArea,
-          measuringCategory,
-          options?.regionPackId,
-        );
-  const bundledFeatures = measuringPlacesToMatchingFeatures(
-    bundledPlaces,
-    gameArea,
-  );
+      : await fetchBundledMeasuringPlaces(gameArea, measuringCategory, options?.regionPackId);
+  const bundledFeatures = measuringPlacesToMatchingFeatures(bundledPlaces, gameArea);
 
   const mergeWithOverpass = async (): Promise<MatchingFeature[]> => {
     const overpassFeatures = filterHygieneMatchingFeatures(
-      await fetchOverpassMatchingFeaturesCached(
-        gameArea,
-        categoryId,
-        customCategories,
-        options,
-      ),
+      await fetchOverpassMatchingFeaturesCached(gameArea, categoryId, customCategories, options),
       categoryId,
     );
 
@@ -201,10 +167,7 @@ async function fetchOverpassPointMatchingFeaturesInArea(
     }
 
     return measuringPlacesToMatchingFeatures(
-      mergeMeasuringPlaces(
-        matchingFeaturesToMeasuringPlaces(overpassFeatures),
-        bundledPlaces,
-      ),
+      mergeMeasuringPlaces(matchingFeaturesToMeasuringPlaces(overpassFeatures), bundledPlaces),
       gameArea,
     );
   };
@@ -233,14 +196,9 @@ async function fetchAdminMatchingFeaturesInArea(
     return [];
   }
 
-  const customJson =
-    customMatchingAreas?.[adminLevel as keyof CustomMatchingAreasByLevel];
+  const customJson = customMatchingAreas?.[adminLevel as keyof CustomMatchingAreasByLevel];
 
-  const divisions = await fetchAdminDivisionFeaturesInArea(
-    gameArea,
-    adminLevel,
-    customJson,
-  );
+  const divisions = await fetchAdminDivisionFeaturesInArea(gameArea, adminLevel, customJson);
   return divisions.map(adminDivisionToMatchingFeature);
 }
 
@@ -259,8 +217,7 @@ export async function fetchMatchingFeaturesInArea(
 ): Promise<MatchingFeature[]> {
   const customCategories = options?.customCategories ?? [];
   const category =
-    resolveMatchingCategory(categoryId, customCategories) ??
-    getMatchingCategory(categoryId);
+    resolveMatchingCategory(categoryId, customCategories) ?? getMatchingCategory(categoryId);
 
   const resolver = category.resolver;
   if (resolver === "overpassPoint") {
@@ -279,13 +236,9 @@ export async function fetchMatchingFeaturesInArea(
         case "streetPath":
           return fetchStreetPathFeaturesInArea(gameArea);
         case "stationNameLength":
-          return buildStationNameLengthFeatures(
-            await fetchStationFeaturesInArea(gameArea),
-          );
+          return buildStationNameLengthFeatures(await fetchStationFeaturesInArea(gameArea));
         case "stationFirstLetter":
-          return buildStationFirstLetterFeatures(
-            await fetchStationFeaturesInArea(gameArea),
-          );
+          return buildStationFirstLetterFeatures(await fetchStationFeaturesInArea(gameArea));
         case "letterZone": {
           const divisions = await fetchAdminDivisionFeaturesInArea(
             gameArea,
@@ -301,10 +254,7 @@ export async function fetchMatchingFeaturesInArea(
             options?.customMatchingAreas,
           );
         case "landmass":
-          return fetchLandmassMatchingFeaturesInArea(
-            gameArea,
-            options?.regionPackId,
-          );
+          return fetchLandmassMatchingFeaturesInArea(gameArea, options?.regionPackId);
         case "transitLine":
           return fetchTransitLineMatchingFeaturesInArea(gameArea);
         default: {
@@ -369,14 +319,11 @@ export async function findNearestMatchingFeature(
 ): Promise<(MatchingFeature & { distanceMeters: number }) | null> {
   const customCategories = options?.customCategories ?? [];
   const category =
-    resolveMatchingCategory(categoryId, customCategories) ??
-    getMatchingCategory(categoryId);
+    resolveMatchingCategory(categoryId, customCategories) ?? getMatchingCategory(categoryId);
 
   if (category.resolver === "reverseGeocodeAdmin" || category.resolver === "letterZone") {
     const adminLevel =
-      category.resolver === "letterZone"
-        ? 4
-        : adminLevelForMatchingCategory(categoryId);
+      category.resolver === "letterZone" ? 4 : adminLevelForMatchingCategory(categoryId);
     if (adminLevel === null) {
       return null;
     }
@@ -408,10 +355,7 @@ export async function findNearestMatchingFeature(
   }
 
   if (category.resolver === "landmass") {
-    const landmasses = await fetchLandmassFeaturesInArea(
-      gameArea,
-      options?.regionPackId,
-    );
+    const landmasses = await fetchLandmassFeaturesInArea(gameArea, options?.regionPackId);
     const landmass = classifyLandmassAtPoint(anchor, landmasses);
     if (!landmass) {
       return null;
@@ -424,10 +368,6 @@ export async function findNearestMatchingFeature(
     };
   }
 
-  const features = await fetchMatchingFeaturesInArea(
-    gameArea,
-    categoryId,
-    options,
-  );
+  const features = await fetchMatchingFeaturesInArea(gameArea, categoryId, options);
   return pickNearestMatchingFeature(anchor, features);
 }

@@ -1,9 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import {
-  CUSTOM_PRESET_ID,
-  type DeskPreset,
-} from "../../domain/admin/opsDeskLayout";
+import { CUSTOM_PRESET_ID, type DeskPreset } from "../../domain/admin/opsDeskLayout";
 import { AdminPresetMenu } from "./AdminPresetMenu";
 
 const userPresets: DeskPreset[] = [
@@ -23,13 +20,7 @@ const userPresets: DeskPreset[] = [
 const baseProps = {
   activePresetId: CUSTOM_PRESET_ID,
   defaultPresetId: CUSTOM_PRESET_ID,
-  presetOrder: [
-    "session-watch",
-    "incident-triage",
-    "ops-overview",
-    CUSTOM_PRESET_ID,
-    "user-night",
-  ],
+  presetOrder: ["session-watch", "incident-triage", "ops-overview", CUSTOM_PRESET_ID, "user-night"],
   userPresets,
   onSelectPreset: vi.fn(),
   onSaveCurrent: vi.fn(),
@@ -77,40 +68,27 @@ describe("AdminPresetMenu", () => {
       />,
     );
 
-    fireEvent.click(
-      screen.getByRole("button", { name: "Set Night shift as default" }),
-    );
+    fireEvent.click(screen.getByRole("button", { name: "Set Night shift as default" }));
     expect(onSetDefault).toHaveBeenCalledWith("user-night");
     expect(onSelectPreset).not.toHaveBeenCalled();
   });
 
   it("does not render always-on move chevrons in the idle strip", () => {
     render(<AdminPresetMenu {...baseProps} />);
-    expect(
-      screen.queryByRole("button", { name: /move .* earlier/i }),
-    ).toBeNull();
-    expect(
-      screen.queryByRole("button", { name: /move .* later/i }),
-    ).toBeNull();
+    expect(screen.queryByRole("button", { name: /move .* earlier/i })).toBeNull();
+    expect(screen.queryByRole("button", { name: /move .* later/i })).toBeNull();
     expect(screen.queryByText("‹")).toBeNull();
     expect(screen.queryByText("›")).toBeNull();
   });
 
   it("Manage move earlier calls onReorderPresets with swapped order", () => {
     const onReorderPresets = vi.fn();
-    render(
-      <AdminPresetMenu {...baseProps} onReorderPresets={onReorderPresets} />,
-    );
+    render(<AdminPresetMenu {...baseProps} onReorderPresets={onReorderPresets} />);
 
     fireEvent.click(screen.getByRole("button", { name: "Manage" }));
-    fireEvent.click(
-      screen.getByRole("button", { name: "Move Night shift earlier" }),
-    );
+    fireEvent.click(screen.getByRole("button", { name: "Move Night shift earlier" }));
 
-    expect(onReorderPresets).toHaveBeenCalledWith([
-      "user-night",
-      CUSTOM_PRESET_ID,
-    ]);
+    expect(onReorderPresets).toHaveBeenCalledWith(["user-night", CUSTOM_PRESET_ID]);
   });
 
   it("closes Manage on Escape", () => {

@@ -8,17 +8,13 @@ describe("isTerminalSessionSyncMessage", () => {
   });
 
   it("detects missing session copy", () => {
-    expect(
-      isTerminalSessionSyncMessage("That session no longer exists."),
-    ).toBe(true);
+    expect(isTerminalSessionSyncMessage("That session no longer exists.")).toBe(true);
   });
 
   it("detects ended session copy", () => {
-    expect(
-      isTerminalSessionSyncMessage(
-        "That session has ended. Join or create a new one.",
-      ),
-    ).toBe(true);
+    expect(isTerminalSessionSyncMessage("That session has ended. Join or create a new one.")).toBe(
+      true,
+    );
   });
 
   it("ignores retriable sync failures", () => {

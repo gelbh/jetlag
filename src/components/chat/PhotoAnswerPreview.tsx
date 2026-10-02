@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import {
-  parsePhotoAnswer,
   PHOTO_CANNOT_ANSWER_LABEL,
   PHOTO_SENT_EXTERNALLY_SEEKER_LABEL,
+  parsePhotoAnswer,
 } from "../../domain/questions";
 import { getPhotoDownloadUrl } from "../../services/core/capture/photoStorage";
 
@@ -12,8 +12,7 @@ interface PhotoAnswerPreviewProps {
 
 export function PhotoAnswerPreview({ answer }: PhotoAnswerPreviewProps) {
   const parsed = parsePhotoAnswer(answer);
-  const photoPath =
-    parsed?.kind === "photo" ? parsed.storagePath : null;
+  const photoPath = parsed?.kind === "photo" ? parsed.storagePath : null;
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -47,19 +46,11 @@ export function PhotoAnswerPreview({ answer }: PhotoAnswerPreviewProps) {
   }
 
   if (parsed.kind === "cannot_answer") {
-    return (
-      <p className="mt-2 text-xs text-ink-dim">
-        Answered: {PHOTO_CANNOT_ANSWER_LABEL}
-      </p>
-    );
+    return <p className="mt-2 text-xs text-ink-dim">Answered: {PHOTO_CANNOT_ANSWER_LABEL}</p>;
   }
 
   if (parsed.kind === "sent_externally") {
-    return (
-      <p className="mt-2 text-xs text-ink-dim">
-        {PHOTO_SENT_EXTERNALLY_SEEKER_LABEL}
-      </p>
-    );
+    return <p className="mt-2 text-xs text-ink-dim">{PHOTO_SENT_EXTERNALLY_SEEKER_LABEL}</p>;
   }
 
   if (error) {

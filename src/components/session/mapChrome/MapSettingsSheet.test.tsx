@@ -1,10 +1,10 @@
-import { fireEvent, screen } from "@testing-library/react";
 import { MantineProvider } from "@mantine/core";
+import { fireEvent, screen } from "@testing-library/react";
 import type { ReactElement } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { MapSettingsSheet } from "./MapSettingsSheet";
 import { renderWithRouter } from "@/test/renderWithRouter";
 import { jetlagTheme } from "@/theme/theme";
+import { MapSettingsSheet } from "./MapSettingsSheet";
 
 function renderSettings(ui: ReactElement) {
   return renderWithRouter(
@@ -108,10 +108,7 @@ describe("MapSettingsSheet", () => {
     ).toBeInTheDocument();
 
     renderSettings(
-      <MapSettingsSheet
-        {...baseProps}
-        general={{ ...baseProps.general, mapStyle: "satellite" }}
-      />,
+      <MapSettingsSheet {...baseProps} general={{ ...baseProps.general, mapStyle: "satellite" }} />,
     );
 
     expect(screen.getByText(/Tiles © Esri/)).toBeInTheDocument();

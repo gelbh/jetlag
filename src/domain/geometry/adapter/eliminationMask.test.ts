@@ -55,9 +55,7 @@ function matchingAnnotation(id: string, west: number): AnnotationRecord {
   };
 }
 
-function radarAnnotation(
-  inside: boolean | undefined,
-): AnnotationRecord {
+function radarAnnotation(inside: boolean | undefined): AnnotationRecord {
   return {
     id: "radar-1",
     sessionId: "session",
@@ -81,16 +79,11 @@ function radarAnnotation(
 
 describe("adapter/eliminationMask", () => {
   it("does not shade exterior when radar inside is undefined", () => {
-    expect(
-      eliminationFeatureForAnnotationTs(radarAnnotation(undefined)),
-    ).toBeNull();
+    expect(eliminationFeatureForAnnotationTs(radarAnnotation(undefined))).toBeNull();
   });
 
   it("yes (hider inside): eliminates outside the radar disk, not the disk", async () => {
-    const input = await computeEliminationUnionInput(
-      [radarAnnotation(true)],
-      gameArea,
-    );
+    const input = await computeEliminationUnionInput([radarAnnotation(true)], gameArea);
     expect(input.disks).toEqual([]);
     expect(input.polygons).toHaveLength(1);
     const shade = input.polygons[0]!;
@@ -101,14 +94,9 @@ describe("adapter/eliminationMask", () => {
   });
 
   it("no (hider outside): eliminates the radar disk", () => {
-    const input = computeEliminationUnionInputTs(
-      [radarAnnotation(false)],
-      gameArea,
-    );
+    const input = computeEliminationUnionInputTs([radarAnnotation(false)], gameArea);
     expect(input.polygons).toEqual([]);
-    expect(input.disks).toEqual([
-      { center: [51.45, -0.15], radiusMeters: 800 },
-    ]);
+    expect(input.disks).toEqual([{ center: [51.45, -0.15], radiusMeters: 800 }]);
   });
 
   it("maps matching annotations to polygon union input", async () => {
@@ -132,11 +120,7 @@ describe("adapter/eliminationMask", () => {
     if (ring?.type !== "Polygon") {
       throw new Error("expected Polygon geometry");
     }
-    expect(
-      ring.coordinates[0]?.map((coord) =>
-        coord.map((n) => Number(n.toFixed(5))),
-      ),
-    ).toEqual([
+    expect(ring.coordinates[0]?.map((coord) => coord.map((n) => Number(n.toFixed(5))))).toEqual([
       [-0.18, 51.42],
       [-0.15, 51.42],
       [-0.15, 51.48],
@@ -175,8 +159,6 @@ describe("adapter/eliminationMask", () => {
 
     const shade = await eliminationFeatureForAnnotation(annotation, gameArea);
     expect(shade?.geometry.type).toMatch(/Polygon/);
-    expect(
-      booleanPointInPolygon(turfPoint([-0.14, 51.44]), shade!),
-    ).toBe(true);
+    expect(booleanPointInPolygon(turfPoint([-0.14, 51.44]), shade!)).toBe(true);
   });
 });

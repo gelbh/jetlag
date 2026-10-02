@@ -2,11 +2,7 @@ import { getFirestore } from "firebase-admin/firestore";
 import { onCall } from "firebase-functions/v2/https";
 import { withSentryEventHandler } from "../../lib/sentry.mjs";
 import { controlSessionTimerForMoveHandler } from "../../session/controlSessionTimerForMove.mjs";
-import {
-  mapMoveTimerError,
-  requireAuthSessionId,
-  sentryDsnSecret,
-} from "./shared.mjs";
+import { mapMoveTimerError, requireAuthSessionId, sentryDsnSecret } from "./shared.mjs";
 
 export const controlSessionTimerForMove = onCall(
   { secrets: [sentryDsnSecret], enforceAppCheck: true },
@@ -16,12 +12,7 @@ export const controlSessionTimerForMove = onCall(
     const db = getFirestore();
 
     try {
-      return await controlSessionTimerForMoveHandler(
-        db,
-        uid,
-        sessionId,
-        action,
-      );
+      return await controlSessionTimerForMoveHandler(db, uid, sessionId, action);
     } catch (error) {
       mapMoveTimerError(error);
     }

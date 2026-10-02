@@ -38,9 +38,7 @@ export function ToolSection({
           {statusLabel ? (
             <span
               className={`text-xs font-medium ${
-                status === "complete"
-                  ? "text-status-success"
-                  : "text-status-info"
+                status === "complete" ? "text-status-success" : "text-status-info"
               }`}
             >
               {statusLabel}

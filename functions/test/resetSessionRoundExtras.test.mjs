@@ -1,5 +1,5 @@
-import test from "node:test";
 import assert from "node:assert/strict";
+import test from "node:test";
 import { resetSessionRoundExtras } from "../session/resetSessionRoundExtras.mjs";
 
 /**
@@ -54,9 +54,7 @@ function mockExtrasDb({
             });
             return {
               empty: filtered.length === 0,
-              docs: filtered.map((ref) =>
-                docSnap(true, ref.data, { id: ref.id, path: ref.path }),
-              ),
+              docs: filtered.map((ref) => docSnap(true, ref.data, { id: ref.id, path: ref.path })),
             };
           },
         };
@@ -90,9 +88,7 @@ function mockExtrasDb({
       async get() {
         return {
           empty: refs.length === 0,
-          docs: refs.map((ref) =>
-            docSnap(true, ref.data, { id: ref.id, path: ref.path }),
-          ),
+          docs: refs.map((ref) => docSnap(true, ref.data, { id: ref.id, path: ref.path })),
         };
       },
     };
@@ -214,9 +210,7 @@ test("resetSessionRoundExtras deletes map/live docs and soft-clears annotations/
 
   await resetSessionRoundExtras(db, "sess-1");
 
-  const annotationUpdate = db.updates.find(
-    (u) => u.path === "sessions/sess-1/annotations/a1",
-  );
+  const annotationUpdate = db.updates.find((u) => u.path === "sessions/sess-1/annotations/a1");
   assert.ok(annotationUpdate, "active annotation should be updated");
   assert.equal(annotationUpdate.payload.status, "deleted");
   assert.notEqual(
@@ -226,15 +220,11 @@ test("resetSessionRoundExtras deletes map/live docs and soft-clears annotations/
   );
   assert.equal(typeof annotationUpdate.payload.updatedAt, "string");
 
-  const walkingUpdate = db.updates.find(
-    (u) => u.path === "sessions/sess-1/pendingQuestions/q1",
-  );
+  const walkingUpdate = db.updates.find((u) => u.path === "sessions/sess-1/pendingQuestions/q1");
   assert.ok(walkingUpdate, "walking question should be cancelled");
   assert.deepEqual(walkingUpdate.payload, { status: "cancelled" });
 
-  const pendingUpdate = db.updates.find(
-    (u) => u.path === "sessions/sess-1/pendingQuestions/q3",
-  );
+  const pendingUpdate = db.updates.find((u) => u.path === "sessions/sess-1/pendingQuestions/q3");
   assert.ok(pendingUpdate, "pending question should be cancelled");
   assert.deepEqual(pendingUpdate.payload, { status: "cancelled" });
 
@@ -253,12 +243,8 @@ test("resetSessionRoundExtras deletes map/live docs and soft-clears annotations/
   assert.ok(db.deletes.includes("sessions/sess-1/startingLocations/s1"));
   assert.ok(db.deletes.includes("sessions/sess-1/boardEconomy/state"));
   assert.ok(db.deletes.includes("sessions/sess-1/endGameTruth/anchors"));
-  assert.ok(
-    db.deletes.includes("sessions/sess-1/playerTrailPoints/u1/points/p1"),
-  );
-  assert.ok(
-    db.deletes.includes("sessions/sess-1/playerTrailPoints/u1/points/p2"),
-  );
+  assert.ok(db.deletes.includes("sessions/sess-1/playerTrailPoints/u1/points/p1"));
+  assert.ok(db.deletes.includes("sessions/sess-1/playerTrailPoints/u1/points/p2"));
 });
 
 test("resetSessionRoundExtras tolerates empty memberUids and missing collections", async () => {

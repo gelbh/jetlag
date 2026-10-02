@@ -50,12 +50,7 @@ export function SearchField({
         inputMode="search"
         disabled={busy}
       />
-      <button
-        type="button"
-        onClick={onSubmit}
-        disabled={busy}
-        className={submitClassName}
-      >
+      <button type="button" onClick={onSubmit} disabled={busy} className={submitClassName}>
         {loading ? loadingLabel : submitLabel}
       </button>
     </>

@@ -11,8 +11,8 @@ const sampleGameArea: GameArea = {
   coordinates: [
     [
       [-130.35, 54.28],
-      [-130.30, 54.28],
-      [-130.30, 54.32],
+      [-130.3, 54.28],
+      [-130.3, 54.32],
       [-130.35, 54.32],
       [-130.35, 54.28],
     ],
@@ -44,9 +44,7 @@ describe("transitStops", () => {
 
   it("falls back to local_ref then name then Transit stop", () => {
     expect(transitStopDisplayName({ local_ref: "Stop A" })).toBe("Stop A");
-    expect(transitStopDisplayName({ name: "Central Station" })).toBe(
-      "Central Station",
-    );
+    expect(transitStopDisplayName({ name: "Central Station" })).toBe("Central Station");
     expect(transitStopDisplayName({})).toBe("Transit stop");
   });
 

@@ -24,10 +24,7 @@ export interface AdminSessionFilterInput {
   sort: AdminSessionSort;
 }
 
-function matchesStateChip(
-  phase: AdminSessionPhase,
-  state: AdminSessionStateChip,
-): boolean {
+function matchesStateChip(phase: AdminSessionPhase, state: AdminSessionStateChip): boolean {
   if (state == null) {
     return true;
   }
@@ -62,12 +59,8 @@ function compareBySort(
   }
 
   if (sort === "lastAnnotation") {
-    const leftAnnotation = left.lastAnnotationAt
-      ? Date.parse(left.lastAnnotationAt)
-      : 0;
-    const rightAnnotation = right.lastAnnotationAt
-      ? Date.parse(right.lastAnnotationAt)
-      : 0;
+    const leftAnnotation = left.lastAnnotationAt ? Date.parse(left.lastAnnotationAt) : 0;
+    const rightAnnotation = right.lastAnnotationAt ? Date.parse(right.lastAnnotationAt) : 0;
     if (rightAnnotation !== leftAnnotation) {
       return rightAnnotation - leftAnnotation;
     }
@@ -75,9 +68,7 @@ function compareBySort(
 
   if (sort === "lastLocation") {
     const leftLocation = left.lastLocationAt ? Date.parse(left.lastLocationAt) : 0;
-    const rightLocation = right.lastLocationAt
-      ? Date.parse(right.lastLocationAt)
-      : 0;
+    const rightLocation = right.lastLocationAt ? Date.parse(right.lastLocationAt) : 0;
     if (rightLocation !== leftLocation) {
       return rightLocation - leftLocation;
     }
@@ -130,9 +121,7 @@ export function filterAdminSessions(
     );
   });
 
-  return filtered.toSorted((left, right) =>
-    compareBySort(left, right, input.sort),
-  );
+  return filtered.toSorted((left, right) => compareBySort(left, right, input.sort));
 }
 
 export function summarizeAdminSessions(sessions: readonly AdminSessionSummary[]) {

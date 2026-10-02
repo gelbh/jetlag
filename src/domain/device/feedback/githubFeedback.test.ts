@@ -2,16 +2,14 @@ import { describe, expect, it } from "vitest";
 import {
   githubBugReportUrl,
   githubBugsBrowseUrl,
-  githubIdeasBrowseUrl,
   githubIdeaSubmitUrl,
+  githubIdeasBrowseUrl,
   githubIssuesUrl,
 } from "./githubFeedback";
 
 describe("githubFeedback", () => {
   it("builds GitHub feedback URLs", () => {
-    expect(githubIssuesUrl()).toBe(
-      "https://github.com/gelbh/jetlag/issues/new",
-    );
+    expect(githubIssuesUrl()).toBe("https://github.com/gelbh/jetlag/issues/new");
     expect(githubBugReportUrl()).toBe(
       "https://github.com/gelbh/jetlag/issues/new?template=bug_report.md",
     );

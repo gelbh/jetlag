@@ -2,17 +2,17 @@ import { useCallback, useEffect, useState } from "react";
 import type { AnnotationRecord } from "@/domain/map/annotations";
 import {
   DEFAULT_RADIUS_METERS,
-  parseDistanceInput,
   type DistanceUnit,
+  parseDistanceInput,
 } from "@/domain/map/distance";
 import {
   isRadarDistanceOptionUsed,
   isRadarPresetRadius,
   isRadarRadiusAllowedForGameSize,
-  radarAnswerFromInside,
-  radarInsideFromAnswer,
   type RadarAnswer,
   type RadarDistanceOptionKey,
+  radarAnswerFromInside,
+  radarInsideFromAnswer,
 } from "@/domain/questions";
 import type { GameSize } from "@/domain/session/size/gameSize";
 import { RadarDistancePicker } from "../RadarDistancePicker";
@@ -44,9 +44,7 @@ export function RadarEditFields({
   const [customRadius, setCustomRadius] = useState("");
   const [chooseCustom, setChooseCustom] = useState(
     annotation.metadata.radarChooseCustom ??
-      !isRadarPresetRadius(
-        annotation.metadata.radiusMeters ?? DEFAULT_RADIUS_METERS,
-      ),
+      !isRadarPresetRadius(annotation.metadata.radiusMeters ?? DEFAULT_RADIUS_METERS),
   );
   const [radarAnswer, setRadarAnswer] = useState<RadarAnswer | null>(
     annotation.metadata.inside !== undefined
@@ -59,18 +57,8 @@ export function RadarEditFields({
     : radiusMeters;
 
   const canSave =
-    isRadarRadiusAllowedForGameSize(
-      gameSize,
-      resolvedRadius,
-      distanceUnit,
-      chooseCustom,
-    ) &&
-    !isRadarDistanceOptionUsed(
-      usedRadarOptions,
-      chooseCustom,
-      resolvedRadius,
-      distanceUnit,
-    );
+    isRadarRadiusAllowedForGameSize(gameSize, resolvedRadius, distanceUnit, chooseCustom) &&
+    !isRadarDistanceOptionUsed(usedRadarOptions, chooseCustom, resolvedRadius, distanceUnit);
 
   const save = useCallback(() => {
     if (!canSave) {
@@ -86,9 +74,7 @@ export function RadarEditFields({
           radiusMeters: resolvedRadius,
           radarChooseCustom: chooseCustom,
           inside:
-            radarAnswer === null
-              ? annotation.metadata.inside
-              : radarInsideFromAnswer(radarAnswer),
+            radarAnswer === null ? annotation.metadata.inside : radarInsideFromAnswer(radarAnswer),
         },
       },
     };
@@ -115,10 +101,7 @@ export function RadarEditFields({
         onChooseSelect={() => setChooseCustom(true)}
         onCustomRadiusChange={setCustomRadius}
       />
-      <ToolSection
-        title="Answer"
-        status={radarAnswer !== null ? "complete" : "active"}
-      >
+      <ToolSection title="Answer" status={radarAnswer !== null ? "complete" : "active"}>
         <BinaryAnswerPicker
           value={radarAnswer}
           onChange={setRadarAnswer}

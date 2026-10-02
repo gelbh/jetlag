@@ -2,9 +2,8 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import type { BoundingBox } from "@/domain/geometry/gameArea/gameAreaBounds";
-import { BASE_MEASURING_CATALOG } from "@/domain/questions";
 import { PACK_SEA_LEVEL_SEED_DIVISIONS } from "@/domain/geometry/measuring/seaLevel";
-import { REGION_PACK_IDS, type RegionPackId } from "./regionPack";
+import { BASE_MEASURING_CATALOG } from "@/domain/questions";
 import {
   isPackGeoSupported,
   PACK_GEO_PACK_IDS,
@@ -17,6 +16,7 @@ import {
   packGeoSeaLevelSeedUrl,
   REGION_PACK_REFERENCE_BBOXES,
 } from "./packGeoManifest";
+import { REGION_PACK_IDS, type RegionPackId } from "./regionPack";
 
 const publicRoot = resolve(import.meta.dirname, "../../../public");
 
@@ -49,13 +49,10 @@ describe("packGeoManifest", () => {
 
   it("includes every measuring point category with overpassSelectors (excl custom)", () => {
     const expected = BASE_MEASURING_CATALOG.filter(
-      (option) =>
-        option.targetKind === "point" && option.overpassSelectors.length > 0,
+      (option) => option.targetKind === "point" && option.overpassSelectors.length > 0,
     ).map((option) => option.id);
 
-    expect([...PACK_GEO_POINT_CATEGORIES].sort()).toEqual(
-      [...expected].sort(),
-    );
+    expect([...PACK_GEO_POINT_CATEGORIES].sort()).toEqual([...expected].sort());
     expect(PACK_GEO_POINT_CATEGORIES).not.toContain("custom_place");
   });
 
@@ -88,21 +85,13 @@ describe("packGeoManifest", () => {
 
   it("builds coastline and sea-level seed urls", () => {
     expect(packGeoCoastlineUrl("dublin")).toBe("/geo/dublin/coastline.json");
-    expect(packGeoSeaLevelSeedUrl("tokyo")).toBe(
-      "/geo/tokyo/sea_level_seed.json",
-    );
+    expect(packGeoSeaLevelSeedUrl("tokyo")).toBe("/geo/tokyo/sea_level_seed.json");
   });
 
   it("has on-disk coastline and sea_level_seed json for every pack", () => {
     for (const packId of PACK_GEO_PACK_IDS) {
-      const coastlinePath = resolve(
-        publicRoot,
-        packGeoCoastlinePublicPath(packId),
-      );
-      const seaLevelPath = resolve(
-        publicRoot,
-        packGeoSeaLevelSeedPublicPath(packId),
-      );
+      const coastlinePath = resolve(publicRoot, packGeoCoastlinePublicPath(packId));
+      const seaLevelPath = resolve(publicRoot, packGeoSeaLevelSeedPublicPath(packId));
       expect(existsSync(coastlinePath), coastlinePath).toBe(true);
       expect(existsSync(seaLevelPath), seaLevelPath).toBe(true);
 
@@ -133,9 +122,7 @@ describe("packGeoManifest", () => {
       expect(box.south).toBeLessThan(box.north);
       expect(box.west).toBeLessThan(box.east);
     }
-    expect(Object.keys(REGION_PACK_REFERENCE_BBOXES).sort()).toEqual(
-      [...REGION_PACK_IDS].sort(),
-    );
+    expect(Object.keys(REGION_PACK_REFERENCE_BBOXES).sort()).toEqual([...REGION_PACK_IDS].sort());
   });
 
   it("reference bbox contains each POI file bbox when present", () => {
@@ -151,9 +138,9 @@ describe("packGeoManifest", () => {
         if (!fileName.endsWith(".json")) {
           continue;
         }
-        const payload = JSON.parse(
-          readFileSync(resolve(poiDir, fileName), "utf8"),
-        ) as { bbox?: unknown };
+        const payload = JSON.parse(readFileSync(resolve(poiDir, fileName), "utf8")) as {
+          bbox?: unknown;
+        };
         // Skip files without bbox (tokyo/osaka/zurich/lucerne stubs).
         if (!isPoiBbox(payload.bbox)) {
           continue;
@@ -168,10 +155,7 @@ describe("packGeoManifest", () => {
 
   it("ships dense complete sea_level_seed for london and tokyo", () => {
     for (const packId of ["london", "tokyo"] as const) {
-      const seaLevelPath = resolve(
-        publicRoot,
-        packGeoSeaLevelSeedPublicPath(packId),
-      );
+      const seaLevelPath = resolve(publicRoot, packGeoSeaLevelSeedPublicPath(packId));
       const seaLevel = JSON.parse(readFileSync(seaLevelPath, "utf8")) as {
         source: string;
         divisions: number;
@@ -180,9 +164,7 @@ describe("packGeoManifest", () => {
         complete?: boolean;
       };
       expect(seaLevel.source).toBe("open-meteo");
-      expect(seaLevel.divisions).toBeGreaterThanOrEqual(
-        PACK_SEA_LEVEL_SEED_DIVISIONS,
-      );
+      expect(seaLevel.divisions).toBeGreaterThanOrEqual(PACK_SEA_LEVEL_SEED_DIVISIONS);
       expect(seaLevel.complete).toBe(true);
       expect(seaLevel.cells.length).toBeGreaterThan(0);
       expect(seaLevel.cellElevations.length).toBe(seaLevel.cells.length);

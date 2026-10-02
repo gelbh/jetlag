@@ -12,12 +12,7 @@ import {
 
 const SESSION_CODE_PATTERN = /\b[A-Z0-9]{4}\b/g;
 const REACT_REFRESH_FRAME = /@react-refresh/i;
-const SENSITIVE_EXTRA_KEYS = new Set([
-  "sessionId",
-  "authUid",
-  "memberUids",
-  "uid",
-]);
+const SENSITIVE_EXTRA_KEYS = new Set(["sessionId", "authUid", "memberUids", "uid"]);
 
 function scrubString(value: string): string {
   return value.replace(SESSION_CODE_PATTERN, "****");
@@ -49,9 +44,7 @@ function scrubUnknown(value: unknown): unknown {
 }
 
 function isReactRefreshNoiseEvent(
-  event: Parameters<
-    NonNullable<NonNullable<Parameters<typeof Sentry.init>[0]>["beforeSend"]>
-  >[0],
+  event: Parameters<NonNullable<NonNullable<Parameters<typeof Sentry.init>[0]>["beforeSend"]>>[0],
 ): boolean {
   if (event.environment === "development") {
     for (const exception of event.exception?.values ?? []) {
@@ -67,12 +60,8 @@ function isReactRefreshNoiseEvent(
 }
 
 function scrubEvent(
-  event: Parameters<
-    NonNullable<NonNullable<Parameters<typeof Sentry.init>[0]>["beforeSend"]>
-  >[0],
-): Parameters<
-  NonNullable<NonNullable<Parameters<typeof Sentry.init>[0]>["beforeSend"]>
->[0] | null {
+  event: Parameters<NonNullable<NonNullable<Parameters<typeof Sentry.init>[0]>["beforeSend"]>>[0],
+): Parameters<NonNullable<NonNullable<Parameters<typeof Sentry.init>[0]>["beforeSend"]>>[0] | null {
   if (typeof event.message === "string") {
     event.message = scrubString(event.message);
   }
@@ -202,10 +191,7 @@ export function setBootstrapTag(phase: string): void {
   });
 }
 
-export function captureAuthPersistenceFallback(
-  mode: "session" | "memory",
-  error?: unknown,
-): void {
+export function captureAuthPersistenceFallback(mode: "session" | "memory", error?: unknown): void {
   withSentryScope((scope) => {
     scope.setTag("auth_persistence", mode);
     if (error) {
@@ -393,9 +379,7 @@ export interface SlowRouteTransitionDetails {
   warm_ready: boolean;
 }
 
-export function reportSlowRouteTransition(
-  details: SlowRouteTransitionDetails,
-): void {
+export function reportSlowRouteTransition(details: SlowRouteTransitionDetails): void {
   if (import.meta.env.MODE === "test" || details.total_ms <= 2000) {
     return;
   }
@@ -437,9 +421,7 @@ export function addAppResumeBreadcrumb(context: AppResumeContext): void {
   });
 }
 
-export function addPwaStoragePressureBreadcrumb(
-  snapshot: StorageEstimateSnapshot,
-): void {
+export function addPwaStoragePressureBreadcrumb(snapshot: StorageEstimateSnapshot): void {
   if (import.meta.env.MODE === "test") {
     return;
   }
@@ -500,4 +482,3 @@ export function addIdbDeleteFailureBreadcrumb(error: unknown): void {
     data: { message },
   });
 }
-

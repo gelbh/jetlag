@@ -73,11 +73,9 @@ describe("usePendingQuestionActions", () => {
       });
     });
 
-    expect(firestoreMocks.updatePendingQuestion).toHaveBeenCalledWith(
-      "session-1",
-      "pq-1",
-      { status: "cancelled" },
-    );
+    expect(firestoreMocks.updatePendingQuestion).toHaveBeenCalledWith("session-1", "pq-1", {
+      status: "cancelled",
+    });
     expect(firestoreMocks.postGameSystemMessage).toHaveBeenCalledWith(
       "session-1",
       "host-1",
@@ -137,9 +135,7 @@ describe("usePendingQuestionActions", () => {
   });
 
   it("does not post a system message when cancel update fails", async () => {
-    firestoreMocks.updatePendingQuestion.mockRejectedValueOnce(
-      new Error("permission-denied"),
-    );
+    firestoreMocks.updatePendingQuestion.mockRejectedValueOnce(new Error("permission-denied"));
     const { result } = renderHook(() => usePendingQuestionActions());
 
     await expect(
@@ -173,11 +169,9 @@ describe("usePendingQuestionActions", () => {
       });
     });
 
-    expect(firestoreMocks.updatePendingQuestion).toHaveBeenCalledWith(
-      "session-1",
-      "pq-1",
-      { status: "cancelled" },
-    );
+    expect(firestoreMocks.updatePendingQuestion).toHaveBeenCalledWith("session-1", "pq-1", {
+      status: "cancelled",
+    });
     expect(firestoreMocks.updateGameMessageStatus).toHaveBeenCalledWith(
       "session-1",
       "msg-1",

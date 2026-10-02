@@ -1,24 +1,18 @@
-import type { Feature, MultiPolygon, Polygon } from "geojson";
 import intersect from "@turf/intersect";
 import simplify from "@turf/simplify";
+import type { Feature, MultiPolygon, Polygon } from "geojson";
+import { matchingFeaturesToAdminDivisions } from "../../geo/matchingAdapters";
+import type { MatchingFeature } from "../../geo/types";
 import type { GameArea } from "../../map/annotations";
 import type { MatchingAnswer } from "../../questions/matchingQuestions";
-import {
-  getCachedVoronoiCellsAsync,
-  matchingSitesFingerprint,
-} from "../voronoi/voronoiCellCache";
-import { voronoiCellSiteId } from "../voronoi/voronoiCellSiteId";
-import {
-  gameAreaToPolygon,
-  safeDifference,
-} from "../gameArea/geometry";
-import type { MatchingFeature } from "../../geo/types";
-import { matchingFeaturesToAdminDivisions } from "../../geo/matchingAdapters";
 import {
   buildAdminDivisionBoundaryPreview,
   buildAdminDivisionEliminationRegion,
   findAdminDivisionById,
 } from "../gameArea/adminDivisionGeometry";
+import { gameAreaToPolygon, safeDifference } from "../gameArea/geometry";
+import { getCachedVoronoiCellsAsync, matchingSitesFingerprint } from "../voronoi/voronoiCellCache";
+import { voronoiCellSiteId } from "../voronoi/voronoiCellSiteId";
 
 const SIMPLIFY_TOLERANCE = 0.000012;
 
@@ -35,8 +29,7 @@ function clipToGameArea(
 
     if (
       clipped &&
-      (clipped.geometry.type === "Polygon" ||
-        clipped.geometry.type === "MultiPolygon")
+      (clipped.geometry.type === "Polygon" || clipped.geometry.type === "MultiPolygon")
     ) {
       return clipped as Feature<Polygon | MultiPolygon>;
     }
@@ -68,16 +61,12 @@ async function buildSameNearestRegionFromVoronoi(
 
   if (
     !seekerCell ||
-    (seekerCell.geometry.type !== "Polygon" &&
-      seekerCell.geometry.type !== "MultiPolygon")
+    (seekerCell.geometry.type !== "Polygon" && seekerCell.geometry.type !== "MultiPolygon")
   ) {
     return null;
   }
 
-  const clipped = clipToGameArea(
-    seekerCell as Feature<Polygon | MultiPolygon>,
-    gameArea,
-  );
+  const clipped = clipToGameArea(seekerCell as Feature<Polygon | MultiPolygon>, gameArea);
   if (!clipped) {
     return null;
   }
@@ -115,11 +104,7 @@ export async function buildSameNearestRegion(
     return gameAreaToPolygon(gameArea);
   }
 
-  return buildSameNearestRegionFromVoronoi(
-    features,
-    seekerFeatureId,
-    gameArea,
-  );
+  return buildSameNearestRegionFromVoronoi(features, seekerFeatureId, gameArea);
 }
 
 export async function buildMatchingEliminationRegion(
@@ -138,21 +123,13 @@ export async function buildMatchingEliminationRegion(
     return buildAdminDivisionEliminationRegion(division, gameArea, answer);
   }
 
-  const sameNearestRegion = await buildSameNearestRegion(
-    features,
-    seekerFeatureId,
-    gameArea,
-  );
+  const sameNearestRegion = await buildSameNearestRegion(features, seekerFeatureId, gameArea);
 
   if (!sameNearestRegion) {
     return null;
   }
 
-  return matchingEliminationFromSameNearestRegion(
-    sameNearestRegion,
-    gameArea,
-    answer,
-  );
+  return matchingEliminationFromSameNearestRegion(sameNearestRegion, gameArea, answer);
 }
 
 const EMPTY_MATCHING_ELIMINATION: Feature<MultiPolygon> = {
@@ -174,7 +151,6 @@ export function matchingEliminationFromSameNearestRegion(
   // Sole in-area site: same-nearest is the whole play area, so outside-the-cell
   // difference is empty (valid yes elimination, nothing to shade).
   return (
-    safeDifference(gameAreaToPolygon(gameArea), sameNearestRegion) ??
-    EMPTY_MATCHING_ELIMINATION
+    safeDifference(gameAreaToPolygon(gameArea), sameNearestRegion) ?? EMPTY_MATCHING_ELIMINATION
   );
 }

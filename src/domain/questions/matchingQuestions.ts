@@ -1,7 +1,8 @@
 import type { AnnotationRecord } from "../map/annotations";
 import type { PendingQuestionRecord } from "../session/activity/sessionChat";
-import { resolveCustomPackMatchingCategory } from "./customQuestionPack";
 import type { SessionCustomCategory } from "../session/catalog/sessionCustomContent";
+import { buildCatalogHelpers } from "./catalogHelpers";
+import { resolveCustomPackMatchingCategory } from "./customQuestionPack";
 import {
   customCategoryToMatchingDefinition,
   MATCHING_CATEGORIES,
@@ -9,7 +10,6 @@ import {
   type MatchingCategoryId,
   type MatchingQuestionDefinition,
 } from "./matching/matchingCatalog";
-import { buildCatalogHelpers } from "./catalogHelpers";
 
 export type {
   MatchingAnswer,
@@ -35,9 +35,7 @@ function readMatchingCategoryFromAnnotation(
   }
 
   const categoryId = annotation.metadata.matchingCategory;
-  return typeof categoryId === "string"
-    ? (categoryId as MatchingCategoryId)
-    : null;
+  return typeof categoryId === "string" ? (categoryId as MatchingCategoryId) : null;
 }
 
 export function readMatchingCategoryFromPending(
@@ -48,9 +46,7 @@ export function readMatchingCategoryFromPending(
   }
 
   const categoryId = question.placement.metadata.matchingCategory;
-  return typeof categoryId === "string"
-    ? (categoryId as MatchingCategoryId)
-    : null;
+  return typeof categoryId === "string" ? (categoryId as MatchingCategoryId) : null;
 }
 
 const matchingCatalogHelpers = buildCatalogHelpers<MatchingCategoryId>({
@@ -77,12 +73,8 @@ export function resolveMatchingCategory(
   return custom ? customCategoryToMatchingDefinition(custom) : null;
 }
 
-export function getMatchingCategory(
-  categoryId: MatchingCategoryId,
-): MatchingCategoryDefinition {
-  return (
-    resolveMatchingCategory(categoryId) ?? MATCHING_CATEGORIES[0]!
-  );
+export function getMatchingCategory(categoryId: MatchingCategoryId): MatchingCategoryDefinition {
+  return resolveMatchingCategory(categoryId) ?? MATCHING_CATEGORIES[0]!;
 }
 
 export function matchingCategoryLabel(categoryId: MatchingCategoryId): string {
@@ -100,8 +92,7 @@ export function matchingQuestionFor(
   customCategories: readonly SessionCustomCategory[] = [],
 ): MatchingQuestionDefinition {
   const category =
-    resolveMatchingCategory(categoryId, customCategories) ??
-    getMatchingCategory(categoryId);
+    resolveMatchingCategory(categoryId, customCategories) ?? getMatchingCategory(categoryId);
 
   return {
     category: categoryId,
@@ -114,9 +105,7 @@ export function matchingQuestionLabel(categoryId: MatchingCategoryId): string {
   return `Match · ${matchingCategoryLabel(categoryId).toLowerCase()}`;
 }
 
-export function isMatchingCategoryEnabled(
-  categoryId: MatchingCategoryId,
-): boolean {
+export function isMatchingCategoryEnabled(categoryId: MatchingCategoryId): boolean {
   const category = resolveMatchingCategory(categoryId);
   return category?.phase === 1;
 }
@@ -125,10 +114,7 @@ export function usedMatchingCategoryIds(
   annotations: AnnotationRecord[],
   exceptAnnotationId?: string,
 ): Set<MatchingCategoryId> {
-  return matchingCatalogHelpers.usedOptionsFromAnnotations(
-    annotations,
-    exceptAnnotationId,
-  );
+  return matchingCatalogHelpers.usedOptionsFromAnnotations(annotations, exceptAnnotationId);
 }
 
 export function usedMatchingCategoryIdsForSession(
@@ -137,9 +123,7 @@ export function usedMatchingCategoryIdsForSession(
   exceptAnnotationId?: string,
 ): Set<MatchingCategoryId> {
   const used = usedMatchingCategoryIds(annotations, exceptAnnotationId);
-  for (const id of matchingCatalogHelpers.usedOptionsFromPending(
-    pendingQuestions,
-  )) {
+  for (const id of matchingCatalogHelpers.usedOptionsFromPending(pendingQuestions)) {
     used.add(id);
   }
   return used;
@@ -155,9 +139,7 @@ export function firstAvailableMatchingCategoryId(
   );
 }
 
-export function isMatchingCategoryAvailable(
-  categoryId: MatchingCategoryId,
-): boolean {
+export function isMatchingCategoryAvailable(categoryId: MatchingCategoryId): boolean {
   return isMatchingCategoryEnabled(categoryId);
 }
 
@@ -196,9 +178,7 @@ export function defaultMatchingCategoryId(
   );
 }
 
-export function adminLevelForMatchingCategory(
-  categoryId: MatchingCategoryId,
-): number | null {
+export function adminLevelForMatchingCategory(categoryId: MatchingCategoryId): number | null {
   switch (categoryId) {
     case "admin_division_1":
       return 4;
@@ -214,9 +194,7 @@ export function adminLevelForMatchingCategory(
 }
 
 /** Matching is play-area-only; expanded near-search is retired. */
-export function matchingUsesExpandedFeatureSearch(
-  _category?: MatchingCategoryDefinition,
-): boolean {
+export function matchingUsesExpandedFeatureSearch(_category?: MatchingCategoryDefinition): boolean {
   void _category;
   return false;
 }

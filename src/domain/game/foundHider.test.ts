@@ -1,9 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  foundHiderBlocked,
-  isFoundHiderPending,
-  isRoundComplete,
-} from "./foundHider";
+import { foundHiderBlocked, isFoundHiderPending, isRoundComplete } from "./foundHider";
 
 describe("foundHider", () => {
   it("treats a request without confirm as pending", () => {

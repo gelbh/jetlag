@@ -10,10 +10,7 @@ import { ensureDatedVersionHeaders } from "./normalize-changelog-sections.mjs";
 
 const projectRoot = resolve(import.meta.dirname, "..");
 const changelogMdPath = resolve(projectRoot, "CHANGELOG.md");
-const changelogTsPath = resolve(
-  projectRoot,
-  "src/domain/device/changelog.ts",
-);
+const changelogTsPath = resolve(projectRoot, "src/domain/device/changelog.ts");
 
 const SECTION_TITLE_MAP = {
   Fixes: "Fixes",
@@ -53,9 +50,7 @@ function parseChangelogMarkdown(content) {
       }
 
       const sectionBody = sectionPart.slice(newlineIndex + 1);
-      const items = [...sectionBody.matchAll(/^- (.+)$/gm)].map((item) =>
-        item[1].trim(),
-      );
+      const items = [...sectionBody.matchAll(/^- (.+)$/gm)].map((item) => item[1].trim());
       if (items.length === 0) {
         continue;
       }
@@ -134,9 +129,7 @@ ${formattedEntries}
 }
 
 function readPackageVersion() {
-  const packageJson = JSON.parse(
-    readFileSync(resolve(projectRoot, "package.json"), "utf8"),
-  );
+  const packageJson = JSON.parse(readFileSync(resolve(projectRoot, "package.json"), "utf8"));
   return packageJson.version;
 }
 
@@ -163,9 +156,6 @@ const functionsPackagePath = resolve(projectRoot, "functions/package.json");
 const functionsPackage = JSON.parse(readFileSync(functionsPackagePath, "utf8"));
 if (functionsPackage.version !== packageVersion) {
   functionsPackage.version = packageVersion;
-  writeFileSync(
-    functionsPackagePath,
-    `${JSON.stringify(functionsPackage, null, 2)}\n`,
-  );
+  writeFileSync(functionsPackagePath, `${JSON.stringify(functionsPackage, null, 2)}\n`);
   console.info(`Synced functions/package.json version to ${packageVersion}`);
 }

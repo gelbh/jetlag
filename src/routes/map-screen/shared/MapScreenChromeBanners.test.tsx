@@ -36,9 +36,7 @@ describe("MapScreenChromeBanners", () => {
       />,
     );
     expect(screen.getByText("Refining measure")).toBeInTheDocument();
-    expect(
-      screen.getByText("Adding detail to the shaded area…"),
-    ).toBeInTheDocument();
+    expect(screen.getByText("Adding detail to the shaded area…")).toBeInTheDocument();
   });
 
   it("shows loading-places copy when catalog is hydrating", () => {

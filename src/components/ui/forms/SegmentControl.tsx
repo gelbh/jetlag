@@ -80,9 +80,7 @@ export function SegmentControl<Value extends string>({
               disabled={disabled || option.disabled}
               aria-pressed={selected}
               className={`rounded-lg px-3 py-1.5 text-sm font-medium disabled:opacity-50 ${
-                selected
-                  ? "bg-flag-soft text-flag"
-                  : "text-field-ink-muted"
+                selected ? "bg-flag-soft text-flag" : "text-field-ink-muted"
               }`}
             >
               {option.label}

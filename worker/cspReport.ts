@@ -2,9 +2,7 @@ export const CSP_REPORT_PATH = "/api/csp-report";
 
 const CSP_REPORT_LOG_BYTES = 8_000;
 
-export async function handleCspReportRequest(
-  request: Request,
-): Promise<Response> {
+export async function handleCspReportRequest(request: Request): Promise<Response> {
   // Some browsers and intermediaries appear to probe this endpoint with non-POST
   // methods (or preflight-like requests). Don't emit noisy 405s in the console.
   if (request.method !== "POST") {

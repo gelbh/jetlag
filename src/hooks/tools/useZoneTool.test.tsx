@@ -1,7 +1,7 @@
 import { act, renderHook } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { useZoneTool } from "./useZoneTool";
 import { createToolHookMocks } from "../../test/helpers/toolHookMocks";
+import { useZoneTool } from "./useZoneTool";
 
 describe("useZoneTool", () => {
   it("collects polygon vertices from map taps", () => {
@@ -43,8 +43,6 @@ describe("useZoneTool", () => {
       await result.current.panel.props.onClosePolygon();
     });
 
-    expect(mocks.createAnnotation).toHaveBeenCalledWith(
-      expect.objectContaining({ type: "zone" }),
-    );
+    expect(mocks.createAnnotation).toHaveBeenCalledWith(expect.objectContaining({ type: "zone" }));
   });
 });

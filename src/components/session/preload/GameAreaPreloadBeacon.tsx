@@ -1,8 +1,8 @@
 import { useId } from "react";
 import { useShallow } from "zustand/react/shallow";
+import { selectPreloadBanner, usePreloadStore } from "@/state/preloadStore";
 import { HudRefreshIcon } from "../../ui/brand/HudIcons";
 import { loadingSpinnerClass } from "../../ui/feedback/loadingSpinnerClass";
-import { selectPreloadBanner, usePreloadStore } from "@/state/preloadStore";
 import { GameAreaPreloadDetailPanel } from "./GameAreaPreloadDetailPanel";
 
 interface GameAreaPreloadBeaconProps {
@@ -47,9 +47,7 @@ export function GameAreaPreloadBeacon({
       className={`h-5 w-5 stroke-[2.5] ${loadingSpinnerClass(banner.loading)}`}
       aria-hidden
       style={{
-        color: banner.failed
-          ? "var(--color-halt)"
-          : "var(--color-signal)",
+        color: banner.failed ? "var(--color-halt)" : "var(--color-signal)",
       }}
     />
   );
@@ -86,9 +84,7 @@ export function GameAreaPreloadBeacon({
         aria-expanded={detailOpen}
         aria-controls={detailId}
         style={{
-          color: detailOpen
-            ? "var(--color-flag)"
-            : "var(--color-field-ink)",
+          color: detailOpen ? "var(--color-flag)" : "var(--color-field-ink)",
         }}
       >
         {bareIcon}

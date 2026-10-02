@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import type { SessionMessageRecord } from "../../session/activity/sessionChat";
 import {
   baselineAcknowledgedFingerprints,
   collectUnreadFingerprints,
@@ -6,14 +7,11 @@ import {
   isUnreadEligibleMessage,
   messageFingerprint,
 } from "./chatUnread";
-import type { SessionMessageRecord } from "../../session/activity/sessionChat";
 
 const seekerUid = "seeker-1";
 const hiderUid = "hider-1";
 
-function socialMessage(
-  overrides: Partial<SessionMessageRecord> = {},
-): SessionMessageRecord {
+function socialMessage(overrides: Partial<SessionMessageRecord> = {}): SessionMessageRecord {
   return {
     id: "msg-social",
     sessionId: "session-1",
@@ -26,9 +24,7 @@ function socialMessage(
   };
 }
 
-function gameQuestion(
-  overrides: Partial<SessionMessageRecord> = {},
-): SessionMessageRecord {
+function gameQuestion(overrides: Partial<SessionMessageRecord> = {}): SessionMessageRecord {
   return {
     id: "msg-question",
     sessionId: "session-1",
@@ -100,9 +96,7 @@ describe("isUnreadEligibleMessage", () => {
 
 describe("hasUnreadChatMessages", () => {
   it("detects unread social messages from others", () => {
-    expect(
-      hasUnreadChatMessages([socialMessage()], seekerUid, new Set()),
-    ).toBe(true);
+    expect(hasUnreadChatMessages([socialMessage()], seekerUid, new Set())).toBe(true);
   });
 
   it("ignores own social messages", () => {
@@ -116,9 +110,7 @@ describe("hasUnreadChatMessages", () => {
   });
 
   it("detects new game questions for the hider", () => {
-    expect(hasUnreadChatMessages([gameQuestion()], hiderUid, new Set())).toBe(
-      true,
-    );
+    expect(hasUnreadChatMessages([gameQuestion()], hiderUid, new Set())).toBe(true);
   });
 
   it("detects answered questions for the seeker", () => {
@@ -127,18 +119,14 @@ describe("hasUnreadChatMessages", () => {
       selectedReply: "yes",
     });
 
-    expect(
-      hasUnreadChatMessages([answered], seekerUid, new Set()),
-    ).toBe(true);
+    expect(hasUnreadChatMessages([answered], seekerUid, new Set())).toBe(true);
   });
 
   it("returns false when fingerprints are acknowledged", () => {
     const message = socialMessage();
     const acknowledged = new Set([messageFingerprint(message)]);
 
-    expect(
-      hasUnreadChatMessages([message], seekerUid, acknowledged),
-    ).toBe(false);
+    expect(hasUnreadChatMessages([message], seekerUid, acknowledged)).toBe(false);
   });
 
   it("collects multiple unread fingerprints", () => {
@@ -155,15 +143,10 @@ describe("hasUnreadChatMessages", () => {
 
 describe("baselineAcknowledgedFingerprints", () => {
   it("excludes pending seeker questions for the hider", () => {
-    const baseline = baselineAcknowledgedFingerprints(
-      [gameQuestion()],
-      hiderUid,
-    );
+    const baseline = baselineAcknowledgedFingerprints([gameQuestion()], hiderUid);
 
     expect(baseline).toHaveLength(0);
-    expect(hasUnreadChatMessages([gameQuestion()], hiderUid, new Set(baseline))).toBe(
-      true,
-    );
+    expect(hasUnreadChatMessages([gameQuestion()], hiderUid, new Set(baseline))).toBe(true);
   });
 
   it("includes own social messages and answered questions", () => {
@@ -173,19 +156,14 @@ describe("baselineAcknowledgedFingerprints", () => {
       selectedReply: "yes",
     });
 
-    const baseline = baselineAcknowledgedFingerprints(
-      [ownSocial, answered],
-      hiderUid,
-    );
+    const baseline = baselineAcknowledgedFingerprints([ownSocial, answered], hiderUid);
 
     expect(baseline).toContain(messageFingerprint(ownSocial));
     expect(baseline).toContain(messageFingerprint(answered));
   });
 
   it("leaves new fingerprints unread after baseline", () => {
-    const baseline = new Set(
-      baselineAcknowledgedFingerprints([], hiderUid),
-    );
+    const baseline = new Set(baselineAcknowledgedFingerprints([], hiderUid));
     const question = gameQuestion();
 
     expect(hasUnreadChatMessages([question], hiderUid, baseline)).toBe(true);

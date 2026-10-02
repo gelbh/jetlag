@@ -1,13 +1,13 @@
-import type { MapTool } from "../../map/mapToolTypes";
 import type { DistanceUnit } from "../../map/distance";
+import type { MapTool } from "../../map/mapToolTypes";
 import type { ThermometerDistanceOptionMiles } from "../../questions/thermometerQuestions";
 import { toolDockEnabled } from "../size/gameSizeRules";
 import { resolveTentaclesEnabledForSession } from "./tentacleRules";
 import {
   ALL_CONFIGURABLE_TOOLS,
-  sessionGameSize,
   type ConfigurableMapTool,
   type SessionRulesInput,
+  sessionGameSize,
 } from "./types";
 
 export function resolveToolDockEnabled(
@@ -26,9 +26,7 @@ export function resolveToolDockEnabled(
   return toolDockEnabled(toolId, sessionGameSize(session), options);
 }
 
-export function isConfigurableMapTool(
-  toolId: string,
-): toolId is ConfigurableMapTool {
+export function isConfigurableMapTool(toolId: string): toolId is ConfigurableMapTool {
   return (ALL_CONFIGURABLE_TOOLS as readonly string[]).includes(toolId);
 }
 
@@ -41,16 +39,12 @@ export function parseDisabledTools(value: unknown): ConfigurableMapTool[] | unde
   return tools.length > 0 ? tools : undefined;
 }
 
-export function parseThermometerPresetMeters(
-  value: unknown,
-): number[] | undefined {
+export function parseThermometerPresetMeters(value: unknown): number[] | undefined {
   if (!Array.isArray(value)) {
     return undefined;
   }
 
-  const presets = value.filter(
-    (item): item is number => typeof item === "number" && item > 0,
-  );
+  const presets = value.filter((item): item is number => typeof item === "number" && item > 0);
 
   return presets.length > 0 ? presets : undefined;
 }

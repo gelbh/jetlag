@@ -3,11 +3,7 @@
  * (not places with flags): Local authorities, Wards, Boroughs, Districts.
  * Portland council districts use numbered badges via districtNumberFromSubregionId.
  */
-export type HierarchyCategoryGlyphId =
-  | "local-authorities"
-  | "wards"
-  | "boroughs"
-  | "districts";
+export type HierarchyCategoryGlyphId = "local-authorities" | "wards" | "boroughs" | "districts";
 
 const BY_CATEGORY: Record<string, HierarchyCategoryGlyphId> = {
   "Local authorities": "local-authorities",
@@ -16,16 +12,12 @@ const BY_CATEGORY: Record<string, HierarchyCategoryGlyphId> = {
   Districts: "districts",
 };
 
-export function glyphIdForHierarchyCategory(
-  category: string,
-): HierarchyCategoryGlyphId | null {
+export function glyphIdForHierarchyCategory(category: string): HierarchyCategoryGlyphId | null {
   return BY_CATEGORY[category] ?? null;
 }
 
 /** Portland ME council districts: district-1 … district-5 → 1…5 */
-export function districtNumberFromSubregionId(
-  subregionId: string | undefined,
-): number | null {
+export function districtNumberFromSubregionId(subregionId: string | undefined): number | null {
   if (!subregionId) {
     return null;
   }

@@ -1,10 +1,10 @@
 /** Preload-request callables — preserve export names `createPreloadRequest` / `updatePreloadRequestStatus`. */
 import { getFirestore } from "firebase-admin/firestore";
 import { HttpsError, onCall } from "firebase-functions/v2/https";
-import { withSentryEventHandler } from "../lib/sentry.mjs";
-import { consumeRateLimit } from "../lib/firestoreRateLimit.mjs";
 import { requireAdminAuth, resolveAdminEmail } from "../admin/adminAccess.mjs";
 import { sendIncidentEmail } from "../incident/sendIncidentEmail.mjs";
+import { consumeRateLimit } from "../lib/firestoreRateLimit.mjs";
+import { withSentryEventHandler } from "../lib/sentry.mjs";
 import {
   createPreloadRequestHandler,
   PRELOAD_INVALID_SNAPSHOT,
@@ -19,11 +19,7 @@ import {
   PRELOAD_REQUEST_NOT_FOUND,
   updatePreloadRequestStatusHandler,
 } from "../preloadRequest/updatePreloadRequestStatus.mjs";
-import {
-  incidentEmailSecret,
-  incidentWorkerBaseUrl,
-  sentryDsnSecret,
-} from "./incident/shared.mjs";
+import { incidentEmailSecret, incidentWorkerBaseUrl, sentryDsnSecret } from "./incident/shared.mjs";
 
 function mapPreloadError(error) {
   if (!(error instanceof Error)) {
@@ -51,10 +47,7 @@ function mapPreloadError(error) {
     case PRELOAD_INVALID_STATUS:
       throw new HttpsError("invalid-argument", "Invalid preload request status.");
     case PRELOAD_INVALID_TRANSITION:
-      throw new HttpsError(
-        "failed-precondition",
-        "That status transition is not allowed.",
-      );
+      throw new HttpsError("failed-precondition", "That status transition is not allowed.");
     default:
       throw error;
   }

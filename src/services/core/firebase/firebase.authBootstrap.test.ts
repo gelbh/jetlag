@@ -14,9 +14,7 @@ const authMocks = vi.hoisted(() => {
   };
 });
 
-const completeOAuthRedirectIfPending = vi.hoisted(() =>
-  vi.fn(async () => null),
-);
+const completeOAuthRedirectIfPending = vi.hoisted(() => vi.fn(async () => null));
 
 vi.mock("firebase/app", () => ({
   initializeApp: vi.fn(() => ({ name: "[DEFAULT]" })),
@@ -93,8 +91,9 @@ describe("auth bootstrap start", () => {
   });
 
   it("an early waitForAuthStateReady runs the bootstrap once; idle start is a no-op", async () => {
-    const { isAuthBootstrapReady, startAuthBootstrap, waitForAuthStateReady } =
-      await import("./firebase");
+    const { isAuthBootstrapReady, startAuthBootstrap, waitForAuthStateReady } = await import(
+      "./firebase"
+    );
 
     await waitForAuthStateReady();
     expect(isAuthBootstrapReady()).toBe(true);
@@ -112,9 +111,7 @@ describe("auth bootstrap start", () => {
   });
 
   it("an early ensureAnonymousUser shares the bootstrap with a later start", async () => {
-    const { ensureAnonymousUser, startAuthBootstrap } = await import(
-      "./firebase"
-    );
+    const { ensureAnonymousUser, startAuthBootstrap } = await import("./firebase");
 
     const user = await ensureAnonymousUser();
     startAuthBootstrap();

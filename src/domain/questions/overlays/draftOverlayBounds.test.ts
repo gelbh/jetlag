@@ -1,13 +1,13 @@
-import { describe, expect, it } from "vitest";
 import turfCircle from "@turf/circle";
 import { point as turfPoint } from "@turf/helpers";
 import type { Feature, Polygon as GeoPolygon } from "geojson";
+import { describe, expect, it } from "vitest";
+import type { MapDraftOverlay } from "../../map/mapDraftOverlay";
 import {
   boundingBoxFromDraftOverlays,
   boundingBoxFromPositions,
   unionBoundingBoxes,
 } from "./draftOverlayBounds";
-import type { MapDraftOverlay } from "../../map/mapDraftOverlay";
 
 describe("boundingBoxFromPositions", () => {
   it("returns null for empty input", () => {

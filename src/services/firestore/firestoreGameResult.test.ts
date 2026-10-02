@@ -2,24 +2,33 @@ import { describe, expect, it, vi } from "vitest";
 import { subscribeToGameResult } from "./firestoreGameResult";
 
 const onSnapshot = vi.hoisted(() =>
-  vi.fn((_ref: unknown, onNext: (snapshot: { exists: () => boolean; id: string; data: () => Record<string, unknown> }) => void) => {
-    onNext({
-      exists: () => true,
-      id: "result-1",
-      data: () => ({
-        roundNumber: 0,
-        gameSize: "medium",
-        outcome: "found",
-        endedAt: "2026-05-14T02:00:00.000Z",
-        durationMs: 1000,
-        hidingPhaseMs: 0,
-        seekPhaseMs: 1000,
-        seekTimeMs: 1000,
-        players: [],
-      }),
-    });
-    return vi.fn();
-  }),
+  vi.fn(
+    (
+      _ref: unknown,
+      onNext: (snapshot: {
+        exists: () => boolean;
+        id: string;
+        data: () => Record<string, unknown>;
+      }) => void,
+    ) => {
+      onNext({
+        exists: () => true,
+        id: "result-1",
+        data: () => ({
+          roundNumber: 0,
+          gameSize: "medium",
+          outcome: "found",
+          endedAt: "2026-05-14T02:00:00.000Z",
+          durationMs: 1000,
+          hidingPhaseMs: 0,
+          seekPhaseMs: 1000,
+          seekTimeMs: 1000,
+          players: [],
+        }),
+      });
+      return vi.fn();
+    },
+  ),
 );
 
 vi.mock("../core/firebase/firebase", () => ({

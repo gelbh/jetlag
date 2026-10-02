@@ -1,5 +1,5 @@
-import type { ReactNode } from "react";
 import { Alert } from "@mantine/core";
+import type { ReactNode } from "react";
 import {
   askInlineErrorCopy,
   isLocationInlineError,

@@ -1,27 +1,21 @@
 import { useMemo } from "react";
-import type { SessionRecord } from "../../domain/map/annotations";
-import type { SessionRulesInput } from "../../domain/session/rules";
-import type { PlayerRole } from "../../domain/session/players/playerRole";
-import type { LayerVisibility } from "../../state/sessionStore";
-import type { MapViewportState } from "../../components/map/chrome/MapViewportTracker";
-import type { ObserverMapScreenController } from "../observer-map-screen/useObserverMapScreen";
-import { SessionLogBody } from "../../components/session/log/SessionLogBody";
 import { ChatPanelBody } from "../../components/chat/ChatPanelBody";
+import type { MapViewportState } from "../../components/map/chrome/MapViewportTracker";
+import { SessionLogBody } from "../../components/session/log/SessionLogBody";
 import { HudChevronLeftIcon, HudChevronRightIcon } from "../../components/ui/brand/HudIcons";
+import type { SessionRecord } from "../../domain/map/annotations";
+import type { PlayerRole } from "../../domain/session/players/playerRole";
+import type { SessionRulesInput } from "../../domain/session/rules";
 import { useSessionActivityLog } from "../../hooks/session/useSessionActivityLog";
 import { useAnnotationStore } from "../../state/annotationStore";
-import { OverviewPanel } from "./panels/OverviewPanel";
-import { SyncPanel } from "./panels/SyncPanel";
+import type { LayerVisibility } from "../../state/sessionStore";
+import type { ObserverMapScreenController } from "../observer-map-screen/useObserverMapScreen";
 import { MapPanel } from "./panels/MapPanel";
 import { ModPanel } from "./panels/ModPanel";
+import { OverviewPanel } from "./panels/OverviewPanel";
+import { SyncPanel } from "./panels/SyncPanel";
 
-export type AdminMonitorRailTab =
-  | "overview"
-  | "log"
-  | "chat"
-  | "sync"
-  | "map"
-  | "mod";
+export type AdminMonitorRailTab = "overview" | "log" | "chat" | "sync" | "map" | "mod";
 
 const TABS: Array<{ id: AdminMonitorRailTab; label: string; short: string }> = [
   { id: "overview", label: "Overview", short: "Ov" },
@@ -46,10 +40,7 @@ interface AdminMonitorRailProps {
   moderationError: string | null;
   onModerationAction: (action: "end" | "resetBoard" | "cleanupCode") => void;
   mapViewport: MapViewportState | null;
-  onLayerVisibilityChange: (
-    layer: keyof LayerVisibility,
-    visible: boolean,
-  ) => void;
+  onLayerVisibilityChange: (layer: keyof LayerVisibility, visible: boolean) => void;
   onLowPowerModeChange: (enabled: boolean) => void;
 }
 
@@ -71,12 +62,8 @@ export function AdminMonitorRail({
   onLowPowerModeChange,
 }: AdminMonitorRailProps) {
   const events = useSessionActivityLog(session.id);
-  const setSelectedAnnotationId = useAnnotationStore(
-    (state) => state.setSelectedAnnotationId,
-  );
-  const markAnnotationPulse = useAnnotationStore(
-    (state) => state.markAnnotationPulse,
-  );
+  const setSelectedAnnotationId = useAnnotationStore((state) => state.setSelectedAnnotationId);
+  const markAnnotationPulse = useAnnotationStore((state) => state.markAnnotationPulse);
   const activeLabel = useMemo(
     () => TABS.find((tab) => tab.id === activeTab)?.label ?? "Overview",
     [activeTab],

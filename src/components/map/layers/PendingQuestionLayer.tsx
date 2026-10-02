@@ -1,12 +1,12 @@
 import { memo, useEffect, useMemo, useState } from "react";
 import type { GameArea } from "@/domain/map/annotations";
 import type { MapStyle, StreetBasemap } from "@/domain/map/mapBasemaps";
-import type { SessionRulesInput } from "@/domain/session/rules";
 import {
   buildPendingQuestionOverlays,
   type PendingQuestionOverlayResult,
 } from "@/domain/questions/ui";
 import type { PendingQuestionRecord } from "@/domain/session/activity/sessionChat";
+import type { SessionRulesInput } from "@/domain/session/rules";
 import { MapDraftLayer } from "./MapDraftLayer";
 
 interface PendingQuestionLayerProps {
@@ -29,20 +29,13 @@ export const PendingQuestionLayer = memo(function PendingQuestionLayer({
     [mapStyle, streetBasemap, pendingQuestions],
   );
 
-  const [overlayResults, setOverlayResults] = useState<
-    PendingQuestionOverlayResult[]
-  >([]);
+  const [overlayResults, setOverlayResults] = useState<PendingQuestionOverlayResult[]>([]);
   const [loadedKey, setLoadedKey] = useState("");
 
   useEffect(() => {
     let cancelled = false;
 
-    void buildPendingQuestionOverlays(
-      pendingQuestions,
-      gameArea,
-      mapStyle,
-      streetBasemap,
-    )
+    void buildPendingQuestionOverlays(pendingQuestions, gameArea, mapStyle, streetBasemap)
       .then((results) => {
         if (!cancelled) {
           setOverlayResults(results);

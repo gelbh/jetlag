@@ -17,10 +17,7 @@ describe("measuringCatalog rulebook alignment", () => {
     expect(BASE_MEASURING_CATALOG).toHaveLength(20);
     expect(CUSTOM_PACK_GATED_MEASURING).toHaveLength(3);
     expect(MEASURING_CATALOG).toHaveLength(23);
-    expect(MEASURING_CATALOG).toEqual([
-      ...BASE_MEASURING_CATALOG,
-      ...CUSTOM_PACK_GATED_MEASURING,
-    ]);
+    expect(MEASURING_CATALOG).toEqual([...BASE_MEASURING_CATALOG, ...CUSTOM_PACK_GATED_MEASURING]);
     expect([...CUSTOM_PACK_GATED_MEASURING_IDS]).toEqual([
       "admin3_border",
       "admin4_border",

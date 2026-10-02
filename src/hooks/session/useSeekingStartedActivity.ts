@@ -19,9 +19,7 @@ export interface ShouldEmitSeekingStartedInput {
 }
 
 /** Pure predicate for host/controller seeking_started emission. */
-export function shouldEmitSeekingStarted(
-  input: ShouldEmitSeekingStartedInput,
-): boolean {
+export function shouldEmitSeekingStarted(input: ShouldEmitSeekingStartedInput): boolean {
   return (
     input.canEmit &&
     input.hasTimerStarted &&

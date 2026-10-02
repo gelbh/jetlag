@@ -1,11 +1,7 @@
 import { Box, Button, Stack, Text } from "@mantine/core";
-import { usePersistedDismiss } from "@/hooks/forms/usePersistedDismiss";
-import {
-  InsetGroup,
-  SectionLabel,
-  filledStyles,
-} from "@/components/ui/entry/entryChrome";
+import { filledStyles, InsetGroup, SectionLabel } from "@/components/ui/entry/entryChrome";
 import { InsetHairline } from "@/components/ui/entry/InsetRow";
+import { usePersistedDismiss } from "@/hooks/forms/usePersistedDismiss";
 import { SheetHost } from "../../ui/sheets/SheetHost";
 
 const STORAGE_KEY = "jetlag.mapFirstRunDismissed";
@@ -56,11 +52,7 @@ function GuideRow({
   );
 }
 
-export function MapFirstRunSheet({
-  open,
-  onDismiss,
-  forceOpen = false,
-}: MapFirstRunSheetProps) {
+export function MapFirstRunSheet({ open, onDismiss, forceOpen = false }: MapFirstRunSheetProps) {
   const { dismissed, dismiss: persistDismiss } = usePersistedDismiss(STORAGE_KEY);
 
   if (dismissed && !forceOpen) {
@@ -92,9 +84,8 @@ export function MapFirstRunSheet({
             color: "var(--color-field-ink-muted)",
           }}
         >
-          Question tools live on the Hunt dock. Cue sits up top; chips stay in
-          the thumb zone; the send strip arms when you are ready. Markup lives
-          under Draw.
+          Question tools live on the Hunt dock. Cue sits up top; chips stay in the thumb zone; the
+          send strip arms when you are ready. Markup lives under Draw.
         </Text>
 
         <Stack gap="xs">

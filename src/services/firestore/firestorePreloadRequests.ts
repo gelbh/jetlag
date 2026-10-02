@@ -1,3 +1,4 @@
+import { FirebaseError } from "firebase/app";
 import {
   collection,
   limit,
@@ -6,9 +7,8 @@ import {
   query,
   type Unsubscribe,
 } from "firebase/firestore";
-import { FirebaseError } from "firebase/app";
-import type { PreloadRequest } from "../../domain/preloadRequest/preloadRequestTypes";
 import { deserializePreloadRequest } from "../../domain/preloadRequest/preloadRequestAdmin";
+import type { PreloadRequest } from "../../domain/preloadRequest/preloadRequestTypes";
 import { forceRefreshIdToken } from "../core/auth/forceRefreshIdToken";
 import { getFirestoreDb } from "../core/firebase/firebase";
 
@@ -29,11 +29,7 @@ export function subscribePreloadRequestList(
 
   const attach = () => {
     activeUnsub = onSnapshot(
-      query(
-        preloadRequestsCollection(),
-        orderBy("updatedAt", "desc"),
-        limit(limitCount),
-      ),
+      query(preloadRequestsCollection(), orderBy("updatedAt", "desc"), limit(limitCount)),
       (snapshot) => {
         const requests: PreloadRequest[] = [];
         for (const docSnapshot of snapshot.docs) {
@@ -65,9 +61,7 @@ export function subscribePreloadRequestList(
                 return;
               }
               onError(
-                refreshError instanceof Error
-                  ? refreshError
-                  : new Error(String(refreshError)),
+                refreshError instanceof Error ? refreshError : new Error(String(refreshError)),
               );
             });
           return;

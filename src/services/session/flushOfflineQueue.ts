@@ -14,9 +14,7 @@ export interface FlushOfflineQueueResult {
   lastError: string | null;
 }
 
-export async function flushOfflineQueue(
-  sessionId: string,
-): Promise<FlushOfflineQueueResult> {
+export async function flushOfflineQueue(sessionId: string): Promise<FlushOfflineQueueResult> {
   const pendingForSession = await readOfflineQueueForSession(sessionId);
 
   if (pendingForSession.length === 0) {
@@ -24,9 +22,7 @@ export async function flushOfflineQueue(
   }
 
   let lastError: string | null = null;
-  const retryable = pendingForSession.filter((entry) =>
-    shouldRetryOfflineWrite(entry),
-  );
+  const retryable = pendingForSession.filter((entry) => shouldRetryOfflineWrite(entry));
 
   if (retryable.length === 0) {
     return {
@@ -50,8 +46,7 @@ export async function flushOfflineQueue(
         await writeRemoteAnnotation(sessionId, entry.annotation);
         await removeOfflineWrite(entry.id);
       } catch (error) {
-        lastError =
-          error instanceof Error ? error.message : "Sync failed.";
+        lastError = error instanceof Error ? error.message : "Sync failed.";
         await recordOfflineWriteFailure(entry.id);
       }
     }

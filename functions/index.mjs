@@ -5,8 +5,8 @@ if (getApps().length === 0) {
   initializeApp();
 }
 
-export { grantAccess, proxy } from "./handlers/proxies.mjs";
-
+export { listActiveSessions } from "./admin/listActiveSessions.mjs";
+export { adminModerateSession } from "./admin/moderateSession.mjs";
 export {
   createBillingPortalSession,
   createCheckoutSession,
@@ -16,15 +16,24 @@ export {
   startPremiumTrial,
   stripeWebhook,
 } from "./handlers/billing.mjs";
-
 export {
-  captureStartingLocations,
-  finalizeGameResult,
-  pollSessionOpsAgentRuns,
-  purgeStaleSessions,
-  warmPremiumOverpassPreload,
-} from "./handlers/triggers.mjs";
-
+  applyIncidentMitigation,
+  approveHostConfirm,
+  createIncident,
+  denyHostConfirm,
+  launchIncidentCursorAgent,
+  postIncidentMessage,
+  postSupportAgentTurn,
+  publishIncidentHotfix,
+  sessionOpsMcp,
+  updateIncidentStatus,
+} from "./handlers/incident.mjs";
+export {
+  createPreloadRequest,
+  updatePreloadRequestStatus,
+} from "./handlers/preloadRequest.mjs";
+export { claimUsername, profileFriends } from "./handlers/profile.mjs";
+export { grantAccess, proxy } from "./handlers/proxies.mjs";
 export {
   cancelRoleJoinRequest,
   controlSessionTimerForMove,
@@ -40,26 +49,10 @@ export {
   resolveRoleJoinRequest,
   revealRolePasscode,
 } from "./handlers/session.mjs";
-
-export { claimUsername, profileFriends } from "./handlers/profile.mjs";
-
 export {
-  applyIncidentMitigation,
-  approveHostConfirm,
-  createIncident,
-  denyHostConfirm,
-  launchIncidentCursorAgent,
-  postIncidentMessage,
-  postSupportAgentTurn,
-  publishIncidentHotfix,
-  sessionOpsMcp,
-  updateIncidentStatus,
-} from "./handlers/incident.mjs";
-
-export {
-  createPreloadRequest,
-  updatePreloadRequestStatus,
-} from "./handlers/preloadRequest.mjs";
-
-export { listActiveSessions } from "./admin/listActiveSessions.mjs";
-export { adminModerateSession } from "./admin/moderateSession.mjs";
+  captureStartingLocations,
+  finalizeGameResult,
+  pollSessionOpsAgentRuns,
+  purgeStaleSessions,
+  warmPremiumOverpassPreload,
+} from "./handlers/triggers.mjs";

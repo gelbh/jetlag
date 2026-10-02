@@ -1,11 +1,11 @@
-import { describe, expect, it } from "vitest";
 import type { Feature, Polygon } from "geojson";
-import { countPolygonVertices } from "./polygonMetrics";
+import { describe, expect, it } from "vitest";
 import {
-  POLYGON_LOD_TURF_VERTEX_CEILING,
   buildCoarsePolygonFeature,
+  POLYGON_LOD_TURF_VERTEX_CEILING,
   refinePolygonFeatureStep,
 } from "./polygonLod";
+import { countPolygonVertices } from "./polygonMetrics";
 
 function denseZigzagPolygon(vertexCount: number): Feature<Polygon> {
   const ring: number[][] = [];
@@ -26,9 +26,7 @@ describe("polygonLod", () => {
   it("builds coarse with fewer vertices than a dense full feature", () => {
     const full = denseZigzagPolygon(6_000);
     const coarse = buildCoarsePolygonFeature(full);
-    expect(countPolygonVertices(coarse)).toBeLessThan(
-      countPolygonVertices(full),
-    );
+    expect(countPolygonVertices(coarse)).toBeLessThan(countPolygonVertices(full));
   });
 
   it("refines until done returns the full feature", () => {
@@ -48,17 +46,11 @@ describe("polygonLod", () => {
 
   it("skips Turf path for dense rings over the LOD ceiling (stride coarse)", () => {
     const full = denseZigzagPolygon(6_000);
-    expect(countPolygonVertices(full)).toBeGreaterThan(
-      POLYGON_LOD_TURF_VERTEX_CEILING,
-    );
+    expect(countPolygonVertices(full)).toBeGreaterThan(POLYGON_LOD_TURF_VERTEX_CEILING);
     const coarse = buildCoarsePolygonFeature(full);
     const fullVerts = countPolygonVertices(full);
-    expect(countPolygonVertices(coarse)).toBeLessThanOrEqual(
-      Math.floor(fullVerts * 0.3),
-    );
+    expect(countPolygonVertices(coarse)).toBeLessThanOrEqual(Math.floor(fullVerts * 0.3));
     const step = refinePolygonFeatureStep(full, coarse, 0);
-    expect(countPolygonVertices(step.feature)).toBeGreaterThan(
-      countPolygonVertices(coarse),
-    );
+    expect(countPolygonVertices(step.feature)).toBeGreaterThan(countPolygonVertices(coarse));
   });
 });

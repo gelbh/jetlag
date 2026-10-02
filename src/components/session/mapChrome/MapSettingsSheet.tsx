@@ -1,24 +1,21 @@
-import { useState } from "react";
 import { Box, Text } from "@mantine/core";
-import { SheetHost } from "../../ui/sheets/SheetHost";
-import {
-  SettingsSegmentControl,
-  type SettingsSegment,
-} from "../settings/SettingsSegmentControl";
+import { useState } from "react";
+import type { SessionRecord } from "@/domain/map/annotations";
 import type { DistanceUnit } from "@/domain/map/distance";
-import type { GameSize } from "@/domain/session/size/gameSize";
-import {
-  defaultAdvancedSessionSettings,
-  type AdvancedSessionSettingsValue,
-} from "@/domain/session/tools/advancedSessionSettings";
 import type { MapStyle, StreetBasemap } from "@/domain/map/mapBasemaps";
 import { getBasemapAttributionText } from "@/domain/map/mapBasemaps";
-import type { SessionRecord } from "@/domain/map/annotations";
-import type { LayerVisibility } from "@/state/sessionStore";
 import type { TransitRouteFilter } from "@/domain/map/transit";
-import { MapSettingsGeneralTab } from "../settings/GeneralTab";
+import type { GameSize } from "@/domain/session/size/gameSize";
+import {
+  type AdvancedSessionSettingsValue,
+  defaultAdvancedSessionSettings,
+} from "@/domain/session/tools/advancedSessionSettings";
+import type { LayerVisibility } from "@/state/sessionStore";
+import { SheetHost } from "../../ui/sheets/SheetHost";
 import { MapSettingsGameTab } from "../settings/GameTab";
+import { MapSettingsGeneralTab } from "../settings/GeneralTab";
 import { MapSettingsSessionTab } from "../settings/SessionTab";
+import { type SettingsSegment, SettingsSegmentControl } from "../settings/SettingsSegmentControl";
 
 export interface MapSettingsGeneralProps {
   showCurrentLocation: boolean;
@@ -58,10 +55,7 @@ export interface MapSettingsGeneralProps {
 
 export interface MapSettingsLayersProps {
   layerVisibility: LayerVisibility;
-  onLayerVisibilityChange: (
-    layer: keyof LayerVisibility,
-    visible: boolean,
-  ) => void;
+  onLayerVisibilityChange: (layer: keyof LayerVisibility, visible: boolean) => void;
 }
 
 export interface MapSettingsRulesProps {
@@ -138,16 +132,11 @@ export function MapSettingsSheet({
               py="0.55rem"
               style={{
                 borderRadius: 12,
-                border:
-                  "0.33px solid oklch(from var(--color-signal) l c h / 0.55)",
+                border: "0.33px solid oklch(from var(--color-signal) l c h / 0.55)",
                 backgroundColor: "oklch(from var(--color-signal) l c h / 0.14)",
               }}
             >
-              <Text
-                size="sm"
-                fw={600}
-                style={{ color: "var(--color-field-ink)" }}
-              >
+              <Text size="sm" fw={600} style={{ color: "var(--color-field-ink)" }}>
                 {pendingWrites} pending sync
               </Text>
             </Box>
@@ -188,9 +177,7 @@ export function MapSettingsSheet({
               rules?.advancedSettings ??
               defaultAdvancedSessionSettings(gameSize, general.distanceUnit)
             }
-            onAdvancedSettingsChange={
-              rules?.onAdvancedSettingsChange ?? (() => {})
-            }
+            onAdvancedSettingsChange={rules?.onAdvancedSettingsChange ?? (() => {})}
             onSaveGameRules={rules?.onSaveGameRules}
             gameRulesSaveLabel={gameRulesSaveLabel}
           />

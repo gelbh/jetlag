@@ -25,9 +25,7 @@ function releaseSlot(): void {
   }
 }
 
-export async function withOverpassConcurrencyLimit<T>(
-  task: () => Promise<T>,
-): Promise<T> {
+export async function withOverpassConcurrencyLimit<T>(task: () => Promise<T>): Promise<T> {
   await acquireSlot();
   try {
     return await task();

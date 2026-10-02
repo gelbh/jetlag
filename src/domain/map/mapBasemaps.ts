@@ -58,9 +58,7 @@ const SATELLITE_BASEMAP = {
   maxZoom: 19,
 } as const satisfies MapBasemapDefinition;
 
-export function getStreetBasemap(
-  streetBasemap: StreetBasemap = "light",
-): MapBasemapDefinition {
+export function getStreetBasemap(streetBasemap: StreetBasemap = "light"): MapBasemapDefinition {
   return STREET_BASEMAPS[streetBasemap];
 }
 

@@ -30,9 +30,7 @@ vi.mock("./sentry", () => ({
   captureErrorBoundaryException: mocks.captureErrorBoundaryException,
 }));
 
-import {
-  ANALYTICS_CONSENT_KEY,
-} from "@/domain/device/consent/analyticsConsent";
+import { ANALYTICS_CONSENT_KEY } from "@/domain/device/consent/analyticsConsent";
 import {
   captureAuthBootstrapFailureLazy,
   captureAuthPersistenceFallbackLazy,
@@ -54,9 +52,7 @@ async function flush(): Promise<void> {
 
 describe("lazyTelemetry", () => {
   it("forwards analytics identity", async () => {
-    const user = { uid: "u1" } as Parameters<
-      typeof syncAnalyticsIdentityLazy
-    >[0];
+    const user = { uid: "u1" } as Parameters<typeof syncAnalyticsIdentityLazy>[0];
     syncAnalyticsIdentityLazy(user);
     await flush();
     expect(mocks.syncAnalyticsIdentity).toHaveBeenCalledWith(user);
@@ -72,15 +68,9 @@ describe("lazyTelemetry", () => {
       expect(mocks.captureAuthPersistenceFallback).toHaveBeenCalled();
       expect(mocks.setBootstrapTag).toHaveBeenCalledTimes(2);
     });
-    expect(mocks.setBootstrapTag.mock.calls).toEqual([
-      ["auth_start"],
-      ["auth_ready"],
-    ]);
+    expect(mocks.setBootstrapTag.mock.calls).toEqual([["auth_start"], ["auth_ready"]]);
     expect(mocks.captureAuthBootstrapFailure).toHaveBeenCalledWith(err);
-    expect(mocks.captureAuthPersistenceFallback).toHaveBeenCalledWith(
-      "memory",
-      err,
-    );
+    expect(mocks.captureAuthPersistenceFallback).toHaveBeenCalledWith("memory", err);
   });
 
   it("swallows errors thrown by the underlying module", async () => {
@@ -117,10 +107,7 @@ describe("lazyTelemetry", () => {
     setTransactionNameLazy("/stats");
     captureErrorBoundaryExceptionLazy(err, "\n    at Boom");
     await vi.waitFor(() => {
-      expect(mocks.captureErrorBoundaryException).toHaveBeenCalledWith(
-        err,
-        "\n    at Boom",
-      );
+      expect(mocks.captureErrorBoundaryException).toHaveBeenCalledWith(err, "\n    at Boom");
       expect(mocks.trackPageView).toHaveBeenCalledWith("/stats?x=1");
       expect(mocks.captureException).toHaveBeenCalledWith(err);
       expect(mocks.reportSlowRouteTransition).toHaveBeenCalledWith(details);

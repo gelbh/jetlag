@@ -7,9 +7,7 @@ import {
 } from "./embedMode";
 
 function setFramed(framed: boolean): void {
-  vi.spyOn(window, "top", "get").mockReturnValue(
-    framed ? ({} as Window) : window
-  );
+  vi.spyOn(window, "top", "get").mockReturnValue(framed ? ({} as Window) : window);
 }
 
 function setSearch(search: string): void {

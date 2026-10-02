@@ -31,12 +31,11 @@ export function isFirestoreContentionError(error) {
   }
 
   const message =
-    typeof /** @type {{ message?: unknown }} */ (error).message === "string"
+    typeof (/** @type {{ message?: unknown }} */ (error).message) === "string"
       ? /** @type {{ message: string }} */ (error).message
       : "";
   return (
-    /Too much contention on these documents/i.test(message) ||
-    /\b10\s+ABORTED\b/i.test(message)
+    /Too much contention on these documents/i.test(message) || /\b10\s+ABORTED\b/i.test(message)
   );
 }
 
@@ -151,11 +150,7 @@ export async function consumeRateLimit(
   );
 }
 
-export async function getGrantAccessFailureCount(
-  db,
-  uid,
-  { windowMs, nowMs = Date.now() },
-) {
+export async function getGrantAccessFailureCount(db, uid, { windowMs, nowMs = Date.now() }) {
   const snapshot = await rateLimitDocRef(db, GRANT_ACCESS_ROUTE, uid).get();
   return readCounterFromSnapshot(snapshot, windowMs, nowMs).count;
 }

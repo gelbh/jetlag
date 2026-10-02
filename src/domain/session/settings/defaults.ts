@@ -1,11 +1,10 @@
+import type { SessionRecord } from "../../map/annotations";
 import type { DistanceUnit } from "../../map/distance";
 import { resolveDistanceUnit } from "../../map/distancePresets";
-import type { SessionRecord } from "../../map/annotations";
+import { sessionDistanceUnit } from "../meta/sessionDistanceUnit";
+import { isConfigurableMapTool } from "../rules";
 import type { GameSize } from "../size/gameSize";
-import {
-  clampHidingZoneRadiusMeters,
-  hidingZoneRadiusMeters,
-} from "../size/gameSize";
+import { clampHidingZoneRadiusMeters, hidingZoneRadiusMeters } from "../size/gameSize";
 import {
   answerDeadlineMs,
   hidingPeriodMinutes,
@@ -13,9 +12,7 @@ import {
   thermometerPresetsMetersForGameSize,
   thermometerPresetsMilesForGameSize,
 } from "../size/gameSizeRules";
-import { sessionDistanceUnit } from "../meta/sessionDistanceUnit";
 import type { AdvancedSessionSettingsValue } from "./types";
-import { isConfigurableMapTool } from "../rules";
 
 export function defaultAdvancedSessionSettings(
   gameSize: GameSize,
@@ -28,31 +25,18 @@ export function defaultAdvancedSessionSettings(
     customHidingPeriodEnabled: false,
     hidingPeriodMinutes: hidingPeriodMinutes(gameSize),
     customPhotoAnswerDeadlineEnabled: false,
-    photoAnswerDeadlineMinutes:
-      answerDeadlineMs("photo", gameSize) / (60 * 1000),
+    photoAnswerDeadlineMinutes: answerDeadlineMs("photo", gameSize) / (60 * 1000),
     customQuestionAnswerDeadlineEnabled: false,
-    questionAnswerDeadlineMinutes:
-      answerDeadlineMs("matching", gameSize) / (60 * 1000),
+    questionAnswerDeadlineMinutes: answerDeadlineMs("matching", gameSize) / (60 * 1000),
     disabledTools: [],
     tentaclesEnabledOverride: false,
     customThermometerPresetsEnabled: false,
     thermometerPresetMiles: thermometerPresetsMilesForGameSize(gameSize),
-    thermometerPresetMeters: thermometerPresetsMetersForGameSize(
-      gameSize,
-      resolved,
-    ),
+    thermometerPresetMeters: thermometerPresetsMetersForGameSize(gameSize, resolved),
     customTentacleMediumRadiusEnabled: false,
-    tentacleMediumRadiusMeters: tentacleRadiusMeters(
-      "museum",
-      gameSize,
-      resolved,
-    ),
+    tentacleMediumRadiusMeters: tentacleRadiusMeters("museum", gameSize, resolved),
     customTentacleLargeRadiusEnabled: false,
-    tentacleLargeRadiusMeters: tentacleRadiusMeters(
-      "metro_line",
-      "large",
-      resolved,
-    ),
+    tentacleLargeRadiusMeters: tentacleRadiusMeters("metro_line", "large", resolved),
     customMatchingAreas: {},
     customCategories: [],
     customLocationPins: [],
@@ -64,9 +48,7 @@ export function defaultAdvancedSessionSettings(
   };
 }
 
-export function advancedSettingsFromSession(
-  session: SessionRecord,
-): AdvancedSessionSettingsValue {
+export function advancedSettingsFromSession(session: SessionRecord): AdvancedSessionSettingsValue {
   const gameSize = session.gameSize ?? "medium";
   const unit = sessionDistanceUnit(session);
   const defaults = defaultAdvancedSessionSettings(gameSize, unit);
@@ -75,46 +57,33 @@ export function advancedSettingsFromSession(
     typeof session.hidingZoneRadiusMeters === "number" &&
     Math.abs(session.hidingZoneRadiusMeters - defaultRadius) >= 1;
 
-  const availableThermoMeters = thermometerPresetsMetersForGameSize(
-    gameSize,
-    unit,
-  );
-  const sessionThermoMeters = session.thermometerPresetMeters?.filter(
-    (meters) =>
-      availableThermoMeters.some((preset) => Math.abs(preset - meters) < 5),
+  const availableThermoMeters = thermometerPresetsMetersForGameSize(gameSize, unit);
+  const sessionThermoMeters = session.thermometerPresetMeters?.filter((meters) =>
+    availableThermoMeters.some((preset) => Math.abs(preset - meters) < 5),
   );
 
   return {
     customHidingZoneRadiusEnabled: hasCustomRadius,
     hidingZoneRadiusMeters: session.hidingZoneRadiusMeters ?? defaultRadius,
-    customHidingPeriodEnabled:
-      typeof session.hidingPeriodMinutes === "number",
-    hidingPeriodMinutes:
-      session.hidingPeriodMinutes ?? defaults.hidingPeriodMinutes,
-    customPhotoAnswerDeadlineEnabled:
-      typeof session.photoAnswerDeadlineMinutes === "number",
+    customHidingPeriodEnabled: typeof session.hidingPeriodMinutes === "number",
+    hidingPeriodMinutes: session.hidingPeriodMinutes ?? defaults.hidingPeriodMinutes,
+    customPhotoAnswerDeadlineEnabled: typeof session.photoAnswerDeadlineMinutes === "number",
     photoAnswerDeadlineMinutes:
-      session.photoAnswerDeadlineMinutes ??
-      defaults.photoAnswerDeadlineMinutes,
-    customQuestionAnswerDeadlineEnabled:
-      typeof session.questionAnswerDeadlineMinutes === "number",
+      session.photoAnswerDeadlineMinutes ?? defaults.photoAnswerDeadlineMinutes,
+    customQuestionAnswerDeadlineEnabled: typeof session.questionAnswerDeadlineMinutes === "number",
     questionAnswerDeadlineMinutes:
-      session.questionAnswerDeadlineMinutes ??
-      defaults.questionAnswerDeadlineMinutes,
+      session.questionAnswerDeadlineMinutes ?? defaults.questionAnswerDeadlineMinutes,
     disabledTools: (session.disabledTools ?? []).filter(isConfigurableMapTool),
     tentaclesEnabledOverride: session.tentaclesEnabled === true,
     customThermometerPresetsEnabled: (sessionThermoMeters?.length ?? 0) > 0,
     thermometerPresetMiles: defaults.thermometerPresetMiles,
-    thermometerPresetMeters:
-      sessionThermoMeters?.length
-        ? sessionThermoMeters
-        : defaults.thermometerPresetMeters,
-    customTentacleMediumRadiusEnabled:
-      typeof session.tentacleMediumRadiusMeters === "number",
+    thermometerPresetMeters: sessionThermoMeters?.length
+      ? sessionThermoMeters
+      : defaults.thermometerPresetMeters,
+    customTentacleMediumRadiusEnabled: typeof session.tentacleMediumRadiusMeters === "number",
     tentacleMediumRadiusMeters:
       session.tentacleMediumRadiusMeters ?? defaults.tentacleMediumRadiusMeters,
-    customTentacleLargeRadiusEnabled:
-      typeof session.tentacleLargeRadiusMeters === "number",
+    customTentacleLargeRadiusEnabled: typeof session.tentacleLargeRadiusMeters === "number",
     tentacleLargeRadiusMeters:
       session.tentacleLargeRadiusMeters ?? defaults.tentacleLargeRadiusMeters,
     customMatchingAreas: session.customMatchingAreas ?? {},

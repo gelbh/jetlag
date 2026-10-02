@@ -1,17 +1,17 @@
 import { describe, expect, it } from "vitest";
 import {
+  canSelectPremiumSessionTier,
   canStartPremiumTrial,
   formatBankedPremiumSessionCreditsLabel,
   formatEntitlementSummary,
   formatPremiumSessionCreditsLabel,
   formatPremiumSessionTierHint,
-  canSelectPremiumSessionTier,
   hasUnlimitedPremiumHosting,
   isAppPremiumTrialActive,
-  shouldDefaultSessionTierToPremium,
   PREMIUM_PRODUCT_OFFERS,
-  resolveHomePremiumButtonDisplay,
   type PremiumEntitlements,
+  resolveHomePremiumButtonDisplay,
+  shouldDefaultSessionTierToPremium,
 } from "./premiumProducts";
 
 const baseEntitlements: PremiumEntitlements = {
@@ -380,9 +380,7 @@ describe("premiumProducts", () => {
           false,
         ),
       ).toBe(true);
-      expect(shouldDefaultSessionTierToPremium(baseEntitlements, false)).toBe(
-        false,
-      );
+      expect(shouldDefaultSessionTierToPremium(baseEntitlements, false)).toBe(false);
     });
   });
 });

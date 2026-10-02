@@ -22,10 +22,7 @@ function dotClassName(state: "complete" | "current" | "upcoming"): string {
   }
 }
 
-export function WizardConfigureContinuum({
-  steps,
-  index,
-}: WizardConfigureContinuumProps) {
+export function WizardConfigureContinuum({ steps, index }: WizardConfigureContinuumProps) {
   if (steps.length <= 1) {
     return null;
   }
@@ -33,11 +30,7 @@ export function WizardConfigureContinuum({
   const currentStep = steps[index] ?? steps[0];
 
   return (
-    <div
-      role="list"
-      aria-label="Configure steps"
-      className="wizard-configure-continuum space-y-1"
-    >
+    <div role="list" aria-label="Configure steps" className="wizard-configure-continuum space-y-1">
       <p className="min-w-0 text-center text-xs leading-snug text-field-ink-muted">
         <span className="font-medium text-field-ink">{currentStep?.label}</span>
         <span aria-hidden="true"> · </span>
@@ -48,17 +41,9 @@ export function WizardConfigureContinuum({
       <div className="flex items-center">
         {steps.map((step, stepIndex) => {
           const state =
-            stepIndex === index
-              ? "current"
-              : stepIndex < index
-                ? "complete"
-                : "upcoming";
+            stepIndex === index ? "current" : stepIndex < index ? "complete" : "upcoming";
           return (
-            <div
-              key={step.id}
-              role="listitem"
-              className="flex min-w-0 flex-1 items-center"
-            >
+            <div key={step.id} role="listitem" className="flex min-w-0 flex-1 items-center">
               {stepIndex > 0 ? (
                 <div
                   className={`h-px flex-1 motion-safe:transition-colors motion-reduce:transition-none ${

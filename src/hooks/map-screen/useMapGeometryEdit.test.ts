@@ -17,11 +17,12 @@ const storeMocks = vi.hoisted(() => {
 });
 
 vi.mock("../../state/sessionStore", () => ({
-  useAnnotationStore: vi.fn(
-    (selector: (state: typeof storeMocks) => unknown) => selector(storeMocks),
+  useAnnotationStore: vi.fn((selector: (state: typeof storeMocks) => unknown) =>
+    selector(storeMocks),
   ),
-  useMapStore: vi.fn((selector: (state: { setActiveTool: typeof storeMocks.setActiveTool }) => unknown) =>
-    selector({ setActiveTool: storeMocks.setActiveTool }),
+  useMapStore: vi.fn(
+    (selector: (state: { setActiveTool: typeof storeMocks.setActiveTool }) => unknown) =>
+      selector({ setActiveTool: storeMocks.setActiveTool }),
   ),
 }));
 

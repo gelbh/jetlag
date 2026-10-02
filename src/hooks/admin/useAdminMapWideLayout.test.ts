@@ -1,6 +1,6 @@
 import { renderHook } from "@testing-library/react";
-import { describe, expect, it, vi, beforeEach } from "vitest";
 import { createRef } from "react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { useAdminMapWideLayout } from "./useAdminMapWideLayout";
 
 describe("useAdminMapWideLayout", () => {
@@ -25,9 +25,7 @@ describe("useAdminMapWideLayout", () => {
 
   it("returns false for embedded monitor when only viewport is wide", () => {
     const shellRef = createRef<HTMLDivElement>();
-    const { result } = renderHook(() =>
-      useAdminMapWideLayout(shellRef, { embedded: true }),
-    );
+    const { result } = renderHook(() => useAdminMapWideLayout(shellRef, { embedded: true }));
 
     expect(result.current).toBe(false);
   });

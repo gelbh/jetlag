@@ -62,10 +62,7 @@ function expandCount<T>(count: number, make: () => T): T[] {
 /** Exact base hider-deck multiset (100 cards). See hider-deck.md. */
 export const HIDER_DECK_TEMPLATE: readonly BoardCardDef[] = Object.freeze([
   ...TIME_ROWS.flatMap(({ id, count, durations }) =>
-    expandCount(
-      count,
-      (): TimeBonusCardDef => ({ kind: "timeBonus", id, durations }),
-    ),
+    expandCount(count, (): TimeBonusCardDef => ({ kind: "timeBonus", id, durations })),
   ),
   ...POWER_ROWS.flatMap(({ id, count }) =>
     expandCount(count, (): PowerUpCardDef => ({ kind: "powerUp", id })),

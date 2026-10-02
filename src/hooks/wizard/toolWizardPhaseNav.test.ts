@@ -70,9 +70,7 @@ describe("toolWizardPhaseNav", () => {
   it("starts on configure for hiding zone create", () => {
     const state = initialPhaseNavState(HIDING_ZONE_CREATE_WIZARD);
     expect(resolvePhaseId(HIDING_ZONE_CREATE_WIZARD, state)).toBe("configure");
-    expect(resolveWizardStepId(HIDING_ZONE_CREATE_WIZARD, state)).toBe(
-      "method",
-    );
+    expect(resolveWizardStepId(HIDING_ZONE_CREATE_WIZARD, state)).toBe("method");
   });
 
   it("marks prior phases complete", () => {
@@ -80,9 +78,6 @@ describe("toolWizardPhaseNav", () => {
       phaseIndex: MATCHING_WIZARD.phases.indexOf("ask"),
       configureIndex: 0,
     };
-    expect(completePhaseIds(MATCHING_WIZARD, state)).toEqual([
-      "place",
-      "configure",
-    ]);
+    expect(completePhaseIds(MATCHING_WIZARD, state)).toEqual(["place", "configure"]);
   });
 });

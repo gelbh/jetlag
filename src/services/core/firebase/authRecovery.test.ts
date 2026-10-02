@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
 import { FirebaseError } from "firebase/app";
+import { describe, expect, it } from "vitest";
 import { isDefinitiveAuthFailure } from "./authRecovery";
 
 describe("isDefinitiveAuthFailure", () => {
@@ -23,8 +23,6 @@ describe("isDefinitiveAuthFailure", () => {
   });
 
   it("keeps the user on plain TypeError (Failed to fetch)", () => {
-    expect(isDefinitiveAuthFailure(new TypeError("Failed to fetch"))).toBe(
-      false,
-    );
+    expect(isDefinitiveAuthFailure(new TypeError("Failed to fetch"))).toBe(false);
   });
 });

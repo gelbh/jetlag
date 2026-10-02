@@ -1,13 +1,11 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { THERMOMETER_WALK_MAX_DURATION_MS } from "../../domain/questions";
-import { STALE_WALK_CLOCK_MS } from "./useStaleWalkNowMs";
 import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
 import { useCancelOrphanThermometerWalks } from "./useCancelOrphanThermometerWalks";
+import { STALE_WALK_CLOCK_MS } from "./useStaleWalkNowMs";
 
-function walkingQuestion(
-  overrides: Partial<PendingQuestionRecord> = {},
-): PendingQuestionRecord {
+function walkingQuestion(overrides: Partial<PendingQuestionRecord> = {}): PendingQuestionRecord {
   return {
     id: "pq-orphan",
     sessionId: "session-1",
@@ -21,7 +19,6 @@ function walkingQuestion(
     ...overrides,
   };
 }
-
 
 function seekerLocation(
   overrides: Partial<{ uid: string; updatedAt: string }> & { uid: string; updatedAt: string },
@@ -220,9 +217,7 @@ describe("useCancelOrphanThermometerWalks", () => {
             createdAt,
           }),
         ],
-        seekerLocations: [
-          seekerLocation({ uid: "gone-1", updatedAt: createdAt }),
-        ],
+        seekerLocations: [seekerLocation({ uid: "gone-1", updatedAt: createdAt })],
         cancelThermometerWalk,
         nowMs: () => nowMs,
       }),
@@ -278,9 +273,7 @@ describe("useCancelOrphanThermometerWalks", () => {
       createdAt,
     });
 
-    const locs = [
-      seekerLocation({ uid: "seeker-1", updatedAt: "2026-01-01T00:00:00.000Z" }),
-    ];
+    const locs = [seekerLocation({ uid: "seeker-1", updatedAt: "2026-01-01T00:00:00.000Z" })];
     const { rerender } = renderHook(
       ({ pendingQuestions }) =>
         useCancelOrphanThermometerWalks({
@@ -330,9 +323,7 @@ describe("useCancelOrphanThermometerWalks", () => {
               createdAt,
             }),
           ],
-          seekerLocations: [
-            seekerLocation({ uid: "seeker-1", updatedAt: createdAt }),
-          ],
+          seekerLocations: [seekerLocation({ uid: "seeker-1", updatedAt: createdAt })],
           cancelThermometerWalk,
         }),
       );
@@ -340,9 +331,7 @@ describe("useCancelOrphanThermometerWalks", () => {
       expect(cancelThermometerWalk).not.toHaveBeenCalled();
 
       await act(async () => {
-        await vi.advanceTimersByTimeAsync(
-          THERMOMETER_WALK_MAX_DURATION_MS + STALE_WALK_CLOCK_MS,
-        );
+        await vi.advanceTimersByTimeAsync(THERMOMETER_WALK_MAX_DURATION_MS + STALE_WALK_CLOCK_MS);
       });
 
       expect(cancelThermometerWalk).toHaveBeenCalledWith(

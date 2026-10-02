@@ -1,11 +1,11 @@
-import test from "node:test";
 import assert from "node:assert/strict";
+import test from "node:test";
+import { INCIDENT_NOT_FOUND } from "../incident/postIncidentMessage.mjs";
 import {
   INCIDENT_INVALID_STATUS,
   INCIDENT_INVALID_TRANSITION,
   updateIncidentStatusHandler,
 } from "../incident/updateIncidentStatus.mjs";
-import { INCIDENT_NOT_FOUND } from "../incident/postIncidentMessage.mjs";
 
 function mockDb(incident) {
   const messages = [];

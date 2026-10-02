@@ -7,11 +7,7 @@ import {
   getStreetBasemap,
   OPENFREEMAP_STYLE_URLS,
 } from "./mapBasemaps";
-import {
-  isEsriTileUrl,
-  isMapTileHostname,
-  isOpenFreeMapUrl,
-} from "./mapTileHosts";
+import { isEsriTileUrl, isMapTileHostname, isOpenFreeMapUrl } from "./mapTileHosts";
 
 describe("mapBasemaps", () => {
   it("resolves light street to OpenFreeMap liberty style", () => {
@@ -42,26 +38,18 @@ describe("mapBasemaps", () => {
 
   it("returns plain-text attribution for settings chrome", () => {
     expect(getBasemapAttributionText("standard")).toContain("OpenFreeMap");
-    expect(getBasemapAttributionText("standard")).toContain(
-      "openstreetmap.org/copyright",
-    );
+    expect(getBasemapAttributionText("standard")).toContain("openstreetmap.org/copyright");
     expect(getBasemapAttributionText("satellite")).toContain("Esri");
   });
 
   it("resolves MapLibre OpenFreeMap styles and satellite hybrid raster style", () => {
-    expect(getMapLibreStyle("standard", "light")).toBe(
-      OPENFREEMAP_STYLE_URLS.light,
-    );
-    expect(getMapLibreStyle("standard", "dark")).toBe(
-      OPENFREEMAP_STYLE_URLS.dark,
-    );
+    expect(getMapLibreStyle("standard", "light")).toBe(OPENFREEMAP_STYLE_URLS.light);
+    expect(getMapLibreStyle("standard", "dark")).toBe(OPENFREEMAP_STYLE_URLS.dark);
     const sat = getMapLibreStyle("satellite", "dark");
     expect(typeof sat).toBe("object");
     if (typeof sat === "object") {
       expect(sat.sources.esri.tiles[0]).toContain("World_Imagery");
-      expect(sat.sources["esri-reference"].tiles[0]).toContain(
-        "World_Boundaries_and_Places",
-      );
+      expect(sat.sources["esri-reference"].tiles[0]).toContain("World_Boundaries_and_Places");
       expect(sat.layers.map((layer) => layer.id)).toEqual([
         "esri-world-imagery",
         "esri-reference-labels",
@@ -82,19 +70,13 @@ describe("mapTileHosts", () => {
         "https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/1/2/3",
       ),
     ).toBe(true);
-    expect(
-      isOpenFreeMapUrl("https://tiles.openfreemap.org/styles/liberty"),
-    ).toBe(true);
-    expect(
-      isOpenFreeMapUrl(
-        "https://tiles.openfreemap.org.attacker.example/styles/liberty",
-      ),
-    ).toBe(false);
-    expect(isMapTileHostname("server.arcgisonline.com")).toBe(true);
-    expect(isMapTileHostname("tiles.openfreemap.org")).toBe(true);
-    expect(isMapTileHostname("evil.arcgisonline.com.attacker.example")).toBe(
+    expect(isOpenFreeMapUrl("https://tiles.openfreemap.org/styles/liberty")).toBe(true);
+    expect(isOpenFreeMapUrl("https://tiles.openfreemap.org.attacker.example/styles/liberty")).toBe(
       false,
     );
+    expect(isMapTileHostname("server.arcgisonline.com")).toBe(true);
+    expect(isMapTileHostname("tiles.openfreemap.org")).toBe(true);
+    expect(isMapTileHostname("evil.arcgisonline.com.attacker.example")).toBe(false);
     expect(isMapTileHostname("tile.openstreetmap.org")).toBe(false);
   });
 });

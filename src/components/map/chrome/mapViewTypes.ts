@@ -1,10 +1,6 @@
 import type { RefObject } from "react";
-import type {
-  MapBounds,
-  MapBoundsExpression,
-  MapLatLng,
-} from "@/domain/map/mapBounds";
 import type { MapStyle, StreetBasemap } from "@/domain/map/mapBasemaps";
+import type { MapBounds, MapBoundsExpression, MapLatLng } from "@/domain/map/mapBounds";
 import type { MapZoomControlInset } from "./MapZoomControl";
 
 /** MapLibre map surface props. */
@@ -46,10 +42,7 @@ export interface MapViewMapLibreChromeProps {
 }
 
 /** Flat map surface + chrome bag (children stay a React slot on the props type). */
-export type MapViewModel = Omit<
-  MapViewCoreProps & MapViewMapLibreChromeProps,
-  "children"
->;
+export type MapViewModel = Omit<MapViewCoreProps & MapViewMapLibreChromeProps, "children">;
 
 export type MapViewMapLibreProps = {
   model: MapViewModel;

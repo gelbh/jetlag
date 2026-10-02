@@ -1,9 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import {
-  parseClientEnv,
-  readFirebaseConfigFromEnv,
-  resetClientEnvForTests,
-} from "./env";
+import { parseClientEnv, readFirebaseConfigFromEnv, resetClientEnvForTests } from "./env";
 
 const validFirebaseEnv = {
   VITE_FIREBASE_API_KEY: "demo-api-key",
@@ -60,7 +56,6 @@ describe("parseClientEnv", () => {
     expect(env.VITE_SENTRY_ENVIRONMENT).toBe("production");
     expect(env.VITE_POSTHOG_KEY).toBe("phc_test_key");
   });
-
 
   it("rejects invalid proxy URLs", () => {
     expect(() =>

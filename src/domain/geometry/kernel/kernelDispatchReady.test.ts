@@ -1,13 +1,13 @@
-import { describe, expect, it } from "vitest";
 import area from "@turf/area";
 import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
 import { point as turfPoint } from "@turf/helpers";
 import type { Feature, MultiPolygon, Polygon } from "geojson";
-import { wasmBuildSpatialVoronoiFromSites } from "./voronoiWasm";
-import { dispatchSpatialVoronoi } from "./voronoiKernelRunner";
-import { wasmBuildTentacleEliminationRegion } from "./tentacleWasm";
+import { describe, expect, it } from "vitest";
 import { runTentacleEliminationRegion } from "./tentacleKernelRunner";
+import { wasmBuildTentacleEliminationRegion } from "./tentacleWasm";
 import type { GameAreaGeometry, LatLngTuple } from "./types";
+import { dispatchSpatialVoronoi } from "./voronoiKernelRunner";
+import { wasmBuildSpatialVoronoiFromSites } from "./voronoiWasm";
 
 const sampleGameArea: GameAreaGeometry = {
   type: "Polygon",
@@ -129,14 +129,14 @@ describe("wasmBuildTentacleEliminationRegion kernel", () => {
         properties: { poiId: s.id },
       })),
     );
-    const region = await wasmBuildTentacleEliminationRegion(
+    const region = (await wasmBuildTentacleEliminationRegion(
       anchor,
       oneMileMeters,
       sites,
       "east",
       sampleGameArea,
       cells,
-    ) as Feature<Polygon | MultiPolygon>;
+    )) as Feature<Polygon | MultiPolygon>;
 
     expect(area(region)).toBeGreaterThan(0);
   });

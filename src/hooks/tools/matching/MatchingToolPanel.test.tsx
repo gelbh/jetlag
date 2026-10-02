@@ -1,6 +1,6 @@
-import { describe, expect, it, vi } from "vitest";
-import { createRef } from "react";
 import { render, screen } from "@testing-library/react";
+import { createRef } from "react";
+import { describe, expect, it, vi } from "vitest";
 import type { DistanceUnit } from "@/domain/map/distance";
 import {
   MATCHING_CATEGORIES,

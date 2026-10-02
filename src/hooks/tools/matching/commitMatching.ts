@@ -1,29 +1,23 @@
-import type {
-  Feature,
-  MultiPolygon,
-  Point,
-  Polygon as GeoPolygon,
-} from "geojson";
-import type { GameArea } from "@/domain/map/annotations";
-import type { AnnotationRecord } from "@/domain/map/annotations";
+import type { Feature, Polygon as GeoPolygon, MultiPolygon, Point } from "geojson";
+import { yesNoAnswerOptions } from "@/components/tools/shared/answers/binaryAnswerOptions";
+import { serializeMatchingFeatures } from "@/domain/geo/matchingAdapters";
 import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
 import {
   buildMatchingEliminationRegion,
   buildSameNearestRegion,
 } from "@/domain/geometry/measuring/matchingGeometry";
+import { persistSlimPolygonFeature } from "@/domain/geometry/progressive/persistSlim";
+import type { AnnotationRecord, GameArea } from "@/domain/map/annotations";
+import { MAP_ANNOTATION_COLORS } from "@/domain/map/mapAnnotationColors";
 import {
-  matchingQuestionFor,
   type MatchingAnswer,
   type MatchingCategoryId,
+  matchingQuestionFor,
 } from "@/domain/questions";
 import type { SessionCustomCategory } from "@/domain/session/catalog/sessionCustomContent";
-import { yesNoAnswerOptions } from "@/components/tools/shared/answers/binaryAnswerOptions";
-import type { SubmitPendingQuestionInput } from "../../sync/usePendingQuestionActions";
-import { serializeMatchingFeatures } from "@/domain/geo/matchingAdapters";
 import type { MatchingFeature } from "@/services/geo/matching";
-import { MAP_ANNOTATION_COLORS } from "@/domain/map/mapAnnotationColors";
-import { persistSlimPolygonFeature } from "@/domain/geometry/progressive/persistSlim";
 import { emitQuestionAnsweredActivity } from "@/services/session/emitSessionActivity";
+import type { SubmitPendingQuestionInput } from "../../sync/usePendingQuestionActions";
 
 export interface CommitMatchingInput {
   canSubmitQuestion: boolean;
@@ -43,10 +37,7 @@ export interface CommitMatchingInput {
   gameArea: GameArea;
   awaitHiderAnswer: boolean;
   submitPendingQuestion?: (
-    input: Omit<
-      SubmitPendingQuestionInput,
-      "sessionId" | "senderUid" | "senderRole" | "toolType"
-    >,
+    input: Omit<SubmitPendingQuestionInput, "sessionId" | "senderUid" | "senderRole" | "toolType">,
   ) => Promise<void>;
   sessionId?: string;
   senderUid?: string | null;
@@ -103,9 +94,7 @@ export async function commitMatching(
   return "done";
 }
 
-export async function performMatchingCommit(
-  input: CommitMatchingInput,
-): Promise<void> {
+export async function performMatchingCommit(input: CommitMatchingInput): Promise<void> {
   const {
     matchingSeekerPoint,
     matchingCategoryId,
@@ -138,10 +127,7 @@ export async function performMatchingCommit(
 
   // Empty play-area catalog must bounce, not send a null match (preview path
   // calls this directly and must not bypass the outer commitMatching guard).
-  if (
-    matchingNullAnswer &&
-    (matchingFeatureCount === 0 || matchingFeatures.length === 0)
-  ) {
+  if (matchingNullAnswer && (matchingFeatureCount === 0 || matchingFeatures.length === 0)) {
     return;
   }
 
@@ -165,9 +151,7 @@ export async function performMatchingCommit(
             id: option.value,
             label: option.label,
           })),
-          ...(matchingNullAnswer
-            ? [{ id: "null", label: "Null (not in play area)" }]
-            : []),
+          ...(matchingNullAnswer ? [{ id: "null", label: "Null (not in play area)" }] : []),
         ],
         placement: {
           geometryJson: JSON.stringify(geometry),
@@ -189,9 +173,7 @@ export async function performMatchingCommit(
             matchingFeatureCount: matchingFeatureCount ?? undefined,
             matchingNullAnswer,
             matchingFeaturesJson: serializeMatchingFeatures(matchingFeatures),
-            ...(matchingTransitMetroId
-              ? { transitMetroId: matchingTransitMetroId }
-              : {}),
+            ...(matchingTransitMetroId ? { transitMetroId: matchingTransitMetroId } : {}),
           },
         },
         cardDraw,
@@ -199,9 +181,7 @@ export async function performMatchingCommit(
       });
     } catch (error) {
       setMatchingError(
-        error instanceof Error
-          ? error.message
-          : "Couldn't send this match question.",
+        error instanceof Error ? error.message : "Couldn't send this match question.",
       );
       return;
     }
@@ -216,11 +196,7 @@ export async function performMatchingCommit(
 
   const boundaryRegion = matchingNullAnswer
     ? null
-    : await buildSameNearestRegion(
-        matchingFeatures,
-        matchingNearestFeatureId!,
-        gameArea,
-      );
+    : await buildSameNearestRegion(matchingFeatures, matchingNearestFeatureId!, gameArea);
   const eliminationRegion = matchingNullAnswer
     ? null
     : await buildMatchingEliminationRegion(
@@ -255,15 +231,14 @@ export async function performMatchingCommit(
     storedElim = slimmed.feature;
   }
 
-  const geometry: Feature<Point | GeoPolygon | MultiPolygon> =
-    storedElim ?? {
-      type: "Feature",
-      properties: {},
-      geometry: {
-        type: "Point",
-        coordinates: [matchingSeekerPoint[1], matchingSeekerPoint[0]],
-      },
-    };
+  const geometry: Feature<Point | GeoPolygon | MultiPolygon> = storedElim ?? {
+    type: "Feature",
+    properties: {},
+    geometry: {
+      type: "Point",
+      coordinates: [matchingSeekerPoint[1], matchingSeekerPoint[0]],
+    },
+  };
 
   try {
     const created = await createAnnotation({
@@ -288,21 +263,15 @@ export async function performMatchingCommit(
         matchingDistanceMeters: matchingDistanceMeters ?? undefined,
         matchingFeatureCount: matchingFeatureCount ?? undefined,
         matchingNullAnswer,
-        matchingBoundaryJson: storedBoundary
-          ? JSON.stringify(storedBoundary)
-          : undefined,
+        matchingBoundaryJson: storedBoundary ? JSON.stringify(storedBoundary) : undefined,
         matchingFeaturesJson: serializeMatchingFeatures(matchingFeatures),
-        ...(matchingTransitMetroId
-          ? { transitMetroId: matchingTransitMetroId }
-          : {}),
+        ...(matchingTransitMetroId ? { transitMetroId: matchingTransitMetroId } : {}),
         color: MAP_ANNOTATION_COLORS.elimination,
       },
     });
 
     if (sessionId) {
-      const answerOption = yesNoAnswerOptions.find(
-        (option) => option.value === matchingAnswer,
-      );
+      const answerOption = yesNoAnswerOptions.find((option) => option.value === matchingAnswer);
       emitQuestionAnsweredActivity({
         sessionId,
         toolType: "matching",
@@ -313,11 +282,7 @@ export async function performMatchingCommit(
       });
     }
   } catch (error) {
-    setMatchingError(
-      error instanceof Error
-        ? error.message
-        : "Couldn't save this match question.",
-    );
+    setMatchingError(error instanceof Error ? error.message : "Couldn't save this match question.");
     return;
   }
 

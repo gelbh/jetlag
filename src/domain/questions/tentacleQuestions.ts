@@ -1,23 +1,15 @@
+import type { AnnotationRecord } from "../map/annotations";
+import { type DistanceUnit, formatDistance, milesToMeters } from "../map/distance";
+import type { PendingQuestionRecord } from "../session/activity/sessionChat";
+import { resolveTentacleOptions, type SessionRulesInput, sessionGameSize } from "../session/rules";
 import type { GameSize } from "../session/size/gameSize";
 import {
   isTentacleCategoryAvailableForGameSize,
+  type TentacleGameSizeCategoryId,
   tentacleOptionsForGameSize,
   tentacleRadiusMeters,
-  type TentacleGameSizeCategoryId,
 } from "../session/size/gameSizeRules";
-import {
-  resolveTentacleOptions,
-  sessionGameSize,
-  type SessionRulesInput,
-} from "../session/rules";
-import type { AnnotationRecord } from "../map/annotations";
-import type { PendingQuestionRecord } from "../session/activity/sessionChat";
 import { buildCatalogHelpers } from "./catalogHelpers";
-import {
-  formatDistance,
-  milesToMeters,
-  type DistanceUnit,
-} from "../map/distance";
 import type { MatchingCategoryId } from "./matchingQuestions";
 import {
   getMatchingCategory,
@@ -34,8 +26,7 @@ export const TENTACLE_LOCATION_CATEGORY_IDS = [
   "hospital",
 ] as const satisfies readonly MatchingCategoryId[];
 
-export type TentacleLocationCategoryId =
-  (typeof TENTACLE_LOCATION_CATEGORY_IDS)[number];
+export type TentacleLocationCategoryId = (typeof TENTACLE_LOCATION_CATEGORY_IDS)[number];
 
 export type TentacleExtendedCategoryId =
   | TentacleLocationCategoryId
@@ -73,9 +64,7 @@ function tentacleCategoryDefinition(
   if (categoryId in EXTENDED_CATEGORY_LABELS) {
     return {
       id: categoryId,
-      ...EXTENDED_CATEGORY_LABELS[
-        categoryId as keyof typeof EXTENDED_CATEGORY_LABELS
-      ],
+      ...EXTENDED_CATEGORY_LABELS[categoryId as keyof typeof EXTENDED_CATEGORY_LABELS],
     };
   }
 
@@ -125,9 +114,7 @@ export function tentacleSearchRadiusMetersForSession(
   session: SessionRulesInput,
   categoryId: TentacleExtendedCategoryId,
 ): number {
-  const option = resolveTentacleOptions(session).find(
-    (entry) => entry.categoryId === categoryId,
-  );
+  const option = resolveTentacleOptions(session).find((entry) => entry.categoryId === categoryId);
 
   if (option) {
     return option.radiusMeters;
@@ -140,9 +127,7 @@ export function isTentacleCategoryAvailableForSession(
   session: SessionRulesInput,
   categoryId: string,
 ): boolean {
-  return resolveTentacleOptions(session).some(
-    (option) => option.categoryId === categoryId,
-  );
+  return resolveTentacleOptions(session).some((option) => option.categoryId === categoryId);
 }
 
 /** @deprecated Use tentacleSearchRadiusMeters */
@@ -167,12 +152,7 @@ export function tentacleCategoryOverpassSelectors(
   categoryId: TentacleExtendedCategoryId,
 ): readonly string[] {
   if (categoryId === "metro_line") {
-    return [
-      "[route=light_rail]",
-      "[route=subway]",
-      "[route=tram]",
-      "[route=monorail]",
-    ];
+    return ["[route=light_rail]", "[route=subway]", "[route=tram]", "[route=monorail]"];
   }
 
   return matchingCategoryOverpassSelectors(categoryId as MatchingCategoryId);
@@ -191,10 +171,10 @@ export function tentacleQuestionPrompt(
   const distanceLabel = formatDistance(radiusMeters, unit);
   const typesLabel = tentacleLocationTypesLabel(categoryId);
 
-  return TENTACLE_PROMPT_TEMPLATE.replaceAll(
-    "[DISTANCE]",
-    distanceLabel,
-  ).replace("[TYPES]", typesLabel);
+  return TENTACLE_PROMPT_TEMPLATE.replaceAll("[DISTANCE]", distanceLabel).replace(
+    "[TYPES]",
+    typesLabel,
+  );
 }
 
 export function tentacleHiderAnswerClipboardText(
@@ -220,9 +200,7 @@ export function tentacleCategoryIdForAnnotation(
   }
 
   const categoryId =
-    annotation.metadata.tentacleCategoryId ??
-    annotation.metadata.tentacleAnswerCategory ??
-    null;
+    annotation.metadata.tentacleCategoryId ?? annotation.metadata.tentacleAnswerCategory ?? null;
 
   return categoryId ? (categoryId as TentacleExtendedCategoryId) : null;
 }
@@ -235,9 +213,7 @@ export function readTentacleCategoryFromPending(
   }
 
   const categoryId = question.placement.metadata.tentacleCategoryId;
-  return typeof categoryId === "string"
-    ? (categoryId as TentacleExtendedCategoryId)
-    : null;
+  return typeof categoryId === "string" ? (categoryId as TentacleExtendedCategoryId) : null;
 }
 
 const tentacleCatalogHelpers = buildCatalogHelpers<TentacleExtendedCategoryId>({
@@ -250,10 +226,7 @@ export function usedTentacleCategoryIds(
   annotations: AnnotationRecord[],
   exceptAnnotationId?: string,
 ): Set<TentacleExtendedCategoryId> {
-  return tentacleCatalogHelpers.usedOptionsFromAnnotations(
-    annotations,
-    exceptAnnotationId,
-  );
+  return tentacleCatalogHelpers.usedOptionsFromAnnotations(annotations, exceptAnnotationId);
 }
 
 export function usedTentacleCategoryIdsForSession(
@@ -262,9 +235,7 @@ export function usedTentacleCategoryIdsForSession(
   exceptAnnotationId?: string,
 ): Set<TentacleExtendedCategoryId> {
   const used = usedTentacleCategoryIds(annotations, exceptAnnotationId);
-  for (const id of tentacleCatalogHelpers.usedOptionsFromPending(
-    pendingQuestions,
-  )) {
+  for (const id of tentacleCatalogHelpers.usedOptionsFromPending(pendingQuestions)) {
     used.add(id);
   }
   return used;
@@ -275,10 +246,7 @@ export function firstAvailableTentacleCategoryId(
   usedCategories: ReadonlySet<TentacleExtendedCategoryId> = new Set(),
 ): TentacleExtendedCategoryId | null {
   const categories = tentacleCategoriesForGameSize(gameSize);
-  return tentacleCatalogHelpers.firstAvailableFromCatalog(
-    categories,
-    usedCategories,
-  );
+  return tentacleCatalogHelpers.firstAvailableFromCatalog(categories, usedCategories);
 }
 
 export function firstAvailableTentacleCategoryIdForSession(
@@ -286,10 +254,7 @@ export function firstAvailableTentacleCategoryIdForSession(
   usedCategories: ReadonlySet<TentacleExtendedCategoryId> = new Set(),
 ): TentacleExtendedCategoryId | null {
   const categories = tentacleCategoriesForSession(session);
-  return tentacleCatalogHelpers.firstAvailableFromCatalog(
-    categories,
-    usedCategories,
-  );
+  return tentacleCatalogHelpers.firstAvailableFromCatalog(categories, usedCategories);
 }
 
 export function isTentacleCategoryAvailable(
@@ -352,9 +317,7 @@ export function tentacleCategoryUseCountFromPending(
   );
 }
 
-export function tentacleAnswerLabel(
-  annotation: AnnotationRecord,
-): string | null {
+export function tentacleAnswerLabel(annotation: AnnotationRecord): string | null {
   if (annotation.type !== "tentacle") {
     return null;
   }

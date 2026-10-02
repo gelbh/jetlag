@@ -31,12 +31,7 @@ export function EndGameAlert({
         data-testid="end-game-alert-panel"
       >
         <p className="text-sm font-semibold text-ink">End game started</p>
-        <Button
-          type="button"
-          variant="default"
-          size="md"
-          onClick={onResetEndGame}
-        >
+        <Button type="button" variant="default" size="md" onClick={onResetEndGame}>
           End end game
         </Button>
       </MapFloatSurface>
@@ -44,8 +39,6 @@ export function EndGameAlert({
   }
 
   return (
-    <MapFloatAlert className="pointer-events-auto mx-3 mt-1.5">
-      End game started
-    </MapFloatAlert>
+    <MapFloatAlert className="pointer-events-auto mx-3 mt-1.5">End game started</MapFloatAlert>
   );
 }

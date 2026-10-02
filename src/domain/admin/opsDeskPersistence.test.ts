@@ -1,16 +1,16 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import {
   CUSTOM_PRESET_ID,
-  FORMER_BUILTIN_IDS,
   cloneLayout,
+  type DeskLayout,
   defaultMonitorLayout,
   defaultScratchLayout,
+  FORMER_BUILTIN_IDS,
   layoutForFormerBuiltinId,
-  type DeskLayout,
 } from "./opsDeskLayout";
 import {
-  defaultOpsDeskStore,
   coldStartOpsDeskStore,
+  defaultOpsDeskStore,
   loadOpsDeskStore,
   saveOpsDeskStore,
   storageKey,
@@ -242,9 +242,12 @@ describe("opsDeskPersistence", () => {
       userPresets: [],
     });
     const loaded = loadOpsDeskStore(null);
-    expect(loaded.customLayout.monitor?.stacks.flatMap((s) => s.panelIds)).toEqual(
-      ["map", "roster", "overview", "log"],
-    );
+    expect(loaded.customLayout.monitor?.stacks.flatMap((s) => s.panelIds)).toEqual([
+      "map",
+      "roster",
+      "overview",
+      "log",
+    ]);
   });
 
   it("persists monitor layout edits on Scratch customLayout", () => {
@@ -297,11 +300,7 @@ describe("opsDeskPersistence", () => {
       version: 1,
       activePresetId: CUSTOM_PRESET_ID,
       defaultPresetId: CUSTOM_PRESET_ID,
-      presetOrder: [
-        ...FORMER_BUILTIN_IDS,
-        CUSTOM_PRESET_ID,
-        "user-x",
-      ],
+      presetOrder: [...FORMER_BUILTIN_IDS, CUSTOM_PRESET_ID, "user-x"],
       customLayout: layout,
       userPresets: [
         {
@@ -316,14 +315,8 @@ describe("opsDeskPersistence", () => {
     const loaded = loadOpsDeskStore(null);
     expect(loaded.presetOrder).toEqual([CUSTOM_PRESET_ID, "user-x"]);
     expect(loaded.customLayout.stacks).toHaveLength(1);
-    expect(loaded.customLayout.stacks[0]?.panelIds).toEqual([
-      "sessions",
-      "inbox",
-    ]);
+    expect(loaded.customLayout.stacks[0]?.panelIds).toEqual(["sessions", "inbox"]);
     expect(loaded.customLayout.hiddenPanelIds).toEqual(["settings"]);
-    expect(loaded.userPresets[0]?.layout.stacks[0]?.panelIds).toEqual([
-      "sessions",
-      "inbox",
-    ]);
+    expect(loaded.userPresets[0]?.layout.stacks[0]?.panelIds).toEqual(["sessions", "inbox"]);
   });
 });

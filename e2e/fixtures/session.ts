@@ -1,11 +1,8 @@
-import { type Browser, type Page, expect } from "@playwright/test";
+import { type Browser, expect, type Page } from "@playwright/test";
 import { toLocalStorageSeed } from "../../src/test/scenarios/adapters/toLocalStorageSeed";
-import {
-  E2E_GEOLOCATION,
-  MAP_CONTAINER_SELECTOR,
-} from "./map";
-import { dismissMapOnboarding, prepareE2EPage } from "./page-init";
+import { E2E_GEOLOCATION, MAP_CONTAINER_SELECTOR } from "./map";
 import type { BlockExternalAssetsOptions } from "./network";
+import { dismissMapOnboarding, prepareE2EPage } from "./page-init";
 
 type PlayerRole = "seeker" | "hider";
 type GameSize = "small" | "medium" | "large";
@@ -20,18 +17,8 @@ export interface LocalSessionSeedOptions {
   network?: BlockExternalAssetsOptions;
 }
 
-export async function seedLocalSession(
-  page: Page,
-  options: LocalSessionSeedOptions = {},
-) {
-  const {
-    code,
-    myRole,
-    gameSize,
-    sessionId,
-    hidingPeriodMinutes,
-    memberRoles,
-  } = options;
+export async function seedLocalSession(page: Page, options: LocalSessionSeedOptions = {}) {
+  const { code, myRole, gameSize, sessionId, hidingPeriodMinutes, memberRoles } = options;
   const seed = toLocalStorageSeed("dublin-local-map", {
     code,
     myRole,
@@ -41,23 +28,17 @@ export async function seedLocalSession(
     memberRoles,
   });
 
-  await page.addInitScript(
-    ({ sessionBlob, mapBlob, annotationsBlob, clearTimer }) => {
-      localStorage.setItem("jetlag-session", sessionBlob);
-      localStorage.setItem("jetlag-map", mapBlob);
-      localStorage.setItem("jetlag-annotations", annotationsBlob);
-      if (clearTimer) {
-        localStorage.removeItem("jetlag-timer");
-      }
-    },
-    seed,
-  );
+  await page.addInitScript(({ sessionBlob, mapBlob, annotationsBlob, clearTimer }) => {
+    localStorage.setItem("jetlag-session", sessionBlob);
+    localStorage.setItem("jetlag-map", mapBlob);
+    localStorage.setItem("jetlag-annotations", annotationsBlob);
+    if (clearTimer) {
+      localStorage.removeItem("jetlag-timer");
+    }
+  }, seed);
 }
 
-export async function openMapWithLocalSession(
-  page: Page,
-  options: LocalSessionSeedOptions = {},
-) {
+export async function openMapWithLocalSession(page: Page, options: LocalSessionSeedOptions = {}) {
   const { network, ...seedOptions } = options;
   await prepareE2EPage(page, network);
   await seedLocalSession(page, seedOptions);
@@ -75,16 +56,9 @@ export async function expectCreatePageMapPreviewLoaded(page: Page) {
   const map = page.locator(MAP_CONTAINER_SELECTOR).first();
   await map.waitFor({ state: "visible", timeout: 10_000 });
 
-  await expect
-    .poll(async () => (await map.boundingBox())?.height ?? 0)
-    .toBeGreaterThan(200);
+  await expect.poll(async () => (await map.boundingBox())?.height ?? 0).toBeGreaterThan(200);
 
-  await expect
-    .poll(
-      async () =>
-        page.locator(".maplibregl-canvas").count(),
-    )
-    .toBeGreaterThan(0);
+  await expect.poll(async () => page.locator(".maplibregl-canvas").count()).toBeGreaterThan(0);
 }
 
 export async function createSessionFromCreatePage(page: Page) {
@@ -114,18 +88,12 @@ export async function readSessionCode(page: Page): Promise<string> {
     return codeText?.trim() ?? "ABCD";
   }
 
-  const codeText = await block
-    .locator(".jl-view-transition-session-code")
-    .textContent();
+  const codeText = await block.locator(".jl-view-transition-session-code").textContent();
   expect(codeText?.trim()).toMatch(/^[A-Z]{4}$/);
   return codeText?.trim() ?? "ABCD";
 }
 
-export async function joinAsRole(
-  guestPage: Page,
-  code: string,
-  role: PlayerRole,
-) {
+export async function joinAsRole(guestPage: Page, code: string, role: PlayerRole) {
   await guestPage.goto("/join");
   const roleName = role === "hider" ? "Hider" : "Seeker";
   // SegmentedControl radios are visually hidden; click the visible label.

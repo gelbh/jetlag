@@ -24,9 +24,11 @@ describe("controlSessionTimerForMove", () => {
       data: { ok: true, action: "pause", noop: false },
     });
 
-    await expect(
-      controlSessionTimerForMove("sess-1", "pause"),
-    ).resolves.toEqual({ ok: true, action: "pause", noop: false });
+    await expect(controlSessionTimerForMove("sess-1", "pause")).resolves.toEqual({
+      ok: true,
+      action: "pause",
+      noop: false,
+    });
 
     expect(httpsCallable).toHaveBeenCalledWith({}, "controlSessionTimerForMove");
     expect(callable).toHaveBeenCalledWith({
@@ -40,9 +42,11 @@ describe("controlSessionTimerForMove", () => {
       data: { ok: true, action: "resume", noop: false },
     });
 
-    await expect(
-      controlSessionTimerForMove("sess-1", "resume"),
-    ).resolves.toEqual({ ok: true, action: "resume", noop: false });
+    await expect(controlSessionTimerForMove("sess-1", "resume")).resolves.toEqual({
+      ok: true,
+      action: "resume",
+      noop: false,
+    });
 
     expect(callable).toHaveBeenCalledWith({
       sessionId: "sess-1",

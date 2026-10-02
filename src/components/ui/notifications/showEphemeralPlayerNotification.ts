@@ -15,9 +15,7 @@ function ephemeralColor(input: EphemeralInput): string {
 }
 
 function ephemeralId(input: EphemeralInput): string {
-  return "id" in input && input.id
-    ? input.id
-    : `ephemeral:${input.title}:${input.message}`;
+  return "id" in input && input.id ? input.id : `ephemeral:${input.title}:${input.message}`;
 }
 
 /** Bridge from HUD ephemeral errors to Mantine notifications (channel 1). */

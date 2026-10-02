@@ -1,9 +1,9 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MantineProvider } from "@mantine/core";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
-import type { HostConfirmRecord } from "../../domain/incident/incidentTypes";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { jetlagTheme } from "@/theme/theme";
+import type { HostConfirmRecord } from "../../domain/incident/incidentTypes";
 import { HostConfirmSheet } from "./HostConfirmSheet";
 
 function withProviders(ui: ReactNode) {
@@ -47,19 +47,10 @@ describe("HostConfirmSheet", () => {
     const onClose = vi.fn();
 
     render(
-      withProviders(
-        <HostConfirmSheet
-          open
-          confirm={confirm}
-          onClose={onClose}
-          denyFn={denyFn}
-        />,
-      ),
+      withProviders(<HostConfirmSheet open confirm={confirm} onClose={onClose} denyFn={denyFn} />),
     );
 
-    expect(
-      screen.getByRole("heading", { name: "Confirm change" }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Confirm change" })).toBeInTheDocument();
 
     const overlay = document.querySelector(".mantine-Drawer-overlay");
     expect(overlay).toBeTruthy();

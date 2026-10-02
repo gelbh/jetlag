@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
-import { MapDraggableFixedStack } from "./MapDraggableFixedStack";
 import { useMapSideDockSide } from "@/hooks/map/useMapSideDockSide";
+import { MapDraggableFixedStack } from "./MapDraggableFixedStack";
 
 type MapSideDockStackProps = {
   children: ReactNode;

@@ -1,23 +1,17 @@
-import { describe, expect, it, vi } from "vitest";
 import type { Feature, Polygon } from "geojson";
-import type { GameArea } from "@/domain/map/annotations";
+import { describe, expect, it, vi } from "vitest";
 import type { MatchingFeature } from "@/domain/geo/types";
 import * as persistSlim from "@/domain/geometry/progressive/persistSlim";
 import { POLYGON_PERSIST_OVER_BUDGET_MESSAGE } from "@/domain/geometry/progressive/persistSlim";
-import {
-  commitMatching,
-  performMatchingCommit,
-  type CommitMatchingInput,
-} from "./commitMatching";
+import type { GameArea } from "@/domain/map/annotations";
+import { type CommitMatchingInput, commitMatching, performMatchingCommit } from "./commitMatching";
 
 const buildMatchingEliminationRegion = vi.hoisted(() => vi.fn());
 const buildSameNearestRegion = vi.hoisted(() => vi.fn());
 
 vi.mock("@/domain/geometry/measuring/matchingGeometry", () => ({
-  buildMatchingEliminationRegion: (...args: unknown[]) =>
-    buildMatchingEliminationRegion(...args),
-  buildSameNearestRegion: (...args: unknown[]) =>
-    buildSameNearestRegion(...args),
+  buildMatchingEliminationRegion: (...args: unknown[]) => buildMatchingEliminationRegion(...args),
+  buildSameNearestRegion: (...args: unknown[]) => buildSameNearestRegion(...args),
 }));
 
 function samplePolygon(): Feature<Polygon> {
@@ -58,9 +52,7 @@ const feature: MatchingFeature = {
   point: [51.45, -0.15],
 };
 
-function baseInput(
-  overrides: Partial<CommitMatchingInput> = {},
-): CommitMatchingInput {
+function baseInput(overrides: Partial<CommitMatchingInput> = {}): CommitMatchingInput {
   return {
     canSubmitQuestion: true,
     matchingSeekerPoint: [51.45, -0.15],
@@ -164,22 +156,16 @@ describe("performMatchingCommit persist-slim", () => {
   it("sets a storage error and skips create when persist-slim fails", async () => {
     buildSameNearestRegion.mockResolvedValue(samplePolygon());
     buildMatchingEliminationRegion.mockResolvedValue(samplePolygon());
-    const slimSpy = vi
-      .spyOn(persistSlim, "persistSlimPolygonFeature")
-      .mockReturnValue({
-        ok: false,
-        message: POLYGON_PERSIST_OVER_BUDGET_MESSAGE,
-      });
+    const slimSpy = vi.spyOn(persistSlim, "persistSlimPolygonFeature").mockReturnValue({
+      ok: false,
+      message: POLYGON_PERSIST_OVER_BUDGET_MESSAGE,
+    });
     const createAnnotation = vi.fn();
     const setMatchingError = vi.fn();
 
-    await performMatchingCommit(
-      baseInput({ createAnnotation, setMatchingError }),
-    );
+    await performMatchingCommit(baseInput({ createAnnotation, setMatchingError }));
 
-    expect(setMatchingError).toHaveBeenCalledWith(
-      POLYGON_PERSIST_OVER_BUDGET_MESSAGE,
-    );
+    expect(setMatchingError).toHaveBeenCalledWith(POLYGON_PERSIST_OVER_BUDGET_MESSAGE);
     expect(createAnnotation).not.toHaveBeenCalled();
     slimSpy.mockRestore();
   });

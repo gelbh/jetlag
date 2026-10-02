@@ -1,6 +1,6 @@
-import { attachPlayArea } from "./attachPlayArea";
-import { EXPANSION_OFF, type BundledGamePresetDefinition } from "./shared";
 import { OSAKA_REGION_PACK_ID } from "../osakaRegionPack";
+import { attachPlayArea } from "./attachPlayArea";
+import { type BundledGamePresetDefinition, EXPANSION_OFF } from "./shared";
 
 const OSAKA_WARDS = [
   { id: "ward-27102", name: "Miyakojima" },
@@ -29,7 +29,6 @@ const OSAKA_WARDS = [
   { id: "ward-27128", name: "Chūō" },
 ] as const;
 
-
 export function osakaPresets(): BundledGamePresetDefinition[] {
   const baseHierarchy = [
     { id: "continent-asia", category: "Continent", name: "Asia" },
@@ -55,8 +54,8 @@ export function osakaPresets(): BundledGamePresetDefinition[] {
       distanceUnit: "metric",
       advancedSettingsPatch: EXPANSION_OFF,
     }),
-    ...OSAKA_WARDS.map(
-      (ward) => attachPlayArea({
+    ...OSAKA_WARDS.map((ward) =>
+      attachPlayArea({
         id: `bundled:osaka-${ward.id}`,
         name: ward.name,
         description: `${ward.name} ward with local area subdivisions.`,
@@ -66,7 +65,7 @@ export function osakaPresets(): BundledGamePresetDefinition[] {
         hierarchy: wardHierarchy,
         distanceUnit: "metric",
         advancedSettingsPatch: EXPANSION_OFF,
-       }),
+      }),
     ),
   ];
 }

@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
+import { APP_VERSION } from "../../domain/device/changelog";
 import {
   connectEmulatorsForTests,
   teardownEmulatorsForTests,
@@ -16,7 +17,6 @@ import {
   writeRemoteAnnotation,
 } from "./firestoreAnnotations";
 import { buildAnnotationDocument } from "./serialization/serializeAnnotation";
-import { APP_VERSION } from "../../domain/device/changelog";
 
 describe("firestoreAnnotations emulator", () => {
   beforeEach(async () => {
@@ -64,12 +64,10 @@ describe("firestoreAnnotations emulator", () => {
     await teardownEmulatorsForTests();
     const { uid: driftedGuestUid } = await connectEmulatorsForTests();
 
-    const healed = await ensureRemoteSessionMembership(
-      session,
-      driftedGuestUid,
-      "seeker",
-      { returningMemberUid: guestUid, persistedMyUid: guestUid },
-    );
+    const healed = await ensureRemoteSessionMembership(session, driftedGuestUid, "seeker", {
+      returningMemberUid: guestUid,
+      persistedMyUid: guestUid,
+    });
 
     expect(healed.memberUids).toContain(driftedGuestUid);
     expect(healed.memberUids).not.toContain(guestUid);
@@ -157,10 +155,7 @@ describe("firestoreAnnotations emulator", () => {
   });
 });
 
-async function viWaitFor(
-  predicate: () => boolean,
-  timeoutMs = 5_000,
-): Promise<void> {
+async function viWaitFor(predicate: () => boolean, timeoutMs = 5_000): Promise<void> {
   const started = Date.now();
   while (!predicate()) {
     if (Date.now() - started > timeoutMs) {

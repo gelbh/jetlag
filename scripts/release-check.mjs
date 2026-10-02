@@ -6,13 +6,8 @@ const packageVersion = JSON.parse(
   readFileSync(resolve(projectRoot, "package.json"), "utf8"),
 ).version;
 
-const changelogTs = readFileSync(
-  resolve(projectRoot, "src/domain/device/changelog.ts"),
-  "utf8",
-);
-const appVersionMatch = changelogTs.match(
-  /export const APP_VERSION = "([^"]+)"/,
-);
+const changelogTs = readFileSync(resolve(projectRoot, "src/domain/device/changelog.ts"), "utf8");
+const appVersionMatch = changelogTs.match(/export const APP_VERSION = "([^"]+)"/);
 
 if (!appVersionMatch) {
   console.error("Could not read APP_VERSION from changelog.ts.");

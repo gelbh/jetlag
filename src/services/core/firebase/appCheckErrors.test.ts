@@ -11,9 +11,7 @@ describe("isRecaptchaAlreadyRenderedError", () => {
   });
 
   it("ignores unrelated errors", () => {
-    expect(isRecaptchaAlreadyRenderedError(new Error("network failed"))).toBe(
-      false,
-    );
+    expect(isRecaptchaAlreadyRenderedError(new Error("network failed"))).toBe(false);
     expect(isRecaptchaAlreadyRenderedError("not an error")).toBe(false);
   });
 });

@@ -117,15 +117,13 @@ describe("useCombinedEliminationMask", () => {
   });
 
   it("clears the mask on worker reject (no sync TS fallback)", async () => {
-    requestCombinedEliminationMask.mockImplementation(
-      (annotations: AnnotationRecord[]) => {
-        const id = annotations[0]?.id;
-        if (id === "ann-1") {
-          return Promise.resolve(workerFeature);
-        }
-        return Promise.reject(new Error("worker boom"));
-      },
-    );
+    requestCombinedEliminationMask.mockImplementation((annotations: AnnotationRecord[]) => {
+      const id = annotations[0]?.id;
+      if (id === "ann-1") {
+        return Promise.resolve(workerFeature);
+      }
+      return Promise.reject(new Error("worker boom"));
+    });
 
     const { result, rerender } = renderHook(
       ({ annotations }: { annotations: AnnotationRecord[] }) =>
@@ -162,14 +160,12 @@ describe("useCombinedEliminationMask", () => {
       }
     >();
 
-    requestCombinedEliminationMask.mockImplementation(
-      (annotations: AnnotationRecord[]) => {
-        const key = annotations.map((entry) => entry.id).join(",");
-        return new Promise((resolve) => {
-          latestByKey.set(key, { resolve });
-        });
-      },
-    );
+    requestCombinedEliminationMask.mockImplementation((annotations: AnnotationRecord[]) => {
+      const key = annotations.map((entry) => entry.id).join(",");
+      return new Promise((resolve) => {
+        latestByKey.set(key, { resolve });
+      });
+    });
 
     const { result, rerender } = renderHook(
       ({ annotations }: { annotations: AnnotationRecord[] }) =>

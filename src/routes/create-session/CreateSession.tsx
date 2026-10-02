@@ -1,5 +1,5 @@
-import { useCallback } from "react";
 import { Box, Button, Stack, Text } from "@mantine/core";
+import { useCallback } from "react";
 import { EntryAsyncButton } from "@/components/ui/entry/EntryAsyncButton";
 import { EntryHeader } from "@/components/ui/entry/EntryHeader";
 import { filledStyles } from "@/components/ui/entry/entryStyles";
@@ -40,8 +40,7 @@ export function CreateSession() {
           distanceUnit: session.distanceUnit,
           advancedSettings: session.advancedSettings,
           gameArea: session.previewGameArea,
-          placeLabel:
-            session.selectedPlace?.displayName ?? session.locationQuery,
+          placeLabel: session.selectedPlace?.displayName ?? session.locationQuery,
           sessionTier: session.resolvedSessionTier,
           regionPackId: session.regionPackId,
           subregionId: session.regionPackSubregionId,
@@ -62,9 +61,7 @@ export function CreateSession() {
         <CreateSessionMapPane
           mapStyle={session.mapStyle}
           focusBounds={session.mapFocusBounds}
-          previewGameArea={
-            session.mapPreviewGameArea ?? session.previewGameArea
-          }
+          previewGameArea={session.mapPreviewGameArea ?? session.previewGameArea}
           selectedGameSize={session.gameSize}
           manualFramingActive={session.manualFramingActive}
           framingMode={session.framing.framingMode}
@@ -79,8 +76,7 @@ export function CreateSession() {
           onUserViewportFramed={session.handleUserViewportFramed}
           onMapClick={
             session.manualFramingActive &&
-            (session.framing.framingMode === "circle" ||
-              session.framing.framingMode === "polygon")
+            (session.framing.framingMode === "circle" || session.framing.framingMode === "polygon")
               ? session.framing.handleMapClick
               : undefined
           }
@@ -91,12 +87,8 @@ export function CreateSession() {
           mapStyle={session.mapStyle}
           onMapStyleChange={session.setMapStyle}
           framing={session.framing}
-          referenceGameArea={
-            !session.manualFramingActive ? session.previewGameArea : null
-          }
-          referenceFocusBounds={
-            !session.manualFramingActive ? session.mapFocusBounds : null
-          }
+          referenceGameArea={!session.manualFramingActive ? session.previewGameArea : null}
+          referenceFocusBounds={!session.manualFramingActive ? session.mapFocusBounds : null}
           onClose={() => session.setFramingModalOpen(false)}
           onConfirm={session.handleFramingModalConfirm}
         />
@@ -111,8 +103,7 @@ export function CreateSession() {
               className="shrink-0 px-4 pt-3 pb-[max(0.25rem,var(--safe-area-bottom))]"
               style={{
                 backgroundColor: "oklch(from var(--color-canvas) l c h / 0.88)",
-                borderTop:
-                  "0.33px solid oklch(from var(--color-field-ink) l c h / 0.12)",
+                borderTop: "0.33px solid oklch(from var(--color-field-ink) l c h / 0.12)",
                 backdropFilter: "blur(20px) saturate(1.4)",
                 WebkitBackdropFilter: "blur(20px) saturate(1.4)",
               }}
@@ -122,9 +113,7 @@ export function CreateSession() {
                 fullWidth
                 styles={filledStyles}
                 busy={confirmBusy}
-                unavailable={
-                  session.requiresPremiumSignIn || !session.hostAuthReady
-                }
+                unavailable={session.requiresPremiumSignIn || !session.hostAuthReady}
                 idleLabel="Confirm game area"
                 busyLabel={session.confirmLabel}
                 onClick={() => void session.handleConfirm()}
@@ -155,8 +144,7 @@ export function CreateSession() {
           <GameAreaSection
             model={{
               bundledPresetSelectGroups: session.bundledPresetSelectGroups,
-              favouritePresetSelectOptions:
-                session.favouritePresetSelectOptions,
+              favouritePresetSelectOptions: session.favouritePresetSelectOptions,
               userPresets: session.userPresets,
               loading: session.loading,
               verifyingAccess: session.verifyingAccess,
@@ -181,8 +169,7 @@ export function CreateSession() {
               onLocationQueryChange: session.handleLocationQueryChange,
               onSearch: () => void session.handleSearch(),
               onAddCurrentArea: session.addCurrentArea,
-              onBoundaryImport: (event) =>
-                void session.handleBoundaryImport(event),
+              onBoundaryImport: (event) => void session.handleBoundaryImport(event),
               onApplyPlace: session.applyPlace,
               onRequestLocationBias: session.requestLocationBias,
               onTransitMetroChange: session.setTransitMetroOverride,

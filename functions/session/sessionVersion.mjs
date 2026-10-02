@@ -22,7 +22,13 @@ export function compareAppVersions(a, b) {
   return 0;
 }
 
-export function sessionVersionCompatible(session, clientVersion, uid, returningMemberUid, joinRole) {
+export function sessionVersionCompatible(
+  session,
+  clientVersion,
+  uid,
+  returningMemberUid,
+  joinRole,
+) {
   if (joinRole === "observer" || joinRole === "admin") {
     return true;
   }

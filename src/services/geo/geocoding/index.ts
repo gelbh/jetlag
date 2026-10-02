@@ -1,3 +1,14 @@
+export type { SearchPlacesOptions } from "./client";
+export { reverseGeocodePoint, searchPlaces } from "./client";
+export {
+  formatPlaceSearchSubtitle,
+  mergeRankedGeocodedPlaceCandidates,
+  type NominatimPlaceMetadata,
+  placeBoundsFingerprint,
+  placeCategoryLabel,
+  type RankedGeocodedPlaceCandidate,
+  rankGeocodedPlaceCandidates,
+} from "./geocodingRank";
 export type {
   GeocodedPlace,
   NominatimGeoJson,
@@ -11,14 +22,3 @@ export {
   placeHasBoundary,
   viewboxForPoint,
 } from "./normalize";
-export type { SearchPlacesOptions } from "./client";
-export { reverseGeocodePoint, searchPlaces } from "./client";
-export {
-  formatPlaceSearchSubtitle,
-  mergeRankedGeocodedPlaceCandidates,
-  placeBoundsFingerprint,
-  placeCategoryLabel,
-  rankGeocodedPlaceCandidates,
-  type NominatimPlaceMetadata,
-  type RankedGeocodedPlaceCandidate,
-} from "./geocodingRank";

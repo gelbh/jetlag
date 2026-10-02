@@ -1,12 +1,6 @@
-import {
-  assertFails,
-  assertSucceeds,
-} from "@firebase/rules-unit-testing";
+import { assertFails, assertSucceeds } from "@firebase/rules-unit-testing";
 import { describe, it } from "vitest";
-import {
-  bindRulesTestEnv,
-  sessionPayload,
-} from "./helpers";
+import { bindRulesTestEnv, sessionPayload } from "./helpers";
 
 describe("firestore.rules", () => {
   const rules = bindRulesTestEnv();

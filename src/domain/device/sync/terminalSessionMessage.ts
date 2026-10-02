@@ -6,15 +6,11 @@ const TERMINAL_SESSION_MESSAGE_FRAGMENTS = [
   "session is no longer available",
 ] as const;
 
-export function isTerminalSessionSyncMessage(
-  message: string | null | undefined,
-): boolean {
+export function isTerminalSessionSyncMessage(message: string | null | undefined): boolean {
   if (!message) {
     return false;
   }
 
   const normalized = message.toLowerCase();
-  return TERMINAL_SESSION_MESSAGE_FRAGMENTS.some((fragment) =>
-    normalized.includes(fragment),
-  );
+  return TERMINAL_SESSION_MESSAGE_FRAGMENTS.some((fragment) => normalized.includes(fragment));
 }

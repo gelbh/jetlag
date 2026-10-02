@@ -1,9 +1,5 @@
+import { loadKernelWasm, parseWasmFeature, resetKernelWasmForTests } from "./kernelWasmPkg";
 import type { NearRegionBatchInput, PolygonFeature } from "./types";
-import {
-  loadKernelWasm,
-  parseWasmFeature,
-  resetKernelWasmForTests,
-} from "./kernelWasmPkg";
 
 export type { NearRegionBatchInput } from "./types";
 

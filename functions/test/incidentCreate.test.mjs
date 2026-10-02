@@ -1,5 +1,6 @@
-import test from "node:test";
 import assert from "node:assert/strict";
+import test from "node:test";
+import { buildAdminPrompt } from "../incident/adminPrompt.mjs";
 import {
   createIncidentHandler,
   INCIDENT_INVALID_DIAGNOSTICS,
@@ -7,7 +8,6 @@ import {
   INCIDENT_RATE_LIMITED,
   INCIDENT_UNAUTHENTICATED,
 } from "../incident/createIncident.mjs";
-import { buildAdminPrompt } from "../incident/adminPrompt.mjs";
 
 function mockDb() {
   const incidents = new Map();
@@ -214,11 +214,7 @@ test("createIncidentHandler rejects oversized diagnostics", async () => {
 
 test("createIncidentHandler clamps the player note to 140 characters", async () => {
   const db = mockDb();
-  await createIncidentHandler(
-    db,
-    baseInput({ playerNote: "a".repeat(200) }),
-    baseDeps(),
-  );
+  await createIncidentHandler(db, baseInput({ playerNote: "a".repeat(200) }), baseDeps());
   const incident = db._incidents.get("id-1");
   assert.equal(incident.playerNote.length, 140);
 });

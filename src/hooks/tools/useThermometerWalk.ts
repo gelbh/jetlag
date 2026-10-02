@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import {
-  THERMOMETER_WALK_MAX_DURATION_MS,
   buildThermometerStartPointGeometry,
   crowFliesDistanceMeters,
+  THERMOMETER_WALK_MAX_DURATION_MS,
 } from "../../domain/questions";
 import type { PendingQuestionPlacement } from "../../domain/session/activity/sessionChat";
 import { useLiveLocation } from "../location/useLiveLocation";
@@ -85,9 +85,7 @@ export function useThermometerWalk({
     } catch (error) {
       completedRef.current = false;
       onErrorRef.current?.(
-        error instanceof Error
-          ? error.message
-          : "Thermometer walk could not finish. Try again.",
+        error instanceof Error ? error.message : "Thermometer walk could not finish. Try again.",
       );
     } finally {
       stoppingRef.current = false;
@@ -138,9 +136,7 @@ export function useThermometerWalk({
     // Refuse start=end publishes — wait for a GPS sample past minDistance.
     const point = currentPointRef.current;
     if (!point) {
-      onErrorRef.current?.(
-        "Keep walking until GPS updates, then end the walk.",
-      );
+      onErrorRef.current?.("Keep walking until GPS updates, then end the walk.");
       return;
     }
     void finishWalk(point);

@@ -1,45 +1,50 @@
-import { AskHudPanel } from "@/components/tools/ask/AskHudPanel";
+import { UnstyledButton } from "@mantine/core";
+import {
+  BuildingsIcon,
+  type IconProps,
+  MapPinAreaIcon,
+  SquaresFourIcon,
+  TrainIcon,
+  TreeIcon,
+  WrenchIcon,
+} from "@phosphor-icons/react";
 /**
  * Matching Ask HUD mode body — CatalogRail → map resolve (+ solo answer).
  * SingleBottomChord: row tap advances; no PhaseRail / CONTINUE.
  * Spec: ask-surface-kit-design rev 2026-08-05b.
  */
-import { createElement, useState, type ComponentType } from "react";
-import { UnstyledButton } from "@mantine/core";
-import { BuildingsIcon, MapPinAreaIcon, SquaresFourIcon, TrainIcon, TreeIcon, WrenchIcon, type IconProps } from "@phosphor-icons/react";
-import { AskCatalogRail } from "@/components/tools/ask/AskCatalogRail";
-import { AskToolQuestionHeader } from "@/components/tools/ask/AskToolQuestionHeader";
+import { type ComponentType, createElement, useState } from "react";
 import { HudMatchingIcon } from "@/components/map/icons/ToolIcons";
-import { yesNoAnswerOptions } from "@/components/tools/shared/answers/binaryAnswerOptions";
+import { AskCatalogRail } from "@/components/tools/ask/AskCatalogRail";
+import { AskHudPanel } from "@/components/tools/ask/AskHudPanel";
+import { AskToolQuestionHeader } from "@/components/tools/ask/AskToolQuestionHeader";
 import { BinaryAnswerPicker } from "@/components/tools/shared/answers/BinaryAnswerPicker";
+import { yesNoAnswerOptions } from "@/components/tools/shared/answers/binaryAnswerOptions";
 import { AnchorControls } from "@/components/tools/shared/controls/AnchorControls";
-import { CatalogExhaustedMessage } from "@/components/tools/shared/readout/CatalogExhaustedMessage";
+import { QuestionTruthReferenceHint } from "@/components/tools/shared/QuestionTruthReferenceHint";
 import { AskInlineError } from "@/components/tools/shared/readout/AskInlineError";
+import { CatalogExhaustedMessage } from "@/components/tools/shared/readout/CatalogExhaustedMessage";
 import { LoadingReadout } from "@/components/tools/shared/readout/LoadingReadout";
 import { ProvisionalBadge } from "@/components/tools/shared/readout/ProvisionalBadge";
 import { ResolvedReadout } from "@/components/tools/shared/readout/ResolvedReadout";
-import { QuestionTruthReferenceHint } from "@/components/tools/shared/QuestionTruthReferenceHint";
 import {
   askInsetSurfaceStyle,
   filterChipStyles,
   filterChipTrackStyle,
 } from "@/components/ui/entry/entryChrome";
-import { formatDistance, type DistanceUnit } from "@/domain/map/distance";
+import { type DistanceUnit, formatDistance } from "@/domain/map/distance";
 import {
   isMatchingCategoryAvailable,
   isMatchingCategoryEnabled,
   MATCHING_CATEGORIES,
   MATCHING_CATEGORY_GROUPS,
-  matchingQuestionFor,
   type MatchingAnswer,
   type MatchingCategoryDefinition,
   type MatchingCategoryGroupId,
   type MatchingCategoryId,
+  matchingQuestionFor,
 } from "@/domain/questions";
-import {
-  matchingFeatureCountLabel,
-  matchingEmptyPlayAreaMessage,
-} from "@/services/geo/matching";
+import { matchingEmptyPlayAreaMessage, matchingFeatureCountLabel } from "@/services/geo/matching";
 import { matchingCategoryIcon } from "./matchingCategoryIcons";
 
 type GroupFilter = "all" | MatchingCategoryGroupId;
@@ -52,10 +57,7 @@ const GROUP_CHIP_LABEL: Record<MatchingCategoryGroupId, string> = {
   public_utilities: "Utilities",
 };
 
-const GROUP_CHIP_ICON: Record<
-  GroupFilter,
-  ComponentType<IconProps>
-> = {
+const GROUP_CHIP_ICON: Record<GroupFilter, ComponentType<IconProps>> = {
   all: SquaresFourIcon,
   transit: TrainIcon,
   administrative_divisions: BuildingsIcon,
@@ -132,12 +134,9 @@ export function MatchingHudBody({
 }: MatchingHudBodyProps) {
   const [groupFilter, setGroupFilter] = useState<GroupFilter>("all");
 
-  const catalogForRail = catalogCategories.filter((item) =>
-    isMatchingCategoryEnabled(item.id),
-  );
+  const catalogForRail = catalogCategories.filter((item) => isMatchingCategoryEnabled(item.id));
   const availableCategories = catalogForRail.filter(
-    (item) =>
-      !usedCategoryIds.has(item.id) && !unavailableCategoryIds.has(item.id),
+    (item) => !usedCategoryIds.has(item.id) && !unavailableCategoryIds.has(item.id),
   );
 
   const groupsWithRows = MATCHING_CATEGORY_GROUPS.filter((group) =>
@@ -145,8 +144,7 @@ export function MatchingHudBody({
   );
 
   const effectiveFilter: GroupFilter =
-    groupFilter === "all" ||
-    groupsWithRows.some((group) => group.id === groupFilter)
+    groupFilter === "all" || groupsWithRows.some((group) => group.id === groupFilter)
       ? groupFilter
       : "all";
 
@@ -165,28 +163,15 @@ export function MatchingHudBody({
           label: cat.label,
           groupLabel: effectiveFilter === "all" ? group.label : undefined,
           disabled:
-            (usedCategoryIds.has(cat.id) ||
-              unavailableCategoryIds.has(cat.id)) &&
+            (usedCategoryIds.has(cat.id) || unavailableCategoryIds.has(cat.id)) &&
             cat.id !== categoryId,
-          icon: (
-            <Icon
-              size={20}
-              weight="duotone"
-              color="currentColor"
-              aria-hidden
-            />
-          ),
+          icon: <Icon size={20} weight="duotone" color="currentColor" aria-hidden />,
         };
       }),
   );
 
-  const category = categoryId
-    ? catalogCategories.find((item) => item.id === categoryId)
-    : null;
-  const question =
-    categoryId != null
-      ? matchingQuestionFor(categoryId)
-      : MATCHING_QUESTION_INTRO;
+  const category = categoryId ? catalogCategories.find((item) => item.id === categoryId) : null;
+  const question = categoryId != null ? matchingQuestionFor(categoryId) : MATCHING_QUESTION_INTRO;
   const categoryIcon = category ? matchingCategoryIcon(category.id) : null;
   const usesLandmassMatching = category?.resolver === "landmass";
   const resolveComplete = nullAnswer || nearestFeatureName !== null;
@@ -219,9 +204,7 @@ export function MatchingHudBody({
 
   const nearestFeatureSummary = nearestFeatureName
     ? `${nearestFeatureName}${
-        !usesContainmentMatching &&
-        distanceMeters !== null &&
-        !nearestProvisional
+        !usesContainmentMatching && distanceMeters !== null && !nearestProvisional
           ? ` · ${formatDistance(distanceMeters, distanceUnit)} from you`
           : ""
       }${nearestOutsidePlayArea ? " · outside play area" : ""}`
@@ -236,10 +219,7 @@ export function MatchingHudBody({
   ];
 
   return (
-    <div
-      data-testid="matching-hud-body"
-      className="ask-hud-mode-body flex w-full flex-col gap-2"
-    >
+    <div data-testid="matching-hud-body" className="ask-hud-mode-body flex w-full flex-col gap-2">
       <AskToolQuestionHeader
         toolLabel={toolLabel}
         costLabel={costLabel}
@@ -278,11 +258,7 @@ export function MatchingHudBody({
                   onClick={() => setGroupFilter(option.value)}
                   styles={filterChipStyles(selected)}
                 >
-                  <Icon
-                    size={14}
-                    weight={selected ? "fill" : "regular"}
-                    aria-hidden
-                  />
+                  <Icon size={14} weight={selected ? "fill" : "regular"} aria-hidden />
                   {option.label}
                 </UnstyledButton>
               );
@@ -305,10 +281,7 @@ export function MatchingHudBody({
       ) : null}
 
       {chord === "resolve" ? (
-        <div
-          className="pointer-events-auto space-y-3 p-3"
-          style={askInsetSurfaceStyle}
-        >
+        <div className="pointer-events-auto space-y-3 p-3" style={askInsetSurfaceStyle}>
           {category ? (
             <div className="flex items-center gap-2.5">
               <span
@@ -318,14 +291,11 @@ export function MatchingHudBody({
                   width: 36,
                   height: 36,
                   borderRadius: 10,
-                  backgroundColor:
-                    "oklch(from var(--color-flag) l c h / 0.14)",
+                  backgroundColor: "oklch(from var(--color-flag) l c h / 0.14)",
                   color: "var(--color-flag)",
                 }}
               >
-                {categoryIcon
-                  ? createElement(categoryIcon, { size: 18, weight: "duotone" })
-                  : null}
+                {categoryIcon ? createElement(categoryIcon, { size: 18, weight: "duotone" }) : null}
               </span>
               <div className="min-w-0">
                 <p
@@ -340,14 +310,8 @@ export function MatchingHudBody({
               </div>
             </div>
           ) : null}
-          <AnchorControls
-            gpsLoading={gpsLoading}
-            hasAnchor={hasSeekerPoint}
-            onUseGps={onUseGps}
-          />
-          {loadingMessage !== null ? (
-            <LoadingReadout>{loadingMessage}</LoadingReadout>
-          ) : null}
+          <AnchorControls gpsLoading={gpsLoading} hasAnchor={hasSeekerPoint} onUseGps={onUseGps} />
+          {loadingMessage !== null ? <LoadingReadout>{loadingMessage}</LoadingReadout> : null}
           {nullAnswer && categoryId ? (
             <ResolvedReadout variant="warning">
               {matchingEmptyPlayAreaMessage(categoryId)}
@@ -357,10 +321,8 @@ export function MatchingHudBody({
               style={{
                 borderRadius: 12,
                 padding: "0.65rem 0.75rem",
-                backgroundColor:
-                  "oklch(from var(--color-field-ink) l c h / 0.05)",
-                border:
-                  "0.33px solid oklch(from var(--color-field-ink) l c h / 0.1)",
+                backgroundColor: "oklch(from var(--color-field-ink) l c h / 0.05)",
+                border: "0.33px solid oklch(from var(--color-field-ink) l c h / 0.1)",
               }}
             >
               <ResolvedReadout caption={featureCountLabel}>
@@ -371,23 +333,16 @@ export function MatchingHudBody({
               </ResolvedReadout>
             </div>
           ) : !loading && hasSeekerPoint ? (
-            <ResolvedReadout variant="dim">
-              Looking up the nearest feature…
-            </ResolvedReadout>
+            <ResolvedReadout variant="dim">Looking up the nearest feature…</ResolvedReadout>
           ) : !hasSeekerPoint ? (
-            <ResolvedReadout variant="dim">
-              Tap the map to set your anchor.
-            </ResolvedReadout>
+            <ResolvedReadout variant="dim">Tap the map to set your anchor.</ResolvedReadout>
           ) : null}
           {error ? <AskInlineError message={error} /> : null}
         </div>
       ) : null}
 
       {chord === "answer" ? (
-        <div
-          className="pointer-events-auto space-y-3 p-3"
-          style={askInsetSurfaceStyle}
-        >
+        <div className="pointer-events-auto space-y-3 p-3" style={askInsetSurfaceStyle}>
           {category ? (
             <div className="flex items-center gap-2.5">
               <span
@@ -397,14 +352,11 @@ export function MatchingHudBody({
                   width: 36,
                   height: 36,
                   borderRadius: 10,
-                  backgroundColor:
-                    "oklch(from var(--color-flag) l c h / 0.14)",
+                  backgroundColor: "oklch(from var(--color-flag) l c h / 0.14)",
                   color: "var(--color-flag)",
                 }}
               >
-                {categoryIcon
-                  ? createElement(categoryIcon, { size: 18, weight: "duotone" })
-                  : null}
+                {categoryIcon ? createElement(categoryIcon, { size: 18, weight: "duotone" }) : null}
               </span>
               <div className="min-w-0">
                 <p
@@ -424,15 +376,11 @@ export function MatchingHudBody({
               style={{
                 borderRadius: 12,
                 padding: "0.65rem 0.75rem",
-                backgroundColor:
-                  "oklch(from var(--color-field-ink) l c h / 0.05)",
-                border:
-                  "0.33px solid oklch(from var(--color-field-ink) l c h / 0.1)",
+                backgroundColor: "oklch(from var(--color-field-ink) l c h / 0.05)",
+                border: "0.33px solid oklch(from var(--color-field-ink) l c h / 0.1)",
               }}
             >
-              <ResolvedReadout caption={featureCountLabel}>
-                {nearestFeatureSummary}
-              </ResolvedReadout>
+              <ResolvedReadout caption={featureCountLabel}>{nearestFeatureSummary}</ResolvedReadout>
             </div>
           ) : null}
           <BinaryAnswerPicker

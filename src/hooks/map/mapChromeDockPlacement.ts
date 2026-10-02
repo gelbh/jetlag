@@ -73,24 +73,13 @@ export function placementFromLegacyAnchor(
     return fallback;
   }
   const side: MapChromeDockSide = anchor.endsWith("left") ? "left" : "right";
-  const topRatio = anchor.startsWith("top")
-    ? 0.08
-    : anchor.startsWith("mid")
-      ? 0.42
-      : 0.72;
+  const topRatio = anchor.startsWith("top") ? 0.08 : anchor.startsWith("mid") ? 0.42 : 0.72;
   return { side, topRatio };
 }
 
 /** Coarse label for dataset / a11y (still left|right + band). */
-export function legacyAnchorFromPlacement(
-  placement: MapChromeDockPlacement,
-): MapSideDockAnchor {
-  const band =
-    placement.topRatio < 0.33
-      ? "top"
-      : placement.topRatio > 0.66
-        ? "bottom"
-        : "mid";
+export function legacyAnchorFromPlacement(placement: MapChromeDockPlacement): MapSideDockAnchor {
+  const band = placement.topRatio < 0.33 ? "top" : placement.topRatio > 0.66 ? "bottom" : "mid";
   return `${band}-${placement.side}` as MapSideDockAnchor;
 }
 
@@ -103,13 +92,9 @@ export function usableVerticalBand(
 } {
   // Status island: safe-area + float gap + island height, then clearance.
   const minTop =
-    Math.max(0, safeAreaTopPx) +
-    FLOAT_GAP_PX +
-    STATUS_ISLAND_PX +
-    SIDE_DOCK_CLEARANCE_PX;
+    Math.max(0, safeAreaTopPx) + FLOAT_GAP_PX + STATUS_ISLAND_PX + SIDE_DOCK_CLEARANCE_PX;
   // Hunt dock: float gap + island height from physical bottom, then clearance.
-  const maxBottom =
-    viewportHeight - (FLOAT_GAP_PX + HUNT_DOCK_PX + SIDE_DOCK_CLEARANCE_PX);
+  const maxBottom = viewportHeight - (FLOAT_GAP_PX + HUNT_DOCK_PX + SIDE_DOCK_CLEARANCE_PX);
   return { minTop, maxBottom: Math.max(minTop + 48, maxBottom) };
 }
 
@@ -141,10 +126,7 @@ export function clampTopPx(
   viewportHeight: number,
   safeAreaTopPx = 0,
 ): number {
-  const { minTop, maxBottom } = usableVerticalBand(
-    viewportHeight,
-    safeAreaTopPx,
-  );
+  const { minTop, maxBottom } = usableVerticalBand(viewportHeight, safeAreaTopPx);
   const maxTop = Math.max(minTop, maxBottom - height);
   return Math.min(maxTop, Math.max(minTop, top));
 }
@@ -155,10 +137,7 @@ export function topRatioFromTopPx(
   viewportHeight: number,
   safeAreaTopPx = 0,
 ): number {
-  const { minTop, maxBottom } = usableVerticalBand(
-    viewportHeight,
-    safeAreaTopPx,
-  );
+  const { minTop, maxBottom } = usableVerticalBand(viewportHeight, safeAreaTopPx);
   const span = Math.max(1, maxBottom - height - minTop);
   const clamped = clampTopPx(top, height, viewportHeight, safeAreaTopPx);
   return Math.min(1, Math.max(0, (clamped - minTop) / span));
@@ -170,18 +149,10 @@ export function topPxFromTopRatio(
   viewportHeight: number,
   safeAreaTopPx = 0,
 ): number {
-  const { minTop, maxBottom } = usableVerticalBand(
-    viewportHeight,
-    safeAreaTopPx,
-  );
+  const { minTop, maxBottom } = usableVerticalBand(viewportHeight, safeAreaTopPx);
   const span = Math.max(1, maxBottom - height - minTop);
   const ratio = Math.min(1, Math.max(0, topRatio));
-  return clampTopPx(
-    minTop + ratio * span,
-    height,
-    viewportHeight,
-    safeAreaTopPx,
-  );
+  return clampTopPx(minTop + ratio * span, height, viewportHeight, safeAreaTopPx);
 }
 
 /**
@@ -200,26 +171,16 @@ export function resolveStackedTops(input: {
 }): { moverTop: number; peerTop: number } {
   const gap = input.gap ?? PEER_GAP_PX;
   const safeTop = input.safeAreaTopPx ?? 0;
-  const { minTop, maxBottom } = usableVerticalBand(
-    input.viewportHeight,
-    safeTop,
-  );
+  const { minTop, maxBottom } = usableVerticalBand(input.viewportHeight, safeTop);
   let moverTop = input.moverTop;
   let peerTop = input.peerTop;
   const { moverHeight, peerHeight } = input;
 
-  const overlaps =
-    moverTop < peerTop + peerHeight + gap &&
-    moverTop + moverHeight > peerTop - gap;
+  const overlaps = moverTop < peerTop + peerHeight + gap && moverTop + moverHeight > peerTop - gap;
 
   if (!overlaps) {
     return {
-      moverTop: clampTopPx(
-        moverTop,
-        moverHeight,
-        input.viewportHeight,
-        safeTop,
-      ),
+      moverTop: clampTopPx(moverTop, moverHeight, input.viewportHeight, safeTop),
       peerTop: clampTopPx(peerTop, peerHeight, input.viewportHeight, safeTop),
     };
   }
@@ -262,23 +223,12 @@ export function resolveStackedTops(input: {
   };
 }
 
-export function sideFromPointX(
-  pointX: number,
-  viewportWidth: number,
-): MapChromeDockSide {
+export function sideFromPointX(pointX: number, viewportWidth: number): MapChromeDockSide {
   return pointX < viewportWidth / 2 ? "left" : "right";
 }
 
-function parsePlacement(
-  value: unknown,
-  fallback: MapChromeDockPlacement,
-): MapChromeDockPlacement {
-  if (
-    value &&
-    typeof value === "object" &&
-    "side" in value &&
-    "topRatio" in value
-  ) {
+function parsePlacement(value: unknown, fallback: MapChromeDockPlacement): MapChromeDockPlacement {
+  if (value && typeof value === "object" && "side" in value && "topRatio" in value) {
     const side = (value as MapChromeDockPlacement).side;
     const topRatio = Number((value as MapChromeDockPlacement).topRatio);
     if ((side === "left" || side === "right") && Number.isFinite(topRatio)) {
@@ -326,24 +276,14 @@ export function writeMapChromeDocksState(state: MapChromeDocksState): void {
   try {
     localStorage.setItem(MAP_CHROME_DOCKS_STORAGE_KEY, JSON.stringify(state));
     // Keep legacy keys in sync for older CSS / readers.
-    localStorage.setItem(
-      MAP_SIDE_DOCK_STORAGE_KEY,
-      legacyAnchorFromPlacement(state.side),
-    );
-    localStorage.setItem(
-      MAP_NAV_DOCK_STORAGE_KEY,
-      legacyAnchorFromPlacement(state.nav),
-    );
+    localStorage.setItem(MAP_SIDE_DOCK_STORAGE_KEY, legacyAnchorFromPlacement(state.side));
+    localStorage.setItem(MAP_NAV_DOCK_STORAGE_KEY, legacyAnchorFromPlacement(state.nav));
   } catch {
     // ignore
   }
   if (typeof document !== "undefined") {
-    document.documentElement.dataset.mapSideDock = legacyAnchorFromPlacement(
-      state.side,
-    );
-    document.documentElement.dataset.mapNavDock = legacyAnchorFromPlacement(
-      state.nav,
-    );
+    document.documentElement.dataset.mapSideDock = legacyAnchorFromPlacement(state.side);
+    document.documentElement.dataset.mapNavDock = legacyAnchorFromPlacement(state.nav);
   }
   window.dispatchEvent(new Event(MAP_CHROME_DOCKS_CHANGE_EVENT));
 }
@@ -354,8 +294,7 @@ export function syncMapSideDockDataset(
   if (typeof document === "undefined") {
     return;
   }
-  document.documentElement.dataset.mapSideDock =
-    legacyAnchorFromPlacement(placement);
+  document.documentElement.dataset.mapSideDock = legacyAnchorFromPlacement(placement);
 }
 
 export function syncMapNavDockDataset(
@@ -364,8 +303,7 @@ export function syncMapNavDockDataset(
   if (typeof document === "undefined") {
     return;
   }
-  document.documentElement.dataset.mapNavDock =
-    legacyAnchorFromPlacement(placement);
+  document.documentElement.dataset.mapNavDock = legacyAnchorFromPlacement(placement);
 }
 
 /** @deprecated migrate callers to placement APIs */
@@ -374,10 +312,7 @@ export function normalizeStoredAnchor(
   fallback: MapSideDockAnchor = "bottom-right",
 ): MapSideDockAnchor {
   return legacyAnchorFromPlacement(
-    placementFromLegacyAnchor(
-      raw,
-      placementFromLegacyAnchor(fallback, DEFAULT_SIDE_PLACEMENT),
-    ),
+    placementFromLegacyAnchor(raw, placementFromLegacyAnchor(fallback, DEFAULT_SIDE_PLACEMENT)),
   );
 }
 

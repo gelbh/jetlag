@@ -40,9 +40,7 @@ export function useSessionTimer(
   const setStoredTimer = useTimerStore((state) => state.setTimer);
   const clearStoredTimer = useTimerStore((state) => state.clearTimer);
 
-  const [timerState, setTimerStateInternal] = useState<TimerState>(
-    INITIAL_TIMER_STATE,
-  );
+  const [timerState, setTimerStateInternal] = useState<TimerState>(INITIAL_TIMER_STATE);
   const timerStateRef = useRef(timerState);
   const onControlRef = useRef(onControl);
   const lastSessionIdRef = useRef<string | undefined>(undefined);
@@ -56,8 +54,7 @@ export function useSessionTimer(
   const setTimerState = useCallback(
     (next: TimerState | ((current: TimerState) => TimerState)) => {
       setTimerStateInternal((current) => {
-        const resolved =
-          typeof next === "function" ? next(current) : next;
+        const resolved = typeof next === "function" ? next(current) : next;
         timerStateRef.current = resolved;
 
         if (sessionId) {
@@ -74,9 +71,7 @@ export function useSessionTimer(
     if (!sessionId) {
       lastSessionIdRef.current = undefined;
       lastSessionResetAtRef.current = undefined;
-      /* eslint-disable react-hooks/set-state-in-effect -- reset when leaving a session */
       setTimerStateInternal(INITIAL_TIMER_STATE);
-      /* eslint-enable react-hooks/set-state-in-effect */
       return;
     }
 
@@ -99,32 +94,18 @@ export function useSessionTimer(
       clearStoredTimer(sessionId);
     }
 
-    const local = resetChanged
-      ? INITIAL_TIMER_STATE
-      : getStoredTimer(sessionId);
-    const next =
-      remoteSnapshot !== undefined
-        ? reconcileTimerState(local, remoteSnapshot)
-        : local;
+    const local = resetChanged ? INITIAL_TIMER_STATE : getStoredTimer(sessionId);
+    const next = remoteSnapshot !== undefined ? reconcileTimerState(local, remoteSnapshot) : local;
     setTimerStateInternal(next);
     timerStateRef.current = next;
-  }, [
-    canControl,
-    clearStoredTimer,
-    getStoredTimer,
-    remoteSnapshot,
-    sessionId,
-    sessionResetAt,
-  ]);
+  }, [canControl, clearStoredTimer, getStoredTimer, remoteSnapshot, sessionId, sessionResetAt]);
 
   useEffect(() => {
     if (canControl || remoteState === null || remoteState === undefined) {
       return;
     }
 
-    /* eslint-disable react-hooks/set-state-in-effect -- mirror host timer from Firestore */
     setTimerStateInternal(remoteState);
-    /* eslint-enable react-hooks/set-state-in-effect */
     timerStateRef.current = remoteState;
 
     if (sessionId) {

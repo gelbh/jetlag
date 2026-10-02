@@ -1,32 +1,26 @@
-import type { Feature, LineString, MultiPolygon, Polygon } from "geojson";
 import area from "@turf/area";
 import difference from "@turf/difference";
 import { lineString } from "@turf/helpers";
-import { dispatchGeodesicLineBuffer } from "@/domain/geometry/measuring/geodesicLineBuffer";
-import { unionPolygonFeatures } from "@/domain/geometry/masks/unionPolygonFeatures";
-import type { GameArea } from "@/domain/map/annotations";
-import type { RegionPackId } from "@/domain/regions/regionPack";
+import type { Feature, LineString, MultiPolygon, Polygon } from "geojson";
 import {
   featureToGameArea,
   gameAreaToBoundingBox,
   gameAreaToPolygon,
-  simplifyGameArea,
   type LatLngTuple,
+  simplifyGameArea,
 } from "@/domain/geometry/gameArea/geometry";
+import { unionPolygonFeatures } from "@/domain/geometry/masks/unionPolygonFeatures";
+import { dispatchGeodesicLineBuffer } from "@/domain/geometry/measuring/geodesicLineBuffer";
+import type { GameArea } from "@/domain/map/annotations";
+import type { RegionPackId } from "@/domain/regions/regionPack";
 import { queryOverpass } from "../../core/overpass/overpassClient";
-import {
-  getOrFetchCached,
-  landmassCacheKey,
-} from "../cache";
-import {
-  classifyAdminDivisionAtPoint,
-  type AdminDivisionFeature,
-} from "./adminDivisionBoundaries";
+import { getOrFetchCached, landmassCacheKey } from "../cache";
 import { isBundledAdminRegionPack } from "./adminDivisionAvailability";
+import { type AdminDivisionFeature, classifyAdminDivisionAtPoint } from "./adminDivisionBoundaries";
 import {
   mergeOverpassElementPayloads,
-  queryOverpassWithBboxSplit,
   type OverpassBbox,
+  queryOverpassWithBboxSplit,
 } from "./overpassBboxSplit";
 
 export type LandmassFeature = AdminDivisionFeature;
@@ -88,9 +82,7 @@ function wayGeometryToPolygon(
   };
 }
 
-function polygonFeatureToGameArea(
-  feature: Feature<Polygon | MultiPolygon>,
-): GameArea {
+function polygonFeatureToGameArea(feature: Feature<Polygon | MultiPolygon>): GameArea {
   return featureToGameArea(feature);
 }
 
@@ -149,11 +141,7 @@ export async function obstacleFeaturesFromElements(
         continue;
       }
 
-      const buffered = await dispatchGeodesicLineBuffer(
-        line,
-        WATERWAY_BUFFER_METERS,
-        undefined,
-      );
+      const buffered = await dispatchGeodesicLineBuffer(line, WATERWAY_BUFFER_METERS, undefined);
 
       if (buffered) {
         obstacles.push(buffered);
@@ -202,15 +190,11 @@ function namedIslandLabels(elements: OverpassElement[]): Map<string, string> {
     const lat =
       element.lat ??
       element.center?.lat ??
-      (element.bounds
-        ? (element.bounds.minlat + element.bounds.maxlat) / 2
-        : undefined);
+      (element.bounds ? (element.bounds.minlat + element.bounds.maxlat) / 2 : undefined);
     const lng =
       element.lon ??
       element.center?.lon ??
-      (element.bounds
-        ? (element.bounds.minlon + element.bounds.maxlon) / 2
-        : undefined);
+      (element.bounds ? (element.bounds.minlon + element.bounds.maxlon) / 2 : undefined);
     if (lat === undefined || lng === undefined) {
       continue;
     }
@@ -263,8 +247,7 @@ export async function computeLandmassFeatures(
 
   if (
     !remaining ||
-    (remaining.geometry.type !== "Polygon" &&
-      remaining.geometry.type !== "MultiPolygon")
+    (remaining.geometry.type !== "Polygon" && remaining.geometry.type !== "MultiPolygon")
   ) {
     const boundary = simplifyGameArea(gameArea);
     return [
@@ -285,8 +268,7 @@ export async function computeLandmassFeatures(
     }))
     .sort(
       (left, right) =>
-        area(gameAreaToPolygon(right.boundary)) -
-        area(gameAreaToPolygon(left.boundary)),
+        area(gameAreaToPolygon(right.boundary)) - area(gameAreaToPolygon(left.boundary)),
     );
 
   return polygons.map(({ boundary }, index) => ({

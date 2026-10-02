@@ -10,11 +10,7 @@ function formatCoordinates(lat: number, lng: number): string {
   return `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
 }
 
-export function CoordinateCopyButton({
-  lat,
-  lng,
-  className = "",
-}: CoordinateCopyButtonProps) {
+export function CoordinateCopyButton({ lat, lng, className = "" }: CoordinateCopyButtonProps) {
   const { status, copy } = useCopyFeedback({ failureResetMs: 2000 });
   const coords = formatCoordinates(lat, lng);
 
@@ -44,17 +40,11 @@ export function CoordinateCopyButton({
         aria-label={`Copy coordinates ${coords}`}
         className={`flex min-h-11 w-full flex-col items-start justify-center gap-0.5 rounded-[var(--radius-hud-md)] border border-border bg-surface-raised px-3 py-2 text-left text-sm font-medium ${className}`}
       >
-        <span
-          className={
-            status === "failed" ? "text-status-error" : "text-ink-secondary"
-          }
-        >
+        <span className={status === "failed" ? "text-status-error" : "text-ink-secondary"}>
           {headline}
         </span>
         {status === "idle" ? (
-          <span className="w-full truncate font-mono text-xs text-ink-muted">
-            {coords}
-          </span>
+          <span className="w-full truncate font-mono text-xs text-ink-muted">{coords}</span>
         ) : null}
       </button>
       <p aria-live="polite" className="sr-only">

@@ -1,15 +1,15 @@
 import { Box, UnstyledButton } from "@mantine/core";
 import {
   createContext,
+  type KeyboardEvent as ReactKeyboardEvent,
+  type ReactNode,
+  type PointerEvent as ReactPointerEvent,
   useCallback,
   useContext,
   useEffect,
   useId,
   useRef,
   useState,
-  type KeyboardEvent as ReactKeyboardEvent,
-  type PointerEvent as ReactPointerEvent,
-  type ReactNode,
 } from "react";
 
 const ACTION_WIDTH = 74;
@@ -204,11 +204,8 @@ export function FriendSwipeRow({
           position: "relative",
           zIndex: 1,
           transform: `translateX(${offset}px)`,
-          transition: isDragging
-            ? "none"
-            : "transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1)",
-          backgroundColor:
-            "color-mix(in oklch, var(--color-field-ink) 8%, var(--color-canvas))",
+          transition: isDragging ? "none" : "transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1)",
+          backgroundColor: "color-mix(in oklch, var(--color-field-ink) 8%, var(--color-canvas))",
           touchAction: "pan-y",
         }}
       >
@@ -241,8 +238,7 @@ export function FriendSwipeAction({
       : tone === "halt"
         ? "var(--color-halt)"
         : "oklch(from var(--color-rule) l c h / 0.55)";
-  const color =
-    tone === "flag" ? "var(--color-flag-ink)" : "var(--color-field-ink)";
+  const color = tone === "flag" ? "var(--color-flag-ink)" : "var(--color-field-ink)";
 
   return (
     <UnstyledButton

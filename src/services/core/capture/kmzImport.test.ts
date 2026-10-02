@@ -64,18 +64,13 @@ describe("parseBoundaryKml", () => {
   });
 
   it("rejects malformed XML", () => {
-    expect(() => parseBoundaryKml("<kml><Placemark><unclosed>")).toThrow(
-      "Invalid KML file.",
-    );
+    expect(() => parseBoundaryKml("<kml><Placemark><unclosed>")).toThrow("Invalid KML file.");
   });
 });
 
 describe("parseBoundaryFile", () => {
   it("parses a .kml file", async () => {
-    const file = fileFromFixture(
-      "sample-polygon.kml",
-      readFixture("sample-polygon.kml"),
-    );
+    const file = fileFromFixture("sample-polygon.kml", readFixture("sample-polygon.kml"));
     const gameArea = await parseBoundaryFile(file);
 
     expect(gameArea.type).toBe("Polygon");

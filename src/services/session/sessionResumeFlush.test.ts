@@ -75,14 +75,10 @@ describe("sessionResumeFlush", () => {
 
   it("shouldFlushOfflineQueueOnPageShow requires persisted bfcache", () => {
     expect(
-      shouldFlushOfflineQueueOnPageShow(
-        new PageTransitionEvent("pageshow", { persisted: true }),
-      ),
+      shouldFlushOfflineQueueOnPageShow(new PageTransitionEvent("pageshow", { persisted: true })),
     ).toBe(true);
     expect(
-      shouldFlushOfflineQueueOnPageShow(
-        new PageTransitionEvent("pageshow", { persisted: false }),
-      ),
+      shouldFlushOfflineQueueOnPageShow(new PageTransitionEvent("pageshow", { persisted: false })),
     ).toBe(false);
   });
 });

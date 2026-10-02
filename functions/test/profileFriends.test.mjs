@@ -1,5 +1,5 @@
-import test from "node:test";
 import assert from "node:assert/strict";
+import test from "node:test";
 import {
   FRIENDS_ALREADY,
   FRIENDS_INVALID,
@@ -115,7 +115,7 @@ function createMemoryDb(seed = {}) {
           if (target && typeof target.get === "function" && target.path) {
             return target.get();
           }
-          if (target && target._collectionPath) {
+          if (target?._collectionPath) {
             return target.get();
           }
           throw new Error("Unsupported transaction get target");
@@ -181,14 +181,8 @@ test("request creates pending edges for both users", async () => {
     toUid: "u2",
   });
 
-  assert.equal(
-    db._store.get("users/u2/friendRequests/u1")?.fromUsername,
-    "alice",
-  );
-  assert.equal(
-    db._store.get("users/u1/outgoingFriendRequests/u2")?.toUsername,
-    "bob",
-  );
+  assert.equal(db._store.get("users/u2/friendRequests/u1")?.fromUsername, "alice");
+  assert.equal(db._store.get("users/u1/outgoingFriendRequests/u2")?.toUsername, "bob");
 });
 
 test("duplicate request is a no-op", async () => {

@@ -36,10 +36,7 @@ export function parseLeaderboardEntry(
   if (!uid || !Number.isFinite(value)) {
     return null;
   }
-  const rank =
-    typeof data.rank === "number" && Number.isFinite(data.rank)
-      ? data.rank
-      : index + 1;
+  const rank = typeof data.rank === "number" && Number.isFinite(data.rank) ? data.rank : index + 1;
   return { uid, displayName: displayName || "Player", value, rank };
 }
 
@@ -49,18 +46,8 @@ function boardEntriesCollection(
   role: LeaderboardRole,
   metric: LeaderboardMetric,
 ) {
-  const boardId = leaderboardBoardKey(scope, gameSize, role, metric).replaceAll(
-    "/",
-    "_",
-  );
-  return collection(
-    getFirestoreDb(),
-    "leaderboard",
-    scope,
-    "boards",
-    boardId,
-    "entries",
-  );
+  const boardId = leaderboardBoardKey(scope, gameSize, role, metric).replaceAll("/", "_");
+  return collection(getFirestoreDb(), "leaderboard", scope, "boards", boardId, "entries");
 }
 
 /**

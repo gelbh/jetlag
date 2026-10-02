@@ -2,8 +2,7 @@
 
 export const SECTION_ORDER = ["Fixes", "Improvements", "Technical"];
 
-const PREFIX_RE =
-  /^(fix|improve|improvement|tech|technical):\s*(.*)$/i;
+const PREFIX_RE = /^(fix|improve|improvement|tech|technical):\s*(.*)$/i;
 
 /**
  * @param {string} raw
@@ -14,8 +13,7 @@ export function parsePrefixedBullet(raw, bumpType) {
   const trimmed = raw.trim();
   const match = trimmed.match(PREFIX_RE);
   if (!match) {
-    const section =
-      bumpType === "patch" ? "Technical" : "Improvements";
+    const section = bumpType === "patch" ? "Technical" : "Improvements";
     return { section, text: trimmed };
   }
 

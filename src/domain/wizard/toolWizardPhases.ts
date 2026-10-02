@@ -30,9 +30,7 @@ function seekerWizard(
   };
 }
 
-export const RADAR_WIZARD = seekerWizard("radar", [
-  { id: "distance", label: "Distance" },
-]);
+export const RADAR_WIZARD = seekerWizard("radar", [{ id: "distance", label: "Distance" }]);
 
 export const THERMOMETER_WIZARD = seekerWizard("thermometer", [
   { id: "distance", label: "Distance" },

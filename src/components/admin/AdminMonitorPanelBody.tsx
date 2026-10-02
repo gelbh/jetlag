@@ -8,9 +8,6 @@ interface AdminMonitorPanelBodyProps {
   bodies: AdminMonitorPanelBodies;
 }
 
-export function AdminMonitorPanelBody({
-  panelId,
-  bodies,
-}: AdminMonitorPanelBodyProps) {
+export function AdminMonitorPanelBody({ panelId, bodies }: AdminMonitorPanelBodyProps) {
   return <>{bodies[panelId] ?? null}</>;
 }

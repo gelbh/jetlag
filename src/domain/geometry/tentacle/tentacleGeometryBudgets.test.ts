@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 import exysHospitalTentacle from "./fixtures/exysHospitalTentacle.json";
 import {
-  TentacleGeometryBudgetError,
   TENTACLE_POI_MAX,
   TENTACLE_POI_OVER_BUDGET_MESSAGE,
+  TentacleGeometryBudgetError,
 } from "./tentacleGeometryBudgets";
 
 describe("tentacleGeometryBudgets", () => {

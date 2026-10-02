@@ -1,5 +1,5 @@
-import { describe, expect, it, vi } from "vitest";
 import { fireEvent, screen } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
 import { renderWithAppUi } from "../../../test/renderWithAppUi";
 import { AskCommitStrip } from "./AskCommitStrip";
 
@@ -7,11 +7,7 @@ describe("AskCommitStrip", () => {
   it("stays muted and does not fire commit when !canCommit", () => {
     const onCommit = vi.fn();
     renderWithAppUi(
-      <AskCommitStrip
-        canCommit={false}
-        label="SEND — SET CENTER FIRST"
-        onCommit={onCommit}
-      />,
+      <AskCommitStrip canCommit={false} label="SEND — SET CENTER FIRST" onCommit={onCommit} />,
     );
 
     const button = screen.getByRole("button", {
@@ -26,13 +22,7 @@ describe("AskCommitStrip", () => {
 
   it("arms Survey flag primary and commits when canCommit", () => {
     const onCommit = vi.fn();
-    renderWithAppUi(
-      <AskCommitStrip
-        canCommit
-        label="SEND · D2P1"
-        onCommit={onCommit}
-      />,
-    );
+    renderWithAppUi(<AskCommitStrip canCommit label="SEND · D2P1" onCommit={onCommit} />);
 
     const button = screen.getByRole("button", { name: "SEND · D2P1" });
     expect(button).toBeEnabled();

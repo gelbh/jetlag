@@ -1,5 +1,5 @@
-import { describe, expect, it, vi } from "vitest";
 import type { Map as MapLibreMap } from "maplibre-gl";
+import { describe, expect, it, vi } from "vitest";
 import { stopMapCameraEase } from "./stopMapCameraEase";
 
 describe("stopMapCameraEase", () => {

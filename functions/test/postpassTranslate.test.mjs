@@ -1,8 +1,8 @@
-import { describe, it } from "node:test";
 import assert from "node:assert/strict";
+import { describe, it } from "node:test";
+import { geoJsonToOverpassElements } from "../proxies/geoJsonToOverpassElements.mjs";
 import { classifyOverpassQuery } from "../proxies/postpassClassify.mjs";
 import { buildPostpassSql } from "../proxies/postpassSql.mjs";
-import { geoJsonToOverpassElements } from "../proxies/geoJsonToOverpassElements.mjs";
 
 describe("postpassTranslate", () => {
   it("classifies admin QL and builds polygon SQL", () => {
@@ -206,9 +206,7 @@ describe("postpassTranslate", () => {
       },
       "landmass",
     );
-    const waterWays = elements.filter(
-      (e) => e.type === "way" && e.tags?.natural === "water",
-    );
+    const waterWays = elements.filter((e) => e.type === "way" && e.tags?.natural === "water");
     assert.equal(waterWays.length, 1);
     assert.ok(waterWays[0].geometry?.length >= 4);
   });

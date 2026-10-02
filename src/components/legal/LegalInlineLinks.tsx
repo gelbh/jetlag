@@ -1,5 +1,5 @@
-import { AppLink } from "../navigation/AppLink";
 import { LEGAL_PRIVACY_PATH, LEGAL_TERMS_PATH } from "../../domain/legal/legalContact";
+import { AppLink } from "../navigation/AppLink";
 
 export function LegalInlineLinks() {
   return (

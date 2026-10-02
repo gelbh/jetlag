@@ -72,9 +72,7 @@ export function premiumSessionCredits(data) {
  * @param {Record<string, unknown> | undefined} data
  */
 export function canCreatePaidPremiumSession(data) {
-  return (
-    hasUnlimitedPremiumEntitlement(data) || premiumSessionCredits(data) > 0
-  );
+  return hasUnlimitedPremiumEntitlement(data) || premiumSessionCredits(data) > 0;
 }
 
 /**
@@ -96,14 +94,8 @@ export function serializeEntitlementsForClient(data) {
                 : null,
           }
         : null,
-    trialUsedAt:
-      data?.trialUsedAt instanceof Timestamp
-        ? data.trialUsedAt.toMillis()
-        : null,
-    trialEndsAt:
-      data?.trialEndsAt instanceof Timestamp
-        ? data.trialEndsAt.toMillis()
-        : null,
+    trialUsedAt: data?.trialUsedAt instanceof Timestamp ? data.trialUsedAt.toMillis() : null,
+    trialEndsAt: data?.trialEndsAt instanceof Timestamp ? data.trialEndsAt.toMillis() : null,
     canCreatePremium: canCreatePaidPremiumSession(data),
     hasUnlimitedPremium: hasUnlimitedPremiumEntitlement(data),
   };
@@ -128,11 +120,7 @@ export function buildMergedEntitlementPatch(source, target) {
 
   const sourceSubscription = source?.subscription;
   const targetHasUnlimited = hasUnlimitedPremiumEntitlement(target);
-  if (
-    sourceSubscription &&
-    typeof sourceSubscription === "object" &&
-    !targetHasUnlimited
-  ) {
+  if (sourceSubscription && typeof sourceSubscription === "object" && !targetHasUnlimited) {
     patch.subscription = sourceSubscription;
   }
 
@@ -179,9 +167,7 @@ export function canStartAppPremiumTrial(data) {
  */
 export async function startPremiumTrialHandler(db, uid) {
   const userRef = userEntitlementsRef(db, uid);
-  const trialEndsAt = Timestamp.fromMillis(
-    Date.now() + PREMIUM_TRIAL_DAYS * 24 * 60 * 60 * 1000,
-  );
+  const trialEndsAt = Timestamp.fromMillis(Date.now() + PREMIUM_TRIAL_DAYS * 24 * 60 * 60 * 1000);
 
   await db.runTransaction(async (transaction) => {
     const snapshot = await transaction.get(userRef);
@@ -189,10 +175,7 @@ export async function startPremiumTrialHandler(db, uid) {
 
     if (!canStartAppPremiumTrial(userData)) {
       if (userData?.trialUsedAt) {
-        throw new HttpsError(
-          "failed-precondition",
-          "Free trial already used on this account.",
-        );
+        throw new HttpsError("failed-precondition", "Free trial already used on this account.");
       }
 
       if (userData?.subscription?.status === "past_due") {
@@ -202,10 +185,7 @@ export async function startPremiumTrialHandler(db, uid) {
         );
       }
 
-      throw new HttpsError(
-        "failed-precondition",
-        "You already have unlimited premium hosting.",
-      );
+      throw new HttpsError("failed-precondition", "You already have unlimited premium hosting.");
     }
 
     transaction.set(

@@ -10,10 +10,7 @@ export const INITIAL_TIMER_STATE: TimerState = {
   runningSince: null,
 };
 
-export function computeElapsedMs(
-  state: TimerState,
-  now = Date.now(),
-): number {
+export function computeElapsedMs(state: TimerState, now = Date.now()): number {
   if (state.runningSince === null) {
     return Math.max(0, state.accumulatedMs);
   }
@@ -48,7 +45,6 @@ export function startTimer(state: TimerState, now = Date.now()): TimerState {
   };
 }
 
-
 /**
  * Pause local timer, adopting remote first when local is already paused but
  * remote is still running (deadline pause across host desync).
@@ -58,12 +54,7 @@ export function pausePreferringRemote(
   remote: TimerState | null | undefined,
   now = Date.now(),
 ): TimerState {
-  const base =
-    remote &&
-    !isTimerRunning(local) &&
-    isTimerRunning(remote)
-      ? remote
-      : local;
+  const base = remote && !isTimerRunning(local) && isTimerRunning(remote) ? remote : local;
   return pauseTimer(base, now);
 }
 

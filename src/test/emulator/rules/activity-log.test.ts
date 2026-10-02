@@ -1,20 +1,12 @@
-import {
-  assertFails,
-  assertSucceeds,
-} from "@firebase/rules-unit-testing";
+import { assertFails, assertSucceeds } from "@firebase/rules-unit-testing";
 import { describe, it } from "vitest";
-import {
-  bindRulesTestEnv,
-  sessionPayload,
-} from "./helpers";
+import { bindRulesTestEnv, sessionPayload } from "./helpers";
 
 describe("firestore.rules", () => {
   const rules = bindRulesTestEnv();
 
   describe("activityLog", () => {
-    function activityLogPayload(
-      overrides: Record<string, unknown> = {},
-    ): Record<string, unknown> {
+    function activityLogPayload(overrides: Record<string, unknown> = {}): Record<string, unknown> {
       return {
         type: "session_started",
         createdAt: "2026-07-25T10:00:00.000Z",
@@ -25,11 +17,7 @@ describe("firestore.rules", () => {
 
     async function seedSessionWithMember(memberUid: string) {
       const host = rules.testEnv.authenticatedContext("host-1");
-      await host
-        .firestore()
-        .collection("sessions")
-        .doc("session-1")
-        .set(sessionPayload("host-1"));
+      await host.firestore().collection("sessions").doc("session-1").set(sessionPayload("host-1"));
       await host
         .firestore()
         .collection("sessions")
@@ -107,5 +95,4 @@ describe("firestore.rules", () => {
       );
     });
   });
-
 });

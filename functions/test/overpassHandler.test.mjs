@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
-  OVERPASS_MAX_RESPONSE_BYTES,
   isOverpassResponseTooLarge,
+  OVERPASS_MAX_RESPONSE_BYTES,
 } from "../proxies/handlers/overpass.mjs";
 
 describe("overpassHandler response cap", () => {

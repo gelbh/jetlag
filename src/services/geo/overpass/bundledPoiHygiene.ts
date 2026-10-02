@@ -16,8 +16,7 @@ const TYPO_FIXES: readonly [RegExp, string][] = [[/\bsqaure\b/g, "square"]];
 const PARK_NOISE_SUFFIX = /\s+(park|playground|square|plaza|playfield)$/;
 
 /** Street-like names that leak in from GIS parcel data. */
-const STREET_SUFFIX =
-  /\b(st|rd|dr|ave|blvd|boulevard|road|street|avenue|drive)\.?$/;
+const STREET_SUFFIX = /\b(st|rd|dr|ave|blvd|boulevard|road|street|avenue|drive)\.?$/;
 
 const PARK_EXCLUSIONS: readonly RegExp[] = [
   /school/,
@@ -39,11 +38,7 @@ const PARK_EXCLUSIONS: readonly RegExp[] = [
   /\bbeach\b/,
 ];
 
-const HOSPITAL_EXCLUSIONS: readonly RegExp[] = [
-  /\bclinic\b/,
-  /\bdental\b/,
-  /\bveterinar/,
-];
+const HOSPITAL_EXCLUSIONS: readonly RegExp[] = [/\bclinic\b/, /\bdental\b/, /\bveterinar/];
 
 const MUSEUM_EXCLUSIONS: readonly RegExp[] = [
   /\boutdoor gym\b/,
@@ -52,11 +47,7 @@ const MUSEUM_EXCLUSIONS: readonly RegExp[] = [
   /\bwarehouse\b/,
 ];
 
-const AIRPORT_EXCLUSIONS: readonly RegExp[] = [
-  /\baerodrome\b/,
-  /\bheliport\b/,
-  /\bairfield\b/,
-];
+const AIRPORT_EXCLUSIONS: readonly RegExp[] = [/\baerodrome\b/, /\bheliport\b/, /\bairfield\b/];
 
 const ZOO_EXCLUSIONS: readonly RegExp[] = [
   /\bpetting\b/,
@@ -130,10 +121,7 @@ function isEligibleMuseum(name: string): boolean {
 }
 
 /** Category-specific exclusions for bundled POI hygiene. */
-export function isEligibleBundledPoi(
-  place: BundledPoiPlaceLike,
-  category: string,
-): boolean {
+export function isEligibleBundledPoi(place: BundledPoiPlaceLike, category: string): boolean {
   const name = collapseName(place.name);
 
   switch (category) {
@@ -158,9 +146,7 @@ function preferenceRank(id: string): number {
 }
 
 function withinProximity(a: BundledPoiPlaceLike, b: BundledPoiPlaceLike): boolean {
-  return (
-    haversineMeters([a.lat, a.lng], [b.lat, b.lng]) <= DEDUPE_PROXIMITY_METERS
-  );
+  return haversineMeters([a.lat, a.lng], [b.lat, b.lng]) <= DEDUPE_PROXIMITY_METERS;
 }
 
 function tokensSubset(candidate: string, existing: string): boolean {
@@ -198,9 +184,7 @@ export function dedupeBundledPoiPlaces<T extends BundledPoiPlaceLike>(
 
   const exactDeduped: T[] = [];
   for (const bucket of buckets.values()) {
-    const sorted = [...bucket].sort(
-      (a, b) => preferenceRank(a.id) - preferenceRank(b.id),
-    );
+    const sorted = [...bucket].sort((a, b) => preferenceRank(a.id) - preferenceRank(b.id));
 
     if (category === "rail_station") {
       const kept: T[] = [];
@@ -245,8 +229,6 @@ export function sanitizeBundledPoiPlaces<T extends BundledPoiPlaceLike>(
   places: readonly T[],
   category: string,
 ): T[] {
-  const eligible = places.filter((place) =>
-    isEligibleBundledPoi(place, category),
-  );
+  const eligible = places.filter((place) => isEligibleBundledPoi(place, category));
   return dedupeBundledPoiPlaces(eligible, category);
 }

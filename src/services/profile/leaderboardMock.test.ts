@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import {
-  LEADERBOARD_MOCK_SELF_UID,
-  LEADERBOARD_MOCK_STORAGE_KEY,
   getLeaderboardPlayerSheetProfile,
   isLeaderboardMockEnabled,
+  LEADERBOARD_MOCK_SELF_UID,
+  LEADERBOARD_MOCK_STORAGE_KEY,
   mockListLeaderboardBoard,
 } from "./leaderboardMock";
 
@@ -27,9 +27,7 @@ describe("leaderboardMock", () => {
     });
     expect(entries.length).toBeGreaterThan(8);
     expect(entries[0]?.rank).toBe(1);
-    expect(entries.some((entry) => entry.uid === LEADERBOARD_MOCK_SELF_UID)).toBe(
-      true,
-    );
+    expect(entries.some((entry) => entry.uid === LEADERBOARD_MOCK_SELF_UID)).toBe(true);
   });
 
   it("filters friends scope to friends-only players", async () => {

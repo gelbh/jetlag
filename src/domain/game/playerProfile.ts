@@ -70,9 +70,7 @@ export function validateUsername(raw: string): ValidateUsernameResult {
 /** Prefix search for friends (server requires ≥2 chars). */
 export const FRIEND_SEARCH_MIN_LENGTH = 2;
 
-export function validateFriendSearchQuery(
-  raw: string,
-): ValidateUsernameResult {
+export function validateFriendSearchQuery(raw: string): ValidateUsernameResult {
   const username = raw.trim();
 
   if (username.length === 0) {

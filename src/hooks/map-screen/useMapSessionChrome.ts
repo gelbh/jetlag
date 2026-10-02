@@ -1,40 +1,33 @@
-import { useCallback, useRef } from "react";
 import type { RefObject } from "react";
-import {
-  isActive,
-  LOCAL_SESSION_ID,
-  type SessionRecord,
-} from "../../domain/map/annotations";
+import { useCallback, useRef } from "react";
 import type { AnnotationRecord } from "../../domain/map/annotations";
+import { isActive, LOCAL_SESSION_ID, type SessionRecord } from "../../domain/map/annotations";
 import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
+import { isSessionRoleGated } from "../../domain/session/players/roleGates";
+import { trackSessionEnded } from "../../services/core/analytics/analytics";
+import { captureException } from "../../services/core/analytics/sentry";
+import { forceRgbCssColorsInClone } from "../../services/core/capture/html2canvasColors";
+import { isHtml2CanvasUnsupportedColorMessage } from "../../services/core/capture/html2canvasErrors";
+import { ensureAnonymousUser } from "../../services/core/firebase/firebase";
 import {
   endRemoteSession,
   resetRemoteSession,
 } from "../../services/firestore/firestoreAnnotations";
 import { clearLiveLocationOnLeave } from "../../services/session/clearLiveLocationOnLeave";
+import { emitGameEndedActivity } from "../../services/session/emitSessionActivity";
 import {
   allowPlayerLocationPublishes,
   blockPlayerLocationPublishes,
 } from "../../services/session/playerLocationPublishGate";
+import { leaveSessionMembership } from "../../services/session/rolePasscodeLifecycle";
 import {
   clearSessionLocalArtifacts,
   teardownSessionUiState,
 } from "../../services/session/sessionCleanup";
-import {
-  endSession,
-  leaveHostSession,
-} from "../../services/session/sessionLifecycle";
-import { leaveSessionMembership } from "../../services/session/rolePasscodeLifecycle";
-import { isSessionRoleGated } from "../../domain/session/players/roleGates";
 import { isExpectedSessionLeaveError } from "../../services/session/sessionLeaveErrors";
-import { emitGameEndedActivity } from "../../services/session/emitSessionActivity";
-import { trackSessionEnded } from "../../services/core/analytics/analytics";
-import { useSessionExit } from "../session/useSessionExit";
-import { ensureAnonymousUser } from "../../services/core/firebase/firebase";
-import { captureException } from "../../services/core/analytics/sentry";
-import { forceRgbCssColorsInClone } from "../../services/core/capture/html2canvasColors";
-import { isHtml2CanvasUnsupportedColorMessage } from "../../services/core/capture/html2canvasErrors";
+import { endSession, leaveHostSession } from "../../services/session/sessionLifecycle";
 import { useSessionStore } from "../../state/sessionStore";
+import { useSessionExit } from "../session/useSessionExit";
 
 const MAP_EXPORT_BACKGROUND = "#0f172a";
 
@@ -112,11 +105,7 @@ export function useMapSessionChrome({
       return;
     }
 
-    if (
-      !window.confirm(
-        "Remove all annotations for every player on this session?",
-      )
-    ) {
+    if (!window.confirm("Remove all annotations for every player on this session?")) {
       return;
     }
 
@@ -133,12 +122,7 @@ export function useMapSessionChrome({
   ]);
 
   const handleResetSession = useCallback(async () => {
-    if (
-      !session ||
-      !isHost ||
-      session.id === LOCAL_SESSION_ID ||
-      resetInFlightRef.current
-    ) {
+    if (!session || !isHost || session.id === LOCAL_SESSION_ID || resetInFlightRef.current) {
       return;
     }
 
@@ -270,8 +254,7 @@ export function useMapSessionChrome({
 
     // Prefer live hostUid over the isHost prop so stale host chrome cannot
     // call the host-only leave callable after a transfer.
-    const isRemoteHost =
-      !isLocalSession && user !== null && session.hostUid === user.uid;
+    const isRemoteHost = !isLocalSession && user !== null && session.hostUid === user.uid;
     if (isRemoteHost && user) {
       const hostUid = session.hostUid ?? "";
       const alone = !(session.memberUids ?? []).some((uid) => uid !== hostUid);
@@ -313,9 +296,7 @@ export function useMapSessionChrome({
         }
       }
     } else if (
-      !window.confirm(
-        "Leave this session on this device? Other players can keep playing.",
-      )
+      !window.confirm("Leave this session on this device? Other players can keep playing.")
     ) {
       return;
     } else if (!isLocalSession) {
@@ -385,15 +366,11 @@ export function useMapSessionChrome({
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       if (isHtml2CanvasUnsupportedColorMessage(message)) {
-        window.alert(
-          "Could not export the map. Try again, or take a screenshot instead.",
-        );
+        window.alert("Could not export the map. Try again, or take a screenshot instead.");
         return;
       }
       captureException(error);
-      window.alert(
-        "Could not export the map. Try again, or take a screenshot instead.",
-      );
+      window.alert("Could not export the map. Try again, or take a screenshot instead.");
     } finally {
       if (exportLegendRef.current) {
         exportLegendRef.current.style.display = "none";

@@ -1,5 +1,5 @@
-import test from "node:test";
 import assert from "node:assert/strict";
+import test from "node:test";
 import { normalizeTflPayload } from "../proxies/tflNormalize.mjs";
 
 test("normalizeTflPayload filters vehicles outside bounds", () => {

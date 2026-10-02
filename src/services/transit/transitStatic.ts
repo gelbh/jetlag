@@ -1,5 +1,5 @@
-import type { GameArea } from "../../domain/map/annotations";
 import { gameAreaToBoundingBox } from "../../domain/geometry/gameArea/geometry";
+import type { GameArea } from "../../domain/map/annotations";
 import type {
   TransitRouteLine,
   TransitRouteMode,
@@ -7,14 +7,8 @@ import type {
   TransitStop,
 } from "../../domain/map/transit";
 import { queryOverpass } from "../core/overpass/overpassClient";
-import {
-  buildTransitStopOverpassQuery,
-  transitStopDisplayName,
-} from "./transitStops";
-import {
-  getOrFetchCached,
-  staticTransitCacheKey,
-} from "../geo/cache";
+import { getOrFetchCached, staticTransitCacheKey } from "../geo/cache";
+import { buildTransitStopOverpassQuery, transitStopDisplayName } from "./transitStops";
 
 const MAX_STOPS = 250;
 const MAX_ROUTES = 80;
@@ -37,9 +31,7 @@ export function buildStaticTransitRoutesQuery(bounds: TransitBounds): string {
   `;
 }
 
-function modeFromTags(
-  tags: Record<string, string> | undefined,
-): TransitRouteMode {
+function modeFromTags(tags: Record<string, string> | undefined): TransitRouteMode {
   const route = tags?.route ?? tags?.railway ?? tags?.public_transport ?? "";
   if (route.includes("subway") || route.includes("metro")) {
     return "metro";
@@ -97,9 +89,7 @@ function parseRoute(element: {
   };
 }
 
-export async function fetchStaticTransit(
-  gameArea: GameArea,
-): Promise<TransitStaticData> {
+export async function fetchStaticTransit(gameArea: GameArea): Promise<TransitStaticData> {
   return getOrFetchCached(staticTransitCacheKey(gameArea), async () => {
     const bounds = gameAreaToBoundingBox(gameArea);
     const [stopsPayload, routesPayload] = await Promise.all([

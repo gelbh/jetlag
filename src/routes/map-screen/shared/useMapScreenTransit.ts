@@ -1,12 +1,9 @@
 import { useEffect } from "react";
-import type { GameArea, SessionRecord } from "@/domain/map/annotations";
 import { fallbackGameArea } from "@/domain/geometry/gameArea/geometry";
+import type { GameArea, SessionRecord } from "@/domain/map/annotations";
 import { isPremiumSession } from "@/domain/map/annotations";
 import { useTransitLayer } from "@/hooks/map/useTransitLayer";
-import {
-  getTransitMetro,
-  metroSupportsLiveVehicles,
-} from "@/services/transit/transitCatalog";
+import { getTransitMetro, metroSupportsLiveVehicles } from "@/services/transit/transitCatalog";
 import { useMapStore } from "@/state/sessionStore";
 
 export function useMapScreenTransit(
@@ -18,17 +15,12 @@ export function useMapScreenTransit(
   const transitLiveEnabled = useMapStore((state) => state.transitLiveEnabled);
   const transitRouteFilter = useMapStore((state) => state.transitRouteFilter);
   const setTransitEnabled = useMapStore((state) => state.setTransitEnabled);
-  const setTransitLiveEnabled = useMapStore(
-    (state) => state.setTransitLiveEnabled,
-  );
-  const setTransitRouteFilter = useMapStore(
-    (state) => state.setTransitRouteFilter,
-  );
+  const setTransitLiveEnabled = useMapStore((state) => state.setTransitLiveEnabled);
+  const setTransitRouteFilter = useMapStore((state) => state.setTransitRouteFilter);
 
   const transitMetro = getTransitMetro(session?.transitMetroId);
   const sessionIsPremium = isPremiumSession(session);
-  const transitLiveSupported =
-    sessionIsPremium && metroSupportsLiveVehicles(transitMetro ?? null);
+  const transitLiveSupported = sessionIsPremium && metroSupportsLiveVehicles(transitMetro ?? null);
   const {
     staticData: transitStaticData,
     liveData: transitLiveData,

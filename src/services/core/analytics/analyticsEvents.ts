@@ -1,8 +1,8 @@
+import type { PremiumProductKey } from "@/domain/billing/premiumProducts";
+import type { SessionTier } from "@/domain/map/annotations";
 import type { MapTool } from "@/domain/map/mapToolTypes";
 import type { PlayerRole } from "@/domain/session/players/playerRole";
 import type { GameSize } from "@/domain/session/size/gameSize";
-import type { SessionTier } from "@/domain/map/annotations";
-import type { PremiumProductKey } from "@/domain/billing/premiumProducts";
 
 export const ANALYTICS_EVENTS = {
   session_created: "session_created",
@@ -15,8 +15,7 @@ export const ANALYTICS_EVENTS = {
   map_tool_used: "map_tool_used",
 } as const;
 
-export type AnalyticsEventName =
-  (typeof ANALYTICS_EVENTS)[keyof typeof ANALYTICS_EVENTS];
+export type AnalyticsEventName = (typeof ANALYTICS_EVENTS)[keyof typeof ANALYTICS_EVENTS];
 
 /** Reasons emitted with `session_ended`. Host leave that promotes does not emit. */
 export type SessionEndedReason =

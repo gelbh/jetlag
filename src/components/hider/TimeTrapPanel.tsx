@@ -37,15 +37,13 @@ export function TimeTrapPanel({
   return (
     <div className="space-y-3">
       <p className="text-sm text-ink-muted">
-        Place a time trap on a valid transit station in the play area. Seekers
-        earn +{bonusMinutes} min hiding time when they pass through your trap
-        station.
+        Place a time trap on a valid transit station in the play area. Seekers earn +{bonusMinutes}{" "}
+        min hiding time when they pass through your trap station.
       </p>
 
       {existingTrapStationName ? (
         <p className="rounded-[var(--radius-hud-md)] border border-border bg-surface-raised px-3 py-2 text-sm text-ink-secondary">
-          Trap placed at{" "}
-          <span className="font-medium text-ink">{existingTrapStationName}</span>
+          Trap placed at <span className="font-medium text-ink">{existingTrapStationName}</span>
         </p>
       ) : (
         <>

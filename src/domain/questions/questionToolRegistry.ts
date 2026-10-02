@@ -1,7 +1,9 @@
 import type { GameArea } from "../map/annotations";
 import type { MapStyle, StreetBasemap } from "../map/mapBasemaps";
-import type { PendingQuestionRecord } from "../session/activity/sessionChat";
-import type { PendingQuestionToolType } from "../session/activity/sessionChat";
+import type {
+  PendingQuestionRecord,
+  PendingQuestionToolType,
+} from "../session/activity/sessionChat";
 import { buildMatchingOverlays } from "./overlays/matching";
 import { buildMeasuringOverlays } from "./overlays/measuring";
 import { buildRadarOverlays } from "./overlays/radar";
@@ -26,12 +28,10 @@ export const pendingQuestionOverlayBuilders: Partial<
   Record<PendingQuestionToolType, OverlayBuilder>
 > = {
   radar: (question, _gameArea, prefix) => buildRadarOverlays(question, prefix),
-  thermometer: (question, _gameArea, prefix) =>
-    buildThermometerOverlays(question, prefix),
+  thermometer: (question, _gameArea, prefix) => buildThermometerOverlays(question, prefix),
   matching: (question, gameArea, prefix, mapStyle, streetBasemap) =>
     buildMatchingOverlays(question, gameArea, prefix, mapStyle, streetBasemap),
   measuring: (question, gameArea, prefix, mapStyle, streetBasemap) =>
     buildMeasuringOverlays(question, gameArea, prefix, mapStyle, streetBasemap),
-  tentacle: (question, _gameArea, prefix) =>
-    buildTentacleOverlays(question, prefix),
+  tentacle: (question, _gameArea, prefix) => buildTentacleOverlays(question, prefix),
 };

@@ -16,9 +16,7 @@ function polygonParts(mask: PolygonFeature): PolygonFeature[] {
 
 function concatClippedParts(parts: PolygonFeature[]): PolygonFeature {
   const coordinates = parts.flatMap((part) =>
-    part.geometry.type === "Polygon"
-      ? [part.geometry.coordinates]
-      : part.geometry.coordinates,
+    part.geometry.type === "Polygon" ? [part.geometry.coordinates] : part.geometry.coordinates,
   );
   const first = coordinates[0];
   if (coordinates.length === 1 && first) {
@@ -48,8 +46,7 @@ function clipPolygonToGameArea(
 
     if (
       clipped &&
-      (clipped.geometry.type === "Polygon" ||
-        clipped.geometry.type === "MultiPolygon")
+      (clipped.geometry.type === "Polygon" || clipped.geometry.type === "MultiPolygon")
     ) {
       return clipped as PolygonFeature;
     }

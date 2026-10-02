@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { DiskSpec, GameAreaGeometry, EliminationUnionInput } from "./types";
+import type { DiskSpec, EliminationUnionInput, GameAreaGeometry } from "./types";
 
 describe("kernel/types", () => {
   it("accepts plain disk and game-area shapes", () => {

@@ -20,9 +20,7 @@ function orDash(value) {
 }
 
 function formatErrors(diagnostics) {
-  const errors = Array.isArray(diagnostics.lastClientErrors)
-    ? diagnostics.lastClientErrors
-    : [];
+  const errors = Array.isArray(diagnostics.lastClientErrors) ? diagnostics.lastClientErrors : [];
   if (errors.length === 0) {
     return EMPTY;
   }

@@ -1,8 +1,8 @@
+import { SearchField } from "@/components/ui/forms/SearchField";
 import { AnchorControls } from "../controls/AnchorControls";
 import { CoordinateCopyButton } from "../controls/CoordinateCopyButton";
-import { LoadingReadout } from "../readout/LoadingReadout";
-import { SearchField } from "@/components/ui/forms/SearchField";
 import { ToolSection } from "../panels/ToolSection";
+import { LoadingReadout } from "../readout/LoadingReadout";
 
 interface MeasuringAnchorStepProps {
   hasSeekerPoint: boolean;
@@ -43,9 +43,7 @@ export function MeasuringAnchorStep({
         onUseGps={onUseGps}
         anchorPlaceName={hasSeekerPoint ? seekerPlaceName : null}
       />
-      {hasSeekerPoint &&
-      typeof anchorLat === "number" &&
-      typeof anchorLng === "number" ? (
+      {hasSeekerPoint && typeof anchorLat === "number" && typeof anchorLng === "number" ? (
         <CoordinateCopyButton lat={anchorLat} lng={anchorLng} className="w-full" />
       ) : null}
       {loading && hasSeekerPoint && anchorLoadingMessage ? (

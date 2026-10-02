@@ -1,19 +1,16 @@
-import {
-  distanceBetweenPoints,
-  type LatLngTuple,
-} from "../../geometry/gameArea/geometry";
+import { fetchElevations } from "@/services/geo/elevation";
+import { distanceBetweenPoints, type LatLngTuple } from "../../geometry/gameArea/geometry";
 import { nearestPointToCoastlines } from "../../geometry/measuring/geometryMeasuring";
 import type { MeasuringRegionInput } from "../../geometry/measuring/measuringRegions";
-import { fetchElevations } from "@/services/geo/elevation";
 import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
-import { isMeasuringLinearLocation } from "../measuringQuestions";
 import { measuringPlacesFromMetadata } from "../measuringPlacesFromMetadata";
+import { isMeasuringLinearLocation } from "../measuringQuestions";
 import {
+  type HiderTruthResult,
   minDistanceToPlaces,
   resultFromReplyId,
   seekerAnchorFromMetadata,
   truthUnavailable,
-  type HiderTruthResult,
 } from "./shared";
 
 export function truthMeasuringSync(
@@ -48,10 +45,7 @@ export function truthMeasuringSync(
 
   if (
     measuringSubject === "coastline" ||
-    isMeasuringLinearLocation(
-      measuringSubject,
-      measuringLocationCategory ?? undefined,
-    )
+    isMeasuringLinearLocation(measuringSubject, measuringLocationCategory ?? undefined)
   ) {
     const coastNearestStation = nearestPointToCoastlines(
       stationCenter,
@@ -67,17 +61,12 @@ export function truthMeasuringSync(
     }
 
     const replyId =
-      coastNearestStation.distanceMeters < coastNearestSeeker.distanceMeters
-        ? "closer"
-        : "further";
+      coastNearestStation.distanceMeters < coastNearestSeeker.distanceMeters ? "closer" : "further";
     return resultFromReplyId(pending, replyId);
   }
 
   if (regionInput.usesAllPlacesInArea) {
-    const measuringPlaces = measuringPlacesFromMetadata(
-      metadata,
-      regionInput.measuringPlaces,
-    );
+    const measuringPlaces = measuringPlacesFromMetadata(metadata, regionInput.measuringPlaces);
     const stationDistance = minDistanceToPlaces(stationCenter, measuringPlaces);
     const seekerDistance = minDistanceToPlaces(seekerAnchor, measuringPlaces);
 

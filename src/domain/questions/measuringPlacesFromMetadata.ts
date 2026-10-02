@@ -1,5 +1,5 @@
-import type { LatLngTuple } from "../geometry/gameArea/geometry";
 import type { MeasuringPlace } from "../geo/types";
+import type { LatLngTuple } from "../geometry/gameArea/geometry";
 
 type StoredMeasuringPlace = {
   id: string;

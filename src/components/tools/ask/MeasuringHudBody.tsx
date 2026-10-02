@@ -1,15 +1,24 @@
-import { AskHudPanel } from "@/components/tools/ask/AskHudPanel";
+import { UnstyledButton } from "@mantine/core";
+import {
+  BuildingsIcon,
+  DropIcon,
+  type IconProps,
+  MapPinAreaIcon,
+  SquaresFourIcon,
+  TrainIcon,
+  TreeIcon,
+} from "@phosphor-icons/react";
 /**
  * Measuring Ask HUD — Matching twin: question header + icon catalog, then map-first.
  * Sheet path keeps anchor/target/answer chords when Mantine map-first is off.
  */
-import { useState, type ComponentType } from "react";
-import { UnstyledButton } from "@mantine/core";
-import { BuildingsIcon, DropIcon, MapPinAreaIcon, SquaresFourIcon, TrainIcon, TreeIcon, type IconProps } from "@phosphor-icons/react";
+import { type ComponentType, useState } from "react";
+import { HudMeasuringIcon } from "@/components/map/icons/ToolIcons";
 import { AskCatalogRail } from "@/components/tools/ask/AskCatalogRail";
+import { AskHudPanel } from "@/components/tools/ask/AskHudPanel";
 import { AskToolQuestionHeader } from "@/components/tools/ask/AskToolQuestionHeader";
 import { measuringCategoryIcon } from "@/components/tools/ask/measuringCategoryIcons";
-import { HudMeasuringIcon } from "@/components/map/icons/ToolIcons";
+import { SearchResultsList } from "@/components/tools/shared/controls/SearchResultsList";
 import { MeasuringAnchorStep } from "@/components/tools/shared/measuring/MeasuringAnchorStep";
 import {
   MeasuringAnswerSection,
@@ -19,21 +28,15 @@ import {
   anchorResolveLoadingMessage,
   type MeasuringSearchRole,
 } from "@/components/tools/shared/measuring/measuringPanelUtils";
-import { SearchResultsList } from "@/components/tools/shared/controls/SearchResultsList";
+import { QuestionTruthReferenceHint } from "@/components/tools/shared/QuestionTruthReferenceHint";
 import { CatalogExhaustedMessage } from "@/components/tools/shared/readout/CatalogExhaustedMessage";
 import { ResolvedReadout } from "@/components/tools/shared/readout/ResolvedReadout";
-import { QuestionTruthReferenceHint } from "@/components/tools/shared/QuestionTruthReferenceHint";
-import {
-  filterChipStyles,
-  filterChipTrackStyle,
-} from "@/components/ui/entry/entryChrome";
+import { filterChipStyles, filterChipTrackStyle } from "@/components/ui/entry/entryChrome";
+import type { SeaLevelEdgeCase } from "@/domain/geometry/measuring/seaLevel";
+import type { DistanceUnit } from "@/domain/map/distance";
 import {
   BASE_MEASURING_CATALOG,
   MEASURING_GROUPS,
-  measuringQuestionFor,
-  measuringSupportsSearch,
-  measuringTargetKind,
-  measuringTargetLabel,
   type MeasuringAnswer,
   type MeasuringCatalogOption,
   type MeasuringFromKind,
@@ -41,10 +44,13 @@ import {
   type MeasuringLocationCategory,
   type MeasuringSubject,
   type MeasuringTargetMode,
+  measuringQuestionFor,
+  measuringSupportsSearch,
+  measuringTargetKind,
+  measuringTargetLabel,
 } from "@/domain/questions";
-import type { DistanceUnit } from "@/domain/map/distance";
-import type { SeaLevelEdgeCase } from "@/domain/geometry/measuring/seaLevel";
 import type { GeocodedPlace } from "@/services/geo/geocoding";
+
 type GroupFilter = "all" | MeasuringGroupId;
 
 const GROUP_CHIP_LABEL: Record<MeasuringGroupId, string> = {
@@ -103,10 +109,7 @@ export type MeasuringHudBodyModel = {
   onTargetModeChange: (mode: MeasuringTargetMode) => void;
   onSearchQueryChange: (value: string) => void;
   onSearchSubmit: (role: MeasuringSearchRole) => void;
-  onSearchResultSelect: (
-    place: GeocodedPlace,
-    role: MeasuringSearchRole,
-  ) => void;
+  onSearchResultSelect: (place: GeocodedPlace, role: MeasuringSearchRole) => void;
   onUseGps: () => void;
   onFindCoastline: () => void;
   onRetrySeaLevel: () => void;
@@ -171,9 +174,7 @@ export function MeasuringHudBody({ model }: MeasuringHudBodyProps) {
   const [groupFilter, setGroupFilter] = useState<GroupFilter>("all");
 
   const locationCategory: MeasuringLocationCategory | undefined =
-    subject === "location"
-      ? (measureFrom as MeasuringLocationCategory)
-      : undefined;
+    subject === "location" ? (measureFrom as MeasuringLocationCategory) : undefined;
   const targetLabel = measuringTargetLabel(subject, locationCategory);
   const targetKind = measuringTargetKind(measureFrom);
   const isCoastline = targetKind === "coastline";
@@ -183,8 +184,7 @@ export function MeasuringHudBody({ model }: MeasuringHudBodyProps) {
 
   const availableOptions = measureCatalog.filter(
     (option) =>
-      !usedMeasuringFromKinds.has(option.id) &&
-      !unavailableMeasuringFromKinds.has(option.id),
+      !usedMeasuringFromKinds.has(option.id) && !unavailableMeasuringFromKinds.has(option.id),
   );
   const hasAvailableMeasureOptions = availableOptions.length > 0;
 
@@ -193,8 +193,7 @@ export function MeasuringHudBody({ model }: MeasuringHudBodyProps) {
   );
 
   const effectiveFilter: GroupFilter =
-    groupFilter === "all" ||
-    groupsWithRows.some((group) => group.id === groupFilter)
+    groupFilter === "all" || groupsWithRows.some((group) => group.id === groupFilter)
       ? groupFilter
       : "all";
 
@@ -216,9 +215,7 @@ export function MeasuringHudBody({ model }: MeasuringHudBodyProps) {
             (usedMeasuringFromKinds.has(option.id) ||
               unavailableMeasuringFromKinds.has(option.id)) &&
             !(optionChosen && option.id === measureFrom),
-          icon: (
-            <Icon size={20} weight="duotone" color="currentColor" aria-hidden />
-          ),
+          icon: <Icon size={20} weight="duotone" color="currentColor" aria-hidden />,
         };
       }),
   );
@@ -227,11 +224,7 @@ export function MeasuringHudBody({ model }: MeasuringHudBodyProps) {
     ? measuringQuestionFor(subject, locationCategory)
     : MEASURING_QUESTION_INTRO;
 
-  const anchorLoadingMessage = anchorResolveLoadingMessage(
-    subject,
-    measureFrom,
-    locationCategory,
-  );
+  const anchorLoadingMessage = anchorResolveLoadingMessage(subject, measureFrom, locationCategory);
 
   const showAnswer =
     hasAvailableMeasureOptions &&
@@ -257,10 +250,7 @@ export function MeasuringHudBody({ model }: MeasuringHudBodyProps) {
   ];
 
   return (
-    <div
-      data-testid="measuring-hud-body"
-      className="ask-hud-mode-body flex w-full flex-col gap-2"
-    >
+    <div data-testid="measuring-hud-body" className="ask-hud-mode-body flex w-full flex-col gap-2">
       <AskToolQuestionHeader
         toolLabel={toolLabel}
         costLabel={costLabel}
@@ -299,11 +289,7 @@ export function MeasuringHudBody({ model }: MeasuringHudBodyProps) {
                   onClick={() => setGroupFilter(option.value)}
                   styles={filterChipStyles(selected)}
                 >
-                  <Icon
-                    size={14}
-                    weight={selected ? "fill" : "regular"}
-                    aria-hidden
-                  />
+                  <Icon size={14} weight={selected ? "fill" : "regular"} aria-hidden />
                   {option.label}
                 </UnstyledButton>
               );

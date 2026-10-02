@@ -96,9 +96,7 @@ export function phaseActivityEventId(type: FixedSessionActivityType): string {
 export function sortActivityEventsDesc(
   events: readonly SessionActivityEvent[],
 ): SessionActivityEvent[] {
-  return [...events].sort((left, right) =>
-    right.createdAt.localeCompare(left.createdAt),
-  );
+  return [...events].sort((left, right) => right.createdAt.localeCompare(left.createdAt));
 }
 
 /** Ask + resolve plate for the session log (oldest-first / messaging order). */
@@ -142,10 +140,7 @@ function isResolveEvent(event: SessionActivityEvent): boolean {
   );
 }
 
-function askMatchesResolve(
-  asked: SessionActivityEvent,
-  resolved: SessionActivityEvent,
-): boolean {
+function askMatchesResolve(asked: SessionActivityEvent, resolved: SessionActivityEvent): boolean {
   const askPending = activityPendingId(asked);
   const resolvePending = activityPendingId(resolved);
   if (askPending && resolvePending && askPending === resolvePending) {
@@ -154,14 +149,11 @@ function askMatchesResolve(
 
   if (
     asked.type === "question_asked" &&
-    (resolved.type === "question_answered" ||
-      resolved.type === "question_cancelled")
+    (resolved.type === "question_answered" || resolved.type === "question_cancelled")
   ) {
     const askAnn = asked.payload.annotationId;
     const resolveAnn =
-      resolved.type === "question_answered"
-        ? resolved.payload.annotationId
-        : undefined;
+      resolved.type === "question_answered" ? resolved.payload.annotationId : undefined;
     if (askAnn && resolveAnn && askAnn === resolveAnn) {
       return true;
     }
@@ -179,10 +171,7 @@ function askMatchesResolve(
     );
   }
 
-  if (
-    asked.type === "thermometer_walk_started" &&
-    resolved.type === "thermometer_walk_separated"
-  ) {
+  if (asked.type === "thermometer_walk_started" && resolved.type === "thermometer_walk_separated") {
     return Boolean(askPending && resolvePending && askPending === resolvePending);
   }
 
@@ -208,8 +197,7 @@ export function groupSessionActivityEntries(
 
     if (isResolveEvent(event)) {
       const asked = asks.find(
-        (candidate) =>
-          !consumed.has(candidate.id) && askMatchesResolve(candidate, event),
+        (candidate) => !consumed.has(candidate.id) && askMatchesResolve(candidate, event),
       );
       if (asked) {
         consumed.add(asked.id);
@@ -229,9 +217,7 @@ export function groupSessionActivityEntries(
 }
 
 /** Annotation id for map focus / edit when the event links to a live answer. */
-export function activityAnnotationId(
-  event: SessionActivityEvent,
-): string | undefined {
+export function activityAnnotationId(event: SessionActivityEvent): string | undefined {
   switch (event.type) {
     case "question_asked":
     case "question_answered":
@@ -315,9 +301,7 @@ export function sessionActivitySummary(event: SessionActivityEvent): string {
     case "question_cancelled":
       return `${activityToolLabel(event.payload.toolType)} cancelled: ${event.payload.promptText}`;
     case "photo_asked":
-      return event.payload.promptText
-        ? `Photo asked: ${event.payload.promptText}`
-        : "Photo asked";
+      return event.payload.promptText ? `Photo asked: ${event.payload.promptText}` : "Photo asked";
     case "photo_answered": {
       const { promptText, answerSummary } = event.payload;
       if (promptText && answerSummary) {
@@ -332,9 +316,7 @@ export function sessionActivitySummary(event: SessionActivityEvent): string {
       return "Photo answered";
     }
     case "game_ended":
-      return event.payload.summary
-        ? `Game ended: ${event.payload.summary}`
-        : "Game ended";
+      return event.payload.summary ? `Game ended: ${event.payload.summary}` : "Game ended";
     default: {
       const _exhaustive: never = event;
       throw new Error(`Unhandled session activity type: ${JSON.stringify(_exhaustive)}`);

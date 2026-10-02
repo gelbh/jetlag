@@ -48,9 +48,7 @@ export async function joinSessionWithRole(input: {
   return result.data;
 }
 
-export async function initSessionRoleGates(
-  sessionId: string,
-): Promise<InitSessionRoleGatesResult> {
+export async function initSessionRoleGates(sessionId: string): Promise<InitSessionRoleGatesResult> {
   if (!isFirebaseConfigured()) {
     throw new Error("Firebase is not configured.");
   }
@@ -108,10 +106,7 @@ export function clearRolePasscodeRevealWarm(sessionId?: string): void {
  * Warm the reveal path without exposing the code in UI.
  * Coalesces with an in-flight reveal for the same session+role.
  */
-export function prefetchRolePasscode(
-  sessionId: string,
-  role: RevealRole,
-): void {
+export function prefetchRolePasscode(sessionId: string, role: RevealRole): void {
   void revealRolePasscode(sessionId, role).catch(() => {
     // Prefetch is best-effort; tap Reveal surfaces the error.
   });
@@ -163,10 +158,10 @@ export async function regenerateRolePasscode(
   revealInflight.delete(revealWarmKey(sessionId, role));
 
   const functions = await getFirebaseFunctions();
-  const callable = httpsCallable<
-    { sessionId: string; role: RevealRole },
-    RolePasscodeActionResult
-  >(functions, "regenerateRolePasscode");
+  const callable = httpsCallable<{ sessionId: string; role: RevealRole }, RolePasscodeActionResult>(
+    functions,
+    "regenerateRolePasscode",
+  );
   const result = await callable({ sessionId, role });
   return result.data;
 }
@@ -192,19 +187,16 @@ export async function requestRoleJoin(
   return result.data;
 }
 
-export async function cancelRoleJoinRequest(
-  sessionId: string,
-  requestId: string,
-): Promise<void> {
+export async function cancelRoleJoinRequest(sessionId: string, requestId: string): Promise<void> {
   if (!isFirebaseConfigured()) {
     throw new Error("Firebase is not configured.");
   }
 
   const functions = await getFirebaseFunctions();
-  const callable = httpsCallable<
-    { sessionId: string; requestId: string },
-    { ok: boolean }
-  >(functions, "cancelRoleJoinRequest");
+  const callable = httpsCallable<{ sessionId: string; requestId: string }, { ok: boolean }>(
+    functions,
+    "cancelRoleJoinRequest",
+  );
   await callable({ sessionId, requestId });
 }
 
@@ -229,8 +221,7 @@ export async function resolveRoleJoinRequest(
   await callable({ sessionId, requestId, decision });
 }
 
-const CLIENT_UPDATE_REQUIRED_COPY =
-  "Update the app to continue. Refresh to load the latest build.";
+const CLIENT_UPDATE_REQUIRED_COPY = "Update the app to continue. Refresh to load the latest build.";
 
 function isClientUpdateRequiredMessage(message: string): boolean {
   return message.includes("Client update required.");
@@ -260,10 +251,7 @@ export function mapRolePasscodeJoinError(error: unknown): string {
 
 /** Leader-facing copy when accept/decline of a pending request fails. */
 export function mapLeaderJoinResolveError(error: unknown): string {
-  if (
-    error instanceof Error &&
-    isClientUpdateRequiredMessage(error.message)
-  ) {
+  if (error instanceof Error && isClientUpdateRequiredMessage(error.message)) {
     return "That player needs to update the app before they can join.";
   }
   return mapJoinRequestError(error);

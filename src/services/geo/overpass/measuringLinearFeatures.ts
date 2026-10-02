@@ -1,35 +1,29 @@
 import type { Feature, LineString } from "geojson";
+import { gameAreaToBoundingBox, type LatLngTuple } from "@/domain/geometry/gameArea/geometry";
+import {
+  nearestPointToCoastlines,
+  type PreparedLinearSegments,
+  prepareMeasuringLineSegments,
+} from "@/domain/geometry/measuring/geometryMeasuring";
 import type { GameArea } from "@/domain/map/annotations";
+import {
+  type MeasuringFromKind,
+  measuringLinearOverpassSelectors,
+  measuringLocationLabel,
+} from "@/domain/questions";
+import type { RegionPackId } from "@/domain/regions/regionPack";
 import type {
   CustomMatchingAreasByLevel,
   MatchingAdminLevel,
 } from "@/domain/session/catalog/sessionCustomContent";
-import {
-  gameAreaToBoundingBox,
-  type LatLngTuple,
-} from "@/domain/geometry/gameArea/geometry";
-import {
-  nearestPointToCoastlines,
-  prepareMeasuringLineSegments,
-  type PreparedLinearSegments,
-} from "@/domain/geometry/measuring/geometryMeasuring";
-import {
-  measuringLinearOverpassSelectors,
-  measuringLocationLabel,
-  type MeasuringFromKind,
-} from "@/domain/questions";
-import type { RegionPackId } from "@/domain/regions/regionPack";
-import {
-  getOrFetchCached,
-  linearSegmentsCacheKey,
-} from "../cache";
 import { queryOverpass } from "../../core/overpass/overpassClient";
+import { getOrFetchCached, linearSegmentsCacheKey } from "../cache";
+import { loadRegionPackMatchingAreas } from "../matching/regionPackBoundaries";
 import {
   adminLevelForMeasuringBorderKind,
   allowsOverpassAdminBorderFallthrough,
   isMeasuringAdminBorderKind,
 } from "./adminDivisionAvailability";
-import { loadRegionPackMatchingAreas } from "../matching/regionPackBoundaries";
 import { fetchCustomAdminBorderLineSegments } from "./adminDivisionLineStrings";
 
 type OverpassWay = {
@@ -37,10 +31,7 @@ type OverpassWay = {
   geometry?: Array<{ lat: number; lon: number }>;
 };
 
-export function buildLinearFeaturesQuery(
-  gameArea: GameArea,
-  selectors: readonly string[],
-): string {
+export function buildLinearFeaturesQuery(gameArea: GameArea, selectors: readonly string[]): string {
   const { south, west, north, east } = gameAreaToBoundingBox(gameArea);
   const bbox = `${south},${west},${north},${east}`;
   const clauses = selectors.map((selector) => `way${selector}(${bbox});`);
@@ -54,9 +45,7 @@ export function buildLinearFeaturesQuery(
   `;
 }
 
-function wayToLineString(
-  nodes: Array<{ lat: number; lon: number }>,
-): Feature<LineString> | null {
+function wayToLineString(nodes: Array<{ lat: number; lon: number }>): Feature<LineString> | null {
   if (nodes.length < 2) {
     return null;
   }
@@ -109,11 +98,7 @@ async function fetchMeasuringLinearSegmentsForKind(
     if (regionPackId) {
       try {
         const packAreas = await loadRegionPackMatchingAreas(regionPackId);
-        const packSegments = await fetchCustomAdminBorderLineSegments(
-          gameArea,
-          kind,
-          packAreas,
-        );
+        const packSegments = await fetchCustomAdminBorderLineSegments(gameArea, kind, packAreas);
         if (packSegments.length > 0) {
           return packSegments;
         }
@@ -212,9 +197,7 @@ export async function loadMeasuringLinearContext(
   };
 }
 
-export function measuringLinearNotFoundMessage(
-  kind: MeasuringFromKind,
-): string {
+export function measuringLinearNotFoundMessage(kind: MeasuringFromKind): string {
   const label = measuringLocationLabel(kind).toLowerCase();
   return `No ${label} found in this play area.`;
 }

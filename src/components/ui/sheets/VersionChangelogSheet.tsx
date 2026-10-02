@@ -1,8 +1,8 @@
 import { useId, useState } from "react";
 import { CHANGELOG, type ChangelogEntry } from "@/domain/device/changelog";
 import {
-  groupChangelogEntries,
   type ChangelogNode,
+  groupChangelogEntries,
   type MajorGroupNode,
   type MinorGroupNode,
 } from "@/domain/device/chrome/groupChangelog";
@@ -63,11 +63,7 @@ function CollapsibleChangelogEntry({
     return (
       <section className="space-y-2">
         <h3 className="font-display text-sm font-semibold uppercase tracking-wide">
-          <ChangelogVersionHeader
-            label={entry.version}
-            date={entry.date}
-            highlight={highlight}
-          />
+          <ChangelogVersionHeader label={entry.version} date={entry.date} highlight={highlight} />
         </h3>
         <ChangelogEntrySections entry={entry} />
       </section>
@@ -84,11 +80,7 @@ function CollapsibleChangelogEntry({
         className="flex min-h-11 w-full items-center justify-between gap-3 border-2 border-rule bg-canvas px-3 py-2 text-left"
       >
         <span className="font-display text-sm font-semibold uppercase tracking-wide">
-          <ChangelogVersionHeader
-            label={entry.version}
-            date={entry.date}
-            highlight={false}
-          />
+          <ChangelogVersionHeader label={entry.version} date={entry.date} highlight={false} />
         </span>
         <span className="shrink-0 font-display text-[10px] font-semibold uppercase tracking-[0.12em] text-field-ink-muted">
           {open ? "Hide" : "Show"}
@@ -137,11 +129,7 @@ function CollapsibleMinorGroup({
         className="flex min-h-11 w-full items-center justify-between gap-3 border-2 border-rule bg-canvas px-3 py-2 text-left"
       >
         <span className="font-display text-sm font-semibold uppercase tracking-wide">
-          <ChangelogVersionHeader
-            label={group.label}
-            date={group.date}
-            highlight={false}
-          />
+          <ChangelogVersionHeader label={group.label} date={group.date} highlight={false} />
         </span>
         <span className="shrink-0 font-display text-[10px] font-semibold uppercase tracking-[0.12em] text-field-ink-muted">
           {open ? "Hide" : "Show"}
@@ -180,11 +168,7 @@ function CollapsibleMajorGroup({ group }: { group: MajorGroupNode }) {
         className="flex min-h-11 w-full items-center justify-between gap-3 border-2 border-rule bg-canvas px-3 py-2 text-left"
       >
         <span className="font-display text-sm font-semibold uppercase tracking-wide">
-          <ChangelogVersionHeader
-            label={group.label}
-            date={group.date}
-            highlight={false}
-          />
+          <ChangelogVersionHeader label={group.label} date={group.date} highlight={false} />
         </span>
         <span className="shrink-0 font-display text-[10px] font-semibold uppercase tracking-[0.12em] text-field-ink-muted">
           {open ? "Hide" : "Show"}
@@ -249,10 +233,7 @@ function firstVersionLabel(nodes: readonly ChangelogNode[]): string | null {
   return null;
 }
 
-export function VersionChangelogSheet({
-  open,
-  onClose,
-}: VersionChangelogSheetProps) {
+export function VersionChangelogSheet({ open, onClose }: VersionChangelogSheetProps) {
   const changelogNodes = groupChangelogEntries(CHANGELOG);
   const latestVersion = firstVersionLabel(changelogNodes);
 
@@ -268,16 +249,11 @@ export function VersionChangelogSheet({
 
       <div className="jl-scroll jl-selectable space-y-5 overflow-y-auto pr-1">
         {changelogNodes.map((node) => {
-          const isLatestVersion =
-            node.kind === "version" && node.entry.version === latestVersion;
+          const isLatestVersion = node.kind === "version" && node.entry.version === latestVersion;
 
           return (
             <ChangelogNodeView
-              key={
-                node.kind === "version"
-                  ? node.entry.version
-                  : `${node.kind}-${node.label}`
-              }
+              key={node.kind === "version" ? node.entry.version : `${node.kind}-${node.label}`}
               node={node}
               isLatestVersion={isLatestVersion}
             />

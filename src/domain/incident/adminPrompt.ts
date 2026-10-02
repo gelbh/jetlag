@@ -1,8 +1,4 @@
-import {
-  clampIncidentNote,
-  type IncidentDiagnostics,
-  type IncidentStatus,
-} from "./incidentTypes";
+import { clampIncidentNote, type IncidentDiagnostics, type IncidentStatus } from "./incidentTypes";
 
 export interface AdminPromptInput {
   incidentId: string;

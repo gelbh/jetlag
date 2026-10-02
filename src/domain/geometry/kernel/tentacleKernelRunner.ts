@@ -18,10 +18,9 @@ export type TentacleEliminationParams = {
 const tentacleWasm = createLazyWasmImport(() => import("./tentacleWasm"));
 
 export async function dispatchTentacleEliminationRegion(
-  params: TentacleEliminationParams
+  params: TentacleEliminationParams,
 ): Promise<Feature<Polygon | MultiPolygon> | null> {
-  const { anchor, radiusMeters, sites, answeredSiteId, gameArea, voronoiCells } =
-    params;
+  const { anchor, radiusMeters, sites, answeredSiteId, gameArea, voronoiCells } = params;
   return dispatchKernel({
     entrypoint: "tentacleEliminationRegion",
     label: "buildTentacleEliminationRegion",
@@ -40,10 +39,9 @@ export async function dispatchTentacleEliminationRegion(
 }
 
 export async function dispatchTentaclePoiAnswerEliminationRegion(
-  params: TentacleEliminationParams
+  params: TentacleEliminationParams,
 ): Promise<Feature<Polygon | MultiPolygon> | null> {
-  const { anchor, radiusMeters, sites, answeredSiteId, gameArea, voronoiCells } =
-    params;
+  const { anchor, radiusMeters, sites, answeredSiteId, gameArea, voronoiCells } = params;
   return dispatchKernel({
     entrypoint: "tentacleEliminationRegion",
     label: "buildTentaclePoiAnswerEliminationRegion",
@@ -65,5 +63,4 @@ export async function dispatchTentaclePoiAnswerEliminationRegion(
 export const runTentacleEliminationRegion = dispatchTentacleEliminationRegion;
 
 /** Public alias; callers may import either name. */
-export const runTentaclePoiAnswerEliminationRegion =
-  dispatchTentaclePoiAnswerEliminationRegion;
+export const runTentaclePoiAnswerEliminationRegion = dispatchTentaclePoiAnswerEliminationRegion;

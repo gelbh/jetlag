@@ -1,7 +1,6 @@
 import { HttpsError } from "firebase-functions/v2/https";
 
-const ANONYMOUS_BILLING_MESSAGE =
-  "Sign in with email, Google, or Apple to purchase premium.";
+const ANONYMOUS_BILLING_MESSAGE = "Sign in with email, Google, or Apple to purchase premium.";
 
 /**
  * @param {import("firebase-functions/v2/https").CallableRequest} request

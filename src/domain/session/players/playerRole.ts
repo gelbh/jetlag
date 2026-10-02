@@ -61,9 +61,7 @@ export function sessionHasHiders(memberRoles: MemberRoles | undefined): boolean 
   return Object.values(memberRoles).some((role) => role === "hider");
 }
 
-export function hiderMemberUids(
-  memberRoles: MemberRoles | undefined,
-): string[] {
+export function hiderMemberUids(memberRoles: MemberRoles | undefined): string[] {
   if (!memberRoles) {
     return [];
   }

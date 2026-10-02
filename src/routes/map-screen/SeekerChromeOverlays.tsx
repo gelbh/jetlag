@@ -2,20 +2,17 @@ import { Button, Group } from "@mantine/core";
 import { MapFirstRunSheet } from "../../components/session/mapChrome/MapFirstRunSheet";
 import { AskHudHost } from "../../components/tools/ask/AskHudHost";
 import { ToolFloatingPanel } from "../../components/tools/ToolFloatingPanel";
+import { filledStyles, grayStyles } from "../../components/ui/entry/entryChrome";
 import {
-  filledStyles,
-  grayStyles,
-} from "../../components/ui/entry/entryChrome";
-import {
+  type AskHudSurface,
   activeModeCue,
   canCommit,
   commitKind,
   isAskHudOwnedTool,
   primedCommitLabel,
-  type AskHudSurface,
 } from "../../domain/ask/askHudModes";
-import type { AskToolHudBundle } from "../../hooks/map-screen/heavyMapTools";
 import { MAP_TOOL_DOCK_ENTRIES } from "../../domain/map/mapTools";
+import type { AskToolHudBundle } from "../../hooks/map-screen/heavyMapTools";
 import type { MapScreenController } from "./useMapScreenController";
 
 type SeekerChromeOverlaysProps = {
@@ -127,10 +124,7 @@ export function SeekerChromeOverlays({
   saveGeometryEdit,
   tools,
 }: SeekerChromeOverlaysProps) {
-  const askHudOwned =
-    activeTool !== "none" &&
-    isAskHudOwnedTool(activeTool) &&
-    !selectedAnnotation;
+  const askHudOwned = activeTool !== "none" && isAskHudOwnedTool(activeTool) && !selectedAnnotation;
 
   const askSurface: AskHudSurface | null = askHudOwned ? activeTool : null;
   const dockEntry = askHudOwned
@@ -152,10 +146,7 @@ export function SeekerChromeOverlays({
   const askCanCommit = toolHud ? canCommit(toolHud.readiness) : false;
   const askCommitKind = toolHud
     ? (toolHud.commitKind ??
-      commitKind(
-        toolHud.readiness.surface,
-        toolHud.readiness.awaitHiderAnswer,
-      ))
+      commitKind(toolHud.readiness.surface, toolHud.readiness.awaitHiderAnswer))
     : "send";
   const askCommitLabel = toolHud
     ? primedCommitLabel({
@@ -167,9 +158,7 @@ export function SeekerChromeOverlays({
     : "";
 
   const showFloatingPanel =
-    activeTool !== "none" &&
-    !selectedAnnotation &&
-    !isAskHudOwnedTool(activeTool);
+    activeTool !== "none" && !selectedAnnotation && !isAskHudOwnedTool(activeTool);
 
   return (
     <>
@@ -186,10 +175,7 @@ export function SeekerChromeOverlays({
               border: "0.33px solid oklch(from var(--color-field-ink) l c h / 0.12)",
             }}
           >
-            <Button
-              onClick={() => void saveGeometryEdit()}
-              styles={filledStyles}
-            >
+            <Button onClick={() => void saveGeometryEdit()} styles={filledStyles}>
               Save shape
             </Button>
             <Button onClick={cancelGeometryEdit} styles={grayStyles}>

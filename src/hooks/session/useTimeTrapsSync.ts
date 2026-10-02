@@ -1,17 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
-import { LOCAL_SESSION_ID } from "../../domain/map/annotations";
 import type { TimeTrapRecord } from "../../domain/expansion/timeTraps";
+import { LOCAL_SESSION_ID } from "../../domain/map/annotations";
 import { filterExtrasAfterReset } from "../../domain/session/meta/sessionReset";
 import { isFirebaseConfigured } from "../../services/core/firebase/firebase";
 import { subscribeToTimeTraps } from "../../services/firestore/firestoreSessionExtras";
 import { useSessionStore } from "../../state/sessionStore";
 
 function isRemoteSession(sessionId: string | undefined): sessionId is string {
-  return (
-    Boolean(sessionId) &&
-    isFirebaseConfigured() &&
-    sessionId !== LOCAL_SESSION_ID
-  );
+  return Boolean(sessionId) && isFirebaseConfigured() && sessionId !== LOCAL_SESSION_ID;
 }
 
 export function useTimeTrapsSync(sessionId: string | undefined) {
@@ -24,17 +20,9 @@ export function useTimeTrapsSync(sessionId: string | undefined) {
       return;
     }
 
-    const unsubscribe = subscribeToTimeTraps(
-      sessionId,
-      setTraps,
-      (error) => {
-        setLastSyncError(
-          error instanceof Error
-            ? error.message
-            : "Time trap sync failed.",
-        );
-      },
-    );
+    const unsubscribe = subscribeToTimeTraps(sessionId, setTraps, (error) => {
+      setLastSyncError(error instanceof Error ? error.message : "Time trap sync failed.");
+    });
 
     return () => {
       unsubscribe();
@@ -43,8 +31,7 @@ export function useTimeTrapsSync(sessionId: string | undefined) {
   }, [sessionId, setLastSyncError]);
 
   return useMemo(
-    () =>
-      filterExtrasAfterReset(traps, sessionResetAt, (trap) => trap.placedAt),
+    () => filterExtrasAfterReset(traps, sessionResetAt, (trap) => trap.placedAt),
     [sessionResetAt, traps],
   );
 }

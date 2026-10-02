@@ -1,8 +1,8 @@
 import { Progress, Text } from "@mantine/core";
-import { HudRefreshIcon } from "../../ui/brand/HudIcons";
-import { HudDetailPanel } from "../../ui/hud/HudDetailPanel";
-import { loadingSpinnerClass } from "../../ui/feedback/loadingSpinnerClass";
 import { preloadBeaconStyle } from "@/components/ui/entry/entryChrome";
+import { HudRefreshIcon } from "../../ui/brand/HudIcons";
+import { loadingSpinnerClass } from "../../ui/feedback/loadingSpinnerClass";
+import { HudDetailPanel } from "../../ui/hud/HudDetailPanel";
 
 interface GameAreaPreloadDetailPanelProps {
   loading: boolean;
@@ -25,8 +25,7 @@ export function GameAreaPreloadDetailPanel({
   onClose,
   onDismiss,
 }: GameAreaPreloadDetailPanelProps) {
-  const progress =
-    totalJobs > 0 ? Math.min(100, (completedJobs / totalJobs) * 100) : 0;
+  const progress = totalJobs > 0 ? Math.min(100, (completedJobs / totalJobs) * 100) : 0;
   const statusClass = failed
     ? "jl-preload-detail-panel--failed"
     : "jl-preload-detail-panel--loading";

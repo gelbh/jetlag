@@ -1,7 +1,7 @@
-import { SheetHost } from "@/components/ui/sheets/SheetHost";
 import { SheetHeader } from "@/components/ui/sheets/SheetHeader";
-import { QuestionPromptBlock } from "./QuestionPromptBlock";
+import { SheetHost } from "@/components/ui/sheets/SheetHost";
 import { CoordinateCopyButton } from "./CoordinateCopyButton";
+import { QuestionPromptBlock } from "./QuestionPromptBlock";
 
 interface QuestionPreviewSheetProps {
   open: boolean;
@@ -41,9 +41,7 @@ export function QuestionPreviewSheet({
         {typeof anchorLat === "number" && typeof anchorLng === "number" ? (
           <CoordinateCopyButton lat={anchorLat} lng={anchorLng} className="w-full" />
         ) : null}
-        {costLabel ? (
-          <p className="text-xs text-ink-muted">Card cost: {costLabel}</p>
-        ) : null}
+        {costLabel ? <p className="text-xs text-ink-muted">Card cost: {costLabel}</p> : null}
         <button
           type="button"
           onClick={onConfirm}

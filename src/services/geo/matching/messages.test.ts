@@ -1,14 +1,9 @@
 import { describe, expect, it } from "vitest";
-import {
-  matchingEmptyPlayAreaMessage,
-  matchingNullAnswerMessage,
-} from "./messages";
+import { matchingEmptyPlayAreaMessage, matchingNullAnswerMessage } from "./messages";
 
 describe("matching empty play-area messages", () => {
   it("empty play area message has no null-match suffix", () => {
-    expect(matchingEmptyPlayAreaMessage("landmass")).toBe(
-      "No landmass intersects the play area.",
-    );
+    expect(matchingEmptyPlayAreaMessage("landmass")).toBe("No landmass intersects the play area.");
     expect(matchingEmptyPlayAreaMessage("landmass")).not.toMatch(/null match/i);
   });
 

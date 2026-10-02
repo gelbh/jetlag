@@ -1,9 +1,9 @@
-import { fireEvent, screen } from "@testing-library/react";
 import { MantineProvider } from "@mantine/core";
+import { fireEvent, screen } from "@testing-library/react";
 import type { ReactElement } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { jetlagTheme } from "@/theme/theme";
 import { renderWithRouter } from "@/test/renderWithRouter";
+import { jetlagTheme } from "@/theme/theme";
 import { AdvancedSettingsCategory } from "./shared";
 
 function renderUi(ui: ReactElement) {

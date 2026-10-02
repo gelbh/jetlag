@@ -18,12 +18,8 @@ describe("computeZoomAdaptiveWeight", () => {
   });
 
   it("clamps to min and max", () => {
-    expect(
-      computeZoomAdaptiveWeight(2, 1, { minWeight: 1, maxWeight: 3 }),
-    ).toBe(1);
-    expect(
-      computeZoomAdaptiveWeight(2, 40, { minWeight: 1, maxWeight: 3 }),
-    ).toBe(3);
+    expect(computeZoomAdaptiveWeight(2, 1, { minWeight: 1, maxWeight: 3 })).toBe(1);
+    expect(computeZoomAdaptiveWeight(2, 40, { minWeight: 1, maxWeight: 3 })).toBe(3);
   });
 });
 

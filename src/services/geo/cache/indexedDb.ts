@@ -42,9 +42,7 @@ function openDatabase(): Promise<IDBDatabase> {
   return databasePromise;
 }
 
-export async function readPersistedEntryIgnoringExpiry<T>(
-  key: string,
-): Promise<T | undefined> {
+export async function readPersistedEntryIgnoringExpiry<T>(key: string): Promise<T | undefined> {
   if (typeof indexedDB === "undefined") {
     return undefined;
   }
@@ -55,19 +53,14 @@ export async function readPersistedEntryIgnoringExpiry<T>(
     const store = transaction.objectStore(STORE_NAME);
     const request = store.get(key);
 
-    const entry = await new Promise<PersistedCacheEntry<T> | undefined>(
-      (resolve, reject) => {
-        request.onsuccess = () =>
-          resolve(request.result as PersistedCacheEntry<T> | undefined);
-        request.onerror = () =>
-          reject(request.error ?? new Error("Cache read failed"));
-      },
-    );
+    const entry = await new Promise<PersistedCacheEntry<T> | undefined>((resolve, reject) => {
+      request.onsuccess = () => resolve(request.result as PersistedCacheEntry<T> | undefined);
+      request.onerror = () => reject(request.error ?? new Error("Cache read failed"));
+    });
 
     await new Promise<void>((resolve, reject) => {
       transaction.oncomplete = () => resolve();
-      transaction.onerror = () =>
-        reject(transaction.error ?? new Error("Cache read failed"));
+      transaction.onerror = () => reject(transaction.error ?? new Error("Cache read failed"));
     });
 
     if (!entry) {
@@ -91,19 +84,14 @@ export async function readPersistedEntry<T>(key: string): Promise<T | undefined>
     const store = transaction.objectStore(STORE_NAME);
     const request = store.get(key);
 
-    const entry = await new Promise<PersistedCacheEntry<T> | undefined>(
-      (resolve, reject) => {
-        request.onsuccess = () =>
-          resolve(request.result as PersistedCacheEntry<T> | undefined);
-        request.onerror = () =>
-          reject(request.error ?? new Error("Cache read failed"));
-      },
-    );
+    const entry = await new Promise<PersistedCacheEntry<T> | undefined>((resolve, reject) => {
+      request.onsuccess = () => resolve(request.result as PersistedCacheEntry<T> | undefined);
+      request.onerror = () => reject(request.error ?? new Error("Cache read failed"));
+    });
 
     await new Promise<void>((resolve, reject) => {
       transaction.oncomplete = () => resolve();
-      transaction.onerror = () =>
-        reject(transaction.error ?? new Error("Cache read failed"));
+      transaction.onerror = () => reject(transaction.error ?? new Error("Cache read failed"));
     });
 
     if (!entry || entry.expiresAt <= Date.now()) {
@@ -134,8 +122,7 @@ export async function writePersistedEntry<T>(key: string, value: T): Promise<voi
 
     await new Promise<void>((resolve, reject) => {
       transaction.oncomplete = () => resolve();
-      transaction.onerror = () =>
-        reject(transaction.error ?? new Error("Cache write failed"));
+      transaction.onerror = () => reject(transaction.error ?? new Error("Cache write failed"));
     });
   } catch {
     // Ignore persistence failures; memory cache still helps this session.
@@ -154,8 +141,7 @@ export async function clearPersistedCacheForTests(): Promise<void> {
 
     await new Promise<void>((resolve, reject) => {
       transaction.oncomplete = () => resolve();
-      transaction.onerror = () =>
-        reject(transaction.error ?? new Error("Cache clear failed"));
+      transaction.onerror = () => reject(transaction.error ?? new Error("Cache clear failed"));
     });
   } catch {
     // Ignore persistence failures in tests.

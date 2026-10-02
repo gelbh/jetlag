@@ -1,22 +1,17 @@
-import type { GameArea } from "../../domain/map/annotations";
 import { gameAreaCenter } from "../../domain/geometry/gameArea/geometry";
+import type { GameArea } from "../../domain/map/annotations";
 import type { TransitMetro } from "../../domain/map/transit";
 
 const EARTH_RADIUS_KM = 6_371;
 
-function distanceKm(
-  a: [number, number],
-  b: [number, number],
-): number {
+function distanceKm(a: [number, number], b: [number, number]): number {
   const lat1 = (a[0] * Math.PI) / 180;
   const lat2 = (b[0] * Math.PI) / 180;
   const dLat = ((b[0] - a[0]) * Math.PI) / 180;
   const dLng = ((b[1] - a[1]) * Math.PI) / 180;
   const sinLat = Math.sin(dLat / 2);
   const sinLng = Math.sin(dLng / 2);
-  const h =
-    sinLat * sinLat +
-    Math.cos(lat1) * Math.cos(lat2) * sinLng * sinLng;
+  const h = sinLat * sinLat + Math.cos(lat1) * Math.cos(lat2) * sinLng * sinLng;
 
   return 2 * EARTH_RADIUS_KM * Math.asin(Math.min(1, Math.sqrt(h)));
 }
@@ -29,8 +24,7 @@ export const TRANSIT_METROS: TransitMetro[] = [
     radiusKm: 45,
     transitlandFeed: "f-transport~for~london",
     transitlandRtFeed: "f-dpwh-londontransit~rt",
-    gtfsRtVehicleUrl:
-      "https://api.tfl.gov.uk/vehicle/vehiclepositions",
+    gtfsRtVehicleUrl: "https://api.tfl.gov.uk/vehicle/vehiclepositions",
     vehiclesProxyMetro: "london",
   },
   {
@@ -114,9 +108,5 @@ export function listTransitMetros(): TransitMetro[] {
 }
 
 export function metroSupportsLiveVehicles(metro: TransitMetro | null): boolean {
-  return Boolean(
-    metro?.transitlandRtFeed ||
-      metro?.gtfsRtVehicleUrl ||
-      metro?.vehiclesProxyMetro,
-  );
+  return Boolean(metro?.transitlandRtFeed || metro?.gtfsRtVehicleUrl || metro?.vehiclesProxyMetro);
 }

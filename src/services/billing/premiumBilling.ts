@@ -1,22 +1,16 @@
 import { FirebaseError } from "firebase/app";
 import { httpsCallable } from "firebase/functions";
+import { clientEnvUsesFirebaseEmulator } from "../../config/env";
+import type { PremiumEntitlements, PremiumProductKey } from "../../domain/billing/premiumProducts";
 import type { GameArea, SessionRecord, SessionTier } from "../../domain/map/annotations";
+import type { PlayerRole } from "../../domain/session/players/playerRole";
 import type { GameSize } from "../../domain/session/size/gameSize";
 import type { SessionRulesPatch } from "../../domain/session/tools/advancedSessionSettings";
-import type { PlayerRole } from "../../domain/session/players/playerRole";
-import type {
-  PremiumEntitlements,
-  PremiumProductKey,
-} from "../../domain/billing/premiumProducts";
-import { clientEnvUsesFirebaseEmulator } from "../../config/env";
 import { ANALYTICS_EVENTS, track } from "../core/analytics/analytics";
 import { getFirebaseFunctions, isFirebaseConfigured } from "../core/firebase/firebase";
-import { serializeGameAreaForFirestore } from "../firestore/serialization/shared";
 import { deserializeSessionFromFirestore } from "../firestore/serialization/serializeSession";
-import {
-  AUTH_FAILURE_MESSAGE,
-  withPermissionDeniedAuthRetry,
-} from "../firestore/sessions/shared";
+import { serializeGameAreaForFirestore } from "../firestore/serialization/shared";
+import { AUTH_FAILURE_MESSAGE, withPermissionDeniedAuthRetry } from "../firestore/sessions/shared";
 
 function billingUnavailable(): never {
   throw new Error("Premium billing is not available offline.");
@@ -44,10 +38,7 @@ export async function fetchPremiumEntitlements(): Promise<PremiumEntitlements | 
   }
 
   const functions = await getFirebaseFunctions();
-  const callable = httpsCallable<void, PremiumEntitlements>(
-    functions,
-    "getPremiumEntitlements",
-  );
+  const callable = httpsCallable<void, PremiumEntitlements>(functions, "getPremiumEntitlements");
 
   try {
     const result = await callable();
@@ -57,18 +48,16 @@ export async function fetchPremiumEntitlements(): Promise<PremiumEntitlements | 
   }
 }
 
-export async function startPremiumCheckout(
-  productKey: PremiumProductKey,
-): Promise<string> {
+export async function startPremiumCheckout(productKey: PremiumProductKey): Promise<string> {
   if (!isFirebaseConfigured()) {
     billingUnavailable();
   }
 
   const functions = await getFirebaseFunctions();
-  const callable = httpsCallable<
-    { productKey: PremiumProductKey },
-    { url: string }
-  >(functions, "createCheckoutSession");
+  const callable = httpsCallable<{ productKey: PremiumProductKey }, { url: string }>(
+    functions,
+    "createCheckoutSession",
+  );
 
   try {
     const result = await callable({
@@ -95,10 +84,7 @@ export async function startPremiumTrial(): Promise<PremiumEntitlements> {
   }
 
   const functions = await getFirebaseFunctions();
-  const callable = httpsCallable<void, PremiumEntitlements>(
-    functions,
-    "startPremiumTrial",
-  );
+  const callable = httpsCallable<void, PremiumEntitlements>(functions, "startPremiumTrial");
 
   try {
     const result = await callable();
@@ -114,10 +100,7 @@ export async function openPremiumBillingPortal(): Promise<string> {
   }
 
   const functions = await getFirebaseFunctions();
-  const callable = httpsCallable<void, { url: string }>(
-    functions,
-    "createBillingPortalSession",
-  );
+  const callable = httpsCallable<void, { url: string }>(functions, "createBillingPortalSession");
 
   try {
     const result = await callable();
@@ -200,11 +183,7 @@ export async function createPremiumRemoteSession(
     return deserializeSessionFromFirestore(raw.id, raw);
   } catch (error) {
     // After auth-retry exhaustion, preserve callable denials (e.g. entitlement).
-    if (
-      error instanceof Error &&
-      error.message === AUTH_FAILURE_MESSAGE &&
-      error.cause != null
-    ) {
+    if (error instanceof Error && error.message === AUTH_FAILURE_MESSAGE && error.cause != null) {
       throw mapCallableError(error.cause, "Could not create premium session.");
     }
     throw mapCallableError(error, "Could not create premium session.");

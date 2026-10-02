@@ -43,11 +43,7 @@ function getStaleWalkNowMs(): number {
 }
 
 export function useStaleWalkNowMs(): number {
-  return useSyncExternalStore(
-    subscribeStaleWalkClock,
-    getStaleWalkNowMs,
-    () => 0,
-  );
+  return useSyncExternalStore(subscribeStaleWalkClock, getStaleWalkNowMs, () => 0);
 }
 
 /** Test helper — reset module clock between suites if needed. */

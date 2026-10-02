@@ -28,7 +28,7 @@ describe("firestore.rules — incident notices & user devices", () => {
   async function seedNotice(
     uid = "owner-1",
     incidentId = "inc-1",
-    overrides: Record<string, unknown> = {}
+    overrides: Record<string, unknown> = {},
   ) {
     await rules.testEnv.withSecurityRulesDisabled(async (ctx) => {
       await ctx
@@ -56,7 +56,7 @@ describe("firestore.rules — incident notices & user devices", () => {
         .doc("owner-1")
         .collection("incidentNotices")
         .where("bannerDismissedAt", "==", null)
-        .get()
+        .get(),
     );
   });
 
@@ -71,15 +71,10 @@ describe("firestore.rules — incident notices & user devices", () => {
         .doc("owner-1")
         .collection("incidentNotices")
         .doc("inc-1")
-        .get()
+        .get(),
     );
     await assertFails(
-      other
-        .firestore()
-        .collection("users")
-        .doc("owner-1")
-        .collection("incidentNotices")
-        .get()
+      other.firestore().collection("users").doc("owner-1").collection("incidentNotices").get(),
     );
   });
 
@@ -94,7 +89,7 @@ describe("firestore.rules — incident notices & user devices", () => {
         .doc("owner-1")
         .collection("incidentNotices")
         .doc("inc-1")
-        .update({ bannerDismissedAt: "2026-01-02T00:00:00.000Z" })
+        .update({ bannerDismissedAt: "2026-01-02T00:00:00.000Z" }),
     );
   });
 
@@ -109,7 +104,7 @@ describe("firestore.rules — incident notices & user devices", () => {
         .doc("owner-1")
         .collection("incidentNotices")
         .doc("inc-1")
-        .update({ resolvedAt: "2026-01-99T00:00:00.000Z" })
+        .update({ resolvedAt: "2026-01-99T00:00:00.000Z" }),
     );
   });
 
@@ -122,7 +117,7 @@ describe("firestore.rules — incident notices & user devices", () => {
         .doc("owner-1")
         .collection("devices")
         .doc("ios")
-        .set(devicePayload())
+        .set(devicePayload()),
     );
   });
 
@@ -135,7 +130,7 @@ describe("firestore.rules — incident notices & user devices", () => {
         .doc("owner-1")
         .collection("devices")
         .doc("ios")
-        .set(devicePayload())
+        .set(devicePayload()),
     );
   });
 
@@ -158,7 +153,7 @@ describe("firestore.rules — incident notices & user devices", () => {
         .doc("owner-1")
         .collection("devices")
         .doc("ios")
-        .delete()
+        .delete(),
     );
   });
 });

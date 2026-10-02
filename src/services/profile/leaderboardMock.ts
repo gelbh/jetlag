@@ -79,10 +79,7 @@ const MOCK_PLAYER_PROFILES: Record<string, LeaderboardPlayerSheetProfile> = {
 
 export function isLeaderboardMockEnabled(): boolean {
   try {
-    return (
-      import.meta.env.DEV &&
-      localStorage.getItem(LEADERBOARD_MOCK_STORAGE_KEY) === "1"
-    );
+    return import.meta.env.DEV && localStorage.getItem(LEADERBOARD_MOCK_STORAGE_KEY) === "1";
   } catch {
     return false;
   }
@@ -100,9 +97,7 @@ export function setLeaderboardMockEnabled(enabled: boolean): void {
   }
 }
 
-export function getLeaderboardPlayerSheetProfile(
-  uid: string,
-): LeaderboardPlayerSheetProfile {
+export function getLeaderboardPlayerSheetProfile(uid: string): LeaderboardPlayerSheetProfile {
   if (!isLeaderboardMockEnabled()) {
     return EMPTY_PLAYER_PROFILE;
   }
@@ -160,14 +155,11 @@ export async function mockListLeaderboardBoard(args: {
   metric: LeaderboardMetric;
 }): Promise<LeaderboardEntry[]> {
   const pool =
-    args.scope === "friends"
-      ? SEED_PLAYERS.filter((player) => player.friends)
-      : SEED_PLAYERS;
+    args.scope === "friends" ? SEED_PLAYERS.filter((player) => player.friends) : SEED_PLAYERS;
 
   const ranked = pool
     .map((player) => {
-      const scaled =
-        player.base * sizeFactor(args.gameSize) * roleFactor(args.role);
+      const scaled = player.base * sizeFactor(args.gameSize) * roleFactor(args.role);
       return {
         uid: player.uid,
         displayName: player.displayName,
@@ -209,9 +201,7 @@ export function subscribeMockLeaderboardBoard(
     })
     .catch((error: unknown) => {
       if (!cancelled) {
-        onError(
-          error instanceof Error ? error : new Error("Mock board failed."),
-        );
+        onError(error instanceof Error ? error : new Error("Mock board failed."));
       }
     });
   return () => {

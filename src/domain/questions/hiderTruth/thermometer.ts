@@ -1,11 +1,7 @@
 import { distanceBetweenPoints, type LatLngTuple } from "../../geometry/gameArea/geometry";
 import { parseLineEndpoints } from "../../geometry/gameArea/geometryParsing";
 import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
-import {
-  resultFromReplyId,
-  truthUnavailable,
-  type HiderTruthResult,
-} from "./shared";
+import { type HiderTruthResult, resultFromReplyId, truthUnavailable } from "./shared";
 
 export function truthThermometer(
   pending: PendingQuestionRecord,

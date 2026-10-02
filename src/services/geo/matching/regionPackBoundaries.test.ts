@@ -1,11 +1,8 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it, vi } from "vitest";
-import {
-  clearRegionPackGeoCacheForTests,
-  loadRegionPackPlayArea,
-} from "./regionPackBoundaries";
 import { gameAreaSquareMiles } from "@/domain/session/size/gameSize";
+import { clearRegionPackGeoCacheForTests, loadRegionPackPlayArea } from "./regionPackBoundaries";
 
 const ROOT = resolve(import.meta.dirname, "../../../..");
 
@@ -60,8 +57,9 @@ function stubFetchForPortlandMaineAssets() {
     "/geo/portland-maine/municipalities.geojson": read("municipalities.geojson"),
     "/geo/portland-maine/districts.geojson": read("districts.geojson"),
     "/geo/portland-maine/neighborhoods.geojson": read("neighborhoods.geojson"),
-    "/geo/portland-maine/neighborhoods/district-1.geojson":
-      read("neighborhoods/district-1.geojson"),
+    "/geo/portland-maine/neighborhoods/district-1.geojson": read(
+      "neighborhoods/district-1.geojson",
+    ),
   };
 
   return vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
@@ -94,10 +92,7 @@ function stubFetchForPrinceRupertAssets() {
   });
 }
 
-function ringPointCount(gameArea: {
-  type: string;
-  coordinates: unknown;
-}): number {
+function ringPointCount(gameArea: { type: string; coordinates: unknown }): number {
   if (gameArea.type === "Polygon") {
     const ring = (gameArea.coordinates as number[][][])[0] ?? [];
     return ring.length;
@@ -106,10 +101,7 @@ function ringPointCount(gameArea: {
   return polygons.reduce((total, polygon) => total + (polygon[0]?.length ?? 0), 0);
 }
 
-function isAxisAlignedRectangle(gameArea: {
-  type: string;
-  coordinates: unknown;
-}): boolean {
+function isAxisAlignedRectangle(gameArea: { type: string; coordinates: unknown }): boolean {
   if (gameArea.type !== "Polygon") {
     return false;
   }

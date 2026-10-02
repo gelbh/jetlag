@@ -1,7 +1,7 @@
-import type { GameSize } from "../size/gameSize";
+import { formatPrefixedClockDuration } from "../../time/formatClockDuration";
 import type { SessionRulesInput } from "../rules";
 import { resolveHidingPeriodMs } from "../rules";
-import { formatPrefixedClockDuration } from "../../time/formatClockDuration";
+import type { GameSize } from "../size/gameSize";
 
 export function hidingPeriodRemainingMs(
   sessionOrGameSize: SessionRulesInput | GameSize,

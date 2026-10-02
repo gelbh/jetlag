@@ -13,10 +13,7 @@ import { DUBLIN_CITY_GAME_AREA } from "../fixtures/dublinGameArea";
 
 const PROJECT_ID = "demo-jetlag";
 
-function sessionPayload(
-  hostUid: string,
-  overrides: Record<string, unknown> = {},
-) {
+function sessionPayload(hostUid: string, overrides: Record<string, unknown> = {}) {
   return {
     code: "ABCD",
     gameArea: serializeGameAreaForFirestore(DUBLIN_CITY_GAME_AREA),
@@ -40,11 +37,7 @@ async function seedSession(
   payload: Record<string, unknown>,
 ) {
   await testEnv.withSecurityRulesDisabled(async (context) => {
-    await context
-      .firestore()
-      .collection("sessions")
-      .doc(sessionId)
-      .set(payload);
+    await context.firestore().collection("sessions").doc(sessionId).set(payload);
   });
 }
 
@@ -55,10 +48,7 @@ describe("storage.rules", () => {
     testEnv = await initializeTestEnvironment({
       projectId: PROJECT_ID,
       firestore: {
-        rules: readFileSync(
-          resolve(process.cwd(), "firestore.rules"),
-          "utf8",
-        ),
+        rules: readFileSync(resolve(process.cwd(), "firestore.rules"), "utf8"),
       },
       storage: {
         rules: readFileSync(resolve(process.cwd(), "storage.rules"), "utf8"),
@@ -97,9 +87,7 @@ describe("storage.rules", () => {
     });
 
     const hider = testEnv.authenticatedContext("hider-1");
-    const ref = hider
-      .storage()
-      .ref("sessions/session-1/photoAnswers/q1/1700000000000.jpg");
+    const ref = hider.storage().ref("sessions/session-1/photoAnswers/q1/1700000000000.jpg");
 
     await assertSucceeds(
       ref.put(new Uint8Array([0xff, 0xd8, 0xff]), {
@@ -116,9 +104,7 @@ describe("storage.rules", () => {
     });
 
     const seeker = testEnv.authenticatedContext("host-1");
-    const ref = seeker
-      .storage()
-      .ref("sessions/session-1/photoAnswers/q1/1700000000000.jpg");
+    const ref = seeker.storage().ref("sessions/session-1/photoAnswers/q1/1700000000000.jpg");
 
     await assertFails(
       ref.put(new Uint8Array([0xff, 0xd8, 0xff]), {
@@ -131,9 +117,7 @@ describe("storage.rules", () => {
     await seedSession(testEnv, "session-1", sessionPayload("host-1"));
 
     const outsider = testEnv.authenticatedContext("outsider-1");
-    const ref = outsider
-      .storage()
-      .ref("sessions/session-1/photoAnswers/q1/1700000000000.jpg");
+    const ref = outsider.storage().ref("sessions/session-1/photoAnswers/q1/1700000000000.jpg");
 
     await assertFails(ref.getMetadata());
     await assertFails(
@@ -151,9 +135,7 @@ describe("storage.rules", () => {
     });
 
     const hider = testEnv.authenticatedContext("hider-1");
-    const ref = hider
-      .storage()
-      .ref("sessions/session-legacy/photoAnswers/q1/1700000000000.jpg");
+    const ref = hider.storage().ref("sessions/session-legacy/photoAnswers/q1/1700000000000.jpg");
 
     await assertFails(
       ref.put(new Uint8Array([0xff, 0xd8, 0xff]), {
@@ -170,9 +152,7 @@ describe("storage.rules", () => {
     });
 
     const hider = testEnv.authenticatedContext("hider-1");
-    const ref = hider
-      .storage()
-      .ref("sessions/session-1/photoAnswers/q1/1700000000000.jpg");
+    const ref = hider.storage().ref("sessions/session-1/photoAnswers/q1/1700000000000.jpg");
 
     await assertFails(
       ref.put(new Uint8Array([0xff, 0xd8, 0xff]), {
@@ -199,10 +179,7 @@ describe("storage.rules", () => {
 
     const seeker = testEnv.authenticatedContext("host-1");
     await assertSucceeds(
-      seeker
-        .storage()
-        .ref("sessions/session-1/photoAnswers/q1/1700000000000.jpg")
-        .getMetadata(),
+      seeker.storage().ref("sessions/session-1/photoAnswers/q1/1700000000000.jpg").getMetadata(),
     );
   });
 });

@@ -1,14 +1,7 @@
+import { assertFails, assertSucceeds } from "@firebase/rules-unit-testing";
 import { deleteField } from "firebase/firestore";
-import {
-  assertFails,
-  assertSucceeds,
-} from "@firebase/rules-unit-testing";
 import { describe, expect, it } from "vitest";
-import {
-  bindRulesTestEnv,
-  milesToMeters,
-  sessionPayload,
-} from "./helpers";
+import { bindRulesTestEnv, milesToMeters, sessionPayload } from "./helpers";
 
 describe("firestore.rules — sessions", () => {
   const rules = bindRulesTestEnv();
@@ -16,11 +9,7 @@ describe("firestore.rules — sessions", () => {
   it("allows a signed-in host to create a free session", async () => {
     const host = rules.testEnv.authenticatedContext("host-1");
     await assertSucceeds(
-      host
-        .firestore()
-        .collection("sessions")
-        .doc("session-1")
-        .set(sessionPayload("host-1")),
+      host.firestore().collection("sessions").doc("session-1").set(sessionPayload("host-1")),
     );
   });
 
@@ -80,11 +69,7 @@ describe("firestore.rules — sessions", () => {
 
   it("allows signed-in users to look up session codes without reading session docs", async () => {
     const host = rules.testEnv.authenticatedContext("host-1");
-    await host
-      .firestore()
-      .collection("sessions")
-      .doc("session-1")
-      .set(sessionPayload("host-1"));
+    await host.firestore().collection("sessions").doc("session-1").set(sessionPayload("host-1"));
     await host
       .firestore()
       .collection("sessionCodes")
@@ -92,32 +77,21 @@ describe("firestore.rules — sessions", () => {
       .set({ sessionId: "session-1", hostUid: "host-1" });
 
     const guest = rules.testEnv.authenticatedContext("guest-1");
-    await assertSucceeds(
-      guest.firestore().collection("sessionCodes").doc("ABCD").get(),
-    );
-    await assertFails(
-      guest.firestore().collection("sessions").doc("session-1").get(),
-    );
+    await assertSucceeds(guest.firestore().collection("sessionCodes").doc("ABCD").get());
+    await assertFails(guest.firestore().collection("sessions").doc("session-1").get());
   });
 
   it("lets only the host mark a session code as ended", async () => {
     const host = rules.testEnv.authenticatedContext("host-1");
-    const codeDoc = () =>
-      host.firestore().collection("sessionCodes").doc("ABCD");
+    const codeDoc = () => host.firestore().collection("sessionCodes").doc("ABCD");
     await codeDoc().set({ sessionId: "session-1", hostUid: "host-1" });
 
     const guest = rules.testEnv.authenticatedContext("guest-1");
     await assertFails(
-      guest
-        .firestore()
-        .collection("sessionCodes")
-        .doc("ABCD")
-        .update({ status: "ended" }),
+      guest.firestore().collection("sessionCodes").doc("ABCD").update({ status: "ended" }),
     );
     await assertFails(codeDoc().update({ status: "archived" }));
-    await assertFails(
-      codeDoc().update({ status: "ended", sessionId: "session-2" }),
-    );
+    await assertFails(codeDoc().update({ status: "ended", sessionId: "session-2" }));
     await assertSucceeds(codeDoc().update({ status: "ended" }));
   });
 
@@ -238,11 +212,7 @@ describe("firestore.rules — sessions", () => {
 
   it("allows session members to update lastActiveAt only", async () => {
     const host = rules.testEnv.authenticatedContext("host-1");
-    await host
-      .firestore()
-      .collection("sessions")
-      .doc("session-1")
-      .set(sessionPayload("host-1"));
+    await host.firestore().collection("sessions").doc("session-1").set(sessionPayload("host-1"));
     await host
       .firestore()
       .collection("sessionCodes")
@@ -277,14 +247,10 @@ describe("firestore.rules — sessions", () => {
     );
 
     await assertFails(
-      guest
-        .firestore()
-        .collection("sessions")
-        .doc("session-1")
-        .update({
-          lastActiveAt: "2026-07-12T12:00:00.000Z",
-          code: "WXYZ",
-        }),
+      guest.firestore().collection("sessions").doc("session-1").update({
+        lastActiveAt: "2026-07-12T12:00:00.000Z",
+        code: "WXYZ",
+      }),
     );
 
     await assertFails(
@@ -298,11 +264,7 @@ describe("firestore.rules — sessions", () => {
 
   it("allows a second guest to join as hider when one hider is already in the session", async () => {
     const host = rules.testEnv.authenticatedContext("host-1");
-    await host
-      .firestore()
-      .collection("sessions")
-      .doc("session-1")
-      .set(sessionPayload("host-1"));
+    await host.firestore().collection("sessions").doc("session-1").set(sessionPayload("host-1"));
     await host
       .firestore()
       .collection("sessions")
@@ -331,11 +293,7 @@ describe("firestore.rules — sessions", () => {
 
   it("allows a returning member to change role on join", async () => {
     const host = rules.testEnv.authenticatedContext("host-1");
-    await host
-      .firestore()
-      .collection("sessions")
-      .doc("session-1")
-      .set(sessionPayload("host-1"));
+    await host.firestore().collection("sessions").doc("session-1").set(sessionPayload("host-1"));
     await host
       .firestore()
       .collection("sessions")
@@ -371,14 +329,10 @@ describe("firestore.rules — sessions", () => {
 
   it("allows users to read their own entitlements doc only", async () => {
     const host = rules.testEnv.authenticatedContext("host-1");
-    await assertSucceeds(
-      host.firestore().collection("users").doc("host-1").get(),
-    );
+    await assertSucceeds(host.firestore().collection("users").doc("host-1").get());
 
     const guest = rules.testEnv.authenticatedContext("guest-1");
-    await assertFails(
-      guest.firestore().collection("users").doc("host-1").get(),
-    );
+    await assertFails(guest.firestore().collection("users").doc("host-1").get());
     await assertFails(
       host.firestore().collection("users").doc("host-1").set({
         premiumSessionCredits: 5,
@@ -388,11 +342,7 @@ describe("firestore.rules — sessions", () => {
 
   it("allows the host to end a session", async () => {
     const host = rules.testEnv.authenticatedContext("host-1");
-    await host
-      .firestore()
-      .collection("sessions")
-      .doc("session-1")
-      .set(sessionPayload("host-1"));
+    await host.firestore().collection("sessions").doc("session-1").set(sessionPayload("host-1"));
 
     await assertSucceeds(
       host.firestore().collection("sessions").doc("session-1").update({
@@ -405,11 +355,7 @@ describe("firestore.rules — sessions", () => {
 
   it("allows the host to update timer fields", async () => {
     const host = rules.testEnv.authenticatedContext("host-1");
-    await host
-      .firestore()
-      .collection("sessions")
-      .doc("session-1")
-      .set(sessionPayload("host-1"));
+    await host.firestore().collection("sessions").doc("session-1").set(sessionPayload("host-1"));
 
     await assertSucceeds(
       host.firestore().collection("sessions").doc("session-1").update({
@@ -445,46 +391,24 @@ describe("firestore.rules — sessions", () => {
     );
   });
 
-
   it("requires sign-in for session reads", async () => {
     const unauthenticated = rules.testEnv.unauthenticatedContext();
-    await assertFails(
-      unauthenticated
-        .firestore()
-        .collection("sessions")
-        .doc("session-1")
-        .get(),
-    );
+    await assertFails(unauthenticated.firestore().collection("sessions").doc("session-1").get());
   });
 
   it("denies session collection listing for non-members", async () => {
     const host = rules.testEnv.authenticatedContext("host-1");
-    await host
-      .firestore()
-      .collection("sessions")
-      .doc("session-1")
-      .set(sessionPayload("host-1"));
+    await host.firestore().collection("sessions").doc("session-1").set(sessionPayload("host-1"));
 
     const outsider = rules.testEnv.authenticatedContext("outsider-1");
-    await assertFails(
-      outsider.firestore().collection("sessions").get(),
-    );
+    await assertFails(outsider.firestore().collection("sessions").get());
   });
-
 
   it("stores session documents with expected host uid", async () => {
     const host = rules.testEnv.authenticatedContext("host-1");
-    await host
-      .firestore()
-      .collection("sessions")
-      .doc("session-1")
-      .set(sessionPayload("host-1"));
+    await host.firestore().collection("sessions").doc("session-1").set(sessionPayload("host-1"));
 
-    const snapshot = await host
-      .firestore()
-      .collection("sessions")
-      .doc("session-1")
-      .get();
+    const snapshot = await host.firestore().collection("sessions").doc("session-1").get();
 
     expect(snapshot.data()?.hostUid).toBe("host-1");
   });
@@ -550,11 +474,7 @@ describe("firestore.rules — sessions", () => {
 
   it("allows host to update session rules before timer starts", async () => {
     const host = rules.testEnv.authenticatedContext("host-1");
-    await host
-      .firestore()
-      .collection("sessions")
-      .doc("session-1")
-      .set(sessionPayload("host-1"));
+    await host.firestore().collection("sessions").doc("session-1").set(sessionPayload("host-1"));
 
     await assertSucceeds(
       host
@@ -595,11 +515,7 @@ describe("firestore.rules — sessions", () => {
 
   it("rejects non-host session rules update", async () => {
     const host = rules.testEnv.authenticatedContext("host-1");
-    await host
-      .firestore()
-      .collection("sessions")
-      .doc("session-1")
-      .set(sessionPayload("host-1"));
+    await host.firestore().collection("sessions").doc("session-1").set(sessionPayload("host-1"));
 
     const guest = rules.testEnv.authenticatedContext("guest-1");
     await assertFails(
@@ -613,5 +529,4 @@ describe("firestore.rules — sessions", () => {
         }),
     );
   });
-
 });

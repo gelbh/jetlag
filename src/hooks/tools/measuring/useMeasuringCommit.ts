@@ -1,27 +1,22 @@
-import { useCallback } from "react";
 import type { Feature, Point } from "geojson";
-import { isActive, type AnnotationRecord } from "@/domain/map/annotations";
-import {
-  buildMeasuringRegions,
-} from "@/domain/geometry/measuring/measuringRegions";
+import { useCallback } from "react";
+import { closerFurtherAnswerOptions } from "@/components/tools/shared/answers/binaryAnswerOptions";
+import { persistSlimMeasuringGeometry } from "@/domain/geometry/measuring/measuringGeometryBudgets";
+import { buildMeasuringRegions } from "@/domain/geometry/measuring/measuringRegions";
+import { type AnnotationRecord, isActive } from "@/domain/map/annotations";
+import { MAP_ANNOTATION_COLORS } from "@/domain/map/mapAnnotationColors";
 import {
   measuringFromKind,
   measuringFromKindUseCount,
   measuringFromKindUseCountFromPending,
   measuringQuestionFor,
+  questionCostBreakdown,
 } from "@/domain/questions";
-import { questionCostBreakdown } from "@/domain/questions";
 import type { PendingQuestionRecord } from "@/domain/session/activity/sessionChat";
 import { adminBorderKindAvailability } from "@/services/geo/overpass/adminDivisionAvailability";
-import { closerFurtherAnswerOptions } from "@/components/tools/shared/answers/binaryAnswerOptions";
-import type { SubmitPendingQuestionInput } from "../../sync/usePendingQuestionActions";
-import { MAP_ANNOTATION_COLORS } from "@/domain/map/mapAnnotationColors";
 import { emitQuestionAnsweredActivity } from "@/services/session/emitSessionActivity";
-import { persistSlimMeasuringGeometry } from "@/domain/geometry/measuring/measuringGeometryBudgets";
-import {
-  buildStoredMeasuringRegionInput,
-  measuringCommitReady,
-} from "./helpers";
+import type { SubmitPendingQuestionInput } from "../../sync/usePendingQuestionActions";
+import { buildStoredMeasuringRegionInput, measuringCommitReady } from "./helpers";
 import type { MeasuringDraftState } from "./useMeasuringDraftState";
 import type { MeasuringPreviews } from "./useMeasuringPreviews";
 
@@ -33,10 +28,7 @@ interface UseMeasuringCommitParams {
   ) => Promise<AnnotationRecord>;
   awaitHiderAnswer: boolean;
   submitPendingQuestion?: (
-    input: Omit<
-      SubmitPendingQuestionInput,
-      "sessionId" | "senderUid" | "senderRole" | "toolType"
-    >,
+    input: Omit<SubmitPendingQuestionInput, "sessionId" | "senderUid" | "senderRole" | "toolType">,
   ) => Promise<void>;
   sessionId?: string;
   senderUid?: string | null;
@@ -100,10 +92,7 @@ export function useMeasuringCommit({
       return;
     }
 
-    const committedKind = measuringFromKind(
-      measuringSubject,
-      measuringLocationCategory,
-    );
+    const committedKind = measuringFromKind(measuringSubject, measuringLocationCategory);
 
     const locationCategory =
       measuringSubject === "location" ? measuringLocationCategory : undefined;
@@ -156,9 +145,7 @@ export function useMeasuringCommit({
                 }
               : undefined,
         measuringTargetName:
-          measuringSubject === "sea_level"
-            ? "Sea level"
-            : (measuringTargetPlaceName ?? undefined),
+          measuringSubject === "sea_level" ? "Sea level" : (measuringTargetPlaceName ?? undefined),
         measuringRegionInputJson: JSON.stringify(regionInputWithoutAnswer),
       };
 
@@ -248,9 +235,7 @@ export function useMeasuringCommit({
               }
             : undefined,
       measuringTargetName:
-        measuringSubject === "sea_level"
-          ? "Sea level"
-          : (measuringTargetPlaceName ?? undefined),
+        measuringSubject === "sea_level" ? "Sea level" : (measuringTargetPlaceName ?? undefined),
       color: MAP_ANNOTATION_COLORS.elimination,
     };
 
@@ -326,18 +311,12 @@ export function useMeasuringCommit({
       return;
     }
 
-    if (
-      !adminBorderKindAvailability(measureFromKind, adminDivisionCounts, regionPackId)
-    ) {
+    if (!adminBorderKindAvailability(measureFromKind, adminDivisionCounts, regionPackId)) {
       setMeasuringError("That measure category has already been added.");
       return;
     }
 
-    if (
-      measuringSubject !== "sea_level" &&
-      !usesAllPlacesInArea &&
-      !measuringTargetPoint
-    ) {
+    if (measuringSubject !== "sea_level" && !usesAllPlacesInArea && !measuringTargetPoint) {
       return;
     }
 

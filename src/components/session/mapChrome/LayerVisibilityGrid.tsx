@@ -1,7 +1,7 @@
 import { Box } from "@mantine/core";
+import { InsetGroup } from "@/components/ui/entry/entryChrome";
 import { MAP_ANNOTATION_COLORS } from "@/domain/map/mapAnnotationColors";
 import type { LayerVisibility } from "@/state/sessionStore";
-import { InsetGroup } from "@/components/ui/entry/entryChrome";
 import { SettingsToggleRow } from "../settings/SettingsToggleRow";
 
 const LAYER_ITEMS: ReadonlyArray<{
@@ -38,10 +38,7 @@ const LAYER_ITEMS: ReadonlyArray<{
 
 interface LayerVisibilityGridProps {
   layerVisibility: LayerVisibility;
-  onLayerVisibilityChange: (
-    layer: keyof LayerVisibility,
-    visible: boolean,
-  ) => void;
+  onLayerVisibilityChange: (layer: keyof LayerVisibility, visible: boolean) => void;
 }
 
 export function LayerVisibilityGrid({

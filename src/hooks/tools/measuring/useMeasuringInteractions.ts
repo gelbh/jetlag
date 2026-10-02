@@ -1,16 +1,14 @@
 import { useCallback } from "react";
-import type { GameArea } from "@/domain/map/annotations";
 import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
+import type { GameArea } from "@/domain/map/annotations";
 import { overpassErrorMessage } from "@/services/core/overpass/overpassClient";
-import { searchPlaces, type GeocodedPlace } from "@/services/geo/geocoding";
+import { type GeocodedPlace, searchPlaces } from "@/services/geo/geocoding";
 import { previewBasemapPois } from "@/services/geo/maplibre/previewBasemapPois";
 import { useMapStore } from "@/state/mapStore";
-import {
-  fetchMeasuringMapTarget,
-  fetchNearestMeasuringPlace,
-} from "../measuringToolResolvers";
+import { fetchMeasuringMapTarget, fetchNearestMeasuringPlace } from "../measuringToolResolvers";
 import type { MeasuringAnchorLoaders } from "./useMeasuringAnchorLoaders";
 import type { MeasuringDraftState } from "./useMeasuringDraftState";
+
 interface UseMeasuringInteractionsParams {
   active: boolean;
   gameArea: GameArea;
@@ -49,8 +47,7 @@ export function useMeasuringInteractions({
     setMeasuringAnswer,
   } = draft;
 
-  const { setMeasuringTargetAnchor, setMeasuringSeekerAnchorAndResolve } =
-    loaders;
+  const { setMeasuringTargetAnchor, setMeasuringSeekerAnchorAndResolve } = loaders;
 
   const handleGps = useCallback(async () => {
     setMeasuringError(null);
@@ -65,16 +62,9 @@ export function useMeasuringInteractions({
 
       setMeasuringSeekerAnchorAndResolve(point);
     } catch (error) {
-      setMeasuringError(
-        error instanceof Error ? error.message : "GPS location unavailable.",
-      );
+      setMeasuringError(error instanceof Error ? error.message : "GPS location unavailable.");
     }
-  }, [
-    ensurePointInGameArea,
-    refreshGps,
-    setMeasuringError,
-    setMeasuringSeekerAnchorAndResolve,
-  ]);
+  }, [ensurePointInGameArea, refreshGps, setMeasuringError, setMeasuringSeekerAnchorAndResolve]);
 
   const handleSearch = useCallback(
     async (role: "seeker" | "target") => {
@@ -97,18 +87,14 @@ export function useMeasuringInteractions({
         const results = await searchPlaces(trimmed);
         if (results.length === 0) {
           setMeasuringSearchResults([]);
-          setMeasuringError(
-            "No matching places found. Try a more specific name.",
-          );
+          setMeasuringError("No matching places found. Try a more specific name.");
           return;
         }
 
         setMeasuringSearchResults(results);
       } catch (error) {
         setMeasuringSearchResults([]);
-        setMeasuringError(
-          error instanceof Error ? error.message : "Place search failed.",
-        );
+        setMeasuringError(error instanceof Error ? error.message : "Place search failed.");
       } finally {
         setMeasuringSearchLoading(false);
       }
@@ -169,11 +155,7 @@ export function useMeasuringInteractions({
       setMeasuringError(null);
 
       try {
-        const nearest = await fetchMeasuringMapTarget(
-          point,
-          gameArea,
-          measuringLocationCategory,
-        );
+        const nearest = await fetchMeasuringMapTarget(point, gameArea, measuringLocationCategory);
 
         if (!nearest.ok) {
           setMeasuringError(nearest.message);
@@ -182,9 +164,7 @@ export function useMeasuringInteractions({
 
         setMeasuringTargetAnchor(nearest.point, nearest.name);
       } catch (error) {
-        setMeasuringError(
-          overpassErrorMessage(error, "That venue wasn't found on the map."),
-        );
+        setMeasuringError(overpassErrorMessage(error, "That venue wasn't found on the map."));
       } finally {
         setMeasuringLoading(false);
       }
@@ -209,9 +189,7 @@ export function useMeasuringInteractions({
       const mapStyle = useMapStore.getState().mapStyle;
       const tapHit = previewBasemapPois({
         mapStyle,
-        categoryIds: measuringLocationCategory
-          ? [measuringLocationCategory]
-          : undefined,
+        categoryIds: measuringLocationCategory ? [measuringLocationCategory] : undefined,
         point,
         maxResults: 1,
       })[0];
@@ -281,9 +259,7 @@ export function useMeasuringInteractions({
       setMeasuringTargetPoint(null);
       setMeasuringTargetPlaceName(null);
       setMeasuringDistanceMeters(null);
-      setMeasuringError(
-        overpassErrorMessage(error, "Nearest place wasn't found."),
-      );
+      setMeasuringError(overpassErrorMessage(error, "Nearest place wasn't found."));
     } finally {
       setMeasuringLoading(false);
     }

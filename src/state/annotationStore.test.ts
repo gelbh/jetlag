@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { useAnnotationStore } from "./annotationStore";
 import { createTestPinAnnotation } from "../test/fixtures/sessions";
 import { resetAllStores } from "../test/helpers/storeReset";
+import { useAnnotationStore } from "./annotationStore";
 
 function quotaError(): DOMException {
   return new DOMException("QuotaExceededError", "QuotaExceededError");
@@ -31,9 +31,7 @@ describe("annotationStore", () => {
       metadata: { ...created.metadata, label: "Updated" },
     });
 
-    expect(useAnnotationStore.getState().annotations[0]?.metadata.label).toBe(
-      "Updated",
-    );
+    expect(useAnnotationStore.getState().annotations[0]?.metadata.label).toBe("Updated");
   });
 
   it("soft deletes the most recent active annotation on undo", () => {
@@ -49,9 +47,7 @@ describe("annotationStore", () => {
     });
 
     useAnnotationStore.getState().undoLastAnnotation();
-    const deleted = useAnnotationStore
-      .getState()
-      .annotations.find((item) => item.id === zone.id);
+    const deleted = useAnnotationStore.getState().annotations.find((item) => item.id === zone.id);
     expect(deleted?.status).toBe("deleted");
   });
 
@@ -66,9 +62,7 @@ describe("annotationStore", () => {
 
   it("marks pulsing annotations", () => {
     useAnnotationStore.getState().markAnnotationPulse("ann-1");
-    expect(useAnnotationStore.getState().pulsingAnnotationIds).toEqual([
-      "ann-1",
-    ]);
+    expect(useAnnotationStore.getState().pulsingAnnotationIds).toEqual(["ann-1"]);
     useAnnotationStore.getState().clearAnnotationPulse("ann-1");
     expect(useAnnotationStore.getState().pulsingAnnotationIds).toEqual([]);
   });
@@ -98,11 +92,7 @@ describe("annotationStore", () => {
       }
     });
 
-    expect(() =>
-      useAnnotationStore.getState().setSelectedAnnotationId(created.id),
-    ).not.toThrow();
-    expect(useAnnotationStore.getState().selectedAnnotationId).toBe(
-      created.id,
-    );
+    expect(() => useAnnotationStore.getState().setSelectedAnnotationId(created.id)).not.toThrow();
+    expect(useAnnotationStore.getState().selectedAnnotationId).toBe(created.id);
   });
 });

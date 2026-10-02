@@ -26,8 +26,7 @@ export const importGamePresetList = () =>
 export const importGamePresetEditor = () =>
   import("../routes/GamePresets").then((m) => ({ default: m.GamePresetEditor }));
 
-export const importStats = () =>
-  import("../routes/Stats").then((m) => ({ default: m.Stats }));
+export const importStats = () => import("../routes/Stats").then((m) => ({ default: m.Stats }));
 
 export const importFriends = () =>
   import("../routes/Friends").then((m) => ({ default: m.Friends }));
@@ -54,8 +53,7 @@ export const importPrivacy = () =>
 export const importPremium = () =>
   import("../routes/Premium").then((m) => ({ default: m.Premium }));
 
-export const importTerms = () =>
-  import("../routes/Terms").then((m) => ({ default: m.Terms }));
+export const importTerms = () => import("../routes/Terms").then((m) => ({ default: m.Terms }));
 
 export const importNotFound = () =>
   import("../routes/NotFound").then((m) => ({ default: m.NotFound }));
@@ -92,9 +90,7 @@ export const StatsLazy = lazyWithChunkRetry(importStats);
 export const FriendsLazy = lazyWithChunkRetry(importFriends);
 export const LeaderboardLazy = lazyWithChunkRetry(importLeaderboard);
 export const AdminOpsDeskLazy = lazyWithChunkRetry(importAdminOpsDesk);
-export const AdminPreloadRequestInboxLazy = lazyWithChunkRetry(
-  importAdminPreloadRequestInbox,
-);
+export const AdminPreloadRequestInboxLazy = lazyWithChunkRetry(importAdminPreloadRequestInbox);
 export const FeedbackLazy = lazyWithChunkRetry(importFeedback);
 export const PrivacyLazy = lazyWithChunkRetry(importPrivacy);
 export const PremiumLazy = lazyWithChunkRetry(importPremium);
@@ -122,9 +118,7 @@ export function resolveNavigateDestinationKey(to: To): string {
     );
     const pathPart = to.slice(0, pathEnd) || "/";
     const queryPart =
-      queryIndex === -1
-        ? ""
-        : to.slice(queryIndex, hashIndex === -1 ? undefined : hashIndex);
+      queryIndex === -1 ? "" : to.slice(queryIndex, hashIndex === -1 ? undefined : hashIndex);
     const hashPart = hashIndex === -1 ? "" : to.slice(hashIndex);
 
     return `${normalizeRoutePath(pathPart)}${queryPart}${hashPart}`;

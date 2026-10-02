@@ -8,9 +8,7 @@ export function normalizeRolePasscode(input: string): string {
 /** CSPRNG role codes (matches functions/session/rolePasscodes.mjs). */
 export function generateRolePasscode(): string {
   let code = "";
-  const limit =
-    ROLE_PASSCODE_ALPHABET.length *
-    Math.floor(256 / ROLE_PASSCODE_ALPHABET.length);
+  const limit = ROLE_PASSCODE_ALPHABET.length * Math.floor(256 / ROLE_PASSCODE_ALPHABET.length);
   const bytes = new Uint8Array(ROLE_PASSCODE_LENGTH);
 
   while (code.length < ROLE_PASSCODE_LENGTH) {

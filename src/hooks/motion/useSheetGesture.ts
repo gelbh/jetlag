@@ -1,10 +1,4 @@
-import {
-  useCallback,
-  useRef,
-  useState,
-  type CSSProperties,
-  type RefObject,
-} from "react";
+import { type CSSProperties, type RefObject, useCallback, useRef, useState } from "react";
 import {
   MOTION_TRANSITION_SCRIM,
   MOTION_TRANSITION_SHEET,
@@ -26,18 +20,10 @@ export interface UseSheetGestureOptions {
 }
 
 export interface SheetHandleProps {
-  onPointerDown: ReturnType<
-    typeof useInteractiveDragY
-  >["bindings"]["onPointerDown"];
-  onPointerMove: ReturnType<
-    typeof useInteractiveDragY
-  >["bindings"]["onPointerMove"];
-  onPointerUp: ReturnType<
-    typeof useInteractiveDragY
-  >["bindings"]["onPointerUp"];
-  onPointerCancel: ReturnType<
-    typeof useInteractiveDragY
-  >["bindings"]["onPointerCancel"];
+  onPointerDown: ReturnType<typeof useInteractiveDragY>["bindings"]["onPointerDown"];
+  onPointerMove: ReturnType<typeof useInteractiveDragY>["bindings"]["onPointerMove"];
+  onPointerUp: ReturnType<typeof useInteractiveDragY>["bindings"]["onPointerUp"];
+  onPointerCancel: ReturnType<typeof useInteractiveDragY>["bindings"]["onPointerCancel"];
 }
 
 export interface UseSheetGestureResult {
@@ -82,8 +68,7 @@ export function useSheetGesture({
     onDragEnd: ({ offsetY: currentOffset, velocityY }) => {
       const height = sheetRef.current?.offsetHeight ?? sheetHeight;
       const shouldDismiss =
-        currentOffset > height * SHEET_DISMISS_FRACTION ||
-        velocityY > SHEET_VELOCITY_DISMISS_PX_MS;
+        currentOffset > height * SHEET_DISMISS_FRACTION || velocityY > SHEET_VELOCITY_DISMISS_PX_MS;
 
       if (shouldDismiss && enabled) {
         // Keep translate until unmount so Mantine exit does not snap home first.
@@ -126,10 +111,7 @@ export function shouldDismissSheetDrag(
   sheetHeight: number,
   velocityY: number,
 ): boolean {
-  return (
-    offsetY > sheetHeight * SHEET_DISMISS_FRACTION ||
-    velocityY > SHEET_VELOCITY_DISMISS_PX_MS
-  );
+  return offsetY > sheetHeight * SHEET_DISMISS_FRACTION || velocityY > SHEET_VELOCITY_DISMISS_PX_MS;
 }
 
 export {

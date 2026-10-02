@@ -1,47 +1,40 @@
-import type {
-  Feature,
-  Polygon,
-  Point,
-  LineString,
-  MultiPolygon,
-} from "geojson";
-import type { DistanceUnit } from "./distance";
-import { DEFAULT_RADIUS_METERS } from "./distance";
+import type { Feature, LineString, MultiPolygon, Point, Polygon } from "geojson";
+import type { GameOutcome } from "../game/foundHider";
+import type { PoiCandidateSource, PoiConfirmStatus } from "../geo/poiCandidate";
 import type { MatchingAnswer, MatchingCategoryId } from "../questions/matchingQuestions";
 import { matchingQuestionLabel } from "../questions/matchingQuestions";
-import { radarAnnotationSummary } from "../questions/radarQuestions";
 import type {
   MeasuringAnswer,
   MeasuringLocationCategory,
   MeasuringSubject,
 } from "../questions/measuringQuestions";
 import { measuringQuestionLabel } from "../questions/measuringQuestions";
-import type { ThermometerAnswer } from "../questions/thermometerQuestions";
-import { thermometerQuestionPrompt } from "../questions/thermometerQuestions";
+import { radarAnnotationSummary } from "../questions/radarQuestions";
 import type { TentacleExtendedCategoryId } from "../questions/tentacleQuestions";
 import { tentacleAnnotationSummary } from "../questions/tentacleQuestions";
 import type {
-  PoiCandidateSource,
-  PoiConfirmStatus,
-} from "../geo/poiCandidate";
-import type { MapTool } from "./mapToolTypes";
-import type { GameSize } from "../session/size/gameSize";
-import type { MemberRoles } from "../session/players/playerRole";
-import type { RoleGates } from "../session/players/roleGates";
-import type { ThermometerDistanceOptionMiles } from "../questions/thermometerQuestions";
+  ThermometerAnswer,
+  ThermometerDistanceOptionMiles,
+} from "../questions/thermometerQuestions";
+import { thermometerQuestionPrompt } from "../questions/thermometerQuestions";
+import type { RegionPackId } from "../regions/regionPack";
+import type { SessionCustomMeasureGeometry } from "../session/catalog/customMeasureGeometry";
 import type {
   CustomMatchingAreasByLevel,
   SessionCustomCategory,
   SessionCustomLocationPin,
 } from "../session/catalog/sessionCustomContent";
-import type { SessionCustomMeasureGeometry } from "../session/catalog/customMeasureGeometry";
-import type { RegionPackId } from "../regions/regionPack";
-import type { GameOutcome } from "../game/foundHider";
 import type { EndGameTruthAnchor } from "../session/hiding/endGameTruthAnchors";
+import type { MemberRoles } from "../session/players/playerRole";
+import type { RoleGates } from "../session/players/roleGates";
+import type { GameSize } from "../session/size/gameSize";
+import type { DistanceUnit } from "./distance";
+import { DEFAULT_RADIUS_METERS } from "./distance";
+import type { MapTool } from "./mapToolTypes";
 
-export type { GameSize } from "../session/size/gameSize";
 export type { EndGameTruthAnchor } from "../session/hiding/endGameTruthAnchors";
 export type { MemberRoles, PlayerRole } from "../session/players/playerRole";
+export type { GameSize } from "../session/size/gameSize";
 
 export type AnnotationType =
   | "radar"
@@ -76,10 +69,7 @@ export interface AnnotationMetadata {
   tentacleAnswerCategory?: TentacleExtendedCategoryId;
   tentacleHiderAnchor?: { lat: number; lng: number };
   tentacleNearestByCategory?: Partial<
-    Record<
-      TentacleExtendedCategoryId,
-      { poiId: string; distanceMeters: number }
-    >
+    Record<TentacleExtendedCategoryId, { poiId: string; distanceMeters: number }>
   >;
   /** Post-answer display radius (search radius + hiding zone); POI answers only. */
   tentacleAnswerRadiusMeters?: number;
@@ -213,11 +203,7 @@ export interface SessionRecord {
 /** Bounded session override written by `applyIncidentMitigation` (server-only). */
 export interface SessionOpsMitigation {
   id: string;
-  type:
-    | "soft_reload"
-    | "reset_board"
-    | "clear_pending_questions"
-    | "end_session";
+  type: "soft_reload" | "reset_board" | "clear_pending_questions" | "end_session";
   appliedAt: string;
   appliedByUid: string;
   incidentId: string;
@@ -231,15 +217,9 @@ export function isEndGameActive(
 }
 
 export function isEndGamePending(
-  session:
-    | Pick<SessionRecord, "endGameStartedAt" | "endGameRequestedAt">
-    | null
-    | undefined,
+  session: Pick<SessionRecord, "endGameStartedAt" | "endGameRequestedAt"> | null | undefined,
 ): boolean {
-  return (
-    typeof session?.endGameRequestedAt === "string" &&
-    !isEndGameActive(session)
-  );
+  return typeof session?.endGameRequestedAt === "string" && !isEndGameActive(session);
 }
 
 export function isPremiumSession(session: SessionRecord | null | undefined): boolean {
@@ -256,21 +236,16 @@ export function createAnnotationId(): string {
   return `ann-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 }
 
-export { isActive } from "./annotationActive";
+export type { GameOutcome } from "../game/foundHider";
 export {
   foundHiderBlocked,
   isFoundHiderPending,
   isRoundComplete,
 } from "../game/foundHider";
-export type { GameOutcome } from "../game/foundHider";
+export { isActive } from "./annotationActive";
 
-export function migrateAnnotationRecord(
-  annotation: AnnotationRecord,
-): AnnotationRecord {
-  if (
-    annotation.type === "thermometer" &&
-    annotation.metadata.measuringSubject
-  ) {
+export function migrateAnnotationRecord(annotation: AnnotationRecord): AnnotationRecord {
+  if (annotation.type === "thermometer" && annotation.metadata.measuringSubject) {
     return {
       ...annotation,
       type: "measuring",
@@ -280,9 +255,7 @@ export function migrateAnnotationRecord(
   return annotation;
 }
 
-export function migrateAnnotations(
-  annotations: readonly AnnotationRecord[],
-): AnnotationRecord[] {
+export function migrateAnnotations(annotations: readonly AnnotationRecord[]): AnnotationRecord[] {
   return annotations.map(migrateAnnotationRecord);
 }
 
@@ -326,9 +299,7 @@ export function annotationSummary(
       const answer = annotation.metadata.matchingAnswer
         ? ` · ${annotation.metadata.matchingAnswer}`
         : "";
-      const nullSuffix = annotation.metadata.matchingNullAnswer
-        ? " · null"
-        : "";
+      const nullSuffix = annotation.metadata.matchingNullAnswer ? " · null" : "";
       return `${matchingQuestionLabel(
         annotation.metadata.matchingCategory ?? "commercial_airport",
       )}${answer}${nullSuffix}`;
@@ -339,10 +310,7 @@ export function annotationSummary(
 }
 
 export function pointToolRadiusFromMetadata(
-  metadata: Pick<
-    AnnotationMetadata,
-    "radiusMeters" | "tentacleAnswerRadiusMeters"
-  >,
+  metadata: Pick<AnnotationMetadata, "radiusMeters" | "tentacleAnswerRadiusMeters">,
   fallbackMeters: number = DEFAULT_RADIUS_METERS,
 ): number {
   const radius = metadata.radiusMeters;
@@ -351,11 +319,7 @@ export function pointToolRadiusFromMetadata(
   }
 
   const answerRadius = metadata.tentacleAnswerRadiusMeters;
-  if (
-    typeof answerRadius === "number" &&
-    Number.isFinite(answerRadius) &&
-    answerRadius > 0
-  ) {
+  if (typeof answerRadius === "number" && Number.isFinite(answerRadius) && answerRadius > 0) {
     return answerRadius;
   }
 

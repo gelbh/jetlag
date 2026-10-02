@@ -1,16 +1,17 @@
 export {
-  assertNoNestedArrays,
-  deserializeGameAreaFromFirestore,
-  serializeGameAreaForFirestore,
-  stripUndefinedValues,
-  type FirestoreGameArea,
-} from "./shared";
-
-export {
   buildAnnotationDocument,
   deserializeAnnotationFromFirestore,
   serializeAnnotationForFirestore,
 } from "./serializeAnnotation";
+export {
+  buildPendingQuestionDocument,
+  buildPlayerLocationDocument,
+  buildSessionMessageDocument,
+  deserializeGameResultFromFirestore,
+  deserializePendingQuestionFromFirestore,
+  deserializePlayerLocationFromFirestore,
+  deserializeSessionMessageFromFirestore,
+} from "./serializePlayer";
 
 export {
   buildHidingZoneDocument,
@@ -21,13 +22,10 @@ export {
   deserializeTimeTrapFromFirestore,
   sessionRulesPatchToFirestore,
 } from "./serializeSession";
-
 export {
-  buildPendingQuestionDocument,
-  buildPlayerLocationDocument,
-  buildSessionMessageDocument,
-  deserializeGameResultFromFirestore,
-  deserializePendingQuestionFromFirestore,
-  deserializePlayerLocationFromFirestore,
-  deserializeSessionMessageFromFirestore,
-} from "./serializePlayer";
+  assertNoNestedArrays,
+  deserializeGameAreaFromFirestore,
+  type FirestoreGameArea,
+  serializeGameAreaForFirestore,
+  stripUndefinedValues,
+} from "./shared";

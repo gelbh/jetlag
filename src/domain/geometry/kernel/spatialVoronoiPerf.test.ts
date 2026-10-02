@@ -3,10 +3,7 @@ import { wasmBuildSpatialVoronoiFromSites } from "./voronoiWasm";
 
 const runGeometryPerf = process.env.GEOMETRY_PERF === "1";
 
-async function measureMedianMsAsync(
-  run: () => Promise<void>,
-  iterations = 31,
-): Promise<number> {
+async function measureMedianMsAsync(run: () => Promise<void>, iterations = 31): Promise<number> {
   const samples: number[] = [];
   for (let i = 0; i < iterations; i += 1) {
     const start = performance.now();

@@ -2,10 +2,7 @@
 export const TIME_ENDPOINT_PATH = "/api/time";
 
 /** Reachability probe + server clock source (NTP-style midpoint on the client). */
-export function handleTimeRequest(
-  request: Request,
-  now: () => number = Date.now,
-): Response {
+export function handleTimeRequest(request: Request, now: () => number = Date.now): Response {
   const serverMs = now();
   const headers = {
     "cache-control": "no-store",

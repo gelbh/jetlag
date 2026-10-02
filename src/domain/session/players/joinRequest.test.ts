@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
-  JOIN_REQUEST_TTL_MS,
   computeJoinRequestExpiresAt,
   isJoinRequestExpired,
+  JOIN_REQUEST_TTL_MS,
 } from "./joinRequest";
 
 describe("joinRequest", () => {

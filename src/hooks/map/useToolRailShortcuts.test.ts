@@ -1,13 +1,9 @@
 import { renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { useToolRailShortcuts } from "./useToolRailShortcuts";
 import type { MapTool } from "../../domain/map/mapToolTypes";
+import { useToolRailShortcuts } from "./useToolRailShortcuts";
 
-const TOOL_ORDER = [
-  "matching",
-  "measuring",
-  "thermometer",
-] as const satisfies readonly MapTool[];
+const TOOL_ORDER = ["matching", "measuring", "thermometer"] as const satisfies readonly MapTool[];
 
 describe("useToolRailShortcuts", () => {
   beforeEach(() => {
@@ -69,9 +65,7 @@ describe("useToolRailShortcuts", () => {
 
     const input = document.createElement("input");
     document.body.appendChild(input);
-    input.dispatchEvent(
-      new KeyboardEvent("keydown", { key: "1", bubbles: true }),
-    );
+    input.dispatchEvent(new KeyboardEvent("keydown", { key: "1", bubbles: true }));
     expect(onSelect).not.toHaveBeenCalled();
     input.remove();
   });

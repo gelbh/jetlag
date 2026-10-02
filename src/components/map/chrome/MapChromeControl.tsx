@@ -1,11 +1,11 @@
-import type { ButtonHTMLAttributes, ReactNode } from "react";
 import { UnstyledButton } from "@mantine/core";
+import type { ButtonHTMLAttributes, ReactNode } from "react";
 import {
   hudChromeStyles,
+  type MapToolSlotTone,
   mapToolSlotIconStyle,
   mapToolSlotLabelStyle,
   mapToolSlotStyles,
-  type MapToolSlotTone,
 } from "@/components/ui/entry/entryChrome";
 
 export type MapChromeControlVariant = "floating" | "slot";
@@ -62,9 +62,7 @@ function ControlBody({
   }
 
   if (variant === "slot") {
-    const iconClass = ["jl-tool-slot-icon", iconClassName]
-      .filter(Boolean)
-      .join(" ");
+    const iconClass = ["jl-tool-slot-icon", iconClassName].filter(Boolean).join(" ");
     return (
       <>
         {icon != null ? (
@@ -73,11 +71,7 @@ function ControlBody({
           </span>
         ) : null}
         {label != null ? (
-          <span
-            className="jl-tool-slot-label"
-            data-ios-tool-label=""
-            style={mapToolSlotLabelStyle}
-          >
+          <span className="jl-tool-slot-label" data-ios-tool-label="" style={mapToolSlotLabelStyle}>
             {label}
           </span>
         ) : null}
@@ -85,15 +79,11 @@ function ControlBody({
     );
   }
 
-  const iconClass = ["map-chrome-control__icon", iconClassName]
-    .filter(Boolean)
-    .join(" ");
+  const iconClass = ["map-chrome-control__icon", iconClassName].filter(Boolean).join(" ");
   return (
     <>
       {icon != null ? <span className={iconClass}>{icon}</span> : null}
-      {label != null ? (
-        <span className="map-chrome-control__label">{label}</span>
-      ) : null}
+      {label != null ? <span className="map-chrome-control__label">{label}</span> : null}
     </>
   );
 }
@@ -119,12 +109,7 @@ export function MapChromeControl({
 }: MapChromeControlProps) {
   const resolvedClassName = controlClassName(variant, pressed, className);
   const body = (
-    <ControlBody
-      variant={variant}
-      icon={icon}
-      iconClassName={iconClassName}
-      label={label}
-    >
+    <ControlBody variant={variant} icon={icon} iconClassName={iconClassName} label={label}>
       {children}
     </ControlBody>
   );

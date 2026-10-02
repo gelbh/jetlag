@@ -55,11 +55,7 @@ export function resolveSessionDocActivityMs(session) {
   return maxMs;
 }
 
-export function resolveLatestSubcollectionActivityMs(
-  annotationDoc,
-  messageDoc,
-  questionDoc,
-) {
+export function resolveLatestSubcollectionActivityMs(annotationDoc, messageDoc, questionDoc) {
   const candidates = [
     parseFirestoreTimestampMs(annotationDoc?.updatedAt),
     parseFirestoreTimestampMs(messageDoc?.createdAt),
@@ -74,11 +70,7 @@ export function resolveLatestSubcollectionActivityMs(
 }
 
 export function resolveSessionLastActivityMs(session, latestEvents = {}) {
-  const {
-    annotationDoc = null,
-    messageDoc = null,
-    questionDoc = null,
-  } = latestEvents;
+  const { annotationDoc = null, messageDoc = null, questionDoc = null } = latestEvents;
   const candidates = [
     resolveSessionDocActivityMs(session),
     resolveLatestSubcollectionActivityMs(annotationDoc, messageDoc, questionDoc),
@@ -125,10 +117,7 @@ function countRoles(memberRoles) {
 }
 
 export function deriveSessionMode(memberCount, roleCounts) {
-  if (
-    memberCount >= 2 ||
-    (roleCounts.seeker >= 1 && roleCounts.hider >= 1)
-  ) {
+  if (memberCount >= 2 || (roleCounts.seeker >= 1 && roleCounts.hider >= 1)) {
     return "multiplayer";
   }
 
@@ -161,9 +150,7 @@ function resolveHidingPeriodMs(session) {
 
 function timerElapsedMs(session, nowMs = Date.now()) {
   const accumulated =
-    typeof session.timerAccumulatedMs === "number"
-      ? session.timerAccumulatedMs
-      : 0;
+    typeof session.timerAccumulatedMs === "number" ? session.timerAccumulatedMs : 0;
   const runningSince = session.timerRunningSince;
   if (typeof runningSince !== "string") {
     return accumulated;
@@ -211,49 +198,28 @@ export function summarizeSession(sessionId, code, session, nowMs = Date.now()) {
     hostUid: typeof session.hostUid === "string" ? session.hostUid : null,
     tier: session.tier === "premium" ? "premium" : "free",
     gameSize:
-      session.gameSize === "small" ||
-      session.gameSize === "medium" ||
-      session.gameSize === "large"
+      session.gameSize === "small" || session.gameSize === "medium" || session.gameSize === "large"
         ? session.gameSize
         : "medium",
-    createdAt:
-      typeof session.createdAt === "string" ? session.createdAt : null,
+    createdAt: typeof session.createdAt === "string" ? session.createdAt : null,
     memberCount: memberUids.length,
     roleCounts,
     timerAccumulatedMs:
-      typeof session.timerAccumulatedMs === "number"
-        ? session.timerAccumulatedMs
-        : 0,
+      typeof session.timerAccumulatedMs === "number" ? session.timerAccumulatedMs : 0,
     timerRunningSince:
-      typeof session.timerRunningSince === "string"
-        ? session.timerRunningSince
-        : null,
+      typeof session.timerRunningSince === "string" ? session.timerRunningSince : null,
     endGameStartedAt:
-      typeof session.endGameStartedAt === "string"
-        ? session.endGameStartedAt
-        : null,
+      typeof session.endGameStartedAt === "string" ? session.endGameStartedAt : null,
     endGameRequestedAt:
-      typeof session.endGameRequestedAt === "string"
-        ? session.endGameRequestedAt
-        : null,
-    hostAppVersion:
-      typeof session.hostAppVersion === "string"
-        ? session.hostAppVersion
-        : null,
+      typeof session.endGameRequestedAt === "string" ? session.endGameRequestedAt : null,
+    hostAppVersion: typeof session.hostAppVersion === "string" ? session.hostAppVersion : null,
     hidingPeriodMinutes:
-      typeof session.hidingPeriodMinutes === "number"
-        ? session.hidingPeriodMinutes
-        : null,
-    regionPackId:
-      typeof session.regionPackId === "string" ? session.regionPackId : null,
+      typeof session.hidingPeriodMinutes === "number" ? session.hidingPeriodMinutes : null,
+    regionPackId: typeof session.regionPackId === "string" ? session.regionPackId : null,
     regionPackSubregionId:
-      typeof session.regionPackSubregionId === "string"
-        ? session.regionPackSubregionId
-        : null,
-    transitMetroId:
-      typeof session.transitMetroId === "string" ? session.transitMetroId : null,
-    gameAreaLabel:
-      typeof session.gameAreaLabel === "string" ? session.gameAreaLabel : null,
+      typeof session.regionPackSubregionId === "string" ? session.regionPackSubregionId : null,
+    transitMetroId: typeof session.transitMetroId === "string" ? session.transitMetroId : null,
+    gameAreaLabel: typeof session.gameAreaLabel === "string" ? session.gameAreaLabel : null,
     phase: deriveSessionPhase(session, nowMs),
     lastActivityAt: null,
     lastLocationAt: null,
@@ -268,8 +234,7 @@ export function summarizeSession(sessionId, code, session, nowMs = Date.now()) {
 export async function mapActiveCodeToSummary(codeDoc, db, nowMs = Date.now()) {
   const code = codeDoc.id;
   const codeData = codeDoc.data();
-  const sessionId =
-    typeof codeData.sessionId === "string" ? codeData.sessionId : null;
+  const sessionId = typeof codeData.sessionId === "string" ? codeData.sessionId : null;
   if (!sessionId) {
     return null;
   }
@@ -287,58 +252,30 @@ export async function mapActiveCodeToSummary(codeDoc, db, nowMs = Date.now()) {
 
   const [annotationsSnap, annotationCountSnap, messagesSnap, questionsSnap, locationsSnap] =
     await Promise.all([
-    sessionRef
-      .collection("annotations")
-      .orderBy("updatedAt", "desc")
-      .limit(1)
-      .get(),
-    sessionRef
-      .collection("annotations")
-      .where("status", "==", "active")
-      .count()
-      .get(),
-    sessionRef
-      .collection("messages")
-      .orderBy("createdAt", "desc")
-      .limit(1)
-      .get(),
-    sessionRef
-      .collection("pendingQuestions")
-      .orderBy("createdAt", "desc")
-      .limit(1)
-      .get(),
-    sessionRef
-      .collection("playerLocations")
-      .orderBy("updatedAt", "desc")
-      .limit(1)
-      .get(),
-  ]);
+      sessionRef.collection("annotations").orderBy("updatedAt", "desc").limit(1).get(),
+      sessionRef.collection("annotations").where("status", "==", "active").count().get(),
+      sessionRef.collection("messages").orderBy("createdAt", "desc").limit(1).get(),
+      sessionRef.collection("pendingQuestions").orderBy("createdAt", "desc").limit(1).get(),
+      sessionRef.collection("playerLocations").orderBy("updatedAt", "desc").limit(1).get(),
+    ]);
 
   const lastActivityMs = resolveSessionLastActivityMs(session, {
     annotationDoc: annotationsSnap.docs[0]?.data() ?? null,
     messageDoc: messagesSnap.docs[0]?.data() ?? null,
     questionDoc: questionsSnap.docs[0]?.data() ?? null,
   });
-  const lastLocationMs = parseFirestoreTimestampMs(
-    locationsSnap.docs[0]?.data()?.updatedAt,
-  );
-  const lastAnnotationMs = parseFirestoreTimestampMs(
-    annotationsSnap.docs[0]?.data()?.updatedAt,
-  );
+  const lastLocationMs = parseFirestoreTimestampMs(locationsSnap.docs[0]?.data()?.updatedAt);
+  const lastAnnotationMs = parseFirestoreTimestampMs(annotationsSnap.docs[0]?.data()?.updatedAt);
 
   const summary = summarizeSession(sessionId, code, session, nowMs);
-  summary.lastActivityAt =
-    lastActivityMs == null ? null : new Date(lastActivityMs).toISOString();
-  summary.lastLocationAt =
-    lastLocationMs == null ? null : new Date(lastLocationMs).toISOString();
+  summary.lastActivityAt = lastActivityMs == null ? null : new Date(lastActivityMs).toISOString();
+  summary.lastLocationAt = lastLocationMs == null ? null : new Date(lastLocationMs).toISOString();
   summary.lastAnnotationAt =
     lastAnnotationMs == null ? null : new Date(lastAnnotationMs).toISOString();
   summary.activeAnnotationCount = annotationCountSnap.data().count ?? 0;
   summary.isLive = computeIsLive(lastActivityMs, lastLocationMs, nowMs);
   summary.liveMultiplayer =
-    summary.isLive &&
-    summary.roleCounts.seeker >= 1 &&
-    summary.roleCounts.hider >= 1;
+    summary.isLive && summary.roleCounts.seeker >= 1 && summary.roleCounts.hider >= 1;
   return summary;
 }
 
@@ -364,8 +301,7 @@ export const listActiveSessions = onCall(
     const limit = Number.isFinite(requestedLimit)
       ? Math.min(Math.max(Math.trunc(requestedLimit), 1), MAX_PAGE_LIMIT)
       : DEFAULT_PAGE_LIMIT;
-    const pageToken =
-      typeof request.data?.pageToken === "string" ? request.data.pageToken : null;
+    const pageToken = typeof request.data?.pageToken === "string" ? request.data.pageToken : null;
 
     let codesQuery = db
       .collection("sessionCodes")
@@ -384,19 +320,15 @@ export const listActiveSessions = onCall(
     const codesSnap = await codesQuery.get();
     const nowMs = Date.now();
     const sessions = (
-      await mapWithConcurrency(
-        codesSnap.docs,
-        SUMMARY_CONCURRENCY,
-        (codeDoc) => mapActiveCodeToSummary(codeDoc, db, nowMs),
+      await mapWithConcurrency(codesSnap.docs, SUMMARY_CONCURRENCY, (codeDoc) =>
+        mapActiveCodeToSummary(codeDoc, db, nowMs),
       )
     ).filter((summary) => summary != null);
 
     sessions.sort(compareSessionsByLastActivity);
 
     const nextPageToken =
-      codesSnap.size === limit
-        ? codesSnap.docs[codesSnap.docs.length - 1]?.id ?? null
-        : null;
+      codesSnap.size === limit ? (codesSnap.docs[codesSnap.docs.length - 1]?.id ?? null) : null;
 
     return { sessions, nextPageToken };
   }),

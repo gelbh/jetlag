@@ -1,7 +1,4 @@
-import {
-  type KernelEntrypoint,
-  shouldUseWasm,
-} from "./kernelWasmReady";
+import { type KernelEntrypoint, shouldUseWasm } from "./kernelWasmReady";
 
 export type DispatchKernelOptions<T> = {
   entrypoint: KernelEntrypoint;
@@ -13,14 +10,10 @@ export type DispatchKernelOptions<T> = {
  * Runs the wasm kernel for a ready entrypoint.
  * Not-ready entrypoints throw (no TS fallback).
  */
-export async function dispatchKernel<T>(
-  options: DispatchKernelOptions<T>,
-): Promise<T> {
+export async function dispatchKernel<T>(options: DispatchKernelOptions<T>): Promise<T> {
   const { entrypoint, label, runWasm } = options;
   if (!shouldUseWasm(entrypoint)) {
-    throw new Error(
-      `[geometry] kernel entrypoint ${entrypoint} is not wasm-ready`,
-    );
+    throw new Error(`[geometry] kernel entrypoint ${entrypoint} is not wasm-ready`);
   }
   try {
     return await runWasm();

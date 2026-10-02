@@ -1,4 +1,4 @@
-import { forwardRef, type CSSProperties, type ReactNode } from "react";
+import { type CSSProperties, forwardRef, type ReactNode } from "react";
 import { cn } from "@/lib/cn";
 
 /**
@@ -14,25 +14,26 @@ export interface OverlayHostProps {
   children?: ReactNode;
 }
 
-export const OverlayHost = forwardRef<HTMLDivElement, OverlayHostProps>(
-  function OverlayHost({ className, style, children }, ref) {
-    return (
-      <div
-        ref={ref}
-        data-overlay-host=""
-        data-layout="phone"
-        className={cn(
-          "jl-map-bottom-chrome-host",
-          "pointer-events-none fixed inset-x-0 bottom-0 z-[var(--z-dock)]",
-          OVERLAY_SAFE_PAD_X,
-          /* Bottom float gap: real CSS --dock-float-gap on host */
-          "pt-1.5",
-          className,
-        )}
-        style={style}
-      >
-        {children}
-      </div>
-    );
-  },
-);
+export const OverlayHost = forwardRef<HTMLDivElement, OverlayHostProps>(function OverlayHost(
+  { className, style, children },
+  ref,
+) {
+  return (
+    <div
+      ref={ref}
+      data-overlay-host=""
+      data-layout="phone"
+      className={cn(
+        "jl-map-bottom-chrome-host",
+        "pointer-events-none fixed inset-x-0 bottom-0 z-[var(--z-dock)]",
+        OVERLAY_SAFE_PAD_X,
+        /* Bottom float gap: real CSS --dock-float-gap on host */
+        "pt-1.5",
+        className,
+      )}
+      style={style}
+    >
+      {children}
+    </div>
+  );
+});

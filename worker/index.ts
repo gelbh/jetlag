@@ -1,37 +1,19 @@
-import {
-  handleSentryTunnelRequest,
-  SENTRY_TUNNEL_PATH,
-} from "./sentryTunnel";
-import {
-  handlePosthogProxyRequest,
-  shouldHandlePosthogProxy,
-} from "./posthogProxy";
-import {
-  applyDocumentCspNonce,
-  shouldApplyDocumentCsp,
-} from "./documentCsp";
 import { applyCacheControlHeader } from "./assetCacheHeaders";
-import {
-  handleIncidentEmailRequest,
-  INCIDENT_EMAIL_PATH,
-} from "./incidentEmail";
-import {
-  CSP_REPORT_PATH,
-  handleCspReportRequest,
-} from "./cspReport";
-import { handleTimeRequest, TIME_ENDPOINT_PATH } from "./timeEndpoint";
 import {
   fetchAssetsFollowingRedirects,
   homePrerenderRequest,
   isPrerenderHomePath,
 } from "./assetFetch";
+import { CSP_REPORT_PATH, handleCspReportRequest } from "./cspReport";
+import { applyDocumentCspNonce, shouldApplyDocumentCsp } from "./documentCsp";
+import { handleIncidentEmailRequest, INCIDENT_EMAIL_PATH } from "./incidentEmail";
+import { handlePosthogProxyRequest, shouldHandlePosthogProxy } from "./posthogProxy";
+import { handleSentryTunnelRequest, SENTRY_TUNNEL_PATH } from "./sentryTunnel";
+import { handleTimeRequest, TIME_ENDPOINT_PATH } from "./timeEndpoint";
 
 export { CSP_REPORT_PATH } from "./cspReport";
 
-export function isSpaFallbackForAssetRequest(
-  request: Request,
-  response: Response,
-): boolean {
+export function isSpaFallbackForAssetRequest(request: Request, response: Response): boolean {
   const pathname = new URL(request.url).pathname;
   if (!pathname.startsWith("/assets/")) {
     return false;
@@ -72,12 +54,8 @@ export default {
 
     // Exact `/` serves prerendered home HTML; keep dist/index.html as the SPA shell
     // for nested-route fallbacks and the service worker.
-    const assetRequest =
-      pathname === "/" ? homePrerenderRequest(request) : request;
-    const assetResponse = await fetchAssetsFollowingRedirects(
-      env,
-      assetRequest,
-    );
+    const assetRequest = pathname === "/" ? homePrerenderRequest(request) : request;
+    const assetResponse = await fetchAssetsFollowingRedirects(env, assetRequest);
     if (isSpaFallbackForAssetRequest(request, assetResponse)) {
       return new Response("Not Found", {
         status: 404,
@@ -89,16 +67,21 @@ export default {
     }
 
     if (shouldApplyDocumentCsp(assetResponse)) {
-      return applyCacheControlHeader(
-        await applyDocumentCspNonce(assetResponse),
-        pathname,
-      );
+      return applyCacheControlHeader(await applyDocumentCspNonce(assetResponse), pathname);
     }
 
     return applyCacheControlHeader(assetResponse, pathname);
   },
 } satisfies ExportedHandler<Env>;
 
+export {
+  addScriptNonceToCsp,
+  applyDocumentCspNonce,
+  generateCspNonce,
+  injectScriptNonces,
+  isHtmlDocumentResponse,
+  shouldApplyDocumentCsp,
+} from "./documentCsp";
 export {
   handleIncidentEmailRequest,
   INCIDENT_EMAIL_PATH,
@@ -108,11 +91,3 @@ export {
   parseSentryEnvelopeTarget,
   SENTRY_TUNNEL_PATH,
 } from "./sentryTunnel";
-export {
-  addScriptNonceToCsp,
-  applyDocumentCspNonce,
-  generateCspNonce,
-  injectScriptNonces,
-  isHtmlDocumentResponse,
-  shouldApplyDocumentCsp,
-} from "./documentCsp";

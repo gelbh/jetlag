@@ -48,11 +48,7 @@ function sanitizeFocusBounds(value) {
 }
 
 function assertValidSnapshotShape(snapshot) {
-  if (
-    typeof snapshot !== "object" ||
-    snapshot === null ||
-    Array.isArray(snapshot)
-  ) {
+  if (typeof snapshot !== "object" || snapshot === null || Array.isArray(snapshot)) {
     throw new Error(PRELOAD_INVALID_SNAPSHOT);
   }
   if (typeof snapshot.name !== "string" || snapshot.name.trim().length === 0) {

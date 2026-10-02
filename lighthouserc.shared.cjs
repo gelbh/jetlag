@@ -1,9 +1,7 @@
 function createLhciConfig({ homeJoinPerf, createPerf, outputDir, collectSettings }) {
   // Native-feel PWA locks browser page zoom (user-scalable=no). Skip meta-viewport
   // so the a11y category score is not dragged below the gate; map zoom is separate.
-  const skipAudits = [
-    ...new Set([...(collectSettings.skipAudits ?? []), "meta-viewport"]),
-  ];
+  const skipAudits = [...new Set([...(collectSettings.skipAudits ?? []), "meta-viewport"])];
   return {
     ci: {
       collect: {

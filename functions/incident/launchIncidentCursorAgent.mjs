@@ -3,13 +3,13 @@
  * AuthZ (admin) is enforced by the callable wrapper.
  */
 
-import { INCIDENT_NOT_FOUND } from "./postIncidentMessage.mjs";
 import {
   CURSOR_HOTFIX_FAILED,
   CURSOR_HOTFIX_MISCONFIGURED,
   CURSOR_HOTFIX_SKIPPED,
   forceLaunchCursorHotfixForIncident,
 } from "./launchCursorHotfix.mjs";
+import { INCIDENT_NOT_FOUND } from "./postIncidentMessage.mjs";
 
 export const CURSOR_HOTFIX_ALREADY_LAUNCHED = "CURSOR_HOTFIX_ALREADY_LAUNCHED";
 
@@ -22,8 +22,7 @@ export const CURSOR_HOTFIX_ALREADY_LAUNCHED = "CURSOR_HOTFIX_ALREADY_LAUNCHED";
  * }} [deps]
  */
 export async function launchIncidentCursorAgentHandler(db, input, deps = {}) {
-  const incidentId =
-    typeof input?.incidentId === "string" ? input.incidentId.trim() : "";
+  const incidentId = typeof input?.incidentId === "string" ? input.incidentId.trim() : "";
   const uid = typeof input?.uid === "string" ? input.uid : "";
   if (!incidentId) {
     throw new Error(INCIDENT_NOT_FOUND);

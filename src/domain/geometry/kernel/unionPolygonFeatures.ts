@@ -1,11 +1,12 @@
-import union from "@turf/union";
 import bbox from "@turf/bbox";
 import { featureCollection } from "@turf/helpers";
-import { union as martinezUnion, type Geometry } from "martinez-polygon-clipping";
+import union from "@turf/union";
 import { CircleUnion } from "circle-union";
+import type { Feature, Polygon as GeoPolygon, MultiPolygon } from "geojson";
+import { type Geometry, union as martinezUnion } from "martinez-polygon-clipping";
 import RBush from "rbush";
-import type { Feature, MultiPolygon, Polygon as GeoPolygon } from "geojson";
 import type { DiskSpec, EliminationUnionInput, PolygonFeature } from "./types";
+
 export type { DiskSpec, EliminationUnionInput, PolygonFeature } from "./types";
 
 const RBUSH_BATCH_THRESHOLD = 10;
@@ -23,14 +24,11 @@ function logMartinezFallbackOnce(): void {
   }
 }
 
-function isPolygonFeature(
-  feature: Feature | null | undefined,
-): feature is PolygonFeature {
+function isPolygonFeature(feature: Feature | null | undefined): feature is PolygonFeature {
   return (
     feature !== null &&
     feature !== undefined &&
-    (feature.geometry.type === "Polygon" ||
-      feature.geometry.type === "MultiPolygon")
+    (feature.geometry.type === "Polygon" || feature.geometry.type === "MultiPolygon")
   );
 }
 
@@ -68,10 +66,7 @@ function martinezGeometryToFeature(geometry: Geometry): PolygonFeature | null {
   };
 }
 
-function unionPairTurf(
-  left: PolygonFeature,
-  right: PolygonFeature,
-): PolygonFeature | null {
+function unionPairTurf(left: PolygonFeature, right: PolygonFeature): PolygonFeature | null {
   try {
     const merged = union(featureCollection([left, right]));
     return isPolygonFeature(merged) ? merged : null;
@@ -80,15 +75,9 @@ function unionPairTurf(
   }
 }
 
-function unionPairMartinez(
-  left: PolygonFeature,
-  right: PolygonFeature,
-): PolygonFeature | null {
+function unionPairMartinez(left: PolygonFeature, right: PolygonFeature): PolygonFeature | null {
   try {
-    const merged = martinezUnion(
-      featureToMartinezGeometry(left),
-      featureToMartinezGeometry(right),
-    );
+    const merged = martinezUnion(featureToMartinezGeometry(left), featureToMartinezGeometry(right));
     if (!merged || merged.length === 0) {
       return unionPairTurf(left, right);
     }
@@ -113,18 +102,11 @@ function unionPair(
 }
 
 /** Keep both polygons when clip engines fail so confirmed shade is not dropped. */
-function concatPolygonFeatures(
-  left: PolygonFeature,
-  right: PolygonFeature,
-): PolygonFeature {
+function concatPolygonFeatures(left: PolygonFeature, right: PolygonFeature): PolygonFeature {
   const leftParts =
-    left.geometry.type === "Polygon"
-      ? [left.geometry.coordinates]
-      : left.geometry.coordinates;
+    left.geometry.type === "Polygon" ? [left.geometry.coordinates] : left.geometry.coordinates;
   const rightParts =
-    right.geometry.type === "Polygon"
-      ? [right.geometry.coordinates]
-      : right.geometry.coordinates;
+    right.geometry.type === "Polygon" ? [right.geometry.coordinates] : right.geometry.coordinates;
   return {
     type: "Feature",
     properties: {},
@@ -288,9 +270,7 @@ function mergeUnionResults(
   return unionPair(left, right, engine) ?? concatPolygonFeatures(left, right);
 }
 
-export function unionPolygonFeatures(
-  features: readonly PolygonFeature[],
-): PolygonFeature | null {
+export function unionPolygonFeatures(features: readonly PolygonFeature[]): PolygonFeature | null {
   return divideAndConquerUnion(features, "martinez");
 }
 

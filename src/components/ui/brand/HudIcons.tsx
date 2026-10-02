@@ -116,12 +116,7 @@ export function HudCompassIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <IconBase {...props}>
       <path d="M12 3.5 15.5 12 12 10.5 8.5 12Z" fill="currentColor" stroke="none" />
-      <path
-        d="M12 20.5 8.5 12 12 13.5 15.5 12Z"
-        fill="currentColor"
-        stroke="none"
-        opacity="0.35"
-      />
+      <path d="M12 20.5 8.5 12 12 13.5 15.5 12Z" fill="currentColor" stroke="none" opacity="0.35" />
     </IconBase>
   );
 }

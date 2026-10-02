@@ -1,27 +1,20 @@
-import {
-  memo,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  type ReactNode,
-} from "react";
 import { Paper, Text } from "@mantine/core";
 import type { Map as MapLibreMap } from "maplibre-gl";
-import type { MapBounds, MapBoundsExpression } from "@/domain/map/mapBounds";
+import { memo, type ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import { scheduleWhenIdleAfterLoad } from "@/domain/device/perf/scheduleWhenIdleAfterLoad";
+import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
+import type { GameArea } from "@/domain/map/annotations";
+import type { MapStyle } from "@/domain/map/mapBasemaps";
+import type { MapBounds, MapBoundsExpression } from "@/domain/map/mapBounds";
+import { type GameSize } from "@/domain/session/size/gameSize";
+import type { FramingMode } from "@/hooks/session/useGameAreaFraming";
 import { MapView } from "../../map/chrome/MapView";
 import { useMapLibreMap } from "../../map/helpers/useMapLibreMap";
 import { FramingPreviewLayers } from "../../map/layers/FramingPreviewLayers";
 import { GameAreaMask } from "../../map/layers/GameAreaMask";
-import type { GameArea } from "@/domain/map/annotations";
-import type { MapStyle } from "@/domain/map/mapBasemaps";
-import type { FramingMode } from "@/hooks/session/useGameAreaFraming";
-import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
+import { CreateSessionMapFacade } from "./CreateSessionMapFacade";
 import { GameAreaFramingStats } from "./GameAreaFramingControls";
 import { framingModeHint } from "./gameAreaFramingUi";
-import { type GameSize } from "@/domain/session/size/gameSize";
-import { CreateSessionMapFacade } from "./CreateSessionMapFacade";
 import { prefetchCreateSessionMap } from "./prefetchCreateSessionMap";
 
 const mapHintPanelStyles = {
@@ -120,10 +113,7 @@ function CreateSessionMapPaneInner({
     if (!mapRequested || mapMounted) {
       return;
     }
-    const timeoutId = setTimeout(
-      () => setLoadingPlateExpired(true),
-      LOADING_PLATE_TIMEOUT_MS,
-    );
+    const timeoutId = setTimeout(() => setLoadingPlateExpired(true), LOADING_PLATE_TIMEOUT_MS);
     return () => clearTimeout(timeoutId);
   }, [mapMounted, mapRequested]);
 
@@ -137,8 +127,7 @@ function CreateSessionMapPaneInner({
     }
     // The facade unmounts on this signal; keep focus in the map, not <body>.
     const facadeHadFocus =
-      facadeRef.current !== null &&
-      document.activeElement === facadeRef.current;
+      facadeRef.current !== null && document.activeElement === facadeRef.current;
     onMapMounted(map);
     if (facadeHadFocus) {
       map.getCanvas().focus();
@@ -230,13 +219,7 @@ function CreateSessionMapPaneInner({
       {mapRequested ? (
         <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[var(--z-banner)] flex justify-center px-3 pb-3">
           {previewGameArea ? (
-            <Paper
-              className="max-w-full"
-              radius={14}
-              px="sm"
-              py="xs"
-              style={mapHintPanelStyles}
-            >
+            <Paper className="max-w-full" radius={14} px="sm" py="xs" style={mapHintPanelStyles}>
               <GameAreaFramingStats
                 gameArea={previewGameArea}
                 selectedGameSize={selectedGameSize}
@@ -244,13 +227,7 @@ function CreateSessionMapPaneInner({
               />
             </Paper>
           ) : mapMounted ? (
-            <Paper
-              className="max-w-md"
-              radius={14}
-              px="sm"
-              py="xs"
-              style={mapHintPanelStyles}
-            >
+            <Paper className="max-w-md" radius={14} px="sm" py="xs" style={mapHintPanelStyles}>
               <Text size="xs" c="var(--color-field-ink-muted)" lh={1.35}>
                 {manualFramingActive
                   ? framingModeHint(framingMode)

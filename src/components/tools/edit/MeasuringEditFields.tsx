@@ -1,9 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import type { AnnotationRecord } from "@/domain/map/annotations";
-import {
-  measuringQuestionFor,
-  type MeasuringAnswer,
-} from "@/domain/questions";
+import { type MeasuringAnswer, measuringQuestionFor } from "@/domain/questions";
 import { BinaryAnswerPicker } from "../shared/answers/BinaryAnswerPicker";
 import { closerFurtherAnswerOptions } from "../shared/answers/binaryAnswerOptions";
 import { QuestionPromptBlock } from "../shared/controls/QuestionPromptBlock";
@@ -17,12 +14,10 @@ interface MeasuringEditFieldsProps {
   onSavePayloadChange: (payload: EditSavePayload) => void;
 }
 
-export function MeasuringEditFields({
-  annotation,
-  onSavePayloadChange,
-}: MeasuringEditFieldsProps) {
-  const [measuringAnswer, setMeasuringAnswer] =
-    useState<MeasuringAnswer | null>(annotation.metadata.measuringAnswer ?? null);
+export function MeasuringEditFields({ annotation, onSavePayloadChange }: MeasuringEditFieldsProps) {
+  const [measuringAnswer, setMeasuringAnswer] = useState<MeasuringAnswer | null>(
+    annotation.metadata.measuringAnswer ?? null,
+  );
 
   const canSave = measuringAnswer !== null;
 
@@ -59,10 +54,7 @@ export function MeasuringEditFields({
           }
         />
       </ToolSection>
-      <ToolSection
-        title="Answer"
-        status={measuringAnswer !== null ? "complete" : "active"}
-      >
+      <ToolSection title="Answer" status={measuringAnswer !== null ? "complete" : "active"}>
         <BinaryAnswerPicker
           value={measuringAnswer}
           onChange={setMeasuringAnswer}

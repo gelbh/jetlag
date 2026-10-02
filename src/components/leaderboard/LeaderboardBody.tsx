@@ -10,26 +10,37 @@ import {
   TextInput,
   UnstyledButton,
 } from "@mantine/core";
-import { ArrowsClockwiseIcon, CaretDownIcon, CaretRightIcon, CheckIcon, CircleNotchIcon, CrownIcon, MagnifyingGlassIcon, TrophyIcon, UserPlusIcon, XIcon } from "@phosphor-icons/react";
 import {
+  ArrowsClockwiseIcon,
+  CaretDownIcon,
+  CaretRightIcon,
+  CheckIcon,
+  CircleNotchIcon,
+  CrownIcon,
+  MagnifyingGlassIcon,
+  TrophyIcon,
+  UserPlusIcon,
+  XIcon,
+} from "@phosphor-icons/react";
+import {
+  type MutableRefObject,
+  type ReactNode,
+  type PointerEvent as ReactPointerEvent,
   useCallback,
   useEffect,
   useMemo,
   useRef,
   useState,
-  type MutableRefObject,
-  type PointerEvent as ReactPointerEvent,
-  type ReactNode,
 } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
+  bottomDrawerStyles,
+  DrawerGrabber,
   ErrorCallout,
+  filledStyles,
   InsetGroup,
   SectionLabel,
   SuccessCallout,
-  DrawerGrabber,
-  bottomDrawerStyles,
-  filledStyles,
 } from "@/components/ui/entry/entryChrome";
 import { InsetHairline } from "@/components/ui/entry/InsetRow";
 import {
@@ -37,25 +48,25 @@ import {
   LEADERBOARD_METRICS,
   LEADERBOARD_ROLES,
   LEADERBOARD_SCOPES,
-  leaderboardEntryLabel,
-  leaderboardMetricLabel,
-  leaderboardScopeLabel,
   type LeaderboardEntry,
   type LeaderboardMetric,
   type LeaderboardScope,
+  leaderboardEntryLabel,
+  leaderboardMetricLabel,
+  leaderboardScopeLabel,
 } from "@/domain/game/leaderboard";
 import {
+  type LeaderboardBoardSelection,
   loadLeaderboardBoardPrefs,
   saveLeaderboardBoardPrefs,
-  type LeaderboardBoardSelection,
 } from "@/domain/game/leaderboardBoardPrefs";
 import {
   leaderboardBoardSummaryLabel,
   resolveSelfFooterMode,
   splitLeadPack,
 } from "@/domain/game/leaderboardView";
-import { GAME_SIZE_OPTIONS, gameSizeLabel } from "@/domain/session/size/gameSize";
 import { playerRoleLabel } from "@/domain/session/players/playerRole";
+import { GAME_SIZE_OPTIONS, gameSizeLabel } from "@/domain/session/size/gameSize";
 import { usePermanentAuthUser } from "@/hooks/billing/usePermanentAuthUser";
 import { useRowInView } from "@/hooks/leaderboard/useRowInView";
 import { isFirebaseConfigured } from "@/services/core/firebase/firebase";
@@ -122,13 +133,7 @@ function monogramInitials(username: string): string {
   return "?";
 }
 
-function PlayerMonogram({
-  username,
-  size = 36,
-}: {
-  username: string;
-  size?: number;
-}) {
+function PlayerMonogram({ username, size = 36 }: { username: string; size?: number }) {
   return (
     <Box
       aria-hidden
@@ -152,13 +157,7 @@ function PlayerMonogram({
   );
 }
 
-function EmptyInset({
-  icon,
-  children,
-}: {
-  icon: ReactNode;
-  children: ReactNode;
-}) {
+function EmptyInset({ icon, children }: { icon: ReactNode; children: ReactNode }) {
   return (
     <InsetGroup>
       <Stack gap={8} align="center" px="md" py="xl">
@@ -252,11 +251,7 @@ function PullToRefresh({
       >
         <ArrowsClockwiseIcon size={16} weight="bold" />
         <Text size="xs" fw={590}>
-          {refreshing
-            ? "Refreshing…"
-            : pull >= 84
-              ? "Release to refresh"
-              : "Pull to refresh"}
+          {refreshing ? "Refreshing…" : pull >= 84 ? "Release to refresh" : "Pull to refresh"}
         </Text>
       </Group>
       <Box
@@ -430,9 +425,7 @@ function LeaderboardPodium({
   const visualOrder: LeaderboardEntry[] =
     second && third
       ? [second, first, third]
-      : [first, second, third].filter(
-          (entry): entry is LeaderboardEntry => entry != null,
-        );
+      : [first, second, third].filter((entry): entry is LeaderboardEntry => entry != null);
 
   return (
     <Box
@@ -619,8 +612,7 @@ function BoardOptionTile({
             : "0.33px solid oklch(from var(--color-field-ink) l c h / 0.12)",
           color: "var(--color-field-ink)",
           textAlign: "left",
-          transition:
-            "background-color 140ms ease, border-color 140ms ease, transform 80ms ease",
+          transition: "background-color 140ms ease, border-color 140ms ease, transform 80ms ease",
           "&:active": {
             transform: "scale(0.985)",
             opacity: 0.92,
@@ -706,13 +698,7 @@ function BoardPickerDrawer({
 
         <Stack gap={10}>
           <SectionLabel>Game size</SectionLabel>
-          <Group
-            gap={8}
-            align="stretch"
-            wrap="nowrap"
-            role="group"
-            aria-label="Game size"
-          >
+          <Group gap={8} align="stretch" wrap="nowrap" role="group" aria-label="Game size">
             {GAME_SIZE_OPTIONS.map((value) => {
               const meta = gameSizeLabel(value);
               return (
@@ -730,13 +716,7 @@ function BoardPickerDrawer({
 
         <Stack gap={10}>
           <SectionLabel>Role</SectionLabel>
-          <Group
-            gap={8}
-            align="stretch"
-            wrap="nowrap"
-            role="group"
-            aria-label="Player role"
-          >
+          <Group gap={8} align="stretch" wrap="nowrap" role="group" aria-label="Player role">
             {LEADERBOARD_ROLES.map((value) => (
               <BoardOptionTile
                 key={value}
@@ -786,9 +766,7 @@ function BoardPickerDrawer({
                           flex: 1,
                           fontSize: "1.0625rem",
                           letterSpacing: "-0.01em",
-                          color: selected
-                            ? "var(--color-flag)"
-                            : "var(--color-field-ink)",
+                          color: selected ? "var(--color-flag)" : "var(--color-field-ink)",
                         }}
                       >
                         {label}
@@ -904,8 +882,7 @@ function PlayerDetailDrawer({
           style={{
             borderRadius: 12,
             backgroundColor: "oklch(from var(--color-field-ink) l c h / 0.08)",
-            border:
-              "0.33px solid oklch(from var(--color-field-ink) l c h / 0.12)",
+            border: "0.33px solid oklch(from var(--color-field-ink) l c h / 0.12)",
           }}
         >
           {cells.map((cell, index) => (
@@ -1051,10 +1028,7 @@ function RankRow({
           ta="center"
           style={{
             fontVariantNumeric: "tabular-nums",
-            color:
-              entry.rank <= 3
-                ? "var(--color-flag)"
-                : "var(--color-field-ink-muted)",
+            color: entry.rank <= 3 ? "var(--color-flag)" : "var(--color-field-ink-muted)",
           }}
         >
           {entry.rank}
@@ -1062,11 +1036,7 @@ function RankRow({
         <PlayerMonogram username={label} size={34} />
         <Box style={{ flex: 1, minWidth: 0 }}>
           <Group gap={6} wrap="nowrap">
-            <Text
-              fw={590}
-              truncate
-              style={{ letterSpacing: "-0.01em", fontSize: "1.0625rem" }}
-            >
+            <Text fw={590} truncate style={{ letterSpacing: "-0.01em", fontSize: "1.0625rem" }}>
               {label}
             </Text>
             {isYou ? (
@@ -1076,10 +1046,7 @@ function RankRow({
             ) : null}
           </Group>
         </Box>
-        <Text
-          fw={590}
-          style={{ fontVariantNumeric: "tabular-nums", fontSize: "0.9375rem" }}
-        >
+        <Text fw={590} style={{ fontVariantNumeric: "tabular-nums", fontSize: "0.9375rem" }}>
           {formatLeaderboardValue(metric, entry.value)}
         </Text>
         <Box c="var(--color-field-ink-muted)" style={{ display: "inline-flex" }}>
@@ -1100,9 +1067,7 @@ export function LeaderboardBody() {
   const [searchParams, setSearchParams] = useSearchParams();
   const mockEnabled = isLeaderboardMockEnabled();
   const { user } = usePermanentAuthUser();
-  const viewerUid = mockEnabled
-    ? LEADERBOARD_MOCK_SELF_UID
-    : (user?.uid ?? null);
+  const viewerUid = mockEnabled ? LEADERBOARD_MOCK_SELF_UID : (user?.uid ?? null);
 
   const [selection, setSelection] = useState(loadLeaderboardBoardPrefs);
   const [boardSheetOpen, setBoardSheetOpen] = useState(false);
@@ -1119,9 +1084,7 @@ export function LeaderboardBody() {
   const viewerRowRef = useRef<HTMLElement | null>(null);
   const rowRefs = useRef(new Map<string, HTMLElement>());
   const listEntry =
-    viewerUid != null
-      ? (entries.find((entry) => entry.uid === viewerUid) ?? null)
-      : null;
+    viewerUid != null ? (entries.find((entry) => entry.uid === viewerUid) ?? null) : null;
   const rowInView = useRowInView(viewerRowRef, listEntry?.uid ?? null);
 
   const registerRowRef = useCallback((uid: string, node: HTMLElement | null) => {
@@ -1137,11 +1100,8 @@ export function LeaderboardBody() {
   }, [selection]);
 
   useEffect(() => {
-    /* eslint-disable react-hooks/set-state-in-effect -- board subscription resets */
     setBoardLoading(true);
     setBoardError(null);
-    /* eslint-enable react-hooks/set-state-in-effect */
-
     if (mockEnabled) {
       return subscribeMockLeaderboardBoard(
         selection.scope,
@@ -1208,13 +1168,11 @@ export function LeaderboardBody() {
     }
     const match = entries.find(
       (entry) =>
-        entry.displayName.toLowerCase() === userParam.toLowerCase() ||
-        entry.uid === userParam,
+        entry.displayName.toLowerCase() === userParam.toLowerCase() || entry.uid === userParam,
     );
     if (!match) {
       return;
     }
-    /* eslint-disable react-hooks/set-state-in-effect -- deep-link opens player sheet once */
     setSelectedUid(match.uid);
     setSearchParams(
       (prev) => {
@@ -1224,7 +1182,6 @@ export function LeaderboardBody() {
       },
       { replace: true },
     );
-    /* eslint-enable react-hooks/set-state-in-effect */
   }, [userParam, boardLoading, entries, setSearchParams]);
 
   const searchActive = query.trim().length > 0;
@@ -1233,16 +1190,12 @@ export function LeaderboardBody() {
       return [];
     }
     const needle = query.trim().toLowerCase();
-    return entries.filter((entry) =>
-      leaderboardEntryLabel(entry).toLowerCase().includes(needle),
-    );
+    return entries.filter((entry) => leaderboardEntryLabel(entry).toLowerCase().includes(needle));
   }, [entries, query, searchActive]);
 
   const { lead, rest } = splitLeadPack(entries);
   const selectedEntry =
-    selectedUid == null
-      ? null
-      : (entries.find((entry) => entry.uid === selectedUid) ?? null);
+    selectedUid == null ? null : (entries.find((entry) => entry.uid === selectedUid) ?? null);
 
   const jumpToMatch = useCallback(
     (cycle: boolean) => {
@@ -1259,9 +1212,7 @@ export function LeaderboardBody() {
 
       let index = 0;
       if (cycle && focusedUid != null) {
-        const current = searchMatches.findIndex(
-          (entry) => entry.uid === focusedUid,
-        );
+        const current = searchMatches.findIndex((entry) => entry.uid === focusedUid);
         index = current >= 0 ? (current + 1) % searchMatches.length : 0;
       }
 
@@ -1385,11 +1336,7 @@ export function LeaderboardBody() {
             <Text
               size="xs"
               px={4}
-              c={
-                focusedUid
-                  ? "var(--color-field-ink-muted)"
-                  : "var(--color-halt)"
-              }
+              c={focusedUid ? "var(--color-field-ink-muted)" : "var(--color-halt)"}
               role="status"
             >
               {searchNote}
@@ -1432,12 +1379,7 @@ export function LeaderboardBody() {
         {boardLoading ? (
           <InsetGroup>
             <Group gap={10} px="md" py="md" c="var(--color-field-ink-muted)">
-              <CircleNotchIcon
-                size={18}
-                weight="bold"
-                className="loading-spinner"
-                aria-hidden
-              />
+              <CircleNotchIcon size={18} weight="bold" className="loading-spinner" aria-hidden />
               <Text size="sm">Loading board…</Text>
             </Group>
           </InsetGroup>
@@ -1535,10 +1477,8 @@ export function LeaderboardBody() {
                 justifyContent: "center",
                 paddingBottom: "max(0.75rem, var(--safe-area-bottom))",
                 paddingTop: "0.75rem",
-                backgroundColor:
-                  "oklch(from var(--color-canvas) l c h / 0.92)",
-                borderTop:
-                  "0.33px solid oklch(from var(--color-field-ink) l c h / 0.14)",
+                backgroundColor: "oklch(from var(--color-canvas) l c h / 0.92)",
+                borderTop: "0.33px solid oklch(from var(--color-field-ink) l c h / 0.14)",
                 backdropFilter: "blur(20px) saturate(1.4)",
                 WebkitBackdropFilter: "blur(20px) saturate(1.4)",
                 color: "var(--color-field-ink)",

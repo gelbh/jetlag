@@ -51,21 +51,12 @@ describe("useBatteryStatus", () => {
       expect(result.current.level).toBe(0.8);
     });
 
-    expect(battery.addEventListener).toHaveBeenCalledWith(
-      "levelchange",
-      expect.any(Function),
-    );
-    expect(battery.addEventListener).toHaveBeenCalledWith(
-      "chargingchange",
-      expect.any(Function),
-    );
+    expect(battery.addEventListener).toHaveBeenCalledWith("levelchange", expect.any(Function));
+    expect(battery.addEventListener).toHaveBeenCalledWith("chargingchange", expect.any(Function));
 
     unmount();
 
-    expect(battery.removeEventListener).toHaveBeenCalledWith(
-      "levelchange",
-      expect.any(Function),
-    );
+    expect(battery.removeEventListener).toHaveBeenCalledWith("levelchange", expect.any(Function));
     expect(battery.removeEventListener).toHaveBeenCalledWith(
       "chargingchange",
       expect.any(Function),

@@ -1,4 +1,4 @@
-import { type Locator, type Page, expect } from "@playwright/test";
+import { expect, type Locator, type Page } from "@playwright/test";
 import { clickViaEvaluate } from "../dom";
 
 export async function clickSheetButton(sheet: Locator, name: string) {
@@ -24,9 +24,7 @@ export async function redoAnnotation(page: Page) {
 }
 
 export async function expectRedoEnabled(page: Page) {
-  await expect(
-    page.getByRole("button", { name: "Redo last annotation" }),
-  ).toBeEnabled();
+  await expect(page.getByRole("button", { name: "Redo last annotation" })).toBeEnabled();
 }
 
 export async function openSettings(page: Page) {

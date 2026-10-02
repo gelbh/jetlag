@@ -6,11 +6,7 @@ import {
   splitLeadPack,
 } from "./leaderboardView";
 
-const entry = (
-  uid: string,
-  rank: number,
-  value = 1,
-): LeaderboardEntry => ({
+const entry = (uid: string, rank: number, value = 1): LeaderboardEntry => ({
   uid,
   displayName: uid,
   value,

@@ -1,4 +1,5 @@
 import type { Feature, Point } from "geojson";
+import { yesNoAnswerOptions } from "../../../components/tools/shared/answers/binaryAnswerOptions";
 import type { LatLngTuple } from "../../../domain/geometry/gameArea/geometry";
 import type { AnnotationRecord } from "../../../domain/map/annotations";
 import type { DistanceUnit } from "../../../domain/map/distance";
@@ -6,15 +7,14 @@ import { MAP_ANNOTATION_COLORS } from "../../../domain/map/mapAnnotationColors";
 import {
   isRadarDistanceOptionUsed,
   isRadarRadiusAllowedForGameSize,
-  radarInsideFromAnswer,
-  radarQuestionPrompt,
   type RadarAnswer,
   type RadarDistanceOptionKey,
+  radarInsideFromAnswer,
+  radarQuestionPrompt,
 } from "../../../domain/questions";
 import type { GameSize } from "../../../domain/session/size/gameSize";
-import type { SubmitPendingQuestionInput } from "../../sync/usePendingQuestionActions";
-import { yesNoAnswerOptions } from "../../../components/tools/shared/answers/binaryAnswerOptions";
 import { emitQuestionAnsweredActivity } from "../../../services/session/emitSessionActivity";
+import type { SubmitPendingQuestionInput } from "../../sync/usePendingQuestionActions";
 
 export interface CommitRadarInput {
   canSubmitQuestion: boolean;
@@ -28,10 +28,7 @@ export interface CommitRadarInput {
   usedRadarOptions: ReadonlySet<RadarDistanceOptionKey>;
   awaitHiderAnswer: boolean;
   submitPendingQuestion?: (
-    input: Omit<
-      SubmitPendingQuestionInput,
-      "sessionId" | "senderUid" | "senderRole" | "toolType"
-    >,
+    input: Omit<SubmitPendingQuestionInput, "sessionId" | "senderUid" | "senderRole" | "toolType">,
   ) => Promise<void>;
   sessionId?: string;
   senderUid?: string | null;
@@ -82,12 +79,7 @@ export async function commitRadar(input: CommitRadarInput): Promise<void> {
   }
 
   if (
-    !isRadarRadiusAllowedForGameSize(
-      gameSize,
-      resolvedRadarRadius,
-      distanceUnit,
-      radarChooseCustom,
-    )
+    !isRadarRadiusAllowedForGameSize(gameSize, resolvedRadarRadius, distanceUnit, radarChooseCustom)
   ) {
     setMapError("That radar distance exceeds the limit for this game size.");
     return;
@@ -155,9 +147,7 @@ export async function commitRadar(input: CommitRadarInput): Promise<void> {
     });
 
     if (sessionId) {
-      const answerOption = yesNoAnswerOptions.find(
-        (option) => option.value === radarAnswer,
-      );
+      const answerOption = yesNoAnswerOptions.find((option) => option.value === radarAnswer);
       emitQuestionAnsweredActivity({
         sessionId,
         toolType: "radar",

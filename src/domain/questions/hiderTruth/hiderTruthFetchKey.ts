@@ -1,11 +1,11 @@
 import type { LatLngTuple } from "../../geometry/gameArea/geometry";
-import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
 import { isEndGameActive } from "../../map/annotations";
+import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
 import {
   askOriginFromPendingQuestion,
+  type HiderQuestionTruthContextInput,
   isAskOriginInsideHidingZone,
   isMapPinTruthTool,
-  type HiderQuestionTruthContextInput,
 } from "./resolveHiderTruthReference";
 
 function pointKey(point: LatLngTuple | null | undefined): string {
@@ -21,8 +21,7 @@ function pendingPlacementValueKey(value: unknown): string {
     return `{${Object.entries(value)
       .sort(([left], [right]) => left.localeCompare(right))
       .map(
-        ([key, nestedValue]) =>
-          `${JSON.stringify(key)}:${pendingPlacementValueKey(nestedValue)}`,
+        ([key, nestedValue]) => `${JSON.stringify(key)}:${pendingPlacementValueKey(nestedValue)}`,
       )
       .join(",")}}`;
   }
@@ -30,9 +29,7 @@ function pendingPlacementValueKey(value: unknown): string {
   return JSON.stringify(value) ?? "null";
 }
 
-function openQuestionsContentKey(
-  openQuestions: readonly PendingQuestionRecord[],
-): string {
+function openQuestionsContentKey(openQuestions: readonly PendingQuestionRecord[]): string {
   return openQuestions
     .map((question) =>
       [
@@ -75,15 +72,8 @@ export function openQuestionNeedsHidingPlace(
   if (isEndGameActive(context.session)) {
     return false;
   }
-  const askOrigin = askOriginFromPendingQuestion(
-    question,
-    context.seekerPlacesByUid,
-  );
-  return isAskOriginInsideHidingZone(
-    askOrigin,
-    context.zoneCenter,
-    context.zoneRadiusMeters,
-  );
+  const askOrigin = askOriginFromPendingQuestion(question, context.seekerPlacesByUid);
+  return isAskOriginInsideHidingZone(askOrigin, context.zoneCenter, context.zoneRadiusMeters);
 }
 
 export function buildHiderTruthFetchKey(

@@ -1,7 +1,7 @@
 import { act, renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { createTestGameArea } from "../../test/fixtures/sessions";
 import type { HidingZoneRecord } from "../../domain/session/hiding/hidingZone";
+import { createTestGameArea } from "../../test/fixtures/sessions";
 import { useHiderZoneTool } from "./useHiderZoneTool";
 
 const writeHidingZone = vi.hoisted(() => vi.fn());
@@ -100,10 +100,7 @@ describe("useHiderZoneTool", () => {
     });
 
     expect(pauseTimer).not.toHaveBeenCalled();
-    expect(controlSessionTimerForMove).toHaveBeenCalledWith(
-      "session-1",
-      "pause",
-    );
+    expect(controlSessionTimerForMove).toHaveBeenCalledWith("session-1", "pause");
     expect(writeHidingZone).toHaveBeenCalledWith(
       "session-1",
       expect.objectContaining({ moveInProgress: true }),
@@ -152,10 +149,7 @@ describe("useHiderZoneTool", () => {
       await result.current.confirmZone();
     });
 
-    expect(controlSessionTimerForMove).toHaveBeenCalledWith(
-      "session-1",
-      "resume",
-    );
+    expect(controlSessionTimerForMove).toHaveBeenCalledWith("session-1", "resume");
     expect(resumeTimer).not.toHaveBeenCalled();
   });
 });

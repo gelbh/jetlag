@@ -1,16 +1,9 @@
 import { describe, expect, it } from "vitest";
-import {
-  MATCHING_STEPS,
-  RADAR_STEPS,
-  stepsForMode,
-} from "./toolStepUtils";
+import { MATCHING_STEPS, RADAR_STEPS, stepsForMode } from "./toolStepUtils";
 
 describe("stepsForMode", () => {
   it("drops the answer step in multiplayer", () => {
-    expect(stepsForMode(RADAR_STEPS, true).map((step) => step.id)).toEqual([
-      "anchor",
-      "distance",
-    ]);
+    expect(stepsForMode(RADAR_STEPS, true).map((step) => step.id)).toEqual(["anchor", "distance"]);
     expect(stepsForMode(MATCHING_STEPS, true).map((step) => step.id)).toEqual([
       "anchor",
       "category",

@@ -19,9 +19,7 @@ export function readAdminSessionListCache(): AdminSessionListCacheSnapshot | nul
   };
 }
 
-export function writeAdminSessionListCache(
-  next: AdminSessionListCacheSnapshot,
-): void {
+export function writeAdminSessionListCache(next: AdminSessionListCacheSnapshot): void {
   snapshot = {
     sessions: [...next.sessions],
     nextPageToken: next.nextPageToken,

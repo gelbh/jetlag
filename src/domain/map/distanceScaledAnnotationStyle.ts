@@ -31,9 +31,7 @@ export interface DistanceScaledAnnotationStyle {
   strokeOpacity: number;
 }
 
-export function quietRadarAnnotationStyle(
-  distanceMeters: number,
-): DistanceScaledAnnotationStyle {
+export function quietRadarAnnotationStyle(distanceMeters: number): DistanceScaledAnnotationStyle {
   const scale = distanceScale(distanceMeters);
 
   return {

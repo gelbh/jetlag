@@ -4,46 +4,29 @@ export const PURGE_BATCH_LIMIT = 50;
 /** Idle auto-end throughput (indexed + legacy fill) — higher than delete purge. */
 export const IDLE_PURGE_BATCH_LIMIT = 200;
 
-export function computeEndedCutoffIso(
-  now = Date.now(),
-  retentionDays = ENDED_RETENTION_DAYS,
-) {
-  return new Date(
-    now - retentionDays * 24 * 60 * 60 * 1000,
-  ).toISOString();
+export function computeEndedCutoffIso(now = Date.now(), retentionDays = ENDED_RETENTION_DAYS) {
+  return new Date(now - retentionDays * 24 * 60 * 60 * 1000).toISOString();
 }
 
 export function computeAbandonedCutoffIso(
   now = Date.now(),
   retentionDays = ABANDONED_RETENTION_DAYS,
 ) {
-  return new Date(
-    now - retentionDays * 24 * 60 * 60 * 1000,
-  ).toISOString();
+  return new Date(now - retentionDays * 24 * 60 * 60 * 1000).toISOString();
 }
 
-export function isEndedSessionPastRetention(
-  data,
-  endedCutoffIso,
-) {
+export function isEndedSessionPastRetention(data, endedCutoffIso) {
   return (
-    data.status === "ended" &&
-    typeof data.endedAt === "string" &&
-    data.endedAt < endedCutoffIso
+    data.status === "ended" && typeof data.endedAt === "string" && data.endedAt < endedCutoffIso
   );
 }
 
-export function isAbandonedSessionPastRetention(
-  data,
-  abandonedCutoffIso,
-) {
+export function isAbandonedSessionPastRetention(data, abandonedCutoffIso) {
   if (data.status === "ended" || typeof data.endedAt === "string") {
     return false;
   }
 
-  return (
-    typeof data.createdAt === "string" && data.createdAt < abandonedCutoffIso
-  );
+  return typeof data.createdAt === "string" && data.createdAt < abandonedCutoffIso;
 }
 
 export function selectSessionsToPurge(

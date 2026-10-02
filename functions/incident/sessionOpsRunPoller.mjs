@@ -5,17 +5,9 @@
 
 import { randomUUID } from "node:crypto";
 import { getSessionOpsRun } from "./sessionOpsCursorAgent.mjs";
-import {
-  SUPPORT_AGENT_WORKING_TEXT,
-  appendSupportThreadMessage,
-} from "./sessionOpsThread.mjs";
+import { appendSupportThreadMessage, SUPPORT_AGENT_WORKING_TEXT } from "./sessionOpsThread.mjs";
 
-export const SESSION_OPS_RUN_TERMINAL = new Set([
-  "FINISHED",
-  "ERROR",
-  "CANCELLED",
-  "EXPIRED",
-]);
+export const SESSION_OPS_RUN_TERMINAL = new Set(["FINISHED", "ERROR", "CANCELLED", "EXPIRED"]);
 
 export const SESSION_OPS_RUN_FAILURE_TEXT =
   "I could not finish that request. Please try again in a moment.";
@@ -36,8 +28,7 @@ export function isSessionOpsRunTerminal(status) {
  * @param {number} maxAgeMs
  */
 export function isSessionOpsRunExpired(run, now, maxAgeMs = SESSION_OPS_RUN_MAX_AGE_MS) {
-  const startedAt =
-    typeof run?.startedAt === "string" ? Date.parse(run.startedAt) : NaN;
+  const startedAt = typeof run?.startedAt === "string" ? Date.parse(run.startedAt) : NaN;
   if (Number.isNaN(startedAt)) {
     return false;
   }
@@ -54,15 +45,8 @@ export function isSessionOpsRunExpired(run, now, maxAgeMs = SESSION_OPS_RUN_MAX_
  * @param {() => Date} now
  * @param {{ runTransaction?: Function }} [deps]
  */
-export async function claimSessionOpsRunFinalize(
-  db,
-  incidentId,
-  runId,
-  now,
-  deps = {},
-) {
-  const runTransaction =
-    deps.runTransaction ?? ((fn) => db.runTransaction(fn));
+export async function claimSessionOpsRunFinalize(db, incidentId, runId, now, deps = {}) {
+  const runTransaction = deps.runTransaction ?? ((fn) => db.runTransaction(fn));
   const ref = db.collection("incidents").doc(incidentId);
 
   return runTransaction(async (transaction) => {
@@ -158,12 +142,7 @@ async function clearWorkingPlaceholder(db, incidentId, workingMessageId, text) {
  *   maxAgeMs?: number,
  * }}
  */
-export async function finalizeSessionOpsRunIfReady(
-  db,
-  incidentId,
-  incident,
-  deps,
-) {
+export async function finalizeSessionOpsRunIfReady(db, incidentId, incident, deps) {
   const run =
     incident?.supportAgentRun && typeof incident.supportAgentRun === "object"
       ? incident.supportAgentRun
@@ -198,10 +177,7 @@ export async function finalizeSessionOpsRunIfReady(
   const getRun = deps.getRun ?? getSessionOpsRun;
   let snapshot = { status: "RUNNING", text: null };
   try {
-    snapshot = await getRun(
-      { apiKey, agentId, runId },
-      { fetch: deps.fetch },
-    );
+    snapshot = await getRun({ apiKey, agentId, runId }, { fetch: deps.fetch });
   } catch (error) {
     if (!agedOut) {
       throw error;
@@ -213,13 +189,7 @@ export async function finalizeSessionOpsRunIfReady(
     return { handled: false, reason: "still_running", status: snapshot.status };
   }
 
-  const claimed = await claimSessionOpsRunFinalize(
-    db,
-    incidentId,
-    runId,
-    now,
-    deps,
-  );
+  const claimed = await claimSessionOpsRunFinalize(db, incidentId, runId, now, deps);
   if (!claimed.ok) {
     return { handled: false, reason: claimed.reason ?? "claim_failed" };
   }
@@ -228,8 +198,7 @@ export async function finalizeSessionOpsRunIfReady(
   const generateId = deps.generateId ?? (() => randomUUID());
   const appendMessage =
     deps.appendSupportMessage ??
-    ((message) =>
-      appendSupportThreadMessage(db, incidentId, message, generateId));
+    ((message) => appendSupportThreadMessage(db, incidentId, message, generateId));
 
   const succeeded = snapshot.status === "FINISHED" && !agedOut;
   const assistantText =
@@ -251,15 +220,8 @@ export async function finalizeSessionOpsRunIfReady(
   });
 
   const workingMessageId =
-    typeof claimedRun.workingMessageId === "string"
-      ? claimedRun.workingMessageId
-      : "";
-  await clearWorkingPlaceholder(
-    db,
-    incidentId,
-    workingMessageId,
-    SUPPORT_AGENT_WORKING_TEXT,
-  );
+    typeof claimedRun.workingMessageId === "string" ? claimedRun.workingMessageId : "";
+  await clearWorkingPlaceholder(db, incidentId, workingMessageId, SUPPORT_AGENT_WORKING_TEXT);
 
   // Re-check runId so we never merge finished over a newer active run.
   const freshSnap = await db.collection("incidents").doc(incidentId).get();
@@ -337,12 +299,7 @@ export async function pollSessionOpsRuns(db, deps) {
   const results = [];
   for (const entry of incidents) {
     try {
-      const result = await finalizeSessionOpsRunIfReady(
-        db,
-        entry.id,
-        entry.data,
-        deps,
-      );
+      const result = await finalizeSessionOpsRunIfReady(db, entry.id, entry.data, deps);
       results.push({ incidentId: entry.id, ...result });
     } catch (error) {
       results.push({

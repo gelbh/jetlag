@@ -9,10 +9,7 @@ function shouldShowPersistenceBanner(): boolean {
     return false;
   }
 
-  return (
-    isFirestorePersistenceUnavailable() &&
-    sessionStorage.getItem(DISMISS_KEY) !== "1"
-  );
+  return isFirestorePersistenceUnavailable() && sessionStorage.getItem(DISMISS_KEY) !== "1";
 }
 
 export function FirestorePersistenceBanner() {
@@ -29,8 +26,7 @@ export function FirestorePersistenceBanner() {
       aria-live="polite"
       className="pointer-events-auto mx-3 mt-1.5 text-center text-sm font-semibold text-pretty"
     >
-      Offline cache unavailable on this device. Map data may not reload without
-      signal.{" "}
+      Offline cache unavailable on this device. Map data may not reload without signal.{" "}
       <button
         type="button"
         className="underline"

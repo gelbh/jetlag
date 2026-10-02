@@ -1,9 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { formatDistance } from "../map/distance";
-import {
-  photoUploadAccessError,
-  photoUploadServerDiagnostics,
-} from "./photoUploadAccess";
+import { photoUploadAccessError, photoUploadServerDiagnostics } from "./photoUploadAccess";
 
 describe("formatDistance metric", () => {
   it("formats whole kilometers without decimals", () => {

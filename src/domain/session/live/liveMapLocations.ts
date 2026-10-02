@@ -19,10 +19,7 @@ export function clusterNearbyPoints<T extends PlayerLocationRecord>(
   for (const point of points) {
     const existing = clusters.find(
       (cluster) =>
-        haversineMeters(
-          [cluster.lat, cluster.lng],
-          [point.lat, point.lng],
-        ) <= proximityMeters,
+        haversineMeters([cluster.lat, cluster.lng], [point.lat, point.lng]) <= proximityMeters,
     );
 
     if (existing) {
@@ -53,9 +50,7 @@ export function clusterHiderLocations(
   return clusterNearbyPoints(locations);
 }
 
-export function locationClusterStableKey(
-  cluster: LocationCluster,
-): string {
+export function locationClusterStableKey(cluster: LocationCluster): string {
   return [...cluster.uids].sort().join("-");
 }
 
@@ -75,14 +70,10 @@ export function clusterTooltipLabel(
   return count === 1 ? "1 hider" : `${count} hiders`;
 }
 
-export function isSeekerLocationRole(
-  role: PlayerLocationRecord["role"] | undefined,
-): boolean {
+export function isSeekerLocationRole(role: PlayerLocationRecord["role"] | undefined): boolean {
   return role !== "hider";
 }
 
-export function isHiderLocationRole(
-  role: PlayerLocationRecord["role"] | undefined,
-): boolean {
+export function isHiderLocationRole(role: PlayerLocationRecord["role"] | undefined): boolean {
   return role === "hider";
 }

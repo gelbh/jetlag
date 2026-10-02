@@ -32,11 +32,7 @@ export function WizardPhaseStepper({
   nav,
 }: WizardPhaseStepperProps): ReactElement {
   const navBack = nav ? (
-    <WizardStepBackButton
-      canGoBack={nav.canGoBack}
-      onBack={nav.onBack}
-      reserveSpace
-    />
+    <WizardStepBackButton canGoBack={nav.canGoBack} onBack={nav.onBack} reserveSpace />
   ) : (
     <span className="wizard-step-nav-slot" aria-hidden />
   );
@@ -62,10 +58,7 @@ export function WizardPhaseStepper({
         {navNext}
       </div>
       {currentPhaseId === "configure" ? (
-        <WizardConfigureContinuum
-          steps={configureSteps}
-          index={configureIndex}
-        />
+        <WizardConfigureContinuum steps={configureSteps} index={configureIndex} />
       ) : null}
     </div>
   );

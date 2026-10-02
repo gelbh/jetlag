@@ -12,20 +12,17 @@ const emitQuestionAnsweredActivity = vi.fn();
 
 vi.mock("../../services/firestore/firestoreSessionExtras", () => ({
   updatePendingQuestion: (...args: unknown[]) => updatePendingQuestion(...args),
-  getPendingQuestionStatus: (...args: unknown[]) =>
-    getPendingQuestionStatus(...args),
+  getPendingQuestionStatus: (...args: unknown[]) => getPendingQuestionStatus(...args),
 }));
 
 vi.mock("../../services/session/emitSessionActivity", async () => {
-  const actual = await vi.importActual<
-    typeof import("../../services/session/emitSessionActivity")
-  >("../../services/session/emitSessionActivity");
+  const actual = await vi.importActual<typeof import("../../services/session/emitSessionActivity")>(
+    "../../services/session/emitSessionActivity",
+  );
   return {
     ...actual,
-    emitPhotoAnsweredActivity: (...args: unknown[]) =>
-      emitPhotoAnsweredActivity(...args),
-    emitQuestionAnsweredActivity: (...args: unknown[]) =>
-      emitQuestionAnsweredActivity(...args),
+    emitPhotoAnsweredActivity: (...args: unknown[]) => emitPhotoAnsweredActivity(...args),
+    emitQuestionAnsweredActivity: (...args: unknown[]) => emitQuestionAnsweredActivity(...args),
   };
 });
 
@@ -86,11 +83,9 @@ describe("usePendingQuestionResolver", () => {
     );
 
     await waitFor(() => {
-      expect(updatePendingQuestion).toHaveBeenCalledWith(
-        "session-1",
-        "pq-photo",
-        { status: "resolved" },
-      );
+      expect(updatePendingQuestion).toHaveBeenCalledWith("session-1", "pq-photo", {
+        status: "resolved",
+      });
     });
 
     expect(createAnnotation).not.toHaveBeenCalled();
@@ -104,9 +99,7 @@ describe("usePendingQuestionResolver", () => {
     updatePendingQuestion.mockRejectedValue(
       new FirebaseError("permission-denied", "Missing or insufficient permissions."),
     );
-    getPendingQuestionStatus
-      .mockResolvedValueOnce("answered")
-      .mockResolvedValueOnce("resolved");
+    getPendingQuestionStatus.mockResolvedValueOnce("answered").mockResolvedValueOnce("resolved");
 
     renderHook(() =>
       usePendingQuestionResolver({
@@ -137,9 +130,7 @@ describe("usePendingQuestionResolver", () => {
     updatePendingQuestion.mockRejectedValue(
       new FirebaseError("permission-denied", "Missing or insufficient permissions."),
     );
-    getPendingQuestionStatus
-      .mockResolvedValueOnce("answered")
-      .mockResolvedValueOnce("cancelled");
+    getPendingQuestionStatus.mockResolvedValueOnce("answered").mockResolvedValueOnce("cancelled");
 
     renderHook(() =>
       usePendingQuestionResolver({
@@ -198,10 +189,7 @@ describe("usePendingQuestionResolver", () => {
     );
 
     await waitFor(() => {
-      expect(getPendingQuestionStatus).toHaveBeenCalledWith(
-        "session-1",
-        "pq-photo",
-      );
+      expect(getPendingQuestionStatus).toHaveBeenCalledWith("session-1", "pq-photo");
     });
 
     expect(createAnnotation).not.toHaveBeenCalled();
@@ -255,11 +243,10 @@ describe("usePendingQuestionResolver", () => {
       id: "pq-radar-1",
       type: "radar",
     });
-    expect(updatePendingQuestion).toHaveBeenCalledWith(
-      "session-1",
-      "pq-radar-1",
-      { status: "resolved", resolvedAnnotationId: "pq-radar-1" },
-    );
+    expect(updatePendingQuestion).toHaveBeenCalledWith("session-1", "pq-radar-1", {
+      status: "resolved",
+      resolvedAnnotationId: "pq-radar-1",
+    });
   });
 
   it("cancels pending when resolve throws and does not retry", async () => {
@@ -303,11 +290,9 @@ describe("usePendingQuestionResolver", () => {
     );
 
     await waitFor(() => {
-      expect(updatePendingQuestion).toHaveBeenCalledWith(
-        "session-1",
-        "pq-radar-fail",
-        { status: "cancelled" },
-      );
+      expect(updatePendingQuestion).toHaveBeenCalledWith("session-1", "pq-radar-fail", {
+        status: "cancelled",
+      });
     });
 
     expect(createAnnotation).toHaveBeenCalledTimes(1);
@@ -320,9 +305,7 @@ describe("usePendingQuestionResolver", () => {
 
     expect(createAnnotation).toHaveBeenCalledTimes(1);
     expect(
-      updatePendingQuestion.mock.calls.filter(
-        (call) => call[2]?.status === "cancelled",
-      ),
+      updatePendingQuestion.mock.calls.filter((call) => call[2]?.status === "cancelled"),
     ).toHaveLength(1);
   });
 
@@ -365,11 +348,10 @@ describe("usePendingQuestionResolver", () => {
     );
 
     await waitFor(() => {
-      expect(updatePendingQuestion).toHaveBeenCalledWith(
-        "session-1",
-        "pq-radar-known",
-        { status: "resolved", resolvedAnnotationId: "pq-radar-known" },
-      );
+      expect(updatePendingQuestion).toHaveBeenCalledWith("session-1", "pq-radar-known", {
+        status: "resolved",
+        resolvedAnnotationId: "pq-radar-known",
+      });
     });
 
     expect(createAnnotation).not.toHaveBeenCalled();
@@ -416,18 +398,15 @@ describe("usePendingQuestionResolver", () => {
     );
 
     await waitFor(() => {
-      expect(updatePendingQuestion).toHaveBeenCalledWith(
-        "session-1",
-        "pq-radar-known-fail",
-        { status: "resolved", resolvedAnnotationId: "pq-radar-known-fail" },
-      );
+      expect(updatePendingQuestion).toHaveBeenCalledWith("session-1", "pq-radar-known-fail", {
+        status: "resolved",
+        resolvedAnnotationId: "pq-radar-known-fail",
+      });
     });
 
     expect(createAnnotation).not.toHaveBeenCalled();
     expect(
-      updatePendingQuestion.mock.calls.filter(
-        (call) => call[2]?.status === "cancelled",
-      ),
+      updatePendingQuestion.mock.calls.filter((call) => call[2]?.status === "cancelled"),
     ).toHaveLength(0);
   });
 
@@ -494,11 +473,10 @@ describe("usePendingQuestionResolver", () => {
     releaseStatus("answered");
 
     await waitFor(() => {
-      expect(updatePendingQuestion).toHaveBeenCalledWith(
-        "session-1",
-        "pq-radar-hydrate",
-        { status: "resolved", resolvedAnnotationId: "pq-radar-hydrate" },
-      );
+      expect(updatePendingQuestion).toHaveBeenCalledWith("session-1", "pq-radar-hydrate", {
+        status: "resolved",
+        resolvedAnnotationId: "pq-radar-hydrate",
+      });
     });
 
     expect(createAnnotation).not.toHaveBeenCalled();
@@ -546,18 +524,15 @@ describe("usePendingQuestionResolver", () => {
     );
 
     await waitFor(() => {
-      expect(updatePendingQuestion).toHaveBeenCalledWith(
-        "session-1",
-        "pq-radar-postwrite",
-        { status: "resolved", resolvedAnnotationId: "pq-radar-postwrite" },
-      );
+      expect(updatePendingQuestion).toHaveBeenCalledWith("session-1", "pq-radar-postwrite", {
+        status: "resolved",
+        resolvedAnnotationId: "pq-radar-postwrite",
+      });
     });
 
     expect(createAnnotation).toHaveBeenCalledTimes(1);
     expect(
-      updatePendingQuestion.mock.calls.filter(
-        (call) => call[2]?.status === "cancelled",
-      ),
+      updatePendingQuestion.mock.calls.filter((call) => call[2]?.status === "cancelled"),
     ).toHaveLength(0);
     // First call: happy-path resolve (rejected); second: catch complete-to-resolved
     expect(updatePendingQuestion).toHaveBeenCalledTimes(2);
@@ -595,9 +570,7 @@ describe("usePendingQuestionResolver", () => {
     updatePendingQuestion.mockRejectedValue(
       new FirebaseError("permission-denied", "Missing or insufficient permissions."),
     );
-    getPendingQuestionStatus
-      .mockResolvedValueOnce("answered")
-      .mockResolvedValueOnce("cancelled");
+    getPendingQuestionStatus.mockResolvedValueOnce("answered").mockResolvedValueOnce("cancelled");
 
     renderHook(() =>
       usePendingQuestionResolver({

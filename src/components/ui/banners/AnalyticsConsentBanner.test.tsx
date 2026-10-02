@@ -1,15 +1,15 @@
-import type { ReactNode } from "react";
 import { fireEvent, screen } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { ReactNode } from "react";
 import { MemoryRouter } from "react-router-dom";
-import { AnalyticsConsentBanner } from "./AnalyticsConsentBanner";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   ANALYTICS_CONSENT_KEY,
   writeAnalyticsConsent,
 } from "@/domain/device/consent/analyticsConsent";
-import { resetAnalyticsForTests } from "@/services/core/analytics/analytics";
 import { resetEmbedModeForTests } from "@/domain/device/embed/embedMode";
+import { resetAnalyticsForTests } from "@/services/core/analytics/analytics";
 import { renderWithAppUi } from "../../../test/renderWithAppUi";
+import { AnalyticsConsentBanner } from "./AnalyticsConsentBanner";
 
 vi.mock("posthog-js", () => ({
   default: {
@@ -73,13 +73,8 @@ describe("AnalyticsConsentBanner", () => {
     expect(screen.getByRole("dialog")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Accept" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Decline" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Privacy" })).toHaveAttribute(
-      "href",
-      "/privacy",
-    );
-    expect(container.innerHTML).not.toMatch(
-      /hud-panel|btn-primary|btn-secondary|map-float-alert/,
-    );
+    expect(screen.getByRole("link", { name: "Privacy" })).toHaveAttribute("href", "/privacy");
+    expect(container.innerHTML).not.toMatch(/hud-panel|btn-primary|btn-secondary|map-float-alert/);
   });
 
   it("hides when consent is already set", () => {

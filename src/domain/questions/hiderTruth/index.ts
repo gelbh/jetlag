@@ -1,14 +1,10 @@
-import type { GameArea } from "../../map/annotations";
 import type { LatLngTuple } from "../../geometry/gameArea/geometry";
+import type { GameArea } from "../../map/annotations";
 import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
 import { truthMatching, truthMatchingAsync } from "./matching";
 import { truthMeasuringSeaLevel, truthMeasuringSync } from "./measuring";
 import { truthRadar } from "./radar";
-import {
-  truthUnavailable,
-  UNAVAILABLE_NO_ZONE,
-  type HiderTruthResult,
-} from "./shared";
+import { type HiderTruthResult, truthUnavailable, UNAVAILABLE_NO_ZONE } from "./shared";
 import { truthTentacle } from "./tentacle";
 import { truthThermometer } from "./thermometer";
 

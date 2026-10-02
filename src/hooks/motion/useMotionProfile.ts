@@ -10,9 +10,7 @@ function readPrefersReducedMotion(): boolean {
 }
 
 export function usePrefersReducedMotion(): boolean {
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(
-    readPrefersReducedMotion,
-  );
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(readPrefersReducedMotion);
 
   useEffect(() => {
     if (typeof window.matchMedia !== "function") {

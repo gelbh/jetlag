@@ -1,9 +1,6 @@
 import { act, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import {
-  shouldEmitSeekingStarted,
-  useSeekingStartedActivity,
-} from "./useSeekingStartedActivity";
+import { shouldEmitSeekingStarted, useSeekingStartedActivity } from "./useSeekingStartedActivity";
 
 const emitSeekingStartedActivity = vi.hoisted(() => vi.fn());
 

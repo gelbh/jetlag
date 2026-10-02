@@ -1,21 +1,20 @@
-import { AdvancedSessionSettings } from "../../components/session/settings/AdvancedSessionSettings";
 import { GameSizePicker } from "../../components/session/identity/GameSizePicker";
 import { RolePicker } from "../../components/session/identity/RolePicker";
+import { AdvancedSessionSettings } from "../../components/session/settings/AdvancedSessionSettings";
 import {
   formatPremiumSessionTierHint,
   type PremiumEntitlements,
 } from "../../domain/billing/premiumProducts";
 import type { GameArea, SessionTier } from "../../domain/map/annotations";
-import type { AdvancedSessionSettingsValue } from "../../domain/session/tools/advancedSessionSettings";
-import type { GameSize } from "../../domain/session/size/gameSize";
 import type { DistanceUnit } from "../../domain/map/distance";
 import type { PlayerRole } from "../../domain/session/players/playerRole";
+import type { GameSize } from "../../domain/session/size/gameSize";
+import type { AdvancedSessionSettingsValue } from "../../domain/session/tools/advancedSessionSettings";
+import type { usePremiumHostEligibility } from "../../hooks/billing/usePremiumHostEligibility";
 import { ANALYTICS_EVENTS, track } from "../../services/core/analytics/analytics";
 import { isFirebaseConfigured } from "../../services/core/firebase/firebase";
-import type { usePremiumHostEligibility } from "../../hooks/billing/usePremiumHostEligibility";
 
-type VisibleTierOption =
-  ReturnType<typeof usePremiumHostEligibility>["visibleTierOptions"][number];
+type VisibleTierOption = ReturnType<typeof usePremiumHostEligibility>["visibleTierOptions"][number];
 
 export interface SessionSettingsSectionProps {
   loading: boolean;
@@ -70,11 +69,7 @@ export function SessionSettingsSection({
           <p className="font-display text-xs font-semibold uppercase tracking-[0.1em] text-field-ink-muted">
             Session tier
           </p>
-          <div
-            role="radiogroup"
-            aria-label="Session tier"
-            className="space-y-1.5"
-          >
+          <div role="radiogroup" aria-label="Session tier" className="space-y-1.5">
             {visibleTierOptions.map((option) => {
               const tierHint =
                 option.value === "premium"
@@ -102,9 +97,7 @@ export function SessionSettingsSection({
                     {option.summary}
                   </span>
                   {tierHint ? (
-                    <span className="mt-1 block text-xs font-semibold text-flag">
-                      {tierHint}
-                    </span>
+                    <span className="mt-1 block text-xs font-semibold text-flag">{tierHint}</span>
                   ) : null}
                 </button>
               );

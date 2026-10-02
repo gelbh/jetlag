@@ -1,8 +1,8 @@
 import { act, renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { useSessionStore } from "../../state/sessionStore";
 import { createTestRemoteSession } from "../../test/fixtures/sessions";
 import { resetAllStores } from "../../test/helpers/storeReset";
-import { useSessionStore } from "../../state/sessionStore";
 import { useBoardEconomy } from "./useBoardEconomy";
 
 const ensureBoardEconomyState = vi.hoisted(() =>
@@ -38,9 +38,7 @@ describe("useBoardEconomy", () => {
   beforeEach(() => {
     resetAllStores();
     vi.clearAllMocks();
-    useSessionStore.getState().setSession(
-      createTestRemoteSession({ roundNumber: 2 }),
-    );
+    useSessionStore.getState().setSession(createTestRemoteSession({ roundNumber: 2 }));
   });
 
   it("reseeds board economy with seed:roundNumber", async () => {
@@ -56,9 +54,6 @@ describe("useBoardEconomy", () => {
       await Promise.resolve();
     });
 
-    expect(ensureBoardEconomyState).toHaveBeenCalledWith(
-      "remote-session-1",
-      "board-seed:2",
-    );
+    expect(ensureBoardEconomyState).toHaveBeenCalledWith("remote-session-1", "board-seed:2");
   });
 });

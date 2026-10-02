@@ -1,14 +1,11 @@
-import type { GameArea } from "@/domain/map/annotations";
-import {
-  resolveFineSeaLevelDivisions,
-  sampleGameAreaCells,
-  type ElevationSampleCell,
-} from "@/domain/geometry/measuring/seaLevel";
 import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
 import {
-  isPackGeoSupported,
-  packGeoSeaLevelSeedUrl,
-} from "@/domain/regions/packGeoManifest";
+  type ElevationSampleCell,
+  resolveFineSeaLevelDivisions,
+  sampleGameAreaCells,
+} from "@/domain/geometry/measuring/seaLevel";
+import type { GameArea } from "@/domain/map/annotations";
+import { isPackGeoSupported, packGeoSeaLevelSeedUrl } from "@/domain/regions/packGeoManifest";
 import type { RegionPackId } from "@/domain/regions/regionPack";
 import type { CachedSeaLevelSampling } from "../cache";
 
@@ -70,9 +67,7 @@ export async function loadBundledSeaLevelSeed(
   }
 
   try {
-    const response = await fetch(
-      resolveGeoAssetUrl(packGeoSeaLevelSeedUrl(regionPackId)),
-    );
+    const response = await fetch(resolveGeoAssetUrl(packGeoSeaLevelSeedUrl(regionPackId)));
     if (!response.ok) {
       seedCache.set(regionPackId, null);
       return null;
@@ -131,10 +126,7 @@ export async function loadBundledSeaLevelSeed(
   }
 }
 
-function lookupSeedElevation(
-  seed: BundledSeaLevelSeed,
-  point: LatLngTuple,
-): number {
+function lookupSeedElevation(seed: BundledSeaLevelSeed, point: LatLngTuple): number {
   // Containment only — nearest-fill would invent pack elevations outside the
   // seed footprint and green-wash sparse/stub seeds.
   for (let index = 0; index < seed.cells.length; index += 1) {
@@ -169,16 +161,9 @@ export function remapBundledSeaLevelSeedToGameArea(
     return null;
   }
 
-  const cellElevations = sessionCells.map((cell) =>
-    lookupSeedElevation(seed, cell.point),
-  );
-  const finiteCount = cellElevations.filter((value) =>
-    Number.isFinite(value),
-  ).length;
-  const minCoverage = Math.max(
-    1,
-    Math.ceil(sessionCells.length * MIN_SEED_COVERAGE_RATIO),
-  );
+  const cellElevations = sessionCells.map((cell) => lookupSeedElevation(seed, cell.point));
+  const finiteCount = cellElevations.filter((value) => Number.isFinite(value)).length;
+  const minCoverage = Math.max(1, Math.ceil(sessionCells.length * MIN_SEED_COVERAGE_RATIO));
   if (finiteCount < minCoverage) {
     return null;
   }

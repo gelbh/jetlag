@@ -1,18 +1,11 @@
 import { describe, expect, it } from "vitest";
-import {
-  shouldAppendStrokePoint,
-  strokePointsToLineString,
-} from "./useDrawTool";
+import { shouldAppendStrokePoint, strokePointsToLineString } from "./useDrawTool";
 
 describe("useDrawTool helpers", () => {
   it("appends the first point and skips micro jitter", () => {
     expect(shouldAppendStrokePoint([], [51.5, -0.12])).toBe(true);
-    expect(
-      shouldAppendStrokePoint([[51.5, -0.12]], [51.50001, -0.12]),
-    ).toBe(false);
-    expect(
-      shouldAppendStrokePoint([[51.5, -0.12]], [51.501, -0.12]),
-    ).toBe(true);
+    expect(shouldAppendStrokePoint([[51.5, -0.12]], [51.50001, -0.12])).toBe(false);
+    expect(shouldAppendStrokePoint([[51.5, -0.12]], [51.501, -0.12])).toBe(true);
   });
 
   it("builds a LineString only with 2+ points", () => {

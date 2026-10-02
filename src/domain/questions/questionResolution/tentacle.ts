@@ -1,8 +1,8 @@
-import type { AnnotationRecord, GameArea, TentaclePoi } from "../../map/annotations";
 import type { LatLngTuple } from "../../geometry/gameArea/geometry";
+import { tentacleEliminationJsonForAnswer } from "../../geometry/tentacle/tentacleGeometry";
+import type { AnnotationRecord, GameArea, TentaclePoi } from "../../map/annotations";
 import { DEFAULT_RADIUS_METERS } from "../../map/distance";
 import { MAP_ANNOTATION_COLORS } from "../../map/mapAnnotationColors";
-import { tentacleEliminationJsonForAnswer } from "../../geometry/tentacle/tentacleGeometry";
 import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
 import { tentacleRadiusFromMetadata } from "../tentacleQuestions";
 
@@ -26,13 +26,9 @@ export async function resolveTentaclePendingQuestion(
   const pois = JSON.parse(poisJson) as TentaclePoi[];
   const center = JSON.parse(centerJson) as { lat: number; lng: number };
   const anchor: LatLngTuple = [center.lat, center.lng];
-  const geometry = JSON.parse(
-    pending.placement.geometryJson,
-  ) as AnnotationRecord["geometry"];
+  const geometry = JSON.parse(pending.placement.geometryJson) as AnnotationRecord["geometry"];
   const outOfReach = answerReplyId === "out-of-reach";
-  const answerPoi = outOfReach
-    ? undefined
-    : pois.find((poi) => poi.id === answerReplyId);
+  const answerPoi = outOfReach ? undefined : pois.find((poi) => poi.id === answerReplyId);
   const radiusMeters = tentacleRadiusFromMetadata(metadata, DEFAULT_RADIUS_METERS);
   let eliminationJson: string | undefined;
   try {

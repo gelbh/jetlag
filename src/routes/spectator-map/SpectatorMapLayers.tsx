@@ -1,22 +1,22 @@
-import { AnnotationLayer } from "../../components/map/layers/AnnotationLayer";
 import { ActiveThermometerWalkLayer } from "../../components/map/layers/ActiveThermometerWalkLayer";
+import { AnnotationLayer } from "../../components/map/layers/AnnotationLayer";
 import { HidingZonesLayer } from "../../components/map/layers/HidingZonesLayer";
 import { LiveHiderLocationsLayer } from "../../components/map/layers/LiveHiderLocationsLayer";
 import { LiveSeekerLocationsLayer } from "../../components/map/layers/LiveSeekerLocationsLayer";
 import { PendingQuestionLayer } from "../../components/map/layers/PendingQuestionLayer";
-import type { SessionRecord, GameArea, AnnotationRecord } from "../../domain/map/annotations";
-import type { HidingZoneRecord } from "../../domain/session/hiding/hidingZone";
+import type { AnnotationRecord, GameArea, SessionRecord } from "../../domain/map/annotations";
+import type { DistanceUnit } from "../../domain/map/distance";
+import type { MapStyle } from "../../domain/map/mapBasemaps";
 import type {
   PendingQuestionRecord,
   PlayerLocationRecord,
 } from "../../domain/session/activity/sessionChat";
-import type { SessionRulesInput } from "../../domain/session/rules";
+import type { HidingZoneRecord } from "../../domain/session/hiding/hidingZone";
 import type { SpectatorLayerConfig } from "../../domain/session/players/observerPerspective";
-import type { LayerVisibility } from "../../state/mapStore";
-import type { MapStyle } from "../../domain/map/mapBasemaps";
-import type { DistanceUnit } from "../../domain/map/distance";
+import type { SessionRulesInput } from "../../domain/session/rules";
 import type { useActiveThermometerWalk } from "../../hooks/location/useActiveThermometerWalk";
 import { useAnnotationStore } from "../../state/annotationStore";
+import type { LayerVisibility } from "../../state/mapStore";
 import { useMapStore } from "../../state/sessionStore";
 
 type SpectatorMapLayersProps = {
@@ -52,9 +52,7 @@ export function SpectatorMapLayers({
   uid,
   activeThermometerWalk,
 }: SpectatorMapLayersProps) {
-  const selectedAnnotationId = useAnnotationStore(
-    (state) => state.selectedAnnotationId,
-  );
+  const selectedAnnotationId = useAnnotationStore((state) => state.selectedAnnotationId);
   const streetBasemap = useMapStore((state) => state.streetBasemap);
 
   return (

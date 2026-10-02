@@ -1,9 +1,9 @@
-import { describe, expect, it } from "vitest";
+import { existsSync } from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
 import { point as turfPoint } from "@turf/helpers";
-import { existsSync } from "node:fs";
-import { fileURLToPath } from "node:url";
-import path from "node:path";
+import { describe, expect, it } from "vitest";
 import type { AnnotationRecord, GameArea } from "../../map/annotations";
 import type { HidingZoneRecord } from "../../session/hiding/hidingZone";
 import {
@@ -11,12 +11,9 @@ import {
   computeEliminationUnionInputTs,
   eliminationFeatureForAnnotationTs,
 } from "../adapter/eliminationMask";
-import {
-  runEndGameMaskFromDisks,
-  runMaskFromUnionInput,
-} from "../kernel/maskKernelRunner";
-import { featureToGameAreaGeometry } from "../kernel/featureConvert";
 import { gameAreaToFeature } from "../core/gameAreaConvert";
+import { featureToGameAreaGeometry } from "../kernel/featureConvert";
+import { runEndGameMaskFromDisks, runMaskFromUnionInput } from "../kernel/maskKernelRunner";
 import { unionEliminationParts } from "../kernel/unionPolygonFeatures";
 
 const pkgEntry = path.resolve(
@@ -38,10 +35,7 @@ const gameArea: GameArea = {
   ],
 };
 
-function matchingAnnotation(
-  id: string,
-  west: number,
-): AnnotationRecord {
+function matchingAnnotation(id: string, west: number): AnnotationRecord {
   return {
     id,
     sessionId: "session",
@@ -81,10 +75,7 @@ async function buildCombinedMask(
 ) {
   const geometry = featureToGameAreaGeometry(gameAreaToFeature(area));
   if (endGameHidingZones.length > 0) {
-    return runEndGameMaskFromDisks(
-      geometry,
-      annotationsToEndGameDisks(endGameHidingZones),
-    );
+    return runEndGameMaskFromDisks(geometry, annotationsToEndGameDisks(endGameHidingZones));
   }
   return runMaskFromUnionInput(
     computeEliminationUnionInputTs(annotations, area, draftFeatures),
@@ -103,9 +94,7 @@ describe.skipIf(!wasmPkgReady)("combinedEliminationMask parity", () => {
     const candidate = await buildCombinedMask(annotations, gameArea);
     const baseline = unionEliminationParts(
       {
-        polygons: annotations.map(
-          (annotation) => eliminationFeatureForAnnotationTs(annotation)!,
-        ),
+        polygons: annotations.map((annotation) => eliminationFeatureForAnnotationTs(annotation)!),
         disks: [],
       },
       "turf",
@@ -113,12 +102,12 @@ describe.skipIf(!wasmPkgReady)("combinedEliminationMask parity", () => {
 
     expect(candidate).not.toBeNull();
     expect(baseline).not.toBeNull();
-    expect(
-      booleanPointInPolygon(turfPoint([-0.185, 51.45]), candidate!),
-    ).toBe(booleanPointInPolygon(turfPoint([-0.185, 51.45]), baseline!));
-    expect(
-      booleanPointInPolygon(turfPoint([-0.155, 51.45]), candidate!),
-    ).toBe(booleanPointInPolygon(turfPoint([-0.155, 51.45]), baseline!));
+    expect(booleanPointInPolygon(turfPoint([-0.185, 51.45]), candidate!)).toBe(
+      booleanPointInPolygon(turfPoint([-0.185, 51.45]), baseline!),
+    );
+    expect(booleanPointInPolygon(turfPoint([-0.155, 51.45]), candidate!)).toBe(
+      booleanPointInPolygon(turfPoint([-0.155, 51.45]), baseline!),
+    );
   });
 });
 
@@ -130,19 +119,12 @@ describe.skipIf(!wasmPkgReady)("combinedEliminationMask", () => {
     );
 
     expect(combined).not.toBeNull();
-    expect(
-      booleanPointInPolygon(turfPoint([-0.185, 51.45]), combined!),
-    ).toBe(true);
-    expect(
-      booleanPointInPolygon(turfPoint([-0.155, 51.45]), combined!),
-    ).toBe(true);
+    expect(booleanPointInPolygon(turfPoint([-0.185, 51.45]), combined!)).toBe(true);
+    expect(booleanPointInPolygon(turfPoint([-0.155, 51.45]), combined!)).toBe(true);
   });
 
   it("adds a new elimination region to an existing mask", async () => {
-    const first = await buildCombinedMask(
-      [matchingAnnotation("a", -0.19)],
-      gameArea,
-    );
+    const first = await buildCombinedMask([matchingAnnotation("a", -0.19)], gameArea);
     const combined = await buildCombinedMask(
       [matchingAnnotation("a", -0.19), matchingAnnotation("b", -0.16)],
       gameArea,
@@ -150,15 +132,11 @@ describe.skipIf(!wasmPkgReady)("combinedEliminationMask", () => {
 
     expect(first).not.toBeNull();
     expect(combined).not.toBeNull();
-    expect(
-      booleanPointInPolygon(turfPoint([-0.155, 51.45]), combined!),
-    ).toBe(true);
+    expect(booleanPointInPolygon(turfPoint([-0.155, 51.45]), combined!)).toBe(true);
   });
 
   it("includes draft preview features with committed eliminations", async () => {
-    const draft = eliminationFeatureForAnnotationTs(
-      matchingAnnotation("draft", -0.12),
-    );
+    const draft = eliminationFeatureForAnnotationTs(matchingAnnotation("draft", -0.12));
 
     expect(draft).not.toBeNull();
 
@@ -169,12 +147,8 @@ describe.skipIf(!wasmPkgReady)("combinedEliminationMask", () => {
     );
 
     expect(combined).not.toBeNull();
-    expect(
-      booleanPointInPolygon(turfPoint([-0.185, 51.45]), combined!),
-    ).toBe(true);
-    expect(
-      booleanPointInPolygon(turfPoint([-0.115, 51.45]), combined!),
-    ).toBe(true);
+    expect(booleanPointInPolygon(turfPoint([-0.185, 51.45]), combined!)).toBe(true);
+    expect(booleanPointInPolygon(turfPoint([-0.115, 51.45]), combined!)).toBe(true);
   });
 
   it("does not throw when union receives an invalid draft polygon", async () => {
@@ -196,11 +170,7 @@ describe.skipIf(!wasmPkgReady)("combinedEliminationMask", () => {
     } as import("../kernel/types").PolygonFeature;
 
     await expect(
-      buildCombinedMask(
-        [matchingAnnotation("a", -0.19)],
-        gameArea,
-        [invalidGeometry],
-      ),
+      buildCombinedMask([matchingAnnotation("a", -0.19)], gameArea, [invalidGeometry]),
     ).resolves.not.toThrow();
   });
 
@@ -219,12 +189,8 @@ describe.skipIf(!wasmPkgReady)("combinedEliminationMask", () => {
 
     const endGameMask = await buildCombinedMask([], gameArea, [], [hidingZone]);
     expect(endGameMask).not.toBeNull();
-    expect(
-      booleanPointInPolygon(turfPoint([-0.15, 51.45]), endGameMask!),
-    ).toBe(false);
-    expect(
-      booleanPointInPolygon(turfPoint([-0.185, 51.45]), endGameMask!),
-    ).toBe(true);
+    expect(booleanPointInPolygon(turfPoint([-0.15, 51.45]), endGameMask!)).toBe(false);
+    expect(booleanPointInPolygon(turfPoint([-0.185, 51.45]), endGameMask!)).toBe(true);
   });
 
   it("uses end-game mask when hiding zones are provided", async () => {
@@ -248,9 +214,7 @@ describe.skipIf(!wasmPkgReady)("combinedEliminationMask", () => {
     );
 
     expect(combined).not.toBeNull();
-    expect(
-      booleanPointInPolygon(turfPoint([-0.15, 51.45]), combined!),
-    ).toBe(false);
+    expect(booleanPointInPolygon(turfPoint([-0.15, 51.45]), combined!)).toBe(false);
   });
 
   it("clips elimination shading to the play area boundary", async () => {
@@ -277,12 +241,8 @@ describe.skipIf(!wasmPkgReady)("combinedEliminationMask", () => {
     const combined = await buildCombinedMask([outsideWest], gameArea);
 
     expect(combined).not.toBeNull();
-    expect(
-      booleanPointInPolygon(turfPoint([-0.21, 51.45]), combined!),
-    ).toBe(false);
-    expect(
-      booleanPointInPolygon(turfPoint([-0.185, 51.45]), combined!),
-    ).toBe(true);
+    expect(booleanPointInPolygon(turfPoint([-0.21, 51.45]), combined!)).toBe(false);
+    expect(booleanPointInPolygon(turfPoint([-0.185, 51.45]), combined!)).toBe(true);
   });
 
   it("returns null when elimination geometry is entirely outside the play area", async () => {

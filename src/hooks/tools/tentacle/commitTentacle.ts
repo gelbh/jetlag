@@ -1,22 +1,18 @@
-import type {
-  AnnotationRecord,
-  GameArea,
-  TentaclePoi,
-} from "@/domain/map/annotations";
 import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
-import { tentacleEliminationJsonForAnswer } from "@/domain/geometry/tentacle/tentacleGeometry";
 import { MEASURING_PERSIST_OVER_BUDGET_MESSAGE } from "@/domain/geometry/measuring/measuringGeometryBudgets";
+import { tentacleEliminationJsonForAnswer } from "@/domain/geometry/tentacle/tentacleGeometry";
+import type { AnnotationRecord, GameArea, TentaclePoi } from "@/domain/map/annotations";
 import type { DistanceUnit } from "@/domain/map/distance";
 import { MAP_ANNOTATION_COLORS } from "@/domain/map/mapAnnotationColors";
 import {
-  TENTACLE_NOT_WITHIN_REACH_LABEL,
   isTentacleCategoryAvailableInSession,
-  tentacleQuestionPrompt,
+  TENTACLE_NOT_WITHIN_REACH_LABEL,
   type TentacleExtendedCategoryId,
+  tentacleQuestionPrompt,
 } from "@/domain/questions";
 import type { SessionRulesInput } from "@/domain/session/rules";
-import type { SubmitPendingQuestionInput } from "../../sync/usePendingQuestionActions";
 import { emitQuestionAnsweredActivity } from "@/services/session/emitSessionActivity";
+import type { SubmitPendingQuestionInput } from "../../sync/usePendingQuestionActions";
 
 export interface CommitTentacleInput {
   canSubmitQuestion: boolean;
@@ -31,10 +27,7 @@ export interface CommitTentacleInput {
   gameArea: GameArea;
   awaitHiderAnswer: boolean;
   submitPendingQuestion?: (
-    input: Omit<
-      SubmitPendingQuestionInput,
-      "sessionId" | "senderUid" | "senderRole" | "toolType"
-    >,
+    input: Omit<SubmitPendingQuestionInput, "sessionId" | "senderUid" | "senderRole" | "toolType">,
   ) => Promise<void>;
   sessionId?: string;
   senderUid?: string | null;
@@ -108,11 +101,7 @@ export async function commitTentacle(input: CommitTentacleInput): Promise<void> 
 
   if (awaitHiderAnswer && submitPendingQuestion && sessionId && senderUid) {
     await submitPendingQuestion({
-      promptText: tentacleQuestionPrompt(
-        tentacleCategoryId,
-        distanceUnit,
-        searchRadiusMeters,
-      ),
+      promptText: tentacleQuestionPrompt(tentacleCategoryId, distanceUnit, searchRadiusMeters),
       replyOptions: [
         ...tentaclePois.map((poi) => ({
           id: poi.id,
@@ -160,11 +149,7 @@ export async function commitTentacle(input: CommitTentacleInput): Promise<void> 
       gameArea,
     });
   } catch (error) {
-    setMapError(
-      error instanceof Error
-        ? error.message
-        : MEASURING_PERSIST_OVER_BUDGET_MESSAGE,
-    );
+    setMapError(error instanceof Error ? error.message : MEASURING_PERSIST_OVER_BUDGET_MESSAGE);
     return;
   }
 
@@ -200,11 +185,7 @@ export async function commitTentacle(input: CommitTentacleInput): Promise<void> 
     emitQuestionAnsweredActivity({
       sessionId,
       toolType: "tentacle",
-      promptText: tentacleQuestionPrompt(
-        tentacleCategoryId,
-        distanceUnit,
-        searchRadiusMeters,
-      ),
+      promptText: tentacleQuestionPrompt(tentacleCategoryId, distanceUnit, searchRadiusMeters),
       annotationId: created.id,
       answerSummary: tentacleOutOfReach
         ? TENTACLE_NOT_WITHIN_REACH_LABEL

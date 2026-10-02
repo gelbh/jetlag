@@ -1,15 +1,12 @@
 export {
-  OVERPASS_JSON_QUERY_HEADER,
   formatOverpassBbox,
   formatOverpassBboxFromGameArea,
+  OVERPASS_JSON_QUERY_HEADER,
   overpassQueryTemplate,
   overpassTaggedBboxClauses,
 } from "./query";
 
-import {
-  overpassQueryTemplate,
-  overpassTaggedBboxClauses,
-} from "./query";
+import { overpassQueryTemplate, overpassTaggedBboxClauses } from "./query";
 
 export function buildTaggedBboxOverpassQuery(
   bbox: string,

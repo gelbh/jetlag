@@ -1,11 +1,8 @@
-import { render, screen } from "@testing-library/react";
 import { MantineProvider } from "@mantine/core";
+import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import {
-  MapLandscapeChromeChip,
-  type MapLandscapeChromeChipProps,
-} from "./MapLandscapeChromeChip";
 import { jetlagTheme } from "@/theme/theme";
+import { MapLandscapeChromeChip, type MapLandscapeChromeChipProps } from "./MapLandscapeChromeChip";
 
 const chipProps: MapLandscapeChromeChipProps = {
   collapsed: true,
@@ -19,9 +16,13 @@ const chipProps: MapLandscapeChromeChipProps = {
 
 beforeEach(() => {
   vi.stubGlobal("matchMedia", (query: string) => ({
-    matches: false, media: query, onchange: null,
-    addListener() {}, removeListener() {},
-    addEventListener() {}, removeEventListener() {},
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener() {},
+    removeListener() {},
+    addEventListener() {},
+    removeEventListener() {},
     dispatchEvent: () => false,
   }));
 });
@@ -40,9 +41,10 @@ describe("MapLandscapeChromeChip", () => {
 
     expect(screen.getByText("HIDE")).toBeInTheDocument();
     expect(screen.getByText(/Offline/)).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: /Show map controls/i }),
-    ).toHaveAttribute("aria-expanded", "false");
+    expect(screen.getByRole("button", { name: /Show map controls/i })).toHaveAttribute(
+      "aria-expanded",
+      "false",
+    );
   });
 
   it("omits sync copy when status is healthy", () => {
@@ -54,9 +56,10 @@ describe("MapLandscapeChromeChip", () => {
     });
 
     expect(screen.queryByText(/Offline/)).not.toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Hide map controls" }),
-    ).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByRole("button", { name: "Hide map controls" })).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
   });
 
   it("mounts Mantine chip", () => {

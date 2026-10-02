@@ -9,12 +9,7 @@ import {
 import { REGION_PACK_REFERENCE_BBOXES } from "./packGeoManifest";
 
 /** Axis-aligned polygon from south/west/north/east (lng, lat rings). */
-function boxPolygon(
-  south: number,
-  west: number,
-  north: number,
-  east: number,
-): GameArea {
+function boxPolygon(south: number, west: number, north: number, east: number): GameArea {
   return {
     type: "Polygon",
     coordinates: [
@@ -61,24 +56,17 @@ describe("suggestRegionPackForGameArea", () => {
     expect(south).toBeLessThan(north);
     expect(west).toBeLessThan(east);
 
-    const suggestion = suggestRegionPackForGameArea(
-      boxPolygon(south, west, north, east),
-    );
+    const suggestion = suggestRegionPackForGameArea(boxPolygon(south, west, north, east));
     expect(suggestion).not.toBeNull();
 
     // Score = intersection / pack area; same intersection ⇒ smaller pack wins.
     const zurichArea =
-      (REGION_PACK_REFERENCE_BBOXES.zurich.north -
-        REGION_PACK_REFERENCE_BBOXES.zurich.south) *
-      (REGION_PACK_REFERENCE_BBOXES.zurich.east -
-        REGION_PACK_REFERENCE_BBOXES.zurich.west);
+      (REGION_PACK_REFERENCE_BBOXES.zurich.north - REGION_PACK_REFERENCE_BBOXES.zurich.south) *
+      (REGION_PACK_REFERENCE_BBOXES.zurich.east - REGION_PACK_REFERENCE_BBOXES.zurich.west);
     const lucerneArea =
-      (REGION_PACK_REFERENCE_BBOXES.lucerne.north -
-        REGION_PACK_REFERENCE_BBOXES.lucerne.south) *
-      (REGION_PACK_REFERENCE_BBOXES.lucerne.east -
-        REGION_PACK_REFERENCE_BBOXES.lucerne.west);
-    const expectedWinner =
-      zurichArea <= lucerneArea ? "zurich" : "lucerne";
+      (REGION_PACK_REFERENCE_BBOXES.lucerne.north - REGION_PACK_REFERENCE_BBOXES.lucerne.south) *
+      (REGION_PACK_REFERENCE_BBOXES.lucerne.east - REGION_PACK_REFERENCE_BBOXES.lucerne.west);
+    const expectedWinner = zurichArea <= lucerneArea ? "zurich" : "lucerne";
     expect(suggestion!.packId).toBe(expectedWinner);
   });
 
@@ -86,12 +74,7 @@ describe("suggestRegionPackForGameArea", () => {
     const nyc = REGION_PACK_REFERENCE_BBOXES.nyc;
     // Tiny sliver along the southern edge — well below default α and β.
     // Uses unexpanded AABB so min-span normalize cannot inflate the score.
-    const tiny = boxPolygon(
-      nyc.south - 0.002,
-      nyc.west,
-      nyc.south + 0.00005,
-      nyc.west + 0.00005,
-    );
+    const tiny = boxPolygon(nyc.south - 0.002, nyc.west, nyc.south + 0.00005, nyc.west + 0.00005);
     expect(suggestRegionPackForGameArea(tiny)).toBeNull();
   });
 });

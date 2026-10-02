@@ -3,18 +3,17 @@ import type { PendingQuestionToolType } from "../session/activity/sessionChat";
 import { rewardForQuestion } from "./engine";
 import type { DrawKeepCycle } from "./types";
 
-export { rewardForQuestion };
 export type { DrawKeepCycle };
+export { rewardForQuestion };
 
-const TOOL_BASE_COST: Partial<Record<PendingQuestionToolType, QuestionCardCost>> =
-  {
-    matching: "D3P1",
-    measuring: "D3P1",
-    radar: "D2P1",
-    thermometer: "D2P1",
-    tentacle: "D4P2",
-    photo: "D1P1",
-  };
+const TOOL_BASE_COST: Partial<Record<PendingQuestionToolType, QuestionCardCost>> = {
+  matching: "D3P1",
+  measuring: "D3P1",
+  radar: "D2P1",
+  thermometer: "D2P1",
+  tentacle: "D4P2",
+  photo: "D1P1",
+};
 
 export function baseCostForQuestionTool(
   toolType: PendingQuestionToolType,

@@ -1,5 +1,4 @@
 import { Stack } from "@mantine/core";
-import type { SessionRulesInput } from "../../domain/session/rules";
 import type { HiderTruthReferenceMode } from "../../domain/questions/hiderTruth/resolveHiderTruthReference";
 import type { HiderTruthResult } from "../../domain/questions/ui";
 import type {
@@ -7,6 +6,7 @@ import type {
   SessionMessageRecord,
 } from "../../domain/session/activity/sessionChat";
 import type { PlayerRole } from "../../domain/session/players/playerRole";
+import type { SessionRulesInput } from "../../domain/session/rules";
 import { useVisualViewportBottomInset } from "../../hooks/layout/useVisualViewportBottomInset";
 import { SheetHost } from "../ui/sheets/SheetHost";
 import { ChatPanelBody } from "./ChatPanelBody";
@@ -36,10 +36,7 @@ export type ChatPanelModel = {
     selectedReply: string,
     deadlineExpired?: boolean,
   ) => Promise<void>;
-  onDismissExpiredQuestion?: (
-    pendingQuestionId: string,
-    messageId: string,
-  ) => Promise<void>;
+  onDismissExpiredQuestion?: (pendingQuestionId: string, messageId: string) => Promise<void>;
   readOnly?: boolean;
 };
 
@@ -98,9 +95,7 @@ export function ChatPanel({ model }: ChatPanelProps) {
       ariaLabel="Chat"
       maxHeightClassName="max-h-[min(72dvh,640px)]"
       scrollMode="child"
-      contentStyle={
-        keyboardInset > 0 ? { paddingBottom: keyboardInset } : undefined
-      }
+      contentStyle={keyboardInset > 0 ? { paddingBottom: keyboardInset } : undefined}
     >
       <Stack gap={8} style={{ flex: 1, minHeight: 0, height: "100%" }}>
         {body}

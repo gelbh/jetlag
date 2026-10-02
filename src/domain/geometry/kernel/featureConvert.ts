@@ -1,5 +1,5 @@
-import type { Feature, MultiPolygon, Polygon } from "geojson";
 import { multiPolygon, polygon as turfPolygon } from "@turf/helpers";
+import type { Feature, MultiPolygon, Polygon } from "geojson";
 import type { GameAreaGeometry } from "./types";
 
 export function gameAreaGeometryToFeature(

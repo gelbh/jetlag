@@ -10,9 +10,7 @@ export function formatClockDurationFromMs(
 ): string {
   const totalSeconds = Math.max(
     0,
-    options.ceilSeconds
-      ? Math.ceil(elapsedMs / 1000)
-      : Math.floor(elapsedMs / 1000),
+    options.ceilSeconds ? Math.ceil(elapsedMs / 1000) : Math.floor(elapsedMs / 1000),
   );
   const duration = intervalToDuration({ start: 0, end: totalSeconds * 1000 });
   const hours = duration.hours ?? 0;
@@ -36,9 +34,7 @@ export function formatShortCountdownFromMs(
 ): string {
   const totalSeconds = Math.max(
     0,
-    options.ceilSeconds
-      ? Math.ceil(elapsedMs / 1000)
-      : Math.floor(elapsedMs / 1000),
+    options.ceilSeconds ? Math.ceil(elapsedMs / 1000) : Math.floor(elapsedMs / 1000),
   );
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds % 60;

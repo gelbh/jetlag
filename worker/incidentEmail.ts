@@ -13,8 +13,7 @@ export const INCIDENT_EMAIL_PATH = "/api/incident-email";
 
 const RESEND_ENDPOINT = "https://api.resend.com/emails";
 const DEFAULT_INCIDENT_ADMIN_EMAIL = "gelbharttomer@gmail.com";
-const DEFAULT_INCIDENT_EMAIL_FROM =
-  "Jet Lag Incidents <incidents@gelbhart.dev>";
+const DEFAULT_INCIDENT_EMAIL_FROM = "Jet Lag Incidents <incidents@gelbhart.dev>";
 
 export type IncidentEmailAudience = "admin" | "reporter";
 
@@ -60,8 +59,7 @@ function parseBody(value: unknown): IncidentEmailRequestBody | null {
   }
   const parsed: IncidentEmailRequestBody = { subject, text };
   const audience = record.audience;
-  parsed.audience =
-    audience === "reporter" || audience === "admin" ? audience : "admin";
+  parsed.audience = audience === "reporter" || audience === "admin" ? audience : "admin";
   if (typeof record.to === "string" && record.to.length > 0) {
     parsed.to = record.to;
   }
@@ -77,7 +75,7 @@ function parseBody(value: unknown): IncidentEmailRequestBody | null {
 export async function handleIncidentEmailRequest(
   request: Request,
   env: Env,
-  fetchImpl: typeof fetch = fetch
+  fetchImpl: typeof fetch = fetch,
 ): Promise<Response> {
   if (request.method !== "POST") {
     return jsonResponse(405, { error: "Method not allowed" });
@@ -162,11 +160,7 @@ export async function handleIncidentEmailRequest(
     } catch {
       // keep default
     }
-    console.warn(
-      "incident email Resend rejected",
-      upstream.status,
-      providerDetail
-    );
+    console.warn("incident email Resend rejected", upstream.status, providerDetail);
     return jsonResponse(502, { error: "Email provider rejected the request" });
   }
 

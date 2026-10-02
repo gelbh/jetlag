@@ -1,8 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-const initializeAppCheck = vi.hoisted(() =>
-  vi.fn(() => ({ name: "app-check" })),
-);
+const initializeAppCheck = vi.hoisted(() => vi.fn(() => ({ name: "app-check" })));
 
 const firebaseAppMocks = vi.hoisted(() => ({
   initializeApp: vi.fn(() => ({ name: "[DEFAULT]" })),

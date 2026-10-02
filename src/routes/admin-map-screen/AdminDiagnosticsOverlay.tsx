@@ -1,5 +1,5 @@
-import type { SessionRecord } from "../../domain/map/annotations";
 import { APP_VERSION } from "../../domain/device/changelog";
+import type { SessionRecord } from "../../domain/map/annotations";
 
 function formatTimestamp(value: string | undefined): string {
   if (!value) {
@@ -50,11 +50,7 @@ export function AdminDiagnosticsOverlay({
           <h2 className="font-display text-sm font-semibold uppercase tracking-wide text-ink">
             Diagnostics
           </h2>
-          <button
-            type="button"
-            className="btn-secondary min-h-9 px-3 text-xs"
-            onClick={onClose}
-          >
+          <button type="button" className="btn-secondary min-h-9 px-3 text-xs" onClick={onClose}>
             Close
           </button>
         </div>

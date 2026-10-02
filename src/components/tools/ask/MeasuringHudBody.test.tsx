@@ -1,7 +1,8 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
 import { MantineProvider } from "@mantine/core";
+import { render, screen } from "@testing-library/react";
 import type { ReactElement } from "react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { type AskHudReadiness, activeModeCue, canCommit } from "@/domain/ask/askHudModes";
 import type { DistanceUnit } from "@/domain/map/distance";
 import {
   BASE_MEASURING_CATALOG,
@@ -18,11 +19,6 @@ import {
   type MeasuringHudBodyModel,
   type MeasuringHudBodyProps,
 } from "./MeasuringHudBody";
-import {
-  activeModeCue,
-  canCommit,
-  type AskHudReadiness,
-} from "@/domain/ask/askHudModes";
 
 function renderHud(ui: ReactElement) {
   return render(
@@ -106,9 +102,7 @@ describe("MeasuringHudBody", () => {
         canCommit={false}
         commitLabel="SEND"
         onCommit={() => {}}
-        modeBody={
-          <MeasuringHudBody model={{ ...baseModel, costLabel: "D3P1" }} />
-        }
+        modeBody={<MeasuringHudBody model={{ ...baseModel, costLabel: "D3P1" }} />}
         showCue={false}
         showCostChip={false}
         showCommitStrip={false}
@@ -117,9 +111,7 @@ describe("MeasuringHudBody", () => {
 
     expect(screen.getByTestId("measuring-hud-body")).toBeInTheDocument();
     expect(screen.getByTestId("ask-catalog-rail")).toBeInTheDocument();
-    expect(
-      screen.getByRole("status", { name: /Measuring · D3P1/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("status", { name: /Measuring · D3P1/i })).toBeInTheDocument();
     expect(
       screen.getByText(/Compared to me, are you closer to or further from/i),
     ).toBeInTheDocument();
@@ -194,9 +186,7 @@ describe("MeasuringHudBody", () => {
       />,
     );
     expect(screen.getByText("Zoo")).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: /Zoo/i }),
-    ).toBeDisabled();
+    expect(screen.getByRole("button", { name: /Zoo/i })).toBeDisabled();
   });
 
   it("shows empty-area reason and disables that category on the sheet", () => {
@@ -209,11 +199,7 @@ describe("MeasuringHudBody", () => {
         }}
       />,
     );
-    expect(
-      screen.getByText("No named zoo found in this play area."),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: /Zoo/i }),
-    ).toBeDisabled();
+    expect(screen.getByText("No named zoo found in this play area.")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Zoo/i })).toBeDisabled();
   });
 });

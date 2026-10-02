@@ -1,13 +1,7 @@
-import type { GameArea } from "@/domain/map/annotations";
 import { gameAreaToBoundingBox } from "@/domain/geometry/gameArea/gameAreaBounds";
-import {
-  buildOverpassAuditCases,
-  type OverpassAuditCase,
-} from "../../overpass/auditQueries";
-import {
-  OVERPASS_ENDPOINTS,
-  OVERPASS_USER_AGENT,
-} from "../../overpass/endpoints";
+import type { GameArea } from "@/domain/map/annotations";
+import { buildOverpassAuditCases, type OverpassAuditCase } from "../../overpass/auditQueries";
+import { OVERPASS_ENDPOINTS, OVERPASS_USER_AGENT } from "../../overpass/endpoints";
 
 export type { OverpassAuditCase };
 export { buildOverpassAuditCases };
@@ -41,10 +35,7 @@ function percentile(values: number[], fraction: number): number {
   }
 
   const sorted = [...values].sort((left, right) => left - right);
-  const index = Math.min(
-    sorted.length - 1,
-    Math.max(0, Math.ceil(sorted.length * fraction) - 1),
-  );
+  const index = Math.min(sorted.length - 1, Math.max(0, Math.ceil(sorted.length * fraction) - 1));
   return sorted[index] ?? 0;
 }
 
@@ -66,11 +57,9 @@ export function summarizeOverpassAuditRuns(
     latencyP50Ms: percentile(latencies, 0.5),
     latencyP95Ms: percentile(latencies, 0.95),
     avgByteSize:
-      successes.reduce((sum, run) => sum + run.byteSize, 0) /
-      Math.max(successes.length, 1),
+      successes.reduce((sum, run) => sum + run.byteSize, 0) / Math.max(successes.length, 1),
     avgElementCount:
-      successes.reduce((sum, run) => sum + run.elementCount, 0) /
-      Math.max(successes.length, 1),
+      successes.reduce((sum, run) => sum + run.elementCount, 0) / Math.max(successes.length, 1),
   };
 }
 
@@ -172,11 +161,7 @@ export async function runOverpassAuditCase(
   const results: OverpassAuditRunResult[] = [];
 
   for (let index = 0; index < runs; index += 1) {
-    const result = await runOverpassAuditQuery(
-      auditCase.query,
-      endpoint,
-      timeoutMs,
-    );
+    const result = await runOverpassAuditQuery(auditCase.query, endpoint, timeoutMs);
     results.push({ ...result, caseId: auditCase.id });
 
     if (index < runs - 1 && pauseMs > 0) {
@@ -201,9 +186,7 @@ export async function runOverpassAudit(
   runs: OverpassAuditRunResult[];
   summaries: OverpassAuditSummary[];
 }> {
-  const cases = buildOverpassAuditCases(gameArea).filter(
-    options.caseFilter ?? (() => true),
-  );
+  const cases = buildOverpassAuditCases(gameArea).filter(options.caseFilter ?? (() => true));
   const runs: OverpassAuditRunResult[] = [];
 
   for (const auditCase of cases) {
@@ -227,16 +210,12 @@ export async function runOverpassAudit(
   return { cases, runs, summaries };
 }
 
-export function formatOverpassAuditReport(
-  summaries: OverpassAuditSummary[],
-): string {
-  const header =
-    "caseId\ttool\tsuccessRate\ttimeoutRate\tp50ms\tp95ms\tavgBytes\tavgElements";
+export function formatOverpassAuditReport(summaries: OverpassAuditSummary[]): string {
+  const header = "caseId\ttool\tsuccessRate\ttimeoutRate\tp50ms\tp95ms\tavgBytes\tavgElements";
   const rows = summaries
     .sort(
       (left, right) =>
-        right.timeoutRate - left.timeoutRate ||
-        right.latencyP95Ms - left.latencyP95Ms,
+        right.timeoutRate - left.timeoutRate || right.latencyP95Ms - left.latencyP95Ms,
     )
     .map(
       (summary) =>

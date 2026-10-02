@@ -51,11 +51,7 @@ function BackControl({ to, label }: { to: string; label: string }) {
  * Shared Apple-native nav bar for Join / Create / Friends Mantine screens.
  * Safe-area inset + 52pt toolbar; sticky so it stays while the page scrolls.
  */
-export function EntryHeader({
-  title,
-  backTo = "/",
-  backLabel = "Back",
-}: EntryHeaderProps) {
+export function EntryHeader({ title, backTo = "/", backLabel = "Back" }: EntryHeaderProps) {
   return (
     <Box
       component="header"
@@ -68,8 +64,7 @@ export function EntryHeader({
         width: "100%",
         paddingTop: "max(0.5rem, var(--safe-area-top))",
         backgroundColor: "oklch(from var(--color-canvas) l c h / 0.78)",
-        borderBottom:
-          "0.33px solid oklch(from var(--color-field-ink) l c h / 0.12)",
+        borderBottom: "0.33px solid oklch(from var(--color-field-ink) l c h / 0.12)",
         backdropFilter: "blur(20px) saturate(1.4)",
         WebkitBackdropFilter: "blur(20px) saturate(1.4)",
       }}

@@ -58,9 +58,7 @@ export interface SymbolMarkerProps {
   hitKind?: string;
 }
 
-export function symbolMarkerFeature(
-  props: SymbolMarkerProps,
-): Feature<Point> {
+export function symbolMarkerFeature(props: SymbolMarkerProps): Feature<Point> {
   const textOffset = props.textOffset ?? [0, 0];
   return {
     type: "Feature",

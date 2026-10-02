@@ -1,12 +1,8 @@
-import { describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
 import type { DistanceUnit } from "@/domain/map/distance";
 import type { TentacleExtendedCategoryId } from "@/domain/questions";
-import {
-  TentaclePanel,
-  type TentaclePanelModel,
-  type TentaclePanelProps,
-} from "./TentaclePanel";
+import { TentaclePanel, type TentaclePanelModel, type TentaclePanelProps } from "./TentaclePanel";
 
 vi.mock("../../hooks/wizard/useToolWizard", () => ({
   useToolWizard: () => ({

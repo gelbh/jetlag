@@ -1,8 +1,5 @@
 import { useEffect, useRef } from "react";
-import {
-  LOCAL_SESSION_ID,
-  type SessionRecord,
-} from "../../domain/map/annotations";
+import { LOCAL_SESSION_ID, type SessionRecord } from "../../domain/map/annotations";
 import { touchSessionLastActive } from "../../services/firestore/firestoreAnnotations";
 
 const HEARTBEAT_INTERVAL_MS = 5 * 60 * 1000;
@@ -28,10 +25,7 @@ export function useSessionHeartbeat(session: SessionRecord | null) {
 
     const maybeTouch = async (force = false) => {
       const now = Date.now();
-      if (
-        !force &&
-        now - lastTouchAtRef.current < CLIENT_TOUCH_THROTTLE_MS
-      ) {
+      if (!force && now - lastTouchAtRef.current < CLIENT_TOUCH_THROTTLE_MS) {
         return;
       }
 

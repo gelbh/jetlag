@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
-import type { GeocodedPlace } from "./index";
 import {
   formatPlaceSearchSubtitle,
   mergeRankedGeocodedPlaceCandidates,
@@ -8,6 +7,7 @@ import {
   placeCategoryLabel,
   rankGeocodedPlaceCandidates,
 } from "./geocodingRank";
+import type { GeocodedPlace } from "./index";
 
 function samplePlace(
   overrides: Partial<GeocodedPlace> & Pick<GeocodedPlace, "id" | "displayName">,
@@ -23,15 +23,9 @@ function samplePlace(
 
 describe("geocodingRank", () => {
   it("labels administrative boundaries distinctly", () => {
-    expect(placeCategoryLabel({ addresstype: "administrative" })).toBe(
-      "administrative area",
-    );
-    expect(placeCategoryLabel({ type: "administrative" })).toBe(
-      "administrative area",
-    );
-    expect(placeCategoryLabel({ class: "boundary" })).toBe(
-      "administrative area",
-    );
+    expect(placeCategoryLabel({ addresstype: "administrative" })).toBe("administrative area");
+    expect(placeCategoryLabel({ type: "administrative" })).toBe("administrative area");
+    expect(placeCategoryLabel({ class: "boundary" })).toBe("administrative area");
   });
 
   it("prefers addresstype for settlement categories", () => {

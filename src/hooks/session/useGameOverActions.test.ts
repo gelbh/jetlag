@@ -1,8 +1,8 @@
 import { act, renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { useTimerStore } from "../../state/timerStore";
 import { createTestRemoteSession } from "../../test/fixtures/sessions";
 import { resetAllStores } from "../../test/helpers/storeReset";
-import { useTimerStore } from "../../state/timerStore";
 import { useGameOverActions } from "./useGameOverActions";
 
 const resetSessionForRematch = vi.hoisted(() => vi.fn(async () => undefined));
@@ -10,9 +10,7 @@ const teardownSessionUiState = vi.hoisted(() => vi.fn());
 const blockPlayerLocationPublishes = vi.hoisted(() => vi.fn());
 const allowPlayerLocationPublishes = vi.hoisted(() => vi.fn());
 const clearLiveLocationOnLeave = vi.hoisted(() => vi.fn(async () => undefined));
-const ensureAnonymousUser = vi.hoisted(() =>
-  vi.fn(async () => ({ uid: "user-1" })),
-);
+const ensureAnonymousUser = vi.hoisted(() => vi.fn(async () => ({ uid: "user-1" })));
 const exitSession = vi.hoisted(() => vi.fn(async () => undefined));
 
 vi.mock("../../services/session/sessionRematch", () => ({
@@ -81,9 +79,7 @@ describe("useGameOverActions", () => {
     const clearTimer = vi.spyOn(useTimerStore.getState(), "clearTimer");
     const closeSheet = vi.fn();
 
-    const { result } = renderHook(() =>
-      useGameOverActions(session, { closeSheet }),
-    );
+    const { result } = renderHook(() => useGameOverActions(session, { closeSheet }));
 
     await act(async () => {
       await result.current.handleRematch();

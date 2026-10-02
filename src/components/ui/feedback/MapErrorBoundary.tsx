@@ -1,11 +1,11 @@
 import { Component, type ErrorInfo, type ReactNode } from "react";
+import { appUpdateCopy } from "@/domain/device/updates/appUpdateCopy";
 import {
   clearChunkReloadFlag,
   hasChunkReloadBeenAttempted,
   isChunkLoadError,
   wasChunkReloadDeferred,
 } from "@/domain/device/updates/chunkLoadRecovery";
-import { appUpdateCopy } from "@/domain/device/updates/appUpdateCopy";
 import { captureExceptionLazy } from "@/services/core/analytics/lazyTelemetry";
 import { AppErrorPage } from "./AppErrorPage";
 
@@ -17,10 +17,7 @@ interface MapErrorBoundaryState {
   error: Error | null;
 }
 
-export class MapErrorBoundary extends Component<
-  MapErrorBoundaryProps,
-  MapErrorBoundaryState
-> {
+export class MapErrorBoundary extends Component<MapErrorBoundaryProps, MapErrorBoundaryState> {
   state: MapErrorBoundaryState = { error: null };
 
   static getDerivedStateFromError(error: Error): MapErrorBoundaryState {
@@ -66,21 +63,12 @@ export class MapErrorBoundary extends Component<
 
   render(): ReactNode {
     if (this.state.error) {
-      const deferredChunk =
-        isChunkLoadError(this.state.error) && wasChunkReloadDeferred();
+      const deferredChunk = isChunkLoadError(this.state.error) && wasChunkReloadDeferred();
 
       return (
         <AppErrorPage
-          title={
-            deferredChunk
-              ? appUpdateCopy.deferredTitle
-              : appUpdateCopy.mapErrorTitle
-          }
-          message={
-            deferredChunk
-              ? appUpdateCopy.chunkDeferredBody
-              : this.errorMessage()
-          }
+          title={deferredChunk ? appUpdateCopy.deferredTitle : appUpdateCopy.mapErrorTitle}
+          message={deferredChunk ? appUpdateCopy.chunkDeferredBody : this.errorMessage()}
           assertive
           primaryAction={
             this.showReloadAction()

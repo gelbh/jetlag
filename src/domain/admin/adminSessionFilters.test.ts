@@ -1,13 +1,8 @@
 import { describe, expect, it } from "vitest";
-import {
-  filterAdminSessions,
-  summarizeAdminSessions,
-} from "./adminSessionFilters";
 import type { AdminSessionSummary } from "@/services/admin/adminSessions";
+import { filterAdminSessions, summarizeAdminSessions } from "./adminSessionFilters";
 
-function summary(
-  overrides: Partial<AdminSessionSummary> = {},
-): AdminSessionSummary {
+function summary(overrides: Partial<AdminSessionSummary> = {}): AdminSessionSummary {
   return {
     sessionId: "session-1",
     code: "ABCD",

@@ -1,5 +1,5 @@
-import { describe, expect, it, vi } from "vitest";
 import type { MapGeoJSONFeature } from "maplibre-gl";
+import { describe, expect, it, vi } from "vitest";
 import {
   dispatchMapFeatureHit,
   featureHitId,
@@ -18,11 +18,7 @@ describe("mapMarkerConstants", () => {
 });
 
 describe("mapFeatureHitTest", () => {
-  function mockFeature(
-    hitId: string,
-    hitKind: string,
-    layerId: string,
-  ): MapGeoJSONFeature {
+  function mockFeature(hitId: string, hitKind: string, layerId: string): MapGeoJSONFeature {
     return {
       type: "Feature",
       geometry: { type: "Point", coordinates: [0, 0] },
@@ -32,11 +28,7 @@ describe("mapFeatureHitTest", () => {
   }
 
   it("reads hit id and kind from feature properties", () => {
-    const feature = mockFeature(
-      "stop-1",
-      "transit-stop",
-      "jl-marker-transit-stops-circle",
-    );
+    const feature = mockFeature("stop-1", "transit-stop", "jl-marker-transit-stops-circle");
     expect(featureHitId(feature)).toBe("stop-1");
     expect(featureHitKind(feature)).toBe("transit-stop");
   });
@@ -77,11 +69,7 @@ describe("mapFeatureHitTest", () => {
 
   it("falls back to layer prefix when hitId has no handler", () => {
     const result = {
-      feature: mockFeature(
-        "vehicle-9",
-        "transit-vehicle",
-        "jl-marker-transit-vehicles-symbol",
-      ),
+      feature: mockFeature("vehicle-9", "transit-vehicle", "jl-marker-transit-vehicles-symbol"),
       layerId: "jl-marker-transit-vehicles-symbol",
       lngLat: { lng: 0, lat: 0 } as never,
     };
@@ -89,10 +77,7 @@ describe("mapFeatureHitTest", () => {
       {
         byHitId: new Map(),
         byLayerPrefix: new Map([
-          [
-            jlMarkerLayerId("transit"),
-            (hit) => featureHitId(hit.feature) === "vehicle-9",
-          ],
+          [jlMarkerLayerId("transit"), (hit) => featureHitId(hit.feature) === "vehicle-9"],
         ]),
       },
       result,
@@ -116,9 +101,7 @@ describe("mapFeatureHitTest", () => {
       getStyle: () => ({ sources: { openmaptiles: {} }, layers: [] }),
       querySourceFeatures,
     } as unknown as import("maplibre-gl").Map;
-    expect(
-      queryBasemapPoiAtPoint(map, "satellite", [51.5, -0.1], ["museum"]),
-    ).toBeNull();
+    expect(queryBasemapPoiAtPoint(map, "satellite", [51.5, -0.1], ["museum"])).toBeNull();
     expect(querySourceFeatures).not.toHaveBeenCalled();
   });
 });

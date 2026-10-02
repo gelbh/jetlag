@@ -1,12 +1,7 @@
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
 import type { ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
+import { setServiceWorkerChunkReloadContext } from "@/domain/device/updates/lazyWithChunkRetry";
 import {
   acknowledgeSoftReload,
   shouldHonorSoftReload,
@@ -19,7 +14,6 @@ import {
   registerAppNeedRefreshHandler,
   scheduleServiceWorkerUpdateChecks,
 } from "@/domain/device/updates/serviceWorkerRefresh";
-import { setServiceWorkerChunkReloadContext } from "@/domain/device/updates/lazyWithChunkRetry";
 import { tryUpdateServiceWorker } from "@/domain/device/updates/serviceWorkerUpdate";
 import { compareAppVersions } from "@/domain/session/meta/sessionVersion";
 import { useAuthBootstrapReady } from "@/hooks/app/useAuthBootstrapReady";
@@ -28,17 +22,11 @@ import { isFirebaseConfigured } from "@/services/core/firebase/authBootstrapStat
 import { DEFAULT_HOTFIX_GRACE_SECONDS } from "@/services/firestore/appConfigRuntimeDefaults";
 import type { AppConfigRuntime } from "@/services/firestore/firestoreIncidents";
 import { useSessionStore } from "@/state/sessionStore";
-import {
-  AppUpdateContext,
-  type AppUpdateContextValue,
-} from "./appUpdateContext";
+import { AppUpdateContext, type AppUpdateContextValue } from "./appUpdateContext";
 
 type ServiceWorkerReloader = (reloadPage?: boolean) => Promise<void>;
 
-function pickHigherVersion(
-  left: string | undefined,
-  right: string | undefined,
-): string | null {
+function pickHigherVersion(left: string | undefined, right: string | undefined): string | null {
   if (!left && !right) {
     return null;
   }
@@ -55,16 +43,13 @@ export function AppUpdateProvider({ children }: { children: ReactNode }) {
   const [needsRefresh, setNeedsRefresh] = useState(false);
   const [dismissed, setDismissed] = useState(false);
   const [updateSW, setUpdateSW] = useState<ServiceWorkerReloader | null>(null);
-  const [runtimeConfig, setRuntimeConfig] = useState<AppConfigRuntime | null>(
-    null,
-  );
+  const [runtimeConfig, setRuntimeConfig] = useState<AppConfigRuntime | null>(null);
   const registrationRef = useRef<ServiceWorkerRegistration | undefined>(undefined);
   const lastSoftReloadMitigationIdRef = useRef<string | null>(null);
   const location = useLocation();
   const session = useSessionStore((state) => state.session);
 
-  const inActiveMapSession =
-    Boolean(session) && location.pathname === "/map";
+  const inActiveMapSession = Boolean(session) && location.pathname === "/map";
   const safeToReload = isSafeToReloadApp({
     session,
     pathname: location.pathname,
@@ -118,10 +103,7 @@ export function AppUpdateProvider({ children }: { children: ReactNode }) {
       : (effectiveRuntimeConfig?.hotfixGraceSeconds ?? DEFAULT_HOTFIX_GRACE_SECONDS);
 
   const applyHotfixReload = useCallback(() => {
-    void applyServiceWorkerUpdate(
-      registrationRef.current,
-      updateSW ?? undefined,
-    );
+    void applyServiceWorkerUpdate(registrationRef.current, updateSW ?? undefined);
   }, [updateSW]);
 
   const hotfixGrace = useHotfixGraceReload({
@@ -156,10 +138,7 @@ export function AppUpdateProvider({ children }: { children: ReactNode }) {
     if (!acknowledgeSoftReload(mitigation.id)) {
       return;
     }
-    void applyServiceWorkerUpdate(
-      registrationRef.current,
-      updateSW ?? undefined,
-    );
+    void applyServiceWorkerUpdate(registrationRef.current, updateSW ?? undefined);
   }, [session?.opsMitigation, updateSW]);
 
   useEffect(() => {
@@ -195,16 +174,13 @@ export function AppUpdateProvider({ children }: { children: ReactNode }) {
             setNeedsRefresh(true);
             setDismissed(false);
           });
-          stopScheduledChecks = scheduleServiceWorkerUpdateChecks(
-            nextRegistration,
-            () => {
-              if (cancelled) {
-                return;
-              }
-              setNeedsRefresh(true);
-              setDismissed(false);
-            },
-          );
+          stopScheduledChecks = scheduleServiceWorkerUpdateChecks(nextRegistration, () => {
+            if (cancelled) {
+              return;
+            }
+            setNeedsRefresh(true);
+            setDismissed(false);
+          });
         },
         onRegisterError() {
           // Registration failures are handled by the browser.
@@ -274,12 +250,8 @@ export function AppUpdateProvider({ children }: { children: ReactNode }) {
   }, [needsRefresh, updateSW, location.pathname, session]);
 
   const value = useMemo<AppUpdateContextValue>(() => {
-    const showMapChip =
-      needsRefresh && inActiveMapSession && !dismissed && !safeToReload;
-    const showGlobalBanner =
-      needsRefresh &&
-      !showMapChip &&
-      !(inActiveMapSession && dismissed);
+    const showMapChip = needsRefresh && inActiveMapSession && !dismissed && !safeToReload;
+    const showGlobalBanner = needsRefresh && !showMapChip && !(inActiveMapSession && dismissed);
 
     return {
       inActiveMapSession,
@@ -288,10 +260,7 @@ export function AppUpdateProvider({ children }: { children: ReactNode }) {
       showGlobalBanner,
       dismissDeferred: () => setDismissed(true),
       applyUpdate: () => {
-        void applyServiceWorkerUpdate(
-          registrationRef.current,
-          updateSW ?? undefined,
-        );
+        void applyServiceWorkerUpdate(registrationRef.current, updateSW ?? undefined);
       },
       hotfixGraceActive: hotfixGrace.active,
       hotfixGraceSecondsRemaining: hotfixGrace.secondsRemaining,
@@ -308,9 +277,5 @@ export function AppUpdateProvider({ children }: { children: ReactNode }) {
     updateSW,
   ]);
 
-  return (
-    <AppUpdateContext.Provider value={value}>
-      {children}
-    </AppUpdateContext.Provider>
-  );
+  return <AppUpdateContext.Provider value={value}>{children}</AppUpdateContext.Provider>;
 }

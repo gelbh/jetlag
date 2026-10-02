@@ -1,6 +1,5 @@
-import { useState } from "react";
 import { Box, SegmentedControl, Stack } from "@mantine/core";
-import type { SessionRulesInput } from "../../domain/session/rules";
+import { useState } from "react";
 import type { HiderTruthReferenceMode } from "../../domain/questions/hiderTruth/resolveHiderTruthReference";
 import type { HiderTruthResult } from "../../domain/questions/ui";
 import type {
@@ -8,6 +7,7 @@ import type {
   SessionMessageRecord,
 } from "../../domain/session/activity/sessionChat";
 import type { PlayerRole } from "../../domain/session/players/playerRole";
+import type { SessionRulesInput } from "../../domain/session/rules";
 import { GameChatTab } from "./GameChatTab";
 import { SocialChatTab } from "./SocialChatTab";
 
@@ -32,10 +32,7 @@ interface ChatPanelBodyProps {
     selectedReply: string,
     deadlineExpired?: boolean,
   ) => Promise<void>;
-  onDismissExpiredQuestion?: (
-    pendingQuestionId: string,
-    messageId: string,
-  ) => Promise<void>;
+  onDismissExpiredQuestion?: (pendingQuestionId: string, messageId: string) => Promise<void>;
   readOnly?: boolean;
 }
 

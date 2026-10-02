@@ -6,8 +6,7 @@ export function ringToLineString(ring: number[][]): Feature<LineString> | null {
   }
 
   const closed =
-    ring[0]?.[0] === ring[ring.length - 1]?.[0] &&
-    ring[0]?.[1] === ring[ring.length - 1]?.[1];
+    ring[0]?.[0] === ring[ring.length - 1]?.[0] && ring[0]?.[1] === ring[ring.length - 1]?.[1];
   const coordinates = closed ? ring : [...ring, ring[0]!];
 
   return {
@@ -20,11 +19,8 @@ export function ringToLineString(ring: number[][]): Feature<LineString> | null {
   };
 }
 
-export function polygonRingsToLineStrings(
-  geometry: Polygon | MultiPolygon,
-): Feature<LineString>[] {
-  const polygons =
-    geometry.type === "Polygon" ? [geometry.coordinates] : geometry.coordinates;
+export function polygonRingsToLineStrings(geometry: Polygon | MultiPolygon): Feature<LineString>[] {
+  const polygons = geometry.type === "Polygon" ? [geometry.coordinates] : geometry.coordinates;
 
   const segments: Feature<LineString>[] = [];
   for (const polygonCoords of polygons) {

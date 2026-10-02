@@ -20,7 +20,7 @@ export function useBusyAction(): BusyActionState {
     setError(null);
   }, []);
 
-  const run = useCallback(async <T,>(asyncFn: () => Promise<T>) => {
+  const run = useCallback(async <T>(asyncFn: () => Promise<T>) => {
     const generation = ++generationRef.current;
     setBusy(true);
     setError(null);

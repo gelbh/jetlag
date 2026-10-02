@@ -21,17 +21,11 @@ export function mapFocusApplyDependencyKeys(args: {
   recenterToken: number;
 }): unknown[] {
   const focusBoundsDep =
-    args.fitBoundsMode === "always"
-      ? args.focusBounds
-      : args.focusBounds != null;
-  const focusPaddingBiasDep =
-    args.fitBoundsMode === "always" ? args.focusPaddingBias : null;
-  const focusPaddingTopBiasDep =
-    args.fitBoundsMode === "always" ? args.focusPaddingTopBias : null;
-  const focusMaxZoomDep =
-    args.fitBoundsMode === "always" ? args.focusMaxZoom : null;
-  const focusMinZoomDep =
-    args.fitBoundsMode === "always" ? args.focusMinZoom : null;
+    args.fitBoundsMode === "always" ? args.focusBounds : args.focusBounds != null;
+  const focusPaddingBiasDep = args.fitBoundsMode === "always" ? args.focusPaddingBias : null;
+  const focusPaddingTopBiasDep = args.fitBoundsMode === "always" ? args.focusPaddingTopBias : null;
+  const focusMaxZoomDep = args.fitBoundsMode === "always" ? args.focusMaxZoom : null;
+  const focusMinZoomDep = args.fitBoundsMode === "always" ? args.focusMinZoom : null;
 
   return [
     args.animate,

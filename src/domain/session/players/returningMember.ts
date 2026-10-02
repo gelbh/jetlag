@@ -1,5 +1,5 @@
-import type { PlayerRole } from "./playerRole";
 import { pickHostPromotee } from "./pickHostPromotee";
+import type { PlayerRole } from "./playerRole";
 
 /**
  * Only honor a returning-member heal when the client persisted the prior UID locally.
@@ -20,10 +20,7 @@ export function sanitizeReturningMemberUid(
   return persistedMyUid === candidate ? candidate : undefined;
 }
 
-export function memberUidSetsEqual(
-  left: readonly string[],
-  right: readonly string[],
-): boolean {
+export function memberUidSetsEqual(left: readonly string[], right: readonly string[]): boolean {
   if (left.length !== right.length) {
     return false;
   }
@@ -56,8 +53,7 @@ export function resolveHostUidAfterHeal(input: {
   memberRolesAfterHeal: Record<string, PlayerRole | string>;
   removedUid: string | undefined;
 }): string | null {
-  const { currentHostUid, memberUidsAfterHeal, memberRolesAfterHeal, removedUid } =
-    input;
+  const { currentHostUid, memberUidsAfterHeal, memberRolesAfterHeal, removedUid } = input;
 
   if (removedUid == null || removedUid !== currentHostUid) {
     return null;
@@ -67,11 +63,7 @@ export function resolveHostUidAfterHeal(input: {
     return null;
   }
 
-  return pickHostPromotee(
-    memberUidsAfterHeal,
-    memberRolesAfterHeal,
-    currentHostUid,
-  );
+  return pickHostPromotee(memberUidsAfterHeal, memberRolesAfterHeal, currentHostUid);
 }
 
 export type MembershipHealState = {

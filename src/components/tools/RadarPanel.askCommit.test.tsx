@@ -1,9 +1,9 @@
-import { describe, expect, it, vi } from "vitest";
 import { fireEvent, screen } from "@testing-library/react";
-import { renderWithAppUi } from "../../test/renderWithAppUi";
+import { describe, expect, it, vi } from "vitest";
 import type { DistanceUnit } from "../../domain/map/distance";
-import type { GameSize } from "../../domain/session/size/gameSize";
 import type { RadarDistanceOptionKey } from "../../domain/questions";
+import type { GameSize } from "../../domain/session/size/gameSize";
+import { renderWithAppUi } from "../../test/renderWithAppUi";
 import { RadarPanel } from "./RadarPanel";
 
 const baseProps = {
@@ -32,31 +32,18 @@ function advanceToAskPhase() {
 
 describe("RadarPanel ask-phase commit chrome", () => {
   it("exposes exactly one Add radar question control", () => {
-    renderWithAppUi(
-      <RadarPanel {...baseProps} answer="yes" />,
-    );
+    renderWithAppUi(<RadarPanel {...baseProps} answer="yes" />);
 
     advanceToAskPhase();
 
-    expect(
-      screen.getAllByRole("button", { name: "Add radar question" }),
-    ).toHaveLength(1);
+    expect(screen.getAllByRole("button", { name: "Add radar question" })).toHaveLength(1);
   });
 
   it("exposes exactly one Send to hiders control in multiplayer ask", () => {
-    renderWithAppUi(
-      <RadarPanel
-        {...baseProps}
-        answer={null}
-        awaitHiderAnswer
-        costLabel="D2P1"
-      />,
-    );
+    renderWithAppUi(<RadarPanel {...baseProps} answer={null} awaitHiderAnswer costLabel="D2P1" />);
 
     advanceToAskPhase();
 
-    expect(
-      screen.getAllByRole("button", { name: "Send to hiders (D2P1)" }),
-    ).toHaveLength(1);
+    expect(screen.getAllByRole("button", { name: "Send to hiders (D2P1)" })).toHaveLength(1);
   });
 });

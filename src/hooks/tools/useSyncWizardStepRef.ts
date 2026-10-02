@@ -1,4 +1,4 @@
-import { useLayoutEffect, type RefObject } from "react";
+import { type RefObject, useLayoutEffect } from "react";
 
 export const WIZARD_STEP_CHANGE_EVENT = "jetlag:wizard-step-change";
 
@@ -19,10 +19,7 @@ function notifyWizardStepListeners(): void {
 }
 
 /** Publish the active wizard step for sheet-snap / map-attention subscribers. */
-export function publishWizardStep(
-  toolId: string | null,
-  stepId: string,
-): void {
+export function publishWizardStep(toolId: string | null, stepId: string): void {
   latestWizardStep = { toolId, stepId };
   notifyWizardStepListeners();
   window.dispatchEvent(
@@ -45,10 +42,7 @@ export function getLatestWizardStepIdForTool(toolId: string): string | null {
   }
   // Legacy useToolWizard(steps) publishes toolId null; phase spine publishes
   // def.toolId. Accept unscoped publishes so place peek still seeds.
-  if (
-    latestWizardStep.toolId == null ||
-    latestWizardStep.toolId === toolId
-  ) {
+  if (latestWizardStep.toolId == null || latestWizardStep.toolId === toolId) {
     return latestWizardStep.stepId;
   }
   return null;

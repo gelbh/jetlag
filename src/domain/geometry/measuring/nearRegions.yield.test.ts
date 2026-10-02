@@ -1,5 +1,5 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
 import type { Feature, LineString } from "geojson";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import type { GameArea } from "../../map/annotations";
 
 vi.mock("./geodesicLineBuffer", () => ({
@@ -59,10 +59,9 @@ describe("buildCoastlineNearRegion cooperative yield", () => {
   it("yields to the event loop when segment count exceeds the interval", async () => {
     vi.resetModules();
     vi.doMock("../kernel/kernelWasmReady", async () => {
-      const actual =
-        await vi.importActual<typeof import("../kernel/kernelWasmReady")>(
-          "../kernel/kernelWasmReady",
-        );
+      const actual = await vi.importActual<typeof import("../kernel/kernelWasmReady")>(
+        "../kernel/kernelWasmReady",
+      );
       return {
         ...actual,
         KERNEL_WASM_READY: {
@@ -90,9 +89,8 @@ describe("buildCoastlineNearRegion cooperative yield", () => {
       yieldCount += 1;
     });
 
-    const segments = Array.from(
-      { length: COASTLINE_NEAR_REGION_YIELD_EVERY + 1 },
-      (_, index) => lineSegment(index),
+    const segments = Array.from({ length: COASTLINE_NEAR_REGION_YIELD_EVERY + 1 }, (_, index) =>
+      lineSegment(index),
     );
 
     await buildCoastlineNearRegion(segments, 5_000, sampleGameArea);
@@ -106,10 +104,9 @@ describe("buildCoastlineNearRegion cooperative yield", () => {
   it("skips cooperative yield when nearRegionBatch wasm path is used", async () => {
     vi.resetModules();
     vi.doMock("../kernel/kernelWasmReady", async () => {
-      const actual =
-        await vi.importActual<typeof import("../kernel/kernelWasmReady")>(
-          "../kernel/kernelWasmReady",
-        );
+      const actual = await vi.importActual<typeof import("../kernel/kernelWasmReady")>(
+        "../kernel/kernelWasmReady",
+      );
       return {
         ...actual,
         KERNEL_WASM_READY: {
@@ -155,9 +152,8 @@ describe("buildCoastlineNearRegion cooperative yield", () => {
       yieldCount += 1;
     });
 
-    const segments = Array.from(
-      { length: COASTLINE_NEAR_REGION_YIELD_EVERY + 1 },
-      (_, index) => lineSegment(index),
+    const segments = Array.from({ length: COASTLINE_NEAR_REGION_YIELD_EVERY + 1 }, (_, index) =>
+      lineSegment(index),
     );
 
     await buildCoastlineNearRegion(segments, 5_000, sampleGameArea);

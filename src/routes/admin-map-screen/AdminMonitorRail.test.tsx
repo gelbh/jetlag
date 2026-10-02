@@ -1,9 +1,9 @@
 import { fireEvent, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { AdminMonitorRail } from "./AdminMonitorRail";
 import { createTestSession } from "../../test/fixtures/sessions";
 import { renderWithRouter } from "../../test/renderWithRouter";
 import type { ObserverMapScreenController } from "../observer-map-screen/useObserverMapScreen";
+import { AdminMonitorRail } from "./AdminMonitorRail";
 
 function createController(): ObserverMapScreenController {
   const session = createTestSession();

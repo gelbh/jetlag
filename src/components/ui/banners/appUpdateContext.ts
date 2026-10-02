@@ -13,6 +13,4 @@ export interface AppUpdateContextValue {
   hotfixRequiredMinAppVersion: string | null;
 }
 
-export const AppUpdateContext = createContext<AppUpdateContextValue | null>(
-  null,
-);
+export const AppUpdateContext = createContext<AppUpdateContextValue | null>(null);

@@ -1,10 +1,7 @@
 import type { useAppNavigate } from "../../hooks/navigation/useAppNavigate";
-import {
-  clearSessionLocalArtifacts,
-  teardownSessionUiState,
-} from "./sessionCleanup";
-import { allowPlayerLocationPublishes } from "./playerLocationPublishGate";
 import { useSessionStore } from "../../state/sessionStore";
+import { allowPlayerLocationPublishes } from "./playerLocationPublishGate";
+import { clearSessionLocalArtifacts, teardownSessionUiState } from "./sessionCleanup";
 
 export type SessionExitReason = "leave" | "end" | "remote-ended" | "reset";
 

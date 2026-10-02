@@ -50,9 +50,7 @@ async function readSweepCursor(db) {
     return null;
   }
   const lastCodeId = snap.data()?.lastCodeId;
-  return typeof lastCodeId === "string" && lastCodeId.length > 0
-    ? lastCodeId
-    : null;
+  return typeof lastCodeId === "string" && lastCodeId.length > 0 ? lastCodeId : null;
 }
 
 async function writeSweepCursor(db, lastCodeId) {
@@ -73,10 +71,7 @@ async function writeSweepCursor(db, lastCodeId) {
  * Advances a persisted cursor so repeated cron runs eventually cover the collection.
  * Returns number deleted.
  */
-export async function sweepOrphanSessionCodes(
-  db,
-  { limit = ORPHAN_CODE_SWEEP_LIMIT } = {},
-) {
+export async function sweepOrphanSessionCodes(db, { limit = ORPHAN_CODE_SWEEP_LIMIT } = {}) {
   const startAfterId = await readSweepCursor(db);
   let codesSnap = await sessionCodesQuery(db, { limit, startAfterId }).get();
 
@@ -88,8 +83,7 @@ export async function sweepOrphanSessionCodes(
   const withSessions = await Promise.all(
     codesSnap.docs.map(async (codeDoc) => {
       const codeData = codeDoc.data() ?? {};
-      const sessionId =
-        typeof codeData.sessionId === "string" ? codeData.sessionId : null;
+      const sessionId = typeof codeData.sessionId === "string" ? codeData.sessionId : null;
 
       let sessionData = null;
       if (sessionId) {
@@ -105,8 +99,7 @@ export async function sweepOrphanSessionCodes(
   await Promise.all(orphans.map((entry) => entry.codeDoc.ref.delete()));
 
   const lastDoc = codesSnap.docs[codesSnap.docs.length - 1];
-  const nextCursor =
-    codesSnap.docs.length < limit || lastDoc == null ? null : lastDoc.id;
+  const nextCursor = codesSnap.docs.length < limit || lastDoc == null ? null : lastDoc.id;
   await writeSweepCursor(db, nextCursor);
 
   return orphans.length;

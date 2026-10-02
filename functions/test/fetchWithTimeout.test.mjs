@@ -1,5 +1,5 @@
-import { describe, it } from "node:test";
 import assert from "node:assert/strict";
+import { describe, it } from "node:test";
 import { fetchWithTimeout, fetchWithTimeoutAndRetry } from "../lib/fetchWithTimeout.mjs";
 
 describe("fetchWithTimeout", () => {
@@ -33,12 +33,7 @@ describe("fetchWithTimeout", () => {
       return new Response(null, { status: attempts === 1 ? 502 : 200 });
     };
 
-    const response = await fetchWithTimeoutAndRetry(
-      "https://example.com",
-      {},
-      50,
-      1,
-    );
+    const response = await fetchWithTimeoutAndRetry("https://example.com", {}, 50, 1);
 
     assert.equal(response.status, 200);
     assert.equal(attempts, 2);

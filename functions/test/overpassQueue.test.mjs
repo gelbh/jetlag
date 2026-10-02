@@ -1,9 +1,6 @@
-import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import {
-  clearOverpassQueueForTests,
-  enqueueOverpassFetch,
-} from "../proxies/overpassQueue.mjs";
+import { describe, it } from "node:test";
+import { clearOverpassQueueForTests, enqueueOverpassFetch } from "../proxies/overpassQueue.mjs";
 
 describe("overpassQueue", () => {
   it("runs premium requests before free backlog", async () => {
@@ -36,10 +33,6 @@ describe("overpassQueue", () => {
     releaseFirst();
     await Promise.all([firstPending, freePending, premiumPending]);
 
-    assert.deepEqual(order, [
-      "active-free",
-      "queued-premium",
-      "queued-free",
-    ]);
+    assert.deepEqual(order, ["active-free", "queued-premium", "queued-free"]);
   });
 });

@@ -3,12 +3,12 @@
  */
 import { createElement } from "react";
 import { Marker } from "react-map-gl/maplibre";
-import type { MatchingCategoryId, MeasuringFromKind } from "@/domain/questions";
 import { matchingCategoryIcon } from "@/components/tools/ask/matchingCategoryIcons";
 import {
   hasMeasuringCategoryIcon,
   measuringCategoryIcon,
 } from "@/components/tools/ask/measuringCategoryIcons";
+import type { MatchingCategoryId, MeasuringFromKind } from "@/domain/questions";
 
 export type MatchingCategoryPinMarkerProps = {
   latitude: number;

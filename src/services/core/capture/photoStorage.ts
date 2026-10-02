@@ -3,8 +3,8 @@ import {
   deleteObject,
   getDownloadURL,
   ref,
-  uploadBytes,
   type UploadMetadata,
+  uploadBytes,
 } from "firebase/storage";
 import type { SessionRecord } from "@/domain/map/annotations";
 import {
@@ -14,11 +14,8 @@ import {
   photoUploadServerDiagnostics,
 } from "@/domain/questions";
 import { ensureHiderPhotoUploadAccess } from "../../firestore/firestoreAnnotations";
+import { addPhotoUploadBreadcrumb, capturePhotoUploadFailure } from "../analytics/sentry";
 import { ensureAnonymousUser, getFirebaseStorage } from "../firebase/firebase";
-import {
-  addPhotoUploadBreadcrumb,
-  capturePhotoUploadFailure,
-} from "../analytics/sentry";
 
 const MAX_DIMENSION = 1920;
 const JPEG_QUALITY = 0.85;
@@ -89,11 +86,7 @@ function loadImageFromFile(file: File): Promise<HTMLImageElement> {
   });
 }
 
-function canvasToBlob(
-  canvas: HTMLCanvasElement,
-  type: string,
-  quality: number,
-): Promise<Blob> {
+function canvasToBlob(canvas: HTMLCanvasElement, type: string, quality: number): Promise<Blob> {
   return new Promise((resolve, reject) => {
     canvas.toBlob(
       (blob) => {
@@ -125,10 +118,7 @@ export async function compressPhotoForUpload(file: File): Promise<Blob> {
     throw error;
   }
 
-  const scale = Math.min(
-    1,
-    MAX_DIMENSION / Math.max(image.naturalWidth, image.naturalHeight),
-  );
+  const scale = Math.min(1, MAX_DIMENSION / Math.max(image.naturalWidth, image.naturalHeight));
   const width = Math.max(1, Math.round(image.naturalWidth * scale));
   const height = Math.max(1, Math.round(image.naturalHeight * scale));
 
@@ -144,9 +134,7 @@ export async function compressPhotoForUpload(file: File): Promise<Blob> {
   context.drawImage(image, 0, 0, width, height);
 
   const outputType =
-    resolvedType === "image/png" || resolvedType === "image/webp"
-      ? resolvedType
-      : "image/jpeg";
+    resolvedType === "image/png" || resolvedType === "image/webp" ? resolvedType : "image/jpeg";
   const blob = await canvasToBlob(canvas, outputType, JPEG_QUALITY);
 
   if (blob.size > MAX_UPLOAD_BYTES) {
@@ -205,10 +193,7 @@ export async function uploadPhotoAnswer(
   sessionId: string,
   questionId: string,
   file: File,
-  session?: Pick<
-    SessionRecord,
-    "id" | "code" | "memberUids" | "memberRoles"
-  > | null,
+  session?: Pick<SessionRecord, "id" | "code" | "memberUids" | "memberRoles"> | null,
   myUid?: string | null,
 ): Promise<string> {
   const user = await ensureAnonymousUser();
@@ -219,21 +204,10 @@ export async function uploadPhotoAnswer(
     throw new Error("Syncing session… Try again in a moment.");
   }
 
-  let activeSession = await ensureHiderPhotoUploadAccess(
-    session,
-    authUid,
-    myUid,
-  );
+  let activeSession = await ensureHiderPhotoUploadAccess(session, authUid, myUid);
 
   addPhotoUploadBreadcrumb(
-    uploadBreadcrumbData(
-      authUid,
-      activeSession,
-      myUid,
-      sessionId,
-      questionId,
-      file,
-    ),
+    uploadBreadcrumbData(authUid, activeSession, myUid, sessionId, questionId, file),
   );
 
   let blob: Blob;
@@ -249,12 +223,7 @@ export async function uploadPhotoAnswer(
     throw error;
   }
 
-  const extension =
-    blob.type === "image/png"
-      ? "png"
-      : blob.type === "image/webp"
-        ? "webp"
-        : "jpg";
+  const extension = blob.type === "image/png" ? "png" : blob.type === "image/webp" ? "webp" : "jpg";
   const fileName = `${Date.now()}.${extension}`;
   const storagePath = photoAnswerStoragePath(sessionId, questionId, fileName);
   const storageRef = ref(await getFirebaseStorage(), storagePath);
@@ -275,11 +244,7 @@ export async function uploadPhotoAnswer(
       }
 
       try {
-        activeSession = await ensureHiderPhotoUploadAccess(
-          activeSession,
-          authUid,
-          myUid,
-        );
+        activeSession = await ensureHiderPhotoUploadAccess(activeSession, authUid, myUid);
       } catch {
         break;
       }
@@ -289,16 +254,11 @@ export async function uploadPhotoAnswer(
         break;
       }
 
-      await new Promise((resolve) =>
-        setTimeout(resolve, RETRY_DELAYS_MS[attempt]),
-      );
+      await new Promise((resolve) => setTimeout(resolve, RETRY_DELAYS_MS[attempt]));
     }
   }
 
-  const failureDiagnostics = photoUploadServerDiagnostics(
-    activeSession,
-    authUid,
-  );
+  const failureDiagnostics = photoUploadServerDiagnostics(activeSession, authUid);
 
   capturePhotoUploadFailure(lastError, "storage", {
     sessionId,
@@ -307,14 +267,10 @@ export async function uploadPhotoAnswer(
     serverMemberRole: failureDiagnostics.serverMemberRole,
     authUidMatchesServerHider: failureDiagnostics.authUidMatchesServerHider,
     attempts: RETRY_DELAYS_MS.length + 1,
-    code:
-      lastError instanceof FirebaseError ? lastError.code : undefined,
+    code: lastError instanceof FirebaseError ? lastError.code : undefined,
   });
 
-  throw new Error(
-    formatPhotoStorageError(lastError, activeSession, authUid),
-    { cause: lastError },
-  );
+  throw new Error(formatPhotoStorageError(lastError, activeSession, authUid), { cause: lastError });
 }
 
 export async function getPhotoDownloadUrl(storagePath: string): Promise<string> {

@@ -4,19 +4,12 @@ import {
   collectUsedAnnotationOptions,
   firstUnusedCatalogOption,
 } from "../session/tools/toolSessionOptions";
-import {
-  isCountablePendingQuestionStatus,
-  isUsedOptionPendingQuestion,
-} from "./questionRules";
+import { isCountablePendingQuestionStatus, isUsedOptionPendingQuestion } from "./questionRules";
 
 export interface CatalogHelpersConfig<Option> {
   toolType: string;
-  readOptionFromAnnotation: (
-    annotation: AnnotationRecord,
-  ) => Option | null | undefined;
-  readOptionFromPending?: (
-    question: PendingQuestionRecord,
-  ) => Option | null | undefined;
+  readOptionFromAnnotation: (annotation: AnnotationRecord) => Option | null | undefined;
+  readOptionFromPending?: (question: PendingQuestionRecord) => Option | null | undefined;
   /** Sticky used-set membership (pending ∪ cancelled-with-answer). */
   isPendingQuestionUsed?: (question: PendingQuestionRecord) => boolean;
   /** Cost / useCount membership (open countable statuses only). */
@@ -63,19 +56,14 @@ export function buildCatalogHelpers<Option>(
     readOptionFromAnnotation,
     readOptionFromPending,
     isPendingQuestionUsed = isUsedOptionPendingQuestion,
-    isPendingQuestionCountable = (question) =>
-      isCountablePendingQuestionStatus(question.status),
+    isPendingQuestionCountable = (question) => isCountablePendingQuestionStatus(question.status),
   } = config;
 
   function usedOptionsFromAnnotations(
     annotations: readonly AnnotationRecord[],
     exceptAnnotationId?: string,
   ): Set<Option> {
-    return collectUsedAnnotationOptions(
-      annotations,
-      readOptionFromAnnotation,
-      exceptAnnotationId,
-    );
+    return collectUsedAnnotationOptions(annotations, readOptionFromAnnotation, exceptAnnotationId);
   }
 
   function usedOptionsFromPending(

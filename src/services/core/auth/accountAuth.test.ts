@@ -53,8 +53,7 @@ vi.mock("firebase/auth", () => ({
     }));
   },
   OAuthProvider: class {
-    static credentialFromError = (...args: unknown[]) =>
-      credentialFromError(...args);
+    static credentialFromError = (...args: unknown[]) => credentialFromError(...args);
   },
   getRedirectResult: (...args: unknown[]) => getRedirectResult(...args),
   isSignInWithEmailLink: (...args: unknown[]) => isSignInWithEmailLink(...args),
@@ -135,10 +134,7 @@ describe("accountAuth", () => {
     const user = await signInWithGoogle();
 
     expect(user.uid).toBe("anon-3");
-    expect(linkWithPopup).toHaveBeenCalledWith(
-      mockAuth.currentUser,
-      expect.anything(),
-    );
+    expect(linkWithPopup).toHaveBeenCalledWith(mockAuth.currentUser, expect.anything());
     expect(linkWithRedirect).not.toHaveBeenCalled();
   });
 
@@ -151,27 +147,17 @@ describe("accountAuth", () => {
     const user = await signInWithGoogle();
 
     expect(user.uid).toBe("signed-in");
-    expect(signInWithPopup).toHaveBeenCalledWith(
-      mockAuth,
-      expect.anything(),
-    );
+    expect(signInWithPopup).toHaveBeenCalledWith(mockAuth, expect.anything());
     expect(signInWithRedirect).not.toHaveBeenCalled();
   });
 
   it("redirects when Google popup is blocked", async () => {
     mockAuth.currentUser = { isAnonymous: true, uid: "anon-redirect" };
-    linkWithPopup.mockRejectedValueOnce(
-      new FirebaseError("auth/popup-blocked", "Popup blocked."),
-    );
+    linkWithPopup.mockRejectedValueOnce(new FirebaseError("auth/popup-blocked", "Popup blocked."));
     linkWithRedirect.mockResolvedValueOnce(undefined);
 
-    await expect(signInWithGoogle()).rejects.toBeInstanceOf(
-      OAuthRedirectInProgressError,
-    );
-    expect(linkWithRedirect).toHaveBeenCalledWith(
-      mockAuth.currentUser,
-      expect.anything(),
-    );
+    await expect(signInWithGoogle()).rejects.toBeInstanceOf(OAuthRedirectInProgressError);
+    expect(linkWithRedirect).toHaveBeenCalledWith(mockAuth.currentUser, expect.anything());
     expect(window.sessionStorage.getItem(OAUTH_REDIRECT_PENDING_KEY)).toBeTruthy();
   });
 
@@ -182,20 +168,13 @@ describe("accountAuth", () => {
     );
     signInWithRedirect.mockResolvedValueOnce(undefined);
 
-    await expect(signInWithGoogle()).rejects.toBeInstanceOf(
-      OAuthRedirectInProgressError,
-    );
-    expect(signInWithRedirect).toHaveBeenCalledWith(
-      mockAuth,
-      expect.anything(),
-    );
+    await expect(signInWithGoogle()).rejects.toBeInstanceOf(OAuthRedirectInProgressError);
+    expect(signInWithRedirect).toHaveBeenCalledWith(mockAuth, expect.anything());
   });
 
   it("surfaces redirect start failure and clears the pending flag", async () => {
     mockAuth.currentUser = { isAnonymous: true, uid: "anon-5" };
-    linkWithPopup.mockRejectedValueOnce(
-      new FirebaseError("auth/popup-blocked", "Popup blocked."),
-    );
+    linkWithPopup.mockRejectedValueOnce(new FirebaseError("auth/popup-blocked", "Popup blocked."));
     linkWithRedirect.mockRejectedValueOnce(
       new FirebaseError("auth/network-request-failed", "Network error."),
     );
@@ -284,18 +263,13 @@ describe("accountAuth", () => {
     const user = await completeOAuthRedirectIfPending();
 
     expect(user).toBeNull();
-    expect(consumeOAuthRedirectFailureMessage()).toBe(
-      OAUTH_REDIRECT_FAILED_MESSAGE,
-    );
+    expect(consumeOAuthRedirectFailureMessage()).toBe(OAUTH_REDIRECT_FAILED_MESSAGE);
     expect(consumeOAuthRedirectFailureMessage()).toBeNull();
     expect(window.sessionStorage.getItem(OAUTH_REDIRECT_PENDING_KEY)).toBeNull();
   });
 
   it("ignores a stale redirect-pending flag without surfacing failure", async () => {
-    window.sessionStorage.setItem(
-      OAUTH_REDIRECT_PENDING_KEY,
-      String(Date.now() - 11 * 60 * 1000),
-    );
+    window.sessionStorage.setItem(OAUTH_REDIRECT_PENDING_KEY, String(Date.now() - 11 * 60 * 1000));
     getRedirectResult.mockResolvedValueOnce(null);
 
     const user = await completeOAuthRedirectIfPending();
@@ -312,9 +286,7 @@ describe("accountAuth", () => {
     const user = await completeOAuthRedirectIfPending();
 
     expect(user).toBeNull();
-    expect(consumeOAuthRedirectFailureMessage()).toBe(
-      OAUTH_REDIRECT_FAILED_MESSAGE,
-    );
+    expect(consumeOAuthRedirectFailureMessage()).toBe(OAUTH_REDIRECT_FAILED_MESSAGE);
   });
 
   it("signs in with email link when the credential is already in use", async () => {

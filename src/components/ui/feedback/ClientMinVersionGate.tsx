@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import { APP_VERSION } from "@/domain/device/changelog";
 import { isBelowClientMinVersion } from "@/domain/device/clientMinVersion";
 import { useAuthBootstrapReady } from "@/hooks/app/useAuthBootstrapReady";
@@ -13,9 +13,7 @@ import { ClientUpdateRequiredPage } from "./ClientUpdateRequiredPage";
 export function ClientMinVersionGate({ children }: { children: ReactNode }) {
   const authReady = useAuthBootstrapReady();
   const firebaseReady = isFirebaseConfigured();
-  const [minVersion, setMinVersion] = useState<string | null | undefined>(
-    undefined,
-  );
+  const [minVersion, setMinVersion] = useState<string | null | undefined>(undefined);
 
   useEffect(() => {
     if (!authReady || !firebaseReady) {

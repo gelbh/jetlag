@@ -1,6 +1,6 @@
-import { describe, expect, it } from "vitest";
 import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
 import { point as turfPoint } from "@turf/helpers";
+import { describe, expect, it } from "vitest";
 import { clipMaskToGameArea } from "./clipMask";
 import type { GameAreaGeometry, PolygonFeature } from "./types";
 
@@ -43,12 +43,8 @@ describe("clipMaskToGameArea", () => {
     const clipped = clipMaskToGameArea(overlapping, gameArea);
 
     expect(clipped).not.toBeNull();
-    expect(
-      booleanPointInPolygon(turfPoint([-0.185, 51.45]), clipped!),
-    ).toBe(true);
-    expect(
-      booleanPointInPolygon(turfPoint([-0.15, 51.45]), clipped!),
-    ).toBe(true);
+    expect(booleanPointInPolygon(turfPoint([-0.185, 51.45]), clipped!)).toBe(true);
+    expect(booleanPointInPolygon(turfPoint([-0.15, 51.45]), clipped!)).toBe(true);
   });
 
   it("keeps valid MultiPolygon parts when one part cannot clip", () => {
@@ -75,8 +71,6 @@ describe("clipMaskToGameArea", () => {
     const clipped = clipMaskToGameArea(mixed, gameArea);
 
     expect(clipped).not.toBeNull();
-    expect(
-      booleanPointInPolygon(turfPoint([-0.105, 51.45]), clipped!),
-    ).toBe(true);
+    expect(booleanPointInPolygon(turfPoint([-0.105, 51.45]), clipped!)).toBe(true);
   });
 });

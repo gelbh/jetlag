@@ -1,17 +1,14 @@
 import type { ReactNode } from "react";
 import type { AnnotationRecord, GameArea } from "@/domain/map/annotations";
 import type { DistanceUnit } from "@/domain/map/distance";
-import type {
-  RadarDistanceOptionKey,
-  ThermometerDistanceOptionMiles,
-} from "@/domain/questions";
+import type { RadarDistanceOptionKey, ThermometerDistanceOptionMiles } from "@/domain/questions";
 import type { GameSize } from "@/domain/session/size/gameSize";
-import { MatchingEditFields, type MatchingAnnotation } from "./MatchingEditFields";
-import { MeasuringEditFields, type MeasuringAnnotation } from "./MeasuringEditFields";
-import { PinZoneEditFields, type PinZoneAnnotation } from "./PinZoneEditFields";
-import { RadarEditFields, type RadarAnnotation } from "./RadarEditFields";
-import { TentacleEditFields, type TentacleAnnotation } from "./TentacleEditFields";
-import { ThermometerEditFields, type ThermometerAnnotation } from "./ThermometerEditFields";
+import { type MatchingAnnotation, MatchingEditFields } from "./MatchingEditFields";
+import { type MeasuringAnnotation, MeasuringEditFields } from "./MeasuringEditFields";
+import { type PinZoneAnnotation, PinZoneEditFields } from "./PinZoneEditFields";
+import { type RadarAnnotation, RadarEditFields } from "./RadarEditFields";
+import { type TentacleAnnotation, TentacleEditFields } from "./TentacleEditFields";
+import { type ThermometerAnnotation, ThermometerEditFields } from "./ThermometerEditFields";
 import type { EditSavePayload } from "./types";
 
 export interface AnnotationEditFieldsContext {

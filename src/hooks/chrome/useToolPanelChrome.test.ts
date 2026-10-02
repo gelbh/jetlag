@@ -102,9 +102,7 @@ describe("useToolPanelChrome", () => {
   });
 
   it("keeps place-phase peek after a pan cycle (tool stays open)", () => {
-    const { result } = renderHook(() =>
-      useToolPanelChrome("thermometer", { sheetSnap: "peek" }),
-    );
+    const { result } = renderHook(() => useToolPanelChrome("thermometer", { sheetSnap: "peek" }));
 
     expect(result.current.userMinimized).toBe(true);
 
@@ -124,8 +122,7 @@ describe("useToolPanelChrome", () => {
 
   it("clears stuck mapPanning when the active tool changes", () => {
     const { result, rerender } = renderHook(
-      ({ tool }: { tool: "thermometer" | "none" }) =>
-        useToolPanelChrome(tool),
+      ({ tool }: { tool: "thermometer" | "none" }) => useToolPanelChrome(tool),
       { initialProps: { tool: "thermometer" as "thermometer" | "none" } },
     );
 

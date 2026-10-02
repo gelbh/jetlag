@@ -1,6 +1,6 @@
-import { describe, expect, it } from "vitest";
 import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
 import { point as turfPoint } from "@turf/helpers";
+import { describe, expect, it } from "vitest";
 import type { GameArea } from "../../map/annotations";
 import {
   buildLocationEliminationRegion,
@@ -33,12 +33,7 @@ describe("measuring elimination polarity", () => {
     const hiderInside: [number, number] = [51.451, -0.151];
     const seekerRingFar: [number, number] = [51.405, -0.195];
 
-    const closer = buildLocationEliminationRegion(
-      target,
-      distanceMeters,
-      sampleGameArea,
-      "closer",
-    );
+    const closer = buildLocationEliminationRegion(target, distanceMeters, sampleGameArea, "closer");
     const further = buildLocationEliminationRegion(
       target,
       distanceMeters,
@@ -82,16 +77,8 @@ describe("measuring elimination polarity", () => {
     const hiderPt = turfPoint([hiderCell.point[1], hiderCell.point[0]]);
     const farPt = turfPoint([farCell.point[1], farCell.point[0]]);
 
-    const closer = buildSeaLevelEliminationRegion(
-      nearRegion!,
-      sampleGameArea,
-      "closer",
-    );
-    const further = buildSeaLevelEliminationRegion(
-      nearRegion!,
-      sampleGameArea,
-      "further",
-    );
+    const closer = buildSeaLevelEliminationRegion(nearRegion!, sampleGameArea, "closer");
+    const further = buildSeaLevelEliminationRegion(nearRegion!, sampleGameArea, "further");
 
     expect(closer).not.toBeNull();
     expect(further).not.toBeNull();
@@ -105,17 +92,8 @@ describe("measuring elimination polarity", () => {
     const target: [number, number] = [51.45, -0.15];
     const near = buildLocationNearRegion(target, 1_500, sampleGameArea);
     expect(near).not.toBeNull();
-    const viaShared = buildMeasuringEliminationRegion(
-      near!,
-      sampleGameArea,
-      "closer",
-    );
-    const viaLocation = buildLocationEliminationRegion(
-      target,
-      1_500,
-      sampleGameArea,
-      "closer",
-    );
+    const viaShared = buildMeasuringEliminationRegion(near!, sampleGameArea, "closer");
+    const viaLocation = buildLocationEliminationRegion(target, 1_500, sampleGameArea, "closer");
     expect(viaShared).not.toBeNull();
     expect(viaLocation).not.toBeNull();
 

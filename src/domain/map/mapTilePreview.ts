@@ -10,17 +10,12 @@ export const MAP_STYLE_PREVIEW_ASSETS = {
   satellite: "/map-preview/satellite.svg",
 } as const;
 
-export function latLngToTileXY(
-  lat: number,
-  lng: number,
-  zoom: number,
-): { x: number; y: number } {
+export function latLngToTileXY(lat: number, lng: number, zoom: number): { x: number; y: number } {
   const latRad = (lat * Math.PI) / 180;
   const scale = 2 ** zoom;
   const x = Math.floor(((lng + 180) / 360) * scale);
   const y = Math.floor(
-    ((1 - Math.log(Math.tan(latRad) + 1 / Math.cos(latRad)) / Math.PI) / 2) *
-      scale,
+    ((1 - Math.log(Math.tan(latRad) + 1 / Math.cos(latRad)) / Math.PI) / 2) * scale,
   );
 
   return { x, y };

@@ -1,5 +1,5 @@
 import { FirebaseError } from "firebase/app";
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   compressPhotoForUpload,
   deletePhotoAnswer,
@@ -32,8 +32,7 @@ vi.mock("../analytics/sentry", () => ({
 const ensureHiderPhotoUploadAccess = vi.fn();
 
 vi.mock("../../firestore/firestoreAnnotations", () => ({
-  ensureHiderPhotoUploadAccess: (...args: unknown[]) =>
-    ensureHiderPhotoUploadAccess(...args),
+  ensureHiderPhotoUploadAccess: (...args: unknown[]) => ensureHiderPhotoUploadAccess(...args),
 }));
 
 import { deleteObject, getDownloadURL, uploadBytes } from "firebase/storage";
@@ -46,11 +45,7 @@ const hiderSession = {
   memberRoles: { "hider-1": "hider" as const },
 };
 
-function withMockImage(
-  width: number,
-  height: number,
-  run: () => Promise<void> | void,
-) {
+function withMockImage(width: number, height: number, run: () => Promise<void> | void) {
   const originalImage = globalThis.Image;
   class MockImage {
     naturalWidth = width;
@@ -86,18 +81,16 @@ describe("photoStorage", () => {
   });
 
   it("builds storage paths for photo answers", () => {
-    expect(
-      photoAnswerStoragePath("session-1", "question-1", "photo.jpg"),
-    ).toBe("sessions/session-1/photoAnswers/question-1/photo.jpg");
+    expect(photoAnswerStoragePath("session-1", "question-1", "photo.jpg")).toBe(
+      "sessions/session-1/photoAnswers/question-1/photo.jpg",
+    );
   });
 
   it("resolves MIME types from extensions when file.type is empty", () => {
-    expect(
-      resolveImageMimeType(new File(["image"], "photo.heic", { type: "" })),
-    ).toBe("image/heic");
-    expect(
-      resolveImageMimeType(new File(["image"], "photo.jpg", { type: "" })),
-    ).toBe("image/jpeg");
+    expect(resolveImageMimeType(new File(["image"], "photo.heic", { type: "" }))).toBe(
+      "image/heic",
+    );
+    expect(resolveImageMimeType(new File(["image"], "photo.jpg", { type: "" }))).toBe("image/jpeg");
   });
 
   it("rejects non-image files during compression", async () => {
@@ -117,9 +110,7 @@ describe("photoStorage", () => {
 
   it("compresses files with empty MIME from the gallery picker", async () => {
     await withMockImage(800, 600, async () => {
-      const blob = await compressPhotoForUpload(
-        new File(["image"], "photo.jpg", { type: "" }),
-      );
+      const blob = await compressPhotoForUpload(new File(["image"], "photo.jpg", { type: "" }));
       expect(blob.type).toBe("image/jpeg");
     });
   });
@@ -138,11 +129,7 @@ describe("photoStorage", () => {
       );
     });
 
-    expect(ensureHiderPhotoUploadAccess).toHaveBeenCalledWith(
-      hiderSession,
-      "hider-1",
-      "hider-1",
-    );
+    expect(ensureHiderPhotoUploadAccess).toHaveBeenCalledWith(hiderSession, "hider-1", "hider-1");
     expect(uploadBytes).toHaveBeenCalledOnce();
     expect(addPhotoUploadBreadcrumb).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -168,9 +155,7 @@ describe("photoStorage", () => {
         "hider-1",
       );
 
-      expect(path).toBe(
-        "sessions/session-1/photoAnswers/question-1/1700000000000.jpg",
-      );
+      expect(path).toBe("sessions/session-1/photoAnswers/question-1/1700000000000.jpg");
       expect(uploadBytes).toHaveBeenCalledOnce();
     });
 
@@ -196,9 +181,7 @@ describe("photoStorage", () => {
         "hider-1",
       );
 
-      expect(path).toBe(
-        "sessions/session-1/photoAnswers/question-1/1700000000000.jpg",
-      );
+      expect(path).toBe("sessions/session-1/photoAnswers/question-1/1700000000000.jpg");
       expect(ensureHiderPhotoUploadAccess).toHaveBeenCalledTimes(2);
       expect(uploadBytes).toHaveBeenCalledTimes(2);
     });
@@ -209,9 +192,7 @@ describe("photoStorage", () => {
   it("deletes stored photo answers", async () => {
     vi.mocked(deleteObject).mockResolvedValue(undefined as never);
 
-    await deletePhotoAnswer(
-      "sessions/session-1/photoAnswers/question-1/1700000000000.jpg",
-    );
+    await deletePhotoAnswer("sessions/session-1/photoAnswers/question-1/1700000000000.jpg");
 
     expect(deleteObject).toHaveBeenCalledOnce();
   });

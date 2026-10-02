@@ -38,9 +38,7 @@ describe("matchingQuestions", () => {
     expect(usedMatchingCategoryIds([airport, park])).toEqual(
       new Set(["commercial_airport", "park"]),
     );
-    expect(usedMatchingCategoryIds([airport, park], "match-airport")).toEqual(
-      new Set(["park"]),
-    );
+    expect(usedMatchingCategoryIds([airport, park], "match-airport")).toEqual(new Set(["park"]));
   });
 
   it("skips inactive matching annotations when tracking used categories", () => {
@@ -50,9 +48,7 @@ describe("matchingQuestions", () => {
       status: "deleted",
     };
 
-    expect(usedMatchingCategoryIds([active, inactive])).toEqual(
-      new Set(["commercial_airport"]),
-    );
+    expect(usedMatchingCategoryIds([active, inactive])).toEqual(new Set(["commercial_airport"]));
   });
 
   it("picks the first enabled category that is not already used", () => {
@@ -70,17 +66,13 @@ describe("matchingQuestions", () => {
       status: "pending",
       placement: { metadata: { matchingCategory: "landmass" } },
     } as unknown as PendingQuestionRecord;
-    expect(usedMatchingCategoryIdsForSession([], [pending])).toEqual(
-      new Set(["landmass"]),
-    );
+    expect(usedMatchingCategoryIdsForSession([], [pending])).toEqual(new Set(["landmass"]));
 
     const cancelled = {
       ...pending,
       status: "cancelled",
       answer: "yes",
     } as unknown as PendingQuestionRecord;
-    expect(usedMatchingCategoryIdsForSession([], [cancelled])).toEqual(
-      new Set(["landmass"]),
-    );
+    expect(usedMatchingCategoryIdsForSession([], [cancelled])).toEqual(new Set(["landmass"]));
   });
 });

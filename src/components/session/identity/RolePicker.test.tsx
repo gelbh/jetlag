@@ -25,9 +25,7 @@ vi.mock("../../ui/forms/RadioCardGroup", () => ({
 
 describe("RolePicker", () => {
   it("shows seeker and hider by default", () => {
-    render(
-      <RolePicker value="seeker" onChange={() => undefined} />,
-    );
+    render(<RolePicker value="seeker" onChange={() => undefined} />);
 
     expect(screen.getByText(/Seeker:/)).toBeInTheDocument();
     expect(screen.getByText(/Hider:/)).toBeInTheDocument();
@@ -35,17 +33,9 @@ describe("RolePicker", () => {
   });
 
   it("includes observer when requested", () => {
-    render(
-      <RolePicker
-        value="observer"
-        onChange={() => undefined}
-        includeObserver
-      />,
-    );
+    render(<RolePicker value="observer" onChange={() => undefined} includeObserver />);
 
     expect(screen.getByText(/Observer:/)).toBeInTheDocument();
-    expect(
-      screen.getByText(/Switch between seeker and hider views/i),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/Switch between seeker and hider views/i)).toBeInTheDocument();
   });
 });

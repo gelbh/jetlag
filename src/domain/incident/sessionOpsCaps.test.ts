@@ -1,10 +1,5 @@
 import { describe, expect, it } from "vitest";
 import {
-  SESSION_OPS_CAPS,
-  SESSION_OPS_GLOBAL_TOOL_CAP,
-  SESSION_OPS_SUMMON_CAP,
-  SESSION_OPS_TOOL_CAP,
-  SESSION_OPS_TURN_CAP,
   canConsumeTool,
   canConsumeTurn,
   canSummon,
@@ -12,11 +7,16 @@ import {
   consumeTool,
   consumeTurn,
   getSessionOpsCaps,
+  isSessionOpsPremiumTier,
   remainingSummons,
   remainingTools,
   remainingTurns,
   resolveSessionOpsCapTier,
-  isSessionOpsPremiumTier,
+  SESSION_OPS_CAPS,
+  SESSION_OPS_GLOBAL_TOOL_CAP,
+  SESSION_OPS_SUMMON_CAP,
+  SESSION_OPS_TOOL_CAP,
+  SESSION_OPS_TURN_CAP,
 } from "./sessionOpsCaps";
 
 describe("sessionOpsCaps", () => {
@@ -38,21 +38,17 @@ describe("sessionOpsCaps", () => {
   });
 
   it("treats reporter unlimited premium or premium session as premium caps", () => {
-    expect(
-      isSessionOpsPremiumTier({ hasUnlimitedPremium: true, sessionTier: "free" }),
-    ).toBe(true);
+    expect(isSessionOpsPremiumTier({ hasUnlimitedPremium: true, sessionTier: "free" })).toBe(true);
     expect(
       isSessionOpsPremiumTier({
         hasUnlimitedPremium: false,
         sessionTier: "premium",
       }),
     ).toBe(true);
-    expect(
-      isSessionOpsPremiumTier({ hasUnlimitedPremium: false, sessionTier: "free" }),
-    ).toBe(false);
-    expect(resolveSessionOpsCapTier({ hasUnlimitedPremium: true })).toBe(
-      "premium",
+    expect(isSessionOpsPremiumTier({ hasUnlimitedPremium: false, sessionTier: "free" })).toBe(
+      false,
     );
+    expect(resolveSessionOpsCapTier({ hasUnlimitedPremium: true })).toBe("premium");
     expect(
       resolveSessionOpsCapTier({
         hasUnlimitedPremium: false,

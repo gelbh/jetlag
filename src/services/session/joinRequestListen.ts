@@ -1,11 +1,4 @@
-import {
-  collection,
-  doc,
-  onSnapshot,
-  query,
-  where,
-  type Unsubscribe,
-} from "firebase/firestore";
+import { collection, doc, onSnapshot, query, type Unsubscribe, where } from "firebase/firestore";
 import type {
   JoinRequestRole,
   JoinRequestStatus,
@@ -13,11 +6,7 @@ import type {
 } from "../../domain/session/players/joinRequest";
 import { getFirestoreDb, isFirebaseConfigured } from "../core/firebase/firebase";
 
-const JOIN_REQUEST_ROLES = new Set<JoinRequestRole>([
-  "seeker",
-  "hider",
-  "observer",
-]);
+const JOIN_REQUEST_ROLES = new Set<JoinRequestRole>(["seeker", "hider", "observer"]);
 
 const JOIN_REQUEST_STATUSES = new Set<JoinRequestStatus>([
   "pending",
@@ -31,10 +20,7 @@ function joinRequestsCollection(sessionId: string) {
   return collection(getFirestoreDb(), "sessions", sessionId, "joinRequests");
 }
 
-function mapJoinRequest(
-  id: string,
-  data: Record<string, unknown>,
-): RoleJoinRequest | null {
+function mapJoinRequest(id: string, data: Record<string, unknown>): RoleJoinRequest | null {
   const role = data.role;
   const status = data.status;
   if (
@@ -49,20 +35,14 @@ function mapJoinRequest(
   return {
     id,
     sessionId: typeof data.sessionId === "string" ? data.sessionId : "",
-    requesterUid:
-      typeof data.requesterUid === "string" ? data.requesterUid : "",
+    requesterUid: typeof data.requesterUid === "string" ? data.requesterUid : "",
     role: role as JoinRequestRole,
     status: status as JoinRequestStatus,
-    identityLabel:
-      typeof data.identityLabel === "string"
-        ? data.identityLabel
-        : "Anonymous player",
+    identityLabel: typeof data.identityLabel === "string" ? data.identityLabel : "Anonymous player",
     createdAt: typeof data.createdAt === "string" ? data.createdAt : "",
     expiresAt: typeof data.expiresAt === "string" ? data.expiresAt : "",
-    resolvedAt:
-      typeof data.resolvedAt === "string" ? data.resolvedAt : undefined,
-    resolvedByUid:
-      typeof data.resolvedByUid === "string" ? data.resolvedByUid : undefined,
+    resolvedAt: typeof data.resolvedAt === "string" ? data.resolvedAt : undefined,
+    resolvedByUid: typeof data.resolvedByUid === "string" ? data.resolvedByUid : undefined,
   };
 }
 
@@ -84,12 +64,7 @@ export function listenOwnJoinRequest(
         onChange(null);
         return;
       }
-      onChange(
-        mapJoinRequest(
-          snapshot.id,
-          snapshot.data() as Record<string, unknown>,
-        ),
-      );
+      onChange(mapJoinRequest(snapshot.id, snapshot.data() as Record<string, unknown>));
     },
     (error) => onError(error),
   );
@@ -120,10 +95,7 @@ export function listenLeaderJoinRequests(
     (snapshot) => {
       const requests = snapshot.docs
         .map((requestDoc) =>
-          mapJoinRequest(
-            requestDoc.id,
-            requestDoc.data() as Record<string, unknown>,
-          ),
+          mapJoinRequest(requestDoc.id, requestDoc.data() as Record<string, unknown>),
         )
         .filter((request): request is RoleJoinRequest => request != null)
         .sort((left, right) => left.createdAt.localeCompare(right.createdAt));

@@ -3,10 +3,7 @@ import {
   isJoinRequestExpired,
   type RoleJoinRequest,
 } from "../../domain/session/players/joinRequest";
-import {
-  ledJoinRequestRoles,
-  type RoleGates,
-} from "../../domain/session/players/roleGates";
+import { ledJoinRequestRoles, type RoleGates } from "../../domain/session/players/roleGates";
 import { listenLeaderJoinRequests } from "../../services/session/joinRequestListen";
 import {
   mapLeaderJoinResolveError,
@@ -39,24 +36,16 @@ export function useLeaderJoinRequests({
     [isHost, myUid, roleGates],
   );
 
-  const enabled =
-    Boolean(sessionId) &&
-    sessionId !== LOCAL_SESSION_ID &&
-    roles.length > 0;
+  const enabled = Boolean(sessionId) && sessionId !== LOCAL_SESSION_ID && roles.length > 0;
 
   useEffect(() => {
     if (!enabled || !sessionId) {
       return;
     }
 
-    return listenLeaderJoinRequests(
-      sessionId,
-      roles,
-      setRequests,
-      () => {
-        setRequests([]);
-      },
-    );
+    return listenLeaderJoinRequests(sessionId, roles, setRequests, () => {
+      setRequests([]);
+    });
   }, [enabled, roles, sessionId]);
 
   useEffect(() => {
@@ -72,9 +61,7 @@ export function useLeaderJoinRequests({
     const activeRequests = enabled ? requests : [];
     return (
       activeRequests.find(
-        (request) =>
-          request.status === "pending" &&
-          !isJoinRequestExpired(request, nowMs),
+        (request) => request.status === "pending" && !isJoinRequestExpired(request, nowMs),
       ) ?? null
     );
   }, [enabled, nowMs, requests]);

@@ -1,27 +1,23 @@
-import type { AnnotationType } from "../../domain/map/annotations";
 import type { GameOutcome } from "../../domain/game/foundHider";
+import type { AnnotationType } from "../../domain/map/annotations";
+import { parsePhotoAnswer } from "../../domain/questions/photoQuestions";
 import {
   createActivityEventId,
   phaseActivityEventId,
   type SessionActivityEvent,
 } from "../../domain/session/activity/sessionActivityLog";
 import type { PendingQuestionToolType } from "../../domain/session/activity/sessionChat";
-import { parsePhotoAnswer } from "../../domain/questions/photoQuestions";
 import { trackSessionEnded } from "../core/analytics/analytics";
 import { appendSessionActivityEvent } from "./sessionActivityLog";
 
 /** Fire-and-forget append; lifecycle writers must not fail the primary action. */
-export function voidAppendSessionActivityEvent(
-  event: SessionActivityEvent,
-): void {
+export function voidAppendSessionActivityEvent(event: SessionActivityEvent): void {
   void appendSessionActivityEvent(event).catch(() => {
     // Silent miss — timeline stays on last good snapshot.
   });
 }
 
-function isGameOverAnalyticsOutcome(
-  outcome: GameOutcome | string | undefined,
-): boolean {
+function isGameOverAnalyticsOutcome(outcome: GameOutcome | string | undefined): boolean {
   return outcome === "found" || outcome === "abandoned";
 }
 
@@ -39,10 +35,7 @@ export function pendingActivityEventId(
   return `${pendingQuestionId}_${phase}`;
 }
 
-export function emitSessionStartedActivity(
-  sessionId: string,
-  createdByUid?: string,
-): void {
+export function emitSessionStartedActivity(sessionId: string, createdByUid?: string): void {
   voidAppendSessionActivityEvent({
     id: phaseActivityEventId("session_started"),
     sessionId,
@@ -53,10 +46,7 @@ export function emitSessionStartedActivity(
   });
 }
 
-export function emitHidingTimerStartedActivity(
-  sessionId: string,
-  createdByUid?: string,
-): void {
+export function emitHidingTimerStartedActivity(sessionId: string, createdByUid?: string): void {
   voidAppendSessionActivityEvent({
     id: phaseActivityEventId("hiding_timer_started"),
     sessionId,

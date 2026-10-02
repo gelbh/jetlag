@@ -1,11 +1,11 @@
 import { getToken } from "firebase/app-check";
 import { httpsCallable } from "firebase/functions";
+import { captureAppCheckTokenFailure } from "../core/analytics/sentry";
 import {
   getFirebaseAppCheck,
   getFirebaseFunctions,
   isFirebaseConfigured,
 } from "../core/firebase/firebase";
-import { captureAppCheckTokenFailure } from "../core/analytics/sentry";
 
 /**
  * Prime App Check before enforceAppCheck callables. Lazy App Check init on the

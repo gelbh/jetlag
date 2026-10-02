@@ -1,15 +1,12 @@
 import { useSyncExternalStore } from "react";
-import type { MapTool } from "../../domain/map/mapToolTypes";
 import { isQuestionDockTool } from "../../domain/map/mapTools";
+import type { MapTool } from "../../domain/map/mapToolTypes";
 import {
   isWizardPlacePhaseStep,
   sheetSnapFromStepId,
   type WizardSheetSnap,
 } from "../../domain/wizard/phaseToSheetSnap";
-import {
-  getLatestWizardStepIdForTool,
-  subscribeWizardStep,
-} from "../tools/useSyncWizardStepRef";
+import { getLatestWizardStepIdForTool, subscribeWizardStep } from "../tools/useSyncWizardStepRef";
 
 export function useWizardSheetSnap(activeTool: MapTool) {
   const wizardActive = activeTool !== "none" && isQuestionDockTool(activeTool);
@@ -21,9 +18,7 @@ export function useWizardSheetSnap(activeTool: MapTool) {
     () => null,
   );
 
-  const sheetSnap: WizardSheetSnap = wizardStepId
-    ? sheetSnapFromStepId(wizardStepId)
-    : "mid";
+  const sheetSnap: WizardSheetSnap = wizardStepId ? sheetSnapFromStepId(wizardStepId) : "mid";
   const mapAttentionActive =
     wizardActive && wizardStepId !== null && isWizardPlacePhaseStep(wizardStepId);
 

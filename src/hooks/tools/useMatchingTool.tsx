@@ -5,12 +5,13 @@ import {
   type MatchingMapPlacementPhase,
 } from "@/components/tools/ask/MatchingMapPlacementChrome";
 import { QuestionPreviewSheet } from "@/components/tools/shared/controls/QuestionPreviewSheet";
-import { useLatestRequest } from "../forms/useLatestRequest";
-import { useDebouncedValue } from "../forms/useDebouncedValue";
 import type { AskHudReadiness } from "@/domain/ask/askHudModes";
 import { canCommit as askCanCommit } from "@/domain/ask/askHudModes";
-import { isActive } from "../../domain/map/annotations";
+import { poiCandidateToMatchingFeature } from "@/domain/geo/poiCandidateAdapters";
+import { previewBasemapPois } from "@/services/geo/maplibre/previewBasemapPois";
+import { useMapStore } from "@/state/mapStore";
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
+import { isActive } from "../../domain/map/annotations";
 import { formatDistance } from "../../domain/map/distance";
 import {
   defaultMatchingCategoryId,
@@ -18,29 +19,27 @@ import {
   getMatchingCategory,
   isMatchingCategoryAvailable,
   isMatchingCategoryEnabled,
-  matchingQuestionFor,
-  usedMatchingCategoryIdsForSession,
   type MatchingAnswer,
   type MatchingCategoryId,
+  matchingQuestionFor,
+  usedMatchingCategoryIdsForSession,
 } from "../../domain/questions";
 import {
-  queryGeolocationPermission,
   type GeolocationPermissionState,
+  queryGeolocationPermission,
 } from "../../services/core/location/geolocation";
 import {
   matchingEmptyPlayAreaMessage,
   matchingFeatureCountLabel,
 } from "../../services/geo/matching";
 import { isAdminDivisionCategoryAvailable } from "../../services/geo/overpass/adminDivisionAvailability";
-import { poiCandidateToMatchingFeature } from "@/domain/geo/poiCandidateAdapters";
-import { previewBasemapPois } from "@/services/geo/maplibre/previewBasemapPois";
-import { useMapStore } from "@/state/mapStore";
+import { useDebouncedValue } from "../forms/useDebouncedValue";
+import { useLatestRequest } from "../forms/useLatestRequest";
 import { useToolSession } from "./framework/useToolSession";
-import { useToolSessionOptions } from "./useToolSessionOptions";
 import {
+  type CommitMatchingInput,
   commitMatching,
   performMatchingCommit,
-  type CommitMatchingInput,
 } from "./matching/commitMatching";
 import { MatchingToolPanel } from "./matching/MatchingToolPanel";
 import {
@@ -48,12 +47,10 @@ import {
   reconcileLockedMatchingNearest,
   resolveMatchingAnchor,
 } from "./matching/resolveMatchingAnchor";
-import type {
-  MatchingSessionConfig,
-  UseMatchingToolParams,
-} from "./matching/types";
+import type { MatchingSessionConfig, UseMatchingToolParams } from "./matching/types";
 import { useMatchingCatalog } from "./matching/useMatchingCatalog";
 import { useMatchingDraftState } from "./matching/useMatchingDraftState";
+import { useToolSessionOptions } from "./useToolSessionOptions";
 
 export type { UseMatchingToolParams } from "./matching/types";
 
@@ -130,13 +127,9 @@ export function useMatchingTool({
     [unavailableMatchingCategories],
   );
 
-  const activeAnnotations = useMemo(
-    () => annotations.filter(isActive),
-    [annotations],
-  );
+  const activeAnnotations = useMemo(() => annotations.filter(isActive), [annotations]);
   const usedMatchingCategories = useMemo(
-    () =>
-      usedMatchingCategoryIdsForSession(activeAnnotations, pendingQuestions),
+    () => usedMatchingCategoryIdsForSession(activeAnnotations, pendingQuestions),
     [activeAnnotations, pendingQuestions],
   );
 
@@ -322,11 +315,7 @@ export function useMatchingTool({
         if (tilePreview.length > 0) {
           applyResolveResult(
             requestId,
-            buildResolveMatchingAnchorResult(
-              seekerPoint,
-              categoryId,
-              tilePreview,
-            ),
+            buildResolveMatchingAnchorResult(seekerPoint, categoryId, tilePreview),
             0,
             categoryId,
           );
@@ -362,12 +351,7 @@ export function useMatchingTool({
   const debouncedSeekerPoint = useDebouncedValue(matchingSeekerPoint, 400);
 
   useEffect(() => {
-    if (
-      !active ||
-      !debouncedSeekerPoint ||
-      !matchingCategoryId ||
-      !matchingCategoryChosen
-    ) {
+    if (!active || !debouncedSeekerPoint || !matchingCategoryId || !matchingCategoryChosen) {
       return;
     }
 
@@ -376,13 +360,7 @@ export function useMatchingTool({
     }, 0);
 
     return () => window.clearTimeout(timeoutId);
-  }, [
-    active,
-    matchingCategoryChosen,
-    matchingCategoryId,
-    debouncedSeekerPoint,
-    resolveForAnchor,
-  ]);
+  }, [active, matchingCategoryChosen, matchingCategoryId, debouncedSeekerPoint, resolveForAnchor]);
 
   const resetDraft = useCallback(() => {
     cancelRequests();
@@ -397,8 +375,7 @@ export function useMatchingTool({
 
       const mapStyle = useMapStore.getState().mapStyle;
       const categoryId = matchingCategoryChosen ? matchingCategoryId : null;
-      const resolver =
-        categoryId != null ? getMatchingCategory(categoryId).resolver : null;
+      const resolver = categoryId != null ? getMatchingCategory(categoryId).resolver : null;
       const tapHit =
         resolver === "overpassPoint" && categoryId != null
           ? previewBasemapPois({
@@ -412,12 +389,7 @@ export function useMatchingTool({
       setMatchingSeekerAnchor(tapHit?.point ?? point);
       return true;
     },
-    [
-      active,
-      matchingCategoryChosen,
-      matchingCategoryId,
-      setMatchingSeekerAnchor,
-    ],
+    [active, matchingCategoryChosen, matchingCategoryId, setMatchingSeekerAnchor],
   );
 
   const handleGps = useCallback(async () => {
@@ -433,16 +405,9 @@ export function useMatchingTool({
 
       setMatchingSeekerAnchor(point);
     } catch (error) {
-      setMatchingError(
-        error instanceof Error ? error.message : "GPS location unavailable.",
-      );
+      setMatchingError(error instanceof Error ? error.message : "GPS location unavailable.");
     }
-  }, [
-    ensurePointInGameArea,
-    refreshGps,
-    setMatchingError,
-    setMatchingSeekerAnchor,
-  ]);
+  }, [ensurePointInGameArea, refreshGps, setMatchingError, setMatchingSeekerAnchor]);
 
   const handleGpsRef = useRef(handleGps);
 
@@ -539,8 +504,7 @@ export function useMatchingTool({
       : null;
 
   const nearestProvisional =
-    matchingLoading &&
-    matchingFeatures.some((feature) => feature.confirmStatus === "provisional");
+    matchingLoading && matchingFeatures.some((feature) => feature.confirmStatus === "provisional");
 
   const panel = (
     <MatchingToolPanel
@@ -578,8 +542,7 @@ export function useMatchingTool({
         onCommit: () => void commit(),
         onRetry:
           matchingSeekerPoint && matchingCategoryId
-            ? () =>
-                void resolveForAnchor(matchingSeekerPoint, matchingCategoryId)
+            ? () => void resolveForAnchor(matchingSeekerPoint, matchingCategoryId)
             : undefined,
         onPreviewConfirm: () =>
           void session.runAction(async () => {
@@ -611,13 +574,10 @@ export function useMatchingTool({
   ]);
 
   const categoryAvailable =
-    matchingCategoryId !== null &&
-    isMatchingCategoryAvailable(matchingCategoryId);
-  const resolveComplete =
-    matchingNullAnswer || matchingNearestFeatureName !== null;
+    matchingCategoryId !== null && isMatchingCategoryAvailable(matchingCategoryId);
+  const resolveComplete = matchingNullAnswer || matchingNearestFeatureName !== null;
 
-  const mapFirstEligible =
-    matchingCategoryChosen && matchingCategoryId !== null;
+  const mapFirstEligible = matchingCategoryChosen && matchingCategoryId !== null;
 
   const [eligiblePlacementGeo, setEligiblePlacementGeo] = useState<
     GeolocationPermissionState | "checking"
@@ -652,7 +612,6 @@ export function useMatchingTool({
       cancelled = true;
     };
     // matchingSeekerPoint intentionally omitted: only gate auto-GPS at entry
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- category entry only
   }, [mapFirstEligible, matchingCategoryId]);
 
   useEffect(() => {
@@ -664,14 +623,8 @@ export function useMatchingTool({
 
   // Drop stale GPS errors once an anchor exists (map tap or later successful fix).
   const placementError =
-    matchingError ??
-    (matchingSeekerPoint === null ? gpsError : null) ??
-    mapError ??
-    null;
-  const categoryDef =
-    matchingCategoryId !== null
-      ? getMatchingCategory(matchingCategoryId)
-      : null;
+    matchingError ?? (matchingSeekerPoint === null ? gpsError : null) ?? mapError ?? null;
+  const categoryDef = matchingCategoryId !== null ? getMatchingCategory(matchingCategoryId) : null;
   const usesContainmentMatching = catalog.matchingUsesContainment;
   const usesLandmassMatching = categoryDef?.resolver === "landmass";
 
@@ -704,10 +657,7 @@ export function useMatchingTool({
   let placementPhase: MatchingMapPlacementPhase;
   if (matchingSeekerPoint !== null && resolveComplete && !matchingLoading) {
     placementPhase = "answer";
-  } else if (
-    matchingSeekerPoint !== null &&
-    (matchingLoading || !resolveComplete)
-  ) {
+  } else if (matchingSeekerPoint !== null && (matchingLoading || !resolveComplete)) {
     placementPhase = "resolving";
   } else if (matchingSeekerPoint === null && gpsLoading) {
     placementPhase = "locating";
@@ -715,9 +665,7 @@ export function useMatchingTool({
     placementPhase = "failed";
   } else if (
     matchingSeekerPoint === null &&
-    (placementGeo === "prompt" ||
-      placementGeo === "denied" ||
-      placementGeo === "unavailable")
+    (placementGeo === "prompt" || placementGeo === "denied" || placementGeo === "unavailable")
   ) {
     placementPhase = placementGeo === "prompt" ? "needs_permission" : "failed";
   } else {

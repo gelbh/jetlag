@@ -1,11 +1,12 @@
-import { useEffect, useMemo, useRef, useState } from "react";
 import { Text } from "@mantine/core";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { SectionLabel } from "@/components/ui/entry/entryChrome";
 import type { GameArea } from "@/domain/map/annotations";
 import type { DistanceUnit } from "@/domain/map/distance";
 import type { GameSize } from "@/domain/session/size/gameSize";
 import {
-  GAME_SIZE_OPTIONS,
   formatPlayAreaSummary,
+  GAME_SIZE_OPTIONS,
   gameAreaSquareKilometers,
   gameAreaSquareMiles,
   gameSizeLabel,
@@ -14,7 +15,6 @@ import {
 } from "@/domain/session/size/gameSize";
 import { gameSizeRulesSummary } from "@/domain/session/size/gameSizeRules";
 import { RadioCardGroup } from "../../ui/forms/RadioCardGroup";
-import { SectionLabel } from "@/components/ui/entry/entryChrome";
 
 interface GameSizePickerProps {
   gameArea: GameArea | null;
@@ -40,10 +40,7 @@ export function GameSizePicker({
       return null;
     }
 
-    return formatPlayAreaSummary(
-      playAreaValueForUnit(gameArea, distanceUnit),
-      distanceUnit,
-    );
+    return formatPlayAreaSummary(playAreaValueForUnit(gameArea, distanceUnit), distanceUnit);
   }, [gameArea, distanceUnit]);
   const [userOverrode, setUserOverrode] = useState(false);
   const onChangeRef = useRef(onChange);

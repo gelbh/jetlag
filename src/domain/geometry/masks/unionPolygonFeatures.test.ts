@@ -1,15 +1,15 @@
-import { describe, expect, it } from "vitest";
 import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
 import turfCircle from "@turf/circle";
 import { point as turfPoint } from "@turf/helpers";
 import type { Feature, Polygon as GeoPolygon } from "geojson";
+import { describe, expect, it } from "vitest";
 import { assertPolygonTopologyParity } from "../kernel/parity";
 import {
+  type DiskSpec,
+  type PolygonFeature,
   unionDiskSpecs,
   unionEliminationParts,
   unionPolygonFeatures,
-  type DiskSpec,
-  type PolygonFeature,
 } from "./unionPolygonFeatures";
 
 function squareFeature(west: number): Feature<GeoPolygon> {
@@ -62,23 +62,15 @@ describe("unionPolygonFeatures parity", () => {
   it("matches turf engine union for overlapping squares", () => {
     const features = [squareFeature(-0.19), squareFeature(-0.16)];
     const candidate = unionPolygonFeatures(features);
-    const baseline = unionEliminationParts(
-      { polygons: features, disks: [] },
-      "turf",
-    );
+    const baseline = unionEliminationParts({ polygons: features, disks: [] }, "turf");
 
     assertMaskParity(candidate, baseline, -0.2, -0.1, 51.4, 51.5);
   });
 
   it("matches turf engine union for ten mixed polygons", () => {
-    const features = Array.from({ length: 10 }, (_, index) =>
-      squareFeature(-0.19 + index * 0.008),
-    );
+    const features = Array.from({ length: 10 }, (_, index) => squareFeature(-0.19 + index * 0.008));
     const candidate = unionPolygonFeatures(features);
-    const baseline = unionEliminationParts(
-      { polygons: features, disks: [] },
-      "turf",
-    );
+    const baseline = unionEliminationParts({ polygons: features, disks: [] }, "turf");
 
     assertMaskParity(candidate, baseline, -0.2, -0.1, 51.4, 51.5);
   });
@@ -96,11 +88,10 @@ describe("unionPolygonFeatures parity", () => {
         polygons: [
           ...polygons,
           ...(disks.map((disk) =>
-            turfCircle(
-              turfPoint([disk.center[1], disk.center[0]]),
-              disk.radiusMeters / 1000,
-              { steps: 64, units: "kilometers" },
-            ),
+            turfCircle(turfPoint([disk.center[1], disk.center[0]]), disk.radiusMeters / 1000, {
+              steps: 64,
+              units: "kilometers",
+            }),
           ) as PolygonFeature[]),
         ],
         disks: [],
@@ -133,11 +124,7 @@ describe("unionPolygonFeatures smoke", () => {
     const combined = unionPolygonFeatures(features);
 
     expect(combined).not.toBeNull();
-    expect(
-      booleanPointInPolygon(turfPoint([-0.185, 51.45]), combined!),
-    ).toBe(true);
-    expect(
-      booleanPointInPolygon(turfPoint([-0.155, 51.45]), combined!),
-    ).toBe(true);
+    expect(booleanPointInPolygon(turfPoint([-0.185, 51.45]), combined!)).toBe(true);
+    expect(booleanPointInPolygon(turfPoint([-0.155, 51.45]), combined!)).toBe(true);
   });
 });

@@ -9,20 +9,14 @@ export async function dispatchHalfPlane(
   pointB: LatLngTuple,
   gameArea: GameAreaGeometry,
   shadedSide: "hot" | "cold" = "cold",
-  divisionAnchor: "midpoint" | "start" = "midpoint"
+  divisionAnchor: "midpoint" | "start" = "midpoint",
 ): Promise<PolygonFeature | null> {
   return dispatchKernel({
     entrypoint: "halfPlane",
     label: "buildHalfPlanePolygon",
     runWasm: async () => {
       const wasm = await halfPlaneWasm.load();
-      return wasm.wasmBuildHalfPlanePolygon(
-        pointA,
-        pointB,
-        gameArea,
-        shadedSide,
-        divisionAnchor,
-      );
+      return wasm.wasmBuildHalfPlanePolygon(pointA, pointB, gameArea, shadedSide, divisionAnchor);
     },
   });
 }
@@ -31,19 +25,14 @@ export async function dispatchRadarShadedRegion(
   center: LatLngTuple,
   radiusMeters: number,
   gameArea: GameAreaGeometry,
-  shadedInside: boolean
+  shadedInside: boolean,
 ): Promise<PolygonFeature | null> {
   return dispatchKernel({
     entrypoint: "halfPlane",
     label: "buildRadarShadedRegion",
     runWasm: async () => {
       const wasm = await halfPlaneWasm.load();
-      return wasm.wasmBuildRadarShadedRegion(
-        center,
-        radiusMeters,
-        gameArea,
-        shadedInside,
-      );
+      return wasm.wasmBuildRadarShadedRegion(center, radiusMeters, gameArea, shadedInside);
     },
   });
 }

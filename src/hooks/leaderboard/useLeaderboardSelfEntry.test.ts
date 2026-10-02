@@ -29,9 +29,7 @@ describe("useLeaderboardSelfEntry", () => {
       rank: 12,
     });
 
-    const { result } = renderHook(() =>
-      useLeaderboardSelfEntry(selection, "me"),
-    );
+    const { result } = renderHook(() => useLeaderboardSelfEntry(selection, "me"));
 
     expect(result.current.loading).toBe(true);
 
@@ -58,9 +56,7 @@ describe("useLeaderboardSelfEntry", () => {
   it("sets error when fetch rejects", async () => {
     getLeaderboardSelfEntry.mockRejectedValue(new Error("boom"));
 
-    const { result } = renderHook(() =>
-      useLeaderboardSelfEntry(selection, "me"),
-    );
+    const { result } = renderHook(() => useLeaderboardSelfEntry(selection, "me"));
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
@@ -71,9 +67,7 @@ describe("useLeaderboardSelfEntry", () => {
   });
 
   it("clears state when uid is missing", async () => {
-    const { result } = renderHook(() =>
-      useLeaderboardSelfEntry(selection, null),
-    );
+    const { result } = renderHook(() => useLeaderboardSelfEntry(selection, null));
 
     expect(result.current.loading).toBe(false);
     expect(result.current.entry).toBeNull();
@@ -98,10 +92,9 @@ describe("useLeaderboardSelfEntry", () => {
         }),
     );
 
-    const { result, rerender } = renderHook(
-      ({ sel }) => useLeaderboardSelfEntry(sel, "me"),
-      { initialProps: { sel: selection } },
-    );
+    const { result, rerender } = renderHook(({ sel }) => useLeaderboardSelfEntry(sel, "me"), {
+      initialProps: { sel: selection },
+    });
 
     await waitFor(() => {
       expect(result.current.entry?.rank).toBe(12);
@@ -123,9 +116,7 @@ describe("useLeaderboardSelfEntry", () => {
   });
 
   it("skips fetch when skip is true", async () => {
-    const { result } = renderHook(() =>
-      useLeaderboardSelfEntry(selection, "me", true),
-    );
+    const { result } = renderHook(() => useLeaderboardSelfEntry(selection, "me", true));
 
     expect(result.current.loading).toBe(false);
     expect(result.current.entry).toBeNull();

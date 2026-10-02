@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import {
-  THERMOMETER_WALK_MAX_DURATION_MS,
   buildThermometerLineGeometry,
   crowFliesDistanceMeters,
   isStaleThermometerWalk,
@@ -8,6 +7,7 @@ import {
   listStaleWalkingThermometerQuestionIds,
   listWalkingThermometerQuestionIds,
   parseThermometerStartPoint,
+  THERMOMETER_WALK_MAX_DURATION_MS,
 } from "./thermometerWalk";
 
 describe("thermometerWalk", () => {
@@ -75,20 +75,10 @@ describe("thermometerWalk", () => {
     } as never;
 
     expect(isStaleThermometerWalk(question, null, nowMs)).toBe(true);
-    expect(
-      isStaleThermometerWalk(
-        question,
-        "2026-01-01T00:00:00.000Z",
-        nowMs,
-      ),
-    ).toBe(true);
-    expect(
-      isStaleThermometerWalk(
-        question,
-        new Date(nowMs - 30_000).toISOString(),
-        nowMs,
-      ),
-    ).toBe(false);
+    expect(isStaleThermometerWalk(question, "2026-01-01T00:00:00.000Z", nowMs)).toBe(true);
+    expect(isStaleThermometerWalk(question, new Date(nowMs - 30_000).toISOString(), nowMs)).toBe(
+      false,
+    );
     expect(
       isStaleThermometerWalk(
         question,
@@ -143,5 +133,4 @@ describe("thermometerWalk", () => {
 
     expect(listStaleWalkingThermometerQuestionIds([], new Map(), nowMs)).toEqual([]);
   });
-
 });

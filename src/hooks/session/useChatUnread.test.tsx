@@ -1,7 +1,7 @@
-import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
-import { renderHook, act, waitFor } from "@testing-library/react";
-import { useChatUnread } from "./useChatUnread";
+import { act, renderHook, waitFor } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { SessionMessageRecord } from "../../domain/session/activity/sessionChat";
+import { useChatUnread } from "./useChatUnread";
 
 function message(
   overrides: Partial<SessionMessageRecord> & Pick<SessionMessageRecord, "id">,
@@ -119,9 +119,7 @@ describe("useChatUnread acknowledgeFingerprints", () => {
       expect(result.current.unreadCount).toBe(2);
     });
 
-    const { messageFingerprint } = await import(
-      "../../domain/device/chrome/chatUnread"
-    );
+    const { messageFingerprint } = await import("../../domain/device/chrome/chatUnread");
 
     act(() => {
       result.current.acknowledgeFingerprints([messageFingerprint(question)]);

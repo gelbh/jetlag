@@ -39,12 +39,8 @@ describe("sessionOpsTools", () => {
         questionId: "q-1",
       }),
     ).toEqual({ questionId: "q-1" });
-    expect(() =>
-      parseSessionOpsToolArgs("cancel_pending_question", {}),
-    ).toThrow();
-    expect(() =>
-      parseSessionOpsToolArgs("soft_reload", { sessionId: "other" }),
-    ).toThrow();
+    expect(() => parseSessionOpsToolArgs("cancel_pending_question", {})).toThrow();
+    expect(() => parseSessionOpsToolArgs("soft_reload", { sessionId: "other" })).toThrow();
   });
 
   it("keeps JSON schemas aligned with tool ids", () => {

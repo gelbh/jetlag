@@ -7,8 +7,6 @@ const PUBLIC_SHELL_PATHS = new Set(["/", "/privacy", "/terms"]);
  */
 export function isPublicShellPath(pathname: string): boolean {
   const normalized =
-    pathname.length > 1 && pathname.endsWith("/")
-      ? pathname.slice(0, -1)
-      : pathname;
+    pathname.length > 1 && pathname.endsWith("/") ? pathname.slice(0, -1) : pathname;
   return PUBLIC_SHELL_PATHS.has(normalized);
 }

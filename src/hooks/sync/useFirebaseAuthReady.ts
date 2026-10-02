@@ -2,24 +2,14 @@ import { useEffect, useState } from "react";
 import { LOCAL_SESSION_ID, type SessionRecord } from "../../domain/map/annotations";
 import { ensureAnonymousUser, isFirebaseConfigured } from "../../services/core/firebase/firebase";
 
-function sessionNeedsFirebaseAuth(
-  session: SessionRecord | null | undefined,
-): boolean {
-  return Boolean(
-    session &&
-      session.id !== LOCAL_SESSION_ID &&
-      isFirebaseConfigured(),
-  );
+function sessionNeedsFirebaseAuth(session: SessionRecord | null | undefined): boolean {
+  return Boolean(session && session.id !== LOCAL_SESSION_ID && isFirebaseConfigured());
 }
 
-export function useFirebaseAuthReady(
-  session: SessionRecord | null | undefined,
-): boolean {
+export function useFirebaseAuthReady(session: SessionRecord | null | undefined): boolean {
   const needsAuth = sessionNeedsFirebaseAuth(session);
   const sessionKey = session?.id ?? "";
-  const [readyBySession, setReadyBySession] = useState<Record<string, boolean>>(
-    {},
-  );
+  const [readyBySession, setReadyBySession] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     if (!needsAuth) {

@@ -1,9 +1,9 @@
 import type { Feature, MultiPolygon, Polygon } from "geojson";
-import type { AnnotationRecord, GameArea } from "../../map/annotations";
-import { isActive } from "../../map/annotationActive";
 import { eliminationFeatureForAnnotation } from "../../geometry/adapter/eliminationMask";
-import { resolvePendingAnnotationFromReply } from "../questionResolution/resolvePendingAnnotationFromReply";
+import { isActive } from "../../map/annotationActive";
+import type { AnnotationRecord, GameArea } from "../../map/annotations";
 import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
+import { resolvePendingAnnotationFromReply } from "../questionResolution/resolvePendingAnnotationFromReply";
 
 export interface PendingPreviewEliminationInput {
   pending: PendingQuestionRecord;
@@ -16,9 +16,7 @@ function replyIdFromPendingAnswer(pending: PendingQuestionRecord): string | null
     return null;
   }
 
-  return typeof pending.answer === "string"
-    ? pending.answer
-    : String(pending.answer);
+  return typeof pending.answer === "string" ? pending.answer : String(pending.answer);
 }
 
 export function pendingQuestionHasResolvedAnnotation(
@@ -34,8 +32,7 @@ export function pendingQuestionHasResolvedAnnotation(
   }
 
   return annotations.some(
-    (annotation) =>
-      annotation.id === pending.resolvedAnnotationId && isActive(annotation),
+    (annotation) => annotation.id === pending.resolvedAnnotationId && isActive(annotation),
   );
 }
 
@@ -47,11 +44,7 @@ export async function buildPendingPreviewEliminationFeature(
     return null;
   }
 
-  const annotation = await resolvePendingAnnotationFromReply(
-    pending,
-    replyId,
-    gameArea,
-  );
+  const annotation = await resolvePendingAnnotationFromReply(pending, replyId, gameArea);
   if (!annotation) {
     return null;
   }
@@ -80,8 +73,7 @@ export async function buildPendingPreviewEliminationFeatures(
       continue;
     }
 
-    const replyId =
-      replyIdByQuestionId.get(pending.id) ?? replyIdFromPendingAnswer(pending);
+    const replyId = replyIdByQuestionId.get(pending.id) ?? replyIdFromPendingAnswer(pending);
     if (!replyId) {
       continue;
     }

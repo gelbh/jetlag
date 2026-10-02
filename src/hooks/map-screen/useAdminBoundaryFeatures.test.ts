@@ -23,18 +23,14 @@ vi.mock("../../services/geo/overpass/adminDivisionBoundaries", () => ({
 
 describe("useAdminBoundaryFeatures", () => {
   it("returns empty features when disabled", () => {
-    const { result } = renderHook(() =>
-      useAdminBoundaryFeatures(DUBLIN_CITY_GAME_AREA, {}, false),
-    );
+    const { result } = renderHook(() => useAdminBoundaryFeatures(DUBLIN_CITY_GAME_AREA, {}, false));
 
     expect(result.current.features).toEqual([]);
     expect(result.current.loading).toBe(false);
   });
 
   it("loads admin boundaries when enabled", async () => {
-    const { result } = renderHook(() =>
-      useAdminBoundaryFeatures(DUBLIN_CITY_GAME_AREA, {}, true),
-    );
+    const { result } = renderHook(() => useAdminBoundaryFeatures(DUBLIN_CITY_GAME_AREA, {}, true));
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false);

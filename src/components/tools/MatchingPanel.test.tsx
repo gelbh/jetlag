@@ -1,16 +1,12 @@
-import { describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
 import type { DistanceUnit } from "@/domain/map/distance";
 import {
   MATCHING_CATEGORIES,
   type MatchingAnswer,
   type MatchingCategoryId,
 } from "@/domain/questions";
-import {
-  MatchingPanel,
-  type MatchingPanelModel,
-  type MatchingPanelProps,
-} from "./MatchingPanel";
+import { MatchingPanel, type MatchingPanelModel, type MatchingPanelProps } from "./MatchingPanel";
 
 vi.mock("../../hooks/wizard/useToolWizard", () => ({
   useToolWizard: () => ({
@@ -75,9 +71,7 @@ describe("MatchingPanel public props (AC #1)", () => {
     );
 
     expect(screen.getByRole("option", { name: "Landmass" })).toBeDisabled();
-    expect(
-      screen.getByRole("option", { name: "Commercial Airport" }),
-    ).not.toBeDisabled();
+    expect(screen.getByRole("option", { name: "Commercial Airport" })).not.toBeDisabled();
   });
 
   it("greys unavailable categories and shows catalog notice", () => {
@@ -92,8 +86,6 @@ describe("MatchingPanel public props (AC #1)", () => {
     );
 
     expect(screen.getByRole("option", { name: "Landmass" })).toBeDisabled();
-    expect(
-      screen.getByText("No landmass intersects the play area."),
-    ).toBeInTheDocument();
+    expect(screen.getByText("No landmass intersects the play area.")).toBeInTheDocument();
   });
 });

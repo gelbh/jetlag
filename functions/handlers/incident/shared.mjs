@@ -1,34 +1,17 @@
-import { HttpsError } from "firebase-functions/v2/https";
 import { defineSecret, defineString } from "firebase-functions/params";
-import { getSentryDsnSecret } from "../../lib/sentry.mjs";
-import {
-  cancelOpenPendingQuestions,
-  moderateSession,
-} from "../../admin/moderateSession.mjs";
-import {
-  INCIDENT_INVALID_DIAGNOSTICS,
-  INCIDENT_PAYLOAD_TOO_LARGE,
-  INCIDENT_RATE_LIMITED,
-  INCIDENT_UNAUTHENTICATED,
-} from "../../incident/createIncident.mjs";
-import {
-  INCIDENT_FORBIDDEN,
-  INCIDENT_INVALID_MESSAGE,
-  INCIDENT_NOT_FOUND,
-} from "../../incident/postIncidentMessage.mjs";
+import { HttpsError } from "firebase-functions/v2/https";
+import { cancelOpenPendingQuestions, moderateSession } from "../../admin/moderateSession.mjs";
 import {
   INCIDENT_INVALID_MITIGATION,
   INCIDENT_NO_SESSION,
   INCIDENT_REPORTER_NOT_MEMBER,
 } from "../../incident/applyIncidentMitigation.mjs";
 import {
-  INCIDENT_INVALID_STATUS,
-  INCIDENT_INVALID_TRANSITION,
-} from "../../incident/updateIncidentStatus.mjs";
-import {
-  INCIDENT_HOTFIX_VERSION_TOO_LOW,
-  INCIDENT_INVALID_HOTFIX_VERSION,
-} from "../../incident/publishIncidentHotfix.mjs";
+  INCIDENT_INVALID_DIAGNOSTICS,
+  INCIDENT_PAYLOAD_TOO_LARGE,
+  INCIDENT_RATE_LIMITED,
+  INCIDENT_UNAUTHENTICATED,
+} from "../../incident/createIncident.mjs";
 import {
   HOST_CONFIRM_EXPIRED,
   HOST_CONFIRM_FORBIDDEN,
@@ -40,27 +23,41 @@ import {
   HOST_CONFIRM_UNAUTHENTICATED,
 } from "../../incident/hostConfirm.mjs";
 import {
-  cancelPendingQuestionInSession,
-  softDeleteAnnotationInSession,
-} from "../../incident/sessionOpsExecute.mjs";
-import {
-  SUPPORT_AGENT_NO_SESSION,
-  SUPPORT_AGENT_UNAUTHENTICATED,
-  SESSION_OPS_GLOBAL_TOOL_CAP,
-  SESSION_OPS_SUMMON_CAP,
-  SESSION_OPS_SUMMON_NOT_FOUND,
-  SESSION_OPS_TOOL_CAP,
-  SESSION_OPS_TURN_CAP,
-  SESSION_OPS_AGENT_BUSY,
-  SESSION_OPS_AGENT_FAILED,
-  SESSION_OPS_AGENT_MISCONFIGURED,
-} from "../../incident/supportAgentTurn.mjs";
-import {
   CURSOR_HOTFIX_FAILED,
   CURSOR_HOTFIX_MISCONFIGURED,
   CURSOR_HOTFIX_SKIPPED,
 } from "../../incident/launchCursorHotfix.mjs";
 import { CURSOR_HOTFIX_ALREADY_LAUNCHED } from "../../incident/launchIncidentCursorAgent.mjs";
+import {
+  INCIDENT_FORBIDDEN,
+  INCIDENT_INVALID_MESSAGE,
+  INCIDENT_NOT_FOUND,
+} from "../../incident/postIncidentMessage.mjs";
+import {
+  INCIDENT_HOTFIX_VERSION_TOO_LOW,
+  INCIDENT_INVALID_HOTFIX_VERSION,
+} from "../../incident/publishIncidentHotfix.mjs";
+import {
+  cancelPendingQuestionInSession,
+  softDeleteAnnotationInSession,
+} from "../../incident/sessionOpsExecute.mjs";
+import {
+  SESSION_OPS_AGENT_BUSY,
+  SESSION_OPS_AGENT_FAILED,
+  SESSION_OPS_AGENT_MISCONFIGURED,
+  SESSION_OPS_GLOBAL_TOOL_CAP,
+  SESSION_OPS_SUMMON_CAP,
+  SESSION_OPS_SUMMON_NOT_FOUND,
+  SESSION_OPS_TOOL_CAP,
+  SESSION_OPS_TURN_CAP,
+  SUPPORT_AGENT_NO_SESSION,
+  SUPPORT_AGENT_UNAUTHENTICATED,
+} from "../../incident/supportAgentTurn.mjs";
+import {
+  INCIDENT_INVALID_STATUS,
+  INCIDENT_INVALID_TRANSITION,
+} from "../../incident/updateIncidentStatus.mjs";
+import { getSentryDsnSecret } from "../../lib/sentry.mjs";
 
 export const sentryDsnSecret = getSentryDsnSecret();
 export const incidentEmailSecret = defineSecret("INCIDENT_EMAIL_SECRET");
@@ -104,10 +101,7 @@ export function mapIncidentError(error) {
     case INCIDENT_NOT_FOUND:
       throw new HttpsError("not-found", "Incident not found.");
     case INCIDENT_FORBIDDEN:
-      throw new HttpsError(
-        "permission-denied",
-        "You do not have access to this incident.",
-      );
+      throw new HttpsError("permission-denied", "You do not have access to this incident.");
     case INCIDENT_INVALID_MESSAGE:
       throw new HttpsError("invalid-argument", "Invalid message.");
     case INCIDENT_INVALID_MITIGATION:
@@ -115,25 +109,16 @@ export function mapIncidentError(error) {
     case INCIDENT_INVALID_STATUS:
       throw new HttpsError("invalid-argument", "Invalid incident status.");
     case INCIDENT_INVALID_TRANSITION:
-      throw new HttpsError(
-        "failed-precondition",
-        "That status transition is not allowed.",
-      );
+      throw new HttpsError("failed-precondition", "That status transition is not allowed.");
     case INCIDENT_NO_SESSION:
-      throw new HttpsError(
-        "failed-precondition",
-        "Incident has no linked session.",
-      );
+      throw new HttpsError("failed-precondition", "Incident has no linked session.");
     case INCIDENT_REPORTER_NOT_MEMBER:
       throw new HttpsError(
         "failed-precondition",
         "Incident reporter is not a member of the linked session.",
       );
     case INCIDENT_INVALID_HOTFIX_VERSION:
-      throw new HttpsError(
-        "invalid-argument",
-        "Hotfix version must be four-segment (x.y.z.n).",
-      );
+      throw new HttpsError("invalid-argument", "Hotfix version must be four-segment (x.y.z.n).");
     case INCIDENT_HOTFIX_VERSION_TOO_LOW:
       throw new HttpsError(
         "invalid-argument",
@@ -144,49 +129,28 @@ export function mapIncidentError(error) {
     case HOST_CONFIRM_NOT_FOUND:
       throw new HttpsError("not-found", "Host confirmation not found.");
     case HOST_CONFIRM_FORBIDDEN:
-      throw new HttpsError(
-        "permission-denied",
-        "Only the session host can approve this action.",
-      );
+      throw new HttpsError("permission-denied", "Only the session host can approve this action.");
     case HOST_CONFIRM_EXPIRED:
       throw new HttpsError(
         "failed-precondition",
         "This confirmation expired. Ask the fix agent to try again.",
       );
     case HOST_CONFIRM_NOT_PENDING:
-      throw new HttpsError(
-        "failed-precondition",
-        "This confirmation was already used or denied.",
-      );
+      throw new HttpsError("failed-precondition", "This confirmation was already used or denied.");
     case HOST_CONFIRM_NO_SESSION:
-      throw new HttpsError(
-        "failed-precondition",
-        "Incident has no linked session host.",
-      );
+      throw new HttpsError("failed-precondition", "Incident has no linked session host.");
     case HOST_CONFIRM_INVALID_TOOL:
       throw new HttpsError("invalid-argument", "Invalid tool for confirmation.");
     case HOST_CONFIRM_SESSION_MISMATCH:
-      throw new HttpsError(
-        "invalid-argument",
-        "Confirmation session does not match the incident.",
-      );
+      throw new HttpsError("invalid-argument", "Confirmation session does not match the incident.");
     case SUPPORT_AGENT_UNAUTHENTICATED:
       throw new HttpsError("unauthenticated", "Sign in required.");
     case SUPPORT_AGENT_NO_SESSION:
-      throw new HttpsError(
-        "failed-precondition",
-        "Incident has no linked session.",
-      );
+      throw new HttpsError("failed-precondition", "Incident has no linked session.");
     case SESSION_OPS_AGENT_FAILED:
-      throw new HttpsError(
-        "internal",
-        "Support agent is temporarily unavailable.",
-      );
+      throw new HttpsError("internal", "Support agent is temporarily unavailable.");
     case SESSION_OPS_AGENT_MISCONFIGURED:
-      throw new HttpsError(
-        "failed-precondition",
-        "Support agent is not configured.",
-      );
+      throw new HttpsError("failed-precondition", "Support agent is not configured.");
     case SESSION_OPS_AGENT_BUSY:
       throw new HttpsError(
         "resource-exhausted",
@@ -206,10 +170,7 @@ export function mapIncidentError(error) {
         "Session-ops summon not found. Ask the fix agent again.",
       );
     case CURSOR_HOTFIX_MISCONFIGURED:
-      throw new HttpsError(
-        "failed-precondition",
-        "Cursor API is not configured.",
-      );
+      throw new HttpsError("failed-precondition", "Cursor API is not configured.");
     case CURSOR_HOTFIX_FAILED:
       throw new HttpsError("internal", "Could not launch the Cursor agent.");
     case CURSOR_HOTFIX_ALREADY_LAUNCHED:
@@ -230,18 +191,11 @@ export function mapIncidentError(error) {
 /** Shared session-ops execute deps wired to Firestore + admin moderate helpers. */
 export function buildSessionOpsExecuteDeps(db) {
   return {
-    moderate: (sessionId, action, adminUid) =>
-      moderateSession(db, sessionId, action, adminUid),
-    clearPendingQuestions: (sessionId) =>
-      cancelOpenPendingQuestions(db, sessionId),
+    moderate: (sessionId, action, adminUid) => moderateSession(db, sessionId, action, adminUid),
+    clearPendingQuestions: (sessionId) => cancelOpenPendingQuestions(db, sessionId),
     cancelPendingQuestion: (sessionId, questionId) =>
       cancelPendingQuestionInSession(db, sessionId, questionId),
     softDeleteAnnotation: (sessionId, annotationId) =>
-      softDeleteAnnotationInSession(
-        db,
-        sessionId,
-        annotationId,
-        new Date().toISOString(),
-      ),
+      softDeleteAnnotationInSession(db, sessionId, annotationId, new Date().toISOString()),
   };
 }

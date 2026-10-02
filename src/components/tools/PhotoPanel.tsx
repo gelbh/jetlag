@@ -1,18 +1,18 @@
+import type { DistanceUnit } from "../../domain/map/distance";
 import {
   isPhotoCategoryAvailableForGameSize,
+  type PhotoCategoryId,
   photoCategoriesForGameSize,
   photoCategoryLabelForUnit,
   photoQuestionFor,
-  type PhotoCategoryId,
 } from "../../domain/questions";
-import type { DistanceUnit } from "../../domain/map/distance";
 import type { GameSize } from "../../domain/session/size/gameSize";
-import { CatalogExhaustedMessage } from "./shared/readout/CatalogExhaustedMessage";
 import { QuestionPromptBlock } from "./shared/controls/QuestionPromptBlock";
 import { SendToHidersButton } from "./shared/controls/SendToHidersButton";
 import { ToolPanelShell } from "./shared/panels/ToolPanelShell";
-import { QuestionTruthReferenceHint } from "./shared/QuestionTruthReferenceHint";
 import { ToolSection } from "./shared/panels/ToolSection";
+import { QuestionTruthReferenceHint } from "./shared/QuestionTruthReferenceHint";
+import { CatalogExhaustedMessage } from "./shared/readout/CatalogExhaustedMessage";
 
 interface PhotoPanelProps {
   gameSize: GameSize;
@@ -54,10 +54,7 @@ export function PhotoPanel({
     !isSubmitting;
   const displayError =
     error &&
-    !(
-      hasOpenQuestion === false &&
-      error === "Finish the open question before starting another."
-    )
+    !(hasOpenQuestion === false && error === "Finish the open question before starting another.")
       ? error
       : null;
 
@@ -70,12 +67,8 @@ export function PhotoPanel({
         <label className="field-label">
           Photo question
           <select
-            value={
-              usedCategoryIds.has(categoryId) ? "" : categoryId
-            }
-            onChange={(event) =>
-              onCategoryChange(event.target.value as PhotoCategoryId)
-            }
+            value={usedCategoryIds.has(categoryId) ? "" : categoryId}
+            onChange={(event) => onCategoryChange(event.target.value as PhotoCategoryId)}
             className="field-input"
             disabled={availableCategories.length === 0}
           >
@@ -90,10 +83,7 @@ export function PhotoPanel({
             ))}
           </select>
         </label>
-        <QuestionPromptBlock
-          prompt={question.prompt}
-          ruleSummary={question.ruleSummary}
-        />
+        <QuestionPromptBlock prompt={question.prompt} ruleSummary={question.ruleSummary} />
         <QuestionTruthReferenceHint />
         <SendToHidersButton
           costLabel={costLabel}
@@ -102,9 +92,7 @@ export function PhotoPanel({
           onClick={onCommit}
           instruction="Hiders upload a photo or reply that they cannot answer in game chat."
           warning={
-            hasOpenQuestion
-              ? "Finish the open question before starting another."
-              : undefined
+            hasOpenQuestion ? "Finish the open question before starting another." : undefined
           }
           error={displayError}
         />

@@ -2,9 +2,7 @@ export type DistanceUnit = "metric" | "imperial";
 
 export const METERS_PER_MILE = 1609.344;
 export const METERS_PER_FOOT = 0.3048;
-export const MILE_RADIUS_PRESETS = [
-  0.25, 0.5, 1, 3, 5, 10, 25, 50, 100,
-] as const;
+export const MILE_RADIUS_PRESETS = [0.25, 0.5, 1, 3, 5, 10, 25, 50, 100] as const;
 
 export function milesToMeters(miles: number): number {
   return miles * METERS_PER_MILE;
@@ -12,10 +10,7 @@ export function milesToMeters(miles: number): number {
 
 export const DEFAULT_RADIUS_METERS = milesToMeters(1);
 
-export function formatDistance(
-  meters: number,
-  unit: DistanceUnit = "metric",
-): string {
+export function formatDistance(meters: number, unit: DistanceUnit = "metric"): string {
   if (!Number.isFinite(meters) || meters < 0) {
     return unit === "imperial" ? "0 mi" : "0 m";
   }
@@ -60,11 +55,7 @@ export function formatThermometerWalkProgress(
   unit: DistanceUnit = "metric",
 ): ThermometerWalkProgressLabel {
   const walked = formatDistance(walkedMeters, unit);
-  if (
-    typeof targetMeters === "number" &&
-    Number.isFinite(targetMeters) &&
-    targetMeters > 0
-  ) {
+  if (typeof targetMeters === "number" && Number.isFinite(targetMeters) && targetMeters > 0) {
     return {
       walked,
       target: formatDistance(targetMeters, unit),
@@ -74,10 +65,7 @@ export function formatThermometerWalkProgress(
   return { walked, target: null };
 }
 
-export function formatPresetDistance(
-  meters: number,
-  unit: DistanceUnit = "metric",
-): string {
+export function formatPresetDistance(meters: number, unit: DistanceUnit = "metric"): string {
   if (unit === "imperial") {
     const miles = meters / METERS_PER_MILE;
     if (Math.abs(miles - 0.25) < 0.01) {
@@ -102,10 +90,7 @@ export function formatPresetDistance(
   return `${meters} m`;
 }
 
-export function parseDistanceInput(
-  value: string,
-  unit: DistanceUnit,
-): number | null {
+export function parseDistanceInput(value: string, unit: DistanceUnit): number | null {
   const trimmed = value.trim();
   if (!trimmed) {
     return null;
@@ -123,10 +108,7 @@ export function distanceUnitLabel(unit: DistanceUnit): string {
   return unit === "imperial" ? "miles" : "meters";
 }
 
-export function formatAltitude(
-  meters: number,
-  unit: DistanceUnit = "metric",
-): string {
+export function formatAltitude(meters: number, unit: DistanceUnit = "metric"): string {
   if (!Number.isFinite(meters)) {
     return unit === "imperial" ? "0 ft" : "0 m";
   }
@@ -139,16 +121,11 @@ export function formatAltitude(
   return `${Math.round(Math.abs(meters))} m`;
 }
 
-export function formatAltitudeLabel(
-  meters: number,
-  unit: DistanceUnit = "metric",
-): string {
+export function formatAltitudeLabel(meters: number, unit: DistanceUnit = "metric"): string {
   if (!Number.isFinite(meters) || meters === 0) {
     return "at sea level";
   }
 
   const magnitude = formatAltitude(meters, unit);
-  return meters > 0
-    ? `${magnitude} above sea level`
-    : `${magnitude} below sea level`;
+  return meters > 0 ? `${magnitude} above sea level` : `${magnitude} below sea level`;
 }

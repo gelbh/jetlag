@@ -19,5 +19,4 @@ export interface RouteTransitionContextValue {
   resetStuckTransition: () => void;
 }
 
-export const RouteTransitionContext =
-  createContext<RouteTransitionContextValue | null>(null);
+export const RouteTransitionContext = createContext<RouteTransitionContextValue | null>(null);

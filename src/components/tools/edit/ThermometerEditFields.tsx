@@ -1,24 +1,21 @@
 import { useCallback, useEffect, useState } from "react";
 import type { AnnotationRecord } from "@/domain/map/annotations";
-import {
-  formatPresetDistance,
-  type DistanceUnit,
-} from "@/domain/map/distance";
+import { type DistanceUnit, formatPresetDistance } from "@/domain/map/distance";
 import {
   availableThermometerDistancePresets,
   DEFAULT_THERMOMETER_DISTANCE_METERS,
   isThermometerDistanceOptionAvailable,
-  thermometerQuestionPrompt,
-  thermometerHotterTowards,
   type ThermometerAnswer,
   type ThermometerDistanceOptionMiles,
+  thermometerHotterTowards,
+  thermometerQuestionPrompt,
 } from "@/domain/questions";
 import { BinaryAnswerPicker } from "../shared/answers/BinaryAnswerPicker";
 import { hotterColderAnswerOptions } from "../shared/answers/binaryAnswerOptions";
 import { OptionChip, OptionChipRow } from "../shared/controls/OptionChip";
 import { QuestionPromptBlock } from "../shared/controls/QuestionPromptBlock";
-import { ResolvedReadout } from "../shared/readout/ResolvedReadout";
 import { ToolSection } from "../shared/panels/ToolSection";
+import { ResolvedReadout } from "../shared/readout/ResolvedReadout";
 import type { EditSavePayload } from "./types";
 
 export type ThermometerAnnotation = AnnotationRecord & { type: "thermometer" };
@@ -37,24 +34,17 @@ export function ThermometerEditFields({
   onSavePayloadChange,
 }: ThermometerEditFieldsProps) {
   const [thermometerDistanceMeters, setThermometerDistanceMeters] = useState(
-    annotation.metadata.thermometerDistanceMeters ??
-      DEFAULT_THERMOMETER_DISTANCE_METERS,
+    annotation.metadata.thermometerDistanceMeters ?? DEFAULT_THERMOMETER_DISTANCE_METERS,
   );
-  const [thermometerAnswer, setThermometerAnswer] =
-    useState<ThermometerAnswer | null>(
-      annotation.metadata.thermometerAnswer ?? null,
-    );
+  const [thermometerAnswer, setThermometerAnswer] = useState<ThermometerAnswer | null>(
+    annotation.metadata.thermometerAnswer ?? null,
+  );
 
   const canSave =
     thermometerAnswer !== null &&
-    isThermometerDistanceOptionAvailable(
-      usedThermometerOptions,
-      thermometerDistanceMeters,
-    );
+    isThermometerDistanceOptionAvailable(usedThermometerOptions, thermometerDistanceMeters);
 
-  const availableThermometerPresets = availableThermometerDistancePresets(
-    usedThermometerOptions,
-  );
+  const availableThermometerPresets = availableThermometerDistancePresets(usedThermometerOptions);
 
   const save = useCallback(() => {
     if (!canSave || !thermometerAnswer) {
@@ -83,10 +73,7 @@ export function ThermometerEditFields({
     <>
       <ToolSection title="Question" first status="active">
         <QuestionPromptBlock
-          prompt={thermometerQuestionPrompt(
-            thermometerDistanceMeters,
-            distanceUnit,
-          )}
+          prompt={thermometerQuestionPrompt(thermometerDistanceMeters, distanceUnit)}
         />
       </ToolSection>
       <ToolSection title="Distance traveled" status="active">
@@ -102,10 +89,7 @@ export function ThermometerEditFields({
           ))}
         </OptionChipRow>
       </ToolSection>
-      <ToolSection
-        title="Answer"
-        status={thermometerAnswer !== null ? "complete" : "active"}
-      >
+      <ToolSection title="Answer" status={thermometerAnswer !== null ? "complete" : "active"}>
         <BinaryAnswerPicker
           value={thermometerAnswer}
           onChange={setThermometerAnswer}

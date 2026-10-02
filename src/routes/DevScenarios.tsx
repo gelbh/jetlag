@@ -1,8 +1,8 @@
-import { useCallback } from "react";
 import { Button, Stack, Text, Title } from "@mantine/core";
+import { useCallback } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
-import { clientEnvUsesFirebaseEmulator } from "@/config/env";
 import { ScreenNav } from "@/components/ui/layout/ScreenNav";
+import { clientEnvUsesFirebaseEmulator } from "@/config/env";
 import { toEmulatorSeed } from "@/test/scenarios/adapters/toEmulatorSeed";
 import { toLocalStorageSeed } from "@/test/scenarios/adapters/toLocalStorageSeed";
 import { getScenario, listScenarios } from "@/test/scenarios/catalog";
@@ -26,10 +26,7 @@ export function DevScenarios() {
       if (seed.clearTimer) {
         localStorage.removeItem("jetlag-timer");
       }
-      if (
-        scenario.tags.includes("emulator") &&
-        clientEnvUsesFirebaseEmulator()
-      ) {
+      if (scenario.tags.includes("emulator") && clientEnvUsesFirebaseEmulator()) {
         await toEmulatorSeed(id);
       }
       navigate(scenario.entryPath);

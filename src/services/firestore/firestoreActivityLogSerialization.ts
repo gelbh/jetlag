@@ -1,12 +1,9 @@
 import type { AnnotationType } from "../../domain/map/annotations";
-import type { PendingQuestionToolType } from "../../domain/session/activity/sessionChat";
 import type { SessionActivityEvent } from "../../domain/session/activity/sessionActivityLog";
-import {
-  assertNoNestedArrays,
-  stripUndefinedValues,
-} from "./serialization/shared";
-import { parseFirestoreDocument } from "./zodConverter";
+import type { PendingQuestionToolType } from "../../domain/session/activity/sessionChat";
 import { activityLogDocumentSchema } from "./schemas/firestoreDocuments";
+import { assertNoNestedArrays, stripUndefinedValues } from "./serialization/shared";
+import { parseFirestoreDocument } from "./zodConverter";
 
 const ACTIVITY_ANNOTATION_TYPES = [
   "radar",
@@ -24,13 +21,9 @@ const ACTIVITY_PENDING_TOOL_TYPES = [
   "photo",
 ] as const satisfies readonly PendingQuestionToolType[];
 
-const ACTIVITY_ANNOTATION_TYPE_SET: ReadonlySet<string> = new Set(
-  ACTIVITY_ANNOTATION_TYPES,
-);
+const ACTIVITY_ANNOTATION_TYPE_SET: ReadonlySet<string> = new Set(ACTIVITY_ANNOTATION_TYPES);
 
-const ACTIVITY_PENDING_TOOL_TYPE_SET: ReadonlySet<string> = new Set(
-  ACTIVITY_PENDING_TOOL_TYPES,
-);
+const ACTIVITY_PENDING_TOOL_TYPE_SET: ReadonlySet<string> = new Set(ACTIVITY_PENDING_TOOL_TYPES);
 
 function optionalString(value: unknown): string | undefined {
   return typeof value === "string" ? value : undefined;
@@ -54,9 +47,7 @@ function parsePendingQuestionToolType(value: unknown): PendingQuestionToolType {
   throw new Error(`Invalid activity log toolType: ${String(value)}`);
 }
 
-export function buildActivityLogDocument(
-  event: SessionActivityEvent,
-): Record<string, unknown> {
+export function buildActivityLogDocument(event: SessionActivityEvent): Record<string, unknown> {
   const payload = stripUndefinedValues({
     type: event.type,
     createdAt: event.createdAt,
@@ -141,16 +132,13 @@ export function deserializeActivityLogFromFirestore(
         ...base,
         type: "game_ended",
         payload: {
-          outcome:
-            typeof payload.outcome === "string" ? payload.outcome : undefined,
+          outcome: typeof payload.outcome === "string" ? payload.outcome : undefined,
           summary: optionalString(payload.summary),
         },
       };
     default: {
       const _exhaustive: never = document.type;
-      throw new Error(
-        `Unhandled activity log type: ${String(_exhaustive)}`,
-      );
+      throw new Error(`Unhandled activity log type: ${String(_exhaustive)}`);
     }
   }
 }

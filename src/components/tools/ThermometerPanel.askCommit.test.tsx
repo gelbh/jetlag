@@ -1,8 +1,8 @@
-import { describe, expect, it, vi } from "vitest";
 import { fireEvent, screen } from "@testing-library/react";
-import { renderWithAppUi } from "../../test/renderWithAppUi";
+import { describe, expect, it, vi } from "vitest";
 import type { DistanceUnit } from "../../domain/map/distance";
 import type { SessionRulesInput } from "../../domain/session/rules";
+import { renderWithAppUi } from "../../test/renderWithAppUi";
 import { ThermometerPanel } from "./ThermometerPanel";
 
 const sessionRules = {
@@ -38,17 +38,11 @@ describe("ThermometerPanel place→configure→ask commit chrome", () => {
 
   it("keeps Place Continue disabled when manual travel is shorter than distance", () => {
     renderWithAppUi(
-      <ThermometerPanel
-        {...baseProps}
-        travelMeters={700}
-        distanceMeters={804.672}
-      />,
+      <ThermometerPanel {...baseProps} travelMeters={700} distanceMeters={804.672} />,
     );
 
     expect(screen.getByRole("button", { name: "Continue" })).toBeDisabled();
-    expect(
-      screen.getByText("Movement is shorter than the selected distance."),
-    ).toBeInTheDocument();
+    expect(screen.getByText("Movement is shorter than the selected distance.")).toBeInTheDocument();
   });
 
   it("exposes exactly one enabled Add thermometer control on ask", () => {
@@ -63,13 +57,7 @@ describe("ThermometerPanel place→configure→ask commit chrome", () => {
   });
 
   it("exposes exactly one enabled Send to hiders control in multiplayer ask", () => {
-    renderWithAppUi(
-      <ThermometerPanel
-        {...baseProps}
-        awaitHiderAnswer
-        costLabel="D2P1"
-      />,
-    );
+    renderWithAppUi(<ThermometerPanel {...baseProps} awaitHiderAnswer costLabel="D2P1" />);
 
     fireEvent.click(screen.getByRole("button", { name: "Continue" }));
     fireEvent.click(screen.getByRole("button", { name: "Continue" }));

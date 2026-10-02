@@ -1,9 +1,9 @@
 import {
   LngLatBounds,
-  MercatorCoordinate,
   type LngLatBoundsLike,
   type LngLatLike,
   type Map as MapLibreMap,
+  MercatorCoordinate,
   type PaddingOptions,
 } from "maplibre-gl";
 
@@ -14,20 +14,10 @@ function normalizeLngLat(center: LngLatLike): { lng: number; lat: number } {
   if (Array.isArray(center)) {
     return { lng: center[0], lat: center[1] };
   }
-  if (
-    typeof center === "object" &&
-    center !== null &&
-    "lng" in center &&
-    "lat" in center
-  ) {
+  if (typeof center === "object" && center !== null && "lng" in center && "lat" in center) {
     return { lng: center.lng, lat: center.lat };
   }
-  if (
-    typeof center === "object" &&
-    center !== null &&
-    "lon" in center &&
-    "lat" in center
-  ) {
+  if (typeof center === "object" && center !== null && "lon" in center && "lat" in center) {
     return { lng: center.lon, lat: center.lat };
   }
   throw new Error("computeFramedCenterZoomMapLibre: unsupported center");
@@ -118,11 +108,6 @@ export function computeFramedCenterZoomMapLibre(
   }
 
   const llb = LngLatBounds.convert(bounds);
-  const center = computePaddedCenterAtZoom(
-    llb.getSouthWest(),
-    llb.getNorthEast(),
-    padding,
-    zoom,
-  );
+  const center = computePaddedCenterAtZoom(llb.getSouthWest(), llb.getNorthEast(), padding, zoom);
   return { center, zoom };
 }

@@ -1,8 +1,4 @@
-import type {
-  AnnotationRecord,
-  GameArea,
-  SessionRecord,
-} from "../../domain/map/annotations";
+import type { AnnotationRecord, GameArea, SessionRecord } from "../../domain/map/annotations";
 
 export type ScenarioTag = "unit" | "e2e" | "manual" | "emulator";
 

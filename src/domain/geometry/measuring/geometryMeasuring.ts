@@ -1,2 +1,2 @@
-export * from "./nearRegions";
 export * from "./eliminationRegions";
+export * from "./nearRegions";

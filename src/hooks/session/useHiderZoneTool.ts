@@ -1,22 +1,22 @@
 import { useCallback, useMemo, useState } from "react";
-import { useLatestRequest } from "../forms/useLatestRequest";
-import type { GameArea } from "../../domain/map/annotations";
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import { isPointInGameArea } from "../../domain/geometry/gameArea/geometry";
+import type { GameArea } from "../../domain/map/annotations";
+import type { MapViewportBounds } from "../../domain/map/transitViewport";
 import {
   buildHidingZoneCircle,
+  type HidingZoneRecord,
   haversineMeters,
   MANUAL_STATION_ID,
   nearestStation,
   searchStations,
-  type HidingZoneRecord,
   type TransitStation,
 } from "../../domain/session/hiding/hidingZone";
-import type { MapViewportBounds } from "../../domain/map/transitViewport";
 import { isFirestorePermissionDenied } from "../../services/firestore/firestoreAnnotations";
-import { fetchTransitStationsForHidingZoneViewport } from "../../services/geo/matching";
 import { writeHidingZone } from "../../services/firestore/firestoreSessionExtras";
+import { fetchTransitStationsForHidingZoneViewport } from "../../services/geo/matching";
 import { controlSessionTimerForMove } from "../../services/session/moveTimerControl";
+import { useLatestRequest } from "../forms/useLatestRequest";
 
 const MOVE_MIN_DISTANCE_METERS = 50;
 
@@ -60,9 +60,7 @@ export function useHiderZoneTool({
   const [stationsLoading, setStationsLoading] = useState(false);
   const [stationsError, setStationsError] = useState<string | null>(null);
   const [query, setQuery] = useState("");
-  const [selectedStation, setSelectedStation] = useState<TransitStation | null>(
-    null,
-  );
+  const [selectedStation, setSelectedStation] = useState<TransitStation | null>(null);
   const [manualMode, setManualMode] = useState(false);
   const [methodChosen, setMethodChosen] = useState(false);
   const [manualCenter, setManualCenter] = useState<LatLngTuple | null>(null);
@@ -91,19 +89,14 @@ export function useHiderZoneTool({
       setStationsError(null);
 
       try {
-        const loaded = await fetchTransitStationsForHidingZoneViewport(
-          viewport,
-          gameArea,
-        );
+        const loaded = await fetchTransitStationsForHidingZoneViewport(viewport, gameArea);
         if (!isLatestRequest(requestId)) {
           return;
         }
 
         setStations(loaded);
         setSelectedStation((current) =>
-          current && loaded.some((station) => station.id === current.id)
-            ? current
-            : null,
+          current && loaded.some((station) => station.id === current.id) ? current : null,
         );
       } catch {
         if (!isLatestRequest(requestId)) {
@@ -120,10 +113,7 @@ export function useHiderZoneTool({
     [beginRequest, gameArea, isLatestRequest],
   );
 
-  const filteredStations = useMemo(
-    () => searchStations(query, stations),
-    [query, stations],
-  );
+  const filteredStations = useMemo(() => searchStations(query, stations), [query, stations]);
 
   const previewCircle = useMemo(() => {
     if (manualMode && manualCenter) {
@@ -134,15 +124,10 @@ export function useHiderZoneTool({
       return null;
     }
 
-    return buildHidingZoneCircle(
-      [selectedStation.lat, selectedStation.lng],
-      radiusMeters,
-    );
+    return buildHidingZoneCircle([selectedStation.lat, selectedStation.lng], radiusMeters);
   }, [manualCenter, manualMode, radiusMeters, selectedStation]);
 
-  const hasPlacement = manualMode
-    ? manualCenter !== null
-    : selectedStation !== null;
+  const hasPlacement = manualMode ? manualCenter !== null : selectedStation !== null;
 
   const openWizard = useCallback(() => {
     setWizardOpen(true);
@@ -175,17 +160,13 @@ export function useHiderZoneTool({
       return;
     }
 
-    const confirmed = window.confirm(
-      "Play Move? Timer pauses and you must pick a new station.",
-    );
+    const confirmed = window.confirm("Play Move? Timer pauses and you must pick a new station.");
     if (!confirmed) {
       return;
     }
 
     if (hasMoveCard && !hasMoveCard()) {
-      window.alert(
-        "Board economy: you need a Move card in hand before relocating.",
-      );
+      window.alert("Board economy: you need a Move card in hand before relocating.");
       return;
     }
 
@@ -305,10 +286,8 @@ export function useHiderZoneTool({
     if (
       moveMode &&
       existingZone &&
-      haversineMeters(center, [
-        existingZone.center.lat,
-        existingZone.center.lng,
-      ]) < MOVE_MIN_DISTANCE_METERS
+      haversineMeters(center, [existingZone.center.lat, existingZone.center.lng]) <
+        MOVE_MIN_DISTANCE_METERS
     ) {
       setError("Move requires a different location.");
       return;
@@ -362,9 +341,7 @@ export function useHiderZoneTool({
         try {
           await resumeTimerForMove();
         } catch {
-          setError(
-            "Zone saved, but the timer didn't resume. Ask the host to resume it.",
-          );
+          setError("Zone saved, but the timer didn't resume. Ask the host to resume it.");
         }
       }
     } catch (nextError) {

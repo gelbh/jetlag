@@ -37,15 +37,9 @@ export function shouldApplyDocumentCsp(response: Response): boolean {
   return response.body !== null;
 }
 
-export async function injectScriptNonces(
-  html: string,
-  nonce: string,
-): Promise<string> {
+export async function injectScriptNonces(html: string, nonce: string): Promise<string> {
   if (typeof HTMLRewriter === "undefined") {
-    return html.replace(
-      /<script(?![^>]*\snonce=)/gi,
-      `<script nonce="${nonce}"`,
-    );
+    return html.replace(/<script(?![^>]*\snonce=)/gi, `<script nonce="${nonce}"`);
   }
 
   const rewriter = new HTMLRewriter().on("script", {
@@ -85,19 +79,14 @@ export function addScriptNonceToCsp(csp: string, nonce: string): string {
   );
 }
 
-export async function applyDocumentCspNonce(
-  response: Response,
-): Promise<Response> {
+export async function applyDocumentCspNonce(response: Response): Promise<Response> {
   const nonce = generateCspNonce();
   const html = await response.text();
   const headers = new Headers(response.headers);
   const contentSecurityPolicy = headers.get("Content-Security-Policy");
 
   if (contentSecurityPolicy) {
-    headers.set(
-      "Content-Security-Policy",
-      addScriptNonceToCsp(contentSecurityPolicy, nonce),
-    );
+    headers.set("Content-Security-Policy", addScriptNonceToCsp(contentSecurityPolicy, nonce));
   }
 
   return new Response(await injectScriptNonces(html, nonce), {

@@ -14,8 +14,7 @@ export const screenHeaderInsetTopClassName =
 export const screenHeaderShellClassName = `shrink-0 border-b-2 border-rule bg-canvas pb-2 ${screenHeaderInsetTopClassName}`;
 
 /** Top padding for page content below a fixed ScreenHeader. */
-export const screenHeaderOffsetClassName =
-  "pt-[max(6rem,calc(var(--safe-area-top)+3.875rem))]";
+export const screenHeaderOffsetClassName = "pt-[max(6rem,calc(var(--safe-area-top)+3.875rem))]";
 
 interface ScreenHeaderProps {
   backTo?: string;

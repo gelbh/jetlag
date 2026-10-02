@@ -1,17 +1,15 @@
-import type { AnnotationRecord, GameArea } from "../../map/annotations";
-import { MAP_ANNOTATION_COLORS } from "../../map/mapAnnotationColors";
-import type { MatchingAnswer } from "../matchingQuestions";
+import { deserializeMatchingFeatures } from "@/domain/geo/matchingAdapters";
 import {
   buildMatchingEliminationRegion,
   buildSameNearestRegion,
 } from "../../geometry/measuring/matchingGeometry";
 import { persistSlimPolygonFeature } from "../../geometry/progressive/persistSlim";
-import { deserializeMatchingFeatures } from "@/domain/geo/matchingAdapters";
+import type { AnnotationRecord, GameArea } from "../../map/annotations";
+import { MAP_ANNOTATION_COLORS } from "../../map/mapAnnotationColors";
 import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
+import type { MatchingAnswer } from "../matchingQuestions";
 
-export function matchingAnswerFromReplyId(
-  replyId: string,
-): MatchingAnswer | null {
+export function matchingAnswerFromReplyId(replyId: string): MatchingAnswer | null {
   if (replyId === "yes" || replyId === "no") {
     return replyId;
   }
@@ -33,9 +31,7 @@ export async function resolveMatchingPendingQuestion(
   }
 
   const features = deserializeMatchingFeatures(featuresJson);
-  const geometry = JSON.parse(
-    pending.placement.geometryJson,
-  ) as AnnotationRecord["geometry"];
+  const geometry = JSON.parse(pending.placement.geometryJson) as AnnotationRecord["geometry"];
   const matchingNullAnswer = metadata.matchingNullAnswer === true;
 
   if (matchingNullAnswer) {
@@ -51,11 +47,7 @@ export async function resolveMatchingPendingQuestion(
     };
   }
 
-  const boundaryRegion = await buildSameNearestRegion(
-    features,
-    seekerFeatureId,
-    gameArea,
-  );
+  const boundaryRegion = await buildSameNearestRegion(features, seekerFeatureId, gameArea);
   const eliminationRegion = await buildMatchingEliminationRegion(
     features,
     seekerFeatureId,

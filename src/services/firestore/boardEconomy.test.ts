@@ -35,20 +35,12 @@ describe("subscribeBoardEconomyState", () => {
     subscribeBoardEconomyState("session-1", onChange, onError);
 
     expect(onSnapshot).toHaveBeenCalledOnce();
-    const errorHandler = onSnapshot.mock.calls[0]?.[2] as
-      | ((error: Error) => void)
-      | undefined;
+    const errorHandler = onSnapshot.mock.calls[0]?.[2] as ((error: Error) => void) | undefined;
     expect(errorHandler).toEqual(expect.any(Function));
 
-    const boom = new FirebaseError(
-      "permission-denied",
-      "Missing or insufficient permissions.",
-    );
+    const boom = new FirebaseError("permission-denied", "Missing or insufficient permissions.");
     errorHandler?.(boom);
 
-    expect(handleFirestoreListenError).toHaveBeenCalledExactlyOnceWith(
-      boom,
-      onError,
-    );
+    expect(handleFirestoreListenError).toHaveBeenCalledExactlyOnceWith(boom, onError);
   });
 });

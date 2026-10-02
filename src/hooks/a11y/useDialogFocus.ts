@@ -1,4 +1,4 @@
-import { useEffect, type RefObject } from "react";
+import { type RefObject, useEffect } from "react";
 
 const FOCUSABLE_SELECTOR = [
   "a[href]",
@@ -10,25 +10,22 @@ const FOCUSABLE_SELECTOR = [
 ].join(", ");
 
 function listFocusable(container: HTMLElement): HTMLElement[] {
-  return Array.from(
-    container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR),
-  ).filter((element) => {
-    if (element.getAttribute("aria-hidden") === "true") {
-      return false;
-    }
-    const style = window.getComputedStyle(element);
-    return style.visibility !== "hidden" && style.display !== "none";
-  });
+  return Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(
+    (element) => {
+      if (element.getAttribute("aria-hidden") === "true") {
+        return false;
+      }
+      const style = window.getComputedStyle(element);
+      return style.visibility !== "hidden" && style.display !== "none";
+    },
+  );
 }
 
 /**
  * When `active`, moves focus into `containerRef`, traps Tab inside it, and
  * restores the previously focused element on cleanup.
  */
-export function useDialogFocus(
-  containerRef: RefObject<HTMLElement | null>,
-  active: boolean,
-) {
+export function useDialogFocus(containerRef: RefObject<HTMLElement | null>, active: boolean) {
   useEffect(() => {
     if (!active) {
       return;
@@ -40,9 +37,7 @@ export function useDialogFocus(
     }
 
     const previouslyFocused =
-      document.activeElement instanceof HTMLElement
-        ? document.activeElement
-        : null;
+      document.activeElement instanceof HTMLElement ? document.activeElement : null;
 
     if (!container.hasAttribute("tabindex")) {
       container.tabIndex = -1;

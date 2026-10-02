@@ -1,7 +1,7 @@
 import type { GeocodedPlace } from "@/services/geo/geocoding";
 import { formatPlaceSearchSubtitle } from "@/services/geo/geocoding/geocodingRank";
-import { SearchField } from "../../ui/forms/SearchField";
 import { SearchResultsList } from "../../tools/shared/controls/SearchResultsList";
+import { SearchField } from "../../ui/forms/SearchField";
 
 interface PlaceAreaSearchFieldsProps {
   locationQuery: string;
@@ -49,9 +49,7 @@ export function PlaceAreaSearchFields({
       />
 
       {selectedPlace && searchResults.length === 0 ? (
-        <p className="text-xs text-ink-dim">
-          {formatPlaceSearchSubtitle(selectedPlace)}
-        </p>
+        <p className="text-xs text-ink-dim">{formatPlaceSearchSubtitle(selectedPlace)}</p>
       ) : null}
     </>
   );

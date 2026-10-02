@@ -1,5 +1,5 @@
-import { describe, it } from "node:test";
 import assert from "node:assert/strict";
+import { describe, it } from "node:test";
 import { setCors } from "../lib/cors.mjs";
 
 describe("cors", () => {
@@ -15,15 +15,9 @@ describe("cors", () => {
       headers: { origin: "https://jetlag.gelbhart.dev" },
     });
 
-    assert.equal(
-      headers.get("Access-Control-Allow-Origin"),
-      "https://jetlag.gelbhart.dev",
-    );
+    assert.equal(headers.get("Access-Control-Allow-Origin"), "https://jetlag.gelbhart.dev");
     assert.equal(headers.get("Vary"), "Origin");
-    assert.match(
-      headers.get("Access-Control-Allow-Headers"),
-      /Authorization/,
-    );
+    assert.match(headers.get("Access-Control-Allow-Headers"), /Authorization/);
   });
 
   it("defaults to production origin when Origin header is absent", () => {
@@ -36,9 +30,6 @@ describe("cors", () => {
 
     setCors(res);
 
-    assert.equal(
-      headers.get("Access-Control-Allow-Origin"),
-      "https://jetlag.gelbhart.dev",
-    );
+    assert.equal(headers.get("Access-Control-Allow-Origin"), "https://jetlag.gelbhart.dev");
   });
 });

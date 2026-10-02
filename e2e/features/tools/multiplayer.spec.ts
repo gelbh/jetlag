@@ -1,28 +1,26 @@
 import {
-  test,
+  clickToolDockButton,
+  completeRadarSolo,
   createHostSession,
   createMultiplayerContexts,
-  completeRadarSolo,
+  expectAskHud,
   expectPendingQuestionText,
+  expectSendToHidersInViewport,
+  placeAskAnchor,
   runHiderAnswerFlow,
+  selectFirstRadarDistance,
   sendMatchingToHiders,
   sendMeasuringToHiders,
   sendRadarToHiders,
   sendTentacleToHiders,
   sendThermometerToHiders,
-  clickToolDockButton,
-  expectAskHud,
-  expectSendToHidersInViewport,
-  placeAskAnchor,
-  selectFirstRadarDistance,
+  test,
 } from "../../fixtures";
 
 test.setTimeout(120_000);
 
 test.describe("multiplayer question tools", () => {
-  test("radar send to hiders stays in viewport on send step", async ({
-    hostHider,
-  }) => {
+  test("radar send to hiders stays in viewport on send step", async ({ hostHider }) => {
     const { hostPage } = hostHider;
 
     await test.step("place radar and arm send", async () => {
@@ -46,9 +44,7 @@ test.describe("multiplayer question tools", () => {
     await runHiderAnswerFlow(browser, sendMeasuringToHiders, "Closer");
   });
 
-  test("thermometer question syncs answers through chat", async ({
-    browser,
-  }) => {
+  test("thermometer question syncs answers through chat", async ({ browser }) => {
     await runHiderAnswerFlow(browser, sendThermometerToHiders, "Hotter");
   });
 

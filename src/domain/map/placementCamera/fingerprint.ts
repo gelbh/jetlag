@@ -113,19 +113,13 @@ export interface PlacementCameraFingerprintInput {
   walkCurrentPoint?: [number, number] | null;
 }
 
-export function placementCameraFingerprint(
-  input: PlacementCameraFingerprintInput,
-): string {
-  const structural = input.overlays.filter(
-    (overlay) => !isVolatileWalkOverlay(overlay),
-  );
+export function placementCameraFingerprint(input: PlacementCameraFingerprintInput): string {
+  const structural = input.overlays.filter((overlay) => !isVolatileWalkOverlay(overlay));
 
   // Matching yes/no are complements of the same cell — keep the camera fingerprint
   // stable across flips so we do not flyTo on every tap.
   const eliminationHash =
-    input.phase === "answered" ||
-    input.seekerResolving ||
-    input.eliminationPreview
+    input.phase === "answered" || input.seekerResolving || input.eliminationPreview
       ? input.tool === "matching"
         ? input.eliminationFeatures.length > 0
           ? `matching:${input.eliminationFeatures.length}`

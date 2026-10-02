@@ -1,9 +1,9 @@
+import { MantineProvider } from "@mantine/core";
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import { MantineProvider } from "@mantine/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { Leaderboard } from "./Leaderboard";
 import { jetlagTheme } from "@/theme/theme";
+import { Leaderboard } from "./Leaderboard";
 
 vi.mock("@/services/core/firebase/firebase", () => ({
   isFirebaseConfigured: () => false,
@@ -43,8 +43,6 @@ describe("Leaderboard", () => {
         </MemoryRouter>
       </MantineProvider>,
     );
-    expect(
-      screen.getByRole("heading", { name: "Leaderboard" }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Leaderboard" })).toBeInTheDocument();
   });
 });

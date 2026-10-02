@@ -3,22 +3,15 @@ import type { SessionRecord } from "../map/annotations";
 export type GameOutcome = "found" | "ended_early" | "abandoned";
 
 export function isFoundHiderPending(
-  session:
-    | Pick<SessionRecord, "foundConfirmedAt" | "foundRequestedAt">
-    | null
-    | undefined,
+  session: Pick<SessionRecord, "foundConfirmedAt" | "foundRequestedAt"> | null | undefined,
 ): boolean {
   return (
-    typeof session?.foundRequestedAt === "string" &&
-    typeof session?.foundConfirmedAt !== "string"
+    typeof session?.foundRequestedAt === "string" && typeof session?.foundConfirmedAt !== "string"
   );
 }
 
 export function isRoundComplete(
-  session:
-    | Pick<SessionRecord, "foundConfirmedAt" | "gameOutcome">
-    | null
-    | undefined,
+  session: Pick<SessionRecord, "foundConfirmedAt" | "gameOutcome"> | null | undefined,
 ): boolean {
   return (
     typeof session?.foundConfirmedAt === "string" ||
@@ -30,10 +23,7 @@ export function isRoundComplete(
 
 export function foundHiderBlocked(
   session:
-    | Pick<
-        SessionRecord,
-        "foundRequestedAt" | "foundConfirmedAt" | "gameOutcome"
-      >
+    | Pick<SessionRecord, "foundRequestedAt" | "foundConfirmedAt" | "gameOutcome">
     | null
     | undefined,
 ): boolean {

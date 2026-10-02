@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { DEFAULT_RADIUS_METERS } from "./distance";
 import { pointToolRadiusFromMetadata } from "./annotations";
+import { DEFAULT_RADIUS_METERS } from "./distance";
 
 describe("pointToolRadiusFromMetadata", () => {
   it("prefers radiusMeters when set", () => {

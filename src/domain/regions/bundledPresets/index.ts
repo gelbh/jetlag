@@ -1,3 +1,7 @@
+import type { GamePreset } from "../../session/presets/gamePreset";
+import { GAME_PRESET_SCHEMA_VERSION } from "../../session/presets/gamePreset";
+import { recommendGameSizeFromPlayAreaSquareMiles } from "../../session/size/gameSize";
+import { defaultAdvancedSessionSettings } from "../../session/tools/advancedSessionSettings";
 import { attachPlayArea } from "./attachPlayArea";
 import { dublinPresets } from "./dublin";
 import { londonPresets } from "./london";
@@ -5,36 +9,29 @@ import { nycPresets } from "./nyc";
 import { osakaPresets } from "./osaka";
 import { portlandMainePresets } from "./portlandMaine";
 import { princeRupertPresets } from "./princeRupert";
+import type { BundledGamePresetDefinition } from "./shared";
 import { swissPresets } from "./swiss";
 import { tokyoPresets } from "./tokyo";
-import type { BundledGamePresetDefinition } from "./shared";
-import type { GamePreset } from "../../session/presets/gamePreset";
-import { GAME_PRESET_SCHEMA_VERSION } from "../../session/presets/gamePreset";
-import { defaultAdvancedSessionSettings } from "../../session/tools/advancedSessionSettings";
-import { recommendGameSizeFromPlayAreaSquareMiles } from "../../session/size/gameSize";
 
 export type { BundledGamePresetDefinition } from "./shared";
 export { EXPANSION_OFF, titleCase } from "./shared";
 
-export const BUNDLED_GAME_PRESET_DEFINITIONS: readonly BundledGamePresetDefinition[] =
-  [
-    ...dublinPresets(),
-    ...nycPresets(),
-    ...portlandMainePresets(),
-    ...londonPresets(),
-    ...tokyoPresets(),
-    ...osakaPresets(),
-    ...swissPresets(),
-    ...princeRupertPresets(),
-  ];
+export const BUNDLED_GAME_PRESET_DEFINITIONS: readonly BundledGamePresetDefinition[] = [
+  ...dublinPresets(),
+  ...nycPresets(),
+  ...portlandMainePresets(),
+  ...londonPresets(),
+  ...tokyoPresets(),
+  ...osakaPresets(),
+  ...swissPresets(),
+  ...princeRupertPresets(),
+];
 
 export function isBundledPresetId(id: string): boolean {
   return id.startsWith("bundled:");
 }
 
-export function bundledPresetDefinition(
-  id: string,
-): BundledGamePresetDefinition | undefined {
+export function bundledPresetDefinition(id: string): BundledGamePresetDefinition | undefined {
   return BUNDLED_GAME_PRESET_DEFINITIONS.find((preset) => preset.id === id);
 }
 
@@ -71,8 +68,7 @@ export function buildBundledGamePresets(now = new Date().toISOString()): GamePre
 export function mergeBundledPresets(existing: GamePreset[]): GamePreset[] {
   const userPresets = existing.filter((preset) => !isBundledPresetId(preset.id));
   const bundledCreatedAt =
-    existing.find((preset) => isBundledPresetId(preset.id))?.createdAt ??
-    new Date().toISOString();
+    existing.find((preset) => isBundledPresetId(preset.id))?.createdAt ?? new Date().toISOString();
   const bundled = buildBundledGamePresets(bundledCreatedAt);
   return [...bundled, ...userPresets];
 }

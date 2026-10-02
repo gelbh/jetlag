@@ -3,14 +3,11 @@ import {
   doc,
   onSnapshot,
   query,
+  type Unsubscribe,
   updateDoc,
   where,
-  type Unsubscribe,
 } from "firebase/firestore";
-import {
-  getFirestoreDb,
-  isFirebaseConfigured,
-} from "../core/firebase/firebase";
+import { getFirestoreDb, isFirebaseConfigured } from "../core/firebase/firebase";
 
 export interface IncidentNotice {
   incidentId: string;
@@ -23,14 +20,9 @@ function noticesCollection(uid: string) {
   return collection(getFirestoreDb(), "users", uid, "incidentNotices");
 }
 
-function parseNotice(
-  id: string,
-  data: Record<string, unknown>
-): IncidentNotice | null {
+function parseNotice(id: string, data: Record<string, unknown>): IncidentNotice | null {
   const resolvedAt =
-    typeof data.resolvedAt === "string" && data.resolvedAt.length > 0
-      ? data.resolvedAt
-      : null;
+    typeof data.resolvedAt === "string" && data.resolvedAt.length > 0 ? data.resolvedAt : null;
   if (!resolvedAt) {
     return null;
   }
@@ -40,9 +32,7 @@ function parseNotice(
 
   return {
     incidentId:
-      typeof data.incidentId === "string" && data.incidentId.length > 0
-        ? data.incidentId
-        : id,
+      typeof data.incidentId === "string" && data.incidentId.length > 0 ? data.incidentId : id,
     status: "resolved",
     resolvedAt,
     bannerDismissedAt,
@@ -52,27 +42,21 @@ function parseNotice(
 export function listenUndismissedIncidentNotices(
   uid: string,
   onChange: (notices: IncidentNotice[]) => void,
-  onError?: (error: Error) => void
+  onError?: (error: Error) => void,
 ): Unsubscribe {
   if (!isFirebaseConfigured()) {
     onChange([]);
     return () => undefined;
   }
 
-  const noticesQuery = query(
-    noticesCollection(uid),
-    where("bannerDismissedAt", "==", null)
-  );
+  const noticesQuery = query(noticesCollection(uid), where("bannerDismissedAt", "==", null));
 
   return onSnapshot(
     noticesQuery,
     (snapshot) => {
       const notices: IncidentNotice[] = [];
       for (const docSnap of snapshot.docs) {
-        const parsed = parseNotice(
-          docSnap.id,
-          docSnap.data() as Record<string, unknown>
-        );
+        const parsed = parseNotice(docSnap.id, docSnap.data() as Record<string, unknown>);
         if (parsed) {
           notices.push(parsed);
         }
@@ -81,16 +65,12 @@ export function listenUndismissedIncidentNotices(
     },
     (error) => {
       onError?.(error);
-    }
+    },
   );
 }
 
-export async function dismissIncidentNotice(
-  uid: string,
-  incidentId: string
-): Promise<void> {
-  await updateDoc(
-    doc(getFirestoreDb(), "users", uid, "incidentNotices", incidentId),
-    { bannerDismissedAt: new Date().toISOString() }
-  );
+export async function dismissIncidentNotice(uid: string, incidentId: string): Promise<void> {
+  await updateDoc(doc(getFirestoreDb(), "users", uid, "incidentNotices", incidentId), {
+    bannerDismissedAt: new Date().toISOString(),
+  });
 }

@@ -1,11 +1,6 @@
+import type { SessionRecord } from "../../map/annotations";
 import type { DistanceUnit } from "../../map/distance";
 import { resolveDistanceUnit } from "../../map/distancePresets";
-import type { SessionRecord } from "../../map/annotations";
-import type { GameSize } from "../size/gameSize";
-import { hidingZoneRadiusMeters } from "../size/gameSize";
-import {
-  thermometerPresetsMetersForGameSize,
-} from "../size/gameSizeRules";
 import { sessionDistanceUnit } from "../meta/sessionDistanceUnit";
 import {
   clampHidingPeriodMinutes,
@@ -13,6 +8,9 @@ import {
   clampQuestionAnswerDeadlineMinutes,
   clampTentacleRadiusMeters,
 } from "../rules";
+import type { GameSize } from "../size/gameSize";
+import { hidingZoneRadiusMeters } from "../size/gameSize";
+import { thermometerPresetsMetersForGameSize } from "../size/gameSizeRules";
 import type { AdvancedSessionSettingsValue, SessionRulesPatch } from "./types";
 
 export function sessionRulesPatchFromAdvancedSettings(
@@ -28,9 +26,7 @@ export function sessionRulesPatchFromAdvancedSettings(
   }
 
   if (settings.customHidingPeriodEnabled) {
-    patch.hidingPeriodMinutes = clampHidingPeriodMinutes(
-      settings.hidingPeriodMinutes,
-    );
+    patch.hidingPeriodMinutes = clampHidingPeriodMinutes(settings.hidingPeriodMinutes);
   }
 
   if (settings.customPhotoAnswerDeadlineEnabled) {
@@ -70,9 +66,7 @@ export function sessionRulesPatchFromAdvancedSettings(
   }
 
   if (settings.customTentacleLargeRadiusEnabled) {
-    patch.tentacleLargeRadiusMeters = clampTentacleRadiusMeters(
-      settings.tentacleLargeRadiusMeters,
-    );
+    patch.tentacleLargeRadiusMeters = clampTentacleRadiusMeters(settings.tentacleLargeRadiusMeters);
   }
 
   if (Object.keys(settings.customMatchingAreas).length > 0) {
@@ -134,14 +128,9 @@ export function mergeSessionRulesPatch(
       patch.questionAnswerDeadlineMinutes !== undefined
         ? patch.questionAnswerDeadlineMinutes
         : session.questionAnswerDeadlineMinutes,
-    disabledTools:
-      patch.disabledTools !== undefined
-        ? patch.disabledTools
-        : session.disabledTools,
+    disabledTools: patch.disabledTools !== undefined ? patch.disabledTools : session.disabledTools,
     tentaclesEnabled:
-      patch.tentaclesEnabled !== undefined
-        ? patch.tentaclesEnabled
-        : session.tentaclesEnabled,
+      patch.tentaclesEnabled !== undefined ? patch.tentaclesEnabled : session.tentaclesEnabled,
     thermometerPresetMiles:
       patch.thermometerPresetMiles !== undefined
         ? patch.thermometerPresetMiles
@@ -163,9 +152,7 @@ export function mergeSessionRulesPatch(
         ? patch.customMatchingAreas
         : session.customMatchingAreas,
     customCategories:
-      patch.customCategories !== undefined
-        ? patch.customCategories
-        : session.customCategories,
+      patch.customCategories !== undefined ? patch.customCategories : session.customCategories,
     customLocationPins:
       patch.customLocationPins !== undefined
         ? patch.customLocationPins
@@ -174,10 +161,7 @@ export function mergeSessionRulesPatch(
       patch.customMeasureGeometries !== undefined
         ? patch.customMeasureGeometries
         : session.customMeasureGeometries,
-    regionPackId:
-      patch.regionPackId !== undefined
-        ? patch.regionPackId
-        : session.regionPackId,
+    regionPackId: patch.regionPackId !== undefined ? patch.regionPackId : session.regionPackId,
     regionPackSubregionId:
       patch.regionPackSubregionId !== undefined
         ? patch.regionPackSubregionId
@@ -227,19 +211,14 @@ export function sessionRecordFromAdvancedSettings(
   >,
   unit: DistanceUnit = "imperial",
 ): SessionRecord {
-  const patch = sessionRulesPatchFromAdvancedSettings(
-    gameSize,
-    settings,
-    unit,
-  );
+  const patch = sessionRulesPatchFromAdvancedSettings(gameSize, settings, unit);
   const merged = mergeSessionRulesPatch(
     {
       ...base,
       gameSize,
       distanceUnit: unit,
       hidingZoneRadiusMeters:
-        patch.hidingZoneRadiusMeters ??
-        hidingZoneRadiusMeters(gameSize, unit),
+        patch.hidingZoneRadiusMeters ?? hidingZoneRadiusMeters(gameSize, unit),
     },
     patch,
   );

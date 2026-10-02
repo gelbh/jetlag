@@ -17,9 +17,7 @@ export const SESSION_OPS_AGENT_BUSY = "SESSION_OPS_AGENT_BUSY";
  */
 function resolveBaseUrl(baseUrl) {
   return (
-    typeof baseUrl === "string" && baseUrl.trim()
-      ? baseUrl.trim()
-      : CURSOR_API_DEFAULT_BASE_URL
+    typeof baseUrl === "string" && baseUrl.trim() ? baseUrl.trim() : CURSOR_API_DEFAULT_BASE_URL
   ).replace(/\/+$/, "");
 }
 
@@ -37,14 +35,12 @@ function requireAgentInputs(input) {
   if (!apiKey) {
     throw new Error(SESSION_OPS_AGENT_MISCONFIGURED);
   }
-  const promptText =
-    typeof input?.promptText === "string" ? input.promptText.trim() : "";
+  const promptText = typeof input?.promptText === "string" ? input.promptText.trim() : "";
   if (!promptText) {
     throw new Error(SESSION_OPS_AGENT_FAILED);
   }
   const mcpUrl = typeof input?.mcpUrl === "string" ? input.mcpUrl.trim() : "";
-  const mcpAuthHeader =
-    typeof input?.mcpAuthHeader === "string" ? input.mcpAuthHeader.trim() : "";
+  const mcpAuthHeader = typeof input?.mcpAuthHeader === "string" ? input.mcpAuthHeader.trim() : "";
   if (!mcpUrl || !mcpAuthHeader) {
     throw new Error(SESSION_OPS_AGENT_MISCONFIGURED);
   }
@@ -96,9 +92,7 @@ function throwForFailedResponse(response, payload) {
     throw new Error(SESSION_OPS_AGENT_BUSY);
   }
   const code =
-    payload && typeof payload === "object" && typeof payload.code === "string"
-      ? payload.code
-      : "";
+    payload && typeof payload === "object" && typeof payload.code === "string" ? payload.code : "";
   if (code === "agent_busy") {
     throw new Error(SESSION_OPS_AGENT_BUSY);
   }
@@ -120,8 +114,7 @@ function throwForFailedResponse(response, payload) {
  * @returns {Promise<{ agentId: string, runId: string | null, agentUrl: string | null, raw: unknown }>}
  */
 export async function createSessionOpsAgent(input, deps = {}) {
-  const { apiKey, promptText, mcpUrl, mcpAuthHeader, mcpExtraHeaders } =
-    requireAgentInputs(input);
+  const { apiKey, promptText, mcpUrl, mcpAuthHeader, mcpExtraHeaders } = requireAgentInputs(input);
   const baseUrl = resolveBaseUrl(input.baseUrl);
   const fetchImpl = deps.fetch ?? globalThis.fetch;
   if (typeof fetchImpl !== "function") {
@@ -165,11 +158,7 @@ export async function createSessionOpsAgent(input, deps = {}) {
 
   const agent = payload?.agent ?? payload;
   const agentId =
-    typeof agent?.id === "string"
-      ? agent.id
-      : typeof payload?.id === "string"
-        ? payload.id
-        : null;
+    typeof agent?.id === "string" ? agent.id : typeof payload?.id === "string" ? payload.id : null;
   const agentUrl =
     typeof agent?.url === "string"
       ? agent.url
@@ -205,8 +194,7 @@ export async function createSessionOpsAgent(input, deps = {}) {
  * @returns {Promise<{ runId: string, raw: unknown }>}
  */
 export async function createSessionOpsRun(input, deps = {}) {
-  const { apiKey, promptText, mcpUrl, mcpAuthHeader, mcpExtraHeaders } =
-    requireAgentInputs(input);
+  const { apiKey, promptText, mcpUrl, mcpAuthHeader, mcpExtraHeaders } = requireAgentInputs(input);
   const agentId = typeof input?.agentId === "string" ? input.agentId.trim() : "";
   if (!agentId) {
     throw new Error(SESSION_OPS_AGENT_MISCONFIGURED);
@@ -226,17 +214,14 @@ export async function createSessionOpsRun(input, deps = {}) {
 
   let response;
   try {
-    response = await fetchImpl(
-      `${baseUrl}/v1/agents/${encodeURIComponent(agentId)}/runs`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: basicAuthHeader(apiKey),
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(body),
+    response = await fetchImpl(`${baseUrl}/v1/agents/${encodeURIComponent(agentId)}/runs`, {
+      method: "POST",
+      headers: {
+        Authorization: basicAuthHeader(apiKey),
+        "Content-Type": "application/json",
       },
-    );
+      body: JSON.stringify(body),
+    });
   } catch {
     throw new Error(SESSION_OPS_AGENT_FAILED);
   }
@@ -329,10 +314,7 @@ export async function getSessionOpsRun(input, deps = {}) {
     text = payload.result.text.trim();
   } else if (typeof payload?.text === "string" && payload.text.trim()) {
     text = payload.text.trim();
-  } else if (
-    typeof payload?.summary === "string" &&
-    payload.summary.trim()
-  ) {
+  } else if (typeof payload?.summary === "string" && payload.summary.trim()) {
     text = payload.summary.trim();
   }
 

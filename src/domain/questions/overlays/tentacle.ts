@@ -1,8 +1,11 @@
+import {
+  parseGeometryJson,
+  pointFromGeometryFeature,
+} from "../../geometry/gameArea/geometryParsing";
 import type { TentaclePoi } from "../../map/annotations";
-import { parseGeometryJson, pointFromGeometryFeature } from "../../geometry/gameArea/geometryParsing";
-import type { MapDraftOverlay } from "../../map/mapDraftOverlay";
-import { MAP_ANNOTATION_COLORS } from "../../map/mapAnnotationColors";
 import { DEFAULT_RADIUS_METERS } from "../../map/distance";
+import { MAP_ANNOTATION_COLORS } from "../../map/mapAnnotationColors";
+import type { MapDraftOverlay } from "../../map/mapDraftOverlay";
 import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
 import { tentacleRadiusFromMetadata } from "../tentacleQuestions";
 import type { OverlayBuildResult } from "./shared";

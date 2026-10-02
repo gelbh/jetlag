@@ -1,10 +1,10 @@
+import { MantineProvider } from "@mantine/core";
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import { MantineProvider } from "@mantine/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { Privacy } from "./Privacy";
 import { jetlagTheme } from "@/theme/theme";
 import { RouteTransitionTestProvider } from "../test/RouteTransitionTestProvider";
+import { Privacy } from "./Privacy";
 
 beforeEach(() => {
   vi.stubGlobal("matchMedia", (query: string) => ({
@@ -30,8 +30,6 @@ describe("Privacy", () => {
         </MemoryRouter>
       </MantineProvider>,
     );
-    expect(
-      screen.getByRole("heading", { name: "Privacy Policy" }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Privacy Policy" })).toBeInTheDocument();
   });
 });

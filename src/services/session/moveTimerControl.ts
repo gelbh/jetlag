@@ -1,8 +1,5 @@
 import { httpsCallable } from "firebase/functions";
-import {
-  getFirebaseFunctions,
-  isFirebaseConfigured,
-} from "../core/firebase/firebase";
+import { getFirebaseFunctions, isFirebaseConfigured } from "../core/firebase/firebase";
 
 export type MoveTimerAction = "pause" | "resume";
 

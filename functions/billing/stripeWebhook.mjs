@@ -1,14 +1,10 @@
 import Stripe from "stripe";
 import { setCors } from "../lib/cors.mjs";
 import { captureFunctionsException } from "../lib/sentry.mjs";
-import {
-  applyCheckoutSessionCompleted,
-  syncSubscriptionEntitlements,
-} from "./stripeBilling.mjs";
 import { markStripeEventProcessed } from "./premiumEntitlements.mjs";
+import { applyCheckoutSessionCompleted, syncSubscriptionEntitlements } from "./stripeBilling.mjs";
 
-const STRIPE_SIGNATURE_MISMATCH =
-  /No signatures found matching the expected signature/i;
+const STRIPE_SIGNATURE_MISMATCH = /No signatures found matching the expected signature/i;
 
 /**
  * @param {import('firebase-admin/firestore').Firestore} db
@@ -42,11 +38,7 @@ export async function handleStripeWebhook(db, webhookSecret, req, res) {
 
   let event;
   try {
-    event = Stripe.webhooks.constructEvent(
-      req.rawBody,
-      signature,
-      webhookSecret,
-    );
+    event = Stripe.webhooks.constructEvent(req.rawBody, signature, webhookSecret);
   } catch (error) {
     if (
       error instanceof Error &&
@@ -80,9 +72,7 @@ export async function handleStripeWebhook(db, webhookSecret, req, res) {
       case "customer.subscription.created":
       case "customer.subscription.updated":
       case "customer.subscription.deleted": {
-        const subscription = /** @type {Stripe.Subscription} */ (
-          event.data.object
-        );
+        const subscription = /** @type {Stripe.Subscription} */ (event.data.object);
         await syncSubscriptionEntitlements(db, subscription);
         break;
       }

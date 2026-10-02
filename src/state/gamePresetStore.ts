@@ -1,11 +1,11 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { mergeBundledPresets } from "../domain/regions/bundledGamePresets";
 import {
+  type GamePreset,
   migrateGamePreset,
   migrateGamePresets,
-  type GamePreset,
 } from "../domain/session/presets/gamePreset";
-import { mergeBundledPresets } from "../domain/regions/bundledGamePresets";
 import { withoutFavouritePresetId } from "../domain/session/presets/presetFavourites";
 
 interface GamePresetState {
@@ -31,9 +31,7 @@ export const useGamePresetStore = create<GamePresetState>()(
             schemaVersion: preset.schemaVersion,
             bundled: preset.bundled ?? false,
           });
-          const existingIndex = state.presets.findIndex(
-            (entry) => entry.id === migrated.id,
-          );
+          const existingIndex = state.presets.findIndex((entry) => entry.id === migrated.id);
           if (existingIndex >= 0) {
             const next = [...state.presets];
             next[existingIndex] = migrated;
@@ -46,13 +44,8 @@ export const useGamePresetStore = create<GamePresetState>()(
       },
       deletePreset: (id) => {
         set((state) => ({
-          presets: mergeBundledPresets(
-            state.presets.filter((preset) => preset.id !== id),
-          ),
-          favouritePresetIds: withoutFavouritePresetId(
-            state.favouritePresetIds,
-            id,
-          ),
+          presets: mergeBundledPresets(state.presets.filter((preset) => preset.id !== id)),
+          favouritePresetIds: withoutFavouritePresetId(state.favouritePresetIds, id),
         }));
       },
       getPreset: (id) => {
@@ -78,8 +71,7 @@ export const useGamePresetStore = create<GamePresetState>()(
         ...((persistedState as GamePresetState | undefined) ?? {}),
         presets: mergeBundledPresets(
           migrateGamePresets(
-            (persistedState as GamePresetState | undefined)?.presets ??
-              currentState.presets,
+            (persistedState as GamePresetState | undefined)?.presets ?? currentState.presets,
           ),
         ),
         favouritePresetIds:

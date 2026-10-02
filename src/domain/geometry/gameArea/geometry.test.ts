@@ -1,23 +1,13 @@
-import { describe, expect, it } from "vitest";
+import { existsSync } from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import bboxPolygon from "@turf/bbox-polygon";
 import type { Feature, LineString } from "geojson";
-import { existsSync } from "node:fs";
-import { fileURLToPath } from "node:url";
-import path from "node:path";
-import {
-  boundsToGameArea,
-  centerToViewportEdgeRadiusMeters,
-  circleToGameArea,
-  distanceBetweenPoints,
-  gameAreaOutsideMask,
-  gameAreaExteriorStrokeRings,
-  isPointInGameArea,
-  normalizeBoundingBox,
-  safeDifference,
-} from "./geometry";
-import { runHalfPlane } from "../kernel/halfPlaneKernelRunner";
-import { featureToGameAreaGeometry } from "../kernel/featureConvert";
+import { describe, expect, it } from "vitest";
+import type { GameArea } from "../../map/annotations";
 import { gameAreaToFeature } from "../core/gameAreaConvert";
+import { featureToGameAreaGeometry } from "../kernel/featureConvert";
+import { runHalfPlane } from "../kernel/halfPlaneKernelRunner";
 import {
   buildCoastlineEliminationRegion,
   buildCoastlineNearRegion,
@@ -27,7 +17,17 @@ import {
   nearestPointToCoastlines,
   prepareMeasuringLineSegments,
 } from "../measuring/geometryMeasuring";
-import type { GameArea } from "../../map/annotations";
+import {
+  boundsToGameArea,
+  centerToViewportEdgeRadiusMeters,
+  circleToGameArea,
+  distanceBetweenPoints,
+  gameAreaExteriorStrokeRings,
+  gameAreaOutsideMask,
+  isPointInGameArea,
+  normalizeBoundingBox,
+  safeDifference,
+} from "./geometry";
 
 const pkgEntry = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -90,46 +90,28 @@ describe("geometry helpers", () => {
     expect(gameArea.east - gameArea.west).toBeGreaterThan(0);
   });
 
-  it.skipIf(!wasmPkgReady)(
-    "returns a clipped polygon for thermometer shading",
-    async () => {
-      const colderSide = await runHalfPlane(
-        [51.45, -0.18],
-        [51.46, -0.12],
-        featureToGameAreaGeometry(gameAreaToFeature(sampleGameArea)),
-      );
-      expect(colderSide?.geometry.type).toBe("Polygon");
-    },
-  );
+  it.skipIf(!wasmPkgReady)("returns a clipped polygon for thermometer shading", async () => {
+    const colderSide = await runHalfPlane(
+      [51.45, -0.18],
+      [51.46, -0.12],
+      featureToGameAreaGeometry(gameAreaToFeature(sampleGameArea)),
+    );
+    expect(colderSide?.geometry.type).toBe("Polygon");
+  });
 
-  it.skipIf(!wasmPkgReady)(
-    "shades opposite halves for hotter and colder answers",
-    async () => {
-      const pointA: [number, number] = [51.45, -0.18];
-      const pointB: [number, number] = [51.46, -0.12];
-      const geometry = featureToGameAreaGeometry(
-        gameAreaToFeature(sampleGameArea),
-      );
-      const colderAnswerSide = await runHalfPlane(
-        pointA,
-        pointB,
-        geometry,
-        "cold",
-      );
-      const hotterAnswerSide = await runHalfPlane(
-        pointA,
-        pointB,
-        geometry,
-        "hot",
-      );
+  it.skipIf(!wasmPkgReady)("shades opposite halves for hotter and colder answers", async () => {
+    const pointA: [number, number] = [51.45, -0.18];
+    const pointB: [number, number] = [51.46, -0.12];
+    const geometry = featureToGameAreaGeometry(gameAreaToFeature(sampleGameArea));
+    const colderAnswerSide = await runHalfPlane(pointA, pointB, geometry, "cold");
+    const hotterAnswerSide = await runHalfPlane(pointA, pointB, geometry, "hot");
 
-      expect(colderAnswerSide?.geometry.type).toBe("Polygon");
-      expect(hotterAnswerSide?.geometry.type).toBe("Polygon");
-      expect(colderAnswerSide?.geometry.coordinates).not.toEqual(
-        hotterAnswerSide?.geometry.coordinates,
-      );
-    },
-  );
+    expect(colderAnswerSide?.geometry.type).toBe("Polygon");
+    expect(hotterAnswerSide?.geometry.type).toBe("Polygon");
+    expect(colderAnswerSide?.geometry.coordinates).not.toEqual(
+      hotterAnswerSide?.geometry.coordinates,
+    );
+  });
 
   it("subtracts an inner polygon safely", () => {
     const outer = bboxPolygon([-0.2, 51.4, -0.1, 51.5]);
@@ -213,11 +195,7 @@ describe("geometry helpers", () => {
         ],
       },
     };
-    const nearCoast = await buildCoastlineNearRegion(
-      [coast],
-      5_000,
-      sampleGameArea,
-    );
+    const nearCoast = await buildCoastlineNearRegion([coast], 5_000, sampleGameArea);
     const eliminated = await buildCoastlineEliminationRegion(
       [coast],
       5_000,
@@ -243,11 +221,7 @@ describe("geometry helpers", () => {
         ],
       },
     };
-    const nearCoast = await buildCoastlineNearRegion(
-      [coast],
-      5_000,
-      sampleGameArea,
-    );
+    const nearCoast = await buildCoastlineNearRegion([coast], 5_000, sampleGameArea);
     const eliminated = await buildCoastlineEliminationRegion(
       [coast],
       5_000,
@@ -275,11 +249,7 @@ describe("geometry helpers", () => {
     };
 
     const first = await buildCoastlineNearRegion([coast], 5_000, sampleGameArea);
-    const second = await buildCoastlineNearRegion(
-      [coast],
-      5_000,
-      sampleGameArea,
-    );
+    const second = await buildCoastlineNearRegion([coast], 5_000, sampleGameArea);
 
     expect(first).toBe(second);
   });
@@ -308,10 +278,7 @@ describe("geometry helpers", () => {
       },
     };
 
-    const prepared = prepareMeasuringLineSegments(
-      [inside, outside],
-      sampleGameArea,
-    );
+    const prepared = prepareMeasuringLineSegments([inside, outside], sampleGameArea);
 
     expect(prepared.segments).toHaveLength(1);
     expect(prepared.boundingBoxes).toHaveLength(1);
@@ -320,12 +287,7 @@ describe("geometry helpers", () => {
   it("builds location distance regions from a map point", () => {
     const target: [number, number] = [51.44, -0.16];
     const nearRegion = buildLocationNearRegion(target, 2_000, sampleGameArea);
-    const eliminated = buildLocationEliminationRegion(
-      target,
-      2_000,
-      sampleGameArea,
-      "further",
-    );
+    const eliminated = buildLocationEliminationRegion(target, 2_000, sampleGameArea, "further");
 
     expect(nearRegion?.geometry.type).toBe("Polygon");
     expect(eliminated?.geometry.type).toBe("Polygon");
@@ -334,12 +296,7 @@ describe("geometry helpers", () => {
 
   it("builds a closer-than-measure region with a hole around the target", () => {
     const target: [number, number] = [51.44, -0.16];
-    const eliminated = buildLocationEliminationRegion(
-      target,
-      2_000,
-      sampleGameArea,
-      "closer",
-    );
+    const eliminated = buildLocationEliminationRegion(target, 2_000, sampleGameArea, "closer");
 
     expect(eliminated?.geometry.type).toBe("Polygon");
     if (eliminated?.geometry.type === "Polygon") {

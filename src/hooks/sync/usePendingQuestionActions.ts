@@ -1,26 +1,28 @@
-import { useCallback, useRef } from "react";
 import type { Feature, LineString } from "geojson";
-import type { PendingQuestionToolType } from "../../domain/session/activity/sessionChat";
-import type { PlayerRole } from "../../domain/session/players/playerRole";
-import type { GameReplyOption } from "../../domain/session/activity/sessionChat";
+import { useCallback, useRef } from "react";
+import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
+import { buildThermometerLineGeometry } from "../../domain/questions";
+import type {
+  GameReplyOption,
+  PendingQuestionToolType,
+} from "../../domain/session/activity/sessionChat";
 import {
   createMessageId,
   createPendingQuestionId,
   type PendingQuestionPlacement,
 } from "../../domain/session/activity/sessionChat";
-import { buildThermometerLineGeometry } from "../../domain/questions";
-import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
+import type { PlayerRole } from "../../domain/session/players/playerRole";
 import {
   deletePendingQuestion,
   getPendingQuestionStatus,
   postGameSystemMessage,
   THERMOMETER_WALK_CANCEL_TEXT,
+  type ThermometerWalkCancelReason,
   updateGameMessageAnswer,
   updateGameMessageStatus,
   updatePendingQuestion,
   writePendingQuestion,
   writeSessionMessage,
-  type ThermometerWalkCancelReason,
 } from "../../services/firestore/firestoreSessionExtras";
 import {
   emitPhotoAskedActivity,
@@ -85,13 +87,7 @@ export function usePendingQuestionActions() {
         });
 
         if (status === "walking") {
-          await postGameSystemMessage(
-            sessionId,
-            senderUid,
-            senderRole,
-            promptText,
-            messageId,
-          );
+          await postGameSystemMessage(sessionId, senderUid, senderRole, promptText, messageId);
           emitThermometerWalkStartedActivity({
             sessionId,
             pendingQuestionId,
@@ -176,10 +172,7 @@ export function usePendingQuestionActions() {
       cardDraw?: number;
       cardKeep?: number;
     }) => {
-      const geometry: Feature<LineString> = buildThermometerLineGeometry(
-        startPoint,
-        endPoint,
-      );
+      const geometry: Feature<LineString> = buildThermometerLineGeometry(startPoint, endPoint);
       const answerableAt = new Date().toISOString();
       const messageId = createMessageId();
 
@@ -243,11 +236,7 @@ export function usePendingQuestionActions() {
       });
       await updateGameMessageAnswer(sessionId, messageId, selectedReply);
 
-      if (
-        options?.deadlineExpired &&
-        options.senderUid &&
-        options.senderRole
-      ) {
+      if (options?.deadlineExpired && options.senderUid && options.senderRole) {
         await postGameSystemMessage(
           sessionId,
           options.senderUid,
@@ -261,19 +250,8 @@ export function usePendingQuestionActions() {
   );
 
   const postSystemMessage = useCallback(
-    async (
-      sessionId: string,
-      senderUid: string,
-      senderRole: PlayerRole,
-      text: string,
-    ) => {
-      await postGameSystemMessage(
-        sessionId,
-        senderUid,
-        senderRole,
-        text,
-        createMessageId(),
-      );
+    async (sessionId: string, senderUid: string, senderRole: PlayerRole, text: string) => {
+      await postGameSystemMessage(sessionId, senderUid, senderRole, text, createMessageId());
     },
     [],
   );
@@ -292,10 +270,7 @@ export function usePendingQuestionActions() {
       senderRole: PlayerRole;
       reason: ThermometerWalkCancelReason;
     }) => {
-      const status = await getPendingQuestionStatus(
-        sessionId,
-        pendingQuestionId,
-      );
+      const status = await getPendingQuestionStatus(sessionId, pendingQuestionId);
       if (status !== "walking") {
         return;
       }
@@ -333,10 +308,7 @@ export function usePendingQuestionActions() {
       toolType: PendingQuestionToolType;
       promptText: string;
     }) => {
-      const status = await getPendingQuestionStatus(
-        options.sessionId,
-        options.pendingQuestionId,
-      );
+      const status = await getPendingQuestionStatus(options.sessionId, options.pendingQuestionId);
       if (status !== "pending") {
         return;
       }
@@ -344,11 +316,7 @@ export function usePendingQuestionActions() {
       await updatePendingQuestion(options.sessionId, options.pendingQuestionId, {
         status: "cancelled",
       });
-      await updateGameMessageStatus(
-        options.sessionId,
-        options.messageId,
-        "cancelled",
-      );
+      await updateGameMessageStatus(options.sessionId, options.messageId, "cancelled");
       await postGameSystemMessage(
         options.sessionId,
         options.senderUid,

@@ -1,6 +1,6 @@
-import type { PlayerRole } from "../../domain/session/players/playerRole";
-import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
 import { listWalkingThermometerQuestionIds } from "../../domain/questions";
+import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
+import type { PlayerRole } from "../../domain/session/players/playerRole";
 import { captureException } from "../core/analytics/sentry";
 import { isFirestorePermissionDenied } from "../firestore/firestoreAnnotations";
 import {
@@ -18,10 +18,7 @@ export async function clearLiveLocationOnLeave(params: {
 }): Promise<void> {
   blockPlayerLocationPublishes();
 
-  const walkIds = listWalkingThermometerQuestionIds(
-    params.pendingQuestions,
-    params.uid,
-  );
+  const walkIds = listWalkingThermometerQuestionIds(params.pendingQuestions, params.uid);
 
   const results = await Promise.allSettled([
     cancelWalkingThermometersAndAnnounce(

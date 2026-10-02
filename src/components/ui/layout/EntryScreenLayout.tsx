@@ -1,8 +1,5 @@
 import type { ReactNode } from "react";
-import {
-  homePosterStyle,
-  homeTerminalAccentBarStyle,
-} from "@/components/ui/entry/entryStyles";
+import { homePosterStyle, homeTerminalAccentBarStyle } from "@/components/ui/entry/entryStyles";
 
 interface EntryScreenLayoutProps {
   children: ReactNode;

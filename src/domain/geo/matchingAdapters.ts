@@ -1,10 +1,7 @@
-import type { GameArea } from "../map/annotations";
 import type { LatLngTuple } from "../geometry/gameArea/geometry";
 import { distanceBetweenPoints } from "../geometry/gameArea/geometry";
-import type {
-  AdminDivisionFeature,
-  MatchingFeature,
-} from "./types";
+import type { GameArea } from "../map/annotations";
+import type { AdminDivisionFeature, MatchingFeature } from "./types";
 
 export function adminDivisionToMatchingFeature(division: AdminDivisionFeature): {
   id: string;
@@ -59,8 +56,7 @@ export function pickNearestMatchingFeature(
     if (
       !nearest ||
       distanceMeters < nearest.distanceMeters ||
-      (distanceMeters === nearest.distanceMeters &&
-        feature.id.localeCompare(nearest.id) < 0)
+      (distanceMeters === nearest.distanceMeters && feature.id.localeCompare(nearest.id) < 0)
     ) {
       nearest = { ...feature, distanceMeters };
     }
@@ -80,9 +76,7 @@ export function serializeMatchingFeatures(features: MatchingFeature[]): string {
   return JSON.stringify(features);
 }
 
-export function deserializeMatchingFeatures(
-  payload: string | undefined,
-): MatchingFeature[] {
+export function deserializeMatchingFeatures(payload: string | undefined): MatchingFeature[] {
   if (!payload) {
     return [];
   }

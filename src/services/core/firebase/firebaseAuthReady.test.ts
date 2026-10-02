@@ -1,19 +1,15 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { waitForFirebaseAuth } from "./firebaseAuthReady";
 
-const {
-  ensureAnonymousUser,
-  getFirebaseAuth,
-  isFirebaseConfigured,
-  waitForAuthStateReady,
-} = vi.hoisted(() => ({
-  ensureAnonymousUser: vi.fn(),
-  waitForAuthStateReady: vi.fn(async () => undefined),
-  isFirebaseConfigured: vi.fn(() => true),
-  getFirebaseAuth: vi.fn((): { currentUser: { uid: string } | null } => ({
-    currentUser: null,
-  })),
-}));
+const { ensureAnonymousUser, getFirebaseAuth, isFirebaseConfigured, waitForAuthStateReady } =
+  vi.hoisted(() => ({
+    ensureAnonymousUser: vi.fn(),
+    waitForAuthStateReady: vi.fn(async () => undefined),
+    isFirebaseConfigured: vi.fn(() => true),
+    getFirebaseAuth: vi.fn((): { currentUser: { uid: string } | null } => ({
+      currentUser: null,
+    })),
+  }));
 
 vi.mock("./firebase", () => ({
   ensureAnonymousUser,
@@ -50,9 +46,7 @@ describe("waitForFirebaseAuth", () => {
   });
 
   it("does not create anonymous users when auth restore times out", async () => {
-    waitForAuthStateReady.mockImplementation(
-      () => new Promise(() => undefined),
-    );
+    waitForAuthStateReady.mockImplementation(() => new Promise(() => undefined));
     getFirebaseAuth.mockReturnValue({ currentUser: null });
 
     await expect(waitForFirebaseAuth(20)).resolves.toBe(false);

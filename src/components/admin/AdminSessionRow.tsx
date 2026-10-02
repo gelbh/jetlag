@@ -1,8 +1,8 @@
-import { formatFreshnessAge } from "../../domain/admin/formatAdminFreshness";
+import { homeCardBtnStyle } from "@/components/ui/entry/entryStyles";
 import { resolveAdminSessionAreaLabel } from "../../domain/admin/adminSessionAreaLabel";
+import { formatFreshnessAge } from "../../domain/admin/formatAdminFreshness";
 import { adminSessionPhaseLabel } from "../../domain/admin/sessionPhase";
 import { useFreshnessClock } from "../../hooks/time/useFreshnessClock";
-import { homeCardBtnStyle } from "@/components/ui/entry/entryStyles";
 import type { AdminSessionSummary } from "../../services/admin/adminSessions";
 
 interface AdminSessionRowProps {
@@ -43,9 +43,7 @@ export function AdminSessionRow({
           <span className="font-mono text-lg font-bold tracking-[0.18em] text-ink">
             {summary.code}
           </span>
-          {areaLabel ? (
-            <span className="truncate text-sm text-ink">{areaLabel}</span>
-          ) : null}
+          {areaLabel ? <span className="truncate text-sm text-ink">{areaLabel}</span> : null}
         </div>
         <div className="flex flex-wrap items-center gap-1.5">
           {summary.isLive ? (
@@ -62,14 +60,12 @@ export function AdminSessionRow({
         </div>
         <p className="text-xs text-ink-muted">
           Activity {formatFreshnessAge(summary.lastActivityAt, nowMs)} · Location{" "}
-          {formatFreshnessAge(summary.lastLocationAt, nowMs)} · {summary.roleCounts.seeker}
-          S / {summary.roleCounts.hider}H
+          {formatFreshnessAge(summary.lastLocationAt, nowMs)} · {summary.roleCounts.seeker}S /{" "}
+          {summary.roleCounts.hider}H
           {summary.roleCounts.observer > 0
             ? ` · ${summary.roleCounts.observer} observer${summary.roleCounts.observer === 1 ? "" : "s"}`
             : ""}
-          {summary.activeAnnotationCount > 0
-            ? ` · ${summary.activeAnnotationCount} ann`
-            : ""}
+          {summary.activeAnnotationCount > 0 ? ` · ${summary.activeAnnotationCount} ann` : ""}
         </p>
       </div>
       <span className="shrink-0 text-xs font-semibold uppercase tracking-wide text-brand-blue">

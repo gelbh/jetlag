@@ -1,14 +1,14 @@
 import { FirebaseError } from "firebase/app";
 import { getToken } from "firebase/app-check";
-import { httpsCallable } from "firebase/functions";
 import type { User } from "firebase/auth";
+import { httpsCallable } from "firebase/functions";
+import { captureAppCheckTokenFailure } from "../analytics/sentry";
 import {
   getFirebaseAppCheck,
   getFirebaseAuth,
   getFirebaseFunctions,
   isFirebaseConfigured,
 } from "../firebase/firebase";
-import { captureAppCheckTokenFailure } from "../analytics/sentry";
 
 export async function hasAccessClaim(user: User): Promise<boolean> {
   const token = await user.getIdTokenResult();
@@ -21,10 +21,7 @@ export async function grantAccess(code: string): Promise<void> {
   }
 
   const functions = await getFirebaseFunctions();
-  const callable = httpsCallable<{ code: string }, { granted: boolean }>(
-    functions,
-    "grantAccess",
-  );
+  const callable = httpsCallable<{ code: string }, { granted: boolean }>(functions, "grantAccess");
 
   try {
     await callable({ code });

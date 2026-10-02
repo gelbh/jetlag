@@ -17,11 +17,7 @@ interface UsePinToolParams {
   finishPlacement: () => void;
 }
 
-export function usePinTool({
-  active,
-  createAnnotation,
-  finishPlacement,
-}: UsePinToolParams) {
+export function usePinTool({ active, createAnnotation, finishPlacement }: UsePinToolParams) {
   const [pinLabel, setPinLabel] = useState("");
   const [pinPoint, setPinPoint] = useState<LatLngTuple | null>(null);
   const finishPlacementRef = useRef(finishPlacement);

@@ -1,14 +1,14 @@
 import { Stack } from "@mantine/core";
-import { TransitControls } from "../../map/chrome/TransitControls";
-import type { TransitRouteFilter } from "@/domain/map/transit";
+import { InsetGroup, SectionLabel } from "@/components/ui/entry/entryChrome";
+import { effectiveMapStyle } from "@/domain/device/power/powerProfile";
 import type { DistanceUnit } from "@/domain/map/distance";
 import type { MapStyle, StreetBasemap } from "@/domain/map/mapBasemaps";
-import { effectiveMapStyle } from "@/domain/device/power/powerProfile";
-import { SegmentControl } from "../../ui/forms/SegmentControl";
-import { InsetGroup, SectionLabel } from "@/components/ui/entry/entryChrome";
-import { SettingsToggleRow } from "../settings/SettingsToggleRow";
-import { LayerVisibilityGrid } from "../mapChrome/LayerVisibilityGrid";
+import type { TransitRouteFilter } from "@/domain/map/transit";
 import type { LayerVisibility } from "@/state/sessionStore";
+import { TransitControls } from "../../map/chrome/TransitControls";
+import { SegmentControl } from "../../ui/forms/SegmentControl";
+import { LayerVisibilityGrid } from "../mapChrome/LayerVisibilityGrid";
+import { SettingsToggleRow } from "../settings/SettingsToggleRow";
 
 /** Flat general/layers fields bag for MapSettingsGeneralTab (W4-C peel). */
 export type MapSettingsGeneralTabModel = {
@@ -44,10 +44,7 @@ export type MapSettingsGeneralTabModel = {
   onToggleLiveTransit: () => void;
   onTransitRouteFilterChange: (value: TransitRouteFilter) => void;
   layerVisibility: LayerVisibility;
-  onLayerVisibilityChange: (
-    layer: keyof LayerVisibility,
-    visible: boolean,
-  ) => void;
+  onLayerVisibilityChange: (layer: keyof LayerVisibility, visible: boolean) => void;
 };
 
 export type MapSettingsGeneralTabProps = {
@@ -110,9 +107,7 @@ export function MapSettingsGeneralTab({ model }: MapSettingsGeneralTabProps) {
           />
         </InsetGroup>
         {locationError ? (
-          <p className="px-1 text-sm text-[var(--color-halt)]">
-            {locationError}
-          </p>
+          <p className="px-1 text-sm text-[var(--color-halt)]">{locationError}</p>
         ) : null}
       </Stack>
 
@@ -164,8 +159,7 @@ export function MapSettingsGeneralTab({ model }: MapSettingsGeneralTabProps) {
             />
             {lowPowerMode ? (
               <p className="text-xs text-[var(--color-field-ink-muted)]">
-                Low power keeps the street map. Turn it off under Session for
-                satellite.
+                Low power keeps the street map. Turn it off under Session for satellite.
               </p>
             ) : (
               <p className="text-xs text-[var(--color-field-ink-muted)]">

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import type { SessionActivityEvent } from "../domain/session/activity/sessionActivityLog";
 import { LOCAL_SESSION_ID } from "../domain/map/annotations";
+import type { SessionActivityEvent } from "../domain/session/activity/sessionActivityLog";
 import { useActivityLogStore } from "./activityLogStore";
 
 function sessionStarted(
@@ -38,9 +38,7 @@ describe("activityLogStore", () => {
 
     expect(useActivityLogStore.getState().appendIfAbsent(event)).toBe(true);
     expect(useActivityLogStore.getState().appendIfAbsent(event)).toBe(false);
-    expect(useActivityLogStore.getState().getEvents(LOCAL_SESSION_ID)).toHaveLength(
-      1,
-    );
+    expect(useActivityLogStore.getState().getEvents(LOCAL_SESSION_ID)).toHaveLength(1);
   });
 
   it("appendIfAbsent always appends distinct random ids", () => {
@@ -67,9 +65,6 @@ describe("activityLogStore", () => {
 
     expect(useActivityLogStore.getState().appendIfAbsent(first)).toBe(true);
     expect(useActivityLogStore.getState().appendIfAbsent(second)).toBe(true);
-    expect(useActivityLogStore.getState().getEvents(LOCAL_SESSION_ID)).toEqual([
-      first,
-      second,
-    ]);
+    expect(useActivityLogStore.getState().getEvents(LOCAL_SESSION_ID)).toEqual([first, second]);
   });
 });

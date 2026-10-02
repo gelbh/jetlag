@@ -1,18 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type {
-  MapBounds,
-  MapBoundsExpression,
-} from "../../domain/map/mapBounds";
-import {
-  boundingBoxToBoundsExpression,
-  createMapBounds,
-} from "../../domain/map/mapBounds";
-import type { GameArea } from "../../domain/map/annotations";
 import type { BoundingBox } from "../../domain/geometry/gameArea/gameAreaBounds";
 import {
-  boundsToGameArea,
-  boundingBoxToMapBounds,
   boundingBoxHasMinimumSpan,
+  boundingBoxToMapBounds,
+  boundsToGameArea,
   centerToViewportEdgeRadiusMeters,
   circleToGameArea,
   gameAreaToBoundingBox,
@@ -21,6 +12,9 @@ import {
   type LatLngTuple,
   verticesToGameArea,
 } from "../../domain/geometry/gameArea/geometry";
+import type { GameArea } from "../../domain/map/annotations";
+import type { MapBounds, MapBoundsExpression } from "../../domain/map/mapBounds";
+import { boundingBoxToBoundsExpression, createMapBounds } from "../../domain/map/mapBounds";
 
 export type FramingMode = "rectangle" | "circle" | "polygon";
 
@@ -63,29 +57,22 @@ export function useGameAreaFraming(options: UseGameAreaFramingOptions = {}) {
 
     return null;
   });
-  const [focusBounds, setFocusBounds] = useState<MapBoundsExpression | null>(
-    () =>
-      options.initialFocusBounds
-        ? boundingBoxToBoundsExpression(options.initialFocusBounds)
-        : null,
+  const [focusBounds, setFocusBounds] = useState<MapBoundsExpression | null>(() =>
+    options.initialFocusBounds ? boundingBoxToBoundsExpression(options.initialFocusBounds) : null,
   );
   const [circleCenter, setCircleCenter] = useState<LatLngTuple | null>(null);
   const [polygonVertices, setPolygonVertices] = useState<LatLngTuple[]>([]);
   const [manualGameArea, setManualGameArea] = useState<GameArea | null>(
     options.initialGameArea ?? null,
   );
-  const [userFramed, setUserFramed] = useState(
-    Boolean(options.initialGameArea),
-  );
+  const [userFramed, setUserFramed] = useState(Boolean(options.initialGameArea));
   const [manualDrawingEnabled, setManualDrawingEnabled] = useState(
     Boolean(options.initialGameArea) || !options.initialFocusBounds,
   );
   const ignoreViewportUpdatesRef = useRef(false);
   const suppressTimeoutRef = useRef<number | null>(null);
   const boundsRef = useRef<MapBounds | null>(
-    options.initialFocusBounds
-      ? boundingBoxToMapBounds(options.initialFocusBounds)
-      : null,
+    options.initialFocusBounds ? boundingBoxToMapBounds(options.initialFocusBounds) : null,
   );
 
   const suppressViewportUpdates = useCallback((durationMs = 600) => {
@@ -116,21 +103,11 @@ export function useGameAreaFraming(options: UseGameAreaFramingOptions = {}) {
       vertices: LatLngTuple[],
     ): GameArea | null => {
       if (mode === "rectangle" && nextBounds && isUsableMapBounds(nextBounds)) {
-        return boundsToGameArea(
-          insetMapBounds(nextBounds, RECTANGLE_VIEWPORT_INSET_FRACTION),
-        );
+        return boundsToGameArea(insetMapBounds(nextBounds, RECTANGLE_VIEWPORT_INSET_FRACTION));
       }
 
-      if (
-        mode === "circle" &&
-        center &&
-        nextBounds &&
-        isUsableMapBounds(nextBounds)
-      ) {
-        const radiusMeters = centerToViewportEdgeRadiusMeters(
-          center,
-          nextBounds,
-        );
+      if (mode === "circle" && center && nextBounds && isUsableMapBounds(nextBounds)) {
+        const radiusMeters = centerToViewportEdgeRadiusMeters(center, nextBounds);
         if (radiusMeters < MIN_CIRCLE_RADIUS_METERS) {
           return null;
         }
@@ -176,10 +153,7 @@ export function useGameAreaFraming(options: UseGameAreaFramingOptions = {}) {
         return nextBounds;
       });
 
-      if (
-        manualDrawingEnabled &&
-        (framingMode === "rectangle" || framingMode === "circle")
-      ) {
+      if (manualDrawingEnabled && (framingMode === "rectangle" || framingMode === "circle")) {
         const nextArea = computeManualGameArea(
           framingMode,
           nextBounds,
@@ -191,13 +165,7 @@ export function useGameAreaFraming(options: UseGameAreaFramingOptions = {}) {
         }
       }
     },
-    [
-      circleCenter,
-      computeManualGameArea,
-      framingMode,
-      manualDrawingEnabled,
-      polygonVertices,
-    ],
+    [circleCenter, computeManualGameArea, framingMode, manualDrawingEnabled, polygonVertices],
   );
 
   const handleUserViewportFramed = useCallback(() => {
@@ -218,12 +186,7 @@ export function useGameAreaFraming(options: UseGameAreaFramingOptions = {}) {
         setUserFramed(true);
         const currentBounds = boundsRef.current;
         if (currentBounds) {
-          const nextArea = computeManualGameArea(
-            "circle",
-            currentBounds,
-            point,
-            polygonVertices,
-          );
+          const nextArea = computeManualGameArea("circle", currentBounds, point, polygonVertices);
           if (nextArea) {
             setManualGameArea(nextArea);
           }
@@ -283,9 +246,7 @@ export function useGameAreaFraming(options: UseGameAreaFramingOptions = {}) {
 
   const loadFramingResult = useCallback(
     (result: GameAreaFramingResult) => {
-      const nextBounds = boundingBoxToMapBounds(
-        gameAreaToBoundingBox(result.gameArea),
-      );
+      const nextBounds = boundingBoxToMapBounds(gameAreaToBoundingBox(result.gameArea));
       setManualDrawingEnabled(true);
       setManualGameArea(result.gameArea);
       setFocusBounds(gameAreaToBoundsExpression(result.gameArea));
@@ -299,9 +260,7 @@ export function useGameAreaFraming(options: UseGameAreaFramingOptions = {}) {
 
   const applyFocusToGameArea = useCallback(
     (gameArea: GameArea) => {
-      const nextBounds = boundingBoxToMapBounds(
-        gameAreaToBoundingBox(gameArea),
-      );
+      const nextBounds = boundingBoxToMapBounds(gameAreaToBoundingBox(gameArea));
       setFocusBounds(gameAreaToBoundsExpression(gameArea));
       suppressViewportUpdates();
       boundsRef.current = nextBounds;
@@ -310,10 +269,7 @@ export function useGameAreaFraming(options: UseGameAreaFramingOptions = {}) {
     [suppressViewportUpdates],
   );
 
-  const previewGameArea = useMemo(
-    () => manualGameArea,
-    [manualGameArea],
-  );
+  const previewGameArea = useMemo(() => manualGameArea, [manualGameArea]);
 
   const hasValidDraft = useMemo(() => {
     if (!manualGameArea) {

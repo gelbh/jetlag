@@ -7,8 +7,7 @@ export const NYC_REGION_PACK_ID = "nyc" satisfies RegionPackId;
 export const NYC_GEO_ASSETS = {
   boroughs: "/geo/nyc/boroughs.geojson",
   districts: "/geo/nyc/districts.geojson",
-  districtsByBorough: (boroughId: string) =>
-    `/geo/nyc/districts/${boroughId}.geojson`,
+  districtsByBorough: (boroughId: string) => `/geo/nyc/districts/${boroughId}.geojson`,
   poi: (category: string) => `/geo/nyc/poi/${category}.json`,
 } as const;
 
@@ -23,8 +22,7 @@ export const NYC_MATCHING_LABEL_OVERRIDES: Partial<
   admin_division_4: {
     label: "Community district",
     promptNoun: "community district",
-    ruleSummary:
-      "A community district within the framed New York City play area.",
+    ruleSummary: "A community district within the framed New York City play area.",
   },
 };
 
@@ -41,8 +39,6 @@ export const NYC_MEASURING_LABEL_OVERRIDES: Partial<
   },
 };
 
-export function isNycRegionPack(
-  regionPackId: RegionPackId | undefined,
-): boolean {
+export function isNycRegionPack(regionPackId: RegionPackId | undefined): boolean {
   return regionPackId === NYC_REGION_PACK_ID;
 }

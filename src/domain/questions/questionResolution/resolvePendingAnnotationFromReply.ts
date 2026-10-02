@@ -1,25 +1,10 @@
 import type { AnnotationRecord, GameArea } from "../../map/annotations";
 import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
-import {
-  matchingAnswerFromReplyId,
-  resolveMatchingPendingQuestion,
-} from "./matching";
-import {
-  measuringAnswerFromReplyId,
-  resolveMeasuringPendingQuestion,
-} from "./measuring";
-import {
-  radarAnswerFromReplyId,
-  resolveRadarPendingQuestion,
-} from "./radar";
-import {
-  resolveTentaclePendingQuestion,
-  tentacleAnswerFromReplyId,
-} from "./tentacle";
-import {
-  resolveThermometerPendingQuestion,
-  thermometerAnswerFromReplyId,
-} from "./thermometer";
+import { matchingAnswerFromReplyId, resolveMatchingPendingQuestion } from "./matching";
+import { measuringAnswerFromReplyId, resolveMeasuringPendingQuestion } from "./measuring";
+import { radarAnswerFromReplyId, resolveRadarPendingQuestion } from "./radar";
+import { resolveTentaclePendingQuestion, tentacleAnswerFromReplyId } from "./tentacle";
+import { resolveThermometerPendingQuestion, thermometerAnswerFromReplyId } from "./thermometer";
 
 export async function resolvePendingAnnotationFromReply(
   pending: PendingQuestionRecord,
@@ -49,11 +34,7 @@ export async function resolvePendingAnnotationFromReply(
         return null;
       }
 
-      return resolveMeasuringPendingQuestion(
-        pending,
-        measuringAnswer,
-        gameArea,
-      );
+      return resolveMeasuringPendingQuestion(pending, measuringAnswer, gameArea);
     }
     case "matching": {
       const matchingAnswer = matchingAnswerFromReplyId(replyId);
@@ -64,11 +45,7 @@ export async function resolvePendingAnnotationFromReply(
       return resolveMatchingPendingQuestion(pending, matchingAnswer, gameArea);
     }
     case "tentacle": {
-      return resolveTentaclePendingQuestion(
-        pending,
-        tentacleAnswerFromReplyId(replyId),
-        gameArea,
-      );
+      return resolveTentaclePendingQuestion(pending, tentacleAnswerFromReplyId(replyId), gameArea);
     }
     case "photo":
       return null;

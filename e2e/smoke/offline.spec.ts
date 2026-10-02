@@ -1,10 +1,11 @@
-import { test, expect } from "../fixtures";
 import {
   clickMapAtLatLng,
   E2E_GEOLOCATION,
+  expect,
   MAP_CONTAINER_SELECTOR,
   openMapWithLocalSession,
   selectDrawTool,
+  test,
 } from "../fixtures";
 
 test("@smoke keeps the map usable while offline", async ({ page, context }) => {
@@ -24,14 +25,8 @@ test("@smoke keeps the map usable while offline", async ({ page, context }) => {
   await context.setOffline(true);
 
   await selectDrawTool(page, "Pin");
-  await clickMapAtLatLng(
-    page,
-    E2E_GEOLOCATION.latitude,
-    E2E_GEOLOCATION.longitude,
-  );
-  await expect(
-    page.getByText(/Location pinned on the map/i),
-  ).toBeVisible({ timeout: 15_000 });
+  await clickMapAtLatLng(page, E2E_GEOLOCATION.latitude, E2E_GEOLOCATION.longitude);
+  await expect(page.getByText(/Location pinned on the map/i)).toBeVisible({ timeout: 15_000 });
 
   await context.setOffline(false);
   await expect(page.getByRole("button", { name: "Matching" })).toBeVisible();

@@ -1,22 +1,18 @@
-import type { ReactNode, RefObject } from "react";
 import { Button } from "@mantine/core";
-import {
-  fieldFrameStyle,
-  filledStyles,
-  grayStyles,
-} from "@/components/ui/entry/entryStyles";
+import type { ReactNode, RefObject } from "react";
+import { fieldFrameStyle, filledStyles, grayStyles } from "@/components/ui/entry/entryStyles";
 import {
   FramingModeSegmentControl,
   GameAreaFramingPolygonActions,
 } from "../../components/session/framing/GameAreaFramingControls";
 import { framingModeHint } from "../../components/session/framing/gameAreaFramingUi";
 import type { GameArea } from "../../domain/map/annotations";
+import type { TransitMetro } from "../../domain/map/transit";
 import type { BundledPresetSelectGroup } from "../../domain/regions/bundledPresetHierarchy";
 import type { GamePreset } from "../../domain/session/presets/gamePreset";
 import type { useGameAreaFraming } from "../../hooks/session/useGameAreaFraming";
 import type { GeocodedPlace } from "../../services/geo/geocoding";
 import { formatPlaceSearchSubtitle } from "../../services/geo/geocoding/geocodingRank";
-import type { TransitMetro } from "../../domain/map/transit";
 
 type GameAreaFraming = ReturnType<typeof useGameAreaFraming>;
 
@@ -43,9 +39,7 @@ export type GameAreaSectionModel = {
   onPresetSelect: (presetId: string) => void;
   onSavePreset: () => void;
   onOpenFramingModal: () => void;
-  onFramingModeChange: (
-    mode: Parameters<GameAreaFraming["setFramingMode"]>[0],
-  ) => void;
+  onFramingModeChange: (mode: Parameters<GameAreaFraming["setFramingMode"]>[0]) => void;
   onRemoveSelectedArea: (index: number) => void;
   onLocationQueryChange: (value: string) => void;
   onSearch: () => void;
@@ -316,9 +310,7 @@ export function GameAreaSection({ model, settingsSlot }: GameAreaSectionProps) {
         ) : null}
 
         {selectedPlace && searchResults.length === 0 ? (
-          <p className="text-xs text-field-ink-muted">
-            {formatPlaceSearchSubtitle(selectedPlace)}
-          </p>
+          <p className="text-xs text-field-ink-muted">{formatPlaceSearchSubtitle(selectedPlace)}</p>
         ) : null}
 
         <label className="field-label text-[0.8125rem] font-semibold tracking-[0.04em] text-field-ink-muted uppercase">

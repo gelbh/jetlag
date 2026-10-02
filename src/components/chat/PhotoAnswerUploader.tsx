@@ -1,20 +1,17 @@
-import { useState } from "react";
 import { Button, Stack, Text } from "@mantine/core";
+import { useState } from "react";
+import type { DistanceUnit } from "../../domain/map/distance";
 import {
   PHOTO_CANNOT_ANSWER_LABEL,
   PHOTO_SENT_EXTERNALLY_LABEL,
   PHOTO_UPLOAD_OUTAGE_NOTICE,
+  type PhotoAnswer,
   photoAnswerSelectedReply,
   photoRuleSummaryForUnit,
   readPhotoCategoryId,
-  type PhotoAnswer,
 } from "../../domain/questions";
-import type { DistanceUnit } from "../../domain/map/distance";
 import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
-import {
-  filledStyles,
-  grayStyles,
-} from "../ui/entry/entryChrome";
+import { filledStyles, grayStyles } from "../ui/entry/entryChrome";
 
 interface PhotoAnswerUploaderProps {
   sessionId: string;
@@ -43,9 +40,7 @@ export function PhotoAnswerUploader({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const categoryId = readPhotoCategoryId(pendingQuestion);
-  const ruleSummary = categoryId
-    ? photoRuleSummaryForUnit(categoryId, distanceUnit)
-    : null;
+  const ruleSummary = categoryId ? photoRuleSummaryForUnit(categoryId, distanceUnit) : null;
 
   const busy = submitting || disabled;
 
@@ -64,11 +59,7 @@ export function PhotoAnswerUploader({
         deadlineExpired,
       );
     } catch (submitError) {
-      setError(
-        submitError instanceof Error
-          ? submitError.message
-          : "Could not save your answer.",
-      );
+      setError(submitError instanceof Error ? submitError.message : "Could not save your answer.");
     } finally {
       setSubmitting(false);
     }

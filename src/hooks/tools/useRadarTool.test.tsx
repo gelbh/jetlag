@@ -1,8 +1,8 @@
 import { act, renderHook } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { useRadarTool } from "./useRadarTool";
-import { createToolHookMocks } from "../../test/helpers/toolHookMocks";
 import { milesToMeters } from "../../domain/map/distance";
+import { createToolHookMocks } from "../../test/helpers/toolHookMocks";
+import { useRadarTool } from "./useRadarTool";
 
 describe("useRadarTool", () => {
   it("stores radar center from map taps", () => {

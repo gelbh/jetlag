@@ -1,28 +1,18 @@
 import { useEffect, useRef } from "react";
-import type { GameSize } from "../../domain/session/size/gameSize";
-import { useVisualViewportBottomInset } from "../../hooks/layout/useVisualViewportBottomInset";
+import { isAskHudOwnedTool } from "../../domain/ask/askHudModes";
+import { MARKUP_DOCK_TOOL_IDS, QUESTION_DOCK_TOOL_IDS } from "../../domain/map/mapTools";
 import type { SessionRulesInput } from "../../domain/session/rules";
 import { resolveToolDockEnabled } from "../../domain/session/rules";
-import {
-  MARKUP_DOCK_TOOL_IDS,
-  QUESTION_DOCK_TOOL_IDS,
-} from "../../domain/map/mapTools";
-import { isAskHudOwnedTool } from "../../domain/ask/askHudModes";
+import type { GameSize } from "../../domain/session/size/gameSize";
+import { useVisualViewportBottomInset } from "../../hooks/layout/useVisualViewportBottomInset";
 import { cn } from "../../lib/cn";
 import type { MapTool } from "../../state/sessionStore";
 import { MapBottomChrome } from "../map/chrome/MapBottomChrome";
 import { SessionIslandSlots } from "../map/chrome/SessionIslandSlots";
 import { ToolDeckGroup, ToolDeckInner, ToolDeckQuestionStrip } from "./ToolDeck";
-import {
-  ToolDockDrawControl,
-  ToolDockHistorySlot,
-  ToolDockQuestionSlot,
-} from "./ToolDockSlot";
 import { ToolDockDrawMenu } from "./ToolDockOverflowMenu";
-import {
-  useToolDockHighlight,
-  useToolDockMenus,
-} from "./useToolDockState";
+import { ToolDockDrawControl, ToolDockHistorySlot, ToolDockQuestionSlot } from "./ToolDockSlot";
+import { useToolDockHighlight, useToolDockMenus } from "./useToolDockState";
 
 interface ToolDockProps {
   activeTool: MapTool;
@@ -81,11 +71,9 @@ export function ToolDock({
   const dockRef = useRef<HTMLDivElement>(null);
   const mainGroupRef = useRef<HTMLDivElement>(null);
   const viewportBottomInset = useVisualViewportBottomInset(true);
-  const { drawMenuOpen, setDrawMenuOpen, closeMenus } =
-    useToolDockMenus(dockRef);
+  const { drawMenuOpen, setDrawMenuOpen, closeMenus } = useToolDockMenus(dockRef);
 
-  const drawMenuVisible =
-    drawMenuOpen && !dismissOverflowMenus && !inactive;
+  const drawMenuVisible = drawMenuOpen && !dismissOverflowMenus && !inactive;
 
   useEffect(() => {
     if (inactive) {
@@ -112,19 +100,14 @@ export function ToolDock({
     closeMenus();
   };
 
-  const askFirst =
-    activeTool !== "none" && isAskHudOwnedTool(activeTool);
+  const askFirst = activeTool !== "none" && isAskHudOwnedTool(activeTool);
 
   return (
     <MapBottomChrome
       ref={dockRef}
       inactive={inactive}
       askFirst={askFirst}
-      style={
-        viewportBottomInset > 0
-          ? { bottom: `${viewportBottomInset}px` }
-          : undefined
-      }
+      style={viewportBottomInset > 0 ? { bottom: `${viewportBottomInset}px` } : undefined}
       hunt={
         <ToolDeckInner>
           {dockHighlight ? (

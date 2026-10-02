@@ -1,12 +1,11 @@
 import type { Feature, MultiPolygon, Polygon } from "geojson";
-import type { MapBoundsExpression } from "../mapBounds";
 import type { BoundingBox } from "../../geometry/gameArea/gameAreaBounds";
 import type { LatLngTuple } from "../../geometry/gameArea/geometry";
+import type { RadarAnswer, ThermometerAnswer } from "../../questions";
 import type { GameArea } from "../annotations";
+import type { MapBoundsExpression } from "../mapBounds";
 import type { MapDraftOverlay } from "../mapDraftOverlay";
 import type { MapTool } from "../mapToolTypes";
-import type { RadarAnswer } from "../../questions";
-import type { ThermometerAnswer } from "../../questions";
 
 export type PlacementPhase =
   | "idle"

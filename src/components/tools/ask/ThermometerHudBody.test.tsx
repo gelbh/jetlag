@@ -1,18 +1,14 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
-import { fireEvent, render, screen } from "@testing-library/react";
 import { MantineProvider } from "@mantine/core";
+import { fireEvent, render, screen } from "@testing-library/react";
 import type { ReactElement } from "react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { type AskHudReadiness, canCommit, primedCommitLabel } from "@/domain/ask/askHudModes";
 import type { DistanceUnit } from "@/domain/map/distance";
-import type { SessionRulesInput } from "@/domain/session/rules";
 import type { ThermometerDistanceOptionMiles } from "@/domain/questions";
+import type { SessionRulesInput } from "@/domain/session/rules";
 import { jetlagTheme } from "@/theme/theme";
 import { AskHudHost } from "./AskHudHost";
 import { ThermometerHudBody } from "./ThermometerHudBody";
-import {
-  canCommit,
-  primedCommitLabel,
-  type AskHudReadiness,
-} from "@/domain/ask/askHudModes";
 
 function renderHud(ui: ReactElement) {
   return render(
@@ -94,14 +90,7 @@ describe("ThermometerHudBody", () => {
   });
 
   it("shows walk banner without PhaseRail, CONTINUE, or END WALK in the body", () => {
-    renderHud(
-      <ThermometerHudBody
-        {...baseProps}
-        walkingActive
-        travelMeters={420}
-        step="b"
-      />,
-    );
+    renderHud(<ThermometerHudBody {...baseProps} walkingActive travelMeters={420} step="b" />);
 
     expect(screen.getByTestId("ask-walk-banner")).toBeInTheDocument();
     expect(screen.getByTestId("ask-walk-banner")).toHaveTextContent(/Walking/i);
@@ -144,21 +133,12 @@ describe("ThermometerHudBody", () => {
           cue: "",
         })}
         onCommit={onCommit}
-        modeBody={
-          <ThermometerHudBody
-            {...baseProps}
-            walkingActive
-            travelMeters={420}
-            step="b"
-          />
-        }
+        modeBody={<ThermometerHudBody {...baseProps} walkingActive travelMeters={420} step="b" />}
       />,
     );
 
     expect(screen.getByTestId("ask-walk-banner")).toBeInTheDocument();
-    expect(
-      screen.getAllByRole("button", { name: /end walk/i }),
-    ).toHaveLength(1);
+    expect(screen.getAllByRole("button", { name: /end walk/i })).toHaveLength(1);
     expect(screen.getByTestId("ask-commit-strip").querySelector("button")).toHaveAttribute(
       "data-armed",
       "true",

@@ -1,14 +1,14 @@
 import { describe, expect, it } from "vitest";
 import {
-  assertNoNestedArrays,
-  deserializeGameAreaFromFirestore,
-  serializeGameAreaForFirestore,
-} from "./shared";
-import {
   buildHidingZoneDocument,
   buildSessionDocument,
   deserializeSessionFromFirestore,
 } from "./serializeSession";
+import {
+  assertNoNestedArrays,
+  deserializeGameAreaFromFirestore,
+  serializeGameAreaForFirestore,
+} from "./shared";
 
 const sampleGameArea = {
   type: "Polygon" as const,
@@ -259,5 +259,4 @@ describe("serializeSession", () => {
     expect(restored.gameResultId).toBe("result-1");
     expect(restored.roundNumber).toBe(2);
   });
-
 });

@@ -2,8 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import type { GameResultRecord } from "../../domain/game/gameResult";
 import { splitRoundPhaseMs } from "../../domain/game/splitRoundPhaseMs";
 import {
-  LOCAL_SESSION_ID,
   isRoundComplete,
+  LOCAL_SESSION_ID,
   type SessionRecord,
 } from "../../domain/map/annotations";
 import { resolveHidingPeriodMs } from "../../domain/session/rules/deadlines";
@@ -11,14 +11,9 @@ import { isFirebaseConfigured } from "../../services/core/firebase/firebase";
 import { subscribeToGameResult } from "../../services/firestore/firestoreGameResult";
 
 function buildLocalGameResult(session: SessionRecord): GameResultRecord {
-  const endedAt =
-    session.foundConfirmedAt ??
-    session.endGameStartedAt ??
-    new Date().toISOString();
+  const endedAt = session.foundConfirmedAt ?? session.endGameStartedAt ?? new Date().toISOString();
   const durationMs =
-    typeof session.timerAccumulatedMs === "number"
-      ? session.timerAccumulatedMs
-      : 0;
+    typeof session.timerAccumulatedMs === "number" ? session.timerAccumulatedMs : 0;
   const gameSize = session.gameSize ?? "medium";
   const { hidingPhaseMs, seekPhaseMs } = splitRoundPhaseMs(
     durationMs,
@@ -49,25 +44,16 @@ export function useGameOver(session: SessionRecord | null | undefined) {
     Boolean(gameResultId) &&
     sessionId !== LOCAL_SESSION_ID &&
     isFirebaseConfigured();
-  const [remoteResult, setRemoteResult] = useState<GameResultRecord | null>(
-    null,
-  );
-  const [failedSubscriptionKey, setFailedSubscriptionKey] = useState<
-    string | null
-  >(null);
+  const [remoteResult, setRemoteResult] = useState<GameResultRecord | null>(null);
+  const [failedSubscriptionKey, setFailedSubscriptionKey] = useState<string | null>(null);
   const subscriptionKey =
-    subscribed && sessionId && gameResultId
-      ? `${sessionId}:${gameResultId}`
-      : null;
-  const subscriptionFailed =
-    subscriptionKey != null && failedSubscriptionKey === subscriptionKey;
+    subscribed && sessionId && gameResultId ? `${sessionId}:${gameResultId}` : null;
+  const subscriptionFailed = subscriptionKey != null && failedSubscriptionKey === subscriptionKey;
 
   useEffect(() => {
-    /* eslint-disable react-hooks/set-state-in-effect -- drop stale game-over result when the round is no longer complete */
     if (!subscribed) {
       setRemoteResult(null);
     }
-    /* eslint-enable react-hooks/set-state-in-effect */
   }, [subscribed]);
 
   useEffect(() => {
@@ -77,15 +63,10 @@ export function useGameOver(session: SessionRecord | null | undefined) {
 
     const activeKey = `${sessionId}:${gameResultId}`;
 
-    return subscribeToGameResult(
-      sessionId,
-      gameResultId,
-      setRemoteResult,
-      () => {
-        setRemoteResult(null);
-        setFailedSubscriptionKey(activeKey);
-      },
-    );
+    return subscribeToGameResult(sessionId, gameResultId, setRemoteResult, () => {
+      setRemoteResult(null);
+      setFailedSubscriptionKey(activeKey);
+    });
   }, [gameResultId, sessionId, subscribed]);
 
   const result = useMemo(() => {
@@ -97,23 +78,12 @@ export function useGameOver(session: SessionRecord | null | undefined) {
       return remoteResult;
     }
 
-    if (
-      sessionId === LOCAL_SESSION_ID ||
-      !isFirebaseConfigured() ||
-      subscriptionFailed
-    ) {
+    if (sessionId === LOCAL_SESSION_ID || !isFirebaseConfigured() || subscriptionFailed) {
       return buildLocalGameResult(session);
     }
 
     return null;
-  }, [
-    remoteResult,
-    roundComplete,
-    session,
-    sessionId,
-    subscribed,
-    subscriptionFailed,
-  ]);
+  }, [remoteResult, roundComplete, session, sessionId, subscribed, subscriptionFailed]);
 
   const loading =
     roundComplete &&

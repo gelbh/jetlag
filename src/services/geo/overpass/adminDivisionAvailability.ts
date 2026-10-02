@@ -1,20 +1,20 @@
 import type { GameArea } from "@/domain/map/annotations";
-import type { CustomMatchingAreasByLevel, MatchingAdminLevel } from "@/domain/session/catalog/sessionCustomContent";
+import type { MatchingCategoryId, MeasuringFromKind } from "@/domain/questions";
 import { adminLevelForMatchingCategory } from "@/domain/questions";
-import type { MatchingCategoryId } from "@/domain/questions";
-import type { MeasuringFromKind } from "@/domain/questions";
-import { getRegionPackConfig } from "@/domain/regions/regionPackRegistry";
-import { regionPackHasBundledBoundaries } from "../matching/regionPackBoundaries";
 import type { RegionPackId } from "@/domain/regions/regionPack";
+import { getRegionPackConfig } from "@/domain/regions/regionPackRegistry";
+import type {
+  CustomMatchingAreasByLevel,
+  MatchingAdminLevel,
+} from "@/domain/session/catalog/sessionCustomContent";
+import { regionPackHasBundledBoundaries } from "../matching/regionPackBoundaries";
 import { fetchAdminDivisionFeaturesInArea } from "./adminDivisionBoundaries";
 
 export const MIN_ADMIN_DIVISIONS_FOR_AVAILABILITY = 2;
 
 export const ADMIN_DIVISION_PROBE_LEVELS = [4, 6, 8, 9] as const;
 
-export function isBundledAdminRegionPack(
-  regionPackId: RegionPackId | undefined,
-): boolean {
+export function isBundledAdminRegionPack(regionPackId: RegionPackId | undefined): boolean {
   return regionPackHasBundledBoundaries(regionPackId);
 }
 
@@ -36,10 +36,7 @@ export type AdminDivisionMatchingCategory =
   | "admin_division_3"
   | "admin_division_4";
 
-export type AdminDivisionCounts = Record<
-  AdminDivisionMatchingCategory,
-  number
->;
+export type AdminDivisionCounts = Record<AdminDivisionMatchingCategory, number>;
 
 const ADMIN_DIVISION_CATEGORIES: readonly AdminDivisionMatchingCategory[] = [
   "admin_division_1",
@@ -47,7 +44,6 @@ const ADMIN_DIVISION_CATEGORIES: readonly AdminDivisionMatchingCategory[] = [
   "admin_division_3",
   "admin_division_4",
 ];
-
 
 export function emptyAdminDivisionCounts(): AdminDivisionCounts {
   return {
@@ -58,9 +54,7 @@ export function emptyAdminDivisionCounts(): AdminDivisionCounts {
   };
 }
 
-export function adminCategoryForProbeLevel(
-  level: number,
-): AdminDivisionMatchingCategory | null {
+export function adminCategoryForProbeLevel(level: number): AdminDivisionMatchingCategory | null {
   switch (level) {
     case 4:
       return "admin_division_1";
@@ -78,9 +72,7 @@ export function adminCategoryForProbeLevel(
 export function isAdminDivisionMatchingCategory(
   categoryId: MatchingCategoryId,
 ): categoryId is AdminDivisionMatchingCategory {
-  return ADMIN_DIVISION_CATEGORIES.includes(
-    categoryId as AdminDivisionMatchingCategory,
-  );
+  return ADMIN_DIVISION_CATEGORIES.includes(categoryId as AdminDivisionMatchingCategory);
 }
 
 export async function probeAdminDivisionCounts(
@@ -162,11 +154,7 @@ export function adminBoundaryLevelsForSession(
       return false;
     }
 
-    return isAdminDivisionCategoryAvailable(
-      category,
-      adminDivisionCounts,
-      regionPackId,
-    );
+    return isAdminDivisionCategoryAvailable(category, adminDivisionCounts, regionPackId);
   });
 }
 
@@ -261,29 +249,13 @@ export function adminBorderKindAvailability(
 
   switch (kind) {
     case "admin1_border":
-      return isAdminDivisionCategoryAvailable(
-        "admin_division_1",
-        counts,
-        regionPackId,
-      );
+      return isAdminDivisionCategoryAvailable("admin_division_1", counts, regionPackId);
     case "admin2_border":
-      return isAdminDivisionCategoryAvailable(
-        "admin_division_2",
-        counts,
-        regionPackId,
-      );
+      return isAdminDivisionCategoryAvailable("admin_division_2", counts, regionPackId);
     case "admin3_border":
-      return isAdminDivisionCategoryAvailable(
-        "admin_division_3",
-        counts,
-        regionPackId,
-      );
+      return isAdminDivisionCategoryAvailable("admin_division_3", counts, regionPackId);
     case "admin4_border":
-      return isAdminDivisionCategoryAvailable(
-        "admin_division_4",
-        counts,
-        regionPackId,
-      );
+      return isAdminDivisionCategoryAvailable("admin_division_4", counts, regionPackId);
     default: {
       const _exhaustive: never = kind;
       return _exhaustive;

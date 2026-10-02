@@ -2,9 +2,9 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { AnnotationType } from "../domain/map/annotations";
 import type { DistanceUnit } from "../domain/map/distance";
+import type { MapStyle, StreetBasemap } from "../domain/map/mapBasemaps";
 import type { MapTool } from "../domain/map/mapToolTypes";
 import type { TransitRouteFilter } from "../domain/map/transit";
-import type { MapStyle, StreetBasemap } from "../domain/map/mapBasemaps";
 
 export type LayerVisibility = Record<AnnotationType | "transit", boolean>;
 
@@ -21,30 +21,30 @@ const DEFAULT_LAYER_VISIBILITY: LayerVisibility = {
 };
 
 export const useMapStore = create<{
-  activeTool: MapTool,
-  transitEnabled: boolean,
-  transitLiveEnabled: boolean,
-  transitRouteFilter: TransitRouteFilter,
-  showCurrentLocation: boolean,
-  showAdminBoundaries: boolean,
-  keepScreenAwake: boolean,
-  lowPowerMode: boolean,
-  distanceUnit: DistanceUnit,
-  mapStyle: MapStyle,
-  streetBasemap: StreetBasemap,
-  layerVisibility: LayerVisibility,
-  setActiveTool: (tool: MapTool) => void,
-  setTransitEnabled: (enabled: boolean) => void,
-  setTransitLiveEnabled: (enabled: boolean) => void,
-  setTransitRouteFilter: (filter: TransitRouteFilter) => void,
-  setShowCurrentLocation: (enabled: boolean) => void,
-  setShowAdminBoundaries: (enabled: boolean) => void,
-  setKeepScreenAwake: (enabled: boolean) => void,
-  setLowPowerMode: (enabled: boolean) => void,
-  setDistanceUnit: (unit: DistanceUnit) => void,
-  setMapStyle: (style: MapStyle) => void,
-  setStreetBasemap: (streetBasemap: StreetBasemap) => void,
-  setLayerVisibility: (layer: keyof LayerVisibility, visible: boolean) => void,
+  activeTool: MapTool;
+  transitEnabled: boolean;
+  transitLiveEnabled: boolean;
+  transitRouteFilter: TransitRouteFilter;
+  showCurrentLocation: boolean;
+  showAdminBoundaries: boolean;
+  keepScreenAwake: boolean;
+  lowPowerMode: boolean;
+  distanceUnit: DistanceUnit;
+  mapStyle: MapStyle;
+  streetBasemap: StreetBasemap;
+  layerVisibility: LayerVisibility;
+  setActiveTool: (tool: MapTool) => void;
+  setTransitEnabled: (enabled: boolean) => void;
+  setTransitLiveEnabled: (enabled: boolean) => void;
+  setTransitRouteFilter: (filter: TransitRouteFilter) => void;
+  setShowCurrentLocation: (enabled: boolean) => void;
+  setShowAdminBoundaries: (enabled: boolean) => void;
+  setKeepScreenAwake: (enabled: boolean) => void;
+  setLowPowerMode: (enabled: boolean) => void;
+  setDistanceUnit: (unit: DistanceUnit) => void;
+  setMapStyle: (style: MapStyle) => void;
+  setStreetBasemap: (streetBasemap: StreetBasemap) => void;
+  setLayerVisibility: (layer: keyof LayerVisibility, visible: boolean) => void;
 }>()(
   persist(
     (set) => ({
@@ -62,14 +62,10 @@ export const useMapStore = create<{
       layerVisibility: DEFAULT_LAYER_VISIBILITY,
       setActiveTool: (activeTool) => set({ activeTool }),
       setTransitEnabled: (transitEnabled) => set({ transitEnabled }),
-      setTransitLiveEnabled: (transitLiveEnabled) =>
-        set({ transitLiveEnabled }),
-      setTransitRouteFilter: (transitRouteFilter) =>
-        set({ transitRouteFilter }),
-      setShowCurrentLocation: (showCurrentLocation) =>
-        set({ showCurrentLocation }),
-      setShowAdminBoundaries: (showAdminBoundaries) =>
-        set({ showAdminBoundaries }),
+      setTransitLiveEnabled: (transitLiveEnabled) => set({ transitLiveEnabled }),
+      setTransitRouteFilter: (transitRouteFilter) => set({ transitRouteFilter }),
+      setShowCurrentLocation: (showCurrentLocation) => set({ showCurrentLocation }),
+      setShowAdminBoundaries: (showAdminBoundaries) => set({ showAdminBoundaries }),
       setKeepScreenAwake: (keepScreenAwake) => set({ keepScreenAwake }),
       setLowPowerMode: (lowPowerMode) => set({ lowPowerMode }),
       setDistanceUnit: (distanceUnit) => set({ distanceUnit }),
@@ -88,14 +84,12 @@ export const useMapStore = create<{
       merge: (persistedState, currentState) => {
         const persisted = {
           ...currentState,
-          ...((persistedState as Partial<typeof currentState> | undefined) ??
-            {}),
+          ...((persistedState as Partial<typeof currentState> | undefined) ?? {}),
         };
         return {
           ...persisted,
           streetBasemap:
-            persisted.streetBasemap === "dark" ||
-            persisted.streetBasemap === "light"
+            persisted.streetBasemap === "dark" || persisted.streetBasemap === "light"
               ? persisted.streetBasemap
               : "light",
           showCurrentLocation: true,

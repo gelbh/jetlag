@@ -40,12 +40,8 @@ const DEFAULT_MAP: ScenarioMapSpec = {
   lowPowerMode: true,
 };
 
-function resolveScenario(
-  scenarioOrId: ScenarioId | ScenarioDefinition,
-): ScenarioDefinition {
-  return typeof scenarioOrId === "string"
-    ? getScenario(scenarioOrId)
-    : scenarioOrId;
+function resolveScenario(scenarioOrId: ScenarioId | ScenarioDefinition): ScenarioDefinition {
+  return typeof scenarioOrId === "string" ? getScenario(scenarioOrId) : scenarioOrId;
 }
 
 export function toLocalStorageSeed(
@@ -62,9 +58,7 @@ export function toLocalStorageSeed(
     ...(overrides.hidingPeriodMinutes !== undefined
       ? { hidingPeriodMinutes: overrides.hidingPeriodMinutes }
       : {}),
-    ...(overrides.memberRoles
-      ? { memberRoles: overrides.memberRoles }
-      : {}),
+    ...(overrides.memberRoles ? { memberRoles: overrides.memberRoles } : {}),
   };
   const myRole = overrides.myRole ?? specRole ?? "seeker";
   const mapState = scenario.map ?? DEFAULT_MAP;

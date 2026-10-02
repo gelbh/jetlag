@@ -13,6 +13,7 @@ export type {
   ElevationFetchProfile,
   FetchElevationsOptions,
 } from "./constants";
+export { isUsElevationPoint } from "./providers";
 export {
   clearElevationCacheForTests,
   hydrateElevationCacheFromIdb,
@@ -20,7 +21,6 @@ export {
   openElevationCircuitForTests,
   requestGapMsForBatchSize,
 } from "./rateLimit";
-export { isUsElevationPoint } from "./providers";
 
 export async function fetchElevations(
   points: LatLngTuple[],
@@ -33,10 +33,7 @@ export async function fetchElevations(
   }
 
   const elevations: number[] = new Array(points.length);
-  const pendingByKey = new Map<
-    string,
-    { point: LatLngTuple; indices: number[] }
-  >();
+  const pendingByKey = new Map<string, { point: LatLngTuple; indices: number[] }>();
 
   for (let index = 0; index < points.length; index += 1) {
     const point = points[index];
@@ -85,15 +82,9 @@ export async function fetchElevations(
 
   const pendingPoints = [...pendingByKey.values()];
 
-  for (
-    let index = 0;
-    index < pendingPoints.length;
-    index += ELEVATION_BATCH_SIZE
-  ) {
+  for (let index = 0; index < pendingPoints.length; index += ELEVATION_BATCH_SIZE) {
     const batch = pendingPoints.slice(index, index + ELEVATION_BATCH_SIZE);
-    await runLimitedElevationRequest(() =>
-      fetchElevationBatchAndWrite(batch, elevations, profile),
-    );
+    await runLimitedElevationRequest(() => fetchElevationBatchAndWrite(batch, elevations, profile));
   }
 
   return elevations;

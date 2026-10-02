@@ -15,9 +15,7 @@ export function getScenario(id: ScenarioId): ScenarioDefinition {
   return scenario;
 }
 
-export function listScenarios(filter?: {
-  tag?: ScenarioTag;
-}): ScenarioDefinition[] {
+export function listScenarios(filter?: { tag?: ScenarioTag }): ScenarioDefinition[] {
   const all = Object.values(SCENARIOS);
   if (!filter?.tag) {
     return all;

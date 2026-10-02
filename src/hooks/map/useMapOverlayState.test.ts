@@ -1,6 +1,6 @@
-import { useMapOverlayState } from "./useMapOverlayState";
-import { describe, expect, it } from "vitest";
 import { act, renderHook } from "@testing-library/react";
+import { describe, expect, it } from "vitest";
+import { useMapOverlayState } from "./useMapOverlayState";
 
 describe("useMapOverlayState sheet stack", () => {
   it("replace openers clear prior sheets", () => {
@@ -31,10 +31,7 @@ describe("useMapOverlayState sheet stack", () => {
     expect(result.current.isMapToolsGuideOpen).toBe(true);
     expect(result.current.isSettingsOpen).toBe(false);
     expect(result.current.settingsInStack).toBe(true);
-    expect(result.current.sheetStack).toEqual([
-      "settings",
-      "map-tools-guide",
-    ]);
+    expect(result.current.sheetStack).toEqual(["settings", "map-tools-guide"]);
 
     act(() => {
       result.current.closeSheet();
@@ -70,9 +67,6 @@ describe("useMapOverlayState sheet stack", () => {
       result.current.pushSheet("curse-reference");
       result.current.pushSheet("curse-reference");
     });
-    expect(result.current.sheetStack).toEqual([
-      "settings",
-      "curse-reference",
-    ]);
+    expect(result.current.sheetStack).toEqual(["settings", "curse-reference"]);
   });
 });

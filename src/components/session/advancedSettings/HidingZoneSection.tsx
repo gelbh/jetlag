@@ -6,10 +6,7 @@ import {
   HIDING_ZONE_RADIUS_MIN_METERS,
   hidingZoneRadiusMeters,
 } from "@/domain/session/size/gameSize";
-import {
-  AdvancedSettingsCategory,
-  ToggleNumberWithPresets,
-} from "./shared";
+import { AdvancedSettingsCategory, ToggleNumberWithPresets } from "./shared";
 import type { AdvancedSettingsSectionProps } from "./types";
 
 export function HidingZoneSection({

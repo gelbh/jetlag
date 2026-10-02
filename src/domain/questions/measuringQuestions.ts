@@ -1,15 +1,14 @@
-import { resolveCustomPackMeasuringOption } from "./customQuestionPack";
 import type { AnnotationRecord } from "../map/annotations";
 import type { PendingQuestionRecord } from "../session/activity/sessionChat";
 import { buildCatalogHelpers } from "./catalogHelpers";
+import { resolveCustomPackMeasuringOption } from "./customQuestionPack";
 import {
   BASE_MEASURING_CATALOG,
   BODY_OF_WATER_MEASURING_QUESTION,
   COASTLINE_MEASURING_QUESTION,
   DEFAULT_MEASURING_FROM_KIND,
-  MEASURING_CATALOG,
   MEASURE_RULE_SUMMARY,
-  SEA_LEVEL_MEASURING_QUESTION,
+  MEASURING_CATALOG,
   type MeasuringCatalogOption,
   type MeasuringFromKind,
   type MeasuringGroupId,
@@ -17,6 +16,7 @@ import {
   type MeasuringQuestionDefinition,
   type MeasuringSubject,
   type MeasuringTargetKind,
+  SEA_LEVEL_MEASURING_QUESTION,
 } from "./measuring/measuringCatalog";
 
 export type {
@@ -41,9 +41,9 @@ export {
   CUSTOM_PACK_GATED_MEASURING_IDS,
   DEFAULT_MEASURING_FROM_KIND,
   isCustomPackGatedMeasuringId,
+  MEASURE_RULE_SUMMARY,
   MEASURING_CATALOG,
   MEASURING_GROUPS,
-  MEASURE_RULE_SUMMARY,
   SEA_LEVEL_DEFINITION,
   SEA_LEVEL_MEASURING_QUESTION,
 } from "./measuring/measuringCatalog";
@@ -115,9 +115,7 @@ export function measuringLocationOverpassSelectors(
   return measuringCatalogOption(category)?.overpassSelectors ?? [];
 }
 
-export function measuringLinearOverpassSelectors(
-  kind: MeasuringFromKind,
-): readonly string[] {
+export function measuringLinearOverpassSelectors(kind: MeasuringFromKind): readonly string[] {
   return measuringCatalogOption(kind)?.linearSelectors ?? [];
 }
 
@@ -194,10 +192,7 @@ export function measuringUsesAllPlacesInArea(kind: MeasuringFromKind): boolean {
   );
 }
 
-export function measuringMultiPlaceTargetLabel(
-  count: number,
-  kind: MeasuringFromKind,
-): string {
+export function measuringMultiPlaceTargetLabel(count: number, kind: MeasuringFromKind): string {
   const label = measuringLocationLabel(kind).toLowerCase();
   if (count === 1) {
     return `1 ${label}`;
@@ -206,9 +201,7 @@ export function measuringMultiPlaceTargetLabel(
   return `${count} ${label}s`;
 }
 
-export function measuringTargetKind(
-  kind: MeasuringFromKind,
-): MeasuringTargetKind {
+export function measuringTargetKind(kind: MeasuringFromKind): MeasuringTargetKind {
   return measuringCatalogOption(kind)?.targetKind ?? "point";
 }
 
@@ -220,9 +213,7 @@ export function isMeasuringLinearLocation(
     return false;
   }
 
-  const targetKind = measuringTargetKind(
-    measuringFromKind(subject, locationCategory),
-  );
+  const targetKind = measuringTargetKind(measuringFromKind(subject, locationCategory));
   return targetKind === "linear" || targetKind === "polygon";
 }
 
@@ -270,10 +261,7 @@ export function usedMeasuringFromKinds(
   annotations: readonly AnnotationRecord[],
   exceptAnnotationId?: string,
 ): Set<MeasuringFromKind> {
-  return measuringCatalogHelpers.usedOptionsFromAnnotations(
-    annotations,
-    exceptAnnotationId,
-  );
+  return measuringCatalogHelpers.usedOptionsFromAnnotations(annotations, exceptAnnotationId);
 }
 
 export function usedMeasuringFromKindsForSession(
@@ -282,9 +270,7 @@ export function usedMeasuringFromKindsForSession(
   exceptAnnotationId?: string,
 ): Set<MeasuringFromKind> {
   const used = usedMeasuringFromKinds(annotations, exceptAnnotationId);
-  for (const id of measuringCatalogHelpers.usedOptionsFromPending(
-    pendingQuestions,
-  )) {
+  for (const id of measuringCatalogHelpers.usedOptionsFromPending(pendingQuestions)) {
     used.add(id);
   }
   return used;
@@ -294,10 +280,7 @@ export function firstAvailableMeasuringFromKind(
   usedKinds: ReadonlySet<MeasuringFromKind>,
   catalog: readonly MeasuringCatalogOption[] = BASE_MEASURING_CATALOG,
 ): MeasuringFromKind | null {
-  return measuringCatalogHelpers.firstAvailableFromCatalog(
-    catalog,
-    usedKinds,
-  );
+  return measuringCatalogHelpers.firstAvailableFromCatalog(catalog, usedKinds);
 }
 
 export function measuringFromKindUseCount(

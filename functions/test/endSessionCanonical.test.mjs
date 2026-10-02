@@ -1,5 +1,5 @@
-import test from "node:test";
 import assert from "node:assert/strict";
+import test from "node:test";
 import { endSessionCanonical } from "../session/endSessionCanonical.mjs";
 
 function mockDb({ sessionData, sessionExists = true, updates, deleted }) {

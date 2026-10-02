@@ -53,9 +53,7 @@ describe("endGameTruthAnchors", () => {
       ["hider-b", { lat: 51.2, lng: -0.2 }],
     ]);
 
-    expect(missingHiderUidsForAnchors(["hider-a", "hider-b"], locations)).toEqual([
-      "hider-a",
-    ]);
+    expect(missingHiderUidsForAnchors(["hider-a", "hider-b"], locations)).toEqual(["hider-a"]);
   });
 
   it("assembles start anchors preferring hiding place over zone center", () => {

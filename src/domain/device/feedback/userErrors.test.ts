@@ -27,9 +27,7 @@ describe("userErrorFromSyncMessage", () => {
 
 describe("userErrorFromTerminalSessionMessage", () => {
   it("offers retry and return to join for missing sessions", () => {
-    const error = userErrorFromTerminalSessionMessage(
-      "That session no longer exists.",
-    );
+    const error = userErrorFromTerminalSessionMessage("That session no longer exists.");
     expect(error.actionLabel).toBe("Retry");
     expect(error.secondaryActionLabel).toBe("Return to join");
   });

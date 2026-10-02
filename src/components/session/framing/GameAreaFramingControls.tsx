@@ -1,5 +1,5 @@
 import { Button, Group, SegmentedControl, Text } from "@mantine/core";
-import type { FramingMode } from "@/hooks/session/useGameAreaFraming";
+import { compactFilledStyles, grayStyles } from "@/components/ui/entry/entryStyles";
 import type { GameArea } from "@/domain/map/annotations";
 import {
   formatPlayAreaSummary,
@@ -7,10 +7,7 @@ import {
   gameSizeLabel,
   recommendGameSize,
 } from "@/domain/session/size/gameSize";
-import {
-  compactFilledStyles,
-  grayStyles,
-} from "@/components/ui/entry/entryStyles";
+import type { FramingMode } from "@/hooks/session/useGameAreaFraming";
 import { FRAMING_MODE_OPTIONS } from "./gameAreaFramingUi";
 
 interface FramingModeSegmentControlProps {
@@ -76,9 +73,7 @@ export function GameAreaFramingStats({
   const summary = formatPlayAreaSummary(gameAreaSquareMiles(gameArea));
   const recommended = recommendGameSize(gameArea);
   const sizeMismatch =
-    selectedGameSize !== undefined &&
-    selectedGameSize !== null &&
-    recommended !== selectedGameSize;
+    selectedGameSize !== undefined && selectedGameSize !== null && recommended !== selectedGameSize;
 
   return (
     <Group
@@ -138,12 +133,7 @@ export function GameAreaFramingPolygonActions({
       >
         Close shape
       </Button>
-      <Button
-        type="button"
-        styles={grayStyles}
-        onClick={onReset}
-        disabled={vertexCount === 0}
-      >
+      <Button type="button" styles={grayStyles} onClick={onReset} disabled={vertexCount === 0}>
         Clear points
       </Button>
     </Group>

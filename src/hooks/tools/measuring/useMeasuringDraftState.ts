@@ -1,28 +1,31 @@
+import type { Feature, Polygon as GeoPolygon, LineString, MultiPolygon } from "geojson";
 import { useCallback, useMemo, useRef, useState } from "react";
-import type { Feature, LineString, Polygon as GeoPolygon, MultiPolygon } from "geojson";
-import { isActive, type AnnotationRecord } from "@/domain/map/annotations";
+import type { MeasuringPlace } from "@/domain/geo/types";
 import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
+import type { SeaLevelEdgeCase } from "@/domain/geometry/measuring/seaLevel";
+import { type AnnotationRecord, isActive } from "@/domain/map/annotations";
 import {
   applyMeasuringFromKind,
   DEFAULT_MEASURING_FROM_KIND,
   firstAvailableMeasuringFromKind,
-  measuringFromKind,
-  measuringUsesAllPlacesInArea,
-  usedMeasuringFromKindsForSession,
   type MeasuringAnswer,
   type MeasuringFromKind,
   type MeasuringLocationCategory,
   type MeasuringSubject,
   type MeasuringTargetMode,
+  measuringFromKind,
+  measuringUsesAllPlacesInArea,
+  usedMeasuringFromKindsForSession,
 } from "@/domain/questions";
 import type { PendingQuestionRecord } from "@/domain/session/activity/sessionChat";
+import {
+  availableMeasuringCatalog,
+  isPreviewQuestionBeforeSendEnabled,
+} from "@/domain/session/catalog/sessionCatalogAvailability";
 import type { SessionRulesInput } from "@/domain/session/rules";
+import type { GeocodedPlace } from "@/services/geo/geocoding";
 import { adminBorderKindAvailability } from "@/services/geo/overpass/adminDivisionAvailability";
 import { usePreloadStore } from "@/state/preloadStore";
-import { availableMeasuringCatalog, isPreviewQuestionBeforeSendEnabled } from "@/domain/session/catalog/sessionCatalogAvailability";
-import type { MeasuringPlace } from "@/domain/geo/types";
-import type { GeocodedPlace } from "@/services/geo/geocoding";
-import type { SeaLevelEdgeCase } from "@/domain/geometry/measuring/seaLevel";
 
 export function useMeasuringDraftState(
   annotations: AnnotationRecord[],
@@ -39,63 +42,43 @@ export function useMeasuringDraftState(
   const placesRequestIdRef = useRef(0);
 
   const usedMeasuringFromKindsSet = useMemo(
-    () =>
-      usedMeasuringFromKindsForSession(
-        annotations.filter(isActive),
-        pendingQuestions,
-      ),
+    () => usedMeasuringFromKindsForSession(annotations.filter(isActive), pendingQuestions),
     [annotations, pendingQuestions],
   );
 
-  const [measuringSeekerPoint, setMeasuringSeekerPoint] =
-    useState<LatLngTuple | null>(null);
-  const [measuringTargetPoint, setMeasuringTargetPoint] =
-    useState<LatLngTuple | null>(null);
-  const [measuringSubject, setMeasuringSubject] =
-    useState<MeasuringSubject>("location");
+  const [measuringSeekerPoint, setMeasuringSeekerPoint] = useState<LatLngTuple | null>(null);
+  const [measuringTargetPoint, setMeasuringTargetPoint] = useState<LatLngTuple | null>(null);
+  const [measuringSubject, setMeasuringSubject] = useState<MeasuringSubject>("location");
   const [measuringLocationCategory, setMeasuringLocationCategory] =
     useState<MeasuringLocationCategory>(DEFAULT_MEASURING_FROM_KIND);
-  const [measuringDistanceMeters, setMeasuringDistanceMeters] = useState<
-    number | null
-  >(null);
-  const [measuringAnswer, setMeasuringAnswer] =
-    useState<MeasuringAnswer | null>(null);
+  const [measuringDistanceMeters, setMeasuringDistanceMeters] = useState<number | null>(null);
+  const [measuringAnswer, setMeasuringAnswer] = useState<MeasuringAnswer | null>(null);
   const [measuringLoading, setMeasuringLoading] = useState(false);
   const [measuringError, setMeasuringError] = useState<string | null>(null);
-  const [measuringCoastSegments, setMeasuringCoastSegments] = useState<
-    Feature<LineString>[]
-  >([]);
+  const [measuringCoastSegments, setMeasuringCoastSegments] = useState<Feature<LineString>[]>([]);
   const [coastlineContextVersion, setCoastlineContextVersion] = useState(0);
-  const [measuringSeaLevelNearRegion, setMeasuringSeaLevelNearRegion] =
-    useState<Feature<GeoPolygon | MultiPolygon> | null>(null);
-  const [measuringAnchorElevationMeters, setMeasuringAnchorElevationMeters] =
-    useState<number | null>(null);
+  const [measuringSeaLevelNearRegion, setMeasuringSeaLevelNearRegion] = useState<Feature<
+    GeoPolygon | MultiPolygon
+  > | null>(null);
+  const [measuringAnchorElevationMeters, setMeasuringAnchorElevationMeters] = useState<
+    number | null
+  >(null);
   const [measuringSeaLevelEdgeCase, setMeasuringSeaLevelEdgeCase] =
     useState<SeaLevelEdgeCase | null>(null);
-  const [measuringSeaLevelNote, setMeasuringSeaLevelNote] = useState<
-    string | null
-  >(null);
-  const [measuringTargetMode, setMeasuringTargetMode] =
-    useState<MeasuringTargetMode>("map");
-  const [measuringSeekerPlaceName, setMeasuringSeekerPlaceName] = useState<
-    string | null
-  >(null);
-  const [measuringTargetPlaceName, setMeasuringTargetPlaceName] = useState<
-    string | null
-  >(null);
+  const [measuringSeaLevelNote, setMeasuringSeaLevelNote] = useState<string | null>(null);
+  const [measuringTargetMode, setMeasuringTargetMode] = useState<MeasuringTargetMode>("map");
+  const [measuringSeekerPlaceName, setMeasuringSeekerPlaceName] = useState<string | null>(null);
+  const [measuringTargetPlaceName, setMeasuringTargetPlaceName] = useState<string | null>(null);
   const [measuringSearchQuery, setMeasuringSearchQuery] = useState("");
-  const [measuringSearchResults, setMeasuringSearchResults] = useState<
-    GeocodedPlace[]
-  >([]);
+  const [measuringSearchResults, setMeasuringSearchResults] = useState<GeocodedPlace[]>([]);
   const [measuringSearchLoading, setMeasuringSearchLoading] = useState(false);
-  const [measuringSearchRole, setMeasuringSearchRole] = useState<
-    "seeker" | "target"
-  >("seeker");
+  const [measuringSearchRole, setMeasuringSearchRole] = useState<"seeker" | "target">("seeker");
   const [measuringPlaces, setMeasuringPlaces] = useState<MeasuringPlace[]>([]);
   const [measuringOptionChosen, setMeasuringOptionChosen] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
-  const [unavailableMeasuringFromKinds, setUnavailableMeasuringFromKinds] =
-    useState<Map<MeasuringFromKind, string>>(() => new Map());
+  const [unavailableMeasuringFromKinds, setUnavailableMeasuringFromKinds] = useState<
+    Map<MeasuringFromKind, string>
+  >(() => new Map());
   const [catalogNotice, setCatalogNotice] = useState<string | null>(null);
 
   const customMeasureGeometries = sessionRules?.customMeasureGeometries ?? [];
@@ -116,10 +99,7 @@ export function useMeasuringDraftState(
     sessionRules ?? { gameSize: "medium" },
   );
 
-  const measureFromKind = measuringFromKind(
-    measuringSubject,
-    measuringLocationCategory,
-  );
+  const measureFromKind = measuringFromKind(measuringSubject, measuringLocationCategory);
   const usesAllPlacesInArea = measuringUsesAllPlacesInArea(measureFromKind);
 
   const clearSubjectDerivedState = useCallback(() => {
@@ -154,8 +134,7 @@ export function useMeasuringDraftState(
       }
 
       const nextKind =
-        firstAvailableMeasuringFromKind(usedKinds, measuringCatalog) ??
-        DEFAULT_MEASURING_FROM_KIND;
+        firstAvailableMeasuringFromKind(usedKinds, measuringCatalog) ?? DEFAULT_MEASURING_FROM_KIND;
       const next = applyMeasuringFromKind(nextKind);
 
       setMeasuringSeekerPoint(null);

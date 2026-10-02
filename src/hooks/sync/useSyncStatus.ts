@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import { LOCAL_SESSION_ID } from "../../domain/map/annotations";
 import { getPowerProfile } from "../../domain/device/power/powerProfile";
 import { resolveSyncStatus, type SyncStatus } from "../../domain/device/sync/sync";
-import { useReachability } from "../location/useReachability";
+import { LOCAL_SESSION_ID } from "../../domain/map/annotations";
 import { useMapStore } from "../../state/mapStore";
 import { useSessionStore } from "../../state/sessionStore";
+import { useReachability } from "../location/useReachability";
 
 export function useSyncStatus(): {
   status: SyncStatus;
@@ -16,19 +16,11 @@ export function useSyncStatus(): {
   const pendingWrites = useSessionStore((state) => state.pendingWrites);
   const syncInFlight = useSessionStore((state) => state.syncInFlight);
   const lastSyncError = useSessionStore((state) => state.lastSyncError);
-  const remoteUpdateNotice = useSessionStore(
-    (state) => state.remoteUpdateNotice,
-  );
-  const [online, setOnline] = useState(
-    typeof navigator === "undefined" ? true : navigator.onLine,
-  );
-  const reachabilityEnabled =
-    Boolean(session) &&
-    session?.id !== LOCAL_SESSION_ID;
+  const remoteUpdateNotice = useSessionStore((state) => state.remoteUpdateNotice);
+  const [online, setOnline] = useState(typeof navigator === "undefined" ? true : navigator.onLine);
+  const reachabilityEnabled = Boolean(session) && session?.id !== LOCAL_SESSION_ID;
   const lowPowerMode = useMapStore((state) => state.lowPowerMode);
-  const setNetworkReachable = useSessionStore(
-    (state) => state.setNetworkReachable,
-  );
+  const setNetworkReachable = useSessionStore((state) => state.setNetworkReachable);
   const reachabilityProbeMs = getPowerProfile(lowPowerMode).reachabilityProbeMs;
   const { reachable } = useReachability(reachabilityEnabled, reachabilityProbeMs);
 

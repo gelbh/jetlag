@@ -1,14 +1,10 @@
-import { createRef } from "react";
 import { render, screen } from "@testing-library/react";
+import { createRef } from "react";
 import { describe, expect, it } from "vitest";
 import type { LeaderboardEntry } from "../../domain/game/leaderboard";
 import { LeaderboardLeadPack } from "./LeaderboardLeadPack";
 
-const entry = (
-  uid: string,
-  rank: number,
-  value = 10,
-): LeaderboardEntry => ({
+const entry = (uid: string, rank: number, value = 10): LeaderboardEntry => ({
   uid,
   displayName: uid,
   value,
@@ -17,19 +13,12 @@ const entry = (
 
 describe("LeaderboardLeadPack", () => {
   it("renders nothing for empty entries", () => {
-    const { container } = render(
-      <LeaderboardLeadPack entries={[]} metric="wins" />,
-    );
+    const { container } = render(<LeaderboardLeadPack entries={[]} metric="wins" />);
     expect(container.firstChild).toBeNull();
   });
 
   it("renders only provided rows without fillers", () => {
-    render(
-      <LeaderboardLeadPack
-        entries={[entry("a", 1), entry("b", 2)]}
-        metric="wins"
-      />,
-    );
+    render(<LeaderboardLeadPack entries={[entry("a", 1), entry("b", 2)]} metric="wins" />);
     expect(screen.getByTestId("leaderboard-row-a")).toBeTruthy();
     expect(screen.getByTestId("leaderboard-row-b")).toBeTruthy();
     expect(screen.queryByTestId("leaderboard-row-c")).toBeNull();
@@ -37,12 +26,11 @@ describe("LeaderboardLeadPack", () => {
   });
 
   it("shows named status skeleton while loading", () => {
-    render(
-      <LeaderboardLeadPack entries={[]} metric="wins" loading />,
+    render(<LeaderboardLeadPack entries={[]} metric="wins" loading />);
+    expect(screen.getByRole("status", { name: "Loading top ranks" })).toHaveAttribute(
+      "aria-busy",
+      "true",
     );
-    expect(
-      screen.getByRole("status", { name: "Loading top ranks" }),
-    ).toHaveAttribute("aria-busy", "true");
   });
 
   it("marks the viewer row, attaches viewerRowRef, and shows YOU", () => {

@@ -30,13 +30,6 @@ import {
   OSAKA_MEASURING_LABEL_OVERRIDES,
   OSAKA_REGION_PACK_ID,
 } from "./osakaRegionPack";
-import type { RegionPackId, RegionPackLabelOverride } from "./regionPack";
-import {
-  TOKYO_GEO_ASSETS,
-  TOKYO_MATCHING_LABEL_OVERRIDES,
-  TOKYO_MEASURING_LABEL_OVERRIDES,
-  TOKYO_REGION_PACK_ID,
-} from "./tokyoRegionPack";
 import {
   PORTLAND_MAINE_GEO_ASSETS,
   PORTLAND_MAINE_MATCHING_LABEL_OVERRIDES,
@@ -49,6 +42,13 @@ import {
   PRINCE_RUPERT_MEASURING_LABEL_OVERRIDES,
   PRINCE_RUPERT_REGION_PACK_ID,
 } from "./princeRupertRegionPack";
+import type { RegionPackId, RegionPackLabelOverride } from "./regionPack";
+import {
+  TOKYO_GEO_ASSETS,
+  TOKYO_MATCHING_LABEL_OVERRIDES,
+  TOKYO_MEASURING_LABEL_OVERRIDES,
+  TOKYO_REGION_PACK_ID,
+} from "./tokyoRegionPack";
 import {
   ZURICH_GEO_ASSETS,
   ZURICH_MATCHING_LABEL_OVERRIDES,
@@ -69,31 +69,25 @@ export interface RegionPackConfig {
   subregionPropertyKey: string;
   /** When "secondary", full-pack play area unions level-9 features instead of level-8. */
   playAreaLevel?: "primary" | "secondary";
-  matchingLabelOverrides: Partial<
-    Record<MatchingCategoryId, RegionPackLabelOverride>
-  >;
-  measuringLabelOverrides: Partial<
-    Record<MeasuringFromKind, RegionPackLabelOverride>
-  >;
+  matchingLabelOverrides: Partial<Record<MatchingCategoryId, RegionPackLabelOverride>>;
+  measuringLabelOverrides: Partial<Record<MeasuringFromKind, RegionPackLabelOverride>>;
   unsupportedMatching: ReadonlySet<
     "admin_division_1" | "admin_division_2" | "admin_division_3" | "admin_division_4"
   >;
   unsupportedBorders: ReadonlySet<MeasuringFromKind>;
 }
 
-const HIDE_COUNTRY_PROVINCE_MATCHING = new Set<
-  "admin_division_1" | "admin_division_2"
->(["admin_division_1", "admin_division_2"]);
+const HIDE_COUNTRY_PROVINCE_MATCHING = new Set<"admin_division_1" | "admin_division_2">([
+  "admin_division_1",
+  "admin_division_2",
+]);
 
 const HIDE_COUNTRY_PROVINCE_BORDERS = new Set<MeasuringFromKind>([
   "admin1_border",
   "admin2_border",
 ]);
 
-type MetroRegionPackConfig = Omit<
-  RegionPackConfig,
-  "unsupportedMatching" | "unsupportedBorders"
->;
+type MetroRegionPackConfig = Omit<RegionPackConfig, "unsupportedMatching" | "unsupportedBorders">;
 
 function metroRegionPack(config: MetroRegionPackConfig): RegionPackConfig {
   return {
@@ -110,9 +104,7 @@ export const REGION_PACK_CONFIGS: Record<RegionPackId, RegionPackConfig> = {
       primary: DUBLIN_GEO_ASSETS.councils,
       secondary: DUBLIN_GEO_ASSETS.leas,
       secondaryBySubregion: (subregionId) =>
-        DUBLIN_GEO_ASSETS.leasByCouncil(
-          subregionId as "dcc" | "fingal" | "sdcc" | "dlr",
-        ),
+        DUBLIN_GEO_ASSETS.leasByCouncil(subregionId as "dcc" | "fingal" | "sdcc" | "dlr"),
     },
     subregionPropertyKey: "councilId",
     matchingLabelOverrides: DUBLIN_MATCHING_LABEL_OVERRIDES,
@@ -123,8 +115,7 @@ export const REGION_PACK_CONFIGS: Record<RegionPackId, RegionPackConfig> = {
     geoAssets: {
       primary: NYC_GEO_ASSETS.boroughs,
       secondary: NYC_GEO_ASSETS.districts,
-      secondaryBySubregion: (subregionId) =>
-        NYC_GEO_ASSETS.districtsByBorough(subregionId),
+      secondaryBySubregion: (subregionId) => NYC_GEO_ASSETS.districtsByBorough(subregionId),
     },
     subregionPropertyKey: "boroughId",
     matchingLabelOverrides: NYC_MATCHING_LABEL_OVERRIDES,
@@ -135,8 +126,7 @@ export const REGION_PACK_CONFIGS: Record<RegionPackId, RegionPackConfig> = {
     geoAssets: {
       primary: LONDON_GEO_ASSETS.boroughs,
       secondary: LONDON_GEO_ASSETS.areas,
-      secondaryBySubregion: (subregionId) =>
-        LONDON_GEO_ASSETS.areasByBorough(subregionId),
+      secondaryBySubregion: (subregionId) => LONDON_GEO_ASSETS.areasByBorough(subregionId),
     },
     subregionPropertyKey: "boroughId",
     matchingLabelOverrides: LONDON_MATCHING_LABEL_OVERRIDES,
@@ -147,8 +137,7 @@ export const REGION_PACK_CONFIGS: Record<RegionPackId, RegionPackConfig> = {
     geoAssets: {
       primary: TOKYO_GEO_ASSETS.wards,
       secondary: TOKYO_GEO_ASSETS.areas,
-      secondaryBySubregion: (subregionId) =>
-        TOKYO_GEO_ASSETS.areasByWard(subregionId),
+      secondaryBySubregion: (subregionId) => TOKYO_GEO_ASSETS.areasByWard(subregionId),
     },
     subregionPropertyKey: "wardId",
     matchingLabelOverrides: TOKYO_MATCHING_LABEL_OVERRIDES,
@@ -159,8 +148,7 @@ export const REGION_PACK_CONFIGS: Record<RegionPackId, RegionPackConfig> = {
     geoAssets: {
       primary: OSAKA_GEO_ASSETS.wards,
       secondary: OSAKA_GEO_ASSETS.areas,
-      secondaryBySubregion: (subregionId) =>
-        OSAKA_GEO_ASSETS.areasByWard(subregionId),
+      secondaryBySubregion: (subregionId) => OSAKA_GEO_ASSETS.areasByWard(subregionId),
     },
     subregionPropertyKey: "wardId",
     matchingLabelOverrides: OSAKA_MATCHING_LABEL_OVERRIDES,
@@ -171,8 +159,7 @@ export const REGION_PACK_CONFIGS: Record<RegionPackId, RegionPackConfig> = {
     geoAssets: {
       primary: ZURICH_GEO_ASSETS.districts,
       secondary: ZURICH_GEO_ASSETS.quarters,
-      secondaryBySubregion: (subregionId) =>
-        ZURICH_GEO_ASSETS.quartersByDistrict(subregionId),
+      secondaryBySubregion: (subregionId) => ZURICH_GEO_ASSETS.quartersByDistrict(subregionId),
     },
     subregionPropertyKey: "districtId",
     matchingLabelOverrides: ZURICH_MATCHING_LABEL_OVERRIDES,
@@ -217,9 +204,7 @@ export const REGION_PACK_CONFIGS: Record<RegionPackId, RegionPackConfig> = {
   }),
 };
 
-export function getRegionPackConfig(
-  packId: RegionPackId,
-): RegionPackConfig | undefined {
+export function getRegionPackConfig(packId: RegionPackId): RegionPackConfig | undefined {
   return REGION_PACK_CONFIGS[packId];
 }
 

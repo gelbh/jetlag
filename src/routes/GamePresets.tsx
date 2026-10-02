@@ -1,8 +1,8 @@
 import { Stack, Text } from "@mantine/core";
 import { useParams } from "react-router-dom";
 import { EntryRouteShell } from "@/components/ui/entry/EntryRouteShell";
-import { GamePresetListBody } from "./GamePresetListBody";
 import { GamePresetEditorContent } from "./GamePresetEditorContent";
+import { GamePresetListBody } from "./GamePresetListBody";
 
 export function GamePresetList() {
   return (
@@ -13,8 +13,7 @@ export function GamePresetList() {
           size="sm"
           style={{ lineHeight: 1.35, textWrap: "pretty", maxWidth: "22rem" }}
         >
-          Saved templates pre-fill create session. Game area can be added when
-          hosting.
+          Saved templates pre-fill create session. Game area can be added when hosting.
         </Text>
         <GamePresetListBody />
       </Stack>

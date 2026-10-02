@@ -2,13 +2,11 @@
 const IDB_CONNECTION_CLOSING =
   /Can't start a transaction on a closed database|database connection is closing|database is closing\/hidden/i;
 const WEBKIT_LOAD_FAILED = /^Load failed(?:\s*\([^)]*\))?$/i;
-const RECAPTCHA_OT_TYPEERROR =
-  /(?:reading ['"]oT['"]|evaluating ['"][^'"]*\.oT['"])/i;
+const RECAPTCHA_OT_TYPEERROR = /(?:reading ['"]oT['"]|evaluating ['"][^'"]*\.oT['"])/i;
 const FIRESTORE_IDB_PERSISTENCE =
   /INTERNAL ASSERTION FAILED:[\s\S]*\bID:\s*b815\b|Error storing new key generator value in database/i;
 /** Safari Firestore IDB: UnknownError looking up object-store records by key range. */
-const FIRESTORE_IDB_OBJECT_STORE_LOOKUP =
-  /looking up record in object store by key range/i;
+const FIRESTORE_IDB_OBJECT_STORE_LOOKUP = /looking up record in object store by key range/i;
 /** Chrome/WebKit IDB resume: index cursor without an open transaction. */
 const IDB_INDEX_WITHOUT_TRANSACTION =
   /Attempt to get all index records from database without an in-progress transaction/i;
@@ -47,9 +45,7 @@ export function isFirestoreIdbPersistenceNoiseMessage(message: string): boolean 
 }
 
 /** Safari Firestore IndexedDB object-store key-range lookup failures. */
-export function isFirestoreIdbObjectStoreLookupNoiseMessage(
-  message: string,
-): boolean {
+export function isFirestoreIdbObjectStoreLookupNoiseMessage(message: string): boolean {
   return FIRESTORE_IDB_OBJECT_STORE_LOOKUP.test(message);
 }
 

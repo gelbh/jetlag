@@ -1,14 +1,7 @@
-import { toggleToolInSettings } from "@/domain/session/tools/advancedSessionSettings";
 import { MAP_TOOL_DOCK_ENTRIES } from "@/domain/map/mapTools";
-import {
-  ALL_CONFIGURABLE_TOOLS,
-  type ConfigurableMapTool,
-} from "@/domain/session/rules";
-import {
-  AdvancedSettingsCategory,
-  AdvancedSettingsInset,
-  AdvancedSettingsToggle,
-} from "./shared";
+import { ALL_CONFIGURABLE_TOOLS, type ConfigurableMapTool } from "@/domain/session/rules";
+import { toggleToolInSettings } from "@/domain/session/tools/advancedSessionSettings";
+import { AdvancedSettingsCategory, AdvancedSettingsInset, AdvancedSettingsToggle } from "./shared";
 import type { AdvancedSettingsSectionProps } from "./types";
 
 export function ToolsSection({
@@ -45,13 +38,7 @@ export function ToolsSection({
               label={entry?.name ?? toolId}
               showSeparator={index > 0}
               onChange={(checked) =>
-                onChange(
-                  toggleToolInSettings(
-                    value,
-                    toolId as ConfigurableMapTool,
-                    checked,
-                  ),
-                )
+                onChange(toggleToolInSettings(value, toolId as ConfigurableMapTool, checked))
               }
             />
           );

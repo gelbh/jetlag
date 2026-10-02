@@ -6,9 +6,7 @@ import {
 
 describe("bundledPresetCategorySymbols", () => {
   it("maps subdivision folder categories to glyphs", () => {
-    expect(glyphIdForHierarchyCategory("Local authorities")).toBe(
-      "local-authorities",
-    );
+    expect(glyphIdForHierarchyCategory("Local authorities")).toBe("local-authorities");
     expect(glyphIdForHierarchyCategory("Wards")).toBe("wards");
     expect(glyphIdForHierarchyCategory("Boroughs")).toBe("boroughs");
     expect(glyphIdForHierarchyCategory("Districts")).toBe("districts");

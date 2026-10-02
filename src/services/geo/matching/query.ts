@@ -1,21 +1,15 @@
-import type { GameArea } from "@/domain/map/annotations";
-import {
-  gameAreaToBoundingBox,
-  type LatLngTuple,
-} from "@/domain/geometry/gameArea/geometry";
 import type { BoundingBox } from "@/domain/geometry/gameArea/gameAreaBounds";
-import {
-  adminLevelForMatchingCategory,
-  type MatchingCategoryId,
-} from "@/domain/questions";
+import { gameAreaToBoundingBox, type LatLngTuple } from "@/domain/geometry/gameArea/geometry";
+import type { GameArea } from "@/domain/map/annotations";
+import { adminLevelForMatchingCategory, type MatchingCategoryId } from "@/domain/questions";
 import type { SessionCustomCategory } from "@/domain/session/catalog/sessionCustomContent";
-import { customMatchingAreasCacheSuffix } from "./matchingAreaGeoJson";
 import { geographicCacheKey } from "../cache";
 import {
   buildNodeWayRelationBboxQuery,
   formatOverpassBbox,
   overpassQueryTemplate,
 } from "../overpass/queryHelpers";
+import { customMatchingAreasCacheSuffix } from "./matchingAreaGeoJson";
 import type { MatchingFetchOptions } from "./types";
 
 export function matchingFeaturesCacheKey(
@@ -31,10 +25,7 @@ export function matchingFeaturesCacheKey(
           adminLevel,
         )
       : "";
-  return geographicCacheKey(
-    gameArea,
-    `matching:in:${categoryId}${customSuffix}`,
-  );
+  return geographicCacheKey(gameArea, `matching:in:${categoryId}${customSuffix}`);
 }
 
 export function matchingSearchBoundingBox(gameArea: GameArea): BoundingBox {

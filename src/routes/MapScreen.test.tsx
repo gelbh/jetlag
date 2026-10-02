@@ -1,10 +1,10 @@
 import { fireEvent, screen, waitFor } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
 import { Route, Routes } from "react-router-dom";
-import { MapScreen } from "./MapScreen";
+import { describe, expect, it, vi } from "vitest";
+import { useSessionStore } from "../state/sessionStore";
 import { createTestSession } from "../test/fixtures/sessions";
 import { renderWithRouter } from "../test/renderWithRouter";
-import { useSessionStore } from "../state/sessionStore";
+import { MapScreen } from "./MapScreen";
 
 vi.mock("../components/ui/banners/AppUpdateMapChip", () => ({
   AppUpdateMapChip: () => null,
@@ -62,9 +62,8 @@ vi.mock("../hooks/location/useWakeLock", () => ({
 }));
 
 vi.mock("../services/geo/matching/resolveSessionMatchingAreas", async (importOriginal) => {
-  const actual = await importOriginal<
-    typeof import("../services/geo/matching/resolveSessionMatchingAreas")
-  >();
+  const actual =
+    await importOriginal<typeof import("../services/geo/matching/resolveSessionMatchingAreas")>();
   return {
     ...actual,
     resolveSessionMatchingAreas: vi.fn(async () => undefined),
@@ -100,9 +99,7 @@ describe("MapScreen", () => {
   }
 
   it("redirects to create when no session game area exists", async () => {
-    useSessionStore.getState().setSession(
-      createTestSession({ gameArea: undefined }),
-    );
+    useSessionStore.getState().setSession(createTestSession({ gameArea: undefined }));
 
     renderWithRouter(
       <Routes>

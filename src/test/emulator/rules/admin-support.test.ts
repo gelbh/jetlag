@@ -1,25 +1,13 @@
-import {
-  assertFails,
-  assertSucceeds,
-} from "@firebase/rules-unit-testing";
+import { assertFails, assertSucceeds } from "@firebase/rules-unit-testing";
 import { describe, it } from "vitest";
-import {
-  bindRulesTestEnv,
-  adminContext,
-  sessionPayload,
-  annotationPayload,
-} from "./helpers";
+import { adminContext, annotationPayload, bindRulesTestEnv, sessionPayload } from "./helpers";
 
 describe("firestore.rules — admin, incidents & support", () => {
   const rules = bindRulesTestEnv();
 
   it("allows admin to join as admin and read session data", async () => {
     const host = rules.testEnv.authenticatedContext("host-1");
-    await host
-      .firestore()
-      .collection("sessions")
-      .doc("session-1")
-      .set(sessionPayload("host-1"));
+    await host.firestore().collection("sessions").doc("session-1").set(sessionPayload("host-1"));
 
     const admin = adminContext(rules.testEnv);
     await assertSucceeds(
@@ -33,9 +21,7 @@ describe("firestore.rules — admin, incidents & support", () => {
         }),
     );
 
-    await assertSucceeds(
-      admin.firestore().collection("sessions").doc("session-1").get(),
-    );
+    await assertSucceeds(admin.firestore().collection("sessions").doc("session-1").get());
 
     await assertSucceeds(
       admin
@@ -50,11 +36,7 @@ describe("firestore.rules — admin, incidents & support", () => {
 
   it("allows anyone to join as observer", async () => {
     const host = rules.testEnv.authenticatedContext("host-1");
-    await host
-      .firestore()
-      .collection("sessions")
-      .doc("session-1")
-      .set(sessionPayload("host-1"));
+    await host.firestore().collection("sessions").doc("session-1").set(sessionPayload("host-1"));
 
     const guest = rules.testEnv.authenticatedContext("guest-1");
     await assertSucceeds(
@@ -71,11 +53,7 @@ describe("firestore.rules — admin, incidents & support", () => {
 
   it("rejects non-admin admin join", async () => {
     const host = rules.testEnv.authenticatedContext("host-1");
-    await host
-      .firestore()
-      .collection("sessions")
-      .doc("session-1")
-      .set(sessionPayload("host-1"));
+    await host.firestore().collection("sessions").doc("session-1").set(sessionPayload("host-1"));
 
     const guest = rules.testEnv.authenticatedContext("guest-1");
     await assertFails(
@@ -126,26 +104,19 @@ describe("firestore.rules — admin, incidents & support", () => {
         createdAt: "2026-01-01T00:00:00.000Z",
         updatedAt: "2026-01-01T00:00:00.000Z",
       });
-      await db
-        .collection("incidents")
-        .doc("inc-1")
-        .collection("messages")
-        .doc("msg-1")
-        .set({
-          sender: "system",
-          kind: "prompt",
-          text: "Incident report",
-          createdAt: "2026-01-01T00:00:00.000Z",
-        });
+      await db.collection("incidents").doc("inc-1").collection("messages").doc("msg-1").set({
+        sender: "system",
+        kind: "prompt",
+        text: "Incident report",
+        createdAt: "2026-01-01T00:00:00.000Z",
+      });
     });
   }
 
   it("allows admin to read an incident and its messages", async () => {
     await seedIncident();
     const admin = adminContext(rules.testEnv);
-    await assertSucceeds(
-      admin.firestore().collection("incidents").doc("inc-1").get(),
-    );
+    await assertSucceeds(admin.firestore().collection("incidents").doc("inc-1").get());
     await assertSucceeds(
       admin
         .firestore()
@@ -160,9 +131,7 @@ describe("firestore.rules — admin, incidents & support", () => {
   it("allows the reporter to read their own incident and messages", async () => {
     await seedIncident();
     const reporter = rules.testEnv.authenticatedContext("reporter-1");
-    await assertSucceeds(
-      reporter.firestore().collection("incidents").doc("inc-1").get(),
-    );
+    await assertSucceeds(reporter.firestore().collection("incidents").doc("inc-1").get());
     await assertSucceeds(
       reporter
         .firestore()
@@ -177,9 +146,7 @@ describe("firestore.rules — admin, incidents & support", () => {
   it("denies a stranger reading an incident or its messages", async () => {
     await seedIncident();
     const stranger = rules.testEnv.authenticatedContext("stranger-1");
-    await assertFails(
-      stranger.firestore().collection("incidents").doc("inc-1").get(),
-    );
+    await assertFails(stranger.firestore().collection("incidents").doc("inc-1").get());
     await assertFails(
       stranger
         .firestore()
@@ -195,15 +162,11 @@ describe("firestore.rules — admin, incidents & support", () => {
     await seedIncident();
     const reporter = rules.testEnv.authenticatedContext("reporter-1");
     await assertFails(
-      reporter
-        .firestore()
-        .collection("incidents")
-        .doc("inc-2")
-        .set({
-          status: "open",
-          reporterUid: "reporter-1",
-          createdAt: "2026-01-01T00:00:00.000Z",
-        }),
+      reporter.firestore().collection("incidents").doc("inc-2").set({
+        status: "open",
+        reporterUid: "reporter-1",
+        createdAt: "2026-01-01T00:00:00.000Z",
+      }),
     );
     await assertFails(
       reporter
@@ -247,25 +210,19 @@ describe("firestore.rules — admin, incidents & support", () => {
   it("allows admin to read a preload request", async () => {
     await seedPreloadRequest();
     const admin = adminContext(rules.testEnv);
-    await assertSucceeds(
-      admin.firestore().collection("preloadRequests").doc("pre-1").get(),
-    );
+    await assertSucceeds(admin.firestore().collection("preloadRequests").doc("pre-1").get());
   });
 
   it("allows the reporter to read their own preload request", async () => {
     await seedPreloadRequest();
     const reporter = rules.testEnv.authenticatedContext("reporter-1");
-    await assertSucceeds(
-      reporter.firestore().collection("preloadRequests").doc("pre-1").get(),
-    );
+    await assertSucceeds(reporter.firestore().collection("preloadRequests").doc("pre-1").get());
   });
 
   it("denies a stranger reading a preload request", async () => {
     await seedPreloadRequest();
     const stranger = rules.testEnv.authenticatedContext("stranger-1");
-    await assertFails(
-      stranger.firestore().collection("preloadRequests").doc("pre-1").get(),
-    );
+    await assertFails(stranger.firestore().collection("preloadRequests").doc("pre-1").get());
   });
 
   it("denies clients creating or updating preload requests", async () => {
@@ -302,12 +259,15 @@ describe("firestore.rules — admin, incidents & support", () => {
     await seedIncident();
     await rules.testEnv.withSecurityRulesDisabled(async (ctx) => {
       const db = ctx.firestore();
-      await db.collection("sessions").doc("session-1").set(
-        sessionPayload("host-1", {
-          memberUids: ["host-1", "reporter-1"],
-          memberRoles: { "host-1": "seeker", "reporter-1": "hider" },
-        }),
-      );
+      await db
+        .collection("sessions")
+        .doc("session-1")
+        .set(
+          sessionPayload("host-1", {
+            memberUids: ["host-1", "reporter-1"],
+            memberRoles: { "host-1": "seeker", "reporter-1": "hider" },
+          }),
+        );
       await db
         .collection("incidents")
         .doc("inc-1")
@@ -384,16 +344,19 @@ describe("firestore.rules — admin, incidents & support", () => {
     await seedIncident();
     await rules.testEnv.withSecurityRulesDisabled(async (ctx) => {
       const db = ctx.firestore();
-      await db.collection("sessions").doc("session-1").set(
-        sessionPayload("host-1", {
-          memberUids: ["host-1", "reporter-1", "member-1"],
-          memberRoles: {
-            "host-1": "seeker",
-            "reporter-1": "hider",
-            "member-1": "hider",
-          },
-        }),
-      );
+      await db
+        .collection("sessions")
+        .doc("session-1")
+        .set(
+          sessionPayload("host-1", {
+            memberUids: ["host-1", "reporter-1", "member-1"],
+            memberRoles: {
+              "host-1": "seeker",
+              "reporter-1": "hider",
+              "member-1": "hider",
+            },
+          }),
+        );
       await db
         .collection("incidents")
         .doc("inc-1")
@@ -541,5 +504,4 @@ describe("firestore.rules — admin, incidents & support", () => {
         }),
     );
   });
-
 });

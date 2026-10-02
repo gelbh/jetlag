@@ -1,21 +1,21 @@
 import type { Page } from "@playwright/test";
 import {
-  test,
+  assertEntryAxe,
+  assertInViewport,
+  assertMapChromeAxe,
+  assertMinTapTargets,
+  assertNoHorizontalOverflow,
+  assertNoSeriousAxeViolations,
   expect,
-  prepareE2EPage,
-  openPlayHub,
+  expectCreatePageMapPreviewLoaded,
   openMapWithLocalSession,
+  openPlayHub,
   openSocialRoute,
-  socialRouteViewportLocator,
+  prepareE2EPage,
   SOCIAL_LAYOUT_PATHS,
   type SocialLayoutPath,
-  assertNoHorizontalOverflow,
-  assertInViewport,
-  assertMinTapTargets,
-  assertNoSeriousAxeViolations,
-  assertMapChromeAxe,
-  assertEntryAxe,
-  expectCreatePageMapPreviewLoaded,
+  socialRouteViewportLocator,
+  test,
 } from "../../fixtures";
 
 async function settleHome(page: Page) {
@@ -52,13 +52,9 @@ async function assertCreateAreaReady(page: Page) {
 }
 
 test.describe("layout regression @ default mobile", () => {
-  test("@smoke home has no overflow and meets tap targets", async ({
-    page,
-  }) => {
+  test("@smoke home has no overflow and meets tap targets", async ({ page }) => {
     await settleHome(page);
-    await assertMinTapTargets(
-      page.getByRole("link", { name: /Join session|Create session/i }),
-    );
+    await assertMinTapTargets(page.getByRole("link", { name: /Join session|Create session/i }));
     await assertLayoutSmoke(page);
   });
 
@@ -76,9 +72,7 @@ test.describe("layout regression @ default mobile", () => {
     await assertLayoutSmoke(page);
   });
 
-  test("@smoke create setup sheet scrolls with pinned confirm", async ({
-    page,
-  }) => {
+  test("@smoke create setup sheet scrolls with pinned confirm", async ({ page }) => {
     await prepareE2EPage(page);
     await page.goto("/create");
     await assertCreateAreaReady(page);
@@ -94,10 +88,7 @@ test.describe("layout regression @ default mobile", () => {
       const button = Array.from(root?.querySelectorAll("button") ?? []).find(
         (el) => el.textContent?.trim() === "Confirm game area",
       );
-      if (
-        !(scroll instanceof HTMLElement) ||
-        !(button instanceof HTMLElement)
-      ) {
+      if (!(scroll instanceof HTMLElement) || !(button instanceof HTMLElement)) {
         return { ok: false as const, reason: "missing nodes" };
       }
 
@@ -165,9 +156,7 @@ test.describe("layout regression @ default mobile", () => {
       await expect(page.locator(".jl-map-bottom-chrome-host")).toBeVisible();
       await expect(page.locator('[data-island="hunt"]')).toBeVisible();
       await expect(page.locator('[data-island="session"]')).toBeVisible();
-      await expect(page.locator('[data-island="history-start"]')).toHaveCount(
-        0,
-      );
+      await expect(page.locator('[data-island="history-start"]')).toHaveCount(0);
       await expect(page.locator('[data-island="history-end"]')).toHaveCount(0);
     });
 
@@ -175,12 +164,8 @@ test.describe("layout regression @ default mobile", () => {
       const host = page.locator(".jl-map-bottom-chrome-host");
       const hunt = page.locator('[data-island="hunt"]');
       const session = page.locator('[data-island="session"]');
-      await expect(
-        hunt.getByRole("button", { name: "Undo last annotation" }),
-      ).toBeVisible();
-      await expect(
-        session.getByRole("button", { name: "Draw on map" }),
-      ).toBeVisible();
+      await expect(hunt.getByRole("button", { name: "Undo last annotation" })).toBeVisible();
+      await expect(session.getByRole("button", { name: "Draw on map" })).toBeVisible();
       await assertInViewport(host);
       await assertInViewport(hunt);
       await assertInViewport(session);
@@ -188,15 +173,10 @@ test.describe("layout regression @ default mobile", () => {
       await expect(page.locator(".jl-map-chrome-bottom-band")).toHaveCount(1);
       await expect(page.getByTestId("map-side-dock-stack")).toHaveCount(1);
       await expect(
-        page
-          .getByTestId("map-side-dock-stack")
-          .locator("[data-island='session']"),
+        page.getByTestId("map-side-dock-stack").locator("[data-island='session']"),
       ).toHaveCount(1);
       // Side-stack slots: 2.75rem = 44px; borders may measure slightly under.
-      await assertMinTapTargets(
-        session.getByRole("button", { name: "Open settings" }),
-        40,
-      );
+      await assertMinTapTargets(session.getByRole("button", { name: "Open settings" }), 40);
     });
 
     // Leaflet markers + closed Mantine Drawer shells trip axe; chrome-only.
@@ -215,12 +195,8 @@ test.describe("layout regression @ default mobile", () => {
   test("@smoke home axe includes color-contrast", async ({ page }) => {
     await prepareE2EPage(page);
     await page.goto("/");
-    await expect(
-      page.getByRole("link", { name: "Create session" }),
-    ).toBeVisible();
-    await expect(
-      page.locator("main.home-poster-viewport, main.home-poster").first(),
-    ).toBeVisible();
+    await expect(page.getByRole("link", { name: "Create session" })).toBeVisible();
+    await expect(page.locator("main.home-poster-viewport, main.home-poster").first()).toBeVisible();
     await assertNoHorizontalOverflow(page);
     await assertEntryAxe(page);
   });
@@ -231,15 +207,13 @@ test.describe("layout regression @ default mobile", () => {
     // Mantine Drawer title is visual text; accessible name is often empty.
     const sheet = page.getByRole("dialog");
     await expect(sheet).toBeVisible();
-    await expect(
-      sheet.getByText("Choose board", { exact: true }),
-    ).toBeVisible();
+    await expect(sheet.getByText("Choose board", { exact: true })).toBeVisible();
   });
 
   for (const path of SOCIAL_LAYOUT_PATHS) {
-    test(`@smoke ${path.slice(
-      1,
-    )} has no overflow and chrome stays in viewport`, async ({ page }) => {
+    test(`@smoke ${path.slice(1)} has no overflow and chrome stays in viewport`, async ({
+      page,
+    }) => {
       await assertSocialLayoutSmoke(page, path);
     });
   }
@@ -260,4 +234,3 @@ test.describe("layout regression @ 320px", () => {
     await assertLayoutSmoke(page);
   });
 });
-

@@ -1,6 +1,6 @@
+import type { PlayerRole } from "../../../domain/session/players/playerRole";
 import type { RoleGates } from "../../../domain/session/players/roleGates";
 import { visibleRoleCodeRoles } from "../../../domain/session/players/roleGates";
-import type { PlayerRole } from "../../../domain/session/players/playerRole";
 
 export type CanOpenMapScreenRoleCodesInput = {
   roleGates: RoleGates | null | undefined;
@@ -10,9 +10,7 @@ export type CanOpenMapScreenRoleCodesInput = {
 };
 
 /** Whether Codes is available on map chrome (dock / rail / observer island). */
-export function canOpenMapScreenRoleCodes(
-  input: CanOpenMapScreenRoleCodesInput,
-): boolean {
+export function canOpenMapScreenRoleCodes(input: CanOpenMapScreenRoleCodesInput): boolean {
   return (
     Boolean(input.myUid) &&
     visibleRoleCodeRoles({

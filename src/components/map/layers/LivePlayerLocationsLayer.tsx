@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import type { PlayerLocationRecord } from "@/domain/session/activity/sessionChat";
-import { clusterNearbyPoints } from "@/domain/session/live/liveMapLocations";
 import { isLiveLocationGone } from "@/domain/session/live/liveLocationFreshness";
+import { clusterNearbyPoints } from "@/domain/session/live/liveMapLocations";
 import { useLiveLocationNowMs } from "@/hooks/map/useLiveLocationNowMs";
 import { buildLiveClusterPaint } from "../helpers/liveClusterPaint";
 import { MapLibrePointMarkers } from "../helpers/MapLibrePointMarkers";
@@ -20,9 +20,7 @@ export function LivePlayerLocationsLayer({
 }: LivePlayerLocationsLayerProps) {
   const nowMs = useLiveLocationNowMs();
   const markers = useMemo((): CircleMarkerProps[] => {
-    const fresh = locations.filter(
-      (location) => !isLiveLocationGone(location.updatedAt, nowMs),
-    );
+    const fresh = locations.filter((location) => !isLiveLocationGone(location.updatedAt, nowMs));
     return clusterNearbyPoints(fresh).map((cluster) => {
       const paint = buildLiveClusterPaint(cluster, role, myUid, nowMs);
       return {

@@ -1,9 +1,9 @@
-import { formatFreshnessAge } from "../../domain/admin/formatAdminFreshness";
-import { resolvePlayerRole, playerRoleLabel } from "../../domain/session/players/playerRole";
-import type { PlayerLocationRecord } from "../../domain/session/activity/sessionChat";
-import type { SessionRecord } from "../../domain/map/annotations";
-import { useFreshnessClock } from "../../hooks/time/useFreshnessClock";
 import { useAdminMonitorFocus } from "../../domain/admin/adminMonitorFocus";
+import { formatFreshnessAge } from "../../domain/admin/formatAdminFreshness";
+import type { SessionRecord } from "../../domain/map/annotations";
+import type { PlayerLocationRecord } from "../../domain/session/activity/sessionChat";
+import { playerRoleLabel, resolvePlayerRole } from "../../domain/session/players/playerRole";
+import { useFreshnessClock } from "../../hooks/time/useFreshnessClock";
 
 interface AdminPlayerRosterProps {
   session: SessionRecord | null;
@@ -14,14 +14,9 @@ function resolveRoleLabel(uid: string, session: SessionRecord): string {
   return playerRoleLabel(resolvePlayerRole(session.memberRoles, uid));
 }
 
-export function AdminPlayerRoster({
-  session,
-  locations,
-}: AdminPlayerRosterProps) {
+export function AdminPlayerRoster({ session, locations }: AdminPlayerRosterProps) {
   const nowMs = useFreshnessClock();
-  const setFocusedPlayerUid = useAdminMonitorFocus(
-    (state) => state.setFocusedPlayerUid,
-  );
+  const setFocusedPlayerUid = useAdminMonitorFocus((state) => state.setFocusedPlayerUid);
 
   if (!session) {
     return null;

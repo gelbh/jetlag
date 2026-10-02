@@ -8,9 +8,7 @@ export function hiderTruthReferenceHint(endGameActive: boolean): string {
   return "Hider answers use the hiding place when the seeker is inside the zone, otherwise the hiding-zone center.";
 }
 
-export function hiderTruthReferenceLoadingLabel(
-  mode: HiderTruthReferenceMode,
-): string {
+export function hiderTruthReferenceLoadingLabel(mode: HiderTruthReferenceMode): string {
   switch (mode) {
     case "endGameFreeze":
       return "Checking end-game location…";
@@ -44,9 +42,7 @@ export function hiderTruthReferenceLabel(mode: HiderTruthReferenceMode): string 
   }
 }
 
-export function hiderTruthReferenceMapTooltip(
-  mode: HiderTruthReferenceMode,
-): string {
+export function hiderTruthReferenceMapTooltip(mode: HiderTruthReferenceMode): string {
   switch (mode) {
     case "endGameFreeze":
       return "Answer reference · End-game location";

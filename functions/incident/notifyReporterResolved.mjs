@@ -1,9 +1,7 @@
 async function sendReporterEmail(reporterUid, deps) {
   try {
     const email =
-      typeof deps.getUserEmail === "function"
-        ? await deps.getUserEmail(reporterUid)
-        : null;
+      typeof deps.getUserEmail === "function" ? await deps.getUserEmail(reporterUid) : null;
     if (email && typeof deps.sendEmail === "function") {
       const homeUrl = deps.homeUrl ?? "https://jetlag.gelbhart.dev/";
       await deps.sendEmail({

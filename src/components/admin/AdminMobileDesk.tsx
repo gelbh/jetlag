@@ -1,11 +1,11 @@
 import {
+  type DeskPreset,
   PANEL_IDS,
   PANEL_LABELS,
-  type DeskPreset,
   type PanelId,
 } from "../../domain/admin/opsDeskLayout";
 import { AdminDeskTopbar } from "./AdminDeskTopbar";
-import { AdminPanelBody, type AdminPanelBodies } from "./AdminPanelBody";
+import { type AdminPanelBodies, AdminPanelBody } from "./AdminPanelBody";
 
 interface AdminMobileDeskProps {
   activePanelId: PanelId;

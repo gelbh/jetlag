@@ -1,6 +1,6 @@
-import { attachPlayArea } from "./attachPlayArea";
-import { EXPANSION_OFF, type BundledGamePresetDefinition } from "./shared";
 import { TOKYO_REGION_PACK_ID } from "../tokyoRegionPack";
+import { attachPlayArea } from "./attachPlayArea";
+import { type BundledGamePresetDefinition, EXPANSION_OFF } from "./shared";
 
 const TOKYO_WARDS = [
   { id: "ward-13101", name: "Chiyoda" },
@@ -28,7 +28,6 @@ const TOKYO_WARDS = [
   { id: "ward-13123", name: "Edogawa" },
 ] as const;
 
-
 export function tokyoPresets(): BundledGamePresetDefinition[] {
   const baseHierarchy = [
     { id: "continent-asia", category: "Continent", name: "Asia" },
@@ -53,8 +52,8 @@ export function tokyoPresets(): BundledGamePresetDefinition[] {
       distanceUnit: "metric",
       advancedSettingsPatch: EXPANSION_OFF,
     }),
-    ...TOKYO_WARDS.map(
-      (ward) => attachPlayArea({
+    ...TOKYO_WARDS.map((ward) =>
+      attachPlayArea({
         id: `bundled:tokyo-${ward.id}`,
         name: ward.name,
         description: `${ward.name} ward with local area subdivisions.`,
@@ -64,7 +63,7 @@ export function tokyoPresets(): BundledGamePresetDefinition[] {
         hierarchy: wardHierarchy,
         distanceUnit: "metric",
         advancedSettingsPatch: EXPANSION_OFF,
-       }),
+      }),
     ),
   ];
 }

@@ -1,13 +1,9 @@
-import { usePremiumEntitlements } from "../hooks/billing/usePremiumEntitlements";
 import { usePermanentAuthUser } from "../hooks/billing/usePermanentAuthUser";
+import { usePremiumEntitlements } from "../hooks/billing/usePremiumEntitlements";
 import { usePlayAreaReady } from "../hooks/session/usePlayAreaReady";
 import { useSessionStore } from "../state/sessionStore";
 
-export type RouteReadinessKind =
-  | "play-area"
-  | "admin-auth"
-  | "premium"
-  | "layout";
+export type RouteReadinessKind = "play-area" | "admin-auth" | "premium" | "layout";
 
 export function routeReadinessKind(pathname: string): RouteReadinessKind {
   switch (pathname) {

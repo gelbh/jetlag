@@ -1,9 +1,9 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
 import type { Map as MapLibreMap } from "maplibre-gl";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
+  attachMapLibreMissingMarkerImageResolver,
   JL_ICON_USER_LOCATION,
   JL_ICON_USER_LOCATION_PLAIN,
-  attachMapLibreMissingMarkerImageResolver,
   registerMapLibreMarkerImages,
   transitModeIconId,
   transitVehicleIconId,
@@ -18,9 +18,7 @@ type MockMap = {
   style: object | undefined;
   isStyleLoaded: () => boolean;
   _removed: boolean;
-  setMissingStyleImageResolver: (
-    resolver: ((id: string) => void | Promise<void>) | null,
-  ) => void;
+  setMissingStyleImageResolver: (resolver: ((id: string) => void | Promise<void>) | null) => void;
   missingResolver: ((id: string) => void | Promise<void>) | null;
 };
 
@@ -95,10 +93,7 @@ describe("mapLibreIconRegistry", () => {
     const map = mock as unknown as MapLibreMap;
 
     await withDelayedMockImage(async () => {
-      await Promise.all([
-        registerMapLibreMarkerImages(map),
-        registerMapLibreMarkerImages(map),
-      ]);
+      await Promise.all([registerMapLibreMarkerImages(map), registerMapLibreMarkerImages(map)]);
     });
 
     expect(mock.hasImage(JL_ICON_USER_LOCATION)).toBe(true);
@@ -112,9 +107,7 @@ describe("mapLibreIconRegistry", () => {
 
   it("skips register when map style is undefined without calling hasImage", async () => {
     const hasImage = vi.fn(() => {
-      throw new TypeError(
-        "Cannot read properties of undefined (reading 'getImage')",
-      );
+      throw new TypeError("Cannot read properties of undefined (reading 'getImage')");
     });
     const addImage = vi.fn();
     const map = {
@@ -132,9 +125,7 @@ describe("mapLibreIconRegistry", () => {
 
   it("skips register when map was removed", async () => {
     const hasImage = vi.fn(() => {
-      throw new TypeError(
-        "Cannot read properties of undefined (reading 'getImage')",
-      );
+      throw new TypeError("Cannot read properties of undefined (reading 'getImage')");
     });
     const addImage = vi.fn();
     const map = {
@@ -155,17 +146,13 @@ describe("mapLibreIconRegistry", () => {
     let styleAvailable = true;
     const hasImage = vi.fn((id: string) => {
       if (!styleAvailable) {
-        throw new TypeError(
-          "Cannot read properties of undefined (reading 'getImage')",
-        );
+        throw new TypeError("Cannot read properties of undefined (reading 'getImage')");
       }
       return images.has(id);
     });
     const addImage = vi.fn((id: string) => {
       if (!styleAvailable) {
-        throw new TypeError(
-          "Cannot read properties of undefined (reading 'addImage')",
-        );
+        throw new TypeError("Cannot read properties of undefined (reading 'addImage')");
       }
       images.add(id);
     });
@@ -190,9 +177,7 @@ describe("mapLibreIconRegistry", () => {
 
   it("swallows hasImage getImage throw when style races mid-register (JETLAG-3H)", async () => {
     const hasImage = vi.fn(() => {
-      throw new TypeError(
-        "Cannot read properties of undefined (reading 'getImage')",
-      );
+      throw new TypeError("Cannot read properties of undefined (reading 'getImage')");
     });
     const addImage = vi.fn();
     const map = {

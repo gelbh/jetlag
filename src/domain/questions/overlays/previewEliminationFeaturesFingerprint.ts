@@ -7,9 +7,7 @@ export function previewEliminationFeaturesFingerprint(
   return features
     .map((feature) => {
       const id =
-        typeof feature.id === "string" || typeof feature.id === "number"
-          ? String(feature.id)
-          : "";
+        typeof feature.id === "string" || typeof feature.id === "number" ? String(feature.id) : "";
       return `${id}:${previewGeometryFingerprint(feature) ?? "null"}`;
     })
     .join("|");

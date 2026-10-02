@@ -35,10 +35,7 @@ describe("useRowInView", () => {
     expect(result.current).toBe(false);
     expect(observe).toHaveBeenCalledWith(node);
 
-    callback(
-      [{ isIntersecting: true } as IntersectionObserverEntry],
-      {} as IntersectionObserver,
-    );
+    callback([{ isIntersecting: true } as IntersectionObserverEntry], {} as IntersectionObserver);
 
     await waitFor(() => {
       expect(result.current).toBe(true);
@@ -54,10 +51,9 @@ describe("useRowInView", () => {
 
   it("rebinds when observeKey changes after mount", async () => {
     const ref = createRef<HTMLElement>();
-    const { rerender } = renderHook(
-      ({ key }: { key: string | null }) => useRowInView(ref, key),
-      { initialProps: { key: null as string | null } },
-    );
+    const { rerender } = renderHook(({ key }: { key: string | null }) => useRowInView(ref, key), {
+      initialProps: { key: null as string | null },
+    });
 
     expect(observe).not.toHaveBeenCalled();
 

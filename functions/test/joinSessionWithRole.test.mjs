@@ -1,12 +1,14 @@
-import test from "node:test";
 import assert from "node:assert/strict";
+import test from "node:test";
+import {
+  CLIENT_UPDATE_REQUIRED,
+  clearClientMinVersionCache,
+} from "../session/clientMinVersion.mjs";
 import {
   JOIN_PASSCODE_REQUIRED,
   JOIN_WRONG_PASSCODE,
   joinSessionWithRoleHandler,
 } from "../session/joinSessionWithRole.mjs";
-import { CLIENT_UPDATE_REQUIRED } from "../session/clientMinVersion.mjs";
-import { clearClientMinVersionCache } from "../session/clientMinVersion.mjs";
 import { newRoleSecret } from "../session/rolePasscodes.mjs";
 
 test.beforeEach(() => {
@@ -104,11 +106,15 @@ test("empty seeker claim returns generated role passcode", async () => {
   };
   const db = buildMockDb({ sessionData, writes });
 
-  const result = await joinSessionWithRoleHandler(db, { uid: "seeker-1" }, {
-    code: "ABCD",
-    role: "seeker",
-    clientVersion: "0.2.0",
-  });
+  const result = await joinSessionWithRoleHandler(
+    db,
+    { uid: "seeker-1" },
+    {
+      code: "ABCD",
+      role: "seeker",
+      clientVersion: "0.2.0",
+    },
+  );
 
   assert.equal(result.sessionId, "sess-1");
   assert.equal(result.becameLeader, true);
@@ -132,12 +138,16 @@ test("second seeker with wrong code throws", async () => {
 
   await assert.rejects(
     () =>
-      joinSessionWithRoleHandler(db, { uid: "seeker-2" }, {
-        code: "ABCD",
-        role: "seeker",
-        rolePasscode: "WRNG",
-        clientVersion: "0.2.0",
-      }),
+      joinSessionWithRoleHandler(
+        db,
+        { uid: "seeker-2" },
+        {
+          code: "ABCD",
+          role: "seeker",
+          rolePasscode: "WRNG",
+          clientVersion: "0.2.0",
+        },
+      ),
     (error) => error instanceof Error && error.message === JOIN_WRONG_PASSCODE,
   );
 });
@@ -155,12 +165,16 @@ test("second seeker with right code joins", async () => {
   };
   const db = buildMockDb({ sessionData, secrets: { seeker: secret }, writes });
 
-  const result = await joinSessionWithRoleHandler(db, { uid: "seeker-2" }, {
-    code: "ABCD",
-    role: "seeker",
-    rolePasscode: secret.code,
-    clientVersion: "0.2.0",
-  });
+  const result = await joinSessionWithRoleHandler(
+    db,
+    { uid: "seeker-2" },
+    {
+      code: "ABCD",
+      role: "seeker",
+      rolePasscode: secret.code,
+      clientVersion: "0.2.0",
+    },
+  );
 
   assert.equal(result.sessionId, "sess-1");
   assert.equal(sessionData.memberRoles["seeker-2"], "seeker");
@@ -184,13 +198,16 @@ test("observer always requires passcode", async () => {
 
   await assert.rejects(
     () =>
-      joinSessionWithRoleHandler(db, { uid: "guest" }, {
-        code: "ABCD",
-        role: "observer",
-        clientVersion: "0.2.0",
-      }),
-    (error) =>
-      error instanceof Error && error.message === JOIN_PASSCODE_REQUIRED,
+      joinSessionWithRoleHandler(
+        db,
+        { uid: "guest" },
+        {
+          code: "ABCD",
+          role: "observer",
+          clientVersion: "0.2.0",
+        },
+      ),
+    (error) => error instanceof Error && error.message === JOIN_PASSCODE_REQUIRED,
   );
 });
 
@@ -209,12 +226,16 @@ test("role switch vacates prior role secret with full replace", async () => {
   };
   const db = buildMockDb({ sessionData, secrets, writes });
 
-  const result = await joinSessionWithRoleHandler(db, { uid: "switcher" }, {
-    code: "ABCD",
-    role: "observer",
-    rolePasscode: observerSecret.code,
-    clientVersion: "0.2.0",
-  });
+  const result = await joinSessionWithRoleHandler(
+    db,
+    { uid: "switcher" },
+    {
+      code: "ABCD",
+      role: "observer",
+      rolePasscode: observerSecret.code,
+      clientVersion: "0.2.0",
+    },
+  );
 
   assert.equal(result.sessionId, "sess-1");
   assert.equal(sessionData.memberRoles.switcher, "observer");
@@ -236,13 +257,17 @@ test("returning member same-role heal skips passcode and remaps leader", async (
   };
   const db = buildMockDb({ sessionData, secrets: { seeker: secret }, writes });
 
-  const result = await joinSessionWithRoleHandler(db, { uid: "new-seeker" }, {
-    code: "ABCD",
-    role: "seeker",
-    clientVersion: "0.2.0",
-    returningMemberUid: "old-seeker",
-    persistedMyUid: "old-seeker",
-  });
+  const result = await joinSessionWithRoleHandler(
+    db,
+    { uid: "new-seeker" },
+    {
+      code: "ABCD",
+      role: "seeker",
+      clientVersion: "0.2.0",
+      returningMemberUid: "old-seeker",
+      persistedMyUid: "old-seeker",
+    },
+  );
 
   assert.equal(result.sessionId, "sess-1");
   assert.equal(result.becameLeader, false);
@@ -279,8 +304,7 @@ test("global client min rejects 0.10.8 and allows 0.11.0", async () => {
           clientVersion: "0.10.8",
         },
       ),
-    (error) =>
-      error instanceof Error && error.message === CLIENT_UPDATE_REQUIRED,
+    (error) => error instanceof Error && error.message === CLIENT_UPDATE_REQUIRED,
   );
 
   const writes = [];

@@ -1,7 +1,7 @@
 import { onDocumentWritten } from "firebase-functions/v2/firestore";
+import { adminDb } from "../handlers/proxyShared.mjs";
 import { getSentryDsnSecret, withSentryEventHandler } from "../lib/sentry.mjs";
 import { handleFinalizeGameResultWrite } from "../session/finalizeGameResult.mjs";
-import { adminDb } from "../handlers/proxyShared.mjs";
 
 const sentryDsnSecret = getSentryDsnSecret();
 

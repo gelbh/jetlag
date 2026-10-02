@@ -1,10 +1,4 @@
-import {
-  Box,
-  SegmentedControl,
-  Stack,
-  Text,
-  TextInput,
-} from "@mantine/core";
+import { Box, SegmentedControl, Stack, Text, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
@@ -18,21 +12,18 @@ import {
 } from "@/components/ui/entry/entryChrome";
 import { filledStyles, grayStyles } from "@/components/ui/entry/entryStyles";
 import {
-  joinSessionFormSchema,
   type JoinSessionFormValues,
+  joinSessionFormSchema,
 } from "@/domain/session/join/joinSessionForm";
-import {
-  SESSION_CODE_INPUT_PLACEHOLDER,
-  normalizeSessionCode,
-} from "@/services/session/sessionCodes";
-import { parseSessionInviteCode } from "@/services/session/sessionInviteUrl";
 import type { PlayerRole } from "@/domain/session/players/playerRole";
 import { playerRoleLabel } from "@/domain/session/players/playerRole";
 import { normalizeRolePasscode } from "@/domain/session/players/rolePasscode";
+import { ANALYTICS_EVENTS, track } from "@/services/core/analytics/analytics";
 import {
-  ANALYTICS_EVENTS,
-  track,
-} from "@/services/core/analytics/analytics";
+  normalizeSessionCode,
+  SESSION_CODE_INPUT_PLACEHOLDER,
+} from "@/services/session/sessionCodes";
+import { parseSessionInviteCode } from "@/services/session/sessionInviteUrl";
 import { useJoinSession } from "./join-session/useJoinSession";
 
 const JOIN_ROLE_OPTIONS: Array<{ value: PlayerRole; label: string }> = [
@@ -79,8 +70,7 @@ export function JoinSession() {
    */
   const [previewEnabledByTyping, setPreviewEnabledByTyping] = useState(false);
   const inviteFromQuery = parseSessionInviteCode(codeFromQuery);
-  const suppressPreview =
-    codeFromQuery == null ? !previewEnabledByTyping : false;
+  const suppressPreview = codeFromQuery == null ? !previewEnabledByTyping : false;
 
   const [prevCodeFromQuery, setPrevCodeFromQuery] = useState(codeFromQuery);
   if (codeFromQuery !== prevCodeFromQuery) {
@@ -122,28 +112,18 @@ export function JoinSession() {
       let message = "Check the join form and try again.";
       if (typeof fieldErrors.code === "string" && fieldErrors.code) {
         message = fieldErrors.code;
-      } else if (
-        typeof fieldErrors.rolePasscode === "string" &&
-        fieldErrors.rolePasscode
-      ) {
+      } else if (typeof fieldErrors.rolePasscode === "string" && fieldErrors.rolePasscode) {
         message = fieldErrors.rolePasscode;
       }
       onJoinValidationError(message);
     },
   );
 
-  const {
-    error: codeErrorRaw,
-    ...codeFieldProps
-  } = form.getInputProps("code");
-  const {
-    error: rolePasscodeErrorRaw,
-    ...rolePasscodeFieldProps
-  } = form.getInputProps("rolePasscode");
-  const codeError =
-    typeof codeErrorRaw === "string" ? codeErrorRaw : null;
-  const rolePasscodeError =
-    typeof rolePasscodeErrorRaw === "string" ? rolePasscodeErrorRaw : null;
+  const { error: codeErrorRaw, ...codeFieldProps } = form.getInputProps("code");
+  const { error: rolePasscodeErrorRaw, ...rolePasscodeFieldProps } =
+    form.getInputProps("rolePasscode");
+  const codeError = typeof codeErrorRaw === "string" ? codeErrorRaw : null;
+  const rolePasscodeError = typeof rolePasscodeErrorRaw === "string" ? rolePasscodeErrorRaw : null;
 
   return (
     <EntryRouteShell title="Join" centerBody>
@@ -164,8 +144,7 @@ export function JoinSession() {
                   {waitingLeaderCopy(pendingRequest.role)}
                 </Text>
                 <Text size="sm" c="var(--color-field-ink-muted)" mt={6}>
-                  Stay on this screen. You&apos;ll join automatically when the
-                  leader accepts.
+                  Stay on this screen. You&apos;ll join automatically when the leader accepts.
                 </Text>
               </Box>
             </InsetGroup>
@@ -194,10 +173,7 @@ export function JoinSession() {
                     {...codeFieldProps}
                     onChange={(event) => {
                       setPreviewEnabledByTyping(true);
-                      form.setFieldValue(
-                        "code",
-                        normalizeSessionCode(event.currentTarget.value),
-                      );
+                      form.setFieldValue("code", normalizeSessionCode(event.currentTarget.value));
                     }}
                     maxLength={4}
                     placeholder={SESSION_CODE_INPUT_PLACEHOLDER}
@@ -223,12 +199,7 @@ export function JoinSession() {
                 </InsetGroup>
                 <FieldError>{codeError}</FieldError>
                 {previewPremium ? (
-                  <Text
-                    size="xs"
-                    fw={590}
-                    c="var(--color-signal)"
-                    px={4}
-                  >
+                  <Text size="xs" fw={590} c="var(--color-signal)" px={4}>
                     Premium · live transit
                   </Text>
                 ) : null}
@@ -258,10 +229,8 @@ export function JoinSession() {
                   aria-label="Player side"
                   styles={{
                     root: {
-                      backgroundColor:
-                        "oklch(from var(--color-field-ink) l c h / 0.08)",
-                      border:
-                        "0.33px solid oklch(from var(--color-field-ink) l c h / 0.12)",
+                      backgroundColor: "oklch(from var(--color-field-ink) l c h / 0.08)",
+                      border: "0.33px solid oklch(from var(--color-field-ink) l c h / 0.12)",
                       borderRadius: 12,
                       padding: 2,
                     },
@@ -271,8 +240,7 @@ export function JoinSession() {
                       fontSize: "0.9375rem",
                     },
                     indicator: {
-                      backgroundColor:
-                        "oklch(from var(--color-field-ink) l c h / 0.16)",
+                      backgroundColor: "oklch(from var(--color-field-ink) l c h / 0.16)",
                       borderRadius: 10,
                     },
                   }}

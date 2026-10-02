@@ -1,49 +1,43 @@
-import type { GameArea } from "@/domain/map/annotations";
-import type { TransitStation } from "@/domain/session/hiding/hidingZone";
-import { gameAreaToBoundingBox } from "@/domain/geometry/gameArea/geometry";
-import { intersectBoundingBoxes } from "@/domain/geometry/gameArea/gameAreaBounds";
 import type { MatchingFeature } from "@/domain/geo/types";
+import { intersectBoundingBoxes } from "@/domain/geometry/gameArea/gameAreaBounds";
+import { gameAreaToBoundingBox } from "@/domain/geometry/gameArea/geometry";
+import type { GameArea } from "@/domain/map/annotations";
 import type { MapViewportBounds } from "@/domain/map/transitViewport";
+import type { TransitStation } from "@/domain/session/hiding/hidingZone";
 import { queryOverpass } from "../../core/overpass/overpassClient";
-import {
-  buildTransitStopOverpassQuery,
-  overpassTransitStopsToMatchingFeatures,
-  parseOverpassTransitStops,
-  type OverpassTransitStopElement,
-} from "../../transit/transitStops";
-import { inferTransitMetroId } from "../../transit/transitCatalog";
 import {
   filterGtfsStopsForGameArea,
   gtfsStopsToMatchingFeatures,
   loadGtfsBundle,
 } from "../../transit/gtfsRouteGraph";
-import { buildStreetPathQuery, matchingSearchBoundingBox } from "./query";
+import { inferTransitMetroId } from "../../transit/transitCatalog";
+import {
+  buildTransitStopOverpassQuery,
+  type OverpassTransitStopElement,
+  overpassTransitStopsToMatchingFeatures,
+  parseOverpassTransitStops,
+} from "../../transit/transitStops";
 import { parseMatchingFeatures } from "./parse";
+import { buildStreetPathQuery, matchingSearchBoundingBox } from "./query";
 import type { OverpassElement } from "./types";
 
 function buildStationQuery(gameArea: GameArea): string {
-  return buildTransitStopOverpassQuery(
-    matchingSearchBoundingBox(gameArea),
-  );
+  return buildTransitStopOverpassQuery(matchingSearchBoundingBox(gameArea));
 }
 
 function overpassStopsToMatchingFeatures(
   elements: readonly OverpassTransitStopElement[],
   gameArea: GameArea,
 ): MatchingFeature[] {
-  return overpassTransitStopsToMatchingFeatures(elements, gameArea).map(
-    (station) => ({
-      id: station.id,
-      name: station.name,
-      point: station.point,
-      inPlayArea: true,
-    }),
-  );
+  return overpassTransitStopsToMatchingFeatures(elements, gameArea).map((station) => ({
+    id: station.id,
+    name: station.name,
+    point: station.point,
+    inPlayArea: true,
+  }));
 }
 
-export async function fetchStationFeaturesInArea(
-  gameArea: GameArea,
-): Promise<MatchingFeature[]> {
+export async function fetchStationFeaturesInArea(gameArea: GameArea): Promise<MatchingFeature[]> {
   const payload = await queryOverpass<{ elements: OverpassTransitStopElement[] }>(
     buildStationQuery(gameArea),
   );

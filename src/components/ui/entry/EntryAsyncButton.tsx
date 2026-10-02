@@ -1,12 +1,12 @@
+import { Button, type ButtonProps } from "@mantine/core";
 import {
-  useEffect,
-  useId,
-  useRef,
   type ComponentPropsWithoutRef,
   type MouseEventHandler,
   type ReactNode,
+  useEffect,
+  useId,
+  useRef,
 } from "react";
-import { Button, type ButtonProps } from "@mantine/core";
 import { LoadingSpinnerRing } from "@/components/ui/feedback/LoadingSpinner";
 
 export type EntryAsyncButtonProps = Omit<
@@ -38,8 +38,7 @@ export function EntryAsyncButton({
   const buttonRef = useRef<HTMLButtonElement>(null);
   const label = busy ? busyLabel : idleLabel;
   const statusText = busy
-    ? (statusMessage ??
-      (typeof busyLabel === "string" ? busyLabel : "Working…"))
+    ? (statusMessage ?? (typeof busyLabel === "string" ? busyLabel : "Working…"))
     : "";
   const gated = unavailable && !busy;
   const blockActivation = busy || unavailable;

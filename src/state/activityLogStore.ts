@@ -23,10 +23,7 @@ export const useActivityLogStore = create<ActivityLogState>()(
         set((state) => ({
           eventsBySessionId: {
             ...state.eventsBySessionId,
-            [event.sessionId]: [
-              ...(state.eventsBySessionId[event.sessionId] ?? []),
-              event,
-            ],
+            [event.sessionId]: [...(state.eventsBySessionId[event.sessionId] ?? []), event],
           },
         }));
         return true;

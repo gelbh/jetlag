@@ -7,12 +7,7 @@ export type ChatChannel = "social" | "game";
 
 export type GameMessageKind = "question" | "answer" | "system";
 
-export type PendingQuestionStatus =
-  | "walking"
-  | "pending"
-  | "answered"
-  | "resolved"
-  | "cancelled";
+export type PendingQuestionStatus = "walking" | "pending" | "answered" | "resolved" | "cancelled";
 
 export interface GameReplyOption {
   id: string;

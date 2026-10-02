@@ -56,9 +56,7 @@ export type SessionOpsToolArgs = {
   [K in SessionOpsToolId]: z.infer<(typeof sessionOpsToolArgSchemas)[K]>;
 };
 
-export interface SessionOpsToolDefinition<
-  Id extends SessionOpsToolId = SessionOpsToolId,
-> {
+export interface SessionOpsToolDefinition<Id extends SessionOpsToolId = SessionOpsToolId> {
   id: Id;
   /** When true, executor requires `hostConfirmed` before mutating. */
   destructive: boolean;
@@ -162,15 +160,10 @@ export const SESSION_OPS_TOOL_JSON_SCHEMAS: Record<
 };
 
 export function isSessionOpsToolId(value: unknown): value is SessionOpsToolId {
-  return (
-    typeof value === "string" &&
-    (SESSION_OPS_TOOL_IDS as readonly string[]).includes(value)
-  );
+  return typeof value === "string" && (SESSION_OPS_TOOL_IDS as readonly string[]).includes(value);
 }
 
-export function getSessionOpsTool(
-  id: SessionOpsToolId,
-): SessionOpsToolDefinition {
+export function getSessionOpsTool(id: SessionOpsToolId): SessionOpsToolDefinition {
   return SESSION_OPS_TOOLS[id];
 }
 

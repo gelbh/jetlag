@@ -1,18 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
-  answerSummaryFromPendingReply,
-  emitGameEndedActivity,
-} from "./emitSessionActivity";
-import {
   PHOTO_CANNOT_ANSWER_LABEL,
   PHOTO_REPLY_OPTIONS,
   PHOTO_SENT_EXTERNALLY_LABEL,
 } from "../../domain/questions/photoQuestions";
+import { answerSummaryFromPendingReply, emitGameEndedActivity } from "./emitSessionActivity";
 
 const trackSessionEnded = vi.hoisted(() => vi.fn());
-const appendSessionActivityEvent = vi.hoisted(() =>
-  vi.fn(async () => ({ wrote: true })),
-);
+const appendSessionActivityEvent = vi.hoisted(() => vi.fn(async () => ({ wrote: true })));
 
 vi.mock("../core/analytics/analytics", () => ({
   trackSessionEnded,
@@ -24,21 +19,15 @@ vi.mock("./sessionActivityLog", () => ({
 
 describe("answerSummaryFromPendingReply", () => {
   it("maps sent_externally object to Mark sent label", () => {
-    expect(
-      answerSummaryFromPendingReply(
-        { kind: "sent_externally" },
-        PHOTO_REPLY_OPTIONS,
-      ),
-    ).toBe(PHOTO_SENT_EXTERNALLY_LABEL);
+    expect(answerSummaryFromPendingReply({ kind: "sent_externally" }, PHOTO_REPLY_OPTIONS)).toBe(
+      PHOTO_SENT_EXTERNALLY_LABEL,
+    );
   });
 
   it("maps cannot_answer object to cannot-answer label", () => {
-    expect(
-      answerSummaryFromPendingReply(
-        { kind: "cannot_answer" },
-        PHOTO_REPLY_OPTIONS,
-      ),
-    ).toBe(PHOTO_CANNOT_ANSWER_LABEL);
+    expect(answerSummaryFromPendingReply({ kind: "cannot_answer" }, PHOTO_REPLY_OPTIONS)).toBe(
+      PHOTO_CANNOT_ANSWER_LABEL,
+    );
   });
 
   it("keeps Photo received for uploaded photo", () => {
@@ -51,9 +40,9 @@ describe("answerSummaryFromPendingReply", () => {
   });
 
   it("does not stringify plain objects as [object Object]", () => {
-    expect(
-      answerSummaryFromPendingReply({ kind: "sent_externally" }, []),
-    ).not.toBe("[object Object]");
+    expect(answerSummaryFromPendingReply({ kind: "sent_externally" }, [])).not.toBe(
+      "[object Object]",
+    );
   });
 });
 

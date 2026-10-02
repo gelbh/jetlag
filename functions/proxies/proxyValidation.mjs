@@ -51,19 +51,10 @@ export function parseTransitlandFeedQuery(query) {
   return { ok: true, value: result.data };
 }
 
-const overpassQuerySchema = z
-  .string()
-  .trim()
-  .min(1)
-  .max(20_000);
+const overpassQuerySchema = z.string().trim().min(1).max(20_000);
 
 export function parseOverpassQueryBody(body) {
-  const query =
-    typeof body?.query === "string"
-      ? body.query
-      : typeof body === "string"
-        ? body
-        : "";
+  const query = typeof body?.query === "string" ? body.query : typeof body === "string" ? body : "";
 
   const result = overpassQuerySchema.safeParse(query);
   if (!result.success) {

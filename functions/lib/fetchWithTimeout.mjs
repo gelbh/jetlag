@@ -43,12 +43,7 @@ export async function fetchWithTimeout(url, init, timeoutMs) {
   }
 }
 
-export async function fetchWithTimeoutAndRetry(
-  url,
-  init,
-  timeoutMs,
-  retries = 1,
-) {
+export async function fetchWithTimeoutAndRetry(url, init, timeoutMs, retries = 1) {
   let lastError = null;
 
   for (let attempt = 0; attempt <= retries; attempt += 1) {

@@ -104,13 +104,10 @@ function readRawClientEnv(): Record<string, unknown> {
     VITE_FIREBASE_AUTH_DOMAIN: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
     VITE_FIREBASE_PROJECT_ID: import.meta.env.VITE_FIREBASE_PROJECT_ID,
     VITE_FIREBASE_STORAGE_BUCKET: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-    VITE_FIREBASE_MESSAGING_SENDER_ID:
-      import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+    VITE_FIREBASE_MESSAGING_SENDER_ID: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
     VITE_FIREBASE_APP_ID: import.meta.env.VITE_FIREBASE_APP_ID,
-    VITE_FIREBASE_APP_CHECK_SITE_KEY:
-      import.meta.env.VITE_FIREBASE_APP_CHECK_SITE_KEY,
-    VITE_FIREBASE_APP_CHECK_DEBUG_TOKEN:
-      import.meta.env.VITE_FIREBASE_APP_CHECK_DEBUG_TOKEN,
+    VITE_FIREBASE_APP_CHECK_SITE_KEY: import.meta.env.VITE_FIREBASE_APP_CHECK_SITE_KEY,
+    VITE_FIREBASE_APP_CHECK_DEBUG_TOKEN: import.meta.env.VITE_FIREBASE_APP_CHECK_DEBUG_TOKEN,
     VITE_OVERPASS_PROXY_URL: import.meta.env.VITE_OVERPASS_PROXY_URL,
     VITE_TRANSIT_PROXY_URL: import.meta.env.VITE_TRANSIT_PROXY_URL,
     VITE_TRANSITLAND_PROXY_URL: import.meta.env.VITE_TRANSITLAND_PROXY_URL,
@@ -134,14 +131,10 @@ function readRawClientEnv(): Record<string, unknown> {
   return raw;
 }
 
-export function parseClientEnv(
-  raw: Record<string, unknown> = readRawClientEnv(),
-): ClientEnv {
+export function parseClientEnv(raw: Record<string, unknown> = readRawClientEnv()): ClientEnv {
   const result = clientEnvSchema.safeParse(raw);
   if (!result.success) {
-    const message = result.error.issues
-      .map((issue) => issue.message)
-      .join("; ");
+    const message = result.error.issues.map((issue) => issue.message).join("; ");
     throw new Error(`Invalid client environment: ${message}`);
   }
 
@@ -179,8 +172,6 @@ export function readFirebaseConfigFromEnv(
   return Object.values(config).every((value) => value.length > 0) ? config : null;
 }
 
-export function isFirebaseConfiguredFromEnv(
-  env: ClientEnv = getClientEnv(),
-): boolean {
+export function isFirebaseConfiguredFromEnv(env: ClientEnv = getClientEnv()): boolean {
   return readFirebaseConfigFromEnv(env) !== null;
 }

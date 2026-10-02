@@ -1,28 +1,25 @@
 import { Box, Button, Group, Paper, Stack, Text, Title } from "@mantine/core";
-import { MapView } from "../../map/chrome/MapView";
-import { FramingPreviewLayers } from "../../map/layers/FramingPreviewLayers";
-import { GameAreaMask } from "../../map/layers/GameAreaMask";
-import { useScrollLock } from "@/hooks/layout/useScrollLock";
-import type { MapStyle } from "@/domain/map/mapBasemaps";
+import { filledStyles, grayStyles } from "@/components/ui/entry/entryStyles";
+import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
 import {
   boundingBoxHasMinimumSpan,
   gameAreaToBoundingBox,
 } from "@/domain/geometry/gameArea/geometry";
-import type {
-  FramingMode,
-  GameAreaFramingResult,
-} from "@/hooks/session/useGameAreaFraming";
-import type { MapBounds, MapBoundsExpression } from "@/domain/map/mapBounds";
-import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
 import type { GameArea } from "@/domain/map/annotations";
+import type { MapStyle } from "@/domain/map/mapBasemaps";
+import type { MapBounds, MapBoundsExpression } from "@/domain/map/mapBounds";
+import { useScrollLock } from "@/hooks/layout/useScrollLock";
+import type { FramingMode, GameAreaFramingResult } from "@/hooks/session/useGameAreaFraming";
+import { JETLAG_MODAL_Z_INDEX } from "@/theme/theme";
+import { MapView } from "../../map/chrome/MapView";
+import { FramingPreviewLayers } from "../../map/layers/FramingPreviewLayers";
+import { GameAreaMask } from "../../map/layers/GameAreaMask";
 import {
   FramingModeSegmentControl,
   GameAreaFramingPolygonActions,
   GameAreaFramingStats,
 } from "./GameAreaFramingControls";
 import { framingModeHint } from "./gameAreaFramingUi";
-import { filledStyles, grayStyles } from "@/components/ui/entry/entryStyles";
-import { JETLAG_MODAL_Z_INDEX } from "@/theme/theme";
 
 export interface GameAreaFramingController {
   framingMode: FramingMode;
@@ -81,14 +78,11 @@ export function GameAreaFramingModal({
     ? framing.previewGameArea
     : (referenceGameArea ?? framing.previewGameArea);
   const effectiveFocusBounds =
-    !manualFramingActive && referenceFocusBounds
-      ? referenceFocusBounds
-      : framing.focusBounds;
+    !manualFramingActive && referenceFocusBounds ? referenceFocusBounds : framing.focusBounds;
   const hasValidDraft = manualFramingActive
     ? framing.hasValidDraft
     : Boolean(
-        effectiveGameArea &&
-        boundingBoxHasMinimumSpan(gameAreaToBoundingBox(effectiveGameArea)),
+        effectiveGameArea && boundingBoxHasMinimumSpan(gameAreaToBoundingBox(effectiveGameArea)),
       );
 
   const handleConfirm = () => {
@@ -104,9 +98,7 @@ export function GameAreaFramingModal({
   };
 
   const maskGameArea =
-    framing.framingMode === "circle" && !effectiveGameArea
-      ? null
-      : effectiveGameArea;
+    framing.framingMode === "circle" && !effectiveGameArea ? null : effectiveGameArea;
 
   return (
     <Box

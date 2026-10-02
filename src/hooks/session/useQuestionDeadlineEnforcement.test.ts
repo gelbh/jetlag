@@ -9,9 +9,7 @@ vi.mock("../../services/firestore/firestoreSessionExtras", () => ({
 
 import { updatePendingQuestion } from "../../services/firestore/firestoreSessionExtras";
 
-function pendingQuestion(
-  overrides: Partial<PendingQuestionRecord> = {},
-): PendingQuestionRecord {
+function pendingQuestion(overrides: Partial<PendingQuestionRecord> = {}): PendingQuestionRecord {
   return {
     id: "pq-1",
     sessionId: "session-1",
@@ -294,5 +292,4 @@ describe("useQuestionDeadlineEnforcement", () => {
     });
     expect(pauseTimer).not.toHaveBeenCalled();
   });
-
 });

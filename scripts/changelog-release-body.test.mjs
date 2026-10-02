@@ -48,10 +48,7 @@ describe("extractChangelogReleaseBody", () => {
   });
 
   it("returns null when the version is missing", () => {
-    assert.equal(
-      extractChangelogReleaseBody("## 0.1.0 - 2026-01-01\n\n- a\n", "9.9.9"),
-      null,
-    );
+    assert.equal(extractChangelogReleaseBody("## 0.1.0 - 2026-01-01\n\n- a\n", "9.9.9"), null);
   });
 
   it("treats regex metacharacters in version as literals", () => {

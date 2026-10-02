@@ -26,8 +26,7 @@ function detectEmbedMode(): boolean {
   if (typeof window === "undefined" || !isFramed()) {
     return false;
   }
-  const requested =
-    new URLSearchParams(window.location.search).get(EMBED_PARAM) === "1";
+  const requested = new URLSearchParams(window.location.search).get(EMBED_PARAM) === "1";
   try {
     // Remember for in-frame reloads that drop the query string.
     if (requested) {

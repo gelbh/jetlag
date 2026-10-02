@@ -1,10 +1,10 @@
-import { forwardRef, type CSSProperties, type ReactNode } from "react";
 import { Box, Paper } from "@mantine/core";
-import { cn } from "@/lib/cn";
-import { mapChromeSurfaceStyles } from "@/components/ui/entry/entryChrome";
-import { OverlayHost } from "./OverlayHost";
-import { MapSideDockStack } from "./MapSideDockStack";
+import { type CSSProperties, forwardRef, type ReactNode } from "react";
 import { ToolDeck } from "@/components/tools/ToolDeck";
+import { mapChromeSurfaceStyles } from "@/components/ui/entry/entryChrome";
+import { cn } from "@/lib/cn";
+import { MapSideDockStack } from "./MapSideDockStack";
+import { OverlayHost } from "./OverlayHost";
 
 /** Seeker multi-tool Hunt (`tools`) vs hider 1–2 chip content-sized island (`sparse`). */
 export type MapBottomChromeHuntDensity = "tools" | "sparse";
@@ -27,11 +27,10 @@ export interface MapBottomChromeProps {
   style?: CSSProperties;
 }
 
-const ISLAND_ARIA: Record<Exclude<MapBottomChromeIslandName, "hunt">, string> =
-  {
-    session: "Session tools",
-    "map-controls": "Map controls",
-  };
+const ISLAND_ARIA: Record<Exclude<MapBottomChromeIslandName, "hunt">, string> = {
+  session: "Session tools",
+  "map-controls": "Map controls",
+};
 
 function SideIsland({
   name,
@@ -90,8 +89,7 @@ export const MapBottomChrome = forwardRef<HTMLDivElement, MapBottomChromeProps>(
     const askFirstActive = askFirst;
     const chromeClassName = cn(
       "jl-map-bottom-chrome jl-tool-dock relative block w-full pointer-events-none bg-transparent",
-      !askFirstActive &&
-        "min-h-[calc(var(--dock-island-height)+0.75rem)]",
+      !askFirstActive && "min-h-[calc(var(--dock-island-height)+0.75rem)]",
       askFirstActive && "min-h-0",
       "px-1",
       inactive &&
@@ -127,12 +125,8 @@ export const MapBottomChrome = forwardRef<HTMLDivElement, MapBottomChromeProps>(
           </div>
           {askFirstActive ? null : (
             <MapSideDockStack>
-              {session ? (
-                <SideIsland name="session">{session}</SideIsland>
-              ) : null}
-              {mapControls ? (
-                <SideIsland name="map-controls">{mapControls}</SideIsland>
-              ) : null}
+              {session ? <SideIsland name="session">{session}</SideIsland> : null}
+              {mapControls ? <SideIsland name="map-controls">{mapControls}</SideIsland> : null}
             </MapSideDockStack>
           )}
         </Box>

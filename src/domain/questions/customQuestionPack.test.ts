@@ -25,17 +25,13 @@ describe("customQuestionPack", () => {
   });
 
   it("resolves pack matching categories", () => {
-    const category = resolveCustomPackMatchingCategory(
-      `${CUSTOM_QUESTION_PACK_PREFIX}major_city`,
-    );
+    const category = resolveCustomPackMatchingCategory(`${CUSTOM_QUESTION_PACK_PREFIX}major_city`);
     expect(category?.label).toBe("Major city");
     expect(resolveCustomPackMatchingCategory("museum")).toBeNull();
   });
 
   it("resolves pack measuring options", () => {
-    const option = resolveCustomPackMeasuringOption(
-      `${CUSTOM_QUESTION_PACK_PREFIX}seven_eleven`,
-    );
+    const option = resolveCustomPackMeasuringOption(`${CUSTOM_QUESTION_PACK_PREFIX}seven_eleven`);
     expect(option?.label).toBe("7-Eleven");
     expect(resolveCustomPackMeasuringOption("body_of_water")).toBeNull();
   });

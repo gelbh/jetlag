@@ -39,10 +39,7 @@ describe("useReachability", () => {
   });
 
   it("marks unreachable after two consecutive probe failures", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn().mockRejectedValue(new TypeError("Failed to fetch")),
-    );
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new TypeError("Failed to fetch")));
 
     const { result } = renderHook(() => useReachability(true));
 

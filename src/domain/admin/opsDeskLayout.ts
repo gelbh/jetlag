@@ -1,11 +1,4 @@
-export const PANEL_IDS = [
-  "sessions",
-  "monitor",
-  "inbox",
-  "detail",
-  "actions",
-  "settings",
-] as const;
+export const PANEL_IDS = ["sessions", "monitor", "inbox", "detail", "actions", "settings"] as const;
 
 export type PanelId = (typeof PANEL_IDS)[number];
 
@@ -74,11 +67,7 @@ export type DeskPreset = {
 export const CUSTOM_PRESET_ID = "custom";
 
 /** Former stock preset ids — invalid after sanitize; migrate source only. */
-export const FORMER_BUILTIN_IDS = [
-  "session-watch",
-  "incident-triage",
-  "ops-overview",
-] as const;
+export const FORMER_BUILTIN_IDS = ["session-watch", "incident-triage", "ops-overview"] as const;
 
 export type FormerBuiltinId = (typeof FORMER_BUILTIN_IDS)[number];
 
@@ -96,10 +85,7 @@ export function isPanelId(value: unknown): value is PanelId {
 }
 
 export function isMonitorPanelId(value: unknown): value is MonitorPanelId {
-  return (
-    typeof value === "string" &&
-    (MONITOR_PANEL_IDS as readonly string[]).includes(value)
-  );
+  return typeof value === "string" && (MONITOR_PANEL_IDS as readonly string[]).includes(value);
 }
 
 export function cloneMonitorLayout(layout: MonitorLayout): MonitorLayout {
@@ -344,10 +330,7 @@ export function setMonitorCollapsed(
   return next;
 }
 
-export function hideMonitorPanel(
-  layout: MonitorLayout,
-  panelId: MonitorPanelId,
-): MonitorLayout {
+export function hideMonitorPanel(layout: MonitorLayout, panelId: MonitorPanelId): MonitorLayout {
   const next = cloneMonitorLayout(layout);
   const stackIndex = next.stacks.findIndex((s) => s.panelIds.includes(panelId));
   if (stackIndex < 0) {
@@ -614,11 +597,7 @@ export function unstackPanelToCell(
   return clampLayoutToCols(next);
 }
 
-export function setPinned(
-  layout: DeskLayout,
-  stackId: StackId,
-  pinned: boolean,
-): DeskLayout {
+export function setPinned(layout: DeskLayout, stackId: StackId, pinned: boolean): DeskLayout {
   const found = findStack(layout, stackId);
   if (!found) return layout;
   const next = cloneLayout(layout);
@@ -626,11 +605,7 @@ export function setPinned(
   return next;
 }
 
-export function setCollapsed(
-  layout: DeskLayout,
-  stackId: StackId,
-  collapsed: boolean,
-): DeskLayout {
+export function setCollapsed(layout: DeskLayout, stackId: StackId, collapsed: boolean): DeskLayout {
   const found = findStack(layout, stackId);
   if (!found) return layout;
   const next = cloneLayout(layout);
@@ -751,10 +726,7 @@ function makeStack(
   };
 }
 
-function layoutFromVisible(
-  stacks: GridStack[],
-  hidden: PanelId[] = [],
-): DeskLayout {
+function layoutFromVisible(stacks: GridStack[], hidden: PanelId[] = []): DeskLayout {
   return {
     cols: DEFAULT_COLS,
     rowHeight: DEFAULT_ROW_HEIGHT,
@@ -765,10 +737,7 @@ function layoutFromVisible(
 
 /** Former Session watch geometry — Scratch cold-start / wipe default. */
 const SESSION_WATCH_LAYOUT: DeskLayout = layoutFromVisible(
-  [
-    makeStack("sessions", "sessions", 0, 0, 14, 10),
-    makeStack("monitor", "monitor", 14, 0, 10, 10),
-  ],
+  [makeStack("sessions", "sessions", 0, 0, 14, 10), makeStack("monitor", "monitor", 14, 0, 10, 10)],
   ["inbox", "detail", "actions", "settings"],
 );
 
@@ -815,11 +784,7 @@ export function presetLabel(id: string, userPresets: DeskPreset[]): string {
 }
 
 /** Move `id` by `delta` steps (−1 earlier, +1 later). Null if no-op. */
-export function movePresetOrder(
-  orderedIds: string[],
-  id: string,
-  delta: number,
-): string[] | null {
+export function movePresetOrder(orderedIds: string[], id: string, delta: number): string[] | null {
   if (!Number.isInteger(delta)) return null;
   const index = orderedIds.indexOf(id);
   if (index < 0) return null;
@@ -879,7 +844,12 @@ export function upsertUserPreset(
 
   const id =
     options?.overwriteId ??
-    `user-${trimmed.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "layout"}`;
+    `user-${
+      trimmed
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-|-$/g, "") || "layout"
+    }`;
 
   const preset: DeskPreset = {
     id,
@@ -892,10 +862,7 @@ export function upsertUserPreset(
   return { ok: true, presets: [...without, preset], preset };
 }
 
-export function deleteUserPreset(
-  userPresets: DeskPreset[],
-  presetId: string,
-): DeskPreset[] {
+export function deleteUserPreset(userPresets: DeskPreset[], presetId: string): DeskPreset[] {
   return userPresets.filter((p) => p.id !== presetId);
 }
 
@@ -972,8 +939,7 @@ export function migrateLayoutToCols(
   const fromCols = layout.cols > 0 ? layout.cols : DEFAULT_COLS;
   const next = cloneLayout(layout);
   next.cols = targetCols;
-  next.rowHeight =
-    layout.rowHeight > 0 ? layout.rowHeight : DEFAULT_ROW_HEIGHT;
+  next.rowHeight = layout.rowHeight > 0 ? layout.rowHeight : DEFAULT_ROW_HEIGHT;
   if (fromCols !== targetCols) {
     next.rowHeight = DEFAULT_ROW_HEIGHT;
     const scale = targetCols / fromCols;

@@ -1,11 +1,8 @@
-import { useMemo, useState } from "react";
 import { Box, Container, Group, SegmentedControl, Stack, Text } from "@mantine/core";
+import { useMemo, useState } from "react";
 import { RequireUsername } from "@/components/auth/RequireUsername";
-import {
-  InsetGroup,
-  SectionLabel,
-} from "@/components/ui/entry/entryChrome";
 import { EntryHeader } from "@/components/ui/entry/EntryHeader";
+import { InsetGroup, SectionLabel } from "@/components/ui/entry/entryChrome";
 import { EntryScreenLayout } from "@/components/ui/layout/EntryScreenLayout";
 import type { LeaderboardRole } from "@/domain/game/leaderboard";
 import { playerRoleLabel } from "@/domain/session/players/playerRole";
@@ -22,10 +19,7 @@ type MockStatCell = { label: string; value: string };
 
 function isStatsMockEnabled(): boolean {
   try {
-    return (
-      import.meta.env.DEV &&
-      localStorage.getItem(STATS_MOCK_STORAGE_KEY) === "1"
-    );
+    return import.meta.env.DEV && localStorage.getItem(STATS_MOCK_STORAGE_KEY) === "1";
   } catch {
     return false;
   }
@@ -76,18 +70,11 @@ function StatsBody({ roleTab }: { roleTab: LeaderboardRole }) {
 
   return (
     <Stack gap={14}>
-      <SectionLabel>
-        {`${playerRoleLabel(roleTab)} · All sizes`}
-      </SectionLabel>
+      <SectionLabel>{`${playerRoleLabel(roleTab)} · All sizes`}</SectionLabel>
 
       {cells ? (
         <InsetGroup>
-          <Box
-            role="region"
-            aria-label={`${playerRoleLabel(roleTab)} stats`}
-            px="sm"
-            py="md"
-          >
+          <Box role="region" aria-label={`${playerRoleLabel(roleTab)} stats`} px="sm" py="md">
             <Group gap={0} wrap="wrap">
               {cells.map((cell, index) => (
                 <Stack
@@ -125,12 +112,7 @@ function StatsBody({ roleTab }: { roleTab: LeaderboardRole }) {
         </InsetGroup>
       ) : (
         <InsetGroup>
-          <Box
-            role="region"
-            aria-label={`${playerRoleLabel(roleTab)} stats`}
-            px="md"
-            py="xl"
-          >
+          <Box role="region" aria-label={`${playerRoleLabel(roleTab)} stats`} px="md" py="xl">
             <Text
               size="sm"
               ta="center"
@@ -138,8 +120,8 @@ function StatsBody({ roleTab }: { roleTab: LeaderboardRole }) {
               style={{ lineHeight: 1.4, textWrap: "pretty" }}
             >
               No completed rounds yet. Finish a synced session as{" "}
-              {playerRoleLabel(roleTab).toLowerCase()} to see distance, phase
-              time, and question stats here.
+              {playerRoleLabel(roleTab).toLowerCase()} to see distance, phase time, and question
+              stats here.
             </Text>
           </Box>
         </InsetGroup>
@@ -161,13 +143,7 @@ export function Stats() {
   return (
     <EntryScreenLayout justify="start" skin="plain" flush>
       <EntryHeader title="Stats" />
-      <Container
-        size="xs"
-        w="100%"
-        px="md"
-        maw={PHONE_SHELL_MAX_WIDTH_PX}
-        py="lg"
-      >
+      <Container size="xs" w="100%" px="md" maw={PHONE_SHELL_MAX_WIDTH_PX} py="lg">
         <Stack gap={18}>
           <Text
             size="sm"

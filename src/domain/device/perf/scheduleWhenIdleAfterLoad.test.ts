@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
 import {
   IDLE_AFTER_LOAD_TIMEOUT_MS,
-  scheduleWhenIdleAfterLoad,
   type IdleAfterLoadHost,
+  scheduleWhenIdleAfterLoad,
 } from "./scheduleWhenIdleAfterLoad";
 
 function createHost(options: { readyState: string; idle?: boolean }) {
@@ -76,20 +76,17 @@ describe("scheduleWhenIdleAfterLoad", () => {
 
     scheduleWhenIdleAfterLoad(callback, { host: fake.host });
 
-    expect(fake.host.addEventListener).toHaveBeenCalledWith(
-      "load",
-      expect.any(Function),
-      { once: true },
-    );
+    expect(fake.host.addEventListener).toHaveBeenCalledWith("load", expect.any(Function), {
+      once: true,
+    });
     fake.flushIdle();
     expect(callback).not.toHaveBeenCalled();
 
     fake.fireLoad();
     expect(callback).not.toHaveBeenCalled();
-    expect(fake.host.requestIdleCallback).toHaveBeenCalledWith(
-      expect.any(Function),
-      { timeout: IDLE_AFTER_LOAD_TIMEOUT_MS },
-    );
+    expect(fake.host.requestIdleCallback).toHaveBeenCalledWith(expect.any(Function), {
+      timeout: IDLE_AFTER_LOAD_TIMEOUT_MS,
+    });
 
     fake.flushIdle();
     fake.flushIdle();
@@ -103,10 +100,9 @@ describe("scheduleWhenIdleAfterLoad", () => {
     scheduleWhenIdleAfterLoad(callback, { host: fake.host, timeoutMs: 500 });
 
     expect(fake.host.addEventListener).not.toHaveBeenCalled();
-    expect(fake.host.requestIdleCallback).toHaveBeenCalledWith(
-      expect.any(Function),
-      { timeout: 500 },
-    );
+    expect(fake.host.requestIdleCallback).toHaveBeenCalledWith(expect.any(Function), {
+      timeout: 500,
+    });
     fake.flushIdle();
     expect(callback).toHaveBeenCalledTimes(1);
   });

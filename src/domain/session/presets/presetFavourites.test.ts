@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { createSessionDraftToGamePreset } from "./gamePreset";
 import { defaultAdvancedSessionSettings } from "../tools/advancedSessionSettings";
+import { createSessionDraftToGamePreset } from "./gamePreset";
 import {
   buildFavouritePresetSelectOptions,
   isFavouritePresetId,
@@ -42,30 +42,27 @@ describe("presetFavourites", () => {
 
   it("resolves favourites in stored order and skips missing ids", () => {
     expect(
-      resolveFavouritePresets([presetA, presetB, presetC], [
-        presetC.id,
-        "missing",
-        presetA.id,
-      ]).map((preset) => preset.name),
+      resolveFavouritePresets([presetA, presetB, presetC], [presetC.id, "missing", presetA.id]).map(
+        (preset) => preset.name,
+      ),
     ).toEqual(["Charlie", "Alpha"]);
   });
 
   it("sorts favourites before the rest", () => {
     expect(
-      sortPresetsWithFavouritesFirst([presetA, presetB, presetC], [
-        presetC.id,
-        presetA.id,
-      ]).map((preset) => preset.name),
+      sortPresetsWithFavouritesFirst([presetA, presetB, presetC], [presetC.id, presetA.id]).map(
+        (preset) => preset.name,
+      ),
     ).toEqual(["Alpha", "Charlie", "Bravo"]);
   });
 
   it("builds select options from favourite order", () => {
-    expect(
-      buildFavouritePresetSelectOptions([presetA, presetB], [presetB.id, presetA.id]),
-    ).toEqual([
-      { presetId: presetB.id, name: "Bravo" },
-      { presetId: presetA.id, name: "Alpha" },
-    ]);
+    expect(buildFavouritePresetSelectOptions([presetA, presetB], [presetB.id, presetA.id])).toEqual(
+      [
+        { presetId: presetB.id, name: "Bravo" },
+        { presetId: presetA.id, name: "Alpha" },
+      ],
+    );
   });
 
   it("removes favourite ids", () => {

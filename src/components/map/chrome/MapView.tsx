@@ -1,11 +1,11 @@
-import { lazy, Suspense, type ReactNode } from "react";
+import { lazy, type ReactNode, Suspense } from "react";
 import type { MapViewProps } from "./mapViewTypes";
 
 export type {
   MapViewCoreProps,
   MapViewMapLibreChromeProps,
-  MapViewModel,
   MapViewMapLibreProps,
+  MapViewModel,
   MapViewProps,
 } from "./mapViewTypes";
 
@@ -14,13 +14,7 @@ const MapViewMapLibreLazy = lazy(async () => {
   return { default: mod.MapViewMapLibre };
 });
 
-function MapLibreSuspense({
-  className,
-  children,
-}: {
-  className?: string;
-  children: ReactNode;
-}) {
+function MapLibreSuspense({ className, children }: { className?: string; children: ReactNode }) {
   return (
     <Suspense
       fallback={

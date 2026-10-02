@@ -19,9 +19,7 @@ describe("distance helpers", () => {
   it("formats imperial distances", () => {
     expect(formatDistance(1609.344, "imperial")).toBe("1.0 mi");
     expect(formatPresetDistance(milesToMeters(3), "imperial")).toBe("3 mi");
-    expect(formatPresetDistance(milesToMeters(0.25), "imperial")).toBe(
-      "1/4 mi",
-    );
+    expect(formatPresetDistance(milesToMeters(0.25), "imperial")).toBe("1/4 mi");
     expect(formatPresetDistance(milesToMeters(0.5), "imperial")).toBe("1/2 mi");
     expect(formatPresetDistance(milesToMeters(25), "imperial")).toBe("25 mi");
     expect(formatPresetDistance(milesToMeters(50), "imperial")).toBe("50 mi");

@@ -17,9 +17,7 @@ function isStillPending(confirm: HostConfirmRecord, nowMs: number): boolean {
 /**
  * Newest non-expired pending host confirm for an incident (host modal source).
  */
-export function usePendingHostConfirm(
-  incidentId: string | null | undefined,
-): {
+export function usePendingHostConfirm(incidentId: string | null | undefined): {
   pending: HostConfirmRecord | null;
   confirms: HostConfirmRecord[];
   error: Error | null;
@@ -27,9 +25,7 @@ export function usePendingHostConfirm(
   const [confirms, setConfirms] = useState<HostConfirmRecord[]>([]);
   const [error, setError] = useState<Error | null>(null);
   const [nowMs, setNowMs] = useState(() => Date.now());
-  const [syncedIncidentId, setSyncedIncidentId] = useState(
-    incidentId ?? null,
-  );
+  const [syncedIncidentId, setSyncedIncidentId] = useState(incidentId ?? null);
 
   const normalizedIncidentId = incidentId ?? null;
   if (normalizedIncidentId !== syncedIncidentId) {
@@ -45,14 +41,10 @@ export function usePendingHostConfirm(
       return;
     }
 
-    const unsub = subscribeIncidentHostConfirms(
-      normalizedIncidentId,
-      setConfirms,
-      (nextError) => {
-        setError(nextError);
-        setConfirms([]);
-      },
-    );
+    const unsub = subscribeIncidentHostConfirms(normalizedIncidentId, setConfirms, (nextError) => {
+      setError(nextError);
+      setConfirms([]);
+    });
 
     const tick = window.setInterval(() => {
       setNowMs(Date.now());

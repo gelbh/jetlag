@@ -1,9 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  SIDE_DOCK_CLEARANCE_PX,
-  clampTopPx,
-  usableVerticalBand,
-} from "./mapChromeDockPlacement";
+import { clampTopPx, SIDE_DOCK_CLEARANCE_PX, usableVerticalBand } from "./mapChromeDockPlacement";
 
 describe("usableVerticalBand", () => {
   it("keeps side docks clear of status and hunt chrome", () => {

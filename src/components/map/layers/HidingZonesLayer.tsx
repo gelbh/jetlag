@@ -15,10 +15,7 @@ interface HidingZonesLayerProps {
   zones: readonly HidingZoneRecord[];
   myUid?: string | null;
   memberUids?: readonly string[];
-  session?: Pick<
-    SessionRecord,
-    "endGameStartedAt" | "endGameTruthAnchors"
-  > | null;
+  session?: Pick<SessionRecord, "endGameStartedAt" | "endGameTruthAnchors"> | null;
 }
 
 function polygonFeature(ring: LatLngTuple[]): Feature<GeoPolygon> {
@@ -42,24 +39,15 @@ function polygonPositions(geometryJson: string): LatLngTuple[] | null {
       return null;
     }
 
-    return geometry.coordinates[0].map(
-      ([lng, lat]) => [lat, lng] as LatLngTuple,
-    );
+    return geometry.coordinates[0].map(([lng, lat]) => [lat, lng] as LatLngTuple);
   } catch {
     return null;
   }
 }
 
-export function HidingZonesLayer({
-  zones,
-  myUid,
-  memberUids,
-  session,
-}: HidingZonesLayerProps) {
+export function HidingZonesLayer({ zones, myUid, memberUids, session }: HidingZonesLayerProps) {
   const memberSet = memberUids ? new Set(memberUids) : null;
-  const visibleZones = memberSet
-    ? zones.filter((zone) => memberSet.has(zone.hiderUid))
-    : zones;
+  const visibleZones = memberSet ? zones.filter((zone) => memberSet.has(zone.hiderUid)) : zones;
 
   const referenceMarkers = useMemo((): CircleMarkerProps[] => {
     const markers: CircleMarkerProps[] = [];
@@ -128,10 +116,7 @@ export function HidingZonesLayer({
         );
       })}
       {referenceMarkers.length > 0 ? (
-        <MapLibrePointMarkers
-          id="hiding-truth-pins"
-          markers={referenceMarkers}
-        />
+        <MapLibrePointMarkers id="hiding-truth-pins" markers={referenceMarkers} />
       ) : null}
     </>
   );

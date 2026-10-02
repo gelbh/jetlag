@@ -21,9 +21,7 @@ describe("useDialogFocus", () => {
   it("moves focus into the dialog when active", async () => {
     render(<FocusHarness open />);
     await waitFor(() => {
-      expect(document.activeElement).toBe(
-        screen.getByRole("button", { name: "First" }),
-      );
+      expect(document.activeElement).toBe(screen.getByRole("button", { name: "First" }));
     });
   });
 
@@ -35,9 +33,7 @@ describe("useDialogFocus", () => {
 
     const { rerender } = render(<FocusHarness open />);
     await waitFor(() => {
-      expect(document.activeElement).toBe(
-        screen.getByRole("button", { name: "First" }),
-      );
+      expect(document.activeElement).toBe(screen.getByRole("button", { name: "First" }));
     });
 
     rerender(<FocusHarness open={false} />);

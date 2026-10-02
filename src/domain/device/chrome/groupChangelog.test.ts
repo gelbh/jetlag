@@ -26,9 +26,7 @@ describe("filterUserFacingChangelog", () => {
 
     expect(filtered).toHaveLength(1);
     expect(filtered[0]?.version).toBe("0.5.7");
-    expect(filtered[0]?.sections.map((section) => section.title)).toEqual([
-      "Fixes",
-    ]);
+    expect(filtered[0]?.sections.map((section) => section.title)).toEqual(["Fixes"]);
   });
 });
 
@@ -46,13 +44,7 @@ describe("buildGroupSummary", () => {
       ]),
     ]);
 
-    expect(summary).toEqual([
-      "imp-newest",
-      "imp-a",
-      "imp-b",
-      "imp-c",
-      "fix-newest",
-    ]);
+    expect(summary).toEqual(["imp-newest", "imp-a", "imp-b", "imp-c", "fix-newest"]);
   });
 });
 
@@ -77,11 +69,7 @@ describe("groupChangelogEntries", () => {
       entry("0.7.0", "2026-07-14", [{ title: "Improvements", items: ["closed minor base"] }]),
     ]);
 
-    expect(nodes.map((node) => node.kind)).toEqual([
-      "version",
-      "version",
-      "minorGroup",
-    ]);
+    expect(nodes.map((node) => node.kind)).toEqual(["version", "version", "minorGroup"]);
     expect(nodes[0]).toMatchObject({ kind: "version", entry: { version: "0.8.1" } });
     expect(nodes[1]).toMatchObject({ kind: "version", entry: { version: "0.8.0" } });
     expect(nodes[2]).toMatchObject({
@@ -103,11 +91,7 @@ describe("groupChangelogEntries", () => {
       entry("0.7.0", "2026-07-14", [{ title: "Fixes", items: ["0.7 base"] }]),
     ]);
 
-    expect(nodes.map((node) => node.kind)).toEqual([
-      "version",
-      "minorGroup",
-      "minorGroup",
-    ]);
+    expect(nodes.map((node) => node.kind)).toEqual(["version", "minorGroup", "minorGroup"]);
     expect(nodes.some((node) => node.kind === "majorGroup")).toBe(false);
     expect(nodes[1]).toMatchObject({ kind: "minorGroup", label: "0.8" });
     expect(nodes[2]).toMatchObject({ kind: "minorGroup", label: "0.7" });
@@ -150,9 +134,7 @@ describe("groupChangelogEntries", () => {
 
   it("throws for a malformed version string", () => {
     expect(() =>
-      groupChangelogEntries([
-        entry("0.8", "2026-07-17", [{ title: "Fixes", items: ["a"] }]),
-      ]),
+      groupChangelogEntries([entry("0.8", "2026-07-17", [{ title: "Fixes", items: ["a"] }])]),
     ).toThrow(/Invalid changelog version/);
   });
 

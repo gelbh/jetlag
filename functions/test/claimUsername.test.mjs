@@ -1,5 +1,5 @@
-import test from "node:test";
 import assert from "node:assert/strict";
+import test from "node:test";
 import {
   CLAIM_USERNAME_ALREADY_SET,
   CLAIM_USERNAME_INVALID,

@@ -25,11 +25,7 @@ export function HudBanner({
   }
 
   return (
-    <AnimatedBanner
-      visible={visible}
-      onDismiss={onDismiss}
-      className={className}
-    >
+    <AnimatedBanner visible={visible} onDismiss={onDismiss} className={className}>
       {children}
     </AnimatedBanner>
   );

@@ -18,30 +18,13 @@ type RadarSweepMarkProps = SVGProps<SVGSVGElement> & {
 };
 
 /** Radar sweep icon geometry, shared by AppLogo and static PWA assets */
-export function RadarSweepMark({
-  compact = false,
-  ...props
-}: RadarSweepMarkProps) {
+export function RadarSweepMark({ compact = false, ...props }: RadarSweepMarkProps) {
   return (
     <svg viewBox="0 0 64 64" fill="none" {...props}>
       <rect width="64" height="64" rx="12" fill={COLORS.surfaceDeep} />
-      <circle
-        cx="32"
-        cy="32"
-        r="18"
-        stroke={COLORS.action}
-        strokeWidth="4"
-        fill="none"
-      />
+      <circle cx="32" cy="32" r="18" stroke={COLORS.action} strokeWidth="4" fill="none" />
       {!compact ? (
-        <circle
-          cx="32"
-          cy="32"
-          r="12"
-          stroke={COLORS.brandBlue}
-          strokeWidth="2.5"
-          fill="none"
-        />
+        <circle cx="32" cy="32" r="12" stroke={COLORS.brandBlue} strokeWidth="2.5" fill="none" />
       ) : null}
       <path
         d="M32 32 L44.7 19.3 A18 18 0 0 1 44.7 44.7 Z"
@@ -78,12 +61,7 @@ const WORDMARK_CLASSES: Record<MarkSize, string> = {
   lg: "text-sm tracking-[0.2em]",
 };
 
-export function AppLogo({
-  variant = "mark",
-  size = "md",
-  className,
-  ...props
-}: AppLogoProps) {
+export function AppLogo({ variant = "mark", size = "md", className, ...props }: AppLogoProps) {
   "use memo";
   const markPx = MARK_SIZES[size];
 
@@ -106,12 +84,7 @@ export function AppLogo({
       role="img"
       aria-label="Jet Lag Map Companion"
     >
-      <RadarSweepMark
-        width={markPx}
-        height={markPx}
-        aria-hidden="true"
-        className="shrink-0"
-      />
+      <RadarSweepMark width={markPx} height={markPx} aria-hidden="true" className="shrink-0" />
       <span
         className={`font-display font-semibold uppercase text-signal ${WORDMARK_CLASSES[size]}`}
       >

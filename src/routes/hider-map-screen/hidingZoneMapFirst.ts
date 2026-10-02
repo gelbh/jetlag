@@ -7,9 +7,5 @@ export function isHidingZoneMapFirstEligible(input: {
   moveMode: boolean;
   methodChosen: boolean;
 }): boolean {
-  return (
-    input.wizardOpen &&
-    !input.sheetBlocksWizard &&
-    (input.moveMode || input.methodChosen)
-  );
+  return input.wizardOpen && !input.sheetBlocksWizard && (input.moveMode || input.methodChosen);
 }

@@ -10,8 +10,7 @@ export function haversineMeters(a: LatLngTuple, b: LatLngTuple): number {
   const lat1 = (a[0] * Math.PI) / 180;
   const lat2 = (b[0] * Math.PI) / 180;
   const h =
-    Math.sin(latDelta / 2) ** 2 +
-    Math.cos(lat1) * Math.cos(lat2) * Math.sin(lngDelta / 2) ** 2;
+    Math.sin(latDelta / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(lngDelta / 2) ** 2;
 
   return 2 * earthRadius * Math.asin(Math.sqrt(h));
 }

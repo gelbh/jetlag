@@ -1,18 +1,15 @@
-import type { ReactNode } from "react";
 import type { Feature, MultiPolygon, Polygon } from "geojson";
-import type {
-  AskHudCommitKind,
-  AskHudReadiness,
-} from "../../domain/ask/askHudModes";
+import type { ReactNode } from "react";
+import type { AskHudCommitKind, AskHudReadiness } from "../../domain/ask/askHudModes";
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
-import type { MeasuringPlace } from "../../services/geo/overpass/measuringPlaces";
+import type { MeasuringLodPhase } from "../../domain/geometry/measuring/measuringLod";
+import type { PolygonLodPhase } from "../../domain/geometry/progressive/polygonLod";
+import type { TentaclePoi } from "../../domain/map/annotations";
 import {
   TENTACLE_ANSWER_RADIUS_METERS,
   TENTACLE_SEARCH_RADIUS_METERS,
 } from "../../domain/questions";
-import type { TentaclePoi } from "../../domain/map/annotations";
-import type { MeasuringLodPhase } from "../../domain/geometry/measuring/measuringLod";
-import type { PolygonLodPhase } from "../../domain/geometry/progressive/polygonLod";
+import type { MeasuringPlace } from "../../services/geo/overpass/measuringPlaces";
 
 /** Ask Map HUD bundle returned by migrated question tools. */
 export type AskToolHudBundle = {

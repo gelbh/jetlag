@@ -1,10 +1,10 @@
-import type { GameArea } from "@/domain/map/annotations";
 import {
   boundingBoxToGameArea,
   gameAreaToBoundingBox,
 } from "@/domain/geometry/gameArea/gameAreaBounds";
-import { parseFirestoreDocument } from "../zodConverter";
+import type { GameArea } from "@/domain/map/annotations";
 import { firestoreGameAreaSchema } from "../schemas/firestoreDocuments";
+import { parseFirestoreDocument } from "../zodConverter";
 
 export interface FirestoreGameArea {
   south: number;
@@ -32,9 +32,7 @@ function isFirestoreGameArea(value: unknown): value is FirestoreGameArea {
   );
 }
 
-export function serializeGameAreaForFirestore(
-  gameArea: GameArea,
-): FirestoreGameArea {
+export function serializeGameAreaForFirestore(gameArea: GameArea): FirestoreGameArea {
   const { south, west, north, east } = gameAreaToBoundingBox(gameArea);
 
   return {
@@ -59,8 +57,7 @@ export function deserializeGameAreaFromFirestore(value: unknown): GameArea {
   if (
     value &&
     typeof value === "object" &&
-    ((value as GameArea).type === "Polygon" ||
-      (value as GameArea).type === "MultiPolygon") &&
+    ((value as GameArea).type === "Polygon" || (value as GameArea).type === "MultiPolygon") &&
     Array.isArray((value as GameArea).coordinates)
   ) {
     return value as GameArea;
@@ -75,9 +72,7 @@ export function stripUndefinedValues(value: unknown): unknown {
   }
 
   if (Array.isArray(value)) {
-    return value
-      .map((item) => stripUndefinedValues(item))
-      .filter((item) => item !== undefined);
+    return value.map((item) => stripUndefinedValues(item)).filter((item) => item !== undefined);
   }
 
   if (!value || typeof value !== "object") {

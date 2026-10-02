@@ -1,15 +1,9 @@
 import { useEffect, useRef } from "react";
-import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
-import type { AnnotationRecord } from "../../domain/map/annotations";
-import type { AnnotationType, GameArea } from "../../domain/map/annotations";
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
+import type { AnnotationRecord, AnnotationType, GameArea } from "../../domain/map/annotations";
 import type { DistanceUnit } from "../../domain/map/distance";
+import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
 import type { SessionRulesInput } from "../../domain/session/rules";
-import type { SubmitPendingQuestionInput } from "../../hooks/sync/usePendingQuestionActions";
-import { useMatchingTool } from "../../hooks/tools/useMatchingTool";
-import { useMeasuringTool } from "../../hooks/tools/useMeasuringTool";
-import { useTentacleTool } from "../../hooks/tools/useTentacleTool";
-import type { MapTool } from "../../state/sessionStore";
 import {
   createIdleHeavyMapTools,
   type HeavyMapToolsApi,
@@ -17,6 +11,11 @@ import {
   type MeasuringToolApi,
   type TentacleToolApi,
 } from "../../hooks/map-screen/heavyMapTools";
+import type { SubmitPendingQuestionInput } from "../../hooks/sync/usePendingQuestionActions";
+import { useMatchingTool } from "../../hooks/tools/useMatchingTool";
+import { useMeasuringTool } from "../../hooks/tools/useMeasuringTool";
+import { useTentacleTool } from "../../hooks/tools/useTentacleTool";
+import type { MapTool } from "../../state/sessionStore";
 
 /** Flat heavy-tool host fields bag for HeavyToolHost (W4-F peel). */
 export type HeavyToolHostModel = {
@@ -42,10 +41,7 @@ export type HeavyToolHostModel = {
   awaitHiderAnswer?: boolean;
   submitToolQuestion?: (
     toolType: AnnotationType,
-    input: Omit<
-      SubmitPendingQuestionInput,
-      "sessionId" | "senderUid" | "senderRole" | "toolType"
-    >,
+    input: Omit<SubmitPendingQuestionInput, "sessionId" | "senderUid" | "senderRole" | "toolType">,
   ) => Promise<void | string | undefined>;
   sessionId?: string;
   senderUid?: string | null;
@@ -137,10 +133,7 @@ interface HeavyToolHookParams {
   ) => Promise<AnnotationRecord>;
   awaitHiderAnswer?: boolean;
   submitPendingQuestion?: (
-    input: Omit<
-      SubmitPendingQuestionInput,
-      "sessionId" | "senderUid" | "senderRole" | "toolType"
-    >,
+    input: Omit<SubmitPendingQuestionInput, "sessionId" | "senderUid" | "senderRole" | "toolType">,
   ) => Promise<void>;
   sessionId?: string;
   senderUid?: string | null;
@@ -200,15 +193,9 @@ function HeavyToolRunner({
  * Tool hooks share the useToolSession open/submit/close machine; registry API is unchanged. */
 export function HeavyToolHost({ model }: HeavyToolHostProps) {
   const { activeTool, ...sharedProps } = model;
-  if (
-    activeTool !== "matching" &&
-    activeTool !== "measuring" &&
-    activeTool !== "tentacle"
-  ) {
+  if (activeTool !== "matching" && activeTool !== "measuring" && activeTool !== "tentacle") {
     return null;
   }
 
-  return (
-    <HeavyToolRunner key={activeTool} toolName={activeTool} {...sharedProps} />
-  );
+  return <HeavyToolRunner key={activeTool} toolName={activeTool} {...sharedProps} />;
 }

@@ -1,13 +1,13 @@
 import { useEffect } from "react";
-import { LOCAL_SESSION_ID } from "../../domain/map/annotations";
 import { getPowerProfile } from "../../domain/device/power/powerProfile";
+import { LOCAL_SESSION_ID } from "../../domain/map/annotations";
 import type { PlayerLocationRecord } from "../../domain/session/activity/sessionChat";
-import { useMapStore } from "../../state/mapStore";
-import { useLiveLocation } from "../location/useLiveLocation";
 import { isFirebaseConfigured } from "../../services/core/firebase/firebase";
 import { isFirestorePermissionDenied } from "../../services/firestore/firestoreAnnotations";
-import { arePlayerLocationPublishesBlocked } from "../../services/session/playerLocationPublishGate";
 import { writePlayerLocation } from "../../services/firestore/firestoreSessionExtras";
+import { arePlayerLocationPublishesBlocked } from "../../services/session/playerLocationPublishGate";
+import { useMapStore } from "../../state/mapStore";
+import { useLiveLocation } from "../location/useLiveLocation";
 import { maybeAppendPlayerTrailPoint } from "./appendPlayerTrailPoint";
 
 interface UseSeekerLocationSyncParams {
@@ -16,11 +16,7 @@ interface UseSeekerLocationSyncParams {
   enabled: boolean;
 }
 
-export function useSeekerLocationSync({
-  sessionId,
-  uid,
-  enabled,
-}: UseSeekerLocationSyncParams) {
+export function useSeekerLocationSync({ sessionId, uid, enabled }: UseSeekerLocationSyncParams) {
   const lowPowerMode = useMapStore((state) => state.lowPowerMode);
   const profile = getPowerProfile(lowPowerMode).seekerLocationSync;
   const { reading, error } = useLiveLocation(enabled, profile);
@@ -62,10 +58,10 @@ export function useSeekerLocationSync({
         }),
       )
       .catch((error: unknown) => {
-      if (!isFirestorePermissionDenied(error)) {
-        throw error;
-      }
-    });
+        if (!isFirestorePermissionDenied(error)) {
+          throw error;
+        }
+      });
   }, [enabled, reading, sessionId, uid]);
 
   return { error };

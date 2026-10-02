@@ -1,13 +1,10 @@
 import area from "@turf/area";
 import { multiPolygon as turfMultiPolygon, polygon as turfPolygon } from "@turf/helpers";
+import { gameAreaToBoundingBox } from "../../geometry/gameArea/gameAreaBounds";
 import type { GameArea } from "../../map/annotations";
 import type { DistanceUnit } from "../../map/distance";
 import { milesToMeters } from "../../map/distance";
-import {
-  GAME_SIZE_THRESHOLDS_SQ_KM,
-  resolveDistanceUnit,
-} from "../../map/distancePresets";
-import { gameAreaToBoundingBox } from "../../geometry/gameArea/gameAreaBounds";
+import { GAME_SIZE_THRESHOLDS_SQ_KM, resolveDistanceUnit } from "../../map/distancePresets";
 
 export type GameSize = "small" | "medium" | "large";
 
@@ -28,11 +25,7 @@ const GAME_SIZE_THRESHOLDS_SQ_MI = {
   large: 1_000,
 } as const;
 
-export const GAME_SIZE_OPTIONS: readonly GameSize[] = [
-  "small",
-  "medium",
-  "large",
-] as const;
+export const GAME_SIZE_OPTIONS: readonly GameSize[] = ["small", "medium", "large"] as const;
 
 function gameAreaSquareMeters(gameArea: GameArea): number {
   const positions =
@@ -65,10 +58,7 @@ export function gameAreaSquareKilometers(gameArea: GameArea): number {
   return gameAreaSquareMeters(gameArea) / SQ_METERS_PER_SQ_KM;
 }
 
-export function recommendGameSize(
-  gameArea: GameArea,
-  unit: DistanceUnit = "imperial",
-): GameSize {
+export function recommendGameSize(gameArea: GameArea, unit: DistanceUnit = "imperial"): GameSize {
   const resolved = resolveDistanceUnit(unit);
 
   if (resolved === "metric") {
@@ -210,10 +200,7 @@ export function gameSizeLabel(
   }
 }
 
-export function formatPlayAreaSummary(
-  areaValue: number,
-  unit: DistanceUnit = "imperial",
-): string {
+export function formatPlayAreaSummary(areaValue: number, unit: DistanceUnit = "imperial"): string {
   const resolved = resolveDistanceUnit(unit);
 
   if (resolved === "metric") {
@@ -235,10 +222,7 @@ export function formatPlayAreaSummary(
   return `~${Math.round(areaValue).toLocaleString()} sq mi play area`;
 }
 
-export function playAreaValueForUnit(
-  gameArea: GameArea,
-  unit: DistanceUnit,
-): number {
+export function playAreaValueForUnit(gameArea: GameArea, unit: DistanceUnit): number {
   return resolveDistanceUnit(unit) === "metric"
     ? gameAreaSquareKilometers(gameArea)
     : gameAreaSquareMiles(gameArea);

@@ -71,16 +71,13 @@ describe("collectIncidentDiagnostics", () => {
     expect(diagnostics.lastClientErrors).toHaveLength(INCIDENT_MAX_CLIENT_ERRORS);
     // Most-recent (tail) errors are retained.
     expect(diagnostics.lastClientErrors[0]?.name).toBe("Err5");
-    expect(
-      diagnostics.lastClientErrors[INCIDENT_MAX_CLIENT_ERRORS - 1]?.name,
-    ).toBe(`Err${INCIDENT_MAX_CLIENT_ERRORS + 4}`);
+    expect(diagnostics.lastClientErrors[INCIDENT_MAX_CLIENT_ERRORS - 1]?.name).toBe(
+      `Err${INCIDENT_MAX_CLIENT_ERRORS + 4}`,
+    );
   });
 
   it("keeps only the most recent recent-ops within the cap", () => {
-    const ops = Array.from(
-      { length: INCIDENT_MAX_RECENT_OPS + 3 },
-      (_, i) => `op-${i}`,
-    );
+    const ops = Array.from({ length: INCIDENT_MAX_RECENT_OPS + 3 }, (_, i) => `op-${i}`);
 
     const diagnostics = collectIncidentDiagnostics({ ...base, recentOps: ops });
 
@@ -93,7 +90,11 @@ describe("collectIncidentDiagnostics", () => {
       ...base,
       userAgent: "u".repeat(INCIDENT_MAX_USER_AGENT_LENGTH + 50),
       lastClientErrors: [
-        { name: "Boom", message: "m".repeat(INCIDENT_MAX_ERROR_MESSAGE_LENGTH + 50), at: "2026-07-25T00:00:00Z" },
+        {
+          name: "Boom",
+          message: "m".repeat(INCIDENT_MAX_ERROR_MESSAGE_LENGTH + 50),
+          at: "2026-07-25T00:00:00Z",
+        },
       ],
       recentOps: ["o".repeat(INCIDENT_MAX_OP_LENGTH + 50)],
     });

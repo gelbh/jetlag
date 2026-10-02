@@ -1,33 +1,33 @@
 import { useCallback, useEffect, useState } from "react";
 import {
-  MAP_CHROME_DOCKS_CHANGE_EVENT,
   legacyAnchorFromPlacement,
+  MAP_CHROME_DOCKS_CHANGE_EVENT,
+  type MapChromeDockPlacement,
+  type MapSideDockAnchor,
   mapSideDockIsLeft,
   readMapChromeDocksState,
   syncMapSideDockDataset,
   writeMapChromeDocksState,
-  type MapChromeDockPlacement,
-  type MapSideDockAnchor,
 } from "./mapChromeDockPlacement";
 
-export type { MapSideDockAnchor, MapChromeDockPlacement };
 export {
+  clampTopPx,
+  legacyAnchorFromPlacement,
   MAP_NAV_DOCK_STORAGE_KEY,
+  mapSideDockIsLeft,
   normalizeStoredAnchor,
   placementFromLegacyAnchor,
-  legacyAnchorFromPlacement,
-  resolveStackedTops,
+  readMapChromeDocksState,
   resolveSafeAreaTopPx,
+  resolveStackedTops,
   resolveUsableVerticalBand,
   sideFromPointX,
   topPxFromTopRatio,
   topRatioFromTopPx,
-  clampTopPx,
   usableVerticalBand,
-  mapSideDockIsLeft,
-  readMapChromeDocksState,
   writeMapChromeDocksState,
 } from "./mapChromeDockPlacement";
+export type { MapChromeDockPlacement, MapSideDockAnchor };
 
 export const MAP_SIDE_DOCK_ANCHORS: readonly MapSideDockAnchor[] = [
   "top-right",
@@ -57,9 +57,7 @@ export function cycleMapChromeDockPlacement(
 }
 
 /** @deprecated prefer cycleMapChromeDockPlacement */
-export function cycleMapSideDockAnchor(
-  anchor: MapSideDockAnchor,
-): MapSideDockAnchor {
+export function cycleMapSideDockAnchor(anchor: MapSideDockAnchor): MapSideDockAnchor {
   const order = MAP_SIDE_DOCK_ANCHORS;
   const index = order.indexOf(anchor);
   return order[(index + 1) % order.length] ?? "bottom-right";
@@ -73,19 +71,10 @@ export function nearestMapSideDockAnchor(
   viewportHeight = typeof window !== "undefined" ? window.innerHeight : 0,
   exclude?: ReadonlySet<MapSideDockAnchor> | readonly MapSideDockAnchor[],
 ): MapSideDockAnchor {
-  const blocked =
-    exclude == null
-      ? null
-      : exclude instanceof Set
-        ? exclude
-        : new Set(exclude);
+  const blocked = exclude == null ? null : exclude instanceof Set ? exclude : new Set(exclude);
   const side = pointX < viewportWidth / 2 ? "left" : "right";
   const band =
-    pointY < viewportHeight * 0.33
-      ? "top"
-      : pointY > viewportHeight * 0.66
-        ? "bottom"
-        : "mid";
+    pointY < viewportHeight * 0.33 ? "top" : pointY > viewportHeight * 0.66 ? "bottom" : "mid";
   const candidate = `${band}-${side}` as MapSideDockAnchor;
   if (!blocked?.has(candidate)) {
     return candidate;
@@ -134,11 +123,7 @@ export function useMapSideDockSide(): {
     (anchor: MapSideDockAnchor) => {
       setPlacement({
         side: mapSideDockIsLeft(anchor) ? "left" : "right",
-        topRatio: anchor.startsWith("top")
-          ? 0.08
-          : anchor.startsWith("mid")
-            ? 0.42
-            : 0.72,
+        topRatio: anchor.startsWith("top") ? 0.08 : anchor.startsWith("mid") ? 0.42 : 0.72,
       });
     },
     [setPlacement],

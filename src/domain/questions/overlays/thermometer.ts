@@ -1,9 +1,6 @@
 import type { Feature, LineString } from "geojson";
+import { bearingDegrees, destinationPoint } from "../../geometry/core/geodesicPrimitives";
 import type { LatLngTuple } from "../../geometry/gameArea/geometry";
-import {
-  bearingDegrees,
-  destinationPoint,
-} from "../../geometry/core/geodesicPrimitives";
 import {
   lineEndpointsFromFeature,
   parseGeometryJson,
@@ -15,8 +12,8 @@ import {
 import { MAP_ANNOTATION_COLORS } from "../../map/mapAnnotationColors";
 import type { MapDraftOverlay } from "../../map/mapDraftOverlay";
 import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
-import { crowFliesDistanceMeters } from "../thermometerWalk";
 import type { ThermometerAnswer } from "../thermometerQuestions";
+import { crowFliesDistanceMeters } from "../thermometerWalk";
 import type { OverlayBuildResult } from "./shared";
 
 export function buildThermometerOverlays(
@@ -28,9 +25,7 @@ export function buildThermometerOverlays(
     return { overlays: [], badgeAnchor: null };
   }
 
-  const endpoints = lineEndpointsFromFeature(
-    geometry as Feature<LineString>,
-  );
+  const endpoints = lineEndpointsFromFeature(geometry as Feature<LineString>);
   if (!endpoints) {
     return { overlays: [], badgeAnchor: null };
   }
@@ -83,13 +78,7 @@ export interface ThermometerDraftOverlayInputs {
 export function buildThermometerDraftOverlays(
   inputs: ThermometerDraftOverlayInputs,
 ): MapDraftOverlay[] {
-  const {
-    thermoA,
-    thermoB,
-    targetDistanceMeters,
-    walkCurrentPoint,
-    walkActive,
-  } = inputs;
+  const { thermoA, thermoB, targetDistanceMeters, walkCurrentPoint, walkActive } = inputs;
   const c = MAP_ANNOTATION_COLORS;
   const overlays: MapDraftOverlay[] = [];
 
@@ -158,11 +147,7 @@ export function buildThermometerDraftOverlays(
 
     if (remainingMeters > 0) {
       const bearing = bearingDegrees(thermoA, walkCurrentPoint);
-      const projectedEnd = destinationPoint(
-        walkCurrentPoint,
-        remainingMeters,
-        bearing,
-      );
+      const projectedEnd = destinationPoint(walkCurrentPoint, remainingMeters, bearing);
 
       overlays.push({
         kind: "polyline",

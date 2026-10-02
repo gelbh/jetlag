@@ -1,14 +1,14 @@
 import { useCallback, useEffect, useState } from "react";
 import {
+  legacyAnchorFromPlacement,
   MAP_CHROME_DOCKS_CHANGE_EVENT,
   MAP_NAV_DOCK_STORAGE_KEY,
-  legacyAnchorFromPlacement,
+  type MapChromeDockPlacement,
+  type MapSideDockAnchor,
   mapSideDockIsLeft,
   readMapChromeDocksState,
   syncMapNavDockDataset,
   writeMapChromeDocksState,
-  type MapChromeDockPlacement,
-  type MapSideDockAnchor,
 } from "./mapChromeDockPlacement";
 
 export { MAP_NAV_DOCK_STORAGE_KEY };
@@ -47,11 +47,7 @@ export function useMapNavDockSide(): {
     (anchor: MapSideDockAnchor) => {
       setPlacement({
         side: mapSideDockIsLeft(anchor) ? "left" : "right",
-        topRatio: anchor.startsWith("top")
-          ? 0.08
-          : anchor.startsWith("mid")
-            ? 0.42
-            : 0.72,
+        topRatio: anchor.startsWith("top") ? 0.08 : anchor.startsWith("mid") ? 0.42 : 0.72,
       });
     },
     [setPlacement],

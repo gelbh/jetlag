@@ -4,9 +4,7 @@ describe("voronoiWasmParity", () => {
   it("wasm init failure rethrows when entrypoint is ready", async () => {
     vi.resetModules();
     vi.doMock("./kernelWasmReady", async () => {
-      const actual = await vi.importActual<typeof import("./kernelWasmReady")>(
-        "./kernelWasmReady",
-      );
+      const actual = await vi.importActual<typeof import("./kernelWasmReady")>("./kernelWasmReady");
       return {
         ...actual,
         KERNEL_WASM_READY: {
@@ -17,9 +15,7 @@ describe("voronoiWasmParity", () => {
           if (entrypoint === "spatialVoronoi") {
             return true;
           }
-          return actual.shouldUseWasm(
-            entrypoint as import("./kernelWasmReady").KernelEntrypoint,
-          );
+          return actual.shouldUseWasm(entrypoint as import("./kernelWasmReady").KernelEntrypoint);
         },
       };
     });
@@ -30,9 +26,7 @@ describe("voronoiWasmParity", () => {
       resetVoronoiWasmForTests: vi.fn(),
     }));
 
-    const { runSpatialVoronoi: runWithMock } = await import(
-      "./voronoiKernelRunner"
-    );
+    const { runSpatialVoronoi: runWithMock } = await import("./voronoiKernelRunner");
 
     const sites = [
       { lng: -0.18, lat: 51.45, properties: { poiId: "west" } },
@@ -70,10 +64,6 @@ describe("voronoiWasmParity", () => {
     ];
     const result = await wasmBuildSpatialVoronoiFromSites(sites);
     expect(result.features).toHaveLength(3);
-    expect(result.features.map((f) => f.properties?.poiId)).toEqual([
-      "a",
-      "near",
-      "b",
-    ]);
+    expect(result.features.map((f) => f.properties?.poiId)).toEqual(["a", "near", "b"]);
   });
 });

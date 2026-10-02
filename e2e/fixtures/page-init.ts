@@ -1,8 +1,5 @@
-import { type Page, expect } from "@playwright/test";
-import {
-  blockExternalAssets,
-  type BlockExternalAssetsOptions,
-} from "./network";
+import { expect, type Page } from "@playwright/test";
+import { type BlockExternalAssetsOptions, blockExternalAssets } from "./network";
 
 async function applyPageCaptureInit(page: Page) {
   await page.addInitScript(() => {
@@ -37,10 +34,7 @@ async function applyPageCaptureInit(page: Page) {
   });
 }
 
-export async function prepareE2EPage(
-  page: Page,
-  options: BlockExternalAssetsOptions = {},
-) {
+export async function prepareE2EPage(page: Page, options: BlockExternalAssetsOptions = {}) {
   await applyPageCaptureInit(page);
   await blockExternalAssets(page, options);
 }

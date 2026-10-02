@@ -11,8 +11,8 @@ describe("body of water measuring question", () => {
   });
 
   it("returns the official rule text and prompt", () => {
-    expect(
-      measuringQuestionFor("location", "body_of_water"),
-    ).toEqual(BODY_OF_WATER_MEASURING_QUESTION);
+    expect(measuringQuestionFor("location", "body_of_water")).toEqual(
+      BODY_OF_WATER_MEASURING_QUESTION,
+    );
   });
 });

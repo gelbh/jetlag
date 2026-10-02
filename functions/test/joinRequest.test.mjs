@@ -1,18 +1,18 @@
-import test from "node:test";
 import assert from "node:assert/strict";
-import {
-  JOIN_REQ_EXPIRED,
-  JOIN_REQ_NOT_AUTHORIZED,
-  JOIN_REQ_SIDE_EMPTY,
-  JOIN_REQUEST_TTL_MS,
-  cancelRoleJoinRequestHandler,
-  requestRoleJoinHandler,
-  resolveRoleJoinRequestHandler,
-} from "../session/joinRequest.mjs";
+import test from "node:test";
 import {
   CLIENT_UPDATE_REQUIRED,
   clearClientMinVersionCache,
 } from "../session/clientMinVersion.mjs";
+import {
+  cancelRoleJoinRequestHandler,
+  JOIN_REQ_EXPIRED,
+  JOIN_REQ_NOT_AUTHORIZED,
+  JOIN_REQ_SIDE_EMPTY,
+  JOIN_REQUEST_TTL_MS,
+  requestRoleJoinHandler,
+  resolveRoleJoinRequestHandler,
+} from "../session/joinRequest.mjs";
 
 test.beforeEach(() => {
   clearClientMinVersionCache();
@@ -136,10 +136,7 @@ function buildMockDb({
               data: () => store[ref.id],
             };
           }
-          if (
-            typeof ref.path === "string" &&
-            ref.path.startsWith("joinRequests/")
-          ) {
+          if (typeof ref.path === "string" && ref.path.startsWith("joinRequests/")) {
             const id = ref.id;
             return {
               exists: store[id] != null,
@@ -205,10 +202,7 @@ test("requestRoleJoin creates pending with 10m expiry", async () => {
   );
 
   assert.equal(typeof result.requestId, "string");
-  assert.equal(
-    result.expiresAt,
-    new Date(createdMs + JOIN_REQUEST_TTL_MS).toISOString(),
-  );
+  assert.equal(result.expiresAt, new Date(createdMs + JOIN_REQUEST_TTL_MS).toISOString());
   const stored = db._store[result.requestId];
   assert.equal(stored.status, "pending");
   assert.equal(stored.identityLabel, "ada");
@@ -228,12 +222,7 @@ test("requestRoleJoin rejects empty seeker side", async () => {
 
   await assert.rejects(
     () =>
-      requestRoleJoinHandler(
-        db,
-        { uid: "guest" },
-        null,
-        { sessionId: "sess-1", role: "seeker" },
-      ),
+      requestRoleJoinHandler(db, { uid: "guest" }, null, { sessionId: "sess-1", role: "seeker" }),
     (error) => error instanceof Error && error.message === JOIN_REQ_SIDE_EMPTY,
   );
 });
@@ -321,8 +310,7 @@ test("resolveRoleJoinRequest decline by non-leader fails", async () => {
         { sessionId: "sess-1", requestId: "req-1", decision: "decline" },
         Date.parse("2026-08-03T12:05:00.000Z"),
       ),
-    (error) =>
-      error instanceof Error && error.message === JOIN_REQ_NOT_AUTHORIZED,
+    (error) => error instanceof Error && error.message === JOIN_REQ_NOT_AUTHORIZED,
   );
 });
 
@@ -399,21 +387,18 @@ test("requestRoleJoin rejects clients below global min 0.11.0", async () => {
 
   await assert.rejects(
     () =>
-      requestRoleJoinHandler(
-        db,
-        { uid: "guest" },
-        authAdmin,
-        { sessionId: "sess-1", role: "seeker", clientVersion: "0.10.8" },
-      ),
-    (error) =>
-      error instanceof Error && error.message === CLIENT_UPDATE_REQUIRED,
+      requestRoleJoinHandler(db, { uid: "guest" }, authAdmin, {
+        sessionId: "sess-1",
+        role: "seeker",
+        clientVersion: "0.10.8",
+      }),
+    (error) => error instanceof Error && error.message === CLIENT_UPDATE_REQUIRED,
   );
 
-  const ok = await requestRoleJoinHandler(
-    db,
-    { uid: "guest" },
-    authAdmin,
-    { sessionId: "sess-1", role: "seeker", clientVersion: "0.11.0" },
-  );
+  const ok = await requestRoleJoinHandler(db, { uid: "guest" }, authAdmin, {
+    sessionId: "sess-1",
+    role: "seeker",
+    clientVersion: "0.11.0",
+  });
   assert.ok(ok.requestId);
 });

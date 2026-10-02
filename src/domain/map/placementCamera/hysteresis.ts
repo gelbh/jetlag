@@ -12,9 +12,7 @@ function isBoxContained(inner: BoundingBox, outer: BoundingBox): boolean {
   );
 }
 
-export function computeSafeRectBounds(
-  frame: PlacementViewportFrame,
-): BoundingBox {
+export function computeSafeRectBounds(frame: PlacementViewportFrame): BoundingBox {
   const { bounds, heightPx, bottomPaddingPx } = frame;
   const latSpan = bounds.north - bounds.south;
   const lngSpan = bounds.east - bounds.west;
@@ -23,8 +21,7 @@ export function computeSafeRectBounds(
   const latMargin = latSpan * marginFraction;
   const lngMargin = lngSpan * marginFraction;
 
-  const bottomPaddingFraction =
-    heightPx > 0 ? Math.min(0.45, bottomPaddingPx / heightPx) : 0;
+  const bottomPaddingFraction = heightPx > 0 ? Math.min(0.45, bottomPaddingPx / heightPx) : 0;
   const extraSouth = latSpan * bottomPaddingFraction;
 
   return normalizeBoundingBox({

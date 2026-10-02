@@ -59,26 +59,18 @@ export function retreatPhaseNavState(
       continue;
     }
     const configureIndex =
-      prevPhaseId === "configure"
-        ? Math.max(def.configureSteps.length - 1, 0)
-        : 0;
+      prevPhaseId === "configure" ? Math.max(def.configureSteps.length - 1, 0) : 0;
     return { phaseIndex: prevPhaseIndex, configureIndex };
   }
 
   return initialPhaseNavState(def);
 }
 
-export function resolvePhaseId(
-  def: ToolWizardDefinition,
-  state: PhaseNavState,
-): ToolWizardPhaseId {
+export function resolvePhaseId(def: ToolWizardDefinition, state: PhaseNavState): ToolWizardPhaseId {
   return def.phases[state.phaseIndex] ?? def.startsOn;
 }
 
-export function resolveWizardStepId(
-  def: ToolWizardDefinition,
-  state: PhaseNavState,
-): string {
+export function resolveWizardStepId(def: ToolWizardDefinition, state: PhaseNavState): string {
   const phaseId = resolvePhaseId(def, state);
   if (phaseId === "place" || phaseId === "ask") {
     return phaseId;

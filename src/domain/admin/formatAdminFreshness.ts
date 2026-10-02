@@ -1,7 +1,4 @@
-export function formatFreshnessAge(
-  iso: string | null | undefined,
-  nowMs = Date.now(),
-): string {
+export function formatFreshnessAge(iso: string | null | undefined, nowMs = Date.now()): string {
   if (!iso) {
     return "never";
   }

@@ -1,6 +1,6 @@
+import type { ReactNode } from "react";
 import { AskHudPanel } from "@/components/tools/ask/AskHudPanel";
 import { cn } from "@/lib/cn";
-import type { ReactNode } from "react";
 
 /** Shared Ask HUD / panel shell for tentacle locations (rail max-height). */
 export function TentacleLocationsChord({
@@ -20,11 +20,7 @@ export function TentacleLocationsChord({
         className,
       )}
     >
-      {header ? (
-        <div className="ask-scroll-chord__header shrink-0 space-y-2">
-          {header}
-        </div>
-      ) : null}
+      {header ? <div className="ask-scroll-chord__header shrink-0 space-y-2">{header}</div> : null}
       {children ? (
         <div className="ask-scroll-chord__list jl-scroll flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto">
           {children}

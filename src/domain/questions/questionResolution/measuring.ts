@@ -1,17 +1,18 @@
 import type { Feature, Point } from "geojson";
+import { parseGeometryJson } from "../../geometry/gameArea/geometryParsing";
+import { persistSlimMeasuringGeometry } from "../../geometry/measuring/measuringGeometryBudgets";
+import {
+  buildMeasuringRegions,
+  type MeasuringRegionInput,
+} from "../../geometry/measuring/measuringRegions";
 import type { AnnotationRecord, GameArea } from "../../map/annotations";
 import { MAP_ANNOTATION_COLORS } from "../../map/mapAnnotationColors";
-import { persistSlimMeasuringGeometry } from "../../geometry/measuring/measuringGeometryBudgets";
-import { parseGeometryJson } from "../../geometry/gameArea/geometryParsing";
-import { buildMeasuringRegions, type MeasuringRegionInput } from "../../geometry/measuring/measuringRegions";
-import type { MeasuringAnswer } from "../measuringQuestions";
-import { measuringPlacesFromMetadata } from "../measuringPlacesFromMetadata";
-import { seekerAnchorFromMetadata } from "../hiderTruth/shared";
 import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
+import { seekerAnchorFromMetadata } from "../hiderTruth/shared";
+import { measuringPlacesFromMetadata } from "../measuringPlacesFromMetadata";
+import type { MeasuringAnswer } from "../measuringQuestions";
 
-function deferredMeasuringPointGeometry(
-  pending: PendingQuestionRecord,
-): Feature<Point> | null {
+function deferredMeasuringPointGeometry(pending: PendingQuestionRecord): Feature<Point> | null {
   const parsed = parseGeometryJson(pending.placement.geometryJson);
   if (parsed?.geometry.type === "Point") {
     return parsed as Feature<Point>;
@@ -32,9 +33,7 @@ function deferredMeasuringPointGeometry(
   };
 }
 
-export function measuringAnswerFromReplyId(
-  replyId: string,
-): MeasuringAnswer | null {
+export function measuringAnswerFromReplyId(replyId: string): MeasuringAnswer | null {
   if (replyId === "closer" || replyId === "further") {
     return replyId;
   }
@@ -59,10 +58,7 @@ export async function resolveMeasuringPendingQuestion(
     "measuringAnswer" | "gameArea"
   > & { gameArea?: GameArea };
 
-  const measuringPlaces = measuringPlacesFromMetadata(
-    metadata,
-    regionInput.measuringPlaces,
-  );
+  const measuringPlaces = measuringPlacesFromMetadata(metadata, regionInput.measuringPlaces);
 
   const regions = await buildMeasuringRegions({
     ...regionInput,

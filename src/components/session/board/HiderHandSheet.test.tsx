@@ -1,8 +1,8 @@
 import { fireEvent, screen } from "@testing-library/react";
-import { renderWithAppUi } from "../../../test/renderWithAppUi";
 import { describe, expect, it, vi } from "vitest";
-import { HiderHandSheet } from "./HiderHandSheet";
 import { createInitialBoardEconomyState } from "../../../domain/boardEconomy";
+import { renderWithAppUi } from "../../../test/renderWithAppUi";
+import { HiderHandSheet } from "./HiderHandSheet";
 
 const noopHandlers = {
   onPlayExpand: vi.fn(),

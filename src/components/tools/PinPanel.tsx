@@ -21,9 +21,7 @@ export function PinPanel({
         Tap the map to place a note for matching or measuring questions.
       </p>
       {hasPoint ? (
-        <p className="text-xs text-ink-dim">
-          Location pinned on the map. Tap again to move it.
-        </p>
+        <p className="text-xs text-ink-dim">Location pinned on the map. Tap again to move it.</p>
       ) : null}
       <TextAreaField
         label="Label"

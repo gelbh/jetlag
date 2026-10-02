@@ -10,9 +10,7 @@ import {
 import * as serviceWorkerRefresh from "./serviceWorkerRefresh";
 
 vi.mock("./serviceWorkerRefresh", async () => {
-  const actual = await vi.importActual<typeof serviceWorkerRefresh>(
-    "./serviceWorkerRefresh",
-  );
+  const actual = await vi.importActual<typeof serviceWorkerRefresh>("./serviceWorkerRefresh");
   return {
     ...actual,
     applyServiceWorkerUpdate: vi.fn().mockResolvedValue(undefined),
@@ -32,16 +30,12 @@ describe("isChunkLoadError", () => {
 
   it("matches HTML MIME type failures", () => {
     expect(
-      isChunkLoadError(
-        new TypeError("'text/html' is not a valid JavaScript MIME type."),
-      ),
+      isChunkLoadError(new TypeError("'text/html' is not a valid JavaScript MIME type.")),
     ).toBe(true);
   });
 
   it("matches root module import failures", () => {
-    expect(
-      isChunkLoadError(new TypeError("Importing a module script failed.")),
-    ).toBe(true);
+    expect(isChunkLoadError(new TypeError("Importing a module script failed."))).toBe(true);
   });
 
   it("returns false for unrelated errors", () => {

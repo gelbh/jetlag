@@ -1,22 +1,18 @@
 import { UnstyledButton } from "@mantine/core";
-import { AppLink } from "../../components/navigation/AppLink";
-import { MapBottomChrome } from "../../components/map/chrome/MapBottomChrome";
-import { MapChromeControl } from "../../components/map/chrome/MapChromeControl";
-import { MapStatusRail } from "../../components/session/mapChrome/MapStatusRail";
-import { RoleCodesSheet } from "../../components/session/settings/RoleCodesSheet";
-import {
-  HudAdminIcon,
-  HudHomeIcon,
-  HudStarIcon,
-} from "../../components/ui/brand/HudIcons";
 import {
   mapToolSlotIconStyle,
   mapToolSlotLabelStyle,
   mapToolSlotStyles,
 } from "@/components/ui/entry/entryChrome";
+import { MapBottomChrome } from "../../components/map/chrome/MapBottomChrome";
+import { MapChromeControl } from "../../components/map/chrome/MapChromeControl";
+import { AppLink } from "../../components/navigation/AppLink";
+import { MapStatusRail } from "../../components/session/mapChrome/MapStatusRail";
+import { RoleCodesSheet } from "../../components/session/settings/RoleCodesSheet";
+import { HudAdminIcon, HudHomeIcon, HudStarIcon } from "../../components/ui/brand/HudIcons";
+import type { SessionRecord } from "../../domain/map/annotations";
 import type { PlayerRole } from "../../domain/session/players/playerRole";
 import { visibleRoleCodeRoles } from "../../domain/session/players/roleGates";
-import type { SessionRecord } from "../../domain/map/annotations";
 import type { UseMapOverlayStateResult } from "../../hooks/map/useMapOverlayState";
 import type { useSessionTimer } from "../../hooks/session/useSessionTimer";
 import { MapScreenChromeSlots } from "../map-screen/shared/MapScreenChromeSlots";
@@ -44,11 +40,8 @@ export function ObserverMapScreenChrome({
   moveInProgress = false,
 }: ObserverMapScreenChromeProps) {
   const roleConfig =
-    myRole === "admin"
-      ? getMapScreenRoleConfig("admin")
-      : getMapScreenRoleConfig("observer");
-  const leaveLabel =
-    roleConfig.role === "admin" ? "Leave admin monitor" : "Leave observation";
+    myRole === "admin" ? getMapScreenRoleConfig("admin") : getMapScreenRoleConfig("observer");
+  const leaveLabel = roleConfig.role === "admin" ? "Leave admin monitor" : "Leave observation";
   const isAdmin = roleConfig.role === "admin";
   const canOpenCodes =
     Boolean(myUid) &&
@@ -122,18 +115,14 @@ export function ObserverMapScreenChrome({
         pressed={overlay.isChatOpen}
         aria-label="Open chat"
         label="Chat"
-        onClick={() =>
-          overlay.isChatOpen ? overlay.closeSheet() : overlay.openChat()
-        }
+        onClick={() => (overlay.isChatOpen ? overlay.closeSheet() : overlay.openChat())}
       />
       <MapChromeControl
         variant="slot"
         pressed={overlay.isLogOpen}
         aria-label="Open session log"
         label="Log"
-        onClick={() =>
-          overlay.isLogOpen ? overlay.closeSheet() : overlay.openLog()
-        }
+        onClick={() => (overlay.isLogOpen ? overlay.closeSheet() : overlay.openLog())}
       />
       {canOpenCodes ? (
         <MapChromeControl
@@ -142,17 +131,13 @@ export function ObserverMapScreenChrome({
           aria-label="Open role codes"
           icon={<HudStarIcon className="h-5 w-5 shrink-0" />}
           label="Codes"
-          onClick={() =>
-            overlay.isCodesOpen ? overlay.closeSheet() : overlay.openCodes()
-          }
+          onClick={() => (overlay.isCodesOpen ? overlay.closeSheet() : overlay.openCodes())}
         />
       ) : null}
     </div>
   );
 
-  const toolChrome = (
-    <MapBottomChrome session={sessionIsland} />
-  );
+  const toolChrome = <MapBottomChrome session={sessionIsland} />;
 
   const codesSheet =
     myUid && canOpenCodes ? (
@@ -168,11 +153,7 @@ export function ObserverMapScreenChrome({
 
   return (
     <>
-      <MapScreenChromeSlots
-        layout="fragments"
-        header={statusBar}
-        toolbar={toolChrome}
-      />
+      <MapScreenChromeSlots layout="fragments" header={statusBar} toolbar={toolChrome} />
       {codesSheet}
     </>
   );

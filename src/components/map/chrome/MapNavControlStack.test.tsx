@@ -1,12 +1,12 @@
-import { render, screen, fireEvent } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { useState } from "react";
-import { MapDraggableFixedStack } from "./MapDraggableFixedStack";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   MAP_CHROME_DOCKS_STORAGE_KEY,
   MAP_NAV_DOCK_STORAGE_KEY,
   type MapChromeDockPlacement,
 } from "@/hooks/map/mapChromeDockPlacement";
+import { MapDraggableFixedStack } from "./MapDraggableFixedStack";
 
 function Harness({
   initial = { side: "left", topRatio: 0.72 } satisfies MapChromeDockPlacement,
@@ -70,16 +70,12 @@ describe("MapDraggableFixedStack (nav)", () => {
 
   it("rests with edge padding on left and right (React owns inset)", () => {
     const { container, unmount } = render(<Harness />);
-    const stack = container.querySelector(
-      '[data-testid="map-nav-dock-stack"]',
-    ) as HTMLElement;
+    const stack = container.querySelector('[data-testid="map-nav-dock-stack"]') as HTMLElement;
     expect(stack.style.left).toBe("12px");
     expect(stack.style.right).toBe("auto");
     unmount();
 
-    const right = render(
-      <Harness initial={{ side: "right", topRatio: 0.72 }} />,
-    );
+    const right = render(<Harness initial={{ side: "right", topRatio: 0.72 }} />);
     const rightStack = right.container.querySelector(
       '[data-testid="map-nav-dock-stack"]',
     ) as HTMLElement;
@@ -94,25 +90,23 @@ describe("MapDraggableFixedStack (nav)", () => {
       finishListeners: Listener[];
     }> = [];
     let rectN = 0;
-    vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(
-      () => {
-        rectN += 1;
-        const top = 100 + rectN * 40;
-        return {
-          x: 12,
-          y: top,
-          top,
-          left: 12,
-          bottom: top + 200,
-          right: 64,
-          width: 52,
-          height: 200,
-          toJSON() {
-            return {};
-          },
-        };
-      },
-    );
+    vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(() => {
+      rectN += 1;
+      const top = 100 + rectN * 40;
+      return {
+        x: 12,
+        y: top,
+        top,
+        left: 12,
+        bottom: top + 200,
+        right: 64,
+        width: 52,
+        height: 200,
+        toJSON() {
+          return {};
+        },
+      };
+    });
 
     Object.defineProperty(HTMLElement.prototype, "animate", {
       configurable: true,

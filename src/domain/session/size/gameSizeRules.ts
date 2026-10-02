@@ -1,5 +1,4 @@
 import type { AnnotationType } from "../../map/annotations";
-import type { MapTool } from "../../map/mapToolTypes";
 import type { DistanceUnit } from "../../map/distance";
 import { milesToMeters } from "../../map/distance";
 import {
@@ -12,8 +11,9 @@ import {
   tentacleMediumRadiusMeters,
   thermometerPresetsMetersForGameSizeAndUnit,
 } from "../../map/distancePresets";
-import type { GameSize } from "./gameSize";
+import type { MapTool } from "../../map/mapToolTypes";
 import type { TentacleLocationCategoryId } from "../../questions/tentacleQuestions";
+import type { GameSize } from "./gameSize";
 
 export {
   radarPresetsMilesForGameSize,
@@ -41,12 +41,7 @@ const TENTACLE_MEDIUM_CATEGORIES = [
   "hospital",
 ] as const satisfies readonly TentacleLocationCategoryId[];
 
-const TENTACLE_LARGE_CATEGORIES = [
-  "metro_line",
-  "zoo",
-  "aquarium",
-  "amusement_park",
-] as const;
+const TENTACLE_LARGE_CATEGORIES = ["metro_line", "zoo", "aquarium", "amusement_park"] as const;
 
 export type TentacleGameSizeCategoryId =
   | (typeof TENTACLE_MEDIUM_CATEGORIES)[number]
@@ -69,10 +64,7 @@ export function radarPresetsMetersForGameSize(
   gameSize: GameSize,
   unit: DistanceUnit = "imperial",
 ): number[] {
-  return radarPresetsMetersForGameSizeAndUnit(
-    gameSize,
-    resolveDistanceUnit(unit),
-  );
+  return radarPresetsMetersForGameSizeAndUnit(gameSize, resolveDistanceUnit(unit));
 }
 
 export function isRadarPresetAvailableForGameSize(
@@ -80,11 +72,7 @@ export function isRadarPresetAvailableForGameSize(
   distanceMeters: number,
   unit: DistanceUnit = "imperial",
 ): boolean {
-  return isRadarPresetMetersForGameSize(
-    gameSize,
-    distanceMeters,
-    resolveDistanceUnit(unit),
-  );
+  return isRadarPresetMetersForGameSize(gameSize, distanceMeters, resolveDistanceUnit(unit));
 }
 
 export function isRadarCustomRadiusAllowedForGameSize(
@@ -103,10 +91,7 @@ export function thermometerPresetsMetersForGameSize(
   gameSize: GameSize,
   unit: DistanceUnit = "imperial",
 ): number[] {
-  return thermometerPresetsMetersForGameSizeAndUnit(
-    gameSize,
-    resolveDistanceUnit(unit),
-  );
+  return thermometerPresetsMetersForGameSizeAndUnit(gameSize, resolveDistanceUnit(unit));
 }
 
 export function isThermometerPresetAvailableForGameSize(
@@ -115,8 +100,7 @@ export function isThermometerPresetAvailableForGameSize(
   unit: DistanceUnit = "imperial",
 ): boolean {
   return thermometerPresetsMetersForGameSize(gameSize, unit).some(
-    (preset) =>
-      Math.abs(preset - distanceMeters) < PRESET_MATCH_TOLERANCE_METERS,
+    (preset) => Math.abs(preset - distanceMeters) < PRESET_MATCH_TOLERANCE_METERS,
   );
 }
 
@@ -168,9 +152,7 @@ export function isTentacleCategoryAvailableForGameSize(
   gameSize: GameSize,
   categoryId: string,
 ): boolean {
-  return tentacleOptionsForGameSize(gameSize).some(
-    (option) => option.categoryId === categoryId,
-  );
+  return tentacleOptionsForGameSize(gameSize).some((option) => option.categoryId === categoryId);
 }
 
 export function toolDockEnabled(
@@ -187,10 +169,7 @@ export function toolDockEnabled(
   return true;
 }
 
-export function answerDeadlineMs(
-  toolType: AnnotationType | "photo",
-  gameSize: GameSize,
-): number {
+export function answerDeadlineMs(toolType: AnnotationType | "photo", gameSize: GameSize): number {
   if (toolType === "photo") {
     return PHOTO_ANSWER_DEADLINE_MS[gameSize];
   }
@@ -210,9 +189,7 @@ export function gameSizeRulesSummary(
   const hidingMinutes = hidingPeriodMinutes(gameSize);
   const hidingHours = hidingMinutes / 60;
   const hidingPeriodLabel =
-    hidingMinutes < 60
-      ? `${hidingMinutes} min hiding period`
-      : `${hidingHours} hr hiding period`;
+    hidingMinutes < 60 ? `${hidingMinutes} min hiding period` : `${hidingHours} hr hiding period`;
 
   const hidingZoneLabel =
     resolved === "metric"

@@ -1,12 +1,12 @@
-import test from "node:test";
 import assert from "node:assert/strict";
+import test from "node:test";
 import {
-  SESSION_OPS_AGENT_BUSY,
-  SESSION_OPS_AGENT_FAILED,
-  SESSION_OPS_AGENT_MISCONFIGURED,
   createSessionOpsAgent,
   createSessionOpsRun,
   getSessionOpsRun,
+  SESSION_OPS_AGENT_BUSY,
+  SESSION_OPS_AGENT_FAILED,
+  SESSION_OPS_AGENT_MISCONFIGURED,
 } from "../incident/sessionOpsCursorAgent.mjs";
 
 test("createSessionOpsAgent posts no-repo agent with HTTP mcpServers", async () => {
@@ -96,10 +96,7 @@ test("createSessionOpsRun posts follow-up run with mcpServers", async () => {
   );
 
   assert.equal(result.runId, "run-2");
-  assert.equal(
-    calls[0].url,
-    "https://api.cursor.com/v1/agents/bc-agent-1/runs",
-  );
+  assert.equal(calls[0].url, "https://api.cursor.com/v1/agents/bc-agent-1/runs");
   const body = JSON.parse(calls[0].init.body);
   assert.equal(body.prompt.text, "Second turn");
   assert.equal(body.mcpServers[0].type, "http");
@@ -137,10 +134,7 @@ test("getSessionOpsRun returns status and text", async () => {
     },
     {
       fetch: async (url) => {
-        assert.equal(
-          url,
-          "https://api.cursor.com/v1/agents/bc-agent-1/runs/run-1",
-        );
+        assert.equal(url, "https://api.cursor.com/v1/agents/bc-agent-1/runs/run-1");
         return {
           ok: true,
           status: 200,

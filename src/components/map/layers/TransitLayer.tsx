@@ -1,5 +1,5 @@
-import { memo, useCallback, useMemo, useState } from "react";
 import type { FeatureCollection, LineString } from "geojson";
+import { memo, useCallback, useMemo, useState } from "react";
 import { MAP_ANNOTATION_COLORS } from "@/domain/map/mapAnnotationColors";
 import type {
   TransitRealtimeSnapshot,
@@ -12,19 +12,13 @@ import {
   filterTransitVehiclesForViewport,
   type MapViewportBounds,
 } from "@/domain/map/transitViewport";
-import { featureHitId } from "../helpers/mapFeatureHitTest";
+import { useMapFeatureHitTest } from "../helpers/MapFeatureHitTestContext";
 import { MapLibreFeaturePopup } from "../helpers/MapLibreFeaturePopup";
 import { MapLibreGeoJsonOverlay } from "../helpers/MapLibreGeoJsonOverlay";
-import {
-  transitModeIconId,
-  transitVehicleIconId,
-} from "../helpers/mapLibreIconRegistry";
-import {
-  symbolMarkerCollection,
-  type SymbolMarkerProps,
-} from "../helpers/mapMarkerFeatures";
+import { featureHitId } from "../helpers/mapFeatureHitTest";
+import { transitModeIconId, transitVehicleIconId } from "../helpers/mapLibreIconRegistry";
 import { jlMarkerLayerId } from "../helpers/mapMarkerConstants";
-import { useMapFeatureHitTest } from "../helpers/MapFeatureHitTestContext";
+import { type SymbolMarkerProps, symbolMarkerCollection } from "../helpers/mapMarkerFeatures";
 
 interface TransitLayerProps {
   staticData: TransitStaticData | null;
@@ -60,10 +54,7 @@ export const TransitLayer = memo(function TransitLayer({
   }, [staticData?.routes, viewport]);
 
   const routeCollectionsByMode = useMemo(() => {
-    const byMode = new Map<
-      TransitRouteMode,
-      FeatureCollection<LineString, { id: string }>
-    >();
+    const byMode = new Map<TransitRouteMode, FeatureCollection<LineString, { id: string }>>();
     for (const route of visibleRoutes) {
       let collection = byMode.get(route.mode);
       if (!collection) {
@@ -83,8 +74,7 @@ export const TransitLayer = memo(function TransitLayer({
   }, [visibleRoutes]);
 
   const visibleStops = useMemo(
-    () =>
-      filterTransitStopsForViewport(staticData?.stops ?? [], viewport, zoom),
+    () => filterTransitStopsForViewport(staticData?.stops ?? [], viewport, zoom),
     [staticData?.stops, viewport, zoom],
   );
   const visibleVehicles = useMemo(
@@ -134,9 +124,7 @@ export const TransitLayer = memo(function TransitLayer({
   }
 
   const openStop = visibleStops.find((stop) => `stop-${stop.id}` === openPopupId);
-  const openVehicle = visibleVehicles.find(
-    (vehicle) => `vehicle-${vehicle.id}` === openPopupId,
-  );
+  const openVehicle = visibleVehicles.find((vehicle) => `vehicle-${vehicle.id}` === openPopupId);
 
   return (
     <>

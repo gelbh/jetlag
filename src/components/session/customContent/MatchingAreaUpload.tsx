@@ -1,17 +1,17 @@
-import { useRef, useState } from "react";
 import { Box, Button, Stack, Text } from "@mantine/core";
-import type { AdvancedSessionSettingsValue } from "@/domain/session/tools/advancedSessionSettings";
-import type { MatchingAdminLevel } from "@/domain/session/catalog/sessionCustomContent";
-import { parseMatchingAreaGeoJson } from "@/services/geo/matching/matchingAreaGeoJson";
-import type { GameArea } from "@/domain/map/annotations";
+import { useRef, useState } from "react";
 import {
+  compactDangerStyles,
+  compactGrayStyles,
   ErrorCallout,
   InsetGroup,
   SectionLabel,
-  compactDangerStyles,
-  compactGrayStyles,
 } from "@/components/ui/entry/entryChrome";
 import { InsetHairline } from "@/components/ui/entry/InsetRow";
+import type { GameArea } from "@/domain/map/annotations";
+import type { MatchingAdminLevel } from "@/domain/session/catalog/sessionCustomContent";
+import type { AdvancedSessionSettingsValue } from "@/domain/session/tools/advancedSessionSettings";
+import { parseMatchingAreaGeoJson } from "@/services/geo/matching/matchingAreaGeoJson";
 
 const ADMIN_LEVEL_LABELS: Record<MatchingAdminLevel, string> = {
   4: "1st division (admin level 4)",
@@ -33,15 +33,10 @@ export function MatchingAreaUpload({
   gameArea,
   disabled,
 }: MatchingAreaUploadProps) {
-  const fileInputRefs = useRef<
-    Partial<Record<MatchingAdminLevel, HTMLInputElement | null>>
-  >({});
+  const fileInputRefs = useRef<Partial<Record<MatchingAdminLevel, HTMLInputElement | null>>>({});
   const [uploadError, setUploadError] = useState<string | null>(null);
 
-  const handleMatchingAreaUpload = async (
-    level: MatchingAdminLevel,
-    file: File,
-  ) => {
+  const handleMatchingAreaUpload = async (level: MatchingAdminLevel, file: File) => {
     if (!gameArea) {
       setUploadError("Frame a play area on the map before uploading boundaries.");
       return;
@@ -60,9 +55,7 @@ export function MatchingAreaUpload({
         },
       });
     } catch (error) {
-      setUploadError(
-        error instanceof Error ? error.message : "Couldn't import GeoJSON.",
-      );
+      setUploadError(error instanceof Error ? error.message : "Couldn't import GeoJSON.");
     }
   };
 
@@ -70,8 +63,8 @@ export function MatchingAreaUpload({
     <Stack gap="xs">
       <SectionLabel>Custom matching areas</SectionLabel>
       <Text size="xs" c="var(--color-field-ink-muted)" px={4}>
-        Upload GeoJSON FeatureCollections to replace OpenStreetMap admin
-        boundaries for a division level in this session.
+        Upload GeoJSON FeatureCollections to replace OpenStreetMap admin boundaries for a division
+        level in this session.
       </Text>
       {!gameArea ? (
         <Text size="xs" c="var(--color-signal)" px={4}>
@@ -102,12 +95,7 @@ export function MatchingAreaUpload({
                 >
                   {ADMIN_LEVEL_LABELS[level]}
                   {uploaded ? (
-                    <Text
-                      span
-                      size="xs"
-                      c="var(--color-field-ink-muted)"
-                      ml={6}
-                    >
+                    <Text span size="xs" c="var(--color-field-ink-muted)" ml={6}>
                       Uploaded
                     </Text>
                   ) : null}

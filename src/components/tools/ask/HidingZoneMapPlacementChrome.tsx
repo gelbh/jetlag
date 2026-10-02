@@ -1,18 +1,19 @@
 /**
  * Map-first hiding-zone chrome: shared placement shell + place/confirm slots (no GPS).
  */
-import { useLayoutEffect } from "react";
+
 import { Button } from "@mantine/core";
 import { CheckIcon } from "@phosphor-icons/react";
-import { HudZoneIcon } from "@/components/map/icons/ToolIcons";
+import { useLayoutEffect } from "react";
+import type { HidingZoneStepId } from "@/components/hider/hidingZoneSteps";
+import type { HidingZoneToolPanelState } from "@/components/hider/hidingZoneToolPanelState";
 import { TransitStationPicker } from "@/components/hider/TransitStationPicker";
+import { HudZoneIcon } from "@/components/map/icons/ToolIcons";
 import {
   AskMapPlacementChrome,
   askMapPlacementSendStyles,
 } from "@/components/tools/ask/AskMapPlacementChrome";
 import { mapChromeSurfaceStyles } from "@/components/ui/entry/entryChrome";
-import type { HidingZoneStepId } from "@/components/hider/hidingZoneSteps";
-import type { HidingZoneToolPanelState } from "@/components/hider/hidingZoneToolPanelState";
 
 export type HidingZoneMapPlacementChromeProps = {
   moveMode: boolean;
@@ -69,13 +70,8 @@ export function HidingZoneMapPlacementChrome({
   onBackToMethod,
   writesEnabled = true,
 }: HidingZoneMapPlacementChromeProps) {
-  const step = resolveStep(
-    moveMode,
-    zoneTool.methodChosen,
-    zoneTool.hasPlacement,
-  );
-  const showStationPicker =
-    !zoneTool.manualMode && (step === "location" || step === "confirm");
+  const step = resolveStep(moveMode, zoneTool.methodChosen, zoneTool.hasPlacement);
+  const showStationPicker = !zoneTool.manualMode && (step === "location" || step === "confirm");
 
   // Layout: sync step before paint so mapPickEnabled / stations layer match overlay.
   useLayoutEffect(() => {
@@ -93,13 +89,9 @@ export function HidingZoneMapPlacementChrome({
 
   // Banner already owns questionPrompt + radius (configureLabel). Mid is
   // placement artifact only: station picker, manual confirm summary, or move cues.
-  const summary =
-    step === "confirm" && !showStationPicker
-      ? placementSummary(zoneTool)
-      : null;
+  const summary = step === "confirm" && !showStationPicker ? placementSummary(zoneTool) : null;
   const showMoveCues = moveMode;
-  const showMid =
-    showStationPicker || summary !== null || showMoveCues;
+  const showMid = showStationPicker || summary !== null || showMoveCues;
 
   const midSlot = showMid ? (
     <div
@@ -113,10 +105,7 @@ export function HidingZoneMapPlacementChrome({
       }}
     >
       {showMoveCues ? (
-        <p
-          className="m-0 mb-2 text-xs"
-          style={{ color: "var(--color-field-ink-muted)" }}
-        >
+        <p className="m-0 mb-2 text-xs" style={{ color: "var(--color-field-ink-muted)" }}>
           Timer paused while you relocate.
         </p>
       ) : null}
@@ -145,10 +134,7 @@ export function HidingZoneMapPlacementChrome({
           >
             Zone center
           </p>
-          <p
-            className="m-0 mt-1 text-sm font-medium"
-            title={summary.detail}
-          >
+          <p className="m-0 mt-1 text-sm font-medium" title={summary.detail}>
             {summary.label}
           </p>
         </>
@@ -190,14 +176,10 @@ export function HidingZoneMapPlacementChrome({
         onClick={() => {
           void zoneTool.confirmZone();
         }}
-        disabled={
-          !writesEnabled || !zoneTool.hasPlacement || zoneTool.saving
-        }
+        disabled={!writesEnabled || !zoneTool.hasPlacement || zoneTool.saving}
         aria-busy={zoneTool.saving || undefined}
         leftSection={
-          zoneTool.saving ? undefined : (
-            <CheckIcon size={16} weight="bold" aria-hidden />
-          )
+          zoneTool.saving ? undefined : <CheckIcon size={16} weight="bold" aria-hidden />
         }
         styles={askMapPlacementSendStyles}
       >
@@ -236,9 +218,7 @@ export function HidingZoneMapPlacementChrome({
       statusBody=""
       toolIcon={<HudZoneIcon width={20} height={20} />}
       questionAriaLabel={`${toolTitle} placement`}
-      onChangeConfigure={
-        !moveMode && onBackToMethod ? onBackToMethod : undefined
-      }
+      onChangeConfigure={!moveMode && onBackToMethod ? onBackToMethod : undefined}
       changeConfigureAriaLabel="Change placement method"
       midSlot={midSlot}
       answerSlot={answerSlot}

@@ -1,10 +1,4 @@
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  type RefCallback,
-} from "react";
+import { type RefCallback, useCallback, useEffect, useRef, useState } from "react";
 import { useMotionProfile } from "./useMotionProfile";
 
 export type PresencePhase = "closed" | "entering" | "open" | "exiting";
@@ -73,14 +67,12 @@ export function useAnimatedPresence({
 
   useEffect(() => {
     if (open) {
-      /* eslint-disable react-hooks/set-state-in-effect -- sync mount phase to open prop */
       setPhase((current) => {
         if (current === "closed") {
           return decorativeAnimate ? "entering" : "open";
         }
         return current;
       });
-      /* eslint-enable react-hooks/set-state-in-effect */
       return;
     }
 
@@ -173,12 +165,7 @@ export function useAnimatedPresence({
     beginExit();
   }, [beginExit]);
 
-  const animClass =
-    phase === "entering"
-      ? enterClass
-      : phase === "exiting"
-        ? exitClass
-        : "";
+  const animClass = phase === "entering" ? enterClass : phase === "exiting" ? exitClass : "";
 
   return {
     mounted: phase !== "closed",

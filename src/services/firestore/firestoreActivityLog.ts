@@ -11,14 +11,14 @@ import {
 } from "firebase/firestore";
 import type { SessionActivityEvent } from "../../domain/session/activity/sessionActivityLog";
 import { sortActivityEventsDesc } from "../../domain/session/activity/sessionActivityLog";
-import { getFirestoreDb } from "../core/firebase/firebase";
 import { captureException } from "../core/analytics/sentry";
-import { isFirestorePermissionDenied } from "./firestoreAnnotations";
-import { handleFirestoreListenError } from "./sessions/listenError";
+import { getFirestoreDb } from "../core/firebase/firebase";
 import {
   buildActivityLogDocument,
   deserializeActivityLogFromFirestore,
 } from "./firestoreActivityLogSerialization";
+import { isFirestorePermissionDenied } from "./firestoreAnnotations";
+import { handleFirestoreListenError } from "./sessions/listenError";
 
 function activityLogCollection(sessionId: string) {
   return collection(getFirestoreDb(), "sessions", sessionId, "activityLog");

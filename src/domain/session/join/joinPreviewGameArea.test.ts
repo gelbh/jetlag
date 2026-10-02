@@ -1,9 +1,6 @@
 import { describe, expect, it } from "vitest";
-import {
-  JOIN_PREVIEW_PLACEHOLDER_AREA,
-  isPlaceholderGameArea,
-} from "./joinPreviewGameArea";
 import type { GameArea } from "../../map/annotations";
+import { isPlaceholderGameArea, JOIN_PREVIEW_PLACEHOLDER_AREA } from "./joinPreviewGameArea";
 
 const zeroFallback: GameArea = {
   type: "Polygon",

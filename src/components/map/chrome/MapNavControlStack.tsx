@@ -1,14 +1,10 @@
+import { ActionIcon, Box, Stack } from "@mantine/core";
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
-import { ActionIcon, Box, Stack } from "@mantine/core";
-import {
-  getMapBasemap,
-  type MapStyle,
-  type StreetBasemap,
-} from "@/domain/map/mapBasemaps";
+import { mapChromeSurfaceStyles } from "@/components/ui/entry/entryChrome";
+import { getMapBasemap, type MapStyle, type StreetBasemap } from "@/domain/map/mapBasemaps";
 import { previewTileUrlsFromOrigin } from "@/domain/map/mapTilePreview";
 import { useMapNavDockSide } from "@/hooks/map/useMapNavDockSide";
-import { mapChromeSurfaceStyles } from "@/components/ui/entry/entryChrome";
 import { HudCompassIcon, HudMinusIcon, HudPlusIcon } from "../../ui/brand/HudIcons";
 import {
   useMapLibreInteracting,
@@ -110,18 +106,11 @@ export function MapNavControlStack({
 
   const nextStyle = mapStyle === "standard" ? "satellite" : "standard";
   const previewBasemap = getMapBasemap(nextStyle, streetBasemap);
-  const styleLabel =
-    mapStyle === "standard" ? "Switch to satellite view" : "Switch to map view";
+  const styleLabel = mapStyle === "standard" ? "Switch to satellite view" : "Switch to map view";
   const satelliteActive = mapStyle === "satellite";
   const previewTileUrls = useMemo(
     () =>
-      previewTileUrlsFromOrigin(
-        nextStyle,
-        tileOrigin.x,
-        tileOrigin.y,
-        undefined,
-        streetBasemap,
-      ),
+      previewTileUrlsFromOrigin(nextStyle, tileOrigin.x, tileOrigin.y, undefined, streetBasemap),
     [nextStyle, streetBasemap, tileOrigin.x, tileOrigin.y],
   );
 
@@ -176,9 +165,7 @@ export function MapNavControlStack({
                   />
                 ))}
               </span>
-              <span className="map-style-control__label">
-                {previewBasemap.label}
-              </span>
+              <span className="map-style-control__label">{previewBasemap.label}</span>
             </span>
           </ActionIcon>
         ) : null}
@@ -201,8 +188,7 @@ export function MapNavControlStack({
               style={{
                 height: 1,
                 marginInline: 8,
-                backgroundColor:
-                  "oklch(from var(--color-field-ink) l c h / 0.14)",
+                backgroundColor: "oklch(from var(--color-field-ink) l c h / 0.14)",
               }}
             />
             <ActionIcon

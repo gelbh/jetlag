@@ -1,10 +1,10 @@
-import { useCallback, useState, type ReactNode } from "react";
 import { Stack } from "@mantine/core";
-import { AccountSignInGate } from "../auth/AccountSignInGate";
-import { AppleSignInButton } from "./AppleSignInButton";
-import { ErrorCallout, SuccessCallout } from "../ui/entry/entryChrome";
-import { APPLE_SIGN_IN_ENABLED } from "../../services/core/auth/accountAuth";
+import { type ReactNode, useCallback, useState } from "react";
 import { recoverPremiumEntitlements } from "../../services/billing/premiumBilling";
+import { APPLE_SIGN_IN_ENABLED } from "../../services/core/auth/accountAuth";
+import { AccountSignInGate } from "../auth/AccountSignInGate";
+import { ErrorCallout, SuccessCallout } from "../ui/entry/entryChrome";
+import { AppleSignInButton } from "./AppleSignInButton";
 
 interface PremiumSignInGateProps {
   children?: ReactNode;

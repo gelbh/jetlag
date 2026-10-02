@@ -1,7 +1,7 @@
 import type { ComponentProps } from "react";
-import { MapView } from "./chrome/MapView";
 import { useMapLandscapeChrome } from "../session/mapChrome/MapLandscapeChromeContext";
 import { resolveLandscapeMapControlInset } from "../session/mapChrome/resolveLandscapeMapControlInset";
+import { MapView } from "./chrome/MapView";
 import type { MapChromeControlInset } from "./helpers/mapChromeControlInset";
 
 type MapViewWithLandscapeInsetProps = ComponentProps<typeof MapView> & {
@@ -17,11 +17,7 @@ export function MapViewWithLandscapeInset({
 }: MapViewWithLandscapeInsetProps) {
   const landscape = useMapLandscapeChrome();
   const baseInset = isDesktop ? "safe-area" : mobileInset;
-  const resolvedInset = resolveLandscapeMapControlInset(
-    baseInset,
-    isDesktop,
-    landscape,
-  );
+  const resolvedInset = resolveLandscapeMapControlInset(baseInset, isDesktop, landscape);
 
   return (
     <MapView

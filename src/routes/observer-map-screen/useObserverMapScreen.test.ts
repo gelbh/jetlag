@@ -1,8 +1,8 @@
 import { renderHook } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
+import type { GameArea } from "../../domain/map/annotations";
 import { DEFAULT_MAP_CENTER } from "../../domain/map/defaultMapCenter";
 import { JOIN_PREVIEW_PLACEHOLDER_AREA } from "../../domain/session/join/joinPreviewGameArea";
-import type { GameArea } from "../../domain/map/annotations";
 import { useObserverMapScreen } from "./useObserverMapScreen";
 
 const ZERO_GAME_AREA: GameArea = {
@@ -21,8 +21,7 @@ const ZERO_GAME_AREA: GameArea = {
 const mockUseResolvedSessionRules = vi.fn();
 
 vi.mock("../../hooks/session/useResolvedSessionRules", () => ({
-  useResolvedSessionRules: (...args: unknown[]) =>
-    mockUseResolvedSessionRules(...args),
+  useResolvedSessionRules: (...args: unknown[]) => mockUseResolvedSessionRules(...args),
 }));
 
 vi.mock("../../hooks/session/useSharedSessionScreen", () => ({

@@ -18,8 +18,7 @@ export function ZonePanel({
   return (
     <div className="space-y-4">
       <p className="text-sm text-ink-muted">
-        Tap the map to add vertices. Close the polygon when the dead zone is
-        outlined.
+        Tap the map to add vertices. Close the polygon when the dead zone is outlined.
       </p>
       <p className="text-sm text-ink-dim">Vertices: {vertexCount}</p>
       <TextField

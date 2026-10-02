@@ -133,20 +133,14 @@ describe("resolveHiderTruthReference", () => {
 
 describe("isAskOriginInsideHidingZone", () => {
   it("detects ask origins inside the radius", () => {
-    expect(
-      isAskOriginInsideHidingZone(insideAsk, zoneCenter, zoneRadiusMeters),
-    ).toBe(true);
-    expect(
-      isAskOriginInsideHidingZone(outsideAsk, zoneCenter, zoneRadiusMeters),
-    ).toBe(false);
+    expect(isAskOriginInsideHidingZone(insideAsk, zoneCenter, zoneRadiusMeters)).toBe(true);
+    expect(isAskOriginInsideHidingZone(outsideAsk, zoneCenter, zoneRadiusMeters)).toBe(false);
     expect(isAskOriginInsideHidingZone(zoneCenter, zoneCenter, 0)).toBe(true);
   });
 
   it("rejects invalid zone radii", () => {
     expect(isAskOriginInsideHidingZone(insideAsk, zoneCenter, -1)).toBe(false);
-    expect(isAskOriginInsideHidingZone(insideAsk, zoneCenter, Number.NaN)).toBe(
-      false,
-    );
+    expect(isAskOriginInsideHidingZone(insideAsk, zoneCenter, Number.NaN)).toBe(false);
   });
 });
 
@@ -182,12 +176,14 @@ describe("resolvePendingQuestionTruthReference", () => {
       session: null,
     };
 
-    expect(
-      resolvePendingQuestionTruthReference(pendingAt(insideAsk), context),
-    ).toEqual({ point: liveGps, mode: "hidingPlace" });
-    expect(
-      resolvePendingQuestionTruthReference(pendingAt(outsideAsk), context),
-    ).toEqual({ point: zoneCenter, mode: "hidingZoneCenter" });
+    expect(resolvePendingQuestionTruthReference(pendingAt(insideAsk), context)).toEqual({
+      point: liveGps,
+      mode: "hidingPlace",
+    });
+    expect(resolvePendingQuestionTruthReference(pendingAt(outsideAsk), context)).toEqual({
+      point: zoneCenter,
+      mode: "hidingZoneCenter",
+    });
   });
 
   it("falls back to zone center for empty photo geometryJson", () => {
@@ -221,10 +217,7 @@ describe("resolvePendingQuestionTruthReference", () => {
       };
 
       expect(
-        resolvePendingQuestionTruthReference(
-          pendingAt(insideAsk, { toolType }),
-          context,
-        ),
+        resolvePendingQuestionTruthReference(pendingAt(insideAsk, { toolType }), context),
       ).toEqual({ point: zoneCenter, mode: "hidingZoneCenter" });
     },
   );
@@ -242,26 +235,20 @@ describe("resolvePendingQuestionTruthReference", () => {
       };
 
       expect(
-        resolvePendingQuestionTruthReference(
-          pendingAt(outsideAsk, { toolType }),
-          context,
-        ),
+        resolvePendingQuestionTruthReference(pendingAt(outsideAsk, { toolType }), context),
       ).toEqual({ point: liveGps, mode: "hidingPlace" });
     },
   );
 
   it("uses zone center for tentacle when seeker GPS is missing", () => {
     expect(
-      resolvePendingQuestionTruthReference(
-        pendingAt(insideAsk, { toolType: "tentacle" }),
-        {
-          hiderUid: "hider-1",
-          zoneCenter,
-          hidingPlace: liveGps,
-          zoneRadiusMeters,
-          session: null,
-        },
-      ),
+      resolvePendingQuestionTruthReference(pendingAt(insideAsk, { toolType: "tentacle" }), {
+        hiderUid: "hider-1",
+        zoneCenter,
+        hidingPlace: liveGps,
+        zoneRadiusMeters,
+        session: null,
+      }),
     ).toEqual({ point: zoneCenter, mode: "hidingZoneCenter" });
   });
 
@@ -295,10 +282,7 @@ describe("resolvePendingQuestionTruthReference", () => {
     };
 
     expect(
-      resolvePendingQuestionTruthReference(
-        pendingAt(insideAsk, { toolType: "radar" }),
-        context,
-      ),
+      resolvePendingQuestionTruthReference(pendingAt(insideAsk, { toolType: "radar" }), context),
     ).toEqual({ point: liveGps, mode: "hidingPlace" });
   });
 });

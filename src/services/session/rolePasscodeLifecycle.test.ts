@@ -69,9 +69,7 @@ describe("rolePasscodeLifecycle", () => {
   it("calls reveal and regenerate role passcode callables", async () => {
     const reveal = vi.fn(async () => ({ data: { role: "observer", rolePasscode: "OBSV" } }));
     const regenerate = vi.fn(async () => ({ data: { role: "seeker", rolePasscode: "SEEK" } }));
-    httpsCallable
-      .mockReturnValueOnce(reveal)
-      .mockReturnValueOnce(regenerate);
+    httpsCallable.mockReturnValueOnce(reveal).mockReturnValueOnce(regenerate);
 
     await revealRolePasscode("sess-1", "observer");
     await regenerateRolePasscode("sess-1", "seeker");
@@ -81,7 +79,9 @@ describe("rolePasscodeLifecycle", () => {
   });
 
   it("coalesces in-flight reveal requests without durable memoization", async () => {
-    let resolveReveal: ((value: { data: { role: "seeker"; rolePasscode: string } }) => void) | undefined;
+    let resolveReveal:
+      | ((value: { data: { role: "seeker"; rolePasscode: string } }) => void)
+      | undefined;
     const reveal = vi.fn(
       () =>
         new Promise<{ data: { role: "seeker"; rolePasscode: string } }>((resolve) => {
@@ -112,7 +112,9 @@ describe("rolePasscodeLifecycle", () => {
   });
 
   it("abandons warm reveal when regenerating so late prefetch cannot win", async () => {
-    let resolvePrefetch: ((value: { data: { role: "seeker"; rolePasscode: string } }) => void) | undefined;
+    let resolvePrefetch:
+      | ((value: { data: { role: "seeker"; rolePasscode: string } }) => void)
+      | undefined;
     const prefetchReveal = vi.fn(
       () =>
         new Promise<{ data: { role: "seeker"; rolePasscode: string } }>((resolve) => {
@@ -201,26 +203,20 @@ describe("rolePasscodeLifecycle", () => {
   });
 
   it("maps wrong role code errors to player copy", () => {
-    expect(
-      mapRolePasscodeJoinError(new Error("permission-denied Wrong role code.")),
-    ).toContain("Wrong role code");
+    expect(mapRolePasscodeJoinError(new Error("permission-denied Wrong role code."))).toContain(
+      "Wrong role code",
+    );
   });
 
   it("maps global client update required to refresh copy", () => {
     expect(
-      mapRolePasscodeJoinError(
-        new Error("failed-precondition Client update required."),
-      ),
+      mapRolePasscodeJoinError(new Error("failed-precondition Client update required.")),
     ).toContain("Refresh");
+    expect(mapJoinRequestError(new Error("failed-precondition Client update required."))).toContain(
+      "Refresh",
+    );
     expect(
-      mapJoinRequestError(
-        new Error("failed-precondition Client update required."),
-      ),
-    ).toContain("Refresh");
-    expect(
-      mapLeaderJoinResolveError(
-        new Error("failed-precondition Client update required."),
-      ),
+      mapLeaderJoinResolveError(new Error("failed-precondition Client update required.")),
     ).toContain("That player needs to update");
   });
 

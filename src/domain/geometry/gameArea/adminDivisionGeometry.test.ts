@@ -1,12 +1,12 @@
-import { describe, expect, it } from "vitest";
 import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
 import { point as turfPoint } from "@turf/helpers";
+import { describe, expect, it } from "vitest";
+import type { AdminDivisionFeature } from "@/domain/geo/types";
 import type { GameArea } from "../../map/annotations";
 import {
   buildAdminDivisionBoundaryPreview,
   buildAdminDivisionEliminationRegion,
 } from "./adminDivisionGeometry";
-import type { AdminDivisionFeature } from "@/domain/geo/types";
 import { gameAreaToPolygon } from "./geometry";
 
 const sampleGameArea: GameArea = {
@@ -43,10 +43,7 @@ const westDivision: AdminDivisionFeature = {
 
 describe("admin division geometry", () => {
   it("clips the seeker division to the play area", () => {
-    const preview = buildAdminDivisionBoundaryPreview(
-      westDivision,
-      sampleGameArea,
-    );
+    const preview = buildAdminDivisionBoundaryPreview(westDivision, sampleGameArea);
 
     expect(preview).not.toBeNull();
     expect(
@@ -58,16 +55,8 @@ describe("admin division geometry", () => {
   });
 
   it("eliminates the complement on yes and the division on no", () => {
-    const yesRegion = buildAdminDivisionEliminationRegion(
-      westDivision,
-      sampleGameArea,
-      "yes",
-    );
-    const noRegion = buildAdminDivisionEliminationRegion(
-      westDivision,
-      sampleGameArea,
-      "no",
-    );
+    const yesRegion = buildAdminDivisionEliminationRegion(westDivision, sampleGameArea, "yes");
+    const noRegion = buildAdminDivisionEliminationRegion(westDivision, sampleGameArea, "no");
 
     expect(yesRegion).not.toBeNull();
     expect(noRegion).not.toBeNull();

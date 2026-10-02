@@ -21,12 +21,7 @@ export type IncidentPlatform = "web" | "capacitor";
 
 export type IncidentMessageSender = "player" | "admin" | "system";
 
-export type IncidentMessageKind =
-  | "chat"
-  | "prompt"
-  | "mitigation"
-  | "agent"
-  | "hotfix";
+export type IncidentMessageKind = "chat" | "prompt" | "mitigation" | "agent" | "hotfix";
 
 export type IncidentMitigationType =
   | "soft_reload"
@@ -95,10 +90,7 @@ export interface IncidentHotfixState {
   publishedAt?: string;
 }
 
-export type IncidentCodingAgentStatus =
-  | "launched"
-  | "failed"
-  | "misconfigured";
+export type IncidentCodingAgentStatus = "launched" | "failed" | "misconfigured";
 
 /** Private coding-agent / Cursor hotfix launch state on the incident doc. */
 export interface IncidentCodingAgentState {
@@ -162,11 +154,7 @@ export interface IncidentMessageRecord {
   kind: IncidentMessageKind;
 }
 
-export type HostConfirmStatus =
-  | "pending"
-  | "approved"
-  | "denied"
-  | "expired";
+export type HostConfirmStatus = "pending" | "approved" | "denied" | "expired";
 
 export interface HostConfirmRecord {
   id: string;
@@ -188,10 +176,7 @@ export interface HostConfirmRecord {
 }
 
 export function isIncidentStatus(value: unknown): value is IncidentStatus {
-  return (
-    typeof value === "string" &&
-    (INCIDENT_STATUSES as readonly string[]).includes(value)
-  );
+  return typeof value === "string" && (INCIDENT_STATUSES as readonly string[]).includes(value);
 }
 
 /** Trims a player note and clamps it to {@link INCIDENT_NOTE_MAX_LENGTH}. */

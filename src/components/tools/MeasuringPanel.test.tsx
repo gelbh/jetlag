@@ -1,5 +1,5 @@
-import { describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
 import type { DistanceUnit } from "@/domain/map/distance";
 import {
   BASE_MEASURING_CATALOG,
@@ -89,9 +89,7 @@ describe("MeasuringPanel public props (AC #1)", () => {
       />,
     );
 
-    expect(
-      screen.getByText("No named zoo found in this play area."),
-    ).toBeInTheDocument();
+    expect(screen.getByText("No named zoo found in this play area.")).toBeInTheDocument();
     expect(screen.getByText("Measuring from")).toBeInTheDocument();
   });
 });

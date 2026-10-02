@@ -6,9 +6,7 @@ export type LeaveHostSessionResult =
   | { action: "promoted"; newHostUid: string }
   | { action: "ended" };
 
-export async function leaveHostSession(
-  sessionId: string,
-): Promise<LeaveHostSessionResult> {
+export async function leaveHostSession(sessionId: string): Promise<LeaveHostSessionResult> {
   if (!isFirebaseConfigured()) {
     throw new Error("Firebase is not configured.");
   }
@@ -26,9 +24,7 @@ export type RepairGhostHostResult =
   | { action: "repaired"; newHostUid: string }
   | { action: "noop"; hostUid: string };
 
-export async function repairGhostHost(
-  sessionId: string,
-): Promise<RepairGhostHostResult> {
+export async function repairGhostHost(sessionId: string): Promise<RepairGhostHostResult> {
   if (!isFirebaseConfigured()) {
     throw new Error("Firebase is not configured.");
   }
@@ -47,10 +43,7 @@ export async function repairGhostHost(
   ) {
     return { action: "repaired", newHostUid: data.newHostUid };
   }
-  if (
-    data?.action === "noop" &&
-    typeof data.hostUid === "string"
-  ) {
+  if (data?.action === "noop" && typeof data.hostUid === "string") {
     return { action: "noop", hostUid: data.hostUid };
   }
   throw new Error("Unexpected repairGhostHost response.");
@@ -62,10 +55,7 @@ export async function endSession(sessionId: string): Promise<void> {
   }
 
   const functions = await getFirebaseFunctions();
-  const callable = httpsCallable<{ sessionId: string }, { ok: boolean }>(
-    functions,
-    "endSession",
-  );
+  const callable = httpsCallable<{ sessionId: string }, { ok: boolean }>(functions, "endSession");
   await callable({ sessionId });
   trackSessionEnded("host_end");
 }

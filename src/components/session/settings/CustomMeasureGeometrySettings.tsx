@@ -1,19 +1,19 @@
-import { useId, useState } from "react";
 import { Box, Button, Stack, Text, Textarea, TextInput } from "@mantine/core";
-import type { AdvancedSessionSettingsValue } from "@/domain/session/tools/advancedSessionSettings";
+import { useId, useState } from "react";
+import {
+  compactDangerStyles,
+  ErrorCallout,
+  filledStyles,
+  InsetGroup,
+  insetTextareaStyles,
+  insetTextInputStyles,
+} from "@/components/ui/entry/entryChrome";
+import { InsetHairline } from "@/components/ui/entry/InsetRow";
 import {
   createCustomMeasureGeometryId,
   type SessionCustomMeasureGeometry,
 } from "@/domain/session/catalog/customMeasureGeometry";
-import {
-  ErrorCallout,
-  InsetGroup,
-  compactDangerStyles,
-  filledStyles,
-  insetTextInputStyles,
-  insetTextareaStyles,
-} from "@/components/ui/entry/entryChrome";
-import { InsetHairline } from "@/components/ui/entry/InsetRow";
+import type { AdvancedSessionSettingsValue } from "@/domain/session/tools/advancedSessionSettings";
 
 interface CustomMeasureGeometrySettingsProps {
   value: AdvancedSessionSettingsValue;
@@ -21,10 +21,7 @@ interface CustomMeasureGeometrySettingsProps {
   disabled?: boolean;
 }
 
-function parseMeasureGeometryGeoJson(
-  text: string,
-  label: string,
-): SessionCustomMeasureGeometry {
+function parseMeasureGeometryGeoJson(text: string, label: string): SessionCustomMeasureGeometry {
   const parsed = JSON.parse(text) as {
     type?: string;
     geometry?: { type?: string };
@@ -91,33 +88,22 @@ export function CustomMeasureGeometrySettings({
       setGeoJson("");
       setError(null);
     } catch (uploadError) {
-      setError(
-        uploadError instanceof Error
-          ? uploadError.message
-          : "Couldn't import GeoJSON.",
-      );
+      setError(uploadError instanceof Error ? uploadError.message : "Couldn't import GeoJSON.");
     }
   };
 
   const removeGeometry = (id: string) => {
     onChange({
       ...value,
-      customMeasureGeometries: customMeasureGeometries.filter(
-        (geometry) => geometry.id !== id,
-      ),
+      customMeasureGeometries: customMeasureGeometries.filter((geometry) => geometry.id !== id),
     });
   };
 
   return (
     <Stack gap="xs">
-      <Text
-        id={panelId}
-        size="xs"
-        c="var(--color-field-ink-muted)"
-        px={4}
-      >
-        Import a LineString or Polygon GeoJSON for coastline traces, HSR lines,
-        or other custom measuring targets.
+      <Text id={panelId} size="xs" c="var(--color-field-ink-muted)" px={4}>
+        Import a LineString or Polygon GeoJSON for coastline traces, HSR lines, or other custom
+        measuring targets.
       </Text>
 
       {customMeasureGeometries.length > 0 ? (

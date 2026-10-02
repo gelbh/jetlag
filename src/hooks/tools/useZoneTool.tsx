@@ -1,5 +1,5 @@
-import { useCallback, useState } from "react";
 import type { Feature, Polygon as GeoPolygon } from "geojson";
+import { useCallback, useState } from "react";
 import { ZonePanel } from "../../components/tools/ZonePanel";
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import type { AnnotationRecord } from "../../domain/map/annotations";
@@ -13,11 +13,7 @@ interface UseZoneToolParams {
   finishPlacement: () => void;
 }
 
-export function useZoneTool({
-  active,
-  createAnnotation,
-  finishPlacement,
-}: UseZoneToolParams) {
+export function useZoneTool({ active, createAnnotation, finishPlacement }: UseZoneToolParams) {
   const [zoneVertices, setZoneVertices] = useState<LatLngTuple[]>([]);
   const [zoneLabel, setZoneLabel] = useState("");
 

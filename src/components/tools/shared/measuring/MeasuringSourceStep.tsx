@@ -1,16 +1,16 @@
+import { GroupedSelectField } from "@/components/ui/forms/GroupedSelectField";
 import {
   BASE_MEASURING_CATALOG,
   MEASURING_GROUPS,
-  measuringQuestionFor,
   type MeasuringCatalogOption,
   type MeasuringFromKind,
   type MeasuringLocationCategory,
   type MeasuringSubject,
+  measuringQuestionFor,
 } from "@/domain/questions";
-import { GroupedSelectField } from "@/components/ui/forms/GroupedSelectField";
-import { CatalogExhaustedMessage } from "../readout/CatalogExhaustedMessage";
 import { QuestionPromptBlock } from "../controls/QuestionPromptBlock";
 import { ToolSection } from "../panels/ToolSection";
+import { CatalogExhaustedMessage } from "../readout/CatalogExhaustedMessage";
 
 interface MeasuringSourceStepProps {
   measureFrom: MeasuringFromKind;
@@ -43,20 +43,16 @@ export function MeasuringSourceStep({
         value: option.id,
         label: option.label,
         disabled:
-          (usedMeasuringFromKinds.has(option.id) ||
-            unavailableMeasuringFromKinds.has(option.id)) &&
+          (usedMeasuringFromKinds.has(option.id) || unavailableMeasuringFromKinds.has(option.id)) &&
           !(optionChosen && option.id === measureFrom),
       })),
   })).filter((group) => group.options.length > 0);
   const hasAvailableMeasureOptions = measureCatalog.some(
     (option) =>
-      !usedMeasuringFromKinds.has(option.id) &&
-      !unavailableMeasuringFromKinds.has(option.id),
+      !usedMeasuringFromKinds.has(option.id) && !unavailableMeasuringFromKinds.has(option.id),
   );
   const question =
-    optionChosen && locationCategory
-      ? measuringQuestionFor(subject, locationCategory)
-      : null;
+    optionChosen && locationCategory ? measuringQuestionFor(subject, locationCategory) : null;
 
   return (
     <ToolSection first compact status="active">
@@ -72,10 +68,7 @@ export function MeasuringSourceStep({
         disabled={!hasAvailableMeasureOptions}
       />
       {question ? (
-        <QuestionPromptBlock
-          prompt={question.prompt}
-          ruleSummary={question.ruleSummary}
-        />
+        <QuestionPromptBlock prompt={question.prompt} ruleSummary={question.ruleSummary} />
       ) : null}
     </ToolSection>
   );

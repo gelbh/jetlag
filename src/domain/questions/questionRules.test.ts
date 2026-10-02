@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { AnnotationRecord } from "../map/annotations";
+import type { PendingQuestionRecord } from "../session/activity/sessionChat";
+import { answerDeadlineMs } from "../session/size/gameSizeRules";
 import {
   countAnnotationUses,
   formatAnswerCountdown,
@@ -14,17 +16,11 @@ import {
   questionCostBreakdown,
   questionCostLabel,
 } from "./questionRules";
-import { answerDeadlineMs } from "../session/size/gameSizeRules";
-import type { PendingQuestionRecord } from "../session/activity/sessionChat";
 
 describe("isUsedOptionPendingQuestion", () => {
   it("counts pending and resolved", () => {
-    expect(
-      isUsedOptionPendingQuestion({ status: "pending" } as never),
-    ).toBe(true);
-    expect(
-      isUsedOptionPendingQuestion({ status: "resolved" } as never),
-    ).toBe(true);
+    expect(isUsedOptionPendingQuestion({ status: "pending" } as never)).toBe(true);
+    expect(isUsedOptionPendingQuestion({ status: "resolved" } as never)).toBe(true);
   });
 
   it("counts cancelled only when an answer is present", () => {
@@ -71,27 +67,16 @@ describe("questionRules", () => {
     expect(formatDrawPickSummary(2, 1)).toBe("Draw 2, pick 1");
     expect(formatDrawPickSummary(6, 2)).toBe("Draw 6, pick 2");
     expect(formatSequentialDrawPickSummary("D3P1", 0)).toBe("Draw 3, pick 1");
-    expect(formatSequentialDrawPickSummary("D3P1", 1)).toBe(
-      "Draw 3, pick 1 × 2",
-    );
+    expect(formatSequentialDrawPickSummary("D3P1", 1)).toBe("Draw 3, pick 1 × 2");
     expect(formatPendingDrawPickSummary("radar", 2, 1)).toBe("Draw 2, pick 1");
-    expect(formatPendingDrawPickSummary("radar", 4, 2)).toBe(
-      "Draw 2, pick 1 × 2",
-    );
-    expect(formatPendingDrawPickSummary("tentacle", 4, 2)).toBe(
-      "Draw 4, pick 2",
-    );
+    expect(formatPendingDrawPickSummary("radar", 4, 2)).toBe("Draw 2, pick 1 × 2");
+    expect(formatPendingDrawPickSummary("tentacle", 4, 2)).toBe("Draw 4, pick 2");
   });
 
   it("detects open pending questions", () => {
-    const pending = [
-      { status: "answered" },
-      { status: "pending" },
-    ] as PendingQuestionRecord[];
+    const pending = [{ status: "answered" }, { status: "pending" }] as PendingQuestionRecord[];
     expect(hasOpenPendingQuestion(pending)).toBe(true);
-    expect(
-      hasOpenPendingQuestion([{ status: "answered" }] as PendingQuestionRecord[]),
-    ).toBe(false);
+    expect(hasOpenPendingQuestion([{ status: "answered" }] as PendingQuestionRecord[])).toBe(false);
   });
 
   it("uses five minute answer deadlines for question tools", () => {
@@ -113,29 +98,18 @@ describe("questionRules", () => {
   it("detects expired answer deadlines", () => {
     const answerableAt = "2026-01-01T00:00:00.000Z";
     const now = Date.parse("2026-01-01T00:06:00.000Z");
-    expect(
-      isQuestionAnswerDeadlineExpired(answerableAt, 5 * 60 * 1000, now),
-    ).toBe(true);
-    expect(
-      formatExpiredAnswerCountdown(
-        answerableAt,
-        5 * 60 * 1000,
-        undefined,
-        now,
-      ),
-    ).toBe("Time expired. Timer paused.");
+    expect(isQuestionAnswerDeadlineExpired(answerableAt, 5 * 60 * 1000, now)).toBe(true);
+    expect(formatExpiredAnswerCountdown(answerableAt, 5 * 60 * 1000, undefined, now)).toBe(
+      "Time expired. Timer paused.",
+    );
   });
 
   it("formats answer countdowns", () => {
     const now = Date.parse("2026-01-01T00:05:00.000Z");
     const answerableAt = "2026-01-01T00:00:00.000Z";
     expect(formatAnswerCountdown(undefined, 60_000, now)).toBeNull();
-    expect(formatAnswerCountdown(answerableAt, 10 * 60 * 1000, now)).toBe(
-      "5:00 remaining",
-    );
-    expect(formatAnswerCountdown(answerableAt, 5 * 60 * 1000, now)).toBe(
-      "Time expired",
-    );
+    expect(formatAnswerCountdown(answerableAt, 10 * 60 * 1000, now)).toBe("5:00 remaining");
+    expect(formatAnswerCountdown(answerableAt, 5 * 60 * 1000, now)).toBe("Time expired");
   });
 
   it("counts annotation option uses", () => {

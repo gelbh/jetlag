@@ -1,8 +1,9 @@
 /**
  * Ask Map HUD host — iOS entry SheetHost (Mantine bottom Drawer), same chassis as Chat.
  */
-import type { ReactNode } from "react";
+
 import { Stack } from "@mantine/core";
+import type { ReactNode } from "react";
 import { SheetHost } from "@/components/ui/sheets/SheetHost";
 import { AskCommitStrip } from "./AskCommitStrip";
 import { AskCostChip } from "./AskCostChip";
@@ -44,27 +45,24 @@ export function AskHudHost({
 }: AskHudHostProps) {
   const cueTicker = showCue ? <AskModeCueTicker cue={cue} /> : null;
 
-  const costChip =
-    showCostChip ? (
-      <div className="flex justify-start">
-        <AskCostChip toolLabel={toolLabel} costLabel={costLabel} />
-      </div>
-    ) : null;
+  const costChip = showCostChip ? (
+    <div className="flex justify-start">
+      <AskCostChip toolLabel={toolLabel} costLabel={costLabel} />
+    </div>
+  ) : null;
 
   // Sheet path: hide muted "SEND/ASK — …" footer; cue already states the next step.
-  const sheetShowCommit =
-    showCommitStrip && (canCommit || Boolean(error) || isSubmitting);
+  const sheetShowCommit = showCommitStrip && (canCommit || Boolean(error) || isSubmitting);
 
-  const sheetCommit =
-    sheetShowCommit ? (
-      <AskCommitStrip
-        canCommit={canCommit}
-        label={commitLabel}
-        onCommit={onCommit}
-        isSubmitting={isSubmitting}
-        error={error}
-      />
-    ) : null;
+  const sheetCommit = sheetShowCommit ? (
+    <AskCommitStrip
+      canCommit={canCommit}
+      label={commitLabel}
+      onCommit={onCommit}
+      isSubmitting={isSubmitting}
+      error={error}
+    />
+  ) : null;
 
   const pinned =
     cueTicker || costChip ? (
@@ -75,10 +73,7 @@ export function AskHudHost({
     ) : null;
 
   return (
-    <div
-      data-testid="ask-hud-host"
-      data-ask-composition="ask-first"
-    >
+    <div data-testid="ask-hud-host" data-ask-composition="ask-first">
       <SheetHost
         open
         onClose={onDismiss ?? (() => undefined)}

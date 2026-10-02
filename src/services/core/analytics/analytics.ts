@@ -5,13 +5,13 @@ import {
   writeAnalyticsConsent,
 } from "@/domain/device/consent/analyticsConsent";
 import { isEmbedMode } from "@/domain/device/embed/embedMode";
+import { shouldEnableAnalytics } from "./analyticsEnabled";
 import {
   ANALYTICS_EVENTS,
   type AnalyticsEventName,
   type AnalyticsEventProps,
   type SessionEndedReason,
 } from "./analyticsEvents";
-import { shouldEnableAnalytics } from "./analyticsEnabled";
 import { filterPosthogException } from "./posthogExceptionPolicy";
 
 export {
@@ -21,8 +21,7 @@ export {
   type SessionEndedReason,
 };
 
-const ASSET_PAGEVIEW_PATH =
-  /\.(png|jpe?g|webp|gif|svg|ico|json|xml|txt)$/i;
+const ASSET_PAGEVIEW_PATH = /\.(png|jpe?g|webp|gif|svg|ico|json|xml|txt)$/i;
 
 /**
  * First-party Worker reverse proxy path.
@@ -34,7 +33,6 @@ export const POSTHOG_UI_HOST = "https://eu.posthog.com";
 function resolvePosthogApiHost(): string {
   return POSTHOG_API_HOST;
 }
-
 
 /** Keys that must never leave the device via product analytics. */
 const FORBIDDEN_PROP_KEYS = new Set([
@@ -201,9 +199,7 @@ export function syncAnalyticsIdentity(user: AnalyticsIdentity | null): void {
   applyIdentity(user);
 }
 
-function pageViewProperties(
-  pathWithSearch: string,
-): Record<string, string | boolean> {
+function pageViewProperties(pathWithSearch: string): Record<string, string | boolean> {
   const pathname = pathWithSearch.split("?", 1)[0] ?? pathWithSearch;
   const props: Record<string, string | boolean> = {
     path: pathname,
@@ -220,13 +216,7 @@ function pageViewProperties(
   const queryIndex = pathWithSearch.indexOf("?");
   if (queryIndex >= 0) {
     const params = new URLSearchParams(pathWithSearch.slice(queryIndex + 1));
-    for (const key of [
-      "utm_source",
-      "utm_medium",
-      "utm_campaign",
-      "utm_content",
-      "utm_term",
-    ]) {
+    for (const key of ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"]) {
       const value = params.get(key);
       if (value) props[key] = value;
     }
@@ -261,9 +251,7 @@ export function track<E extends AnalyticsEventName>(
     return;
   }
 
-  const scrubbed = scrubAnalyticsProperties(
-    props as Record<string, unknown> | undefined,
-  );
+  const scrubbed = scrubAnalyticsProperties(props as Record<string, unknown> | undefined);
   posthog.capture(event, scrubbed);
 }
 
@@ -271,9 +259,7 @@ export function trackSessionEnded(reason: SessionEndedReason): void {
   track(ANALYTICS_EVENTS.session_ended, { reason });
 }
 
-export function resetAnalyticsForTests(options?: {
-  initialized?: boolean;
-}): void {
+export function resetAnalyticsForTests(options?: { initialized?: boolean }): void {
   initialized = options?.initialized ?? false;
   identifiedUid = null;
   lastSeenIdentity = null;

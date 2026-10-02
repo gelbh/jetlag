@@ -1,9 +1,9 @@
 import { useCallback } from "react";
-import { isTerminalSessionSyncMessage } from "../../domain/device/sync/terminalSessionMessage";
 import {
-  userErrorFromTerminalSessionMessage,
   type UserErrorDisplay,
+  userErrorFromTerminalSessionMessage,
 } from "../../domain/device/feedback/userErrors";
+import { isTerminalSessionSyncMessage } from "../../domain/device/sync/terminalSessionMessage";
 import { useSessionExit } from "./useSessionExit";
 import { useSyncRetryAction } from "./useSyncRetryAction";
 
@@ -27,9 +27,7 @@ export function useMapTerminalSessionChrome({
   const onSyncRetry = useSyncRetryAction();
   const inactiveChrome = isTerminalSessionSyncMessage(syncMessage);
   const terminalSessionError =
-    inactiveChrome && syncMessage
-      ? userErrorFromTerminalSessionMessage(syncMessage)
-      : null;
+    inactiveChrome && syncMessage ? userErrorFromTerminalSessionMessage(syncMessage) : null;
 
   const onReturnToJoin = useCallback(() => {
     void exitSession({

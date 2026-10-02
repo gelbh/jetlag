@@ -11,9 +11,7 @@ describe("PhotoAnswerPreview", () => {
   it("renders sent externally without loading a photo", () => {
     render(<PhotoAnswerPreview answer={{ kind: "sent_externally" }} />);
 
-    expect(
-      screen.getByText("Photo sent outside the app"),
-    ).toBeInTheDocument();
+    expect(screen.getByText("Photo sent outside the app")).toBeInTheDocument();
     expect(getPhotoDownloadUrl).not.toHaveBeenCalled();
   });
 
@@ -32,8 +30,6 @@ describe("PhotoAnswerPreview", () => {
     await waitFor(() => {
       expect(screen.getByAltText("Hider photo answer")).toBeInTheDocument();
     });
-    expect(getPhotoDownloadUrl).toHaveBeenCalledWith(
-      "sessions/s1/photoAnswers/q1/photo.jpg",
-    );
+    expect(getPhotoDownloadUrl).toHaveBeenCalledWith("sessions/s1/photoAnswers/q1/photo.jpg");
   });
 });

@@ -1,5 +1,6 @@
 import { HttpsError } from "firebase-functions/v2/https";
 import { isAdminAuth } from "../admin/adminAccess.mjs";
+import { assertClientMeetsConfiguredMin } from "./clientMinVersion.mjs";
 import {
   buildMembershipHealState,
   countMembersWithRole,
@@ -7,12 +8,7 @@ import {
   promoteOrClearRoleLeader,
   readMembershipFields,
 } from "./roleGateShared.mjs";
-import {
-  newRoleSecret,
-  normalizeRolePasscode,
-  verifyRolePasscode,
-} from "./rolePasscodes.mjs";
-import { assertClientMeetsConfiguredMin } from "./clientMinVersion.mjs";
+import { newRoleSecret, normalizeRolePasscode, verifyRolePasscode } from "./rolePasscodes.mjs";
 import { sessionVersionCompatible } from "./sessionVersion.mjs";
 
 export const JOIN_SESSION_NOT_FOUND = "JOIN_SESSION_NOT_FOUND";
@@ -56,13 +52,7 @@ function applyLeaderPromotionOnRoleSwitch({
     return { roleGates, clearSecret: false };
   }
 
-  const promoted = promoteOrClearRoleLeader(
-    roleGates,
-    memberUids,
-    memberRoles,
-    currentRole,
-    uid,
-  );
+  const promoted = promoteOrClearRoleLeader(roleGates, memberUids, memberRoles, currentRole, uid);
   return {
     roleGates: promoted.roleGates,
     clearSecret: promoted.clearSecret,
@@ -85,21 +75,35 @@ function assertRolePasscodeForJoin(
     if (!verifyRolePasscode(secrets.observer, normalized)) {
       throw new Error(JOIN_WRONG_PASSCODE);
     }
-    return { becameLeader: false, returnedPasscode: undefined, secretsPatch: null, roleGatesPatch: null };
+    return {
+      becameLeader: false,
+      returnedPasscode: undefined,
+      secretsPatch: null,
+      roleGatesPatch: null,
+    };
   }
 
   if (role !== "seeker" && role !== "hider") {
-    return { becameLeader: false, returnedPasscode: undefined, secretsPatch: null, roleGatesPatch: null };
+    return {
+      becameLeader: false,
+      returnedPasscode: undefined,
+      secretsPatch: null,
+      roleGatesPatch: null,
+    };
   }
 
   // Same-role silent heal/rejoin: returning member already holds this role under
   // the prior uid (auth drift). Do not require a passcode to reclaim membership.
   const alreadyInRole =
     memberRoles[uid] === role ||
-    (typeof returningMemberUid === "string" &&
-      memberRoles[returningMemberUid] === role);
+    (typeof returningMemberUid === "string" && memberRoles[returningMemberUid] === role);
   if (alreadyInRole) {
-    return { becameLeader: false, returnedPasscode: undefined, secretsPatch: null, roleGatesPatch: null };
+    return {
+      becameLeader: false,
+      returnedPasscode: undefined,
+      secretsPatch: null,
+      roleGatesPatch: null,
+    };
   }
 
   const occupied = countMembersWithRole(memberRoles, role) > 0;
@@ -122,7 +126,12 @@ function assertRolePasscodeForJoin(
     throw new Error(JOIN_WRONG_PASSCODE);
   }
 
-  return { becameLeader: false, returnedPasscode: undefined, secretsPatch: null, roleGatesPatch: null };
+  return {
+    becameLeader: false,
+    returnedPasscode: undefined,
+    secretsPatch: null,
+    roleGatesPatch: null,
+  };
 }
 
 export async function joinSessionWithRoleHandler(db, auth, rawInput) {
@@ -134,8 +143,7 @@ export async function joinSessionWithRoleHandler(db, auth, rawInput) {
   const code = normalizeSessionCode(rawInput?.code);
   const role = rawInput?.role;
   const rolePasscode = rawInput?.rolePasscode;
-  const clientVersion =
-    typeof rawInput?.clientVersion === "string" ? rawInput.clientVersion : "";
+  const clientVersion = typeof rawInput?.clientVersion === "string" ? rawInput.clientVersion : "";
   const returningMemberUid = sanitizeReturningMemberUid(
     rawInput?.persistedMyUid,
     rawInput?.returningMemberUid,
@@ -161,8 +169,7 @@ export async function joinSessionWithRoleHandler(db, auth, rawInput) {
   }
 
   const codeData = codeSnap.data() ?? {};
-  const sessionId =
-    typeof codeData.sessionId === "string" ? codeData.sessionId : "";
+  const sessionId = typeof codeData.sessionId === "string" ? codeData.sessionId : "";
   if (!sessionId) {
     throw new HttpsError("not-found", "Session not found.");
   }
@@ -188,19 +195,13 @@ export async function joinSessionWithRoleHandler(db, auth, rawInput) {
 
     if (
       role !== "admin" &&
-      !sessionVersionCompatible(
-        data,
-        clientVersion,
-        uid,
-        returningMemberUid,
-        role,
-      )
+      !sessionVersionCompatible(data, clientVersion, uid, returningMemberUid, role)
     ) {
       throw new Error(JOIN_INCOMPATIBLE_VERSION);
     }
 
     const membership = readMembershipFields(data);
-    let { memberUids, memberRoles, memberAppVersions, hostUid } = membership;
+    const { memberUids, memberRoles, memberAppVersions, hostUid } = membership;
     let roleGates = {
       version: 1,
       leaders: { ...(data.roleGates?.leaders ?? {}) },
@@ -252,9 +253,7 @@ export async function joinSessionWithRoleHandler(db, auth, rawInput) {
       secretsChanged = true;
     }
     if (passcodeResult.roleGatesPatch) {
-      for (const [gateRole, leaderUid] of Object.entries(
-        passcodeResult.roleGatesPatch,
-      )) {
+      for (const [gateRole, leaderUid] of Object.entries(passcodeResult.roleGatesPatch)) {
         roleGates.leaders[gateRole] = leaderUid;
       }
     }

@@ -20,9 +20,7 @@ describe("serviceWorkerRefresh", () => {
 
   it("detects a waiting service worker", () => {
     expect(hasWaitingServiceWorker(undefined)).toBe(false);
-    expect(
-      hasWaitingServiceWorker({ waiting: {} } as ServiceWorkerRegistration),
-    ).toBe(true);
+    expect(hasWaitingServiceWorker({ waiting: {} } as ServiceWorkerRegistration)).toBe(true);
   });
 
   it("prompts when a worker is waiting", () => {
@@ -30,10 +28,7 @@ describe("serviceWorkerRefresh", () => {
     promptIfWaiting(undefined, onNeedRefresh);
     expect(onNeedRefresh).not.toHaveBeenCalled();
 
-    promptIfWaiting(
-      { waiting: {} } as ServiceWorkerRegistration,
-      onNeedRefresh,
-    );
+    promptIfWaiting({ waiting: {} } as ServiceWorkerRegistration, onNeedRefresh);
     expect(onNeedRefresh).toHaveBeenCalledOnce();
   });
 
@@ -116,9 +111,9 @@ describe("serviceWorkerRefresh", () => {
 
     try {
       const registerApplyUpdate = vi.fn().mockRejectedValue(new Error("nope"));
-      await expect(
-        applyServiceWorkerUpdate(undefined, registerApplyUpdate),
-      ).rejects.toThrow("nope");
+      await expect(applyServiceWorkerUpdate(undefined, registerApplyUpdate)).rejects.toThrow(
+        "nope",
+      );
 
       expect(reload).not.toHaveBeenCalled();
       vi.advanceTimersByTime(1500);

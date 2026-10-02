@@ -226,11 +226,7 @@ describe("revealRouteTransition", () => {
       expect(document.documentElement.dataset.navDirection).toBe("forward");
     } finally {
       if (visibilityDescriptor) {
-        Object.defineProperty(
-          document,
-          "visibilityState",
-          visibilityDescriptor,
-        );
+        Object.defineProperty(document, "visibilityState", visibilityDescriptor);
       } else {
         Reflect.deleteProperty(document, "visibilityState");
       }
@@ -267,16 +263,10 @@ describe("revealRouteTransition", () => {
   });
 
   it("route CSS durations use --motion-route tokens (Verify #5)", () => {
-    const stylesDir = resolve(
-      dirname(fileURLToPath(import.meta.url)),
-      "../styles",
-    );
+    const stylesDir = resolve(dirname(fileURLToPath(import.meta.url)), "../styles");
     const baseCss = readFileSync(resolve(stylesDir, "base.css"), "utf8");
     const motionCss = readFileSync(resolve(stylesDir, "motion.css"), "utf8");
-    const routeTransitionCss = readFileSync(
-      resolve(stylesDir, "route-transition.css"),
-      "utf8",
-    );
+    const routeTransitionCss = readFileSync(resolve(stylesDir, "route-transition.css"), "utf8");
 
     expect(baseCss).toMatch(/--motion-route-reveal:\s*260ms/);
     expect(baseCss).toMatch(/--motion-route-overlay-exit:\s*200ms/);
@@ -287,8 +277,6 @@ describe("revealRouteTransition", () => {
       /::view-transition-old\(root\)[^;{]*\{[^}]*var\(--motion-route-reveal\)/s,
     );
     expect(routeTransitionCss).toMatch(/var\(--motion-route-overlay-exit/);
-    expect(motionCss).not.toMatch(
-      /\.jl-route-fallback-enter-\w+\s*\{[^}]*animation:[^;]*\d+ms/s,
-    );
+    expect(motionCss).not.toMatch(/\.jl-route-fallback-enter-\w+\s*\{[^}]*animation:[^;]*\d+ms/s);
   });
 });

@@ -1,7 +1,7 @@
 import { Button } from "@mantine/core";
 import { useLocation } from "react-router-dom";
-import { appUpdateCopy } from "@/domain/device/updates/appUpdateCopy";
 import { isStandalonePwa } from "@/domain/device/pwa/isStandalonePwa";
+import { appUpdateCopy } from "@/domain/device/updates/appUpdateCopy";
 import { useAppUpdateState } from "@/hooks/app/useAppUpdateState";
 import { HudBanner } from "../hud/HudBanner";
 import { MapFloatSurface } from "./MapFloatSurface";
@@ -10,8 +10,7 @@ export function AppUpdateBanner() {
   const location = useLocation();
   const { showGlobalBanner, applyUpdate } = useAppUpdateState();
 
-  const preferBottom =
-    isStandalonePwa() || location.pathname === "/map";
+  const preferBottom = isStandalonePwa() || location.pathname === "/map";
 
   return (
     <HudBanner

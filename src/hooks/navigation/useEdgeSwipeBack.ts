@@ -95,8 +95,7 @@ export function useEdgeSwipeBack(): void {
       }
 
       const dx = event.clientX - startXRef.current;
-      const shouldCommit =
-        dx >= COMMIT_DRAG_PX || velocityRef.current >= COMMIT_VELOCITY_PX_MS;
+      const shouldCommit = dx >= COMMIT_DRAG_PX || velocityRef.current >= COMMIT_VELOCITY_PX_MS;
 
       reset();
 

@@ -20,14 +20,8 @@ interface GameOverChromeProps {
   };
 }
 
-export function GameOverChrome({
-  sessionId,
-  playerRole,
-  myUid,
-  actions,
-}: GameOverChromeProps) {
-  const { gameOver, rematchPending, rematchError, handleRematch, handleGameOverHome } =
-    actions;
+export function GameOverChrome({ sessionId, playerRole, myUid, actions }: GameOverChromeProps) {
+  const { gameOver, rematchPending, rematchError, handleRematch, handleGameOverHome } = actions;
 
   if (gameOver.loading) {
     return (

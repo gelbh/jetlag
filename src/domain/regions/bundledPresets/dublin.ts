@@ -1,6 +1,6 @@
-import { attachPlayArea } from "./attachPlayArea";
-import { EXPANSION_OFF, type BundledGamePresetDefinition } from "./shared";
 import { DUBLIN_REGION_PACK_ID } from "../dublinRegionPack";
+import { attachPlayArea } from "./attachPlayArea";
+import { type BundledGamePresetDefinition, EXPANSION_OFF } from "./shared";
 
 export function dublinPresets(): BundledGamePresetDefinition[] {
   const dublinHierarchy = [

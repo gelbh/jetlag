@@ -8,10 +8,7 @@ export function generateSessionCode(): string {
   let code = "";
 
   for (let index = 0; index < 4; index += 1) {
-    code +=
-      SESSION_CODE_ALPHABET[
-        Math.floor(Math.random() * SESSION_CODE_ALPHABET.length)
-      ];
+    code += SESSION_CODE_ALPHABET[Math.floor(Math.random() * SESSION_CODE_ALPHABET.length)];
   }
 
   return code;

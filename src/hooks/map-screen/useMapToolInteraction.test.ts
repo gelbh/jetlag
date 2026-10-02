@@ -6,9 +6,7 @@ function createHandler() {
   return { handleMapClick: vi.fn() };
 }
 
-function renderInteraction(
-  overrides: Partial<Parameters<typeof useMapToolInteraction>[0]> = {},
-) {
+function renderInteraction(overrides: Partial<Parameters<typeof useMapToolInteraction>[0]> = {}) {
   const radarTool = createHandler();
   const handlers = {
     radarTool,

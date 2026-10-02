@@ -1,18 +1,15 @@
 import type { MapViewportState } from "@/components/map/chrome/MapViewportTracker";
-import type { MapStyle } from "@/domain/map/mapBasemaps";
-import type { LayerVisibility } from "@/state/sessionStore";
 import { LayerVisibilityGrid } from "@/components/session/mapChrome/LayerVisibilityGrid";
 import { toggleRowStyle } from "@/components/ui/entry/entryStyles";
+import type { MapStyle } from "@/domain/map/mapBasemaps";
+import type { LayerVisibility } from "@/state/sessionStore";
 
 interface MapPanelProps {
   mapViewport: MapViewportState | null;
   layerVisibility: LayerVisibility;
   effectiveBasemapStyle: MapStyle;
   lowPowerMode: boolean;
-  onLayerVisibilityChange: (
-    layer: keyof LayerVisibility,
-    visible: boolean,
-  ) => void;
+  onLayerVisibilityChange: (layer: keyof LayerVisibility, visible: boolean) => void;
   onMapStyleChange: (style: MapStyle) => void;
   onLowPowerModeChange: (enabled: boolean) => void;
 }

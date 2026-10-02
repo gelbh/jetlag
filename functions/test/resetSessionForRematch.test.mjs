@@ -1,5 +1,5 @@
-import test from "node:test";
 import assert from "node:assert/strict";
+import test from "node:test";
 import { FieldValue } from "firebase-admin/firestore";
 import {
   REMATCH_NOT_MEMBER,
@@ -74,9 +74,7 @@ function mockRematchDb({
                       return {
                         exists: anchorsExists,
                         data: () =>
-                          anchorsExists
-                            ? { anchors: { host: { lat: 1, lng: 2 } } }
-                            : {},
+                          anchorsExists ? { anchors: { host: { lat: 1, lng: 2 } } } : {},
                       };
                     },
                   }),
@@ -299,7 +297,6 @@ test("missing session is not found", async () => {
 
   await assert.rejects(
     () => resetSessionForRematchHandler(db, "host", "sess-1"),
-    (error) =>
-      error instanceof Error && error.message === REMATCH_SESSION_NOT_FOUND,
+    (error) => error instanceof Error && error.message === REMATCH_SESSION_NOT_FOUND,
   );
 });

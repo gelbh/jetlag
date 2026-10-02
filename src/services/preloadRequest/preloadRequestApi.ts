@@ -4,10 +4,7 @@ import type {
   PreloadPresetSnapshot,
   PreloadRequestStatus,
 } from "../../domain/preloadRequest/preloadRequestTypes";
-import {
-  getFirebaseFunctions,
-  isFirebaseConfigured,
-} from "../core/firebase/firebase";
+import { getFirebaseFunctions, isFirebaseConfigured } from "../core/firebase/firebase";
 
 function mapCallableError(error: unknown, fallback: string): Error {
   if (error instanceof FirebaseError) {

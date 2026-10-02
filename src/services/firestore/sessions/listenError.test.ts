@@ -19,10 +19,7 @@ describe("handleFirestoreListenError", () => {
 
   it("breadcrumbs expected permission-denied without captureException", () => {
     const onError = vi.fn();
-    const error = new FirebaseError(
-      "permission-denied",
-      "Missing or insufficient permissions.",
-    );
+    const error = new FirebaseError("permission-denied", "Missing or insufficient permissions.");
 
     handleFirestoreListenError(error, onError);
 

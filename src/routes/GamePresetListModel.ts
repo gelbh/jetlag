@@ -1,16 +1,14 @@
 import { useId, useMemo, useState } from "react";
 import type { PresetBrowseBodyProps } from "../components/presets/PresetBrowseLayout";
-import { filterGamePresetsForSearch } from "../domain/session/presets/gamePresetSearch";
-import { migrateGamePreset } from "../domain/session/presets/gamePreset";
-import { resolveFavouritePresets } from "../domain/session/presets/presetFavourites";
 import { isBundledPresetId } from "../domain/regions/bundledGamePresets";
+import { migrateGamePreset } from "../domain/session/presets/gamePreset";
+import { filterGamePresetsForSearch } from "../domain/session/presets/gamePresetSearch";
+import { resolveFavouritePresets } from "../domain/session/presets/presetFavourites";
 import { useGamePresetStore } from "../state/gamePresetStore";
 
 export function useGamePresetListModel(): PresetBrowseBodyProps {
   const presets = useGamePresetStore((state) => state.presets);
-  const favouritePresetIds = useGamePresetStore(
-    (state) => state.favouritePresetIds,
-  );
+  const favouritePresetIds = useGamePresetStore((state) => state.favouritePresetIds);
   const deletePreset = useGamePresetStore((state) => state.deletePreset);
   const searchId = useId();
   const [query, setQuery] = useState("");

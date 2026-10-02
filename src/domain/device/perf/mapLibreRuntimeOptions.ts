@@ -18,8 +18,6 @@ const LOW_POWER_MAP_RUNTIME: MapLibreRuntimeOptions = {
  * Explicit MapLibre constructor knobs so low-power toggles always apply
  * known values (constructor options are not live-updated by react-map-gl).
  */
-export function mapLibreRuntimeOptions(
-  lowPowerMode: boolean,
-): MapLibreRuntimeOptions {
+export function mapLibreRuntimeOptions(lowPowerMode: boolean): MapLibreRuntimeOptions {
   return lowPowerMode ? LOW_POWER_MAP_RUNTIME : NORMAL_MAP_RUNTIME;
 }

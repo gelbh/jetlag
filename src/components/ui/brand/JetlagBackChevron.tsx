@@ -1,4 +1,4 @@
-import { useId, type SVGProps } from "react";
+import { type SVGProps, useId } from "react";
 
 /**
  * Curved reply/back arrow (product mark style).
@@ -25,14 +25,7 @@ export function JetlagBackChevron({
       {...props}
     >
       <defs>
-        <linearGradient
-          id={gradId}
-          x1="8"
-          y1="16"
-          x2="40"
-          y2="34"
-          gradientUnits="userSpaceOnUse"
-        >
+        <linearGradient id={gradId} x1="8" y1="16" x2="40" y2="34" gradientUnits="userSpaceOnUse">
           <stop offset="0%" stopColor="var(--color-flag)" />
           <stop offset="55%" stopColor="var(--color-flag)" />
           <stop offset="100%" stopColor="var(--color-signal)" />

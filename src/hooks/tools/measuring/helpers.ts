@@ -1,12 +1,12 @@
 import type { Feature, LineString, MultiPolygon, Polygon } from "geojson";
-import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
 import type { MeasuringPlace } from "@/domain/geo/types";
+import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
 import {
-  measuringTargetKind,
-  measuringUsesAllPlacesInArea,
   type MeasuringFromKind,
   type MeasuringLocationCategory,
   type MeasuringSubject,
+  measuringTargetKind,
+  measuringUsesAllPlacesInArea,
 } from "@/domain/questions";
 
 export function measuringCommitReady(input: {

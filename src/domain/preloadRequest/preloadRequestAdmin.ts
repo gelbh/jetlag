@@ -1,32 +1,24 @@
+import { parseRegionPackId } from "../regions/regionPack";
 import type {
   PreloadPresetSnapshot,
   PreloadRequest,
   PreloadRequestEmailState,
   PreloadRequestStatus,
 } from "./preloadRequestTypes";
-import { parseRegionPackId } from "../regions/regionPack";
 
-const STATUSES = new Set<PreloadRequestStatus>([
-  "open",
-  "accepted",
-  "declined",
-  "shipped",
-]);
+const STATUSES = new Set<PreloadRequestStatus>(["open", "accepted", "declined", "shipped"]);
 
-export function isPreloadRequestStatus(
-  value: unknown,
-): value is PreloadRequestStatus {
+export function isPreloadRequestStatus(value: unknown): value is PreloadRequestStatus {
   return typeof value === "string" && STATUSES.has(value as PreloadRequestStatus);
 }
 
 /** Admin status edges for inbox actions (mirrors Cloud Function ALLOWED). */
-const ALLOWED: Record<PreloadRequestStatus, ReadonlySet<PreloadRequestStatus>> =
-  {
-    open: new Set(["accepted", "declined", "shipped"]),
-    accepted: new Set(["shipped", "declined", "open"]),
-    declined: new Set(["open", "accepted"]),
-    shipped: new Set(["open"]),
-  };
+const ALLOWED: Record<PreloadRequestStatus, ReadonlySet<PreloadRequestStatus>> = {
+  open: new Set(["accepted", "declined", "shipped"]),
+  accepted: new Set(["shipped", "declined", "open"]),
+  declined: new Set(["open", "accepted"]),
+  shipped: new Set(["open"]),
+};
 
 export function canTransitionPreloadRequestStatus(
   from: PreloadRequestStatus,
@@ -35,9 +27,7 @@ export function canTransitionPreloadRequestStatus(
   return ALLOWED[from]?.has(to) ?? false;
 }
 
-export function preloadRequestStatusChipLabel(
-  status: PreloadRequestStatus,
-): string {
+export function preloadRequestStatusChipLabel(status: PreloadRequestStatus): string {
   switch (status) {
     case "open":
       return "OPEN";
@@ -56,9 +46,7 @@ export function preloadRequestStatusChipLabel(
 
 export type PreloadStatusChipTone = "open" | "active" | "muted" | "warning";
 
-export function preloadRequestStatusChipTone(
-  status: PreloadRequestStatus,
-): PreloadStatusChipTone {
+export function preloadRequestStatusChipTone(status: PreloadRequestStatus): PreloadStatusChipTone {
   switch (status) {
     case "open":
       return "open";
@@ -75,15 +63,11 @@ export function preloadRequestStatusChipTone(
   }
 }
 
-export function countOpenPreloadRequests(
-  requests: readonly PreloadRequest[],
-): number {
+export function countOpenPreloadRequests(requests: readonly PreloadRequest[]): number {
   return requests.filter((request) => request.status === "open").length;
 }
 
-function parseEmailState(
-  value: unknown,
-): PreloadRequestEmailState | undefined {
+function parseEmailState(value: unknown): PreloadRequestEmailState | undefined {
   if (typeof value !== "object" || value === null || Array.isArray(value)) {
     return undefined;
   }
@@ -109,11 +93,7 @@ function parseSnapshot(value: unknown): PreloadPresetSnapshot | null {
   if (typeof record.name !== "string" || record.name.trim().length === 0) {
     return null;
   }
-  if (
-    record.gameSize !== "small" &&
-    record.gameSize !== "medium" &&
-    record.gameSize !== "large"
-  ) {
+  if (record.gameSize !== "small" && record.gameSize !== "medium" && record.gameSize !== "large") {
     return null;
   }
   if (record.distanceUnit !== "imperial" && record.distanceUnit !== "metric") {

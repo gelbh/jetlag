@@ -1,6 +1,6 @@
 import { useCallback } from "react";
+import { type ExitSessionParams, exitSession } from "../../services/session/sessionExit";
 import { useAppNavigate } from "../navigation/useAppNavigate";
-import { exitSession, type ExitSessionParams } from "../../services/session/sessionExit";
 
 type UseSessionExitParams = Omit<ExitSessionParams, "navigate">;
 

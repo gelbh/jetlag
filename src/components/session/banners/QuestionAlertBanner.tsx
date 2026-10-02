@@ -1,14 +1,12 @@
 import { useEffect, useState } from "react";
-import type { SessionRulesInput } from "@/domain/session/rules";
-import {
-  selectPrimaryHiderAnswerTarget,
-} from "@/domain/questions";
+import { selectPrimaryHiderAnswerTarget } from "@/domain/questions";
 import type { HiderTruthReferenceMode } from "@/domain/questions/hiderTruth/resolveHiderTruthReference";
 import type { HiderTruthResult } from "@/domain/questions/ui";
 import type {
   PendingQuestionRecord,
   SessionMessageRecord,
 } from "@/domain/session/activity/sessionChat";
+import type { SessionRulesInput } from "@/domain/session/rules";
 import {
   HiderPendingQuestionAnswer,
   type HiderPendingQuestionAnswerProps,
@@ -53,12 +51,7 @@ export function QuestionAlertBanner({
     return () => window.clearInterval(interval);
   }, []);
 
-  const target = selectPrimaryHiderAnswerTarget(
-    pendingQuestions,
-    messages,
-    sessionRules,
-    nowMs,
-  );
+  const target = selectPrimaryHiderAnswerTarget(pendingQuestions, messages, sessionRules, nowMs);
   const closed =
     target != null &&
     (target.message.status === "answered" ||
@@ -83,26 +76,17 @@ export function QuestionAlertBanner({
           role="region"
           aria-label="Open question"
         >
-          {answerError ? (
-            <InlineError className="mb-2">{answerError}</InlineError>
-          ) : null}
+          {answerError ? <InlineError className="mb-2">{answerError}</InlineError> : null}
           <HiderPendingQuestionAnswer
             message={target.message}
             pending={target.pending}
             sessionRules={sessionRules}
             sessionId={sessionId}
-            truth={
-              questionTruths?.get(target.pending.id) ?? null
-            }
+            truth={questionTruths?.get(target.pending.id) ?? null}
             truthsLoading={truthsLoading}
-            truthReferenceMode={
-              truthReferenceModes?.get(target.pending.id) ?? "hidingZoneCenter"
-            }
+            truthReferenceMode={truthReferenceModes?.get(target.pending.id) ?? "hidingZoneCenter"}
             nowMs={nowMs}
-            disabled={
-              answerSubmitting ||
-              answeredPendingIds?.has(target.pending.id) === true
-            }
+            disabled={answerSubmitting || answeredPendingIds?.has(target.pending.id) === true}
             onAnswerQuestion={onAnswerQuestion}
           />
         </MapFloatSurface>

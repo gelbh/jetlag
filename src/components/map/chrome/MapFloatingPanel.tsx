@@ -1,7 +1,7 @@
 import type { CSSProperties, Ref } from "react";
-import type { PanelHandleProps } from "@/hooks/motion/usePanelDrag";
-import { useMotionProfile } from "@/hooks/motion/useMotionProfile";
 import { sheetHandleStyle } from "@/components/ui/entry/entryStyles";
+import { useMotionProfile } from "@/hooks/motion/useMotionProfile";
+import type { PanelHandleProps } from "@/hooks/motion/usePanelDrag";
 import { PopupCloseButton } from "../../ui/brand/PopupCloseButton";
 
 type PeekHandleProps = PanelHandleProps & {
@@ -57,8 +57,7 @@ export function MapFloatingPanel({
   children,
 }: MapFloatingPanelProps) {
   const { decorativeAnimate } = useMotionProfile();
-  const panelMotionClass =
-    !displayMinimized && decorativeAnimate ? "jl-panel-enter" : "";
+  const panelMotionClass = !displayMinimized && decorativeAnimate ? "jl-panel-enter" : "";
 
   const panelClassName = [
     outerClassName,

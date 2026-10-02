@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  MAP_PITCH_MAX_DEGREES,
-  resolveMapPitchDegrees,
-} from "./resolveMapPitchDegrees";
+import { MAP_PITCH_MAX_DEGREES, resolveMapPitchDegrees } from "./resolveMapPitchDegrees";
 
 describe("resolveMapPitchDegrees", () => {
   it("returns 0 when low-power is on", () => {

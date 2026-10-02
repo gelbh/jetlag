@@ -1,8 +1,8 @@
-import { fireEvent, render, screen } from "@testing-library/react";
 import { MantineProvider } from "@mantine/core";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { jetlagTheme } from "@/theme/theme";
 import type { TentaclePoi } from "@/domain/map/annotations";
+import { jetlagTheme } from "@/theme/theme";
 import { TentacleAnswerPicker } from "./TentacleAnswerPicker";
 
 const pois: TentaclePoi[] = [

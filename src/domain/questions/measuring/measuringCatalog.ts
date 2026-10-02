@@ -1,20 +1,10 @@
-export type MeasuringGroupId =
-  | "transit"
-  | "borders"
-  | "natural"
-  | "poi"
-  | "public_utilities";
+export type MeasuringGroupId = "transit" | "borders" | "natural" | "poi" | "public_utilities";
 
 export type MeasuringSubject = "coastline" | "location" | "sea_level";
 
 export type MeasuringTargetMode = "map" | "search" | "nearest";
 
-export type MeasuringTargetKind =
-  | "sea_level"
-  | "coastline"
-  | "linear"
-  | "polygon"
-  | "point";
+export type MeasuringTargetKind = "sea_level" | "coastline" | "linear" | "polygon" | "point";
 
 export type MeasuringFromKind =
   | "commercial_airport"
@@ -44,10 +34,7 @@ export type MeasuringFromKind =
   | `pack:${string}`
   | `custom_geo:${string}`;
 
-export type MeasuringLocationCategory = Exclude<
-  MeasuringFromKind,
-  "coastline" | "sea_level"
->;
+export type MeasuringLocationCategory = Exclude<MeasuringFromKind, "coastline" | "sea_level">;
 
 export type MeasuringAnswer = "closer" | "further";
 
@@ -90,10 +77,7 @@ export const BASE_MEASURING_CATALOG = [
     promptNoun: "a commercial airport",
     subject: "location",
     targetKind: "point",
-    overpassSelectors: [
-      "[aeroway=aerodrome][iata]",
-      "[aeroway=aerodrome][icao]",
-    ],
+    overpassSelectors: ["[aeroway=aerodrome][iata]", "[aeroway=aerodrome][icao]"],
     linearSelectors: [],
     supportsSearch: false,
     supportsNearest: true,
@@ -417,15 +401,13 @@ export const DEFAULT_MEASURING_FROM_KIND: MeasuringLocationCategory = "zoo";
 export const MEASURE_RULE_SUMMARY =
   "Set your anchor, then pick what you're measuring from. The shade uses your distance to that target.";
 
-export const CUSTOM_PACK_GATED_MEASURING_IDS =
-  CUSTOM_PACK_GATED_MEASURING.map((option) => option.id);
+export const CUSTOM_PACK_GATED_MEASURING_IDS = CUSTOM_PACK_GATED_MEASURING.map(
+  (option) => option.id,
+);
 
-export type CustomPackGatedMeasuringId =
-  (typeof CUSTOM_PACK_GATED_MEASURING_IDS)[number];
+export type CustomPackGatedMeasuringId = (typeof CUSTOM_PACK_GATED_MEASURING_IDS)[number];
 
-export function isCustomPackGatedMeasuringId(
-  id: string,
-): id is CustomPackGatedMeasuringId {
+export function isCustomPackGatedMeasuringId(id: string): id is CustomPackGatedMeasuringId {
   return (CUSTOM_PACK_GATED_MEASURING_IDS as readonly string[]).includes(id);
 }
 

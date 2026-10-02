@@ -1,21 +1,12 @@
 import { randomUUID } from "node:crypto";
 import { INCIDENT_NOT_FOUND } from "./postIncidentMessage.mjs";
 
-export const INCIDENT_STATUS_TARGETS = new Set([
-  "resolved",
-  "dismissed",
-  "chatting",
-]);
+export const INCIDENT_STATUS_TARGETS = new Set(["resolved", "dismissed", "chatting"]);
 
 export const INCIDENT_INVALID_STATUS = "INCIDENT_INVALID_STATUS";
 export const INCIDENT_INVALID_TRANSITION = "INCIDENT_INVALID_TRANSITION";
 
-const CLOSE_FROM = new Set([
-  "open",
-  "chatting",
-  "mitigating",
-  "hotfix_pending",
-]);
+const CLOSE_FROM = new Set(["open", "chatting", "mitigating", "hotfix_pending"]);
 
 const REOPEN_FROM = new Set(["resolved", "dismissed"]);
 

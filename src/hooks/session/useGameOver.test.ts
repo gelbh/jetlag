@@ -43,10 +43,9 @@ describe("useGameOver", () => {
       gameResultId: "result-1",
     });
 
-    const { result, rerender } = renderHook(
-      ({ session }) => useGameOver(session),
-      { initialProps: { session: completeSession } },
-    );
+    const { result, rerender } = renderHook(({ session }) => useGameOver(session), {
+      initialProps: { session: completeSession },
+    });
 
     expect(result.current.result).toEqual(remoteResult);
 

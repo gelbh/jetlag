@@ -8,10 +8,7 @@
  */
 
 import { randomUUID } from "node:crypto";
-import {
-  TRIAGE_OUTCOME_AGENT,
-  triageIncidentDiagnostics,
-} from "./incidentTriage.mjs";
+import { TRIAGE_OUTCOME_AGENT, triageIncidentDiagnostics } from "./incidentTriage.mjs";
 
 export const CURSOR_API_DEFAULT_BASE_URL = "https://api.cursor.com";
 export const CURSOR_HOTFIX_MISCONFIGURED = "CURSOR_HOTFIX_MISCONFIGURED";
@@ -26,9 +23,7 @@ function orDash(value) {
 }
 
 function formatErrors(diagnostics) {
-  const errors = Array.isArray(diagnostics?.lastClientErrors)
-    ? diagnostics.lastClientErrors
-    : [];
+  const errors = Array.isArray(diagnostics?.lastClientErrors) ? diagnostics.lastClientErrors : [];
   if (errors.length === 0) {
     return EMPTY;
   }
@@ -67,12 +62,10 @@ function formatOps(diagnostics) {
  * }} input
  */
 export function buildCursorHotfixPrompt(input) {
-  const incidentId =
-    typeof input?.incidentId === "string" ? input.incidentId : "";
+  const incidentId = typeof input?.incidentId === "string" ? input.incidentId : "";
   const diagnostics = input?.diagnostics ?? {};
   const triage = input?.triage ?? {};
-  const adminPrompt =
-    typeof input?.adminPrompt === "string" ? input.adminPrompt.trim() : "";
+  const adminPrompt = typeof input?.adminPrompt === "string" ? input.adminPrompt.trim() : "";
 
   const sections = [
     "You are fixing a clear client bug in the Jetlag Hide+Seek companion.",
@@ -105,12 +98,7 @@ export function buildCursorHotfixPrompt(input) {
   ];
 
   if (adminPrompt) {
-    sections.push(
-      "",
-      "### Frozen admin desk summary",
-      "",
-      adminPrompt,
-    );
+    sections.push("", "### Frozen admin desk summary", "", adminPrompt);
   }
 
   sections.push(
@@ -145,14 +133,12 @@ export async function createCursorCloudAgent(input, deps = {}) {
     throw new Error(CURSOR_HOTFIX_MISCONFIGURED);
   }
 
-  const repositoryUrl =
-    typeof input?.repositoryUrl === "string" ? input.repositoryUrl.trim() : "";
+  const repositoryUrl = typeof input?.repositoryUrl === "string" ? input.repositoryUrl.trim() : "";
   if (!repositoryUrl) {
     throw new Error(CURSOR_HOTFIX_MISCONFIGURED);
   }
 
-  const promptText =
-    typeof input?.promptText === "string" ? input.promptText.trim() : "";
+  const promptText = typeof input?.promptText === "string" ? input.promptText.trim() : "";
   if (!promptText) {
     throw new Error(CURSOR_HOTFIX_FAILED);
   }
@@ -169,9 +155,7 @@ export async function createCursorCloudAgent(input, deps = {}) {
       {
         url: repositoryUrl,
         startingRef:
-          typeof input?.startingRef === "string" && input.startingRef
-            ? input.startingRef
-            : "main",
+          typeof input?.startingRef === "string" && input.startingRef ? input.startingRef : "main",
       },
     ],
     autoCreatePR: input?.autoCreatePR !== false,
@@ -213,11 +197,7 @@ export async function createCursorCloudAgent(input, deps = {}) {
 
   const agent = payload?.agent ?? payload;
   const agentId =
-    typeof agent?.id === "string"
-      ? agent.id
-      : typeof payload?.id === "string"
-        ? payload.id
-        : null;
+    typeof agent?.id === "string" ? agent.id : typeof payload?.id === "string" ? payload.id : null;
   const agentUrl =
     typeof agent?.url === "string"
       ? agent.url
@@ -251,11 +231,7 @@ export async function appendHotfixThreadMessage(
     ...message,
   };
 
-  const threadRef = db
-    .collection("incidents")
-    .doc(incidentId)
-    .collection("threads")
-    .doc("hotfix");
+  const threadRef = db.collection("incidents").doc(incidentId).collection("threads").doc("hotfix");
 
   await threadRef.set(
     {
@@ -312,8 +288,7 @@ async function executeCursorHotfixLaunch(db, ctx, deps = {}) {
   const extras = normalizeAgentExtras(agentExtras);
 
   const apiKey = typeof deps.apiKey === "string" ? deps.apiKey : "";
-  const repositoryUrl =
-    typeof deps.repositoryUrl === "string" ? deps.repositoryUrl : "";
+  const repositoryUrl = typeof deps.repositoryUrl === "string" ? deps.repositoryUrl : "";
   if (!apiKey || !repositoryUrl) {
     const now = deps.now ?? (() => new Date());
     const nowIso = now().toISOString();
@@ -528,8 +503,7 @@ async function loadIncidentForCursorLaunch(db, incidentId) {
  * @param {object} [deps]
  */
 export async function launchCursorHotfixForIncident(db, input, deps = {}) {
-  const incidentId =
-    typeof input?.incidentId === "string" ? input.incidentId : "";
+  const incidentId = typeof input?.incidentId === "string" ? input.incidentId : "";
   const loaded = await loadIncidentForCursorLaunch(db, incidentId);
   if (!loaded.ok) {
     return loaded.result;
@@ -539,9 +513,7 @@ export async function launchCursorHotfixForIncident(db, input, deps = {}) {
   const diagnostics = input?.diagnostics ?? incident.diagnostics ?? {};
   const triageFn = deps.triage ?? triageIncidentDiagnostics;
   const triage =
-    input?.triage && typeof input.triage === "object"
-      ? input.triage
-      : triageFn(diagnostics);
+    input?.triage && typeof input.triage === "object" ? input.triage : triageFn(diagnostics);
 
   if (triage.outcome !== TRIAGE_OUTCOME_AGENT) {
     return {
@@ -581,8 +553,7 @@ export async function launchCursorHotfixForIncident(db, input, deps = {}) {
  * @param {object} [deps]
  */
 export async function forceLaunchCursorHotfixForIncident(db, input, deps = {}) {
-  const incidentId =
-    typeof input?.incidentId === "string" ? input.incidentId : "";
+  const incidentId = typeof input?.incidentId === "string" ? input.incidentId : "";
   const loaded = await loadIncidentForCursorLaunch(db, incidentId);
   if (!loaded.ok) {
     return loaded.result;
@@ -592,9 +563,7 @@ export async function forceLaunchCursorHotfixForIncident(db, input, deps = {}) {
   const diagnostics = input?.diagnostics ?? incident.diagnostics ?? {};
   const triageFn = deps.triage ?? triageIncidentDiagnostics;
   const triage =
-    input?.triage && typeof input.triage === "object"
-      ? input.triage
-      : triageFn(diagnostics);
+    input?.triage && typeof input.triage === "object" ? input.triage : triageFn(diagnostics);
 
   return executeCursorHotfixLaunch(
     db,
@@ -608,9 +577,7 @@ export async function forceLaunchCursorHotfixForIncident(db, input, deps = {}) {
       agentExtras: {
         forced: true,
         forcedByUid:
-          typeof input?.forcedByUid === "string" && input.forcedByUid
-            ? input.forcedByUid
-            : null,
+          typeof input?.forcedByUid === "string" && input.forcedByUid ? input.forcedByUid : null,
       },
       metaLead: "Coding agent force-launched by admin.",
     },

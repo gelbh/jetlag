@@ -1,31 +1,27 @@
-import { AskHudPanel } from "@/components/tools/ask/AskHudPanel";
+import { HudTentacleIcon } from "@/components/map/icons/ToolIcons";
 /**
  * Tentacle Ask HUD mode body — CatalogRail → map radius (+ locations / solo answer).
  * Matching-style question header + catalog; map-first overlays after category.
  * SingleBottomChord: row tap advances; no PhaseRail / CONTINUE.
  */
 import { AskCatalogRail } from "@/components/tools/ask/AskCatalogRail";
+import { AskHudPanel } from "@/components/tools/ask/AskHudPanel";
 import { AskToolQuestionHeader } from "@/components/tools/ask/AskToolQuestionHeader";
 import { TentacleLocationsChord } from "@/components/tools/ask/TentacleLocationsChord";
-import { HudTentacleIcon } from "@/components/map/icons/ToolIcons";
 import { TentacleAnswerPicker } from "@/components/tools/shared/answers/TentacleAnswerPicker";
 import { AnchorControls } from "@/components/tools/shared/controls/AnchorControls";
+import { QuestionTruthReferenceHint } from "@/components/tools/shared/QuestionTruthReferenceHint";
 import { AskInlineError } from "@/components/tools/shared/readout/AskInlineError";
 import { LoadingReadout } from "@/components/tools/shared/readout/LoadingReadout";
 import { ResolvedReadout } from "@/components/tools/shared/readout/ResolvedReadout";
-import { QuestionTruthReferenceHint } from "@/components/tools/shared/QuestionTruthReferenceHint";
 import type { TentaclePoi } from "@/domain/map/annotations";
+import { type DistanceUnit, formatDistance, formatPresetDistance } from "@/domain/map/distance";
 import {
-  formatDistance,
-  formatPresetDistance,
-  type DistanceUnit,
-} from "@/domain/map/distance";
-import type { GameSize } from "@/domain/session/size/gameSize";
-import {
+  type TentacleExtendedCategoryId,
   tentacleCategoriesForGameSize,
   tentacleQuestionPrompt,
-  type TentacleExtendedCategoryId,
 } from "@/domain/questions";
+import type { GameSize } from "@/domain/session/size/gameSize";
 import { tentacleCategoryIcon } from "./tentacleCategoryIcons";
 
 const TENTACLE_QUESTION_INTRO_RULE =
@@ -80,35 +76,23 @@ export function TentacleHudBody({
   costLabel = null,
   toolLabel = "Tentacle",
 }: TentacleHudBodyProps) {
-  const catalogRows = tentacleCategoriesForGameSize(gameSize).map(
-    (category) => {
-      const Icon = tentacleCategoryIcon(category.id);
-      return {
-        id: category.id,
-        label: category.label,
-        disabled:
-          usedCategoryIds.has(category.id) &&
-          !(categoryChosen && category.id === categoryId),
-        icon: (
-          <Icon size={20} weight="duotone" color="currentColor" aria-hidden />
-        ),
-      };
-    },
-  );
+  const catalogRows = tentacleCategoriesForGameSize(gameSize).map((category) => {
+    const Icon = tentacleCategoryIcon(category.id);
+    return {
+      id: category.id,
+      label: category.label,
+      disabled: usedCategoryIds.has(category.id) && !(categoryChosen && category.id === categoryId),
+      icon: <Icon size={20} weight="duotone" color="currentColor" aria-hidden />,
+    };
+  });
   const searchRadiusLabel =
-    categoryId !== null
-      ? formatPresetDistance(searchRadiusMeters, distanceUnit)
-      : null;
+    categoryId !== null ? formatPresetDistance(searchRadiusMeters, distanceUnit) : null;
 
   const distanceLabel = formatDistance(searchRadiusMeters, distanceUnit);
   const question =
     categoryId != null
       ? {
-          prompt: tentacleQuestionPrompt(
-            categoryId,
-            distanceUnit,
-            searchRadiusMeters,
-          ),
+          prompt: tentacleQuestionPrompt(categoryId, distanceUnit, searchRadiusMeters),
           ruleSummary: TENTACLE_QUESTION_INTRO_RULE,
         }
       : {
@@ -123,10 +107,7 @@ export function TentacleHudBody({
       : "locations";
 
   return (
-    <div
-      data-testid="tentacle-hud-body"
-      className="ask-hud-mode-body flex w-full flex-col gap-2"
-    >
+    <div data-testid="tentacle-hud-body" className="ask-hud-mode-body flex w-full flex-col gap-2">
       <AskToolQuestionHeader
         toolLabel={toolLabel}
         costLabel={costLabel}
@@ -142,9 +123,7 @@ export function TentacleHudBody({
           <AskCatalogRail
             rows={catalogRows}
             selectedId={categoryChosen ? categoryId : null}
-            onSelect={(id) =>
-              onCategoryChange(id as TentacleExtendedCategoryId)
-            }
+            onSelect={(id) => onCategoryChange(id as TentacleExtendedCategoryId)}
             aria-label="Location type"
             hint="Tap a type to continue"
             columns={2}
@@ -195,8 +174,7 @@ export function TentacleHudBody({
               ) : poiOptions.length > 0 ? (
                 <ResolvedReadout>
                   {poiOptions.length} location
-                  {poiOptions.length === 1 ? "" : "s"} found within{" "}
-                  {searchRadiusLabel}.
+                  {poiOptions.length === 1 ? "" : "s"} found within {searchRadiusLabel}.
                 </ResolvedReadout>
               ) : (
                 <ResolvedReadout variant="warning">

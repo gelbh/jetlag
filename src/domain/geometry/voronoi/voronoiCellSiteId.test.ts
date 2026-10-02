@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
 import type { Feature } from "geojson";
+import { describe, expect, it } from "vitest";
 import { voronoiCellSiteId } from "./voronoiCellSiteId";
 
 describe("voronoiCellSiteId", () => {

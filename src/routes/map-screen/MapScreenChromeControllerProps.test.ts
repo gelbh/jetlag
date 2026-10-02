@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
+import type { HiderMapScreenChromeProps } from "../hider-map-screen/HiderMapScreenChrome";
 import type { MapScreenChromeProps } from "./MapScreenChrome";
 import type { MapScreenMapLayersProps } from "./MapScreenMapLayers";
-import type { HiderMapScreenChromeProps } from "../hider-map-screen/HiderMapScreenChrome";
 
 describe("map chrome controller prop shapes (W3-D2)", () => {
   it("MapScreenChrome accepts only controller", () => {

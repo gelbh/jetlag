@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
   computeElapsedMs,
+  INITIAL_TIMER_STATE,
+  pauseTimer,
   reconcileTimerState,
   startTimer,
-  pauseTimer,
-  INITIAL_TIMER_STATE,
 } from "./timer";
 
 describe("reconcileTimerState committed tentacle", () => {

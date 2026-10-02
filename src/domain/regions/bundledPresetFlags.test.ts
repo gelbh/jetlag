@@ -1,28 +1,22 @@
 import { describe, expect, it } from "vitest";
+import { BUNDLED_PRESET_FLAG_ASSETS } from "./bundledPresetFlagAssets.generated";
 import {
+  flagIdentityForSegmentId,
   flagMarkForBundledPresetId,
   flagMarkForHierarchySegmentId,
   flagMarkForSegmentRow,
-  flagIdentityForSegmentId,
 } from "./bundledPresetFlags";
-import { BUNDLED_PRESET_FLAG_ASSETS } from "./bundledPresetFlagAssets.generated";
 
 describe("bundledPresetFlags", () => {
   it("uses local regional flags for Kansai and Kantō", () => {
     expect(flagMarkForHierarchySegmentId("region-kansai")?.alt).toBe("Kansai");
     expect(flagMarkForHierarchySegmentId("region-kanto")?.alt).toBe("Kantō");
-    expect(BUNDLED_PRESET_FLAG_ASSETS["region-kanto"].source).toMatch(
-      /^local:/,
-    );
+    expect(BUNDLED_PRESET_FLAG_ASSETS["region-kanto"].source).toMatch(/^local:/);
   });
 
   it("uses Osaka Prefecture and Osaka City as distinct marks", () => {
-    expect(flagMarkForHierarchySegmentId("prefecture-osaka")?.alt).toBe(
-      "Osaka Prefecture",
-    );
-    expect(flagMarkForHierarchySegmentId("metro-osaka")?.identity).toMatch(
-      /osaka/i,
-    );
+    expect(flagMarkForHierarchySegmentId("prefecture-osaka")?.alt).toBe("Osaka Prefecture");
+    expect(flagMarkForHierarchySegmentId("metro-osaka")?.identity).toMatch(/osaka/i);
     expect(flagMarkForHierarchySegmentId("prefecture-osaka")?.identity).not.toBe(
       flagMarkForHierarchySegmentId("metro-osaka")?.identity,
     );
@@ -32,18 +26,12 @@ describe("bundledPresetFlags", () => {
     expect(flagMarkForHierarchySegmentId("country-ireland")?.src).toBe(
       "/region-flags/country-ireland.png",
     );
-    expect(BUNDLED_PRESET_FLAG_ASSETS["country-ireland"].source).toMatch(
-      /^flagcdn:/,
-    );
+    expect(BUNDLED_PRESET_FLAG_ASSETS["country-ireland"].source).toMatch(/^flagcdn:/);
   });
 
   it("uses Wikidata-backed assets for cities and states", () => {
-    expect(BUNDLED_PRESET_FLAG_ASSETS["metro-nyc"].source).toMatch(
-      /^wikidata:Q60:P41$/,
-    );
-    expect(BUNDLED_PRESET_FLAG_ASSETS["state-ny"].source).toMatch(
-      /^wikidata:Q1384:P41$/,
-    );
+    expect(BUNDLED_PRESET_FLAG_ASSETS["metro-nyc"].source).toMatch(/^wikidata:Q60:P41$/);
+    expect(BUNDLED_PRESET_FLAG_ASSETS["state-ny"].source).toMatch(/^wikidata:Q1384:P41$/);
   });
 
   it("uses local overrides for Portland Maine and Prince Rupert", () => {
@@ -60,15 +48,13 @@ describe("bundledPresetFlags", () => {
       "Organization of American States",
     );
     expect(flagMarkForHierarchySegmentId("continent-asia")?.alt).toBe("ASEAN");
-    expect(
-      BUNDLED_PRESET_FLAG_ASSETS["continent-north-america"].source,
-    ).toMatch(/^wikidata:Q123759:/);
+    expect(BUNDLED_PRESET_FLAG_ASSETS["continent-north-america"].source).toMatch(
+      /^wikidata:Q123759:/,
+    );
   });
 
   it("uses a city/metro's own mark on matching leaves", () => {
-    expect(flagMarkForBundledPresetId("bundled:nyc")?.src).toBe(
-      "/region-flags/metro-nyc.png",
-    );
+    expect(flagMarkForBundledPresetId("bundled:nyc")?.src).toBe("/region-flags/metro-nyc.png");
   });
 
   it("does not reuse parent flags on leaves without their own mark", () => {
@@ -79,9 +65,7 @@ describe("bundledPresetFlags", () => {
     expect(flagMarkForBundledPresetId("bundled:osaka-ward-27127")?.src).toBe(
       "/region-flags/ward-27127.png",
     );
-    expect(flagMarkForBundledPresetId("bundled:osaka-ward-27113")?.alt).toBe(
-      "Nishi-Yodogawa",
-    );
+    expect(flagMarkForBundledPresetId("bundled:osaka-ward-27113")?.alt).toBe("Nishi-Yodogawa");
   });
 
   it("uses local flags for Prince Rupert and Portland Maine", () => {
@@ -97,36 +81,24 @@ describe("bundledPresetFlags", () => {
     expect(flagMarkForBundledPresetId("bundled:nyc-brooklyn")?.src).toBe(
       "/region-flags/brooklyn.png",
     );
-    expect(flagMarkForBundledPresetId("bundled:nyc-manhattan")?.alt).toBe(
-      "Manhattan",
-    );
-    expect(flagMarkForBundledPresetId("bundled:nyc-bronx")?.src).toBe(
-      "/region-flags/bronx.png",
-    );
+    expect(flagMarkForBundledPresetId("bundled:nyc-manhattan")?.alt).toBe("Manhattan");
+    expect(flagMarkForBundledPresetId("bundled:nyc-bronx")?.src).toBe("/region-flags/bronx.png");
     expect(flagMarkForBundledPresetId("bundled:nyc-staten-island")?.src).toBe(
       "/region-flags/staten-island.png",
     );
   });
 
   it("uses Dublin local-authority flags on council leaves", () => {
-    expect(flagMarkForBundledPresetId("bundled:dublin-city")?.src).toBe(
-      "/region-flags/dcc.png",
-    );
-    expect(flagMarkForBundledPresetId("bundled:dublin-fingal")?.alt).toBe(
-      "Fingal County Council",
-    );
+    expect(flagMarkForBundledPresetId("bundled:dublin-city")?.src).toBe("/region-flags/dcc.png");
+    expect(flagMarkForBundledPresetId("bundled:dublin-fingal")?.alt).toBe("Fingal County Council");
     expect(flagMarkForBundledPresetId("bundled:dublin-south-dublin")?.src).toBe(
       "/region-flags/sdcc.png",
     );
-    expect(flagMarkForBundledPresetId("bundled:dublin-dlr")?.alt).toBe(
-      "Dún Laoghaire–Rathdown",
-    );
+    expect(flagMarkForBundledPresetId("bundled:dublin-dlr")?.alt).toBe("Dún Laoghaire–Rathdown");
   });
 
   it("uses Tokyo special-ward flags on ward leaves", () => {
-    expect(flagMarkForBundledPresetId("bundled:tokyo-ward-13113")?.alt).toBe(
-      "Shibuya",
-    );
+    expect(flagMarkForBundledPresetId("bundled:tokyo-ward-13113")?.alt).toBe("Shibuya");
     expect(flagMarkForBundledPresetId("bundled:tokyo-ward-13104")?.src).toBe(
       "/region-flags/ward-13104.png",
     );
@@ -155,11 +127,7 @@ describe("bundledPresetFlags", () => {
       flagIdentityForSegmentId("lucerne-metro"),
     );
     expect(flagMarkForSegmentRow("canton-lucerne", [])).not.toBeNull();
-    expect(
-      flagMarkForSegmentRow("lucerne-metro", ["canton-lucerne"]),
-    ).toBeNull();
-    expect(
-      flagMarkForSegmentRow("zurich-city", ["canton-zurich"]),
-    ).toBeNull();
+    expect(flagMarkForSegmentRow("lucerne-metro", ["canton-lucerne"])).toBeNull();
+    expect(flagMarkForSegmentRow("zurich-city", ["canton-zurich"])).toBeNull();
   });
 });

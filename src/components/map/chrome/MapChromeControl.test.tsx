@@ -1,5 +1,5 @@
-import { fireEvent, render, screen } from "@testing-library/react";
 import { MantineProvider } from "@mantine/core";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { jetlagTheme } from "@/theme/theme";
 import { MapChromeControl } from "./MapChromeControl";
@@ -45,11 +45,7 @@ describe("MapChromeControl", () => {
 
   it("exposes pressed state for toggle controls", () => {
     renderControl(
-      <MapChromeControl
-        aria-label="Switch to map view"
-        pressed
-        icon={<span>sat</span>}
-      />,
+      <MapChromeControl aria-label="Switch to map view" pressed icon={<span>sat</span>} />,
     );
 
     const button = screen.getByRole("button", { name: "Switch to map view" });
@@ -88,9 +84,7 @@ describe("MapChromeControl", () => {
     expect(button).toHaveClass("jl-tool-slot");
     expect(button).not.toHaveClass("map-chrome-control");
     expect(screen.getByTestId("slot-icon")).toBeInTheDocument();
-    expect(screen.getByText("Recenter").getAttribute("data-ios-tool-label")).toBe(
-      "",
-    );
+    expect(screen.getByText("Recenter").getAttribute("data-ios-tool-label")).toBe("");
   });
 
   it("fires clicks and honors disabled for side-dock slots", () => {
@@ -146,12 +140,7 @@ describe("MapChromeControl", () => {
   it("honors disabled", () => {
     const onClick = vi.fn();
     renderControl(
-      <MapChromeControl
-        aria-label="Zoom out"
-        disabled
-        onClick={onClick}
-        icon={<span>-</span>}
-      />,
+      <MapChromeControl aria-label="Zoom out" disabled onClick={onClick} icon={<span>-</span>} />,
     );
 
     const button = screen.getByRole("button", { name: "Zoom out" });
@@ -177,9 +166,7 @@ describe("MapChromeControl", () => {
     expect(button).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByTestId("mantine-slot-icon")).toBeInTheDocument();
     expect(screen.getByText("Match")).toHaveClass("jl-tool-slot-label");
-    expect(screen.getByText("Match").getAttribute("data-ios-tool-label")).toBe(
-      "",
-    );
+    expect(screen.getByText("Match").getAttribute("data-ios-tool-label")).toBe("");
     expect(button.getAttribute("data-ios-tool-tone")).toBe("tool");
   });
 
@@ -196,8 +183,9 @@ describe("MapChromeControl", () => {
       </MantineProvider>,
     );
 
-    expect(
-      screen.getByRole("button", { name: "Undo last annotation" }),
-    ).toHaveAttribute("data-ios-tool-tone", "history");
+    expect(screen.getByRole("button", { name: "Undo last annotation" })).toHaveAttribute(
+      "data-ios-tool-tone",
+      "history",
+    );
   });
 });

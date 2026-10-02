@@ -90,8 +90,7 @@ export function assertClientMeetsGlobalMin(clientVersion, minVersion) {
     return;
   }
   const min = minVersion.trim();
-  const client =
-    typeof clientVersion === "string" ? clientVersion.trim() : "";
+  const client = typeof clientVersion === "string" ? clientVersion.trim() : "";
   if (!client || !meetsClientMinVersion(client, min)) {
     throw new Error(CLIENT_UPDATE_REQUIRED);
   }

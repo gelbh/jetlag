@@ -1,16 +1,12 @@
-import { HttpsError } from "firebase-functions/v2/https";
 import { FieldValue } from "firebase-admin/firestore";
-import {
-  buildMergedEntitlementPatch,
-  userEntitlementsRef,
-} from "./premiumEntitlements.mjs";
+import { HttpsError } from "firebase-functions/v2/https";
+import { buildMergedEntitlementPatch, userEntitlementsRef } from "./premiumEntitlements.mjs";
 
 export const RECOVER_PREMIUM_ROUTE = "recoverPremium";
 export const RECOVER_PREMIUM_DAILY_LIMIT = 5;
 export const RECOVER_PREMIUM_WINDOW_MS = 24 * 60 * 60 * 1000;
 
-const VERIFIED_EMAIL_MESSAGE =
-  "Verify your email address before recovering purchases.";
+const VERIFIED_EMAIL_MESSAGE = "Verify your email address before recovering purchases.";
 
 /**
  * @param {boolean | undefined} emailVerified
@@ -113,13 +109,7 @@ export async function listStripeCustomersByEmail(stripe, email) {
  * @param {string | null | undefined} email
  * @param {boolean | undefined} emailVerified
  */
-export async function recoverPremiumByStripeEmailHandler(
-  stripe,
-  db,
-  uid,
-  email,
-  emailVerified,
-) {
+export async function recoverPremiumByStripeEmailHandler(stripe, db, uid, email, emailVerified) {
   requireVerifiedEmailForRecovery(emailVerified);
 
   const normalizedEmail = typeof email === "string" ? email.trim() : "";

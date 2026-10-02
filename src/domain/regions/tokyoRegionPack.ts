@@ -1,7 +1,6 @@
 import type { MatchingCategoryId } from "../questions/matchingQuestions";
 import type { MeasuringFromKind } from "../questions/measuringQuestions";
-import type { RegionPackId } from "./regionPack";
-import type { RegionPackLabelOverride } from "./regionPack";
+import type { RegionPackId, RegionPackLabelOverride } from "./regionPack";
 
 export const TOKYO_REGION_PACK_ID = "tokyo" satisfies RegionPackId;
 
@@ -39,8 +38,6 @@ export const TOKYO_MEASURING_LABEL_OVERRIDES: Partial<
   },
 };
 
-export function isTokyoRegionPack(
-  regionPackId: RegionPackId | undefined,
-): boolean {
+export function isTokyoRegionPack(regionPackId: RegionPackId | undefined): boolean {
   return regionPackId === TOKYO_REGION_PACK_ID;
 }

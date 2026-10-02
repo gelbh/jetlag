@@ -1,7 +1,4 @@
-import {
-  bundledPresetDefinition,
-  isBundledPresetId,
-} from "../../regions/bundledGamePresets";
+import { bundledPresetDefinition, isBundledPresetId } from "../../regions/bundledGamePresets";
 import { formatBundledPresetLocation } from "../../regions/bundledPresetHierarchy";
 import type { GamePreset } from "./gamePreset";
 

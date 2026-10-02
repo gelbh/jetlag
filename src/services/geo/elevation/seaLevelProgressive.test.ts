@@ -4,17 +4,14 @@ import {
   sampleGameAreaCells,
 } from "@/domain/geometry/measuring/seaLevel";
 import { DUBLIN_CITY_GAME_AREA } from "@/test/fixtures/dublinGameArea";
-import {
-  clearGeographicFeatureCacheForTests,
-  writeSeaLevelSamplingCache,
-} from "../cache";
+import { clearGeographicFeatureCacheForTests, writeSeaLevelSamplingCache } from "../cache";
+import { clearBundledSeaLevelSeedCacheForTests } from "./regionPackSeaLevelSeed";
 import {
   clearSeaLevelProgressiveStateForTests,
   ensureSeaLevelSamplingComplete,
   getSeaLevelSamplingProgress,
   startSeaLevelBackgroundSampling,
 } from "./seaLevelProgressive";
-import { clearBundledSeaLevelSeedCacheForTests } from "./regionPackSeaLevelSeed";
 
 vi.mock("./index", () => ({
   fetchElevations: vi.fn(async (points: Array<[number, number]>) =>
@@ -49,9 +46,7 @@ describe("seaLevelProgressive", () => {
 
     expect(sampling.complete).toBe(true);
     expect(sampling.cells.length).toBeGreaterThan(0);
-    expect(sampling.cellElevations.every((value) => Number.isFinite(value))).toBe(
-      true,
-    );
+    expect(sampling.cellElevations.every((value) => Number.isFinite(value))).toBe(true);
 
     const progress = getSeaLevelSamplingProgress(DUBLIN_CITY_GAME_AREA);
     expect(progress.phase).toBe("complete");
@@ -152,19 +147,14 @@ describe("seaLevelProgressive", () => {
     );
 
     const enrich = vi.fn();
-    const sampling = await ensureSeaLevelSamplingComplete(
-      DUBLIN_CITY_GAME_AREA,
-      {
-        regionPackId: "dublin",
-        onEnrich: enrich,
-      },
-    );
+    const sampling = await ensureSeaLevelSamplingComplete(DUBLIN_CITY_GAME_AREA, {
+      regionPackId: "dublin",
+      onEnrich: enrich,
+    });
 
     expect(sampling.cells.length).toBeGreaterThan(1);
     expect(sampling.divisions).toBe(8);
-    expect(
-      sampling.cellElevations.every((value) => Number.isFinite(value)),
-    ).toBe(true);
+    expect(sampling.cellElevations.every((value) => Number.isFinite(value))).toBe(true);
     // Session-local cells (not pack-native extents).
     expect(sampling.cells[0]?.south).toBeGreaterThanOrEqual(53.27 - 1e-9);
   });
@@ -228,10 +218,9 @@ describe("seaLevelProgressive", () => {
       })),
     );
 
-    const sampling = await ensureSeaLevelSamplingComplete(
-      DUBLIN_CITY_GAME_AREA,
-      { regionPackId: "dublin" },
-    );
+    const sampling = await ensureSeaLevelSamplingComplete(DUBLIN_CITY_GAME_AREA, {
+      regionPackId: "dublin",
+    });
 
     expect(sampling.complete).toBe(true);
     expect(sampling.divisions).toBe(20);
@@ -302,9 +291,7 @@ describe("seaLevelProgressive", () => {
     });
 
     await vi.waitFor(() => {
-      expect(getSeaLevelSamplingProgress(DUBLIN_CITY_GAME_AREA).phase).toBe(
-        "complete",
-      );
+      expect(getSeaLevelSamplingProgress(DUBLIN_CITY_GAME_AREA).phase).toBe("complete");
     });
 
     expect(fetchMock).not.toHaveBeenCalled();

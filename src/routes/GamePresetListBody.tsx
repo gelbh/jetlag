@@ -1,11 +1,5 @@
 import { Button, Stack, Text, TextInput } from "@mantine/core";
 import { Link } from "react-router-dom";
-import {
-  InsetGroup,
-  SectionLabel,
-  filledStyles,
-} from "@/components/ui/entry/entryChrome";
-import { EmptyState } from "@/components/ui/feedback/EmptyState";
 import { BundledPresetTree } from "@/components/presets/BundledPresetTree";
 import {
   PresetBadge,
@@ -15,10 +9,9 @@ import {
   PresetSecondaryLink,
 } from "@/components/presets/PresetCard";
 import { PresetFavouriteButton } from "@/components/presets/PresetFavouriteButton";
-import {
-  bundledPresetDefinition,
-  isBundledPresetId,
-} from "@/domain/regions/bundledGamePresets";
+import { filledStyles, InsetGroup, SectionLabel } from "@/components/ui/entry/entryChrome";
+import { EmptyState } from "@/components/ui/feedback/EmptyState";
+import { bundledPresetDefinition, isBundledPresetId } from "@/domain/regions/bundledGamePresets";
 import { formatBundledPresetLocation } from "@/domain/regions/bundledPresetHierarchy";
 import { migrateGamePreset } from "@/domain/session/presets/gamePreset";
 import { useGamePresetListModel } from "./GamePresetListModel";
@@ -28,9 +21,7 @@ type MigratedPreset = ReturnType<typeof migrateGamePreset>;
 function presetBadges(preset: MigratedPreset) {
   return (
     <>
-      {preset.advancedSettings.expansionPackEnabled ? (
-        <PresetBadge>Expansion</PresetBadge>
-      ) : null}
+      {preset.advancedSettings.expansionPackEnabled ? <PresetBadge>Expansion</PresetBadge> : null}
       {preset.advancedSettings.customQuestionPackEnabled ? (
         <PresetBadge>Custom Q</PresetBadge>
       ) : null}
@@ -61,22 +52,14 @@ function PresetRowActions({
   return (
     <>
       {preset.migrationStatus === "manual_required" ? (
-        <PresetHostButton to={`/presets/${preset.id}/edit`}>
-          Review
-        </PresetHostButton>
+        <PresetHostButton to={`/presets/${preset.id}/edit`}>Review</PresetHostButton>
       ) : (
-        <PresetHostButton to={`/create?preset=${preset.id}`}>
-          Host
-        </PresetHostButton>
+        <PresetHostButton to={`/create?preset=${preset.id}`}>Host</PresetHostButton>
       )}
       {!bundled ? (
         <>
-          <PresetSecondaryLink to={`/presets/${preset.id}/edit`}>
-            Edit
-          </PresetSecondaryLink>
-          <PresetDangerButton onClick={() => onDelete(preset.id)}>
-            Delete
-          </PresetDangerButton>
+          <PresetSecondaryLink to={`/presets/${preset.id}/edit`}>Edit</PresetSecondaryLink>
+          <PresetDangerButton onClick={() => onDelete(preset.id)}>Delete</PresetDangerButton>
         </>
       ) : null}
     </>
@@ -91,9 +74,7 @@ function UserOrFavouriteRow({
   onDelete: (id: string) => void;
 }) {
   const bundled = isBundledPresetId(preset.id);
-  const description = bundled
-    ? bundledPresetDefinition(preset.id)?.description
-    : undefined;
+  const description = bundled ? bundledPresetDefinition(preset.id)?.description : undefined;
 
   return (
     <PresetCard
@@ -101,9 +82,7 @@ function UserOrFavouriteRow({
       meta={presetMeta(preset)}
       description={description}
       badges={!bundled ? presetBadges(preset) : undefined}
-      headerAction={
-        <PresetFavouriteButton presetId={preset.id} />
-      }
+      headerAction={<PresetFavouriteButton presetId={preset.id} />}
       actions={<PresetRowActions preset={preset} onDelete={onDelete} />}
     />
   );
@@ -119,9 +98,7 @@ function SearchResultRow({
   const bundled = isBundledPresetId(preset.id);
   const definition = bundled ? bundledPresetDefinition(preset.id) : undefined;
   const description = definition?.description;
-  const location = definition
-    ? formatBundledPresetLocation(definition)
-    : undefined;
+  const location = definition ? formatBundledPresetLocation(definition) : undefined;
 
   return (
     <PresetCard
@@ -130,9 +107,7 @@ function SearchResultRow({
       location={location}
       description={description}
       badges={!bundled ? presetBadges(preset) : undefined}
-      headerAction={
-        <PresetFavouriteButton presetId={preset.id} />
-      }
+      headerAction={<PresetFavouriteButton presetId={preset.id} />}
       actions={<PresetRowActions preset={preset} onDelete={onDelete} />}
     />
   );
@@ -172,12 +147,7 @@ export function GamePresetListBody() {
         </InsetGroup>
       </Stack>
 
-      <Button
-        component={Link}
-        to="/presets/new"
-        fullWidth
-        styles={filledStyles}
-      >
+      <Button component={Link} to="/presets/new" fullWidth styles={filledStyles}>
         New preset
       </Button>
 
@@ -187,11 +157,7 @@ export function GamePresetListBody() {
         ) : (
           <Stack gap="sm">
             {model.searchResults.map((preset) => (
-              <SearchResultRow
-                key={preset.id}
-                preset={preset}
-                onDelete={model.onDelete}
-              />
+              <SearchResultRow key={preset.id} preset={preset} onDelete={model.onDelete} />
             ))}
           </Stack>
         )
@@ -202,11 +168,7 @@ export function GamePresetListBody() {
               <SectionLabel>Favourites</SectionLabel>
               <Stack gap="sm">
                 {model.favouritePresets.map((preset) => (
-                  <UserOrFavouriteRow
-                    key={preset.id}
-                    preset={preset}
-                    onDelete={model.onDelete}
-                  />
+                  <UserOrFavouriteRow key={preset.id} preset={preset} onDelete={model.onDelete} />
                 ))}
               </Stack>
             </Stack>
@@ -216,8 +178,7 @@ export function GamePresetListBody() {
             <Stack gap={8}>
               <SectionLabel>Recommended</SectionLabel>
               <Text size="xs" c="var(--color-field-ink-muted)" px={4}>
-                Browse by continent, country, and region. More areas ship over
-                time.
+                Browse by continent, country, and region. More areas ship over time.
               </Text>
               <BundledPresetTree presets={model.bundledPresets} />
             </Stack>
@@ -229,16 +190,10 @@ export function GamePresetListBody() {
             ) : null
           ) : (
             <Stack gap={8}>
-              {model.bundledPresets.length > 0 ? (
-                <SectionLabel>Your presets</SectionLabel>
-              ) : null}
+              {model.bundledPresets.length > 0 ? <SectionLabel>Your presets</SectionLabel> : null}
               <Stack gap="sm">
                 {model.userPresets.map((preset) => (
-                  <UserOrFavouriteRow
-                    key={preset.id}
-                    preset={preset}
-                    onDelete={model.onDelete}
-                  />
+                  <UserOrFavouriteRow key={preset.id} preset={preset} onDelete={model.onDelete} />
                 ))}
               </Stack>
             </Stack>

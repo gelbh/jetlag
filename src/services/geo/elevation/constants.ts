@@ -1,5 +1,4 @@
-export const OPEN_METEO_ELEVATION_ENDPOINT =
-  "https://api.open-meteo.com/v1/elevation";
+export const OPEN_METEO_ELEVATION_ENDPOINT = "https://api.open-meteo.com/v1/elevation";
 export const USGS_EPQS_ENDPOINT = "https://epqs.nationalmap.gov/v1/json";
 export const ELEVATION_BATCH_SIZE = 100;
 export const USGS_MIN_REQUEST_GAP_MS = 250;

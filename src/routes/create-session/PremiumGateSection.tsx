@@ -1,10 +1,7 @@
 import { Button, Stack, Text, TextInput } from "@mantine/core";
-import { AppLink } from "../../components/navigation/AppLink";
 import { PremiumSignInGate } from "../../components/billing/PremiumSignInGate";
-import {
-  ErrorCallout,
-  InsetGroup,
-} from "../../components/ui/entry/entryChrome";
+import { AppLink } from "../../components/navigation/AppLink";
+import { ErrorCallout, InsetGroup } from "../../components/ui/entry/entryChrome";
 import {
   filledStyles,
   insetTextInputStyles,
@@ -44,10 +41,7 @@ export function PremiumGateSection({
         }`}
       >
         {requiresPremiumSignIn ? (
-          <PremiumSignInGate
-            continuePath="/create"
-            onSignedIn={onPremiumSignedIn}
-          />
+          <PremiumSignInGate continuePath="/create" onSignedIn={onPremiumSignedIn} />
         ) : null}
         {showPremiumUnlockPanel ? (
           <Stack gap="sm" pt={requiresPremiumSignIn ? "sm" : 0}>
@@ -58,12 +52,7 @@ export function PremiumGateSection({
             >
               Buy a session pack or subscription to host premium games.
             </Text>
-            <Button
-              component={AppLink}
-              to="/premium"
-              fullWidth
-              styles={filledStyles}
-            >
+            <Button component={AppLink} to="/premium" fullWidth styles={filledStyles}>
               View premium options
             </Button>
             <Button
@@ -81,9 +70,7 @@ export function PremiumGateSection({
 
       <div
         className={`overflow-hidden motion-safe:transition-[max-height,opacity] motion-safe:duration-200 motion-safe:ease-[cubic-bezier(0.25,1,0.5,1)] motion-reduce:transition-none ${
-          showAccessCodeField
-            ? "max-h-[120rem] opacity-100"
-            : "max-h-0 opacity-0"
+          showAccessCodeField ? "max-h-[120rem] opacity-100" : "max-h-0 opacity-0"
         }`}
       >
         <Stack gap={6} pt="sm">
@@ -91,9 +78,7 @@ export function PremiumGateSection({
             <TextInput
               label="Host access code"
               value={accessCode}
-              onChange={(event) =>
-                onAccessCodeChange(event.currentTarget.value)
-              }
+              onChange={(event) => onAccessCodeChange(event.currentTarget.value)}
               type="password"
               autoComplete="off"
               autoCorrect="off"
@@ -105,9 +90,7 @@ export function PremiumGateSection({
           <Text size="xs" c="var(--color-field-ink-muted)" px={4}>
             Enter once. Friends join with the game code only.
           </Text>
-          {accessCodeError ? (
-            <ErrorCallout>{accessCodeError}</ErrorCallout>
-          ) : null}
+          {accessCodeError ? <ErrorCallout>{accessCodeError}</ErrorCallout> : null}
         </Stack>
       </div>
     </>

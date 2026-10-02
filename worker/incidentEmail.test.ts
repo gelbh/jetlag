@@ -10,10 +10,7 @@ const env = {
 
 function emailRequest(
   body: unknown,
-  {
-    method = "POST",
-    secret = "s3cret",
-  }: { method?: string; secret?: string | null } = {}
+  { method = "POST", secret = "s3cret" }: { method?: string; secret?: string | null } = {},
 ): Request {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
@@ -34,7 +31,7 @@ describe("handleIncidentEmailRequest", () => {
     const response = await handleIncidentEmailRequest(
       emailRequest(null, { method: "GET" }),
       env,
-      fetchImpl
+      fetchImpl,
     );
     expect(response.status).toBe(405);
     expect(fetchImpl).not.toHaveBeenCalled();
@@ -45,7 +42,7 @@ describe("handleIncidentEmailRequest", () => {
     const response = await handleIncidentEmailRequest(
       emailRequest({ subject: "x", text: "y" }, { secret: null }),
       env,
-      fetchImpl
+      fetchImpl,
     );
     expect(response.status).toBe(401);
     expect(fetchImpl).not.toHaveBeenCalled();
@@ -56,7 +53,7 @@ describe("handleIncidentEmailRequest", () => {
     const response = await handleIncidentEmailRequest(
       emailRequest({ subject: "x", text: "y" }, { secret: "nope" }),
       env,
-      fetchImpl
+      fetchImpl,
     );
     expect(response.status).toBe(401);
     expect(fetchImpl).not.toHaveBeenCalled();
@@ -67,7 +64,7 @@ describe("handleIncidentEmailRequest", () => {
     const response = await handleIncidentEmailRequest(
       emailRequest({ subject: "only subject" }),
       env,
-      fetchImpl
+      fetchImpl,
     );
     expect(response.status).toBe(400);
     expect(fetchImpl).not.toHaveBeenCalled();
@@ -79,7 +76,7 @@ describe("handleIncidentEmailRequest", () => {
         new Response(JSON.stringify({ id: "email-123" }), {
           status: 200,
           headers: { "Content-Type": "application/json" },
-        })
+        }),
     );
 
     const response = await handleIncidentEmailRequest(
@@ -89,7 +86,7 @@ describe("handleIncidentEmailRequest", () => {
         incidentUrl: "u",
       }),
       env,
-      fetchImpl
+      fetchImpl,
     );
 
     expect(response.status).toBe(200);
@@ -108,24 +105,20 @@ describe("handleIncidentEmailRequest", () => {
 
   it("ignores request `to` and always uses env admin email", async () => {
     const fetchImpl = vi.fn(
-      async () =>
-        new Response(JSON.stringify({ id: "email-9" }), { status: 200 })
+      async () => new Response(JSON.stringify({ id: "email-9" }), { status: 200 }),
     );
     await handleIncidentEmailRequest(
       emailRequest({ subject: "s", text: "t", to: "other@example.com" }),
       env,
-      fetchImpl
+      fetchImpl,
     );
-    const sent = JSON.parse(
-      (fetchImpl.mock.calls[0][1] as RequestInit).body as string
-    );
+    const sent = JSON.parse((fetchImpl.mock.calls[0][1] as RequestInit).body as string);
     expect(sent.to).toEqual(["admin@example.com"]);
   });
 
   it("sends to body.to when audience is reporter", async () => {
     const fetchImpl = vi.fn(
-      async () =>
-        new Response(JSON.stringify({ id: "email-r" }), { status: 200 })
+      async () => new Response(JSON.stringify({ id: "email-r" }), { status: 200 }),
     );
     const response = await handleIncidentEmailRequest(
       emailRequest({
@@ -135,12 +128,10 @@ describe("handleIncidentEmailRequest", () => {
         to: "player@example.com",
       }),
       env,
-      fetchImpl
+      fetchImpl,
     );
     expect(response.status).toBe(200);
-    const sent = JSON.parse(
-      (fetchImpl.mock.calls[0][1] as RequestInit).body as string
-    );
+    const sent = JSON.parse((fetchImpl.mock.calls[0][1] as RequestInit).body as string);
     expect(sent.to).toEqual(["player@example.com"]);
   });
 
@@ -153,7 +144,7 @@ describe("handleIncidentEmailRequest", () => {
         audience: "reporter",
       }),
       env,
-      fetchImpl
+      fetchImpl,
     );
     expect(response.status).toBe(400);
     expect(fetchImpl).not.toHaveBeenCalled();
@@ -169,7 +160,7 @@ describe("handleIncidentEmailRequest", () => {
         to: "not-an-email",
       }),
       env,
-      fetchImpl
+      fetchImpl,
     );
     expect(response.status).toBe(400);
     expect(fetchImpl).not.toHaveBeenCalled();
@@ -180,7 +171,7 @@ describe("handleIncidentEmailRequest", () => {
     const response = await handleIncidentEmailRequest(
       emailRequest({ subject: "s", text: "t" }),
       env,
-      fetchImpl
+      fetchImpl,
     );
     expect(response.status).toBe(502);
   });
@@ -190,7 +181,7 @@ describe("handleIncidentEmailRequest", () => {
     const response = await handleIncidentEmailRequest(
       emailRequest({ subject: "s", text: "t" }),
       { RESEND_API_KEY: "re_test" } as Env,
-      fetchImpl
+      fetchImpl,
     );
     expect(response.status).toBe(500);
     expect(fetchImpl).not.toHaveBeenCalled();

@@ -39,9 +39,7 @@ describe("tryUpdateServiceWorker", () => {
   it("swallows rejected update() promises", async () => {
     const registration = mockRegistration({
       update: vi.fn(() =>
-        Promise.reject(
-          new DOMException("newestWorker is null", "InvalidStateError"),
-        ),
+        Promise.reject(new DOMException("newestWorker is null", "InvalidStateError")),
       ),
     });
 

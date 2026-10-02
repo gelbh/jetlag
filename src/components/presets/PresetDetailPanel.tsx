@@ -1,10 +1,10 @@
-import { AppLink } from "../navigation/AppLink";
 import { homeCardBtnStyle } from "@/components/ui/entry/entryStyles";
 import {
   bundledPresetDefinition,
   isBundledPresetId,
 } from "../../domain/regions/bundledGamePresets";
 import { migrateGamePreset } from "../../domain/session/presets/gamePreset";
+import { AppLink } from "../navigation/AppLink";
 import { PresetFavouriteButton } from "./PresetFavouriteButton";
 
 export function PresetDetailPanel({
@@ -29,16 +29,12 @@ export function PresetDetailPanel({
     >
       <div className="flex w-full items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="font-display text-base tracking-wide text-ink">
-            {preset.name}
-          </p>
+          <p className="font-display text-base tracking-wide text-ink">{preset.name}</p>
           <p className="mt-1 text-xs text-ink-muted">
             {preset.gameSize} · {preset.distanceUnit}
             {preset.placeLabel ? ` · ${preset.placeLabel}` : ""}
           </p>
-          {description ? (
-            <p className="mt-2 text-xs text-ink-dim">{description}</p>
-          ) : null}
+          {description ? <p className="mt-2 text-xs text-ink-dim">{description}</p> : null}
           <div className="mt-2 flex flex-wrap gap-1.5">
             {preset.advancedSettings.expansionPackEnabled ? (
               <span className="rounded-full border border-border px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-brand-blue">
@@ -61,17 +57,11 @@ export function PresetDetailPanel({
       </div>
       <div className="flex flex-wrap gap-2">
         {preset.migrationStatus === "manual_required" ? (
-          <AppLink
-            to={`/presets/${preset.id}/edit`}
-            className="btn-primary min-h-10 px-3 text-xs"
-          >
+          <AppLink to={`/presets/${preset.id}/edit`} className="btn-primary min-h-10 px-3 text-xs">
             Review
           </AppLink>
         ) : (
-          <AppLink
-            to={`/create?preset=${preset.id}`}
-            className="btn-primary min-h-10 px-3 text-xs"
-          >
+          <AppLink to={`/create?preset=${preset.id}`} className="btn-primary min-h-10 px-3 text-xs">
             Host
           </AppLink>
         )}

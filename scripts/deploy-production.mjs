@@ -23,9 +23,7 @@ function buildProxyRouteUrls(baseUrl) {
 
 function syncProxySecrets(functionUrls) {
   if (!process.env.DOPPLER_TOKEN?.trim()) {
-    console.warn(
-      "DOPPLER_TOKEN is not set; skipping proxy URL sync to Doppler.",
-    );
+    console.warn("DOPPLER_TOKEN is not set; skipping proxy URL sync to Doppler.");
     return false;
   }
 
@@ -39,16 +37,7 @@ function syncProxySecrets(functionUrls) {
 
     const result = spawnSync(
       "doppler",
-      [
-        "secrets",
-        "set",
-        secretName,
-        url,
-        "--project",
-        "jetlag",
-        "--config",
-        "prd",
-      ],
+      ["secrets", "set", secretName, url, "--project", "jetlag", "--config", "prd"],
       { stdio: "inherit", env: process.env },
     );
 
@@ -128,7 +117,7 @@ function parseFunctionUrls(deployOutput) {
   return urls;
 }
 
-const HTTP_FUNCTION_IDS = ["proxy"];
+const _HTTP_FUNCTION_IDS = ["proxy"];
 
 /** @returns {Record<string, string>} */
 function listFunctionUrlsFromCli(projectId) {
@@ -206,16 +195,12 @@ function resolveFunctionUrls(deployOutput) {
 function printProxyEnvInstructions(functionUrls) {
   const lines = ["\nVerify these in Doppler config prd:"];
 
-  lines.push(
-    "  VITE_FIREBASE_APP_CHECK_SITE_KEY=<reCAPTCHA v3 site key from Firebase App Check>",
-  );
+  lines.push("  VITE_FIREBASE_APP_CHECK_SITE_KEY=<reCAPTCHA v3 site key from Firebase App Check>");
 
   if (functionUrls.overpass) {
     lines.push(`  VITE_OVERPASS_PROXY_URL=${functionUrls.overpass}`);
   } else {
-    lines.push(
-      "  VITE_OVERPASS_PROXY_URL=<overpass function URL from Firebase console>",
-    );
+    lines.push("  VITE_OVERPASS_PROXY_URL=<overpass function URL from Firebase console>");
   }
 
   if (functionUrls.vehicles) {
@@ -248,15 +233,7 @@ function runFirebaseDeploy(onlyTargets) {
     let output = "";
     const child = spawn(
       "npx",
-      [
-        "firebase",
-        "deploy",
-        "--project",
-        firebaseProjectId,
-        "--only",
-        onlyTargets,
-        "--force",
-      ],
+      ["firebase", "deploy", "--project", firebaseProjectId, "--only", onlyTargets, "--force"],
       { cwd: projectRoot, env: process.env },
     );
 
@@ -288,9 +265,7 @@ async function main() {
   const onlyLite = "firestore,storage";
 
   if (!shouldDeployFunctions(process.env)) {
-    console.log(
-      "Skipping Cloud Functions (DEPLOY_FIREBASE_FUNCTIONS is 0/false/no/off).",
-    );
+    console.log("Skipping Cloud Functions (DEPLOY_FIREBASE_FUNCTIONS is 0/false/no/off).");
     const lite = await runFirebaseDeploy(onlyLite);
     if (lite.code !== 0) {
       process.exit(lite.code);
@@ -304,7 +279,7 @@ async function main() {
     cwd: resolve(projectRoot, "functions"),
   });
 
-  let result = await runFirebaseDeploy(onlyFull);
+  const result = await runFirebaseDeploy(onlyFull);
   if (result.code === 0) {
     console.log("Backend deploy complete (Firestore + Functions + Storage).");
     const functionUrls = resolveFunctionUrls(result.output);
@@ -317,9 +292,7 @@ async function main() {
   }
 
   if (isBlazeOrArtifactRegistryBlock(result.output)) {
-    console.error(
-      "\nCloud Functions deploy failed: Blaze plan required on this project.",
-    );
+    console.error("\nCloud Functions deploy failed: Blaze plan required on this project.");
     console.error(
       "Firestore and Storage were not deployed. Fix billing or set DEPLOY_FIREBASE_FUNCTIONS=0 to deploy rules only.",
     );

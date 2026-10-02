@@ -7,12 +7,7 @@ describe("PackAttachChip", () => {
     const onClear = vi.fn();
 
     render(
-      <PackAttachChip
-        packId="dublin"
-        source="auto"
-        onClear={onClear}
-        onChangePack={vi.fn()}
-      />,
+      <PackAttachChip packId="dublin" source="auto" onClear={onClear} onChangePack={vi.fn()} />,
     );
 
     fireEvent.click(screen.getByRole("button", { name: "Clear" }));
@@ -41,14 +36,7 @@ describe("PackAttachChip", () => {
   });
 
   it("shows auto-match hint for auto source", () => {
-    render(
-      <PackAttachChip
-        packId="nyc"
-        source="auto"
-        onClear={vi.fn()}
-        onChangePack={vi.fn()}
-      />,
-    );
+    render(<PackAttachChip packId="nyc" source="auto" onClear={vi.fn()} onChangePack={vi.fn()} />);
 
     expect(screen.getByText(/Matched to play area/i)).toBeInTheDocument();
     expect(screen.getByText(/New York City/i)).toBeInTheDocument();

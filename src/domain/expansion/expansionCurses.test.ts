@@ -1,9 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  EXPANSION_CURSE_COUNT,
-  EXPANSION_CURSES,
-  searchExpansionCurses,
-} from "./expansionCurses";
+import { EXPANSION_CURSE_COUNT, EXPANSION_CURSES, searchExpansionCurses } from "./expansionCurses";
 
 describe("expansionCurses", () => {
   it("ships all 30 Expansion Pack Vol. 1 curses", () => {

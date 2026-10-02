@@ -18,9 +18,7 @@ export async function readVisibleToolDockLabelMetrics(
   return page.evaluate(() => {
     // Mantine slot labels use data-ios-tool-label (jl-tool-slot-label retired).
     const labels = [
-      ...document.querySelectorAll(
-        ".jl-map-island .jl-tool-slot [data-ios-tool-label]",
-      ),
+      ...document.querySelectorAll(".jl-map-island .jl-tool-slot [data-ios-tool-label]"),
     ];
     return labels
       .map((label) => {
@@ -39,9 +37,7 @@ export async function readVisibleToolDockLabelMetrics(
   });
 }
 
-export async function readToolDockOverflowMetrics(
-  page: Page,
-): Promise<ToolDockOverflowMetrics> {
+export async function readToolDockOverflowMetrics(page: Page): Promise<ToolDockOverflowMetrics> {
   return page.evaluate(() => {
     const chrome = document.querySelector(".jl-map-bottom-chrome");
     const chromeRect = chrome?.getBoundingClientRect();
@@ -61,10 +57,7 @@ export async function readToolDockOverflowMetrics(
   });
 }
 
-export async function injectSimulatedSafeAreaBottom(
-  page: Page,
-  safeBottomPx: number,
-) {
+export async function injectSimulatedSafeAreaBottom(page: Page, safeBottomPx: number) {
   await page.evaluate((bottomPx) => {
     const root = document.documentElement;
     root.style.setProperty("--safe-area-bottom", `${bottomPx}px`);
@@ -82,10 +75,7 @@ export async function injectSimulatedSafeAreaBottom(
   }, safeBottomPx);
 }
 
-export async function injectSimulatedSafeAreaTop(
-  page: Page,
-  safeTopPx: number,
-) {
+export async function injectSimulatedSafeAreaTop(page: Page, safeTopPx: number) {
   await page.evaluate((topPx) => {
     const root = document.documentElement;
     root.style.setProperty("--safe-area-top", `${topPx}px`);
@@ -112,19 +102,12 @@ export const SIMULATED_SAFE_AREA_TOP_PX = 59;
 export async function injectStandaloneDisplayMode(page: Page) {
   await page.emulateMedia({ media: "screen" });
   await page.addInitScript(() => {
-    Object.defineProperty(
-      window.matchMedia("(display-mode: standalone)"),
-      "matches",
-      {
-        configurable: true,
-        get: () => true,
-      },
-    );
+    Object.defineProperty(window.matchMedia("(display-mode: standalone)"), "matches", {
+      configurable: true,
+      get: () => true,
+    });
     const apply = () => {
-      document.documentElement.classList.add(
-        "jl-e2e-standalone",
-        "jl-standalone-shell",
-      );
+      document.documentElement.classList.add("jl-e2e-standalone", "jl-standalone-shell");
       if (document.getElementById("jl-e2e-standalone-mode")) return;
       const el = document.createElement("style");
       el.id = "jl-e2e-standalone-mode";
@@ -140,10 +123,7 @@ export async function injectStandaloneDisplayMode(page: Page) {
     else document.addEventListener("DOMContentLoaded", apply);
   });
   await page.evaluate(() => {
-    document.documentElement.classList.add(
-      "jl-e2e-standalone",
-      "jl-standalone-shell",
-    );
+    document.documentElement.classList.add("jl-e2e-standalone", "jl-standalone-shell");
     const sheet = document.getElementById("jl-e2e-standalone-mode");
     const css = `@media (display-mode: standalone) {
   .jl-e2e-standalone .jl-map-bottom-chrome-host,

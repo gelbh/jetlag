@@ -1,14 +1,10 @@
-import type { DistanceUnit } from "../map/distance";
 import type { BoundingBox } from "../geometry/gameArea/gameAreaBounds";
-import type { GameSize } from "../session/size/gameSize";
+import type { DistanceUnit } from "../map/distance";
 import type { RegionPackId } from "../regions/regionPack";
+import type { GameSize } from "../session/size/gameSize";
 
 /** v1 status enum — do not change without updating the max-data plan + spec. */
-export type PreloadRequestStatus =
-  | "open"
-  | "accepted"
-  | "declined"
-  | "shipped";
+export type PreloadRequestStatus = "open" | "accepted" | "declined" | "shipped";
 
 export const PRELOAD_NOTE_MAX_LENGTH = 140;
 

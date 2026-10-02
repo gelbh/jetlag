@@ -3,30 +3,27 @@
  * Spec: ask-surface-kit-design rev 2026-08-05b.
  */
 import { CrosshairIcon } from "@phosphor-icons/react";
+import { HudThermometerIcon } from "@/components/map/icons/ToolIcons";
 import { AskCatalogRail } from "@/components/tools/ask/AskCatalogRail";
 import { AskToolQuestionHeader } from "@/components/tools/ask/AskToolQuestionHeader";
-import { HudThermometerIcon } from "@/components/map/icons/ToolIcons";
+import { QuestionTruthReferenceHint } from "@/components/tools/shared/QuestionTruthReferenceHint";
 import { AskInlineError } from "@/components/tools/shared/readout/AskInlineError";
 import { ResolvedReadout } from "@/components/tools/shared/readout/ResolvedReadout";
-import { QuestionTruthReferenceHint } from "@/components/tools/shared/QuestionTruthReferenceHint";
 import { askInsetSurfaceStyle } from "@/components/ui/entry/entryChrome";
-import {
-  formatPresetDistance,
-  type DistanceUnit,
-} from "@/domain/map/distance";
+import { type DistanceUnit, formatPresetDistance } from "@/domain/map/distance";
 import {
   availableThermometerDistancePresetsForSession,
-  thermometerPresetMilesForMeters,
   type ThermometerAnswer,
   type ThermometerDistanceOptionMiles,
+  thermometerPresetMilesForMeters,
 } from "@/domain/questions";
 import type { SessionRulesInput } from "@/domain/session/rules";
+
 type PlacementMode = "gps" | "manual";
 
 const THERMO_QUESTION_INTRO = {
   prompt: "After traveling [distance], am I hotter or colder?",
-  ruleSummary:
-    "Pick a walk distance. On the map, start a GPS track or place start and end pins.",
+  ruleSummary: "Pick a walk distance. On the map, start a GPS track or place start and end pins.",
 };
 
 export type ThermometerHudBodyProps = {
@@ -71,8 +68,7 @@ export function ThermometerHudBody({
   awaitHiderAnswer = false,
   toolLabel = "Thermometer",
 }: ThermometerHudBodyProps) {
-  const availableDistancePresets =
-    availableThermometerDistancePresetsForSession(sessionRules);
+  const availableDistancePresets = availableThermometerDistancePresetsForSession(sessionRules);
   const pinsReady = mapStep === "ready";
 
   let chord: "setup" | "walking" | "answer" = "setup";
@@ -98,16 +94,8 @@ export function ThermometerHudBody({
         presetUseCount > 0 && preset === distanceMeters
           ? `${formatPresetDistance(preset, distanceUnit)} · ${costLabel}`
           : formatPresetDistance(preset, distanceUnit),
-      disabled:
-        presetMiles !== null && usedDistanceOptions.has(presetMiles),
-      icon: (
-        <CrosshairIcon
-          size={20}
-          weight="duotone"
-          color="currentColor"
-          aria-hidden
-        />
-      ),
+      disabled: presetMiles !== null && usedDistanceOptions.has(presetMiles),
+      icon: <CrosshairIcon size={20} weight="duotone" color="currentColor" aria-hidden />,
     };
   });
 
@@ -135,10 +123,7 @@ export function ThermometerHudBody({
           style={{ color: "var(--color-field-ink)" }}
         >
           {walkedLabel}
-          <span
-            className="font-medium"
-            style={{ color: "var(--color-field-ink-muted)" }}
-          >
+          <span className="font-medium" style={{ color: "var(--color-field-ink-muted)" }}>
             {" "}
             /{" "}
           </span>

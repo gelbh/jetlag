@@ -1,12 +1,6 @@
 import type { LatLngTuple } from "../geometry/gameArea/geometry";
 
-export type TransitRouteMode =
-  | "rail"
-  | "metro"
-  | "tram"
-  | "bus"
-  | "ferry"
-  | "other";
+export type TransitRouteMode = "rail" | "metro" | "tram" | "bus" | "ferry" | "other";
 
 export type TransitRouteFilter = "all" | TransitRouteMode;
 

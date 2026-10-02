@@ -29,10 +29,7 @@ const ZERO_FALLBACK_GAME_AREA: GameArea = {
 };
 
 function gameAreaCoordinatesEqual(a: GameArea, b: GameArea): boolean {
-  return (
-    a.type === b.type &&
-    JSON.stringify(a.coordinates) === JSON.stringify(b.coordinates)
-  );
+  return a.type === b.type && JSON.stringify(a.coordinates) === JSON.stringify(b.coordinates);
 }
 
 /** True for join-preview Null Island (0–1°) or the zero fallback polygon. */

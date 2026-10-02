@@ -1,11 +1,11 @@
-import test from "node:test";
 import assert from "node:assert/strict";
+import test from "node:test";
+import { getSessionOpsCaps } from "../incident/sessionOpsCaps.mjs";
+import { SESSION_OPS_AGENT_BUSY } from "../incident/sessionOpsCursorAgent.mjs";
 import {
   SUPPORT_AGENT_WORKING_TEXT,
   supportAgentTurnHandler,
 } from "../incident/supportAgentTurn.mjs";
-import { SESSION_OPS_AGENT_BUSY } from "../incident/sessionOpsCursorAgent.mjs";
-import { getSessionOpsCaps } from "../incident/sessionOpsCaps.mjs";
 
 function createInMemoryFirestore() {
   const documents = new Map();
@@ -68,9 +68,7 @@ function createInMemoryFirestore() {
         set(ref, data, options = {}) {
           const base = options.merge
             ? {
-                ...(pendingWrites.get(ref.path) ??
-                  documents.get(ref.path) ??
-                  {}),
+                ...(pendingWrites.get(ref.path) ?? documents.get(ref.path) ?? {}),
                 ...data,
               }
             : { ...data };
@@ -276,14 +274,8 @@ test("Cursor failure releases claim without charging a turn", async () => {
   );
 
   assert.equal(turnCharges, 0);
-  assert.equal(
-    db.documents.get("incidents/inc-1").supportAgentRun.status,
-    "failed",
-  );
-  assert.equal(
-    db.documents.get("incidents/inc-1").supportAgentRun.terminalStatus,
-    "RELEASED",
-  );
+  assert.equal(db.documents.get("incidents/inc-1").supportAgentRun.status, "failed");
+  assert.equal(db.documents.get("incidents/inc-1").supportAgentRun.terminalStatus, "RELEASED");
 });
 
 test("second concurrent claim loses the busy race", async () => {
@@ -315,11 +307,7 @@ test("second concurrent claim loses the busy race", async () => {
 
   await assert.rejects(
     () =>
-      supportAgentTurnHandler(
-        db,
-        { incidentId: "inc-1", uid: "reporter-1", text: "second" },
-        deps,
-      ),
+      supportAgentTurnHandler(db, { incidentId: "inc-1", uid: "reporter-1", text: "second" }, deps),
     (error) => error.message === SESSION_OPS_AGENT_BUSY,
   );
   assert.equal(createCalls, 1);

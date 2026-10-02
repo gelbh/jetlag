@@ -1,5 +1,5 @@
-import test from "node:test";
 import assert from "node:assert/strict";
+import test from "node:test";
 import {
   buildGameResultDocument,
   buildGameResultPlayers,
@@ -20,12 +20,10 @@ function createFinalizeMockDb({ liveSession } = {}) {
   const state = {
     gameResults: new Map(),
     sessionUpdate: null,
-    liveSession:
-      liveSession ??
-      ({
-        foundConfirmedAt: "2026-01-01T01:00:00.000Z",
-        gameOutcome: "found",
-      }),
+    liveSession: liveSession ?? {
+      foundConfirmedAt: "2026-01-01T01:00:00.000Z",
+      gameOutcome: "found",
+    },
   };
 
   const sessionRef = {
@@ -84,17 +82,11 @@ test("shouldFinalizeGameResult triggers on found confirm, ended_early, or abando
     true,
   );
   assert.equal(
-    shouldFinalizeGameResult(
-      { gameOutcome: undefined },
-      { gameOutcome: "ended_early" },
-    ),
+    shouldFinalizeGameResult({ gameOutcome: undefined }, { gameOutcome: "ended_early" }),
     true,
   );
   assert.equal(
-    shouldFinalizeGameResult(
-      { gameOutcome: undefined },
-      { gameOutcome: "abandoned" },
-    ),
+    shouldFinalizeGameResult({ gameOutcome: undefined }, { gameOutcome: "abandoned" }),
     true,
   );
   assert.equal(
@@ -217,17 +209,13 @@ test("buildGameResultDocument prefers hidingPeriodMinutes override", () => {
 test("finalizeGameResultForSession writes gameResult and session gameResultId", async () => {
   const db = createFinalizeMockDb();
 
-  const { gameResultId, gameResult } = await finalizeGameResultForSession(
-    db,
-    "session-1",
-    {
-      foundConfirmedAt: "2026-01-01T01:00:00.000Z",
-      gameOutcome: "found",
-      timerAccumulatedMs: 30_000,
-      timerRunningSince: "2026-01-01T00:30:00.000Z",
-      memberRoles: { "seeker-1": "seeker", "hider-1": "hider" },
-    },
-  );
+  const { gameResultId, gameResult } = await finalizeGameResultForSession(db, "session-1", {
+    foundConfirmedAt: "2026-01-01T01:00:00.000Z",
+    gameOutcome: "found",
+    timerAccumulatedMs: 30_000,
+    timerRunningSince: "2026-01-01T00:30:00.000Z",
+    memberRoles: { "seeker-1": "seeker", "hider-1": "hider" },
+  });
 
   assert.match(gameResultId, /^[0-9a-f-]{36}$/);
   assert.equal(gameResult.outcome, "found");
@@ -257,10 +245,7 @@ test("handleFinalizeGameResultWrite ignores unrelated session updates", async ()
 
   await handleFinalizeGameResultWrite(db, {
     params: { sessionId: "session-1" },
-    data: firestoreChange(
-      { timerAccumulatedMs: 0 },
-      { timerAccumulatedMs: 1000 },
-    ),
+    data: firestoreChange({ timerAccumulatedMs: 0 }, { timerAccumulatedMs: 1000 }),
   });
 
   assert.equal(db.gameResults.size, 0);

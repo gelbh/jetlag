@@ -14,10 +14,7 @@ export {
 
 export type ToolStepDefinition = { id: string; label: string };
 
-export function deriveStepStates(
-  stepCount: number,
-  currentIndex: number,
-): ToolStepState[] {
+export function deriveStepStates(stepCount: number, currentIndex: number): ToolStepState[] {
   return Array.from({ length: stepCount }, (_, index) => {
     if (index === currentIndex) {
       return "current";

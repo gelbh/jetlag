@@ -126,18 +126,14 @@ describe("createRemoteSession role-gate bootstrap", () => {
       new FirebaseError("permission-denied", "Missing or insufficient permissions."),
     );
 
-    await expect(createRemoteSession(AREA, "host-1")).rejects.toThrow(
-      AUTH_FAILURE_MESSAGE,
-    );
+    await expect(createRemoteSession(AREA, "host-1")).rejects.toThrow(AUTH_FAILURE_MESSAGE);
     expect(initSessionRoleGates).not.toHaveBeenCalled();
   });
 
   it("rolls back session docs when init fails outside emulator", async () => {
     initSessionRoleGates.mockRejectedValueOnce(new Error("functions down"));
 
-    await expect(createRemoteSession(AREA, "host-1")).rejects.toThrow(
-      /Couldn't set up role codes/,
-    );
+    await expect(createRemoteSession(AREA, "host-1")).rejects.toThrow(/Couldn't set up role codes/);
 
     expect(updateDoc).toHaveBeenCalledWith(
       expect.anything(),

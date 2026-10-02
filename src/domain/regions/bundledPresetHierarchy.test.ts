@@ -1,12 +1,6 @@
 import { describe, expect, it } from "vitest";
-import {
-  BUNDLED_GAME_PRESET_DEFINITIONS,
-  bundledPresetDefinition,
-} from "./bundledGamePresets";
-import {
-  buildBundledPresetTree,
-  formatBundledPresetLocation,
-} from "./bundledPresetHierarchy";
+import { BUNDLED_GAME_PRESET_DEFINITIONS, bundledPresetDefinition } from "./bundledGamePresets";
+import { buildBundledPresetTree, formatBundledPresetLocation } from "./bundledPresetHierarchy";
 
 describe("bundledPresetHierarchy", () => {
   it("builds continent → country → county → local authority tree", () => {
@@ -52,7 +46,9 @@ describe("bundledPresetHierarchy", () => {
   it("includes North America and Asia preset groups", () => {
     const tree = buildBundledPresetTree(BUNDLED_GAME_PRESET_DEFINITIONS);
     const names = tree
-      .filter((node): node is Extract<(typeof tree)[number], { kind: "group" }> => node.kind === "group")
+      .filter(
+        (node): node is Extract<(typeof tree)[number], { kind: "group" }> => node.kind === "group",
+      )
       .map((node) => node.name);
     expect(names).toEqual(expect.arrayContaining(["North America", "Asia"]));
   });
@@ -71,14 +67,11 @@ describe("bundledPresetHierarchy", () => {
     expect(canada).toBeTruthy();
     expect(
       canada!.children.some(
-        (node) =>
-          node.kind === "preset" && node.presetId === "bundled:prince-rupert",
+        (node) => node.kind === "preset" && node.presetId === "bundled:prince-rupert",
       ),
     ).toBe(true);
     expect(
-      canada!.children.some(
-        (node) => node.kind === "group" && node.name === "British Columbia",
-      ),
+      canada!.children.some((node) => node.kind === "group" && node.name === "British Columbia"),
     ).toBe(false);
   });
 

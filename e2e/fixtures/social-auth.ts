@@ -7,16 +7,12 @@ export const E2E_LAYOUT_USERNAME = "e2e_layout_user";
 export const SOCIAL_LAYOUT_ROUTES = {
   "/leaderboard": {
     // Sticky Choose board chip (metric controls live in the board sheet).
-    ready: (page: Page) =>
-      page.getByRole("button", { name: /Choose board/i }),
-    viewportTarget: (page: Page) =>
-      page.getByRole("button", { name: /Choose board/i }),
+    ready: (page: Page) => page.getByRole("button", { name: /Choose board/i }),
+    viewportTarget: (page: Page) => page.getByRole("button", { name: /Choose board/i }),
   },
   "/friends": {
-    ready: (page: Page) =>
-      page.getByRole("textbox", { name: "Search username" }),
-    viewportTarget: (page: Page) =>
-      page.getByRole("textbox", { name: "Search username" }),
+    ready: (page: Page) => page.getByRole("textbox", { name: "Search username" }),
+    viewportTarget: (page: Page) => page.getByRole("textbox", { name: "Search username" }),
   },
   "/stats": {
     // Mantine SegmentedControl is a radiogroup, not a tablist.
@@ -27,21 +23,13 @@ export const SOCIAL_LAYOUT_ROUTES = {
 
 export type SocialLayoutPath = keyof typeof SOCIAL_LAYOUT_ROUTES;
 
-export const SOCIAL_LAYOUT_PATHS = Object.keys(
-  SOCIAL_LAYOUT_ROUTES,
-) as SocialLayoutPath[];
+export const SOCIAL_LAYOUT_PATHS = Object.keys(SOCIAL_LAYOUT_ROUTES) as SocialLayoutPath[];
 
-export function socialRouteReadyLocator(
-  page: Page,
-  path: SocialLayoutPath,
-): Locator {
+export function socialRouteReadyLocator(page: Page, path: SocialLayoutPath): Locator {
   return SOCIAL_LAYOUT_ROUTES[path].ready(page);
 }
 
-export function socialRouteViewportLocator(
-  page: Page,
-  path: SocialLayoutPath,
-): Locator {
+export function socialRouteViewportLocator(page: Page, path: SocialLayoutPath): Locator {
   return SOCIAL_LAYOUT_ROUTES[path].viewportTarget(page);
 }
 
@@ -49,9 +37,7 @@ export async function signInAndSeedUsernameProfile(
   page: Page,
   username: string = E2E_LAYOUT_USERNAME,
 ): Promise<void> {
-  await page.waitForFunction(
-    () => window.__JETLAG_E2E__?.signInPermanentUserForCapture != null,
-  );
+  await page.waitForFunction(() => window.__JETLAG_E2E__?.signInPermanentUserForCapture != null);
   const uid = await page.evaluate(async () => {
     const bridge = window.__JETLAG_E2E__;
     if (!bridge?.signInPermanentUserForCapture) {
@@ -63,10 +49,7 @@ export async function signInAndSeedUsernameProfile(
   await seedUsernameProfileDocs(uid, username);
 }
 
-async function waitForSocialRouteChrome(
-  page: Page,
-  path: SocialLayoutPath,
-): Promise<void> {
+async function waitForSocialRouteChrome(page: Page, path: SocialLayoutPath): Promise<void> {
   await expect(socialRouteReadyLocator(page, path)).toBeVisible({
     timeout: 15_000,
   });

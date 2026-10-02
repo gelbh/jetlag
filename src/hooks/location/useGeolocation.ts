@@ -1,8 +1,8 @@
 import { useCallback, useState } from "react";
 import {
   confirmAndRequestLocationAccess,
-  unknownGeolocationErrorMessage,
   type GeolocationReading,
+  unknownGeolocationErrorMessage,
 } from "../../services/core/location/geolocation";
 import {
   getFreshLiveLocationReading,

@@ -7,23 +7,20 @@ import { milesToMeters } from "@/domain/map/distance";
 import { matchingQuestionFor } from "@/domain/questions/matchingQuestions";
 import { BODY_OF_WATER_MEASURING_QUESTION } from "@/domain/questions/measuring/measuringCatalog";
 import { measuringQuestionFor } from "@/domain/questions/measuringQuestions";
-import {
-  PHOTO_REPLY_OPTIONS,
-  photoQuestionPrompt,
-} from "@/domain/questions/photoQuestions";
+import { PHOTO_REPLY_OPTIONS, photoQuestionPrompt } from "@/domain/questions/photoQuestions";
 import { radarQuestionPrompt } from "@/domain/questions/radarQuestions";
 import {
   TENTACLE_NOT_WITHIN_REACH_LABEL,
   tentacleQuestionPrompt,
 } from "@/domain/questions/tentacleQuestions";
 import { thermometerQuestionPrompt } from "@/domain/questions/thermometerQuestions";
+import type { HiderTruthResult } from "@/domain/questions/ui";
+import type { SessionActivityEvent } from "@/domain/session/activity/sessionActivityLog";
 import type {
   GameReplyOption,
   PendingQuestionRecord,
   SessionMessageRecord,
 } from "@/domain/session/activity/sessionChat";
-import type { SessionActivityEvent } from "@/domain/session/activity/sessionActivityLog";
-import type { HiderTruthResult } from "@/domain/questions/ui";
 import { tentacleRadiusMeters } from "@/domain/session/size/gameSizeRules";
 import { THERMOMETER_WALK_CANCEL_TEXT } from "@/services/firestore/firestoreSessionExtras";
 
@@ -68,19 +65,15 @@ const YES_NO: GameReplyOption[] = yesNoAnswerOptions.map((option) => ({
   label: option.label,
 }));
 
-const CLOSER_FURTHER: GameReplyOption[] = closerFurtherAnswerOptions.map(
-  (option) => ({
-    id: option.value,
-    label: option.label,
-  }),
-);
+const CLOSER_FURTHER: GameReplyOption[] = closerFurtherAnswerOptions.map((option) => ({
+  id: option.value,
+  label: option.label,
+}));
 
-const HOTTER_COLDER: GameReplyOption[] = hotterColderAnswerOptions.map(
-  (option) => ({
-    id: option.value,
-    label: option.label,
-  }),
-);
+const HOTTER_COLDER: GameReplyOption[] = hotterColderAnswerOptions.map((option) => ({
+  id: option.value,
+  label: option.label,
+}));
 
 const MATCHING_MUSEUM = matchingQuestionFor("museum");
 const MATCHING_AIRPORT = matchingQuestionFor("commercial_airport");
@@ -223,10 +216,7 @@ export function buildMockChatMessages(
       pendingQuestionId: "mock-pq-matching-airport",
       toolType: "matching",
       promptText: MATCHING_AIRPORT.prompt,
-      replyOptions: [
-        ...YES_NO,
-        { id: "null", label: "Null (not in play area)" },
-      ],
+      replyOptions: [...YES_NO, { id: "null", label: "Null (not in play area)" }],
       status: "answered",
       selectedReply: "null",
     },
@@ -522,10 +512,7 @@ export function buildMockPendingQuestions(
           matchingNullAnswer: true,
         },
       },
-      replyOptions: [
-        ...YES_NO,
-        { id: "null", label: "Null (not in play area)" },
-      ],
+      replyOptions: [...YES_NO, { id: "null", label: "Null (not in play area)" }],
       promptText: MATCHING_AIRPORT.prompt,
       answer: null,
       cardDraw: 3,
@@ -735,14 +722,8 @@ export function buildMockPendingQuestions(
 /** Recommended truth labels for open hider-answer demos. */
 export function buildMockHiderTruths(): ReadonlyMap<string, HiderTruthResult> {
   return new Map([
-    [
-      "mock-pq-matching-answerable",
-      { replyId: "no", label: "No" },
-    ],
-    [
-      "mock-pq-radar-answerable",
-      { replyId: "yes", label: "Yes" },
-    ],
+    ["mock-pq-matching-answerable", { replyId: "no", label: "No" }],
+    ["mock-pq-radar-answerable", { replyId: "yes", label: "Yes" }],
   ]);
 }
 

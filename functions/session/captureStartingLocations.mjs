@@ -1,7 +1,5 @@
 export function isFirstTimerStartTransition(before, after) {
-  const wasStopped =
-    before?.timerRunningSince == null ||
-    before?.timerRunningSince === undefined;
+  const wasStopped = before?.timerRunningSince == null || before?.timerRunningSince === undefined;
   const isRunning = typeof after?.timerRunningSince === "string";
 
   return wasStopped && isRunning;
@@ -9,13 +7,9 @@ export function isFirstTimerStartTransition(before, after) {
 
 function buildStartingLocationDocument(sessionId, uid, location, memberRoles, capturedAt) {
   const roleFromLocation =
-    location.role === "hider" || location.role === "seeker"
-      ? location.role
-      : null;
+    location.role === "hider" || location.role === "seeker" ? location.role : null;
   const roleFromSession =
-    memberRoles?.[uid] === "hider" || memberRoles?.[uid] === "seeker"
-      ? memberRoles[uid]
-      : "seeker";
+    memberRoles?.[uid] === "hider" || memberRoles?.[uid] === "seeker" ? memberRoles[uid] : "seeker";
 
   return {
     uid,
@@ -54,18 +48,10 @@ export async function captureStartingLocationsForSession(db, sessionId, captured
       continue;
     }
 
-    const startingRef = sessionRef
-      .collection("startingLocations")
-      .doc(locationDoc.id);
+    const startingRef = sessionRef.collection("startingLocations").doc(locationDoc.id);
     batch.set(
       startingRef,
-      buildStartingLocationDocument(
-        sessionId,
-        locationDoc.id,
-        location,
-        memberRoles,
-        capturedAt,
-      ),
+      buildStartingLocationDocument(sessionId, locationDoc.id, location, memberRoles, capturedAt),
     );
     captured += 1;
   }

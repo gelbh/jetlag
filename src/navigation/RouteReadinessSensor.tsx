@@ -2,13 +2,13 @@ import { useLayoutEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { isPublicShellPath } from "@/domain/device/perf/publicShellPaths";
 import { usePremiumEntitlements } from "../hooks/billing/usePremiumEntitlements";
-import { useRouteTransition } from "./useRouteTransition";
 import {
   routeReadinessKind,
   useAdminAuthScreenReady,
   usePlayAreaScreenReady,
   usePremiumScreenReady,
 } from "./useRouteScreenReady";
+import { useRouteTransition } from "./useRouteTransition";
 
 function ScreenReadyReporter({ ready }: { ready: boolean }) {
   const { reportScreenReady } = useRouteTransition();

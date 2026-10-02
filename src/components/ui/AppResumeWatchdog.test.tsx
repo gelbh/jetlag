@@ -1,11 +1,8 @@
 import { act, render } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import {
-  AppResumeWatchdog,
-  RESUME_WATCHDOG_RELOAD_KEY,
-} from "./AppResumeWatchdog";
 import { RouteTransitionTestProvider } from "../../test/RouteTransitionTestProvider";
+import { AppResumeWatchdog, RESUME_WATCHDOG_RELOAD_KEY } from "./AppResumeWatchdog";
 
 const resetStuckTransition = vi.fn();
 const captureResumeShellUnresponsiveMock = vi.fn();
@@ -23,16 +20,15 @@ vi.mock("../../navigation/useRouteTransition", () => ({
 }));
 
 vi.mock("../../services/core/analytics/sentry", () => ({
-  addAppResumeBreadcrumb: (...args: unknown[]) =>
-    addAppResumeBreadcrumbMock(...args),
+  addAppResumeBreadcrumb: (...args: unknown[]) => addAppResumeBreadcrumbMock(...args),
   captureResumeShellUnresponsive: (...args: unknown[]) =>
     captureResumeShellUnresponsiveMock(...args),
 }));
 
 vi.mock("../../domain/device/resumeShell", async () => {
-  const actual = await vi.importActual<
-    typeof import("../../domain/device/resumeShell")
-  >("../../domain/device/resumeShell");
+  const actual = await vi.importActual<typeof import("../../domain/device/resumeShell")>(
+    "../../domain/device/resumeShell",
+  );
   return {
     ...actual,
     resumeWatchdogBudgets: (pathname: string = "") => {

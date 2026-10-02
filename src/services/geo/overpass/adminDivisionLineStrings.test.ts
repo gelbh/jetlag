@@ -17,9 +17,7 @@ describe("adminDivisionLineStrings", () => {
       ],
     };
 
-    const segments = lineStringsFromAdminDivisionBoundaries([
-      { boundary },
-    ]);
+    const segments = lineStringsFromAdminDivisionBoundaries([{ boundary }]);
 
     expect(segments).toHaveLength(1);
     expect(segments[0]?.geometry.coordinates.length).toBeGreaterThanOrEqual(4);

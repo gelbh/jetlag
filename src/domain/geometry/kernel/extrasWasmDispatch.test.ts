@@ -1,5 +1,5 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
 import type { Feature, LineString } from "geojson";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { loadPolygonGolden } from "./loadPolygonGolden";
 import type { GameAreaGeometry, LatLngTuple } from "./types";
 
@@ -55,22 +55,11 @@ describe("extras wasm dispatch (halfPlane ready)", () => {
       "./halfPlaneKernelRunner"
     );
 
-    const half = await dispatchHalfPlane(
-      pointA,
-      pointB,
-      gameArea,
-      "cold",
-      "midpoint",
-    );
+    const half = await dispatchHalfPlane(pointA, pointB, gameArea, "cold", "midpoint");
     expect(half).toEqual(coldGolden);
     expect(wasmBuildHalfPlanePolygon).toHaveBeenCalledOnce();
 
-    const radar = await dispatchRadarShadedRegion(
-      [51.45, -0.15],
-      400,
-      gameArea,
-      false,
-    );
+    const radar = await dispatchRadarShadedRegion([51.45, -0.15], 400, gameArea, false);
     expect(radar).toEqual(radarGolden);
     expect(wasmBuildRadarShadedRegion).toHaveBeenCalledOnce();
   });
@@ -95,12 +84,10 @@ describe("extras wasm dispatch (halfPlane ready)", () => {
       resetGeodesicWasmForTests: vi.fn(),
     }));
 
-    const { dispatchGeodesicLineBuffer } = await import(
-      "./geodesicKernelRunner"
+    const { dispatchGeodesicLineBuffer } = await import("./geodesicKernelRunner");
+    await expect(dispatchGeodesicLineBuffer(shortLine, 200, undefined)).rejects.toThrow(
+      /not wasm-ready/,
     );
-    await expect(
-      dispatchGeodesicLineBuffer(shortLine, 200, undefined),
-    ).rejects.toThrow(/not wasm-ready/);
     expect(wasmGeodesicLineBuffer).not.toHaveBeenCalled();
   });
 });

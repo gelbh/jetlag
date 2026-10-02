@@ -10,12 +10,10 @@ export function shouldFinalizeGameResult(before, after) {
   }
 
   const foundConfirmedNewlySet =
-    typeof before?.foundConfirmedAt !== "string" &&
-    typeof after.foundConfirmedAt === "string";
+    typeof before?.foundConfirmedAt !== "string" && typeof after.foundConfirmedAt === "string";
 
   const terminalNewlySet =
-    (after.gameOutcome === "ended_early" ||
-      after.gameOutcome === "abandoned") &&
+    (after.gameOutcome === "ended_early" || after.gameOutcome === "abandoned") &&
     before?.gameOutcome !== after.gameOutcome;
 
   return foundConfirmedNewlySet || terminalNewlySet;
@@ -23,9 +21,7 @@ export function shouldFinalizeGameResult(before, after) {
 
 export function computeDurationMs(session, endedAtIso) {
   const accumulatedMs =
-    typeof session.timerAccumulatedMs === "number"
-      ? session.timerAccumulatedMs
-      : 0;
+    typeof session.timerAccumulatedMs === "number" ? session.timerAccumulatedMs : 0;
 
   if (typeof session.timerRunningSince !== "string") {
     return accumulatedMs;
@@ -134,12 +130,9 @@ export function buildGameResultDocument(sessionId, session) {
     resolveHidingPeriodMs(session),
   );
   const outcome = resolveOutcome(session);
-  const roundNumber =
-    typeof session.roundNumber === "number" ? session.roundNumber : 0;
+  const roundNumber = typeof session.roundNumber === "number" ? session.roundNumber : 0;
   const gameSize =
-    session.gameSize === "small" ||
-    session.gameSize === "medium" ||
-    session.gameSize === "large"
+    session.gameSize === "small" || session.gameSize === "medium" || session.gameSize === "large"
       ? session.gameSize
       : "medium";
 

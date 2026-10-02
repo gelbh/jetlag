@@ -3,8 +3,8 @@ import type { IncidentRecord } from "../../domain/incident/incidentTypes";
 import { isFirebaseConfigured } from "../../services/core/firebase/firebase";
 import { subscribeIncident } from "../../services/firestore/firestoreIncidents";
 import {
-  subscribeSupportThreadMessages,
   type IncidentThreadMessageRecord,
+  subscribeSupportThreadMessages,
 } from "../../services/firestore/firestoreIncidentThreads";
 import { postSupportAgentTurn } from "../../services/incident/incidentApi";
 
@@ -21,17 +21,13 @@ export interface UseSupportThreadResult {
  * Live support thread (player ↔ session-ops agent ± admin) + incident doc.
  * Mutations go through `postSupportAgentTurn`; Firestore is read-only.
  */
-export function useSupportThread(
-  incidentId: string | null | undefined,
-): UseSupportThreadResult {
+export function useSupportThread(incidentId: string | null | undefined): UseSupportThreadResult {
   const [incident, setIncident] = useState<IncidentRecord | null>(null);
   const [messages, setMessages] = useState<IncidentThreadMessageRecord[]>([]);
   const [error, setError] = useState<Error | null>(null);
   const [sending, setSending] = useState(false);
   const [summonId, setSummonId] = useState<string | null>(null);
-  const [syncedIncidentId, setSyncedIncidentId] = useState(
-    incidentId ?? null,
-  );
+  const [syncedIncidentId, setSyncedIncidentId] = useState(incidentId ?? null);
 
   const normalizedIncidentId = incidentId ?? null;
   if (normalizedIncidentId !== syncedIncidentId) {
@@ -85,11 +81,7 @@ export function useSupportThread(
       }
       setSending(true);
       try {
-        const result = await postSupportAgentTurn(
-          normalizedIncidentId,
-          text,
-          summonId,
-        );
+        const result = await postSupportAgentTurn(normalizedIncidentId, text, summonId);
         if (result.summonId) {
           setSummonId(result.summonId);
         }

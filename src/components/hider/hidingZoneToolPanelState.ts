@@ -1,5 +1,5 @@
-import type { TransitStation } from "../../domain/session/hiding/hidingZone";
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
+import type { TransitStation } from "../../domain/session/hiding/hidingZone";
 
 /** Shared zone-tool bag for HudBody + map-first placement chrome. */
 export interface HidingZoneToolPanelState {

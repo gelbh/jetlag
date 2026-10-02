@@ -1,9 +1,9 @@
-import { render, screen } from "@testing-library/react";
 import { MantineProvider } from "@mantine/core";
+import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { jetlagTheme } from "@/theme/theme";
-import { GameAreaFramingModal } from "./GameAreaFramingModal";
 import type { GameAreaFramingController } from "./GameAreaFramingModal";
+import { GameAreaFramingModal } from "./GameAreaFramingModal";
 
 vi.mock("@/components/map/chrome/MapView", () => ({
   MapView: ({ children }: { children?: React.ReactNode }) => (
@@ -72,14 +72,10 @@ describe("GameAreaFramingModal", () => {
     );
 
     expect(screen.getByTestId("game-area-framing-modal")).toBeInTheDocument();
-    expect(
-      screen.getByRole("heading", { name: "Frame area" }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Frame area" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Cancel" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Done" })).toBeDisabled();
-    expect(
-      screen.getByRole("radiogroup", { name: "Play area shape" }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("radiogroup", { name: "Play area shape" })).toBeInTheDocument();
     expect(screen.getByTestId("framing-map")).toBeInTheDocument();
   });
 

@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { captureAppCheckTokenFailure } from "../analytics/sentry";
 import {
   APP_CHECK_PROBE_SKIP_KEY,
   APP_CHECK_PROBE_TIMEOUT_MS,
@@ -6,17 +7,15 @@ import {
   resetAppCheckProbeForTests,
   shouldSkipAppCheckProbe,
 } from "./appCheckProbe";
-import { captureAppCheckTokenFailure } from "../analytics/sentry";
 
-const { getFirebaseAppCheck, getToken, isFirebaseConfigured, getClientEnv } =
-  vi.hoisted(() => ({
-    getFirebaseAppCheck: vi.fn(),
-    getToken: vi.fn(),
-    isFirebaseConfigured: vi.fn(() => true),
-    getClientEnv: vi.fn(() => ({
-      VITE_FIREBASE_APP_CHECK_SITE_KEY: "test-site-key",
-    })),
-  }));
+const { getFirebaseAppCheck, getToken, isFirebaseConfigured, getClientEnv } = vi.hoisted(() => ({
+  getFirebaseAppCheck: vi.fn(),
+  getToken: vi.fn(),
+  isFirebaseConfigured: vi.fn(() => true),
+  getClientEnv: vi.fn(() => ({
+    VITE_FIREBASE_APP_CHECK_SITE_KEY: "test-site-key",
+  })),
+}));
 
 vi.mock("firebase/app-check", () => ({
   getToken: (...args: unknown[]) => getToken(...args),
@@ -137,10 +136,7 @@ describe("appCheckProbe", () => {
     const second = probeAppCheckAvailability();
     expect(getToken).toHaveBeenCalledTimes(1);
     resolveToken({ token: "ok-token" });
-    await expect(Promise.all([first, second])).resolves.toEqual([
-      { ok: true },
-      { ok: true },
-    ]);
+    await expect(Promise.all([first, second])).resolves.toEqual([{ ok: true }, { ok: true }]);
   });
 
   it("soft-fails when the probe times out", async () => {

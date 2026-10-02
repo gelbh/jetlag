@@ -1,8 +1,5 @@
 import type { Feature, LineString } from "geojson";
-import {
-  isPackGeoSupported,
-  packGeoCoastlineUrl,
-} from "@/domain/regions/packGeoManifest";
+import { isPackGeoSupported, packGeoCoastlineUrl } from "@/domain/regions/packGeoManifest";
 import type { RegionPackId } from "@/domain/regions/regionPack";
 
 export interface BundledCoastlinePack {
@@ -28,9 +25,7 @@ function resolveGeoAssetUrl(path: string): string {
   return path;
 }
 
-function isLineStringFeature(
-  value: unknown,
-): value is Feature<LineString> {
+function isLineStringFeature(value: unknown): value is Feature<LineString> {
   if (!value || typeof value !== "object") {
     return false;
   }
@@ -55,9 +50,7 @@ export async function loadBundledCoastlinePack(
   }
 
   try {
-    const response = await fetch(
-      resolveGeoAssetUrl(packGeoCoastlineUrl(regionPackId)),
-    );
+    const response = await fetch(resolveGeoAssetUrl(packGeoCoastlineUrl(regionPackId)));
     if (!response.ok) {
       coastlineCache.set(regionPackId, null);
       return null;

@@ -1,9 +1,9 @@
-import type { ReactElement } from "react";
-import { screen } from "@testing-library/react";
 import { MantineProvider } from "@mantine/core";
+import { screen } from "@testing-library/react";
+import type { ReactElement } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { jetlagTheme } from "@/theme/theme";
 import { renderWithRouter } from "@/test/renderWithRouter";
+import { jetlagTheme } from "@/theme/theme";
 import { AppErrorPage } from "./AppErrorPage";
 
 beforeEach(() => {
@@ -37,9 +37,7 @@ describe("AppErrorPage", () => {
       />,
     );
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
-    expect(
-      screen.getByRole("heading", { name: /page not found/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /page not found/i })).toBeInTheDocument();
     expect(container.querySelector(".mantine-Title-root")).toBeTruthy();
     expect(container.querySelector(".mantine-Button-root")).toBeTruthy();
   });

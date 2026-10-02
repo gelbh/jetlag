@@ -1,7 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  mergeBundledPresets,
-} from "../../regions/bundledGamePresets";
+import { mergeBundledPresets } from "../../regions/bundledGamePresets";
 import { defaultAdvancedSessionSettings } from "../tools/advancedSessionSettings";
 import { filterGamePresetsForSearch } from "./gamePresetSearch";
 
@@ -40,18 +38,16 @@ describe("filterGamePresetsForSearch", () => {
   it("matches bundled presets by hierarchy segment", () => {
     const results = filterGamePresetsForSearch(presets, "Ireland");
     expect(results.length).toBeGreaterThan(1);
-    expect(
-      results.filter((preset) => preset.id.startsWith("bundled:")).length,
-    ).toBeGreaterThan(0);
+    expect(results.filter((preset) => preset.id.startsWith("bundled:")).length).toBeGreaterThan(0);
   });
 
   it("matches user presets by name and place label", () => {
-    expect(
-      filterGamePresetsForSearch(presets, "Weekly").map((preset) => preset.id),
-    ).toEqual(["preset-weekly"]);
-    expect(
-      filterGamePresetsForSearch(presets, "Galway").map((preset) => preset.id),
-    ).toEqual(["preset-weekly"]);
+    expect(filterGamePresetsForSearch(presets, "Weekly").map((preset) => preset.id)).toEqual([
+      "preset-weekly",
+    ]);
+    expect(filterGamePresetsForSearch(presets, "Galway").map((preset) => preset.id)).toEqual([
+      "preset-weekly",
+    ]);
   });
 
   it("matches Hide+Seek show metros by place", () => {
@@ -62,12 +58,8 @@ describe("filterGamePresetsForSearch", () => {
 
   it("sorts bundled presets before user presets", () => {
     const results = filterGamePresetsForSearch(presets, "Ireland");
-    const firstUserIndex = results.findIndex(
-      (preset) => preset.id === "preset-weekly",
-    );
-    const lastBundledIndex = results.findLastIndex((preset) =>
-      preset.id.startsWith("bundled:"),
-    );
+    const firstUserIndex = results.findIndex((preset) => preset.id === "preset-weekly");
+    const lastBundledIndex = results.findLastIndex((preset) => preset.id.startsWith("bundled:"));
     expect(firstUserIndex).toBeGreaterThan(lastBundledIndex);
   });
 });

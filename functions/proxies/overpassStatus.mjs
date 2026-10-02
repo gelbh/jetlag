@@ -70,8 +70,7 @@ export async function orderOverpassEndpointsByStatus(endpoints) {
         return {
           endpoint,
           index,
-          slotAfter:
-            slotAfter == null ? Number.POSITIVE_INFINITY : Math.max(0, slotAfter),
+          slotAfter: slotAfter == null ? Number.POSITIVE_INFINITY : Math.max(0, slotAfter),
         };
       } catch {
         return { endpoint, index, slotAfter: Number.POSITIVE_INFINITY };

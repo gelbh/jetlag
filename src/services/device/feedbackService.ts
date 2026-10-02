@@ -1,9 +1,4 @@
-export type FeedbackEvent =
-  | "tap"
-  | "selection"
-  | "success"
-  | "error"
-  | "sheetSnap";
+export type FeedbackEvent = "tap" | "selection" | "success" | "error" | "sheetSnap";
 
 const VIBRATION_MS: Partial<Record<FeedbackEvent, number>> = {
   tap: 10,

@@ -3,11 +3,7 @@ import { CaretRightIcon } from "@phosphor-icons/react";
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 
-export function InsetHairline({
-  insetStart = "3.25rem",
-}: {
-  insetStart?: string;
-}) {
+export function InsetHairline({ insetStart = "3.25rem" }: { insetStart?: string }) {
   return (
     <Box
       aria-hidden
@@ -85,8 +81,7 @@ export function InsetRow({
       fontWeight: 400,
       fontSize: "1.0625rem",
       letterSpacing: "-0.01em",
-      transition:
-        "background-color 120ms ease, transform 80ms ease, opacity 80ms ease",
+      transition: "background-color 120ms ease, transform 80ms ease, opacity 80ms ease",
       "&:hover": {
         backgroundColor: "oklch(from var(--color-field-ink) l c h / 0.06)",
       },
@@ -102,12 +97,7 @@ export function InsetRow({
     <>
       {showSeparator ? <InsetHairline /> : null}
       {to ? (
-        <UnstyledButton
-          component={Link}
-          to={to}
-          aria-label={ariaLabel}
-          styles={rootStyles}
-        >
+        <UnstyledButton component={Link} to={to} aria-label={ariaLabel} styles={rootStyles}>
           {content}
         </UnstyledButton>
       ) : href ? (
@@ -122,12 +112,7 @@ export function InsetRow({
           {content}
         </UnstyledButton>
       ) : (
-        <UnstyledButton
-          type="button"
-          onClick={onClick}
-          aria-label={ariaLabel}
-          styles={rootStyles}
-        >
+        <UnstyledButton type="button" onClick={onClick} aria-label={ariaLabel} styles={rootStyles}>
           {content}
         </UnstyledButton>
       )}

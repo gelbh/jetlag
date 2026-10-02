@@ -1,8 +1,5 @@
+import { type BoundingBox, gameAreaToBoundingBox } from "@/domain/geometry/gameArea/gameAreaBounds";
 import type { GameArea } from "@/domain/map/annotations";
-import {
-  gameAreaToBoundingBox,
-  type BoundingBox,
-} from "@/domain/geometry/gameArea/gameAreaBounds";
 
 export const OVERPASS_JSON_QUERY_HEADER = "[out:json][timeout:25];";
 
@@ -21,10 +18,7 @@ export function overpassQueryTemplate(body: string): string {
   `;
 }
 
-export function overpassTaggedBboxClauses(
-  bbox: string,
-  selectors: readonly string[],
-): string[] {
+export function overpassTaggedBboxClauses(bbox: string, selectors: readonly string[]): string[] {
   return selectors.flatMap((selector) => [
     `node${selector}(${bbox});`,
     `way${selector}(${bbox});`,

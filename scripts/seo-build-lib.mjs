@@ -4,9 +4,7 @@ import { join } from "node:path";
 export const MIN_ROOT_TEXT_CHARS = 40;
 
 export function loadCrawlPolicy(root) {
-  return JSON.parse(
-    readFileSync(join(root, "src/domain/seo/seoCrawlPolicy.json"), "utf8"),
-  );
+  return JSON.parse(readFileSync(join(root, "src/domain/seo/seoCrawlPolicy.json"), "utf8"));
 }
 
 /** Home must not overwrite Vite's SPA shell at dist/index.html. */
@@ -41,15 +39,14 @@ export function rewritePrerenderPreviewUrls(html, previewOrigin) {
 
 const HEAD_ASSET_LINK_RELS = new Set(["modulepreload", "stylesheet", "preload"]);
 // Attribute runs may contain `>` inside quotes (e.g. `media="(width > 600px)"`).
-const TAG_ATTRS = String.raw`(?:[^>"']|"[^"]*"|'[^']*')*`;
+const TAG_ATTRS = "(?:[^>\"']|\"[^\"]*\"|'[^']*')*";
 const HEAD_ASSET_TAG_RE = new RegExp(
-  String.raw`<link\b${TAG_ATTRS}>|<script\b${TAG_ATTRS}>[\s\S]*?<\/script\s*>`,
+  `<link\\b${TAG_ATTRS}>|<script\\b${TAG_ATTRS}>[\\s\\S]*?<\\/script\\s*>`,
   "gi",
 );
 const HEAD_TAG_JOINER = "\n    ";
 // Inert markup whose `<link>`/`<script>` text must not count as loaded assets.
-const INERT_SPAN_RE =
-  /<!--[\s\S]*?-->|<(noscript|template|style)\b[^>]*>[\s\S]*?<\/\1\s*>/gi;
+const INERT_SPAN_RE = /<!--[\s\S]*?-->|<(noscript|template|style)\b[^>]*>[\s\S]*?<\/\1\s*>/gi;
 
 /** Same-length copy with inert spans blanked, so match indices still address the original. */
 function maskInert(html) {
@@ -73,9 +70,7 @@ function headAssetKey(fullTag) {
     return rel && href && HEAD_ASSET_LINK_RELS.has(rel) ? `${rel}:${href}` : null;
   }
   const src = attr(tag, "src");
-  return src && attr(tag, "type")?.toLowerCase() === "module"
-    ? `module:${src}`
-    : null;
+  return src && attr(tag, "type")?.toLowerCase() === "module" ? `module:${src}` : null;
 }
 
 function headBounds(html) {

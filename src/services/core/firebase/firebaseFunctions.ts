@@ -17,9 +17,7 @@ export async function getFirebaseFunctions(): Promise<Functions> {
 
   if (!functionsPromise) {
     functionsPromise = (async () => {
-      const { connectFunctionsEmulator, getFunctions } = await import(
-        "firebase/functions"
-      );
+      const { connectFunctionsEmulator, getFunctions } = await import("firebase/functions");
       const app = getFirebaseApp();
       // Arm App Check before callables (enforceAppCheck) — not on bare getFirebaseApp (LCP).
       getFirebaseAppCheck();

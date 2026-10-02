@@ -7,9 +7,7 @@ const voronoiWasm = createLazyWasmImport(() => import("./voronoiWasm"));
 
 export async function dispatchSpatialVoronoi<
   T extends Record<string, unknown> = Record<string, unknown>,
->(
-  sites: Array<SpatialVoronoiSite<T>>
-): Promise<FeatureCollection> {
+>(sites: Array<SpatialVoronoiSite<T>>): Promise<FeatureCollection> {
   return dispatchKernel({
     entrypoint: "spatialVoronoi",
     label: "spatialVoronoi",

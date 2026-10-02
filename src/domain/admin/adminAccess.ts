@@ -31,9 +31,7 @@ export function claimsLookAdmin(
   claims: Record<string, unknown> | { email?: unknown; email_verified?: unknown },
 ): boolean {
   return (
-    claims.email_verified === true &&
-    typeof claims.email === "string" &&
-    isAdminEmail(claims.email)
+    claims.email_verified === true && typeof claims.email === "string" && isAdminEmail(claims.email)
   );
 }
 

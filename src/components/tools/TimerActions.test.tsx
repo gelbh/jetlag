@@ -1,7 +1,7 @@
 import { fireEvent, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { TimerActions } from "./TimerActions";
 import { renderWithRouter } from "../../test/renderWithRouter";
+import { TimerActions } from "./TimerActions";
 
 describe("TimerActions", () => {
   it("starts and pauses the timer", () => {

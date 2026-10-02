@@ -1,5 +1,4 @@
 import {
-  test,
   chooseAnswer,
   clickToolDockButton,
   completeMatchingSolo,
@@ -13,6 +12,7 @@ import {
   placeAskAnchor,
   primedAskSendButton,
   selectFirstRadarDistance,
+  test,
   waitForPrimedCommit,
 } from "../../fixtures";
 
@@ -21,9 +21,7 @@ test.describe("solo question tools", () => {
     await completeRadarSolo(localMap);
   });
 
-  test("radar ask strip arms after distance and answer", async ({
-    localMap: page,
-  }) => {
+  test("radar ask strip arms after distance and answer", async ({ localMap: page }) => {
     await test.step("pick distance, place, answer Yes", async () => {
       await clickToolDockButton(page, "Radar");
       await expectAskHud(page);

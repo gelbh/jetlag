@@ -1,10 +1,7 @@
-import type { ReactNode } from "react";
 import { Button, Group, Paper, Text } from "@mantine/core";
+import type { ReactNode } from "react";
+import { grayStyles, mapChromeSurfaceStyles } from "../entry/entryChrome";
 import { SheetCloseButton } from "../sheets/SheetCloseButton";
-import {
-  grayStyles,
-  mapChromeSurfaceStyles,
-} from "../entry/entryChrome";
 
 interface HudDetailPanelProps {
   panelClassName: string;
@@ -80,12 +77,7 @@ export function HudDetailPanel({
       ) : null}
 
       {actionLabel && onAction ? (
-        <Button
-          fullWidth
-          mt="sm"
-          onClick={onAction}
-          styles={grayStyles}
-        >
+        <Button fullWidth mt="sm" onClick={onAction} styles={grayStyles}>
           {actionLabel}
         </Button>
       ) : null}

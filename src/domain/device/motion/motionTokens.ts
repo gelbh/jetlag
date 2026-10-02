@@ -24,10 +24,8 @@ export const MOTION_SHEET_PRESENT_MS = 380;
 export const MOTION_TRANSITION_SHEET =
   "transform var(--motion-sheet-present) var(--ease-ios-standard)";
 export const MOTION_TRANSITION_PANEL = MOTION_TRANSITION_SHEET;
-export const MOTION_TRANSITION_BASE =
-  "transform var(--motion-base) var(--ease-spring-subtle)";
-export const MOTION_TRANSITION_SCRIM =
-  "opacity var(--motion-fast) var(--ease-out-quint)";
+export const MOTION_TRANSITION_BASE = "transform var(--motion-base) var(--ease-spring-subtle)";
+export const MOTION_TRANSITION_SCRIM = "opacity var(--motion-fast) var(--ease-out-quint)";
 
 /** Small placement reframe duration (walk/POI updates, radius edits); sits
  * just above `--motion-base` in base.css. */

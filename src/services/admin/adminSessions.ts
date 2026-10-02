@@ -1,5 +1,5 @@
 import { FirebaseError } from "firebase/app";
-import { httpsCallable, type HttpsCallableResult } from "firebase/functions";
+import { type HttpsCallableResult, httpsCallable } from "firebase/functions";
 import { forceRefreshIdToken } from "../core/auth/forceRefreshIdToken";
 import { getFirebaseFunctions, isFirebaseConfigured } from "../core/firebase/firebase";
 
@@ -76,8 +76,7 @@ export type ListActiveSessionsResponse = {
 function isRetriableAdminAuthError(error: unknown): boolean {
   return (
     error instanceof FirebaseError &&
-    (error.code === "functions/permission-denied" ||
-      error.code === "functions/unauthenticated")
+    (error.code === "functions/permission-denied" || error.code === "functions/unauthenticated")
   );
 }
 
@@ -98,10 +97,9 @@ function mapAdminSessionsError(error: unknown): never {
   }
 
   if (error instanceof FirebaseError && error.code === "functions/not-found") {
-    throw new Error(
-      "Admin session service isn't available yet. Try again after deploy.",
-      { cause: error },
-    );
+    throw new Error("Admin session service isn't available yet. Try again after deploy.", {
+      cause: error,
+    });
   }
 
   if (error instanceof Error) {
@@ -120,17 +118,16 @@ export async function fetchAdminSessionsPage(
   }
 
   const functions = await getFirebaseFunctions();
-  const callable = httpsCallable<
-    ListActiveSessionsRequest,
-    ListActiveSessionsResponse
-  >(functions, "listActiveSessions");
+  const callable = httpsCallable<ListActiveSessionsRequest, ListActiveSessionsResponse>(
+    functions,
+    "listActiveSessions",
+  );
 
   const callOnce = async (): Promise<ListActiveSessionsResponse> => {
-    const result: HttpsCallableResult<ListActiveSessionsResponse> =
-      await callable({
-        limit,
-        pageToken,
-      });
+    const result: HttpsCallableResult<ListActiveSessionsResponse> = await callable({
+      limit,
+      pageToken,
+    });
 
     return {
       sessions: result.data.sessions ?? [],

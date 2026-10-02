@@ -7,8 +7,7 @@ import {
 export const SESSION_OPS_UNKNOWN_TOOL = "SESSION_OPS_UNKNOWN_TOOL";
 export const SESSION_OPS_SESSION_MISMATCH = "SESSION_OPS_SESSION_MISMATCH";
 export const SESSION_OPS_INVALID_ARGS = "SESSION_OPS_INVALID_ARGS";
-export const SESSION_OPS_HOST_CONFIRM_REQUIRED =
-  "SESSION_OPS_HOST_CONFIRM_REQUIRED";
+export const SESSION_OPS_HOST_CONFIRM_REQUIRED = "SESSION_OPS_HOST_CONFIRM_REQUIRED";
 export const SESSION_OPS_INCIDENT_NOT_FOUND = "SESSION_OPS_INCIDENT_NOT_FOUND";
 export const SESSION_OPS_NO_SESSION = "SESSION_OPS_NO_SESSION";
 
@@ -35,12 +34,9 @@ export function validateSessionOpsTool(input) {
     };
   }
 
-  const sessionId =
-    typeof input.sessionId === "string" ? input.sessionId : "";
+  const sessionId = typeof input.sessionId === "string" ? input.sessionId : "";
   const incidentSessionId =
-    typeof input.incidentSessionId === "string"
-      ? input.incidentSessionId
-      : "";
+    typeof input.incidentSessionId === "string" ? input.incidentSessionId : "";
 
   if (!sessionId || !incidentSessionId || sessionId !== incidentSessionId) {
     return {
@@ -58,8 +54,7 @@ export function validateSessionOpsTool(input) {
     return {
       ok: false,
       code: SESSION_OPS_INVALID_ARGS,
-      message:
-        error instanceof Error ? error.message : "Invalid tool arguments.",
+      message: error instanceof Error ? error.message : "Invalid tool arguments.",
       toolId: tool,
     };
   }

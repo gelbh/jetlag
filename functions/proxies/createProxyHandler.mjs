@@ -1,13 +1,10 @@
-import { setCors } from "../lib/cors.mjs";
-import {
-  captureFunctionsExceptionWithTags,
-  resolveDeployedFunctionName,
-} from "../lib/sentry.mjs";
 import {
   enforceRateLimit,
   requireOverpassProxyAccess,
   requireProxyAccess,
 } from "../handlers/proxyShared.mjs";
+import { setCors } from "../lib/cors.mjs";
+import { captureFunctionsExceptionWithTags, resolveDeployedFunctionName } from "../lib/sentry.mjs";
 
 /**
  * Shared HTTP proxy pipeline: CORS, auth, rate limit, handler.

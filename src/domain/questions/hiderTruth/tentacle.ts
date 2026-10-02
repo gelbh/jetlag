@@ -1,13 +1,9 @@
-import type { TentaclePoi } from "../../map/annotations";
 import { distanceBetweenPoints, type LatLngTuple } from "../../geometry/gameArea/geometry";
+import type { TentaclePoi } from "../../map/annotations";
 import { DEFAULT_RADIUS_METERS } from "../../map/distance";
 import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
 import { tentacleRadiusFromMetadata } from "../tentacleQuestions";
-import {
-  resultFromReplyId,
-  truthUnavailable,
-  type HiderTruthResult,
-} from "./shared";
+import { type HiderTruthResult, resultFromReplyId, truthUnavailable } from "./shared";
 
 export function truthTentacle(
   pending: PendingQuestionRecord,
@@ -45,10 +41,7 @@ export function truthTentacle(
   let nearestDistance = Number.POSITIVE_INFINITY;
 
   for (const poi of pois) {
-    const distanceMeters = distanceBetweenPoints(stationCenter, [
-      poi.lat,
-      poi.lng,
-    ]);
+    const distanceMeters = distanceBetweenPoints(stationCenter, [poi.lat, poi.lng]);
     if (distanceMeters < nearestDistance) {
       nearestDistance = distanceMeters;
       nearest = poi;

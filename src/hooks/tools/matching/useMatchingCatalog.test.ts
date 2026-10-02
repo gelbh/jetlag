@@ -1,8 +1,8 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
 import { renderHook, waitFor } from "@testing-library/react";
 import type { Feature, Polygon } from "geojson";
-import type { GameArea } from "@/domain/map/annotations";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { MatchingFeature } from "@/domain/geo/types";
+import type { GameArea } from "@/domain/map/annotations";
 import { useMatchingCatalog } from "./useMatchingCatalog";
 
 const buildMatchingEliminationRegion = vi.hoisted(() => vi.fn());
@@ -12,28 +12,22 @@ const refinePolygonFeatureStep = vi.hoisted(() => vi.fn());
 
 vi.mock("@/domain/geometry/measuring/matchingGeometry", async (importOriginal) => {
   const actual =
-    await importOriginal<
-      typeof import("@/domain/geometry/measuring/matchingGeometry")
-    >();
+    await importOriginal<typeof import("@/domain/geometry/measuring/matchingGeometry")>();
   return {
     ...actual,
-    buildMatchingEliminationRegion: (...args: unknown[]) =>
-      buildMatchingEliminationRegion(...args),
-    buildSameNearestRegion: (...args: unknown[]) =>
-      buildSameNearestRegion(...args),
+    buildMatchingEliminationRegion: (...args: unknown[]) => buildMatchingEliminationRegion(...args),
+    buildSameNearestRegion: (...args: unknown[]) => buildSameNearestRegion(...args),
   };
 });
 
 vi.mock("@/domain/geometry/progressive/polygonLod", async () => {
-  const actual = await vi.importActual<
-    typeof import("@/domain/geometry/progressive/polygonLod")
-  >("@/domain/geometry/progressive/polygonLod");
+  const actual = await vi.importActual<typeof import("@/domain/geometry/progressive/polygonLod")>(
+    "@/domain/geometry/progressive/polygonLod",
+  );
   return {
     ...actual,
-    buildCoarsePolygonFeature: (...args: unknown[]) =>
-      buildCoarsePolygonFeature(...args),
-    refinePolygonFeatureStep: (...args: unknown[]) =>
-      refinePolygonFeatureStep(...args),
+    buildCoarsePolygonFeature: (...args: unknown[]) => buildCoarsePolygonFeature(...args),
+    refinePolygonFeatureStep: (...args: unknown[]) => refinePolygonFeatureStep(...args),
   };
 });
 
@@ -106,9 +100,7 @@ describe("useMatchingCatalog LOD", () => {
   });
 
   it("paints coarse then complete elim for a 20-feature catalog", async () => {
-    const features = Array.from({ length: 20 }, (_, i) =>
-      featureWithArea(i, 20 - i),
-    );
+    const features = Array.from({ length: 20 }, (_, i) => featureWithArea(i, 20 - i));
     const { result } = renderHook(() =>
       useMatchingCatalog({
         activeAnnotations: [],
@@ -148,9 +140,7 @@ describe("useMatchingCatalog LOD", () => {
       return samplePolygon();
     });
 
-    const features = Array.from({ length: 20 }, (_, i) =>
-      featureWithArea(i, 20 - i),
-    );
+    const features = Array.from({ length: 20 }, (_, i) => featureWithArea(i, 20 - i));
     const { result } = renderHook(() =>
       useMatchingCatalog({
         activeAnnotations: [],
@@ -183,9 +173,7 @@ describe("useMatchingCatalog LOD", () => {
       return samplePolygon();
     });
 
-    const features = Array.from({ length: 20 }, (_, i) =>
-      featureWithArea(i, 20 - i),
-    );
+    const features = Array.from({ length: 20 }, (_, i) => featureWithArea(i, 20 - i));
     const { result } = renderHook(() =>
       useMatchingCatalog({
         activeAnnotations: [],
@@ -209,9 +197,7 @@ describe("useMatchingCatalog LOD", () => {
   });
 
   it("uses the 16 largest features as the coarse prefix", async () => {
-    const features = Array.from({ length: 20 }, (_, i) =>
-      featureWithArea(i, i + 1),
-    );
+    const features = Array.from({ length: 20 }, (_, i) => featureWithArea(i, i + 1));
     renderHook(() =>
       useMatchingCatalog({
         activeAnnotations: [],
@@ -266,17 +252,13 @@ describe("useMatchingCatalog LOD", () => {
     rerender({ answer: "yes" });
     expect(result.current.matchingEliminationPreview).not.toBeNull();
     expect(result.current.matchingEliminationPreview).not.toBe(boundary);
-    expect(buildMatchingEliminationRegion.mock.calls.length).toBe(
-      callsAfterBoundary,
-    );
+    expect(buildMatchingEliminationRegion.mock.calls.length).toBe(callsAfterBoundary);
 
     const yesElim = result.current.matchingEliminationPreview;
     rerender({ answer: "no" });
     expect(result.current.matchingEliminationPreview).toBe(boundary);
     rerender({ answer: "yes" });
     expect(result.current.matchingEliminationPreview).toBe(yesElim);
-    expect(buildMatchingEliminationRegion.mock.calls.length).toBe(
-      callsAfterBoundary,
-    );
+    expect(buildMatchingEliminationRegion.mock.calls.length).toBe(callsAfterBoundary);
   });
 });

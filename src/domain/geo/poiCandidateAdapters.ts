@@ -1,18 +1,17 @@
-import type { TentaclePoi } from "@/domain/map/annotations";
-import type { TentacleExtendedCategoryId } from "@/domain/questions";
-import type { MatchingFeature, MeasuringPlace } from "@/domain/geo/types";
 import {
   assertConfirmedForCommit,
   type PoiCandidate,
   type PoiConfirmStatus,
 } from "@/domain/geo/poiCandidate";
+import type { MatchingFeature, MeasuringPlace } from "@/domain/geo/types";
+import type { TentaclePoi } from "@/domain/map/annotations";
+import type { TentacleExtendedCategoryId } from "@/domain/questions";
 
 export function measuringPlaceToPoiCandidate(
   place: MeasuringPlace,
   categoryId?: string,
 ): PoiCandidate {
-  const confirmStatus: PoiConfirmStatus =
-    place.confirmStatus ?? "confirmed";
+  const confirmStatus: PoiConfirmStatus = place.confirmStatus ?? "confirmed";
   return {
     id: place.id,
     name: place.name,
@@ -24,9 +23,7 @@ export function measuringPlaceToPoiCandidate(
   };
 }
 
-export function poiCandidateToMeasuringPlace(
-  candidate: PoiCandidate,
-): MeasuringPlace {
+export function poiCandidateToMeasuringPlace(candidate: PoiCandidate): MeasuringPlace {
   return {
     id: candidate.id,
     name: candidate.name,
@@ -71,23 +68,19 @@ export function matchingFeatureToPoiCandidate(
   feature: MatchingFeature,
   categoryId?: string,
 ): PoiCandidate {
-  const confirmStatus: PoiConfirmStatus =
-    feature.confirmStatus ?? "confirmed";
+  const confirmStatus: PoiConfirmStatus = feature.confirmStatus ?? "confirmed";
   return {
     id: feature.id,
     name: feature.name,
     point: feature.point,
     categoryId: feature.categoryId ?? categoryId,
-    source:
-      feature.source ?? (confirmStatus === "provisional" ? "tile" : "overpass"),
+    source: feature.source ?? (confirmStatus === "provisional" ? "tile" : "overpass"),
     confirmStatus,
     osmId: feature.osmId,
   };
 }
 
-export function poiCandidateToMatchingFeature(
-  candidate: PoiCandidate,
-): MatchingFeature {
+export function poiCandidateToMatchingFeature(candidate: PoiCandidate): MatchingFeature {
   return {
     id: candidate.id,
     name: candidate.name,
@@ -112,9 +105,7 @@ export function isConfirmedPoiLike(input: {
   });
 }
 
-export function filterConfirmedTentaclePois(
-  pois: readonly TentaclePoi[],
-): TentaclePoi[] {
+export function filterConfirmedTentaclePois(pois: readonly TentaclePoi[]): TentaclePoi[] {
   return pois.filter((poi) => isConfirmedPoiLike(poi));
 }
 

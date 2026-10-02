@@ -1,9 +1,6 @@
 import { useMemo, useState } from "react";
 import { formatFreshnessAge } from "../../domain/admin/formatAdminFreshness";
-import type {
-  IncidentRecord,
-  IncidentStatus,
-} from "../../domain/incident/incidentTypes";
+import type { IncidentRecord, IncidentStatus } from "../../domain/incident/incidentTypes";
 import {
   formatIncidentQueueId,
   incidentStatusChipLabel,
@@ -37,10 +34,7 @@ export function AdminIncidentInbox({
   const [rowError, setRowError] = useState<string | null>(null);
 
   const visible = useMemo(
-    () =>
-      showClosed
-        ? incidents
-        : incidents.filter((incident) => !CLOSED.has(incident.status)),
+    () => (showClosed ? incidents : incidents.filter((incident) => !CLOSED.has(incident.status))),
     [incidents, showClosed],
   );
 
@@ -53,9 +47,7 @@ export function AdminIncidentInbox({
     try {
       await updateStatusFn(incidentId, status);
     } catch (err) {
-      setRowError(
-        err instanceof Error ? err.message : "Could not update status.",
-      );
+      setRowError(err instanceof Error ? err.message : "Could not update status.");
     } finally {
       setBusyId(null);
     }
@@ -129,9 +121,7 @@ export function AdminIncidentInbox({
                     <span className="jl-incident-queue-id">
                       {formatIncidentQueueId(incident.id)}
                     </span>
-                    <span
-                      className={`jl-incident-chip jl-incident-chip--${tone}`}
-                    >
+                    <span className={`jl-incident-chip jl-incident-chip--${tone}`}>
                       {incidentStatusChipLabel(incident.status)}
                     </span>
                   </div>
@@ -142,11 +132,7 @@ export function AdminIncidentInbox({
                         ? incident.sessionCode.trim().toUpperCase()
                         : "—"}
                     </span>
-                    <span>
-                      {formatFreshnessAge(
-                        incident.updatedAt || incident.createdAt,
-                      )}
-                    </span>
+                    <span>{formatFreshnessAge(incident.updatedAt || incident.createdAt)}</span>
                   </div>
                 </button>
                 {canClose ? (

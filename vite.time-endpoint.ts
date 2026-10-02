@@ -7,11 +7,7 @@ import { handleTimeRequest, TIME_ENDPOINT_PATH } from "./worker/timeEndpoint";
  * (e2e) through a thin Node → Fetch adapter, so both share one implementation.
  */
 export function timeEndpointPlugin(): Plugin {
-  const handler = (
-    req: IncomingMessage,
-    res: ServerResponse,
-    next: () => void,
-  ) => {
+  const handler = (req: IncomingMessage, res: ServerResponse, next: () => void) => {
     if (req.url?.split("?")[0] !== TIME_ENDPOINT_PATH) {
       next();
       return;

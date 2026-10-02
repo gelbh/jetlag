@@ -1,10 +1,10 @@
 import { useMemo } from "react";
-import type { HidingZoneRecord } from "../../domain/session/hiding/hidingZone";
+import { distanceBetweenPoints } from "../../domain/geometry/gameArea/geometry";
 import { isHidingPeriodActive } from "../../domain/session/hiding/hidingPeriod";
+import type { HidingZoneRecord } from "../../domain/session/hiding/hidingZone";
 import type { SessionRulesInput } from "../../domain/session/rules";
 import type { TimerState } from "../../domain/session/timer/timer";
 import { computeElapsedMs } from "../../domain/session/timer/timer";
-import { distanceBetweenPoints } from "../../domain/geometry/gameArea/geometry";
 
 const MIN_GPS_BUFFER_METERS = 25;
 
@@ -42,12 +42,5 @@ export function useHiderZoneAdvisory({
     );
 
     return distance > zone.radiusMeters + bufferMeters;
-  }, [
-    accuracyMeters,
-    enabled,
-    location,
-    sessionRules,
-    timerState,
-    zone,
-  ]);
+  }, [accuracyMeters, enabled, location, sessionRules, timerState, zone]);
 }

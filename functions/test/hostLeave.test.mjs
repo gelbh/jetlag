@@ -1,20 +1,16 @@
-import test from "node:test";
 import assert from "node:assert/strict";
+import test from "node:test";
 import {
   endSessionHandler,
+  LEAVE_ALREADY_ENDED,
+  LEAVE_NOT_HOST,
   leaveHostSessionHandler,
   pickHostPromotee,
-  LEAVE_NOT_HOST,
-  LEAVE_ALREADY_ENDED,
 } from "../session/hostLeave.mjs";
 
 test("pickHostPromotee prefers seeker over hider", () => {
   assert.equal(
-    pickHostPromotee(
-      ["host", "h1", "s1"],
-      { host: "seeker", h1: "hider", s1: "seeker" },
-      "host",
-    ),
+    pickHostPromotee(["host", "h1", "s1"], { host: "seeker", h1: "hider", s1: "seeker" }, "host"),
     "s1",
   );
 });
@@ -25,11 +21,7 @@ test("pickHostPromotee returns null when alone", () => {
 
 test("pickHostPromotee lexicographic tie-break among seekers", () => {
   assert.equal(
-    pickHostPromotee(
-      ["host", "b", "a"],
-      { host: "seeker", a: "seeker", b: "seeker" },
-      "host",
-    ),
+    pickHostPromotee(["host", "b", "a"], { host: "seeker", a: "seeker", b: "seeker" }, "host"),
     "a",
   );
 });
@@ -151,8 +143,14 @@ test("leaveHostSessionHandler ends when host is alone", async () => {
 
   const result = await leaveHostSessionHandler(db, "host", "sess-1");
   assert.deepEqual(result, { action: "ended" });
-  assert.equal(updates.some((u) => u.status === "ended"), true);
-  assert.equal(updates.some((u) => u.gameOutcome === "ended_early"), true);
+  assert.equal(
+    updates.some((u) => u.status === "ended"),
+    true,
+  );
+  assert.equal(
+    updates.some((u) => u.gameOutcome === "ended_early"),
+    true,
+  );
   assert.deepEqual(ended.deleted, [{ name: "sessionCodes", id: "ABCD" }]);
 });
 
@@ -179,7 +177,7 @@ test("leaveHostSessionHandler rejects non-host", async () => {
 test("endSessionHandler ends for host", async () => {
   const updates = [];
   const ended = { deleted: [] };
-  let liveData = {
+  const liveData = {
     hostUid: "host",
     status: "active",
     memberUids: ["host", "s1"],

@@ -1,21 +1,21 @@
 import { Box, Group, Stack, Text } from "@mantine/core";
 import {
+  type DockableMapTool,
+  isQuestionDockTool,
+  mapToolDockShortLabel,
+} from "../../domain/map/mapTools";
+import {
   formatExpiredAnswerCountdown,
   formatPendingDrawPickSummary,
   questionAnswerDeadlineMs,
 } from "../../domain/questions";
 import type { HiderTruthReferenceMode } from "../../domain/questions/hiderTruth/resolveHiderTruthReference";
 import type { HiderTruthResult } from "../../domain/questions/ui";
-import {
-  mapToolDockShortLabel,
-  isQuestionDockTool,
-  type DockableMapTool,
-} from "../../domain/map/mapTools";
-import type { SessionRulesInput } from "../../domain/session/rules";
 import type {
   PendingQuestionRecord,
   SessionMessageRecord,
 } from "../../domain/session/activity/sessionChat";
+import type { SessionRulesInput } from "../../domain/session/rules";
 import { HudToolIcon } from "../map/icons/ToolIcons";
 import { HiderAnswerPicker } from "./HiderAnswerPicker";
 import { PhotoAnswerUploader } from "./PhotoAnswerUploader";
@@ -61,10 +61,8 @@ export function HiderPendingQuestionAnswer({
   onAnswerQuestion,
 }: HiderPendingQuestionAnswerProps) {
   const walking = pending?.status === "walking";
-  const cancelled =
-    message.status === "cancelled" || pending?.status === "cancelled";
-  const answered =
-    message.status === "answered" || message.status === "resolved";
+  const cancelled = message.status === "cancelled" || pending?.status === "cancelled";
+  const answered = message.status === "answered" || message.status === "resolved";
   const closed = answered || cancelled;
   const deadlineMs = pending
     ? questionAnswerDeadlineMs(pending.toolType, sessionRules)
@@ -79,8 +77,7 @@ export function HiderPendingQuestionAnswer({
         )
       : null;
   const expired =
-    pending?.deadlineExpiredAt !== undefined ||
-    countdown === "Time expired. Timer paused";
+    pending?.deadlineExpiredAt !== undefined || countdown === "Time expired. Timer paused";
 
   const isPhotoQuestion = pending?.toolType === "photo";
   const toolLabel =
@@ -88,8 +85,7 @@ export function HiderPendingQuestionAnswer({
       ? mapToolDockShortLabel(message.toolType)
       : (message.toolType ?? "Question");
   const showToolIcon =
-    message.toolType != null &&
-    (QUESTION_DOCK_IDS as readonly string[]).includes(message.toolType);
+    message.toolType != null && (QUESTION_DOCK_IDS as readonly string[]).includes(message.toolType);
 
   const answerControls = (
     <>
@@ -146,11 +142,7 @@ export function HiderPendingQuestionAnswer({
             }}
             aria-hidden
           >
-            <HudToolIcon
-              tool={message.toolType as DockableMapTool}
-              width={16}
-              height={16}
-            />
+            <HudToolIcon tool={message.toolType as DockableMapTool} width={16} height={16} />
           </Box>
         ) : null}
         <Stack gap={4} style={{ flex: 1, minWidth: 0 }}>
@@ -162,11 +154,7 @@ export function HiderPendingQuestionAnswer({
           </Text>
           {pending?.cardDraw != null && pending?.cardKeep != null ? (
             <Text size="xs" c="var(--color-field-ink-muted)">
-              {formatPendingDrawPickSummary(
-                pending.toolType,
-                pending.cardDraw,
-                pending.cardKeep,
-              )}
+              {formatPendingDrawPickSummary(pending.toolType, pending.cardDraw, pending.cardKeep)}
             </Text>
           ) : null}
         </Stack>

@@ -1,10 +1,10 @@
 import {
-  useCallback,
-  useRef,
-  useState,
   type CSSProperties,
   type PointerEvent as ReactPointerEvent,
   type RefObject,
+  useCallback,
+  useRef,
+  useState,
 } from "react";
 import { useMotionProfile } from "./useMotionProfile";
 
@@ -29,9 +29,7 @@ function resolvePointerTarget(target: EventTarget | null): Element | null {
 }
 
 /** Exported for unit tests. */
-export function isInteractiveWizardSwipeTarget(
-  target: EventTarget | null,
-): boolean {
+export function isInteractiveWizardSwipeTarget(target: EventTarget | null): boolean {
   const element = resolvePointerTarget(target);
   if (!element) {
     return false;
@@ -94,15 +92,12 @@ export function useWizardSwipe({
     velocityX.current = 0;
   }, []);
 
-  const applyRubberBand = useCallback(
-    (offset: number, allowed: boolean) => {
-      if (allowed) {
-        return offset;
-      }
-      return offset * RUBBER_BAND_FACTOR;
-    },
-    [],
-  );
+  const applyRubberBand = useCallback((offset: number, allowed: boolean) => {
+    if (allowed) {
+      return offset;
+    }
+    return offset * RUBBER_BAND_FACTOR;
+  }, []);
 
   const clampOffset = useCallback(
     (rawOffset: number) => {
@@ -137,11 +132,7 @@ export function useWizardSwipe({
 
   const handlePointerDownCapture = useCallback(
     (event: ReactPointerEvent<HTMLElement>) => {
-      if (
-        !animate ||
-        event.button !== 0 ||
-        isInteractiveWizardSwipeTarget(event.target)
-      ) {
+      if (!animate || event.button !== 0 || isInteractiveWizardSwipeTarget(event.target)) {
         return;
       }
 
@@ -203,13 +194,11 @@ export function useWizardSwipe({
       const shouldNext =
         canGoNext &&
         axisClaimed.current &&
-        (dragOffsetX <= -threshold ||
-          velocityX.current < -COMMIT_VELOCITY_PX_MS);
+        (dragOffsetX <= -threshold || velocityX.current < -COMMIT_VELOCITY_PX_MS);
       const shouldBack =
         canGoBack &&
         axisClaimed.current &&
-        (dragOffsetX >= threshold ||
-          velocityX.current > COMMIT_VELOCITY_PX_MS);
+        (dragOffsetX >= threshold || velocityX.current > COMMIT_VELOCITY_PX_MS);
 
       resetDrag();
 
@@ -222,16 +211,7 @@ export function useWizardSwipe({
         onBack();
       }
     },
-    [
-      canGoBack,
-      canGoNext,
-      containerRef,
-      dragOffsetX,
-      onBack,
-      onNext,
-      releaseCapture,
-      resetDrag,
-    ],
+    [canGoBack, canGoNext, containerRef, dragOffsetX, onBack, onNext, releaseCapture, resetDrag],
   );
 
   const surfaceStyle: CSSProperties =
@@ -266,9 +246,7 @@ export function shouldCommitWizardSwipe(
 ): boolean {
   const threshold = containerWidth * COMMIT_FRACTION;
   if (direction === "next") {
-    return (
-      offsetX <= -threshold || velocityX < -COMMIT_VELOCITY_PX_MS
-    );
+    return offsetX <= -threshold || velocityX < -COMMIT_VELOCITY_PX_MS;
   }
   return offsetX >= threshold || velocityX > COMMIT_VELOCITY_PX_MS;
 }

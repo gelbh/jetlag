@@ -1,7 +1,4 @@
-import {
-  MOTION_MAP_CAMERA_FLY_MS,
-  MOTION_MAP_CAMERA_MS,
-} from "../device/motion/motionTokens";
+import { MOTION_MAP_CAMERA_FLY_MS, MOTION_MAP_CAMERA_MS } from "../device/motion/motionTokens";
 
 export type PlacementCameraMotion =
   | { kind: "jump" }

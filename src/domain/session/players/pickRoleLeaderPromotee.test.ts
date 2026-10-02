@@ -14,9 +14,7 @@ describe("pickRoleLeaderPromotee", () => {
   });
 
   it("returns null when no candidates remain", () => {
-    expect(
-      pickRoleLeaderPromotee(["solo"], { solo: "hider" }, "hider", "solo"),
-    ).toBeNull();
+    expect(pickRoleLeaderPromotee(["solo"], { solo: "hider" }, "hider", "solo")).toBeNull();
   });
 
   it("excludes the leaving leader uid", () => {

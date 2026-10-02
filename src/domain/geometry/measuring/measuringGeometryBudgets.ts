@@ -6,9 +6,9 @@ import {
 } from "../../questions/measuringQuestions";
 import { persistSlimPolygonFeature } from "../progressive/persistSlim";
 import {
+  countPolygonVertices as countProgressivePolygonVertices,
   POLYGON_PERSIST_MAX_JSON_CHARS,
   POLYGON_PERSIST_MAX_VERTICES,
-  countPolygonVertices as countProgressivePolygonVertices,
   polygonGeometryJsonChars,
 } from "../progressive/polygonMetrics";
 
@@ -45,35 +45,27 @@ export const MEASURING_OUTPUT_OVER_BUDGET_MESSAGE =
 export const MEASURING_PERSIST_OVER_BUDGET_MESSAGE =
   "Couldn't save this measure — geometry is too large to store. Try a shorter distance.";
 
-export type MeasuringBudgetResult =
-  | { ok: true }
-  | { ok: false; message: string };
+export type MeasuringBudgetResult = { ok: true } | { ok: false; message: string };
 
 export type MeasuringOutputSoftenResult =
   | { ok: true; feature: Feature<Polygon | MultiPolygon> }
   | { ok: false; message: string };
 
-export function assertMeasuringMultiPlaceBudget(
-  count: number,
-): MeasuringBudgetResult {
+export function assertMeasuringMultiPlaceBudget(count: number): MeasuringBudgetResult {
   if (count > MEASURING_MULTI_PLACE_MAX) {
     return { ok: false, message: MEASURING_MULTI_PLACE_OVER_BUDGET_MESSAGE };
   }
   return { ok: true };
 }
 
-export function assertMeasuringLinearVertexBudget(
-  totalVertices: number,
-): MeasuringBudgetResult {
+export function assertMeasuringLinearVertexBudget(totalVertices: number): MeasuringBudgetResult {
   if (totalVertices > MEASURING_LINEAR_MAX_VERTICES) {
     return { ok: false, message: MEASURING_LINEAR_OVER_BUDGET_MESSAGE };
   }
   return { ok: true };
 }
 
-export function countLineStringVertices(
-  segments: readonly Feature<LineString>[],
-): number {
+export function countLineStringVertices(segments: readonly Feature<LineString>[]): number {
   let total = 0;
   for (const segment of segments) {
     total += segment.geometry.coordinates.length;
@@ -83,9 +75,7 @@ export function countLineStringVertices(
 
 export const countPolygonVertices = countProgressivePolygonVertices;
 
-export function measuringGeometryJsonChars(
-  feature: Feature<Polygon | MultiPolygon>,
-): number {
+export function measuringGeometryJsonChars(feature: Feature<Polygon | MultiPolygon>): number {
   return polygonGeometryJsonChars(feature);
 }
 
@@ -114,8 +104,7 @@ export function assertMeasuringOutputComplexityBudget(
   const vertexCount = metrics.vertexCount;
   const jsonChars = metrics.jsonChars;
   if (
-    (typeof vertexCount === "number" &&
-      vertexCount > MEASURING_OUTPUT_MAX_VERTICES) ||
+    (typeof vertexCount === "number" && vertexCount > MEASURING_OUTPUT_MAX_VERTICES) ||
     (typeof jsonChars === "number" && jsonChars > MEASURING_OUTPUT_MAX_JSON_CHARS)
   ) {
     return { ok: false, message: MEASURING_OUTPUT_OVER_BUDGET_MESSAGE };
@@ -156,14 +145,9 @@ export function assertMeasuringGeometryBudget(input: {
 
   if (
     input.measuringSubject === "coastline" ||
-    isMeasuringLinearLocation(
-      input.measuringSubject,
-      input.measuringLocationCategory ?? undefined,
-    )
+    isMeasuringLinearLocation(input.measuringSubject, input.measuringLocationCategory ?? undefined)
   ) {
-    return assertMeasuringLinearVertexBudget(
-      countLineStringVertices(input.linearSegments),
-    );
+    return assertMeasuringLinearVertexBudget(countLineStringVertices(input.linearSegments));
   }
 
   return { ok: true };

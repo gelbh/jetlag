@@ -1,19 +1,19 @@
 // @vitest-environment jsdom
 import { cleanup, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { LOCAL_SESSION_ID } from "../../domain/map/annotations";
+import * as firestoreAnnotations from "../../services/firestore/firestoreAnnotations";
+import {
+  createRemoteSession,
+  writeRemoteAnnotation,
+} from "../../services/firestore/firestoreAnnotations";
+import { useAnnotationStore, useSessionStore } from "../../state/sessionStore";
 import {
   connectEmulatorsForTests,
   teardownEmulatorsForTests,
 } from "../../test/emulator/connectEmulators";
 import { DUBLIN_CITY_GAME_AREA } from "../../test/fixtures/dublinGameArea";
 import { createTestPinAnnotation } from "../../test/fixtures/sessions";
-import * as firestoreAnnotations from "../../services/firestore/firestoreAnnotations";
-import {
-  createRemoteSession,
-  writeRemoteAnnotation,
-} from "../../services/firestore/firestoreAnnotations";
-import { LOCAL_SESSION_ID } from "../../domain/map/annotations";
-import { useAnnotationStore, useSessionStore } from "../../state/sessionStore";
 import { useSessionSync } from "./useSessionSync";
 
 describe("useSessionSync emulator", () => {
@@ -79,9 +79,7 @@ describe("useSessionSync emulator", () => {
     await writeRemoteAnnotation(session.id, annotation);
     await waitFor(() => {
       expect(useAnnotationStore.getState().annotations).toHaveLength(1);
-      expect(
-        useAnnotationStore.getState().annotations[0]?.metadata.label,
-      ).toBe("Test pin");
+      expect(useAnnotationStore.getState().annotations[0]?.metadata.label).toBe("Test pin");
     });
 
     await writeRemoteAnnotation(session.id, {
@@ -90,17 +88,12 @@ describe("useSessionSync emulator", () => {
     });
 
     await waitFor(() => {
-      expect(
-        useAnnotationStore.getState().annotations[0]?.metadata.label,
-      ).toBe("Updated pin");
+      expect(useAnnotationStore.getState().annotations[0]?.metadata.label).toBe("Updated pin");
     });
   });
 
   it("waits for syncEnabled before subscribing to annotations", async () => {
-    const subscribeSpy = vi.spyOn(
-      firestoreAnnotations,
-      "subscribeToRemoteAnnotations",
-    );
+    const subscribeSpy = vi.spyOn(firestoreAnnotations, "subscribeToRemoteAnnotations");
     const session = await createRemoteSession(DUBLIN_CITY_GAME_AREA, testUid);
     const annotation = createTestPinAnnotation({
       id: "ann-sync-gated",
@@ -122,8 +115,7 @@ describe("useSessionSync emulator", () => {
     });
 
     const { rerender } = renderHook(
-      ({ enabled }: { enabled: boolean }) =>
-        useSessionSync({ syncEnabled: enabled }),
+      ({ enabled }: { enabled: boolean }) => useSessionSync({ syncEnabled: enabled }),
       { initialProps: { enabled: false } },
     );
 
@@ -138,14 +130,10 @@ describe("useSessionSync emulator", () => {
     await waitFor(() => {
       expect(useAnnotationStore.getState().annotations).toHaveLength(1);
       expect(
-        useAnnotationStore
-          .getState()
-          .annotations.find((item) => item.id === annotation.id),
+        useAnnotationStore.getState().annotations.find((item) => item.id === annotation.id),
       ).toBeDefined();
       expect(
-        useAnnotationStore
-          .getState()
-          .annotations.some((item) => item.id === staleAnnotation.id),
+        useAnnotationStore.getState().annotations.some((item) => item.id === staleAnnotation.id),
       ).toBe(false);
     });
 
@@ -161,18 +149,13 @@ describe("useSessionSync emulator", () => {
     await waitFor(() => {
       expect(subscribeSpy.mock.calls.length).toBe(afterEnableCount);
       expect(
-        useAnnotationStore
-          .getState()
-          .annotations.some((item) => item.id === blockedAnnotation.id),
+        useAnnotationStore.getState().annotations.some((item) => item.id === blockedAnnotation.id),
       ).toBe(false);
     });
   });
 
   it("does not subscribe for local-only sessions", async () => {
-    const subscribeSpy = vi.spyOn(
-      firestoreAnnotations,
-      "subscribeToRemoteAnnotations",
-    );
+    const subscribeSpy = vi.spyOn(firestoreAnnotations, "subscribeToRemoteAnnotations");
     const session = await createRemoteSession(DUBLIN_CITY_GAME_AREA, testUid);
     const remoteAnnotation = createTestPinAnnotation({
       sessionId: session.id,
@@ -194,9 +177,7 @@ describe("useSessionSync emulator", () => {
 
     await waitFor(() => {
       expect(
-        useAnnotationStore
-          .getState()
-          .annotations.some((item) => item.id === remoteAnnotation.id),
+        useAnnotationStore.getState().annotations.some((item) => item.id === remoteAnnotation.id),
       ).toBe(false);
     });
   });

@@ -1,14 +1,10 @@
 import { TextInput } from "@mantine/core";
-import { formatHidingZoneRadiusLabel } from "@/domain/session/size/gameSize";
+import { insetTextInputStyles } from "@/components/ui/entry/entryChrome";
 import { milesToMeters } from "@/domain/map/distance";
 import { tentacleRadiusPresetMeters } from "@/domain/map/distancePresets";
 import { clampTentacleRadiusMeters } from "@/domain/session/rules";
-import { insetTextInputStyles } from "@/components/ui/entry/entryChrome";
-import {
-  AdvancedSettingsInset,
-  AdvancedSettingsToggle,
-  PresetButton,
-} from "./shared";
+import { formatHidingZoneRadiusLabel } from "@/domain/session/size/gameSize";
+import { AdvancedSettingsInset, AdvancedSettingsToggle, PresetButton } from "./shared";
 import type { AdvancedSettingsSectionProps } from "./types";
 
 export function TentaclesSection({
@@ -44,11 +40,7 @@ export function TentaclesSection({
               value={
                 distanceUnit === "metric"
                   ? value.tentacleMediumRadiusMeters
-                  : Number(
-                      (
-                        value.tentacleMediumRadiusMeters / milesToMeters(1)
-                      ).toFixed(2),
-                    )
+                  : Number((value.tentacleMediumRadiusMeters / milesToMeters(1)).toFixed(2))
               }
               disabled={disabled}
               inputMode="decimal"
@@ -57,14 +49,10 @@ export function TentaclesSection({
                 if (!Number.isFinite(parsed)) {
                   return;
                 }
-                const meters =
-                  distanceUnit === "metric"
-                    ? parsed
-                    : parsed * milesToMeters(1);
+                const meters = distanceUnit === "metric" ? parsed : parsed * milesToMeters(1);
                 onChange({
                   ...value,
-                  tentacleMediumRadiusMeters:
-                    clampTentacleRadiusMeters(meters),
+                  tentacleMediumRadiusMeters: clampTentacleRadiusMeters(meters),
                 });
               }}
               styles={insetTextInputStyles}
@@ -110,11 +98,7 @@ export function TentaclesSection({
                 value={
                   distanceUnit === "metric"
                     ? value.tentacleLargeRadiusMeters
-                    : Number(
-                        (
-                          value.tentacleLargeRadiusMeters / milesToMeters(1)
-                        ).toFixed(2),
-                      )
+                    : Number((value.tentacleLargeRadiusMeters / milesToMeters(1)).toFixed(2))
                 }
                 disabled={disabled}
                 inputMode="decimal"
@@ -123,14 +107,10 @@ export function TentaclesSection({
                   if (!Number.isFinite(parsed)) {
                     return;
                   }
-                  const meters =
-                    distanceUnit === "metric"
-                      ? parsed
-                      : parsed * milesToMeters(1);
+                  const meters = distanceUnit === "metric" ? parsed : parsed * milesToMeters(1);
                   onChange({
                     ...value,
-                    tentacleLargeRadiusMeters:
-                      clampTentacleRadiusMeters(meters),
+                    tentacleLargeRadiusMeters: clampTentacleRadiusMeters(meters),
                   });
                 }}
                 styles={insetTextInputStyles}

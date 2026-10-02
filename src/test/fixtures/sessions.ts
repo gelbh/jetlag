@@ -5,25 +5,19 @@ import { DUBLIN_CITY_GAME_AREA } from "./dublinGameArea";
 
 export { DUBLIN_CITY_GAME_AREA };
 
-export function createTestGameArea(
-  overrides: Partial<GameArea> = {},
-): GameArea {
+export function createTestGameArea(overrides: Partial<GameArea> = {}): GameArea {
   return {
     ...DUBLIN_CITY_GAME_AREA,
     ...overrides,
   } as GameArea;
 }
 
-export function createTestSession(
-  overrides: Partial<SessionRecord> = {},
-): SessionRecord {
+export function createTestSession(overrides: Partial<SessionRecord> = {}): SessionRecord {
   const { session } = toUnitFixture("dublin-local-map");
   return { ...session, ...overrides };
 }
 
-export function createTestRemoteSession(
-  overrides: Partial<SessionRecord> = {},
-): SessionRecord {
+export function createTestRemoteSession(overrides: Partial<SessionRecord> = {}): SessionRecord {
   return createTestSession({
     id: "remote-session-1",
     code: "ABCD",

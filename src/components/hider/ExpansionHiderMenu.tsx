@@ -1,5 +1,5 @@
-import { SheetHost } from "../ui/sheets/SheetHost";
 import { SheetHeader } from "../ui/sheets/SheetHeader";
+import { SheetHost } from "../ui/sheets/SheetHost";
 
 interface ExpansionHiderMenuProps {
   open: boolean;
@@ -30,21 +30,13 @@ export function ExpansionHiderMenu({
 
       <div className="space-y-2">
         {canPlaceTimeTrap ? (
-          <button
-            type="button"
-            onClick={onPlaceTimeTrap}
-            className="btn-primary min-h-12 w-full"
-          >
+          <button type="button" onClick={onPlaceTimeTrap} className="btn-primary min-h-12 w-full">
             Place time trap
           </button>
         ) : trapPlaced ? (
-          <p className="text-sm text-ink-muted">
-            Time trap already placed this round.
-          </p>
+          <p className="text-sm text-ink-muted">Time trap already placed this round.</p>
         ) : (
-          <p className="text-sm text-ink-muted">
-            Set your hiding zone before placing a time trap.
-          </p>
+          <p className="text-sm text-ink-muted">Set your hiding zone before placing a time trap.</p>
         )}
         <button
           type="button"

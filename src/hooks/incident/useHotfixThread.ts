@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { isFirebaseConfigured } from "../../services/core/firebase/firebase";
 import {
-  subscribeHotfixThreadMessages,
   type IncidentThreadMessageRecord,
+  subscribeHotfixThreadMessages,
 } from "../../services/firestore/firestoreIncidentThreads";
 
 export interface UseHotfixThreadResult {
@@ -13,14 +13,10 @@ export interface UseHotfixThreadResult {
 /**
  * Admin-only live hotfix thread (coding-agent status / agent_meta).
  */
-export function useHotfixThread(
-  incidentId: string | null | undefined,
-): UseHotfixThreadResult {
+export function useHotfixThread(incidentId: string | null | undefined): UseHotfixThreadResult {
   const [messages, setMessages] = useState<IncidentThreadMessageRecord[]>([]);
   const [error, setError] = useState<Error | null>(null);
-  const [syncedIncidentId, setSyncedIncidentId] = useState(
-    incidentId ?? null,
-  );
+  const [syncedIncidentId, setSyncedIncidentId] = useState(incidentId ?? null);
 
   const normalizedIncidentId = incidentId ?? null;
   if (normalizedIncidentId !== syncedIncidentId) {
@@ -36,14 +32,10 @@ export function useHotfixThread(
       return;
     }
 
-    return subscribeHotfixThreadMessages(
-      normalizedIncidentId,
-      setMessages,
-      (nextError) => {
-        setError(nextError);
-        setMessages([]);
-      },
-    );
+    return subscribeHotfixThreadMessages(normalizedIncidentId, setMessages, (nextError) => {
+      setError(nextError);
+      setMessages([]);
+    });
   }, [normalizedIncidentId, subscribed]);
 
   return {

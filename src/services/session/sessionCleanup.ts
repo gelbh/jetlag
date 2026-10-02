@@ -1,5 +1,5 @@
-import { useMapStore } from "../../state/mapStore";
 import { useAnnotationStore } from "../../state/annotationStore";
+import { useMapStore } from "../../state/mapStore";
 import { usePreloadStore } from "../../state/preloadStore";
 import { useSessionStore } from "../../state/sessionStore";
 import { useTimerStore } from "../../state/timerStore";
@@ -24,9 +24,7 @@ export function teardownSessionUiState(): void {
   });
 }
 
-export async function clearSessionLocalArtifacts(
-  sessionId: string,
-): Promise<void> {
+export async function clearSessionLocalArtifacts(sessionId: string): Promise<void> {
   useTimerStore.getState().clearTimer(sessionId);
   useSessionStore.getState().setRemoteUpdateNotice(null);
   useSessionStore.getState().setLastSyncError(null);

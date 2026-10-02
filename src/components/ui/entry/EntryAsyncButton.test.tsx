@@ -1,7 +1,7 @@
-import { describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen } from "@testing-library/react";
 import { MantineProvider } from "@mantine/core";
+import { fireEvent, render, screen } from "@testing-library/react";
 import type { ReactElement } from "react";
+import { describe, expect, it, vi } from "vitest";
 import { jetlagTheme } from "@/theme/theme";
 import { EntryAsyncButton } from "./EntryAsyncButton";
 import { filledStyles } from "./entryStyles";
@@ -29,10 +29,7 @@ describe("EntryAsyncButton", () => {
     expect(button).toHaveAttribute("aria-disabled", "true");
     expect(button).not.toBeDisabled();
     expect(screen.getByRole("status")).toHaveTextContent("Creating…");
-    expect(button).toHaveAttribute(
-      "aria-describedby",
-      screen.getByRole("status").id,
-    );
+    expect(button).toHaveAttribute("aria-describedby", screen.getByRole("status").id);
   });
 
   it("ignores click while busy", () => {
@@ -81,9 +78,7 @@ describe("EntryAsyncButton", () => {
         onClick={() => {}}
       />,
     );
-    expect(
-      screen.getByRole("button", { name: "Confirm game area" }),
-    ).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Confirm game area" })).toBeDisabled();
     expect(screen.queryByRole("status")).toBeNull();
   });
 });

@@ -48,8 +48,7 @@ export function markLocationAccessConfirmed(): void {
   emitLocationPermissionUi();
 }
 
-export const LOCATION_ACCESS_CONFIRMED_STORAGE_KEY =
-  "jetlag.locationAccessConfirmed";
+export const LOCATION_ACCESS_CONFIRMED_STORAGE_KEY = "jetlag.locationAccessConfirmed";
 
 export function hasPersistedLocationAccessConfirmed(): boolean {
   try {

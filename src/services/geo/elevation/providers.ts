@@ -1,11 +1,11 @@
 import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
 import {
   ELEVATION_MIN_429_BACKOFF_MS,
+  type ElevationFetchProfile,
   OPEN_METEO_ELEVATION_ENDPOINT,
+  type OpenMeteoElevationResponse,
   USGS_EPQS_ENDPOINT,
   USGS_MIN_REQUEST_GAP_MS,
-  type ElevationFetchProfile,
-  type OpenMeteoElevationResponse,
   type UsgsEpqsResponse,
 } from "./constants";
 import {
@@ -62,10 +62,7 @@ async function fetchOpenMeteoElevationBatch(
     if (response.ok) {
       recordSuccessfulElevationResponse();
       const payload = (await response.json()) as OpenMeteoElevationResponse;
-      if (
-        !Array.isArray(payload.elevation) ||
-        payload.elevation.length !== points.length
-      ) {
+      if (!Array.isArray(payload.elevation) || payload.elevation.length !== points.length) {
         throw new Error("Elevation lookup returned an unexpected response.");
       }
 
@@ -74,9 +71,7 @@ async function fetchOpenMeteoElevationBatch(
 
     if (response.status === 429) {
       record429Response();
-      lastError = new Error(
-        "Elevation lookup is temporarily rate-limited. Try again in a moment.",
-      );
+      lastError = new Error("Elevation lookup is temporarily rate-limited. Try again in a moment.");
       if (isElevationCircuitOpen() || attempt >= maxRetries) {
         throw lastError;
       }
@@ -126,9 +121,7 @@ async function fetchUsgsElevation(
 
     if (response.status === 429) {
       record429Response();
-      lastError = new Error(
-        "Elevation lookup is temporarily rate-limited. Try again in a moment.",
-      );
+      lastError = new Error("Elevation lookup is temporarily rate-limited. Try again in a moment.");
       if (isElevationCircuitOpen() || attempt >= maxRetries) {
         throw lastError;
       }
@@ -178,14 +171,10 @@ async function fetchElevationBatch(
     return elevations;
   }
 
-  const openMeteoElevations = await fetchOpenMeteoElevationBatch(
-    openMeteoPoints,
-    profile,
-  );
+  const openMeteoElevations = await fetchOpenMeteoElevationBatch(openMeteoPoints, profile);
 
   for (let fallbackIndex = 0; fallbackIndex < openMeteoIndices.length; fallbackIndex += 1) {
-    elevations[openMeteoIndices[fallbackIndex]] =
-      openMeteoElevations[fallbackIndex];
+    elevations[openMeteoIndices[fallbackIndex]] = openMeteoElevations[fallbackIndex];
   }
 
   return elevations;

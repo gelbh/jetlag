@@ -7,10 +7,7 @@ vi.mock("@/services/core/auth/forceRefreshIdToken", () => ({
   forceRefreshIdToken,
 }));
 
-import {
-  AUTH_FAILURE_MESSAGE,
-  withPermissionDeniedAuthRetry,
-} from "./shared";
+import { AUTH_FAILURE_MESSAGE, withPermissionDeniedAuthRetry } from "./shared";
 
 describe("withPermissionDeniedAuthRetry", () => {
   beforeEach(() => {
@@ -31,13 +28,13 @@ describe("withPermissionDeniedAuthRetry", () => {
   });
 
   it("throws auth failure after two permission-denied", async () => {
-    const op = vi.fn().mockRejectedValue(
-      new FirebaseError("permission-denied", "Missing or insufficient permissions."),
-    );
+    const op = vi
+      .fn()
+      .mockRejectedValue(
+        new FirebaseError("permission-denied", "Missing or insufficient permissions."),
+      );
 
-    await expect(withPermissionDeniedAuthRetry(op)).rejects.toThrow(
-      AUTH_FAILURE_MESSAGE,
-    );
+    await expect(withPermissionDeniedAuthRetry(op)).rejects.toThrow(AUTH_FAILURE_MESSAGE);
     expect(forceRefreshIdToken).toHaveBeenCalledOnce();
   });
 
@@ -50,9 +47,7 @@ describe("withPermissionDeniedAuthRetry", () => {
   it("retries functions/permission-denied once", async () => {
     const op = vi
       .fn()
-      .mockRejectedValueOnce(
-        new FirebaseError("functions/permission-denied", "denied"),
-      )
+      .mockRejectedValueOnce(new FirebaseError("functions/permission-denied", "denied"))
       .mockResolvedValueOnce("ok");
 
     await expect(withPermissionDeniedAuthRetry(op)).resolves.toBe("ok");

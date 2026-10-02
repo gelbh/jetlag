@@ -1,17 +1,17 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useLatestRequest } from "../../hooks/forms/useLatestRequest";
-import { useDebouncedValue } from "../../hooks/forms/useDebouncedValue";
 import { validateFriendSearchQuery } from "../../domain/game/playerProfile";
+import { useDebouncedValue } from "../../hooks/forms/useDebouncedValue";
+import { useLatestRequest } from "../../hooks/forms/useLatestRequest";
 import { feedback } from "../../services/device/feedbackService";
 import {
   acceptFriendRequest,
   cancelFriendRequest,
   declineFriendRequest,
+  type FriendListEntry,
   listFriends,
   removeFriend,
   requestFriend,
   searchFriends,
-  type FriendListEntry,
 } from "../../services/profile/profileFriends";
 
 export type FriendRelation = "incoming" | "outgoing" | "friend" | "search";
@@ -78,9 +78,7 @@ export function useFriendsPanelModel() {
       if (cancelledRef.current) {
         return;
       }
-      setError(
-        nextError instanceof Error ? nextError.message : "Could not load friends.",
-      );
+      setError(nextError instanceof Error ? nextError.message : "Could not load friends.");
       void feedback("error");
     } finally {
       if (!cancelledRef.current) {
@@ -106,9 +104,7 @@ export function useFriendsPanelModel() {
 
   useEffect(() => {
     cancelledRef.current = false;
-    /* eslint-disable react-hooks/set-state-in-effect -- initial friends list load */
     void refresh();
-    /* eslint-enable react-hooks/set-state-in-effect */
     return () => {
       cancelledRef.current = true;
     };
@@ -173,9 +169,7 @@ export function useFriendsPanelModel() {
         }
         setSearchResults([]);
         setHasSearched(true);
-        setError(
-          nextError instanceof Error ? nextError.message : "Search failed.",
-        );
+        setError(nextError instanceof Error ? nextError.message : "Search failed.");
         void feedback("error");
       } finally {
         if (isLatestRequest(requestId) && !cancelledRef.current) {
@@ -189,12 +183,10 @@ export function useFriendsPanelModel() {
   useEffect(() => {
     const trimmed = debouncedQuery.trim();
     if (trimmed.length === 0) {
-      /* eslint-disable react-hooks/set-state-in-effect -- invalidate in-flight search on clear */
       beginRequest();
       setSearchResults([]);
       setHasSearched(false);
       setSearching(false);
-      /* eslint-enable react-hooks/set-state-in-effect */
       return;
     }
     const validated = validateFriendSearchQuery(debouncedQuery);
@@ -220,11 +212,7 @@ export function useFriendsPanelModel() {
     void feedback("success");
   }, []);
 
-  const runAction = async (
-    uid: string,
-    action: () => Promise<unknown>,
-    success: string,
-  ) => {
+  const runAction = async (uid: string, action: () => Promise<unknown>, success: string) => {
     setBusyUid(uid);
     setError(null);
     try {
@@ -234,9 +222,7 @@ export function useFriendsPanelModel() {
       flashSuccess(success);
       setSelectedUid(null);
     } catch (nextError) {
-      setError(
-        nextError instanceof Error ? nextError.message : "Action failed.",
-      );
+      setError(nextError instanceof Error ? nextError.message : "Action failed.");
       void feedback("error");
     } finally {
       setBusyUid(null);
@@ -244,18 +230,12 @@ export function useFriendsPanelModel() {
   };
 
   const relationshipUids = useMemo(
-    () =>
-      new Set(
-        [...friends, ...incoming, ...outgoing].map((entry) => entry.uid),
-      ),
+    () => new Set([...friends, ...incoming, ...outgoing].map((entry) => entry.uid)),
     [friends, incoming, outgoing],
   );
 
   const requestableResults = useMemo(
-    () =>
-      loadingList
-        ? []
-        : searchResults.filter((entry) => !relationshipUids.has(entry.uid)),
+    () => (loadingList ? [] : searchResults.filter((entry) => !relationshipUids.has(entry.uid))),
     [loadingList, relationshipUids, searchResults],
   );
 
@@ -286,9 +266,7 @@ export function useFriendsPanelModel() {
       selectableEntries.some((entry) => entry.uid === selectedUid) ||
       requestableResults.some((entry) => entry.uid === selectedUid);
     if (!stillListed) {
-      /* eslint-disable react-hooks/set-state-in-effect -- clear selection when the uid leaves the list */
       setSelectedUid(null);
-      /* eslint-enable react-hooks/set-state-in-effect */
     }
   }, [selectableEntries, requestableResults, selectedUid]);
 
@@ -325,8 +303,7 @@ export function useFriendsPanelModel() {
       runAction(uid, () => declineFriendRequest(uid), "Request declined."),
     cancelFriend: (uid: string) =>
       runAction(uid, () => cancelFriendRequest(uid), "Request cancelled."),
-    removeFriend: (uid: string) =>
-      runAction(uid, () => removeFriend(uid), "Removed from friends."),
+    removeFriend: (uid: string) => runAction(uid, () => removeFriend(uid), "Removed from friends."),
   };
 }
 

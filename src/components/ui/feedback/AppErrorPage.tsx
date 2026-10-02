@@ -1,12 +1,9 @@
-import type { ReactNode } from "react";
 import { Button, Group, Stack, Text, Title } from "@mantine/core";
+import type { ReactNode } from "react";
+import { filledStyles, grayStyles } from "@/components/ui/entry/entryStyles";
 import { AppLink } from "../../navigation/AppLink";
 import { AppLogo } from "../brand/AppLogo";
 import { EntryScreenLayout } from "../layout/EntryScreenLayout";
-import {
-  filledStyles,
-  grayStyles,
-} from "@/components/ui/entry/entryStyles";
 
 export type AppErrorPrimaryAction = {
   label: string;
@@ -37,14 +34,7 @@ export function AppErrorPage({
   assertive = false,
 }: AppErrorPageProps) {
   const body = (
-    <Stack
-      gap="lg"
-      align="center"
-      ta="center"
-      maw={420}
-      mx="auto"
-      w="100%"
-    >
+    <Stack gap="lg" align="center" ta="center" maw={420} mx="auto" w="100%">
       <AppLogo variant="lockup" size="md" className="justify-center" />
       <Stack gap={8} align="center">
         <Title
@@ -79,11 +69,7 @@ export function AppErrorPage({
             </Button>
           ) : null}
           {secondaryAction ? (
-            <Button
-              component={AppLink}
-              to={secondaryAction.to}
-              styles={grayStyles}
-            >
+            <Button component={AppLink} to={secondaryAction.to} styles={grayStyles}>
               {secondaryAction.label}
             </Button>
           ) : null}

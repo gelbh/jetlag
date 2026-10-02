@@ -1,23 +1,20 @@
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const notificationsMock = vi.fn(
-  ({ portalProps }: { portalProps?: { target?: HTMLElement } }) => (
-    <div
-      data-testid="mantine-notifications"
-      data-portal-target={portalProps?.target ? "shell" : "none"}
-    />
-  ),
-);
+const notificationsMock = vi.fn(({ portalProps }: { portalProps?: { target?: HTMLElement } }) => (
+  <div
+    data-testid="mantine-notifications"
+    data-portal-target={portalProps?.target ? "shell" : "none"}
+  />
+));
 
 vi.mock("@mantine/notifications", () => ({
-  Notifications: (props: { portalProps?: { target?: HTMLElement } }) =>
-    notificationsMock(props),
+  Notifications: (props: { portalProps?: { target?: HTMLElement } }) => notificationsMock(props),
   notifications: { show: vi.fn() },
 }));
 
-import { AppUiProvider } from "./AppUiProvider";
 import { setPlayerPhoneShellPortalHost } from "@/components/ui/layout/playerPhoneShellPortalHost";
+import { AppUiProvider } from "./AppUiProvider";
 
 beforeEach(() => {
   setPlayerPhoneShellPortalHost(null);

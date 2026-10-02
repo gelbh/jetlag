@@ -1,7 +1,7 @@
 import { FirebaseError } from "firebase/app";
 import { beforeEach, describe, expect, it } from "vitest";
-import type { AnnotationRecord } from "../../domain/map/annotations";
 import { isRetriableSyncError } from "../../domain/device/sync/syncRetry";
+import type { AnnotationRecord } from "../../domain/map/annotations";
 import {
   countOfflineQueueForSession,
   enqueueOfflineWrite,
@@ -48,9 +48,7 @@ describe("offline queue on retriable sync failure", () => {
 
   it("does not treat permission-denied as retriable", () => {
     expect(
-      isRetriableSyncError(
-        new FirebaseError("permission-denied", "Missing permission."),
-      ),
+      isRetriableSyncError(new FirebaseError("permission-denied", "Missing permission.")),
     ).toBe(false);
   });
 

@@ -4,9 +4,7 @@ import type { RoleJoinRequest } from "@/domain/session/players/joinRequest";
 import { renderWithAppUi } from "../../../test/renderWithAppUi";
 import { RoleJoinRequestAlert } from "./RoleJoinRequestAlert";
 
-function pendingRequest(
-  overrides: Partial<RoleJoinRequest> = {},
-): RoleJoinRequest {
+function pendingRequest(overrides: Partial<RoleJoinRequest> = {}): RoleJoinRequest {
   return {
     id: "req-1",
     sessionId: "sess-1",
@@ -26,16 +24,10 @@ describe("RoleJoinRequestAlert", () => {
     const onDecline = vi.fn();
 
     const { container } = renderWithAppUi(
-      <RoleJoinRequestAlert
-        request={pendingRequest()}
-        onAccept={onAccept}
-        onDecline={onDecline}
-      />,
+      <RoleJoinRequestAlert request={pendingRequest()} onAccept={onAccept} onDecline={onDecline} />,
     );
 
-    expect(
-      screen.getByText("ada wants to join as Seeker"),
-    ).toBeInTheDocument();
+    expect(screen.getByText("ada wants to join as Seeker")).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Accept" }));
     expect(onAccept).toHaveBeenCalledTimes(1);
@@ -49,13 +41,7 @@ describe("RoleJoinRequestAlert", () => {
   });
 
   it("is hidden when there is no pending request", () => {
-    renderWithAppUi(
-      <RoleJoinRequestAlert
-        request={null}
-        onAccept={vi.fn()}
-        onDecline={vi.fn()}
-      />,
-    );
+    renderWithAppUi(<RoleJoinRequestAlert request={null} onAccept={vi.fn()} onDecline={vi.fn()} />);
 
     expect(screen.queryByRole("button", { name: "Accept" })).toBeNull();
   });

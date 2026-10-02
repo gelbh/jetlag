@@ -2,12 +2,12 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type { GameArea } from "@/domain/map/annotations";
 import * as overpassClient from "../../core/overpass/overpassClient";
 import { clearGeographicFeatureCacheForTests } from "../cache";
-import { clearBundledPoiCacheForTests } from "./regionPackPoi";
 import {
   fetchMeasuringPlacesInArea,
   findNearestMeasuringPlace,
   parseMeasuringPlaces,
 } from "./measuringPlaces";
+import { clearBundledPoiCacheForTests } from "./regionPackPoi";
 
 const sampleGameArea: GameArea = {
   type: "Polygon",
@@ -80,11 +80,7 @@ describe("measuring places", () => {
 
     expect(places).toHaveLength(2);
 
-    const nearest = await findNearestMeasuringPlace(
-      [51.46, -0.15],
-      sampleGameArea,
-      "museum",
-    );
+    const nearest = await findNearestMeasuringPlace([51.46, -0.15], sampleGameArea, "museum");
 
     expect(nearest?.name).toBe("Near Museum");
     expect(nearest?.distanceMeters).toBeGreaterThan(0);
@@ -136,12 +132,9 @@ describe("measuring places", () => {
       ],
     });
 
-    const nearest = await findNearestMeasuringPlace(
-      [51.46, -0.15],
-      sampleGameArea,
-      "museum",
-      { maxDistanceMeters: 500 },
-    );
+    const nearest = await findNearestMeasuringPlace([51.46, -0.15], sampleGameArea, "museum", {
+      maxDistanceMeters: 500,
+    });
 
     expect(nearest).toBeNull();
   });
@@ -271,13 +264,9 @@ describe("measuring places", () => {
     );
 
     const enrich = vi.fn();
-    const placesPromise = fetchMeasuringPlacesInArea(
-      sampleGameArea,
-      "museum",
-      [],
-      "london",
-      { onEnrich: enrich },
-    );
+    const placesPromise = fetchMeasuringPlacesInArea(sampleGameArea, "museum", [], "london", {
+      onEnrich: enrich,
+    });
 
     const places = await placesPromise;
     expect(places).toEqual([
@@ -313,18 +302,16 @@ describe("measuring places", () => {
   });
 
   it("awaits Overpass when the bundle is empty or missing", async () => {
-    const queryOverpass = vi
-      .spyOn(overpassClient, "queryOverpass")
-      .mockResolvedValue({
-        elements: [
-          {
-            id: 7,
-            tags: { name: "Live Museum", tourism: "museum" },
-            lat: 51.45,
-            lon: -0.16,
-          },
-        ],
-      });
+    const queryOverpass = vi.spyOn(overpassClient, "queryOverpass").mockResolvedValue({
+      elements: [
+        {
+          id: 7,
+          tags: { name: "Live Museum", tourism: "museum" },
+          lat: 51.45,
+          lon: -0.16,
+        },
+      ],
+    });
 
     vi.stubGlobal(
       "fetch",
@@ -336,13 +323,9 @@ describe("measuring places", () => {
     );
 
     const enrich = vi.fn();
-    const places = await fetchMeasuringPlacesInArea(
-      sampleGameArea,
-      "museum",
-      [],
-      "london",
-      { onEnrich: enrich },
-    );
+    const places = await fetchMeasuringPlacesInArea(sampleGameArea, "museum", [], "london", {
+      onEnrich: enrich,
+    });
 
     expect(queryOverpass).toHaveBeenCalled();
     expect(enrich).not.toHaveBeenCalled();
