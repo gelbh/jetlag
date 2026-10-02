@@ -300,10 +300,11 @@ export function MeasuringAnswerSection({
       : undefined;
 
   const readout =
-    hasTargetPoint && distanceMeters !== null && !isSeaLevel && !isCoastline ? (
+    hasTargetPoint && distanceMeters !== null && !isSeaLevel ? (
       <ResolvedReadout>
-        {targetPlaceName ?? targetLabel} is{" "}
-        {formatDistance(distanceMeters, distanceUnit)} from you.
+        {isCoastline
+          ? `Nearest coastline is ${formatDistance(distanceMeters, distanceUnit)} away.`
+          : `${targetPlaceName ?? targetLabel} is ${formatDistance(distanceMeters, distanceUnit)} from you.`}
       </ResolvedReadout>
     ) : null;
 

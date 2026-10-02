@@ -1,4 +1,5 @@
 import { startTransition, useCallback, useEffect, useRef } from "react";
+import type { Feature, LineString } from "geojson";
 import type { GameArea } from "@/domain/map/annotations";
 import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
 import { distanceBetweenPoints } from "@/domain/geometry/gameArea/geometry";
@@ -344,6 +345,9 @@ export function useMeasuringAnchorLoaders({
       const requestId = ++coastlineRequestIdRef.current;
       setMeasuringLoading(true);
       setMeasuringError(null);
+      setMeasuringTargetPoint(null);
+      setMeasuringDistanceMeters(null);
+      setMeasuringCoastSegments([]);
 
       const syncResult = resolveCoastlineContextFromCache(seekerPoint, gameArea);
       if (syncResult) {
@@ -354,8 +358,9 @@ export function useMeasuringAnchorLoaders({
         startTransition(() => {
           setMeasuringTargetPoint(syncResult.coastPoint);
           setMeasuringDistanceMeters(syncResult.distanceMeters);
+          setMeasuringCoastSegments(syncResult.segments);
+          setMeasuringLoading(false);
         });
-        setMeasuringLoading(false);
         return;
       }
 
@@ -363,6 +368,7 @@ export function useMeasuringAnchorLoaders({
         const applyCoastlineOk = (result: {
           coastPoint: LatLngTuple;
           distanceMeters: number;
+          segments: Feature<LineString>[];
         }) => {
           if (requestId !== coastlineRequestIdRef.current) {
             return;
@@ -370,7 +376,9 @@ export function useMeasuringAnchorLoaders({
           startTransition(() => {
             setMeasuringTargetPoint(result.coastPoint);
             setMeasuringDistanceMeters(result.distanceMeters);
+            setMeasuringCoastSegments(result.segments);
             setCoastlineContextVersion((version) => version + 1);
+            setMeasuringLoading(false);
           });
         };
 
@@ -392,6 +400,7 @@ export function useMeasuringAnchorLoaders({
         if (!result.ok) {
           setMeasuringTargetPoint(null);
           setMeasuringDistanceMeters(null);
+          setMeasuringCoastSegments([]);
           setMeasuringError(result.message);
           return;
         }
@@ -404,6 +413,7 @@ export function useMeasuringAnchorLoaders({
 
         setMeasuringTargetPoint(null);
         setMeasuringDistanceMeters(null);
+        setMeasuringCoastSegments([]);
         setMeasuringError(
           overpassErrorMessage(error, "Coastline not found."),
         );
@@ -418,6 +428,7 @@ export function useMeasuringAnchorLoaders({
       gameArea,
       sessionRules,
       setCoastlineContextVersion,
+      setMeasuringCoastSegments,
       setMeasuringDistanceMeters,
       setMeasuringError,
       setMeasuringLoading,

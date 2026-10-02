@@ -32,7 +32,10 @@ export function useMeasuringPreviews(
 
   const resolvedCoastSegments = useMemo(() => {
     if (measuringSubject === "coastline") {
-      return getCachedPreparedCoastlineSegments(gameArea)?.segments ?? [];
+      return (
+        getCachedPreparedCoastlineSegments(gameArea)?.segments ??
+        measuringCoastSegments
+      );
     }
 
     return measuringCoastSegments;

@@ -131,14 +131,17 @@ export function getCachedPreparedCoastlineSegments(
   );
 }
 
-export function resolveCoastlineContextFromCache(
-  seeker: LatLngTuple,
-  gameArea: GameArea,
-): {
+export type CoastlineContext = {
   coastPoint: LatLngTuple;
   distanceMeters: number;
   segmentCount: number;
-} | null {
+  segments: Feature<LineString>[];
+};
+
+export function resolveCoastlineContextFromCache(
+  seeker: LatLngTuple,
+  gameArea: GameArea,
+): CoastlineContext | null {
   const prepared = getCachedPreparedCoastlineSegments(gameArea);
   if (!prepared) {
     return null;
@@ -153,6 +156,7 @@ export function resolveCoastlineContextFromCache(
     coastPoint: nearest.point,
     distanceMeters: nearest.distanceMeters,
     segmentCount: prepared.segments.length,
+    segments: prepared.segments,
   };
 }
 
@@ -160,11 +164,7 @@ export async function loadCoastlineContext(
   seeker: LatLngTuple,
   gameArea: GameArea,
   options?: FetchCoastlineOptions,
-): Promise<{
-  coastPoint: LatLngTuple;
-  distanceMeters: number;
-  segmentCount: number;
-} | null> {
+): Promise<CoastlineContext | null> {
   const cached = resolveCoastlineContextFromCache(seeker, gameArea);
   if (cached) {
     return cached;
@@ -181,6 +181,7 @@ export async function loadCoastlineContext(
     coastPoint: nearest.point,
     distanceMeters: nearest.distanceMeters,
     segmentCount: prepared.segments.length,
+    segments: prepared.segments,
   };
 }
 
