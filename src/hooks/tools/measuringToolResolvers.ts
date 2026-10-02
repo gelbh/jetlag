@@ -124,6 +124,7 @@ export async function fetchMeasuringCoastlineContext(
     onEnrich?: (result: {
       coastPoint: LatLngTuple;
       distanceMeters: number;
+      segments: Feature<LineString>[];
     }) => void;
   },
 ) {
@@ -142,6 +143,7 @@ export async function fetchMeasuringCoastlineContext(
           options.onEnrich?.({
             coastPoint: nearest.point,
             distanceMeters: nearest.distanceMeters,
+            segments: prepared.segments,
           });
         }
       : undefined,
@@ -159,6 +161,7 @@ export async function fetchMeasuringCoastlineContext(
     ok: true as const,
     coastPoint: result.coastPoint,
     distanceMeters: result.distanceMeters,
+    segments: result.segments,
   };
 }
 

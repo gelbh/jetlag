@@ -18,7 +18,10 @@ import type { SubmitPendingQuestionInput } from "../../sync/usePendingQuestionAc
 import { MAP_ANNOTATION_COLORS } from "@/domain/map/mapAnnotationColors";
 import { emitQuestionAnsweredActivity } from "@/services/session/emitSessionActivity";
 import { persistSlimMeasuringGeometry } from "@/domain/geometry/measuring/measuringGeometryBudgets";
-import { buildStoredMeasuringRegionInput } from "./helpers";
+import {
+  buildStoredMeasuringRegionInput,
+  measuringCommitReady,
+} from "./helpers";
 import type { MeasuringDraftState } from "./useMeasuringDraftState";
 import type { MeasuringPreviews } from "./useMeasuringPreviews";
 
@@ -73,6 +76,7 @@ export function useMeasuringCommit({
     measuringTargetPlaceName,
     measuringAnswer,
     measuringSeaLevelNote,
+    measuringLoading,
     setMeasuringError,
     setPreviewOpen,
     resetDraft,
@@ -80,7 +84,18 @@ export function useMeasuringCommit({
 
   const { resolvedCoastSegments, measuringRegionInput } = previews;
 
+  const commitReady = measuringCommitReady({
+    measuringSubject,
+    measuringLoading,
+    resolvedCoastSegmentsLength: resolvedCoastSegments.length,
+  });
+
   const performCommit = useCallback(async () => {
+    if (!commitReady) {
+      setMeasuringError("Measuring target isn't ready yet. Wait for resolve or retry.");
+      return;
+    }
+
     if (!measuringSeekerPoint || measuringDistanceMeters === null) {
       return;
     }
@@ -276,6 +291,7 @@ export function useMeasuringCommit({
   }, [
     annotations,
     awaitHiderAnswer,
+    commitReady,
     createAnnotation,
     finishPlacement,
     measuringAnchorElevationMeters,
@@ -329,6 +345,11 @@ export function useMeasuringCommit({
       return;
     }
 
+    if (!commitReady) {
+      setMeasuringError("Measuring target isn't ready yet. Wait for resolve or retry.");
+      return;
+    }
+
     if (measuringSubject === "sea_level" && !measuringSeaLevelNearRegion) {
       setMeasuringError(
         measuringSeaLevelNote ??
@@ -346,6 +367,7 @@ export function useMeasuringCommit({
   }, [
     adminDivisionCounts,
     canSubmitQuestion,
+    commitReady,
     measureFromKind,
     measuringDistanceMeters,
     measuringPlaces.length,
