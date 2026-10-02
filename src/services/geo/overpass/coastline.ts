@@ -1,27 +1,21 @@
 import type { Feature, LineString } from "geojson";
-import type { GameArea } from "@/domain/map/annotations";
-import type { RegionPackId } from "@/domain/regions/regionPack";
 import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
 import {
   nearestPointToCoastlines,
-  prepareMeasuringLineSegments,
   type PreparedLinearSegments,
+  prepareMeasuringLineSegments,
 } from "@/domain/geometry/measuring/geometryMeasuring";
+import type { GameArea } from "@/domain/map/annotations";
+import type { RegionPackId } from "@/domain/regions/regionPack";
+import { queryOverpass } from "../../core/overpass/overpassClient";
 import {
   coastlineSegmentsCacheKey,
   getOrFetchCached,
   readCachedMemoryEntry,
   writeCoastlineSegmentsCache,
 } from "../cache";
-import { queryOverpass } from "../../core/overpass/overpassClient";
-import {
-  formatOverpassBboxFromGameArea,
-  overpassQueryTemplate,
-} from "./query";
-import {
-  loadBundledCoastlinePack,
-  mergeCoastlineSegments,
-} from "./regionPackCoastline";
+import { formatOverpassBboxFromGameArea, overpassQueryTemplate } from "./query";
+import { loadBundledCoastlinePack, mergeCoastlineSegments } from "./regionPackCoastline";
 
 export interface FetchCoastlineOptions {
   regionPackId?: RegionPackId;
@@ -37,9 +31,7 @@ export function buildCoastlineQuery(gameArea: GameArea): string {
   `);
 }
 
-function wayToLineString(
-  nodes: Array<{ lat: number; lon: number }>,
-): Feature<LineString> | null {
+function wayToLineString(nodes: Array<{ lat: number; lon: number }>): Feature<LineString> | null {
   if (nodes.length < 2) {
     return null;
   }
@@ -91,9 +83,7 @@ export async function fetchPreparedCoastlineSegments(
   gameArea: GameArea,
   options?: FetchCoastlineOptions,
 ): Promise<PreparedLinearSegments> {
-  const pack = options?.regionPackId
-    ? await loadBundledCoastlinePack(options.regionPackId)
-    : null;
+  const pack = options?.regionPackId ? await loadBundledCoastlinePack(options.regionPackId) : null;
 
   if (pack?.source === "none") {
     const empty = prepareMeasuringLineSegments([], gameArea);
@@ -126,9 +116,7 @@ export async function fetchPreparedCoastlineSegments(
 export function getCachedPreparedCoastlineSegments(
   gameArea: GameArea,
 ): PreparedLinearSegments | undefined {
-  return readCachedMemoryEntry<PreparedLinearSegments>(
-    coastlineSegmentsCacheKey(gameArea),
-  );
+  return readCachedMemoryEntry<PreparedLinearSegments>(coastlineSegmentsCacheKey(gameArea));
 }
 
 export type CoastlineContext = {

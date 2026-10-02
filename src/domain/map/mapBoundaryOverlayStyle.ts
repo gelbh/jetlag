@@ -1,13 +1,10 @@
 import type { ExpressionSpecification } from "maplibre-gl";
-import type { MapPathOptions } from "./mapPathOptions";
+import { MAP_ANNOTATION_COLORS } from "./mapAnnotationColors";
 import type { MapStyle, StreetBasemap } from "./mapBasemaps";
 import { getBasemapSurface } from "./mapBasemaps";
 import type { MapDraftOverlayStyle } from "./mapDraftOverlay";
-import { MAP_ANNOTATION_COLORS } from "./mapAnnotationColors";
-import {
-  computeZoomAdaptiveWeight,
-  quantizeWeight,
-} from "./zoomAdaptiveStrokeWeight";
+import type { MapPathOptions } from "./mapPathOptions";
+import { computeZoomAdaptiveWeight, quantizeWeight } from "./zoomAdaptiveStrokeWeight";
 
 const ADMIN_LEVEL_STROKE_WEIGHT: Record<number, number> = {
   4: 2.5,
@@ -28,17 +25,12 @@ const ADMIN_STROKE_REF_ZOOM = 12;
 
 const ADMIN_LINE_WIDTH_ZOOM_STOPS = [4, 8, 10, 12, 14, 16, 18, 20] as const;
 
-function highContrastSurface(
-  mapStyle: MapStyle,
-  streetBasemap: StreetBasemap,
-): boolean {
+function highContrastSurface(mapStyle: MapStyle, streetBasemap: StreetBasemap): boolean {
   const surface = getBasemapSurface(mapStyle, streetBasemap);
   return surface === "satellite" || surface === "dark";
 }
 
-export function getAdminBoundaryLineWidthExpression(
-  adminLevel: number,
-): ExpressionSpecification {
+export function getAdminBoundaryLineWidthExpression(adminLevel: number): ExpressionSpecification {
   const baseWeight = ADMIN_LEVEL_STROKE_WEIGHT[adminLevel] ?? 1;
   const stops = ADMIN_LINE_WIDTH_ZOOM_STOPS.flatMap((zoom) => [
     zoom,

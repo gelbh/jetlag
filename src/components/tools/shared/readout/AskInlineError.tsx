@@ -15,10 +15,7 @@ type ErrorCopy = {
 /** Friendlier titles for common GPS / ask failures shown in sheets. */
 export function askInlineErrorCopy(message: string): ErrorCopy {
   const lower = message.toLowerCase();
-  if (
-    lower.includes("timed out") ||
-    lower.includes("waiting for your location")
-  ) {
+  if (lower.includes("timed out") || lower.includes("waiting for your location")) {
     return {
       title: "Location timed out",
       detail:
@@ -38,8 +35,7 @@ export function askInlineErrorCopy(message: string): ErrorCopy {
   ) {
     return {
       title: "Location unavailable",
-      detail:
-        "Your device could not find a fix. Try again, or tap the map to place your anchor.",
+      detail: "Your device could not find a fix. Try again, or tap the map to place your anchor.",
     };
   }
   return {

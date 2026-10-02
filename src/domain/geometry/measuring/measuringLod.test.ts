@@ -1,15 +1,15 @@
-import { describe, expect, it } from "vitest";
 import type { Feature, MultiPolygon, Polygon } from "geojson";
+import { describe, expect, it } from "vitest";
 import {
+  countPolygonVertices,
   MEASURING_OUTPUT_MAX_VERTICES,
   MEASURING_OUTPUT_OVER_BUDGET_MESSAGE,
   MEASURING_PERSIST_OVER_BUDGET_MESSAGE,
-  countPolygonVertices,
   persistSlimMeasuringGeometry,
 } from "./measuringGeometryBudgets";
 import {
-  MEASURING_LOD_TURF_VERTEX_CEILING,
   buildMeasuringCoarseFeature,
+  MEASURING_LOD_TURF_VERTEX_CEILING,
   refineMeasuringFeatureStep,
 } from "./measuringLod";
 
@@ -28,9 +28,7 @@ function denseZigzagPolygon(vertexCount: number): Feature<Polygon> {
   };
 }
 
-function separateSquaresMultiPolygon(
-  squareCount: number,
-): Feature<MultiPolygon> {
+function separateSquaresMultiPolygon(squareCount: number): Feature<MultiPolygon> {
   const polygons: number[][][][] = [];
   for (let i = 0; i < squareCount; i++) {
     const x = -6.5 + (i % 80) * 0.05;
@@ -56,9 +54,7 @@ describe("measuringLod", () => {
   it("builds coarse with fewer vertices than a dense full feature", () => {
     const full = denseZigzagPolygon(6_000);
     const coarse = buildMeasuringCoarseFeature(full);
-    expect(countPolygonVertices(coarse)).toBeLessThan(
-      countPolygonVertices(full),
-    );
+    expect(countPolygonVertices(coarse)).toBeLessThan(countPolygonVertices(full));
   });
 
   it("refines until done returns the full feature", () => {
@@ -78,9 +74,7 @@ describe("measuringLod", () => {
 
   it("persist-slim succeeds under the ceiling for soften-able density", () => {
     const dense = denseZigzagPolygon(6_000);
-    expect(countPolygonVertices(dense)).toBeGreaterThan(
-      MEASURING_OUTPUT_MAX_VERTICES,
-    );
+    expect(countPolygonVertices(dense)).toBeGreaterThan(MEASURING_OUTPUT_MAX_VERTICES);
     const slimmed = persistSlimMeasuringGeometry(dense);
     expect(slimmed.ok).toBe(true);
   });
@@ -97,18 +91,12 @@ describe("measuringLod", () => {
 
   it("skips Turf path for dense rings over the LOD ceiling (stride coarse)", () => {
     const full = denseZigzagPolygon(6_000);
-    expect(countPolygonVertices(full)).toBeGreaterThan(
-      MEASURING_LOD_TURF_VERTEX_CEILING,
-    );
+    expect(countPolygonVertices(full)).toBeGreaterThan(MEASURING_LOD_TURF_VERTEX_CEILING);
     const coarse = buildMeasuringCoarseFeature(full);
     const fullVerts = countPolygonVertices(full);
     // Stride coarse targets ~25% of verts — well under Turf-free ceiling path.
-    expect(countPolygonVertices(coarse)).toBeLessThanOrEqual(
-      Math.floor(fullVerts * 0.3),
-    );
+    expect(countPolygonVertices(coarse)).toBeLessThanOrEqual(Math.floor(fullVerts * 0.3));
     const step = refineMeasuringFeatureStep(full, coarse, 0);
-    expect(countPolygonVertices(step.feature)).toBeGreaterThan(
-      countPolygonVertices(coarse),
-    );
+    expect(countPolygonVertices(step.feature)).toBeGreaterThan(countPolygonVertices(coarse));
   });
 });

@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import type { GameArea, SessionRecord } from "../../domain/map/annotations";
 import { BUNDLED_REGION_PACK_GEO_REVISION } from "../../domain/regions/regionPack";
+import { isKnownRegionPack } from "../../domain/regions/regionPackRegistry";
 import {
+  type SessionRulesInput,
   sessionRulesFromRecord,
   sessionRulesSnapshot,
-  type SessionRulesInput,
 } from "../../domain/session/rules";
-import { isKnownRegionPack } from "../../domain/regions/regionPackRegistry";
 import {
   isPlayAreaReadySync,
   matchingAreasCacheKey,
@@ -16,9 +16,7 @@ import {
   resolveSessionPlayArea,
 } from "../../services/geo/matching/resolveSessionMatchingAreas";
 
-function sessionHasBundledMatchingLevels(
-  session: SessionRecord | null | undefined,
-): boolean {
+function sessionHasBundledMatchingLevels(session: SessionRecord | null | undefined): boolean {
   const areas = session?.customMatchingAreas;
   if (!areas) {
     return false;
@@ -27,9 +25,7 @@ function sessionHasBundledMatchingLevels(
   return Boolean(areas[8] && areas[9]);
 }
 
-function sessionNeedsAsyncMatchingAreas(
-  session: SessionRecord | null | undefined,
-): boolean {
+function sessionNeedsAsyncMatchingAreas(session: SessionRecord | null | undefined): boolean {
   if (!session) {
     return false;
   }
@@ -44,9 +40,7 @@ function sessionNeedsAsyncMatchingAreas(
   return isKnownRegionPack(session.regionPackId);
 }
 
-function sessionNeedsAsyncPlayArea(
-  session: SessionRecord | null | undefined,
-): boolean {
+function sessionNeedsAsyncPlayArea(session: SessionRecord | null | undefined): boolean {
   return Boolean(session && isKnownRegionPack(session.regionPackId));
 }
 
@@ -61,54 +55,42 @@ export interface ResolvedSessionRulesState {
 export function useResolvedSessionRules(
   session: SessionRecord | null | undefined,
 ): ResolvedSessionRulesState {
-  const sessionRulesKey = sessionRulesSnapshot(session);
+  const _sessionRulesKey = sessionRulesSnapshot(session);
   const baseRules = useMemo(
     () => sessionRulesFromRecord(session),
     // eslint-disable-next-line react-hooks/exhaustive-deps -- sessionRulesKey tracks rule fields
-    [sessionRulesKey],
+    [session],
   );
 
   const regionPackId = session?.regionPackId;
   const regionPackSubregionId = session?.regionPackSubregionId;
   const customMatchingArea8 = session?.customMatchingAreas?.[8];
   const customMatchingArea9 = session?.customMatchingAreas?.[9];
-  const hasCustomMatchingPair = Boolean(
-    customMatchingArea8 && customMatchingArea9,
-  );
+  const hasCustomMatchingPair = Boolean(customMatchingArea8 && customMatchingArea9);
   const hasSession = session != null;
 
   const areasCacheKey = useMemo(
     () =>
       hasSession
-        ? matchingAreasCacheKey(
-            regionPackId,
-            regionPackSubregionId,
-            hasCustomMatchingPair,
-          )
+        ? matchingAreasCacheKey(regionPackId, regionPackSubregionId, hasCustomMatchingPair)
         : "",
     [hasSession, regionPackId, regionPackSubregionId, hasCustomMatchingPair],
   );
 
   const playAreaCacheKeyValue = useMemo(
-    () =>
-      hasSession
-        ? playAreaCacheKey(regionPackId, regionPackSubregionId)
-        : "",
+    () => (hasSession ? playAreaCacheKey(regionPackId, regionPackSubregionId) : ""),
     [hasSession, regionPackId, regionPackSubregionId],
   );
 
   const needsAsyncResolve = sessionNeedsAsyncMatchingAreas(session);
   const needsPlayAreaResolve = sessionNeedsAsyncPlayArea(session);
 
-  const [resolvedAreas, setResolvedAreas] = useState<
-    SessionRulesInput["customMatchingAreas"]
-  >(undefined);
-  const [resolvedGameArea, setResolvedGameArea] = useState<GameArea | undefined>(
-    () => peekResolvedPlayArea(session),
+  const [resolvedAreas, setResolvedAreas] =
+    useState<SessionRulesInput["customMatchingAreas"]>(undefined);
+  const [resolvedGameArea, setResolvedGameArea] = useState<GameArea | undefined>(() =>
+    peekResolvedPlayArea(session),
   );
-  const [matchingAreasError, setMatchingAreasError] = useState<string | null>(
-    null,
-  );
+  const [matchingAreasError, setMatchingAreasError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!needsAsyncResolve || !playAreaCacheKeyValue) {
@@ -134,10 +116,7 @@ export function useResolvedSessionRules(
           matchingAreasCacheKey(
             snapshot.regionPackId,
             snapshot.regionPackSubregionId,
-            Boolean(
-              snapshot.customMatchingAreas?.[8] &&
-                snapshot.customMatchingAreas?.[9],
-            ),
+            Boolean(snapshot.customMatchingAreas?.[8] && snapshot.customMatchingAreas?.[9]),
           ) === expectedKey
         ) {
           setResolvedAreas(areas);
@@ -157,7 +136,13 @@ export function useResolvedSessionRules(
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- pack-key only; session churn must not cancel
-  }, [areasCacheKey, needsAsyncResolve]);
+  }, [
+    areasCacheKey,
+    needsAsyncResolve,
+    session?.customMatchingAreas,
+    playAreaCacheKeyValue,
+    session,
+  ]);
 
   useEffect(() => {
     if (!needsPlayAreaResolve || !playAreaCacheKeyValue) {
@@ -184,10 +169,7 @@ export function useResolvedSessionRules(
         const playArea = await resolveSessionPlayArea(snapshot);
         if (
           !cancelled &&
-          playAreaCacheKey(
-            snapshot.regionPackId,
-            snapshot.regionPackSubregionId,
-          ) === expectedKey
+          playAreaCacheKey(snapshot.regionPackId, snapshot.regionPackSubregionId) === expectedKey
         ) {
           setResolvedGameArea(playArea);
         }
@@ -202,24 +184,17 @@ export function useResolvedSessionRules(
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- pack-key only; session churn must not cancel
-  }, [needsPlayAreaResolve, playAreaCacheKeyValue]);
+  }, [needsPlayAreaResolve, playAreaCacheKeyValue, session]);
 
   const sessionRules = useMemo(
-    () =>
-      resolvedAreas
-        ? { ...baseRules, customMatchingAreas: resolvedAreas }
-        : baseRules,
+    () => (resolvedAreas ? { ...baseRules, customMatchingAreas: resolvedAreas } : baseRules),
     [baseRules, resolvedAreas],
   );
 
-  const gameArea =
-    resolvedGameArea ?? peekResolvedPlayArea(session) ?? session?.gameArea ?? null;
+  const gameArea = resolvedGameArea ?? peekResolvedPlayArea(session) ?? session?.gameArea ?? null;
 
   const matchingAreasReady =
-    !session ||
-    !needsAsyncResolve ||
-    resolvedAreas !== undefined ||
-    matchingAreasError !== null;
+    !session || !needsAsyncResolve || resolvedAreas !== undefined || matchingAreasError !== null;
 
   const playAreaReady =
     !session ||

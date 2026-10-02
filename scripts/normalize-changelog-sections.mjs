@@ -5,10 +5,7 @@
 
 import { readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
-import {
-  parsePrefixedBullet,
-  SECTION_ORDER,
-} from "../.changeset/section-map.mjs";
+import { parsePrefixedBullet, SECTION_ORDER } from "../.changeset/section-map.mjs";
 
 const projectRoot = resolve(import.meta.dirname, "..");
 const changelogPath = resolve(projectRoot, "CHANGELOG.md");
@@ -28,10 +25,7 @@ function todayUtc() {
  * @param {string} content
  */
 export function ensureDatedVersionHeaders(content, date = todayUtc()) {
-  return content.replace(
-    /^## (\d+\.\d+\.\d+)[ \t]*$/gm,
-    `## $1 - ${date}`,
-  );
+  return content.replace(/^## (\d+\.\d+\.\d+)[ \t]*$/gm, `## $1 - ${date}`);
 }
 
 /**
@@ -95,10 +89,7 @@ export function normalizeChangelogSections(content) {
     return `### ${title}\n\n${lines}`;
   }).filter(Boolean);
 
-  const newBody =
-    rebuiltSections.length > 0
-      ? `\n\n${rebuiltSections.join("\n\n")}\n\n`
-      : "\n\n";
+  const newBody = rebuiltSections.length > 0 ? `\n\n${rebuiltSections.join("\n\n")}\n\n` : "\n\n";
 
   return `${preamble}${header}${newBody}${after.startsWith("##") ? after : after.replace(/^\n*/, "")}`;
 }
@@ -107,7 +98,5 @@ if (resolve(process.argv[1] ?? "") === resolve(import.meta.filename)) {
   const markdown = readFileSync(changelogPath, "utf8");
   const next = normalizeChangelogSections(markdown);
   writeFileSync(changelogPath, next);
-  console.info(
-    "Normalized CHANGELOG.md sections (Fixes / Improvements / Technical).",
-  );
+  console.info("Normalized CHANGELOG.md sections (Fixes / Improvements / Technical).");
 }

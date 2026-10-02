@@ -1,8 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  subscribeUserProfile,
-  type UserProfile,
-} from "../../services/firestore/firestoreProfile";
+import { subscribeUserProfile, type UserProfile } from "../../services/firestore/firestoreProfile";
 
 export function useUserProfile(
   uid: string | null | undefined,

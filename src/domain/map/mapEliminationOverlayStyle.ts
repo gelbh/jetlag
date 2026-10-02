@@ -1,7 +1,7 @@
-import type { MapPathOptions } from "./mapPathOptions";
+import { MAP_ANNOTATION_COLORS } from "./mapAnnotationColors";
 import type { BasemapSurface, MapStyle, StreetBasemap } from "./mapBasemaps";
 import { getBasemapSurface } from "./mapBasemaps";
-import { MAP_ANNOTATION_COLORS } from "./mapAnnotationColors";
+import type { MapPathOptions } from "./mapPathOptions";
 
 export type EliminationOverlayLayer = MapPathOptions & {
   className?: string;

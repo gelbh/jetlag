@@ -1,7 +1,7 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { usePhotoTool } from "./usePhotoTool";
 import { createToolHookMocks } from "../../test/helpers/toolHookMocks";
+import { usePhotoTool } from "./usePhotoTool";
 
 describe("usePhotoTool map-first", () => {
   it("suppresses the Ask sheet after a photo category is chosen", async () => {
@@ -28,7 +28,7 @@ describe("usePhotoTool map-first", () => {
 
     act(() => {
       (
-        result.current.hud!.modeBody as {
+        result.current.hud?.modeBody as {
           props: { onCategoryChange: (id: string) => void };
         }
       ).props.onCategoryChange("tree");

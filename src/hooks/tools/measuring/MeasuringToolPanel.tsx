@@ -1,12 +1,8 @@
 import { startTransition } from "react";
 import { MeasuringPanel } from "@/components/tools/MeasuringPanel";
 import { QuestionPreviewSheet } from "@/components/tools/shared/controls/QuestionPreviewSheet";
-import {
-  measuringFromKind,
-  measuringQuestionFor,
-  type MeasuringAnswer,
-} from "@/domain/questions";
 import type { DistanceUnit } from "@/domain/map/distance";
+import { type MeasuringAnswer, measuringFromKind, measuringQuestionFor } from "@/domain/questions";
 import type { GeocodedPlace } from "@/services/geo/geocoding";
 import type { MeasuringAnchorLoaders } from "./useMeasuringAnchorLoaders";
 import type { MeasuringDraftState } from "./useMeasuringDraftState";
@@ -94,17 +90,12 @@ export function MeasuringToolPanel({
           distanceUnit,
           optionChosen: measuringOptionChosen,
           usedMeasuringFromKinds: usedMeasuringFromKindsSet,
-          unavailableMeasuringFromKinds: new Set(
-            unavailableMeasuringFromKinds.keys(),
-          ),
+          unavailableMeasuringFromKinds: new Set(unavailableMeasuringFromKinds.keys()),
           catalogNotice,
           catalogOptions: measuringCatalog,
           anchorLat: measuringSeekerPoint?.[0] ?? null,
           anchorLng: measuringSeekerPoint?.[1] ?? null,
-          measureFrom: measuringFromKind(
-            measuringSubject,
-            measuringLocationCategory,
-          ),
+          measureFrom: measuringFromKind(measuringSubject, measuringLocationCategory),
           subject: measuringSubject,
           targetMode: measuringTargetMode,
           usesAllPlacesInArea,
@@ -161,17 +152,13 @@ export function MeasuringToolPanel({
         prompt={
           measuringQuestionFor(
             measuringSubject,
-            measuringSubject === "location"
-              ? measuringLocationCategory
-              : undefined,
+            measuringSubject === "location" ? measuringLocationCategory : undefined,
           ).prompt
         }
         ruleSummary={
           measuringQuestionFor(
             measuringSubject,
-            measuringSubject === "location"
-              ? measuringLocationCategory
-              : undefined,
+            measuringSubject === "location" ? measuringLocationCategory : undefined,
           ).ruleSummary
         }
         anchorLat={measuringSeekerPoint?.[0] ?? null}

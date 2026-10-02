@@ -1,43 +1,43 @@
 import {
   arrayUnion,
+  type DocumentData,
+  type DocumentSnapshot,
   doc,
   getDoc,
   getDocFromServer,
   updateDoc,
-  type DocumentData,
-  type DocumentSnapshot,
 } from "firebase/firestore";
+import { APP_VERSION } from "@/domain/device/changelog";
 import type { SessionRecord, SessionTier } from "@/domain/map/annotations";
-import type { PlayerRole } from "@/domain/session/players/playerRole";
+import { photoUploadAccessError } from "@/domain/questions";
+import { buildJoinPreviewSession } from "@/domain/session/join/joinPreviewSession";
 import {
   sessionVersionCompatible,
   sessionVersionMismatchMessage,
 } from "@/domain/session/meta/sessionVersion";
-import { APP_VERSION } from "@/domain/device/changelog";
-import { deserializeSessionFromFirestore } from "../serialization/serializeSession";
-import { buildJoinPreviewSession } from "@/domain/session/join/joinPreviewSession";
-import { photoUploadAccessError } from "@/domain/questions";
+import type { PlayerRole } from "@/domain/session/players/playerRole";
 import {
-  buildMemberUidsAfterHeal,
   buildMembershipHealState,
+  buildMemberUidsAfterHeal,
   sanitizeReturningMemberUid,
 } from "@/domain/session/players/returningMember";
 import { isSessionRoleGated } from "@/domain/session/players/roleGates";
 import { joinGatedRemoteSessionByCode } from "../joinGatedRemoteSession";
-import {
-  sessionsCollection,
-  sessionCodeDoc,
-  withJoinPermissionRetry,
-  readSessionMembershipFields,
-  membershipPatchFromHealState,
-  writeSessionMembershipPatch,
-  applyReturningMemberHealWrite,
-  isFirestorePermissionDenied,
-  HIDER_ROLE_POLL_MS,
-  HIDER_ROLE_POLL_MAX_MS,
-  touchSessionLastActive,
-} from "./shared";
+import { deserializeSessionFromFirestore } from "../serialization/serializeSession";
 import { ensureRemoteSessionMembership } from "./membership";
+import {
+  applyReturningMemberHealWrite,
+  HIDER_ROLE_POLL_MAX_MS,
+  HIDER_ROLE_POLL_MS,
+  isFirestorePermissionDenied,
+  membershipPatchFromHealState,
+  readSessionMembershipFields,
+  sessionCodeDoc,
+  sessionsCollection,
+  touchSessionLastActive,
+  withJoinPermissionRetry,
+  writeSessionMembershipPatch,
+} from "./shared";
 
 export type JoinRemoteSessionResult =
   | { status: "missing" }
@@ -65,18 +65,11 @@ type SessionCodeRecord = {
   createdAt?: string;
 };
 
-function sanitizeJoinReturningMemberUid(
-  options: JoinRemoteSessionOptions,
-): string | undefined {
-  return sanitizeReturningMemberUid(
-    options.persistedMyUid,
-    options.returningMemberUid,
-  );
+function sanitizeJoinReturningMemberUid(options: JoinRemoteSessionOptions): string | undefined {
+  return sanitizeReturningMemberUid(options.persistedMyUid, options.returningMemberUid);
 }
 
-async function readSessionCodeRecord(
-  code: string,
-): Promise<SessionCodeRecord | null> {
+async function readSessionCodeRecord(code: string): Promise<SessionCodeRecord | null> {
   const codeDoc = await getDoc(sessionCodeDoc(code));
   if (!codeDoc.exists()) {
     return null;
@@ -90,8 +83,7 @@ async function readSessionCodeRecord(
   return {
     sessionId: data.sessionId,
     hostUid: data.hostUid,
-    hostAppVersion:
-      typeof data.hostAppVersion === "string" ? data.hostAppVersion : undefined,
+    hostAppVersion: typeof data.hostAppVersion === "string" ? data.hostAppVersion : undefined,
     tier: data.tier === "premium" ? "premium" : "free",
     status: data.status === "ended" ? "ended" : "active",
     createdAt: typeof data.createdAt === "string" ? data.createdAt : undefined,
@@ -106,9 +98,7 @@ export function mapJoinFailureToError(
   missingMessage: string,
 ): Error {
   if (result.status === "incompatible") {
-    return new Error(
-      sessionVersionMismatchMessage(result.hostVersion, APP_VERSION),
-    );
+    return new Error(sessionVersionMismatchMessage(result.hostVersion, APP_VERSION));
   }
 
   if (result.status === "ended") {
@@ -121,9 +111,7 @@ export function mapJoinFailureToError(
 export async function lookupRemoteSessionByCode(
   code: string,
 ): Promise<
-  | { status: "missing" }
-  | { status: "ended" }
-  | { status: "found"; session: SessionRecord }
+  { status: "missing" } | { status: "ended" } | { status: "found"; session: SessionRecord }
 > {
   const codeRecord = await readSessionCodeRecord(code);
   if (!codeRecord) {
@@ -169,8 +157,7 @@ async function joinRemoteSessionWithRead(
   clientVersion: string,
   returningMemberUid?: string,
 ): Promise<
-  | { status: "incompatible"; hostVersion: string }
-  | { status: "joined"; session: SessionRecord }
+  { status: "incompatible"; hostVersion: string } | { status: "joined"; session: SessionRecord }
 > {
   const data = sessionDoc.data() as Record<string, unknown>;
   const existing = readSessionMembershipFields(data);
@@ -184,13 +171,7 @@ async function joinRemoteSessionWithRead(
     (returningMemberUid != null && existingMemberUids.includes(returningMemberUid));
   if (
     !isReturningMember &&
-    !sessionVersionCompatible(
-      sessionForVersionCheck,
-      clientVersion,
-      uid,
-      returningMemberUid,
-      role,
-    )
+    !sessionVersionCompatible(sessionForVersionCheck, clientVersion, uid, returningMemberUid, role)
   ) {
     return {
       status: "incompatible",
@@ -222,10 +203,7 @@ async function joinRemoteSessionWithRead(
       returningMemberUid,
     );
   } else if (!existingMemberUids.includes(uid) || returningMemberUid != null) {
-    await writeSessionMembershipPatch(
-      sessionDoc.ref,
-      membershipPatchFromHealState(heal),
-    );
+    await writeSessionMembershipPatch(sessionDoc.ref, membershipPatchFromHealState(heal));
   } else if (!existingRoles[uid] || roleChanged) {
     await writeSessionMembershipPatch(sessionDoc.ref, {
       memberRoles: heal.memberRoles,
@@ -257,8 +235,7 @@ async function joinRemoteSessionWithoutRead(
   clientVersion: string,
   returningMemberUid?: string,
 ): Promise<
-  | { status: "incompatible"; hostVersion: string }
-  | { status: "joined"; session: SessionRecord }
+  { status: "incompatible"; hostVersion: string } | { status: "joined"; session: SessionRecord }
 > {
   const previewSession = buildJoinPreviewSession(sessionId, "", codeRecord);
   if (
@@ -314,7 +291,10 @@ async function joinRemoteSessionWithoutRead(
     if (sessionDoc.exists()) {
       return {
         status: "joined",
-        session: deserializeSessionFromFirestore(sessionDoc.id, sessionDoc.data() as Record<string, unknown>),
+        session: deserializeSessionFromFirestore(
+          sessionDoc.id,
+          sessionDoc.data() as Record<string, unknown>,
+        ),
       };
     }
   } catch {
@@ -410,10 +390,7 @@ async function joinRemoteSessionByCodeOnce(
           rolePasscode: options.rolePasscode,
         });
       } catch (gatedError) {
-        if (
-          gatedError instanceof Error &&
-          gatedError.message.includes("legacy join")
-        ) {
+        if (gatedError instanceof Error && gatedError.message.includes("legacy join")) {
           throw legacyJoinError;
         }
         throw gatedError;
@@ -430,11 +407,7 @@ async function joinRemoteSessionByCodeOnce(
     return { status: "ended" };
   }
 
-  if (
-    isSessionRoleGated(
-      deserializeSessionFromFirestore(sessionDoc.id, data),
-    )
-  ) {
+  if (isSessionRoleGated(deserializeSessionFromFirestore(sessionDoc.id, data))) {
     return callJoinGatedRemoteSession(code, codeRecord, role, clientVersion, {
       ...options,
       returningMemberUid,
@@ -517,9 +490,7 @@ export async function joinRemoteSessionByCode(
   );
 }
 
-export async function getRemoteSessionById(
-  sessionId: string,
-): Promise<SessionRecord | null> {
+export async function getRemoteSessionById(sessionId: string): Promise<SessionRecord | null> {
   const sessionRef = doc(sessionsCollection(), sessionId);
   const snapshot = await getDoc(sessionRef);
 
@@ -551,10 +522,7 @@ function serverSessionGrantsHiderUpload(
   session: Pick<SessionRecord, "memberUids" | "memberRoles">,
   uid: string,
 ): boolean {
-  return (
-    session.memberUids.includes(uid) &&
-    session.memberRoles?.[uid] === "hider"
-  );
+  return session.memberUids.includes(uid) && session.memberRoles?.[uid] === "hider";
 }
 
 export async function waitForServerHiderRole(
@@ -587,10 +555,7 @@ export async function ensureHiderPhotoUploadAccess(
       returningMemberUid,
     });
   } catch (error) {
-    if (
-      error instanceof Error &&
-      error.message === "That session no longer exists."
-    ) {
+    if (error instanceof Error && error.message === "That session no longer exists.") {
       throw new Error("Syncing session… Try again in a moment.", { cause: error });
     }
 
@@ -598,8 +563,7 @@ export async function ensureHiderPhotoUploadAccess(
   }
 
   if (!serverSessionGrantsHiderUpload(serverSession, uid)) {
-    serverSession =
-      (await waitForServerHiderRole(session.id, uid)) ?? serverSession;
+    serverSession = (await waitForServerHiderRole(session.id, uid)) ?? serverSession;
   }
 
   const accessError = photoUploadAccessError(serverSession, uid);
@@ -609,4 +573,3 @@ export async function ensureHiderPhotoUploadAccess(
 
   return serverSession;
 }
-

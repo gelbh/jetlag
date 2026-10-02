@@ -1,8 +1,4 @@
-import {
-  Link,
-  useNavigate,
-  type LinkProps,
-} from "react-router-dom";
+import { Link, type LinkProps, useNavigate } from "react-router-dom";
 import { useRouteTransition } from "../../navigation/useRouteTransition";
 
 export function AppLink({
@@ -19,8 +15,7 @@ export function AppLink({
   const { beginTransition } = useRouteTransition();
   const navigate = useNavigate();
 
-  const bypassTransition =
-    reloadDocument === true || (target !== undefined && target !== "_self");
+  const bypassTransition = reloadDocument === true || (target !== undefined && target !== "_self");
 
   if (bypassTransition) {
     return (

@@ -47,14 +47,7 @@ export function useLeaderboardSelfEntry(
     return () => {
       cancelled = true;
     };
-  }, [
-    selection.scope,
-    selection.gameSize,
-    selection.role,
-    selection.metric,
-    uid,
-    skip,
-  ]);
+  }, [selection.scope, selection.gameSize, selection.role, selection.metric, uid, skip]);
 
   return { entry, error, loading };
 }

@@ -6,9 +6,7 @@ const httpsCallable = vi.hoisted(() => vi.fn(() => callable));
 const getFirebaseFunctions = vi.hoisted(() => vi.fn(async () => ({})));
 const getFirebaseAppCheck = vi.hoisted(() => vi.fn(() => ({ name: "app-check" })));
 const isFirebaseConfigured = vi.hoisted(() => vi.fn(() => true));
-const getToken = vi.hoisted(() =>
-  vi.fn(async () => ({ token: "app-check-token" })),
-);
+const getToken = vi.hoisted(() => vi.fn(async () => ({ token: "app-check-token" })));
 const captureAppCheckTokenFailure = vi.hoisted(() => vi.fn());
 
 vi.mock("../core/firebase/firebase", () => ({

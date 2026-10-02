@@ -2,9 +2,7 @@ import { z } from "zod";
 
 /** Join screen fields — RHF + Zod (L3). */
 export const joinSessionFormSchema = z.object({
-  code: z
-    .string()
-    .regex(/^[A-Z]{4}$/, "Enter a 4-letter session code."),
+  code: z.string().regex(/^[A-Z]{4}$/, "Enter a 4-letter session code."),
   playerRole: z.enum(["seeker", "hider", "observer", "admin"]),
   rolePasscode: z
     .string()

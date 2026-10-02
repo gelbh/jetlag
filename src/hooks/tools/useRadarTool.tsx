@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { RadarHudBody } from "../../components/tools/ask/RadarHudBody";
 import {
   RadarMapPlacementChrome,
@@ -7,28 +7,28 @@ import {
 import { RadarPanel } from "../../components/tools/RadarPanel";
 import type { AskHudReadiness } from "../../domain/ask/askHudModes";
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
-import { isActive, type AnnotationRecord } from "../../domain/map/annotations";
+import { type AnnotationRecord, isActive } from "../../domain/map/annotations";
 import {
+  type DistanceUnit,
   formatPresetDistance,
   parseDistanceInput,
-  type DistanceUnit,
 } from "../../domain/map/distance";
 import { defaultRadarPresetMeters } from "../../domain/map/distancePresets";
 import {
   isRadarRadiusAllowedForGameSize,
+  questionCostBreakdown,
+  type RadarAnswer,
   radarDistanceUseCount,
   radarDistanceUseCountFromPending,
-  type RadarAnswer,
-  usedRadarDistanceOptionsForSession,
   radarQuestionPrompt,
+  usedRadarDistanceOptionsForSession,
 } from "../../domain/questions";
-import { questionCostBreakdown } from "../../domain/questions";
 import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
-import type { SubmitPendingQuestionInput } from "../../hooks/sync/usePendingQuestionActions";
 import type { GameSize } from "../../domain/session/size/gameSize";
+import type { SubmitPendingQuestionInput } from "../../hooks/sync/usePendingQuestionActions";
 import {
-  queryGeolocationPermission,
   type GeolocationPermissionState,
+  queryGeolocationPermission,
 } from "../../services/core/location/geolocation";
 import { useToolSession } from "./framework/useToolSession";
 import { commitRadar } from "./radar/commitRadar";
@@ -48,10 +48,7 @@ interface UseRadarToolParams {
   ) => Promise<AnnotationRecord>;
   awaitHiderAnswer?: boolean;
   submitPendingQuestion?: (
-    input: Omit<
-      SubmitPendingQuestionInput,
-      "sessionId" | "senderUid" | "senderRole" | "toolType"
-    >,
+    input: Omit<SubmitPendingQuestionInput, "sessionId" | "senderUid" | "senderRole" | "toolType">,
   ) => Promise<void>;
   sessionId?: string;
   senderUid?: string | null;
@@ -99,17 +96,9 @@ export function useRadarTool({
     finishPlacementRef.current = finishPlacement;
   }, [finishPlacement]);
 
-  const activeAnnotations = useMemo(
-    () => annotations.filter(isActive),
-    [annotations],
-  );
+  const activeAnnotations = useMemo(() => annotations.filter(isActive), [annotations]);
   const usedRadarOptions = useMemo(
-    () =>
-      usedRadarDistanceOptionsForSession(
-        activeAnnotations,
-        pendingQuestions,
-        distanceUnit,
-      ),
+    () => usedRadarDistanceOptionsForSession(activeAnnotations, pendingQuestions, distanceUnit),
     [activeAnnotations, distanceUnit, pendingQuestions],
   );
   const defaultRadius = defaultRadarPresetMeters(distanceUnit);
@@ -124,18 +113,11 @@ export function useRadarTool({
   const distanceCatalogArmEpochRef = useRef(0);
 
   const resolvedRadarRadius = radarChooseCustom
-    ? (parseDistanceInput(radarCustomRadius, distanceUnit) ??
-      radarRadius ??
-      defaultRadius)
+    ? (parseDistanceInput(radarCustomRadius, distanceUnit) ?? radarRadius ?? defaultRadius)
     : (radarRadius ?? defaultRadius);
 
   const radarUseCount = Math.max(
-    radarDistanceUseCount(
-      activeAnnotations,
-      radarChooseCustom,
-      resolvedRadarRadius,
-      distanceUnit,
-    ),
+    radarDistanceUseCount(activeAnnotations, radarChooseCustom, resolvedRadarRadius, distanceUnit),
     radarDistanceUseCountFromPending(
       pendingQuestions,
       radarChooseCustom,
@@ -143,8 +125,11 @@ export function useRadarTool({
       distanceUnit,
     ),
   );
-  const { label: costLabel, draw: cardDraw, keep: cardKeep } =
-    questionCostBreakdown("D2P1", radarUseCount);
+  const {
+    label: costLabel,
+    draw: cardDraw,
+    keep: cardKeep,
+  } = questionCostBreakdown("D2P1", radarUseCount);
 
   const resetDraft = useCallback(() => {
     setRadarRadius(null);
@@ -195,9 +180,7 @@ export function useRadarTool({
       setAwaitingPlacement(false);
       setMapError(null);
     } catch (error) {
-      setMapError(
-        error instanceof Error ? error.message : "GPS location unavailable.",
-      );
+      setMapError(error instanceof Error ? error.message : "GPS location unavailable.");
     }
   }, [ensurePointInGameArea, refreshGps, setAwaitingPlacement, setMapError]);
 
@@ -240,8 +223,7 @@ export function useRadarTool({
 
   const commit = () => session.submit();
 
-  const placementCrosshair =
-    active && (awaitingPlacement || radarCenter === null);
+  const placementCrosshair = active && (awaitingPlacement || radarCenter === null);
 
   const hasCenter = radarCenter !== null;
   const resolvedForReady = radarChooseCustom
@@ -249,12 +231,7 @@ export function useRadarTool({
     : radarRadius;
   const distanceSelectionAvailable =
     resolvedForReady !== null &&
-    isRadarRadiusAllowedForGameSize(
-      gameSize,
-      resolvedForReady,
-      distanceUnit,
-      radarChooseCustom,
-    );
+    isRadarRadiusAllowedForGameSize(gameSize, resolvedForReady, distanceUnit, radarChooseCustom);
 
   const onPresetSelect = (radiusMeters: number) => {
     setRadarChooseCustom(false);
@@ -300,8 +277,7 @@ export function useRadarTool({
     onPresetSelect(radiusMeters);
   };
 
-  const mapFirstEligible =
-    distanceSelectionAvailable && !editingDistance;
+  const mapFirstEligible = distanceSelectionAvailable && !editingDistance;
 
   const [eligiblePlacementGeo, setEligiblePlacementGeo] = useState<
     GeolocationPermissionState | "checking"
@@ -341,11 +317,11 @@ export function useRadarTool({
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- distance entry only
-  }, [mapFirstEligible, resolvedForReady]);
+  }, [mapFirstEligible, resolvedForReady, radarCenter]);
 
   useEffect(() => {
     autoGpsForDistanceRef.current = null;
-  }, [resolvedForReady]);
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -354,8 +330,7 @@ export function useRadarTool({
   }, []);
 
   const mapPlacementActive = Boolean(mapFirstEligible);
-  const placementError =
-    (radarCenter === null ? gpsError : null) ?? mapError ?? null;
+  const placementError = (radarCenter === null ? gpsError : null) ?? mapError ?? null;
 
   let placementPhase: RadarMapPlacementPhase;
   if (radarCenter !== null) {
@@ -371,9 +346,7 @@ export function useRadarTool({
   }
 
   const distanceLabel =
-    resolvedForReady !== null
-      ? formatPresetDistance(resolvedForReady, distanceUnit)
-      : "Distance";
+    resolvedForReady !== null ? formatPresetDistance(resolvedForReady, distanceUnit) : "Distance";
 
   const panel = (
     <RadarPanel
@@ -430,10 +403,7 @@ export function useRadarTool({
     mapOverlay: mapPlacementActive ? (
       <RadarMapPlacementChrome
         distanceLabel={distanceLabel}
-        questionPrompt={radarQuestionPrompt(
-          resolvedForReady ?? resolvedRadarRadius,
-          distanceUnit,
-        )}
+        questionPrompt={radarQuestionPrompt(resolvedForReady ?? resolvedRadarRadius, distanceUnit)}
         costLabel={costLabel}
         phase={placementPhase}
         onUseGps={() => void handleUseGps()}

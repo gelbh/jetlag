@@ -1,17 +1,13 @@
-import { wrap } from "comlink";
 import type { Remote } from "comlink";
-import type { Feature, MultiPolygon, Polygon as GeoPolygon } from "geojson";
+import { wrap } from "comlink";
+import type { Feature, Polygon as GeoPolygon, MultiPolygon } from "geojson";
 import type { AnnotationRecord, GameArea } from "../../map/annotations";
 import type { HidingZoneRecord } from "../../session/hiding/hidingZone";
 import {
   annotationsToEndGameDisks,
   computeEliminationUnionInput,
 } from "../adapter/eliminationMask";
-import type {
-  DiskSpec,
-  EliminationUnionInput,
-  PolygonFeature,
-} from "../kernel/types";
+import type { DiskSpec, EliminationUnionInput, PolygonFeature } from "../kernel/types";
 
 type EliminationMaskWorkerApi = {
   buildMaskFromUnionInput: (
@@ -46,10 +42,9 @@ function disposeWorker(error?: Error): void {
 
 function getWorkerApi(): Remote<EliminationMaskWorkerApi> {
   if (!workerApi) {
-    worker = new Worker(
-      new URL("./eliminationMask.worker.ts", import.meta.url),
-      { type: "module" },
-    );
+    worker = new Worker(new URL("./eliminationMask.worker.ts", import.meta.url), {
+      type: "module",
+    });
     worker.onerror = () => {
       disposeWorker();
     };
@@ -84,27 +79,15 @@ export async function requestCombinedEliminationMask(
   try {
     if (endGameHidingZones.length > 0) {
       return await Promise.race([
-        api.buildEndGameMaskFromDisks(
-          gameArea,
-          annotationsToEndGameDisks(endGameHidingZones),
-        ),
+        api.buildEndGameMaskFromDisks(gameArea, annotationsToEndGameDisks(endGameHidingZones)),
         pendingFailure,
       ]);
     }
 
-    const input = await computeEliminationUnionInput(
-      annotations,
-      gameArea,
-      draftFeatures,
-    );
-    return await Promise.race([
-      api.buildMaskFromUnionInput(input, gameArea),
-      pendingFailure,
-    ]);
+    const input = await computeEliminationUnionInput(annotations, gameArea, draftFeatures);
+    return await Promise.race([api.buildMaskFromUnionInput(input, gameArea), pendingFailure]);
   } catch (error) {
-    disposeWorker(
-      error instanceof Error ? error : new Error(WORKER_FAILURE_MESSAGE),
-    );
+    disposeWorker(error instanceof Error ? error : new Error(WORKER_FAILURE_MESSAGE));
     throw error;
   } finally {
     releasePending?.();

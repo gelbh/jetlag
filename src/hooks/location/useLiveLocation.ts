@@ -1,20 +1,20 @@
 import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
 import { haversineMeters } from "../../domain/geometry/gameArea/distance";
 import {
+  type GeolocationReading,
   getCurrentPosition,
-  restoreLocationAccessIfPersisted,
+  LOCATION_BLOCKED_MESSAGE,
   queryGeolocationPermission,
   requestLocationAccess,
+  restoreLocationAccessIfPersisted,
   unknownGeolocationErrorMessage,
   watchPosition,
-  type GeolocationReading,
-  LOCATION_BLOCKED_MESSAGE,
 } from "../../services/core/location/geolocation";
 import {
   getLocationPermissionUiSnapshot,
+  persistLocationAccessConfirmed,
   retainLocationPermissionDemand,
   subscribeLocationPermissionUi,
-  persistLocationAccessConfirmed,
 } from "../../services/core/location/locationPermissionUi";
 import {
   clearLiveLocationReading,
@@ -37,10 +37,7 @@ interface UseLiveLocationOptions {
   pollIntervalMs?: number;
 }
 
-export function useLiveLocation(
-  enabled: boolean,
-  options: UseLiveLocationOptions = {},
-) {
+export function useLiveLocation(enabled: boolean, options: UseLiveLocationOptions = {}) {
   const {
     highAccuracy = false,
     minIntervalMs = 1500,
@@ -51,9 +48,7 @@ export function useLiveLocation(
   const [reading, setReading] = useState<GeolocationReading | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [needsPermissionPrompt, setNeedsPermissionPrompt] = useState(false);
-  const lastPublishRef = useRef<{ at: number; reading: GeolocationReading } | null>(
-    null,
-  );
+  const lastPublishRef = useRef<{ at: number; reading: GeolocationReading } | null>(null);
   const confirmEpoch = useSyncExternalStore(
     subscribeLocationPermissionUi,
     () => getLocationPermissionUiSnapshot().confirmEpoch,
@@ -100,10 +95,7 @@ export function useLiveLocation(
 
       if (!force && last) {
         const elapsed = now - last.at;
-        const moved = haversineMeters(
-          [last.reading.lat, last.reading.lng],
-          [next.lat, next.lng],
-        );
+        const moved = haversineMeters([last.reading.lat, last.reading.lng], [next.lat, next.lng]);
 
         if (elapsed < minIntervalMs && moved < minDistanceMeters) {
           return;

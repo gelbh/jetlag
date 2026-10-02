@@ -1,18 +1,18 @@
-import { describe, expect, it } from "vitest";
 import type { Feature, MultiPolygon, Polygon } from "geojson";
+import { describe, expect, it } from "vitest";
 import {
-  MEASURING_LINEAR_MAX_VERTICES,
-  MEASURING_MULTI_PLACE_MAX,
-  MEASURING_OUTPUT_MAX_JSON_CHARS,
-  MEASURING_OUTPUT_MAX_VERTICES,
-  MEASURING_OUTPUT_OVER_BUDGET_MESSAGE,
-  MEASURING_PERSIST_OVER_BUDGET_MESSAGE,
   assertMeasuringGeometryBudget,
   assertMeasuringLinearVertexBudget,
   assertMeasuringMultiPlaceBudget,
   assertMeasuringOutputComplexityBudget,
   countLineStringVertices,
   countPolygonVertices,
+  MEASURING_LINEAR_MAX_VERTICES,
+  MEASURING_MULTI_PLACE_MAX,
+  MEASURING_OUTPUT_MAX_JSON_CHARS,
+  MEASURING_OUTPUT_MAX_VERTICES,
+  MEASURING_OUTPUT_OVER_BUDGET_MESSAGE,
+  MEASURING_PERSIST_OVER_BUDGET_MESSAGE,
   measuringGeometryJsonChars,
   persistSlimMeasuringGeometry,
   softenMeasuringOutputToBudget,
@@ -38,9 +38,7 @@ function denseZigzagPolygon(vertexCount: number): Feature<Polygon> {
  * Many well-separated unit squares — Turf simplify cannot collapse under the
  * output cap (RLBT golf-closer class: ~8k verts that stay heavy).
  */
-function separateSquaresMultiPolygon(
-  squareCount: number,
-): Feature<MultiPolygon> {
+function separateSquaresMultiPolygon(squareCount: number): Feature<MultiPolygon> {
   const polygons: number[][][][] = [];
   for (let i = 0; i < squareCount; i++) {
     const x = -6.5 + (i % 80) * 0.05;
@@ -65,9 +63,7 @@ function separateSquaresMultiPolygon(
 describe("measuringGeometryBudgets", () => {
   it("allows 107 and 128 multi-place counts", () => {
     expect(assertMeasuringMultiPlaceBudget(107).ok).toBe(true);
-    expect(assertMeasuringMultiPlaceBudget(MEASURING_MULTI_PLACE_MAX).ok).toBe(
-      true,
-    );
+    expect(assertMeasuringMultiPlaceBudget(MEASURING_MULTI_PLACE_MAX).ok).toBe(true);
   });
 
   it("rejects 129 multi-place with the locked copy", () => {
@@ -79,9 +75,7 @@ describe("measuringGeometryBudgets", () => {
   });
 
   it("rejects linear vertex totals over the locked max", () => {
-    const result = assertMeasuringLinearVertexBudget(
-      MEASURING_LINEAR_MAX_VERTICES + 1,
-    );
+    const result = assertMeasuringLinearVertexBudget(MEASURING_LINEAR_MAX_VERTICES + 1);
     expect(result.ok).toBe(false);
     if (!result.ok) {
       expect(result.message).toMatch(/too detailed/);
@@ -186,24 +180,18 @@ describe("measuring output complexity budget", () => {
   it("passes museum-scale fixtures (~1.3k verts)", () => {
     const museum = denseZigzagPolygon(1_300);
     expect(countPolygonVertices(museum)).toBeGreaterThanOrEqual(1_200);
-    expect(countPolygonVertices(museum)).toBeLessThan(
-      MEASURING_OUTPUT_MAX_VERTICES,
-    );
+    expect(countPolygonVertices(museum)).toBeLessThan(MEASURING_OUTPUT_MAX_VERTICES);
     expect(assertMeasuringOutputComplexityBudget(museum).ok).toBe(true);
     expect(softenMeasuringOutputToBudget(museum).ok).toBe(true);
   });
 
   it("softens dense geometry under the cap (simplify or decimate)", () => {
     const dense = denseZigzagPolygon(6_000);
-    expect(countPolygonVertices(dense)).toBeGreaterThan(
-      MEASURING_OUTPUT_MAX_VERTICES,
-    );
+    expect(countPolygonVertices(dense)).toBeGreaterThan(MEASURING_OUTPUT_MAX_VERTICES);
     const softened = softenMeasuringOutputToBudget(dense);
     expect(softened.ok).toBe(true);
     if (softened.ok) {
-      expect(assertMeasuringOutputComplexityBudget(softened.feature).ok).toBe(
-        true,
-      );
+      expect(assertMeasuringOutputComplexityBudget(softened.feature).ok).toBe(true);
     }
   });
 

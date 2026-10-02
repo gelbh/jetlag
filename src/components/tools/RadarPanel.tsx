@@ -1,28 +1,25 @@
-import { type RefObject } from "react";
-import { RadarDistancePicker } from "./RadarDistancePicker";
-import { yesNoAnswerOptions } from "./shared/answers/binaryAnswerOptions";
-import { BinaryAnswerPicker } from "./shared/answers/BinaryAnswerPicker";
-import { PlacementActions } from "./shared/controls/PlacementActions";
-import { ToolPanelShell } from "./shared/panels/ToolPanelShell";
-import { ViewOnlyQuestionBanner } from "./shared/readout/ViewOnlyQuestionBanner";
-import { ToolSection } from "./shared/panels/ToolSection";
-import { SendToHidersButton } from "./shared/controls/SendToHidersButton";
-import { QuestionTruthReferenceHint } from "./shared/QuestionTruthReferenceHint";
-import { WizardPanelFrame } from "./shared/wizard/WizardPanelFrame";
-import { WizardSwipeSurface } from "./shared/wizard/WizardSwipeSurface";
-import { RADAR_WIZARD } from "./shared/wizard/toolStepUtils";
-import {
-  toolWizardPhasePrimaryNav,
-  toolWizardSwipeNext,
-} from "./shared/wizard/toolWizardGuards";
-import { useToolWizard } from "../../hooks/wizard/useToolWizard";
-import { parseDistanceInput, type DistanceUnit } from "../../domain/map/distance";
+import type { RefObject } from "react";
+import { type DistanceUnit, parseDistanceInput } from "../../domain/map/distance";
 import {
   isRadarRadiusAllowedForGameSize,
   type RadarAnswer,
   type RadarDistanceOptionKey,
 } from "../../domain/questions";
 import type { GameSize } from "../../domain/session/size/gameSize";
+import { useToolWizard } from "../../hooks/wizard/useToolWizard";
+import { RadarDistancePicker } from "./RadarDistancePicker";
+import { BinaryAnswerPicker } from "./shared/answers/BinaryAnswerPicker";
+import { yesNoAnswerOptions } from "./shared/answers/binaryAnswerOptions";
+import { PlacementActions } from "./shared/controls/PlacementActions";
+import { SendToHidersButton } from "./shared/controls/SendToHidersButton";
+import { ToolPanelShell } from "./shared/panels/ToolPanelShell";
+import { ToolSection } from "./shared/panels/ToolSection";
+import { QuestionTruthReferenceHint } from "./shared/QuestionTruthReferenceHint";
+import { ViewOnlyQuestionBanner } from "./shared/readout/ViewOnlyQuestionBanner";
+import { RADAR_WIZARD } from "./shared/wizard/toolStepUtils";
+import { toolWizardPhasePrimaryNav, toolWizardSwipeNext } from "./shared/wizard/toolWizardGuards";
+import { WizardPanelFrame } from "./shared/wizard/WizardPanelFrame";
+import { WizardSwipeSurface } from "./shared/wizard/WizardSwipeSurface";
 
 interface RadarPanelProps {
   radiusMeters: number | null;
@@ -75,51 +72,31 @@ export function RadarPanel({
   viewOnly = false,
   wizardStepRef,
 }: RadarPanelProps) {
-  const {
-    phaseId,
-    stepId,
-    phaseIndex,
-    phaseCount,
-    configureIndex,
-    goNext,
-    goBack,
-    Stepper,
-  } = useToolWizard(RADAR_WIZARD, {
-    wizardStepRef,
-    awaitHiderAnswer,
-    toolCommitLabel: awaitHiderAnswer
-      ? `Send to hiders (${costLabel})`
-      : "Add radar question",
-    isSubmitting,
-  });
+  const { phaseId, stepId, phaseIndex, phaseCount, configureIndex, goNext, goBack, Stepper } =
+    useToolWizard(RADAR_WIZARD, {
+      wizardStepRef,
+      awaitHiderAnswer,
+      toolCommitLabel: awaitHiderAnswer ? `Send to hiders (${costLabel})` : "Add radar question",
+      isSubmitting,
+    });
 
   const resolvedRadius = chooseCustom
     ? (parseDistanceInput(customRadius, distanceUnit) ?? radiusMeters)
     : radiusMeters;
   const distanceSelectionAvailable =
     resolvedRadius !== null &&
-    isRadarRadiusAllowedForGameSize(
-      gameSize,
-      resolvedRadius,
-      distanceUnit,
-      chooseCustom,
-    );
+    isRadarRadiusAllowedForGameSize(gameSize, resolvedRadius, distanceUnit, chooseCustom);
   const canCommit =
     hasCenter &&
     distanceSelectionAvailable &&
     (awaitHiderAnswer || answer !== null) &&
     !isSubmitting;
   const canSendToHiders =
-    !viewOnly &&
-    awaitHiderAnswer &&
-    hasCenter &&
-    distanceSelectionAvailable &&
-    !isSubmitting;
+    !viewOnly && awaitHiderAnswer && hasCenter && distanceSelectionAvailable && !isSubmitting;
   const canCommitActions = !viewOnly && canCommit;
 
   const canGoNext =
-    (phaseId === "place" && hasCenter) ||
-    (phaseId === "configure" && distanceSelectionAvailable);
+    (phaseId === "place" && hasCenter) || (phaseId === "configure" && distanceSelectionAvailable);
   const canSwipeNext = toolWizardSwipeNext(canGoNext, phaseIndex, phaseCount);
 
   const radarAnswerStepActions =
@@ -132,9 +109,7 @@ export function RadarPanel({
           label=""
         />
         {hasCenter && distanceSelectionAvailable ? (
-          <p className="text-xs text-ink-dim">
-            The map shows the shaded area for your choice.
-          </p>
+          <p className="text-xs text-ink-dim">The map shows the shaded area for your choice.</p>
         ) : null}
       </>
     ) : null;
@@ -156,9 +131,7 @@ export function RadarPanel({
       {viewOnly ? <ViewOnlyQuestionBanner /> : null}
       {phaseId === "configure" ? (
         <ToolSection first compact status="active">
-          {awaitHiderAnswer ? (
-            <QuestionTruthReferenceHint />
-          ) : null}
+          {awaitHiderAnswer ? <QuestionTruthReferenceHint /> : null}
           <RadarDistancePicker
             radiusMeters={radiusMeters ?? 0}
             chooseCustom={chooseCustom}
@@ -203,9 +176,7 @@ export function RadarPanel({
       stepper={
         <Stepper
           nav={{
-            canGoBack:
-              phaseIndex > 0 ||
-              (phaseId === "configure" && configureIndex > 0),
+            canGoBack: phaseIndex > 0 || (phaseId === "configure" && configureIndex > 0),
             onBack: goBack,
             ...toolWizardPhasePrimaryNav({
               phaseId,

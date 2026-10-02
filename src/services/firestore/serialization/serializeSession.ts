@@ -1,41 +1,37 @@
-import type {
-  GameArea,
-  SessionRecord,
-  SessionTier,
-} from "@/domain/map/annotations";
-import type { EndGameTruthAnchor } from "@/domain/session/hiding/endGameTruthAnchors";
-import type { SessionRulesPatch } from "@/domain/session/tools/advancedSessionSettings";
-import type { GameSize } from "@/domain/session/size/gameSize";
-import { hidingZoneRadiusMeters } from "@/domain/session/size/gameSize";
-import {
-  parseDisabledTools,
-  parseDistanceUnit,
-  parseThermometerPresetMeters,
-  parseThermometerPresetMiles,
-  clampHidingPeriodMinutes,
-  clampPhotoAnswerDeadlineMinutes,
-  clampQuestionAnswerDeadlineMinutes,
-  clampTentacleRadiusMeters,
-  HIDING_PERIOD_MINUTES_MIN,
-  HIDING_PERIOD_MINUTES_MAX,
-  PHOTO_ANSWER_DEADLINE_MINUTES_MIN,
-  PHOTO_ANSWER_DEADLINE_MINUTES_MAX,
-  QUESTION_ANSWER_DEADLINE_MINUTES_MIN,
-  QUESTION_ANSWER_DEADLINE_MINUTES_MAX,
-} from "@/domain/session/rules";
-import type { MemberRoles, PlayerRole } from "@/domain/session/players/playerRole";
-import type { HidingZoneRecord } from "@/domain/session/hiding/hidingZone";
+import type { TimeTrapRecord } from "@/domain/expansion/timeTraps";
+import type { GameArea, SessionRecord, SessionTier } from "@/domain/map/annotations";
+import { parseRegionPackId } from "@/domain/regions/regionPack";
+import { parseCustomMeasureGeometries } from "@/domain/session/catalog/customMeasureGeometry";
 import {
   parseCustomCategories,
   parseCustomLocationPins,
   parseCustomMatchingAreas,
 } from "@/domain/session/catalog/sessionCustomContent";
-import { parseRegionPackId } from "@/domain/regions/regionPack";
-import { parseCustomMeasureGeometries } from "@/domain/session/catalog/customMeasureGeometry";
-import type { TimeTrapRecord } from "@/domain/expansion/timeTraps";
+import type { EndGameTruthAnchor } from "@/domain/session/hiding/endGameTruthAnchors";
+import type { HidingZoneRecord } from "@/domain/session/hiding/hidingZone";
+import type { MemberRoles, PlayerRole } from "@/domain/session/players/playerRole";
+import {
+  clampHidingPeriodMinutes,
+  clampPhotoAnswerDeadlineMinutes,
+  clampQuestionAnswerDeadlineMinutes,
+  clampTentacleRadiusMeters,
+  HIDING_PERIOD_MINUTES_MAX,
+  HIDING_PERIOD_MINUTES_MIN,
+  PHOTO_ANSWER_DEADLINE_MINUTES_MAX,
+  PHOTO_ANSWER_DEADLINE_MINUTES_MIN,
+  parseDisabledTools,
+  parseDistanceUnit,
+  parseThermometerPresetMeters,
+  parseThermometerPresetMiles,
+  QUESTION_ANSWER_DEADLINE_MINUTES_MAX,
+  QUESTION_ANSWER_DEADLINE_MINUTES_MIN,
+} from "@/domain/session/rules";
+import type { GameSize } from "@/domain/session/size/gameSize";
+import { hidingZoneRadiusMeters } from "@/domain/session/size/gameSize";
+import type { SessionRulesPatch } from "@/domain/session/tools/advancedSessionSettings";
 import { parseSessionOpsMitigation } from "../firestoreSessionOps";
-import { parseFirestoreDocument } from "../zodConverter";
 import { sessionDocumentSchema } from "../schemas/firestoreDocuments";
+import { parseFirestoreDocument } from "../zodConverter";
 import {
   assertNoNestedArrays,
   deserializeGameAreaFromFirestore,
@@ -54,12 +50,7 @@ function parseMemberRoles(value: unknown): MemberRoles | undefined {
 
   const roles: MemberRoles = {};
   for (const [uid, role] of Object.entries(value as Record<string, unknown>)) {
-    if (
-      role === "seeker" ||
-      role === "hider" ||
-      role === "observer" ||
-      role === "admin"
-    ) {
+    if (role === "seeker" || role === "hider" || role === "observer" || role === "admin") {
       roles[uid] = role;
     }
   }
@@ -147,9 +138,7 @@ function parseOptionalMinutes(
   return clamped;
 }
 
-export function sessionRulesPatchToFirestore(
-  patch: SessionRulesPatch,
-): Record<string, unknown> {
+export function sessionRulesPatchToFirestore(patch: SessionRulesPatch): Record<string, unknown> {
   const payload: Record<string, unknown> = {};
 
   if (patch.distanceUnit !== undefined) {
@@ -175,15 +164,11 @@ export function sessionRulesPatchToFirestore(
   }
   if (patch.thermometerPresetMiles !== undefined) {
     payload.thermometerPresetMiles =
-      patch.thermometerPresetMiles.length > 0
-        ? [...patch.thermometerPresetMiles]
-        : [];
+      patch.thermometerPresetMiles.length > 0 ? [...patch.thermometerPresetMiles] : [];
   }
   if (patch.thermometerPresetMeters !== undefined) {
     payload.thermometerPresetMeters =
-      patch.thermometerPresetMeters.length > 0
-        ? [...patch.thermometerPresetMeters]
-        : [];
+      patch.thermometerPresetMeters.length > 0 ? [...patch.thermometerPresetMeters] : [];
   }
   if (typeof patch.tentacleMediumRadiusMeters === "number") {
     payload.tentacleMediumRadiusMeters = patch.tentacleMediumRadiusMeters;
@@ -282,11 +267,7 @@ export function deserializeSessionFromFirestore(
   id: string,
   data: Record<string, unknown>,
 ): SessionRecord {
-  const document = parseFirestoreDocument(
-    sessionDocumentSchema,
-    data,
-    `session ${id}`,
-  );
+  const document = parseFirestoreDocument(sessionDocumentSchema, data, `session ${id}`);
 
   return {
     id,
@@ -325,15 +306,9 @@ export function deserializeSessionFromFirestore(
     ),
     disabledTools: parseDisabledTools(document.disabledTools),
     tentaclesEnabled:
-      typeof document.tentaclesEnabled === "boolean"
-        ? document.tentaclesEnabled
-        : undefined,
-    thermometerPresetMiles: parseThermometerPresetMiles(
-      document.thermometerPresetMiles,
-    ),
-    thermometerPresetMeters: parseThermometerPresetMeters(
-      document.thermometerPresetMeters,
-    ),
+      typeof document.tentaclesEnabled === "boolean" ? document.tentaclesEnabled : undefined,
+    thermometerPresetMiles: parseThermometerPresetMiles(document.thermometerPresetMiles),
+    thermometerPresetMeters: parseThermometerPresetMeters(document.thermometerPresetMeters),
     tentacleMediumRadiusMeters:
       typeof document.tentacleMediumRadiusMeters === "number"
         ? clampTentacleRadiusMeters(document.tentacleMediumRadiusMeters)
@@ -345,26 +320,20 @@ export function deserializeSessionFromFirestore(
     customMatchingAreas: parseCustomMatchingAreas(document.customMatchingAreas),
     customCategories: parseCustomCategories(document.customCategories),
     customLocationPins: parseCustomLocationPins(document.customLocationPins),
-    customMeasureGeometries: parseCustomMeasureGeometries(
-      document.customMeasureGeometries,
-    ),
+    customMeasureGeometries: parseCustomMeasureGeometries(document.customMeasureGeometries),
     regionPackId: parseRegionPackId(document.regionPackId),
     regionPackSubregionId:
       typeof document.regionPackSubregionId === "string"
         ? document.regionPackSubregionId
         : undefined,
     bundledGeoRevision:
-      typeof document.bundledGeoRevision === "number"
-        ? document.bundledGeoRevision
-        : undefined,
+      typeof document.bundledGeoRevision === "number" ? document.bundledGeoRevision : undefined,
     expansionPackEnabled:
       typeof document.expansionPackEnabled === "boolean"
         ? document.expansionPackEnabled
         : undefined,
     boardEconomyEnabled:
-      typeof document.boardEconomyEnabled === "boolean"
-        ? document.boardEconomyEnabled
-        : undefined,
+      typeof document.boardEconomyEnabled === "boolean" ? document.boardEconomyEnabled : undefined,
     customQuestionPackEnabled:
       typeof document.customQuestionPackEnabled === "boolean"
         ? document.customQuestionPackEnabled
@@ -375,18 +344,12 @@ export function deserializeSessionFromFirestore(
         : undefined,
     tier: parseSessionTier(document.tier),
     transitMetroId:
-      typeof document.transitMetroId === "string"
-        ? document.transitMetroId
-        : undefined,
+      typeof document.transitMetroId === "string" ? document.transitMetroId : undefined,
     endedAt: typeof document.endedAt === "string" ? document.endedAt : undefined,
     status:
-      document.status === "active" || document.status === "ended"
-        ? document.status
-        : undefined,
+      document.status === "active" || document.status === "ended" ? document.status : undefined,
     timerAccumulatedMs:
-      typeof document.timerAccumulatedMs === "number"
-        ? document.timerAccumulatedMs
-        : undefined,
+      typeof document.timerAccumulatedMs === "number" ? document.timerAccumulatedMs : undefined,
     timerRunningSince:
       document.timerRunningSince === null
         ? null
@@ -394,75 +357,45 @@ export function deserializeSessionFromFirestore(
           ? document.timerRunningSince
           : undefined,
     endGameStartedAt:
-      typeof document.endGameStartedAt === "string"
-        ? document.endGameStartedAt
-        : undefined,
+      typeof document.endGameStartedAt === "string" ? document.endGameStartedAt : undefined,
     endGameStartedByUid:
-      typeof document.endGameStartedByUid === "string"
-        ? document.endGameStartedByUid
-        : undefined,
+      typeof document.endGameStartedByUid === "string" ? document.endGameStartedByUid : undefined,
     // Freeze coords live under sessions/{id}/endGameTruth/anchors — never on the session doc.
     endGameTruthAnchors: undefined,
     endGameRequestedAt:
-      typeof document.endGameRequestedAt === "string"
-        ? document.endGameRequestedAt
-        : undefined,
+      typeof document.endGameRequestedAt === "string" ? document.endGameRequestedAt : undefined,
     endGameRequestedByUid:
       typeof document.endGameRequestedByUid === "string"
         ? document.endGameRequestedByUid
         : undefined,
     foundRequestedAt:
-      typeof document.foundRequestedAt === "string"
-        ? document.foundRequestedAt
-        : undefined,
+      typeof document.foundRequestedAt === "string" ? document.foundRequestedAt : undefined,
     foundRequestedByUid:
-      typeof document.foundRequestedByUid === "string"
-        ? document.foundRequestedByUid
-        : undefined,
+      typeof document.foundRequestedByUid === "string" ? document.foundRequestedByUid : undefined,
     foundConfirmedAt:
-      typeof document.foundConfirmedAt === "string"
-        ? document.foundConfirmedAt
-        : undefined,
+      typeof document.foundConfirmedAt === "string" ? document.foundConfirmedAt : undefined,
     foundConfirmedByUid:
-      typeof document.foundConfirmedByUid === "string"
-        ? document.foundConfirmedByUid
-        : undefined,
+      typeof document.foundConfirmedByUid === "string" ? document.foundConfirmedByUid : undefined,
     gameOutcome:
       document.gameOutcome === "found" ||
       document.gameOutcome === "ended_early" ||
       document.gameOutcome === "abandoned"
         ? document.gameOutcome
         : undefined,
-    gameResultId:
-      typeof document.gameResultId === "string"
-        ? document.gameResultId
-        : undefined,
-    roundNumber:
-      typeof document.roundNumber === "number"
-        ? document.roundNumber
-        : undefined,
+    gameResultId: typeof document.gameResultId === "string" ? document.gameResultId : undefined,
+    roundNumber: typeof document.roundNumber === "number" ? document.roundNumber : undefined,
     sessionResetAt:
-      typeof document.sessionResetAt === "string"
-        ? document.sessionResetAt
-        : undefined,
-    lastActiveAt:
-      typeof document.lastActiveAt === "string"
-        ? document.lastActiveAt
-        : undefined,
+      typeof document.sessionResetAt === "string" ? document.sessionResetAt : undefined,
+    lastActiveAt: typeof document.lastActiveAt === "string" ? document.lastActiveAt : undefined,
     hostAppVersion:
-      typeof document.hostAppVersion === "string"
-        ? document.hostAppVersion
-        : undefined,
+      typeof document.hostAppVersion === "string" ? document.hostAppVersion : undefined,
     memberAppVersions:
       document.memberAppVersions &&
       typeof document.memberAppVersions === "object" &&
       !Array.isArray(document.memberAppVersions)
         ? (document.memberAppVersions as Record<string, string>)
         : undefined,
-    gameAreaLabel:
-      typeof document.gameAreaLabel === "string"
-        ? document.gameAreaLabel
-        : undefined,
+    gameAreaLabel: typeof document.gameAreaLabel === "string" ? document.gameAreaLabel : undefined,
     opsMitigation: parseSessionOpsMitigation(document.opsMitigation),
     requiredMinAppVersion:
       typeof document.requiredMinAppVersion === "string"
@@ -480,9 +413,7 @@ export function deserializeSessionFromFirestore(
   };
 }
 
-export function buildTimeTrapDocument(
-  trap: TimeTrapRecord,
-): Record<string, unknown> {
+export function buildTimeTrapDocument(trap: TimeTrapRecord): Record<string, unknown> {
   const payload = stripUndefinedValues({
     stationId: trap.stationId,
     stationName: trap.stationName,
@@ -514,9 +445,7 @@ export function deserializeTimeTrapFromFirestore(
   };
 }
 
-export function buildHidingZoneDocument(
-  zone: HidingZoneRecord,
-): Record<string, unknown> {
+export function buildHidingZoneDocument(zone: HidingZoneRecord): Record<string, unknown> {
   const payload = stripUndefinedValues({
     stationId: zone.stationId,
     stationName: zone.stationName,
@@ -556,8 +485,6 @@ export function deserializeHidingZoneFromFirestore(
     previousStations: Array.isArray(data.previousStations)
       ? (data.previousStations as HidingZoneRecord["previousStations"])
       : undefined,
-    moveInProgress:
-      typeof data.moveInProgress === "boolean" ? data.moveInProgress : undefined,
+    moveInProgress: typeof data.moveInProgress === "boolean" ? data.moveInProgress : undefined,
   };
 }
-

@@ -1,8 +1,8 @@
-import type { DistanceUnit } from "../map/distance";
-import type { GameArea } from "../map/annotations";
 import type { BoundingBox } from "../geometry/gameArea/gameAreaBounds";
-import type { GameSize } from "../session/size/gameSize";
+import type { GameArea } from "../map/annotations";
+import type { DistanceUnit } from "../map/distance";
 import type { RegionPackId } from "../regions/regionPack";
+import type { GameSize } from "../session/size/gameSize";
 import type { PreloadPresetSnapshot } from "./preloadRequestTypes";
 
 export interface BuildPreloadPresetSnapshotInput {
@@ -41,9 +41,7 @@ export function buildPreloadPresetSnapshot(
   }
 
   if (input.gameArea) {
-    snapshot.gameAreaBytes = new TextEncoder().encode(
-      JSON.stringify(input.gameArea),
-    ).length;
+    snapshot.gameAreaBytes = new TextEncoder().encode(JSON.stringify(input.gameArea)).length;
   }
 
   if (input.regionPackId) {

@@ -3,16 +3,9 @@ export type CancelIdleAfterLoad = () => void;
 /** The slice of `window` the scheduler needs; injectable for tests. */
 export type IdleAfterLoadHost = {
   document: { readyState: string };
-  addEventListener(
-    type: "load",
-    listener: () => void,
-    options: { once: true },
-  ): void;
+  addEventListener(type: "load", listener: () => void, options: { once: true }): void;
   removeEventListener(type: "load", listener: () => void): void;
-  requestIdleCallback?: (
-    callback: () => void,
-    options: { timeout: number },
-  ) => number;
+  requestIdleCallback?: (callback: () => void, options: { timeout: number }) => number;
   cancelIdleCallback?: (handle: number) => void;
   setTimeout(callback: () => void, ms: number): number;
   clearTimeout(handle: number): void;

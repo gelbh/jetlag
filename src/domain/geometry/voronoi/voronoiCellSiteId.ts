@@ -1,10 +1,9 @@
+/** @deprecated Use voronoiCellSiteIdByCoordinates */
 export {
   resolveVoronoiCellPoiId,
   resolveVoronoiCellSiteId,
+  type VoronoiSiteRef,
   voronoiCellSiteId,
   voronoiCellSiteIdByCoordinates,
-  type VoronoiSiteRef,
+  voronoiCellSiteIdByCoordinates as voronoiCellPoiIdByCoordinates,
 } from "../kernel/voronoiCellSiteId";
-
-/** @deprecated Use voronoiCellSiteIdByCoordinates */
-export { voronoiCellSiteIdByCoordinates as voronoiCellPoiIdByCoordinates } from "../kernel/voronoiCellSiteId";

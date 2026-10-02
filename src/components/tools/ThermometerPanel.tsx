@@ -1,35 +1,29 @@
-import { type RefObject } from "react";
-import {
-  formatPresetDistance,
-  type DistanceUnit,
-} from "../../domain/map/distance";
+import type { RefObject } from "react";
+import { type DistanceUnit, formatPresetDistance } from "../../domain/map/distance";
 import {
   availableThermometerDistancePresetsForSession,
   isThermometerDistanceOptionAvailable,
   isThermometerDistanceOptionAvailableForSession,
-  thermometerPresetMilesForMeters,
-  thermometerQuestionPrompt,
   type ThermometerAnswer,
   type ThermometerDistanceOptionMiles,
+  thermometerPresetMilesForMeters,
+  thermometerQuestionPrompt,
 } from "../../domain/questions";
 import type { SessionRulesInput } from "../../domain/session/rules";
-import { hotterColderAnswerOptions } from "./shared/answers/binaryAnswerOptions";
+import { useToolWizard } from "../../hooks/wizard/useToolWizard";
 import { BinaryAnswerPicker } from "./shared/answers/BinaryAnswerPicker";
+import { hotterColderAnswerOptions } from "./shared/answers/binaryAnswerOptions";
 import { OptionChip, OptionChipRow } from "./shared/controls/OptionChip";
 import { QuestionPromptBlock } from "./shared/controls/QuestionPromptBlock";
-import { ResolvedReadout } from "./shared/readout/ResolvedReadout";
+import { SendToHidersButton } from "./shared/controls/SendToHidersButton";
 import { ToolPanelShell } from "./shared/panels/ToolPanelShell";
 import { ToolSection } from "./shared/panels/ToolSection";
-import { SendToHidersButton } from "./shared/controls/SendToHidersButton";
+import { QuestionTruthReferenceHint } from "./shared/QuestionTruthReferenceHint";
+import { ResolvedReadout } from "./shared/readout/ResolvedReadout";
+import { THERMOMETER_WIZARD } from "./shared/wizard/toolStepUtils";
+import { toolWizardPhasePrimaryNav, toolWizardSwipeNext } from "./shared/wizard/toolWizardGuards";
 import { WizardPanelFrame } from "./shared/wizard/WizardPanelFrame";
 import { WizardSwipeSurface } from "./shared/wizard/WizardSwipeSurface";
-import { THERMOMETER_WIZARD } from "./shared/wizard/toolStepUtils";
-import {
-  toolWizardPhasePrimaryNav,
-  toolWizardSwipeNext,
-} from "./shared/wizard/toolWizardGuards";
-import { useToolWizard } from "../../hooks/wizard/useToolWizard";
-import { QuestionTruthReferenceHint } from "./shared/QuestionTruthReferenceHint";
 
 type PlacementMode = "gps" | "manual";
 
@@ -106,33 +100,18 @@ export function ThermometerPanel({
   error = null,
   wizardStepRef,
 }: ThermometerPanelProps) {
-  const {
-    phaseId,
-    stepId,
-    phaseIndex,
-    phaseCount,
-    configureIndex,
-    goNext,
-    goBack,
-    Stepper,
-  } = useToolWizard(THERMOMETER_WIZARD, {
-    wizardStepRef,
-    awaitHiderAnswer,
-    toolCommitLabel: awaitHiderAnswer
-      ? `Send to hiders (${costLabel})`
-      : "Add thermometer",
-    isSubmitting,
-  });
+  const { phaseId, stepId, phaseIndex, phaseCount, configureIndex, goNext, goBack, Stepper } =
+    useToolWizard(THERMOMETER_WIZARD, {
+      wizardStepRef,
+      awaitHiderAnswer,
+      toolCommitLabel: awaitHiderAnswer ? `Send to hiders (${costLabel})` : "Add thermometer",
+      isSubmitting,
+    });
 
-  const travelTooShort =
-    travelMeters !== null && travelMeters + 1 < distanceMeters;
-  const availableDistancePresets =
-    availableThermometerDistancePresetsForSession(sessionRules);
+  const travelTooShort = travelMeters !== null && travelMeters + 1 < distanceMeters;
+  const availableDistancePresets = availableThermometerDistancePresetsForSession(sessionRules);
   const distanceAvailable =
-    isThermometerDistanceOptionAvailableForSession(
-      sessionRules,
-      distanceMeters,
-    ) &&
+    isThermometerDistanceOptionAvailableForSession(sessionRules, distanceMeters) &&
     isThermometerDistanceOptionAvailable(usedDistanceOptions, distanceMeters);
   const pinsReady = mapStep === "ready";
   const canCommit =
@@ -158,8 +137,7 @@ export function ThermometerPanel({
   })();
   const placeReady = walkingActive || placeReadyByMode;
   const canGoNext =
-    (phaseId === "place" && placeReady) ||
-    (phaseId === "configure" && distanceAvailable);
+    (phaseId === "place" && placeReady) || (phaseId === "configure" && distanceAvailable);
   const canSwipeNext = toolWizardSwipeNext(canGoNext, phaseIndex, phaseCount);
 
   const thermometerAnswerStepActions =
@@ -237,9 +215,7 @@ export function ThermometerPanel({
               <button
                 type="button"
                 onClick={onStartWalk}
-                disabled={
-                  !distanceAvailable || !canSubmitQuestion || isSubmitting
-                }
+                disabled={!distanceAvailable || !canSubmitQuestion || isSubmitting}
                 aria-busy={gpsLoading || isSubmitting}
                 className="btn-primary w-full disabled:opacity-40"
               >
@@ -255,12 +231,8 @@ export function ThermometerPanel({
 
       {phaseId === "configure" ? (
         <ToolSection first compact status="active">
-          {awaitHiderAnswer ? (
-            <QuestionTruthReferenceHint />
-          ) : null}
-          <QuestionPromptBlock
-            prompt={thermometerQuestionPrompt(distanceMeters, distanceUnit)}
-          />
+          {awaitHiderAnswer ? <QuestionTruthReferenceHint /> : null}
+          <QuestionPromptBlock prompt={thermometerQuestionPrompt(distanceMeters, distanceUnit)} />
           <div>
             <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-muted">
               Distance
@@ -268,12 +240,8 @@ export function ThermometerPanel({
             <OptionChipRow>
               {availableDistancePresets.map((preset) => {
                 const presetMiles = thermometerPresetMilesForMeters(preset);
-                const used =
-                  presetMiles !== null && usedDistanceOptions.has(presetMiles);
-                const reuse =
-                  presetUseCount > 0 && preset === distanceMeters
-                    ? costLabel
-                    : null;
+                const used = presetMiles !== null && usedDistanceOptions.has(presetMiles);
+                const reuse = presetUseCount > 0 && preset === distanceMeters ? costLabel : null;
                 return (
                   <OptionChip
                     key={preset}
@@ -293,8 +261,7 @@ export function ThermometerPanel({
     </>
   );
 
-  const stickyFooterActions =
-    thermometerAnswerStepActions ?? thermometerSendActions;
+  const stickyFooterActions = thermometerAnswerStepActions ?? thermometerSendActions;
 
   const answerFooter = stickyFooterActions ? (
     <ToolSection first compact status="active">
@@ -309,9 +276,7 @@ export function ThermometerPanel({
       stepper={
         <Stepper
           nav={{
-            canGoBack:
-              phaseIndex > 0 ||
-              (phaseId === "configure" && configureIndex > 0),
+            canGoBack: phaseIndex > 0 || (phaseId === "configure" && configureIndex > 0),
             onBack: goBack,
             ...toolWizardPhasePrimaryNav({
               phaseId,
@@ -327,11 +292,7 @@ export function ThermometerPanel({
       <WizardPanelFrame
         scrollable
         stickyFooter={answerFooter}
-        trailing={
-          error ? (
-            <ResolvedReadout variant="warning">{error}</ResolvedReadout>
-          ) : null
-        }
+        trailing={error ? <ResolvedReadout variant="warning">{error}</ResolvedReadout> : null}
       >
         <WizardSwipeSurface
           stepId={stepId}

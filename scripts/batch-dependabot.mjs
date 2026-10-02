@@ -153,11 +153,7 @@ function ensureCleanMain() {
 function mergeHeads(included, batchBranch) {
   sh("git", ["fetch", "origin", "main"]);
   for (const pr of included) {
-    sh("git", [
-      "fetch",
-      "origin",
-      `pull/${pr.number}/head:refs/deps-batch/pr-${pr.number}`,
-    ]);
+    sh("git", ["fetch", "origin", `pull/${pr.number}/head:refs/deps-batch/pr-${pr.number}`]);
   }
   sh("git", ["checkout", "-B", batchBranch, "origin/main"]);
 
@@ -265,7 +261,8 @@ function main() {
   const { included, skipped } = selectBatch(classified);
 
   console.log("\n=== INCLUDE ===");
-  for (const p of included) console.log(`#${p.number}\t${p.group ? "GROUP" : "SINGLE"}\t${p.title}`);
+  for (const p of included)
+    console.log(`#${p.number}\t${p.group ? "GROUP" : "SINGLE"}\t${p.title}`);
   console.log("\n=== SKIP ===");
   for (const p of skipped) console.log(`#${p.number}\t${p.skip}\t${p.title}`);
 

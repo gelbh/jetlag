@@ -1,4 +1,4 @@
-import { type Page, expect } from "@playwright/test";
+import { expect, type Page } from "@playwright/test";
 import { DUBLIN_CITY_GAME_AREA } from "../../src/test/fixtures/dublinGameArea";
 
 /** Matches Playwright `use.geolocation` in playwright.config.ts */
@@ -34,11 +34,7 @@ export async function clickMapAt(page: Page, xRatio: number, yRatio: number) {
 }
 
 /** WGS84 map click via MapLibre; Playwright canvas clicks often miss under Drawer stacking. */
-export async function clickMapAtLatLng(
-  page: Page,
-  latitude: number,
-  longitude: number,
-) {
+export async function clickMapAtLatLng(page: Page, latitude: number, longitude: number) {
   await page.locator(`${MAP_CONTAINER_SELECTOR} canvas`).first().waitFor({
     state: "visible",
     timeout: 15_000,
@@ -96,9 +92,7 @@ export async function clickMapAtLatLng(
           }
         }
       };
-      const fiberKey = Object.keys(root).find((k) =>
-        k.startsWith("__reactFiber"),
-      );
+      const fiberKey = Object.keys(root).find((k) => k.startsWith("__reactFiber"));
       if (fiberKey) {
         visit((root as AnyRec)[fiberKey], 0);
       }
@@ -130,10 +124,7 @@ async function countPersistedActiveAnnotations(page: Page): Promise<number> {
       const parsed = JSON.parse(raw) as {
         state?: { annotations?: Array<{ status?: string }> };
       };
-      return (
-        parsed.state?.annotations?.filter((a) => a.status !== "deleted")
-          .length ?? 0
-      );
+      return parsed.state?.annotations?.filter((a) => a.status !== "deleted").length ?? 0;
     } catch {
       return 0;
     }
@@ -167,10 +158,7 @@ export async function expectEliminationMaskVisible(page: Page) {
             };
             return (
               parsed.state?.annotations?.filter(
-                (a) =>
-                  a.status !== "deleted" &&
-                  a.type !== "pin" &&
-                  a.type !== "zone",
+                (a) => a.status !== "deleted" && a.type !== "pin" && a.type !== "zone",
               ).length ?? 0
             );
           } catch {
@@ -206,13 +194,10 @@ export async function waitForMapTilesLoaded(page: Page) {
 export async function clickToolDockButton(page: Page, name: string) {
   // Ask-first hunt re-labels the strip to "Question tool switcher" once an Ask
   // tool is active; match both so post-click aria-pressed checks still resolve.
-  const questionTools = page.getByLabel(
-    /Question tools|Question tool switcher/,
-  );
+  const questionTools = page.getByLabel(/Question tools|Question tool switcher/);
   const button = questionTools.getByRole("button", { name, exact: true });
   await expect(button).toBeVisible();
-  const isPreviewOnly =
-    (await button.getAttribute("title"))?.includes("Preview only") ?? false;
+  const isPreviewOnly = (await button.getAttribute("title"))?.includes("Preview only") ?? false;
   // DOM click: avoids hit-target misses when Draw shares the hunt strip.
   await button.evaluate((el) => {
     if (el instanceof HTMLElement) {
@@ -232,9 +217,7 @@ export async function clickToolDockButton(page: Page, name: string) {
           if ((await button.count()) === 0) {
             return "gone";
           }
-          return (await button.getAttribute("aria-pressed")) === "true"
-            ? "pressed"
-            : "idle";
+          return (await button.getAttribute("aria-pressed")) === "true" ? "pressed" : "idle";
         },
         { timeout: 15_000 },
       )
@@ -249,10 +232,9 @@ export async function clickToolDockButton(page: Page, name: string) {
     });
   }
   await expect
-    .poll(
-      async () => (await hud.count()) > 0 || (await toolDialog.count()) > 0,
-      { timeout: 15_000 },
-    )
+    .poll(async () => (await hud.count()) > 0 || (await toolDialog.count()) > 0, {
+      timeout: 15_000,
+    })
     .toBe(true);
 }
 

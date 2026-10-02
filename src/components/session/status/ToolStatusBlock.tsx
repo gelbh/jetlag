@@ -1,25 +1,25 @@
-import type { ReactNode } from "react";
 import { Box, Button, Group, Paper, Stack, Text } from "@mantine/core";
-import type { MapTool } from "@/state/sessionStore";
-import type {
-  PendingQuestionRecord,
-  PlayerLocationRecord,
-} from "@/domain/session/activity/sessionChat";
-import type { SessionRulesInput } from "@/domain/session/rules";
-import { type TimerState } from "@/domain/session/timer/timer";
-import type { PlayerRole } from "@/domain/session/players/playerRole";
-import { PlayIcon, PauseIcon } from "@phosphor-icons/react";
-import {
-  mapIslandSessionStatus,
-  mapIslandSessionStatusCompact,
-  mapIslandStatusIsLive,
-} from "@/domain/device/surveyStatusCopy";
+import { PauseIcon, PlayIcon } from "@phosphor-icons/react";
+import type { ReactNode } from "react";
 import {
   mapIslandFilledStyles,
   mapIslandIconStyles,
   mapStatusIslandStyles,
 } from "@/components/ui/entry/entryChrome";
+import {
+  mapIslandSessionStatus,
+  mapIslandSessionStatusCompact,
+  mapIslandStatusIsLive,
+} from "@/domain/device/surveyStatusCopy";
+import type {
+  PendingQuestionRecord,
+  PlayerLocationRecord,
+} from "@/domain/session/activity/sessionChat";
+import type { PlayerRole } from "@/domain/session/players/playerRole";
+import type { SessionRulesInput } from "@/domain/session/rules";
+import type { TimerState } from "@/domain/session/timer/timer";
 import { useMinWidth } from "@/hooks/layout/useMinWidth";
+import type { MapTool } from "@/state/sessionStore";
 import { JlIcon } from "../../ui/brand/JlIcon";
 import { MapTimerCluster } from "../mapChrome/MapTimerCluster";
 
@@ -112,9 +112,7 @@ export function ToolStatusBlock({
     timerState,
     pendingQuestions,
   });
-  const statusLabel = comfortableWidth
-    ? status
-    : mapIslandSessionStatusCompact(status);
+  const statusLabel = comfortableWidth ? status : mapIslandSessionStatusCompact(status);
   const statusIsLive = mapIslandStatusIsLive(status);
 
   let timerBody: ReactNode;
@@ -137,9 +135,7 @@ export function ToolStatusBlock({
     }
   } else {
     const pauseResumeDisabled =
-      timerControlsDisabled ||
-      (!timerRunning && !onTimerResume) ||
-      (timerRunning && !onTimerPause);
+      timerControlsDisabled || (!timerRunning && !onTimerResume) || (timerRunning && !onTimerPause);
     timerBody = (
       <Group gap={6} wrap="nowrap" align="center" style={{ minWidth: 0 }}>
         <MapTimerCluster
@@ -169,11 +165,7 @@ export function ToolStatusBlock({
             className="jl-map-chrome-press"
             ml={4}
           >
-            <JlIcon
-              icon={timerRunning ? PauseIcon : PlayIcon}
-              size={16}
-              weight="bold"
-            />
+            <JlIcon icon={timerRunning ? PauseIcon : PlayIcon} size={16} weight="bold" />
           </Button>
         ) : null}
       </Group>
@@ -267,9 +259,7 @@ export function ToolStatusBlock({
               style={{
                 letterSpacing: "-0.01em",
                 lineHeight: 1.2,
-                color: statusIsLive
-                  ? "var(--color-flag)"
-                  : "var(--color-field-ink-muted)",
+                color: statusIsLive ? "var(--color-flag)" : "var(--color-field-ink-muted)",
                 overflow: "hidden",
                 textOverflow: "ellipsis",
                 whiteSpace: "nowrap",

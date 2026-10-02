@@ -25,12 +25,7 @@ export function AppUpdateMapChip() {
           </p>
           <p className="text-sm text-ink">{appUpdateCopy.deferredBody}</p>
         </div>
-        <Button
-          type="button"
-          variant="default"
-          size="md"
-          onClick={dismissDeferred}
-        >
+        <Button type="button" variant="default" size="md" onClick={dismissDeferred}>
           {appUpdateCopy.deferredDismiss}
         </Button>
       </MapFloatSurface>

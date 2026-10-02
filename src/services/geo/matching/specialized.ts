@@ -1,5 +1,4 @@
-import type { MatchingFeature } from "@/domain/geo/types";
-import type { AdminDivisionFeature } from "@/domain/geo/types";
+import type { AdminDivisionFeature, MatchingFeature } from "@/domain/geo/types";
 
 function stationNameLength(name: string): number {
   return name.length;
@@ -13,9 +12,7 @@ function stationNameLengthFeatureName(name: string): string {
   return `${stationNameLength(name)} characters (${name})`;
 }
 
-export function buildStationNameLengthFeatures(
-  stations: MatchingFeature[],
-): MatchingFeature[] {
+export function buildStationNameLengthFeatures(stations: MatchingFeature[]): MatchingFeature[] {
   const byLength = new Map<string, MatchingFeature>();
 
   for (const station of stations) {
@@ -36,7 +33,7 @@ export function buildStationNameLengthFeatures(
 
 function stationFirstLetter(name: string): string {
   const trimmed = name.trim();
-  return trimmed.length > 0 ? trimmed[0]!.toUpperCase() : "?";
+  return trimmed.length > 0 ? trimmed[0]?.toUpperCase() : "?";
 }
 
 function stationFirstLetterFeatureId(name: string): string {
@@ -47,9 +44,7 @@ function stationFirstLetterFeatureName(name: string): string {
   return `Letter ${stationFirstLetter(name)} (${name})`;
 }
 
-export function buildStationFirstLetterFeatures(
-  stations: MatchingFeature[],
-): MatchingFeature[] {
+export function buildStationFirstLetterFeatures(stations: MatchingFeature[]): MatchingFeature[] {
   const byLetter = new Map<string, MatchingFeature>();
 
   for (const station of stations) {
@@ -78,9 +73,7 @@ function letterZoneFeatureName(name: string): string {
   return `Letter ${letter} (${name})`;
 }
 
-export function buildLetterZoneFeatures(
-  divisions: AdminDivisionFeature[],
-): MatchingFeature[] {
+export function buildLetterZoneFeatures(divisions: AdminDivisionFeature[]): MatchingFeature[] {
   const byLetter = new Map<string, MatchingFeature>();
 
   for (const division of divisions) {

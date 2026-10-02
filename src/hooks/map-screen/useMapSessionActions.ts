@@ -1,23 +1,25 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { endGameChecklistCopy } from "../../domain/boardEconomy/checklists";
 import {
-  LOCAL_SESSION_ID,
   foundHiderBlocked,
   isEndGameActive,
   isEndGamePending,
   isFoundHiderPending,
+  LOCAL_SESSION_ID,
   type SessionRecord,
 } from "../../domain/map/annotations";
 import type { DistanceUnit } from "../../domain/map/distance";
+import { assembleEndGameStartAnchors } from "../../domain/session/hiding/endGameTruthAnchors";
+import type { HidingZoneRecord } from "../../domain/session/hiding/hidingZone";
+import type { PlayerRole } from "../../domain/session/players/playerRole";
 import {
+  type AdvancedSessionSettingsValue,
   advancedSettingsFromSession,
   mergeSessionRulesPatch,
   sessionRulesPatchFromAdvancedSettings,
-  type AdvancedSessionSettingsValue,
 } from "../../domain/session/tools/advancedSessionSettings";
-import type { HidingZoneRecord } from "../../domain/session/hiding/hidingZone";
-import type { PlayerRole } from "../../domain/session/players/playerRole";
 import { isFirebaseConfigured } from "../../services/core/firebase/firebase";
-import { assembleEndGameStartAnchors } from "../../domain/session/hiding/endGameTruthAnchors";
+import { updateBoardEconomyEnabled } from "../../services/firestore/boardEconomy";
 import {
   clearEndGameRequestSession,
   confirmFoundHiderSession,
@@ -27,9 +29,7 @@ import {
   startEndGameSession,
   updateSessionRules,
 } from "../../services/firestore/firestoreAnnotations";
-import { updateBoardEconomyEnabled } from "../../services/firestore/boardEconomy";
 import { emitGameEndedActivity } from "../../services/session/emitSessionActivity";
-import { endGameChecklistCopy } from "../../domain/boardEconomy/checklists";
 
 interface UseMapSessionActionsParams {
   session: SessionRecord | null;
@@ -57,15 +57,13 @@ export function useMapSessionActions({
     useState<AdvancedSessionSettingsValue | null>(() =>
       session ? advancedSettingsFromSession(session) : null,
     );
-  const currentSessionId = session?.id ?? null;
+  const _currentSessionId = session?.id ?? null;
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- reset draft when switching sessions only
-    setDraftAdvancedSettings(
-      session ? advancedSettingsFromSession(session) : null,
-    );
+    setDraftAdvancedSettings(session ? advancedSettingsFromSession(session) : null);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- reset draft when switching sessions only
-  }, [currentSessionId]);
+  }, [session]);
 
   const confirmedHidingZones = useMemo(
     () => hidingZones.filter((zone) => zone.status === "confirmed"),
@@ -200,11 +198,7 @@ export function useMapSessionActions({
         },
         uid,
       );
-      emitGameEndedActivity(
-        session.id,
-        { outcome: "found", summary: "Hider found" },
-        uid,
-      );
+      emitGameEndedActivity(session.id, { outcome: "found", summary: "Hider found" }, uid);
       return;
     }
 
@@ -315,14 +309,7 @@ export function useMapSessionActions({
     }
 
     setSession(merged, uid ?? undefined);
-  }, [
-    draftAdvancedSettings,
-    gameRulesEditable,
-    isRemote,
-    session,
-    setSession,
-    uid,
-  ]);
+  }, [draftAdvancedSettings, gameRulesEditable, isRemote, session, setSession, uid]);
 
   const handleDistanceUnitChange = useCallback(
     async (unit: DistanceUnit) => {

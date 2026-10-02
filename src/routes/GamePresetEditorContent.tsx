@@ -1,30 +1,23 @@
-import {
-  Box,
-  Button,
-  SegmentedControl,
-  Stack,
-  Text,
-  TextInput,
-} from "@mantine/core";
+import { Box, Button, SegmentedControl, Stack, Text, TextInput } from "@mantine/core";
 import { Link } from "react-router-dom";
 import {
   ErrorCallout,
-  InsetGroup,
-  SectionLabel,
   filledStyles,
   grayStyles,
+  InsetGroup,
   plainStyles,
+  SectionLabel,
 } from "@/components/ui/entry/entryChrome";
-import { AdvancedSessionSettings } from "../components/session/settings/AdvancedSessionSettings";
-import { GameAreaFramingModal } from "../components/session/framing/GameAreaFramingModal";
-import { GameAreaFramingStats } from "../components/session/framing/GameAreaFramingControls";
-import { PlaceAreaSearchFields } from "../components/session/framing/PlaceAreaSearchFields";
-import { GameSizePicker } from "../components/session/identity/GameSizePicker";
-import { defaultAdvancedSessionSettings } from "../domain/session/tools/advancedSessionSettings";
-import { hidingZoneRadiusMeters } from "../domain/session/size/gameSize";
 import { PackAttachChip } from "../components/presets/PackAttachChip";
 import { RequestPackWhenUnavailable } from "../components/presets/RequestPackWhenUnavailable";
+import { GameAreaFramingStats } from "../components/session/framing/GameAreaFramingControls";
+import { GameAreaFramingModal } from "../components/session/framing/GameAreaFramingModal";
+import { PlaceAreaSearchFields } from "../components/session/framing/PlaceAreaSearchFields";
+import { GameSizePicker } from "../components/session/identity/GameSizePicker";
+import { AdvancedSessionSettings } from "../components/session/settings/AdvancedSessionSettings";
 import { buildPreloadPresetSnapshot } from "../domain/preloadRequest/buildPreloadPresetSnapshot";
+import { hidingZoneRadiusMeters } from "../domain/session/size/gameSize";
+import { defaultAdvancedSessionSettings } from "../domain/session/tools/advancedSessionSettings";
 import { useGamePresetEditorModel } from "./GamePresetEditorModel";
 
 /** Join-style iOS editor body for Mantine presets (title lives in EntryHeader). */
@@ -39,9 +32,7 @@ export function GamePresetEditorContent() {
         onMapStyleChange={model.setMapStyle}
         framing={model.framing}
         referenceGameArea={!model.framing.userFramed ? model.gameArea : null}
-        referenceFocusBounds={
-          !model.framing.userFramed ? model.referenceFocusBounds : null
-        }
+        referenceFocusBounds={!model.framing.userFramed ? model.referenceFocusBounds : null}
         onClose={() => model.setFramingModalOpen(false)}
         onConfirm={(result) => {
           const manualResult = model.framing.userFramed;
@@ -62,15 +53,12 @@ export function GamePresetEditorContent() {
             style={{
               borderRadius: 12,
               padding: "0.75rem 1rem",
-              backgroundColor:
-                "oklch(from var(--color-status-warning) l c h / 0.14)",
-              border:
-                "0.33px solid oklch(from var(--color-status-warning) l c h / 0.35)",
+              backgroundColor: "oklch(from var(--color-status-warning) l c h / 0.14)",
+              border: "0.33px solid oklch(from var(--color-status-warning) l c h / 0.35)",
             }}
           >
             <Text size="sm" fw={510} c="var(--color-status-warning)">
-              This preset uses an older format. Review settings and save to
-              upgrade.
+              This preset uses an older format. Review settings and save to upgrade.
             </Text>
           </Box>
         ) : null}
@@ -113,8 +101,7 @@ export function GamePresetEditorContent() {
               gap="sm"
               pt="sm"
               style={{
-                borderTop:
-                  "0.33px solid oklch(from var(--color-field-ink) l c h / 0.12)",
+                borderTop: "0.33px solid oklch(from var(--color-field-ink) l c h / 0.12)",
               }}
             >
               <GameAreaFramingStats gameArea={model.gameArea} compact />
@@ -136,8 +123,7 @@ export function GamePresetEditorContent() {
                     color: "var(--color-halt)",
                     fontWeight: 510,
                     "&:hover": {
-                      backgroundColor:
-                        "oklch(from var(--color-halt) l c h / 0.12)",
+                      backgroundColor: "oklch(from var(--color-halt) l c h / 0.12)",
                     },
                   },
                 }}
@@ -196,9 +182,7 @@ export function GamePresetEditorContent() {
             onChange={(value) => {
               const unit = value as "imperial" | "metric";
               model.setDistanceUnit(unit);
-              model.setAdvancedSettings(
-                defaultAdvancedSessionSettings(model.gameSize, unit),
-              );
+              model.setAdvancedSettings(defaultAdvancedSessionSettings(model.gameSize, unit));
             }}
             data={[
               { label: "Imperial (mi)", value: "imperial" },
@@ -207,10 +191,8 @@ export function GamePresetEditorContent() {
             aria-label="Distance edition"
             styles={{
               root: {
-                backgroundColor:
-                  "oklch(from var(--color-field-ink) l c h / 0.08)",
-                border:
-                  "0.33px solid oklch(from var(--color-field-ink) l c h / 0.12)",
+                backgroundColor: "oklch(from var(--color-field-ink) l c h / 0.08)",
+                border: "0.33px solid oklch(from var(--color-field-ink) l c h / 0.12)",
                 borderRadius: 12,
                 padding: 2,
               },
@@ -220,8 +202,7 @@ export function GamePresetEditorContent() {
                 fontSize: "0.875rem",
               },
               indicator: {
-                backgroundColor:
-                  "oklch(from var(--color-field-ink) l c h / 0.16)",
+                backgroundColor: "oklch(from var(--color-field-ink) l c h / 0.16)",
                 borderRadius: 10,
               },
             }}
@@ -238,10 +219,7 @@ export function GamePresetEditorContent() {
               model.setAdvancedSettings((current) => ({
                 ...defaultAdvancedSessionSettings(size, model.distanceUnit),
                 ...current,
-                hidingZoneRadiusMeters: hidingZoneRadiusMeters(
-                  size,
-                  model.distanceUnit,
-                ),
+                hidingZoneRadiusMeters: hidingZoneRadiusMeters(size, model.distanceUnit),
               }));
             }}
           />
@@ -274,12 +252,7 @@ export function GamePresetEditorContent() {
         <ErrorCallout>{model.error}</ErrorCallout>
 
         <Stack gap="sm">
-          <Button
-            type="button"
-            fullWidth
-            styles={filledStyles}
-            onClick={model.handleSave}
-          >
+          <Button type="button" fullWidth styles={filledStyles} onClick={model.handleSave}>
             Save preset
           </Button>
           {model.existing && !model.needsMigrationReview ? (
@@ -298,19 +271,14 @@ export function GamePresetEditorContent() {
               fullWidth
               styles={grayStyles}
               onClick={() => {
-                model.deletePreset(model.existing!.id);
+                model.deletePreset(model.existing?.id);
                 model.navigate("/presets");
               }}
             >
               Delete
             </Button>
           ) : null}
-          <Button
-            component={Link}
-            to="/presets"
-            fullWidth
-            styles={plainStyles}
-          >
+          <Button component={Link} to="/presets" fullWidth styles={plainStyles}>
             Cancel
           </Button>
         </Stack>

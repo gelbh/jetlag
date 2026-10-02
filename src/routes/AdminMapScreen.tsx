@@ -1,44 +1,33 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { AppNavigate } from "../navigation/AppNavigate";
-import { GameAreaMask } from "../components/map/layers/GameAreaMask";
+import { AdminMonitorPlayerFocus } from "../components/admin/AdminMonitorPlayerFocus";
+import { ChatPanel } from "../components/chat/ChatPanel";
 import { MapView } from "../components/map/chrome/MapView";
 import { MapViewportTracker } from "../components/map/chrome/MapViewportTracker";
-import { ChatPanel } from "../components/chat/ChatPanel";
+import { GameAreaMask } from "../components/map/layers/GameAreaMask";
 import { SessionLog } from "../components/session/log/SessionLog";
 import { InlineError } from "../components/ui/banners/InlineError";
-import { LOCAL_SESSION_ID } from "../domain/map/annotations";
 import { fallbackGameArea } from "../domain/geometry/gameArea/geometry";
-import { useAppNavigate } from "../hooks/navigation/useAppNavigate";
+import { LOCAL_SESSION_ID } from "../domain/map/annotations";
 import { useAdminMapWideLayout } from "../hooks/admin/useAdminMapWideLayout";
-import { clearSessionLocalArtifacts } from "../services/session/sessionCleanup";
+import { useAppNavigate } from "../hooks/navigation/useAppNavigate";
+import { AppNavigate } from "../navigation/AppNavigate";
 import { adminModerateSession } from "../services/admin/adminModeration";
+import { clearSessionLocalArtifacts } from "../services/session/sessionCleanup";
 import { useAnnotationStore } from "../state/annotationStore";
 import { useMapStore, useSessionStore } from "../state/sessionStore";
-import { useObserverMapScreen } from "./observer-map-screen/useObserverMapScreen";
-import { SpectatorMapLayers } from "./spectator-map/SpectatorMapLayers";
 import { AdminDiagnosticsOverlay } from "./admin-map-screen/AdminDiagnosticsOverlay";
 import { AdminMapScreenChrome } from "./admin-map-screen/AdminMapScreenChrome";
-import {
-  AdminMonitorRail,
-  type AdminMonitorRailTab,
-} from "./admin-map-screen/AdminMonitorRail";
-import { AdminMonitorPlayerFocus } from "../components/admin/AdminMonitorPlayerFocus";
+import { AdminMonitorRail, type AdminMonitorRailTab } from "./admin-map-screen/AdminMonitorRail";
+import { useObserverMapScreen } from "./observer-map-screen/useObserverMapScreen";
+import { SpectatorMapLayers } from "./spectator-map/SpectatorMapLayers";
 
-export function AdminMapScreen({
-  embeddedMonitor = false,
-}: {
-  embeddedMonitor?: boolean;
-}) {
+export function AdminMapScreen({ embeddedMonitor = false }: { embeddedMonitor?: boolean }) {
   const navigate = useAppNavigate();
   const setSession = useSessionStore((state) => state.setSession);
   const setLayerVisibility = useMapStore((state) => state.setLayerVisibility);
   const setLowPowerMode = useMapStore((state) => state.setLowPowerMode);
-  const setSelectedAnnotationId = useAnnotationStore(
-    (state) => state.setSelectedAnnotationId,
-  );
-  const markAnnotationPulse = useAnnotationStore(
-    (state) => state.markAnnotationPulse,
-  );
+  const setSelectedAnnotationId = useAnnotationStore((state) => state.setSelectedAnnotationId);
+  const markAnnotationPulse = useAnnotationStore((state) => state.markAnnotationPulse);
   const controller = useObserverMapScreen();
   const shellRef = useRef<HTMLDivElement>(null);
   const isWide = useAdminMapWideLayout(shellRef, {
@@ -86,9 +75,7 @@ export function AdminMapScreen({
           await handleLeave();
         }
       } catch (error) {
-        setModerationError(
-          error instanceof Error ? error.message : "Moderation failed.",
-        );
+        setModerationError(error instanceof Error ? error.message : "Moderation failed.");
       } finally {
         setModerationBusy(false);
       }
@@ -105,7 +92,7 @@ export function AdminMapScreen({
     if (map && "dispatchEvent" in map) {
       window.dispatchEvent(new Event("resize"));
     }
-  }, [isWide, railCollapsed]);
+  }, [isWide]);
 
   if (!controller.session) {
     return <AppNavigate to="/admin" replace />;
@@ -194,14 +181,10 @@ export function AdminMapScreen({
         moderationError={moderationError}
         onModerationAction={(action) => void handleModerationAction(action)}
         diagnosticsOpen={diagnosticsOpen}
-        onToggleDiagnostics={
-          isWide ? undefined : () => setDiagnosticsOpen((open) => !open)
-        }
+        onToggleDiagnostics={isWide ? undefined : () => setDiagnosticsOpen((open) => !open)}
       />
 
-      <div className={isWide ? "admin-map-shell__map" : "absolute inset-0"}>
-        {mapLayers}
-      </div>
+      <div className={isWide ? "admin-map-shell__map" : "absolute inset-0"}>{mapLayers}</div>
 
       {isWide ? (
         <AdminMonitorRail
@@ -267,8 +250,7 @@ export function AdminMapScreen({
                 senderUid: controller.uid,
                 senderRole: chatDisplayRole,
                 isHider: false,
-                bottomClassName:
-                  "bottom-[calc(7.75rem+var(--safe-area-bottom))]",
+                bottomClassName: "bottom-[calc(7.75rem+var(--safe-area-bottom))]",
                 onAnswerQuestion: async () => undefined,
                 readOnly: true,
               }}

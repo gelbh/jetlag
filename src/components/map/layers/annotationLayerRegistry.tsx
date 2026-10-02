@@ -1,16 +1,16 @@
 /* eslint-disable react-refresh/only-export-components -- registry exports render helper alongside layer components */
 import turfCircle from "@turf/circle";
 import type { Feature, Polygon as GeoPolygon } from "geojson";
+import { useCallback } from "react";
+import { polygonFeatureToRings } from "@/domain/geometry/measuring/geometryMeasuring";
 import type { AnnotationRecord, GameArea } from "@/domain/map/annotations";
 import { pointToolRadiusFromMetadata } from "@/domain/map/annotations";
-import { polygonFeatureToRings } from "@/domain/geometry/measuring/geometryMeasuring";
-import type { LayerVisibility } from "@/state/sessionStore";
 import { MAP_ANNOTATION_COLORS } from "@/domain/map/mapAnnotationColors";
+import type { LayerVisibility } from "@/state/sessionStore";
 import { cssPxDashToMapLibre } from "../helpers/cssPxDashToMapLibre";
-import { useCallback } from "react";
+import { useMapFeatureHitTarget } from "../helpers/MapFeatureHitTestContext";
 import { MapLibreGeoJsonOverlay } from "../helpers/MapLibreGeoJsonOverlay";
 import { MapLibrePointMarkers } from "../helpers/MapLibrePointMarkers";
-import { useMapFeatureHitTarget } from "../helpers/MapFeatureHitTestContext";
 import { PinAnnotationMarker } from "./PinAnnotationMarker";
 
 interface RenderAnnotationLayerItemParams {
@@ -111,9 +111,7 @@ export function renderAnnotationLayerItem({
 
   const color =
     annotation.metadata.color ??
-    (annotation.type === "pin"
-      ? MAP_ANNOTATION_COLORS.pin
-      : MAP_ANNOTATION_COLORS.elimination);
+    (annotation.type === "pin" ? MAP_ANNOTATION_COLORS.pin : MAP_ANNOTATION_COLORS.elimination);
   const selected = annotation.id === selectedAnnotationId;
 
   if (
@@ -124,10 +122,7 @@ export function renderAnnotationLayerItem({
     return null;
   }
 
-  if (
-    annotation.type === "radar" &&
-    annotation.geometry.geometry.type === "Point"
-  ) {
+  if (annotation.type === "radar" && annotation.geometry.geometry.type === "Point") {
     const [lng, lat] = annotation.geometry.geometry.coordinates;
     const radiusMeters = pointToolRadiusFromMetadata(annotation.metadata);
     return (
@@ -147,10 +142,7 @@ export function renderAnnotationLayerItem({
     );
   }
 
-  if (
-    annotation.type === "tentacle" &&
-    annotation.geometry.geometry.type === "Point"
-  ) {
+  if (annotation.type === "tentacle" && annotation.geometry.geometry.type === "Point") {
     const [lng, lat] = annotation.geometry.geometry.coordinates;
     const radiusMeters = pointToolRadiusFromMetadata(annotation.metadata);
     return (
@@ -176,16 +168,12 @@ export function renderAnnotationLayerItem({
     (annotation.type === "measuring" &&
       (annotation.geometry.geometry.type === "Polygon" ||
         annotation.geometry.geometry.type === "MultiPolygon")) ||
-    (annotation.type === "thermometer" &&
-      annotation.geometry.geometry.type === "LineString")
+    (annotation.type === "thermometer" && annotation.geometry.geometry.type === "LineString")
   ) {
     return null;
   }
 
-  if (
-    annotation.type === "zone" &&
-    annotation.geometry.geometry.type === "Polygon"
-  ) {
+  if (annotation.type === "zone" && annotation.geometry.geometry.type === "Polygon") {
     const zonePolygon = annotation.geometry as Feature<GeoPolygon>;
     const weight = selected ? 4 : 2;
     return polygonFeatureToRings(zonePolygon).map((ring, index) => (
@@ -208,10 +196,7 @@ export function renderAnnotationLayerItem({
     ));
   }
 
-  if (
-    annotation.type === "draw" &&
-    annotation.geometry.geometry.type === "LineString"
-  ) {
+  if (annotation.type === "draw" && annotation.geometry.geometry.type === "LineString") {
     const weight = selected ? 4 : 2.5;
     return (
       <MapLibreGeoJsonOverlay
@@ -226,10 +211,7 @@ export function renderAnnotationLayerItem({
     );
   }
 
-  if (
-    annotation.type === "pin" &&
-    annotation.geometry.geometry.type === "Point"
-  ) {
+  if (annotation.type === "pin" && annotation.geometry.geometry.type === "Point") {
     const [lng, lat] = annotation.geometry.geometry.coordinates;
     return (
       <PinAnnotationMarker

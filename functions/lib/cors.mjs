@@ -1,7 +1,4 @@
-const ALLOWED_ORIGINS = new Set([
-  "https://jetlag.gelbhart.dev",
-  "http://localhost:5173",
-]);
+const ALLOWED_ORIGINS = new Set(["https://jetlag.gelbhart.dev", "http://localhost:5173"]);
 
 /**
  * @param {import("firebase-functions/v2/https").Response} res

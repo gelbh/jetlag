@@ -1,14 +1,11 @@
+import difference from "@turf/difference";
 import type { Feature, MultiPolygon, Polygon } from "geojson";
 import type { MapBounds } from "../../map/mapBounds";
-import difference from "@turf/difference";
 import { haversineMeters } from "./haversine";
 import type { LatLngTuple } from "./types";
 
 /** Geodesic distance from center to the nearest viewport edge. */
-export function centerToViewportEdgeRadiusMeters(
-  center: LatLngTuple,
-  bounds: MapBounds,
-): number {
+export function centerToViewportEdgeRadiusMeters(center: LatLngTuple, bounds: MapBounds): number {
   const southWest = bounds.getSouthWest();
   const northEast = bounds.getNorthEast();
   const south = southWest.lat;
@@ -34,9 +31,7 @@ export function bearingDegrees(a: LatLngTuple, b: LatLngTuple): number {
   const lat2 = (b[0] * Math.PI) / 180;
   const dLng = ((b[1] - a[1]) * Math.PI) / 180;
   const y = Math.sin(dLng) * Math.cos(lat2);
-  const x =
-    Math.cos(lat1) * Math.sin(lat2) -
-    Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLng);
+  const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLng);
 
   return ((Math.atan2(y, x) * 180) / Math.PI + 360) % 360;
 }
@@ -77,8 +72,7 @@ export function safeDifference(
     });
     if (
       !result ||
-      (result.geometry.type !== "Polygon" &&
-        result.geometry.type !== "MultiPolygon")
+      (result.geometry.type !== "Polygon" && result.geometry.type !== "MultiPolygon")
     ) {
       return null;
     }

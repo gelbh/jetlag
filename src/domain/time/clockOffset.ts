@@ -14,16 +14,12 @@ function roundTripMs(sample: ClockSample): number {
 
 /** Offset implied by one sample: server time − local midpoint. */
 export function sampleOffset(sample: ClockSample): number {
-  return Math.round(
-    sample.serverMs - (sample.sentAtMs + sample.receivedAtMs) / 2,
-  );
+  return Math.round(sample.serverMs - (sample.sentAtMs + sample.receivedAtMs) / 2);
 }
 
 /** Whether `offsetMs` is plausible skew rather than garbage. */
 export function isPlausibleOffset(offsetMs: number): boolean {
-  return (
-    Number.isFinite(offsetMs) && Math.abs(offsetMs) <= MAX_ABS_CLOCK_OFFSET_MS
-  );
+  return Number.isFinite(offsetMs) && Math.abs(offsetMs) <= MAX_ABS_CLOCK_OFFSET_MS;
 }
 
 /**

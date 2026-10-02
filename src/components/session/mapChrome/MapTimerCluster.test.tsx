@@ -1,8 +1,8 @@
-import { render, screen } from "@testing-library/react";
 import { MantineProvider } from "@mantine/core";
+import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { PendingQuestionRecord } from "@/domain/session/activity/sessionChat";
 import { THERMOMETER_WALK_MAX_DURATION_MS } from "@/domain/questions";
+import type { PendingQuestionRecord } from "@/domain/session/activity/sessionChat";
 import { jetlagTheme } from "@/theme/theme";
 import { MapTimerCluster } from "./MapTimerCluster";
 
@@ -41,9 +41,7 @@ const timerState = {
   runningSince: null as number | null,
 };
 
-function renderCluster(
-  ui: React.ReactElement,
-) {
+function renderCluster(ui: React.ReactElement) {
   return render(
     <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
       {ui}

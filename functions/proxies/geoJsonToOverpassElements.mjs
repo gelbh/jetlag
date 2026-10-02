@@ -164,9 +164,7 @@ function relationFromPolygonRings(geometry, relationId, tags, nextWayId, opts = 
  */
 function featureToElements(feature, family, nextWayId) {
   const properties =
-    feature?.properties && typeof feature.properties === "object"
-      ? feature.properties
-      : {};
+    feature?.properties && typeof feature.properties === "object" ? feature.properties : {};
   const tags = normalizeTags(properties.tags != null ? properties.tags : {});
   const { id } = osmIdentity(properties);
   const geometry = feature?.geometry;
@@ -193,11 +191,7 @@ function featureToElements(feature, family, nextWayId) {
     ];
   }
 
-  if (
-    family === "linear" ||
-    family === "coastline" ||
-    family === "landmass"
-  ) {
+  if (family === "linear" || family === "coastline" || family === "landmass") {
     /** @type {object[]} */
     const elements = [];
     if (geometry?.type === "LineString") {
@@ -292,9 +286,7 @@ export function geoJsonToOverpassElements(featureCollection, family) {
     nextId -= 1;
     return id;
   };
-  const features = Array.isArray(featureCollection?.features)
-    ? featureCollection.features
-    : [];
+  const features = Array.isArray(featureCollection?.features) ? featureCollection.features : [];
   /** @type {object[]} */
   const elements = [];
   for (const feature of features) {

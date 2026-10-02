@@ -37,7 +37,7 @@ describe("bundledGamePresets", () => {
         schemaVersion: 1,
         gameSize: "small",
         distanceUnit: "imperial",
-        advancedSettings: buildBundledGamePresets()[0]!.advancedSettings,
+        advancedSettings: buildBundledGamePresets()[0]?.advancedSettings,
         migrationStatus: "ok",
       },
     ]);
@@ -51,25 +51,21 @@ describe("bundledGamePresets", () => {
 
   it("applies preset tuning to bundled game presets", () => {
     const presets = buildBundledGamePresets();
-    expect(
-      presets.every((preset) => preset.advancedSettings.expansionPackEnabled === false),
-    ).toBe(true);
+    expect(presets.every((preset) => preset.advancedSettings.expansionPackEnabled === false)).toBe(
+      true,
+    );
 
     const nyc = presets.find((preset) => preset.id === "bundled:nyc");
     expect(nyc?.distanceUnit).toBe("imperial");
     expect(nyc?.transitMetroId).toBe("nyc");
     expect(nyc?.advancedSettings.expansionPackEnabled).toBe(false);
 
-    const portlandMaine = presets.find(
-      (preset) => preset.id === "bundled:portland-maine",
-    );
+    const portlandMaine = presets.find((preset) => preset.id === "bundled:portland-maine");
     expect(portlandMaine?.distanceUnit).toBe("imperial");
     expect(portlandMaine?.transitMetroId).toBe("portland-maine");
     expect(portlandMaine?.regionPackId).toBe("portland-maine");
 
-    const princeRupert = presets.find(
-      (preset) => preset.id === "bundled:prince-rupert",
-    );
+    const princeRupert = presets.find((preset) => preset.id === "bundled:prince-rupert");
     expect(princeRupert?.distanceUnit).toBe("metric");
     expect(princeRupert?.transitMetroId).toBe("prince-rupert");
     expect(princeRupert?.regionPackId).toBe("prince-rupert");
@@ -97,10 +93,7 @@ describe("Dublin GeoJSON asset counts", () => {
       ),
     );
     const leas = JSON.parse(
-      readFileSync(
-        resolve(import.meta.dirname, "../../../public/geo/dublin/leas.geojson"),
-        "utf8",
-      ),
+      readFileSync(resolve(import.meta.dirname, "../../../public/geo/dublin/leas.geojson"), "utf8"),
     );
 
     expect(councils.features).toHaveLength(4);
@@ -112,28 +105,19 @@ describe("Portland Maine GeoJSON asset counts", () => {
   it("ships five municipalities, districts, and neighborhoods", () => {
     const municipalities = JSON.parse(
       readFileSync(
-        resolve(
-          import.meta.dirname,
-          "../../../public/geo/portland-maine/municipalities.geojson",
-        ),
+        resolve(import.meta.dirname, "../../../public/geo/portland-maine/municipalities.geojson"),
         "utf8",
       ),
     );
     const districts = JSON.parse(
       readFileSync(
-        resolve(
-          import.meta.dirname,
-          "../../../public/geo/portland-maine/districts.geojson",
-        ),
+        resolve(import.meta.dirname, "../../../public/geo/portland-maine/districts.geojson"),
         "utf8",
       ),
     );
     const neighborhoods = JSON.parse(
       readFileSync(
-        resolve(
-          import.meta.dirname,
-          "../../../public/geo/portland-maine/neighborhoods.geojson",
-        ),
+        resolve(import.meta.dirname, "../../../public/geo/portland-maine/neighborhoods.geojson"),
         "utf8",
       ),
     );
@@ -174,10 +158,7 @@ describe("Prince Rupert GeoJSON asset counts", () => {
     );
     const neighbourhoods = JSON.parse(
       readFileSync(
-        resolve(
-          import.meta.dirname,
-          "../../../public/geo/prince-rupert/neighbourhoods.geojson",
-        ),
+        resolve(import.meta.dirname, "../../../public/geo/prince-rupert/neighbourhoods.geojson"),
         "utf8",
       ),
     );

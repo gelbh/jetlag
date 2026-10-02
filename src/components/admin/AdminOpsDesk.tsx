@@ -1,33 +1,28 @@
 import { signOut } from "firebase/auth";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
-import { AppLink } from "../navigation/AppLink";
-import { PremiumSignInGate } from "../billing/PremiumSignInGate";
-import { EntryScreenLayout } from "../ui/layout/EntryScreenLayout";
 import { homeCardBtnStyle } from "@/components/ui/entry/entryStyles";
-import {
-  ScreenHeader,
-  screenHeaderOffsetClassName,
-} from "../ui/layout/ScreenHeader";
-import { InlineError } from "../ui/banners/InlineError";
-import { filterAdminSessions } from "../../domain/admin/adminSessionFilters";
 import type {
   AdminSessionModeFilter,
   AdminSessionSort,
   AdminSessionStateChip,
 } from "../../domain/admin/adminSessionFilters";
+import { filterAdminSessions } from "../../domain/admin/adminSessionFilters";
 import {
   CUSTOM_PRESET_ID,
-  PANEL_IDS,
+  clampLayoutToCols,
   clampMonitorLayoutToCols,
   cloneLayout,
-  clampLayoutToCols,
+  type DeskLayout,
   defaultMonitorLayout,
   deleteUserPreset,
   ensureIncidentPanelsVisible,
   hidePanel,
   layoutsEqual,
+  type MonitorLayout,
   mergePanelOntoStack,
+  PANEL_IDS,
+  type PanelId,
   reorderPanelInStack,
   resolvePresetLayout,
   setCollapsed,
@@ -36,28 +31,27 @@ import {
   showPanel,
   unstackPanelToCell,
   upsertUserPreset,
-  type DeskLayout,
-  type MonitorLayout,
-  type PanelId,
 } from "../../domain/admin/opsDeskLayout";
 import {
   coldStartOpsDeskStore,
-  saveOpsDeskStore,
   type OpsDeskStoreV1,
+  saveOpsDeskStore,
 } from "../../domain/admin/opsDeskPersistence";
 import type { IncidentRecord } from "../../domain/incident/incidentTypes";
+import { useAdminAccessState } from "../../hooks/admin/useAdminAccessState";
 import { useAdminJoinSession } from "../../hooks/admin/useAdminJoinSession";
 import { useAdminSessionList } from "../../hooks/admin/useAdminSessionList";
-import { useAdminAccessState } from "../../hooks/admin/useAdminAccessState";
-import { useAppNavigate } from "../../hooks/navigation/useAppNavigate";
 import { useMinWidth } from "../../hooks/layout/useMinWidth";
-import {
-  countOpenIncidents,
-  subscribeIncidentList,
-} from "../../services/admin/adminIncidents";
+import { useAppNavigate } from "../../hooks/navigation/useAppNavigate";
+import { countOpenIncidents, subscribeIncidentList } from "../../services/admin/adminIncidents";
 import type { AdminSessionSummary } from "../../services/admin/adminSessions";
 import { getFirebaseAuth } from "../../services/core/firebase/firebase";
 import { useSessionStore } from "../../state/sessionStore";
+import { PremiumSignInGate } from "../billing/PremiumSignInGate";
+import { AppLink } from "../navigation/AppLink";
+import { InlineError } from "../ui/banners/InlineError";
+import { EntryScreenLayout } from "../ui/layout/EntryScreenLayout";
+import { ScreenHeader, screenHeaderOffsetClassName } from "../ui/layout/ScreenHeader";
 import { AdminDeskTopbar } from "./AdminDeskTopbar";
 import { AdminGridWorkspace } from "./AdminGridWorkspace";
 import { AdminIncidentActions } from "./AdminIncidentActions";
@@ -67,10 +61,7 @@ import { AdminMobileDesk } from "./AdminMobileDesk";
 import { AdminMonitorPane } from "./AdminMonitorPane";
 import type { AdminPanelBodies } from "./AdminPanelBody";
 import type { PanelMergePayload } from "./AdminPanelStack";
-import {
-  AdminPresetDialog,
-  type AdminPresetDialogMode,
-} from "./AdminPresetDialog";
+import { AdminPresetDialog, type AdminPresetDialogMode } from "./AdminPresetDialog";
 import { AdminSessionFilters } from "./AdminSessionFilters";
 import { AdminSessionRow } from "./AdminSessionRow";
 import { AdminSettingsPanel } from "./AdminSettingsPanel";
@@ -93,10 +84,7 @@ function AdminSessionSkeletonRows() {
   );
 }
 
-function continuePathForRoute(
-  pathname: string,
-  incidentId: string | null,
-): string {
+function continuePathForRoute(pathname: string, incidentId: string | null): string {
   if (incidentId) {
     return `/admin/incidents/${encodeURIComponent(incidentId)}`;
   }
@@ -162,9 +150,7 @@ export function AdminOpsDesk() {
   const [modeFilter, setModeFilter] = useState<AdminSessionModeFilter>("all");
   const [stateFilter, setStateFilter] = useState<AdminSessionStateChip>(null);
   const [sort, setSort] = useState<AdminSessionSort>("lastActivity");
-  const [selectedSessionId, setSelectedSessionId] = useState<string | null>(
-    null,
-  );
+  const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
   const [monitorSessionId, setMonitorSessionId] = useState<string | null>(null);
   const monitorRequestRef = useRef(0);
   const [signOutError, setSignOutError] = useState<string | null>(null);
@@ -215,12 +201,7 @@ export function AdminOpsDesk() {
   );
 
   const deskLayout = useMemo(
-    () =>
-      resolvePresetLayout(
-        store.activePresetId,
-        store.customLayout,
-        store.userPresets,
-      ),
+    () => resolvePresetLayout(store.activePresetId, store.customLayout, store.userPresets),
     [store.activePresetId, store.customLayout, store.userPresets],
   );
 
@@ -268,11 +249,7 @@ export function AdminOpsDesk() {
 
     /* eslint-disable react-hooks/set-state-in-effect -- deep-link ensure-visible + Scratch preset flip from route */
     setStore((prev) => {
-      const current = resolvePresetLayout(
-        prev.activePresetId,
-        prev.customLayout,
-        prev.userPresets,
-      );
+      const current = resolvePresetLayout(prev.activePresetId, prev.customLayout, prev.userPresets);
       const ensured = ensureIncidentPanelsVisible(current);
       const layoutChanged = !layoutsEqual(current, ensured);
       const nextMobile: PanelId =
@@ -294,20 +271,10 @@ export function AdminOpsDesk() {
     });
     setDeepLinkKey(key);
     /* eslint-enable react-hooks/set-state-in-effect */
-  }, [
-    deepLinkKey,
-    enabled,
-    location.pathname,
-    onIncidentsRoute,
-    selectedIncidentId,
-    uid,
-  ]);
+  }, [deepLinkKey, enabled, location.pathname, onIncidentsRoute, selectedIncidentId, uid]);
 
   const visibleIncidents = enabled ? incidents : EMPTY_INCIDENTS;
-  const openCount = useMemo(
-    () => countOpenIncidents(visibleIncidents),
-    [visibleIncidents],
-  );
+  const openCount = useMemo(() => countOpenIncidents(visibleIncidents), [visibleIncidents]);
 
   const filteredSessions = useMemo(
     () =>
@@ -323,11 +290,8 @@ export function AdminOpsDesk() {
   );
 
   const monitorRoleError =
-    monitorSessionId != null &&
-    activeSession?.id === monitorSessionId &&
-    activeRole !== "admin"
-      ? (observeError ??
-        "Couldn't confirm admin monitor role after joining. Try again.")
+    monitorSessionId != null && activeSession?.id === monitorSessionId && activeRole !== "admin"
+      ? (observeError ?? "Couldn't confirm admin monitor role after joining. Try again.")
       : null;
 
   const monitorActive =
@@ -389,14 +353,7 @@ export function AdminOpsDesk() {
     };
 
     void handleMonitor(summary);
-  }, [
-    handleMonitor,
-    incidents,
-    isDesktop,
-    monitorSessionId,
-    selectedIncidentId,
-    sessions,
-  ]);
+  }, [handleMonitor, incidents, isDesktop, monitorSessionId, selectedIncidentId, sessions]);
 
   const handleSelectIncident = (incidentId: string) => {
     void navigate(`/admin/incidents/${encodeURIComponent(incidentId)}`);
@@ -407,19 +364,13 @@ export function AdminOpsDesk() {
     try {
       await signOut(getFirebaseAuth());
     } catch (error) {
-      setSignOutError(
-        error instanceof Error ? error.message : "Could not sign out.",
-      );
+      setSignOutError(error instanceof Error ? error.message : "Could not sign out.");
     }
   };
 
   const handleSelectPreset = (presetId: string) => {
     setStore((prev) => {
-      const layout = resolvePresetLayout(
-        presetId,
-        prev.customLayout,
-        prev.userPresets,
-      );
+      const layout = resolvePresetLayout(presetId, prev.customLayout, prev.userPresets);
       const next: OpsDeskStoreV1 = {
         ...prev,
         activePresetId: presetId,
@@ -462,9 +413,7 @@ export function AdminOpsDesk() {
       persistStore({
         ...store,
         userPresets: store.userPresets.map((preset) =>
-          preset.id === presetDialog.presetId
-            ? { ...preset, name: trimmed }
-            : preset,
+          preset.id === presetDialog.presetId ? { ...preset, name: trimmed } : preset,
         ),
       });
       setPresetDialog(null);
@@ -520,13 +469,8 @@ export function AdminOpsDesk() {
       userPresets: deleteUserPreset(store.userPresets, presetId),
       presetOrder: store.presetOrder.filter((id) => id !== presetId),
       defaultPresetId:
-        store.defaultPresetId === presetId
-          ? CUSTOM_PRESET_ID
-          : store.defaultPresetId,
-      activePresetId:
-        store.activePresetId === presetId
-          ? CUSTOM_PRESET_ID
-          : store.activePresetId,
+        store.defaultPresetId === presetId ? CUSTOM_PRESET_ID : store.defaultPresetId,
+      activePresetId: store.activePresetId === presetId ? CUSTOM_PRESET_ID : store.activePresetId,
     });
   };
 
@@ -539,8 +483,7 @@ export function AdminOpsDesk() {
   };
 
   const mobilePanelId: PanelId =
-    store.lastMobilePanelId &&
-    (PANEL_IDS as readonly string[]).includes(store.lastMobilePanelId)
+    store.lastMobilePanelId && (PANEL_IDS as readonly string[]).includes(store.lastMobilePanelId)
       ? store.lastMobilePanelId
       : onIncidentsRoute
         ? "inbox"
@@ -582,17 +525,13 @@ export function AdminOpsDesk() {
       ) : sessions.length === 0 ? (
         <div className="jl-ops-empty">
           <p className="jl-ops-empty-title">No live sessions</p>
-          <p className="jl-ops-empty-body">
-            Games appear here while a host session is active.
-          </p>
+          <p className="jl-ops-empty-body">Games appear here while a host session is active.</p>
         </div>
       ) : filteredSessions.length === 0 ? (
         <div className="space-y-2.5">
           <div className="jl-ops-empty">
             <p className="jl-ops-empty-title">No matching sessions</p>
-            <p className="jl-ops-empty-body">
-              Try another code, area name, or phase filter.
-            </p>
+            <p className="jl-ops-empty-body">Try another code, area name, or phase filter.</p>
           </div>
           {loadMoreButton}
         </div>
@@ -686,10 +625,7 @@ export function AdminOpsDesk() {
             </p>
           </div>
           <PremiumSignInGate
-            continuePath={continuePathForRoute(
-              location.pathname,
-              selectedIncidentId,
-            )}
+            continuePath={continuePathForRoute(location.pathname, selectedIncidentId)}
           />
         </div>
       </EntryScreenLayout>
@@ -705,8 +641,7 @@ export function AdminOpsDesk() {
             Access denied
           </h1>
           <p className="text-sm text-ink-muted">
-            Signed in as {user?.email ?? "unknown"}. This panel is restricted to
-            the app owner.
+            Signed in as {user?.email ?? "unknown"}. This panel is restricted to the app owner.
           </p>
           {signOutError ? <InlineError>{signOutError}</InlineError> : null}
           <div className="flex flex-wrap gap-2">
@@ -717,10 +652,7 @@ export function AdminOpsDesk() {
             >
               Sign out
             </button>
-            <AppLink
-              to="/"
-              className="btn-secondary inline-flex min-h-11 items-center px-4"
-            >
+            <AppLink to="/" className="btn-secondary inline-flex min-h-11 items-center px-4">
               Back home
             </AppLink>
           </div>
@@ -775,9 +707,7 @@ export function AdminOpsDesk() {
                 );
               }}
               onReorderPanel={(stackId, fromIndex, toIndex) => {
-                mutateLayout((layout) =>
-                  reorderPanelInStack(layout, stackId, fromIndex, toIndex),
-                );
+                mutateLayout((layout) => reorderPanelInStack(layout, stackId, fromIndex, toIndex));
               }}
               onUnstackPanel={(sourceStackId, panelId, x, y, w, h) => {
                 mutateLayout((layout) =>
@@ -785,14 +715,10 @@ export function AdminOpsDesk() {
                 );
               }}
               onPlacePanel={(panelId, x, y, w, h) => {
-                mutateLayout((layout) =>
-                  showPanel(layout, panelId, { x, y, w, h }),
-                );
+                mutateLayout((layout) => showPanel(layout, panelId, { x, y, w, h }));
               }}
               onActiveIndexChange={(stackId, activeIndex) => {
-                mutateLayout((layout) =>
-                  setStackActiveIndex(layout, stackId, activeIndex),
-                );
+                mutateLayout((layout) => setStackActiveIndex(layout, stackId, activeIndex));
               }}
               onPinToggle={(stackId) => {
                 mutateLayout((layout) => {
@@ -812,8 +738,7 @@ export function AdminOpsDesk() {
                 mutateLayout((layout) => {
                   const stack = layout.stacks.find((s) => s.id === stackId);
                   if (!stack) return layout;
-                  const panelId =
-                    stack.panelIds[stack.activeIndex] ?? stack.panelIds[0];
+                  const panelId = stack.panelIds[stack.activeIndex] ?? stack.panelIds[0];
                   if (!panelId) return layout;
                   return hidePanel(layout, panelId);
                 });
@@ -835,9 +760,7 @@ export function AdminOpsDesk() {
                     ? "Update preset"
                     : "Save layout as…"
               }
-              confirmLabel={
-                presetDialog?.mode === "overwrite" ? "Overwrite" : "Save"
-              }
+              confirmLabel={presetDialog?.mode === "overwrite" ? "Overwrite" : "Save"}
               onCancel={() => setPresetDialog(null)}
               onConfirm={handlePresetDialogConfirm}
             />
@@ -848,9 +771,7 @@ export function AdminOpsDesk() {
             onSelectPanel={(panelId) => {
               persistStore({ ...store, lastMobilePanelId: panelId });
               if (
-                (panelId === "detail" ||
-                  panelId === "actions" ||
-                  panelId === "inbox") &&
+                (panelId === "detail" || panelId === "actions" || panelId === "inbox") &&
                 !onIncidentsRoute
               ) {
                 void navigate(

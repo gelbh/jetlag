@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from "react";
 import type { Map as MapLibreMap } from "maplibre-gl";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 /** Fallback so a map that never loads (no WebGL, chunk failure) cannot wedge Confirm. */
 export const CREATE_SESSION_MAP_MOUNT_TIMEOUT_MS = 10_000;
@@ -44,7 +44,9 @@ export interface CreateSessionMapMount {
 
 export function useCreateSessionMapMount({
   timeoutMs = CREATE_SESSION_MAP_MOUNT_TIMEOUT_MS,
-}: { timeoutMs?: number } = {}): CreateSessionMapMount {
+}: {
+  timeoutMs?: number;
+} = {}): CreateSessionMapMount {
   const [mapRequested, setMapRequested] = useState(false);
   const [mountedMap, setMountedMap] = useState<MapLibreMap | null>(null);
   const mountedMapRef = useRef<MapLibreMap | null>(null);
@@ -66,9 +68,7 @@ export function useCreateSessionMapMount({
         resolve,
         reject,
         timeoutId: setTimeout(() => {
-          pendingRef.current = pendingRef.current.filter(
-            (pending) => pending !== entry,
-          );
+          pendingRef.current = pendingRef.current.filter((pending) => pending !== entry);
           reject(new CreateSessionMapMountTimeoutError());
         }, timeoutMs),
       };

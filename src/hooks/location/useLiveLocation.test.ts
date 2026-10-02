@@ -1,9 +1,6 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import {
-  createMockGeolocationPosition,
-  mockGeolocation,
-} from "../../test/mocks/geolocation";
+import { createMockGeolocationPosition, mockGeolocation } from "../../test/mocks/geolocation";
 import * as geolocation from "../../services/core/location/geolocation";
 import {
   confirmAndRequestLocationAccess,
@@ -98,10 +95,9 @@ describe("useLiveLocation", () => {
     mockGeolocation(createMockGeolocationPosition(53.35, -6.26));
     mockPermissions("granted");
 
-    const { rerender } = renderHook(
-      ({ enabled }) => useLiveLocation(enabled),
-      { initialProps: { enabled: true } },
-    );
+    const { rerender } = renderHook(({ enabled }) => useLiveLocation(enabled), {
+      initialProps: { enabled: true },
+    });
 
     await waitFor(() => {
       expect(getLiveLocationReadingSnapshot().reading).not.toBeNull();
@@ -147,10 +143,9 @@ describe("useLiveLocation", () => {
     mockPermissions("granted");
     const watchPosition = vi.mocked(navigator.geolocation.watchPosition);
 
-    const { result, rerender } = renderHook(
-      ({ enabled }) => useLiveLocation(enabled),
-      { initialProps: { enabled: false } },
-    );
+    const { result, rerender } = renderHook(({ enabled }) => useLiveLocation(enabled), {
+      initialProps: { enabled: false },
+    });
 
     expect(result.current.reading).toBeNull();
     expect(watchPosition).not.toHaveBeenCalled();
@@ -205,12 +200,10 @@ describe("useLiveLocation", () => {
       accuracy: 5,
       heading: null,
     };
-    const restoreSpy = vi
-      .spyOn(geolocation, "restoreLocationAccessIfPersisted")
-      .mockResolvedValue({
-        status: "restored",
-        reading: restoredReading,
-      });
+    const restoreSpy = vi.spyOn(geolocation, "restoreLocationAccessIfPersisted").mockResolvedValue({
+      status: "restored",
+      reading: restoredReading,
+    });
     const getCurrentPosition = vi.mocked(navigator.geolocation.getCurrentPosition);
     const watchPosition = vi.mocked(navigator.geolocation.watchPosition);
     watchPosition.mockImplementation(() => 1);

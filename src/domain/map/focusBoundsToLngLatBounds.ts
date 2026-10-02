@@ -1,9 +1,5 @@
 import type { LngLatBoundsLike } from "maplibre-gl";
-import {
-  normalizeBoundsExpression,
-  type MapBounds,
-  type MapBoundsExpression,
-} from "./mapBounds";
+import { type MapBounds, type MapBoundsExpression, normalizeBoundsExpression } from "./mapBounds";
 
 /** Map focus bounds → MapLibre `[[west,south],[east,north]]`. */
 export function focusBoundsToLngLatBounds(

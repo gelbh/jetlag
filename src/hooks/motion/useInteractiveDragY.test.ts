@@ -1,9 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { MIN_DRAG_START_PX } from "../../domain/device/motion/motionTokens";
-import {
-  computeDragOffset,
-  hasExceededDragSlop,
-} from "./useInteractiveDragY";
+import { computeDragOffset, hasExceededDragSlop } from "./useInteractiveDragY";
 
 describe("useInteractiveDragY helpers", () => {
   it("maps delta through mapDelta without slop gating", () => {

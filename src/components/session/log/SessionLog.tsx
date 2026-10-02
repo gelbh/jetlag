@@ -1,5 +1,5 @@
 import { Text } from "@mantine/core";
-import { type AnnotationRecord } from "@/domain/map/annotations";
+import type { AnnotationRecord } from "@/domain/map/annotations";
 import { useSessionActivityLog } from "@/hooks/session/useSessionActivityLog";
 import { SheetHost } from "../../ui/sheets/SheetHost";
 import { SessionLogBody } from "./SessionLogBody";

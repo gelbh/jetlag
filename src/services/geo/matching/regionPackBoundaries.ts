@@ -1,17 +1,16 @@
 import type { Feature, FeatureCollection, MultiPolygon, Polygon } from "geojson";
-import type { GameArea } from "@/domain/map/annotations";
 import type { BoundingBox } from "@/domain/geometry/gameArea/gameAreaBounds";
 import { gameAreaToBoundingBox } from "@/domain/geometry/gameArea/gameAreaBounds";
 import { featureToGameArea } from "@/domain/geometry/gameArea/geometry";
 import { gameAreaWithoutInteriorRings } from "@/domain/geometry/gameArea/geometryCore";
 import { unionGameAreas } from "@/domain/geometry/masks/unionGameAreas";
-import type { CustomMatchingAreasByLevel } from "@/domain/session/catalog/sessionCustomContent";
-import type { MatchingAdminLevel } from "@/domain/session/catalog/sessionCustomContent";
-import {
-  getRegionPackConfig,
-  isKnownRegionPack,
-} from "@/domain/regions/regionPackRegistry";
+import type { GameArea } from "@/domain/map/annotations";
 import type { RegionPackId } from "@/domain/regions/regionPack";
+import { getRegionPackConfig, isKnownRegionPack } from "@/domain/regions/regionPackRegistry";
+import type {
+  CustomMatchingAreasByLevel,
+  MatchingAdminLevel,
+} from "@/domain/session/catalog/sessionCustomContent";
 
 const regionPackGeoCache = new Map<string, string>();
 
@@ -54,13 +53,10 @@ function parseFeatureCollection(text: string): FeatureCollection {
   return parsed;
 }
 
-function polygonFeatures(
-  collection: FeatureCollection,
-): Feature<Polygon | MultiPolygon>[] {
+function polygonFeatures(collection: FeatureCollection): Feature<Polygon | MultiPolygon>[] {
   return collection.features.filter(
     (feature): feature is Feature<Polygon | MultiPolygon> =>
-      feature.geometry?.type === "Polygon" ||
-      feature.geometry?.type === "MultiPolygon",
+      feature.geometry?.type === "Polygon" || feature.geometry?.type === "MultiPolygon",
   );
 }
 
@@ -72,22 +68,15 @@ function subregionIdFromFeature(
   return typeof value === "string" && value.length > 0 ? value : null;
 }
 
-function featureToRegionGameArea(
-  feature: Feature<Polygon | MultiPolygon>,
-): GameArea {
-  if (
-    feature.geometry.type !== "Polygon" &&
-    feature.geometry.type !== "MultiPolygon"
-  ) {
+function featureToRegionGameArea(feature: Feature<Polygon | MultiPolygon>): GameArea {
+  if (feature.geometry.type !== "Polygon" && feature.geometry.type !== "MultiPolygon") {
     throw new Error("Region boundary must be a polygon.");
   }
 
   return featureToGameArea(feature);
 }
 
-function combineRegionGameAreas(
-  features: Feature<Polygon | MultiPolygon>[],
-): GameArea {
+function combineRegionGameAreas(features: Feature<Polygon | MultiPolygon>[]): GameArea {
   if (features.length === 0) {
     throw new Error("No region boundaries found.");
   }
@@ -96,9 +85,7 @@ function combineRegionGameAreas(
     return gameAreaWithoutInteriorRings(featureToRegionGameArea(features[0]!));
   }
 
-  return unionGameAreas(
-    features.map((feature) => featureToRegionGameArea(feature)),
-  );
+  return unionGameAreas(features.map((feature) => featureToRegionGameArea(feature)));
 }
 
 export async function loadRegionPackPlayArea(
@@ -128,9 +115,7 @@ export async function loadRegionPackPlayArea(
 
   if (subregionId) {
     const subregion = primaryFeatures.find(
-      (feature) =>
-        subregionIdFromFeature(feature, config.subregionPropertyKey) ===
-        subregionId,
+      (feature) => subregionIdFromFeature(feature, config.subregionPropertyKey) === subregionId,
     );
     if (!subregion) {
       throw new Error(`Couldn't find region boundary for ${subregionId}.`);
@@ -157,9 +142,10 @@ export async function loadRegionPackSessionBoundaries(
   }
 
   const primaryJson = await fetchGeoJsonText(config.geoAssets.primary);
-  const secondaryPath = subregionId && config.geoAssets.secondaryBySubregion
-    ? config.geoAssets.secondaryBySubregion(subregionId)
-    : config.geoAssets.secondary;
+  const secondaryPath =
+    subregionId && config.geoAssets.secondaryBySubregion
+      ? config.geoAssets.secondaryBySubregion(subregionId)
+      : config.geoAssets.secondary;
   const secondaryJson = await fetchGeoJsonText(secondaryPath);
   const playArea = await loadRegionPackPlayArea(packId, subregionId);
 
@@ -190,8 +176,6 @@ export function adminLevelForRegionPackAsset(
   return null;
 }
 
-export function regionPackHasBundledBoundaries(
-  regionPackId: RegionPackId | undefined,
-): boolean {
+export function regionPackHasBundledBoundaries(regionPackId: RegionPackId | undefined): boolean {
   return isKnownRegionPack(regionPackId);
 }

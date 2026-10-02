@@ -1,11 +1,11 @@
-import { APP_VERSION } from "../../domain/device/changelog";
 import type { DeskPreset } from "../../domain/admin/opsDeskLayout";
+import { APP_VERSION } from "../../domain/device/changelog";
 import { AppLink } from "../navigation/AppLink";
 import { HudHomeIcon } from "../ui/brand/HudIcons";
 import { AdminPresetMenu } from "./AdminPresetMenu";
 
 function formatUtcClock(now: Date): string {
-  return now.toISOString().slice(11, 19) + " UTC";
+  return `${now.toISOString().slice(11, 19)} UTC`;
 }
 
 interface AdminDeskTopbarProps {
@@ -53,7 +53,8 @@ export function AdminDeskTopbar({
         </AppLink>
         <span className="jl-ops-brand-mark">Jetlag</span>
         <span className="jl-ops-brand-title">
-          Broadcast HUD // Admin ops desk v{APP_VERSION}
+          Broadcast HUD {/* Admin ops desk v */}
+          {APP_VERSION}
         </span>
       </div>
       <AdminPresetMenu

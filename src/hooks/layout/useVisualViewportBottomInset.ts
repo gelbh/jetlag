@@ -42,10 +42,7 @@ function readBottomInset(viewport: VisualViewport): number {
   if (viewport.scale > 1) {
     return 0;
   }
-  const rawBottom = Math.max(
-    0,
-    window.innerHeight - viewport.height - viewport.offsetTop,
-  );
+  const rawBottom = Math.max(0, window.innerHeight - viewport.height - viewport.offsetTop);
   if (rawBottom < KEYBOARD_INSET_THRESHOLD_PX) {
     return 0;
   }

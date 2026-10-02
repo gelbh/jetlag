@@ -1,29 +1,25 @@
-import { deleteApp, getApps, initializeApp, type FirebaseApp } from "firebase/app";
+import { deleteApp, type FirebaseApp, getApps, initializeApp } from "firebase/app";
+import { type AppCheck, initializeAppCheck, ReCaptchaEnterpriseProvider } from "firebase/app-check";
 import {
-  connectAuthEmulator,
-  getAuth,
-  setPersistence,
+  type Auth,
   browserLocalPersistence,
   browserSessionPersistence,
+  connectAuthEmulator,
+  getAuth,
   inMemoryPersistence,
+  onAuthStateChanged,
+  setPersistence,
   signInAnonymously,
   signOut,
-  onAuthStateChanged,
-  type Auth,
   type User,
 } from "firebase/auth";
 import {
-  initializeAppCheck,
-  ReCaptchaEnterpriseProvider,
-  type AppCheck,
-} from "firebase/app-check";
-import {
   connectFirestoreEmulator,
+  type Firestore,
   initializeFirestore,
   memoryLocalCache,
   persistentLocalCache,
   persistentMultipleTabManager,
-  type Firestore,
 } from "firebase/firestore";
 import {
   clientEnvUsesFirebaseEmulator,
@@ -50,16 +46,12 @@ export {
   subscribeAuthBootstrapReady,
 } from "./authBootstrapState";
 
-export async function getFirebaseStorage(): Promise<
-  import("firebase/storage").FirebaseStorage
-> {
+export async function getFirebaseStorage(): Promise<import("firebase/storage").FirebaseStorage> {
   const { getFirebaseStorage: get } = await import("./firebaseStorage");
   return get();
 }
 
-export async function getFirebaseFunctions(): Promise<
-  import("firebase/functions").Functions
-> {
+export async function getFirebaseFunctions(): Promise<import("firebase/functions").Functions> {
   const { getFirebaseFunctions: get } = await import("./firebaseFunctions");
   return get();
 }
@@ -277,17 +269,14 @@ async function bootstrapAuthState(): Promise<void> {
   const { completeOAuthRedirectIfPending } = await import("../auth/accountAuth");
 
   await Promise.race([
-    Promise.all([
-      completeOAuthRedirectIfPending(),
-      firebaseAuth.authStateReady(),
-    ]),
+    Promise.all([completeOAuthRedirectIfPending(), firebaseAuth.authStateReady()]),
     sleep(AUTH_BOOTSTRAP_TIMEOUT_MS),
   ]);
 
   setBootstrapTagLazy("auth_ready");
 }
 
-let authAnalyticsUnsubscribe: (() => void) | null = null;
+let _authAnalyticsUnsubscribe: (() => void) | null = null;
 
 function getAuthBootstrapPromise(): Promise<void> {
   authStateReadyPromise ??= bootstrapAuthState()
@@ -306,10 +295,8 @@ export function startAuthBootstrap(): void {
     return;
   }
 
-  authAnalyticsUnsubscribe ??= onAuthStateChanged(getFirebaseAuth(), (user) => {
-    syncAnalyticsIdentityLazy(
-      user ? { uid: user.uid, isAnonymous: user.isAnonymous } : null,
-    );
+  _authAnalyticsUnsubscribe ??= onAuthStateChanged(getFirebaseAuth(), (user) => {
+    syncAnalyticsIdentityLazy(user ? { uid: user.uid, isAnonymous: user.isAnonymous } : null);
   });
 
   void getAuthBootstrapPromise();
@@ -390,4 +377,3 @@ export async function resetFirebaseForTests(): Promise<void> {
   authStateReadyPromise = null;
   resetAuthBootstrapStateForTests();
 }
-

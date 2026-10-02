@@ -1,5 +1,5 @@
-import test from "node:test";
 import assert from "node:assert/strict";
+import test from "node:test";
 import {
   controlSessionTimerForMoveHandler,
   MOVE_TIMER_NOT_HIDER,
@@ -50,12 +50,7 @@ test("pause writes accumulated ms and clears runningSince for confirmed hider", 
   };
   const db = mockSessionDb({ sessionData, updates });
 
-  const result = await controlSessionTimerForMoveHandler(
-    db,
-    "hider-1",
-    "sess-1",
-    "pause",
-  );
+  const result = await controlSessionTimerForMoveHandler(db, "hider-1", "sess-1", "pause");
 
   assert.equal(result.ok, true);
   assert.equal(result.action, "pause");
@@ -78,12 +73,7 @@ test("pause no-ops when timer already paused", async () => {
   };
   const db = mockSessionDb({ sessionData, updates });
 
-  const result = await controlSessionTimerForMoveHandler(
-    db,
-    "hider-1",
-    "sess-1",
-    "pause",
-  );
+  const result = await controlSessionTimerForMoveHandler(db, "hider-1", "sess-1", "pause");
 
   assert.deepEqual(result, { ok: true, action: "pause", noop: true });
   assert.equal(updates.length, 0);
@@ -101,12 +91,7 @@ test("resume starts timer for confirmed hider", async () => {
   };
   const db = mockSessionDb({ sessionData, updates });
 
-  const result = await controlSessionTimerForMoveHandler(
-    db,
-    "hider-1",
-    "sess-1",
-    "resume",
-  );
+  const result = await controlSessionTimerForMoveHandler(db, "hider-1", "sess-1", "resume");
 
   assert.equal(result.ok, true);
   assert.equal(result.action, "resume");
@@ -129,8 +114,7 @@ test("rejects non-hider callers", async () => {
   const db = mockSessionDb({ sessionData, updates });
 
   await assert.rejects(
-    () =>
-      controlSessionTimerForMoveHandler(db, "seeker-1", "sess-1", "pause"),
+    () => controlSessionTimerForMoveHandler(db, "seeker-1", "sess-1", "pause"),
     (error) => error instanceof Error && error.message === MOVE_TIMER_NOT_HIDER,
   );
   assert.equal(updates.length, 0);
@@ -150,9 +134,7 @@ test("rejects ended sessions", async () => {
   const db = mockSessionDb({ sessionData, updates });
 
   await assert.rejects(
-    () =>
-      controlSessionTimerForMoveHandler(db, "hider-1", "sess-1", "pause"),
-    (error) =>
-      error instanceof Error && error.message === MOVE_TIMER_SESSION_ENDED,
+    () => controlSessionTimerForMoveHandler(db, "hider-1", "sess-1", "pause"),
+    (error) => error instanceof Error && error.message === MOVE_TIMER_SESSION_ENDED,
   );
 });

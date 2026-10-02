@@ -1,24 +1,24 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Feature, MultiPolygon, Polygon } from "geojson";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  DEFAULT_PANEL_HEIGHT_PX,
+  PANEL_PEEK_HEIGHT_PX,
+} from "../../domain/device/motion/motionTokens";
+import { gameAreaToBoundingBox } from "../../domain/geometry/gameArea/gameAreaBounds";
+import type { GameArea } from "../../domain/map/annotations";
 import type { MapBoundsExpression } from "../../domain/map/mapBounds";
+import type { MapDraftOverlay } from "../../domain/map/mapDraftOverlay";
 import {
   computePlacementCameraTarget,
+  type PlacementCameraDraftState,
+  type PlacementViewportFrame,
   placementCameraFingerprint,
   resolvePlacementPhase,
   shouldReframeWithHysteresis,
   toMapBounds,
   WALK_REFRAME_INTERVAL_MS,
-  type PlacementCameraDraftState,
-  type PlacementViewportFrame,
 } from "../../domain/map/placementCamera";
-import { gameAreaToBoundingBox } from "../../domain/geometry/gameArea/gameAreaBounds";
-import type { GameArea } from "../../domain/map/annotations";
-import type { MapDraftOverlay } from "../../domain/map/mapDraftOverlay";
 import type { MapTool } from "../../state/sessionStore";
-import {
-  DEFAULT_PANEL_HEIGHT_PX,
-  PANEL_PEEK_HEIGHT_PX,
-} from "../../domain/device/motion/motionTokens";
 
 export interface UsePlacementMapFocusOptions {
   activeTool: MapTool;
@@ -105,8 +105,7 @@ export function usePlacementMapFocus({
     hudBottomPaddingPx != null && hudBottomPaddingPx > 0
       ? hudBottomPaddingPx
       : resolvePanelPeekHeightPx(panelMinimized);
-  const panelTopPaddingPx =
-    hudTopPaddingPx != null && hudTopPaddingPx > 0 ? hudTopPaddingPx : 0;
+  const panelTopPaddingPx = hudTopPaddingPx != null && hudTopPaddingPx > 0 ? hudTopPaddingPx : 0;
   const phase = resolvePlacementPhase(activeTool, draft);
   const placementActive = enabled && activeTool !== "none";
 
@@ -154,10 +153,8 @@ export function usePlacementMapFocus({
         overlays,
         eliminationFeatures,
         selectedPoiId,
-        seekerResolving:
-          draft.measuring.seekerResolving || draft.matching.seekerResolving,
-        eliminationPreview:
-          draft.measuring.eliminationPreview || draft.matching.eliminationPreview,
+        seekerResolving: draft.measuring.seekerResolving || draft.matching.seekerResolving,
+        eliminationPreview: draft.measuring.eliminationPreview || draft.matching.eliminationPreview,
         walkActive,
         walkCurrentPoint: draft.thermometer.walkCurrentPoint,
       }),
@@ -191,9 +188,7 @@ export function usePlacementMapFocus({
     }
 
     const fingerprintChanged = fingerprintRef.current !== fingerprint;
-    const poiSelectionChange =
-      previousPoiIdRef.current !== selectedPoiId &&
-      phase === "pick_poi";
+    const poiSelectionChange = previousPoiIdRef.current !== selectedPoiId && phase === "pick_poi";
 
     if (!fingerprintChanged) {
       return;
@@ -237,15 +232,7 @@ export function usePlacementMapFocus({
 
     setFocusPreferFly(cameraTarget.forceReframe ?? false);
     setPlacementRecenterToken((token) => token + 1);
-  }, [
-    cameraTarget,
-    fingerprint,
-    phase,
-    placementActive,
-    selectedPoiId,
-    viewportFrame,
-    walkActive,
-  ]);
+  }, [cameraTarget, fingerprint, phase, placementActive, selectedPoiId, viewportFrame, walkActive]);
 
   // `focusPreferFly` is a one-shot signal for the reframe that just fired
   // (`placementRecenterToken` bump above). `MapView` only re-fits on token
@@ -255,7 +242,7 @@ export function usePlacementMapFocus({
   useEffect(() => {
     /* eslint-disable-next-line react-hooks/set-state-in-effect -- consume the one-shot fly preference after MapView reads it for this token */
     setFocusPreferFly(false);
-  }, [placementRecenterToken]);
+  }, []);
 
   return {
     effectiveFocusBounds: cameraTarget?.bounds ?? defaultFocusBounds,

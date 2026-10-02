@@ -12,9 +12,7 @@ describe("useSheetGesture", () => {
   });
 
   it("dismisses on a fast downward flick", () => {
-    expect(
-      shouldDismissSheetDrag(10, 320, SHEET_VELOCITY_DISMISS_PX_MS + 0.1),
-    ).toBe(true);
+    expect(shouldDismissSheetDrag(10, 320, SHEET_VELOCITY_DISMISS_PX_MS + 0.1)).toBe(true);
   });
 
   it("exports stable dismiss constants", () => {

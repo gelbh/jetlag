@@ -1,13 +1,10 @@
-import { describe, expect, it } from "vitest";
 import area from "@turf/area";
 import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
 import { point as turfPoint } from "@turf/helpers";
 import type { Feature, MultiPolygon, Polygon } from "geojson";
+import { describe, expect, it } from "vitest";
+import { resolveVoronoiCellSiteId, voronoiCellSiteId } from "./voronoiCellSiteId";
 import { wasmBuildSpatialVoronoiFromSites } from "./voronoiWasm";
-import {
-  resolveVoronoiCellSiteId,
-  voronoiCellSiteId,
-} from "./voronoiCellSiteId";
 
 /** Finite clip cells can reach ~1e10–1e11 m²; planet-scale was ≫1e14. */
 const MAX_PLAUSIBLE_CELL_AREA_M2 = 1e12;
@@ -34,9 +31,7 @@ describe("geoSpatialVoronoiFromSites", () => {
     ]);
 
     expect(cells.features.length).toBeGreaterThanOrEqual(3);
-    expect(cells.features.every((cell) => cell.geometry.type === "Polygon")).toBe(
-      true,
-    );
+    expect(cells.features.every((cell) => cell.geometry.type === "Polygon")).toBe(true);
   });
 
   it("preserves poiId on projected voronoi cells", async () => {
@@ -133,10 +128,7 @@ describe("geoSpatialVoronoiFromSites — extent coverage", () => {
     const kmPerLongitudeDegree = 111.32 * Math.cos((53.35 * Math.PI) / 180);
     const farWest: [number, number] = [-6.26 - 8 / kmPerLongitudeDegree, 53.35];
     expect(
-      booleanPointInPolygon(
-        turfPoint(farWest),
-        westCell as Feature<Polygon | MultiPolygon>,
-      ),
+      booleanPointInPolygon(turfPoint(farWest), westCell as Feature<Polygon | MultiPolygon>),
       "8 km west probe should remain in western cell",
     ).toBe(true);
   });

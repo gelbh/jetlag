@@ -1,12 +1,12 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
-import { describe, expect, it, beforeEach, vi } from "vitest";
-import { useTentacleTool } from "./useTentacleTool";
-import { createToolHookMocks } from "../../test/helpers/toolHookMocks";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { registerMapLibreMap } from "@/services/geo/maplibre/mapLibreMapRegistry";
-import { useMapStore } from "@/state/mapStore";
 import * as previewBasemapPoisModule from "@/services/geo/maplibre/previewBasemapPois";
-import * as tentacleOverpassModule from "../../services/geo/overpass/tentacleOverpass";
+import { useMapStore } from "@/state/mapStore";
 import { tentacleSearchRadiusMetersForSession } from "../../domain/questions";
+import * as tentacleOverpassModule from "../../services/geo/overpass/tentacleOverpass";
+import { createToolHookMocks } from "../../test/helpers/toolHookMocks";
+import { useTentacleTool } from "./useTentacleTool";
 
 describe("useTentacleTool", () => {
   beforeEach(() => {
@@ -222,9 +222,7 @@ describe("useTentacleTool", () => {
   });
 
   it("keeps map-first Send disabled until POIs are confirmed (multiplayer)", async () => {
-    vi.spyOn(previewBasemapPoisModule, "previewBasemapPois").mockReturnValue(
-      [],
-    );
+    vi.spyOn(previewBasemapPoisModule, "previewBasemapPois").mockReturnValue([]);
     vi.spyOn(tentacleOverpassModule, "fetchTentaclePois").mockResolvedValue([
       {
         id: "prov-1",
@@ -276,14 +274,12 @@ describe("useTentacleTool", () => {
     } | null;
     expect(overlay).not.toBeNull();
     // Submit filters provisional POIs out; Send must stay disabled instead of no-op.
-    expect(overlay!.props.canCommit).toBe(false);
+    expect(overlay?.props.canCommit).toBe(false);
     expect(result.current.hud.readiness.resolveReady).toBe(false);
   });
 
   it("arms map-first Send when Overpass POIs are confirmed (multiplayer)", async () => {
-    vi.spyOn(previewBasemapPoisModule, "previewBasemapPois").mockReturnValue(
-      [],
-    );
+    vi.spyOn(previewBasemapPoisModule, "previewBasemapPois").mockReturnValue([]);
     vi.spyOn(tentacleOverpassModule, "fetchTentaclePois").mockResolvedValue([
       {
         id: "osm-1",

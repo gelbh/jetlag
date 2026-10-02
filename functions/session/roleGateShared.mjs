@@ -4,9 +4,7 @@ import { newRoleSecret } from "./rolePasscodes.mjs";
 
 export function isRoleGatedSession(data) {
   return (
-    data?.roleGates?.version === 1 &&
-    data.roleGates != null &&
-    typeof data.roleGates === "object"
+    data?.roleGates?.version === 1 && data.roleGates != null && typeof data.roleGates === "object"
   );
 }
 
@@ -15,9 +13,7 @@ export function readMembershipFields(data) {
     ? data.memberUids.filter((uid) => typeof uid === "string")
     : [];
   const memberRoles =
-    data.memberRoles && typeof data.memberRoles === "object"
-      ? { ...data.memberRoles }
-      : {};
+    data.memberRoles && typeof data.memberRoles === "object" ? { ...data.memberRoles } : {};
   const memberAppVersions =
     data.memberAppVersions && typeof data.memberAppVersions === "object"
       ? { ...data.memberAppVersions }
@@ -42,8 +38,7 @@ export function countMembersWithRole(memberRoles, role) {
     return 0;
   }
 
-  return Object.values(memberRoles).filter((memberRole) => memberRole === role)
-    .length;
+  return Object.values(memberRoles).filter((memberRole) => memberRole === role).length;
 }
 
 export function buildMemberUidsAfterHeal(existingMemberUids, uid, returningMemberUid) {
@@ -85,11 +80,7 @@ export function buildMembershipHealState(input) {
     removedUid === input.currentHostUid &&
     !memberUids.includes(input.currentHostUid)
   ) {
-    const promotee = pickHostPromotee(
-      memberUids,
-      memberRoles,
-      input.currentHostUid,
-    );
+    const promotee = pickHostPromotee(memberUids, memberRoles, input.currentHostUid);
     if (promotee != null) {
       hostUid = promotee;
       nextHostUid = promotee;

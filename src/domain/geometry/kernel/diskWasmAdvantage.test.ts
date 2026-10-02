@@ -1,12 +1,12 @@
-import { beforeAll, describe, expect, it } from "vitest";
 import { existsSync } from "node:fs";
-import { fileURLToPath } from "node:url";
 import path from "node:path";
-import { wasmBuildEndGameMaskFromDisks } from "./maskWasm";
+import { fileURLToPath } from "node:url";
+import { beforeAll, describe, expect, it } from "vitest";
 import { loadPolygonGolden } from "./loadPolygonGolden";
+import { wasmBuildEndGameMaskFromDisks } from "./maskWasm";
 import { assertPolygonTopologyParity } from "./parity";
-import { type DiskSpec } from "./unionPolygonFeatures";
 import type { GameAreaGeometry } from "./types";
+import type { DiskSpec } from "./unionPolygonFeatures";
 
 const pkgEntry = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -40,10 +40,7 @@ function overlappingEndGameDisks(): DiskSpec[] {
   const centerLat = 51.45;
   const centerLng = -0.15;
   return Array.from({ length: 5 }, (_, index) => ({
-    center: [centerLat + index * 0.002, centerLng + index * 0.002] as [
-      number,
-      number,
-    ],
+    center: [centerLat + index * 0.002, centerLng + index * 0.002] as [number, number],
     radiusMeters: 500,
   }));
 }
@@ -58,10 +55,7 @@ function circleDisks(count: number): DiskSpec[] {
   }));
 }
 
-async function measureMedianMsAsync(
-  fn: () => Promise<void>,
-  iterations = 5,
-): Promise<number> {
+async function measureMedianMsAsync(fn: () => Promise<void>, iterations = 5): Promise<number> {
   const samples: number[] = [];
   for (let index = 0; index <= iterations; index += 1) {
     const start = performance.now();
@@ -95,30 +89,27 @@ describe.skipIf(!wasmPkgReady)("disk wasm advantage", () => {
   });
 });
 
-describe.skipIf(!wasmPkgReady || !runGeometryPerf)(
-  "disk wasm advantage perf",
-  () => {
-    beforeAll(async () => {
-      await wasmBuildEndGameMaskFromDisks(gameArea, overlappingEndGameDisks());
-    }, 60_000);
+describe.skipIf(!wasmPkgReady || !runGeometryPerf)("disk wasm advantage perf", () => {
+  beforeAll(async () => {
+    await wasmBuildEndGameMaskFromDisks(gameArea, overlappingEndGameDisks());
+  }, 60_000);
 
-    it("wasm overlapping end-game disks median under 50ms", async () => {
-      const disks = overlappingEndGameDisks();
-      const wasmMs = await measureMedianMsAsync(async () => {
-        await wasmBuildEndGameMaskFromDisks(gameArea, disks);
-      });
-      expect(wasmMs).toBeLessThan(50);
+  it("wasm overlapping end-game disks median under 50ms", async () => {
+    const disks = overlappingEndGameDisks();
+    const wasmMs = await measureMedianMsAsync(async () => {
+      await wasmBuildEndGameMaskFromDisks(gameArea, disks);
     });
+    expect(wasmMs).toBeLessThan(50);
+  });
 
-    it("wasm ten end-game disks median under 100ms", async () => {
-      const disks = circleDisks(10);
-      const wasmMs = await measureMedianMsAsync(async () => {
-        await wasmBuildEndGameMaskFromDisks(gameArea, disks);
-      });
-      expect(wasmMs).toBeLessThan(100);
+  it("wasm ten end-game disks median under 100ms", async () => {
+    const disks = circleDisks(10);
+    const wasmMs = await measureMedianMsAsync(async () => {
+      await wasmBuildEndGameMaskFromDisks(gameArea, disks);
     });
-  },
-);
+    expect(wasmMs).toBeLessThan(100);
+  });
+});
 
 describe("disk wasm advantage gate", () => {
   it("skips perf gates unless GEOMETRY_PERF=1", () => {

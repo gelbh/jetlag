@@ -1,13 +1,10 @@
-import { useEffect, useState, type RefObject } from "react";
+import { type RefObject, useEffect, useState } from "react";
 
 /**
  * Tracks whether `ref.current` intersects the viewport.
  * Pass `observeKey` (e.g. viewer uid) so the observer rebinds after async mount.
  */
-export function useRowInView(
-  ref: RefObject<Element | null>,
-  observeKey?: string | null,
-): boolean {
+export function useRowInView(ref: RefObject<Element | null>, _observeKey?: string | null): boolean {
   const [inView, setInView] = useState(false);
 
   useEffect(() => {
@@ -27,7 +24,7 @@ export function useRowInView(
     return () => {
       observer.disconnect();
     };
-  }, [ref, observeKey]);
+  }, [ref]);
 
   return inView;
 }

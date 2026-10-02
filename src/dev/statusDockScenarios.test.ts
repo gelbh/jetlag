@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  STATUS_DOCK_SCENARIOS,
-  assertStatusDockScenarioIdsUnique,
-} from "./statusDockScenarios";
+import { assertStatusDockScenarioIdsUnique, STATUS_DOCK_SCENARIOS } from "./statusDockScenarios";
 
 describe("statusDockScenarios", () => {
   it("keeps unique scenario ids", () => {

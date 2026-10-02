@@ -145,12 +145,9 @@ describe("tentacle overpass", () => {
   });
 
   it("maps amenity=museum tags to the museum category", () => {
-    expect(
-      tentacleCategoryForTags(
-        { amenity: "museum", name: "Science Museum" },
-        "museum",
-      ),
-    ).toBe("museum");
+    expect(tentacleCategoryForTags({ amenity: "museum", name: "Science Museum" }, "museum")).toBe(
+      "museum",
+    );
   });
 
   it("resolves from the bundle without awaiting slow Overpass when onEnrich is set", async () => {
@@ -230,18 +227,16 @@ describe("tentacle overpass", () => {
   });
 
   it("awaits Overpass when the tentacle bundle is empty", async () => {
-    const queryOverpass = vi
-      .spyOn(overpassClient, "queryOverpass")
-      .mockResolvedValue({
-        elements: [
-          {
-            id: 8,
-            tags: { amenity: "hospital", name: "Live Hospital" },
-            lat: 51.5,
-            lon: -0.12,
-          },
-        ],
-      });
+    const queryOverpass = vi.spyOn(overpassClient, "queryOverpass").mockResolvedValue({
+      elements: [
+        {
+          id: 8,
+          tags: { amenity: "hospital", name: "Live Hospital" },
+          lat: 51.5,
+          lon: -0.12,
+        },
+      ],
+    });
 
     vi.stubGlobal(
       "fetch",

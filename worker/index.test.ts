@@ -7,14 +7,8 @@ import {
   shouldApplyDocumentCsp,
 } from "./documentCsp";
 import worker, { isSpaFallbackForAssetRequest } from "./index";
-import {
-  handleSentryTunnelRequest,
-  parseSentryEnvelopeTarget,
-} from "./sentryTunnel";
-import {
-  handlePosthogProxyRequest,
-  shouldHandlePosthogProxy,
-} from "./posthogProxy";
+import { handlePosthogProxyRequest, shouldHandlePosthogProxy } from "./posthogProxy";
+import { handleSentryTunnelRequest, parseSentryEnvelopeTarget } from "./sentryTunnel";
 
 describe("isSpaFallbackForAssetRequest", () => {
   it("detects SPA index.html served for a missing asset", () => {
@@ -133,25 +127,22 @@ describe("document CSP nonce", () => {
         return {
           text: () =>
             response.text().then((html) => {
-              return html.replace(
-                /<script\b([^>]*)>/gi,
-                (_match, rawAttributes: string) => {
-                  let attributes = rawAttributes.trim();
-                  const element = {
-                    hasAttribute(name: string) {
-                      return new RegExp(`\\b${name}\\s*=`).test(attributes);
-                    },
-                    setAttribute(name: string, value: string) {
-                      attributes = attributes
-                        ? `${attributes} ${name}="${value}"`
-                        : `${name}="${value}"`;
-                    },
-                  };
+              return html.replace(/<script\b([^>]*)>/gi, (_match, rawAttributes: string) => {
+                let attributes = rawAttributes.trim();
+                const element = {
+                  hasAttribute(name: string) {
+                    return new RegExp(`\\b${name}\\s*=`).test(attributes);
+                  },
+                  setAttribute(name: string, value: string) {
+                    attributes = attributes
+                      ? `${attributes} ${name}="${value}"`
+                      : `${name}="${value}"`;
+                  },
+                };
 
-                  this.#onScript?.(element);
-                  return attributes ? `<script ${attributes}>` : "<script>";
-                },
-              );
+                this.#onScript?.(element);
+                return attributes ? `<script ${attributes}>` : "<script>";
+              });
             }),
         };
       }
@@ -204,7 +195,7 @@ describe("document CSP nonce", () => {
     );
 
     const response = await applyDocumentCspNonce(
-      new Response("<!doctype html><script src=\"/boot-recovery.js\"></script>", {
+      new Response('<!doctype html><script src="/boot-recovery.js"></script>', {
         headers: {
           "Content-Type": "text/html; charset=utf-8",
           "Content-Security-Policy": csp,
@@ -310,10 +301,7 @@ describe("worker fetch", () => {
       },
     } as Env;
 
-    const response = await worker.fetch(
-      new Request("https://jetlag.gelbhart.dev/"),
-      env,
-    );
+    const response = await worker.fetch(new Request("https://jetlag.gelbhart.dev/"), env);
 
     expect(env.ASSETS.fetch).toHaveBeenCalledTimes(1);
     const assetRequest = env.ASSETS.fetch.mock.calls[0][0] as Request;
@@ -335,9 +323,7 @@ describe("worker fetch", () => {
 
     expect(env.ASSETS.fetch).not.toHaveBeenCalled();
     expect(response.status).toBe(308);
-    expect(response.headers.get("Location")).toBe(
-      "https://jetlag.gelbhart.dev/?x=1",
-    );
+    expect(response.headers.get("Location")).toBe("https://jetlag.gelbhart.dev/?x=1");
   });
 
   it("redirects /prerender/home to / with 308", async () => {
@@ -356,8 +342,7 @@ describe("worker fetch", () => {
   });
 
   it("does not forward Assets directory redirects for /", async () => {
-    const html =
-      '<!doctype html><html><body><div id="root">home</div></body></html>';
+    const html = '<!doctype html><html><body><div id="root">home</div></body></html>';
     const env = {
       ASSETS: {
         fetch: vi
@@ -378,10 +363,7 @@ describe("worker fetch", () => {
       },
     } as Env;
 
-    const response = await worker.fetch(
-      new Request("https://jetlag.gelbhart.dev/"),
-      env,
-    );
+    const response = await worker.fetch(new Request("https://jetlag.gelbhart.dev/"), env);
 
     expect(response.status).toBe(200);
     expect(response.headers.get("Location")).toBeNull();
@@ -443,9 +425,7 @@ describe("worker fetch", () => {
 
     expect(await response.text()).toBe(javascript);
     expect(response.headers.get("Content-Security-Policy")).toBeNull();
-    expect(response.headers.get("Cache-Control")).toBe(
-      "public, max-age=31536000, immutable",
-    );
+    expect(response.headers.get("Cache-Control")).toBe("public, max-age=31536000, immutable");
   });
 
   it("keeps SPA-fallback asset misses as no-store", async () => {
@@ -483,10 +463,7 @@ describe("worker fetch", () => {
       },
     } as Env;
 
-    const response = await worker.fetch(
-      new Request("https://jetlag.gelbhart.dev/"),
-      env,
-    );
+    const response = await worker.fetch(new Request("https://jetlag.gelbhart.dev/"), env);
 
     const body = await response.text();
     expect(body).toMatch(/<script nonce="[^"]+" src="\/boot-recovery\.js"><\/script>/);
@@ -526,10 +503,7 @@ describe("worker fetch", () => {
       },
     } as Env;
 
-    await worker.fetch(
-      new Request("https://jetlag.gelbhart.dev/ph-anything"),
-      env,
-    );
+    await worker.fetch(new Request("https://jetlag.gelbhart.dev/ph-anything"), env);
 
     expect(env.ASSETS.fetch).toHaveBeenCalledOnce();
   });
@@ -553,8 +527,6 @@ describe("worker fetch", () => {
     expect(env.ASSETS.fetch).not.toHaveBeenCalled();
     expect(response.status).toBe(401);
   });
-
-
 });
 
 describe("parseSentryEnvelopeTarget", () => {
@@ -635,16 +607,14 @@ describe("posthogProxy", () => {
   });
 
   it("forwards API paths to eu.i.posthog.com with Host set and cookies stripped", async () => {
-    const fetchImpl = vi.fn(
-      async (input: RequestInfo | URL, init?: RequestInit) => {
-        const req = new Request(input, init);
-        expect(req.url).toBe("https://eu.i.posthog.com/e/?ip=0");
-        expect(req.headers.get("Host")).toBe("eu.i.posthog.com");
-        expect(req.headers.get("Cookie")).toBeNull();
-        expect(req.headers.get("X-Forwarded-For")).toBeNull();
-        return new Response("ok", { status: 200 });
-      },
-    );
+    const fetchImpl = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const req = new Request(input, init);
+      expect(req.url).toBe("https://eu.i.posthog.com/e/?ip=0");
+      expect(req.headers.get("Host")).toBe("eu.i.posthog.com");
+      expect(req.headers.get("Cookie")).toBeNull();
+      expect(req.headers.get("X-Forwarded-For")).toBeNull();
+      return new Response("ok", { status: 200 });
+    });
 
     const response = await handlePosthogProxyRequest(
       new Request("https://jetlag.gelbhart.dev/ph/e/?ip=0", {

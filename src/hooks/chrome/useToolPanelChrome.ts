@@ -21,7 +21,7 @@ export function useToolPanelChrome(
     setMapPanning(false);
     setUserMinimized(false);
     /* eslint-enable react-hooks/set-state-in-effect */
-  }, [activeTool]);
+  }, []);
 
   useEffect(() => {
     /* eslint-disable react-hooks/set-state-in-effect -- phase snap; user expand sticks until snap flips */

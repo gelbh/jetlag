@@ -1,22 +1,14 @@
-import { useCallback, useEffect, useRef, useState } from "react";
 import type { Map as MapLibreMap } from "maplibre-gl";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { mergePoiCandidates, type PoiCandidate } from "@/domain/geo/poiCandidate";
 import type { MapStyle } from "@/domain/map/mapBasemaps";
 import {
-  mergePoiCandidates,
-  type PoiCandidate,
-} from "@/domain/geo/poiCandidate";
-import {
   isBasemapPoiQueryAvailable,
-  queryBasemapPois,
   type QueryBasemapPoisOptions,
+  queryBasemapPois,
 } from "@/services/geo/maplibre/basemapPoiQuery";
 
-export type PoiCandidatesStatus =
-  | "idle"
-  | "preview"
-  | "confirming"
-  | "ready"
-  | "error";
+export type PoiCandidatesStatus = "idle" | "preview" | "confirming" | "ready" | "error";
 
 export type QueryBasemapPoisFn = (
   map: MapLibreMap,
@@ -67,7 +59,7 @@ export function usePoiCandidates({
   const [confirmed, setConfirmed] = useState<PoiCandidate[]>([]);
   const [status, setStatus] = useState<PoiCandidatesStatus>("idle");
   const [error, setError] = useState<string | null>(null);
-  const [refreshToken, setRefreshToken] = useState(0);
+  const [_refreshToken, setRefreshToken] = useState(0);
 
   useEffect(() => {
     confirmRef.current = confirm;
@@ -100,8 +92,7 @@ export function usePoiCandidates({
     setError(null);
     setConfirmed([]);
 
-    const tileAvailable =
-      isTileAvailableRef.current(mapStyle) && map != null;
+    const tileAvailable = isTileAvailableRef.current(mapStyle) && map != null;
     const preview: PoiCandidate[] =
       tileAvailable && map
         ? (() => {
@@ -120,9 +111,7 @@ export function usePoiCandidates({
     }
 
     setProvisional(preview);
-    setStatus(
-      tileAvailable && preview.length > 0 ? "preview" : "confirming",
-    );
+    setStatus(tileAvailable && preview.length > 0 ? "preview" : "confirming");
 
     let cancelled = false;
     void (async () => {
@@ -148,7 +137,7 @@ export function usePoiCandidates({
       cancelled = true;
     };
     /* eslint-enable react-hooks/set-state-in-effect */
-  }, [categoryId, enabled, map, mapStyle, refreshToken]);
+  }, [categoryId, enabled, map, mapStyle]);
 
   const candidates = mergePoiCandidates(provisional, confirmed);
 

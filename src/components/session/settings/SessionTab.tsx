@@ -1,12 +1,9 @@
-import { useState, type ReactNode } from "react";
 import { Button, Stack } from "@mantine/core";
 import { BookOpenIcon, ExportIcon, ScrollIcon, WarningCircleIcon } from "@phosphor-icons/react";
-import { SettingsToggleRow } from "../settings/SettingsToggleRow";
-import {
-  InsetGroup,
-  SectionLabel,
-} from "@/components/ui/entry/entryChrome";
+import { type ReactNode, useState } from "react";
+import { InsetGroup, SectionLabel } from "@/components/ui/entry/entryChrome";
 import { InsetRow } from "@/components/ui/entry/InsetRow";
+import { SettingsToggleRow } from "../settings/SettingsToggleRow";
 
 const haltQuietRoot = {
   minHeight: "2.875rem",
@@ -214,19 +211,15 @@ export function MapSettingsSessionTab({
                           Reset session progress
                         </Button>
                         <p className="text-xs leading-relaxed text-[var(--color-field-ink-muted)]">
-                          Keeps the code and roster. Clears timer, map,
-                          questions, chat, zones, traps, and end-game state.
+                          Keeps the code and roster. Clears timer, map, questions, chat, zones,
+                          traps, and end-game state.
                         </p>
                       </>
                     ) : null}
                   </div>
                 </InsetGroup>
               ) : null}
-              <Button
-                fullWidth
-                styles={{ root: haltSolidRoot }}
-                onClick={onEndSession}
-              >
+              <Button fullWidth styles={{ root: haltSolidRoot }} onClick={onEndSession}>
                 End session for everyone
               </Button>
             </>

@@ -23,11 +23,7 @@ function senderLabel(sender: "player" | "admin" | "system"): string {
   }
 }
 
-export function IncidentChatPanel({
-  incidentId,
-  onClose,
-  className = "",
-}: IncidentChatPanelProps) {
+export function IncidentChatPanel({ incidentId, onClose, className = "" }: IncidentChatPanelProps) {
   const { messages, error, sending, sendMessage } = useIncidentThread(incidentId);
   const [draft, setDraft] = useState("");
   const [sendError, setSendError] = useState<string | null>(null);
@@ -35,7 +31,7 @@ export function IncidentChatPanel({
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView?.({ block: "end" });
-  }, [messages.length]);
+  }, []);
 
   const send = async () => {
     const text = draft.trim();
@@ -47,15 +43,11 @@ export function IncidentChatPanel({
       await sendMessage(text);
       setDraft("");
     } catch (err) {
-      setSendError(
-        err instanceof Error ? err.message : "Could not send the message.",
-      );
+      setSendError(err instanceof Error ? err.message : "Could not send the message.");
     }
   };
 
-  const visibleMessages = messages.filter(
-    (message) => message.kind !== "prompt",
-  );
+  const visibleMessages = messages.filter((message) => message.kind !== "prompt");
 
   return (
     <div className={`flex min-h-0 flex-1 flex-col gap-3 ${className}`.trim()}>
@@ -64,9 +56,7 @@ export function IncidentChatPanel({
           <p className="font-display text-[10px] font-semibold uppercase tracking-[0.14em] text-brand-blue">
             Incident chat
           </p>
-          <p className="text-sm text-ink-muted">
-            Report sent — you can chat here.
-          </p>
+          <p className="text-sm text-ink-muted">Report sent — you can chat here.</p>
         </div>
         {onClose ? (
           <button
@@ -110,9 +100,7 @@ export function IncidentChatPanel({
         <div ref={bottomRef} />
       </div>
 
-      {sendError ? (
-        <p className="text-sm font-semibold text-status-error">{sendError}</p>
-      ) : null}
+      {sendError ? <p className="text-sm font-semibold text-status-error">{sendError}</p> : null}
 
       <div className="flex shrink-0 gap-2">
         <input

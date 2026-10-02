@@ -111,10 +111,7 @@ export function resolveDrawKeep(
   const drawnById = new Map(drawn.map((card) => [card.instanceId, card]));
   const uniqueKeepIds = [...new Set(keepInstanceIds)];
   const targetKeep = Math.min(keepM, drawn.length);
-  if (
-    uniqueKeepIds.length !== targetKeep ||
-    uniqueKeepIds.some((id) => !drawnById.has(id))
-  ) {
+  if (uniqueKeepIds.length !== targetKeep || uniqueKeepIds.some((id) => !drawnById.has(id))) {
     return {
       ok: false,
       deck: [...deck],
@@ -222,18 +219,14 @@ export function continueSequentialRewardPick(
 }
 
 /** Auto-advance cycles that need no choice (`keep === 0` or keep-all). */
-export function advanceUntilInteractivePick(
-  state: BoardEconomyState,
-): BoardEconomyState {
+export function advanceUntilInteractivePick(state: BoardEconomyState): BoardEconomyState {
   let current = state;
   while (current.pendingPick) {
     const pick = current.pendingPick;
     if (pick.keep > 0 && pick.keep < pick.drawn.length) {
       break;
     }
-    const keepIds = pick.drawn
-      .slice(0, pick.keep)
-      .map((card) => card.instanceId);
+    const keepIds = pick.drawn.slice(0, pick.keep).map((card) => card.instanceId);
     const next = continueSequentialRewardPick(current, keepIds);
     if (next === current) {
       break;
@@ -322,10 +315,7 @@ export function discardFromHand(
   };
 }
 
-export function handLimitAfterExpand(
-  currentLimit: number,
-  powerUpId: PowerUpId,
-): number {
+export function handLimitAfterExpand(currentLimit: number, powerUpId: PowerUpId): number {
   switch (powerUpId) {
     case "expandHand1":
       return currentLimit + 1;
@@ -351,7 +341,7 @@ export function playExpandHand(
   powerUpId: Extract<PowerUpId, "expandHand1" | "expandHand2">,
 ): BoardEconomyState {
   const card = state.hand.find((c) => c.instanceId === instanceId);
-  if (!card || card.def.kind !== "powerUp" || card.def.id !== powerUpId) {
+  if (card?.def.kind !== "powerUp" || card.def.id !== powerUpId) {
     return state;
   }
   let next = discardFromHand(state, [instanceId]);
@@ -376,7 +366,7 @@ export function playDiscardDrawPowerUp(
   drawN: number,
 ): BoardEconomyState {
   const powerUp = state.hand.find((c) => c.instanceId === powerUpInstanceId);
-  if (!powerUp || powerUp.def.kind !== "powerUp") {
+  if (powerUp?.def.kind !== "powerUp") {
     return state;
   }
   const requiredDiscard =
@@ -390,10 +380,7 @@ export function playDiscardDrawPowerUp(
   if (requiredDiscard < 0 || discardInstanceIds.length !== requiredDiscard) {
     return state;
   }
-  const next = discardFromHand(state, [
-    powerUpInstanceId,
-    ...discardInstanceIds,
-  ]);
+  const next = discardFromHand(state, [powerUpInstanceId, ...discardInstanceIds]);
   const result = drawKeep(next.deck, next.hand, drawN, drawN);
   return {
     ...next,
@@ -403,12 +390,9 @@ export function playDiscardDrawPowerUp(
   };
 }
 
-export function playMoveCard(
-  state: BoardEconomyState,
-  moveInstanceId: string,
-): BoardEconomyState {
+export function playMoveCard(state: BoardEconomyState, moveInstanceId: string): BoardEconomyState {
   const move = state.hand.find((c) => c.instanceId === moveInstanceId);
-  if (!move || move.def.kind !== "move") {
+  if (move?.def.kind !== "move") {
     return state;
   }
   return {
@@ -425,7 +409,7 @@ export function playCurse(
   playedAt: string,
 ): BoardEconomyState {
   const curse = state.hand.find((c) => c.instanceId === curseInstanceId);
-  if (!curse || curse.def.kind !== "curse") {
+  if (curse?.def.kind !== "curse") {
     return state;
   }
   const next = discardFromHand(state, [curseInstanceId]);
@@ -451,9 +435,7 @@ export function markCurseCleared(
   return {
     ...state,
     activeCurses: state.activeCurses.map((c) =>
-      c.instanceId === curseInstanceId
-        ? { ...c, cleared: true, clearedAt }
-        : c,
+      c.instanceId === curseInstanceId ? { ...c, cleared: true, clearedAt } : c,
     ),
   };
 }

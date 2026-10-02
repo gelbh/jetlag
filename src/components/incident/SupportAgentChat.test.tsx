@@ -56,20 +56,12 @@ const baseIncident: IncidentRecord = {
 describe("SupportAgentChat", () => {
   it("shows summon CTA and free-tier cap hint before an active summon", () => {
     renderWithRouter(
-      <SupportAgentChat
-        incidentId="inc-1"
-        incidentOverride={baseIncident}
-        messagesOverride={[]}
-      />,
+      <SupportAgentChat incidentId="inc-1" incidentOverride={baseIncident} messagesOverride={[]} />,
     );
 
     expect(screen.getByTestId("support-agent-caps")).toHaveTextContent(/Free/);
-    expect(screen.getByTestId("support-agent-caps")).toHaveTextContent(
-      /1 summon left/,
-    );
-    expect(
-      screen.getByRole("button", { name: "Ask fix agent" }),
-    ).toBeInTheDocument();
+    expect(screen.getByTestId("support-agent-caps")).toHaveTextContent(/1 summon left/);
+    expect(screen.getByRole("button", { name: "Ask fix agent" })).toBeInTheDocument();
   });
 
   it("renders tool rows and waiting-on-host banner", () => {
@@ -117,9 +109,7 @@ describe("SupportAgentChat", () => {
 
     expect(screen.getByText(/Waiting on the session host/i)).toBeInTheDocument();
     expect(screen.getByText(/reset board/i)).toBeInTheDocument();
-    expect(
-      screen.getByText("I can reset the board — need host OK."),
-    ).toBeInTheDocument();
+    expect(screen.getByText("I can reset the board — need host OK.")).toBeInTheDocument();
   });
 
   it("shows working banner and disables composer while a run is in flight", () => {
@@ -153,9 +143,7 @@ describe("SupportAgentChat", () => {
       />,
     );
 
-    expect(
-      screen.getByText(/Fix agent is working on your last message/i),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/Fix agent is working on your last message/i)).toBeInTheDocument();
     expect(screen.getByLabelText("Fix agent message")).toBeDisabled();
     expect(screen.getByRole("button", { name: "Working…" })).toBeDisabled();
   });

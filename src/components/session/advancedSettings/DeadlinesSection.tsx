@@ -12,17 +12,10 @@ import {
   QUESTION_ANSWER_DEADLINE_MINUTES_MIN,
   QUESTION_ANSWER_DEADLINE_PRESET_MINUTES,
 } from "@/domain/session/rules";
-import {
-  AdvancedSettingsCategory,
-  ToggleNumberWithPresets,
-} from "./shared";
+import { AdvancedSettingsCategory, ToggleNumberWithPresets } from "./shared";
 import type { AdvancedSettingsSectionProps } from "./types";
 
-export function DeadlinesSection({
-  value,
-  onChange,
-  disabled,
-}: AdvancedSettingsSectionProps) {
+export function DeadlinesSection({ value, onChange, disabled }: AdvancedSettingsSectionProps) {
   return (
     <AdvancedSettingsCategory title="Timers">
       <ToggleNumberWithPresets
@@ -84,8 +77,7 @@ export function DeadlinesSection({
         onNumberChange={(parsed) =>
           onChange({
             ...value,
-            questionAnswerDeadlineMinutes:
-              clampQuestionAnswerDeadlineMinutes(parsed),
+            questionAnswerDeadlineMinutes: clampQuestionAnswerDeadlineMinutes(parsed),
           })
         }
         min={QUESTION_ANSWER_DEADLINE_MINUTES_MIN}

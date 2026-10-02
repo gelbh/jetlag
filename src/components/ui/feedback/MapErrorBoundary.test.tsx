@@ -1,10 +1,10 @@
-import { Component, type ReactNode } from "react";
-import { render, screen } from "@testing-library/react";
 import { MantineProvider } from "@mantine/core";
+import { render, screen } from "@testing-library/react";
+import { Component, type ReactNode } from "react";
 import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { jetlagTheme } from "@/theme/theme";
 import { RouteTransitionProvider } from "@/navigation/RouteTransitionContext";
+import { jetlagTheme } from "@/theme/theme";
 import { MapErrorBoundary } from "./MapErrorBoundary";
 
 beforeEach(() => {
@@ -42,9 +42,7 @@ describe("MapErrorBoundary", () => {
     );
 
     expect(screen.getByRole("alert")).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: /refresh now/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /refresh now/i })).toBeInTheDocument();
     expect(container.querySelector(".map-float-alert")).toBeNull();
     expect(container.querySelector(".mantine-Title-root")).toBeTruthy();
     spy.mockRestore();

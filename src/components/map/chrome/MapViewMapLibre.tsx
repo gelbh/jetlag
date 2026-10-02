@@ -1,39 +1,36 @@
+import { type Map as MapLibreMap, setWorkerUrl } from "maplibre-gl";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Map, { type MapRef } from "react-map-gl/maplibre";
-import { setWorkerUrl, type Map as MapLibreMap } from "maplibre-gl";
 import {
   createMapBounds,
-  toMapBounds,
   type MapBoundsExpression,
   type MapLatLng,
+  toMapBounds,
 } from "@/domain/map/mapBounds";
 import "maplibre-gl/dist/maplibre-gl.css";
 import "@/styles/map-touch-gestures.css";
 import mapLibreWorkerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
-import { getBasemapSurface, getMapLibreStyle } from "@/domain/map/mapBasemaps";
-import {
-  DEFAULT_MAP_CENTER,
-  DEFAULT_MAP_LNGLAT,
-} from "@/domain/map/defaultMapCenter";
+import { mapLibreRuntimeOptions } from "@/domain/device/perf/mapLibreRuntimeOptions";
 import { isUsableMapBounds } from "@/domain/geometry/gameArea/geometry";
-import { computeFramedCenterZoomMapLibre } from "@/domain/map/computeFramedCenterZoomMapLibre";
-import { focusBoundsToLngLatBounds } from "@/domain/map/focusBoundsToLngLatBounds";
 import { choosePlacementCameraMotion } from "@/domain/map/choosePlacementCameraMotion";
+import { computeFramedCenterZoomMapLibre } from "@/domain/map/computeFramedCenterZoomMapLibre";
+import { DEFAULT_MAP_CENTER, DEFAULT_MAP_LNGLAT } from "@/domain/map/defaultMapCenter";
+import { focusBoundsToLngLatBounds } from "@/domain/map/focusBoundsToLngLatBounds";
 import { isLargeCameraJumpMapLibre } from "@/domain/map/isLargeCameraJumpMapLibre";
-import { shouldApplyMapFocus } from "@/domain/map/mapFocusPolicy";
-import { mapFocusApplyDependencyKeys } from "@/domain/map/mapFocusApplyDeps";
+import { getBasemapSurface, getMapLibreStyle } from "@/domain/map/mapBasemaps";
 import { MAP_CAMERA_HOME_ORIENTATION } from "@/domain/map/mapCameraHome";
+import { mapFocusApplyDependencyKeys } from "@/domain/map/mapFocusApplyDeps";
+import { shouldApplyMapFocus } from "@/domain/map/mapFocusPolicy";
 import { resolveMapPitchDegrees } from "@/domain/map/resolveMapPitchDegrees";
 import { stopMapCameraEase } from "@/domain/map/stopMapCameraEase";
-import { mapLibreRuntimeOptions } from "@/domain/device/perf/mapLibreRuntimeOptions";
 import { useMotionProfile } from "@/hooks/motion/useMotionProfile";
-import { useMapLibreMap } from "../helpers/useMapLibreMap";
+import { registerMapLibreMap } from "@/services/geo/maplibre/mapLibreMapRegistry";
 import {
   MapFeatureHitTestBridge,
   MapFeatureHitTestProvider,
 } from "../helpers/MapFeatureHitTestContext";
 import { useMapLibreMarkerImages } from "../helpers/mapLibreIconRegistry";
-import { registerMapLibreMap } from "@/services/geo/maplibre/mapLibreMapRegistry";
+import { useMapLibreMap } from "../helpers/useMapLibreMap";
 import { MapChromeListener } from "./MapChromeListener";
 import { MapNavControlStack } from "./MapNavControlStack";
 import type { MapViewMapLibreProps } from "./mapViewTypes";
@@ -58,9 +55,7 @@ function centerToLngLat(center: MapLatLng | undefined): [number, number] {
     return [center.lng, center.lat];
   }
   if (import.meta.env.DEV) {
-    throw new Error(
-      `MapViewMapLibre: unsupported LatLngExpression ${String(center)}`,
-    );
+    throw new Error(`MapViewMapLibre: unsupported LatLngExpression ${String(center)}`);
   }
   return DEFAULT_MAP_LNGLAT;
 }
@@ -138,14 +133,7 @@ function MapFocus({
     focusPaddingTopBiasRef.current = focusPaddingTopBias;
     focusMinZoomRef.current = focusMinZoom;
     focusMaxZoomRef.current = focusMaxZoom;
-  }, [
-    preferFly,
-    focusBounds,
-    focusPaddingBias,
-    focusPaddingTopBias,
-    focusMinZoom,
-    focusMaxZoom,
-  ]);
+  }, [preferFly, focusBounds, focusPaddingBias, focusPaddingTopBias, focusMinZoom, focusMaxZoom]);
 
   useEffect(() => {
     const map = mapRef.getMap();
@@ -166,11 +154,8 @@ function MapFocus({
     // Apply-time values always from refs (synced above). Deps differ by mode:
     // once → presence/token only; always → live bounds/bias/zoom.
     const map = mapRef.getMap();
-    const orientationRequested =
-      orientationResetToken !== lastOrientationRef.current;
-    const homeOrientation = orientationRequested
-      ? MAP_CAMERA_HOME_ORIENTATION
-      : null;
+    const orientationRequested = orientationResetToken !== lastOrientationRef.current;
+    const homeOrientation = orientationRequested ? MAP_CAMERA_HOME_ORIENTATION : null;
 
     const levelOrientationOnly = () => {
       lastOrientationRef.current = orientationResetToken;
@@ -231,13 +216,7 @@ function MapFocus({
     }
 
     const lngLatBounds = focusBoundsToLngLatBounds(mapBounds);
-    const framed = computeFramedCenterZoomMapLibre(
-      map,
-      lngLatBounds,
-      padding,
-      minZoom,
-      maxZoom,
-    );
+    const framed = computeFramedCenterZoomMapLibre(map, lngLatBounds, padding, minZoom, maxZoom);
     if (!framed) {
       return orientationRequested ? levelOrientationOnly() : undefined;
     }
@@ -253,17 +232,10 @@ function MapFocus({
     map.on("moveend", onMoveEnd);
 
     const { center, zoom } = framed;
-    const target = homeOrientation
-      ? { center, zoom, ...homeOrientation }
-      : { center, zoom };
+    const target = homeOrientation ? { center, zoom, ...homeOrientation } : { center, zoom };
     const motion = choosePlacementCameraMotion({
       animate,
-      isLargeJump: isLargeCameraJumpMapLibre(
-        map,
-        center,
-        zoom,
-        preferFlyRef.current,
-      ),
+      isLargeJump: isLargeCameraJumpMapLibre(map, center, zoom, preferFlyRef.current),
     });
 
     if (motion.kind === "jump") {
@@ -282,7 +254,16 @@ function MapFocus({
       map.off("moveend", onMoveEnd);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- keys from mapFocusApplyDependencyKeys
-  }, [...applyDependencyKeys, mapRef, orientationResetToken]);
+  }, [
+    ...applyDependencyKeys,
+    mapRef,
+    orientationResetToken,
+    fitBoundsMode,
+    recenterToken,
+    padY,
+    padX,
+    animate,
+  ]);
 
   return null;
 }
@@ -324,15 +305,11 @@ export function MapViewMapLibre({ model, children }: MapViewMapLibreProps) {
   const onBoundsChangeRef = useRef(onBoundsChange);
   const onUserViewportFramedRef = useRef(onUserViewportFramed);
   const onRecenterRef = useRef(onRecenter);
-  const style = useMemo(
-    () => getMapLibreStyle(mapStyle, streetBasemap),
-    [mapStyle, streetBasemap],
-  );
+  const style = useMemo(() => getMapLibreStyle(mapStyle, streetBasemap), [mapStyle, streetBasemap]);
   const surface = getBasemapSurface(mapStyle, streetBasemap);
   const containerSurfaceClass =
     surface === "light" ? "jl-basemap--light" : "jl-basemap--dark-canvas";
-  const satelliteGradeClass =
-    mapStyle === "satellite" ? " jl-basemap--satellite-grade" : "";
+  const satelliteGradeClass = mapStyle === "satellite" ? " jl-basemap--satellite-grade" : "";
   const [longitude, latitude] = centerToLngLat(center);
   const zoomControlEnabled = showZoomControl ?? interactive;
   // Opt-in only — admin/observer/create-session must not inherit play-map compass.
@@ -350,8 +327,7 @@ export function MapViewMapLibre({ model, children }: MapViewMapLibreProps) {
     setFallbackRecenterToken((value) => value + 1);
   }, []);
   const mapStyleToggleEnabled =
-    (showMapStyleToggle ?? Boolean(onMapStyleChange)) &&
-    Boolean(onMapStyleChange);
+    (showMapStyleToggle ?? Boolean(onMapStyleChange)) && Boolean(onMapStyleChange);
   const { lowPowerMode } = useMotionProfile();
   const maxPitchDegrees = resolveMapPitchDegrees(lowPowerMode);
   const pitchGesturesEnabled = interactive && maxPitchDegrees > 0;
@@ -503,9 +479,7 @@ export function MapViewMapLibre({ model, children }: MapViewMapLibreProps) {
               focusPaddingTopBias={focusPaddingTopBias}
               preferFly={focusPreferFly}
             />
-            {chromeHudRef ? (
-              <MapChromeListener chromeHudRef={chromeHudRef} />
-            ) : null}
+            {chromeHudRef ? <MapChromeListener chromeHudRef={chromeHudRef} /> : null}
             <MapNavControlStack
               zoomEnabled={zoomControlEnabled}
               compassEnabled={compassControlEnabled}

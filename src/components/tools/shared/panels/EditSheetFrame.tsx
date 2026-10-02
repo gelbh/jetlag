@@ -34,11 +34,7 @@ export function EditSheetFrame({
         </div>
         <div className="grid shrink-0 grid-cols-2 gap-2 border-t border-border p-4">
           {onSave ? (
-            <button
-              type="button"
-              onClick={onSave}
-              className="btn-primary w-full"
-            >
+            <button type="button" onClick={onSave} className="btn-primary w-full">
               Save changes
             </button>
           ) : null}

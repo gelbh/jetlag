@@ -26,23 +26,13 @@ describe("surveyPhaseLabel", () => {
 
   it("returns Hiding during the hiding period", () => {
     expect(
-      surveyPhaseLabel(
-        true,
-        rules,
-        { accumulatedMs: 30_000, runningSince: null },
-        false,
-      ),
+      surveyPhaseLabel(true, rules, { accumulatedMs: 30_000, runningSince: null }, false),
     ).toBe("Hiding");
   });
 
   it("returns Seeking after the hiding period", () => {
     expect(
-      surveyPhaseLabel(
-        true,
-        rules,
-        { accumulatedMs: 3_600_000, runningSince: null },
-        false,
-      ),
+      surveyPhaseLabel(true, rules, { accumulatedMs: 3_600_000, runningSince: null }, false),
     ).toBe("Seeking");
   });
 
@@ -56,12 +46,7 @@ describe("surveyPhaseLabel", () => {
       ),
     ).toBe("Hiding");
     expect(
-      surveyPhaseLabel(
-        true,
-        rules,
-        { accumulatedMs: hidingPeriodMs, runningSince: null },
-        false,
-      ),
+      surveyPhaseLabel(true, rules, { accumulatedMs: hidingPeriodMs, runningSince: null }, false),
     ).toBe("Seeking");
   });
 });

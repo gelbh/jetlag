@@ -1,92 +1,80 @@
 import {
   startTransition,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
-  useEffect,
-  useCallback,
-  useLayoutEffect,
 } from "react";
 import { useSearchParams } from "react-router-dom";
-import { useAppNavigate } from "../../hooks/navigation/useAppNavigate";
-import { useGameAreaFraming } from "../../hooks/session/useGameAreaFraming";
 import {
-  LOCAL_SESSION_ID,
-  type GameArea,
-  type SessionTier,
-} from "../../domain/map/annotations";
+  canSelectPremiumSessionTier,
+  shouldDefaultSessionTierToPremium,
+} from "../../domain/billing/premiumProducts";
+import { APP_VERSION } from "../../domain/device/changelog";
+import { isChunkLoadError } from "../../domain/device/updates/chunkLoadRecovery";
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import {
   boundingBoxHasMinimumSpan,
   gameAreaToBoundingBox,
   placeToGameArea,
 } from "../../domain/geometry/gameArea/geometry";
-import { generateLocalCode } from "../../domain/session/meta/sessionCode";
-import type { DistanceUnit } from "../../domain/map/distance";
-import {
-  hidingZoneRadiusMeters,
-  recommendGameSize,
-  type GameSize,
-} from "../../domain/session/size/gameSize";
-import type { PlayerRole } from "../../domain/session/players/playerRole";
-import {
-  defaultAdvancedSessionSettings,
-  sessionRulesPatchFromAdvancedSettings,
-} from "../../domain/session/tools/advancedSessionSettings";
-import { useSessionStore, useMapStore } from "../../state/sessionStore";
-import {
-  isFirebaseConfigured,
-  ensureAnonymousUser,
-} from "../../services/core/firebase/firebase";
-import { usePremiumHostEligibility } from "../../hooks/billing/usePremiumHostEligibility";
-import { shouldDefaultSessionTierToPremium, canSelectPremiumSessionTier } from "../../domain/billing/premiumProducts";
-import { usePremiumEntitlements } from "../../hooks/billing/usePremiumEntitlements";
-import { createRemoteSession } from "../../services/firestore/firestoreAnnotations";
-import {
-  preloadCriticalGameAreaCaches,
-  preloadGameAreaCaches,
-} from "../../services/session/gameAreaPreload";
-import { resolveSessionMatchingAreas } from "../../services/geo/matching/resolveSessionMatchingAreas";
-import { retryAsync } from "../../services/core/network/retryAsync";
-import {
-  inferTransitMetroId,
-  listTransitMetros,
-} from "../../services/transit/transitCatalog";
-import { searchPlaces, type GeocodedPlace } from "../../services/geo/geocoding";
-import { requestLocationAccess } from "../../services/core/location/geolocation";
-import { APP_VERSION } from "../../domain/device/changelog";
-import { grantAccess, hasAccessClaim } from "../../services/core/auth/accessControl";
-import {
-  createPremiumRemoteSession,
-} from "../../services/billing/premiumBilling";
-import {
-  ANALYTICS_EVENTS,
-  track,
-} from "../../services/core/analytics/analytics";
-import { setPremiumApiContext } from "../../services/core/auth/premiumApiContext";
-import { emitSessionStartedActivity } from "../../services/session/emitSessionActivity";
 import { unionGameAreas } from "../../domain/geometry/masks/unionGameAreas";
-import { isChunkLoadError } from "../../domain/device/updates/chunkLoadRecovery";
-import { gamePresetToCreateSessionDraft } from "../../domain/session/presets/gamePreset";
-import { useGamePresetStore } from "../../state/gamePresetStore";
-import {
-  BUNDLED_REGION_PACK_GEO_REVISION,
-  type RegionPackId,
-} from "../../domain/regions/regionPack";
-import { loadRegionPackSessionBoundaries } from "../../services/geo/matching/regionPackBoundaries";
+import { type GameArea, LOCAL_SESSION_ID, type SessionTier } from "../../domain/map/annotations";
+import type { DistanceUnit } from "../../domain/map/distance";
 import {
   BUNDLED_GAME_PRESET_DEFINITIONS,
   isBundledPresetId,
 } from "../../domain/regions/bundledGamePresets";
 import { buildBundledPresetSelectGroups } from "../../domain/regions/bundledPresetHierarchy";
+import {
+  BUNDLED_REGION_PACK_GEO_REVISION,
+  type RegionPackId,
+} from "../../domain/regions/regionPack";
+import { generateLocalCode } from "../../domain/session/meta/sessionCode";
+import type { PlayerRole } from "../../domain/session/players/playerRole";
+import { gamePresetToCreateSessionDraft } from "../../domain/session/presets/gamePreset";
 import { buildFavouritePresetSelectOptions } from "../../domain/session/presets/presetFavourites";
-import { placeToFocusBounds } from "./utils";
+import {
+  type GameSize,
+  hidingZoneRadiusMeters,
+  recommendGameSize,
+} from "../../domain/session/size/gameSize";
+import {
+  defaultAdvancedSessionSettings,
+  sessionRulesPatchFromAdvancedSettings,
+} from "../../domain/session/tools/advancedSessionSettings";
+import { usePremiumEntitlements } from "../../hooks/billing/usePremiumEntitlements";
+import { usePremiumHostEligibility } from "../../hooks/billing/usePremiumHostEligibility";
 import { useLatestRequest } from "../../hooks/forms/useLatestRequest";
 import { useSubmitLock } from "../../hooks/forms/useSubmitLock";
+import { useAppNavigate } from "../../hooks/navigation/useAppNavigate";
+import { useGameAreaFraming } from "../../hooks/session/useGameAreaFraming";
+import { createPremiumRemoteSession } from "../../services/billing/premiumBilling";
+import { ANALYTICS_EVENTS, track } from "../../services/core/analytics/analytics";
+import { grantAccess, hasAccessClaim } from "../../services/core/auth/accessControl";
+import { setPremiumApiContext } from "../../services/core/auth/premiumApiContext";
+import { ensureAnonymousUser, isFirebaseConfigured } from "../../services/core/firebase/firebase";
+import { requestLocationAccess } from "../../services/core/location/geolocation";
+import { retryAsync } from "../../services/core/network/retryAsync";
+import { createRemoteSession } from "../../services/firestore/firestoreAnnotations";
+import { type GeocodedPlace, searchPlaces } from "../../services/geo/geocoding";
+import { loadRegionPackSessionBoundaries } from "../../services/geo/matching/regionPackBoundaries";
+import { resolveSessionMatchingAreas } from "../../services/geo/matching/resolveSessionMatchingAreas";
+import { emitSessionStartedActivity } from "../../services/session/emitSessionActivity";
+import {
+  preloadCriticalGameAreaCaches,
+  preloadGameAreaCaches,
+} from "../../services/session/gameAreaPreload";
+import { inferTransitMetroId, listTransitMetros } from "../../services/transit/transitCatalog";
+import { useGamePresetStore } from "../../state/gamePresetStore";
+import { useMapStore, useSessionStore } from "../../state/sessionStore";
 import {
   CreateSessionMapMountAbortedError,
   useCreateSessionMapMount,
 } from "./useCreateSessionMapMount";
+import { placeToFocusBounds } from "./utils";
 
 const MISSING_GAME_AREA_ERROR =
   "Search for a place, import a boundary, or move the map until the play area is framed.";
@@ -99,9 +87,7 @@ export function useCreateSession() {
   const { beginRequest, isLatestRequest } = useLatestRequest();
   const { isSubmitting, runLocked } = useSubmitLock();
   const presets = useGamePresetStore((state) => state.presets);
-  const favouritePresetIds = useGamePresetStore(
-    (state) => state.favouritePresetIds,
-  );
+  const favouritePresetIds = useGamePresetStore((state) => state.favouritePresetIds);
   const bundledPresetSelectGroups = useMemo(
     () => buildBundledPresetSelectGroups(BUNDLED_GAME_PRESET_DEFINITIONS),
     [],
@@ -125,9 +111,7 @@ export function useCreateSession() {
   const [locationQuery, setLocationQuery] = useState("");
   const [searchResults, setSearchResults] = useState<GeocodedPlace[]>([]);
   const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
-  const [selectedPlace, setSelectedPlace] = useState<GeocodedPlace | null>(
-    null,
-  );
+  const [selectedPlace, setSelectedPlace] = useState<GeocodedPlace | null>(null);
   const [searchLoading, setSearchLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [accessCodeError, setAccessCodeError] = useState<string | null>(null);
@@ -143,13 +127,9 @@ export function useCreateSession() {
   );
   const [accessCode, setAccessCode] = useState("");
   const [regionPackId, setRegionPackId] = useState<RegionPackId | undefined>();
-  const [regionPackSubregionId, setRegionPackSubregionId] = useState<
-    string | undefined
-  >();
+  const [regionPackSubregionId, setRegionPackSubregionId] = useState<string | undefined>();
   const [hostHasAccessClaim, setHostHasAccessClaim] = useState(false);
-  const [hostAuthReady, setHostAuthReady] = useState(
-    () => !isFirebaseConfigured(),
-  );
+  const [hostAuthReady, setHostAuthReady] = useState(() => !isFirebaseConfigured());
   const [hostAuthError, setHostAuthError] = useState<string | null>(null);
   const { entitlements: premiumEntitlements, refresh: refreshPremiumEntitlements } =
     usePremiumEntitlements();
@@ -168,18 +148,14 @@ export function useCreateSession() {
     [distanceUnit],
   );
   const metros = useMemo(() => listTransitMetros(), []);
-  const [importedGameArea, setImportedGameArea] = useState<GameArea | null>(
-    null,
-  );
+  const [importedGameArea, setImportedGameArea] = useState<GameArea | null>(null);
   const [selectedAreas, setSelectedAreas] = useState<GameArea[]>([]);
   const [importLoading, setImportLoading] = useState(false);
   const importFileInputRef = useRef<HTMLInputElement>(null);
   const userLocationRef = useRef<LatLngTuple | null>(null);
   const appliedPresetRef = useRef<string | null>(null);
   const presetApplyGenerationRef = useRef(0);
-  const [transitMetroOverride, setTransitMetroOverride] = useState<
-    string | null
-  >(null);
+  const [transitMetroOverride, setTransitMetroOverride] = useState<string | null>(null);
 
   useEffect(() => {
     const presetId = searchParams.get("preset");
@@ -212,10 +188,7 @@ export function useCreateSession() {
         setRegionPackId(draft.regionPackId);
         setRegionPackSubregionId(subregionId);
         try {
-          const boundaries = await loadRegionPackSessionBoundaries(
-            draft.regionPackId,
-            subregionId,
-          );
+          const boundaries = await loadRegionPackSessionBoundaries(draft.regionPackId, subregionId);
           if (applyGeneration !== presetApplyGenerationRef.current) {
             return;
           }
@@ -226,9 +199,7 @@ export function useCreateSession() {
             return;
           }
           setError(
-            loadError instanceof Error
-              ? loadError.message
-              : "Couldn't load region boundary data.",
+            loadError instanceof Error ? loadError.message : "Couldn't load region boundary data.",
           );
         }
       } else {
@@ -240,17 +211,13 @@ export function useCreateSession() {
         return;
       }
 
-      const resolvedGameSize = gameArea
-        ? recommendGameSize(gameArea, unit)
-        : draft.gameSize;
+      const resolvedGameSize = gameArea ? recommendGameSize(gameArea, unit) : draft.gameSize;
       const resolvedAdvanced = {
         ...defaultAdvancedSessionSettings(resolvedGameSize, unit),
         ...draft.advancedSettings,
         customMatchingAreas,
-        customCategories:
-          draft.customCategories ?? draft.advancedSettings.customCategories,
-        customLocationPins:
-          draft.customLocationPins ?? draft.advancedSettings.customLocationPins,
+        customCategories: draft.customCategories ?? draft.advancedSettings.customCategories,
+        customLocationPins: draft.customLocationPins ?? draft.advancedSettings.customLocationPins,
         hidingZoneRadiusMeters: hidingZoneRadiusMeters(resolvedGameSize, unit),
       };
 
@@ -300,9 +267,7 @@ export function useCreateSession() {
     } catch {
       setHostHasAccessClaim(false);
       setHostAuthReady(false);
-      setHostAuthError(
-        "Couldn't sign in to create a session. Tap Retry.",
-      );
+      setHostAuthError("Couldn't sign in to create a session. Tap Retry.");
     }
   }, []);
 
@@ -327,9 +292,7 @@ export function useCreateSession() {
         if (!cancelled) {
           setHostHasAccessClaim(false);
           setHostAuthReady(false);
-          setHostAuthError(
-            "Couldn't sign in to create a session. Tap Retry.",
-          );
+          setHostAuthError("Couldn't sign in to create a session. Tap Retry.");
         }
       }
     })();
@@ -356,9 +319,8 @@ export function useCreateSession() {
 
     return inferTransitMetroId(gameArea) ?? "";
   }, [framing.manualGameArea, framing.userFramed, importedGameArea, selectedPlace]);
-  const [transitMetroInferenceSeed, setTransitMetroInferenceSeed] = useState(
-    inferredTransitMetroId,
-  );
+  const [transitMetroInferenceSeed, setTransitMetroInferenceSeed] =
+    useState(inferredTransitMetroId);
 
   useEffect(() => {
     if (inferredTransitMetroId !== transitMetroInferenceSeed) {
@@ -370,10 +332,7 @@ export function useCreateSession() {
   }, [inferredTransitMetroId, transitMetroInferenceSeed]);
 
   const transitMetroId = transitMetroOverride ?? inferredTransitMetroId;
-  const canSelectPremiumTier = canSelectPremiumSessionTier(
-    premiumEntitlements,
-    hostHasAccessClaim,
-  );
+  const canSelectPremiumTier = canSelectPremiumSessionTier(premiumEntitlements, hostHasAccessClaim);
   const autoSessionTier = useMemo((): SessionTier => {
     if (searchParams.get("tier") === "premium" && canSelectPremiumTier) {
       return "premium";
@@ -384,12 +343,7 @@ export function useCreateSession() {
     }
 
     return "free";
-  }, [
-    canSelectPremiumTier,
-    hostHasAccessClaim,
-    premiumEntitlements,
-    searchParams,
-  ]);
+  }, [canSelectPremiumTier, hostHasAccessClaim, premiumEntitlements, searchParams]);
   const activeSessionTier = tierManuallySet ? sessionTier : autoSessionTier;
   const {
     packCreditsLabel,
@@ -408,8 +362,7 @@ export function useCreateSession() {
     premiumEntitlements,
     hostHasAccessClaim,
   });
-  const showAccessCodeField =
-    showPremiumUnlockPanel && accessCodeExpanded;
+  const showAccessCodeField = showPremiumUnlockPanel && accessCodeExpanded;
 
   const previewGameArea = useMemo(() => {
     if (importedGameArea) {
@@ -423,8 +376,7 @@ export function useCreateSession() {
     return framing.manualGameArea;
   }, [framing.manualGameArea, framing.userFramed, importedGameArea, selectedPlace]);
 
-  const manualFramingActive =
-    !importedGameArea && (!selectedPlace || framing.userFramed);
+  const manualFramingActive = !importedGameArea && (!selectedPlace || framing.userFramed);
 
   const handleUserViewportFramed = useCallback(() => {
     if ((selectedPlace || importedGameArea) && !framing.userFramed) {
@@ -508,9 +460,7 @@ export function useCreateSession() {
     setError(null);
   };
 
-  const handleBoundaryImport = async (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
+  const handleBoundaryImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     event.target.value = "";
     if (!file) {
@@ -524,9 +474,7 @@ export function useCreateSession() {
 
     try {
       // Dynamic: jszip / @xmldom/xmldom / @tmcw/togeojson stay off the /create route chunk.
-      const { parseBoundaryFile } = await import(
-        "../../services/core/capture/kmzImport"
-      );
+      const { parseBoundaryFile } = await import("../../services/core/capture/kmzImport");
       const gameArea = await parseBoundaryFile(file);
       applyImportedBoundary(gameArea, file.name);
     } catch (nextError) {
@@ -579,11 +527,7 @@ export function useCreateSession() {
       if (!isLatestRequest(requestId)) {
         return;
       }
-      setError(
-        nextError instanceof Error
-          ? nextError.message
-          : "Place search failed.",
-      );
+      setError(nextError instanceof Error ? nextError.message : "Place search failed.");
     } finally {
       if (isLatestRequest(requestId)) {
         setSearchLoading(false);
@@ -591,15 +535,11 @@ export function useCreateSession() {
     }
   };
 
-  const hasExplicitGameArea = Boolean(
-    importedGameArea || framing.manualGameArea || selectedPlace,
-  );
+  const hasExplicitGameArea = Boolean(importedGameArea || framing.manualGameArea || selectedPlace);
 
   const confirmSession = async () => {
     if (!hasExplicitGameArea) {
-      setError(
-        MISSING_GAME_AREA_ERROR,
-      );
+      setError(MISSING_GAME_AREA_ERROR);
       return;
     }
 
@@ -611,9 +551,7 @@ export function useCreateSession() {
       const manualArea =
         framing.userFramed &&
         framing.manualGameArea &&
-        boundingBoxHasMinimumSpan(
-          gameAreaToBoundingBox(framing.manualGameArea),
-        )
+        boundingBoxHasMinimumSpan(gameAreaToBoundingBox(framing.manualGameArea))
           ? framing.manualGameArea
           : null;
       const draftArea = importedGameArea
@@ -624,9 +562,7 @@ export function useCreateSession() {
             ? placeToGameArea(selectedPlace)
             : framing.manualGameArea;
 
-      const areasForSession = draftArea
-        ? [...selectedAreas, draftArea]
-        : selectedAreas;
+      const areasForSession = draftArea ? [...selectedAreas, draftArea] : selectedAreas;
 
       const gameArea =
         areasForSession.length === 0
@@ -636,9 +572,7 @@ export function useCreateSession() {
             : unionGameAreas(areasForSession);
 
       if (!gameArea) {
-        setError(
-          MISSING_GAME_AREA_ERROR,
-        );
+        setError(MISSING_GAME_AREA_ERROR);
         return;
       }
 
@@ -660,9 +594,7 @@ export function useCreateSession() {
           useAccessClaimForPremium = true;
         } catch (nextError) {
           setAccessCodeError(
-            nextError instanceof Error
-              ? nextError.message
-              : "Invalid access code.",
+            nextError instanceof Error ? nextError.message : "Invalid access code.",
           );
           return;
         } finally {
@@ -671,24 +603,17 @@ export function useCreateSession() {
       }
 
       const rulesPatch = {
-        ...sessionRulesPatchFromAdvancedSettings(
-          gameSize,
-          advancedSettings,
-          distanceUnit,
-        ),
+        ...sessionRulesPatchFromAdvancedSettings(gameSize, advancedSettings, distanceUnit),
         ...(regionPackId
           ? {
               regionPackId,
               bundledGeoRevision: BUNDLED_REGION_PACK_GEO_REVISION,
-              ...(regionPackSubregionId
-                ? { regionPackSubregionId }
-                : {}),
+              ...(regionPackSubregionId ? { regionPackSubregionId } : {}),
             }
           : {}),
         ...(selectedPlace?.displayName?.trim() || locationQuery.trim()
           ? {
-              gameAreaLabel:
-                selectedPlace?.displayName.trim() || locationQuery.trim(),
+              gameAreaLabel: selectedPlace?.displayName.trim() || locationQuery.trim(),
             }
           : {}),
       };
@@ -698,20 +623,14 @@ export function useCreateSession() {
 
       if (isFirebaseConfigured()) {
         const user = await retryAsync(() => ensureAnonymousUser());
-        const premiumSubmitError = validatePremiumHostSubmit(
-          user,
-          tier,
-          useAccessClaimForPremium,
-        );
+        const premiumSubmitError = validatePremiumHostSubmit(user, tier, useAccessClaimForPremium);
         if (premiumSubmitError) {
           setError(premiumSubmitError);
           return;
         }
 
         const usePremiumCallable =
-          tier === "premium" &&
-          !useAccessClaimForPremium &&
-          paidPremiumHost;
+          tier === "premium" && !useAccessClaimForPremium && paidPremiumHost;
         const session = usePremiumCallable
           ? await retryAsync(() =>
               createPremiumRemoteSession({
@@ -755,8 +674,7 @@ export function useCreateSession() {
           transitMetroId: metroId,
           ...rulesPatch,
           hidingZoneRadiusMeters:
-            rulesPatch.hidingZoneRadiusMeters ??
-            hidingZoneRadiusMeters(gameSize, distanceUnit),
+            rulesPatch.hidingZoneRadiusMeters ?? hidingZoneRadiusMeters(gameSize, distanceUnit),
         };
         setSession(localSession, "local");
         setPremiumApiContext(localSession);
@@ -773,16 +691,9 @@ export function useCreateSession() {
         const matchingAreas = await resolveSessionMatchingAreas({
           regionPackId,
           regionPackSubregionId,
-          customMatchingAreas: regionPackId
-            ? undefined
-            : advancedSettings.customMatchingAreas,
+          customMatchingAreas: regionPackId ? undefined : advancedSettings.customMatchingAreas,
         });
-        preloadGameAreaCaches(
-          gameArea,
-          matchingAreas,
-          regionPackId,
-          tier,
-        );
+        preloadGameAreaCaches(gameArea, matchingAreas, regionPackId, tier);
         // Dynamic: submit-only sea-level sampling stays off the /create route chunk.
         void import("../../services/geo/elevation/seaLevelProgressive")
           .then(({ startSeaLevelBackgroundSampling }) => {
@@ -791,19 +702,11 @@ export function useCreateSession() {
           .catch(() => {
             // Head start only; /map restarts sampling on mount (deduped).
           });
-        void preloadCriticalGameAreaCaches(
-          gameArea,
-          matchingAreas,
-          regionPackId,
-        );
+        void preloadCriticalGameAreaCaches(gameArea, matchingAreas, regionPackId);
       }
       navigate("/map");
     } catch (nextError) {
-      setError(
-        nextError instanceof Error
-          ? nextError.message
-          : "Couldn't create session.",
-      );
+      setError(nextError instanceof Error ? nextError.message : "Couldn't create session.");
     } finally {
       setLoading(false);
     }

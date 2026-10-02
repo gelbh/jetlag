@@ -1,36 +1,36 @@
 import { useCallback, useDeferredValue, useEffect, useMemo, useState } from "react";
 import type { MapChromeControlInset } from "../../components/map/helpers/mapChromeControlInset";
-import { useMapScreenTools } from "../../hooks/map-screen/useMapScreenTools";
-import { useMapSessionActions } from "../../hooks/map-screen/useMapSessionActions";
-import { useMapOverlayActions } from "../../hooks/map-screen/useMapOverlayActions";
-import { useMapGeometryEdit } from "../../hooks/map-screen/useMapGeometryEdit";
-import { useMapSessionChrome } from "../../hooks/map-screen/useMapSessionChrome";
-import { useMapDraftOverlays } from "../../hooks/map-screen/useMapDraftOverlays";
-import { usePlacementMapFocus } from "../../hooks/map-screen/usePlacementMapFocus";
-import {
-  PANEL_PADDING_EXTRA_PX,
-  type PlacementViewportFrame,
-} from "../../domain/map/placementCamera";
-import {
-  DEFAULT_PANEL_HEIGHT_PX,
-  PANEL_PEEK_HEIGHT_PX,
-} from "../../domain/device/motion/motionTokens";
-import { useMapToolInteraction } from "../../hooks/map-screen/useMapToolInteraction";
-import { useAdminBoundaryFeatures } from "../../hooks/map-screen/useAdminBoundaryFeatures";
-import { resolveToolDockEnabled } from "../../domain/session/rules";
-import { useActiveThermometerWalk } from "../../hooks/location/useActiveThermometerWalk";
-import { useToolPanelChrome } from "../../hooks/chrome/useToolPanelChrome";
-import { useWizardSheetSnap } from "../../hooks/wizard/useWizardSheetSnap";
-import { isQuestionDockTool } from "../../domain/map/mapTools";
 import {
   askHudCameraPaddingPx,
   isAskHudOwnedTool,
   MAP_FIRST_CAMERA_BOTTOM_PX,
   MAP_FIRST_CAMERA_TOP_PX,
 } from "../../domain/ask/askHudModes";
-import type { MapTool } from "../../state/sessionStore";
+import {
+  DEFAULT_PANEL_HEIGHT_PX,
+  PANEL_PEEK_HEIGHT_PX,
+} from "../../domain/device/motion/motionTokens";
+import { isQuestionDockTool } from "../../domain/map/mapTools";
+import {
+  PANEL_PADDING_EXTRA_PX,
+  type PlacementViewportFrame,
+} from "../../domain/map/placementCamera";
 import { tentacleDraftPoiIdFromOverlayId } from "../../domain/map/tentacleDraftOverlay";
+import { resolveToolDockEnabled } from "../../domain/session/rules";
+import { useToolPanelChrome } from "../../hooks/chrome/useToolPanelChrome";
+import { useActiveThermometerWalk } from "../../hooks/location/useActiveThermometerWalk";
+import { useAdminBoundaryFeatures } from "../../hooks/map-screen/useAdminBoundaryFeatures";
+import { useMapDraftOverlays } from "../../hooks/map-screen/useMapDraftOverlays";
+import { useMapGeometryEdit } from "../../hooks/map-screen/useMapGeometryEdit";
+import { useMapOverlayActions } from "../../hooks/map-screen/useMapOverlayActions";
+import { useMapScreenTools } from "../../hooks/map-screen/useMapScreenTools";
+import { useMapSessionActions } from "../../hooks/map-screen/useMapSessionActions";
+import { useMapSessionChrome } from "../../hooks/map-screen/useMapSessionChrome";
+import { useMapToolInteraction } from "../../hooks/map-screen/useMapToolInteraction";
+import { usePlacementMapFocus } from "../../hooks/map-screen/usePlacementMapFocus";
+import { useWizardSheetSnap } from "../../hooks/wizard/useWizardSheetSnap";
 import { ANALYTICS_EVENTS, track } from "../../services/core/analytics/analytics";
+import type { MapTool } from "../../state/sessionStore";
 import { buildPlacementCameraDraft } from "./shared/placementCameraDraft";
 import { useMapScreenCore } from "./shared/useMapScreenCore";
 import { useMapScreenSeekerEffects } from "./shared/useMapScreenSeekerEffects";
@@ -108,11 +108,7 @@ export function useMapScreenController() {
 
   const transit = useMapScreenTransit(session, gameArea, lowPowerMode);
   const { features: adminBoundaryFeatures, loading: adminBoundaryLoading } =
-    useAdminBoundaryFeatures(
-    gameArea,
-    sessionRules,
-    showAdminBoundaries,
-  );
+    useAdminBoundaryFeatures(gameArea, sessionRules, showAdminBoundaries);
 
   const [firstRunDismissed, setFirstRunDismissed] = useState(false);
 
@@ -247,79 +243,82 @@ export function useMapScreenController() {
   const { confirmedHidingZones, endGameBlocked, canStartEndGame, canRequestFoundHider } =
     sessionActions;
 
-  const { handleClearMap, handleResetBoard, handleResetSession, handleEndSession, handleLeaveSession, exportMap } =
-    useMapSessionChrome({
-      session,
-      isHost,
-      annotations,
-      pendingQuestions,
-      mapShellRef,
-      exportLegendRef,
-      clearAllAnnotations,
-      setSelectedAnnotationId,
-      closeSettingsPanel: overlay.closeSheet,
-      resetTimer: timer.reset,
-      endGameBlocked,
-    });
+  const {
+    handleClearMap,
+    handleResetBoard,
+    handleResetSession,
+    handleEndSession,
+    handleLeaveSession,
+    exportMap,
+  } = useMapSessionChrome({
+    session,
+    isHost,
+    annotations,
+    pendingQuestions,
+    mapShellRef,
+    exportLegendRef,
+    clearAllAnnotations,
+    setSelectedAnnotationId,
+    closeSettingsPanel: overlay.closeSheet,
+    resetTimer: timer.reset,
+    endGameBlocked,
+  });
 
-  const deferredTentacleSelectedPoiId = useDeferredValue(
-    tentacleTool.draft.tentacleSelectedPoiId,
-  );
+  const deferredTentacleSelectedPoiId = useDeferredValue(tentacleTool.draft.tentacleSelectedPoiId);
 
   const {
     overlays: mapDraftOverlays,
     eliminationFeatures: draftEliminationFeatures,
     tentacleLodPhase,
-  } =
-    useMapDraftOverlays({
-        activeTool,
-        gameArea: toolGameArea,
-        mapStyle: effectiveBasemapStyle,
-        streetBasemap,
-        radar: {
-          center: radarTool.draft.radarCenter,
-          radiusMeters: radarTool.draft.radarRadius,
-          answer: radarTool.draft.radarAnswer,
-        },
-        pin: { point: pinTool.draft.pinPoint },
-        tentacle: {
-          center: tentacleTool.draft.tentacleCenter,
-          searchRadiusMeters: tentacleTool.draft.tentacleSearchRadiusMeters,
-          answerRadiusMeters: tentacleTool.draft.tentacleAnswerRadiusMeters,
-          pois: tentacleTool.draft.tentaclePois,
-          selectedPoiId: deferredTentacleSelectedPoiId,
-          outOfReach: tentacleTool.draft.tentacleOutOfReach,
-          seekerResolving: tentacleTool.draft.seekerResolving,
-        },
-        thermometer: {
-          thermoA: thermometerTool.draft.thermoA,
-          thermoB: thermometerTool.draft.thermoB,
-          answer: thermometerTool.draft.thermometerAnswer,
-          targetDistanceMeters: thermometerTool.draft.thermometerDistanceMeters,
-          walkCurrentPoint: thermometerTool.walkCurrentPoint,
-          walkActive: thermometerTool.draft.walkingQuestionId !== null,
-        },
-        measuring: {
-          seekerPoint: measuringTool.draft.measuringSeekerPoint,
-          targetPoint: measuringTool.draft.measuringTargetPoint,
-          placePoints: tools.measuringPlacePoints,
-          siteRadiusMeters: measuringTool.draft.measuringDistanceMeters,
-          boundaryPreview: measuringTool.draft.measuringBoundaryPreview,
-          eliminationPreview: measuringTool.draft.measuringEliminationPreview,
-          seekerResolving: measuringTool.draft.seekerResolving,
-          categoryId: measuringTool.draft.measuringCategoryId,
-        },
-        matching: {
-          seekerPoint: matchingTool.draft.matchingSeekerPoint,
-          nearestFeaturePoint: matchingTool.draft.matchingNearestFeaturePoint,
-          boundaryPreview: matchingTool.draft.matchingBoundaryPreview,
-          eliminationPreview: matchingTool.draft.matchingEliminationPreview,
-          seekerResolving: matchingTool.draft.seekerResolving,
-          categoryId: matchingTool.draft.matchingCategoryId,
-        },
-        zone: { vertices: zoneTool.draft.zoneVertices },
-        draw: { strokePoints: drawTool.draft.strokePoints },
-      });
+  } = useMapDraftOverlays({
+    activeTool,
+    gameArea: toolGameArea,
+    mapStyle: effectiveBasemapStyle,
+    streetBasemap,
+    radar: {
+      center: radarTool.draft.radarCenter,
+      radiusMeters: radarTool.draft.radarRadius,
+      answer: radarTool.draft.radarAnswer,
+    },
+    pin: { point: pinTool.draft.pinPoint },
+    tentacle: {
+      center: tentacleTool.draft.tentacleCenter,
+      searchRadiusMeters: tentacleTool.draft.tentacleSearchRadiusMeters,
+      answerRadiusMeters: tentacleTool.draft.tentacleAnswerRadiusMeters,
+      pois: tentacleTool.draft.tentaclePois,
+      selectedPoiId: deferredTentacleSelectedPoiId,
+      outOfReach: tentacleTool.draft.tentacleOutOfReach,
+      seekerResolving: tentacleTool.draft.seekerResolving,
+    },
+    thermometer: {
+      thermoA: thermometerTool.draft.thermoA,
+      thermoB: thermometerTool.draft.thermoB,
+      answer: thermometerTool.draft.thermometerAnswer,
+      targetDistanceMeters: thermometerTool.draft.thermometerDistanceMeters,
+      walkCurrentPoint: thermometerTool.walkCurrentPoint,
+      walkActive: thermometerTool.draft.walkingQuestionId !== null,
+    },
+    measuring: {
+      seekerPoint: measuringTool.draft.measuringSeekerPoint,
+      targetPoint: measuringTool.draft.measuringTargetPoint,
+      placePoints: tools.measuringPlacePoints,
+      siteRadiusMeters: measuringTool.draft.measuringDistanceMeters,
+      boundaryPreview: measuringTool.draft.measuringBoundaryPreview,
+      eliminationPreview: measuringTool.draft.measuringEliminationPreview,
+      seekerResolving: measuringTool.draft.seekerResolving,
+      categoryId: measuringTool.draft.measuringCategoryId,
+    },
+    matching: {
+      seekerPoint: matchingTool.draft.matchingSeekerPoint,
+      nearestFeaturePoint: matchingTool.draft.matchingNearestFeaturePoint,
+      boundaryPreview: matchingTool.draft.matchingBoundaryPreview,
+      eliminationPreview: matchingTool.draft.matchingEliminationPreview,
+      seekerResolving: matchingTool.draft.seekerResolving,
+      categoryId: matchingTool.draft.matchingCategoryId,
+    },
+    zone: { vertices: zoneTool.draft.zoneVertices },
+    draw: { strokePoints: drawTool.draft.strokePoints },
+  });
 
   const { sheetSnap, mapAttentionActive } = useWizardSheetSnap(activeTool);
 
@@ -331,8 +330,7 @@ export function useMapScreenController() {
     handleMapPanStart,
     handleMapPanEnd,
   } = useToolPanelChrome(activeTool, {
-    sheetSnap:
-      activeTool !== "none" && isQuestionDockTool(activeTool) ? sheetSnap : "mid",
+    sheetSnap: activeTool !== "none" && isQuestionDockTool(activeTool) ? sheetSnap : "mid",
   });
   const mapChromeControlInset: MapChromeControlInset =
     panelMinimized || mapPanning ? "chrome-hidden" : "dock";
@@ -383,10 +381,8 @@ export function useMapScreenController() {
     | import("../../hooks/map-screen/heavyMapTools").AskToolHudBundle
     | null;
   const askMapFirst = Boolean(askHudBundle?.suppressSheet);
-  const mapFirstBottomPx =
-    askHudBundle?.mapFirstCameraBottomPx ?? MAP_FIRST_CAMERA_BOTTOM_PX;
-  const mapFirstTopPx =
-    askHudBundle?.mapFirstCameraTopPx ?? MAP_FIRST_CAMERA_TOP_PX;
+  const mapFirstBottomPx = askHudBundle?.mapFirstCameraBottomPx ?? MAP_FIRST_CAMERA_BOTTOM_PX;
+  const mapFirstTopPx = askHudBundle?.mapFirstCameraTopPx ?? MAP_FIRST_CAMERA_TOP_PX;
   const panelPeekHeightPx = askMapFirst
     ? mapFirstBottomPx
     : isAskHudOwnedTool(activeTool)
@@ -463,14 +459,7 @@ export function useMapScreenController() {
         track(ANALYTICS_EVENTS.map_tool_used, { tool });
       }
     },
-    [
-      awaitHiderAnswer,
-      dismissTransientUi,
-      resetToolDrafts,
-      session,
-      setActiveTool,
-      setMapError,
-    ],
+    [awaitHiderAnswer, dismissTransientUi, resetToolDrafts, session, setActiveTool, setMapError],
   );
 
   const { handleOpenChat, handleOpenSettings, handleOpenLog, handleOpenCodes } =

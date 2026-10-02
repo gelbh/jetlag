@@ -1,22 +1,15 @@
-import { useEffect, useState } from "react";
 import { Stack } from "@mantine/core";
+import { useEffect, useState } from "react";
+import { ErrorCallout, SectionLabel, SuccessCallout } from "@/components/ui/entry/entryChrome";
 import type { SessionRecord } from "@/domain/map/annotations";
-import {
-  isSessionRoleGated,
-  visibleRoleCodeRoles,
-} from "@/domain/session/players/roleGates";
 import { playerRoleLabel } from "@/domain/session/players/playerRole";
+import { isSessionRoleGated, visibleRoleCodeRoles } from "@/domain/session/players/roleGates";
 import { useCopyFeedback } from "@/hooks/forms/useCopyFeedback";
 import {
   prefetchRolePasscode,
   regenerateRolePasscode,
   revealRolePasscode,
 } from "@/services/session/rolePasscodeLifecycle";
-import {
-  ErrorCallout,
-  SectionLabel,
-  SuccessCallout,
-} from "@/components/ui/entry/entryChrome";
 import { RoleCodeStamp } from "../identity/RoleCodeStamp";
 
 type RevealRole = "seeker" | "hider" | "observer";
@@ -44,9 +37,7 @@ export function RolePasscodeSettings({
   embedded = false,
 }: RolePasscodeSettingsProps) {
   const [busyRole, setBusyRole] = useState<RevealRole | null>(null);
-  const [revealedCodes, setRevealedCodes] = useState<
-    Partial<Record<RevealRole, string>>
-  >({});
+  const [revealedCodes, setRevealedCodes] = useState<Partial<Record<RevealRole, string>>>({});
   const [error, setError] = useState<string | null>(null);
   const { status: copyStatus, copy } = useCopyFeedback();
 
@@ -142,9 +133,7 @@ export function RolePasscodeSettings({
           onCopy={() => void handleCopy(role)}
         />
       ))}
-      {copyStatus === "copied" ? (
-        <SuccessCallout>Copied to clipboard.</SuccessCallout>
-      ) : null}
+      {copyStatus === "copied" ? <SuccessCallout>Copied to clipboard.</SuccessCallout> : null}
       <ErrorCallout>{error}</ErrorCallout>
     </Stack>
   );

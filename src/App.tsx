@@ -1,34 +1,23 @@
-import { Suspense, useEffect, useLayoutEffect, type ReactNode } from "react";
 import { QueryClientProvider } from "@tanstack/react-query";
-import {
-  BrowserRouter,
-  Navigate,
-  Outlet,
-  Route,
-  Routes,
-  useLocation,
-} from "react-router-dom";
-import { appQueryClient } from "./lib/queryClient";
-import {
-  setTransactionNameLazy,
-  trackPageViewLazy,
-} from "./services/core/analytics/lazyTelemetry";
-import { MapErrorBoundary } from "./components/ui/feedback/MapErrorBoundary";
-import { AppErrorBoundary } from "./components/ui/feedback/AppErrorBoundary";
-import { AppEntryBackdrop } from "./components/ui/layout/AppEntryBackdrop";
-import { PlayerPhoneShell } from "./components/ui/layout/PlayerPhoneShell";
-import { AnalyticsConsentBanner } from "./components/ui/banners/AnalyticsConsentBanner";
-import { AppUpdateBanner } from "./components/ui/banners/AppUpdateBanner";
-import { PwaInstallTipBanner } from "./components/ui/banners/PwaInstallTipBanner";
-import { AppUpdateProvider } from "./components/ui/banners/AppUpdateProvider";
-import { AppUiProvider } from "./components/ui/providers/AppUiProvider";
+import { type ReactNode, Suspense, useEffect, useLayoutEffect } from "react";
+import { BrowserRouter, Navigate, Outlet, Route, Routes, useLocation } from "react-router-dom";
+import { MotionDatasetEffect } from "./components/motion/MotionDatasetEffect";
 import { LowBatteryPrompt } from "./components/session/banners/LowBatteryPrompt";
 import { LocationPermissionPrompt } from "./components/session/status/LocationPermissionPrompt";
-import { MotionDatasetEffect } from "./components/motion/MotionDatasetEffect";
+import { AnalyticsConsentBanner } from "./components/ui/banners/AnalyticsConsentBanner";
+import { AppUpdateBanner } from "./components/ui/banners/AppUpdateBanner";
+import { AppUpdateProvider } from "./components/ui/banners/AppUpdateProvider";
+import { PwaInstallTipBanner } from "./components/ui/banners/PwaInstallTipBanner";
 import { AppCheckProbeGate } from "./components/ui/feedback/AppCheckProbeGate";
-import { ClientMinVersionGate } from "./components/ui/feedback/ClientMinVersionGate";
+import { AppErrorBoundary } from "./components/ui/feedback/AppErrorBoundary";
 import { AppErrorPage } from "./components/ui/feedback/AppErrorPage";
-import { Home } from "./routes/Home";
+import { ClientMinVersionGate } from "./components/ui/feedback/ClientMinVersionGate";
+import { MapErrorBoundary } from "./components/ui/feedback/MapErrorBoundary";
+import { AppEntryBackdrop } from "./components/ui/layout/AppEntryBackdrop";
+import { PlayerPhoneShell } from "./components/ui/layout/PlayerPhoneShell";
+import { AppUiProvider } from "./components/ui/providers/AppUiProvider";
+import { removeBootSplash } from "./domain/device/chrome/bootSplash";
+import { markPlayDay, PWA_MARK_APP_READY } from "./domain/device/perf/playDayMarks";
 import { scheduleIdleBootWork } from "./domain/device/perf/scheduleAfterFirstPaint";
 import {
   CHUNK_RELOAD_CLEAR_MS,
@@ -38,20 +27,16 @@ import {
 } from "./domain/device/updates/chunkLoadRecovery";
 import {
   getServiceWorkerChunkReloadContext,
+  lazyWithChunkRetry,
   setChunkReloadContextGetter,
 } from "./domain/device/updates/lazyWithChunkRetry";
-import { removeBootSplash } from "./domain/device/chrome/bootSplash";
-import {
-  PWA_MARK_APP_READY,
-  markPlayDay,
-} from "./domain/device/perf/playDayMarks";
 import { notifyAppNeedRefresh } from "./domain/device/updates/serviceWorkerRefresh";
 import { useEdgeSwipeBack } from "./hooks/navigation/useEdgeSwipeBack";
 import { useRouteSeo } from "./hooks/navigation/useRouteSeo";
-import { useSessionStore } from "./state/sessionStore";
-import { RouteReadinessSensor } from "./navigation/RouteReadinessSensor";
-import { RouteProgressChrome } from "./navigation/RouteProgressChrome";
+import { appQueryClient } from "./lib/queryClient";
 import { AppGlobalActivity } from "./navigation/AppGlobalActivity";
+import { RouteProgressChrome } from "./navigation/RouteProgressChrome";
+import { RouteReadinessSensor } from "./navigation/RouteReadinessSensor";
 import { RouteTransitionProvider } from "./navigation/RouteTransitionContext";
 import {
   AdminOpsDeskLazy,
@@ -71,7 +56,9 @@ import {
   StatsLazy,
   TermsLazy,
 } from "./navigation/routePreloaders";
-import { lazyWithChunkRetry } from "./domain/device/updates/lazyWithChunkRetry";
+import { Home } from "./routes/Home";
+import { setTransactionNameLazy, trackPageViewLazy } from "./services/core/analytics/lazyTelemetry";
+import { useSessionStore } from "./state/sessionStore";
 
 const StatusDockGalleryLazy = import.meta.env.DEV
   ? lazyWithChunkRetry(() =>
@@ -100,6 +87,7 @@ function RouteFallback() {
     <div
       className="route-fallback-skeleton route-loading-enter"
       aria-busy="true"
+      role="status"
       aria-label="Loading map"
     >
       <div className="route-fallback-status" />
@@ -388,10 +376,7 @@ export default function App() {
                               </LazyRoute>
                             }
                           />
-                          <Route
-                            path="/tutorial"
-                            element={<Navigate to="/" replace />}
-                          />
+                          <Route path="/tutorial" element={<Navigate to="/" replace />} />
                           <Route
                             path="*"
                             element={

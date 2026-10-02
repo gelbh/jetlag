@@ -1,5 +1,5 @@
-import { useEffect, useRef } from "react";
 import type { MapMouseEvent, MapTouchEvent } from "maplibre-gl";
+import { useEffect, useRef } from "react";
 import { useMapLibreMap } from "../helpers/useMapLibreMap";
 
 type StrokeHandlers = {
@@ -13,12 +13,7 @@ type StrokeHandlers = {
  * Captures freehand strokes on the MapLibre canvas while `enabled`.
  * Disables drag-pan for the gesture so the stroke owns the pointer.
  */
-export function MapDrawStrokeCapture({
-  enabled,
-  onBegin,
-  onExtend,
-  onEnd,
-}: StrokeHandlers) {
+export function MapDrawStrokeCapture({ enabled, onBegin, onExtend, onEnd }: StrokeHandlers) {
   const map = useMapLibreMap();
   const drawingRef = useRef(false);
   const handlersRef = useRef({ onBegin, onExtend, onEnd });

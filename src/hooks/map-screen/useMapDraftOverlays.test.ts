@@ -3,8 +3,8 @@ import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
 import { point as turfPoint } from "@turf/helpers";
 import type { Feature, MultiPolygon, Polygon } from "geojson";
 import { describe, expect, it } from "vitest";
-import { buildMapDraftOverlays } from "./useMapDraftOverlays";
 import { DUBLIN_CITY_GAME_AREA } from "../../test/fixtures/dublinGameArea";
+import { buildMapDraftOverlays } from "./useMapDraftOverlays";
 
 function pointInAnyElimination(
   lngLat: [number, number],
@@ -77,9 +77,7 @@ describe("buildMapDraftOverlays", () => {
       },
     });
 
-    expect(result.overlays.some((overlay) => overlay.id === "radar-draft-range")).toBe(
-      true,
-    );
+    expect(result.overlays.some((overlay) => overlay.id === "radar-draft-range")).toBe(true);
   });
 
   it("yes (hider inside): draft eliminates outside the disk, not the center", async () => {
@@ -94,12 +92,8 @@ describe("buildMapDraftOverlays", () => {
     });
 
     expect(result.eliminationFeatures.length).toBeGreaterThan(0);
-    expect(
-      pointInAnyElimination([-6.26, 53.35], result.eliminationFeatures),
-    ).toBe(false);
-    expect(
-      pointInAnyElimination([-6.45, 53.27], result.eliminationFeatures),
-    ).toBe(true);
+    expect(pointInAnyElimination([-6.26, 53.35], result.eliminationFeatures)).toBe(false);
+    expect(pointInAnyElimination([-6.45, 53.27], result.eliminationFeatures)).toBe(true);
   });
 
   it("no (hider outside): draft eliminates the radar disk", async () => {
@@ -114,12 +108,8 @@ describe("buildMapDraftOverlays", () => {
     });
 
     expect(result.eliminationFeatures.length).toBeGreaterThan(0);
-    expect(
-      pointInAnyElimination([-6.26, 53.35], result.eliminationFeatures),
-    ).toBe(true);
-    expect(
-      pointInAnyElimination([-6.45, 53.27], result.eliminationFeatures),
-    ).toBe(false);
+    expect(pointInAnyElimination([-6.26, 53.35], result.eliminationFeatures)).toBe(true);
+    expect(pointInAnyElimination([-6.45, 53.27], result.eliminationFeatures)).toBe(false);
   });
 
   it("shades tentacle POI answer elimination inline with the draft overlays", async () => {
@@ -155,15 +145,9 @@ describe("buildMapDraftOverlays", () => {
     const { eliminationFeatures } = result;
     expect(eliminationFeatures.length).toBeGreaterThan(0);
 
-    expect(
-      pointInAnyElimination([-6.24, 53.351], eliminationFeatures),
-    ).toBe(false);
-    expect(
-      pointInAnyElimination([-6.28, 53.351], eliminationFeatures),
-    ).toBe(true);
-    expect(
-      pointInAnyElimination([-6.35, 53.35], eliminationFeatures),
-    ).toBe(true);
+    expect(pointInAnyElimination([-6.24, 53.351], eliminationFeatures)).toBe(false);
+    expect(pointInAnyElimination([-6.28, 53.351], eliminationFeatures)).toBe(true);
+    expect(pointInAnyElimination([-6.35, 53.35], eliminationFeatures)).toBe(true);
   });
 
   it("shades only the exterior for a single tentacle POI answer draft", async () => {
@@ -191,12 +175,8 @@ describe("buildMapDraftOverlays", () => {
 
     const { eliminationFeatures } = result;
     expect(eliminationFeatures.length).toBeGreaterThan(0);
-    expect(
-      pointInAnyElimination([-6.35, 53.35], eliminationFeatures),
-    ).toBe(true);
-    expect(
-      pointInAnyElimination([-6.261, 53.35], eliminationFeatures),
-    ).toBe(false);
+    expect(pointInAnyElimination([-6.35, 53.35], eliminationFeatures)).toBe(true);
+    expect(pointInAnyElimination([-6.261, 53.35], eliminationFeatures)).toBe(false);
   });
 
   it("4+ POI tentacle draft shades distinct cells per selection", async () => {
@@ -228,19 +208,11 @@ describe("buildMapDraftOverlays", () => {
     const eastAnswer = await forAnswer("poi-4");
     const westAnswer = await forAnswer("poi-0");
 
-    expect(pointInAnyElimination([pois[4]!.lng, pois[4]!.lat], eastAnswer)).toBe(
-      false,
-    );
-    expect(pointInAnyElimination([pois[0]!.lng, pois[0]!.lat], eastAnswer)).toBe(
-      true,
-    );
+    expect(pointInAnyElimination([pois[4]?.lng, pois[4]?.lat], eastAnswer)).toBe(false);
+    expect(pointInAnyElimination([pois[0]?.lng, pois[0]?.lat], eastAnswer)).toBe(true);
 
-    expect(pointInAnyElimination([pois[0]!.lng, pois[0]!.lat], westAnswer)).toBe(
-      false,
-    );
-    expect(pointInAnyElimination([pois[4]!.lng, pois[4]!.lat], westAnswer)).toBe(
-      true,
-    );
+    expect(pointInAnyElimination([pois[0]?.lng, pois[0]?.lat], westAnswer)).toBe(false);
+    expect(pointInAnyElimination([pois[4]?.lng, pois[4]?.lat], westAnswer)).toBe(true);
   });
 });
 
@@ -257,9 +229,7 @@ describe("useMapDraftOverlays", () => {
     const { result } = renderHook(() => useMapDraftOverlays(sources));
 
     await waitFor(() => {
-      expect(
-        result.current.overlays.some((overlay) => overlay.id === "pin-draft"),
-      ).toBe(true);
+      expect(result.current.overlays.some((overlay) => overlay.id === "pin-draft")).toBe(true);
     });
   });
 
@@ -277,12 +247,8 @@ describe("useMapDraftOverlays", () => {
       },
     });
 
-    const seeker = result.overlays.find(
-      (overlay) => overlay.id === "matching-draft-seeker",
-    );
-    const nearest = result.overlays.find(
-      (overlay) => overlay.id === "matching-draft-nearest",
-    );
+    const seeker = result.overlays.find((overlay) => overlay.id === "matching-draft-seeker");
+    const nearest = result.overlays.find((overlay) => overlay.id === "matching-draft-nearest");
     expect(seeker?.kind).toBe("marker");
     expect(nearest?.kind).toBe("marker");
     if (seeker?.kind === "marker") {

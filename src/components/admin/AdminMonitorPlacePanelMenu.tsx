@@ -1,7 +1,4 @@
-import {
-  MONITOR_PANEL_LABELS,
-  type MonitorPanelId,
-} from "../../domain/admin/opsDeskLayout";
+import { MONITOR_PANEL_LABELS, type MonitorPanelId } from "../../domain/admin/opsDeskLayout";
 
 interface AdminMonitorPlacePanelMenuProps {
   hiddenPanelIds: readonly MonitorPanelId[];
@@ -43,11 +40,7 @@ export function AdminMonitorPlacePanelMenu({
           ))}
         </ul>
       )}
-      <button
-        type="button"
-        className="jl-ops-place-menu-dismiss"
-        onClick={onDismiss}
-      >
+      <button type="button" className="jl-ops-place-menu-dismiss" onClick={onDismiss}>
         Cancel
       </button>
     </div>

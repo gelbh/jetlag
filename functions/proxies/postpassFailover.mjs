@@ -1,7 +1,7 @@
-import { classifyOverpassQuery } from "./postpassClassify.mjs";
-import { buildPostpassSql } from "./postpassSql.mjs";
-import { fetchPostpassGeoJson } from "./postpassClient.mjs";
 import { geoJsonToOverpassElements } from "./geoJsonToOverpassElements.mjs";
+import { classifyOverpassQuery } from "./postpassClassify.mjs";
+import { fetchPostpassGeoJson } from "./postpassClient.mjs";
+import { buildPostpassSql } from "./postpassSql.mjs";
 
 function logFailover(fields) {
   console.log(JSON.stringify({ type: "overpass_failover", ...fields }));
@@ -49,10 +49,7 @@ export async function tryPostpassForOverpassQuery(query) {
       backend: "postpass",
       family: classification.family,
       endpoint: "postpass.geofabrik.de",
-      error:
-        error instanceof Error
-          ? error.message.slice(0, 120)
-          : String(error).slice(0, 120),
+      error: error instanceof Error ? error.message.slice(0, 120) : String(error).slice(0, 120),
     });
     throw error;
   }

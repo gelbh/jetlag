@@ -1,25 +1,23 @@
 import { describe, expect, it } from "vitest";
 import { annotationSummary } from "../map/annotations";
+import { milesToMeters } from "../map/distance";
 import type { PendingQuestionRecord } from "../session/activity/sessionChat";
 import {
+  availableThermometerDistancePresets,
   DEFAULT_THERMOMETER_DISTANCE_METERS,
+  firstAvailableThermometerDistanceMeters,
+  isThermometerDistanceOptionAvailable,
   THERMOMETER_DISTANCE_PRESETS,
   THERMOMETER_DISTANCE_PRESETS_MILES,
   thermometerDistanceLabel,
+  thermometerDistanceOptionForAnnotation,
   thermometerHotterTowards,
+  thermometerPresetMilesForMeters,
   thermometerQuestionPrompt,
   thermometerShadedSide,
-} from "./thermometerQuestions";
-import {
-  availableThermometerDistancePresets,
-  firstAvailableThermometerDistanceMeters,
-  isThermometerDistanceOptionAvailable,
-  thermometerDistanceOptionForAnnotation,
-  thermometerPresetMilesForMeters,
   usedThermometerDistanceOptions,
   usedThermometerDistanceOptionsForSession,
 } from "./thermometerQuestions";
-import { milesToMeters } from "../map/distance";
 
 describe("thermometerQuestions", () => {
   it("converts mile presets to meters", () => {
@@ -30,12 +28,10 @@ describe("thermometerQuestions", () => {
   });
 
   it("formats distance labels for the question copy", () => {
-    expect(
-      thermometerDistanceLabel(DEFAULT_THERMOMETER_DISTANCE_METERS, "imperial"),
-    ).toBe("1/2 mile");
-    expect(thermometerDistanceLabel(milesToMeters(3), "imperial")).toBe(
-      "3 miles",
+    expect(thermometerDistanceLabel(DEFAULT_THERMOMETER_DISTANCE_METERS, "imperial")).toBe(
+      "1/2 mile",
     );
+    expect(thermometerDistanceLabel(milesToMeters(3), "imperial")).toBe("3 miles");
     expect(thermometerQuestionPrompt(milesToMeters(10), "imperial")).toBe(
       "After traveling 10 miles, am I hotter or colder?",
     );
@@ -78,13 +74,9 @@ describe("thermometerQuestions", () => {
     expect(thermometerPresetMilesForMeters(halfMile)).toBe(0.5);
     expect(thermometerDistanceOptionForAnnotation(thermometer)).toBe(3);
     expect(usedThermometerDistanceOptions([thermometer])).toEqual(new Set([3]));
-    expect(usedThermometerDistanceOptions([thermometer], "thermo-1")).toEqual(
-      new Set(),
-    );
+    expect(usedThermometerDistanceOptions([thermometer], "thermo-1")).toEqual(new Set());
     expect(
-      firstAvailableThermometerDistanceMeters(
-        usedThermometerDistanceOptions([thermometer]),
-      ),
+      firstAvailableThermometerDistanceMeters(usedThermometerDistanceOptions([thermometer])),
     ).toBe(halfMile);
 
     const pending = {
@@ -95,22 +87,16 @@ describe("thermometerQuestions", () => {
         metadata: { thermometerDistanceMeters: threeMiles },
       },
     } as unknown as PendingQuestionRecord;
-    expect(usedThermometerDistanceOptionsForSession([], [pending])).toEqual(
-      new Set([3]),
-    );
+    expect(usedThermometerDistanceOptionsForSession([], [pending])).toEqual(new Set([3]));
 
     const cancelled = {
       ...pending,
       status: "cancelled",
       answer: "hotter",
     } as unknown as PendingQuestionRecord;
-    expect(usedThermometerDistanceOptionsForSession([], [cancelled])).toEqual(
-      new Set([3]),
-    );
+    expect(usedThermometerDistanceOptionsForSession([], [cancelled])).toEqual(new Set([3]));
     expect(isThermometerDistanceOptionAvailable("large", threeMiles)).toBe(true);
-    expect(availableThermometerDistancePresets("large")).toEqual(
-      THERMOMETER_DISTANCE_PRESETS,
-    );
+    expect(availableThermometerDistancePresets("large")).toEqual(THERMOMETER_DISTANCE_PRESETS);
   });
 });
 
@@ -142,8 +128,6 @@ describe("annotationSummary for thermometers", () => {
       "imperial",
     );
 
-    expect(summary).toBe(
-      "After traveling 3 miles, am I hotter or colder? · hotter",
-    );
+    expect(summary).toBe("After traveling 3 miles, am I hotter or colder? · hotter");
   });
 });

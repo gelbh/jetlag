@@ -35,7 +35,7 @@ describe("useAdminSessionList", () => {
 
   it("shows loading when enabled flips true before the first fetch settles", async () => {
     let resolvePage!: (value: {
-      sessions: typeof sampleSession[];
+      sessions: (typeof sampleSession)[];
       nextPageToken: string | null;
     }) => void;
     fetchAdminSessionsPage.mockReturnValue(
@@ -44,10 +44,9 @@ describe("useAdminSessionList", () => {
       }),
     );
 
-    const { result, rerender } = renderHook(
-      ({ enabled }) => useAdminSessionList(enabled),
-      { initialProps: { enabled: false } },
-    );
+    const { result, rerender } = renderHook(({ enabled }) => useAdminSessionList(enabled), {
+      initialProps: { enabled: false },
+    });
 
     expect(result.current.loading).toBe(false);
 
@@ -71,10 +70,9 @@ describe("useAdminSessionList", () => {
       nextPageToken: null,
     });
 
-    const { result, rerender } = renderHook(
-      ({ enabled }) => useAdminSessionList(enabled),
-      { initialProps: { enabled: true } },
-    );
+    const { result, rerender } = renderHook(({ enabled }) => useAdminSessionList(enabled), {
+      initialProps: { enabled: true },
+    });
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
@@ -82,7 +80,7 @@ describe("useAdminSessionList", () => {
     expect(result.current.sessions).toEqual([sampleSession]);
 
     let resolveSecond!: (value: {
-      sessions: typeof sampleSession[];
+      sessions: (typeof sampleSession)[];
       nextPageToken: string | null;
     }) => void;
     fetchAdminSessionsPage.mockImplementation(
@@ -127,7 +125,7 @@ describe("useAdminSessionList", () => {
     first.unmount();
 
     let resolveSecond!: (value: {
-      sessions: typeof sampleSession[];
+      sessions: (typeof sampleSession)[];
       nextPageToken: string | null;
     }) => void;
     fetchAdminSessionsPage.mockImplementation(
@@ -180,10 +178,7 @@ describe("useAdminSessionList", () => {
 
   it("queues a trailing refresh when refresh is called while one is in flight", async () => {
     const resolvers: Array<
-      (value: {
-        sessions: typeof sampleSession[];
-        nextPageToken: string | null;
-      }) => void
+      (value: { sessions: (typeof sampleSession)[]; nextPageToken: string | null }) => void
     > = [];
     fetchAdminSessionsPage.mockImplementation(
       () =>
@@ -204,7 +199,7 @@ describe("useAdminSessionList", () => {
     expect(fetchAdminSessionsPage).toHaveBeenCalledTimes(1);
 
     await act(async () => {
-      resolvers[0]!({ sessions: [sampleSession], nextPageToken: null });
+      resolvers[0]?.({ sessions: [sampleSession], nextPageToken: null });
     });
 
     await waitFor(() => {
@@ -212,7 +207,7 @@ describe("useAdminSessionList", () => {
     });
 
     await act(async () => {
-      resolvers[1]!({ sessions: [otherSession], nextPageToken: null });
+      resolvers[1]?.({ sessions: [otherSession], nextPageToken: null });
       await Promise.all([first, second]);
     });
 
@@ -222,14 +217,12 @@ describe("useAdminSessionList", () => {
   });
 
   it("keeps background retry after error from flipping into full-page loading only via refreshing", async () => {
-    fetchAdminSessionsPage
-      .mockRejectedValueOnce(new Error("boom"))
-      .mockImplementation(
-        () =>
-          new Promise(() => {
-            /* leave hanging */
-          }),
-      );
+    fetchAdminSessionsPage.mockRejectedValueOnce(new Error("boom")).mockImplementation(
+      () =>
+        new Promise(() => {
+          /* leave hanging */
+        }),
+    );
 
     const { result } = renderHook(() => useAdminSessionList(true));
 

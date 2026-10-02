@@ -1,14 +1,8 @@
 import type { PolygonFeature } from "./types";
 
 export type KernelWasmModule = {
-  build_mask_from_union_input_json: (
-    inputJson: string,
-    gameAreaJson: string,
-  ) => unknown;
-  build_end_game_mask_from_disks_json: (
-    gameAreaJson: string,
-    disksJson: string,
-  ) => unknown;
+  build_mask_from_union_input_json: (inputJson: string, gameAreaJson: string) => unknown;
+  build_end_game_mask_from_disks_json: (gameAreaJson: string, disksJson: string) => unknown;
   build_half_plane_polygon_json: (
     pointAJson: string,
     pointBJson: string,

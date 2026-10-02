@@ -1,8 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { applyRegionPackMatchingLabels } from "./regionPackLabels";
 import { getMatchingCategory } from "../questions/matchingQuestions";
-import { applyRegionPackMeasuringLabels } from "./regionPackLabels";
 import { MEASURING_CATALOG } from "../questions/measuringQuestions";
+import { applyRegionPackMatchingLabels, applyRegionPackMeasuringLabels } from "./regionPackLabels";
 
 describe("regionPackLabels", () => {
   it("applies Dublin labels to local authority and LEA categories", () => {
@@ -10,10 +9,7 @@ describe("regionPackLabels", () => {
       getMatchingCategory("admin_division_3"),
       "dublin",
     );
-    const lea = applyRegionPackMatchingLabels(
-      getMatchingCategory("admin_division_4"),
-      "dublin",
-    );
+    const lea = applyRegionPackMatchingLabels(getMatchingCategory("admin_division_4"), "dublin");
 
     expect(authority.label).toBe("Local Authority");
     expect(lea.label).toBe("Local Electoral Area");

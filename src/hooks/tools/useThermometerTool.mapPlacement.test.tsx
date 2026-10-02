@@ -1,8 +1,8 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { isValidElement } from "react";
 import { describe, expect, it } from "vitest";
-import { useThermometerTool } from "./useThermometerTool";
 import { createToolHookMocks } from "../../test/helpers/toolHookMocks";
+import { useThermometerTool } from "./useThermometerTool";
 
 describe("useThermometerTool map-first", () => {
   it("suppresses the Ask sheet after choosing a distance", async () => {
@@ -26,9 +26,7 @@ describe("useThermometerTool map-first", () => {
       (() => {
         const panel = result.current.panel;
         if (!isValidElement(panel)) throw new Error("expected panel element");
-        (panel.props as { onDistanceChange: (n: number) => void }).onDistanceChange(
-          1609.344,
-        );
+        (panel.props as { onDistanceChange: (n: number) => void }).onDistanceChange(1609.344);
       })();
     });
 
@@ -42,9 +40,9 @@ describe("useThermometerTool map-first", () => {
       (() => {
         const overlay = result.current.hud.mapOverlay;
         if (!isValidElement(overlay)) throw new Error("expected overlay");
-        (
-          overlay.props as { onPlacementModeChange: (m: "manual") => void }
-        ).onPlacementModeChange("manual");
+        (overlay.props as { onPlacementModeChange: (m: "manual") => void }).onPlacementModeChange(
+          "manual",
+        );
       })();
     });
     act(() => {
@@ -79,9 +77,7 @@ describe("useThermometerTool map-first", () => {
       (() => {
         const panel = result.current.panel;
         if (!isValidElement(panel)) throw new Error("expected panel element");
-        (panel.props as { onDistanceChange: (n: number) => void }).onDistanceChange(
-          1609.344,
-        );
+        (panel.props as { onDistanceChange: (n: number) => void }).onDistanceChange(1609.344);
       })();
     });
     await waitFor(() => {

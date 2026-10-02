@@ -177,10 +177,7 @@ export function parseSessionOpsToolArgs(toolId, args) {
     }
     case "soft_delete_annotation": {
       assertNoExtraKeys(raw, new Set(["annotationId", "note"]));
-      if (
-        typeof raw.annotationId !== "string" ||
-        raw.annotationId.length === 0
-      ) {
+      if (typeof raw.annotationId !== "string" || raw.annotationId.length === 0) {
         throw new Error("annotationId is required");
       }
       const parsed = { annotationId: raw.annotationId };

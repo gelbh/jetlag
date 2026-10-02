@@ -1,9 +1,9 @@
-import test from "node:test";
 import assert from "node:assert/strict";
+import test from "node:test";
 import {
+  buildCursorHotfixPrompt,
   CURSOR_HOTFIX_MISCONFIGURED,
   CURSOR_HOTFIX_SKIPPED,
-  buildCursorHotfixPrompt,
   createCursorCloudAgent,
   forceLaunchCursorHotfixForIncident,
   launchCursorHotfixForIncident,
@@ -360,9 +360,7 @@ test("launchCursorHotfixForIncident records misconfigured when API key missing",
 
   assert.equal(result.launched, false);
   assert.equal(result.code, CURSOR_HOTFIX_MISCONFIGURED);
-  const meta = db.documents.get(
-    "incidents/inc-1/threads/hotfix/messages/msg-misc",
-  );
+  const meta = db.documents.get("incidents/inc-1/threads/hotfix/messages/msg-misc");
   assert.equal(meta.kind, "agent_meta");
   assert.match(meta.text, /not configured/i);
 });

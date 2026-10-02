@@ -1,23 +1,16 @@
+import { Stack, Text, TextInput } from "@mantine/core";
+import { isSignInWithEmailLink } from "firebase/auth";
 import {
   cloneElement,
   isValidElement,
+  type ReactElement,
+  type ReactNode,
   useCallback,
   useEffect,
   useState,
-  type ReactElement,
-  type ReactNode,
 } from "react";
-import { Stack, Text, TextInput } from "@mantine/core";
 import { EntryAsyncButton } from "@/components/ui/entry/EntryAsyncButton";
-import { isSignInWithEmailLink } from "firebase/auth";
-import { LegalInlineLinks } from "../legal/LegalInlineLinks";
-import {
-  ErrorCallout,
-  InsetGroup,
-  SectionLabel,
-} from "../ui/entry/entryChrome";
-import { filledStyles, grayStyles } from "../ui/entry/entryStyles";
-import { GoogleSignInButton } from "../billing/GoogleSignInButton";
+import { usePermanentAuthUser } from "../../hooks/billing/usePermanentAuthUser";
 import {
   completeOAuthRedirectIfPending,
   completePremiumEmailSignInLink,
@@ -31,7 +24,10 @@ import {
   getFirebaseAuth,
   isFirebaseConfigured,
 } from "../../services/core/firebase/firebase";
-import { usePermanentAuthUser } from "../../hooks/billing/usePermanentAuthUser";
+import { GoogleSignInButton } from "../billing/GoogleSignInButton";
+import { LegalInlineLinks } from "../legal/LegalInlineLinks";
+import { ErrorCallout, InsetGroup, SectionLabel } from "../ui/entry/entryChrome";
+import { filledStyles, grayStyles } from "../ui/entry/entryStyles";
 
 interface AccountSignInGateProps {
   children?: ReactNode;
@@ -58,8 +54,7 @@ export function AccountSignInGate({
   const [error, setError] = useState<string | null>(null);
   const [completingEmailLink, setCompletingEmailLink] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
-  const oauthControlsDisabled =
-    completingEmailLink || busyAction !== null || !hasAuthUser;
+  const oauthControlsDisabled = completingEmailLink || busyAction !== null || !hasAuthUser;
 
   const handleSignedIn = useCallback(async () => {
     setError(null);
@@ -72,8 +67,7 @@ export function AccountSignInGate({
     void (async () => {
       try {
         const finishingEmailLink =
-          isFirebaseConfigured() &&
-          isSignInWithEmailLink(getFirebaseAuth(), window.location.href);
+          isFirebaseConfigured() && isSignInWithEmailLink(getFirebaseAuth(), window.location.href);
         if (finishingEmailLink && !cancelled) {
           setCompletingEmailLink(true);
         }
@@ -98,9 +92,7 @@ export function AccountSignInGate({
       } catch (nextError) {
         if (!cancelled) {
           setError(
-            nextError instanceof Error
-              ? nextError.message
-              : "Could not complete email sign-in.",
+            nextError instanceof Error ? nextError.message : "Could not complete email sign-in.",
           );
         }
         try {
@@ -131,11 +123,7 @@ export function AccountSignInGate({
     try {
       await signOutToAnonymous();
     } catch (nextError) {
-      setError(
-        nextError instanceof Error
-          ? nextError.message
-          : "Could not sign out.",
-      );
+      setError(nextError instanceof Error ? nextError.message : "Could not sign out.");
     } finally {
       setSigningOut(false);
     }
@@ -150,11 +138,7 @@ export function AccountSignInGate({
       await sendPremiumEmailSignInLink(email, continuePath);
       setEmailLinkSent(true);
     } catch (nextError) {
-      setError(
-        nextError instanceof Error
-          ? nextError.message
-          : "Could not send sign-in link.",
-      );
+      setError(nextError instanceof Error ? nextError.message : "Could not send sign-in link.");
     } finally {
       setBusyAction(null);
     }
@@ -177,8 +161,7 @@ export function AccountSignInGate({
   }
 
   if (isPermanent) {
-    const accountLabel =
-      user?.email ?? user?.displayName ?? "your account";
+    const accountLabel = user?.email ?? user?.displayName ?? "your account";
 
     return (
       <Stack gap="md">
@@ -230,10 +213,9 @@ export function AccountSignInGate({
           onError={setError}
         />
         {isValidElement(extraSignInProviders)
-          ? cloneElement(
-              extraSignInProviders as ReactElement<{ disabled?: boolean }>,
-              { disabled: oauthControlsDisabled },
-            )
+          ? cloneElement(extraSignInProviders as ReactElement<{ disabled?: boolean }>, {
+              disabled: oauthControlsDisabled,
+            })
           : extraSignInProviders}
         <LegalInlineLinks />
       </Stack>
@@ -270,10 +252,7 @@ export function AccountSignInGate({
           type="button"
           fullWidth
           busy={busyAction === "email"}
-          unavailable={
-            (busyAction !== null && busyAction !== "email") ||
-            email.trim().length === 0
-          }
+          unavailable={(busyAction !== null && busyAction !== "email") || email.trim().length === 0}
           idleLabel="Email me a sign-in link"
           busyLabel="Sending…"
           onClick={() => void handleEmailLink()}
@@ -281,8 +260,7 @@ export function AccountSignInGate({
         />
         {emailLinkSent ? (
           <Text size="sm" c="var(--color-signal)" px={4}>
-            Check your inbox for a sign-in link. Open it on this device to
-            continue.
+            Check your inbox for a sign-in link. Open it on this device to continue.
           </Text>
         ) : (
           <Text size="xs" c="var(--color-field-ink-muted)" px={4}>

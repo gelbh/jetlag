@@ -1,18 +1,18 @@
-import { memo, useCallback, useMemo, useState } from "react";
 import turfCircle from "@turf/circle";
 import type { Feature, LineString } from "geojson";
-import type { MapDraftOverlay } from "@/domain/map/mapDraftOverlay";
+import { memo, useCallback, useMemo, useState } from "react";
 import { MAP_ANNOTATION_COLORS } from "@/domain/map/mapAnnotationColors";
+import type { MapDraftOverlay } from "@/domain/map/mapDraftOverlay";
 import { tentacleDraftPoiIdFromOverlayId } from "@/domain/map/tentacleDraftOverlay";
 import type { TentacleExtendedCategoryId } from "@/domain/questions";
-import { featureHitId } from "../helpers/mapFeatureHitTest";
 import { cssPxDashToMapLibre } from "../helpers/cssPxDashToMapLibre";
+import { useMapFeatureHitTest } from "../helpers/MapFeatureHitTestContext";
 import { MapLibreFeaturePopup } from "../helpers/MapLibreFeaturePopup";
 import { MapLibreGeoJsonOverlay } from "../helpers/MapLibreGeoJsonOverlay";
 import { MapLibrePointMarkers } from "../helpers/MapLibrePointMarkers";
-import type { CircleMarkerProps } from "../helpers/mapMarkerFeatures";
+import { featureHitId } from "../helpers/mapFeatureHitTest";
 import { jlMarkerLayerId } from "../helpers/mapMarkerConstants";
-import { useMapFeatureHitTest } from "../helpers/MapFeatureHitTestContext";
+import type { CircleMarkerProps } from "../helpers/mapMarkerFeatures";
 import { MatchingCategoryPinMarker } from "./MatchingCategoryPinMarker";
 import { TentaclePoiPinMarker } from "./TentaclePoiPinMarker";
 
@@ -28,9 +28,7 @@ interface MapDraftLayerProps {
 
 const DRAFT_HIT_PREFIX = jlMarkerLayerId("draft");
 
-function draftPolylineFeature(
-  positions: readonly [number, number][],
-): Feature<LineString> {
+function draftPolylineFeature(positions: readonly [number, number][]): Feature<LineString> {
   return {
     type: "Feature",
     properties: {},
@@ -41,9 +39,7 @@ function draftPolylineFeature(
   };
 }
 
-function isTentaclePoiMarker(
-  overlay: Extract<MapDraftOverlay, { kind: "marker" }>,
-): boolean {
+function isTentaclePoiMarker(overlay: Extract<MapDraftOverlay, { kind: "marker" }>): boolean {
   return tentacleDraftPoiIdFromOverlayId(overlay.id) !== null;
 }
 
@@ -55,9 +51,7 @@ export const MapDraftLayer = memo(function MapDraftLayer({
   const [openPopupId, setOpenPopupId] = useState<string | null>(null);
   const openMarker = overlays.find(
     (overlay): overlay is Extract<MapDraftOverlay, { kind: "marker" }> =>
-      overlay.kind === "marker" &&
-      overlay.id === openPopupId &&
-      Boolean(overlay.popup),
+      overlay.kind === "marker" && overlay.id === openPopupId && Boolean(overlay.popup),
   );
 
   const markerOverlays = useMemo(
@@ -70,8 +64,7 @@ export const MapDraftLayer = memo(function MapDraftLayer({
   );
 
   const iconMarkers = useMemo(
-    () =>
-      markerOverlays.filter((overlay) => Boolean(overlay.style?.iconCategoryId)),
+    () => markerOverlays.filter((overlay) => Boolean(overlay.style?.iconCategoryId)),
     [markerOverlays],
   );
 
@@ -81,18 +74,14 @@ export const MapDraftLayer = memo(function MapDraftLayer({
   );
 
   const tentacleHasSelection = useMemo(
-    () =>
-      tentaclePoiMarkers.some(
-        (overlay) => overlay.style?.tentaclePoiSelected === true,
-      ),
+    () => tentaclePoiMarkers.some((overlay) => overlay.style?.tentaclePoiSelected === true),
     [tentaclePoiMarkers],
   );
 
   const circleMarkers = useMemo(
     () =>
       markerOverlays.filter(
-        (overlay) =>
-          !overlay.style?.iconCategoryId && !isTentaclePoiMarker(overlay),
+        (overlay) => !overlay.style?.iconCategoryId && !isTentaclePoiMarker(overlay),
       ),
     [markerOverlays],
   );
@@ -112,7 +101,7 @@ export const MapDraftLayer = memo(function MapDraftLayer({
         hitKind: overlay.popup ? "draft-marker" : "draft-marker-no-popup",
       };
     });
-  }, [c.pin, c.strokeLight, circleMarkers]);
+  }, [circleMarkers]);
 
   const activateMarker = useCallback(
     (overlayId: string) => {
@@ -172,10 +161,7 @@ export const MapDraftLayer = memo(function MapDraftLayer({
                   color: overlay.style?.color ?? c.boundary,
                   width,
                   opacity: overlay.style?.opacity ?? 1,
-                  dashArray: cssPxDashToMapLibre(
-                    overlay.style?.dashArray,
-                    width,
-                  ),
+                  dashArray: cssPxDashToMapLibre(overlay.style?.dashArray, width),
                 }}
               />
             );
@@ -202,10 +188,7 @@ export const MapDraftLayer = memo(function MapDraftLayer({
                   color: overlay.style?.color ?? c.radar,
                   width,
                   opacity: overlay.style?.opacity ?? 1,
-                  dashArray: cssPxDashToMapLibre(
-                    overlay.style?.dashArray,
-                    width,
-                  ),
+                  dashArray: cssPxDashToMapLibre(overlay.style?.dashArray, width),
                 }}
               />
             );
@@ -221,10 +204,7 @@ export const MapDraftLayer = memo(function MapDraftLayer({
                   color: overlay.style?.color ?? c.thermometerAxis,
                   width,
                   opacity: overlay.style?.opacity ?? 1,
-                  dashArray: cssPxDashToMapLibre(
-                    overlay.style?.dashArray,
-                    width,
-                  ),
+                  dashArray: cssPxDashToMapLibre(overlay.style?.dashArray, width),
                 }}
               />
             );
@@ -269,11 +249,7 @@ export const MapDraftLayer = memo(function MapDraftLayer({
           />
         );
       })}
-      <MapLibrePointMarkers
-        id="draft"
-        interactive
-        markers={draftMarkers}
-      />
+      <MapLibrePointMarkers id="draft" interactive markers={draftMarkers} />
       {openMarker ? (
         <MapLibreFeaturePopup
           latitude={openMarker.point[0]}

@@ -1,11 +1,11 @@
-import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { Box } from "@mantine/core";
+import { type ReactNode, useLayoutEffect, useRef, useState } from "react";
 import { PHONE_SHELL_MAX_WIDTH_PX } from "@/theme/phoneShell";
+import { PlayerPhoneShellPortalContext } from "./PlayerPhoneShellPortalContext";
 import {
   getPlayerPhoneShellPortalHost,
   setPlayerPhoneShellPortalHost,
 } from "./playerPhoneShellPortalHost";
-import { PlayerPhoneShellPortalContext } from "./PlayerPhoneShellPortalContext";
 
 export function PlayerPhoneShell({ children }: { children: ReactNode }) {
   const shellRef = useRef<HTMLDivElement>(null);

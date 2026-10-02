@@ -31,9 +31,7 @@ function resetDatabaseConnection(failedHandle?: IDBDatabase): void {
   databasePromise = null;
 }
 
-async function withDatabaseRetry<T>(
-  operation: (database: IDBDatabase) => Promise<T>,
-): Promise<T> {
+async function withDatabaseRetry<T>(operation: (database: IDBDatabase) => Promise<T>): Promise<T> {
   let database = await openDatabase();
   try {
     return await operation(database);
@@ -60,7 +58,7 @@ function openDatabase(): Promise<IDBDatabase> {
       const database = request.result;
       const transaction = (event.target as IDBOpenDBRequest).transaction;
       const store = database.objectStoreNames.contains(STORE_NAME)
-        ? transaction!.objectStore(STORE_NAME)
+        ? transaction?.objectStore(STORE_NAME)
         : database.createObjectStore(STORE_NAME, { keyPath: "id" });
 
       if (!store.indexNames.contains("sessionId")) {
@@ -109,9 +107,7 @@ export function shouldRetryOfflineWrite(entry: QueuedWrite): boolean {
     return false;
   }
 
-  const lastFailedAt = entry.lastFailedAt
-    ? Date.parse(entry.lastFailedAt)
-    : 0;
+  const lastFailedAt = entry.lastFailedAt ? Date.parse(entry.lastFailedAt) : 0;
   const delay = BASE_BACKOFF_MS * 2 ** (failureCount - 1);
   return Date.now() >= lastFailedAt + delay;
 }
@@ -136,8 +132,7 @@ export async function enqueueOfflineWrite(
 
     await new Promise<void>((resolve, reject) => {
       transaction.oncomplete = () => resolve();
-      transaction.onerror = () =>
-        reject(transaction.error ?? new Error("Queue write failed"));
+      transaction.onerror = () => reject(transaction.error ?? new Error("Queue write failed"));
     });
   });
 }
@@ -150,15 +145,12 @@ export async function readOfflineQueue(): Promise<QueuedWrite[]> {
 
     return new Promise<QueuedWrite[]>((resolve, reject) => {
       request.onsuccess = () => resolve((request.result as QueuedWrite[]) ?? []);
-      request.onerror = () =>
-        reject(request.error ?? new Error("Queue read failed"));
+      request.onerror = () => reject(request.error ?? new Error("Queue read failed"));
     });
   });
 }
 
-export async function readOfflineQueueForSession(
-  sessionId: string,
-): Promise<QueuedWrite[]> {
+export async function readOfflineQueueForSession(sessionId: string): Promise<QueuedWrite[]> {
   return withDatabaseRetry(async (database) => {
     const transaction = database.transaction(STORE_NAME, "readonly");
     const store = transaction.objectStore(STORE_NAME);
@@ -167,15 +159,12 @@ export async function readOfflineQueueForSession(
 
     return new Promise<QueuedWrite[]>((resolve, reject) => {
       request.onsuccess = () => resolve((request.result as QueuedWrite[]) ?? []);
-      request.onerror = () =>
-        reject(request.error ?? new Error("Queue read failed"));
+      request.onerror = () => reject(request.error ?? new Error("Queue read failed"));
     });
   });
 }
 
-export async function recordOfflineWriteFailure(
-  id: string,
-): Promise<QueuedWrite | null> {
+export async function recordOfflineWriteFailure(id: string): Promise<QueuedWrite | null> {
   return withDatabaseRetry(async (database) => {
     const transaction = database.transaction(STORE_NAME, "readwrite");
     const store = transaction.objectStore(STORE_NAME);
@@ -183,8 +172,7 @@ export async function recordOfflineWriteFailure(
 
     const entry = await new Promise<QueuedWrite | undefined>((resolve, reject) => {
       request.onsuccess = () => resolve(request.result as QueuedWrite | undefined);
-      request.onerror = () =>
-        reject(request.error ?? new Error("Queue read failed"));
+      request.onerror = () => reject(request.error ?? new Error("Queue read failed"));
     });
 
     if (!entry) {
@@ -201,8 +189,7 @@ export async function recordOfflineWriteFailure(
 
     await new Promise<void>((resolve, reject) => {
       transaction.oncomplete = () => resolve();
-      transaction.onerror = () =>
-        reject(transaction.error ?? new Error("Queue update failed"));
+      transaction.onerror = () => reject(transaction.error ?? new Error("Queue update failed"));
     });
 
     return updated;
@@ -222,11 +209,7 @@ export async function removeOfflineWrite(id: string): Promise<void> {
         }
         settled = true;
         addIdbDeleteFailureBreadcrumb(error);
-        reject(
-          error instanceof Error
-            ? error
-            : new Error("Queue delete failed"),
-        );
+        reject(error instanceof Error ? error : new Error("Queue delete failed"));
       };
 
       request.onerror = () => {
@@ -246,16 +229,12 @@ export async function removeOfflineWrite(id: string): Promise<void> {
   });
 }
 
-export async function clearOfflineQueueForSession(
-  sessionId: string,
-): Promise<void> {
+export async function clearOfflineQueueForSession(sessionId: string): Promise<void> {
   const entries = await readOfflineQueueForSession(sessionId);
   await Promise.all(entries.map((entry) => removeOfflineWrite(entry.id)));
 }
 
-export async function countOfflineQueueForSession(
-  sessionId: string,
-): Promise<number> {
+export async function countOfflineQueueForSession(sessionId: string): Promise<number> {
   const entries = await readOfflineQueueForSession(sessionId);
   return entries.length;
 }

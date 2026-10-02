@@ -1,17 +1,14 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { describe, expect, it } from "vitest";
 import area from "@turf/area";
+import { describe, expect, it } from "vitest";
 import { BUNDLED_PRESET_PLAY_AREA_SQ_MI } from "./playAreas";
 
 const SQ_METERS_PER_SQ_MILE = 2_589_988.110336;
 
 function squareMilesFromCityGeoJson(relativePath: string): number {
   const collection = JSON.parse(
-    readFileSync(
-      resolve(import.meta.dirname, `../../../../public/geo/${relativePath}`),
-      "utf8",
-    ),
+    readFileSync(resolve(import.meta.dirname, `../../../../public/geo/${relativePath}`), "utf8"),
   );
   const feature = collection.features?.[0];
   if (!feature) {

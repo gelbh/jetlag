@@ -1,9 +1,9 @@
-import { useCallback, useRef, useState } from "react";
 import type { Feature, LineString } from "geojson";
+import { useCallback, useRef, useState } from "react";
+import { DrawPanel } from "../../components/tools/DrawPanel";
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import type { AnnotationRecord } from "../../domain/map/annotations";
 import { MAP_ANNOTATION_COLORS } from "../../domain/map/mapAnnotationColors";
-import { DrawPanel } from "../../components/tools/DrawPanel";
 
 const MIN_STROKE_POINTS = 2;
 /** Skip samples closer than this (degrees ~ few meters). */

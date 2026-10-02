@@ -1,23 +1,20 @@
 import { describe, expect, it } from "vitest";
+import type { SessionRecord } from "../map/annotations";
 import { milesToMeters } from "../map/distance";
 import {
-  advancedSettingsFromSession,
-  defaultAdvancedSessionSettings,
-  sessionRulesPatchFromAdvancedSettings,
-} from "./tools/advancedSessionSettings";
-import type { SessionRecord } from "../map/annotations";
-import {
+  clampHidingPeriodMinutes,
   resolveAnswerDeadlineMs,
   resolveHidingPeriodMinutes,
   resolveTentacleOptions,
   resolveThermometerPresetsMiles,
   resolveToolDockEnabled,
-  clampHidingPeriodMinutes,
 } from "./rules";
+import { sessionRulesFromRecord, timerNeverStarted } from "./rules/core";
 import {
-  sessionRulesFromRecord,
-  timerNeverStarted,
-} from "./rules/core";
+  advancedSettingsFromSession,
+  defaultAdvancedSessionSettings,
+  sessionRulesPatchFromAdvancedSettings,
+} from "./tools/advancedSessionSettings";
 
 function baseSession(overrides: Partial<SessionRecord> = {}): SessionRecord {
   return {
@@ -44,15 +41,9 @@ function baseSession(overrides: Partial<SessionRecord> = {}): SessionRecord {
 describe("sessionRules", () => {
   it("falls back to game size defaults", () => {
     expect(resolveHidingPeriodMinutes({ gameSize: "small" })).toBe(30);
-    expect(resolveAnswerDeadlineMs({ gameSize: "large" }, "photo")).toBe(
-      20 * 60 * 1000,
-    );
-    expect(resolveThermometerPresetsMiles({ gameSize: "medium" })).toEqual([
-      0.5, 3, 10,
-    ]);
-    expect(resolveToolDockEnabled({ gameSize: "small" }, "tentacle")).toBe(
-      false,
-    );
+    expect(resolveAnswerDeadlineMs({ gameSize: "large" }, "photo")).toBe(20 * 60 * 1000);
+    expect(resolveThermometerPresetsMiles({ gameSize: "medium" })).toEqual([0.5, 3, 10]);
+    expect(resolveToolDockEnabled({ gameSize: "small" }, "tentacle")).toBe(false);
   });
 
   it("applies session overrides", () => {
@@ -71,8 +62,7 @@ describe("sessionRules", () => {
     expect(resolveToolDockEnabled(session, "tentacle")).toBe(true);
     expect(resolveThermometerPresetsMiles(session)).toEqual([0.5]);
     expect(
-      resolveTentacleOptions({ gameSize: "small", tentaclesEnabled: true })
-        .length,
+      resolveTentacleOptions({ gameSize: "small", tentaclesEnabled: true }).length,
     ).toBeGreaterThan(0);
   });
 

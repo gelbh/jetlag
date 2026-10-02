@@ -1,15 +1,15 @@
 import {
-  test,
-  expect,
   createHostSession,
   createMultiplayerContexts,
   endSessionInEmulator,
+  expect,
   joinAsRole,
   openSettings,
   prepareE2EPage,
   readPersistedSessionId,
   rotateAnonymousAuth,
   seedPersistedLocalSessionOnHome,
+  test,
 } from "../../fixtures";
 
 test.describe("session lifecycle", () => {
@@ -73,8 +73,7 @@ test.describe("session lifecycle", () => {
   });
 
   test("redirects guest home when host ends the session", async ({ browser }) => {
-    const { hostPage, guestPage, cleanup } =
-      await createMultiplayerContexts(browser);
+    const { hostPage, guestPage, cleanup } = await createMultiplayerContexts(browser);
 
     await test.step("host ends session from settings", async () => {
       const { code } = await createHostSession(hostPage);
@@ -107,9 +106,7 @@ test.describe("session lifecycle", () => {
     await expect(page.getByRole("radio", { name: /Large/i })).toBeVisible();
   });
 
-  test("continue shows error when persisted remote session has ended", async ({
-    browser,
-  }) => {
+  test("continue shows error when persisted remote session has ended", async ({ browser }) => {
     const { hostPage, cleanup } = await createMultiplayerContexts(browser);
 
     await test.step("end remote session in emulator", async () => {
@@ -122,17 +119,13 @@ test.describe("session lifecycle", () => {
       // Tip: exitSession clears `session` before continueError can render (Alert
       // is gated on session). Soft-gate: Continue removes Return to map.
       await hostPage.goto("/");
-      await expect(
-        hostPage.getByRole("button", { name: /Return to map/i }),
-      ).toBeVisible();
+      await expect(hostPage.getByRole("button", { name: /Return to map/i })).toBeVisible();
 
       await hostPage.getByRole("button", { name: /Return to map/i }).click();
-      await expect(
-        hostPage.getByRole("button", { name: /Return to map/i }),
-      ).toHaveCount(0, { timeout: 15_000 });
-      await expect(
-        hostPage.getByRole("link", { name: "Create session" }),
-      ).toBeVisible();
+      await expect(hostPage.getByRole("button", { name: /Return to map/i })).toHaveCount(0, {
+        timeout: 15_000,
+      });
+      await expect(hostPage.getByRole("link", { name: "Create session" })).toBeVisible();
     });
 
     await cleanup();

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { HIDER_DECK_SIZE } from "./deckComposition";
 import {
   advanceUntilInteractivePick,
   applySequentialRewards,
@@ -12,7 +13,6 @@ import {
   resolveDrawKeep,
   rewardForQuestion,
 } from "./engine";
-import { HIDER_DECK_SIZE } from "./deckComposition";
 
 describe("board economy engine", () => {
   it("shuffles deterministically from seed and keeps full multiset", () => {
@@ -68,7 +68,7 @@ describe("board economy engine", () => {
   it("resolveDrawKeep keeps selected ids and discards the rest", () => {
     const deck = createShuffledDeck("pick");
     const { deck: afterDraw, drawn } = drawFromDeck(deck, 3);
-    const keepId = drawn[2]!.instanceId;
+    const keepId = drawn[2]?.instanceId;
     const resolved = resolveDrawKeep(afterDraw, [], drawn, [keepId], 1);
     expect(resolved.ok).toBe(true);
     expect(resolved.kept.map((c) => c.instanceId)).toEqual([keepId]);
@@ -83,12 +83,12 @@ describe("board economy engine", () => {
       { draw: 3, keep: 1 },
     ]);
     expect(first.pendingPick).not.toBeNull();
-    expect(first.pendingPick!.drawn).toHaveLength(3);
-    const keepFirst = first.pendingPick!.drawn[1]!.instanceId;
+    expect(first.pendingPick?.drawn).toHaveLength(3);
+    const keepFirst = first.pendingPick?.drawn[1]?.instanceId;
     const mid = continueSequentialRewardPick(first, [keepFirst]);
     expect(mid.pendingPick).not.toBeNull();
     expect(mid.hand.map((c) => c.instanceId)).toEqual([keepFirst]);
-    const keepSecond = mid.pendingPick!.drawn[0]!.instanceId;
+    const keepSecond = mid.pendingPick?.drawn[0]?.instanceId;
     const done = continueSequentialRewardPick(mid, [keepSecond]);
     expect(done.pendingPick).toBeNull();
     expect(done.hand).toHaveLength(2);
@@ -116,7 +116,7 @@ describe("board economy engine", () => {
       afterDraw,
       hand,
       drawn,
-      [drawn[0]!.instanceId, drawn[0]!.instanceId],
+      [drawn[0]?.instanceId, drawn[0]?.instanceId],
       1,
     );
     expect(duplicate.ok).toBe(true);
@@ -125,7 +125,7 @@ describe("board economy engine", () => {
       afterDraw,
       hand,
       drawn,
-      [drawn[0]!.instanceId, drawn[1]!.instanceId],
+      [drawn[0]?.instanceId, drawn[1]?.instanceId],
       1,
     );
     expect(tooMany.ok).toBe(false);

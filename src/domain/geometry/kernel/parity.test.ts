@@ -2,10 +2,7 @@ import { describe, expect, it } from "vitest";
 import { loadPolygonGolden } from "./loadPolygonGolden";
 import { assertPolygonTopologyParity } from "./parity";
 import type { PolygonFeature } from "./types";
-import {
-  unionEliminationParts,
-  type EliminationUnionInput,
-} from "./unionPolygonFeatures";
+import { type EliminationUnionInput, unionEliminationParts } from "./unionPolygonFeatures";
 
 function square(west: number): PolygonFeature {
   return {
@@ -46,14 +43,12 @@ describe("kernel parity", () => {
       mask.geometry.type === "Polygon"
         ? mask.geometry.coordinates[0]
         : mask.geometry.coordinates[0]?.[0];
-    expect(ring?.map((coord) => coord.map((n) => Number(n.toFixed(5))))).toEqual(
-      [
-        [-0.18, 51.42],
-        [-0.15, 51.42],
-        [-0.15, 51.48],
-        [-0.18, 51.48],
-        [-0.18, 51.42],
-      ],
-    );
+    expect(ring?.map((coord) => coord.map((n) => Number(n.toFixed(5))))).toEqual([
+      [-0.18, 51.42],
+      [-0.15, 51.42],
+      [-0.15, 51.48],
+      [-0.18, 51.48],
+      [-0.18, 51.42],
+    ]);
   });
 });

@@ -1,12 +1,12 @@
 import {
+  type CSSProperties,
+  type PointerEvent as ReactPointerEvent,
+  type RefObject,
   useCallback,
   useEffect,
   useLayoutEffect,
   useRef,
   useState,
-  type CSSProperties,
-  type PointerEvent as ReactPointerEvent,
-  type RefObject,
 } from "react";
 import {
   DEFAULT_PANEL_HEIGHT_PX,
@@ -17,10 +17,7 @@ import {
   PANEL_PEEK_HEIGHT_PX,
   PANEL_SNAP_FRACTION,
 } from "../../domain/device/motion/motionTokens";
-import {
-  hasExceededDragSlop,
-  useInteractiveDragY,
-} from "./useInteractiveDragY";
+import { hasExceededDragSlop, useInteractiveDragY } from "./useInteractiveDragY";
 import { useMotionProfile } from "./useMotionProfile";
 
 export interface UsePanelDragOptions {
@@ -50,10 +47,7 @@ export interface UsePanelDragResult {
 }
 
 /** Collapsed rest offset in px from fully expanded (0). */
-export function collapsedRestOffsetPx(
-  panelHeight: number,
-  peekHeightPx: number,
-): number {
+export function collapsedRestOffsetPx(panelHeight: number, peekHeightPx: number): number {
   return Math.max(0, panelHeight - peekHeightPx);
 }
 
@@ -63,9 +57,7 @@ export function panelTransformPx(offsetPx: number): string {
 }
 
 /** Whether the panel should visually show peek UI after settle completes. */
-export function resolveDisplayMinimizedAfterSettle(
-  targetMinimized: boolean,
-): boolean {
+export function resolveDisplayMinimizedAfterSettle(targetMinimized: boolean): boolean {
   return targetMinimized;
 }
 
@@ -109,14 +101,10 @@ export function usePanelDrag({
       setOffsetPx(collapsed);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- align state with initial minimized prop on mount only
-  }, []);
+  }, [userMinimized, peekHeightPx, panelRef?.current?.offsetHeight]);
 
   const beginSettle = useCallback(
-    (
-      targetPx: number,
-      targetMinimized: boolean,
-      options?: { persistMinimized?: boolean },
-    ) => {
+    (targetPx: number, targetMinimized: boolean, options?: { persistMinimized?: boolean }) => {
       pendingMinimizedRef.current = targetMinimized;
       settleShouldPersistRef.current = options?.persistMinimized ?? true;
       setIsSettling(true);
@@ -153,14 +141,12 @@ export function usePanelDrag({
       setDragBaseOffsetPx(baseOffset);
       return true;
     },
-    mapDelta: (delta) =>
-      dragFromCollapsed.current ? Math.min(0, delta) : Math.max(0, delta),
+    mapDelta: (delta) => (dragFromCollapsed.current ? Math.min(0, delta) : Math.max(0, delta)),
     onDragEnd: ({ offsetY: relativeOffset, velocityY }) => {
       const height = panelRef?.current?.offsetHeight ?? panelHeight;
       const collapsed = collapsedRestOffsetPx(height, peekHeightPx);
       const moved =
-        hasExceededDragSlop(relativeOffset, MIN_DRAG_START_PX) ||
-        Math.abs(velocityY) > 0.01;
+        hasExceededDragSlop(relativeOffset, MIN_DRAG_START_PX) || Math.abs(velocityY) > 0.01;
 
       if (moved) {
         suppressPeekClick.current = true;
@@ -235,14 +221,7 @@ export function usePanelDrag({
     } else if (panEnded && !userMinimized) {
       beginSettle(0, false);
     }
-  }, [
-    animate,
-    beginSettle,
-    collapsedPx,
-    isDragging,
-    mapPanning,
-    userMinimized,
-  ]);
+  }, [animate, beginSettle, collapsedPx, isDragging, mapPanning, userMinimized]);
 
   const wrappedBindings: PanelHandleProps = {
     onPointerDown: bindings.onPointerDown,
@@ -280,14 +259,9 @@ export function usePanelDrag({
 
   const showTransform =
     animate &&
-    (isDragging ||
-      isSettling ||
-      effectiveDisplayMinimized ||
-      effectiveOffsetPx > 0 ||
-      mapPanning);
+    (isDragging || isSettling || effectiveDisplayMinimized || effectiveOffsetPx > 0 || mapPanning);
 
-  const transition =
-    isDragging || !animate ? "none" : MOTION_TRANSITION_PANEL;
+  const transition = isDragging || !animate ? "none" : MOTION_TRANSITION_PANEL;
 
   const panelStyle: CSSProperties =
     showTransform || (!animate && reducedMotionMinimized)
@@ -316,10 +290,7 @@ export function shouldMinimizePanelSnap(
   panelHeight: number,
   velocityY: number,
 ): boolean {
-  return (
-    offsetY >= panelHeight * PANEL_SNAP_FRACTION ||
-    velocityY > PANEL_MINIMIZE_VELOCITY_PX_MS
-  );
+  return offsetY >= panelHeight * PANEL_SNAP_FRACTION || velocityY > PANEL_MINIMIZE_VELOCITY_PX_MS;
 }
 
 /** Exported for unit tests. */
@@ -328,17 +299,11 @@ export function shouldExpandPanelSnap(
   panelHeight: number,
   velocityY: number,
 ): boolean {
-  return (
-    -offsetY >= panelHeight * PANEL_SNAP_FRACTION ||
-    velocityY < -PANEL_EXPAND_VELOCITY_PX_MS
-  );
+  return -offsetY >= panelHeight * PANEL_SNAP_FRACTION || velocityY < -PANEL_EXPAND_VELOCITY_PX_MS;
 }
 
 /** @deprecated Use shouldMinimizePanelSnap */
-export function shouldMinimizePanelDrag(
-  offsetY: number,
-  velocityY: number,
-): boolean {
+export function shouldMinimizePanelDrag(offsetY: number, velocityY: number): boolean {
   return shouldMinimizePanelSnap(offsetY, DEFAULT_PANEL_HEIGHT_PX, velocityY);
 }
 

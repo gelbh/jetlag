@@ -1,5 +1,5 @@
-import type { GameArea } from "@/domain/map/annotations";
 import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
+import type { GameArea } from "@/domain/map/annotations";
 import {
   getMatchingCategory,
   isMatchingCategoryAvailable,
@@ -10,10 +10,10 @@ import { overpassErrorMessage } from "@/services/core/overpass/overpassClient";
 import {
   countMatchingFeaturesInPlayArea,
   fetchMatchingFeaturesInArea,
-  matchingResolveFailureMessage,
-  pickMatchingFeatureForAnchor,
   type MatchingFeature,
   type MatchingFetchOptions,
+  matchingResolveFailureMessage,
+  pickMatchingFeatureForAnchor,
 } from "@/services/geo/matching";
 
 export interface ResolveMatchingAnchorResult {
@@ -30,10 +30,7 @@ export interface ResolveMatchingAnchorResult {
 }
 
 /** Dual-phase apply guard: ignore a late phase-0 after phase-1 enrich for the same request. */
-export function shouldApplyMatchingAnchorPhase(
-  lastAppliedPhase: number,
-  phase: 0 | 1,
-): boolean {
+export function shouldApplyMatchingAnchorPhase(lastAppliedPhase: number, phase: 0 | 1): boolean {
   return phase >= lastAppliedPhase;
 }
 
@@ -68,9 +65,7 @@ export function reconcileLockedMatchingNearest(
     return null;
   }
 
-  const byName = features.find(
-    (feature) => feature.name.trim().toLowerCase() === normalized,
-  );
+  const byName = features.find((feature) => feature.name.trim().toLowerCase() === normalized);
   if (!byName) {
     return null;
   }
@@ -107,14 +102,9 @@ export function buildResolveMatchingAnchorResult(
 
   const category = getMatchingCategory(categoryId);
   const usesContainment =
-    category.resolver === "reverseGeocodeAdmin" ||
-    category.resolver === "landmass";
+    category.resolver === "reverseGeocodeAdmin" || category.resolver === "landmass";
 
-  const nearest = pickMatchingFeatureForAnchor(
-    seekerPoint,
-    features,
-    categoryId,
-  );
+  const nearest = pickMatchingFeatureForAnchor(seekerPoint, features, categoryId);
 
   if (!nearest) {
     return {
@@ -152,18 +142,9 @@ export async function resolveMatchingAnchor(input: {
   matchingFetchOptions: MatchingFetchOptions;
   onEnrich?: (result: ResolveMatchingAnchorResult) => void;
 }): Promise<ResolveMatchingAnchorResult> {
-  const {
-    seekerPoint,
-    categoryId,
-    gameArea,
-    matchingFetchOptions,
-    onEnrich,
-  } = input;
+  const { seekerPoint, categoryId, gameArea, matchingFetchOptions, onEnrich } = input;
 
-  if (
-    !isMatchingCategoryEnabled(categoryId) ||
-    !isMatchingCategoryAvailable(categoryId)
-  ) {
+  if (!isMatchingCategoryEnabled(categoryId) || !isMatchingCategoryAvailable(categoryId)) {
     return {
       features: [],
       featureCount: 0,
@@ -179,30 +160,16 @@ export async function resolveMatchingAnchor(input: {
   }
 
   try {
-    const features = await fetchMatchingFeaturesInArea(
-      gameArea,
-      categoryId,
-      {
-        ...matchingFetchOptions,
-        onEnrich: onEnrich
-          ? (enrichedFeatures) => {
-              onEnrich(
-                buildResolveMatchingAnchorResult(
-                  seekerPoint,
-                  categoryId,
-                  enrichedFeatures,
-                ),
-              );
-            }
-          : undefined,
-      },
-    );
+    const features = await fetchMatchingFeaturesInArea(gameArea, categoryId, {
+      ...matchingFetchOptions,
+      onEnrich: onEnrich
+        ? (enrichedFeatures) => {
+            onEnrich(buildResolveMatchingAnchorResult(seekerPoint, categoryId, enrichedFeatures));
+          }
+        : undefined,
+    });
 
-    return buildResolveMatchingAnchorResult(
-      seekerPoint,
-      categoryId,
-      features,
-    );
+    return buildResolveMatchingAnchorResult(seekerPoint, categoryId, features);
   } catch (error) {
     return {
       features: [],

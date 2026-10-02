@@ -1,11 +1,8 @@
 import type { MatchingCategoryDefinition } from "../questions/matchingQuestions";
 import type { MeasuringCatalogOption } from "../questions/measuringQuestions";
 import type { SessionRulesInput } from "../session/rules";
-import {
-  getRegionPackConfig,
-  isKnownRegionPack,
-} from "./regionPackRegistry";
 import type { RegionPackId } from "./regionPack";
+import { getRegionPackConfig, isKnownRegionPack } from "./regionPackRegistry";
 
 export function sessionRegionPackId(
   session: Pick<SessionRulesInput, "regionPackId">,
@@ -21,8 +18,7 @@ export function applyRegionPackMatchingLabels(
     return category;
   }
 
-  const override =
-    getRegionPackConfig(regionPackId)?.matchingLabelOverrides[category.id];
+  const override = getRegionPackConfig(regionPackId)?.matchingLabelOverrides[category.id];
   if (!override) {
     return category;
   }
@@ -39,10 +35,7 @@ export function resolveMatchingCategoryLabelForSession(
   category: MatchingCategoryDefinition,
   session: Pick<SessionRulesInput, "regionPackId">,
 ): string {
-  return applyRegionPackMatchingLabels(
-    category,
-    sessionRegionPackId(session),
-  ).label;
+  return applyRegionPackMatchingLabels(category, sessionRegionPackId(session)).label;
 }
 
 export function applyRegionPackMeasuringLabels(
@@ -53,8 +46,7 @@ export function applyRegionPackMeasuringLabels(
     return option;
   }
 
-  const override =
-    getRegionPackConfig(regionPackId)?.measuringLabelOverrides[option.id];
+  const override = getRegionPackConfig(regionPackId)?.measuringLabelOverrides[option.id];
   if (!override) {
     return option;
   }
@@ -70,6 +62,5 @@ export function resolveMeasuringOptionLabelForSession(
   option: MeasuringCatalogOption,
   session: Pick<SessionRulesInput, "regionPackId">,
 ): string {
-  return applyRegionPackMeasuringLabels(option, sessionRegionPackId(session))
-    .label;
+  return applyRegionPackMeasuringLabels(option, sessionRegionPackId(session)).label;
 }

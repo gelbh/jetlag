@@ -7,25 +7,22 @@ import {
   updateDoc,
   writeBatch,
 } from "firebase/firestore";
-import type { SessionRulesPatch } from "@/domain/session/tools/advancedSessionSettings";
 import type { PlayerRole } from "@/domain/session/players/playerRole";
-import { timerStateToRemote, type TimerState } from "@/domain/session/timer/timer";
+import { type TimerState, timerStateToRemote } from "@/domain/session/timer/timer";
+import type { SessionRulesPatch } from "@/domain/session/tools/advancedSessionSettings";
 import { getFirestoreDb } from "@/services/core/firebase/firebase";
-import { sessionRulesPatchToFirestore } from "../serialization/serializeSession";
-import {
-  cancelOpenPendingQuestions,
-  postGameSystemMessage,
-} from "../firestoreSessionExtras";
 import { emitGameEndedActivity } from "@/services/session/emitSessionActivity";
-import {
-  sessionsCollection,
-  endGameTruthAnchorsDoc,
-  clearEndGameTruthAnchorsDoc,
-  sessionCodeDoc,
-  annotationsCollection,
-  FIRESTORE_BATCH_LIMIT,
-} from "./shared";
+import { cancelOpenPendingQuestions, postGameSystemMessage } from "../firestoreSessionExtras";
+import { sessionRulesPatchToFirestore } from "../serialization/serializeSession";
 import { getRemoteSessionById } from "./join";
+import {
+  annotationsCollection,
+  clearEndGameTruthAnchorsDoc,
+  endGameTruthAnchorsDoc,
+  FIRESTORE_BATCH_LIMIT,
+  sessionCodeDoc,
+  sessionsCollection,
+} from "./shared";
 
 export async function endRemoteSession(sessionId: string): Promise<void> {
   const session = await getRemoteSessionById(sessionId);
@@ -40,10 +37,7 @@ export async function endRemoteSession(sessionId: string): Promise<void> {
   }
 }
 
-export async function updateSessionTimer(
-  sessionId: string,
-  state: TimerState,
-): Promise<void> {
+export async function updateSessionTimer(sessionId: string, state: TimerState): Promise<void> {
   const remote = timerStateToRemote(state);
   const patch =
     remote.timerRunningSince === null
@@ -60,10 +54,7 @@ export async function updateSessionRules(
   sessionId: string,
   patch: SessionRulesPatch,
 ): Promise<void> {
-  await updateDoc(
-    doc(sessionsCollection(), sessionId),
-    sessionRulesPatchToFirestore(patch),
-  );
+  await updateDoc(doc(sessionsCollection(), sessionId), sessionRulesPatchToFirestore(patch));
 }
 
 /** Seeker/host direct End Game start (no hider Accept). Clears legacy request fields. */
@@ -99,9 +90,7 @@ export async function startEndGameSession(
 }
 
 /** Clear a pending end-game request only (hider decline / seeker cancel). */
-export async function clearEndGameRequestSession(
-  sessionId: string,
-): Promise<void> {
+export async function clearEndGameRequestSession(sessionId: string): Promise<void> {
   await updateDoc(doc(sessionsCollection(), sessionId), {
     endGameRequestedAt: deleteField(),
     endGameRequestedByUid: deleteField(),
@@ -152,11 +141,7 @@ export async function confirmFoundHiderSession(
   } catch {
     // Best-effort; anchors may already be absent or rules-denied after end.
   }
-  emitGameEndedActivity(
-    sessionId,
-    { outcome: "found", summary: "Hider found" },
-    confirmedByUid,
-  );
+  emitGameEndedActivity(sessionId, { outcome: "found", summary: "Hider found" }, confirmedByUid);
 }
 
 export async function resetFoundHiderSession(sessionId: string): Promise<void> {
@@ -217,4 +202,3 @@ export async function resetRemoteSession(
 
   return resetAt;
 }
-

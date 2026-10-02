@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { useNavigate, type NavigateProps } from "react-router-dom";
+import { type NavigateProps, useNavigate } from "react-router-dom";
 import { useRouteTransition } from "./useRouteTransition";
 
 export function AppNavigate({ to, replace, state }: NavigateProps) {
@@ -25,7 +25,7 @@ export function AppNavigate({ to, replace, state }: NavigateProps) {
     navigate(to, { replace, state, viewTransition: false });
     // Redirect once on mount; during an active gate, follow the chain in-place.
     // eslint-disable-next-line react-hooks/exhaustive-deps -- mount-only redirect
-  }, []);
+  }, [state, navigate, to, replace, phase, beginTransition]);
 
   return null;
 }

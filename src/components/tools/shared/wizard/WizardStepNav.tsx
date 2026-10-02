@@ -54,13 +54,7 @@ export function WizardStepNextButton({
   reserveSpace = true,
 }: Pick<
   WizardStepNavProps,
-  | "stepIndex"
-  | "stepCount"
-  | "canGoNext"
-  | "onNext"
-  | "nextLabel"
-  | "finishLabel"
-  | "showFinish"
+  "stepIndex" | "stepCount" | "canGoNext" | "onNext" | "nextLabel" | "finishLabel" | "showFinish"
 > & {
   reserveSpace?: boolean;
 }) {

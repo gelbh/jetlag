@@ -1,15 +1,14 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import {
-  DEFAULT_COLS,
   cloneLayout,
+  DEFAULT_COLS,
   layoutForFormerBuiltinId,
 } from "../../domain/admin/opsDeskLayout";
 
 const OPS_OVERVIEW_LAYOUT = layoutForFormerBuiltinId("ops-overview")!;
-import {
-  AdminGridWorkspace,
-} from "./AdminGridWorkspace";
+
+import { AdminGridWorkspace } from "./AdminGridWorkspace";
 import { commitWorkspaceGeometry } from "./adminGridGeometry";
 
 vi.mock("react-grid-layout", () => ({
@@ -27,13 +26,11 @@ vi.mock("react-grid-layout", () => ({
 describe("AdminGridWorkspace", () => {
   it("clamps committed geometry so stacks never exceed cols", () => {
     const layout = cloneLayout(OPS_OVERVIEW_LAYOUT);
-    const next = commitWorkspaceGeometry(layout, [
-      { i: "sessions", x: 20, y: 0, w: 10, h: 5 },
-    ]);
+    const next = commitWorkspaceGeometry(layout, [{ i: "sessions", x: 20, y: 0, w: 10, h: 5 }]);
     const sessions = next.stacks.find((s) => s.id === "sessions");
     expect(sessions).toBeDefined();
-    expect(sessions!.x + sessions!.w).toBeLessThanOrEqual(DEFAULT_COLS);
-    expect(sessions!.w).toBeLessThanOrEqual(DEFAULT_COLS);
+    expect(sessions?.x + sessions?.w).toBeLessThanOrEqual(DEFAULT_COLS);
+    expect(sessions?.w).toBeLessThanOrEqual(DEFAULT_COLS);
   });
 
   it("renders stack titles from the layout fixture", () => {

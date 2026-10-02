@@ -1,10 +1,6 @@
-import type { MapBounds } from "../map/mapBounds";
 import type { LatLngTuple } from "../geometry/gameArea/geometry";
-import type {
-  TransitRouteLine,
-  TransitStop,
-  TransitVehicle,
-} from "./transit";
+import type { MapBounds } from "../map/mapBounds";
+import type { TransitRouteLine, TransitStop, TransitVehicle } from "./transit";
 
 export interface MapViewportBounds {
   south: number;
@@ -28,16 +24,9 @@ export function mapBoundsToViewport(bounds: MapBounds): MapViewportBounds {
 /** @deprecated Prefer `mapBoundsToViewport`. */
 export const latLngBoundsToViewport = mapBoundsToViewport;
 
-function pointInViewport(
-  lat: number,
-  lng: number,
-  viewport: MapViewportBounds,
-): boolean {
+function pointInViewport(lat: number, lng: number, viewport: MapViewportBounds): boolean {
   return (
-    lat >= viewport.south &&
-    lat <= viewport.north &&
-    lng >= viewport.west &&
-    lng <= viewport.east
+    lat >= viewport.south && lat <= viewport.north && lng >= viewport.west && lng <= viewport.east
   );
 }
 
@@ -85,9 +74,7 @@ export function filterTransitStopsForViewport(
     return [];
   }
 
-  const inView = stops.filter((stop) =>
-    pointInViewport(stop.lat, stop.lng, viewport),
-  );
+  const inView = stops.filter((stop) => pointInViewport(stop.lat, stop.lng, viewport));
   if (inView.length <= TRANSIT_STOP_MARKER_CAP) {
     return inView;
   }
@@ -116,11 +103,7 @@ export function filterTransitRoutesForViewport(
       }
     }
 
-    return pointInViewport(
-      route.positions[0]![0],
-      route.positions[0]![1],
-      viewport,
-    );
+    return pointInViewport(route.positions[0]?.[0], route.positions[0]?.[1], viewport);
   });
 }
 
@@ -132,7 +115,5 @@ export function filterTransitVehiclesForViewport(
     return [...vehicles];
   }
 
-  return vehicles.filter((vehicle) =>
-    pointInViewport(vehicle.lat, vehicle.lng, viewport),
-  );
+  return vehicles.filter((vehicle) => pointInViewport(vehicle.lat, vehicle.lng, viewport));
 }

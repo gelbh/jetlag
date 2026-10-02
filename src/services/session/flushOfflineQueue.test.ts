@@ -1,11 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { AnnotationRecord } from "../../domain/map/annotations";
-import {
-  enqueueOfflineWrite,
-  readOfflineQueue,
-  removeOfflineWrite,
-} from "./offlineQueue";
 import { flushOfflineQueue } from "./flushOfflineQueue";
+import { enqueueOfflineWrite, readOfflineQueue, removeOfflineWrite } from "./offlineQueue";
 
 vi.mock("../firestore/firestoreAnnotations", () => ({
   writeRemoteAnnotationsBatch: vi.fn(),
@@ -56,15 +52,11 @@ describe("flushOfflineQueue", () => {
       remaining: 0,
       lastError: null,
     });
-    expect(writeRemoteAnnotationsBatch).toHaveBeenCalledWith("session-1", [
-      sampleAnnotation,
-    ]);
+    expect(writeRemoteAnnotationsBatch).toHaveBeenCalledWith("session-1", [sampleAnnotation]);
   });
 
   it("falls back to single writes when batch fails", async () => {
-    vi.mocked(writeRemoteAnnotationsBatch).mockRejectedValue(
-      new Error("batch failed"),
-    );
+    vi.mocked(writeRemoteAnnotationsBatch).mockRejectedValue(new Error("batch failed"));
     vi.mocked(writeRemoteAnnotation).mockResolvedValue(undefined);
 
     await enqueueOfflineWrite("session-1", sampleAnnotation);
@@ -73,19 +65,12 @@ describe("flushOfflineQueue", () => {
       remaining: 0,
       lastError: null,
     });
-    expect(writeRemoteAnnotation).toHaveBeenCalledWith(
-      "session-1",
-      sampleAnnotation,
-    );
+    expect(writeRemoteAnnotation).toHaveBeenCalledWith("session-1", sampleAnnotation);
   });
 
   it("returns lastError when single writes fail", async () => {
-    vi.mocked(writeRemoteAnnotationsBatch).mockRejectedValue(
-      new Error("batch failed"),
-    );
-    vi.mocked(writeRemoteAnnotation).mockRejectedValue(
-      new Error("network down"),
-    );
+    vi.mocked(writeRemoteAnnotationsBatch).mockRejectedValue(new Error("batch failed"));
+    vi.mocked(writeRemoteAnnotation).mockRejectedValue(new Error("network down"));
 
     await enqueueOfflineWrite("session-1", sampleAnnotation);
 

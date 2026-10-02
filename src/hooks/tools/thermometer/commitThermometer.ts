@@ -1,20 +1,20 @@
 import type { Feature, LineString } from "geojson";
-import type { AnnotationRecord } from "@/domain/map/annotations";
+import { hotterColderAnswerOptions } from "@/components/tools/shared/answers/binaryAnswerOptions";
 import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
-import { MAP_ANNOTATION_COLORS } from "@/domain/map/mapAnnotationColors";
+import type { AnnotationRecord } from "@/domain/map/annotations";
 import type { DistanceUnit } from "@/domain/map/distance";
+import { MAP_ANNOTATION_COLORS } from "@/domain/map/mapAnnotationColors";
 import {
   hasOpenPendingQuestion,
   isThermometerDistanceOptionUsed,
-  thermometerHotterTowards,
-  thermometerQuestionPrompt,
   type ThermometerAnswer,
   type ThermometerDistanceOptionMiles,
+  thermometerHotterTowards,
+  thermometerQuestionPrompt,
 } from "@/domain/questions";
 import type { PendingQuestionRecord } from "@/domain/session/activity/sessionChat";
-import { hotterColderAnswerOptions } from "@/components/tools/shared/answers/binaryAnswerOptions";
-import type { SubmitPendingQuestionInput } from "../../sync/usePendingQuestionActions";
 import { emitQuestionAnsweredActivity } from "@/services/session/emitSessionActivity";
+import type { SubmitPendingQuestionInput } from "../../sync/usePendingQuestionActions";
 
 export interface CommitThermometerManualInput {
   thermoA: LatLngTuple;
@@ -25,11 +25,8 @@ export interface CommitThermometerManualInput {
   pendingQuestions: readonly PendingQuestionRecord[];
   awaitHiderAnswer: boolean;
   submitPendingQuestion?: (
-    input: Omit<
-      SubmitPendingQuestionInput,
-      "sessionId" | "senderUid" | "senderRole" | "toolType"
-    >,
-  ) => Promise<string | void>;
+    input: Omit<SubmitPendingQuestionInput, "sessionId" | "senderUid" | "senderRole" | "toolType">,
+  ) => Promise<string | undefined>;
   sessionId?: string;
   senderUid?: string | null;
   distanceUnit: DistanceUnit;
@@ -43,9 +40,7 @@ export interface CommitThermometerManualInput {
   onSuccess: () => void;
 }
 
-export async function commitThermometerManual(
-  input: CommitThermometerManualInput,
-): Promise<void> {
+export async function commitThermometerManual(input: CommitThermometerManualInput): Promise<void> {
   const {
     thermoA,
     thermoB,
@@ -71,10 +66,7 @@ export async function commitThermometerManual(
     return;
   }
 
-  if (
-    thermoTravelMeters !== null &&
-    thermoTravelMeters + 1 < distanceMeters
-  ) {
+  if (thermoTravelMeters !== null && thermoTravelMeters + 1 < distanceMeters) {
     setMapError("Movement is shorter than the selected distance.");
     return;
   }
@@ -135,9 +127,7 @@ export async function commitThermometerManual(
   });
 
   if (sessionId) {
-    const answerOption = hotterColderAnswerOptions.find(
-      (option) => option.value === answer,
-    );
+    const answerOption = hotterColderAnswerOptions.find((option) => option.value === answer);
     emitQuestionAnsweredActivity({
       sessionId,
       toolType: "thermometer",

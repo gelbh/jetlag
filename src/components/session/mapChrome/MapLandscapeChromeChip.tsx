@@ -1,14 +1,14 @@
+import { Paper } from "@mantine/core";
+import { CaretDownIcon, CaretUpIcon } from "@phosphor-icons/react";
+import { mapChromeSurfaceStyles } from "@/components/ui/entry/entryChrome";
+import { surveySyncShortLabel } from "@/domain/device/surveyStatusCopy";
 import type { SyncStatus } from "@/domain/device/sync/sync";
 import type { PendingQuestionRecord } from "@/domain/session/activity/sessionChat";
 import type { SessionRulesInput } from "@/domain/session/rules";
 import type { TimerState } from "@/domain/session/timer/timer";
-import { Paper } from "@mantine/core";
-import { CaretDownIcon, CaretUpIcon } from "@phosphor-icons/react";
-import { surveySyncShortLabel } from "@/domain/device/surveyStatusCopy";
-import { mapChromeSurfaceStyles } from "@/components/ui/entry/entryChrome";
 import { JlIcon } from "../../ui/brand/JlIcon";
-import { SyncStatusBeacon } from "../syncUi/SyncStatusDot";
 import { SYNC_TONE_CLASSES, syncRailDisplay } from "../status/syncRailDisplay";
+import { SyncStatusBeacon } from "../syncUi/SyncStatusDot";
 import { mapLandscapeChipTimerLabel } from "./mapLandscapeChipTimerLabel";
 
 export type MapLandscapeChromeChipProps = {
@@ -42,8 +42,7 @@ export function MapLandscapeChromeChip({
   });
   const syncDisplay = syncRailDisplay(syncStatus, queuedWrites, syncMessage);
   const syncLabel = surveySyncShortLabel(syncStatus, queuedWrites);
-  const syncTone =
-    syncDisplay.inline?.tone ?? syncDisplay.banner?.tone;
+  const syncTone = syncDisplay.inline?.tone ?? syncDisplay.banner?.tone;
 
   const ariaLabel = collapsed
     ? syncLabel

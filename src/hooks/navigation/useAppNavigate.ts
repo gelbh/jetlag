@@ -1,14 +1,12 @@
 import { useCallback } from "react";
-import { type NavigateOptions, type To } from "react-router-dom";
+import type { NavigateOptions, To } from "react-router-dom";
+import { resolveNavigatePath } from "../../navigation/routePreloaders";
 import type { BeginTransitionOptions } from "../../navigation/routeTransitionContextInstance";
 import { useRouteTransition } from "../../navigation/useRouteTransition";
-import { resolveNavigatePath } from "../../navigation/routePreloaders";
 
 const RESET_PATHS = new Set(["/", "/map"]);
 
-let navigationStack: string[] = [
-  typeof window !== "undefined" ? window.location.pathname : "/",
-];
+let navigationStack: string[] = [typeof window !== "undefined" ? window.location.pathname : "/"];
 
 /** @internal Test-only reset for navigation stack. */
 export function resetAppNavigationStackForTests(path = "/"): void {
@@ -26,8 +24,7 @@ export function useAppNavigate() {
       },
     ) => {
       const path = resolveNavigatePath(to);
-      const direction =
-        options?.direction ?? (options?.replace ? "replace" : "forward");
+      const direction = options?.direction ?? (options?.replace ? "replace" : "forward");
 
       if (RESET_PATHS.has(path)) {
         navigationStack = [path];

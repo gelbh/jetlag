@@ -1,17 +1,17 @@
 import { useCallback, useEffect, useState } from "react";
 import {
   advanceUntilInteractivePick,
+  type BoardEconomyState,
   beginSequentialRewardPick,
   continueSequentialRewardPick,
+  discardFromHand,
   enforceHandLimit,
+  markCurseCleared,
   playCurse,
   playDiscardDrawPowerUp,
   playExpandHand,
   playMoveCard,
-  markCurseCleared,
-  discardFromHand,
   rewardCyclesFromPendingCost,
-  type BoardEconomyState,
 } from "../../domain/boardEconomy";
 import type { PendingQuestionToolType } from "../../domain/session/activity/sessionChat";
 import {
@@ -95,8 +95,7 @@ export function useBoardEconomy(params: {
       const current = await ensureBoardEconomyState(sessionId, roundSeed);
       if (current.pendingPick) {
         return {
-          mustDiscard: enforceHandLimit(current.hand, current.handLimit)
-            .mustDiscard,
+          mustDiscard: enforceHandLimit(current.hand, current.handLimit).mustDiscard,
           needsPick: true,
         };
       }
@@ -108,8 +107,7 @@ export function useBoardEconomy(params: {
       const advanced = advanceUntilInteractivePick(started);
       await persist(advanced);
       return {
-        mustDiscard: enforceHandLimit(advanced.hand, advanced.handLimit)
-          .mustDiscard,
+        mustDiscard: enforceHandLimit(advanced.hand, advanced.handLimit).mustDiscard,
         needsPick: advanced.pendingPick !== null,
       };
     },
@@ -141,10 +139,7 @@ export function useBoardEconomy(params: {
   );
 
   const runExpandHand = useCallback(
-    async (
-      instanceId: string,
-      powerUpId: "expandHand1" | "expandHand2",
-    ) => {
+    async (instanceId: string, powerUpId: "expandHand1" | "expandHand2") => {
       if (!state || state.pendingPick) {
         return;
       }
@@ -154,22 +149,11 @@ export function useBoardEconomy(params: {
   );
 
   const runDiscardDraw = useCallback(
-    async (
-      powerUpInstanceId: string,
-      discardInstanceIds: readonly string[],
-      drawN: number,
-    ) => {
+    async (powerUpInstanceId: string, discardInstanceIds: readonly string[], drawN: number) => {
       if (!state || state.pendingPick) {
         return;
       }
-      await persist(
-        playDiscardDrawPowerUp(
-          state,
-          powerUpInstanceId,
-          discardInstanceIds,
-          drawN,
-        ),
-      );
+      await persist(playDiscardDrawPowerUp(state, powerUpInstanceId, discardInstanceIds, drawN));
     },
     [persist, state],
   );
@@ -189,9 +173,7 @@ export function useBoardEconomy(params: {
       if (!state || state.pendingPick) {
         return;
       }
-      await persist(
-        playCurse(state, curseInstanceId, new Date().toISOString()),
-      );
+      await persist(playCurse(state, curseInstanceId, new Date().toISOString()));
     },
     [persist, state],
   );
@@ -201,9 +183,7 @@ export function useBoardEconomy(params: {
       if (!state || state.pendingPick) {
         return;
       }
-      await persist(
-        markCurseCleared(state, curseInstanceId, new Date().toISOString()),
-      );
+      await persist(markCurseCleared(state, curseInstanceId, new Date().toISOString()));
     },
     [persist, state],
   );
@@ -212,9 +192,7 @@ export function useBoardEconomy(params: {
     state,
     ready,
     pendingDraw: state?.pendingPick ?? null,
-    mustDiscard: state
-      ? enforceHandLimit(state.hand, state.handLimit).mustDiscard
-      : 0,
+    mustDiscard: state ? enforceHandLimit(state.hand, state.handLimit).mustDiscard : 0,
     applyAnswerReward,
     confirmDrawPick,
     discardCards,

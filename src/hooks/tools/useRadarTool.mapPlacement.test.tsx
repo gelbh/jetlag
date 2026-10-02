@@ -1,14 +1,11 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { useRadarTool } from "./useRadarTool";
-import { createToolHookMocks } from "../../test/helpers/toolHookMocks";
 import { milesToMeters } from "../../domain/map/distance";
+import { createToolHookMocks } from "../../test/helpers/toolHookMocks";
+import { useRadarTool } from "./useRadarTool";
 
 vi.mock("../../services/core/location/geolocation", async (importOriginal) => {
-  const actual =
-    await importOriginal<
-      typeof import("../../services/core/location/geolocation")
-    >();
+  const actual = await importOriginal<typeof import("../../services/core/location/geolocation")>();
   return {
     ...actual,
     queryGeolocationPermission: vi.fn(async () => "prompt" as const),

@@ -1,17 +1,14 @@
 import { useCallback, useEffect, useState } from "react";
+import { tentacleEliminationJsonForAnswer } from "@/domain/geometry/tentacle/tentacleGeometry";
 import type { AnnotationRecord, GameArea } from "@/domain/map/annotations";
 import {
   DEFAULT_RADIUS_METERS,
-  formatPresetDistance,
   type DistanceUnit,
+  formatPresetDistance,
 } from "@/domain/map/distance";
-import { tentacleEliminationJsonForAnswer } from "@/domain/geometry/tentacle/tentacleGeometry";
-import {
-  tentacleCategoryIdForAnnotation,
-  tentacleQuestionPrompt,
-} from "@/domain/questions";
-import { QuestionPromptBlock } from "../shared/controls/QuestionPromptBlock";
+import { tentacleCategoryIdForAnnotation, tentacleQuestionPrompt } from "@/domain/questions";
 import { TentacleAnswerPicker } from "../shared/answers/TentacleAnswerPicker";
+import { QuestionPromptBlock } from "../shared/controls/QuestionPromptBlock";
 import { ToolSection } from "../shared/panels/ToolSection";
 import type { EditSavePayload } from "./types";
 
@@ -38,9 +35,7 @@ export function TentacleEditFields({
   );
 
   const save = useCallback(async () => {
-    const selectedPoi = annotation.metadata.pois?.find(
-      (poi) => poi.id === tentacleAnswerPoiId,
-    );
+    const selectedPoi = annotation.metadata.pois?.find((poi) => poi.id === tentacleAnswerPoiId);
 
     const radiusMeters = annotation.metadata.radiusMeters ?? DEFAULT_RADIUS_METERS;
     const metaRest = { ...annotation.metadata };

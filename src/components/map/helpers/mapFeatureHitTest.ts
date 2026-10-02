@@ -1,7 +1,7 @@
 import type { MapGeoJSONFeature, Map as MapLibreMap } from "maplibre-gl";
+import type { PoiCandidate } from "@/domain/geo/poiCandidate";
 import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
 import type { MapStyle } from "@/domain/map/mapBasemaps";
-import type { PoiCandidate } from "@/domain/geo/poiCandidate";
 import { previewBasemapPois } from "@/services/geo/maplibre/previewBasemapPois";
 import { isJlMarkerLayerId } from "./mapMarkerConstants";
 
@@ -11,9 +11,7 @@ export interface MapFeatureHitResult {
   lngLat: import("maplibre-gl").LngLat;
 }
 
-export type MapFeatureHitHandler = (
-  result: MapFeatureHitResult,
-) => boolean | void;
+export type MapFeatureHitHandler = (result: MapFeatureHitResult) => boolean | undefined;
 
 export function queryJlMarkerFeatures(
   map: MapLibreMap,
@@ -24,9 +22,7 @@ export function queryJlMarkerFeatures(
     return null;
   }
 
-  const markerLayerIds = style.layers
-    .map((layer) => layer.id)
-    .filter(isJlMarkerLayerId);
+  const markerLayerIds = style.layers.map((layer) => layer.id).filter(isJlMarkerLayerId);
 
   if (markerLayerIds.length === 0) {
     return null;

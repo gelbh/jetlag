@@ -1,11 +1,4 @@
-import {
-  collection,
-  doc,
-  onSnapshot,
-  orderBy,
-  query,
-  type Unsubscribe,
-} from "firebase/firestore";
+import { collection, doc, onSnapshot, orderBy, query, type Unsubscribe } from "firebase/firestore";
 import { getFirestoreDb } from "../core/firebase/firebase";
 
 /** Thread ids under `incidents/{id}/threads/{threadId}`. */
@@ -75,18 +68,8 @@ const THREAD_KINDS = new Set<IncidentThreadMessageKind>([
   "hotfix",
 ]);
 
-function incidentThreadMessagesCollection(
-  incidentId: string,
-  threadId: IncidentThreadId,
-) {
-  return collection(
-    getFirestoreDb(),
-    "incidents",
-    incidentId,
-    "threads",
-    threadId,
-    "messages",
-  );
+function incidentThreadMessagesCollection(incidentId: string, threadId: IncidentThreadId) {
+  return collection(getFirestoreDb(), "incidents", incidentId, "threads", threadId, "messages");
 }
 
 function asNullableString(value: unknown): string | null {
@@ -172,10 +155,7 @@ function subscribeIncidentThreadMessages(
   onError: (error: Error) => void,
 ): Unsubscribe {
   return onSnapshot(
-    query(
-      incidentThreadMessagesCollection(incidentId, threadId),
-      orderBy("createdAt", "asc"),
-    ),
+    query(incidentThreadMessagesCollection(incidentId, threadId), orderBy("createdAt", "asc")),
     (snapshot) => {
       const messages: IncidentThreadMessageRecord[] = [];
       for (const messageDoc of snapshot.docs) {
@@ -201,12 +181,7 @@ export function subscribeSupportThreadMessages(
   onChange: (messages: IncidentThreadMessageRecord[]) => void,
   onError: (error: Error) => void,
 ): Unsubscribe {
-  return subscribeIncidentThreadMessages(
-    incidentId,
-    "support",
-    onChange,
-    onError,
-  );
+  return subscribeIncidentThreadMessages(incidentId, "support", onChange, onError);
 }
 
 /** Admin-only live hotfix thread (coding-agent status / agent_meta). */
@@ -215,12 +190,7 @@ export function subscribeHotfixThreadMessages(
   onChange: (messages: IncidentThreadMessageRecord[]) => void,
   onError: (error: Error) => void,
 ): Unsubscribe {
-  return subscribeIncidentThreadMessages(
-    incidentId,
-    "hotfix",
-    onChange,
-    onError,
-  );
+  return subscribeIncidentThreadMessages(incidentId, "hotfix", onChange, onError);
 }
 
 /** Convenience: thread doc path for admin deep-links / debugging. */

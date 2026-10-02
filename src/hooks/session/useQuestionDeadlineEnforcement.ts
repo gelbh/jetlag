@@ -1,11 +1,8 @@
 import { useEffect, useRef } from "react";
-import type { SessionRulesInput } from "../../domain/session/rules";
-import type { HidingZoneRecord } from "../../domain/session/hiding/hidingZone";
-import {
-  isQuestionAnswerDeadlineExpired,
-  questionAnswerDeadlineMs,
-} from "../../domain/questions";
+import { isQuestionAnswerDeadlineExpired, questionAnswerDeadlineMs } from "../../domain/questions";
 import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
+import type { HidingZoneRecord } from "../../domain/session/hiding/hidingZone";
+import type { SessionRulesInput } from "../../domain/session/rules";
 import { updatePendingQuestion } from "../../services/firestore/firestoreSessionExtras";
 
 const DEADLINE_EXPIRED_MESSAGE =
@@ -24,9 +21,7 @@ interface UseQuestionDeadlineEnforcementParams {
   postSystemMessage: (text: string) => Promise<void>;
 }
 
-function hasMoveInProgress(
-  hidingZones: readonly HidingZoneRecord[],
-): boolean {
+function hasMoveInProgress(hidingZones: readonly HidingZoneRecord[]): boolean {
   return hidingZones.some((zone) => zone.moveInProgress === true);
 }
 
@@ -50,7 +45,7 @@ export function useQuestionDeadlineEnforcement({
     expiryHandledRef.current = new Set();
     autoPausedQuestionRef.current = null;
     resumeHandledRef.current = new Set();
-  }, [sessionId]);
+  }, []);
 
   useEffect(() => {
     hidingTimerRunningRef.current = hidingTimerRunning;
@@ -68,17 +63,10 @@ export function useQuestionDeadlineEnforcement({
       );
 
       for (const question of openQuestions) {
-        const deadlineMs = questionAnswerDeadlineMs(
-          question.toolType,
-          sessionRules,
-        );
+        const deadlineMs = questionAnswerDeadlineMs(question.toolType, sessionRules);
         const expired =
           question.deadlineExpiredAt !== undefined ||
-          isQuestionAnswerDeadlineExpired(
-            question.answerableAt,
-            deadlineMs,
-            nowMs,
-          );
+          isQuestionAnswerDeadlineExpired(question.answerableAt, deadlineMs, nowMs);
 
         if (!expired || expiryHandledRef.current.has(question.id)) {
           continue;

@@ -1,10 +1,10 @@
-import { act, fireEvent, render, screen } from "@testing-library/react";
 import { MantineProvider } from "@mantine/core";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import type { ComponentProps } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { jetlagTheme } from "@/theme/theme";
 import type { MapViewModel } from "@/components/map/chrome/mapViewTypes";
 import { createMapBounds } from "@/domain/map/mapBounds";
+import { jetlagTheme } from "@/theme/theme";
 import { CreateSessionMapPane } from "./CreateSessionMapPane";
 
 let lastMapViewModel: MapViewModel | null = null;
@@ -21,8 +21,7 @@ vi.mock("./prefetchCreateSessionMap", () => ({
 }));
 
 vi.mock("@/domain/device/perf/scheduleWhenIdleAfterLoad", () => ({
-  scheduleWhenIdleAfterLoad: (callback: () => void) =>
-    scheduleWhenIdleAfterLoad(callback),
+  scheduleWhenIdleAfterLoad: (callback: () => void) => scheduleWhenIdleAfterLoad(callback),
 }));
 
 vi.mock("@/components/map/helpers/useMapLibreMap", () => ({
@@ -30,13 +29,7 @@ vi.mock("@/components/map/helpers/useMapLibreMap", () => ({
 }));
 
 vi.mock("@/components/map/chrome/MapView", () => ({
-  MapView: ({
-    model,
-    children,
-  }: {
-    model: MapViewModel;
-    children?: React.ReactNode;
-  }) => {
+  MapView: ({ model, children }: { model: MapViewModel; children?: React.ReactNode }) => {
     lastMapViewModel = model;
     return <div data-testid="create-session-map">{children}</div>;
   },
@@ -160,9 +153,7 @@ describe("CreateSessionMapPane", () => {
     const plate = screen.getByRole("button", { name: "Loading map…" });
     expect(plate).toHaveAttribute("aria-busy", "true");
     expect(plate).toHaveAttribute("aria-disabled", "true");
-    expect(
-      screen.queryByRole("button", { name: "Open map" }),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Open map" })).not.toBeInTheDocument();
   });
 
   it("drops the busy plate when the map never reports a viewport", () => {
@@ -174,9 +165,7 @@ describe("CreateSessionMapPane", () => {
         vi.advanceTimersByTime(10_000);
       });
 
-      expect(
-        screen.queryByTestId("create-session-map-facade"),
-      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId("create-session-map-facade")).not.toBeInTheDocument();
     } finally {
       vi.useRealTimers();
     }

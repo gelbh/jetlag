@@ -1,27 +1,25 @@
-import { describe, expect, it, vi } from "vitest";
 import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
 import { point as turfPoint } from "@turf/helpers";
 import type { Feature, MultiPolygon, Polygon } from "geojson";
+import { describe, expect, it, vi } from "vitest";
 import type { GameArea, TentaclePoi } from "../../map/annotations";
 import { milesToMeters } from "../../map/distance";
+import { MEASURING_PERSIST_OVER_BUDGET_MESSAGE } from "../measuring/measuringGeometryBudgets";
+import * as persistSlim from "../progressive/persistSlim";
 import {
   clearVoronoiCellCacheForTests,
   getCachedVoronoiCellsAsync,
   tentacleSitesFingerprint,
 } from "../voronoi/voronoiCellCache";
-import { voronoiCellSiteId } from "../voronoi/voronoiCellSiteId";
+import { resolveVoronoiCellPoiId, voronoiCellSiteId } from "../voronoi/voronoiCellSiteId";
+import exysHospitalTentacle from "./fixtures/exysHospitalTentacle.json";
 import {
   buildTentacleEliminationRegion,
   buildTentaclePoiAnswerEliminationRegion,
   clearTentacleEliminationCacheForTests,
   tentacleEliminationJsonForAnswer,
 } from "./tentacleGeometry";
-import { resolveVoronoiCellPoiId } from "../voronoi/voronoiCellSiteId";
-import * as persistSlim from "../progressive/persistSlim";
-import { MEASURING_PERSIST_OVER_BUDGET_MESSAGE } from "../measuring/measuringGeometryBudgets";
-import { TENTACLE_POI_OVER_BUDGET_MESSAGE } from "./tentacleGeometryBudgets";
-import exysHospitalTentacle from "./fixtures/exysHospitalTentacle.json";
-import { TENTACLE_POI_MAX } from "./tentacleGeometryBudgets";
+import { TENTACLE_POI_MAX, TENTACLE_POI_OVER_BUDGET_MESSAGE } from "./tentacleGeometryBudgets";
 
 const oneMileMeters = milesToMeters(1);
 const POLYGON_OR_MULTIPOLYGON = /Polygon|MultiPolygon/;
@@ -69,9 +67,7 @@ describe("tentacleGeometry", () => {
       })),
     );
 
-    const siteIds = cells.features.map((cell) =>
-      voronoiCellSiteId(cell, ["poiId"]),
-    );
+    const siteIds = cells.features.map((cell) => voronoiCellSiteId(cell, ["poiId"]));
 
     expect(siteIds).toContain("west");
     expect(siteIds).toContain("east");
@@ -89,7 +85,6 @@ describe("tentacleGeometry", () => {
       ),
     ).toBeNull();
   });
-
 
   it("single POI answer shades only the exterior of the search disk", async () => {
     const anchor: [number, number] = [51.45, -0.15];
@@ -163,9 +158,7 @@ describe("tentacleGeometry", () => {
     const westOfBisectorInsideMile = turfPoint([-0.165, 51.45]);
     const eastOfBisectorInsideMile = turfPoint([-0.135, 51.45]);
     expect(booleanPointInPolygon(westOfBisectorInsideMile, region!)).toBe(true);
-    expect(booleanPointInPolygon(eastOfBisectorInsideMile, region!)).toBe(
-      false,
-    );
+    expect(booleanPointInPolygon(eastOfBisectorInsideMile, region!)).toBe(false);
   });
 
   it("shades the search disk except near the answered poi", async () => {
@@ -291,21 +284,18 @@ describe("tentacleGeometry", () => {
     const region = JSON.parse(json!) as Feature<Polygon | MultiPolygon>;
     expect(region.geometry.type).toMatch(POLYGON_OR_MULTIPOLYGON);
 
-    const answeredPoint = turfPoint([answered!.lng, answered!.lat]);
+    const answeredPoint = turfPoint([answered?.lng, answered?.lat]);
     expect(booleanPointInPolygon(answeredPoint, region)).toBe(false);
   });
 
   it("returns elim JSON for POI lists above the former 64 cap", async () => {
-    const overBudget: TentaclePoi[] = Array.from(
-      { length: TENTACLE_POI_MAX + 1 },
-      (_, index) => ({
-        id: `poi-${index}`,
-        name: `POI ${index}`,
-        lat: 51.45 + index * 0.0001,
-        lng: -0.15 + index * 0.0001,
-        category: "museum",
-      }),
-    );
+    const overBudget: TentaclePoi[] = Array.from({ length: TENTACLE_POI_MAX + 1 }, (_, index) => ({
+      id: `poi-${index}`,
+      name: `POI ${index}`,
+      lat: 51.45 + index * 0.0001,
+      lng: -0.15 + index * 0.0001,
+      category: "museum",
+    }));
 
     await expect(
       tentacleEliminationJsonForAnswer({
@@ -320,12 +310,10 @@ describe("tentacleGeometry", () => {
   });
 
   it("persist-slim failure does not use the POI refuse copy", async () => {
-    const slimSpy = vi
-      .spyOn(persistSlim, "persistSlimPolygonFeature")
-      .mockReturnValue({
-        ok: false,
-        message: MEASURING_PERSIST_OVER_BUDGET_MESSAGE,
-      });
+    const slimSpy = vi.spyOn(persistSlim, "persistSlimPolygonFeature").mockReturnValue({
+      ok: false,
+      message: MEASURING_PERSIST_OVER_BUDGET_MESSAGE,
+    });
 
     await expect(
       tentacleEliminationJsonForAnswer({
@@ -353,9 +341,7 @@ describe("tentacleGeometry", () => {
       }),
     ).rejects.toThrow(MEASURING_PERSIST_OVER_BUDGET_MESSAGE);
     expect(slimSpy).toHaveBeenCalled();
-    expect(MEASURING_PERSIST_OVER_BUDGET_MESSAGE).not.toBe(
-      TENTACLE_POI_OVER_BUDGET_MESSAGE,
-    );
+    expect(MEASURING_PERSIST_OVER_BUDGET_MESSAGE).not.toBe(TENTACLE_POI_OVER_BUDGET_MESSAGE);
     slimSpy.mockRestore();
   });
 

@@ -1,5 +1,5 @@
-import { fireEvent, render, screen, within } from "@testing-library/react";
 import { MantineProvider } from "@mantine/core";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import type { ReactElement } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { AnnotationRecord } from "@/domain/map/annotations";
@@ -95,28 +95,14 @@ describe("SessionLogBody", () => {
   });
 
   it("has no filter controls", () => {
-    renderUi(
-      <SessionLogBody
-        events={[]}
-        annotations={[]}
-        onDelete={vi.fn()}
-        onEdit={vi.fn()}
-      />,
-    );
+    renderUi(<SessionLogBody events={[]} annotations={[]} onDelete={vi.fn()} onEdit={vi.fn()} />);
 
     expect(screen.queryByRole("button", { name: /^all$/i })).toBeNull();
     expect(screen.queryByRole("button", { name: /^radar$/i })).toBeNull();
   });
 
   it("shows empty copy when there is no activity", () => {
-    renderUi(
-      <SessionLogBody
-        events={[]}
-        annotations={[]}
-        onDelete={vi.fn()}
-        onEdit={vi.fn()}
-      />,
-    );
+    renderUi(<SessionLogBody events={[]} annotations={[]} onDelete={vi.fn()} onEdit={vi.fn()} />);
 
     expect(screen.getByText("No activity yet.")).toBeInTheDocument();
   });

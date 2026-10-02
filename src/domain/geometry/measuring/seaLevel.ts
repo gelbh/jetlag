@@ -1,19 +1,16 @@
-import type { Feature, Polygon, MultiPolygon, Position } from "geojson";
 import intersect from "@turf/intersect";
+import type { Feature, MultiPolygon, Polygon, Position } from "geojson";
 import type { GameArea } from "../../map/annotations";
+import type { MeasuringAnswer } from "../../questions/measuringQuestions";
+import { MIN_GAME_AREA_LAT_SPAN, MIN_GAME_AREA_LNG_SPAN } from "../gameArea/gameAreaConstants";
 import {
+  gameAreaFingerprint,
   gameAreaToBoundingBox,
   gameAreaToPolygon,
   isPointInGameArea,
-  gameAreaFingerprint,
   type LatLngTuple,
 } from "../gameArea/geometryCore";
 import { buildMeasuringEliminationRegion } from "./eliminationRegions";
-import type { MeasuringAnswer } from "../../questions/measuringQuestions";
-import {
-  MIN_GAME_AREA_LAT_SPAN,
-  MIN_GAME_AREA_LNG_SPAN,
-} from "../gameArea/gameAreaConstants";
 
 export interface ElevationSampleCell {
   point: LatLngTuple;
@@ -66,8 +63,7 @@ export function resolveGameAreaCellDivisions(gameArea: GameArea): number {
   const { south, west, north, east } = gameAreaToBoundingBox(gameArea);
   const latSpan = north - south;
   const lngSpan = east - west;
-  const areaRatio =
-    (latSpan * lngSpan) / (MIN_GAME_AREA_LAT_SPAN * MIN_GAME_AREA_LNG_SPAN);
+  const areaRatio = (latSpan * lngSpan) / (MIN_GAME_AREA_LAT_SPAN * MIN_GAME_AREA_LNG_SPAN);
 
   if (areaRatio <= 1) {
     const targetDivisions = Math.floor(
@@ -79,14 +75,9 @@ export function resolveGameAreaCellDivisions(gameArea: GameArea): number {
     );
   }
 
-  const targetDivisions = Math.floor(
-    Math.sqrt(MAX_SEA_LEVEL_SAMPLE_CELLS / areaRatio),
-  );
+  const targetDivisions = Math.floor(Math.sqrt(MAX_SEA_LEVEL_SAMPLE_CELLS / areaRatio));
 
-  return Math.max(
-    MIN_GAME_AREA_DIVISIONS,
-    Math.min(DEFAULT_SEA_LEVEL_DIVISIONS, targetDivisions),
-  );
+  return Math.max(MIN_GAME_AREA_DIVISIONS, Math.min(DEFAULT_SEA_LEVEL_DIVISIONS, targetDivisions));
 }
 
 const gameAreaCellMaskCache = new Map<string, boolean[]>();
@@ -99,10 +90,7 @@ function gameAreaCellMaskKey(gameArea: GameArea, divisions: number): string {
   return `${gameAreaFingerprint(gameArea)}:${divisions}`;
 }
 
-function buildInPlayAreaCellMask(
-  gameArea: GameArea,
-  divisions: number,
-): boolean[] {
+function buildInPlayAreaCellMask(gameArea: GameArea, divisions: number): boolean[] {
   const { south, west, north, east } = gameAreaToBoundingBox(gameArea);
   const latStep = (north - south) / divisions;
   const lngStep = (east - west) / divisions;
@@ -110,10 +98,7 @@ function buildInPlayAreaCellMask(
 
   for (let row = 0; row < divisions; row += 1) {
     for (let col = 0; col < divisions; col += 1) {
-      const point: LatLngTuple = [
-        south + (row + 0.5) * latStep,
-        west + (col + 0.5) * lngStep,
-      ];
+      const point: LatLngTuple = [south + (row + 0.5) * latStep, west + (col + 0.5) * lngStep];
 
       if (isPointInGameArea(point, gameArea)) {
         mask[row * divisions + col] = true;
@@ -124,10 +109,7 @@ function buildInPlayAreaCellMask(
   return mask;
 }
 
-function inPlayAreaCellMask(
-  gameArea: GameArea,
-  divisions: number,
-): boolean[] {
+function inPlayAreaCellMask(gameArea: GameArea, divisions: number): boolean[] {
   const cacheKey = gameAreaCellMaskKey(gameArea, divisions);
   const cached = gameAreaCellMaskCache.get(cacheKey);
   if (cached) {
@@ -159,10 +141,7 @@ export function sampleGameAreaCells(
       const cellNorth = south + (row + 1) * latStep;
       const cellWest = west + col * lngStep;
       const cellEast = west + (col + 1) * lngStep;
-      const point: LatLngTuple = [
-        (cellSouth + cellNorth) / 2,
-        (cellWest + cellEast) / 2,
-      ];
+      const point: LatLngTuple = [(cellSouth + cellNorth) / 2, (cellWest + cellEast) / 2];
 
       cells.push({
         point,
@@ -187,10 +166,7 @@ export function isSeaLevelNearElevation(
   elevationMeters: number,
   seekerDistanceFromSeaLevelMeters: number,
 ): boolean {
-  return (
-    distanceFromSeaLevelMeters(elevationMeters) <=
-    seekerDistanceFromSeaLevelMeters
-  );
+  return distanceFromSeaLevelMeters(elevationMeters) <= seekerDistanceFromSeaLevelMeters;
 }
 
 export function isAmbiguousSeaLevelElevation(
@@ -243,9 +219,7 @@ export function selectAmbiguousSeaLevelCells(
   elevations: number[],
   seekerDistanceFromSeaLevelMeters: number,
   marginMeters: number = DEFAULT_SEA_LEVEL_AMBIGUITY_MARGIN_METERS,
-  maxCells: number = Math.floor(
-    MAX_SEA_LEVEL_REFINE_SAMPLES / (SEA_LEVEL_REFINE_SUBDIVISIONS ** 2),
-  ),
+  maxCells: number = Math.floor(MAX_SEA_LEVEL_REFINE_SAMPLES / SEA_LEVEL_REFINE_SUBDIVISIONS ** 2),
 ): ElevationSampleCell[] {
   const ambiguous: ElevationSampleCell[] = [];
   for (let index = 0; index < cells.length; index += 1) {
@@ -269,10 +243,7 @@ interface SeaLevelNearRect {
   east: number;
 }
 
-function seaLevelNearEdgeCase(
-  finiteCount: number,
-  nearCount: number,
-): SeaLevelEdgeCase | null {
+function seaLevelNearEdgeCase(finiteCount: number, nearCount: number): SeaLevelEdgeCase | null {
   if (nearCount === 0) {
     return "lowest";
   }
@@ -302,8 +273,7 @@ function clipNearMultiPolygon(
 
   if (
     !clipped ||
-    (clipped.geometry.type !== "Polygon" &&
-      clipped.geometry.type !== "MultiPolygon")
+    (clipped.geometry.type !== "Polygon" && clipped.geometry.type !== "MultiPolygon")
   ) {
     return null;
   }
@@ -388,12 +358,7 @@ export function buildSeaLevelNearRegionWithLocalRefine(args: {
     if (children && children.length > 0) {
       for (const child of children) {
         finiteCount += 1;
-        if (
-          isSeaLevelNearElevation(
-            child.elevation,
-            seekerDistanceFromSeaLevelMeters,
-          )
-        ) {
+        if (isSeaLevelNearElevation(child.elevation, seekerDistanceFromSeaLevelMeters)) {
           nearCount += 1;
           nearRects.push({
             south: child.cell.south,
@@ -452,9 +417,7 @@ function cellRing(
   ];
 }
 
-function mergeNearCellRects(
-  grid: CellClass[][],
-): MergedRect[] {
+function mergeNearCellRects(grid: CellClass[][]): MergedRect[] {
   const height = grid.length;
   const width = grid[0]?.length ?? 0;
   const rowRuns: Array<Array<{ colStart: number; colEnd: number }>> = [];
@@ -532,9 +495,7 @@ function buildNearRegionFromGrid(
   const { south, west, north, east } = gameAreaToBoundingBox(gameArea);
   const latStep = (north - south) / divisions;
   const lngStep = (east - west) / divisions;
-  const coordinates = rects.map((rect) => [
-    cellRing(rect, south, west, latStep, lngStep),
-  ]);
+  const coordinates = rects.map((rect) => [cellRing(rect, south, west, latStep, lngStep)]);
 
   return clipNearMultiPolygon(coordinates, gameArea);
 }
@@ -570,9 +531,7 @@ export function buildSeaLevelNearRegionFromSamples(
     }
 
     finiteCount += 1;
-    if (
-      isSeaLevelNearElevation(elevation, seekerDistanceFromSeaLevelMeters)
-    ) {
+    if (isSeaLevelNearElevation(elevation, seekerDistanceFromSeaLevelMeters)) {
       nearCount += 1;
       grid[cell.row][cell.col] = "near";
     } else {

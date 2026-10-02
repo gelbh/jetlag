@@ -1,14 +1,14 @@
-import type { GameArea } from "../../domain/map/annotations";
 import { gameAreaToBoundingBox } from "../../domain/geometry/gameArea/geometry";
+import type { GameArea } from "../../domain/map/annotations";
 import type {
   TransitRealtimeSnapshot,
   TransitRouteMode,
   TransitVehicle,
 } from "../../domain/map/transit";
-import { getTransitMetro } from "./transitCatalog";
-import { fetchWithTimeout } from "../core/network/fetchWithTimeout";
 import { buildPremiumProxyHeaders } from "../core/auth/accessControl";
 import { shouldUsePremiumProxies } from "../core/auth/premiumApiContext";
+import { fetchWithTimeout } from "../core/network/fetchWithTimeout";
+import { getTransitMetro } from "./transitCatalog";
 
 const TRANSIT_FETCH_TIMEOUT_MS = 30_000;
 
@@ -37,12 +37,7 @@ function isInsideBounds(
   lng: number,
   bounds: ReturnType<typeof gameAreaToBoundingBox>,
 ): boolean {
-  return (
-    lat >= bounds.south &&
-    lat <= bounds.north &&
-    lng >= bounds.west &&
-    lng <= bounds.east
-  );
+  return lat >= bounds.south && lat <= bounds.north && lng >= bounds.west && lng <= bounds.east;
 }
 
 function normalizeProxyVehicles(payload: unknown): TransitVehicle[] {
@@ -68,17 +63,11 @@ function normalizeProxyVehicles(payload: unknown): TransitVehicle[] {
         label: String(record.label ?? record.routeRef ?? "Vehicle"),
         lat,
         lng,
-        bearing:
-          typeof record.bearing === "number" ? record.bearing : undefined,
-        routeRef:
-          typeof record.routeRef === "string" ? record.routeRef : undefined,
-        mode: modeFromRouteType(
-          typeof record.mode === "string" ? record.mode : undefined,
-        ),
+        bearing: typeof record.bearing === "number" ? record.bearing : undefined,
+        routeRef: typeof record.routeRef === "string" ? record.routeRef : undefined,
+        mode: modeFromRouteType(typeof record.mode === "string" ? record.mode : undefined),
         updatedAt:
-          typeof record.updatedAt === "string"
-            ? record.updatedAt
-            : new Date().toISOString(),
+          typeof record.updatedAt === "string" ? record.updatedAt : new Date().toISOString(),
       };
 
       return vehicle;
@@ -131,9 +120,7 @@ async function fetchVehiclesProxy(
 
   const response = await fetchPremiumProxyJson(url);
   if (response.status === 401 || response.status === 403) {
-    throw new Error(
-      "Map data unavailable. Rejoin session or create a new Premium session.",
-    );
+    throw new Error("Map data unavailable. Rejoin session or create a new Premium session.");
   }
 
   if (!response.ok) {
@@ -173,9 +160,7 @@ async function fetchTransitlandProxyVehicles(
 
   const response = await fetchPremiumProxyJson(url);
   if (response.status === 401 || response.status === 403) {
-    throw new Error(
-      "Map data unavailable. Rejoin session or create a new Premium session.",
-    );
+    throw new Error("Map data unavailable. Rejoin session or create a new Premium session.");
   }
 
   if (!response.ok) {
@@ -226,6 +211,4 @@ export async function fetchLiveTransitVehicles(
   return fetchTransitlandProxyVehicles(metro.transitlandRtFeed, bounds);
 }
 
-export {
-  normalizeProxyVehicles,
-};
+export { normalizeProxyVehicles };

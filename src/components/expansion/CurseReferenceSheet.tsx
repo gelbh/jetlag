@@ -1,14 +1,11 @@
-import { useId, useState } from "react";
 import { Stack, Text, TextInput } from "@mantine/core";
-import { SheetHost } from "../ui/sheets/SheetHost";
+import { useId, useState } from "react";
+import { InsetGroup, insetTextInputStyles } from "@/components/ui/entry/entryChrome";
 import {
   EXPANSION_CURSE_COUNT,
   searchExpansionCurses,
 } from "../../domain/expansion/expansionCurses";
-import {
-  InsetGroup,
-  insetTextInputStyles,
-} from "@/components/ui/entry/entryChrome";
+import { SheetHost } from "../ui/sheets/SheetHost";
 
 interface CurseReferenceSheetProps {
   open: boolean;
@@ -35,8 +32,8 @@ export function CurseReferenceSheet({ open, onClose }: CurseReferenceSheetProps)
     >
       <Stack gap="md">
         <Text size="sm" c="var(--color-field-ink-muted)">
-          {EXPANSION_CURSE_COUNT} curses from Expansion Pack Vol. 1. Reference
-          only; play the physical card in your group.
+          {EXPANSION_CURSE_COUNT} curses from Expansion Pack Vol. 1. Reference only; play the
+          physical card in your group.
         </Text>
 
         <InsetGroup>

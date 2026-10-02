@@ -1,14 +1,14 @@
 import { useEffect, useRef } from "react";
 import type { AnnotationRecord, GameArea } from "../../domain/map/annotations";
-import { isStaleAfterReset } from "../../domain/session/meta/sessionReset";
 import { resolvePendingAnnotationFromReply } from "../../domain/questions/questionResolution/resolvePendingAnnotationFromReply";
 import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
+import { isStaleAfterReset } from "../../domain/session/meta/sessionReset";
+import { capturePendingResolveFailure } from "../../services/core/analytics/sentry";
 import {
   getPendingQuestionStatus,
   updatePendingQuestion,
 } from "../../services/firestore/firestoreSessionExtras";
 import { isFirestorePermissionDenied } from "../../services/firestore/sessions/shared";
-import { capturePendingResolveFailure } from "../../services/core/analytics/sentry";
 import {
   answerSummaryFromPendingReply,
   emitPhotoAnsweredActivity,
@@ -38,10 +38,7 @@ interface UsePendingQuestionResolverParams {
   knownAnnotationIds?: ReadonlySet<string>;
 }
 
-type TerminalWriteOutcome =
-  | "committed"
-  | "already-resolved"
-  | "already-cancelled";
+type TerminalWriteOutcome = "committed" | "already-resolved" | "already-cancelled";
 
 function shouldEmitAnsweredActivity(outcome: TerminalWriteOutcome): boolean {
   return outcome === "committed" || outcome === "already-resolved";
@@ -52,8 +49,7 @@ async function resolvePendingQuestion(
   gameArea: GameArea,
 ): Promise<Omit<AnnotationRecord, "id" | "sessionId" | "status"> | null> {
   const answer = pending.answer;
-  const replyId =
-    typeof answer === "string" ? answer : answer != null ? String(answer) : "";
+  const replyId = typeof answer === "string" ? answer : answer != null ? String(answer) : "";
   if (!replyId) {
     return null;
   }
@@ -96,10 +92,7 @@ function isKnownAnnotationForPending(
   pending: PendingQuestionRecord,
   knownIds: ReadonlySet<string> | undefined,
 ): boolean {
-  return (
-    isAnnotationQuestionTool(pending.toolType) &&
-    Boolean(knownIds?.has(pending.id))
-  );
+  return isAnnotationQuestionTool(pending.toolType) && Boolean(knownIds?.has(pending.id));
 }
 
 export function usePendingQuestionResolver({
@@ -122,16 +115,14 @@ export function usePendingQuestionResolver({
 
   useEffect(() => {
     resolvingRef.current = new Set();
-  }, [sessionId]);
+  }, []);
 
   useEffect(() => {
     if (!enabled || !sessionId) {
       return;
     }
 
-    const answered = pendingQuestions.filter(
-      (question) => question.status === "answered",
-    );
+    const answered = pendingQuestions.filter((question) => question.status === "answered");
 
     for (const pending of answered) {
       if (resolvingRef.current.has(pending.id)) {
@@ -148,10 +139,7 @@ export function usePendingQuestionResolver({
             return;
           }
 
-          const latestStatus = await getPendingQuestionStatus(
-            sessionId,
-            pending.id,
-          );
+          const latestStatus = await getPendingQuestionStatus(sessionId, pending.id);
           if (latestStatus !== "answered") {
             return;
           }
@@ -160,12 +148,7 @@ export function usePendingQuestionResolver({
           // id match as "already known".
           // Read ref after await so annotation baseline hydration is visible
           // (reload wipe → empty set must not lock us into a rebuild).
-          if (
-            isKnownAnnotationForPending(
-              pending,
-              knownAnnotationIdsRef.current,
-            )
-          ) {
+          if (isKnownAnnotationForPending(pending, knownAnnotationIdsRef.current)) {
             annotationAlreadyKnown = true;
             await writePendingTerminalStatus(sessionId, pending.id, {
               status: "resolved",
@@ -177,12 +160,7 @@ export function usePendingQuestionResolver({
           const annotation = await resolvePendingQuestion(pending, gameArea);
 
           // Hydration may have landed during geometry work — complete without write.
-          if (
-            isKnownAnnotationForPending(
-              pending,
-              knownAnnotationIdsRef.current,
-            )
-          ) {
+          if (isKnownAnnotationForPending(pending, knownAnnotationIdsRef.current)) {
             annotationAlreadyKnown = true;
             await writePendingTerminalStatus(sessionId, pending.id, {
               status: "resolved",
@@ -193,11 +171,9 @@ export function usePendingQuestionResolver({
 
           if (!annotation) {
             if (pending.toolType === "photo") {
-              const outcome = await writePendingTerminalStatus(
-                sessionId,
-                pending.id,
-                { status: "resolved" },
-              );
+              const outcome = await writePendingTerminalStatus(sessionId, pending.id, {
+                status: "resolved",
+              });
               if (shouldEmitAnsweredActivity(outcome)) {
                 emitPhotoAnsweredActivity({
                   sessionId,
@@ -225,14 +201,10 @@ export function usePendingQuestionResolver({
           });
           annotationCreated = true;
 
-          const outcome = await writePendingTerminalStatus(
-            sessionId,
-            pending.id,
-            {
-              status: "resolved",
-              resolvedAnnotationId: created.id,
-            },
-          );
+          const outcome = await writePendingTerminalStatus(sessionId, pending.id, {
+            status: "resolved",
+            resolvedAnnotationId: created.id,
+          });
 
           if (outcome === "already-cancelled") {
             // Host/other tab cancelled while we created — drop orphan shade.
@@ -244,20 +216,14 @@ export function usePendingQuestionResolver({
             return;
           }
 
-          if (
-            isAnnotationQuestionTool(pending.toolType) &&
-            shouldEmitAnsweredActivity(outcome)
-          ) {
+          if (isAnnotationQuestionTool(pending.toolType) && shouldEmitAnsweredActivity(outcome)) {
             emitQuestionAnsweredActivity({
               sessionId,
               toolType: pending.toolType,
               promptText: pending.promptText,
               pendingQuestionId: pending.id,
               annotationId: created.id,
-              answerSummary: answerSummaryFromPendingReply(
-                pending.answer,
-                pending.replyOptions,
-              ),
+              answerSummary: answerSummaryFromPendingReply(pending.answer, pending.replyOptions),
               answeredLate: Boolean(pending.answeredLate),
             });
           }
@@ -270,10 +236,7 @@ export function usePendingQuestionResolver({
           const shouldComplete =
             annotationCreated ||
             annotationAlreadyKnown ||
-            isKnownAnnotationForPending(
-              pending,
-              knownAnnotationIdsRef.current,
-            );
+            isKnownAnnotationForPending(pending, knownAnnotationIdsRef.current);
           if (shouldComplete) {
             try {
               await writePendingTerminalStatus(sessionId, pending.id, {
@@ -304,7 +267,6 @@ export function usePendingQuestionResolver({
     deleteAnnotation,
     enabled,
     gameArea,
-    knownAnnotationIdsKey,
     pendingQuestions,
     sessionId,
     sessionResetAt,

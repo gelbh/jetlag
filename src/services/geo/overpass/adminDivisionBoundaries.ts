@@ -1,27 +1,24 @@
-import type { Feature, LineString } from "geojson";
 import area from "@turf/area";
 import booleanIntersects from "@turf/boolean-intersects";
 import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
 import { lineString, point as turfPoint } from "@turf/helpers";
 import polygonize from "@turf/polygonize";
-import type { GameArea } from "@/domain/map/annotations";
-import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
+import type { Feature, LineString } from "geojson";
 import type { AdminDivisionFeature } from "@/domain/geo/types";
+import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
 import {
   gameAreaToBoundingBox,
   gameAreaToPolygon,
   simplifyGameArea,
 } from "@/domain/geometry/gameArea/geometry";
+import type { GameArea } from "@/domain/map/annotations";
 import { queryOverpass } from "../../core/overpass/overpassClient";
+import { adminDivisionCacheKey, getOrFetchCached } from "../cache";
 import { parseMatchingAreaGeoJson } from "../matching/matchingAreaGeoJson";
 import {
-  adminDivisionCacheKey,
-  getOrFetchCached,
-} from "../cache";
-import {
   mergeOverpassElementPayloads,
-  queryOverpassWithBboxSplit,
   type OverpassBbox,
+  queryOverpassWithBboxSplit,
 } from "./overpassBboxSplit";
 
 export type { AdminDivisionFeature } from "@/domain/geo/types";
@@ -48,9 +45,7 @@ type OverpassElement = {
   lon?: number;
 };
 
-function isActiveAdminRelation(
-  tags: Record<string, string> | undefined,
-): boolean {
+function isActiveAdminRelation(tags: Record<string, string> | undefined): boolean {
   if (!tags) {
     return false;
   }
@@ -130,8 +125,7 @@ export function relationBoundaryFromElements(
     relation.members
       ?.filter(
         (member) =>
-          member.type === "way" &&
-          (member.role === "outer" || member.role === "" || !member.role),
+          member.type === "way" && (member.role === "outer" || member.role === "" || !member.role),
       )
       .map((member) => member.ref) ?? [];
 
@@ -201,10 +195,7 @@ function representativePointForBoundary(boundary: GameArea): LatLngTuple {
 }
 
 function intersectsGameArea(boundary: GameArea, gameArea: GameArea): boolean {
-  return booleanIntersects(
-    gameAreaToPolygon(boundary),
-    gameAreaToPolygon(gameArea),
-  );
+  return booleanIntersects(gameAreaToPolygon(boundary), gameAreaToPolygon(gameArea));
 }
 
 export function parseAdminDivisionFeatures(
@@ -256,10 +247,7 @@ export function parseAdminDivisionFeatures(
   return divisions.sort((left, right) => left.id.localeCompare(right.id));
 }
 
-export function buildAdminDivisionQueryForBbox(
-  bbox: OverpassBbox,
-  adminLevel: number,
-): string {
+export function buildAdminDivisionQueryForBbox(bbox: OverpassBbox, adminLevel: number): string {
   const bboxStr = `${bbox.south},${bbox.west},${bbox.north},${bbox.east}`;
 
   // Explicit bbox — `area.searchArea` was never populated, so admin queries
@@ -275,14 +263,8 @@ export function buildAdminDivisionQueryForBbox(
   `;
 }
 
-export function buildAdminDivisionQuery(
-  gameArea: GameArea,
-  adminLevel: number,
-): string {
-  return buildAdminDivisionQueryForBbox(
-    gameAreaToBoundingBox(gameArea),
-    adminLevel,
-  );
+export function buildAdminDivisionQuery(gameArea: GameArea, adminLevel: number): string {
+  return buildAdminDivisionQueryForBbox(gameAreaToBoundingBox(gameArea), adminLevel);
 }
 
 export async function fetchAdminDivisionFeaturesInArea(
@@ -294,29 +276,23 @@ export async function fetchAdminDivisionFeaturesInArea(
     return parseMatchingAreaGeoJson(customAreasJson, gameArea, adminLevel);
   }
 
-  return getOrFetchCached(
-    adminDivisionCacheKey(gameArea, adminLevel),
-    async () => {
-      const payload = await queryOverpassWithBboxSplit(
-        (bbox) => buildAdminDivisionQueryForBbox(bbox, adminLevel),
-        gameAreaToBoundingBox(gameArea),
-        (ql) => queryOverpass<{ elements: OverpassElement[] }>(ql),
-        mergeOverpassElementPayloads,
-      );
+  return getOrFetchCached(adminDivisionCacheKey(gameArea, adminLevel), async () => {
+    const payload = await queryOverpassWithBboxSplit(
+      (bbox) => buildAdminDivisionQueryForBbox(bbox, adminLevel),
+      gameAreaToBoundingBox(gameArea),
+      (ql) => queryOverpass<{ elements: OverpassElement[] }>(ql),
+      mergeOverpassElementPayloads,
+    );
 
-      return parseAdminDivisionFeatures(payload.elements, gameArea, adminLevel);
-    },
-  );
+    return parseAdminDivisionFeatures(payload.elements, gameArea, adminLevel);
+  });
 }
 
 export function adminDivisionAreaSquareMeters(boundary: GameArea): number {
   return area(gameAreaToPolygon(boundary));
 }
 
-export function pointInAdminDivision(
-  point: LatLngTuple,
-  division: AdminDivisionFeature,
-): boolean {
+export function pointInAdminDivision(point: LatLngTuple, division: AdminDivisionFeature): boolean {
   return booleanPointInPolygon(
     turfPoint([point[1], point[0]]),
     gameAreaToPolygon(division.boundary),

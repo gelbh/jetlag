@@ -1,18 +1,18 @@
-import { describe, expect, it, beforeEach, vi } from "vitest";
-import { fireEvent, render, screen } from "@testing-library/react";
 import { MantineProvider } from "@mantine/core";
-import { jetlagTheme } from "@/theme/theme";
-import type { DistanceUnit } from "@/domain/map/distance";
-import type { GameSize } from "@/domain/session/size/gameSize";
-import type { RadarDistanceOptionKey } from "@/domain/questions";
-import { AskHudHost } from "./AskHudHost";
-import { RadarHudBody } from "./RadarHudBody";
+import { fireEvent, render, screen } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
+  type AskHudReadiness,
   activeModeCue,
   canCommit,
   primedCommitLabel,
-  type AskHudReadiness,
 } from "@/domain/ask/askHudModes";
+import type { DistanceUnit } from "@/domain/map/distance";
+import type { RadarDistanceOptionKey } from "@/domain/questions";
+import type { GameSize } from "@/domain/session/size/gameSize";
+import { jetlagTheme } from "@/theme/theme";
+import { AskHudHost } from "./AskHudHost";
+import { RadarHudBody } from "./RadarHudBody";
 
 const baseBodyProps = {
   radiusMeters: null as number | null,
@@ -112,9 +112,7 @@ describe("RadarHudBody", () => {
 
     expect(screen.getByTestId("radar-hud-body")).toBeInTheDocument();
     expect(screen.queryByRole("list", { name: "Wizard phases" })).toBeNull();
-    expect(
-      screen.queryByRole("button", { name: "Continue" }),
-    ).toBeNull();
+    expect(screen.queryByRole("button", { name: "Continue" })).toBeNull();
   });
 
   it("keeps used presets and choose visible but disabled", () => {

@@ -1,40 +1,33 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
+import { statusRailExpandedFlowStyle } from "@/components/ui/entry/entryChrome";
+import {
+  type UserErrorDisplay,
+  userErrorFromSyncMessage,
+} from "@/domain/device/feedback/userErrors";
 import type { SyncStatus } from "@/domain/device/sync/sync";
-import type { TimerState } from "@/domain/session/timer/timer";
-import type { MapTool } from "@/state/sessionStore";
 import type {
   PendingQuestionRecord,
   PlayerLocationRecord,
 } from "@/domain/session/activity/sessionChat";
-import { ScreenNav } from "../../ui/layout/ScreenNav";
-import { GameAreaPreloadBeacon } from "../preload/GameAreaPreloadBeacon";
-import { PlayerStickyErrorAlert } from "../../ui/feedback/PlayerStickyErrorAlert";
-import { showEphemeralPlayerNotification } from "../../ui/notifications/showEphemeralPlayerNotification";
-import {
-  userErrorFromSyncMessage,
-  type UserErrorDisplay,
-} from "@/domain/device/feedback/userErrors";
-import type { SessionRulesInput } from "@/domain/session/rules";
 import type { PlayerRole } from "@/domain/session/players/playerRole";
 import type { RoleGates } from "@/domain/session/players/roleGates";
+import type { SessionRulesInput } from "@/domain/session/rules";
+import type { TimerState } from "@/domain/session/timer/timer";
 import { useLeaderJoinRequests } from "@/hooks/map-screen/useLeaderJoinRequests";
-import { statusRailExpandedFlowStyle } from "@/components/ui/entry/entryChrome";
+import type { MapTool } from "@/state/sessionStore";
+import { MapFloatSurface, type MapFloatTone } from "../../ui/banners/MapFloatSurface";
+import { PlayerStickyErrorAlert } from "../../ui/feedback/PlayerStickyErrorAlert";
+import { ScreenNav } from "../../ui/layout/ScreenNav";
+import { showEphemeralPlayerNotification } from "../../ui/notifications/showEphemeralPlayerNotification";
+import { GameAreaPreloadBeacon } from "../preload/GameAreaPreloadBeacon";
 import { EndGameAlert } from "../status/EndGameAlert";
 import { FoundHiderAlert } from "../status/FoundHiderAlert";
 import { HiderOutsideZoneAlert } from "../status/HiderOutsideZoneAlert";
 import { RoleJoinRequestAlert } from "../status/RoleJoinRequestAlert";
 import { SyncBlock } from "../status/SyncBlock";
+import { SYNC_TONE_CLASSES, type SyncTone, syncRailDisplay } from "../status/syncRailDisplay";
 import { TimerBlock } from "../status/TimerBlock";
 import { ToolStatusBlock } from "../status/ToolStatusBlock";
-import {
-  SYNC_TONE_CLASSES,
-  syncRailDisplay,
-  type SyncTone,
-} from "../status/syncRailDisplay";
-import {
-  MapFloatSurface,
-  type MapFloatTone,
-} from "../../ui/banners/MapFloatSurface";
 
 const SYNC_BANNER_TONE: Record<SyncTone, MapFloatTone> = {
   error: "halt",
@@ -45,8 +38,7 @@ const SYNC_BANNER_TONE: Record<SyncTone, MapFloatTone> = {
 /** Spec: action / secondaryAction fields → sticky; only toast when action-free. */
 function errorHasActions(error: UserErrorDisplay): boolean {
   return Boolean(
-    (error.action && error.actionLabel) ||
-      (error.secondaryAction && error.secondaryActionLabel),
+    (error.action && error.actionLabel) || (error.secondaryAction && error.secondaryActionLabel),
   );
 }
 
@@ -68,7 +60,7 @@ function MapPlayerErrorChannel({
     }
     showEphemeralPlayerNotification(error);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- notify on title/message text only
-  }, [hasActions, error.title, error.message]);
+  }, [hasActions, error.title, error.message, error]);
 
   if (!hasActions) {
     return null;
@@ -124,8 +116,7 @@ export type MapStatusRailModel = {
   onSyncErrorAction?: () => void;
   /** Dim chrome and block tool/timer interaction when the session is gone. */
   inactiveChrome?: boolean;
-  terminalSessionError?:
-    import("@/domain/device/feedback/userErrors").UserErrorDisplay | null;
+  terminalSessionError?: import("@/domain/device/feedback/userErrors").UserErrorDisplay | null;
   onReturnToJoin?: () => void;
   expanded?: boolean;
   /** Synced hiding-zone Move card: drives PHASE=MOVE in status chrome. */
@@ -200,10 +191,7 @@ export function MapStatusRail({ model, headerLeading }: MapStatusRailProps) {
   const sync = syncRailDisplay(syncStatus, queuedWrites, message);
   const syncErrorDisplay = userErrorFromSyncMessage(message);
   const showTerminalBanner =
-    inactiveChrome &&
-    terminalSessionError &&
-    onSyncErrorAction &&
-    onReturnToJoin;
+    inactiveChrome && terminalSessionError && onSyncErrorAction && onReturnToJoin;
   const showTimerMenu = timerMenuOpen && !closeTimerMenu;
   const showPreloadMenu = preloadMenuOpen && !closeTimerMenu;
 
@@ -235,7 +223,7 @@ export function MapStatusRail({ model, headerLeading }: MapStatusRailProps) {
       window.removeEventListener("pointerdown", handlePointerDown);
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [showPreloadMenu, showTimerMenu]);
+  }, [showPreloadMenu, showTimerMenu, closeOtherMenus]);
 
   const railClassName = `jl-status-rail pointer-events-none z-[var(--z-banner)]${
     expanded ? "" : " absolute inset-x-0 top-0"
@@ -288,9 +276,7 @@ export function MapStatusRail({ model, headerLeading }: MapStatusRailProps) {
             onTimerPause={onTimerPause}
             onTimerResume={onTimerStart}
             timerControlsDisabled={timerControlsDisabled || inactiveChrome}
-            headerLeading={
-              headerLeading ?? <ScreenNav variant="home" placement="inline" />
-            }
+            headerLeading={headerLeading ?? <ScreenNav variant="home" placement="inline" />}
             syncSlot={
               <SyncBlock
                 syncStatus={syncStatus}
@@ -329,10 +315,7 @@ export function MapStatusRail({ model, headerLeading }: MapStatusRailProps) {
           />
         ) : sync.banner?.visible ? (
           syncErrorDisplay ? (
-            <MapPlayerErrorChannel
-              error={syncErrorDisplay}
-              onAction={onSyncErrorAction}
-            />
+            <MapPlayerErrorChannel error={syncErrorDisplay} onAction={onSyncErrorAction} />
           ) : (
             <MapFloatSurface
               tone={SYNC_BANNER_TONE[sync.banner.tone]}

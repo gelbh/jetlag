@@ -3,9 +3,9 @@ import type {
   PendingQuestionRecord,
   PlayerLocationRecord,
 } from "@/domain/session/activity/sessionChat";
+import type { PlayerRole } from "@/domain/session/players/playerRole";
 import type { SessionRulesInput } from "@/domain/session/rules";
 import type { TimerState } from "@/domain/session/timer/timer";
-import type { PlayerRole } from "@/domain/session/players/playerRole";
 
 export type StatusDockScenario = {
   id: string;

@@ -1,24 +1,21 @@
-import {
-  boundingBoxToBoundsExpression,
-  createMapBounds,
-  normalizeBoundsExpression,
-  type MapBounds,
-  type MapBoundsExpression,
-} from "../../map/mapBounds";
-import type { Feature, MultiPolygon, Polygon, Position } from "geojson";
 import bboxPolygon from "@turf/bbox-polygon";
 import turfCircle from "@turf/circle";
 import simplify from "@turf/simplify";
+import type { Feature, MultiPolygon, Polygon, Position } from "geojson";
 import type { GameArea } from "../../map/annotations";
 import {
+  boundingBoxToBoundsExpression,
+  createMapBounds,
+  type MapBounds,
+  type MapBoundsExpression,
+  normalizeBoundsExpression,
+} from "../../map/mapBounds";
+import {
+  type BoundingBox,
   boundingBoxToGameArea,
   gameAreaToBoundingBox,
-  type BoundingBox,
 } from "../gameArea/gameAreaBounds";
-import {
-  MIN_GAME_AREA_LAT_SPAN,
-  MIN_GAME_AREA_LNG_SPAN,
-} from "../gameArea/gameAreaConstants";
+import { MIN_GAME_AREA_LAT_SPAN, MIN_GAME_AREA_LNG_SPAN } from "../gameArea/gameAreaConstants";
 import { featureToGameArea, gameAreaToFeature } from "./featureConvert";
 import { safeDifference } from "./geodesicPrimitives";
 import type { LatLngTuple } from "./types";
@@ -51,8 +48,7 @@ export function fallbackGameArea(gameArea?: GameArea | null): GameArea {
 
 export function boundingBoxHasMinimumSpan(box: BoundingBox): boolean {
   return (
-    box.north - box.south >= MIN_GAME_AREA_LAT_SPAN &&
-    box.east - box.west >= MIN_GAME_AREA_LNG_SPAN
+    box.north - box.south >= MIN_GAME_AREA_LAT_SPAN && box.east - box.west >= MIN_GAME_AREA_LNG_SPAN
   );
 }
 
@@ -80,10 +76,7 @@ export function boundsToGameArea(bounds: MapBounds): GameArea {
   });
 }
 
-export function circleToGameArea(
-  center: LatLngTuple,
-  radiusMeters: number,
-): GameArea {
+export function circleToGameArea(center: LatLngTuple, radiusMeters: number): GameArea {
   const circle = turfCircle([center[1], center[0]], radiusMeters / 1000, {
     steps: 64,
     units: "kilometers",
@@ -92,9 +85,7 @@ export function circleToGameArea(
   return featureToGameArea(circle as Feature<Polygon>);
 }
 
-export function verticesToGameArea(
-  vertices: readonly LatLngTuple[],
-): GameArea | null {
+export function verticesToGameArea(vertices: readonly LatLngTuple[]): GameArea | null {
   if (vertices.length < 3) {
     return null;
   }
@@ -112,27 +103,20 @@ export function boundingBoxToMapBounds(box: BoundingBox): MapBounds {
   return createMapBounds(normalizeBoundsExpression(boundingBoxToBoundsExpression(box)));
 }
 
-export function gameAreaToBoundsExpression(
-  gameArea: GameArea,
-): MapBoundsExpression {
+export function gameAreaToBoundsExpression(gameArea: GameArea): MapBoundsExpression {
   return boundingBoxToBoundsExpression(gameAreaToBoundingBox(gameArea));
 }
 
-export function placeToGameArea(place: {
-  bounds: BoundingBox;
-  boundary?: GameArea;
-}): GameArea {
+export function placeToGameArea(place: { bounds: BoundingBox; boundary?: GameArea }): GameArea {
   return place.boundary ?? boundingBoxToGameArea(place.bounds);
 }
 
 function collectPositions(gameArea: GameArea): Position[] {
   if (gameArea.type === "MultiPolygon") {
-    return gameArea.coordinates.flatMap((polygon) =>
-      polygon.flatMap((ring) => ring),
-    );
+    return gameArea.coordinates.flatMap((polygon) => polygon.flat());
   }
 
-  return gameArea.coordinates.flatMap((ring) => ring);
+  return gameArea.coordinates.flat();
 }
 
 export function gameAreaFingerprint(gameArea: GameArea): string {
@@ -140,8 +124,7 @@ export function gameAreaFingerprint(gameArea: GameArea): string {
   const coordCount =
     gameArea.type === "MultiPolygon"
       ? gameArea.coordinates.reduce(
-          (sum, polygon) =>
-            sum + polygon.reduce((ringSum, ring) => ringSum + ring.length, 0),
+          (sum, polygon) => sum + polygon.reduce((ringSum, ring) => ringSum + ring.length, 0),
           0,
         )
       : gameArea.coordinates.reduce((sum, ring) => sum + ring.length, 0);
@@ -171,9 +154,7 @@ export function simplifyGameArea(gameArea: GameArea): GameArea {
   return simplified;
 }
 
-export function gameAreaToPolygon(
-  gameArea: GameArea,
-): Feature<Polygon | MultiPolygon> {
+export function gameAreaToPolygon(gameArea: GameArea): Feature<Polygon | MultiPolygon> {
   return gameAreaToFeature(gameArea);
 }
 
@@ -207,9 +188,8 @@ export function gameAreaWithoutInteriorRings(gameArea: GameArea): GameArea {
 
 export function gameAreaExteriorStrokeRings(gameArea: GameArea): LatLngTuple[][] {
   if (gameArea.type === "MultiPolygon") {
-    return gameArea.coordinates.map(
-      (polygon) =>
-        (polygon[0] ?? []).map(([lng, lat]) => [lat, lng] as LatLngTuple),
+    return gameArea.coordinates.map((polygon) =>
+      (polygon[0] ?? []).map(([lng, lat]) => [lat, lng] as LatLngTuple),
     );
   }
 
@@ -219,14 +199,8 @@ export function gameAreaExteriorStrokeRings(gameArea: GameArea): LatLngTuple[][]
 
 export function gameAreaOutsideMaskOuterBounds(gameArea: GameArea): BoundingBox {
   const { south, west, north, east } = gameAreaToBoundingBox(gameArea);
-  const latPad = Math.max(
-    (north - south) * OUTSIDE_MASK_PAD_FACTOR,
-    OUTSIDE_MASK_MIN_PAD_DEG,
-  );
-  const lngPad = Math.max(
-    (east - west) * OUTSIDE_MASK_PAD_FACTOR,
-    OUTSIDE_MASK_MIN_PAD_DEG,
-  );
+  const latPad = Math.max((north - south) * OUTSIDE_MASK_PAD_FACTOR, OUTSIDE_MASK_MIN_PAD_DEG);
+  const lngPad = Math.max((east - west) * OUTSIDE_MASK_PAD_FACTOR, OUTSIDE_MASK_MIN_PAD_DEG);
   return {
     south: Math.max(south - latPad, -OUTSIDE_MASK_LAT_LIMIT),
     west: Math.max(west - lngPad, -180),
@@ -250,7 +224,5 @@ export {
   midpoint,
   safeDifference,
 } from "./geodesicPrimitives";
-export {
-  isPointInGameArea,
-} from "./radarHalfPlane";
+export { isPointInGameArea } from "./radarHalfPlane";
 export type { LatLngTuple } from "./types";

@@ -10,11 +10,5 @@ export function LiveSeekerLocationsLayer({
   locations,
   myUid = null,
 }: LiveSeekerLocationsLayerProps) {
-  return (
-    <LivePlayerLocationsLayer
-      locations={locations}
-      myUid={myUid}
-      role="seeker"
-    />
-  );
+  return <LivePlayerLocationsLayer locations={locations} myUid={myUid} />;
 }

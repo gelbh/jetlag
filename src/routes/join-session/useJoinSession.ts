@@ -1,46 +1,40 @@
 import { useEffect, useRef, useState } from "react";
-import { useAppNavigate } from "@/hooks/navigation/useAppNavigate";
-import { useSubmitLock } from "@/hooks/forms/useSubmitLock";
-import type { JoinSessionFormValues } from "@/domain/session/join/joinSessionForm";
-import { useSessionStore } from "@/state/sessionStore";
-import type { PlayerRole } from "@/domain/session/players/playerRole";
-import { joinRequiresRolePasscode } from "@/domain/session/players/roleGates";
+import { APP_VERSION } from "@/domain/device/changelog";
+import type { SessionRecord } from "@/domain/map/annotations";
 import { isPlaceholderGameArea } from "@/domain/session/join/joinPreviewGameArea";
+import type { JoinSessionFormValues } from "@/domain/session/join/joinSessionForm";
+import { sessionVersionMismatchMessage } from "@/domain/session/meta/sessionVersion";
 import {
   isJoinRequestExpired,
   type JoinRequestRole,
   type JoinRequestStatus,
   type RoleJoinRequest,
 } from "@/domain/session/players/joinRequest";
-import type { SessionRecord } from "@/domain/map/annotations";
+import type { PlayerRole } from "@/domain/session/players/playerRole";
+import { joinRequiresRolePasscode } from "@/domain/session/players/roleGates";
+import { useSubmitLock } from "@/hooks/forms/useSubmitLock";
+import { useAppNavigate } from "@/hooks/navigation/useAppNavigate";
+import { useJoinSessionPreview } from "@/hooks/session/useJoinSessionPreview";
 import { copyToClipboard } from "@/platform/copyToClipboard";
-import {
-  ensureFreshAnonymousUser,
-  isFirebaseConfigured,
-} from "@/services/core/firebase/firebase";
+import { ANALYTICS_EVENTS, track } from "@/services/core/analytics/analytics";
+import { setPremiumApiContext } from "@/services/core/auth/premiumApiContext";
+import { ensureFreshAnonymousUser, isFirebaseConfigured } from "@/services/core/firebase/firebase";
+import { retryAsync } from "@/services/core/network/retryAsync";
+import { withTimeout } from "@/services/core/withTimeout";
 import {
   getRemoteSessionByIdFromServer,
   joinRemoteSessionByCode,
   waitForServerHiderRole,
 } from "@/services/firestore/firestoreAnnotations";
-import { APP_VERSION } from "@/domain/device/changelog";
-import { sessionVersionMismatchMessage } from "@/domain/session/meta/sessionVersion";
-import { retryAsync } from "@/services/core/network/retryAsync";
-import { withTimeout } from "@/services/core/withTimeout";
-import {
-  ANALYTICS_EVENTS,
-  track,
-} from "@/services/core/analytics/analytics";
-import { setPremiumApiContext } from "@/services/core/auth/premiumApiContext";
-import { preloadCriticalGameAreaCaches } from "@/services/session/gameAreaPreload";
 import { resolveSessionMatchingAreas } from "@/services/geo/matching/resolveSessionMatchingAreas";
-import { useJoinSessionPreview } from "@/hooks/session/useJoinSessionPreview";
+import { preloadCriticalGameAreaCaches } from "@/services/session/gameAreaPreload";
+import { listenOwnJoinRequest } from "@/services/session/joinRequestListen";
 import {
   cancelRoleJoinRequest,
   mapJoinRequestError,
   requestRoleJoin,
 } from "@/services/session/rolePasscodeLifecycle";
-import { listenOwnJoinRequest } from "@/services/session/joinRequestListen";
+import { useSessionStore } from "@/state/sessionStore";
 
 const VERIFY_SESSION_TIMEOUT_MS = 15_000;
 const VERIFY_SESSION_TIMEOUT_MESSAGE =
@@ -115,17 +109,11 @@ export function useJoinSession({
   const [loading, setLoading] = useState(false);
   const { isSubmitting, runLocked } = useSubmitLock();
   const joinBusy = loading || isSubmitting;
-  const [pendingRequest, setPendingRequest] = useState<PendingJoinRequest | null>(
-    null,
-  );
+  const [pendingRequest, setPendingRequest] = useState<PendingJoinRequest | null>(null);
   const [requestBusy, setRequestBusy] = useState(false);
 
-  const {
-    previewSession,
-    previewPremium,
-    lookupLoading,
-    existingRole,
-  } = useJoinSessionPreview(code);
+  const { previewSession, previewPremium, lookupLoading, existingRole } =
+    useJoinSessionPreview(code);
 
   const needsRolePasscode = Boolean(
     previewSession &&
@@ -137,9 +125,7 @@ export function useJoinSession({
       ),
   );
   const canRequestAccess =
-    Boolean(previewSession) &&
-    needsRolePasscode &&
-    isJoinRequestRole(playerRole);
+    Boolean(previewSession) && needsRolePasscode && isJoinRequestRole(playerRole);
   const formBusy = joinBusy || requestBusy || pendingRequest != null;
 
   useEffect(() => {
@@ -183,22 +169,15 @@ export function useJoinSession({
 
       try {
         const user = await retryAsync(() => ensureFreshAnonymousUser());
-        let joinedSession = await getRemoteSessionByIdFromServer(
-          pendingRequest.sessionId,
-        );
+        let joinedSession = await getRemoteSessionByIdFromServer(pendingRequest.sessionId);
         if (!joinedSession) {
           throw new Error("Couldn't load the session after approval.");
         }
 
         if (pendingRequest.role === "hider") {
-          const confirmed = await waitForServerHiderRole(
-            joinedSession.id,
-            user.uid,
-          );
-          if (!confirmed || confirmed.memberRoles?.[user.uid] !== "hider") {
-            throw new Error(
-              "Couldn't confirm your hider role. Wait a moment and try again.",
-            );
+          const confirmed = await waitForServerHiderRole(joinedSession.id, user.uid);
+          if (confirmed?.memberRoles?.[user.uid] !== "hider") {
+            throw new Error("Couldn't confirm your hider role. Wait a moment and try again.");
           }
           joinedSession = confirmed;
         }
@@ -210,8 +189,7 @@ export function useJoinSession({
         track(ANALYTICS_EVENTS.session_joined, { role: joinedRole });
         if (joinedSession.gameArea) {
           void (async () => {
-            const matchingAreas =
-              await resolveSessionMatchingAreas(joinedSession);
+            const matchingAreas = await resolveSessionMatchingAreas(joinedSession);
             void preloadCriticalGameAreaCaches(
               joinedSession.gameArea!,
               matchingAreas,
@@ -222,11 +200,7 @@ export function useJoinSession({
         navigate("/map");
       } catch (nextError) {
         setPendingRequest(null);
-        setError(
-          nextError instanceof Error
-            ? nextError.message
-            : "Couldn't join that session.",
-        );
+        setError(nextError instanceof Error ? nextError.message : "Couldn't join that session.");
       } finally {
         setLoading(false);
         setRequestBusy(false);
@@ -249,9 +223,7 @@ export function useJoinSession({
         request.status === "expired" ||
         isJoinRequestExpired(request, Date.now())
       ) {
-        finishTerminal(
-          request.status === "pending" ? "expired" : request.status,
-        );
+        finishTerminal(request.status === "pending" ? "expired" : request.status);
       }
     };
 
@@ -280,19 +252,14 @@ export function useJoinSession({
     // Only set up a timer if the expiry is in the future and within the max timeout range.
     // Don't immediately call finishTerminal for past expiry, as the listener may still report
     // the request as accepted before recognizing expiry.
-    if (
-      Number.isFinite(expiresInMs) &&
-      expiresInMs > 0 &&
-      expiresInMs <= MAX_TIMEOUT_MS
-    ) {
+    if (Number.isFinite(expiresInMs) && expiresInMs > 0 && expiresInMs <= MAX_TIMEOUT_MS) {
       expiryTimer = window.setTimeout(() => {
         if (!cancelled && !accepting) {
-          void cancelRoleJoinRequest(
-            pendingRequest.sessionId,
-            pendingRequest.requestId,
-          ).catch(() => {
-            // Ignore errors if cancellation fails
-          });
+          void cancelRoleJoinRequest(pendingRequest.sessionId, pendingRequest.requestId).catch(
+            () => {
+              // Ignore errors if cancellation fails
+            },
+          );
         }
         finishTerminal("expired");
       }, expiresInMs);
@@ -329,8 +296,7 @@ export function useJoinSession({
     track(ANALYTICS_EVENTS.session_joined, { role });
     if (joinedSession.gameArea) {
       void (async () => {
-        const matchingAreas =
-          await resolveSessionMatchingAreas(joinedSession);
+        const matchingAreas = await resolveSessionMatchingAreas(joinedSession);
         void preloadCriticalGameAreaCaches(
           joinedSession.gameArea!,
           matchingAreas,
@@ -349,9 +315,7 @@ export function useJoinSession({
 
       try {
         if (!isFirebaseConfigured()) {
-          setError(
-            "Firebase is not configured. Create a local session instead.",
-          );
+          setError("Firebase is not configured. Create a local session instead.");
           return;
         }
 
@@ -381,35 +345,20 @@ export function useJoinSession({
             }
 
             if (result.status === "ended") {
-              setError(
-                "That session has ended. Ask the host for a new code.",
-              );
+              setError("That session has ended. Ask the host for a new code.");
               return;
             }
 
             if (result.status === "incompatible") {
-              setError(
-                sessionVersionMismatchMessage(
-                  result.hostVersion,
-                  APP_VERSION,
-                ),
-              );
+              setError(sessionVersionMismatchMessage(result.hostVersion, APP_VERSION));
               return;
             }
 
             let joinedSession = result.session;
             if (values.playerRole === "hider") {
-              const confirmed = await waitForServerHiderRole(
-                joinedSession.id,
-                user.uid,
-              );
-              if (
-                !confirmed ||
-                confirmed.memberRoles?.[user.uid] !== "hider"
-              ) {
-                setError(
-                  "Couldn't confirm your hider role. Wait a moment and try again.",
-                );
+              const confirmed = await waitForServerHiderRole(joinedSession.id, user.uid);
+              if (confirmed?.memberRoles?.[user.uid] !== "hider") {
+                setError("Couldn't confirm your hider role. Wait a moment and try again.");
                 return;
               }
               joinedSession = confirmed;
@@ -426,11 +375,7 @@ export function useJoinSession({
           VERIFY_SESSION_TIMEOUT_MESSAGE,
         );
       } catch (nextError) {
-        setError(
-          nextError instanceof Error
-            ? nextError.message
-            : "Couldn't join that session.",
-        );
+        setError(nextError instanceof Error ? nextError.message : "Couldn't join that session.");
       } finally {
         setLoading(false);
       }
@@ -451,9 +396,7 @@ export function useJoinSession({
 
       try {
         if (!isFirebaseConfigured()) {
-          setError(
-            "Firebase is not configured. Create a local session instead.",
-          );
+          setError("Firebase is not configured. Create a local session instead.");
           return;
         }
 
@@ -482,10 +425,7 @@ export function useJoinSession({
       setError(null);
 
       try {
-        await cancelRoleJoinRequest(
-          pendingRequest.sessionId,
-          pendingRequest.requestId,
-        );
+        await cancelRoleJoinRequest(pendingRequest.sessionId, pendingRequest.requestId);
         setPendingRequest(null);
         setError("Join request cancelled.");
       } catch (nextError) {

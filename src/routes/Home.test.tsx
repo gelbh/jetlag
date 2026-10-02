@@ -1,14 +1,14 @@
-import { act, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { MantineProvider } from "@mantine/core";
+import { act, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { Home } from "./Home";
+import { jetlagTheme } from "@/theme/theme";
 import { APP_VERSION } from "../domain/device/changelog";
 import { LEGAL_APP_NAME } from "../domain/legal/legalContact";
 import { LOCAL_SESSION_ID } from "../domain/map/annotations";
-import { renderWithRouter } from "../test/renderWithRouter";
-import { createTestRemoteSession, createTestSession } from "../test/fixtures/sessions";
 import { useSessionStore } from "../state/sessionStore";
-import { jetlagTheme } from "@/theme/theme";
+import { createTestRemoteSession, createTestSession } from "../test/fixtures/sessions";
+import { renderWithRouter } from "../test/renderWithRouter";
+import { Home } from "./Home";
 
 const navigate = vi.fn();
 const mockIsFirebaseConfigured = vi.fn(() => false);
@@ -29,8 +29,7 @@ vi.mock("../services/core/firebase/firebase", () => ({
   isFirebaseConfigured: () => mockIsFirebaseConfigured(),
   isAuthBootstrapReady: () => true,
   subscribeAuthBootstrapReady: () => () => undefined,
-  ensureFreshAnonymousUser: (...args: unknown[]) =>
-    mockEnsureAnonymousUser(...args),
+  ensureFreshAnonymousUser: (...args: unknown[]) => mockEnsureAnonymousUser(...args),
   getFirebaseAuth: () => ({ currentUser: null, onAuthStateChanged: () => () => undefined }),
 }));
 
@@ -60,8 +59,7 @@ vi.mock("../services/billing/premiumBilling", () => ({
 
 vi.mock("../services/firestore/sessionMembershipHeal", () => ({
   getRemoteSessionById: (...args: unknown[]) => mockGetRemoteSessionById(...args),
-  healSessionMembership: (...args: unknown[]) =>
-    mockEnsureRemoteSessionMembership(...args),
+  healSessionMembership: (...args: unknown[]) => mockEnsureRemoteSessionMembership(...args),
   lookupRemoteSessionByCode: vi.fn(),
 }));
 
@@ -94,14 +92,8 @@ describe("Home", () => {
   it("links play actions for join, create, and presets", () => {
     renderHome();
 
-    expect(screen.getByRole("link", { name: "Create session" })).toHaveAttribute(
-      "href",
-      "/create",
-    );
-    expect(screen.getByRole("link", { name: "Join session" })).toHaveAttribute(
-      "href",
-      "/join",
-    );
+    expect(screen.getByRole("link", { name: "Create session" })).toHaveAttribute("href", "/create");
+    expect(screen.getByRole("link", { name: "Join session" })).toHaveAttribute("href", "/join");
     expect(screen.getByRole("link", { name: "Browse presets" })).toHaveAttribute(
       "href",
       "/presets",
@@ -111,10 +103,7 @@ describe("Home", () => {
   it("links to friends and leaderboard in the header", () => {
     renderHome();
 
-    expect(screen.getByRole("link", { name: "Friends" })).toHaveAttribute(
-      "href",
-      "/friends",
-    );
+    expect(screen.getByRole("link", { name: "Friends" })).toHaveAttribute("href", "/friends");
     expect(screen.getByRole("link", { name: "Leaderboard" })).toHaveAttribute(
       "href",
       "/leaderboard",
@@ -125,9 +114,7 @@ describe("Home", () => {
     useSessionStore.getState().setSession(createTestSession());
 
     renderHome({ resetStores: false });
-    fireEvent.click(
-      screen.getByRole("button", { name: /Return to map for session TEST/i }),
-    );
+    fireEvent.click(screen.getByRole("button", { name: /Return to map for session TEST/i }));
 
     expect(navigate).toHaveBeenCalledWith("/map");
     expect(mockEnsureRemoteSessionMembership).not.toHaveBeenCalled();
@@ -151,9 +138,7 @@ describe("Home", () => {
     useSessionStore.getState().setMyUid("user-old");
 
     renderHome({ resetStores: false });
-    fireEvent.click(
-      screen.getByRole("button", { name: /Return to map for session ABCD/i }),
-    );
+    fireEvent.click(screen.getByRole("button", { name: /Return to map for session ABCD/i }));
 
     await waitFor(() => {
       expect(mockEnsureRemoteSessionMembership).toHaveBeenCalledWith(
@@ -165,15 +150,13 @@ describe("Home", () => {
     });
 
     expect(navigate).toHaveBeenCalledWith("/map");
-    expect(
-      screen.queryByText(/no longer a member/i),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByText(/no longer a member/i)).not.toBeInTheDocument();
   });
 
   it("shows resume action when a session exists", () => {
-    useSessionStore.getState().setSession(
-      createTestSession({ id: LOCAL_SESSION_ID, code: "WXYZ" }),
-    );
+    useSessionStore
+      .getState()
+      .setSession(createTestSession({ id: LOCAL_SESSION_ID, code: "WXYZ" }));
 
     renderHome({ resetStores: false });
     expect(screen.getByText("WXYZ")).toBeInTheDocument();
@@ -200,12 +183,8 @@ describe("Home", () => {
   it("renders the brand mark and LEGAL_APP_NAME heading", () => {
     renderHome();
 
-    expect(
-      screen.getByRole("heading", { level: 1, name: LEGAL_APP_NAME }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("img", { name: LEGAL_APP_NAME }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 1, name: LEGAL_APP_NAME })).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: LEGAL_APP_NAME })).toBeInTheDocument();
   });
 
   it("keeps the brand mark left of the title in a nowrap lockup", () => {
@@ -216,9 +195,7 @@ describe("Home", () => {
       name: LEGAL_APP_NAME,
     });
     const logo = screen.getByRole("img", { name: LEGAL_APP_NAME });
-    const tagline = screen.getByText(
-      "Unofficial fan companion for Jet Lag: The Game.",
-    );
+    const tagline = screen.getByText("Unofficial fan companion for Jet Lag: The Game.");
     const versionControl = screen.getByRole("button", {
       name: `Version ${APP_VERSION}. Open changelog`,
     });
@@ -231,15 +208,9 @@ describe("Home", () => {
     expect(lockup).not.toBeNull();
     expect(lockup).toContainElement(logo);
     expect(lockup).toContainElement(heading);
-    expect(lockup!.style.getPropertyValue("--group-wrap").trim()).toBe(
-      "nowrap",
-    );
-    expect(
-      logo.compareDocumentPosition(heading) & Node.DOCUMENT_POSITION_FOLLOWING,
-    ).toBeTruthy();
-    expect(String(logoColumn?.getAttribute("class") ?? "")).toContain(
-      "shrink-0",
-    );
+    expect(lockup?.style.getPropertyValue("--group-wrap").trim()).toBe("nowrap");
+    expect(logo.compareDocumentPosition(heading) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(String(logoColumn?.getAttribute("class") ?? "")).toContain("shrink-0");
     expect(heading.style.minWidth).toMatch(/^0(px)?$/);
   });
 
@@ -262,18 +233,14 @@ describe("Home", () => {
     fireEvent.click(within(changelog).getByRole("button", { name: "Close" }));
 
     await waitFor(() => {
-      expect(
-        screen.queryByRole("dialog", { name: "Changelog" }),
-      ).not.toBeInTheDocument();
+      expect(screen.queryByRole("dialog", { name: "Changelog" })).not.toBeInTheDocument();
     });
   });
 
   it("clears verifying when ensureFreshAnonymousUser times out", async () => {
     vi.useFakeTimers();
     mockIsFirebaseConfigured.mockReturnValue(true);
-    mockEnsureAnonymousUser.mockImplementation(
-      () => new Promise(() => undefined),
-    );
+    mockEnsureAnonymousUser.mockImplementation(() => new Promise(() => undefined));
 
     const remoteSession = createTestRemoteSession({
       memberUids: ["user-old"],
@@ -295,9 +262,7 @@ describe("Home", () => {
     });
 
     expect(
-      screen.getByText(
-        "Couldn't verify the session. Check your connection and try again.",
-      ),
+      screen.getByText("Couldn't verify the session. Check your connection and try again."),
     ).toBeInTheDocument();
     expect(continueButton).not.toHaveAttribute("aria-busy");
   });

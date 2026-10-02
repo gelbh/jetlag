@@ -1,10 +1,10 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MantineProvider } from "@mantine/core";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { jetlagTheme } from "@/theme/theme";
-import { FriendsBody } from "./FriendsBody";
 import { searchFriends } from "../../services/profile/profileFriends";
+import { FriendsBody } from "./FriendsBody";
 
 vi.mock("../../services/profile/profileFriends", () => ({
   listFriends: vi.fn(async () => ({
@@ -65,9 +65,7 @@ describe("FriendsBody", () => {
     });
     fireEvent.click(screen.getByRole("button", { name: "Search" }));
 
-    expect(
-      screen.getByText("Enter at least 2 characters to search."),
-    ).toBeInTheDocument();
+    expect(screen.getByText("Enter at least 2 characters to search.")).toBeInTheDocument();
     expect(searchFriends).not.toHaveBeenCalled();
   });
 
@@ -90,9 +88,7 @@ describe("FriendsBody", () => {
       expect(searchFriends).toHaveBeenCalledWith("bo");
     });
     expect(screen.getByText("bob")).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Request bob" }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Request bob" })).toBeInTheDocument();
   });
 
   it("defaults to Friends and can switch to Incoming", async () => {

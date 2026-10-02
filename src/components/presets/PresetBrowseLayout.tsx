@@ -1,14 +1,11 @@
-import { AppLink } from "../navigation/AppLink";
 import { homeCardBtnStyle, homePosterStyle } from "@/components/ui/entry/entryStyles";
-import {
-  ScreenHeader,
-  screenHeaderOffsetClassName,
-} from "../ui/layout/ScreenHeader";
+import type { migrateGamePreset } from "../../domain/session/presets/gamePreset";
+import { AppLink } from "../navigation/AppLink";
 import { EmptyState } from "../ui/feedback/EmptyState";
+import { ScreenHeader, screenHeaderOffsetClassName } from "../ui/layout/ScreenHeader";
 import { BundledPresetTree } from "./BundledPresetTree";
-import { PresetSearchResults } from "./PresetSearchResults";
 import { PresetDetailPanel } from "./PresetDetailPanel";
-import { migrateGamePreset } from "../../domain/session/presets/gamePreset";
+import { PresetSearchResults } from "./PresetSearchResults";
 
 export type PresetBrowseBodyProps = {
   searchId: string;
@@ -51,11 +48,7 @@ export function PresetBrowseBody({
         />
       </label>
 
-      <AppLink
-        to="/presets/new"
-        data-feedback="tap"
-        style={homeCardBtnStyle("primary")}
-      >
+      <AppLink to="/presets/new" data-feedback="tap" style={homeCardBtnStyle("primary")}>
         <span>New preset</span>
       </AppLink>
 
@@ -70,11 +63,7 @@ export function PresetBrowseBody({
               </p>
               <ul className="space-y-3">
                 {favouritePresets.map((preset) => (
-                  <PresetDetailPanel
-                    key={preset.id}
-                    preset={preset}
-                    onDelete={onDelete}
-                  />
+                  <PresetDetailPanel key={preset.id} preset={preset} onDelete={onDelete} />
                 ))}
               </ul>
             </section>
@@ -86,8 +75,7 @@ export function PresetBrowseBody({
                 Recommended
               </p>
               <p className="text-xs leading-snug text-ink-muted">
-                Browse by continent, country, and region. More areas ship over
-                time.
+                Browse by continent, country, and region. More areas ship over time.
               </p>
               <BundledPresetTree presets={bundledPresets} />
             </section>
@@ -106,11 +94,7 @@ export function PresetBrowseBody({
               ) : null}
               <ul className="space-y-3">
                 {userPresets.map((preset) => (
-                  <PresetDetailPanel
-                    key={preset.id}
-                    preset={preset}
-                    onDelete={onDelete}
-                  />
+                  <PresetDetailPanel key={preset.id} preset={preset} onDelete={onDelete} />
                 ))}
               </ul>
             </section>
@@ -132,8 +116,7 @@ export function PresetBrowseLayout(props: PresetBrowseBodyProps) {
           Custom games
         </h1>
         <p className="text-sm text-ink-muted">
-          Saved templates pre-fill create session. Game area can be added when
-          hosting.
+          Saved templates pre-fill create session. Game area can be added when hosting.
         </p>
 
         <PresetBrowseBody {...props} />

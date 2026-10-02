@@ -4,13 +4,7 @@ import type { ComponentProps, ComponentType } from "react";
 export type PhosphorIcon = ComponentType<
   ComponentProps<"svg"> & {
     size?: number | string;
-    weight?:
-      | "thin"
-      | "light"
-      | "regular"
-      | "bold"
-      | "fill"
-      | "duotone";
+    weight?: "thin" | "light" | "regular" | "bold" | "fill" | "duotone";
     color?: string;
     mirrored?: boolean;
   }
@@ -20,13 +14,7 @@ export type JlIconProps = {
   icon: PhosphorIcon;
   size?: number | string;
   /** Idle chrome: `regular`; active/pressed: prefer `bold` or `fill`. */
-  weight?:
-    | "thin"
-    | "light"
-    | "regular"
-    | "bold"
-    | "fill"
-    | "duotone";
+  weight?: "thin" | "light" | "regular" | "bold" | "fill" | "duotone";
   className?: string;
   color?: string;
   mirrored?: boolean;
@@ -48,10 +36,7 @@ export function JlIcon({
   "aria-hidden": ariaHidden,
   "aria-label": ariaLabel,
 }: JlIconProps) {
-  const hidden =
-    ariaLabel != null
-      ? ariaHidden
-      : ariaHidden ?? true;
+  const hidden = ariaLabel != null ? ariaHidden : (ariaHidden ?? true);
 
   return (
     <Icon

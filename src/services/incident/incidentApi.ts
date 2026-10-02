@@ -35,9 +35,7 @@ export interface CreateIncidentResult {
   status: IncidentStatus;
 }
 
-export async function createIncident(
-  input: CreateIncidentInput,
-): Promise<CreateIncidentResult> {
+export async function createIncident(input: CreateIncidentInput): Promise<CreateIncidentResult> {
   requireFirebase();
 
   const functions = await getFirebaseFunctions();
@@ -73,10 +71,10 @@ export async function postIncidentMessage(
   requireFirebase();
 
   const functions = await getFirebaseFunctions();
-  const callable = httpsCallable<
-    { incidentId: string; text: string },
-    PostIncidentMessageResult
-  >(functions, "postIncidentMessage");
+  const callable = httpsCallable<{ incidentId: string; text: string }, PostIncidentMessageResult>(
+    functions,
+    "postIncidentMessage",
+  );
 
   try {
     const result = await callable({ incidentId, text });
@@ -188,10 +186,10 @@ export async function launchIncidentCursorAgent(
   requireFirebase();
 
   const functions = await getFirebaseFunctions();
-  const callable = httpsCallable<
-    { incidentId: string },
-    LaunchIncidentCursorAgentResult
-  >(functions, "launchIncidentCursorAgent");
+  const callable = httpsCallable<{ incidentId: string }, LaunchIncidentCursorAgentResult>(
+    functions,
+    "launchIncidentCursorAgent",
+  );
 
   try {
     const result = await callable({ incidentId });
@@ -240,10 +238,10 @@ export async function denyHostConfirm(
   requireFirebase();
 
   const functions = await getFirebaseFunctions();
-  const callable = httpsCallable<
-    { incidentId: string; confirmId: string },
-    DenyHostConfirmResult
-  >(functions, "denyHostConfirm");
+  const callable = httpsCallable<{ incidentId: string; confirmId: string }, DenyHostConfirmResult>(
+    functions,
+    "denyHostConfirm",
+  );
 
   try {
     const result = await callable({ incidentId, confirmId });

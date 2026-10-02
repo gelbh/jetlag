@@ -1,9 +1,9 @@
-import type { SessionRulesInput } from "../session/rules";
-import { questionAnswerDeadlineMs } from "./questionRules";
-import type { PendingQuestionRecord } from "../session/activity/sessionChat";
 import { mapToolDockShortLabel } from "../map/mapTools";
-import type { QuestionToolType } from "./questionRules";
+import type { PendingQuestionRecord } from "../session/activity/sessionChat";
+import type { SessionRulesInput } from "../session/rules";
 import { formatShortCountdownFromMs } from "../time/formatClockDuration";
+import type { QuestionToolType } from "./questionRules";
+import { questionAnswerDeadlineMs } from "./questionRules";
 
 export interface ActiveQuestionTimer {
   pendingQuestionId: string;
@@ -38,7 +38,7 @@ export function selectPrimaryQuestionTimer(
         remainingMs: Number.POSITIVE_INFINITY,
       };
 
-      if (!best || best.countdownLabel !== "WALKING") {
+      if (best?.countdownLabel !== "WALKING") {
         best = candidate;
       }
       continue;
@@ -53,9 +53,7 @@ export function selectPrimaryQuestionTimer(
     const remainingMs = deadlineMs - elapsed;
 
     const countdownLabel =
-      remainingMs <= 0
-        ? "EXPIRED"
-        : formatShortCountdownFromMs(remainingMs, { ceilSeconds: true });
+      remainingMs <= 0 ? "EXPIRED" : formatShortCountdownFromMs(remainingMs, { ceilSeconds: true });
 
     const candidate: ActiveQuestionTimer = {
       pendingQuestionId: question.id,
@@ -64,11 +62,7 @@ export function selectPrimaryQuestionTimer(
       remainingMs,
     };
 
-    if (
-      !best ||
-      best.countdownLabel === "WALKING" ||
-      candidate.remainingMs < best.remainingMs
-    ) {
+    if (!best || best.countdownLabel === "WALKING" || candidate.remainingMs < best.remainingMs) {
       best = candidate;
     }
   }

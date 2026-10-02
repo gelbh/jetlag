@@ -1,21 +1,18 @@
-import { act, render, renderHook, screen, waitFor } from "@testing-library/react";
 import { MantineProvider } from "@mantine/core";
+import { act, render, renderHook, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { matchingEmptyPlayAreaMessage } from "@/services/geo/matching";
 import { jetlagTheme } from "@/theme/theme";
-import { useMatchingTool } from "./useMatchingTool";
 import { createToolHookMocks } from "../../test/helpers/toolHookMocks";
 import type { ResolveMatchingAnchorResult } from "./matching/resolveMatchingAnchor";
+import { useMatchingTool } from "./useMatchingTool";
 
 vi.mock("../forms/useDebouncedValue", () => ({
   useDebouncedValue: <T,>(value: T) => value,
 }));
 
 vi.mock("../../services/core/location/geolocation", async (importOriginal) => {
-  const actual =
-    await importOriginal<
-      typeof import("../../services/core/location/geolocation")
-    >();
+  const actual = await importOriginal<typeof import("../../services/core/location/geolocation")>();
   return {
     ...actual,
     queryGeolocationPermission: vi.fn(async () => "prompt" as const),
@@ -42,18 +39,14 @@ const resolveMatchingAnchor = vi.hoisted(() => {
     nullAnswer: false,
     error: null as string | null,
   } satisfies ResolveMatchingAnchorResult;
-  return vi.fn(
-    async (): Promise<ResolveMatchingAnchorResult> => defaultResult,
-  );
+  return vi.fn(async (): Promise<ResolveMatchingAnchorResult> => defaultResult);
 });
 
 vi.mock("./matching/resolveMatchingAnchor", async (importOriginal) => {
-  const actual =
-    await importOriginal<typeof import("./matching/resolveMatchingAnchor")>();
+  const actual = await importOriginal<typeof import("./matching/resolveMatchingAnchor")>();
   return {
     ...actual,
-    resolveMatchingAnchor: (() =>
-      resolveMatchingAnchor()) as typeof actual.resolveMatchingAnchor,
+    resolveMatchingAnchor: (() => resolveMatchingAnchor()) as typeof actual.resolveMatchingAnchor,
   };
 });
 
@@ -154,9 +147,7 @@ describe("useMatchingTool map-first answer", () => {
       </MantineProvider>,
     );
 
-    expect(
-      screen.getByText(matchingEmptyPlayAreaMessage("landmass")),
-    ).toBeInTheDocument();
+    expect(screen.getByText(matchingEmptyPlayAreaMessage("landmass"))).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /landmass/i })).toBeDisabled();
   });
 });

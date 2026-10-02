@@ -9,9 +9,7 @@ describe("cacheControlForPathname", () => {
   });
 
   it("long-caches geo bundles", () => {
-    expect(cacheControlForPathname("/geo/us-northeast.geojson")).toBe(
-      "public, max-age=2592000",
-    );
+    expect(cacheControlForPathname("/geo/us-northeast.geojson")).toBe("public, max-age=2592000");
   });
 
   it("revalidates HTML and service worker", () => {

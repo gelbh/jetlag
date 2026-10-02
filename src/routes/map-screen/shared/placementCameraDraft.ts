@@ -1,6 +1,4 @@
-import type {
-  PlacementCameraDraftState,
-} from "@/domain/map/placementCamera";
+import type { PlacementCameraDraftState } from "@/domain/map/placementCamera";
 
 type ToolDraftSlice = {
   radar: {

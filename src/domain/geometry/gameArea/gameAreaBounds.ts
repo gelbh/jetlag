@@ -1,9 +1,6 @@
 import type { Position } from "geojson";
+import { type BoundingBox, normalizeBoundingBox } from "../kernel/boundingBox";
 import type { GameAreaGeometry } from "../kernel/types";
-import {
-  normalizeBoundingBox,
-  type BoundingBox,
-} from "../kernel/boundingBox";
 
 export type { BoundingBox } from "../kernel/boundingBox";
 export { normalizeBoundingBox } from "../kernel/boundingBox";
@@ -15,10 +12,7 @@ export const METERS_PER_DEGREE_LAT = 111_320;
  * Raw axis-aligned bbox intersection without {@link normalizeBoundingBox}.
  * Tiny intersections stay tiny (attach scoring, threshold tests).
  */
-export function intersectBoundingBoxesRaw(
-  a: BoundingBox,
-  b: BoundingBox,
-): BoundingBox | null {
+export function intersectBoundingBoxesRaw(a: BoundingBox, b: BoundingBox): BoundingBox | null {
   const south = Math.max(a.south, b.south);
   const west = Math.max(a.west, b.west);
   const north = Math.min(a.north, b.north);
@@ -31,10 +25,7 @@ export function intersectBoundingBoxesRaw(
   return { south, west, north, east };
 }
 
-export function intersectBoundingBoxes(
-  a: BoundingBox,
-  b: BoundingBox,
-): BoundingBox | null {
+export function intersectBoundingBoxes(a: BoundingBox, b: BoundingBox): BoundingBox | null {
   const intersection = intersectBoundingBoxesRaw(a, b);
   return intersection ? normalizeBoundingBox(intersection) : null;
 }
@@ -47,20 +38,16 @@ export function boundingBoxAreaKm2(box: BoundingBox): number {
   const midLat = (box.north + box.south) / 2;
   const latMeters = (box.north - box.south) * METERS_PER_DEGREE_LAT;
   const lngMeters =
-    (box.east - box.west) *
-    METERS_PER_DEGREE_LAT *
-    Math.cos((midLat * Math.PI) / 180);
+    (box.east - box.west) * METERS_PER_DEGREE_LAT * Math.cos((midLat * Math.PI) / 180);
   return Math.max((latMeters * lngMeters) / 1_000_000, 0);
 }
 
 function collectPositions(gameArea: GameAreaGeometry): Position[] {
   if (gameArea.type === "MultiPolygon") {
-    return gameArea.coordinates.flatMap((polygon) =>
-      polygon.flatMap((ring) => ring),
-    );
+    return gameArea.coordinates.flatMap((polygon) => polygon.flat());
   }
 
-  return gameArea.coordinates.flatMap((ring) => ring);
+  return gameArea.coordinates.flat();
 }
 
 export function boundingBoxToGameArea(box: BoundingBox): GameAreaGeometry {
@@ -81,9 +68,7 @@ export function boundingBoxToGameArea(box: BoundingBox): GameAreaGeometry {
 }
 
 /** Unexpanded AABB from game-area coordinates (no min-span inflate). */
-export function gameAreaToBoundingBoxRaw(
-  gameArea: GameAreaGeometry,
-): BoundingBox {
+export function gameAreaToBoundingBoxRaw(gameArea: GameAreaGeometry): BoundingBox {
   const positions = collectPositions(gameArea);
   let south = Infinity;
   let west = Infinity;
@@ -104,19 +89,14 @@ export function gameAreaToBoundingBox(gameArea: GameAreaGeometry): BoundingBox {
   return normalizeBoundingBox(gameAreaToBoundingBoxRaw(gameArea));
 }
 
-export function expandBoundingBox(
-  box: BoundingBox,
-  bufferMeters: number,
-): BoundingBox {
+export function expandBoundingBox(box: BoundingBox, bufferMeters: number): BoundingBox {
   if (bufferMeters <= 0) {
     return normalizeBoundingBox(box);
   }
 
   const centerLat = (box.north + box.south) / 2;
   const latDelta = bufferMeters / METERS_PER_DEGREE_LAT;
-  const lngDelta =
-    bufferMeters /
-    (METERS_PER_DEGREE_LAT * Math.cos((centerLat * Math.PI) / 180));
+  const lngDelta = bufferMeters / (METERS_PER_DEGREE_LAT * Math.cos((centerLat * Math.PI) / 180));
 
   return normalizeBoundingBox({
     south: box.south - latDelta,

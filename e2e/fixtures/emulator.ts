@@ -1,14 +1,11 @@
-import { type Page } from "@playwright/test";
+import type { Page } from "@playwright/test";
 
 /** The bridge installs via dynamic import after boot, so wait before evaluating. */
 async function waitForE2EBridge(page: Page): Promise<void> {
   await page.waitForFunction(() => window.__JETLAG_E2E__ != null);
 }
 
-export async function listPendingQuestionIds(
-  page: Page,
-  sessionId: string,
-): Promise<string[]> {
+export async function listPendingQuestionIds(page: Page, sessionId: string): Promise<string[]> {
   await waitForE2EBridge(page);
   return page.evaluate(async (id) => {
     const bridge = window.__JETLAG_E2E__;
@@ -32,11 +29,7 @@ export async function patchPendingQuestionAnswerableAt(
       if (!bridge?.patchPendingQuestionAnswerableAt) {
         throw new Error("E2E bridge is not installed.");
       }
-      await bridge.patchPendingQuestionAnswerableAt(
-        id,
-        pendingQuestionId,
-        nextAnswerableAt,
-      );
+      await bridge.patchPendingQuestionAnswerableAt(id, pendingQuestionId, nextAnswerableAt);
     },
     { id: sessionId, questionId, answerableAt },
   );
@@ -52,7 +45,12 @@ export async function advanceLocalTimerElapsedMs(
       const raw = sessionStorage.getItem("jetlag-timer");
       const parsed = raw
         ? (JSON.parse(raw) as {
-            state?: { bySessionId?: Record<string, { accumulatedMs?: number; runningSince?: number | null }> };
+            state?: {
+              bySessionId?: Record<
+                string,
+                { accumulatedMs?: number; runningSince?: number | null }
+              >;
+            };
           })
         : { state: { bySessionId: {} } };
 
@@ -89,10 +87,7 @@ export async function readPersistedSessionId(page: Page): Promise<string> {
   return sessionId;
 }
 
-export async function endSessionInEmulator(
-  page: Page,
-  sessionId: string,
-): Promise<void> {
+export async function endSessionInEmulator(page: Page, sessionId: string): Promise<void> {
   await waitForE2EBridge(page);
   await page.evaluate(async (id) => {
     const bridge = window.__JETLAG_E2E__;

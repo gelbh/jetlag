@@ -4,8 +4,8 @@ import {
   writeAdminSessionListCache,
 } from "../../services/admin/adminSessionListCache";
 import {
-  fetchAdminSessionsPage,
   type AdminSessionSummary,
+  fetchAdminSessionsPage,
 } from "../../services/admin/adminSessions";
 
 function mergeSessionsById(
@@ -56,19 +56,13 @@ type RefreshOptions = { background?: boolean };
 
 export function useAdminSessionList(enabled: boolean) {
   const initial = initialFromCache(enabled);
-  const [sessions, setSessions] = useState<AdminSessionSummary[]>(
-    () => initial.sessions,
-  );
+  const [sessions, setSessions] = useState<AdminSessionSummary[]>(() => initial.sessions);
   const [loading, setLoading] = useState(() => initial.loading);
   const [refreshing, setRefreshing] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [lastFetchedAt, setLastFetchedAt] = useState<Date | null>(
-    () => initial.lastFetchedAt,
-  );
-  const [nextPageToken, setNextPageToken] = useState<string | null>(
-    () => initial.nextPageToken,
-  );
+  const [lastFetchedAt, setLastFetchedAt] = useState<Date | null>(() => initial.lastFetchedAt);
+  const [nextPageToken, setNextPageToken] = useState<string | null>(() => initial.nextPageToken);
   const [enabledState, setEnabledState] = useState(enabled);
   const requestGenerationRef = useRef(0);
   const inFlightRefreshRef = useRef<Promise<void> | null>(null);
@@ -95,82 +89,83 @@ export function useAdminSessionList(enabled: boolean) {
     }
   }
 
-  const refresh = useCallback(async (options?: RefreshOptions) => {
-    if (!enabled) {
-      return;
-    }
-
-    if (inFlightRefreshRef.current) {
-      trailingRefreshOptionsRef.current = options ?? {};
-      await inFlightRefreshRef.current;
-      return;
-    }
-
-    let currentOptions = options;
-    const run = (async () => {
-      for (;;) {
-        const requestGeneration = ++requestGenerationRef.current;
-        const background = currentOptions?.background === true;
-
-        setLoadingMore(false);
-
-        if (background) {
-          setRefreshing(true);
-        } else {
-          setLoading(true);
-        }
-        setError(null);
-
-        try {
-          const page = await fetchAdminSessionsPage(null);
-          if (requestGeneration !== requestGenerationRef.current) {
-            return;
-          }
-
-          const fetchedAt = new Date();
-          setSessions(page.sessions);
-          setNextPageToken(page.nextPageToken);
-          setLastFetchedAt(fetchedAt);
-          writeAdminSessionListCache({
-            sessions: page.sessions,
-            nextPageToken: page.nextPageToken,
-            lastFetchedAt: fetchedAt,
-          });
-        } catch (refreshError) {
-          if (requestGeneration !== requestGenerationRef.current) {
-            return;
-          }
-
-          setError(
-            refreshError instanceof Error
-              ? refreshError.message
-              : "Couldn't load live sessions.",
-          );
-        } finally {
-          if (requestGeneration === requestGenerationRef.current) {
-            setLoading(false);
-            setRefreshing(false);
-          }
-        }
-
-        const trailing = trailingRefreshOptionsRef.current;
-        trailingRefreshOptionsRef.current = null;
-        if (trailing == null) {
-          break;
-        }
-        currentOptions = trailing;
+  const refresh = useCallback(
+    async (options?: RefreshOptions) => {
+      if (!enabled) {
+        return;
       }
-    })();
 
-    inFlightRefreshRef.current = run;
-    try {
-      await run;
-    } finally {
-      if (inFlightRefreshRef.current === run) {
-        inFlightRefreshRef.current = null;
+      if (inFlightRefreshRef.current) {
+        trailingRefreshOptionsRef.current = options ?? {};
+        await inFlightRefreshRef.current;
+        return;
       }
-    }
-  }, [enabled]);
+
+      let currentOptions = options;
+      const run = (async () => {
+        for (;;) {
+          const requestGeneration = ++requestGenerationRef.current;
+          const background = currentOptions?.background === true;
+
+          setLoadingMore(false);
+
+          if (background) {
+            setRefreshing(true);
+          } else {
+            setLoading(true);
+          }
+          setError(null);
+
+          try {
+            const page = await fetchAdminSessionsPage(null);
+            if (requestGeneration !== requestGenerationRef.current) {
+              return;
+            }
+
+            const fetchedAt = new Date();
+            setSessions(page.sessions);
+            setNextPageToken(page.nextPageToken);
+            setLastFetchedAt(fetchedAt);
+            writeAdminSessionListCache({
+              sessions: page.sessions,
+              nextPageToken: page.nextPageToken,
+              lastFetchedAt: fetchedAt,
+            });
+          } catch (refreshError) {
+            if (requestGeneration !== requestGenerationRef.current) {
+              return;
+            }
+
+            setError(
+              refreshError instanceof Error ? refreshError.message : "Couldn't load live sessions.",
+            );
+          } finally {
+            if (requestGeneration === requestGenerationRef.current) {
+              setLoading(false);
+              setRefreshing(false);
+            }
+          }
+
+          const trailing = trailingRefreshOptionsRef.current;
+          trailingRefreshOptionsRef.current = null;
+          if (trailing == null) {
+            break;
+          }
+          currentOptions = trailing;
+        }
+      })();
+
+      inFlightRefreshRef.current = run;
+      try {
+        await run;
+      } finally {
+        if (inFlightRefreshRef.current === run) {
+          inFlightRefreshRef.current = null;
+        }
+      }
+    },
+    [enabled],
+  );
 
   const loadMore = useCallback(async () => {
     if (!enabled || !nextPageToken || loadingMore) {
@@ -206,9 +201,7 @@ export function useAdminSessionList(enabled: boolean) {
       }
 
       setError(
-        loadMoreError instanceof Error
-          ? loadMoreError.message
-          : "Couldn't load more sessions.",
+        loadMoreError instanceof Error ? loadMoreError.message : "Couldn't load more sessions.",
       );
     } finally {
       if (requestGeneration === requestGenerationRef.current) {

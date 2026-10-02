@@ -80,7 +80,7 @@ function eliminationQuickHash(
       const ring = (geometry.coordinates as Position[][] | undefined)?.[0];
       const count = ring?.length ?? 0;
       const first = ring?.[0];
-      const mid = count > 0 ? ring![Math.floor(count / 2)] : undefined;
+      const mid = count > 0 ? ring?.[Math.floor(count / 2)] : undefined;
       parts.push(
         `P:${count}:${first?.[0]?.toFixed(5) ?? ""}:${first?.[1]?.toFixed(5) ?? ""}:${mid?.[0]?.toFixed(5) ?? ""}:${mid?.[1]?.toFixed(5) ?? ""}`,
       );
@@ -113,19 +113,13 @@ export interface PlacementCameraFingerprintInput {
   walkCurrentPoint?: [number, number] | null;
 }
 
-export function placementCameraFingerprint(
-  input: PlacementCameraFingerprintInput,
-): string {
-  const structural = input.overlays.filter(
-    (overlay) => !isVolatileWalkOverlay(overlay),
-  );
+export function placementCameraFingerprint(input: PlacementCameraFingerprintInput): string {
+  const structural = input.overlays.filter((overlay) => !isVolatileWalkOverlay(overlay));
 
   // Matching yes/no are complements of the same cell — keep the camera fingerprint
   // stable across flips so we do not flyTo on every tap.
   const eliminationHash =
-    input.phase === "answered" ||
-    input.seekerResolving ||
-    input.eliminationPreview
+    input.phase === "answered" || input.seekerResolving || input.eliminationPreview
       ? input.tool === "matching"
         ? input.eliminationFeatures.length > 0
           ? `matching:${input.eliminationFeatures.length}`

@@ -1,7 +1,7 @@
-import { describe, expect, it, vi } from "vitest";
 import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
 import { point as turfPoint } from "@turf/helpers";
 import type { Feature, Polygon as GeoPolygon } from "geojson";
+import { describe, expect, it, vi } from "vitest";
 import { clipMaskToGameArea } from "../kernel/clipMask";
 import type { GameAreaGeometry } from "../kernel/types";
 import { unionPolygonFeatures } from "./unionPolygonFeatures";
@@ -37,18 +37,11 @@ function squareFeature(west: number): Feature<GeoPolygon> {
 
 describe("unionPolygonFeatures clip failure", () => {
   it("keeps both polygons when clip engines fail", () => {
-    const combined = unionPolygonFeatures([
-      squareFeature(-0.19),
-      squareFeature(-0.12),
-    ]);
+    const combined = unionPolygonFeatures([squareFeature(-0.19), squareFeature(-0.12)]);
 
     expect(combined?.geometry.type).toBe("MultiPolygon");
-    expect(
-      booleanPointInPolygon(turfPoint([-0.175, 51.45]), combined!),
-    ).toBe(true);
-    expect(
-      booleanPointInPolygon(turfPoint([-0.105, 51.45]), combined!),
-    ).toBe(true);
+    expect(booleanPointInPolygon(turfPoint([-0.175, 51.45]), combined!)).toBe(true);
+    expect(booleanPointInPolygon(turfPoint([-0.105, 51.45]), combined!)).toBe(true);
 
     const gameArea: GameAreaGeometry = {
       type: "Polygon",
@@ -64,11 +57,7 @@ describe("unionPolygonFeatures clip failure", () => {
     };
     const clipped = clipMaskToGameArea(combined!, gameArea);
     expect(clipped).not.toBeNull();
-    expect(
-      booleanPointInPolygon(turfPoint([-0.175, 51.45]), clipped!),
-    ).toBe(true);
-    expect(
-      booleanPointInPolygon(turfPoint([-0.105, 51.45]), clipped!),
-    ).toBe(true);
+    expect(booleanPointInPolygon(turfPoint([-0.175, 51.45]), clipped!)).toBe(true);
+    expect(booleanPointInPolygon(turfPoint([-0.105, 51.45]), clipped!)).toBe(true);
   });
 });

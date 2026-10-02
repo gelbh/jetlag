@@ -1,12 +1,12 @@
-import { useEffect, type ReactNode } from "react";
-import { AppNavigate } from "../navigation/AppNavigate";
-import { HiderMapScreen } from "./HiderMapScreen";
-import { AdminMapScreen } from "./AdminMapScreen";
-import { ObserverMapScreen } from "./ObserverMapScreen";
-import { SeekerMapScreen } from "./SeekerMapScreen";
+import { type ReactNode, useEffect } from "react";
 import { useSessionHeartbeat } from "../hooks/session/useSessionHeartbeat";
+import { AppNavigate } from "../navigation/AppNavigate";
 import { teardownSessionUiState } from "../services/session/sessionCleanup";
 import { useSessionStore } from "../state/sessionStore";
+import { AdminMapScreen } from "./AdminMapScreen";
+import { HiderMapScreen } from "./HiderMapScreen";
+import { ObserverMapScreen } from "./ObserverMapScreen";
+import { SeekerMapScreen } from "./SeekerMapScreen";
 
 function MapScreenShell({ children }: { children: ReactNode }) {
   return (
@@ -24,7 +24,7 @@ export function MapScreen() {
 
   useEffect(() => () => teardownSessionUiState(), []);
 
-  if (!session || !session.gameArea) {
+  if (!session?.gameArea) {
     return <AppNavigate to={session ? "/create" : "/"} replace />;
   }
 

@@ -1,31 +1,29 @@
 import { describe, expect, it } from "vitest";
 import {
   CUSTOM_PRESET_ID,
+  clampLayoutToCols,
+  cloneLayout,
   DEFAULT_COLS,
   DEFAULT_ROW_HEIGHT,
-  FORMER_BUILTIN_IDS,
-  PANEL_IDS,
-  cloneLayout,
-  clampLayoutToCols,
+  type DeskLayout,
   defaultMonitorLayout,
   defaultScratchLayout,
   ensureIncidentPanelsVisible,
+  FORMER_BUILTIN_IDS,
+  type GridStack,
   hidePanel,
   layoutForFormerBuiltinId,
   mergePanelOntoStack,
   migrateLayoutToCols,
+  PANEL_IDS,
+  reorderPanelInStack,
   setCollapsed,
   setPinned,
   showPanel,
   unstackPanelToCell,
-  reorderPanelInStack,
-  type DeskLayout,
-  type GridStack,
 } from "./opsDeskLayout";
 
-function stack(
-  partial: Partial<GridStack> & Pick<GridStack, "id" | "panelIds">,
-): GridStack {
+function stack(partial: Partial<GridStack> & Pick<GridStack, "id" | "panelIds">): GridStack {
   return {
     activeIndex: 0,
     x: 0,
@@ -47,27 +45,13 @@ function layoutOf(...stacks: GridStack[]): DeskLayout {
 
 describe("opsDeskLayout", () => {
   it("exposes six panel ids, Scratch id, and former builtin migrate ids only", () => {
-    expect(PANEL_IDS).toEqual([
-      "sessions",
-      "monitor",
-      "inbox",
-      "detail",
-      "actions",
-      "settings",
-    ]);
+    expect(PANEL_IDS).toEqual(["sessions", "monitor", "inbox", "detail", "actions", "settings"]);
     expect(CUSTOM_PRESET_ID).toBe("custom");
-    expect(FORMER_BUILTIN_IDS).toEqual([
-      "session-watch",
-      "incident-triage",
-      "ops-overview",
-    ]);
+    expect(FORMER_BUILTIN_IDS).toEqual(["session-watch", "incident-triage", "ops-overview"]);
     const scratch = defaultScratchLayout();
     expect(scratch.cols).toBe(DEFAULT_COLS);
     expect(scratch.rowHeight).toBe(DEFAULT_ROW_HEIGHT);
-    expect(scratch.stacks.map((s) => s.panelIds[0])).toEqual([
-      "sessions",
-      "monitor",
-    ]);
+    expect(scratch.stacks.map((s) => s.panelIds[0])).toEqual(["sessions", "monitor"]);
     expect(layoutForFormerBuiltinId("session-watch")).toEqual(scratch);
     expect(layoutForFormerBuiltinId("not-a-builtin")).toBeNull();
   });
@@ -85,12 +69,7 @@ describe("opsDeskLayout", () => {
     const monitor = defaultMonitorLayout();
     const visible = monitor.stacks.flatMap((s) => s.panelIds);
     expect(visible).toEqual(["map", "roster", "overview", "log"]);
-    expect(monitor.hiddenPanelIds).toEqual([
-      "chat",
-      "sync",
-      "mapTools",
-      "mod",
-    ]);
+    expect(monitor.hiddenPanelIds).toEqual(["chat", "sync", "mapTools", "mod"]);
   });
 
   it("migrates 12-col layouts to 24 and clamps overflow", () => {
@@ -134,7 +113,7 @@ describe("opsDeskLayout", () => {
     };
     const clamped = clampLayoutToCols(overflow);
     expect(clamped.stacks[0]).toMatchObject({ x: 14, w: 10 });
-    expect(clamped.stacks[0]!.x + clamped.stacks[0]!.w).toBe(24);
+    expect(clamped.stacks[0]?.x + clamped.stacks[0]?.w).toBe(24);
   });
 
   it("mergePanelOntoStack moves a panel into the target stack and removes empty source", () => {
@@ -266,9 +245,7 @@ describe("opsDeskLayout", () => {
     const layout: DeskLayout = {
       cols: 12,
       rowHeight: 36,
-      stacks: [
-        stack({ id: "sessions", panelIds: ["sessions"], x: 0, y: 0, w: 12, h: 8 }),
-      ],
+      stacks: [stack({ id: "sessions", panelIds: ["sessions"], x: 0, y: 0, w: 12, h: 8 })],
       hiddenPanelIds: ["inbox", "detail", "actions", "monitor", "settings"],
     };
 
@@ -346,9 +323,7 @@ describe("opsDeskLayout", () => {
     const layout: DeskLayout = {
       cols: 12,
       rowHeight: 36,
-      stacks: [
-        stack({ id: "a", panelIds: ["sessions"], x: 0, y: 0, w: 12, h: 6 }),
-      ],
+      stacks: [stack({ id: "a", panelIds: ["sessions"], x: 0, y: 0, w: 12, h: 6 })],
       hiddenPanelIds: ["settings"],
     };
 
@@ -359,16 +334,14 @@ describe("opsDeskLayout", () => {
   });
 
   it("cloneLayout deep-copies stacks and hidden ids", () => {
-    const layout = layoutOf(
-      stack({ id: "a", panelIds: ["sessions", "monitor"], activeIndex: 1 }),
-    );
+    const layout = layoutOf(stack({ id: "a", panelIds: ["sessions", "monitor"], activeIndex: 1 }));
     layout.hiddenPanelIds = ["settings"];
 
     const cloned = cloneLayout(layout);
-    cloned.stacks[0]!.panelIds.push("inbox");
+    cloned.stacks[0]?.panelIds.push("inbox");
     cloned.hiddenPanelIds.push("detail");
 
-    expect(layout.stacks[0]!.panelIds).toEqual(["sessions", "monitor"]);
+    expect(layout.stacks[0]?.panelIds).toEqual(["sessions", "monitor"]);
     expect(layout.hiddenPanelIds).toEqual(["settings"]);
   });
 });

@@ -1,4 +1,4 @@
-import { type Page } from "@playwright/test";
+import type { Page } from "@playwright/test";
 import { E2E_GEOLOCATION } from "./map";
 
 type E2eGeoPoint = { latitude: number; longitude: number; accuracy?: number };
@@ -87,10 +87,7 @@ export async function installE2eGeolocationDriver(
   }, initial);
 }
 
-export async function stepE2eGeolocation(
-  page: Page,
-  point: E2eGeoPoint,
-): Promise<void> {
+export async function stepE2eGeolocation(page: Page, point: E2eGeoPoint): Promise<void> {
   await page.context().setGeolocation({
     latitude: point.latitude,
     longitude: point.longitude,
@@ -98,12 +95,16 @@ export async function stepE2eGeolocation(
   });
 
   await page.evaluate((next) => {
-    const state = (window as unknown as { __jlE2eGeo?: {
-      lat: number;
-      lng: number;
-      accuracy: number;
-      watchers: Map<number, PositionCallback>;
-    } }).__jlE2eGeo;
+    const state = (
+      window as unknown as {
+        __jlE2eGeo?: {
+          lat: number;
+          lng: number;
+          accuracy: number;
+          watchers: Map<number, PositionCallback>;
+        };
+      }
+    ).__jlE2eGeo;
     if (!state) {
       return;
     }

@@ -13,39 +13,36 @@ import {
   INCIDENT_NOT_FOUND,
 } from "./postIncidentMessage.mjs";
 import {
+  consumeSessionOpsSummon,
+  consumeSessionOpsTurn,
+  resolveSessionOpsCaps,
+  resolveSessionOpsCapTier,
+  SESSION_OPS_GLOBAL_TOOL_CAP,
   SESSION_OPS_SUMMON_CAP,
   SESSION_OPS_SUMMON_NOT_FOUND,
   SESSION_OPS_TOOL_CAP,
   SESSION_OPS_TURN_CAP,
-  SESSION_OPS_GLOBAL_TOOL_CAP,
-  consumeSessionOpsSummon,
-  consumeSessionOpsTurn,
-  resolveSessionOpsCapTier,
-  resolveSessionOpsCaps,
 } from "./sessionOpsCaps.mjs";
-import { SESSION_OPS_TOOL_IDS } from "./sessionOpsTools.mjs";
+import {
+  createSessionOpsAgent,
+  createSessionOpsRun,
+  SESSION_OPS_AGENT_BUSY,
+  SESSION_OPS_AGENT_FAILED,
+  SESSION_OPS_AGENT_MISCONFIGURED,
+} from "./sessionOpsCursorAgent.mjs";
 import {
   buildDataMessages,
   buildPolicyMessages,
   buildSessionOpsAgentPrompt,
 } from "./sessionOpsLlm.mjs";
 import {
-  SESSION_OPS_AGENT_BUSY,
-  SESSION_OPS_AGENT_FAILED,
-  SESSION_OPS_AGENT_MISCONFIGURED,
-  createSessionOpsAgent,
-  createSessionOpsRun,
-} from "./sessionOpsCursorAgent.mjs";
-import {
   SESSION_OPS_MCP_HEADER_ACTOR,
   SESSION_OPS_MCP_HEADER_INCIDENT,
   SESSION_OPS_MCP_HEADER_SESSION,
   SESSION_OPS_MCP_HEADER_SUMMON,
 } from "./sessionOpsMcp.mjs";
-import {
-  SUPPORT_AGENT_WORKING_TEXT,
-  appendSupportThreadMessage,
-} from "./sessionOpsThread.mjs";
+import { appendSupportThreadMessage, SUPPORT_AGENT_WORKING_TEXT } from "./sessionOpsThread.mjs";
+import { SESSION_OPS_TOOL_IDS } from "./sessionOpsTools.mjs";
 
 export const SUPPORT_AGENT_TURN_ROUTE = "postSupportAgentTurn";
 export const SUPPORT_AGENT_TURN_RATE_LIMIT = 20;
@@ -60,14 +57,14 @@ export {
   INCIDENT_INVALID_MESSAGE as SUPPORT_AGENT_INVALID_MESSAGE,
   INCIDENT_NOT_FOUND as SUPPORT_AGENT_NOT_FOUND,
   INCIDENT_RATE_LIMITED as SUPPORT_AGENT_RATE_LIMITED,
+  SESSION_OPS_AGENT_BUSY,
+  SESSION_OPS_AGENT_FAILED,
+  SESSION_OPS_AGENT_MISCONFIGURED,
+  SESSION_OPS_GLOBAL_TOOL_CAP,
   SESSION_OPS_SUMMON_CAP,
   SESSION_OPS_SUMMON_NOT_FOUND,
   SESSION_OPS_TOOL_CAP,
   SESSION_OPS_TURN_CAP,
-  SESSION_OPS_GLOBAL_TOOL_CAP,
-  SESSION_OPS_AGENT_BUSY,
-  SESSION_OPS_AGENT_FAILED,
-  SESSION_OPS_AGENT_MISCONFIGURED,
 };
 
 /**
@@ -103,8 +100,7 @@ export async function supportAgentTurnHandler(db, input, deps = {}) {
     throw new Error(SUPPORT_AGENT_UNAUTHENTICATED);
   }
 
-  const incidentId =
-    typeof input?.incidentId === "string" ? input.incidentId : "";
+  const incidentId = typeof input?.incidentId === "string" ? input.incidentId : "";
   if (!incidentId) {
     throw new Error(INCIDENT_NOT_FOUND);
   }
@@ -137,8 +133,7 @@ export async function supportAgentTurnHandler(db, input, deps = {}) {
   }
   const incident = incidentSnap.data() ?? {};
 
-  const policySessionId =
-    typeof incident.sessionId === "string" ? incident.sessionId : "";
+  const policySessionId = typeof incident.sessionId === "string" ? incident.sessionId : "";
   if (!policySessionId) {
     throw new Error(SUPPORT_AGENT_NO_SESSION);
   }
@@ -146,9 +141,7 @@ export async function supportAgentTurnHandler(db, input, deps = {}) {
   const sessionSnap = await db.collection("sessions").doc(policySessionId).get();
   const session = sessionSnap.exists ? (sessionSnap.data() ?? {}) : {};
   const hostUid = typeof session.hostUid === "string" ? session.hostUid : "";
-  const memberUids = Array.isArray(session.memberUids)
-    ? session.memberUids
-    : [];
+  const memberUids = Array.isArray(session.memberUids) ? session.memberUids : [];
 
   const isReporter = incident.reporterUid === uid;
   const isHost = hostUid === uid;
@@ -199,10 +192,7 @@ export async function supportAgentTurnHandler(db, input, deps = {}) {
     if (!summoned.ok) {
       throw new Error(summoned.code ?? SESSION_OPS_SUMMON_CAP);
     }
-    await incidentRef.set(
-      { activeSessionOpsSummonId: summonId },
-      { merge: true },
-    );
+    await incidentRef.set({ activeSessionOpsSummonId: summonId }, { merge: true });
   }
 
   const claimToken = generateId();
@@ -249,8 +239,7 @@ export async function supportAgentTurnHandler(db, input, deps = {}) {
 
   const apiKey = typeof deps.apiKey === "string" ? deps.apiKey.trim() : "";
   const mcpUrl = typeof deps.mcpUrl === "string" ? deps.mcpUrl.trim() : "";
-  const mcpAuthSecret =
-    typeof deps.mcpAuthSecret === "string" ? deps.mcpAuthSecret.trim() : "";
+  const mcpAuthSecret = typeof deps.mcpAuthSecret === "string" ? deps.mcpAuthSecret.trim() : "";
   if (!apiKey || !mcpUrl || !mcpAuthSecret) {
     await releaseSupportAgentRunSlot(db, incidentId, claimToken, { now });
     throw new Error(SESSION_OPS_AGENT_MISCONFIGURED);
@@ -268,8 +257,7 @@ export async function supportAgentTurnHandler(db, input, deps = {}) {
   const createRun = deps.createRun ?? createSessionOpsRun;
   const fetchDeps = { fetch: deps.fetch };
 
-  let agentId =
-    typeof incident.cursorAgentId === "string" ? incident.cursorAgentId.trim() : "";
+  let agentId = typeof incident.cursorAgentId === "string" ? incident.cursorAgentId.trim() : "";
   let runId = null;
   let agentUrl = null;
 
@@ -379,8 +367,7 @@ export async function claimSupportAgentRunSlot(db, incidentId, input) {
   const summonId = input.summonId;
   const actorUid = input.actorUid;
   const now = input.now ?? (() => new Date());
-  const runTransaction =
-    input.runTransaction ?? ((fn) => db.runTransaction(fn));
+  const runTransaction = input.runTransaction ?? ((fn) => db.runTransaction(fn));
   const ref = db.collection("incidents").doc(incidentId);
 
   return runTransaction(async (transaction) => {
@@ -424,15 +411,9 @@ export async function claimSupportAgentRunSlot(db, incidentId, input) {
 /**
  * Clear a claim/working slot when Cursor enqueue fails (only if claimToken matches).
  */
-export async function releaseSupportAgentRunSlot(
-  db,
-  incidentId,
-  claimToken,
-  deps = {},
-) {
+export async function releaseSupportAgentRunSlot(db, incidentId, claimToken, deps = {}) {
   const now = deps.now ?? (() => new Date());
-  const runTransaction =
-    deps.runTransaction ?? ((fn) => db.runTransaction(fn));
+  const runTransaction = deps.runTransaction ?? ((fn) => db.runTransaction(fn));
   const ref = db.collection("incidents").doc(incidentId);
 
   return runTransaction(async (transaction) => {

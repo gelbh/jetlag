@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useState, type RefObject } from "react";
+import { type RefObject, useCallback, useEffect, useLayoutEffect, useState } from "react";
 import { QUESTION_DOCK_TOOL_IDS } from "../../domain/map/mapTools";
 import type { MapTool } from "../../state/sessionStore";
 
@@ -62,8 +62,8 @@ export function useToolDockMenus(dockRef: RefObject<HTMLDivElement | null>) {
 export function useToolDockHighlight(
   mainGroupRef: RefObject<HTMLDivElement | null>,
   activeTool: MapTool,
-  viewportBottomInset: number,
-  visibleQuestionToolCount: number,
+  _viewportBottomInset: number,
+  _visibleQuestionToolCount: number,
 ) {
   const [dockHighlight, setDockHighlight] = useState<{
     x: number;
@@ -101,12 +101,12 @@ export function useToolDockHighlight(
 
   useLayoutEffect(() => {
     updateDockHighlight();
-  }, [updateDockHighlight, activeTool, viewportBottomInset, visibleQuestionToolCount]);
+  }, [updateDockHighlight]);
 
   useEffect(() => {
     window.addEventListener("resize", updateDockHighlight);
     return () => window.removeEventListener("resize", updateDockHighlight);
-  }, [updateDockHighlight, viewportBottomInset, visibleQuestionToolCount]);
+  }, [updateDockHighlight]);
 
   return dockHighlight;
 }

@@ -26,7 +26,7 @@ export function useWakeLock(enabled: boolean) {
 
     const requestWakeLock = async () => {
       try {
-        sentinel = await navigatorWithWakeLock.wakeLock!.request("screen");
+        sentinel = await navigatorWithWakeLock.wakeLock?.request("screen");
       } catch {
         sentinel = null;
       }

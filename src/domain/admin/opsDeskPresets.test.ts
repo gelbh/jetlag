@@ -103,11 +103,7 @@ describe("opsDeskPresets", () => {
 
   it("exposes former builtin layouts for migrate only", () => {
     const triage = layoutForFormerBuiltinId("incident-triage");
-    expect(triage?.stacks.map((s) => s.panelIds[0])).toEqual([
-      "inbox",
-      "detail",
-      "actions",
-    ]);
+    expect(triage?.stacks.map((s) => s.panelIds[0])).toEqual(["inbox", "detail", "actions"]);
     expect(cloneLayout(triage!).stacks[0]?.panelIds).toEqual(["inbox"]);
   });
 });

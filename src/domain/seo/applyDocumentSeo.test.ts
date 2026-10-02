@@ -15,14 +15,12 @@ describe("applyDocumentSeo", () => {
     applyDocumentSeo("/premium");
     expect(document.title).toContain("Premium");
     expect(metaContent('meta[name="description"]')).toBeTruthy();
-    expect(
-      document.head.querySelector('link[rel="canonical"]')?.getAttribute("href"),
-    ).toBe("https://jetlag.gelbhart.dev/premium");
-    expect(metaContent('meta[name="robots"]')).toBe("index,follow");
-    expect(metaContent('meta[property="og:title"]')).toContain("Premium");
-    expect(metaContent('meta[property="og:url"]')).toBe(
+    expect(document.head.querySelector('link[rel="canonical"]')?.getAttribute("href")).toBe(
       "https://jetlag.gelbhart.dev/premium",
     );
+    expect(metaContent('meta[name="robots"]')).toBe("index,follow");
+    expect(metaContent('meta[property="og:title"]')).toContain("Premium");
+    expect(metaContent('meta[property="og:url"]')).toBe("https://jetlag.gelbhart.dev/premium");
     expect(metaContent('meta[property="og:image"]')).toBe(
       "https://jetlag.gelbhart.dev/og-default.png",
     );
@@ -37,9 +35,7 @@ describe("applyDocumentSeo", () => {
   it("upserts rather than duplicating tags on second call", () => {
     applyDocumentSeo("/");
     applyDocumentSeo("/premium");
-    expect(document.head.querySelectorAll('meta[name="description"]')).toHaveLength(
-      1,
-    );
+    expect(document.head.querySelectorAll('meta[name="description"]')).toHaveLength(1);
     expect(document.head.querySelectorAll('link[rel="canonical"]')).toHaveLength(1);
   });
 });

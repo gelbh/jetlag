@@ -1,10 +1,4 @@
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  type RefCallback,
-} from "react";
+import { type RefCallback, useCallback, useEffect, useRef, useState } from "react";
 import { useMotionProfile } from "./useMotionProfile";
 
 export type PresencePhase = "closed" | "entering" | "open" | "exiting";
@@ -173,12 +167,7 @@ export function useAnimatedPresence({
     beginExit();
   }, [beginExit]);
 
-  const animClass =
-    phase === "entering"
-      ? enterClass
-      : phase === "exiting"
-        ? exitClass
-        : "";
+  const animClass = phase === "entering" ? enterClass : phase === "exiting" ? exitClass : "";
 
   return {
     mounted: phase !== "closed",

@@ -21,10 +21,7 @@ export type BundledPresetTreeNode =
       presetId: string;
     };
 
-function compareTreeNodes(
-  left: BundledPresetTreeNode,
-  right: BundledPresetTreeNode,
-): number {
+function compareTreeNodes(left: BundledPresetTreeNode, right: BundledPresetTreeNode): number {
   if (left.kind === "group" && right.kind === "group") {
     const nameOrder = left.name.localeCompare(right.name);
     if (nameOrder !== 0) {
@@ -35,8 +32,7 @@ function compareTreeNodes(
 
   if (left.kind === "preset" && right.kind === "preset") {
     const leftName = bundledPresetDefinition(left.presetId)?.name ?? left.presetId;
-    const rightName =
-      bundledPresetDefinition(right.presetId)?.name ?? right.presetId;
+    const rightName = bundledPresetDefinition(right.presetId)?.name ?? right.presetId;
     return leftName.localeCompare(rightName);
   }
 
@@ -67,7 +63,7 @@ function findOrCreateGroup(
   return nodes.find(
     (node): node is Extract<BundledPresetTreeNode, { kind: "group" }> =>
       node.kind === "group" && node.id === segment.id,
-  )!.children;
+  )?.children;
 }
 
 function countPresetsInTree(node: BundledPresetTreeNode): number {
@@ -98,15 +94,9 @@ function findSolePreset(
  * (e.g. Canada → BC → Prince Rupert becomes Canada → Prince Rupert).
  * Keep Continent / Country / Constituent country rows even when unary.
  */
-const KEEP_UNARY_GROUP_CATEGORIES = new Set([
-  "Continent",
-  "Country",
-  "Constituent country",
-]);
+const KEEP_UNARY_GROUP_CATEGORIES = new Set(["Continent", "Country", "Constituent country"]);
 
-function collapseUnaryPresetChains(
-  nodes: BundledPresetTreeNode[],
-): BundledPresetTreeNode[] {
+function collapseUnaryPresetChains(nodes: BundledPresetTreeNode[]): BundledPresetTreeNode[] {
   const collapsed: BundledPresetTreeNode[] = [];
   for (const node of nodes) {
     if (node.kind === "preset") {
@@ -115,9 +105,7 @@ function collapseUnaryPresetChains(
     }
     const children = collapseUnaryPresetChains(node.children);
     const group: BundledPresetTreeNode = { ...node, children };
-    const keep =
-      KEEP_UNARY_GROUP_CATEGORIES.has(node.category) ||
-      countPresetsInTree(group) !== 1;
+    const keep = KEEP_UNARY_GROUP_CATEGORIES.has(node.category) || countPresetsInTree(group) !== 1;
     if (keep) {
       collapsed.push(group);
     } else {
@@ -146,9 +134,7 @@ export function buildBundledPresetTree(
   return collapseUnaryPresetChains(root);
 }
 
-export function formatBundledPresetLocation(
-  definition: BundledGamePresetDefinition,
-): string {
+export function formatBundledPresetLocation(definition: BundledGamePresetDefinition): string {
   return definition.hierarchy.map((segment) => segment.name).join(" · ");
 }
 
@@ -172,9 +158,7 @@ export function buildBundledPresetSelectGroups(
   return [...groups.values()]
     .map((group) => ({
       ...group,
-      options: [...group.options].sort((left, right) =>
-        left.name.localeCompare(right.name),
-      ),
+      options: [...group.options].sort((left, right) => left.name.localeCompare(right.name)),
     }))
     .sort((left, right) => left.label.localeCompare(right.label));
 }

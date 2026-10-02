@@ -13,10 +13,7 @@ function toSentryEventLike(properties: CaptureResult["properties"]): SentryEvent
   const list: unknown = properties.$exception_list;
   const values = Array.isArray(list)
     ? list.map((entry: unknown) => {
-        const record =
-          entry && typeof entry === "object"
-            ? (entry as Record<string, unknown>)
-            : {};
+        const record = entry && typeof entry === "object" ? (entry as Record<string, unknown>) : {};
         return {
           type: typeof record.type === "string" ? record.type : undefined,
           value: typeof record.value === "string" ? record.value : undefined,
@@ -30,7 +27,7 @@ export function filterPosthogException(
   capture: CaptureResult | null,
   random: () => number = Math.random,
 ): CaptureResult | null {
-  if (!capture || capture.event !== "$exception") {
+  if (capture?.event !== "$exception") {
     return capture;
   }
 

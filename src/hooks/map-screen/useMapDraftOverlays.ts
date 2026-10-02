@@ -1,32 +1,30 @@
-import { useEffect, useMemo, useRef, useState } from "react";
 import turfCircle from "@turf/circle";
 import { point as turfPoint } from "@turf/helpers";
-import type { Feature, MultiPolygon, Polygon as GeoPolygon } from "geojson";
-import type { GameArea, TentaclePoi } from "../../domain/map/annotations";
-import type { MapDraftOverlay } from "../../domain/map/mapDraftOverlay";
-import type { MapTool } from "../../state/sessionStore";
+import type { Feature, Polygon as GeoPolygon, MultiPolygon } from "geojson";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   dispatchHalfPlane,
   dispatchRadarShadedRegion,
   type LatLngTuple,
 } from "../../domain/geometry/gameArea/geometry";
-import { buildTentaclePoiAnswerEliminationRegion } from "../../domain/geometry/tentacle/tentacleGeometry";
+import { EMPTY_GEOJSON_FEATURES } from "../../domain/geometry/masks/emptyFeatures";
 import type { PolygonLodPhase } from "../../domain/geometry/progressive/polygonLod";
-import { paintPolygonLod } from "../tools/framework/paintPolygonLod";
+import { buildTentaclePoiAnswerEliminationRegion } from "../../domain/geometry/tentacle/tentacleGeometry";
+import type { GameArea, TentaclePoi } from "../../domain/map/annotations";
+import { MAP_ANNOTATION_COLORS } from "../../domain/map/mapAnnotationColors";
+import type { MapStyle, StreetBasemap } from "../../domain/map/mapBasemaps";
+import { getBoundaryPreviewStyle } from "../../domain/map/mapBoundaryOverlayStyle";
+import type { MapDraftOverlay } from "../../domain/map/mapDraftOverlay";
+import { tentacleDraftOverlayId } from "../../domain/map/tentacleDraftOverlay";
 import {
-  radarShadedInsideFromAnswer,
   type RadarAnswer,
-} from "../../domain/questions";
-import {
-  thermometerShadedSide,
+  radarShadedInsideFromAnswer,
   type ThermometerAnswer,
+  thermometerShadedSide,
 } from "../../domain/questions";
 import { buildThermometerDraftOverlays } from "../../domain/questions/overlays/thermometer";
-import { MAP_ANNOTATION_COLORS } from "../../domain/map/mapAnnotationColors";
-import { getBoundaryPreviewStyle } from "../../domain/map/mapBoundaryOverlayStyle";
-import type { MapStyle, StreetBasemap } from "../../domain/map/mapBasemaps";
-import { tentacleDraftOverlayId } from "../../domain/map/tentacleDraftOverlay";
-import { EMPTY_GEOJSON_FEATURES } from "../../domain/geometry/masks/emptyFeatures";
+import type { MapTool } from "../../state/sessionStore";
+import { paintPolygonLod } from "../tools/framework/paintPolygonLod";
 
 export interface MapDraftOverlaySources {
   activeTool: MapTool;
@@ -93,10 +91,7 @@ export async function buildMapDraftOverlays(
   const c = MAP_ANNOTATION_COLORS;
   const boundaryPreviewStyle = getBoundaryPreviewStyle(mapStyle, streetBasemap);
 
-  const pushBoundary = (
-    id: string,
-    feature: Feature<GeoPolygon | MultiPolygon> | null,
-  ) => {
+  const pushBoundary = (id: string, feature: Feature<GeoPolygon | MultiPolygon> | null) => {
     if (!feature) {
       return;
     }
@@ -168,9 +163,7 @@ export async function buildMapDraftOverlays(
       seekerResolving,
     } = sources.tentacle;
     const hasPoiAnswer = !outOfReach && selectedPoiId !== null;
-    const displayRadius = hasPoiAnswer
-      ? answerRadiusMeters
-      : searchRadiusMeters;
+    const displayRadius = hasPoiAnswer ? answerRadiusMeters : searchRadiusMeters;
 
     if (searchRadiusMeters > 0) {
       overlays.push({
@@ -196,11 +189,10 @@ export async function buildMapDraftOverlays(
       overlays.push({
         kind: "polygon",
         id: "tentacle-draft-out-of-reach",
-        feature: turfCircle(
-          turfPoint([center[1], center[0]]),
-          searchRadiusMeters / 1000,
-          { steps: 64, units: "kilometers" },
-        ) as Feature<GeoPolygon>,
+        feature: turfCircle(turfPoint([center[1], center[0]]), searchRadiusMeters / 1000, {
+          steps: 64,
+          units: "kilometers",
+        }) as Feature<GeoPolygon>,
         layer: "decoration",
         style: {
           color: c.tentacle,
@@ -423,11 +415,10 @@ export function useMapDraftOverlays(
   } = sources;
 
   const [built, setBuilt] = useState<MapDraftOverlayResult>(EMPTY_DRAFT_RESULT);
-  const [tentacleDisplayElim, setTentacleDisplayElim] = useState<
-    Feature<GeoPolygon | MultiPolygon> | null
-  >(null);
-  const [tentacleLodPhase, setTentacleLodPhase] =
-    useState<PolygonLodPhase>("complete");
+  const [tentacleDisplayElim, setTentacleDisplayElim] = useState<Feature<
+    GeoPolygon | MultiPolygon
+  > | null>(null);
+  const [tentacleLodPhase, setTentacleLodPhase] = useState<PolygonLodPhase>("complete");
   const generationRef = useRef(0);
   const tentacleLodCancelRef = useRef<(() => void) | null>(null);
 
@@ -452,9 +443,7 @@ export function useMapDraftOverlays(
         }
         setBuilt(result);
         const tentacleFull =
-          sources.activeTool === "tentacle"
-            ? (result.eliminationFeatures.at(-1) ?? null)
-            : null;
+          sources.activeTool === "tentacle" ? (result.eliminationFeatures.at(-1) ?? null) : null;
         if (!tentacleFull) {
           return;
         }
@@ -478,52 +467,12 @@ export function useMapDraftOverlays(
       tentacleLodCancelRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- field deps cover `sources` inputs
-  }, [
-    activeTool,
-    gameArea,
-    mapStyle,
-    streetBasemap,
-    matching.boundaryPreview,
-    matching.eliminationPreview,
-    matching.nearestFeaturePoint,
-    matching.seekerPoint,
-    matching.seekerResolving,
-    matching.categoryId,
-    measuring.boundaryPreview,
-    measuring.eliminationPreview,
-    measuring.placePoints,
-    measuring.seekerPoint,
-    measuring.seekerResolving,
-    measuring.siteRadiusMeters,
-    measuring.targetPoint,
-    measuring.categoryId,
-    pin.point,
-    radar.answer,
-    radar.center,
-    radar.radiusMeters,
-    tentacle.answerRadiusMeters,
-    tentacle.center,
-    tentacle.outOfReach,
-    tentacle.pois,
-    tentacle.searchRadiusMeters,
-    tentacle.seekerResolving,
-    tentacle.selectedPoiId,
-    thermometer.answer,
-    thermometer.targetDistanceMeters,
-    thermometer.walkActive,
-    thermometer.walkCurrentPoint,
-    thermometer.thermoA,
-    thermometer.thermoB,
-    zone.vertices,
-  ]);
+  }, [sources.activeTool, sources]);
 
   return useMemo(() => {
     const tentacleElms =
       tentacleDisplayElim && built.eliminationFeatures.length > 0
-        ? [
-            ...built.eliminationFeatures.slice(0, -1),
-            tentacleDisplayElim,
-          ]
+        ? [...built.eliminationFeatures.slice(0, -1), tentacleDisplayElim]
         : built.eliminationFeatures;
     return {
       overlays: built.overlays,

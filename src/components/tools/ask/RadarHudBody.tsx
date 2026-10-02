@@ -1,38 +1,39 @@
-import { AskHudPanel } from "@/components/tools/ask/AskHudPanel";
 /**
  * Radar Ask HUD — Matching twin: question header + distance catalog, then map-first.
  */
 import { Text } from "@mantine/core";
-import { useEffect, useRef } from "react";
 import { CheckIcon, CrosshairIcon, PencilSimpleIcon } from "@phosphor-icons/react";
-import { AskCatalogRail } from "@/components/tools/ask/AskCatalogRail";
-import { AskToolQuestionHeader } from "@/components/tools/ask/AskToolQuestionHeader";
+import { useEffect, useRef } from "react";
 import { HudRadarIcon } from "@/components/map/icons/ToolIcons";
-import { yesNoAnswerOptions } from "@/components/tools/shared/answers/binaryAnswerOptions";
+import { AskCatalogRail } from "@/components/tools/ask/AskCatalogRail";
+import { AskHudPanel } from "@/components/tools/ask/AskHudPanel";
+import { AskToolQuestionHeader } from "@/components/tools/ask/AskToolQuestionHeader";
 import { BinaryAnswerPicker } from "@/components/tools/shared/answers/BinaryAnswerPicker";
+import { yesNoAnswerOptions } from "@/components/tools/shared/answers/binaryAnswerOptions";
 import { AnchorControls } from "@/components/tools/shared/controls/AnchorControls";
-import { CatalogExhaustedMessage } from "@/components/tools/shared/readout/CatalogExhaustedMessage";
 import { QuestionTruthReferenceHint } from "@/components/tools/shared/QuestionTruthReferenceHint";
+import { CatalogExhaustedMessage } from "@/components/tools/shared/readout/CatalogExhaustedMessage";
 import { ViewOnlyQuestionBanner } from "@/components/tools/shared/readout/ViewOnlyQuestionBanner";
 import { askInsetSurfaceStyle } from "@/components/ui/entry/entryChrome";
 import {
+  type DistanceUnit,
   distanceUnitLabel,
   formatDistance,
   milesToMeters,
   parseDistanceInput,
-  type DistanceUnit,
 } from "@/domain/map/distance";
 import {
   isRadarRadiusAllowedForGameSize,
   maxRadarCustomRadiusMeters,
+  type RadarAnswer,
+  type RadarDistanceOptionKey,
   radarDistanceOptionLabel,
   radarDistancePresetsForGameSize,
   radarOptionKeyForPresetMeters,
   radarQuestionPrompt,
-  type RadarAnswer,
-  type RadarDistanceOptionKey,
 } from "@/domain/questions";
 import type { GameSize } from "@/domain/session/size/gameSize";
+
 const RADAR_QUESTION_INTRO = {
   prompt: "Are you within [distance] of me?",
   ruleSummary:
@@ -61,7 +62,6 @@ function sanitizeRadarCustomRadiusInput(raw: string): string {
 function radarCustomUnitShort(unit: DistanceUnit): string {
   return unit === "imperial" ? "mi" : "m";
 }
-
 
 export type RadarHudBodyProps = {
   radiusMeters: number | null;
@@ -132,53 +132,30 @@ export function RadarHudBody({
     : radiusMeters;
   const distanceSelectionAvailable =
     resolvedRadius !== null &&
-    isRadarRadiusAllowedForGameSize(
-      gameSize,
-      resolvedRadius,
-      distanceUnit,
-      chooseCustom,
-    );
-  const showAnswer =
-    !awaitHiderAnswer &&
-    !viewOnly &&
-    hasCenter &&
-    distanceSelectionAvailable;
+    isRadarRadiusAllowedForGameSize(gameSize, resolvedRadius, distanceUnit, chooseCustom);
+  const showAnswer = !awaitHiderAnswer && !viewOnly && hasCenter && distanceSelectionAvailable;
 
   const allPresets = radarDistancePresetsForGameSize(gameSize, distanceUnit);
   const chooseDisabled = usedDistanceOptions.has("choose");
   const exhausted =
     allPresets.every((preset) =>
-      usedDistanceOptions.has(
-        radarOptionKeyForPresetMeters(preset, distanceUnit),
-      ),
+      usedDistanceOptions.has(radarOptionKeyForPresetMeters(preset, distanceUnit)),
     ) && chooseDisabled;
-  const maxCustomRadiusMeters = maxRadarCustomRadiusMeters(
-    gameSize,
-    distanceUnit,
-  );
+  const maxCustomRadiusMeters = maxRadarCustomRadiusMeters(gameSize, distanceUnit);
   const parsedCustomRadius = parseDistanceInput(customRadius, distanceUnit);
   const customRadiusOverLimit =
-    chooseCustom &&
-    parsedCustomRadius !== null &&
-    parsedCustomRadius > maxCustomRadiusMeters;
+    chooseCustom && parsedCustomRadius !== null && parsedCustomRadius > maxCustomRadiusMeters;
 
-  const distanceChosen =
-    chooseCustom || (radiusMeters !== null && radiusMeters > 0);
+  const distanceChosen = chooseCustom || (radiusMeters !== null && radiusMeters > 0);
   const question = distanceChosen
     ? {
-        prompt: radarQuestionPrompt(
-          resolvedRadius ?? radiusMeters ?? 0,
-          distanceUnit,
-        ),
+        prompt: radarQuestionPrompt(resolvedRadius ?? radiusMeters ?? 0, distanceUnit),
         ruleSummary: RADAR_QUESTION_INTRO.ruleSummary,
       }
     : RADAR_QUESTION_INTRO;
 
   const unitShort = radarCustomUnitShort(distanceUnit);
-  const canCommitCustom =
-    chooseCustom &&
-    distanceSelectionAvailable &&
-    !customRadiusOverLimit;
+  const canCommitCustom = chooseCustom && distanceSelectionAvailable && !customRadiusOverLimit;
   const chooseLabel = `Choose custom distance (${unitShort})`;
   const catalogRows = [
     ...allPresets.map((preset) => {
@@ -187,28 +164,14 @@ export function RadarHudBody({
         id: String(preset),
         label: presetLabel(preset, distanceUnit),
         disabled: usedDistanceOptions.has(optionKey),
-        icon: (
-          <CrosshairIcon
-            size={20}
-            weight="duotone"
-            color="currentColor"
-            aria-hidden
-          />
-        ),
+        icon: <CrosshairIcon size={20} weight="duotone" color="currentColor" aria-hidden />,
       };
     }),
     {
       id: CHOOSE_ROW_ID,
       label: chooseLabel,
       disabled: chooseDisabled,
-      icon: (
-        <PencilSimpleIcon
-          size={20}
-          weight="duotone"
-          color="currentColor"
-          aria-hidden
-        />
-      ),
+      icon: <PencilSimpleIcon size={20} weight="duotone" color="currentColor" aria-hidden />,
       content:
         chooseCustom && !chooseDisabled ? (
           <span
@@ -220,9 +183,7 @@ export function RadarHudBody({
               data-testid="radar-choose-distance-input"
               value={customRadius}
               onChange={(event) => {
-                const next = sanitizeRadarCustomRadiusInput(
-                  event.currentTarget.value,
-                );
+                const next = sanitizeRadarCustomRadiusInput(event.currentTarget.value);
                 if (!chooseCustom) {
                   onChooseSelect();
                 }
@@ -260,9 +221,7 @@ export function RadarHudBody({
                 fontWeight: 650,
                 fontSize: "0.8125rem",
                 lineHeight: 1.1,
-                color: customRadiusOverLimit
-                  ? "var(--color-halt)"
-                  : "var(--color-field-ink)",
+                color: customRadiusOverLimit ? "var(--color-halt)" : "var(--color-field-ink)",
                 outline: "none",
                 padding: 0,
                 caretColor: "var(--color-flag)",
@@ -329,10 +288,7 @@ export function RadarHudBody({
     editingDistance || !distanceSelectionAvailable ? "distance" : "place";
 
   return (
-    <div
-      data-testid="radar-hud-body"
-      className="ask-hud-mode-body flex w-full flex-col gap-2"
-    >
+    <div data-testid="radar-hud-body" className="ask-hud-mode-body flex w-full flex-col gap-2">
       {viewOnly ? <ViewOnlyQuestionBanner /> : null}
 
       <AskToolQuestionHeader
@@ -374,22 +330,15 @@ export function RadarHudBody({
             columns={3}
           />
           {chooseCustom && customRadiusOverLimit ? (
-            <Text
-              size="xs"
-              style={{ color: "var(--color-halt)", paddingInline: 4 }}
-            >
-              Max {formatDistance(maxCustomRadiusMeters, distanceUnit)} for
-              this game size.
+            <Text size="xs" style={{ color: "var(--color-halt)", paddingInline: 4 }}>
+              Max {formatDistance(maxCustomRadiusMeters, distanceUnit)} for this game size.
             </Text>
           ) : null}
         </div>
       ) : null}
 
       {chord === "place" ? (
-        <div
-          className="pointer-events-auto space-y-3 p-3"
-          style={askInsetSurfaceStyle}
-        >
+        <div className="pointer-events-auto space-y-3 p-3" style={askInsetSurfaceStyle}>
           <AnchorControls
             awaitingPlacement={awaitingPlacement}
             hasAnchor={hasCenter}

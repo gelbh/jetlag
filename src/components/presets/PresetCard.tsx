@@ -51,13 +51,7 @@ const rowDangerStyles = {
   },
 } as const;
 
-export function PresetHostButton({
-  to,
-  children,
-}: {
-  to: string;
-  children: ReactNode;
-}) {
+export function PresetHostButton({ to, children }: { to: string; children: ReactNode }) {
   return (
     <Button component={Link} to={to} styles={rowPrimaryStyles}>
       {children}
@@ -65,13 +59,7 @@ export function PresetHostButton({
   );
 }
 
-export function PresetSecondaryLink({
-  to,
-  children,
-}: {
-  to: string;
-  children: ReactNode;
-}) {
+export function PresetSecondaryLink({ to, children }: { to: string; children: ReactNode }) {
   return (
     <Button component={Link} to={to} styles={rowSecondaryStyles}>
       {children}
@@ -165,8 +153,7 @@ export function PresetBadge({
         fontWeight: 590,
         letterSpacing: "0.04em",
         textTransform: "uppercase",
-        color:
-          tone === "warning" ? "var(--color-status-warning)" : "var(--color-signal)",
+        color: tone === "warning" ? "var(--color-status-warning)" : "var(--color-signal)",
         backgroundColor:
           tone === "warning"
             ? "oklch(from var(--color-status-warning) l c h / 0.14)"

@@ -1,13 +1,13 @@
-import { fireEvent, render, screen } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { ReactNode } from "react";
 import { MantineProvider } from "@mantine/core";
+import { fireEvent, render, screen } from "@testing-library/react";
+import type { ReactNode } from "react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { MOTION_SHEET_PRESENT_MS } from "@/domain/device/motion/motionTokens";
+import { useMapStore } from "@/state/mapStore";
+import { resetAllStores } from "@/test/helpers/storeReset";
+import { jetlagTheme } from "@/theme/theme";
 import { DrawerSheet } from "./DrawerSheet";
 import { resolveDrawerSheetTransitionProps } from "./drawerSheetTransition";
-import { jetlagTheme } from "@/theme/theme";
-import { resetAllStores } from "@/test/helpers/storeReset";
-import { useMapStore } from "@/state/mapStore";
-import { MOTION_SHEET_PRESENT_MS } from "@/domain/device/motion/motionTokens";
 
 function withAppUi(ui: ReactNode) {
   return (
@@ -142,20 +142,13 @@ describe("DrawerSheet", () => {
     const onClose = vi.fn();
     render(
       withAppUi(
-        <DrawerSheet
-          open
-          onClose={onClose}
-          ariaLabel="Forced"
-          dismissible={false}
-        >
+        <DrawerSheet open onClose={onClose} ariaLabel="Forced" dismissible={false}>
           <p>body</p>
         </DrawerSheet>,
       ),
     );
 
-    expect(
-      screen.queryByRole("button", { name: "Drag sheet down to dismiss" }),
-    ).toBeNull();
+    expect(screen.queryByRole("button", { name: "Drag sheet down to dismiss" })).toBeNull();
     expect(onClose).not.toHaveBeenCalled();
   });
 
@@ -228,8 +221,8 @@ describe("DrawerSheet", () => {
     expect(handle.className).toMatch(/\bw-full\b/);
     const pill = handle.querySelector("[aria-hidden]") as HTMLElement | null;
     expect(pill).toBeTruthy();
-    expect(pill!.style.width).toBe("36px");
-    expect(pill!.style.height).toBe("5px");
+    expect(pill?.style.width).toBe("36px");
+    expect(pill?.style.height).toBe("5px");
   });
 
   it("insets scroll body horizontally so children are not edge-flush (Verify #7)", () => {
@@ -244,7 +237,7 @@ describe("DrawerSheet", () => {
     const sheet = screen.getByTestId("mantine-drawer-sheet");
     const scroll = sheet.querySelector(".jl-scroll") as HTMLElement | null;
     expect(scroll).toBeTruthy();
-    expect(scroll!.style.paddingInline).toBe("1rem");
+    expect(scroll?.style.paddingInline).toBe("1rem");
   });
 
   it("applies bottom safe-area on scroll, not an empty gesture-wrapper bar (Verify #8)", () => {
@@ -261,18 +254,13 @@ describe("DrawerSheet", () => {
 
     const scroll = sheet.querySelector(".jl-scroll") as HTMLElement | null;
     expect(scroll).toBeTruthy();
-    expect(scroll!.style.paddingBottom).toContain("--safe-area-bottom");
+    expect(scroll?.style.paddingBottom).toContain("--safe-area-bottom");
   });
 
   it("uses contentStyle paddingBottom on scroll and skips safe-area stack (keyboard)", () => {
     render(
       withAppUi(
-        <DrawerSheet
-          open
-          onClose={() => {}}
-          ariaLabel="Chat"
-          contentStyle={{ paddingBottom: 120 }}
-        >
+        <DrawerSheet open onClose={() => {}} ariaLabel="Chat" contentStyle={{ paddingBottom: 120 }}>
           <p>body</p>
         </DrawerSheet>,
       ),
@@ -283,8 +271,8 @@ describe("DrawerSheet", () => {
 
     const scroll = sheet.querySelector(".jl-scroll") as HTMLElement | null;
     expect(scroll).toBeTruthy();
-    expect(scroll!.style.paddingBottom).toBe("120px");
-    expect(scroll!.style.paddingBottom).not.toContain("--safe-area-bottom");
+    expect(scroll?.style.paddingBottom).toBe("120px");
+    expect(scroll?.style.paddingBottom).not.toContain("--safe-area-bottom");
   });
 
   it("applies calc() contentStyle paddingBottom on scroll (keyboard CSS expression)", () => {
@@ -305,9 +293,7 @@ describe("DrawerSheet", () => {
       .getByTestId("mantine-drawer-sheet")
       .querySelector(".jl-scroll") as HTMLElement | null;
     expect(scroll).toBeTruthy();
-    expect(scroll!.style.paddingBottom).toBe(
-      "calc(120px + env(safe-area-inset-bottom))",
-    );
+    expect(scroll?.style.paddingBottom).toBe("calc(120px + env(safe-area-inset-bottom))");
   });
 
   it("applies keyboard paddingBottom on child scrollMode body (Chat path)", () => {
@@ -333,7 +319,7 @@ describe("DrawerSheet", () => {
       ".flex.min-h-0.flex-1.flex-col.overflow-hidden",
     ) as HTMLElement | null;
     expect(body).toBeTruthy();
-    expect(body!.style.paddingBottom).toBe("96px");
-    expect(body!.style.paddingBottom).not.toContain("--safe-area-bottom");
+    expect(body?.style.paddingBottom).toBe("96px");
+    expect(body?.style.paddingBottom).not.toContain("--safe-area-bottom");
   });
 });

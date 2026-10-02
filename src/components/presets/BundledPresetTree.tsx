@@ -2,7 +2,10 @@ import { Box, Stack, Text, UnstyledButton } from "@mantine/core";
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { InsetGroup } from "@/components/ui/entry/entryChrome";
-import { BUNDLED_GAME_PRESET_DEFINITIONS } from "@/domain/regions/bundledGamePresets";
+import {
+  BUNDLED_GAME_PRESET_DEFINITIONS,
+  bundledPresetDefinition,
+} from "@/domain/regions/bundledGamePresets";
 import {
   districtNumberFromSubregionId,
   glyphIdForHierarchyCategory,
@@ -14,11 +17,10 @@ import {
   type RegionFlagMark,
 } from "@/domain/regions/bundledPresetFlags";
 import {
-  buildBundledPresetTree,
   type BundledPresetTreeNode,
+  buildBundledPresetTree,
 } from "@/domain/regions/bundledPresetHierarchy";
-import { bundledPresetDefinition } from "@/domain/regions/bundledGamePresets";
-import { migrateGamePreset } from "@/domain/session/presets/gamePreset";
+import type { migrateGamePreset } from "@/domain/session/presets/gamePreset";
 import { PresetFavouriteButton } from "./PresetFavouriteButton";
 
 type MigratedPreset = ReturnType<typeof migrateGamePreset>;
@@ -67,14 +69,10 @@ function collectVisibleRows(
         ancestorIds,
       });
       if (open) {
-        collectVisibleRows(
-          node.children,
-          openGroupIds,
-          presetsById,
-          depth + 1,
-          out,
-          [...ancestorIds, node.id],
-        );
+        collectVisibleRows(node.children, openGroupIds, presetsById, depth + 1, out, [
+          ...ancestorIds,
+          node.id,
+        ]);
       }
       continue;
     }
@@ -269,9 +267,7 @@ function RowLeading({
           ...leadingSlotStyle,
           objectFit: cutout ? "contain" : "cover",
           borderRadius: 2,
-          border: cutout
-            ? "none"
-            : "0.33px solid oklch(from var(--color-field-ink) l c h / 0.22)",
+          border: cutout ? "none" : "0.33px solid oklch(from var(--color-field-ink) l c h / 0.22)",
           backgroundColor: cutout
             ? "transparent"
             : "oklch(from var(--color-field-ink) l c h / 0.08)",
@@ -335,8 +331,7 @@ function groupLabelStyle(depth: number): {
   return { fw: 510, size: "sm", opacity: 0.92 };
 }
 
-const hairline =
-  "0.33px solid oklch(from var(--color-field-ink) l c h / 0.12)";
+const hairline = "0.33px solid oklch(from var(--color-field-ink) l c h / 0.12)";
 
 function childWellBackground(depth: number): string {
   if (depth <= 0) {
@@ -394,8 +389,7 @@ function TreeRows({
                       : "oklch(from var(--color-field-ink) l c h / 0.07)",
                   },
                   "&:active": {
-                    backgroundColor:
-                      "oklch(from var(--color-field-ink) l c h / 0.1)",
+                    backgroundColor: "oklch(from var(--color-field-ink) l c h / 0.1)",
                   },
                 },
               }}
@@ -450,11 +444,7 @@ function TreeRows({
           );
         }
 
-        const meta = [
-          row.preset.gameSize,
-          row.preset.distanceUnit,
-          row.preset.placeLabel,
-        ]
+        const meta = [row.preset.gameSize, row.preset.distanceUnit, row.preset.placeLabel]
           .filter(Boolean)
           .join(" · ");
         const presetFlag = flagMarkForBundledPresetId(row.preset.id);
@@ -495,20 +485,15 @@ function TreeRows({
                   textDecoration: "none",
                   WebkitTapHighlightColor: "transparent",
                   "&:hover": {
-                    backgroundColor:
-                      "oklch(from var(--color-field-ink) l c h / 0.05)",
+                    backgroundColor: "oklch(from var(--color-field-ink) l c h / 0.05)",
                   },
                   "&:active": {
-                    backgroundColor:
-                      "oklch(from var(--color-field-ink) l c h / 0.08)",
+                    backgroundColor: "oklch(from var(--color-field-ink) l c h / 0.08)",
                   },
                 },
               }}
             >
-              <RowLeading
-                mark={presetFlag}
-                districtNumber={districtNumber}
-              />
+              <RowLeading mark={presetFlag} districtNumber={districtNumber} />
               <Box style={{ minWidth: 0, flex: 1 }}>
                 <Text
                   fw={510}
@@ -555,10 +540,7 @@ function TreeRows({
   );
 }
 
-function collectAllGroupIds(
-  nodes: readonly BundledPresetTreeNode[],
-  out: string[] = [],
-): string[] {
+function collectAllGroupIds(nodes: readonly BundledPresetTreeNode[], out: string[] = []): string[] {
   for (const node of nodes) {
     if (node.kind !== "group") {
       continue;
@@ -570,15 +552,8 @@ function collectAllGroupIds(
 }
 
 /** One frosted card per continent; nested rows sit in a deeper well. */
-export function BundledPresetTree({
-  presets,
-}: {
-  presets: readonly MigratedPreset[];
-}) {
-  const tree = useMemo(
-    () => buildBundledPresetTree(BUNDLED_GAME_PRESET_DEFINITIONS),
-    [],
-  );
+export function BundledPresetTree({ presets }: { presets: readonly MigratedPreset[] }) {
+  const tree = useMemo(() => buildBundledPresetTree(BUNDLED_GAME_PRESET_DEFINITIONS), []);
   const presetsById = useMemo(
     () => new Map(presets.map((preset) => [preset.id, preset])),
     [presets],
@@ -586,18 +561,14 @@ export function BundledPresetTree({
   const [openGroupIds, setOpenGroupIds] = useState(() => new Set<string>());
 
   const continentGroups = useMemo(
-    () =>
-      tree.filter(
-        (node): node is GroupNode => node.kind === "group",
-      ),
+    () => tree.filter((node): node is GroupNode => node.kind === "group"),
     [tree],
   );
 
   const allGroupIds = useMemo(() => collectAllGroupIds(tree), [tree]);
 
   const allExpanded =
-    allGroupIds.length > 0 &&
-    allGroupIds.every((groupId) => openGroupIds.has(groupId));
+    allGroupIds.length > 0 && allGroupIds.every((groupId) => openGroupIds.has(groupId));
 
   const toggleGroup = (groupId: string) => {
     setOpenGroupIds((current) => {
@@ -635,22 +606,18 @@ export function BundledPresetTree({
             minHeight: 36,
             paddingInline: 12,
             borderRadius: 10,
-            border:
-              "0.33px solid oklch(from var(--color-field-ink) l c h / 0.14)",
-            backgroundColor:
-              "oklch(from var(--color-field-ink) l c h / 0.06)",
+            border: "0.33px solid oklch(from var(--color-field-ink) l c h / 0.14)",
+            backgroundColor: "oklch(from var(--color-field-ink) l c h / 0.06)",
             color: "var(--color-field-ink)",
             fontSize: "0.8125rem",
             fontWeight: 590,
             letterSpacing: "-0.01em",
             WebkitTapHighlightColor: "transparent",
             "&:hover": {
-              backgroundColor:
-                "oklch(from var(--color-field-ink) l c h / 0.09)",
+              backgroundColor: "oklch(from var(--color-field-ink) l c h / 0.09)",
             },
             "&:active": {
-              backgroundColor:
-                "oklch(from var(--color-field-ink) l c h / 0.12)",
+              backgroundColor: "oklch(from var(--color-field-ink) l c h / 0.12)",
             },
           },
         }}
@@ -681,13 +648,7 @@ export function BundledPresetTree({
       </UnstyledButton>
       {continentGroups.map((continent) => {
         const rows: VisibleRow[] = [];
-        collectVisibleRows(
-          [continent],
-          openGroupIds,
-          presetsById,
-          0,
-          rows,
-        );
+        collectVisibleRows([continent], openGroupIds, presetsById, 0, rows);
         return (
           <InsetGroup key={continent.id}>
             <TreeRows rows={rows} onToggleGroup={toggleGroup} />

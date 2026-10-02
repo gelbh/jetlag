@@ -4,18 +4,18 @@
  */
 import { Button, Text } from "@mantine/core";
 import {
-  TENTACLE_NOT_WITHIN_REACH_LABEL,
-  tentacleHiderAnswerClipboardText,
-  type TentacleExtendedCategoryId,
-} from "@/domain/questions";
-import type { TentaclePoi } from "@/domain/map/annotations";
-import type { DistanceUnit } from "@/domain/map/distance";
-import { useCopyFeedback } from "@/hooks/forms/useCopyFeedback";
-import {
   choiceChipStyles,
   compactGrayStyles,
   mapChromeSurfaceStyles,
 } from "@/components/ui/entry/entryChrome";
+import type { TentaclePoi } from "@/domain/map/annotations";
+import type { DistanceUnit } from "@/domain/map/distance";
+import {
+  TENTACLE_NOT_WITHIN_REACH_LABEL,
+  type TentacleExtendedCategoryId,
+  tentacleHiderAnswerClipboardText,
+} from "@/domain/questions";
+import { useCopyFeedback } from "@/hooks/forms/useCopyFeedback";
 
 export type TentacleMapAnswerStripProps = {
   categoryId: TentacleExtendedCategoryId;
@@ -85,9 +85,7 @@ export function TentacleMapAnswerStrip({
         style={{
           letterSpacing: "-0.01em",
           color:
-            selectedName || outOfReach
-              ? "var(--color-field-ink)"
-              : "var(--color-field-ink-muted)",
+            selectedName || outOfReach ? "var(--color-field-ink)" : "var(--color-field-ink-muted)",
           lineHeight: 1.3,
         }}
       >
@@ -126,8 +124,7 @@ export function TentacleMapAnswerStrip({
         onClick={() => onOutOfReachChange(true)}
         styles={{
           root: {
-            ...choiceChipStyles(outOfReach, outOfReach ? "danger" : "default")
-              .root,
+            ...choiceChipStyles(outOfReach, outOfReach ? "danger" : "default").root,
             width: "100%",
             justifyContent: "center",
             minHeight: "2.5rem",

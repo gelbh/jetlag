@@ -1,9 +1,6 @@
-import { type Locator, type Page, expect } from "@playwright/test";
+import { expect, type Locator, type Page } from "@playwright/test";
 import { dismissMapOnboarding } from "../page-init";
-import {
-  dismissActiveToolPanel,
-  PENDING_QUESTION_TEXT,
-} from "./question-wizards";
+import { dismissActiveToolPanel, PENDING_QUESTION_TEXT } from "./question-wizards";
 
 export function questionAlertBanner(page: Page): Locator {
   return page.getByTestId("question-alert-banner");
@@ -15,7 +12,12 @@ export function gameChatScroll(page: Page): Locator {
 }
 
 export async function openChat(page: Page) {
-  if (await page.getByLabel("Chat tabs").isVisible().catch(() => false)) {
+  if (
+    await page
+      .getByLabel("Chat tabs")
+      .isVisible()
+      .catch(() => false)
+  ) {
     return;
   }
 
@@ -24,7 +26,12 @@ export async function openChat(page: Page) {
 
   // Hider chat uses jl-panel-hider-wizard above the dock; if still mounted after
   // dismiss (exit animation / bare Close), treat chat as already open.
-  if (await page.getByLabel("Chat tabs").isVisible().catch(() => false)) {
+  if (
+    await page
+      .getByLabel("Chat tabs")
+      .isVisible()
+      .catch(() => false)
+  ) {
     return;
   }
 
@@ -56,10 +63,7 @@ export async function openChat(page: Page) {
   throw new Error("Chat control not found on map chrome");
 }
 
-async function resolveAnswerButton(
-  page: Page,
-  name: string | RegExp,
-): Promise<Locator> {
+async function resolveAnswerButton(page: Page, name: string | RegExp): Promise<Locator> {
   let resolved: Locator | undefined;
   await expect(async () => {
     const bannerButton = questionAlertBanner(page).getByRole("button", {
@@ -83,18 +87,12 @@ async function resolveAnswerButton(
 }
 
 export async function answerInChat(page: Page, label: string) {
-  const answerButton = await resolveAnswerButton(
-    page,
-    `Send answer: ${label}`,
-  );
+  const answerButton = await resolveAnswerButton(page, `Send answer: ${label}`);
   await answerButton.click();
 }
 
 export async function answerPhotoCannotInChat(page: Page) {
-  const answerButton = await resolveAnswerButton(
-    page,
-    "I cannot answer the question",
-  );
+  const answerButton = await resolveAnswerButton(page, "I cannot answer the question");
   await answerButton.click();
 }
 
@@ -127,9 +125,7 @@ export async function expectChatAnswer(page: Page, answer: string) {
   await openChat(page);
   // Wave GameChatTab shows the reply label in an Answer box (aria Answer: Yes),
   // not the legacy "Answered: yes" prefix.
-  await expect(
-    page.getByLabel(new RegExp(`Answer:\\s*${answer}`, "i")),
-  ).toBeVisible({
+  await expect(page.getByLabel(new RegExp(`Answer:\\s*${answer}`, "i"))).toBeVisible({
     timeout: 20_000,
   });
 }

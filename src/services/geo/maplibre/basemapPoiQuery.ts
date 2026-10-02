@@ -1,22 +1,19 @@
 import type { MapGeoJSONFeature, Map as MapLibreMap } from "maplibre-gl";
-import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
-import { haversineMeters } from "@/domain/geometry/gameArea/distance";
-import type { MapStyle } from "@/domain/map/mapBasemaps";
 import {
   mapOpenMapTilesPoiToCategoryIds,
-  openMapTilesPoiDisplayName,
   type OpenMapTilesPoiProperties,
+  openMapTilesPoiDisplayName,
 } from "@/domain/geo/openMapTilesPoiClassMap";
 import type { PoiCandidate } from "@/domain/geo/poiCandidate";
+import { haversineMeters } from "@/domain/geometry/gameArea/distance";
+import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
+import type { MapStyle } from "@/domain/map/mapBasemaps";
 
 export const OPENMAPTILES_SOURCE_ID = "openmaptiles";
 export const OPENMAPTILES_POI_SOURCE_LAYER = "poi";
 
 /** Liberty/dark rendered POI layers used when source query is empty. */
-export const OPENMAPTILES_POI_RENDERED_LAYER_PREFIXES = [
-  "poi_r",
-  "poi_transit",
-] as const;
+export const OPENMAPTILES_POI_RENDERED_LAYER_PREFIXES = ["poi_r", "poi_transit"] as const;
 
 const DEFAULT_MAX_RESULTS = 48;
 const POINT_QUERY_RADIUS_METERS = 80;
@@ -48,9 +45,7 @@ export function queryBasemapPois(
 
   const maxResults = opts.maxResults ?? DEFAULT_MAX_RESULTS;
   const categoryFilter =
-    opts.categoryIds && opts.categoryIds.length > 0
-      ? new Set(opts.categoryIds)
-      : null;
+    opts.categoryIds && opts.categoryIds.length > 0 ? new Set(opts.categoryIds) : null;
 
   let features = queryPoiSourceFeatures(map);
   if (features.length === 0) {
@@ -163,7 +158,7 @@ function featureToPoiCandidate(
 function geometryToLatLng(
   geometry: MapGeoJSONFeature["geometry"] | null | undefined,
 ): LatLngTuple | null {
-  if (!geometry || geometry.type !== "Point") {
+  if (geometry?.type !== "Point") {
     return null;
   }
   const coords = geometry.coordinates;
@@ -187,9 +182,7 @@ function osmIdFromFeature(
   if (fromFeatureId) {
     return fromFeatureId;
   }
-  return coerceOsmId(
-    props.osm_id ?? props.osmId ?? props.id ?? props["@id"] ?? null,
-  );
+  return coerceOsmId(props.osm_id ?? props.osmId ?? props.id ?? props["@id"] ?? null);
 }
 
 function coerceOsmId(raw: unknown): string | null {

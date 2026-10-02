@@ -65,8 +65,7 @@ export function MapViewportTracker({
 
   useEffect(() => {
     const handlers = createViewportTrackerHandlers({
-      publish: () =>
-        publishViewportMapLibre(map, onViewportChangeRef.current),
+      publish: () => publishViewportMapLibre(map, onViewportChangeRef.current),
       onUserPanStart: () => onUserPanStartRef.current?.(),
       onUserPanEnd: () => onUserPanEndRef.current?.(),
     });

@@ -1,5 +1,5 @@
-import { render, screen } from "@testing-library/react";
 import { MantineProvider } from "@mantine/core";
+import { render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import { DrawerSheet } from "@/components/ui/sheets/DrawerSheet";
 import { PHONE_SHELL_MAX_WIDTH_PX } from "@/theme/phoneShell";
@@ -48,9 +48,7 @@ describe("PlayerPhoneShell", () => {
     );
 
     const shell = screen.getByTestId("player-phone-shell");
-    const overlay = document.querySelector(
-      ".mantine-Drawer-overlay",
-    ) as HTMLElement | null;
+    const overlay = document.querySelector(".mantine-Drawer-overlay") as HTMLElement | null;
     expect(overlay).not.toBeNull();
     expect(shell.contains(overlay!)).toBe(true);
     expect(getComputedStyle(overlay!).position).toBe("absolute");
@@ -71,10 +69,8 @@ describe("PlayerPhoneShell", () => {
       },
     });
 
-    expect(overlay!.clientWidth).toBe(shell.clientWidth);
-    expect(overlay!.clientWidth).toBeLessThanOrEqual(PHONE_SHELL_MAX_WIDTH_PX);
-    expect(overlay!.clientWidth).toBeLessThan(
-      document.documentElement.clientWidth,
-    );
+    expect(overlay?.clientWidth).toBe(shell.clientWidth);
+    expect(overlay?.clientWidth).toBeLessThanOrEqual(PHONE_SHELL_MAX_WIDTH_PX);
+    expect(overlay?.clientWidth).toBeLessThan(document.documentElement.clientWidth);
   });
 });

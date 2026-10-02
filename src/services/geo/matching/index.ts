@@ -1,40 +1,13 @@
-export {
-  type MatchingFetchOptions,
-} from "./types";
-
-export {
-  buildMatchingFeaturesQuery,
-  buildStreetPathQuery,
-  formatOverpassBbox,
-  matchingFeaturesCacheKey,
-  matchingSearchBoundingBox,
-} from "./query";
-
-export {
-  countMatchingFeaturesInPlayArea,
-  parseMatchingFeatures,
-} from "./parse";
-
-export {
-  buildLetterZoneFeatures,
-  buildStationFirstLetterFeatures,
-  buildStationNameLengthFeatures,
-} from "./specialized";
-
-export {
-  fetchStationFeaturesInArea,
-  fetchStreetPathFeaturesInArea,
-  fetchTransitLineMatchingFeaturesInArea,
-  fetchTransitStationsForHidingZone,
-  fetchTransitStationsForHidingZoneViewport,
-} from "./transit";
-
+export type { MatchingFeature } from "@/domain/geo/types";
 export {
   fetchMatchingFeaturesInArea,
   findNearestMatchingFeature,
   pickMatchingFeatureForAnchor,
 } from "./fetch";
-
+export {
+  customMatchingAreasCacheSuffix,
+  parseMatchingAreaGeoJson,
+} from "./matchingAreaGeoJson";
 export {
   matchingEmptyPlayAreaMessage,
   matchingFeatureCountLabel,
@@ -42,13 +15,26 @@ export {
   matchingNullAnswerMessage,
   matchingResolveFailureMessage,
 } from "./messages";
-
-export type { MatchingFeature } from "@/domain/geo/types";
-
 export {
-  parseMatchingAreaGeoJson,
-  customMatchingAreasCacheSuffix,
-} from "./matchingAreaGeoJson";
+  countMatchingFeaturesInPlayArea,
+  parseMatchingFeatures,
+} from "./parse";
+export {
+  buildMatchingFeaturesQuery,
+  buildStreetPathQuery,
+  formatOverpassBbox,
+  matchingFeaturesCacheKey,
+  matchingSearchBoundingBox,
+} from "./query";
+export {
+  adminLevelForRegionPackAsset,
+  clearRegionPackGeoCacheForTests,
+  loadRegionPackMatchingAreas,
+  loadRegionPackPlayArea,
+  loadRegionPackSessionBoundaries,
+  type RegionPackSessionBoundaries,
+  regionPackHasBundledBoundaries,
+} from "./regionPackBoundaries";
 export {
   clearResolvedMatchingAreasCacheForTests,
   isPlayAreaReadySync,
@@ -61,11 +47,15 @@ export {
   type SessionPlayAreaInput,
 } from "./resolveSessionMatchingAreas";
 export {
-  adminLevelForRegionPackAsset,
-  clearRegionPackGeoCacheForTests,
-  loadRegionPackMatchingAreas,
-  loadRegionPackPlayArea,
-  loadRegionPackSessionBoundaries,
-  regionPackHasBundledBoundaries,
-  type RegionPackSessionBoundaries,
-} from "./regionPackBoundaries";
+  buildLetterZoneFeatures,
+  buildStationFirstLetterFeatures,
+  buildStationNameLengthFeatures,
+} from "./specialized";
+export {
+  fetchStationFeaturesInArea,
+  fetchStreetPathFeaturesInArea,
+  fetchTransitLineMatchingFeaturesInArea,
+  fetchTransitStationsForHidingZone,
+  fetchTransitStationsForHidingZoneViewport,
+} from "./transit";
+export type { MatchingFetchOptions } from "./types";

@@ -4,10 +4,7 @@
  * `resolveSessionMatchingAreas` (which re-exports these).
  */
 import type { GameArea, SessionRecord } from "@/domain/map/annotations";
-import {
-  BUNDLED_REGION_PACK_GEO_REVISION,
-  type RegionPackId,
-} from "@/domain/regions/regionPack";
+import { BUNDLED_REGION_PACK_GEO_REVISION, type RegionPackId } from "@/domain/regions/regionPack";
 import { isKnownRegionPack } from "@/domain/regions/regionPackRegistry";
 
 export type SessionPlayAreaInput = Pick<
@@ -30,9 +27,7 @@ export function playAreaCacheKey(
   ].join(":");
 }
 
-export function isPlayAreaReadySync(
-  session: SessionPlayAreaInput | null | undefined,
-): boolean {
+export function isPlayAreaReadySync(session: SessionPlayAreaInput | null | undefined): boolean {
   if (!session) {
     return true;
   }
@@ -43,7 +38,5 @@ export function isPlayAreaReadySync(
   }
 
   const cacheKey = playAreaCacheKey(packId, session.regionPackSubregionId);
-  return (
-    resolvedPlayAreaCache.has(cacheKey) || failedPlayAreaKeys.has(cacheKey)
-  );
+  return resolvedPlayAreaCache.has(cacheKey) || failedPlayAreaKeys.has(cacheKey);
 }

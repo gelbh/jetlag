@@ -51,23 +51,17 @@ export function AdminHotfixThread({
   messagesOverride,
   errorOverride,
 }: AdminHotfixThreadProps) {
-  const live = useHotfixThread(
-    messagesOverride !== undefined ? null : incidentId,
-  );
-  const messages =
-    messagesOverride !== undefined ? messagesOverride : live.messages;
+  const live = useHotfixThread(messagesOverride !== undefined ? null : incidentId);
+  const messages = messagesOverride !== undefined ? messagesOverride : live.messages;
   const error = errorOverride !== undefined ? errorOverride : live.error;
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView?.({ block: "end" });
-  }, [messages.length]);
+  }, []);
 
   return (
-    <div
-      className={`jl-incident-chat ${className}`.trim()}
-      data-testid="admin-hotfix-thread"
-    >
+    <div className={`jl-incident-chat ${className}`.trim()} data-testid="admin-hotfix-thread">
       <p className="jl-incident-prompt-label">Private hotfix thread</p>
       <p className="text-sm text-ink-muted">
         Coding-agent status only — players cannot read this thread.
@@ -85,8 +79,7 @@ export function AdminHotfixThread({
       <div className="jl-scroll jl-incident-chat-scroll">
         {messages.length === 0 ? (
           <p className="text-sm text-ink-dim">
-            No coding-agent activity yet. Clear-bug triage launches here
-            automatically.
+            No coding-agent activity yet. Clear-bug triage launches here automatically.
           </p>
         ) : (
           messages.map((message) => (

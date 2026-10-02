@@ -57,7 +57,7 @@ export function SessionTimerLabel({ timerState }: SessionTimerLabelProps) {
       window.removeEventListener("focus", bump);
       document.removeEventListener("visibilitychange", handleVisibility);
     };
-  }, [timerState.runningSince]); // eslint-disable-line react-hooks/exhaustive-deps -- restart interval when run anchor changes
+  }, [timerState.runningSince, timerState]); // eslint-disable-line react-hooks/exhaustive-deps -- restart interval when run anchor changes
 
   void tick;
 

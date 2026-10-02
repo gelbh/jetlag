@@ -1,13 +1,6 @@
-import {
-  test,
-  expect,
-  openMapWithLocalSession,
-  advanceLocalTimerElapsedMs,
-} from "../../fixtures";
+import { advanceLocalTimerElapsedMs, expect, openMapWithLocalSession, test } from "../../fixtures";
 
-test("@smoke shows hiding countdown then seek phase after the period ends", async ({
-  page,
-}) => {
+test("@smoke shows hiding countdown then seek phase after the period ends", async ({ page }) => {
   await openMapWithLocalSession(page, {
     gameSize: "small",
     hidingPeriodMinutes: 5,

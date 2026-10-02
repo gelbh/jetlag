@@ -76,46 +76,27 @@ describe("buildCatalogHelpers", () => {
   });
 
   it("returns first unused catalog option", () => {
-    expect(helpers.firstAvailableFromCatalog(TEST_CATALOG, new Set(["a"]))).toBe(
-      "b",
-    );
+    expect(helpers.firstAvailableFromCatalog(TEST_CATALOG, new Set(["a"]))).toBe("b");
   });
 
   it("returns null when all catalog options are used", () => {
-    expect(
-      helpers.firstAvailableFromCatalog(
-        TEST_CATALOG,
-        new Set(["a", "b", "c"]),
-      ),
-    ).toBeNull();
+    expect(helpers.firstAvailableFromCatalog(TEST_CATALOG, new Set(["a", "b", "c"]))).toBeNull();
   });
 
   it("respects isEnabled filter for first available", () => {
     expect(
-      helpers.firstAvailableFromCatalog(TEST_CATALOG, new Set(), (option) =>
-        option !== "a",
-      ),
+      helpers.firstAvailableFromCatalog(TEST_CATALOG, new Set(), (option) => option !== "a"),
     ).toBe("b");
   });
 
   it("returns fallback when catalog is fully used", () => {
-    expect(
-      helpers.defaultFromCatalog(
-        TEST_CATALOG,
-        new Set(["a", "b", "c"]),
-        "a",
-      ),
-    ).toBe("a");
+    expect(helpers.defaultFromCatalog(TEST_CATALOG, new Set(["a", "b", "c"]), "a")).toBe("a");
   });
 
   it("counts annotation use for a single option", () => {
     expect(
       helpers.optionUseCountFromAnnotations(
-        [
-          matchingAnnotation("1", "a"),
-          matchingAnnotation("2", "a"),
-          matchingAnnotation("3", "b"),
-        ],
+        [matchingAnnotation("1", "a"), matchingAnnotation("2", "a"), matchingAnnotation("3", "b")],
         "a",
       ),
     ).toBe(2);
@@ -135,18 +116,13 @@ describe("buildCatalogHelpers", () => {
   });
 
   it("treats cancelled-with-answer pending as used", () => {
-    const used = helpers.usedOptionsFromPending([
-      matchingPending("p1", "a", "cancelled", "yes"),
-    ]);
+    const used = helpers.usedOptionsFromPending([matchingPending("p1", "a", "cancelled", "yes")]);
     expect(used).toEqual(new Set(["a"]));
   });
 
   it("does not inflate useCount for cancelled-with-answer pending", () => {
     expect(
-      helpers.optionUseCountFromPending(
-        [matchingPending("p1", "a", "cancelled", "yes")],
-        "a",
-      ),
+      helpers.optionUseCountFromPending([matchingPending("p1", "a", "cancelled", "yes")], "a"),
     ).toBe(0);
   });
 });

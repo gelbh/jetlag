@@ -45,15 +45,9 @@ export function useMapOverlayActions({
   );
 
   const handleOpenChat = useCallback(() => openOverlay("chat"), [openOverlay]);
-  const handleOpenSettings = useCallback(
-    () => openOverlay("settings"),
-    [openOverlay],
-  );
+  const handleOpenSettings = useCallback(() => openOverlay("settings"), [openOverlay]);
   const handleOpenLog = useCallback(() => openOverlay("log"), [openOverlay]);
-  const handleOpenCodes = useCallback(
-    () => openOverlay("codes"),
-    [openOverlay],
-  );
+  const handleOpenCodes = useCallback(() => openOverlay("codes"), [openOverlay]);
 
   return {
     openOverlay,

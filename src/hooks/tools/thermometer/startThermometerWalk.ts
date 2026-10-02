@@ -5,14 +5,14 @@ import {
   isThermometerDistanceOptionAvailableForSession,
   isThermometerDistanceOptionUsed,
   LOCAL_THERMOMETER_WALK_ID,
-  thermometerQuestionPrompt,
   type ThermometerDistanceOptionMiles,
+  thermometerQuestionPrompt,
 } from "@/domain/questions";
 import type { PendingQuestionRecord } from "@/domain/session/activity/sessionChat";
 import type { SessionRulesInput } from "@/domain/session/rules";
-import type { SubmitPendingQuestionInput } from "../../sync/usePendingQuestionActions";
 import type { GeolocationReading } from "@/services/core/location/geolocation";
 import { emitThermometerWalkStartedActivity } from "@/services/session/emitSessionActivity";
+import type { SubmitPendingQuestionInput } from "../../sync/usePendingQuestionActions";
 import { thermometerWalkStartPlacement } from "../useThermometerWalk";
 import type { ThermometerSessionConfig } from "./types";
 
@@ -26,11 +26,8 @@ export interface StartThermometerWalkInput {
   ensurePointInGameArea?: (point: LatLngTuple) => boolean;
   awaitHiderAnswer: boolean;
   submitPendingQuestion?: (
-    input: Omit<
-      SubmitPendingQuestionInput,
-      "sessionId" | "senderUid" | "senderRole" | "toolType"
-    >,
-  ) => Promise<string | void>;
+    input: Omit<SubmitPendingQuestionInput, "sessionId" | "senderUid" | "senderRole" | "toolType">,
+  ) => Promise<string | undefined>;
   sessionId?: string;
   senderUid?: string | null;
   distanceUnit: DistanceUnit;
@@ -40,9 +37,7 @@ export interface StartThermometerWalkInput {
   patchConfig: (patch: Partial<ThermometerSessionConfig>) => void;
 }
 
-export async function startThermometerGpsWalk(
-  input: StartThermometerWalkInput,
-): Promise<void> {
+export async function startThermometerGpsWalk(input: StartThermometerWalkInput): Promise<void> {
   const {
     canSubmitQuestion,
     pendingQuestions,
@@ -71,12 +66,7 @@ export async function startThermometerGpsWalk(
     return;
   }
 
-  if (
-    !isThermometerDistanceOptionAvailableForSession(
-      sessionRules,
-      distanceMeters,
-    )
-  ) {
+  if (!isThermometerDistanceOptionAvailableForSession(sessionRules, distanceMeters)) {
     patchConfig({
       panelError: "That distance is not available for this game size.",
     });
@@ -96,8 +86,7 @@ export async function startThermometerGpsWalk(
       reading = await refreshGps();
     } catch (error) {
       patchConfig({
-        panelError:
-          error instanceof Error ? error.message : "GPS location unavailable.",
+        panelError: error instanceof Error ? error.message : "GPS location unavailable.",
       });
       return;
     }
@@ -160,10 +149,7 @@ export async function startThermometerGpsWalk(
     patchConfig({ localWalkingQuestionId: questionId });
   } catch (error) {
     patchConfig({
-      panelError:
-        error instanceof Error
-          ? error.message
-          : "Couldn't start the walk. Try again.",
+      panelError: error instanceof Error ? error.message : "Couldn't start the walk. Try again.",
       localThermoA: null,
     });
   }

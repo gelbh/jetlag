@@ -3,11 +3,11 @@ import {
   listOrphanWalkingThermometerQuestionIds,
   listStaleWalkingThermometerQuestionIds,
 } from "../../domain/questions";
-import type { PlayerRole } from "../../domain/session/players/playerRole";
 import type {
   PendingQuestionRecord,
   PlayerLocationRecord,
 } from "../../domain/session/activity/sessionChat";
+import type { PlayerRole } from "../../domain/session/players/playerRole";
 import type { ThermometerWalkCancelReason } from "../../services/firestore/firestoreSessionExtras";
 import { useStaleWalkNowMs } from "./useStaleWalkNowMs";
 
@@ -54,7 +54,7 @@ export function useCancelOrphanThermometerWalks(args: {
 
   useEffect(() => {
     handledIdsRef.current = new Set();
-  }, [sessionId]);
+  }, []);
 
   useEffect(() => {
     if (!sessionId || !myUid || !myRole) {

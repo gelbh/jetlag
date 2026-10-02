@@ -1,9 +1,9 @@
-import { useEffect, useRef, useState, type DragEvent } from "react";
+import { type DragEvent, useEffect, useRef, useState } from "react";
 import {
   CUSTOM_PRESET_ID,
+  type DeskPreset,
   movePresetOntoId,
   presetLabel,
-  type DeskPreset,
 } from "../../domain/admin/opsDeskLayout";
 import { AdminPresetManageMenu } from "./AdminPresetManageMenu";
 
@@ -37,13 +37,9 @@ export function AdminPresetMenu({
   onOverwriteUserPreset,
 }: AdminPresetMenuProps) {
   const userIds = new Set(userPresets.map((p) => p.id));
-  const orderedIds = (presetOrder ?? []).filter(
-    (id) => id === CUSTOM_PRESET_ID || userIds.has(id),
-  );
+  const orderedIds = (presetOrder ?? []).filter((id) => id === CUSTOM_PRESET_ID || userIds.has(id));
   const [manageOpen, setManageOpen] = useState(false);
-  const [managePos, setManagePos] = useState<{ left: number; top: number } | null>(
-    null,
-  );
+  const [managePos, setManagePos] = useState<{ left: number; top: number } | null>(null);
   const manageAnchorRef = useRef<HTMLSpanElement>(null);
   const manageTriggerRef = useRef<HTMLButtonElement>(null);
   const managePanelRef = useRef<HTMLDivElement>(null);
@@ -62,10 +58,7 @@ export function AdminPresetMenu({
       if (!trigger) return;
       const rect = trigger.getBoundingClientRect();
       const width = 16 * 16; // min-width 16rem ≈ clamp left
-      const left = Math.max(
-        8,
-        Math.min(rect.left, window.innerWidth - width - 8),
-      );
+      const left = Math.max(8, Math.min(rect.left, window.innerWidth - width - 8));
       setManagePos({ left, top: rect.bottom + 4 });
     };
     updatePos();
@@ -89,7 +82,7 @@ export function AdminPresetMenu({
       window.removeEventListener("resize", updatePos);
       window.removeEventListener("scroll", updatePos, true);
     };
-  }, [manageOpen]);
+  }, [manageOpen, closeManage]);
 
   const handleDragStart = (event: DragEvent, presetId: string) => {
     dragFromIdRef.current = presetId;
@@ -109,8 +102,7 @@ export function AdminPresetMenu({
 
   const handleDrop = (event: DragEvent, targetId: string) => {
     event.preventDefault();
-    const fromId =
-      event.dataTransfer.getData(PRESET_MIME) || dragFromIdRef.current;
+    const fromId = event.dataTransfer.getData(PRESET_MIME) || dragFromIdRef.current;
     if (!fromId || fromId === targetId) return;
     const next = movePresetOntoId(orderedIds, fromId, targetId);
     if (next) onReorderPresets(next);
@@ -154,15 +146,9 @@ export function AdminPresetMenu({
             <button
               type="button"
               className={
-                isDefault
-                  ? "jl-ops-preset-star jl-ops-preset-star--active"
-                  : "jl-ops-preset-star"
+                isDefault ? "jl-ops-preset-star jl-ops-preset-star--active" : "jl-ops-preset-star"
               }
-              aria-label={
-                isDefault
-                  ? `${label} is default`
-                  : `Set ${label} as default`
-              }
+              aria-label={isDefault ? `${label} is default` : `Set ${label} as default`}
               aria-pressed={isDefault}
               onClick={() => onSetDefault(presetId)}
             >
@@ -187,10 +173,7 @@ export function AdminPresetMenu({
               const rect = trigger.getBoundingClientRect();
               const width = 16 * 16;
               setManagePos({
-                left: Math.max(
-                  8,
-                  Math.min(rect.left, window.innerWidth - width - 8),
-                ),
+                left: Math.max(8, Math.min(rect.left, window.innerWidth - width - 8)),
                 top: rect.bottom + 4,
               });
             }
@@ -219,19 +202,11 @@ export function AdminPresetMenu({
           />
         ) : null}
       </span>
-      <button
-        type="button"
-        className="jl-ops-preset-chip"
-        onClick={onSaveCurrent}
-      >
+      <button type="button" className="jl-ops-preset-chip" onClick={onSaveCurrent}>
         Save as…
       </button>
       {userIds.has(activePresetId) ? (
-        <button
-          type="button"
-          className="jl-ops-preset-chip"
-          onClick={onOverwriteUserPreset}
-        >
+        <button type="button" className="jl-ops-preset-chip" onClick={onOverwriteUserPreset}>
           Update preset
         </button>
       ) : null}

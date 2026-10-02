@@ -1,11 +1,7 @@
 import type { Feature, FeatureCollection, MultiPolygon, Polygon } from "geojson";
-import {
-  loadKernelWasm,
-  parseWasmFeature,
-  resetKernelWasmForTests,
-} from "./kernelWasmPkg";
-import type { GameAreaGeometry, LatLngTuple, PolygonFeature } from "./types";
+import { loadKernelWasm, parseWasmFeature, resetKernelWasmForTests } from "./kernelWasmPkg";
 import type { TentacleSite } from "./tentacleTypes";
+import type { GameAreaGeometry, LatLngTuple, PolygonFeature } from "./types";
 
 /** Reset lazy WASM module (tests). */
 export const resetTentacleWasmForTests = resetKernelWasmForTests;

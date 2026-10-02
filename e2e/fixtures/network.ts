@@ -1,15 +1,8 @@
-import { type Page, type Route } from "@playwright/test";
+import type { Page, Route } from "@playwright/test";
 import { isMapTileHostname } from "../../src/domain/map/mapTileHosts";
-import {
-  resolveOverpassResponse,
-  type OverpassFixtureProfile,
-} from "./overpass/resolver";
+import { type OverpassFixtureProfile, resolveOverpassResponse } from "./overpass/resolver";
 
-const OVERPASS_API_HOSTS = new Set([
-  "overpass-api.de",
-  "maps.mail.ru",
-  "overpass.kumi.systems",
-]);
+const OVERPASS_API_HOSTS = new Set(["overpass-api.de", "maps.mail.ru", "overpass.kumi.systems"]);
 
 const TILE_PNG = Buffer.from(
   "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
@@ -56,17 +49,10 @@ function isMapTileHost(hostname: string): boolean {
  * Non-host Play Move pauses the timer via `controlSessionTimerForMove`; stub
  * the callable so startMove does not roll back the wizard when :5001 is down.
  */
-async function fulfillMoveTimerCallableIfMatched(
-  route: Route,
-  parsed: URL,
-): Promise<boolean> {
+async function fulfillMoveTimerCallableIfMatched(route: Route, parsed: URL): Promise<boolean> {
   const isFunctionsEmulator =
-    (parsed.hostname === "127.0.0.1" || parsed.hostname === "localhost") &&
-    parsed.port === "5001";
-  if (
-    !isFunctionsEmulator ||
-    !parsed.pathname.includes("controlSessionTimerForMove")
-  ) {
+    (parsed.hostname === "127.0.0.1" || parsed.hostname === "localhost") && parsed.port === "5001";
+  if (!isFunctionsEmulator || !parsed.pathname.includes("controlSessionTimerForMove")) {
     return false;
   }
 
@@ -92,10 +78,7 @@ async function fulfillMoveTimerCallableIfMatched(
   return true;
 }
 
-export async function blockExternalAssets(
-  page: Page,
-  options: BlockExternalAssetsOptions = {},
-) {
+export async function blockExternalAssets(page: Page, options: BlockExternalAssetsOptions = {}) {
   const overpassProfile = options.overpassProfile ?? "default";
 
   await page.route("**/*", async (route) => {
@@ -120,10 +103,7 @@ export async function blockExternalAssets(
 
     const { hostname, pathname } = parsed;
 
-    if (
-      hostname === "nominatim.openstreetmap.org" &&
-      pathname.includes("/search")
-    ) {
+    if (hostname === "nominatim.openstreetmap.org" && pathname.includes("/search")) {
       await route.fulfill({
         status: 200,
         contentType: "application/json",

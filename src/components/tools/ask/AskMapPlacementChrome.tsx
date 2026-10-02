@@ -3,15 +3,13 @@
  * Shared map-first Ask placement chrome: GPS phases, frosted banner, Send slot.
  * Tool adapters supply answer/mid slots and labels.
  */
-import { useEffect, type ReactNode } from "react";
+
 import { Button } from "@mantine/core";
 import { CaretLeftIcon, CrosshairIcon } from "@phosphor-icons/react";
-import { askInlineErrorCopy } from "@/components/tools/shared/readout/AskInlineError";
+import { type ReactNode, useEffect } from "react";
 import { OVERLAY_SAFE_PAD_X } from "@/components/map/chrome/OverlayHost";
-import {
-  compactFilledStyles,
-  mapChromeSurfaceStyles,
-} from "@/components/ui/entry/entryChrome";
+import { askInlineErrorCopy } from "@/components/tools/shared/readout/AskInlineError";
+import { compactFilledStyles, mapChromeSurfaceStyles } from "@/components/ui/entry/entryChrome";
 import { cn } from "@/lib/cn";
 
 export type AskMapPlacementPhase =
@@ -141,14 +139,9 @@ export function AskMapPlacementChrome({
   const showMapBackup = phase === "failed";
   const showAnswer = phase === "answer";
   const showStatus = phase === "locating" || phase === "resolving";
-  const failedErrorCopy =
-    phase === "failed" && error ? askInlineErrorCopy(error) : null;
+  const failedErrorCopy = phase === "failed" && error ? askInlineErrorCopy(error) : null;
 
-  const bottomClearance = bottomClearanceForPhase(
-    phase,
-    Boolean(failedErrorCopy),
-    answerTall,
-  );
+  const bottomClearance = bottomClearanceForPhase(phase, Boolean(failedErrorCopy), answerTall);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -196,17 +189,14 @@ export function AskMapPlacementChrome({
           {onChangeConfigure ? (
             <button
               type="button"
-              data-testid={
-                changeConfigureTestId ?? `${testId}-change-configure`
-              }
+              data-testid={changeConfigureTestId ?? `${testId}-change-configure`}
               aria-label={changeConfigureAriaLabel}
               className="pointer-events-auto inline-flex shrink-0 items-center justify-center border-0"
               style={{
                 width: 36,
                 height: 36,
                 borderRadius: 10,
-                backgroundColor:
-                  "oklch(from var(--color-field-ink) l c h / 0.08)",
+                backgroundColor: "oklch(from var(--color-field-ink) l c h / 0.08)",
                 color: "var(--color-field-ink)",
               }}
               onClick={onChangeConfigure}
@@ -221,8 +211,7 @@ export function AskMapPlacementChrome({
                 width: 36,
                 height: 36,
                 borderRadius: 10,
-                backgroundColor:
-                  "oklch(from var(--color-field-ink) l c h / 0.08)",
+                backgroundColor: "oklch(from var(--color-field-ink) l c h / 0.08)",
                 color: "var(--color-field-ink)",
               }}
             >
@@ -311,18 +300,13 @@ export function AskMapPlacementChrome({
               color: "var(--color-field-ink)",
               ...(failedErrorCopy
                 ? {
-                    border:
-                      "0.33px solid oklch(from var(--color-halt) l c h / 0.4)",
+                    border: "0.33px solid oklch(from var(--color-halt) l c h / 0.4)",
                   }
                 : null),
             }}
           >
             {failedErrorCopy ? (
-              <div
-                data-testid={`${testId}-error`}
-                role="alert"
-                className="px-1 pt-0.5"
-              >
+              <div data-testid={`${testId}-error`} role="alert" className="px-1 pt-0.5">
                 <p
                   className="m-0 text-sm font-semibold leading-snug"
                   style={{ color: "var(--color-halt)" }}
@@ -349,8 +333,7 @@ export function AskMapPlacementChrome({
                 aria-hidden
                 style={{
                   borderRadius: 11,
-                  backgroundColor:
-                    "oklch(from var(--color-flag) l c h / 0.18)",
+                  backgroundColor: "oklch(from var(--color-flag) l c h / 0.18)",
                   color: "var(--color-flag)",
                 }}
               >
@@ -358,9 +341,7 @@ export function AskMapPlacementChrome({
               </span>
               <span className="flex min-w-0 flex-col items-start gap-0.5 text-left leading-tight">
                 <span className="text-sm font-semibold">
-                  {phase === "failed"
-                    ? "Try location again"
-                    : "Use my location"}
+                  {phase === "failed" ? "Try location again" : "Use my location"}
                 </span>
                 {!failedErrorCopy ? (
                   <span
@@ -369,9 +350,7 @@ export function AskMapPlacementChrome({
                       color: "oklch(from var(--color-flag) l c h / 0.85)",
                     }}
                   >
-                    {phase === "failed"
-                      ? "GPS did not lock"
-                      : "Allow location when prompted"}
+                    {phase === "failed" ? "GPS did not lock" : "Allow location when prompted"}
                   </span>
                 ) : null}
               </span>

@@ -1,38 +1,19 @@
 import { describe, expect, it, vi } from "vitest";
-import type { GameArea } from "../../map/annotations";
-import { MAP_ANNOTATION_COLORS } from "../../map/mapAnnotationColors";
-import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
-import { milesToMeters } from "../../map/distance";
 import { serializeMatchingFeatures } from "@/domain/geo/matchingAdapters";
-import {
-  matchingAnswerFromReplyId,
-  resolveMatchingPendingQuestion,
-} from "./matching";
-import {
-  measuringAnswerFromReplyId,
-  resolveMeasuringPendingQuestion,
-} from "./measuring";
 import * as measuringGeometryBudgets from "../../geometry/measuring/measuringGeometryBudgets";
 import { MEASURING_PERSIST_OVER_BUDGET_MESSAGE } from "../../geometry/measuring/measuringGeometryBudgets";
-import {
-  isPhotoPendingQuestion,
-  photoPendingQuestionAnswered,
-} from "./photo";
-import {
-  radarAnswerFromReplyId,
-  resolveRadarPendingQuestion,
-} from "./radar";
-import {
-  resolveTentaclePendingQuestion,
-  tentacleAnswerFromReplyId,
-} from "./tentacle";
-import {
-  resolveThermometerPendingQuestion,
-  thermometerAnswerFromReplyId,
-} from "./thermometer";
 import exysHospitalTentacle from "../../geometry/tentacle/fixtures/exysHospitalTentacle.json";
 import { TENTACLE_POI_MAX } from "../../geometry/tentacle/tentacleGeometryBudgets";
-import type { TentaclePoi } from "../../map/annotations";
+import type { GameArea, TentaclePoi } from "../../map/annotations";
+import { milesToMeters } from "../../map/distance";
+import { MAP_ANNOTATION_COLORS } from "../../map/mapAnnotationColors";
+import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
+import { matchingAnswerFromReplyId, resolveMatchingPendingQuestion } from "./matching";
+import { measuringAnswerFromReplyId, resolveMeasuringPendingQuestion } from "./measuring";
+import { isPhotoPendingQuestion, photoPendingQuestionAnswered } from "./photo";
+import { radarAnswerFromReplyId, resolveRadarPendingQuestion } from "./radar";
+import { resolveTentaclePendingQuestion, tentacleAnswerFromReplyId } from "./tentacle";
+import { resolveThermometerPendingQuestion, thermometerAnswerFromReplyId } from "./thermometer";
 
 const gameArea: GameArea = {
   type: "Polygon",
@@ -47,9 +28,7 @@ const gameArea: GameArea = {
   ],
 };
 
-function basePending(
-  overrides: Partial<PendingQuestionRecord> = {},
-): PendingQuestionRecord {
+function basePending(overrides: Partial<PendingQuestionRecord> = {}): PendingQuestionRecord {
   return {
     id: "pq-1",
     sessionId: "session-1",
@@ -158,11 +137,7 @@ describe("resolveThermometerPendingQuestion", () => {
 describe("resolveMatchingPendingQuestion", () => {
   it("returns null when matching metadata is incomplete", async () => {
     await expect(
-      resolveMatchingPendingQuestion(
-        basePending({ toolType: "matching" }),
-        "yes",
-        gameArea,
-      ),
+      resolveMatchingPendingQuestion(basePending({ toolType: "matching" }), "yes", gameArea),
     ).resolves.toBeNull();
   });
 
@@ -197,11 +172,7 @@ describe("resolveMatchingPendingQuestion", () => {
       },
     });
 
-    const resolved = await resolveMatchingPendingQuestion(
-      pending,
-      "yes",
-      gameArea,
-    );
+    const resolved = await resolveMatchingPendingQuestion(pending, "yes", gameArea);
 
     expect(resolved).not.toBeNull();
     expect(resolved?.type).toBe("matching");
@@ -227,11 +198,7 @@ describe("resolveMatchingPendingQuestion", () => {
       },
     });
 
-    const resolved = await resolveMatchingPendingQuestion(
-      pending,
-      "no",
-      gameArea,
-    );
+    const resolved = await resolveMatchingPendingQuestion(pending, "no", gameArea);
 
     expect(resolved?.metadata.matchingAnswer).toBe("no");
     expect(resolved?.metadata.matchingBoundaryJson).toBeUndefined();
@@ -241,11 +208,7 @@ describe("resolveMatchingPendingQuestion", () => {
 describe("resolveMeasuringPendingQuestion", () => {
   it("returns null without region input metadata", async () => {
     await expect(
-      resolveMeasuringPendingQuestion(
-        basePending({ toolType: "measuring" }),
-        "closer",
-        gameArea,
-      ),
+      resolveMeasuringPendingQuestion(basePending({ toolType: "measuring" }), "closer", gameArea),
     ).resolves.toBeNull();
   });
 
@@ -274,11 +237,7 @@ describe("resolveMeasuringPendingQuestion", () => {
       },
     });
 
-    const resolved = await resolveMeasuringPendingQuestion(
-      pending,
-      "further",
-      gameArea,
-    );
+    const resolved = await resolveMeasuringPendingQuestion(pending, "further", gameArea);
 
     expect(resolved?.type).toBe("measuring");
     expect(resolved?.metadata.measuringAnswer).toBe("further");
@@ -309,11 +268,7 @@ describe("resolveMeasuringPendingQuestion", () => {
       },
     });
 
-    const resolved = await resolveMeasuringPendingQuestion(
-      pending,
-      "further",
-      gameArea,
-    );
+    const resolved = await resolveMeasuringPendingQuestion(pending, "further", gameArea);
 
     expect(resolved?.type).toBe("measuring");
     expect(resolved?.metadata.measuringBoundaryJson).toBeUndefined();
@@ -347,11 +302,7 @@ describe("resolveMeasuringPendingQuestion", () => {
       },
     });
 
-    const resolved = await resolveMeasuringPendingQuestion(
-      pending,
-      "further",
-      gameArea,
-    );
+    const resolved = await resolveMeasuringPendingQuestion(pending, "further", gameArea);
 
     expect(resolved?.type).toBe("measuring");
     expect(resolved?.metadata.measuringBoundaryJson).toBeUndefined();
@@ -388,11 +339,7 @@ describe("resolveMeasuringPendingQuestion", () => {
       },
     });
 
-    const resolved = await resolveMeasuringPendingQuestion(
-      pending,
-      "further",
-      gameArea,
-    );
+    const resolved = await resolveMeasuringPendingQuestion(pending, "further", gameArea);
 
     expect(resolved?.type).toBe("measuring");
     expect(resolved?.geometry.geometry.type).toBe("Point");
@@ -438,11 +385,7 @@ describe("resolveTentaclePendingQuestion", () => {
       },
     });
 
-    const resolved = await resolveTentaclePendingQuestion(
-      pending,
-      "out-of-reach",
-      gameArea,
-    );
+    const resolved = await resolveTentaclePendingQuestion(pending, "out-of-reach", gameArea);
 
     expect(resolved?.metadata.tentacleOutOfReach).toBe(true);
     expect(resolved?.metadata.highlightedPoiId).toBeUndefined();
@@ -473,11 +416,7 @@ describe("resolveTentaclePendingQuestion", () => {
       },
     });
 
-    const resolved = await resolveTentaclePendingQuestion(
-      pending,
-      "poi-west",
-      gameArea,
-    );
+    const resolved = await resolveTentaclePendingQuestion(pending, "poi-west", gameArea);
 
     expect(resolved?.metadata.tentacleOutOfReach).toBe(false);
     expect(resolved?.metadata.highlightedPoiId).toBe("poi-west");
@@ -517,11 +456,7 @@ describe("resolveTentaclePendingQuestion", () => {
       },
     });
 
-    const resolved = await resolveTentaclePendingQuestion(
-      pending,
-      "poi-west",
-      gameArea,
-    );
+    const resolved = await resolveTentaclePendingQuestion(pending, "poi-west", gameArea);
 
     expect(resolved?.metadata.radiusMeters).toBe(largeRadius);
     expect(resolved?.metadata.tentacleAnswerRadiusMeters).toBe(largeRadius);
@@ -552,10 +487,7 @@ describe("resolveTentaclePendingQuestion", () => {
           properties: {},
           geometry: {
             type: "Point",
-            coordinates: [
-              exysHospitalTentacle.center.lng,
-              exysHospitalTentacle.center.lat,
-            ],
+            coordinates: [exysHospitalTentacle.center.lng, exysHospitalTentacle.center.lat],
           },
         }),
         metadata: {
@@ -574,28 +506,21 @@ describe("resolveTentaclePendingQuestion", () => {
     );
 
     expect(resolved).not.toBeNull();
-    expect(resolved?.metadata.highlightedPoiId).toBe(
-      exysHospitalTentacle.answerPoiId,
-    );
+    expect(resolved?.metadata.highlightedPoiId).toBe(exysHospitalTentacle.answerPoiId);
     expect(resolved?.metadata.tentacleEliminationJson).toBeTruthy();
-    expect(
-      JSON.parse(resolved!.metadata.tentacleEliminationJson as string),
-    ).toMatchObject({
+    expect(JSON.parse(resolved?.metadata.tentacleEliminationJson as string)).toMatchObject({
       geometry: { type: expect.stringMatching(/Polygon|MultiPolygon/) },
     });
   });
 
   it("returns elim JSON for POI lists above the former 64 cap", async () => {
-    const overBudget: TentaclePoi[] = Array.from(
-      { length: TENTACLE_POI_MAX + 1 },
-      (_, index) => ({
-        id: `poi-${index}`,
-        name: `POI ${index}`,
-        lat: 51.45,
-        lng: -0.15 + index * 0.0001,
-        category: "museum",
-      }),
-    );
+    const overBudget: TentaclePoi[] = Array.from({ length: TENTACLE_POI_MAX + 1 }, (_, index) => ({
+      id: `poi-${index}`,
+      name: `POI ${index}`,
+      lat: 51.45,
+      lng: -0.15 + index * 0.0001,
+      category: "museum",
+    }));
     const pending = basePending({
       toolType: "tentacle",
       placement: {
@@ -624,14 +549,8 @@ describe("photo pending question helpers", () => {
     expect(isPhotoPendingQuestion(undefined)).toBe(false);
     expect(isPhotoPendingQuestion(basePending())).toBe(false);
 
-    expect(photoPendingQuestionAnswered({ ...photo, status: "pending" })).toBe(
-      false,
-    );
-    expect(photoPendingQuestionAnswered({ ...photo, status: "answered" })).toBe(
-      true,
-    );
-    expect(photoPendingQuestionAnswered({ ...photo, status: "resolved" })).toBe(
-      true,
-    );
+    expect(photoPendingQuestionAnswered({ ...photo, status: "pending" })).toBe(false);
+    expect(photoPendingQuestionAnswered({ ...photo, status: "answered" })).toBe(true);
+    expect(photoPendingQuestionAnswered({ ...photo, status: "resolved" })).toBe(true);
   });
 });

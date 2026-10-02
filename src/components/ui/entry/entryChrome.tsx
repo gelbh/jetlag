@@ -1,76 +1,23 @@
 /* eslint-disable react-refresh/only-export-components -- entry chrome pairs surface components with shared style tokens */
 import { Box } from "@mantine/core";
 import type { ReactNode } from "react";
-import type { SheetHandleProps } from "@/hooks/motion/useSheetGesture";
-import {
-  askHudPanelStyle,
-  bottomDrawerStyles,
-  chatUnreadBadgeHostStyle,
-  chatUnreadBadgeStyle,
-  choiceChipStyles,
-  catalogTileStyles,
-  askInsetSurfaceStyle,
-  compactDangerStyles,
-  compactFilledStyles,
-  compactGrayStyles,
-  statusRailExpandedFlowStyle,
-  entryBackdropStyle,
-  fieldFrameStyle,
-  filledStyles,
-  filterChipStyles,
-  filterChipTrackStyle,
-  grayStyles,
-  homeCardBtnHintOnPrimaryStyle,
-  homeCardBtnHintStyle,
-  homeCardBtnStyle,
-  homeEnterActionsStyle,
-  homeFeedbackLinkStyle,
-  homePosterStyle,
-  homeTerminalAccentBarStyle,
-  hudChromeStyles,
-  hudPanelStyle,
-  hudScrimStyle,
-  hudSheetStyle,
-  insetTextInputStyles,
-  insetTextareaStyles,
-  mapAttentionRingStyle,
-  mapIslandFilledStyles,
-  mapIslandIconStyles,
-  mapToolSlotIconStyle,
-  mapToolSlotLabelStyle,
-  mapToolSlotStyles,
-  oauthProviderButtonIconStyle,
-  oauthProviderButtonStyle,
-  plainStyles,
-  preloadBeaconStyle,
-  segmentBtnStyle,
-  segmentChipsTrackStyle,
-  segmentControlTrackStyle,
-  sheetHandleStyle,
-  sheetIconCloseStyle,
-  syncBeaconStyle,
-  toggleRowStyle,
-} from "@/components/ui/entry/entryStyles";
 import type {
   ChoiceTone,
   HomeCardBtnVariant,
   MapToolSlotTone,
   SyncBeaconStatus,
 } from "@/components/ui/entry/entryStyles";
-
-/** Re-export button/drawer styles so map chrome callers keep one import path. */
-export {
+import {
   askHudPanelStyle,
+  askInsetSurfaceStyle,
   bottomDrawerStyles,
+  catalogTileStyles,
   chatUnreadBadgeHostStyle,
   chatUnreadBadgeStyle,
   choiceChipStyles,
-  catalogTileStyles,
-  askInsetSurfaceStyle,
   compactDangerStyles,
   compactFilledStyles,
   compactGrayStyles,
-  statusRailExpandedFlowStyle,
   entryBackdropStyle,
   fieldFrameStyle,
   filledStyles,
@@ -88,8 +35,8 @@ export {
   hudPanelStyle,
   hudScrimStyle,
   hudSheetStyle,
-  insetTextInputStyles,
   insetTextareaStyles,
+  insetTextInputStyles,
   mapAttentionRingStyle,
   mapIslandFilledStyles,
   mapIslandIconStyles,
@@ -105,24 +52,66 @@ export {
   segmentControlTrackStyle,
   sheetHandleStyle,
   sheetIconCloseStyle,
+  statusRailExpandedFlowStyle,
+  syncBeaconStyle,
+  toggleRowStyle,
+} from "@/components/ui/entry/entryStyles";
+import type { SheetHandleProps } from "@/hooks/motion/useSheetGesture";
+
+export type { ChoiceTone, HomeCardBtnVariant, MapToolSlotTone, SyncBeaconStatus };
+/** Re-export button/drawer styles so map chrome callers keep one import path. */
+export {
+  askHudPanelStyle,
+  askInsetSurfaceStyle,
+  bottomDrawerStyles,
+  catalogTileStyles,
+  chatUnreadBadgeHostStyle,
+  chatUnreadBadgeStyle,
+  choiceChipStyles,
+  compactDangerStyles,
+  compactFilledStyles,
+  compactGrayStyles,
+  entryBackdropStyle,
+  fieldFrameStyle,
+  filledStyles,
+  filterChipStyles,
+  filterChipTrackStyle,
+  grayStyles,
+  homeCardBtnHintOnPrimaryStyle,
+  homeCardBtnHintStyle,
+  homeCardBtnStyle,
+  homeEnterActionsStyle,
+  homeFeedbackLinkStyle,
+  homePosterStyle,
+  homeTerminalAccentBarStyle,
+  hudChromeStyles,
+  hudPanelStyle,
+  hudScrimStyle,
+  hudSheetStyle,
+  insetTextareaStyles,
+  insetTextInputStyles,
+  mapAttentionRingStyle,
+  mapIslandFilledStyles,
+  mapIslandIconStyles,
+  mapToolSlotIconStyle,
+  mapToolSlotLabelStyle,
+  mapToolSlotStyles,
+  oauthProviderButtonIconStyle,
+  oauthProviderButtonStyle,
+  plainStyles,
+  preloadBeaconStyle,
+  segmentBtnStyle,
+  segmentChipsTrackStyle,
+  segmentControlTrackStyle,
+  sheetHandleStyle,
+  sheetIconCloseStyle,
+  statusRailExpandedFlowStyle,
   syncBeaconStyle,
   toggleRowStyle,
 };
-export type {
-  ChoiceTone,
-  HomeCardBtnVariant,
-  MapToolSlotTone,
-  SyncBeaconStatus,
-};
 
 /** Frosted inset grouped list / form surface. */
-export function InsetGroup({
-  children,
-  error = false,
-}: {
-  children: ReactNode;
-  error?: boolean;
-}) {
+export function InsetGroup({ children, error = false }: { children: ReactNode; error?: boolean }) {
   return (
     <Box
       className="jl-inset-group"
@@ -146,13 +135,7 @@ export function InsetGroup({
 }
 
 /** Caption under an inset field (field-level validation). */
-export function FieldError({
-  children,
-  id,
-}: {
-  children: ReactNode;
-  id?: string;
-}) {
+export function FieldError({ children, id }: { children: ReactNode; id?: string }) {
   if (children == null || children === false || children === "") {
     return null;
   }
@@ -313,11 +296,7 @@ export const mapHuntAskFirstQuestionStripStyles = {
 } as const;
 
 /** Drag affordance for iOS bottom drawers. */
-export function DrawerGrabber({
-  handleProps,
-}: {
-  handleProps?: SheetHandleProps;
-} = {}) {
+export function DrawerGrabber({ handleProps }: { handleProps?: SheetHandleProps } = {}) {
   const bar = (
     <Box
       aria-hidden

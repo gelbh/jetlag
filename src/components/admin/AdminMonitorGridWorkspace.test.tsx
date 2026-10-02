@@ -1,8 +1,8 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import {
-  DEFAULT_COLS,
   cloneMonitorLayout,
+  DEFAULT_COLS,
   defaultMonitorLayout,
 } from "../../domain/admin/opsDeskLayout";
 import { AdminMonitorGridWorkspace } from "./AdminMonitorGridWorkspace";
@@ -39,8 +39,8 @@ describe("AdminMonitorGridWorkspace", () => {
     ]);
     const mapStack = next.stacks.find((s) => s.id === "monitor-map");
     expect(mapStack).toBeDefined();
-    expect(mapStack!.x + mapStack!.w).toBeLessThanOrEqual(DEFAULT_COLS);
-    expect(mapStack!.w).toBeLessThanOrEqual(DEFAULT_COLS);
+    expect(mapStack?.x + mapStack?.w).toBeLessThanOrEqual(DEFAULT_COLS);
+    expect(mapStack?.w).toBeLessThanOrEqual(DEFAULT_COLS);
   });
 
   it("renders nested monitor grid and stack titles", () => {
@@ -88,9 +88,7 @@ describe("AdminMonitorGridWorkspace", () => {
 
     const workspace = screen.getByTestId("admin-monitor-grid");
     fireEvent.click(workspace);
-    expect(
-      screen.queryByLabelText("Place monitor panel"),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Place monitor panel")).not.toBeInTheDocument();
 
     fireEvent.contextMenu(workspace);
     expect(screen.getByLabelText("Place monitor panel")).toBeInTheDocument();

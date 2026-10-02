@@ -1,29 +1,26 @@
-import { useEffect, useState } from "react";
 import { Stack, Text } from "@mantine/core";
-import type { SessionRulesInput } from "@/domain/session/rules";
+import { useEffect, useState } from "react";
 import { getPowerProfile } from "@/domain/device/power/powerProfile";
-import {
-  computeElapsedMs,
-  formatElapsedTime,
-  isTimerRunning,
-  type TimerState,
-} from "@/domain/session/timer/timer";
+import { isStaleThermometerWalk, selectPrimaryQuestionTimer } from "@/domain/questions";
+import type {
+  PendingQuestionRecord,
+  PlayerLocationRecord,
+} from "@/domain/session/activity/sessionChat";
 import {
   formatHidingPeriodCountdown,
   hidingPeriodRemainingMs,
   isHidingPeriodActive,
   seekPhaseElapsedMs,
 } from "@/domain/session/hiding/hidingPeriod";
-import type {
-  PendingQuestionRecord,
-  PlayerLocationRecord,
-} from "@/domain/session/activity/sessionChat";
+import type { SessionRulesInput } from "@/domain/session/rules";
 import {
-  isStaleThermometerWalk,
-  selectPrimaryQuestionTimer,
-} from "@/domain/questions";
-import { useMapStore } from "@/state/mapStore";
+  computeElapsedMs,
+  formatElapsedTime,
+  isTimerRunning,
+  type TimerState,
+} from "@/domain/session/timer/timer";
 import { useStaleWalkNowMs } from "@/hooks/sync/useStaleWalkNowMs";
+import { useMapStore } from "@/state/mapStore";
 
 export type MapTimerClusterProps = {
   sessionRules: SessionRulesInput;
@@ -83,7 +80,7 @@ export function MapTimerCluster({
 
     return () => window.clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- restart interval when run anchor changes
-  }, [timerHasStarted, timerState.runningSince, timerTickMs]);
+  }, [timerHasStarted, timerState.runningSince, timerTickMs, timerState]);
 
   void tick;
   const staleWalkNowMs = useStaleWalkNowMs();
@@ -95,9 +92,7 @@ export function MapTimerCluster({
   const elapsed = computeElapsedMs(timerState);
   const sessionLabel = formatElapsedTime(elapsed);
   const hidingActive = isHidingPeriodActive(sessionRules, elapsed);
-  const hidingLabel = formatHidingPeriodCountdown(
-    hidingPeriodRemainingMs(sessionRules, elapsed),
-  );
+  const hidingLabel = formatHidingPeriodCountdown(hidingPeriodRemainingMs(sessionRules, elapsed));
   const questionTimer = selectPrimaryQuestionTimer(pendingQuestions, sessionRules);
 
   let secondaryLabel: string | null;
@@ -108,23 +103,17 @@ export function MapTimerCluster({
       (question) => question.id === questionTimer.pendingQuestionId,
     );
     const isWalkingThermometer =
-      primaryQuestion?.toolType === "thermometer" &&
-      primaryQuestion.status === "walking";
+      primaryQuestion?.toolType === "thermometer" && primaryQuestion.status === "walking";
     const walkerLocationUpdatedAt =
       primaryQuestion == null
         ? null
-        : (seekerLocations.find(
-            (location) => location.uid === primaryQuestion.createdByUid,
-          )?.updatedAt ?? null);
+        : (seekerLocations.find((location) => location.uid === primaryQuestion.createdByUid)
+            ?.updatedAt ?? null);
     const showStuckCue =
       isWalkingThermometer &&
       primaryQuestion != null &&
       myUid === hostUid &&
-      isStaleThermometerWalk(
-        primaryQuestion,
-        walkerLocationUpdatedAt,
-        staleWalkNowMs,
-      );
+      isStaleThermometerWalk(primaryQuestion, walkerLocationUpdatedAt, staleWalkNowMs);
 
     if (showStuckCue) {
       secondaryLabel = "Stale GPS";
@@ -149,12 +138,7 @@ export function MapTimerCluster({
       aria-live="polite"
       style={{ opacity: timerRunning ? 1 : 0.72, minWidth: 0 }}
     >
-      <Text
-        component="span"
-        ff="monospace"
-        style={primaryStyle}
-        title="Session time since start"
-      >
+      <Text component="span" ff="monospace" style={primaryStyle} title="Session time since start">
         {sessionLabel}
       </Text>
       {secondaryLabel ? (

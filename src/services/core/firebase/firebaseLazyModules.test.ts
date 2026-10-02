@@ -28,9 +28,7 @@ describe("firebase lazy modules", () => {
     const { clientEnvUsesFirebaseEmulator } = await import("@/config/env");
     vi.mocked(clientEnvUsesFirebaseEmulator).mockReturnValue(false);
     const { resetFirebaseStorageForTests } = await import("./firebaseStorage");
-    const { resetFirebaseFunctionsForTests } = await import(
-      "./firebaseFunctions"
-    );
+    const { resetFirebaseFunctionsForTests } = await import("./firebaseFunctions");
     resetFirebaseStorageForTests();
     resetFirebaseFunctionsForTests();
     getStorage.mockClear();
