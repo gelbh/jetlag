@@ -37,7 +37,7 @@ describe("bundledGamePresets", () => {
         schemaVersion: 1,
         gameSize: "small",
         distanceUnit: "imperial",
-        advancedSettings: buildBundledGamePresets()[0]?.advancedSettings,
+        advancedSettings: buildBundledGamePresets()[0]!.advancedSettings,
         migrationStatus: "ok",
       },
     ]);

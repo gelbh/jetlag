@@ -274,7 +274,7 @@ describe("useTentacleTool", () => {
     } | null;
     expect(overlay).not.toBeNull();
     // Submit filters provisional POIs out; Send must stay disabled instead of no-op.
-    expect(overlay?.props.canCommit).toBe(false);
+    expect(overlay!.props.canCommit).toBe(false);
     expect(result.current.hud.readiness.resolveReady).toBe(false);
   });
 

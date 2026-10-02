@@ -792,7 +792,7 @@ export function HiderMapScreen() {
                 coordinates: [
                   [
                     ...previewRing.map(([lat, lng]) => [lng, lat] as [number, number]),
-                    [previewRing[0]?.[1], previewRing[0]?.[0]],
+                    [previewRing[0]![1], previewRing[0]![0]],
                   ],
                 ],
               },

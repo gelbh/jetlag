@@ -79,7 +79,7 @@ export function MapTimerCluster({
     }, timerTickMs);
 
     return () => window.clearInterval(interval);
-  }, [timerHasStarted, timerState.runningSince, timerTickMs, timerState]);
+  }, [timerHasStarted, timerState.runningSince, timerTickMs]);
 
   void tick;
   const staleWalkNowMs = useStaleWalkNowMs();

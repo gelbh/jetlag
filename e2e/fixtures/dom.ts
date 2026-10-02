@@ -1,4 +1,4 @@
-import type { Locator } from "@playwright/test";
+import { type Locator } from "@playwright/test";
 
 export async function clickViaEvaluate(element: Locator) {
   await element.evaluate((node) => {

@@ -17,7 +17,7 @@ import type {
 } from "@/domain/session/activity/sessionChat";
 import type { PlayerRole } from "@/domain/session/players/playerRole";
 import type { SessionRulesInput } from "@/domain/session/rules";
-import type { TimerState } from "@/domain/session/timer/timer";
+import { type TimerState } from "@/domain/session/timer/timer";
 import { useMinWidth } from "@/hooks/layout/useMinWidth";
 import type { MapTool } from "@/state/sessionStore";
 import { JlIcon } from "../../ui/brand/JlIcon";

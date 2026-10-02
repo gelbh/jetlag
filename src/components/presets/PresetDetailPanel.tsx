@@ -3,7 +3,7 @@ import {
   bundledPresetDefinition,
   isBundledPresetId,
 } from "../../domain/regions/bundledGamePresets";
-import type { migrateGamePreset } from "../../domain/session/presets/gamePreset";
+import { migrateGamePreset } from "../../domain/session/presets/gamePreset";
 import { AppLink } from "../navigation/AppLink";
 import { PresetFavouriteButton } from "./PresetFavouriteButton";
 

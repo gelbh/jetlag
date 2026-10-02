@@ -27,7 +27,7 @@ export function stopMapCameraEase(map: MapLibreMap): void {
 
   const easing =
     typeof (map as MapWithCamera).isEasing === "function"
-      ? (map as MapWithCamera).isEasing?.()
+      ? (map as MapWithCamera).isEasing!()
       : true;
   if (easing) {
     map.stop();

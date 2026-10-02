@@ -44,10 +44,10 @@ export function boundingBoxAreaKm2(box: BoundingBox): number {
 
 function collectPositions(gameArea: GameAreaGeometry): Position[] {
   if (gameArea.type === "MultiPolygon") {
-    return gameArea.coordinates.flatMap((polygon) => polygon.flat());
+    return gameArea.coordinates.flatMap((polygon) => polygon.flatMap((ring) => ring));
   }
 
-  return gameArea.coordinates.flat();
+  return gameArea.coordinates.flatMap((ring) => ring);
 }
 
 export function boundingBoxToGameArea(box: BoundingBox): GameAreaGeometry {

@@ -6,7 +6,7 @@ import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
 import type { GameArea } from "@/domain/map/annotations";
 import type { MapStyle } from "@/domain/map/mapBasemaps";
 import type { MapBounds, MapBoundsExpression } from "@/domain/map/mapBounds";
-import type { GameSize } from "@/domain/session/size/gameSize";
+import { type GameSize } from "@/domain/session/size/gameSize";
 import type { FramingMode } from "@/hooks/session/useGameAreaFraming";
 import { MapView } from "../../map/chrome/MapView";
 import { useMapLibreMap } from "../../map/helpers/useMapLibreMap";

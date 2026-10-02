@@ -31,7 +31,7 @@ export function IncidentChatPanel({ incidentId, onClose, className = "" }: Incid
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView?.({ block: "end" });
-  }, []);
+  }, [messages.length]);
 
   const send = async () => {
     const text = draft.trim();

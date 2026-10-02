@@ -69,8 +69,8 @@ describe("PlayerPhoneShell", () => {
       },
     });
 
-    expect(overlay?.clientWidth).toBe(shell.clientWidth);
-    expect(overlay?.clientWidth).toBeLessThanOrEqual(PHONE_SHELL_MAX_WIDTH_PX);
-    expect(overlay?.clientWidth).toBeLessThan(document.documentElement.clientWidth);
+    expect(overlay!.clientWidth).toBe(shell.clientWidth);
+    expect(overlay!.clientWidth).toBeLessThanOrEqual(PHONE_SHELL_MAX_WIDTH_PX);
+    expect(overlay!.clientWidth).toBeLessThan(document.documentElement.clientWidth);
   });
 });

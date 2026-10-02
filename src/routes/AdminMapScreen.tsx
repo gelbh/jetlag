@@ -92,7 +92,7 @@ export function AdminMapScreen({ embeddedMonitor = false }: { embeddedMonitor?: 
     if (map && "dispatchEvent" in map) {
       window.dispatchEvent(new Event("resize"));
     }
-  }, [isWide]);
+  }, [isWide, railCollapsed]);
 
   if (!controller.session) {
     return <AppNavigate to="/admin" replace />;

@@ -176,7 +176,7 @@ export function useJoinSession({
 
         if (pendingRequest.role === "hider") {
           const confirmed = await waitForServerHiderRole(joinedSession.id, user.uid);
-          if (confirmed?.memberRoles?.[user.uid] !== "hider") {
+          if (!confirmed || confirmed.memberRoles?.[user.uid] !== "hider") {
             throw new Error("Couldn't confirm your hider role. Wait a moment and try again.");
           }
           joinedSession = confirmed;
@@ -357,7 +357,7 @@ export function useJoinSession({
             let joinedSession = result.session;
             if (values.playerRole === "hider") {
               const confirmed = await waitForServerHiderRole(joinedSession.id, user.uid);
-              if (confirmed?.memberRoles?.[user.uid] !== "hider") {
+              if (!confirmed || confirmed.memberRoles?.[user.uid] !== "hider") {
                 setError("Couldn't confirm your hider role. Wait a moment and try again.");
                 return;
               }

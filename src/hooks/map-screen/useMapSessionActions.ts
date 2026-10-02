@@ -57,10 +57,11 @@ export function useMapSessionActions({
     useState<AdvancedSessionSettingsValue | null>(() =>
       session ? advancedSettingsFromSession(session) : null,
     );
+  const currentSessionId = session?.id ?? null;
 
   useEffect(() => {
     setDraftAdvancedSettings(session ? advancedSettingsFromSession(session) : null);
-  }, [session]);
+  }, [currentSessionId]);
 
   const confirmedHidingZones = useMemo(
     () => hidingZones.filter((zone) => zone.status === "confirmed"),

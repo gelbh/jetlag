@@ -250,11 +250,11 @@ export function useMeasuringTool({
     return () => {
       cancelled = true;
     };
-  }, [mapFirstEligible, measureFromKey, draft.measuringSeekerPoint]);
+  }, [mapFirstEligible, measureFromKey]);
 
   useEffect(() => {
     autoGpsForOptionRef.current = null;
-  }, []);
+  }, [measureFromKey]);
 
   const mapPlacementActive = Boolean(mapFirstEligible);
   const placementError =

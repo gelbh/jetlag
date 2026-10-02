@@ -21,7 +21,7 @@ export function buildThermometerOverlays(
   prefix: string,
 ): OverlayBuildResult {
   const geometry = parseGeometryJson(question.placement.geometryJson);
-  if (geometry?.geometry.type !== "LineString") {
+  if (!geometry || geometry.geometry.type !== "LineString") {
     return { overlays: [], badgeAnchor: null };
   }
 

@@ -215,7 +215,7 @@ describe("useMatchingCatalog LOD", () => {
       expect(buildMatchingEliminationRegion).toHaveBeenCalled();
     });
 
-    const prefix = buildMatchingEliminationRegion.mock.calls[0]?.[0] as MatchingFeature[];
+    const prefix = buildMatchingEliminationRegion.mock.calls[0]![0] as MatchingFeature[];
     expect(prefix).toHaveLength(16);
     const ids = prefix.map((feature) => feature.id);
     expect(ids).toContain("f-19");

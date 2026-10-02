@@ -3,7 +3,7 @@ import {
   isBundledPresetId,
 } from "../../domain/regions/bundledGamePresets";
 import { formatBundledPresetLocation } from "../../domain/regions/bundledPresetHierarchy";
-import type { migrateGamePreset } from "../../domain/session/presets/gamePreset";
+import { migrateGamePreset } from "../../domain/session/presets/gamePreset";
 import { AppLink } from "../navigation/AppLink";
 import { EmptyState } from "../ui/feedback/EmptyState";
 import { PresetCard } from "./PresetCard";

@@ -66,7 +66,7 @@ export function LocationPermissionPrompt() {
     return () => {
       cancelled = true;
     };
-  }, [onMap, ui.demand]);
+  }, [onMap, ui.confirmEpoch, ui.demand]);
 
   const denied = forceDenied || permission === "denied";
   const unavailable = permission === "unavailable";

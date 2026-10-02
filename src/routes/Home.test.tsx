@@ -208,7 +208,7 @@ describe("Home", () => {
     expect(lockup).not.toBeNull();
     expect(lockup).toContainElement(logo);
     expect(lockup).toContainElement(heading);
-    expect(lockup?.style.getPropertyValue("--group-wrap").trim()).toBe("nowrap");
+    expect(lockup!.style.getPropertyValue("--group-wrap").trim()).toBe("nowrap");
     expect(logo.compareDocumentPosition(heading) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(String(logoColumn?.getAttribute("class") ?? "")).toContain("shrink-0");
     expect(heading.style.minWidth).toMatch(/^0(px)?$/);

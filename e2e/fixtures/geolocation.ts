@@ -1,4 +1,4 @@
-import type { Page } from "@playwright/test";
+import { type Page } from "@playwright/test";
 import { E2E_GEOLOCATION } from "./map";
 
 type E2eGeoPoint = { latitude: number; longitude: number; accuracy?: number };

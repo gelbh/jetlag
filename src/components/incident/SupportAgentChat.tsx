@@ -121,7 +121,7 @@ export function SupportAgentChat({
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView?.({ block: "end" });
-  }, []);
+  }, [messages.length]);
 
   const waitingOnHost = useMemo(() => isWaitingOnHost(messages), [messages]);
   const agentWorking = useMemo(() => {

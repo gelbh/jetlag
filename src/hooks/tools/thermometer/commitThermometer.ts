@@ -26,7 +26,7 @@ export interface CommitThermometerManualInput {
   awaitHiderAnswer: boolean;
   submitPendingQuestion?: (
     input: Omit<SubmitPendingQuestionInput, "sessionId" | "senderUid" | "senderRole" | "toolType">,
-  ) => Promise<string | undefined>;
+  ) => Promise<string | void>;
   sessionId?: string;
   senderUid?: string | null;
   distanceUnit: DistanceUnit;

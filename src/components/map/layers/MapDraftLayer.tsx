@@ -101,7 +101,7 @@ export const MapDraftLayer = memo(function MapDraftLayer({
         hitKind: overlay.popup ? "draft-marker" : "draft-marker-no-popup",
       };
     });
-  }, [circleMarkers]);
+  }, [c.pin, c.strokeLight, circleMarkers]);
 
   const activateMarker = useCallback(
     (overlayId: string) => {

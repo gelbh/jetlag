@@ -33,7 +33,7 @@ export function buildStationNameLengthFeatures(stations: MatchingFeature[]): Mat
 
 function stationFirstLetter(name: string): string {
   const trimmed = name.trim();
-  return trimmed.length > 0 ? trimmed[0]?.toUpperCase() : "?";
+  return trimmed.length > 0 ? trimmed[0]!.toUpperCase() : "?";
 }
 
 function stationFirstLetterFeatureId(name: string): string {

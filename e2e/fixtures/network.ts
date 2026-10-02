@@ -1,4 +1,4 @@
-import type { Page, Route } from "@playwright/test";
+import { type Page, type Route } from "@playwright/test";
 import { isMapTileHostname } from "../../src/domain/map/mapTileHosts";
 import { type OverpassFixtureProfile, resolveOverpassResponse } from "./overpass/resolver";
 

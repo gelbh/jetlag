@@ -31,6 +31,7 @@ function shellClassName(placement: ScreenHeaderPlacement, className: string) {
       return className;
     case "sticky":
       return `pointer-events-auto sticky top-0 z-[var(--z-banner)] -mx-5 mb-2 border-b-2 border-rule bg-canvas px-5 pb-2 ${screenHeaderInsetTopClassName} ${className}`;
+    case "fixed":
     default:
       return `pointer-events-auto fixed inset-x-0 top-0 z-[var(--z-banner)] border-b-2 border-rule bg-canvas px-[max(1.25rem,env(safe-area-inset-left))] pb-2 ${screenHeaderInsetTopClassName} ${className}`;
   }

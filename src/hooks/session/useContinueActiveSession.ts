@@ -110,7 +110,12 @@ export function useContinueActiveSession(): {
           });
 
           const role = resolvePlayerRole(activeSession.memberRoles, user.uid);
-          if (myRole && activeSession.memberRoles?.[user.uid] && myRole !== role) {
+          if (
+            myRole &&
+            activeSession.memberRoles &&
+            activeSession.memberRoles[user.uid] &&
+            myRole !== role
+          ) {
             setContinueError("Your role changed for this session. Rejoin with a new code.");
             return;
           }

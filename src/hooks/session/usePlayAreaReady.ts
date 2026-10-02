@@ -35,7 +35,7 @@ export function usePlayAreaReady(session: SessionRecord | null | undefined): boo
     return () => {
       cancelled = true;
     };
-  }, [packKey, readySync, session]);
+  }, [packKey, readySync]);
 
   return readySync || (packKey !== "" && settledKey === packKey);
 }

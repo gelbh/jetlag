@@ -59,7 +59,7 @@ export function usePoiCandidates({
   const [confirmed, setConfirmed] = useState<PoiCandidate[]>([]);
   const [status, setStatus] = useState<PoiCandidatesStatus>("idle");
   const [error, setError] = useState<string | null>(null);
-  const [_refreshToken, setRefreshToken] = useState(0);
+  const [refreshToken, setRefreshToken] = useState(0);
 
   useEffect(() => {
     confirmRef.current = confirm;
@@ -135,7 +135,7 @@ export function usePoiCandidates({
     return () => {
       cancelled = true;
     };
-  }, [categoryId, enabled, map, mapStyle]);
+  }, [categoryId, enabled, map, mapStyle, refreshToken]);
 
   const candidates = mergePoiCandidates(provisional, confirmed);
 

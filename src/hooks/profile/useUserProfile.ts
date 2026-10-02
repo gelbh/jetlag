@@ -19,7 +19,6 @@ export function useUserProfile(
 
     setReady(false);
     setError(null);
-
     return subscribeUserProfile(
       uid,
       (nextProfile) => {

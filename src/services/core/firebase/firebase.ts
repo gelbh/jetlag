@@ -276,7 +276,7 @@ async function bootstrapAuthState(): Promise<void> {
   setBootstrapTagLazy("auth_ready");
 }
 
-let _authAnalyticsUnsubscribe: (() => void) | null = null;
+let authAnalyticsUnsubscribe: (() => void) | null = null;
 
 function getAuthBootstrapPromise(): Promise<void> {
   authStateReadyPromise ??= bootstrapAuthState()
@@ -295,7 +295,7 @@ export function startAuthBootstrap(): void {
     return;
   }
 
-  _authAnalyticsUnsubscribe ??= onAuthStateChanged(getFirebaseAuth(), (user) => {
+  authAnalyticsUnsubscribe ??= onAuthStateChanged(getFirebaseAuth(), (user) => {
     syncAnalyticsIdentityLazy(user ? { uid: user.uid, isAnonymous: user.isAnonymous } : null);
   });
 

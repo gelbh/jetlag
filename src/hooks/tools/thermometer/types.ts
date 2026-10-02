@@ -31,7 +31,7 @@ export interface UseThermometerToolParams {
   awaitHiderAnswer?: boolean;
   submitPendingQuestion?: (
     input: Omit<SubmitPendingQuestionInput, "sessionId" | "senderUid" | "senderRole" | "toolType">,
-  ) => Promise<string | undefined>;
+  ) => Promise<string | void>;
   completeThermometerWalk?: (input: {
     pendingQuestionId: string;
     startPoint: LatLngTuple;

@@ -10,8 +10,8 @@ test.describe("phone shell @ 1280", () => {
     await expect(shell).toBeVisible();
     const box = await shell.boundingBox();
     expect(box).not.toBeNull();
-    expect(box?.width).toBeGreaterThanOrEqual(430);
-    expect(box?.width).toBeLessThanOrEqual(440 + 1);
+    expect(box!.width).toBeGreaterThanOrEqual(430);
+    expect(box!.width).toBeLessThanOrEqual(440 + 1);
   });
 
   test("@smoke shell fills phone viewport up to max", async ({ page }) => {
@@ -20,8 +20,8 @@ test.describe("phone shell @ 1280", () => {
     await page.goto("/");
     const box = await page.getByTestId("player-phone-shell").boundingBox();
     expect(box).not.toBeNull();
-    expect(box?.width).toBeGreaterThan(430);
-    expect(box?.width).toBeLessThanOrEqual(440 + 1);
+    expect(box!.width).toBeGreaterThan(430);
+    expect(box!.width).toBeLessThanOrEqual(440 + 1);
   });
 
   test("@smoke map uses bottom dock not ops shell", async ({ page }) => {
@@ -35,9 +35,9 @@ test.describe("phone shell @ 1280", () => {
     expect(box).not.toBeNull();
     const viewport = page.viewportSize();
     expect(viewport).not.toBeNull();
-    expect(box?.x).toBeGreaterThan(120);
-    expect(box?.y + box?.height).toBeGreaterThan(viewport?.height * 0.7);
-    expect(box?.width).toBeGreaterThan(box?.height);
+    expect(box!.x).toBeGreaterThan(120);
+    expect(box!.y + box!.height).toBeGreaterThan(viewport!.height * 0.7);
+    expect(box!.width).toBeGreaterThan(box!.height);
   });
 
   test("@smoke admin stays outside phone shell", async ({ page }) => {

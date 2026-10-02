@@ -59,7 +59,7 @@ function MapPlayerErrorChannel({
       return;
     }
     showEphemeralPlayerNotification(error);
-  }, [hasActions, error.title, error.message, error]);
+  }, [hasActions, error.title, error.message]);
 
   if (!hasActions) {
     return null;
@@ -222,7 +222,7 @@ export function MapStatusRail({ model, headerLeading }: MapStatusRailProps) {
       window.removeEventListener("pointerdown", handlePointerDown);
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [showPreloadMenu, showTimerMenu, closeOtherMenus]);
+  }, [showPreloadMenu, showTimerMenu]);
 
   const railClassName = `jl-status-rail pointer-events-none z-[var(--z-banner)]${
     expanded ? "" : " absolute inset-x-0 top-0"

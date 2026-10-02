@@ -82,7 +82,7 @@ export function AdminPresetMenu({
       window.removeEventListener("resize", updatePos);
       window.removeEventListener("scroll", updatePos, true);
     };
-  }, [manageOpen, closeManage]);
+  }, [manageOpen]);
 
   const handleDragStart = (event: DragEvent, presetId: string) => {
     dragFromIdRef.current = presetId;

@@ -16,7 +16,7 @@ export function usePremiumEntitlements() {
 
   useEffect(() => {
     void refresh();
-  }, [refresh]);
+  }, [refresh, user?.uid]);
 
   return {
     entitlements,

@@ -28,7 +28,7 @@ describe("usePhotoTool map-first", () => {
 
     act(() => {
       (
-        result.current.hud?.modeBody as {
+        result.current.hud!.modeBody as {
           props: { onCategoryChange: (id: string) => void };
         }
       ).props.onCategoryChange("tree");

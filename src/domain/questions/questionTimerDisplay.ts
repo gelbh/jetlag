@@ -38,7 +38,7 @@ export function selectPrimaryQuestionTimer(
         remainingMs: Number.POSITIVE_INFINITY,
       };
 
-      if (best?.countdownLabel !== "WALKING") {
+      if (!best || best.countdownLabel !== "WALKING") {
         best = candidate;
       }
       continue;

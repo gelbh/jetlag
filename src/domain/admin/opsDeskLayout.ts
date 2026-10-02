@@ -215,7 +215,7 @@ export function mergeMonitorPanelOntoStack(
   next.stacks[source.index] = clampMonitorActiveIndex(src);
   next.stacks[target.index] = clampMonitorActiveIndex(dst);
 
-  if (next.stacks[source.index]?.panelIds.length === 0) {
+  if (next.stacks[source.index]!.panelIds.length === 0) {
     next.stacks.splice(source.index, 1);
   }
 
@@ -343,7 +343,7 @@ export function hideMonitorPanel(layout: MonitorLayout, panelId: MonitorPanelId)
   const stack = next.stacks[stackIndex]!;
   stack.panelIds = stack.panelIds.filter((id) => id !== panelId);
   next.stacks[stackIndex] = clampMonitorActiveIndex(stack);
-  if (next.stacks[stackIndex]?.panelIds.length === 0) {
+  if (next.stacks[stackIndex]!.panelIds.length === 0) {
     next.stacks.splice(stackIndex, 1);
   }
 
@@ -505,7 +505,7 @@ export function mergePanelOntoStack(
   next.stacks[source.index] = clampActiveIndex(src);
   next.stacks[target.index] = clampActiveIndex(dst);
 
-  if (next.stacks[source.index]?.panelIds.length === 0) {
+  if (next.stacks[source.index]!.panelIds.length === 0) {
     next.stacks.splice(source.index, 1);
   }
 
@@ -626,7 +626,7 @@ export function hidePanel(layout: DeskLayout, panelId: PanelId): DeskLayout {
   const stack = next.stacks[stackIndex]!;
   stack.panelIds = stack.panelIds.filter((id) => id !== panelId);
   next.stacks[stackIndex] = clampActiveIndex(stack);
-  if (next.stacks[stackIndex]?.panelIds.length === 0) {
+  if (next.stacks[stackIndex]!.panelIds.length === 0) {
     next.stacks.splice(stackIndex, 1);
   }
 

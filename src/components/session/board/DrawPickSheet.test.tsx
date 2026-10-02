@@ -27,6 +27,6 @@ describe("DrawPickSheet", () => {
     fireEvent.click(options[0]!);
     fireEvent.click(screen.getByRole("button", { name: /Confirm keep/i }));
     expect(onConfirm).toHaveBeenCalledTimes(1);
-    expect(onConfirm.mock.calls[0]?.[0]).toEqual([started.pendingPick?.drawn[0]?.instanceId]);
+    expect(onConfirm.mock.calls[0]![0]).toEqual([started.pendingPick!.drawn[0]!.instanceId]);
   });
 });

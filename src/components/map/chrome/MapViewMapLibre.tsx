@@ -253,16 +253,7 @@ function MapFocus({
       stopMapCameraEase(map);
       map.off("moveend", onMoveEnd);
     };
-  }, [
-    ...applyDependencyKeys,
-    mapRef,
-    orientationResetToken,
-    fitBoundsMode,
-    recenterToken,
-    padY,
-    padX,
-    animate,
-  ]);
+  }, [...applyDependencyKeys, mapRef, orientationResetToken]);
 
   return null;
 }

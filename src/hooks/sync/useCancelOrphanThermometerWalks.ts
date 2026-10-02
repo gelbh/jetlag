@@ -54,7 +54,7 @@ export function useCancelOrphanThermometerWalks(args: {
 
   useEffect(() => {
     handledIdsRef.current = new Set();
-  }, []);
+  }, [sessionId]);
 
   useEffect(() => {
     if (!sessionId || !myUid || !myRole) {

@@ -1,6 +1,6 @@
-import type { RefObject } from "react";
+import { type RefObject } from "react";
 import type { SeaLevelEdgeCase } from "../../domain/geometry/measuring/seaLevel";
-import type { DistanceUnit } from "../../domain/map/distance";
+import { type DistanceUnit } from "../../domain/map/distance";
 import {
   BASE_MEASURING_CATALOG,
   type MeasuringAnswer,

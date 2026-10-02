@@ -11,6 +11,7 @@ export function BootSplash({ label = "Starting…" }: BootSplashProps) {
     <EntryScreenLayout viewport viewportLayout="center">
       <output
         className="flex min-h-[40dvh] flex-col items-center justify-center gap-4"
+        role="status"
         aria-live="polite"
         aria-busy="true"
         aria-label={label}

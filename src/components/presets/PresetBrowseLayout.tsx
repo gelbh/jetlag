@@ -1,5 +1,5 @@
 import { homeCardBtnStyle, homePosterStyle } from "@/components/ui/entry/entryStyles";
-import type { migrateGamePreset } from "../../domain/session/presets/gamePreset";
+import { migrateGamePreset } from "../../domain/session/presets/gamePreset";
 import { AppLink } from "../navigation/AppLink";
 import { EmptyState } from "../ui/feedback/EmptyState";
 import { ScreenHeader, screenHeaderOffsetClassName } from "../ui/layout/ScreenHeader";

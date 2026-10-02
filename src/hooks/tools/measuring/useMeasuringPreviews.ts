@@ -23,6 +23,7 @@ export function useMeasuringPreviews(gameArea: GameArea, draft: MeasuringDraftSt
     measuringSeaLevelNearRegion,
     usesAllPlacesInArea,
     measuringSeaLevelEdgeCase,
+    coastlineContextVersion,
     setMeasuringError,
   } = draft;
 
@@ -32,7 +33,7 @@ export function useMeasuringPreviews(gameArea: GameArea, draft: MeasuringDraftSt
     }
 
     return measuringCoastSegments;
-  }, [gameArea, measuringCoastSegments, measuringSubject]);
+  }, [coastlineContextVersion, gameArea, measuringCoastSegments, measuringSubject]);
 
   const measuringRegionInput = useMemo(
     () => ({

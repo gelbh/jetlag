@@ -80,7 +80,7 @@ function eliminationQuickHash(
       const ring = (geometry.coordinates as Position[][] | undefined)?.[0];
       const count = ring?.length ?? 0;
       const first = ring?.[0];
-      const mid = count > 0 ? ring?.[Math.floor(count / 2)] : undefined;
+      const mid = count > 0 ? ring![Math.floor(count / 2)] : undefined;
       parts.push(
         `P:${count}:${first?.[0]?.toFixed(5) ?? ""}:${first?.[1]?.toFixed(5) ?? ""}:${mid?.[0]?.toFixed(5) ?? ""}:${mid?.[1]?.toFixed(5) ?? ""}`,
       );

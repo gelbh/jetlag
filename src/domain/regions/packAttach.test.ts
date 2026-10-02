@@ -30,14 +30,14 @@ describe("suggestRegionPackForGameArea", () => {
     const nyState = boxPolygon(40.4, -79.8, 45.0, -71.8);
     const suggestion = suggestRegionPackForGameArea(nyState);
     expect(suggestion).not.toBeNull();
-    expect(suggestion?.packId).toBe("nyc");
-    expect(suggestion?.score).toBeGreaterThan(0);
+    expect(suggestion!.packId).toBe("nyc");
+    expect(suggestion!.score).toBeGreaterThan(0);
   });
 
   it("suggests dublin for a Dublin-city-sized polygon", () => {
     const suggestion = suggestRegionPackForGameArea(DUBLIN_CITY_GAME_AREA);
     expect(suggestion).not.toBeNull();
-    expect(suggestion?.packId).toBe("dublin");
+    expect(suggestion!.packId).toBe("dublin");
   });
 
   it("returns null for a mid-Atlantic ocean polygon", () => {
@@ -67,7 +67,7 @@ describe("suggestRegionPackForGameArea", () => {
       (REGION_PACK_REFERENCE_BBOXES.lucerne.north - REGION_PACK_REFERENCE_BBOXES.lucerne.south) *
       (REGION_PACK_REFERENCE_BBOXES.lucerne.east - REGION_PACK_REFERENCE_BBOXES.lucerne.west);
     const expectedWinner = zurichArea <= lucerneArea ? "zurich" : "lucerne";
-    expect(suggestion?.packId).toBe(expectedWinner);
+    expect(suggestion!.packId).toBe(expectedWinner);
   });
 
   it("returns null when intersection is below max(α×packArea, β km²)", () => {

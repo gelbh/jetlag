@@ -24,7 +24,7 @@ export function AppNavigate({ to, replace, state }: NavigateProps) {
 
     navigate(to, { replace, state, viewTransition: false });
     // Redirect once on mount; during an active gate, follow the chain in-place.
-  }, [state, navigate, to, replace, phase, beginTransition]);
+  }, []);
 
   return null;
 }

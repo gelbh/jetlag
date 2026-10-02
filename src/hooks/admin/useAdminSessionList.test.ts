@@ -199,7 +199,7 @@ describe("useAdminSessionList", () => {
     expect(fetchAdminSessionsPage).toHaveBeenCalledTimes(1);
 
     await act(async () => {
-      resolvers[0]?.({ sessions: [sampleSession], nextPageToken: null });
+      resolvers[0]!({ sessions: [sampleSession], nextPageToken: null });
     });
 
     await waitFor(() => {
@@ -207,7 +207,7 @@ describe("useAdminSessionList", () => {
     });
 
     await act(async () => {
-      resolvers[1]?.({ sessions: [otherSession], nextPageToken: null });
+      resolvers[1]!({ sessions: [otherSession], nextPageToken: null });
       await Promise.all([first, second]);
     });
 

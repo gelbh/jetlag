@@ -612,11 +612,11 @@ export function useMatchingTool({
       cancelled = true;
     };
     // matchingSeekerPoint intentionally omitted: only gate auto-GPS at entry
-  }, [mapFirstEligible, matchingCategoryId, matchingSeekerPoint]);
+  }, [mapFirstEligible, matchingCategoryId]);
 
   useEffect(() => {
     autoGpsForCategoryRef.current = null;
-  }, []);
+  }, [matchingCategoryId]);
 
   // Stay map-first for the whole post-category flow (locate → resolve → answer/send).
   const mapPlacementActive = Boolean(mapFirstEligible);

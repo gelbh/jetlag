@@ -5,7 +5,7 @@ import { HudHomeIcon } from "../ui/brand/HudIcons";
 import { AdminPresetMenu } from "./AdminPresetMenu";
 
 function formatUtcClock(now: Date): string {
-  return `${now.toISOString().slice(11, 19)} UTC`;
+  return now.toISOString().slice(11, 19) + " UTC";
 }
 
 interface AdminDeskTopbarProps {
@@ -52,10 +52,7 @@ export function AdminDeskTopbar({
           <HudHomeIcon className="size-4" aria-hidden="true" />
         </AppLink>
         <span className="jl-ops-brand-mark">Jetlag</span>
-        <span className="jl-ops-brand-title">
-          Broadcast HUD {/* Admin ops desk v */}
-          {APP_VERSION}
-        </span>
+        <span className="jl-ops-brand-title">{`Broadcast HUD // Admin ops desk v${APP_VERSION}`}</span>
       </div>
       <AdminPresetMenu
         activePresetId={activePresetId}

@@ -24,7 +24,7 @@ export function MapScreen() {
 
   useEffect(() => () => teardownSessionUiState(), []);
 
-  if (!session?.gameArea) {
+  if (!session || !session.gameArea) {
     return <AppNavigate to={session ? "/create" : "/"} replace />;
   }
 

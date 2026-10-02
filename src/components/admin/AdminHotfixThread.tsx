@@ -58,7 +58,7 @@ export function AdminHotfixThread({
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView?.({ block: "end" });
-  }, []);
+  }, [messages.length]);
 
   return (
     <div className={`jl-incident-chat ${className}`.trim()} data-testid="admin-hotfix-thread">

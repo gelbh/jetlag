@@ -508,7 +508,7 @@ describe("resolveTentaclePendingQuestion", () => {
     expect(resolved).not.toBeNull();
     expect(resolved?.metadata.highlightedPoiId).toBe(exysHospitalTentacle.answerPoiId);
     expect(resolved?.metadata.tentacleEliminationJson).toBeTruthy();
-    expect(JSON.parse(resolved?.metadata.tentacleEliminationJson as string)).toMatchObject({
+    expect(JSON.parse(resolved!.metadata.tentacleEliminationJson as string)).toMatchObject({
       geometry: { type: expect.stringMatching(/Polygon|MultiPolygon/) },
     });
   });

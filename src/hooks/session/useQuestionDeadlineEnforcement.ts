@@ -45,7 +45,7 @@ export function useQuestionDeadlineEnforcement({
     expiryHandledRef.current = new Set();
     autoPausedQuestionRef.current = null;
     resumeHandledRef.current = new Set();
-  }, []);
+  }, [sessionId]);
 
   useEffect(() => {
     hidingTimerRunningRef.current = hidingTimerRunning;

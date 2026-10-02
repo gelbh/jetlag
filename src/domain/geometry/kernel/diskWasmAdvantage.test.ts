@@ -6,7 +6,7 @@ import { loadPolygonGolden } from "./loadPolygonGolden";
 import { wasmBuildEndGameMaskFromDisks } from "./maskWasm";
 import { assertPolygonTopologyParity } from "./parity";
 import type { GameAreaGeometry } from "./types";
-import type { DiskSpec } from "./unionPolygonFeatures";
+import { type DiskSpec } from "./unionPolygonFeatures";
 
 const pkgEntry = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),

@@ -1,4 +1,4 @@
-import type { RefObject } from "react";
+import { type RefObject } from "react";
 import { type DistanceUnit, formatPresetDistance } from "../../domain/map/distance";
 import {
   availableThermometerDistancePresetsForSession,

@@ -136,7 +136,7 @@ describe("sea level measuring", () => {
     const refineCells = subdivideElevationSampleCell(borderCell, 2);
     const refineParentKeys = refineCells.map(() => `${borderCell.row}:${borderCell.col}`);
     const refineElevations = [40, 40, 40, 180];
-    const hiderPoint: [number, number] = [refineCells[0]?.point[0], refineCells[0]?.point[1]];
+    const hiderPoint: [number, number] = [refineCells[0]!.point[0], refineCells[0]!.point[1]];
 
     const refined = buildSeaLevelNearRegionWithLocalRefine({
       cells,

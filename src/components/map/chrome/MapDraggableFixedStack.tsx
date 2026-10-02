@@ -282,7 +282,7 @@ export function MapDraggableFixedStack({
     if (height > 0 && Math.abs(height - stackHeight) > 1) {
       setStackHeight(height);
     }
-  }, [dragging, dragPos, stackHeight]);
+  }, [dragging, dragPos, placement, stackHeight, children]);
 
   const safeTop = typeof window !== "undefined" ? resolveSafeAreaTopPx() : 0;
   const restTop = topPxFromTopRatio(
@@ -341,7 +341,7 @@ export function MapDraggableFixedStack({
         settleAnimRef.current = null;
       }
     };
-  }, [dragging, dragPos]);
+  }, [placement, dragging, dragPos]);
 
   const endDrag = useCallback(
     (snapped: boolean) => {
@@ -570,6 +570,7 @@ export function MapDraggableFixedStack({
       data-testid={testId}
       role="group"
       aria-label={ariaLabel}
+      tabIndex={0}
       className={cn(
         "jl-map-chrome-side-stack jl-map-chrome-side-stack--phone jl-map-chrome-side-stack--fixed pointer-events-auto z-[calc(var(--z-dock)+2)] flex flex-col items-stretch gap-1.5",
         className,

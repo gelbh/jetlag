@@ -54,7 +54,7 @@ export function parseGeometryJson(geometryJson: string): Feature<Point | LineStr
 
 export function parsePointGeometry(geometryJson: string): LatLngTuple | null {
   const geometry = parseGeometryJson(geometryJson);
-  if (geometry?.geometry?.type !== "Point") {
+  if (!geometry || geometry.geometry?.type !== "Point") {
     return null;
   }
 
@@ -67,7 +67,7 @@ export function parseLineEndpoints(geometryJson: string): {
   end: LatLngTuple;
 } | null {
   const geometry = parseGeometryJson(geometryJson);
-  if (geometry?.geometry?.type !== "LineString") {
+  if (!geometry || geometry.geometry?.type !== "LineString") {
     return null;
   }
 

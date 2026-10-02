@@ -17,7 +17,7 @@ describe("bundledPresetHierarchy", () => {
       category: "Continent",
     });
 
-    const ireland = europe?.children.find(
+    const ireland = europe!.children.find(
       (node) => node.kind === "group" && node.name === "Ireland",
     );
     expect(ireland).toMatchObject({ category: "Country" });
@@ -60,18 +60,18 @@ describe("bundledPresetHierarchy", () => {
         node.kind === "group" && node.name === "North America",
     );
     expect(northAmerica).toBeTruthy();
-    const canada = northAmerica?.children.find(
+    const canada = northAmerica!.children.find(
       (node): node is Extract<(typeof tree)[number], { kind: "group" }> =>
         node.kind === "group" && node.name === "Canada",
     );
     expect(canada).toBeTruthy();
     expect(
-      canada?.children.some(
+      canada!.children.some(
         (node) => node.kind === "preset" && node.presetId === "bundled:prince-rupert",
       ),
     ).toBe(true);
     expect(
-      canada?.children.some((node) => node.kind === "group" && node.name === "British Columbia"),
+      canada!.children.some((node) => node.kind === "group" && node.name === "British Columbia"),
     ).toBe(false);
   });
 

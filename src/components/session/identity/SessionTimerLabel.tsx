@@ -57,8 +57,7 @@ export function SessionTimerLabel({ timerState }: SessionTimerLabelProps) {
       window.removeEventListener("focus", bump);
       document.removeEventListener("visibilitychange", handleVisibility);
     };
-  }, [timerState.runningSince, timerState]);
-
+  }, [timerState.runningSince]);
   void tick;
 
   return formatElapsedTime(computeElapsedMs(timerState));

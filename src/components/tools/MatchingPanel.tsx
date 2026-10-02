@@ -1,4 +1,4 @@
-import type { RefObject } from "react";
+import { type RefObject } from "react";
 import { satelliteBasemapPoiUnavailableMessage } from "@/services/geo/maplibre/previewBasemapPois";
 import { type DistanceUnit, formatDistance } from "../../domain/map/distance";
 import {

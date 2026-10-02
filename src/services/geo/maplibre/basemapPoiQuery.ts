@@ -158,7 +158,7 @@ function featureToPoiCandidate(
 function geometryToLatLng(
   geometry: MapGeoJSONFeature["geometry"] | null | undefined,
 ): LatLngTuple | null {
-  if (geometry?.type !== "Point") {
+  if (!geometry || geometry.type !== "Point") {
     return null;
   }
   const coords = geometry.coordinates;

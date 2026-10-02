@@ -62,8 +62,8 @@ export function useToolDockMenus(dockRef: RefObject<HTMLDivElement | null>) {
 export function useToolDockHighlight(
   mainGroupRef: RefObject<HTMLDivElement | null>,
   activeTool: MapTool,
-  _viewportBottomInset: number,
-  _visibleQuestionToolCount: number,
+  viewportBottomInset: number,
+  visibleQuestionToolCount: number,
 ) {
   const [dockHighlight, setDockHighlight] = useState<{
     x: number;
@@ -101,12 +101,12 @@ export function useToolDockHighlight(
 
   useLayoutEffect(() => {
     updateDockHighlight();
-  }, [updateDockHighlight]);
+  }, [updateDockHighlight, activeTool, viewportBottomInset, visibleQuestionToolCount]);
 
   useEffect(() => {
     window.addEventListener("resize", updateDockHighlight);
     return () => window.removeEventListener("resize", updateDockHighlight);
-  }, [updateDockHighlight]);
+  }, [updateDockHighlight, viewportBottomInset, visibleQuestionToolCount]);
 
   return dockHighlight;
 }

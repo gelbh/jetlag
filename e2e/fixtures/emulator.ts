@@ -1,4 +1,4 @@
-import type { Page } from "@playwright/test";
+import { type Page } from "@playwright/test";
 
 /** The bridge installs via dynamic import after boot, so wait before evaluating. */
 async function waitForE2EBridge(page: Page): Promise<void> {

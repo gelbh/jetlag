@@ -38,7 +38,10 @@ export function bboxFromGameArea(gameArea: GameAreaGeometry): {
   let south = Infinity;
   let north = -Infinity;
 
-  const rings = gameArea.type === "Polygon" ? gameArea.coordinates : gameArea.coordinates.flat();
+  const rings =
+    gameArea.type === "Polygon"
+      ? gameArea.coordinates
+      : gameArea.coordinates.flatMap((polygon) => polygon);
 
   for (const ring of rings) {
     for (const position of ring) {
@@ -70,7 +73,10 @@ export function normalizedBboxFromGameArea(gameArea: GameAreaGeometry): Bounding
   let south = Infinity;
   let north = -Infinity;
 
-  const rings = gameArea.type === "Polygon" ? gameArea.coordinates : gameArea.coordinates.flat();
+  const rings =
+    gameArea.type === "Polygon"
+      ? gameArea.coordinates
+      : gameArea.coordinates.flatMap((polygon) => polygon);
 
   for (const ring of rings) {
     for (const position of ring) {

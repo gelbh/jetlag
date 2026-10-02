@@ -1,4 +1,4 @@
-import type { RefObject } from "react";
+import { type RefObject } from "react";
 import { type DistanceUnit, parseDistanceInput } from "../../domain/map/distance";
 import {
   isRadarRadiusAllowedForGameSize,

@@ -27,7 +27,7 @@ export function filterPosthogException(
   capture: CaptureResult | null,
   random: () => number = Math.random,
 ): CaptureResult | null {
-  if (capture?.event !== "$exception") {
+  if (!capture || capture.event !== "$exception") {
     return capture;
   }
 

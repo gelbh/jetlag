@@ -162,7 +162,7 @@ describe("opsDeskPersistence", () => {
     expect(started.defaultPresetId).toBe(CUSTOM_PRESET_ID);
     expect(started.activePresetId).toBe(CUSTOM_PRESET_ID);
     expect(started.customLayout.stacks.map((s) => s.panelIds)).toEqual(
-      layoutForFormerBuiltinId("ops-overview")?.stacks.map((s) => s.panelIds),
+      layoutForFormerBuiltinId("ops-overview")!.stacks.map((s) => s.panelIds),
     );
   });
 

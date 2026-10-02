@@ -10,10 +10,10 @@ export async function assertInViewport(locator: Locator) {
     })),
   ]);
   expect(box, "element has no bounding box").not.toBeNull();
-  expect(box?.x).toBeGreaterThanOrEqual(0);
-  expect(box?.y).toBeGreaterThanOrEqual(0);
-  expect(box?.x + box?.width).toBeLessThanOrEqual(viewport.width);
-  expect(box?.y + box?.height).toBeLessThanOrEqual(viewport.height);
+  expect(box!.x).toBeGreaterThanOrEqual(0);
+  expect(box!.y).toBeGreaterThanOrEqual(0);
+  expect(box!.x + box!.width).toBeLessThanOrEqual(viewport.width);
+  expect(box!.y + box!.height).toBeLessThanOrEqual(viewport.height);
 }
 
 export async function assertNoHorizontalOverflow(page: Page) {
@@ -30,8 +30,8 @@ export async function assertMinTapTargets(locator: Locator, minPx = 44) {
   for (let i = 0; i < count; i++) {
     const box = await locator.nth(i).boundingBox();
     expect(box, `missing box for tap target ${i}`).not.toBeNull();
-    expect(box?.width, `width ${i}`).toBeGreaterThanOrEqual(minPx);
-    expect(box?.height, `height ${i}`).toBeGreaterThanOrEqual(minPx);
+    expect(box!.width, `width ${i}`).toBeGreaterThanOrEqual(minPx);
+    expect(box!.height, `height ${i}`).toBeGreaterThanOrEqual(minPx);
   }
 }
 

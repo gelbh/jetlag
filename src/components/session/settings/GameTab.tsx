@@ -4,7 +4,7 @@ import type { SessionRecord } from "@/domain/map/annotations";
 import type { DistanceUnit } from "@/domain/map/distance";
 import { sessionRulesSummary } from "@/domain/session/rules";
 import type { GameSize } from "@/domain/session/size/gameSize";
-import type { AdvancedSessionSettingsValue } from "@/domain/session/tools/advancedSessionSettings";
+import { type AdvancedSessionSettingsValue } from "@/domain/session/tools/advancedSessionSettings";
 import { ShareCode } from "../identity/ShareCode";
 import { AdvancedSessionSettings } from "./AdvancedSessionSettings";
 import { RolePasscodeSettings } from "./RolePasscodeSettings";

@@ -79,9 +79,9 @@ export function MapScreenMapLayers({ controller }: MapScreenMapLayersProps) {
   return (
     <div ref={mapShellRef} className="absolute inset-0">
       <MapView
-        key={session?.id}
+        key={session!.id}
         model={{
-          mapKey: session?.id,
+          mapKey: session!.id,
           mapStyle: effectiveBasemapStyle,
           streetBasemap,
           onMapStyleChange: hideMapControls ? undefined : handleMapStyleChange,
@@ -180,7 +180,7 @@ export function MapScreenMapLayers({ controller }: MapScreenMapLayersProps) {
         ref={exportLegendRef}
         className="pointer-events-none absolute inset-x-0 bottom-0 hidden bg-surface-deep/90 px-4 py-3 text-xs text-ink-secondary"
       >
-        <p className="font-semibold">Session {session?.code}</p>
+        <p className="font-semibold">Session {session!.code}</p>
         <p className="mt-1">Legend: radar, thermometer, zone, pin, tentacle overlays</p>
       </div>
     </div>

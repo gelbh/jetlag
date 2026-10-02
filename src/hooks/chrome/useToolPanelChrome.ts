@@ -19,7 +19,7 @@ export function useToolPanelChrome(
   useEffect(() => {
     setMapPanning(false);
     setUserMinimized(false);
-  }, []);
+  }, [activeTool]);
 
   useEffect(() => {
     if (shouldAutoPeek) {

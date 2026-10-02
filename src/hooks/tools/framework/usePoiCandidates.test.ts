@@ -133,8 +133,8 @@ describe("usePoiCandidates", () => {
     });
 
     await act(async () => {
-      resolvers[0]?.([confirmedCandidate("Stale")]);
-      resolvers[1]?.([confirmedCandidate("Fresh")]);
+      resolvers[0]!([confirmedCandidate("Stale")]);
+      resolvers[1]!([confirmedCandidate("Fresh")]);
     });
 
     await waitFor(() => {

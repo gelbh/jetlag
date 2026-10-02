@@ -95,8 +95,8 @@ describe("matching geometry", () => {
     expect(ring).not.toBeNull();
     // A Voronoi cell clipped to a rectangle has a modest vertex count;
     // the old grid produced a MultiPolygon of hundreds of axis-aligned rects.
-    expect(ring?.length).toBeLessThan(20);
-    expect(ring?.length).toBeGreaterThan(4);
+    expect(ring!.length).toBeLessThan(20);
+    expect(ring!.length).toBeGreaterThan(4);
   });
 
   it("eliminates the complement on yes and the same-nearest region on no", async () => {

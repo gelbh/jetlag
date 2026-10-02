@@ -13,7 +13,7 @@ import { filledStyles, InsetGroup, SectionLabel } from "@/components/ui/entry/en
 import { EmptyState } from "@/components/ui/feedback/EmptyState";
 import { bundledPresetDefinition, isBundledPresetId } from "@/domain/regions/bundledGamePresets";
 import { formatBundledPresetLocation } from "@/domain/regions/bundledPresetHierarchy";
-import type { migrateGamePreset } from "@/domain/session/presets/gamePreset";
+import { migrateGamePreset } from "@/domain/session/presets/gamePreset";
 import { useGamePresetListModel } from "./GamePresetListModel";
 
 type MigratedPreset = ReturnType<typeof migrateGamePreset>;

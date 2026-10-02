@@ -20,7 +20,7 @@ interface HidingZonesLayerProps {
 
 function polygonFeature(ring: LatLngTuple[]): Feature<GeoPolygon> {
   const coordinates = [ring.map(([lat, lng]) => [lng, lat] as [number, number])];
-  coordinates[0]?.push(coordinates[0]?.[0]!);
+  coordinates[0]!.push(coordinates[0]![0]!);
   return {
     type: "Feature",
     properties: {},

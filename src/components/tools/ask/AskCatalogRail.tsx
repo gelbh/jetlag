@@ -5,7 +5,7 @@
  * Optional `columns={2|3}` lays category tiles in a multi-column grid under each group.
  */
 import { Paper, Text, UnstyledButton } from "@mantine/core";
-import type { ReactNode } from "react";
+import { type ReactNode } from "react";
 import { ListSelectRow } from "@/components/tools/shared/controls/ListSelectRow";
 import { catalogTileStyles, mapChromeSurfaceStyles } from "@/components/ui/entry/entryChrome";
 

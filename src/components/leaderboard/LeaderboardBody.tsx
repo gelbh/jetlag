@@ -1080,7 +1080,7 @@ export function LeaderboardBody() {
   const [searchNote, setSearchNote] = useState<string | null>(null);
   const [selectedUid, setSelectedUid] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [_reloadToken, setReloadToken] = useState(0);
+  const [reloadToken, setReloadToken] = useState(0);
   const viewerRowRef = useRef<HTMLElement | null>(null);
   const rowRefs = useRef(new Map<string, HTMLElement>());
   const listEntry =
@@ -1102,7 +1102,6 @@ export function LeaderboardBody() {
   useEffect(() => {
     setBoardLoading(true);
     setBoardError(null);
-
     if (mockEnabled) {
       return subscribeMockLeaderboardBoard(
         selection.scope,
@@ -1145,7 +1144,14 @@ export function LeaderboardBody() {
         setBoardError(error.message);
       },
     );
-  }, [mockEnabled, selection.scope, selection.gameSize, selection.role, selection.metric]);
+  }, [
+    mockEnabled,
+    selection.scope,
+    selection.gameSize,
+    selection.role,
+    selection.metric,
+    reloadToken,
+  ]);
 
   useEffect(() => {
     if (!successMessage) {

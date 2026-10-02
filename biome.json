@@ -35,14 +35,27 @@
       "a11y": "off",
       "correctness": {
         "noUnsafeOptionalChaining": "off",
+        "noUnusedVariables": "off",
         "useExhaustiveDependencies": "off"
       },
+      "complexity": {
+        "noFlatMapIdentity": "off",
+        "noStaticOnlyClass": "off",
+        "noUselessContinue": "off",
+        "noUselessSwitchCase": "off",
+        "useOptionalChain": "off"
+      },
       "style": {
-        "noNonNullAssertion": "off"
+        "noNonNullAssertion": "off",
+        "useExportType": "off",
+        "useImportType": "off",
+        "useTemplate": "off"
       },
       "suspicious": {
         "noArrayIndexKey": "off",
+        "noCommentText": "off",
         "noConfusingVoidType": "off",
+        "noExplicitAny": "off",
         "noImplicitAnyLet": "off",
         "noNonNullAssertedOptionalChain": "off",
         "noShadowRestrictedNames": "off",

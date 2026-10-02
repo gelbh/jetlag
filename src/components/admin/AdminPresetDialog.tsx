@@ -51,6 +51,7 @@ export function AdminPresetDialog({
               className="field-input"
               value={name}
               onChange={(event) => setName(event.target.value)}
+              autoFocus
             />
           </label>
         )}

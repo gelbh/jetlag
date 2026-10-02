@@ -70,7 +70,7 @@ export function useSessionSync({ syncEnabled = true }: UseSessionSyncOptions = {
     );
 
     return unsubscribe;
-  }, [myUid, session?.id, setLastSyncError, setSession, syncEnabled, session]);
+  }, [myUid, session?.id, setLastSyncError, setSession, syncEnabled]);
 
   const endGameSessionId = session?.id;
   const endGameMemberRoles = session?.memberRoles;
@@ -185,7 +185,6 @@ export function useSessionSync({ syncEnabled = true }: UseSessionSyncOptions = {
     setLastSyncError,
     setRemoteUpdateNotice,
     syncEnabled,
-    session,
   ]);
 
   useEffect(() => {
@@ -267,7 +266,7 @@ export function useSessionSync({ syncEnabled = true }: UseSessionSyncOptions = {
       }
       window.clearInterval(intervalId);
     };
-  }, [queueFlushMs, session?.id, setLastSyncError, setPendingWrites, syncEnabled, session]);
+  }, [queueFlushMs, session?.id, setLastSyncError, setPendingWrites, syncEnabled]);
 
   useEffect(() => {
     const handleOffline = () => {

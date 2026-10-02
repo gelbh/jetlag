@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 import GridLayout, { type Layout, useContainerWidth, verticalCompactor } from "react-grid-layout";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
-import type { DeskLayout, PanelId } from "../../domain/admin/opsDeskLayout";
+import { type DeskLayout, type PanelId } from "../../domain/admin/opsDeskLayout";
 import type { AdminPanelBodies } from "./AdminPanelBody";
 import { AdminPanelStack, OPS_PANEL_MIME, type PanelMergePayload } from "./AdminPanelStack";
 import { AdminPlacePanelMenu } from "./AdminPlacePanelMenu";

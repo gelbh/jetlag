@@ -314,11 +314,11 @@ export function useRadarTool({
     return () => {
       cancelled = true;
     };
-  }, [mapFirstEligible, resolvedForReady, radarCenter]);
+  }, [mapFirstEligible, resolvedForReady]);
 
   useEffect(() => {
     autoGpsForDistanceRef.current = null;
-  }, []);
+  }, [resolvedForReady]);
 
   useEffect(() => {
     return () => {

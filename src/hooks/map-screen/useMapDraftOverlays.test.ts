@@ -208,11 +208,11 @@ describe("buildMapDraftOverlays", () => {
     const eastAnswer = await forAnswer("poi-4");
     const westAnswer = await forAnswer("poi-0");
 
-    expect(pointInAnyElimination([pois[4]?.lng, pois[4]?.lat], eastAnswer)).toBe(false);
-    expect(pointInAnyElimination([pois[0]?.lng, pois[0]?.lat], eastAnswer)).toBe(true);
+    expect(pointInAnyElimination([pois[4]!.lng, pois[4]!.lat], eastAnswer)).toBe(false);
+    expect(pointInAnyElimination([pois[0]!.lng, pois[0]!.lat], eastAnswer)).toBe(true);
 
-    expect(pointInAnyElimination([pois[0]?.lng, pois[0]?.lat], westAnswer)).toBe(false);
-    expect(pointInAnyElimination([pois[4]?.lng, pois[4]?.lat], westAnswer)).toBe(true);
+    expect(pointInAnyElimination([pois[0]!.lng, pois[0]!.lat], westAnswer)).toBe(false);
+    expect(pointInAnyElimination([pois[4]!.lng, pois[4]!.lat], westAnswer)).toBe(true);
   });
 });
 

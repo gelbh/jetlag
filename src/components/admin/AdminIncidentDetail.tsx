@@ -109,7 +109,7 @@ function AdminIncidentDetailBody({
     if (tab === "chat") {
       bottomRef.current?.scrollIntoView?.({ block: "end" });
     }
-  }, [tab]);
+  }, [messages.length, tab]);
 
   const chatMessages = useMemo(
     () =>

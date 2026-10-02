@@ -341,7 +341,7 @@ export function playExpandHand(
   powerUpId: Extract<PowerUpId, "expandHand1" | "expandHand2">,
 ): BoardEconomyState {
   const card = state.hand.find((c) => c.instanceId === instanceId);
-  if (card?.def.kind !== "powerUp" || card.def.id !== powerUpId) {
+  if (!card || card.def.kind !== "powerUp" || card.def.id !== powerUpId) {
     return state;
   }
   let next = discardFromHand(state, [instanceId]);
@@ -366,7 +366,7 @@ export function playDiscardDrawPowerUp(
   drawN: number,
 ): BoardEconomyState {
   const powerUp = state.hand.find((c) => c.instanceId === powerUpInstanceId);
-  if (powerUp?.def.kind !== "powerUp") {
+  if (!powerUp || powerUp.def.kind !== "powerUp") {
     return state;
   }
   const requiredDiscard =
@@ -392,7 +392,7 @@ export function playDiscardDrawPowerUp(
 
 export function playMoveCard(state: BoardEconomyState, moveInstanceId: string): BoardEconomyState {
   const move = state.hand.find((c) => c.instanceId === moveInstanceId);
-  if (move?.def.kind !== "move") {
+  if (!move || move.def.kind !== "move") {
     return state;
   }
   return {
@@ -409,7 +409,7 @@ export function playCurse(
   playedAt: string,
 ): BoardEconomyState {
   const curse = state.hand.find((c) => c.instanceId === curseInstanceId);
-  if (curse?.def.kind !== "curse") {
+  if (!curse || curse.def.kind !== "curse") {
     return state;
   }
   const next = discardFromHand(state, [curseInstanceId]);

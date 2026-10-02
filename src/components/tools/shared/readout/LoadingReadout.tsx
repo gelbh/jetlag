@@ -22,7 +22,7 @@ export function LoadingReadout({ children, variant = "dim" }: LoadingReadoutProp
     setStale(false);
     const timerId = window.setTimeout(() => setStale(true), STALE_LOADING_MS);
     return () => window.clearTimeout(timerId);
-  }, []);
+  }, [children]);
 
   return (
     <div

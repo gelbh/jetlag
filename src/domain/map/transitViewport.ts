@@ -103,7 +103,7 @@ export function filterTransitRoutesForViewport(
       }
     }
 
-    return pointInViewport(route.positions[0]?.[0], route.positions[0]?.[1], viewport);
+    return pointInViewport(route.positions[0]![0], route.positions[0]![1], viewport);
   });
 }
 

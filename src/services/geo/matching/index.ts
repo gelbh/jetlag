@@ -58,4 +58,4 @@ export {
   fetchTransitStationsForHidingZone,
   fetchTransitStationsForHidingZoneViewport,
 } from "./transit";
-export type { MatchingFetchOptions } from "./types";
+export { type MatchingFetchOptions } from "./types";

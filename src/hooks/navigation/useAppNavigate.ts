@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import type { NavigateOptions, To } from "react-router-dom";
+import { type NavigateOptions, type To } from "react-router-dom";
 import { resolveNavigatePath } from "../../navigation/routePreloaders";
 import type { BeginTransitionOptions } from "../../navigation/routeTransitionContextInstance";
 import { useRouteTransition } from "../../navigation/useRouteTransition";

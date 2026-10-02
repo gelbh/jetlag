@@ -245,6 +245,7 @@ async function fetchOverpassViaProxy(query: string, proxyHeaders: HeadersInit): 
       lastError = new OverpassUnavailableError();
       if (attempt < OVERPASS_MAX_RETRIES) {
         await sleep(retryDelayMs(attempt, null));
+        continue;
       }
     }
   }

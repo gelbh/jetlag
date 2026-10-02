@@ -20,7 +20,7 @@ import {
   type BundledPresetTreeNode,
   buildBundledPresetTree,
 } from "@/domain/regions/bundledPresetHierarchy";
-import type { migrateGamePreset } from "@/domain/session/presets/gamePreset";
+import { migrateGamePreset } from "@/domain/session/presets/gamePreset";
 import { PresetFavouriteButton } from "./PresetFavouriteButton";
 
 type MigratedPreset = ReturnType<typeof migrateGamePreset>;

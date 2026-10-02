@@ -100,7 +100,7 @@ export function usePanelDrag({
     if (userMinimized) {
       setOffsetPx(collapsed);
     }
-  }, [userMinimized, peekHeightPx, panelRef?.current?.offsetHeight]);
+  }, []);
 
   const beginSettle = useCallback(
     (targetPx: number, targetMinimized: boolean, options?: { persistMinimized?: boolean }) => {

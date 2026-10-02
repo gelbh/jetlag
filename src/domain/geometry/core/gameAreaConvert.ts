@@ -113,10 +113,10 @@ export function placeToGameArea(place: { bounds: BoundingBox; boundary?: GameAre
 
 function collectPositions(gameArea: GameArea): Position[] {
   if (gameArea.type === "MultiPolygon") {
-    return gameArea.coordinates.flatMap((polygon) => polygon.flat());
+    return gameArea.coordinates.flatMap((polygon) => polygon.flatMap((ring) => ring));
   }
 
-  return gameArea.coordinates.flat();
+  return gameArea.coordinates.flatMap((ring) => ring);
 }
 
 export function gameAreaFingerprint(gameArea: GameArea): string {

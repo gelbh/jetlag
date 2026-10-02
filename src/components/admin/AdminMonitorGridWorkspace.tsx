@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 import GridLayout, { type Layout, useContainerWidth, verticalCompactor } from "react-grid-layout";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
-import type { MonitorLayout, MonitorPanelId } from "../../domain/admin/opsDeskLayout";
+import { type MonitorLayout, type MonitorPanelId } from "../../domain/admin/opsDeskLayout";
 import type { AdminMonitorPanelBodies } from "./AdminMonitorPanelBody";
 import {
   AdminMonitorPanelStack,

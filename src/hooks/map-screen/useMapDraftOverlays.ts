@@ -400,6 +400,20 @@ export function useMapDraftOverlays(
   sources: MapDraftOverlaySources,
   extraEliminationFeatures: readonly Feature<GeoPolygon | MultiPolygon>[] = EMPTY_GEOJSON_FEATURES,
 ): MapDraftOverlayResult {
+  const {
+    activeTool,
+    gameArea,
+    mapStyle,
+    streetBasemap = "light",
+    radar,
+    pin,
+    tentacle,
+    thermometer,
+    measuring,
+    matching,
+    zone,
+  } = sources;
+
   const [built, setBuilt] = useState<MapDraftOverlayResult>(EMPTY_DRAFT_RESULT);
   const [tentacleDisplayElim, setTentacleDisplayElim] = useState<Feature<
     GeoPolygon | MultiPolygon
@@ -452,7 +466,44 @@ export function useMapDraftOverlays(
       tentacleLodCancelRef.current?.();
       tentacleLodCancelRef.current = null;
     };
-  }, [sources.activeTool, sources]);
+  }, [
+    activeTool,
+    gameArea,
+    mapStyle,
+    streetBasemap,
+    matching.boundaryPreview,
+    matching.eliminationPreview,
+    matching.nearestFeaturePoint,
+    matching.seekerPoint,
+    matching.seekerResolving,
+    matching.categoryId,
+    measuring.boundaryPreview,
+    measuring.eliminationPreview,
+    measuring.placePoints,
+    measuring.seekerPoint,
+    measuring.seekerResolving,
+    measuring.siteRadiusMeters,
+    measuring.targetPoint,
+    measuring.categoryId,
+    pin.point,
+    radar.answer,
+    radar.center,
+    radar.radiusMeters,
+    tentacle.answerRadiusMeters,
+    tentacle.center,
+    tentacle.outOfReach,
+    tentacle.pois,
+    tentacle.searchRadiusMeters,
+    tentacle.seekerResolving,
+    tentacle.selectedPoiId,
+    thermometer.answer,
+    thermometer.targetDistanceMeters,
+    thermometer.walkActive,
+    thermometer.walkCurrentPoint,
+    thermometer.thermoA,
+    thermometer.thermoB,
+    zone.vertices,
+  ]);
 
   return useMemo(() => {
     const tentacleElms =

@@ -87,7 +87,6 @@ function RouteFallback() {
     <div
       className="route-fallback-skeleton route-loading-enter"
       aria-busy="true"
-      role="status"
       aria-label="Loading map"
     >
       <div className="route-fallback-status" />

@@ -42,7 +42,7 @@ export type HeavyToolHostModel = {
   submitToolQuestion?: (
     toolType: AnnotationType,
     input: Omit<SubmitPendingQuestionInput, "sessionId" | "senderUid" | "senderRole" | "toolType">,
-  ) => Promise<undefined | string | undefined>;
+  ) => Promise<void | string | undefined>;
   sessionId?: string;
   senderUid?: string | null;
   onToolsChange: (tools: HeavyMapToolsApi) => void;

@@ -240,7 +240,7 @@ export function usePlacementMapFocus({
   // lingering into later ordinary reframes.
   useEffect(() => {
     setFocusPreferFly(false);
-  }, []);
+  }, [placementRecenterToken]);
 
   return {
     effectiveFocusBounds: cameraTarget?.bounds ?? defaultFocusBounds,

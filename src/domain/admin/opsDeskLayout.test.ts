@@ -113,7 +113,7 @@ describe("opsDeskLayout", () => {
     };
     const clamped = clampLayoutToCols(overflow);
     expect(clamped.stacks[0]).toMatchObject({ x: 14, w: 10 });
-    expect(clamped.stacks[0]?.x + clamped.stacks[0]?.w).toBe(24);
+    expect(clamped.stacks[0]!.x + clamped.stacks[0]!.w).toBe(24);
   });
 
   it("mergePanelOntoStack moves a panel into the target stack and removes empty source", () => {
@@ -338,10 +338,10 @@ describe("opsDeskLayout", () => {
     layout.hiddenPanelIds = ["settings"];
 
     const cloned = cloneLayout(layout);
-    cloned.stacks[0]?.panelIds.push("inbox");
+    cloned.stacks[0]!.panelIds.push("inbox");
     cloned.hiddenPanelIds.push("detail");
 
-    expect(layout.stacks[0]?.panelIds).toEqual(["sessions", "monitor"]);
+    expect(layout.stacks[0]!.panelIds).toEqual(["sessions", "monitor"]);
     expect(layout.hiddenPanelIds).toEqual(["settings"]);
   });
 });

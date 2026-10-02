@@ -11,7 +11,7 @@ export interface MapFeatureHitResult {
   lngLat: import("maplibre-gl").LngLat;
 }
 
-export type MapFeatureHitHandler = (result: MapFeatureHitResult) => boolean | undefined;
+export type MapFeatureHitHandler = (result: MapFeatureHitResult) => boolean | void;
 
 export function queryJlMarkerFeatures(
   map: MapLibreMap,

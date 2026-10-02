@@ -555,11 +555,11 @@ export function useTentacleTool({
     return () => {
       cancelled = true;
     };
-  }, [mapFirstEligible, tentacleCategoryId, tentacleCenter]);
+  }, [mapFirstEligible, tentacleCategoryId]);
 
   useEffect(() => {
     autoGpsForCategoryRef.current = null;
-  }, []);
+  }, [tentacleCategoryId]);
 
   const mapPlacementActive = Boolean(mapFirstEligible);
   const placementError =

@@ -82,7 +82,7 @@ export function useOptionalMapFeatureHitTestContext(): MapFeatureHitTestContextV
 
 export function useMapFeatureHitTest(
   layerIdPrefix: string,
-  handler: (result: MapFeatureHitResult) => boolean | undefined,
+  handler: (result: MapFeatureHitResult) => boolean | void,
 ) {
   const ctx = useOptionalMapFeatureHitTestContext();
   const handlerRef = useRef(handler);
@@ -101,7 +101,7 @@ export function useMapFeatureHitTest(
 
 export function useMapFeatureHitTarget(
   hitId: string,
-  handler: (result: MapFeatureHitResult) => boolean | undefined,
+  handler: (result: MapFeatureHitResult) => boolean | void,
   enabled = true,
 ) {
   const ctx = useOptionalMapFeatureHitTestContext();

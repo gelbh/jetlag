@@ -1,4 +1,4 @@
-import type { RefObject } from "react";
+import { type RefObject } from "react";
 import { filterConfirmedTentaclePois } from "../../domain/geo/poiCandidateAdapters";
 import type { TentaclePoi } from "../../domain/map/annotations";
 import { type DistanceUnit, formatPresetDistance } from "../../domain/map/distance";
