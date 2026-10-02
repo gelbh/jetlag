@@ -152,7 +152,7 @@ export function GameAreaFramingModal({
         className="pointer-events-none absolute inset-x-0 top-0 px-3"
         style={{
           zIndex: JETLAG_MODAL_Z_INDEX + 1,
-          paddingTop: "max(0.75rem, env(safe-area-inset-top))",
+          paddingTop: "max(0.75rem, var(--safe-area-top))",
         }}
       >
         <Paper
@@ -200,7 +200,7 @@ export function GameAreaFramingModal({
         className="pointer-events-none absolute inset-x-0 bottom-0 px-3"
         style={{
           zIndex: JETLAG_MODAL_Z_INDEX + 1,
-          paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))",
+          paddingBottom: "max(0.75rem, var(--safe-area-bottom))",
         }}
       >
         <Paper

@@ -1,9 +1,11 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { MantineProvider } from "@mantine/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { CreateSession } from "./CreateSession";
 import { jetlagTheme } from "@/theme/theme";
+import type { MapViewModel } from "@/components/map/chrome/mapViewTypes";
+import { createMapBounds } from "@/domain/map/mapBounds";
 
 const ensureAnonymousUser = vi.hoisted(() =>
   vi.fn(async () => ({ uid: "host-1" })),
@@ -14,8 +16,40 @@ vi.mock("@/hooks/navigation/useAppNavigate", () => ({
   useAppNavigate: () => vi.fn(),
 }));
 
+const mapView = vi.hoisted(() => ({ model: null as MapViewModel | null }));
 vi.mock("@/components/map/chrome/MapView", () => ({
-  MapView: () => <div data-testid="create-map" />,
+  MapView: ({
+    model,
+    children,
+  }: {
+    model: MapViewModel;
+    children?: React.ReactNode;
+  }) => {
+    mapView.model = model;
+    return <div data-testid="create-map">{children}</div>;
+  },
+}));
+
+const fakeMapRef = vi.hoisted(() => {
+  const map = { getCanvas: () => ({ focus: () => {} }) };
+  return { getMap: () => map };
+});
+vi.mock("@/components/map/helpers/useMapLibreMap", () => ({
+  useMapLibreMap: () => fakeMapRef,
+}));
+
+const searchPlaces = vi.hoisted(() => vi.fn(async () => [] as unknown[]));
+vi.mock("@/services/geo/geocoding", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/services/geo/geocoding")>()),
+  searchPlaces,
+}));
+
+vi.mock("@/components/map/layers/FramingPreviewLayers", () => ({
+  FramingPreviewLayers: () => null,
+}));
+
+vi.mock("@/components/session/framing/prefetchCreateSessionMap", () => ({
+  prefetchCreateSessionMap: vi.fn(async () => undefined),
 }));
 
 vi.mock("@/components/map/layers/GameAreaMask", () => ({
@@ -57,11 +91,52 @@ vi.mock("@/services/session/gameAreaPreload", () => ({
   preloadCriticalGameAreaCaches: vi.fn(async () => undefined),
 }));
 
+const startSeaLevelBackgroundSampling = vi.hoisted(() => vi.fn());
 vi.mock("@/services/geo/elevation/seaLevelProgressive", () => ({
-  startSeaLevelBackgroundSampling: vi.fn(),
+  startSeaLevelBackgroundSampling,
 }));
 
+const parseBoundaryFile = vi.hoisted(() => vi.fn());
+vi.mock("@/services/core/capture/kmzImport", () => ({
+  parseBoundaryFile,
+}));
+
+const IMPORTED_AREA = {
+  type: "Polygon" as const,
+  coordinates: [
+    [
+      [-6.3, 53.3],
+      [-6.2, 53.3],
+      [-6.2, 53.4],
+      [-6.3, 53.4],
+      [-6.3, 53.3],
+    ],
+  ],
+};
+
+function importBoundaryFile() {
+  const input = document.querySelector<HTMLInputElement>('input[type="file"]');
+  expect(input).toBeTruthy();
+  const file = new File(["<kml/>"], "dublin.kml", {
+    type: "application/vnd.google-earth.kml+xml",
+  });
+  fireEvent.change(input!, { target: { files: [file] } });
+  return file;
+}
+
+/** MapLibre `load` → first `onBoundsChange` with the default London viewport. */
+function loadMapWithDefaultViewport() {
+  act(() => {
+    mapView.model?.onBoundsChange?.(
+      createMapBounds({ south: 51.4, west: -0.25, north: 51.6, east: 0.05 }),
+    );
+  });
+}
+
 beforeEach(() => {
+  mapView.model = null;
+  startSeaLevelBackgroundSampling.mockReset();
+  parseBoundaryFile.mockReset();
   isFirebaseConfigured.mockReturnValue(false);
   ensureAnonymousUser.mockResolvedValue({ uid: "host-1" });
   vi.stubGlobal("matchMedia", (query: string) => ({
@@ -153,5 +228,125 @@ describe("CreateSession", () => {
     expect(
       screen.getByRole("button", { name: /confirm game area/i }),
     ).toBeDisabled();
+  });
+
+  it("lazy-loads the boundary parser and starts sea-level sampling on confirm", async () => {
+    parseBoundaryFile.mockResolvedValue(IMPORTED_AREA);
+    renderCreateSession();
+
+    const file = importBoundaryFile();
+    await waitFor(() => {
+      expect(parseBoundaryFile).toHaveBeenCalledWith(file);
+    });
+    await waitFor(() => {
+      expect(screen.getByDisplayValue("dublin.kml")).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: /confirm game area/i }));
+
+    await waitFor(() => {
+      expect(startSeaLevelBackgroundSampling).toHaveBeenCalledWith(
+        IMPORTED_AREA,
+        { regionPackId: undefined },
+      );
+    });
+  });
+
+  it("shows friendly copy when the boundary importer chunk fails to load", async () => {
+    parseBoundaryFile.mockRejectedValue(
+      new TypeError(
+        "Failed to fetch dynamically imported module: /assets/kmzImport-x.js",
+      ),
+    );
+    renderCreateSession();
+
+    importBoundaryFile();
+
+    expect(
+      await screen.findByText(/couldn't load the importer/i),
+    ).toBeInTheDocument();
+  });
+
+  it("shows a map facade instead of constructing MapLibre on load", () => {
+    renderCreateSession();
+
+    expect(screen.queryByTestId("create-map")).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Open map" }));
+
+    expect(screen.getByTestId("create-map")).toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent("Loading map…");
+
+    loadMapWithDefaultViewport();
+
+    expect(screen.queryByText("Loading map…")).not.toBeInTheDocument();
+  });
+
+  it("mounts the map on search intent", () => {
+    renderCreateSession();
+
+    fireEvent.change(screen.getByPlaceholderText("Dublin, Ireland"), {
+      target: { value: "Dublin" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Find place" }));
+
+    expect(screen.getByTestId("create-map")).toBeInTheDocument();
+  });
+
+  it("Confirm with no area awaits map mount, then frames the live viewport", async () => {
+    renderCreateSession();
+
+    fireEvent.click(screen.getByRole("button", { name: /confirm game area/i }));
+
+    // Confirm is the intent: the map mounts, and nothing is submitted yet.
+    expect(await screen.findByTestId("create-map")).toBeInTheDocument();
+    expect(startSeaLevelBackgroundSampling).not.toHaveBeenCalled();
+    expect(
+      screen.queryByText(/move the map until the play area is framed/i),
+    ).not.toBeInTheDocument();
+
+    loadMapWithDefaultViewport();
+
+    await waitFor(() => {
+      expect(startSeaLevelBackgroundSampling).toHaveBeenCalledTimes(1);
+    });
+    const [gameArea] = startSeaLevelBackgroundSampling.mock.calls[0]!;
+    expect(gameArea).toMatchObject({ type: "Polygon" });
+  });
+
+  it("mounts the map on boundary import intent", () => {
+    parseBoundaryFile.mockReturnValue(new Promise(() => {}));
+    renderCreateSession();
+
+    importBoundaryFile();
+
+    expect(screen.getByTestId("create-map")).toBeInTheDocument();
+  });
+
+  it("mounts the map on framing-mode change (circle needs map taps)", () => {
+    renderCreateSession();
+
+    fireEvent.click(screen.getByRole("radio", { name: "Circle" }));
+
+    expect(screen.getByTestId("create-map")).toBeInTheDocument();
+  });
+
+  it("Confirm reports a map load failure instead of blaming the player", async () => {
+    vi.useFakeTimers();
+    try {
+      renderCreateSession();
+
+      fireEvent.click(
+        screen.getByRole("button", { name: /confirm game area/i }),
+      );
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(10_000);
+      });
+
+      expect(screen.getByText(/the map couldn't load/i)).toBeInTheDocument();
+      expect(startSeaLevelBackgroundSampling).not.toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

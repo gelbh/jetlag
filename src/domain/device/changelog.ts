@@ -1,4 +1,4 @@
-export const APP_VERSION = "0.17.1";
+export const APP_VERSION = "1.0.0";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,25 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "1.0.0",
+    date: "2026-09-30",
+    sections: [
+      {
+        title: "Improvements",
+        items: [
+          "Mantine/iOS is the player UI (program close)",
+          "Survey dual path removed after the Mantine migration",
+        ],
+      },
+      {
+        title: "Technical",
+        items: [
+          "Wave 7 dead-code purge (routes, components, fixtures, deps, package.json policy)",
+        ],
+      }
+    ],
+  },
   {
     version: "0.17.1",
     date: "2026-09-28",

@@ -10,6 +10,7 @@ import { optionalKernelWasmPkg } from "./vite.optional-kernel-wasm-pkg";
 import { createPwaPlugin } from "./vite.pwa";
 import { createSentryPlugins } from "./vite.sentry";
 import { sharedAlias } from "./vite.resolve-shared";
+import { timeEndpointPlugin } from "./vite.time-endpoint";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -40,6 +41,7 @@ export default defineConfig(({ mode }) => ({
   // es2022: enough for module workers + modern Safari; avoid global `esnext`
   // (undownleveled main bundle). Worker wasm still loads via vite-plugin-wasm.
   build: {
+    manifest: true,
     target: "es2022",
     sourcemap: mode === "production" ? "hidden" : true,
     rolldownOptions: {
@@ -66,5 +68,6 @@ export default defineConfig(({ mode }) => ({
     react(),
     tailwindcss(),
     createPwaPlugin(),
+    timeEndpointPlugin(),
   ],
 }));

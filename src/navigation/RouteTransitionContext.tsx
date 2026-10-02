@@ -13,7 +13,7 @@ import {
   type To,
 } from "react-router-dom";
 import { useMotionProfile } from "../hooks/motion/useMotionProfile";
-import { reportSlowRouteTransition } from "../services/core/analytics/sentry";
+import { reportSlowRouteTransitionLazy } from "@/services/core/analytics/lazyTelemetry";
 import {
   isLazyRoute,
   preloadRoute,
@@ -62,8 +62,6 @@ function toRevealDirection(
 
 function loadingReasonForPath(pathname: string): RouteLoadingReason {
   switch (routeReadinessKind(pathname)) {
-    case "auth-bootstrap":
-      return "sign-in";
     case "play-area":
       return "map";
     case "admin-auth":
@@ -307,7 +305,7 @@ export function RouteTransitionProvider({ children }: { children: ReactNode }) {
           computeLoadingProgress(targetPath, screenReadyRef.current),
         );
 
-        reportSlowRouteTransition({
+        reportSlowRouteTransitionLazy({
           preload_ms: preloadMs,
           ready_wait_ms: readyWaitMs,
           total_ms: Date.now() - startedAt,

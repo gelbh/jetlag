@@ -1,5 +1,5 @@
-import { isAuthBootstrapReady, isFirebaseConfigured } from "../services/core/firebase/firebase";
-import { isPlayAreaReadySync } from "../services/geo/matching/resolveSessionMatchingAreas";
+import { isAuthBootstrapReady, isFirebaseConfigured } from "@/services/core/firebase/authBootstrapState";
+import { isPlayAreaReadySync } from "@/services/geo/matching/playAreaReadiness";
 import { usePremiumEntitlementsStore } from "../state/premiumEntitlementsStore";
 import { useSessionStore } from "../state/sessionStore";
 import { isLazyRoute, normalizeRoutePath } from "./routeMetadata";
@@ -21,8 +21,6 @@ export function clearRouteWarmStateForTests(): void {
 
 export function getSyncRouteReady(pathname: string): boolean {
   switch (routeReadinessKind(pathname)) {
-    case "auth-bootstrap":
-      return !isFirebaseConfigured() || isAuthBootstrapReady();
     case "play-area":
       return isPlayAreaReadySync(useSessionStore.getState().session);
     case "admin-auth":

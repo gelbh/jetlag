@@ -19,7 +19,7 @@ export function AppUpdateBanner() {
       className={
         preferBottom
           ? "jl-app-update-chip pointer-events-auto fixed inset-x-0 z-[var(--z-toast)] px-3"
-          : "pointer-events-auto fixed inset-x-0 top-0 z-[var(--z-toast)] px-3 pt-[max(0.5rem,env(safe-area-inset-top))]"
+          : "pointer-events-auto fixed inset-x-0 top-0 z-[var(--z-toast)] px-3 pt-[max(0.5rem,var(--safe-area-top))]"
       }
     >
       <MapFloatSurface

@@ -20,7 +20,7 @@ describe("jetlagTheme", () => {
       frostBlur: jetlagBrand.frostBlur,
       dockHeight: "4.25rem",
       chromeGapAboveDock: "0.5rem",
-      safeAreaBottom: "env(safe-area-inset-bottom, 0px)",
+      safeAreaBottom: "var(--safe-area-bottom)",
       zDock: JETLAG_DOCK_Z_INDEX,
       zModal: JETLAG_MODAL_Z_INDEX,
     });

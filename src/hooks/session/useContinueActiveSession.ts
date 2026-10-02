@@ -8,19 +8,10 @@ import {
   type PlayerRole,
 } from "@/domain/session/players/playerRole";
 import { useAppNavigate } from "@/hooks/navigation/useAppNavigate";
-import { useSessionExit } from "@/hooks/session/useSessionExit";
 import { setPremiumApiContext } from "@/services/core/auth/premiumApiContext";
-import {
-  ensureFreshAnonymousUser,
-  isFirebaseConfigured,
-} from "@/services/core/firebase/firebase";
+import { isFirebaseConfigured } from "@/services/core/firebase/authBootstrapState";
 import { withTimeout } from "@/services/core/withTimeout";
-import { isFirestorePermissionDenied } from "@/services/firestore/firestoreAnnotations";
-import {
-  getRemoteSessionById,
-  healSessionMembership,
-  lookupRemoteSessionByCode,
-} from "@/services/firestore/sessionMembershipHeal";
+import type { ExitSessionParams } from "@/services/session/sessionExit";
 import { useSessionStore } from "@/state/sessionStore";
 
 const VERIFY_SESSION_TIMEOUT_MS = 15_000;
@@ -35,7 +26,14 @@ export function useContinueActiveSession(): {
   handleContinue: () => Promise<void>;
 } {
   const navigate = useAppNavigate();
-  const exitSession = useSessionExit();
+  // Not useSessionExit: its static sessionExit → sessionCleanup graph pulls
+  // firestore/turf into the prerendered Home (App chunk).
+  const exitSession = async (params: Omit<ExitSessionParams, "navigate">) => {
+    const { exitSession: runExit } = await import(
+      "@/services/session/sessionExit"
+    );
+    await runExit({ ...params, navigate });
+  };
   const session = useSessionStore((state) => state.session);
   const myRole = useSessionStore((state) => state.myRole);
   const myUid = useSessionStore((state) => state.myUid);
@@ -59,6 +57,20 @@ export function useContinueActiveSession(): {
 
       await withTimeout(
         (async () => {
+          // Dynamic: Home is prerendered on the App chunk; keep firestore off it.
+          const [
+            { ensureFreshAnonymousUser },
+            { isFirestorePermissionDenied },
+            {
+              getRemoteSessionById,
+              healSessionMembership,
+              lookupRemoteSessionByCode,
+            },
+          ] = await Promise.all([
+            import("@/services/core/firebase/firebase"),
+            import("@/services/firestore/firestoreAnnotations"),
+            import("@/services/firestore/sessionMembershipHeal"),
+          ]);
           const user = await ensureFreshAnonymousUser();
           let remoteSession = null;
           try {

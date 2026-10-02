@@ -5,15 +5,7 @@ import { AskHudPanel } from "@/components/tools/ask/AskHudPanel";
  */
 import { useState, type ComponentType } from "react";
 import { UnstyledButton } from "@mantine/core";
-import {
-  Buildings,
-  Drop,
-  MapPinArea,
-  SquaresFour,
-  Train,
-  Tree,
-  type IconProps,
-} from "@phosphor-icons/react";
+import { BuildingsIcon, DropIcon, MapPinAreaIcon, SquaresFourIcon, TrainIcon, TreeIcon, type IconProps } from "@phosphor-icons/react";
 import { AskCatalogRail } from "@/components/tools/ask/AskCatalogRail";
 import { AskToolQuestionHeader } from "@/components/tools/ask/AskToolQuestionHeader";
 import { measuringCategoryIcon } from "@/components/tools/ask/measuringCategoryIcons";
@@ -64,12 +56,12 @@ const GROUP_CHIP_LABEL: Record<MeasuringGroupId, string> = {
 };
 
 const GROUP_CHIP_ICON: Record<GroupFilter, ComponentType<IconProps>> = {
-  all: SquaresFour,
-  transit: Train,
-  borders: Buildings,
-  natural: Tree,
-  poi: MapPinArea,
-  public_utilities: Drop,
+  all: SquaresFourIcon,
+  transit: TrainIcon,
+  borders: BuildingsIcon,
+  natural: TreeIcon,
+  poi: MapPinAreaIcon,
+  public_utilities: DropIcon,
 };
 
 const MEASURING_QUESTION_INTRO = {
