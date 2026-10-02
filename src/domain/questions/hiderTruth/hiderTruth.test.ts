@@ -4,6 +4,7 @@ import {
   nearestPointToCoastlines,
   prepareMeasuringLineSegments,
 } from "../../geometry/measuring/geometryMeasuring";
+import { loadXwxzRegionInputFixture } from "../../geometry/measuring/loadXwxzRegionInput";
 import { milesToMeters } from "../../map/distance";
 import type { GameArea } from "../../map/annotations";
 import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
@@ -459,6 +460,50 @@ describe("computeHiderTruthReply", () => {
     expect(computeHiderTruthReply(pending, station, dublinCoastTruthGameArea)?.replyId).toBe(
       "closer",
     );
+  });
+
+  it("XWXZ coastline truth uses zone center vs seeker on prepared segments", () => {
+    const fixture = loadXwxzRegionInputFixture();
+    const { gameArea, zoneCenter, seekerAnchor } = fixture;
+    const prepared = prepareMeasuringLineSegments(fixture.measuringCoastSegments, gameArea);
+    const zoneDistance = nearestPointToCoastlines(zoneCenter, prepared.segments, prepared)
+      ?.distanceMeters;
+    const seekerDistance = nearestPointToCoastlines(seekerAnchor, prepared.segments, prepared)
+      ?.distanceMeters;
+    expect(zoneDistance).toBeDefined();
+    expect(seekerDistance).toBeDefined();
+    expect(zoneDistance!).toBeLessThan(seekerDistance!);
+
+    const pending = basePending({
+      toolType: "measuring",
+      replyOptions: [
+        { id: "closer", label: "Closer" },
+        { id: "further", label: "Further" },
+      ],
+      placement: {
+        geometryJson: JSON.stringify({
+          type: "Feature",
+          properties: {},
+          geometry: { type: "Point", coordinates: [seekerAnchor[1], seekerAnchor[0]] },
+        }),
+        metadata: {
+          measuringAnchor: { lat: seekerAnchor[0], lng: seekerAnchor[1] },
+          measuringRegionInputJson: JSON.stringify({
+            gameArea,
+            measuringSubject: fixture.measuringSubject,
+            measuringLocationCategory: fixture.measuringLocationCategory,
+            measuringDistanceMeters: fixture.measuringDistanceMeters,
+            measuringTargetPoint: fixture.measuringTargetPoint,
+            measuringPlaces: fixture.measuringPlaces,
+            measuringCoastSegments: fixture.measuringCoastSegments,
+            measuringSeaLevelNearRegion: fixture.measuringSeaLevelNearRegion,
+            usesAllPlacesInArea: fixture.usesAllPlacesInArea,
+          }),
+        },
+      },
+    });
+
+    expect(computeHiderTruthReply(pending, zoneCenter, gameArea)?.replyId).toBe("closer");
   });
 
   it("measuring compares distance to a point target", () => {

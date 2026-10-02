@@ -1,16 +1,19 @@
 import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
-import turfDestination from "@turf/destination";
 import { point as turfPoint } from "@turf/helpers";
 import type { Feature, LineString, MultiPolygon, Polygon } from "geojson";
 import { describe, expect, it } from "vitest";
 import type { GameArea } from "../../map/annotations";
+import { buildCoastlineEliminationRegion } from "./eliminationRegions";
+import { coastlineSeekerRayProbeBeyondRadius } from "./coastlineSeekerRayProbe";
 import {
   assertCoastlineNearRegionOracle,
   buildCoastlineNearRegionDistanceThreshold,
   coastlineNearRegionOracleEpsilonMeters,
 } from "./coastlineNearRegion";
+import { loadXwxzRegionInputFixture } from "./loadXwxzRegionInput";
 import {
   buildCoastlineNearRegionUnionBufferForTests,
+  clearCoastlineNearRegionCacheForTests,
   nearestPointToCoastlines,
   prepareMeasuringLineSegments,
 } from "./nearRegions";
@@ -125,25 +128,69 @@ describe("coastline near region oracle", () => {
     const nearest = nearestPointToCoastlines(seekerLatLng, prepared.segments, prepared);
     expect(nearest).not.toBeNull();
 
-    const seeker = turfPoint([seekerLatLng[1], seekerLatLng[0]]);
-    const coastPoint = turfPoint([nearest!.point[1], nearest!.point[0]]);
-    const fromLng = coastPoint.geometry.coordinates[0]!;
-    const fromLat = coastPoint.geometry.coordinates[1]!;
-    const toLng = seeker.geometry.coordinates[0]!;
-    const toLat = seeker.geometry.coordinates[1]!;
-    const dLng = ((toLng - fromLng) * Math.PI) / 180;
-    const fromLatRad = (fromLat * Math.PI) / 180;
-    const toLatRad = (toLat * Math.PI) / 180;
-    const y = Math.sin(dLng) * Math.cos(toLatRad);
-    const x =
-      Math.cos(fromLatRad) * Math.sin(toLatRad) -
-      Math.sin(fromLatRad) * Math.cos(toLatRad) * Math.cos(dLng);
-    const towardSeekerBearing = ((Math.atan2(y, x) * 180) / Math.PI + 360) % 360;
-
-    const probe = turfDestination(coastPoint, (fixtureRadiusMeters + 500) / 1000, towardSeekerBearing, {
-      units: "kilometers",
-    });
+    const probe = coastlineSeekerRayProbeBeyondRadius(
+      nearest!.point,
+      seekerLatLng,
+      fixtureRadiusMeters,
+      500,
+    );
 
     expect(booleanPointInPolygon(probe, distanceThresholdRegion!)).toBe(false);
+  });
+
+  it("XWXZ regression: oracle, further band, seeker-ray probe", async () => {
+    clearCoastlineNearRegionCacheForTests();
+    const fixture = loadXwxzRegionInputFixture();
+    const { gameArea, measuringCoastSegments, measuringDistanceMeters, zoneCenter, seekerAnchor } =
+      fixture;
+    const prepared = prepareMeasuringLineSegments(measuringCoastSegments, gameArea);
+    const divisions = 24;
+    const epsilon = coastlineNearRegionOracleEpsilonMeters(gameArea, divisions);
+
+    const nearRegion = await buildCoastlineNearRegionDistanceThreshold(
+      measuringCoastSegments,
+      measuringDistanceMeters,
+      gameArea,
+      { divisions },
+    );
+    expect(nearRegion).not.toBeNull();
+    assertCoastlineNearRegionOracle(
+      nearRegion!,
+      prepared,
+      measuringDistanceMeters,
+      gameArea,
+      epsilon,
+      divisions,
+    );
+
+    const bufferRegion = await buildCoastlineNearRegionUnionBufferForTests(
+      measuringCoastSegments,
+      measuringDistanceMeters,
+      gameArea,
+    );
+    expect(bufferRegion).not.toBeNull();
+
+    const furtherElimination = await buildCoastlineEliminationRegion(
+      measuringCoastSegments,
+      measuringDistanceMeters,
+      gameArea,
+      "further",
+      nearRegion,
+    );
+    expect(furtherElimination).not.toBeNull();
+    expect(
+      booleanPointInPolygon(turfPoint([zoneCenter[1], zoneCenter[0]]), furtherElimination!),
+    ).toBe(true);
+
+    const nearestSeeker = nearestPointToCoastlines(seekerAnchor, prepared.segments, prepared);
+    expect(nearestSeeker).not.toBeNull();
+    const inflatedProbe = coastlineSeekerRayProbeBeyondRadius(
+      nearestSeeker!.point,
+      seekerAnchor,
+      measuringDistanceMeters,
+      500,
+    );
+    expect(booleanPointInPolygon(inflatedProbe, nearRegion!)).toBe(false);
+    expect(booleanPointInPolygon(inflatedProbe, bufferRegion!)).toBe(true);
   });
 });
