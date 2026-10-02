@@ -97,7 +97,7 @@ export type HiderQuestionTruthContextInput = Omit<
   "askOrigin" | "originInsideZone"
 >;
 
-/** Per-question truth reference (in-zone → hiding place; map pin stays zone/freeze). */
+/** Per-question truth reference (zone center until end-game freeze). */
 export function resolvePendingQuestionTruthReference(
   question: PendingQuestionRecord,
   context: HiderQuestionTruthContextInput,
@@ -111,10 +111,6 @@ export function resolvePendingQuestionTruthReference(
 export function resolveHiderTruthReference({
   hiderUid,
   zoneCenter,
-  hidingPlace = null,
-  askOrigin = null,
-  originInsideZone,
-  zoneRadiusMeters = null,
   session,
 }: ResolveHiderTruthReferenceInput): HiderTruthReference {
   if (isEndGameActive(session)) {
@@ -127,13 +123,6 @@ export function resolveHiderTruthReference({
     }
 
     return { point: null, mode: "unavailable" };
-  }
-
-  const insideZone =
-    originInsideZone ?? isAskOriginInsideHidingZone(askOrigin, zoneCenter, zoneRadiusMeters);
-
-  if (insideZone && isUsablePoint(hidingPlace)) {
-    return { point: hidingPlace, mode: "hidingPlace" };
   }
 
   if (isUsablePoint(zoneCenter)) {

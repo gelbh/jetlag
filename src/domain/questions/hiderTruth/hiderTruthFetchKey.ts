@@ -1,10 +1,7 @@
 import type { LatLngTuple } from "../../geometry/gameArea/geometry";
-import { isEndGameActive } from "../../map/annotations";
 import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
 import {
-  askOriginFromPendingQuestion,
   type HiderQuestionTruthContextInput,
-  isAskOriginInsideHidingZone,
   isMapPinTruthTool,
 } from "./resolveHiderTruthReference";
 
@@ -66,14 +63,10 @@ function relevantSeekerPlacesKey(
 }
 
 export function openQuestionNeedsHidingPlace(
-  question: PendingQuestionRecord,
-  context: HiderQuestionTruthContextInput,
+  _question: PendingQuestionRecord,
+  _context: HiderQuestionTruthContextInput,
 ): boolean {
-  if (isEndGameActive(context.session)) {
-    return false;
-  }
-  const askOrigin = askOriginFromPendingQuestion(question, context.seekerPlacesByUid);
-  return isAskOriginInsideHidingZone(askOrigin, context.zoneCenter, context.zoneRadiusMeters);
+  return false;
 }
 
 export function buildHiderTruthFetchKey(

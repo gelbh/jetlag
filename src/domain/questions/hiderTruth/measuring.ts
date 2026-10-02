@@ -13,6 +13,22 @@ import {
   truthUnavailable,
 } from "./shared";
 
+/** Equal nearest-coast distances within this band resolve to Closer. */
+export const COASTLINE_TRUTH_DISTANCE_TIE_EPSILON_METERS = 1;
+
+function closerFurtherFromCoastDistances(
+  stationDistanceMeters: number,
+  seekerDistanceMeters: number,
+): "closer" | "further" {
+  if (
+    stationDistanceMeters <=
+    seekerDistanceMeters + COASTLINE_TRUTH_DISTANCE_TIE_EPSILON_METERS
+  ) {
+    return "closer";
+  }
+  return "further";
+}
+
 export function truthMeasuringSync(
   pending: PendingQuestionRecord,
   stationCenter: LatLngTuple,
@@ -60,8 +76,10 @@ export function truthMeasuringSync(
       return truthUnavailable();
     }
 
-    const replyId =
-      coastNearestStation.distanceMeters < coastNearestSeeker.distanceMeters ? "closer" : "further";
+    const replyId = closerFurtherFromCoastDistances(
+      coastNearestStation.distanceMeters,
+      coastNearestSeeker.distanceMeters,
+    );
     return resultFromReplyId(pending, replyId);
   }
 

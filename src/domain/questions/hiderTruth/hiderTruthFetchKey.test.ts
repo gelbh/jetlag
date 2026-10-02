@@ -58,7 +58,7 @@ describe("buildHiderTruthFetchKey", () => {
     expect(a).toBe(b);
   });
 
-  it("includes hidingPlace when open radar ask is inside the zone", () => {
+  it("omits hidingPlace when open radar ask is inside the zone", () => {
     const open = [
       radarPending({
         placement: {
@@ -76,7 +76,8 @@ describe("buildHiderTruthFetchKey", () => {
     ];
     const a = buildHiderTruthFetchKey(open, baseContext({ hidingPlace: [51.5, -0.12] }));
     const b = buildHiderTruthFetchKey(open, baseContext({ hidingPlace: [51.501, -0.121] }));
-    expect(a).not.toBe(b);
+    expect(a).toBe(b);
+    expect(a).toContain("place:omitted");
   });
 
   it("omits hidingPlace during end game even when ask is inside the zone", () => {
@@ -114,7 +115,7 @@ describe("buildHiderTruthFetchKey", () => {
     expect(a).toContain("place:omitted");
   });
 
-  it("still includes hidingPlace slot when in-zone but place is null (first fix)", () => {
+  it("omits hidingPlace when in-zone even if live GPS differs", () => {
     const open = [
       radarPending({
         placement: {
@@ -132,7 +133,7 @@ describe("buildHiderTruthFetchKey", () => {
     ];
     const without = buildHiderTruthFetchKey(open, baseContext({ hidingPlace: null }));
     const withPlace = buildHiderTruthFetchKey(open, baseContext({ hidingPlace: [51.5, -0.12] }));
-    expect(without).not.toBe(withPlace);
+    expect(without).toBe(withPlace);
   });
 
   it("changes when open question placement geometry changes under the same id", () => {
