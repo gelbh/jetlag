@@ -17,20 +17,16 @@ export function useToolPanelChrome(
   const [userMinimized, setUserMinimized] = useState(false);
 
   useEffect(() => {
-    /* eslint-disable react-hooks/set-state-in-effect -- reset panel chrome when the active tool changes */
     setMapPanning(false);
     setUserMinimized(false);
-    /* eslint-enable react-hooks/set-state-in-effect */
   }, [activeTool]);
 
   useEffect(() => {
-    /* eslint-disable react-hooks/set-state-in-effect -- phase snap; user expand sticks until snap flips */
     if (shouldAutoPeek) {
       setUserMinimized(true);
     } else {
       setUserMinimized(false);
     }
-    /* eslint-enable react-hooks/set-state-in-effect */
   }, [shouldAutoPeek]);
 
   const handleMapPanStart = useCallback(() => {

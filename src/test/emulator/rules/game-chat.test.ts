@@ -1,23 +1,13 @@
-import {
-  assertFails,
-  assertSucceeds,
-} from "@firebase/rules-unit-testing";
+import { assertFails, assertSucceeds } from "@firebase/rules-unit-testing";
 import { describe, it } from "vitest";
-import {
-  bindRulesTestEnv,
-  sessionPayload,
-} from "./helpers";
+import { bindRulesTestEnv, sessionPayload } from "./helpers";
 
 describe("firestore.rules — game chat & questions", () => {
   const rules = bindRulesTestEnv();
 
   it("allows hiders to post game system messages", async () => {
     const host = rules.testEnv.authenticatedContext("host-1");
-    await host
-      .firestore()
-      .collection("sessions")
-      .doc("session-1")
-      .set(sessionPayload("host-1"));
+    await host.firestore().collection("sessions").doc("session-1").set(sessionPayload("host-1"));
 
     const hider = rules.testEnv.authenticatedContext("hider-1");
     await host
@@ -46,7 +36,6 @@ describe("firestore.rules — game chat & questions", () => {
         }),
     );
   });
-
 
   it("allows seeker walking thermometer flow and hider answer after pending", async () => {
     const host = rules.testEnv.authenticatedContext("host-1");
@@ -879,5 +868,4 @@ describe("firestore.rules — game chat & questions", () => {
         .update({ selectedReply: "cannot_answer", status: "answered" }),
     );
   });
-
 });

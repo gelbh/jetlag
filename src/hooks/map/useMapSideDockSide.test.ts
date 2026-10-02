@@ -1,12 +1,12 @@
-import { describe, expect, it, beforeEach, afterEach } from "vitest";
-import { renderHook, act } from "@testing-library/react";
+import { act, renderHook } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { separateFromPeerRect } from "@/components/map/chrome/MapDraggableFixedStack";
 import {
   MAP_CHROME_DOCKS_STORAGE_KEY,
   MAP_SIDE_DOCK_STORAGE_KEY,
   resolveStackedTops,
 } from "./mapChromeDockPlacement";
 import { useMapSideDockSide } from "./useMapSideDockSide";
-import { separateFromPeerRect } from "@/components/map/chrome/MapDraggableFixedStack";
 
 describe("resolveStackedTops", () => {
   it("parks the mover above and pushes the peer down when needed", () => {

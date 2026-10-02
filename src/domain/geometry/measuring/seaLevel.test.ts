@@ -1,16 +1,16 @@
-import { describe, expect, it } from "vitest";
 import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
 import { point as turfPoint } from "@turf/helpers";
+import { describe, expect, it } from "vitest";
 import type { GameArea } from "../../map/annotations";
 import {
   buildSeaLevelEliminationRegion,
   buildSeaLevelNearRegionFromSamples,
   buildSeaLevelNearRegionWithLocalRefine,
   distanceFromSeaLevelMeters,
+  type ElevationSampleCell,
   resolveGameAreaCellDivisions,
   sampleGameAreaCells,
   subdivideElevationSampleCell,
-  type ElevationSampleCell,
 } from "./seaLevel";
 
 const sampleGameArea: GameArea = {
@@ -77,8 +77,7 @@ describe("sea level measuring", () => {
 
     expect(edgeCase).toBeNull();
     expect(
-      nearRegion?.geometry.type === "Polygon" ||
-        nearRegion?.geometry.type === "MultiPolygon",
+      nearRegion?.geometry.type === "Polygon" || nearRegion?.geometry.type === "MultiPolygon",
     ).toBe(true);
   });
 
@@ -111,10 +110,9 @@ describe("sea level measuring", () => {
     );
 
     expect(edgeCase).toBe("highest");
-    expect(
-      region?.geometry.type === "Polygon" ||
-        region?.geometry.type === "MultiPolygon",
-    ).toBe(true);
+    expect(region?.geometry.type === "Polygon" || region?.geometry.type === "MultiPolygon").toBe(
+      true,
+    );
   });
 
   it("local refine restores a truthful hider that coarse center misclassifies", () => {
@@ -136,14 +134,9 @@ describe("sea level measuring", () => {
     // Pick a border cell and refine: three subcells near sea level, one far.
     const borderCell = cells[0]!;
     const refineCells = subdivideElevationSampleCell(borderCell, 2);
-    const refineParentKeys = refineCells.map(
-      () => `${borderCell.row}:${borderCell.col}`,
-    );
+    const refineParentKeys = refineCells.map(() => `${borderCell.row}:${borderCell.col}`);
     const refineElevations = [40, 40, 40, 180];
-    const hiderPoint: [number, number] = [
-      refineCells[0]!.point[0],
-      refineCells[0]!.point[1],
-    ];
+    const hiderPoint: [number, number] = [refineCells[0]!.point[0], refineCells[0]!.point[1]];
 
     const refined = buildSeaLevelNearRegionWithLocalRefine({
       cells,
@@ -156,11 +149,7 @@ describe("sea level measuring", () => {
     });
     expect(refined.region).not.toBeNull();
 
-    const elimination = buildSeaLevelEliminationRegion(
-      refined.region!,
-      sampleGameArea,
-      "closer",
-    );
+    const elimination = buildSeaLevelEliminationRegion(refined.region!, sampleGameArea, "closer");
     expect(elimination).not.toBeNull();
 
     const hiderPt = turfPoint([hiderPoint[1], hiderPoint[0]]);

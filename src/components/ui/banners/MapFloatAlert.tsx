@@ -15,12 +15,7 @@ export function MapFloatAlert({
   "aria-live": ariaLive = "polite",
 }: MapFloatAlertProps) {
   return (
-    <MapFloatSurface
-      tone="default"
-      role={role}
-      aria-live={ariaLive}
-      className={className}
-    >
+    <MapFloatSurface tone="default" role={role} aria-live={ariaLive} className={className}>
       {children}
     </MapFloatSurface>
   );

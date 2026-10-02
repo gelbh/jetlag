@@ -1,11 +1,11 @@
-import { fireEvent, screen, waitFor } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MantineProvider } from "@mantine/core";
+import { fireEvent, screen, waitFor } from "@testing-library/react";
 import type { ReactElement } from "react";
-import { ShareCode } from "./ShareCode";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { copyToClipboard } from "@/platform/copyToClipboard";
 import { renderWithRouter } from "@/test/renderWithRouter";
 import { jetlagTheme } from "@/theme/theme";
-import { copyToClipboard } from "@/platform/copyToClipboard";
+import { ShareCode } from "./ShareCode";
 
 vi.mock("../../../platform/copyToClipboard", () => ({
   copyToClipboard: vi.fn(),
@@ -75,9 +75,7 @@ describe("ShareCode", () => {
     fireEvent.click(screen.getByRole("button", { name: "Invite friends" }));
 
     await waitFor(() => {
-      expect(copyToClipboard).toHaveBeenCalledWith(
-        "https://play.example.com/join?code=WXYZ",
-      );
+      expect(copyToClipboard).toHaveBeenCalledWith("https://play.example.com/join?code=WXYZ");
     });
     expect(screen.getByText("Join link copied.")).toBeInTheDocument();
   });
@@ -93,16 +91,12 @@ describe("ShareCode", () => {
     fireEvent.click(screen.getByRole("button", { name: "Copy join link" }));
 
     await waitFor(() => {
-      expect(copyToClipboard).toHaveBeenCalledWith(
-        "https://jetlag.gelbhart.dev/join?code=WXYZ",
-      );
+      expect(copyToClipboard).toHaveBeenCalledWith("https://jetlag.gelbhart.dev/join?code=WXYZ");
     });
   });
 
   it("does not fall back to clipboard when native share is cancelled", async () => {
-    const share = vi
-      .fn()
-      .mockRejectedValue(new DOMException("Share canceled", "AbortError"));
+    const share = vi.fn().mockRejectedValue(new DOMException("Share canceled", "AbortError"));
     vi.stubGlobal("navigator", { ...navigator, share });
 
     renderShareCode(<ShareCode code="WXYZ" remote />);
@@ -115,18 +109,14 @@ describe("ShareCode", () => {
   it("copies the join URL when native share fails", async () => {
     const share = vi
       .fn()
-      .mockRejectedValue(
-        new DOMException("Share unavailable", "NotAllowedError"),
-      );
+      .mockRejectedValue(new DOMException("Share unavailable", "NotAllowedError"));
     vi.stubGlobal("navigator", { ...navigator, share });
 
     renderShareCode(<ShareCode code="WXYZ" remote />);
     fireEvent.click(screen.getByRole("button", { name: "Invite friends" }));
 
     await waitFor(() => {
-      expect(copyToClipboard).toHaveBeenCalledWith(
-        "https://play.example.com/join?code=WXYZ",
-      );
+      expect(copyToClipboard).toHaveBeenCalledWith("https://play.example.com/join?code=WXYZ");
     });
   });
 
@@ -144,14 +134,8 @@ describe("ShareCode", () => {
 
   it("hides invite actions for local-only sessions", () => {
     renderShareCode(<ShareCode code="WXYZ" remote={false} />);
-    expect(
-      screen.queryByRole("button", { name: "Invite friends" }),
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByRole("button", { name: "Copy join link" }),
-    ).not.toBeInTheDocument();
-    expect(
-      screen.getByText(/Local-only session for solo play/),
-    ).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Invite friends" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Copy join link" })).not.toBeInTheDocument();
+    expect(screen.getByText(/Local-only session for solo play/)).toBeInTheDocument();
   });
 });

@@ -1,10 +1,10 @@
 import { act, renderHook } from "@testing-library/react";
 import { beforeAll, describe, expect, it, vi } from "vitest";
-import { buildMapDraftOverlays } from "./useMapDraftOverlays";
-import { usePlacementMapFocus } from "./usePlacementMapFocus";
 import type { MapDraftOverlay } from "../../domain/map/mapDraftOverlay";
 import { placementCameraDraftFromOverlaySources } from "../../domain/map/placementCamera";
 import { DUBLIN_CITY_GAME_AREA } from "../../test/fixtures/dublinGameArea";
+import { buildMapDraftOverlays } from "./useMapDraftOverlays";
+import { usePlacementMapFocus } from "./usePlacementMapFocus";
 
 const defaultBounds: [[number, number], [number, number]] = [
   [53.34, -6.27],
@@ -276,13 +276,15 @@ describe("usePlacementMapFocus", () => {
         walkCurrentPoint: [53.351, -6.261],
       },
     });
-    const walkOverlaysB = (await buildMapDraftOverlays({
-      ...walkSourcesBase,
-      thermometer: {
-        ...walkSourcesBase.thermometer,
-        walkCurrentPoint: [53.351, -6.261],
-      },
-    })).overlays;
+    const walkOverlaysB = (
+      await buildMapDraftOverlays({
+        ...walkSourcesBase,
+        thermometer: {
+          ...walkSourcesBase.thermometer,
+          walkCurrentPoint: [53.351, -6.261],
+        },
+      })
+    ).overlays;
 
     rerender({ overlays: walkOverlaysB, draft: walkDraftB });
     expect(result.current.placementRecenterToken).toBe(1);
@@ -298,13 +300,15 @@ describe("usePlacementMapFocus", () => {
         walkCurrentPoint: [53.352, -6.262],
       },
     });
-    const walkOverlaysC = (await buildMapDraftOverlays({
-      ...walkSourcesBase,
-      thermometer: {
-        ...walkSourcesBase.thermometer,
-        walkCurrentPoint: [53.352, -6.262],
-      },
-    })).overlays;
+    const walkOverlaysC = (
+      await buildMapDraftOverlays({
+        ...walkSourcesBase,
+        thermometer: {
+          ...walkSourcesBase.thermometer,
+          walkCurrentPoint: [53.352, -6.262],
+        },
+      })
+    ).overlays;
 
     rerender({ overlays: walkOverlaysC, draft: walkDraftC });
     expect(result.current.placementRecenterToken).toBe(2);

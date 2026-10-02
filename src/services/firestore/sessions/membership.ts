@@ -1,41 +1,28 @@
-import {
-  deleteDoc,
-  doc,
-  getDoc,
-  serverTimestamp,
-  writeBatch,
-} from "firebase/firestore";
-import type {
-  GameArea,
-  SessionRecord,
-  SessionTier,
-} from "@/domain/map/annotations";
-import { hidingZoneRadiusMeters, type GameSize } from "@/domain/session/size/gameSize";
-import type { SessionRulesPatch } from "@/domain/session/tools/advancedSessionSettings";
-import {
-  resolvePlayerRole,
-  type PlayerRole,
-} from "@/domain/session/players/playerRole";
-import { APP_VERSION } from "@/domain/device/changelog";
+import { deleteDoc, doc, getDoc, serverTimestamp, writeBatch } from "firebase/firestore";
 import { clientEnvUsesFirebaseEmulator } from "@/config/env";
-import { getFirestoreDb } from "@/services/core/firebase/firebase";
-import { buildSessionDocument } from "../serialization/serializeSession";
-import { generateSessionCode } from "@/services/session/sessionCodes";
+import { APP_VERSION } from "@/domain/device/changelog";
+import type { GameArea, SessionRecord, SessionTier } from "@/domain/map/annotations";
+import { type PlayerRole, resolvePlayerRole } from "@/domain/session/players/playerRole";
 import { buildRoleGatesForHost } from "@/domain/session/players/roleGates";
+import { type GameSize, hidingZoneRadiusMeters } from "@/domain/session/size/gameSize";
+import type { SessionRulesPatch } from "@/domain/session/tools/advancedSessionSettings";
+import { getFirestoreDb } from "@/services/core/firebase/firebase";
 import { initSessionRoleGates } from "@/services/session/rolePasscodeLifecycle";
-import {
-  sessionsCollection,
-  sessionCodeDoc,
-  rollbackCreatedRemoteSession,
-  isFirestorePermissionDenied,
-  withPermissionDeniedAuthRetry,
-} from "./shared";
+import { generateSessionCode } from "@/services/session/sessionCodes";
+import { buildSessionDocument } from "../serialization/serializeSession";
 import {
   getRemoteSessionByIdFromServer,
-  lookupRemoteSessionByCode,
   joinRemoteSessionByCode,
+  lookupRemoteSessionByCode,
   mapJoinFailureToError,
 } from "./join";
+import {
+  isFirestorePermissionDenied,
+  rollbackCreatedRemoteSession,
+  sessionCodeDoc,
+  sessionsCollection,
+  withPermissionDeniedAuthRetry,
+} from "./shared";
 
 export type EnsureRemoteSessionMembershipOptions = {
   returningMemberUid?: string | null;
@@ -99,10 +86,7 @@ export async function ensureRemoteSessionWriteAccess(
   try {
     return await ensureRemoteSessionMembership(session, uid, role, options);
   } catch (error) {
-    if (
-      error instanceof Error &&
-      error.message === "That session no longer exists."
-    ) {
+    if (error instanceof Error && error.message === "That session no longer exists.") {
       throw new Error("No access to that session.", { cause: error });
     }
 
@@ -207,13 +191,11 @@ export async function createRemoteSession(
     await initSessionRoleGates(session.id);
   } catch (error) {
     await rollbackCreatedRemoteSession(session.id, code);
-    throw new Error(
-      "Couldn't set up role codes for this session. Try creating again.",
-      { cause: error },
-    );
+    throw new Error("Couldn't set up role codes for this session. Try creating again.", {
+      cause: error,
+    });
   }
   session.roleGates = buildRoleGatesForHost(hostUid, hostRole);
 
   return session;
 }
-

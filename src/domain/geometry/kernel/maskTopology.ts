@@ -1,6 +1,6 @@
 import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
 import { point as turfPoint } from "@turf/helpers";
-import { normalizeBoundingBox, type BoundingBox } from "./boundingBox";
+import { type BoundingBox, normalizeBoundingBox } from "./boundingBox";
 import type { GameAreaGeometry, PolygonFeature } from "./types";
 
 export function sampleGridPoints(
@@ -20,9 +20,7 @@ export function sampleGridPoints(
 
   for (let lngIndex = 0; lngIndex <= steps; lngIndex += 1) {
     for (let latIndex = 0; latIndex <= steps; latIndex += 1) {
-      points.push(
-        turfPoint([west + lngIndex * lngStep, south + latIndex * latStep]),
-      );
+      points.push(turfPoint([west + lngIndex * lngStep, south + latIndex * latStep]));
     }
   }
 
@@ -69,9 +67,7 @@ export function bboxFromGameArea(gameArea: GameAreaGeometry): {
 }
 
 /** Raw AABB (no zero fallback) plus min-span normalize; matches `gameAreaToBoundingBox`. */
-export function normalizedBboxFromGameArea(
-  gameArea: GameAreaGeometry,
-): BoundingBox {
+export function normalizedBboxFromGameArea(gameArea: GameAreaGeometry): BoundingBox {
   let west = Infinity;
   let east = -Infinity;
   let south = Infinity;
@@ -113,19 +109,10 @@ export function maskTopologyMatches(
     return false;
   }
 
-  const points = sampleGridPoints(
-    bbox.west,
-    bbox.east,
-    bbox.south,
-    bbox.north,
-    steps,
-  );
+  const points = sampleGridPoints(bbox.west, bbox.east, bbox.south, bbox.north, steps);
 
   for (const sample of points) {
-    if (
-      booleanPointInPolygon(sample, candidate) !==
-      booleanPointInPolygon(sample, baseline)
-    ) {
+    if (booleanPointInPolygon(sample, candidate) !== booleanPointInPolygon(sample, baseline)) {
       return false;
     }
   }

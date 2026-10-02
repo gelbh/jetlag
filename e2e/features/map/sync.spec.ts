@@ -1,21 +1,20 @@
 import {
-  test,
-  expect,
   countMapAnnotations,
   createHostSession,
   createMultiplayerContexts,
+  expect,
   joinAsRole,
   placePin,
   resetBoardForEveryone,
   resetSessionProgress,
   sessionElapsedLocator,
   startSessionTimer,
+  test,
 } from "../../fixtures";
 
 test.describe("cross-device sync", () => {
   test("guest sees host pin annotations", async ({ browser }) => {
-    const { hostPage, guestPage, cleanup } =
-      await createMultiplayerContexts(browser);
+    const { hostPage, guestPage, cleanup } = await createMultiplayerContexts(browser);
 
     await test.step("host places shared pin", async () => {
       const { code } = await createHostSession(hostPage);
@@ -31,8 +30,7 @@ test.describe("cross-device sync", () => {
   });
 
   test("offline pin queues and syncs when back online", async ({ browser }) => {
-    const { hostPage, guestPage, hostContext, cleanup } =
-      await createMultiplayerContexts(browser);
+    const { hostPage, guestPage, hostContext, cleanup } = await createMultiplayerContexts(browser);
 
     await test.step("queue pin while offline", async () => {
       const { code } = await createHostSession(hostPage);
@@ -50,8 +48,7 @@ test.describe("cross-device sync", () => {
   });
 
   test("timer state syncs to guest", async ({ browser }) => {
-    const { hostPage, guestPage, cleanup } =
-      await createMultiplayerContexts(browser);
+    const { hostPage, guestPage, cleanup } = await createMultiplayerContexts(browser);
 
     await test.step("host starts session timer", async () => {
       const { code } = await createHostSession(hostPage);
@@ -67,8 +64,7 @@ test.describe("cross-device sync", () => {
   });
 
   test("host reset board clears guest annotations", async ({ browser }) => {
-    const { hostPage, guestPage, cleanup } =
-      await createMultiplayerContexts(browser);
+    const { hostPage, guestPage, cleanup } = await createMultiplayerContexts(browser);
 
     const { code } = await createHostSession(hostPage);
     await joinAsRole(guestPage, code, "seeker");
@@ -78,9 +74,7 @@ test.describe("cross-device sync", () => {
     await placePin(hostPage, "Temporary");
 
     await expect(async () => {
-      expect(await countMapAnnotations(guestPage)).toBeGreaterThan(
-        baselineCount,
-      );
+      expect(await countMapAnnotations(guestPage)).toBeGreaterThan(baselineCount);
     }).toPass({ timeout: 30_000 });
 
     const afterPinCount = await countMapAnnotations(guestPage);
@@ -99,8 +93,7 @@ test.describe("cross-device sync", () => {
   test("host full session reset clears guest progress", async ({ browser }) => {
     test.setTimeout(90_000);
 
-    const { hostPage, guestPage, cleanup } =
-      await createMultiplayerContexts(browser);
+    const { hostPage, guestPage, cleanup } = await createMultiplayerContexts(browser);
 
     const { code } = await createHostSession(hostPage);
     await joinAsRole(guestPage, code, "seeker");
@@ -114,9 +107,7 @@ test.describe("cross-device sync", () => {
         timeout: 15_000,
       });
       await expect(async () => {
-        expect(await countMapAnnotations(guestPage)).toBeGreaterThan(
-          baselineCount,
-        );
+        expect(await countMapAnnotations(guestPage)).toBeGreaterThan(baselineCount);
       }).toPass({ timeout: 30_000 });
     });
 
@@ -134,9 +125,7 @@ test.describe("cross-device sync", () => {
     // Scope to the status island so short tokens do not match chat/copy elsewhere.
     // Features project is mobile (no desktop "Map status" region).
     await expect(
-      guestPage
-        .getByTestId("tool-status-block-mantine")
-        .getByText(/^(Waiting|Wait)$/),
+      guestPage.getByTestId("tool-status-block-mantine").getByText(/^(Waiting|Wait)$/),
     ).toBeVisible({
       timeout: 45_000,
     });

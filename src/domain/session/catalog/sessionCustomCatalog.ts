@@ -1,29 +1,23 @@
+import type { MeasuringPlace } from "../../geo/types";
+import { distanceBetweenLatLngPoints } from "../../geometry/gameArea/distance";
+import type { LatLngTuple } from "../../geometry/gameArea/geometry";
+import type { TentaclePoi } from "../../map/annotations";
 import type {
   MatchingCategoryDefinition,
   MatchingCategoryId,
 } from "../../questions/matchingQuestions";
 import {
-  MATCHING_CATEGORIES,
   customCategoryToMatchingDefinition,
+  MATCHING_CATEGORIES,
   matchingUsesExpandedFeatureSearch,
   resolveMatchingCategory,
 } from "../../questions/matchingQuestions";
-import type {
-  MeasuringCatalogOption,
-  MeasuringFromKind,
-} from "../../questions/measuringQuestions";
+import type { MeasuringCatalogOption, MeasuringFromKind } from "../../questions/measuringQuestions";
 import { MEASURING_CATALOG } from "../../questions/measuringQuestions";
 import type { TentacleExtendedCategoryId } from "../../questions/tentacleQuestions";
 import type { SessionRulesInput } from "../rules";
-import type {
-  SessionCustomCategory,
-  SessionCustomLocationPin,
-} from "./sessionCustomContent";
+import type { SessionCustomCategory, SessionCustomLocationPin } from "./sessionCustomContent";
 import { isSessionCustomCategoryId } from "./sessionCustomContent";
-import type { MeasuringPlace } from "../../geo/types";
-import type { TentaclePoi } from "../../map/annotations";
-import type { LatLngTuple } from "../../geometry/gameArea/geometry";
-import { distanceBetweenLatLngPoints } from "../../geometry/gameArea/distance";
 
 export function customCategoryToMeasuringOption(
   category: SessionCustomCategory,
@@ -50,10 +44,7 @@ export { resolveMatchingCategory };
 export function matchingCategoriesForSession(
   customCategories: readonly SessionCustomCategory[] = [],
 ): MatchingCategoryDefinition[] {
-  return [
-    ...MATCHING_CATEGORIES,
-    ...customCategories.map(customCategoryToMatchingDefinition),
-  ];
+  return [...MATCHING_CATEGORIES, ...customCategories.map(customCategoryToMatchingDefinition)];
 }
 
 export function measuringCatalogForSession(
@@ -107,30 +98,17 @@ export function tentacleOverpassSelectorsForCategory(
   customCategories: readonly SessionCustomCategory[] = [],
 ): readonly string[] {
   if (categoryId === "metro_line") {
-    return [
-      "[route=light_rail]",
-      "[route=subway]",
-      "[route=tram]",
-      "[route=monorail]",
-    ];
+    return ["[route=light_rail]", "[route=subway]", "[route=tram]", "[route=monorail]"];
   }
 
   if (isSessionCustomCategoryId(categoryId)) {
-    return (
-      customCategories.find((item) => item.id === categoryId)
-        ?.overpassSelectors ?? []
-    );
+    return customCategories.find((item) => item.id === categoryId)?.overpassSelectors ?? [];
   }
 
-  return matchingOverpassSelectorsForCategory(
-    categoryId as MatchingCategoryId,
-    customCategories,
-  );
+  return matchingOverpassSelectorsForCategory(categoryId as MatchingCategoryId, customCategories);
 }
 
-export function manualPinAsMeasuringPlace(
-  pin: SessionCustomLocationPin,
-): MeasuringPlace {
+export function manualPinAsMeasuringPlace(pin: SessionCustomLocationPin): MeasuringPlace {
   return {
     id: pin.id,
     name: pin.name,
@@ -163,9 +141,7 @@ export function manualPinsWithinRadius(
     }));
 }
 
-export function sessionCustomContentFromRules(
-  session: SessionRulesInput,
-): {
+export function sessionCustomContentFromRules(session: SessionRulesInput): {
   customMatchingAreas: SessionRulesInput["customMatchingAreas"];
   customCategories: readonly SessionCustomCategory[];
   customLocationPins: readonly SessionCustomLocationPin[];

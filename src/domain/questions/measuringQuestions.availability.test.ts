@@ -82,17 +82,13 @@ describe("measuring availability", () => {
         },
       },
     } as unknown as PendingQuestionRecord;
-    expect(usedMeasuringFromKindsForSession([], [pending])).toEqual(
-      new Set(["zoo"]),
-    );
+    expect(usedMeasuringFromKindsForSession([], [pending])).toEqual(new Set(["zoo"]));
 
     const cancelled = {
       ...pending,
       status: "cancelled",
       answer: "closer",
     } as unknown as PendingQuestionRecord;
-    expect(usedMeasuringFromKindsForSession([], [cancelled])).toEqual(
-      new Set(["zoo"]),
-    );
+    expect(usedMeasuringFromKindsForSession([], [cancelled])).toEqual(new Set(["zoo"]));
   });
 });

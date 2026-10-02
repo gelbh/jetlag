@@ -1,7 +1,7 @@
 import type { Feature, LineString, Point, Polygon } from "geojson";
 import type { AnnotationRecord } from "@/domain/map/annotations";
-import { parseFirestoreDocument } from "../zodConverter";
 import { annotationDocumentSchema } from "../schemas/firestoreDocuments";
+import { parseFirestoreDocument } from "../zodConverter";
 import { assertNoNestedArrays, stripUndefinedValues } from "./shared";
 
 type AnnotationGeometry = Feature<Point | LineString | Polygon>;
@@ -73,9 +73,7 @@ export function deserializeAnnotationFromFirestore(
   };
 }
 
-function deserializeAnnotationGeometry(
-  data: Record<string, unknown>,
-): AnnotationGeometry | null {
+function deserializeAnnotationGeometry(data: Record<string, unknown>): AnnotationGeometry | null {
   if (typeof data.geometryJson === "string") {
     return JSON.parse(data.geometryJson) as AnnotationGeometry;
   }
@@ -87,9 +85,7 @@ function deserializeAnnotationGeometry(
   return null;
 }
 
-export function buildAnnotationDocument(
-  annotation: AnnotationRecord,
-): Record<string, unknown> {
+export function buildAnnotationDocument(annotation: AnnotationRecord): Record<string, unknown> {
   const payload = serializeAnnotationForFirestore(annotation);
   assertNoNestedArrays(payload);
   return payload;

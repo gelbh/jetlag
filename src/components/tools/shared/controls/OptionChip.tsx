@@ -8,12 +8,7 @@ interface OptionChipProps {
   disabled?: boolean;
 }
 
-export function OptionChip({
-  selected,
-  onClick,
-  children,
-  disabled = false,
-}: OptionChipProps) {
+export function OptionChip({ selected, onClick, children, disabled = false }: OptionChipProps) {
   return (
     <ChoiceButton selected={selected} onClick={onClick} disabled={disabled}>
       {children}

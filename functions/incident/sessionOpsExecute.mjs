@@ -1,8 +1,5 @@
 import { randomUUID } from "node:crypto";
-import {
-  applyIncidentMitigationHandler,
-  INCIDENT_NO_SESSION,
-} from "./applyIncidentMitigation.mjs";
+import { applyIncidentMitigationHandler, INCIDENT_NO_SESSION } from "./applyIncidentMitigation.mjs";
 import { INCIDENT_NOT_FOUND } from "./postIncidentMessage.mjs";
 import { SESSION_OPS_MITIGATION_TOOLS } from "./sessionOpsTools.mjs";
 import {
@@ -24,8 +21,7 @@ export {
   SESSION_OPS_UNKNOWN_TOOL,
 };
 
-export const SESSION_OPS_ANNOTATION_NOT_FOUND =
-  "SESSION_OPS_ANNOTATION_NOT_FOUND";
+export const SESSION_OPS_ANNOTATION_NOT_FOUND = "SESSION_OPS_ANNOTATION_NOT_FOUND";
 export const SESSION_OPS_QUESTION_NOT_FOUND = "SESSION_OPS_QUESTION_NOT_FOUND";
 
 /**
@@ -47,10 +43,8 @@ export async function executeSessionOpsTool(db, input, deps = {}) {
   const nowIso = now().toISOString();
   const auditId = generateId();
 
-  const incidentId =
-    typeof input?.incidentId === "string" ? input.incidentId : "";
-  const sessionId =
-    typeof input?.sessionId === "string" ? input.sessionId : "";
+  const incidentId = typeof input?.incidentId === "string" ? input.incidentId : "";
+  const sessionId = typeof input?.sessionId === "string" ? input.sessionId : "";
   const actorUid = typeof input?.actorUid === "string" ? input.actorUid : "";
   const tool = input?.tool;
 
@@ -94,8 +88,7 @@ export async function executeSessionOpsTool(db, input, deps = {}) {
   }
 
   const incident = incidentSnap.data() ?? {};
-  const incidentSessionId =
-    typeof incident.sessionId === "string" ? incident.sessionId : "";
+  const incidentSessionId = typeof incident.sessionId === "string" ? incident.sessionId : "";
   if (!incidentSessionId) {
     await writeAudit({
       status: "rejected",
@@ -159,8 +152,7 @@ export async function executeSessionOpsTool(db, input, deps = {}) {
       auditId,
     };
   } catch (error) {
-    const code =
-      error instanceof Error ? error.message : "SESSION_OPS_EXECUTE_FAILED";
+    const code = error instanceof Error ? error.message : "SESSION_OPS_EXECUTE_FAILED";
     await writeAudit({
       status: "rejected",
       code,
@@ -172,8 +164,7 @@ export async function executeSessionOpsTool(db, input, deps = {}) {
 
 async function runTool(db, { incidentId, sessionId, actorUid, toolId, args, deps }) {
   if (SESSION_OPS_MITIGATION_TOOLS.has(toolId)) {
-    const applyMitigation =
-      deps.applyMitigation ?? applyIncidentMitigationHandler;
+    const applyMitigation = deps.applyMitigation ?? applyIncidentMitigationHandler;
     try {
       return await applyMitigation(
         db,
@@ -239,17 +230,8 @@ export async function cancelPendingQuestionInSession(db, sessionId, questionId) 
   await ref.update({ status: "cancelled" });
 }
 
-export async function softDeleteAnnotationInSession(
-  db,
-  sessionId,
-  annotationId,
-  nowIso,
-) {
-  const ref = db
-    .collection("sessions")
-    .doc(sessionId)
-    .collection("annotations")
-    .doc(annotationId);
+export async function softDeleteAnnotationInSession(db, sessionId, annotationId, nowIso) {
+  const ref = db.collection("sessions").doc(sessionId).collection("annotations").doc(annotationId);
   const snap = await ref.get();
   if (!snap.exists) {
     throw new Error(SESSION_OPS_ANNOTATION_NOT_FOUND);

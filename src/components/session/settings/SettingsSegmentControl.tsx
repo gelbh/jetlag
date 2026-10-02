@@ -14,10 +14,7 @@ interface SettingsSegmentControlProps {
 }
 
 /** Equal-width Survey segment track for settings (tablist ↔ tabpanel). */
-export function SettingsSegmentControl({
-  value,
-  onChange,
-}: SettingsSegmentControlProps) {
+export function SettingsSegmentControl({ value, onChange }: SettingsSegmentControlProps) {
   return (
     <Box
       role="tablist"
@@ -53,14 +50,11 @@ export function SettingsSegmentControl({
               fontWeight: selected ? 590 : 500,
               letterSpacing: "-0.01em",
               cursor: "pointer",
-              color: selected
-                ? "var(--color-field-ink)"
-                : "var(--color-field-ink-muted)",
+              color: selected ? "var(--color-field-ink)" : "var(--color-field-ink-muted)",
               backgroundColor: selected
                 ? "oklch(from var(--color-flag) l c h / 0.22)"
                 : "transparent",
-              transition:
-                "background-color 140ms ease, color 140ms ease, transform 80ms ease",
+              transition: "background-color 140ms ease, color 140ms ease, transform 80ms ease",
             }}
           >
             {segment.label}

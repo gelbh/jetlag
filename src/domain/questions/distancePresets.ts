@@ -6,10 +6,7 @@ import {
   isPresetOptionAvailable,
   presetMetersForMiles,
 } from "../session/tools/toolSessionOptions";
-import {
-  isCountablePendingQuestionStatus,
-  isUsedOptionPendingQuestion,
-} from "./questionRules";
+import { isCountablePendingQuestionStatus, isUsedOptionPendingQuestion } from "./questionRules";
 
 export {
   matchPresetMeters,
@@ -19,12 +16,8 @@ export {
 
 export interface PresetCatalogHelpersConfig<Option extends string | number> {
   toolType: string;
-  readOptionFromAnnotation: (
-    annotation: AnnotationRecord,
-  ) => Option | null | undefined;
-  readOptionFromPending?: (
-    question: PendingQuestionRecord,
-  ) => Option | null | undefined;
+  readOptionFromAnnotation: (annotation: AnnotationRecord) => Option | null | undefined;
+  readOptionFromPending?: (question: PendingQuestionRecord) => Option | null | undefined;
   /** Sticky used-set membership (pending ∪ cancelled-with-answer). */
   isPendingQuestionUsed?: (question: PendingQuestionRecord) => boolean;
   /** Cost / useCount membership (open countable statuses only). */
@@ -44,10 +37,7 @@ export interface PresetCatalogHelpers<Option extends string | number> {
     presets: readonly Option[],
     usedOptions: ReadonlySet<Option>,
   ) => Option | null;
-  isOptionAvailable: (
-    option: Option | null,
-    usedOptions: ReadonlySet<Option>,
-  ) => boolean;
+  isOptionAvailable: (option: Option | null, usedOptions: ReadonlySet<Option>) => boolean;
   optionUseCountFromAnnotations: (
     annotations: readonly AnnotationRecord[],
     option: Option,
@@ -68,19 +58,14 @@ export function buildPresetCatalogHelpers<Option extends string | number>(
     readOptionFromAnnotation,
     readOptionFromPending,
     isPendingQuestionUsed = isUsedOptionPendingQuestion,
-    isPendingQuestionCountable = (question) =>
-      isCountablePendingQuestionStatus(question.status),
+    isPendingQuestionCountable = (question) => isCountablePendingQuestionStatus(question.status),
   } = config;
 
   function usedOptionsFromAnnotations(
     annotations: readonly AnnotationRecord[],
     exceptAnnotationId?: string,
   ): Set<Option> {
-    return collectUsedAnnotationOptions(
-      annotations,
-      readOptionFromAnnotation,
-      exceptAnnotationId,
-    );
+    return collectUsedAnnotationOptions(annotations, readOptionFromAnnotation, exceptAnnotationId);
   }
 
   function usedOptionsFromPending(
@@ -118,10 +103,7 @@ export function buildPresetCatalogHelpers<Option extends string | number>(
     return firstUnusedPreset(presets, usedOptions);
   }
 
-  function isOptionAvailable(
-    option: Option | null,
-    usedOptions: ReadonlySet<Option>,
-  ): boolean {
+  function isOptionAvailable(option: Option | null, usedOptions: ReadonlySet<Option>): boolean {
     return isPresetOptionAvailable(option, usedOptions);
   }
 
@@ -188,10 +170,5 @@ export function presetMilesForDistanceMeters<Miles extends number>(
   milesToMeters: (miles: number) => number,
   toleranceMeters = 1,
 ): Miles | null {
-  return presetMetersForMiles(
-    distanceMeters,
-    presetsMiles,
-    milesToMeters,
-    toleranceMeters,
-  );
+  return presetMetersForMiles(distanceMeters, presetsMiles, milesToMeters, toleranceMeters);
 }

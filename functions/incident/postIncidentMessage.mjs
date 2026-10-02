@@ -61,13 +61,16 @@ export async function postIncidentMessageHandler(db, input, deps = {}) {
 
   const nowIso = now().toISOString();
   const messageId = generateId();
-  await incidentRef.collection("messages").doc(messageId).set({
-    sender: isAdmin ? "admin" : "player",
-    senderUid: uid,
-    kind: "chat",
-    text,
-    createdAt: nowIso,
-  });
+  await incidentRef
+    .collection("messages")
+    .doc(messageId)
+    .set({
+      sender: isAdmin ? "admin" : "player",
+      senderUid: uid,
+      kind: "chat",
+      text,
+      createdAt: nowIso,
+    });
 
   const update = { updatedAt: nowIso };
   if (incident.status === "open") {

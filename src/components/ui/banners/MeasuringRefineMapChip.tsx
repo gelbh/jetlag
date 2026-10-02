@@ -1,6 +1,6 @@
 import { jetlagBrand } from "@/theme/theme";
-import { MapFloatSurface } from "./MapFloatSurface";
 import { HudBanner } from "../hud/HudBanner";
+import { MapFloatSurface } from "./MapFloatSurface";
 
 const DEFAULT_TITLE = "Refining measure";
 const DEFAULT_BODY = "Adding detail to the shaded area…";

@@ -6,20 +6,18 @@ import {
 } from "../../domain/preloadRequest/preloadRequestTypes";
 import { usePermanentAuthUser } from "../../hooks/billing/usePermanentAuthUser";
 import {
-  createPreloadRequest,
   type CreatePreloadRequestResult,
+  createPreloadRequest,
 } from "../../services/preloadRequest/preloadRequestApi";
 
 export interface RequestPreloadSectionProps {
   /** Built at submit time so the editor does not stringify gameArea on every render. */
   getSnapshot: () => PreloadPresetSnapshot | null;
   /** Injected for tests; production uses {@link createPreloadRequest}. */
-  createPreloadRequestFn?: (
-    input: {
-      presetSnapshot: PreloadPresetSnapshot;
-      note?: string | null;
-    },
-  ) => Promise<CreatePreloadRequestResult>;
+  createPreloadRequestFn?: (input: {
+    presetSnapshot: PreloadPresetSnapshot;
+    note?: string | null;
+  }) => Promise<CreatePreloadRequestResult>;
 }
 
 export function RequestPreloadSection({
@@ -33,8 +31,7 @@ export function RequestPreloadSection({
   const [successId, setSuccessId] = useState<string | null>(null);
   const inFlightRef = useRef(false);
 
-  const canSubmit =
-    authReady && isPermanent && !submitting && successId == null;
+  const canSubmit = authReady && isPermanent && !submitting && successId == null;
 
   async function handleSubmit() {
     if (!canSubmit || inFlightRef.current) {
@@ -81,9 +78,8 @@ export function RequestPreloadSection({
           Request a custom location pack
         </p>
         <p className="text-xs leading-snug text-ink-muted">
-          This play area does not overlap a supported city pack. You can request
-          a custom pack review — requests are reviewed manually and are not
-          instant.
+          This play area does not overlap a supported city pack. You can request a custom pack
+          review — requests are reviewed manually and are not instant.
         </p>
       </div>
 

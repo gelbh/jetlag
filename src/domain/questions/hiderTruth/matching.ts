@@ -1,5 +1,3 @@
-import type { GameArea } from "../../map/annotations";
-import type { LatLngTuple } from "../../geometry/gameArea/geometry";
 import { classifyAdminDivisionAtPoint } from "@/services/geo/overpass/adminDivisionBoundaries";
 import { classifyLandmassAtPoint } from "@/services/geo/overpass/landmassFeatures";
 import {
@@ -7,20 +5,22 @@ import {
   loadGtfsBundle,
   nearestGtfsStopInGameArea,
 } from "@/services/transit/gtfsRouteGraph";
-import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
 import {
   deserializeMatchingFeatures,
   matchingFeaturesToAdminDivisions,
   matchingFeaturesToBoundedRegions,
   nearestMatchingFeatureIdForPoint,
 } from "../../geo/matchingAdapters";
+import type { LatLngTuple } from "../../geometry/gameArea/geometry";
+import type { GameArea } from "../../map/annotations";
+import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
 import type { MatchingCategoryId } from "../matchingQuestions";
 import { getMatchingCategory } from "../matchingQuestions";
 import {
+  type HiderTruthResult,
   parseMatchingAnchor,
   resultFromReplyId,
   truthUnavailable,
-  type HiderTruthResult,
 } from "./shared";
 
 function matchingFeatureIdAtStation(
@@ -82,9 +82,7 @@ export function truthMatching(
   }
 
   if (typeof seekerFeatureId !== "string") {
-    return allowsNull
-      ? resultFromReplyId(pending, "null")
-      : resultFromReplyId(pending, "no");
+    return allowsNull ? resultFromReplyId(pending, "null") : resultFromReplyId(pending, "no");
   }
 
   const replyId = stationFeatureId === seekerFeatureId ? "yes" : "no";
@@ -111,18 +109,8 @@ async function truthMatchingTransitLineWithGtfs(
     return null;
   }
 
-  const seekerStop = nearestGtfsStopInGameArea(
-    seekerPoint,
-    bundle,
-    gameArea,
-    metroId,
-  );
-  const hiderStop = nearestGtfsStopInGameArea(
-    stationCenter,
-    bundle,
-    gameArea,
-    metroId,
-  );
+  const seekerStop = nearestGtfsStopInGameArea(seekerPoint, bundle, gameArea, metroId);
+  const hiderStop = nearestGtfsStopInGameArea(stationCenter, bundle, gameArea, metroId);
 
   if (!seekerStop || !hiderStop) {
     if (allowsNull) {
@@ -133,19 +121,11 @@ async function truthMatchingTransitLineWithGtfs(
 
   if (typeof seekerFeatureId === "string") {
     const legacyMatch = seekerFeatureId === hiderStop.id;
-    const graphMatch = gtfsStopsShareStationOrRoute(
-      seekerStop.id,
-      hiderStop.id,
-      bundle,
-    );
+    const graphMatch = gtfsStopsShareStationOrRoute(seekerStop.id, hiderStop.id, bundle);
     return resultFromReplyId(pending, legacyMatch || graphMatch ? "yes" : "no");
   }
 
-  const graphMatch = gtfsStopsShareStationOrRoute(
-    seekerStop.id,
-    hiderStop.id,
-    bundle,
-  );
+  const graphMatch = gtfsStopsShareStationOrRoute(seekerStop.id, hiderStop.id, bundle);
   return resultFromReplyId(pending, graphMatch ? "yes" : "no");
 }
 

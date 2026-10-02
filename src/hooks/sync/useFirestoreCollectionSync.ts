@@ -3,11 +3,7 @@ import { LOCAL_SESSION_ID } from "../../domain/map/annotations";
 import { isFirebaseConfigured } from "../../services/core/firebase/firebase";
 
 function isRemoteSession(sessionId: string | undefined): sessionId is string {
-  return (
-    Boolean(sessionId) &&
-    isFirebaseConfigured() &&
-    sessionId !== LOCAL_SESSION_ID
-  );
+  return Boolean(sessionId) && isFirebaseConfigured() && sessionId !== LOCAL_SESSION_ID;
 }
 
 type CollectionSubscriber<T> = (
@@ -24,10 +20,7 @@ type CollectionSubscriber<T> = (
 export function useFirestoreCollectionSync<T>(
   sessionId: string | undefined,
   subscribe: CollectionSubscriber<T>,
-  {
-    enabled = true,
-    onSyncError,
-  }: { enabled?: boolean; onSyncError?: () => void } = {},
+  { enabled = true, onSyncError }: { enabled?: boolean; onSyncError?: () => void } = {},
 ): T[] {
   const [items, setItems] = useState<T[]>([]);
   const onSyncErrorRef = useRef(onSyncError);
@@ -41,18 +34,14 @@ export function useFirestoreCollectionSync<T>(
       return;
     }
 
-    const unsubscribe = subscribe(
-      sessionId,
-      setItems,
-      () => {
-        const handler = onSyncErrorRef.current;
-        if (handler) {
-          handler();
-        } else {
-          setItems([]);
-        }
-      },
-    );
+    const unsubscribe = subscribe(sessionId, setItems, () => {
+      const handler = onSyncErrorRef.current;
+      if (handler) {
+        handler();
+      } else {
+        setItems([]);
+      }
+    });
 
     return () => {
       unsubscribe();

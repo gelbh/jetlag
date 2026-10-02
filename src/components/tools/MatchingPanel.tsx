@@ -1,44 +1,41 @@
 import { type RefObject } from "react";
+import { satelliteBasemapPoiUnavailableMessage } from "@/services/geo/maplibre/previewBasemapPois";
+import { type DistanceUnit, formatDistance } from "../../domain/map/distance";
 import {
-  isMatchingCategoryEnabled,
   isMatchingCategoryAvailable,
+  isMatchingCategoryEnabled,
   MATCHING_CATEGORIES,
   MATCHING_CATEGORY_GROUPS,
-  matchingQuestionFor,
   type MatchingAnswer,
   type MatchingCategoryDefinition,
   type MatchingCategoryId,
+  matchingQuestionFor,
 } from "../../domain/questions";
 import { resolveMatchingCategory } from "../../domain/session/catalog/sessionCustomCatalog";
+import { useToolWizard } from "../../hooks/wizard/useToolWizard";
 import {
   matchingEmptyPlayAreaMessage,
   matchingFeatureCountLabel,
 } from "../../services/geo/matching";
-import { formatDistance, type DistanceUnit } from "../../domain/map/distance";
 import { GroupedSelectField } from "../ui/forms/GroupedSelectField";
-import { yesNoAnswerOptions } from "./shared/answers/binaryAnswerOptions";
 import { BinaryAnswerPicker } from "./shared/answers/BinaryAnswerPicker";
+import { yesNoAnswerOptions } from "./shared/answers/binaryAnswerOptions";
 import { AnchorControls } from "./shared/controls/AnchorControls";
 import { CoordinateCopyButton } from "./shared/controls/CoordinateCopyButton";
+import { QuestionPromptBlock } from "./shared/controls/QuestionPromptBlock";
+import { SendToHidersButton } from "./shared/controls/SendToHidersButton";
+import { ToolPanelShell } from "./shared/panels/ToolPanelShell";
+import { ToolSection } from "./shared/panels/ToolSection";
+import { QuestionTruthReferenceHint } from "./shared/QuestionTruthReferenceHint";
+import { CatalogExhaustedMessage } from "./shared/readout/CatalogExhaustedMessage";
 import { ErrorWithRetry } from "./shared/readout/ErrorWithRetry";
 import { LoadingReadout } from "./shared/readout/LoadingReadout";
 import { ProvisionalBadge } from "./shared/readout/ProvisionalBadge";
-import { CatalogExhaustedMessage } from "./shared/readout/CatalogExhaustedMessage";
-import { QuestionPromptBlock } from "./shared/controls/QuestionPromptBlock";
 import { ResolvedReadout } from "./shared/readout/ResolvedReadout";
-import { satelliteBasemapPoiUnavailableMessage } from "@/services/geo/maplibre/previewBasemapPois";
-import { ToolPanelShell } from "./shared/panels/ToolPanelShell";
-import { ToolSection } from "./shared/panels/ToolSection";
-import { SendToHidersButton } from "./shared/controls/SendToHidersButton";
+import { MATCHING_WIZARD } from "./shared/wizard/toolStepUtils";
+import { toolWizardPhasePrimaryNav, toolWizardSwipeNext } from "./shared/wizard/toolWizardGuards";
 import { WizardPanelFrame } from "./shared/wizard/WizardPanelFrame";
 import { WizardSwipeSurface } from "./shared/wizard/WizardSwipeSurface";
-import { MATCHING_WIZARD } from "./shared/wizard/toolStepUtils";
-import {
-  toolWizardPhasePrimaryNav,
-  toolWizardSwipeNext,
-} from "./shared/wizard/toolWizardGuards";
-import { useToolWizard } from "../../hooks/wizard/useToolWizard";
-import { QuestionTruthReferenceHint } from "./shared/QuestionTruthReferenceHint";
 
 /** Flat matching wizard fields bag for MatchingPanel (W4-D peel). */
 export type MatchingPanelModel = {
@@ -132,9 +129,7 @@ export function MatchingPanel({ model }: MatchingPanelProps) {
   } = useToolWizard(MATCHING_WIZARD, {
     wizardStepRef,
     awaitHiderAnswer,
-    toolCommitLabel: awaitHiderAnswer
-      ? `Send to hiders (${costLabel})`
-      : "Add match question",
+    toolCommitLabel: awaitHiderAnswer ? `Send to hiders (${costLabel})` : "Add match question",
     isSubmitting,
   });
   const configurePhaseIndex = MATCHING_WIZARD.phases.indexOf("configure");
@@ -165,8 +160,7 @@ export function MatchingPanel({ model }: MatchingPanelProps) {
       resolveMatchingCategory(categoryId))
     : null;
   const usesLandmassMatching = category?.resolver === "landmass";
-  const categoryAvailable =
-    categoryId !== null && isMatchingCategoryAvailable(categoryId);
+  const categoryAvailable = categoryId !== null && isMatchingCategoryAvailable(categoryId);
   const resolveComplete = nullAnswer || nearestFeatureName !== null;
   const canCommit =
     hasSeekerPoint &&
@@ -175,12 +169,9 @@ export function MatchingPanel({ model }: MatchingPanelProps) {
     categoryAvailable &&
     !loading &&
     !isSubmitting;
-  const catalogForSelect = catalogCategories.filter((item) =>
-    isMatchingCategoryEnabled(item.id),
-  );
+  const catalogForSelect = catalogCategories.filter((item) => isMatchingCategoryEnabled(item.id));
   const availableCategories = catalogForSelect.filter(
-    (item) =>
-      !usedCategoryIds.has(item.id) && !unavailableCategoryIds.has(item.id),
+    (item) => !usedCategoryIds.has(item.id) && !unavailableCategoryIds.has(item.id),
   );
 
   const loadingMessage = loading
@@ -194,15 +185,11 @@ export function MatchingPanel({ model }: MatchingPanelProps) {
     : null;
 
   const loadingIndicator =
-    loadingMessage !== null ? (
-      <LoadingReadout>{loadingMessage}</LoadingReadout>
-    ) : null;
+    loadingMessage !== null ? <LoadingReadout>{loadingMessage}</LoadingReadout> : null;
 
   const satelliteHint =
     satelliteBasemap && !usesContainmentMatching ? (
-      <p className="text-xs text-ink-dim">
-        {satelliteBasemapPoiUnavailableMessage()}
-      </p>
+      <p className="text-xs text-ink-dim">{satelliteBasemapPoiUnavailableMessage()}</p>
     ) : null;
 
   const featureCountLabel =
@@ -217,9 +204,7 @@ export function MatchingPanel({ model }: MatchingPanelProps) {
 
   const nearestFeatureSummary = nearestFeatureName
     ? `${nearestFeatureName}${
-        !usesContainmentMatching &&
-        distanceMeters !== null &&
-        !nearestProvisional
+        !usesContainmentMatching && distanceMeters !== null && !nearestProvisional
           ? ` · ${formatDistance(distanceMeters, distanceUnit)} from you`
           : ""
       }${nearestOutsidePlayArea ? " · outside play area" : ""}`
@@ -227,21 +212,13 @@ export function MatchingPanel({ model }: MatchingPanelProps) {
 
   const canGoNext =
     (phaseId === "place" && hasSeekerPoint && !loading) ||
-    (phaseId === "configure" &&
-      stepId === "category" &&
-      categoryAvailable &&
-      categoryChosen) ||
-    (phaseId === "configure" &&
-      stepId === "resolve" &&
-      resolveComplete &&
-      !loading);
+    (phaseId === "configure" && stepId === "category" && categoryAvailable && categoryChosen) ||
+    (phaseId === "configure" && stepId === "resolve" && resolveComplete && !loading);
   const canSwipeNext = toolWizardSwipeNext(canGoNext, phaseIndex, phaseCount);
 
   const matchingAnswerStepReadout =
     phaseId === "ask" && !nullAnswer && nearestFeatureSummary ? (
-      <ResolvedReadout caption={featureCountLabel}>
-        {nearestFeatureSummary}
-      </ResolvedReadout>
+      <ResolvedReadout caption={featureCountLabel}>{nearestFeatureSummary}</ResolvedReadout>
     ) : null;
 
   const matchingAnswerStepActions =
@@ -254,9 +231,7 @@ export function MatchingPanel({ model }: MatchingPanelProps) {
           label=""
         />
         {resolveComplete && !nullAnswer ? (
-          <p className="text-xs text-ink-dim">
-            The map shows the shaded area for your choice.
-          </p>
+          <p className="text-xs text-ink-dim">The map shows the shaded area for your choice.</p>
         ) : null}
       </>
     ) : null;
@@ -297,39 +272,23 @@ export function MatchingPanel({ model }: MatchingPanelProps) {
                   value: cat.id,
                   label: cat.label,
                   disabled:
-                    (usedCategoryIds.has(cat.id) ||
-                      unavailableCategoryIds.has(cat.id)) &&
+                    (usedCategoryIds.has(cat.id) || unavailableCategoryIds.has(cat.id)) &&
                     cat.id !== categoryId,
                 })),
             })).filter((group) => group.options.length > 0)}
-            onChange={(value) =>
-              handleCategoryChange(value as MatchingCategoryId)
-            }
+            onChange={(value) => handleCategoryChange(value as MatchingCategoryId)}
           />
           {question ? (
-            <QuestionPromptBlock
-              prompt={question.prompt}
-              ruleSummary={question.ruleSummary}
-            />
+            <QuestionPromptBlock prompt={question.prompt} ruleSummary={question.ruleSummary} />
           ) : null}
         </ToolSection>
       ) : null}
 
       {phaseId === "place" ? (
         <ToolSection first compact status="active">
-          <AnchorControls
-            gpsLoading={gpsLoading}
-            hasAnchor={hasSeekerPoint}
-            onUseGps={onUseGps}
-          />
-          {hasSeekerPoint &&
-          typeof anchorLat === "number" &&
-          typeof anchorLng === "number" ? (
-            <CoordinateCopyButton
-              lat={anchorLat}
-              lng={anchorLng}
-              className="w-full"
-            />
+          <AnchorControls gpsLoading={gpsLoading} hasAnchor={hasSeekerPoint} onUseGps={onUseGps} />
+          {hasSeekerPoint && typeof anchorLat === "number" && typeof anchorLng === "number" ? (
+            <CoordinateCopyButton lat={anchorLat} lng={anchorLng} className="w-full" />
           ) : null}
           {satelliteHint}
           {loading && hasSeekerPoint ? loadingIndicator : null}
@@ -381,8 +340,7 @@ export function MatchingPanel({ model }: MatchingPanelProps) {
       stepper={
         <Stepper
           nav={{
-            canGoBack:
-              phaseIndex > 0 || (phaseId === "configure" && configureIndex > 0),
+            canGoBack: phaseIndex > 0 || (phaseId === "configure" && configureIndex > 0),
             onBack: goBack,
             ...toolWizardPhasePrimaryNav({
               phaseId,
@@ -398,9 +356,7 @@ export function MatchingPanel({ model }: MatchingPanelProps) {
       <WizardPanelFrame
         scrollable
         stickyFooter={answerFooter}
-        trailing={
-          error ? <ErrorWithRetry error={error} onRetry={onRetry} /> : null
-        }
+        trailing={error ? <ErrorWithRetry error={error} onRetry={onRetry} /> : null}
       >
         <WizardSwipeSurface
           stepId={stepId}

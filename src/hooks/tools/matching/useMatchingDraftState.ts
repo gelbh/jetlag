@@ -1,47 +1,31 @@
 import { useCallback, useState } from "react";
 import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
-import type {
-  MatchingAnswer,
-  MatchingCategoryId,
-} from "@/domain/questions";
+import type { MatchingAnswer, MatchingCategoryId } from "@/domain/questions";
 import type { MatchingFeature } from "@/services/geo/matching";
 
 export function useMatchingDraftState() {
-  const [matchingSeekerPoint, setMatchingSeekerPoint] =
-    useState<LatLngTuple | null>(null);
-  const [matchingCategoryId, setMatchingCategoryId] =
-    useState<MatchingCategoryId | null>(null);
+  const [matchingSeekerPoint, setMatchingSeekerPoint] = useState<LatLngTuple | null>(null);
+  const [matchingCategoryId, setMatchingCategoryId] = useState<MatchingCategoryId | null>(null);
   const [matchingCategoryChosen, setMatchingCategoryChosen] = useState(false);
-  const [matchingFeatures, setMatchingFeatures] = useState<MatchingFeature[]>(
-    [],
-  );
-  const [matchingNearestFeatureId, setMatchingNearestFeatureId] = useState<
-    string | null
-  >(null);
-  const [matchingNearestFeatureName, setMatchingNearestFeatureName] = useState<
-    string | null
-  >(null);
+  const [matchingFeatures, setMatchingFeatures] = useState<MatchingFeature[]>([]);
+  const [matchingNearestFeatureId, setMatchingNearestFeatureId] = useState<string | null>(null);
+  const [matchingNearestFeatureName, setMatchingNearestFeatureName] = useState<string | null>(null);
   const [matchingNearestFeaturePoint, setMatchingNearestFeaturePoint] =
     useState<LatLngTuple | null>(null);
-  const [matchingDistanceMeters, setMatchingDistanceMeters] = useState<
+  const [matchingDistanceMeters, setMatchingDistanceMeters] = useState<number | null>(null);
+  const [matchingFeatureCount, setMatchingFeatureCount] = useState<number | null>(null);
+  const [matchingInPlayAreaFeatureCount, setMatchingInPlayAreaFeatureCount] = useState<
     number | null
   >(null);
-  const [matchingFeatureCount, setMatchingFeatureCount] = useState<
-    number | null
-  >(null);
-  const [matchingInPlayAreaFeatureCount, setMatchingInPlayAreaFeatureCount] =
-    useState<number | null>(null);
-  const [matchingNearestOutsidePlayArea, setMatchingNearestOutsidePlayArea] =
-    useState(false);
+  const [matchingNearestOutsidePlayArea, setMatchingNearestOutsidePlayArea] = useState(false);
   const [matchingNullAnswer, setMatchingNullAnswer] = useState(false);
-  const [matchingAnswer, setMatchingAnswer] = useState<MatchingAnswer | null>(
-    null,
-  );
+  const [matchingAnswer, setMatchingAnswer] = useState<MatchingAnswer | null>(null);
   const [matchingLoading, setMatchingLoading] = useState(false);
   const [matchingError, setMatchingError] = useState<string | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
-  const [unavailableMatchingCategories, setUnavailableMatchingCategories] =
-    useState<Map<MatchingCategoryId, string>>(() => new Map());
+  const [unavailableMatchingCategories, setUnavailableMatchingCategories] = useState<
+    Map<MatchingCategoryId, string>
+  >(() => new Map());
   const [catalogNotice, setCatalogNotice] = useState<string | null>(null);
 
   const clearResolvedFields = useCallback(() => {

@@ -1,5 +1,5 @@
-import test from "node:test";
 import assert from "node:assert/strict";
+import test from "node:test";
 import {
   SESSION_OPS_HOST_CONFIRM_REQUIRED,
   SESSION_OPS_INVALID_ARGS,

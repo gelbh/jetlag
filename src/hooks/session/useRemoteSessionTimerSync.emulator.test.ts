@@ -1,15 +1,17 @@
 // @vitest-environment jsdom
 import { renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
-import { updateSessionTimer } from "../../services/firestore/firestoreAnnotations";
+import { INITIAL_TIMER_STATE, startTimer } from "../../domain/session/timer/timer";
+import {
+  createRemoteSession,
+  updateSessionTimer,
+} from "../../services/firestore/firestoreAnnotations";
+import { useSessionStore } from "../../state/sessionStore";
 import {
   connectEmulatorsForTests,
   teardownEmulatorsForTests,
 } from "../../test/emulator/connectEmulators";
 import { DUBLIN_CITY_GAME_AREA } from "../../test/fixtures/dublinGameArea";
-import { createRemoteSession } from "../../services/firestore/firestoreAnnotations";
-import { startTimer, INITIAL_TIMER_STATE } from "../../domain/session/timer/timer";
-import { useSessionStore } from "../../state/sessionStore";
 import { useRemoteSessionTimerSync } from "./useRemoteSessionTimerSync";
 import { useSessionSync } from "./useSessionSync";
 
@@ -37,21 +39,15 @@ describe("useRemoteSessionTimerSync emulator", () => {
     useSessionStore.getState().setSession(session, testUid);
     renderHook(() => useSessionSync());
 
-    const host = renderHook(() =>
-      useRemoteSessionTimerSync(session.id, true),
-    );
-    const guest = renderHook(() =>
-      useRemoteSessionTimerSync(session.id, false),
-    );
+    const host = renderHook(() => useRemoteSessionTimerSync(session.id, true));
+    const guest = renderHook(() => useRemoteSessionTimerSync(session.id, false));
 
     const running = startTimer(INITIAL_TIMER_STATE);
     host.result.current.onControl?.(running);
     await updateSessionTimer(session.id, running);
 
     await waitFor(() => {
-      expect(guest.result.current.remoteState?.runningSince).toBe(
-        running.runningSince,
-      );
+      expect(guest.result.current.remoteState?.runningSince).toBe(running.runningSince);
     });
   });
 });

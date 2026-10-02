@@ -1,6 +1,6 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
 import type { Map as MapLibreMap } from "maplibre-gl";
+import { describe, expect, it, vi } from "vitest";
 import type { PoiCandidate } from "@/domain/geo/poiCandidate";
 import { usePoiCandidates } from "./usePoiCandidates";
 

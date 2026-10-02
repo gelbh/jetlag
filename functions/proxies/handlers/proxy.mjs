@@ -1,22 +1,16 @@
 import { onRequest } from "firebase-functions/v2/https";
-import { withSentryHttpHandler, getSentryDsnSecret } from "../../lib/sentry.mjs";
-import { createProxyRouter } from "../proxyRouter.mjs";
-import { overpassHandler } from "./overpass.mjs";
-import {
-  transitlandHandler,
-  transitlandApiKeySecret,
-} from "./transitland.mjs";
-import {
-  vehiclesHandler,
-  ctaBusTrackerApiKeySecret,
-  ctaTrainTrackerApiKeySecret,
-} from "./vehicles.mjs";
-import {
-  OVERPASS_L2_PARAMS,
-  OVERPASS_L2_SECRETS,
-} from "../overpassL2Secrets.mjs";
+import { getSentryDsnSecret, withSentryHttpHandler } from "../../lib/sentry.mjs";
+import { OVERPASS_L2_PARAMS, OVERPASS_L2_SECRETS } from "../overpassL2Secrets.mjs";
 import { OVERPASS_PAID_SECRETS } from "../overpassPaidEnv.mjs";
 import { PROXY_TIMEOUT_SECONDS_CEILING } from "../overpassProxyCore.mjs";
+import { createProxyRouter } from "../proxyRouter.mjs";
+import { overpassHandler } from "./overpass.mjs";
+import { transitlandApiKeySecret, transitlandHandler } from "./transitland.mjs";
+import {
+  ctaBusTrackerApiKeySecret,
+  ctaTrainTrackerApiKeySecret,
+  vehiclesHandler,
+} from "./vehicles.mjs";
 
 const sentryDsnSecret = getSentryDsnSecret();
 

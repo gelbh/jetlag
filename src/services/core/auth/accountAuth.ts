@@ -1,24 +1,24 @@
 import { FirebaseError } from "firebase/app";
 import {
+  type AuthCredential,
+  type AuthProvider,
   EmailAuthProvider,
   GoogleAuthProvider,
-  OAuthProvider,
   getRedirectResult,
   isSignInWithEmailLink,
   linkWithCredential,
   linkWithPopup,
   linkWithRedirect,
+  OAuthProvider,
   sendSignInLinkToEmail,
   signInWithCredential,
   signInWithEmailLink,
   signInWithPopup,
   signInWithRedirect,
   signOut,
-  type AuthCredential,
-  type AuthProvider,
   type User,
 } from "firebase/auth";
-import { getFirebaseAuth, ensureAnonymousUser } from "../firebase/firebase";
+import { ensureAnonymousUser, getFirebaseAuth } from "../firebase/firebase";
 
 export const EMAIL_LINK_STORAGE_KEY = "premiumEmailForSignIn";
 /** Set before linkWithRedirect / signInWithRedirect; cleared on redirect recovery. */
@@ -82,28 +82,18 @@ function mapAuthError(error: unknown, fallback: string): Error {
 }
 
 function isCredentialAlreadyInUse(error: unknown): boolean {
-  return (
-    error instanceof FirebaseError &&
-    error.code === "auth/credential-already-in-use"
-  );
+  return error instanceof FirebaseError && error.code === "auth/credential-already-in-use";
 }
 
 function isPopupBlockedError(error: unknown): boolean {
-  return (
-    error instanceof FirebaseError && error.code === "auth/popup-blocked"
-  );
+  return error instanceof FirebaseError && error.code === "auth/popup-blocked";
 }
 
 function isFirebasePendingPromiseAssertion(error: unknown): boolean {
-  return (
-    error instanceof Error &&
-    error.message.includes("Pending promise was never set")
-  );
+  return error instanceof Error && error.message.includes("Pending promise was never set");
 }
 
-async function linkCredentialOrSignInExisting(
-  credential: AuthCredential,
-): Promise<User> {
+async function linkCredentialOrSignInExisting(credential: AuthCredential): Promise<User> {
   const auth = getFirebaseAuth();
 
   if (!auth.currentUser?.isAnonymous) {
@@ -124,9 +114,7 @@ async function linkCredentialOrSignInExisting(
   }
 }
 
-async function linkWithPopupOrSignInExisting(
-  provider: AuthProvider,
-): Promise<User> {
+async function linkWithPopupOrSignInExisting(provider: AuthProvider): Promise<User> {
   const auth = getFirebaseAuth();
 
   if (!auth.currentUser?.isAnonymous) {
@@ -153,9 +141,7 @@ async function linkWithPopupOrSignInExisting(
       throw error;
     }
 
-    const credential = OAuthProvider.credentialFromError(
-      error as FirebaseError,
-    );
+    const credential = OAuthProvider.credentialFromError(error as FirebaseError);
     if (!credential) {
       throw error;
     }
@@ -167,10 +153,7 @@ async function linkWithPopupOrSignInExisting(
 
 function markOAuthRedirectPending(): void {
   try {
-    window.sessionStorage.setItem(
-      OAUTH_REDIRECT_PENDING_KEY,
-      String(Date.now()),
-    );
+    window.sessionStorage.setItem(OAUTH_REDIRECT_PENDING_KEY, String(Date.now()));
   } catch {
     // Private mode / blocked storage — recovery still runs; UI may miss the hint.
   }
@@ -217,9 +200,9 @@ async function beginOAuthRedirect(provider: AuthProvider): Promise<never> {
   throw new OAuthRedirectInProgressError();
 }
 
-async function completeGoogleCredential(credential: ReturnType<
-  typeof GoogleAuthProvider.credential
->): Promise<User> {
+async function completeGoogleCredential(
+  credential: ReturnType<typeof GoogleAuthProvider.credential>,
+): Promise<User> {
   return linkCredentialOrSignInExisting(credential);
 }
 
@@ -274,10 +257,7 @@ export function consumeOAuthRedirectFailureMessage(): string | null {
   return message;
 }
 
-function resolveRedirectUser(
-  user: User | null,
-  wasPending: boolean,
-): User | null {
+function resolveRedirectUser(user: User | null, wasPending: boolean): User | null {
   if (user) {
     return user;
   }
@@ -297,8 +277,7 @@ async function completeOAuthRedirectOnce(): Promise<User | null> {
   } catch (error) {
     if (isFirebasePendingPromiseAssertion(error)) {
       const current = auth.currentUser;
-      const recovered =
-        current && !current.isAnonymous ? current : null;
+      const recovered = current && !current.isAnonymous ? current : null;
       return resolveRedirectUser(recovered, wasPending);
     }
 
@@ -362,10 +341,7 @@ export async function completePremiumEmailSignInLink(
 
   try {
     if (auth.currentUser?.isAnonymous) {
-      const credential = EmailAuthProvider.credentialWithLink(
-        storedEmail,
-        linkUrl,
-      );
+      const credential = EmailAuthProvider.credentialWithLink(storedEmail, linkUrl);
       const user = await linkCredentialOrSignInExisting(credential);
       window.localStorage.removeItem(EMAIL_LINK_STORAGE_KEY);
       return user;

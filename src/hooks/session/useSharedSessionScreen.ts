@@ -2,35 +2,32 @@ import { useEffect, useState } from "react";
 import { LOCAL_SESSION_ID } from "../../domain/map/annotations";
 import type { PlayerRole } from "../../domain/session/players/playerRole";
 import { DEFAULT_SESSION_RULES } from "../../domain/session/rules";
-import { useChatUnread } from "./useChatUnread";
-import {
-  useHidingZonesSync,
-  useHiderLocationsSync,
-  usePendingQuestionsSync,
-  useSeekerLocationsSync,
-  useSessionMessagesSync,
-} from "./useSessionExtrasSync";
-import { useRemoteSessionTimerSync } from "./useRemoteSessionTimerSync";
-import { useSeekingStartedActivity } from "./useSeekingStartedActivity";
-import { useSessionEndedRedirect } from "./useSessionEndedRedirect";
-import { useSessionSync } from "./useSessionSync";
-import { useSessionTimer } from "./useSessionTimer";
-import { useSyncStatus } from "../sync/useSyncStatus";
-import { useFirebaseAuthReady } from "../sync/useFirebaseAuthReady";
+import { setPremiumApiContext } from "../../services/core/auth/premiumApiContext";
 import {
   ensureAnonymousUser,
   getFirebaseAuth,
   isFirebaseConfigured,
 } from "../../services/core/firebase/firebase";
 import { waitForPermanentAuthReady } from "../../services/core/firebase/firebaseAuthReady";
-import { setPremiumApiContext } from "../../services/core/auth/premiumApiContext";
 import { useSessionStore } from "../../state/sessionStore";
+import { useFirebaseAuthReady } from "../sync/useFirebaseAuthReady";
+import { useSyncStatus } from "../sync/useSyncStatus";
+import { useChatUnread } from "./useChatUnread";
 import { useEnsureSessionMembership } from "./useEnsureSessionMembership";
+import { useRemoteSessionTimerSync } from "./useRemoteSessionTimerSync";
+import { useSeekingStartedActivity } from "./useSeekingStartedActivity";
+import { useSessionEndedRedirect } from "./useSessionEndedRedirect";
+import {
+  useHiderLocationsSync,
+  useHidingZonesSync,
+  usePendingQuestionsSync,
+  useSeekerLocationsSync,
+  useSessionMessagesSync,
+} from "./useSessionExtrasSync";
+import { useSessionSync } from "./useSessionSync";
+import { useSessionTimer } from "./useSessionTimer";
 
-export type SessionAuthMode =
-  | "seeker-remote"
-  | "hider-anonymous"
-  | "admin-permanent";
+export type SessionAuthMode = "seeker-remote" | "hider-anonymous" | "admin-permanent";
 
 export interface UseSharedSessionScreenOptions {
   isChatOpen: boolean;
@@ -50,12 +47,8 @@ export function useSharedSessionScreen({
   const setMyUid = useSessionStore((state) => state.setMyUid);
   const setLastSyncError = useSessionStore((state) => state.setLastSyncError);
   const sessionId = session?.id;
-  const anonymousAuthReady = useFirebaseAuthReady(
-    authMode === "admin-permanent" ? null : session,
-  );
-  const [permanentAuthSessionId, setPermanentAuthSessionId] = useState<
-    string | null
-  >(null);
+  const anonymousAuthReady = useFirebaseAuthReady(authMode === "admin-permanent" ? null : session);
+  const [permanentAuthSessionId, setPermanentAuthSessionId] = useState<string | null>(null);
   const [authUid, setAuthUid] = useState<string | null>(null);
 
   useEffect(() => {
@@ -66,11 +59,7 @@ export function useSharedSessionScreen({
 
   useEffect(() => {
     if (authMode === "admin-permanent") {
-      if (
-        !session ||
-        session.id === LOCAL_SESSION_ID ||
-        !isFirebaseConfigured()
-      ) {
+      if (!session || session.id === LOCAL_SESSION_ID || !isFirebaseConfigured()) {
         return;
       }
 
@@ -91,11 +80,7 @@ export function useSharedSessionScreen({
     }
 
     if (authMode === "seeker-remote") {
-      if (
-        !session ||
-        session.id === LOCAL_SESSION_ID ||
-        !isFirebaseConfigured()
-      ) {
+      if (!session || session.id === LOCAL_SESSION_ID || !isFirebaseConfigured()) {
         return;
       }
 
@@ -111,11 +96,7 @@ export function useSharedSessionScreen({
           if (cancelled) {
             return;
           }
-          setLastSyncError(
-            error instanceof Error
-              ? error.message
-              : "No access to this session.",
-          );
+          setLastSyncError(error instanceof Error ? error.message : "No access to this session.");
         }
       })();
       return () => {
@@ -137,9 +118,7 @@ export function useSharedSessionScreen({
   }, [authMode, myUid, session, session?.id, setLastSyncError, setMyUid]);
 
   const authReady =
-    authMode === "admin-permanent"
-      ? permanentAuthSessionId === session?.id
-      : anonymousAuthReady;
+    authMode === "admin-permanent" ? permanentAuthSessionId === session?.id : anonymousAuthReady;
 
   useSessionSync({ syncEnabled: authReady });
 
@@ -153,12 +132,10 @@ export function useSharedSessionScreen({
           ? authUid
           : null
         : authReady
-          ? authUid ?? myUid
+          ? (authUid ?? myUid)
           : null;
 
-  const isHost = Boolean(
-    session?.hostUid && uid && session.hostUid === uid,
-  );
+  const isHost = Boolean(session?.hostUid && uid && session.hostUid === uid);
 
   useSessionEndedRedirect(sessionId, isHost, exitPath);
   const {
@@ -189,13 +166,8 @@ export function useSharedSessionScreen({
   const hidingZones = useHidingZonesSync(sessionId);
   const seekerLocations = useSeekerLocationsSync(sessionId, authReady);
   const showHiderLocations =
-    notificationRole === "hider" ||
-    notificationRole === "observer" ||
-    notificationRole === "admin";
-  const hiderLocations = useHiderLocationsSync(
-    sessionId,
-    showHiderLocations && authReady,
-  );
+    notificationRole === "hider" || notificationRole === "observer" || notificationRole === "admin";
+  const hiderLocations = useHiderLocationsSync(sessionId, showHiderLocations && authReady);
   const chatMessages = useSessionMessagesSync(sessionId);
   const syncStatus = useSyncStatus();
 

@@ -1,22 +1,15 @@
 import type { DragEvent, MouseEvent as ReactMouseEvent } from "react";
 import { useMemo, useState } from "react";
-import GridLayout, {
-  useContainerWidth,
-  verticalCompactor,
-  type Layout,
-} from "react-grid-layout";
+import GridLayout, { type Layout, useContainerWidth, verticalCompactor } from "react-grid-layout";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
-import {
-  type MonitorLayout,
-  type MonitorPanelId,
-} from "../../domain/admin/opsDeskLayout";
+import { type MonitorLayout, type MonitorPanelId } from "../../domain/admin/opsDeskLayout";
+import type { AdminMonitorPanelBodies } from "./AdminMonitorPanelBody";
 import {
   AdminMonitorPanelStack,
   MONITOR_PANEL_MIME,
   type MonitorPanelMergePayload,
 } from "./AdminMonitorPanelStack";
-import type { AdminMonitorPanelBodies } from "./AdminMonitorPanelBody";
 import { AdminMonitorPlacePanelMenu } from "./AdminMonitorPlacePanelMenu";
 import { commitMonitorWorkspaceGeometry } from "./adminMonitorGridGeometry";
 
@@ -31,15 +24,8 @@ interface AdminMonitorGridWorkspaceProps {
   layout: MonitorLayout;
   bodies: AdminMonitorPanelBodies;
   onLayoutChange: (layout: MonitorLayout) => void;
-  onMergePanel: (
-    targetStackId: string,
-    payload: MonitorPanelMergePayload,
-  ) => void;
-  onReorderPanel: (
-    stackId: string,
-    fromIndex: number,
-    toIndex: number,
-  ) => void;
+  onMergePanel: (targetStackId: string, payload: MonitorPanelMergePayload) => void;
+  onReorderPanel: (stackId: string, fromIndex: number, toIndex: number) => void;
   onUnstackPanel: (
     sourceStackId: string,
     panelId: MonitorPanelId,
@@ -48,13 +34,7 @@ interface AdminMonitorGridWorkspaceProps {
     w: number,
     h: number,
   ) => void;
-  onPlacePanel: (
-    panelId: MonitorPanelId,
-    x: number,
-    y: number,
-    w: number,
-    h: number,
-  ) => void;
+  onPlacePanel: (panelId: MonitorPanelId, x: number, y: number, w: number, h: number) => void;
   onActiveIndexChange: (stackId: string, activeIndex: number) => void;
   onPinToggle: (stackId: string) => void;
   onCollapseToggle: (stackId: string) => void;
@@ -84,9 +64,7 @@ export function AdminMonitorGridWorkspace({
   const { width, containerRef, mounted } = useContainerWidth({
     measureBeforeMount: true,
   });
-  const [dropTargetStackId, setDropTargetStackId] = useState<string | null>(
-    null,
-  );
+  const [dropTargetStackId, setDropTargetStackId] = useState<string | null>(null);
   const [placeMenu, setPlaceMenu] = useState<PlaceMenuState | null>(null);
   const [emptyHover, setEmptyHover] = useState(false);
 
@@ -121,10 +99,7 @@ export function AdminMonitorGridWorkspace({
     const rowPitch = layout.rowHeight + 8;
     const x = Math.max(
       0,
-      Math.min(
-        layout.cols - UNSTACK_DEFAULT_W,
-        Math.floor((clientX - rect.left) / colWidth),
-      ),
+      Math.min(layout.cols - UNSTACK_DEFAULT_W, Math.floor((clientX - rect.left) / colWidth)),
     );
     const y = Math.max(0, Math.floor((clientY - rect.top) / rowPitch));
     return { x, y };
@@ -209,8 +184,7 @@ export function AdminMonitorGridWorkspace({
           dragConfig={{
             enabled: true,
             handle: ".jl-ops-drag-handle",
-            cancel:
-              "button,input,textarea,select,a,.jl-ops-tab,.maplibregl-map,.maplibregl-ctrl",
+            cancel: "button,input,textarea,select,a,.jl-ops-tab,.maplibregl-map,.maplibregl-ctrl",
           }}
           resizeConfig={{
             enabled: true,

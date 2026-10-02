@@ -1,18 +1,11 @@
 import type { SessionRecord } from "../../map/annotations";
 import { PRESET_MATCH_TOLERANCE_METERS } from "../../map/distancePresets";
-import {
-  effectiveHidingZoneRadiusMeters,
-  hidingZoneRadiusMeters,
-} from "../size/hidingZoneRadius";
-import { gameSizeRulesSummary, hidingPeriodMs } from "../size/gameSizeRules";
 import { sessionDistanceUnit } from "../meta/sessionDistanceUnit";
+import { gameSizeRulesSummary, hidingPeriodMs } from "../size/gameSizeRules";
+import { effectiveHidingZoneRadiusMeters, hidingZoneRadiusMeters } from "../size/hidingZoneRadius";
 import { resolveHidingPeriodMinutes } from "./deadlines";
 import { resolveTentaclesEnabledForSession } from "./tentacleRules";
-import {
-  DEFAULT_SESSION_RULES,
-  sessionGameSize,
-  type SessionRulesInput,
-} from "./types";
+import { DEFAULT_SESSION_RULES, type SessionRulesInput, sessionGameSize } from "./types";
 
 export function sessionRulesFromRecord(
   session: SessionRecord | null | undefined,
@@ -46,15 +39,11 @@ export function sessionRulesFromRecord(
   };
 }
 
-export function sessionRulesSnapshot(
-  session: SessionRecord | null | undefined,
-): string {
+export function sessionRulesSnapshot(session: SessionRecord | null | undefined): string {
   return JSON.stringify(sessionRulesFromRecord(session));
 }
 
-export function resolveHidingZoneRadiusMeters(
-  session: SessionRulesInput,
-): number {
+export function resolveHidingZoneRadiusMeters(session: SessionRulesInput): number {
   return effectiveHidingZoneRadiusMeters({
     gameSize: sessionGameSize(session),
     hidingZoneRadiusMeters: session.hidingZoneRadiusMeters,
@@ -71,14 +60,9 @@ export function sessionRulesSummary(session: SessionRulesInput): {
   const hidingMinutes = resolveHidingPeriodMinutes(session);
   const hidingHours = hidingMinutes / 60;
   const hidingPeriodLabel =
-    hidingMinutes < 60
-      ? `${hidingMinutes} min hiding period`
-      : `${hidingHours} hr hiding period`;
+    hidingMinutes < 60 ? `${hidingMinutes} min hiding period` : `${hidingHours} hr hiding period`;
 
-  const base = gameSizeRulesSummary(
-    sessionGameSize(session),
-    sessionDistanceUnit(session),
-  );
+  const base = gameSizeRulesSummary(sessionGameSize(session), sessionDistanceUnit(session));
 
   const radiusMeters = resolveHidingZoneRadiusMeters(session);
   const defaultRadius = hidingZoneRadiusMeters(

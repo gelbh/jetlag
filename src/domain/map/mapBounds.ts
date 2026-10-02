@@ -1,7 +1,4 @@
-import {
-  normalizeBoundingBox,
-  type BoundingBox,
-} from "../geometry/gameArea/gameAreaBounds";
+import { type BoundingBox, normalizeBoundingBox } from "../geometry/gameArea/gameAreaBounds";
 
 export type MapLatLngTuple = [lat: number, lng: number];
 export type MapLatLng = MapLatLngTuple | { lat: number; lng: number };
@@ -67,18 +64,14 @@ export function normalizeBoundsExpression(
   throw new Error("Invalid map bounds expression");
 }
 
-export function toMapBounds(
-  expression: MapBoundsExpression | MapBounds,
-): MapBounds {
+export function toMapBounds(expression: MapBoundsExpression | MapBounds): MapBounds {
   if ("getSouthWest" in expression) {
     return expression;
   }
   return createMapBounds(normalizeBoundsExpression(expression));
 }
 
-export function boundingBoxToBoundsExpression(
-  box: BoundingBox,
-): MapBoundsExpression {
+export function boundingBoxToBoundsExpression(box: BoundingBox): MapBoundsExpression {
   const normalized = normalizeBoundingBox(box);
   return [
     [normalized.south, normalized.west],

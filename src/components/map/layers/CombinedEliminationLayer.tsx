@@ -1,17 +1,13 @@
+import type { Feature, Polygon as GeoPolygon, MultiPolygon } from "geojson";
 import { memo, useMemo } from "react";
-import type { Feature, MultiPolygon, Polygon as GeoPolygon } from "geojson";
-import type {
-  AnnotationRecord,
-  GameArea,
-  SessionRecord,
-} from "@/domain/map/annotations";
-import { isEndGameActive } from "@/domain/map/annotations";
-import type { HidingZoneRecord } from "@/domain/session/hiding/hidingZone";
+import { MOTION_MAP_SHADE_MS } from "@/domain/device/motion/motionTokens";
 import { annotationHasEliminationFeature } from "@/domain/geometry/masks/combinedEliminationMask";
 import { EMPTY_GEOJSON_FEATURES } from "@/domain/geometry/masks/emptyFeatures";
-import { MOTION_MAP_SHADE_MS } from "@/domain/device/motion/motionTokens";
+import type { AnnotationRecord, GameArea, SessionRecord } from "@/domain/map/annotations";
+import { isEndGameActive } from "@/domain/map/annotations";
 import { MAP_ANNOTATION_COLORS } from "@/domain/map/mapAnnotationColors";
 import { getEliminationOverlayLayers } from "@/domain/map/mapEliminationOverlayStyle";
+import type { HidingZoneRecord } from "@/domain/session/hiding/hidingZone";
 import { useCombinedEliminationMask } from "@/hooks/map/useCombinedEliminationMask";
 import { useMotionProfile } from "@/hooks/motion/useMotionProfile";
 import { useMapStore } from "@/state/sessionStore";
@@ -59,16 +55,10 @@ export const CombinedEliminationLayer = memo(function CombinedEliminationLayer({
     hidden,
   });
 
-  const pulsingIds = useMemo(
-    () => new Set(pulsingAnnotationIds),
-    [pulsingAnnotationIds],
-  );
+  const pulsingIds = useMemo(() => new Set(pulsingAnnotationIds), [pulsingAnnotationIds]);
 
   const pulsing = useMemo(
-    () =>
-      annotations.some((annotation) =>
-        annotationHasEliminationFeature(annotation, pulsingIds),
-      ),
+    () => annotations.some((annotation) => annotationHasEliminationFeature(annotation, pulsingIds)),
     [annotations, pulsingIds],
   );
 

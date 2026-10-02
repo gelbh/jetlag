@@ -12,12 +12,7 @@ function transitlandCacheKey(feed, bounds) {
 }
 
 function isInsideBounds(lat, lng, bounds) {
-  return (
-    lat >= bounds.south &&
-    lat <= bounds.north &&
-    lng >= bounds.west &&
-    lng <= bounds.east
-  );
+  return lat >= bounds.south && lat <= bounds.north && lng >= bounds.west && lng <= bounds.east;
 }
 
 function normalizeTransitlandVehicles(payload, bounds) {
@@ -65,10 +60,7 @@ function normalizeGtfsRtVehicleEntities(payload, bounds) {
 
     vehicles.push({
       id: String(entry.id ?? `${lat},${lng}`),
-      label:
-        entry.vehicle?.vehicle?.label ??
-        entry.vehicle?.trip?.routeId ??
-        "Vehicle",
+      label: entry.vehicle?.vehicle?.label ?? entry.vehicle?.trip?.routeId ?? "Vehicle",
       lat,
       lng,
       bearing: entry.vehicle?.position?.bearing,
@@ -120,10 +112,7 @@ export async function fetchTransitlandVehicles(feed, apiKey, bounds) {
     const url = new URL(`${TRANSITLAND_API_BASE}/vehicle_positions`);
     url.searchParams.set("apikey", apiKey);
     url.searchParams.set("feed", feed);
-    url.searchParams.set(
-      "search",
-      `${bounds.south},${bounds.west},${bounds.north},${bounds.east}`,
-    );
+    url.searchParams.set("search", `${bounds.south},${bounds.west},${bounds.north},${bounds.east}`);
     url.searchParams.set("limit", "200");
 
     const payload = await fetchTransitlandJson(url, apiKey);

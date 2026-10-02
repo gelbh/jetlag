@@ -1,8 +1,8 @@
 import { useCallback, useState } from "react";
 import { MAP_ANNOTATION_COLORS } from "@/domain/map/mapAnnotationColors";
+import { useMapFeatureHitTarget } from "../helpers/MapFeatureHitTestContext";
 import { MapLibreFeaturePopup } from "../helpers/MapLibreFeaturePopup";
 import { MapLibrePointMarkers } from "../helpers/MapLibrePointMarkers";
-import { useMapFeatureHitTarget } from "../helpers/MapFeatureHitTestContext";
 
 interface PinAnnotationMarkerProps {
   annotationId: string;

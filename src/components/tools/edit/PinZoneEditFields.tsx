@@ -12,10 +12,7 @@ interface PinZoneEditFieldsProps {
   onSavePayloadChange: (payload: EditSavePayload) => void;
 }
 
-export function PinZoneEditFields({
-  annotation,
-  onSavePayloadChange,
-}: PinZoneEditFieldsProps) {
+export function PinZoneEditFields({ annotation, onSavePayloadChange }: PinZoneEditFieldsProps) {
   const [label, setLabel] = useState(annotation.metadata.label ?? "");
 
   const save = useCallback((): EditSaveResult => {

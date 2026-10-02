@@ -1,20 +1,17 @@
-import type { AdvancedSessionSettingsValue } from "@/domain/session/tools/advancedSessionSettings";
-import type { DistanceUnit } from "@/domain/map/distance";
-import type { GameSize } from "@/domain/session/size/gameSize";
-import { sessionRulesSummary } from "@/domain/session/rules";
 import type { GameArea } from "@/domain/map/annotations";
-import { SessionCustomContentSettings } from "./SessionCustomContentSettings";
-import { CustomMeasureGeometrySettings } from "./CustomMeasureGeometrySettings";
+import type { DistanceUnit } from "@/domain/map/distance";
+import { sessionRulesSummary } from "@/domain/session/rules";
+import type { GameSize } from "@/domain/session/size/gameSize";
+import type { AdvancedSessionSettingsValue } from "@/domain/session/tools/advancedSessionSettings";
 import { DeadlinesSection } from "../advancedSettings/DeadlinesSection";
 import { ExpansionPackSection } from "../advancedSettings/ExpansionPackSection";
 import { HidingZoneSection } from "../advancedSettings/HidingZoneSection";
-import {
-  AdvancedSettingsCategory,
-  SectionSummary,
-} from "../advancedSettings/shared";
+import { AdvancedSettingsCategory, SectionSummary } from "../advancedSettings/shared";
 import { TentaclesSection } from "../advancedSettings/TentaclesSection";
 import { ThermometerSection } from "../advancedSettings/ThermometerSection";
 import { ToolsSection } from "../advancedSettings/ToolsSection";
+import { CustomMeasureGeometrySettings } from "./CustomMeasureGeometrySettings";
+import { SessionCustomContentSettings } from "./SessionCustomContentSettings";
 
 interface AdvancedSessionSettingsProps {
   gameSize: GameSize;
@@ -52,9 +49,7 @@ export function AdvancedSessionSettings({
     hidingZoneRadiusMeters: value.customHidingZoneRadiusEnabled
       ? value.hidingZoneRadiusMeters
       : undefined,
-    hidingPeriodMinutes: value.customHidingPeriodEnabled
-      ? value.hidingPeriodMinutes
-      : undefined,
+    hidingPeriodMinutes: value.customHidingPeriodEnabled ? value.hidingPeriodMinutes : undefined,
     photoAnswerDeadlineMinutes: value.customPhotoAnswerDeadlineEnabled
       ? value.photoAnswerDeadlineMinutes
       : undefined,
@@ -86,25 +81,15 @@ export function AdvancedSessionSettings({
       <DeadlinesSection {...sectionProps} />
       <ToolsSection {...sectionProps} />
 
-      <AdvancedSettingsCategory
-        title="Thermometer and tentacles"
-        defaultOpen={false}
-      >
+      <AdvancedSettingsCategory title="Thermometer and tentacles" defaultOpen={false}>
         <ThermometerSection {...sectionProps} />
         <TentaclesSection {...sectionProps} />
       </AdvancedSettingsCategory>
 
       <ExpansionPackSection {...sectionProps} />
 
-      <AdvancedSettingsCategory
-        title="Custom measuring geometry"
-        defaultOpen={false}
-      >
-        <CustomMeasureGeometrySettings
-          value={value}
-          onChange={onChange}
-          disabled={disabled}
-        />
+      <AdvancedSettingsCategory title="Custom measuring geometry" defaultOpen={false}>
+        <CustomMeasureGeometrySettings value={value} onChange={onChange} disabled={disabled} />
       </AdvancedSettingsCategory>
 
       <AdvancedSettingsCategory title="Custom content" defaultOpen={false}>

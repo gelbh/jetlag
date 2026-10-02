@@ -84,12 +84,8 @@ export function TransitStationPicker({
       >
         Search stations in this area
       </button>
-      {stationsLoading ? (
-        <LoadingReadout>Loading stations…</LoadingReadout>
-      ) : null}
-      {stationsError ? (
-        <p className="text-sm text-status-error">{stationsError}</p>
-      ) : null}
+      {stationsLoading ? <LoadingReadout>Loading stations…</LoadingReadout> : null}
+      {stationsError ? <p className="text-sm text-status-error">{stationsError}</p> : null}
       {selectedStation ? (
         <div className="flex shrink-0 items-center justify-between gap-2 rounded-[var(--radius-hud-md)] border border-highlight/40 bg-highlight-soft px-3 py-2">
           <span className="min-w-0 truncate text-sm font-medium text-highlight">

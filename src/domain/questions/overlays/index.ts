@@ -4,13 +4,13 @@ import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
 import { pendingQuestionOverlayBuilders } from "../questionToolRegistry";
 import type { PendingQuestionOverlayResult } from "./shared";
 
-export type { PendingQuestionOverlayResult } from "./shared";
+export type { PendingPreviewEliminationInput } from "./pendingPreviewElimination";
 export {
   buildPendingPreviewEliminationFeature,
   buildPendingPreviewEliminationFeatures,
   pendingQuestionHasResolvedAnnotation,
 } from "./pendingPreviewElimination";
-export type { PendingPreviewEliminationInput } from "./pendingPreviewElimination";
+export type { PendingQuestionOverlayResult } from "./shared";
 
 export async function buildPendingQuestionOverlay(
   question: PendingQuestionRecord,
@@ -57,7 +57,5 @@ export async function buildPendingQuestionOverlays(
       buildPendingQuestionOverlay(question, gameArea, mapStyle, streetBasemap),
     ),
   );
-  return results.filter(
-    (result): result is PendingQuestionOverlayResult => result !== null,
-  );
+  return results.filter((result): result is PendingQuestionOverlayResult => result !== null);
 }

@@ -4,11 +4,7 @@ interface ModPanelProps {
   onModerationAction: (action: "end" | "resetBoard" | "cleanupCode") => void;
 }
 
-export function ModPanel({
-  moderationBusy,
-  moderationError,
-  onModerationAction,
-}: ModPanelProps) {
+export function ModPanel({ moderationBusy, moderationError, onModerationAction }: ModPanelProps) {
   return (
     <div className="space-y-3">
       <p className="text-xs text-ink-muted">

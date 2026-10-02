@@ -1,8 +1,8 @@
 export {
-  ELIMINATION_FILL_COLOR,
   annotationHasEliminationFeature,
   computeEliminationUnionInput,
   computeEliminationUnionInputTs,
+  ELIMINATION_FILL_COLOR,
   eliminationDiskForAnnotation,
   eliminationFeatureForAnnotation,
   eliminationFeatureForAnnotationTs,

@@ -27,10 +27,7 @@ export function useToolRailShortcuts(options: {
       return;
     }
 
-    if (
-      typeof window === "undefined" ||
-      !window.matchMedia("(pointer: fine)").matches
-    ) {
+    if (typeof window === "undefined" || !window.matchMedia("(pointer: fine)").matches) {
       return;
     }
 

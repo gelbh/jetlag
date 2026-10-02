@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
-  LIVE_LOCATION_GONE_MS,
   formatLiveLocationLastSeen,
   isLiveLocationGone,
+  LIVE_LOCATION_GONE_MS,
   liveClusterPresentation,
   liveLocationAgeMs,
   liveLocationFillOpacity,
@@ -31,44 +31,27 @@ describe("liveLocationFreshness", () => {
 
   it("fades opacity linearly until gone", () => {
     expect(liveLocationFillOpacity(isoAgo(0), NOW)).toBe(1);
-    expect(liveLocationFillOpacity(isoAgo(LIVE_LOCATION_GONE_MS / 2), NOW)).toBe(
-      0.5,
-    );
+    expect(liveLocationFillOpacity(isoAgo(LIVE_LOCATION_GONE_MS / 2), NOW)).toBe(0.5);
     expect(liveLocationFillOpacity(isoAgo(LIVE_LOCATION_GONE_MS), NOW)).toBe(0);
   });
 
   it("picks the oldest updatedAt among members", () => {
-    expect(
-      oldestLiveLocationUpdatedAt([
-        isoAgo(60_000),
-        isoAgo(180_000),
-        isoAgo(30_000),
-      ]),
-    ).toBe(isoAgo(180_000));
+    expect(oldestLiveLocationUpdatedAt([isoAgo(60_000), isoAgo(180_000), isoAgo(30_000)])).toBe(
+      isoAgo(180_000),
+    );
     expect(oldestLiveLocationUpdatedAt([])).toBeNull();
   });
 
   it("formats last-seen copy via admin freshness ages", () => {
-    expect(formatLiveLocationLastSeen(isoAgo(15_000), NOW)).toBe(
-      "Last seen just now",
-    );
-    expect(formatLiveLocationLastSeen(isoAgo(90_000), NOW)).toBe(
-      "Last seen 1m ago",
-    );
-    expect(formatLiveLocationLastSeen(isoAgo(7 * 60_000), NOW)).toBe(
-      "Last seen 7m ago",
-    );
+    expect(formatLiveLocationLastSeen(isoAgo(15_000), NOW)).toBe("Last seen just now");
+    expect(formatLiveLocationLastSeen(isoAgo(90_000), NOW)).toBe("Last seen 1m ago");
+    expect(formatLiveLocationLastSeen(isoAgo(7 * 60_000), NOW)).toBe("Last seen 7m ago");
     expect(formatLiveLocationLastSeen("bad", NOW)).toBe("Last seen unknown");
   });
 
   it("builds cluster presentation from the oldest member", () => {
-    const presentation = liveClusterPresentation(
-      [isoAgo(60_000), isoAgo(180_000)],
-      NOW,
-    );
-    expect(presentation.fillOpacity).toBe(
-      liveLocationFillOpacity(isoAgo(180_000), NOW),
-    );
+    const presentation = liveClusterPresentation([isoAgo(60_000), isoAgo(180_000)], NOW);
+    expect(presentation.fillOpacity).toBe(liveLocationFillOpacity(isoAgo(180_000), NOW));
     expect(presentation.lastSeenLabel).toBe("Last seen 3m ago");
   });
 

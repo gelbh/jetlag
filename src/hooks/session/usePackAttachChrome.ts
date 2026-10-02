@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { GameArea } from "@/domain/map/annotations";
 import {
+  type PackAttachManualOverride,
+  type PackAttachSource,
   playAreaAttachFingerprint,
   resolvePackAttachChrome,
   suggestRegionPackForGameArea,
-  type PackAttachManualOverride,
-  type PackAttachSource,
 } from "@/domain/regions/packAttach";
 import type { RegionPackId } from "@/domain/regions/regionPack";
 
@@ -35,9 +35,7 @@ export function usePackAttachChrome({
   initialPackId,
 }: UsePackAttachChromeOptions): PackAttachChrome {
   const [manual, setManual] = useState<PackAttachManualOverride | null>(null);
-  const [seededPackId, setSeededPackId] = useState<RegionPackId | undefined>(
-    initialPackId,
-  );
+  const [seededPackId, setSeededPackId] = useState<RegionPackId | undefined>(initialPackId);
   const seededRef = useRef(initialPackId);
 
   useEffect(() => {
@@ -49,10 +47,7 @@ export function usePackAttachChrome({
     setManual(null);
   }, [initialPackId]);
 
-  const fingerprint = useMemo(
-    () => playAreaAttachFingerprint(gameArea),
-    [gameArea],
-  );
+  const fingerprint = useMemo(() => playAreaAttachFingerprint(gameArea), [gameArea]);
   const suggestion = useMemo(
     () => (gameArea ? suggestRegionPackForGameArea(gameArea) : null),
     [gameArea],

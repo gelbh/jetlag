@@ -12,8 +12,7 @@ const storeState = vi.hoisted(() => ({
 }));
 
 vi.mock("../../services/core/firebase/firebase", () => ({
-  ensureFreshAnonymousUser: (...args: unknown[]) =>
-    ensureFreshAnonymousUser(...args),
+  ensureFreshAnonymousUser: (...args: unknown[]) => ensureFreshAnonymousUser(...args),
   isFirebaseConfigured: vi.fn(() => true),
 }));
 
@@ -81,12 +80,10 @@ describe("useEnsureSessionMembership", () => {
 
     await waitFor(() => {
       expect(ensureFreshAnonymousUser).toHaveBeenCalled();
-      expect(healSessionMembership).toHaveBeenCalledWith(
-        session,
-        "uid-1",
-        "hider",
-        { returningMemberUid: "uid-1", persistedMyUid: "uid-1" },
-      );
+      expect(healSessionMembership).toHaveBeenCalledWith(session, "uid-1", "hider", {
+        returningMemberUid: "uid-1",
+        persistedMyUid: "uid-1",
+      });
     });
   });
 

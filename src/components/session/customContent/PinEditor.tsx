@@ -1,16 +1,16 @@
-import { useState } from "react";
 import { Box, Button, Stack, Text, TextInput } from "@mantine/core";
-import type { AdvancedSessionSettingsValue } from "@/domain/session/tools/advancedSessionSettings";
-import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
-import type { SessionCustomLocationPin } from "@/domain/session/catalog/sessionCustomContent";
+import { useState } from "react";
 import {
-  InsetGroup,
-  SectionLabel,
   compactDangerStyles,
   filledStyles,
+  InsetGroup,
   insetTextInputStyles,
+  SectionLabel,
 } from "@/components/ui/entry/entryChrome";
 import { InsetHairline } from "@/components/ui/entry/InsetRow";
+import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
+import type { SessionCustomLocationPin } from "@/domain/session/catalog/sessionCustomContent";
+import type { AdvancedSessionSettingsValue } from "@/domain/session/tools/advancedSessionSettings";
 
 interface PinEditorProps {
   value: AdvancedSessionSettingsValue;
@@ -145,13 +145,7 @@ export function PinEditor({ value, onChange, disabled }: PinEditorProps) {
         />
       </InsetGroup>
 
-      <Button
-        type="button"
-        fullWidth
-        disabled={disabled}
-        styles={filledStyles}
-        onClick={addPin}
-      >
+      <Button type="button" fullWidth disabled={disabled} styles={filledStyles} onClick={addPin}>
         Add pin
       </Button>
     </Stack>

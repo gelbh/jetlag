@@ -1,10 +1,10 @@
-import type { Feature, MultiPolygon, Polygon as GeoPolygon } from "geojson";
+import type { Feature, Polygon as GeoPolygon, MultiPolygon } from "geojson";
+import { previewGeometryFingerprint } from "@/domain/geometry/measuring/previewGeometryFingerprint";
 import {
   buildCoarsePolygonFeature,
-  refinePolygonFeatureStep,
   type PolygonLodPhase,
+  refinePolygonFeatureStep,
 } from "@/domain/geometry/progressive/polygonLod";
-import { previewGeometryFingerprint } from "@/domain/geometry/measuring/previewGeometryFingerprint";
 
 export function scheduleIdle(callback: () => void): () => void {
   if (typeof requestIdleCallback === "function") {

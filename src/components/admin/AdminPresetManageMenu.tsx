@@ -1,9 +1,5 @@
 import type { CSSProperties, Ref } from "react";
-import {
-  movePresetOrder,
-  presetLabel,
-  type DeskPreset,
-} from "../../domain/admin/opsDeskLayout";
+import { type DeskPreset, movePresetOrder, presetLabel } from "../../domain/admin/opsDeskLayout";
 
 interface AdminPresetManageMenuProps {
   orderedIds: readonly string[];
@@ -61,11 +57,7 @@ export function AdminPresetManageMenu({
                 <button
                   type="button"
                   className="jl-ops-preset-manage-btn"
-                  aria-label={
-                    isDefault
-                      ? `${label} is default`
-                      : `Set ${label} as default`
-                  }
+                  aria-label={isDefault ? `${label} is default` : `Set ${label} as default`}
                   aria-pressed={isDefault}
                   disabled={isDefault}
                   onClick={() => onSetDefault(presetId)}
@@ -127,11 +119,7 @@ export function AdminPresetManageMenu({
           );
         })}
       </ul>
-      <button
-        type="button"
-        className="jl-ops-preset-manage-dismiss"
-        onClick={onDismiss}
-      >
+      <button type="button" className="jl-ops-preset-manage-dismiss" onClick={onDismiss}>
         Close
       </button>
     </div>

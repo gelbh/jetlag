@@ -1,11 +1,4 @@
-import {
-  doc,
-  getDoc,
-  onSnapshot,
-  setDoc,
-  updateDoc,
-  type Unsubscribe,
-} from "firebase/firestore";
+import { doc, getDoc, onSnapshot, setDoc, type Unsubscribe, updateDoc } from "firebase/firestore";
 import type { BoardEconomyState } from "../../domain/boardEconomy";
 import { createInitialBoardEconomyState } from "../../domain/boardEconomy";
 import { getFirestoreDb } from "../core/firebase/firebase";
@@ -14,18 +7,10 @@ import { handleFirestoreListenError } from "./sessions/listenError";
 const STATE_DOC = "state";
 
 function boardEconomyStateRef(sessionId: string) {
-  return doc(
-    getFirestoreDb(),
-    "sessions",
-    sessionId,
-    "boardEconomy",
-    STATE_DOC,
-  );
+  return doc(getFirestoreDb(), "sessions", sessionId, "boardEconomy", STATE_DOC);
 }
 
-export function serializeBoardEconomyState(
-  state: BoardEconomyState,
-): Record<string, unknown> {
+export function serializeBoardEconomyState(state: BoardEconomyState): Record<string, unknown> {
   return {
     deck: state.deck,
     hand: state.hand,
@@ -37,9 +22,7 @@ export function serializeBoardEconomyState(
   };
 }
 
-function parsePendingPick(
-  value: unknown,
-): BoardEconomyState["pendingPick"] {
+function parsePendingPick(value: unknown): BoardEconomyState["pendingPick"] {
   if (!value || typeof value !== "object") {
     return null;
   }
@@ -153,9 +136,7 @@ export function subscribeBoardEconomyState(
         onChange(null);
         return;
       }
-      onChange(
-        deserializeBoardEconomyState(snap.data() as Record<string, unknown>),
-      );
+      onChange(deserializeBoardEconomyState(snap.data() as Record<string, unknown>));
     },
     (error) => handleFirestoreListenError(error, onError),
   );

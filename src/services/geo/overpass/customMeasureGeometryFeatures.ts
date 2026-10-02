@@ -1,17 +1,15 @@
 import type { Feature, LineString, Polygon } from "geojson";
-import type { GameArea } from "@/domain/map/annotations";
 import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
 import {
   nearestPointToCoastlines,
   prepareMeasuringLineSegments,
 } from "@/domain/geometry/measuring/geometryMeasuring";
 import { polygonOuterRingToLineString } from "@/domain/geometry/measuring/ringToLineString";
+import type { GameArea } from "@/domain/map/annotations";
 import type { SessionCustomMeasureGeometry } from "@/domain/session/catalog/customMeasureGeometry";
 import { parseCustomMeasureGeometryFeature } from "@/domain/session/catalog/customMeasureGeometry";
 
-function geometryToLineSegments(
-  feature: Feature<LineString | Polygon>,
-): Feature<LineString>[] {
+function geometryToLineSegments(feature: Feature<LineString | Polygon>): Feature<LineString>[] {
   if (feature.geometry.type === "LineString") {
     return [feature as Feature<LineString>];
   }

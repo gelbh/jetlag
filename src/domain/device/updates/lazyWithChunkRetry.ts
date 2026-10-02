@@ -1,4 +1,4 @@
-import { lazy, type ComponentType } from "react";
+import { type ComponentType, lazy } from "react";
 import { attemptChunkReload, isChunkLoadError } from "./chunkLoadRecovery";
 
 export type ChunkReloadContext = {
@@ -10,14 +10,9 @@ export type ChunkReloadContext = {
 };
 
 let chunkReloadContextGetter: (() => ChunkReloadContext) | undefined;
-let serviceWorkerChunkReloadContext: Pick<
-  ChunkReloadContext,
-  "registration" | "applyUpdate"
-> = {};
+let serviceWorkerChunkReloadContext: Pick<ChunkReloadContext, "registration" | "applyUpdate"> = {};
 
-export function setChunkReloadContextGetter(
-  getter: (() => ChunkReloadContext) | undefined,
-): void {
+export function setChunkReloadContextGetter(getter: (() => ChunkReloadContext) | undefined): void {
   chunkReloadContextGetter = getter;
 }
 
@@ -36,7 +31,6 @@ export function getServiceWorkerChunkReloadContext(): Pick<
 
 export function lazyWithChunkRetry(
   // React.lazy needs a wide component type across named-export modules.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- lazy route modules use incompatible prop shapes
   importFn: () => Promise<{ default: ComponentType<any> }>,
   getReloadContext?: () => ChunkReloadContext,
 ) {

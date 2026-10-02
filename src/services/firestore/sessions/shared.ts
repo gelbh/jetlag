@@ -1,19 +1,19 @@
 import { FirebaseError } from "firebase/app";
 import {
   collection,
+  type DocumentReference,
   deleteDoc,
   deleteField,
   doc,
   updateDoc,
-  type DocumentReference,
 } from "firebase/firestore";
 import type { PlayerRole } from "@/domain/session/players/playerRole";
-import { getFirestoreDb } from "@/services/core/firebase/firebase";
-import { forceRefreshIdToken } from "@/services/core/auth/forceRefreshIdToken";
-import { reportJoinPermissionDenied } from "@/services/core/analytics/sentry";
-import { cancelWalkingThermometersAfterIdentityHeal } from "../firestoreSessionExtras";
 import { buildMembershipHealState } from "@/domain/session/players/returningMember";
+import { reportJoinPermissionDenied } from "@/services/core/analytics/sentry";
+import { forceRefreshIdToken } from "@/services/core/auth/forceRefreshIdToken";
+import { getFirestoreDb } from "@/services/core/firebase/firebase";
 import { repairGhostHost } from "@/services/session/sessionLifecycle";
+import { cancelWalkingThermometersAfterIdentityHeal } from "../firestoreSessionExtras";
 
 export const HIDER_ROLE_POLL_MS = 250;
 export const HIDER_ROLE_POLL_MAX_MS = 3000;
@@ -48,10 +48,7 @@ export function sessionCodeDoc(code: string) {
  * Best-effort rollback when role-gate init fails after session docs land.
  * Host can end + delete the code; hard session delete is rules-denied.
  */
-export async function rollbackCreatedRemoteSession(
-  sessionId: string,
-  code: string,
-): Promise<void> {
+export async function rollbackCreatedRemoteSession(sessionId: string, code: string): Promise<void> {
   try {
     await updateDoc(doc(sessionsCollection(), sessionId), {
       endedAt: new Date().toISOString(),
@@ -76,9 +73,7 @@ export function isReclaimableSessionForCode(
     return true;
   }
 
-  return (
-    sessionData.status === "ended" || typeof sessionData.endedAt === "string"
-  );
+  return sessionData.status === "ended" || typeof sessionData.endedAt === "string";
 }
 export function annotationsCollection(sessionId: string) {
   return collection(getFirestoreDb(), "sessions", sessionId, "annotations");
@@ -95,17 +90,12 @@ export const JOIN_AUTH_FAILURE_MESSAGE = AUTH_FAILURE_MESSAGE;
 
 export function isPermissionDeniedForAuthRetry(error: unknown): boolean {
   if (error instanceof FirebaseError) {
-    return (
-      error.code === "permission-denied" ||
-      error.code === "functions/permission-denied"
-    );
+    return error.code === "permission-denied" || error.code === "functions/permission-denied";
   }
   return false;
 }
 
-export async function withPermissionDeniedAuthRetry<T>(
-  operation: () => Promise<T>,
-): Promise<T> {
+export async function withPermissionDeniedAuthRetry<T>(operation: () => Promise<T>): Promise<T> {
   try {
     return await operation();
   } catch (error) {
@@ -159,9 +149,7 @@ export function readSessionMembershipFields(data: Record<string, unknown>): {
   hostUid: string;
 } {
   const memberUids = Array.isArray(data.memberUids)
-    ? data.memberUids.filter(
-        (memberUid): memberUid is string => typeof memberUid === "string",
-      )
+    ? data.memberUids.filter((memberUid): memberUid is string => typeof memberUid === "string")
     : [];
   const memberRoles =
     data.memberRoles && typeof data.memberRoles === "object"
@@ -228,16 +216,8 @@ export async function applyReturningMemberHealWrite(
     returningMemberUid,
     currentHostUid: fields.hostUid || fallbackHostUid || "",
   });
-  await writeSessionMembershipPatch(
-    sessionRef,
-    membershipPatchFromHealState(heal),
-  );
-  void cancelWalkingThermometersAfterIdentityHeal(
-    sessionId,
-    returningMemberUid,
-    uid,
-    role,
-  );
+  await writeSessionMembershipPatch(sessionRef, membershipPatchFromHealState(heal));
+  void cancelWalkingThermometersAfterIdentityHeal(sessionId, returningMemberUid, uid, role);
 
   // hostUid is Admin-only — repair ghost host after membership heal removes it.
   if (heal.nextHostUid != null) {
@@ -259,4 +239,3 @@ export async function touchSessionLastActive(sessionId: string): Promise<void> {
     lastActiveAt: new Date().toISOString(),
   });
 }
-

@@ -1,16 +1,16 @@
 import { useCallback, useEffect, useState } from "react";
 import { LOCAL_SESSION_ID, type SessionRecord } from "../../domain/map/annotations";
-import { useSessionExit } from "../session/useSessionExit";
-import { resetSessionForRematch } from "../../services/session/sessionRematch";
-import { mapRematchError } from "../../services/session/sessionRematchErrors";
-import { teardownSessionUiState } from "../../services/session/sessionCleanup";
+import { ensureAnonymousUser } from "../../services/core/firebase/firebase";
 import { clearLiveLocationOnLeave } from "../../services/session/clearLiveLocationOnLeave";
 import {
   allowPlayerLocationPublishes,
   blockPlayerLocationPublishes,
 } from "../../services/session/playerLocationPublishGate";
-import { ensureAnonymousUser } from "../../services/core/firebase/firebase";
+import { teardownSessionUiState } from "../../services/session/sessionCleanup";
+import { resetSessionForRematch } from "../../services/session/sessionRematch";
+import { mapRematchError } from "../../services/session/sessionRematchErrors";
 import { useTimerStore } from "../../state/timerStore";
+import { useSessionExit } from "../session/useSessionExit";
 import { useGameOver } from "./useGameOver";
 
 interface GameOverOverlay {
@@ -29,12 +29,10 @@ export function useGameOverActions(
   const rematchSessionId = session?.id;
 
   useEffect(() => {
-    /* eslint-disable react-hooks/set-state-in-effect -- hold rematch CTA until the game-over sheet unmounts */
     if (!gameOver.roundComplete) {
       setRematchPending(false);
       setRematchError(null);
     }
-    /* eslint-enable react-hooks/set-state-in-effect */
   }, [gameOver.roundComplete]);
 
   const handleRematch = useCallback(async () => {

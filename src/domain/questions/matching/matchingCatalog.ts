@@ -87,10 +87,7 @@ export const MATCHING_CATEGORIES = [
       "Commercial if flights to or from it appear on Google Flights. Measure to the map icon.",
     phase: 1,
     resolver: "overpassPoint",
-    overpassSelectors: [
-      "[aeroway=aerodrome][iata]",
-      "[aeroway=aerodrome][icao]",
-    ],
+    overpassSelectors: ["[aeroway=aerodrome][iata]", "[aeroway=aerodrome][icao]"],
   },
   {
     id: "transit_line",
@@ -147,8 +144,7 @@ export const MATCHING_CATEGORIES = [
     groupId: "administrative_divisions",
     label: "3rd Administrative Division",
     promptNoun: "3rd administrative division",
-    ruleSummary:
-      "Municipality-level division. Clarify ambiguous borders when asking.",
+    ruleSummary: "Municipality-level division. Clarify ambiguous borders when asking.",
     phase: 1,
     resolver: "reverseGeocodeAdmin",
   },
@@ -170,11 +166,7 @@ export const MATCHING_CATEGORIES = [
     ruleSummary: mapIconPoiRule("mountain"),
     phase: 1,
     resolver: "overpassPoint",
-    overpassSelectors: [
-      "[natural=peak]",
-      "[natural=volcano]",
-      "[place=mountain]",
-    ],
+    overpassSelectors: ["[natural=peak]", "[natural=volcano]", "[place=mountain]"],
   },
   {
     id: "landmass",

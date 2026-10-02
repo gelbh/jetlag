@@ -18,11 +18,7 @@ export function markPlayDay(name: string): void {
   }
 }
 
-export function measurePlayDay(
-  name: string,
-  start: string,
-  end: string,
-): number | null {
+export function measurePlayDay(name: string, start: string, end: string): number | null {
   if (typeof performance === "undefined") {
     return null;
   }
@@ -45,9 +41,5 @@ export function markMapResumeStart(): void {
 /** Mark map-usable and measure return from the latest map-resume mark. */
 export function markMapUsableAndMeasureReturn(): number | null {
   markPlayDay(PWA_MARK_MAP_USABLE);
-  return measurePlayDay(
-    PWA_MEASURE_MAP_RETURN,
-    PWA_MARK_MAP_RESUME,
-    PWA_MARK_MAP_USABLE,
-  );
+  return measurePlayDay(PWA_MEASURE_MAP_RETURN, PWA_MARK_MAP_RESUME, PWA_MARK_MAP_USABLE);
 }

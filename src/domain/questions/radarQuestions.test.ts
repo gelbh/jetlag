@@ -1,10 +1,15 @@
 import { describe, expect, it } from "vitest";
 import type { AnnotationRecord } from "../map/annotations";
+import { milesToMeters } from "../map/distance";
+import {
+  isRadarCustomRadiusWithinGameSizeLimit,
+  isRadarPresetMetersForGameSize,
+} from "../map/distancePresets";
 import type { PendingQuestionRecord } from "../session/activity/sessionChat";
 import {
-  RADAR_RADIUS_PRESET_METERS,
   availableRadarDistancePresets,
   firstAvailableRadarDistanceSelection,
+  RADAR_RADIUS_PRESET_METERS,
   radarAnnotationSummary,
   radarAnswerFromInside,
   radarDistanceOptionLabel,
@@ -14,26 +19,13 @@ import {
   usedRadarDistanceOptions,
   usedRadarDistanceOptionsForSession,
 } from "./radarQuestions";
-import { milesToMeters } from "../map/distance";
-import {
-  isRadarCustomRadiusWithinGameSizeLimit,
-  isRadarPresetMetersForGameSize,
-} from "../map/distancePresets";
 
 describe("radarQuestions", () => {
   it("builds the live prompt from the resolved radius", () => {
-    expect(radarQuestionPrompt(milesToMeters(1), "imperial")).toBe(
-      "Are you within 1.0 mi of me?",
-    );
-    expect(radarQuestionPrompt(milesToMeters(25), "imperial")).toBe(
-      "Are you within 25 mi of me?",
-    );
-    expect(radarQuestionPrompt(2500, "metric")).toBe(
-      "Are you within 2.5 km of me?",
-    );
-    expect(radarQuestionPrompt(2000, "metric")).toBe(
-      "Are you within 2 km of me?",
-    );
+    expect(radarQuestionPrompt(milesToMeters(1), "imperial")).toBe("Are you within 1.0 mi of me?");
+    expect(radarQuestionPrompt(milesToMeters(25), "imperial")).toBe("Are you within 25 mi of me?");
+    expect(radarQuestionPrompt(2500, "metric")).toBe("Are you within 2.5 km of me?");
+    expect(radarQuestionPrompt(2000, "metric")).toBe("Are you within 2 km of me?");
   });
 
   it("labels card distance options in imperial and metric modes", () => {
@@ -86,9 +78,7 @@ describe("radarQuestions", () => {
       },
     };
 
-    expect(radarAnnotationSummary(legacy, "imperial")).toBe(
-      "Radar · Are you within 3.0 mi of me?",
-    );
+    expect(radarAnnotationSummary(legacy, "imperial")).toBe("Radar · Are you within 3.0 mi of me?");
   });
 
   it("exposes nine mile presets in meters", () => {
@@ -98,12 +88,8 @@ describe("radarQuestions", () => {
   });
 
   it("limits radar presets by game size", () => {
-    expect(
-      availableRadarDistancePresets("small", "imperial", new Set()),
-    ).toHaveLength(5);
-    expect(
-      availableRadarDistancePresets("large", "imperial", new Set()),
-    ).toHaveLength(9);
+    expect(availableRadarDistancePresets("small", "imperial", new Set())).toHaveLength(5);
+    expect(availableRadarDistancePresets("large", "imperial", new Set())).toHaveLength(9);
     expect(
       firstAvailableRadarDistanceSelection(new Set([3, "choose"]), "imperial", "small"),
     ).toEqual({
@@ -140,19 +126,13 @@ describe("radarQuestions", () => {
       },
     };
 
+    expect(usedRadarDistanceOptions([presetRadar, chooseRadar], "imperial")).toEqual(
+      new Set([3, "choose"]),
+    );
     expect(
-      usedRadarDistanceOptions([presetRadar, chooseRadar], "imperial"),
-    ).toEqual(new Set([3, "choose"]));
-    expect(
-      usedRadarDistanceOptions(
-        [presetRadar, chooseRadar],
-        "imperial",
-        "radar-preset",
-      ),
+      usedRadarDistanceOptions([presetRadar, chooseRadar], "imperial", "radar-preset"),
     ).toEqual(new Set(["choose"]));
-    expect(
-      firstAvailableRadarDistanceSelection(new Set([3, "choose"]), "imperial"),
-    ).toEqual({
+    expect(firstAvailableRadarDistanceSelection(new Set([3, "choose"]), "imperial")).toEqual({
       chooseCustom: false,
       radiusMeters: milesToMeters(0.25),
     });
@@ -168,34 +148,20 @@ describe("radarQuestions", () => {
         },
       },
     } as unknown as PendingQuestionRecord;
-    expect(
-      usedRadarDistanceOptionsForSession([], [pending], "imperial"),
-    ).toEqual(new Set([3]));
+    expect(usedRadarDistanceOptionsForSession([], [pending], "imperial")).toEqual(new Set([3]));
 
     const cancelled = {
       ...pending,
       status: "cancelled",
       answer: "yes",
     } as unknown as PendingQuestionRecord;
-    expect(
-      usedRadarDistanceOptionsForSession([], [cancelled], "imperial"),
-    ).toEqual(new Set([3]));
-    expect(isRadarPresetMetersForGameSize("small", milesToMeters(5), "imperial")).toBe(
+    expect(usedRadarDistanceOptionsForSession([], [cancelled], "imperial")).toEqual(new Set([3]));
+    expect(isRadarPresetMetersForGameSize("small", milesToMeters(5), "imperial")).toBe(true);
+    expect(isRadarCustomRadiusWithinGameSizeLimit("small", milesToMeters(6), "imperial")).toBe(
+      false,
+    );
+    expect(isRadarCustomRadiusWithinGameSizeLimit("small", milesToMeters(4), "imperial")).toBe(
       true,
     );
-    expect(
-      isRadarCustomRadiusWithinGameSizeLimit(
-        "small",
-        milesToMeters(6),
-        "imperial",
-      ),
-    ).toBe(false);
-    expect(
-      isRadarCustomRadiusWithinGameSizeLimit(
-        "small",
-        milesToMeters(4),
-        "imperial",
-      ),
-    ).toBe(true);
   });
 });

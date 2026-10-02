@@ -1,5 +1,5 @@
-import test from "node:test";
 import assert from "node:assert/strict";
+import test from "node:test";
 import {
   REPAIR_ALREADY_ENDED,
   REPAIR_NOT_MEMBER,
@@ -81,8 +81,7 @@ test("repairGhostHostHandler rejects missing session", async () => {
 
   await assert.rejects(
     () => repairGhostHostHandler(db, "uid-new", "sess-1"),
-    (error) =>
-      error instanceof Error && error.message === REPAIR_SESSION_NOT_FOUND,
+    (error) => error instanceof Error && error.message === REPAIR_SESSION_NOT_FOUND,
   );
 });
 
@@ -99,8 +98,7 @@ test("repairGhostHostHandler rejects ended session", async () => {
 
   await assert.rejects(
     () => repairGhostHostHandler(db, "uid-new", "sess-1"),
-    (error) =>
-      error instanceof Error && error.message === REPAIR_ALREADY_ENDED,
+    (error) => error instanceof Error && error.message === REPAIR_ALREADY_ENDED,
   );
 });
 

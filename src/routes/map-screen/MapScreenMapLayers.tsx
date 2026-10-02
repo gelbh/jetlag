@@ -1,15 +1,15 @@
 import { Suspense } from "react";
-import { AnnotationLayer } from "../../components/map/layers/AnnotationLayer";
-import { LiveSeekerLocationsLayer } from "../../components/map/layers/LiveSeekerLocationsLayer";
-import { GeometryEditLayer } from "../../components/map/layers/GeometryEditLayer";
-import { GameAreaMask } from "../../components/map/layers/GameAreaMask";
 import { MapView } from "../../components/map/chrome/MapView";
-import { MapDraftLayer } from "../../components/map/layers/MapDraftLayer";
-import { LiveUserLocationLayer } from "../../components/map/layers/LiveUserLocationLayer";
 import { MapViewportTracker } from "../../components/map/chrome/MapViewportTracker";
-import { ActiveThermometerWalkLayer } from "../../components/map/layers/ActiveThermometerWalkLayer";
-import { PendingQuestionLayer } from "../../components/map/layers/PendingQuestionLayer";
 import { MapDrawStrokeCapture } from "../../components/map/helpers/MapDrawStrokeCapture";
+import { ActiveThermometerWalkLayer } from "../../components/map/layers/ActiveThermometerWalkLayer";
+import { AnnotationLayer } from "../../components/map/layers/AnnotationLayer";
+import { GameAreaMask } from "../../components/map/layers/GameAreaMask";
+import { GeometryEditLayer } from "../../components/map/layers/GeometryEditLayer";
+import { LiveSeekerLocationsLayer } from "../../components/map/layers/LiveSeekerLocationsLayer";
+import { LiveUserLocationLayer } from "../../components/map/layers/LiveUserLocationLayer";
+import { MapDraftLayer } from "../../components/map/layers/MapDraftLayer";
+import { PendingQuestionLayer } from "../../components/map/layers/PendingQuestionLayer";
 import { isAskHudOwnedTool } from "../../domain/ask/askHudModes";
 import { AdminBoundariesLayer, TransitLayer } from "./lazyImports";
 import type { MapScreenController } from "./useMapScreenController";
@@ -74,8 +74,7 @@ export function MapScreenMapLayers({ controller }: MapScreenMapLayersProps) {
     drawTool,
   } = controller;
 
-  const hideMapControls =
-    activeTool !== "none" && isAskHudOwnedTool(activeTool);
+  const hideMapControls = activeTool !== "none" && isAskHudOwnedTool(activeTool);
 
   return (
     <div ref={mapShellRef} className="absolute inset-0">
@@ -104,9 +103,7 @@ export function MapScreenMapLayers({ controller }: MapScreenMapLayersProps) {
           onRecenter: requestPlacementRecenter,
           onMapClick: handleMapClick,
           chromeHudRef,
-          className: placementCrosshair
-            ? "map-crosshair h-full w-full"
-            : "h-full w-full",
+          className: placementCrosshair ? "map-crosshair h-full w-full" : "h-full w-full",
         }}
       >
         <MapViewportTracker
@@ -162,10 +159,7 @@ export function MapScreenMapLayers({ controller }: MapScreenMapLayersProps) {
             gameArea={toolGameArea}
           />
         ) : null}
-        <MapDraftLayer
-          overlays={mapDraftOverlays}
-          onMarkerActivate={handleDraftMarkerActivate}
-        />
+        <MapDraftLayer overlays={mapDraftOverlays} onMarkerActivate={handleDraftMarkerActivate} />
         {showAdminBoundaries && !adminBoundaryLoading ? (
           <Suspense fallback={null}>
             <AdminBoundariesLayer
@@ -187,9 +181,7 @@ export function MapScreenMapLayers({ controller }: MapScreenMapLayersProps) {
         className="pointer-events-none absolute inset-x-0 bottom-0 hidden bg-surface-deep/90 px-4 py-3 text-xs text-ink-secondary"
       >
         <p className="font-semibold">Session {session!.code}</p>
-        <p className="mt-1">
-          Legend: radar, thermometer, zone, pin, tentacle overlays
-        </p>
+        <p className="mt-1">Legend: radar, thermometer, zone, pin, tentacle overlays</p>
       </div>
     </div>
   );

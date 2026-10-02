@@ -1,5 +1,5 @@
-import { describe, it } from "node:test";
 import assert from "node:assert/strict";
+import { describe, it } from "node:test";
 
 async function loadTransitlandProxy() {
   const originalFetch = globalThis.fetch;
@@ -49,24 +49,15 @@ describe("transitlandProxy", () => {
     const { module, restore } = await loadTransitlandProxy();
 
     try {
-      const { fetchTransitlandVehicles, clearTransitlandCacheForTests } =
-        module;
+      const { fetchTransitlandVehicles, clearTransitlandCacheForTests } = module;
       clearTransitlandCacheForTests();
       const bounds = { south: 53.2, west: -6.5, north: 53.5, east: -6.0 };
 
-      const rtVehicles = await fetchTransitlandVehicles(
-        "f-feed~rt",
-        "test-key",
-        bounds,
-      );
+      const rtVehicles = await fetchTransitlandVehicles("f-feed~rt", "test-key", bounds);
       assert.equal(rtVehicles.length, 1);
       assert.equal(rtVehicles[0].label, "Bus 1");
 
-      const restVehicles = await fetchTransitlandVehicles(
-        "f-feed",
-        "test-key",
-        bounds,
-      );
+      const restVehicles = await fetchTransitlandVehicles("f-feed", "test-key", bounds);
       assert.equal(restVehicles.length, 1);
       assert.equal(restVehicles[0].label, "Tram 2");
     } finally {
@@ -78,8 +69,7 @@ describe("transitlandProxy", () => {
     const { module, getFetchCount, restore } = await loadTransitlandProxy();
 
     try {
-      const { fetchTransitlandVehicles, clearTransitlandCacheForTests } =
-        module;
+      const { fetchTransitlandVehicles, clearTransitlandCacheForTests } = module;
       clearTransitlandCacheForTests();
       const bounds = { south: 53.2, west: -6.5, north: 53.5, east: -6.0 };
 

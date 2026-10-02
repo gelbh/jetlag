@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, readdirSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { dirname, join, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -6,10 +6,7 @@ import { describe, expect, it } from "vitest";
 const require = createRequire(import.meta.url);
 // `require.resolve("@mantine/core")` → <pkg>/cjs/index.cjs
 const coreRoot = resolve(dirname(require.resolve("@mantine/core")), "..");
-const notificationsRoot = resolve(
-  dirname(require.resolve("@mantine/notifications")),
-  "..",
-);
+const notificationsRoot = resolve(dirname(require.resolve("@mantine/notifications")), "..");
 const componentsDir = join(coreRoot, "esm/components");
 const cssFor = (name: string) => join(coreRoot, "styles", `${name}.layer.css`);
 const srcDir = resolve(__dirname, "..");
@@ -26,11 +23,13 @@ function walkFiles(dir: string, match: RegExp): string[] {
 function mantineCoreImports(source: string): string[] {
   const re = /import\s+(type\s+)?\{([^}]*)\}\s*from\s*["']@mantine\/core["']/g;
   return [...source.matchAll(re)].flatMap(([, typeOnly, body]) =>
-    typeOnly ? [] : body
-      .split(",")
-      .map((s) => s.trim())
-      .filter((s) => s && !s.startsWith("type "))
-      .map((s) => s.split(/\s+as\s+/)[0].trim()),
+    typeOnly
+      ? []
+      : body
+          .split(",")
+          .map((s) => s.trim())
+          .filter((s) => s && !s.startsWith("type "))
+          .map((s) => s.split(/\s+as\s+/)[0].trim()),
   );
 }
 
@@ -56,9 +55,7 @@ function withInternalDeps(roots: Iterable<string>): Set<string> {
 
 function listedCssImports(file: string): string[] {
   const source = readFileSync(resolve(__dirname, file), "utf8");
-  return [
-    ...source.matchAll(/import\s+["']@mantine\/core\/styles\/([A-Za-z]+)\.layer\.css["']/g),
-  ]
+  return [...source.matchAll(/import\s+["']@mantine\/core\/styles\/([A-Za-z]+)\.layer\.css["']/g)]
     .map(([, name]) => name)
     .filter((name) => /^[A-Z]/.test(name)); // skip baseline / global / variables
 }
@@ -67,9 +64,7 @@ describe("Mantine per-component CSS", () => {
   const listed = new Set(listedCssImports("mantineShellStyles.ts"));
 
   it("covers every styled Mantine component the app renders", () => {
-    const appSources = walkFiles(srcDir, /\.tsx?$/).filter(
-      (f) => !/\.test\.tsx?$/.test(f),
-    );
+    const appSources = walkFiles(srcDir, /\.tsx?$/).filter((f) => !/\.test\.tsx?$/.test(f));
     const notificationSources = walkFiles(join(notificationsRoot, "esm"), /\.mjs$/);
     const used = new Set(
       [...appSources, ...notificationSources].flatMap((f) =>

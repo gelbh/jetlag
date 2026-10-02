@@ -1,9 +1,7 @@
 import { sentryVitePlugin } from "@sentry/vite-plugin";
 import type { PluginOption } from "vite";
 
-export function createSentryPlugins(opts: {
-  appVersion: string;
-}): PluginOption[] {
+export function createSentryPlugins(opts: { appVersion: string }): PluginOption[] {
   const sentryAuthToken = process.env.SENTRY_AUTH_TOKEN;
   const sentryOrg = process.env.SENTRY_ORG;
   const sentryProject = process.env.SENTRY_PROJECT;

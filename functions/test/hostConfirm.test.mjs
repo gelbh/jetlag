@@ -1,13 +1,13 @@
-import test from "node:test";
 import assert from "node:assert/strict";
+import test from "node:test";
 import {
   approveHostConfirmHandler,
   denyHostConfirmHandler,
-  hashToolArgs,
   HOST_CONFIRM_EXPIRED,
   HOST_CONFIRM_FORBIDDEN,
   HOST_CONFIRM_NOT_PENDING,
   HOST_CONFIRM_TTL_MS,
+  hashToolArgs,
   isHostConfirmExpired,
   requestHostConfirm,
 } from "../incident/hostConfirm.mjs";
@@ -126,14 +126,8 @@ test("hashToolArgs is stable for the same args", () => {
 
 test("isHostConfirmExpired respects TTL boundary", () => {
   const now = () => new Date("2026-07-25T12:00:00.000Z");
-  assert.equal(
-    isHostConfirmExpired("2026-07-25T12:00:00.000Z", now),
-    true,
-  );
-  assert.equal(
-    isHostConfirmExpired("2026-07-25T12:00:01.000Z", now),
-    false,
-  );
+  assert.equal(isHostConfirmExpired("2026-07-25T12:00:00.000Z", now), true);
+  assert.equal(isHostConfirmExpired("2026-07-25T12:00:01.000Z", now), false);
 });
 
 test("requestHostConfirm creates pending doc and notifies host", async () => {

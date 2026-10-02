@@ -1,6 +1,14 @@
-import type { Feature, LineString, MultiPolygon, Polygon as GeoPolygon } from "geojson";
+import type { Feature, Polygon as GeoPolygon, LineString, MultiPolygon } from "geojson";
+import type { MeasuringPlace } from "../../geo/types";
 import type { GameArea } from "../../map/annotations";
+import {
+  isMeasuringLinearLocation,
+  type MeasuringAnswer,
+  type MeasuringLocationCategory,
+  type MeasuringSubject,
+} from "../../questions/measuringQuestions";
 import type { LatLngTuple } from "../gameArea/geometry";
+import { buildMeasuringEliminationRegion } from "./eliminationRegions";
 import {
   buildCoastlineEliminationRegion,
   buildCoastlineNearRegion,
@@ -8,15 +16,7 @@ import {
   buildLocationNearRegion,
   buildMultiPlaceNearRegion,
 } from "./geometryMeasuring";
-import { buildMeasuringEliminationRegion } from "./eliminationRegions";
-import {
-  isMeasuringLinearLocation,
-  type MeasuringAnswer,
-  type MeasuringLocationCategory,
-  type MeasuringSubject,
-} from "../../questions/measuringQuestions";
 import { buildSeaLevelEliminationRegion } from "./seaLevel";
-import type { MeasuringPlace } from "../../geo/types";
 
 export interface MeasuringRegionInput {
   gameArea: GameArea;
@@ -58,20 +58,13 @@ async function buildMeasuringNearRegion(
 
   if (
     measuringSubject === "coastline" ||
-    isMeasuringLinearLocation(
-      measuringSubject,
-      measuringLocationCategory ?? undefined,
-    )
+    isMeasuringLinearLocation(measuringSubject, measuringLocationCategory ?? undefined)
   ) {
     if (measuringCoastSegments.length === 0) {
       return null;
     }
 
-    return buildCoastlineNearRegion(
-      measuringCoastSegments,
-      measuringDistanceMeters,
-      gameArea,
-    );
+    return buildCoastlineNearRegion(measuringCoastSegments, measuringDistanceMeters, gameArea);
   }
 
   if (measuringSubject === "sea_level") {
@@ -94,18 +87,13 @@ async function buildMeasuringNearRegion(
     return null;
   }
 
-  return buildLocationNearRegion(
-    measuringTargetPoint,
-    measuringDistanceMeters,
-    gameArea,
-  );
+  return buildLocationNearRegion(measuringTargetPoint, measuringDistanceMeters, gameArea);
 }
 
 export async function buildMeasuringRegions(
   input: MeasuringRegionInput,
 ): Promise<MeasuringRegions | null> {
-  const near =
-    input.precomputedNearRegion ?? (await buildMeasuringNearRegion(input));
+  const near = input.precomputedNearRegion ?? (await buildMeasuringNearRegion(input));
   if (!near || input.measuringDistanceMeters === null || !input.measuringAnswer) {
     return null;
   }
@@ -123,10 +111,7 @@ export async function buildMeasuringRegions(
 
   if (
     measuringSubject === "coastline" ||
-    isMeasuringLinearLocation(
-      measuringSubject,
-      measuringLocationCategory ?? undefined,
-    )
+    isMeasuringLinearLocation(measuringSubject, measuringLocationCategory ?? undefined)
   ) {
     const elimination = await buildCoastlineEliminationRegion(
       measuringCoastSegments,
@@ -140,21 +125,13 @@ export async function buildMeasuringRegions(
   }
 
   if (measuringSubject === "sea_level") {
-    const elimination = buildSeaLevelEliminationRegion(
-      near,
-      gameArea,
-      measuringAnswer,
-    );
+    const elimination = buildSeaLevelEliminationRegion(near, gameArea, measuringAnswer);
 
     return elimination ? { near, elimination } : null;
   }
 
   if (usesAllPlacesInArea) {
-    const elimination = buildMeasuringEliminationRegion(
-      near,
-      gameArea,
-      measuringAnswer,
-    );
+    const elimination = buildMeasuringEliminationRegion(near, gameArea, measuringAnswer);
 
     return elimination ? { near, elimination } : null;
   }

@@ -1,5 +1,5 @@
-import { HudStarIcon } from "../ui/brand/HudIcons";
 import { useGamePresetStore } from "../../state/gamePresetStore";
+import { HudStarIcon } from "../ui/brand/HudIcons";
 
 export function PresetFavouriteButton({ presetId }: { presetId: string }) {
   const isFavourite = useGamePresetStore((state) => state.isFavourite(presetId));
@@ -25,9 +25,7 @@ export function PresetFavouriteButton({ presetId }: { presetId: string }) {
         backgroundColor: isFavourite
           ? "oklch(from var(--color-signal) l c h / 0.14)"
           : "oklch(from var(--color-field-ink) l c h / 0.06)",
-        color: isFavourite
-          ? "var(--color-signal)"
-          : "var(--color-field-ink-muted)",
+        color: isFavourite ? "var(--color-signal)" : "var(--color-field-ink-muted)",
         WebkitTapHighlightColor: "transparent",
       }}
     >

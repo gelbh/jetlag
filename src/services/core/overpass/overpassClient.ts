@@ -1,16 +1,15 @@
-import { FetchTimeoutError, fetchWithTimeout } from "../network/fetchWithTimeout";
+import { OVERPASS_ENDPOINTS, OVERPASS_USER_AGENT } from "../../overpass/endpoints";
+import { withOverpassConcurrencyLimit } from "../../overpass/requestQueue";
 import { buildPremiumProxyHeaders } from "../auth/accessControl";
 import { getFirebaseAuth } from "../firebase/firebase";
 import { waitForRestoredFirebaseAuth } from "../firebase/firebaseAuthReady";
-import { OVERPASS_ENDPOINTS, OVERPASS_USER_AGENT } from "../../overpass/endpoints";
-import { withOverpassConcurrencyLimit } from "../../overpass/requestQueue";
+import { FetchTimeoutError, fetchWithTimeout } from "../network/fetchWithTimeout";
 
 const OVERPASS_MAX_RETRIES = 3;
 const OVERPASS_BASE_BACKOFF_MS = 750;
 const OVERPASS_FETCH_TIMEOUT_MS = 15_000;
 
-const OVERPASS_UNAVAILABLE_MESSAGE =
-  "Map data didn't load. Check your connection and try again.";
+const OVERPASS_UNAVAILABLE_MESSAGE = "Map data didn't load. Check your connection and try again.";
 
 export class OverpassUnavailableError extends Error {
   constructor(message = OVERPASS_UNAVAILABLE_MESSAGE) {
@@ -26,10 +25,7 @@ export class OverpassPayloadTooLargeError extends Error {
   }
 }
 
-export function overpassErrorMessage(
-  error: unknown,
-  fallback = "Map data didn't load.",
-): string {
+export function overpassErrorMessage(error: unknown, fallback = "Map data didn't load."): string {
   if (error instanceof OverpassUnavailableError) {
     return error.message;
   }
@@ -47,10 +43,7 @@ function sleep(ms: number): Promise<void> {
   });
 }
 
-function retryDelayMs(
-  attempt: number,
-  retryAfterHeader: string | null,
-): number {
+function retryDelayMs(attempt: number, retryAfterHeader: string | null): number {
   if (retryAfterHeader) {
     const retryAfterSeconds = Number.parseInt(retryAfterHeader, 10);
     if (Number.isFinite(retryAfterSeconds) && retryAfterSeconds >= 0) {
@@ -98,10 +91,7 @@ function isNonRetryableOverpassFailure(error: unknown): boolean {
   );
 }
 
-async function postOverpassQuery(
-  endpoint: string,
-  query: string,
-): Promise<Response> {
+async function postOverpassQuery(endpoint: string, query: string): Promise<Response> {
   return fetchWithTimeout(
     endpoint,
     {
@@ -128,10 +118,7 @@ async function fetchOverpassDirect(query: string): Promise<Response> {
           return response;
         }
 
-        if (
-          isRetryableOverpassStatus(response.status) &&
-          attempt < OVERPASS_MAX_RETRIES
-        ) {
+        if (isRetryableOverpassStatus(response.status) && attempt < OVERPASS_MAX_RETRIES) {
           lastError = new OverpassUnavailableError();
           await sleep(retryDelayMs(attempt, response.headers.get("Retry-After")));
           continue;
@@ -194,10 +181,7 @@ function proxyHeadersIncludeAuth(headers: HeadersInit): boolean {
   );
 }
 
-async function fetchOverpassViaProxy(
-  query: string,
-  proxyHeaders: HeadersInit,
-): Promise<Response> {
+async function fetchOverpassViaProxy(query: string, proxyHeaders: HeadersInit): Promise<Response> {
   const proxyUrl = overpassProxyUrl();
   if (!proxyUrl) {
     return fetchOverpassDirect(query);
@@ -234,10 +218,7 @@ async function fetchOverpassViaProxy(
         return response;
       }
 
-      if (
-        isRetryableOverpassStatus(response.status) &&
-        attempt < OVERPASS_MAX_RETRIES
-      ) {
+      if (isRetryableOverpassStatus(response.status) && attempt < OVERPASS_MAX_RETRIES) {
         lastError = new OverpassUnavailableError();
         await sleep(retryDelayMs(attempt, response.headers.get("Retry-After")));
         continue;
@@ -253,10 +234,7 @@ async function fetchOverpassViaProxy(
 
       throw new Error("Overpass query failed.");
     } catch (error) {
-      if (
-        error instanceof OverpassUnavailableError ||
-        isNonRetryableOverpassFailure(error)
-      ) {
+      if (error instanceof OverpassUnavailableError || isNonRetryableOverpassFailure(error)) {
         throw error;
       }
 
@@ -298,9 +276,7 @@ async function fetchOverpass(query: string): Promise<Response> {
 
   const user = getFirebaseAuth().currentUser;
   if (!user) {
-    throw new OverpassUnavailableError(
-      "Map data unavailable. Sign in and try again.",
-    );
+    throw new OverpassUnavailableError("Map data unavailable. Sign in and try again.");
   }
 
   const freshToken = await user.getIdToken(true);

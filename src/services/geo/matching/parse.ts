@@ -1,9 +1,6 @@
-import type { GameArea } from "@/domain/map/annotations";
-import {
-  isPointInGameArea,
-  type LatLngTuple,
-} from "@/domain/geometry/gameArea/geometry";
 import type { MatchingFeature } from "@/domain/geo/types";
+import { isPointInGameArea, type LatLngTuple } from "@/domain/geometry/gameArea/geometry";
+import type { GameArea } from "@/domain/map/annotations";
 import type { MatchingCategoryId } from "@/domain/questions";
 import type { SessionCustomCategory } from "@/domain/session/catalog/sessionCustomContent";
 import type { OverpassElement } from "./types";
@@ -14,9 +11,7 @@ function isHonoraryConsulate(tags: Record<string, string>): boolean {
   const name = tags.name?.toLowerCase() ?? "";
 
   return (
-    diplomatic.includes("honorary") ||
-    office.includes("honorary") ||
-    name.includes("honorary")
+    diplomatic.includes("honorary") || office.includes("honorary") || name.includes("honorary")
   );
 }
 
@@ -25,12 +20,7 @@ function isMiniatureGolf(tags: Record<string, string>): boolean {
 }
 
 function matchingFeatureName(tags: Record<string, string>): string | null {
-  const candidates = [
-    tags.name,
-    tags["name:en"],
-    tags.official_name,
-    tags["official_name:en"],
-  ];
+  const candidates = [tags.name, tags["name:en"], tags.official_name, tags["official_name:en"]];
 
   for (const candidate of candidates) {
     const trimmed = candidate?.trim();
@@ -115,8 +105,6 @@ export function parseMatchingFeatures(
     .filter((feature): feature is MatchingFeature => feature !== null);
 }
 
-export function countMatchingFeaturesInPlayArea(
-  features: MatchingFeature[],
-): number {
+export function countMatchingFeaturesInPlayArea(features: MatchingFeature[]): number {
   return features.filter((feature) => feature.inPlayArea !== false).length;
 }

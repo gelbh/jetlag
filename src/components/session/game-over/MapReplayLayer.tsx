@@ -1,5 +1,5 @@
-import { SheetHost } from "../../ui/sheets/SheetHost";
 import { PopupCloseButton } from "../../ui/brand/PopupCloseButton";
+import { SheetHost } from "../../ui/sheets/SheetHost";
 
 interface MapReplayLayerProps {
   open: boolean;
@@ -33,8 +33,8 @@ export function MapReplayLayer({ open, sessionId, onClose }: MapReplayLayerProps
           Map placeholder
         </div>
         <p className="max-w-sm text-center text-sm text-ink-muted">
-          Replay scrubber for session {sessionId} will show start pins, trails,
-          and hiding zones in a later phase.
+          Replay scrubber for session {sessionId} will show start pins, trails, and hiding zones in
+          a later phase.
         </p>
       </div>
     </SheetHost>

@@ -1,9 +1,6 @@
 import { AppLink } from "../../navigation/AppLink";
 import { HudHomeIcon } from "../brand/HudIcons";
-import {
-  screenBackLinkClassName,
-  screenHeaderInsetTopClassName,
-} from "./ScreenHeader";
+import { screenBackLinkClassName, screenHeaderInsetTopClassName } from "./ScreenHeader";
 
 type ScreenNavPlacement = "fixed" | "sticky" | "inline";
 
@@ -54,11 +51,7 @@ export function ScreenNav({
   return (
     <nav className={shellClassName} aria-label="Screen navigation">
       {isHome ? (
-        <AppLink
-          to={homeTo}
-          className={homeLinkClassName}
-          aria-label="Home"
-        >
+        <AppLink to={homeTo} className={homeLinkClassName} aria-label="Home">
           <HudHomeIcon className="h-5 w-5" />
         </AppLink>
       ) : (

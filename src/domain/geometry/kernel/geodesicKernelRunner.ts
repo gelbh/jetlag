@@ -8,18 +8,14 @@ const geodesicWasm = createLazyWasmImport(() => import("./geodesicWasm"));
 export async function dispatchGeodesicLineBuffer(
   segment: Feature<LineString>,
   distanceMeters: number,
-  sampleSpacingMeters?: number
+  sampleSpacingMeters?: number,
 ): Promise<PolygonFeature | null> {
   return dispatchKernel({
     entrypoint: "geodesicLineBuffer",
     label: "geodesicLineBuffer",
     runWasm: async () => {
       const wasm = await geodesicWasm.load();
-      return wasm.wasmGeodesicLineBuffer(
-        segment,
-        distanceMeters,
-        sampleSpacingMeters,
-      );
+      return wasm.wasmGeodesicLineBuffer(segment, distanceMeters, sampleSpacingMeters);
     },
   });
 }

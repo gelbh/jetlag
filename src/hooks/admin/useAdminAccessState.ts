@@ -1,9 +1,6 @@
-import { useEffect, useRef, useState } from "react";
 import type { User } from "firebase/auth";
-import {
-  resolveAdminAccess,
-  type AdminAccessResolution,
-} from "../../domain/admin/adminAccess";
+import { useEffect, useRef, useState } from "react";
+import { type AdminAccessResolution, resolveAdminAccess } from "../../domain/admin/adminAccess";
 import { usePermanentAuthUser } from "../billing/usePermanentAuthUser";
 
 export type AdminAccessState = "loading" | AdminAccessResolution;
@@ -41,9 +38,7 @@ export function useAdminAccessState(): {
   }, [authReady, user]);
 
   const state: AdminAccessState =
-    !authReady || resolved == null || resolved.userKey !== userKey
-      ? "loading"
-      : resolved.value;
+    !authReady || resolved == null || resolved.userKey !== userKey ? "loading" : resolved.value;
 
   return { state, user, authReady, isPermanent };
 }

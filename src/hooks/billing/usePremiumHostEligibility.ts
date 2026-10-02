@@ -1,15 +1,15 @@
+import type { User } from "firebase/auth";
 import { useEffect, useMemo } from "react";
 import type { SetURLSearchParams } from "react-router-dom";
-import type { SessionTier } from "../../domain/map/annotations";
 import {
   canSelectPremiumSessionTier,
   formatEntitlementSummary,
   formatPremiumSessionCreditsLabel,
   type PremiumEntitlements,
 } from "../../domain/billing/premiumProducts";
-import { isFirebaseConfigured } from "../../services/core/firebase/firebase";
+import type { SessionTier } from "../../domain/map/annotations";
 import { isPermanentUser } from "../../services/core/auth/accountAuth";
-import type { User } from "firebase/auth";
+import { isFirebaseConfigured } from "../../services/core/firebase/firebase";
 import { usePermanentAuthUser } from "./usePermanentAuthUser";
 
 const TIER_OPTIONS = [
@@ -42,10 +42,7 @@ export function usePremiumHostEligibility({
 }: PremiumHostEligibilityInput) {
   const { isPermanent } = usePermanentAuthUser();
 
-  const canSelectPremiumTier = canSelectPremiumSessionTier(
-    premiumEntitlements,
-    hostHasAccessClaim,
-  );
+  const canSelectPremiumTier = canSelectPremiumSessionTier(premiumEntitlements, hostHasAccessClaim);
   const packCreditsLabel = formatPremiumSessionCreditsLabel(premiumEntitlements);
   const packPremiumFlow =
     isFirebaseConfigured() &&
@@ -59,21 +56,12 @@ export function usePremiumHostEligibility({
       return "premium";
     }
 
-    if (
-      sessionTier === "premium" &&
-      !canSelectPremiumTier &&
-      !hostHasAccessClaim
-    ) {
+    if (sessionTier === "premium" && !canSelectPremiumTier && !hostHasAccessClaim) {
       return "free";
     }
 
     return sessionTier;
-  }, [
-    canSelectPremiumTier,
-    hostHasAccessClaim,
-    packPremiumFlow,
-    sessionTier,
-  ]);
+  }, [canSelectPremiumTier, hostHasAccessClaim, packPremiumFlow, sessionTier]);
 
   const requiresPremiumSignIn =
     isFirebaseConfigured() &&
@@ -91,10 +79,7 @@ export function usePremiumHostEligibility({
   const premiumEntitlementSummary = formatEntitlementSummary(premiumEntitlements);
 
   const visibleTierOptions = useMemo(
-    () =>
-      TIER_OPTIONS.filter(
-        (option) => option.value === "free" || canSelectPremiumTier,
-      ),
+    () => TIER_OPTIONS.filter((option) => option.value === "free" || canSelectPremiumTier),
     [canSelectPremiumTier],
   );
 
@@ -109,9 +94,7 @@ export function usePremiumHostEligibility({
   }, [canSelectPremiumTier, resolvedSessionTier, searchParams, setSearchParams]);
 
   const resolveSubmitTier = (): SessionTier =>
-    isFirebaseConfigured() && resolvedSessionTier === "premium"
-      ? "premium"
-      : "free";
+    isFirebaseConfigured() && resolvedSessionTier === "premium" ? "premium" : "free";
 
   const validatePremiumHostSubmit = (
     user: User | null,

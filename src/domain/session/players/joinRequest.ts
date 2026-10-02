@@ -1,11 +1,6 @@
 export const JOIN_REQUEST_TTL_MS = 10 * 60 * 1000;
 
-export type JoinRequestStatus =
-  | "pending"
-  | "accepted"
-  | "declined"
-  | "cancelled"
-  | "expired";
+export type JoinRequestStatus = "pending" | "accepted" | "declined" | "cancelled" | "expired";
 
 export type JoinRequestRole = "seeker" | "hider" | "observer";
 

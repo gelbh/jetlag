@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
 import type { User } from "firebase/auth";
+import { useEffect, useState } from "react";
 import { isFirebaseConfigured } from "@/services/core/firebase/authBootstrapState";
 
 type PermanentAuthDeps = {
@@ -18,18 +18,20 @@ function loadPermanentAuthDeps(): Promise<PermanentAuthDeps> {
     import("firebase/auth"),
     import("@/services/core/firebase/firebase"),
     import("@/services/core/firebase/firebaseAuthReady"),
-  ]).then(([authSdk, firebase, authReady]) => {
-    loadedDeps = {
-      getFirebaseAuth: firebase.getFirebaseAuth,
-      onAuthStateChanged: authSdk.onAuthStateChanged,
-      waitForPermanentAuthReady: authReady.waitForPermanentAuthReady,
-    };
-    return loadedDeps;
-  }).catch((error: unknown) => {
-    // Don't cache a transient chunk-load failure: the next mount retries.
-    depsPromise = null;
-    throw error;
-  });
+  ])
+    .then(([authSdk, firebase, authReady]) => {
+      loadedDeps = {
+        getFirebaseAuth: firebase.getFirebaseAuth,
+        onAuthStateChanged: authSdk.onAuthStateChanged,
+        waitForPermanentAuthReady: authReady.waitForPermanentAuthReady,
+      };
+      return loadedDeps;
+    })
+    .catch((error: unknown) => {
+      // Don't cache a transient chunk-load failure: the next mount retries.
+      depsPromise = null;
+      throw error;
+    });
   return depsPromise;
 }
 
@@ -44,9 +46,7 @@ export function usePermanentAuthUser(): {
   authReady: boolean;
 } {
   const [user, setUser] = useState<User | null>(() =>
-    isFirebaseConfigured() && loadedDeps
-      ? loadedDeps.getFirebaseAuth().currentUser
-      : null,
+    isFirebaseConfigured() && loadedDeps ? loadedDeps.getFirebaseAuth().currentUser : null,
   );
   const [authReady, setAuthReady] = useState(() => !isFirebaseConfigured());
 

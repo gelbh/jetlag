@@ -1,9 +1,9 @@
-import { beforeAll, describe, expect, it, vi } from "vitest";
 import { existsSync } from "node:fs";
-import { fileURLToPath } from "node:url";
 import path from "node:path";
-import { runEndGameMaskFromDisks } from "./maskKernelRunner";
+import { fileURLToPath } from "node:url";
+import { beforeAll, describe, expect, it, vi } from "vitest";
 import { loadPolygonGolden } from "./loadPolygonGolden";
+import { runEndGameMaskFromDisks } from "./maskKernelRunner";
 import { assertPolygonTopologyParity } from "./parity";
 import type { DiskSpec, GameAreaGeometry, PolygonFeature } from "./types";
 
@@ -57,10 +57,7 @@ function overlappingEndGameDisks(): DiskSpec[] {
   const centerLat = 51.45;
   const centerLng = -0.15;
   return Array.from({ length: 5 }, (_, index) => ({
-    center: [centerLat + index * 0.002, centerLng + index * 0.002] as [
-      number,
-      number,
-    ],
+    center: [centerLat + index * 0.002, centerLng + index * 0.002] as [number, number],
     radiusMeters: 500,
   }));
 }
@@ -87,9 +84,7 @@ describe.skipIf(!wasmPkgReady)("mask wasm parity", () => {
   });
 
   it("raw wasm matches golden on a single end-game disk", async () => {
-    const disks: DiskSpec[] = [
-      { center: [51.45, -0.15], radiusMeters: 400 },
-    ];
+    const disks: DiskSpec[] = [{ center: [51.45, -0.15], radiusMeters: 400 }];
     const golden = loadPolygonGolden("mask", "single-endgame-disk.json");
     const wasm = await wasmBuildEndGameMaskFromDisks(gameArea, disks);
     assertPolygonTopologyParity(wasm, golden, topologyBbox);
@@ -116,15 +111,11 @@ describe("mask wasm failure", () => {
       resetMaskWasmForTests: vi.fn(),
     }));
 
-    const { runMaskFromUnionInput: runWithMock } = await import(
-      "./maskKernelRunner"
-    );
+    const { runMaskFromUnionInput: runWithMock } = await import("./maskKernelRunner");
 
     const input = { polygons: [square(-0.18)], disks: [] };
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
-    await expect(runWithMock(input, gameArea)).rejects.toThrow(
-      "wasm init failed",
-    );
+    await expect(runWithMock(input, gameArea)).rejects.toThrow("wasm init failed");
     expect(warnSpy).toHaveBeenCalled();
     warnSpy.mockRestore();
 
@@ -142,13 +133,9 @@ describe("mask wasm failure", () => {
       resetMaskWasmForTests: vi.fn(),
     }));
 
-    const { runEndGameMaskFromDisks: runWithMock } = await import(
-      "./maskKernelRunner"
-    );
+    const { runEndGameMaskFromDisks: runWithMock } = await import("./maskKernelRunner");
 
-    const disks: DiskSpec[] = [
-      { center: [51.45, -0.15], radiusMeters: 400 },
-    ];
+    const disks: DiskSpec[] = [{ center: [51.45, -0.15], radiusMeters: 400 }];
     await runWithMock(gameArea, disks);
     expect(wasmBuildEndGame).toHaveBeenCalled();
 

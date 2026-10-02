@@ -2,16 +2,13 @@ import { fireEvent, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
-  createMockGeolocationPosition,
-  mockGeolocation,
-} from "@/test/mocks/geolocation";
-import {
   persistLocationAccessConfirmed,
-  retainLocationPermissionDemand,
   resetLocationPermissionUiForTests,
+  retainLocationPermissionDemand,
 } from "@/services/core/location/locationPermissionUi";
-import { LocationPermissionPrompt } from "./LocationPermissionPrompt";
+import { createMockGeolocationPosition, mockGeolocation } from "@/test/mocks/geolocation";
 import { renderWithAppUi } from "../../../test/renderWithAppUi";
+import { LocationPermissionPrompt } from "./LocationPermissionPrompt";
 
 function mockPermissions(state: PermissionState): void {
   Object.defineProperty(navigator, "permissions", {
@@ -47,9 +44,7 @@ describe("LocationPermissionPrompt", () => {
       expect(dialog).toHaveFocus();
     });
     expect(dialog.className).not.toMatch(/map-float-alert/);
-    expect(
-      screen.getByRole("button", { name: /allow location/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /allow location/i })).toBeInTheDocument();
 
     release();
   });
@@ -79,9 +74,7 @@ describe("LocationPermissionPrompt", () => {
       </MemoryRouter>,
     );
 
-    fireEvent.click(
-      await screen.findByRole("button", { name: /allow location/i }),
-    );
+    fireEvent.click(await screen.findByRole("button", { name: /allow location/i }));
 
     await waitFor(() => {
       expect(getCurrentPosition).toHaveBeenCalled();
@@ -130,9 +123,7 @@ describe("LocationPermissionPrompt", () => {
       </MemoryRouter>,
     );
 
-    fireEvent.click(
-      await screen.findByRole("button", { name: /allow location/i }),
-    );
+    fireEvent.click(await screen.findByRole("button", { name: /allow location/i }));
 
     await waitFor(() => {
       expect(getCurrentPosition).toHaveBeenCalled();
@@ -152,9 +143,7 @@ describe("LocationPermissionPrompt", () => {
       </MemoryRouter>,
     );
 
-    expect(
-      await screen.findByRole("dialog", { name: /location blocked/i }),
-    ).toBeInTheDocument();
+    expect(await screen.findByRole("dialog", { name: /location blocked/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /try again/i })).toBeInTheDocument();
 
     release();
@@ -177,9 +166,7 @@ describe("LocationPermissionPrompt", () => {
       expect(getCurrentPosition).toHaveBeenCalled();
     });
 
-    expect(
-      await screen.findByRole("dialog", { name: /location blocked/i }),
-    ).toBeInTheDocument();
+    expect(await screen.findByRole("dialog", { name: /location blocked/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /try again/i })).toBeInTheDocument();
 
     release();

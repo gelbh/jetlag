@@ -1,14 +1,14 @@
 import type { Feature, LineString } from "geojson";
+import { polygonRingsToLineStrings } from "@/domain/geometry/measuring/ringToLineString";
 import type { GameArea } from "@/domain/map/annotations";
 import type {
   CustomMatchingAreasByLevel,
   MatchingAdminLevel,
 } from "@/domain/session/catalog/sessionCustomContent";
-import { polygonRingsToLineStrings } from "@/domain/geometry/measuring/ringToLineString";
 import { parseMatchingAreaGeoJson } from "../matching/matchingAreaGeoJson";
 import {
-  adminLevelForMeasuringBorderKind,
   type AdminDivisionCounts,
+  adminLevelForMeasuringBorderKind,
 } from "./adminDivisionAvailability";
 
 export function lineStringsFromAdminDivisionBoundaries(

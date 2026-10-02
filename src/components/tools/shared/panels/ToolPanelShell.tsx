@@ -1,8 +1,5 @@
 import type { ReactNode } from "react";
-import {
-  mapToolPlacingLabel,
-  type DockableMapTool,
-} from "@/domain/map/mapTools";
+import { type DockableMapTool, mapToolPlacingLabel } from "@/domain/map/mapTools";
 
 interface ToolPanelShellProps {
   toolId: DockableMapTool;
@@ -27,13 +24,7 @@ export function ToolPanelShell({
   const showHeader = !stepper && (prompt || helper);
 
   return (
-    <div
-      className={
-        fillHeight
-          ? "flex min-h-0 flex-1 flex-col gap-2.5"
-          : "space-y-2.5"
-      }
-    >
+    <div className={fillHeight ? "flex min-h-0 flex-1 flex-col gap-2.5" : "space-y-2.5"}>
       {showHeader ? (
         <div className="space-y-1 pb-2 text-center">
           {!prompt ? (
@@ -44,13 +35,9 @@ export function ToolPanelShell({
           {prompt ? (
             typeof prompt === "string" ? (
               <div className="space-y-0.5 text-center">
-                <p className="text-sm font-medium leading-snug text-ink">
-                  {prompt}
-                </p>
+                <p className="text-sm font-medium leading-snug text-ink">{prompt}</p>
                 {ruleSummary ? (
-                  <p className="text-xs leading-snug text-ink-dim">
-                    {ruleSummary}
-                  </p>
+                  <p className="text-xs leading-snug text-ink-dim">{ruleSummary}</p>
                 ) : null}
               </div>
             ) : (
@@ -67,11 +54,7 @@ export function ToolPanelShell({
         </div>
       ) : null}
       {stepper ? <div className="shrink-0">{stepper}</div> : null}
-      {fillHeight ? (
-        <div className="flex min-h-0 flex-1 flex-col">{children}</div>
-      ) : (
-        children
-      )}
+      {fillHeight ? <div className="flex min-h-0 flex-1 flex-col">{children}</div> : children}
     </div>
   );
 }

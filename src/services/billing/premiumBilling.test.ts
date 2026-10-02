@@ -1,5 +1,6 @@
 import { FirebaseError } from "firebase/app";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { createTestSession } from "../../test/fixtures/sessions";
 import {
   createPremiumRemoteSession,
   fetchPremiumEntitlements,
@@ -7,7 +8,6 @@ import {
   startPremiumCheckout,
   startPremiumTrial,
 } from "./premiumBilling";
-import { createTestSession } from "../../test/fixtures/sessions";
 
 const { callable, httpsCallable, isFirebaseConfigured } = vi.hoisted(() => {
   const callable = vi.fn();
@@ -77,23 +77,15 @@ describe("premiumBilling", () => {
   });
 
   it("maps callable errors when entitlements fail", async () => {
-    callable.mockRejectedValueOnce(
-      new FirebaseError("functions/internal", "Billing unavailable"),
-    );
+    callable.mockRejectedValueOnce(new FirebaseError("functions/internal", "Billing unavailable"));
 
-    await expect(fetchPremiumEntitlements()).rejects.toThrow(
-      "Billing unavailable",
-    );
+    await expect(fetchPremiumEntitlements()).rejects.toThrow("Billing unavailable");
   });
 
   it("maps generic INTERNAL callable errors to fallback text", async () => {
-    callable.mockRejectedValueOnce(
-      new FirebaseError("functions/internal", "INTERNAL"),
-    );
+    callable.mockRejectedValueOnce(new FirebaseError("functions/internal", "INTERNAL"));
 
-    await expect(startPremiumCheckout("pack_1")).rejects.toThrow(
-      "Could not start checkout.",
-    );
+    await expect(startPremiumCheckout("pack_1")).rejects.toThrow("Could not start checkout.");
     expect(track).toHaveBeenCalledWith("premium_checkout_failed", {
       productKey: "pack_1",
       message: "Could not start checkout.",
@@ -103,9 +95,7 @@ describe("premiumBilling", () => {
   it("starts checkout and returns the redirect URL", async () => {
     callable.mockResolvedValueOnce({ data: { url: "https://checkout.test" } });
 
-    await expect(startPremiumCheckout("pack_3")).resolves.toBe(
-      "https://checkout.test",
-    );
+    await expect(startPremiumCheckout("pack_3")).resolves.toBe("https://checkout.test");
     expect(callable).toHaveBeenCalledWith({
       productKey: "pack_3",
     });
@@ -117,9 +107,7 @@ describe("premiumBilling", () => {
   it("tracks checkout failure when redirect URL is missing", async () => {
     callable.mockResolvedValueOnce({ data: {} });
 
-    await expect(startPremiumCheckout("monthly")).rejects.toThrow(
-      "Checkout URL missing.",
-    );
+    await expect(startPremiumCheckout("monthly")).rejects.toThrow("Checkout URL missing.");
     expect(track).toHaveBeenCalledWith("premium_checkout_failed", {
       productKey: "monthly",
       message: "Checkout URL missing.",
@@ -163,9 +151,7 @@ describe("premiumBilling", () => {
   it("refreshes auth and retries premium create after permission-denied", async () => {
     const session = createTestSession({ id: "session-premium", code: "PREM" });
     callable
-      .mockRejectedValueOnce(
-        new FirebaseError("functions/permission-denied", "denied"),
-      )
+      .mockRejectedValueOnce(new FirebaseError("functions/permission-denied", "denied"))
       .mockResolvedValueOnce({
         data: {
           session: {
@@ -216,9 +202,7 @@ describe("premiumBilling", () => {
         distanceUnit: "imperial",
         hostAppVersion: "0.4.0",
       }),
-    ).rejects.toThrow(
-      "Premium unlock required. Buy a session or subscription first.",
-    );
+    ).rejects.toThrow("Premium unlock required. Buy a session or subscription first.");
     expect(forceRefreshIdToken).toHaveBeenCalledOnce();
   });
 

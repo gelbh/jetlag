@@ -57,13 +57,14 @@ export function extractTagPredicates(ql) {
   /** @type {Array<{ key: string, op: "eq" | "regex", value: string }>} */
   const preds = [];
   const re = /\["([^"\\]+)"\s*(=|~)\s*"([^"\\]*)"\]/g;
-  let match;
-  while ((match = re.exec(ql)) != null) {
+  let match = re.exec(ql);
+  while (match != null) {
     preds.push({
       key: match[1],
       op: match[2] === "~" ? "regex" : "eq",
       value: match[3],
     });
+    match = re.exec(ql);
   }
   return preds;
 }
@@ -78,10 +79,7 @@ export function classifyOverpassQuery(ql) {
   const bbox = extractOverpassBbox(text);
   const around = extractAround(text);
 
-  if (
-    text.includes('natural"="water"') &&
-    (text.includes("waterway") || text.includes("place"))
-  ) {
+  if (text.includes('natural"="water"') && (text.includes("waterway") || text.includes("place"))) {
     // Fail closed: landmass needs a bbox (never unbounded PostGIS).
     if (!bbox) return null;
     return { family: "landmass", meta: { bbox, tags, around } };
@@ -100,8 +98,7 @@ export function classifyOverpassQuery(ql) {
   // Measuring linear borders use way["boundary"="administrative"]… + out geom.
   // Admin-division uses relation["boundary"="administrative"]… — require relation.
   const isAdminRelation =
-    /relation\s*\[\s*"boundary"\s*=\s*"administrative"/i.test(text) &&
-    text.includes("admin_level");
+    /relation\s*\[\s*"boundary"\s*=\s*"administrative"/i.test(text) && text.includes("admin_level");
   const isLinearWayGeom =
     /\bout\s+geom\b/i.test(text) &&
     /way\s*\[/.test(text) &&

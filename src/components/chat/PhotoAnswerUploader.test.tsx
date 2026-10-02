@@ -1,9 +1,9 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MantineProvider } from "@mantine/core";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { PhotoAnswerUploader } from "./PhotoAnswerUploader";
 import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
 import { jetlagTheme } from "../../theme/theme";
+import { PhotoAnswerUploader } from "./PhotoAnswerUploader";
 
 const pendingQuestion: PendingQuestionRecord = {
   id: "pq-photo",
@@ -66,9 +66,7 @@ describe("PhotoAnswerUploader", () => {
   it("shows outage notice and mark-sent action", () => {
     renderUploader();
 
-    expect(
-      screen.getByText(/In-app photo upload is temporarily unavailable/i),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/In-app photo upload is temporarily unavailable/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Mark sent" })).toBeInTheDocument();
     expect(document.querySelector('input[type="file"]')).toBeNull();
   });
@@ -76,12 +74,10 @@ describe("PhotoAnswerUploader", () => {
   it("uses iOS Mantine controls", () => {
     renderUploader();
 
-    expect(screen.getByRole("button", { name: "Mark sent" })).toHaveClass(
+    expect(screen.getByRole("button", { name: "Mark sent" })).toHaveClass("mantine-Button-root");
+    expect(screen.getByRole("button", { name: "I cannot answer the question" })).toHaveClass(
       "mantine-Button-root",
     );
-    expect(
-      screen.getByRole("button", { name: "I cannot answer the question" }),
-    ).toHaveClass("mantine-Button-root");
     expect(document.querySelector(".btn-primary")).toBeNull();
     expect(document.querySelector(".btn-secondary")).toBeNull();
   });
@@ -107,9 +103,7 @@ describe("PhotoAnswerUploader", () => {
     const onAnswerQuestion = vi.fn().mockResolvedValue(undefined);
     renderUploader(onAnswerQuestion);
 
-    fireEvent.click(
-      screen.getByRole("button", { name: "I cannot answer the question" }),
-    );
+    fireEvent.click(screen.getByRole("button", { name: "I cannot answer the question" }));
 
     await waitFor(() => {
       expect(onAnswerQuestion).toHaveBeenCalledWith(
@@ -123,17 +117,13 @@ describe("PhotoAnswerUploader", () => {
   });
 
   it("shows an error when saving the answer fails", async () => {
-    const onAnswerQuestion = vi
-      .fn()
-      .mockRejectedValue(new Error("Could not save your answer."));
+    const onAnswerQuestion = vi.fn().mockRejectedValue(new Error("Could not save your answer."));
     renderUploader(onAnswerQuestion);
 
     fireEvent.click(screen.getByRole("button", { name: "Mark sent" }));
 
     await waitFor(() => {
-      expect(
-        screen.getByText("Could not save your answer."),
-      ).toBeInTheDocument();
+      expect(screen.getByText("Could not save your answer.")).toBeInTheDocument();
     });
   });
 });

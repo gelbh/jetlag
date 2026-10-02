@@ -1,12 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { AnnotationRecord } from "../../domain/map/annotations";
 import {
+  clearOfflineQueueForSession,
   enqueueOfflineWrite,
   readOfflineQueue,
   readOfflineQueueForSession,
   recordOfflineWriteFailure,
   removeOfflineWrite,
-  clearOfflineQueueForSession,
   shouldRetryOfflineWrite,
 } from "./offlineQueue";
 
@@ -54,7 +54,15 @@ describe("offlineQueue", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-01-01T00:00:00.000Z"));
 
-    expect(shouldRetryOfflineWrite({ kind: "annotation", id: "a", sessionId: "s", annotation, createdAt: "" })).toBe(true);
+    expect(
+      shouldRetryOfflineWrite({
+        kind: "annotation",
+        id: "a",
+        sessionId: "s",
+        annotation,
+        createdAt: "",
+      }),
+    ).toBe(true);
 
     const failed = {
       kind: "annotation" as const,
@@ -106,19 +114,17 @@ describe("offlineQueue", () => {
       "Failed to delete record from object store",
       "UnknownError",
     );
-    const deleteSpy = vi
-      .spyOn(IDBObjectStore.prototype, "delete")
-      .mockImplementation(() => {
-        const request = {
-          error: deleteError,
-          onerror: null as ((this: IDBRequest, ev: Event) => void) | null,
-          onsuccess: null as ((this: IDBRequest, ev: Event) => void) | null,
-        };
-        queueMicrotask(() => {
-          request.onerror?.call(request as unknown as IDBRequest, new Event("error"));
-        });
-        return request as unknown as IDBRequest;
+    const deleteSpy = vi.spyOn(IDBObjectStore.prototype, "delete").mockImplementation(() => {
+      const request = {
+        error: deleteError,
+        onerror: null as ((this: IDBRequest, ev: Event) => void) | null,
+        onsuccess: null as ((this: IDBRequest, ev: Event) => void) | null,
+      };
+      queueMicrotask(() => {
+        request.onerror?.call(request as unknown as IDBRequest, new Event("error"));
       });
+      return request as unknown as IDBRequest;
+    });
 
     await expect(removeOfflineWrite("ann-offline")).rejects.toThrow(
       /Failed to delete record from object store|Queue delete failed/,
@@ -147,9 +153,7 @@ describe("offlineQueue", () => {
 
     try {
       await expect(readOfflineQueue()).resolves.toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({ id: "ann-offline" }),
-        ]),
+        expect.arrayContaining([expect.objectContaining({ id: "ann-offline" })]),
       );
       expect(transactionCalls).toBeGreaterThanOrEqual(2);
     } finally {

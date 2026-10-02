@@ -9,9 +9,7 @@ describe("isReclaimableSessionForCode", () => {
 
   it("reclaims ended sessions", () => {
     expect(isReclaimableSessionForCode({ status: "ended" })).toBe(true);
-    expect(
-      isReclaimableSessionForCode({ endedAt: "2026-01-01T00:00:00.000Z" }),
-    ).toBe(true);
+    expect(isReclaimableSessionForCode({ endedAt: "2026-01-01T00:00:00.000Z" })).toBe(true);
   });
 
   it("does not reclaim live active sessions", () => {

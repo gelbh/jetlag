@@ -1,10 +1,10 @@
-import { describe, expect, it } from "vitest";
-import { lineString } from "@turf/helpers";
+import { existsSync } from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import buffer from "@turf/buffer";
 import difference from "@turf/difference";
-import { existsSync } from "node:fs";
-import { fileURLToPath } from "node:url";
-import path from "node:path";
+import { lineString } from "@turf/helpers";
+import { describe, expect, it } from "vitest";
 import { runGeodesicLineBuffer } from "../kernel/geodesicKernelRunner";
 
 const pkgEntry = path.resolve(
@@ -65,8 +65,6 @@ describe.skipIf(!wasmPkgReady)("geodesicLineBuffer", () => {
         ],
       },
     };
-    await expect(runGeodesicLineBuffer(line, 200, 0)).rejects.toThrow(
-      RangeError,
-    );
+    await expect(runGeodesicLineBuffer(line, 200, 0)).rejects.toThrow(RangeError);
   });
 });

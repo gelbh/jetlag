@@ -40,11 +40,7 @@ export function AdminPlacePanelMenu({
           ))}
         </ul>
       )}
-      <button
-        type="button"
-        className="jl-ops-place-menu-dismiss"
-        onClick={onDismiss}
-      >
+      <button type="button" className="jl-ops-place-menu-dismiss" onClick={onDismiss}>
         Cancel
       </button>
     </div>

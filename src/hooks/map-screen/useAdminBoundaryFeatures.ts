@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
 import type { Feature, MultiPolygon, Polygon } from "geojson";
-import type { GameArea } from "../../domain/map/annotations";
-import type { SessionRulesInput } from "../../domain/session/rules";
-import type { MatchingAdminLevel } from "../../domain/session/catalog/sessionCustomContent";
+import { useEffect, useMemo, useState } from "react";
 import { gameAreaToPolygon } from "../../domain/geometry/gameArea/geometry";
+import type { GameArea } from "../../domain/map/annotations";
+import type { MatchingAdminLevel } from "../../domain/session/catalog/sessionCustomContent";
+import type { SessionRulesInput } from "../../domain/session/rules";
 import { adminBoundaryLevelsForSession } from "../../services/geo/overpass/adminDivisionAvailability";
 import { fetchAdminDivisionFeaturesInArea } from "../../services/geo/overpass/adminDivisionBoundaries";
 import { usePreloadStore } from "../../state/preloadStore";
@@ -45,11 +45,9 @@ export function useAdminBoundaryFeatures(
   const [loading, setLoading] = useState(false);
   const availableLevelKey = useMemo(
     () =>
-      adminBoundaryLevelsForSession(
-        regionPackId,
-        customMatchingAreas,
-        adminDivisionCounts,
-      ).join(","),
+      adminBoundaryLevelsForSession(regionPackId, customMatchingAreas, adminDivisionCounts).join(
+        ",",
+      ),
     [adminDivisionCounts, customMatchingAreas, regionPackId],
   );
 

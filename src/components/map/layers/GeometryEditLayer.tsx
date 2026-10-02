@@ -1,19 +1,10 @@
-import { memo, useMemo } from "react";
 import turfCircle from "@turf/circle";
-import type {
-  Feature,
-  LineString,
-  MultiPolygon,
-  Point,
-  Polygon as GeoPolygon,
-} from "geojson";
+import type { Feature, Polygon as GeoPolygon, LineString, MultiPolygon, Point } from "geojson";
+import { memo, useMemo } from "react";
+import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
 import type { AnnotationRecord, GameArea } from "@/domain/map/annotations";
 import { MAP_ANNOTATION_COLORS } from "@/domain/map/mapAnnotationColors";
-import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
-import {
-  buildGeometryEditModel,
-  type GeometryEditModel,
-} from "../helpers/buildGeometryEditModel";
+import { buildGeometryEditModel, type GeometryEditModel } from "../helpers/buildGeometryEditModel";
 import { cssPxDashToMapLibre } from "../helpers/cssPxDashToMapLibre";
 import { MapLibreGeoJsonOverlay } from "../helpers/MapLibreGeoJsonOverlay";
 import { MapLibrePointMarkers } from "../helpers/MapLibrePointMarkers";
@@ -25,21 +16,14 @@ interface GeometryEditLayerProps {
   gameArea: GameArea;
 }
 
-function editCircleFeature(
-  center: LatLngTuple,
-  radiusMeters: number,
-): Feature<GeoPolygon> {
+function editCircleFeature(center: LatLngTuple, radiusMeters: number): Feature<GeoPolygon> {
   return turfCircle([center[1], center[0]], radiusMeters / 1000, {
     steps: 64,
     units: "kilometers",
   }) as Feature<GeoPolygon>;
 }
 
-function editCenterMarker(
-  id: string,
-  center: LatLngTuple,
-  fillColor: string,
-): CircleMarkerProps {
+function editCenterMarker(id: string, center: LatLngTuple, fillColor: string): CircleMarkerProps {
   return {
     id,
     lat: center[0],
@@ -143,10 +127,7 @@ function geometryEditMarkers(model: GeometryEditModel): CircleMarkerProps[] {
   }
 }
 
-function renderGeometryEditMapLibre(
-  model: GeometryEditModel,
-  markers: CircleMarkerProps[],
-) {
+function renderGeometryEditMapLibre(model: GeometryEditModel, markers: CircleMarkerProps[]) {
   switch (model.kind) {
     case "radar":
       return (

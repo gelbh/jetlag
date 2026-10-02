@@ -6,15 +6,11 @@ import {
 
 describe("openMapTilesPoiClassMap", () => {
   it("maps museum class to museum category", () => {
-    expect(mapOpenMapTilesPoiToCategoryIds({ class: "museum", name: "MoMA" })).toEqual([
-      "museum",
-    ]);
+    expect(mapOpenMapTilesPoiToCategoryIds({ class: "museum", name: "MoMA" })).toEqual(["museum"]);
   });
 
   it("maps hospital class but not clinic / nursing_home", () => {
-    expect(mapOpenMapTilesPoiToCategoryIds({ class: "hospital" })).toEqual([
-      "hospital",
-    ]);
+    expect(mapOpenMapTilesPoiToCategoryIds({ class: "hospital" })).toEqual(["hospital"]);
     expect(
       mapOpenMapTilesPoiToCategoryIds({
         class: "hospital",
@@ -38,18 +34,14 @@ describe("openMapTilesPoiClassMap", () => {
   });
 
   it("maps transit stop samples (railway / bus / subclass station)", () => {
-    expect(mapOpenMapTilesPoiToCategoryIds({ class: "railway" })).toEqual([
+    expect(mapOpenMapTilesPoiToCategoryIds({ class: "railway" })).toEqual(["rail_station"]);
+    expect(mapOpenMapTilesPoiToCategoryIds({ class: "bus" })).toEqual(["rail_station"]);
+    expect(mapOpenMapTilesPoiToCategoryIds({ class: "railway", subclass: "station" })).toEqual([
       "rail_station",
     ]);
-    expect(mapOpenMapTilesPoiToCategoryIds({ class: "bus" })).toEqual([
+    expect(mapOpenMapTilesPoiToCategoryIds({ class: "bus", subclass: "bus_stop" })).toEqual([
       "rail_station",
     ]);
-    expect(
-      mapOpenMapTilesPoiToCategoryIds({ class: "railway", subclass: "station" }),
-    ).toEqual(["rail_station"]);
-    expect(
-      mapOpenMapTilesPoiToCategoryIds({ class: "bus", subclass: "bus_stop" }),
-    ).toEqual(["rail_station"]);
   });
 
   it("returns empty for unknown class", () => {

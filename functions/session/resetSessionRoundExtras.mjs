@@ -1,10 +1,6 @@
 const FIRESTORE_BATCH_LIMIT = 500;
 
-const CANCELABLE_QUESTION_STATUSES = new Set([
-  "pending",
-  "walking",
-  "answered",
-]);
+const CANCELABLE_QUESTION_STATUSES = new Set(["pending", "walking", "answered"]);
 
 async function commitInChunks(db, refs, apply) {
   for (let i = 0; i < refs.length; i += FIRESTORE_BATCH_LIMIT) {
@@ -39,11 +35,7 @@ async function softDeleteActiveAnnotations(db, sessionId) {
 }
 
 async function cancelOpenPendingQuestions(db, sessionId) {
-  const snapshot = await sessionCollection(
-    db,
-    sessionId,
-    "pendingQuestions",
-  ).get();
+  const snapshot = await sessionCollection(db, sessionId, "pendingQuestions").get();
   if (snapshot.empty) {
     return;
   }
@@ -104,12 +96,7 @@ async function deletePlayerTrailPoints(db, sessionId, memberUids) {
         },
       );
     } catch (error) {
-      console.error(
-        "resetSessionRoundExtras trail delete failed",
-        sessionId,
-        uid,
-        error,
-      );
+      console.error("resetSessionRoundExtras trail delete failed", sessionId, uid, error);
     }
   }
 }
@@ -134,32 +121,20 @@ export async function resetSessionRoundExtras(db, sessionId) {
   let memberUids = [];
   try {
     const sessionSnap = await db.collection("sessions").doc(sessionId).get();
-    memberUids = Array.isArray(sessionSnap.data()?.memberUids)
-      ? sessionSnap.data().memberUids
-      : [];
+    memberUids = Array.isArray(sessionSnap.data()?.memberUids) ? sessionSnap.data().memberUids : [];
   } catch (error) {
-    console.error(
-      "resetSessionRoundExtras session read failed",
-      sessionId,
-      error,
-    );
+    console.error("resetSessionRoundExtras session read failed", sessionId, error);
   }
 
-  await runSafely("annotations", sessionId, () =>
-    softDeleteActiveAnnotations(db, sessionId),
-  );
-  await runSafely("pendingQuestions", sessionId, () =>
-    cancelOpenPendingQuestions(db, sessionId),
-  );
+  await runSafely("annotations", sessionId, () => softDeleteActiveAnnotations(db, sessionId));
+  await runSafely("pendingQuestions", sessionId, () => cancelOpenPendingQuestions(db, sessionId));
   await runSafely("playerLocations", sessionId, () =>
     deleteCollectionDocs(db, sessionId, "playerLocations"),
   );
   await runSafely("hidingZones", sessionId, () =>
     deleteCollectionDocs(db, sessionId, "hidingZones"),
   );
-  await runSafely("timeTraps", sessionId, () =>
-    deleteCollectionDocs(db, sessionId, "timeTraps"),
-  );
+  await runSafely("timeTraps", sessionId, () => deleteCollectionDocs(db, sessionId, "timeTraps"));
   await runSafely("startingLocations", sessionId, () =>
     deleteCollectionDocs(db, sessionId, "startingLocations"),
   );

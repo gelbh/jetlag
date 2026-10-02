@@ -1,6 +1,6 @@
 import { create } from "zustand";
-import type { PremiumEntitlements } from "../domain/billing/premiumProducts";
 import { isFirebaseConfigured } from "@/services/core/firebase/authBootstrapState";
+import type { PremiumEntitlements } from "../domain/billing/premiumProducts";
 
 const STORAGE_KEY = "jetlag-premium-entitlements-v1";
 const SOFT_STALE_MS = 10 * 60 * 1000;
@@ -61,116 +61,109 @@ function writePersistedSnapshot(snapshot: PersistedEntitlements): void {
   }
 }
 
-export const usePremiumEntitlementsStore = create<PremiumEntitlementsState>(
-  (set, get) => ({
-    uid: null,
-    entitlements: null,
-    loading: false,
-    hydrated: false,
-    softStale: false,
-    generation: 0,
-    setUid: (uid) => {
-      if (get().uid === uid) {
-        return;
-      }
+export const usePremiumEntitlementsStore = create<PremiumEntitlementsState>((set, get) => ({
+  uid: null,
+  entitlements: null,
+  loading: false,
+  hydrated: false,
+  softStale: false,
+  generation: 0,
+  setUid: (uid) => {
+    if (get().uid === uid) {
+      return;
+    }
 
-      set({
-        uid,
-        entitlements: null,
-        hydrated: false,
-        softStale: false,
-        generation: get().generation + 1,
-      });
-      if (uid) {
-        get().hydrateFromStorage();
-      }
-    },
-    setEntitlements: (entitlements) => {
-      set({ entitlements, loading: false, hydrated: true, softStale: false });
-    },
-    hydrateFromStorage: () => {
-      const uid = get().uid;
-      if (!uid) {
-        return;
-      }
-      const snapshot = readPersistedSnapshot();
-      if (!snapshot || snapshot.uid !== uid) {
-        return;
-      }
-      set({
-        entitlements: snapshot.entitlements,
-        hydrated: true,
-        softStale: Date.now() - snapshot.fetchedAt > SOFT_STALE_MS,
-      });
-    },
-    refresh: async () => {
-      if (!isFirebaseConfigured()) {
-        set({ entitlements: null, loading: false, hydrated: true, softStale: false });
-        return null;
-      }
+    set({
+      uid,
+      entitlements: null,
+      hydrated: false,
+      softStale: false,
+      generation: get().generation + 1,
+    });
+    if (uid) {
+      get().hydrateFromStorage();
+    }
+  },
+  setEntitlements: (entitlements) => {
+    set({ entitlements, loading: false, hydrated: true, softStale: false });
+  },
+  hydrateFromStorage: () => {
+    const uid = get().uid;
+    if (!uid) {
+      return;
+    }
+    const snapshot = readPersistedSnapshot();
+    if (!snapshot || snapshot.uid !== uid) {
+      return;
+    }
+    set({
+      entitlements: snapshot.entitlements,
+      hydrated: true,
+      softStale: Date.now() - snapshot.fetchedAt > SOFT_STALE_MS,
+    });
+  },
+  refresh: async () => {
+    if (!isFirebaseConfigured()) {
+      set({ entitlements: null, loading: false, hydrated: true, softStale: false });
+      return null;
+    }
 
-      // Dynamic: keeps firebase off the App chunk (route loading steps read this store).
-      const { ensureAnonymousUser } = await import(
-        "@/services/core/firebase/firebase"
-      );
-      const user = await ensureAnonymousUser();
-      if (!user?.uid) {
-        set({ entitlements: null, loading: false, hydrated: true, softStale: false });
-        return null;
-      }
-      get().setUid(user.uid);
-      const generation = get().generation;
+    // Dynamic: keeps firebase off the App chunk (route loading steps read this store).
+    const { ensureAnonymousUser } = await import("@/services/core/firebase/firebase");
+    const user = await ensureAnonymousUser();
+    if (!user?.uid) {
+      set({ entitlements: null, loading: false, hydrated: true, softStale: false });
+      return null;
+    }
+    get().setUid(user.uid);
+    const generation = get().generation;
 
-      if (inflightRefresh && inflightUid === user.uid) {
-        return inflightRefresh;
-      }
-
-      set({ loading: true });
-      inflightUid = user.uid;
-
-      inflightRefresh = (async () => {
-        try {
-          const { fetchPremiumEntitlements } = await import(
-            "@/services/billing/premiumBilling"
-          );
-          const next = await fetchPremiumEntitlements();
-          if (get().uid === user.uid && get().generation === generation) {
-            set({
-              entitlements: next,
-              loading: false,
-              hydrated: true,
-              softStale: false,
-            });
-            if (next) {
-              writePersistedSnapshot({
-                uid: user.uid,
-                entitlements: next,
-                fetchedAt: Date.now(),
-              });
-            }
-          }
-          return next;
-        } catch {
-          if (get().uid === user.uid && get().generation === generation) {
-            const snapshot = readPersistedSnapshot();
-            const fromStorage =
-              snapshot?.uid === user.uid ? snapshot.entitlements : null;
-            const existing = get().entitlements ?? fromStorage;
-            set({
-              entitlements: existing,
-              loading: false,
-              hydrated: true,
-              softStale: existing !== null,
-            });
-          }
-          return get().entitlements;
-        } finally {
-          inflightRefresh = null;
-          inflightUid = null;
-        }
-      })();
-
+    if (inflightRefresh && inflightUid === user.uid) {
       return inflightRefresh;
-    },
-  }),
-);
+    }
+
+    set({ loading: true });
+    inflightUid = user.uid;
+
+    inflightRefresh = (async () => {
+      try {
+        const { fetchPremiumEntitlements } = await import("@/services/billing/premiumBilling");
+        const next = await fetchPremiumEntitlements();
+        if (get().uid === user.uid && get().generation === generation) {
+          set({
+            entitlements: next,
+            loading: false,
+            hydrated: true,
+            softStale: false,
+          });
+          if (next) {
+            writePersistedSnapshot({
+              uid: user.uid,
+              entitlements: next,
+              fetchedAt: Date.now(),
+            });
+          }
+        }
+        return next;
+      } catch {
+        if (get().uid === user.uid && get().generation === generation) {
+          const snapshot = readPersistedSnapshot();
+          const fromStorage = snapshot?.uid === user.uid ? snapshot.entitlements : null;
+          const existing = get().entitlements ?? fromStorage;
+          set({
+            entitlements: existing,
+            loading: false,
+            hydrated: true,
+            softStale: existing !== null,
+          });
+        }
+        return get().entitlements;
+      } finally {
+        inflightRefresh = null;
+        inflightUid = null;
+      }
+    })();
+
+    return inflightRefresh;
+  },
+}));

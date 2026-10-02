@@ -1,9 +1,5 @@
 import type { Feature, LineString } from "geojson";
-import {
-  loadKernelWasm,
-  parseWasmFeature,
-  resetKernelWasmForTests,
-} from "./kernelWasmPkg";
+import { loadKernelWasm, parseWasmFeature, resetKernelWasmForTests } from "./kernelWasmPkg";
 import type { PolygonFeature } from "./types";
 
 /** Reset lazy WASM module (tests). */

@@ -1,20 +1,14 @@
 import turfCircle from "@turf/circle";
 import { point as turfPoint } from "@turf/helpers";
-import type {
-  Feature,
-  LineString,
-  MultiPolygon,
-  Point,
-  Polygon as GeoPolygon,
-} from "geojson";
+import type { Feature, Polygon as GeoPolygon, LineString, MultiPolygon, Point } from "geojson";
+import {
+  gameAreaToPolygon,
+  type LatLngTuple,
+  safeDifference,
+} from "@/domain/geometry/gameArea/geometry";
 import type { AnnotationRecord, GameArea } from "@/domain/map/annotations";
 import { DEFAULT_RADIUS_METERS } from "@/domain/map/distance";
 import { MAP_ANNOTATION_COLORS } from "@/domain/map/mapAnnotationColors";
-import {
-  gameAreaToPolygon,
-  safeDifference,
-  type LatLngTuple,
-} from "@/domain/geometry/gameArea/geometry";
 
 const TENTACLE_CIRCLE_STEPS = 64;
 
@@ -93,20 +87,14 @@ export function buildGeometryEditModel(
       if (!point) {
         return { kind: "empty" };
       }
-      const center: LatLngTuple = [
-        point.coordinates[1],
-        point.coordinates[0],
-      ];
-      const searchRadiusMeters =
-        annotation.metadata.radiusMeters ?? DEFAULT_RADIUS_METERS;
-      const color =
-        annotation.metadata.color ?? MAP_ANNOTATION_COLORS.tentacle;
+      const center: LatLngTuple = [point.coordinates[1], point.coordinates[0]];
+      const searchRadiusMeters = annotation.metadata.radiusMeters ?? DEFAULT_RADIUS_METERS;
+      const color = annotation.metadata.color ?? MAP_ANNOTATION_COLORS.tentacle;
       const outOfReach = Boolean(annotation.metadata.tentacleOutOfReach);
-      const searchCircle = turfCircle(
-        turfPoint(point.coordinates),
-        searchRadiusMeters / 1000,
-        { steps: TENTACLE_CIRCLE_STEPS, units: "kilometers" },
-      ) as Feature<GeoPolygon>;
+      const searchCircle = turfCircle(turfPoint(point.coordinates), searchRadiusMeters / 1000, {
+        steps: TENTACLE_CIRCLE_STEPS,
+        units: "kilometers",
+      }) as Feature<GeoPolygon>;
 
       if (outOfReach) {
         return {
@@ -127,10 +115,7 @@ export function buildGeometryEditModel(
         color,
         outOfReach: false,
         noRadarDisk: null,
-        yesRadarOutside: safeDifference(
-          gameAreaToPolygon(gameArea),
-          searchCircle,
-        ),
+        yesRadarOutside: safeDifference(gameAreaToPolygon(gameArea), searchCircle),
       };
     }
     case "pin": {
@@ -176,9 +161,7 @@ export function buildGeometryEditModel(
       if (!polygon) {
         return { kind: "empty" };
       }
-      const ringLatLng = polygon.coordinates[0].map(
-        ([lng, lat]) => [lat, lng] as LatLngTuple,
-      );
+      const ringLatLng = polygon.coordinates[0].map(([lng, lat]) => [lat, lng] as LatLngTuple);
       return {
         kind: "zone",
         polygonFeature: { type: "Feature", properties: {}, geometry: polygon },

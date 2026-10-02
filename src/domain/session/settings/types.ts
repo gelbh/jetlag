@@ -1,11 +1,11 @@
 import type { SessionRecord } from "../../map/annotations";
 import type { ThermometerDistanceOptionMiles } from "../../questions/thermometerQuestions";
+import type { SessionCustomMeasureGeometry } from "../catalog/customMeasureGeometry";
 import type {
   CustomMatchingAreasByLevel,
   SessionCustomCategory,
   SessionCustomLocationPin,
 } from "../catalog/sessionCustomContent";
-import type { SessionCustomMeasureGeometry } from "../catalog/customMeasureGeometry";
 import type { ConfigurableMapTool } from "../rules";
 
 export interface AdvancedSessionSettingsValue {

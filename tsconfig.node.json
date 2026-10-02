@@ -4,9 +4,5 @@
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
     "types": ["node"]
   },
-  "include": [
-    "vite.*.ts",
-    "vitest.*.ts",
-    "scripts/deploy-production.mjs"
-  ]
+  "include": ["vite.*.ts", "vitest.*.ts", "scripts/deploy-production.mjs"]
 }

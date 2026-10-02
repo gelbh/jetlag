@@ -37,22 +37,10 @@ export function RoleJoinRequestAlert({
         {error ? <p className="text-sm text-status-error">{error}</p> : null}
       </div>
       <Group gap="sm" wrap="nowrap">
-        <Button
-          type="button"
-          variant="default"
-          size="md"
-          disabled={busy}
-          onClick={onDecline}
-        >
+        <Button type="button" variant="default" size="md" disabled={busy} onClick={onDecline}>
           Decline
         </Button>
-        <Button
-          type="button"
-          variant="filled"
-          size="md"
-          disabled={busy}
-          onClick={onAccept}
-        >
+        <Button type="button" variant="filled" size="md" disabled={busy} onClick={onAccept}>
           Accept
         </Button>
       </Group>

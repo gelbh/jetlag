@@ -1,5 +1,5 @@
-import { describe, it } from "node:test";
 import assert from "node:assert/strict";
+import { describe, it } from "node:test";
 import {
   hasPremiumAccessClaim,
   isPremiumSessionMember,
@@ -16,37 +16,19 @@ describe("verifyProxyAccess helpers", () => {
 
   it("detects premium session membership", () => {
     assert.equal(
-      isPremiumSessionMember(
-        { tier: "premium", memberUids: ["host", "guest"] },
-        "guest",
-      ),
+      isPremiumSessionMember({ tier: "premium", memberUids: ["host", "guest"] }, "guest"),
       true,
     );
     assert.equal(
-      isPremiumSessionMember(
-        { tier: "free", memberUids: ["host", "guest"] },
-        "guest",
-      ),
+      isPremiumSessionMember({ tier: "free", memberUids: ["host", "guest"] }, "guest"),
       false,
     );
-    assert.equal(
-      isPremiumSessionMember(
-        { tier: "premium", memberUids: ["host"] },
-        "guest",
-      ),
-      false,
-    );
+    assert.equal(isPremiumSessionMember({ tier: "premium", memberUids: ["host"] }, "guest"), false);
   });
 
   it("detects free and premium session membership", () => {
-    assert.equal(
-      isSessionMember({ memberUids: ["host", "guest"] }, "guest"),
-      true,
-    );
-    assert.equal(
-      isSessionMember({ memberUids: ["host"] }, "guest"),
-      false,
-    );
+    assert.equal(isSessionMember({ memberUids: ["host", "guest"] }, "guest"), true);
+    assert.equal(isSessionMember({ memberUids: ["host"] }, "guest"), false);
   });
 
   it("requires session membership for overpass proxy access", async () => {

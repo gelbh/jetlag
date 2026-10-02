@@ -1,11 +1,11 @@
 import { useCallback, useState } from "react";
-import { useAppNavigate } from "../navigation/useAppNavigate";
-import { usePermanentAuthUser } from "../billing/usePermanentAuthUser";
 import { resolvePlayerRole } from "../../domain/session/players/playerRole";
-import { joinRemoteSessionByCode } from "../../services/firestore/firestoreAnnotations";
-import { setPremiumApiContext } from "../../services/core/auth/premiumApiContext";
-import { useSessionStore } from "../../state/sessionStore";
 import type { AdminSessionSummary } from "../../services/admin/adminSessions";
+import { setPremiumApiContext } from "../../services/core/auth/premiumApiContext";
+import { joinRemoteSessionByCode } from "../../services/firestore/firestoreAnnotations";
+import { useSessionStore } from "../../state/sessionStore";
+import { usePermanentAuthUser } from "../billing/usePermanentAuthUser";
+import { useAppNavigate } from "../navigation/useAppNavigate";
 
 interface UseAdminJoinSessionOptions {
   onRefresh?: (options?: { background?: boolean }) => void;
@@ -33,11 +33,7 @@ export function useAdminJoinSession(options: UseAdminJoinSessionOptions = {}) {
       setError(null);
 
       try {
-        const result = await joinRemoteSessionByCode(
-          summary.code,
-          user.uid,
-          "admin",
-        );
+        const result = await joinRemoteSessionByCode(summary.code, user.uid, "admin");
 
         if (result.status === "missing") {
           setError("That session is no longer available.");
@@ -69,11 +65,7 @@ export function useAdminJoinSession(options: UseAdminJoinSessionOptions = {}) {
         }
         return true;
       } catch (joinError) {
-        setError(
-          joinError instanceof Error
-            ? joinError.message
-            : "Couldn't join as admin.",
-        );
+        setError(joinError instanceof Error ? joinError.message : "Couldn't join as admin.");
         return false;
       } finally {
         setJoiningCode(null);

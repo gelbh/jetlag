@@ -1,8 +1,8 @@
 import { fireEvent, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { AdminOpsDesk } from "./AdminOpsDesk";
-import { renderWithRouter } from "../../test/renderWithRouter";
 import type { AdminSessionSummary } from "../../services/admin/adminSessions";
+import { renderWithRouter } from "../../test/renderWithRouter";
+import { AdminOpsDesk } from "./AdminOpsDesk";
 
 const SEEKER_HIDER_META = /1S \/ 1H/i;
 
@@ -106,9 +106,7 @@ describe("AdminOpsDesk", () => {
 
     renderWithRouter(<AdminOpsDesk />);
 
-    expect(
-      screen.getByText(/Sign in with your Google account/i),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/Sign in with your Google account/i)).toBeInTheDocument();
     expect(screen.getByTestId("premium-sign-in-gate")).toHaveTextContent("/admin");
   });
 
@@ -230,14 +228,8 @@ describe("AdminOpsDesk", () => {
 
     expect(document.querySelector(".admin-dashboard-list-scroll")).toBeInTheDocument();
     expect(document.querySelector(".home-poster-viewport")).toBeInTheDocument();
-    expect(screen.getByTestId("admin-ops-desk")).toHaveAttribute(
-      "data-layout",
-      "desktop",
-    );
-    expect(screen.getByRole("link", { name: /^home$/i })).toHaveAttribute(
-      "href",
-      "/",
-    );
+    expect(screen.getByTestId("admin-ops-desk")).toHaveAttribute("data-layout", "desktop");
+    expect(screen.getByRole("link", { name: /^home$/i })).toHaveAttribute("href", "/");
     expect(screen.queryByRole("banner", { name: /screen header/i })).toBeNull();
     expect(screen.queryByRole("link", { name: /←\s*back/i })).toBeNull();
   });
@@ -264,14 +256,8 @@ describe("AdminOpsDesk", () => {
 
     renderWithRouter(<AdminOpsDesk />);
 
-    expect(screen.getByTestId("admin-ops-desk")).toHaveAttribute(
-      "data-layout",
-      "mobile",
-    );
-    expect(screen.getByRole("link", { name: /^home$/i })).toHaveAttribute(
-      "href",
-      "/",
-    );
+    expect(screen.getByTestId("admin-ops-desk")).toHaveAttribute("data-layout", "mobile");
+    expect(screen.getByRole("link", { name: /^home$/i })).toHaveAttribute("href", "/");
     expect(screen.queryByRole("banner", { name: /screen header/i })).toBeNull();
     expect(screen.queryByRole("link", { name: /←\s*back/i })).toBeNull();
   });

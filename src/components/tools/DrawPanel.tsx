@@ -8,12 +8,7 @@ interface DrawPanelProps {
   onClear: () => void;
 }
 
-export function DrawPanel({
-  pointCount,
-  drawing,
-  busy,
-  onClear,
-}: DrawPanelProps) {
+export function DrawPanel({ pointCount, drawing, busy, onClear }: DrawPanelProps) {
   const clearDisabled = pointCount === 0 || busy;
 
   return (
@@ -30,12 +25,7 @@ export function DrawPanel({
               ? `Last stroke: ${pointCount} points`
               : "Ready"}
       </p>
-      <Button
-        fullWidth
-        disabled={clearDisabled}
-        onClick={onClear}
-        styles={grayStyles}
-      >
+      <Button fullWidth disabled={clearDisabled} onClick={onClear} styles={grayStyles}>
         Clear draft
       </Button>
     </div>

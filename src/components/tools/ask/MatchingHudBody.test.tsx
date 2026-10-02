@@ -1,7 +1,13 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen } from "@testing-library/react";
 import { MantineProvider } from "@mantine/core";
+import { fireEvent, render, screen } from "@testing-library/react";
 import type { ReactElement } from "react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  type AskHudReadiness,
+  activeModeCue,
+  canCommit,
+  primedCommitLabel,
+} from "@/domain/ask/askHudModes";
 import type { DistanceUnit } from "@/domain/map/distance";
 import {
   MATCHING_CATEGORIES,
@@ -11,12 +17,6 @@ import {
 import { jetlagTheme } from "@/theme/theme";
 import { AskHudHost } from "./AskHudHost";
 import { MatchingHudBody } from "./MatchingHudBody";
-import {
-  activeModeCue,
-  canCommit,
-  primedCommitLabel,
-  type AskHudReadiness,
-} from "@/domain/ask/askHudModes";
 
 const baseProps = {
   distanceUnit: "imperial" as DistanceUnit,
@@ -64,23 +64,17 @@ beforeEach(() => {
 
 describe("MatchingHudBody", () => {
   it("shows matching question prompt and category row icons", () => {
-    const { container } = renderMatching(
-      <MatchingHudBody {...baseProps} costLabel="D3P1" />,
-    );
+    const { container } = renderMatching(<MatchingHudBody {...baseProps} costLabel="D3P1" />);
 
     expect(
-      screen.getByText(
-        "Is your nearest [place] the same as my nearest [place]?",
-      ),
+      screen.getByText("Is your nearest [place] the same as my nearest [place]?"),
     ).toBeInTheDocument();
     expect(screen.getByTestId("ask-cost-chip")).toHaveTextContent("D3P1");
     expect(screen.queryByText("PICK CATEGORY")).toBeNull();
 
     const airport = screen.getByRole("button", { name: /Commercial Airport/i });
     expect(airport.querySelector("svg")).not.toBeNull();
-    expect(
-      container.querySelector(".ask-catalog-rail__grid"),
-    ).toBeInTheDocument();
+    expect(container.querySelector(".ask-catalog-rail__grid")).toBeInTheDocument();
     expect(
       container.querySelectorAll('[data-testid="ask-catalog-rail"] svg').length,
     ).toBeGreaterThan(3);
@@ -105,16 +99,12 @@ describe("MatchingHudBody", () => {
 
   it("shows catalog rail without PhaseRail or CONTINUE; row select advances", () => {
     const onCategoryChange = vi.fn();
-    renderMatching(
-      <MatchingHudBody {...baseProps} onCategoryChange={onCategoryChange} />,
-    );
+    renderMatching(<MatchingHudBody {...baseProps} onCategoryChange={onCategoryChange} />);
 
     expect(screen.getByTestId("matching-hud-body")).toBeInTheDocument();
     expect(screen.getByTestId("ask-catalog-rail")).toBeInTheDocument();
     expect(screen.queryByRole("list", { name: "Wizard phases" })).toBeNull();
-    expect(
-      screen.queryByRole("button", { name: "Continue" }),
-    ).toBeNull();
+    expect(screen.queryByRole("button", { name: "Continue" })).toBeNull();
 
     fireEvent.click(screen.getByRole("button", { name: /Commercial Airport/i }));
     expect(onCategoryChange).toHaveBeenCalledWith("commercial_airport");
@@ -131,9 +121,7 @@ describe("MatchingHudBody", () => {
 
     fireEvent.click(screen.getByRole("tab", { name: "Transit" }));
     expect(screen.getByRole("button", { name: /Commercial Airport/i })).toBeInTheDocument();
-    expect(
-      screen.queryByRole("button", { name: /1st Administrative Division/i }),
-    ).toBeNull();
+    expect(screen.queryByRole("button", { name: /1st Administrative Division/i })).toBeNull();
 
     fireEvent.click(screen.getByRole("tab", { name: "Admin" }));
     expect(screen.queryByRole("button", { name: /Commercial Airport/i })).toBeNull();
@@ -152,9 +140,7 @@ describe("MatchingHudBody", () => {
       />,
     );
     expect(screen.getByText("Landmass")).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: /landmass/i }),
-    ).toBeDisabled();
+    expect(screen.getByRole("button", { name: /landmass/i })).toBeDisabled();
   });
 
   it("shows empty-area reason and disables that category on the sheet", () => {
@@ -166,12 +152,8 @@ describe("MatchingHudBody", () => {
         catalogNotice="No landmass intersects the play area."
       />,
     );
-    expect(
-      screen.getByText("No landmass intersects the play area."),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: /landmass/i }),
-    ).toBeDisabled();
+    expect(screen.getByText("No landmass intersects the play area.")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /landmass/i })).toBeDisabled();
   });
 
   it("renders GPS timeout with AskInlineError treatment", () => {
@@ -203,9 +185,7 @@ describe("MatchingHudBody", () => {
     expect(screen.getByTestId("matching-hud-body")).toBeInTheDocument();
     expect(screen.getByText("Commercial Airport")).toBeInTheDocument();
     expect(screen.getByText("Category")).toBeInTheDocument();
-    expect(
-      screen.queryByRole("button", { name: "Continue" }),
-    ).toBeNull();
+    expect(screen.queryByRole("button", { name: "Continue" })).toBeNull();
   });
 
   it("wires cue ticker and muted strip until canCommit", () => {
@@ -251,9 +231,7 @@ describe("MatchingHudBody", () => {
       />,
     );
 
-    expect(screen.getByTestId("ask-mode-cue-ticker")).toHaveTextContent(
-      "RESOLVE ON MAP",
-    );
+    expect(screen.getByTestId("ask-mode-cue-ticker")).toHaveTextContent("RESOLVE ON MAP");
     // Sheet path hides muted SEND footer; cue carries the next-step hint.
     expect(screen.queryByTestId("ask-commit-strip")).toBeNull();
   });
@@ -303,9 +281,7 @@ describe("MatchingHudBody", () => {
       />,
     );
 
-    expect(screen.getByTestId("ask-mode-cue-ticker")).toHaveTextContent(
-      "READY TO SEND",
-    );
+    expect(screen.getByTestId("ask-mode-cue-ticker")).toHaveTextContent("READY TO SEND");
     const strip = screen.getByRole("button", { name: "SEND · D3P1" });
     expect(strip).toHaveAttribute("data-armed", "true");
     fireEvent.click(strip);

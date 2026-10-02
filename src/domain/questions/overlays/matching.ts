@@ -1,12 +1,15 @@
+import { deserializeMatchingFeatures } from "@/domain/geo/matchingAdapters";
+import {
+  parseGeometryJson,
+  pointFromGeometryFeature,
+} from "../../geometry/gameArea/geometryParsing";
+import { buildSameNearestRegion } from "../../geometry/measuring/matchingGeometry";
 import type { GameArea } from "../../map/annotations";
-import { parseGeometryJson, pointFromGeometryFeature } from "../../geometry/gameArea/geometryParsing";
-import type { MapDraftOverlay } from "../../map/mapDraftOverlay";
 import { MAP_ANNOTATION_COLORS } from "../../map/mapAnnotationColors";
 import type { MapStyle, StreetBasemap } from "../../map/mapBasemaps";
-import { buildSameNearestRegion } from "../../geometry/measuring/matchingGeometry";
+import type { MapDraftOverlay } from "../../map/mapDraftOverlay";
 import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
-import { deserializeMatchingFeatures } from "@/domain/geo/matchingAdapters";
-import { pushBoundaryOverlay, type OverlayBuildResult } from "./shared";
+import { type OverlayBuildResult, pushBoundaryOverlay } from "./shared";
 
 export async function buildMatchingOverlays(
   question: PendingQuestionRecord,

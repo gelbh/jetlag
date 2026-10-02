@@ -1,5 +1,5 @@
-import type { ReactNode } from "react";
 import { Box, Text, UnstyledButton } from "@mantine/core";
+import type { ReactNode } from "react";
 import { InsetGroup, SectionLabel } from "@/components/ui/entry/entryChrome";
 import { InsetHairline } from "@/components/ui/entry/InsetRow";
 
@@ -71,32 +71,19 @@ export function RadioCardGroup<Value extends string>({
                     <Text
                       size="sm"
                       fw={selected ? 600 : 510}
-                      c={
-                        selected
-                          ? "var(--color-flag)"
-                          : "var(--color-field-ink)"
-                      }
+                      c={selected ? "var(--color-flag)" : "var(--color-field-ink)"}
                     >
                       {option.title}
                     </Text>
                     {option.badge}
                   </Box>
                   {option.description ? (
-                    <Text
-                      size="xs"
-                      mt={4}
-                      c="var(--color-field-ink-muted)"
-                      lh={1.35}
-                    >
+                    <Text size="xs" mt={4} c="var(--color-field-ink-muted)" lh={1.35}>
                       {option.description}
                     </Text>
                   ) : null}
                   {option.footer ? (
-                    <Text
-                      size="xs"
-                      mt={2}
-                      c="var(--color-field-ink-muted)"
-                    >
+                    <Text size="xs" mt={2} c="var(--color-field-ink-muted)">
                       {option.footer}
                     </Text>
                   ) : null}

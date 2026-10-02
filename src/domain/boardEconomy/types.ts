@@ -13,12 +13,7 @@ export type PowerUpId =
   | "expandHand1"
   | "expandHand2";
 
-export type TimeBonusId =
-  | "time-1"
-  | "time-2"
-  | "time-3"
-  | "time-4"
-  | "time-5";
+export type TimeBonusId = "time-1" | "time-2" | "time-3" | "time-4" | "time-5";
 
 /** Minutes for [small, medium, large]. */
 export type TimeBonusDurations = readonly [number, number, number];
@@ -44,11 +39,7 @@ export interface MoveCardDef {
   id: "move";
 }
 
-export type BoardCardDef =
-  | TimeBonusCardDef
-  | PowerUpCardDef
-  | CurseCardDef
-  | MoveCardDef;
+export type BoardCardDef = TimeBonusCardDef | PowerUpCardDef | CurseCardDef | MoveCardDef;
 
 export interface BoardCardInstance {
   instanceId: string;

@@ -1,11 +1,11 @@
 import { screen } from "@testing-library/react";
-import { renderWithAppUi } from "../../test/renderWithAppUi";
 import { describe, expect, it, vi } from "vitest";
-import { GameChatTab } from "./GameChatTab";
 import type {
   PendingQuestionRecord,
   SessionMessageRecord,
 } from "../../domain/session/activity/sessionChat";
+import { renderWithAppUi } from "../../test/renderWithAppUi";
+import { GameChatTab } from "./GameChatTab";
 
 const pendingQuestion: PendingQuestionRecord = {
   id: "pq-radar",
@@ -97,9 +97,7 @@ describe("GameChatTab", () => {
       />,
     );
 
-    expect(
-      screen.getByRole("button", { name: "Dismiss question" }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Dismiss question" })).toBeInTheDocument();
   });
 
   it("hides dismiss from hiders", () => {
@@ -121,9 +119,7 @@ describe("GameChatTab", () => {
       />,
     );
 
-    expect(
-      screen.queryByRole("button", { name: "Dismiss question" }),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Dismiss question" })).not.toBeInTheDocument();
   });
 
   it("hides waiting copy when the question was cancelled", () => {
@@ -140,8 +136,6 @@ describe("GameChatTab", () => {
     );
 
     expect(screen.queryByText("Waiting for hider…")).not.toBeInTheDocument();
-    expect(
-      screen.queryByRole("button", { name: "Dismiss question" }),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Dismiss question" })).not.toBeInTheDocument();
   });
 });

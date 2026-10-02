@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import { useAuthBootstrapReady } from "@/hooks/app/useAuthBootstrapReady";
 import type { AppCheckProbeResult } from "@/services/core/firebase/appCheckProbe";
 import { ContentBlockerErrorPage } from "./ContentBlockerErrorPage";

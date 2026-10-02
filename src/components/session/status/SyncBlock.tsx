@@ -1,17 +1,10 @@
 import { Group, Paper, Text } from "@mantine/core";
-import type { SyncStatus } from "@/domain/device/sync/sync";
-import {
-  surveySyncSegmentLabel,
-  surveySyncShortLabel,
-} from "@/domain/device/surveyStatusCopy";
 import { mapChromeSurfaceStyles } from "@/components/ui/entry/entryChrome";
+import { surveySyncSegmentLabel, surveySyncShortLabel } from "@/domain/device/surveyStatusCopy";
+import type { SyncStatus } from "@/domain/device/sync/sync";
 import { useMinWidth } from "@/hooks/layout/useMinWidth";
 import { SyncStatusBeacon } from "../syncUi/SyncStatusDot";
-import {
-  SYNC_TONE_CLASSES,
-  type SyncTone,
-  syncBeaconAriaLabel,
-} from "./syncRailDisplay";
+import { SYNC_TONE_CLASSES, type SyncTone, syncBeaconAriaLabel } from "./syncRailDisplay";
 
 interface SyncBlockProps {
   syncStatus: SyncStatus;
@@ -60,9 +53,7 @@ export function SyncBlock({
 }: SyncBlockProps) {
   const comfortableWidth = useMinWidth(380) && !compact;
   const shortLabel = surveySyncShortLabel(syncStatus, queuedWrites);
-  const segmentLabel = comfortableWidth
-    ? surveySyncSegmentLabel(syncStatus, queuedWrites)
-    : null;
+  const segmentLabel = comfortableWidth ? surveySyncSegmentLabel(syncStatus, queuedWrites) : null;
   const shortLabelTone = surveyShortLabelTone(syncStatus);
   const statusAria = shortLabel ?? syncBeaconAriaLabel(syncStatus);
 
@@ -72,9 +63,7 @@ export function SyncBlock({
         <Text
           size="xs"
           fw={590}
-          className={
-            shortLabelTone ? SYNC_TONE_CLASSES[shortLabelTone].text : undefined
-          }
+          className={shortLabelTone ? SYNC_TONE_CLASSES[shortLabelTone].text : undefined}
           style={{ maxWidth: "6.5rem", lineHeight: 1.25 }}
         >
           {shortLabel}
@@ -97,11 +86,7 @@ export function SyncBlock({
             <Text
               size="xs"
               fw={590}
-              className={
-                shortLabelTone
-                  ? SYNC_TONE_CLASSES[shortLabelTone].text
-                  : undefined
-              }
+              className={shortLabelTone ? SYNC_TONE_CLASSES[shortLabelTone].text : undefined}
               style={{
                 maxWidth: "4.75rem",
                 lineHeight: 1.2,
@@ -122,11 +107,7 @@ export function SyncBlock({
   const inline = placement === "inline";
   return (
     <div
-      className={
-        inline
-          ? "pointer-events-auto relative shrink-0"
-          : "jl-sync-map-indicator"
-      }
+      className={inline ? "pointer-events-auto relative shrink-0" : "jl-sync-map-indicator"}
       data-testid="sync-block-mantine"
     >
       <Paper

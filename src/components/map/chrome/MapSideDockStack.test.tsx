@@ -1,10 +1,10 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { MapSideDockStack } from "./MapSideDockStack";
 import {
   MAP_CHROME_DOCKS_STORAGE_KEY,
   MAP_SIDE_DOCK_STORAGE_KEY,
 } from "@/hooks/map/mapChromeDockPlacement";
+import { MapSideDockStack } from "./MapSideDockStack";
 
 describe("MapSideDockStack", () => {
   beforeEach(() => {
@@ -62,9 +62,7 @@ describe("MapSideDockStack", () => {
         <button type="button">Chat</button>
       </MapSideDockStack>,
     );
-    const stack = container.querySelector(
-      '[data-testid="map-side-dock-stack"]',
-    ) as HTMLElement;
+    const stack = container.querySelector('[data-testid="map-side-dock-stack"]') as HTMLElement;
     const tool = screen.getByRole("button", { name: "Chat" });
 
     fireEvent.pointerDown(tool, {

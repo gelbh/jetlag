@@ -1,5 +1,5 @@
-import { fireEvent, render, screen } from "@testing-library/react";
 import { MantineProvider } from "@mantine/core";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { jetlagTheme } from "@/theme/theme";
 import { PlayerStickyErrorAlert } from "./PlayerStickyErrorAlert";
@@ -39,9 +39,7 @@ describe("PlayerStickyErrorAlert", () => {
     expect(screen.getByText("Session gone")).toBeInTheDocument();
     expect(screen.getByText("That session no longer exists.")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Retry" })).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Return to join" }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Return to join" })).toBeInTheDocument();
   });
 
   it("calls primary and secondary action callbacks on click", () => {

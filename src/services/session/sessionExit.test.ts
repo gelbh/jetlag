@@ -1,14 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import {
-  exitSession,
-  resetExitSessionGuardForTests,
-} from "./sessionExit";
+import { exitSession, resetExitSessionGuardForTests } from "./sessionExit";
 
 const navigate = vi.fn();
 const teardownSessionUiState = vi.hoisted(() => vi.fn());
-const clearSessionLocalArtifacts = vi.hoisted(() =>
-  vi.fn(async () => undefined),
-);
+const clearSessionLocalArtifacts = vi.hoisted(() => vi.fn(async () => undefined));
 const setSession = vi.hoisted(() => vi.fn());
 const setRemoteUpdateNotice = vi.hoisted(() => vi.fn());
 

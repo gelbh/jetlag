@@ -1,28 +1,25 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { GameArea } from "@/domain/map/annotations";
-import {
-  DUBLIN_CITY_GAME_AREA,
-  DUBLIN_COUNTY_GAME_AREA,
-} from "@/test/fixtures/dublinGameArea";
-import * as overpassClient from "../../core/overpass/overpassClient";
 import {
   deserializeMatchingFeatures,
   pickNearestMatchingFeature,
   serializeMatchingFeatures,
 } from "@/domain/geo/matchingAdapters";
+import type { GameArea } from "@/domain/map/annotations";
 import {
   reconcileLockedMatchingNearest,
   shouldApplyMatchingAnchorPhase,
 } from "@/hooks/tools/matching/resolveMatchingAnchor";
+import { DUBLIN_CITY_GAME_AREA, DUBLIN_COUNTY_GAME_AREA } from "@/test/fixtures/dublinGameArea";
+import * as overpassClient from "../../core/overpass/overpassClient";
 import { clearGeographicFeatureCacheForTests } from "../cache";
 import { formatOverpassBboxFromGameArea } from "../overpass/queryHelpers";
 import { clearBundledPoiCacheForTests } from "../overpass/regionPackPoi";
 import {
   fetchMatchingFeaturesInArea,
   findNearestMatchingFeature,
-  parseMatchingFeatures,
-  matchingNullAnswerMessage,
   matchingFeatureCountLabel,
+  matchingNullAnswerMessage,
+  parseMatchingFeatures,
 } from "./index";
 
 const sampleGameArea: GameArea = {
@@ -96,19 +93,12 @@ describe("matching features", () => {
       ],
     });
 
-    const features = await fetchMatchingFeaturesInArea(
-      sampleGameArea,
-      "museum",
-    );
+    const features = await fetchMatchingFeaturesInArea(sampleGameArea, "museum");
 
     expect(features).toHaveLength(2);
     expect(features.every((feature) => feature.inPlayArea)).toBe(true);
 
-    const nearest = await findNearestMatchingFeature(
-      [51.46, -0.15],
-      sampleGameArea,
-      "museum",
-    );
+    const nearest = await findNearestMatchingFeature([51.46, -0.15], sampleGameArea, "museum");
 
     expect(nearest?.name).toBe("Near Museum");
     expect(nearest?.distanceMeters).toBeGreaterThan(0);
@@ -151,11 +141,10 @@ describe("matching features", () => {
     );
 
     const enrich = vi.fn();
-    const featuresPromise = fetchMatchingFeaturesInArea(
-      sampleGameArea,
-      "museum",
-      { regionPackId: "london", onEnrich: enrich },
-    );
+    const featuresPromise = fetchMatchingFeaturesInArea(sampleGameArea, "museum", {
+      regionPackId: "london",
+      onEnrich: enrich,
+    });
 
     const features = await featuresPromise;
     expect(features).toEqual([
@@ -192,18 +181,16 @@ describe("matching features", () => {
   });
 
   it("awaits Overpass when the pack is empty or missing", async () => {
-    const queryOverpass = vi
-      .spyOn(overpassClient, "queryOverpass")
-      .mockResolvedValue({
-        elements: [
-          {
-            id: 7,
-            tags: { name: "Live Museum", tourism: "museum" },
-            lat: 51.45,
-            lon: -0.16,
-          },
-        ],
-      });
+    const queryOverpass = vi.spyOn(overpassClient, "queryOverpass").mockResolvedValue({
+      elements: [
+        {
+          id: 7,
+          tags: { name: "Live Museum", tourism: "museum" },
+          lat: 51.45,
+          lon: -0.16,
+        },
+      ],
+    });
 
     vi.stubGlobal(
       "fetch",
@@ -215,11 +202,10 @@ describe("matching features", () => {
     );
 
     const enrich = vi.fn();
-    const features = await fetchMatchingFeaturesInArea(
-      sampleGameArea,
-      "museum",
-      { regionPackId: "london", onEnrich: enrich },
-    );
+    const features = await fetchMatchingFeaturesInArea(sampleGameArea, "museum", {
+      regionPackId: "london",
+      onEnrich: enrich,
+    });
 
     expect(queryOverpass).toHaveBeenCalled();
     expect(enrich).not.toHaveBeenCalled();
@@ -320,10 +306,7 @@ describe("matching features", () => {
       ],
     });
 
-    const features = await fetchMatchingFeaturesInArea(
-      DUBLIN_CITY_GAME_AREA,
-      "commercial_airport",
-    );
+    const features = await fetchMatchingFeaturesInArea(DUBLIN_CITY_GAME_AREA, "commercial_airport");
 
     expect(features).toEqual([]);
 
@@ -340,10 +323,7 @@ describe("matching features", () => {
     const expectedDublinAirportFeature = {
       id: DUBLIN_AIRPORT_PACK_POI.id,
       name: DUBLIN_AIRPORT_PACK_POI.name,
-      point: [DUBLIN_AIRPORT_PACK_POI.lat, DUBLIN_AIRPORT_PACK_POI.lng] as [
-        number,
-        number,
-      ],
+      point: [DUBLIN_AIRPORT_PACK_POI.lat, DUBLIN_AIRPORT_PACK_POI.lng] as [number, number],
       inPlayArea: true,
     };
 
@@ -396,9 +376,7 @@ describe("matching features", () => {
     });
 
     it("enrich Overpass query bbox matches the play area", async () => {
-      const expectedBbox = formatOverpassBboxFromGameArea(
-        DUBLIN_COUNTY_GAME_AREA,
-      );
+      const expectedBbox = formatOverpassBboxFromGameArea(DUBLIN_COUNTY_GAME_AREA);
       let resolveOverpass: ((value: { elements: unknown[] }) => void) | undefined;
       const queryOverpass = vi
         .spyOn(overpassClient, "queryOverpass")
@@ -452,25 +430,22 @@ describe("matching features", () => {
       });
 
       const enriched = enrich.mock.calls[0]?.[0] ?? [];
-      expect(
-        enriched.map((feature: { name: string }) => feature.name).sort(),
-      ).toEqual(["Dublin Airport", "Enrich Airport"]);
+      expect(enriched.map((feature: { name: string }) => feature.name).sort()).toEqual([
+        "Dublin Airport",
+        "Enrich Airport",
+      ]);
     });
   });
 
   it("builds feature count labels for play-area features", () => {
-    expect(
-      matchingFeatureCountLabel(3, 1, false, false),
-    ).toBe("3 features (1 in play area, 2 nearby)");
-    expect(
-      matchingFeatureCountLabel(2, 2, false, false),
-    ).toBe("2 features in play area");
+    expect(matchingFeatureCountLabel(3, 1, false, false)).toBe(
+      "3 features (1 in play area, 2 nearby)",
+    );
+    expect(matchingFeatureCountLabel(2, 2, false, false)).toBe("2 features in play area");
   });
 
   it("describes null answers with category-specific guidance", () => {
-    expect(matchingNullAnswerMessage("commercial_airport")).toContain(
-      "commercial airport",
-    );
+    expect(matchingNullAnswerMessage("commercial_airport")).toContain("commercial airport");
     expect(matchingNullAnswerMessage("museum")).toContain("museum");
     expect(matchingNullAnswerMessage("landmass")).toContain("landmass");
   });
@@ -564,8 +539,6 @@ describe("matching features", () => {
       },
     ];
 
-    expect(
-      deserializeMatchingFeatures(serializeMatchingFeatures(features)),
-    ).toEqual(features);
+    expect(deserializeMatchingFeatures(serializeMatchingFeatures(features))).toEqual(features);
   });
 });

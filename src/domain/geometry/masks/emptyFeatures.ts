@@ -1,5 +1,3 @@
-import type { Feature, MultiPolygon, Polygon as GeoPolygon } from "geojson";
+import type { Feature, Polygon as GeoPolygon, MultiPolygon } from "geojson";
 
-export const EMPTY_GEOJSON_FEATURES = [] as const as readonly Feature<
-  GeoPolygon | MultiPolygon
->[];
+export const EMPTY_GEOJSON_FEATURES = [] as const as readonly Feature<GeoPolygon | MultiPolygon>[];

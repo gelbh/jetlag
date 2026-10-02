@@ -237,7 +237,7 @@ jobs:
               - 'package-lock.json'
               - 'tsconfig*.json'
               - 'tailwind.css'
-              - 'eslint.config.js'
+              - 'biome.json'
               - 'scripts/**'
               - 'crates/**'
               - 'Cargo.toml'

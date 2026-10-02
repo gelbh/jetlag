@@ -4,10 +4,7 @@ export function messageFingerprint(message: SessionMessageRecord): string {
   return `${message.id}|${message.status ?? ""}|${message.selectedReply ?? ""}`;
 }
 
-export function isUnreadEligibleMessage(
-  message: SessionMessageRecord,
-  viewerUid: string,
-): boolean {
+export function isUnreadEligibleMessage(message: SessionMessageRecord, viewerUid: string): boolean {
   if (message.channel === "game" && message.kind === "system") {
     return message.senderUid !== viewerUid;
   }
@@ -61,9 +58,7 @@ export function hasUnreadChatMessages(
   return collectUnreadFingerprints(messages, viewerUid, acknowledged).length > 0;
 }
 
-export function allMessageFingerprints(
-  messages: readonly SessionMessageRecord[],
-): string[] {
+export function allMessageFingerprints(messages: readonly SessionMessageRecord[]): string[] {
   return messages.map((message) => messageFingerprint(message));
 }
 
@@ -76,9 +71,6 @@ export function baselineAcknowledgedFingerprints(
     .map((message) => messageFingerprint(message));
 }
 
-export function chatReadStorageKey(
-  sessionId: string,
-  viewerUid: string,
-): string {
+export function chatReadStorageKey(sessionId: string, viewerUid: string): string {
   return `jetlag-chat-read:${sessionId}:${viewerUid}`;
 }

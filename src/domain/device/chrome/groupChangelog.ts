@@ -56,9 +56,7 @@ function compareVersionsDescending(a: string, b: string): number {
   return right.patch - left.patch;
 }
 
-export function filterUserFacingChangelog(
-  entries: readonly ChangelogEntry[],
-): ChangelogEntry[] {
+export function filterUserFacingChangelog(entries: readonly ChangelogEntry[]): ChangelogEntry[] {
   return entries
     .map((entry) => ({
       ...entry,
@@ -84,10 +82,7 @@ export function buildGroupSummary(entries: readonly ChangelogEntry[]): string[] 
   return [...improvements, ...fixes].slice(0, 5);
 }
 
-function createMinorGroup(
-  label: string,
-  children: ChangelogEntry[],
-): MinorGroupNode {
+function createMinorGroup(label: string, children: ChangelogEntry[]): MinorGroupNode {
   return {
     kind: "minorGroup",
     label,
@@ -97,10 +92,7 @@ function createMinorGroup(
   };
 }
 
-function createMajorGroup(
-  label: string,
-  children: MinorGroupNode[],
-): MajorGroupNode {
+function createMajorGroup(label: string, children: MinorGroupNode[]): MajorGroupNode {
   const allEntries = children.flatMap((group) => group.children);
 
   return {
@@ -112,9 +104,7 @@ function createMajorGroup(
   };
 }
 
-export function groupChangelogEntries(
-  entries: readonly ChangelogEntry[],
-): ChangelogNode[] {
+export function groupChangelogEntries(entries: readonly ChangelogEntry[]): ChangelogNode[] {
   const filtered = filterUserFacingChangelog(entries).toSorted((a, b) =>
     compareVersionsDescending(a.version, b.version),
   );
@@ -123,9 +113,7 @@ export function groupChangelogEntries(
   }
 
   const currentMinorKey = minorKey(parseVersionParts(filtered[0].version));
-  const maxMajor = Math.max(
-    ...filtered.map((entry) => parseVersionParts(entry.version).major),
-  );
+  const maxMajor = Math.max(...filtered.map((entry) => parseVersionParts(entry.version).major));
 
   const minorBuckets = new Map<string, ChangelogEntry[]>();
   for (const entry of filtered) {

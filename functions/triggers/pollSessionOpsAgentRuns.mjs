@@ -1,14 +1,8 @@
-import { onSchedule } from "firebase-functions/v2/scheduler";
 import { getFirestore } from "firebase-admin/firestore";
-import {
-  captureFunctionsException,
-  withSentryEventHandler,
-} from "../lib/sentry.mjs";
+import { onSchedule } from "firebase-functions/v2/scheduler";
+import { cursorApiKey, sentryDsnSecret } from "../handlers/incident/shared.mjs";
 import { pollSessionOpsRuns } from "../incident/sessionOpsRunPoller.mjs";
-import {
-  cursorApiKey,
-  sentryDsnSecret,
-} from "../handlers/incident/shared.mjs";
+import { captureFunctionsException, withSentryEventHandler } from "../lib/sentry.mjs";
 
 /**
  * Poll Cursor session-ops runs every minute and persist terminal results.

@@ -1,5 +1,5 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
 import { FirebaseError } from "firebase/app";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { SessionActivityEvent } from "../../domain/session/activity/sessionActivityLog";
 import {
   buildActivityLogDocument,
@@ -59,10 +59,7 @@ vi.mock("../core/analytics/sentry", () => ({
   reportFirestoreListenPermissionDenied: vi.fn(),
 }));
 
-import {
-  createActivityLogEventIfAbsent,
-  subscribeActivityLog,
-} from "./firestoreActivityLog";
+import { createActivityLogEventIfAbsent, subscribeActivityLog } from "./firestoreActivityLog";
 
 function sessionStartedEvent(
   overrides: Partial<{
@@ -102,9 +99,9 @@ describe("firestoreActivityLog", () => {
   it("creates activity log events with serialized documents", async () => {
     const event = sessionStartedEvent();
 
-    await expect(
-      createActivityLogEventIfAbsent("session-1", event),
-    ).resolves.toEqual({ wrote: true });
+    await expect(createActivityLogEventIfAbsent("session-1", event)).resolves.toEqual({
+      wrote: true,
+    });
 
     expect(firestoreMocks.setDoc).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -136,16 +133,13 @@ describe("firestoreActivityLog", () => {
   });
 
   it("rethrows permission-denied when the document does not exist", async () => {
-    const denied = new FirebaseError(
-      "permission-denied",
-      "Missing or insufficient permissions.",
-    );
+    const denied = new FirebaseError("permission-denied", "Missing or insufficient permissions.");
     firestoreMocks.setDoc.mockRejectedValueOnce(denied);
     firestoreMocks.getDoc.mockResolvedValueOnce({ exists: () => false });
 
-    await expect(
-      createActivityLogEventIfAbsent("session-1", sessionStartedEvent()),
-    ).rejects.toBe(denied);
+    await expect(createActivityLogEventIfAbsent("session-1", sessionStartedEvent())).rejects.toBe(
+      denied,
+    );
   });
 
   it("subscribes ordered by createdAt desc and sorts client-side", () => {
@@ -244,10 +238,7 @@ describe("firestoreActivityLog", () => {
       expect.objectContaining({ id: "also-good", type: "hiding_timer_started" }),
     ]);
     expect(captureException).toHaveBeenCalledTimes(1);
-    expect(warnSpy).toHaveBeenCalledWith(
-      expect.stringContaining("poison"),
-      expect.any(Error),
-    );
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining("poison"), expect.any(Error));
     warnSpy.mockRestore();
   });
 });

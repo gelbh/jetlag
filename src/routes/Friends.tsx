@@ -1,11 +1,8 @@
 import { Anchor, Text } from "@mantine/core";
+import { EntryRouteShell } from "@/components/ui/entry/EntryRouteShell";
+import { isFriendsMockEnabled, resetFriendsMock } from "@/services/profile/friendsMock";
 import { RequireUsername } from "../components/auth/RequireUsername";
 import { FriendsBody } from "../components/friends/FriendsBody";
-import { EntryRouteShell } from "@/components/ui/entry/EntryRouteShell";
-import {
-  isFriendsMockEnabled,
-  resetFriendsMock,
-} from "@/services/profile/friendsMock";
 
 export function Friends() {
   const mockEnabled = isFriendsMockEnabled();
@@ -13,13 +10,7 @@ export function Friends() {
   return (
     <EntryRouteShell title="Friends">
       {mockEnabled ? (
-        <Text
-          size="xs"
-          c="var(--color-signal)"
-          mb="sm"
-          px={4}
-          style={{ lineHeight: 1.35 }}
-        >
+        <Text size="xs" c="var(--color-signal)" mb="sm" px={4} style={{ lineHeight: 1.35 }}>
           Mock friends data on. Search{" "}
           <Text span fw={590} c="var(--color-field-ink)">
             bo
