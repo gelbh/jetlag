@@ -8,16 +8,14 @@ import wasm from "vite-plugin-wasm";
 import { clientChunkGroups } from "./vite.chunk-groups";
 import { optionalKernelWasmPkg } from "./vite.optional-kernel-wasm-pkg";
 import { createPwaPlugin } from "./vite.pwa";
-import { createSentryPlugins } from "./vite.sentry";
 import { sharedAlias } from "./vite.resolve-shared";
+import { createSentryPlugins } from "./vite.sentry";
 import { timeEndpointPlugin } from "./vite.time-endpoint";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const appVersion = (
-  JSON.parse(
-    readFileSync(new URL("./package.json", import.meta.url), "utf8"),
-  ) as {
+  JSON.parse(readFileSync(new URL("./package.json", import.meta.url), "utf8")) as {
     version: string;
   }
 ).version;
@@ -33,11 +31,7 @@ export default defineConfig(({ mode }) => ({
     // Worktrees under `.worktrees/` often resolve fonts from the primary
     // checkout's node_modules; allow that path so e2e matches CI.
     fs: {
-      allow: [
-        __dirname,
-        path.resolve(__dirname, ".."),
-        path.resolve(__dirname, "../.."),
-      ],
+      allow: [__dirname, path.resolve(__dirname, ".."), path.resolve(__dirname, "../..")],
     },
   },
   // es2022: enough for module workers + modern Safari; avoid global `esnext`

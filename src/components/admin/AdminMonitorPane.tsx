@@ -1,8 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useAdminMonitorFocus } from "../../domain/admin/adminMonitorFocus";
 import {
   clampMonitorLayoutToCols,
   defaultMonitorLayout,
   hideMonitorPanel,
+  type MonitorLayout,
+  type MonitorPanelId,
   mergeMonitorPanelOntoStack,
   monitorLayoutsEqual,
   reorderMonitorPanelInStack,
@@ -11,20 +14,17 @@ import {
   setMonitorStackActiveIndex,
   showMonitorPanel,
   unstackMonitorPanelToCell,
-  type MonitorLayout,
-  type MonitorPanelId,
 } from "../../domain/admin/opsDeskLayout";
 import { useAdminMapWideLayout } from "../../hooks/admin/useAdminMapWideLayout";
 import { usePlayerLocationsSync } from "../../hooks/session/useSessionExtrasSync";
-import { adminModerateSession } from "../../services/admin/adminModeration";
-import { useMapStore, useSessionStore } from "../../state/sessionStore";
 import { AdminMapScreen } from "../../routes/AdminMapScreen";
 import { AdminMonitorPanelContent } from "../../routes/admin-map-screen/AdminMonitorPanelContent";
 import { useObserverMapScreen } from "../../routes/observer-map-screen/useObserverMapScreen";
+import { adminModerateSession } from "../../services/admin/adminModeration";
+import { useMapStore, useSessionStore } from "../../state/sessionStore";
 import { InlineError } from "../ui/banners/InlineError";
-import { useAdminMonitorFocus } from "../../domain/admin/adminMonitorFocus";
-import type { AdminMonitorPanelBodies } from "./AdminMonitorPanelBody";
 import { AdminMonitorGridWorkspace } from "./AdminMonitorGridWorkspace";
+import type { AdminMonitorPanelBodies } from "./AdminMonitorPanelBody";
 import { AdminPlayerRoster } from "./AdminPlayerRoster";
 
 export function AdminMonitorPane({
@@ -42,9 +42,7 @@ export function AdminMonitorPane({
 }) {
   const session = useSessionStore((state) => state.session);
   const locations = usePlayerLocationsSync(active ? session?.id : undefined);
-  const setFocusedPlayerUid = useAdminMonitorFocus(
-    (state) => state.setFocusedPlayerUid,
-  );
+  const setFocusedPlayerUid = useAdminMonitorFocus((state) => state.setFocusedPlayerUid);
   const shellRef = useRef<HTMLDivElement>(null);
   const controller = useObserverMapScreen();
   const setLayerVisibility = useMapStore((state) => state.setLayerVisibility);
@@ -95,9 +93,7 @@ export function AdminMonitorPane({
       try {
         await adminModerateSession(sessionId, action);
       } catch (error) {
-        setModerationError(
-          error instanceof Error ? error.message : "Moderation failed.",
-        );
+        setModerationError(error instanceof Error ? error.message : "Moderation failed.");
       } finally {
         setModerationBusy(false);
       }
@@ -193,12 +189,7 @@ export function AdminMonitorPane({
     );
   }
 
-  if (
-    isWide &&
-    onMonitorLayoutChange &&
-    panelBodies &&
-    controller.playAreaReady
-  ) {
+  if (isWide && onMonitorLayoutChange && panelBodies && controller.playAreaReady) {
     return (
       <div
         ref={shellRef}
@@ -231,21 +222,11 @@ export function AdminMonitorPane({
           }}
           onUnstackPanel={(sourceStackId, panelId, x, y, w, h) => {
             mutateMonitorLayout((layout) =>
-              unstackMonitorPanelToCell(
-                layout,
-                sourceStackId,
-                panelId,
-                x,
-                y,
-                w,
-                h,
-              ),
+              unstackMonitorPanelToCell(layout, sourceStackId, panelId, x, y, w, h),
             );
           }}
           onPlacePanel={(panelId, x, y, w, h) => {
-            mutateMonitorLayout((layout) =>
-              showMonitorPanel(layout, panelId, { x, y, w, h }),
-            );
+            mutateMonitorLayout((layout) => showMonitorPanel(layout, panelId, { x, y, w, h }));
           }}
           onActiveIndexChange={(stackId, activeIndex) => {
             mutateMonitorLayout((layout) =>
@@ -270,8 +251,7 @@ export function AdminMonitorPane({
             mutateMonitorLayout((layout) => {
               const stack = layout.stacks.find((s) => s.id === stackId);
               if (!stack) return layout;
-              const panelId =
-                stack.panelIds[stack.activeIndex] ?? stack.panelIds[0];
+              const panelId = stack.panelIds[stack.activeIndex] ?? stack.panelIds[0];
               if (!panelId) return layout;
               return hideMonitorPanel(layout, panelId);
             });

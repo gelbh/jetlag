@@ -1,8 +1,8 @@
 import { useEffect } from "react";
 import { LOCAL_SESSION_ID } from "../../domain/map/annotations";
 import { isFirebaseConfigured } from "../../services/core/firebase/firebase";
-import { useSessionExit } from "./useSessionExit";
 import { useSessionStore } from "../../state/sessionStore";
+import { useSessionExit } from "./useSessionExit";
 
 export function useSessionEndedRedirect(
   sessionId: string | undefined,
@@ -13,12 +13,7 @@ export function useSessionEndedRedirect(
   const session = useSessionStore((state) => state.session);
 
   useEffect(() => {
-    if (
-      isHost ||
-      !sessionId ||
-      sessionId === LOCAL_SESSION_ID ||
-      !isFirebaseConfigured()
-    ) {
+    if (isHost || !sessionId || sessionId === LOCAL_SESSION_ID || !isFirebaseConfigured()) {
       return;
     }
 
@@ -32,12 +27,5 @@ export function useSessionEndedRedirect(
       navigateTo: exitPath,
       remoteNotice: "The host ended this session.",
     });
-  }, [
-    exitPath,
-    exitSession,
-    isHost,
-    session?.endedAt,
-    session?.id,
-    sessionId,
-  ]);
+  }, [exitPath, exitSession, isHost, session?.endedAt, session?.id, sessionId]);
 }

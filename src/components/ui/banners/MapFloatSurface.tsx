@@ -1,11 +1,7 @@
 import { Alert, Paper } from "@mantine/core";
 import type { ReactNode } from "react";
 import { jetlagBrand } from "@/theme/theme";
-import {
-  floatToneStyles,
-  toneAlertColor,
-  type MapFloatTone,
-} from "./mapFloatToneStyles";
+import { floatToneStyles, type MapFloatTone, toneAlertColor } from "./mapFloatToneStyles";
 
 export type { MapFloatTone };
 

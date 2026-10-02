@@ -15,9 +15,7 @@ export function getPlayerPhoneShellPortalHost(): HTMLElement | null {
   return portalHost;
 }
 
-export function subscribePlayerPhoneShellPortalHost(
-  listener: PortalHostListener,
-): () => void {
+export function subscribePlayerPhoneShellPortalHost(listener: PortalHostListener): () => void {
   listeners.add(listener);
   listener(portalHost);
   return () => {

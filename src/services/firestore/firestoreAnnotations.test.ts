@@ -1,14 +1,11 @@
 import { FirebaseError } from "firebase/app";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { GameArea } from "../../domain/map/annotations";
 import {
   isPlaceholderGameArea,
   JOIN_PREVIEW_PLACEHOLDER_AREA,
 } from "../../domain/session/join/joinPreviewGameArea";
-import type { GameArea } from "../../domain/map/annotations";
-import {
-  JOIN_AUTH_FAILURE_MESSAGE,
-  joinRemoteSessionByCode,
-} from "./firestoreAnnotations";
+import { JOIN_AUTH_FAILURE_MESSAGE, joinRemoteSessionByCode } from "./firestoreAnnotations";
 
 const zeroFallback: GameArea = {
   type: "Polygon",
@@ -167,12 +164,7 @@ describe("joinRemoteSessionByCode without initial read", () => {
       }),
     });
 
-    const result = await joinRemoteSessionByCode(
-      "ABCD",
-      "admin-1",
-      "admin",
-      "0.8.2",
-    );
+    const result = await joinRemoteSessionByCode("ABCD", "admin-1", "admin", "0.8.2");
 
     expect(result.status).toBe("joined");
     if (result.status !== "joined") {
@@ -213,12 +205,7 @@ describe("joinRemoteSessionByCode without initial read", () => {
       );
     getDocFromServer.mockRejectedValueOnce(new Error("re-read failed"));
 
-    const result = await joinRemoteSessionByCode(
-      "ABCD",
-      "admin-1",
-      "admin",
-      "0.8.2",
-    );
+    const result = await joinRemoteSessionByCode("ABCD", "admin-1", "admin", "0.8.2");
 
     expect(result.status).toBe("joined");
     if (result.status !== "joined") {
@@ -250,9 +237,7 @@ describe("joinRemoteSessionByCode without initial read", () => {
       .mockRejectedValueOnce(sessionPermissionDenied)
       .mockRejectedValueOnce(sessionPermissionDenied);
 
-    updateDoc
-      .mockRejectedValueOnce(sessionPermissionDenied)
-      .mockResolvedValueOnce(undefined);
+    updateDoc.mockRejectedValueOnce(sessionPermissionDenied).mockResolvedValueOnce(undefined);
 
     getDocFromServer.mockResolvedValueOnce({
       exists: () => true,
@@ -267,12 +252,7 @@ describe("joinRemoteSessionByCode without initial read", () => {
       }),
     });
 
-    const result = await joinRemoteSessionByCode(
-      "ABCD",
-      "admin-1",
-      "admin",
-      "0.8.2",
-    );
+    const result = await joinRemoteSessionByCode("ABCD", "admin-1", "admin", "0.8.2");
 
     expect(result.status).toBe("joined");
     expect(getIdToken).toHaveBeenCalledWith(true);
@@ -304,9 +284,9 @@ describe("joinRemoteSessionByCode without initial read", () => {
 
     updateDoc.mockRejectedValue(sessionPermissionDenied);
 
-    await expect(
-      joinRemoteSessionByCode("ABCD", "admin-1", "admin", "0.8.2"),
-    ).rejects.toThrow(JOIN_AUTH_FAILURE_MESSAGE);
+    await expect(joinRemoteSessionByCode("ABCD", "admin-1", "admin", "0.8.2")).rejects.toThrow(
+      JOIN_AUTH_FAILURE_MESSAGE,
+    );
 
     expect(getIdToken).toHaveBeenCalledWith(true);
     expect(reportJoinPermissionDenied).toHaveBeenCalledWith("initial");

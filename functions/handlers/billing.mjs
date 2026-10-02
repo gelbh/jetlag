@@ -1,22 +1,4 @@
-import { onCall, onRequest, HttpsError } from "firebase-functions/v2/https";
-import {
-  getSentryDsnSecret,
-  withSentryEventHandler,
-  withSentryHttpHandler,
-} from "../lib/sentry.mjs";
-import {
-  STRIPE_BILLING_PARAMS,
-  STRIPE_BILLING_SECRETS,
-  stripeSecretKey,
-  stripeWebhookSecret,
-} from "../billing/stripeConfig.mjs";
-import {
-  createBillingPortalSessionHandler,
-  createCheckoutSessionHandler,
-  createPremiumSessionHandler,
-  createStripeClient,
-  getPremiumEntitlementsHandler,
-} from "../billing/stripeBilling.mjs";
+import { HttpsError, onCall, onRequest } from "firebase-functions/v2/https";
 import { rejectAnonymousBillingAuth } from "../billing/billingAuth.mjs";
 import { startPremiumTrialHandler } from "../billing/premiumEntitlements.mjs";
 import {
@@ -25,8 +7,26 @@ import {
   RECOVER_PREMIUM_WINDOW_MS,
   recoverPremiumByStripeEmailHandler,
 } from "../billing/premiumRecovery.mjs";
+import {
+  createBillingPortalSessionHandler,
+  createCheckoutSessionHandler,
+  createPremiumSessionHandler,
+  createStripeClient,
+  getPremiumEntitlementsHandler,
+} from "../billing/stripeBilling.mjs";
+import {
+  STRIPE_BILLING_PARAMS,
+  STRIPE_BILLING_SECRETS,
+  stripeSecretKey,
+  stripeWebhookSecret,
+} from "../billing/stripeConfig.mjs";
 import { handleStripeWebhook } from "../billing/stripeWebhook.mjs";
 import { consumeRateLimit } from "../lib/firestoreRateLimit.mjs";
+import {
+  getSentryDsnSecret,
+  withSentryEventHandler,
+  withSentryHttpHandler,
+} from "../lib/sentry.mjs";
 import { adminDb } from "./proxyShared.mjs";
 
 const sentryDsnSecret = getSentryDsnSecret();
@@ -56,9 +56,7 @@ export const createCheckoutSession = onCall(
     rejectAnonymousBillingAuth(request);
 
     const productKey =
-      typeof request.data?.productKey === "string"
-        ? request.data.productKey.trim()
-        : "";
+      typeof request.data?.productKey === "string" ? request.data.productKey.trim() : "";
 
     if (!productKey) {
       throw new HttpsError("invalid-argument", "Product key required.");
@@ -113,11 +111,7 @@ export const createPremiumSession = onCall(
     }
     rejectAnonymousBillingAuth(request);
 
-    return createPremiumSessionHandler(
-      adminDb(),
-      request.auth.uid,
-      request.data,
-    );
+    return createPremiumSessionHandler(adminDb(), request.auth.uid, request.data);
   }),
 );
 
@@ -136,10 +130,7 @@ export const recoverPremiumByStripeEmail = onCall(
       windowMs: RECOVER_PREMIUM_WINDOW_MS,
     });
     if (!rateLimit.allowed) {
-      throw new HttpsError(
-        "resource-exhausted",
-        "Too many recovery attempts. Try again tomorrow.",
-      );
+      throw new HttpsError("resource-exhausted", "Too many recovery attempts. Try again tomorrow.");
     }
 
     const stripe = createStripeClient(stripeSecretKey.value());
@@ -159,11 +150,6 @@ export const stripeWebhook = onRequest(
     secrets: [stripeWebhookSecret, sentryDsnSecret],
   },
   withSentryHttpHandler(async (req, res) => {
-    await handleStripeWebhook(
-      adminDb(),
-      stripeWebhookSecret.value(),
-      req,
-      res,
-    );
+    await handleStripeWebhook(adminDb(), stripeWebhookSecret.value(), req, res);
   }),
 );

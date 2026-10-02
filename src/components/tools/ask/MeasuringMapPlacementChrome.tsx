@@ -1,14 +1,15 @@
 /**
  * Map-first Measuring chrome: GPS → resolve → closer/further + Send (Matching twin).
  */
-import type { ReactNode } from "react";
+
 import { Button, UnstyledButton } from "@mantine/core";
 import { PaperPlaneTiltIcon } from "@phosphor-icons/react";
+import type { ReactNode } from "react";
 import { HudMeasuringIcon } from "@/components/map/icons/ToolIcons";
 import {
   AskMapPlacementChrome,
-  askMapPlacementSendStyles,
   type AskMapPlacementPhase,
+  askMapPlacementSendStyles,
 } from "@/components/tools/ask/AskMapPlacementChrome";
 import { closerFurtherAnswerOptions } from "@/components/tools/shared/answers/binaryAnswerOptions";
 import {
@@ -16,8 +17,8 @@ import {
   choiceChipStyles,
   mapChromeSurfaceStyles,
 } from "@/components/ui/entry/entryChrome";
+import { type DistanceUnit, formatDistance } from "@/domain/map/distance";
 import type { MeasuringAnswer } from "@/domain/questions";
-import { formatDistance, type DistanceUnit } from "@/domain/map/distance";
 
 export type MeasuringMapPlacementPhase = AskMapPlacementPhase;
 
@@ -45,10 +46,7 @@ export type MeasuringMapPlacementChromeProps = {
   midSlot?: ReactNode;
 };
 
-const compactChoiceStyles = (
-  selected: boolean,
-  tone: "success" | "danger" | "default",
-) => {
+const compactChoiceStyles = (selected: boolean, tone: "success" | "danger" | "default") => {
   const base = choiceChipStyles(selected, tone);
   const selectedSoft =
     tone === "success"
@@ -56,19 +54,16 @@ const compactChoiceStyles = (
           backgroundColor:
             "color-mix(in oklch, var(--color-canvas) 72%, var(--color-status-success) 28%)",
           color: "var(--color-status-success)",
-          border:
-            "0.5px solid oklch(from var(--color-status-success) l c h / 0.55)",
+          border: "0.5px solid oklch(from var(--color-status-success) l c h / 0.55)",
         }
       : tone === "danger"
         ? {
-            backgroundColor:
-              "color-mix(in oklch, var(--color-canvas) 72%, var(--color-halt) 28%)",
+            backgroundColor: "color-mix(in oklch, var(--color-canvas) 72%, var(--color-halt) 28%)",
             color: "var(--color-halt)",
             border: "0.5px solid oklch(from var(--color-halt) l c h / 0.55)",
           }
         : {
-            backgroundColor:
-              "color-mix(in oklch, var(--color-canvas) 72%, var(--color-flag) 28%)",
+            backgroundColor: "color-mix(in oklch, var(--color-canvas) 72%, var(--color-flag) 28%)",
             color: "var(--color-flag)",
             border: "0.5px solid oklch(from var(--color-flag) l c h / 0.5)",
           };
@@ -97,13 +92,11 @@ const compactChoiceStyles = (
         : {
             backgroundColor: "oklch(from var(--color-canvas) l c h / 0.96)",
             color: "var(--color-field-ink)",
-            border:
-              "0.5px solid oklch(from var(--color-field-ink) l c h / 0.18)",
+            border: "0.5px solid oklch(from var(--color-field-ink) l c h / 0.18)",
             backdropFilter: "blur(24px) saturate(1.35)",
             WebkitBackdropFilter: "blur(24px) saturate(1.35)",
           }),
-      boxShadow:
-        "0 6px 18px 0 oklch(0.12 0.04 265 / 0.32), 0 1px 0 0 oklch(1 0 0 / 0.35) inset",
+      boxShadow: "0 6px 18px 0 oklch(0.12 0.04 265 / 0.32), 0 1px 0 0 oklch(1 0 0 / 0.35) inset",
     },
   };
 };
@@ -131,16 +124,11 @@ export function MeasuringMapPlacementChrome({
   midSlot,
 }: MeasuringMapPlacementChromeProps) {
   const distanceLabel =
-    distanceMeters !== null
-      ? formatDistance(distanceMeters, distanceUnit)
-      : null;
+    distanceMeters !== null ? formatDistance(distanceMeters, distanceUnit) : null;
 
   const answerSlot =
     phase === "answer" ? (
-      <div
-        data-testid="measuring-map-placement-answer"
-        className="flex flex-col gap-2"
-      >
+      <div data-testid="measuring-map-placement-answer" className="flex flex-col gap-2">
         {!awaitHiderAnswer && onAnswerChange ? (
           <div
             data-testid="measuring-map-placement-choices"
@@ -186,9 +174,7 @@ export function MeasuringMapPlacementChrome({
               }}
             >
               {seekerPlaceName ? (
-                <p className="m-0 truncate text-sm font-semibold">
-                  {seekerPlaceName}
-                </p>
+                <p className="m-0 truncate text-sm font-semibold">{seekerPlaceName}</p>
               ) : null}
               {targetPlaceName ? (
                 <p

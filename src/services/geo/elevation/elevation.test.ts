@@ -49,10 +49,7 @@ function mockUsgsResponse(elevation: number) {
 }
 
 function uniquePoints(count: number): LatLngTuple[] {
-  return Array.from({ length: count }, (_, index) => [
-    53 + index * 0.001,
-    -6 + index * 0.001,
-  ]);
+  return Array.from({ length: count }, (_, index) => [53 + index * 0.001, -6 + index * 0.001]);
 }
 
 async function fetchSingleElevation(point: LatLngTuple): Promise<number> {
@@ -101,9 +98,7 @@ describe("elevation", () => {
 
     await expect(fetchSingleElevation(timesSquarePoint)).resolves.toBe(14.8);
     expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(requestHostname(fetchMock.mock.calls[0]?.[0] as RequestInfo)).toBe(
-      USGS_EPQS_HOST,
-    );
+    expect(requestHostname(fetchMock.mock.calls[0]?.[0] as RequestInfo)).toBe(USGS_EPQS_HOST);
   });
 
   it("falls back to Open-Meteo when USGS lookup fails", async () => {
@@ -120,12 +115,8 @@ describe("elevation", () => {
 
     await expect(fetchSingleElevation(timesSquarePoint)).resolves.toBe(135);
     expect(fetchMock).toHaveBeenCalledTimes(2);
-    expect(requestHostname(fetchMock.mock.calls[0]?.[0] as RequestInfo)).toBe(
-      USGS_EPQS_HOST,
-    );
-    expect(requestHostname(fetchMock.mock.calls[1]?.[0] as RequestInfo)).toBe(
-      OPEN_METEO_HOST,
-    );
+    expect(requestHostname(fetchMock.mock.calls[0]?.[0] as RequestInfo)).toBe(USGS_EPQS_HOST);
+    expect(requestHostname(fetchMock.mock.calls[1]?.[0] as RequestInfo)).toBe(OPEN_METEO_HOST);
   });
 
   it("reuses cached elevations for repeated coordinates", async () => {
@@ -170,26 +161,22 @@ describe("elevation", () => {
     expect(fetchMock.mock.calls.length).toBeLessThanOrEqual(9);
   });
 
-  it(
-    "stops retrying Open-Meteo after the circuit breaker opens",
-    async () => {
-      const fetchMock = vi.fn().mockResolvedValue({
-        ok: false,
-        status: 429,
-        headers: new Headers(),
-        json: async () => ({}),
-      });
-      vi.stubGlobal("fetch", fetchMock);
+  it("stops retrying Open-Meteo after the circuit breaker opens", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 429,
+      headers: new Headers(),
+      json: async () => ({}),
+    });
+    vi.stubGlobal("fetch", fetchMock);
 
-      await expect(
-        fetchElevations([dublinPoint], { profile: "foreground" }),
-      ).rejects.toThrow(/rate-limited/i);
+    await expect(fetchElevations([dublinPoint], { profile: "foreground" })).rejects.toThrow(
+      /rate-limited/i,
+    );
 
-      // Threshold 3 opens circuit; without abort, foreground would attempt up to 7.
-      expect(fetchMock.mock.calls.length).toBeLessThanOrEqual(3);
-    },
-    30_000,
-  );
+    // Threshold 3 opens circuit; without abort, foreground would attempt up to 7.
+    expect(fetchMock.mock.calls.length).toBeLessThanOrEqual(3);
+  }, 30_000);
 
   it("skips network calls while the circuit breaker is open", async () => {
     openElevationCircuitForTests();

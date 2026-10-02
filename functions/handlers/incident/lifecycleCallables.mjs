@@ -1,26 +1,19 @@
 import { getAuth } from "firebase-admin/auth";
 import { getFirestore } from "firebase-admin/firestore";
 import { HttpsError, onCall } from "firebase-functions/v2/https";
-import { withSentryEventHandler } from "../../lib/sentry.mjs";
-import { consumeRateLimit } from "../../lib/firestoreRateLimit.mjs";
-import {
-  isAdminAuth,
-  requireAdminAuth,
-  resolveAdminEmail,
-} from "../../admin/adminAccess.mjs";
-import {
-  cancelOpenPendingQuestions,
-  moderateSession,
-} from "../../admin/moderateSession.mjs";
-import { createIncidentHandler } from "../../incident/createIncident.mjs";
-import { sendIncidentEmail } from "../../incident/sendIncidentEmail.mjs";
-import { postIncidentMessageHandler } from "../../incident/postIncidentMessage.mjs";
+import { isAdminAuth, requireAdminAuth, resolveAdminEmail } from "../../admin/adminAccess.mjs";
+import { cancelOpenPendingQuestions, moderateSession } from "../../admin/moderateSession.mjs";
 import { applyIncidentMitigationHandler } from "../../incident/applyIncidentMitigation.mjs";
-import { updateIncidentStatusHandler } from "../../incident/updateIncidentStatus.mjs";
-import { notifyReporterResolved } from "../../incident/notifyReporterResolved.mjs";
-import { publishIncidentHotfixHandler } from "../../incident/publishIncidentHotfix.mjs";
+import { createIncidentHandler } from "../../incident/createIncident.mjs";
 import { launchCursorHotfixForIncident } from "../../incident/launchCursorHotfix.mjs";
 import { launchIncidentCursorAgentHandler } from "../../incident/launchIncidentCursorAgent.mjs";
+import { notifyReporterResolved } from "../../incident/notifyReporterResolved.mjs";
+import { postIncidentMessageHandler } from "../../incident/postIncidentMessage.mjs";
+import { publishIncidentHotfixHandler } from "../../incident/publishIncidentHotfix.mjs";
+import { sendIncidentEmail } from "../../incident/sendIncidentEmail.mjs";
+import { updateIncidentStatusHandler } from "../../incident/updateIncidentStatus.mjs";
+import { consumeRateLimit } from "../../lib/firestoreRateLimit.mjs";
+import { withSentryEventHandler } from "../../lib/sentry.mjs";
 import {
   cursorApiKey,
   cursorHotfixRepoUrl,
@@ -126,8 +119,7 @@ export const applyIncidentMitigation = onCall(
         {
           moderate: (sessionId, action, adminUid) =>
             moderateSession(db, sessionId, action, adminUid),
-          clearPendingQuestions: (sessionId) =>
-            cancelOpenPendingQuestions(db, sessionId),
+          clearPendingQuestions: (sessionId) => cancelOpenPendingQuestions(db, sessionId),
         },
       );
     } catch (error) {

@@ -10,6 +10,7 @@ import {
   isTentacleCategoryAvailable,
   isTentacleCategoryAvailableInSession,
   readTentacleCategoryFromPending,
+  type TentacleExtendedCategoryId,
   tentacleAnswerLabel,
   tentacleCategoriesForGameSize,
   tentacleCategoriesForSession,
@@ -18,7 +19,6 @@ import {
   tentacleHiderAnswerClipboardText,
   tentacleQuestionPrompt,
   tentacleSearchRadiusMeters,
-  type TentacleExtendedCategoryId,
   usedTentacleCategoryIds,
   usedTentacleCategoryIdsForSession,
 } from "./tentacleQuestions";
@@ -48,9 +48,7 @@ function tentacleAnnotation(
 
 describe("tentacleQuestions", () => {
   it("lists categories by game size", () => {
-    expect(tentacleCategoriesForGameSize("small").map((item) => item.id)).toEqual(
-      [],
-    );
+    expect(tentacleCategoriesForGameSize("small").map((item) => item.id)).toEqual([]);
     expect(tentacleCategoriesForGameSize("medium").length).toBeGreaterThan(0);
     expect(tentacleCategoriesForGameSize("large").length).toBeGreaterThan(
       tentacleCategoriesForGameSize("medium").length,
@@ -74,12 +72,8 @@ describe("tentacleQuestions", () => {
     const zoo = tentacleAnnotation("t-2", "zoo");
     const deleted = tentacleAnnotation("t-3", "aquarium", "deleted");
 
-    expect(usedTentacleCategoryIds([museum, zoo, deleted])).toEqual(
-      new Set(["museum", "zoo"]),
-    );
-    expect(usedTentacleCategoryIds([museum, zoo], "t-1")).toEqual(
-      new Set(["zoo"]),
-    );
+    expect(usedTentacleCategoryIds([museum, zoo, deleted])).toEqual(new Set(["museum", "zoo"]));
+    expect(usedTentacleCategoryIds([museum, zoo], "t-1")).toEqual(new Set(["zoo"]));
   });
 
   it("marks museum used from pending and cancelled-with-answer", () => {
@@ -89,18 +83,14 @@ describe("tentacleQuestions", () => {
       status: "pending",
       placement: { metadata: { tentacleCategoryId: "museum" } },
     } as unknown as PendingQuestionRecord;
-    expect(usedTentacleCategoryIdsForSession([], [pending])).toEqual(
-      new Set(["museum"]),
-    );
+    expect(usedTentacleCategoryIdsForSession([], [pending])).toEqual(new Set(["museum"]));
 
     const cancelled = {
       ...pending,
       status: "cancelled",
       answer: "City Museum",
     } as unknown as PendingQuestionRecord;
-    expect(usedTentacleCategoryIdsForSession([], [cancelled])).toEqual(
-      new Set(["museum"]),
-    );
+    expect(usedTentacleCategoryIdsForSession([], [cancelled])).toEqual(new Set(["museum"]));
   });
 
   it("counts category reuse from annotations and pending questions", () => {
@@ -170,9 +160,7 @@ describe("tentacleQuestions", () => {
 
     expect(isTentacleCategoryAvailableInSession(session, "museum")).toBe(true);
     expect(
-      tentacleCategoriesForSession(session).some(
-        (category) => category.id === "custom:landmark",
-      ),
+      tentacleCategoriesForSession(session).some((category) => category.id === "custom:landmark"),
     ).toBe(true);
     expect(defaultTentacleCategoryIdForSession(session)).toBeTruthy();
     expect(getTentacleLocationCategory("zoo").label).toBe("Zoo");

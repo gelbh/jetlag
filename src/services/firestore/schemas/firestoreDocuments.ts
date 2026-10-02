@@ -67,12 +67,7 @@ export const sessionDocumentSchema = z
     opsMitigation: z
       .object({
         id: z.string(),
-        type: z.enum([
-          "soft_reload",
-          "reset_board",
-          "clear_pending_questions",
-          "end_session",
-        ]),
+        type: z.enum(["soft_reload", "reset_board", "clear_pending_questions", "end_session"]),
         appliedAt: z.string(),
         appliedByUid: z.string(),
         incidentId: z.string(),
@@ -108,9 +103,7 @@ export const pendingQuestionDocumentSchema = z
     toolType: z.string().min(1),
     createdByUid: z.string().optional(),
     createdAt: z.unknown().optional(),
-    status: z
-      .enum(["walking", "pending", "answered", "resolved", "cancelled"])
-      .optional(),
+    status: z.enum(["walking", "pending", "answered", "resolved", "cancelled"]).optional(),
     placement: z
       .object({
         geometryJson: z.string().optional(),
@@ -163,6 +156,4 @@ export const userEntitlementsDocumentSchema = z
   })
   .passthrough();
 
-export type UserEntitlementsDocument = z.infer<
-  typeof userEntitlementsDocumentSchema
->;
+export type UserEntitlementsDocument = z.infer<typeof userEntitlementsDocumentSchema>;

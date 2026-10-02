@@ -1,12 +1,12 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { GameArea } from "../../domain/map/annotations";
-import { createTestSession } from "../../test/fixtures/sessions";
+import * as regionPackBoundaries from "../../services/geo/matching/regionPackBoundaries";
 import {
   clearResolvedMatchingAreasCacheForTests,
   resolveSessionPlayArea,
 } from "../../services/geo/matching/resolveSessionMatchingAreas";
-import * as regionPackBoundaries from "../../services/geo/matching/regionPackBoundaries";
+import { createTestSession } from "../../test/fixtures/sessions";
 import { useResolvedSessionRules } from "./useResolvedSessionRules";
 
 vi.mock("../../services/geo/matching/regionPackBoundaries", async (importOriginal) => {
@@ -34,9 +34,7 @@ describe("useResolvedSessionRules play area readiness", () => {
       regionPackId: "london",
       regionPackSubregionId: "camden",
     });
-    vi.mocked(regionPackBoundaries.loadRegionPackPlayArea).mockResolvedValue(
-      session.gameArea,
-    );
+    vi.mocked(regionPackBoundaries.loadRegionPackPlayArea).mockResolvedValue(session.gameArea);
     await resolveSessionPlayArea(session);
 
     const { result } = renderHook(() => useResolvedSessionRules(session));
@@ -50,19 +48,16 @@ describe("useResolvedSessionRules play area readiness", () => {
     const delayed = new Promise<GameArea>((resolve) => {
       release = resolve;
     });
-    vi.mocked(regionPackBoundaries.loadRegionPackPlayArea).mockReturnValue(
-      delayed,
-    );
+    vi.mocked(regionPackBoundaries.loadRegionPackPlayArea).mockReturnValue(delayed);
 
     const base = createTestSession({
       regionPackId: "london",
       regionPackSubregionId: "camden",
     });
 
-    const { result, rerender } = renderHook(
-      ({ session }) => useResolvedSessionRules(session),
-      { initialProps: { session: base } },
-    );
+    const { result, rerender } = renderHook(({ session }) => useResolvedSessionRules(session), {
+      initialProps: { session: base },
+    });
 
     expect(result.current.playAreaReady).toBe(false);
 

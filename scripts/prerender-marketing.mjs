@@ -1,8 +1,8 @@
 #!/usr/bin/env node
+import { spawn } from "node:child_process";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { spawn } from "node:child_process";
 import { chromium } from "playwright";
 import {
   distHtmlPath,
@@ -97,9 +97,7 @@ try {
     await page.waitForFunction(
       (minChars) => {
         const rootEl = document.querySelector("#root");
-        return Boolean(
-          rootEl && rootEl.textContent && rootEl.textContent.trim().length > minChars,
-        );
+        return Boolean(rootEl?.textContent && rootEl.textContent.trim().length > minChars);
       },
       MIN_ROOT_TEXT_CHARS,
       { timeout: 120_000 },

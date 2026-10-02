@@ -1,16 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import {
-  computeHiderTruthReplyAsync,
-  type HiderTruthResult,
-} from "../../domain/questions/ui";
+import type { GameArea } from "../../domain/map/annotations";
 import { buildHiderTruthFetchKey } from "../../domain/questions/hiderTruth/hiderTruthFetchKey";
 import { reuseHiderTruthMapIfEqual } from "../../domain/questions/hiderTruth/hiderTruthMapReuse";
 import {
-  resolvePendingQuestionTruthReference,
   type HiderQuestionTruthContextInput,
   type HiderTruthReferenceMode,
+  resolvePendingQuestionTruthReference,
 } from "../../domain/questions/hiderTruth/resolveHiderTruthReference";
-import type { GameArea } from "../../domain/map/annotations";
+import { computeHiderTruthReplyAsync, type HiderTruthResult } from "../../domain/questions/ui";
 import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
 import { useLatestRequest } from "../forms/useLatestRequest";
 
@@ -38,16 +35,13 @@ export function useHiderQuestionTruths(
   /** Per open question id → reference mode for picker labels. */
   truthReferenceModes: ReadonlyMap<string, HiderTruthReferenceMode>;
 } {
-  const [questionTruths, setQuestionTruths] = useState<
-    ReadonlyMap<string, HiderTruthResult>
-  >(() => new Map());
+  const [questionTruths, setQuestionTruths] = useState<ReadonlyMap<string, HiderTruthResult>>(
+    () => new Map(),
+  );
   const [resolvedFetchKey, setResolvedFetchKey] = useState<string | null>(null);
   const { beginRequest, isLatestRequest } = useLatestRequest();
 
-  const openQuestions = useMemo(
-    () => openPendingQuestions(pendingQuestions),
-    [pendingQuestions],
-  );
+  const openQuestions = useMemo(() => openPendingQuestions(pendingQuestions), [pendingQuestions]);
   const openQuestionsRef = useRef(openQuestions);
   const truthContextRef = useRef(truthContext);
 
@@ -70,17 +64,13 @@ export function useHiderQuestionTruths(
     }
     const modes = new Map<string, HiderTruthReferenceMode>();
     for (const question of openQuestions) {
-      modes.set(
-        question.id,
-        resolvePendingQuestionTruthReference(question, truthContext).mode,
-      );
+      modes.set(question.id, resolvePendingQuestionTruthReference(question, truthContext).mode);
     }
     return modes;
   }, [openQuestions, truthContext]);
   const truthReferenceReady = options?.truthReferenceReady ?? true;
   const loading =
-    openQuestions.length > 0 &&
-    (!truthReferenceReady || resolvedFetchKey !== fetchKey);
+    openQuestions.length > 0 && (!truthReferenceReady || resolvedFetchKey !== fetchKey);
 
   useEffect(() => {
     const open = openQuestionsRef.current;
@@ -95,15 +85,8 @@ export function useHiderQuestionTruths(
     void (async () => {
       const entries = await Promise.all(
         open.map(async (question) => {
-          const reference = resolvePendingQuestionTruthReference(
-            question,
-            context,
-          );
-          const truth = await computeHiderTruthReplyAsync(
-            question,
-            reference.point,
-            gameArea,
-          );
+          const reference = resolvePendingQuestionTruthReference(question, context);
+          const truth = await computeHiderTruthReplyAsync(question, reference.point, gameArea);
           return [question.id, truth] as const;
         }),
       );
@@ -119,9 +102,7 @@ export function useHiderQuestionTruths(
         }
       }
 
-      setQuestionTruths((previous) =>
-        reuseHiderTruthMapIfEqual(previous, nextTruths),
-      );
+      setQuestionTruths((previous) => reuseHiderTruthMapIfEqual(previous, nextTruths));
       setResolvedFetchKey(fetchKey);
     })();
   }, [fetchKey, beginRequest, isLatestRequest, gameArea, truthReferenceReady]);
@@ -129,7 +110,6 @@ export function useHiderQuestionTruths(
   return {
     questionTruths: openQuestions.length === 0 ? EMPTY_TRUTHS : questionTruths,
     loading: openQuestions.length === 0 ? false : loading,
-    truthReferenceModes:
-      openQuestions.length === 0 ? EMPTY_MODES : truthReferenceModes,
+    truthReferenceModes: openQuestions.length === 0 ? EMPTY_MODES : truthReferenceModes,
   };
 }

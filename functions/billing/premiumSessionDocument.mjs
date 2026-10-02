@@ -53,12 +53,7 @@ function defaultHidingZoneRadiusMeters(gameSize) {
  * @param {string} hostUid
  * @param {string} createdAt
  */
-export function buildPremiumSessionFirestoreDocument(
-  input,
-  code,
-  hostUid,
-  createdAt,
-) {
+export function buildPremiumSessionFirestoreDocument(input, code, hostUid, createdAt) {
   const radiusMeters =
     typeof input.rulesPatch.hidingZoneRadiusMeters === "number"
       ? input.rulesPatch.hidingZoneRadiusMeters

@@ -1,5 +1,5 @@
-import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
 import { haversineMeters } from "@/domain/geometry/gameArea/distance";
+import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
 
 export type PoiCandidateSource = "tile" | "bundle" | "overpass";
 export type PoiConfirmStatus = "provisional" | "confirmed";

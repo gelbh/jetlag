@@ -1,10 +1,7 @@
 import { useId, useState } from "react";
 import type { PackAttachSource } from "@/domain/regions/packAttach";
+import { REGION_PACK_IDS, type RegionPackId } from "@/domain/regions/regionPack";
 import { regionPackDisplayLabel } from "@/domain/regions/regionPackDisplayLabel";
-import {
-  REGION_PACK_IDS,
-  type RegionPackId,
-} from "@/domain/regions/regionPack";
 
 export type { PackAttachSource };
 

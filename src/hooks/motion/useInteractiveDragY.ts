@@ -1,9 +1,4 @@
-import {
-  useCallback,
-  useRef,
-  useState,
-  type PointerEvent as ReactPointerEvent,
-} from "react";
+import { type PointerEvent as ReactPointerEvent, useCallback, useRef, useState } from "react";
 import { MIN_DRAG_START_PX } from "../../domain/device/motion/motionTokens";
 
 export interface PointerDragBindings {
@@ -32,10 +27,7 @@ export function computeDragOffset(
   return mapDelta(delta, startOffset);
 }
 
-export function hasExceededDragSlop(
-  delta: number,
-  minDragStartPx: number,
-): boolean {
+export function hasExceededDragSlop(delta: number, minDragStartPx: number): boolean {
   return Math.abs(delta) >= minDragStartPx;
 }
 

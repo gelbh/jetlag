@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { writeFileSync, mkdirSync } from "node:fs";
+import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { loadCrawlPolicy } from "./seo-build-lib.mjs";
@@ -7,9 +7,7 @@ import { loadCrawlPolicy } from "./seo-build-lib.mjs";
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const policy = loadCrawlPolicy(root);
 
-const disallow = (policy.disallowPaths ?? [])
-  .map((path) => `Disallow: ${path}`)
-  .join("\n");
+const disallow = (policy.disallowPaths ?? []).map((path) => `Disallow: ${path}`).join("\n");
 
 const body = `User-agent: *
 Allow: /

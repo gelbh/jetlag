@@ -1,8 +1,8 @@
-import test from "node:test";
 import assert from "node:assert/strict";
+import test from "node:test";
 import {
-  CLIENT_UPDATE_REQUIRED,
   assertClientMeetsGlobalMin,
+  CLIENT_UPDATE_REQUIRED,
   clearClientMinVersionCache,
   meetsClientMinVersion,
   resolveClientMinVersion,

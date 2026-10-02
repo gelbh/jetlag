@@ -1,20 +1,18 @@
 import {
-  test,
-  expect,
+  cancelEndGame,
   confirmInitialHidingZoneAtStation,
   dismissMapOnboarding,
-  cancelEndGame,
+  expect,
   expectEndGameRestrictions,
   expectEndGameStarted,
   startEndGameFromFoundStation,
   startSessionTimer,
+  test,
 } from "../../fixtures";
 
 test.setTimeout(120_000);
 
-test("found station starts end game immediately; cancel and reset work", async ({
-  hostHider,
-}) => {
+test("found station starts end game immediately; cancel and reset work", async ({ hostHider }) => {
   const { hostPage, guestPage } = hostHider;
 
   await test.step("hider confirms zone; host starts timer", async () => {
@@ -28,12 +26,8 @@ test("found station starts end game immediately; cancel and reset work", async (
     await startEndGameFromFoundStation(hostPage);
     await expectEndGameStarted(hostPage, guestPage);
 
-    await expect(
-      guestPage.getByRole("button", { name: "Accept" }),
-    ).toBeHidden();
-    await expect(
-      guestPage.getByText("Seekers requested end game"),
-    ).toBeHidden();
+    await expect(guestPage.getByRole("button", { name: "Accept" })).toBeHidden();
+    await expect(guestPage.getByText("Seekers requested end game")).toBeHidden();
   });
 
   await test.step("restrictions apply; cancel clears end game", async () => {

@@ -1,39 +1,40 @@
 /** Public session Firestore API — split by concern under ./sessions/. */
+
 export {
-  isReclaimableSessionForCode,
+  ensureHiderPhotoUploadAccess,
+  getRemoteSessionById,
+  getRemoteSessionByIdFromServer,
+  type JoinRemoteSessionResult,
+  joinRemoteSessionByCode,
+  lookupRemoteSessionByCode,
+  waitForServerHiderRole,
+} from "./sessions/join";
+export {
+  clearEndGameRequestSession,
+  confirmFoundHiderSession,
+  endRemoteSession,
+  requestFoundHiderSession,
+  resetEndGameSession,
+  resetFoundHiderSession,
+  resetRemoteSession,
+  startEndGameSession,
+  updateSessionRules,
+  updateSessionTimer,
+} from "./sessions/lifecycle";
+export { handleFirestoreListenError } from "./sessions/listenError";
+export {
+  createRemoteSession,
+  type EnsureRemoteSessionMembershipOptions,
+  ensureRemoteSessionMembership,
+  ensureRemoteSessionWriteAccess,
+} from "./sessions/membership";
+export {
   isFirestorePermissionDenied,
+  isReclaimableSessionForCode,
   JOIN_AUTH_FAILURE_MESSAGE,
   touchSessionLastActive,
 } from "./sessions/shared";
 export {
-  ensureRemoteSessionMembership,
-  ensureRemoteSessionWriteAccess,
-  createRemoteSession,
-  type EnsureRemoteSessionMembershipOptions,
-} from "./sessions/membership";
-export {
-  lookupRemoteSessionByCode,
-  joinRemoteSessionByCode,
-  getRemoteSessionById,
-  getRemoteSessionByIdFromServer,
-  waitForServerHiderRole,
-  ensureHiderPhotoUploadAccess,
-  type JoinRemoteSessionResult,
-} from "./sessions/join";
-export {
-  endRemoteSession,
-  updateSessionTimer,
-  updateSessionRules,
-  startEndGameSession,
-  clearEndGameRequestSession,
-  resetEndGameSession,
-  requestFoundHiderSession,
-  confirmFoundHiderSession,
-  resetFoundHiderSession,
-  resetRemoteSession,
-} from "./sessions/lifecycle";
-export {
-  subscribeToSession,
   subscribeToEndGameTruthAnchors,
+  subscribeToSession,
 } from "./sessions/subscribe";
-export { handleFirestoreListenError } from "./sessions/listenError";

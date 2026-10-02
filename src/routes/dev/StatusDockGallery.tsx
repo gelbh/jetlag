@@ -1,11 +1,11 @@
-import { useState } from "react";
 import { Box, Stack, Text, Title } from "@mantine/core";
-import { ToolStatusBlock } from "@/components/session/status/ToolStatusBlock";
+import { useState } from "react";
 import { SyncBlock } from "@/components/session/status/SyncBlock";
+import { ToolStatusBlock } from "@/components/session/status/ToolStatusBlock";
 import { ScreenNav } from "@/components/ui/layout/ScreenNav";
 import {
-  STATUS_DOCK_SCENARIOS,
   assertStatusDockScenarioIdsUnique,
+  STATUS_DOCK_SCENARIOS,
   type StatusDockScenario,
 } from "@/dev/statusDockScenarios";
 
@@ -39,8 +39,7 @@ function ScenarioRow({ scenario }: { scenario: StatusDockScenario }) {
         style={{
           ...frameStyle,
           // Map-ish wash so frost reads like over MapLibre.
-          background:
-            "linear-gradient(160deg, oklch(0.42 0.04 230), oklch(0.28 0.03 200))",
+          background: "linear-gradient(160deg, oklch(0.42 0.04 230), oklch(0.28 0.03 200))",
           borderRadius: 16,
           padding: 12,
         }}
@@ -100,8 +99,8 @@ export function StatusDockGallery() {
           Status dock scenarios
         </Title>
         <Text size="sm" style={{ color: "var(--color-field-ink-muted)" }}>
-          Mock fixtures for the status top island. Resize the window under
-          380px to exercise compact layout on non-framed rows.
+          Mock fixtures for the status top island. Resize the window under 380px to exercise compact
+          layout on non-framed rows.
         </Text>
       </Stack>
       {STATUS_DOCK_SCENARIOS.map((scenario) => (

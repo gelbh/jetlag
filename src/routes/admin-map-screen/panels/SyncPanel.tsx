@@ -1,8 +1,5 @@
+import { SYNC_TONE_CLASSES, syncRailDisplay } from "@/components/session/status/syncRailDisplay";
 import type { SyncStatus } from "@/domain/device/sync/sync";
-import {
-  SYNC_TONE_CLASSES,
-  syncRailDisplay,
-} from "@/components/session/status/syncRailDisplay";
 
 interface SyncPanelProps {
   status: SyncStatus;
@@ -26,12 +23,7 @@ export function SyncPanel({
     { label: "Queued writes", value: String(queuedWrites) },
     {
       label: "Reachability",
-      value:
-        status === "offline"
-          ? "Offline"
-          : status === "degraded"
-            ? "Unstable"
-            : "OK",
+      value: status === "offline" ? "Offline" : status === "degraded" ? "Unstable" : "OK",
     },
     { label: "Last error", value: lastSyncError ?? "—" },
     { label: "Remote notice", value: remoteUpdateNotice ?? "—" },

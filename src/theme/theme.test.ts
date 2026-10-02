@@ -44,9 +44,7 @@ describe("jetlagTheme", () => {
     expect(resolved.variables?.["--jl-ops-rail-width"]).toBe("22rem");
     expect(resolved.variables?.["--ops-rail-width"]).toBe("22rem");
     expect(resolved.variables?.["--ask-hud-strip-height"]).toBe("3rem");
-    expect(resolved.variables?.["--jl-safe-area-bottom"]).toBe(
-      jetlagBrand.safeAreaBottom,
-    );
+    expect(resolved.variables?.["--jl-safe-area-bottom"]).toBe(jetlagBrand.safeAreaBottom);
     expect(resolved.variables?.["--jl-z-dock"]).toBe("1000");
     expect(resolved.variables?.["--jl-z-modal"]).toBe("1100");
     expect(resolved.dark?.["--mantine-color-body"]).toBe(jetlagBrand.canvas);

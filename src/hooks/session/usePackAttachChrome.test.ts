@@ -19,9 +19,7 @@ const MID_ATLANTIC: GameArea = {
 
 describe("usePackAttachChrome", () => {
   it("auto-attaches dublin for a dublin-city play area", () => {
-    const { result } = renderHook(() =>
-      usePackAttachChrome({ gameArea: DUBLIN_CITY_GAME_AREA }),
-    );
+    const { result } = renderHook(() => usePackAttachChrome({ gameArea: DUBLIN_CITY_GAME_AREA }));
 
     expect(result.current.packId).toBe("dublin");
     expect(result.current.source).toBe("auto");
@@ -29,19 +27,16 @@ describe("usePackAttachChrome", () => {
   });
 
   it("shows request CTA when no pack qualifies", () => {
-    const { result } = renderHook(() =>
-      usePackAttachChrome({ gameArea: MID_ATLANTIC }),
-    );
+    const { result } = renderHook(() => usePackAttachChrome({ gameArea: MID_ATLANTIC }));
 
     expect(result.current.packId).toBeUndefined();
     expect(result.current.showRequestCta).toBe(true);
   });
 
   it("keeps manual clear sticky until the play area changes", () => {
-    const { result, rerender } = renderHook(
-      ({ gameArea }) => usePackAttachChrome({ gameArea }),
-      { initialProps: { gameArea: DUBLIN_CITY_GAME_AREA as GameArea | null } },
-    );
+    const { result, rerender } = renderHook(({ gameArea }) => usePackAttachChrome({ gameArea }), {
+      initialProps: { gameArea: DUBLIN_CITY_GAME_AREA as GameArea | null },
+    });
 
     act(() => {
       result.current.clearPack();

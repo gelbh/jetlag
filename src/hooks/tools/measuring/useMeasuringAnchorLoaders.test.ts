@@ -1,13 +1,13 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
-import { renderHook, act, waitFor } from "@testing-library/react";
+import { act, renderHook, waitFor } from "@testing-library/react";
 import type { Feature, LineString } from "geojson";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { registerMapLibreMap } from "@/services/geo/maplibre/mapLibreMapRegistry";
+import { resolveCoastlineContextFromCache } from "@/services/geo/overpass/coastline";
+import { fetchMeasuringPlacesInArea } from "@/services/geo/overpass/measuringPlaces";
+import { useMapStore } from "@/state/mapStore";
+import { fetchMeasuringCoastlineContext } from "../measuringToolResolvers";
 import { useMeasuringAnchorLoaders } from "./useMeasuringAnchorLoaders";
 import { useMeasuringDraftState } from "./useMeasuringDraftState";
-import { registerMapLibreMap } from "@/services/geo/maplibre/mapLibreMapRegistry";
-import { useMapStore } from "@/state/mapStore";
-import { fetchMeasuringPlacesInArea } from "@/services/geo/overpass/measuringPlaces";
-import { resolveCoastlineContextFromCache } from "@/services/geo/overpass/coastline";
-import { fetchMeasuringCoastlineContext } from "../measuringToolResolvers";
 
 vi.mock("@/services/geo/overpass/measuringPlaces", () => ({
   fetchMeasuringPlacesInArea: vi.fn(),
@@ -15,8 +15,7 @@ vi.mock("@/services/geo/overpass/measuringPlaces", () => ({
 }));
 
 vi.mock("@/services/geo/overpass/coastline", async (importOriginal) => {
-  const actual =
-    await importOriginal<typeof import("@/services/geo/overpass/coastline")>();
+  const actual = await importOriginal<typeof import("@/services/geo/overpass/coastline")>();
   return {
     ...actual,
     resolveCoastlineContextFromCache: vi.fn(),
@@ -24,8 +23,7 @@ vi.mock("@/services/geo/overpass/coastline", async (importOriginal) => {
 });
 
 vi.mock("../measuringToolResolvers", async (importOriginal) => {
-  const actual =
-    await importOriginal<typeof import("../measuringToolResolvers")>();
+  const actual = await importOriginal<typeof import("../measuringToolResolvers")>();
   return {
     ...actual,
     fetchMeasuringCoastlineContext: vi.fn(),
@@ -84,11 +82,13 @@ describe("useMeasuringAnchorLoaders tile preview", () => {
   });
 
   it("shows tile provisional places then upgrades to confirmed", async () => {
-    let resolveConfirm!: (places: Array<{
-      id: string;
-      name: string;
-      point: [number, number];
-    }>) => void;
+    let resolveConfirm!: (
+      places: Array<{
+        id: string;
+        name: string;
+        point: [number, number];
+      }>,
+    ) => void;
     fetchMock.mockImplementation(
       () =>
         new Promise((resolve) => {
@@ -122,17 +122,12 @@ describe("useMeasuringAnchorLoaders tile preview", () => {
 
     let loadPromise!: Promise<void>;
     act(() => {
-      loadPromise = result.current.loaders.loadAllPlacesAt(
-        [51.5, -0.1],
-        "museum",
-      );
+      loadPromise = result.current.loaders.loadAllPlacesAt([51.5, -0.1], "museum");
     });
 
     await waitFor(() => {
       expect(result.current.draft.measuringPlaces[0]?.name).toBe("Tile Museum");
-      expect(result.current.draft.measuringPlaces[0]?.confirmStatus).toBe(
-        "provisional",
-      );
+      expect(result.current.draft.measuringPlaces[0]?.confirmStatus).toBe("provisional");
     });
 
     await act(async () => {
@@ -146,12 +141,8 @@ describe("useMeasuringAnchorLoaders tile preview", () => {
       await loadPromise;
     });
 
-    expect(result.current.draft.measuringPlaces[0]?.name).toBe(
-      "Confirmed Museum",
-    );
-    expect(
-      result.current.draft.measuringPlaces[0]?.confirmStatus !== "provisional",
-    ).toBe(true);
+    expect(result.current.draft.measuringPlaces[0]?.name).toBe("Confirmed Museum");
+    expect(result.current.draft.measuringPlaces[0]?.confirmStatus !== "provisional").toBe(true);
   });
 });
 
@@ -191,9 +182,7 @@ describe("useMeasuringAnchorLoaders coastline pack seed", () => {
       await result.current.loaders.loadMeasuringCoastlineAt([53.35, -6.26]);
     });
 
-    expect(result.current.draft.measuringCoastSegments).toEqual([
-      packCoastSegment,
-    ]);
+    expect(result.current.draft.measuringCoastSegments).toEqual([packCoastSegment]);
     expect(result.current.draft.measuringLoading).toBe(false);
   });
 
@@ -234,9 +223,7 @@ describe("useMeasuringAnchorLoaders coastline pack seed", () => {
 
     let loadPromise!: Promise<void>;
     act(() => {
-      loadPromise = result.current.loaders.loadMeasuringCoastlineAt([
-        53.35, -6.26,
-      ]);
+      loadPromise = result.current.loaders.loadMeasuringCoastlineAt([53.35, -6.26]);
     });
 
     expect(result.current.draft.measuringLoading).toBe(true);
@@ -255,8 +242,6 @@ describe("useMeasuringAnchorLoaders coastline pack seed", () => {
     });
 
     expect(result.current.draft.measuringLoading).toBe(false);
-    expect(result.current.draft.measuringCoastSegments).toEqual([
-      packCoastSegment,
-    ]);
+    expect(result.current.draft.measuringCoastSegments).toEqual([packCoastSegment]);
   });
 });

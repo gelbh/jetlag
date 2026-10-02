@@ -1,4 +1,4 @@
-import { useRef, type ReactNode, type RefObject } from "react";
+import { type ReactNode, type RefObject, useRef } from "react";
 import { sheetHandleStyle } from "@/components/ui/entry/entryStyles";
 import type { SheetHandleProps } from "@/hooks/motion/useSheetGesture";
 
@@ -62,10 +62,7 @@ export function MobileSheet({
     // nested (Radix modal) must stay in-flow so the dialog has a non-zero box;
     // overlay keeps fixed bottom sheet chassis for MotionSheet.
     const splitHandle =
-      handle ??
-      (variant === "nested" ? (
-        <div style={sheetHandleStyle} aria-hidden="true" />
-      ) : null);
+      handle ?? (variant === "nested" ? <div style={sheetHandleStyle} aria-hidden="true" /> : null);
     return (
       <div className={`${positionClass} hud-sheet ${className}`}>
         <div

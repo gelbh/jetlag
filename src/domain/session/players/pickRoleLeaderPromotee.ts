@@ -12,15 +12,11 @@ export function pickRoleLeaderPromotee(
   role: PlayerRole,
   excludeUid: string,
 ): string | null {
-  const roles =
-    memberRoles && typeof memberRoles === "object" ? memberRoles : {};
+  const roles = memberRoles && typeof memberRoles === "object" ? memberRoles : {};
   const candidates = (Array.isArray(memberUids) ? memberUids : [])
     .filter(
       (uid) =>
-        typeof uid === "string" &&
-        uid.length > 0 &&
-        uid !== excludeUid &&
-        roles[uid] === role,
+        typeof uid === "string" && uid.length > 0 && uid !== excludeUid && roles[uid] === role,
     )
     .sort((a, b) => a.localeCompare(b));
 

@@ -1,12 +1,9 @@
-import { formatPresetDistance } from "@/domain/map/distance";
-import { toggleThermometerPresetInSettings } from "@/domain/session/tools/advancedSessionSettings";
-import { thermometerPresetsMetersForGameSize } from "@/domain/session/size/gameSizeRules";
 import { Button } from "@mantine/core";
-import {
-  AdvancedSettingsInset,
-  AdvancedSettingsToggle,
-} from "./shared";
 import { filledStyles, grayStyles } from "@/components/ui/entry/entryChrome";
+import { formatPresetDistance } from "@/domain/map/distance";
+import { thermometerPresetsMetersForGameSize } from "@/domain/session/size/gameSizeRules";
+import { toggleThermometerPresetInSettings } from "@/domain/session/tools/advancedSessionSettings";
+import { AdvancedSettingsInset, AdvancedSettingsToggle } from "./shared";
 import type { AdvancedSettingsSectionProps } from "./types";
 
 export function ThermometerSection({
@@ -16,10 +13,7 @@ export function ThermometerSection({
   onChange,
   disabled,
 }: AdvancedSettingsSectionProps) {
-  const availableThermoPresets = thermometerPresetsMetersForGameSize(
-    gameSize,
-    distanceUnit,
-  );
+  const availableThermoPresets = thermometerPresetsMetersForGameSize(gameSize, distanceUnit);
 
   return (
     <AdvancedSettingsInset>
@@ -52,12 +46,7 @@ export function ThermometerSection({
                 disabled={disabled}
                 onClick={() =>
                   onChange(
-                    toggleThermometerPresetInSettings(
-                      value,
-                      presetMeters,
-                      gameSize,
-                      distanceUnit,
-                    ),
+                    toggleThermometerPresetInSettings(value, presetMeters, gameSize, distanceUnit),
                   )
                 }
                 styles={selected ? filledStyles : grayStyles}

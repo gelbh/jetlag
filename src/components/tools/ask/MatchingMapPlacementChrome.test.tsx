@@ -1,7 +1,7 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { MantineProvider } from "@mantine/core";
 import { fireEvent, render, screen } from "@testing-library/react";
 import type { ComponentProps } from "react";
-import { MantineProvider } from "@mantine/core";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { jetlagTheme } from "@/theme/theme";
 import { MatchingMapPlacementChrome } from "./MatchingMapPlacementChrome";
 
@@ -18,9 +18,7 @@ beforeEach(() => {
   }));
 });
 
-function renderChrome(
-  props: Partial<ComponentProps<typeof MatchingMapPlacementChrome>> = {},
-) {
+function renderChrome(props: Partial<ComponentProps<typeof MatchingMapPlacementChrome>> = {}) {
   const onUseGps = props.onUseGps ?? vi.fn();
   const onCommit = props.onCommit ?? vi.fn();
   const onAnswerChange = props.onAnswerChange ?? vi.fn();
@@ -53,9 +51,7 @@ describe("MatchingMapPlacementChrome", () => {
     expect(screen.getByTestId("matching-map-placement-status")).toHaveTextContent(
       "Nearest place found",
     );
-    expect(screen.getByTestId("matching-map-placement-status")).toHaveTextContent(
-      "Dublin Airport",
-    );
+    expect(screen.getByTestId("matching-map-placement-status")).toHaveTextContent("Dublin Airport");
   });
 
   it("uses one resolving status for nearest + map loading", () => {
@@ -71,9 +67,7 @@ describe("MatchingMapPlacementChrome", () => {
 
   it("lets the user reopen the category sheet from the leading back control", () => {
     const { onChangeCategory } = renderChrome({ phase: "answer" });
-    fireEvent.click(
-      screen.getByRole("button", { name: /Change category/i }),
-    );
+    fireEvent.click(screen.getByRole("button", { name: /Change category/i }));
     expect(onChangeCategory).toHaveBeenCalled();
   });
 
@@ -97,9 +91,7 @@ describe("MatchingMapPlacementChrome", () => {
     });
 
     const cta = screen.getByTestId("matching-map-placement-cta");
-    expect(cta).toContainElement(
-      screen.getByTestId("matching-map-placement-error"),
-    );
+    expect(cta).toContainElement(screen.getByTestId("matching-map-placement-error"));
     expect(cta).toHaveTextContent("Location timed out");
     expect(cta).toHaveTextContent("Try location again");
     expect(screen.queryByText("GPS did not lock")).toBeNull();
@@ -130,9 +122,7 @@ describe("MatchingMapPlacementChrome", () => {
       canCommit: false,
     });
 
-    expect(
-      screen.queryByRole("button", { name: /^Send$/i }),
-    ).toBeNull();
+    expect(screen.queryByRole("button", { name: /^Send$/i })).toBeNull();
   });
 
   it("puts Yes / No / Send on one row for solo answer", () => {
@@ -144,9 +134,7 @@ describe("MatchingMapPlacementChrome", () => {
       canCommit: true,
     });
 
-    expect(screen.getByTestId("matching-map-placement-answer")).toHaveTextContent(
-      "Dublin Airport",
-    );
+    expect(screen.getByTestId("matching-map-placement-answer")).toHaveTextContent("Dublin Airport");
     fireEvent.click(screen.getByRole("button", { name: /^No$/i }));
     expect(onAnswerChange).toHaveBeenCalledWith("no");
     fireEvent.click(screen.getByRole("button", { name: /^Send$/i }));

@@ -25,9 +25,7 @@ export function tagPredicateSql(pred) {
  */
 function tagWhereClauses(tags, skipKeys = []) {
   const skip = new Set(skipKeys);
-  return tags
-    .filter((pred) => !skip.has(pred.key))
-    .map((pred) => tagPredicateSql(pred));
+  return tags.filter((pred) => !skip.has(pred.key)).map((pred) => tagPredicateSql(pred));
 }
 
 /**
@@ -53,8 +51,7 @@ export function dwithinSql(around) {
  * @returns {string}
  */
 function selectSql(table, wheres, limit) {
-  const where =
-    wheres.length > 0 ? ` WHERE ${wheres.join(" AND ")}` : "";
+  const where = wheres.length > 0 ? ` WHERE ${wheres.join(" AND ")}` : "";
   const lim = limit != null ? ` LIMIT ${limit}` : "";
   return `SELECT osm_id, osm_type, tags, geom FROM ${table}${where}${lim}`;
 }
@@ -114,9 +111,7 @@ export function buildPostpassSql(classification) {
       return [waterwayLine, waterPoly, islandPoly].join(" UNION ALL ");
     }
     case "metro": {
-      const wheres = [
-        `tags->>'route' ~ '^(subway|light_rail|tram|monorail)$'`,
-      ];
+      const wheres = [`tags->>'route' ~ '^(subway|light_rail|tram|monorail)$'`];
       if (around) {
         wheres.push(dwithinSql(around));
       } else if (bbox) {
@@ -137,10 +132,7 @@ export function buildPostpassSql(classification) {
       if (!bbox) {
         throw new Error("Postpass linear SQL requires bbox.");
       }
-      return selectSql("postpass_line", [
-        ...tagWhereClauses(tags),
-        `geom && ${envelopeSql(bbox)}`,
-      ]);
+      return selectSql("postpass_line", [...tagWhereClauses(tags), `geom && ${envelopeSql(bbox)}`]);
     }
     case "places": {
       const wheres = tagWhereClauses(tags);

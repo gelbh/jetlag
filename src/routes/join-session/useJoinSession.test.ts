@@ -1,4 +1,4 @@
-import { renderHook, act, waitFor } from "@testing-library/react";
+import { act, renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { JoinSessionFormValues } from "@/domain/session/join/joinSessionForm";
 import { createTestRemoteSession } from "@/test/fixtures/sessions";
@@ -33,39 +33,33 @@ vi.mock("@/state/sessionStore", () => ({
 
 vi.mock("@/services/core/firebase/firebase", () => ({
   isFirebaseConfigured: () => mockIsFirebaseConfigured(),
-  ensureFreshAnonymousUser: (...args: unknown[]) =>
-    mockEnsureFreshAnonymousUser(...(args as [])),
+  ensureFreshAnonymousUser: (...args: unknown[]) => mockEnsureFreshAnonymousUser(...(args as [])),
 }));
 
 vi.mock("@/services/firestore/firestoreAnnotations", () => ({
-  joinRemoteSessionByCode: (...args: unknown[]) =>
-    mockJoinRemoteSessionByCode(...(args as [])),
+  joinRemoteSessionByCode: (...args: unknown[]) => mockJoinRemoteSessionByCode(...(args as [])),
   waitForServerHiderRole: vi.fn(),
   getRemoteSessionByIdFromServer: vi.fn(),
   lookupRemoteSessionByCode: vi.fn(),
 }));
 
 vi.mock("@/hooks/session/useJoinSessionPreview", () => ({
-  useJoinSessionPreview: (...args: unknown[]) =>
-    mockUseJoinSessionPreview(...(args as [])),
+  useJoinSessionPreview: (...args: unknown[]) => mockUseJoinSessionPreview(...(args as [])),
 }));
 
 vi.mock("@/services/session/rolePasscodeLifecycle", async () => {
-  const actual = await vi.importActual<
-    typeof import("@/services/session/rolePasscodeLifecycle")
-  >("@/services/session/rolePasscodeLifecycle");
+  const actual = await vi.importActual<typeof import("@/services/session/rolePasscodeLifecycle")>(
+    "@/services/session/rolePasscodeLifecycle",
+  );
   return {
     ...actual,
-    requestRoleJoin: (...args: unknown[]) =>
-      mockRequestRoleJoin(...(args as [])),
-    cancelRoleJoinRequest: (...args: unknown[]) =>
-      mockCancelRoleJoinRequest(...(args as [])),
+    requestRoleJoin: (...args: unknown[]) => mockRequestRoleJoin(...(args as [])),
+    cancelRoleJoinRequest: (...args: unknown[]) => mockCancelRoleJoinRequest(...(args as [])),
   };
 });
 
 vi.mock("@/services/session/joinRequestListen", () => ({
-  listenOwnJoinRequest: (...args: unknown[]) =>
-    mockListenOwnJoinRequest(...(args as [])),
+  listenOwnJoinRequest: (...args: unknown[]) => mockListenOwnJoinRequest(...(args as [])),
 }));
 
 vi.mock("@/platform/copyToClipboard", () => ({

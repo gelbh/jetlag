@@ -20,10 +20,7 @@ function renderWithLandscapeProvider(ui: React.ReactElement) {
 describe("MapScreenChromeSlots", () => {
   it("renders header and toolbar in the mobile HUD shell", () => {
     renderWithLandscapeProvider(
-      <MapScreenChromeSlots
-        header={<div>Header slot</div>}
-        toolbar={<div>Toolbar slot</div>}
-      >
+      <MapScreenChromeSlots header={<div>Header slot</div>} toolbar={<div>Toolbar slot</div>}>
         <div>Sheet child</div>
       </MapScreenChromeSlots>,
     );

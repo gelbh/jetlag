@@ -7,9 +7,7 @@ export function usePremiumEntitlements() {
   const loading = usePremiumEntitlementsStore((state) => state.loading);
   const hydrated = usePremiumEntitlementsStore((state) => state.hydrated);
   const refresh = usePremiumEntitlementsStore((state) => state.refresh);
-  const setEntitlements = usePremiumEntitlementsStore(
-    (state) => state.setEntitlements,
-  );
+  const setEntitlements = usePremiumEntitlementsStore((state) => state.setEntitlements);
   const { user } = usePermanentAuthUser();
 
   useEffect(() => {

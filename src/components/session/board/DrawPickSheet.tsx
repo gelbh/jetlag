@@ -1,8 +1,8 @@
 import { useId, useState } from "react";
-import { SheetHost } from "../../ui/sheets/SheetHost";
-import { SheetHeader } from "../../ui/sheets/SheetHeader";
 import type { PendingPickState } from "../../../domain/boardEconomy";
 import type { GameSize } from "../../../domain/session/size/gameSize";
+import { SheetHeader } from "../../ui/sheets/SheetHeader";
+import { SheetHost } from "../../ui/sheets/SheetHost";
 import { boardCardLabel } from "./boardCardLabels";
 
 type DrawPickSheetProps = {
@@ -11,23 +11,13 @@ type DrawPickSheetProps = {
   onConfirm: (keepInstanceIds: readonly string[]) => void;
 };
 
-export function DrawPickSheet({
-  pending,
-  gameSize,
-  onConfirm,
-}: DrawPickSheetProps) {
+export function DrawPickSheet({ pending, gameSize, onConfirm }: DrawPickSheetProps) {
   if (!pending) {
     return null;
   }
-  const cycleKey =
-    pending.drawn.map((card) => card.instanceId).join("|") || "empty";
+  const cycleKey = pending.drawn.map((card) => card.instanceId).join("|") || "empty";
   return (
-    <DrawPickSheetOpen
-      key={cycleKey}
-      pending={pending}
-      gameSize={gameSize}
-      onConfirm={onConfirm}
-    />
+    <DrawPickSheetOpen key={cycleKey} pending={pending} gameSize={gameSize} onConfirm={onConfirm} />
   );
 }
 
@@ -60,12 +50,7 @@ function DrawPickSheetOpen({
   };
 
   return (
-    <SheetHost
-      open
-      dismissible={false}
-      onClose={() => undefined}
-      ariaLabel="Choose cards to keep"
-    >
+    <SheetHost open dismissible={false} onClose={() => undefined} ariaLabel="Choose cards to keep">
       <SheetHeader
         title="Draw"
         eyebrow={
@@ -100,9 +85,7 @@ function DrawPickSheetOpen({
                   }`}
                 >
                   <span>{boardCardLabel(card, gameSize)}</span>
-                  <span className="text-xs text-ink-muted">
-                    {selected ? "Keep" : "Discard"}
-                  </span>
+                  <span className="text-xs text-ink-muted">{selected ? "Keep" : "Discard"}</span>
                 </button>
               </li>
             );
@@ -118,9 +101,7 @@ function DrawPickSheetOpen({
           className="btn-primary min-h-11 w-full"
           onClick={() => {
             if (selectedIds.length !== need) {
-              setError(
-                `Select exactly ${need} card${need === 1 ? "" : "s"} to keep.`,
-              );
+              setError(`Select exactly ${need} card${need === 1 ? "" : "s"} to keep.`);
               return;
             }
             onConfirm(selectedIds);

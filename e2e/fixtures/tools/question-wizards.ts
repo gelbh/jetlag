@@ -1,8 +1,5 @@
-import { type Page, expect } from "@playwright/test";
-import {
-  installE2eGeolocationDriver,
-  stepE2eGeolocation,
-} from "../geolocation";
+import { expect, type Page } from "@playwright/test";
+import { installE2eGeolocationDriver, stepE2eGeolocation } from "../geolocation";
 import {
   clickMapAt,
   clickToolDockButton,
@@ -88,9 +85,7 @@ export async function retreatWizard(page: Page) {
 
 export async function chooseAnswer(page: Page, name: string) {
   // Tentacle map-first: selection lives on POI pins (strip only mirrors status).
-  const tentaclePin = page.locator(
-    `[data-testid="tentacle-poi-pin"][aria-label="${name}"]`,
-  );
+  const tentaclePin = page.locator(`[data-testid="tentacle-poi-pin"][aria-label="${name}"]`);
   if ((await tentaclePin.count()) > 0) {
     await expect(tentaclePin.first()).toBeVisible({ timeout: 15_000 });
     await tentaclePin.first().evaluate((el) => {
@@ -105,11 +100,7 @@ export async function chooseAnswer(page: Page, name: string) {
   const option = page
     .getByRole("list", { name: /Tentacle answers/i })
     .getByRole("button", { name, exact: true })
-    .or(
-      page
-        .getByRole("group", { name: /answer/i })
-        .getByRole("button", { name, exact: true }),
-    )
+    .or(page.getByRole("group", { name: /answer/i }).getByRole("button", { name, exact: true }))
     .or(page.getByRole("button", { name, exact: true }))
     .first();
   await expect(option).toBeEnabled({ timeout: 15_000 });
@@ -137,16 +128,10 @@ export async function placeAskAnchor(page: Page) {
         async () => {
           const locked =
             (await page
-              .getByText(
-                /Location locked|pinned on the map|Anchor set|Anchor ·|Center pinned/i,
-              )
+              .getByText(/Location locked|pinned on the map|Anchor set|Anchor ·|Center pinned/i)
               .count()) > 0;
           if (locked) return true;
-          return (
-            (await page
-              .getByRole("button", { name: /Use my location/i })
-              .count()) === 0
-          );
+          return (await page.getByRole("button", { name: /Use my location/i }).count()) === 0;
         },
         { timeout: 15_000 },
       )
@@ -160,11 +145,7 @@ export async function placeAskAnchor(page: Page) {
       .getByRole("button", {
         name: /Yes|No|Closer|Further|Hotter|Colder|Send to hiders|^SEND(?: ·|$)|^Send$/i,
       })
-      .or(
-        page.getByText(
-          /Location locked|pinned on the map|Anchor set|Anchor ·|Center pinned/i,
-        ),
-      )
+      .or(page.getByText(/Location locked|pinned on the map|Anchor set|Anchor ·|Center pinned/i))
       .first(),
   ).toBeVisible({ timeout: 15_000 });
 }
@@ -188,9 +169,7 @@ export async function waitForGeoLoadingIdle(page: Page) {
 const SEND_COST = String.raw`D\d+P\d+`;
 
 /** Solo primed strip or plain map-first Send (`SEND · D2P1`, `SEND`, `Send`). */
-export const PRIMED_ASK_SEND_BUTTON = new RegExp(
-  `^(SEND(?: · ${SEND_COST})?|Send)$`,
-);
+export const PRIMED_ASK_SEND_BUTTON = new RegExp(`^(SEND(?: · ${SEND_COST})?|Send)$`);
 
 /** Multiplayer armed send (`SEND · DnPm`, `Send to hiders`, cost suffix variant). */
 export const SEND_TO_HIDERS_BUTTON = new RegExp(
@@ -215,10 +194,7 @@ export function sendToHidersButton(page: Page) {
   return page.getByRole("button", { name: SEND_TO_HIDERS_BUTTON });
 }
 
-export async function expectSendToHidersInViewport(
-  page: Page,
-  options?: { timeout?: number },
-) {
+export async function expectSendToHidersInViewport(page: Page, options?: { timeout?: number }) {
   const send = sendToHidersButton(page);
   await expect(send).toBeEnabled({ timeout: options?.timeout ?? 15_000 });
   await expect(send).toBeInViewport();
@@ -236,9 +212,9 @@ async function clickSendToHiders(page: Page) {
   });
   // While submitting, label becomes "Sending…" which would otherwise make the
   // primed-send locator match count 0 and spuriously pass toBeHidden.
-  await expect(
-    page.getByRole("button", { name: SEND_TO_HIDERS_IN_FLIGHT_BUTTON }),
-  ).toHaveCount(0, { timeout: 30_000 });
+  await expect(page.getByRole("button", { name: SEND_TO_HIDERS_IN_FLIGHT_BUTTON })).toHaveCount(0, {
+    timeout: 30_000,
+  });
 }
 
 async function clickPrimedAsk(page: Page) {
@@ -352,9 +328,9 @@ export async function completeMeasuringSolo(page: Page) {
   await placeAskAnchor(page);
   await clickMapAboveAskHud(page, 0.72);
   await waitForGeoLoadingIdle(page);
-  await expect(
-    page.getByText(/\d+(\.\d+)?\s*(mi|km|m)\b/i).first(),
-  ).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByText(/\d+(\.\d+)?\s*(mi|km|m)\b/i).first()).toBeVisible({
+    timeout: 30_000,
+  });
   await chooseAnswer(page, "Closer");
   await clickPrimedAsk(page);
   await expectMapHasAnnotations(page);
@@ -386,9 +362,7 @@ async function placeThermometerGpsWalk(page: Page) {
   await clickToolDockButton(page, "Thermometer");
   await expectAskHud(page);
 
-  const distance = page
-    .getByRole("button", { name: /1\/2 mi|½ mi|0\.5 mi/i })
-    .first();
+  const distance = page.getByRole("button", { name: /1\/2 mi|½ mi|0\.5 mi/i }).first();
   if (await distance.isVisible().catch(() => false)) {
     await distance.click();
   }

@@ -31,16 +31,13 @@ export const SESSION_OPS_DATA_CHANNEL_PREFIX =
  * @returns {Array<{ role: "system", channel: "policy", content: string }>}
  */
 export function buildPolicyMessages(input) {
-  const sessionId =
-    typeof input?.sessionId === "string" ? input.sessionId : "";
-  const incidentId =
-    typeof input?.incidentId === "string" ? input.incidentId : "";
+  const sessionId = typeof input?.sessionId === "string" ? input.sessionId : "";
+  const incidentId = typeof input?.incidentId === "string" ? input.incidentId : "";
   const allowlist = Array.isArray(input?.allowlist)
     ? input.allowlist.filter((id) => typeof id === "string")
     : [...SESSION_OPS_TOOL_IDS];
   const role = typeof input?.role === "string" ? input.role : "ops_agent";
-  const tier =
-    input?.tier === "premium" || input?.tier === "free" ? input.tier : "free";
+  const tier = input?.tier === "premium" || input?.tier === "free" ? input.tier : "free";
 
   const toolLines = allowlist
     .map((id) => {
@@ -136,8 +133,7 @@ export function buildDataMessages(input = {}) {
     });
   }
 
-  const userText =
-    typeof input.userText === "string" ? input.userText.trim() : "";
+  const userText = typeof input.userText === "string" ? input.userText.trim() : "";
   if (userText) {
     messages.push({
       role: "user",
@@ -154,8 +150,7 @@ export function buildDataMessages(input = {}) {
     messages.push({
       role: "tool",
       channel: "data",
-      tool_call_id:
-        typeof result.toolCallId === "string" ? result.toolCallId : "unknown",
+      tool_call_id: typeof result.toolCallId === "string" ? result.toolCallId : "unknown",
       name: typeof result.name === "string" ? result.name : undefined,
       content: SESSION_OPS_DATA_CHANNEL_PREFIX + result.content,
     });

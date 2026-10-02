@@ -1,6 +1,6 @@
-import { attachPlayArea } from "./attachPlayArea";
-import { EXPANSION_OFF, type BundledGamePresetDefinition } from "./shared";
 import { PORTLAND_MAINE_REGION_PACK_ID } from "../portlandMaineRegionPack";
+import { attachPlayArea } from "./attachPlayArea";
+import { type BundledGamePresetDefinition, EXPANSION_OFF } from "./shared";
 
 const PORTLAND_MAINE_DISTRICTS = [
   { id: "district-1", name: "District 1" },
@@ -9,7 +9,6 @@ const PORTLAND_MAINE_DISTRICTS = [
   { id: "district-4", name: "District 4" },
   { id: "district-5", name: "District 5" },
 ] as const;
-
 
 export function portlandMainePresets(): BundledGamePresetDefinition[] {
   const baseHierarchy = [
@@ -36,8 +35,8 @@ export function portlandMainePresets(): BundledGamePresetDefinition[] {
       advancedSettingsPatch: EXPANSION_OFF,
       transitMetroId: "portland-maine",
     }),
-    ...PORTLAND_MAINE_DISTRICTS.map(
-      (district) => attachPlayArea({
+    ...PORTLAND_MAINE_DISTRICTS.map((district) =>
+      attachPlayArea({
         id: `bundled:portland-maine-${district.id}`,
         name: district.name,
         description: `${district.name} with neighborhoods. Council district boundaries © City of Portland, Maine GIS.`,
@@ -48,7 +47,7 @@ export function portlandMainePresets(): BundledGamePresetDefinition[] {
         distanceUnit: "imperial",
         advancedSettingsPatch: EXPANSION_OFF,
         transitMetroId: "portland-maine",
-       }),
+      }),
     ),
   ];
 }

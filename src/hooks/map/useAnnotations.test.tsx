@@ -1,9 +1,9 @@
 import { act, renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { LOCAL_SESSION_ID } from "../../domain/map/annotations";
+import { useAnnotationStore, useSessionStore } from "../../state/sessionStore";
 import { createTestPinAnnotation, createTestSession } from "../../test/fixtures/sessions";
 import { resetAllStores } from "../../test/helpers/storeReset";
-import { useAnnotationStore, useSessionStore } from "../../state/sessionStore";
 import { useAnnotations } from "./useAnnotations";
 
 vi.mock("../../services/core/firebase/firebase", () => ({
@@ -18,9 +18,7 @@ describe("useAnnotations", () => {
   });
 
   it("adds local annotations and increments pending writes for remote sessions", async () => {
-    useSessionStore.getState().setSession(
-      createTestSession({ id: "remote-1", code: "ABCD" }),
-    );
+    useSessionStore.getState().setSession(createTestSession({ id: "remote-1", code: "ABCD" }));
 
     const { result } = renderHook(() => useAnnotations());
 

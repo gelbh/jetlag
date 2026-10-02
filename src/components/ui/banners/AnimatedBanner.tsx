@@ -27,10 +27,7 @@ export function AnimatedBanner({
   }
 
   return (
-    <div
-      ref={setAnimNode}
-      className={`${animClass} ${className}`.trim()}
-    >
+    <div ref={setAnimNode} className={`${animClass} ${className}`.trim()}>
       {children}
     </div>
   );

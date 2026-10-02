@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import type { IncidentRecord } from "../../domain/incident/incidentTypes";
 import {
   getSessionOpsCaps,
   remainingSummons,
   resolveSessionOpsCapTier,
 } from "../../domain/incident/sessionOpsCaps";
-import type { IncidentRecord } from "../../domain/incident/incidentTypes";
 import { usePendingHostConfirm } from "../../hooks/incident/usePendingHostConfirm";
 import { useSupportThread } from "../../hooks/incident/useSupportThread";
 import type { IncidentThreadMessageRecord } from "../../services/firestore/firestoreIncidentThreads";
@@ -65,10 +65,7 @@ function isWaitingOnHost(messages: IncidentThreadMessageRecord[]): boolean {
     if (message.kind === "host_confirm") {
       return true;
     }
-    if (
-      message.kind === "tool_result" &&
-      message.toolCall?.status === "host_confirm_required"
-    ) {
+    if (message.kind === "tool_result" && message.toolCall?.status === "host_confirm_required") {
       return true;
     }
     if (message.kind === "tool_result" && message.toolCall?.status === "ok") {
@@ -91,29 +88,20 @@ export function SupportAgentChat({
   onSendOverride,
   isHostOverride,
 }: SupportAgentChatProps) {
-  const live = useSupportThread(
-    incidentOverride !== undefined ? null : incidentId,
-  );
-  const incident =
-    incidentOverride !== undefined ? incidentOverride : live.incident;
-  const messages =
-    messagesOverride !== undefined ? messagesOverride : live.messages;
+  const live = useSupportThread(incidentOverride !== undefined ? null : incidentId);
+  const incident = incidentOverride !== undefined ? incidentOverride : live.incident;
+  const messages = messagesOverride !== undefined ? messagesOverride : live.messages;
   const error = errorOverride !== undefined ? errorOverride : live.error;
-  const sending =
-    sendingOverride !== undefined ? sendingOverride : live.sending;
-  const summonId =
-    summonIdOverride !== undefined ? summonIdOverride : live.summonId;
+  const sending = sendingOverride !== undefined ? sendingOverride : live.sending;
+  const summonId = summonIdOverride !== undefined ? summonIdOverride : live.summonId;
   const sendTurn = onSendOverride ?? live.sendTurn;
 
   const session = useSessionStore((state) => state.session);
   const myUid = useSessionStore((state) => state.myUid);
-  const storeIsHost =
-    Boolean(session?.hostUid && myUid && session.hostUid === myUid);
+  const storeIsHost = Boolean(session?.hostUid && myUid && session.hostUid === myUid);
   const isHost = isHostOverride ?? storeIsHost;
 
-  const entitlements = usePremiumEntitlementsStore(
-    (state) => state.entitlements,
-  );
+  const entitlements = usePremiumEntitlementsStore((state) => state.entitlements);
   const tier = resolveSessionOpsCapTier({
     hasUnlimitedPremium: entitlements?.hasUnlimitedPremium === true,
     sessionTier: session?.tier ?? null,
@@ -121,17 +109,11 @@ export function SupportAgentChat({
   const caps = getSessionOpsCaps(tier);
   const summonCount = incident?.sessionOpsSummonCount ?? 0;
   const summonsLeft = remainingSummons({ summonCount }, caps);
-  const hasActiveSummon = Boolean(
-    summonId || incident?.activeSessionOpsSummonId,
-  );
+  const hasActiveSummon = Boolean(summonId || incident?.activeSessionOpsSummonId);
 
   const { pending } = usePendingHostConfirm(incidentId);
-  const [dismissedConfirmId, setDismissedConfirmId] = useState<string | null>(
-    null,
-  );
-  const hostSheetOpen = Boolean(
-    isHost && pending && pending.id !== dismissedConfirmId,
-  );
+  const [dismissedConfirmId, setDismissedConfirmId] = useState<string | null>(null);
+  const hostSheetOpen = Boolean(isHost && pending && pending.id !== dismissedConfirmId);
 
   const [draft, setDraft] = useState("");
   const [sendError, setSendError] = useState<string | null>(null);
@@ -161,16 +143,12 @@ export function SupportAgentChat({
       await sendTurn(trimmed);
       setDraft("");
     } catch (err) {
-      setSendError(
-        err instanceof Error ? err.message : "Could not reach the fix agent.",
-      );
+      setSendError(err instanceof Error ? err.message : "Could not reach the fix agent.");
     }
   };
 
   const summon = () => {
-    void send(
-      "Please help fix this session. Ask me clarifying questions if needed.",
-    );
+    void send("Please help fix this session. Ask me clarifying questions if needed.");
   };
 
   return (
@@ -232,15 +210,11 @@ export function SupportAgentChat({
       <div className="jl-scroll jl-support-chat-scroll">
         {messages.length === 0 ? (
           <p className="jl-support-empty">
-            {hasActiveSummon
-              ? "Agent is ready — send a message."
-              : "No fix-agent messages yet."}
+            {hasActiveSummon ? "Agent is ready — send a message." : "No fix-agent messages yet."}
           </p>
         ) : (
           messages.map((message) => {
-            const isToolRow =
-              message.kind === "tool_result" ||
-              message.kind === "host_confirm";
+            const isToolRow = message.kind === "tool_result" || message.kind === "host_confirm";
             const rowClass = [
               isToolRow
                 ? "jl-support-msg jl-support-msg--tool"
@@ -256,9 +230,7 @@ export function SupportAgentChat({
                 aria-busy={message.working === true ? true : undefined}
               >
                 <p className="jl-support-msg-sender">
-                  {isToolRow
-                    ? "Tool"
-                    : senderLabel(message.sender, variant)}
+                  {isToolRow ? "Tool" : senderLabel(message.sender, variant)}
                 </p>
                 {isToolRow && message.toolCall?.name ? (
                   <p className="jl-support-msg-text">
@@ -291,9 +263,7 @@ export function SupportAgentChat({
             {sending || agentWorking ? "Working…" : "Ask fix agent"}
           </button>
           {summonsLeft <= 0 ? (
-            <p className="jl-support-chat-caps">
-              Summon limit reached for this session.
-            </p>
+            <p className="jl-support-chat-caps">Summon limit reached for this session.</p>
           ) : null}
         </div>
       ) : (
@@ -308,11 +278,7 @@ export function SupportAgentChat({
               }
             }}
             className="field-input min-h-11 flex-1"
-            placeholder={
-              variant === "admin"
-                ? "Message the fix agent…"
-                : "Reply to the fix agent…"
-            }
+            placeholder={variant === "admin" ? "Message the fix agent…" : "Reply to the fix agent…"}
             aria-label="Fix agent message"
             disabled={composerDisabled}
           />

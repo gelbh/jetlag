@@ -1,23 +1,21 @@
 import { describe, expect, it } from "vitest";
 import {
-  RADAR_WIZARD,
-  MATCHING_WIZARD,
-  TENTACLE_WIZARD,
-  MEASURING_WIZARD,
-  THERMOMETER_WIZARD,
   HIDING_ZONE_CREATE_WIZARD,
   HIDING_ZONE_MOVE_WIZARD,
+  MATCHING_WIZARD,
+  MEASURING_WIZARD,
   phaseRailLabels,
-  resolveAskMode,
   primaryFooterLabel,
+  RADAR_WIZARD,
+  resolveAskMode,
+  TENTACLE_WIZARD,
+  THERMOMETER_WIZARD,
 } from "./toolWizardPhases";
 
 describe("toolWizardPhases", () => {
   it("thermometer starts on place with configure distance", () => {
     expect(THERMOMETER_WIZARD.startsOn).toBe("place");
-    expect(THERMOMETER_WIZARD.configureSteps.map((s) => s.id)).toEqual([
-      "distance",
-    ]);
+    expect(THERMOMETER_WIZARD.configureSteps.map((s) => s.id)).toEqual(["distance"]);
   });
 
   it("hiding zone create starts on configure (method)", () => {
@@ -33,21 +31,9 @@ describe("toolWizardPhases", () => {
   it("labels Ask vs Send from awaitHiderAnswer", () => {
     const solo = phaseRailLabels(THERMOMETER_WIZARD, false);
     const mp = phaseRailLabels(THERMOMETER_WIZARD, true);
-    expect(solo.map((phase) => phase.id)).toEqual([
-      "place",
-      "configure",
-      "ask",
-    ]);
-    expect(solo.map((phase) => phase.label)).toEqual([
-      "Place",
-      "Configure",
-      "Ask",
-    ]);
-    expect(mp.map((phase) => phase.label)).toEqual([
-      "Place",
-      "Configure",
-      "Send",
-    ]);
+    expect(solo.map((phase) => phase.id)).toEqual(["place", "configure", "ask"]);
+    expect(solo.map((phase) => phase.label)).toEqual(["Place", "Configure", "Ask"]);
+    expect(mp.map((phase) => phase.label)).toEqual(["Place", "Configure", "Send"]);
     expect(resolveAskMode(THERMOMETER_WIZARD, true)).toBe("send");
   });
 
@@ -71,20 +57,10 @@ describe("toolWizardPhases", () => {
   });
 
   it("hiding create rail is Method→Place→Confirm and sticky confirm mode", () => {
-    expect(HIDING_ZONE_CREATE_WIZARD.phases).toEqual([
-      "configure",
-      "place",
-      "ask",
-    ]);
-    expect(HIDING_ZONE_CREATE_WIZARD.phases).toContain(
-      HIDING_ZONE_CREATE_WIZARD.startsOn,
-    );
+    expect(HIDING_ZONE_CREATE_WIZARD.phases).toEqual(["configure", "place", "ask"]);
+    expect(HIDING_ZONE_CREATE_WIZARD.phases).toContain(HIDING_ZONE_CREATE_WIZARD.startsOn);
     const labels = phaseRailLabels(HIDING_ZONE_CREATE_WIZARD, true);
-    expect(labels.map((p) => p.label)).toEqual([
-      "Configure",
-      "Place",
-      "Confirm",
-    ]);
+    expect(labels.map((p) => p.label)).toEqual(["Configure", "Place", "Confirm"]);
     expect(resolveAskMode(HIDING_ZONE_CREATE_WIZARD, false)).toBe("confirm");
     expect(resolveAskMode(HIDING_ZONE_CREATE_WIZARD, true)).toBe("confirm");
   });
@@ -99,18 +75,9 @@ describe("toolWizardPhases", () => {
 
   it("seeker configure continua match phase model ids", () => {
     expect(RADAR_WIZARD.configureSteps.map((s) => s.id)).toEqual(["distance"]);
-    expect(MATCHING_WIZARD.configureSteps.map((s) => s.id)).toEqual([
-      "category",
-      "resolve",
-    ]);
-    expect(TENTACLE_WIZARD.configureSteps.map((s) => s.id)).toEqual([
-      "category",
-      "locations",
-    ]);
-    expect(MEASURING_WIZARD.configureSteps.map((s) => s.id)).toEqual([
-      "source",
-      "target",
-    ]);
+    expect(MATCHING_WIZARD.configureSteps.map((s) => s.id)).toEqual(["category", "resolve"]);
+    expect(TENTACLE_WIZARD.configureSteps.map((s) => s.id)).toEqual(["category", "locations"]);
+    expect(MEASURING_WIZARD.configureSteps.map((s) => s.id)).toEqual(["source", "target"]);
     for (const def of [
       RADAR_WIZARD,
       THERMOMETER_WIZARD,

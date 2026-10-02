@@ -1,8 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import {
-  toolWizardPhasePrimaryNav,
-  toolWizardSwipeNext,
-} from "./toolWizardGuards";
+import { toolWizardPhasePrimaryNav, toolWizardSwipeNext } from "./toolWizardGuards";
 
 describe("toolWizardPhasePrimaryNav", () => {
   it("wires ask-phase primary to commit, not goNext", () => {

@@ -1,10 +1,10 @@
 import { screen } from "@testing-library/react";
-import { renderWithAppUi } from "../../../test/renderWithAppUi";
 import { describe, expect, it, vi } from "vitest";
 import type {
   PendingQuestionRecord,
   SessionMessageRecord,
 } from "@/domain/session/activity/sessionChat";
+import { renderWithAppUi } from "../../../test/renderWithAppUi";
 import { QuestionAlertBanner } from "./QuestionAlertBanner";
 
 const radarPending: PendingQuestionRecord = {
@@ -70,15 +70,9 @@ describe("QuestionAlertBanner", () => {
     );
 
     expect(screen.getByText(radarPending.promptText)).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: /Send answer: Yes/i }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByTestId("question-alert-banner").className,
-    ).not.toMatch(/map-float-alert/);
-    expect(
-      screen.getByTestId("question-alert-banner").className,
-    ).not.toMatch(/border-highlight/);
+    expect(screen.getByRole("button", { name: /Send answer: Yes/i })).toBeInTheDocument();
+    expect(screen.getByTestId("question-alert-banner").className).not.toMatch(/map-float-alert/);
+    expect(screen.getByTestId("question-alert-banner").className).not.toMatch(/border-highlight/);
   });
 
   it("does not render a dismiss control while open", () => {

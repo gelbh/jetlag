@@ -2,24 +2,20 @@ import type { Feature, FeatureCollection, MultiPolygon, Polygon } from "geojson"
 import { LRUCache } from "lru-cache";
 import type { GameArea, TentaclePoi } from "../../map/annotations";
 import { gameAreaFingerprint } from "../core/gameAreaConvert";
-import type { LatLngTuple } from "../kernel/types";
 import {
   dispatchTentacleEliminationRegion,
   dispatchTentaclePoiAnswerEliminationRegion,
   type TentacleSite,
 } from "../kernel/tentacleKernelRunner";
-import {
-  getCachedVoronoiCellsAsync,
-  tentacleSitesFingerprint,
-} from "../voronoi/voronoiCellCache";
+import type { LatLngTuple } from "../kernel/types";
 import { persistSlimPolygonFeature } from "../progressive/persistSlim";
+import { getCachedVoronoiCellsAsync, tentacleSitesFingerprint } from "../voronoi/voronoiCellCache";
 
 const POI_ANSWER_ELIMINATION_CACHE_MAX = 16;
 
-const poiAnswerEliminationCache = new LRUCache<
-  string,
-  Feature<Polygon | MultiPolygon>
->({ max: POI_ANSWER_ELIMINATION_CACHE_MAX });
+const poiAnswerEliminationCache = new LRUCache<string, Feature<Polygon | MultiPolygon>>({
+  max: POI_ANSWER_ELIMINATION_CACHE_MAX,
+});
 
 function toTentacleSites(pois: readonly TentaclePoi[]): TentacleSite[] {
   return pois.map((poi) => ({
@@ -29,9 +25,7 @@ function toTentacleSites(pois: readonly TentaclePoi[]): TentacleSite[] {
   }));
 }
 
-async function voronoiCellsForPois(
-  pois: readonly TentaclePoi[],
-): Promise<FeatureCollection> {
+async function voronoiCellsForPois(pois: readonly TentaclePoi[]): Promise<FeatureCollection> {
   const fingerprint = tentacleSitesFingerprint(pois);
   return getCachedVoronoiCellsAsync(
     fingerprint,
@@ -106,12 +100,7 @@ export async function tentacleEliminationJsonForAnswer(params: {
   outOfReach: boolean;
   gameArea: GameArea;
 }): Promise<string | undefined> {
-  if (
-    params.outOfReach ||
-    !params.answeredPoiId ||
-    !params.pois ||
-    params.pois.length === 0
-  ) {
+  if (params.outOfReach || !params.answeredPoiId || !params.pois || params.pois.length === 0) {
     return undefined;
   }
 

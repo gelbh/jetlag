@@ -1,8 +1,8 @@
 import { fireEvent, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { PwaInstallTipBanner } from "./PwaInstallTipBanner";
 import { PWA_INSTALL_TIP_DISMISS_KEY } from "@/domain/device/pwa/pwaInstallTipStorage";
 import { renderWithAppUi } from "../../../test/renderWithAppUi";
+import { PwaInstallTipBanner } from "./PwaInstallTipBanner";
 
 vi.mock("../../../domain/device/pwa/isStandalonePwa", () => ({
   isStandalonePwa: vi.fn(() => false),
@@ -35,14 +35,10 @@ describe("PwaInstallTipBanner", () => {
 
     expect(screen.getByRole("dialog")).toBeInTheDocument();
     expect(screen.getByText("Add to Home Screen")).toBeInTheDocument();
-    expect(
-      screen.getByText(/Tap Share, then Add to Home Screen/i),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/Tap Share, then Add to Home Screen/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Not now" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "OK" })).toBeInTheDocument();
-    expect(container.innerHTML).not.toMatch(
-      /hud-panel|btn-primary|btn-secondary|map-float-alert/,
-    );
+    expect(container.innerHTML).not.toMatch(/hud-panel|btn-primary|btn-secondary|map-float-alert/);
   });
 
   it("persists dismiss when Not now is tapped", () => {

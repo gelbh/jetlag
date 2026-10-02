@@ -12,9 +12,9 @@
  * Usage: node scripts/sync-region-flags.mjs
  */
 import { createWriteStream } from "node:fs";
-import { mkdir, writeFile, rm } from "node:fs/promises";
-import { pipeline } from "node:stream/promises";
+import { mkdir, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { pipeline } from "node:stream/promises";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
 
@@ -22,13 +22,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "..");
 const outDir = path.join(root, "public", "region-flags");
 const overrideDir = path.join(__dirname, "flag-overrides");
-const outTs = path.join(
-  root,
-  "src",
-  "domain",
-  "regions",
-  "bundledPresetFlagAssets.generated.ts",
-);
+const outTs = path.join(root, "src", "domain", "regions", "bundledPresetFlagAssets.generated.ts");
 
 const UA = "JetlagFlagSync/1.0 (https://github.com/gelbh/jetlag; flag sync)";
 
@@ -315,9 +309,7 @@ const WIKIDATA = {
 };
 
 async function sparql(query, attempt = 1) {
-  const url =
-    "https://query.wikidata.org/sparql?" +
-    new URLSearchParams({ query, format: "json" });
+  const url = `https://query.wikidata.org/sparql?${new URLSearchParams({ query, format: "json" })}`;
   const res = await fetch(url, {
     headers: { Accept: "application/sparql-results+json", "User-Agent": UA },
   });
@@ -394,7 +386,10 @@ async function finalizePng(srcPath, destPath, presentation) {
       height: 128,
       fit: presentation === "cutout" ? "inside" : "inside",
       withoutEnlargement: false,
-      background: presentation === "flag" ? { r: 255, g: 255, b: 255, alpha: 1 } : { r: 0, g: 0, b: 0, alpha: 0 },
+      background:
+        presentation === "flag"
+          ? { r: 255, g: 255, b: 255, alpha: 1 }
+          : { r: 0, g: 0, b: 0, alpha: 0 },
     })
     .ensureAlpha()
     .raw()
@@ -419,13 +414,7 @@ async function finalizePng(srcPath, destPath, presentation) {
     .toFile(destPath);
 }
 
-async function writeAsset(assets, segmentId, {
-  alt,
-  source,
-  identity,
-  presentation,
-  destPath,
-}) {
+async function writeAsset(assets, segmentId, { alt, source, identity, presentation, destPath }) {
   assets[segmentId] = {
     src: `/region-flags/${path.basename(destPath)}`,
     alt,
@@ -465,9 +454,7 @@ async function main() {
   const settlementQids = Object.values(WIKIDATA).map((entry) => entry.qid);
   const images = await fetchWikidataImages([...orgQids, ...settlementQids]);
 
-  for (const [segmentId, { qid, alt, commonsFile }] of Object.entries(
-    REGION_ORG,
-  )) {
+  for (const [segmentId, { qid, alt, commonsFile }] of Object.entries(REGION_ORG)) {
     const hit = images.get(qid);
     const imageUrl =
       hit?.flag ||
@@ -530,9 +517,7 @@ async function main() {
     }
   }
 
-  for (const [segmentId, { commonsFile, alt }] of Object.entries(
-    COMMONS_FLAGS,
-  )) {
+  for (const [segmentId, { commonsFile, alt }] of Object.entries(COMMONS_FLAGS)) {
     const imageUrl = `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(commonsFile)}`;
     const file = `${segmentId}.png`;
     const dest = path.join(outDir, file);

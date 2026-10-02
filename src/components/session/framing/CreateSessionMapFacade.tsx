@@ -1,5 +1,5 @@
-import { useId, type MouseEvent, type Ref } from "react";
 import { MapTrifold } from "@phosphor-icons/react";
+import { type MouseEvent, type Ref, useId } from "react";
 
 /** Survey-sheet grid: ruled hairlines on the canvas plate, no tiles fetched. */
 const facadePlateStyle = {
@@ -74,12 +74,7 @@ export function CreateSessionMapFacade({
           className="inline-flex min-h-11 items-center gap-2 rounded-[14px] border border-rule bg-canvas px-4 text-base font-semibold text-field-ink transition-colors group-hover:border-flag group-focus-visible:border-flag motion-reduce:transition-none"
           style={facadeChipStyle}
         >
-          <MapTrifold
-            aria-hidden
-            size={20}
-            weight="bold"
-            color="var(--color-flag)"
-          />
+          <MapTrifold aria-hidden size={20} weight="bold" color="var(--color-flag)" />
           <span id={labelId}>{loading ? "Loading map…" : "Open map"}</span>
         </span>
         {loading ? null : (

@@ -1,12 +1,6 @@
 import { useState } from "react";
-import {
-  LOCAL_SESSION_ID,
-  type SessionRecord,
-} from "@/domain/map/annotations";
-import {
-  resolvePlayerRole,
-  type PlayerRole,
-} from "@/domain/session/players/playerRole";
+import { LOCAL_SESSION_ID, type SessionRecord } from "@/domain/map/annotations";
+import { type PlayerRole, resolvePlayerRole } from "@/domain/session/players/playerRole";
 import { useAppNavigate } from "@/hooks/navigation/useAppNavigate";
 import { setPremiumApiContext } from "@/services/core/auth/premiumApiContext";
 import { isFirebaseConfigured } from "@/services/core/firebase/authBootstrapState";
@@ -29,9 +23,7 @@ export function useContinueActiveSession(): {
   // Not useSessionExit: its static sessionExit → sessionCleanup graph pulls
   // firestore/turf into the prerendered Home (App chunk).
   const exitSession = async (params: Omit<ExitSessionParams, "navigate">) => {
-    const { exitSession: runExit } = await import(
-      "@/services/session/sessionExit"
-    );
+    const { exitSession: runExit } = await import("@/services/session/sessionExit");
     await runExit({ ...params, navigate });
   };
   const session = useSessionStore((state) => state.session);
@@ -61,11 +53,7 @@ export function useContinueActiveSession(): {
           const [
             { ensureFreshAnonymousUser },
             { isFirestorePermissionDenied },
-            {
-              getRemoteSessionById,
-              healSessionMembership,
-              lookupRemoteSessionByCode,
-            },
+            { getRemoteSessionById, healSessionMembership, lookupRemoteSessionByCode },
           ] = await Promise.all([
             import("@/services/core/firebase/firebase"),
             import("@/services/firestore/firestoreAnnotations"),
@@ -98,9 +86,7 @@ export function useContinueActiveSession(): {
                 sessionId: session.id,
                 animate: false,
               });
-              setContinueError(
-                "That session has ended. Join or create a new one."
-              );
+              setContinueError("That session has ended. Join or create a new one.");
               return;
             }
             remoteSession = lookup.session;
@@ -112,21 +98,16 @@ export function useContinueActiveSession(): {
               sessionId: session.id,
               animate: false,
             });
-            setContinueError(
-              "That session has ended. Join or create a new one."
-            );
+            setContinueError("That session has ended. Join or create a new one.");
             return;
           }
 
           const resumeRole =
-            myRole ??
-            resolvePlayerRole(remoteSession.memberRoles, myUid ?? user.uid);
-          const activeSession = await healSessionMembership(
-            remoteSession,
-            user.uid,
-            resumeRole,
-            { returningMemberUid: myUid, persistedMyUid: myUid }
-          );
+            myRole ?? resolvePlayerRole(remoteSession.memberRoles, myUid ?? user.uid);
+          const activeSession = await healSessionMembership(remoteSession, user.uid, resumeRole, {
+            returningMemberUid: myUid,
+            persistedMyUid: myUid,
+          });
 
           const role = resolvePlayerRole(activeSession.memberRoles, user.uid);
           if (
@@ -135,9 +116,7 @@ export function useContinueActiveSession(): {
             activeSession.memberRoles[user.uid] &&
             myRole !== role
           ) {
-            setContinueError(
-              "Your role changed for this session. Rejoin with a new code."
-            );
+            setContinueError("Your role changed for this session. Rejoin with a new code.");
             return;
           }
 
@@ -146,13 +125,10 @@ export function useContinueActiveSession(): {
           navigate("/map");
         })(),
         VERIFY_SESSION_TIMEOUT_MS,
-        VERIFY_SESSION_TIMEOUT_MESSAGE
+        VERIFY_SESSION_TIMEOUT_MESSAGE,
       );
     } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : "Couldn't continue that session.";
+      const message = error instanceof Error ? error.message : "Couldn't continue that session.";
       if (
         message === "That session no longer exists." ||
         message === "That session has ended. Join or create a new one."

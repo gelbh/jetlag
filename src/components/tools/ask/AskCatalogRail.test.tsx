@@ -1,6 +1,6 @@
-import { describe, expect, it, beforeEach, vi } from "vitest";
-import { fireEvent, render, screen } from "@testing-library/react";
 import { MantineProvider } from "@mantine/core";
+import { fireEvent, render, screen } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { jetlagTheme } from "@/theme/theme";
 import { AskCatalogRail } from "./AskCatalogRail";
 
@@ -34,13 +34,9 @@ function renderRail(ui: React.ReactElement) {
 describe("AskCatalogRail", () => {
   it("advances via row select and has no CONTINUE sibling control", () => {
     const onSelect = vi.fn();
-    renderRail(
-      <AskCatalogRail rows={ROWS} selectedId={null} onSelect={onSelect} />,
-    );
+    renderRail(<AskCatalogRail rows={ROWS} selectedId={null} onSelect={onSelect} />);
 
-    expect(
-      screen.queryByRole("button", { name: /continue/i }),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /continue/i })).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Transit stop" }));
     expect(onSelect).toHaveBeenCalledWith("transit");
@@ -52,16 +48,9 @@ describe("AskCatalogRail", () => {
       <AskCatalogRail rows={ROWS} selectedId="park" onSelect={onSelect} />,
     );
 
-    expect(screen.getByRole("button", { name: "Park" })).toHaveAttribute(
-      "aria-pressed",
-      "true",
-    );
-    expect(
-      screen.queryByRole("button", { name: /continue/i }),
-    ).not.toBeInTheDocument();
-    expect(
-      container.querySelector("[data-testid='ask-commit-strip']"),
-    ).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Park" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.queryByRole("button", { name: /continue/i })).not.toBeInTheDocument();
+    expect(container.querySelector("[data-testid='ask-commit-strip']")).not.toBeInTheDocument();
   });
 
   it("mounts Mantine catalog shell and advances under flag", () => {
@@ -96,12 +85,8 @@ describe("AskCatalogRail", () => {
 
     expect(screen.getAllByText("Transit")).toHaveLength(1);
     expect(screen.getByText("Nature")).toBeInTheDocument();
-    expect(
-      screen.queryByRole("button", { name: /Transit:/i }),
-    ).not.toBeInTheDocument();
-    expect(
-      document.querySelector(".ask-catalog-rail__grid"),
-    ).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Transit:/i })).not.toBeInTheDocument();
+    expect(document.querySelector(".ask-catalog-rail__grid")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Bus stop" }));
     expect(onSelect).toHaveBeenCalledWith("bus");
   });

@@ -1,10 +1,7 @@
-import type { GameArea } from "../../domain/map/annotations";
-import {
-  dedupeTransitStations,
-  type TransitStation,
-} from "../../domain/session/hiding/hidingZone";
 import type { BoundingBox } from "../../domain/geometry/gameArea/gameAreaBounds";
 import { isPointInGameArea } from "../../domain/geometry/gameArea/geometry";
+import type { GameArea } from "../../domain/map/annotations";
+import { dedupeTransitStations, type TransitStation } from "../../domain/session/hiding/hidingZone";
 
 export const TRANSIT_STOP_OVERPASS_LIMIT = 250;
 
@@ -44,9 +41,7 @@ export function buildTransitStopOverpassQuery(
   `;
 }
 
-export function transitStopDisplayName(
-  tags: Record<string, string> | undefined,
-): string {
+export function transitStopDisplayName(tags: Record<string, string> | undefined): string {
   if (!tags) {
     return "Transit stop";
   }
@@ -61,12 +56,7 @@ export function transitStopDisplayName(
     return localRef;
   }
 
-  const candidates = [
-    tags.name,
-    tags["name:en"],
-    tags.official_name,
-    tags["official_name:en"],
-  ];
+  const candidates = [tags.name, tags["name:en"], tags.official_name, tags["official_name:en"]];
 
   for (const candidate of candidates) {
     const trimmed = candidate?.trim();

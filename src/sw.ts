@@ -7,24 +7,17 @@ import {
   precacheAndRoute,
 } from "workbox-precaching";
 import { NavigationRoute, registerRoute } from "workbox-routing";
-import {
-  CacheFirst,
-  NetworkOnly,
-  StaleWhileRevalidate,
-} from "workbox-strategies";
-import {
-  ANNOTATION_SYNC_MESSAGE_TYPE,
-  ANNOTATION_SYNC_TAG,
-} from "./services/session/backgroundSync";
-import {
-  isEsriTileUrl,
-  isOpenFreeMapUrl,
-} from "./domain/map/mapTileHosts";
+import { CacheFirst, NetworkOnly, StaleWhileRevalidate } from "workbox-strategies";
 import {
   PWA_TILE_CACHE_MAX_AGE_SECONDS,
   PWA_TILE_CACHE_MAX_ENTRIES,
   reportStoragePressureIfHigh,
 } from "./domain/device/pwa/pwaStorageBudget";
+import { isEsriTileUrl, isOpenFreeMapUrl } from "./domain/map/mapTileHosts";
+import {
+  ANNOTATION_SYNC_MESSAGE_TYPE,
+  ANNOTATION_SYNC_TAG,
+} from "./services/session/backgroundSync";
 
 declare let self: ServiceWorkerGlobalScope;
 
@@ -38,10 +31,7 @@ registerRoute(
   }),
 );
 
-registerRoute(
-  ({ url }) => url.pathname.startsWith("/assets/"),
-  new NetworkOnly(),
-);
+registerRoute(({ url }) => url.pathname.startsWith("/assets/"), new NetworkOnly());
 
 registerRoute(
   ({ url }) => isEsriTileUrl(url.href),
@@ -101,15 +91,13 @@ self.addEventListener("sync", (event: Event) => {
   // Reject when no window client is awake so the browser retries Background Sync.
   // Clients that receive the message flush via useSessionSync.
   syncEvent.waitUntil(
-    self.clients
-      .matchAll({ type: "window", includeUncontrolled: true })
-      .then((windowClients) => {
-        if (windowClients.length === 0) {
-          throw new Error("No window clients available for annotation sync");
-        }
-        for (const client of windowClients) {
-          client.postMessage({ type: ANNOTATION_SYNC_MESSAGE_TYPE });
-        }
-      }),
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((windowClients) => {
+      if (windowClients.length === 0) {
+        throw new Error("No window clients available for annotation sync");
+      }
+      for (const client of windowClients) {
+        client.postMessage({ type: ANNOTATION_SYNC_MESSAGE_TYPE });
+      }
+    }),
   );
 });

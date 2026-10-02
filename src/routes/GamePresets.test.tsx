@@ -1,10 +1,13 @@
 import { fireEvent, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { GamePresetEditor, GamePresetList } from "./GamePresets";
-import { renderWithRouter } from "../test/renderWithRouter";
-import { useGamePresetStore } from "../state/gamePresetStore";
+import {
+  BUNDLED_GAME_PRESET_DEFINITIONS,
+  mergeBundledPresets,
+} from "../domain/regions/bundledGamePresets";
 import { defaultAdvancedSessionSettings } from "../domain/session/tools/advancedSessionSettings";
-import { mergeBundledPresets, BUNDLED_GAME_PRESET_DEFINITIONS } from "../domain/regions/bundledGamePresets";
+import { useGamePresetStore } from "../state/gamePresetStore";
+import { renderWithRouter } from "../test/renderWithRouter";
+import { GamePresetEditor, GamePresetList } from "./GamePresets";
 
 const navigate = vi.fn();
 
@@ -102,9 +105,10 @@ describe("GamePresetList", () => {
     });
 
     expect(screen.getByText("Fingal County Council")).toBeInTheDocument();
-    expect(
-      screen.getByRole("link", { name: "Host" }),
-    ).toHaveAttribute("href", "/create?preset=bundled:dublin-fingal");
+    expect(screen.getByRole("link", { name: "Host" })).toHaveAttribute(
+      "href",
+      "/create?preset=bundled:dublin-fingal",
+    );
     expect(screen.queryByRole("button", { name: /Europe/i })).not.toBeInTheDocument();
   });
 
@@ -166,12 +170,8 @@ describe("GamePresetEditor", () => {
       resetStores: false,
     });
 
-    expect(
-      screen.getByRole("button", { name: "Open fullscreen map" }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Find place" }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Open fullscreen map" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Find place" })).toBeInTheDocument();
   });
 
   it("enables Done in the fullscreen map after searching for a place", async () => {
@@ -181,10 +181,9 @@ describe("GamePresetEditor", () => {
       resetStores: false,
     });
 
-    fireEvent.change(
-      screen.getByLabelText(/City, county, state, or country/i),
-      { target: { value: "Dublin" } },
-    );
+    fireEvent.change(screen.getByLabelText(/City, county, state, or country/i), {
+      target: { value: "Dublin" },
+    });
     fireEvent.click(screen.getByRole("button", { name: "Find place" }));
     expect(await screen.findByText(/Suggested/i)).toBeInTheDocument();
 
@@ -209,9 +208,7 @@ describe("GamePresetEditor", () => {
       BUNDLED_GAME_PRESET_DEFINITIONS.length + 1,
     );
     expect(
-      useGamePresetStore
-        .getState()
-        .presets.find((preset) => preset.name === "Dublin medium")?.name,
+      useGamePresetStore.getState().presets.find((preset) => preset.name === "Dublin medium")?.name,
     ).toBe("Dublin medium");
     expect(navigate).toHaveBeenCalledWith("/presets");
   });

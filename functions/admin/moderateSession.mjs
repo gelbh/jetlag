@@ -9,10 +9,7 @@ const FIRESTORE_BATCH_LIMIT = 500;
 const VALID_ACTIONS = new Set(["end", "resetBoard", "cleanupCode"]);
 
 async function softDeleteActiveAnnotations(db, sessionId, resetAt) {
-  const annotationsRef = db
-    .collection("sessions")
-    .doc(sessionId)
-    .collection("annotations");
+  const annotationsRef = db.collection("sessions").doc(sessionId).collection("annotations");
 
   const snapshot = await annotationsRef.where("status", "==", "active").get();
   if (snapshot.empty) {
@@ -35,10 +32,7 @@ async function softDeleteActiveAnnotations(db, sessionId, resetAt) {
 }
 
 async function cancelOpenPendingQuestions(db, sessionId) {
-  const questionsRef = db
-    .collection("sessions")
-    .doc(sessionId)
-    .collection("pendingQuestions");
+  const questionsRef = db.collection("sessions").doc(sessionId).collection("pendingQuestions");
 
   const snapshot = await questionsRef.where("status", "==", "open").get();
   if (snapshot.empty) {
@@ -96,10 +90,7 @@ async function moderateSession(db, sessionId, action, adminUid) {
     });
 
     if (code) {
-      await db.collection("sessionCodes").doc(code).set(
-        { status: "ended" },
-        { merge: true },
-      );
+      await db.collection("sessionCodes").doc(code).set({ status: "ended" }, { merge: true });
     }
   }
 }
@@ -109,10 +100,8 @@ export const adminModerateSession = onCall(
   withSentryEventHandler(async (request) => {
     requireAdminAuth(request.auth);
 
-    const sessionId =
-      typeof request.data?.sessionId === "string" ? request.data.sessionId : "";
-    const action =
-      typeof request.data?.action === "string" ? request.data.action : "";
+    const sessionId = typeof request.data?.sessionId === "string" ? request.data.sessionId : "";
+    const action = typeof request.data?.action === "string" ? request.data.action : "";
 
     if (!sessionId) {
       throw new HttpsError("invalid-argument", "sessionId is required.");
@@ -128,8 +117,4 @@ export const adminModerateSession = onCall(
   }),
 );
 
-export {
-  moderateSession,
-  softDeleteActiveAnnotations,
-  cancelOpenPendingQuestions,
-};
+export { cancelOpenPendingQuestions, moderateSession, softDeleteActiveAnnotations };

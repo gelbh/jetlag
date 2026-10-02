@@ -1,9 +1,9 @@
-import { fireEvent, screen } from "@testing-library/react";
 import { MantineProvider } from "@mantine/core";
+import { fireEvent, screen } from "@testing-library/react";
 import type { ReactElement } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { jetlagTheme } from "@/theme/theme";
 import { renderWithRouter } from "@/test/renderWithRouter";
+import { jetlagTheme } from "@/theme/theme";
 import { MapFirstRunSheet } from "./MapFirstRunSheet";
 
 const STORAGE_KEY = "jetlag.mapFirstRunDismissed";
@@ -36,9 +36,7 @@ describe("MapFirstRunSheet", () => {
 
     renderGuide(<MapFirstRunSheet open onDismiss={onDismiss} />);
 
-    expect(
-      screen.getByRole("heading", { name: "Map tools" }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Map tools" })).toBeInTheDocument();
     expect(screen.getByText("Hunt dock")).toBeInTheDocument();
     expect(screen.getByText("Zone, Pin, Freehand")).toBeInTheDocument();
     expect(screen.getByText("Map, Game, Session")).toBeInTheDocument();

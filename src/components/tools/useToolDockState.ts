@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useState, type RefObject } from "react";
+import { type RefObject, useCallback, useEffect, useLayoutEffect, useState } from "react";
 import { QUESTION_DOCK_TOOL_IDS } from "../../domain/map/mapTools";
 import type { MapTool } from "../../state/sessionStore";
 

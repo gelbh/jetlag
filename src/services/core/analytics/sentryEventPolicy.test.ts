@@ -13,9 +13,7 @@ function exc(type: string, value: string): SentryEventLike {
 describe("classifyClientSentryEvent", () => {
   it("meters QuotaExceededError with quota message", () => {
     expect(
-      classifyClientSentryEvent(
-        exc("QuotaExceededError", "The quota has been exceeded."),
-      ),
+      classifyClientSentryEvent(exc("QuotaExceededError", "The quota has been exceeded.")),
     ).toBe("meter_quota");
     expect(
       classifyClientSentryEvent(
@@ -28,11 +26,7 @@ describe("classifyClientSentryEvent", () => {
   });
 
   it("drops AbortError aborted operation", () => {
-    expect(
-      classifyClientSentryEvent(
-        exc("AbortError", "This operation was aborted"),
-      ),
-    ).toBe("drop");
+    expect(classifyClientSentryEvent(exc("AbortError", "This operation was aborted"))).toBe("drop");
   });
 
   it("drops soft App Check throttle, probe timeout, and fetch-network-error", () => {
@@ -52,9 +46,7 @@ describe("classifyClientSentryEvent", () => {
         ),
       ),
     ).toBe("drop");
-    expect(
-      classifyClientSentryEvent(exc("Error", "App Check probe timed out")),
-    ).toBe("drop");
+    expect(classifyClientSentryEvent(exc("Error", "App Check probe timed out"))).toBe("drop");
     expect(
       classifyClientSentryEvent(
         exc(
@@ -66,12 +58,8 @@ describe("classifyClientSentryEvent", () => {
   });
 
   it("drops expected leave messages", () => {
-    expect(
-      classifyClientSentryEvent(exc("Error", "Session already ended.")),
-    ).toBe("drop");
-    expect(
-      classifyClientSentryEvent(exc("Error", "Only the host can do that.")),
-    ).toBe("drop");
+    expect(classifyClientSentryEvent(exc("Error", "Session already ended."))).toBe("drop");
+    expect(classifyClientSentryEvent(exc("Error", "Only the host can do that."))).toBe("drop");
   });
 
   it("drops Firestore b815 persistence noise", () => {
@@ -86,22 +74,15 @@ describe("classifyClientSentryEvent", () => {
   });
 
   it("drops IDB closing/hidden and Safari object-store lookup noise", () => {
+    expect(classifyClientSentryEvent(exc("InvalidStateError", "Database is closing/hidden"))).toBe(
+      "drop",
+    );
     expect(
       classifyClientSentryEvent(
-        exc("InvalidStateError", "Database is closing/hidden"),
+        exc("UnknownError", "Error looking up record in object store by key range"),
       ),
     ).toBe("drop");
-    expect(
-      classifyClientSentryEvent(
-        exc(
-          "UnknownError",
-          "Error looking up record in object store by key range",
-        ),
-      ),
-    ).toBe("drop");
-    expect(
-      classifyClientSentryEvent({ message: "Database is closing/hidden" }),
-    ).toBe("drop");
+    expect(classifyClientSentryEvent({ message: "Database is closing/hidden" })).toBe("drop");
     expect(
       classifyClientSentryEvent({
         message: "Error looking up record in object store by key range",
@@ -112,10 +93,7 @@ describe("classifyClientSentryEvent", () => {
   it("drops view-transition abort and visibility-hidden skips", () => {
     expect(
       classifyClientSentryEvent(
-        exc(
-          "InvalidStateError",
-          "Transition was aborted because of invalid state",
-        ),
+        exc("InvalidStateError", "Transition was aborted because of invalid state"),
       ),
     ).toBe("drop");
     expect(
@@ -128,31 +106,22 @@ describe("classifyClientSentryEvent", () => {
     ).toBe("drop");
     expect(
       classifyClientSentryEvent({
-        message:
-          "Skipping view transition because document visibility state has become hidden.",
+        message: "Skipping view transition because document visibility state has become hidden.",
       }),
     ).toBe("drop");
   });
 
   it("drops view transition skipped wording (JETLAG-3V)", () => {
-    expect(
-      classifyClientSentryEvent(
-        exc("Error", "AbortError: Transition was skipped"),
-      ),
-    ).toBe("drop");
+    expect(classifyClientSentryEvent(exc("Error", "AbortError: Transition was skipped"))).toBe(
+      "drop",
+    );
   });
 
   it("drops Firefox Firestore IDB NS_ERROR_FAILURE noise (JETLAG-3Z)", () => {
-    expect(
-      classifyClientSentryEvent(
-        exc("NS_ERROR_FAILURE", "No error message"),
-      ),
-    ).toBe("drop");
-    expect(
-      classifyClientSentryEvent(
-        exc("Error", "NS_ERROR_FAILURE: No error message"),
-      ),
-    ).toBe("drop");
+    expect(classifyClientSentryEvent(exc("NS_ERROR_FAILURE", "No error message"))).toBe("drop");
+    expect(classifyClientSentryEvent(exc("Error", "NS_ERROR_FAILURE: No error message"))).toBe(
+      "drop",
+    );
   });
 
   it("drops IDB index lookup without in-progress transaction (JETLAG-3S)", () => {
@@ -168,12 +137,7 @@ describe("classifyClientSentryEvent", () => {
 
   it("sends Firestore missing-or-insufficient-permissions (reopened)", () => {
     expect(
-      classifyClientSentryEvent(
-        exc(
-          "FirebaseError",
-          "Missing or insufficient permissions.",
-        ),
-      ),
+      classifyClientSentryEvent(exc("FirebaseError", "Missing or insufficient permissions.")),
     ).toBe("send");
   });
 
@@ -212,9 +176,7 @@ describe("classifyClientSentryEvent", () => {
       "Session uses legacy join.",
     ];
     for (const message of fixtures) {
-      expect(classifyClientSentryEvent(exc("FirebaseError", message))).toBe(
-        "drop",
-      );
+      expect(classifyClientSentryEvent(exc("FirebaseError", message))).toBe("drop");
       expect(classifyClientSentryEvent({ message })).toBe("drop");
       expect(
         classifyClientSentryEvent({
@@ -225,19 +187,13 @@ describe("classifyClientSentryEvent", () => {
   });
 
   it("keeps module script import failure and WebKit Load failed", () => {
-    expect(
-      classifyClientSentryEvent(
-        exc("TypeError", "Importing a module script failed."),
-      ),
-    ).toBe("send");
-    expect(classifyClientSentryEvent(exc("TypeError", "Load failed"))).toBe(
+    expect(classifyClientSentryEvent(exc("TypeError", "Importing a module script failed."))).toBe(
       "send",
     );
-    expect(
-      classifyClientSentryEvent(
-        exc("TypeError", "Load failed (jetlag.gelbhart.dev)"),
-      ),
-    ).toBe("send");
+    expect(classifyClientSentryEvent(exc("TypeError", "Load failed"))).toBe("send");
+    expect(classifyClientSentryEvent(exc("TypeError", "Load failed (jetlag.gelbhart.dev)"))).toBe(
+      "send",
+    );
   });
 
   it("does not denylist isCorePipeline, getImage, deadline-exceeded, or dynamic import failures", () => {
@@ -248,21 +204,12 @@ describe("classifyClientSentryEvent", () => {
     ).toBe("send");
     expect(
       classifyClientSentryEvent(
-        exc(
-          "TypeError",
-          "Cannot read properties of undefined (reading 'getImage')",
-        ),
+        exc("TypeError", "Cannot read properties of undefined (reading 'getImage')"),
       ),
     ).toBe("send");
+    expect(classifyClientSentryEvent(exc("FirebaseError", "deadline-exceeded"))).toBe("send");
     expect(
-      classifyClientSentryEvent(
-        exc("FirebaseError", "deadline-exceeded"),
-      ),
-    ).toBe("send");
-    expect(
-      classifyClientSentryEvent(
-        exc("TypeError", "Failed to fetch dynamically imported module"),
-      ),
+      classifyClientSentryEvent(exc("TypeError", "Failed to fetch dynamically imported module")),
     ).toBe("send");
   });
 });
@@ -271,19 +218,11 @@ describe("applyClientSentryDisposition", () => {
   it("samples quota at rate and fingerprints", () => {
     const event = exc("QuotaExceededError", "The quota has been exceeded.");
     const justBelow = Math.max(0, QUOTA_SAMPLE_RATE - Number.EPSILON);
-    const sent = applyClientSentryDisposition(
-      event,
-      "meter_quota",
-      () => justBelow,
-    );
+    const sent = applyClientSentryDisposition(event, "meter_quota", () => justBelow);
     expect(sent).not.toBeNull();
     expect(sent?.fingerprint).toEqual(["storage-quota-exceeded"]);
     expect(sent?.level).toBe("warning");
-    const atRate = applyClientSentryDisposition(
-      event,
-      "meter_quota",
-      () => QUOTA_SAMPLE_RATE,
-    );
+    const atRate = applyClientSentryDisposition(event, "meter_quota", () => QUOTA_SAMPLE_RATE);
     expect(atRate).toBeNull();
     const above = applyClientSentryDisposition(
       event,

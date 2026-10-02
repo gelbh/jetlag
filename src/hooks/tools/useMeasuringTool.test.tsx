@@ -1,7 +1,7 @@
 import { act, renderHook } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { useMeasuringTool } from "./useMeasuringTool";
 import { createToolHookMocks } from "../../test/helpers/toolHookMocks";
+import { useMeasuringTool } from "./useMeasuringTool";
 
 vi.mock("../../services/geo/overpass/measuringPlaces", () => ({
   fetchMeasuringPlacesInArea: vi.fn(async () => ({ ok: true, places: [] })),

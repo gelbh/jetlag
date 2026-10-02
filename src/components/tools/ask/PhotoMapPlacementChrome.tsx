@@ -6,8 +6,8 @@ import { PaperPlaneTiltIcon } from "@phosphor-icons/react";
 import { HudPhotoIcon } from "@/components/map/icons/ToolIcons";
 import {
   AskMapPlacementChrome,
-  askMapPlacementSendStyles,
   type AskMapPlacementPhase,
+  askMapPlacementSendStyles,
 } from "@/components/tools/ask/AskMapPlacementChrome";
 import { mapChromeSurfaceStyles } from "@/components/ui/entry/entryChrome";
 
@@ -45,10 +45,7 @@ export function PhotoMapPlacementChrome({
       }}
     >
       {error ? (
-        <p
-          className="m-0 px-1 text-xs leading-snug"
-          style={{ color: "var(--color-halt)" }}
-        >
+        <p className="m-0 px-1 text-xs leading-snug" style={{ color: "var(--color-halt)" }}>
           {error}
         </p>
       ) : null}
@@ -59,9 +56,7 @@ export function PhotoMapPlacementChrome({
         disabled={!canCommit || isSubmitting}
         aria-busy={isSubmitting || undefined}
         leftSection={
-          isSubmitting ? undefined : (
-            <PaperPlaneTiltIcon size={16} weight="fill" aria-hidden />
-          )
+          isSubmitting ? undefined : <PaperPlaneTiltIcon size={16} weight="fill" aria-hidden />
         }
         styles={askMapPlacementSendStyles}
       >

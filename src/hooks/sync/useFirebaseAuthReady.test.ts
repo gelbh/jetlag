@@ -1,7 +1,7 @@
 import { renderHook, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { LOCAL_SESSION_ID } from "../../domain/map/annotations";
 import type { SessionRecord } from "../../domain/map/annotations";
+import { LOCAL_SESSION_ID } from "../../domain/map/annotations";
 import { useFirebaseAuthReady } from "./useFirebaseAuthReady";
 
 const { ensureAnonymousUser, isFirebaseConfigured } = vi.hoisted(() => ({

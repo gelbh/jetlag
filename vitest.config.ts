@@ -1,5 +1,5 @@
-import { defineConfig } from "vitest/config";
 import wasm from "vite-plugin-wasm";
+import { defineConfig } from "vitest/config";
 import { optionalKernelWasmPkg } from "./vite.optional-kernel-wasm-pkg";
 
 export default defineConfig({
@@ -16,12 +16,7 @@ export default defineConfig({
     coverage: {
       provider: "v8",
       include: ["src/**/*.{ts,tsx}"],
-      exclude: [
-        "src/test/**",
-        "**/*.test.*",
-        "**/*.emulator.test.*",
-        "src/main.tsx",
-      ],
+      exclude: ["src/test/**", "**/*.test.*", "**/*.emulator.test.*", "src/main.tsx"],
       thresholds: {
         "src/domain/**": { lines: 65, branches: 50 },
         "src/services/**": { lines: 58, branches: 43 },
@@ -59,10 +54,7 @@ export default defineConfig({
           name: "emulator",
           environment: "node",
           setupFiles: "./src/test/emulator/setup.ts",
-          include: [
-            "**/*.emulator.test.{ts,tsx}",
-            "src/test/emulator/**/*.test.ts",
-          ],
+          include: ["**/*.emulator.test.{ts,tsx}", "src/test/emulator/**/*.test.ts"],
           exclude: [".changeset/**", ".worktrees/**", "node_modules/**", "dist/**"],
           testTimeout: 30_000,
           hookTimeout: 30_000,

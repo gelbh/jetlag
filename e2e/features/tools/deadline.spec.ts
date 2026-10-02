@@ -1,7 +1,6 @@
 import {
-  test,
-  expect,
   answerInChat,
+  expect,
   expectChatAnswer,
   listPendingQuestionIds,
   openChat,
@@ -9,6 +8,7 @@ import {
   readPersistedSessionId,
   sendRadarToHiders,
   startSessionTimer,
+  test,
 } from "../../fixtures";
 
 test.setTimeout(120_000);

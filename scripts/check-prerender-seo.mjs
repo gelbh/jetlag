@@ -65,13 +65,8 @@ for (const urlPath of policy.indexablePaths) {
     failed = true;
   }
 
-  if (
-    html.includes("http://127.0.0.1") ||
-    html.includes("http://localhost")
-  ) {
-    console.error(
-      `${urlPath}: prerender HTML still contains preview-origin absolute URLs`,
-    );
+  if (html.includes("http://127.0.0.1") || html.includes("http://localhost")) {
+    console.error(`${urlPath}: prerender HTML still contains preview-origin absolute URLs`);
     failed = true;
   }
 
@@ -105,9 +100,7 @@ for (const urlPath of policy.indexablePaths) {
     .replace(/\s+/g, " ")
     .trim();
   if (rootText.length <= MIN_ROOT_TEXT_CHARS) {
-    console.error(
-      `${urlPath}: #root text too short (${rootText.length} chars)`,
-    );
+    console.error(`${urlPath}: #root text too short (${rootText.length} chars)`);
     failed = true;
   }
 }
@@ -116,6 +109,4 @@ if (failed) {
   process.exit(1);
 }
 
-console.log(
-  `Prerender SEO check passed for ${policy.indexablePaths.length} routes`,
-);
+console.log(`Prerender SEO check passed for ${policy.indexablePaths.length} routes`);

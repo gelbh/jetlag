@@ -1,5 +1,5 @@
-import { LRUCache } from "lru-cache";
 import type { FeatureCollection } from "geojson";
+import { LRUCache } from "lru-cache";
 import { runSpatialVoronoi } from "../kernel/voronoiKernelRunner";
 
 const VORONOI_CACHE_MAX = 8;
@@ -14,10 +14,7 @@ export function matchingSitesFingerprint(
   features: Array<{ id: string; point: readonly [number, number] }>,
 ): string {
   return features
-    .map(
-      (feature) =>
-        `${feature.id}:${feature.point[0].toFixed(6)}:${feature.point[1].toFixed(6)}`,
-    )
+    .map((feature) => `${feature.id}:${feature.point[0].toFixed(6)}:${feature.point[1].toFixed(6)}`)
     .sort()
     .join("|");
 }

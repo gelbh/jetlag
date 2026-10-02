@@ -12,15 +12,9 @@ export type LeaderboardMetric =
   | "wins"
   | "round_duration";
 
-export const LEADERBOARD_SCOPES: readonly LeaderboardScope[] = [
-  "global",
-  "friends",
-] as const;
+export const LEADERBOARD_SCOPES: readonly LeaderboardScope[] = ["global", "friends"] as const;
 
-export const LEADERBOARD_ROLES: readonly LeaderboardRole[] = [
-  "seeker",
-  "hider",
-] as const;
+export const LEADERBOARD_ROLES: readonly LeaderboardRole[] = ["seeker", "hider"] as const;
 
 export const LEADERBOARD_METRICS: readonly LeaderboardMetric[] = [
   "distance_traveled",
@@ -46,10 +40,7 @@ export function leaderboardEntryLabel(entry: LeaderboardEntry): string {
 }
 
 /** Format a board value for the active metric (meters / ms / counts). */
-export function formatLeaderboardValue(
-  metric: LeaderboardMetric,
-  value: number,
-): string {
+export function formatLeaderboardValue(metric: LeaderboardMetric, value: number): string {
   if (!Number.isFinite(value)) {
     return "—";
   }
@@ -85,10 +76,7 @@ export function formatLeaderboardValue(
   }
 }
 
-export function leaderboardMetricLabel(
-  metric: LeaderboardMetric,
-  role: LeaderboardRole,
-): string {
+export function leaderboardMetricLabel(metric: LeaderboardMetric, role: LeaderboardRole): string {
   switch (metric) {
     case "distance_traveled":
       return "Distance traveled";

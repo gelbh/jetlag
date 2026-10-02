@@ -25,8 +25,6 @@ export function adminSessionTimerState(summary: {
 }) {
   return {
     accumulatedMs: summary.timerAccumulatedMs,
-    runningSince: summary.timerRunningSince
-      ? Date.parse(summary.timerRunningSince)
-      : null,
+    runningSince: summary.timerRunningSince ? Date.parse(summary.timerRunningSince) : null,
   };
 }

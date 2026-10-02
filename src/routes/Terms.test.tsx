@@ -1,10 +1,10 @@
+import { MantineProvider } from "@mantine/core";
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import { MantineProvider } from "@mantine/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { Terms } from "./Terms";
 import { jetlagTheme } from "@/theme/theme";
 import { RouteTransitionTestProvider } from "../test/RouteTransitionTestProvider";
+import { Terms } from "./Terms";
 
 beforeEach(() => {
   vi.stubGlobal("matchMedia", (query: string) => ({
@@ -30,8 +30,6 @@ describe("Terms", () => {
         </MemoryRouter>
       </MantineProvider>,
     );
-    expect(
-      screen.getByRole("heading", { name: "Terms of Service" }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Terms of Service" })).toBeInTheDocument();
   });
 });

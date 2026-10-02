@@ -11,11 +11,7 @@ export type EmptyStateProps = {
  * Shared empty copy for lists, boards, and recovery surfaces.
  * field-ink-muted on canvas; `.jl-empty-state` keeps a hairline under residual roots.
  */
-export function EmptyState({
-  children,
-  className,
-  role = "note",
-}: EmptyStateProps) {
+export function EmptyState({ children, className, role = "note" }: EmptyStateProps) {
   return (
     <p
       role={role}

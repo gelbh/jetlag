@@ -1,4 +1,4 @@
-import { type Page, expect } from "@playwright/test";
+import { expect, type Page } from "@playwright/test";
 import { closePanel, openSettings } from "./tools/navigation";
 
 export async function startEndGameFromFoundStation(hostPage: Page) {

@@ -1,8 +1,4 @@
-import type {
-  FriendListEntry,
-  FriendSearchResult,
-  FriendsListResult,
-} from "./profileFriends";
+import type { FriendListEntry, FriendSearchResult, FriendsListResult } from "./profileFriends";
 
 export const FRIENDS_MOCK_STORAGE_KEY = "jl.friends.mock";
 /** Four-letter code used when inviting from the friends mock sheet. */
@@ -146,10 +142,7 @@ let state: MockState = createSeedState();
 
 export function isFriendsMockEnabled(): boolean {
   try {
-    return (
-      import.meta.env.DEV &&
-      localStorage.getItem(FRIENDS_MOCK_STORAGE_KEY) === "1"
-    );
+    return import.meta.env.DEV && localStorage.getItem(FRIENDS_MOCK_STORAGE_KEY) === "1";
   } catch {
     return false;
   }
@@ -193,9 +186,7 @@ function delay<T>(value: T): Promise<T> {
 
 function relatedUids(): Set<string> {
   return new Set(
-    [...state.friends, ...state.incoming, ...state.outgoing].map(
-      (entry) => entry.uid,
-    ),
+    [...state.friends, ...state.incoming, ...state.outgoing].map((entry) => entry.uid),
   );
 }
 
@@ -207,9 +198,7 @@ export async function mockListFriends(): Promise<FriendsListResult> {
   });
 }
 
-export async function mockSearchFriends(
-  query: string,
-): Promise<FriendSearchResult> {
+export async function mockSearchFriends(query: string): Promise<FriendSearchResult> {
   const normalized = query.trim().toLowerCase();
   if (normalized.length < 2) {
     throw new Error("Enter at least 2 characters to search.");
@@ -217,17 +206,13 @@ export async function mockSearchFriends(
   const related = relatedUids();
   const results = state.directory
     .filter(
-      (entry) =>
-        !related.has(entry.uid) &&
-        entry.username.toLowerCase().startsWith(normalized),
+      (entry) => !related.has(entry.uid) && entry.username.toLowerCase().startsWith(normalized),
     )
     .map(cloneEntry);
   return delay({ results });
 }
 
-export async function mockRequestFriend(
-  toUid: string,
-): Promise<{ ok: boolean }> {
+export async function mockRequestFriend(toUid: string): Promise<{ ok: boolean }> {
   if (relatedUids().has(toUid)) {
     throw new Error("Already connected or pending with that player.");
   }
@@ -239,9 +224,7 @@ export async function mockRequestFriend(
   return delay({ ok: true });
 }
 
-export async function mockAcceptFriendRequest(
-  fromUid: string,
-): Promise<{ ok: boolean }> {
+export async function mockAcceptFriendRequest(fromUid: string): Promise<{ ok: boolean }> {
   const incoming = state.incoming.find((entry) => entry.uid === fromUid);
   if (!incoming) {
     throw new Error("No pending request from that player.");
@@ -251,9 +234,7 @@ export async function mockAcceptFriendRequest(
   return delay({ ok: true });
 }
 
-export async function mockDeclineFriendRequest(
-  fromUid: string,
-): Promise<{ ok: boolean }> {
+export async function mockDeclineFriendRequest(fromUid: string): Promise<{ ok: boolean }> {
   if (!state.incoming.some((entry) => entry.uid === fromUid)) {
     throw new Error("No pending request from that player.");
   }
@@ -261,9 +242,7 @@ export async function mockDeclineFriendRequest(
   return delay({ ok: true });
 }
 
-export async function mockCancelFriendRequest(
-  toUid: string,
-): Promise<{ ok: boolean }> {
+export async function mockCancelFriendRequest(toUid: string): Promise<{ ok: boolean }> {
   if (!state.outgoing.some((entry) => entry.uid === toUid)) {
     throw new Error("No outgoing request to that player.");
   }
@@ -271,9 +250,7 @@ export async function mockCancelFriendRequest(
   return delay({ ok: true });
 }
 
-export async function mockRemoveFriend(
-  friendUid: string,
-): Promise<{ ok: boolean }> {
+export async function mockRemoveFriend(friendUid: string): Promise<{ ok: boolean }> {
   if (!state.friends.some((entry) => entry.uid === friendUid)) {
     throw new Error("That player is not on your friends list.");
   }

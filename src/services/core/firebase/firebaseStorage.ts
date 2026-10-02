@@ -7,11 +7,7 @@ let storageEmulatorConnected = false;
 
 function connectStorageEmulatorIfConfigured(
   firebaseStorage: FirebaseStorage,
-  connectStorageEmulator: (
-    storage: FirebaseStorage,
-    host: string,
-    port: number,
-  ) => void,
+  connectStorageEmulator: (storage: FirebaseStorage, host: string, port: number) => void,
 ): void {
   if (!clientEnvUsesFirebaseEmulator() || storageEmulatorConnected) {
     return;
@@ -23,9 +19,7 @@ function connectStorageEmulatorIfConfigured(
 
 export async function getFirebaseStorage(): Promise<FirebaseStorage> {
   if (!storage) {
-    const { connectStorageEmulator, getStorage } = await import(
-      "firebase/storage"
-    );
+    const { connectStorageEmulator, getStorage } = await import("firebase/storage");
     storage = getStorage(getFirebaseApp());
     connectStorageEmulatorIfConfigured(storage, connectStorageEmulator);
   }

@@ -1,4 +1,4 @@
-import type { Feature, LineString, MultiPolygon, Polygon as GeoPolygon } from "geojson";
+import type { Feature, Polygon as GeoPolygon, LineString, MultiPolygon } from "geojson";
 
 export type LatLngTuple = [number, number];
 

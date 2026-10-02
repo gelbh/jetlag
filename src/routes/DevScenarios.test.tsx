@@ -1,5 +1,5 @@
-import { screen } from "@testing-library/react";
 import { MantineProvider } from "@mantine/core";
+import { screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { jetlagTheme } from "@/theme/theme";
 import { renderWithRouter } from "../test/renderWithRouter";
@@ -43,22 +43,14 @@ describe("DevScenarios", () => {
     expect(screen.queryByRole("heading", { name: /scenarios/i })).toBeNull();
   });
 
-  it(
-    "lists dublin-local-map when the gate is on",
-    () => {
-      renderWithRouter(
-        <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
-          <DevScenarios />
-        </MantineProvider>,
-        { route: "/dev/scenarios" },
-      );
-      expect(
-        screen.getByRole("heading", { name: /scenarios/i }),
-      ).toBeInTheDocument();
-      expect(
-        screen.getByRole("button", { name: /dublin local map/i }),
-      ).toBeInTheDocument();
-    },
-    15_000,
-  );
+  it("lists dublin-local-map when the gate is on", () => {
+    renderWithRouter(
+      <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
+        <DevScenarios />
+      </MantineProvider>,
+      { route: "/dev/scenarios" },
+    );
+    expect(screen.getByRole("heading", { name: /scenarios/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /dublin local map/i })).toBeInTheDocument();
+  }, 15_000);
 });

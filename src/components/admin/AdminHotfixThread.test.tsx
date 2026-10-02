@@ -13,15 +13,11 @@ vi.mock("../../hooks/incident/useHotfixThread", () => ({
 
 describe("AdminHotfixThread", () => {
   it("renders empty state for private hotfix thread", () => {
-    renderWithRouter(
-      <AdminHotfixThread incidentId="inc-1" messagesOverride={[]} />,
-    );
+    renderWithRouter(<AdminHotfixThread incidentId="inc-1" messagesOverride={[]} />);
 
     expect(screen.getByTestId("admin-hotfix-thread")).toBeInTheDocument();
     expect(screen.getByText(/Private hotfix thread/i)).toBeInTheDocument();
-    expect(
-      screen.getByText(/players cannot read this thread/i),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/players cannot read this thread/i)).toBeInTheDocument();
   });
 
   it("renders coding-agent agent_meta rows", () => {
@@ -38,12 +34,7 @@ describe("AdminHotfixThread", () => {
       },
     ];
 
-    renderWithRouter(
-      <AdminHotfixThread
-        incidentId="inc-1"
-        messagesOverride={messages}
-      />,
-    );
+    renderWithRouter(<AdminHotfixThread incidentId="inc-1" messagesOverride={messages} />);
 
     expect(screen.getByText(/Coding agent/i)).toBeInTheDocument();
     expect(screen.getByText(/Agent launched/i)).toBeInTheDocument();

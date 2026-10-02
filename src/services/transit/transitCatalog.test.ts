@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  metroSupportsLiveVehicles,
-  TRANSIT_METROS,
-} from "./transitCatalog";
+import { metroSupportsLiveVehicles, TRANSIT_METROS } from "./transitCatalog";
 
 describe("transitCatalog", () => {
   it("enables live vehicles for metros with RT feeds", () => {
@@ -29,9 +26,7 @@ describe("transitCatalog", () => {
     const dublin = TRANSIT_METROS.find((metro) => metro.id === "dublin");
     const sf = TRANSIT_METROS.find((metro) => metro.id === "sf");
 
-    expect(dublin?.transitlandRtFeed).toBe(
-      "f-national~transport~authority~ie~rt",
-    );
+    expect(dublin?.transitlandRtFeed).toBe("f-national~transport~authority~ie~rt");
     expect(sf?.transitlandRtFeed).toBe("f-sf~bay~area~rg~rt");
   });
 });

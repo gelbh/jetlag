@@ -1,6 +1,6 @@
-import { describe, expect, it, beforeEach, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
 import { MantineProvider } from "@mantine/core";
+import { render, screen } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { cueExcludesCostTokens } from "@/domain/ask/askHudModes";
 import { jetlagTheme } from "@/theme/theme";
 import { AskModeCueTicker } from "./AskModeCueTicker";

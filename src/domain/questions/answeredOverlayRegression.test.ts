@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import type { AnnotationRecord, GameArea } from "../map/annotations";
 import { eliminationFeatureForAnnotation } from "../geometry/adapter/eliminationMask";
+import type { AnnotationRecord, GameArea } from "../map/annotations";
 import { milesToMeters } from "../map/distance";
 import type { PendingQuestionRecord } from "../session/activity/sessionChat";
 import { buildPendingQuestionOverlay } from "./pendingQuestionOverlays";
@@ -102,13 +102,8 @@ describe("answered overlay regression", () => {
   });
 
   it("keeps answered radar elimination on the annotation while pending has no polygon shade", async () => {
-    const pending = await buildPendingQuestionOverlay(
-      pendingRadar("pending"),
-      gameArea,
-    );
-    expect(pending?.overlays.some((overlay) => overlay.kind === "polygon")).toBe(
-      false,
-    );
+    const pending = await buildPendingQuestionOverlay(pendingRadar("pending"), gameArea);
+    expect(pending?.overlays.some((overlay) => overlay.kind === "polygon")).toBe(false);
 
     const answeredShade = await eliminationFeatureForAnnotation(
       answeredRadarAnnotation(),

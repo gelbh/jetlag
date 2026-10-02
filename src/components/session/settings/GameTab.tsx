@@ -1,17 +1,13 @@
 import { Button, Stack } from "@mantine/core";
+import { filledStyles, InsetGroup, SectionLabel } from "@/components/ui/entry/entryChrome";
+import type { SessionRecord } from "@/domain/map/annotations";
+import type { DistanceUnit } from "@/domain/map/distance";
+import { sessionRulesSummary } from "@/domain/session/rules";
 import type { GameSize } from "@/domain/session/size/gameSize";
 import { type AdvancedSessionSettingsValue } from "@/domain/session/tools/advancedSessionSettings";
-import { AdvancedSessionSettings } from "./AdvancedSessionSettings";
-import type { DistanceUnit } from "@/domain/map/distance";
-import type { SessionRecord } from "@/domain/map/annotations";
 import { ShareCode } from "../identity/ShareCode";
+import { AdvancedSessionSettings } from "./AdvancedSessionSettings";
 import { RolePasscodeSettings } from "./RolePasscodeSettings";
-import {
-  InsetGroup,
-  SectionLabel,
-  filledStyles,
-} from "@/components/ui/entry/entryChrome";
-import { sessionRulesSummary } from "@/domain/session/rules";
 
 export interface MapSettingsGameTabProps {
   sessionCode: string;
@@ -51,29 +47,23 @@ export function MapSettingsGameTab({
     hidingPeriodMinutes: advancedSettings.customHidingPeriodEnabled
       ? advancedSettings.hidingPeriodMinutes
       : undefined,
-    photoAnswerDeadlineMinutes:
-      advancedSettings.customPhotoAnswerDeadlineEnabled
-        ? advancedSettings.photoAnswerDeadlineMinutes
-        : undefined,
-    questionAnswerDeadlineMinutes:
-      advancedSettings.customQuestionAnswerDeadlineEnabled
-        ? advancedSettings.questionAnswerDeadlineMinutes
-        : undefined,
-    disabledTools: advancedSettings.disabledTools,
-    tentaclesEnabled: advancedSettings.tentaclesEnabledOverride
-      ? true
+    photoAnswerDeadlineMinutes: advancedSettings.customPhotoAnswerDeadlineEnabled
+      ? advancedSettings.photoAnswerDeadlineMinutes
       : undefined,
+    questionAnswerDeadlineMinutes: advancedSettings.customQuestionAnswerDeadlineEnabled
+      ? advancedSettings.questionAnswerDeadlineMinutes
+      : undefined,
+    disabledTools: advancedSettings.disabledTools,
+    tentaclesEnabled: advancedSettings.tentaclesEnabledOverride ? true : undefined,
     thermometerPresetMeters: advancedSettings.customThermometerPresetsEnabled
       ? advancedSettings.thermometerPresetMeters
       : undefined,
-    tentacleMediumRadiusMeters:
-      advancedSettings.customTentacleMediumRadiusEnabled
-        ? advancedSettings.tentacleMediumRadiusMeters
-        : undefined,
-    tentacleLargeRadiusMeters:
-      advancedSettings.customTentacleLargeRadiusEnabled
-        ? advancedSettings.tentacleLargeRadiusMeters
-        : undefined,
+    tentacleMediumRadiusMeters: advancedSettings.customTentacleMediumRadiusEnabled
+      ? advancedSettings.tentacleMediumRadiusMeters
+      : undefined,
+    tentacleLargeRadiusMeters: advancedSettings.customTentacleLargeRadiusEnabled
+      ? advancedSettings.tentacleLargeRadiusMeters
+      : undefined,
   });
 
   return (
@@ -86,12 +76,7 @@ export function MapSettingsGameTab({
       {session && myUid ? (
         <Stack gap="xs">
           <SectionLabel>Role passcodes</SectionLabel>
-          <RolePasscodeSettings
-            session={session}
-            myUid={myUid}
-            isHost={isHost}
-            embedded
-          />
+          <RolePasscodeSettings session={session} myUid={myUid} isHost={isHost} embedded />
         </Stack>
       ) : null}
 
@@ -99,8 +84,8 @@ export function MapSettingsGameTab({
         <SectionLabel>Game rules</SectionLabel>
         <InsetGroup>
           <p className="px-4 py-3 text-sm leading-snug text-[var(--color-field-ink-muted)]">
-            {summary.hidingPeriodLabel} · {summary.hidingZoneLabel} ·{" "}
-            {summary.tentacleLabel} · {summary.thermometerMaxLabel}
+            {summary.hidingPeriodLabel} · {summary.hidingZoneLabel} · {summary.tentacleLabel} ·{" "}
+            {summary.thermometerMaxLabel}
           </p>
         </InsetGroup>
         {!gameRulesEditable ? (
@@ -119,11 +104,7 @@ export function MapSettingsGameTab({
           collapsible={false}
         />
         {gameRulesEditable && onSaveGameRules ? (
-          <Button
-            fullWidth
-            styles={filledStyles}
-            onClick={() => void onSaveGameRules()}
-          >
+          <Button fullWidth styles={filledStyles} onClick={() => void onSaveGameRules()}>
             {gameRulesSaveLabel}
           </Button>
         ) : null}

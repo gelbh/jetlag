@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it } from "vitest";
 import {
-  LOCATION_ACCESS_CONFIRMED_STORAGE_KEY,
   clearPersistedLocationAccessConfirmed,
   hasPersistedLocationAccessConfirmed,
+  LOCATION_ACCESS_CONFIRMED_STORAGE_KEY,
   persistLocationAccessConfirmed,
   resetLocationPermissionUiForTests,
 } from "./locationPermissionUi";

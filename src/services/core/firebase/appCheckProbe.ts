@@ -1,21 +1,16 @@
 import { getToken } from "firebase/app-check";
 import { getClientEnv } from "@/config/env";
-import {
-  getFirebaseAppCheck,
-  isFirebaseConfigured,
-} from "./firebase";
 import { captureAppCheckTokenFailure } from "../analytics/sentry";
 import {
-  classifyAppCheckProbeFailure,
   type AppCheckProbeFailureClass,
+  classifyAppCheckProbeFailure,
 } from "../network/clientNoiseErrors";
+import { getFirebaseAppCheck, isFirebaseConfigured } from "./firebase";
 
 export const APP_CHECK_PROBE_SKIP_KEY = "jl.appCheckProbe.skip";
 export const APP_CHECK_PROBE_TIMEOUT_MS = 15_000;
 
-export type AppCheckProbeResult =
-  | { ok: true }
-  | { ok: false; reason: "blocked" };
+export type AppCheckProbeResult = { ok: true } | { ok: false; reason: "blocked" };
 
 let cachedProbe: AppCheckProbeResult | null = null;
 let inFlight: Promise<AppCheckProbeResult> | null = null;
@@ -70,9 +65,7 @@ function reportProbeFailure(
     reason: classification.reason,
     soft: classification.soft,
   });
-  cachedProbe = classification.allowApp
-    ? { ok: true }
-    : { ok: false, reason: "blocked" };
+  cachedProbe = classification.allowApp ? { ok: true } : { ok: false, reason: "blocked" };
   return cachedProbe;
 }
 

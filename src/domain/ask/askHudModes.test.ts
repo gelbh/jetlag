@@ -1,18 +1,18 @@
 import { describe, expect, it } from "vitest";
 import {
+  ASK_HUD_CAMERA_PADDING_RAIL_PX,
+  type AskHudReadiness,
+  type AskHudSurface,
   activeModeCue,
   askHudCameraPaddingPx,
   askHudDefinition,
   askHudSurfaces,
-  ASK_HUD_CAMERA_PADDING_RAIL_PX,
   canCommit,
   commitKind,
   cueExcludesCostTokens,
   isAskHudOwnedTool,
   notReadyCommitHint,
   primedCommitLabel,
-  type AskHudReadiness,
-  type AskHudSurface,
 } from "./askHudModes";
 
 function readiness(
@@ -44,9 +44,7 @@ describe("askHudModes", () => {
     expect(askHudDefinition("radar").modeBody).toBe("chipIsland");
     expect(askHudDefinition("matching").modeBody).toBe("catalogRail");
     expect(askHudDefinition("thermometer").modeBody).toBe("walkBanner");
-    expect(askHudDefinition("hiding-zone-create").modeBody).toBe(
-      "methodChipIsland",
-    );
+    expect(askHudDefinition("hiding-zone-create").modeBody).toBe("methodChipIsland");
   });
 
   it("radar cue is quiet on distance pick, then center → send", () => {
@@ -351,14 +349,8 @@ describe("askHudModes", () => {
 
   it("catalog-rail tools get taller camera padding", () => {
     expect(askHudCameraPaddingPx("radar")).toBe(ASK_HUD_CAMERA_PADDING_RAIL_PX);
-    expect(askHudCameraPaddingPx("matching")).toBe(
-      ASK_HUD_CAMERA_PADDING_RAIL_PX,
-    );
-    expect(askHudCameraPaddingPx("tentacle")).toBe(
-      ASK_HUD_CAMERA_PADDING_RAIL_PX,
-    );
-    expect(askHudCameraPaddingPx("measuring")).toBe(
-      ASK_HUD_CAMERA_PADDING_RAIL_PX,
-    );
+    expect(askHudCameraPaddingPx("matching")).toBe(ASK_HUD_CAMERA_PADDING_RAIL_PX);
+    expect(askHudCameraPaddingPx("tentacle")).toBe(ASK_HUD_CAMERA_PADDING_RAIL_PX);
+    expect(askHudCameraPaddingPx("measuring")).toBe(ASK_HUD_CAMERA_PADDING_RAIL_PX);
   });
 });

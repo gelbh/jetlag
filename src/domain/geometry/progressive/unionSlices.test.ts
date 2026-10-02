@@ -1,10 +1,7 @@
-import { describe, expect, it, vi } from "vitest";
 import type { Feature, Polygon } from "geojson";
+import { describe, expect, it, vi } from "vitest";
 import { countPolygonVertices } from "./polygonMetrics";
-import {
-  POLYGON_UNION_SLICE_BATCH,
-  unionPolygonFeaturesInSlices,
-} from "./unionSlices";
+import { POLYGON_UNION_SLICE_BATCH, unionPolygonFeaturesInSlices } from "./unionSlices";
 
 function unitSquare(i: number): Feature<Polygon> {
   return {

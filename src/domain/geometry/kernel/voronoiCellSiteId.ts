@@ -16,10 +16,7 @@ export function voronoiCellSiteId(
 
   const site = properties?.site;
   if (site && typeof site === "object") {
-    const siteProps =
-      "properties" in site
-        ? (site as Feature<Point>).properties
-        : site.properties;
+    const siteProps = "properties" in site ? (site as Feature<Point>).properties : site.properties;
 
     if (siteProps && typeof siteProps === "object") {
       for (const key of keys) {
@@ -80,11 +77,7 @@ export function voronoiCellSiteIdByCoordinates(
     }
   }
 
-  if (
-    nearestId == null ||
-    !Number.isFinite(minDistSq) ||
-    runnerUpDistSq - minDistSq < 1e-12
-  ) {
+  if (nearestId == null || !Number.isFinite(minDistSq) || runnerUpDistSq - minDistSq < 1e-12) {
     return undefined;
   }
 
@@ -96,9 +89,7 @@ export function resolveVoronoiCellSiteId(
   sites: ReadonlyArray<VoronoiSiteRef>,
   keys: readonly string[] = ["poiId", "featureId"],
 ): string | undefined {
-  return (
-    voronoiCellSiteId(cell, keys) ?? voronoiCellSiteIdByCoordinates(cell, sites)
-  );
+  return voronoiCellSiteId(cell, keys) ?? voronoiCellSiteIdByCoordinates(cell, sites);
 }
 
 /** @deprecated Use resolveVoronoiCellSiteId — tentacle POI alias kept for adapter shims. */

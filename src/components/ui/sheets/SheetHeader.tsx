@@ -47,22 +47,12 @@ export function SheetHeader({
       ) : (
         <h2 className={titleClassName}>{title}</h2>
       )}
-      {trailing ?? (
-        <SheetCloseButton
-          onClick={onClose}
-          label={closeLabel}
-          variant={closeVariant}
-        />
-      )}
+      {trailing ?? <SheetCloseButton onClick={onClose} label={closeLabel} variant={closeVariant} />}
     </div>
   );
 
   if (sticky) {
-    return (
-      <div className="sticky top-0 z-10 -mx-4 bg-canvas px-4 pb-3 pt-1">
-        {header}
-      </div>
-    );
+    return <div className="sticky top-0 z-10 -mx-4 bg-canvas px-4 pb-3 pt-1">{header}</div>;
   }
 
   return <div className={flush ? className : `mb-4 ${className}`.trim()}>{header}</div>;

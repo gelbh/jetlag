@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState, type ReactElement, type RefObject } from "react";
+import { type ReactElement, type RefObject, useCallback, useMemo, useState } from "react";
 import {
   WizardPhaseStepper,
   type WizardPhaseStepperNav,
@@ -15,10 +15,10 @@ import {
   advancePhaseNavState,
   completePhaseIds,
   initialPhaseNavState,
+  type PhaseNavState,
   resolvePhaseId,
   resolveWizardStepId,
   retreatPhaseNavState,
-  type PhaseNavState,
 } from "./toolWizardPhaseNav";
 
 interface UseToolWizardOptions {
@@ -30,9 +30,7 @@ interface UseToolWizardOptions {
   isSubmitting?: boolean;
 }
 
-type PhaseStepperComponent = (props: {
-  nav?: WizardPhaseStepperNav;
-}) => ReactElement;
+type PhaseStepperComponent = (props: { nav?: WizardPhaseStepperNav }) => ReactElement;
 
 export interface PhaseToolWizardResult {
   phaseId: ToolWizardPhaseId;
@@ -47,10 +45,7 @@ export interface PhaseToolWizardResult {
   Stepper: PhaseStepperComponent;
 }
 
-function initialPhaseState(
-  def: ToolWizardDefinition,
-  initialStepId?: string,
-): PhaseNavState {
+function initialPhaseState(def: ToolWizardDefinition, initialStepId?: string): PhaseNavState {
   const base = initialPhaseNavState(def);
   if (!initialStepId) {
     return base;
@@ -63,9 +58,7 @@ function initialPhaseState(
     }
   }
 
-  const configureIndex = def.configureSteps.findIndex(
-    (step) => step.id === initialStepId,
-  );
+  const configureIndex = def.configureSteps.findIndex((step) => step.id === initialStepId);
   if (configureIndex >= 0) {
     const phaseIndex = def.phases.indexOf("configure");
     if (phaseIndex >= 0) {
@@ -91,14 +84,8 @@ export function useToolWizard(
   const phaseId = resolvePhaseId(def, navState);
   const configureIndex = navState.configureIndex;
   const stepId = resolveWizardStepId(def, navState);
-  const phases = useMemo(
-    () => phaseRailLabels(def, awaitHiderAnswer),
-    [awaitHiderAnswer, def],
-  );
-  const completedIds = useMemo(
-    () => completePhaseIds(def, navState),
-    [def, navState],
-  );
+  const phases = useMemo(() => phaseRailLabels(def, awaitHiderAnswer), [awaitHiderAnswer, def]);
+  const completedIds = useMemo(() => completePhaseIds(def, navState), [def, navState]);
   const askMode = resolveAskMode(def, awaitHiderAnswer);
   const footerLabel = primaryFooterLabel({
     phase: phaseId,

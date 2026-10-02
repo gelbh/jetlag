@@ -1,8 +1,8 @@
 import { Text, UnstyledButton } from "@mantine/core";
+import { choiceChipStyles } from "@/components/ui/entry/entryChrome";
+import { isConfirmedPoiLike } from "@/domain/geo/poiCandidateAdapters";
 import type { TentaclePoi } from "@/domain/map/annotations";
 import { TENTACLE_NOT_WITHIN_REACH_LABEL } from "@/domain/questions";
-import { isConfirmedPoiLike } from "@/domain/geo/poiCandidateAdapters";
-import { choiceChipStyles } from "@/components/ui/entry/entryChrome";
 import { ProvisionalBadge } from "../readout/ProvisionalBadge";
 
 interface TentacleAnswerPickerProps {
@@ -42,11 +42,7 @@ export function TentacleAnswerPicker({
   }
 
   return (
-    <div
-      data-testid="tentacle-answer-picker"
-      className="flex flex-col gap-2"
-      data-wizard-no-swipe
-    >
+    <div data-testid="tentacle-answer-picker" className="flex flex-col gap-2" data-wizard-no-swipe>
       <Text
         size="sm"
         style={{

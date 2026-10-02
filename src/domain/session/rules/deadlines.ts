@@ -1,7 +1,11 @@
 import type { AnnotationType } from "../../map/annotations";
 import { answerDeadlineMs, hidingPeriodMinutes } from "../size/gameSizeRules";
-import { clampHidingPeriodMinutes, clampPhotoAnswerDeadlineMinutes, clampQuestionAnswerDeadlineMinutes } from "./clamps";
-import { sessionGameSize, type SessionRulesInput } from "./types";
+import {
+  clampHidingPeriodMinutes,
+  clampPhotoAnswerDeadlineMinutes,
+  clampQuestionAnswerDeadlineMinutes,
+} from "./clamps";
+import { type SessionRulesInput, sessionGameSize } from "./types";
 
 export function resolveHidingPeriodMinutes(session: SessionRulesInput): number {
   if (typeof session.hidingPeriodMinutes === "number") {
@@ -15,9 +19,7 @@ export function resolveHidingPeriodMs(session: SessionRulesInput): number {
   return resolveHidingPeriodMinutes(session) * 60 * 1000;
 }
 
-export function resolvePhotoAnswerDeadlineMinutes(
-  session: SessionRulesInput,
-): number {
+export function resolvePhotoAnswerDeadlineMinutes(session: SessionRulesInput): number {
   if (typeof session.photoAnswerDeadlineMinutes === "number") {
     return clampPhotoAnswerDeadlineMinutes(session.photoAnswerDeadlineMinutes);
   }
@@ -25,13 +27,9 @@ export function resolvePhotoAnswerDeadlineMinutes(
   return answerDeadlineMs("photo", sessionGameSize(session)) / (60 * 1000);
 }
 
-export function resolveQuestionAnswerDeadlineMinutes(
-  session: SessionRulesInput,
-): number {
+export function resolveQuestionAnswerDeadlineMinutes(session: SessionRulesInput): number {
   if (typeof session.questionAnswerDeadlineMinutes === "number") {
-    return clampQuestionAnswerDeadlineMinutes(
-      session.questionAnswerDeadlineMinutes,
-    );
+    return clampQuestionAnswerDeadlineMinutes(session.questionAnswerDeadlineMinutes);
   }
 
   return answerDeadlineMs("matching", sessionGameSize(session)) / (60 * 1000);

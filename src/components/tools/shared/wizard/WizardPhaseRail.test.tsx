@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
+import { describe, expect, it } from "vitest";
 import { WizardPhaseRail } from "./WizardPhaseRail";
 
 describe("WizardPhaseRail", () => {
@@ -11,21 +11,11 @@ describe("WizardPhaseRail", () => {
 
   it("marks the current phase and completed predecessors", () => {
     render(
-      <WizardPhaseRail
-        phases={phases}
-        currentPhaseId="configure"
-        completePhaseIds={["place"]}
-      />,
+      <WizardPhaseRail phases={phases} currentPhaseId="configure" completePhaseIds={["place"]} />,
     );
 
-    expect(screen.getByRole("listitem", { name: "Place" })).toHaveClass(
-      "bg-flag/60",
-    );
-    expect(screen.getByRole("listitem", { name: "Configure" })).toHaveClass(
-      "bg-flag",
-    );
-    expect(screen.getByRole("listitem", { name: "Ask" })).toHaveClass(
-      "bg-canvas",
-    );
+    expect(screen.getByRole("listitem", { name: "Place" })).toHaveClass("bg-flag/60");
+    expect(screen.getByRole("listitem", { name: "Configure" })).toHaveClass("bg-flag");
+    expect(screen.getByRole("listitem", { name: "Ask" })).toHaveClass("bg-canvas");
   });
 });

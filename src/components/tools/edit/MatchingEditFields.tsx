@@ -1,18 +1,15 @@
 import { useCallback, useEffect, useState } from "react";
-import type { AnnotationRecord, GameArea } from "@/domain/map/annotations";
-import {
-  buildMatchingEliminationRegion,
-  buildSameNearestRegion,
-} from "@/domain/geometry/measuring/matchingGeometry";
-import { persistSlimPolygonFeature } from "@/domain/geometry/progressive/persistSlim";
 import {
   deserializeMatchingFeatures,
   serializeMatchingFeatures,
 } from "@/domain/geo/matchingAdapters";
 import {
-  matchingQuestionFor,
-  type MatchingAnswer,
-} from "@/domain/questions";
+  buildMatchingEliminationRegion,
+  buildSameNearestRegion,
+} from "@/domain/geometry/measuring/matchingGeometry";
+import { persistSlimPolygonFeature } from "@/domain/geometry/progressive/persistSlim";
+import type { AnnotationRecord, GameArea } from "@/domain/map/annotations";
+import { type MatchingAnswer, matchingQuestionFor } from "@/domain/questions";
 import { BinaryAnswerPicker } from "../shared/answers/BinaryAnswerPicker";
 import { yesNoAnswerOptions } from "../shared/answers/binaryAnswerOptions";
 import { QuestionPromptBlock } from "../shared/controls/QuestionPromptBlock";
@@ -43,9 +40,7 @@ export function MatchingEditFields({
       !annotation.metadata.matchingNullAnswer &&
       annotation.metadata.matchingNearestFeatureId
     ) {
-      const features = deserializeMatchingFeatures(
-        annotation.metadata.matchingFeaturesJson,
-      );
+      const features = deserializeMatchingFeatures(annotation.metadata.matchingFeaturesJson);
       const boundaryRegion = await buildSameNearestRegion(
         features,
         annotation.metadata.matchingNearestFeatureId,
@@ -108,16 +103,11 @@ export function MatchingEditFields({
       <ToolSection title="Question" first status="active">
         <QuestionPromptBlock
           prompt={
-            matchingQuestionFor(
-              annotation.metadata.matchingCategory ?? "commercial_airport",
-            ).prompt
+            matchingQuestionFor(annotation.metadata.matchingCategory ?? "commercial_airport").prompt
           }
         />
       </ToolSection>
-      <ToolSection
-        title="Answer"
-        status={matchingAnswer !== null ? "complete" : "active"}
-      >
+      <ToolSection title="Answer" status={matchingAnswer !== null ? "complete" : "active"}>
         <BinaryAnswerPicker
           value={matchingAnswer}
           onChange={setMatchingAnswer}

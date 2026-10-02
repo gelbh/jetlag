@@ -11,8 +11,6 @@ describe("isHtml2CanvasUnsupportedColorMessage", () => {
   });
 
   it("ignores unrelated messages", () => {
-    expect(
-      isHtml2CanvasUnsupportedColorMessage("Failed to execute 'transaction'"),
-    ).toBe(false);
+    expect(isHtml2CanvasUnsupportedColorMessage("Failed to execute 'transaction'")).toBe(false);
   });
 });

@@ -1,8 +1,8 @@
-import { GameAreaMask } from "../../components/map/layers/GameAreaMask";
+import { AdminMonitorPlayerFocus } from "../../components/admin/AdminMonitorPlayerFocus";
 import { MapView } from "../../components/map/chrome/MapView";
 import { MapViewportTracker } from "../../components/map/chrome/MapViewportTracker";
+import { GameAreaMask } from "../../components/map/layers/GameAreaMask";
 import { fallbackGameArea } from "../../domain/geometry/core/gameAreaConvert";
-import { AdminMonitorPlayerFocus } from "../../components/admin/AdminMonitorPlayerFocus";
 import type { ObserverMapScreenController } from "../observer-map-screen/useObserverMapScreen";
 import { SpectatorMapLayers } from "../spectator-map/SpectatorMapLayers";
 

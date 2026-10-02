@@ -1,12 +1,12 @@
 import { Button } from "@mantine/core";
-import type { TransitRouteFilter } from "@/domain/map/transit";
 import { SettingsToggleRow } from "@/components/session/settings/SettingsToggleRow";
 import {
-  InsetGroup,
   compactFilledStyles,
   compactGrayStyles,
+  InsetGroup,
 } from "@/components/ui/entry/entryChrome";
 import { SegmentControl } from "@/components/ui/forms/SegmentControl";
+import type { TransitRouteFilter } from "@/domain/map/transit";
 
 interface TransitControlsProps {
   enabled: boolean;
@@ -80,9 +80,7 @@ function statusLine({
   }
   if (enabled) {
     parts.push(
-      `${routeCount} routes · ${stopCount} stops${
-        liveEnabled ? ` · ${vehicleCount} live` : ""
-      }`,
+      `${routeCount} routes · ${stopCount} stops${liveEnabled ? ` · ${vehicleCount} live` : ""}`,
     );
   }
   if (loadingStatic || loadingLive) {
@@ -181,20 +179,21 @@ export function TransitControls({
             </p>
           </>
         ) : null}
-        {error ? (
-          <p className="px-1 text-xs text-[var(--color-halt)]">{error}</p>
-        ) : null}
+        {error ? <p className="px-1 text-xs text-[var(--color-halt)]">{error}</p> : null}
       </div>
     );
   }
 
   return (
-    <div className="pointer-events-auto space-y-2 rounded-[14px] p-3" style={{
-      backgroundColor: "oklch(from var(--color-canvas) l c h / 0.88)",
-      border: "0.33px solid oklch(from var(--color-rule) l c h / 0.65)",
-      backdropFilter: "blur(24px) saturate(1.35)",
-      WebkitBackdropFilter: "blur(24px) saturate(1.35)",
-    }}>
+    <div
+      className="pointer-events-auto space-y-2 rounded-[14px] p-3"
+      style={{
+        backgroundColor: "oklch(from var(--color-canvas) l c h / 0.88)",
+        border: "0.33px solid oklch(from var(--color-rule) l c h / 0.65)",
+        backdropFilter: "blur(24px) saturate(1.35)",
+        WebkitBackdropFilter: "blur(24px) saturate(1.35)",
+      }}
+    >
       <div className="flex flex-wrap items-center gap-2">
         <Button
           type="button"
@@ -240,9 +239,7 @@ export function TransitControls({
         })}
       </p>
 
-      {error ? (
-        <p className="text-xs text-[var(--color-halt)]">{error}</p>
-      ) : null}
+      {error ? <p className="text-xs text-[var(--color-halt)]">{error}</p> : null}
     </div>
   );
 }

@@ -1,5 +1,13 @@
+import {
+  ChatCircleIcon,
+  CheckFatIcon,
+  GearSixIcon,
+  NotebookIcon,
+  SealWarningIcon,
+  StarIcon,
+  WarningCircleIcon,
+} from "@phosphor-icons/react";
 import type { ReactNode } from "react";
-import { ChatCircleIcon, CheckFatIcon, GearSixIcon, NotebookIcon, SealWarningIcon, StarIcon, WarningCircleIcon } from "@phosphor-icons/react";
 import { ChatUnreadBadge } from "../../chat/ChatUnreadBadge";
 import { JlIcon } from "../../ui/brand/JlIcon";
 import { MapChromeControl } from "./MapChromeControl";
@@ -56,9 +64,7 @@ export function SessionIslandSlots({
           variant="slot"
           disabled={inactive}
           onClick={onOpenChat}
-          aria-label={
-            hasUnreadChat ? "Open chat, unread messages" : "Open chat"
-          }
+          aria-label={hasUnreadChat ? "Open chat, unread messages" : "Open chat"}
           iconClassName="jl-unread-badge-host relative"
           icon={
             <>

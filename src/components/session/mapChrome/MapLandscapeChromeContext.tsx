@@ -1,18 +1,13 @@
-/* eslint-disable react-refresh/only-export-components -- context module pairs provider with hooks */
-import {
-  createContext,
-  useContext,
-  type ReactNode,
-} from "react";
+import { createContext, type ReactNode, useContext } from "react";
 import type { SyncStatus } from "@/domain/device/sync/sync";
 import type { PendingQuestionRecord } from "@/domain/session/activity/sessionChat";
 import type { SessionRulesInput } from "@/domain/session/rules";
 import type { TimerState } from "@/domain/session/timer/timer";
-import type { MapChromeControlInset } from "../../map/helpers/mapChromeControlInset";
 import {
-  useMapLandscapeChromeReveal,
   type MapLandscapeChromeMode,
+  useMapLandscapeChromeReveal,
 } from "@/hooks/chrome/useMapLandscapeChromeReveal";
+import type { MapChromeControlInset } from "../../map/helpers/mapChromeControlInset";
 import { MapLandscapeChromeChip } from "./MapLandscapeChromeChip";
 
 type MapLandscapeChromeContextValue = {
@@ -24,8 +19,7 @@ type MapLandscapeChromeContextValue = {
   chip: ReactNode | null;
 };
 
-const MapLandscapeChromeContext =
-  createContext<MapLandscapeChromeContextValue | null>(null);
+const MapLandscapeChromeContext = createContext<MapLandscapeChromeContextValue | null>(null);
 
 export type MapLandscapeChromeProviderProps = {
   children: ReactNode;
@@ -51,9 +45,7 @@ export function MapLandscapeChromeProvider({
   "use memo";
   const { mode, collapsed, active, toggle } = useMapLandscapeChromeReveal();
 
-  const mapControlInset: MapChromeControlInset = active && collapsed
-    ? "chrome-hidden"
-    : "dock";
+  const mapControlInset: MapChromeControlInset = active && collapsed ? "chrome-hidden" : "dock";
 
   const chip = active ? (
     <MapLandscapeChromeChip

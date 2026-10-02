@@ -15,9 +15,7 @@ const DEFAULT_MIN_WEIGHT = 0.5;
 const DEFAULT_MAX_WEIGHT = 6;
 const WEIGHT_STEP = 0.5;
 
-export function resolveZoomAdaptiveWeightOptions(
-  options: ZoomAdaptiveWeightOptions = {},
-) {
+export function resolveZoomAdaptiveWeightOptions(options: ZoomAdaptiveWeightOptions = {}) {
   return {
     refZoom: options.refZoom ?? DEFAULT_REF_ZOOM,
     scaleFactor: options.scaleFactor ?? DEFAULT_SCALE_FACTOR,
@@ -34,8 +32,7 @@ export function computeZoomAdaptiveWeight(
   zoom: number,
   options: ZoomAdaptiveWeightOptions = {},
 ): number {
-  const { refZoom, scaleFactor, minWeight, maxWeight } =
-    resolveZoomAdaptiveWeightOptions(options);
+  const { refZoom, scaleFactor, minWeight, maxWeight } = resolveZoomAdaptiveWeightOptions(options);
   const safeZoom = Number.isFinite(zoom) && zoom > 0 ? zoom : refZoom;
   const ratio = safeZoom / refZoom;
   const scaled = baseWeight * ratio ** scaleFactor;
@@ -54,11 +51,7 @@ export function quantizeWeight(weight: number, step = WEIGHT_STEP): number {
  * Scale a Leaflet `dashArray` string with stroke weight
  * (e.g. `"8 6"` at baseWeight 3 → larger/smaller dashes as weight changes).
  */
-export function scaleDashArray(
-  dashArray: string,
-  weight: number,
-  baseWeight: number,
-): string {
+export function scaleDashArray(dashArray: string, weight: number, baseWeight: number): string {
   if (!(baseWeight > 0) || !Number.isFinite(weight)) {
     return dashArray;
   }

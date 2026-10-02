@@ -45,9 +45,7 @@ export type SuggestRegionPackOptions = {
 };
 
 /** AABB fingerprint for sticky manual pack override (not full-geometry hash). */
-export function playAreaAttachFingerprint(
-  gameArea: GameArea | null,
-): string | null {
+export function playAreaAttachFingerprint(gameArea: GameArea | null): string | null {
   if (!gameArea) {
     return null;
   }
@@ -78,10 +76,7 @@ export function resolvePackAttachChrome(input: {
   if (suggestion) {
     return {
       packId: suggestion.packId,
-      source:
-        seededPackId !== undefined && seededPackId === suggestion.packId
-          ? "bundled"
-          : "auto",
+      source: seededPackId !== undefined && seededPackId === suggestion.packId ? "bundled" : "auto",
       showRequestCta: false,
     };
   }
@@ -107,10 +102,8 @@ export function suggestRegionPackForGameArea(
   gameArea: GameArea,
   options?: SuggestRegionPackOptions,
 ): PackAttachSuggestion | null {
-  const minRatio =
-    options?.minIntersectionRatio ?? PACK_ATTACH_MIN_INTERSECTION_RATIO;
-  const minKm2 =
-    options?.minIntersectionKm2 ?? PACK_ATTACH_MIN_INTERSECTION_KM2;
+  const minRatio = options?.minIntersectionRatio ?? PACK_ATTACH_MIN_INTERSECTION_RATIO;
+  const minKm2 = options?.minIntersectionKm2 ?? PACK_ATTACH_MIN_INTERSECTION_KM2;
 
   const gameBox = gameAreaToBoundingBoxRaw(gameArea);
 

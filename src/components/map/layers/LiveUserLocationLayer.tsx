@@ -33,4 +33,3 @@ export function LiveUserLocationLayer({
 
   return <UserLocationLayer reading={reading} />;
 }
-

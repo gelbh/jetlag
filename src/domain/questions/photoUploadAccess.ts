@@ -53,8 +53,7 @@ export function photoUploadServerDiagnostics(
 
   return {
     serverMemberRole,
-    authUidMatchesServerHider:
-      session.memberUids.includes(authUid) && serverMemberRole === "hider",
+    authUidMatchesServerHider: session.memberUids.includes(authUid) && serverMemberRole === "hider",
   };
 }
 
@@ -63,8 +62,7 @@ export function formatPhotoStorageError(
   session?: Pick<SessionRecord, "memberUids" | "memberRoles"> | null,
   myUid?: string | null,
 ): string {
-  const message =
-    error instanceof Error ? error.message : "Could not upload the photo.";
+  const message = error instanceof Error ? error.message : "Could not upload the photo.";
 
   if (!isStorageUnauthorized(error)) {
     return message;

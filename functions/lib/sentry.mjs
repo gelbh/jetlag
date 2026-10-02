@@ -71,8 +71,7 @@ function isOverpassTransportCause(cause) {
 
   const name = "name" in cause ? cause.name : undefined;
   const code = "code" in cause ? cause.code : undefined;
-  const message =
-    "message" in cause && cause.message != null ? String(cause.message) : "";
+  const message = "message" in cause && cause.message != null ? String(cause.message) : "";
 
   if (name === "ConnectTimeoutError" || code === "UND_ERR_CONNECT_TIMEOUT") {
     return true;
@@ -95,8 +94,7 @@ export function isOverpassTransportNoise(error) {
   }
 
   const name = "name" in error ? error.name : undefined;
-  const message =
-    "message" in error && error.message != null ? String(error.message) : "";
+  const message = "message" in error && error.message != null ? String(error.message) : "";
   if (name !== "TypeError" || !/fetch failed/i.test(message)) {
     return false;
   }
@@ -131,18 +129,14 @@ export function isAbortErrorEvent(event) {
     if (exception.type === "AbortError") {
       return true;
     }
-    if (
-      typeof exception.value === "string" &&
-      /operation was aborted/i.test(exception.value)
-    ) {
+    if (typeof exception.value === "string" && /operation was aborted/i.test(exception.value)) {
       return true;
     }
   }
 
   if (
     typeof event.message === "string" &&
-    (/AbortError/i.test(event.message) ||
-      /operation was aborted/i.test(event.message))
+    (/AbortError/i.test(event.message) || /operation was aborted/i.test(event.message))
   ) {
     return true;
   }
@@ -173,10 +167,7 @@ export function isOverpassTransportNoiseEvent(event) {
     if (typeof exception.value !== "string") {
       return false;
     }
-    return (
-      /UND_ERR_CONNECT_TIMEOUT/i.test(exception.value) ||
-      /\bEPIPE\b/.test(exception.value)
-    );
+    return /UND_ERR_CONNECT_TIMEOUT/i.test(exception.value) || /\bEPIPE\b/.test(exception.value);
   });
 }
 
@@ -184,9 +175,7 @@ export function readAppVersion() {
   const functionsDir = dirname(fileURLToPath(import.meta.url));
   try {
     // functions/package.json is in the Firebase deploy bundle (root is not).
-    const packageJson = JSON.parse(
-      readFileSync(resolve(functionsDir, "../package.json"), "utf8"),
-    );
+    const packageJson = JSON.parse(readFileSync(resolve(functionsDir, "../package.json"), "utf8"));
     return packageJson.version ?? "0.0.0";
   } catch {
     return "0.0.0";

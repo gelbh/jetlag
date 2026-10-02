@@ -1,10 +1,10 @@
-import { beforeAll, describe, expect, it, vi } from "vitest";
 import { existsSync } from "node:fs";
-import { fileURLToPath } from "node:url";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import type { Feature, LineString } from "geojson";
-import { assertPolygonTopologyParity } from "./parity";
+import { beforeAll, describe, expect, it, vi } from "vitest";
 import { loadPolygonGolden } from "./loadPolygonGolden";
+import { assertPolygonTopologyParity } from "./parity";
 import type { GameAreaGeometry } from "./types";
 
 const pkgEntry = path.resolve(
@@ -71,10 +71,7 @@ describe.skipIf(!wasmPkgReady)("near-region batch wasm parity", () => {
   });
 
   it("matches golden multi-place disks topology", async () => {
-    const places = [
-      [51.45, -0.15] as [number, number],
-      [51.46, -0.14] as [number, number],
-    ];
+    const places = [[51.45, -0.15] as [number, number], [51.46, -0.14] as [number, number]];
     const golden = loadPolygonGolden("nearRegion", "multi-place-400m.json");
     const wasm = await wasmBuildNearRegion({
       segments: [],
@@ -93,10 +90,7 @@ describe("near-region batch wasm failure", () => {
   it("wasm init failure rethrows when entrypoint forced ready", async () => {
     vi.resetModules();
     vi.doMock("./kernelWasmReady", async () => {
-      const actual =
-        await vi.importActual<typeof import("./kernelWasmReady")>(
-          "./kernelWasmReady",
-        );
+      const actual = await vi.importActual<typeof import("./kernelWasmReady")>("./kernelWasmReady");
       return {
         ...actual,
         KERNEL_WASM_READY: {

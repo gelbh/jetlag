@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
+import { defaultAdvancedSessionSettings } from "../tools/advancedSessionSettings";
 import {
-  GAME_PRESET_SCHEMA_VERSION,
   buildCreateSessionPresetDraft,
   createSessionDraftToGamePreset,
+  GAME_PRESET_SCHEMA_VERSION,
   gamePresetToCreateSessionDraft,
   migrateGamePreset,
   migrateGamePresets,
 } from "./gamePreset";
-import { defaultAdvancedSessionSettings } from "../tools/advancedSessionSettings";
 
 describe("migrateGamePreset", () => {
   it("deep-merges partial advancedSettings with defaults", () => {

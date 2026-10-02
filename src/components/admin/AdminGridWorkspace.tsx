@@ -1,22 +1,11 @@
 import type { DragEvent, MouseEvent as ReactMouseEvent } from "react";
 import { useMemo, useState } from "react";
-import GridLayout, {
-  useContainerWidth,
-  verticalCompactor,
-  type Layout,
-} from "react-grid-layout";
+import GridLayout, { type Layout, useContainerWidth, verticalCompactor } from "react-grid-layout";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
-import {
-  type DeskLayout,
-  type PanelId,
-} from "../../domain/admin/opsDeskLayout";
-import {
-  AdminPanelStack,
-  OPS_PANEL_MIME,
-  type PanelMergePayload,
-} from "./AdminPanelStack";
+import { type DeskLayout, type PanelId } from "../../domain/admin/opsDeskLayout";
 import type { AdminPanelBodies } from "./AdminPanelBody";
+import { AdminPanelStack, OPS_PANEL_MIME, type PanelMergePayload } from "./AdminPanelStack";
 import { AdminPlacePanelMenu } from "./AdminPlacePanelMenu";
 import { commitWorkspaceGeometry } from "./adminGridGeometry";
 
@@ -31,15 +20,8 @@ interface AdminGridWorkspaceProps {
   layout: DeskLayout;
   bodies: AdminPanelBodies;
   onLayoutChange: (layout: DeskLayout) => void;
-  onMergePanel: (
-    targetStackId: string,
-    payload: PanelMergePayload,
-  ) => void;
-  onReorderPanel: (
-    stackId: string,
-    fromIndex: number,
-    toIndex: number,
-  ) => void;
+  onMergePanel: (targetStackId: string, payload: PanelMergePayload) => void;
+  onReorderPanel: (stackId: string, fromIndex: number, toIndex: number) => void;
   onUnstackPanel: (
     sourceStackId: string,
     panelId: PanelId,
@@ -48,13 +30,7 @@ interface AdminGridWorkspaceProps {
     w: number,
     h: number,
   ) => void;
-  onPlacePanel: (
-    panelId: PanelId,
-    x: number,
-    y: number,
-    w: number,
-    h: number,
-  ) => void;
+  onPlacePanel: (panelId: PanelId, x: number, y: number, w: number, h: number) => void;
   onActiveIndexChange: (stackId: string, activeIndex: number) => void;
   onPinToggle: (stackId: string) => void;
   onCollapseToggle: (stackId: string) => void;
@@ -84,9 +60,7 @@ export function AdminGridWorkspace({
   const { width, containerRef, mounted } = useContainerWidth({
     measureBeforeMount: true,
   });
-  const [dropTargetStackId, setDropTargetStackId] = useState<string | null>(
-    null,
-  );
+  const [dropTargetStackId, setDropTargetStackId] = useState<string | null>(null);
   const [placeMenu, setPlaceMenu] = useState<PlaceMenuState | null>(null);
   const [emptyHover, setEmptyHover] = useState(false);
 
@@ -121,10 +95,7 @@ export function AdminGridWorkspace({
     const rowPitch = layout.rowHeight + 8;
     const x = Math.max(
       0,
-      Math.min(
-        layout.cols - UNSTACK_DEFAULT_W,
-        Math.floor((clientX - rect.left) / colWidth),
-      ),
+      Math.min(layout.cols - UNSTACK_DEFAULT_W, Math.floor((clientX - rect.left) / colWidth)),
     );
     const y = Math.max(0, Math.floor((clientY - rect.top) / rowPitch));
     return { x, y };

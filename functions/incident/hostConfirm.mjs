@@ -54,13 +54,10 @@ function toolLabel(tool) {
  * @param deps { now, generateId, notify, ttlMs }
  */
 export async function requestHostConfirm(db, input, deps = {}) {
-  const incidentId =
-    typeof input?.incidentId === "string" ? input.incidentId : "";
-  const sessionId =
-    typeof input?.sessionId === "string" ? input.sessionId : "";
+  const incidentId = typeof input?.incidentId === "string" ? input.incidentId : "";
+  const sessionId = typeof input?.sessionId === "string" ? input.sessionId : "";
   const tool = input?.tool;
-  const requestedByUid =
-    typeof input?.requestedByUid === "string" ? input.requestedByUid : "";
+  const requestedByUid = typeof input?.requestedByUid === "string" ? input.requestedByUid : "";
 
   if (!incidentId) {
     throw new Error(INCIDENT_NOT_FOUND);
@@ -77,8 +74,7 @@ export async function requestHostConfirm(db, input, deps = {}) {
     throw new Error(INCIDENT_NOT_FOUND);
   }
   const incident = incidentSnap.data() ?? {};
-  const incidentSessionId =
-    typeof incident.sessionId === "string" ? incident.sessionId : "";
+  const incidentSessionId = typeof incident.sessionId === "string" ? incident.sessionId : "";
   if (!incidentSessionId) {
     throw new Error(HOST_CONFIRM_NO_SESSION);
   }
@@ -98,10 +94,7 @@ export async function requestHostConfirm(db, input, deps = {}) {
 
   const now = deps.now ?? (() => new Date());
   const generateId = deps.generateId ?? (() => randomUUID());
-  const ttlMs =
-    typeof deps.ttlMs === "number" && deps.ttlMs > 0
-      ? deps.ttlMs
-      : HOST_CONFIRM_TTL_MS;
+  const ttlMs = typeof deps.ttlMs === "number" && deps.ttlMs > 0 ? deps.ttlMs : HOST_CONFIRM_TTL_MS;
 
   const nowDate = now();
   const nowIso = nowDate.toISOString();
@@ -169,10 +162,8 @@ export async function requestHostConfirm(db, input, deps = {}) {
  * @param deps { now, execute, runTransaction?, executeDeps? }
  */
 export async function approveHostConfirmHandler(db, input, deps = {}) {
-  const incidentId =
-    typeof input?.incidentId === "string" ? input.incidentId : "";
-  const confirmId =
-    typeof input?.confirmId === "string" ? input.confirmId : "";
+  const incidentId = typeof input?.incidentId === "string" ? input.incidentId : "";
+  const confirmId = typeof input?.confirmId === "string" ? input.confirmId : "";
   const uid = typeof input?.uid === "string" ? input.uid : "";
 
   if (!uid) {
@@ -239,10 +230,8 @@ export async function approveHostConfirmHandler(db, input, deps = {}) {
  * still applies if left pending.
  */
 export async function denyHostConfirmHandler(db, input, deps = {}) {
-  const incidentId =
-    typeof input?.incidentId === "string" ? input.incidentId : "";
-  const confirmId =
-    typeof input?.confirmId === "string" ? input.confirmId : "";
+  const incidentId = typeof input?.incidentId === "string" ? input.incidentId : "";
+  const confirmId = typeof input?.confirmId === "string" ? input.confirmId : "";
   const uid = typeof input?.uid === "string" ? input.uid : "";
 
   if (!uid) {
@@ -285,9 +274,7 @@ export async function denyHostConfirmHandler(db, input, deps = {}) {
 
 async function claimPendingHostConfirm(db, confirmRef, { uid, now, runTransaction }) {
   const runTx =
-    typeof runTransaction === "function"
-      ? runTransaction
-      : (fn) => db.runTransaction(fn);
+    typeof runTransaction === "function" ? runTransaction : (fn) => db.runTransaction(fn);
 
   // Return codes (don't throw) when a write must commit — Firestore aborts
   // the transaction if the callback throws, which would drop status updates.
@@ -307,8 +294,7 @@ async function claimPendingHostConfirm(db, confirmRef, { uid, now, runTransactio
       throw new Error(HOST_CONFIRM_NOT_PENDING);
     }
 
-    const sessionId =
-      typeof confirm.sessionId === "string" ? confirm.sessionId : "";
+    const sessionId = typeof confirm.sessionId === "string" ? confirm.sessionId : "";
     const tool = confirm.tool;
     if (!sessionId || !isSessionOpsToolId(tool)) {
       throw new Error(HOST_CONFIRM_NOT_FOUND);
@@ -334,8 +320,7 @@ async function claimPendingHostConfirm(db, confirmRef, { uid, now, runTransactio
 }
 
 async function assertCallerIsHost(db, confirm, uid) {
-  const sessionId =
-    typeof confirm.sessionId === "string" ? confirm.sessionId : "";
+  const sessionId = typeof confirm.sessionId === "string" ? confirm.sessionId : "";
   if (!sessionId) {
     throw new Error(HOST_CONFIRM_NO_SESSION);
   }

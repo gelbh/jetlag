@@ -2,15 +2,9 @@ import { absoluteUrl, getRouteSeo } from "./routeSeo";
 
 const JSON_LD_ATTR = "data-seo-jsonld";
 
-function upsertMeta(options: {
-  name?: string;
-  property?: string;
-  content: string;
-}): void {
+function upsertMeta(options: { name?: string; property?: string; content: string }): void {
   const { name, property, content } = options;
-  const selector = name
-    ? `meta[name="${name}"]`
-    : `meta[property="${property}"]`;
+  const selector = name ? `meta[name="${name}"]` : `meta[property="${property}"]`;
   let el = document.head.querySelector(selector);
   if (!(el instanceof HTMLMetaElement)) {
     el = document.createElement("meta");

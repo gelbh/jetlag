@@ -1,11 +1,8 @@
 import { doc, getDocFromServer } from "firebase/firestore";
-import type { PlayerRole } from "../../domain/session/players/playerRole";
 import type { SessionRecord, SessionTier } from "../../domain/map/annotations";
+import type { PlayerRole } from "../../domain/session/players/playerRole";
 import { getFirestoreDb } from "../core/firebase/firebase";
-import {
-  joinSessionWithRole,
-  mapRolePasscodeJoinError,
-} from "../session/rolePasscodeLifecycle";
+import { joinSessionWithRole, mapRolePasscodeJoinError } from "../session/rolePasscodeLifecycle";
 import { deserializeSessionFromFirestore } from "./serialization/serializeSession";
 
 export type SessionCodeRecord = {
@@ -24,20 +21,16 @@ export type JoinGatedRemoteSessionResult = {
   becameLeader?: boolean;
 };
 
-type LookupRemoteSessionByCode = (code: string) => Promise<
-  | { status: "missing" }
-  | { status: "ended" }
-  | { status: "found"; session: SessionRecord }
+type LookupRemoteSessionByCode = (
+  code: string,
+) => Promise<
+  { status: "missing" } | { status: "ended" } | { status: "found"; session: SessionRecord }
 >;
 
 type TouchSessionLastActive = (sessionId: string) => void;
 
-async function getRemoteSessionByIdFromServer(
-  sessionId: string,
-): Promise<SessionRecord> {
-  const sessionDoc = await getDocFromServer(
-    doc(getFirestoreDb(), "sessions", sessionId),
-  );
+async function getRemoteSessionByIdFromServer(sessionId: string): Promise<SessionRecord> {
+  const sessionDoc = await getDocFromServer(doc(getFirestoreDb(), "sessions", sessionId));
   if (!sessionDoc.exists()) {
     throw new Error("Session not found.");
   }

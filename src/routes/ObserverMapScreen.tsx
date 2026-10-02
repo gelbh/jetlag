@@ -1,15 +1,15 @@
 import { useCallback } from "react";
-import { AppNavigate } from "../navigation/AppNavigate";
+import { ChatPanel } from "../components/chat/ChatPanel";
+import { MapViewportTracker } from "../components/map/chrome/MapViewportTracker";
 import { GameAreaMask } from "../components/map/layers/GameAreaMask";
 import { MapViewWithLandscapeInset } from "../components/map/MapViewWithLandscapeInset";
-import { MapViewportTracker } from "../components/map/chrome/MapViewportTracker";
-import { ChatPanel } from "../components/chat/ChatPanel";
 import { SessionLog } from "../components/session/log/SessionLog";
 import { MapLandscapeChromeShell } from "../components/session/mapChrome/MapLandscapeChromeShell";
 import { InlineError } from "../components/ui/banners/InlineError";
-import { LOCAL_SESSION_ID } from "../domain/map/annotations";
 import { fallbackGameArea } from "../domain/geometry/gameArea/geometry";
+import { LOCAL_SESSION_ID } from "../domain/map/annotations";
 import { useAppNavigate } from "../hooks/navigation/useAppNavigate";
+import { AppNavigate } from "../navigation/AppNavigate";
 import { clearSessionLocalArtifacts } from "../services/session/sessionCleanup";
 import { useAnnotationStore } from "../state/annotationStore";
 import { useSessionStore } from "../state/sessionStore";
@@ -21,12 +21,8 @@ export function ObserverMapScreen() {
   const navigate = useAppNavigate();
   const setSession = useSessionStore((state) => state.setSession);
   const controller = useObserverMapScreen();
-  const setSelectedAnnotationId = useAnnotationStore(
-    (state) => state.setSelectedAnnotationId,
-  );
-  const markAnnotationPulse = useAnnotationStore(
-    (state) => state.markAnnotationPulse,
-  );
+  const setSelectedAnnotationId = useAnnotationStore((state) => state.setSelectedAnnotationId);
+  const markAnnotationPulse = useAnnotationStore((state) => state.markAnnotationPulse);
 
   const handleLeave = useCallback(async () => {
     const sessionId = controller.session?.id;
@@ -38,12 +34,7 @@ export function ObserverMapScreen() {
   }, [controller.exitPath, controller.session?.id, navigate, setSession]);
 
   if (!controller.session) {
-    return (
-      <AppNavigate
-        to={controller.myRole === "admin" ? "/admin" : "/"}
-        replace
-      />
-    );
+    return <AppNavigate to={controller.myRole === "admin" ? "/admin" : "/"} replace />;
   }
 
   if (controller.myRole !== "observer" && controller.myRole !== "admin") {
@@ -108,76 +99,70 @@ export function ObserverMapScreen() {
 
   return (
     <MapLandscapeChromeShell
-        sessionRules={sessionRules}
-        timerState={controller.timer.timerState}
-        timerHasStarted={controller.timer.hasStarted}
-        pendingQuestions={controller.pendingQuestions}
-        syncStatus={controller.syncStatus.status}
-        queuedWrites={controller.syncStatus.queuedWrites}
-        syncMessage={controller.syncStatus.lastSyncError}
-      >
-        <div className="map-screen-shell">
-          {mapLayers}
+      sessionRules={sessionRules}
+      timerState={controller.timer.timerState}
+      timerHasStarted={controller.timer.hasStarted}
+      pendingQuestions={controller.pendingQuestions}
+      syncStatus={controller.syncStatus.status}
+      queuedWrites={controller.syncStatus.queuedWrites}
+      syncMessage={controller.syncStatus.lastSyncError}
+    >
+      <div className="map-screen-shell">
+        {mapLayers}
 
-          <ObserverMapScreenChrome
-            session={controller.session}
-            myRole={controller.myRole ?? "observer"}
-            myUid={controller.uid ?? undefined}
-            isHost={
-              Boolean(controller.uid) &&
-              controller.session.hostUid === controller.uid
-            }
-            timer={controller.timer}
-            overlay={controller.overlay}
-            onLeave={() => void handleLeave()}
-            moveInProgress={controller.hidingZones.some(
-              (zone) => zone.moveInProgress === true,
-            )}
-          />
+        <ObserverMapScreenChrome
+          session={controller.session}
+          myRole={controller.myRole ?? "observer"}
+          myUid={controller.uid ?? undefined}
+          isHost={Boolean(controller.uid) && controller.session.hostUid === controller.uid}
+          timer={controller.timer}
+          overlay={controller.overlay}
+          onLeave={() => void handleLeave()}
+          moveInProgress={controller.hidingZones.some((zone) => zone.moveInProgress === true)}
+        />
 
-          {controller.syncStatus.lastSyncError ? (
-            <div className="pointer-events-none absolute inset-x-0 top-20 z-[var(--z-panel)] px-3">
-              <InlineError className="pointer-events-auto mx-auto max-w-xl">
-                {controller.syncStatus.lastSyncError}
-              </InlineError>
-            </div>
-          ) : null}
+        {controller.syncStatus.lastSyncError ? (
+          <div className="pointer-events-none absolute inset-x-0 top-20 z-[var(--z-panel)] px-3">
+            <InlineError className="pointer-events-auto mx-auto max-w-xl">
+              {controller.syncStatus.lastSyncError}
+            </InlineError>
+          </div>
+        ) : null}
 
-          <SessionLog
-            open={controller.overlay.isLogOpen}
-            sessionId={controller.session.id}
-            annotations={controller.annotations}
-            onClose={controller.overlay.closeSheet}
-            onDelete={() => undefined}
-            onEdit={() => undefined}
-            readOnly
-            onSelect={(id) => {
-              controller.overlay.closeSheet();
-              setSelectedAnnotationId(id);
-              markAnnotationPulse(id);
+        <SessionLog
+          open={controller.overlay.isLogOpen}
+          sessionId={controller.session.id}
+          annotations={controller.annotations}
+          onClose={controller.overlay.closeSheet}
+          onDelete={() => undefined}
+          onEdit={() => undefined}
+          readOnly
+          onSelect={(id) => {
+            controller.overlay.closeSheet();
+            setSelectedAnnotationId(id);
+            markAnnotationPulse(id);
+          }}
+        />
+
+        {controller.sessionId && controller.uid ? (
+          <ChatPanel
+            model={{
+              open: controller.overlay.isChatOpen,
+              onClose: controller.overlay.closeSheet,
+              messages: controller.chatMessages,
+              pendingQuestions: controller.pendingQuestions,
+              sessionRules,
+              sessionId: controller.sessionId,
+              senderUid: controller.uid,
+              senderRole: chatDisplayRole,
+              isHider: false,
+              bottomClassName: "bottom-[calc(7.75rem+var(--safe-area-bottom))]",
+              onAnswerQuestion: async () => undefined,
+              readOnly: true,
             }}
           />
-
-          {controller.sessionId && controller.uid ? (
-            <ChatPanel
-              model={{
-                open: controller.overlay.isChatOpen,
-                onClose: controller.overlay.closeSheet,
-                messages: controller.chatMessages,
-                pendingQuestions: controller.pendingQuestions,
-                sessionRules,
-                sessionId: controller.sessionId,
-                senderUid: controller.uid,
-                senderRole: chatDisplayRole,
-                isHider: false,
-                bottomClassName:
-                  "bottom-[calc(7.75rem+var(--safe-area-bottom))]",
-                onAnswerQuestion: async () => undefined,
-                readOnly: true,
-              }}
-            />
-          ) : null}
-        </div>
-      </MapLandscapeChromeShell>
+        ) : null}
+      </div>
+    </MapLandscapeChromeShell>
   );
 }

@@ -61,10 +61,7 @@ function fixtureBody(elements: readonly unknown[]): string {
   return JSON.stringify({ elements });
 }
 
-export function resolveOverpassResponse(
-  query: string,
-  profile: OverpassFixtureProfile,
-): string {
+export function resolveOverpassResponse(query: string, profile: OverpassFixtureProfile): string {
   if (profile === "empty") {
     return JSON.stringify({ elements: [] });
   }
@@ -92,9 +89,5 @@ export function resolveOverpassResponse(
     return fixtureBody(DUBLIN_STATIONS);
   }
 
-  return fixtureBody([
-    ...DUBLIN_STATIONS,
-    ...DUBLIN_MUSEUMS,
-    ...DUBLIN_TENTACLE,
-  ]);
+  return fixtureBody([...DUBLIN_STATIONS, ...DUBLIN_MUSEUMS, ...DUBLIN_TENTACLE]);
 }

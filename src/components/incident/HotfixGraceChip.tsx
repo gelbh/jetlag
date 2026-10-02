@@ -5,9 +5,7 @@ import { HudBanner } from "../ui/hud/HudBanner";
 export function HotfixGraceChip() {
   const { hotfixGraceActive, hotfixGraceSecondsRemaining } = useAppUpdateState();
   const seconds =
-    typeof hotfixGraceSecondsRemaining === "number"
-      ? hotfixGraceSecondsRemaining
-      : null;
+    typeof hotfixGraceSecondsRemaining === "number" ? hotfixGraceSecondsRemaining : null;
 
   return (
     <HudBanner
@@ -24,9 +22,7 @@ export function HotfixGraceChip() {
           Update required
         </p>
         <p className="text-sm text-ink">
-          {seconds === null
-            ? "Refreshing…"
-            : `Update required - refreshing in ${seconds}s`}
+          {seconds === null ? "Refreshing…" : `Update required - refreshing in ${seconds}s`}
         </p>
       </MapFloatSurface>
     </HudBanner>

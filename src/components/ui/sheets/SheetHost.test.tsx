@@ -1,9 +1,9 @@
-import { render, screen, waitFor, fireEvent } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import { useState, type ReactNode } from "react";
 import { MantineProvider } from "@mantine/core";
-import { SheetHost } from "./SheetHost";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { type ReactNode, useState } from "react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { jetlagTheme } from "@/theme/theme";
+import { SheetHost } from "./SheetHost";
 
 function withAppUi(ui: ReactNode) {
   return (
@@ -43,12 +43,7 @@ describe("SheetHost", () => {
   it("ignores deprecated railTab and still uses Drawer", () => {
     render(
       withAppUi(
-        <SheetHost
-          open
-          onClose={() => {}}
-          ariaLabel="Settings"
-          railTab="settings"
-        >
+        <SheetHost open onClose={() => {}} ariaLabel="Settings" railTab="settings">
           <p>drawer body</p>
         </SheetHost>,
       ),
@@ -88,11 +83,7 @@ describe("SheetHost", () => {
           >
             map
           </button>
-          <SheetHost
-            open={open}
-            onClose={() => setOpen(false)}
-            ariaLabel="Settings"
-          >
+          <SheetHost open={open} onClose={() => setOpen(false)} ariaLabel="Settings">
             <p>settings body</p>
             <button type="button" onClick={() => setOpen(false)}>
               close-sheet

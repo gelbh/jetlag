@@ -1,23 +1,17 @@
 import { useQuery } from "@tanstack/react-query";
-import { useDebouncedValue } from "../forms/useDebouncedValue";
-import { isPremiumSession } from "../../domain/map/annotations";
 import type { SessionRecord } from "../../domain/map/annotations";
-import { resolvePlayerRole } from "../../domain/session/players/playerRole";
+import { isPremiumSession } from "../../domain/map/annotations";
 import type { PlayerRole } from "../../domain/session/players/playerRole";
-import {
-  ensureAnonymousUser,
-  isFirebaseConfigured,
-} from "../../services/core/firebase/firebase";
-import { lookupRemoteSessionByCode } from "../../services/firestore/firestoreAnnotations";
+import { resolvePlayerRole } from "../../domain/session/players/playerRole";
+import { ensureAnonymousUser, isFirebaseConfigured } from "../../services/core/firebase/firebase";
 import { retryAsync } from "../../services/core/network/retryAsync";
-import {
-  isValidSessionCode,
-  normalizeSessionCode,
-} from "../../services/session/sessionCodes";
+import { lookupRemoteSessionByCode } from "../../services/firestore/firestoreAnnotations";
 import {
   JOIN_PREVIEW_DEBOUNCE_MS,
   JOIN_PREVIEW_TTL_MS,
 } from "../../services/session/joinSessionPreviewCache";
+import { isValidSessionCode, normalizeSessionCode } from "../../services/session/sessionCodes";
+import { useDebouncedValue } from "../forms/useDebouncedValue";
 
 type JoinPreviewResult = Awaited<ReturnType<typeof lookupRemoteSessionByCode>>;
 
@@ -50,10 +44,7 @@ export function useJoinSessionPreview(code: string): JoinSessionPreviewState {
   const liveNormalized = normalizeSessionCode(code);
   const debouncedNormalized = normalizeSessionCode(debouncedCode);
   const settled = liveNormalized === debouncedNormalized;
-  const enabled =
-    isFirebaseConfigured() &&
-    isValidSessionCode(debouncedNormalized) &&
-    settled;
+  const enabled = isFirebaseConfigured() && isValidSessionCode(debouncedNormalized) && settled;
 
   const query = useQuery({
     queryKey: ["join-preview", debouncedNormalized] as const,
@@ -67,21 +58,15 @@ export function useJoinSessionPreview(code: string): JoinSessionPreviewState {
     return {
       previewSession: null,
       previewPremium: false,
-      lookupLoading:
-        isFirebaseConfigured() &&
-        isValidSessionCode(liveNormalized) &&
-        !settled,
+      lookupLoading: isFirebaseConfigured() && isValidSessionCode(liveNormalized) && !settled,
       existingRole: null,
     };
   }
 
   const payload = query.data;
   const result = payload?.result;
-  const previewSession =
-    result?.status === "found" ? result.session : null;
-  const previewPremium = Boolean(
-    previewSession && isPremiumSession(previewSession),
-  );
+  const previewSession = result?.status === "found" ? result.session : null;
+  const previewPremium = Boolean(previewSession && isPremiumSession(previewSession));
   const existingRole =
     previewSession && payload?.uid && previewSession.memberRoles?.[payload.uid]
       ? resolvePlayerRole(previewSession.memberRoles, payload.uid)

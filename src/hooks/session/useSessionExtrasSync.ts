@@ -1,14 +1,14 @@
 import { useMemo } from "react";
-import type { HidingZoneRecord } from "../../domain/session/hiding/hidingZone";
-import {
-  isHiderLocationRole,
-  isSeekerLocationRole,
-} from "../../domain/session/live/liveMapLocations";
 import type {
   PendingQuestionRecord,
   PlayerLocationRecord,
   SessionMessageRecord,
 } from "../../domain/session/activity/sessionChat";
+import type { HidingZoneRecord } from "../../domain/session/hiding/hidingZone";
+import {
+  isHiderLocationRole,
+  isSeekerLocationRole,
+} from "../../domain/session/live/liveMapLocations";
 import { filterExtrasAfterReset } from "../../domain/session/meta/sessionReset";
 import {
   subscribeToHiderPlayerLocations,
@@ -33,16 +33,12 @@ export function usePlayerLocationsSync(sessionId: string | undefined) {
   );
 
   return useMemo(
-    () =>
-      filterExtrasAfterReset(items, sessionResetAt, (location) => location.updatedAt),
+    () => filterExtrasAfterReset(items, sessionResetAt, (location) => location.updatedAt),
     [items, sessionResetAt],
   );
 }
 
-export function useSeekerLocationsSync(
-  sessionId: string | undefined,
-  enabled = true,
-) {
+export function useSeekerLocationsSync(sessionId: string | undefined, enabled = true) {
   const sessionResetAt = useSessionResetAt();
   const setLastSyncError = useSessionStore((state) => state.setLastSyncError);
   const items = useFirestoreCollectionSync<PlayerLocationRecord>(
@@ -65,10 +61,7 @@ export function useSeekerLocationsSync(
   );
 }
 
-export function useHiderLocationsSync(
-  sessionId: string | undefined,
-  enabled = true,
-) {
+export function useHiderLocationsSync(sessionId: string | undefined, enabled = true) {
   const sessionResetAt = useSessionResetAt();
   const setLastSyncError = useSessionStore((state) => state.setLastSyncError);
   const items = useFirestoreCollectionSync<PlayerLocationRecord>(
@@ -93,14 +86,10 @@ export function useHiderLocationsSync(
 
 export function useHidingZonesSync(sessionId: string | undefined) {
   const sessionResetAt = useSessionResetAt();
-  const items = useFirestoreCollectionSync<HidingZoneRecord>(
-    sessionId,
-    subscribeToHidingZones,
-  );
+  const items = useFirestoreCollectionSync<HidingZoneRecord>(sessionId, subscribeToHidingZones);
 
   return useMemo(
-    () =>
-      filterExtrasAfterReset(items, sessionResetAt, (zone) => zone.confirmedAt),
+    () => filterExtrasAfterReset(items, sessionResetAt, (zone) => zone.confirmedAt),
     [items, sessionResetAt],
   );
 }
@@ -113,8 +102,7 @@ export function useSessionMessagesSync(sessionId: string | undefined) {
   );
 
   return useMemo(
-    () =>
-      filterExtrasAfterReset(items, sessionResetAt, (message) => message.createdAt),
+    () => filterExtrasAfterReset(items, sessionResetAt, (message) => message.createdAt),
     [items, sessionResetAt],
   );
 }
@@ -127,8 +115,7 @@ export function usePendingQuestionsSync(sessionId: string | undefined) {
   );
 
   return useMemo(
-    () =>
-      filterExtrasAfterReset(items, sessionResetAt, (question) => question.createdAt),
+    () => filterExtrasAfterReset(items, sessionResetAt, (question) => question.createdAt),
     [items, sessionResetAt],
   );
 }

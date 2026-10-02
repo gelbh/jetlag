@@ -1,17 +1,17 @@
 import type { SessionRecord } from "../../domain/map/annotations";
 import type { PlayerRole } from "../../domain/session/players/playerRole";
 import {
+  memberUidSetsEqual,
+  sanitizeReturningMemberUid,
+} from "../../domain/session/players/returningMember";
+import {
+  type EnsureRemoteSessionMembershipOptions,
   ensureRemoteSessionMembership,
   ensureRemoteSessionWriteAccess,
   getRemoteSessionById,
   getRemoteSessionByIdFromServer,
   lookupRemoteSessionByCode,
-  type EnsureRemoteSessionMembershipOptions,
 } from "./firestoreAnnotations";
-import {
-  memberUidSetsEqual,
-  sanitizeReturningMemberUid,
-} from "../../domain/session/players/returningMember";
 
 export type HealSessionMembershipOptions = EnsureRemoteSessionMembershipOptions & {
   persistedMyUid?: string | null;

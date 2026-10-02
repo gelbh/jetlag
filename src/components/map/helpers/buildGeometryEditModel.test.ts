@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
 import type { Feature, Point, Polygon } from "geojson";
+import { describe, expect, it } from "vitest";
 import type { AnnotationRecord, GameArea } from "@/domain/map/annotations";
 import { buildGeometryEditModel } from "./buildGeometryEditModel";
 
@@ -96,11 +96,7 @@ describe("buildGeometryEditModel", () => {
         ],
       },
     };
-    const model = buildGeometryEditModel(
-      baseAnnotation("zone"),
-      draft,
-      gameArea,
-    );
+    const model = buildGeometryEditModel(baseAnnotation("zone"), draft, gameArea);
     expect(model.kind).toBe("zone");
     if (model.kind !== "zone") {
       return;

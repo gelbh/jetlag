@@ -1,6 +1,6 @@
+import type { PendingQuestionToolType } from "../session/activity/sessionChat";
 import type { AnnotationRecord } from "./annotations";
 import type { MapTool } from "./mapToolTypes";
-import type { PendingQuestionToolType } from "../session/activity/sessionChat";
 
 export type QuestionCardCost = "D3P1" | "D2P1" | "D4P2" | "D1P1";
 
@@ -29,9 +29,7 @@ export function mapToolDockLabel(entry: MapToolDockEntry): string {
   return entry.cost ? `${entry.name} (${entry.cost})` : entry.name;
 }
 
-export function baseQuestionCostForTool(
-  toolType: PendingQuestionToolType,
-): QuestionCardCost {
+export function baseQuestionCostForTool(toolType: PendingQuestionToolType): QuestionCardCost {
   const entry = MAP_TOOL_DOCK_ENTRIES.find((item) => item.id === toolType);
   if (!entry?.cost) {
     throw new Error(`No question card cost for tool: ${toolType}`);
@@ -59,9 +57,7 @@ const MARKUP_TOOL_HINTS: Partial<Record<DockableMapTool, string>> = {
 };
 
 export function mapToolDockMenuHint(entry: MapToolDockEntry): string | null {
-  return (
-    OVERFLOW_TOOL_HINTS[entry.id] ?? MARKUP_TOOL_HINTS[entry.id] ?? null
-  );
+  return OVERFLOW_TOOL_HINTS[entry.id] ?? MARKUP_TOOL_HINTS[entry.id] ?? null;
 }
 
 export const QUESTION_DOCK_TOOL_IDS = [
@@ -73,7 +69,11 @@ export const QUESTION_DOCK_TOOL_IDS = [
   "photo",
 ] as const satisfies readonly DockableMapTool[];
 
-export const MARKUP_DOCK_TOOL_IDS = ["zone", "pin", "draw"] as const satisfies readonly DockableMapTool[];
+export const MARKUP_DOCK_TOOL_IDS = [
+  "zone",
+  "pin",
+  "draw",
+] as const satisfies readonly DockableMapTool[];
 
 export const WIZARD_DOCK_TOOL_IDS = [
   "matching",
@@ -81,9 +81,7 @@ export const WIZARD_DOCK_TOOL_IDS = [
   "tentacle",
 ] as const satisfies readonly DockableMapTool[];
 
-export function isWizardDockTool(
-  id: MapTool,
-): id is (typeof WIZARD_DOCK_TOOL_IDS)[number] {
+export function isWizardDockTool(id: MapTool): id is (typeof WIZARD_DOCK_TOOL_IDS)[number] {
   return (WIZARD_DOCK_TOOL_IDS as readonly string[]).includes(id);
 }
 
@@ -102,9 +100,7 @@ export function isQuestionDockTool(
   return (QUESTION_DOCK_TOOL_IDS as readonly string[]).includes(id);
 }
 
-export function isMarkupDockTool(
-  id: DockableMapTool,
-): id is (typeof MARKUP_DOCK_TOOL_IDS)[number] {
+export function isMarkupDockTool(id: DockableMapTool): id is (typeof MARKUP_DOCK_TOOL_IDS)[number] {
   return (MARKUP_DOCK_TOOL_IDS as readonly string[]).includes(id);
 }
 
@@ -135,16 +131,10 @@ function isMeasuringAnnotation(annotation: AnnotationRecord): boolean {
     return true;
   }
 
-  return (
-    annotation.type === "thermometer" &&
-    annotation.metadata.measuringSubject !== undefined
-  );
+  return annotation.type === "thermometer" && annotation.metadata.measuringSubject !== undefined;
 }
 
-export function annotationMatchesMapTool(
-  annotation: AnnotationRecord,
-  tool: MapTool,
-): boolean {
+export function annotationMatchesMapTool(annotation: AnnotationRecord, tool: MapTool): boolean {
   if (tool === "none") {
     return false;
   }
@@ -154,17 +144,13 @@ export function annotationMatchesMapTool(
   }
 
   if (tool === "thermometer") {
-    return (
-      annotation.type === "thermometer" && !isMeasuringAnnotation(annotation)
-    );
+    return annotation.type === "thermometer" && !isMeasuringAnnotation(annotation);
   }
 
   return annotation.type === tool;
 }
 
-export function findAnnotationMapTool(
-  annotation: AnnotationRecord,
-): DockableMapTool | null {
+export function findAnnotationMapTool(annotation: AnnotationRecord): DockableMapTool | null {
   if (annotation.type === "thermometer") {
     return isMeasuringAnnotation(annotation) ? "measuring" : "thermometer";
   }
@@ -192,28 +178,21 @@ export function findLastUndoableAnnotation(
   tool?: MapTool,
 ): AnnotationRecord | null {
   const active = annotations.filter(
-    (annotation) =>
-      annotation.sessionId === sessionId && annotation.status === "active",
+    (annotation) => annotation.sessionId === sessionId && annotation.status === "active",
   );
   const sorted = [...active].sort((left, right) =>
     left.metadata.createdAt.localeCompare(right.metadata.createdAt),
   );
   const lastPlaced = sorted.at(-1);
   const targetTool =
-    tool && tool !== "none"
-      ? tool
-      : lastPlaced
-        ? findAnnotationMapTool(lastPlaced)
-        : null;
+    tool && tool !== "none" ? tool : lastPlaced ? findAnnotationMapTool(lastPlaced) : null;
 
   if (!targetTool) {
     return null;
   }
 
   return (
-    sorted
-      .filter((annotation) => annotationMatchesMapTool(annotation, targetTool))
-      .at(-1) ?? null
+    sorted.filter((annotation) => annotationMatchesMapTool(annotation, targetTool)).at(-1) ?? null
   );
 }
 
@@ -226,19 +205,11 @@ export function findLastRedoableAnnotation(
   for (let index = redoIds.length - 1; index >= 0; index -= 1) {
     const annotation = annotations.find((item) => item.id === redoIds[index]);
 
-    if (
-      !annotation ||
-      annotation.sessionId !== sessionId ||
-      annotation.status !== "deleted"
-    ) {
+    if (!annotation || annotation.sessionId !== sessionId || annotation.status !== "deleted") {
       continue;
     }
 
-    if (
-      tool &&
-      tool !== "none" &&
-      !annotationMatchesMapTool(annotation, tool)
-    ) {
+    if (tool && tool !== "none" && !annotationMatchesMapTool(annotation, tool)) {
       continue;
     }
 

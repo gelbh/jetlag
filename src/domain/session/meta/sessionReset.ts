@@ -24,9 +24,7 @@ export function filterExtrasAfterReset<T>(
     return [...items];
   }
 
-  return items.filter(
-    (item) => !isStaleAfterReset(pickTimestamp(item), sessionResetAt),
-  );
+  return items.filter((item) => !isStaleAfterReset(pickTimestamp(item), sessionResetAt));
 }
 
 export function filterAnnotationsAfterReset(

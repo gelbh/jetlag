@@ -6,10 +6,7 @@ export const LIVE_LOCATION_GONE_MS = 60 * 60 * 1000;
 /** Shared UI tick for opacity / last-seen refresh. */
 export const LIVE_LOCATION_FRESHNESS_TICK_MS = 15_000;
 
-export function liveLocationAgeMs(
-  updatedAt: string,
-  nowMs: number,
-): number | null {
+export function liveLocationAgeMs(updatedAt: string, nowMs: number): number | null {
   const updatedAtMs = Date.parse(updatedAt);
   if (!Number.isFinite(updatedAtMs)) {
     return null;
@@ -17,10 +14,7 @@ export function liveLocationAgeMs(
   return Math.max(0, nowMs - updatedAtMs);
 }
 
-export function isLiveLocationGone(
-  updatedAt: string,
-  nowMs: number,
-): boolean {
+export function isLiveLocationGone(updatedAt: string, nowMs: number): boolean {
   const ageMs = liveLocationAgeMs(updatedAt, nowMs);
   if (ageMs === null) {
     return true;
@@ -29,10 +23,7 @@ export function isLiveLocationGone(
 }
 
 /** Linear fade from 1 (fresh) to 0 (gone). Gone ages return 0. */
-export function liveLocationFillOpacity(
-  updatedAt: string,
-  nowMs: number,
-): number {
+export function liveLocationFillOpacity(updatedAt: string, nowMs: number): number {
   const ageMs = liveLocationAgeMs(updatedAt, nowMs);
   if (ageMs === null || ageMs >= LIVE_LOCATION_GONE_MS) {
     return 0;
@@ -40,10 +31,7 @@ export function liveLocationFillOpacity(
   return 1 - ageMs / LIVE_LOCATION_GONE_MS;
 }
 
-export function formatLiveLocationLastSeen(
-  updatedAt: string,
-  nowMs: number,
-): string {
+export function formatLiveLocationLastSeen(updatedAt: string, nowMs: number): string {
   const age = formatFreshnessAge(updatedAt, nowMs);
   if (age === "never") {
     return "Last seen unknown";
@@ -52,9 +40,7 @@ export function formatLiveLocationLastSeen(
 }
 
 /** Oldest (stalest) updatedAt among members, or null if empty. */
-export function oldestLiveLocationUpdatedAt(
-  updatedAts: readonly string[],
-): string | null {
+export function oldestLiveLocationUpdatedAt(updatedAts: readonly string[]): string | null {
   let oldest: string | null = null;
   let oldestMs = Number.POSITIVE_INFINITY;
   for (const updatedAt of updatedAts) {

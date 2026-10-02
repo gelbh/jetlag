@@ -21,9 +21,7 @@ const gameArea: GameArea = {
   ],
 };
 
-function pendingRadar(
-  overrides: Partial<PendingQuestionRecord> = {},
-): PendingQuestionRecord {
+function pendingRadar(overrides: Partial<PendingQuestionRecord> = {}): PendingQuestionRecord {
   return {
     id: "pq-radar",
     sessionId: "session-1",
@@ -55,9 +53,7 @@ describe("pending preview elimination", () => {
   it("builds hider-truth preview shade for pending radar without polygon on geometry overlay", async () => {
     const pending = pendingRadar();
     const geometryOverlay = await buildPendingQuestionOverlay(pending, gameArea);
-    expect(
-      geometryOverlay?.overlays.some((overlay) => overlay.kind === "polygon"),
-    ).toBe(false);
+    expect(geometryOverlay?.overlays.some((overlay) => overlay.kind === "polygon")).toBe(false);
 
     const previewShade = await buildPendingPreviewEliminationFeature({
       pending,

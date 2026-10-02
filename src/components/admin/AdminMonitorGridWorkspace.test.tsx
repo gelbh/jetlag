@@ -1,8 +1,8 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import {
-  DEFAULT_COLS,
   cloneMonitorLayout,
+  DEFAULT_COLS,
   defaultMonitorLayout,
 } from "../../domain/admin/opsDeskLayout";
 import { AdminMonitorGridWorkspace } from "./AdminMonitorGridWorkspace";
@@ -88,9 +88,7 @@ describe("AdminMonitorGridWorkspace", () => {
 
     const workspace = screen.getByTestId("admin-monitor-grid");
     fireEvent.click(workspace);
-    expect(
-      screen.queryByLabelText("Place monitor panel"),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Place monitor panel")).not.toBeInTheDocument();
 
     fireEvent.contextMenu(workspace);
     expect(screen.getByLabelText("Place monitor panel")).toBeInTheDocument();

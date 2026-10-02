@@ -1,9 +1,9 @@
-import { fireEvent, render, screen } from "@testing-library/react";
 import { MantineProvider } from "@mantine/core";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { jetlagTheme } from "@/theme/theme";
 import { RouteTransitionProvider } from "@/navigation/RouteTransitionContext";
+import { jetlagTheme } from "@/theme/theme";
 import { ContentBlockerErrorPage } from "./ContentBlockerErrorPage";
 
 beforeEach(() => {
@@ -38,12 +38,8 @@ describe("ContentBlockerErrorPage", () => {
       </MantineProvider>,
     );
 
-    expect(
-      screen.getByRole("heading", { name: /Content blocker detected/i }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText(/Settings → Apps → Safari → Content Blockers/i),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /Content blocker detected/i })).toBeInTheDocument();
+    expect(screen.getByText(/Settings → Apps → Safari → Content Blockers/i)).toBeInTheDocument();
     expect(screen.getByText(/localhost/i)).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: /Try again/i }));

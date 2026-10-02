@@ -1,7 +1,7 @@
+import { requireOverpassProxyAccess } from "../../handlers/proxyShared.mjs";
+import { createProxyHandler } from "../createProxyHandler.mjs";
 import { fetchCachedOverpassQuery } from "../overpassProxyCore.mjs";
 import { parseOverpassQueryBody } from "../proxyValidation.mjs";
-import { createProxyHandler } from "../createProxyHandler.mjs";
-import { requireOverpassProxyAccess } from "../../handlers/proxyShared.mjs";
 
 export const OVERPASS_MAX_RESPONSE_BYTES = 4_000_000;
 
