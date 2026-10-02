@@ -5,7 +5,7 @@ import { buildHiderTruthFetchKey } from "./hiderTruthFetchKey";
 import type { HiderQuestionTruthContextInput } from "./resolveHiderTruthReference";
 
 const zoneCenter: [number, number] = [51.5, -0.12];
-const outsideAsk: [number, number] = [51.6, -0.12]; // far from zone
+const outsideAsk: [number, number] = [51.6, -0.12];
 const insideAsk: [number, number] = [51.5001, -0.1201];
 
 function radarPending(overrides: Partial<PendingQuestionRecord> = {}): PendingQuestionRecord {
@@ -51,51 +51,33 @@ function baseContext(
 }
 
 describe("buildHiderTruthFetchKey", () => {
-  it("omits hidingPlace when open radar ask is outside the zone", () => {
+  it("omits live hidingPlace regardless of ask placement", () => {
+    const outside = [radarPending()];
+    const inside = [
+      radarPending({
+        placement: {
+          geometryJson: JSON.stringify({
+            type: "Feature",
+            properties: {},
+            geometry: {
+              type: "Point",
+              coordinates: [insideAsk[1], insideAsk[0]],
+            },
+          }),
+          metadata: { radiusMeters: milesToMeters(1) },
+        },
+      }),
+    ];
+    for (const open of [outside, inside]) {
+      const a = buildHiderTruthFetchKey(open, baseContext({ hidingPlace: [51.5, -0.12] }));
+      const b = buildHiderTruthFetchKey(open, baseContext({ hidingPlace: [51.501, -0.121] }));
+      expect(a).toBe(b);
+      expect(a).toContain("place:omitted");
+    }
+  });
+
+  it("omits live hidingPlace during end game", () => {
     const open = [radarPending()];
-    const a = buildHiderTruthFetchKey(open, baseContext({ hidingPlace: [51.5, -0.12] }));
-    const b = buildHiderTruthFetchKey(open, baseContext({ hidingPlace: [51.501, -0.121] }));
-    expect(a).toBe(b);
-  });
-
-  it("omits hidingPlace when open radar ask is inside the zone", () => {
-    const open = [
-      radarPending({
-        placement: {
-          geometryJson: JSON.stringify({
-            type: "Feature",
-            properties: {},
-            geometry: {
-              type: "Point",
-              coordinates: [insideAsk[1], insideAsk[0]],
-            },
-          }),
-          metadata: { radiusMeters: milesToMeters(1) },
-        },
-      }),
-    ];
-    const a = buildHiderTruthFetchKey(open, baseContext({ hidingPlace: [51.5, -0.12] }));
-    const b = buildHiderTruthFetchKey(open, baseContext({ hidingPlace: [51.501, -0.121] }));
-    expect(a).toBe(b);
-    expect(a).toContain("place:omitted");
-  });
-
-  it("omits hidingPlace during end game even when ask is inside the zone", () => {
-    const open = [
-      radarPending({
-        placement: {
-          geometryJson: JSON.stringify({
-            type: "Feature",
-            properties: {},
-            geometry: {
-              type: "Point",
-              coordinates: [insideAsk[1], insideAsk[0]],
-            },
-          }),
-          metadata: { radiusMeters: milesToMeters(1) },
-        },
-      }),
-    ];
     const session = {
       endGameStartedAt: "2026-01-01T00:00:00.000Z",
       endGameTruthAnchors: {
@@ -115,9 +97,10 @@ describe("buildHiderTruthFetchKey", () => {
     expect(a).toContain("place:omitted");
   });
 
-  it("omits hidingPlace when in-zone even if live GPS differs", () => {
+  it("omits live seeker GPS for map-pin tools", () => {
     const open = [
       radarPending({
+        toolType: "tentacle",
         placement: {
           geometryJson: JSON.stringify({
             type: "Feature",
@@ -127,13 +110,20 @@ describe("buildHiderTruthFetchKey", () => {
               coordinates: [insideAsk[1], insideAsk[0]],
             },
           }),
-          metadata: { radiusMeters: milesToMeters(1) },
+          metadata: {},
         },
       }),
     ];
-    const without = buildHiderTruthFetchKey(open, baseContext({ hidingPlace: null }));
-    const withPlace = buildHiderTruthFetchKey(open, baseContext({ hidingPlace: [51.5, -0.12] }));
-    expect(without).toBe(withPlace);
+    const a = buildHiderTruthFetchKey(
+      open,
+      baseContext({ seekerPlacesByUid: { "seeker-1": [51.51, -0.11] } }),
+    );
+    const b = buildHiderTruthFetchKey(
+      open,
+      baseContext({ seekerPlacesByUid: { "seeker-1": [51.52, -0.1] } }),
+    );
+    expect(a).toBe(b);
+    expect(a).toContain("seeker:omitted");
   });
 
   it("changes when open question placement geometry changes under the same id", () => {

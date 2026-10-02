@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
 import {
-  isAskOriginInsideHidingZone,
   resolveHiderTruthReference,
   resolvePendingQuestionTruthReference,
 } from "./resolveHiderTruthReference";
@@ -41,7 +40,7 @@ describe("resolveHiderTruthReference", () => {
     expect(result.point).toEqual(zoneCenter);
   });
 
-  it("falls back to zone center when inside zone but hiding place missing", () => {
+  it("returns zone center when hiding place is missing", () => {
     const result = resolveHiderTruthReference({
       hiderUid: "hider-1",
       zoneCenter,
@@ -131,19 +130,6 @@ describe("resolveHiderTruthReference", () => {
   });
 });
 
-describe("isAskOriginInsideHidingZone", () => {
-  it("detects ask origins inside the radius", () => {
-    expect(isAskOriginInsideHidingZone(insideAsk, zoneCenter, zoneRadiusMeters)).toBe(true);
-    expect(isAskOriginInsideHidingZone(outsideAsk, zoneCenter, zoneRadiusMeters)).toBe(false);
-    expect(isAskOriginInsideHidingZone(zoneCenter, zoneCenter, 0)).toBe(true);
-  });
-
-  it("rejects invalid zone radii", () => {
-    expect(isAskOriginInsideHidingZone(insideAsk, zoneCenter, -1)).toBe(false);
-    expect(isAskOriginInsideHidingZone(insideAsk, zoneCenter, Number.NaN)).toBe(false);
-  });
-});
-
 describe("resolvePendingQuestionTruthReference", () => {
   function pendingAt(
     origin: [number, number],
@@ -186,7 +172,7 @@ describe("resolvePendingQuestionTruthReference", () => {
     });
   });
 
-  it("falls back to zone center for empty photo geometryJson", () => {
+  it("returns zone center for empty photo geometryJson", () => {
     const photoPending = {
       id: "q-photo",
       status: "pending",

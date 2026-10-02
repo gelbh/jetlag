@@ -1,4 +1,3 @@
-import { haversineMeters } from "../../geometry/gameArea/distance";
 import type { LatLngTuple } from "../../geometry/gameArea/geometry";
 import {
   parseGeometryJson,
@@ -18,17 +17,16 @@ export type HiderTruthReferenceMode =
 export interface ResolveHiderTruthReferenceInput {
   hiderUid: string;
   zoneCenter: LatLngTuple | null;
-  /** Live / last-known hiding place (hider GPS). */
+  /** Retained for callers; pre-end-game resolver ignores live hider GPS. */
   hidingPlace?: LatLngTuple | null;
-  /** Seeker ask / placement origin used to decide in-zone truth. */
+  /** Retained for callers; pre-end-game resolver ignores ask origin. */
   askOrigin?: LatLngTuple | null;
-  /** Precomputed; when omitted, derived from askOrigin + zone when radius known. */
+  /** Retained for callers; pre-end-game resolver ignores in-zone hints. */
   originInsideZone?: boolean;
   zoneRadiusMeters?: number | null;
   /**
-   * Live seeker GPS by uid. Map-pin questions (tentacle/matching/measuring/
-   * thermometer) use this as in-zone origin so a pin dropped on the hide does
-   * not switch truth to hider GPS (LMTS).
+   * Live seeker GPS by uid. Used by `askOriginFromPendingQuestion` for map-pin
+   * tools; pre-end-game truth reference stays zone center regardless.
    */
   seekerPlacesByUid?: Readonly<Record<string, LatLngTuple>> | null;
   session: Pick<SessionRecord, "endGameStartedAt" | "endGameTruthAnchors"> | null | undefined;
@@ -50,24 +48,6 @@ function isUsableLatLng(lat: unknown, lng: unknown): lat is number {
 
 function isUsablePoint(point: LatLngTuple | null | undefined): point is LatLngTuple {
   return point != null && isUsableLatLng(point[0], point[1]);
-}
-
-export function isAskOriginInsideHidingZone(
-  askOrigin: LatLngTuple | null | undefined,
-  zoneCenter: LatLngTuple | null | undefined,
-  zoneRadiusMeters: number | null | undefined,
-): boolean {
-  if (
-    !isUsablePoint(askOrigin) ||
-    !isUsablePoint(zoneCenter) ||
-    typeof zoneRadiusMeters !== "number" ||
-    !Number.isFinite(zoneRadiusMeters) ||
-    zoneRadiusMeters < 0
-  ) {
-    return false;
-  }
-
-  return haversineMeters(askOrigin, zoneCenter) <= zoneRadiusMeters;
 }
 
 const MAP_PIN_TRUTH_TOOLS = new Set(["tentacle", "matching", "measuring", "thermometer"]);
