@@ -65,7 +65,10 @@ export default defineConfig(({ mode }) => ({
     optionalKernelWasmPkg(),
     wasm(),
     ...createSentryPlugins({ appVersion }),
-    react(),
+    // React Compiler (annotation): opt-in per function with "use memo".
+    // New code: prefer Compiler over hand useMemo/useCallback/memo unless
+    // an effect-dep escape hatch is required. Do not mass-strip existing memos yet.
+    react({ compiler: { compilationMode: "annotation" } }),
     tailwindcss(),
     createPwaPlugin(),
     timeEndpointPlugin(),
