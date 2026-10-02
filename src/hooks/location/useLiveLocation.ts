@@ -11,17 +11,17 @@ import {
   watchPosition,
 } from "../../services/core/location/geolocation";
 import {
-  getLocationPermissionUiSnapshot,
-  persistLocationAccessConfirmed,
-  retainLocationPermissionDemand,
-  subscribeLocationPermissionUi,
-} from "../../services/core/location/locationPermissionUi";
-import {
   clearLiveLocationReading,
   publishLiveLocationReading,
   releaseLiveLocationReading,
   retainLiveLocationReading,
 } from "../../services/core/location/liveLocationReading";
+import {
+  getLocationPermissionUiSnapshot,
+  persistLocationAccessConfirmed,
+  retainLocationPermissionDemand,
+  subscribeLocationPermissionUi,
+} from "../../services/core/location/locationPermissionUi";
 
 interface UseLiveLocationOptions {
   highAccuracy?: boolean;

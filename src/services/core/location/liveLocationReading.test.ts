@@ -1,9 +1,9 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
-  LIVE_LOCATION_FRESH_MS,
   clearLiveLocationReading,
   getFreshLiveLocationReading,
   getLiveLocationReadingSnapshot,
+  LIVE_LOCATION_FRESH_MS,
   publishLiveLocationReading,
   releaseLiveLocationReading,
   resetLiveLocationReadingForTests,
@@ -42,12 +42,8 @@ describe("liveLocationReading", () => {
 
   it("getFreshLiveLocationReading returns reading within FRESH_MS", () => {
     publishLiveLocationReading(sample, 1_000);
-    expect(getFreshLiveLocationReading(1_000 + LIVE_LOCATION_FRESH_MS)).toEqual(
-      sample,
-    );
-    expect(
-      getFreshLiveLocationReading(1_000 + LIVE_LOCATION_FRESH_MS + 1),
-    ).toBeNull();
+    expect(getFreshLiveLocationReading(1_000 + LIVE_LOCATION_FRESH_MS)).toEqual(sample);
+    expect(getFreshLiveLocationReading(1_000 + LIVE_LOCATION_FRESH_MS + 1)).toBeNull();
   });
 
   it("keeps snapshot until the last retain is released", () => {
