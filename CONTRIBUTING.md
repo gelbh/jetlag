@@ -22,6 +22,14 @@ just env-pull
 # or: doppler secrets download --no-file --format env > .env.local
 ```
 
+## React memoization
+
+This app uses React Compiler in annotation mode (`"use memo"` opt-in; expanding later).
+
+- Prefer the Compiler over new `useMemo` / `useCallback` / `React.memo`.
+- Keep or add hand memo only for effect-dependency precision, or for domain identity contracts (see hider elimination-mask thrash work).
+- Do not mass-delete existing memos until full Compiler coverage is trusted.
+
 ## Run the app
 
 ```bash
