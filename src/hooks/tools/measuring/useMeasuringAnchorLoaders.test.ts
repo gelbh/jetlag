@@ -1,22 +1,72 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { renderHook, act, waitFor } from "@testing-library/react";
+import type { Feature, LineString } from "geojson";
 import { useMeasuringAnchorLoaders } from "./useMeasuringAnchorLoaders";
 import { useMeasuringDraftState } from "./useMeasuringDraftState";
 import { registerMapLibreMap } from "@/services/geo/maplibre/mapLibreMapRegistry";
 import { useMapStore } from "@/state/mapStore";
 import { fetchMeasuringPlacesInArea } from "@/services/geo/overpass/measuringPlaces";
+import { resolveCoastlineContextFromCache } from "@/services/geo/overpass/coastline";
+import { fetchMeasuringCoastlineContext } from "../measuringToolResolvers";
 
 vi.mock("@/services/geo/overpass/measuringPlaces", () => ({
   fetchMeasuringPlacesInArea: vi.fn(),
   measuringPlaceNotFoundMessage: () => "No places",
 }));
 
+vi.mock("@/services/geo/overpass/coastline", async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import("@/services/geo/overpass/coastline")>();
+  return {
+    ...actual,
+    resolveCoastlineContextFromCache: vi.fn(),
+  };
+});
+
+vi.mock("../measuringToolResolvers", async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import("../measuringToolResolvers")>();
+  return {
+    ...actual,
+    fetchMeasuringCoastlineContext: vi.fn(),
+  };
+});
+
 const fetchMock = vi.mocked(fetchMeasuringPlacesInArea);
+const resolveCoastlineCacheMock = vi.mocked(resolveCoastlineContextFromCache);
+const fetchCoastlineMock = vi.mocked(fetchMeasuringCoastlineContext);
+
+const dublinishArea = {
+  type: "Polygon",
+  coordinates: [
+    [
+      [-6.4, 53.3],
+      [-6.2, 53.3],
+      [-6.2, 53.4],
+      [-6.4, 53.4],
+      [-6.4, 53.3],
+    ],
+  ],
+} as const;
+
+const packCoastSegment: Feature<LineString> = {
+  type: "Feature",
+  properties: {},
+  geometry: {
+    type: "LineString",
+    coordinates: [
+      [-6.38, 53.32],
+      [-6.3, 53.33],
+    ],
+  },
+};
 
 describe("useMeasuringAnchorLoaders tile preview", () => {
   beforeEach(() => {
     useMapStore.setState({ mapStyle: "standard" });
     fetchMock.mockReset();
+    resolveCoastlineCacheMock.mockReset();
+    fetchCoastlineMock.mockReset();
     registerMapLibreMap({
       getStyle: () => ({
         sources: { openmaptiles: {} },
@@ -102,5 +152,48 @@ describe("useMeasuringAnchorLoaders tile preview", () => {
     expect(
       result.current.draft.measuringPlaces[0]?.confirmStatus !== "provisional",
     ).toBe(true);
+  });
+});
+
+describe("useMeasuringAnchorLoaders coastline pack seed", () => {
+  beforeEach(() => {
+    resolveCoastlineCacheMock.mockReset();
+    fetchCoastlineMock.mockReset();
+  });
+
+  it("seeds draft coastline segments from pack before Overpass enrich lands", async () => {
+    resolveCoastlineCacheMock.mockReturnValue(null);
+    fetchCoastlineMock.mockResolvedValue({
+      ok: true,
+      coastPoint: [53.33, -6.34],
+      distanceMeters: 1_200,
+      segments: [packCoastSegment],
+    });
+
+    const { result } = renderHook(() => {
+      const draft = useMeasuringDraftState([]);
+      const loaders = useMeasuringAnchorLoaders({
+        active: true,
+        gameArea: dublinishArea as never,
+        setMapError: vi.fn(),
+        draft,
+        sessionRules: { regionPackId: "dublin" } as never,
+      });
+      return { draft, loaders };
+    });
+
+    act(() => {
+      result.current.draft.setMeasuringSubject("coastline");
+      result.current.draft.setMeasuringOptionChosen(true);
+    });
+
+    await act(async () => {
+      await result.current.loaders.loadMeasuringCoastlineAt([53.35, -6.26]);
+    });
+
+    expect(result.current.draft.measuringCoastSegments).toEqual([
+      packCoastSegment,
+    ]);
+    expect(result.current.draft.measuringLoading).toBe(false);
   });
 });
