@@ -21,12 +21,18 @@ const buildMeasuringBoundaryPreview = vi.hoisted(() => vi.fn());
 const buildMeasuringEliminationPreview = vi.hoisted(() => vi.fn());
 const buildCoarsePolygonFeature = vi.hoisted(() => vi.fn());
 const refinePolygonFeatureStep = vi.hoisted(() => vi.fn());
+const getCachedPreparedCoastlineSegments = vi.hoisted(() => vi.fn());
 
 vi.mock("@/domain/geometry/measuring/measuringRegions", () => ({
   buildMeasuringBoundaryPreview: (...args: unknown[]) =>
     buildMeasuringBoundaryPreview(...args),
   buildMeasuringEliminationPreview: (...args: unknown[]) =>
     buildMeasuringEliminationPreview(...args),
+}));
+
+vi.mock("@/services/geo/overpass/coastline", () => ({
+  getCachedPreparedCoastlineSegments: (...args: unknown[]) =>
+    getCachedPreparedCoastlineSegments(...args),
 }));
 
 vi.mock("@/domain/geometry/progressive/polygonLod", async () => {
@@ -134,12 +140,69 @@ const sampleGameArea: GameArea = {
   ],
 };
 
+describe("useMeasuringPreviews coastline draft fallback", () => {
+  beforeEach(() => {
+    buildMeasuringBoundaryPreview.mockReset();
+    buildMeasuringEliminationPreview.mockReset();
+    buildCoarsePolygonFeature.mockReset();
+    refinePolygonFeatureStep.mockReset();
+    getCachedPreparedCoastlineSegments.mockReset();
+    getCachedPreparedCoastlineSegments.mockReturnValue(undefined);
+  });
+
+  it("uses draft coastline segments when shared cache is empty", async () => {
+    const near = samplePreview();
+    buildMeasuringBoundaryPreview.mockResolvedValue(near);
+    buildMeasuringEliminationPreview.mockResolvedValue(null);
+    buildCoarsePolygonFeature.mockReturnValue(near);
+    refinePolygonFeatureStep.mockReturnValue({ feature: near, done: true });
+
+    const draftSegment = {
+      type: "Feature" as const,
+      properties: {},
+      geometry: {
+        type: "LineString" as const,
+        coordinates: [
+          [-6.38, 53.32],
+          [-6.3, 53.33],
+        ],
+      },
+    };
+
+    const draft = {
+      ...baseDraft,
+      measuringSubject: "coastline",
+      usesAllPlacesInArea: false,
+      measuringTargetPoint: [53.33, -6.34],
+      measuringDistanceMeters: 1_200,
+      measuringCoastSegments: [draftSegment],
+      measuringSeaLevelNearRegion: null,
+      setMeasuringError: vi.fn(),
+    } as unknown as MeasuringDraftState;
+
+    const { result } = renderHook(() =>
+      useMeasuringPreviews(sampleGameArea, draft),
+    );
+
+    expect(result.current.resolvedCoastSegments).toEqual([draftSegment]);
+    await waitFor(() => {
+      expect(buildMeasuringBoundaryPreview).toHaveBeenCalled();
+    });
+    const input = buildMeasuringBoundaryPreview.mock.calls[0]?.[0] as {
+      measuringCoastSegments: unknown[];
+    };
+    expect(input.measuringCoastSegments).toEqual([draftSegment]);
+  });
+});
+
 describe("useMeasuringPreviews budget gate", () => {
   beforeEach(() => {
     buildMeasuringBoundaryPreview.mockReset();
     buildMeasuringEliminationPreview.mockReset();
     buildCoarsePolygonFeature.mockReset();
     refinePolygonFeatureStep.mockReset();
+    getCachedPreparedCoastlineSegments.mockReset();
+    getCachedPreparedCoastlineSegments.mockReturnValue(undefined);
   });
 
   it("paints coarse LOD when all-places count exceeds the former 128 cap", async () => {
