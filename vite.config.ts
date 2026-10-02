@@ -15,7 +15,9 @@ import { timeEndpointPlugin } from "./vite.time-endpoint";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const appVersion = (
-  JSON.parse(readFileSync(new URL("./package.json", import.meta.url), "utf8")) as {
+  JSON.parse(
+    readFileSync(new URL("./package.json", import.meta.url), "utf8"),
+  ) as {
     version: string;
   }
 ).version;
@@ -65,7 +67,8 @@ export default defineConfig(({ mode }) => ({
     optionalKernelWasmPkg(),
     wasm(),
     ...createSentryPlugins({ appVersion }),
-    react(),
+    // React Compiler annotation mode; policy in CONTRIBUTING.md
+    react({ compiler: { compilationMode: "annotation" } }),
     tailwindcss(),
     createPwaPlugin(),
     timeEndpointPlugin(),

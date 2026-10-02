@@ -84,6 +84,7 @@ export function AppLogo({
   className,
   ...props
 }: AppLogoProps) {
+  "use memo";
   const markPx = MARK_SIZES[size];
 
   if (variant === "mark") {
