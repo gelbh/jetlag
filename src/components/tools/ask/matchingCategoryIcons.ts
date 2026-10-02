@@ -1,62 +1,39 @@
 import type { ComponentType } from "react";
-import {
-  AirplaneTilt,
-  Bank,
-  BookOpen,
-  Buildings,
-  City,
-  Confetti,
-  FilmSlate,
-  FirstAid,
-  Fish,
-  Flag,
-  Golf,
-  House,
-  Island,
-  MapTrifold,
-  Mountains,
-  Path,
-  PawPrint,
-  Tag,
-  TextT,
-  Train,
-  Tree,
-  type IconProps,
-} from "@phosphor-icons/react";
+import { AirplaneTiltIcon, BankIcon, BookOpenIcon, BuildingsIcon, CityIcon, ConfettiIcon, FilmSlateIcon, FirstAidIcon, FishIcon, FlagIcon, GolfIcon, HouseIcon, IslandIcon, MapTrifoldIcon, MountainsIcon, PathIcon, PawPrintIcon, TagIcon, TextTIcon, TrainIcon, TreeIcon, type IconProps } from "@phosphor-icons/react";
 import type { MatchingCategoryId } from "@/domain/questions";
 
 const BUILTIN_ICONS: Record<
   Exclude<MatchingCategoryId, `custom:${string}` | `pack:${string}`>,
   ComponentType<IconProps>
 > = {
-  commercial_airport: AirplaneTilt,
-  transit_line: Train,
-  station_name_length: TextT,
-  street_or_path: Path,
-  admin_division_1: MapTrifold,
-  admin_division_2: Buildings,
-  admin_division_3: City,
-  admin_division_4: House,
-  mountain: Mountains,
-  landmass: Island,
-  park: Tree,
-  amusement_park: Confetti,
-  zoo: PawPrint,
-  aquarium: Fish,
-  golf_course: Golf,
-  museum: Bank,
-  movie_theater: FilmSlate,
-  hospital: FirstAid,
-  library: BookOpen,
-  foreign_consulate: Flag,
+  commercial_airport: AirplaneTiltIcon,
+  transit_line: TrainIcon,
+  station_name_length: TextTIcon,
+  street_or_path: PathIcon,
+  admin_division_1: MapTrifoldIcon,
+  admin_division_2: BuildingsIcon,
+  admin_division_3: CityIcon,
+  admin_division_4: HouseIcon,
+  mountain: MountainsIcon,
+  landmass: IslandIcon,
+  park: TreeIcon,
+  amusement_park: ConfettiIcon,
+  zoo: PawPrintIcon,
+  aquarium: FishIcon,
+  golf_course: GolfIcon,
+  museum: BankIcon,
+  movie_theater: FilmSlateIcon,
+  hospital: FirstAidIcon,
+  library: BookOpenIcon,
+  foreign_consulate: FlagIcon,
 };
 
-/** Phosphor icon for a matching catalog category (custom/pack → Tag). */
+/** Phosphor icon for a matching catalog category (custom/pack → TagIcon). */
 export function matchingCategoryIcon(
   categoryId: MatchingCategoryId,
 ): ComponentType<IconProps> {
   if (categoryId.startsWith("custom:") || categoryId.startsWith("pack:")) {
-    return Tag;
+    return TagIcon;
   }
-  return BUILTIN_ICONS[categoryId as keyof typeof BUILTIN_ICONS] ?? Tag;
+  return BUILTIN_ICONS[categoryId as keyof typeof BUILTIN_ICONS] ?? TagIcon;
 }

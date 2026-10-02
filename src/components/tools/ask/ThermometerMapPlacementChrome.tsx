@@ -3,13 +3,7 @@
  * Distance catalog stays on the sheet; live walk banner stays on the sheet.
  */
 import { Button, UnstyledButton } from "@mantine/core";
-import {
-  Flame,
-  GpsFix,
-  PaperPlaneTilt,
-  Path,
-  Snowflake,
-} from "@phosphor-icons/react";
+import { FlameIcon, GpsFixIcon, PaperPlaneTiltIcon, PathIcon, SnowflakeIcon } from "@phosphor-icons/react";
 import { HudThermometerIcon } from "@/components/map/icons/ToolIcons";
 import {
   AskMapPlacementChrome,
@@ -151,12 +145,12 @@ export function ThermometerMapPlacementChrome({
                 {
                   id: "gps" as const,
                   label: "GPS track",
-                  icon: <GpsFix size={16} weight="duotone" aria-hidden />,
+                  icon: <GpsFixIcon size={16} weight="duotone" aria-hidden />,
                 },
                 {
                   id: "manual" as const,
                   label: "Manual pins",
-                  icon: <Path size={16} weight="duotone" aria-hidden />,
+                  icon: <PathIcon size={16} weight="duotone" aria-hidden />,
                 },
               ] as const
             ).map((mode) => {
@@ -259,7 +253,7 @@ export function ThermometerMapPlacementChrome({
               const tone = option.activeClassName.includes("status-success")
                 ? "success"
                 : "danger";
-              const Icon = option.value === "hotter" ? Flame : Snowflake;
+              const Icon = option.value === "hotter" ? FlameIcon : SnowflakeIcon;
               return (
                 <UnstyledButton
                   key={option.value}
@@ -289,7 +283,7 @@ export function ThermometerMapPlacementChrome({
             aria-busy={isSubmitting || undefined}
             leftSection={
               isSubmitting ? undefined : (
-                <PaperPlaneTilt size={16} weight="fill" aria-hidden />
+                <PaperPlaneTiltIcon size={16} weight="fill" aria-hidden />
               )
             }
             styles={askMapPlacementSendStyles}
