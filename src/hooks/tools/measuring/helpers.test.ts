@@ -2,8 +2,35 @@ import type { MeasuringPlace } from "@/domain/geo/types";
 import { describe, expect, it } from "vitest";
 import {
   buildStoredMeasuringRegionInput,
+  coastlineCommitReady,
   usesDebouncedSeekerResolve,
 } from "./helpers";
+
+describe("coastlineCommitReady", () => {
+  it("disarms coastline commit while loading or without segments", () => {
+    expect(
+      coastlineCommitReady({
+        measuringSubject: "coastline",
+        measuringLoading: false,
+        resolvedCoastSegmentsLength: 0,
+      }),
+    ).toBe(false);
+    expect(
+      coastlineCommitReady({
+        measuringSubject: "coastline",
+        measuringLoading: true,
+        resolvedCoastSegmentsLength: 2,
+      }),
+    ).toBe(false);
+    expect(
+      coastlineCommitReady({
+        measuringSubject: "coastline",
+        measuringLoading: false,
+        resolvedCoastSegmentsLength: 2,
+      }),
+    ).toBe(true);
+  });
+});
 
 describe("usesDebouncedSeekerResolve", () => {
   it("auto-resolves linear measures like coastline and all-places", () => {

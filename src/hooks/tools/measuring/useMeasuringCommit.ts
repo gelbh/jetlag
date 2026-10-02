@@ -18,7 +18,10 @@ import type { SubmitPendingQuestionInput } from "../../sync/usePendingQuestionAc
 import { MAP_ANNOTATION_COLORS } from "@/domain/map/mapAnnotationColors";
 import { emitQuestionAnsweredActivity } from "@/services/session/emitSessionActivity";
 import { persistSlimMeasuringGeometry } from "@/domain/geometry/measuring/measuringGeometryBudgets";
-import { buildStoredMeasuringRegionInput } from "./helpers";
+import {
+  buildStoredMeasuringRegionInput,
+  coastlineCommitReady,
+} from "./helpers";
 import type { MeasuringDraftState } from "./useMeasuringDraftState";
 import type { MeasuringPreviews } from "./useMeasuringPreviews";
 
@@ -73,6 +76,7 @@ export function useMeasuringCommit({
     measuringTargetPlaceName,
     measuringAnswer,
     measuringSeaLevelNote,
+    measuringLoading,
     setMeasuringError,
     setPreviewOpen,
     resetDraft,
@@ -81,6 +85,16 @@ export function useMeasuringCommit({
   const { resolvedCoastSegments, measuringRegionInput } = previews;
 
   const performCommit = useCallback(async () => {
+    if (
+      !coastlineCommitReady({
+        measuringSubject,
+        measuringLoading,
+        resolvedCoastSegmentsLength: resolvedCoastSegments.length,
+      })
+    ) {
+      return;
+    }
+
     if (!measuringSeekerPoint || measuringDistanceMeters === null) {
       return;
     }
@@ -281,6 +295,7 @@ export function useMeasuringCommit({
     measuringAnchorElevationMeters,
     measuringAnswer,
     measuringDistanceMeters,
+    measuringLoading,
     measuringLocationCategory,
     measuringPlaces,
     measuringRegionInput,
@@ -329,6 +344,16 @@ export function useMeasuringCommit({
       return;
     }
 
+    if (
+      !coastlineCommitReady({
+        measuringSubject,
+        measuringLoading,
+        resolvedCoastSegmentsLength: resolvedCoastSegments.length,
+      })
+    ) {
+      return;
+    }
+
     if (measuringSubject === "sea_level" && !measuringSeaLevelNearRegion) {
       setMeasuringError(
         measuringSeaLevelNote ??
@@ -348,8 +373,10 @@ export function useMeasuringCommit({
     canSubmitQuestion,
     measureFromKind,
     measuringDistanceMeters,
+    measuringLoading,
     measuringPlaces.length,
     measuringSeaLevelNearRegion,
+    resolvedCoastSegments.length,
     measuringSeaLevelNote,
     measuringSeekerPoint,
     measuringSubject,

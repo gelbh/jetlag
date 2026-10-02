@@ -9,6 +9,20 @@ import {
   type MeasuringSubject,
 } from "@/domain/questions";
 
+export function coastlineCommitReady(input: {
+  measuringSubject: MeasuringSubject;
+  measuringLoading: boolean;
+  resolvedCoastSegmentsLength: number;
+}): boolean {
+  if (input.measuringLoading) {
+    return false;
+  }
+  if (input.measuringSubject !== "coastline") {
+    return true;
+  }
+  return input.resolvedCoastSegmentsLength > 0;
+}
+
 export function usesDebouncedSeekerResolve(
   subject: MeasuringSubject,
   kind: MeasuringFromKind,

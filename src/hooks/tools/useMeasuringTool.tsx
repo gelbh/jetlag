@@ -31,6 +31,7 @@ import { useToolSession } from "./framework/useToolSession";
 import { useToolSessionOptions } from "./useToolSessionOptions";
 import { MeasuringToolPanel } from "./measuring/MeasuringToolPanel";
 import { useMeasuringAnchorLoaders } from "./measuring/useMeasuringAnchorLoaders";
+import { coastlineCommitReady } from "./measuring/helpers";
 import { useMeasuringCommit } from "./measuring/useMeasuringCommit";
 import { useMeasuringDraftState } from "./measuring/useMeasuringDraftState";
 import { useMeasuringInteractions } from "./measuring/useMeasuringInteractions";
@@ -348,7 +349,12 @@ export function useMeasuringTool({
     draft.measuringOptionChosen &&
     (awaitHiderAnswer || draft.measuringAnswer !== null) &&
     canSubmitQuestion &&
-    !session.isBusy;
+    !session.isBusy &&
+    coastlineCommitReady({
+      measuringSubject: draft.measuringSubject,
+      measuringLoading: draft.measuringLoading,
+      resolvedCoastSegmentsLength: previews.resolvedCoastSegments.length,
+    });
 
   const locationCategory =
     draft.measuringSubject === "location"
