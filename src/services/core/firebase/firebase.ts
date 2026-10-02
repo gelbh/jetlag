@@ -42,6 +42,7 @@ import {
   markAuthBootstrapReady,
   resetAuthBootstrapStateForTests,
 } from "./authBootstrapState";
+import { isDefinitiveAuthFailure } from "./authRecovery";
 
 export {
   isAuthBootstrapReady,
@@ -341,13 +342,26 @@ export async function ensureAnonymousUser(): Promise<User> {
   return anonymousSignInPromise;
 }
 
-/** Ensure a signed-in user with a freshly forced ID token (join/heal paths). */
-export async function ensureFreshAnonymousUser(): Promise<User> {
+/**
+ * Ensure a signed-in user, optionally forcing an ID token refresh (join/heal).
+ *
+ * Never throws for transient refresh failures (network, quota, internal): the
+ * cached user is returned and downstream Firestore / callable requests surface
+ * (and retry) their own errors. Only definitive auth failures sign out and mint
+ * a new anonymous user — that path can still throw if re-sign-in fails.
+ */
+export async function ensureFreshAnonymousUser(
+  options: { forceRefresh?: boolean } = {},
+): Promise<User> {
+  const forceRefresh = options.forceRefresh ?? true;
   let user = await ensureAnonymousUser();
   try {
-    await user.getIdToken(true);
+    await user.getIdToken(forceRefresh);
     return user;
-  } catch {
+  } catch (error) {
+    if (!isDefinitiveAuthFailure(error)) {
+      return user;
+    }
     await signOut(getFirebaseAuth());
     user = await ensureAnonymousUser();
     await user.getIdToken(true);

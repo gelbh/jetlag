@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { isEffectivelyOfflineNow } from "@/hooks/sync/isEffectivelyOfflineNow";
 import { LOCAL_SESSION_ID } from "../../domain/map/annotations";
 import { resolvePlayerRole } from "../../domain/session/players/playerRole";
 import {
@@ -41,7 +42,10 @@ export function useEnsureSessionMembership(options?: {
 
     void (async () => {
       try {
-        const user = await ensureFreshAnonymousUser();
+        // Skip the forced refresh offline: it would only stall on the network.
+        const user = await ensureFreshAnonymousUser({
+          forceRefresh: !isEffectivelyOfflineNow(),
+        });
         if (cancelled) {
           return;
         }
