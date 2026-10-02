@@ -55,6 +55,22 @@ function pendingQuestion(): PendingQuestionRecord {
   };
 }
 
+function pendingQuestionWithGeometry(
+  coordinates: [number, number],
+): PendingQuestionRecord {
+  return {
+    ...pendingQuestion(),
+    placement: {
+      geometryJson: JSON.stringify({
+        type: "Feature",
+        properties: {},
+        geometry: { type: "Point", coordinates },
+      }),
+      metadata: { radiusMeters: 1609 },
+    },
+  };
+}
+
 describe("useHiderPendingPreviewEliminations", () => {
   beforeEach(() => {
     buildPendingPreviewEliminationFeatures.mockReset();
@@ -89,5 +105,39 @@ describe("useHiderPendingPreviewEliminations", () => {
     rerender({ truths: truthsB });
 
     expect(buildPendingPreviewEliminationFeatures).toHaveBeenCalledTimes(1);
+  });
+
+  it("rebuilds when pending placement geometry changes with the same ids", async () => {
+    const truths = new Map<string, HiderTruthResult>([
+      ["pq-1", { replyId: "no", label: "No" }],
+    ]);
+
+    const { rerender } = renderHook(
+      ({ pendingQuestions }) =>
+        useHiderPendingPreviewEliminations({
+          pendingQuestions,
+          questionTruths: truths,
+          optimisticAnswers: new Map<string, string>(),
+          annotations: [],
+          gameArea,
+        }),
+      {
+        initialProps: {
+          pendingQuestions: [pendingQuestionWithGeometry([-0.15, 51.45])],
+        },
+      },
+    );
+
+    await waitFor(() => {
+      expect(buildPendingPreviewEliminationFeatures).toHaveBeenCalledTimes(1);
+    });
+
+    rerender({
+      pendingQuestions: [pendingQuestionWithGeometry([-0.14, 51.46])],
+    });
+
+    await waitFor(() => {
+      expect(buildPendingPreviewEliminationFeatures).toHaveBeenCalledTimes(2);
+    });
   });
 });

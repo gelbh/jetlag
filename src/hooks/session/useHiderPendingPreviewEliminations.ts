@@ -77,6 +77,24 @@ function gameAreaContentKey(gameArea: GameArea | null | undefined): string {
   );
 }
 
+function pendingPlacementValueKey(value: unknown): string {
+  if (Array.isArray(value)) {
+    return `[${value.map((item) => pendingPlacementValueKey(item)).join(",")}]`;
+  }
+
+  if (value && typeof value === "object") {
+    return `{${Object.entries(value)
+      .sort(([left], [right]) => left.localeCompare(right))
+      .map(
+        ([key, nestedValue]) =>
+          `${JSON.stringify(key)}:${pendingPlacementValueKey(nestedValue)}`,
+      )
+      .join(",")}}`;
+  }
+
+  return JSON.stringify(value) ?? "null";
+}
+
 export function useHiderPendingPreviewEliminations({
   pendingQuestions,
   questionTruths,
@@ -123,7 +141,14 @@ export function useHiderPendingPreviewEliminations({
       pendingQuestions
         .map(
           (question) =>
-            `${question.id}:${question.status}:${question.resolvedAnnotationId ?? ""}`,
+            [
+              question.id,
+              question.status,
+              question.resolvedAnnotationId ?? "",
+              question.toolType,
+              question.placement.geometryJson,
+              pendingPlacementValueKey(question.placement.metadata),
+            ].join(":"),
         )
         .join(","),
     [pendingQuestions],
