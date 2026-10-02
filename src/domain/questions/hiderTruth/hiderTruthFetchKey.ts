@@ -4,18 +4,46 @@ import { isEndGameActive } from "../../map/annotations";
 import {
   askOriginFromPendingQuestion,
   isAskOriginInsideHidingZone,
+  isMapPinTruthTool,
   type HiderQuestionTruthContextInput,
 } from "./resolveHiderTruthReference";
 
-const MAP_PIN_TRUTH_TOOLS = new Set([
-  "tentacle",
-  "matching",
-  "measuring",
-  "thermometer",
-]);
-
 function pointKey(point: LatLngTuple | null | undefined): string {
   return point ? point.join(",") : "none";
+}
+
+function pendingPlacementValueKey(value: unknown): string {
+  if (Array.isArray(value)) {
+    return `[${value.map((item) => pendingPlacementValueKey(item)).join(",")}]`;
+  }
+
+  if (value && typeof value === "object") {
+    return `{${Object.entries(value)
+      .sort(([left], [right]) => left.localeCompare(right))
+      .map(
+        ([key, nestedValue]) =>
+          `${JSON.stringify(key)}:${pendingPlacementValueKey(nestedValue)}`,
+      )
+      .join(",")}}`;
+  }
+
+  return JSON.stringify(value) ?? "null";
+}
+
+function openQuestionsContentKey(
+  openQuestions: readonly PendingQuestionRecord[],
+): string {
+  return openQuestions
+    .map((question) =>
+      [
+        question.id,
+        question.toolType,
+        question.placement.geometryJson,
+        pendingPlacementValueKey(question.placement.metadata),
+      ].join(":"),
+    )
+    .sort()
+    .join(",");
 }
 
 function relevantSeekerPlacesKey(
@@ -27,7 +55,7 @@ function relevantSeekerPlacesKey(
   }
   const uids = new Set<string>();
   for (const question of openQuestions) {
-    if (MAP_PIN_TRUTH_TOOLS.has(question.toolType) && question.createdByUid) {
+    if (isMapPinTruthTool(question.toolType) && question.createdByUid) {
       uids.add(question.createdByUid);
     }
   }
@@ -62,17 +90,12 @@ export function buildHiderTruthFetchKey(
   openQuestions: readonly PendingQuestionRecord[],
   context: HiderQuestionTruthContextInput,
 ): string {
-  const openIds = openQuestions
-    .map((question) => question.id)
-    .sort()
-    .join(",");
-
   const needsPlace = openQuestions.some((question) =>
     openQuestionNeedsHidingPlace(question, context),
   );
 
   return [
-    openIds,
+    openQuestionsContentKey(openQuestions),
     context.hiderUid,
     pointKey(context.zoneCenter),
     String(context.zoneRadiusMeters ?? "none"),

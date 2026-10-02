@@ -7,7 +7,6 @@ import {
   buildPendingPreviewEliminationFeatures,
   pendingQuestionHasResolvedAnnotation,
 } from "../../domain/questions/overlays/pendingPreviewElimination";
-import { previewEliminationFeaturesFingerprint } from "../../domain/questions/overlays/previewEliminationFeaturesFingerprint";
 import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
 
 interface UseHiderPendingPreviewEliminationsParams {
@@ -108,7 +107,6 @@ export function useHiderPendingPreviewEliminations({
     Feature<Polygon | MultiPolygon>[]
   >(() => []);
   const generationRef = useRef(0);
-  const lastFingerprintRef = useRef<string | null>(null);
   const pendingQuestionsRef = useRef(pendingQuestions);
   const replyIdByQuestionIdRef = useRef<ReadonlyMap<string, string>>(new Map());
   const annotationsRef = useRef(annotations);
@@ -139,16 +137,15 @@ export function useHiderPendingPreviewEliminations({
   const pendingKey = useMemo(
     () =>
       pendingQuestions
-        .map(
-          (question) =>
-            [
-              question.id,
-              question.status,
-              question.resolvedAnnotationId ?? "",
-              question.toolType,
-              question.placement.geometryJson,
-              pendingPlacementValueKey(question.placement.metadata),
-            ].join(":"),
+        .map((question) =>
+          [
+            question.id,
+            question.status,
+            question.resolvedAnnotationId ?? "",
+            question.toolType,
+            question.placement.geometryJson,
+            pendingPlacementValueKey(question.placement.metadata),
+          ].join(":"),
         )
         .join(","),
     [pendingQuestions],
@@ -167,10 +164,21 @@ export function useHiderPendingPreviewEliminations({
   const shouldComputePreview =
     Boolean(gameArea) && replyIdByQuestionId.size > 0;
 
-  pendingQuestionsRef.current = pendingQuestions;
-  replyIdByQuestionIdRef.current = replyIdByQuestionId;
-  annotationsRef.current = annotations;
-  gameAreaRef.current = gameArea;
+  useEffect(() => {
+    pendingQuestionsRef.current = pendingQuestions;
+  }, [pendingQuestions]);
+
+  useEffect(() => {
+    replyIdByQuestionIdRef.current = replyIdByQuestionId;
+  }, [replyIdByQuestionId]);
+
+  useEffect(() => {
+    annotationsRef.current = annotations;
+  }, [annotations]);
+
+  useEffect(() => {
+    gameAreaRef.current = gameArea;
+  }, [gameArea]);
 
   useEffect(() => {
     const generation = generationRef.current + 1;
@@ -188,38 +196,16 @@ export function useHiderPendingPreviewEliminations({
       annotationsRef.current,
     )
       .then((features) => {
-        if (generation !== generationRef.current) {
-          return;
+        if (generation === generationRef.current) {
+          setPreviewEliminationFeatures(features);
         }
-
-        const fingerprint = previewEliminationFeaturesFingerprint(features);
-        if (fingerprint === lastFingerprintRef.current) {
-          return;
-        }
-
-        lastFingerprintRef.current = fingerprint;
-        setPreviewEliminationFeatures(features);
       })
       .catch(() => {
-        if (generation !== generationRef.current) {
-          return;
+        if (generation === generationRef.current) {
+          setPreviewEliminationFeatures([]);
         }
-
-        const fingerprint = previewEliminationFeaturesFingerprint([]);
-        if (fingerprint === lastFingerprintRef.current) {
-          return;
-        }
-
-        lastFingerprintRef.current = fingerprint;
-        setPreviewEliminationFeatures([]);
       });
-  }, [
-    gameAreaKey,
-    pendingKey,
-    replyKey,
-    annotationKey,
-    shouldComputePreview,
-  ]);
+  }, [gameAreaKey, pendingKey, replyKey, annotationKey, shouldComputePreview]);
 
   return {
     previewEliminationFeatures: shouldComputePreview

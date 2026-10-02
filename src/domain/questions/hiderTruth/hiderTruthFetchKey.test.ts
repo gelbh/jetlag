@@ -22,7 +22,10 @@ function radarPending(
       geometryJson: JSON.stringify({
         type: "Feature",
         properties: {},
-        geometry: { type: "Point", coordinates: [outsideAsk[1], outsideAsk[0]] },
+        geometry: {
+          type: "Point",
+          coordinates: [outsideAsk[1], outsideAsk[0]],
+        },
       }),
       metadata: { radiusMeters: milesToMeters(1) },
     },
@@ -52,8 +55,14 @@ function baseContext(
 describe("buildHiderTruthFetchKey", () => {
   it("omits hidingPlace when open radar ask is outside the zone", () => {
     const open = [radarPending()];
-    const a = buildHiderTruthFetchKey(open, baseContext({ hidingPlace: [51.5, -0.12] }));
-    const b = buildHiderTruthFetchKey(open, baseContext({ hidingPlace: [51.501, -0.121] }));
+    const a = buildHiderTruthFetchKey(
+      open,
+      baseContext({ hidingPlace: [51.5, -0.12] }),
+    );
+    const b = buildHiderTruthFetchKey(
+      open,
+      baseContext({ hidingPlace: [51.501, -0.121] }),
+    );
     expect(a).toBe(b);
   });
 
@@ -64,14 +73,23 @@ describe("buildHiderTruthFetchKey", () => {
           geometryJson: JSON.stringify({
             type: "Feature",
             properties: {},
-            geometry: { type: "Point", coordinates: [insideAsk[1], insideAsk[0]] },
+            geometry: {
+              type: "Point",
+              coordinates: [insideAsk[1], insideAsk[0]],
+            },
           }),
           metadata: { radiusMeters: milesToMeters(1) },
         },
       }),
     ];
-    const a = buildHiderTruthFetchKey(open, baseContext({ hidingPlace: [51.5, -0.12] }));
-    const b = buildHiderTruthFetchKey(open, baseContext({ hidingPlace: [51.501, -0.121] }));
+    const a = buildHiderTruthFetchKey(
+      open,
+      baseContext({ hidingPlace: [51.5, -0.12] }),
+    );
+    const b = buildHiderTruthFetchKey(
+      open,
+      baseContext({ hidingPlace: [51.501, -0.121] }),
+    );
     expect(a).not.toBe(b);
   });
 
@@ -82,7 +100,10 @@ describe("buildHiderTruthFetchKey", () => {
           geometryJson: JSON.stringify({
             type: "Feature",
             properties: {},
-            geometry: { type: "Point", coordinates: [insideAsk[1], insideAsk[0]] },
+            geometry: {
+              type: "Point",
+              coordinates: [insideAsk[1], insideAsk[0]],
+            },
           }),
           metadata: { radiusMeters: milesToMeters(1) },
         },
@@ -90,7 +111,13 @@ describe("buildHiderTruthFetchKey", () => {
     ];
     const session = {
       endGameStartedAt: "2026-01-01T00:00:00.000Z",
-      endGameTruthAnchors: { "hider-1": { lat: 51.5, lng: -0.12 } },
+      endGameTruthAnchors: {
+        "hider-1": {
+          lat: 51.5,
+          lng: -0.12,
+          frozenAt: "2026-01-01T00:00:00.000Z",
+        },
+      },
     };
     const a = buildHiderTruthFetchKey(
       open,
@@ -111,17 +138,60 @@ describe("buildHiderTruthFetchKey", () => {
           geometryJson: JSON.stringify({
             type: "Feature",
             properties: {},
-            geometry: { type: "Point", coordinates: [insideAsk[1], insideAsk[0]] },
+            geometry: {
+              type: "Point",
+              coordinates: [insideAsk[1], insideAsk[0]],
+            },
           }),
           metadata: { radiusMeters: milesToMeters(1) },
         },
       }),
     ];
-    const without = buildHiderTruthFetchKey(open, baseContext({ hidingPlace: null }));
+    const without = buildHiderTruthFetchKey(
+      open,
+      baseContext({ hidingPlace: null }),
+    );
     const withPlace = buildHiderTruthFetchKey(
       open,
       baseContext({ hidingPlace: [51.5, -0.12] }),
     );
     expect(without).not.toBe(withPlace);
+  });
+
+  it("changes when open question placement geometry changes under the same id", () => {
+    const openA = [
+      radarPending({
+        placement: {
+          geometryJson: JSON.stringify({
+            type: "Feature",
+            properties: {},
+            geometry: {
+              type: "Point",
+              coordinates: [outsideAsk[1], outsideAsk[0]],
+            },
+          }),
+          metadata: { radiusMeters: milesToMeters(1) },
+        },
+      }),
+    ];
+    const openB = [
+      radarPending({
+        placement: {
+          geometryJson: JSON.stringify({
+            type: "Feature",
+            properties: {},
+            geometry: {
+              type: "Point",
+              coordinates: [outsideAsk[1] + 0.01, outsideAsk[0]],
+            },
+          }),
+          metadata: { radiusMeters: milesToMeters(1) },
+        },
+      }),
+    ];
+    const context = baseContext();
+    expect(buildHiderTruthFetchKey(openA, context)).not.toBe(
+      buildHiderTruthFetchKey(openB, context),
+    );
   });
 });

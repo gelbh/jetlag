@@ -271,7 +271,7 @@ describe("useCombinedEliminationMask", () => {
     expect(requestCombinedEliminationMask).not.toHaveBeenCalled();
   });
 
-  it("re-requests the worker when draft features move to a fresh array with identical geometry", async () => {
+  it("does not re-request the worker when draft features move to a fresh array with identical geometry", async () => {
     requestCombinedEliminationMask.mockResolvedValue(workerFeature);
 
     const annotations = [annotation("ann-1")];
@@ -312,8 +312,6 @@ describe("useCombinedEliminationMask", () => {
       });
     });
 
-    await waitFor(() => {
-      expect(requestCombinedEliminationMask).toHaveBeenCalledTimes(1);
-    });
+    expect(requestCombinedEliminationMask).not.toHaveBeenCalled();
   });
 });

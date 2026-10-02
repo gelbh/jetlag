@@ -7,16 +7,19 @@ import { useHiderPendingPreviewEliminations } from "./useHiderPendingPreviewElim
 
 const buildPendingPreviewEliminationFeatures = vi.hoisted(() => vi.fn());
 
-vi.mock("../../domain/questions/overlays/pendingPreviewElimination", async () => {
-  const actual = await vi.importActual<
-    typeof import("../../domain/questions/overlays/pendingPreviewElimination")
-  >("../../domain/questions/overlays/pendingPreviewElimination");
-  return {
-    ...actual,
-    buildPendingPreviewEliminationFeatures: (...args: unknown[]) =>
-      buildPendingPreviewEliminationFeatures(...args),
-  };
-});
+vi.mock(
+  "../../domain/questions/overlays/pendingPreviewElimination",
+  async () => {
+    const actual = await vi.importActual<
+      typeof import("../../domain/questions/overlays/pendingPreviewElimination")
+    >("../../domain/questions/overlays/pendingPreviewElimination");
+    return {
+      ...actual,
+      buildPendingPreviewEliminationFeatures: (...args: unknown[]) =>
+        buildPendingPreviewEliminationFeatures(...args),
+    };
+  },
+);
 
 const gameArea: GameArea = {
   type: "Polygon",
@@ -74,7 +77,9 @@ function pendingQuestionWithGeometry(
 describe("useHiderPendingPreviewEliminations", () => {
   beforeEach(() => {
     buildPendingPreviewEliminationFeatures.mockReset();
-    buildPendingPreviewEliminationFeatures.mockReturnValue(new Promise(() => {}));
+    buildPendingPreviewEliminationFeatures.mockReturnValue(
+      new Promise(() => {}),
+    );
   });
 
   it("does not rebuild when questionTruths Map identity changes but replies match", async () => {

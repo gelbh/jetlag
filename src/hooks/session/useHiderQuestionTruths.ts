@@ -50,8 +50,14 @@ export function useHiderQuestionTruths(
   );
   const openQuestionsRef = useRef(openQuestions);
   const truthContextRef = useRef(truthContext);
-  openQuestionsRef.current = openQuestions;
-  truthContextRef.current = truthContext;
+
+  useEffect(() => {
+    openQuestionsRef.current = openQuestions;
+  }, [openQuestions]);
+
+  useEffect(() => {
+    truthContextRef.current = truthContext;
+  }, [truthContext]);
 
   const fetchKey =
     truthContext && openQuestions.length > 0
@@ -118,13 +124,7 @@ export function useHiderQuestionTruths(
       );
       setResolvedFetchKey(fetchKey);
     })();
-  }, [
-    fetchKey,
-    beginRequest,
-    isLatestRequest,
-    gameArea,
-    truthReferenceReady,
-  ]);
+  }, [fetchKey, beginRequest, isLatestRequest, gameArea, truthReferenceReady]);
 
   return {
     questionTruths: openQuestions.length === 0 ? EMPTY_TRUTHS : questionTruths,
