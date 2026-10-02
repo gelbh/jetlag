@@ -51,6 +51,11 @@ pub struct NearRegionInputJson {
     pub disks: Vec<DiskSpecJson>,
     #[serde(rename = "gameArea")]
     pub game_area: GameAreaGeometry,
+    /// `distanceThreshold` for coastline cell sampling; `bufferUnion` keeps legacy buffers.
+    #[serde(default)]
+    pub mode: Option<String>,
+    #[serde(default)]
+    pub divisions: Option<u32>,
 }
 
 /// Tentacle / Voronoi site on the JSON boundary (`id` + lat/lng degrees).

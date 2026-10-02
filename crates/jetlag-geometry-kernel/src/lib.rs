@@ -1,5 +1,6 @@
 //! Geometry kernel (Rust / WASM) — mask + half-plane + geodesic + voronoi + near-region.
 
+pub mod coastline_near_region;
 pub mod geodesic;
 pub mod geodesic_buffer;
 pub mod half_plane;
@@ -28,6 +29,7 @@ use mask::{
     build_end_game_mask_from_disks as build_end_game_native,
     build_mask_from_union_input as build_mask_native,
 };
+use coastline_near_region::build_coastline_near_region_distance_threshold;
 use near_region::build_near_region as build_near_region_native;
 use tentacle::{
     build_tentacle_elimination_region as build_tentacle_elimination_native,
@@ -201,12 +203,26 @@ pub fn build_near_region_json(input_json: &str) -> Result<JsValue, JsValue> {
         })
         .collect();
     let distance = parsed.distance_meters.unwrap_or(0.0);
-    feature_to_js(build_near_region_native(
-        &parsed.segments,
-        distance,
-        &disks,
-        &game_area,
-    ))
+    let use_distance_threshold = parsed.mode.as_deref() == Some("distanceThreshold")
+        || (disks.is_empty()
+            && !parsed.segments.is_empty()
+            && parsed.mode.as_deref() != Some("bufferUnion"));
+
+    if use_distance_threshold {
+        feature_to_js(build_coastline_near_region_distance_threshold(
+            &parsed.segments,
+            distance,
+            &game_area,
+            parsed.divisions,
+        ))
+    } else {
+        feature_to_js(build_near_region_native(
+            &parsed.segments,
+            distance,
+            &disks,
+            &game_area,
+        ))
+    }
 }
 
 /// WASM export: packed Voronoi rings for `coords = [lng0,lat0,…]` (unique sites).

@@ -22,6 +22,7 @@ import {
   shouldUseWasm,
   unionDiskSpecs,
 } from "../kernel";
+import { resolveGameAreaCellDivisions } from "./seaLevel";
 import { unionPolygonFeaturesInSlices } from "../progressive/unionSlices";
 import { dispatchGeodesicLineBuffer } from "./geodesicLineBuffer";
 
@@ -444,11 +445,18 @@ export async function buildCoastlineNearRegion(
     }
 
     try {
+      const prepared = prepareMeasuringLineSegments(segments, gameArea);
+      if (prepared.segments.length === 0) {
+        return null;
+      }
+
       const result = await dispatchNearRegionBatch({
-        segments,
+        segments: prepared.segments,
         distanceMeters,
         disks: [],
         gameArea: featureToGameAreaGeometry(gameAreaToFeature(gameArea)),
+        mode: "distanceThreshold",
+        divisions: resolveGameAreaCellDivisions(gameArea),
       });
 
       if (result) {
