@@ -36,7 +36,7 @@ export const CHANGELOG: ChangelogEntry[] = [
           "Replace CVA button with Mantine Button and drop unused class-variance-authority / @radix-ui/react-slot.",
           "Annotate hot map and session parents for React Compiler coverage",
         ],
-      }
+      },
     ],
   },
   {
