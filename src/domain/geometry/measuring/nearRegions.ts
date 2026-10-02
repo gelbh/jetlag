@@ -218,6 +218,10 @@ function yieldToEventLoop(): Promise<void> {
   });
 }
 
+export function yieldCoastlineNearRegionBuild(): Promise<void> {
+  return yieldToEventLoop();
+}
+
 export function setCoastlineNearRegionYieldHookForTests(hook: (() => Promise<void>) | null): void {
   coastlineNearRegionYieldHook = hook;
 }
@@ -347,6 +351,20 @@ function clipBufferedSegmentsToGameArea(
   return combinePolygonFeatures(clippedParts);
 }
 
+function useLegacyCoastlineBufferUnionPath(): boolean {
+  return import.meta.env.VITE_LEGACY_COASTLINE_BUFFER_UNION === "true";
+}
+
+export async function buildCoastlineNearRegionUnionBufferForTests(
+  segments: Feature<LineString>[],
+  distanceMeters: number,
+  gameArea: GameArea,
+): Promise<Feature<Polygon | MultiPolygon> | null> {
+  return buildCoastlineNearRegionWithBuffer(segments, distanceMeters, gameArea, (segment, meters) =>
+    dispatchGeodesicLineBuffer(segment, meters, undefined),
+  );
+}
+
 async function buildCoastlineNearRegionWithBuffer(
   segments: Feature<LineString>[],
   distanceMeters: number,
@@ -425,22 +443,50 @@ export async function buildCoastlineNearRegion(
       return cached;
     }
 
-    const result = await dispatchNearRegionBatch({
-      segments,
-      distanceMeters,
-      disks: [],
-      gameArea: featureToGameAreaGeometry(gameAreaToFeature(gameArea)),
-    });
+    try {
+      const result = await dispatchNearRegionBatch({
+        segments,
+        distanceMeters,
+        disks: [],
+        gameArea: featureToGameAreaGeometry(gameAreaToFeature(gameArea)),
+      });
 
-    if (result) {
-      setCachedCoastlineNearRegion(cacheKey, result);
+      if (result) {
+        setCachedCoastlineNearRegion(cacheKey, result);
+      }
+      return result;
+    } catch {
+      // TS distance-threshold fallback when wasm pkg is unavailable (local dev).
     }
-    return result;
   }
 
-  return buildCoastlineNearRegionWithBuffer(segments, distanceMeters, gameArea, (segment, meters) =>
-    dispatchGeodesicLineBuffer(segment, meters, undefined),
+  if (useLegacyCoastlineBufferUnionPath()) {
+    return buildCoastlineNearRegionWithBuffer(segments, distanceMeters, gameArea, (segment, meters) =>
+      dispatchGeodesicLineBuffer(segment, meters, undefined),
+    );
+  }
+
+  const { buildCoastlineNearRegionDistanceThreshold } = await import("./coastlineNearRegion");
+  const cacheKey = coastlineNearRegionCacheKey(
+    gameArea,
+    distanceMeters,
+    segments.length,
+    "distanceThreshold",
   );
+  const cached = getCachedCoastlineNearRegion(cacheKey);
+  if (cached) {
+    return cached;
+  }
+
+  const result = await buildCoastlineNearRegionDistanceThreshold(
+    segments,
+    distanceMeters,
+    gameArea,
+  );
+  if (result) {
+    setCachedCoastlineNearRegion(cacheKey, result);
+  }
+  return result;
 }
 
 export { distanceBetweenPoints } from "../gameArea/distance";
