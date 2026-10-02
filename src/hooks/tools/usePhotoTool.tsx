@@ -1,27 +1,25 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { PhotoHudBody } from "../../components/tools/ask/PhotoHudBody";
 import { PhotoMapPlacementChrome } from "../../components/tools/ask/PhotoMapPlacementChrome";
 import { PhotoPanel } from "../../components/tools/PhotoPanel";
 import type { AskHudReadiness } from "../../domain/ask/askHudModes";
-import type { AskToolHudBundle } from "../map-screen/heavyMapTools";
 import type { DistanceUnit } from "../../domain/map/distance";
-import type { GameSize } from "../../domain/session/size/gameSize";
 import {
   firstAvailablePhotoCategoryId,
+  hasOpenPendingQuestion,
   isPhotoCategoryAvailableForGameSize,
   PHOTO_REPLY_OPTIONS,
+  type PhotoCategoryId,
   photoCategoryLabelForUnit,
   photoCategoryUseCount,
   photoQuestionPrompt,
-  usedPhotoCategoryIds,
-  type PhotoCategoryId,
-} from "../../domain/questions";
-import {
-  hasOpenPendingQuestion,
   questionCostBreakdown,
+  usedPhotoCategoryIds,
 } from "../../domain/questions";
-import type { SubmitPendingQuestionInput } from "../sync/usePendingQuestionActions";
 import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
+import type { GameSize } from "../../domain/session/size/gameSize";
+import type { AskToolHudBundle } from "../map-screen/heavyMapTools";
+import type { SubmitPendingQuestionInput } from "../sync/usePendingQuestionActions";
 import { useToolSession } from "./framework/useToolSession";
 
 interface PhotoSessionConfig {
@@ -35,10 +33,7 @@ interface UsePhotoToolParams {
   pendingQuestions: readonly PendingQuestionRecord[];
   awaitHiderAnswer?: boolean;
   submitPendingQuestion?: (
-    input: Omit<
-      SubmitPendingQuestionInput,
-      "sessionId" | "senderUid" | "senderRole" | "toolType"
-    >,
+    input: Omit<SubmitPendingQuestionInput, "sessionId" | "senderUid" | "senderRole" | "toolType">,
   ) => Promise<void>;
   sessionId?: string;
   senderUid?: string | null;
@@ -67,12 +62,8 @@ export function usePhotoTool({
     finishPlacementRef.current = finishPlacement;
   }, [finishPlacement]);
 
-  const usedCategories = useMemo(
-    () => usedPhotoCategoryIds(pendingQuestions),
-    [pendingQuestions],
-  );
-  const [selectedCategoryId, setSelectedCategoryId] =
-    useState<PhotoCategoryId>("tree");
+  const usedCategories = useMemo(() => usedPhotoCategoryIds(pendingQuestions), [pendingQuestions]);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<PhotoCategoryId>("tree");
   const [categoryChosen, setCategoryChosen] = useState(false);
   const categoryId = useMemo(() => {
     if (
@@ -82,22 +73,19 @@ export function usePhotoTool({
       return selectedCategoryId;
     }
 
-    return (
-      firstAvailablePhotoCategoryId(gameSize, usedCategories) ??
-      selectedCategoryId
-    );
+    return firstAvailablePhotoCategoryId(gameSize, usedCategories) ?? selectedCategoryId;
   }, [gameSize, selectedCategoryId, usedCategories]);
 
   const useCount = photoCategoryUseCount(pendingQuestions, categoryId);
   const hasOpenQuestion = hasOpenPendingQuestion(pendingQuestions);
-  const { label: costLabel, draw: cardDraw, keep: cardKeep } =
-    questionCostBreakdown("D1P1", useCount);
+  const {
+    label: costLabel,
+    draw: cardDraw,
+    keep: cardKeep,
+  } = questionCostBreakdown("D1P1", useCount);
 
   useEffect(() => {
-    if (
-      !hasOpenQuestion &&
-      mapError === "Finish the open question before starting another."
-    ) {
+    if (!hasOpenQuestion && mapError === "Finish the open question before starting another.") {
       setMapError(null);
     }
   }, [hasOpenQuestion, mapError, setMapError]);
@@ -116,12 +104,7 @@ export function usePhotoTool({
         return;
       }
 
-      if (
-        !awaitHiderAnswer ||
-        !submitPendingQuestion ||
-        !sessionId ||
-        !senderUid
-      ) {
+      if (!awaitHiderAnswer || !submitPendingQuestion || !sessionId || !senderUid) {
         setMapError("Photo questions require a hider in the session.");
         return;
       }
@@ -156,11 +139,9 @@ export function usePhotoTool({
   const commit = () => session.submit();
 
   const categoryReady =
-    !usedCategories.has(categoryId) &&
-    isPhotoCategoryAvailableForGameSize(gameSize, categoryId);
+    !usedCategories.has(categoryId) && isPhotoCategoryAvailableForGameSize(gameSize, categoryId);
 
-  const mapFirstEligible =
-    categoryChosen && categoryReady && awaitHiderAnswer;
+  const mapFirstEligible = categoryChosen && categoryReady && awaitHiderAnswer;
 
   const handleCategoryChange = (id: PhotoCategoryId) => {
     setSelectedCategoryId(id);
@@ -183,11 +164,7 @@ export function usePhotoTool({
   };
 
   const canCommitPhoto =
-    categoryReady &&
-    categoryChosen &&
-    canSubmitQuestion &&
-    !session.isBusy &&
-    !hasOpenQuestion;
+    categoryReady && categoryChosen && canSubmitQuestion && !session.isBusy && !hasOpenQuestion;
 
   const mapPlacementActive = Boolean(mapFirstEligible);
 
@@ -201,10 +178,7 @@ export function usePhotoTool({
           suppressSheet: mapPlacementActive,
           mapOverlay: mapPlacementActive ? (
             <PhotoMapPlacementChrome
-              categoryLabel={photoCategoryLabelForUnit(
-                categoryId,
-                distanceUnit,
-              )}
+              categoryLabel={photoCategoryLabelForUnit(categoryId, distanceUnit)}
               questionPrompt={photoQuestionPrompt(categoryId, distanceUnit)}
               costLabel={costLabel}
               error={mapError}

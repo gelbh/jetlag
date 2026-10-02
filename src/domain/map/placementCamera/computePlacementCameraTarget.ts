@@ -1,31 +1,23 @@
+import { type BoundingBox, gameAreaToBoundingBox } from "../../geometry/gameArea/gameAreaBounds";
 import type { LatLngTuple } from "../../geometry/gameArea/geometry";
-import type { MapDraftOverlay } from "../mapDraftOverlay";
 import { radarInsideFromAnswer } from "../../questions";
+import type { MapDraftOverlay } from "../mapDraftOverlay";
 import {
   approximatePlayAreaContextMinZoom,
+  boundingBoxToBoundsExpression,
   boundsForGeoJsonFeatures,
   boundsForPinPoint,
   boundsForPlayArea,
   boundsForRadarCircle,
   boundsForTwoPoints,
   boundsForVertexPolygon,
-  boundingBoxToBoundsExpression,
   unionBounds,
 } from "./bounds";
 import { MAX_ZOOM_PIN, MAX_ZOOM_RADAR_CENTER, PANEL_PADDING_EXTRA_PX } from "./constants";
 import type { CameraTarget, PlacementCameraContext } from "./types";
-import {
-  gameAreaToBoundingBox,
-  type BoundingBox,
-} from "../../geometry/gameArea/gameAreaBounds";
 
-function findMarker(
-  overlays: readonly MapDraftOverlay[],
-  id: string,
-): LatLngTuple | null {
-  const overlay = overlays.find(
-    (entry) => entry.kind === "marker" && entry.id === id,
-  );
+function findMarker(overlays: readonly MapDraftOverlay[], id: string): LatLngTuple | null {
+  const overlay = overlays.find((entry) => entry.kind === "marker" && entry.id === id);
   return overlay?.kind === "marker" ? overlay.point : null;
 }
 
@@ -33,9 +25,7 @@ function findCircle(
   overlays: readonly MapDraftOverlay[],
   id: string,
 ): { center: LatLngTuple; radiusMeters: number } | null {
-  const overlay = overlays.find(
-    (entry) => entry.kind === "circle" && entry.id === id,
-  );
+  const overlay = overlays.find((entry) => entry.kind === "circle" && entry.id === id);
   if (overlay?.kind !== "circle") {
     return null;
   }
@@ -44,10 +34,7 @@ function findCircle(
 
 function collectPoiPoints(overlays: readonly MapDraftOverlay[]): LatLngTuple[] {
   return overlays
-    .filter(
-      (overlay) =>
-        overlay.kind === "marker" && overlay.id.startsWith("tentacle-draft-poi-"),
-    )
+    .filter((overlay) => overlay.kind === "marker" && overlay.id.startsWith("tentacle-draft-poi-"))
     .map((overlay) => (overlay.kind === "marker" ? overlay.point : null))
     .filter((point): point is LatLngTuple => point !== null);
 }
@@ -60,9 +47,7 @@ function buildTarget(
   return {
     bounds: boundingBoxToBoundsExpression(box),
     maxZoom: options.maxZoom,
-    minZoom:
-      options.minZoom ??
-      approximatePlayAreaContextMinZoom(ctx.gameArea, box),
+    minZoom: options.minZoom ?? approximatePlayAreaContextMinZoom(ctx.gameArea, box),
     paddingBiasPx: ctx.panelPeekHeightPx + PANEL_PADDING_EXTRA_PX,
     paddingTopBiasPx: ctx.panelTopPaddingPx,
     forceReframe: options.forceReframe ?? ctx.forceReframe,
@@ -111,9 +96,7 @@ function boundingBoxArea(box: BoundingBox): number {
 }
 
 /** Frame the shaded cell (no) or the kept pocket (yes) into the visible map band. */
-function matchingAnsweredFocusBox(
-  ctx: PlacementCameraContext,
-): BoundingBox | null {
+function matchingAnsweredFocusBox(ctx: PlacementCameraContext): BoundingBox | null {
   const eliminationBox = boundsForGeoJsonFeatures(ctx.eliminationFeatures);
   if (!eliminationBox) {
     return null;
@@ -267,16 +250,10 @@ function computeThermometerTarget(ctx: PlacementCameraContext): CameraTarget | n
     const extraRadii = quietRadar ? [quietRadar.radiusMeters] : [];
 
     if (points.length === 1) {
-      return buildTarget(
-        ctx,
-        boundsForRadarCircle(thermoA, quietRadar?.radiusMeters ?? 0),
-      );
+      return buildTarget(ctx, boundsForRadarCircle(thermoA, quietRadar?.radiusMeters ?? 0));
     }
 
-    return buildTarget(
-      ctx,
-      boundsForTwoPoints(points[0]!, points[1]!, extraRadii),
-    );
+    return buildTarget(ctx, boundsForTwoPoints(points[0]!, points[1]!, extraRadii));
   }
 
   if (thermoA && thermoB) {
@@ -285,10 +262,7 @@ function computeThermometerTarget(ctx: PlacementCameraContext): CameraTarget | n
   }
 
   if (thermoA && quietRadar) {
-    return buildTarget(
-      ctx,
-      boundsForRadarCircle(thermoA, quietRadar.radiusMeters),
-    );
+    return buildTarget(ctx, boundsForRadarCircle(thermoA, quietRadar.radiusMeters));
   }
 
   return null;
@@ -306,12 +280,12 @@ function computeMeasuringTarget(ctx: PlacementCameraContext): CameraTarget | nul
 
   if (seeker && target) {
     const siteCircles = ctx.overlays.filter(
-      (overlay) =>
-        overlay.kind === "circle" && overlay.id.startsWith("measuring-draft-site-"),
+      (overlay) => overlay.kind === "circle" && overlay.id.startsWith("measuring-draft-site-"),
     );
     const extraRadii = siteCircles
-      .filter((overlay): overlay is Extract<MapDraftOverlay, { kind: "circle" }> =>
-        overlay.kind === "circle",
+      .filter(
+        (overlay): overlay is Extract<MapDraftOverlay, { kind: "circle" }> =>
+          overlay.kind === "circle",
       )
       .map((overlay) => overlay.radiusMeters);
 
@@ -346,10 +320,7 @@ function computeMatchingTarget(ctx: PlacementCameraContext): CameraTarget | null
 
 function computeZoneTarget(ctx: PlacementCameraContext): CameraTarget | null {
   const vertices = ctx.overlays
-    .filter(
-      (overlay) =>
-        overlay.kind === "marker" && overlay.id.startsWith("zone-draft-vertex-"),
-    )
+    .filter((overlay) => overlay.kind === "marker" && overlay.id.startsWith("zone-draft-vertex-"))
     .map((overlay) => (overlay.kind === "marker" ? overlay.point : null))
     .filter((point): point is LatLngTuple => point !== null);
 
@@ -361,9 +332,7 @@ function computeZoneTarget(ctx: PlacementCameraContext): CameraTarget | null {
   return buildTarget(ctx, box);
 }
 
-export function computePlacementCameraTarget(
-  ctx: PlacementCameraContext,
-): CameraTarget | null {
+export function computePlacementCameraTarget(ctx: PlacementCameraContext): CameraTarget | null {
   if (ctx.tool === "none" || ctx.tool === "photo") {
     return null;
   }
@@ -396,4 +365,3 @@ export function computePlacementCameraTarget(
     }
   }
 }
-

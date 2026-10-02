@@ -1,15 +1,11 @@
 import { describe, expect, it } from "vitest";
+import type { TransitRouteLine, TransitStop, TransitVehicle } from "./transit";
 import {
   filterTransitRoutesForViewport,
   filterTransitStopsForViewport,
   filterTransitVehiclesForViewport,
   type MapViewportBounds,
 } from "./transitViewport";
-import type {
-  TransitRouteLine,
-  TransitStop,
-  TransitVehicle,
-} from "./transit";
 
 const viewport: MapViewportBounds = {
   south: 51.4,
@@ -37,9 +33,7 @@ describe("transitViewport", () => {
       },
     ];
 
-    expect(filterTransitStopsForViewport(stops, viewport, 13)).toEqual([
-      stops[0],
-    ]);
+    expect(filterTransitStopsForViewport(stops, viewport, 13)).toEqual([stops[0]]);
   });
 
   it("hides stops below zoom 13", () => {
@@ -90,9 +84,7 @@ describe("transitViewport", () => {
       },
     ];
 
-    expect(filterTransitRoutesForViewport(routes, viewport)).toEqual([
-      routes[0],
-    ]);
+    expect(filterTransitRoutesForViewport(routes, viewport)).toEqual([routes[0]]);
   });
 
   it("keeps live vehicles inside the viewport", () => {
@@ -115,8 +107,6 @@ describe("transitViewport", () => {
       },
     ];
 
-    expect(filterTransitVehiclesForViewport(vehicles, viewport)).toEqual([
-      vehicles[0],
-    ]);
+    expect(filterTransitVehiclesForViewport(vehicles, viewport)).toEqual([vehicles[0]]);
   });
 });

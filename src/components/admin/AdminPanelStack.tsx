@@ -1,16 +1,7 @@
 import type { DragEvent, ReactNode } from "react";
-import {
-  PANEL_LABELS,
-  type GridStack,
-  type PanelId,
-} from "../../domain/admin/opsDeskLayout";
-import {
-  HudCloseIcon,
-  HudCollapseIcon,
-  HudExpandIcon,
-  HudPinIcon,
-} from "../ui/brand/HudIcons";
-import { AdminPanelBody, type AdminPanelBodies } from "./AdminPanelBody";
+import { type GridStack, PANEL_LABELS, type PanelId } from "../../domain/admin/opsDeskLayout";
+import { HudCloseIcon, HudCollapseIcon, HudExpandIcon, HudPinIcon } from "../ui/brand/HudIcons";
+import { type AdminPanelBodies, AdminPanelBody } from "./AdminPanelBody";
 
 export const OPS_PANEL_MIME = "application/x-jl-ops-panel";
 
@@ -26,15 +17,8 @@ interface AdminPanelStackProps {
   onPinToggle: (stackId: string) => void;
   onCollapseToggle: (stackId: string) => void;
   onCloseActive: (stackId: string) => void;
-  onMergePanel: (
-    targetStackId: string,
-    payload: PanelMergePayload,
-  ) => void;
-  onReorderPanel: (
-    stackId: string,
-    fromIndex: number,
-    toIndex: number,
-  ) => void;
+  onMergePanel: (targetStackId: string, payload: PanelMergePayload) => void;
+  onReorderPanel: (stackId: string, fromIndex: number, toIndex: number) => void;
   dropTargetStackId: string | null;
   onDropTargetChange: (stackId: string | null) => void;
 }
@@ -58,8 +42,7 @@ export function AdminPanelStack({
   dropTargetStackId,
   onDropTargetChange,
 }: AdminPanelStackProps) {
-  const activePanelId =
-    stack.panelIds[stack.activeIndex] ?? stack.panelIds[0] ?? null;
+  const activePanelId = stack.panelIds[stack.activeIndex] ?? stack.panelIds[0] ?? null;
   const multi = stack.panelIds.length > 1;
   const isDropTarget = dropTargetStackId === stack.id;
 
@@ -130,11 +113,7 @@ export function AdminPanelStack({
             role="tab"
             aria-selected={index === stack.activeIndex}
             data-tab-index={index}
-            className={
-              index === stack.activeIndex
-                ? "jl-ops-tab jl-ops-tab--active"
-                : "jl-ops-tab"
-            }
+            className={index === stack.activeIndex ? "jl-ops-tab jl-ops-tab--active" : "jl-ops-tab"}
             draggable
             onDragStart={(event) => handleDragStart(event, panelId)}
             onDragOver={handleDragOver}
@@ -146,9 +125,7 @@ export function AdminPanelStack({
       </div>
     );
   } else {
-    titleNode = (
-      <h2 className="jl-ops-stack-title">{stackTitle(stack)}</h2>
-    );
+    titleNode = <h2 className="jl-ops-stack-title">{stackTitle(stack)}</h2>;
   }
 
   return (
@@ -172,9 +149,7 @@ export function AdminPanelStack({
           className="jl-ops-drag-handle"
           draggable={!multi && !stack.pinned}
           onDragStart={
-            !multi && activePanelId
-              ? (event) => handleDragStart(event, activePanelId)
-              : undefined
+            !multi && activePanelId ? (event) => handleDragStart(event, activePanelId) : undefined
           }
         >
           {titleNode}
@@ -182,11 +157,7 @@ export function AdminPanelStack({
         <div className="jl-ops-stack-controls">
           <button
             type="button"
-            className={
-              stack.pinned
-                ? "jl-ops-icon-btn jl-ops-icon-btn--active"
-                : "jl-ops-icon-btn"
-            }
+            className={stack.pinned ? "jl-ops-icon-btn jl-ops-icon-btn--active" : "jl-ops-icon-btn"}
             aria-pressed={stack.pinned === true}
             aria-label={stack.pinned ? "Unpin panel" : "Pin panel"}
             onClick={() => onPinToggle(stack.id)}

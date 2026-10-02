@@ -1,9 +1,6 @@
 import { Button } from "@mantine/core";
 import { CrosshairIcon, MapPinIcon } from "@phosphor-icons/react";
-import {
-  filledStyles,
-  grayStyles,
-} from "@/components/ui/entry/entryChrome";
+import { filledStyles, grayStyles } from "@/components/ui/entry/entryChrome";
 
 interface AnchorControlsProps {
   gpsLoading: boolean;
@@ -51,12 +48,8 @@ export function AnchorControls({
         <GpsGlyph size={18} weight={hasAnchor ? "fill" : "bold"} />
       </span>
       <span className="flex min-w-0 flex-col items-start text-left leading-tight">
-        <span className="text-sm font-semibold">
-          {gpsLoading ? gpsLoadingLabel : gpsLabel}
-        </span>
-        {!gpsLoading ? (
-          <span className="text-xs font-normal opacity-90">{gpsStatus}</span>
-        ) : null}
+        <span className="text-sm font-semibold">{gpsLoading ? gpsLoadingLabel : gpsLabel}</span>
+        {!gpsLoading ? <span className="text-xs font-normal opacity-90">{gpsStatus}</span> : null}
       </span>
     </>
   );
@@ -84,10 +77,7 @@ export function AnchorControls({
             <>
               {anchorPlaceName ? (
                 <>
-                  Anchor ·{" "}
-                  <span className="font-medium text-field-ink">
-                    {anchorPlaceName}
-                  </span>
+                  Anchor · <span className="font-medium text-field-ink">{anchorPlaceName}</span>
                 </>
               ) : (
                 "Anchor set on the map"
@@ -108,9 +98,7 @@ export function AnchorControls({
           >
             {awaitingPlacement ? "Tap the map" : "Place at map tap"}
           </Button>
-          {hasAnchor ? (
-            <p className="text-xs text-field-ink-muted">{anchorHint}</p>
-          ) : null}
+          {hasAnchor ? <p className="text-xs text-field-ink-muted">{anchorHint}</p> : null}
         </>
       )}
     </div>

@@ -49,9 +49,7 @@ export function SendToHidersButton({
           {isSubmitting ? "Sending…" : `Send to hiders (${costLabel})`}
         </button>
       ) : null}
-      {error ? (
-        <p className="text-sm text-status-error">{error}</p>
-      ) : null}
+      {error ? <p className="text-sm text-status-error">{error}</p> : null}
     </>
   );
 }

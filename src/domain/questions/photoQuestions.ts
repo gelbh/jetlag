@@ -1,9 +1,8 @@
 import type { DistanceUnit } from "../map/distance";
 import { resolveDistanceUnit } from "../map/distancePresets";
+import type { GameReplyOption, PendingQuestionRecord } from "../session/activity/sessionChat";
 import type { GameSize } from "../session/size/gameSize";
 import { firstUnusedCatalogOption } from "../session/tools/toolSessionOptions";
-import type { PendingQuestionRecord } from "../session/activity/sessionChat";
-import type { GameReplyOption } from "../session/activity/sessionChat";
 import { buildCatalogHelpers } from "./catalogHelpers";
 
 export type PhotoCategoryId =
@@ -67,8 +66,7 @@ export const PHOTO_CATEGORIES = [
     id: "widest_street",
     label: "Widest Street",
     promptNoun: "the widest street",
-    ruleSummary:
-      "Must include both sides of the street; background not required.",
+    ruleSummary: "Must include both sides of the street; background not required.",
     phase: 1,
   },
   {
@@ -90,16 +88,14 @@ export const PHOTO_CATEGORIES = [
     id: "you",
     label: "You",
     promptNoun: "you",
-    ruleSummary:
-      "Selfie mode, perpendicular to ground, arm extended, default lens, no zoom.",
+    ruleSummary: "Selfie mode, perpendicular to ground, arm extended, default lens, no zoom.",
     phase: 1,
   },
   {
     id: "the_sky",
     label: "The Sky",
     promptNoun: "the sky",
-    ruleSummary:
-      "Place phone on ground, shoot directly up, no zoom.",
+    ruleSummary: "Place phone on ground, shoot directly up, no zoom.",
     phase: 1,
   },
   {
@@ -129,24 +125,21 @@ export const PHOTO_CATEGORIES = [
     id: "restaurant_interior",
     label: "Restaurant Interior",
     promptNoun: "a restaurant interior",
-    ruleSummary:
-      "No zoom. Take picture through the window from outside.",
+    ruleSummary: "No zoom. Take picture through the window from outside.",
     phase: 2,
   },
   {
     id: "park",
     label: "Park",
     promptNoun: "a park",
-    ruleSummary:
-      "No zoom, perpendicular to ground. Must stand 5 feet from any obstruction.",
+    ruleSummary: "No zoom, perpendicular to ground. Must stand 5 feet from any obstruction.",
     phase: 2,
   },
   {
     id: "grocery_store_aisle",
     label: "Grocery Store Aisle",
     promptNoun: "a grocery store aisle",
-    ruleSummary:
-      "No zoom. Stand at the end of the aisle, shoot directly down.",
+    ruleSummary: "No zoom. Stand at the end of the aisle, shoot directly down.",
     phase: 2,
   },
   {
@@ -161,8 +154,7 @@ export const PHOTO_CATEGORIES = [
     id: "train_platform",
     label: "Train Platform",
     promptNoun: "a train platform",
-    ruleSummary:
-      "5' x 5' section with 3 distinct elements.",
+    ruleSummary: "5' x 5' section with 3 distinct elements.",
     phase: 2,
   },
   {
@@ -177,8 +169,7 @@ export const PHOTO_CATEGORIES = [
     id: "tallest_mountain_from_transit_station",
     label: "Tallest Mountain Visible from Transit Station",
     promptNoun: "the tallest mountain visible from a transit station",
-    ruleSummary:
-      "Tallest from your perspective. Max 3x zoom; top in top 1/3 of frame.",
+    ruleSummary: "Tallest from your perspective. Max 3x zoom; top in top 1/3 of frame.",
     phase: 3,
   },
   {
@@ -208,9 +199,7 @@ function maxPhaseForGameSize(gameSize: GameSize): PhotoCategoryPhase {
   return 1;
 }
 
-export function getPhotoCategory(
-  categoryId: PhotoCategoryId,
-): PhotoCategoryDefinition {
+export function getPhotoCategory(categoryId: PhotoCategoryId): PhotoCategoryDefinition {
   const category = PHOTO_CATEGORIES.find((item) => item.id === categoryId);
   if (!category) {
     throw new Error(`Unknown photo category: ${categoryId}`);
@@ -229,9 +218,7 @@ export function isPhotoCategoryAvailableForGameSize(
   return getPhotoCategory(categoryId).phase <= maxPhaseForGameSize(gameSize);
 }
 
-export function photoCategoriesForGameSize(
-  gameSize: GameSize,
-): readonly PhotoCategoryDefinition[] {
+export function photoCategoriesForGameSize(gameSize: GameSize): readonly PhotoCategoryDefinition[] {
   const maxPhase = maxPhaseForGameSize(gameSize);
   return PHOTO_CATEGORIES.filter((category) => category.phase <= maxPhase);
 }
@@ -244,8 +231,7 @@ const METRIC_PHOTO_COPY: Partial<
   >
 > = {
   park: {
-    ruleSummary:
-      "No zoom, perpendicular to ground. Must stand 2 m from any obstruction.",
+    ruleSummary: "No zoom, perpendicular to ground. Must stand 2 m from any obstruction.",
   },
   place_of_worship: {
     ruleSummary:
@@ -326,9 +312,7 @@ export function photoQuestionLabel(
   return `Photo · ${photoCategoryLabelForUnit(categoryId, unit).toLowerCase()}`;
 }
 
-export function readPhotoCategoryId(
-  pending: PendingQuestionRecord,
-): PhotoCategoryId | null {
+export function readPhotoCategoryId(pending: PendingQuestionRecord): PhotoCategoryId | null {
   if (pending.toolType !== "photo") {
     return null;
   }
@@ -351,10 +335,7 @@ export function usedPhotoCategoryIds(
   pendingQuestions: readonly PendingQuestionRecord[],
   exceptQuestionId?: string,
 ): Set<PhotoCategoryId> {
-  return photoCatalogHelpers.usedOptionsFromPending(
-    pendingQuestions,
-    exceptQuestionId,
-  );
+  return photoCatalogHelpers.usedOptionsFromPending(pendingQuestions, exceptQuestionId);
 }
 
 export function photoCategoryUseCount(
@@ -400,8 +381,7 @@ export function defaultPhotoCategoryId(
   usedCategories: ReadonlySet<PhotoCategoryId> = new Set(),
 ): PhotoCategoryId {
   return (
-    firstAvailablePhotoCategoryId(gameSize, usedCategories) ??
-    "any_building_from_transit_station"
+    firstAvailablePhotoCategoryId(gameSize, usedCategories) ?? "any_building_from_transit_station"
   );
 }
 

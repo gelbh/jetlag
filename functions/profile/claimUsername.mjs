@@ -69,11 +69,7 @@ export async function claimUsernameHandler(db, uid, rawUsername) {
 
   const { username, normalized } = validated;
   const usernameRef = db.collection("usernames").doc(normalized);
-  const profileRef = db
-    .collection("users")
-    .doc(uid)
-    .collection("profile")
-    .doc("main");
+  const profileRef = db.collection("users").doc(uid).collection("profile").doc("main");
 
   const claimed = await db.runTransaction(async (transaction) => {
     const [usernameSnap, profileSnap] = await Promise.all([

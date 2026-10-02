@@ -1,11 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import {
-  MemoryRouter,
-  Navigate,
-  Route,
-  Routes,
-  useLocation,
-} from "react-router-dom";
+import { MemoryRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { describe, expect, it } from "vitest";
 
 function PathProbe() {

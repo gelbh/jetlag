@@ -1,9 +1,6 @@
 import { Box, Stack, Text } from "@mantine/core";
 import { FileTextIcon, ShieldIcon } from "@phosphor-icons/react";
-import {
-  InsetGroup,
-  SectionLabel,
-} from "@/components/ui/entry/entryChrome";
+import { InsetGroup, SectionLabel } from "@/components/ui/entry/entryChrome";
 import { InsetRow } from "@/components/ui/entry/InsetRow";
 import {
   LEGAL_EFFECTIVE_DATE,
@@ -23,10 +20,8 @@ export function LegalDocumentBody({
   sections: LegalSection[];
   crossLink: "privacy" | "terms";
 }) {
-  const otherPath =
-    crossLink === "privacy" ? LEGAL_TERMS_PATH : LEGAL_PRIVACY_PATH;
-  const otherLabel =
-    crossLink === "privacy" ? "Terms of Service" : "Privacy Policy";
+  const otherPath = crossLink === "privacy" ? LEGAL_TERMS_PATH : LEGAL_PRIVACY_PATH;
+  const otherLabel = crossLink === "privacy" ? "Terms of Service" : "Privacy Policy";
   const otherIcon =
     crossLink === "privacy" ? (
       <FileTextIcon size={22} weight="regular" />
@@ -79,11 +74,7 @@ export function LegalDocumentBody({
       <Stack gap={8}>
         <SectionLabel>More</SectionLabel>
         <InsetGroup>
-          <InsetRow
-            to={otherPath}
-            label={otherLabel}
-            icon={otherIcon}
-          />
+          <InsetRow to={otherPath} label={otherLabel} icon={otherIcon} />
           <InsetRow
             showSeparator
             href={LEGAL_FEEDBACK_URL}

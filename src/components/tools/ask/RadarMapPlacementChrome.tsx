@@ -6,8 +6,8 @@ import { CheckIcon, PaperPlaneTiltIcon, XIcon } from "@phosphor-icons/react";
 import { HudRadarIcon } from "@/components/map/icons/ToolIcons";
 import {
   AskMapPlacementChrome,
-  askMapPlacementSendStyles,
   type AskMapPlacementPhase,
+  askMapPlacementSendStyles,
 } from "@/components/tools/ask/AskMapPlacementChrome";
 import { RadarDistancePicker } from "@/components/tools/RadarDistancePicker";
 import { yesNoAnswerOptions } from "@/components/tools/shared/answers/binaryAnswerOptions";
@@ -17,10 +17,7 @@ import {
   mapChromeSurfaceStyles,
 } from "@/components/ui/entry/entryChrome";
 import type { DistanceUnit } from "@/domain/map/distance";
-import type {
-  RadarAnswer,
-  RadarDistanceOptionKey,
-} from "@/domain/questions";
+import type { RadarAnswer, RadarDistanceOptionKey } from "@/domain/questions";
 import type { GameSize } from "@/domain/session/size/gameSize";
 
 export type RadarMapPlacementPhase = AskMapPlacementPhase;
@@ -52,10 +49,7 @@ export type RadarMapPlacementChromeProps = {
 };
 
 /** iOS segmented Yes/No — solid selected chip tones inside an inset track. */
-const answerSegmentStyles = (
-  selected: boolean,
-  tone: "success" | "danger",
-) => {
+const answerSegmentStyles = (selected: boolean, tone: "success" | "danger") => {
   const base = choiceChipStyles(selected, tone);
   return {
     root: {
@@ -71,8 +65,7 @@ const answerSegmentStyles = (
       justifyContent: "center",
       gap: 6,
       boxShadow: "none",
-      transition:
-        "background-color 160ms ease, color 160ms ease, transform 120ms ease",
+      transition: "background-color 160ms ease, color 160ms ease, transform 120ms ease",
       ...(selected
         ? null
         : {
@@ -115,13 +108,10 @@ export function RadarMapPlacementChrome({
   onChooseSelect,
   onCustomRadiusChange,
 }: RadarMapPlacementChromeProps) {
-  const statusTitle =
-    phase === "locating" ? "Getting your location" : "Ready";
-  const statusBody =
-    phase === "locating" ? "Waiting for GPS…" : distanceLabel;
+  const statusTitle = phase === "locating" ? "Getting your location" : "Ready";
+  const statusBody = phase === "locating" ? "Waiting for GPS…" : distanceLabel;
 
-  const showSoloAnswers =
-    phase === "answer" && !awaitHiderAnswer && Boolean(onAnswerChange);
+  const showSoloAnswers = phase === "answer" && !awaitHiderAnswer && Boolean(onAnswerChange);
 
   const distancePlate = (
     <div
@@ -153,8 +143,7 @@ export function RadarMapPlacementChrome({
           className="mt-2.5"
           style={{
             paddingTop: 10,
-            borderTop:
-              "0.33px solid oklch(from var(--color-field-ink) l c h / 0.1)",
+            borderTop: "0.33px solid oklch(from var(--color-field-ink) l c h / 0.1)",
           }}
         >
           <div
@@ -169,9 +158,7 @@ export function RadarMapPlacementChrome({
           >
             {yesNoAnswerOptions.map((option) => {
               const selected = answer === option.value;
-              const tone = option.activeClassName.includes("status-success")
-                ? "success"
-                : "danger";
+              const tone = option.activeClassName.includes("status-success") ? "success" : "danger";
               const Icon = option.value === "yes" ? CheckIcon : XIcon;
               return (
                 <UnstyledButton
@@ -181,11 +168,7 @@ export function RadarMapPlacementChrome({
                   onClick={() => onAnswerChange?.(option.value)}
                   styles={answerSegmentStyles(selected, tone)}
                 >
-                  <Icon
-                    size={16}
-                    weight={selected ? "bold" : "regular"}
-                    aria-hidden
-                  />
+                  <Icon size={16} weight={selected ? "bold" : "regular"} aria-hidden />
                   {option.label}
                 </UnstyledButton>
               );
@@ -197,16 +180,11 @@ export function RadarMapPlacementChrome({
   );
 
   const midSlot =
-    phase === "answer" || phase === "locating" || phase === "failed"
-      ? distancePlate
-      : null;
+    phase === "answer" || phase === "locating" || phase === "failed" ? distancePlate : null;
 
   const answerSlot =
     phase === "answer" ? (
-      <div
-        data-testid="radar-map-placement-answer"
-        className="flex flex-col gap-2"
-      >
+      <div data-testid="radar-map-placement-answer" className="flex flex-col gap-2">
         {awaitHiderAnswer || answer ? (
           <div
             className="flex flex-col gap-2"
@@ -242,7 +220,6 @@ export function RadarMapPlacementChrome({
         ) : null}
       </div>
     ) : null;
-
 
   return (
     <AskMapPlacementChrome

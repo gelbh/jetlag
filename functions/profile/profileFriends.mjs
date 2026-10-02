@@ -35,16 +35,8 @@ function assertPermanent(auth) {
 }
 
 async function requireOwnUsername(db, uid) {
-  const snap = await db
-    .collection("users")
-    .doc(uid)
-    .collection("profile")
-    .doc("main")
-    .get();
-  const username =
-    typeof snap.data()?.username === "string"
-      ? snap.data().username.trim()
-      : "";
+  const snap = await db.collection("users").doc(uid).collection("profile").doc("main").get();
+  const username = typeof snap.data()?.username === "string" ? snap.data().username.trim() : "";
   if (!username) {
     const err = new Error("Set a username first.");
     err.code = FRIENDS_INVALID;
@@ -135,9 +127,7 @@ async function searchUsernames(db, uid, rawQuery) {
       continue;
     }
     const username =
-      typeof data.username === "string" && data.username.trim()
-        ? data.username.trim()
-        : doc.id;
+      typeof data.username === "string" && data.username.trim() ? data.username.trim() : doc.id;
     results.push({ uid: otherUid, username });
   }
   return { results };
@@ -164,9 +154,7 @@ async function sendFriendRequest(db, uid, toUidRaw) {
     .doc("main")
     .get();
   const theirUsername =
-    typeof theirProfile.data()?.username === "string"
-      ? theirProfile.data().username.trim()
-      : "";
+    typeof theirProfile.data()?.username === "string" ? theirProfile.data().username.trim() : "";
   if (!theirUsername) {
     const err = new Error("Player not found.");
     err.code = FRIENDS_NOT_FOUND;
@@ -174,11 +162,7 @@ async function sendFriendRequest(db, uid, toUidRaw) {
   }
 
   const friendRef = db.collection("users").doc(uid).collection("friends").doc(toUid);
-  const incomingRef = db
-    .collection("users")
-    .doc(toUid)
-    .collection("friendRequests")
-    .doc(uid);
+  const incomingRef = db.collection("users").doc(toUid).collection("friendRequests").doc(uid);
   const outgoingRef = db
     .collection("users")
     .doc(uid)
@@ -208,9 +192,7 @@ async function sendFriendRequest(db, uid, toUidRaw) {
       tx.get(friendRef),
       tx.get(incomingRef),
       tx.get(reverseIncomingRef),
-      tx.get(
-        db.collection("users").doc(uid).collection("friends").limit(MAX_FRIENDS),
-      ),
+      tx.get(db.collection("users").doc(uid).collection("friends").limit(MAX_FRIENDS)),
       tx.get(
         db
           .collection("users")
@@ -219,11 +201,7 @@ async function sendFriendRequest(db, uid, toUidRaw) {
           .limit(MAX_PENDING_REQUESTS),
       ),
       tx.get(
-        db
-          .collection("users")
-          .doc(toUid)
-          .collection("friendRequests")
-          .limit(MAX_PENDING_REQUESTS),
+        db.collection("users").doc(toUid).collection("friendRequests").limit(MAX_PENDING_REQUESTS),
       ),
     ]);
     if (friendSnap.exists) {
@@ -239,15 +217,16 @@ async function sendFriendRequest(db, uid, toUidRaw) {
         throw err;
       }
       const now = new Date().toISOString();
-      const fromUsername =
+      const _fromUsername =
         typeof reverseIncomingSnap.data()?.fromUsername === "string"
           ? reverseIncomingSnap.data().fromUsername
           : theirUsername;
       tx.set(friendRef, { uid: toUid, username: theirUsername, since: now });
-      tx.set(
-        db.collection("users").doc(toUid).collection("friends").doc(uid),
-        { uid, username: myUsername, since: now },
-      );
+      tx.set(db.collection("users").doc(toUid).collection("friends").doc(uid), {
+        uid,
+        username: myUsername,
+        since: now,
+      });
       tx.delete(reverseIncomingRef);
       tx.delete(reverseOutgoingRef);
       return;
@@ -293,29 +272,19 @@ async function acceptFriendRequest(db, uid, fromUidRaw) {
     throw err;
   }
 
-  const requestRef = db
-    .collection("users")
-    .doc(uid)
-    .collection("friendRequests")
-    .doc(fromUid);
+  const requestRef = db.collection("users").doc(uid).collection("friendRequests").doc(fromUid);
   const theirOutgoingRef = db
     .collection("users")
     .doc(fromUid)
     .collection("outgoingFriendRequests")
     .doc(uid);
   const myFriendRef = db.collection("users").doc(uid).collection("friends").doc(fromUid);
-  const theirFriendRef = db
-    .collection("users")
-    .doc(fromUid)
-    .collection("friends")
-    .doc(uid);
+  const theirFriendRef = db.collection("users").doc(fromUid).collection("friends").doc(uid);
 
   await db.runTransaction(async (tx) => {
     const [requestSnap, myFriendsSnap] = await Promise.all([
       tx.get(requestRef),
-      tx.get(
-        db.collection("users").doc(uid).collection("friends").limit(MAX_FRIENDS),
-      ),
+      tx.get(db.collection("users").doc(uid).collection("friends").limit(MAX_FRIENDS)),
     ]);
     if (!requestSnap.exists) {
       const err = new Error("No pending request.");
@@ -337,12 +306,8 @@ async function acceptFriendRequest(db, uid, fromUidRaw) {
     tx.delete(requestRef);
     tx.delete(theirOutgoingRef);
     // Clear reverse pending edge if both sides had requested each other.
-    tx.delete(
-      db.collection("users").doc(uid).collection("outgoingFriendRequests").doc(fromUid),
-    );
-    tx.delete(
-      db.collection("users").doc(fromUid).collection("friendRequests").doc(uid),
-    );
+    tx.delete(db.collection("users").doc(uid).collection("outgoingFriendRequests").doc(fromUid));
+    tx.delete(db.collection("users").doc(fromUid).collection("friendRequests").doc(uid));
   });
 
   return { ok: true };
@@ -357,11 +322,7 @@ async function declineFriendRequest(db, uid, fromUidRaw) {
     throw err;
   }
 
-  const requestRef = db
-    .collection("users")
-    .doc(uid)
-    .collection("friendRequests")
-    .doc(fromUid);
+  const requestRef = db.collection("users").doc(uid).collection("friendRequests").doc(fromUid);
   const theirOutgoingRef = db
     .collection("users")
     .doc(fromUid)
@@ -390,11 +351,7 @@ async function cancelFriendRequest(db, uid, toUidRaw) {
     .doc(uid)
     .collection("outgoingFriendRequests")
     .doc(toUid);
-  const theirIncomingRef = db
-    .collection("users")
-    .doc(toUid)
-    .collection("friendRequests")
-    .doc(uid);
+  const theirIncomingRef = db.collection("users").doc(toUid).collection("friendRequests").doc(uid);
 
   await db.runTransaction(async (tx) => {
     tx.delete(outgoingRef);
@@ -414,11 +371,7 @@ async function removeFriend(db, uid, friendUidRaw) {
   }
 
   const myFriendRef = db.collection("users").doc(uid).collection("friends").doc(friendUid);
-  const theirFriendRef = db
-    .collection("users")
-    .doc(friendUid)
-    .collection("friends")
-    .doc(uid);
+  const theirFriendRef = db.collection("users").doc(friendUid).collection("friends").doc(uid);
 
   await db.runTransaction(async (tx) => {
     tx.delete(myFriendRef);
@@ -432,12 +385,7 @@ async function listFriends(db, uid) {
   await requireOwnUsername(db, uid);
   const [friendsSnap, incomingSnap, outgoingSnap] = await Promise.all([
     db.collection("users").doc(uid).collection("friends").limit(MAX_FRIENDS).get(),
-    db
-      .collection("users")
-      .doc(uid)
-      .collection("friendRequests")
-      .limit(MAX_PENDING_REQUESTS)
-      .get(),
+    db.collection("users").doc(uid).collection("friendRequests").limit(MAX_PENDING_REQUESTS).get(),
     db
       .collection("users")
       .doc(uid)
@@ -449,24 +397,15 @@ async function listFriends(db, uid) {
   return {
     friends: friendsSnap.docs.map((doc) => ({
       uid: doc.id,
-      username:
-        typeof doc.data()?.username === "string"
-          ? doc.data().username
-          : doc.id,
+      username: typeof doc.data()?.username === "string" ? doc.data().username : doc.id,
     })),
     incoming: incomingSnap.docs.map((doc) => ({
       uid: doc.id,
-      username:
-        typeof doc.data()?.fromUsername === "string"
-          ? doc.data().fromUsername
-          : doc.id,
+      username: typeof doc.data()?.fromUsername === "string" ? doc.data().fromUsername : doc.id,
     })),
     outgoing: outgoingSnap.docs.map((doc) => ({
       uid: doc.id,
-      username:
-        typeof doc.data()?.toUsername === "string"
-          ? doc.data().toUsername
-          : doc.id,
+      username: typeof doc.data()?.toUsername === "string" ? doc.data().toUsername : doc.id,
     })),
   };
 }

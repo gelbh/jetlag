@@ -1,10 +1,6 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { User } from "firebase/auth";
-import {
-  ADMIN_EMAIL,
-  claimsLookAdmin,
-  resolveAdminAccess,
-} from "./adminAccess";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { ADMIN_EMAIL, claimsLookAdmin, resolveAdminAccess } from "./adminAccess";
 
 function createUser(overrides: {
   email?: string | null;
@@ -19,23 +15,15 @@ function createUser(overrides: {
     emailVerified: overrides.emailVerified ?? false,
     isAnonymous: overrides.isAnonymous ?? false,
     reload: overrides.reload ?? vi.fn(async () => undefined),
-    getIdTokenResult:
-      overrides.getIdTokenResult ??
-      vi.fn(async () => ({ claims: {} })),
+    getIdTokenResult: overrides.getIdTokenResult ?? vi.fn(async () => ({ claims: {} })),
   } as unknown as User;
 }
 
 describe("claimsLookAdmin", () => {
   it("requires email_verified true and admin email", () => {
-    expect(
-      claimsLookAdmin({ email: ADMIN_EMAIL, email_verified: true }),
-    ).toBe(true);
-    expect(
-      claimsLookAdmin({ email: ADMIN_EMAIL, email_verified: false }),
-    ).toBe(false);
-    expect(
-      claimsLookAdmin({ email: "other@example.com", email_verified: true }),
-    ).toBe(false);
+    expect(claimsLookAdmin({ email: ADMIN_EMAIL, email_verified: true })).toBe(true);
+    expect(claimsLookAdmin({ email: ADMIN_EMAIL, email_verified: false })).toBe(false);
+    expect(claimsLookAdmin({ email: "other@example.com", email_verified: true })).toBe(false);
   });
 });
 

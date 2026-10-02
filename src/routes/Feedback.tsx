@@ -1,20 +1,22 @@
-import { useState } from "react";
 import { Button, Container, Stack, Text } from "@mantine/core";
-import { BugIcon, ChatCircleDotsIcon, LightbulbIcon, MagnifyingGlassIcon, WarningCircleIcon } from "@phosphor-icons/react";
-import { ReportProblemSheet } from "@/components/incident/ReportProblemSheet";
 import {
-  InsetGroup,
-  SectionLabel,
-  filledStyles,
-} from "@/components/ui/entry/entryChrome";
-import { InsetRow } from "@/components/ui/entry/InsetRow";
+  BugIcon,
+  ChatCircleDotsIcon,
+  LightbulbIcon,
+  MagnifyingGlassIcon,
+  WarningCircleIcon,
+} from "@phosphor-icons/react";
+import { useState } from "react";
+import { ReportProblemSheet } from "@/components/incident/ReportProblemSheet";
 import { EntryHeader } from "@/components/ui/entry/EntryHeader";
+import { filledStyles, InsetGroup, SectionLabel } from "@/components/ui/entry/entryChrome";
+import { InsetRow } from "@/components/ui/entry/InsetRow";
 import { EntryScreenLayout } from "@/components/ui/layout/EntryScreenLayout";
 import {
   githubBugReportUrl,
   githubBugsBrowseUrl,
-  githubIdeasBrowseUrl,
   githubIdeaSubmitUrl,
+  githubIdeasBrowseUrl,
 } from "@/domain/device/feedback/githubFeedback";
 import { PHONE_SHELL_MAX_WIDTH_PX } from "@/theme/phoneShell";
 
@@ -24,21 +26,15 @@ export function Feedback() {
   return (
     <EntryScreenLayout justify="start" skin="plain" flush>
       <EntryHeader title="Feedback" />
-      <Container
-        size="xs"
-        w="100%"
-        px="md"
-        maw={PHONE_SHELL_MAX_WIDTH_PX}
-        py="lg"
-      >
+      <Container size="xs" w="100%" px="md" maw={PHONE_SHELL_MAX_WIDTH_PX} py="lg">
         <Stack gap={22}>
           <Text
             size="sm"
             c="var(--color-field-ink-muted)"
             style={{ lineHeight: 1.4, textWrap: "pretty" }}
           >
-            Search existing threads before posting so bugs and ideas stay in one
-            place. For an urgent live issue mid-game, report a problem instead.
+            Search existing threads before posting so bugs and ideas stay in one place. For an
+            urgent live issue mid-game, report a problem instead.
           </Text>
 
           <Stack gap={8}>
@@ -93,10 +89,7 @@ export function Feedback() {
           </Stack>
         </Stack>
 
-        <ReportProblemSheet
-          open={reportProblemOpen}
-          onClose={() => setReportProblemOpen(false)}
-        />
+        <ReportProblemSheet open={reportProblemOpen} onClose={() => setReportProblemOpen(false)} />
       </Container>
     </EntryScreenLayout>
   );

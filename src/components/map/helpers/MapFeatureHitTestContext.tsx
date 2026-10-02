@@ -1,19 +1,18 @@
-/* eslint-disable react-refresh/only-export-components -- context module pairs provider with hooks */
 import {
   createContext,
+  type ReactNode,
   useCallback,
   useContext,
   useEffect,
   useMemo,
   useRef,
-  type ReactNode,
 } from "react";
 import type { MapLayerMouseEvent } from "react-map-gl/maplibre";
 import {
   dispatchMapFeatureHit,
-  queryJlMarkerFeatures,
   type MapFeatureHitHandler,
   type MapFeatureHitResult,
+  queryJlMarkerFeatures,
 } from "./mapFeatureHitTest";
 import { useMapLibreMap } from "./useMapLibreMap";
 
@@ -23,19 +22,12 @@ interface HitTestRegistry {
 }
 
 interface MapFeatureHitTestContextValue {
-  registerHitTarget: (
-    hitId: string,
-    handler: MapFeatureHitHandler,
-  ) => () => void;
-  registerLayerHandler: (
-    layerIdPrefix: string,
-    handler: MapFeatureHitHandler,
-  ) => () => void;
+  registerHitTarget: (hitId: string, handler: MapFeatureHitHandler) => () => void;
+  registerLayerHandler: (layerIdPrefix: string, handler: MapFeatureHitHandler) => () => void;
   tryHandleClick: (event: MapLayerMouseEvent) => boolean;
 }
 
-const MapFeatureHitTestContext =
-  createContext<MapFeatureHitTestContextValue | null>(null);
+const MapFeatureHitTestContext = createContext<MapFeatureHitTestContextValue | null>(null);
 
 function createRegistry(): HitTestRegistry {
   return { byHitId: new Map(), byLayerPrefix: new Map() };
@@ -44,15 +36,12 @@ function createRegistry(): HitTestRegistry {
 export function MapFeatureHitTestProvider({ children }: { children: ReactNode }) {
   const registryRef = useRef<HitTestRegistry>(createRegistry());
 
-  const registerHitTarget = useCallback(
-    (hitId: string, handler: MapFeatureHitHandler) => {
-      registryRef.current.byHitId.set(hitId, handler);
-      return () => {
-        registryRef.current.byHitId.delete(hitId);
-      };
-    },
-    [],
-  );
+  const registerHitTarget = useCallback((hitId: string, handler: MapFeatureHitHandler) => {
+    registryRef.current.byHitId.set(hitId, handler);
+    return () => {
+      registryRef.current.byHitId.delete(hitId);
+    };
+  }, []);
 
   const registerLayerHandler = useCallback(
     (layerIdPrefix: string, handler: MapFeatureHitHandler) => {
@@ -83,9 +72,7 @@ export function MapFeatureHitTestProvider({ children }: { children: ReactNode })
   );
 
   return (
-    <MapFeatureHitTestContext.Provider value={value}>
-      {children}
-    </MapFeatureHitTestContext.Provider>
+    <MapFeatureHitTestContext.Provider value={value}>{children}</MapFeatureHitTestContext.Provider>
   );
 }
 
@@ -108,9 +95,7 @@ export function useMapFeatureHitTest(
     if (!ctx) {
       return;
     }
-    return ctx.registerLayerHandler(layerIdPrefix, (result) =>
-      handlerRef.current(result),
-    );
+    return ctx.registerLayerHandler(layerIdPrefix, (result) => handlerRef.current(result));
   }, [ctx, layerIdPrefix]);
 }
 

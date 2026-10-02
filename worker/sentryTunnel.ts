@@ -5,9 +5,7 @@ export interface SentryTunnelTarget {
   projectId: string;
 }
 
-export function parseSentryEnvelopeTarget(
-  envelopeBody: string,
-): SentryTunnelTarget | null {
+export function parseSentryEnvelopeTarget(envelopeBody: string): SentryTunnelTarget | null {
   const headerLine = envelopeBody.split("\n")[0]?.trim();
   if (!headerLine) {
     return null;
@@ -64,22 +62,18 @@ export async function handleSentryTunnelRequest(
     return new Response("Invalid Sentry envelope", { status: 400 });
   }
 
-  const upstream = await fetchImpl(
-    `https://${target.host}/api/${target.projectId}/envelope/`,
-    {
-      method: "POST",
-      body,
-      headers: {
-        "Content-Type": "application/x-sentry-envelope",
-      },
+  const upstream = await fetchImpl(`https://${target.host}/api/${target.projectId}/envelope/`, {
+    method: "POST",
+    body,
+    headers: {
+      "Content-Type": "application/x-sentry-envelope",
     },
-  );
+  });
 
   return new Response(upstream.body, {
     status: upstream.status,
     headers: {
-      "Content-Type":
-        upstream.headers.get("Content-Type") ?? "application/json",
+      "Content-Type": upstream.headers.get("Content-Type") ?? "application/json",
     },
   });
 }

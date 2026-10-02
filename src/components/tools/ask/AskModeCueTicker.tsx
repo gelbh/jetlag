@@ -22,9 +22,7 @@ export function AskModeCueTicker({ cue }: AskModeCueTickerProps) {
       aria-live="polite"
       radius={14}
       p="sm"
-      className={cn(
-        "pointer-events-none mx-auto w-full max-w-md justify-center",
-      )}
+      className={cn("pointer-events-none mx-auto w-full max-w-md justify-center")}
       styles={{
         root: {
           ...mapChromeSurfaceStyles,

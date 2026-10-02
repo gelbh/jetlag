@@ -1,4 +1,6 @@
+import { FirebaseError } from "firebase/app";
 import {
+  addDoc,
   collection,
   deleteDoc,
   doc,
@@ -9,36 +11,27 @@ import {
   query,
   serverTimestamp,
   setDoc,
+  type Unsubscribe,
   updateDoc,
   where,
   writeBatch,
-  addDoc,
-  type Unsubscribe,
 } from "firebase/firestore";
-import { FirebaseError } from "firebase/app";
-import type { PlayerRole } from "../../domain/session/players/playerRole";
-import type { HidingZoneRecord } from "../../domain/session/hiding/hidingZone";
 import type { TimeTrapRecord } from "../../domain/expansion/timeTraps";
+import type { PlayerTrailPointRecord } from "../../domain/game/playerTrail";
+import type { StartingLocationRecord } from "../../domain/game/startingLocation";
+import { listWalkingThermometerQuestionIds } from "../../domain/questions";
 import {
   createMessageId,
   type PendingQuestionRecord,
   type PlayerLocationRecord,
   type SessionMessageRecord,
 } from "../../domain/session/activity/sessionChat";
-import type { PlayerTrailPointRecord } from "../../domain/game/playerTrail";
-import type { StartingLocationRecord } from "../../domain/game/startingLocation";
-import { listWalkingThermometerQuestionIds } from "../../domain/questions";
-import { getFirestoreDb } from "../core/firebase/firebase";
-import { arePlayerLocationPublishesBlocked } from "../session/playerLocationPublishGate";
+import type { HidingZoneRecord } from "../../domain/session/hiding/hidingZone";
+import type { PlayerRole } from "../../domain/session/players/playerRole";
 import { captureException } from "../core/analytics/sentry";
+import { getFirestoreDb } from "../core/firebase/firebase";
 import { emitQuestionCancelledActivity } from "../session/emitSessionActivity";
-import { handleFirestoreListenError } from "./sessions/listenError";
-import {
-  buildHidingZoneDocument,
-  buildTimeTrapDocument,
-  deserializeHidingZoneFromFirestore,
-  deserializeTimeTrapFromFirestore,
-} from "./serialization/serializeSession";
+import { arePlayerLocationPublishesBlocked } from "../session/playerLocationPublishGate";
 import {
   buildPendingQuestionDocument,
   buildPlayerLocationDocument,
@@ -47,7 +40,14 @@ import {
   deserializePlayerLocationFromFirestore,
   deserializeSessionMessageFromFirestore,
 } from "./serialization/serializePlayer";
+import {
+  buildHidingZoneDocument,
+  buildTimeTrapDocument,
+  deserializeHidingZoneFromFirestore,
+  deserializeTimeTrapFromFirestore,
+} from "./serialization/serializeSession";
 import { stripUndefinedValues } from "./serialization/shared";
+import { handleFirestoreListenError } from "./sessions/listenError";
 
 export const THERMOMETER_WALK_CANCEL_TEXT = {
   left: "Thermometer walk cancelled — seeker left.",
@@ -56,8 +56,7 @@ export const THERMOMETER_WALK_CANCEL_TEXT = {
   manual: "Thermometer walk cancelled.",
 } as const;
 
-export type ThermometerWalkCancelReason =
-  keyof typeof THERMOMETER_WALK_CANCEL_TEXT;
+export type ThermometerWalkCancelReason = keyof typeof THERMOMETER_WALK_CANCEL_TEXT;
 
 function sessionDoc(sessionId: string) {
   return doc(getFirestoreDb(), "sessions", sessionId);
@@ -80,9 +79,7 @@ export async function getPendingQuestionStatus(
   sessionId: string,
   questionId: string,
 ): Promise<string | null> {
-  const snapshot = await getDoc(
-    doc(pendingQuestionsCollection(sessionId), questionId),
-  );
+  const snapshot = await getDoc(doc(pendingQuestionsCollection(sessionId), questionId));
   if (!snapshot.exists()) {
     return null;
   }
@@ -99,14 +96,7 @@ function timeTrapsCollection(sessionId: string) {
 }
 
 function playerTrailPointsCollection(sessionId: string, uid: string) {
-  return collection(
-    getFirestoreDb(),
-    "sessions",
-    sessionId,
-    "playerTrailPoints",
-    uid,
-    "points",
-  );
+  return collection(getFirestoreDb(), "sessions", sessionId, "playerTrailPoints", uid, "points");
 }
 
 function startingLocationsCollection(sessionId: string) {
@@ -126,10 +116,7 @@ export async function writePlayerLocation(
   );
 }
 
-export async function deletePlayerLocation(
-  sessionId: string,
-  uid: string,
-): Promise<void> {
+export async function deletePlayerLocation(sessionId: string, uid: string): Promise<void> {
   await deleteDoc(doc(playerLocationsCollection(sessionId), uid));
 }
 
@@ -180,10 +167,7 @@ export function subscribeToStartingLocations(
           sessionId,
           lat: Number(data.lat),
           lng: Number(data.lng),
-          accuracyMeters:
-            typeof data.accuracyMeters === "number"
-              ? data.accuracyMeters
-              : undefined,
+          accuracyMeters: typeof data.accuracyMeters === "number" ? data.accuracyMeters : undefined,
           role: (data.role as PlayerRole) ?? "seeker",
           capturedAt: String(data.capturedAt),
         } satisfies StartingLocationRecord;
@@ -293,10 +277,7 @@ export async function writePendingQuestion(
   );
 }
 
-export async function deletePendingQuestion(
-  sessionId: string,
-  questionId: string,
-): Promise<void> {
+export async function deletePendingQuestion(sessionId: string, questionId: string): Promise<void> {
   await deleteDoc(doc(pendingQuestionsCollection(sessionId), questionId));
 }
 
@@ -326,21 +307,13 @@ export async function updatePendingQuestion(
   );
 }
 
-const OPEN_PENDING_QUESTION_STATUSES = new Set([
-  "pending",
-  "walking",
-  "answered",
-]);
+const OPEN_PENDING_QUESTION_STATUSES = new Set(["pending", "walking", "answered"]);
 
-export async function cancelOpenPendingQuestions(
-  sessionId: string,
-): Promise<void> {
+export async function cancelOpenPendingQuestions(sessionId: string): Promise<void> {
   const snapshot = await getDocs(pendingQuestionsCollection(sessionId));
   const toCancel = snapshot.docs.filter((questionDoc) => {
     const status = questionDoc.data().status;
-    return (
-      typeof status === "string" && OPEN_PENDING_QUESTION_STATUSES.has(status)
-    );
+    return typeof status === "string" && OPEN_PENDING_QUESTION_STATUSES.has(status);
   });
 
   for (let index = 0; index < toCancel.length; index += 500) {
@@ -435,13 +408,7 @@ export async function cancelWalkingThermometersAfterIdentityHeal(
       ),
     );
     const walkIds = listWalkingThermometerQuestionIds(questions, oldUid);
-    await cancelWalkingThermometersAndAnnounce(
-      sessionId,
-      walkIds,
-      senderUid,
-      senderRole,
-      "orphan",
-    );
+    await cancelWalkingThermometersAndAnnounce(sessionId, walkIds, senderUid, senderRole, "orphan");
   } catch (error) {
     captureException(error);
   }
@@ -487,14 +454,8 @@ export function subscribeToPendingQuestions(
   );
 }
 
-export async function writeHidingZone(
-  sessionId: string,
-  zone: HidingZoneRecord,
-): Promise<void> {
-  await setDoc(
-    doc(hidingZonesCollection(sessionId), zone.hiderUid),
-    buildHidingZoneDocument(zone),
-  );
+export async function writeHidingZone(sessionId: string, zone: HidingZoneRecord): Promise<void> {
+  await setDoc(doc(hidingZonesCollection(sessionId), zone.hiderUid), buildHidingZoneDocument(zone));
 }
 
 export function subscribeToHidingZones(
@@ -518,14 +479,8 @@ export function subscribeToHidingZones(
   );
 }
 
-export async function writeTimeTrap(
-  sessionId: string,
-  trap: TimeTrapRecord,
-): Promise<void> {
-  await setDoc(
-    doc(timeTrapsCollection(sessionId), trap.hiderUid),
-    buildTimeTrapDocument(trap),
-  );
+export async function writeTimeTrap(sessionId: string, trap: TimeTrapRecord): Promise<void> {
+  await setDoc(doc(timeTrapsCollection(sessionId), trap.hiderUid), buildTimeTrapDocument(trap));
 }
 
 export function subscribeToTimeTraps(
@@ -586,4 +541,4 @@ export async function postGameSystemMessage(
   });
 }
 
-export { sessionDoc, serverTimestamp };
+export { serverTimestamp, sessionDoc };

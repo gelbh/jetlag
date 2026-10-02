@@ -5,9 +5,7 @@ import { isRetriableSyncError } from "./syncRetry";
 describe("isRetriableSyncError", () => {
   it("rejects permission-denied errors", () => {
     expect(
-      isRetriableSyncError(
-        new FirebaseError("permission-denied", "Missing permission."),
-      ),
+      isRetriableSyncError(new FirebaseError("permission-denied", "Missing permission.")),
     ).toBe(false);
   });
 

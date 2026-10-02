@@ -1,6 +1,4 @@
-export function tryUpdateServiceWorker(
-  registration: ServiceWorkerRegistration | undefined,
-): void {
+export function tryUpdateServiceWorker(registration: ServiceWorkerRegistration | undefined): void {
   if (!registration || registration.installing) {
     return;
   }

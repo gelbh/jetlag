@@ -1,7 +1,7 @@
-import { AppUpdateMapChip } from "../../../components/ui/banners/AppUpdateMapChip";
-import { MeasuringRefineMapChip } from "../../../components/ui/banners/MeasuringRefineMapChip";
 import { HotfixGraceChip } from "../../../components/incident/HotfixGraceChip";
 import { FirestorePersistenceBanner } from "../../../components/session/banners/FirestorePersistenceBanner";
+import { AppUpdateMapChip } from "../../../components/ui/banners/AppUpdateMapChip";
+import { MeasuringRefineMapChip } from "../../../components/ui/banners/MeasuringRefineMapChip";
 import type { MapRefineChip } from "./selectMapRefineChip";
 
 const MEASURING_REFINE: MapRefineChip = {
@@ -26,11 +26,7 @@ export function MapScreenChromeBanners({
   return (
     <>
       <FirestorePersistenceBanner />
-      <MeasuringRefineMapChip
-        visible={chip.visible}
-        title={chip.title}
-        body={chip.body}
-      />
+      <MeasuringRefineMapChip visible={chip.visible} title={chip.title} body={chip.body} />
       <AppUpdateMapChip />
       <HotfixGraceChip />
     </>

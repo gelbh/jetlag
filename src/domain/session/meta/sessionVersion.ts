@@ -38,10 +38,7 @@ export function sessionVersionCompatible(
     return true;
   }
 
-  if (
-    returningMemberUid &&
-    session.memberUids.includes(returningMemberUid)
-  ) {
+  if (returningMemberUid && session.memberUids.includes(returningMemberUid)) {
     return true;
   }
 
@@ -52,10 +49,7 @@ export function sessionVersionCompatible(
   return compareAppVersions(clientVersion, session.hostAppVersion) >= 0;
 }
 
-export function sessionVersionMismatchMessage(
-  hostVersion: string,
-  clientVersion?: string,
-): string {
+export function sessionVersionMismatchMessage(hostVersion: string, clientVersion?: string): string {
   if (clientVersion) {
     const comparison = compareAppVersions(clientVersion, hostVersion);
     if (comparison < 0) {

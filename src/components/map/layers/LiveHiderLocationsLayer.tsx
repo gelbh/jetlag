@@ -6,15 +6,6 @@ interface LiveHiderLocationsLayerProps {
   myUid?: string | null;
 }
 
-export function LiveHiderLocationsLayer({
-  locations,
-  myUid = null,
-}: LiveHiderLocationsLayerProps) {
-  return (
-    <LivePlayerLocationsLayer
-      locations={locations}
-      myUid={myUid}
-      role="hider"
-    />
-  );
+export function LiveHiderLocationsLayer({ locations, myUid = null }: LiveHiderLocationsLayerProps) {
+  return <LivePlayerLocationsLayer locations={locations} myUid={myUid} role="hider" />;
 }

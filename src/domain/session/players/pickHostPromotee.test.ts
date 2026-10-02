@@ -4,11 +4,7 @@ import { pickHostPromotee } from "./pickHostPromotee";
 describe("pickHostPromotee", () => {
   it("prefers seeker over hider", () => {
     expect(
-      pickHostPromotee(
-        ["host", "h1", "s1"],
-        { host: "seeker", h1: "hider", s1: "seeker" },
-        "host",
-      ),
+      pickHostPromotee(["host", "h1", "s1"], { host: "seeker", h1: "hider", s1: "seeker" }, "host"),
     ).toBe("s1");
   });
 
@@ -18,11 +14,7 @@ describe("pickHostPromotee", () => {
 
   it("lexicographic tie-break among seekers", () => {
     expect(
-      pickHostPromotee(
-        ["host", "b", "a"],
-        { host: "seeker", a: "seeker", b: "seeker" },
-        "host",
-      ),
+      pickHostPromotee(["host", "b", "a"], { host: "seeker", a: "seeker", b: "seeker" }, "host"),
     ).toBe("a");
   });
 });

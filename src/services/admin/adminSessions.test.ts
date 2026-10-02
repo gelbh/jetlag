@@ -1,9 +1,9 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
 import { FirebaseError } from "firebase/app";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
+  type AdminSessionSummary,
   fetchActiveAdminSessions,
   fetchAdminSessionsPage,
-  type AdminSessionSummary,
 } from "./adminSessions";
 
 const { mockCallable, forceRefreshIdToken } = vi.hoisted(() => ({
@@ -92,10 +92,7 @@ describe("fetchActiveAdminSessions", () => {
 
     const sessions = await fetchActiveAdminSessions();
 
-    expect(sessions.map((session) => session.sessionId)).toEqual([
-      "newer-page",
-      "older-page",
-    ]);
+    expect(sessions.map((session) => session.sessionId)).toEqual(["newer-page", "older-page"]);
   });
 });
 
@@ -172,9 +169,7 @@ describe("fetchAdminSessionsPage", () => {
   });
 
   it("maps double permission-denied to Admin access required", async () => {
-    mockCallable.mockRejectedValue(
-      new FirebaseError("functions/permission-denied", "nope"),
-    );
+    mockCallable.mockRejectedValue(new FirebaseError("functions/permission-denied", "nope"));
 
     await expect(fetchAdminSessionsPage()).rejects.toThrow("Admin access required.");
     expect(forceRefreshIdToken).toHaveBeenCalledTimes(1);

@@ -1,7 +1,7 @@
 import {
   getMatchingCategory,
-  matchingCategoryLabel,
   type MatchingCategoryId,
+  matchingCategoryLabel,
 } from "@/domain/questions";
 
 export function matchingFeatureCountLabel(
@@ -33,9 +33,7 @@ export function matchingFeatureCountLabel(
   return `${featureCount} ${noun}${plural} (${inPlayAreaFeatureCount} in play area, ${nearbyCount} nearby)`;
 }
 
-export function matchingFeatureNotFoundMessage(
-  categoryId: MatchingCategoryId,
-): string {
+export function matchingFeatureNotFoundMessage(categoryId: MatchingCategoryId): string {
   const label = matchingCategoryLabel(categoryId).toLowerCase();
   return `No named ${label} found in this play area.`;
 }
@@ -60,15 +58,11 @@ function matchingEmptyCatalogBody(categoryId: MatchingCategoryId): string {
 }
 
 /** Empty play-area catalog reason shown on bounce (no null-match offer). */
-export function matchingEmptyPlayAreaMessage(
-  categoryId: MatchingCategoryId,
-): string {
+export function matchingEmptyPlayAreaMessage(categoryId: MatchingCategoryId): string {
   return matchingEmptyCatalogBody(categoryId);
 }
 
-export function matchingNullAnswerMessage(
-  categoryId: MatchingCategoryId,
-): string {
+export function matchingNullAnswerMessage(categoryId: MatchingCategoryId): string {
   return `${matchingEmptyCatalogBody(categoryId)} You can still answer Yes or No as a null match.`;
 }
 

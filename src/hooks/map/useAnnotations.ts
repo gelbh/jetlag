@@ -1,17 +1,10 @@
 import { useCallback } from "react";
+import { isRetriableSyncError } from "../../domain/device/sync/syncRetry";
 import type { AnnotationRecord } from "../../domain/map/annotations";
 import { LOCAL_SESSION_ID, migrateAnnotations } from "../../domain/map/annotations";
+import { findLastRedoableAnnotation, findLastUndoableAnnotation } from "../../domain/map/mapTools";
 import { resolvePlayerRole } from "../../domain/session/players/playerRole";
-import {
-  findLastRedoableAnnotation,
-  findLastUndoableAnnotation,
-} from "../../domain/map/mapTools";
-import type { MapTool } from "../../state/sessionStore";
-import { useAnnotationStore, useSessionStore } from "../../state/sessionStore";
-import {
-  ensureAnonymousUser,
-  isFirebaseConfigured,
-} from "../../services/core/firebase/firebase";
+import { ensureAnonymousUser, isFirebaseConfigured } from "../../services/core/firebase/firebase";
 import {
   ensureRemoteSessionWriteAccess,
   isFirestorePermissionDenied,
@@ -27,23 +20,16 @@ import {
   countOfflineQueueForSession,
   enqueueOfflineWrite,
 } from "../../services/session/offlineQueue";
-import { isRetriableSyncError } from "../../domain/device/sync/syncRetry";
+import type { MapTool } from "../../state/sessionStore";
+import { useAnnotationStore, useSessionStore } from "../../state/sessionStore";
 import { shouldQueueAnnotationOffline } from "./shouldQueueAnnotationOffline";
 
 export function useAnnotations() {
   const session = useSessionStore((state) => state.session);
-  const incrementPendingWrites = useSessionStore(
-    (state) => state.incrementPendingWrites,
-  );
-  const decrementPendingWrites = useSessionStore(
-    (state) => state.decrementPendingWrites,
-  );
-  const incrementSyncInFlight = useSessionStore(
-    (state) => state.incrementSyncInFlight,
-  );
-  const decrementSyncInFlight = useSessionStore(
-    (state) => state.decrementSyncInFlight,
-  );
+  const incrementPendingWrites = useSessionStore((state) => state.incrementPendingWrites);
+  const decrementPendingWrites = useSessionStore((state) => state.decrementPendingWrites);
+  const incrementSyncInFlight = useSessionStore((state) => state.incrementSyncInFlight);
+  const decrementSyncInFlight = useSessionStore((state) => state.decrementSyncInFlight);
   const setLastSyncError = useSessionStore((state) => state.setLastSyncError);
   const setPendingWrites = useSessionStore((state) => state.setPendingWrites);
   const setSession = useSessionStore((state) => state.setSession);
@@ -58,33 +44,17 @@ export function useAnnotations() {
     [setPendingWrites],
   );
   const addAnnotation = useAnnotationStore((state) => state.addAnnotation);
-  const softDeleteAnnotation = useAnnotationStore(
-    (state) => state.softDeleteAnnotation,
-  );
-  const softDeleteAllForSession = useAnnotationStore(
-    (state) => state.softDeleteAllForSession,
-  );
-  const pushRedoAnnotationId = useAnnotationStore(
-    (state) => state.pushRedoAnnotationId,
-  );
-  const removeRedoAnnotationId = useAnnotationStore(
-    (state) => state.removeRedoAnnotationId,
-  );
+  const softDeleteAnnotation = useAnnotationStore((state) => state.softDeleteAnnotation);
+  const softDeleteAllForSession = useAnnotationStore((state) => state.softDeleteAllForSession);
+  const pushRedoAnnotationId = useAnnotationStore((state) => state.pushRedoAnnotationId);
+  const removeRedoAnnotationId = useAnnotationStore((state) => state.removeRedoAnnotationId);
   const clearRedoStack = useAnnotationStore((state) => state.clearRedoStack);
-  const upsertAnnotation = useAnnotationStore(
-    (state) => state.upsertAnnotation,
-  );
-  const markAnnotationPulse = useAnnotationStore(
-    (state) => state.markAnnotationPulse,
-  );
+  const upsertAnnotation = useAnnotationStore((state) => state.upsertAnnotation);
+  const markAnnotationPulse = useAnnotationStore((state) => state.markAnnotationPulse);
 
   const persistAnnotation = useCallback(
     async (annotation: AnnotationRecord) => {
-      if (
-        !session ||
-        session.id === LOCAL_SESSION_ID ||
-        !isFirebaseConfigured()
-      ) {
+      if (!session || session.id === LOCAL_SESSION_ID || !isFirebaseConfigured()) {
         return;
       }
 
@@ -143,8 +113,7 @@ export function useAnnotations() {
           return;
         }
 
-        const message =
-          error instanceof Error ? error.message : "Sync failed.";
+        const message = error instanceof Error ? error.message : "Sync failed.";
         setLastSyncError(message);
         throw new Error(message, { cause: error });
       } finally {
@@ -182,20 +151,12 @@ export function useAnnotations() {
       await persistAnnotation(created);
       return created;
     },
-    [
-      addAnnotation,
-      clearRedoStack,
-      markAnnotationPulse,
-      persistAnnotation,
-      session?.id,
-    ],
+    [addAnnotation, clearRedoStack, markAnnotationPulse, persistAnnotation, session?.id],
   );
 
   const deleteAnnotation = useCallback(
     async (id: string) => {
-      const existing = useAnnotationStore
-        .getState()
-        .annotations.find((item) => item.id === id);
+      const existing = useAnnotationStore.getState().annotations.find((item) => item.id === id);
       if (!existing) {
         return;
       }
@@ -209,9 +170,7 @@ export function useAnnotations() {
   );
 
   const replaceAnnotations = useCallback((annotations: AnnotationRecord[]) => {
-    useAnnotationStore
-      .getState()
-      .setAnnotations(migrateAnnotations(annotations));
+    useAnnotationStore.getState().setAnnotations(migrateAnnotations(annotations));
   }, []);
 
   const mergeRemoteAnnotation = useCallback(
@@ -286,13 +245,7 @@ export function useAnnotations() {
       markAnnotationPulse(restored.id);
       await persistAnnotation(restored);
     },
-    [
-      markAnnotationPulse,
-      persistAnnotation,
-      removeRedoAnnotationId,
-      session,
-      upsertAnnotation,
-    ],
+    [markAnnotationPulse, persistAnnotation, removeRedoAnnotationId, session, upsertAnnotation],
   );
 
   const clearAllAnnotations = useCallback(async () => {
@@ -304,8 +257,7 @@ export function useAnnotations() {
     const active = useAnnotationStore
       .getState()
       .annotations.filter(
-        (annotation) =>
-          annotation.sessionId === session.id && annotation.status === "active",
+        (annotation) => annotation.sessionId === session.id && annotation.status === "active",
       );
 
     if (active.length === 0) {
@@ -314,10 +266,7 @@ export function useAnnotations() {
 
     softDeleteAllForSession(session.id);
 
-    if (
-      session.id === LOCAL_SESSION_ID ||
-      !isFirebaseConfigured()
-    ) {
+    if (session.id === LOCAL_SESSION_ID || !isFirebaseConfigured()) {
       return;
     }
 
@@ -342,10 +291,7 @@ export function useAnnotations() {
         return;
       }
 
-      const activeSession = await ensureRemoteSessionWriteAccess(
-        session,
-        user.uid,
-      );
+      const activeSession = await ensureRemoteSessionWriteAccess(session, user.uid);
 
       await writeRemoteAnnotationsBatch(activeSession.id, deleted);
     } catch (error) {
@@ -364,8 +310,7 @@ export function useAnnotations() {
         return;
       }
 
-      const message =
-        error instanceof Error ? error.message : "Sync failed.";
+      const message = error instanceof Error ? error.message : "Sync failed.";
       setLastSyncError(message);
       throw new Error(message, { cause: error });
     } finally {

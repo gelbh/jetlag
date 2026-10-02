@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 import type { MapScreenController } from "../useMapScreenController";
 import {
+  getMapScreenRoleConfig,
   MAP_SCREEN_CONTROLLER_CORE_KEYS,
   MAP_SCREEN_ROLE_CONFIGS,
-  getMapScreenRoleConfig,
   type MapScreenControllerCoreKey,
 } from "./mapScreenRoleConfig";
 

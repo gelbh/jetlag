@@ -1,13 +1,13 @@
 import { MapBottomChrome } from "../../components/map/chrome/MapBottomChrome";
 import { MapChromeControl } from "../../components/map/chrome/MapChromeControl";
 import { SessionTimerLabel } from "../../components/session/identity/SessionTimerLabel";
-import { SyncStatusBeacon } from "../../components/session/syncUi/SyncStatusDot";
 import { syncBeaconAriaLabel } from "../../components/session/status/syncRailDisplay";
+import { SyncStatusBeacon } from "../../components/session/syncUi/SyncStatusDot";
 import { HudHomeIcon } from "../../components/ui/brand/HudIcons";
-import { playerRoleLabel } from "../../domain/session/players/playerRole";
-import type { PlayerRole } from "../../domain/session/players/playerRole";
-import type { SessionRecord } from "../../domain/map/annotations";
 import type { SyncStatus } from "../../domain/device/sync/sync";
+import type { SessionRecord } from "../../domain/map/annotations";
+import type { PlayerRole } from "../../domain/session/players/playerRole";
+import { playerRoleLabel } from "../../domain/session/players/playerRole";
 import type { UseMapOverlayStateResult } from "../../hooks/map/useMapOverlayState";
 import type { useSessionTimer } from "../../hooks/session/useSessionTimer";
 import { MapScreenChromeSlots } from "../map-screen/shared/MapScreenChromeSlots";
@@ -43,9 +43,7 @@ export function AdminMapScreenChrome({
   diagnosticsOpen = false,
 }: AdminMapScreenChromeProps) {
   const roleConfig =
-    myRole === "admin"
-      ? getMapScreenRoleConfig("admin")
-      : getMapScreenRoleConfig(myRole);
+    myRole === "admin" ? getMapScreenRoleConfig("admin") : getMapScreenRoleConfig(myRole);
   const roleLabel = playerRoleLabel(roleConfig.statusPlayerRole);
 
   if (isWide) {
@@ -64,9 +62,7 @@ export function AdminMapScreenChrome({
                 </p>
               </div>
 
-              <span
-                className="shrink-0 rounded-md border border-brand-blue/50 bg-brand-blue/10 px-2 py-0.5 text-[0.8125rem] font-semibold uppercase tracking-wide text-brand-blue"
-              >
+              <span className="shrink-0 rounded-md border border-brand-blue/50 bg-brand-blue/10 px-2 py-0.5 text-[0.8125rem] font-semibold uppercase tracking-wide text-brand-blue">
                 {roleLabel}
               </span>
 
@@ -98,9 +94,7 @@ export function AdminMapScreenChrome({
       <div className="pointer-events-none absolute inset-x-0 top-0 z-[var(--z-dock)] px-3 pt-[max(0.75rem,var(--safe-area-top))]">
         <div className="pointer-events-auto jl-status-bar mx-auto flex max-w-xl items-center justify-between gap-2 px-2.5 py-1.5">
           <div className="min-w-0">
-            <p className="font-mono text-xs font-bold tracking-[0.18em] text-ink">
-              {session.code}
-            </p>
+            <p className="font-mono text-xs font-bold tracking-[0.18em] text-ink">{session.code}</p>
             <p className="text-[0.8125rem] tabular-nums text-ink-muted">
               <SessionTimerLabel timerState={timer.timerState} />
             </p>
@@ -151,9 +145,7 @@ export function AdminMapScreenChrome({
                 <button
                   type="button"
                   className={`min-h-9 flex-1 rounded-lg px-2.5 text-xs font-semibold uppercase tracking-wide ${
-                    diagnosticsOpen
-                      ? "bg-action text-action-ink"
-                      : "bg-surface-raised text-ink"
+                    diagnosticsOpen ? "bg-action text-action-ink" : "bg-surface-raised text-ink"
                   }`}
                   onClick={onToggleDiagnostics}
                 >
@@ -181,25 +173,19 @@ export function AdminMapScreenChrome({
             pressed={overlay.isChatOpen}
             aria-label="Open chat"
             label="Chat"
-            onClick={() =>
-              overlay.isChatOpen ? overlay.closeSheet() : overlay.openChat()
-            }
+            onClick={() => (overlay.isChatOpen ? overlay.closeSheet() : overlay.openChat())}
           />
           <MapChromeControl
             variant="slot"
             pressed={overlay.isLogOpen}
             aria-label="Open session log"
             label="Log"
-            onClick={() =>
-              overlay.isLogOpen ? overlay.closeSheet() : overlay.openLog()
-            }
+            onClick={() => (overlay.isLogOpen ? overlay.closeSheet() : overlay.openLog())}
           />
         </div>
       }
     />
   );
 
-  return (
-    <MapScreenChromeSlots layout="fragments" header={header} toolbar={toolbar} />
-  );
+  return <MapScreenChromeSlots layout="fragments" header={header} toolbar={toolbar} />;
 }

@@ -1,13 +1,11 @@
-import union from "@turf/union";
 import { featureCollection } from "@turf/helpers";
-import type { Feature, MultiPolygon, Polygon as GeoPolygon } from "geojson";
+import union from "@turf/union";
+import type { Feature, Polygon as GeoPolygon, MultiPolygon } from "geojson";
 import type { GameArea } from "../../map/annotations";
 import { gameAreaToBoundingBox, normalizeBoundingBox } from "../gameArea/gameAreaBounds";
 import { gameAreaWithoutInteriorRings } from "../gameArea/geometryCore";
 
-function gameAreaToFeature(
-  gameArea: GameArea,
-): Feature<GeoPolygon | MultiPolygon> {
+function gameAreaToFeature(gameArea: GameArea): Feature<GeoPolygon | MultiPolygon> {
   return {
     type: "Feature",
     properties: {},
@@ -29,11 +27,7 @@ export function unionGameAreas(areas: readonly GameArea[]): GameArea {
   for (let index = 1; index < areas.length; index += 1) {
     const next = gameAreaToFeature(areas[index]!);
     const merged = union(featureCollection([combined, next]));
-    if (
-      merged &&
-      (merged.geometry.type === "Polygon" ||
-        merged.geometry.type === "MultiPolygon")
-    ) {
+    if (merged && (merged.geometry.type === "Polygon" || merged.geometry.type === "MultiPolygon")) {
       combined = merged as Feature<GeoPolygon | MultiPolygon>;
     }
   }
@@ -41,18 +35,15 @@ export function unionGameAreas(areas: readonly GameArea[]): GameArea {
   const geometry = combined.geometry;
   if (geometry.type !== "Polygon" && geometry.type !== "MultiPolygon") {
     const box = normalizeBoundingBox(
-      areas.reduce(
-        (acc, area) => {
-          const next = gameAreaToBoundingBox(area);
-          return {
-            south: Math.min(acc.south, next.south),
-            west: Math.min(acc.west, next.west),
-            north: Math.max(acc.north, next.north),
-            east: Math.max(acc.east, next.east),
-          };
-        },
-        gameAreaToBoundingBox(areas[0]!),
-      ),
+      areas.reduce((acc, area) => {
+        const next = gameAreaToBoundingBox(area);
+        return {
+          south: Math.min(acc.south, next.south),
+          west: Math.min(acc.west, next.west),
+          north: Math.max(acc.north, next.north),
+          east: Math.max(acc.east, next.east),
+        };
+      }, gameAreaToBoundingBox(areas[0]!)),
     );
 
     return {

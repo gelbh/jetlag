@@ -1,8 +1,8 @@
 import type { BoundingBox } from "@/domain/geometry/gameArea/gameAreaBounds";
 import {
   BASE_MEASURING_CATALOG,
-  TENTACLE_LOCATION_CATEGORY_IDS,
   type MeasuringLocationCategory,
+  TENTACLE_LOCATION_CATEGORY_IDS,
   type TentacleExtendedCategoryId,
 } from "@/domain/questions";
 import { REGION_PACK_IDS, type RegionPackId } from "./regionPack";
@@ -47,8 +47,7 @@ export const REGION_PACK_REFERENCE_BBOXES: Record<RegionPackId, BoundingBox> = {
  * Runtime may fetch empty `source:"none"` stubs until Wikidata fills them.
  */
 export const PACK_GEO_POINT_CATEGORIES = BASE_MEASURING_CATALOG.filter(
-  (option) =>
-    option.targetKind === "point" && option.overpassSelectors.length > 0,
+  (option) => option.targetKind === "point" && option.overpassSelectors.length > 0,
 ).map((option) => option.id) as readonly MeasuringLocationCategory[];
 
 const PACK_GEO_POINT_CATEGORY_SET = new Set<string>(PACK_GEO_POINT_CATEGORIES);
@@ -61,18 +60,14 @@ export const PACK_GEO_TENTACLE_CATEGORIES = [
   "amusement_park",
 ] as const satisfies readonly TentacleExtendedCategoryId[];
 
-const PACK_GEO_TENTACLE_CATEGORY_SET = new Set<string>(
-  PACK_GEO_TENTACLE_CATEGORIES,
-);
+const PACK_GEO_TENTACLE_CATEGORY_SET = new Set<string>(PACK_GEO_TENTACLE_CATEGORIES);
 
 /** All recommended region packs participate in the pack geo matrix. */
 export const PACK_GEO_PACK_IDS: readonly RegionPackId[] = REGION_PACK_IDS;
 
 const PACK_GEO_PACK_ID_SET = new Set<string>(PACK_GEO_PACK_IDS);
 
-export function isPackGeoPointCategory(
-  category: string,
-): category is MeasuringLocationCategory {
+export function isPackGeoPointCategory(category: string): category is MeasuringLocationCategory {
   return PACK_GEO_POINT_CATEGORY_SET.has(category);
 }
 

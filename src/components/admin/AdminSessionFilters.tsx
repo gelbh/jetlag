@@ -115,9 +115,7 @@ export function AdminSessionFilters({
           Sort
           <select
             value={sort}
-            onChange={(event) =>
-              onSortChange(event.target.value as AdminSessionSort)
-            }
+            onChange={(event) => onSortChange(event.target.value as AdminSessionSort)}
             className="field-input"
           >
             <option value="lastActivity">Last activity</option>

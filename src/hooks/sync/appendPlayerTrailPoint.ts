@@ -1,10 +1,10 @@
-import type { PlayerRole } from "../../domain/session/players/playerRole";
-import { haversineMeters } from "../../domain/geometry/gameArea/distance";
 import {
+  type PlayerTrailPointRecord,
   TRAIL_MIN_DISTANCE_METERS,
   TRAIL_MIN_INTERVAL_MS,
-  type PlayerTrailPointRecord,
 } from "../../domain/game/playerTrail";
+import { haversineMeters } from "../../domain/geometry/gameArea/distance";
+import type { PlayerRole } from "../../domain/session/players/playerRole";
 import { appendPlayerTrailPoint } from "../../services/firestore/firestoreSessionExtras";
 
 interface TrailReading {
@@ -13,10 +13,7 @@ interface TrailReading {
   accuracyMeters?: number;
 }
 
-const lastTrailSampleByKey = new Map<
-  string,
-  { lat: number; lng: number; recordedAtMs: number }
->();
+const lastTrailSampleByKey = new Map<string, { lat: number; lng: number; recordedAtMs: number }>();
 
 function trailKey(sessionId: string, uid: string): string {
   return `${sessionId}:${uid}`;
@@ -34,14 +31,8 @@ export function shouldAppendTrailPoint(
     return true;
   }
 
-  const moved = haversineMeters(
-    [prior.lat, prior.lng],
-    [reading.lat, reading.lng],
-  );
-  return (
-    moved >= TRAIL_MIN_DISTANCE_METERS ||
-    nowMs - prior.recordedAtMs >= TRAIL_MIN_INTERVAL_MS
-  );
+  const moved = haversineMeters([prior.lat, prior.lng], [reading.lat, reading.lng]);
+  return moved >= TRAIL_MIN_DISTANCE_METERS || nowMs - prior.recordedAtMs >= TRAIL_MIN_INTERVAL_MS;
 }
 
 export async function maybeAppendPlayerTrailPoint(params: {

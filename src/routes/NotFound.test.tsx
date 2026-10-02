@@ -1,9 +1,9 @@
-import { screen } from "@testing-library/react";
 import { MantineProvider } from "@mantine/core";
+import { screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { jetlagTheme } from "@/theme/theme";
-import { NotFound } from "./NotFound";
 import { renderWithRouter } from "../test/renderWithRouter";
+import { NotFound } from "./NotFound";
 
 beforeEach(() => {
   vi.stubGlobal("matchMedia", (query: string) => ({
@@ -27,13 +27,8 @@ describe("NotFound", () => {
       { route: "/missing-path" },
     );
 
-    expect(
-      screen.getByRole("heading", { name: /Page not found/i }),
-    ).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /Back home/i })).toHaveAttribute(
-      "href",
-      "/",
-    );
+    expect(screen.getByRole("heading", { name: /Page not found/i })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Back home/i })).toHaveAttribute("href", "/");
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 });

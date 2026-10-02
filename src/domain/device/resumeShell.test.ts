@@ -4,8 +4,8 @@ import {
   revealRouteTransition,
 } from "../../navigation/revealRouteTransition";
 import {
-  RESUME_FALLBACK_CLASSES,
   clearResumeVisualArtifacts,
+  RESUME_FALLBACK_CLASSES,
   resumeWatchdogBudgets,
   rootHasInteractiveShell,
   rootHasResumeReady,

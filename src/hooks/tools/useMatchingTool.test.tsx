@@ -1,7 +1,7 @@
 import { act, renderHook } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { useMatchingTool } from "./useMatchingTool";
 import { createToolHookMocks } from "../../test/helpers/toolHookMocks";
+import { useMatchingTool } from "./useMatchingTool";
 
 describe("useMatchingTool", () => {
   it("stores the seeker anchor from map taps", () => {

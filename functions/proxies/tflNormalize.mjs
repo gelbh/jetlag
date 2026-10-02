@@ -1,10 +1,5 @@
 export function isInsideBounds(lat, lng, bounds) {
-  return (
-    lat >= bounds.south &&
-    lat <= bounds.north &&
-    lng >= bounds.west &&
-    lng <= bounds.east
-  );
+  return lat >= bounds.south && lat <= bounds.north && lng >= bounds.west && lng <= bounds.east;
 }
 
 export function normalizeTflPayload(payload, bounds) {
@@ -28,8 +23,7 @@ export function normalizeTflPayload(payload, bounds) {
         lat,
         lng,
         bearing: typeof entry?.bearing === "number" ? entry.bearing : undefined,
-        routeRef:
-          typeof entry?.lineName === "string" ? entry.lineName : undefined,
+        routeRef: typeof entry?.lineName === "string" ? entry.lineName : undefined,
         mode: "metro",
         updatedAt: new Date().toISOString(),
       };

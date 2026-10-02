@@ -12,11 +12,7 @@ export interface PlayerLocationPoint {
 export function isUsablePlayerLocation(
   location: PlayerLocationPoint | null | undefined,
 ): location is PlayerLocationPoint {
-  return (
-    location != null &&
-    Number.isFinite(location.lat) &&
-    Number.isFinite(location.lng)
-  );
+  return location != null && Number.isFinite(location.lat) && Number.isFinite(location.lng);
 }
 
 export function buildEndGameTruthAnchors(

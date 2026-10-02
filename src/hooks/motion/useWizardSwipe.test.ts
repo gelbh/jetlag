@@ -41,42 +41,24 @@ describe("useWizardSwipe", () => {
   });
 
   it("commits forward when dragged past the threshold", () => {
-    expect(
-      shouldCommitWizardSwipe(-threshold, width, 0, "next"),
-    ).toBe(true);
-    expect(
-      shouldCommitWizardSwipe(-threshold + 1, width, 0, "next"),
-    ).toBe(false);
+    expect(shouldCommitWizardSwipe(-threshold, width, 0, "next")).toBe(true);
+    expect(shouldCommitWizardSwipe(-threshold + 1, width, 0, "next")).toBe(false);
   });
 
   it("commits back when dragged past the threshold", () => {
-    expect(
-      shouldCommitWizardSwipe(threshold, width, 0, "back"),
-    ).toBe(true);
-    expect(
-      shouldCommitWizardSwipe(threshold - 1, width, 0, "back"),
-    ).toBe(false);
+    expect(shouldCommitWizardSwipe(threshold, width, 0, "back")).toBe(true);
+    expect(shouldCommitWizardSwipe(threshold - 1, width, 0, "back")).toBe(false);
   });
 
   it("commits forward on a fast left flick", () => {
     expect(
-      shouldCommitWizardSwipe(
-        0,
-        width,
-        -(WIZARD_SWIPE_COMMIT_VELOCITY_PX_MS + 0.05),
-        "next",
-      ),
+      shouldCommitWizardSwipe(0, width, -(WIZARD_SWIPE_COMMIT_VELOCITY_PX_MS + 0.05), "next"),
     ).toBe(true);
   });
 
   it("commits back on a fast right flick", () => {
     expect(
-      shouldCommitWizardSwipe(
-        0,
-        width,
-        WIZARD_SWIPE_COMMIT_VELOCITY_PX_MS + 0.05,
-        "back",
-      ),
+      shouldCommitWizardSwipe(0, width, WIZARD_SWIPE_COMMIT_VELOCITY_PX_MS + 0.05, "back"),
     ).toBe(true);
   });
 });

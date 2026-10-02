@@ -1,9 +1,9 @@
+import { MantineProvider } from "@mantine/core";
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import { MantineProvider } from "@mantine/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { EntryRouteShell } from "./EntryRouteShell";
 import { jetlagTheme } from "@/theme/theme";
+import { EntryRouteShell } from "./EntryRouteShell";
 
 beforeEach(() => {
   vi.stubGlobal("matchMedia", (query: string) => ({

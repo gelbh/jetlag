@@ -1,9 +1,14 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Feature, LineString } from "geojson";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { GameArea } from "@/domain/map/annotations";
 import * as overpassClient from "../../core/overpass/overpassClient";
 import { clearGeographicFeatureCacheForTests } from "../cache";
-import { fetchCoastlineSegments, fetchPreparedCoastlineSegments } from "./coastline";
+import {
+  fetchCoastlineSegments,
+  fetchPreparedCoastlineSegments,
+  getCachedPreparedCoastlineSegments,
+  loadCoastlineContext,
+} from "./coastline";
 import { clearBundledCoastlineCacheForTests } from "./regionPackCoastline";
 
 const sampleGameArea: GameArea = {
@@ -67,24 +72,47 @@ describe("coastline lookup", () => {
   });
 
   it("reuses cached coastline segments for the same play area", async () => {
-    const queryOverpass = vi
-      .spyOn(overpassClient, "queryOverpass")
-      .mockResolvedValue({
-        elements: [
-          {
-            type: "way",
-            geometry: [
-              { lat: 53.35, lon: -6.35 },
-              { lat: 53.36, lon: -6.34 },
-            ],
-          },
-        ],
-      });
+    const queryOverpass = vi.spyOn(overpassClient, "queryOverpass").mockResolvedValue({
+      elements: [
+        {
+          type: "way",
+          geometry: [
+            { lat: 53.35, lon: -6.35 },
+            { lat: 53.36, lon: -6.34 },
+          ],
+        },
+      ],
+    });
 
     await fetchCoastlineSegments(sampleGameArea);
     await fetchCoastlineSegments(sampleGameArea);
 
     expect(queryOverpass).toHaveBeenCalledTimes(1);
+  });
+
+  it("loadCoastlineContext returns pack segments before enrich writes cache", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => ({
+        ok: true,
+        json: async () => ({
+          source: "overpass",
+          segments: [packSegment],
+        }),
+      })),
+    );
+
+    vi.spyOn(overpassClient, "queryOverpass").mockImplementation(() => new Promise(() => {}));
+
+    const enrich = vi.fn();
+    const context = await loadCoastlineContext([53.35, -6.26], sampleGameArea, {
+      regionPackId: "dublin",
+      onEnrich: enrich,
+    });
+
+    expect(context?.segments).toHaveLength(1);
+    expect(getCachedPreparedCoastlineSegments(sampleGameArea)).toBeUndefined();
+    expect(enrich).not.toHaveBeenCalled();
   });
 
   it("resolves from the pack without awaiting slow Overpass when onEnrich is set", async () => {
@@ -100,14 +128,12 @@ describe("coastline lookup", () => {
     );
 
     let resolveOverpass: ((value: unknown) => void) | undefined;
-    const queryOverpass = vi
-      .spyOn(overpassClient, "queryOverpass")
-      .mockImplementation(
-        () =>
-          new Promise((resolve) => {
-            resolveOverpass = resolve;
-          }),
-      );
+    const queryOverpass = vi.spyOn(overpassClient, "queryOverpass").mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolveOverpass = resolve;
+        }),
+    );
 
     const enrich = vi.fn();
     const prepared = await fetchPreparedCoastlineSegments(sampleGameArea, {
@@ -116,9 +142,7 @@ describe("coastline lookup", () => {
     });
 
     expect(prepared.segments).toHaveLength(1);
-    expect(prepared.segments[0]?.geometry.coordinates).toEqual(
-      packSegment.geometry.coordinates,
-    );
+    expect(prepared.segments[0]?.geometry.coordinates).toEqual(packSegment.geometry.coordinates);
     expect(queryOverpass).toHaveBeenCalledTimes(1);
     expect(enrich).not.toHaveBeenCalled();
 

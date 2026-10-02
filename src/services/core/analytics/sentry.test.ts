@@ -3,21 +3,24 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 const addBreadcrumb = vi.hoisted(() => vi.fn());
 const captureMessage = vi.hoisted(() => vi.fn());
 const withScope = vi.hoisted(() =>
-  vi.fn((run: (scope: { setTag: ReturnType<typeof vi.fn>; setExtra: ReturnType<typeof vi.fn> }) => void) => {
-    run({ setTag: vi.fn(), setExtra: vi.fn() });
-  }),
+  vi.fn(
+    (
+      run: (scope: {
+        setTag: ReturnType<typeof vi.fn>;
+        setExtra: ReturnType<typeof vi.fn>;
+      }) => void,
+    ) => {
+      run({ setTag: vi.fn(), setExtra: vi.fn() });
+    },
+  ),
 );
 
 const init = vi.hoisted(() => vi.fn());
 const captureReactException = vi.hoisted(() => vi.fn());
 const addIntegration = vi.hoisted(() => vi.fn());
-const browserTracingIntegration = vi.hoisted(() =>
-  vi.fn(() => ({ name: "BrowserTracing" })),
-);
+const browserTracingIntegration = vi.hoisted(() => vi.fn(() => ({ name: "BrowserTracing" })));
 const replayIntegration = vi.hoisted(() => vi.fn(() => ({ name: "Replay" })));
-const getClientEnv = vi.hoisted(() =>
-  vi.fn((): Record<string, string> => ({})),
-);
+const getClientEnv = vi.hoisted(() => vi.fn((): Record<string, string> => ({})));
 const idleCallbacks = vi.hoisted((): Array<() => void> => []);
 
 vi.mock("@sentry/react", () => ({
@@ -46,8 +49,8 @@ vi.mock("@/domain/device/perf/scheduleAfterFirstPaint", () => ({
 import {
   captureErrorBoundaryException,
   initSentry,
-  reportJoinPermissionDenied,
   reportFirestoreListenPermissionDenied,
+  reportJoinPermissionDenied,
 } from "./sentry";
 
 describe("initSentry", () => {

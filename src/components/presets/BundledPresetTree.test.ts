@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { BUNDLED_GAME_PRESET_DEFINITIONS } from "@/domain/regions/bundledGamePresets";
 import {
-  buildBundledPresetTree,
   type BundledPresetTreeNode,
+  buildBundledPresetTree,
 } from "@/domain/regions/bundledPresetHierarchy";
 
 function countPresets(node: BundledPresetTreeNode): number {

@@ -1,11 +1,6 @@
 import type { AnnotationRecord, SessionRecord } from "../../../domain/map/annotations";
 import { getScenario } from "../catalog";
-import type {
-  PlayerRole,
-  ScenarioDefinition,
-  ScenarioId,
-  ScenarioSessionSpec,
-} from "../types";
+import type { PlayerRole, ScenarioDefinition, ScenarioId, ScenarioSessionSpec } from "../types";
 
 export type UnitFixtureOverrides = Partial<SessionRecord> & {
   myRole?: PlayerRole;
@@ -18,12 +13,8 @@ export interface UnitFixture {
   myRole: PlayerRole;
 }
 
-function resolveScenario(
-  scenarioOrId: ScenarioId | ScenarioDefinition,
-): ScenarioDefinition {
-  return typeof scenarioOrId === "string"
-    ? getScenario(scenarioOrId)
-    : scenarioOrId;
+function resolveScenario(scenarioOrId: ScenarioId | ScenarioDefinition): ScenarioDefinition {
+  return typeof scenarioOrId === "string" ? getScenario(scenarioOrId) : scenarioOrId;
 }
 
 function sessionFromSpec(spec: ScenarioSessionSpec): SessionRecord {
@@ -38,8 +29,7 @@ export function toUnitFixture(
   overrides: UnitFixtureOverrides = {},
 ): UnitFixture {
   const scenario = resolveScenario(scenarioOrId);
-  const { myRole: overrideRole, annotations: overrideAnnotations, ...sessionOverrides } =
-    overrides;
+  const { myRole: overrideRole, annotations: overrideAnnotations, ...sessionOverrides } = overrides;
   const session = {
     ...sessionFromSpec(scenario.session),
     ...sessionOverrides,

@@ -9,10 +9,7 @@ export interface UserErrorDisplay {
   secondaryActionLabel?: string;
 }
 
-export function formatUserError(
-  code: string,
-  fallbackMessage?: string | null,
-): UserErrorDisplay {
+export function formatUserError(code: string, fallbackMessage?: string | null): UserErrorDisplay {
   switch (code) {
     case "sync_offline":
       return {
@@ -77,9 +74,7 @@ export function userErrorFromSyncMessage(
   return formatUserError("unknown", message);
 }
 
-export function userErrorFromTerminalSessionMessage(
-  message: string,
-): UserErrorDisplay {
+export function userErrorFromTerminalSessionMessage(message: string): UserErrorDisplay {
   const missing = /no longer exists/i.test(message);
   return {
     title: missing ? "Session gone" : "Session ended",

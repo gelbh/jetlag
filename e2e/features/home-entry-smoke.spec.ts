@@ -1,9 +1,4 @@
-import {
-  test,
-  expect,
-  prepareE2EPage,
-  seedPersistedLocalSessionOnHome,
-} from "../fixtures";
+import { expect, prepareE2EPage, seedPersistedLocalSessionOnHome, test } from "../fixtures";
 
 test("Home Mantine smoke", async ({ page }) => {
   await prepareE2EPage(page);
@@ -16,9 +11,7 @@ test("Home Mantine continue navigates to map", async ({ page }) => {
   await seedPersistedLocalSessionOnHome(page, { code: "ABCD" });
 
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-  await expect(
-    page.getByRole("button", { name: /Return to map/i }),
-  ).toBeVisible();
+  await expect(page.getByRole("button", { name: /Return to map/i })).toBeVisible();
 
   await page.getByRole("button", { name: /Return to map/i }).click();
   await expect(page).toHaveURL(/\/map/, { timeout: 10_000 });

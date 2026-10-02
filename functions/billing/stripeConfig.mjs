@@ -22,28 +22,19 @@ export const stripePriceLifetime = defineString("STRIPE_PRICE_LIFETIME", {
   default: "price_1Ts1d0LcgH869xqOLySTFXkD",
 });
 
-export const stripeCheckoutSuccessUrl = defineString(
-  "STRIPE_CHECKOUT_SUCCESS_URL",
-  { default: "https://jetlag.gelbhart.dev/premium?checkout=success" },
-);
-export const stripeCheckoutCancelUrl = defineString(
-  "STRIPE_CHECKOUT_CANCEL_URL",
-  { default: "https://jetlag.gelbhart.dev/premium?checkout=cancel" },
-);
+export const stripeCheckoutSuccessUrl = defineString("STRIPE_CHECKOUT_SUCCESS_URL", {
+  default: "https://jetlag.gelbhart.dev/premium?checkout=success",
+});
+export const stripeCheckoutCancelUrl = defineString("STRIPE_CHECKOUT_CANCEL_URL", {
+  default: "https://jetlag.gelbhart.dev/premium?checkout=cancel",
+});
 export const stripePortalReturnUrl = defineString("STRIPE_PORTAL_RETURN_URL", {
   default: "https://jetlag.gelbhart.dev/premium",
 });
 
 /** @typedef {'pack_1' | 'pack_3' | 'pack_5' | 'monthly' | 'yearly' | 'lifetime'} PremiumProductKey */
 
-export const PREMIUM_PRODUCT_KEYS = [
-  "pack_1",
-  "pack_3",
-  "pack_5",
-  "monthly",
-  "yearly",
-  "lifetime",
-];
+export const PREMIUM_PRODUCT_KEYS = ["pack_1", "pack_3", "pack_5", "monthly", "yearly", "lifetime"];
 
 /** @type {Record<PremiumProductKey, { mode: 'payment' | 'subscription', credits?: number, lifetime?: boolean, plan?: 'monthly' | 'yearly', trialDays?: number }>} */
 export const PREMIUM_PRODUCTS = {
@@ -76,10 +67,7 @@ export function resolveStripePriceId(productKey) {
   return priceId;
 }
 
-export const STRIPE_BILLING_SECRETS = [
-  stripeSecretKey,
-  stripeWebhookSecret,
-];
+export const STRIPE_BILLING_SECRETS = [stripeSecretKey, stripeWebhookSecret];
 
 export const STRIPE_BILLING_PARAMS = [
   stripePricePack1,

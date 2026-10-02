@@ -1,10 +1,10 @@
 import { fireEvent, screen } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
 import { MemoryRouter } from "react-router-dom";
-import { LowBatteryPrompt } from "./LowBatteryPrompt";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { useMapStore } from "@/state/mapStore";
 import { resetAllStores } from "@/test/helpers/storeReset";
 import { renderWithAppUi } from "../../../test/renderWithAppUi";
+import { LowBatteryPrompt } from "./LowBatteryPrompt";
 
 const batteryStatus = {
   supported: true,

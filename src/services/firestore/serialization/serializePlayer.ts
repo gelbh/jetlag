@@ -1,14 +1,14 @@
 import type { GameOutcome } from "@/domain/game/foundHider";
-import { splitRoundPhaseMs } from "@/domain/game/splitRoundPhaseMs";
-import { hidingPeriodMs } from "@/domain/session/size/gameSizeRules";
 import type { GameResultPlayer, GameResultRecord } from "@/domain/game/gameResult";
+import { splitRoundPhaseMs } from "@/domain/game/splitRoundPhaseMs";
 import type {
   PendingQuestionRecord,
   PlayerLocationRecord,
   SessionMessageRecord,
 } from "@/domain/session/activity/sessionChat";
-import { parseFirestoreDocument } from "../zodConverter";
+import { hidingPeriodMs } from "@/domain/session/size/gameSizeRules";
 import { pendingQuestionDocumentSchema } from "../schemas/firestoreDocuments";
+import { parseFirestoreDocument } from "../zodConverter";
 import { assertNoNestedArrays, stripUndefinedValues } from "./shared";
 
 export function buildPlayerLocationDocument(
@@ -28,16 +28,14 @@ export function deserializePlayerLocationFromFirestore(
   sessionId: string,
   data: Record<string, unknown>,
 ): PlayerLocationRecord {
-  const role =
-    data.role === "hider" || data.role === "seeker" ? data.role : "seeker";
+  const role = data.role === "hider" || data.role === "seeker" ? data.role : "seeker";
 
   return {
     uid,
     sessionId,
     lat: Number(data.lat),
     lng: Number(data.lng),
-    accuracyMeters:
-      typeof data.accuracyMeters === "number" ? data.accuracyMeters : undefined,
+    accuracyMeters: typeof data.accuracyMeters === "number" ? data.accuracyMeters : undefined,
     updatedAt: String(data.updatedAt ?? ""),
     role,
   };
@@ -78,22 +76,17 @@ export function deserializeSessionMessageFromFirestore(
     createdAt: String(data.createdAt ?? ""),
     text: typeof data.text === "string" ? data.text : undefined,
     kind:
-      data.kind === "question" ||
-      data.kind === "answer" ||
-      data.kind === "system"
+      data.kind === "question" || data.kind === "answer" || data.kind === "system"
         ? data.kind
         : undefined,
     pendingQuestionId:
-      typeof data.pendingQuestionId === "string"
-        ? data.pendingQuestionId
-        : undefined,
+      typeof data.pendingQuestionId === "string" ? data.pendingQuestionId : undefined,
     toolType: data.toolType as SessionMessageRecord["toolType"],
     promptText: typeof data.promptText === "string" ? data.promptText : undefined,
     replyOptions: Array.isArray(data.replyOptions)
       ? (data.replyOptions as SessionMessageRecord["replyOptions"])
       : undefined,
-    selectedReply:
-      typeof data.selectedReply === "string" ? data.selectedReply : undefined,
+    selectedReply: typeof data.selectedReply === "string" ? data.selectedReply : undefined,
     status:
       data.status === "pending" ||
       data.status === "answered" ||
@@ -161,26 +154,18 @@ export function deserializePendingQuestionFromFirestore(
       : [],
     promptText: String(document.promptText ?? ""),
     answer: document.answer,
-    answerableAt:
-      typeof document.answerableAt === "string" ? document.answerableAt : undefined,
+    answerableAt: typeof document.answerableAt === "string" ? document.answerableAt : undefined,
     deadlineExpiredAt:
-      typeof document.deadlineExpiredAt === "string"
-        ? document.deadlineExpiredAt
-        : undefined,
-    answeredLate:
-      typeof document.answeredLate === "boolean" ? document.answeredLate : undefined,
+      typeof document.deadlineExpiredAt === "string" ? document.deadlineExpiredAt : undefined,
+    answeredLate: typeof document.answeredLate === "boolean" ? document.answeredLate : undefined,
     resolvedAnnotationId:
-      typeof document.resolvedAnnotationId === "string"
-        ? document.resolvedAnnotationId
-        : undefined,
+      typeof document.resolvedAnnotationId === "string" ? document.resolvedAnnotationId : undefined,
     cardDraw: typeof document.cardDraw === "number" ? document.cardDraw : undefined,
     cardKeep: typeof document.cardKeep === "number" ? document.cardKeep : undefined,
   };
 }
 
-function deserializeGameResultPlayer(
-  value: unknown,
-): GameResultPlayer | null {
+function deserializeGameResultPlayer(value: unknown): GameResultPlayer | null {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     return null;
   }
@@ -194,36 +179,23 @@ function deserializeGameResultPlayer(
   return {
     uid: typeof player.uid === "string" ? player.uid : "",
     role,
-    displayName:
-      typeof player.displayName === "string" ? player.displayName : undefined,
-    distanceMeters:
-      typeof player.distanceMeters === "number" ? player.distanceMeters : 0,
+    displayName: typeof player.displayName === "string" ? player.displayName : undefined,
+    distanceMeters: typeof player.distanceMeters === "number" ? player.distanceMeters : 0,
     maxDistanceFromStartMeters:
-      typeof player.maxDistanceFromStartMeters === "number"
-        ? player.maxDistanceFromStartMeters
-        : 0,
-    questionsAsked:
-      typeof player.questionsAsked === "number"
-        ? player.questionsAsked
-        : undefined,
+      typeof player.maxDistanceFromStartMeters === "number" ? player.maxDistanceFromStartMeters : 0,
+    questionsAsked: typeof player.questionsAsked === "number" ? player.questionsAsked : undefined,
     questionsReceived:
-      typeof player.questionsReceived === "number"
-        ? player.questionsReceived
-        : undefined,
+      typeof player.questionsReceived === "number" ? player.questionsReceived : undefined,
     questionsByTool:
       player.questionsByTool &&
       typeof player.questionsByTool === "object" &&
       !Array.isArray(player.questionsByTool)
         ? Object.fromEntries(
-            Object.entries(player.questionsByTool).filter(
-              ([, count]) => typeof count === "number",
-            ),
+            Object.entries(player.questionsByTool).filter(([, count]) => typeof count === "number"),
           )
         : undefined,
     avgAnswerTimeMs:
-      typeof player.avgAnswerTimeMs === "number"
-        ? player.avgAnswerTimeMs
-        : undefined,
+      typeof player.avgAnswerTimeMs === "number" ? player.avgAnswerTimeMs : undefined,
     won: player.won === true,
   };
 }
@@ -235,17 +207,13 @@ export function deserializeGameResultFromFirestore(
 ): GameResultRecord {
   const outcomeRaw = document.outcome;
   const outcome: GameOutcome =
-    outcomeRaw === "found" ||
-    outcomeRaw === "ended_early" ||
-    outcomeRaw === "abandoned"
+    outcomeRaw === "found" || outcomeRaw === "ended_early" || outcomeRaw === "abandoned"
       ? outcomeRaw
       : "found";
 
   const gameSizeRaw = document.gameSize;
   const gameSize =
-    gameSizeRaw === "small" ||
-    gameSizeRaw === "medium" ||
-    gameSizeRaw === "large"
+    gameSizeRaw === "small" || gameSizeRaw === "medium" || gameSizeRaw === "large"
       ? gameSizeRaw
       : "medium";
 
@@ -255,8 +223,7 @@ export function deserializeGameResultFromFirestore(
         .filter((player): player is GameResultPlayer => player !== null)
     : [];
 
-  const durationMs =
-    typeof document.durationMs === "number" ? document.durationMs : 0;
+  const durationMs = typeof document.durationMs === "number" ? document.durationMs : 0;
 
   const hasHiding = typeof document.hidingPhaseMs === "number";
   const hasSeek = typeof document.seekPhaseMs === "number";
@@ -294,16 +261,11 @@ export function deserializeGameResultFromFirestore(
       : seekPhaseMs;
 
   return {
-    sessionId:
-      typeof document.sessionId === "string" ? document.sessionId : sessionId,
-    roundNumber:
-      typeof document.roundNumber === "number" ? document.roundNumber : 0,
+    sessionId: typeof document.sessionId === "string" ? document.sessionId : sessionId,
+    roundNumber: typeof document.roundNumber === "number" ? document.roundNumber : 0,
     gameSize,
     outcome,
-    endedAt:
-      typeof document.endedAt === "string"
-        ? document.endedAt
-        : new Date().toISOString(),
+    endedAt: typeof document.endedAt === "string" ? document.endedAt : new Date().toISOString(),
     durationMs,
     hidingPhaseMs,
     seekPhaseMs,
@@ -311,4 +273,3 @@ export function deserializeGameResultFromFirestore(
     players,
   };
 }
-

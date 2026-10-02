@@ -1,5 +1,5 @@
-import { Component, type ReactNode } from "react";
 import { render, screen } from "@testing-library/react";
+import { Component, type ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { AppErrorBoundary } from "./AppErrorBoundary";
 

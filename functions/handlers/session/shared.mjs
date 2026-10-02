@@ -1,14 +1,12 @@
 import { HttpsError } from "firebase-functions/v2/https";
 import { getSentryDsnSecret } from "../../lib/sentry.mjs";
-import {
-  JOIN_INCOMPATIBLE_VERSION,
-  JOIN_NOT_GATED,
-  JOIN_PASSCODE_REQUIRED,
-  JOIN_SESSION_ENDED,
-  JOIN_SESSION_NOT_FOUND,
-  JOIN_WRONG_PASSCODE,
-} from "../../session/joinSessionWithRole.mjs";
 import { CLIENT_UPDATE_REQUIRED } from "../../session/clientMinVersion.mjs";
+import {
+  MOVE_TIMER_INVALID_ACTION,
+  MOVE_TIMER_NOT_HIDER,
+  MOVE_TIMER_SESSION_ENDED,
+  MOVE_TIMER_SESSION_NOT_FOUND,
+} from "../../session/controlSessionTimerForMove.mjs";
 import {
   EXPECTED_SESSION_UX_HTTPS_ERROR_KEYS,
   HTTPS_MSG_APP_VERSION_INCOMPATIBLE,
@@ -23,18 +21,10 @@ import {
   HTTPS_MSG_WRONG_ROLE_CODE,
 } from "../../session/expectedSessionUxHttpsErrors.mjs";
 import {
-  LEAVE_MEMBERSHIP_NOT_MEMBER,
-  LEAVE_NOT_GATED,
-} from "../../session/leaveSessionMembership.mjs";
-import {
   LEAVE_ALREADY_ENDED,
   LEAVE_NOT_HOST,
   LEAVE_SESSION_NOT_FOUND,
 } from "../../session/hostLeave.mjs";
-import {
-  REVEAL_NOT_AUTHORIZED,
-  REVEAL_SESSION_NOT_FOUND,
-} from "../../session/rolePasscodeReveal.mjs";
 import {
   JOIN_REQ_EXPIRED,
   JOIN_REQ_INVALID_DECISION,
@@ -49,11 +39,21 @@ import {
   JOIN_REQ_SIDE_EMPTY,
 } from "../../session/joinRequest.mjs";
 import {
-  MOVE_TIMER_INVALID_ACTION,
-  MOVE_TIMER_NOT_HIDER,
-  MOVE_TIMER_SESSION_ENDED,
-  MOVE_TIMER_SESSION_NOT_FOUND,
-} from "../../session/controlSessionTimerForMove.mjs";
+  JOIN_INCOMPATIBLE_VERSION,
+  JOIN_NOT_GATED,
+  JOIN_PASSCODE_REQUIRED,
+  JOIN_SESSION_ENDED,
+  JOIN_SESSION_NOT_FOUND,
+  JOIN_WRONG_PASSCODE,
+} from "../../session/joinSessionWithRole.mjs";
+import {
+  LEAVE_MEMBERSHIP_NOT_MEMBER,
+  LEAVE_NOT_GATED,
+} from "../../session/leaveSessionMembership.mjs";
+import {
+  REVEAL_NOT_AUTHORIZED,
+  REVEAL_SESSION_NOT_FOUND,
+} from "../../session/rolePasscodeReveal.mjs";
 
 export const sentryDsnSecret = getSentryDsnSecret();
 
@@ -73,10 +73,7 @@ export {
 
 function throwIfClientUpdateRequired(error) {
   if (error.message === CLIENT_UPDATE_REQUIRED) {
-    throw new HttpsError(
-      "failed-precondition",
-      HTTPS_MSG_CLIENT_UPDATE_REQUIRED,
-    );
+    throw new HttpsError("failed-precondition", HTTPS_MSG_CLIENT_UPDATE_REQUIRED);
   }
 }
 
@@ -85,8 +82,7 @@ export function requireAuthSessionId(request) {
     throw new HttpsError("unauthenticated", "Sign in required.");
   }
 
-  const sessionId =
-    typeof request.data?.sessionId === "string" ? request.data.sessionId : "";
+  const sessionId = typeof request.data?.sessionId === "string" ? request.data.sessionId : "";
 
   if (!sessionId) {
     throw new HttpsError("invalid-argument", "sessionId is required.");
@@ -139,10 +135,7 @@ export function mapJoinSessionWithRoleError(error) {
     throw new HttpsError("invalid-argument", HTTPS_MSG_ROLE_CODE_REQUIRED);
   }
   if (error.message === JOIN_INCOMPATIBLE_VERSION) {
-    throw new HttpsError(
-      "failed-precondition",
-      HTTPS_MSG_APP_VERSION_INCOMPATIBLE,
-    );
+    throw new HttpsError("failed-precondition", HTTPS_MSG_APP_VERSION_INCOMPATIBLE);
   }
   throwIfClientUpdateRequired(error);
   throw error;
@@ -162,10 +155,7 @@ export function mapMembershipLeaveError(error) {
     throw new HttpsError("permission-denied", "Session membership required.");
   }
   if (error.message === LEAVE_NOT_HOST) {
-    throw new HttpsError(
-      "failed-precondition",
-      "Host leave must use leaveHostSession.",
-    );
+    throw new HttpsError("failed-precondition", "Host leave must use leaveHostSession.");
   }
   if (error.message === LEAVE_NOT_GATED) {
     throw new HttpsError("failed-precondition", "Session uses legacy leave.");
@@ -208,10 +198,7 @@ export function mapJoinRequestError(error) {
   if (error.message === JOIN_REQ_INVALID_ROLE || error.message === JOIN_REQ_INVALID_DECISION) {
     throw new HttpsError("invalid-argument", HTTPS_MSG_INVALID_JOIN_REQUEST);
   }
-  if (
-    error.message === JOIN_REQ_NOT_AUTHORIZED ||
-    error.message === JOIN_REQ_NOT_REQUESTER
-  ) {
+  if (error.message === JOIN_REQ_NOT_AUTHORIZED || error.message === JOIN_REQ_NOT_REQUESTER) {
     throw new HttpsError("permission-denied", HTTPS_MSG_JOIN_NOT_ALLOWED);
   }
   if (error.message === JOIN_REQ_NOT_PENDING) {

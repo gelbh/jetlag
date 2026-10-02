@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import type { HiderTruthResult } from "./shared";
 import { reuseHiderTruthMapIfEqual } from "./hiderTruthMapReuse";
+import type { HiderTruthResult } from "./shared";
 
 function truth(replyId: string): HiderTruthResult {
   return { replyId, label: replyId };

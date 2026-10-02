@@ -8,15 +8,11 @@ function pendingIdsKey(pendingQuestions: readonly PendingQuestionRecord[]): stri
 export function useSeekerOptimisticPendingOverlays(
   pendingQuestions: readonly PendingQuestionRecord[],
 ) {
-  const [optimisticEntries, setOptimisticEntries] = useState<
-    PendingQuestionRecord[]
-  >([]);
+  const [optimisticEntries, setOptimisticEntries] = useState<PendingQuestionRecord[]>([]);
   const [ackedIds, setAckedIds] = useState(
     () => new Set(pendingQuestions.map((question) => question.id)),
   );
-  const [prevIdsKey, setPrevIdsKey] = useState(() =>
-    pendingIdsKey(pendingQuestions),
-  );
+  const [prevIdsKey, setPrevIdsKey] = useState(() => pendingIdsKey(pendingQuestions));
   const nextIdsKey = pendingIdsKey(pendingQuestions);
 
   if (nextIdsKey !== prevIdsKey) {
@@ -36,10 +32,7 @@ export function useSeekerOptimisticPendingOverlays(
 
   const registerOptimisticPending = useCallback(
     (entry: PendingQuestionRecord) => {
-      if (
-        pendingQuestions.some((question) => question.id === entry.id) ||
-        ackedIds.has(entry.id)
-      ) {
+      if (pendingQuestions.some((question) => question.id === entry.id) || ackedIds.has(entry.id)) {
         return;
       }
 
@@ -58,8 +51,7 @@ export function useSeekerOptimisticPendingOverlays(
     () =>
       optimisticEntries.filter(
         (entry) =>
-          !pendingQuestions.some((question) => question.id === entry.id) &&
-          !ackedIds.has(entry.id),
+          !pendingQuestions.some((question) => question.id === entry.id) && !ackedIds.has(entry.id),
       ),
     [ackedIds, optimisticEntries, pendingQuestions],
   );

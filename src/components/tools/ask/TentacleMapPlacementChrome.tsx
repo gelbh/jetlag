@@ -6,8 +6,8 @@ import { PaperPlaneTiltIcon } from "@phosphor-icons/react";
 import { HudTentacleIcon } from "@/components/map/icons/ToolIcons";
 import {
   AskMapPlacementChrome,
-  askMapPlacementSendStyles,
   type AskMapPlacementPhase,
+  askMapPlacementSendStyles,
 } from "@/components/tools/ask/AskMapPlacementChrome";
 import { TentacleMapAnswerStrip } from "@/components/tools/ask/TentacleMapAnswerStrip";
 import { mapChromeSurfaceStyles } from "@/components/ui/entry/entryChrome";
@@ -66,10 +66,7 @@ export function TentacleMapPlacementChrome({
 
   const answerSlot =
     phase === "answer" ? (
-      <div
-        data-testid="tentacle-map-placement-answer"
-        className="flex flex-col gap-2"
-      >
+      <div data-testid="tentacle-map-placement-answer" className="flex flex-col gap-2">
         {!awaitHiderAnswer ? (
           <TentacleMapAnswerStrip
             categoryId={categoryId}

@@ -1,15 +1,18 @@
-import type { GameArea } from "../../map/annotations";
-import { parseGeometryJson, pointFromGeometryFeature } from "../../geometry/gameArea/geometryParsing";
-import type { MapDraftOverlay } from "../../map/mapDraftOverlay";
-import { MAP_ANNOTATION_COLORS } from "../../map/mapAnnotationColors";
-import type { MapStyle, StreetBasemap } from "../../map/mapBasemaps";
+import {
+  parseGeometryJson,
+  pointFromGeometryFeature,
+} from "../../geometry/gameArea/geometryParsing";
 import {
   buildMeasuringBoundaryPreview,
   type MeasuringRegionInput,
 } from "../../geometry/measuring/measuringRegions";
-import { measuringPlacesFromMetadata } from "../measuringPlacesFromMetadata";
+import type { GameArea } from "../../map/annotations";
+import { MAP_ANNOTATION_COLORS } from "../../map/mapAnnotationColors";
+import type { MapStyle, StreetBasemap } from "../../map/mapBasemaps";
+import type { MapDraftOverlay } from "../../map/mapDraftOverlay";
 import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
-import { pushBoundaryOverlay, type OverlayBuildResult } from "./shared";
+import { measuringPlacesFromMetadata } from "../measuringPlacesFromMetadata";
+import { type OverlayBuildResult, pushBoundaryOverlay } from "./shared";
 
 export async function buildMeasuringOverlays(
   question: PendingQuestionRecord,
@@ -44,10 +47,7 @@ export async function buildMeasuringOverlays(
         `${prefix}-boundary`,
         await buildMeasuringBoundaryPreview({
           ...regionInput,
-          measuringPlaces: measuringPlacesFromMetadata(
-            metadata,
-            regionInput.measuringPlaces,
-          ),
+          measuringPlaces: measuringPlacesFromMetadata(metadata, regionInput.measuringPlaces),
           // Session play area wins over any legacy embedded gameArea.
           gameArea,
         }),
@@ -59,9 +59,7 @@ export async function buildMeasuringOverlays(
     }
   }
 
-  const targetPoint = metadata.measuringCoastPoint as
-    | { lat: number; lng: number }
-    | undefined;
+  const targetPoint = metadata.measuringCoastPoint as { lat: number; lng: number } | undefined;
   if (targetPoint) {
     overlays.push({
       kind: "marker",

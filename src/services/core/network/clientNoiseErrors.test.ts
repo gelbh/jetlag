@@ -21,32 +21,24 @@ describe("isIdbConnectionClosingMessage", () => {
   });
 
   it("matches Chrome iOS Firebase Auth Database is closing/hidden", () => {
-    expect(
-      isIdbConnectionClosingMessage("Database is closing/hidden"),
-    ).toBe(true);
+    expect(isIdbConnectionClosingMessage("Database is closing/hidden")).toBe(true);
   });
 
   it("matches Firefox/WebKit closed-database InvalidStateError", () => {
-    expect(
-      isIdbConnectionClosingMessage(
-        "Can't start a transaction on a closed database",
-      ),
-    ).toBe(true);
+    expect(isIdbConnectionClosingMessage("Can't start a transaction on a closed database")).toBe(
+      true,
+    );
   });
 
   it("ignores unrelated messages", () => {
-    expect(
-      isIdbConnectionClosingMessage("Database deleted by request of the user"),
-    ).toBe(false);
+    expect(isIdbConnectionClosingMessage("Database deleted by request of the user")).toBe(false);
   });
 });
 
 describe("isWebkitLoadFailedMessage", () => {
   it("matches Safari Load failed with optional host suffix", () => {
     expect(isWebkitLoadFailedMessage("Load failed")).toBe(true);
-    expect(isWebkitLoadFailedMessage("Load failed (jetlag.gelbhart.dev)")).toBe(
-      true,
-    );
+    expect(isWebkitLoadFailedMessage("Load failed (jetlag.gelbhart.dev)")).toBe(true);
   });
 
   it("trims whitespace before matching", () => {
@@ -61,22 +53,16 @@ describe("isWebkitLoadFailedMessage", () => {
 
 describe("isRecaptchaOtTypeErrorMessage", () => {
   it("matches Chrome/Safari reCAPTCHA oT property access TypeErrors", () => {
-    expect(
-      isRecaptchaOtTypeErrorMessage(
-        "Cannot read properties of null (reading 'oT')",
-      ),
-    ).toBe(true);
-    expect(
-      isRecaptchaOtTypeErrorMessage(
-        "null is not an object (evaluating 'a.oT')",
-      ),
-    ).toBe(true);
+    expect(isRecaptchaOtTypeErrorMessage("Cannot read properties of null (reading 'oT')")).toBe(
+      true,
+    );
+    expect(isRecaptchaOtTypeErrorMessage("null is not an object (evaluating 'a.oT')")).toBe(true);
   });
 
   it("ignores unrelated TypeError messages", () => {
-    expect(
-      isRecaptchaOtTypeErrorMessage("Cannot read properties of null (reading 'x')"),
-    ).toBe(false);
+    expect(isRecaptchaOtTypeErrorMessage("Cannot read properties of null (reading 'x')")).toBe(
+      false,
+    );
     expect(isRecaptchaOtTypeErrorMessage("Load failed")).toBe(false);
   });
 });
@@ -96,9 +82,9 @@ describe("isFirestoreIdbPersistenceNoiseMessage", () => {
   });
 
   it("ignores unrelated Firestore errors", () => {
-    expect(
-      isFirestoreIdbPersistenceNoiseMessage("Missing or insufficient permissions."),
-    ).toBe(false);
+    expect(isFirestoreIdbPersistenceNoiseMessage("Missing or insufficient permissions.")).toBe(
+      false,
+    );
   });
 });
 
@@ -118,9 +104,7 @@ describe("isFirestoreIdbObjectStoreLookupNoiseMessage", () => {
 
   it("ignores unrelated object-store messages", () => {
     expect(
-      isFirestoreIdbObjectStoreLookupNoiseMessage(
-        "Failed to delete record from object store",
-      ),
+      isFirestoreIdbObjectStoreLookupNoiseMessage("Failed to delete record from object store"),
     ).toBe(false);
   });
 });
@@ -138,9 +122,7 @@ describe("isRecaptchaTimeoutMessage", () => {
 describe("isBrowserExtensionNoiseMessage", () => {
   it("matches extension sendMessage and Object Not Found injector noise", () => {
     expect(
-      isBrowserExtensionNoiseMessage(
-        "Invalid call to runtime.sendMessage(). Tab not found.",
-      ),
+      isBrowserExtensionNoiseMessage("Invalid call to runtime.sendMessage(). Tab not found."),
     ).toBe(true);
     expect(
       isBrowserExtensionNoiseMessage(
@@ -150,9 +132,7 @@ describe("isBrowserExtensionNoiseMessage", () => {
   });
 
   it("ignores first-party messages", () => {
-    expect(isBrowserExtensionNoiseMessage("Couldn't leave the session.")).toBe(
-      false,
-    );
+    expect(isBrowserExtensionNoiseMessage("Couldn't leave the session.")).toBe(false);
   });
 });
 
@@ -178,9 +158,7 @@ describe("isAppCheckSoftFailureMessage", () => {
   });
 
   it("ignores hard App Check failures and bare throttle substrings", () => {
-    expect(
-      isAppCheckSoftFailureMessage("App Check probe returned empty token"),
-    ).toBe(false);
+    expect(isAppCheckSoftFailureMessage("App Check probe returned empty token")).toBe(false);
     expect(isAppCheckSoftFailureMessage("initial-throttle alone")).toBe(false);
     expect(isAppCheckSoftFailureMessage("throttled alone")).toBe(false);
   });
@@ -207,32 +185,41 @@ describe("classifyAppCheckProbeFailure", () => {
           "AppCheck: 403 error. Attempts allowed again after 01d:00m:00s (appCheck/initial-throttle).",
       }),
     ).toEqual({ soft: true, reason: "error", allowApp: true });
-    expect(
-      classifyAppCheckProbeFailure({ message: "reCAPTCHA Timeout (b)" }),
-    ).toEqual({ soft: true, reason: "error", allowApp: true });
+    expect(classifyAppCheckProbeFailure({ message: "reCAPTCHA Timeout (b)" })).toEqual({
+      soft: true,
+      reason: "error",
+      allowApp: true,
+    });
     expect(
       classifyAppCheckProbeFailure({
         message:
           "FirebaseError: AppCheck: Fetch failed to connect to a network. Check Internet connection. Original error: Load failed (content-firebaseappcheck.googleapis.com). (appCheck/fetch-network-error).",
       }),
     ).toEqual({ soft: true, reason: "error", allowApp: true });
-    expect(
-      classifyAppCheckProbeFailure({ message: "Failed to fetch" }),
-    ).toEqual({ soft: false, reason: "blocked", allowApp: false });
-    expect(
-      classifyAppCheckProbeFailure({ message: "Load failed" }),
-    ).toEqual({ soft: false, reason: "blocked", allowApp: false });
+    expect(classifyAppCheckProbeFailure({ message: "Failed to fetch" })).toEqual({
+      soft: false,
+      reason: "blocked",
+      allowApp: false,
+    });
+    expect(classifyAppCheckProbeFailure({ message: "Load failed" })).toEqual({
+      soft: false,
+      reason: "blocked",
+      allowApp: false,
+    });
     expect(
       classifyAppCheckProbeFailure({
         message: "App Check request blocked by a content blocker",
       }),
     ).toEqual({ soft: false, reason: "blocked", allowApp: false });
-    expect(
-      classifyAppCheckProbeFailure({ message: "unblocked-after-retry" }),
-    ).toEqual({ soft: true, reason: "error", allowApp: true });
-    expect(
-      classifyAppCheckProbeFailure({ message: "Internal App Check glitch" }),
-    ).toEqual({ soft: true, reason: "error", allowApp: true });
+    expect(classifyAppCheckProbeFailure({ message: "unblocked-after-retry" })).toEqual({
+      soft: true,
+      reason: "error",
+      allowApp: true,
+    });
+    expect(classifyAppCheckProbeFailure({ message: "Internal App Check glitch" })).toEqual({
+      soft: true,
+      reason: "error",
+      allowApp: true,
+    });
   });
 });
-

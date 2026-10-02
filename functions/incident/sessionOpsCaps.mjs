@@ -45,10 +45,7 @@ export const SESSION_OPS_SUMMON_NOT_FOUND = "SESSION_OPS_SUMMON_NOT_FOUND";
  * @param input {{ entitlementsData?: Record<string, unknown>, sessionTier?: string | null }}
  */
 export function isSessionOpsPremium(input = {}) {
-  return (
-    hasUnlimitedPremiumEntitlement(input.entitlementsData) ||
-    input.sessionTier === "premium"
-  );
+  return hasUnlimitedPremiumEntitlement(input.entitlementsData) || input.sessionTier === "premium";
 }
 
 /**
@@ -74,9 +71,7 @@ export function resolveSessionOpsCaps(input = {}) {
 }
 
 function nonNegativeInt(value) {
-  return typeof value === "number" && Number.isFinite(value) && value > 0
-    ? Math.floor(value)
-    : 0;
+  return typeof value === "number" && Number.isFinite(value) && value > 0 ? Math.floor(value) : 0;
 }
 
 export function readIncidentUsage(data) {
@@ -151,8 +146,7 @@ export function consumeTool(usage, caps) {
  * @param input {{ incidentId, summonId, uid, caps, now? }}
  */
 export async function consumeSessionOpsSummon(db, input) {
-  const incidentId =
-    typeof input?.incidentId === "string" ? input.incidentId : "";
+  const incidentId = typeof input?.incidentId === "string" ? input.incidentId : "";
   const summonId = typeof input?.summonId === "string" ? input.summonId : "";
   const uid = typeof input?.uid === "string" ? input.uid : "";
   const caps = input?.caps ?? SESSION_OPS_CAPS.free;
@@ -202,8 +196,7 @@ export async function consumeSessionOpsSummon(db, input) {
  * @param input {{ incidentId, summonId, caps }}
  */
 export async function consumeSessionOpsTurn(db, input) {
-  const incidentId =
-    typeof input?.incidentId === "string" ? input.incidentId : "";
+  const incidentId = typeof input?.incidentId === "string" ? input.incidentId : "";
   const summonId = typeof input?.summonId === "string" ? input.summonId : "";
   const caps = input?.caps ?? SESSION_OPS_CAPS.free;
 
@@ -211,11 +204,7 @@ export async function consumeSessionOpsTurn(db, input) {
     return { ok: false, code: SESSION_OPS_SUMMON_NOT_FOUND };
   }
 
-  const summonRef = db
-    .collection("incidents")
-    .doc(incidentId)
-    .collection("summons")
-    .doc(summonId);
+  const summonRef = db.collection("incidents").doc(incidentId).collection("summons").doc(summonId);
 
   return db.runTransaction(async (transaction) => {
     const snap = await transaction.get(summonRef);
@@ -229,11 +218,7 @@ export async function consumeSessionOpsTurn(db, input) {
       return next;
     }
 
-    transaction.set(
-      summonRef,
-      { agentTurnCount: next.usage.agentTurnCount },
-      { merge: true },
-    );
+    transaction.set(summonRef, { agentTurnCount: next.usage.agentTurnCount }, { merge: true });
 
     return { ok: true, usage: next.usage };
   });
@@ -249,25 +234,18 @@ export async function consumeSessionOpsTurn(db, input) {
  * @param deps {{ consumeGlobalToolAttempt? }}
  */
 export async function consumeSessionOpsTool(db, input, deps = {}) {
-  const incidentId =
-    typeof input?.incidentId === "string" ? input.incidentId : "";
+  const incidentId = typeof input?.incidentId === "string" ? input.incidentId : "";
   const summonId = typeof input?.summonId === "string" ? input.summonId : "";
   const uid = typeof input?.uid === "string" ? input.uid : "";
   const caps = input?.caps ?? SESSION_OPS_CAPS.free;
   const nowMs =
-    typeof input?.nowMs === "number" && Number.isFinite(input.nowMs)
-      ? input.nowMs
-      : Date.now();
+    typeof input?.nowMs === "number" && Number.isFinite(input.nowMs) ? input.nowMs : Date.now();
 
   if (!incidentId || !summonId) {
     return { ok: false, code: SESSION_OPS_SUMMON_NOT_FOUND };
   }
 
-  const summonRef = db
-    .collection("incidents")
-    .doc(incidentId)
-    .collection("summons")
-    .doc(summonId);
+  const summonRef = db.collection("incidents").doc(incidentId).collection("summons").doc(summonId);
 
   const local = await db.runTransaction(async (transaction) => {
     const snap = await transaction.get(summonRef);
@@ -319,11 +297,7 @@ export async function consumeSessionOpsTool(db, input, deps = {}) {
       }
       const usage = readSummonUsage(snap.data());
       const rolledBack = Math.max(0, usage.toolExecutionCount - 1);
-      transaction.set(
-        summonRef,
-        { toolExecutionCount: rolledBack },
-        { merge: true },
-      );
+      transaction.set(summonRef, { toolExecutionCount: rolledBack }, { merge: true });
     });
 
     return {

@@ -1,8 +1,8 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi, beforeEach } from "vitest";
-import { AdminMonitorPane } from "./AdminMonitorPane";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { defaultMonitorLayout } from "../../domain/admin/opsDeskLayout";
 import { createTestSession } from "../../test/fixtures/sessions";
+import { AdminMonitorPane } from "./AdminMonitorPane";
 
 vi.mock("../../hooks/admin/useAdminMapWideLayout", () => ({
   useAdminMapWideLayout: vi.fn(() => false),
@@ -13,9 +13,7 @@ vi.mock("../../routes/AdminMapScreen", () => ({
 }));
 
 vi.mock("./AdminMonitorGridWorkspace", () => ({
-  AdminMonitorGridWorkspace: () => (
-    <div data-testid="admin-monitor-grid">nested grid</div>
-  ),
+  AdminMonitorGridWorkspace: () => <div data-testid="admin-monitor-grid">nested grid</div>,
 }));
 
 vi.mock("../../routes/observer-map-screen/useObserverMapScreen", () => ({

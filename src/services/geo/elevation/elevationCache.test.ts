@@ -1,8 +1,11 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { clearPersistedCacheForTests } from "../cache/indexedDb";
 import { memoryCache } from "../cache/memory";
-import { hydrateElevationCacheFromIdb } from "./index";
-import { fetchElevations, openElevationCircuitForTests } from "./index";
+import {
+  fetchElevations,
+  hydrateElevationCacheFromIdb,
+  openElevationCircuitForTests,
+} from "./index";
 import {
   clearElevationCacheForTests,
   elevationCacheKey,

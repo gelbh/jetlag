@@ -1,5 +1,5 @@
-import { describe, it } from "node:test";
 import assert from "node:assert/strict";
+import { describe, it } from "node:test";
 import { HttpsError } from "firebase-functions/v2/https";
 import { premiumSessionCredits } from "../billing/premiumEntitlements.mjs";
 import {
@@ -35,10 +35,7 @@ function createMockDb(initialDocs) {
         },
         set(ref, value, options = {}) {
           const existing = docs.get(ref.id) ?? {};
-          docs.set(
-            ref.id,
-            options.merge ? { ...existing, ...value } : { ...value },
-          );
+          docs.set(ref.id, options.merge ? { ...existing, ...value } : { ...value });
         },
       };
 
@@ -78,11 +75,7 @@ describe("premiumRecovery", () => {
       "perm-uid": {},
     });
 
-    const result = await mergeEntitlementsBetweenUsers(
-      db,
-      "anon-uid",
-      "perm-uid",
-    );
+    const result = await mergeEntitlementsBetweenUsers(db, "anon-uid", "perm-uid");
 
     assert.equal(result.merged, true);
     assert.equal(premiumSessionCredits(db.docs.get("perm-uid")), 1);
@@ -95,11 +88,7 @@ describe("premiumRecovery", () => {
       "perm-uid": {},
     });
 
-    const result = await mergeEntitlementsBetweenUsers(
-      db,
-      "anon-uid",
-      "perm-uid",
-    );
+    const result = await mergeEntitlementsBetweenUsers(db, "anon-uid", "perm-uid");
 
     assert.equal(result.merged, false);
   });
@@ -113,11 +102,7 @@ describe("premiumRecovery", () => {
       "perm-uid": {},
     });
 
-    const result = await mergeEntitlementsBetweenUsers(
-      db,
-      "anon-uid",
-      "perm-uid",
-    );
+    const result = await mergeEntitlementsBetweenUsers(db, "anon-uid", "perm-uid");
 
     assert.equal(result.merged, false);
     assert.equal(premiumSessionCredits(db.docs.get("perm-uid")), 0);

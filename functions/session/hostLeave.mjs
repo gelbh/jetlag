@@ -38,11 +38,7 @@ export async function leaveHostSessionHandler(db, uid, sessionId) {
   await db.runTransaction(async (tx) => {
     const sessionSnap = await tx.get(sessionRef);
     const data = assertHostSession(sessionSnap, uid);
-    const promotee = pickHostPromotee(
-      data.memberUids,
-      data.memberRoles,
-      uid,
-    );
+    const promotee = pickHostPromotee(data.memberUids, data.memberRoles, uid);
 
     if (promotee == null) {
       applyEndSessionInTx(tx, db, sessionRef, data, "ended_early");

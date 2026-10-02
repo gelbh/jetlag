@@ -14,10 +14,7 @@ interface AppErrorBoundaryState {
  * Root error boundary. Replaces `Sentry.ErrorBoundary` so `@sentry/react`
  * stays off the App chunk's static graph; capture goes through the lazy facade.
  */
-export class AppErrorBoundary extends Component<
-  AppErrorBoundaryProps,
-  AppErrorBoundaryState
-> {
+export class AppErrorBoundary extends Component<AppErrorBoundaryProps, AppErrorBoundaryState> {
   state: AppErrorBoundaryState = { hasError: false };
 
   // Flag, not the thrown value: a thrown `undefined`/`null` must still show the fallback.

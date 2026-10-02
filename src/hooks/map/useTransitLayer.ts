@@ -26,9 +26,7 @@ export function useTransitLayer({
   routeFilter,
 }: UseTransitLayerOptions) {
   const [staticData, setStaticData] = useState<TransitStaticData | null>(null);
-  const [liveData, setLiveData] = useState<TransitRealtimeSnapshot | null>(
-    null,
-  );
+  const [liveData, setLiveData] = useState<TransitRealtimeSnapshot | null>(null);
   const [loadingStatic, setLoadingStatic] = useState(false);
   const [loadingLive, setLoadingLive] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -47,11 +45,7 @@ export function useTransitLayer({
       const next = await fetchStaticTransit(gameArea);
       setStaticData(next);
     } catch (nextError) {
-      setError(
-        nextError instanceof Error
-          ? nextError.message
-          : "Transit lines didn't load.",
-      );
+      setError(nextError instanceof Error ? nextError.message : "Transit lines didn't load.");
     } finally {
       setLoadingStatic(false);
     }
@@ -105,11 +99,7 @@ export function useTransitLayer({
           return;
         }
 
-        setError(
-          nextError instanceof Error
-            ? nextError.message
-            : "Transit lines didn't load.",
-        );
+        setError(nextError instanceof Error ? nextError.message : "Transit lines didn't load.");
       } finally {
         if (!cancelled) {
           setLoadingStatic(false);
@@ -166,9 +156,7 @@ export function useTransitLayer({
 
     return {
       ...liveData,
-      vehicles: liveData.vehicles.filter(
-        (vehicle) => vehicle.mode === routeFilter,
-      ),
+      vehicles: liveData.vehicles.filter((vehicle) => vehicle.mode === routeFilter),
     };
   }, [liveData, routeFilter]);
 

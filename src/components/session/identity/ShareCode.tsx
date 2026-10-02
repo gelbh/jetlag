@@ -1,15 +1,12 @@
-import { useState } from "react";
 import { Button, Stack, Text } from "@mantine/core";
-import { useCopyFeedback } from "@/hooks/forms/useCopyFeedback";
+import { useState } from "react";
+import { filledStyles, grayStyles } from "@/components/ui/entry/entryChrome";
 import crawlPolicy from "@/domain/seo/seoCrawlPolicy.json";
+import { useCopyFeedback } from "@/hooks/forms/useCopyFeedback";
 import {
   buildSessionInviteUrl,
   resolveSessionInviteOrigin,
 } from "@/services/session/sessionInviteUrl";
-import {
-  filledStyles,
-  grayStyles,
-} from "@/components/ui/entry/entryChrome";
 
 interface ShareCodeProps {
   code: string;
@@ -23,21 +20,12 @@ function canNativeShare(): boolean {
 
 function resolveInviteUrl(code: string): string | null {
   const currentOrigin =
-    typeof window !== "undefined"
-      ? window.location.origin
-      : crawlPolicy.siteOrigin;
-  const origin = resolveSessionInviteOrigin(
-    currentOrigin,
-    crawlPolicy.siteOrigin,
-  );
+    typeof window !== "undefined" ? window.location.origin : crawlPolicy.siteOrigin;
+  const origin = resolveSessionInviteOrigin(currentOrigin, crawlPolicy.siteOrigin);
   return buildSessionInviteUrl(origin, code);
 }
 
-export function ShareCode({
-  code,
-  remote = false,
-  compact = false,
-}: ShareCodeProps) {
+export function ShareCode({ code, remote = false, compact = false }: ShareCodeProps) {
   const { status: copyStatus, copy } = useCopyFeedback();
   const [copyTarget, setCopyTarget] = useState<"code" | "link">("code");
   const inviteUrl = remote ? resolveInviteUrl(code) : null;

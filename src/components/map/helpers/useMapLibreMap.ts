@@ -1,9 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { useMap, type MapRef } from "react-map-gl/maplibre";
-import {
-  latLngToTileXY,
-  MAP_STYLE_PREVIEW_ZOOM,
-} from "@/domain/map/mapTilePreview";
+import { type MapRef, useMap } from "react-map-gl/maplibre";
+import { latLngToTileXY, MAP_STYLE_PREVIEW_ZOOM } from "@/domain/map/mapTilePreview";
 export interface PreviewTileOrigin {
   x: number;
   y: number;
@@ -76,9 +73,7 @@ function readPreviewTileOrigin(map: MapRef): PreviewTileOrigin {
 
 export function useMapLibrePreviewTileOrigin(): PreviewTileOrigin {
   const map = useMapLibreMap();
-  const [tileOrigin, setTileOrigin] = useState<PreviewTileOrigin>(() =>
-    readPreviewTileOrigin(map),
-  );
+  const [tileOrigin, setTileOrigin] = useState<PreviewTileOrigin>(() => readPreviewTileOrigin(map));
 
   useEffect(() => {
     let timeoutId = 0;
@@ -87,9 +82,7 @@ export function useMapLibrePreviewTileOrigin(): PreviewTileOrigin {
       window.clearTimeout(timeoutId);
       timeoutId = window.setTimeout(() => {
         const next = readPreviewTileOrigin(map);
-        setTileOrigin((current) =>
-          current.x === next.x && current.y === next.y ? current : next,
-        );
+        setTileOrigin((current) => (current.x === next.x && current.y === next.y ? current : next));
       }, PREVIEW_TILE_SYNC_MS);
     };
 

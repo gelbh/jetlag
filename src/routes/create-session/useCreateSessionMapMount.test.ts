@@ -80,17 +80,13 @@ describe("useCreateSessionMapMount", () => {
 
   it("rejects with a timeout error when the map never loads", async () => {
     vi.useFakeTimers();
-    const { result } = renderHook(() =>
-      useCreateSessionMapMount({ timeoutMs: 1_000 }),
-    );
+    const { result } = renderHook(() => useCreateSessionMapMount({ timeoutMs: 1_000 }));
     let pending!: Promise<MapLibreMap>;
 
     act(() => {
       pending = result.current.ensureMapMounted();
     });
-    const assertion = expect(pending).rejects.toBeInstanceOf(
-      CreateSessionMapMountTimeoutError,
-    );
+    const assertion = expect(pending).rejects.toBeInstanceOf(CreateSessionMapMountTimeoutError);
 
     await act(async () => {
       vi.advanceTimersByTime(1_000);
@@ -132,9 +128,7 @@ describe("useCreateSessionMapMount", () => {
     act(() => {
       pending = result.current.ensureMapMounted();
     });
-    const assertion = expect(pending).rejects.toBeInstanceOf(
-      CreateSessionMapMountAbortedError,
-    );
+    const assertion = expect(pending).rejects.toBeInstanceOf(CreateSessionMapMountAbortedError);
     unmount();
 
     await assertion;

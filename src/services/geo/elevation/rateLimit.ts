@@ -1,14 +1,7 @@
 import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
+import { readPersistedEntry, writePersistedEntry } from "../cache/indexedDb";
 import { elevationPointCacheKey } from "../cache/keys";
-import {
-  memoryCache,
-  readCachedMemoryEntry,
-  writeMemoryEntry,
-} from "../cache/memory";
-import {
-  readPersistedEntry,
-  writePersistedEntry,
-} from "../cache/indexedDb";
+import { memoryCache, readCachedMemoryEntry, writeMemoryEntry } from "../cache/memory";
 import {
   ELEVATION_BASE_BACKOFF_MS,
   ELEVATION_CIRCUIT_BREAKER_COOLDOWN_MS,
@@ -30,8 +23,7 @@ let consecutive429Count = 0;
 let circuitBreakerOpenUntil = 0;
 
 export function requestGapMsForBatchSize(batchSize: number): number {
-  const weightedGap =
-    (batchSize / ELEVATION_WEIGHTED_CALLS_PER_MINUTE) * 60_000;
+  const weightedGap = (batchSize / ELEVATION_WEIGHTED_CALLS_PER_MINUTE) * 60_000;
   return Math.max(ELEVATION_MIN_REQUEST_GAP_MS, Math.ceil(weightedGap));
 }
 
@@ -65,17 +57,12 @@ export function readCachedElevation(key: string): number | undefined {
   return readCachedMemoryEntry<number>(key);
 }
 
-export async function writeCachedElevation(
-  key: string,
-  value: number,
-): Promise<void> {
+export async function writeCachedElevation(key: string, value: number): Promise<void> {
   writeMemoryEntry(key, value);
   await writePersistedEntry(key, value);
 }
 
-export async function hydrateElevationCacheFromIdb(
-  keys: string[],
-): Promise<void> {
+export async function hydrateElevationCacheFromIdb(keys: string[]): Promise<void> {
   if (keys.length === 0) {
     return;
   }
@@ -88,24 +75,15 @@ export function sleep(ms: number): Promise<void> {
   });
 }
 
-export function retryDelayMs(
-  attempt: number,
-  retryAfterHeader: string | null,
-): number {
+export function retryDelayMs(attempt: number, retryAfterHeader: string | null): number {
   if (retryAfterHeader) {
     const retryAfterSeconds = Number.parseInt(retryAfterHeader, 10);
     if (Number.isFinite(retryAfterSeconds) && retryAfterSeconds > 0) {
-      return Math.min(
-        ELEVATION_MAX_BACKOFF_MS,
-        retryAfterSeconds * 1000,
-      );
+      return Math.min(ELEVATION_MAX_BACKOFF_MS, retryAfterSeconds * 1000);
     }
   }
 
-  return Math.min(
-    ELEVATION_MAX_BACKOFF_MS,
-    ELEVATION_BASE_BACKOFF_MS * 2 ** attempt,
-  );
+  return Math.min(ELEVATION_MAX_BACKOFF_MS, ELEVATION_BASE_BACKOFF_MS * 2 ** attempt);
 }
 
 export async function waitForElevationBatchGap(): Promise<void> {
@@ -148,9 +126,7 @@ function releaseElevationSlot(): void {
   }
 }
 
-export async function runLimitedElevationRequest<T>(
-  task: () => Promise<T>,
-): Promise<T> {
+export async function runLimitedElevationRequest<T>(task: () => Promise<T>): Promise<T> {
   await acquireElevationSlot();
   try {
     return await task();

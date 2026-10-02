@@ -27,20 +27,14 @@ const CODE_ERROR_MESSAGE_RE =
  * }}
  */
 export function triageIncidentDiagnostics(diagnostics) {
-  const errors = Array.isArray(diagnostics?.lastClientErrors)
-    ? diagnostics.lastClientErrors
-    : [];
+  const errors = Array.isArray(diagnostics?.lastClientErrors) ? diagnostics.lastClientErrors : [];
 
   for (const error of errors) {
-    if (
-      typeof error?.sentryEventId === "string" &&
-      error.sentryEventId.trim().length > 0
-    ) {
+    if (typeof error?.sentryEventId === "string" && error.sentryEventId.trim().length > 0) {
       return {
         outcome: TRIAGE_OUTCOME_AGENT,
         reason: "sentry_event",
-        matchedErrorName:
-          typeof error.name === "string" && error.name ? error.name : null,
+        matchedErrorName: typeof error.name === "string" && error.name ? error.name : null,
       };
     }
   }

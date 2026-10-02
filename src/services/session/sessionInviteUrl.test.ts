@@ -19,33 +19,19 @@ describe("resolveSessionInviteOrigin", () => {
   const publicOrigin = "https://jetlag.gelbhart.dev";
 
   it("keeps public https origins", () => {
-    expect(
-      resolveSessionInviteOrigin("https://play.example.com", publicOrigin),
-    ).toBe("https://play.example.com");
+    expect(resolveSessionInviteOrigin("https://play.example.com", publicOrigin)).toBe(
+      "https://play.example.com",
+    );
   });
 
   it("falls back for localhost and non-http schemes", () => {
-    expect(
-      resolveSessionInviteOrigin("https://localhost", publicOrigin),
-    ).toBe(publicOrigin);
-    expect(
-      resolveSessionInviteOrigin("http://127.0.0.1:5173", publicOrigin),
-    ).toBe(publicOrigin);
-    expect(
-      resolveSessionInviteOrigin("http://127.0.0.2:5173", publicOrigin),
-    ).toBe(publicOrigin);
-    expect(
-      resolveSessionInviteOrigin("http://0.0.0.0:5173", publicOrigin),
-    ).toBe(publicOrigin);
-    expect(
-      resolveSessionInviteOrigin("https://[::1]", publicOrigin),
-    ).toBe(publicOrigin);
-    expect(
-      resolveSessionInviteOrigin("app://localhost", publicOrigin),
-    ).toBe(publicOrigin);
-    expect(resolveSessionInviteOrigin("not a url", publicOrigin)).toBe(
-      publicOrigin,
-    );
+    expect(resolveSessionInviteOrigin("https://localhost", publicOrigin)).toBe(publicOrigin);
+    expect(resolveSessionInviteOrigin("http://127.0.0.1:5173", publicOrigin)).toBe(publicOrigin);
+    expect(resolveSessionInviteOrigin("http://127.0.0.2:5173", publicOrigin)).toBe(publicOrigin);
+    expect(resolveSessionInviteOrigin("http://0.0.0.0:5173", publicOrigin)).toBe(publicOrigin);
+    expect(resolveSessionInviteOrigin("https://[::1]", publicOrigin)).toBe(publicOrigin);
+    expect(resolveSessionInviteOrigin("app://localhost", publicOrigin)).toBe(publicOrigin);
+    expect(resolveSessionInviteOrigin("not a url", publicOrigin)).toBe(publicOrigin);
   });
 });
 

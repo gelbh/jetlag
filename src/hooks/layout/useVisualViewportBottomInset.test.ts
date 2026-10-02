@@ -90,9 +90,7 @@ describe("useVisualViewportBottomInset", () => {
     const textarea = document.createElement("textarea");
     document.body.appendChild(textarea);
     textarea.focus();
-    const { result, rerender } = renderHook(() =>
-      useVisualViewportBottomInset(true),
-    );
+    const { result, rerender } = renderHook(() => useVisualViewportBottomInset(true));
     expect(result.current).toBe(400);
 
     const editable = document.createElement("div");
@@ -201,9 +199,7 @@ describe("useVisualViewportBottomInset", () => {
     document.body.appendChild(input);
     input.focus();
 
-    const { result, unmount } = renderHook(() =>
-      useVisualViewportBottomInset(true),
-    );
+    const { result, unmount } = renderHook(() => useVisualViewportBottomInset(true));
     expect(result.current).toBe(400);
     unmount();
 

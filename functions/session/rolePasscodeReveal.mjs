@@ -14,13 +14,9 @@ const VALID_REVEAL_ROLES = new Set(["seeker", "hider", "observer"]);
 function readSessionRole(data, uid) {
   const hostUid = typeof data.hostUid === "string" ? data.hostUid : "";
   const memberRole =
-    data.memberRoles && typeof data.memberRoles === "object"
-      ? data.memberRoles[uid]
-      : undefined;
+    data.memberRoles && typeof data.memberRoles === "object" ? data.memberRoles[uid] : undefined;
   const leaders =
-    data.roleGates && typeof data.roleGates === "object"
-      ? data.roleGates.leaders ?? {}
-      : {};
+    data.roleGates && typeof data.roleGates === "object" ? (data.roleGates.leaders ?? {}) : {};
 
   return { hostUid, memberRole, leaders };
 }
@@ -111,4 +107,4 @@ export async function regenerateRolePasscodeHandler(db, uid, sessionId, role) {
   return { role, rolePasscode };
 }
 
-export { verifyRolePasscode, generateRolePasscode, normalizeRolePasscode };
+export { generateRolePasscode, normalizeRolePasscode, verifyRolePasscode };

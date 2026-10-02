@@ -60,9 +60,7 @@ describe("friendsMock", () => {
     const target = before.incoming[0]!;
     await mockAcceptFriendRequest(target.uid);
     const after = await mockListFriends();
-    expect(after.incoming.some((entry) => entry.uid === target.uid)).toBe(
-      false,
-    );
+    expect(after.incoming.some((entry) => entry.uid === target.uid)).toBe(false);
     expect(after.friends.some((entry) => entry.uid === target.uid)).toBe(true);
   });
 
@@ -79,12 +77,8 @@ describe("friendsMock", () => {
     await mockRequestFriend(hit.uid);
 
     const after = await mockListFriends();
-    expect(after.incoming.some((entry) => entry.uid === incoming.uid)).toBe(
-      false,
-    );
-    expect(after.outgoing.some((entry) => entry.uid === outgoing.uid)).toBe(
-      false,
-    );
+    expect(after.incoming.some((entry) => entry.uid === incoming.uid)).toBe(false);
+    expect(after.outgoing.some((entry) => entry.uid === outgoing.uid)).toBe(false);
     expect(after.outgoing.some((entry) => entry.uid === hit.uid)).toBe(true);
   });
 });

@@ -15,9 +15,7 @@ import { useToolPanelChrome } from "./useToolPanelChrome";
 describe("pan while placing questions", () => {
   it("thermometer: A → pan start/end → B keeps draft and place step", () => {
     const mocks = createToolHookMocks();
-    const chrome = renderHook(() =>
-      useToolPanelChrome("thermometer", { sheetSnap: "peek" }),
-    );
+    const chrome = renderHook(() => useToolPanelChrome("thermometer", { sheetSnap: "peek" }));
     const thermo = renderHook(() =>
       useThermometerTool({
         active: true,
@@ -67,9 +65,7 @@ describe("pan while placing questions", () => {
 
   it("radar: pan mid-place then tap still places and does not close tool", () => {
     const mocks = createToolHookMocks();
-    const chrome = renderHook(() =>
-      useToolPanelChrome("radar", { sheetSnap: "peek" }),
-    );
+    const chrome = renderHook(() => useToolPanelChrome("radar", { sheetSnap: "peek" }));
     const radar = renderHook(() =>
       useRadarTool({
         active: true,
@@ -111,9 +107,7 @@ describe("pan while placing questions", () => {
 
   it("matching: pan then place keeps tool open", () => {
     const mocks = createToolHookMocks();
-    const chrome = renderHook(() =>
-      useToolPanelChrome("matching", { sheetSnap: "peek" }),
-    );
+    const chrome = renderHook(() => useToolPanelChrome("matching", { sheetSnap: "peek" }));
     const matching = renderHook(() =>
       useMatchingTool({
         active: true,
@@ -136,9 +130,7 @@ describe("pan while placing questions", () => {
     });
 
     act(() => {
-      matching.result.current.panel.props.model.onCategoryChange(
-        "commercial_airport",
-      );
+      matching.result.current.panel.props.model.onCategoryChange("commercial_airport");
     });
 
     act(() => {
@@ -151,9 +143,7 @@ describe("pan while placing questions", () => {
       expect(matching.result.current.handleMapClick([53.35, -6.26])).toBe(true);
     });
 
-    expect(matching.result.current.draft.matchingSeekerPoint).toEqual([
-      53.35, -6.26,
-    ]);
+    expect(matching.result.current.draft.matchingSeekerPoint).toEqual([53.35, -6.26]);
     expect(mocks.finishPlacement).not.toHaveBeenCalled();
   });
 });

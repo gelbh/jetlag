@@ -12,9 +12,7 @@ import {
 } from "../../services/firestore/sessionMembershipHeal";
 import { useSessionStore } from "../../state/sessionStore";
 
-export function useEnsureSessionMembership(options?: {
-  enabled?: boolean;
-}): void {
+export function useEnsureSessionMembership(options?: { enabled?: boolean }): void {
   const enabled = options?.enabled ?? true;
   const sessionId = useSessionStore((state) => state.session?.id);
   const myRole = useSessionStore((state) => state.myRole);
@@ -50,15 +48,11 @@ export function useEnsureSessionMembership(options?: {
           return;
         }
 
-        const role =
-          myRole ??
-          resolvePlayerRole(session.memberRoles, myUid ?? user.uid);
-        const healedSession = await healSessionMembership(
-          session,
-          user.uid,
-          role,
-          { returningMemberUid: myUid, persistedMyUid: myUid },
-        );
+        const role = myRole ?? resolvePlayerRole(session.memberRoles, myUid ?? user.uid);
+        const healedSession = await healSessionMembership(session, user.uid, role, {
+          returningMemberUid: myUid,
+          persistedMyUid: myUid,
+        });
 
         if (cancelled) {
           return;
@@ -67,12 +61,7 @@ export function useEnsureSessionMembership(options?: {
         const latestSession = useSessionStore.getState().session;
         const latestMyUid = useSessionStore.getState().myUid;
         if (
-          sessionMembershipChanged(
-            latestSession ?? session,
-            healedSession,
-            user.uid,
-            latestMyUid,
-          )
+          sessionMembershipChanged(latestSession ?? session, healedSession, user.uid, latestMyUid)
         ) {
           setSession(healedSession, user.uid);
         }
@@ -81,11 +70,7 @@ export function useEnsureSessionMembership(options?: {
           return;
         }
 
-        setLastSyncError(
-          error instanceof Error
-            ? error.message
-            : "No access to this session.",
-        );
+        setLastSyncError(error instanceof Error ? error.message : "No access to this session.");
       }
     })();
 

@@ -1,5 +1,5 @@
-import type { SessionRecord } from "../../../domain/map/annotations";
 import { RoleCodesSheet } from "../../../components/session/settings/RoleCodesSheet";
+import type { SessionRecord } from "../../../domain/map/annotations";
 
 export type MapScreenRoleCodesSheetProps = {
   session: SessionRecord;

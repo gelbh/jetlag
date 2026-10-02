@@ -1,26 +1,25 @@
 import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
+import { FetchTimeoutError, fetchWithTimeout } from "../../core/network/fetchWithTimeout";
+import { retryAsync } from "../../core/network/retryAsync";
+import { geographicCacheKey, getOrFetchCached } from "../cache";
 import {
   mergeRankedGeocodedPlaceCandidates,
   placeBoundsFingerprint,
-  rankGeocodedPlaceCandidates,
   type RankedGeocodedPlaceCandidate,
+  rankGeocodedPlaceCandidates,
 } from "../geocoding/geocodingRank";
-import { geographicCacheKey, getOrFetchCached } from "../cache";
-import { FetchTimeoutError, fetchWithTimeout } from "../../core/network/fetchWithTimeout";
-import { retryAsync } from "../../core/network/retryAsync";
 import {
   adminLabelFromAddress,
+  type GeocodedPlace,
   locationBucketKey,
+  type NominatimResult,
   normalizeSearchQuery,
   parseNominatimResult,
   viewboxForPoint,
-  type GeocodedPlace,
-  type NominatimResult,
 } from "./normalize";
 
 const NOMINATIM_ENDPOINT = "https://nominatim.openstreetmap.org/search";
-const NOMINATIM_REVERSE_ENDPOINT =
-  "https://nominatim.openstreetmap.org/reverse";
+const NOMINATIM_REVERSE_ENDPOINT = "https://nominatim.openstreetmap.org/reverse";
 const USER_AGENT = "JetLagMapCompanion/1.0";
 const NOMINATIM_FETCH_TIMEOUT_MS = 15_000;
 const NOMINATIM_MAX_RETRIES = 2;
@@ -161,12 +160,7 @@ function mergeSearchCandidates(
   for (const candidate of groups.flat()) {
     const key = placeBoundsFingerprint(candidate.place);
     const existing = merged.get(key);
-    merged.set(
-      key,
-      existing
-        ? mergeRankedGeocodedPlaceCandidates(existing, candidate)
-        : candidate,
-    );
+    merged.set(key, existing ? mergeRankedGeocodedPlaceCandidates(existing, candidate) : candidate);
   }
 
   return [...merged.values()];
@@ -201,27 +195,20 @@ export async function searchPlaces(
   if (!options?.near) {
     return getOrFetchCached(geocodeSearchCacheKey(trimmed), async () => {
       const candidates = await fetchSearchCandidates(trimmed);
-      return rankGeocodedPlaceCandidates(candidates, trimmed).slice(
-        0,
-        SEARCH_RESULT_LIMIT,
-      );
+      return rankGeocodedPlaceCandidates(candidates, trimmed).slice(0, SEARCH_RESULT_LIMIT);
     });
   }
 
   const near = options.near;
   const [unbiasedCandidates, biasedCandidates] = await Promise.all([
     fetchSearchCandidates(trimmed),
-    getOrFetchCached(
-      geocodeSearchBiasCacheKey(trimmed, near),
-      () => fetchSearchCandidates(trimmed, { viewbox: viewboxForPoint(near) }),
+    getOrFetchCached(geocodeSearchBiasCacheKey(trimmed, near), () =>
+      fetchSearchCandidates(trimmed, { viewbox: viewboxForPoint(near) }),
     ),
   ]);
 
   const merged = mergeSearchCandidates(unbiasedCandidates, biasedCandidates);
-  return rankGeocodedPlaceCandidates(merged, trimmed, near).slice(
-    0,
-    SEARCH_RESULT_LIMIT,
-  );
+  return rankGeocodedPlaceCandidates(merged, trimmed, near).slice(0, SEARCH_RESULT_LIMIT);
 }
 
 export async function reverseGeocodePoint(
@@ -238,10 +225,7 @@ export async function reverseGeocodePoint(
       url.searchParams.set("addressdetails", "1");
       url.searchParams.set("zoom", String(adminLevel));
 
-      const payload = (await fetchNominatim(
-        url,
-        "Reverse geocoding failed.",
-      )) as NominatimResult;
+      const payload = (await fetchNominatim(url, "Reverse geocoding failed.")) as NominatimResult;
       const adminLabel = adminLabelFromAddress(payload.address, adminLevel);
       if (!adminLabel) {
         return null;

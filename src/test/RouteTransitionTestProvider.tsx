@@ -1,8 +1,11 @@
-import { useCallback, useMemo, useRef, type ReactNode } from "react";
-import { useNavigate, type To } from "react-router-dom";
-import type { BeginTransitionOptions, RouteTransitionPhase } from "../navigation/routeTransitionContextInstance";
-import { RouteTransitionContext } from "../navigation/routeTransitionContextInstance";
+import { type ReactNode, useCallback, useMemo, useRef } from "react";
+import { type To, useNavigate } from "react-router-dom";
 import { revealRouteTransition } from "../navigation/revealRouteTransition";
+import type {
+  BeginTransitionOptions,
+  RouteTransitionPhase,
+} from "../navigation/routeTransitionContextInstance";
+import { RouteTransitionContext } from "../navigation/routeTransitionContextInstance";
 
 /**
  * Fast path for unit tests: skip chunk preload, readiness polling, and motion.
@@ -50,8 +53,6 @@ export function RouteTransitionTestProvider({ children }: { children: ReactNode 
   );
 
   return (
-    <RouteTransitionContext.Provider value={value}>
-      {children}
-    </RouteTransitionContext.Provider>
+    <RouteTransitionContext.Provider value={value}>{children}</RouteTransitionContext.Provider>
   );
 }

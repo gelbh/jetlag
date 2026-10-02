@@ -1,6 +1,6 @@
-import { useId } from "react";
 import { Box, Switch, Text } from "@mantine/core";
 import type { ReactNode } from "react";
+import { useId } from "react";
 import { InsetHairline } from "@/components/ui/entry/InsetRow";
 
 interface SettingsToggleRowProps {
@@ -46,11 +46,7 @@ export function SettingsToggleRow({
         }}
       >
         {leading ? (
-          <Box
-            component="span"
-            aria-hidden
-            style={{ display: "inline-flex", flexShrink: 0 }}
-          >
+          <Box component="span" aria-hidden style={{ display: "inline-flex", flexShrink: 0 }}>
             {leading}
           </Box>
         ) : null}

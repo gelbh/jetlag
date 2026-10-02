@@ -1,29 +1,13 @@
 import { fetchWithTimeoutAndRetry } from "../lib/fetchWithTimeout.mjs";
 
 const CTA_BUS_API_BASE = "https://www.ctabustracker.com/bustime/api/v3";
-const CTA_TRAIN_POSITIONS_URL =
-  "https://lapi.transitchicago.com/api/1.0/ttpositions.aspx";
+const CTA_TRAIN_POSITIONS_URL = "https://lapi.transitchicago.com/api/1.0/ttpositions.aspx";
 const CTA_FETCH_TIMEOUT_MS = 15_000;
 const CTA_ROUTE_BATCH_SIZE = 10;
-const CTA_TRAIN_ROUTES = [
-  "red",
-  "blue",
-  "g",
-  "brn",
-  "p",
-  "y",
-  "org",
-  "pnk",
-  "purple",
-];
+const CTA_TRAIN_ROUTES = ["red", "blue", "g", "brn", "p", "y", "org", "pnk", "purple"];
 
 function isInsideBounds(lat, lng, bounds) {
-  return (
-    lat >= bounds.south &&
-    lat <= bounds.north &&
-    lng >= bounds.west &&
-    lng <= bounds.east
-  );
+  return lat >= bounds.south && lat <= bounds.north && lng >= bounds.west && lng <= bounds.east;
 }
 
 function parseLatitude(value) {
@@ -79,7 +63,7 @@ export function normalizeCtaBusVehicles(payload, bounds) {
 
 export function normalizeCtaTrainVehicles(payload, bounds) {
   const root = payload?.ctatt;
-  if (!root || root.errCd !== "0") {
+  if (root?.errCd !== "0") {
     return [];
   }
 
@@ -105,12 +89,10 @@ export function normalizeCtaTrainVehicles(payload, bounds) {
 
       vehicles.push({
         id: String(train.rn ?? `${routeRef ?? "train"}-${lat},${lng}`),
-        label: train.destNm ? String(train.destNm) : routeRef ?? "Train",
+        label: train.destNm ? String(train.destNm) : (routeRef ?? "Train"),
         lat,
         lng,
-        bearing: Number.isFinite(Number(train.heading))
-          ? Number(train.heading)
-          : undefined,
+        bearing: Number.isFinite(Number(train.heading)) ? Number(train.heading) : undefined,
         routeRef,
         mode: "metro",
         updatedAt: new Date().toISOString(),
@@ -195,12 +177,7 @@ async function fetchCtaTrainVehicles(apiKey, bounds) {
   return normalizeCtaTrainVehicles(payload, bounds);
 }
 
-export async function fetchCtaVehicles({
-  busApiKey,
-  trainApiKey,
-  bounds,
-  routeCache,
-}) {
+export async function fetchCtaVehicles({ busApiKey, trainApiKey, bounds, routeCache }) {
   const requests = [];
 
   if (busApiKey) {

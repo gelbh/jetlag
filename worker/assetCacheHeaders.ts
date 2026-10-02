@@ -23,10 +23,7 @@ export function cacheControlForPathname(pathname: string): string | null {
   return null;
 }
 
-export function applyCacheControlHeader(
-  response: Response,
-  pathname: string,
-): Response {
+export function applyCacheControlHeader(response: Response, pathname: string): Response {
   const cacheControl = cacheControlForPathname(pathname);
   if (!cacheControl) {
     return response;

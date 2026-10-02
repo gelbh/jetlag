@@ -2,13 +2,11 @@ import { act, render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { RouteTransitionProvider } from "./RouteTransitionContext";
-import { useRouteTransition } from "./useRouteTransition";
 import { clearRouteWarmStateForTests } from "./routeWarmState";
+import { useRouteTransition } from "./useRouteTransition";
 
 vi.mock("./routePreloaders", async () => {
-  const actual = await vi.importActual<typeof import("./routePreloaders")>(
-    "./routePreloaders",
-  );
+  const actual = await vi.importActual<typeof import("./routePreloaders")>("./routePreloaders");
   return {
     ...actual,
     preloadRoute: vi.fn(() => new Promise(() => undefined)),

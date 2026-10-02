@@ -1,10 +1,7 @@
-import { describe, it } from "node:test";
 import assert from "node:assert/strict";
+import { describe, it } from "node:test";
 import { HttpsError } from "firebase-functions/v2/https";
-import {
-  ANONYMOUS_BILLING_MESSAGE,
-  rejectAnonymousBillingAuth,
-} from "../billing/billingAuth.mjs";
+import { ANONYMOUS_BILLING_MESSAGE, rejectAnonymousBillingAuth } from "../billing/billingAuth.mjs";
 
 describe("billingAuth", () => {
   it("rejects anonymous billing auth", () => {

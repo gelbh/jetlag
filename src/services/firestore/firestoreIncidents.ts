@@ -1,3 +1,4 @@
+import { FirebaseError } from "firebase/app";
 import {
   collection,
   doc,
@@ -7,7 +8,6 @@ import {
   query,
   type Unsubscribe,
 } from "firebase/firestore";
-import { FirebaseError } from "firebase/app";
 import {
   type HostConfirmRecord,
   type HostConfirmStatus,
@@ -64,12 +64,7 @@ function asNullableString(value: unknown): string | null {
 }
 
 function parsePlayerRole(value: unknown): PlayerRole | null {
-  if (
-    value === "seeker" ||
-    value === "hider" ||
-    value === "observer" ||
-    value === "admin"
-  ) {
+  if (value === "seeker" || value === "hider" || value === "observer" || value === "admin") {
     return value;
   }
   return null;
@@ -171,9 +166,7 @@ function parseHotfix(value: unknown): IncidentHotfixState | undefined {
 }
 
 function isCodingAgentStatus(value: string): value is IncidentCodingAgentStatus {
-  return (
-    value === "launched" || value === "failed" || value === "misconfigured"
-  );
+  return value === "launched" || value === "failed" || value === "misconfigured";
 }
 
 function parseCodingAgent(value: unknown): IncidentCodingAgentState | undefined {
@@ -222,9 +215,7 @@ export function deserializeIncidentFromFirestore(
     return null;
   }
 
-  const status: IncidentStatus = isIncidentStatus(data.status)
-    ? data.status
-    : "open";
+  const status: IncidentStatus = isIncidentStatus(data.status) ? data.status : "open";
 
   const record: IncidentRecord = {
     id,
@@ -249,18 +240,13 @@ export function deserializeIncidentFromFirestore(
     }
   }
   if ("activeSessionOpsSummonId" in data) {
-    record.activeSessionOpsSummonId = asNullableString(
-      data.activeSessionOpsSummonId,
-    );
+    record.activeSessionOpsSummonId = asNullableString(data.activeSessionOpsSummonId);
   }
   if (
     typeof data.sessionOpsSummonCount === "number" &&
     Number.isFinite(data.sessionOpsSummonCount)
   ) {
-    record.sessionOpsSummonCount = Math.max(
-      0,
-      Math.floor(data.sessionOpsSummonCount),
-    );
+    record.sessionOpsSummonCount = Math.max(0, Math.floor(data.sessionOpsSummonCount));
   }
   if ("cursorAgentId" in data) {
     record.cursorAgentId = asNullableString(data.cursorAgentId);
@@ -286,11 +272,7 @@ export function deserializeIncidentFromFirestore(
   return record;
 }
 
-const MESSAGE_SENDERS = new Set<IncidentMessageSender>([
-  "player",
-  "admin",
-  "system",
-]);
+const MESSAGE_SENDERS = new Set<IncidentMessageSender>(["player", "admin", "system"]);
 
 const MESSAGE_KINDS = new Set<IncidentMessageKind>([
   "chat",
@@ -342,10 +324,7 @@ export function parseAppConfigRuntime(
   if (typeof data.requiredMinAppVersion === "string") {
     config.requiredMinAppVersion = data.requiredMinAppVersion;
   }
-  if (
-    typeof data.hotfixGraceSeconds === "number" &&
-    Number.isFinite(data.hotfixGraceSeconds)
-  ) {
+  if (typeof data.hotfixGraceSeconds === "number" && Number.isFinite(data.hotfixGraceSeconds)) {
     config.hotfixGraceSeconds = data.hotfixGraceSeconds;
   }
   if (typeof data.updatedAt === "string") {
@@ -373,10 +352,7 @@ export function subscribeIncident(
         return;
       }
       onChange(
-        deserializeIncidentFromFirestore(
-          snapshot.id,
-          snapshot.data() as Record<string, unknown>,
-        ),
+        deserializeIncidentFromFirestore(snapshot.id, snapshot.data() as Record<string, unknown>),
       );
     },
     (error) => onError(error),
@@ -477,10 +453,7 @@ export function subscribeIncidentHostConfirms(
   onError: (error: Error) => void,
 ): Unsubscribe {
   return onSnapshot(
-    query(
-      incidentHostConfirmsCollection(incidentId),
-      orderBy("createdAt", "desc"),
-    ),
+    query(incidentHostConfirmsCollection(incidentId), orderBy("createdAt", "desc")),
     (snapshot) => {
       const confirms: HostConfirmRecord[] = [];
       for (const confirmDoc of snapshot.docs) {
@@ -512,11 +485,7 @@ export function subscribeIncidentList(
 
   const attach = () => {
     activeUnsub = onSnapshot(
-      query(
-        incidentsCollection(),
-        orderBy("updatedAt", "desc"),
-        limit(limitCount),
-      ),
+      query(incidentsCollection(), orderBy("updatedAt", "desc"), limit(limitCount)),
       (snapshot) => {
         const incidents: IncidentRecord[] = [];
         for (const incidentSnapshot of snapshot.docs) {
@@ -546,9 +515,7 @@ export function subscribeIncidentList(
             })
             .catch((refreshError) => {
               onError(
-                refreshError instanceof Error
-                  ? refreshError
-                  : new Error(String(refreshError)),
+                refreshError instanceof Error ? refreshError : new Error(String(refreshError)),
               );
             });
           return;

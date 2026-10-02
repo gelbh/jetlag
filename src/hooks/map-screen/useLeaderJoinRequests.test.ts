@@ -1,15 +1,13 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { renderHook, act } from "@testing-library/react";
-import { useLeaderJoinRequests } from "./useLeaderJoinRequests";
+import { act, renderHook } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { RoleJoinRequest } from "../../domain/session/players/joinRequest";
+import { useLeaderJoinRequests } from "./useLeaderJoinRequests";
 
 vi.mock("../../services/session/joinRequestListen");
 vi.mock("../../services/session/rolePasscodeLifecycle");
 
 const mockListenLeaderJoinRequests = vi.mocked(
-  await import("../../services/session/joinRequestListen").then(
-    (m) => m.listenLeaderJoinRequests,
-  ),
+  await import("../../services/session/joinRequestListen").then((m) => m.listenLeaderJoinRequests),
 );
 
 const mockResolveRoleJoinRequest = vi.mocked(
@@ -68,12 +66,10 @@ describe("useLeaderJoinRequests", () => {
 
   it("filters expired requests from pending", () => {
     let setRequests: ((reqs: RoleJoinRequest[]) => void) | null = null;
-    mockListenLeaderJoinRequests.mockImplementation(
-      (_sessionId, _roles, onRequests) => {
-        setRequests = onRequests;
-        return () => undefined;
-      },
-    );
+    mockListenLeaderJoinRequests.mockImplementation((_sessionId, _roles, onRequests) => {
+      setRequests = onRequests;
+      return () => undefined;
+    });
 
     const { result } = renderHook(() =>
       useLeaderJoinRequests({
@@ -115,12 +111,10 @@ describe("useLeaderJoinRequests", () => {
 
   it("accepts join request", async () => {
     let setRequests: ((reqs: RoleJoinRequest[]) => void) | null = null;
-    mockListenLeaderJoinRequests.mockImplementation(
-      (_sessionId, _roles, onRequests) => {
-        setRequests = onRequests;
-        return () => undefined;
-      },
-    );
+    mockListenLeaderJoinRequests.mockImplementation((_sessionId, _roles, onRequests) => {
+      setRequests = onRequests;
+      return () => undefined;
+    });
 
     const { result } = renderHook(() =>
       useLeaderJoinRequests({
@@ -150,21 +144,15 @@ describe("useLeaderJoinRequests", () => {
       result.current.handleAcceptJoinRequest();
     });
 
-    expect(mockResolveRoleJoinRequest).toHaveBeenCalledWith(
-      "sess-1",
-      "req-1",
-      "accept",
-    );
+    expect(mockResolveRoleJoinRequest).toHaveBeenCalledWith("sess-1", "req-1", "accept");
   });
 
   it("declines join request", async () => {
     let setRequests: ((reqs: RoleJoinRequest[]) => void) | null = null;
-    mockListenLeaderJoinRequests.mockImplementation(
-      (_sessionId, _roles, onRequests) => {
-        setRequests = onRequests;
-        return () => undefined;
-      },
-    );
+    mockListenLeaderJoinRequests.mockImplementation((_sessionId, _roles, onRequests) => {
+      setRequests = onRequests;
+      return () => undefined;
+    });
 
     const { result } = renderHook(() =>
       useLeaderJoinRequests({
@@ -194,21 +182,15 @@ describe("useLeaderJoinRequests", () => {
       result.current.handleDeclineJoinRequest();
     });
 
-    expect(mockResolveRoleJoinRequest).toHaveBeenCalledWith(
-      "sess-1",
-      "req-1",
-      "decline",
-    );
+    expect(mockResolveRoleJoinRequest).toHaveBeenCalledWith("sess-1", "req-1", "decline");
   });
 
   it("surfaces accept failure when requester is below client min", async () => {
     let setRequests: ((reqs: RoleJoinRequest[]) => void) | null = null;
-    mockListenLeaderJoinRequests.mockImplementation(
-      (_sessionId, _roles, onRequests) => {
-        setRequests = onRequests;
-        return () => undefined;
-      },
-    );
+    mockListenLeaderJoinRequests.mockImplementation((_sessionId, _roles, onRequests) => {
+      setRequests = onRequests;
+      return () => undefined;
+    });
     mockResolveRoleJoinRequest.mockRejectedValue(
       new Error("failed-precondition Client update required."),
     );

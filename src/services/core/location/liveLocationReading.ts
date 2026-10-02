@@ -25,9 +25,7 @@ export function getLiveLocationReadingSnapshot(): LiveLocationReadingSnapshot {
   return snapshot;
 }
 
-export function subscribeLiveLocationReading(
-  onStoreChange: () => void,
-): () => void {
+export function subscribeLiveLocationReading(onStoreChange: () => void): () => void {
   listeners.add(onStoreChange);
   return () => {
     listeners.delete(onStoreChange);
@@ -61,9 +59,7 @@ export function clearLiveLocationReading(): void {
   emit();
 }
 
-export function getFreshLiveLocationReading(
-  nowMs: number = Date.now(),
-): GeolocationReading | null {
+export function getFreshLiveLocationReading(nowMs: number = Date.now()): GeolocationReading | null {
   const { reading, updatedAtMs } = snapshot;
   if (!reading || updatedAtMs === null) {
     return null;

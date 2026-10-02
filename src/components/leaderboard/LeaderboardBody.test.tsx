@@ -1,10 +1,10 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MantineProvider } from "@mantine/core";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { LEADERBOARD_MOCK_STORAGE_KEY } from "@/services/profile/leaderboardMock";
 import { jetlagTheme } from "@/theme/theme";
 import { LeaderboardBody } from "./LeaderboardBody";
-import { LEADERBOARD_MOCK_STORAGE_KEY } from "@/services/profile/leaderboardMock";
 
 vi.mock("@/hooks/billing/usePermanentAuthUser", () => ({
   usePermanentAuthUser: () => ({
@@ -90,9 +90,9 @@ describe("LeaderboardBody", () => {
     await waitFor(() => {
       expect(scrollIntoView).toHaveBeenCalled();
     });
-    expect(
-      screen.getByTestId("leaderboard-podium-1").getAttribute("data-highlighted"),
-    ).toBe("true");
+    expect(screen.getByTestId("leaderboard-podium-1").getAttribute("data-highlighted")).toBe(
+      "true",
+    );
   });
 
   it("reports when no player matches the jump query", async () => {

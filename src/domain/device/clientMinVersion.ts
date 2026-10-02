@@ -4,10 +4,7 @@ import { compareAppVersions } from "../session/meta/sessionVersion";
 export const CLIENT_MIN_VERSION_COLLECTION = "ops";
 export const CLIENT_MIN_VERSION_DOC_ID = "clientMinVersion";
 
-export function meetsClientMinVersion(
-  clientVersion: string,
-  minVersion: string,
-): boolean {
+export function meetsClientMinVersion(clientVersion: string, minVersion: string): boolean {
   return compareAppVersions(clientVersion, minVersion) >= 0;
 }
 
@@ -29,9 +26,7 @@ export function isBelowClientMinVersion(
   return compareAppVersions(clientVersion, trimmed) < 0;
 }
 
-export function parseClientMinVersionDoc(
-  data: unknown,
-): string | null {
+export function parseClientMinVersionDoc(data: unknown): string | null {
   if (!data || typeof data !== "object") {
     return null;
   }

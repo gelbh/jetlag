@@ -74,10 +74,9 @@ describe("overpass Postpass failover", () => {
     globalThis.fetch = async (url) => {
       const u = String(url);
       if (u.includes("postpass.geofabrik.de")) {
-        return new Response(
-          JSON.stringify({ type: "FeatureCollection", features: [] }),
-          { status: 200 },
-        );
+        return new Response(JSON.stringify({ type: "FeatureCollection", features: [] }), {
+          status: 200,
+        });
       }
       if (u.includes("/api/status")) {
         return new Response("Slot available after: 0\n", { status: 200 });
@@ -91,10 +90,9 @@ describe("overpass Postpass failover", () => {
       const u = String(url);
       if (u.includes("postpass.geofabrik.de")) {
         postpassCalls += 1;
-        return new Response(
-          JSON.stringify({ type: "FeatureCollection", features: [] }),
-          { status: 200 },
-        );
+        return new Response(JSON.stringify({ type: "FeatureCollection", features: [] }), {
+          status: 200,
+        });
       }
       if (u.includes("/api/status")) {
         return new Response("Slot available after: 0\n", { status: 200 });

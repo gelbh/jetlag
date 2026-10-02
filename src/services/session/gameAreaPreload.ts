@@ -1,19 +1,19 @@
 import type { GameArea, SessionTier } from "../../domain/map/annotations";
 import type { MeasuringLocationCategory } from "../../domain/questions";
+import type { RegionPackId } from "../../domain/regions/regionPack";
 import type {
   CustomMatchingAreasByLevel,
   MatchingAdminLevel,
 } from "../../domain/session/catalog/sessionCustomContent";
-import type { RegionPackId } from "../../domain/regions/regionPack";
-import { fetchAdminDivisionFeaturesInArea } from "../geo/overpass/adminDivisionBoundaries";
+import { usePreloadStore } from "../../state/preloadStore";
 import {
   adminBoundaryLevelsForSession,
   emptyAdminDivisionCounts,
   probeAdminDivisionCounts,
 } from "../geo/overpass/adminDivisionAvailability";
+import { fetchAdminDivisionFeaturesInArea } from "../geo/overpass/adminDivisionBoundaries";
 import { fetchMeasuringPlacesInArea } from "../geo/overpass/measuringPlaces";
 import { fetchStaticTransit } from "../transit/transitStatic";
-import { usePreloadStore } from "../../state/preloadStore";
 
 const PRELOAD_JOB_GAP_MS = 400;
 const PRELOAD_JOB_GAP_PREMIUM_MS = 100;
@@ -45,29 +45,18 @@ function buildPreloadJobs(
   regionPackId?: RegionPackId,
   options?: { includeAdminProbe?: boolean },
 ): Array<() => Promise<unknown>> {
-  const jobs: Array<() => Promise<unknown>> = [
-    () => fetchStaticTransit(gameArea),
-  ];
+  const jobs: Array<() => Promise<unknown>> = [() => fetchStaticTransit(gameArea)];
 
   if (options?.includeAdminProbe !== false) {
     jobs.push(() =>
-      probeAdminDivisionCounts(
-        gameArea,
-        customMatchingAreas,
-        regionPackId,
-      ).then((counts) => {
-        usePreloadStore
-          .getState()
-          .setAdminDivisionCounts(gameAreaPreloadKey(gameArea), counts);
+      probeAdminDivisionCounts(gameArea, customMatchingAreas, regionPackId).then((counts) => {
+        usePreloadStore.getState().setAdminDivisionCounts(gameAreaPreloadKey(gameArea), counts);
         return counts;
       }),
     );
   }
 
-  for (const adminLevel of adminBoundaryLevelsForSession(
-    regionPackId,
-    customMatchingAreas,
-  )) {
+  for (const adminLevel of adminBoundaryLevelsForSession(regionPackId, customMatchingAreas)) {
     jobs.push(() =>
       fetchAdminDivisionFeaturesInArea(
         gameArea,
@@ -78,9 +67,7 @@ function buildPreloadJobs(
   }
 
   for (const category of PRELOAD_MEASURING_CATEGORIES) {
-    jobs.push(() =>
-      fetchMeasuringPlacesInArea(gameArea, category, [], regionPackId),
-    );
+    jobs.push(() => fetchMeasuringPlacesInArea(gameArea, category, [], regionPackId));
   }
 
   return jobs;
@@ -153,12 +140,7 @@ export function preloadGameAreaCaches(
   regionPackId?: RegionPackId,
   tier: SessionTier = "free",
 ): void {
-  void preloadGameAreaCachesAsync(
-    gameArea,
-    customMatchingAreas,
-    regionPackId,
-    tier,
-  );
+  void preloadGameAreaCachesAsync(gameArea, customMatchingAreas, regionPackId, tier);
 }
 
 export async function preloadGameAreaCachesAsync(
@@ -184,11 +166,7 @@ export async function preloadGameAreaCachesAsync(
 
   let counts = emptyAdminDivisionCounts();
   try {
-    counts = await probeAdminDivisionCounts(
-      gameArea,
-      customMatchingAreas,
-      regionPackId,
-    );
+    counts = await probeAdminDivisionCounts(gameArea, customMatchingAreas, regionPackId);
   } catch {
     // probe failure is non-fatal; background preload continues with empty counts
   }
@@ -205,26 +183,19 @@ export async function preloadCriticalGameAreaCaches(
 ): Promise<void> {
   let counts = emptyAdminDivisionCounts();
   try {
-    counts = await probeAdminDivisionCounts(
-      gameArea,
-      customMatchingAreas,
-      regionPackId,
-    );
+    counts = await probeAdminDivisionCounts(gameArea, customMatchingAreas, regionPackId);
   } catch {
     // probe failure is non-fatal; preload continues with empty counts
   }
-  usePreloadStore
-    .getState()
-    .setAdminDivisionCounts(gameAreaPreloadKey(gameArea), counts);
+  usePreloadStore.getState().setAdminDivisionCounts(gameAreaPreloadKey(gameArea), counts);
 
   await Promise.allSettled(
-    adminBoundaryLevelsForSession(regionPackId, customMatchingAreas).map(
-      (adminLevel) =>
-        fetchAdminDivisionFeaturesInArea(
-          gameArea,
-          adminLevel,
-          customMatchingAreas?.[adminLevel as MatchingAdminLevel],
-        ),
+    adminBoundaryLevelsForSession(regionPackId, customMatchingAreas).map((adminLevel) =>
+      fetchAdminDivisionFeaturesInArea(
+        gameArea,
+        adminLevel,
+        customMatchingAreas?.[adminLevel as MatchingAdminLevel],
+      ),
     ),
   );
 }

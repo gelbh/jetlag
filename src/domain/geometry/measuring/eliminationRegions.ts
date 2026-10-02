@@ -1,11 +1,7 @@
 import type { Feature, LineString, MultiPolygon, Polygon } from "geojson";
 import type { GameArea } from "../../map/annotations";
 import type { MeasuringAnswer } from "../../questions/measuringQuestions";
-import {
-  gameAreaToPolygon,
-  safeDifference,
-  type LatLngTuple,
-} from "../gameArea/geometryCore";
+import { gameAreaToPolygon, type LatLngTuple, safeDifference } from "../gameArea/geometryCore";
 import {
   buildCoastlineNearRegion,
   buildLocationNearRegion,
@@ -20,8 +16,7 @@ export async function buildCoastlineEliminationRegion(
   nearRegion?: Feature<Polygon | MultiPolygon> | null,
 ): Promise<Feature<Polygon | MultiPolygon> | null> {
   const nearCoast =
-    nearRegion ??
-    (await buildCoastlineNearRegion(segments, distanceMeters, gameArea));
+    nearRegion ?? (await buildCoastlineNearRegion(segments, distanceMeters, gameArea));
   if (!nearCoast) {
     return null;
   }
@@ -49,11 +44,7 @@ export async function buildMultiPlaceEliminationRegion(
   gameArea: GameArea,
   answer: MeasuringAnswer,
 ): Promise<Feature<Polygon | MultiPolygon> | null> {
-  const nearRegion = await buildMultiPlaceNearRegion(
-    places,
-    distanceMeters,
-    gameArea,
-  );
+  const nearRegion = await buildMultiPlaceNearRegion(places, distanceMeters, gameArea);
   if (!nearRegion) {
     return null;
   }
@@ -73,9 +64,7 @@ export function buildMeasuringEliminationRegion(
   return safeDifference(gameAreaToPolygon(gameArea), nearRegion);
 }
 
-function isFiniteCoordPair(
-  coord: number[] | null | undefined,
-): coord is [number, number] {
+function isFiniteCoordPair(coord: number[] | null | undefined): coord is [number, number] {
   return (
     Array.isArray(coord) &&
     coord.length >= 2 &&
@@ -130,8 +119,6 @@ export function polygonFeatureToPolygonGroups(
   return polygon ? [polygon] : [];
 }
 
-export function polygonFeatureToRings(
-  feature: Feature<Polygon | MultiPolygon>,
-): LatLngTuple[][] {
+export function polygonFeatureToRings(feature: Feature<Polygon | MultiPolygon>): LatLngTuple[][] {
   return polygonFeatureToPolygonGroups(feature).flat();
 }

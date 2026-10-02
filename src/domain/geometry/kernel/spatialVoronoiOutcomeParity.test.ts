@@ -1,13 +1,13 @@
-import { describe, expect, it } from "vitest";
 import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
 import { point as turfPoint } from "@turf/helpers";
-import type { Feature, FeatureCollection, MultiPolygon, Polygon } from "geojson";
 import intersect from "@turf/intersect";
 import simplify from "@turf/simplify";
+import type { Feature, FeatureCollection, MultiPolygon, Polygon } from "geojson";
+import { describe, expect, it } from "vitest";
 import { wasmBuildTentacleEliminationRegion } from "./tentacleWasm";
-import { wasmBuildSpatialVoronoiFromSites } from "./voronoiWasm";
 import type { GameAreaGeometry, LatLngTuple } from "./types";
 import { voronoiCellSiteId } from "./voronoiCellSiteId";
+import { wasmBuildSpatialVoronoiFromSites } from "./voronoiWasm";
 
 const sampleGameArea: GameAreaGeometry = {
   type: "Polygon",
@@ -39,8 +39,7 @@ function sameNearestFromCells(
   );
   if (
     !seekerCell ||
-    (seekerCell.geometry.type !== "Polygon" &&
-      seekerCell.geometry.type !== "MultiPolygon")
+    (seekerCell.geometry.type !== "Polygon" && seekerCell.geometry.type !== "MultiPolygon")
   ) {
     return null;
   }
@@ -55,10 +54,7 @@ function sameNearestFromCells(
       type: "FeatureCollection",
       features: [gameFeature, seekerCell as Feature<Polygon | MultiPolygon>],
     });
-    if (
-      hit &&
-      (hit.geometry.type === "Polygon" || hit.geometry.type === "MultiPolygon")
-    ) {
+    if (hit && (hit.geometry.type === "Polygon" || hit.geometry.type === "MultiPolygon")) {
       clipped = hit as Feature<Polygon | MultiPolygon>;
     }
   } catch {
@@ -122,8 +118,6 @@ describe("spatialVoronoiOutcomeParity", () => {
     const region = sameNearestFromCells("west", sampleGameArea, cells);
 
     expect(region).not.toBeNull();
-    expect(
-      booleanPointInPolygon(turfPoint([westSite.lng, westSite.lat]), region!),
-    ).toBe(true);
+    expect(booleanPointInPolygon(turfPoint([westSite.lng, westSite.lat]), region!)).toBe(true);
   });
 });

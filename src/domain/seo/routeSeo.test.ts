@@ -1,17 +1,10 @@
 import { describe, expect, it } from "vitest";
+import { APP_ROUTE_PATHS, absoluteUrl, getRouteSeo, listIndexablePaths } from "./routeSeo";
 import crawlPolicy from "./seoCrawlPolicy.json";
-import {
-  APP_ROUTE_PATHS,
-  absoluteUrl,
-  getRouteSeo,
-  listIndexablePaths,
-} from "./routeSeo";
 
 describe("routeSeo", () => {
   it("lists exactly the crawl-policy indexable paths", () => {
-    expect([...listIndexablePaths()].sort()).toEqual(
-      [...crawlPolicy.indexablePaths].sort(),
-    );
+    expect([...listIndexablePaths()].sort()).toEqual([...crawlPolicy.indexablePaths].sort());
   });
 
   it("covers every App route path", () => {
@@ -24,17 +17,13 @@ describe("routeSeo", () => {
     const indexable = new Set(listIndexablePaths());
     for (const path of APP_ROUTE_PATHS) {
       const seo = getRouteSeo(path);
-      expect(seo.robots).toBe(
-        indexable.has(path) ? "index,follow" : "noindex,nofollow",
-      );
+      expect(seo.robots).toBe(indexable.has(path) ? "index,follow" : "noindex,nofollow");
     }
   });
 
   it("builds absolute canonical URLs without trailing slash (except root)", () => {
     expect(absoluteUrl("/")).toBe("https://jetlag.gelbhart.dev/");
-    expect(absoluteUrl("/premium")).toBe(
-      "https://jetlag.gelbhart.dev/premium",
-    );
+    expect(absoluteUrl("/premium")).toBe("https://jetlag.gelbhart.dev/premium");
   });
 
   it("returns dedicated not-found SEO for unknown paths with noindex", () => {

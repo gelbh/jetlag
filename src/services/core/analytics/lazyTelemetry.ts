@@ -35,17 +35,13 @@ function loadSentry(): Promise<typeof import("./sentry")> {
   return sentryModule;
 }
 
-export function syncAnalyticsIdentityLazy(
-  ...args: Parameters<typeof syncAnalyticsIdentity>
-): void {
+export function syncAnalyticsIdentityLazy(...args: Parameters<typeof syncAnalyticsIdentity>): void {
   void loadAnalytics()
     .then((m) => m.syncAnalyticsIdentity(...args))
     .catch(() => {});
 }
 
-export function setBootstrapTagLazy(
-  ...args: Parameters<typeof setBootstrapTag>
-): void {
+export function setBootstrapTagLazy(...args: Parameters<typeof setBootstrapTag>): void {
   void loadSentry()
     .then((m) => m.setBootstrapTag(...args))
     .catch(() => {});
@@ -73,17 +69,13 @@ export function trackPageViewLazy(...args: Parameters<typeof trackPageView>): vo
     .catch(() => {});
 }
 
-export function captureExceptionLazy(
-  ...args: Parameters<typeof captureException>
-): void {
+export function captureExceptionLazy(...args: Parameters<typeof captureException>): void {
   void loadSentry()
     .then((m) => m.captureException(...args))
     .catch(() => {});
 }
 
-export function setTransactionNameLazy(
-  ...args: Parameters<typeof setTransactionName>
-): void {
+export function setTransactionNameLazy(...args: Parameters<typeof setTransactionName>): void {
   void loadSentry()
     .then((m) => m.setTransactionName(...args))
     .catch(() => {});

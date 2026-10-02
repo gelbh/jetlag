@@ -1,10 +1,4 @@
-export type PremiumProductKey =
-  | "pack_1"
-  | "pack_3"
-  | "pack_5"
-  | "monthly"
-  | "yearly"
-  | "lifetime";
+export type PremiumProductKey = "pack_1" | "pack_3" | "pack_5" | "monthly" | "yearly" | "lifetime";
 
 export interface PremiumEntitlements {
   premiumSessionCredits: number;
@@ -77,9 +71,7 @@ export const PREMIUM_PRODUCT_OFFERS: PremiumProductOffer[] = [
   },
 ];
 
-export function isAppPremiumTrialActive(
-  entitlements: PremiumEntitlements | null,
-): boolean {
+export function isAppPremiumTrialActive(entitlements: PremiumEntitlements | null): boolean {
   if (!entitlements?.trialEndsAt) {
     return false;
   }
@@ -100,9 +92,7 @@ export function isAppPremiumTrialActive(
   return true;
 }
 
-export function canStartPremiumTrial(
-  entitlements: PremiumEntitlements | null,
-): boolean {
+export function canStartPremiumTrial(entitlements: PremiumEntitlements | null): boolean {
   if (!entitlements || entitlements.trialUsedAt != null) {
     return false;
   }
@@ -118,9 +108,7 @@ export function canStartPremiumTrial(
   return true;
 }
 
-export function hasUnlimitedPremiumHosting(
-  entitlements: PremiumEntitlements | null,
-): boolean {
+export function hasUnlimitedPremiumHosting(entitlements: PremiumEntitlements | null): boolean {
   if (!entitlements) {
     return false;
   }
@@ -140,10 +128,7 @@ export function shouldDefaultSessionTierToPremium(
     return false;
   }
 
-  return (
-    hasUnlimitedPremiumHosting(entitlements) ||
-    isAppPremiumTrialActive(entitlements)
-  );
+  return hasUnlimitedPremiumHosting(entitlements) || isAppPremiumTrialActive(entitlements);
 }
 
 export function canSelectPremiumSessionTier(
@@ -196,9 +181,7 @@ export function formatBankedPremiumSessionCreditsLabel(
   return count === 1 ? "1 session saved" : `${count} sessions saved`;
 }
 
-function joinEntitlementSummaryParts(
-  ...parts: Array<string | null | undefined>
-): string {
+function joinEntitlementSummaryParts(...parts: Array<string | null | undefined>): string {
   return parts.filter((part): part is string => Boolean(part)).join(" · ");
 }
 
@@ -295,9 +278,7 @@ export function resolvePremiumEntitlementDisplayState(
   };
 }
 
-function bankedCreditsLabelForState(
-  entitlements: PremiumEntitlements | null,
-): string | null {
+function bankedCreditsLabelForState(entitlements: PremiumEntitlements | null): string | null {
   return formatBankedPremiumSessionCreditsLabel(entitlements);
 }
 
@@ -435,9 +416,7 @@ export function resolveHomePremiumButtonDisplay(
   }
 }
 
-export function formatEntitlementSummary(
-  entitlements: PremiumEntitlements | null,
-): string | null {
+export function formatEntitlementSummary(entitlements: PremiumEntitlements | null): string | null {
   if (!entitlements) {
     return null;
   }

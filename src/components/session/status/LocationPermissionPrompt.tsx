@@ -3,11 +3,11 @@ import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useLocation } from "react-router-dom";
 import {
   confirmAndRequestLocationAccess,
+  type GeolocationPermissionState,
   LOCATION_BLOCKED_MESSAGE,
   LOCATION_PERMISSION_REQUIRED_MESSAGE,
   queryGeolocationPermission,
   restoreLocationAccessIfPersisted,
-  type GeolocationPermissionState,
 } from "@/services/core/location/geolocation";
 import {
   getLocationPermissionUiSnapshot,
@@ -27,8 +27,7 @@ export function LocationPermissionPrompt() {
     () => EMPTY_LOCATION_PERMISSION_UI,
   );
   const [hydrating, setHydrating] = useState(() => onMap && ui.demand > 0);
-  const [permission, setPermission] =
-    useState<GeolocationPermissionState | null>(null);
+  const [permission, setPermission] = useState<GeolocationPermissionState | null>(null);
   const [busy, setBusy] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
   const [forceDenied, setForceDenied] = useState(false);
@@ -112,8 +111,7 @@ export function LocationPermissionPrompt() {
       const next = await queryGeolocationPermission();
       setPermission(next);
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : LOCATION_BLOCKED_MESSAGE;
+      const message = error instanceof Error ? error.message : LOCATION_BLOCKED_MESSAGE;
       setActionError(message);
       if (message === LOCATION_BLOCKED_MESSAGE) {
         setForceDenied(true);

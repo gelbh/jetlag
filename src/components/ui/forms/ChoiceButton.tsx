@@ -1,9 +1,6 @@
-import type { ButtonHTMLAttributes, ReactNode } from "react";
 import { UnstyledButton } from "@mantine/core";
-import {
-  choiceChipStyles,
-  type ChoiceTone,
-} from "@/components/ui/entry/entryChrome";
+import type { ButtonHTMLAttributes, ReactNode } from "react";
+import { type ChoiceTone, choiceChipStyles } from "@/components/ui/entry/entryChrome";
 
 interface ChoiceButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   selected?: boolean;
@@ -33,12 +30,7 @@ export function ChoiceButton({
   type = "button",
   ...props
 }: ChoiceButtonProps) {
-  const alignClass =
-    align === "left"
-      ? "text-left"
-      : align === "center"
-        ? "text-center"
-        : "";
+  const alignClass = align === "left" ? "text-left" : align === "center" ? "text-center" : "";
 
   return (
     <UnstyledButton

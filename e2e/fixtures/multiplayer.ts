@@ -1,30 +1,20 @@
-import { type Browser, type Page, expect } from "@playwright/test";
-import {
-  createHostSession,
-  createMultiplayerContexts,
-  joinAsRole,
-} from "./session";
-import {
-  answerInChat,
-  expectChatAnswer,
-  expectPendingQuestionText,
-  openChat,
-} from "./tools/chat";
+import { type Browser, expect, type Page } from "@playwright/test";
+import { createHostSession, createMultiplayerContexts, joinAsRole } from "./session";
+import { answerInChat, expectChatAnswer, expectPendingQuestionText, openChat } from "./tools/chat";
 
 export async function runHiderAnswerFlow(
   browser: Browser,
   sendQuestion: (page: Page) => Promise<void>,
   answerLabel: string,
 ) {
-  const { hostPage, guestPage, cleanup } =
-    await createMultiplayerContexts(browser);
+  const { hostPage, guestPage, cleanup } = await createMultiplayerContexts(browser);
 
   const { code } = await createHostSession(hostPage);
   await joinAsRole(guestPage, code, "hider");
 
-  await expect(
-    guestPage.getByRole("button", { name: "Set zone" }),
-  ).toBeVisible({ timeout: 15_000 });
+  await expect(guestPage.getByRole("button", { name: "Set zone" })).toBeVisible({
+    timeout: 15_000,
+  });
 
   await sendQuestion(hostPage);
 

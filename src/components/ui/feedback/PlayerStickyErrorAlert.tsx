@@ -1,6 +1,6 @@
 import { Alert, Button, Group } from "@mantine/core";
-import type { UserErrorDisplay } from "@/domain/device/feedback/userErrors";
 import { floatToneStyles } from "@/components/ui/banners/mapFloatToneStyles";
+import type { UserErrorDisplay } from "@/domain/device/feedback/userErrors";
 
 export type PlayerStickyErrorAlertProps = {
   error: UserErrorDisplay;
@@ -20,12 +20,7 @@ export function PlayerStickyErrorAlert({
   );
 
   return (
-    <Alert
-      color="halt"
-      title={error.title}
-      variant="light"
-      styles={floatToneStyles("halt")}
-    >
+    <Alert color="halt" title={error.title} variant="light" styles={floatToneStyles("halt")}>
       {error.message}
       {showPrimary || showSecondary ? (
         <Group gap="sm" mt="sm" wrap="wrap">

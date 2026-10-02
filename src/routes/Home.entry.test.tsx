@@ -1,9 +1,9 @@
+import { MantineProvider } from "@mantine/core";
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import { MantineProvider } from "@mantine/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { Home } from "./Home";
 import { jetlagTheme } from "@/theme/theme";
+import { Home } from "./Home";
 
 const { isFirebaseConfigured, isAuthBootstrapReady } = vi.hoisted(() => ({
   isFirebaseConfigured: vi.fn(() => false),
@@ -56,15 +56,11 @@ describe("Home", () => {
         <MemoryRouter>
           <Home />
         </MemoryRouter>
-      </MantineProvider>
+      </MantineProvider>,
     );
     expect(screen.getByRole("link", { name: /Join session/i })).toBeInTheDocument();
-    expect(
-      screen.getByRole("link", { name: /Create session/i }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("link", { name: /Browse presets/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Create session/i })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Browse presets/i })).toBeInTheDocument();
   });
 
   it("shows continue card with session code when session is active", () => {
@@ -73,10 +69,10 @@ describe("Home", () => {
         <MemoryRouter>
           <Home />
         </MemoryRouter>
-      </MantineProvider>
+      </MantineProvider>,
     );
     expect(
-      screen.getByRole("button", { name: /Return to map for session ABCD/i })
+      screen.getByRole("button", { name: /Return to map for session ABCD/i }),
     ).toBeInTheDocument();
     expect(screen.getByText("ABCD")).toBeInTheDocument();
     expect(screen.getByText(/^Continue$/i)).toBeInTheDocument();
@@ -89,20 +85,14 @@ describe("Home", () => {
         <MemoryRouter>
           <Home />
         </MemoryRouter>
-      </MantineProvider>
+      </MantineProvider>,
     );
-    expect(screen.getByRole("link", { name: /friends/i })).toHaveAttribute(
-      "href",
-      "/friends",
-    );
+    expect(screen.getByRole("link", { name: /friends/i })).toHaveAttribute("href", "/friends");
     expect(screen.getByRole("link", { name: /leaderboard/i })).toHaveAttribute(
       "href",
       "/leaderboard",
     );
-    expect(screen.getByRole("link", { name: /^stats$/i })).toHaveAttribute(
-      "href",
-      "/stats",
-    );
+    expect(screen.getByRole("link", { name: /^stats$/i })).toHaveAttribute("href", "/stats");
     expect(screen.queryByRole("link", { name: /^premium$/i })).toBeNull();
   });
 
@@ -113,12 +103,9 @@ describe("Home", () => {
         <MemoryRouter>
           <Home />
         </MemoryRouter>
-      </MantineProvider>
+      </MantineProvider>,
     );
-    expect(screen.getByRole("link", { name: /premium/i })).toHaveAttribute(
-      "href",
-      "/premium",
-    );
+    expect(screen.getByRole("link", { name: /premium/i })).toHaveAttribute("href", "/premium");
   });
 
   it("renders entries before Firebase auth bootstrap settles", () => {
@@ -129,7 +116,7 @@ describe("Home", () => {
         <MemoryRouter>
           <Home />
         </MemoryRouter>
-      </MantineProvider>
+      </MantineProvider>,
     );
     expect(screen.queryByText(/Starting…/)).toBeNull();
     expect(screen.getByRole("link", { name: /Join session/i })).toBeInTheDocument();
@@ -141,16 +128,19 @@ describe("Home", () => {
         <MemoryRouter>
           <Home />
         </MemoryRouter>
-      </MantineProvider>
+      </MantineProvider>,
     );
-    expect(
-      screen.getByRole("link", { name: "Privacy Policy" }),
-    ).toHaveAttribute("href", "/privacy");
-    expect(
-      screen.getByRole("link", { name: "Terms of Service" }),
-    ).toHaveAttribute("href", "/terms");
-    expect(
-      screen.getByRole("link", { name: "Feedback and suggestions" }),
-    ).toHaveAttribute("href", "/feedback");
+    expect(screen.getByRole("link", { name: "Privacy Policy" })).toHaveAttribute(
+      "href",
+      "/privacy",
+    );
+    expect(screen.getByRole("link", { name: "Terms of Service" })).toHaveAttribute(
+      "href",
+      "/terms",
+    );
+    expect(screen.getByRole("link", { name: "Feedback and suggestions" })).toHaveAttribute(
+      "href",
+      "/feedback",
+    );
   });
 });

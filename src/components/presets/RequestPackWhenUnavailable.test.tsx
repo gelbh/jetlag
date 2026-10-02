@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { RequestPackWhenUnavailable } from "./RequestPackWhenUnavailable";
 
 const authState = {
@@ -41,9 +41,7 @@ describe("RequestPackWhenUnavailable", () => {
       />,
     );
 
-    expect(
-      screen.getByText("Request a custom location pack"),
-    ).toBeInTheDocument();
+    expect(screen.getByText("Request a custom location pack")).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Request preload" }));
 
@@ -65,8 +63,6 @@ describe("RequestPackWhenUnavailable", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Dismiss" }));
 
-    expect(
-      screen.queryByText("Request a custom location pack"),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByText("Request a custom location pack")).not.toBeInTheDocument();
   });
 });

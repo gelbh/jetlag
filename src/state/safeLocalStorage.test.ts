@@ -1,4 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { LOCAL_SESSION_ID } from "../domain/map/annotations";
+import { createTestPinAnnotation } from "../test/fixtures/sessions";
 import {
   createSafeLocalStorage,
   dropDeletedAnnotations,
@@ -6,16 +8,12 @@ import {
   keepSessionAnnotations,
   safeSetItemForAnnotations,
 } from "./safeLocalStorage";
-import { createTestPinAnnotation } from "../test/fixtures/sessions";
-import { LOCAL_SESSION_ID } from "../domain/map/annotations";
 
 function quotaError(): DOMException {
   return new DOMException("QuotaExceededError", "QuotaExceededError");
 }
 
-function annotationsPayload(
-  annotations: ReturnType<typeof createTestPinAnnotation>[],
-): string {
+function annotationsPayload(annotations: ReturnType<typeof createTestPinAnnotation>[]): string {
   return JSON.stringify({ state: { annotations }, version: 0 });
 }
 
@@ -28,9 +26,7 @@ describe("safeLocalStorage", () => {
   it("detects QuotaExceededError variants", () => {
     expect(isQuotaExceededError(quotaError())).toBe(true);
     expect(isQuotaExceededError(new Error("QuotaExceededError"))).toBe(true);
-    expect(isQuotaExceededError(new Error("The quota has been exceeded."))).toBe(
-      true,
-    );
+    expect(isQuotaExceededError(new Error("The quota has been exceeded."))).toBe(true);
     expect(isQuotaExceededError(new Error("Network failed"))).toBe(false);
   });
 
@@ -76,9 +72,7 @@ describe("safeLocalStorage", () => {
       state: { annotations: { id: string }[] };
     };
 
-    expect(parsed.state.annotations.map((annotation) => annotation.id)).toEqual([
-      "ann-current",
-    ]);
+    expect(parsed.state.annotations.map((annotation) => annotation.id)).toEqual(["ann-current"]);
   });
 
   it("retries after pruning deleted annotations when quota is exceeded", () => {
@@ -89,20 +83,22 @@ describe("safeLocalStorage", () => {
     });
     const value = annotationsPayload([active, deleted]);
 
-    const setItem = vi
-      .spyOn(Storage.prototype, "setItem")
-      .mockImplementation(function mockSetItem(this: Storage, key, payload) {
-        if (key !== "jetlag-annotations") {
-          return Storage.prototype.setItem.call(this, key, payload);
-        }
+    const setItem = vi.spyOn(Storage.prototype, "setItem").mockImplementation(function mockSetItem(
+      this: Storage,
+      key,
+      payload,
+    ) {
+      if (key !== "jetlag-annotations") {
+        return Storage.prototype.setItem.call(this, key, payload);
+      }
 
-        const parsed = JSON.parse(payload) as {
-          state: { annotations: { status: string }[] };
-        };
-        if (parsed.state.annotations.some((item) => item.status === "deleted")) {
-          throw quotaError();
-        }
-      });
+      const parsed = JSON.parse(payload) as {
+        state: { annotations: { status: string }[] };
+      };
+      if (parsed.state.annotations.some((item) => item.status === "deleted")) {
+        throw quotaError();
+      }
+    });
 
     safeSetItemForAnnotations(localStorage, "jetlag-annotations", value);
 
@@ -133,20 +129,22 @@ describe("safeLocalStorage", () => {
 
   it("routes annotation writes through safe setItem", () => {
     const safeStorage = createSafeLocalStorage(localStorage);
-    const setItem = vi
-      .spyOn(Storage.prototype, "setItem")
-      .mockImplementation(function mockSetItem(this: Storage, key, payload) {
-        if (key !== "jetlag-annotations") {
-          return Storage.prototype.setItem.call(this, key, payload);
-        }
+    const setItem = vi.spyOn(Storage.prototype, "setItem").mockImplementation(function mockSetItem(
+      this: Storage,
+      key,
+      payload,
+    ) {
+      if (key !== "jetlag-annotations") {
+        return Storage.prototype.setItem.call(this, key, payload);
+      }
 
-        const parsed = JSON.parse(payload) as {
-          state: { annotations: { status: string }[] };
-        };
-        if (parsed.state.annotations.some((item) => item.status === "deleted")) {
-          throw quotaError();
-        }
-      });
+      const parsed = JSON.parse(payload) as {
+        state: { annotations: { status: string }[] };
+      };
+      if (parsed.state.annotations.some((item) => item.status === "deleted")) {
+        throw quotaError();
+      }
+    });
 
     const active = createTestPinAnnotation({ id: "ann-active" });
     const deleted = createTestPinAnnotation({
@@ -155,9 +153,7 @@ describe("safeLocalStorage", () => {
     });
     const value = annotationsPayload([active, deleted]);
 
-    expect(() =>
-      safeStorage.setItem("jetlag-annotations", value),
-    ).not.toThrow();
+    expect(() => safeStorage.setItem("jetlag-annotations", value)).not.toThrow();
     expect(setItem).toHaveBeenCalledTimes(2);
   });
 });

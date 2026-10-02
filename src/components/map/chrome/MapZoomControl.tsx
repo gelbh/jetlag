@@ -2,10 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { HudMinusIcon, HudPlusIcon } from "../../ui/brand/HudIcons";
 import type { MapChromeControlInset } from "../helpers/mapChromeControlInset";
-import {
-  useMapLibreInteracting,
-  useMapLibreMap,
-} from "../helpers/useMapLibreMap";
+import { useMapLibreInteracting, useMapLibreMap } from "../helpers/useMapLibreMap";
 import { MapChromeControl } from "./MapChromeControl";
 
 export type MapZoomControlInset = MapChromeControlInset;
@@ -15,10 +12,7 @@ interface MapZoomControlProps {
   inset?: MapChromeControlInset;
 }
 
-export function MapZoomControl({
-  enabled,
-  inset = "dock",
-}: MapZoomControlProps) {
+export function MapZoomControl({ enabled, inset = "dock" }: MapZoomControlProps) {
   const map = useMapLibreMap();
   const portalTarget = useMemo(() => map.getContainer(), [map]);
   const [zoom, setZoom] = useState(() => map.getZoom());

@@ -1,9 +1,9 @@
 import {
-  measuringUsesAllPlacesInArea,
-  measuringTargetLabel,
   type MeasuringFromKind,
   type MeasuringLocationCategory,
   type MeasuringSubject,
+  measuringTargetLabel,
+  measuringUsesAllPlacesInArea,
 } from "@/domain/questions";
 
 export type MeasuringSearchRole = "seeker" | "target";
@@ -13,9 +13,7 @@ export function measuringUsesDebouncedSeekerResolve(
   measureFrom: MeasuringFromKind,
 ): boolean {
   return (
-    subject === "coastline" ||
-    subject === "sea_level" ||
-    measuringUsesAllPlacesInArea(measureFrom)
+    subject === "coastline" || subject === "sea_level" || measuringUsesAllPlacesInArea(measureFrom)
   );
 }
 

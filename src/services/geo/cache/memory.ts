@@ -39,11 +39,7 @@ export function readCachedMemoryEntry<T>(key: string): T | undefined {
   return entry.value as T;
 }
 
-export function writeMemoryEntry<T>(
-  key: string,
-  value: T,
-  ttlMs?: number,
-): void {
+export function writeMemoryEntry<T>(key: string, value: T, ttlMs?: number): void {
   const ttl = ttlMs ?? cacheTtlMsForKey(key);
   memoryCache.set(key, {
     value,
@@ -63,9 +59,7 @@ export const memoryGeoCache: GeoCacheLayer = {
 };
 
 export function staleCacheCaptionForKey(key: string): string | undefined {
-  return staleServedKeys.has(key)
-    ? "Showing cached data. Tap to refresh."
-    : undefined;
+  return staleServedKeys.has(key) ? "Showing cached data. Tap to refresh." : undefined;
 }
 
 export function clearStaleCacheNoticesForTests(): void {

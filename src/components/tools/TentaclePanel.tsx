@@ -1,36 +1,30 @@
 import { type RefObject } from "react";
-import type { TentaclePoi } from "../../domain/map/annotations";
 import { filterConfirmedTentaclePois } from "../../domain/geo/poiCandidateAdapters";
-import {
-  formatPresetDistance,
-  type DistanceUnit,
-} from "../../domain/map/distance";
-import type { GameSize } from "../../domain/session/size/gameSize";
+import type { TentaclePoi } from "../../domain/map/annotations";
+import { type DistanceUnit, formatPresetDistance } from "../../domain/map/distance";
 import {
   isTentacleCategoryAvailable,
+  type TentacleExtendedCategoryId,
   tentacleCategoriesForGameSize,
   tentacleQuestionPrompt,
-  type TentacleExtendedCategoryId,
 } from "../../domain/questions";
-import { AnchorControls } from "./shared/controls/AnchorControls";
-import { ErrorWithRetry } from "./shared/readout/ErrorWithRetry";
-import { LoadingReadout } from "./shared/readout/LoadingReadout";
-import { QuestionPromptBlock } from "./shared/controls/QuestionPromptBlock";
-import { ResolvedReadout } from "./shared/readout/ResolvedReadout";
+import type { GameSize } from "../../domain/session/size/gameSize";
+import { useToolWizard } from "../../hooks/wizard/useToolWizard";
 import { TentacleLocationsChord } from "./ask/TentacleLocationsChord";
 import { TentacleAnswerPicker } from "./shared/answers/TentacleAnswerPicker";
+import { AnchorControls } from "./shared/controls/AnchorControls";
+import { QuestionPromptBlock } from "./shared/controls/QuestionPromptBlock";
+import { SendToHidersButton } from "./shared/controls/SendToHidersButton";
 import { ToolPanelShell } from "./shared/panels/ToolPanelShell";
 import { ToolSection } from "./shared/panels/ToolSection";
-import { SendToHidersButton } from "./shared/controls/SendToHidersButton";
+import { QuestionTruthReferenceHint } from "./shared/QuestionTruthReferenceHint";
+import { ErrorWithRetry } from "./shared/readout/ErrorWithRetry";
+import { LoadingReadout } from "./shared/readout/LoadingReadout";
+import { ResolvedReadout } from "./shared/readout/ResolvedReadout";
+import { TENTACLE_WIZARD } from "./shared/wizard/toolStepUtils";
+import { toolWizardPhasePrimaryNav, toolWizardSwipeNext } from "./shared/wizard/toolWizardGuards";
 import { WizardPanelFrame } from "./shared/wizard/WizardPanelFrame";
 import { WizardSwipeSurface } from "./shared/wizard/WizardSwipeSurface";
-import { TENTACLE_WIZARD } from "./shared/wizard/toolStepUtils";
-import {
-  toolWizardPhasePrimaryNav,
-  toolWizardSwipeNext,
-} from "./shared/wizard/toolWizardGuards";
-import { useToolWizard } from "../../hooks/wizard/useToolWizard";
-import { QuestionTruthReferenceHint } from "./shared/QuestionTruthReferenceHint";
 
 /** Flat tentacle wizard fields bag for TentaclePanel (W4-F peel). */
 export type TentaclePanelModel = {
@@ -92,32 +86,20 @@ export function TentaclePanel({ model }: TentaclePanelProps) {
     onRetry,
     wizardStepRef,
   } = model;
-  const {
-    phaseId,
-    stepId,
-    phaseIndex,
-    phaseCount,
-    configureIndex,
-    goNext,
-    goBack,
-    Stepper,
-  } = useToolWizard(TENTACLE_WIZARD, {
-    wizardStepRef,
-    awaitHiderAnswer,
-    toolCommitLabel: awaitHiderAnswer
-      ? `Send to hiders (${costLabel})`
-      : "Add tentacle question",
-    isSubmitting,
-  });
+  const { phaseId, stepId, phaseIndex, phaseCount, configureIndex, goNext, goBack, Stepper } =
+    useToolWizard(TENTACLE_WIZARD, {
+      wizardStepRef,
+      awaitHiderAnswer,
+      toolCommitLabel: awaitHiderAnswer ? `Send to hiders (${costLabel})` : "Add tentacle question",
+      isSubmitting,
+    });
 
   const prompt =
     categoryId !== null
       ? tentacleQuestionPrompt(categoryId, distanceUnit, searchRadiusMeters)
       : "Choose a category to build your tentacle question.";
   const searchRadiusLabel =
-    categoryId !== null
-      ? formatPresetDistance(searchRadiusMeters, distanceUnit)
-      : null;
+    categoryId !== null ? formatPresetDistance(searchRadiusMeters, distanceUnit) : null;
   const categorySelectionAvailable =
     categoryId !== null && isTentacleCategoryAvailable(gameSize, categoryId);
   const hasRecordedAnswer = outOfReach || selectedPoiId !== null;
@@ -135,13 +117,8 @@ export function TentaclePanel({ model }: TentaclePanelProps) {
 
   const canGoNext =
     (phaseId === "place" && hasCenter && !loading) ||
-    (phaseId === "configure" &&
-      stepId === "category" &&
-      categorySelectionAvailable) ||
-    (phaseId === "configure" &&
-      stepId === "locations" &&
-      locationsReady &&
-      !loading);
+    (phaseId === "configure" && stepId === "category" && categorySelectionAvailable) ||
+    (phaseId === "configure" && stepId === "locations" && locationsReady && !loading);
   const canSwipeNext = toolWizardSwipeNext(canGoNext, phaseIndex, phaseCount);
 
   const tentacleSendActions =
@@ -182,9 +159,7 @@ export function TentaclePanel({ model }: TentaclePanelProps) {
                 if (!value) {
                   return;
                 }
-                onCategoryChange(
-                  event.target.value as TentacleExtendedCategoryId,
-                );
+                onCategoryChange(event.target.value as TentacleExtendedCategoryId);
               }}
               className="field-input"
             >
@@ -211,9 +186,7 @@ export function TentaclePanel({ model }: TentaclePanelProps) {
             gpsLoadingLabel="Locating…"
           />
           {loading && hasCenter && categoryChosen ? (
-            <LoadingReadout>
-              Loading locations within {searchRadiusLabel}…
-            </LoadingReadout>
+            <LoadingReadout>Loading locations within {searchRadiusLabel}…</LoadingReadout>
           ) : null}
         </ToolSection>
       ) : null}
@@ -230,8 +203,8 @@ export function TentaclePanel({ model }: TentaclePanelProps) {
             </LoadingReadout>
           ) : poiOptions.length > 0 ? (
             <ResolvedReadout>
-              {poiOptions.length} location{poiOptions.length === 1 ? "" : "s"}{" "}
-              found within {searchRadiusLabel}.
+              {poiOptions.length} location{poiOptions.length === 1 ? "" : "s"} found within{" "}
+              {searchRadiusLabel}.
             </ResolvedReadout>
           ) : (
             <ResolvedReadout variant="warning">
@@ -270,8 +243,7 @@ export function TentaclePanel({ model }: TentaclePanelProps) {
       stepper={
         <Stepper
           nav={{
-            canGoBack:
-              phaseIndex > 0 || (phaseId === "configure" && configureIndex > 0),
+            canGoBack: phaseIndex > 0 || (phaseId === "configure" && configureIndex > 0),
             onBack: goBack,
             ...toolWizardPhasePrimaryNav({
               phaseId,
@@ -287,9 +259,7 @@ export function TentaclePanel({ model }: TentaclePanelProps) {
       <WizardPanelFrame
         scrollable
         stickyFooter={answerFooter}
-        trailing={
-          error ? <ErrorWithRetry error={error} onRetry={onRetry} /> : null
-        }
+        trailing={error ? <ErrorWithRetry error={error} onRetry={onRetry} /> : null}
       >
         <WizardSwipeSurface
           stepId={stepId}

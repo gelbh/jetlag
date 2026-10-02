@@ -1,5 +1,5 @@
-import test from "node:test";
 import assert from "node:assert/strict";
+import test from "node:test";
 import {
   executeSessionOpsTool,
   SESSION_OPS_HOST_CONFIRM_REQUIRED,
@@ -35,9 +35,7 @@ function mockOpsDb({
   },
 } = {}) {
   const incidents = new Map([["inc-1", { ...incident }]]);
-  const sessionDocs = new Map(
-    Object.entries(sessions).map(([id, data]) => [id, { ...data }]),
-  );
+  const sessionDocs = new Map(Object.entries(sessions).map(([id, data]) => [id, { ...data }]));
   const messages = [];
   const toolAudits = [];
 
@@ -237,8 +235,6 @@ test("executeSessionOpsTool reset_board with hostConfirmed delegates to moderate
   );
 
   assert.equal(result.status, "ok");
-  assert.deepEqual(moderated, [
-    { sessionId: "sess-1", action: "resetBoard", adminUid: "admin-1" },
-  ]);
+  assert.deepEqual(moderated, [{ sessionId: "sess-1", action: "resetBoard", adminUid: "admin-1" }]);
   assert.equal(db._toolAudits[0].status, "accepted");
 });

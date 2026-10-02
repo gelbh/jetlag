@@ -1,23 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import type {
-  IncidentMessageRecord,
-  IncidentRecord,
-} from "../../domain/incident/incidentTypes";
 import { formatFreshnessAge } from "../../domain/admin/formatAdminFreshness";
+import type { IncidentMessageRecord, IncidentRecord } from "../../domain/incident/incidentTypes";
+import { useIncidentThread } from "../../hooks/incident/useIncidentThread";
 import {
   incidentStatusChipLabel,
   incidentStatusChipTone,
 } from "../../services/admin/adminIncidents";
-import { useIncidentThread } from "../../hooks/incident/useIncidentThread";
 import { SupportAgentChat } from "../incident/SupportAgentChat";
 import { AdminHotfixThread } from "./AdminHotfixThread";
 
-export type AdminIncidentDetailTab =
-  | "chat"
-  | "support"
-  | "hotfix"
-  | "diagnostics"
-  | "timeline";
+export type AdminIncidentDetailTab = "chat" | "support" | "hotfix" | "diagnostics" | "timeline";
 
 export interface AdminIncidentDetailProps {
   incidentId: string | null;
@@ -101,16 +93,11 @@ function AdminIncidentDetailBody({
   sendingOverride,
   onSendOverride,
 }: AdminIncidentDetailProps & { incidentId: string }) {
-  const live = useIncidentThread(
-    incidentOverride !== undefined ? null : incidentId,
-  );
-  const incident =
-    incidentOverride !== undefined ? incidentOverride : live.incident;
-  const messages =
-    messagesOverride !== undefined ? messagesOverride : live.messages;
+  const live = useIncidentThread(incidentOverride !== undefined ? null : incidentId);
+  const incident = incidentOverride !== undefined ? incidentOverride : live.incident;
+  const messages = messagesOverride !== undefined ? messagesOverride : live.messages;
   const error = errorOverride !== undefined ? errorOverride : live.error;
-  const sending =
-    sendingOverride !== undefined ? sendingOverride : live.sending;
+  const sending = sendingOverride !== undefined ? sendingOverride : live.sending;
   const sendMessage = onSendOverride ?? live.sendMessage;
 
   const [tab, setTab] = useState<AdminIncidentDetailTab>("chat");
@@ -128,8 +115,7 @@ function AdminIncidentDetailBody({
     () =>
       messages.filter(
         (message) =>
-          message.kind !== "prompt" &&
-          (message.kind === "chat" || message.sender === "system"),
+          message.kind !== "prompt" && (message.kind === "chat" || message.sender === "system"),
       ),
     [messages],
   );
@@ -202,9 +188,7 @@ function AdminIncidentDetailBody({
       await sendMessage(text);
       setDraft("");
     } catch (err) {
-      setSendError(
-        err instanceof Error ? err.message : "Could not send the message.",
-      );
+      setSendError(err instanceof Error ? err.message : "Could not send the message.");
     }
   };
 
@@ -214,10 +198,7 @@ function AdminIncidentDetailBody({
         <div>
           <h2 className="jl-incident-detail-id">{incident.id}</h2>
           <p className="jl-incident-detail-meta">
-            Session{" "}
-            {incident.sessionCode?.trim()
-              ? incident.sessionCode.trim().toUpperCase()
-              : "—"}{" "}
+            Session {incident.sessionCode?.trim() ? incident.sessionCode.trim().toUpperCase() : "—"}{" "}
             · {formatFreshnessAge(incident.updatedAt || incident.createdAt)}
           </p>
         </div>
@@ -254,9 +235,7 @@ function AdminIncidentDetailBody({
           <>
             {incident.adminPrompt.trim() ? (
               <section className="jl-scroll jl-incident-prompt" aria-label="Admin prompt">
-                <p className="jl-incident-prompt-label">
-                  System (pinned) — admin prompt
-                </p>
+                <p className="jl-incident-prompt-label">System (pinned) — admin prompt</p>
                 <pre className="jl-incident-prompt-body">{incident.adminPrompt}</pre>
               </section>
             ) : null}
@@ -281,8 +260,7 @@ function AdminIncidentDetailBody({
                       className={`jl-incident-msg jl-incident-msg--${message.sender}`}
                     >
                       <p className="jl-incident-msg-sender">
-                        {senderLabel(message.sender)} ·{" "}
-                        {formatClock(message.createdAt)}
+                        {senderLabel(message.sender)} · {formatClock(message.createdAt)}
                       </p>
                       <p className="jl-incident-msg-text">{message.text}</p>
                     </div>
@@ -325,13 +303,9 @@ function AdminIncidentDetailBody({
           </>
         ) : null}
 
-        {tab === "support" ? (
-          <SupportAgentChat incidentId={incidentId} variant="admin" />
-        ) : null}
+        {tab === "support" ? <SupportAgentChat incidentId={incidentId} variant="admin" /> : null}
 
-        {tab === "hotfix" ? (
-          <AdminHotfixThread incidentId={incidentId} />
-        ) : null}
+        {tab === "hotfix" ? <AdminHotfixThread incidentId={incidentId} /> : null}
 
         {tab === "diagnostics" ? (
           <dl className="jl-scroll jl-incident-diag-list">
@@ -386,9 +360,7 @@ function AdminIncidentDetailBody({
             <ul className="jl-scroll jl-incident-timeline">
               {timelineItems.map((item) => (
                 <li key={item.id} className="jl-incident-timeline-item">
-                  <span className="jl-incident-timeline-time">
-                    {formatClock(item.createdAt)}
-                  </span>
+                  <span className="jl-incident-timeline-time">{formatClock(item.createdAt)}</span>
                   <p className="jl-incident-timeline-text">{item.text}</p>
                 </li>
               ))}
