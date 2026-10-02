@@ -75,6 +75,35 @@ describe("buildHiderTruthFetchKey", () => {
     expect(a).not.toBe(b);
   });
 
+  it("omits hidingPlace during end game even when ask is inside the zone", () => {
+    const open = [
+      radarPending({
+        placement: {
+          geometryJson: JSON.stringify({
+            type: "Feature",
+            properties: {},
+            geometry: { type: "Point", coordinates: [insideAsk[1], insideAsk[0]] },
+          }),
+          metadata: { radiusMeters: milesToMeters(1) },
+        },
+      }),
+    ];
+    const session = {
+      endGameStartedAt: "2026-01-01T00:00:00.000Z",
+      endGameTruthAnchors: { "hider-1": { lat: 51.5, lng: -0.12 } },
+    };
+    const a = buildHiderTruthFetchKey(
+      open,
+      baseContext({ hidingPlace: [51.5, -0.12], session }),
+    );
+    const b = buildHiderTruthFetchKey(
+      open,
+      baseContext({ hidingPlace: [51.501, -0.121], session }),
+    );
+    expect(a).toBe(b);
+    expect(a).toContain("place:omitted");
+  });
+
   it("still includes hidingPlace slot when in-zone but place is null (first fix)", () => {
     const open = [
       radarPending({

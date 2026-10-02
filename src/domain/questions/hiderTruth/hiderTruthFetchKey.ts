@@ -1,5 +1,6 @@
 import type { LatLngTuple } from "../../geometry/gameArea/geometry";
 import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
+import { isEndGameActive } from "../../map/annotations";
 import {
   askOriginFromPendingQuestion,
   isAskOriginInsideHidingZone,
@@ -43,6 +44,9 @@ export function openQuestionNeedsHidingPlace(
   question: PendingQuestionRecord,
   context: HiderQuestionTruthContextInput,
 ): boolean {
+  if (isEndGameActive(context.session)) {
+    return false;
+  }
   const askOrigin = askOriginFromPendingQuestion(
     question,
     context.seekerPlacesByUid,
