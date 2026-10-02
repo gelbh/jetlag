@@ -108,6 +108,7 @@ import { useMapStore, useSessionStore } from "../state/sessionStore";
 import { useAnnotationStore } from "../state/annotationStore";
 
 export function HiderMapScreen() {
+  "use memo";
   const session = useSessionStore((state) => state.session);
   const setSession = useSessionStore((state) => state.setSession);
   const persistedMyUid = useSessionStore((state) => state.myUid);

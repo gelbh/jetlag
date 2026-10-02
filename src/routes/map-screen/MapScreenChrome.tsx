@@ -33,6 +33,7 @@ export type MapScreenChromeProps = {
 };
 
 export function MapScreenChrome({ controller }: MapScreenChromeProps) {
+  "use memo";
   const {
     session,
     gameArea,
