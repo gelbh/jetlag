@@ -75,7 +75,7 @@ export function useThermometerTool({
   const wizardStepRef = useRef("place");
   const [editingSetup, setEditingSetup] = useState(true);
   const finishPlacementRef = useRef(finishPlacement);
-  const resetAfterSuccessRef = useRef(() => undefined as undefined);
+  const resetAfterSuccessRef = useRef(() => undefined as void);
 
   useEffect(() => {
     finishPlacementRef.current = finishPlacement;

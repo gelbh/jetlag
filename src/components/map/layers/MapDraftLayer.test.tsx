@@ -5,12 +5,12 @@ import { describe, expect, it, vi } from "vitest";
 import type { MapFeatureHitResult } from "../helpers/mapFeatureHitTest";
 import { MapDraftLayer } from "./MapDraftLayer";
 
-let hitHandler: ((result: MapFeatureHitResult) => boolean | undefined) | null = null;
+let hitHandler: ((result: MapFeatureHitResult) => boolean | void) | null = null;
 
 vi.mock("../helpers/MapFeatureHitTestContext", () => ({
   useMapFeatureHitTest: (
     _prefix: string,
-    handler: (result: MapFeatureHitResult) => boolean | undefined,
+    handler: (result: MapFeatureHitResult) => boolean | void,
   ) => {
     hitHandler = handler;
   },
@@ -103,7 +103,7 @@ describe("MapDraftLayer", () => {
       />,
     );
 
-    expect(hitHandler?.(fakeHit("draft-pin-1"))).toBe(false);
+    expect(hitHandler!(fakeHit("draft-pin-1"))).toBe(false);
     expect(onMarkerActivate).toHaveBeenCalledWith("draft-pin-1");
   });
 });

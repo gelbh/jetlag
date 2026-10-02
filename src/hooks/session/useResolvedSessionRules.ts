@@ -55,8 +55,8 @@ export interface ResolvedSessionRulesState {
 export function useResolvedSessionRules(
   session: SessionRecord | null | undefined,
 ): ResolvedSessionRulesState {
-  const _sessionRulesKey = sessionRulesSnapshot(session);
-  const baseRules = useMemo(() => sessionRulesFromRecord(session), [session]);
+  const sessionRulesKey = sessionRulesSnapshot(session);
+  const baseRules = useMemo(() => sessionRulesFromRecord(session), [sessionRulesKey]);
 
   const regionPackId = session?.regionPackId;
   const regionPackSubregionId = session?.regionPackSubregionId;
@@ -130,13 +130,7 @@ export function useResolvedSessionRules(
     return () => {
       cancelled = true;
     };
-  }, [
-    areasCacheKey,
-    needsAsyncResolve,
-    session?.customMatchingAreas,
-    playAreaCacheKeyValue,
-    session,
-  ]);
+  }, [areasCacheKey, needsAsyncResolve]);
 
   useEffect(() => {
     if (!needsPlayAreaResolve || !playAreaCacheKeyValue) {
@@ -176,7 +170,7 @@ export function useResolvedSessionRules(
     return () => {
       cancelled = true;
     };
-  }, [needsPlayAreaResolve, playAreaCacheKeyValue, session]);
+  }, [needsPlayAreaResolve, playAreaCacheKeyValue]);
 
   const sessionRules = useMemo(
     () => (resolvedAreas ? { ...baseRules, customMatchingAreas: resolvedAreas } : baseRules),

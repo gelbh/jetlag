@@ -63,7 +63,7 @@ function findOrCreateGroup(
   return nodes.find(
     (node): node is Extract<BundledPresetTreeNode, { kind: "group" }> =>
       node.kind === "group" && node.id === segment.id,
-  )?.children;
+  )!.children;
 }
 
 function countPresetsInTree(node: BundledPresetTreeNode): number {

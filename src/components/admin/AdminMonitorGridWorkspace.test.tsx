@@ -39,8 +39,8 @@ describe("AdminMonitorGridWorkspace", () => {
     ]);
     const mapStack = next.stacks.find((s) => s.id === "monitor-map");
     expect(mapStack).toBeDefined();
-    expect(mapStack?.x + mapStack?.w).toBeLessThanOrEqual(DEFAULT_COLS);
-    expect(mapStack?.w).toBeLessThanOrEqual(DEFAULT_COLS);
+    expect(mapStack!.x + mapStack!.w).toBeLessThanOrEqual(DEFAULT_COLS);
+    expect(mapStack!.w).toBeLessThanOrEqual(DEFAULT_COLS);
   });
 
   it("renders nested monitor grid and stack titles", () => {

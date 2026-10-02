@@ -133,9 +133,9 @@ export function parseTentaclePois(
       seen.add(id);
 
       const displayName =
-        element.tags?.ref?.trim() && categoryId === "metro_line"
-          ? `${element.tags?.name?.trim()} (${element.tags?.ref?.trim()})`
-          : element.tags?.name?.trim();
+        element.tags!.ref?.trim() && categoryId === "metro_line"
+          ? `${element.tags!.name!.trim()} (${element.tags!.ref!.trim()})`
+          : element.tags!.name!.trim();
 
       return {
         id,

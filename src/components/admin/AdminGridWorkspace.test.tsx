@@ -29,8 +29,8 @@ describe("AdminGridWorkspace", () => {
     const next = commitWorkspaceGeometry(layout, [{ i: "sessions", x: 20, y: 0, w: 10, h: 5 }]);
     const sessions = next.stacks.find((s) => s.id === "sessions");
     expect(sessions).toBeDefined();
-    expect(sessions?.x + sessions?.w).toBeLessThanOrEqual(DEFAULT_COLS);
-    expect(sessions?.w).toBeLessThanOrEqual(DEFAULT_COLS);
+    expect(sessions!.x + sessions!.w).toBeLessThanOrEqual(DEFAULT_COLS);
+    expect(sessions!.w).toBeLessThanOrEqual(DEFAULT_COLS);
   });
 
   it("renders stack titles from the layout fixture", () => {

@@ -55,18 +55,18 @@ describe("remapBundledSeaLevelSeedToGameArea", () => {
     const sampling = remapBundledSeaLevelSeedToGameArea(seed, DUBLIN_CITY_GAME_AREA);
 
     expect(sampling).not.toBeNull();
-    expect(sampling?.divisions).toBe(8);
-    expect(sampling?.cells.length).toBeGreaterThan(0);
+    expect(sampling!.divisions).toBe(8);
+    expect(sampling!.cells.length).toBeGreaterThan(0);
 
     const sessionBbox = gameAreaToBoundingBox(DUBLIN_CITY_GAME_AREA);
-    for (const cell of sampling?.cells) {
+    for (const cell of sampling!.cells) {
       expect(cell.south).toBeGreaterThanOrEqual(sessionBbox.south - 1e-9);
       expect(cell.north).toBeLessThanOrEqual(sessionBbox.north + 1e-9);
       expect(cell.west).toBeGreaterThanOrEqual(sessionBbox.west - 1e-9);
       expect(cell.east).toBeLessThanOrEqual(sessionBbox.east + 1e-9);
     }
-    expect(sampling?.cellElevations.every((value) => value === 18)).toBe(true);
-    expect(sampling?.complete).toBe(false);
+    expect(sampling!.cellElevations.every((value) => value === 18)).toBe(true);
+    expect(sampling!.complete).toBe(false);
   });
 
   it("marks complete when seed is dense enough for the session fine target", () => {
@@ -82,9 +82,9 @@ describe("remapBundledSeaLevelSeedToGameArea", () => {
     const sampling = remapBundledSeaLevelSeedToGameArea(seed, DUBLIN_CITY_GAME_AREA);
 
     expect(sampling).not.toBeNull();
-    expect(sampling?.divisions).toBe(20);
-    expect(sampling?.complete).toBe(true);
-    expect(sampling?.cellElevations.every((value) => Number.isFinite(value))).toBe(true);
+    expect(sampling!.divisions).toBe(20);
+    expect(sampling!.complete).toBe(true);
+    expect(sampling!.cellElevations.every((value) => Number.isFinite(value))).toBe(true);
   });
 
   it("rejects sparse seeds that cannot cover the session grid", () => {

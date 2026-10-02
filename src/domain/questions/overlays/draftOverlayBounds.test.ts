@@ -21,10 +21,10 @@ describe("boundingBoxFromPositions", () => {
     ]);
 
     expect(box).not.toBeNull();
-    expect(box?.south).toBeLessThanOrEqual(53.34);
-    expect(box?.north).toBeGreaterThanOrEqual(53.36);
-    expect(box?.west).toBeLessThanOrEqual(-6.27);
-    expect(box?.east).toBeGreaterThanOrEqual(-6.25);
+    expect(box!.south).toBeLessThanOrEqual(53.34);
+    expect(box!.north).toBeGreaterThanOrEqual(53.36);
+    expect(box!.west).toBeLessThanOrEqual(-6.27);
+    expect(box!.east).toBeGreaterThanOrEqual(-6.25);
   });
 });
 
@@ -72,8 +72,8 @@ describe("boundingBoxFromDraftOverlays", () => {
 
     const box = boundingBoxFromDraftOverlays(overlays, 50);
     expect(box).not.toBeNull();
-    expect(box?.north - box?.south).toBeGreaterThan(0);
-    expect(box?.east - box?.west).toBeGreaterThan(0);
+    expect(box!.north - box!.south).toBeGreaterThan(0);
+    expect(box!.east - box!.west).toBeGreaterThan(0);
   });
 
   it("includes polygon ring coordinates", () => {

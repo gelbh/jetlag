@@ -115,7 +115,7 @@ async function readKmlTextFromFile(file: File): Promise<string> {
       throw new Error("No KML file found in KMZ archive.");
     }
 
-    return zip.file(kmlEntry)?.async("string");
+    return zip.file(kmlEntry)!.async("string");
   }
 
   if (lowerName.endsWith(".kml")) {

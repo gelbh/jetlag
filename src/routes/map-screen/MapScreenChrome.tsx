@@ -146,7 +146,7 @@ export function MapScreenChrome({ controller }: MapScreenChromeProps) {
   const { inactiveChrome, terminalSessionError, onReturnToJoin, onSyncRetry } =
     useMapTerminalSessionChrome({
       syncMessage,
-      sessionId: session?.id,
+      sessionId: session!.id,
       closeOverlays: overlay.closeAllSheets,
     });
   const onSyncErrorAction = onSyncRetry;
@@ -166,9 +166,9 @@ export function MapScreenChrome({ controller }: MapScreenChromeProps) {
   const statusRail = (
     <MapStatusRail
       model={{
-        sessionCode: session?.code,
-        sessionId: session?.id,
-        roleGates: session?.roleGates,
+        sessionCode: session!.code,
+        sessionId: session!.id,
+        roleGates: session!.roleGates,
         sessionRules: session!,
         playerRole: roleConfig.statusPlayerRole,
         showPreloadBanner: true,
@@ -179,10 +179,10 @@ export function MapScreenChrome({ controller }: MapScreenChromeProps) {
         message: syncMessage,
         endGameActive: isEndGameActive(session),
         foundHiderPending: isFoundHiderPending(session),
-        foundRequestedByUid: session?.foundRequestedByUid,
+        foundRequestedByUid: session!.foundRequestedByUid,
         onDeclineFoundHider: () => void handleDeclineFoundHider(),
         myUid: uid ?? undefined,
-        hostUid: session?.hostUid,
+        hostUid: session!.hostUid,
         seekerLocations,
         onCancelWalkingQuestion: (pendingQuestionId) => {
           void handleCancelWalkingQuestion(pendingQuestionId);
@@ -216,8 +216,8 @@ export function MapScreenChrome({ controller }: MapScreenChromeProps) {
   );
 
   const canOpenCodes = canOpenMapScreenRoleCodes({
-    roleGates: session?.roleGates,
-    memberRoles: session?.memberRoles,
+    roleGates: session!.roleGates,
+    memberRoles: session!.memberRoles,
     myUid: uid,
     isHost,
   });
@@ -229,7 +229,7 @@ export function MapScreenChrome({ controller }: MapScreenChromeProps) {
       inactive={inactiveChrome}
       activeTool={activeTool}
       sessionRules={session!}
-      gameSize={session?.gameSize ?? "medium"}
+      gameSize={session!.gameSize ?? "medium"}
       hasHiders={awaitHiderAnswer}
       onSelect={handleSelectTool}
       showHistory={showHistory}
@@ -323,7 +323,7 @@ export function MapScreenChrome({ controller }: MapScreenChromeProps) {
       />
 
       <GameOverChrome
-        sessionId={session?.id}
+        sessionId={session!.id}
         playerRole={roleConfig.statusPlayerRole}
         myUid={uid ?? undefined}
         actions={gameOverActions}
@@ -379,7 +379,7 @@ export function MapScreenChrome({ controller }: MapScreenChromeProps) {
             draftAdvancedSettings
               ? {
                   gameRulesEditable: gameRulesEditable && isHost,
-                  gameSize: session?.gameSize ?? "medium",
+                  gameSize: session!.gameSize ?? "medium",
                   advancedSettings: draftAdvancedSettings,
                   onAdvancedSettingsChange: setDraftAdvancedSettings,
                   onSaveGameRules: handleSaveGameRules,
@@ -387,7 +387,7 @@ export function MapScreenChrome({ controller }: MapScreenChromeProps) {
               : undefined
           }
           session={{
-            sessionCode: session?.code,
+            sessionCode: session!.code,
             remoteSession: isRemote,
             session: session!,
             myUid: uid ?? undefined,
@@ -402,7 +402,7 @@ export function MapScreenChrome({ controller }: MapScreenChromeProps) {
             onResetSession: () => void handleResetSession(),
             onEndSession: () => void handleEndSession(),
             onLeaveSession: () => void handleLeaveSession(),
-            expansionPackEnabled: session?.expansionPackEnabled === true,
+            expansionPackEnabled: session!.expansionPackEnabled === true,
             onReviewMapTools: () => {
               overlay.pushSheet("map-tools-guide");
             },
@@ -445,7 +445,7 @@ export function MapScreenChrome({ controller }: MapScreenChromeProps) {
 
       <SessionLog
         open={overlay.isLogOpen}
-        sessionId={session?.id}
+        sessionId={session!.id}
         annotations={annotations}
         onClose={overlay.closeSheet}
         onDelete={(id) => void deleteAnnotation(id)}
@@ -471,7 +471,7 @@ export function MapScreenChrome({ controller }: MapScreenChromeProps) {
           messages: displayChatMessages,
           pendingQuestions: displayPendingQuestions,
           sessionRules: session!,
-          sessionId: session?.id,
+          sessionId: session!.id,
           senderUid: uid ?? "",
           senderRole: "seeker",
           isHider: false,
@@ -483,7 +483,7 @@ export function MapScreenChrome({ controller }: MapScreenChromeProps) {
             deadlineExpired,
           ) => {
             await answerPendingQuestion(
-              session?.id,
+              session!.id,
               pendingQuestionId,
               messageId,
               answer,
@@ -505,7 +505,7 @@ export function MapScreenChrome({ controller }: MapScreenChromeProps) {
               return;
             }
             await dismissExpiredPendingQuestion({
-              sessionId: session?.id,
+              sessionId: session!.id,
               pendingQuestionId,
               messageId,
               senderUid: uid ?? "",

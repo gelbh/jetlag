@@ -58,7 +58,7 @@ function openDatabase(): Promise<IDBDatabase> {
       const database = request.result;
       const transaction = (event.target as IDBOpenDBRequest).transaction;
       const store = database.objectStoreNames.contains(STORE_NAME)
-        ? transaction?.objectStore(STORE_NAME)
+        ? transaction!.objectStore(STORE_NAME)
         : database.createObjectStore(STORE_NAME, { keyPath: "id" });
 
       if (!store.indexNames.contains("sessionId")) {

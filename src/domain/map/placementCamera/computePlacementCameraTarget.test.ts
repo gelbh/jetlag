@@ -154,7 +154,7 @@ describe("computePlacementCameraTarget", () => {
     const target = computePlacementCameraTarget(await buildContext(sources));
 
     expect(target).not.toBeNull();
-    const bounds = toMapBounds(target?.bounds);
+    const bounds = toMapBounds(target!.bounds);
     const southWest = bounds.getSouthWest();
     const northEast = bounds.getNorthEast();
     const center = {

@@ -57,7 +57,6 @@ export function useMapSessionActions({
     useState<AdvancedSessionSettingsValue | null>(() =>
       session ? advancedSettingsFromSession(session) : null,
     );
-  const _currentSessionId = session?.id ?? null;
 
   useEffect(() => {
     setDraftAdvancedSettings(session ? advancedSettingsFromSession(session) : null);

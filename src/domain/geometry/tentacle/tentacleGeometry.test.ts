@@ -284,7 +284,7 @@ describe("tentacleGeometry", () => {
     const region = JSON.parse(json!) as Feature<Polygon | MultiPolygon>;
     expect(region.geometry.type).toMatch(POLYGON_OR_MULTIPOLYGON);
 
-    const answeredPoint = turfPoint([answered?.lng, answered?.lat]);
+    const answeredPoint = turfPoint([answered!.lng, answered!.lat]);
     expect(booleanPointInPolygon(answeredPoint, region)).toBe(false);
   });
 

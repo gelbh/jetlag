@@ -75,7 +75,7 @@ describe("production GTFS bundles", () => {
   it("NYC midtown play area uses full subway stop inventory", async () => {
     const bundle = loadProductionBundle("nyc");
     expect(bundle).not.toBeNull();
-    expect(bundle?.stops.length).toBeGreaterThan(100);
+    expect(bundle!.stops.length).toBeGreaterThan(100);
 
     const stops = filterGtfsStopsForGameArea(bundle!, MIDTOWN_NYC);
     expect(stops.length).toBeGreaterThan(20);
@@ -84,7 +84,7 @@ describe("production GTFS bundles", () => {
     const times = stops.find((stop) => stop.name === "Times Sq-42 St");
     expect(penn).toBeDefined();
     expect(times).toBeDefined();
-    expect(gtfsStopsShareStationOrRoute(penn?.id, times?.id, bundle!)).toBe(true);
+    expect(gtfsStopsShareStationOrRoute(penn!.id, times!.id, bundle!)).toBe(true);
 
     const match = await resolveTransitLineMatch(
       [40.7504, -73.991],
@@ -98,7 +98,7 @@ describe("production GTFS bundles", () => {
   it("London central play area uses full TfL stop inventory", async () => {
     const bundle = loadProductionBundle("london");
     expect(bundle).not.toBeNull();
-    expect(bundle?.stops.length).toBeGreaterThan(100);
+    expect(bundle!.stops.length).toBeGreaterThan(100);
 
     const stops = filterGtfsStopsForGameArea(bundle!, CENTRAL_LONDON);
     expect(stops.length).toBeGreaterThan(10);
@@ -112,7 +112,7 @@ describe("production GTFS bundles", () => {
   it("Portland Maine central play area uses full GP Metro stop inventory", async () => {
     const bundle = loadProductionBundle("portland-maine");
     expect(bundle).not.toBeNull();
-    expect(bundle?.stops.length).toBeGreaterThan(100);
+    expect(bundle!.stops.length).toBeGreaterThan(100);
 
     const stops = filterGtfsStopsForGameArea(bundle!, CENTRAL_PORTLAND_MAINE);
     expect(stops.length).toBeGreaterThan(5);
@@ -124,7 +124,7 @@ describe("production GTFS bundles", () => {
   it("Prince Rupert bundle loads BC Transit production stops", async () => {
     const bundle = loadProductionBundle("prince-rupert");
     expect(bundle).not.toBeNull();
-    expect(bundle?.stops.length).toBeGreaterThanOrEqual(50);
+    expect(bundle!.stops.length).toBeGreaterThanOrEqual(50);
 
     const stops = filterGtfsStopsForGameArea(bundle!, CENTRAL_PRINCE_RUPERT);
     expect(stops.length).toBeGreaterThanOrEqual(5);

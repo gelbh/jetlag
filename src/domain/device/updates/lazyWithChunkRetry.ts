@@ -31,7 +31,8 @@ export function getServiceWorkerChunkReloadContext(): Pick<
 
 export function lazyWithChunkRetry(
   // React.lazy needs a wide component type across named-export modules.
-  importFn: () => Promise<{ default: ComponentType<unknown> }>,
+  // biome-ignore lint/suspicious/noExplicitAny: lazy() default exports vary by module props
+  importFn: () => Promise<{ default: ComponentType<any> }>,
   getReloadContext?: () => ChunkReloadContext,
 ) {
   return lazy(() =>

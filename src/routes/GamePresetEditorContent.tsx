@@ -271,7 +271,7 @@ export function GamePresetEditorContent() {
               fullWidth
               styles={grayStyles}
               onClick={() => {
-                model.deletePreset(model.existing?.id);
+                model.deletePreset(model.existing!.id);
                 model.navigate("/presets");
               }}
             >
