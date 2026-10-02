@@ -12,6 +12,7 @@ let snapshot: LiveLocationReadingSnapshot = {
   reading: null,
   updatedAtMs: null,
 };
+let retainCount = 0;
 const listeners = new Set<() => void>();
 
 function emit(): void {
@@ -41,6 +42,17 @@ export function publishLiveLocationReading(
   emit();
 }
 
+export function retainLiveLocationReading(): void {
+  retainCount += 1;
+}
+
+export function releaseLiveLocationReading(): void {
+  retainCount = Math.max(0, retainCount - 1);
+  if (retainCount === 0) {
+    clearLiveLocationReading();
+  }
+}
+
 export function clearLiveLocationReading(): void {
   if (snapshot.reading === null && snapshot.updatedAtMs === null) {
     return;
@@ -64,5 +76,6 @@ export function getFreshLiveLocationReading(
 
 export function resetLiveLocationReadingForTests(): void {
   snapshot = { reading: null, updatedAtMs: null };
+  retainCount = 0;
   listeners.clear();
 }

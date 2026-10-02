@@ -19,6 +19,8 @@ import {
 import {
   clearLiveLocationReading,
   publishLiveLocationReading,
+  releaseLiveLocationReading,
+  retainLiveLocationReading,
 } from "../../services/core/location/liveLocationReading";
 
 interface UseLiveLocationOptions {
@@ -62,7 +64,12 @@ export function useLiveLocation(
     if (!enabled) {
       return;
     }
-    return retainLocationPermissionDemand();
+    retainLiveLocationReading();
+    const releasePermission = retainLocationPermissionDemand();
+    return () => {
+      releasePermission();
+      releaseLiveLocationReading();
+    };
   }, [enabled]);
 
   // Reset state when location tracking is disabled. This is a necessary cleanup
@@ -76,7 +83,6 @@ export function useLiveLocation(
     setReading(null);
     setError(null);
     setNeedsPermissionPrompt(false);
-    clearLiveLocationReading();
   }, [enabled]);
 
   useEffect(() => {

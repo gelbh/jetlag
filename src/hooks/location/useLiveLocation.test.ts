@@ -48,6 +48,52 @@ describe("useLiveLocation", () => {
     });
   });
 
+  it("keeps live snapshot when one of two hooks disables", async () => {
+    mockGeolocation(createMockGeolocationPosition(53.35, -6.26));
+    mockPermissions("granted");
+
+    const { rerender } = renderHook(
+      ({ enabledA, enabledB }) => {
+        useLiveLocation(enabledA);
+        useLiveLocation(enabledB);
+      },
+      { initialProps: { enabledA: true, enabledB: true } },
+    );
+
+    await waitFor(() => {
+      expect(getLiveLocationReadingSnapshot().reading).not.toBeNull();
+    });
+
+    rerender({ enabledA: false, enabledB: true });
+
+    await waitFor(() => {
+      expect(getLiveLocationReadingSnapshot().reading).not.toBeNull();
+    });
+  });
+
+  it("clears live snapshot when the last enabled hook disables", async () => {
+    mockGeolocation(createMockGeolocationPosition(53.35, -6.26));
+    mockPermissions("granted");
+
+    const { rerender } = renderHook(
+      ({ enabledA, enabledB }) => {
+        useLiveLocation(enabledA);
+        useLiveLocation(enabledB);
+      },
+      { initialProps: { enabledA: true, enabledB: true } },
+    );
+
+    await waitFor(() => {
+      expect(getLiveLocationReadingSnapshot().reading).not.toBeNull();
+    });
+
+    rerender({ enabledA: false, enabledB: false });
+
+    await waitFor(() => {
+      expect(getLiveLocationReadingSnapshot().reading).toBeNull();
+    });
+  });
+
   it("clears live snapshot when disabled", async () => {
     mockGeolocation(createMockGeolocationPosition(53.35, -6.26));
     mockPermissions("granted");

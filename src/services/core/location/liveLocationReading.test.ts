@@ -5,7 +5,9 @@ import {
   getFreshLiveLocationReading,
   getLiveLocationReadingSnapshot,
   publishLiveLocationReading,
+  releaseLiveLocationReading,
   resetLiveLocationReadingForTests,
+  retainLiveLocationReading,
   subscribeLiveLocationReading,
 } from "./liveLocationReading";
 
@@ -46,6 +48,27 @@ describe("liveLocationReading", () => {
     expect(
       getFreshLiveLocationReading(1_000 + LIVE_LOCATION_FRESH_MS + 1),
     ).toBeNull();
+  });
+
+  it("keeps snapshot until the last retain is released", () => {
+    publishLiveLocationReading(sample, 1_000);
+    retainLiveLocationReading();
+    retainLiveLocationReading();
+    releaseLiveLocationReading();
+    expect(getLiveLocationReadingSnapshot().reading).toEqual(sample);
+    releaseLiveLocationReading();
+    expect(getLiveLocationReadingSnapshot().reading).toBeNull();
+  });
+
+  it("hard clear drops snapshot without resetting retain count", () => {
+    retainLiveLocationReading();
+    publishLiveLocationReading(sample, 1_000);
+    clearLiveLocationReading();
+    expect(getLiveLocationReadingSnapshot().reading).toBeNull();
+    publishLiveLocationReading(sample, 2_000);
+    expect(getLiveLocationReadingSnapshot().reading).toEqual(sample);
+    releaseLiveLocationReading();
+    expect(getLiveLocationReadingSnapshot().reading).toBeNull();
   });
 
   it("notifies subscribers on publish and clear", () => {
