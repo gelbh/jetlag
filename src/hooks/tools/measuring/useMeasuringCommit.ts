@@ -20,7 +20,7 @@ import { emitQuestionAnsweredActivity } from "@/services/session/emitSessionActi
 import { persistSlimMeasuringGeometry } from "@/domain/geometry/measuring/measuringGeometryBudgets";
 import {
   buildStoredMeasuringRegionInput,
-  coastlineCommitReady,
+  measuringCommitReady,
 } from "./helpers";
 import type { MeasuringDraftState } from "./useMeasuringDraftState";
 import type { MeasuringPreviews } from "./useMeasuringPreviews";
@@ -84,14 +84,15 @@ export function useMeasuringCommit({
 
   const { resolvedCoastSegments, measuringRegionInput } = previews;
 
+  const commitReady = measuringCommitReady({
+    measuringSubject,
+    measuringLoading,
+    resolvedCoastSegmentsLength: resolvedCoastSegments.length,
+  });
+
   const performCommit = useCallback(async () => {
-    if (
-      !coastlineCommitReady({
-        measuringSubject,
-        measuringLoading,
-        resolvedCoastSegmentsLength: resolvedCoastSegments.length,
-      })
-    ) {
+    if (!commitReady) {
+      setMeasuringError("Measuring target isn't ready yet. Wait for resolve or retry.");
       return;
     }
 
@@ -290,12 +291,12 @@ export function useMeasuringCommit({
   }, [
     annotations,
     awaitHiderAnswer,
+    commitReady,
     createAnnotation,
     finishPlacement,
     measuringAnchorElevationMeters,
     measuringAnswer,
     measuringDistanceMeters,
-    measuringLoading,
     measuringLocationCategory,
     measuringPlaces,
     measuringRegionInput,
@@ -344,13 +345,8 @@ export function useMeasuringCommit({
       return;
     }
 
-    if (
-      !coastlineCommitReady({
-        measuringSubject,
-        measuringLoading,
-        resolvedCoastSegmentsLength: resolvedCoastSegments.length,
-      })
-    ) {
+    if (!commitReady) {
+      setMeasuringError("Measuring target isn't ready yet. Wait for resolve or retry.");
       return;
     }
 
@@ -371,12 +367,11 @@ export function useMeasuringCommit({
   }, [
     adminDivisionCounts,
     canSubmitQuestion,
+    commitReady,
     measureFromKind,
     measuringDistanceMeters,
-    measuringLoading,
     measuringPlaces.length,
     measuringSeaLevelNearRegion,
-    resolvedCoastSegments.length,
     measuringSeaLevelNote,
     measuringSeekerPoint,
     measuringSubject,

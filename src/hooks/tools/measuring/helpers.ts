@@ -9,7 +9,7 @@ import {
   type MeasuringSubject,
 } from "@/domain/questions";
 
-export function coastlineCommitReady(input: {
+export function measuringCommitReady(input: {
   measuringSubject: MeasuringSubject;
   measuringLoading: boolean;
   resolvedCoastSegmentsLength: number;

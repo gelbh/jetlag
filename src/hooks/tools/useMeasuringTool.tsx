@@ -31,7 +31,7 @@ import { useToolSession } from "./framework/useToolSession";
 import { useToolSessionOptions } from "./useToolSessionOptions";
 import { MeasuringToolPanel } from "./measuring/MeasuringToolPanel";
 import { useMeasuringAnchorLoaders } from "./measuring/useMeasuringAnchorLoaders";
-import { coastlineCommitReady } from "./measuring/helpers";
+import { measuringCommitReady } from "./measuring/helpers";
 import { useMeasuringCommit } from "./measuring/useMeasuringCommit";
 import { useMeasuringDraftState } from "./measuring/useMeasuringDraftState";
 import { useMeasuringInteractions } from "./measuring/useMeasuringInteractions";
@@ -350,7 +350,7 @@ export function useMeasuringTool({
     (awaitHiderAnswer || draft.measuringAnswer !== null) &&
     canSubmitQuestion &&
     !session.isBusy &&
-    coastlineCommitReady({
+    measuringCommitReady({
       measuringSubject: draft.measuringSubject,
       measuringLoading: draft.measuringLoading,
       resolvedCoastSegmentsLength: previews.resolvedCoastSegments.length,
