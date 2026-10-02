@@ -51,7 +51,7 @@ pub struct NearRegionInputJson {
     pub disks: Vec<DiskSpecJson>,
     #[serde(rename = "gameArea")]
     pub game_area: GameAreaGeometry,
-    /// `distanceThreshold` for coastline cell sampling; `bufferUnion` keeps legacy buffers.
+    /// `distanceThreshold` for coastline; `bufferUnion` opts into legacy segment buffers (tests).
     #[serde(default)]
     pub mode: Option<String>,
     #[serde(default)]

@@ -187,7 +187,7 @@ pub fn geodesic_line_buffer_json(
     ))
 }
 
-/// WASM export: batch near-region (buffer lines + union disks + clip).
+/// WASM export: near-region batch (distance-threshold coastline default; buffer union for disks / tests).
 #[wasm_bindgen]
 pub fn build_near_region_json(input_json: &str) -> Result<JsValue, JsValue> {
     let parsed: NearRegionInputJson =

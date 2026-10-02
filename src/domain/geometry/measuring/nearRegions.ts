@@ -352,10 +352,7 @@ function clipBufferedSegmentsToGameArea(
   return combinePolygonFeatures(clippedParts);
 }
 
-function useLegacyCoastlineBufferUnionPath(): boolean {
-  return import.meta.env.VITE_LEGACY_COASTLINE_BUFFER_UNION === "true";
-}
-
+/** Oracle negative control: legacy per-segment buffer union (not production coastline). */
 export async function buildCoastlineNearRegionUnionBufferForTests(
   segments: Feature<LineString>[],
   distanceMeters: number,
@@ -466,12 +463,6 @@ export async function buildCoastlineNearRegion(
     } catch {
       // TS distance-threshold fallback when wasm pkg is unavailable (local dev).
     }
-  }
-
-  if (useLegacyCoastlineBufferUnionPath()) {
-    return buildCoastlineNearRegionWithBuffer(segments, distanceMeters, gameArea, (segment, meters) =>
-      dispatchGeodesicLineBuffer(segment, meters, undefined),
-    );
   }
 
   const { buildCoastlineNearRegionDistanceThreshold } = await import("./coastlineNearRegion");
