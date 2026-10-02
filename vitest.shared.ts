@@ -6,5 +6,5 @@ export default defineConfig({
   resolve: {
     alias: { ...sharedAlias },
   },
-  plugins: [react({ compiler: { compilationMode: "annotation" } })],
+  plugins: [react({ compiler: true })],
 });
