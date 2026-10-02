@@ -1,4 +1,4 @@
-export const APP_VERSION = "1.0.0";
+export const APP_VERSION = "1.0.1";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,35 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "1.0.1",
+    date: "2026-10-02",
+    sections: [
+      {
+        title: "Fixes",
+        items: [
+          "Ask tools use your map location when GPS one-shots fail",
+          "Players keep their seat in the game after losing signal instead of rejoining as someone new",
+          "Coastline measuring waits for the distance to finish before Send unlocks",
+          "Home and info pages load faster.",
+        ],
+      },
+      {
+        title: "Improvements",
+        items: [
+          "Create screen opens faster; tap the map to start framing your area.",
+          "The home screen shows up right away instead of a brief “Starting…” splash",
+        ],
+      },
+      {
+        title: "Technical",
+        items: [
+          "Replace CVA button with Mantine Button and drop unused class-variance-authority / @radix-ui/react-slot.",
+          "Annotate hot map and session parents for React Compiler coverage",
+        ],
+      }
+    ],
+  },
   {
     version: "1.0.0",
     date: "2026-09-30",
