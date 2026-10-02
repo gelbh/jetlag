@@ -138,4 +138,38 @@ describe("GameChatTab", () => {
     expect(screen.queryByText("Waiting for hider…")).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Dismiss question" })).not.toBeInTheDocument();
   });
+
+  it("marks question rows waiting for server ack (and drops Waiting for hider)", async () => {
+    renderWithAppUi(
+      <GameChatTab
+        messages={[{ ...questionMessage, pendingSync: true }]}
+        pendingQuestions={[pendingQuestion]}
+        sessionRules={{ gameSize: "medium" }}
+        sessionId="session-1"
+        isHider={false}
+        senderUid="seeker-1"
+        onAnswerQuestion={vi.fn()}
+      />,
+    );
+
+    expect(screen.queryByText("Waiting to send")).not.toBeInTheDocument();
+    expect(await screen.findByText("Waiting to send", {}, { timeout: 2000 })).toBeInTheDocument();
+    expect(screen.queryByText("Waiting for hider…")).not.toBeInTheDocument();
+  });
+
+  it("omits the pending badge once acked", () => {
+    renderWithAppUi(
+      <GameChatTab
+        messages={[questionMessage]}
+        pendingQuestions={[pendingQuestion]}
+        sessionRules={{ gameSize: "medium" }}
+        sessionId="session-1"
+        isHider={false}
+        senderUid="seeker-1"
+        onAnswerQuestion={vi.fn()}
+      />,
+    );
+
+    expect(screen.queryByText("Waiting to send")).not.toBeInTheDocument();
+  });
 });

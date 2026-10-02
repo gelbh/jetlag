@@ -7,7 +7,7 @@ export function syncToneForStatus(status: SyncStatus): SyncTone {
   if (status === "error") {
     return "error";
   }
-  if (status === "offline" || status === "degraded") {
+  if (status === "offline" || status === "degraded" || status === "stale") {
     return "warning";
   }
   return "info";
@@ -64,6 +64,12 @@ export function syncDetailContent(
           queuedWrites > 0
             ? `${queuedWrites} change${queuedWrites === 1 ? "" : "s"} queued. Tap Retry when signal returns.`
             : "Connection is flaky. Changes may queue until signal improves.",
+        tone: "warning",
+      };
+    case "stale":
+      return {
+        title: "Showing last known state",
+        body: "Waiting for the latest from the session. What you see may be out of date.",
         tone: "warning",
       };
     case "error":

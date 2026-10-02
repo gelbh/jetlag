@@ -1,4 +1,5 @@
 import type { CSSProperties } from "react";
+import type { SyncStatus } from "@/domain/device/sync/sync";
 
 /**
  * Concrete Mantine `styles` object (not the function form).
@@ -721,7 +722,7 @@ export const sheetIconCloseStyle: CSSProperties = {
   cursor: "pointer",
 };
 
-export type SyncBeaconStatus = "synced" | "saving" | "offline" | "degraded" | "error";
+export type SyncBeaconStatus = SyncStatus;
 
 const syncBeaconTone: Record<
   SyncBeaconStatus,
@@ -744,6 +745,12 @@ const syncBeaconTone: Record<
     dashed: true,
   },
   degraded: {
+    border: "oklch(from var(--color-flag) l c h / 0.6)",
+    background: "oklch(from var(--color-flag) l c h / 0.1)",
+    color: "var(--color-flag)",
+    dashed: true,
+  },
+  stale: {
     border: "oklch(from var(--color-flag) l c h / 0.6)",
     background: "oklch(from var(--color-flag) l c h / 0.1)",
     color: "var(--color-flag)",

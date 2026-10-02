@@ -11,10 +11,15 @@ export function subscribeToSession(
   sessionId: string,
   onChange: (session: SessionRecord) => void,
   onError: (error: Error) => void,
+  onMetadata?: (metadata: { fromCache: boolean }) => void,
 ): Unsubscribe {
+  // includeMetadataChanges so the cache→server flip reaches `onMetadata`;
+  // metadata-only events still call `onChange`, which `setSession` dedupes.
   return onSnapshot(
     doc(sessionsCollection(), sessionId),
+    { includeMetadataChanges: true },
     (snapshot) => {
+      onMetadata?.({ fromCache: snapshot.metadata.fromCache });
       if (!snapshot.exists()) {
         return;
       }

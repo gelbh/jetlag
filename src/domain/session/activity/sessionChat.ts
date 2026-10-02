@@ -29,6 +29,8 @@ export interface SessionMessageRecord {
   replyOptions?: GameReplyOption[];
   selectedReply?: string;
   status?: PendingQuestionStatus;
+  /** View-only: local write not yet acked by the server. Never serialized. */
+  pendingSync?: boolean;
 }
 
 export interface PendingQuestionPlacement {
@@ -53,6 +55,8 @@ export interface PendingQuestionRecord {
   resolvedAnnotationId?: string;
   cardDraw?: number;
   cardKeep?: number;
+  /** View-only: local write not yet acked by the server. Never serialized. */
+  pendingSync?: boolean;
 }
 
 export type PlayerLocationRole = "seeker" | "hider";

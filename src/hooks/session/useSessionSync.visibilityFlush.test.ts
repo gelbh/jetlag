@@ -18,6 +18,10 @@ vi.mock("../../services/core/firebase/firebase", () => ({
   isFirestorePersistenceUnavailable: vi.fn(() => false),
 }));
 
+vi.mock("@/services/firestore/commitWrite", () => ({
+  trackRestoredWrites: vi.fn(),
+}));
+
 vi.mock("../../services/firestore/firestoreAnnotations", () => ({
   subscribeToSession: vi.fn(() => vi.fn()),
   subscribeToRemoteAnnotations: vi.fn(() => vi.fn()),

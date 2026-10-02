@@ -74,6 +74,17 @@ export function syncRailDisplay(
     };
   }
 
+  if (status === "stale") {
+    return {
+      inline: {
+        visible: true,
+        label: "Showing last known state",
+        tone: "warning",
+      },
+      banner: null,
+    };
+  }
+
   if (status === "saving") {
     return {
       inline: {
@@ -108,6 +119,8 @@ export function syncBeaconAriaLabel(status: SyncStatus): string {
       return "Offline. Show sync details";
     case "degraded":
       return "Unstable connection. Show sync details";
+    case "stale":
+      return "Showing last known state. Show sync details";
     case "error":
       return "Sync issue. Show sync details";
     default: {

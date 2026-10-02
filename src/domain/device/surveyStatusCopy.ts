@@ -113,6 +113,8 @@ export function surveySyncShortLabel(status: SyncStatus, queuedWrites: number): 
       return queuedWrites > 0 ? `Offline · ${queuedWrites} queued` : "Offline";
     case "degraded":
       return queuedWrites > 0 ? `Unstable · ${queuedWrites} queued` : "Unstable";
+    case "stale":
+      return "Last known state";
     case "error":
       return "Sync issue";
     default: {
@@ -136,6 +138,8 @@ export function surveySyncSegmentLabel(status: SyncStatus, queuedWrites: number)
       return queuedWrites > 0 ? `Off · ${queuedWrites}` : "Offline";
     case "degraded":
       return queuedWrites > 0 ? `Unstable · ${queuedWrites}` : "Unstable";
+    case "stale":
+      return "Last known";
     case "error":
       return "Issue";
     default: {
