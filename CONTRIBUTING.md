@@ -36,11 +36,11 @@ New Functions param: update the project dotenv (and a code `default` only when t
 
 ## React memoization
 
-This app uses React Compiler in annotation mode (`"use memo"` opt-in; expanding later).
+This app uses React Compiler in full compile mode (exclude violators with `"use no memo"`).
 
 - Prefer the Compiler over new `useMemo` / `useCallback` / `React.memo`.
 - Keep or add hand memo only for effect-dependency precision, or for domain identity contracts (see hider elimination-mask thrash work).
-- Do not mass-delete existing memos until full Compiler coverage is trusted.
+- Do not mass-delete existing memos until Phase 3 strip is trusted after prod soak.
 
 ## Run the app
 
