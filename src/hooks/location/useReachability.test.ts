@@ -1,20 +1,27 @@
 import { renderHook, waitFor } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { resetServerClockForTests } from "@/services/core/time/serverClock";
 import { useReachability } from "./useReachability";
 
 describe("useReachability", () => {
+  beforeEach(() => {
+    localStorage.clear();
+    resetServerClockForTests();
+  });
+
   afterEach(() => {
     vi.useRealTimers();
     vi.unstubAllGlobals();
   });
 
-  it("marks reachable after a successful health probe", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn().mockResolvedValue({
-        ok: true,
+  it("marks reachable after a successful time probe", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(null, {
+        status: 204,
+        headers: { "x-server-time": String(Date.now()) },
       }),
     );
+    vi.stubGlobal("fetch", fetchMock);
 
     const { result } = renderHook(() => useReachability(true));
 
@@ -25,6 +32,10 @@ describe("useReachability", () => {
       { timeout: 3_000 },
     );
     expect(result.current.lastProbeAt).not.toBeNull();
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/time",
+      expect.objectContaining({ method: "HEAD" }),
+    );
   });
 
   it("marks unreachable after two consecutive probe failures", async () => {

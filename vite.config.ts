@@ -10,6 +10,7 @@ import { optionalKernelWasmPkg } from "./vite.optional-kernel-wasm-pkg";
 import { createPwaPlugin } from "./vite.pwa";
 import { createSentryPlugins } from "./vite.sentry";
 import { sharedAlias } from "./vite.resolve-shared";
+import { timeEndpointPlugin } from "./vite.time-endpoint";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -67,5 +68,6 @@ export default defineConfig(({ mode }) => ({
     react(),
     tailwindcss(),
     createPwaPlugin(),
+    timeEndpointPlugin(),
   ],
 }));

@@ -235,6 +235,23 @@ describe("document CSP nonce", () => {
 });
 
 describe("worker fetch", () => {
+  it("serves /api/time before the asset fetch", async () => {
+    const env = {
+      ASSETS: {
+        fetch: vi.fn(),
+      },
+    } as Env;
+
+    const response = await worker.fetch(
+      new Request("https://jetlag.gelbhart.dev/api/time", { method: "HEAD" }),
+      env,
+    );
+
+    expect(env.ASSETS.fetch).not.toHaveBeenCalled();
+    expect(response.status).toBe(204);
+    expect(Number(response.headers.get("x-server-time"))).toBeGreaterThan(0);
+  });
+
   it("accepts CSP violation reports without hitting assets", async () => {
     const env = {
       ASSETS: {
