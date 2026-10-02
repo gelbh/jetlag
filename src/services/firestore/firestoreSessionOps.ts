@@ -12,9 +12,7 @@ function isSessionOpsMitigationType(
 }
 
 /** Parse the server-only session ops mitigation override from Firestore. */
-export function parseSessionOpsMitigation(
-  value: unknown,
-): SessionRecord["opsMitigation"] {
+export function parseSessionOpsMitigation(value: unknown): SessionRecord["opsMitigation"] {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     return undefined;
   }

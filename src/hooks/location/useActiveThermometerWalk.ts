@@ -1,14 +1,14 @@
 import { useMemo } from "react";
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
-import type {
-  PendingQuestionRecord,
-  PlayerLocationRecord,
-} from "../../domain/session/activity/sessionChat";
 import {
   crowFliesDistanceMeters,
   isThermometerWalkActive,
   parseThermometerStartPoint,
 } from "../../domain/questions";
+import type {
+  PendingQuestionRecord,
+  PlayerLocationRecord,
+} from "../../domain/session/activity/sessionChat";
 
 interface UseActiveThermometerWalkParams {
   pendingQuestions: readonly PendingQuestionRecord[];

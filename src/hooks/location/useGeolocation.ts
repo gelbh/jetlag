@@ -1,9 +1,13 @@
 import { useCallback, useState } from "react";
 import {
   confirmAndRequestLocationAccess,
-  unknownGeolocationErrorMessage,
   type GeolocationReading,
+  unknownGeolocationErrorMessage,
 } from "../../services/core/location/geolocation";
+import {
+  getFreshLiveLocationReading,
+  LIVE_LOCATION_FRESH_MS,
+} from "../../services/core/location/liveLocationReading";
 
 export function useGeolocation() {
   const [reading, setReading] = useState<GeolocationReading | null>(null);
@@ -15,8 +19,16 @@ export function useGeolocation() {
     setError(null);
 
     try {
-      // Mark live-map GPS confirmed so map watches do not re-prompt after refresh.
-      const next = await confirmAndRequestLocationAccess();
+      const live = getFreshLiveLocationReading();
+      if (live) {
+        setReading(live);
+        return live;
+      }
+
+      const next = await confirmAndRequestLocationAccess({
+        highAccuracy: false,
+        maximumAge: LIVE_LOCATION_FRESH_MS,
+      });
       setReading(next);
       return next;
     } catch (nextError) {

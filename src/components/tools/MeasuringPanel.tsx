@@ -1,43 +1,40 @@
 import { type RefObject } from "react";
+import type { SeaLevelEdgeCase } from "../../domain/geometry/measuring/seaLevel";
+import { type DistanceUnit } from "../../domain/map/distance";
 import {
   BASE_MEASURING_CATALOG,
-  measuringSupportsSearch,
-  measuringTargetKind,
-  measuringTargetLabel,
   type MeasuringAnswer,
   type MeasuringCatalogOption,
   type MeasuringFromKind,
   type MeasuringLocationCategory,
   type MeasuringSubject,
   type MeasuringTargetMode,
+  measuringSupportsSearch,
+  measuringTargetKind,
+  measuringTargetLabel,
 } from "../../domain/questions";
+import { useToolWizard } from "../../hooks/wizard/useToolWizard";
 import type { GeocodedPlace } from "../../services/geo/geocoding";
-import type { SeaLevelEdgeCase } from "../../domain/geometry/measuring/seaLevel";
-import { type DistanceUnit } from "../../domain/map/distance";
+import { SearchResultsList } from "./shared/controls/SearchResultsList";
 import { MeasuringAnchorStep } from "./shared/measuring/MeasuringAnchorStep";
+import { MeasuringSourceStep } from "./shared/measuring/MeasuringSourceStep";
 import {
   MeasuringAnswerSection,
   MeasuringTargetSection,
 } from "./shared/measuring/MeasuringTargetStep";
-import { MeasuringSourceStep } from "./shared/measuring/MeasuringSourceStep";
 import {
   anchorResolveLoadingMessage,
-  measuringUsesDebouncedSeekerResolve,
   type MeasuringSearchRole,
+  measuringUsesDebouncedSeekerResolve,
 } from "./shared/measuring/measuringPanelUtils";
-import { SearchResultsList } from "./shared/controls/SearchResultsList";
 import { ToolPanelShell } from "./shared/panels/ToolPanelShell";
 import { ToolSection } from "./shared/panels/ToolSection";
+import { QuestionTruthReferenceHint } from "./shared/QuestionTruthReferenceHint";
 import { ResolvedReadout } from "./shared/readout/ResolvedReadout";
+import { MEASURING_WIZARD } from "./shared/wizard/toolStepUtils";
+import { toolWizardPhasePrimaryNav, toolWizardSwipeNext } from "./shared/wizard/toolWizardGuards";
 import { WizardPanelFrame } from "./shared/wizard/WizardPanelFrame";
 import { WizardSwipeSurface } from "./shared/wizard/WizardSwipeSurface";
-import { MEASURING_WIZARD } from "./shared/wizard/toolStepUtils";
-import {
-  toolWizardPhasePrimaryNav,
-  toolWizardSwipeNext,
-} from "./shared/wizard/toolWizardGuards";
-import { useToolWizard } from "../../hooks/wizard/useToolWizard";
-import { QuestionTruthReferenceHint } from "./shared/QuestionTruthReferenceHint";
 
 /** Flat measuring wizard fields bag for MeasuringPanel (W4-B peel). */
 export type MeasuringPanelModel = {
@@ -74,10 +71,7 @@ export type MeasuringPanelModel = {
   onTargetModeChange: (mode: MeasuringTargetMode) => void;
   onSearchQueryChange: (value: string) => void;
   onSearchSubmit: (role: MeasuringSearchRole) => void;
-  onSearchResultSelect: (
-    place: GeocodedPlace,
-    role: MeasuringSearchRole,
-  ) => void;
+  onSearchResultSelect: (place: GeocodedPlace, role: MeasuringSearchRole) => void;
   onUseGps: () => void;
   onFindCoastline: () => void;
   onRetrySeaLevel: () => void;
@@ -141,28 +135,16 @@ export function MeasuringPanel({ model }: MeasuringPanelProps) {
     isSubmitting = false,
     wizardStepRef,
   } = model;
-  const {
-    phaseId,
-    stepId,
-    phaseIndex,
-    phaseCount,
-    configureIndex,
-    goNext,
-    goBack,
-    Stepper,
-  } = useToolWizard(MEASURING_WIZARD, {
-    wizardStepRef,
-    awaitHiderAnswer,
-    toolCommitLabel: awaitHiderAnswer
-      ? `Send to hiders (${costLabel})`
-      : "Add measure question",
-    isSubmitting,
-  });
+  const { phaseId, stepId, phaseIndex, phaseCount, configureIndex, goNext, goBack, Stepper } =
+    useToolWizard(MEASURING_WIZARD, {
+      wizardStepRef,
+      awaitHiderAnswer,
+      toolCommitLabel: awaitHiderAnswer ? `Send to hiders (${costLabel})` : "Add measure question",
+      isSubmitting,
+    });
 
   const locationCategory: MeasuringLocationCategory | undefined =
-    subject === "location"
-      ? (measureFrom as MeasuringLocationCategory)
-      : undefined;
+    subject === "location" ? (measureFrom as MeasuringLocationCategory) : undefined;
   const targetLabel = measuringTargetLabel(subject, locationCategory);
   const targetKind = measuringTargetKind(measureFrom);
   const isCoastline = targetKind === "coastline";
@@ -171,28 +153,16 @@ export function MeasuringPanel({ model }: MeasuringPanelProps) {
   const measureCatalog = catalogOptions ?? BASE_MEASURING_CATALOG;
   const hasAvailableMeasureOptions = measureCatalog.some(
     (option) =>
-      !usedMeasuringFromKinds.has(option.id) &&
-      !unavailableMeasuringFromKinds.has(option.id),
+      !usedMeasuringFromKinds.has(option.id) && !unavailableMeasuringFromKinds.has(option.id),
   );
 
-  const needsAutoResolve = measuringUsesDebouncedSeekerResolve(
-    subject,
-    measureFrom,
-  );
-  const anchorLoadingMessage = anchorResolveLoadingMessage(
-    subject,
-    measureFrom,
-    locationCategory,
-  );
+  const needsAutoResolve = measuringUsesDebouncedSeekerResolve(subject, measureFrom);
+  const anchorLoadingMessage = anchorResolveLoadingMessage(subject, measureFrom, locationCategory);
   const canAdvanceFromAnchor =
-    hasSeekerPoint &&
-    (!optionChosen || !needsAutoResolve || (hasTargetPoint && !loading));
+    hasSeekerPoint && (!optionChosen || !needsAutoResolve || (hasTargetPoint && !loading));
   const canAdvanceFromTarget = hasTargetPoint;
   const canPreviewAnswer =
-    hasAvailableMeasureOptions &&
-    hasSeekerPoint &&
-    hasTargetPoint &&
-    distanceMeters !== null;
+    hasAvailableMeasureOptions && hasSeekerPoint && hasTargetPoint && distanceMeters !== null;
 
   const canGoNext =
     (phaseId === "place" && canAdvanceFromAnchor) ||
@@ -208,8 +178,7 @@ export function MeasuringPanel({ model }: MeasuringPanelProps) {
     (awaitHiderAnswer || answer !== null) &&
     !isSubmitting;
   const canSwipeNext = toolWizardSwipeNext(canGoNext, phaseIndex, phaseCount);
-  const showMeasuringAnswer =
-    canPreviewAnswer && (stepId === "target" || phaseId === "ask");
+  const showMeasuringAnswer = canPreviewAnswer && (stepId === "target" || phaseId === "ask");
 
   const panelBody = (
     <>
@@ -344,8 +313,7 @@ export function MeasuringPanel({ model }: MeasuringPanelProps) {
       stepper={
         <Stepper
           nav={{
-            canGoBack:
-              phaseIndex > 0 || (phaseId === "configure" && configureIndex > 0),
+            canGoBack: phaseIndex > 0 || (phaseId === "configure" && configureIndex > 0),
             onBack: goBack,
             ...toolWizardPhasePrimaryNav({
               phaseId,

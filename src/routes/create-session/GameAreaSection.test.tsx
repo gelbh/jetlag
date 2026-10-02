@@ -1,7 +1,7 @@
+import { MantineProvider } from "@mantine/core";
+import { render, screen } from "@testing-library/react";
 import { createRef } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
-import { MantineProvider } from "@mantine/core";
 import { jetlagTheme } from "@/theme/theme";
 import {
   GameAreaSection,
@@ -84,8 +84,6 @@ describe("GameAreaSection public props (AC #1)", () => {
       </MantineProvider>,
     );
 
-    expect(
-      screen.getByRole("heading", { name: /frame the game area/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /frame the game area/i })).toBeInTheDocument();
   });
 });

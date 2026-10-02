@@ -4,10 +4,7 @@
  */
 import type { ReactNode } from "react";
 import { QuestionPromptBlock } from "@/components/tools/shared/controls/QuestionPromptBlock";
-import {
-  askHudPanelStyle,
-  askInsetSurfaceStyle,
-} from "@/components/ui/entry/entryChrome";
+import { askHudPanelStyle, askInsetSurfaceStyle } from "@/components/ui/entry/entryChrome";
 
 export type AskToolQuestionHeaderProps = {
   toolLabel: string;
@@ -33,10 +30,7 @@ export function AskToolQuestionHeader({
       style={mantine ? askInsetSurfaceStyle : askHudPanelStyle}
     >
       <div className="flex items-start gap-3">
-        <div
-          className="flex shrink-0 flex-col items-center gap-1"
-          style={{ minWidth: 44 }}
-        >
+        <div className="flex shrink-0 flex-col items-center gap-1" style={{ minWidth: 44 }}>
           <span
             aria-hidden
             className="inline-flex items-center justify-center"

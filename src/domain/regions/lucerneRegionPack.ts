@@ -1,7 +1,6 @@
 import type { MatchingCategoryId } from "../questions/matchingQuestions";
 import type { MeasuringFromKind } from "../questions/measuringQuestions";
-import type { RegionPackId } from "./regionPack";
-import type { RegionPackLabelOverride } from "./regionPack";
+import type { RegionPackId, RegionPackLabelOverride } from "./regionPack";
 
 export const LUCERNE_REGION_PACK_ID = "lucerne" satisfies RegionPackId;
 
@@ -23,8 +22,7 @@ export const LUCERNE_MATCHING_LABEL_OVERRIDES: Partial<
   admin_division_4: {
     label: "Municipality",
     promptNoun: "municipality",
-    ruleSummary:
-      "A municipality within the framed Lucerne play area.",
+    ruleSummary: "A municipality within the framed Lucerne play area.",
   },
 };
 
@@ -41,8 +39,6 @@ export const LUCERNE_MEASURING_LABEL_OVERRIDES: Partial<
   },
 };
 
-export function isLucerneRegionPack(
-  regionPackId: RegionPackId | undefined,
-): boolean {
+export function isLucerneRegionPack(regionPackId: RegionPackId | undefined): boolean {
   return regionPackId === LUCERNE_REGION_PACK_ID;
 }

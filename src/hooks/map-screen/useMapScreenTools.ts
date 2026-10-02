@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
+import type { HeavyToolHostModel } from "../../components/tools/HeavyToolHost";
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import { isPointInGameArea } from "../../domain/geometry/gameArea/geometry";
 import {
@@ -14,16 +15,15 @@ import type {
 } from "../../domain/session/activity/sessionChat";
 import { sessionHasHiders } from "../../domain/session/players/playerRole";
 import type { SessionRulesInput } from "../../domain/session/rules";
+import type { MapTool } from "../../state/sessionStore";
 import { useGeolocation } from "../location/useGeolocation";
 import { usePendingQuestionActions } from "../sync/usePendingQuestionActions";
+import { useDrawTool } from "../tools/useDrawTool";
 import { usePhotoTool } from "../tools/usePhotoTool";
 import { usePinTool } from "../tools/usePinTool";
-import { useDrawTool } from "../tools/useDrawTool";
 import { useRadarTool } from "../tools/useRadarTool";
 import { useThermometerTool } from "../tools/useThermometerTool";
 import { useZoneTool } from "../tools/useZoneTool";
-import type { MapTool } from "../../state/sessionStore";
-import type { HeavyToolHostModel } from "../../components/tools/HeavyToolHost";
 import { useHeavyMapToolsState } from "./useHeavyMapToolsState";
 import { useSeekerOptimisticPendingOverlays } from "./useSeekerOptimisticPendingOverlays";
 
@@ -220,9 +220,7 @@ export function useMapScreenTools({
     submitPendingQuestion: awaitHiderAnswer
       ? (input) => submitToolQuestion("thermometer", input)
       : undefined,
-    completeThermometerWalk: awaitHiderAnswer
-      ? completeThermometerWalkForSession
-      : undefined,
+    completeThermometerWalk: awaitHiderAnswer ? completeThermometerWalkForSession : undefined,
     sessionId: session?.id,
     senderUid: uid,
     distanceUnit,
@@ -233,13 +231,8 @@ export function useMapScreenTools({
     refreshGps: refresh,
     ensurePointInGameArea,
   });
-  const {
-    heavyToolActive,
-    handleHeavyToolsChange,
-    matchingTool,
-    measuringTool,
-    tentacleTool,
-  } = useHeavyMapToolsState(activeTool);
+  const { heavyToolActive, handleHeavyToolsChange, matchingTool, measuringTool, tentacleTool } =
+    useHeavyMapToolsState(activeTool);
   const pinTool = usePinTool({
     active: activeTool === "pin",
     createAnnotation,

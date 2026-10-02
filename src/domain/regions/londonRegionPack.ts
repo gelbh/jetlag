@@ -1,15 +1,13 @@
 import type { MatchingCategoryId } from "../questions/matchingQuestions";
 import type { MeasuringFromKind } from "../questions/measuringQuestions";
-import type { RegionPackId } from "./regionPack";
-import type { RegionPackLabelOverride } from "./regionPack";
+import type { RegionPackId, RegionPackLabelOverride } from "./regionPack";
 
 export const LONDON_REGION_PACK_ID = "london" satisfies RegionPackId;
 
 export const LONDON_GEO_ASSETS = {
   boroughs: "/geo/london/boroughs.geojson",
   areas: "/geo/london/areas.geojson",
-  areasByBorough: (boroughId: string) =>
-    `/geo/london/areas/${boroughId}.geojson`,
+  areasByBorough: (boroughId: string) => `/geo/london/areas/${boroughId}.geojson`,
 } as const;
 
 export const LONDON_MATCHING_LABEL_OVERRIDES: Partial<
@@ -40,8 +38,6 @@ export const LONDON_MEASURING_LABEL_OVERRIDES: Partial<
   },
 };
 
-export function isLondonRegionPack(
-  regionPackId: RegionPackId | undefined,
-): boolean {
+export function isLondonRegionPack(regionPackId: RegionPackId | undefined): boolean {
   return regionPackId === LONDON_REGION_PACK_ID;
 }

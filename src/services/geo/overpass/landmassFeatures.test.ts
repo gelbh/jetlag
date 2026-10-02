@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { DUBLIN_CITY_GAME_AREA } from "@/test/fixtures/dublinGameArea";
 import type { GameArea } from "@/domain/map/annotations";
-import { clearGeographicFeatureCacheForTests } from "../cache";
+import { DUBLIN_CITY_GAME_AREA } from "@/test/fixtures/dublinGameArea";
 import * as overpassClient from "../../core/overpass/overpassClient";
+import { clearGeographicFeatureCacheForTests } from "../cache";
 import {
   buildLandmassQuery,
   classifyLandmassAtPoint,
@@ -12,8 +12,7 @@ import {
 } from "./landmassFeatures";
 
 vi.mock("../../core/overpass/overpassClient", async (importOriginal) => {
-  const actual =
-    await importOriginal<typeof import("../../core/overpass/overpassClient")>();
+  const actual = await importOriginal<typeof import("../../core/overpass/overpassClient")>();
   return {
     ...actual,
     queryOverpass: vi.fn(actual.queryOverpass),
@@ -44,9 +43,7 @@ describe("landmass features", () => {
 
     expect(query).not.toContain("area.searchArea");
     expect(query).toContain('way["natural"="water"](51.4,-0.2,51.5,-0.1)');
-    expect(query).toContain(
-      'way["waterway"~"^(river|canal|dock)$"](51.4,-0.2,51.5,-0.1)',
-    );
+    expect(query).toContain('way["waterway"~"^(river|canal|dock)$"](51.4,-0.2,51.5,-0.1)');
     expect(query).not.toContain('relation["natural"="water"]');
     expect(query).toContain("out geom;");
     expect(query).not.toContain("out center;");
@@ -104,9 +101,7 @@ describe("landmass features", () => {
     ]);
 
     expect(landmasses.length).toBeGreaterThanOrEqual(2);
-    expect(new Set(landmasses.map((landmass) => landmass.id)).size).toBe(
-      landmasses.length,
-    );
+    expect(new Set(landmasses.map((landmass) => landmass.id)).size).toBe(landmasses.length);
   });
 
   it("classifies anchors by containing landmass polygon", async () => {
@@ -131,10 +126,7 @@ describe("landmass features", () => {
   });
 
   it("returns a single mainland for bundled metro packs without Overpass", async () => {
-    const landmasses = await fetchLandmassFeaturesInArea(
-      DUBLIN_CITY_GAME_AREA,
-      "dublin",
-    );
+    const landmasses = await fetchLandmassFeaturesInArea(DUBLIN_CITY_GAME_AREA, "dublin");
 
     expect(overpassClient.queryOverpass).not.toHaveBeenCalled();
     expect(landmasses).toHaveLength(1);
@@ -169,9 +161,7 @@ describe("landmass features", () => {
       .mockResolvedValueOnce({ elements: [{ id: 4 }] });
 
     const landmasses = await fetchLandmassFeaturesInArea(sampleGameArea);
-    expect(vi.mocked(overpassClient.queryOverpass).mock.calls.length).toBeGreaterThan(
-      1,
-    );
+    expect(vi.mocked(overpassClient.queryOverpass).mock.calls.length).toBeGreaterThan(1);
     expect(landmasses.length).toBeGreaterThan(0);
   });
 

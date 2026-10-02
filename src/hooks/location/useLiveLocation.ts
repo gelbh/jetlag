@@ -1,20 +1,26 @@
 import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
 import { haversineMeters } from "../../domain/geometry/gameArea/distance";
 import {
+  type GeolocationReading,
   getCurrentPosition,
-  restoreLocationAccessIfPersisted,
+  LOCATION_BLOCKED_MESSAGE,
   queryGeolocationPermission,
   requestLocationAccess,
+  restoreLocationAccessIfPersisted,
   unknownGeolocationErrorMessage,
   watchPosition,
-  type GeolocationReading,
-  LOCATION_BLOCKED_MESSAGE,
 } from "../../services/core/location/geolocation";
 import {
+  clearLiveLocationReading,
+  publishLiveLocationReading,
+  releaseLiveLocationReading,
+  retainLiveLocationReading,
+} from "../../services/core/location/liveLocationReading";
+import {
   getLocationPermissionUiSnapshot,
+  persistLocationAccessConfirmed,
   retainLocationPermissionDemand,
   subscribeLocationPermissionUi,
-  persistLocationAccessConfirmed,
 } from "../../services/core/location/locationPermissionUi";
 
 interface UseLiveLocationOptions {
@@ -31,10 +37,7 @@ interface UseLiveLocationOptions {
   pollIntervalMs?: number;
 }
 
-export function useLiveLocation(
-  enabled: boolean,
-  options: UseLiveLocationOptions = {},
-) {
+export function useLiveLocation(enabled: boolean, options: UseLiveLocationOptions = {}) {
   const {
     highAccuracy = false,
     minIntervalMs = 1500,
@@ -45,9 +48,7 @@ export function useLiveLocation(
   const [reading, setReading] = useState<GeolocationReading | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [needsPermissionPrompt, setNeedsPermissionPrompt] = useState(false);
-  const lastPublishRef = useRef<{ at: number; reading: GeolocationReading } | null>(
-    null,
-  );
+  const lastPublishRef = useRef<{ at: number; reading: GeolocationReading } | null>(null);
   const confirmEpoch = useSyncExternalStore(
     subscribeLocationPermissionUi,
     () => getLocationPermissionUiSnapshot().confirmEpoch,
@@ -58,7 +59,12 @@ export function useLiveLocation(
     if (!enabled) {
       return;
     }
-    return retainLocationPermissionDemand();
+    retainLiveLocationReading();
+    const releasePermission = retainLocationPermissionDemand();
+    return () => {
+      releasePermission();
+      releaseLiveLocationReading();
+    };
   }, [enabled]);
 
   // Reset state when location tracking is disabled. This is a necessary cleanup
@@ -68,7 +74,6 @@ export function useLiveLocation(
       return;
     }
 
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- disable cleanup
     setReading(null);
     setError(null);
     setNeedsPermissionPrompt(false);
@@ -89,10 +94,7 @@ export function useLiveLocation(
 
       if (!force && last) {
         const elapsed = now - last.at;
-        const moved = haversineMeters(
-          [last.reading.lat, last.reading.lng],
-          [next.lat, next.lng],
-        );
+        const moved = haversineMeters([last.reading.lat, last.reading.lng], [next.lat, next.lng]);
 
         if (elapsed < minIntervalMs && moved < minDistanceMeters) {
           return;
@@ -102,6 +104,7 @@ export function useLiveLocation(
       lastPublishRef.current = { at: now, reading: next };
       setReading(next);
       setError(null);
+      publishLiveLocationReading(next);
     };
 
     const startWatch = () => {
@@ -153,12 +156,14 @@ export function useLiveLocation(
       if (permission === "unavailable") {
         setNeedsPermissionPrompt(false);
         setError("Geolocation is not available on this device.");
+        clearLiveLocationReading();
         return;
       }
 
       if (permission === "denied") {
         setNeedsPermissionPrompt(false);
         setError(LOCATION_BLOCKED_MESSAGE);
+        clearLiveLocationReading();
         return;
       }
 
@@ -181,6 +186,7 @@ export function useLiveLocation(
         if (restore.status === "denied") {
           setNeedsPermissionPrompt(false);
           setError(LOCATION_BLOCKED_MESSAGE);
+          clearLiveLocationReading();
           return;
         }
 

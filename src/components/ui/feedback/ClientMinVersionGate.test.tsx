@@ -1,5 +1,5 @@
-import { render, screen, waitFor } from "@testing-library/react";
 import { MantineProvider } from "@mantine/core";
+import { render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { jetlagTheme } from "@/theme/theme";
 import { ClientMinVersionGate } from "./ClientMinVersionGate";
@@ -62,9 +62,7 @@ describe("ClientMinVersionGate", () => {
 
     renderGate(<div>app-content</div>);
 
-    expect(await screen.findByRole("alert")).toHaveTextContent(
-      /Update required/i,
-    );
+    expect(await screen.findByRole("alert")).toHaveTextContent(/Update required/i);
     expect(screen.queryByText("app-content")).toBeNull();
   });
 
@@ -92,10 +90,7 @@ describe("ClientMinVersionGate", () => {
 
   it("fail-opens when the min-version listener errors", async () => {
     subscribeMock.mockImplementation(
-      (
-        _onChange: (min: string | null) => void,
-        onError: (error: Error) => void,
-      ) => {
+      (_onChange: (min: string | null) => void, onError: (error: Error) => void) => {
         onError(new Error("unavailable"));
       },
     );

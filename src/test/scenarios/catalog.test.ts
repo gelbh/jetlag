@@ -10,9 +10,7 @@ import { getScenario, listScenarios } from "./catalog";
 describe("scenario catalog", () => {
   it("registers dublin-local-map with shared Dublin city game area", () => {
     const scenario = getScenario("dublin-local-map");
-    expect(scenario.tags).toEqual(
-      expect.arrayContaining(["unit", "e2e", "manual"]),
-    );
+    expect(scenario.tags).toEqual(expect.arrayContaining(["unit", "e2e", "manual"]));
     expect(scenario.session.gameArea).toEqual(DUBLIN_CITY_GAME_AREA);
     expect(scenario.entryPath).toBe("/map");
   });
@@ -23,14 +21,8 @@ describe("scenario catalog", () => {
   });
 
   it("keeps a single Dublin city polygon coordinate literal in fixtures", () => {
-    const cityFile = readFileSync(
-      resolve(__dirname, "../fixtures/dublinGameArea.ts"),
-      "utf8",
-    );
-    const e2eMap = readFileSync(
-      resolve(__dirname, "../../../e2e/fixtures/map.ts"),
-      "utf8",
-    );
+    const cityFile = readFileSync(resolve(__dirname, "../fixtures/dublinGameArea.ts"), "utf8");
+    const e2eMap = readFileSync(resolve(__dirname, "../../../e2e/fixtures/map.ts"), "utf8");
     // Multi-line polygon layout; assert the SW corner literal, not a one-line `[[…`.
     const corner = "[-6.45, 53.27]";
     expect(cityFile.includes(corner)).toBe(true);
@@ -56,14 +48,8 @@ describe("scenario catalog", () => {
   });
 
   it("adapters do not import playwright", () => {
-    const unitSrc = readFileSync(
-      resolve(__dirname, "./adapters/toUnitFixture.ts"),
-      "utf8",
-    );
-    const localSrc = readFileSync(
-      resolve(__dirname, "./adapters/toLocalStorageSeed.ts"),
-      "utf8",
-    );
+    const unitSrc = readFileSync(resolve(__dirname, "./adapters/toUnitFixture.ts"), "utf8");
+    const localSrc = readFileSync(resolve(__dirname, "./adapters/toLocalStorageSeed.ts"), "utf8");
     expect(unitSrc).not.toMatch(/playwright/i);
     expect(localSrc).not.toMatch(/playwright/i);
   });

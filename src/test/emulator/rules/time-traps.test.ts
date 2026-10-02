@@ -1,24 +1,13 @@
-import {
-  assertFails,
-  assertSucceeds,
-} from "@firebase/rules-unit-testing";
+import { assertFails, assertSucceeds } from "@firebase/rules-unit-testing";
 import { describe, it } from "vitest";
-import {
-  bindRulesTestEnv,
-  sessionPayload,
-  timeTrapPayload,
-} from "./helpers";
+import { bindRulesTestEnv, sessionPayload, timeTrapPayload } from "./helpers";
 
 describe("firestore.rules — time traps", () => {
   const rules = bindRulesTestEnv();
 
   it("allows hiders to write their own time trap", async () => {
     const host = rules.testEnv.authenticatedContext("host-1");
-    await host
-      .firestore()
-      .collection("sessions")
-      .doc("session-1")
-      .set(sessionPayload("host-1"));
+    await host.firestore().collection("sessions").doc("session-1").set(sessionPayload("host-1"));
 
     const hider = rules.testEnv.authenticatedContext("hider-1");
     await host
@@ -43,11 +32,7 @@ describe("firestore.rules — time traps", () => {
 
   it("denies seekers from writing time traps", async () => {
     const host = rules.testEnv.authenticatedContext("host-1");
-    await host
-      .firestore()
-      .collection("sessions")
-      .doc("session-1")
-      .set(sessionPayload("host-1"));
+    await host.firestore().collection("sessions").doc("session-1").set(sessionPayload("host-1"));
 
     const seeker = rules.testEnv.authenticatedContext("seeker-1");
     await host
@@ -72,11 +57,7 @@ describe("firestore.rules — time traps", () => {
 
   it("denies hiders from writing another player's time trap doc", async () => {
     const host = rules.testEnv.authenticatedContext("host-1");
-    await host
-      .firestore()
-      .collection("sessions")
-      .doc("session-1")
-      .set(sessionPayload("host-1"));
+    await host.firestore().collection("sessions").doc("session-1").set(sessionPayload("host-1"));
 
     const hider = rules.testEnv.authenticatedContext("hider-1");
     await host
@@ -98,5 +79,4 @@ describe("firestore.rules — time traps", () => {
         .set(timeTrapPayload()),
     );
   });
-
 });

@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { createMockGeolocationPosition, mockGeolocation } from "@/test/mocks/geolocation";
 import {
   confirmAndRequestLocationAccess,
   GeolocationPermissionRequiredError,
@@ -14,10 +15,6 @@ import {
   persistLocationAccessConfirmed,
   resetLocationPermissionUiForTests,
 } from "./locationPermissionUi";
-import {
-  createMockGeolocationPosition,
-  mockGeolocation,
-} from "@/test/mocks/geolocation";
 
 function mockPermissions(state: PermissionState | null): void {
   if (state === null) {
@@ -74,9 +71,10 @@ describe("geolocation permission gating", () => {
     mockGeolocation(createMockGeolocationPosition(53.35, -6.26));
     mockPermissions("prompt");
 
-    await expect(
-      confirmAndRequestLocationAccess({ highAccuracy: false }),
-    ).resolves.toMatchObject({ lat: 53.35, lng: -6.26 });
+    await expect(confirmAndRequestLocationAccess({ highAccuracy: false })).resolves.toMatchObject({
+      lat: 53.35,
+      lng: -6.26,
+    });
     expect(navigator.geolocation.getCurrentPosition).toHaveBeenCalledOnce();
   });
 
@@ -127,12 +125,10 @@ describe("geolocation permission gating", () => {
     mockPermissions("prompt");
     persistLocationAccessConfirmed();
 
-    await expect(restoreLocationAccessIfPersisted({ highAccuracy: false })).resolves.toMatchObject(
-      {
-        status: "restored",
-        reading: { lat: 53.35, lng: -6.26 },
-      },
-    );
+    await expect(restoreLocationAccessIfPersisted({ highAccuracy: false })).resolves.toMatchObject({
+      status: "restored",
+      reading: { lat: 53.35, lng: -6.26 },
+    });
     expect(navigator.geolocation.getCurrentPosition).toHaveBeenCalledOnce();
     expect(getLocationPermissionUiSnapshot().confirmEpoch).toBeGreaterThan(0);
   });

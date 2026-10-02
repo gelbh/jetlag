@@ -1,11 +1,7 @@
 import { useAppUpdateState } from "@/hooks/app/useAppUpdateState";
 import { AppErrorPage } from "./AppErrorPage";
 
-export function ClientUpdateRequiredPage({
-  minVersion,
-}: {
-  minVersion: string;
-}) {
+export function ClientUpdateRequiredPage({ minVersion }: { minVersion: string }) {
   const { applyUpdate } = useAppUpdateState();
 
   return (

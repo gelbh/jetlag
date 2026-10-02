@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
+import { serializeMatchingFeatures } from "@/domain/geo/matchingAdapters";
 import type { GameArea } from "../map/annotations";
+import { milesToMeters } from "../map/distance";
+import type { PendingQuestionRecord } from "../session/activity/sessionChat";
 import {
   buildPendingQuestionOverlay,
   buildPendingQuestionOverlays,
 } from "./pendingQuestionOverlays";
-import type { PendingQuestionRecord } from "../session/activity/sessionChat";
-import { milesToMeters } from "../map/distance";
-import { serializeMatchingFeatures } from "@/domain/geo/matchingAdapters";
 
 const gameArea: GameArea = {
   type: "Polygon",
@@ -57,29 +57,17 @@ function basePendingQuestion(
 describe("buildPendingQuestionOverlay", () => {
   it("returns null for non-pending questions", async () => {
     await expect(
-      buildPendingQuestionOverlay(
-        basePendingQuestion({ status: "walking" }),
-        gameArea,
-      ),
+      buildPendingQuestionOverlay(basePendingQuestion({ status: "walking" }), gameArea),
     ).resolves.toBeNull();
   });
 
   it("builds radar circle and center marker without elimination shading", async () => {
-    const result = await buildPendingQuestionOverlay(
-      basePendingQuestion(),
-      gameArea,
-    );
+    const result = await buildPendingQuestionOverlay(basePendingQuestion(), gameArea);
 
     expect(result).not.toBeNull();
-    expect(result?.overlays.some((overlay) => overlay.kind === "circle")).toBe(
-      true,
-    );
-    expect(result?.overlays.some((overlay) => overlay.kind === "marker")).toBe(
-      true,
-    );
-    expect(result?.overlays.some((overlay) => overlay.kind === "polygon")).toBe(
-      false,
-    );
+    expect(result?.overlays.some((overlay) => overlay.kind === "circle")).toBe(true);
+    expect(result?.overlays.some((overlay) => overlay.kind === "marker")).toBe(true);
+    expect(result?.overlays.some((overlay) => overlay.kind === "polygon")).toBe(false);
   });
 
   it("builds thermometer axis markers for pending line geometry", async () => {
@@ -106,12 +94,8 @@ describe("buildPendingQuestionOverlay", () => {
       gameArea,
     );
 
-    expect(result?.overlays.some((overlay) => overlay.kind === "polyline")).toBe(
-      true,
-    );
-    expect(
-      result?.overlays.filter((overlay) => overlay.kind === "marker").length,
-    ).toBe(2);
+    expect(result?.overlays.some((overlay) => overlay.kind === "polyline")).toBe(true);
+    expect(result?.overlays.filter((overlay) => overlay.kind === "marker").length).toBe(2);
   });
 
   it("builds tentacle search circle and poi markers", async () => {
@@ -193,12 +177,8 @@ describe("buildPendingQuestionOverlay", () => {
       gameArea,
     );
 
-    expect(result?.overlays.some((overlay) => overlay.kind === "polygon")).toBe(
-      true,
-    );
-    expect(result?.overlays.filter((overlay) => overlay.kind === "marker").length).toBe(
-      2,
-    );
+    expect(result?.overlays.some((overlay) => overlay.kind === "polygon")).toBe(true);
+    expect(result?.overlays.filter((overlay) => overlay.kind === "marker").length).toBe(2);
   });
 
   it("builds measuring boundary and target marker from region input", async () => {
@@ -233,9 +213,7 @@ describe("buildPendingQuestionOverlay", () => {
       gameArea,
     );
 
-    expect(result?.overlays.some((overlay) => overlay.kind === "marker")).toBe(
-      true,
-    );
+    expect(result?.overlays.some((overlay) => overlay.kind === "marker")).toBe(true);
   });
 
   it("returns null for invalid geometry", async () => {
@@ -286,15 +264,9 @@ describe("buildPendingQuestionOverlay", () => {
       gameArea,
     );
 
-    expect(results.some((entry) => entry.questionId === "pq-radar-ok")).toBe(
-      true,
-    );
-    const measuring = results.find(
-      (entry) => entry.questionId === "pq-measuring-bad",
-    );
-    expect(measuring?.overlays.some((overlay) => overlay.kind === "marker")).toBe(
-      true,
-    );
+    expect(results.some((entry) => entry.questionId === "pq-radar-ok")).toBe(true);
+    const measuring = results.find((entry) => entry.questionId === "pq-measuring-bad");
+    expect(measuring?.overlays.some((overlay) => overlay.kind === "marker")).toBe(true);
   });
 
   it("skips corrupt tentacle pois JSON without failing the batch", async () => {
@@ -320,8 +292,6 @@ describe("buildPendingQuestionOverlay", () => {
     );
 
     expect(result).not.toBeNull();
-    expect(result?.overlays.some((overlay) => overlay.kind === "circle")).toBe(
-      true,
-    );
+    expect(result?.overlays.some((overlay) => overlay.kind === "circle")).toBe(true);
   });
 });

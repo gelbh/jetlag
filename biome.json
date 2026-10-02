@@ -1,0 +1,150 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.5.15/schema.json",
+  "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
+  "files": {
+    "ignoreUnknown": false,
+    "includes": [
+      "**",
+      "!dist",
+      "!coverage",
+      "!target",
+      "!**/node_modules",
+      "!crates/*/pkg",
+      "!**/*.css",
+      "!public/geo/gtfs/chicago.json",
+      "!.worktrees",
+      "!worker-configuration.d.ts"
+    ]
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 100
+  },
+  "linter": {
+    "enabled": true,
+    "domains": {
+      "react": "recommended"
+    },
+    "rules": {
+      "preset": "recommended",
+      "nursery": {
+        "useExpect": "off"
+      },
+      "a11y": "off",
+      "correctness": {
+        "noUnsafeOptionalChaining": "off",
+        "noUnusedVariables": "off",
+        "useExhaustiveDependencies": "off"
+      },
+      "complexity": {
+        "noFlatMapIdentity": "off",
+        "noStaticOnlyClass": "off",
+        "noUselessContinue": "off",
+        "noUselessSwitchCase": "off",
+        "useOptionalChain": "off"
+      },
+      "style": {
+        "noNonNullAssertion": "off",
+        "useExportType": "off",
+        "useImportType": "off",
+        "useTemplate": "off"
+      },
+      "suspicious": {
+        "noArrayIndexKey": "off",
+        "noCommentText": "off",
+        "noConfusingVoidType": "off",
+        "noExplicitAny": "off",
+        "noImplicitAnyLet": "off",
+        "noNonNullAssertedOptionalChain": "off",
+        "noShadowRestrictedNames": "off",
+        "useIterableCallbackReturn": "off"
+      }
+    },
+    "includes": [
+      "**",
+      "!dist",
+      "!coverage",
+      "!worker-configuration.d.ts",
+      "!crates/*/pkg/**",
+      "!target/**",
+      "!**/node_modules",
+      "!**/*.css",
+      "!public/geo/gtfs/chicago.json",
+      "!**/yqrd-*.test.ts",
+      "!.worktrees/**"
+    ]
+  },
+  "javascript": { "formatter": { "quoteStyle": "double" } },
+  "overrides": [
+    {
+      "includes": ["scripts/**/*.mjs"],
+      "javascript": { "globals": ["exports"] }
+    },
+    {
+      "includes": ["src/test/**/*.{ts,tsx}"],
+      "linter": {
+        "rules": {
+          "style": { "useComponentExportOnlyModules": "off" }
+        }
+      }
+    },
+    {
+      "includes": ["**/*.{test,spec}.{ts,tsx,js,mjs}"],
+      "linter": {
+        "rules": {
+          "suspicious": { "noAssignInExpressions": "off" }
+        }
+      }
+    },
+    {
+      "includes": ["e2e/**/*.{ts,tsx}"],
+      "javascript": { "globals": [] },
+      "linter": {
+        "domains": { "playwright": "recommended" },
+        "rules": {
+          "correctness": { "noEmptyPattern": "off" },
+          "nursery": {
+            "useExpect": "off",
+            "noPlaywrightWaitForTimeout": "error",
+            "noPlaywrightForceOption": "warn"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["src/domain/geometry/kernel/**/*.{ts,tsx}"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "paths": {
+                  "leaflet": "geometry kernel must stay Leaflet-free",
+                  "react": "geometry kernel must stay React-free",
+                  "firebase/app": "geometry kernel must stay Firebase-free"
+                },
+                "patterns": [
+                  {
+                    "group": ["**/map/annotations", "**/map/annotations.*"],
+                    "message": "geometry kernel must not import AnnotationRecord/GameArea module; use GameAreaGeometry"
+                  },
+                  {
+                    "group": ["**/session/hidingZone", "**/session/hidingZone.*"],
+                    "message": "geometry kernel must not import session records"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "assist": {
+    "enabled": true,
+    "actions": { "source": { "organizeImports": "on" } }
+  }
+}

@@ -1,18 +1,18 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen } from "@testing-library/react";
 import { MantineProvider } from "@mantine/core";
+import { fireEvent, render, screen } from "@testing-library/react";
 import type { ReactElement } from "react";
-import type { GameSize } from "@/domain/session/size/gameSize";
-import type { PhotoCategoryId } from "@/domain/questions";
-import { jetlagTheme } from "@/theme/theme";
-import { AskHudHost } from "./AskHudHost";
-import { PhotoHudBody } from "./PhotoHudBody";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
+  type AskHudReadiness,
   activeModeCue,
   canCommit,
   primedCommitLabel,
-  type AskHudReadiness,
 } from "@/domain/ask/askHudModes";
+import type { PhotoCategoryId } from "@/domain/questions";
+import type { GameSize } from "@/domain/session/size/gameSize";
+import { jetlagTheme } from "@/theme/theme";
+import { AskHudHost } from "./AskHudHost";
+import { PhotoHudBody } from "./PhotoHudBody";
 
 const baseProps = {
   gameSize: "medium" as GameSize,
@@ -55,16 +55,9 @@ describe("PhotoHudBody", () => {
   });
 
   it("keeps used categories visible but disabled", () => {
-    renderPhoto(
-      <PhotoHudBody
-        {...baseProps}
-        usedCategoryIds={new Set(["tree"])}
-      />,
-    );
+    renderPhoto(<PhotoHudBody {...baseProps} usedCategoryIds={new Set(["tree"])} />);
     expect(screen.getByText("Tree")).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Tree" }),
-    ).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Tree" })).toBeDisabled();
   });
 
   it("arms PrimedCommitStrip only when configureReady via AskHudHost", () => {
@@ -108,12 +101,7 @@ describe("PhotoHudBody", () => {
           cue: "READY TO SEND",
         })}
         onCommit={onCommit}
-        modeBody={
-          <PhotoHudBody
-            {...baseProps}
-            onCategoryChange={onCategoryChange}
-          />
-        }
+        modeBody={<PhotoHudBody {...baseProps} onCategoryChange={onCategoryChange} />}
       />,
     );
 

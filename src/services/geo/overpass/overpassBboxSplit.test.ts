@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
 import { OverpassPayloadTooLargeError } from "../../core/overpass/overpassClient";
 import {
-  OVERPASS_SPLIT_MIN_SPAN_DEG,
   mergeOverpassElementPayloads,
+  OVERPASS_SPLIT_MIN_SPAN_DEG,
   queryOverpassWithBboxSplit,
 } from "./overpassBboxSplit";
 

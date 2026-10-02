@@ -5,10 +5,7 @@ import {
   queryGeolocationPermission,
   requestLocationAccess,
 } from "../../services/core/location/geolocation";
-import {
-  searchPlaces,
-  type GeocodedPlace,
-} from "../../services/geo/geocoding";
+import { type GeocodedPlace, searchPlaces } from "../../services/geo/geocoding";
 import { useLatestRequest } from "../forms/useLatestRequest";
 
 interface UsePlaceAreaSearchOptions {
@@ -21,9 +18,7 @@ export function usePlaceAreaSearch(options: UsePlaceAreaSearchOptions = {}) {
   const [locationQuery, setLocationQueryState] = useState(initialQuery);
   const [searchResults, setSearchResults] = useState<GeocodedPlace[]>([]);
   const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
-  const [selectedPlace, setSelectedPlace] = useState<GeocodedPlace | null>(
-    null,
-  );
+  const [selectedPlace, setSelectedPlace] = useState<GeocodedPlace | null>(null);
   const [searchLoading, setSearchLoading] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
   const userLocationRef = useRef<LatLngTuple | null>(null);
@@ -110,11 +105,7 @@ export function usePlaceAreaSearch(options: UsePlaceAreaSearchOptions = {}) {
       if (!isLatestRequest(requestId)) {
         return;
       }
-      setSearchError(
-        nextError instanceof Error
-          ? nextError.message
-          : "Place search failed.",
-      );
+      setSearchError(nextError instanceof Error ? nextError.message : "Place search failed.");
     } finally {
       if (isLatestRequest(requestId)) {
         setSearchLoading(false);

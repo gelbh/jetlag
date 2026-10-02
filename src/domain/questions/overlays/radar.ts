@@ -1,7 +1,10 @@
 import type { LatLngTuple } from "../../geometry/gameArea/geometry";
-import { parseGeometryJson, pointFromGeometryFeature } from "../../geometry/gameArea/geometryParsing";
-import { MAP_ANNOTATION_COLORS } from "../../map/mapAnnotationColors";
+import {
+  parseGeometryJson,
+  pointFromGeometryFeature,
+} from "../../geometry/gameArea/geometryParsing";
 import { DEFAULT_RADIUS_METERS } from "../../map/distance";
+import { MAP_ANNOTATION_COLORS } from "../../map/mapAnnotationColors";
 import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
 import type { OverlayBuildResult } from "./shared";
 
@@ -49,4 +52,3 @@ export function buildRadarOverlays(
 }
 
 export type { LatLngTuple };
-

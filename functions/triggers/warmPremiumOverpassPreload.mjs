@@ -1,11 +1,8 @@
 import { onDocumentWritten } from "firebase-functions/v2/firestore";
 import { getSentryDsnSecret, withSentryEventHandler } from "../lib/sentry.mjs";
-import { handleSessionWarmPreloadWrite } from "../session/warmOverpassPreload.mjs";
-import {
-  OVERPASS_L2_PARAMS,
-  OVERPASS_L2_SECRETS,
-} from "../proxies/overpassL2Secrets.mjs";
+import { OVERPASS_L2_PARAMS, OVERPASS_L2_SECRETS } from "../proxies/overpassL2Secrets.mjs";
 import { OVERPASS_PAID_SECRETS } from "../proxies/overpassPaidEnv.mjs";
+import { handleSessionWarmPreloadWrite } from "../session/warmOverpassPreload.mjs";
 
 const sentryDsnSecret = getSentryDsnSecret();
 

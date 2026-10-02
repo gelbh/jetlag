@@ -1,4 +1,4 @@
-export const APP_VERSION = "1.0.0";
+export const APP_VERSION = "1.0.1";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,35 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "1.0.1",
+    date: "2026-10-02",
+    sections: [
+      {
+        title: "Fixes",
+        items: [
+          "Ask tools use your map location when GPS one-shots fail",
+          "Players keep their seat in the game after losing signal instead of rejoining as someone new",
+          "Coastline measuring waits for the distance to finish before Send unlocks",
+          "Home and info pages load faster.",
+        ],
+      },
+      {
+        title: "Improvements",
+        items: [
+          "Create screen opens faster; tap the map to start framing your area.",
+          "The home screen shows up right away instead of a brief “Starting…” splash",
+        ],
+      },
+      {
+        title: "Technical",
+        items: [
+          "Replace CVA button with Mantine Button and drop unused class-variance-authority / @radix-ui/react-slot.",
+          "Annotate hot map and session parents for React Compiler coverage",
+        ],
+      },
+    ],
+  },
   {
     version: "1.0.0",
     date: "2026-09-30",
@@ -23,10 +52,8 @@ export const CHANGELOG: ChangelogEntry[] = [
       },
       {
         title: "Technical",
-        items: [
-          "Wave 7 dead-code purge (routes, components, fixtures, deps, package.json policy)",
-        ],
-      }
+        items: ["Wave 7 dead-code purge (routes, components, fixtures, deps, package.json policy)"],
+      },
     ],
   },
   {
@@ -39,7 +66,7 @@ export const CHANGELOG: ChangelogEntry[] = [
           "Heal deleted Stripe customers before Checkout and billing portal.",
           "Restore tentacle Send gate until a POI is confirmed.",
         ],
-      }
+      },
     ],
   },
   {
@@ -84,7 +111,7 @@ export const CHANGELOG: ChangelogEntry[] = [
           "Refresh player README with screenshots and contributing guide.",
           "Route page-transition reveal gates covered by unit tests",
         ],
-      }
+      },
     ],
   },
   {
@@ -115,7 +142,7 @@ export const CHANGELOG: ChangelogEntry[] = [
           "Gate CI on zero ESLint warnings and clear existing lint debt",
           "Geometry kernel production path is WASM-only (G0–G5j); client override and TypeScript dual-path removed for shipped ops",
         ],
-      }
+      },
     ],
   },
   {
@@ -124,9 +151,7 @@ export const CHANGELOG: ChangelogEntry[] = [
     sections: [
       {
         title: "Fixes",
-        items: [
-          "iPhone standalone PWA map paints full-bleed under notch and home indicator",
-        ],
+        items: ["iPhone standalone PWA map paints full-bleed under notch and home indicator"],
       },
       {
         title: "Improvements",
@@ -136,7 +161,7 @@ export const CHANGELOG: ChangelogEntry[] = [
           "Softer elimination shade opacity transitions under reduced-motion rules",
           "Drop the redundant map tools HUD coach toast; first-run Map tools guide remains",
         ],
-      }
+      },
     ],
   },
   {
@@ -156,7 +181,7 @@ export const CHANGELOG: ChangelogEntry[] = [
           "Tentacles: recommended answers use the hiding-zone center unless the seeker is actually inside the zone",
           "Map chrome: full-bleed hunt tool deck with even tool spacing and shared safe-area overlay padding.",
         ],
-      }
+      },
     ],
   },
   {
@@ -179,11 +204,11 @@ export const CHANGELOG: ChangelogEntry[] = [
           "Live map: clearer status strip and stake-plate tool islands outdoors (plain labels, sync text with icon, simpler landscape controls)",
           "Live map: question ask HUD and map sheets use the iOS Mantine player look (plain labels, stake-plate sheets)",
           "Home and secondary screens use the iOS Mantine player look, with a shared empty state for lists and recovery copy",
-          "Measuring: shows a quick outline of the shaded area, then adds detail, and no longer blocks with \"too complex\" on preview",
+          'Measuring: shows a quick outline of the shaded area, then adds detail, and no longer blocks with "too complex" on preview',
           "Matching: every island and admin area in the play area can be used, not a hidden 50-area cut",
           "Tentacle locations: keep the place list within the map rail so previews stay visible, and tap a confirmed place on the map to select it",
         ],
-      }
+      },
     ],
   },
   {
@@ -289,7 +314,7 @@ export const CHANGELOG: ChangelogEntry[] = [
           "Measuring near-regions (coastlines and multi-place disks) run on the WASM geometry kernel by default, with TypeScript fallback.",
           "Spatial Voronoi runs on WASM by default (TS d3-delaunay fallback on failure)",
         ],
-      }
+      },
     ],
   },
   {
@@ -338,7 +363,7 @@ export const CHANGELOG: ChangelogEntry[] = [
           "Disk WASM measured ≤1.0× TS on overlapping and ten-disk fixtures with topology parity (2026-07-29)",
           "Spatial Voronoi WASM kernel + async caller wiring (ready flag stays off until the ≤1.1× perf gate)",
         ],
-      }
+      },
     ],
   },
   {
@@ -350,7 +375,7 @@ export const CHANGELOG: ChangelogEntry[] = [
         items: [
           "Map: status rail keeps fixed height with stacked dual timers and aligned columns so header fields no longer overlap",
         ],
-      }
+      },
     ],
   },
   {
@@ -362,7 +387,7 @@ export const CHANGELOG: ChangelogEntry[] = [
         items: [
           "Map: home control sits in the status-bar brand cell, and dual timers share one row so the header no longer grows",
         ],
-      }
+      },
     ],
   },
   {
@@ -375,7 +400,7 @@ export const CHANGELOG: ChangelogEntry[] = [
           "Admin ops desk: dragging a preset chip onto another lands on that chip instead of one slot past it",
           "Admin ops desk: leaving /admin uses only the top-bar Home control, and the duplicate Back header above the desk no longer shows",
         ],
-      }
+      },
     ],
   },
   {
@@ -387,7 +412,7 @@ export const CHANGELOG: ChangelogEntry[] = [
         items: [
           "Metro games (Dublin and others): stop downloading huge hidden admin border data in the background, fixing a Safari crash when measuring a local electoral area border",
         ],
-      }
+      },
     ],
   },
   {
@@ -416,7 +441,7 @@ export const CHANGELOG: ChangelogEntry[] = [
           "Navigation: open the next screen right away instead of covering the app with a loading overlay, and show settle progress in-shell",
           "HUD panels and sheets: restrained theme-matched scrollbars on desktop and admin chrome",
         ],
-      }
+      },
     ],
   },
   {
@@ -429,7 +454,7 @@ export const CHANGELOG: ChangelogEntry[] = [
           "Safari: when a content blocker stops App Check, show a clear error page with steps to allow this site and a Try again button",
           "Premium: Google sign-in opens a popup again on Chrome instead of a full-page refresh that leaves you signed out. If a fallback redirect still fails, show a clear allow-popups message instead of staying signed out silently",
         ],
-      }
+      },
     ],
   },
   {
@@ -448,7 +473,7 @@ export const CHANGELOG: ChangelogEntry[] = [
         items: [
           "Error screens: branded 404 page and shared crash shell instead of a silent home redirect",
         ],
-      }
+      },
     ],
   },
   {
@@ -464,7 +489,7 @@ export const CHANGELOG: ChangelogEntry[] = [
           "Join and continue: refresh auth before joining and retry once on permission errors, with clearer error copy when the server still rejects",
           "Map: throttle viewport updates while panning and keep transit icons/polylines stable so the map stays interactive with transit on",
         ],
-      }
+      },
     ],
   },
   {
@@ -474,7 +499,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       {
         title: "Fixes",
         items: [
-          "Matching: Landmass (and admin-division) questions no longer collapse the whole play area into one \"Mainland\" because of a broken Overpass query. Landmass splits still use river/canal/dock waterways (not stream/ditch) to keep Overpass payloads tractable.",
+          'Matching: Landmass (and admin-division) questions no longer collapse the whole play area into one "Mainland" because of a broken Overpass query. Landmass splits still use river/canal/dock waterways (not stream/ditch) to keep Overpass payloads tractable.',
           "Safari blank/broken load after the geometry WASM cutover: allow `wasm-unsafe-eval` in CSP (WebKit requires it; Chrome often did not) and stop shipping the main bundle as undownleveled `esnext`.",
         ],
       },
@@ -493,7 +518,7 @@ export const CHANGELOG: ChangelogEntry[] = [
           "Map: elimination masks use the WASM geometry kernel by default; set `jl.geometry.maskKernel=ts` (or the env override) to force TypeScript.",
           "Enable the WASM geometry kernel for radar/half-plane shading (still overridable via `jl.geometry.maskKernel` / env). Measuring geodesic buffers stay on TypeScript until their ready flip.",
         ],
-      }
+      },
     ],
   },
   {
@@ -512,7 +537,7 @@ export const CHANGELOG: ChangelogEntry[] = [
         items: [
           "Privacy: PostHog analytics may use local storage after Accept; page leaves and Core Web Vitals included; a signed-in account may be linked to the analytics ID",
         ],
-      }
+      },
     ],
   },
   {
@@ -532,7 +557,7 @@ export const CHANGELOG: ChangelogEntry[] = [
         items: [
           "SEO: marketing pages ship share previews and crawlable titles; app routes stay out of search results",
         ],
-      }
+      },
     ],
   },
   {
@@ -554,7 +579,7 @@ export const CHANGELOG: ChangelogEntry[] = [
           "Accessibility: action and dim text colors meet stronger contrast on dark surfaces",
           "Create session: Use my location requests GPS only when you tap the button",
         ],
-      }
+      },
     ],
   },
   {
@@ -567,7 +592,7 @@ export const CHANGELOG: ChangelogEntry[] = [
           "Sessions: host Leave transfers host to another player, or ends the session when you are alone",
           "Sessions: End session uses the server end path so join codes are freed",
         ],
-      }
+      },
     ],
   },
   {
@@ -580,7 +605,7 @@ export const CHANGELOG: ChangelogEntry[] = [
           "Join code preview feels snappier (debounced lookup + short cache). Premium status survives a brief reload from the last good snapshot",
           "Offline annotation sync is honored when the browser wakes the app via Background Sync (interval flush still covers other cases)",
         ],
-      }
+      },
     ],
   },
   {
@@ -603,7 +628,7 @@ export const CHANGELOG: ChangelogEntry[] = [
           "Desktop map panels: settings, chat, and session log open in a right contextual rail instead of bottom sheets; digit keys select question tools on fine pointer",
           "Leaderboard: compact board filters, lead pack for top ranks, and sticky self rank when you scroll away",
         ],
-      }
+      },
     ],
   },
   {
@@ -615,7 +640,7 @@ export const CHANGELOG: ChangelogEntry[] = [
         items: [
           "Leaderboard metric filters: scroll within the chip strip without sideways page scroll.",
         ],
-      }
+      },
     ],
   },
   {
@@ -628,7 +653,7 @@ export const CHANGELOG: ChangelogEntry[] = [
           "Map: exporting a session map no longer fails when the page uses modern color styles; you get a short alert if export still cannot finish",
           "Reliability: fewer noisy crash reports from Safari network blips and temporary sign-in storage hiccups",
         ],
-      }
+      },
     ],
   },
   {
@@ -649,7 +674,7 @@ export const CHANGELOG: ChangelogEntry[] = [
           "Leaderboard: ranked list with loading skeletons, empty state, and highlight for your row",
           "Map: smoother camera moves when placing questions, with no more zoom jump on radius or answer changes and no fighting the animation if you pan mid-move",
         ],
-      }
+      },
     ],
   },
   {
@@ -661,7 +686,7 @@ export const CHANGELOG: ChangelogEntry[] = [
         items: [
           "Premium: Google sign-in works again under enforced content security policy, using a popup on mobile with a full-page redirect fallback only when the popup is blocked.",
         ],
-      }
+      },
     ],
   },
   {
@@ -679,7 +704,7 @@ export const CHANGELOG: ChangelogEntry[] = [
         items: [
           "Map: use smarter per-tool camera framing during question placement, fit post-answer shades, and add a Recenter button while placing questions",
         ],
-      }
+      },
     ],
   },
   {
@@ -689,11 +714,11 @@ export const CHANGELOG: ChangelogEntry[] = [
       {
         title: "Improvements",
         items: [
-          "Game over: seekers can declare \"Found hider\" with hider confirmation; post-game sheet shows stats, map replay stub, and same-session rematch with role swap",
+          'Game over: seekers can declare "Found hider" with hider confirmation; post-game sheet shows stats, map replay stub, and same-session rematch with role swap',
           "Stats & social: personal stats dashboard, friends list, and opt-in leaderboards from new Home header icons and Play hub",
           "Home: Create, Join, and Custom game actions move into a Play hub sheet",
         ],
-      }
+      },
     ],
   },
   {
@@ -713,7 +738,7 @@ export const CHANGELOG: ChangelogEntry[] = [
         items: [
           "Photo answers: when in-app upload is unavailable, hiders can send the photo in your group chat and mark it sent in game chat",
         ],
-      }
+      },
     ],
   },
   {
@@ -722,10 +747,8 @@ export const CHANGELOG: ChangelogEntry[] = [
     sections: [
       {
         title: "Fixes",
-        items: [
-          "Map: remove tilted view setting and HUD control.",
-        ],
-      }
+        items: ["Map: remove tilted view setting and HUD control."],
+      },
     ],
   },
   {
@@ -737,7 +760,7 @@ export const CHANGELOG: ChangelogEntry[] = [
         items: [
           "Map settings: optional tilted map view with a settings toggle and HUD control; low-power mode keeps the map flat.",
         ],
-      }
+      },
     ],
   },
   {
@@ -747,7 +770,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       {
         title: "Fixes",
         items: [
-          "App update: \"Refresh now\" always reloads, even when no update is waiting.",
+          'App update: "Refresh now" always reloads, even when no update is waiting.',
           "Map shading: keep answered-question elimination masks inside the play area boundary.",
           "Map: keep elimination-mask worker from loading Leaflet in the background thread.",
           "Low battery prompt: tolerate Battery API objects that omit event listeners.",
@@ -769,7 +792,7 @@ export const CHANGELOG: ChangelogEntry[] = [
         items: [
           "Sentry: drop chunk-load, battery, Overpass payload, and invalid Stripe webhook probe noise.",
         ],
-      }
+      },
     ],
   },
   {
@@ -781,7 +804,7 @@ export const CHANGELOG: ChangelogEntry[] = [
         items: [
           "Startup: branded boot splash paints before the app loads, including offline return visits; shows a retry prompt if the bundle never loads.",
         ],
-      }
+      },
     ],
   },
   {
@@ -802,7 +825,7 @@ export const CHANGELOG: ChangelogEntry[] = [
           "Navigation: repeat in-app route changes skip the loading overlay when the destination is already warm.",
           "UI: prevents accidental text selection across the app shell; chat, legal pages, session codes, and form fields stay selectable.",
         ],
-      }
+      },
     ],
   },
   {
@@ -847,7 +870,7 @@ export const CHANGELOG: ChangelogEntry[] = [
           "Offline write queue schema now tags annotation entries for future write kinds.",
           "Sentry: filter Leaflet teardown, App Check invalid-session, and dev HMR refresh noise.",
         ],
-      }
+      },
     ],
   },
   {
@@ -876,10 +899,8 @@ export const CHANGELOG: ChangelogEntry[] = [
       },
       {
         title: "Technical",
-        items: [
-          "Offline write queue schema now tags annotation entries for future write kinds.",
-        ],
-      }
+        items: ["Offline write queue schema now tags annotation entries for future write kinds."],
+      },
     ],
   },
   {
@@ -894,7 +915,7 @@ export const CHANGELOG: ChangelogEntry[] = [
           "PWA: clearer update notice on phone — waits until your game ends, refresh button only when safe.",
           "Settings: trim duplicate rules summary when editing game rules in the map settings sheet.",
         ],
-      }
+      },
     ],
   },
   {
@@ -908,7 +929,7 @@ export const CHANGELOG: ChangelogEntry[] = [
           "Admin: desktop monitor pane shows the live map beside the session list on wide screens.",
           "Admin: monitor map includes force end, reset board, cleanup code, and session diagnostics.",
         ],
-      }
+      },
     ],
   },
   {
@@ -921,7 +942,7 @@ export const CHANGELOG: ChangelogEntry[] = [
           "Worker typecheck via `tsconfig.worker.json`; CI validates bundles with `wrangler deploy --dry-run`",
           "CSP header is enforcing (was Report-Only); disable public `workers.dev` URL; enable Worker observability",
         ],
-      }
+      },
     ],
   },
   {
@@ -955,7 +976,7 @@ export const CHANGELOG: ChangelogEntry[] = [
           "Firebase: connect Functions emulator in local dev",
           "Motion: decorative animations respect low-power mode independently of essential motion",
         ],
-      }
+      },
     ],
   },
   {
@@ -986,10 +1007,8 @@ export const CHANGELOG: ChangelogEntry[] = [
       },
       {
         title: "Technical",
-        items: [
-          "Deploy: frontend static assets now deploy to Cloudflare Workers instead of Pages",
-        ],
-      }
+        items: ["Deploy: frontend static assets now deploy to Cloudflare Workers instead of Pages"],
+      },
     ],
   },
   {
@@ -1005,7 +1024,7 @@ export const CHANGELOG: ChangelogEntry[] = [
           "Tentacle: pin Send to hiders on the locations step so it stays visible in the wizard panel",
           "Home: logo, title, and version clear the top gradient accent on PWA safe-area insets",
         ],
-      }
+      },
     ],
   },
   {
@@ -1027,7 +1046,7 @@ export const CHANGELOG: ChangelogEntry[] = [
           "Live map: hiders and observers see live hider GPS; seekers still see seeker pins only",
           "Thermometer walk map overlay: HUD-styled progress pill, markers, and axis line",
         ],
-      }
+      },
     ],
   },
   {
@@ -1042,7 +1061,7 @@ export const CHANGELOG: ChangelogEntry[] = [
           "PWA: stale JavaScript chunks reload once instead of serving HTML for asset requests",
           "PWA: iOS home-screen installs auto-reload for waiting updates outside an active map session",
         ],
-      }
+      },
     ],
   },
   {
@@ -1065,7 +1084,7 @@ export const CHANGELOG: ChangelogEntry[] = [
           "Admin observe: join live sessions regardless of app version mismatch",
           "Create session: Premium tier pre-selected for subscription and trial hosts",
         ],
-      }
+      },
     ],
   },
   {
@@ -1093,7 +1112,7 @@ export const CHANGELOG: ChangelogEntry[] = [
           "Premium: home and create session reuse cached entitlement state across navigation",
           "Motion: low power mode still shows sheet and panel enters; decorative motion stays off",
         ],
-      }
+      },
     ],
   },
   {
@@ -1109,7 +1128,7 @@ export const CHANGELOG: ChangelogEntry[] = [
           "Tutorial: interactive intro lets you try the wizard, then choose Got it or See walkthrough",
           "Tutorial: questions hub highlights the next question and shows a progress rail per type",
         ],
-      }
+      },
     ],
   },
   {
@@ -1125,7 +1144,7 @@ export const CHANGELOG: ChangelogEntry[] = [
           "Tutorial: screenshot borders hug images; cards use full phone height with spaced body copy",
           "Tutorial: questions hub is a single-column scrollable list with title, summary, and progress",
         ],
-      }
+      },
     ],
   },
   {
@@ -1155,7 +1174,7 @@ export const CHANGELOG: ChangelogEntry[] = [
         items: [
           "Components: shared primitives for advanced settings, map alerts, OAuth sign-in, and tool wizards; split large tool panels, edit sheet, map chrome, and route screens.",
         ],
-      }
+      },
     ],
   },
   {
@@ -1181,10 +1200,8 @@ export const CHANGELOG: ChangelogEntry[] = [
       },
       {
         title: "Technical",
-        items: [
-          "GTFS builds: strip UTF-8 BOM from BC Transit CSV exports before parsing",
-        ],
-      }
+        items: ["GTFS builds: strip UTF-8 BOM from BC Transit CSV exports before parsing"],
+      },
     ],
   },
   {
@@ -1204,7 +1221,7 @@ export const CHANGELOG: ChangelogEntry[] = [
         items: [
           "Recommended presets: add Prince Rupert, BC with neighbourhood boundaries, bundled POI, and BC Transit.",
         ],
-      }
+      },
     ],
   },
   {
@@ -1233,7 +1250,7 @@ export const CHANGELOG: ChangelogEntry[] = [
           "Wizards: swipe left or right between steps in question tools, hider zone, and tutorial",
           "App: pinch zoom no longer zooms menus and tutorial pages; map zoom unchanged",
         ],
-      }
+      },
     ],
   },
   {
@@ -1267,7 +1284,7 @@ export const CHANGELOG: ChangelogEntry[] = [
           "CI: skip manual tutorial screenshot capture specs in default e2e runs",
           "Deploy: billing client changes trigger a functions deploy before the frontend ships",
         ],
-      }
+      },
     ],
   },
   {
@@ -1326,7 +1343,7 @@ export const CHANGELOG: ChangelogEntry[] = [
           "Premium recovery: paginate Stripe customer lookup, rate-limit recovery calls, skip already-migrated accounts",
           "Map preload: resolve bundled matching areas once through session rules",
         ],
-      }
+      },
     ],
   },
   {
@@ -1355,10 +1372,8 @@ export const CHANGELOG: ChangelogEntry[] = [
       },
       {
         title: "Technical",
-        items: [
-          "Cloud Functions: Sentry release tag reads version from functions package.json",
-        ],
-      }
+        items: ["Cloud Functions: Sentry release tag reads version from functions package.json"],
+      },
     ],
   },
   {
@@ -1386,7 +1401,7 @@ export const CHANGELOG: ChangelogEntry[] = [
         items: [
           "Cloud Functions: Stripe webhooks, checkout, billing portal, and paid premium session creation",
         ],
-      }
+      },
     ],
   },
   {
@@ -1400,7 +1415,7 @@ export const CHANGELOG: ChangelogEntry[] = [
           "Bundled presets: borough and ward play areas with local admin matching for each metro",
           "Create session: recommended presets set game size, distance unit, expansion pack, and transit metro where supported",
         ],
-      }
+      },
     ],
   },
   {
@@ -1441,10 +1456,8 @@ export const CHANGELOG: ChangelogEntry[] = [
       },
       {
         title: "Technical",
-        items: [
-          "Error reporting: filter QuotaExceededError noise",
-        ],
-      }
+        items: ["Error reporting: filter QuotaExceededError noise"],
+      },
     ],
   },
   {
@@ -1464,7 +1477,7 @@ export const CHANGELOG: ChangelogEntry[] = [
         items: [
           "Custom games: search presets by name or place; results show in a flat list while you type",
         ],
-      }
+      },
     ],
   },
   {
@@ -1492,10 +1505,8 @@ export const CHANGELOG: ChangelogEntry[] = [
       },
       {
         title: "Technical",
-        items: [
-          "Backend deploy: include Firebase Storage rules with Firestore and Functions",
-        ],
-      }
+        items: ["Backend deploy: include Firebase Storage rules with Firestore and Functions"],
+      },
     ],
   },
   {
@@ -1529,7 +1540,7 @@ export const CHANGELOG: ChangelogEntry[] = [
           "Map preload panel: progress bar, broadcast title, and dismiss action aligned with sync status popover",
           "Map HUD: borderless home button stays centered as the status bar grows; preload refresh beacon matches sync size with solid icon",
         ],
-      }
+      },
     ],
   },
   {
@@ -1538,9 +1549,7 @@ export const CHANGELOG: ChangelogEntry[] = [
     sections: [
       {
         title: "Fixes",
-        items: [
-          "Feedback: bug and idea links use GitHub Mobile-friendly issue templates",
-        ],
+        items: ["Feedback: bug and idea links use GitHub Mobile-friendly issue templates"],
       },
       {
         title: "Improvements",
@@ -1552,7 +1561,7 @@ export const CHANGELOG: ChangelogEntry[] = [
           "Copy coordinates: larger tap target with copy failure feedback",
           "Advanced settings: expansion toggles grouped in a fieldset",
         ],
-      }
+      },
     ],
   },
   {
@@ -1561,16 +1570,14 @@ export const CHANGELOG: ChangelogEntry[] = [
     sections: [
       {
         title: "Fixes",
-        items: [
-          "Feedback: GitHub bug and idea links open the structured templates",
-        ],
+        items: ["Feedback: GitHub bug and idea links open the structured templates"],
       },
       {
         title: "Improvements",
         items: [
           "Feedback: separate bug reports and improvement ideas; browse existing threads before posting",
         ],
-      }
+      },
     ],
   },
   {
@@ -1580,7 +1587,7 @@ export const CHANGELOG: ChangelogEntry[] = [
       {
         title: "Fixes",
         items: [
-          "Timer: host leave pauses Firestore timer; guests see \"Syncing timer…\" while the session timer loads",
+          'Timer: host leave pauses Firestore timer; guests see "Syncing timer…" while the session timer loads',
           "Photo uploads: wait for role sync; retry once on storage denial; clearer error copy",
           "Tentacles: committed out-of-reach answers shade the full search disk on the map",
         ],
@@ -1597,7 +1604,7 @@ export const CHANGELOG: ChangelogEntry[] = [
           "Settings: leave session navigates home instead of the create flow; leave locally without ending the game for others; create session back link to home",
           "Preload: cancels background jobs when the app is hidden",
         ],
-      }
+      },
     ],
   },
   {
@@ -1613,7 +1620,7 @@ export const CHANGELOG: ChangelogEntry[] = [
           "Map load: HUD skeleton instead of plain loading text",
           "Low power mode and reduced motion: instant transitions, no drag springs",
         ],
-      }
+      },
     ],
   },
   {
@@ -1622,9 +1629,7 @@ export const CHANGELOG: ChangelogEntry[] = [
     sections: [
       {
         title: "Improvements",
-        items: [
-          "Web analytics: optional GA4 page views in production",
-        ],
+        items: ["Web analytics: optional GA4 page views in production"],
       },
       {
         title: "Technical",
@@ -1633,7 +1638,7 @@ export const CHANGELOG: ChangelogEntry[] = [
           "Functions: grantAccess failure throttling survives cold starts",
           "Release tooling: Changesets versions package.json and syncs in-app changelog",
         ],
-      }
+      },
     ],
   },
   {
@@ -1668,7 +1673,7 @@ export const CHANGELOG: ChangelogEntry[] = [
         items: [
           "Firestore: allow answerableAt patch on pending questions; end-game request and accept rules",
         ],
-      }
+      },
     ],
   },
   {
@@ -1686,10 +1691,8 @@ export const CHANGELOG: ChangelogEntry[] = [
       },
       {
         title: "Technical",
-        items: [
-          "E2E: refresh visual baselines and align smoke session timeouts",
-        ],
-      }
+        items: ["E2E: refresh visual baselines and align smoke session timeouts"],
+      },
     ],
   },
   {
@@ -1723,7 +1726,7 @@ export const CHANGELOG: ChangelogEntry[] = [
           "E2E: Playwright visual baselines for home and join screens",
           "Functions: Zod validation on transit and Overpass proxy inputs",
         ],
-      }
+      },
     ],
   },
   {
@@ -1762,7 +1765,7 @@ export const CHANGELOG: ChangelogEntry[] = [
         items: [
           "Spatial Voronoi and geodesic buffers for more accurate elimination zones (matching & tentacles)",
         ],
-      }
+      },
     ],
-  }
+  },
 ];

@@ -10,23 +10,23 @@
  */
 
 import { timingSafeEqual } from "node:crypto";
+import { requestHostConfirm } from "./hostConfirm.mjs";
+import {
+  consumeSessionOpsTool,
+  resolveSessionOpsCaps,
+  SESSION_OPS_TOOL_CAP,
+} from "./sessionOpsCaps.mjs";
+import { appendSupportThreadMessage } from "./sessionOpsThread.mjs";
 import {
   SESSION_OPS_TOOL_IDS,
-  SESSION_OPS_TOOLS,
   SESSION_OPS_TOOL_JSON_SCHEMAS,
+  SESSION_OPS_TOOLS,
 } from "./sessionOpsTools.mjs";
 import {
   SESSION_OPS_HOST_CONFIRM_REQUIRED,
   SESSION_OPS_UNKNOWN_TOOL,
   validateSessionOpsTool,
 } from "./sessionOpsValidate.mjs";
-import {
-  SESSION_OPS_TOOL_CAP,
-  resolveSessionOpsCaps,
-  consumeSessionOpsTool,
-} from "./sessionOpsCaps.mjs";
-import { requestHostConfirm } from "./hostConfirm.mjs";
-import { appendSupportThreadMessage } from "./sessionOpsThread.mjs";
 
 export const SESSION_OPS_MCP_UNAUTHORIZED = "SESSION_OPS_MCP_UNAUTHORIZED";
 export const SESSION_OPS_MCP_HEADER_INCIDENT = "x-jetlag-incident-id";
@@ -156,18 +156,11 @@ function formatToolOutcomeText(outcome) {
  * }} deps
  */
 export async function runSessionOpsMcpBoundTool(input, deps) {
-  const {
-    incidentId,
-    sessionId,
-    actorUid,
-    tool,
-    args,
-  } = input;
+  const { incidentId, sessionId, actorUid, tool, args } = input;
   let summonId = typeof input.summonId === "string" ? input.summonId : "";
 
   const now = deps.now ?? (() => new Date());
-  const generateId =
-    deps.generateId ?? (() => `id_${Math.random().toString(36).slice(2)}`);
+  const generateId = deps.generateId ?? (() => `id_${Math.random().toString(36).slice(2)}`);
 
   const loadIncident =
     deps.loadIncident ??
@@ -183,10 +176,7 @@ export async function runSessionOpsMcpBoundTool(input, deps) {
     const incident = await loadIncident(incidentId);
     if (incident && typeof incident.activeSessionOpsSummonId === "string") {
       summonId = incident.activeSessionOpsSummonId;
-    } else if (
-      incident?.supportAgentRun &&
-      typeof incident.supportAgentRun.summonId === "string"
-    ) {
+    } else if (incident?.supportAgentRun && typeof incident.supportAgentRun.summonId === "string") {
       summonId = incident.supportAgentRun.summonId;
     }
   }
@@ -211,8 +201,7 @@ export async function runSessionOpsMcpBoundTool(input, deps) {
   const appendMessage =
     deps.appendSupportMessage ??
     (deps.db
-      ? (message) =>
-          appendSupportThreadMessage(deps.db, incidentId, message, generateId)
+      ? (message) => appendSupportThreadMessage(deps.db, incidentId, message, generateId)
       : null);
 
   if (validation.gate) {
@@ -453,8 +442,7 @@ export async function handleSessionOpsMcpRequest(request, deps) {
   }
 
   if (method === "tools/call") {
-    const params =
-      body.params && typeof body.params === "object" ? body.params : {};
+    const params = body.params && typeof body.params === "object" ? body.params : {};
     const toolName = typeof params.name === "string" ? params.name : "";
     const binding = readSessionOpsMcpBinding(headers);
 
@@ -525,8 +513,7 @@ export async function handleSessionOpsMcpRequest(request, deps) {
         },
       };
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "SESSION_OPS_MCP_FAILED";
+      const message = error instanceof Error ? error.message : "SESSION_OPS_MCP_FAILED";
       return {
         status: 200,
         body: {

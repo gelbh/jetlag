@@ -1,11 +1,11 @@
 import assert from "node:assert/strict";
 import { afterEach, describe, it, mock } from "node:test";
+import { OVERPASS_ENDPOINTS } from "../proxies/overpassEndpoints.mjs";
 import {
   fetchOverpassWithFailover,
   isTimeoutLikeOverpassStatus,
   toOverpassUpstreamError,
 } from "../proxies/overpassProxyCore.mjs";
-import { OVERPASS_ENDPOINTS } from "../proxies/overpassEndpoints.mjs";
 
 function abortError() {
   const error = new Error("This operation was aborted");
@@ -42,14 +42,8 @@ describe("overpassFailover helpers", () => {
     const fetchFailedEpipe = new TypeError("fetch failed");
     fetchFailedEpipe.cause = epipe;
 
-    assert.equal(
-      toOverpassUpstreamError(fetchFailedEpipe).message,
-      "Overpass timed out.",
-    );
-    assert.equal(
-      toOverpassUpstreamError(connectTimeout).message,
-      "Overpass timed out.",
-    );
+    assert.equal(toOverpassUpstreamError(fetchFailedEpipe).message, "Overpass timed out.");
+    assert.equal(toOverpassUpstreamError(connectTimeout).message, "Overpass timed out.");
   });
 
   it("does not remap unrelated fetch failed", () => {

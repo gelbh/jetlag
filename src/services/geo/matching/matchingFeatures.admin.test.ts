@@ -1,14 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
-import type { GameArea } from "@/domain/map/annotations";
-import * as adminDivisionBoundaries from "../overpass/adminDivisionBoundaries";
 import {
   deserializeMatchingFeatures,
   serializeMatchingFeatures,
 } from "@/domain/geo/matchingAdapters";
-import {
-  fetchMatchingFeaturesInArea,
-  pickMatchingFeatureForAnchor,
-} from "./index";
+import type { GameArea } from "@/domain/map/annotations";
+import * as adminDivisionBoundaries from "../overpass/adminDivisionBoundaries";
+import { fetchMatchingFeaturesInArea, pickMatchingFeatureForAnchor } from "./index";
 
 const sampleGameArea: GameArea = {
   type: "Polygon",
@@ -25,10 +22,7 @@ const sampleGameArea: GameArea = {
 
 describe("matching features admin divisions", () => {
   it("loads admin divisions with stable relation ids", async () => {
-    vi.spyOn(
-      adminDivisionBoundaries,
-      "fetchAdminDivisionFeaturesInArea",
-    ).mockResolvedValue([
+    vi.spyOn(adminDivisionBoundaries, "fetchAdminDivisionFeaturesInArea").mockResolvedValue([
       {
         id: "relation/10",
         name: "West County",
@@ -49,10 +43,7 @@ describe("matching features admin divisions", () => {
       },
     ]);
 
-    const features = await fetchMatchingFeaturesInArea(
-      sampleGameArea,
-      "admin_division_2",
-    );
+    const features = await fetchMatchingFeaturesInArea(sampleGameArea, "admin_division_2");
 
     expect(features[0]?.id).toBe("relation/10");
     expect(features[0]?.boundary?.type).toBe("Polygon");
@@ -80,11 +71,7 @@ describe("matching features admin divisions", () => {
       },
     ];
 
-    const nearest = pickMatchingFeatureForAnchor(
-      [51.45, -0.17],
-      features,
-      "admin_division_2",
-    );
+    const nearest = pickMatchingFeatureForAnchor([51.45, -0.17], features, "admin_division_2");
 
     expect(nearest?.id).toBe("relation/10");
     expect(nearest?.distanceMeters).toBe(0);
@@ -112,8 +99,6 @@ describe("matching features admin divisions", () => {
       },
     ];
 
-    expect(deserializeMatchingFeatures(serializeMatchingFeatures(features))).toEqual(
-      features,
-    );
+    expect(deserializeMatchingFeatures(serializeMatchingFeatures(features))).toEqual(features);
   });
 });

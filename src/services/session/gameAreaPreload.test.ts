@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { DUBLIN_CITY_GAME_AREA } from "../../test/fixtures/dublinGameArea";
 import { selectPreloadBanner, usePreloadStore } from "../../state/preloadStore";
+import { DUBLIN_CITY_GAME_AREA } from "../../test/fixtures/dublinGameArea";
 import { OverpassUnavailableError } from "../core/overpass/overpassClient";
 import * as adminDivisionAvailability from "../geo/overpass/adminDivisionAvailability";
 import { fetchAdminDivisionFeaturesInArea } from "../geo/overpass/adminDivisionBoundaries";
@@ -13,8 +13,8 @@ import {
   preloadCriticalGameAreaCaches,
   preloadGameAreaCachesAsync,
   preloadJobGapMsForTests,
-  preloadJobGapPremiumMsForTests,
   preloadJobGapMsForTier,
+  preloadJobGapPremiumMsForTests,
   preloadMeasuringCategoriesForTests,
 } from "./gameAreaPreload";
 
@@ -49,9 +49,7 @@ vi.mock("../transit/transitStatic", () => ({
 }));
 
 vi.mock("../geo/overpass/adminDivisionAvailability", async (importOriginal) => {
-  const actual = await importOriginal<
-    typeof import("../geo/overpass/adminDivisionAvailability")
-  >();
+  const actual = await importOriginal<typeof import("../geo/overpass/adminDivisionAvailability")>();
   return {
     ...actual,
     probeAdminDivisionCounts: vi.fn(actual.probeAdminDivisionCounts),
@@ -96,20 +94,15 @@ describe("gameAreaPreload", () => {
   });
 
   it("warms critical caches without throwing", async () => {
-    await expect(
-      preloadCriticalGameAreaCaches(DUBLIN_CITY_GAME_AREA),
-    ).resolves.toBeUndefined();
+    await expect(preloadCriticalGameAreaCaches(DUBLIN_CITY_GAME_AREA)).resolves.toBeUndefined();
   });
 
   it("continues critical preload when admin division probe fails", async () => {
-    vi.spyOn(
-      adminDivisionAvailability,
-      "probeAdminDivisionCounts",
-    ).mockRejectedValue(new OverpassUnavailableError());
+    vi.spyOn(adminDivisionAvailability, "probeAdminDivisionCounts").mockRejectedValue(
+      new OverpassUnavailableError(),
+    );
 
-    await expect(
-      preloadCriticalGameAreaCaches(DUBLIN_CITY_GAME_AREA),
-    ).resolves.toBeUndefined();
+    await expect(preloadCriticalGameAreaCaches(DUBLIN_CITY_GAME_AREA)).resolves.toBeUndefined();
 
     expect(fetchPreparedCoastlineSegments).not.toHaveBeenCalled();
     expect(fetchLandmassFeaturesInArea).not.toHaveBeenCalled();
@@ -139,11 +132,7 @@ describe("gameAreaPreload", () => {
     await vi.runAllTimersAsync();
     await preloadPromise;
 
-    await preloadCriticalGameAreaCaches(
-      DUBLIN_CITY_GAME_AREA,
-      { 8: "{}", 9: "{}" },
-      "dublin",
-    );
+    await preloadCriticalGameAreaCaches(DUBLIN_CITY_GAME_AREA, { 8: "{}", 9: "{}" }, "dublin");
 
     expect(fetchPreparedCoastlineSegments).not.toHaveBeenCalled();
     expect(fetchPreparedMeasuringLinearSegments).not.toHaveBeenCalled();
@@ -178,18 +167,12 @@ describe("gameAreaPreload", () => {
   it("preloads measuring categories with auto-attached region pack id", async () => {
     vi.useFakeTimers();
 
-    const preloadPromise = preloadGameAreaCachesAsync(
-      DUBLIN_CITY_GAME_AREA,
-      undefined,
-      "dublin",
-    );
+    const preloadPromise = preloadGameAreaCachesAsync(DUBLIN_CITY_GAME_AREA, undefined, "dublin");
     await vi.runAllTimersAsync();
     await preloadPromise;
 
     const expectedCategories = preloadMeasuringCategoriesForTests();
-    expect(fetchMeasuringPlacesInArea).toHaveBeenCalledTimes(
-      expectedCategories.length,
-    );
+    expect(fetchMeasuringPlacesInArea).toHaveBeenCalledTimes(expectedCategories.length);
     for (const category of expectedCategories) {
       expect(fetchMeasuringPlacesInArea).toHaveBeenCalledWith(
         DUBLIN_CITY_GAME_AREA,
@@ -201,12 +184,8 @@ describe("gameAreaPreload", () => {
   });
 
   it("uses a shorter preload gap for premium sessions", () => {
-    expect(preloadJobGapMsForTier("premium")).toBe(
-      preloadJobGapPremiumMsForTests(),
-    );
+    expect(preloadJobGapMsForTier("premium")).toBe(preloadJobGapPremiumMsForTests());
     expect(preloadJobGapMsForTier("free")).toBe(preloadJobGapMsForTests());
-    expect(preloadJobGapPremiumMsForTests()).toBeLessThan(
-      preloadJobGapMsForTests(),
-    );
+    expect(preloadJobGapPremiumMsForTests()).toBeLessThan(preloadJobGapMsForTests());
   });
 });

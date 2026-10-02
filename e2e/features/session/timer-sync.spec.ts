@@ -1,9 +1,8 @@
 import {
-  test,
-  expect,
-  createMultiplayerContexts,
   createHostSession,
+  createMultiplayerContexts,
   dismissMapOnboarding,
+  expect,
   goHomeFromMap,
   joinAsRole,
   pauseSessionTimer,
@@ -11,6 +10,7 @@ import {
   returnToMapFromHome,
   sessionElapsedLocator,
   startSessionTimer,
+  test,
   waitForSessionElapsedAtLeast,
 } from "../../fixtures";
 
@@ -40,8 +40,7 @@ test.describe("timer rejoin", () => {
   });
 
   test("guest reload shows timer after brief sync", async ({ browser }) => {
-    const { hostPage, guestPage, cleanup } =
-      await createMultiplayerContexts(browser);
+    const { hostPage, guestPage, cleanup } = await createMultiplayerContexts(browser);
 
     await test.step("host starts; guest joins as seeker", async () => {
       const { code } = await createHostSession(hostPage);
@@ -61,11 +60,8 @@ test.describe("timer rejoin", () => {
     await cleanup();
   });
 
-  test("host pause, leave, and rejoin keeps timer paused for guest", async ({
-    browser,
-  }) => {
-    const { hostPage, guestPage, cleanup } =
-      await createMultiplayerContexts(browser);
+  test("host pause, leave, and rejoin keeps timer paused for guest", async ({ browser }) => {
+    const { hostPage, guestPage, cleanup } = await createMultiplayerContexts(browser);
 
     await test.step("start then pause on host", async () => {
       const { code } = await createHostSession(hostPage);
@@ -90,9 +86,7 @@ test.describe("timer rejoin", () => {
       expect(hostAfterRejoin).toBeLessThanOrEqual(pausedElapsed + 3);
 
       const guestAfterRejoin = await readSessionElapsedSeconds(guestPage);
-      expect(Math.abs(guestAfterRejoin - hostAfterRejoin)).toBeLessThanOrEqual(
-        3,
-      );
+      expect(Math.abs(guestAfterRejoin - hostAfterRejoin)).toBeLessThanOrEqual(3);
     });
 
     await cleanup();

@@ -1,1 +1,5 @@
-{"source":"none","bbox":{"south":47.32,"west":8.44,"north":47.44,"east":8.63},"segments":[]}
+{
+  "source": "none",
+  "bbox": { "south": 47.32, "west": 8.44, "north": 47.44, "east": 8.63 },
+  "segments": []
+}

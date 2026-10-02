@@ -10,14 +10,10 @@ export const POLYGON_PERSIST_MAX_JSON_CHARS = 120_000;
 export const POLYGON_PERSIST_OVER_BUDGET_MESSAGE =
   "Couldn't save this shade — geometry is too large to store.";
 
-export type PolygonPersistBudgetResult =
-  | { ok: true }
-  | { ok: false; message: string };
+export type PolygonPersistBudgetResult = { ok: true } | { ok: false; message: string };
 
 /** Count ring vertices without spread (Dublin-scale safe). */
-export function countPolygonVertices(
-  feature: Feature<Polygon | MultiPolygon>,
-): number {
+export function countPolygonVertices(feature: Feature<Polygon | MultiPolygon>): number {
   let total = 0;
   const { geometry } = feature;
   if (geometry.type === "Polygon") {
@@ -34,9 +30,7 @@ export function countPolygonVertices(
   return total;
 }
 
-export function polygonGeometryJsonChars(
-  feature: Feature<Polygon | MultiPolygon>,
-): number {
+export function polygonGeometryJsonChars(feature: Feature<Polygon | MultiPolygon>): number {
   return JSON.stringify(feature.geometry).length;
 }
 
@@ -45,10 +39,7 @@ export function assertPolygonPersistBudget(
 ): PolygonPersistBudgetResult {
   const vertexCount = countPolygonVertices(feature);
   const jsonChars = polygonGeometryJsonChars(feature);
-  if (
-    vertexCount > POLYGON_PERSIST_MAX_VERTICES ||
-    jsonChars > POLYGON_PERSIST_MAX_JSON_CHARS
-  ) {
+  if (vertexCount > POLYGON_PERSIST_MAX_VERTICES || jsonChars > POLYGON_PERSIST_MAX_JSON_CHARS) {
     return { ok: false, message: POLYGON_PERSIST_OVER_BUDGET_MESSAGE };
   }
   return { ok: true };

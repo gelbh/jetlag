@@ -4,9 +4,7 @@ import type { SessionActivityEvent } from "../../domain/session/activity/session
 import { useActivityLogStore } from "../../state/activityLogStore";
 
 const isFirebaseConfigured = vi.hoisted(() => vi.fn(() => true));
-const createActivityLogEventIfAbsent = vi.hoisted(() =>
-  vi.fn(async () => ({ wrote: true })),
-);
+const createActivityLogEventIfAbsent = vi.hoisted(() => vi.fn(async () => ({ wrote: true })));
 
 vi.mock("../core/firebase/firebase", () => ({
   isFirebaseConfigured,
@@ -16,14 +14,9 @@ vi.mock("../firestore/firestoreActivityLog", () => ({
   createActivityLogEventIfAbsent,
 }));
 
-import {
-  appendRemoteSessionActivityEvent,
-  appendSessionActivityEvent,
-} from "./sessionActivityLog";
+import { appendRemoteSessionActivityEvent, appendSessionActivityEvent } from "./sessionActivityLog";
 
-function fixedSessionStarted(
-  sessionId: string = LOCAL_SESSION_ID,
-): SessionActivityEvent {
+function fixedSessionStarted(sessionId: string = LOCAL_SESSION_ID): SessionActivityEvent {
   return {
     id: "session_started",
     sessionId,
@@ -51,9 +44,7 @@ describe("appendSessionActivityEvent", () => {
       wrote: false,
     });
 
-    expect(useActivityLogStore.getState().getEvents(LOCAL_SESSION_ID)).toEqual([
-      event,
-    ]);
+    expect(useActivityLogStore.getState().getEvents(LOCAL_SESSION_ID)).toEqual([event]);
     expect(createActivityLogEventIfAbsent).not.toHaveBeenCalled();
   });
 
@@ -79,10 +70,7 @@ describe("appendSessionActivityEvent", () => {
     await expect(appendSessionActivityEvent(second)).resolves.toEqual({
       wrote: true,
     });
-    expect(useActivityLogStore.getState().getEvents(LOCAL_SESSION_ID)).toEqual([
-      first,
-      second,
-    ]);
+    expect(useActivityLogStore.getState().getEvents(LOCAL_SESSION_ID)).toEqual([first, second]);
   });
 
   it("uses local store when Firebase is not configured", async () => {
@@ -92,9 +80,7 @@ describe("appendSessionActivityEvent", () => {
     await expect(appendSessionActivityEvent(event)).resolves.toEqual({
       wrote: true,
     });
-    expect(useActivityLogStore.getState().getEvents("remote-session")).toEqual([
-      event,
-    ]);
+    expect(useActivityLogStore.getState().getEvents("remote-session")).toEqual([event]);
     expect(createActivityLogEventIfAbsent).not.toHaveBeenCalled();
   });
 
@@ -105,13 +91,8 @@ describe("appendSessionActivityEvent", () => {
     await expect(appendSessionActivityEvent(event)).resolves.toEqual({
       wrote: false,
     });
-    expect(createActivityLogEventIfAbsent).toHaveBeenCalledWith(
-      "remote-session",
-      event,
-    );
-    expect(useActivityLogStore.getState().getEvents("remote-session")).toEqual(
-      [],
-    );
+    expect(createActivityLogEventIfAbsent).toHaveBeenCalledWith("remote-session", event);
+    expect(useActivityLogStore.getState().getEvents("remote-session")).toEqual([]);
   });
 
   it("exposes remote branch that delegates to Firestore", async () => {
@@ -120,9 +101,6 @@ describe("appendSessionActivityEvent", () => {
     await expect(appendRemoteSessionActivityEvent(event)).resolves.toEqual({
       wrote: true,
     });
-    expect(createActivityLogEventIfAbsent).toHaveBeenCalledWith(
-      "remote-session",
-      event,
-    );
+    expect(createActivityLogEventIfAbsent).toHaveBeenCalledWith("remote-session", event);
   });
 });

@@ -38,7 +38,8 @@ describe("firestore document schemas", () => {
   it("accepts annotation documents with geometry json", () => {
     const parsed = annotationDocumentSchema.parse({
       type: "zone",
-      geometryJson: '{"type":"Feature","geometry":{"type":"Polygon","coordinates":[]},"properties":{}}',
+      geometryJson:
+        '{"type":"Feature","geometry":{"type":"Polygon","coordinates":[]},"properties":{}}',
     });
 
     expect(parsed.type).toBe("zone");

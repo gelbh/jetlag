@@ -1,8 +1,8 @@
 import { fireEvent, screen } from "@testing-library/react";
-import { describe, expect, it, vi, beforeEach } from "vitest";
-import { AdminMapScreen } from "./AdminMapScreen";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createTestSession } from "../test/fixtures/sessions";
 import { renderWithRouter } from "../test/renderWithRouter";
+import { AdminMapScreen } from "./AdminMapScreen";
 
 vi.mock("../hooks/admin/useAdminMapWideLayout", () => ({
   useAdminMapWideLayout: vi.fn(() => false),
@@ -32,8 +32,8 @@ vi.mock("./spectator-map/SpectatorMapLayers", () => ({
 
 import { useAdminMapWideLayout } from "../hooks/admin/useAdminMapWideLayout";
 import {
-  useObserverMapScreen,
   type ObserverMapScreenController,
+  useObserverMapScreen,
 } from "./observer-map-screen/useObserverMapScreen";
 
 const mockedUseAdminMapWideLayout = vi.mocked(useAdminMapWideLayout);
@@ -158,14 +158,10 @@ describe("AdminMapScreen", () => {
     renderWithRouter(<AdminMapScreen />, { route: "/map" });
 
     // Drawer overlay inert-hides the dock while a sheet is open.
-    fireEvent.click(
-      screen.getByRole("button", { name: "Open session log", hidden: true }),
-    );
+    fireEvent.click(screen.getByRole("button", { name: "Open session log", hidden: true }));
     expect(controller.overlay.closeSheet).toHaveBeenCalled();
 
-    fireEvent.click(
-      screen.getByRole("button", { name: "Open chat", hidden: true }),
-    );
+    fireEvent.click(screen.getByRole("button", { name: "Open chat", hidden: true }));
     expect(controller.overlay.closeSheet).toHaveBeenCalledTimes(2);
   });
 });

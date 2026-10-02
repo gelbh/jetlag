@@ -9,11 +9,7 @@ export function shouldApplyMapFocus(args: {
   lastRecenterToken: number;
 }): boolean {
   const recenterRequested = args.recenterToken !== args.lastRecenterToken;
-  if (
-    args.fitBoundsMode === "once" &&
-    args.hasFitted &&
-    !recenterRequested
-  ) {
+  if (args.fitBoundsMode === "once" && args.hasFitted && !recenterRequested) {
     return false;
   }
   return true;

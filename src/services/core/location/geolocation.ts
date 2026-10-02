@@ -17,11 +17,7 @@ export type RestoreLocationAccessIfPersistedResult =
   | { status: "restored"; reading: GeolocationReading }
   | { status: "skipped" | "denied" | "failed" };
 
-export type GeolocationPermissionState =
-  | "prompt"
-  | "granted"
-  | "denied"
-  | "unavailable";
+export type GeolocationPermissionState = "prompt" | "granted" | "denied" | "unavailable";
 
 export const LOCATION_BLOCKED_MESSAGE =
   "Location sharing is blocked. Allow location access in your browser settings.";
@@ -38,9 +34,7 @@ export class GeolocationPermissionRequiredError extends Error {
   }
 }
 
-let restoreLocationAccessInFlight:
-  | Promise<RestoreLocationAccessIfPersistedResult>
-  | null = null;
+let restoreLocationAccessInFlight: Promise<RestoreLocationAccessIfPersistedResult> | null = null;
 
 function readPosition(position: GeolocationPosition): GeolocationReading {
   const { latitude, longitude, accuracy, heading } = position.coords;
@@ -50,16 +44,12 @@ function readPosition(position: GeolocationPosition): GeolocationReading {
     lng: longitude,
     accuracy: Number.isFinite(accuracy) ? accuracy : null,
     heading:
-      typeof heading === "number" && Number.isFinite(heading) && heading >= 0
-        ? heading
-        : null,
+      typeof heading === "number" && Number.isFinite(heading) && heading >= 0 ? heading : null,
   };
 }
 
 export function unknownGeolocationErrorMessage(error: unknown): string {
-  return error instanceof Error
-    ? error.message
-    : "GPS location unavailable.";
+  return error instanceof Error ? error.message : "GPS location unavailable.";
 }
 
 function geolocationErrorMessage(error: GeolocationPositionError): string {
@@ -85,11 +75,7 @@ export async function queryGeolocationPermission(): Promise<GeolocationPermissio
       const status = await navigator.permissions.query({
         name: "geolocation",
       });
-      if (
-        status.state === "granted" ||
-        status.state === "denied" ||
-        status.state === "prompt"
-      ) {
+      if (status.state === "granted" || status.state === "denied" || status.state === "prompt") {
         return status.state;
       }
     } catch {
@@ -108,8 +94,7 @@ export function getCurrentPosition(options?: {
   maximumAge?: number;
 }): Promise<GeolocationReading> {
   const highAccuracy = options?.highAccuracy ?? true;
-  const maximumAge =
-    options?.maximumAge ?? (highAccuracy ? 10_000 : 30_000);
+  const maximumAge = options?.maximumAge ?? (highAccuracy ? 10_000 : 30_000);
 
   return new Promise((resolve, reject) => {
     if (!("geolocation" in navigator)) {
@@ -162,6 +147,7 @@ export async function requestLocationAccess(options?: {
  */
 export async function confirmAndRequestLocationAccess(options?: {
   highAccuracy?: boolean;
+  maximumAge?: number;
 }): Promise<GeolocationReading> {
   const reading = await requestLocationAccess({
     ...options,
@@ -193,8 +179,7 @@ export async function restoreLocationAccessIfPersisted(options?: {
       markLocationAccessConfirmed();
       return { status: "restored", reading } as const;
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "GPS location unavailable.";
+      const message = error instanceof Error ? error.message : "GPS location unavailable.";
       if (message === LOCATION_BLOCKED_MESSAGE) {
         clearPersistedLocationAccessConfirmed();
         return { status: "denied" } as const;
@@ -222,8 +207,7 @@ export function watchPosition(
   },
 ): () => void {
   const highAccuracy = options?.highAccuracy ?? true;
-  const maximumAge =
-    options?.maximumAge ?? (highAccuracy ? 5_000 : 20_000);
+  const maximumAge = options?.maximumAge ?? (highAccuracy ? 5_000 : 20_000);
   if (!("geolocation" in navigator)) {
     onError(new Error("Geolocation is not available on this device."));
     return () => {};

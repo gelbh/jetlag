@@ -1,17 +1,13 @@
-import type { MapTool } from "../../state/sessionStore";
 import {
   MAP_TOOL_DOCK_ENTRIES,
-  QUESTION_DOCK_TOOL_IDS,
   mapToolDockMenuHint,
   mapToolDockShortLabel,
+  QUESTION_DOCK_TOOL_IDS,
 } from "../../domain/map/mapTools";
-import {
-  HudDrawIcon,
-  HudRedoIcon,
-  HudUndoIcon,
-} from "../ui/brand/HudIcons";
-import { HudToolIcon } from "../map/icons/ToolIcons";
+import type { MapTool } from "../../state/sessionStore";
 import { MapChromeControl } from "../map/chrome/MapChromeControl";
+import { HudToolIcon } from "../map/icons/ToolIcons";
+import { HudDrawIcon, HudRedoIcon, HudUndoIcon } from "../ui/brand/HudIcons";
 
 interface ToolDockQuestionSlotProps {
   toolId: (typeof QUESTION_DOCK_TOOL_IDS)[number];
@@ -32,8 +28,7 @@ export function ToolDockQuestionSlot({
   }
 
   const active = activeTool === toolId;
-  const blockedByOpenQuestion =
-    !canSubmitQuestion && QUESTION_DOCK_TOOL_IDS.includes(toolId);
+  const blockedByOpenQuestion = !canSubmitQuestion && QUESTION_DOCK_TOOL_IDS.includes(toolId);
 
   return (
     <MapChromeControl
@@ -76,13 +71,7 @@ export function ToolDockHistorySlot({
       onClick={onAct}
       disabled={inactive || !canAct}
       aria-label={isUndo ? "Undo last annotation" : "Redo last annotation"}
-      icon={
-        isUndo ? (
-          <HudUndoIcon className="h-5 w-5" />
-        ) : (
-          <HudRedoIcon className="h-5 w-5" />
-        )
-      }
+      icon={isUndo ? <HudUndoIcon className="h-5 w-5" /> : <HudRedoIcon className="h-5 w-5" />}
       label={isUndo ? "Undo" : "Redo"}
       tone="history"
     />

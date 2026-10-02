@@ -1,11 +1,7 @@
-import { useMemo, type ReactElement } from "react";
-import { Layer, Source } from "react-map-gl/maplibre";
+import type { Feature, FeatureCollection, Geometry } from "geojson";
 import type { ExpressionSpecification } from "maplibre-gl";
-import type {
-  Feature,
-  FeatureCollection,
-  Geometry,
-} from "geojson";
+import { type ReactElement, useMemo } from "react";
+import { Layer, Source } from "react-map-gl/maplibre";
 
 export interface MapLibreFillPaint {
   fillColor: string;
@@ -69,9 +65,7 @@ export interface MapLibreGeoJsonLayerSpec {
   symbol?: MapLibreSymbolSpec | null;
 }
 
-function asFeatureCollection(
-  data: Feature | FeatureCollection | Geometry,
-): FeatureCollection {
+function asFeatureCollection(data: Feature | FeatureCollection | Geometry): FeatureCollection {
   if (data.type === "FeatureCollection") {
     return data;
   }
@@ -117,9 +111,7 @@ function paintLayersForSpec(
           ...(spec.fill.fillOutlineColor
             ? { "fill-outline-color": spec.fill.fillOutlineColor }
             : {}),
-          ...(opacityTransitionSpec
-            ? { "fill-opacity-transition": opacityTransitionSpec }
-            : {}),
+          ...(opacityTransitionSpec ? { "fill-opacity-transition": opacityTransitionSpec } : {}),
         }}
       />,
     );
@@ -135,12 +127,8 @@ function paintLayersForSpec(
           "line-color": spec.line.color,
           "line-width": spec.line.width ?? 1,
           "line-opacity": spec.line.opacity ?? 1,
-          ...(spec.line.dashArray
-            ? { "line-dasharray": spec.line.dashArray }
-            : {}),
-          ...(opacityTransitionSpec
-            ? { "line-opacity-transition": opacityTransitionSpec }
-            : {}),
+          ...(spec.line.dashArray ? { "line-dasharray": spec.line.dashArray } : {}),
+          ...(opacityTransitionSpec ? { "line-opacity-transition": opacityTransitionSpec } : {}),
         }}
         layout={{ "line-join": "round", "line-cap": "round" }}
       />,
@@ -156,15 +144,11 @@ function paintLayersForSpec(
         paint={{
           "circle-radius": spec.circle.radius,
           "circle-color": spec.circle.color,
-          ...(spec.circle.strokeColor
-            ? { "circle-stroke-color": spec.circle.strokeColor }
-            : {}),
+          ...(spec.circle.strokeColor ? { "circle-stroke-color": spec.circle.strokeColor } : {}),
           ...(spec.circle.strokeWidth != null
             ? { "circle-stroke-width": spec.circle.strokeWidth }
             : {}),
-          ...(spec.circle.opacity != null
-            ? { "circle-opacity": spec.circle.opacity }
-            : {}),
+          ...(spec.circle.opacity != null ? { "circle-opacity": spec.circle.opacity } : {}),
         }}
       />,
     );
@@ -179,18 +163,14 @@ function paintLayersForSpec(
         layout={{
           "icon-allow-overlap": spec.symbol.layout?.iconAllowOverlap ?? true,
           "text-allow-overlap": spec.symbol.layout?.textAllowOverlap ?? true,
-          ...(spec.symbol.layout?.iconImage
-            ? { "icon-image": spec.symbol.layout.iconImage }
-            : {}),
+          ...(spec.symbol.layout?.iconImage ? { "icon-image": spec.symbol.layout.iconImage } : {}),
           ...(spec.symbol.layout?.iconRotate != null
             ? { "icon-rotate": spec.symbol.layout.iconRotate }
             : {}),
           ...(spec.symbol.layout?.iconSize != null
             ? { "icon-size": spec.symbol.layout.iconSize }
             : {}),
-          ...(spec.symbol.layout?.textField
-            ? { "text-field": spec.symbol.layout.textField }
-            : {}),
+          ...(spec.symbol.layout?.textField ? { "text-field": spec.symbol.layout.textField } : {}),
           ...(spec.symbol.layout?.textSize != null
             ? { "text-size": spec.symbol.layout.textSize }
             : {}),
@@ -205,9 +185,7 @@ function paintLayersForSpec(
           ...(spec.symbol.paint?.iconOpacity != null
             ? { "icon-opacity": spec.symbol.paint.iconOpacity }
             : {}),
-          ...(spec.symbol.paint?.textColor
-            ? { "text-color": spec.symbol.paint.textColor }
-            : {}),
+          ...(spec.symbol.paint?.textColor ? { "text-color": spec.symbol.paint.textColor } : {}),
           ...(spec.symbol.paint?.textHaloColor
             ? { "text-halo-color": spec.symbol.paint.textHaloColor }
             : {}),
@@ -245,10 +223,8 @@ export function MapLibreGeoJsonOverlay({
   /** MapLibre fill/line opacity transition; omit for MapLibre defaults. */
   paintTransitionMs?: number;
 }) {
-  const collection = useMemo(
-    () => (data ? asFeatureCollection(data) : null),
-    [data],
-  );
+  "use memo";
+  const collection = useMemo(() => (data ? asFeatureCollection(data) : null), [data]);
 
   const resolvedLayers = useMemo((): MapLibreGeoJsonLayerSpec[] => {
     if (layers && layers.length > 0) {
@@ -260,11 +236,7 @@ export function MapLibreGeoJsonOverlay({
     return [];
   }, [layers, fill, line, circle, symbol, id]);
 
-  if (
-    !collection ||
-    collection.features.length === 0 ||
-    resolvedLayers.length === 0
-  ) {
+  if (!collection || collection.features.length === 0 || resolvedLayers.length === 0) {
     return null;
   }
 
@@ -274,9 +246,7 @@ export function MapLibreGeoJsonOverlay({
 
   return (
     <Source key={sourceId} id={sourceId} type="geojson" data={collection}>
-      {resolvedLayers.flatMap((spec) =>
-        paintLayersForSpec(spec, beforeId, paintTransitionMs),
-      )}
+      {resolvedLayers.flatMap((spec) => paintLayersForSpec(spec, beforeId, paintTransitionMs))}
     </Source>
   );
 }

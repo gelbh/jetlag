@@ -1,19 +1,17 @@
 import {
-  test,
-  expect,
   advanceRemoteSessionTimerInEmulator,
   confirmInitialHidingZoneAtStation,
   dismissMapOnboarding,
+  expect,
   readPersistedSessionId,
   sessionElapsedLocator,
   startSessionTimer,
+  test,
 } from "../../fixtures";
 
 test.setTimeout(120_000);
 
-test("shows advisory when hider GPS is outside zone after hiding period", async ({
-  hostHider,
-}) => {
+test("shows advisory when hider GPS is outside zone after hiding period", async ({ hostHider }) => {
   const { hostPage, guestPage } = hostHider;
 
   await test.step("confirm zone and start session timer", async () => {
@@ -23,11 +21,7 @@ test("shows advisory when hider GPS is outside zone after hiding period", async 
 
   await test.step("advance past hiding period and move GPS outside zone", async () => {
     const sessionId = await readPersistedSessionId(hostPage);
-    await advanceRemoteSessionTimerInEmulator(
-      hostPage,
-      sessionId,
-      61 * 60 * 1000,
-    );
+    await advanceRemoteSessionTimerInEmulator(hostPage, sessionId, 61 * 60 * 1000);
 
     await guestPage.context().setGeolocation({
       latitude: 53.1,

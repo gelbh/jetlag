@@ -1,9 +1,6 @@
 /** Turf-free so session rules (boot path) avoid `gameSize`'s area math. */
 import type { DistanceUnit } from "../../map/distance";
-import {
-  hidingZoneDefaultRadiusMeters,
-  resolveDistanceUnit,
-} from "../../map/distancePresets";
+import { hidingZoneDefaultRadiusMeters, resolveDistanceUnit } from "../../map/distancePresets";
 import type { GameSize } from "./gameSize";
 
 export function hidingZoneRadiusMeters(
@@ -22,8 +19,5 @@ export function effectiveHidingZoneRadiusMeters(session: {
     return session.hidingZoneRadiusMeters;
   }
 
-  return hidingZoneRadiusMeters(
-    session.gameSize ?? "medium",
-    session.distanceUnit,
-  );
+  return hidingZoneRadiusMeters(session.gameSize ?? "medium", session.distanceUnit);
 }

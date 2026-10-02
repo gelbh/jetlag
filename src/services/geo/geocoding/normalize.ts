@@ -1,10 +1,7 @@
-import type { GameArea } from "@/domain/map/annotations";
 import { normalizeBoundingBox } from "@/domain/geometry/gameArea/gameAreaBounds";
 import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
-import {
-  computeApproximateAreaSqMi,
-  placeCategoryLabel,
-} from "../geocoding/geocodingRank";
+import type { GameArea } from "@/domain/map/annotations";
+import { computeApproximateAreaSqMi, placeCategoryLabel } from "../geocoding/geocodingRank";
 
 export interface GeocodedPlace {
   id: string;
@@ -114,9 +111,7 @@ function enrichParsedPlace(
   };
 }
 
-export async function parseNominatimResult(
-  result: NominatimResult,
-): Promise<GeocodedPlace> {
+export async function parseNominatimResult(result: NominatimResult): Promise<GeocodedPlace> {
   const [south, north, west, east] = result.boundingbox.map(Number);
   const boundary = await geoJsonToGameArea(result.geojson);
 

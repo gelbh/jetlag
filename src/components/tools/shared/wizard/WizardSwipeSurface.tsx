@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 import { useMotionProfile } from "@/hooks/motion/useMotionProfile";
 import { useWizardSwipe } from "@/hooks/motion/useWizardSwipe";
 
@@ -46,15 +46,10 @@ export function WizardSwipeSurface({
       return;
     }
 
-    const direction =
-      stepIndex > prevStepIndex.current ? "forward" : "back";
+    const direction = stepIndex > prevStepIndex.current ? "forward" : "back";
 
     prevStepIndex.current = stepIndex;
-    setEnterClass(
-      direction === "forward"
-        ? "jl-wizard-step-forward"
-        : "jl-wizard-step-back",
-    );
+    setEnterClass(direction === "forward" ? "jl-wizard-step-forward" : "jl-wizard-step-back");
 
     const timeoutId = window.setTimeout(() => {
       setEnterClass("");
@@ -77,12 +72,8 @@ export function WizardSwipeSurface({
         className={`flex min-h-0 flex-1 flex-col overflow-hidden ${enterClass} motion-reduce:animate-none`.trim()}
         style={surfaceStyle}
       >
-        <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-          {children}
-        </div>
-        {footer ? (
-          <div className="shrink-0 pt-1.5">{footer}</div>
-        ) : null}
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden">{children}</div>
+        {footer ? <div className="shrink-0 pt-1.5">{footer}</div> : null}
       </div>
     </div>
   );

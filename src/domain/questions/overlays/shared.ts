@@ -1,8 +1,8 @@
 import type { Feature, MultiPolygon, Polygon } from "geojson";
 import type { LatLngTuple } from "../../geometry/gameArea/geometry";
-import type { MapDraftOverlay } from "../../map/mapDraftOverlay";
-import { getBoundaryPreviewStyle } from "../../map/mapBoundaryOverlayStyle";
 import type { MapStyle, StreetBasemap } from "../../map/mapBasemaps";
+import { getBoundaryPreviewStyle } from "../../map/mapBoundaryOverlayStyle";
+import type { MapDraftOverlay } from "../../map/mapDraftOverlay";
 
 export interface PendingQuestionOverlayResult {
   questionId: string;

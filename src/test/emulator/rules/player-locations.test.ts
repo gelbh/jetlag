@@ -1,25 +1,13 @@
-import {
-  assertFails,
-  assertSucceeds,
-} from "@firebase/rules-unit-testing";
+import { assertFails, assertSucceeds } from "@firebase/rules-unit-testing";
 import { describe, expect, it } from "vitest";
-import {
-  bindRulesTestEnv,
-  adminContext,
-  sessionPayload,
-  playerLocationPayload,
-} from "./helpers";
+import { adminContext, bindRulesTestEnv, playerLocationPayload, sessionPayload } from "./helpers";
 
 describe("firestore.rules — player locations", () => {
   const rules = bindRulesTestEnv();
 
   it("scopes player location reads so seekers cannot read hider GPS", async () => {
     const host = rules.testEnv.authenticatedContext("host-1");
-    await host
-      .firestore()
-      .collection("sessions")
-      .doc("session-1")
-      .set(sessionPayload("host-1"));
+    await host.firestore().collection("sessions").doc("session-1").set(sessionPayload("host-1"));
 
     const seeker = rules.testEnv.authenticatedContext("seeker-1");
     const hider = rules.testEnv.authenticatedContext("hider-1");
@@ -95,11 +83,7 @@ describe("firestore.rules — player locations", () => {
 
   it("allows a player to delete only their own live location", async () => {
     const host = rules.testEnv.authenticatedContext("host-1");
-    await host
-      .firestore()
-      .collection("sessions")
-      .doc("session-1")
-      .set(sessionPayload("host-1"));
+    await host.firestore().collection("sessions").doc("session-1").set(sessionPayload("host-1"));
 
     const seeker = rules.testEnv.authenticatedContext("seeker-1");
     const hider = rules.testEnv.authenticatedContext("hider-1");
@@ -167,11 +151,7 @@ describe("firestore.rules — player locations", () => {
 
   it("allows seekers to list only seeker player locations when hider docs exist", async () => {
     const host = rules.testEnv.authenticatedContext("host-1");
-    await host
-      .firestore()
-      .collection("sessions")
-      .doc("session-1")
-      .set(sessionPayload("host-1"));
+    await host.firestore().collection("sessions").doc("session-1").set(sessionPayload("host-1"));
 
     const seeker = rules.testEnv.authenticatedContext("seeker-1");
     const hider = rules.testEnv.authenticatedContext("hider-1");
@@ -228,11 +208,7 @@ describe("firestore.rules — player locations", () => {
 
   it("allows observers to read seeker and hider player locations", async () => {
     const host = rules.testEnv.authenticatedContext("host-1");
-    await host
-      .firestore()
-      .collection("sessions")
-      .doc("session-1")
-      .set(sessionPayload("host-1"));
+    await host.firestore().collection("sessions").doc("session-1").set(sessionPayload("host-1"));
 
     const observer = adminContext(rules.testEnv, "observer-1");
     const hider = rules.testEnv.authenticatedContext("hider-1");
@@ -307,5 +283,4 @@ describe("firestore.rules — player locations", () => {
     );
     expect(hiderSnapshot.docs.map((doc) => doc.id).sort()).toEqual(["hider-1"]);
   });
-
 });

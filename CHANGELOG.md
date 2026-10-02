@@ -6,6 +6,25 @@
 
 - Geometry kernel (G5e): production always uses the WASM geometry kernel; client localStorage/env override removed. Wasm dispatch failures rethrow instead of silent TypeScript fail-soft.
 
+## 1.0.1 - 2026-10-02
+
+### Fixes
+
+- Ask tools use your map location when GPS one-shots fail
+- Players keep their seat in the game after losing signal instead of rejoining as someone new
+- Coastline measuring waits for the distance to finish before Send unlocks
+- Home and info pages load faster.
+
+### Improvements
+
+- Create screen opens faster; tap the map to start framing your area.
+- The home screen shows up right away instead of a brief “Starting…” splash
+
+### Technical
+
+- Replace CVA button with Mantine Button and drop unused class-variance-authority / @radix-ui/react-slot.
+- Annotate hot map and session parents for React Compiler coverage
+
 ## 1.0.0 - 2026-09-30
 
 ### Improvements

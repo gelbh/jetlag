@@ -44,13 +44,12 @@ export function HiderZoneWizardShell({
     [setAnimNode],
   );
 
-  const { panelStyle, handleProps, peekHandleProps, displayMinimized, isDragging } =
-    usePanelDrag({
-      userMinimized: peeked,
-      onMinimizedChange: onPeekedChange,
-      panelRef,
-      peekHeightPx: 48,
-    });
+  const { panelStyle, handleProps, peekHandleProps, displayMinimized, isDragging } = usePanelDrag({
+    userMinimized: peeked,
+    onMinimizedChange: onPeekedChange,
+    panelRef,
+    peekHeightPx: 48,
+  });
 
   if (!mounted) {
     return null;

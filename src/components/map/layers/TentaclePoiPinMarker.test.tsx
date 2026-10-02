@@ -1,6 +1,6 @@
-import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import type { ReactNode } from "react";
+import { describe, expect, it, vi } from "vitest";
 import { TentaclePoiPinMarker } from "./TentaclePoiPinMarker";
 
 vi.mock("react-map-gl/maplibre", () => ({

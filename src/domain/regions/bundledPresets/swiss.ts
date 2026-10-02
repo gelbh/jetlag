@@ -1,7 +1,7 @@
-import { attachPlayArea } from "./attachPlayArea";
-import { EXPANSION_OFF, type BundledGamePresetDefinition } from "./shared";
 import { LUCERNE_REGION_PACK_ID } from "../lucerneRegionPack";
 import { ZURICH_REGION_PACK_ID } from "../zurichRegionPack";
+import { attachPlayArea } from "./attachPlayArea";
+import { type BundledGamePresetDefinition, EXPANSION_OFF } from "./shared";
 
 export function swissPresets(): BundledGamePresetDefinition[] {
   const europe = [
@@ -17,18 +17,14 @@ export function swissPresets(): BundledGamePresetDefinition[] {
         "13 districts and city quarters. Boundary data © GADM (verify licensing for your use).",
       placeLabel: "Canton of Zürich, Switzerland",
       regionPackId: ZURICH_REGION_PACK_ID,
-      hierarchy: [
-        ...europe,
-        { id: "canton-zurich", category: "Canton", name: "Zürich" },
-      ],
+      hierarchy: [...europe, { id: "canton-zurich", category: "Canton", name: "Zürich" }],
       distanceUnit: "metric",
       advancedSettingsPatch: EXPANSION_OFF,
     }),
     attachPlayArea({
       id: "bundled:zurich-city",
       name: "Zürich City",
-      description:
-        "City of Zürich with quarter subdivisions. Boundary data © GADM.",
+      description: "City of Zürich with quarter subdivisions. Boundary data © GADM.",
       placeLabel: "Zürich, Switzerland",
       regionPackId: ZURICH_REGION_PACK_ID,
       subregionId: "z-rich",
@@ -43,8 +39,7 @@ export function swissPresets(): BundledGamePresetDefinition[] {
     attachPlayArea({
       id: "bundled:lucerne-metro",
       name: "Lucerne Metro",
-      description:
-        "Lucerne district municipalities. Boundary data © GADM.",
+      description: "Lucerne district municipalities. Boundary data © GADM.",
       placeLabel: "Lucerne, Switzerland",
       regionPackId: LUCERNE_REGION_PACK_ID,
       hierarchy: [

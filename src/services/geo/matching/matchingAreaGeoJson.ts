@@ -1,14 +1,14 @@
-import type { Feature, FeatureCollection, Polygon, MultiPolygon } from "geojson";
 import area from "@turf/area";
 import booleanIntersects from "@turf/boolean-intersects";
-import type { GameArea } from "@/domain/map/annotations";
+import type { Feature, FeatureCollection, MultiPolygon, Polygon } from "geojson";
 import { gameAreaToBoundingBox } from "@/domain/geometry/gameArea/gameAreaBounds";
 import {
   featureToGameArea,
   gameAreaToPolygon,
-  simplifyGameArea,
   type LatLngTuple,
+  simplifyGameArea,
 } from "@/domain/geometry/gameArea/geometry";
+import type { GameArea } from "@/domain/map/annotations";
 import type { AdminDivisionFeature } from "../overpass/adminDivisionBoundaries";
 
 function representativePointFromBoundary(boundary: GameArea): LatLngTuple {
@@ -56,26 +56,18 @@ export function parseMatchingAreaGeoJson(
       continue;
     }
 
-    if (
-      feature.geometry.type !== "Polygon" &&
-      feature.geometry.type !== "MultiPolygon"
-    ) {
+    if (feature.geometry.type !== "Polygon" && feature.geometry.type !== "MultiPolygon") {
       continue;
     }
 
-    const name =
-      typeof feature.properties?.name === "string"
-        ? feature.properties.name.trim()
-        : "";
+    const name = typeof feature.properties?.name === "string" ? feature.properties.name.trim() : "";
 
     if (!name) {
       continue;
     }
 
     const boundary = simplifyGameArea(
-      featureToGameArea(
-        feature as Feature<Polygon | MultiPolygon>,
-      ),
+      featureToGameArea(feature as Feature<Polygon | MultiPolygon>),
     );
 
     if (

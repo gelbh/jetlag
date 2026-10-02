@@ -1,13 +1,13 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
-  PWA_MARK_APP_READY,
-  PWA_MARK_MAP_RESUME,
-  PWA_MARK_MAP_USABLE,
-  PWA_MEASURE_MAP_RETURN,
   markMapResumeStart,
   markMapUsableAndMeasureReturn,
   markPlayDay,
   measurePlayDay,
+  PWA_MARK_APP_READY,
+  PWA_MARK_MAP_RESUME,
+  PWA_MARK_MAP_USABLE,
+  PWA_MEASURE_MAP_RETURN,
 } from "./playDayMarks";
 
 describe("playDayMarks", () => {
@@ -27,9 +27,7 @@ describe("playDayMarks", () => {
   });
 
   it("returns measure duration when present", () => {
-    expect(
-      measurePlayDay("pwa:boot", "pwa:nav", PWA_MARK_APP_READY),
-    ).toBe(12.5);
+    expect(measurePlayDay("pwa:boot", "pwa:nav", PWA_MARK_APP_READY)).toBe(12.5);
   });
 
   it("marks map resume start with frozen name", () => {

@@ -71,12 +71,7 @@ describe("eliminationMaskWorkerClient", () => {
   });
 
   it("requests combined elimination mask from the worker", async () => {
-    const result = await workerClient.requestCombinedEliminationMask(
-      [],
-      gameArea,
-      [],
-      [],
-    );
+    const result = await workerClient.requestCombinedEliminationMask([], gameArea, [], []);
 
     expect(result?.geometry.type).toBe("Polygon");
     expect(buildMaskFromUnionInput).toHaveBeenCalledWith(
@@ -121,9 +116,9 @@ describe("eliminationMaskWorkerClient", () => {
   it("disposes the worker after request failures", async () => {
     buildMaskFromUnionInput.mockRejectedValueOnce(new Error("worker boom"));
 
-    await expect(
-      workerClient.requestCombinedEliminationMask([], gameArea, [], []),
-    ).rejects.toThrow("worker boom");
+    await expect(workerClient.requestCombinedEliminationMask([], gameArea, [], [])).rejects.toThrow(
+      "worker boom",
+    );
 
     expect(terminateSpy).toHaveBeenCalledTimes(1);
 

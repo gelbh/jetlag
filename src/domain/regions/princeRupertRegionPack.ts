@@ -1,10 +1,8 @@
 import type { MatchingCategoryId } from "../questions/matchingQuestions";
 import type { MeasuringFromKind } from "../questions/measuringQuestions";
-import type { RegionPackId } from "./regionPack";
-import type { RegionPackLabelOverride } from "./regionPack";
+import type { RegionPackId, RegionPackLabelOverride } from "./regionPack";
 
-export const PRINCE_RUPERT_REGION_PACK_ID =
-  "prince-rupert" satisfies RegionPackId;
+export const PRINCE_RUPERT_REGION_PACK_ID = "prince-rupert" satisfies RegionPackId;
 
 export const PRINCE_RUPERT_GEO_ASSETS = {
   city: "/geo/prince-rupert/city.geojson",
@@ -19,8 +17,7 @@ export const PRINCE_RUPERT_MATCHING_LABEL_OVERRIDES: Partial<
   admin_division_3: {
     label: "Neighbourhood",
     promptNoun: "neighbourhood",
-    ruleSummary:
-      "A recognized neighbourhood within the framed Prince Rupert play area.",
+    ruleSummary: "A recognized neighbourhood within the framed Prince Rupert play area.",
   },
   admin_division_4: {
     label: "Area",
@@ -42,8 +39,6 @@ export const PRINCE_RUPERT_MEASURING_LABEL_OVERRIDES: Partial<
   },
 };
 
-export function isPrinceRupertRegionPack(
-  regionPackId: RegionPackId | undefined,
-): boolean {
+export function isPrinceRupertRegionPack(regionPackId: RegionPackId | undefined): boolean {
   return regionPackId === PRINCE_RUPERT_REGION_PACK_ID;
 }

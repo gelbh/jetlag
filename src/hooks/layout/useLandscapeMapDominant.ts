@@ -1,5 +1,5 @@
-import { useMediaQuery } from "./useMediaQuery";
 import { LANDSCAPE_MAP_DOMINANT_MEDIA } from "@/theme/phoneShell";
+import { useMediaQuery } from "./useMediaQuery";
 
 export { LANDSCAPE_MAP_DOMINANT_MEDIA } from "@/theme/phoneShell";
 

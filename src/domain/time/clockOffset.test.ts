@@ -21,24 +21,18 @@ describe("estimateOffset", () => {
   });
 
   it("ignores samples with rtt > 10s", () => {
-    expect(
-      estimateOffset([{ sentAtMs: 0, receivedAtMs: 20_000, serverMs: 5 }]),
-    ).toBeNull();
+    expect(estimateOffset([{ sentAtMs: 0, receivedAtMs: 20_000, serverMs: 5 }])).toBeNull();
   });
 
   it("ignores samples with negative rtt", () => {
-    expect(
-      estimateOffset([{ sentAtMs: 100, receivedAtMs: 50, serverMs: 5 }]),
-    ).toBeNull();
+    expect(estimateOffset([{ sentAtMs: 100, receivedAtMs: 50, serverMs: 5 }])).toBeNull();
   });
 });
 
 describe("estimateOffset plausibility", () => {
   it("ignores samples implying more than 24h of skew", () => {
     expect(
-      estimateOffset([
-        { sentAtMs: 0, receivedAtMs: 10, serverMs: 2 * 24 * 60 * 60 * 1000 },
-      ]),
+      estimateOffset([{ sentAtMs: 0, receivedAtMs: 10, serverMs: 2 * 24 * 60 * 60 * 1000 }]),
     ).toBeNull();
   });
 });

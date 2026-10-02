@@ -1,5 +1,5 @@
-import { describe, expect, it, vi } from "vitest";
 import type { LngLatBoundsLike, Map as MapLibreMap, PaddingOptions } from "maplibre-gl";
+import { describe, expect, it, vi } from "vitest";
 import {
   computeFramedCenterZoomMapLibre,
   computePaddedCenterAtZoom,
@@ -69,12 +69,7 @@ describe("computeFramedCenterZoomMapLibre", () => {
       })),
     } as unknown as MapLibreMap;
 
-    const framed = computeFramedCenterZoomMapLibre(
-      map,
-      bounds,
-      padding,
-      minZoom,
-    );
+    const framed = computeFramedCenterZoomMapLibre(map, bounds, padding, minZoom);
 
     expect(framed).not.toBeNull();
     expect(framed!.zoom).toBe(minZoom);

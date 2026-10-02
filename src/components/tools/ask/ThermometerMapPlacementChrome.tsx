@@ -3,12 +3,18 @@
  * Distance catalog stays on the sheet; live walk banner stays on the sheet.
  */
 import { Button, UnstyledButton } from "@mantine/core";
-import { FlameIcon, GpsFixIcon, PaperPlaneTiltIcon, PathIcon, SnowflakeIcon } from "@phosphor-icons/react";
+import {
+  FlameIcon,
+  GpsFixIcon,
+  PaperPlaneTiltIcon,
+  PathIcon,
+  SnowflakeIcon,
+} from "@phosphor-icons/react";
 import { HudThermometerIcon } from "@/components/map/icons/ToolIcons";
 import {
   AskMapPlacementChrome,
-  askMapPlacementSendStyles,
   type AskMapPlacementPhase,
+  askMapPlacementSendStyles,
 } from "@/components/tools/ask/AskMapPlacementChrome";
 import { hotterColderAnswerOptions } from "@/components/tools/shared/answers/binaryAnswerOptions";
 import {
@@ -42,10 +48,7 @@ export type ThermometerMapPlacementChromeProps = {
   onChangeSetup?: () => void;
 };
 
-const answerSegmentStyles = (
-  selected: boolean,
-  tone: "success" | "danger",
-) => {
+const answerSegmentStyles = (selected: boolean, tone: "success" | "danger") => {
   const base = choiceChipStyles(selected, tone);
   return {
     root: {
@@ -61,8 +64,7 @@ const answerSegmentStyles = (
       justifyContent: "center",
       gap: 6,
       boxShadow: "none",
-      transition:
-        "background-color 160ms ease, color 160ms ease, transform 120ms ease",
+      transition: "background-color 160ms ease, color 160ms ease, transform 120ms ease",
       ...(selected
         ? null
         : {
@@ -103,8 +105,7 @@ export function ThermometerMapPlacementChrome({
 }: ThermometerMapPlacementChromeProps) {
   const pinsReady = pinStep === "ready";
   const phase: AskMapPlacementPhase = "answer";
-  const showSoloAnswers =
-    pinsReady && !awaitHiderAnswer && Boolean(onAnswerChange);
+  const showSoloAnswers = pinsReady && !awaitHiderAnswer && Boolean(onAnswerChange);
 
   const placeHint =
     placementMode === "manual" && pinStep === "a"
@@ -214,16 +215,11 @@ export function ThermometerMapPlacementChrome({
               padding: "0.45rem 0.65rem",
             }}
           >
-            <p className="m-0 min-w-0 truncate text-sm font-semibold">
-              Movement: {travelLabel}
-            </p>
+            <p className="m-0 min-w-0 truncate text-sm font-semibold">Movement: {travelLabel}</p>
           </div>
         ) : null}
         {travelTooShort ? (
-          <p
-            className="m-0 px-1 text-xs leading-snug"
-            style={{ color: "var(--color-halt)" }}
-          >
+          <p className="m-0 px-1 text-xs leading-snug" style={{ color: "var(--color-halt)" }}>
             Movement is shorter than the selected distance.
           </p>
         ) : null}
@@ -250,9 +246,7 @@ export function ThermometerMapPlacementChrome({
           >
             {hotterColderAnswerOptions.map((option) => {
               const selected = answer === option.value;
-              const tone = option.activeClassName.includes("status-success")
-                ? "success"
-                : "danger";
+              const tone = option.activeClassName.includes("status-success") ? "success" : "danger";
               const Icon = option.value === "hotter" ? FlameIcon : SnowflakeIcon;
               return (
                 <UnstyledButton
@@ -262,11 +256,7 @@ export function ThermometerMapPlacementChrome({
                   onClick={() => onAnswerChange?.(option.value)}
                   styles={answerSegmentStyles(selected, tone)}
                 >
-                  <Icon
-                    size={16}
-                    weight={selected ? "fill" : "regular"}
-                    aria-hidden
-                  />
+                  <Icon size={16} weight={selected ? "fill" : "regular"} aria-hidden />
                   {option.label}
                 </UnstyledButton>
               );
@@ -282,9 +272,7 @@ export function ThermometerMapPlacementChrome({
             disabled={!canCommit || isSubmitting}
             aria-busy={isSubmitting || undefined}
             leftSection={
-              isSubmitting ? undefined : (
-                <PaperPlaneTiltIcon size={16} weight="fill" aria-hidden />
-              )
+              isSubmitting ? undefined : <PaperPlaneTiltIcon size={16} weight="fill" aria-hidden />
             }
             styles={askMapPlacementSendStyles}
           >

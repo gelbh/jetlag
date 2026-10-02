@@ -1,18 +1,16 @@
 import {
-  test,
-  expect,
   createHostSession,
   createMultiplayerContexts,
   dismissMapOnboarding,
+  expect,
   expectCreatePageMapPreviewLoaded,
   joinAsRole,
   openPlayHub,
   prepareE2EPage,
+  test,
 } from "../fixtures";
 
-test("@smoke creates a session from home and reaches the map", async ({
-  page,
-}) => {
+test("@smoke creates a session from home and reaches the map", async ({ page }) => {
   await test.step("open create flow from home", async () => {
     await prepareE2EPage(page);
     await page.goto("/");
@@ -39,12 +37,9 @@ test("@smoke creates a session from home and reaches the map", async ({
   });
 });
 
-test("@smoke host and guest join the same emulator session", async ({
-  browser,
-}) => {
+test("@smoke host and guest join the same emulator session", async ({ browser }) => {
   test.setTimeout(90_000);
-  const { hostPage, guestPage, cleanup } =
-    await createMultiplayerContexts(browser);
+  const { hostPage, guestPage, cleanup } = await createMultiplayerContexts(browser);
 
   try {
     await test.step("host creates as seeker; guest joins as hider", async () => {

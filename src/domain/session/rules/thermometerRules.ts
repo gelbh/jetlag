@@ -1,13 +1,13 @@
 import { milesToMeters } from "../../map/distance";
 import { PRESET_MATCH_TOLERANCE_METERS } from "../../map/distancePresets";
 import type { ThermometerDistanceOptionMiles } from "../../questions/thermometerQuestions";
+import { sessionDistanceUnit } from "../meta/sessionDistanceUnit";
 import {
   isThermometerPresetAvailableForGameSize,
-  thermometerPresetsMilesForGameSize,
   thermometerPresetsMetersForGameSize,
+  thermometerPresetsMilesForGameSize,
 } from "../size/gameSizeRules";
-import { sessionDistanceUnit } from "../meta/sessionDistanceUnit";
-import { sessionGameSize, type SessionRulesInput } from "./types";
+import { type SessionRulesInput, sessionGameSize } from "./types";
 
 export function resolveThermometerPresetsMiles(
   session: SessionRulesInput,
@@ -28,9 +28,7 @@ export function resolveThermometerPresetsMiles(
   return selected.length > 0 ? selected : defaults;
 }
 
-export function resolveThermometerPresetsMeters(
-  session: SessionRulesInput,
-): number[] {
+export function resolveThermometerPresetsMeters(session: SessionRulesInput): number[] {
   const gameSize = sessionGameSize(session);
   const unit = sessionDistanceUnit(session);
   const defaults = thermometerPresetsMetersForGameSize(gameSize, unit);
@@ -38,9 +36,7 @@ export function resolveThermometerPresetsMeters(
   if (session.thermometerPresetMeters?.length) {
     const allowed = new Set(defaults);
     const selected = session.thermometerPresetMeters.filter((meters) =>
-      [...allowed].some(
-        (preset) => Math.abs(preset - meters) < PRESET_MATCH_TOLERANCE_METERS,
-      ),
+      [...allowed].some((preset) => Math.abs(preset - meters) < PRESET_MATCH_TOLERANCE_METERS),
     );
     return selected.length > 0 ? selected : defaults;
   }
@@ -50,10 +46,7 @@ export function resolveThermometerPresetsMeters(
     const selected = session.thermometerPresetMiles
       .map(milesToMeters)
       .filter((meters) =>
-        [...allowed].some(
-          (preset) =>
-            Math.abs(preset - meters) < PRESET_MATCH_TOLERANCE_METERS,
-        ),
+        [...allowed].some((preset) => Math.abs(preset - meters) < PRESET_MATCH_TOLERANCE_METERS),
       );
     return selected.length > 0 ? selected : defaults;
   }
@@ -66,8 +59,7 @@ export function resolveIsThermometerPresetAvailable(
   distanceMeters: number,
 ): boolean {
   return resolveThermometerPresetsMeters(session).some(
-    (preset) =>
-      Math.abs(preset - distanceMeters) < PRESET_MATCH_TOLERANCE_METERS,
+    (preset) => Math.abs(preset - distanceMeters) < PRESET_MATCH_TOLERANCE_METERS,
   );
 }
 

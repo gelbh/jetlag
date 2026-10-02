@@ -1,9 +1,9 @@
 import type { Ref } from "react";
 import {
   formatLeaderboardValue,
-  leaderboardEntryLabel,
   type LeaderboardEntry,
   type LeaderboardMetric,
+  leaderboardEntryLabel,
 } from "../../domain/game/leaderboard";
 import { leaderboardRankColorClass } from "./leaderboardRankStyle";
 

@@ -1,44 +1,12 @@
-export type {
-  DiskSpec,
-  EliminationUnionInput,
-  GameAreaGeometry,
-  LatLngTuple,
-  PolygonFeature,
-} from "./types";
+export { clipMaskToGameArea } from "./clipMask";
 export {
   featureToGameAreaGeometry,
   gameAreaGeometryToFeature,
 } from "./featureConvert";
-export { clipMaskToGameArea } from "./clipMask";
 export {
-  unionDiskSpecs,
-  unionEliminationParts,
-  unionPolygonFeatures,
-} from "./unionPolygonFeatures";
-export { isPointInGameArea } from "./isPointInGameArea";
-export type { SpatialVoronoiSite } from "./spatialVoronoiTypes";
-export {
-  resolveVoronoiCellPoiId,
-  resolveVoronoiCellSiteId,
-  voronoiCellSiteId,
-  type VoronoiSiteRef,
-} from "./voronoiCellSiteId";
-export type { TentacleSite } from "./tentacleTypes";
-export {
-  dispatchSpatialVoronoi,
-  runSpatialVoronoi,
-} from "./voronoiKernelRunner";
-export {
-  dispatchTentacleEliminationRegion,
-  dispatchTentaclePoiAnswerEliminationRegion,
-  runTentacleEliminationRegion,
-  runTentaclePoiAnswerEliminationRegion,
-  type TentacleEliminationParams,
-} from "./tentacleKernelRunner";
-export {
-  wasmBuildHalfPlanePolygon,
-  wasmBuildRadarShadedRegion,
-} from "./halfPlaneWasm";
+  dispatchGeodesicLineBuffer,
+  runGeodesicLineBuffer,
+} from "./geodesicKernelRunner";
 export { wasmGeodesicLineBuffer } from "./geodesicWasm";
 export {
   dispatchHalfPlane,
@@ -47,12 +15,44 @@ export {
   runRadarShadedRegion,
 } from "./halfPlaneKernelRunner";
 export {
-  dispatchGeodesicLineBuffer,
-  runGeodesicLineBuffer,
-} from "./geodesicKernelRunner";
+  wasmBuildHalfPlanePolygon,
+  wasmBuildRadarShadedRegion,
+} from "./halfPlaneWasm";
+export { isPointInGameArea } from "./isPointInGameArea";
+export { KERNEL_WASM_READY, shouldUseWasm } from "./kernelWasmReady";
 export {
   dispatchNearRegionBatch,
   runNearRegionBatch,
 } from "./nearRegionKernelRunner";
 export { wasmBuildNearRegion } from "./nearRegionWasm";
-export { KERNEL_WASM_READY, shouldUseWasm } from "./kernelWasmReady";
+export type { SpatialVoronoiSite } from "./spatialVoronoiTypes";
+export {
+  dispatchTentacleEliminationRegion,
+  dispatchTentaclePoiAnswerEliminationRegion,
+  runTentacleEliminationRegion,
+  runTentaclePoiAnswerEliminationRegion,
+  type TentacleEliminationParams,
+} from "./tentacleKernelRunner";
+export type { TentacleSite } from "./tentacleTypes";
+export type {
+  DiskSpec,
+  EliminationUnionInput,
+  GameAreaGeometry,
+  LatLngTuple,
+  PolygonFeature,
+} from "./types";
+export {
+  unionDiskSpecs,
+  unionEliminationParts,
+  unionPolygonFeatures,
+} from "./unionPolygonFeatures";
+export {
+  resolveVoronoiCellPoiId,
+  resolveVoronoiCellSiteId,
+  type VoronoiSiteRef,
+  voronoiCellSiteId,
+} from "./voronoiCellSiteId";
+export {
+  dispatchSpatialVoronoi,
+  runSpatialVoronoi,
+} from "./voronoiKernelRunner";

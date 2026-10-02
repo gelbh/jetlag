@@ -12,8 +12,6 @@ interface SegmentedControlProps<Value extends string> {
   "aria-label"?: string;
 }
 
-export function SegmentedControl<Value extends string>(
-  props: SegmentedControlProps<Value>,
-) {
+export function SegmentedControl<Value extends string>(props: SegmentedControlProps<Value>) {
   return <HudSegmentControl tone="action" {...props} />;
 }

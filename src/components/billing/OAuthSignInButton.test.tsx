@@ -76,9 +76,7 @@ describe("OAuthSignInButton", () => {
     fireEvent.click(screen.getByRole("button", { name: /Continue with Google/i }));
 
     await waitFor(() => {
-      expect(onError).toHaveBeenCalledWith(
-        expect.stringMatching(/isn’t ready yet/i),
-      );
+      expect(onError).toHaveBeenCalledWith(expect.stringMatching(/isn’t ready yet/i));
     });
     expect(onSignIn).not.toHaveBeenCalled();
   });

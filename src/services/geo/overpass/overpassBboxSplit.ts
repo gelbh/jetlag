@@ -27,9 +27,9 @@ export function splitOverpassBbox(bbox: OverpassBbox): OverpassBbox[] {
   ];
 }
 
-export function mergeOverpassElementPayloads<
-  T extends { id: number; type?: string },
->(parts: { elements: T[] }[]): { elements: T[] } {
+export function mergeOverpassElementPayloads<T extends { id: number; type?: string }>(
+  parts: { elements: T[] }[],
+): { elements: T[] } {
   const seen = new Set<string>();
   const elements: T[] = [];
   for (const part of parts) {
@@ -62,9 +62,7 @@ export async function queryOverpassWithBboxSplit<T>(
     }
     const parts: T[] = [];
     for (const child of splitOverpassBbox(bbox)) {
-      parts.push(
-        await queryOverpassWithBboxSplit(buildQuery, child, query, merge),
-      );
+      parts.push(await queryOverpassWithBboxSplit(buildQuery, child, query, merge));
     }
     return merge(parts);
   }

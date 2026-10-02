@@ -1,24 +1,17 @@
 import { describe, expect, it, vi } from "vitest";
 import { milesToMeters } from "../../map/distance";
-import {
-  computeHiderTruthReply,
-  computeHiderTruthReplyAsync,
-} from "./index";
 import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
+import { computeHiderTruthReply, computeHiderTruthReplyAsync } from "./index";
 
 vi.mock("@/services/geo/elevation", () => ({
-  fetchElevations: vi.fn(async (points: [number, number][]) =>
-    points.map(() => 10),
-  ),
+  fetchElevations: vi.fn(async (points: [number, number][]) => points.map(() => 10)),
 }));
 
 const stationInside: [number, number] = [51.45, -0.15];
 const stationOutside: [number, number] = [51.42, -0.18];
 const stationGpsOnly: [number, number] = [51.48, -0.12];
 
-function basePending(
-  overrides: Partial<PendingQuestionRecord> = {},
-): PendingQuestionRecord {
+function basePending(overrides: Partial<PendingQuestionRecord> = {}): PendingQuestionRecord {
   return {
     id: "pq-1",
     sessionId: "session-1",
@@ -41,10 +34,7 @@ function basePending(
 
 describe("computeHiderTruthReply", () => {
   it("returns unavailable when hiding zone is not set", () => {
-    const result = computeHiderTruthReply(
-      basePending(),
-      null,
-    );
+    const result = computeHiderTruthReply(basePending(), null);
 
     expect(result?.unavailable).toBe(true);
     expect(result?.label).toMatch(/set your hiding zone/i);
@@ -65,10 +55,7 @@ describe("computeHiderTruthReply", () => {
       },
     });
 
-    const fromStation = computeHiderTruthReply(
-      pending,
-      stationInside,
-    );
+    const fromStation = computeHiderTruthReply(pending, stationInside);
     const fromGps = computeHiderTruthReply(pending, stationGpsOnly);
 
     expect(fromStation?.replyId).toBe("yes");
@@ -110,10 +97,7 @@ describe("computeHiderTruthReply", () => {
       },
     });
 
-    const result = computeHiderTruthReply(
-      pending,
-      stationOutside,
-    );
+    const result = computeHiderTruthReply(pending, stationOutside);
     expect(result?.replyId).toBe("no");
   });
 
@@ -140,10 +124,7 @@ describe("computeHiderTruthReply", () => {
       },
     });
 
-    const result = computeHiderTruthReply(
-      pending,
-      [51.45, -0.15],
-    );
+    const result = computeHiderTruthReply(pending, [51.45, -0.15]);
     expect(result?.replyId).toBe("colder");
   });
 
@@ -170,10 +151,7 @@ describe("computeHiderTruthReply", () => {
       },
     });
 
-    const result = computeHiderTruthReply(
-      pending,
-      [51.45, -0.145],
-    );
+    const result = computeHiderTruthReply(pending, [51.45, -0.145]);
     expect(result?.replyId).toBe("hotter");
   });
 
@@ -199,10 +177,7 @@ describe("computeHiderTruthReply", () => {
       },
     });
 
-    const result = computeHiderTruthReply(
-      pending,
-      stationInside,
-    );
+    const result = computeHiderTruthReply(pending, stationInside);
     expect(result?.replyId).toBe("null");
   });
 
@@ -222,17 +197,12 @@ describe("computeHiderTruthReply", () => {
         metadata: {
           radiusMeters: milesToMeters(1),
           centerJson: JSON.stringify({ lat: 51.45, lng: -0.15 }),
-          poisJson: JSON.stringify([
-            { id: "poi-1", name: "Museum A", lat: 51.451, lng: -0.149 },
-          ]),
+          poisJson: JSON.stringify([{ id: "poi-1", name: "Museum A", lat: 51.451, lng: -0.149 }]),
         },
       },
     });
 
-    const result = computeHiderTruthReply(
-      pending,
-      [51.5, -0.15],
-    );
+    const result = computeHiderTruthReply(pending, [51.5, -0.15]);
     expect(result?.replyId).toBe("out-of-reach");
   });
 
@@ -253,17 +223,12 @@ describe("computeHiderTruthReply", () => {
         metadata: {
           radiusMeters: shortRadius,
           centerJson: JSON.stringify({ lat: 51.45, lng: -0.15 }),
-          poisJson: JSON.stringify([
-            { id: "poi-1", name: "Museum A", lat: 51.451, lng: -0.149 },
-          ]),
+          poisJson: JSON.stringify([{ id: "poi-1", name: "Museum A", lat: 51.451, lng: -0.149 }]),
         },
       },
     });
 
-    const result = computeHiderTruthReply(
-      pending,
-      [51.456, -0.15],
-    );
+    const result = computeHiderTruthReply(pending, [51.456, -0.15]);
     expect(result?.replyId).toBe("out-of-reach");
   });
 

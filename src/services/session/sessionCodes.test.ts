@@ -1,18 +1,16 @@
 import { describe, expect, it } from "vitest";
 import {
-  SESSION_CODE_ALPHABET,
-  SESSION_CODE_INPUT_PLACEHOLDER,
   generateSessionCode,
   isValidSessionCode,
   normalizeSessionCode,
+  SESSION_CODE_ALPHABET,
+  SESSION_CODE_INPUT_PLACEHOLDER,
 } from "./sessionCodes";
 
 describe("sessionCodes", () => {
   it("derives the join placeholder from the alphabet SoT", () => {
     expect(SESSION_CODE_INPUT_PLACEHOLDER).toBe("ABCD");
-    expect(SESSION_CODE_ALPHABET.startsWith(SESSION_CODE_INPUT_PLACEHOLDER)).toBe(
-      true,
-    );
+    expect(SESSION_CODE_ALPHABET.startsWith(SESSION_CODE_INPUT_PLACEHOLDER)).toBe(true);
     expect(SESSION_CODE_INPUT_PLACEHOLDER).not.toMatch(/[IO]/);
   });
 

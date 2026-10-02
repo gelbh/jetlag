@@ -21,10 +21,7 @@ export function ledJoinRequestRoles(input: {
   myUid: string | undefined;
   isHost: boolean;
 }): JoinRequestRole[] {
-  if (
-    !input.myUid ||
-    !isSessionRoleGated({ roleGates: input.roleGates ?? undefined })
-  ) {
+  if (!input.myUid || !isSessionRoleGated({ roleGates: input.roleGates ?? undefined })) {
     return [];
   }
 
@@ -48,10 +45,7 @@ export function visibleRoleCodeRoles(input: {
   myUid: string | undefined;
   isHost: boolean;
 }): JoinRequestRole[] {
-  if (
-    !input.myUid ||
-    !isSessionRoleGated({ roleGates: input.roleGates ?? undefined })
-  ) {
+  if (!input.myUid || !isSessionRoleGated({ roleGates: input.roleGates ?? undefined })) {
     return [];
   }
 
@@ -79,8 +73,7 @@ export function countMembersWithRole(
     return 0;
   }
 
-  return Object.values(memberRoles).filter((memberRole) => memberRole === role)
-    .length;
+  return Object.values(memberRoles).filter((memberRole) => memberRole === role).length;
 }
 
 export function joinRequiresRolePasscode(
@@ -113,10 +106,7 @@ export function joinRequiresRolePasscode(
   return countMembersWithRole(memberRoles, role) > 0;
 }
 
-export function buildRoleGatesForHost(
-  hostUid: string,
-  hostRole: PlayerRole,
-): RoleGates {
+export function buildRoleGatesForHost(hostUid: string, hostRole: PlayerRole): RoleGates {
   const leaders: RoleGates["leaders"] = {};
 
   if (hostRole === "seeker" || hostRole === "hider") {

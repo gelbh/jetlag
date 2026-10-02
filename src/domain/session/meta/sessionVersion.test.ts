@@ -60,11 +60,7 @@ describe("sessionVersionCompatible", () => {
   it("blocks new joiners when client version is older than host", () => {
     expect(sessionVersionCompatible(session, "0.2.0", "new-uid")).toBe(false);
     expect(
-      sessionVersionCompatible(
-        { hostAppVersion: "0.5.1", memberUids: [] },
-        "0.5.0",
-        "new-uid",
-      ),
+      sessionVersionCompatible({ hostAppVersion: "0.5.1", memberUids: [] }, "0.5.0", "new-uid"),
     ).toBe(false);
   });
 
@@ -74,11 +70,7 @@ describe("sessionVersionCompatible", () => {
 
   it("allows new joiners when client version is newer than host", () => {
     expect(
-      sessionVersionCompatible(
-        { hostAppVersion: "0.5.1", memberUids: [] },
-        "0.5.6",
-        "new-uid",
-      ),
+      sessionVersionCompatible({ hostAppVersion: "0.5.1", memberUids: [] }, "0.5.6", "new-uid"),
     ).toBe(true);
   });
 
@@ -93,21 +85,15 @@ describe("sessionVersionCompatible", () => {
   });
 
   it("allows auth drift when the prior uid was already a member", () => {
-    expect(sessionVersionCompatible(session, "0.9.9", "new-uid", "member-1")).toBe(
-      true,
-    );
+    expect(sessionVersionCompatible(session, "0.9.9", "new-uid", "member-1")).toBe(true);
   });
 
   it("allows observers to join regardless of version mismatch", () => {
-    expect(
-      sessionVersionCompatible(session, "0.2.0", "new-uid", undefined, "observer"),
-    ).toBe(true);
+    expect(sessionVersionCompatible(session, "0.2.0", "new-uid", undefined, "observer")).toBe(true);
   });
 
   it("allows admins to join regardless of version mismatch", () => {
-    expect(
-      sessionVersionCompatible(session, "0.2.0", "new-uid", undefined, "admin"),
-    ).toBe(true);
+    expect(sessionVersionCompatible(session, "0.2.0", "new-uid", undefined, "admin")).toBe(true);
   });
 });
 
@@ -117,14 +103,10 @@ describe("sessionVersionMismatchMessage", () => {
   });
 
   it("prompts update when client is older than host", () => {
-    expect(sessionVersionMismatchMessage("0.5.1", "0.5.0")).toContain(
-      "requires v0.5.1 or newer",
-    );
+    expect(sessionVersionMismatchMessage("0.5.1", "0.5.0")).toContain("requires v0.5.1 or newer");
   });
 
   it("prompts host refresh when client is newer than host", () => {
-    expect(sessionVersionMismatchMessage("0.5.1", "0.5.6")).toContain(
-      "created on v0.5.1",
-    );
+    expect(sessionVersionMismatchMessage("0.5.1", "0.5.6")).toContain("created on v0.5.1");
   });
 });

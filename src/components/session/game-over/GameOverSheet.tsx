@@ -1,5 +1,5 @@
-import { useCallback, useState } from "react";
 import { Button } from "@mantine/core";
+import { useCallback, useState } from "react";
 import type { GameOutcome } from "@/domain/game/foundHider";
 import type { GameResultRecord } from "@/domain/game/gameResult";
 import type { PlayerRole } from "@/domain/session/players/playerRole";
@@ -19,10 +19,7 @@ interface GameOverSheetProps {
   onHome: () => void;
 }
 
-function outcomeHeadline(
-  outcome: GameOutcome,
-  playerWon: boolean | undefined,
-): string {
+function outcomeHeadline(outcome: GameOutcome, playerWon: boolean | undefined): string {
   if (outcome === "found") {
     if (playerWon === true) {
       return "You found the hider";
@@ -83,15 +80,12 @@ export function GameOverSheet({
 }: GameOverSheetProps) {
   const [replayOpen, setReplayOpen] = useState(false);
 
-  const myPlayer = myUid
-    ? gameResult.players.find((player) => player.uid === myUid)
-    : undefined;
+  const myPlayer = myUid ? gameResult.players.find((player) => player.uid === myUid) : undefined;
   const playerWon = myPlayer?.won;
   const headline = outcomeHeadline(gameResult.outcome, playerWon);
   const hidingPhaseMs = gameResult.hidingPhaseMs ?? 0;
   const seekPhaseMs = gameResult.seekPhaseMs ?? 0;
-  const heroMs =
-    playerRole === "hider" ? hidingPhaseMs : gameResult.seekTimeMs;
+  const heroMs = playerRole === "hider" ? hidingPhaseMs : gameResult.seekTimeMs;
 
   const handleRematch = useCallback(() => {
     void Promise.resolve(onRematch()).catch(() => {
@@ -147,18 +141,9 @@ export function GameOverSheet({
           </div>
 
           <div className="rounded-lg border border-border bg-surface-deep px-3">
-            <StatRow
-              label="Total round"
-              value={formatClockDurationFromMs(gameResult.durationMs)}
-            />
-            <StatRow
-              label="Hiding phase"
-              value={formatClockDurationFromMs(hidingPhaseMs)}
-            />
-            <StatRow
-              label="Seek phase"
-              value={formatClockDurationFromMs(seekPhaseMs)}
-            />
+            <StatRow label="Total round" value={formatClockDurationFromMs(gameResult.durationMs)} />
+            <StatRow label="Hiding phase" value={formatClockDurationFromMs(hidingPhaseMs)} />
+            <StatRow label="Seek phase" value={formatClockDurationFromMs(seekPhaseMs)} />
           </div>
 
           <button
@@ -174,12 +159,8 @@ export function GameOverSheet({
               Map
             </span>
             <span className="space-y-0.5">
-              <span className="block text-sm font-semibold text-ink">
-                Map replay
-              </span>
-              <span className="block text-xs text-ink-muted">
-                Full scrubber coming soon
-              </span>
+              <span className="block text-sm font-semibold text-ink">Map replay</span>
+              <span className="block text-xs text-ink-muted">Full scrubber coming soon</span>
             </span>
           </button>
         </div>

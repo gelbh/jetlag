@@ -1,7 +1,7 @@
-import { describe, expect, it } from "vitest";
 import { renderHook } from "@testing-library/react";
-import { useActiveThermometerWalk } from "./useActiveThermometerWalk";
+import { describe, expect, it } from "vitest";
 import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
+import { useActiveThermometerWalk } from "./useActiveThermometerWalk";
 
 const walkingQuestion: PendingQuestionRecord = {
   id: "pq-walk",

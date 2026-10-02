@@ -10,10 +10,7 @@ const kernelWasmPkgJs = resolve(
 );
 const kernelWasmPkgStubId = "\0jetlag-geometry-kernel-wasm-stub";
 
-function isKernelWasmPkgSpecifier(
-  id: string,
-  importer: string | undefined,
-): boolean {
+function isKernelWasmPkgSpecifier(id: string, importer: string | undefined): boolean {
   if (id === kernelWasmPkgStubId || id.includes("jetlag_geometry_kernel.js")) {
     return true;
   }

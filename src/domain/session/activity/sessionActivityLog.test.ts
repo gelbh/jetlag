@@ -1,14 +1,14 @@
 import { describe, expect, it } from "vitest";
 import {
-  FIXED_ACTIVITY_EVENT_IDS,
   activityAnnotationId,
   createActivityEventId,
+  FIXED_ACTIVITY_EVENT_IDS,
   groupSessionActivityEntries,
   phaseActivityEventId,
+  type SessionActivityEvent,
   sessionActivitySummary,
   sessionActivityTypeLabel,
   sortActivityEventsDesc,
-  type SessionActivityEvent,
 } from "./sessionActivityLog";
 
 function baseEvent(
@@ -49,12 +49,7 @@ describe("sessionActivityLog", () => {
       }),
     ];
 
-    expect(sortActivityEventsDesc(events).map((event) => event.id)).toEqual([
-      "d",
-      "b",
-      "c",
-      "a",
-    ]);
+    expect(sortActivityEventsDesc(events).map((event) => event.id)).toEqual(["d", "b", "c", "a"]);
   });
 
   it("uses fixed ids for phase lifecycle events", () => {
@@ -65,9 +60,7 @@ describe("sessionActivityLog", () => {
       "game_ended",
     ]);
     expect(phaseActivityEventId("session_started")).toBe("session_started");
-    expect(phaseActivityEventId("hiding_timer_started")).toBe(
-      "hiding_timer_started",
-    );
+    expect(phaseActivityEventId("hiding_timer_started")).toBe("hiding_timer_started");
     expect(phaseActivityEventId("seeking_started")).toBe("seeking_started");
     expect(phaseActivityEventId("game_ended")).toBe("game_ended");
   });

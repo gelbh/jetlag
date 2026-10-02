@@ -23,27 +23,15 @@ describe("adminDivisionAvailability", () => {
       admin_division_4: 11,
     };
 
-    expect(
-      isAdminDivisionCategoryAvailable("admin_division_3", counts),
-    ).toBe(true);
-    expect(
-      isAdminDivisionCategoryAvailable("admin_division_4", counts),
-    ).toBe(true);
-    expect(
-      isAdminDivisionCategoryAvailable("admin_division_2", counts),
-    ).toBe(false);
-    expect(
-      isAdminDivisionCategoryAvailable("commercial_airport", counts),
-    ).toBe(true);
+    expect(isAdminDivisionCategoryAvailable("admin_division_3", counts)).toBe(true);
+    expect(isAdminDivisionCategoryAvailable("admin_division_4", counts)).toBe(true);
+    expect(isAdminDivisionCategoryAvailable("admin_division_2", counts)).toBe(false);
+    expect(isAdminDivisionCategoryAvailable("commercial_airport", counts)).toBe(true);
   });
 
   it("hides admin categories while preload counts are pending", () => {
-    expect(
-      isAdminDivisionCategoryAvailable("admin_division_3", null),
-    ).toBe(false);
-    expect(
-      isAdminDivisionCategoryAvailable("admin_division_3", undefined),
-    ).toBe(false);
+    expect(isAdminDivisionCategoryAvailable("admin_division_3", null)).toBe(false);
+    expect(isAdminDivisionCategoryAvailable("admin_division_3", undefined)).toBe(false);
   });
 
   it("hides first- and second-level admin options for Dublin region packs", () => {
@@ -55,24 +43,12 @@ describe("adminDivisionAvailability", () => {
       admin_division_4: 11,
     };
 
-    expect(
-      isAdminDivisionCategoryAvailable("admin_division_1", counts, "dublin"),
-    ).toBe(false);
-    expect(
-      isAdminDivisionCategoryAvailable("admin_division_2", counts, "dublin"),
-    ).toBe(false);
-    expect(
-      isAdminDivisionCategoryAvailable("admin_division_3", counts, "dublin"),
-    ).toBe(true);
-    expect(adminBorderKindAvailability("admin1_border", counts, "dublin")).toBe(
-      false,
-    );
-    expect(adminBorderKindAvailability("admin2_border", counts, "dublin")).toBe(
-      false,
-    );
-    expect(adminBorderKindAvailability("admin3_border", counts, "dublin")).toBe(
-      true,
-    );
+    expect(isAdminDivisionCategoryAvailable("admin_division_1", counts, "dublin")).toBe(false);
+    expect(isAdminDivisionCategoryAvailable("admin_division_2", counts, "dublin")).toBe(false);
+    expect(isAdminDivisionCategoryAvailable("admin_division_3", counts, "dublin")).toBe(true);
+    expect(adminBorderKindAvailability("admin1_border", counts, "dublin")).toBe(false);
+    expect(adminBorderKindAvailability("admin2_border", counts, "dublin")).toBe(false);
+    expect(adminBorderKindAvailability("admin3_border", counts, "dublin")).toBe(true);
   });
 
   it("returns only Dublin region-pack admin levels for boundary layer", () => {
@@ -84,24 +60,16 @@ describe("adminDivisionAvailability", () => {
       admin_division_4: 31,
     };
 
-    expect(
-      adminBoundaryLevelsForSession("dublin", { 8: "{}", 9: "{}" }, counts),
-    ).toEqual([8, 9]);
-    expect(
-      adminBoundaryLevelsForSession("dublin", { 8: "{}" }, counts),
-    ).toEqual([8]);
+    expect(adminBoundaryLevelsForSession("dublin", { 8: "{}", 9: "{}" }, counts)).toEqual([8, 9]);
+    expect(adminBoundaryLevelsForSession("dublin", { 8: "{}" }, counts)).toEqual([8]);
   });
 
   it("returns every standard admin level for preload sessions (counts omitted)", () => {
-    expect(adminBoundaryLevelsForSession(undefined, undefined)).toEqual([
-      4, 6, 8, 9,
-    ]);
+    expect(adminBoundaryLevelsForSession(undefined, undefined)).toEqual([4, 6, 8, 9]);
   });
 
   it("still restricts Dublin region-pack preload to bundled admin levels", () => {
-    expect(
-      adminBoundaryLevelsForSession("dublin", { 8: "{}", 9: "{}" }),
-    ).toEqual([8, 9]);
+    expect(adminBoundaryLevelsForSession("dublin", { 8: "{}", 9: "{}" })).toEqual([8, 9]);
   });
 
   it("gates Overpass admin-border fallthrough by bundled region packs only", () => {

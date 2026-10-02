@@ -1,9 +1,6 @@
-import { describe, expect, it, vi } from "vitest";
 import type { Map as MapLibreMap } from "maplibre-gl";
-import {
-  isBasemapPoiQueryAvailable,
-  queryBasemapPois,
-} from "./basemapPoiQuery";
+import { describe, expect, it, vi } from "vitest";
+import { isBasemapPoiQueryAvailable, queryBasemapPois } from "./basemapPoiQuery";
 
 function mockMap(options: {
   hasOpenMapTiles?: boolean;
@@ -18,10 +15,7 @@ function mockMap(options: {
   return {
     getStyle: () => ({
       sources: hasOpenMapTiles ? { openmaptiles: { type: "vector" } } : {},
-      layers: options.layers ?? [
-        { id: "poi_r20" },
-        { id: "poi_transit" },
-      ],
+      layers: options.layers ?? [{ id: "poi_r20" }, { id: "poi_transit" }],
     }),
     querySourceFeatures,
     queryRenderedFeatures,

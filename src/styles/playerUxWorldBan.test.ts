@@ -30,9 +30,7 @@ const MFA_HUD_PANEL_SCOPES = [
  * Non-inventory holdouts still using `hud-panel` inside MFA scopes.
  * Do not migrate these in MFA-C (TimerBlock dropdown, etc.).
  */
-const HUD_PANEL_ALLOWLIST = new Set([
-  "src/components/session/status/TimerBlock.tsx",
-]);
+const HUD_PANEL_ALLOWLIST = new Set(["src/components/session/status/TimerBlock.tsx"]);
 
 function collectFiles(dir: string, out: string[]): void {
   for (const entry of readdirSync(dir)) {

@@ -1,25 +1,16 @@
-import { describe, expect, it, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
 import { MantineProvider } from "@mantine/core";
+import { render, screen } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
 import { jetlagTheme } from "@/theme/theme";
-import {
-  ChatPanel,
-  type ChatPanelModel,
-  type ChatPanelProps,
-} from "./ChatPanel";
+import { ChatPanel, type ChatPanelModel, type ChatPanelProps } from "./ChatPanel";
 
 vi.mock("../../hooks/layout/useVisualViewportBottomInset", () => ({
   useVisualViewportBottomInset: () => 0,
 }));
 
 vi.mock("../ui/sheets/SheetHost", () => ({
-  SheetHost: ({
-    open,
-    children,
-  }: {
-    open: boolean;
-    children: React.ReactNode;
-  }) => (open ? <div data-testid="chat-sheet">{children}</div> : null),
+  SheetHost: ({ open, children }: { open: boolean; children: React.ReactNode }) =>
+    open ? <div data-testid="chat-sheet">{children}</div> : null,
 }));
 
 vi.mock("./ChatPanelBody", () => ({

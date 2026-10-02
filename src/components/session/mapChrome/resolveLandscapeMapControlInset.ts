@@ -9,12 +9,7 @@ export function resolveLandscapeMapControlInset(
     mapControlInset: MapChromeControlInset;
   },
 ): MapChromeControlInset {
-  if (
-    isDesktop ||
-    !landscape.active ||
-    !landscape.collapsed ||
-    baseInset !== "dock"
-  ) {
+  if (isDesktop || !landscape.active || !landscape.collapsed || baseInset !== "dock") {
     return baseInset;
   }
 

@@ -1,9 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type {
-  MapViewMapLibreProps,
-  MapViewModel,
-  MapViewProps,
-} from "./mapViewTypes";
+import type { MapViewMapLibreProps, MapViewModel, MapViewProps } from "./mapViewTypes";
 
 describe("MapView public props (AC #1)", () => {
   it("accepts a single model options object plus optional children", () => {

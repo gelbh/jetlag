@@ -13,10 +13,7 @@ const POWER_UP_LABELS: Record<string, string> = {
   expandHand2: "Draw 1, expand hand +2",
 };
 
-export function boardCardLabel(
-  card: BoardCardInstance,
-  gameSize: GameSize,
-): string {
+export function boardCardLabel(card: BoardCardInstance, gameSize: GameSize): string {
   switch (card.def.kind) {
     case "timeBonus":
       return `Time +${timeBonusMinutesForGameSize(card.def.durations, gameSize)} min`;

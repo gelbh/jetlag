@@ -1,10 +1,10 @@
 import { useState } from "react";
+import { APP_VERSION } from "../../domain/device/changelog";
 import type {
   IncidentCodingAgentState,
   IncidentMitigationType,
   IncidentStatus,
 } from "../../domain/incident/incidentTypes";
-import { APP_VERSION } from "../../domain/device/changelog";
 import {
   DEFAULT_HOTFIX_GRACE_SECONDS,
   INCIDENT_MITIGATION_OPTIONS,
@@ -17,12 +17,7 @@ import {
 } from "../../services/incident/incidentApi";
 import { AdminIncidentCursorLaunch } from "./AdminIncidentCursorLaunch";
 
-const CLOSEABLE = new Set<IncidentStatus>([
-  "open",
-  "chatting",
-  "mitigating",
-  "hotfix_pending",
-]);
+const CLOSEABLE = new Set<IncidentStatus>(["open", "chatting", "mitigating", "hotfix_pending"]);
 
 const REOPENABLE = new Set<IncidentStatus>(["resolved", "dismissed"]);
 
@@ -49,16 +44,13 @@ export function AdminIncidentActions({
   launchCursorAgentFn = launchIncidentCursorAgent,
   openExternalUrlFn,
 }: AdminIncidentActionsProps) {
-  const [mitigationType, setMitigationType] =
-    useState<IncidentMitigationType>("soft_reload");
+  const [mitigationType, setMitigationType] = useState<IncidentMitigationType>("soft_reload");
   const [mitigationBusy, setMitigationBusy] = useState(false);
   const [mitigationError, setMitigationError] = useState<string | null>(null);
   const [mitigationOk, setMitigationOk] = useState<string | null>(null);
 
   const [toVersion, setToVersion] = useState("");
-  const [graceSeconds, setGraceSeconds] = useState(
-    String(DEFAULT_HOTFIX_GRACE_SECONDS),
-  );
+  const [graceSeconds, setGraceSeconds] = useState(String(DEFAULT_HOTFIX_GRACE_SECONDS));
   const [hotfixBusy, setHotfixBusy] = useState(false);
   const [hotfixError, setHotfixError] = useState<string | null>(null);
   const [hotfixOk, setHotfixOk] = useState<string | null>(null);
@@ -83,9 +75,7 @@ export function AdminIncidentActions({
       setMitigationOk(`Applied ${result.type}.`);
     } catch (error) {
       setMitigationError(
-        error instanceof Error
-          ? error.message
-          : "Could not apply the mitigation.",
+        error instanceof Error ? error.message : "Could not apply the mitigation.",
       );
     } finally {
       setMitigationBusy(false);
@@ -102,9 +92,7 @@ export function AdminIncidentActions({
       return;
     }
     const parsedGrace = Number.parseInt(graceSeconds, 10);
-    const grace = Number.isFinite(parsedGrace)
-      ? parsedGrace
-      : DEFAULT_HOTFIX_GRACE_SECONDS;
+    const grace = Number.isFinite(parsedGrace) ? parsedGrace : DEFAULT_HOTFIX_GRACE_SECONDS;
 
     setHotfixBusy(true);
     setHotfixError(null);
@@ -115,11 +103,7 @@ export function AdminIncidentActions({
         `Published ${result.toVersion} (${result.graceSeconds}s grace) to ${result.fannedOutSessionCount} session(s).`,
       );
     } catch (error) {
-      setHotfixError(
-        error instanceof Error
-          ? error.message
-          : "Could not publish the hotfix.",
-      );
+      setHotfixError(error instanceof Error ? error.message : "Could not publish the hotfix.");
     } finally {
       setHotfixBusy(false);
     }
@@ -139,9 +123,7 @@ export function AdminIncidentActions({
       setStatusOk(`Status set to ${result.status}.`);
     } catch (error) {
       setStatusError(
-        error instanceof Error
-          ? error.message
-          : "Could not update the incident status.",
+        error instanceof Error ? error.message : "Could not update the incident status.",
       );
     } finally {
       setStatusBusy(false);
@@ -161,9 +143,7 @@ export function AdminIncidentActions({
             {statusError}
           </p>
         ) : null}
-        {statusOk ? (
-          <p className="text-sm text-status-success">{statusOk}</p>
-        ) : null}
+        {statusOk ? <p className="text-sm text-status-success">{statusOk}</p> : null}
         {canClose ? (
           <div className="flex flex-wrap gap-2">
             <button
@@ -209,9 +189,7 @@ export function AdminIncidentActions({
             className="field-input"
             value={mitigationType}
             disabled={actionsDisabled || mitigationBusy}
-            onChange={(event) =>
-              setMitigationType(event.target.value as IncidentMitigationType)
-            }
+            onChange={(event) => setMitigationType(event.target.value as IncidentMitigationType)}
             aria-label="Mitigation type"
           >
             {INCIDENT_MITIGATION_OPTIONS.map((option) => (
@@ -226,9 +204,7 @@ export function AdminIncidentActions({
             {mitigationError}
           </p>
         ) : null}
-        {mitigationOk ? (
-          <p className="text-sm text-status-success">{mitigationOk}</p>
-        ) : null}
+        {mitigationOk ? <p className="text-sm text-status-success">{mitigationOk}</p> : null}
         <button
           type="button"
           className="btn-primary uppercase"
@@ -280,9 +256,7 @@ export function AdminIncidentActions({
             {hotfixError}
           </p>
         ) : null}
-        {hotfixOk ? (
-          <p className="text-sm text-status-success">{hotfixOk}</p>
-        ) : null}
+        {hotfixOk ? <p className="text-sm text-status-success">{hotfixOk}</p> : null}
         <button
           type="button"
           className="btn-primary uppercase"

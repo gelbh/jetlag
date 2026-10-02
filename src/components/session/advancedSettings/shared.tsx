@@ -1,11 +1,11 @@
-import { useId, useState, type ReactNode } from "react";
 import { Button, TextInput, UnstyledButton } from "@mantine/core";
 import { CaretDownIcon } from "@phosphor-icons/react";
+import { type ReactNode, useId, useState } from "react";
 import {
-  InsetGroup,
-  SectionLabel,
   grayStyles,
+  InsetGroup,
   insetTextInputStyles,
+  SectionLabel,
 } from "@/components/ui/entry/entryChrome";
 import { SettingsToggleRow } from "../settings/SettingsToggleRow";
 
@@ -67,12 +67,7 @@ export function AdvancedSettingsCategory({
 }
 
 /** @deprecated Prefer AdvancedSettingsCategory for Game rules. */
-export function AdvancedSettingsSectionHeader({
-  title,
-}: {
-  title: string;
-  bordered?: boolean;
-}) {
+export function AdvancedSettingsSectionHeader({ title }: { title: string; bordered?: boolean }) {
   return <SectionLabel>{title}</SectionLabel>;
 }
 
@@ -186,9 +181,7 @@ export function ToggleNumberWithPresets({
 }
 
 export function SectionSummary({ text }: { text: string }) {
-  return (
-    <p className="text-xs text-[var(--color-field-ink-muted)]">{text}</p>
-  );
+  return <p className="text-xs text-[var(--color-field-ink-muted)]">{text}</p>;
 }
 
 export function PresetButton({

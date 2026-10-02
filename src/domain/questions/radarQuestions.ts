@@ -1,28 +1,27 @@
 import type { AnnotationRecord } from "../map/annotations";
-import type { PendingQuestionRecord } from "../session/activity/sessionChat";
-import type { GameSize } from "../session/size/gameSize";
-import { presetMetersForMiles } from "../session/tools/toolSessionOptions";
 import {
+  type DistanceUnit,
   formatDistance,
   MILE_RADIUS_PRESETS,
   milesToMeters,
-  type DistanceUnit,
 } from "../map/distance";
 import {
   isRadarCustomRadiusWithinGameSizeLimit,
   isRadarPresetMetersForGameSize,
+  METRIC_RADAR_PRESET_METERS,
   matchPresetMeters,
   maxRadarPresetMetersForGameSize,
-  METRIC_RADAR_PRESET_METERS,
   radarPresetsMetersForGameSizeAndUnit,
   UI_PRESET_MATCH_TOLERANCE_METERS,
 } from "../map/distancePresets";
+import type { PendingQuestionRecord } from "../session/activity/sessionChat";
+import type { GameSize } from "../session/size/gameSize";
+import { presetMetersForMiles } from "../session/tools/toolSessionOptions";
 import { buildPresetCatalogHelpers } from "./distancePresets";
 
 export const RADAR_DISTANCE_MILES = MILE_RADIUS_PRESETS;
 
-export const RADAR_RADIUS_PRESET_METERS =
-  RADAR_DISTANCE_MILES.map(milesToMeters);
+export const RADAR_RADIUS_PRESET_METERS = RADAR_DISTANCE_MILES.map(milesToMeters);
 
 export const RADAR_CHOOSE_LABEL = "CHOOSE";
 
@@ -104,9 +103,7 @@ export function radarDistanceOptionForPending(
 
   const metadata = question.placement.metadata;
   const radiusMeters =
-    typeof metadata.radiusMeters === "number"
-      ? metadata.radiusMeters
-      : milesToMeters(1);
+    typeof metadata.radiusMeters === "number" ? metadata.radiusMeters : milesToMeters(1);
   if (metadata.radarChooseCustom === true) {
     return "choose";
   }
@@ -122,10 +119,8 @@ export function radarDistanceOptionForPending(
 function radarPresetHelpersForUnit(unit: DistanceUnit) {
   return buildPresetCatalogHelpers<RadarDistanceOptionKey>({
     toolType: "radar",
-    readOptionFromAnnotation: (annotation) =>
-      radarDistanceOptionForAnnotation(annotation, unit),
-    readOptionFromPending: (question) =>
-      radarDistanceOptionForPending(question, unit),
+    readOptionFromAnnotation: (annotation) => radarDistanceOptionForAnnotation(annotation, unit),
+    readOptionFromPending: (question) => radarDistanceOptionForPending(question, unit),
   });
 }
 
@@ -147,19 +142,14 @@ export function usedRadarDistanceOptionsForSession(
   exceptAnnotationId?: string,
 ): Set<RadarDistanceOptionKey> {
   const used = usedRadarDistanceOptions(annotations, unit, exceptAnnotationId);
-  for (const id of radarPresetHelpersForUnit(unit).usedOptionsFromPending(
-    pendingQuestions,
-  )) {
+  for (const id of radarPresetHelpersForUnit(unit).usedOptionsFromPending(pendingQuestions)) {
     used.add(id);
   }
   return used;
 }
 
 /** Full radar distance presets for game size (does not filter used). */
-export function radarDistancePresetsForGameSize(
-  gameSize: GameSize,
-  unit: DistanceUnit,
-): number[] {
+export function radarDistancePresetsForGameSize(gameSize: GameSize, unit: DistanceUnit): number[] {
   return radarPresetsMetersForGameSizeAndUnit(gameSize, unit);
 }
 
@@ -170,11 +160,7 @@ export function isRadarRadiusAllowedForGameSize(
   chooseCustom: boolean,
 ): boolean {
   if (chooseCustom) {
-    return isRadarCustomRadiusWithinGameSizeLimit(
-      gameSize,
-      distanceMeters,
-      unit,
-    );
+    return isRadarCustomRadiusWithinGameSizeLimit(gameSize, distanceMeters, unit);
   }
 
   return isRadarPresetMetersForGameSize(gameSize, distanceMeters, unit);
@@ -228,10 +214,7 @@ export function availableRadarDistancePresets(
   });
 }
 
-export function maxRadarCustomRadiusMeters(
-  gameSize: GameSize,
-  unit: DistanceUnit,
-): number {
+export function maxRadarCustomRadiusMeters(gameSize: GameSize, unit: DistanceUnit): number {
   return maxRadarPresetMetersForGameSize(gameSize, unit);
 }
 
@@ -242,9 +225,7 @@ export function radarDistanceUseCount(
   unit: DistanceUnit = "imperial",
   exceptAnnotationId?: string,
 ): number {
-  const targetKey = chooseCustom
-    ? "choose"
-    : radarPresetForRadius(radiusMeters, unit);
+  const targetKey = chooseCustom ? "choose" : radarPresetForRadius(radiusMeters, unit);
   if (targetKey === null) {
     return 0;
   }
@@ -263,9 +244,7 @@ export function radarDistanceUseCountFromPending(
   unit: DistanceUnit = "imperial",
   exceptQuestionId?: string,
 ): number {
-  const targetKey = chooseCustom
-    ? "choose"
-    : radarPresetForRadius(radiusMeters, unit);
+  const targetKey = chooseCustom ? "choose" : radarPresetForRadius(radiusMeters, unit);
   if (targetKey === null) {
     return 0;
   }
@@ -277,10 +256,7 @@ export function radarDistanceUseCountFromPending(
   );
 }
 
-export function radarDistanceOptionLabel(
-  miles: number,
-  unit: DistanceUnit,
-): string {
+export function radarDistanceOptionLabel(miles: number, unit: DistanceUnit): string {
   if (unit === "imperial") {
     if (Math.abs(miles - 0.25) < 0.01) {
       return "1/4 Mile";
@@ -300,10 +276,7 @@ export function radarDistanceOptionLabel(
   return formatDistance(milesToMeters(miles), unit);
 }
 
-export function radarQuestionPrompt(
-  radiusMeters: number,
-  unit: DistanceUnit,
-): string {
+export function radarQuestionPrompt(radiusMeters: number, unit: DistanceUnit): string {
   const distanceLabel = formatDistance(radiusMeters, unit);
   return RADAR_PROMPT_TEMPLATE.replace("[DISTANCE]", distanceLabel);
 }

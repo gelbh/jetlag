@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import type { HidingZoneRecord } from "./hidingZone";
 import {
   buildHidingZoneCircle,
   dedupeTransitStations,
@@ -6,14 +7,9 @@ import {
   nearestStation,
   resolveMyHidingZone,
 } from "./hidingZone";
-import type { HidingZoneRecord } from "./hidingZone";
 
 describe("hidingZone", () => {
-  const zone = (
-    hiderUid: string,
-    lat = 53.35,
-    lng = -6.26,
-  ): HidingZoneRecord => ({
+  const zone = (hiderUid: string, lat = 53.35, lng = -6.26): HidingZoneRecord => ({
     hiderUid,
     sessionId: "session-1",
     stationId: "station-1",
@@ -27,22 +23,16 @@ describe("hidingZone", () => {
 
   it("resolves a hiding zone by uid first", () => {
     const zones = [zone("hider-a"), zone("hider-b", 53.4, -6.3)];
-    expect(resolveMyHidingZone(zones, "hider-b", ["hider-a", "hider-b"])).toEqual(
-      zones[1],
-    );
+    expect(resolveMyHidingZone(zones, "hider-b", ["hider-a", "hider-b"])).toEqual(zones[1]);
   });
 
   it("falls back to the sole member zone when uid changed after heal", () => {
     const zones = [zone("old-hider-uid")];
-    expect(resolveMyHidingZone(zones, "new-hider-uid", ["new-hider-uid"])).toEqual(
-      zones[0],
-    );
+    expect(resolveMyHidingZone(zones, "new-hider-uid", ["new-hider-uid"])).toEqual(zones[0]);
   });
 
   it("returns station center from a zone", () => {
-    expect(hiderStationCenter(zone("hider-a", 53.36, -6.27))).toEqual([
-      53.36, -6.27,
-    ]);
+    expect(hiderStationCenter(zone("hider-a", 53.36, -6.27))).toEqual([53.36, -6.27]);
   });
 
   it("builds a circle polygon around a center point", () => {

@@ -6,13 +6,9 @@ import {
   OVERPASS_USER_AGENT,
   overpassEndpointHost,
 } from "./overpassEndpoints.mjs";
-import { orderOverpassEndpointsByStatus } from "./overpassStatus.mjs";
 import { enqueueOverpassFetch } from "./overpassQueue.mjs";
-import {
-  overpassL2CacheKey,
-  readOverpassL2,
-  writeOverpassL2,
-} from "./overpassSharedCache.mjs";
+import { overpassL2CacheKey, readOverpassL2, writeOverpassL2 } from "./overpassSharedCache.mjs";
+import { orderOverpassEndpointsByStatus } from "./overpassStatus.mjs";
 import { tryPostpassForOverpassQuery } from "./postpassFailover.mjs";
 
 export const OVERPASS_FETCH_TIMEOUT_MS = 25_000;
@@ -71,15 +67,12 @@ function isOverpassTransportTimeoutError(error) {
   }
 
   const name = "name" in error ? error.name : undefined;
-  const message =
-    "message" in error && error.message != null ? String(error.message) : "";
+  const message = "message" in error && error.message != null ? String(error.message) : "";
   if (name !== "TypeError" || !/fetch failed/i.test(message)) {
     return false;
   }
 
-  return isOverpassTransportTimeoutCause(
-    "cause" in error ? error.cause : undefined,
-  );
+  return isOverpassTransportTimeoutCause("cause" in error ? error.cause : undefined);
 }
 
 /**
@@ -93,8 +86,7 @@ function isOverpassTransportTimeoutCause(cause) {
 
   const name = "name" in cause ? cause.name : undefined;
   const code = "code" in cause ? cause.code : undefined;
-  const message =
-    "message" in cause && cause.message != null ? String(cause.message) : "";
+  const message = "message" in cause && cause.message != null ? String(cause.message) : "";
 
   if (name === "ConnectTimeoutError" || code === "UND_ERR_CONNECT_TIMEOUT") {
     return true;
@@ -151,9 +143,7 @@ function cancelResponseBody(response) {
 export async function fetchOverpassWithFailover(query, options = {}) {
   let lastError = null;
   const now = options.now ?? Date.now;
-  const endpoints = await orderOverpassEndpointsByStatus(
-    buildOverpassEndpointList(process.env),
-  );
+  const endpoints = await orderOverpassEndpointsByStatus(buildOverpassEndpointList(process.env));
   const deadlineMs =
     typeof options.deadlineMs === "number"
       ? options.deadlineMs
@@ -200,7 +190,6 @@ export async function fetchOverpassWithFailover(query, options = {}) {
           ? "Overpass timed out."
           : "Overpass query failed.",
       );
-      continue;
     } catch (error) {
       const timeoutLike = isAbortOrTimeoutError(error);
       logFailover({
@@ -240,16 +229,10 @@ export async function fetchCachedOverpassQuery(query, tier = "free") {
   }
 
   try {
-    const response = await enqueueOverpassFetch(tier, () =>
-      fetchOverpassWithFailover(query),
-    );
+    const response = await enqueueOverpassFetch(tier, () => fetchOverpassWithFailover(query));
     const text = await response.text();
     if (!response.ok) {
-      throw new Error(
-        response.status === 504
-          ? "Overpass timed out."
-          : "Overpass query failed.",
-      );
+      throw new Error(response.status === 504 ? "Overpass timed out." : "Overpass query failed.");
     }
     overpassResponseCache.set(l1Key, text);
     await writeOverpassL2(l2Key, text, "application/json");
@@ -274,10 +257,7 @@ export async function fetchCachedOverpassQuery(query, tier = "free") {
       logCache("stale", tier);
       return stale.text;
     }
-    if (
-      error instanceof Error &&
-      error.message === "Overpass timed out."
-    ) {
+    if (error instanceof Error && error.message === "Overpass timed out.") {
       logTimeout({ reason: "upstream_exhausted", tier });
     }
     logCache("upstream_error", tier);

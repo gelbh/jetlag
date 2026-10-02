@@ -2,8 +2,8 @@ import type { ReactNode } from "react";
 import { usePermanentAuthUser } from "../../hooks/billing/usePermanentAuthUser";
 import { useUserProfile } from "../../hooks/profile/useUserProfile";
 import { isFirebaseConfigured } from "../../services/core/firebase/firebase";
-import { BootSplash } from "../ui/feedback/BootSplash";
 import { ErrorCallout } from "../ui/entry/entryChrome";
+import { BootSplash } from "../ui/feedback/BootSplash";
 import { AccountSignInGate } from "./AccountSignInGate";
 import { UsernameSetupGate } from "./UsernameSetupGate";
 
@@ -19,8 +19,7 @@ export function RequireUsername({
   signInDescription,
 }: RequireUsernameProps) {
   const { user, isPermanent, authReady } = usePermanentAuthUser();
-  const profileEnabled =
-    isFirebaseConfigured() && isPermanent && user != null;
+  const profileEnabled = isFirebaseConfigured() && isPermanent && user != null;
   const { profile, ready, error } = useUserProfile(user?.uid, profileEnabled);
 
   if (isFirebaseConfigured() && !authReady) {
@@ -31,10 +30,7 @@ export function RequireUsername({
     return (
       <AccountSignInGate
         continuePath={continuePath}
-        description={
-          signInDescription ??
-          "Sign in and choose a username to continue."
-        }
+        description={signInDescription ?? "Sign in and choose a username to continue."}
       />
     );
   }
@@ -45,9 +41,7 @@ export function RequireUsername({
 
   if (profileEnabled && error) {
     return (
-      <ErrorCallout>
-        Could not load your profile. Check your connection and try again.
-      </ErrorCallout>
+      <ErrorCallout>Could not load your profile. Check your connection and try again.</ErrorCallout>
     );
   }
 

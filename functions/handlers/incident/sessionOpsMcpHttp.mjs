@@ -1,15 +1,11 @@
 import { getFirestore } from "firebase-admin/firestore";
 import { onRequest } from "firebase-functions/v2/https";
-import { withSentryHttpHandler } from "../../lib/sentry.mjs";
-import { executeSessionOpsTool } from "../../incident/sessionOpsExecute.mjs";
 import { requestHostConfirm } from "../../incident/hostConfirm.mjs";
 import { consumeSessionOpsTool } from "../../incident/sessionOpsCaps.mjs";
+import { executeSessionOpsTool } from "../../incident/sessionOpsExecute.mjs";
 import { handleSessionOpsMcpRequest } from "../../incident/sessionOpsMcp.mjs";
-import {
-  buildSessionOpsExecuteDeps,
-  sentryDsnSecret,
-  sessionOpsMcpAuthSecret,
-} from "./shared.mjs";
+import { withSentryHttpHandler } from "../../lib/sentry.mjs";
+import { buildSessionOpsExecuteDeps, sentryDsnSecret, sessionOpsMcpAuthSecret } from "./shared.mjs";
 
 /**
  * Parse JSON body from an Express-style request.
@@ -60,8 +56,7 @@ export const sessionOpsMcp = onRequest(
       {
         authSecret,
         db,
-        execute: (input) =>
-          executeSessionOpsTool(db, input, buildSessionOpsExecuteDeps(db)),
+        execute: (input) => executeSessionOpsTool(db, input, buildSessionOpsExecuteDeps(db)),
         requestConfirm: (firestore, input, confirmDeps) =>
           requestHostConfirm(firestore, input, confirmDeps),
         consumeTool: (firestore, input, toolDeps) =>

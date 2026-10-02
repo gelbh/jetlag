@@ -69,12 +69,8 @@ function createMockDb(initialData = {}) {
 function createMockStripe(overrides = {}) {
   return {
     customers: {
-      retrieve:
-        overrides.retrieve ??
-        (async (customerId) => ({ id: customerId })),
-      create:
-        overrides.create ??
-        (async () => ({ id: "cus_live_new" })),
+      retrieve: overrides.retrieve ?? (async (customerId) => ({ id: customerId })),
+      create: overrides.create ?? (async () => ({ id: "cus_live_new" })),
     },
     checkout: {
       sessions: {
@@ -86,8 +82,7 @@ function createMockStripe(overrides = {}) {
     billingPortal: {
       sessions: {
         create:
-          overrides.portalCreate ??
-          (async () => ({ url: "https://billing.stripe.test/portal" })),
+          overrides.portalCreate ?? (async () => ({ url: "https://billing.stripe.test/portal" })),
       },
     },
   };
@@ -136,12 +131,7 @@ describe("stripeBilling", () => {
       return { id: "cus_should_not_create" };
     };
 
-    const customerId = await ensureStripeCustomer(
-      stripe,
-      db,
-      "host-1",
-      "host@example.com",
-    );
+    const customerId = await ensureStripeCustomer(stripe, db, "host-1", "host@example.com");
 
     assert.equal(customerId, "cus_live_existing");
     assert.equal(created, false);
@@ -161,12 +151,7 @@ describe("stripeBilling", () => {
       create: async () => ({ id: "cus_live_replacement" }),
     });
 
-    const customerId = await ensureStripeCustomer(
-      stripe,
-      db,
-      "host-1",
-      "host@example.com",
-    );
+    const customerId = await ensureStripeCustomer(stripe, db, "host-1", "host@example.com");
 
     assert.equal(customerId, "cus_live_replacement");
     assert.equal(db.documents["users/host-1"]?.stripeCustomerId, "cus_live_replacement");
@@ -185,12 +170,7 @@ describe("stripeBilling", () => {
       create: async () => ({ id: "cus_live_replacement" }),
     });
 
-    const customerId = await ensureStripeCustomer(
-      stripe,
-      db,
-      "host-1",
-      "host@example.com",
-    );
+    const customerId = await ensureStripeCustomer(stripe, db, "host-1", "host@example.com");
 
     assert.equal(customerId, "cus_live_replacement");
     assert.equal(db.documents["users/host-1"]?.stripeCustomerId, "cus_live_replacement");
@@ -255,14 +235,7 @@ describe("stripeBilling", () => {
     });
 
     await assert.rejects(
-      () =>
-        createCheckoutSessionHandler(
-          stripe,
-          db,
-          "host-1",
-          "host@example.com",
-          "pack_1",
-        ),
+      () => createCheckoutSessionHandler(stripe, db, "host-1", "host@example.com", "pack_1"),
       (error) => {
         assert.ok(error instanceof HttpsError);
         assert.equal(error.code, "failed-precondition");

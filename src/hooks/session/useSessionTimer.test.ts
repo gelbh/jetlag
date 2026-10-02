@@ -17,9 +17,7 @@ describe("useSessionTimer", () => {
 
   it("starts and pauses the timer for a session", () => {
     const onControl = vi.fn();
-    const { result } = renderHook(() =>
-      useSessionTimer("session-1", { onControl }),
-    );
+    const { result } = renderHook(() => useSessionTimer("session-1", { onControl }));
 
     act(() => {
       result.current.start();
@@ -61,9 +59,7 @@ describe("useSessionTimer", () => {
 
   it("pauses on unmount after start even if effect armed before running", () => {
     const onControl = vi.fn();
-    const { result, unmount } = renderHook(() =>
-      useSessionTimer("session-unmount", { onControl }),
-    );
+    const { result, unmount } = renderHook(() => useSessionTimer("session-unmount", { onControl }));
 
     act(() => {
       result.current.start();

@@ -1,14 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type {
-  ToolSessionControls,
-  ToolSessionPhase,
-  UseToolSessionOptions,
-} from "./types";
+import type { ToolSessionControls, ToolSessionPhase, UseToolSessionOptions } from "./types";
 
-function mergeConfig<TConfig>(
-  base: TConfig,
-  initial?: Partial<TConfig>,
-): TConfig {
+function mergeConfig<TConfig>(base: TConfig, initial?: Partial<TConfig>): TConfig {
   if (!initial) {
     return base;
   }
@@ -73,25 +66,19 @@ export function useToolSession<TConfig>({
     onCloseRef.current?.();
   }, []);
 
-  const setConfig = useCallback(
-    (updater: Partial<TConfig> | ((prev: TConfig) => TConfig)) => {
-      setConfigState((prev) => {
-        if (prev === null) {
-          return prev;
-        }
-        const next =
-          typeof updater === "function"
-            ? updater(prev)
-            : { ...prev, ...updater };
-        configRef.current = next;
-        return next;
-      });
-      if (phaseRef.current === "error") {
-        setPhase("configuring");
+  const setConfig = useCallback((updater: Partial<TConfig> | ((prev: TConfig) => TConfig)) => {
+    setConfigState((prev) => {
+      if (prev === null) {
+        return prev;
       }
-    },
-    [],
-  );
+      const next = typeof updater === "function" ? updater(prev) : { ...prev, ...updater };
+      configRef.current = next;
+      return next;
+    });
+    if (phaseRef.current === "error") {
+      setPhase("configuring");
+    }
+  }, []);
 
   const runAction = useCallback(
     async (action: (ctx: { setResolving: () => void }) => Promise<void>) => {
@@ -111,8 +98,7 @@ export function useToolSession<TConfig>({
         });
         setPhase("configuring");
       } catch (caught) {
-        const message =
-          caught instanceof Error ? caught.message : "Something went wrong.";
+        const message = caught instanceof Error ? caught.message : "Something went wrong.";
         setError(message);
         setPhase("error");
       } finally {

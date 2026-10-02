@@ -7,30 +7,19 @@ import {
 
 describe("bundledPoiHygiene", () => {
   it("normalizes park suffix noise and typos", () => {
-    expect(normalizeBundledPoiName("Deering Oaks Park", "park")).toBe(
-      "deering oaks",
-    );
+    expect(normalizeBundledPoiName("Deering Oaks Park", "park")).toBe("deering oaks");
     expect(normalizeBundledPoiName("Boothby Sqaure", "park")).toBe("boothby");
   });
 
   it("rejects non-park street and facility names", () => {
     expect(
-      isEligibleBundledPoi(
-        { id: "pme:1", name: "Douglas St", lat: 43.66, lng: -70.26 },
-        "park",
-      ),
+      isEligibleBundledPoi({ id: "pme:1", name: "Douglas St", lat: 43.66, lng: -70.26 }, "park"),
     ).toBe(false);
     expect(
-      isEligibleBundledPoi(
-        { id: "pme:2", name: "Hadlock Field", lat: 43.66, lng: -70.26 },
-        "park",
-      ),
+      isEligibleBundledPoi({ id: "pme:2", name: "Hadlock Field", lat: 43.66, lng: -70.26 }, "park"),
     ).toBe(false);
     expect(
-      isEligibleBundledPoi(
-        { id: "pme:3", name: "Openspace", lat: 43.66, lng: -70.26 },
-        "park",
-      ),
+      isEligibleBundledPoi({ id: "pme:3", name: "Openspace", lat: 43.66, lng: -70.26 }, "park"),
     ).toBe(false);
     expect(
       isEligibleBundledPoi(
@@ -83,18 +72,12 @@ describe("bundledPoiHygiene", () => {
       "park",
     );
 
-    expect(places.map((place) => place.name)).toEqual([
-      "Payson Park",
-      "Deering Oaks Park",
-    ]);
+    expect(places.map((place) => place.name)).toEqual(["Payson Park", "Deering Oaks Park"]);
   });
 
   it("rejects park junk and keeps legitimate named parks", () => {
     const reject = (name: string) =>
-      isEligibleBundledPoi(
-        { id: "Q1", name, lat: 43.66, lng: -70.26 },
-        "park",
-      );
+      isEligibleBundledPoi({ id: "Q1", name, lat: 43.66, lng: -70.26 }, "park");
 
     expect(reject("Boothby Square")).toBe(false);
     expect(reject("Waterglade Industrial Park")).toBe(false);
@@ -129,10 +112,7 @@ describe("bundledPoiHygiene", () => {
       ),
     ).toBe(false);
     expect(
-      isEligibleBundledPoi(
-        { id: "Q2", name: "Science Gallery", lat: 53.34, lng: -6.25 },
-        "museum",
-      ),
+      isEligibleBundledPoi({ id: "Q2", name: "Science Gallery", lat: 53.34, lng: -6.25 }, "museum"),
     ).toBe(false);
     expect(
       isEligibleBundledPoi(
@@ -165,10 +145,7 @@ describe("bundledPoiHygiene", () => {
 
   it("rejects zoo noise and keeps named zoos", () => {
     expect(
-      isEligibleBundledPoi(
-        { id: "Q1", name: "Hillside Petting Zoo", lat: 40.7, lng: -74 },
-        "zoo",
-      ),
+      isEligibleBundledPoi({ id: "Q1", name: "Hillside Petting Zoo", lat: 40.7, lng: -74 }, "zoo"),
     ).toBe(false);
     expect(
       isEligibleBundledPoi(
@@ -177,10 +154,7 @@ describe("bundledPoiHygiene", () => {
       ),
     ).toBe(false);
     expect(
-      isEligibleBundledPoi(
-        { id: "Q3", name: "Bronx Zoo", lat: 40.85, lng: -73.87 },
-        "zoo",
-      ),
+      isEligibleBundledPoi({ id: "Q3", name: "Bronx Zoo", lat: 40.85, lng: -73.87 }, "zoo"),
     ).toBe(true);
   });
 

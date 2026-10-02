@@ -1,18 +1,16 @@
-import { PencilSimpleIcon, BoundingBoxIcon, MapPinIcon } from "@phosphor-icons/react";
-import type { MapTool } from "../../state/sessionStore";
+import { BoundingBoxIcon, MapPinIcon, PencilSimpleIcon } from "@phosphor-icons/react";
 import {
-  MAP_TOOL_DOCK_ENTRIES,
   isMarkupDockTool,
+  MAP_TOOL_DOCK_ENTRIES,
   mapToolDockMenuHint,
   mapToolDockMenuLabel,
 } from "../../domain/map/mapTools";
 import { cn } from "../../lib/cn";
+import type { MapTool } from "../../state/sessionStore";
 import { JlIcon } from "../ui/brand/JlIcon";
 import { SheetHost } from "../ui/sheets/SheetHost";
 
-const markupTools = MAP_TOOL_DOCK_ENTRIES.filter((tool) =>
-  isMarkupDockTool(tool.id),
-);
+const markupTools = MAP_TOOL_DOCK_ENTRIES.filter((tool) => isMarkupDockTool(tool.id));
 
 const MARKUP_ICONS = {
   zone: BoundingBoxIcon,
@@ -28,12 +26,7 @@ interface ToolDockDrawMenuProps {
 }
 
 /** iOS bottom action sheet for Zone / Pin / Freehand. */
-export function ToolDockDrawMenu({
-  open,
-  activeTool,
-  onSelect,
-  onClose,
-}: ToolDockDrawMenuProps) {
+export function ToolDockDrawMenu({ open, activeTool, onSelect, onClose }: ToolDockDrawMenuProps) {
   return (
     <SheetHost
       open={open}
@@ -41,9 +34,7 @@ export function ToolDockDrawMenu({
       ariaLabel="Draw on map"
       maxHeightClassName="max-h-[min(50dvh,24rem)]"
       pinned={
-        <h2 className="text-[1.25rem] font-bold tracking-tight text-field-ink">
-          Draw on map
-        </h2>
+        <h2 className="text-[1.25rem] font-bold tracking-tight text-field-ink">Draw on map</h2>
       }
     >
       <div className="flex flex-col gap-1" role="menu" aria-label="Draw on map">
@@ -79,11 +70,7 @@ export function ToolDockDrawMenu({
               )}
             >
               <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-surface-raised/90">
-                <JlIcon
-                  icon={Icon}
-                  size={22}
-                  weight={active ? "bold" : "regular"}
-                />
+                <JlIcon icon={Icon} size={22} weight={active ? "bold" : "regular"} />
               </span>
               <span className="min-w-0 flex-1">
                 <span className="block text-[0.9375rem] font-semibold tracking-tight">

@@ -1,10 +1,5 @@
 import { useCallback, useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
-import {
-  BOOT_RELOAD_KEY,
-  CHUNK_RELOAD_CLEAR_MS,
-  hasChunkReloadBeenAttempted,
-} from "../../domain/device/updates/chunkLoadRecovery";
 import { isIosStandalonePwa } from "../../domain/device/pwa/isIosStandalonePwa";
 import { isStandalonePwa } from "../../domain/device/pwa/isStandalonePwa";
 import {
@@ -13,6 +8,11 @@ import {
   rootHasInteractiveShell,
   rootHasResumeReady,
 } from "../../domain/device/resumeShell";
+import {
+  BOOT_RELOAD_KEY,
+  CHUNK_RELOAD_CLEAR_MS,
+  hasChunkReloadBeenAttempted,
+} from "../../domain/device/updates/chunkLoadRecovery";
 import { clearActiveRevealTransition } from "../../navigation/revealRouteTransition";
 import { useRouteTransition } from "../../navigation/useRouteTransition";
 import {
@@ -26,9 +26,7 @@ function isAdminPathname(pathname: string): boolean {
   return pathname === "/admin" || pathname.startsWith("/admin/");
 }
 
-function rootHasResumeSuccess(
-  root: HTMLElement | null = document.getElementById("root"),
-): boolean {
+function rootHasResumeSuccess(root: HTMLElement | null = document.getElementById("root")): boolean {
   return rootHasInteractiveShell(root) || rootHasResumeReady(root);
 }
 
@@ -101,8 +99,7 @@ export function AppResumeWatchdog() {
     clearResumeVisualArtifacts();
     resetStuckTransition();
 
-    const backgroundMs =
-      hiddenAtRef.current === null ? 0 : Date.now() - hiddenAtRef.current;
+    const backgroundMs = hiddenAtRef.current === null ? 0 : Date.now() - hiddenAtRef.current;
     addAppResumeBreadcrumb({
       pathname: pathnameRef.current,
       backgroundMs,

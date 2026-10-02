@@ -1,8 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type {
-  IncidentMessageRecord,
-  IncidentRecord,
-} from "../../domain/incident/incidentTypes";
+import type { IncidentMessageRecord, IncidentRecord } from "../../domain/incident/incidentTypes";
 import { isFirebaseConfigured } from "../../services/core/firebase/firebase";
 import {
   subscribeIncident,
@@ -22,17 +19,13 @@ export interface UseIncidentThreadResult {
  * Live incident doc + messages for the player/admin chat thread.
  * Mutations go through callables; Firestore is read-only for clients.
  */
-export function useIncidentThread(
-  incidentId: string | null | undefined,
-): UseIncidentThreadResult {
+export function useIncidentThread(incidentId: string | null | undefined): UseIncidentThreadResult {
   const [incident, setIncident] = useState<IncidentRecord | null>(null);
   const [messages, setMessages] = useState<IncidentMessageRecord[]>([]);
   const [error, setError] = useState<Error | null>(null);
   const [sending, setSending] = useState(false);
   const sendInFlightRef = useRef(false);
-  const [syncedIncidentId, setSyncedIncidentId] = useState(
-    incidentId ?? null,
-  );
+  const [syncedIncidentId, setSyncedIncidentId] = useState(incidentId ?? null);
 
   const normalizedIncidentId = incidentId ?? null;
   if (normalizedIncidentId !== syncedIncidentId) {
@@ -49,14 +42,10 @@ export function useIncidentThread(
       return;
     }
 
-    const unsubIncident = subscribeIncident(
-      normalizedIncidentId,
-      setIncident,
-      (nextError) => {
-        setError(nextError);
-        setIncident(null);
-      },
-    );
+    const unsubIncident = subscribeIncident(normalizedIncidentId, setIncident, (nextError) => {
+      setError(nextError);
+      setIncident(null);
+    });
 
     const unsubMessages = subscribeIncidentMessages(
       normalizedIncidentId,

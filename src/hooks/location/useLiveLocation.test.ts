@@ -1,15 +1,16 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import {
-  createMockGeolocationPosition,
-  mockGeolocation,
-} from "../../test/mocks/geolocation";
 import * as geolocation from "../../services/core/location/geolocation";
 import {
   confirmAndRequestLocationAccess,
   type GeolocationReading,
 } from "../../services/core/location/geolocation";
+import {
+  getLiveLocationReadingSnapshot,
+  resetLiveLocationReadingForTests,
+} from "../../services/core/location/liveLocationReading";
 import { resetLocationPermissionUiForTests } from "../../services/core/location/locationPermissionUi";
+import { createMockGeolocationPosition, mockGeolocation } from "../../test/mocks/geolocation";
 import { useLiveLocation } from "./useLiveLocation";
 
 function mockPermissions(state: PermissionState): void {
@@ -24,7 +25,89 @@ function mockPermissions(state: PermissionState): void {
 describe("useLiveLocation", () => {
   afterEach(() => {
     resetLocationPermissionUiForTests();
+    resetLiveLocationReadingForTests();
     vi.unstubAllGlobals();
+  });
+
+  it("publishes live snapshot when a reading arrives", async () => {
+    mockGeolocation(createMockGeolocationPosition(53.35, -6.26));
+    mockPermissions("granted");
+
+    renderHook(() => useLiveLocation(true));
+
+    await waitFor(() => {
+      expect(getLiveLocationReadingSnapshot().reading).toEqual({
+        lat: 53.35,
+        lng: -6.26,
+        accuracy: 5,
+        heading: null,
+      });
+    });
+  });
+
+  it("keeps live snapshot when one of two hooks disables", async () => {
+    mockGeolocation(createMockGeolocationPosition(53.35, -6.26));
+    mockPermissions("granted");
+
+    const { rerender } = renderHook(
+      ({ enabledA, enabledB }) => {
+        useLiveLocation(enabledA);
+        useLiveLocation(enabledB);
+      },
+      { initialProps: { enabledA: true, enabledB: true } },
+    );
+
+    await waitFor(() => {
+      expect(getLiveLocationReadingSnapshot().reading).not.toBeNull();
+    });
+
+    rerender({ enabledA: false, enabledB: true });
+
+    await waitFor(() => {
+      expect(getLiveLocationReadingSnapshot().reading).not.toBeNull();
+    });
+  });
+
+  it("clears live snapshot when the last enabled hook disables", async () => {
+    mockGeolocation(createMockGeolocationPosition(53.35, -6.26));
+    mockPermissions("granted");
+
+    const { rerender } = renderHook(
+      ({ enabledA, enabledB }) => {
+        useLiveLocation(enabledA);
+        useLiveLocation(enabledB);
+      },
+      { initialProps: { enabledA: true, enabledB: true } },
+    );
+
+    await waitFor(() => {
+      expect(getLiveLocationReadingSnapshot().reading).not.toBeNull();
+    });
+
+    rerender({ enabledA: false, enabledB: false });
+
+    await waitFor(() => {
+      expect(getLiveLocationReadingSnapshot().reading).toBeNull();
+    });
+  });
+
+  it("clears live snapshot when disabled", async () => {
+    mockGeolocation(createMockGeolocationPosition(53.35, -6.26));
+    mockPermissions("granted");
+
+    const { rerender } = renderHook(({ enabled }) => useLiveLocation(enabled), {
+      initialProps: { enabled: true },
+    });
+
+    await waitFor(() => {
+      expect(getLiveLocationReadingSnapshot().reading).not.toBeNull();
+    });
+
+    rerender({ enabled: false });
+
+    await waitFor(() => {
+      expect(getLiveLocationReadingSnapshot().reading).toBeNull();
+    });
   });
 
   it("publishes an initial reading when enabled and granted", async () => {
@@ -60,10 +143,9 @@ describe("useLiveLocation", () => {
     mockPermissions("granted");
     const watchPosition = vi.mocked(navigator.geolocation.watchPosition);
 
-    const { result, rerender } = renderHook(
-      ({ enabled }) => useLiveLocation(enabled),
-      { initialProps: { enabled: false } },
-    );
+    const { result, rerender } = renderHook(({ enabled }) => useLiveLocation(enabled), {
+      initialProps: { enabled: false },
+    });
 
     expect(result.current.reading).toBeNull();
     expect(watchPosition).not.toHaveBeenCalled();
@@ -118,12 +200,10 @@ describe("useLiveLocation", () => {
       accuracy: 5,
       heading: null,
     };
-    const restoreSpy = vi
-      .spyOn(geolocation, "restoreLocationAccessIfPersisted")
-      .mockResolvedValue({
-        status: "restored",
-        reading: restoredReading,
-      });
+    const restoreSpy = vi.spyOn(geolocation, "restoreLocationAccessIfPersisted").mockResolvedValue({
+      status: "restored",
+      reading: restoredReading,
+    });
     const getCurrentPosition = vi.mocked(navigator.geolocation.getCurrentPosition);
     const watchPosition = vi.mocked(navigator.geolocation.watchPosition);
     watchPosition.mockImplementation(() => 1);

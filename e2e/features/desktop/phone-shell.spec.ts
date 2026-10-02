@@ -1,9 +1,4 @@
-import {
-  test,
-  expect,
-  prepareE2EPage,
-  openMapWithLocalSession,
-} from "../../fixtures";
+import { expect, openMapWithLocalSession, prepareE2EPage, test } from "../../fixtures";
 
 test.describe("phone shell @ 1280", () => {
   test.use({ viewport: { width: 1280, height: 800 } });

@@ -1,4 +1,5 @@
 import { onSchedule } from "firebase-functions/v2/scheduler";
+import { adminDb } from "../handlers/proxyShared.mjs";
 import {
   captureFunctionsException,
   getSentryDsnSecret,
@@ -9,7 +10,10 @@ import {
   computeIdleCutoffIso,
   selectIdleActiveSessions,
 } from "../session/autoEndIdleSessions.mjs";
-import { sweepOrphanSessionCodes, ORPHAN_CODE_SWEEP_LIMIT } from "../session/orphanSessionCodes.mjs";
+import {
+  ORPHAN_CODE_SWEEP_LIMIT,
+  sweepOrphanSessionCodes,
+} from "../session/orphanSessionCodes.mjs";
 import {
   computeAbandonedCutoffIso,
   computeEndedCutoffIso,
@@ -17,7 +21,6 @@ import {
   PURGE_BATCH_LIMIT,
   selectSessionsToPurge,
 } from "../session/purgeStaleSessions.mjs";
-import { adminDb } from "../handlers/proxyShared.mjs";
 
 const sentryDsnSecret = getSentryDsnSecret();
 

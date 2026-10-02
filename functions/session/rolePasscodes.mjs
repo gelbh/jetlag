@@ -4,9 +4,7 @@ const ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ";
 export const ROLE_PASSCODE_LENGTH = 4;
 
 export function normalizeRolePasscode(input) {
-  return typeof input === "string"
-    ? input.replace(/\s+/g, "").toUpperCase()
-    : "";
+  return typeof input === "string" ? input.replace(/\s+/g, "").toUpperCase() : "";
 }
 
 /** Rejection-sample CSPRNG codes over the role-passcode alphabet. */
@@ -42,9 +40,7 @@ export function verifyRolePasscode(record, code) {
     return false;
   }
 
-  const expected = normalizeRolePasscode(
-    typeof record.code === "string" ? record.code : "",
-  );
+  const expected = normalizeRolePasscode(typeof record.code === "string" ? record.code : "");
   const candidate = normalizeRolePasscode(code);
   if (!expected || expected.length !== candidate.length) {
     return false;

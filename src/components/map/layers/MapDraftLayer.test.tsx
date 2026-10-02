@@ -1,13 +1,11 @@
-import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
-import type { ReactNode } from "react";
 import type { MapGeoJSONFeature } from "maplibre-gl";
+import type { ReactNode } from "react";
+import { describe, expect, it, vi } from "vitest";
 import type { MapFeatureHitResult } from "../helpers/mapFeatureHitTest";
 import { MapDraftLayer } from "./MapDraftLayer";
 
-let hitHandler:
-  | ((result: MapFeatureHitResult) => boolean | void)
-  | null = null;
+let hitHandler: ((result: MapFeatureHitResult) => boolean | void) | null = null;
 
 vi.mock("../helpers/MapFeatureHitTestContext", () => ({
   useMapFeatureHitTest: (
@@ -31,9 +29,7 @@ vi.mock("../helpers/MapLibreFeaturePopup", () => ({
 }));
 
 vi.mock("react-map-gl/maplibre", () => ({
-  Marker: ({ children }: { children: ReactNode }) => (
-    <div data-testid="map-marker">{children}</div>
-  ),
+  Marker: ({ children }: { children: ReactNode }) => <div data-testid="map-marker">{children}</div>,
 }));
 
 function fakeHit(hitId: string): MapFeatureHitResult {
@@ -87,10 +83,7 @@ describe("MapDraftLayer", () => {
       />,
     );
 
-    expect(screen.getByTestId("tentacle-poi-pin")).toHaveAttribute(
-      "data-selected",
-      "1",
-    );
+    expect(screen.getByTestId("tentacle-poi-pin")).toHaveAttribute("data-selected", "1");
   });
 
   it("returns false when activate declines a no-popup marker", () => {

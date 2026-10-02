@@ -40,8 +40,7 @@ export function isJoinRequestExpired(request, nowMs) {
 }
 
 export function buildJoinRequestIdentityLabel(input) {
-  const username =
-    typeof input?.username === "string" ? input.username.trim() : "";
+  const username = typeof input?.username === "string" ? input.username.trim() : "";
   if (username) {
     return username;
   }
@@ -57,8 +56,7 @@ function assertAuth(auth) {
 }
 
 function readSessionId(rawInput) {
-  const sessionId =
-    typeof rawInput?.sessionId === "string" ? rawInput.sessionId.trim() : "";
+  const sessionId = typeof rawInput?.sessionId === "string" ? rawInput.sessionId.trim() : "";
   if (!sessionId) {
     throw new HttpsError("invalid-argument", "sessionId is required.");
   }
@@ -66,8 +64,7 @@ function readSessionId(rawInput) {
 }
 
 function readRequestId(rawInput) {
-  const requestId =
-    typeof rawInput?.requestId === "string" ? rawInput.requestId.trim() : "";
+  const requestId = typeof rawInput?.requestId === "string" ? rawInput.requestId.trim() : "";
   if (!requestId) {
     throw new HttpsError("invalid-argument", "requestId is required.");
   }
@@ -100,13 +97,9 @@ function assertCanApproveRole(data, uid, role) {
   }
 
   const leaders =
-    data.roleGates && typeof data.roleGates === "object"
-      ? data.roleGates.leaders ?? {}
-      : {};
+    data.roleGates && typeof data.roleGates === "object" ? (data.roleGates.leaders ?? {}) : {};
   const memberRole =
-    data.memberRoles && typeof data.memberRoles === "object"
-      ? data.memberRoles[uid]
-      : undefined;
+    data.memberRoles && typeof data.memberRoles === "object" ? data.memberRoles[uid] : undefined;
 
   if (leaders[role] !== uid || memberRole !== role) {
     throw new Error(JOIN_REQ_NOT_AUTHORIZED);
@@ -128,13 +121,7 @@ function applyLeaderPromotionOnRoleSwitch({
     return { roleGates, clearSecret: false };
   }
 
-  const promoted = promoteOrClearRoleLeader(
-    roleGates,
-    memberUids,
-    memberRoles,
-    currentRole,
-    uid,
-  );
+  const promoted = promoteOrClearRoleLeader(roleGates, memberUids, memberRoles, currentRole, uid);
   return {
     roleGates: promoted.roleGates,
     clearSecret: promoted.clearSecret,
@@ -144,12 +131,7 @@ function applyLeaderPromotionOnRoleSwitch({
 async function resolveIdentityLabel(db, uid) {
   let username = null;
 
-  const profileSnap = await db
-    .collection("users")
-    .doc(uid)
-    .collection("profile")
-    .doc("main")
-    .get();
+  const profileSnap = await db.collection("users").doc(uid).collection("profile").doc("main").get();
   if (profileSnap.exists) {
     const profile = profileSnap.data() ?? {};
     if (typeof profile.username === "string") {
@@ -160,18 +142,11 @@ async function resolveIdentityLabel(db, uid) {
   return buildJoinRequestIdentityLabel({ username });
 }
 
-export async function requestRoleJoinHandler(
-  db,
-  auth,
-  authAdmin,
-  rawInput,
-  nowMs = Date.now(),
-) {
+export async function requestRoleJoinHandler(db, auth, _authAdmin, rawInput, nowMs = Date.now()) {
   const uid = assertAuth(auth);
   const sessionId = readSessionId(rawInput);
   const role = readJoinRole(rawInput);
-  const clientVersion =
-    typeof rawInput?.clientVersion === "string" ? rawInput.clientVersion : "";
+  const clientVersion = typeof rawInput?.clientVersion === "string" ? rawInput.clientVersion : "";
 
   await assertClientMeetsConfiguredMin(db, clientVersion);
 
@@ -210,12 +185,7 @@ export async function requestRoleJoinHandler(
   return { requestId: requestRef.id, expiresAt };
 }
 
-export async function cancelRoleJoinRequestHandler(
-  db,
-  auth,
-  rawInput,
-  nowMs = Date.now(),
-) {
+export async function cancelRoleJoinRequestHandler(db, auth, rawInput, nowMs = Date.now()) {
   const uid = assertAuth(auth);
   const sessionId = readSessionId(rawInput);
   const requestId = readRequestId(rawInput);
@@ -265,12 +235,7 @@ export async function cancelRoleJoinRequestHandler(
   return { ok: true };
 }
 
-export async function resolveRoleJoinRequestHandler(
-  db,
-  auth,
-  rawInput,
-  nowMs = Date.now(),
-) {
+export async function resolveRoleJoinRequestHandler(db, auth, rawInput, nowMs = Date.now()) {
   const uid = assertAuth(auth);
   const sessionId = readSessionId(rawInput);
   const requestId = readRequestId(rawInput);
@@ -283,8 +248,7 @@ export async function resolveRoleJoinRequestHandler(
   const sessionRef = db.collection("sessions").doc(sessionId);
   const secretsRef = db.collection("sessionRoleSecrets").doc(sessionId);
   const requestRef = sessionRef.collection("joinRequests").doc(requestId);
-  const globalMinVersion =
-    decision === "accept" ? await resolveClientMinVersion(db) : null;
+  const globalMinVersion = decision === "accept" ? await resolveClientMinVersion(db) : null;
 
   let hasExpired = false;
   await db.runTransaction(async (tx) => {
@@ -334,15 +298,14 @@ export async function resolveRoleJoinRequestHandler(
     }
 
     const membership = readMembershipFields(data);
-    let { memberUids, memberRoles, memberAppVersions, hostUid } = membership;
+    const { memberUids, memberRoles, memberAppVersions, hostUid } = membership;
     let roleGates = {
       version: 1,
       leaders: { ...(data.roleGates?.leaders ?? {}) },
     };
 
     const requesterUid = request.requesterUid;
-    const clientVersion =
-      typeof request.clientVersion === "string" ? request.clientVersion : "";
+    const clientVersion = typeof request.clientVersion === "string" ? request.clientVersion : "";
 
     assertClientMeetsGlobalMin(clientVersion, globalMinVersion);
 

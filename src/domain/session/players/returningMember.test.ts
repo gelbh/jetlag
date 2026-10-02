@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
-  buildMemberUidsAfterHeal,
   buildMembershipHealState,
+  buildMemberUidsAfterHeal,
   memberUidSetsEqual,
   resolveHostUidAfterHeal,
   sanitizeReturningMemberUid,
@@ -20,9 +20,10 @@ describe("returningMember", () => {
   });
 
   it("removes returning uid when healing membership", () => {
-    expect(
-      buildMemberUidsAfterHeal(["host", "uid-old"], "uid-new", "uid-old"),
-    ).toEqual(["host", "uid-new"]);
+    expect(buildMemberUidsAfterHeal(["host", "uid-old"], "uid-new", "uid-old")).toEqual([
+      "host",
+      "uid-new",
+    ]);
   });
 });
 

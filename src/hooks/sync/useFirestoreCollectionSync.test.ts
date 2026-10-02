@@ -10,9 +10,7 @@ vi.mock("../../services/core/firebase/firebase", () => ({
 describe("useFirestoreCollectionSync", () => {
   it("returns an empty list for local sessions", () => {
     const subscribe = vi.fn();
-    const { result } = renderHook(() =>
-      useFirestoreCollectionSync(LOCAL_SESSION_ID, subscribe),
-    );
+    const { result } = renderHook(() => useFirestoreCollectionSync(LOCAL_SESSION_ID, subscribe));
 
     expect(result.current).toEqual([]);
     expect(subscribe).not.toHaveBeenCalled();
@@ -20,15 +18,10 @@ describe("useFirestoreCollectionSync", () => {
 
   it("subscribes for remote sessions and cleans up", async () => {
     const unsubscribe = vi.fn();
-    const subscribe = vi.fn(
-      (
-        _sessionId: string,
-        onData: (items: string[]) => void,
-      ) => {
-        onData(["alpha"]);
-        return unsubscribe;
-      },
-    );
+    const subscribe = vi.fn((_sessionId: string, onData: (items: string[]) => void) => {
+      onData(["alpha"]);
+      return unsubscribe;
+    });
 
     const { result, unmount } = renderHook(() =>
       useFirestoreCollectionSync("remote-session", subscribe),
@@ -59,15 +52,10 @@ describe("useFirestoreCollectionSync", () => {
 
   it("re-subscribes when enabled flips to true", async () => {
     const unsubscribe = vi.fn();
-    const subscribe = vi.fn(
-      (
-        _sessionId: string,
-        onData: (items: string[]) => void,
-      ) => {
-        onData(["alpha"]);
-        return unsubscribe;
-      },
-    );
+    const subscribe = vi.fn((_sessionId: string, onData: (items: string[]) => void) => {
+      onData(["alpha"]);
+      return unsubscribe;
+    });
 
     const { result, rerender } = renderHook(
       ({ enabled }: { enabled: boolean }) =>
@@ -88,19 +76,13 @@ describe("useFirestoreCollectionSync", () => {
   it("calls onSyncError on subscription error", () => {
     const onSyncError = vi.fn();
     const subscribe = vi.fn(
-      (
-        _sessionId: string,
-        _onData: (items: string[]) => void,
-        onError: () => void,
-      ) => {
+      (_sessionId: string, _onData: (items: string[]) => void, onError: () => void) => {
         onError();
         return vi.fn();
       },
     );
 
-    renderHook(() =>
-      useFirestoreCollectionSync("remote-session", subscribe, { onSyncError }),
-    );
+    renderHook(() => useFirestoreCollectionSync("remote-session", subscribe, { onSyncError }));
 
     expect(onSyncError).toHaveBeenCalledOnce();
   });
@@ -125,20 +107,14 @@ describe("useFirestoreCollectionSync", () => {
   it("clears items on subscription error when no handler is provided", () => {
     const unsubscribe = vi.fn();
     const subscribe = vi.fn(
-      (
-        _sessionId: string,
-        onData: (items: string[]) => void,
-        onError: () => void,
-      ) => {
+      (_sessionId: string, onData: (items: string[]) => void, onError: () => void) => {
         onData(["alpha"]);
         onError();
         return unsubscribe;
       },
     );
 
-    const { result } = renderHook(() =>
-      useFirestoreCollectionSync("remote-session", subscribe),
-    );
+    const { result } = renderHook(() => useFirestoreCollectionSync("remote-session", subscribe));
 
     expect(result.current).toEqual([]);
   });

@@ -1,8 +1,5 @@
 import { useState } from "react";
-import {
-  RequestPreloadSection,
-  type RequestPreloadSectionProps,
-} from "./RequestPreloadSection";
+import { RequestPreloadSection, type RequestPreloadSectionProps } from "./RequestPreloadSection";
 
 export type RequestPackWhenUnavailableProps = RequestPreloadSectionProps & {
   /** When false, the CTA stays hidden after dismiss until remount/reset. */

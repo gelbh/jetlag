@@ -1,9 +1,9 @@
+import { signInAnonymously, signOut } from "firebase/auth";
 import {
   getFirebaseAuth,
   getFirestoreDb,
   resetFirebaseForTests,
 } from "../../services/core/firebase/firebase";
-import { signInAnonymously, signOut } from "firebase/auth";
 
 export async function connectEmulatorsForTests(): Promise<{
   uid: string;

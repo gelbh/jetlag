@@ -1,5 +1,28 @@
+import {
+  AirplaneTiltIcon,
+  BankIcon,
+  BookOpenIcon,
+  BuildingsIcon,
+  CityIcon,
+  ConfettiIcon,
+  FilmSlateIcon,
+  FirstAidIcon,
+  FishIcon,
+  FlagIcon,
+  GolfIcon,
+  HouseIcon,
+  type IconProps,
+  IslandIcon,
+  MapTrifoldIcon,
+  MountainsIcon,
+  PathIcon,
+  PawPrintIcon,
+  TagIcon,
+  TextTIcon,
+  TrainIcon,
+  TreeIcon,
+} from "@phosphor-icons/react";
 import type { ComponentType } from "react";
-import { AirplaneTiltIcon, BankIcon, BookOpenIcon, BuildingsIcon, CityIcon, ConfettiIcon, FilmSlateIcon, FirstAidIcon, FishIcon, FlagIcon, GolfIcon, HouseIcon, IslandIcon, MapTrifoldIcon, MountainsIcon, PathIcon, PawPrintIcon, TagIcon, TextTIcon, TrainIcon, TreeIcon, type IconProps } from "@phosphor-icons/react";
 import type { MatchingCategoryId } from "@/domain/questions";
 
 const BUILTIN_ICONS: Record<
@@ -29,9 +52,7 @@ const BUILTIN_ICONS: Record<
 };
 
 /** Phosphor icon for a matching catalog category (custom/pack → TagIcon). */
-export function matchingCategoryIcon(
-  categoryId: MatchingCategoryId,
-): ComponentType<IconProps> {
+export function matchingCategoryIcon(categoryId: MatchingCategoryId): ComponentType<IconProps> {
   if (categoryId.startsWith("custom:") || categoryId.startsWith("pack:")) {
     return TagIcon;
   }

@@ -1,24 +1,25 @@
-import { AskHudPanel } from "@/components/tools/ask/AskHudPanel";
+import { HudPhotoIcon } from "@/components/map/icons/ToolIcons";
 /**
  * Photo Ask HUD mode body — Matching twin: question header + catalog/chips.
  * Map-first overlay owns Send after category is chosen (Mantine flag).
  */
 import { AskCatalogRail } from "@/components/tools/ask/AskCatalogRail";
 import { AskChipIsland } from "@/components/tools/ask/AskChipIsland";
-import { HudPhotoIcon } from "@/components/map/icons/ToolIcons";
-import { CatalogExhaustedMessage } from "@/components/tools/shared/readout/CatalogExhaustedMessage";
+import { AskHudPanel } from "@/components/tools/ask/AskHudPanel";
 import { QuestionPromptBlock } from "@/components/tools/shared/controls/QuestionPromptBlock";
 import { QuestionTruthReferenceHint } from "@/components/tools/shared/QuestionTruthReferenceHint";
+import { CatalogExhaustedMessage } from "@/components/tools/shared/readout/CatalogExhaustedMessage";
 import { askInsetSurfaceStyle } from "@/components/ui/entry/entryChrome";
 import type { DistanceUnit } from "@/domain/map/distance";
-import type { GameSize } from "@/domain/session/size/gameSize";
 import {
   isPhotoCategoryAvailableForGameSize,
+  type PhotoCategoryId,
   photoCategoriesForGameSize,
   photoCategoryLabelForUnit,
   photoQuestionFor,
-  type PhotoCategoryId,
 } from "@/domain/questions";
+import type { GameSize } from "@/domain/session/size/gameSize";
+
 /** Prefer chips when few options; short rail when the catalog is longer. */
 const CHIP_ISLAND_MAX = 6;
 
@@ -55,14 +56,11 @@ export function PhotoHudBody({
   const catalogCategories = photoCategoriesForGameSize(gameSize);
   const availableCategories = catalogCategories.filter(
     (category) =>
-      !usedCategoryIds.has(category.id) ||
-      (categoryChosen && category.id === categoryId),
+      !usedCategoryIds.has(category.id) || (categoryChosen && category.id === categoryId),
   );
   /** Flag-off keeps prior always-selected catalog; Mantine waits for an explicit tap. */
   const showAsChosen = categoryChosen || !true;
-  const question = showAsChosen
-    ? photoQuestionFor(categoryId, distanceUnit)
-    : PHOTO_QUESTION_INTRO;
+  const question = showAsChosen ? photoQuestionFor(categoryId, distanceUnit) : PHOTO_QUESTION_INTRO;
   const categoryReady =
     availableCategories.length > 0 &&
     isPhotoCategoryAvailableForGameSize(gameSize, categoryId) &&
@@ -72,25 +70,14 @@ export function PhotoHudBody({
   const catalogItems = catalogCategories.map((category) => ({
     id: category.id,
     label: photoCategoryLabelForUnit(category.id, distanceUnit),
-    disabled:
-      usedCategoryIds.has(category.id) &&
-      !(categoryChosen && category.id === categoryId),
+    disabled: usedCategoryIds.has(category.id) && !(categoryChosen && category.id === categoryId),
   }));
 
   return (
-    <div
-      data-testid="photo-hud-body"
-      className="ask-hud-mode-body flex w-full flex-col gap-2"
-    >
-      <div
-        className="pointer-events-auto space-y-2 p-3"
-        style={askInsetSurfaceStyle}
-      >
+    <div data-testid="photo-hud-body" className="ask-hud-mode-body flex w-full flex-col gap-2">
+      <div className="pointer-events-auto space-y-2 p-3" style={askInsetSurfaceStyle}>
         <div className="flex items-start gap-3">
-          <div
-            className="flex shrink-0 flex-col items-center gap-1"
-            style={{ minWidth: 44 }}
-          >
+          <div className="flex shrink-0 flex-col items-center gap-1" style={{ minWidth: 44 }}>
             <span
               aria-hidden
               className="inline-flex items-center justify-center"
@@ -98,8 +85,7 @@ export function PhotoHudBody({
                 width: 40,
                 height: 40,
                 borderRadius: 12,
-                backgroundColor:
-                  "oklch(from var(--color-field-ink) l c h / 0.08)",
+                backgroundColor: "oklch(from var(--color-field-ink) l c h / 0.08)",
                 color: "var(--color-field-ink)",
               }}
             >
@@ -132,10 +118,7 @@ export function PhotoHudBody({
             >
               {toolLabel}
             </p>
-            <QuestionPromptBlock
-              prompt={question.prompt}
-              ruleSummary={question.ruleSummary}
-            />
+            <QuestionPromptBlock prompt={question.prompt} ruleSummary={question.ruleSummary} />
           </div>
         </div>
       </div>

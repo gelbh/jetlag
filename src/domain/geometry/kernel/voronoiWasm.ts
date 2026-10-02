@@ -1,16 +1,13 @@
 import type { Feature, FeatureCollection, Polygon } from "geojson";
-import {
-  loadKernelWasm,
-  resetKernelWasmForTests,
-} from "./kernelWasmPkg";
+import { loadKernelWasm, resetKernelWasmForTests } from "./kernelWasmPkg";
 import type { SpatialVoronoiSite } from "./spatialVoronoiTypes";
 
 /** Reset lazy WASM module (tests). */
 export const resetVoronoiWasmForTests = resetKernelWasmForTests;
 
-function dedupeSpatialVoronoiSites<
-  T extends Record<string, unknown> = Record<string, unknown>,
->(sites: Array<SpatialVoronoiSite<T>>): Array<SpatialVoronoiSite<T>> {
+function dedupeSpatialVoronoiSites<T extends Record<string, unknown> = Record<string, unknown>>(
+  sites: Array<SpatialVoronoiSite<T>>,
+): Array<SpatialVoronoiSite<T>> {
   const seen = new Set<string>();
   return sites.filter((site) => {
     const key = `${site.lng},${site.lat}`;
@@ -22,9 +19,7 @@ function dedupeSpatialVoronoiSites<
   });
 }
 
-function spatialVoronoiSitesToCoords(
-  sites: Array<SpatialVoronoiSite>,
-): Float64Array {
+function spatialVoronoiSitesToCoords(sites: Array<SpatialVoronoiSite>): Float64Array {
   const coords = new Float64Array(sites.length * 2);
   for (let i = 0; i < sites.length; i += 1) {
     const site = sites[i]!;
@@ -37,10 +32,7 @@ function spatialVoronoiSitesToCoords(
 /** Unpack packed rings; `sites` must be 1:1 with cells (dedupe first). */
 function featureCollectionFromVoronoiRings<
   T extends Record<string, unknown> = Record<string, unknown>,
->(
-  sites: Array<SpatialVoronoiSite<T>>,
-  packed: ArrayLike<number>,
-): FeatureCollection {
+>(sites: Array<SpatialVoronoiSite<T>>, packed: ArrayLike<number>): FeatureCollection {
   const features: Feature<Polygon>[] = [];
   let offset = 0;
   let siteIndex = 0;
@@ -87,9 +79,7 @@ export async function wasmBuildSpatialVoronoiFromSites<
     return { type: "FeatureCollection", features: [] };
   }
   const wasm = await loadKernelWasm();
-  const result = wasm.build_spatial_voronoi_rings(
-    spatialVoronoiSitesToCoords(working),
-  );
+  const result = wasm.build_spatial_voronoi_rings(spatialVoronoiSitesToCoords(working));
   if (result == null || typeof (result as { length?: unknown }).length !== "number") {
     throw new Error("Geometry kernel returned a non-array Voronoi rings payload");
   }

@@ -1,28 +1,29 @@
+import type { Feature, LineString } from "geojson";
 import { startTransition, useCallback, useEffect, useRef } from "react";
-import type { GameArea } from "@/domain/map/annotations";
+import { poiCandidateToMeasuringPlace } from "@/domain/geo/poiCandidateAdapters";
 import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
 import { distanceBetweenPoints } from "@/domain/geometry/gameArea/geometry";
+import type { GameArea } from "@/domain/map/annotations";
 import {
-  isMeasuringLinearLocation,
-  measuringFromKind,
-  measuringMultiPlaceTargetLabel,
-  measuringUsesAllPlacesInArea,
   applyMeasuringFromKind,
+  isMeasuringLinearLocation,
   type MeasuringFromKind,
   type MeasuringLocationCategory,
   type MeasuringTargetMode,
+  measuringFromKind,
+  measuringMultiPlaceTargetLabel,
+  measuringUsesAllPlacesInArea,
 } from "@/domain/questions";
-import type { SessionRulesInput } from "@/domain/session/rules";
 import { manualPinAsMeasuringPlace } from "@/domain/session/catalog/sessionCustomCatalog";
-import { poiCandidateToMeasuringPlace } from "@/domain/geo/poiCandidateAdapters";
-import { measuringLinearNotFoundMessage } from "@/services/geo/overpass/measuringLinearFeatures";
+import type { SessionRulesInput } from "@/domain/session/rules";
 import { overpassErrorMessage } from "@/services/core/overpass/overpassClient";
+import { previewBasemapPois } from "@/services/geo/maplibre/previewBasemapPois";
+import { resolveCoastlineContextFromCache } from "@/services/geo/overpass/coastline";
+import { measuringLinearNotFoundMessage } from "@/services/geo/overpass/measuringLinearFeatures";
 import {
   fetchMeasuringPlacesInArea,
   measuringPlaceNotFoundMessage,
 } from "@/services/geo/overpass/measuringPlaces";
-import { resolveCoastlineContextFromCache } from "@/services/geo/overpass/coastline";
-import { previewBasemapPois } from "@/services/geo/maplibre/previewBasemapPois";
 import { useMapStore } from "@/state/mapStore";
 import { useDebouncedValue } from "../../forms/useDebouncedValue";
 import {
@@ -114,14 +115,9 @@ export function useMeasuringAnchorLoaders({
       }
       placesApplyPhaseRef.current.set(requestId, phase);
 
-      const pinPlaces = (sessionRules?.customLocationPins ?? []).map(
-        manualPinAsMeasuringPlace,
-      );
+      const pinPlaces = (sessionRules?.customLocationPins ?? []).map(manualPinAsMeasuringPlace);
       const seen = new Set(fetchedPlaces.map((place) => place.id));
-      const places = [
-        ...fetchedPlaces,
-        ...pinPlaces.filter((place) => !seen.has(place.id)),
-      ];
+      const places = [...fetchedPlaces, ...pinPlaces.filter((place) => !seen.has(place.id))];
 
       // Keep seeker answer + nearest target stable once chosen; enrich only refreshes the list.
       if (measuringAnswerRef.current !== null) {
@@ -161,9 +157,7 @@ export function useMeasuringAnchorLoaders({
       setMeasuringPlaces(places);
       setMeasuringDistanceMeters(nearestDistance);
       setMeasuringTargetPoint(nearestPlace.point);
-      setMeasuringTargetPlaceName(
-        measuringMultiPlaceTargetLabel(places.length, measureFromKind),
-      );
+      setMeasuringTargetPlaceName(measuringMultiPlaceTargetLabel(places.length, measureFromKind));
     },
     [
       measureFromKind,
@@ -197,13 +191,7 @@ export function useMeasuringAnchorLoaders({
         maxResults: 48,
       }).map(poiCandidateToMeasuringPlace);
       if (tilePreview.length > 0) {
-        applyAllPlacesResult(
-          requestId,
-          seekerPoint,
-          category,
-          tilePreview,
-          0,
-        );
+        applyAllPlacesResult(requestId, seekerPoint, category, tilePreview, 0);
       }
 
       try {
@@ -215,13 +203,7 @@ export function useMeasuringAnchorLoaders({
           sessionRules?.regionPackId,
           {
             onEnrich: (enrichedPlaces) => {
-              applyAllPlacesResult(
-                requestId,
-                seekerPoint,
-                category,
-                enrichedPlaces,
-                1,
-              );
+              applyAllPlacesResult(requestId, seekerPoint, category, enrichedPlaces, 1);
             },
           },
         );
@@ -235,9 +217,7 @@ export function useMeasuringAnchorLoaders({
         setMeasuringPlaces([]);
         setMeasuringDistanceMeters(null);
         setMeasuringTargetPlaceName(null);
-        setMeasuringError(
-          overpassErrorMessage(error, "Places in the play area didn't load."),
-        );
+        setMeasuringError(overpassErrorMessage(error, "Places in the play area didn't load."));
       } finally {
         if (requestId === placesRequestIdRef.current) {
           setMeasuringLoading(false);
@@ -290,16 +270,12 @@ export function useMeasuringAnchorLoaders({
           });
         };
 
-        const result = await fetchMeasuringSeaLevelContext(
-          seekerPoint,
-          gameArea,
-          {
-            regionPackId: sessionRules?.regionPackId,
-            onEnrich: (enriched) => {
-              applySeaLevelResult(enriched);
-            },
+        const result = await fetchMeasuringSeaLevelContext(seekerPoint, gameArea, {
+          regionPackId: sessionRules?.regionPackId,
+          onEnrich: (enriched) => {
+            applySeaLevelResult(enriched);
           },
-        );
+        });
 
         if (requestId !== seaLevelRequestIdRef.current) {
           return;
@@ -316,9 +292,7 @@ export function useMeasuringAnchorLoaders({
         setMeasuringDistanceMeters(null);
         setMeasuringSeaLevelEdgeCase(null);
         setMeasuringSeaLevelNote(null);
-        setMeasuringError(
-          error instanceof Error ? error.message : "Elevation unavailable.",
-        );
+        setMeasuringError(error instanceof Error ? error.message : "Elevation unavailable.");
       } finally {
         if (requestId === seaLevelRequestIdRef.current) {
           setMeasuringLoading(false);
@@ -344,6 +318,9 @@ export function useMeasuringAnchorLoaders({
       const requestId = ++coastlineRequestIdRef.current;
       setMeasuringLoading(true);
       setMeasuringError(null);
+      setMeasuringTargetPoint(null);
+      setMeasuringDistanceMeters(null);
+      setMeasuringCoastSegments([]);
 
       const syncResult = resolveCoastlineContextFromCache(seekerPoint, gameArea);
       if (syncResult) {
@@ -354,8 +331,9 @@ export function useMeasuringAnchorLoaders({
         startTransition(() => {
           setMeasuringTargetPoint(syncResult.coastPoint);
           setMeasuringDistanceMeters(syncResult.distanceMeters);
+          setMeasuringCoastSegments(syncResult.segments);
+          setMeasuringLoading(false);
         });
-        setMeasuringLoading(false);
         return;
       }
 
@@ -363,6 +341,7 @@ export function useMeasuringAnchorLoaders({
         const applyCoastlineOk = (result: {
           coastPoint: LatLngTuple;
           distanceMeters: number;
+          segments: Feature<LineString>[];
         }) => {
           if (requestId !== coastlineRequestIdRef.current) {
             return;
@@ -370,20 +349,18 @@ export function useMeasuringAnchorLoaders({
           startTransition(() => {
             setMeasuringTargetPoint(result.coastPoint);
             setMeasuringDistanceMeters(result.distanceMeters);
+            setMeasuringCoastSegments(result.segments);
             setCoastlineContextVersion((version) => version + 1);
+            setMeasuringLoading(false);
           });
         };
 
-        const result = await fetchMeasuringCoastlineContext(
-          seekerPoint,
-          gameArea,
-          {
-            regionPackId: sessionRules?.regionPackId,
-            onEnrich: (enriched) => {
-              applyCoastlineOk(enriched);
-            },
+        const result = await fetchMeasuringCoastlineContext(seekerPoint, gameArea, {
+          regionPackId: sessionRules?.regionPackId,
+          onEnrich: (enriched) => {
+            applyCoastlineOk(enriched);
           },
-        );
+        });
 
         if (requestId !== coastlineRequestIdRef.current) {
           return;
@@ -392,6 +369,7 @@ export function useMeasuringAnchorLoaders({
         if (!result.ok) {
           setMeasuringTargetPoint(null);
           setMeasuringDistanceMeters(null);
+          setMeasuringCoastSegments([]);
           setMeasuringError(result.message);
           return;
         }
@@ -404,9 +382,8 @@ export function useMeasuringAnchorLoaders({
 
         setMeasuringTargetPoint(null);
         setMeasuringDistanceMeters(null);
-        setMeasuringError(
-          overpassErrorMessage(error, "Coastline not found."),
-        );
+        setMeasuringCoastSegments([]);
+        setMeasuringError(overpassErrorMessage(error, "Coastline not found."));
       } finally {
         if (requestId === coastlineRequestIdRef.current) {
           setMeasuringLoading(false);
@@ -418,6 +395,7 @@ export function useMeasuringAnchorLoaders({
       gameArea,
       sessionRules,
       setCoastlineContextVersion,
+      setMeasuringCoastSegments,
       setMeasuringDistanceMeters,
       setMeasuringError,
       setMeasuringLoading,
@@ -428,9 +406,7 @@ export function useMeasuringAnchorLoaders({
   const loadMeasuringLinearAt = useCallback(
     async (seekerPoint: LatLngTuple) => {
       const kind = measuringFromKind(measuringSubject, measuringLocationCategory);
-      if (
-        !isMeasuringLinearLocation(measuringSubject, measuringLocationCategory)
-      ) {
+      if (!isMeasuringLinearLocation(measuringSubject, measuringLocationCategory)) {
         return;
       }
 
@@ -475,9 +451,7 @@ export function useMeasuringAnchorLoaders({
         setMeasuringTargetPlaceName(null);
         setMeasuringDistanceMeters(null);
         setMeasuringCoastSegments([]);
-        setMeasuringError(
-          overpassErrorMessage(error, measuringLinearNotFoundMessage(kind)),
-        );
+        setMeasuringError(overpassErrorMessage(error, measuringLinearNotFoundMessage(kind)));
       } finally {
         if (requestId === linearRequestIdRef.current) {
           setMeasuringLoading(false);
@@ -513,9 +487,7 @@ export function useMeasuringAnchorLoaders({
         return;
       }
 
-      if (
-        isMeasuringLinearLocation(measuringSubject, measuringLocationCategory)
-      ) {
+      if (isMeasuringLinearLocation(measuringSubject, measuringLocationCategory)) {
         void loadMeasuringLinearAt(seekerPoint);
         return;
       }
@@ -541,10 +513,7 @@ export function useMeasuringAnchorLoaders({
     resolveSeekerAnchorAtRef.current = resolveSeekerAnchorAt;
   }, [resolveSeekerAnchorAt]);
 
-  const debouncedSeekerPoint = useDebouncedValue(
-    measuringSeekerPoint,
-    ANCHOR_RESOLVE_DEBOUNCE_MS,
-  );
+  const debouncedSeekerPoint = useDebouncedValue(measuringSeekerPoint, ANCHOR_RESOLVE_DEBOUNCE_MS);
 
   useEffect(() => {
     if (!active || !debouncedSeekerPoint || !measuringOptionChosen) {
@@ -560,13 +529,7 @@ export function useMeasuringAnchorLoaders({
     }, 0);
 
     return () => window.clearTimeout(timeoutId);
-  }, [
-    active,
-    debouncedSeekerPoint,
-    measureFromKind,
-    measuringOptionChosen,
-    measuringSubject,
-  ]);
+  }, [active, debouncedSeekerPoint, measureFromKind, measuringOptionChosen, measuringSubject]);
 
   const handleUnavailableMeasuringOption = useCallback(
     (nextKind: MeasuringFromKind) => {
@@ -590,9 +553,7 @@ export function useMeasuringAnchorLoaders({
         return;
       }
 
-      if (
-        isMeasuringLinearLocation(next.subject, next.locationCategory)
-      ) {
+      if (isMeasuringLinearLocation(next.subject, next.locationCategory)) {
         void loadMeasuringLinearAt(measuringSeekerPoint);
         return;
       }
@@ -622,9 +583,7 @@ export function useMeasuringAnchorLoaders({
 
       setMeasuringTargetPoint(point);
       setMeasuringTargetPlaceName(placeName ?? null);
-      setMeasuringDistanceMeters(
-        distanceBetweenPoints(measuringSeekerPoint, point),
-      );
+      setMeasuringDistanceMeters(distanceBetweenPoints(measuringSeekerPoint, point));
       setMeasuringAnswer(null);
       setMeasuringError(null);
       setMapError(null);
@@ -648,10 +607,7 @@ export function useMeasuringAnchorLoaders({
       setMeasuringError(null);
       setMapError(null);
 
-      if (
-        measuringOptionChosen &&
-        usesDebouncedSeekerResolve(measuringSubject, measureFromKind)
-      ) {
+      if (measuringOptionChosen && usesDebouncedSeekerResolve(measuringSubject, measureFromKind)) {
         setMeasuringLoading(true);
         return;
       }
@@ -691,10 +647,7 @@ export function useMeasuringAnchorLoaders({
   const setMeasuringSeekerAnchorAndResolve = useCallback(
     (point: LatLngTuple, placeName?: string | null) => {
       updateSeekerPosition(point, placeName);
-      if (
-        measuringOptionChosen &&
-        usesDebouncedSeekerResolve(measuringSubject, measureFromKind)
-      ) {
+      if (measuringOptionChosen && usesDebouncedSeekerResolve(measuringSubject, measureFromKind)) {
         resolveSeekerAnchorAt(point);
       }
     },
@@ -709,10 +662,7 @@ export function useMeasuringAnchorLoaders({
 
   const handleMeasureFromChange = useCallback(
     (kind: MeasuringFromKind) => {
-      if (
-        usedMeasuringFromKindsSet.has(kind) ||
-        unavailableMeasuringFromKinds.has(kind)
-      ) {
+      if (usedMeasuringFromKindsSet.has(kind) || unavailableMeasuringFromKinds.has(kind)) {
         return;
       }
       setCatalogNotice(null);

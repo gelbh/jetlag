@@ -1,6 +1,6 @@
-import { attachPlayArea } from "./attachPlayArea";
-import { EXPANSION_OFF, type BundledGamePresetDefinition } from "./shared";
 import { NYC_REGION_PACK_ID } from "../nycRegionPack";
+import { attachPlayArea } from "./attachPlayArea";
+import { type BundledGamePresetDefinition, EXPANSION_OFF } from "./shared";
 
 const NYC_BOROUGHS = [
   { id: "manhattan", name: "Manhattan" },
@@ -9,7 +9,6 @@ const NYC_BOROUGHS = [
   { id: "queens", name: "Queens" },
   { id: "staten-island", name: "Staten Island" },
 ] as const;
-
 
 export function nycPresets(): BundledGamePresetDefinition[] {
   const baseHierarchy = [
@@ -36,8 +35,8 @@ export function nycPresets(): BundledGamePresetDefinition[] {
       advancedSettingsPatch: EXPANSION_OFF,
       transitMetroId: "nyc",
     }),
-    ...NYC_BOROUGHS.map(
-      (borough) => attachPlayArea({
+    ...NYC_BOROUGHS.map((borough) =>
+      attachPlayArea({
         id: `bundled:nyc-${borough.id}`,
         name: borough.name,
         description: `${borough.name} borough with community districts. Boundary data © NYC Open Data and NYC Planning.`,
@@ -48,7 +47,7 @@ export function nycPresets(): BundledGamePresetDefinition[] {
         distanceUnit: "imperial",
         advancedSettingsPatch: EXPANSION_OFF,
         transitMetroId: "nyc",
-       }),
+      }),
     ),
   ];
 }

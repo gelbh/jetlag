@@ -1,5 +1,5 @@
-import type { CSSProperties, ReactNode } from "react";
 import { Container } from "@mantine/core";
+import type { CSSProperties, ReactNode } from "react";
 import { EntryHeader } from "@/components/ui/entry/EntryHeader";
 import { EntryScreenLayout } from "@/components/ui/layout/EntryScreenLayout";
 import { PHONE_SHELL_MAX_WIDTH_PX } from "@/theme/phoneShell";

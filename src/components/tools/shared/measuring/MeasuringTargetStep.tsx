@@ -1,29 +1,25 @@
+import { SearchField } from "@/components/ui/forms/SearchField";
 import type { SeaLevelEdgeCase } from "@/domain/geometry/measuring/seaLevel";
+import { type DistanceUnit, formatAltitudeLabel, formatDistance } from "@/domain/map/distance";
 import {
-  formatAltitudeLabel,
-  formatDistance,
-  type DistanceUnit,
-} from "@/domain/map/distance";
-import {
-  measuringSupportsMapTarget,
-  measuringSupportsNearest,
-  measuringSupportsSearch,
-  measuringTargetKind,
-  measuringTargetLabel,
   type MeasuringAnswer,
   type MeasuringFromKind,
   type MeasuringLocationCategory,
   type MeasuringSubject,
   type MeasuringTargetMode,
+  measuringSupportsMapTarget,
+  measuringSupportsNearest,
+  measuringSupportsSearch,
+  measuringTargetKind,
+  measuringTargetLabel,
 } from "@/domain/questions";
-import { closerFurtherAnswerOptions } from "../answers/binaryAnswerOptions";
 import { BinaryAnswerPicker } from "../answers/BinaryAnswerPicker";
-import { LoadingReadout } from "../readout/LoadingReadout";
-import { ResolvedReadout } from "../readout/ResolvedReadout";
-import { SearchField } from "@/components/ui/forms/SearchField";
+import { closerFurtherAnswerOptions } from "../answers/binaryAnswerOptions";
 import { SegmentedControl } from "../controls/SegmentedControl";
 import { SendToHidersButton } from "../controls/SendToHidersButton";
 import { ToolSection } from "../panels/ToolSection";
+import { LoadingReadout } from "../readout/LoadingReadout";
+import { ResolvedReadout } from "../readout/ResolvedReadout";
 
 interface MeasuringTargetSectionProps {
   subject: MeasuringSubject;
@@ -90,8 +86,7 @@ export function MeasuringTargetSection(props: MeasuringTargetSectionProps) {
     ? hasTargetPoint && anchorAltitudeMeters !== null
       ? `Elevation loaded · ${formatAltitudeLabel(anchorAltitudeMeters, distanceUnit)}`
       : "Set your anchor to read elevation"
-    : (targetPlaceName ??
-      (hasTargetPoint ? `${targetLabel} pinned` : "No target yet"));
+    : (targetPlaceName ?? (hasTargetPoint ? `${targetLabel} pinned` : "No target yet"));
 
   const targetModeOptions = [
     ...(canUseMapTarget ? [{ value: "map" as const, label: "Map" }] : []),
@@ -102,9 +97,7 @@ export function MeasuringTargetSection(props: MeasuringTargetSectionProps) {
   if (isCoastline) {
     return (
       <>
-        {loading ? (
-          <LoadingReadout>Finding coastline in the play area…</LoadingReadout>
-        ) : null}
+        {loading ? <LoadingReadout>Finding coastline in the play area…</LoadingReadout> : null}
         {hasTargetPoint && distanceMeters !== null ? (
           <ResolvedReadout>
             Nearest coastline is {formatDistance(distanceMeters, distanceUnit)} away.
@@ -151,14 +144,12 @@ export function MeasuringTargetSection(props: MeasuringTargetSectionProps) {
     return (
       <>
         {loading ? (
-          <LoadingReadout>
-            Finding {targetLabel.toLowerCase()} in the play area…
-          </LoadingReadout>
+          <LoadingReadout>Finding {targetLabel.toLowerCase()} in the play area…</LoadingReadout>
         ) : null}
         {hasTargetPoint && distanceMeters !== null ? (
           <ResolvedReadout>
-            Nearest {targetLabel.toLowerCase()} is{" "}
-            {formatDistance(distanceMeters, distanceUnit)} away.
+            Nearest {targetLabel.toLowerCase()} is {formatDistance(distanceMeters, distanceUnit)}{" "}
+            away.
           </ResolvedReadout>
         ) : (
           <ResolvedReadout variant="dim">
@@ -166,11 +157,7 @@ export function MeasuringTargetSection(props: MeasuringTargetSectionProps) {
           </ResolvedReadout>
         )}
         {error && hasSeekerPoint && !loading ? (
-          <button
-            type="button"
-            onClick={onFindLinearFeature}
-            className="btn-secondary w-full"
-          >
+          <button type="button" onClick={onFindLinearFeature} className="btn-secondary w-full">
             Retry
           </button>
         ) : null}
@@ -183,13 +170,12 @@ export function MeasuringTargetSection(props: MeasuringTargetSectionProps) {
       <>
         {loading ? (
           <LoadingReadout>
-            {anchorLoadingMessage ??
-              `Loading ${targetLabel.toLowerCase()}s in the play area…`}
+            {anchorLoadingMessage ?? `Loading ${targetLabel.toLowerCase()}s in the play area…`}
           </LoadingReadout>
         ) : (
           <ResolvedReadout variant="dim">
-            All {targetLabel.toLowerCase()}s in the play area are used for this question.
-            Set your anchor to load them.
+            All {targetLabel.toLowerCase()}s in the play area are used for this question. Set your
+            anchor to load them.
           </ResolvedReadout>
         )}
         {hasTargetPoint && distanceMeters !== null ? (
@@ -295,57 +281,48 @@ export function MeasuringAnswerSection({
   onCommit,
 }: MeasuringAnswerSectionProps) {
   const disabledSeaLevelAnswers =
-    seaLevelEdgeCase === "highest"
-      ? new Set<MeasuringAnswer>(["further"])
-      : undefined;
+    seaLevelEdgeCase === "highest" ? new Set<MeasuringAnswer>(["further"]) : undefined;
 
   const readout =
-    hasTargetPoint && distanceMeters !== null && !isSeaLevel && !isCoastline ? (
+    hasTargetPoint && distanceMeters !== null && !isSeaLevel ? (
       <ResolvedReadout>
-        {targetPlaceName ?? targetLabel} is{" "}
-        {formatDistance(distanceMeters, distanceUnit)} from you.
+        {isCoastline
+          ? `Nearest coastline is ${formatDistance(distanceMeters, distanceUnit)} away.`
+          : `${targetPlaceName ?? targetLabel} is ${formatDistance(distanceMeters, distanceUnit)} from you.`}
       </ResolvedReadout>
     ) : null;
 
-  const actions =
-    awaitHiderAnswer ? (
-      step === "ask" ? (
-        <SendToHidersButton
-          costLabel={costLabel}
-          isSubmitting={isSubmitting}
-          disabled={
-            !hasAvailableMeasureOptions || !hasSeekerPoint || !hasTargetPoint
-          }
-          onClick={onCommit}
-          showButton={false}
-          instruction="Hiders answer closer or further in game chat once you send this question."
-        />
-      ) : null
-    ) : (
-      <>
-        <BinaryAnswerPicker
-          value={answer}
-          onChange={onAnswerChange}
-          options={closerFurtherAnswerOptions}
-          label=""
-          disabledValues={disabledSeaLevelAnswers}
-        />
-        {step === "target" ? (
-          <p className="text-xs text-ink-dim">
-            The map shows the shaded area for your choice. Tap Next when ready to add
-            the question.
-          </p>
-        ) : null}
-      </>
-    );
+  const actions = awaitHiderAnswer ? (
+    step === "ask" ? (
+      <SendToHidersButton
+        costLabel={costLabel}
+        isSubmitting={isSubmitting}
+        disabled={!hasAvailableMeasureOptions || !hasSeekerPoint || !hasTargetPoint}
+        onClick={onCommit}
+        showButton={false}
+        instruction="Hiders answer closer or further in game chat once you send this question."
+      />
+    ) : null
+  ) : (
+    <>
+      <BinaryAnswerPicker
+        value={answer}
+        onChange={onAnswerChange}
+        options={closerFurtherAnswerOptions}
+        label=""
+        disabledValues={disabledSeaLevelAnswers}
+      />
+      {step === "target" ? (
+        <p className="text-xs text-ink-dim">
+          The map shows the shaded area for your choice. Tap Next when ready to add the question.
+        </p>
+      ) : null}
+    </>
+  );
 
   if (part === "readout") {
     return readout ? (
-      <ToolSection
-        compact
-        first={step === "ask"}
-        status={answer !== null ? "complete" : "active"}
-      >
+      <ToolSection compact first={step === "ask"} status={answer !== null ? "complete" : "active"}>
         {readout}
       </ToolSection>
     ) : null;
@@ -353,22 +330,14 @@ export function MeasuringAnswerSection({
 
   if (part === "actions") {
     return actions ? (
-      <ToolSection
-        compact
-        first={step === "ask"}
-        status={answer !== null ? "complete" : "active"}
-      >
+      <ToolSection compact first={step === "ask"} status={answer !== null ? "complete" : "active"}>
         {actions}
       </ToolSection>
     ) : null;
   }
 
   return (
-    <ToolSection
-      compact
-      first={step === "ask"}
-      status={answer !== null ? "complete" : "active"}
-    >
+    <ToolSection compact first={step === "ask"} status={answer !== null ? "complete" : "active"}>
       {readout}
       {actions}
     </ToolSection>

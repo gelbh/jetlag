@@ -71,26 +71,14 @@ export function LowBatteryPrompt() {
           id="low-battery-prompt-body"
           className="mt-1 text-pretty text-sm leading-snug text-ink-secondary"
         >
-          Switch to low power mode to reduce GPS polling, live transit, and
-          background downloads while keeping core game sync.
+          Switch to low power mode to reduce GPS polling, live transit, and background downloads
+          while keeping core game sync.
         </p>
         <Group gap="sm" mt="sm" wrap="wrap">
-          <Button
-            type="button"
-            variant="filled"
-            size="md"
-            flex={1}
-            onClick={enableLowPowerMode}
-          >
+          <Button type="button" variant="filled" size="md" flex={1} onClick={enableLowPowerMode}>
             Enable low power
           </Button>
-          <Button
-            type="button"
-            variant="default"
-            size="md"
-            flex={1}
-            onClick={dismiss}
-          >
+          <Button type="button" variant="default" size="md" flex={1} onClick={dismiss}>
             Not now
           </Button>
         </Group>

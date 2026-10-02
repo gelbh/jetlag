@@ -1,24 +1,13 @@
-import {
-  assertFails,
-  assertSucceeds,
-} from "@firebase/rules-unit-testing";
+import { assertFails, assertSucceeds } from "@firebase/rules-unit-testing";
 import { describe, it } from "vitest";
-import {
-  bindRulesTestEnv,
-  adminContext,
-  sessionPayload,
-} from "./helpers";
+import { adminContext, bindRulesTestEnv, sessionPayload } from "./helpers";
 
 describe("firestore.rules — boardEconomyEnabled host gate", () => {
   const rules = bindRulesTestEnv();
 
   it("allows session host (non-ops) to enable boardEconomyEnabled before timer", async () => {
     const host = rules.testEnv.authenticatedContext("host-1");
-    await host
-      .firestore()
-      .collection("sessions")
-      .doc("session-be-1")
-      .set(sessionPayload("host-1"));
+    await host.firestore().collection("sessions").doc("session-be-1").set(sessionPayload("host-1"));
 
     await assertSucceeds(
       host
@@ -181,11 +170,7 @@ describe("firestore.rules — boardEconomyEnabled host gate", () => {
     });
     delete payload.timerAccumulatedMs;
     delete payload.timerRunningSince;
-    await host
-      .firestore()
-      .collection("sessions")
-      .doc("session-be-legacy-timer")
-      .set(payload);
+    await host.firestore().collection("sessions").doc("session-be-legacy-timer").set(payload);
 
     const admin = adminContext(rules.testEnv);
     await assertSucceeds(

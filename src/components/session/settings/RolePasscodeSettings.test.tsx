@@ -1,7 +1,7 @@
 import { fireEvent, screen, waitFor } from "@testing-library/react";
-import { renderWithAppUi } from "../../../test/renderWithAppUi";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createTestRemoteSession } from "@/test/fixtures/sessions";
+import { renderWithAppUi } from "../../../test/renderWithAppUi";
 import { RolePasscodeSettings } from "./RolePasscodeSettings";
 
 const revealRolePasscode = vi.fn();
@@ -11,8 +11,7 @@ const copy = vi.fn();
 
 vi.mock("../../../services/session/rolePasscodeLifecycle", () => ({
   revealRolePasscode: (...args: unknown[]) => revealRolePasscode(...args),
-  regenerateRolePasscode: (...args: unknown[]) =>
-    regenerateRolePasscode(...args),
+  regenerateRolePasscode: (...args: unknown[]) => regenerateRolePasscode(...args),
   prefetchRolePasscode: (...args: unknown[]) => prefetchRolePasscode(...args),
 }));
 
@@ -45,20 +44,12 @@ describe("RolePasscodeSettings", () => {
   it("reveals into stamp then copies on stamp tap", async () => {
     revealRolePasscode.mockResolvedValue({ rolePasscode: "WXYZ" });
 
-    renderWithAppUi(
-      <RolePasscodeSettings
-        session={gatedSession}
-        myUid="host-1"
-        isHost
-      />,
-    );
+    renderWithAppUi(<RolePasscodeSettings session={gatedSession} myUid="host-1" isHost />);
 
     expect(screen.getAllByText("••••").length).toBeGreaterThan(0);
     expect(prefetchRolePasscode).toHaveBeenCalledWith("sess-1", "seeker");
 
-    fireEvent.click(
-      screen.getByRole("button", { name: /Reveal Seeker code/i }),
-    );
+    fireEvent.click(screen.getByRole("button", { name: /Reveal Seeker code/i }));
 
     await waitFor(() => {
       expect(revealRolePasscode).toHaveBeenCalledWith("sess-1", "seeker");

@@ -1,12 +1,12 @@
 import { Drawer } from "@mantine/core";
-import { useRef, type CSSProperties, type ReactNode } from "react";
-import { cn } from "@/lib/cn";
+import { type CSSProperties, type ReactNode, useRef } from "react";
 import { DrawerGrabber } from "@/components/ui/entry/entryChrome";
 import { bottomDrawerStyles } from "@/components/ui/entry/entryStyles";
 import { usePlayerPhoneShellPortalTarget } from "@/components/ui/layout/PlayerPhoneShellPortalContext";
+import { resolveDrawerSheetTransitionProps } from "@/components/ui/sheets/drawerSheetTransition";
 import { useMotionProfile } from "@/hooks/motion/useMotionProfile";
 import { useSheetGesture } from "@/hooks/motion/useSheetGesture";
-import { resolveDrawerSheetTransitionProps } from "@/components/ui/sheets/drawerSheetTransition";
+import { cn } from "@/lib/cn";
 import { JETLAG_MODAL_Z_INDEX } from "@/theme/theme";
 
 export interface DrawerSheetProps {
@@ -66,9 +66,7 @@ const DRAWER_PADDING_INLINE: Record<
 };
 
 /** Horizontal inset for scroll/body; named tokens stay non-zero. */
-function resolveDrawerBodyInlinePadding(
-  padding: NonNullable<DrawerSheetProps["padding"]>,
-): string {
+function resolveDrawerBodyInlinePadding(padding: NonNullable<DrawerSheetProps["padding"]>): string {
   if (typeof padding === "number") {
     return `${Math.max(padding, 10)}px`;
   }
@@ -81,9 +79,7 @@ function resolveDrawerBodyInlinePadding(
  * Accepts numbers, px strings, and CSS expressions (calc/env) that parseFloat
  * cannot treat as a positive length.
  */
-function resolveDrawerBodyBottomPadding(
-  contentStyle: CSSProperties | undefined,
-): string | number {
+function resolveDrawerBodyBottomPadding(contentStyle: CSSProperties | undefined): string | number {
   const raw = contentStyle?.paddingBottom;
   if (typeof raw === "number") {
     return raw > 0 ? raw : SHEET_BODY_SAFE_BOTTOM;
@@ -99,9 +95,7 @@ function resolveDrawerBodyBottomPadding(
 }
 
 /** Drop paddingBottom so keyboard inset is not applied on the gesture wrapper too. */
-function stripPaddingBottom(
-  style: CSSProperties | undefined,
-): CSSProperties | undefined {
+function stripPaddingBottom(style: CSSProperties | undefined): CSSProperties | undefined {
   if (style == null || style.paddingBottom === undefined) return style;
   const rest = { ...style };
   delete rest.paddingBottom;
@@ -131,9 +125,7 @@ export function DrawerSheet({
   const portalTarget = usePlayerPhoneShellPortalTarget();
   const shellContained = portalTarget != null;
   /* Fixed → absolute when portaled into the shell (portal alone is not enough). */
-  const shellPositionStyles = shellContained
-    ? ({ position: "absolute" } as const)
-    : undefined;
+  const shellPositionStyles = shellContained ? ({ position: "absolute" } as const) : undefined;
 
   const { decorativeAnimate } = useMotionProfile();
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -180,12 +172,7 @@ export function DrawerSheet({
         style: mapInteractive ? { pointerEvents: "none" as const } : undefined,
       }}
       classNames={{
-        content: cn(
-          "mantine-drawer-sheet",
-          sheetClassName,
-          maxHeightClassName,
-          "flex flex-col",
-        ),
+        content: cn("mantine-drawer-sheet", sheetClassName, maxHeightClassName, "flex flex-col"),
         body: cn(
           "min-h-0 flex flex-1 flex-col",
           childScroll ? "overflow-hidden" : "overflow-hidden",

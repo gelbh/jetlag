@@ -1,5 +1,5 @@
-import test from "node:test";
 import assert from "node:assert/strict";
+import test from "node:test";
 import {
   TRIAGE_OUTCOME_AGENT,
   TRIAGE_OUTCOME_HUMAN,
@@ -38,9 +38,7 @@ test("triageIncidentDiagnostics returns agent when sentryEventId present", () =>
 
 test("triageIncidentDiagnostics returns human without clear bug signals", () => {
   const result = triageIncidentDiagnostics({
-    lastClientErrors: [
-      { name: "Boom", message: "map felt stuck", at: "2026-07-25T12:00:00.000Z" },
-    ],
+    lastClientErrors: [{ name: "Boom", message: "map felt stuck", at: "2026-07-25T12:00:00.000Z" }],
   });
   assert.equal(result.outcome, TRIAGE_OUTCOME_HUMAN);
   assert.equal(result.reason, "no_clear_bug_signal");

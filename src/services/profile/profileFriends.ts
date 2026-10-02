@@ -27,17 +27,12 @@ export interface FriendSearchResult {
   results: FriendListEntry[];
 }
 
-async function callProfileFriends<T>(
-  data: Record<string, unknown>,
-): Promise<T> {
+async function callProfileFriends<T>(data: Record<string, unknown>): Promise<T> {
   if (!isFirebaseConfigured()) {
     throw new Error("Firebase is not configured.");
   }
   const functions = await getFirebaseFunctions();
-  const callable = httpsCallable<Record<string, unknown>, T>(
-    functions,
-    "profileFriends",
-  );
+  const callable = httpsCallable<Record<string, unknown>, T>(functions, "profileFriends");
   try {
     const result = await callable(data);
     return result.data;

@@ -42,10 +42,7 @@ function loadAcknowledgedFingerprints(storageKey: string): Set<string> {
   }
 }
 
-function saveAcknowledgedFingerprints(
-  storageKey: string,
-  acknowledged: ReadonlySet<string>,
-): void {
+function saveAcknowledgedFingerprints(storageKey: string, acknowledged: ReadonlySet<string>): void {
   if (typeof sessionStorage === "undefined") {
     return;
   }
@@ -63,10 +60,7 @@ export function useChatUnread({
   messages,
   isChatOpen,
 }: UseChatUnreadParams): UseChatUnreadResult {
-  const storageKey =
-    sessionId && viewerUid
-      ? chatReadStorageKey(sessionId, viewerUid)
-      : null;
+  const storageKey = sessionId && viewerUid ? chatReadStorageKey(sessionId, viewerUid) : null;
 
   const [acknowledged, setAcknowledged] = useState<Set<string>>(() =>
     storageKey ? loadAcknowledgedFingerprints(storageKey) : new Set(),
@@ -78,9 +72,7 @@ export function useChatUnread({
     if (storageKey !== prevStorageKeyRef.current) {
       prevStorageKeyRef.current = storageKey;
       baselinedRef.current = false;
-      setAcknowledged(
-        storageKey ? loadAcknowledgedFingerprints(storageKey) : new Set(),
-      );
+      setAcknowledged(storageKey ? loadAcknowledgedFingerprints(storageKey) : new Set());
     }
   }, [storageKey]);
 
@@ -94,13 +86,9 @@ export function useChatUnread({
       return;
     }
 
-    const baseline = new Set(
-      baselineAcknowledgedFingerprints(messages, viewerUid),
-    );
+    const baseline = new Set(baselineAcknowledgedFingerprints(messages, viewerUid));
     baselinedRef.current = true;
-    /* eslint-disable react-hooks/set-state-in-effect -- baseline historical messages on first snapshot */
     setAcknowledged(baseline);
-    /* eslint-enable react-hooks/set-state-in-effect */
     saveAcknowledgedFingerprints(storageKey, baseline);
   }, [acknowledged.size, messages, storageKey, viewerUid]);
 
@@ -110,9 +98,7 @@ export function useChatUnread({
     }
 
     const nextAcknowledged = new Set(allMessageFingerprints(messages));
-    /* eslint-disable react-hooks/set-state-in-effect -- mark messages read when chat opens */
     setAcknowledged(nextAcknowledged);
-    /* eslint-enable react-hooks/set-state-in-effect */
     saveAcknowledgedFingerprints(storageKey, nextAcknowledged);
   }, [isChatOpen, messages, storageKey]);
 

@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  assertConfirmedForCommit,
-  type PoiCandidate,
-} from "@/domain/geo/poiCandidate";
+import { assertConfirmedForCommit, type PoiCandidate } from "@/domain/geo/poiCandidate";
 import {
   filterConfirmedTentaclePois,
   isConfirmedPoiLike,
@@ -23,9 +20,7 @@ describe("poiCandidateAdapters", () => {
     };
     const place = poiCandidateToMeasuringPlace(candidate);
     expect(place.confirmStatus).toBe("provisional");
-    expect(assertConfirmedForCommit(measuringPlaceToPoiCandidate(place))).toBe(
-      false,
-    );
+    expect(assertConfirmedForCommit(measuringPlaceToPoiCandidate(place))).toBe(false);
   });
 
   it("treats legacy measuring places without confirmStatus as confirmed", () => {

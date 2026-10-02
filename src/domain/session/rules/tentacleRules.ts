@@ -1,24 +1,20 @@
 import { tentacleRadiusPresetMeters } from "../../map/distancePresets";
+import { sessionDistanceUnit } from "../meta/sessionDistanceUnit";
 import {
+  type TentacleGameSizeCategoryId,
+  type TentacleOptionForGameSize,
   tentacleEnabledForGameSize,
   tentacleOptionsForGameSize,
   tentacleRadiusMeters,
-  type TentacleGameSizeCategoryId,
-  type TentacleOptionForGameSize,
 } from "../size/gameSizeRules";
-import { sessionDistanceUnit } from "../meta/sessionDistanceUnit";
 import { clampTentacleRadiusMeters } from "./clamps";
-import { sessionGameSize, type SessionRulesInput } from "./types";
+import { type SessionRulesInput, sessionGameSize } from "./types";
 
-export function tentacleRadiusPresetsForSession(
-  session: SessionRulesInput,
-): readonly number[] {
+export function tentacleRadiusPresetsForSession(session: SessionRulesInput): readonly number[] {
   return tentacleRadiusPresetMeters(sessionDistanceUnit(session));
 }
 
-export function resolveTentaclesEnabledForSession(
-  session: SessionRulesInput,
-): boolean {
+export function resolveTentaclesEnabledForSession(session: SessionRulesInput): boolean {
   const gameSize = sessionGameSize(session);
 
   if (session.tentaclesEnabled === true) {
@@ -39,9 +35,7 @@ function resolveTentacleRadiusForCategory(
   const gameSize = sessionGameSize(session);
   const isLargeCategory =
     gameSize === "large" &&
-    (["metro_line", "zoo", "aquarium", "amusement_park"] as readonly string[]).includes(
-      categoryId,
-    );
+    (["metro_line", "zoo", "aquarium", "amusement_park"] as readonly string[]).includes(categoryId);
 
   if (isLargeCategory && typeof session.tentacleLargeRadiusMeters === "number") {
     return clampTentacleRadiusMeters(session.tentacleLargeRadiusMeters);
@@ -51,11 +45,7 @@ function resolveTentacleRadiusForCategory(
     return clampTentacleRadiusMeters(session.tentacleMediumRadiusMeters);
   }
 
-  return tentacleRadiusMeters(
-    categoryId,
-    gameSize,
-    sessionDistanceUnit(session),
-  );
+  return tentacleRadiusMeters(categoryId, gameSize, sessionDistanceUnit(session));
 }
 
 export function resolveTentacleOptions(
@@ -66,10 +56,7 @@ export function resolveTentacleOptions(
   }
 
   const gameSize = sessionGameSize(session);
-  const defaults = tentacleOptionsForGameSize(
-    gameSize,
-    sessionDistanceUnit(session),
-  );
+  const defaults = tentacleOptionsForGameSize(gameSize, sessionDistanceUnit(session));
 
   if (defaults.length === 0 && session.tentaclesEnabled === true) {
     const mediumCategories = [

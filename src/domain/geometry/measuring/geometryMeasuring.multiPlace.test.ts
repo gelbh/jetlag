@@ -1,13 +1,10 @@
-import { describe, expect, it } from "vitest";
 import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
 import { point as turfPoint } from "@turf/helpers";
 import type { Feature, MultiPolygon, Polygon } from "geojson";
+import { describe, expect, it } from "vitest";
 import type { GameArea } from "../../map/annotations";
-import {
-  buildMultiPlaceEliminationRegion,
-  buildMultiPlaceNearRegion,
-} from "./geometryMeasuring";
 import dublinCountyParksMeasuring from "./fixtures/dublinCountyParksMeasuring.json";
+import { buildMultiPlaceEliminationRegion, buildMultiPlaceNearRegion } from "./geometryMeasuring";
 
 const sampleGameArea: GameArea = {
   type: "Polygon",
@@ -25,9 +22,7 @@ const sampleGameArea: GameArea = {
 const westAirport: [number, number] = [51.45, -0.18];
 const eastAirport: [number, number] = [51.45, -0.12];
 
-function countPolygonVertices(
-  feature: Feature<Polygon | MultiPolygon>,
-): number {
+function countPolygonVertices(feature: Feature<Polygon | MultiPolygon>): number {
   let total = 0;
   if (feature.geometry.type === "Polygon") {
     for (const ring of feature.geometry.coordinates) {
@@ -54,12 +49,8 @@ describe("multi-place measuring geometry", () => {
     );
 
     expect(nearRegion?.geometry.type).toMatch(/Polygon|MultiPolygon/);
-    expect(booleanPointInPolygon(turfPoint([-0.18, 51.45]), nearRegion!)).toBe(
-      true,
-    );
-    expect(booleanPointInPolygon(turfPoint([-0.12, 51.45]), nearRegion!)).toBe(
-      true,
-    );
+    expect(booleanPointInPolygon(turfPoint([-0.18, 51.45]), nearRegion!)).toBe(true);
+    expect(booleanPointInPolygon(turfPoint([-0.12, 51.45]), nearRegion!)).toBe(true);
   });
 
   it("further answer shades inside any equal-distance disk", async () => {
@@ -106,11 +97,7 @@ describe("multi-place measuring geometry", () => {
     expect(places).toHaveLength(107);
 
     const started = performance.now();
-    const nearRegion = await buildMultiPlaceNearRegion(
-      places,
-      distanceMeters,
-      gameArea,
-    );
+    const nearRegion = await buildMultiPlaceNearRegion(places, distanceMeters, gameArea);
     const elapsedMs = performance.now() - started;
 
     expect(nearRegion).not.toBeNull();

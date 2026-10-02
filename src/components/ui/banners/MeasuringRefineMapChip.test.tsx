@@ -1,5 +1,5 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
 import { screen } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithAppUi } from "../../../test/renderWithAppUi";
 import { MeasuringRefineMapChip } from "./MeasuringRefineMapChip";
 
@@ -50,9 +50,7 @@ describe("MeasuringRefineMapChip", () => {
   });
 
   it("hides when not refining", () => {
-    const { container } = renderWithAppUi(
-      <MeasuringRefineMapChip visible={false} />,
-    );
+    const { container } = renderWithAppUi(<MeasuringRefineMapChip visible={false} />);
     expect(container.querySelector("[role='status']")).toBeNull();
   });
 });

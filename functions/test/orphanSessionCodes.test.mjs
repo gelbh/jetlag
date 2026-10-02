@@ -1,10 +1,10 @@
-import test from "node:test";
 import assert from "node:assert/strict";
+import test from "node:test";
 import {
   isOrphanSession,
+  ORPHAN_CODE_SWEEP_CURSOR_DOC,
   selectOrphanCodeDocs,
   sweepOrphanSessionCodes,
-  ORPHAN_CODE_SWEEP_CURSOR_DOC,
 } from "../session/orphanSessionCodes.mjs";
 
 test("isOrphanSession true when session missing", () => {
@@ -44,12 +44,7 @@ function makeCodeDoc(id, sessionId) {
   };
 }
 
-function buildSweepDb({
-  codesByPage,
-  sessions,
-  deleted,
-  cursorState,
-}) {
+function buildSweepDb({ codesByPage, sessions, cursorState }) {
   return {
     collection: (name) => {
       if (name === ORPHAN_CODE_SWEEP_CURSOR_DOC.collection) {

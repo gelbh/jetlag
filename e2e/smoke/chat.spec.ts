@@ -1,24 +1,22 @@
-import { test, expect } from "../fixtures";
 import {
   answerInChat,
   closePanel,
   confirmInitialHidingZoneAtStation,
   createHostSession,
   createMultiplayerContexts,
+  expect,
   expectChatAnswer,
   expectPendingQuestionText,
   gameChatScroll,
   joinAsRole,
   openChat,
   sendRadarToHiders,
+  test,
 } from "../fixtures";
 
-test("@smoke seeker asks via radar and hider answers in game chat", async ({
-  browser,
-}) => {
+test("@smoke seeker asks via radar and hider answers in game chat", async ({ browser }) => {
   test.setTimeout(90_000);
-  const { hostPage, guestPage, cleanup } =
-    await createMultiplayerContexts(browser);
+  const { hostPage, guestPage, cleanup } = await createMultiplayerContexts(browser);
 
   const { code } = await createHostSession(hostPage);
   await joinAsRole(guestPage, code, "hider");
@@ -28,9 +26,7 @@ test("@smoke seeker asks via radar and hider answers in game chat", async ({
   await sendRadarToHiders(hostPage);
 
   await openChat(hostPage);
-  await expect(
-    gameChatScroll(hostPage).getByText(/Are you within/i),
-  ).toBeVisible({
+  await expect(gameChatScroll(hostPage).getByText(/Are you within/i)).toBeVisible({
     timeout: 15_000,
   });
   await closePanel(hostPage);

@@ -5,12 +5,9 @@
  * Optional `columns={2|3}` lays category tiles in a multi-column grid under each group.
  */
 import { Paper, Text, UnstyledButton } from "@mantine/core";
-import { ListSelectRow } from "@/components/tools/shared/controls/ListSelectRow";
-import {
-  catalogTileStyles,
-  mapChromeSurfaceStyles,
-} from "@/components/ui/entry/entryChrome";
 import { type ReactNode } from "react";
+import { ListSelectRow } from "@/components/tools/shared/controls/ListSelectRow";
+import { catalogTileStyles, mapChromeSurfaceStyles } from "@/components/ui/entry/entryChrome";
 
 export type AskCatalogRailRow = {
   id: string;
@@ -61,7 +58,6 @@ function sectionRows(rows: readonly AskCatalogRailRow[]): CatalogSection[] {
   return sections;
 }
 
-
 function CatalogTileIcon({
   icon,
   selected,
@@ -110,7 +106,10 @@ export function AskCatalogRail({
         : "flex flex-col gap-2";
 
   const list = (
-    <div className="ask-catalog-rail__list jl-scroll flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto" role="list">
+    <div
+      className="ask-catalog-rail__list jl-scroll flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto"
+      role="list"
+    >
       {sections.map((section, sectionIndex) => (
         <div
           key={section.groupLabel ?? `section-${sectionIndex}`}
@@ -153,18 +152,12 @@ export function AskCatalogRail({
               const tileBody = (
                 <>
                   {row.icon && multiCol ? (
-                    <CatalogTileIcon
-                      icon={row.icon}
-                      selected={selected}
-                      columns={columns}
-                    />
+                    <CatalogTileIcon icon={row.icon} selected={selected} columns={columns} />
                   ) : null}
                   {row.content ? (
                     row.content
                   ) : (
-                    <span className="min-w-0 px-0.5 text-center leading-snug">
-                      {row.label}
-                    </span>
+                    <span className="min-w-0 px-0.5 text-center leading-snug">{row.label}</span>
                   )}
                 </>
               );

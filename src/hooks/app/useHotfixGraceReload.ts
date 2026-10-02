@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { DEFAULT_HOTFIX_GRACE_SECONDS } from "@/services/firestore/appConfigRuntimeDefaults";
 import { APP_VERSION } from "../../domain/device/changelog";
 import {
   acknowledgeHotfixReload,
@@ -7,7 +8,6 @@ import {
 } from "../../domain/device/updates/reloadAcknowledgements";
 import { applyServiceWorkerUpdate } from "../../domain/device/updates/serviceWorkerRefresh";
 import { compareAppVersions } from "../../domain/session/meta/sessionVersion";
-import { DEFAULT_HOTFIX_GRACE_SECONDS } from "@/services/firestore/appConfigRuntimeDefaults";
 
 export interface UseHotfixGraceReloadOptions {
   /** Required minimum app version from session and/or `appConfig/runtime`. */
@@ -77,9 +77,7 @@ export function useHotfixGraceReload(
       !isReloadAckStorageAvailable());
 
   const targetVersion =
-    needsUpdate && requiredMinAppVersion && !alreadyAttempted
-      ? requiredMinAppVersion
-      : null;
+    needsUpdate && requiredMinAppVersion && !alreadyAttempted ? requiredMinAppVersion : null;
 
   if (targetVersion !== armedVersion) {
     setArmedVersion(targetVersion);

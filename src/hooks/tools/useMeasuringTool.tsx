@@ -5,31 +5,32 @@ import {
   type MeasuringMapPlacementPhase,
 } from "@/components/tools/ask/MeasuringMapPlacementChrome";
 import { QuestionPreviewSheet } from "@/components/tools/shared/controls/QuestionPreviewSheet";
-import { MeasuringTargetSection } from "@/components/tools/shared/measuring/MeasuringTargetStep";
 import { SearchResultsList } from "@/components/tools/shared/controls/SearchResultsList";
+import { MeasuringTargetSection } from "@/components/tools/shared/measuring/MeasuringTargetStep";
 import { anchorResolveLoadingMessage } from "@/components/tools/shared/measuring/measuringPanelUtils";
+import { mapChromeSurfaceStyles } from "@/components/ui/entry/entryChrome";
 import type { AskHudReadiness } from "@/domain/ask/askHudModes";
 import { isActive } from "../../domain/map/annotations";
 import {
+  type MeasuringFromKind,
   measuringFromKind,
   measuringFromKindUseCount,
   measuringFromKindUseCountFromPending,
   measuringQuestionFor,
   measuringSupportsSearch,
   measuringTargetLabel,
-  type MeasuringFromKind,
+  questionCostBreakdown,
 } from "../../domain/questions";
-import { questionCostBreakdown } from "../../domain/questions";
 import { firstUnusedCatalogOption } from "../../domain/session/tools/toolSessionOptions";
-import { adminBorderKindAvailability } from "../../services/geo/overpass/adminDivisionAvailability";
 import {
-  queryGeolocationPermission,
   type GeolocationPermissionState,
+  queryGeolocationPermission,
 } from "../../services/core/location/geolocation";
-import { mapChromeSurfaceStyles } from "@/components/ui/entry/entryChrome";
+import { adminBorderKindAvailability } from "../../services/geo/overpass/adminDivisionAvailability";
 import { useToolSession } from "./framework/useToolSession";
-import { useToolSessionOptions } from "./useToolSessionOptions";
+import { measuringCommitReady } from "./measuring/helpers";
 import { MeasuringToolPanel } from "./measuring/MeasuringToolPanel";
+import type { UseMeasuringToolParams } from "./measuring/types";
 import { useMeasuringAnchorLoaders } from "./measuring/useMeasuringAnchorLoaders";
 import { useMeasuringCommit } from "./measuring/useMeasuringCommit";
 import { useMeasuringDraftState } from "./measuring/useMeasuringDraftState";
@@ -40,7 +41,7 @@ import {
   useMeasuringPreviews,
   useMeasuringPublishSignature,
 } from "./measuring/useMeasuringPreviews";
-import type { UseMeasuringToolParams } from "./measuring/types";
+import { useToolSessionOptions } from "./useToolSessionOptions";
 
 export type { UseMeasuringToolParams } from "./measuring/types";
 
@@ -69,15 +70,8 @@ export function useMeasuringTool({
   ensurePointInGameArea,
   canSubmitQuestion = true,
 }: UseMeasuringToolParams) {
-  const activeAnnotations = useMemo(
-    () => annotations.filter(isActive),
-    [annotations],
-  );
-  const draft = useMeasuringDraftState(
-    annotations,
-    pendingQuestions,
-    sessionRules,
-  );
+  const activeAnnotations = useMemo(() => annotations.filter(isActive), [annotations]);
+  const draft = useMeasuringDraftState(annotations, pendingQuestions, sessionRules);
   const previews = useMeasuringPreviews(gameArea, draft);
 
   const loaders = useMeasuringAnchorLoaders({
@@ -134,31 +128,17 @@ export function useMeasuringTool({
   useToolSessionOptions({
     active: active && draft.measuringOptionChosen,
     usedOptions: draft.usedMeasuringFromKindsSet,
-    currentOption: measuringFromKind(
-      draft.measuringSubject,
-      draft.measuringLocationCategory,
-    ),
+    currentOption: measuringFromKind(draft.measuringSubject, draft.measuringLocationCategory),
     isAvailable: (_usedOptions, currentOption) =>
-      adminBorderKindAvailability(
-        currentOption,
-        draft.adminDivisionCounts,
-        draft.regionPackId,
-      ),
+      adminBorderKindAvailability(currentOption, draft.adminDivisionCounts, draft.regionPackId),
     pickNext: (usedOptions) =>
-      firstUnusedCatalogOption<MeasuringFromKind>(
-        draft.measuringCatalog,
-        usedOptions,
-      ),
+      firstUnusedCatalogOption<MeasuringFromKind>(draft.measuringCatalog, usedOptions),
     onUnavailable: loaders.handleUnavailableMeasuringOption,
   });
 
   const hasMeasuringTarget = useHasMeasuringTarget(draft);
   const placementCrosshair = useMeasuringPlacementCrosshair(active, draft);
-  const publishSignature = useMeasuringPublishSignature(
-    draft,
-    previews,
-    placementCrosshair,
-  );
+  const publishSignature = useMeasuringPublishSignature(draft, previews, placementCrosshair);
 
   const measuringSeekerPoint = draft.measuringSeekerPoint;
   const measuringOptionChosen = draft.measuringOptionChosen;
@@ -179,20 +159,12 @@ export function useMeasuringTool({
       return;
     }
     setWizardStep("ask");
-  }, [
-    hasMeasuringTarget,
-    measuringOptionChosen,
-    measuringSeekerPoint,
-    setWizardStep,
-  ]);
+  }, [hasMeasuringTarget, measuringOptionChosen, measuringSeekerPoint, setWizardStep]);
 
   const questionCost = useMemo(() => {
     const useCount = Math.max(
       measuringFromKindUseCount(activeAnnotations, draft.measureFromKind),
-      measuringFromKindUseCountFromPending(
-        pendingQuestions,
-        draft.measureFromKind,
-      ),
+      measuringFromKindUseCountFromPending(pendingQuestions, draft.measureFromKind),
     );
     return questionCostBreakdown("D3P1", useCount);
   }, [activeAnnotations, draft.measureFromKind, pendingQuestions]);
@@ -245,10 +217,7 @@ export function useMeasuringTool({
     handleGpsRef.current = interactions.handleGps;
   }, [interactions.handleGps]);
 
-  const measureFromKey = measuringFromKind(
-    draft.measuringSubject,
-    draft.measuringLocationCategory,
-  );
+  const measureFromKey = measuringFromKind(draft.measuringSubject, draft.measuringLocationCategory);
 
   const [eligiblePlacementGeo, setEligiblePlacementGeo] = useState<
     GeolocationPermissionState | "checking"
@@ -281,7 +250,6 @@ export function useMeasuringTool({
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- option entry only
   }, [mapFirstEligible, measureFromKey]);
 
   useEffect(() => {
@@ -295,20 +263,12 @@ export function useMeasuringTool({
     mapError ??
     null;
 
-  const resolveComplete =
-    hasMeasuringTarget && draft.measuringDistanceMeters !== null;
+  const resolveComplete = hasMeasuringTarget && draft.measuringDistanceMeters !== null;
 
   let placementPhase: MeasuringMapPlacementPhase;
-  if (
-    draft.measuringSeekerPoint !== null &&
-    resolveComplete &&
-    !draft.measuringLoading
-  ) {
+  if (draft.measuringSeekerPoint !== null && resolveComplete && !draft.measuringLoading) {
     placementPhase = "answer";
-  } else if (
-    draft.measuringSeekerPoint !== null &&
-    (draft.measuringLoading || !resolveComplete)
-  ) {
+  } else if (draft.measuringSeekerPoint !== null && (draft.measuringLoading || !resolveComplete)) {
     placementPhase = "resolving";
   } else if (draft.measuringSeekerPoint === null && gpsLoading) {
     placementPhase = "locating";
@@ -316,9 +276,7 @@ export function useMeasuringTool({
     placementPhase = "failed";
   } else if (
     draft.measuringSeekerPoint === null &&
-    (placementGeo === "prompt" ||
-      placementGeo === "denied" ||
-      placementGeo === "unavailable")
+    (placementGeo === "prompt" || placementGeo === "denied" || placementGeo === "unavailable")
   ) {
     placementPhase = placementGeo === "prompt" ? "needs_permission" : "failed";
   } else {
@@ -327,15 +285,11 @@ export function useMeasuringTool({
 
   const question = measuringQuestionFor(
     draft.measuringSubject,
-    draft.measuringSubject === "location"
-      ? draft.measuringLocationCategory
-      : undefined,
+    draft.measuringSubject === "location" ? draft.measuringLocationCategory : undefined,
   );
   const configureLabel = measuringTargetLabel(
     draft.measuringSubject,
-    draft.measuringSubject === "location"
-      ? draft.measuringLocationCategory
-      : undefined,
+    draft.measuringSubject === "location" ? draft.measuringLocationCategory : undefined,
   );
 
   const reopenCatalog = () => {
@@ -348,12 +302,15 @@ export function useMeasuringTool({
     draft.measuringOptionChosen &&
     (awaitHiderAnswer || draft.measuringAnswer !== null) &&
     canSubmitQuestion &&
-    !session.isBusy;
+    !session.isBusy &&
+    measuringCommitReady({
+      measuringSubject: draft.measuringSubject,
+      measuringLoading: draft.measuringLoading,
+      resolvedCoastSegmentsLength: previews.resolvedCoastSegments.length,
+    });
 
   const locationCategory =
-    draft.measuringSubject === "location"
-      ? draft.measuringLocationCategory
-      : undefined;
+    draft.measuringSubject === "location" ? draft.measuringLocationCategory : undefined;
   const allowsSearch = measuringSupportsSearch(measureFromKey);
   const statusTitle =
     placementPhase === "locating"
@@ -368,17 +325,11 @@ export function useMeasuringTool({
       ? "Waiting for GPS…"
       : placementPhase === "resolving"
         ? (draft.measuringTargetPlaceName ??
-          anchorResolveLoadingMessage(
-            draft.measuringSubject,
-            measureFromKey,
-            locationCategory,
-          ))
+          anchorResolveLoadingMessage(draft.measuringSubject, measureFromKey, locationCategory))
         : configureLabel;
 
   const midSlot =
-    draft.measuringSeekerPoint !== null &&
-    !resolveComplete &&
-    !draft.measuringLoading ? (
+    draft.measuringSeekerPoint !== null && !resolveComplete && !draft.measuringLoading ? (
       <div
         data-testid="measuring-map-placement-target"
         className="mx-auto w-full max-w-[22rem] max-h-[36dvh] overflow-y-auto"
@@ -434,9 +385,7 @@ export function useMeasuringTool({
           <div className="mt-2 max-h-32 overflow-y-auto">
             <SearchResultsList
               results={draft.measuringSearchResults}
-              onSelect={(place) =>
-                interactions.applySearchResult(place, "target")
-              }
+              onSelect={(place) => interactions.applySearchResult(place, "target")}
             />
           </div>
         ) : null}
@@ -446,9 +395,7 @@ export function useMeasuringTool({
   const hud = {
     readiness,
     costLabel: questionCost.label,
-    error: mapPlacementActive
-      ? null
-      : (draft.measuringError ?? gpsError ?? mapError ?? null),
+    error: mapPlacementActive ? null : (draft.measuringError ?? gpsError ?? mapError ?? null),
     onCommit: () => void commit(),
     suppressSheet: mapPlacementActive,
     mapOverlay: mapPlacementActive ? (
@@ -483,9 +430,7 @@ export function useMeasuringTool({
           distanceUnit,
           optionChosen: draft.measuringOptionChosen,
           usedMeasuringFromKinds: draft.usedMeasuringFromKindsSet,
-          unavailableMeasuringFromKinds: new Set(
-            draft.unavailableMeasuringFromKinds.keys(),
-          ),
+          unavailableMeasuringFromKinds: new Set(draft.unavailableMeasuringFromKinds.keys()),
           catalogNotice: draft.catalogNotice,
           catalogOptions: draft.measuringCatalog,
           anchorLat: draft.measuringSeekerPoint?.[0] ?? null,
@@ -570,8 +515,7 @@ export function useMeasuringTool({
       measuringEliminationPreview: previews.measuringEliminationPreview,
       measuringLodPhase: previews.measuringLodPhase,
       measuringCategoryId: draft.measuringOptionChosen ? measureFromKey : null,
-      seekerResolving:
-        draft.measuringLoading && draft.measuringSeekerPoint !== null,
+      seekerResolving: draft.measuringLoading && draft.measuringSeekerPoint !== null,
     },
     measuringLodPhase: previews.measuringLodPhase,
     placementCrosshair,

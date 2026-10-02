@@ -1,19 +1,19 @@
-import { useState } from "react";
 import { Box, Button, Stack, Text, Textarea, TextInput } from "@mantine/core";
-import type { AdvancedSessionSettingsValue } from "@/domain/session/tools/advancedSessionSettings";
+import { useState } from "react";
+import {
+  compactDangerStyles,
+  filledStyles,
+  InsetGroup,
+  insetTextareaStyles,
+  insetTextInputStyles,
+  SectionLabel,
+} from "@/components/ui/entry/entryChrome";
+import { InsetHairline } from "@/components/ui/entry/InsetRow";
 import {
   createSessionCustomCategoryId,
   type SessionCustomCategory,
 } from "@/domain/session/catalog/sessionCustomContent";
-import {
-  InsetGroup,
-  SectionLabel,
-  compactDangerStyles,
-  filledStyles,
-  insetTextInputStyles,
-  insetTextareaStyles,
-} from "@/components/ui/entry/entryChrome";
-import { InsetHairline } from "@/components/ui/entry/InsetRow";
+import type { AdvancedSessionSettingsValue } from "@/domain/session/tools/advancedSessionSettings";
 
 interface CategoryEditorProps {
   value: AdvancedSessionSettingsValue;
@@ -21,11 +21,7 @@ interface CategoryEditorProps {
   disabled?: boolean;
 }
 
-export function CategoryEditor({
-  value,
-  onChange,
-  disabled,
-}: CategoryEditorProps) {
+export function CategoryEditor({ value, onChange, disabled }: CategoryEditorProps) {
   const [categoryDraft, setCategoryDraft] = useState({
     label: "",
     promptNoun: "",
@@ -62,8 +58,8 @@ export function CategoryEditor({
     <Stack gap="xs">
       <SectionLabel>Custom POI categories</SectionLabel>
       <Text size="xs" c="var(--color-field-ink-muted)" px={4}>
-        Add Overpass tag selectors for Matching, Measuring, and Tentacle (one
-        selector per line, e.g. amenity=police).
+        Add Overpass tag selectors for Matching, Measuring, and Tentacle (one selector per line,
+        e.g. amenity=police).
       </Text>
 
       {value.customCategories.length > 0 ? (

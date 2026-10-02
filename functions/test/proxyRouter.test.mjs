@@ -1,6 +1,6 @@
-import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { resolveProxyRoute, PROXY_ROUTE_NAMES } from "../proxies/proxyRouter.mjs";
+import { describe, it } from "node:test";
+import { PROXY_ROUTE_NAMES, resolveProxyRoute } from "../proxies/proxyRouter.mjs";
 
 describe("proxyRouter", () => {
   it("recognizes supported route names", () => {

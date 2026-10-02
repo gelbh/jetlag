@@ -2,11 +2,12 @@
  * Hider MethodChipIsland — station/map chips only (place/confirm live on map-first overlay).
  * Spec: ask-surface-kit-design rev 2026-08-05b; map-first stream 2026-09-27.
  */
-import { AskChipIsland } from "@/components/tools/ask/AskChipIsland";
-import { InlineError } from "@/components/ui/banners/InlineError";
+
+import { useEffect } from "react";
 import type { HidingZoneStepId } from "@/components/hider/hidingZoneSteps";
 import type { HidingZoneToolPanelState } from "@/components/hider/hidingZoneToolPanelState";
-import { useEffect } from "react";
+import { AskChipIsland } from "@/components/tools/ask/AskChipIsland";
+import { InlineError } from "@/components/ui/banners/InlineError";
 
 export type HidingZoneHudBodyProps = {
   moveMode: boolean;
@@ -26,11 +27,7 @@ export function HidingZoneHudBody({
     onStepChange("method");
   }, [onStepChange]);
 
-  const methodSelectedId = !zoneTool.methodChosen
-    ? null
-    : zoneTool.manualMode
-      ? "map"
-      : "station";
+  const methodSelectedId = !zoneTool.methodChosen ? null : zoneTool.manualMode ? "map" : "station";
 
   return (
     <div

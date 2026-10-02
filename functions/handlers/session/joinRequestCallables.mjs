@@ -7,10 +7,7 @@ import {
   requestRoleJoinHandler,
   resolveRoleJoinRequestHandler,
 } from "../../session/joinRequest.mjs";
-import {
-  mapJoinRequestError,
-  sentryDsnSecret,
-} from "./shared.mjs";
+import { mapJoinRequestError, sentryDsnSecret } from "./shared.mjs";
 
 export const requestRoleJoin = onCall(
   { secrets: [sentryDsnSecret], enforceAppCheck: true },
@@ -22,12 +19,7 @@ export const requestRoleJoin = onCall(
     const db = getFirestore();
 
     try {
-      return await requestRoleJoinHandler(
-        db,
-        request.auth,
-        getAuth(),
-        request.data,
-      );
+      return await requestRoleJoinHandler(db, request.auth, getAuth(), request.data);
     } catch (error) {
       mapJoinRequestError(error);
     }

@@ -1,9 +1,9 @@
+import { MantineProvider } from "@mantine/core";
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import { MantineProvider } from "@mantine/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { JoinSession } from "./JoinSession";
 import { jetlagTheme } from "@/theme/theme";
+import { JoinSession } from "./JoinSession";
 
 vi.mock("@/hooks/navigation/useAppNavigate", () => ({
   useAppNavigate: () => vi.fn(),
@@ -55,9 +55,7 @@ describe("JoinSession", () => {
     );
 
     expect(screen.getByLabelText(/session code/i)).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: /join session/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /join session/i })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: /^join$/i })).toBeInTheDocument();
   });
 });

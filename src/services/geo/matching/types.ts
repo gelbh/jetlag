@@ -1,7 +1,9 @@
 import type { MatchingFeature } from "@/domain/geo/types";
-import type { CustomMatchingAreasByLevel } from "@/domain/session/catalog/sessionCustomContent";
-import type { SessionCustomCategory } from "@/domain/session/catalog/sessionCustomContent";
 import type { RegionPackId } from "@/domain/regions/regionPack";
+import type {
+  CustomMatchingAreasByLevel,
+  SessionCustomCategory,
+} from "@/domain/session/catalog/sessionCustomContent";
 
 export interface MatchingFetchOptions {
   customMatchingAreas?: CustomMatchingAreasByLevel;

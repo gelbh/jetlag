@@ -3,8 +3,7 @@ import { FirebaseError } from "firebase/app";
 const FALLBACK = "Could not start rematch. Try again.";
 const APP_CHECK_MESSAGE =
   "Security check failed. Disable content blockers for this site, then try again.";
-const MEMBERSHIP_MESSAGE =
-  "You are not a member of this session anymore. Rejoin to rematch.";
+const MEMBERSHIP_MESSAGE = "You are not a member of this session anymore. Rejoin to rematch.";
 
 const MEMBERSHIP_SERVER_MESSAGE = /session membership required/i;
 

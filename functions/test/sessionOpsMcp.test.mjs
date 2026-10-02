@@ -1,28 +1,19 @@
-import test from "node:test";
 import assert from "node:assert/strict";
+import test from "node:test";
 import {
-  SESSION_OPS_MCP_UNAUTHORIZED,
-  SESSION_OPS_MCP_HEADER_INCIDENT,
-  SESSION_OPS_MCP_HEADER_SESSION,
-  SESSION_OPS_MCP_HEADER_ACTOR,
-  SESSION_OPS_MCP_HEADER_SUMMON,
   authenticateSessionOpsMcp,
   handleSessionOpsMcpRequest,
+  SESSION_OPS_MCP_HEADER_ACTOR,
+  SESSION_OPS_MCP_HEADER_INCIDENT,
+  SESSION_OPS_MCP_HEADER_SESSION,
+  SESSION_OPS_MCP_HEADER_SUMMON,
+  SESSION_OPS_MCP_UNAUTHORIZED,
 } from "../incident/sessionOpsMcp.mjs";
 
 test("authenticateSessionOpsMcp rejects missing bearer", () => {
-  assert.equal(
-    authenticateSessionOpsMcp({ authorization: "" }, "secret"),
-    false,
-  );
-  assert.equal(
-    authenticateSessionOpsMcp({ authorization: "Bearer wrong" }, "secret"),
-    false,
-  );
-  assert.equal(
-    authenticateSessionOpsMcp({ authorization: "Bearer secret" }, "secret"),
-    true,
-  );
+  assert.equal(authenticateSessionOpsMcp({ authorization: "" }, "secret"), false);
+  assert.equal(authenticateSessionOpsMcp({ authorization: "Bearer wrong" }, "secret"), false);
+  assert.equal(authenticateSessionOpsMcp({ authorization: "Bearer secret" }, "secret"), true);
 });
 
 test("handleSessionOpsMcpRequest returns 401 without auth", async () => {

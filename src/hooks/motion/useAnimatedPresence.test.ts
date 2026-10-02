@@ -1,7 +1,7 @@
-import { renderHook, act } from "@testing-library/react";
-import { beforeEach, afterEach, describe, expect, it, vi } from "vitest";
-import { useAnimatedPresence } from "./useAnimatedPresence";
+import { act, renderHook } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { resetAllStores } from "../../test/helpers/storeReset";
+import { useAnimatedPresence } from "./useAnimatedPresence";
 
 describe("useAnimatedPresence", () => {
   beforeEach(() => {
@@ -27,9 +27,7 @@ describe("useAnimatedPresence", () => {
 
   it("mounts immediately when open with full motion", () => {
     const onClose = vi.fn();
-    const { result } = renderHook(() =>
-      useAnimatedPresence({ open: true, onClose }),
-    );
+    const { result } = renderHook(() => useAnimatedPresence({ open: true, onClose }));
 
     expect(result.current.mounted).toBe(true);
     expect(result.current.phase).toBe("entering");
@@ -48,9 +46,7 @@ describe("useAnimatedPresence", () => {
       })),
     );
     const onClose = vi.fn();
-    const { result } = renderHook(() =>
-      useAnimatedPresence({ open: true, onClose }),
-    );
+    const { result } = renderHook(() => useAnimatedPresence({ open: true, onClose }));
 
     expect(result.current.phase).toBe("open");
     expect(result.current.animClass).toBe("");

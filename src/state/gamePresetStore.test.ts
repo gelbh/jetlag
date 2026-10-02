@@ -1,11 +1,14 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { useGamePresetStore } from "./gamePresetStore";
-import { defaultAdvancedSessionSettings } from "../domain/session/tools/advancedSessionSettings";
-import { mergeBundledPresets, BUNDLED_GAME_PRESET_DEFINITIONS } from "../domain/regions/bundledGamePresets";
+import {
+  BUNDLED_GAME_PRESET_DEFINITIONS,
+  mergeBundledPresets,
+} from "../domain/regions/bundledGamePresets";
 import {
   createSessionDraftToGamePreset,
   gamePresetToCreateSessionDraft,
 } from "../domain/session/presets/gamePreset";
+import { defaultAdvancedSessionSettings } from "../domain/session/tools/advancedSessionSettings";
+import { useGamePresetStore } from "./gamePresetStore";
 
 describe("gamePresetStore", () => {
   beforeEach(() => {
@@ -27,9 +30,7 @@ describe("gamePresetStore", () => {
 
     useGamePresetStore.getState().savePreset(preset);
 
-    expect(useGamePresetStore.getState().getPreset(preset.id)?.name).toBe(
-      "Regional metric",
-    );
+    expect(useGamePresetStore.getState().getPreset(preset.id)?.name).toBe("Regional metric");
     expect(useGamePresetStore.getState().presets).toHaveLength(
       BUNDLED_GAME_PRESET_DEFINITIONS.length + 1,
     );
@@ -51,9 +52,7 @@ describe("gamePresetStore", () => {
     expect(useGamePresetStore.getState().presets).toHaveLength(
       BUNDLED_GAME_PRESET_DEFINITIONS.length,
     );
-    expect(
-      useGamePresetStore.getState().presets.every((entry) => entry.bundled),
-    ).toBe(true);
+    expect(useGamePresetStore.getState().presets.every((entry) => entry.bundled)).toBe(true);
   });
 
   it("round-trips preset drafts", () => {

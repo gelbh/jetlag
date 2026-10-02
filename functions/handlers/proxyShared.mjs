@@ -1,14 +1,11 @@
 import { getAuth } from "firebase-admin/auth";
 import { getFirestore } from "firebase-admin/firestore";
+import { consumeRateLimit, isFirestoreContentionError } from "../lib/firestoreRateLimit.mjs";
 import {
   sendProxyAuthFailure,
   verifyOverpassProxyAccess,
   verifyProxyAccess,
 } from "../proxies/verifyProxyAccess.mjs";
-import {
-  consumeRateLimit,
-  isFirestoreContentionError,
-} from "../lib/firestoreRateLimit.mjs";
 
 export const PROXY_RATE_LIMITS = {
   overpass: {
@@ -54,10 +51,7 @@ function sendContentionFailure(res, route) {
  */
 export async function enforceRateLimit(res, route, uid, tier = "free", deps = {}) {
   const routeLimits = PROXY_RATE_LIMITS[route];
-  const limits =
-    route === "overpass"
-      ? routeLimits[tier] ?? routeLimits.free
-      : routeLimits;
+  const limits = route === "overpass" ? (routeLimits[tier] ?? routeLimits.free) : routeLimits;
   const { limit, windowMs } = limits;
   const db = deps.db ?? adminDb();
   const consume = deps.consumeRateLimit ?? consumeRateLimit;

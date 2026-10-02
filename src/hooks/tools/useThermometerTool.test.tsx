@@ -1,7 +1,7 @@
 import { act, renderHook } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { useThermometerTool } from "./useThermometerTool";
 import { createToolHookMocks } from "../../test/helpers/toolHookMocks";
+import { useThermometerTool } from "./useThermometerTool";
 
 describe("useThermometerTool", () => {
   it("collects thermometer endpoints A and B in manual mode", () => {
