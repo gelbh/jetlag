@@ -1,46 +1,8 @@
-import buffer from "@turf/buffer";
 import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
 import turfDestination from "@turf/destination";
 import { point as turfPoint } from "@turf/helpers";
 import type { Feature, LineString, MultiPolygon, Polygon } from "geojson";
-import { describe, expect, it, vi } from "vitest";
-
-/** Coarse buffers overshoot true {dist ≤ R} membership (XWXZ inflation class). */
-vi.mock("./geodesicLineBuffer", () => ({
-  dispatchGeodesicLineBuffer: vi.fn(async (segment: Feature<LineString>, distanceMeters: number) => {
-    const buffered = buffer(segment, (distanceMeters * 1.35) / 1000, {
-      units: "kilometers",
-      steps: 8,
-    });
-    if (buffered.geometry.type !== "Polygon" && buffered.geometry.type !== "MultiPolygon") {
-      return null;
-    }
-    return buffered as Feature<Polygon>;
-  }),
-}));
-
-function hasCoastlineNearRegionOracleViolation(
-  polygon: Feature<Polygon | MultiPolygon>,
-  prepared: ReturnType<typeof prepareMeasuringLineSegments>,
-  radiusMeters: number,
-  gameArea: GameArea,
-  epsilonMeters: number,
-  divisions: number,
-): boolean {
-  try {
-    assertCoastlineNearRegionOracle(
-      polygon,
-      prepared,
-      radiusMeters,
-      gameArea,
-      epsilonMeters,
-      divisions,
-    );
-    return false;
-  } catch {
-    return true;
-  }
-}
+import { describe, expect, it } from "vitest";
 import type { GameArea } from "../../map/annotations";
 import {
   assertCoastlineNearRegionOracle,
@@ -95,6 +57,29 @@ const fixtureSegments: Feature<LineString>[] = [
 
 const fixtureRadiusMeters = 4_567;
 const seekerLatLng: [number, number] = [51.45, -0.15];
+
+function hasCoastlineNearRegionOracleViolation(
+  polygon: Feature<Polygon | MultiPolygon>,
+  prepared: ReturnType<typeof prepareMeasuringLineSegments>,
+  radiusMeters: number,
+  gameArea: GameArea,
+  epsilonMeters: number,
+  divisions: number,
+): boolean {
+  try {
+    assertCoastlineNearRegionOracle(
+      polygon,
+      prepared,
+      radiusMeters,
+      gameArea,
+      epsilonMeters,
+      divisions,
+    );
+    return false;
+  } catch {
+    return true;
+  }
+}
 
 describe("coastline near region oracle", () => {
   it("passes distance-threshold output and rejects union-buffer inflation", async () => {
@@ -153,9 +138,9 @@ describe("coastline near region oracle", () => {
     const x =
       Math.cos(fromLatRad) * Math.sin(toLatRad) -
       Math.sin(fromLatRad) * Math.cos(toLatRad) * Math.cos(dLng);
-    const awayFromCoastBearing = ((Math.atan2(y, x) * 180) / Math.PI + 360) % 360;
+    const towardSeekerBearing = ((Math.atan2(y, x) * 180) / Math.PI + 360) % 360;
 
-    const probe = turfDestination(seeker, 500 / 1000, awayFromCoastBearing, {
+    const probe = turfDestination(coastPoint, (fixtureRadiusMeters + 500) / 1000, towardSeekerBearing, {
       units: "kilometers",
     });
 
