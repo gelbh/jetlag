@@ -1,7 +1,7 @@
 import { screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { renderWithAppUi } from "../../test/renderWithAppUi";
 import type { SessionMessageRecord } from "../../domain/session/activity/sessionChat";
+import { renderWithAppUi } from "../../test/renderWithAppUi";
 import { SocialChatTab } from "./SocialChatTab";
 
 vi.mock("../../services/firestore/firestoreSessionExtras", () => ({
@@ -31,9 +31,7 @@ describe("SocialChatTab", () => {
 
     expect(screen.getByText("On the tram")).toBeInTheDocument();
     expect(screen.queryByText("Waiting to send")).not.toBeInTheDocument();
-    expect(
-      await screen.findByText("Waiting to send", {}, { timeout: 2000 }),
-    ).toBeInTheDocument();
+    expect(await screen.findByText("Waiting to send", {}, { timeout: 2000 })).toBeInTheDocument();
   });
 
   it("hides the badge for acked messages", () => {

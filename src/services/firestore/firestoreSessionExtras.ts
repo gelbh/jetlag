@@ -8,10 +8,10 @@ import {
   getDocs,
   onSnapshot,
   orderBy,
+  type QuerySnapshot,
   query,
   serverTimestamp,
   setDoc,
-  type QuerySnapshot,
   type Unsubscribe,
   updateDoc,
   where,
@@ -242,15 +242,10 @@ export function subscribeToHiderPlayerLocations(
  * `fromCache` flips that change no document; skip those (after the first
  * emit, which must go out even for an empty collection) to avoid re-renders.
  */
-function createMetadataSnapshotGate(): (
-  snapshot: Pick<QuerySnapshot, "docChanges">,
-) => boolean {
+function createMetadataSnapshotGate(): (snapshot: Pick<QuerySnapshot, "docChanges">) => boolean {
   let emitted = false;
   return (snapshot) => {
-    if (
-      emitted &&
-      snapshot.docChanges({ includeMetadataChanges: true }).length === 0
-    ) {
+    if (emitted && snapshot.docChanges({ includeMetadataChanges: true }).length === 0) {
       return false;
     }
     emitted = true;

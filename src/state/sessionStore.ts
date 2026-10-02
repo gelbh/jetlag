@@ -232,9 +232,7 @@ export const useSessionStore = create<SessionState>()(
       setNetworkReachable: (networkReachable) => set({ networkReachable }),
       setSessionFromCache: (sessionFromCache) =>
         set((state) =>
-          state.sessionFromCache === sessionFromCache
-            ? state
-            : { sessionFromCache },
+          state.sessionFromCache === sessionFromCache ? state : { sessionFromCache },
         ),
     }),
     {

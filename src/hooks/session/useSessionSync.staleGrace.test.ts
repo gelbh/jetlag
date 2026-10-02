@@ -1,7 +1,7 @@
 import { act, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { useSessionStore } from "../../state/sessionStore";
 import { subscribeToSession } from "../../services/firestore/firestoreAnnotations";
+import { useSessionStore } from "../../state/sessionStore";
 import { SESSION_STALE_GRACE_MS, useSessionSync } from "./useSessionSync";
 
 vi.mock("../../services/core/firebase/firebase", () => ({

@@ -421,10 +421,7 @@ describe("subscribeToSessionMessages metadata", () => {
     docChanges: () => unknown[];
   };
 
-  function fakeSnapshot(
-    hasPendingWrites: boolean,
-    changes: number,
-  ): FakeSnapshot {
+  function fakeSnapshot(hasPendingWrites: boolean, changes: number): FakeSnapshot {
     return {
       docs: [
         {

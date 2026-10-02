@@ -1,5 +1,5 @@
-import { describe, expect, it, vi } from "vitest";
 import { onSnapshot } from "firebase/firestore";
+import { describe, expect, it, vi } from "vitest";
 import { subscribeToSession } from "./subscribe";
 
 vi.mock("firebase/firestore", () => ({
@@ -38,10 +38,7 @@ describe("subscribeToSession", () => {
       metadata: { fromCache: false },
     });
 
-    expect(onMetadata.mock.calls).toEqual([
-      [{ fromCache: true }],
-      [{ fromCache: false }],
-    ]);
+    expect(onMetadata.mock.calls).toEqual([[{ fromCache: true }], [{ fromCache: false }]]);
     expect(onChange).toHaveBeenCalledTimes(1);
   });
 });

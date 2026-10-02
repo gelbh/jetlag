@@ -1,6 +1,6 @@
-import { waitForPendingWrites, type Firestore } from "firebase/firestore";
-import { useWriteLedgerStore, type WriteLabel } from "@/state/writeLedgerStore";
+import { type Firestore, waitForPendingWrites } from "firebase/firestore";
 import { addWriteRejectedBreadcrumb } from "@/services/core/analytics/sentry";
+import { useWriteLedgerStore, type WriteLabel } from "@/state/writeLedgerStore";
 
 /**
  * Fire a Firestore write without blocking UI on server ack.

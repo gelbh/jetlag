@@ -19,8 +19,8 @@ import { HudToolIcon } from "../map/icons/ToolIcons";
 import { InlineError } from "../ui/banners/InlineError";
 import { EmptyState } from "../ui/feedback/EmptyState";
 import { HiderPendingQuestionAnswer } from "./HiderPendingQuestionAnswer";
-import { PhotoAnswerPreview } from "./PhotoAnswerPreview";
 import { PendingSyncBadge } from "./PendingSyncBadge";
+import { PhotoAnswerPreview } from "./PhotoAnswerPreview";
 
 interface GameChatTabProps {
   messages: readonly SessionMessageRecord[];
@@ -240,7 +240,7 @@ export function GameChatTab({
               answeredPendingIds?.has(message.pendingQuestionId)
             );
 
-            const rowPendingSync = Boolean(message.pendingSync || pending?.pendingSync);
+          const rowPendingSync = Boolean(message.pendingSync || pending?.pendingSync);
 
           const answerText = answerDisplayText(message);
           const showAnswerBox = closed && answerText != null;

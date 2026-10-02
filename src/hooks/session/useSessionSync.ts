@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { trackRestoredWrites } from "@/services/firestore/commitWrite";
 import { getPowerProfile } from "../../domain/device/power/powerProfile";
 import { reportStoragePressureIfHigh } from "../../domain/device/pwa/pwaStorageBudget";
 import { LOCAL_SESSION_ID, migrateAnnotations } from "../../domain/map/annotations";
@@ -19,7 +20,6 @@ import { ANNOTATION_SYNC_MESSAGE_TYPE } from "../../services/session/backgroundS
 import { flushOfflineQueue } from "../../services/session/flushOfflineQueue";
 import { readOfflineQueueForSession } from "../../services/session/offlineQueue";
 import { bindOfflineQueueResumeFlush } from "../../services/session/sessionResumeFlush";
-import { trackRestoredWrites } from "@/services/firestore/commitWrite";
 import { useAnnotationStore, useMapStore, useSessionStore } from "../../state/sessionStore";
 
 /** How long a cache-served session doc may stand before the rail says "last known state". */
@@ -81,10 +81,7 @@ export function useSessionSync({ syncEnabled = true }: UseSessionSyncOptions = {
           staleTimer = undefined;
           setSessionFromCache(false);
         } else if (staleTimer === undefined) {
-          staleTimer = setTimeout(
-            () => setSessionFromCache(true),
-            SESSION_STALE_GRACE_MS,
-          );
+          staleTimer = setTimeout(() => setSessionFromCache(true), SESSION_STALE_GRACE_MS);
         }
       },
     );

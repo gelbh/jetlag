@@ -43,9 +43,7 @@ describe("writeLedgerStore", () => {
         y: { id: "y", label: "chat.send", startedAt: 500, status: "failed", error: "x" },
       },
     });
-    expect(selectOldestPendingAgeMs(useWriteLedgerStore.getState(), 9000)).toBe(
-      8000,
-    );
+    expect(selectOldestPendingAgeMs(useWriteLedgerStore.getState(), 9000)).toBe(8000);
   });
 
   it("reports null age when nothing is pending", () => {

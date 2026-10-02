@@ -1,17 +1,13 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { FirebaseError } from "firebase/app";
 import type { Firestore } from "firebase/firestore";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { addWriteRejectedBreadcrumb } from "@/services/core/analytics/sentry";
 import {
   selectFailedEntries,
   selectPendingCount,
   useWriteLedgerStore,
 } from "@/state/writeLedgerStore";
-import { addWriteRejectedBreadcrumb } from "@/services/core/analytics/sentry";
-import {
-  RESTORED_WRITES_GRACE_MS,
-  commitWrite,
-  trackRestoredWrites,
-} from "./commitWrite";
+import { commitWrite, RESTORED_WRITES_GRACE_MS, trackRestoredWrites } from "./commitWrite";
 
 vi.mock("@/services/core/analytics/sentry", () => ({
   addWriteRejectedBreadcrumb: vi.fn(),

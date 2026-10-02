@@ -153,9 +153,7 @@ describe("GameChatTab", () => {
     );
 
     expect(screen.queryByText("Waiting to send")).not.toBeInTheDocument();
-    expect(
-      await screen.findByText("Waiting to send", {}, { timeout: 2000 }),
-    ).toBeInTheDocument();
+    expect(await screen.findByText("Waiting to send", {}, { timeout: 2000 })).toBeInTheDocument();
     expect(screen.queryByText("Waiting for hider…")).not.toBeInTheDocument();
   });
 

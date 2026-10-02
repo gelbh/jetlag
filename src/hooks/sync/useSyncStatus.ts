@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
+import { selectPendingCount, useWriteLedgerStore } from "@/state/writeLedgerStore";
 import { getPowerProfile } from "../../domain/device/power/powerProfile";
 import { resolveSyncStatus, type SyncStatus } from "../../domain/device/sync/sync";
 import { LOCAL_SESSION_ID } from "../../domain/map/annotations";
-import { selectPendingCount, useWriteLedgerStore } from "@/state/writeLedgerStore";
 import { useMapStore } from "../../state/mapStore";
 import { useSessionStore } from "../../state/sessionStore";
 import { useReachability } from "../location/useReachability";

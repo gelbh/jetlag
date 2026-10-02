@@ -1,10 +1,4 @@
-export type SyncStatus =
-  | "synced"
-  | "saving"
-  | "offline"
-  | "degraded"
-  | "stale"
-  | "error";
+export type SyncStatus = "synced" | "saving" | "offline" | "degraded" | "stale" | "error";
 
 export function isEffectivelyOffline(input: {
   online: boolean;

@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
 import { Group, Text } from "@mantine/core";
 import { CloudArrowUp } from "@phosphor-icons/react";
+import { useEffect, useState } from "react";
 import { JlIcon } from "../ui/brand/JlIcon";
 
 /** Online acks land in ~100–300 ms; only surface writes that are genuinely stuck. */
@@ -23,12 +23,7 @@ export function PendingSyncBadge() {
   }
 
   return (
-    <Group
-      gap={4}
-      wrap="nowrap"
-      c="var(--color-field-ink)"
-      data-testid="pending-sync-badge"
-    >
+    <Group gap={4} wrap="nowrap" c="var(--color-field-ink)" data-testid="pending-sync-badge">
       <JlIcon icon={CloudArrowUp} size={12} weight="bold" />
       <Text size="xs" fw={500} lh={1.2} c="inherit">
         Waiting to send

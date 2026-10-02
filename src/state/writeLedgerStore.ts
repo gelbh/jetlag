@@ -56,8 +56,7 @@ export const useWriteLedgerStore = create<WriteLedgerState>()((set) => ({
     }));
     return id;
   },
-  remove: (id) =>
-    set((s) => (s.entries[id] ? { entries: withoutEntry(s.entries, id) } : s)),
+  remove: (id) => set((s) => (s.entries[id] ? { entries: withoutEntry(s.entries, id) } : s)),
   fail: (id, message) =>
     set((s) => {
       const entry = s.entries[id];
@@ -86,16 +85,10 @@ export function selectPendingCount(state: LedgerSnapshot): number {
 }
 
 /** Consumed by the pending-age escalation (plan Task 5). */
-export function selectOldestPendingAgeMs(
-  state: LedgerSnapshot,
-  now = Date.now(),
-): number | null {
+export function selectOldestPendingAgeMs(state: LedgerSnapshot, now = Date.now()): number | null {
   let oldest: number | null = null;
   for (const entry of Object.values(state.entries)) {
-    if (
-      entry.status === "pending" &&
-      (oldest === null || entry.startedAt < oldest)
-    ) {
+    if (entry.status === "pending" && (oldest === null || entry.startedAt < oldest)) {
       oldest = entry.startedAt;
     }
   }
@@ -103,7 +96,5 @@ export function selectOldestPendingAgeMs(
 }
 
 export function selectFailedEntries(state: LedgerSnapshot): LedgerEntry[] {
-  return Object.values(state.entries).filter(
-    (entry) => entry.status === "failed",
-  );
+  return Object.values(state.entries).filter((entry) => entry.status === "failed");
 }

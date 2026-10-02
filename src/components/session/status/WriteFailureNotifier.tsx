@@ -1,11 +1,11 @@
 import { useEffect } from "react";
 import { useShallow } from "zustand/react/shallow";
+import { showEphemeralPlayerNotification } from "@/components/ui/notifications/showEphemeralPlayerNotification";
 import {
   selectFailedEntries,
   useWriteLedgerStore,
   type WriteLabel,
 } from "@/state/writeLedgerStore";
-import { showEphemeralPlayerNotification } from "@/components/ui/notifications/showEphemeralPlayerNotification";
 
 const LABEL_COPY: Record<WriteLabel, string> = {
   "chat.send": "Your message",
@@ -23,7 +23,7 @@ const LABEL_COPY: Record<WriteLabel, string> = {
   "zone.write": "Hiding zone",
   "system.message": "Game update",
   "timer.update": "Timer change",
-  "restored": "An earlier change",
+  restored: "An earlier change",
 };
 
 /** Surfaces server rejections of queued writes so nothing drops silently. Mount once (App root). */
