@@ -10,7 +10,10 @@ import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
 export type { EndGameTruthAnchor } from "../../session/hiding/endGameTruthAnchors";
 
 export type HiderTruthReferenceMode =
-  "hidingPlace" | "hidingZoneCenter" | "endGameFreeze" | "unavailable";
+  | "hidingPlace"
+  | "hidingZoneCenter"
+  | "endGameFreeze"
+  | "unavailable";
 
 export interface ResolveHiderTruthReferenceInput {
   hiderUid: string;
@@ -45,9 +48,7 @@ function isUsableLatLng(lat: unknown, lng: unknown): lat is number {
   );
 }
 
-function isUsablePoint(
-  point: LatLngTuple | null | undefined,
-): point is LatLngTuple {
+function isUsablePoint(point: LatLngTuple | null | undefined): point is LatLngTuple {
   return point != null && isUsableLatLng(point[0], point[1]);
 }
 
