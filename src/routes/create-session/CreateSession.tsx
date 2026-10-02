@@ -71,6 +71,10 @@ export function CreateSession() {
           circleCenter={session.framing.circleCenter}
           circleRadiusMeters={session.framing.circleRadiusMeters}
           polygonVertices={session.framing.polygonVertices}
+          mapRequested={session.mapRequested}
+          mapMounted={session.mapMounted}
+          onRequestMap={session.requestMap}
+          onMapMounted={session.handleMapMounted}
           onBoundsChange={session.framing.handleBoundsChange}
           onUserViewportFramed={session.handleUserViewportFramed}
           onMapClick={

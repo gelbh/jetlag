@@ -4,6 +4,7 @@ import {
   askInlineErrorCopy,
   isLocationInlineError,
 } from "@/components/tools/shared/readout/AskInlineError";
+import { floatToneStyles } from "@/components/ui/banners/mapFloatToneStyles";
 
 interface InlineErrorProps {
   children: ReactNode;
@@ -24,6 +25,7 @@ export function InlineError({ children, className = "", id }: InlineErrorProps) 
       role="alert"
       color="halt"
       variant="light"
+      styles={floatToneStyles("halt")}
       className={["jl-selectable", className].filter(Boolean).join(" ")}
       title={copy?.title}
     >

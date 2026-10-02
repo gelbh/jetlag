@@ -5,7 +5,7 @@
  */
 import { useEffect, type ReactNode } from "react";
 import { Button } from "@mantine/core";
-import { CaretLeft, Crosshair } from "@phosphor-icons/react";
+import { CaretLeftIcon, CrosshairIcon } from "@phosphor-icons/react";
 import { askInlineErrorCopy } from "@/components/tools/shared/readout/AskInlineError";
 import { OVERLAY_SAFE_PAD_X } from "@/components/map/chrome/OverlayHost";
 import {
@@ -211,7 +211,7 @@ export function AskMapPlacementChrome({
               }}
               onClick={onChangeConfigure}
             >
-              <CaretLeft size={18} weight="bold" aria-hidden />
+              <CaretLeftIcon size={18} weight="bold" aria-hidden />
             </button>
           ) : (
             <span
@@ -354,7 +354,7 @@ export function AskMapPlacementChrome({
                   color: "var(--color-flag)",
                 }}
               >
-                <Crosshair size={18} weight="bold" />
+                <CrosshairIcon size={18} weight="bold" />
               </span>
               <span className="flex min-w-0 flex-col items-start gap-0.5 text-left leading-tight">
                 <span className="text-sm font-semibold">
