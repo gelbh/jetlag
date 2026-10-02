@@ -28,7 +28,6 @@ import {
 import {
   clientEnvUsesFirebaseEmulator,
   getClientEnv,
-  isFirebaseConfiguredFromEnv,
   readFirebaseConfigFromEnv,
 } from "@/config/env";
 import {
@@ -38,6 +37,18 @@ import {
   syncAnalyticsIdentityLazy,
 } from "../analytics/lazyTelemetry";
 import { isRecaptchaAlreadyRenderedError } from "./appCheckErrors";
+import {
+  isFirebaseConfigured,
+  markAuthBootstrapReady,
+  resetAuthBootstrapStateForTests,
+} from "./authBootstrapState";
+import { isDefinitiveAuthFailure } from "./authRecovery";
+
+export {
+  isAuthBootstrapReady,
+  isFirebaseConfigured,
+  subscribeAuthBootstrapReady,
+} from "./authBootstrapState";
 
 export async function getFirebaseStorage(): Promise<
   import("firebase/storage").FirebaseStorage
@@ -70,10 +81,6 @@ export function isFirestorePersistenceUnavailable(): boolean {
 
 function readConfig() {
   return readFirebaseConfigFromEnv();
-}
-
-export function isFirebaseConfigured(): boolean {
-  return isFirebaseConfiguredFromEnv();
 }
 
 let authEmulatorConnected = false;
@@ -219,8 +226,6 @@ export function getFirestoreDb(): Firestore {
 
 let anonymousSignInPromise: Promise<User> | null = null;
 let authStateReadyPromise: Promise<void> | null = null;
-let authBootstrapReady = false;
-const authBootstrapListeners = new Set<() => void>();
 
 const AUTH_BOOTSTRAP_TIMEOUT_MS = 10_000;
 
@@ -228,32 +233,6 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => {
     setTimeout(resolve, ms);
   });
-}
-
-function markAuthBootstrapReady(): void {
-  if (authBootstrapReady) {
-    return;
-  }
-
-  authBootstrapReady = true;
-  for (const listener of authBootstrapListeners) {
-    listener();
-  }
-}
-
-export function isAuthBootstrapReady(): boolean {
-  if (!isFirebaseConfigured()) {
-    return true;
-  }
-
-  return authBootstrapReady;
-}
-
-export function subscribeAuthBootstrapReady(listener: () => void): () => void {
-  authBootstrapListeners.add(listener);
-  return () => {
-    authBootstrapListeners.delete(listener);
-  };
 }
 
 async function configureAuthPersistence(
@@ -363,13 +342,26 @@ export async function ensureAnonymousUser(): Promise<User> {
   return anonymousSignInPromise;
 }
 
-/** Ensure a signed-in user with a freshly forced ID token (join/heal paths). */
-export async function ensureFreshAnonymousUser(): Promise<User> {
+/**
+ * Ensure a signed-in user, optionally forcing an ID token refresh (join/heal).
+ *
+ * Never throws for transient refresh failures (network, quota, internal): the
+ * cached user is returned and downstream Firestore / callable requests surface
+ * (and retry) their own errors. Only definitive auth failures sign out and mint
+ * a new anonymous user — that path can still throw if re-sign-in fails.
+ */
+export async function ensureFreshAnonymousUser(
+  options: { forceRefresh?: boolean } = {},
+): Promise<User> {
+  const forceRefresh = options.forceRefresh ?? true;
   let user = await ensureAnonymousUser();
   try {
-    await user.getIdToken(true);
+    await user.getIdToken(forceRefresh);
     return user;
-  } catch {
+  } catch (error) {
+    if (!isDefinitiveAuthFailure(error)) {
+      return user;
+    }
     await signOut(getFirebaseAuth());
     user = await ensureAnonymousUser();
     await user.getIdToken(true);
@@ -396,7 +388,6 @@ export async function resetFirebaseForTests(): Promise<void> {
   resetFirebaseStorageForTests();
   anonymousSignInPromise = null;
   authStateReadyPromise = null;
-  authBootstrapReady = false;
-  authBootstrapListeners.clear();
+  resetAuthBootstrapStateForTests();
 }
 

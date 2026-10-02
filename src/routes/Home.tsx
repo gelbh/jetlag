@@ -9,15 +9,7 @@ import {
   Text,
   Title,
 } from "@mantine/core";
-import {
-  Crown,
-  ChartBar,
-  PlusCircle,
-  SignIn,
-  SquaresFour,
-  Trophy,
-  UsersThree,
-} from "@phosphor-icons/react";
+import { CrownIcon, ChartBarIcon, PlusCircleIcon, SignInIcon, SquaresFourIcon, TrophyIcon, UsersThreeIcon } from "@phosphor-icons/react";
 import { Link } from "react-router-dom";
 import {
   InsetGroup,
@@ -27,33 +19,20 @@ import { EntryAsyncButton } from "@/components/ui/entry/EntryAsyncButton";
 import { filledStyles } from "@/components/ui/entry/entryStyles";
 import { InsetRow } from "@/components/ui/entry/InsetRow";
 import { AppLogo } from "@/components/ui/brand/AppLogo";
-import { BootSplash } from "@/components/ui/feedback/BootSplash";
 import { EntryScreenLayout } from "@/components/ui/layout/EntryScreenLayout";
 import { VersionChangelogSheet } from "@/components/ui/sheets/VersionChangelogSheet";
 import { APP_VERSION } from "@/domain/device/changelog";
 import { LEGAL_APP_NAME } from "@/domain/legal/legalContact";
 import { playerRoleLabel } from "@/domain/session/players/playerRole";
-import { useAuthBootstrapReady } from "@/hooks/app/useAuthBootstrapReady";
 import { useContinueActiveSession } from "@/hooks/session/useContinueActiveSession";
-import { useRouteTransition } from "@/navigation/useRouteTransition";
-import { isFirebaseConfigured } from "@/services/core/firebase/firebase";
+import { isFirebaseConfigured } from "@/services/core/firebase/authBootstrapState";
 import { PHONE_SHELL_MAX_WIDTH_PX } from "@/theme/phoneShell";
 
 export function Home() {
   const { session, myRole, continueError, continuing, handleContinue } =
     useContinueActiveSession();
-  const authBootstrapReady = useAuthBootstrapReady();
-  const { phase: routeTransitionPhase } = useRouteTransition();
   const showPremium = isFirebaseConfigured();
   const [changelogOpen, setChangelogOpen] = useState(false);
-
-  if (
-    isFirebaseConfigured() &&
-    !authBootstrapReady &&
-    routeTransitionPhase === "idle"
-  ) {
-    return <BootSplash label="Starting…" />;
-  }
 
   return (
     <>
@@ -174,19 +153,19 @@ export function Home() {
                 <InsetRow
                   to="/join"
                   label="Join session"
-                  icon={<SignIn size={22} weight="regular" />}
+                  icon={<SignInIcon size={22} weight="regular" />}
                 />
                 <InsetRow
                   showSeparator
                   to="/create"
                   label="Create session"
-                  icon={<PlusCircle size={22} weight="regular" />}
+                  icon={<PlusCircleIcon size={22} weight="regular" />}
                 />
                 <InsetRow
                   showSeparator
                   to="/presets"
                   label="Browse presets"
-                  icon={<SquaresFour size={22} weight="regular" />}
+                  icon={<SquaresFourIcon size={22} weight="regular" />}
                 />
               </InsetGroup>
             </Stack>
@@ -197,26 +176,26 @@ export function Home() {
                 <InsetRow
                   to="/friends"
                   label="Friends"
-                  icon={<UsersThree size={22} weight="regular" />}
+                  icon={<UsersThreeIcon size={22} weight="regular" />}
                 />
                 <InsetRow
                   showSeparator
                   to="/leaderboard"
                   label="Leaderboard"
-                  icon={<Trophy size={22} weight="regular" />}
+                  icon={<TrophyIcon size={22} weight="regular" />}
                 />
                 <InsetRow
                   showSeparator
                   to="/stats"
                   label="Stats"
-                  icon={<ChartBar size={22} weight="regular" />}
+                  icon={<ChartBarIcon size={22} weight="regular" />}
                 />
                 {showPremium ? (
                   <InsetRow
                     showSeparator
                     to="/premium"
                     label="Premium"
-                    icon={<Crown size={22} weight="regular" />}
+                    icon={<CrownIcon size={22} weight="regular" />}
                   />
                 ) : null}
               </InsetGroup>

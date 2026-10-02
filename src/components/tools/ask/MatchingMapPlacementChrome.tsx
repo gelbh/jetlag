@@ -3,7 +3,7 @@
  * Thin adapter over AskMapPlacementChrome.
  */
 import { Button, UnstyledButton } from "@mantine/core";
-import { PaperPlaneTilt } from "@phosphor-icons/react";
+import { PaperPlaneTiltIcon } from "@phosphor-icons/react";
 import { HudMatchingIcon } from "@/components/map/icons/ToolIcons";
 import {
   AskMapPlacementChrome,
@@ -215,7 +215,7 @@ export function MatchingMapPlacementChrome({
               aria-busy={isSubmitting || undefined}
               leftSection={
                 isSubmitting ? undefined : (
-                  <PaperPlaneTilt size={16} weight="fill" aria-hidden />
+                  <PaperPlaneTiltIcon size={16} weight="fill" aria-hidden />
                 )
               }
               styles={askMapPlacementSendStyles}
@@ -231,7 +231,7 @@ export function MatchingMapPlacementChrome({
               aria-busy={isSubmitting || undefined}
               leftSection={
                 isSubmitting ? undefined : (
-                  <PaperPlaneTilt size={16} weight="fill" aria-hidden />
+                  <PaperPlaneTiltIcon size={16} weight="fill" aria-hidden />
                 )
               }
               styles={askMapPlacementSendStyles}

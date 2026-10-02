@@ -3,6 +3,9 @@
  * Entry critical-path budget (runs after `vite build`, needs `build.manifest`).
  * Walks static `imports` from index.html in dist/.vite/manifest.json, sums gzip
  * JS + CSS, and fails when over budget or when heavy vendor libs sneak back in.
+ * Also walks the static imports of the `src/App.tsx` chunk (main.tsx loads it
+ * at boot and the prerendered home modulepreloads it, so its static closure is
+ * critical path too) with the same forbidden-chunk checks; no size limit.
  * KB = 1024 bytes. Always removes dist/.vite afterwards so the manifest isn't
  * deployed, so re-running this script alone needs a fresh `vite build`.
  */
@@ -13,14 +16,36 @@ import { gzipSync } from "node:zlib";
 
 // Measured 71.9 KB gz + ~10% headroom (target ceiling stays 130 KB gz).
 export const JS_LIMIT_KB = 80;
-// The Mantine CSS split (follow-up) lowers this to 30 KB.
-export const CSS_LIMIT_KB = 57;
+// Measured 33.0 KB gz after the Mantine per-component CSS split + ~10% headroom
+// (the rest is app CSS: map chrome, motion, Tailwind utilities, fonts).
+export const CSS_LIMIT_KB = 36;
 
 const FORBIDDEN_SRC =
   /node_modules\/(firebase|posthog-js|@sentry|@turf|maplibre-gl)\//;
-const FORBIDDEN_NAME = /^(vendor-firebase|vendor-turf)/;
+// `sentry` / `analytics` are the app-owned wrappers that pull @sentry / posthog.
+const FORBIDDEN_NAME = /^(vendor-firebase|vendor-turf)|^(sentry|analytics)$/;
+export const APP_CHUNK_KEY = "src/App.tsx";
 
 const kb = (bytes) => bytes / 1024;
+
+const isForbiddenChunk = (chunk) =>
+  FORBIDDEN_SRC.test(chunk.src ?? "") || FORBIDDEN_NAME.test(chunk.name ?? "");
+
+/** Forbidden chunks statically reachable from `rootKey` (root included). */
+function findForbiddenStaticChunks(manifest, rootKey) {
+  const seen = new Set();
+  const found = [];
+  const walk = (key) => {
+    if (seen.has(key)) return;
+    seen.add(key);
+    const chunk = manifest[key];
+    if (!chunk) throw new Error(`manifest missing chunk ${key}`);
+    if (isForbiddenChunk(chunk)) found.push({ key, chunk });
+    for (const imp of chunk.imports ?? []) walk(imp);
+  };
+  walk(rootKey);
+  return found;
+}
 
 /**
  * @param {{ manifest: Record<string, any>, sizeOf: (file: string) => number,
@@ -54,10 +79,7 @@ export function evaluateEntryBudget({
     const bytes = sizeOf(chunk.file);
     jsBytes += bytes;
     rows.push({ kind: "js", file: chunk.file, bytes });
-    if (
-      FORBIDDEN_SRC.test(chunk.src ?? "") ||
-      FORBIDDEN_NAME.test(chunk.name ?? "")
-    ) {
+    if (isForbiddenChunk(chunk)) {
       violations.push(
         `forbidden chunk on entry path: ${chunk.name ?? chunk.src ?? key} (${chunk.file})`,
       );
@@ -73,6 +95,19 @@ export function evaluateEntryBudget({
   };
   walk(entryKey);
 
+  const appChecked = APP_CHUNK_KEY in manifest;
+  if (appChecked) {
+    const appFile = manifest[APP_CHUNK_KEY].file;
+    for (const { key, chunk } of findForbiddenStaticChunks(
+      manifest,
+      APP_CHUNK_KEY,
+    )) {
+      violations.push(
+        `forbidden chunk on App static path (${appFile}): ${chunk.name ?? chunk.src ?? key} (${chunk.file})`,
+      );
+    }
+  }
+
   rows.sort((a, b) => b.bytes - a.bytes);
   const jsKb = kb(jsBytes);
   const cssKb = kb(cssBytes);
@@ -80,7 +115,7 @@ export function evaluateEntryBudget({
     violations.push(`JS ${jsKb.toFixed(1)} KB gz > limit ${limits.jsKb} KB`);
   if (cssKb > limits.cssKb)
     violations.push(`CSS ${cssKb.toFixed(1)} KB gz > limit ${limits.cssKb} KB`);
-  return { rows, jsKb, cssKb, violations };
+  return { rows, jsKb, cssKb, violations, appChecked };
 }
 
 function main() {
@@ -92,7 +127,7 @@ function main() {
     const sizeOf = (file) =>
       gzipSync(readFileSync(resolve(dist, file)), { level: 9 }).length;
     const limits = { jsKb: JS_LIMIT_KB, cssKb: CSS_LIMIT_KB };
-    const { rows, jsKb, cssKb, violations } = evaluateEntryBudget({
+    const { rows, jsKb, cssKb, violations, appChecked } = evaluateEntryBudget({
       manifest,
       sizeOf,
       limits,
@@ -106,6 +141,9 @@ function main() {
     console.log(
       `  CSS total ${cssKb.toFixed(1)} KB (limit ${limits.cssKb} KB)`,
     );
+    // Fail closed: a moved/renamed App.tsx must not silently drop the App walk.
+    if (!appChecked)
+      violations.push(`no ${APP_CHUNK_KEY} chunk in manifest; App walk skipped`);
     if (violations.length) {
       console.error("Entry budget violations:");
       for (const v of violations) console.error(`  - ${v}`);

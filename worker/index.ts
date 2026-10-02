@@ -19,6 +19,7 @@ import {
   CSP_REPORT_PATH,
   handleCspReportRequest,
 } from "./cspReport";
+import { handleTimeRequest, TIME_ENDPOINT_PATH } from "./timeEndpoint";
 import {
   fetchAssetsFollowingRedirects,
   homePrerenderRequest,
@@ -47,6 +48,9 @@ export function isSpaFallbackForAssetRequest(
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const pathname = new URL(request.url).pathname;
+    if (pathname === TIME_ENDPOINT_PATH) {
+      return handleTimeRequest(request);
+    }
     if (pathname === SENTRY_TUNNEL_PATH) {
       return handleSentryTunnelRequest(request);
     }

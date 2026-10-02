@@ -1,6 +1,10 @@
 import type { ReactNode, RefObject } from "react";
-import { Button } from "../../components/ui/button";
-import { fieldFrameStyle } from "@/components/ui/entry/entryStyles";
+import { Button } from "@mantine/core";
+import {
+  fieldFrameStyle,
+  filledStyles,
+  grayStyles,
+} from "@/components/ui/entry/entryStyles";
 import {
   FramingModeSegmentControl,
   GameAreaFramingPolygonActions,
@@ -186,10 +190,10 @@ export function GameAreaSection({ model, settingsSlot }: GameAreaSectionProps) {
 
         <Button
           type="button"
-          variant="flag"
+          fullWidth
+          styles={filledStyles}
           onClick={onOpenFramingModal}
           disabled={searchLoading || importLoading}
-          className="min-h-11 w-full"
         >
           Open fullscreen map
         </Button>
@@ -243,30 +247,30 @@ export function GameAreaSection({ model, settingsSlot }: GameAreaSectionProps) {
 
         <Button
           type="button"
-          variant="default"
+          fullWidth
+          styles={grayStyles}
           onClick={onSearch}
           disabled={searchLoading || importLoading}
-          className="min-h-11 w-full"
         >
           {searchLoading ? "Searching…" : "Find place"}
         </Button>
 
         <Button
           type="button"
-          variant="default"
+          fullWidth
+          styles={grayStyles}
           onClick={onRequestLocationBias}
           disabled={searchLoading || importLoading}
-          className="min-h-11 w-full"
         >
           Use my location
         </Button>
 
         <Button
           type="button"
-          variant="default"
+          fullWidth
+          styles={grayStyles}
           onClick={onAddCurrentArea}
           disabled={!previewGameArea || searchLoading || importLoading}
-          className="min-h-11 w-full"
         >
           Add another area
         </Button>
@@ -281,10 +285,10 @@ export function GameAreaSection({ model, settingsSlot }: GameAreaSectionProps) {
 
         <Button
           type="button"
-          variant="default"
+          fullWidth
+          styles={grayStyles}
           onClick={() => importFileInputRef.current?.click()}
           disabled={searchLoading || importLoading}
-          className="min-h-11 w-full"
         >
           {importLoading ? "Importing…" : "Import KML/KMZ"}
         </Button>
