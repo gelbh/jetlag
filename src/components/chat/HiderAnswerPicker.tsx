@@ -18,10 +18,6 @@ interface HiderAnswerPickerProps {
   onSelect: (option: GameReplyOption) => void;
 }
 
-function sendAnswerLabel(optionLabel: string): string {
-  return `Send answer: ${optionLabel}`;
-}
-
 export function HiderAnswerPicker({
   replyOptions,
   truth,
@@ -57,7 +53,7 @@ export function HiderAnswerPicker({
       <SimpleGrid cols={cols} spacing={8}>
         {replyOptions.map((option) => {
           const isRecommended = truthAvailable && option.id === truth.replyId;
-          const buttonLabel = sendAnswerLabel(option.label);
+          const buttonLabel = option.label;
 
           return (
             <Button
