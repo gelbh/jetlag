@@ -24,6 +24,16 @@ just env-pull
 # or: doppler secrets download --no-file --format env > .env.local
 ```
 
+## Where do env vars go?
+
+| Kind | Source of truth | Examples |
+|------|-----------------|----------|
+| Functions non-secret params (`defineString`) | `functions/.env.jet-lag-map-companion` | Stripe price IDs, `SESSION_OPS_MCP_URL`, `CF_*` |
+| Functions secrets (`defineSecret`) | Google Secret Manager | `STRIPE_SECRET_KEY`, `CURSOR_API_KEY` |
+| App / Worker / CI | Doppler | `VITE_*`, Worker bindings, `GCP_*`, Cloudflare deploy |
+
+New Functions param: update the project dotenv (and a code `default` only when the prod value is stable and safe to commit). Do not mirror Functions-only params into Doppler unless another runtime needs them.
+
 ## React memoization
 
 This app uses React Compiler in annotation mode (`"use memo"` opt-in; expanding later).
