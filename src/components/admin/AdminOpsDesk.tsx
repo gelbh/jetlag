@@ -578,7 +578,7 @@ export function AdminOpsDesk() {
           active={monitorActive}
           sessionCode={activeSession?.code ?? null}
           errorMessage={monitorRoleError}
-          sessionsUnavailable={Boolean(sessionsError)}
+          sessionsUnavailable={sessionsFailedEmpty}
           monitorLayout={monitorLayout}
           onMonitorLayoutChange={handleMonitorLayoutChange}
         />
