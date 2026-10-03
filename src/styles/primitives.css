@@ -45,11 +45,6 @@
     transition: none;
   }
 
-  html[data-motion="css"] .hud-pressable-css:active {
-    transform: scale(0.97);
-    transition: transform var(--motion-instant) var(--ease-out-quint);
-  }
-
   .hud-chrome:hover:not(:disabled) {
     background: oklch(from var(--color-canvas) l c h / 96%);
   }
@@ -94,10 +89,6 @@
     border-top: 3px solid var(--color-flag);
     background: oklch(from var(--color-canvas) l c h / 96%);
     box-shadow: 0 -12px 40px oklch(8% 0.04 265deg / 55%);
-  }
-
-  .hud-scrim {
-    background: oklch(from var(--color-canvas) l c h / 88%);
   }
 
   .font-display {

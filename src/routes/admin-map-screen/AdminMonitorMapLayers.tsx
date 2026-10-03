@@ -29,8 +29,6 @@ export function AdminMonitorMapLayers({
         mapKey: controller.session.id,
         mapStyle: controller.effectiveBasemapStyle,
         onMapStyleChange: controller.handleMapStyleChange,
-        mapStyleControlInset: "dock",
-        zoomControlInset: "dock",
         center: controller.center,
         zoom: 12,
         focusBounds: controller.mapFocusBounds,
