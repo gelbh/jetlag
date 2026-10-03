@@ -9,9 +9,7 @@ export function isSafeToReloadApp(options: { session: unknown }): boolean {
   return !options.session;
 }
 
-export function shouldAutoApplyServiceWorkerUpdate(options: {
-  session: unknown;
-}): boolean {
+export function shouldAutoApplyServiceWorkerUpdate(options: { session: unknown }): boolean {
   return isSafeToReloadApp(options);
 }
 
