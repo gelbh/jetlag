@@ -179,7 +179,6 @@ function CreateSessionMapPaneInner({
               focusBounds,
               fitBoundsMode: "once",
               fitBoundsPadding: [48, 48],
-              zoomControlInset: "container",
               showZoomControl: false,
               showMapStyleToggle: false,
               showCompassControl: false,
