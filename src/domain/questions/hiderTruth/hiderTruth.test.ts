@@ -5,8 +5,8 @@ import {
   prepareMeasuringLineSegments,
 } from "../../geometry/measuring/geometryMeasuring";
 import { loadXwxzRegionInputFixture } from "../../geometry/measuring/loadXwxzRegionInput";
-import { milesToMeters } from "../../map/distance";
 import type { GameArea } from "../../map/annotations";
+import { milesToMeters } from "../../map/distance";
 import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
 import { computeHiderTruthReply, computeHiderTruthReplyAsync } from "./index";
 
@@ -381,9 +381,9 @@ describe("computeHiderTruthReply", () => {
     expect(computeHiderTruthReply(pending, zoneCenter, dublinCoastTruthGameArea)?.replyId).toBe(
       "closer",
     );
-    expect(
-      computeHiderTruthReply(pending, [53.32, -6.25], dublinCoastTruthGameArea)?.replyId,
-    ).toBe("further");
+    expect(computeHiderTruthReply(pending, [53.32, -6.25], dublinCoastTruthGameArea)?.replyId).toBe(
+      "further",
+    );
   });
 
   it("coastline truth ignores segments outside session game area (prepared set)", () => {
@@ -466,10 +466,16 @@ describe("computeHiderTruthReply", () => {
     const fixture = loadXwxzRegionInputFixture();
     const { gameArea, zoneCenter, seekerAnchor } = fixture;
     const prepared = prepareMeasuringLineSegments(fixture.measuringCoastSegments, gameArea);
-    const zoneDistance = nearestPointToCoastlines(zoneCenter, prepared.segments, prepared)
-      ?.distanceMeters;
-    const seekerDistance = nearestPointToCoastlines(seekerAnchor, prepared.segments, prepared)
-      ?.distanceMeters;
+    const zoneDistance = nearestPointToCoastlines(
+      zoneCenter,
+      prepared.segments,
+      prepared,
+    )?.distanceMeters;
+    const seekerDistance = nearestPointToCoastlines(
+      seekerAnchor,
+      prepared.segments,
+      prepared,
+    )?.distanceMeters;
     expect(zoneDistance).toBeDefined();
     expect(seekerDistance).toBeDefined();
     expect(zoneDistance!).toBeLessThan(seekerDistance!);

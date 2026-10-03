@@ -14,20 +14,14 @@ export type HiderTruthReferenceMode =
   | "endGameFreeze"
   | "unavailable";
 
+/** Pre-end-game ignores hidingPlace/askOrigin/originInsideZone/seekerPlacesByUid. */
 export interface ResolveHiderTruthReferenceInput {
   hiderUid: string;
   zoneCenter: LatLngTuple | null;
-  /** Retained for callers; pre-end-game resolver ignores live hider GPS. */
   hidingPlace?: LatLngTuple | null;
-  /** Retained for callers; pre-end-game resolver ignores ask origin. */
   askOrigin?: LatLngTuple | null;
-  /** Retained for callers; pre-end-game resolver ignores in-zone hints. */
   originInsideZone?: boolean;
   zoneRadiusMeters?: number | null;
-  /**
-   * Live seeker GPS by uid. Used by `askOriginFromPendingQuestion` for map-pin
-   * tools; pre-end-game truth reference stays zone center regardless.
-   */
   seekerPlacesByUid?: Readonly<Record<string, LatLngTuple>> | null;
   session: Pick<SessionRecord, "endGameStartedAt" | "endGameTruthAnchors"> | null | undefined;
 }
@@ -79,13 +73,10 @@ export type HiderQuestionTruthContextInput = Omit<
 
 /** Per-question truth reference (zone center until end-game freeze). */
 export function resolvePendingQuestionTruthReference(
-  question: PendingQuestionRecord,
+  _question: PendingQuestionRecord,
   context: HiderQuestionTruthContextInput,
 ): HiderTruthReference {
-  return resolveHiderTruthReference({
-    ...context,
-    askOrigin: askOriginFromPendingQuestion(question, context.seekerPlacesByUid),
-  });
+  return resolveHiderTruthReference(context);
 }
 
 export function resolveHiderTruthReference({

@@ -1,15 +1,16 @@
 import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
 import { point as turfPoint } from "@turf/helpers";
-import type { Feature, LineString, MultiPolygon, Polygon } from "geojson";
+import type { Feature, LineString, MultiPolygon, Point, Polygon } from "geojson";
 import { describe, expect, it } from "vitest";
 import type { GameArea } from "../../map/annotations";
-import { buildCoastlineEliminationRegion } from "./eliminationRegions";
-import { coastlineSeekerRayProbeBeyondRadius } from "./coastlineSeekerRayProbe";
+import { bearingDegrees, destinationPoint } from "../core/geodesicPrimitives";
+import type { LatLngTuple } from "../gameArea/geometryCore";
 import {
   assertCoastlineNearRegionOracle,
   buildCoastlineNearRegionDistanceThreshold,
   coastlineNearRegionOracleEpsilonMeters,
 } from "./coastlineNearRegion";
+import { buildCoastlineEliminationRegion } from "./eliminationRegions";
 import { loadXwxzRegionInputFixture } from "./loadXwxzRegionInput";
 import {
   buildCoastlineNearRegionUnionBufferForTests,
@@ -18,7 +19,17 @@ import {
   prepareMeasuringLineSegments,
 } from "./nearRegions";
 
-/** Minimal play area (Dublin-scale bbox subset). */
+function coastlineSeekerRayProbeBeyondRadius(
+  nearestCoastLatLng: LatLngTuple,
+  seekerLatLng: LatLngTuple,
+  radiusMeters: number,
+  beyondMeters: number,
+): Feature<Point> {
+  const bearing = bearingDegrees(nearestCoastLatLng, seekerLatLng);
+  const [lat, lng] = destinationPoint(nearestCoastLatLng, radiusMeters + beyondMeters, bearing);
+  return turfPoint([lng, lat]);
+}
+
 const fixtureGameArea: GameArea = {
   type: "Polygon",
   coordinates: [

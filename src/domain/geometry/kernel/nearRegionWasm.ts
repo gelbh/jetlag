@@ -12,9 +12,7 @@ export async function wasmBuildNearRegion(
   const wasm = await loadKernelWasm();
   const useDistanceThreshold =
     input.mode === "distanceThreshold" ||
-    (input.disks.length === 0 &&
-      input.segments.length > 0 &&
-      input.mode !== "bufferUnion");
+    (input.disks.length === 0 && input.segments.length > 0 && input.mode !== "bufferUnion");
 
   const payload = {
     segments: input.segments.map((segment) => segment.geometry.coordinates),

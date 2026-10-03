@@ -4,17 +4,17 @@ import type { Feature, LineString, MultiPolygon, Polygon } from "geojson";
 import type { GameArea } from "../../map/annotations";
 import { gameAreaToBoundingBox } from "../gameArea/geometryCore";
 import {
+  COASTLINE_NEAR_REGION_YIELD_EVERY,
+  nearestPointToCoastlines,
+  type PreparedLinearSegments,
+  prepareMeasuringLineSegments,
+  yieldCoastlineNearRegionBuild,
+} from "./nearRegions";
+import {
   buildMeasuringNearRegionFromCellGrid,
   resolveGameAreaCellDivisions,
   sampleGameAreaCells,
 } from "./seaLevel";
-import {
-  COASTLINE_NEAR_REGION_YIELD_EVERY,
-  nearestPointToCoastlines,
-  prepareMeasuringLineSegments,
-  type PreparedLinearSegments,
-  yieldCoastlineNearRegionBuild,
-} from "./nearRegions";
 
 type CellClass = "near" | "far" | "skip";
 

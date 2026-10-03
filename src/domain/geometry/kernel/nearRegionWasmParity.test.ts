@@ -3,7 +3,6 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import type { Feature, LineString } from "geojson";
 import { beforeAll, describe, expect, it, vi } from "vitest";
-import type { GameArea } from "../../map/annotations";
 import { buildCoastlineNearRegionDistanceThreshold } from "../measuring/coastlineNearRegion";
 import { prepareMeasuringLineSegments } from "../measuring/nearRegions";
 import { loadPolygonGolden } from "./loadPolygonGolden";
@@ -57,10 +56,7 @@ describe.skipIf(!wasmPkgReady)("near-region batch wasm parity", () => {
   beforeAll(async () => {
     const wasm = await import("./nearRegionWasm");
     wasmBuildNearRegion = wasm.wasmBuildNearRegion;
-    const prepared = prepareMeasuringLineSegments(
-      [segment],
-      sampleGameArea as GameArea,
-    );
+    const prepared = prepareMeasuringLineSegments([segment], sampleGameArea as GameArea);
     await wasmBuildNearRegion({
       segments: prepared.segments,
       distanceMeters: 200,
@@ -73,10 +69,7 @@ describe.skipIf(!wasmPkgReady)("near-region batch wasm parity", () => {
 
   it("matches golden coastline topology on short segment + 200m", async () => {
     const golden = loadPolygonGolden("nearRegion", "coastline-200m.json");
-    const prepared = prepareMeasuringLineSegments(
-      [segment],
-      sampleGameArea as GameArea,
-    );
+    const prepared = prepareMeasuringLineSegments([segment], sampleGameArea as GameArea);
     const wasm = await wasmBuildNearRegion({
       segments: prepared.segments,
       distanceMeters: 200,
@@ -89,10 +82,7 @@ describe.skipIf(!wasmPkgReady)("near-region batch wasm parity", () => {
   });
 
   it("wasm distance-threshold matches TypeScript on short segment + 200m", async () => {
-    const prepared = prepareMeasuringLineSegments(
-      [segment],
-      sampleGameArea as GameArea,
-    );
+    const prepared = prepareMeasuringLineSegments([segment], sampleGameArea as GameArea);
     const ts = await buildCoastlineNearRegionDistanceThreshold(
       prepared.segments,
       200,

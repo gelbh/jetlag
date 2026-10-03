@@ -24,10 +24,7 @@ function closerFurtherFromCoastDistances(
   stationDistanceMeters: number,
   seekerDistanceMeters: number,
 ): "closer" | "further" {
-  if (
-    stationDistanceMeters <=
-    seekerDistanceMeters + COASTLINE_TRUTH_DISTANCE_TIE_EPSILON_METERS
-  ) {
+  if (stationDistanceMeters <= seekerDistanceMeters + COASTLINE_TRUTH_DISTANCE_TIE_EPSILON_METERS) {
     return "closer";
   }
   return "further";
@@ -95,11 +92,7 @@ export function truthMeasuringSync(
       prepared.segments,
       prepared,
     );
-    const coastNearestSeeker = nearestPointToCoastlines(
-      seekerAnchor,
-      prepared.segments,
-      prepared,
-    );
+    const coastNearestSeeker = nearestPointToCoastlines(seekerAnchor, prepared.segments, prepared);
 
     if (!coastNearestStation || !coastNearestSeeker) {
       return truthUnavailable();
