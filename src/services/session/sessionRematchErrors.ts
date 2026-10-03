@@ -1,4 +1,6 @@
 import { FirebaseError } from "firebase/app";
+import { callableErrorMessage } from "@/domain/device/feedback/userErrors";
+import { isNeedsConnectionError } from "@/domain/device/network/needsConnectionError";
 
 const FALLBACK = "Could not start rematch. Try again.";
 const APP_CHECK_MESSAGE =
@@ -20,6 +22,9 @@ function isAppCheckMessage(message: string): boolean {
  * Unknown / internal messages stay behind the fallback (no TX leak).
  */
 export function mapRematchError(error: unknown): string {
+  if (isNeedsConnectionError(error)) {
+    return callableErrorMessage(error, FALLBACK);
+  }
   if (error instanceof FirebaseError) {
     const code = callableCode(error);
     const message = error.message?.trim() ?? "";

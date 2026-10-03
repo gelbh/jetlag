@@ -1,6 +1,7 @@
 import { Stack } from "@mantine/core";
 import { useEffect, useState } from "react";
 import { ErrorCallout, SectionLabel, SuccessCallout } from "@/components/ui/entry/entryChrome";
+import { callableErrorMessage } from "@/domain/device/feedback/userErrors";
 import type { SessionRecord } from "@/domain/map/annotations";
 import { playerRoleLabel } from "@/domain/session/players/playerRole";
 import { isSessionRoleGated, visibleRoleCodeRoles } from "@/domain/session/players/roleGates";
@@ -76,8 +77,8 @@ export function RolePasscodeSettings({
     try {
       const result = await revealRolePasscode(session.id, role);
       setRevealedCodes((prev) => ({ ...prev, [role]: result.rolePasscode }));
-    } catch {
-      setError("Couldn't load that role code. Try again.");
+    } catch (error) {
+      setError(callableErrorMessage(error, "Couldn't load that role code. Try again."));
     } finally {
       setBusyRole(null);
     }
@@ -112,8 +113,8 @@ export function RolePasscodeSettings({
       const result = await regenerateRolePasscode(session.id, role);
       setRevealedCodes((prev) => ({ ...prev, [role]: result.rolePasscode }));
       await copy(result.rolePasscode);
-    } catch {
-      setError("Couldn't regenerate that role code. Try again.");
+    } catch (error) {
+      setError(callableErrorMessage(error, "Couldn't regenerate that role code. Try again."));
     } finally {
       setBusyRole(null);
     }
