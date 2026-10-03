@@ -1,5 +1,7 @@
 import type { RefObject } from "react";
 import { useCallback, useRef } from "react";
+import { callableErrorMessage } from "@/domain/device/feedback/userErrors";
+import { isNeedsConnectionError } from "@/domain/device/network/needsConnectionError";
 import type { AnnotationRecord } from "../../domain/map/annotations";
 import { isActive, LOCAL_SESSION_ID, type SessionRecord } from "../../domain/map/annotations";
 import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
@@ -28,6 +30,15 @@ import { isExpectedSessionLeaveError } from "../../services/session/sessionLeave
 import { endSession, leaveHostSession } from "../../services/session/sessionLifecycle";
 import { useSessionStore } from "../../state/sessionStore";
 import { useSessionExit } from "../session/useSessionExit";
+
+/** Offline fail-fast: tell the player instead of reporting or falling back to a client write. */
+function alertIfNeedsConnection(error: unknown): boolean {
+  if (!isNeedsConnectionError(error)) {
+    return false;
+  }
+  window.alert(callableErrorMessage(error, "Try again."));
+  return true;
+}
 
 const MAP_EXPORT_BACKGROUND = "#0f172a";
 
@@ -207,6 +218,9 @@ export function useMapSessionChrome({
     try {
       await endSession(sessionId);
     } catch (error) {
+      if (alertIfNeedsConnection(error)) {
+        return;
+      }
       if (isExpectedSessionLeaveError(error)) {
         trackSessionEnded("expected_already_ended");
       } else {
@@ -274,6 +288,10 @@ export function useMapSessionChrome({
         }
         // promoted: session continues — do not emit session_ended
       } catch (error) {
+        if (alertIfNeedsConnection(error)) {
+          allowPlayerLocationPublishes();
+          return;
+        }
         if (isExpectedSessionLeaveError(error)) {
           trackSessionEnded("expected_already_ended");
         } else {
@@ -312,6 +330,10 @@ export function useMapSessionChrome({
         try {
           await leaveSessionMembership(session.id);
         } catch (error) {
+          if (alertIfNeedsConnection(error)) {
+            allowPlayerLocationPublishes();
+            return;
+          }
           if (!isExpectedSessionLeaveError(error)) {
             captureException(error);
             window.alert("Couldn't leave the session. Try again.");

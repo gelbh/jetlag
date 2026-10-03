@@ -1,11 +1,7 @@
 import { getToken } from "firebase/app-check";
-import { httpsCallable } from "firebase/functions";
 import { captureAppCheckTokenFailure } from "../core/analytics/sentry";
-import {
-  getFirebaseAppCheck,
-  getFirebaseFunctions,
-  isFirebaseConfigured,
-} from "../core/firebase/firebase";
+import { callWithResilience } from "../core/firebase/callWithResilience";
+import { getFirebaseAppCheck, isFirebaseConfigured } from "../core/firebase/firebase";
 
 /**
  * Prime App Check before enforceAppCheck callables. Lazy App Check init on the
@@ -25,16 +21,23 @@ async function ensureAppCheckTokenForCallable(): Promise<void> {
   }
 }
 
+const REMATCH_TIMEOUT_MS = 30_000;
+
 export async function resetSessionForRematch(sessionId: string): Promise<void> {
   if (!isFirebaseConfigured()) {
     throw new Error("Firebase is not configured.");
   }
 
-  const functions = await getFirebaseFunctions();
-  await ensureAppCheckTokenForCallable();
-  const callable = httpsCallable<{ sessionId: string }, { ok: boolean }>(
-    functions,
+  // Idempotent: the handler returns "idle" when the round was already reset.
+  // Batch-heavy (round extras), so allow a longer wait. App Check is primed
+  // after Functions init (which arms it) and after the offline gate.
+  await callWithResilience<{ sessionId: string }, { ok: boolean }>(
     "resetSessionForRematch",
+    { sessionId },
+    {
+      idempotent: true,
+      timeoutMs: REMATCH_TIMEOUT_MS,
+      prepare: ensureAppCheckTokenForCallable,
+    },
   );
-  await callable({ sessionId });
 }

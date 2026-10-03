@@ -1,8 +1,8 @@
-import { httpsCallable } from "firebase/functions";
 import { APP_VERSION } from "../../domain/device/changelog";
 import type { JoinRequestRole } from "../../domain/session/players/joinRequest";
 import type { PlayerRole } from "../../domain/session/players/playerRole";
-import { getFirebaseFunctions, isFirebaseConfigured } from "../core/firebase/firebase";
+import { callWithResilience, isCallableError } from "../core/firebase/callWithResilience";
+import { isFirebaseConfigured } from "../core/firebase/firebase";
 
 export type JoinSessionWithRoleResult = {
   sessionId: string;
@@ -27,6 +27,16 @@ export type RequestRoleJoinResult = {
 
 export type ResolveRoleJoinDecision = "accept" | "decline";
 
+/** Create-path / write-heavy callables: cold starts can exceed the 12 s default. */
+const SLOW_CALLABLE_TIMEOUT_MS = 25_000;
+
+/** A retry after a committed-but-lost cancel/resolve sees the request already settled. */
+function recoverJoinRequestNoLongerPending(error: unknown): { ok: boolean } | undefined {
+  return isCallableError(error, "failed-precondition", "Join request is not pending.")
+    ? { ok: true }
+    : undefined;
+}
+
 export async function joinSessionWithRole(input: {
   code: string;
   role: PlayerRole;
@@ -39,13 +49,10 @@ export async function joinSessionWithRole(input: {
     throw new Error("Firebase is not configured.");
   }
 
-  const functions = await getFirebaseFunctions();
-  const callable = httpsCallable<typeof input, JoinSessionWithRoleResult>(
-    functions,
-    "joinSessionWithRole",
-  );
-  const result = await callable(input);
-  return result.data;
+  // Membership heal is set-like: a retry after a lost response converges.
+  return callWithResilience<typeof input, JoinSessionWithRoleResult>("joinSessionWithRole", input, {
+    idempotent: true,
+  });
 }
 
 export async function initSessionRoleGates(sessionId: string): Promise<InitSessionRoleGatesResult> {
@@ -53,13 +60,24 @@ export async function initSessionRoleGates(sessionId: string): Promise<InitSessi
     throw new Error("Firebase is not configured.");
   }
 
-  const functions = await getFirebaseFunctions();
-  const callable = httpsCallable<{ sessionId: string }, InitSessionRoleGatesResult>(
-    functions,
+  // Create path: first callable after a cold start, so allow a longer wait.
+  // A retry after a committed-but-lost first call sees "already initialized";
+  // read the observer code back instead of failing (and rolling back) create.
+  return callWithResilience<{ sessionId: string }, InitSessionRoleGatesResult>(
     "initSessionRoleGates",
+    { sessionId },
+    {
+      idempotent: true,
+      timeoutMs: SLOW_CALLABLE_TIMEOUT_MS,
+      recoverAfterRetry: async (error) => {
+        if (!isCallableError(error, "failed-precondition", "Role gates already initialized.")) {
+          return undefined;
+        }
+        const observer = await revealRolePasscode(sessionId, "observer");
+        return { observerPasscode: observer.rolePasscode };
+      },
+    },
   );
-  const result = await callable({ sessionId });
-  return result.data;
 }
 
 export async function leaveSessionMembership(sessionId: string): Promise<void> {
@@ -67,13 +85,19 @@ export async function leaveSessionMembership(sessionId: string): Promise<void> {
     throw new Error("Firebase is not configured.");
   }
 
-  const functions = await getFirebaseFunctions();
-  const callable = httpsCallable<{ sessionId: string }, { ok: boolean }>(
-    functions,
-    "leaveSessionMembership",
-  );
   try {
-    await callable({ sessionId });
+    // A retry after a committed-but-lost leave sees "membership required".
+    await callWithResilience<{ sessionId: string }, { ok: boolean }>(
+      "leaveSessionMembership",
+      { sessionId },
+      {
+        idempotent: true,
+        recoverAfterRetry: (error) =>
+          isCallableError(error, "permission-denied", "Session membership required.")
+            ? { ok: true }
+            : undefined,
+      },
+    );
   } finally {
     clearRolePasscodeRevealWarm(sessionId);
   }
@@ -126,15 +150,10 @@ export async function revealRolePasscode(
     return inflight;
   }
 
-  const promise = (async () => {
-    const functions = await getFirebaseFunctions();
-    const callable = httpsCallable<
-      { sessionId: string; role: RevealRole },
-      RolePasscodeActionResult
-    >(functions, "revealRolePasscode");
-    const result = await callable({ sessionId, role });
-    return result.data;
-  })();
+  const promise = callWithResilience<
+    { sessionId: string; role: RevealRole },
+    RolePasscodeActionResult
+  >("revealRolePasscode", { sessionId, role }, { idempotent: true });
 
   revealInflight.set(key, promise);
   try {
@@ -157,13 +176,12 @@ export async function regenerateRolePasscode(
   // Abandon any warm reveal so a late prefetch cannot win over the new code.
   revealInflight.delete(revealWarmKey(sessionId, role));
 
-  const functions = await getFirebaseFunctions();
-  const callable = httpsCallable<{ sessionId: string; role: RevealRole }, RolePasscodeActionResult>(
-    functions,
+  // Not idempotent: every call mints a new secret.
+  return callWithResilience<{ sessionId: string; role: RevealRole }, RolePasscodeActionResult>(
     "regenerateRolePasscode",
+    { sessionId, role },
+    { idempotent: false },
   );
-  const result = await callable({ sessionId, role });
-  return result.data;
 }
 
 export async function requestRoleJoin(
@@ -174,17 +192,16 @@ export async function requestRoleJoin(
     throw new Error("Firebase is not configured.");
   }
 
-  const functions = await getFirebaseFunctions();
-  const callable = httpsCallable<
+  // Not idempotent: each call creates a new pending request doc. Longer wait so
+  // a cold start does not surface an error for a request that was created.
+  return callWithResilience<
     { sessionId: string; role: JoinRequestRole; clientVersion: string },
     RequestRoleJoinResult
-  >(functions, "requestRoleJoin");
-  const result = await callable({
-    sessionId,
-    role,
-    clientVersion: APP_VERSION,
-  });
-  return result.data;
+  >(
+    "requestRoleJoin",
+    { sessionId, role, clientVersion: APP_VERSION },
+    { idempotent: false, timeoutMs: SLOW_CALLABLE_TIMEOUT_MS },
+  );
 }
 
 export async function cancelRoleJoinRequest(sessionId: string, requestId: string): Promise<void> {
@@ -192,12 +209,14 @@ export async function cancelRoleJoinRequest(sessionId: string, requestId: string
     throw new Error("Firebase is not configured.");
   }
 
-  const functions = await getFirebaseFunctions();
-  const callable = httpsCallable<{ sessionId: string; requestId: string }, { ok: boolean }>(
-    functions,
+  await callWithResilience<{ sessionId: string; requestId: string }, { ok: boolean }>(
     "cancelRoleJoinRequest",
+    { sessionId, requestId },
+    {
+      idempotent: true,
+      recoverAfterRetry: recoverJoinRequestNoLongerPending,
+    },
   );
-  await callable({ sessionId, requestId });
 }
 
 export async function resolveRoleJoinRequest(
@@ -209,16 +228,18 @@ export async function resolveRoleJoinRequest(
     throw new Error("Firebase is not configured.");
   }
 
-  const functions = await getFirebaseFunctions();
-  const callable = httpsCallable<
+  await callWithResilience<
     {
       sessionId: string;
       requestId: string;
       decision: ResolveRoleJoinDecision;
     },
     { ok: boolean }
-  >(functions, "resolveRoleJoinRequest");
-  await callable({ sessionId, requestId, decision });
+  >(
+    "resolveRoleJoinRequest",
+    { sessionId, requestId, decision },
+    { idempotent: true, recoverAfterRetry: recoverJoinRequestNoLongerPending },
+  );
 }
 
 const CLIENT_UPDATE_REQUIRED_COPY = "Update the app to continue. Refresh to load the latest build.";

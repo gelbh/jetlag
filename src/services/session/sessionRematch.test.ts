@@ -39,7 +39,9 @@ describe("resetSessionForRematch", () => {
     await resetSessionForRematch("session-42");
 
     expect(getToken).toHaveBeenCalledOnce();
-    expect(httpsCallable).toHaveBeenCalledWith({}, "resetSessionForRematch");
+    expect(httpsCallable).toHaveBeenCalledWith({}, "resetSessionForRematch", {
+      timeout: 30_000,
+    });
     expect(callable).toHaveBeenCalledWith({ sessionId: "session-42" });
   });
 
@@ -49,7 +51,9 @@ describe("resetSessionForRematch", () => {
     await resetSessionForRematch("session-42");
 
     expect(getToken).not.toHaveBeenCalled();
-    expect(httpsCallable).toHaveBeenCalledWith({}, "resetSessionForRematch");
+    expect(httpsCallable).toHaveBeenCalledWith({}, "resetSessionForRematch", {
+      timeout: 30_000,
+    });
     expect(callable).toHaveBeenCalledWith({ sessionId: "session-42" });
   });
 
