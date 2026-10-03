@@ -1,6 +1,7 @@
 import {
   ArrowsClockwiseIcon,
   CheckCircleIcon,
+  ClockCounterClockwiseIcon,
   CloudSlashIcon,
   WarningCircleIcon,
   WarningIcon,
@@ -20,6 +21,7 @@ const SURVEY_ICON: Record<SyncStatus, PhosphorIcon> = {
   saving: ArrowsClockwiseIcon,
   offline: CloudSlashIcon,
   degraded: WarningIcon,
+  stale: ClockCounterClockwiseIcon,
   error: WarningCircleIcon,
 };
 

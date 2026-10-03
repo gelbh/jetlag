@@ -4,6 +4,7 @@ import { BrowserRouter, Navigate, Outlet, Route, Routes, useLocation } from "rea
 import { MotionDatasetEffect } from "./components/motion/MotionDatasetEffect";
 import { LowBatteryPrompt } from "./components/session/banners/LowBatteryPrompt";
 import { LocationPermissionPrompt } from "./components/session/status/LocationPermissionPrompt";
+import { WriteFailureNotifier } from "./components/session/status/WriteFailureNotifier";
 import { AnalyticsConsentBanner } from "./components/ui/banners/AnalyticsConsentBanner";
 import { AppUpdateBanner } from "./components/ui/banners/AppUpdateBanner";
 import { AppUpdateProvider } from "./components/ui/banners/AppUpdateProvider";
@@ -238,6 +239,7 @@ export default function App() {
                     <div className="jl-scroll app-scroll-root">
                       <LowBatteryPrompt />
                       <LocationPermissionPrompt />
+                      <WriteFailureNotifier />
                       <Routes>
                         <Route element={<PlayerPhoneShellOutlet />}>
                           <Route path="/" element={<Home />} />

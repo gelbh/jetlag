@@ -85,7 +85,7 @@ async function resolveAnswerButton(page: Page, name: string | RegExp): Promise<L
 }
 
 export async function answerInChat(page: Page, label: string) {
-  const answerButton = await resolveAnswerButton(page, `Send answer: ${label}`);
+  const answerButton = await resolveAnswerButton(page, label);
   await answerButton.click();
 }
 

@@ -134,6 +134,8 @@ interface SessionState {
   lastSyncError: string | null;
   remoteUpdateNotice: string | null;
   networkReachable: boolean | null;
+  /** True while the latest session doc snapshot came from the local cache (not persisted). */
+  sessionFromCache: boolean;
   setSession: (session: SessionRecord | null, myUid?: string | null) => void;
   setMyUid: (uid: string | null) => void;
   setGameArea: (gameArea: GameArea) => void;
@@ -145,6 +147,7 @@ interface SessionState {
   setLastSyncError: (message: string | null) => void;
   setRemoteUpdateNotice: (message: string | null) => void;
   setNetworkReachable: (reachable: boolean | null) => void;
+  setSessionFromCache: (fromCache: boolean) => void;
 }
 
 export const useSessionStore = create<SessionState>()(
@@ -158,6 +161,7 @@ export const useSessionStore = create<SessionState>()(
       lastSyncError: null,
       remoteUpdateNotice: null,
       networkReachable: null,
+      sessionFromCache: false,
       setSession: (session, myUid) =>
         set((state) => {
           const uid = myUid === undefined ? state.myUid : myUid;
@@ -226,6 +230,10 @@ export const useSessionStore = create<SessionState>()(
       setLastSyncError: (lastSyncError) => set({ lastSyncError }),
       setRemoteUpdateNotice: (remoteUpdateNotice) => set({ remoteUpdateNotice }),
       setNetworkReachable: (networkReachable) => set({ networkReachable }),
+      setSessionFromCache: (sessionFromCache) =>
+        set((state) =>
+          state.sessionFromCache === sessionFromCache ? state : { sessionFromCache },
+        ),
     }),
     {
       name: "jetlag-session",
