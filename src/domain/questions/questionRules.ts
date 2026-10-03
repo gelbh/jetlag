@@ -159,6 +159,15 @@ export function isAwaitingServerReceipt(q: {
   return q.pendingSync === true && !q.receivedAt;
 }
 
+/** Anchor for a running answer clock; undefined while the ask is still queued locally. */
+export function activeDeadlineAnchor(q: {
+  answerableAt?: string;
+  receivedAt?: string;
+  pendingSync?: boolean;
+}): string | undefined {
+  return isAwaitingServerReceipt(q) ? undefined : resolveDeadlineAnchor(q);
+}
+
 export function formatAnswerCountdown(
   answerableAt: string | undefined,
   deadlineMs: number,

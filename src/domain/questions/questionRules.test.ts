@@ -3,6 +3,7 @@ import type { AnnotationRecord } from "../map/annotations";
 import type { PendingQuestionRecord } from "../session/activity/sessionChat";
 import { answerDeadlineMs } from "../session/size/gameSizeRules";
 import {
+  activeDeadlineAnchor,
   countAnnotationUses,
   formatAnswerCountdown,
   formatDrawPickSummary,
@@ -170,5 +171,16 @@ describe("isAwaitingServerReceipt", () => {
       isAwaitingServerReceipt({ pendingSync: true, receivedAt: "2026-01-01T10:00:00.000Z" }),
     ).toBe(false);
     expect(isAwaitingServerReceipt({})).toBe(false);
+  });
+});
+
+describe("activeDeadlineAnchor", () => {
+  it("withholds the anchor while the ask is queued, then uses the later anchor", () => {
+    const asked = { answerableAt: "2026-01-01T10:00:00.000Z" };
+    expect(activeDeadlineAnchor({ ...asked, pendingSync: true })).toBeUndefined();
+    expect(activeDeadlineAnchor(asked)).toBe("2026-01-01T10:00:00.000Z");
+    expect(activeDeadlineAnchor({ ...asked, receivedAt: "2026-01-01T10:05:00.000Z" })).toBe(
+      "2026-01-01T10:05:00.000Z",
+    );
   });
 });

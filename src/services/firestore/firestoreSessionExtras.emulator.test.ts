@@ -9,7 +9,7 @@ import { createRemoteSession } from "./firestoreAnnotations";
 import {
   subscribeToPendingQuestions,
   updatePendingQuestion,
-  writePendingQuestion,
+  writeAskedQuestionBatch,
 } from "./firestoreSessionExtras";
 
 function samplePendingQuestion(
@@ -76,11 +76,26 @@ describe("firestoreSessionExtras emulator", () => {
       },
     );
 
-    await writePendingQuestion(session.id, question);
+    await writeAskedQuestionBatch(session.id, question, {
+      id: "msg-emulator-1",
+      sessionId: session.id,
+      channel: "game",
+      senderUid: uid,
+      senderRole: "seeker",
+      createdAt: question.createdAt,
+      kind: "question",
+      pendingQuestionId: question.id,
+      toolType: question.toolType,
+      promptText: question.promptText,
+      replyOptions: question.replyOptions,
+      status: "pending",
+    });
 
     await viWaitFor(() => {
-      expect(received.some((item) => item.id === question.id)).toBe(true);
-      expect(received[0]?.status).toBe("pending");
+      const asked = received.find((item) => item.id === question.id);
+      expect(asked?.status).toBe("pending");
+      // Server-stamped receipt round-trips through rules + deserialization.
+      expect(asked?.receivedAt).toMatch(/^\d{4}-\d{2}-\d{2}T/);
     });
 
     await updatePendingQuestion(session.id, question.id, {

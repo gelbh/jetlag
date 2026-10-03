@@ -1,11 +1,22 @@
 import { act, renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { usePendingQuestionActions } from "./usePendingQuestionActions";
+import {
+  SUBMIT_DOUBLE_TAP_COOLDOWN_MS,
+  usePendingQuestionActions,
+} from "./usePendingQuestionActions";
 
 const firestoreMocks = vi.hoisted(() => ({
   writeAskedQuestionBatch: vi.fn(async () => undefined),
   writePendingQuestionUpdateBatch: vi.fn(async () => undefined),
   postGameSystemMessage: vi.fn(async () => undefined),
+  buildGameSystemMessage: (
+    sessionId: string,
+    senderUid: string,
+    senderRole: string,
+    text: string,
+    id: string,
+    createdAt: string,
+  ) => ({ id, sessionId, channel: "game", senderUid, senderRole, createdAt, kind: "system", text }),
   getPendingQuestionStatus: vi.fn(async () => "walking"),
   THERMOMETER_WALK_CANCEL_TEXT: {
     left: "Thermometer walk cancelled — seeker left.",
@@ -58,6 +69,65 @@ const radarAsk = {
 describe("usePendingQuestionActions", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  it("drops a double tap but accepts a deliberate second ask after the cooldown", () => {
+    vi.useFakeTimers();
+    try {
+      const { result } = renderHook(() => usePendingQuestionActions());
+
+      let first: string | undefined;
+      let doubleTap: string | undefined;
+      act(() => {
+        first = result.current.submitPendingQuestion(radarAsk);
+        doubleTap = result.current.submitPendingQuestion(radarAsk);
+      });
+      expect(first).toEqual(expect.any(String));
+      expect(doubleTap).toBeUndefined();
+
+      vi.advanceTimersByTime(SUBMIT_DOUBLE_TAP_COOLDOWN_MS);
+      let later: string | undefined;
+      act(() => {
+        later = result.current.submitPendingQuestion(radarAsk);
+      });
+      expect(later).toEqual(expect.any(String));
+      expect(firestoreMocks.writeAskedQuestionBatch).toHaveBeenCalledTimes(2);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("completes a walk in one batch that stamps server receipt for the hider's window", () => {
+    const { result } = renderHook(() => usePendingQuestionActions());
+
+    act(() => {
+      result.current.completeThermometerWalk({
+        sessionId: "session-1",
+        pendingQuestionId: "pq-walk",
+        senderUid: "seeker-1",
+        senderRole: "seeker",
+        startPoint: [53.35, -6.26],
+        endPoint: [53.36, -6.26],
+        distanceMeters: 1000,
+        promptText: "Hotter or colder?",
+        replyOptions: [],
+      });
+    });
+
+    expect(commitWriteMock).toHaveBeenCalledWith("question.ask", expect.any(Function));
+    expect(firestoreMocks.writePendingQuestionUpdateBatch).toHaveBeenCalledWith(
+      "session-1",
+      expect.objectContaining({
+        questionId: "pq-walk",
+        stampReceivedAt: true,
+        questionPatch: expect.objectContaining({
+          status: "pending",
+          answerableAt: "2026-01-01T10:00:00.000Z",
+        }),
+        newMessage: expect.objectContaining({ kind: "question", pendingQuestionId: "pq-walk" }),
+      }),
+    );
+    expect(activityMocks.emitThermometerWalkSeparatedActivity).toHaveBeenCalled();
   });
 
   it("asks with one batched question + chat row on server-clock time, without awaiting ack", () => {

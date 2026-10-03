@@ -3,11 +3,7 @@ import type { PendingQuestionRecord } from "../session/activity/sessionChat";
 import type { SessionRulesInput } from "../session/rules";
 import { formatShortCountdownFromMs } from "../time/formatClockDuration";
 import type { QuestionToolType } from "./questionRules";
-import {
-  isAwaitingServerReceipt,
-  questionAnswerDeadlineMs,
-  resolveDeadlineAnchor,
-} from "./questionRules";
+import { activeDeadlineAnchor, questionAnswerDeadlineMs } from "./questionRules";
 
 export interface ActiveQuestionTimer {
   pendingQuestionId: string;
@@ -49,8 +45,8 @@ export function selectPrimaryQuestionTimer(
       continue;
     }
 
-    const anchor = resolveDeadlineAnchor(question);
-    if (!anchor || isAwaitingServerReceipt(question)) {
+    const anchor = activeDeadlineAnchor(question);
+    if (!anchor) {
       continue;
     }
 

@@ -72,17 +72,6 @@ describe("firestore.rules — batched question asks", () => {
     await assertSucceeds(batch.commit());
   });
 
-  it("denies a client-chosen receivedAt", async () => {
-    const { sessionRef } = await seekerSession();
-
-    await assertFails(
-      sessionRef
-        .collection("pendingQuestions")
-        .doc("pq-1")
-        .set(questionPayload({ receivedAt: Timestamp.fromMillis(0) })),
-    );
-  });
-
   it("rejects the whole batch when receivedAt is forged", async () => {
     const { db, sessionRef } = await seekerSession();
     const batch = db.batch();
@@ -117,11 +106,78 @@ describe("firestore.rules — batched question asks", () => {
     await assertSucceeds(sessionRef.collection("pendingQuestions").doc("pq-walk").set(walking));
   });
 
-  it("does not let a seeker rewrite receivedAt after create", async () => {
+  it("keeps receivedAt immutable once stamped (no update branch admits it)", async () => {
     const { sessionRef } = await seekerSession();
     const questionRef = sessionRef.collection("pendingQuestions").doc("pq-1");
     await assertSucceeds(questionRef.set(questionPayload({ receivedAt: serverTimestamp() })));
 
     await assertFails(questionRef.update({ receivedAt: Timestamp.fromMillis(0) }));
+  });
+
+  it("stamps server receipt when a walk completes, and rejects a forged one", async () => {
+    const { db, sessionRef } = await seekerSession();
+    const { answerableAt: _omit, ...walking } = questionPayload({
+      toolType: "thermometer",
+      status: "walking",
+      replyOptions: [],
+    });
+    const questionRef = sessionRef.collection("pendingQuestions").doc("pq-walk");
+    await assertSucceeds(questionRef.set(walking));
+
+    const completion = {
+      status: "pending",
+      promptText: "Hotter or colder?",
+      replyOptions: [{ id: "hotter", label: "Hotter" }],
+      answerableAt: ASKED_AT,
+    };
+    await assertFails(questionRef.update({ ...completion, receivedAt: Timestamp.fromMillis(0) }));
+
+    const batch = db.batch();
+    batch.update(questionRef, { ...completion, receivedAt: serverTimestamp() });
+    batch.set(sessionRef.collection("messages").doc("msg-walk"), {
+      ...questionMessage,
+      pendingQuestionId: "pq-walk",
+      toolType: "thermometer",
+      promptText: "Hotter or colder?",
+      replyOptions: [{ id: "hotter", label: "Hotter" }],
+    });
+    await assertSucceeds(batch.commit());
+  });
+
+  it("allows the hider's late answer batch: question, chat row, and late notice", async () => {
+    const { db, sessionRef } = await seekerSession();
+    const seed = db.batch();
+    seed.set(
+      sessionRef.collection("pendingQuestions").doc("pq-1"),
+      questionPayload({ receivedAt: serverTimestamp() }),
+    );
+    seed.set(sessionRef.collection("messages").doc("msg-1"), questionMessage);
+    await assertSucceeds(seed.commit());
+
+    const hiderRef = rules.testEnv
+      .authenticatedContext("hider-1")
+      .firestore()
+      .collection("sessions")
+      .doc("session-1");
+    const answer = hiderRef.firestore.batch();
+    answer.update(hiderRef.collection("pendingQuestions").doc("pq-1"), {
+      answer: "yes",
+      status: "answered",
+      answeredLate: true,
+    });
+    answer.update(hiderRef.collection("messages").doc("msg-1"), {
+      selectedReply: "yes",
+      status: "answered",
+    });
+    answer.set(hiderRef.collection("messages").doc("msg-late"), {
+      channel: "game",
+      senderUid: "hider-1",
+      senderRole: "hider",
+      createdAt: ASKED_AT,
+      kind: "system",
+      text: "Answer received late. Hider forfeits card draw for this question.",
+    });
+
+    await assertSucceeds(answer.commit());
   });
 });
