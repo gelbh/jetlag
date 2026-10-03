@@ -9,16 +9,22 @@
 
 - Node.js `>=24` (see `package.json` `engines`)
 - npm (repo pins `packageManager`)
+- On Apple Silicon, Node must be native arm64 (`node -p "process.arch"` → `arm64`). A Rosetta/x64 Node installs the wrong Biome/native optional deps and breaks `npm run lint`.
+- Git worktrees: run `npm ci` **inside each worktree**. Never copy or symlink `node_modules` between the main tree and a worktree.
+- Prefer `npm run lint` / `npx biome` over a global `biome` so the Biome version pinned in `package.json` is used.
 - [Doppler CLI](https://docs.doppler.com/docs/install-cli) for secrets
 - Optional: [`just`](https://github.com/casey/just) (`brew install just`) for maintainer recipes
 
 CI and husky call `npm run <script>` contracts in `package.json`. Day-to-day recipes live in the root `justfile` (`just --list`).
 
-JS/TS lint and format use Biome (`npm run lint` / `npm run format`); CSS remains Stylelint (`npm run lint:css`).
+JS/TS/CSS lint and format use Biome (`npm run lint` / `npm run format`). Stylelint is retired. BEM-style class names (`__` / `--`) are convention-only; Biome has no `selector-class-pattern` equivalent. CSS lint uses Biome recommended with intentional offs in `biome.json` for `noDescendingSpecificity`, `noImportantStyles`, and `noDuplicateProperties` (map chrome `!important` and progressive unit fallbacks). Pre-commit runs Biome on staged files (autofix); pre-push and CI run `biome ci --error-on-warnings` on the full tree.
 
 ## Setup
 
 ```bash
+# confirm arch first on Apple Silicon
+node -p "process.arch"   # expect: arm64
+
 npm ci
 just env-pull
 # or: doppler secrets download --no-file --format env > .env.local
@@ -74,7 +80,7 @@ just e2e-smoke
 
 ## Release notes
 
-Player-visible changes need a changeset. See [`.changeset/README.md`](.changeset/README.md).
+Player-visible changes need a changeset. See [`.changeset/README.md`](.changeset/README.md). Merge into `main` requires the `changeset-status` check (or an allowed skip / empty changeset). Husky does not enforce this.
 
 ```bash
 npx changeset
