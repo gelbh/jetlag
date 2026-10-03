@@ -1,5 +1,6 @@
 import Stripe from "stripe";
 import { setCors } from "../lib/cors.mjs";
+import { captureAnalyticsEvent } from "../lib/posthog.mjs";
 import { captureFunctionsException } from "../lib/sentry.mjs";
 import { markStripeEventProcessed } from "./premiumEntitlements.mjs";
 import {
@@ -15,8 +16,15 @@ const STRIPE_SIGNATURE_MISMATCH = /No signatures found matching the expected sig
  * @param {string} webhookSecret
  * @param {import("firebase-functions/v2/https").Request} req
  * @param {import("firebase-functions/v2/https").Response} res
+ * @param {{
+ *   posthogApiKey?: string,
+ *   captureAnalyticsEvent?: typeof captureAnalyticsEvent,
+ *   captureImpl?: { capture: Function, shutdown: Function },
+ * } | undefined} [options]
  */
-export async function handleStripeWebhook(db, webhookSecret, req, res) {
+export async function handleStripeWebhook(db, webhookSecret, req, res, options) {
+  const posthogApiKey = options?.posthogApiKey ?? "";
+  const captureEvent = options?.captureAnalyticsEvent ?? captureAnalyticsEvent;
   setCors(res, req);
 
   if (req.method === "OPTIONS") {
@@ -84,11 +92,35 @@ export async function handleStripeWebhook(db, webhookSecret, req, res) {
       case "checkout.session.completed": {
         const session = /** @type {Stripe.Checkout.Session} */ (event.data.object);
         if (session.mode === "payment") {
-          await applyCheckoutSessionCompleted(db, session);
+          await applyCheckoutSessionCompleted(db, session, {
+            stripeEventId: event.id,
+            posthogApiKey,
+            captureAnalyticsEvent: captureEvent,
+            captureImpl: options?.captureImpl,
+          });
         }
         break;
       }
-      case "customer.subscription.created":
+      case "customer.subscription.created": {
+        const subscription = /** @type {Stripe.Subscription} */ (event.data.object);
+        await syncSubscriptionEntitlements(db, subscription);
+        const uid = subscription.metadata?.firebaseUid;
+        const plan = subscription.metadata?.plan === "yearly" ? "yearly" : "monthly";
+        if (
+          uid &&
+          (subscription.status === "active" || subscription.status === "trialing")
+        ) {
+          await captureEvent({
+            apiKey: posthogApiKey,
+            distinctId: uid,
+            event: "premium_purchase_completed",
+            uuidSeed: `premium_purchase_completed:${event.id}`,
+            properties: { productKey: plan, source: "stripe_webhook" },
+            captureImpl: options?.captureImpl,
+          });
+        }
+        break;
+      }
       case "customer.subscription.updated":
       case "customer.subscription.deleted": {
         const subscription = /** @type {Stripe.Subscription} */ (event.data.object);
