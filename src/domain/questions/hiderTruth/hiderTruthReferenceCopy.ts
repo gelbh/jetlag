@@ -5,7 +5,7 @@ export function hiderTruthReferenceHint(endGameActive: boolean): string {
     return "Hider answers are relative to each hider's frozen end-game location, not live GPS.";
   }
 
-  return "Hider answers use the hiding place when the seeker is inside the zone, otherwise the hiding-zone center.";
+  return "Hider answers use the hiding-zone center until end game, then each hider's frozen end-game location.";
 }
 
 export function hiderTruthReferenceLoadingLabel(mode: HiderTruthReferenceMode): string {

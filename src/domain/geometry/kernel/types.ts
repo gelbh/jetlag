@@ -25,4 +25,7 @@ export type NearRegionBatchInput = {
   distanceMeters: number;
   disks: readonly DiskSpec[];
   gameArea: GameAreaGeometry;
+  /** Coastline distance-threshold grid path (empty disks + segments). */
+  mode?: "distanceThreshold" | "bufferUnion";
+  divisions?: number;
 };
