@@ -3,11 +3,11 @@
  */
 import { createElement } from "react";
 import { Marker } from "react-map-gl/maplibre";
-import { matchingCategoryIcon } from "@/components/tools/ask/matchingCategoryIcons";
+import { matchingCategoryIcon } from "@/components/tools/ask/matching/matchingCategoryIcons";
 import {
   hasMeasuringCategoryIcon,
   measuringCategoryIcon,
-} from "@/components/tools/ask/measuringCategoryIcons";
+} from "@/components/tools/ask/measuring/measuringCategoryIcons";
 import type { MatchingCategoryId, MeasuringFromKind } from "@/domain/questions";
 
 export type MatchingCategoryPinMarkerProps = {
