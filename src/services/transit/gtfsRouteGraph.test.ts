@@ -1,8 +1,10 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import type { GtfsStaticBundle } from "./gtfsBundle";
 import {
+  clearGtfsBundleCacheForTests,
   filterGtfsStopsForGameArea,
   gtfsStopsShareStationOrRoute,
+  loadGtfsBundle,
   nearestGtfsStopInGameArea,
   resolveTransitLineMatch,
   stationIdentity,
@@ -143,5 +145,30 @@ describe("gtfsRouteGraph", () => {
 
     const nearest = nearestGtfsStopInGameArea([40.7354, -73.9901], NYC_BUNDLE, downtownGameArea);
     expect(nearest?.id).toBe("nyc:union-n");
+  });
+});
+
+describe("loadGtfsBundle", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    clearGtfsBundleCacheForTests();
+  });
+
+  it("returns null without caching when the network fails transiently", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockRejectedValueOnce(new TypeError("Failed to fetch"))
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          metros: [{ id: "nyc", bundlePath: "/geo/gtfs/nyc.json" }],
+        }),
+      })
+      .mockResolvedValueOnce({ ok: true, json: async () => NYC_BUNDLE });
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(loadGtfsBundle("nyc")).resolves.toBeNull();
+    await expect(loadGtfsBundle("nyc")).resolves.toBe(NYC_BUNDLE);
+    expect(fetchMock).toHaveBeenCalledTimes(3);
   });
 });

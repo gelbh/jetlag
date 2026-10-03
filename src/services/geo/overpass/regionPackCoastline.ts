@@ -1,6 +1,11 @@
 import type { Feature, LineString } from "geojson";
 import { isPackGeoSupported, packGeoCoastlineUrl } from "@/domain/regions/packGeoManifest";
 import type { RegionPackId } from "@/domain/regions/regionPack";
+import {
+  fetchAndReadWithTimeout,
+  GEO_FETCH_TIMEOUT_MS,
+  isTransientFetchError,
+} from "@/services/core/network/fetchWithTimeout";
 
 export interface BundledCoastlinePack {
   source: string;
@@ -50,19 +55,21 @@ export async function loadBundledCoastlinePack(
   }
 
   try {
-    const response = await fetch(resolveGeoAssetUrl(packGeoCoastlineUrl(regionPackId)));
-    if (!response.ok) {
-      coastlineCache.set(regionPackId, null);
-      return null;
-    }
+    const payload = await fetchAndReadWithTimeout(
+      resolveGeoAssetUrl(packGeoCoastlineUrl(regionPackId)),
+      undefined,
+      GEO_FETCH_TIMEOUT_MS,
+      async (response) =>
+        response.ok
+          ? ((await response.json()) as {
+              source?: string;
+              bbox?: BundledCoastlinePack["bbox"];
+              segments?: unknown[];
+            })
+          : null,
+    );
 
-    const payload = (await response.json()) as {
-      source?: string;
-      bbox?: BundledCoastlinePack["bbox"];
-      segments?: unknown[];
-    };
-
-    if (typeof payload.source !== "string" || !Array.isArray(payload.segments)) {
+    if (!payload || typeof payload.source !== "string" || !Array.isArray(payload.segments)) {
       coastlineCache.set(regionPackId, null);
       return null;
     }
@@ -74,8 +81,11 @@ export async function loadBundledCoastlinePack(
     };
     coastlineCache.set(regionPackId, pack);
     return pack;
-  } catch {
-    coastlineCache.set(regionPackId, null);
+  } catch (error) {
+    // Timeouts / offline say nothing about the asset; leave uncached so the next call retries.
+    if (!isTransientFetchError(error)) {
+      coastlineCache.set(regionPackId, null);
+    }
     return null;
   }
 }
