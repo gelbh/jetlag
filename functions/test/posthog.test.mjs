@@ -51,6 +51,21 @@ describe("posthog helper", () => {
         captureImpl: bad,
       }),
     );
+
+    const asyncReject = {
+      capture: () => Promise.reject(new Error("async boom")),
+      shutdown: async () => {},
+    };
+    await assert.doesNotReject(() =>
+      captureAnalyticsEvent({
+        apiKey: "phc_test",
+        distinctId: "uid_1",
+        event: "x",
+        uuidSeed: "e",
+        properties: {},
+        captureImpl: asyncReject,
+      }),
+    );
   });
 
   it("skips when apiKey or distinctId missing", async () => {
