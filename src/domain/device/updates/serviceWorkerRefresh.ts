@@ -5,13 +5,12 @@ const RELOAD_FALLBACK_MS = 1500;
 
 let appNeedRefreshHandler: (() => void) | undefined;
 
-export function isSafeToReloadApp(options: { session: unknown; pathname: string }): boolean {
-  return !options.session || options.pathname !== "/map";
+export function isSafeToReloadApp(options: { session: unknown }): boolean {
+  return !options.session;
 }
 
 export function shouldAutoApplyServiceWorkerUpdate(options: {
   session: unknown;
-  pathname: string;
 }): boolean {
   return isSafeToReloadApp(options);
 }
@@ -32,7 +31,6 @@ export function notifyAppNeedRefresh(): void {
 export async function maybeApplyPendingUpdate(options: {
   needsRefresh: boolean;
   session: unknown;
-  pathname: string;
   registration: ServiceWorkerRegistration | undefined;
   applyUpdate: (reloadPage?: boolean) => Promise<void>;
 }): Promise<void> {
@@ -43,7 +41,6 @@ export async function maybeApplyPendingUpdate(options: {
   if (
     !shouldAutoApplyServiceWorkerUpdate({
       session: options.session,
-      pathname: options.pathname,
     })
   ) {
     return;

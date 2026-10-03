@@ -50,10 +50,7 @@ export function AppUpdateProvider({ children }: { children: ReactNode }) {
   const session = useSessionStore((state) => state.session);
 
   const inActiveMapSession = Boolean(session) && location.pathname === "/map";
-  const safeToReload = isSafeToReloadApp({
-    session,
-    pathname: location.pathname,
-  });
+  const safeToReload = isSafeToReloadApp({ session });
 
   // Wait for auth bootstrap: a restored user is attached before the appConfig
   // read (rules need sign-in), and Firestore stays off the boot path on public
@@ -243,11 +240,10 @@ export function AppUpdateProvider({ children }: { children: ReactNode }) {
     void maybeApplyPendingUpdate({
       needsRefresh,
       session,
-      pathname: location.pathname,
       registration: registrationRef.current,
       applyUpdate: updateSW,
     });
-  }, [needsRefresh, updateSW, location.pathname, session]);
+  }, [needsRefresh, updateSW, session]);
 
   const dismissDeferred = useCallback(() => setDismissed(true), []);
 
