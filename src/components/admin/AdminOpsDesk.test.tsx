@@ -192,6 +192,52 @@ describe("AdminOpsDesk", () => {
     expect(sessionListState.refresh).toHaveBeenCalledTimes(1);
   });
 
+  it("keeps retained sessions visible when refresh fails with an error", () => {
+    authState.state = "admin";
+    authState.authReady = true;
+    authState.user = { email: "admin@example.com", emailVerified: true };
+    sessionListState.loading = false;
+    sessionListState.error = "Couldn't load live sessions.";
+    sessionListState.sessions = [
+      {
+        sessionId: "session-1",
+        code: "ABCD",
+        phase: "seek",
+        tier: "free",
+        gameSize: "medium",
+        roleCounts: { seeker: 1, hider: 1, observer: 0, admin: 0 },
+        hostUid: "host-1",
+        createdAt: "2026-01-01T00:00:00.000Z",
+        memberCount: 2,
+        timerAccumulatedMs: 0,
+        timerRunningSince: "2026-01-01T00:00:00.000Z",
+        endGameStartedAt: null,
+        endGameRequestedAt: null,
+        hostAppVersion: null,
+        hidingPeriodMinutes: null,
+        regionPackId: null,
+        regionPackSubregionId: null,
+        transitMetroId: null,
+        gameAreaLabel: "Dublin",
+        lastActivityAt: "2026-01-02T00:00:00.000Z",
+        lastLocationAt: "2026-01-02T00:00:00.000Z",
+        lastAnnotationAt: null,
+        activeAnnotationCount: 0,
+        mode: "multiplayer",
+        isLive: true,
+        liveMultiplayer: true,
+      },
+    ];
+
+    renderOpsDesk();
+
+    expect(screen.getByText("Couldn't load live sessions.")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Retry" })).toBeInTheDocument();
+    expect(screen.getByText("ABCD")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Live" })).toBeInTheDocument();
+    expect(screen.queryByText("No live sessions")).not.toBeInTheDocument();
+  });
+
   it("renders session phase labels for admin users", () => {
     authState.state = "admin";
     authState.authReady = true;

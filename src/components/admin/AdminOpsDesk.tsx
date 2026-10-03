@@ -493,18 +493,26 @@ export function AdminOpsDesk() {
     </Button>
   ) : null;
 
+  const sessionsErrorRetry = sessionsError ? (
+    <Stack gap="sm" mb={sessions.length > 0 ? "sm" : undefined}>
+      <InlineError>{sessionsError}</InlineError>
+      <Button type="button" variant="default" w="fit-content" onClick={() => void refresh()}>
+        Retry
+      </Button>
+    </Stack>
+  ) : null;
+
+  // Fail-only when the list has nothing retained; keep filters + rows when refresh/loadMore fails.
+  const sessionsFailedEmpty = Boolean(sessionsError) && sessions.length === 0;
+
   const sessionsBody = (
     <div className="jl-scroll jl-ops-panel-scroll" data-testid="admin-ops-sessions">
       {observeError ? <InlineError>{observeError}</InlineError> : null}
-      {sessionsError ? (
-        <Stack gap="sm">
-          <InlineError>{sessionsError}</InlineError>
-          <Button type="button" variant="default" w="fit-content" onClick={() => void refresh()}>
-            Retry
-          </Button>
-        </Stack>
+      {sessionsFailedEmpty ? (
+        sessionsErrorRetry
       ) : (
         <>
+          {sessionsErrorRetry}
           <div className="mb-3">
             <AdminSessionFilters
               query={query}
