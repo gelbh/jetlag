@@ -19,10 +19,18 @@ jobs:
     outputs:
       light: ${{ steps.light.outputs.light }}
       code: ${{ steps.code.outputs.code }}
+      release_pr: ${{ steps.release.outputs.release_pr }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      - id: release
+        run: |
+          if [[ "${GITHUB_HEAD_REF}" == changeset-release/* ]]; then
+            echo "release_pr=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "release_pr=false" >> "$GITHUB_OUTPUT"
+          fi
       - uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v3
         id: light
         with:
@@ -37,7 +45,7 @@ jobs:
       - uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v3
         id: code
         with:
-          # every: ** plus negations — README-only must not set code=true
+          # every: ** plus negations - README-only must not set code=true
           predicate-quantifier: every
           filters: |
             code:
@@ -62,6 +70,7 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
+      - run: npm run lint
       - run: npm run release:check
       - run: npm run test:changeset-map
 
@@ -73,22 +82,50 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: ./.github/actions/setup-rust-wasm
-      - run: cargo fmt --all -- --check
-      - run: cargo clippy --locked -p jetlag-geometry-kernel -- -D warnings
-      - run: cargo test --locked -p jetlag-geometry-kernel
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        if: ${{ needs.changes.outputs.release_pr == 'true' }}
         with:
           node-version: 24
           cache: npm
-      - run: npm ci
-      - run: npm run wasm:build
-      - run: npm run lint
-      - run: npm run typecheck
-      - run: npm run release:check
-      - run: npm run test:changeset-map
-      - run: npm run test:coverage
+      - if: ${{ needs.changes.outputs.release_pr == 'true' }}
+        run: npm ci
+      # Release PRs bump package.json, so path filters mark code=true. Keep the
+      # required `unit` check green with lint + release gates only.
+      - if: ${{ needs.changes.outputs.release_pr == 'true' }}
+        run: npm run lint
+      - if: ${{ needs.changes.outputs.release_pr == 'true' }}
+        run: npm run release:check
+      - if: ${{ needs.changes.outputs.release_pr == 'true' }}
+        run: npm run test:changeset-map
+      - uses: ./.github/actions/setup-rust-wasm
+        if: ${{ needs.changes.outputs.release_pr != 'true' }}
+      - if: ${{ needs.changes.outputs.release_pr != 'true' }}
+        run: cargo fmt --all -- --check
+      - if: ${{ needs.changes.outputs.release_pr != 'true' }}
+        run: cargo clippy --locked -p jetlag-geometry-kernel -- -D warnings
+      - if: ${{ needs.changes.outputs.release_pr != 'true' }}
+        run: cargo test --locked -p jetlag-geometry-kernel
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        if: ${{ needs.changes.outputs.release_pr != 'true' }}
+        with:
+          node-version: 24
+          cache: npm
+      - if: ${{ needs.changes.outputs.release_pr != 'true' }}
+        run: npm ci
+      - if: ${{ needs.changes.outputs.release_pr != 'true' }}
+        run: npm run wasm:build
+      - if: ${{ needs.changes.outputs.release_pr != 'true' }}
+        run: npm run lint
+      - if: ${{ needs.changes.outputs.release_pr != 'true' }}
+        run: npm run typecheck
+      - if: ${{ needs.changes.outputs.release_pr != 'true' }}
+        run: npm run release:check
+      - if: ${{ needs.changes.outputs.release_pr != 'true' }}
+        run: npm run test:changeset-map
+      - if: ${{ needs.changes.outputs.release_pr != 'true' }}
+        run: npm run test:coverage
       - uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v3
+        if: ${{ needs.changes.outputs.release_pr != 'true' }}
         id: geometry
         with:
           filters: |
@@ -111,10 +148,11 @@ jobs:
               - 'vitest.shared.ts'
               - '.github/actions/setup-rust-wasm/action.yml'
       - name: Geometry perf gates
-        if: steps.geometry.outputs.geometry == 'true'
+        if: ${{ needs.changes.outputs.release_pr != 'true' && steps.geometry.outputs.geometry == 'true' }}
         # Reuses pkg/ from wasm:build above (test:perf does not rebuild)
         run: npm run test:perf
-      - run: npm run test:functions
+      - if: ${{ needs.changes.outputs.release_pr != 'true' }}
+        run: npm run test:functions
 
   build:
     runs-on: ubuntu-latest
@@ -124,15 +162,23 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      - if: ${{ needs.changes.outputs.release_pr == 'true' }}
+        run: echo "Skipping full build on changeset-release PR."
       - uses: ./.github/actions/setup-rust-wasm
+        if: ${{ needs.changes.outputs.release_pr != 'true' }}
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        if: ${{ needs.changes.outputs.release_pr != 'true' }}
         with:
           node-version: 24
           cache: npm
-      - run: npm ci
-      - run: npx playwright install --with-deps chromium
-      - run: npm run build
-      - run: npx wrangler deploy --dry-run
+      - if: ${{ needs.changes.outputs.release_pr != 'true' }}
+        run: npm ci
+      - if: ${{ needs.changes.outputs.release_pr != 'true' }}
+        run: npx playwright install --with-deps chromium
+      - if: ${{ needs.changes.outputs.release_pr != 'true' }}
+        run: npm run build
+      - if: ${{ needs.changes.outputs.release_pr != 'true' }}
+        run: npx wrangler deploy --dry-run
 
   emulator:
     runs-on: ubuntu-latest
@@ -142,23 +188,30 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      - if: ${{ needs.changes.outputs.release_pr == 'true' }}
+        run: echo "Skipping emulator suite on changeset-release PR."
       - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v4
+        if: ${{ needs.changes.outputs.release_pr != 'true' }}
         with:
           distribution: temurin
           java-version: "21"
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        if: ${{ needs.changes.outputs.release_pr != 'true' }}
         with:
           node-version: 24
           cache: npm
-      - run: npm ci
+      - if: ${{ needs.changes.outputs.release_pr != 'true' }}
+        run: npm ci
       - name: Cache Firebase emulators
+        if: ${{ needs.changes.outputs.release_pr != 'true' }}
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: ~/.cache/firebase/emulators
           key: firebase-emulators-${{ runner.os }}-${{ hashFiles('firebase.json', 'package-lock.json') }}
           restore-keys: |
             firebase-emulators-${{ runner.os }}-
-      - run: npm run test:emulator
+      - if: ${{ needs.changes.outputs.release_pr != 'true' }}
+        run: npm run test:emulator
 
   e2e:
     runs-on: ubuntu-latest
@@ -170,27 +223,36 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      - if: ${{ needs.changes.outputs.release_pr == 'true' }}
+        run: echo "Skipping e2e on changeset-release PR."
       - uses: ./.github/actions/setup-rust-wasm
+        if: ${{ needs.changes.outputs.release_pr != 'true' }}
       - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v4
+        if: ${{ needs.changes.outputs.release_pr != 'true' }}
         with:
           distribution: temurin
           java-version: "21"
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        if: ${{ needs.changes.outputs.release_pr != 'true' }}
         with:
           node-version: 24
           cache: npm
-      - run: npm ci
-      - run: npx playwright install --with-deps chromium
+      - if: ${{ needs.changes.outputs.release_pr != 'true' }}
+        run: npm ci
+      - if: ${{ needs.changes.outputs.release_pr != 'true' }}
+        run: npx playwright install --with-deps chromium
       - name: Cache Firebase emulators
+        if: ${{ needs.changes.outputs.release_pr != 'true' }}
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: ~/.cache/firebase/emulators
           key: firebase-emulators-${{ runner.os }}-${{ hashFiles('firebase.json', 'package-lock.json') }}
           restore-keys: |
             firebase-emulators-${{ runner.os }}-
-      - run: npx firebase emulators:exec --project demo-jetlag --only auth,firestore,storage "npm run test:e2e:gate-smoke"
+      - if: ${{ needs.changes.outputs.release_pr != 'true' }}
+        run: npx firebase emulators:exec --project demo-jetlag --only auth,firestore,storage "npm run test:e2e:gate-smoke"
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        if: failure()
+        if: ${{ needs.changes.outputs.release_pr != 'true' && failure() }}
         with:
           name: playwright-report-e2e
           path: playwright-report
@@ -203,17 +265,25 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      - if: ${{ needs.changes.outputs.release_pr == 'true' }}
+        run: echo "Skipping Lighthouse on changeset-release PR."
       - uses: ./.github/actions/setup-rust-wasm
+        if: ${{ needs.changes.outputs.release_pr != 'true' }}
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        if: ${{ needs.changes.outputs.release_pr != 'true' }}
         with:
           node-version: 24
           cache: npm
-      - run: npm ci
-      - run: npx playwright install --with-deps chromium
-      - run: npm run build
-      - run: npm run test:lighthouse
+      - if: ${{ needs.changes.outputs.release_pr != 'true' }}
+        run: npm ci
+      - if: ${{ needs.changes.outputs.release_pr != 'true' }}
+        run: npx playwright install --with-deps chromium
+      - if: ${{ needs.changes.outputs.release_pr != 'true' }}
+        run: npm run build
+      - if: ${{ needs.changes.outputs.release_pr != 'true' }}
+        run: npm run test:lighthouse
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        if: always()
+        if: ${{ needs.changes.outputs.release_pr != 'true' && always() }}
         with:
           name: lighthouse-results
           path: .lighthouseci

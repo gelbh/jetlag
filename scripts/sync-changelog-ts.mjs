@@ -4,6 +4,7 @@
 // - Patch Changes -> Technical
 // - Minor Changes, Major Changes -> Improvements
 
+import { spawnSync } from "node:child_process";
 import { readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { ensureDatedVersionHeaders } from "./normalize-changelog-sections.mjs";
@@ -11,6 +12,7 @@ import { ensureDatedVersionHeaders } from "./normalize-changelog-sections.mjs";
 const projectRoot = resolve(import.meta.dirname, "..");
 const changelogMdPath = resolve(projectRoot, "CHANGELOG.md");
 const changelogTsPath = resolve(projectRoot, "src/domain/device/changelog.ts");
+const biomeBinPath = resolve(projectRoot, "node_modules/@biomejs/biome/bin/biome");
 
 const SECTION_TITLE_MAP = {
   Fixes: "Fixes",
@@ -105,7 +107,7 @@ ${items}
     version: "${entry.version}",
     date: "${entry.date}",
     sections: [
-${sections}
+${sections},
     ],
   }`;
     })
@@ -123,9 +125,20 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
-${formattedEntries}
+${formattedEntries},
 ];
 `;
+}
+
+function formatChangelogTsWithBiome(filePath) {
+  const result = spawnSync(process.execPath, [biomeBinPath, "format", "--write", filePath], {
+    cwd: projectRoot,
+    encoding: "utf8",
+  });
+  if (result.status !== 0) {
+    const detail = [result.stderr, result.stdout].filter(Boolean).join("\n").trim();
+    throw new Error(`biome format failed for ${filePath}${detail ? `: ${detail}` : ""}`);
+  }
 }
 
 function readPackageVersion() {
@@ -150,6 +163,7 @@ if (entries[0].version !== packageVersion) {
 }
 
 writeFileSync(changelogTsPath, formatChangelogTs(entries));
+formatChangelogTsWithBiome(changelogTsPath);
 console.info(`Synced ${entries.length} changelog entries to ${changelogTsPath}`);
 
 const functionsPackagePath = resolve(projectRoot, "functions/package.json");
