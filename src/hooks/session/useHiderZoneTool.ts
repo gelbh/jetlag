@@ -1,4 +1,7 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
+import { isEffectivelyOfflineNow } from "@/hooks/sync/isEffectivelyOfflineNow";
+import { commitWrite } from "@/services/firestore/commitWrite";
+import { enqueueMoveTimerIntent } from "@/services/session/sessionIntents";
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
 import { isPointInGameArea } from "../../domain/geometry/gameArea/geometry";
 import type { GameArea } from "../../domain/map/annotations";
@@ -15,10 +18,18 @@ import {
 import { isFirestorePermissionDenied } from "../../services/firestore/firestoreAnnotations";
 import { writeHidingZone } from "../../services/firestore/firestoreSessionExtras";
 import { fetchTransitStationsForHidingZoneViewport } from "../../services/geo/matching";
-import { controlSessionTimerForMove } from "../../services/session/moveTimerControl";
 import { useLatestRequest } from "../forms/useLatestRequest";
 
 const MOVE_MIN_DISTANCE_METERS = 50;
+const MOVE_PLAYED_MESSAGE =
+  "Move card played. Timer paused. Seekers must stay put. Hider is relocating.";
+
+function zoneWriteErrorMessage(error: unknown): string {
+  if (isFirestorePermissionDenied(error)) {
+    return "Couldn't save. Rejoin the session as Hider and try again.";
+  }
+  return error instanceof Error ? error.message : "Couldn't save hiding zone.";
+}
 
 interface UseHiderZoneToolParams {
   sessionId: string;
@@ -29,14 +40,14 @@ interface UseHiderZoneToolParams {
   postSystemMessage: (text: string) => Promise<void>;
   pauseTimer: () => void;
   resumeTimer: () => void;
-  /** Host can write timer via client rules; non-host uses callable. */
+  /** Host can write timer via client rules; non-host queues a server-applied intent. */
   canControlTimer?: boolean;
   ensureWriteAccess?: () => Promise<void>;
   writesEnabled?: boolean;
   mapPickEnabled?: boolean;
   /** Board economy: require a Move card in hand before starting relocate. */
   hasMoveCard?: () => boolean;
-  /** Board economy: discard Move (and hand) after relocate write succeeds. */
+  /** Board economy: discard Move (and hand) when the relocate is queued. */
   consumeMoveCard?: () => Promise<void>;
 }
 
@@ -68,6 +79,8 @@ export function useHiderZoneTool({
   const [moveMode, setMoveMode] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  /** Bumped per Play Move and cleared on confirm, so a late rejection only rolls back the live attempt. */
+  const moveAttemptRef = useRef(0);
 
   const resetWizardDraft = useCallback(() => {
     setSelectedStation(null);
@@ -139,21 +152,33 @@ export function useHiderZoneTool({
     resetWizardDraft();
   }, [resetWizardDraft]);
 
-  const pauseTimerForMove = useCallback(async () => {
+  /**
+   * Membership heal reads from the server, so it only runs when reachable.
+   * Offline, rules re-check access when Firestore replays the queued writes and
+   * any rejection surfaces through the write ledger.
+   */
+  const ensureWriteAccessIfOnline = useCallback(async () => {
+    if (!ensureWriteAccess || isEffectivelyOfflineNow()) {
+      return;
+    }
+    await ensureWriteAccess();
+  }, [ensureWriteAccess]);
+
+  const pauseTimerForMove = useCallback(() => {
     if (canControlTimer) {
       pauseTimer();
       return;
     }
-    await controlSessionTimerForMove(sessionId, "pause");
-  }, [canControlTimer, pauseTimer, sessionId]);
+    enqueueMoveTimerIntent(sessionId, hiderUid, "pause");
+  }, [canControlTimer, hiderUid, pauseTimer, sessionId]);
 
-  const resumeTimerForMove = useCallback(async () => {
+  const resumeTimerForMove = useCallback(() => {
     if (canControlTimer) {
       resumeTimer();
       return;
     }
-    await controlSessionTimerForMove(sessionId, "resume");
-  }, [canControlTimer, resumeTimer, sessionId]);
+    enqueueMoveTimerIntent(sessionId, hiderUid, "resume");
+  }, [canControlTimer, hiderUid, resumeTimer, sessionId]);
 
   const startMove = useCallback(async () => {
     if (!existingZone || !writesEnabled || !hiderUid) {
@@ -175,38 +200,50 @@ export function useHiderZoneTool({
     resetWizardDraft();
 
     try {
-      await pauseTimerForMove();
-      await ensureWriteAccess?.();
-      await postSystemMessage(
-        "Move card played. Timer paused. Seekers must stay put. Hider is relocating.",
-      );
-      await writeHidingZone(sessionId, {
+      await ensureWriteAccessIfOnline();
+    } catch (nextError) {
+      setMoveMode(false);
+      setWizardOpen(false);
+      setError(zoneWriteErrorMessage(nextError));
+      return;
+    }
+
+    // Fire-and-track: each write commits to the local cache now and replays on
+    // reconnect, so Play Move works in a dead zone. Nothing awaits server acks;
+    // rejections also land in the write ledger (WriteFailureNotifier).
+    const attempt = moveAttemptRef.current + 1;
+    moveAttemptRef.current = attempt;
+    pauseTimerForMove();
+    commitWrite("system.message", () => postSystemMessage(MOVE_PLAYED_MESSAGE));
+    const { acknowledged: zoneAcked } = commitWrite("zone.write", () =>
+      writeHidingZone(sessionId, {
         ...existingZone,
         hiderUid,
         moveInProgress: true,
-      });
-      if (consumeMoveCard) {
-        await consumeMoveCard();
-      }
-    } catch (nextError) {
-      try {
-        await resumeTimerForMove();
-      } catch {
-        // Preserve the original Move failure; resume is best-effort.
-      }
-      setMoveMode(false);
-      setWizardOpen(false);
-      setError(
-        isFirestorePermissionDenied(nextError)
-          ? "Couldn't save. Rejoin the session as Hider and try again."
-          : nextError instanceof Error
-            ? nextError.message
-            : "Couldn't save hiding zone.",
-      );
-    }
+      }),
+    );
+    zoneAcked.then(
+      () => {
+        // Discard the Move card only once the relocate is accepted (as before).
+        if (consumeMoveCard) {
+          commitWrite("economy.update", consumeMoveCard);
+        }
+      },
+      (nextError: unknown) => {
+        if (moveAttemptRef.current !== attempt) {
+          return;
+        }
+        // Compensate the pause so a rejected Move cannot leave the timer stopped.
+        moveAttemptRef.current = 0;
+        resumeTimerForMove();
+        setMoveMode(false);
+        setWizardOpen(false);
+        setError(zoneWriteErrorMessage(nextError));
+      },
+    );
   }, [
     consumeMoveCard,
-    ensureWriteAccess,
+    ensureWriteAccessIfOnline,
     existingZone,
     hasMoveCard,
     hiderUid,
@@ -297,7 +334,7 @@ export function useHiderZoneTool({
     setError(null);
 
     try {
-      await ensureWriteAccess?.();
+      await ensureWriteAccessIfOnline();
       const circle = buildHidingZoneCircle(center, radiusMeters);
       const confirmedAt = new Date().toISOString();
       const zone: HidingZoneRecord = {
@@ -331,32 +368,23 @@ export function useHiderZoneTool({
             : existingZone?.previousStations,
       };
 
-      await writeHidingZone(sessionId, zone);
+      commitWrite("zone.write", () => writeHidingZone(sessionId, zone));
+      moveAttemptRef.current = 0;
 
       setMoveMode(false);
       setWizardOpen(false);
       resetWizardDraft();
 
       if (moveMode) {
-        try {
-          await resumeTimerForMove();
-        } catch {
-          setError("Zone saved, but the timer didn't resume. Ask the host to resume it.");
-        }
+        resumeTimerForMove();
       }
     } catch (nextError) {
-      setError(
-        isFirestorePermissionDenied(nextError)
-          ? "Couldn't save. Rejoin the session as Hider and try again."
-          : nextError instanceof Error
-            ? nextError.message
-            : "Couldn't save hiding zone.",
-      );
+      setError(zoneWriteErrorMessage(nextError));
     } finally {
       setSaving(false);
     }
   }, [
-    ensureWriteAccess,
+    ensureWriteAccessIfOnline,
     existingZone,
     hiderUid,
     manualCenter,

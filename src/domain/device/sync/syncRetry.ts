@@ -1,5 +1,5 @@
 import { FirebaseError } from "firebase/app";
-import { isFirestorePermissionDenied } from "@/services/firestore/firestoreAnnotations";
+import { isFirestorePermissionDenied } from "@/services/firestore/sessions/shared";
 
 const NON_RETRIABLE_MESSAGE_FRAGMENTS = [
   "session has ended",
