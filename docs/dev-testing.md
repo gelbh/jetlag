@@ -32,17 +32,15 @@ const seed = /* paste JSON */;
 localStorage.setItem("jetlag-session", seed.sessionBlob);
 localStorage.setItem("jetlag-map", seed.mapBlob);
 localStorage.setItem("jetlag-annotations", seed.annotationsBlob);
-if (seed.clearTimer) localStorage.removeItem("jetlag-timer");
+if (seed.clearTimer) sessionStorage.removeItem("jetlag-timer");
 location.assign("/map");
 ```
 
 ### reset
 
-Prints a clear recipe for seed keys only (no silent wipe of unrelated localStorage):
+Prints a clear recipe for seed keys only (no silent wipe of unrelated storage):
 
-- `jetlag-session`
-- `jetlag-map`
-- `jetlag-annotations`
-- `jetlag-timer`
+- localStorage: `jetlag-session`, `jetlag-map`, `jetlag-annotations`
+- sessionStorage: `jetlag-timer` (`timerStore`)
 
-`npm run world -- reset` prints `localStorage.removeItem(...)` lines for those keys. Reset with no prior apply is a no-op success.
+`npm run world -- reset` prints the matching `removeItem` lines. Reset with no prior apply is a no-op success.

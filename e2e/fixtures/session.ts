@@ -33,7 +33,7 @@ export async function seedLocalSession(page: Page, options: LocalSessionSeedOpti
     localStorage.setItem("jetlag-map", mapBlob);
     localStorage.setItem("jetlag-annotations", annotationsBlob);
     if (clearTimer) {
-      localStorage.removeItem("jetlag-timer");
+      sessionStorage.removeItem("jetlag-timer");
     }
   }, seed);
 }

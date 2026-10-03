@@ -24,7 +24,7 @@ export function DevScenarios() {
       localStorage.setItem("jetlag-map", seed.mapBlob);
       localStorage.setItem("jetlag-annotations", seed.annotationsBlob);
       if (seed.clearTimer) {
-        localStorage.removeItem("jetlag-timer");
+        sessionStorage.removeItem("jetlag-timer");
       }
       if (scenario.tags.includes("emulator") && clientEnvUsesFirebaseEmulator()) {
         await toEmulatorSeed(id);

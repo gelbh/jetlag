@@ -9,13 +9,15 @@ import { createServer } from "vite";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
-/** Keys DevScenarios / e2e session fixtures write or clear for scenario seeds. */
+/** localStorage keys used by scenario session/map/annotations seeds. */
 export const LOCAL_STORAGE_SEED_KEYS = [
   "jetlag-session",
   "jetlag-map",
   "jetlag-annotations",
-  "jetlag-timer",
 ];
+
+/** sessionStorage key for timerStore (not localStorage). */
+export const SESSION_STORAGE_SEED_KEYS = ["jetlag-timer"];
 
 async function loadCatalogModules() {
   const server = await createServer({
@@ -66,8 +68,11 @@ export async function runWorld(argv, { stdout = console.log, stderr = console.er
     for (const key of LOCAL_STORAGE_SEED_KEYS) {
       stdout(`localStorage.removeItem(${JSON.stringify(key)});`);
     }
+    for (const key of SESSION_STORAGE_SEED_KEYS) {
+      stdout(`sessionStorage.removeItem(${JSON.stringify(key)});`);
+    }
     stdout("");
-    stdout("Does not wipe unrelated localStorage. Safe when no prior apply.");
+    stdout("Does not wipe unrelated storage. Safe when no prior apply.");
     return 0;
   }
 
