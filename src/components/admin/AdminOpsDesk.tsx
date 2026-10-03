@@ -1,3 +1,4 @@
+import { AppShell } from "@mantine/core";
 import { signOut } from "firebase/auth";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
@@ -659,34 +660,42 @@ export function AdminOpsDesk() {
     );
   }
 
+  const deskTopbar = (
+    <AdminDeskTopbar
+      openIncidents={openCount}
+      inQueue={visibleIncidents.length}
+      now={now}
+      activePresetId={store.activePresetId}
+      defaultPresetId={store.defaultPresetId}
+      presetOrder={store.presetOrder}
+      userPresets={store.userPresets}
+      onSelectPreset={handleSelectPreset}
+      onSaveCurrent={handleSaveCurrent}
+      onDeleteUserPreset={handleDeleteUserPreset}
+      onSetDefault={handleSetDefault}
+      onReorderPresets={handleReorderPresets}
+      onRenameUserPreset={handleRenameUserPreset}
+      onOverwriteUserPreset={handleOverwriteUserPreset}
+      onRefreshSessions={() => void refresh({ background: true })}
+      refreshing={refreshing}
+    />
+  );
+
   return (
-    <EntryScreenLayout justify="start" viewport={isDesktop}>
-      <div
-        className="jl-ops-desk"
-        data-testid="admin-ops-desk"
-        data-layout={isDesktop ? "desktop" : "mobile"}
-        data-resume-ready="true"
-      >
+    <AppShell
+      mode="static"
+      header={{ height: 56 }}
+      padding="sm"
+      className="jl-ops-desk"
+      data-testid="admin-ops-desk"
+      data-admin-shell="mantine-static"
+      data-layout={isDesktop ? "desktop" : "mobile"}
+      data-resume-ready="true"
+    >
+      <AppShell.Header withBorder={false}>{deskTopbar}</AppShell.Header>
+      <AppShell.Main>
         {isDesktop ? (
           <>
-            <AdminDeskTopbar
-              openIncidents={openCount}
-              inQueue={visibleIncidents.length}
-              now={now}
-              activePresetId={store.activePresetId}
-              defaultPresetId={store.defaultPresetId}
-              presetOrder={store.presetOrder}
-              userPresets={store.userPresets}
-              onSelectPreset={handleSelectPreset}
-              onSaveCurrent={handleSaveCurrent}
-              onDeleteUserPreset={handleDeleteUserPreset}
-              onSetDefault={handleSetDefault}
-              onReorderPresets={handleReorderPresets}
-              onRenameUserPreset={handleRenameUserPreset}
-              onOverwriteUserPreset={handleOverwriteUserPreset}
-              onRefreshSessions={() => void refresh({ background: true })}
-              refreshing={refreshing}
-            />
             {incidentsError && visibleIncidents.length > 0 ? (
               <InlineError>{incidentsError}</InlineError>
             ) : null}
@@ -780,25 +789,9 @@ export function AdminOpsDesk() {
               }
             }}
             bodies={bodies}
-            openIncidents={openCount}
-            inQueue={visibleIncidents.length}
-            now={now}
-            activePresetId={store.activePresetId}
-            defaultPresetId={store.defaultPresetId}
-            presetOrder={store.presetOrder}
-            userPresets={store.userPresets}
-            onSelectPreset={handleSelectPreset}
-            onSaveCurrent={handleSaveCurrent}
-            onDeleteUserPreset={handleDeleteUserPreset}
-            onSetDefault={handleSetDefault}
-            onReorderPresets={handleReorderPresets}
-            onRenameUserPreset={handleRenameUserPreset}
-            onOverwriteUserPreset={handleOverwriteUserPreset}
-            onRefreshSessions={() => void refresh({ background: true })}
-            refreshing={refreshing}
           />
         )}
-      </div>
-    </EntryScreenLayout>
+      </AppShell.Main>
+    </AppShell>
   );
 }

@@ -46,7 +46,7 @@ export function AdminDeskTopbar({
   refreshing = false,
 }: AdminDeskTopbarProps) {
   return (
-    <header className="jl-ops-topbar" data-testid="admin-ops-topbar">
+    <div className="jl-ops-topbar" data-testid="admin-ops-topbar">
       <div className="jl-ops-brand">
         <AppLink to="/" className="jl-ops-home" aria-label="Home">
           <HudHomeIcon className="size-4" aria-hidden="true" />
@@ -96,6 +96,6 @@ export function AdminDeskTopbar({
           </button>
         ) : null}
       </div>
-    </header>
+    </div>
   );
 }

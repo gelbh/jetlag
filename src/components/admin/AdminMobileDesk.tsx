@@ -1,75 +1,19 @@
-import {
-  type DeskPreset,
-  PANEL_IDS,
-  PANEL_LABELS,
-  type PanelId,
-} from "../../domain/admin/opsDeskLayout";
-import { AdminDeskTopbar } from "./AdminDeskTopbar";
+import { PANEL_IDS, PANEL_LABELS, type PanelId } from "../../domain/admin/opsDeskLayout";
 import { type AdminPanelBodies, AdminPanelBody } from "./AdminPanelBody";
 
 interface AdminMobileDeskProps {
   activePanelId: PanelId;
   onSelectPanel: (panelId: PanelId) => void;
   bodies: AdminPanelBodies;
-  openIncidents: number;
-  inQueue: number;
-  now: Date;
-  activePresetId: string;
-  defaultPresetId: string;
-  presetOrder: string[];
-  userPresets: DeskPreset[];
-  onSelectPreset: (presetId: string) => void;
-  onSaveCurrent: () => void;
-  onDeleteUserPreset: (presetId: string) => void;
-  onSetDefault: (presetId: string) => void;
-  onReorderPresets: (orderedIds: string[]) => void;
-  onRenameUserPreset: (presetId: string) => void;
-  onOverwriteUserPreset: () => void;
-  onRefreshSessions?: () => void;
-  refreshing?: boolean;
 }
 
 export function AdminMobileDesk({
   activePanelId,
   onSelectPanel,
   bodies,
-  openIncidents,
-  inQueue,
-  now,
-  activePresetId,
-  defaultPresetId,
-  presetOrder,
-  userPresets,
-  onSelectPreset,
-  onSaveCurrent,
-  onDeleteUserPreset,
-  onSetDefault,
-  onReorderPresets,
-  onRenameUserPreset,
-  onOverwriteUserPreset,
-  onRefreshSessions,
-  refreshing,
 }: AdminMobileDeskProps) {
   return (
     <div className="jl-ops-mobile" data-testid="admin-ops-mobile">
-      <AdminDeskTopbar
-        openIncidents={openIncidents}
-        inQueue={inQueue}
-        now={now}
-        activePresetId={activePresetId}
-        defaultPresetId={defaultPresetId}
-        presetOrder={presetOrder}
-        userPresets={userPresets}
-        onSelectPreset={onSelectPreset}
-        onSaveCurrent={onSaveCurrent}
-        onDeleteUserPreset={onDeleteUserPreset}
-        onSetDefault={onSetDefault}
-        onReorderPresets={onReorderPresets}
-        onRenameUserPreset={onRenameUserPreset}
-        onOverwriteUserPreset={onOverwriteUserPreset}
-        onRefreshSessions={onRefreshSessions}
-        refreshing={refreshing}
-      />
       <div className="jl-scroll jl-ops-mobile-chips" role="tablist" aria-label="Panels">
         {PANEL_IDS.map((panelId) => (
           <button

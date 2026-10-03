@@ -1,8 +1,26 @@
+import { MantineProvider } from "@mantine/core";
 import { fireEvent, screen } from "@testing-library/react";
+import type { ReactElement } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { AdminSessionSummary } from "../../services/admin/adminSessions";
 import { renderWithRouter } from "../../test/renderWithRouter";
+import { jetlagTheme } from "../../theme/theme";
 import { AdminOpsDesk } from "./AdminOpsDesk";
+
+function renderOpsDesk(ui: ReactElement = <AdminOpsDesk />) {
+  return renderWithRouter(
+    <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
+      {ui}
+    </MantineProvider>,
+  );
+}
+
+function expectStaticAppShell(layout: "desktop" | "mobile") {
+  const desk = screen.getByTestId("admin-ops-desk");
+  expect(desk).toHaveAttribute("data-layout", layout);
+  expect(desk).toHaveAttribute("data-admin-shell", "mantine-static");
+  expect(desk.classList.contains("mantine-AppShell-root") || desk.querySelector(".mantine-AppShell-root")).toBeTruthy();
+}
 
 const SEEKER_HIDER_META = /1S \/ 1H/i;
 
@@ -93,7 +111,7 @@ describe("AdminOpsDesk", () => {
     authState.state = "loading";
     authState.authReady = false;
     authState.user = null;
-    renderWithRouter(<AdminOpsDesk />);
+    renderOpsDesk();
 
     expect(document.querySelector(".animate-pulse")).toBeInTheDocument();
   });
@@ -104,7 +122,7 @@ describe("AdminOpsDesk", () => {
     authState.user = null;
     sessionListState.sessions = [];
 
-    renderWithRouter(<AdminOpsDesk />);
+    renderOpsDesk();
 
     expect(screen.getByText(/Sign in with your Google account/i)).toBeInTheDocument();
     expect(screen.getByTestId("premium-sign-in-gate")).toHaveTextContent("/admin");
@@ -115,7 +133,7 @@ describe("AdminOpsDesk", () => {
     authState.authReady = true;
     authState.user = { email: "player@example.com", emailVerified: true };
 
-    renderWithRouter(<AdminOpsDesk />);
+    renderOpsDesk();
 
     expect(screen.getByRole("heading", { name: "Access denied" })).toBeInTheDocument();
   });
@@ -127,7 +145,7 @@ describe("AdminOpsDesk", () => {
     sessionListState.loading = false;
     sessionListState.sessions = [];
 
-    renderWithRouter(<AdminOpsDesk />);
+    renderOpsDesk();
 
     expect(screen.getByText("No live sessions")).toBeInTheDocument();
   });
@@ -167,7 +185,7 @@ describe("AdminOpsDesk", () => {
       },
     ];
 
-    renderWithRouter(<AdminOpsDesk />);
+    renderOpsDesk();
 
     expect(screen.getByText("ABCD")).toBeInTheDocument();
     expect(screen.getByText("Dublin")).toBeInTheDocument();
@@ -224,11 +242,10 @@ describe("AdminOpsDesk", () => {
       })),
     });
 
-    renderWithRouter(<AdminOpsDesk />);
+    renderOpsDesk();
 
     expect(document.querySelector(".admin-dashboard-list-scroll")).toBeInTheDocument();
-    expect(document.querySelector(".home-poster-viewport")).toBeInTheDocument();
-    expect(screen.getByTestId("admin-ops-desk")).toHaveAttribute("data-layout", "desktop");
+    expectStaticAppShell("desktop");
     expect(screen.getByRole("link", { name: /^home$/i })).toHaveAttribute("href", "/");
     expect(screen.queryByRole("banner", { name: /screen header/i })).toBeNull();
     expect(screen.queryByRole("link", { name: /←\s*back/i })).toBeNull();
@@ -254,9 +271,9 @@ describe("AdminOpsDesk", () => {
       })),
     });
 
-    renderWithRouter(<AdminOpsDesk />);
+    renderOpsDesk();
 
-    expect(screen.getByTestId("admin-ops-desk")).toHaveAttribute("data-layout", "mobile");
+    expectStaticAppShell("mobile");
     expect(screen.getByRole("link", { name: /^home$/i })).toHaveAttribute("href", "/");
     expect(screen.queryByRole("banner", { name: /screen header/i })).toBeNull();
     expect(screen.queryByRole("link", { name: /←\s*back/i })).toBeNull();
@@ -301,7 +318,7 @@ describe("AdminOpsDesk", () => {
       },
     ];
 
-    renderWithRouter(<AdminOpsDesk />);
+    renderOpsDesk();
 
     fireEvent.click(screen.getByRole("button", { name: "Load more sessions" }));
     expect(sessionListState.loadMore).toHaveBeenCalledTimes(1);
@@ -344,7 +361,7 @@ describe("AdminOpsDesk", () => {
       },
     ];
 
-    renderWithRouter(<AdminOpsDesk />);
+    renderOpsDesk();
 
     fireEvent.click(screen.getByRole("button", { name: "Live" }));
 
