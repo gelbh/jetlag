@@ -38,14 +38,7 @@ describe("LiveUserLocationLayer", () => {
     });
   });
 
-  it("does not call useLiveLocation when reading prop is provided", () => {
-    render(<LiveUserLocationLayer enabled reading={sampleReading} />);
-
-    expect(useLiveLocationMock).not.toHaveBeenCalled();
-    expect(screen.getByTestId("user-location-layer")).toHaveTextContent("53.35,-6.26");
-  });
-
-  it("starts useLiveLocation when reading prop is omitted", () => {
+  it("starts useLiveLocation when enabled", () => {
     useLiveLocationMock.mockReturnValue({
       reading: sampleReading,
       error: null,
@@ -56,5 +49,17 @@ describe("LiveUserLocationLayer", () => {
     expect(useLiveLocationMock).toHaveBeenCalled();
     expect(useLiveLocationMock.mock.calls[0]?.[0]).toBe(true);
     expect(screen.getByTestId("user-location-layer")).toHaveTextContent("53.35,-6.26");
+  });
+
+  it("does not render when disabled", () => {
+    useLiveLocationMock.mockReturnValue({
+      reading: sampleReading,
+      error: null,
+    });
+
+    const { container } = render(<LiveUserLocationLayer enabled={false} />);
+
+    expect(useLiveLocationMock).toHaveBeenCalledWith(false, expect.any(Object));
+    expect(container).toBeEmptyDOMElement();
   });
 });
