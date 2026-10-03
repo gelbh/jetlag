@@ -79,7 +79,7 @@ export function MapNavControlStack({
   onResetCamera,
 }: MapNavControlStackProps) {
   const map = useMapLibreMap();
-  const portalTarget = map.getContainer();
+  const portalTarget = useMemo(() => map.getContainer(), [map]);
   const interacting = useMapLibreInteracting();
   const { placement, setPlacement } = useMapNavDockSide();
   const [zoom, setZoom] = useState(() => map.getZoom());

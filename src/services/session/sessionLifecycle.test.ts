@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { DEFAULT_CALLABLE_TIMEOUT_MS } from "@/services/core/firebase/callWithResilience";
 import { endSession, leaveHostSession, repairGhostHost } from "./sessionLifecycle";
 
 const callable = vi.hoisted(() => vi.fn(async () => ({ data: { action: "ended" as const } })));
@@ -31,7 +32,9 @@ describe("sessionLifecycle", () => {
   it("calls leaveHostSession with the session id", async () => {
     await leaveHostSession("session-42");
 
-    expect(httpsCallable).toHaveBeenCalledWith({}, "leaveHostSession");
+    expect(httpsCallable).toHaveBeenCalledWith({}, "leaveHostSession", {
+      timeout: DEFAULT_CALLABLE_TIMEOUT_MS,
+    });
     expect(callable).toHaveBeenCalledWith({ sessionId: "session-42" });
     expect(trackSessionEnded).not.toHaveBeenCalled();
   });
@@ -45,7 +48,9 @@ describe("sessionLifecycle", () => {
       newHostUid: "seeker-1",
     });
 
-    expect(httpsCallable).toHaveBeenCalledWith({}, "repairGhostHost");
+    expect(httpsCallable).toHaveBeenCalledWith({}, "repairGhostHost", {
+      timeout: DEFAULT_CALLABLE_TIMEOUT_MS,
+    });
     expect(callable).toHaveBeenCalledWith({ sessionId: "session-42" });
   });
 
@@ -63,7 +68,9 @@ describe("sessionLifecycle", () => {
     callable.mockResolvedValueOnce({ data: { ok: true } } as never);
     await endSession("session-42");
 
-    expect(httpsCallable).toHaveBeenCalledWith({}, "endSession");
+    expect(httpsCallable).toHaveBeenCalledWith({}, "endSession", {
+      timeout: DEFAULT_CALLABLE_TIMEOUT_MS,
+    });
     expect(callable).toHaveBeenCalledWith({ sessionId: "session-42" });
     expect(trackSessionEnded).toHaveBeenCalledOnce();
     expect(trackSessionEnded).toHaveBeenCalledWith("host_end");
