@@ -191,6 +191,15 @@ test("isExpectedFunctionsError matches invalid premium session payload HttpsErro
   );
 });
 
+test("isExpectedFunctionsError matches session-ops agent limit HttpsError", () => {
+  assert.equal(
+    isExpectedFunctionsError(
+      new HttpsError("resource-exhausted", "Session-ops agent limit reached for this session."),
+    ),
+    true,
+  );
+});
+
 test("isExpectedFunctionsError matches role-code required HttpsError", () => {
   assert.equal(
     isExpectedFunctionsError(new HttpsError("invalid-argument", "Role code is required.")),
