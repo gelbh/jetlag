@@ -12,6 +12,7 @@ const mocks = vi.hoisted(() => ({
   setBootstrapTag: vi.fn(),
   captureAuthBootstrapFailure: vi.fn(),
   captureAuthPersistenceFallback: vi.fn(),
+  addRecoverableErrorBreadcrumb: vi.fn(),
 }));
 
 vi.mock("./analytics", () => ({
@@ -28,10 +29,12 @@ vi.mock("./sentry", () => ({
   reportSlowRouteTransition: mocks.reportSlowRouteTransition,
   setTransactionName: mocks.setTransactionName,
   captureErrorBoundaryException: mocks.captureErrorBoundaryException,
+  addRecoverableErrorBreadcrumb: mocks.addRecoverableErrorBreadcrumb,
 }));
 
 import { ANALYTICS_CONSENT_KEY } from "@/domain/device/consent/analyticsConsent";
 import {
+  addRecoverableErrorBreadcrumbLazy,
   captureAuthBootstrapFailureLazy,
   captureAuthPersistenceFallbackLazy,
   captureErrorBoundaryExceptionLazy,
@@ -112,6 +115,14 @@ describe("lazyTelemetry", () => {
       expect(mocks.captureException).toHaveBeenCalledWith(err);
       expect(mocks.reportSlowRouteTransition).toHaveBeenCalledWith(details);
       expect(mocks.setTransactionName).toHaveBeenCalledWith("/stats");
+    });
+  });
+
+  it("forwards recoverable-error breadcrumbs without throwing", async () => {
+    const err = new Error("Hydration failed");
+    expect(() => addRecoverableErrorBreadcrumbLazy(err, "\n    at Home")).not.toThrow();
+    await vi.waitFor(() => {
+      expect(mocks.addRecoverableErrorBreadcrumb).toHaveBeenCalledWith(err, "\n    at Home");
     });
   });
 
