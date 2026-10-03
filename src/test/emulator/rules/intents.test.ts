@@ -54,6 +54,25 @@ describe("firestore.rules — session intents", () => {
     await assertFails(intents("seeker-1").doc("i1").set(intentPayload("seeker-1")));
   });
 
+  it("denies unauthenticated users, non-members, and unknown intent types", async () => {
+    await assertFails(
+      rules.testEnv
+        .unauthenticatedContext()
+        .firestore()
+        .collection("sessions")
+        .doc("session-1")
+        .collection("intents")
+        .doc("i1")
+        .set(intentPayload("hider-1")),
+    );
+    await assertFails(intents("stranger-1").doc("i2").set(intentPayload("stranger-1")));
+    await assertFails(
+      intents("hider-1")
+        .doc("i3")
+        .set(intentPayload("hider-1", { type: "other" })),
+    );
+  });
+
   it("denies a hider creating an intent for another uid", async () => {
     await assertFails(intents("hider-1").doc("i1").set(intentPayload("seeker-1")));
   });

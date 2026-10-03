@@ -1,13 +1,26 @@
 import { FieldValue } from "firebase-admin/firestore";
 import { readMembershipFields } from "./roleGateShared.mjs";
 
-/** Intents the trigger first sees after this long (retry storms) are dropped as `stale`. */
+/**
+ * Intents whose trigger runs this long after `createdAt` (retry storms) are
+ * dropped as `stale`. `createdAt` is the server commit time, so time spent in
+ * the client's offline queue does not count here; `INTENT_MAX_BACKDATE_MS`
+ * bounds that instead.
+ */
 export const INTENT_MAX_AGE_MS = 30 * 60_000;
 
 /**
- * Earlier unprocessed intents drained per invocation. Trigger delivery order is
+ * How far before server `now` a pause may land. Long enough to cover a dead
+ * zone, short enough that a forged `requestedAtMs` cannot erase much elapsed time.
+ */
+export const INTENT_MAX_BACKDATE_MS = 10 * 60_000;
+
+/**
+ * Most recent earlier intents scanned per invocation. Trigger delivery order is
  * not guaranteed, so a queued offline pause+resume pair can arrive resume-first;
- * draining earlier intents in `createdAt` order keeps the timer from sticking paused.
+ * draining earlier unprocessed intents in `createdAt` order keeps the timer from
+ * sticking paused. The scan reads newest-first so processed history (intents
+ * are never deleted mid-session) cannot crowd out the pending ones.
  */
 export const INTENT_DRAIN_LIMIT = 25;
 
@@ -48,9 +61,10 @@ function compareIntents(a, b) {
  * next state (unchanged unless `applied`).
  *
  * Pause applies at the hider's play time (skew-corrected client ms), clamped to
- * [max(runningSince, now - INTENT_MAX_AGE_MS), now]: a Move queued in a dead
- * zone is fair, and a forged `requestedAtMs` can neither extend the timer past
- * now nor rewind it more than the intent max age.
+ * [max(runningSince, now - INTENT_MAX_BACKDATE_MS), now]: a Move queued in a
+ * dead zone is fair, and a forged `requestedAtMs` can neither extend the timer
+ * past now nor rewind it more than the backdate cap. (The legacy callable always
+ * paused at `now`; this is a deliberate, bounded widening.)
  *
  * Resume uses server `now`, not play time: the hider must reconnect for the new
  * zone to reach seekers anyway, and resuming at receipt never credits the hider
@@ -88,7 +102,7 @@ export function applyIntentToTimer({ intent, session, state, nowMs }) {
       return { status: "noop", reason: "already-paused", state };
     }
     const requested = Number(intent.requestedAtMs);
-    const floor = Math.max(runningSinceMs, nowMs - INTENT_MAX_AGE_MS);
+    const floor = Math.max(runningSinceMs, nowMs - INTENT_MAX_BACKDATE_MS);
     const at = Math.min(nowMs, Math.max(Number.isFinite(requested) ? requested : nowMs, floor));
     return {
       status: "applied",
@@ -147,7 +161,7 @@ export async function processSessionIntentHandler(db, sessionId, intentId, nowMs
       const earlier = await tx.get(
         intentsRef
           .where("createdAt", "<=", target.createdAt)
-          .orderBy("createdAt")
+          .orderBy("createdAt", "desc")
           .limit(INTENT_DRAIN_LIMIT),
       );
       for (const doc of earlier.docs) {
