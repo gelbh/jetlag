@@ -4,7 +4,7 @@ import type { GeolocationReading } from "@/services/core/location/geolocation";
 import { LiveUserLocationLayer } from "./LiveUserLocationLayer";
 
 const useLiveLocationMock = vi.hoisted(() =>
-  vi.fn(() => ({
+  vi.fn((_enabled: boolean, _options?: unknown) => ({
     reading: null as GeolocationReading | null,
     error: null as string | null,
   })),
