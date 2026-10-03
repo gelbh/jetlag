@@ -3,11 +3,13 @@ import { describe, it } from "node:test";
 import { FieldValue } from "firebase-admin/firestore";
 import { HttpsError } from "firebase-functions/v2/https";
 import {
+  clearStripeCustomerIdForDeletedCustomer,
   createBillingPortalSessionHandler,
   createCheckoutSessionHandler,
   ensureStripeCustomer,
   isStaleStripeCustomerError,
   mapStripeBillingError,
+  syncSubscriptionEntitlements,
 } from "../billing/stripeBilling.mjs";
 
 function staleCustomerError() {
@@ -17,6 +19,29 @@ function staleCustomerError() {
   error.type = "StripeInvalidRequestError";
   error.code = "resource_missing";
   return error;
+}
+
+function applyMockWrite(documents, writes, path, data, options) {
+  writes.push({ path, data });
+  if (options?.merge && documents[path]) {
+    const merged = { ...documents[path] };
+    for (const [key, value] of Object.entries(data)) {
+      if (value === FieldValue.delete()) {
+        delete merged[key];
+      } else {
+        merged[key] = value;
+      }
+    }
+    documents[path] = merged;
+  } else {
+    const next = { ...(options?.merge ? documents[path] : {}), ...data };
+    for (const [key, value] of Object.entries(next)) {
+      if (value === FieldValue.delete()) {
+        delete next[key];
+      }
+    }
+    documents[path] = next;
+  }
 }
 
 function createMockDb(initialData = {}) {
@@ -31,6 +56,8 @@ function createMockDb(initialData = {}) {
         doc(id) {
           const path = `${name}/${id}`;
           return {
+            id,
+            path,
             async get() {
               const data = documents[path];
               return {
@@ -39,25 +66,57 @@ function createMockDb(initialData = {}) {
               };
             },
             set(data, options) {
-              writes.push({ path, data });
-              if (options?.merge && documents[path]) {
-                const merged = { ...documents[path] };
-                for (const [key, value] of Object.entries(data)) {
-                  if (value === FieldValue.delete()) {
-                    delete merged[key];
-                  } else {
-                    merged[key] = value;
-                  }
-                }
-                documents[path] = merged;
-              } else {
-                documents[path] = data;
-              }
+              applyMockWrite(documents, writes, path, data, options);
               return Promise.resolve();
             },
           };
         },
+        where(field, op, value) {
+          assert.equal(op, "==");
+          const chain = {
+            limit() {
+              return chain;
+            },
+            async get() {
+              const docs = Object.entries(documents)
+                .filter(([path, data]) => {
+                  if (!path.startsWith(`${name}/`)) {
+                    return false;
+                  }
+                  return data?.[field] === value;
+                })
+                .map(([path, data]) => {
+                  const id = path.slice(name.length + 1);
+                  return {
+                    id,
+                    data: () => data,
+                  };
+                });
+              return {
+                empty: docs.length === 0,
+                docs,
+              };
+            },
+          };
+          return chain;
+        },
       };
+    },
+    async runTransaction(callback) {
+      const transaction = {
+        async get(ref) {
+          const path = ref.path;
+          const data = documents[path];
+          return {
+            exists: data !== undefined,
+            data: () => data,
+          };
+        },
+        set(ref, data, options) {
+          applyMockWrite(documents, writes, ref.path, data, options);
+        },
+      };
+      return callback(transaction);
     },
     writes,
     documents,
@@ -71,6 +130,11 @@ function createMockStripe(overrides = {}) {
     customers: {
       retrieve: overrides.retrieve ?? (async (customerId) => ({ id: customerId })),
       create: overrides.create ?? (async () => ({ id: "cus_live_new" })),
+      search:
+        overrides.search ??
+        (async () => ({
+          data: [],
+        })),
     },
     checkout: {
       sessions: {
@@ -265,5 +329,143 @@ describe("stripeBilling", () => {
 
     assert.equal(result.url, "https://billing.stripe.test/portal");
     assert.equal(db.documents["users/host-1"]?.stripeCustomerId, "cus_live_replacement");
+  });
+
+  it("reuses a searched Stripe customer when Firestore has no customer id", async () => {
+    const db = createMockDb({
+      "users/host-1": {
+        subscription: { status: "active", plan: "monthly" },
+      },
+    });
+    let created = false;
+    let searchQuery = "";
+    const stripe = createMockStripe({
+      search: async ({ query }) => {
+        searchQuery = query;
+        return {
+          data: [{ id: "cus_search_hit", metadata: { firebaseUid: "host-1" } }],
+        };
+      },
+      create: async () => {
+        created = true;
+        return { id: "cus_should_not_create" };
+      },
+    });
+
+    const customerId = await ensureStripeCustomer(stripe, db, "host-1", "host@example.com");
+
+    assert.equal(customerId, "cus_search_hit");
+    assert.equal(created, false);
+    assert.equal(searchQuery, "metadata['firebaseUid']:'host-1'");
+    assert.equal(db.documents["users/host-1"]?.stripeCustomerId, "cus_search_hit");
+    assert.deepEqual(db.documents["users/host-1"]?.subscription, {
+      status: "active",
+      plan: "monthly",
+    });
+  });
+
+  it("clears subscription when search reuses a customer after a deleted stored id", async () => {
+    const db = createMockDb({
+      "users/host-1": {
+        stripeCustomerId: "cus_deleted",
+        subscription: { status: "active", plan: "monthly", stripeSubscriptionId: "sub_old" },
+      },
+    });
+    const stripe = createMockStripe({
+      retrieve: async () => ({ id: "cus_deleted", deleted: true }),
+      search: async () => ({
+        data: [{ id: "cus_search_orphan", metadata: { firebaseUid: "host-1" } }],
+      }),
+      create: async () => ({ id: "cus_should_not_create" }),
+    });
+
+    const customerId = await ensureStripeCustomer(stripe, db, "host-1", "host@example.com");
+
+    assert.equal(customerId, "cus_search_orphan");
+    assert.equal(db.documents["users/host-1"]?.stripeCustomerId, "cus_search_orphan");
+    assert.equal(db.documents["users/host-1"]?.subscription, undefined);
+  });
+
+  it("creates a Stripe customer when search returns no live match", async () => {
+    const db = createMockDb({
+      "users/host-1": {},
+    });
+    const stripe = createMockStripe({
+      search: async () => ({
+        data: [{ id: "cus_deleted_orphan", deleted: true }],
+      }),
+      create: async () => ({ id: "cus_created_after_miss" }),
+    });
+
+    const customerId = await ensureStripeCustomer(stripe, db, "host-1", "host@example.com");
+
+    assert.equal(customerId, "cus_created_after_miss");
+    assert.equal(db.documents["users/host-1"]?.stripeCustomerId, "cus_created_after_miss");
+  });
+
+  it("clears matching stripeCustomerId transactionally and skips newer ids", async () => {
+    const db = createMockDb({
+      "users/host-1": { stripeCustomerId: "cus_old" },
+      "users/host-2": { stripeCustomerId: "cus_old" },
+      "users/host-3": { stripeCustomerId: "cus_new" },
+    });
+
+    await clearStripeCustomerIdForDeletedCustomer(db, {
+      id: "cus_old",
+      metadata: {},
+    });
+
+    assert.equal(db.documents["users/host-1"]?.stripeCustomerId, undefined);
+    assert.equal(db.documents["users/host-2"]?.stripeCustomerId, undefined);
+    assert.equal(db.documents["users/host-3"]?.stripeCustomerId, "cus_new");
+  });
+
+  it("does not write when clearing an already-absent stripeCustomerId", async () => {
+    const db = createMockDb({
+      "users/ghost": { premiumSessionCredits: 1 },
+    });
+
+    await clearStripeCustomerIdForDeletedCustomer(db, {
+      id: "cus_missing",
+      metadata: { firebaseUid: "ghost" },
+    });
+
+    assert.equal(db.writes.filter((write) => write.path === "users/ghost").length, 0);
+    assert.deepEqual(db.documents["users/ghost"], { premiumSessionCredits: 1 });
+  });
+
+  it("omits stripeCustomerId when syncing a canceled subscription", async () => {
+    const db = createMockDb({
+      "users/host-1": {},
+    });
+
+    await syncSubscriptionEntitlements(db, {
+      id: "sub_canceled",
+      status: "canceled",
+      customer: "cus_deleted",
+      current_period_end: 1_700_000_000,
+      metadata: { firebaseUid: "host-1", plan: "monthly" },
+    });
+
+    assert.equal(db.documents["users/host-1"]?.stripeCustomerId, undefined);
+    assert.equal(db.documents["users/host-1"]?.subscription?.status, "canceled");
+    assert.equal(db.documents["users/host-1"]?.subscription?.stripeSubscriptionId, "sub_canceled");
+  });
+
+  it("writes stripeCustomerId when syncing an active subscription", async () => {
+    const db = createMockDb({
+      "users/host-1": {},
+    });
+
+    await syncSubscriptionEntitlements(db, {
+      id: "sub_active",
+      status: "active",
+      customer: "cus_live",
+      current_period_end: 1_700_000_000,
+      metadata: { firebaseUid: "host-1", plan: "yearly" },
+    });
+
+    assert.equal(db.documents["users/host-1"]?.stripeCustomerId, "cus_live");
+    assert.equal(db.documents["users/host-1"]?.subscription?.status, "active");
   });
 });
