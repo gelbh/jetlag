@@ -4,3 +4,6 @@ RESEND_API_KEY=re_replace_me
 INCIDENT_EMAIL_SECRET=replace_me
 INCIDENT_ADMIN_EMAIL=admin@example.com
 INCIDENT_EMAIL_FROM=Jet Lag Incidents <incidents@example.com>
+# Envelope tunnel allowlist (from public VITE_SENTRY_DSN host + project id). Empty project ids fail closed.
+SENTRY_TUNNEL_ALLOWED_HOST=o123.ingest.de.sentry.io
+SENTRY_TUNNEL_ALLOWED_PROJECT_IDS=456789
