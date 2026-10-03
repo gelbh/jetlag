@@ -40,12 +40,12 @@ export function applyEndSessionInTx(tx, db, sessionRef, data, gameOutcome) {
 export async function endSessionCanonical(db, sessionDoc, { gameOutcome }) {
   const sessionRef = sessionDoc.ref;
 
-  await db.runTransaction(async (tx) => {
+  return db.runTransaction(async (tx) => {
     const fresh = await tx.get(sessionRef);
     if (!fresh.exists) {
-      return;
+      return false;
     }
 
-    applyEndSessionInTx(tx, db, sessionRef, fresh.data() ?? {}, gameOutcome);
+    return applyEndSessionInTx(tx, db, sessionRef, fresh.data() ?? {}, gameOutcome);
   });
 }

@@ -59,7 +59,10 @@ export function selectIdleActiveSessions(
 }
 
 export async function autoEndIdleSession(db, sessionDoc, options = {}) {
-  await endSessionCanonical(db, sessionDoc, { gameOutcome: "abandoned" });
+  const applied = await endSessionCanonical(db, sessionDoc, { gameOutcome: "abandoned" });
+  if (!applied) {
+    return;
+  }
   const data = sessionDoc.data();
   const hostUid = typeof data?.hostUid === "string" ? data.hostUid : "";
   if (!hostUid) {
