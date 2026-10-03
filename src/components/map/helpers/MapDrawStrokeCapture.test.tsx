@@ -29,7 +29,7 @@ const mapRef = {
   on,
   off,
   getMap: () => ({ dragPan }),
-  // Intentionally no top-level dragPan — matches react-map-gl MapRef runtime.
+  // Intentionally no top-level dragPan - matches react-map-gl MapRef runtime.
 };
 
 vi.mock("../helpers/useMapLibreMap", () => ({
