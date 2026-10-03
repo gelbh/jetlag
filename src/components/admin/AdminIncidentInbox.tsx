@@ -39,6 +39,9 @@ export function AdminIncidentInbox({
     [incidents, showClosed],
   );
 
+  const queueEmpty = !loading && !error && visible.length === 0;
+  const deferShowClosed = visible.length === 0;
+
   const onCloseRow = async (
     incidentId: string,
     status: Extract<IncidentStatus, "resolved" | "dismissed">,
@@ -54,6 +57,20 @@ export function AdminIncidentInbox({
     }
   };
 
+  const showClosedControl = (
+    <Checkbox
+      className={
+        deferShowClosed
+          ? "jl-incident-queue-filter jl-incident-queue-filter--secondary"
+          : "jl-incident-queue-filter"
+      }
+      size="xs"
+      label="Show closed"
+      checked={showClosed}
+      onChange={(event) => setShowClosed(event.currentTarget.checked)}
+    />
+  );
+
   return (
     <section className="jl-incident-queue" aria-label="Incident queue">
       <div className="jl-incident-pane-header">
@@ -61,12 +78,7 @@ export function AdminIncidentInbox({
         <span className="jl-incident-pane-meta">{openCount} open</span>
       </div>
 
-      <Checkbox
-        className="jl-incident-queue-filter"
-        label="Show closed"
-        checked={showClosed}
-        onChange={(event) => setShowClosed(event.currentTarget.checked)}
-      />
+      {!deferShowClosed ? showClosedControl : null}
 
       {error ? (
         <Alert className="jl-incident-empty" color="red" title="Queue error" role="alert">
@@ -87,8 +99,8 @@ export function AdminIncidentInbox({
         </div>
       ) : null}
 
-      {!loading && !error && visible.length === 0 ? (
-        <div className="jl-incident-empty">
+      {queueEmpty ? (
+        <div className="jl-incident-empty" data-testid="admin-incident-inbox-empty">
           <p className="jl-incident-empty-title">No incidents</p>
           <p className="jl-incident-empty-body">
             {showClosed
@@ -97,6 +109,8 @@ export function AdminIncidentInbox({
           </p>
         </div>
       ) : null}
+
+      {deferShowClosed ? showClosedControl : null}
 
       {visible.length > 0 ? (
         <div className="jl-scroll jl-incident-queue-scroll">

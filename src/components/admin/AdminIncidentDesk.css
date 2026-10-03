@@ -321,6 +321,13 @@ html[data-motion="static"] .jl-incident-queue-row {
   color: var(--color-ink-muted);
 }
 
+.jl-incident-queue-filter--secondary {
+  margin-top: 0.25rem;
+  padding-top: 0.5rem;
+  font-weight: 500;
+  color: var(--color-ink-dim);
+}
+
 .jl-incident-chip {
   display: inline-flex;
   align-items: center;
