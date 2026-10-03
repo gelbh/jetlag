@@ -280,4 +280,38 @@ describe("eliminationMaskWorkerClient", () => {
     const fullInput = buildMaskFromUnionInput.mock.calls[0]?.[0] as { polygons: unknown[] };
     expect(fullInput.polygons[0]).not.toBe(sampleFeature);
   });
+
+  it("falls through to full rebuild when incremental union returns null", async () => {
+    const a = matchingAnnotation("a", 0);
+    const b = matchingAnnotation("b", 0.2);
+    const rebuiltFeature = {
+      ...sampleFeature,
+      properties: { rebuilt: true },
+    };
+
+    await workerClient.requestCombinedEliminationMask([a], gameArea, [], []);
+    computeEliminationUnionInput.mockClear();
+    buildMaskFromUnionInput.mockClear();
+
+    buildMaskFromUnionInput
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce(rebuiltFeature);
+
+    const result = await workerClient.requestCombinedEliminationMask([a, b], gameArea, [], []);
+
+    expect(result).toBe(rebuiltFeature);
+    expect(computeEliminationUnionInput).toHaveBeenCalledTimes(2);
+    expect(computeEliminationUnionInput.mock.calls[0]?.[0]).toEqual([b]);
+    expect(computeEliminationUnionInput.mock.calls[1]?.[0]).toEqual([a, b]);
+    expect(buildMaskFromUnionInput).toHaveBeenCalledTimes(2);
+    const fullInput = buildMaskFromUnionInput.mock.calls[1]?.[0] as { polygons: unknown[] };
+    expect(fullInput.polygons[0]).not.toBe(sampleFeature);
+
+    computeEliminationUnionInput.mockClear();
+    buildMaskFromUnionInput.mockClear();
+    const cached = await workerClient.requestCombinedEliminationMask([a, b], gameArea, [], []);
+    expect(cached).toBe(rebuiltFeature);
+    expect(computeEliminationUnionInput).not.toHaveBeenCalled();
+    expect(buildMaskFromUnionInput).not.toHaveBeenCalled();
+  });
 });

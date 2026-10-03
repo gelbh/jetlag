@@ -191,13 +191,16 @@ export async function requestCombinedEliminationMask(
           gameArea,
           pendingFailure,
         );
-        return storeMaskCache({
-          annotationKey,
-          gameAreaKey,
-          draftKey,
-          endGameKey: "",
-          mask,
-        });
+        // Incremental null → full rebuild once (below), same as throw.
+        if (mask !== null) {
+          return storeMaskCache({
+            annotationKey,
+            gameAreaKey,
+            draftKey,
+            endGameKey: "",
+            mask,
+          });
+        }
       } catch {
         // Incremental throw → full rebuild once (below).
       }
