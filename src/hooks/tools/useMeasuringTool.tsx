@@ -1,9 +1,9 @@
 import { startTransition, useEffect, useMemo, useRef, useState } from "react";
-import { MeasuringHudBody } from "@/components/tools/ask/MeasuringHudBody";
+import { MeasuringHudBody } from "@/components/tools/ask/measuring/MeasuringHudBody";
 import {
   MeasuringMapPlacementChrome,
   type MeasuringMapPlacementPhase,
-} from "@/components/tools/ask/MeasuringMapPlacementChrome";
+} from "@/components/tools/ask/measuring/MeasuringMapPlacementChrome";
 import { QuestionPreviewSheet } from "@/components/tools/shared/controls/QuestionPreviewSheet";
 import { SearchResultsList } from "@/components/tools/shared/controls/SearchResultsList";
 import { MeasuringTargetSection } from "@/components/tools/shared/measuring/MeasuringTargetStep";

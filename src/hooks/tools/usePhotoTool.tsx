@@ -1,6 +1,6 @@
 import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
-import { PhotoHudBody } from "../../components/tools/ask/PhotoHudBody";
-import { PhotoMapPlacementChrome } from "../../components/tools/ask/PhotoMapPlacementChrome";
+import { PhotoHudBody } from "../../components/tools/ask/photo/PhotoHudBody";
+import { PhotoMapPlacementChrome } from "../../components/tools/ask/photo/PhotoMapPlacementChrome";
 import { PhotoPanel } from "../../components/tools/PhotoPanel";
 import type { AskHudReadiness } from "../../domain/ask/askHudModes";
 import type { DistanceUnit } from "../../domain/map/distance";

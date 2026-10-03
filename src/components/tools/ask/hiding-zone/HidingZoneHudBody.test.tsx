@@ -4,7 +4,7 @@ import type { ReactElement } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { HidingZoneToolPanelState } from "@/components/hider/hidingZoneToolPanelState";
 import { jetlagTheme } from "@/theme/theme";
-import { AskHudHost } from "./AskHudHost";
+import { AskHudHost } from "../AskHudHost";
 import { HidingZoneHudBody } from "./HidingZoneHudBody";
 
 beforeEach(() => {

@@ -17,7 +17,7 @@ import { HudMeasuringIcon } from "@/components/map/icons/ToolIcons";
 import { AskCatalogRail } from "@/components/tools/ask/AskCatalogRail";
 import { AskHudPanel } from "@/components/tools/ask/AskHudPanel";
 import { AskToolQuestionHeader } from "@/components/tools/ask/AskToolQuestionHeader";
-import { measuringCategoryIcon } from "@/components/tools/ask/measuringCategoryIcons";
+import { measuringCategoryIcon } from "./measuringCategoryIcons";
 import { SearchResultsList } from "@/components/tools/shared/controls/SearchResultsList";
 import { MeasuringAnchorStep } from "@/components/tools/shared/measuring/MeasuringAnchorStep";
 import {

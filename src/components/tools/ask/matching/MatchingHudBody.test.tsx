@@ -15,7 +15,7 @@ import {
   type MatchingCategoryId,
 } from "@/domain/questions";
 import { jetlagTheme } from "@/theme/theme";
-import { AskHudHost } from "./AskHudHost";
+import { AskHudHost } from "../AskHudHost";
 import { MatchingHudBody } from "./MatchingHudBody";
 
 const baseProps = {

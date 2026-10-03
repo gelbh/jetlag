@@ -13,7 +13,7 @@ import {
   type MeasuringTargetMode,
 } from "@/domain/questions";
 import { jetlagTheme } from "@/theme/theme";
-import { AskHudHost } from "./AskHudHost";
+import { AskHudHost } from "../AskHudHost";
 import {
   MeasuringHudBody,
   type MeasuringHudBodyModel,

@@ -9,7 +9,7 @@ import {
   type AskMapPlacementPhase,
   askMapPlacementSendStyles,
 } from "@/components/tools/ask/AskMapPlacementChrome";
-import { TentacleMapAnswerStrip } from "@/components/tools/ask/TentacleMapAnswerStrip";
+import { TentacleMapAnswerStrip } from "./TentacleMapAnswerStrip";
 import { mapChromeSurfaceStyles } from "@/components/ui/entry/entryChrome";
 import type { TentaclePoi } from "@/domain/map/annotations";
 import type { DistanceUnit } from "@/domain/map/distance";

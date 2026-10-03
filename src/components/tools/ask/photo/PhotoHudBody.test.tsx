@@ -11,7 +11,7 @@ import {
 import type { PhotoCategoryId } from "@/domain/questions";
 import type { GameSize } from "@/domain/session/size/gameSize";
 import { jetlagTheme } from "@/theme/theme";
-import { AskHudHost } from "./AskHudHost";
+import { AskHudHost } from "../AskHudHost";
 import { PhotoHudBody } from "./PhotoHudBody";
 
 const baseProps = {

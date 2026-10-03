@@ -7,7 +7,7 @@ import { HudTentacleIcon } from "@/components/map/icons/ToolIcons";
 import { AskCatalogRail } from "@/components/tools/ask/AskCatalogRail";
 import { AskHudPanel } from "@/components/tools/ask/AskHudPanel";
 import { AskToolQuestionHeader } from "@/components/tools/ask/AskToolQuestionHeader";
-import { TentacleLocationsChord } from "@/components/tools/ask/TentacleLocationsChord";
+import { TentacleLocationsChord } from "./TentacleLocationsChord";
 import { TentacleAnswerPicker } from "@/components/tools/shared/answers/TentacleAnswerPicker";
 import { AnchorControls } from "@/components/tools/shared/controls/AnchorControls";
 import { QuestionTruthReferenceHint } from "@/components/tools/shared/QuestionTruthReferenceHint";

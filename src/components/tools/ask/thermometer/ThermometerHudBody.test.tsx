@@ -7,7 +7,7 @@ import type { DistanceUnit } from "@/domain/map/distance";
 import type { ThermometerDistanceOptionMiles } from "@/domain/questions";
 import type { SessionRulesInput } from "@/domain/session/rules";
 import { jetlagTheme } from "@/theme/theme";
-import { AskHudHost } from "./AskHudHost";
+import { AskHudHost } from "../AskHudHost";
 import { ThermometerHudBody } from "./ThermometerHudBody";
 
 function renderHud(ui: ReactElement) {

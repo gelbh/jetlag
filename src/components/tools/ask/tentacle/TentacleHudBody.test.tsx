@@ -13,7 +13,7 @@ import type { DistanceUnit } from "@/domain/map/distance";
 import type { TentacleExtendedCategoryId } from "@/domain/questions";
 import type { GameSize } from "@/domain/session/size/gameSize";
 import { jetlagTheme } from "@/theme/theme";
-import { AskHudHost } from "./AskHudHost";
+import { AskHudHost } from "../AskHudHost";
 import { TentacleHudBody } from "./TentacleHudBody";
 
 function renderHud(ui: ReactElement) {
