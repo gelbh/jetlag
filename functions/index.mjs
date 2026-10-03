@@ -53,6 +53,7 @@ export {
   captureStartingLocations,
   finalizeGameResult,
   pollSessionOpsAgentRuns,
+  processSessionIntent,
   purgeStaleSessions,
   warmPremiumOverpassPreload,
 } from "./handlers/triggers.mjs";
