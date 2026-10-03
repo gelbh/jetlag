@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { uuidFromSeed } from "../lib/posthog.mjs";
 import {
   autoEndIdleSession,
   computeIdleCutoffIso,
@@ -7,7 +8,6 @@ import {
   isIdleActiveSession,
   selectIdleActiveSessions,
 } from "../session/autoEndIdleSessions.mjs";
-import { uuidFromSeed } from "../lib/posthog.mjs";
 
 function fakeSnapshot(id, data) {
   return {
@@ -160,10 +160,7 @@ test("autoEndIdleSession captures session_ended abandoned for host", async () =>
   assert.equal(captureCalls[0].distinctId, "host_1");
   assert.equal(captureCalls[0].event, "session_ended");
   assert.deepEqual(captureCalls[0].properties, { reason: "abandoned" });
-  assert.equal(
-    captureCalls[0].uuid,
-    uuidFromSeed("session_ended:abandoned:sess_1"),
-  );
+  assert.equal(captureCalls[0].uuid, uuidFromSeed("session_ended:abandoned:sess_1"));
 });
 
 test("autoEndIdleSession skips capture when session already ended", async () => {

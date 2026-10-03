@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
-import { PostHog } from "posthog-node";
 import { defineSecret } from "firebase-functions/params";
+import { PostHog } from "posthog-node";
 
 export const posthogProjectApiKey = defineSecret("POSTHOG_PROJECT_API_KEY");
 

@@ -1,6 +1,7 @@
 import { FieldValue } from "firebase-admin/firestore";
 import { HttpsError } from "firebase-functions/v2/https";
 import Stripe from "stripe";
+import { captureAnalyticsEvent } from "../lib/posthog.mjs";
 import { buildInitialRoleSecrets } from "../session/roleGateShared.mjs";
 import { generateSessionCode } from "../session/sessionCodes.mjs";
 import {
@@ -16,7 +17,6 @@ import {
   buildPremiumSessionFirestoreDocument,
   parseCreatePremiumSessionInput,
 } from "./premiumSessionDocument.mjs";
-import { captureAnalyticsEvent } from "../lib/posthog.mjs";
 import {
   PREMIUM_PRODUCT_KEYS,
   PREMIUM_PRODUCTS,
