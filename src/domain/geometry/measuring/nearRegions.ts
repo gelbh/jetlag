@@ -443,13 +443,6 @@ export async function buildCoastlineNearRegion(
   distanceMeters: number,
   gameArea: GameArea,
 ): Promise<Feature<Polygon | MultiPolygon> | null> {
-  if (!shouldUseWasm("nearRegionBatch")) {
-    console.warn(
-      "[geometry] coastline near-region requires wasm (nearRegionBatch); no TypeScript fallback",
-    );
-    return null;
-  }
-
   const cacheKey = coastlineNearRegionCacheKey(gameArea, distanceMeters, segments, "batch:wasm");
   const cached = getCachedCoastlineNearRegion(cacheKey);
   if (cached) {
@@ -462,6 +455,7 @@ export async function buildCoastlineNearRegion(
       return null;
     }
 
+    // Fail closed via dispatchKernel (not-ready + wasm throw): no TS distance-threshold path.
     const result = await dispatchNearRegionBatch({
       segments: prepared.segments,
       distanceMeters,
@@ -476,8 +470,7 @@ export async function buildCoastlineNearRegion(
     }
     return result;
   } catch (error) {
-    // Fail closed (same class as elimination-mask worker reject): no TS distance-threshold path.
-    console.warn("[geometry] coastline near-region wasm failed; clearing near-region", error);
+    console.warn("[geometry] coastline near-region wasm failed; returning null", error);
     return null;
   }
 }

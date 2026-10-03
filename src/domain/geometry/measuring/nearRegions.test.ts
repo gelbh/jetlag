@@ -96,7 +96,6 @@ describe("buildCoastlineNearRegion fail-closed", () => {
     vi.resetModules();
     vi.doUnmock("../kernel/kernelWasmReady");
     vi.doUnmock("../kernel/nearRegionKernelRunner");
-    vi.doUnmock("./coastlineNearRegion");
   });
 
   const coastSegment: Feature<LineString> = {
@@ -131,10 +130,6 @@ describe("buildCoastlineNearRegion fail-closed", () => {
         },
       };
     });
-    const distanceThreshold = vi.fn();
-    vi.doMock("./coastlineNearRegion", () => ({
-      buildCoastlineNearRegionDistanceThreshold: distanceThreshold,
-    }));
     vi.doMock("../kernel/nearRegionKernelRunner", () => ({
       dispatchNearRegionBatch: vi.fn(async () => {
         throw new Error("wasm boom");
@@ -147,10 +142,12 @@ describe("buildCoastlineNearRegion fail-closed", () => {
 
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     const result = await buildCoastlineNearRegion([coastSegment], 1_000, sampleGameArea);
-    warn.mockRestore();
-
     expect(result).toBeNull();
-    expect(distanceThreshold).not.toHaveBeenCalled();
+    expect(warn).toHaveBeenCalledWith(
+      "[geometry] coastline near-region wasm failed; returning null",
+      expect.any(Error),
+    );
+    warn.mockRestore();
   });
 
   it("returns null when nearRegionBatch wasm is disabled (no TS path)", async () => {
@@ -173,10 +170,6 @@ describe("buildCoastlineNearRegion fail-closed", () => {
         },
       };
     });
-    const distanceThreshold = vi.fn();
-    vi.doMock("./coastlineNearRegion", () => ({
-      buildCoastlineNearRegionDistanceThreshold: distanceThreshold,
-    }));
 
     const { buildCoastlineNearRegion, clearCoastlineNearRegionCacheForTests } =
       await import("./nearRegions");
@@ -184,9 +177,11 @@ describe("buildCoastlineNearRegion fail-closed", () => {
 
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     const result = await buildCoastlineNearRegion([coastSegment], 1_000, sampleGameArea);
-    warn.mockRestore();
-
     expect(result).toBeNull();
-    expect(distanceThreshold).not.toHaveBeenCalled();
+    expect(warn).toHaveBeenCalledWith(
+      "[geometry] coastline near-region wasm failed; returning null",
+      expect.any(Error),
+    );
+    warn.mockRestore();
   });
 });
