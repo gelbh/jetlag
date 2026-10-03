@@ -16,6 +16,7 @@
     "lint": "biome ci --error-on-warnings .",
     "format": "biome check --write .",
     "lint:pr-title": "bash scripts/lint-pr-title.sh",
+    "doctor": "npx react-doctor@latest",
     "typecheck": "tsc -b --noEmit",
     "flags:sync": "node scripts/sync-region-flags.mjs",
     "test": "vitest run --project unit",

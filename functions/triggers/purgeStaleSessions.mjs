@@ -1,5 +1,6 @@
 import { onSchedule } from "firebase-functions/v2/scheduler";
 import { adminDb } from "../handlers/proxyShared.mjs";
+import { posthogProjectApiKey } from "../lib/posthog.mjs";
 import {
   captureFunctionsException,
   getSentryDsnSecret,
@@ -62,7 +63,7 @@ async function fetchIdleActiveSessionDocs(db, idleCutoffIso) {
 }
 
 export const purgeStaleSessions = onSchedule(
-  { schedule: "0 4 * * *", secrets: [sentryDsnSecret] },
+  { schedule: "0 4 * * *", secrets: [sentryDsnSecret, posthogProjectApiKey] },
   withSentryEventHandler(async () => {
     const db = adminDb();
     const idleCutoffIso = computeIdleCutoffIso();
@@ -87,7 +88,9 @@ export const purgeStaleSessions = onSchedule(
 
     let autoEnded = 0;
     for (const sessionDoc of idleTargets) {
-      await autoEndIdleSession(db, sessionDoc);
+      await autoEndIdleSession(db, sessionDoc, {
+        posthogApiKey: posthogProjectApiKey.value(),
+      });
       autoEnded += 1;
     }
 
