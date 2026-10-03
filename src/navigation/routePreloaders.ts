@@ -1,6 +1,9 @@
 import type { To } from "react-router-dom";
-import { lazyWithChunkRetry } from "../domain/device/updates/lazyWithChunkRetry";
-import { lazyRouteLoaderKey, normalizeRoutePath } from "./routeMetadata";
+import {
+  type LazyRouteComponent,
+  lazyWithChunkRetry,
+} from "../domain/device/updates/lazyWithChunkRetry";
+import { type LazyRouteLoaderKey, lazyRouteLoaderKey, normalizeRoutePath } from "./routeMetadata";
 import { markRouteImportWarm } from "./routeWarmState";
 
 export const importMapScreen = () =>
@@ -97,6 +100,36 @@ export const PremiumLazy = lazyWithChunkRetry(importPremium);
 export const TermsLazy = lazyWithChunkRetry(importTerms);
 export const NotFoundLazy = lazyWithChunkRetry(importNotFound);
 export const AppResumeWatchdogLazy = lazyWithChunkRetry(importAppResumeWatchdog);
+
+// Hover/intent warmers (`preloadRoute`) keep using `routeImporter`; only hydration needs the
+// lazy component itself resolved.
+const lazyRouteByLoaderKey: Record<LazyRouteLoaderKey, LazyRouteComponent> = {
+  importMapScreen: MapScreenLazy,
+  importCreateSession: CreateSessionLazy,
+  importJoinSession: JoinSessionLazy,
+  importGamePresetList: GamePresetListLazy,
+  importGamePresetEditor: GamePresetEditorLazy,
+  importAdminOpsDesk: AdminOpsDeskLazy,
+  importFeedback: FeedbackLazy,
+  importPrivacy: PrivacyLazy,
+  importPremium: PremiumLazy,
+  importTerms: TermsLazy,
+  importStats: StatsLazy,
+  importFriends: FriendsLazy,
+  importLeaderboard: LeaderboardLazy,
+};
+
+/**
+ * Resolve the route's `React.lazy` component (not just its chunk) so a prerendered shell
+ * hydrates the route in the first pass instead of leaving it dehydrated.
+ */
+export async function preloadLazyRouteComponent(path: string): Promise<void> {
+  // Assets also serve `/join/` from dist/join/index.html.
+  const loaderKey = lazyRouteLoaderKey(path.length > 1 ? path.replace(/\/$/, "") : path);
+  if (loaderKey) {
+    await lazyRouteByLoaderKey[loaderKey].preload();
+  }
+}
 
 export { isLazyRoute, normalizeRoutePath } from "./routeMetadata";
 

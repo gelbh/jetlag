@@ -2,6 +2,7 @@ import { Button, Group } from "@mantine/core";
 import { useState } from "react";
 import { readAnalyticsConsent } from "@/domain/device/consent/analyticsConsent";
 import { isEmbedMode } from "@/domain/device/embed/embedMode";
+import { useHydrated } from "@/hooks/app/useHydrated";
 import { shouldEnableAnalytics } from "@/services/core/analytics/analyticsEnabled";
 import {
   denyAnalyticsConsentLazy,
@@ -13,12 +14,14 @@ import { MapFloatSurface } from "./MapFloatSurface";
 
 export function AnalyticsConsentBanner() {
   const [consent, setConsent] = useState(readAnalyticsConsent);
+  // Stored consent differs per visitor; prerendered shells must not ship the banner.
+  const hydrated = useHydrated();
 
   const analyticsUiEnabled = shouldEnableAnalytics({
     prod: import.meta.env.PROD,
     mode: import.meta.env.MODE,
   });
-  if (!analyticsUiEnabled || isEmbedMode() || consent !== "unset") {
+  if (!hydrated || !analyticsUiEnabled || isEmbedMode() || consent !== "unset") {
     return null;
   }
 

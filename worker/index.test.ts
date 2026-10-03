@@ -371,6 +371,58 @@ describe("worker fetch", () => {
     expect(env.ASSETS.fetch).toHaveBeenCalledTimes(2);
   });
 
+  it("serves the prerendered /join shell with a CSP nonce and noindex intact", async () => {
+    // Assets' auto-trailing-slash answers /join with a 307 to /join/ (dist/join/index.html).
+    const html =
+      '<!doctype html><html><head><meta name="robots" content="noindex,nofollow">' +
+      '<script type="module" src="/assets/index.js"></script></head>' +
+      '<body><div id="root" data-prerendered="true">Join a session</div></body></html>';
+    const csp = "default-src 'self'; script-src 'self'";
+    const env = {
+      ASSETS: {
+        fetch: vi
+          .fn()
+          .mockResolvedValueOnce(
+            new Response(null, {
+              status: 307,
+              headers: { Location: "/join/?code=ABCD" },
+            }),
+          )
+          .mockResolvedValueOnce(
+            new Response(html, {
+              headers: {
+                "Content-Type": "text/html; charset=utf-8",
+                "Content-Security-Policy": csp,
+              },
+            }),
+          ),
+      },
+    } as Env;
+
+    const response = await worker.fetch(
+      new Request("https://jetlag.gelbhart.dev/join?code=ABCD"),
+      env,
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("Location")).toBeNull();
+    expect(env.ASSETS.fetch).toHaveBeenCalledTimes(2);
+    const [first, second] = env.ASSETS.fetch.mock.calls.map(
+      ([request]) => new URL((request as Request).url),
+    );
+    expect(first.pathname).toBe("/join");
+    expect(`${second.pathname}${second.search}`).toBe("/join/?code=ABCD");
+
+    const body = await response.text();
+    const headerNonce = (response.headers.get("Content-Security-Policy") ?? "").match(
+      /'nonce-([^']+)'/,
+    )?.[1];
+    expect(headerNonce).toBeTruthy();
+    expect(body).toContain(`nonce="${headerNonce}"`);
+    expect(body).toContain('<meta name="robots" content="noindex,nofollow">');
+    expect(body).toContain('data-prerendered="true"');
+  });
+
   it("applies document CSP nonce to html asset responses", async () => {
     const html = '<!doctype html><script src="/boot-recovery.js"></script>';
     const csp = "default-src 'self'; script-src 'self' https://www.google.com";

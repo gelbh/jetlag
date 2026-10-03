@@ -7,6 +7,34 @@ export function loadCrawlPolicy(root) {
   return JSON.parse(readFileSync(join(root, "src/domain/seo/seoCrawlPolicy.json"), "utf8"));
 }
 
+/**
+ * Routes prerendered only so the first paint is real HTML (hydrated by `src/main.tsx`), not for
+ * search. They stay `noindex`, off the sitemap and in `disallowPaths`; the crawl policy JSON
+ * (`indexablePaths`) remains the only index list.
+ */
+export const PERF_PRERENDER_PATHS = Object.freeze(["/join"]);
+
+/**
+ * Every path to prerender, indexable first. Throws if a perf-only path is also indexable or is
+ * not disallowed, so the two lists cannot silently merge.
+ */
+export function prerenderTargets(policy, perfPaths = PERF_PRERENDER_PATHS) {
+  const indexable = new Set(policy.indexablePaths);
+  const disallowed = new Set(policy.disallowPaths ?? []);
+  for (const path of perfPaths) {
+    if (indexable.has(path)) {
+      throw new Error(`${path} is in both indexablePaths and PERF_PRERENDER_PATHS`);
+    }
+    if (!disallowed.has(path)) {
+      throw new Error(`Perf-only prerender path ${path} must be in disallowPaths`);
+    }
+  }
+  return [
+    ...policy.indexablePaths.map((path) => ({ path, indexable: true })),
+    ...perfPaths.map((path) => ({ path, indexable: false })),
+  ];
+}
+
 /** Home must not overwrite Vite's SPA shell at dist/index.html. */
 export function distHtmlPath(root, urlPath) {
   if (urlPath === "/") {
@@ -133,4 +161,35 @@ export function restoreTemplateHeadAssets(snapshotHtml, templateHtml) {
     cursor = index + tag.length;
   }
   return out + snapshotHtml.slice(cursor);
+}
+
+/** Opening tag of the element whose `id` is exactly `id`. */
+function openTagWithIdRe(id) {
+  return new RegExp(String.raw`<[a-z][\w-]*\b${TAG_ATTRS}\sid=["']${id}["']${TAG_ATTRS}>`, "i");
+}
+
+const ROOT_OPEN_TAG_RE = openTagWithIdRe("root");
+const BOOT_SPLASH_OPEN_TAG_RE = openTagWithIdRe("boot-splash");
+const META_TAG_RE = new RegExp(String.raw`<meta\b${TAG_ATTRS}>`, "gi");
+
+/** True when the `#root` opening tag carries `data-prerendered="true"` (the hydrate marker). */
+export function hasPrerenderedRootMarker(html) {
+  const tag = maskInert(html).match(ROOT_OPEN_TAG_RE)?.[0];
+  return Boolean(tag && attr(tag, "data-prerendered") === "true");
+}
+
+/** True when live markup (not comments / noscript) still contains the `#boot-splash` element. */
+export function hasBootSplashElement(html) {
+  return BOOT_SPLASH_OPEN_TAG_RE.test(maskInert(html));
+}
+
+/** `content` of `<meta name="robots">`, or undefined. */
+export function robotsMetaContent(html) {
+  const masked = maskInert(html);
+  for (const match of masked.matchAll(META_TAG_RE)) {
+    if (attr(match[0], "name")?.toLowerCase() === "robots") {
+      return attr(match[0], "content");
+    }
+  }
+  return undefined;
 }

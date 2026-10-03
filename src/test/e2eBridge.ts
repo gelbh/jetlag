@@ -6,6 +6,7 @@ import {
   signOut,
 } from "firebase/auth";
 import { collection, doc, getDocs, updateDoc } from "firebase/firestore";
+import { getRecoverableErrorCount } from "../domain/device/perf/recoverableErrors";
 import { getFirebaseAuth, getFirestoreDb } from "../services/core/firebase/firebase";
 import { endRemoteSession } from "../services/firestore/firestoreAnnotations";
 import { updatePendingQuestion } from "../services/firestore/firestoreSessionExtras";
@@ -113,6 +114,8 @@ declare global {
       patchSessionTimer: typeof patchSessionTimer;
       signInPermanentUserForCapture: typeof signInPermanentUserForCapture;
       rotateAnonymousAuth: typeof rotateAnonymousAuth;
+      /** React `onRecoverableError` calls so far (hydration mismatches). */
+      recoverableErrorCount: typeof getRecoverableErrorCount;
     };
   }
 }
@@ -129,5 +132,6 @@ export function installE2EBridgeIfConfigured(): void {
     patchSessionTimer,
     signInPermanentUserForCapture,
     rotateAnonymousAuth,
+    recoverableErrorCount: getRecoverableErrorCount,
   };
 }
