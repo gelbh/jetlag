@@ -35,60 +35,83 @@
   --map-style-control-size: 2.75rem;
   --map-compass-control-size: var(--map-zoom-btn-size, 2.75rem);
   --map-zoom-control-height: calc(
-    (2 * var(--map-zoom-btn-size, 2.75rem)) + var(--map-zoom-stack-gap, 0.375rem)
+    (2 * var(--map-zoom-btn-size, 2.75rem)) +
+    var(--map-zoom-stack-gap, 0.375rem)
   );
   --map-left-stack-base-dock: calc(
-    var(--dock-total-height) + var(--chrome-gap-above-dock) +
-      var(--safe-area-bottom) + 0.5rem
+    var(--dock-total-height) +
+    var(--chrome-gap-above-dock) +
+    var(--safe-area-bottom) +
+    0.5rem
   );
   --map-left-stack-base-dock-narrow: calc(
-    var(--dock-total-height) + var(--chrome-gap-above-dock) +
-      var(--safe-area-bottom) + 2.5rem
+    var(--dock-total-height) +
+    var(--chrome-gap-above-dock) +
+    var(--safe-area-bottom) +
+    2.5rem
   );
   --map-left-stack-base-chrome-hidden: calc(
-    var(--chrome-gap-bottom) + var(--safe-area-bottom) + 0.5rem
+    var(--chrome-gap-bottom) +
+    var(--safe-area-bottom) +
+    0.5rem
   );
   --map-left-stack-base-safe-area: max(0.75rem, var(--safe-area-bottom));
   --map-left-stack-base-container: 4.25rem;
   --map-left-stack-base-hider-actions: calc(
-    var(--hider-action-bar-height) + var(--chrome-gap-above-dock) + 0.5rem
+    var(--hider-action-bar-height) +
+    var(--chrome-gap-above-dock) +
+    0.5rem
   );
   --map-left-stack-base-admin-rail: calc(
-    var(--chrome-gap-bottom) + var(--safe-area-bottom) + 0.5rem
+    var(--chrome-gap-bottom) +
+    var(--safe-area-bottom) +
+    0.5rem
   );
   --map-left-tier-sat-bottom-dock: var(--map-left-stack-base-dock);
   --map-left-tier-zoom-bottom-dock: calc(
-    var(--map-left-stack-base-dock) + var(--map-style-control-size) +
-      var(--map-left-chrome-gap)
+    var(--map-left-stack-base-dock) +
+    var(--map-style-control-size) +
+    var(--map-left-chrome-gap)
   );
   --map-left-tier-compass-bottom-dock: calc(
-    var(--map-left-tier-zoom-bottom-dock) + var(--map-zoom-control-height) +
-      var(--map-left-chrome-gap)
+    var(--map-left-tier-zoom-bottom-dock) +
+    var(--map-zoom-control-height) +
+    var(--map-left-chrome-gap)
   );
   --map-left-tier-compass-bottom-chrome-hidden: calc(
-    var(--map-left-stack-base-chrome-hidden) + var(--map-style-control-size) +
-      var(--map-left-chrome-gap) + var(--map-zoom-control-height) +
-      var(--map-left-chrome-gap)
+    var(--map-left-stack-base-chrome-hidden) +
+    var(--map-style-control-size) +
+    var(--map-left-chrome-gap) +
+    var(--map-zoom-control-height) +
+    var(--map-left-chrome-gap)
   );
   --map-left-tier-compass-bottom-safe-area: calc(
-    var(--map-left-stack-base-safe-area) + var(--map-style-control-size) +
-      var(--map-left-chrome-gap) + var(--map-zoom-control-height) +
-      var(--map-left-chrome-gap)
+    var(--map-left-stack-base-safe-area) +
+    var(--map-style-control-size) +
+    var(--map-left-chrome-gap) +
+    var(--map-zoom-control-height) +
+    var(--map-left-chrome-gap)
   );
   --map-left-tier-compass-bottom-container: calc(
-    var(--map-left-stack-base-container) + var(--map-style-control-size) +
-      var(--map-left-chrome-gap) + var(--map-zoom-control-height) +
-      var(--map-left-chrome-gap)
+    var(--map-left-stack-base-container) +
+    var(--map-style-control-size) +
+    var(--map-left-chrome-gap) +
+    var(--map-zoom-control-height) +
+    var(--map-left-chrome-gap)
   );
   --map-left-tier-compass-bottom-hider-actions: calc(
-    var(--map-left-stack-base-hider-actions) + var(--map-style-control-size) +
-      var(--map-left-chrome-gap) + var(--map-zoom-control-height) +
-      var(--map-left-chrome-gap)
+    var(--map-left-stack-base-hider-actions) +
+    var(--map-style-control-size) +
+    var(--map-left-chrome-gap) +
+    var(--map-zoom-control-height) +
+    var(--map-left-chrome-gap)
   );
   --map-left-tier-compass-bottom-admin-rail: calc(
-    var(--map-left-stack-base-admin-rail) + var(--map-style-control-size) +
-      var(--map-left-chrome-gap) + var(--map-zoom-control-height) +
-      var(--map-left-chrome-gap)
+    var(--map-left-stack-base-admin-rail) +
+    var(--map-style-control-size) +
+    var(--map-left-chrome-gap) +
+    var(--map-zoom-control-height) +
+    var(--map-left-chrome-gap)
   );
 }
 
@@ -118,8 +141,9 @@
 
   [data-chrome-side-stack="phone"] {
     bottom: calc(
-      var(--dock-island-height) + var(--chrome-side-stack-gap) +
-        var(--chrome-side-stack-lift)
+      var(--dock-island-height) +
+      var(--chrome-side-stack-gap) +
+      var(--chrome-side-stack-lift)
     );
   }
 
@@ -135,16 +159,14 @@
 
   [data-chrome-side-stack="phone"][data-side="right"] .jl-map-island,
   [data-chrome-nav-stack="phone"][data-side="right"] .jl-map-island {
-    border-radius: var(--chrome-side-island-corner)
-      var(--chrome-side-island-radius) var(--chrome-side-island-radius)
-      var(--chrome-side-island-corner);
+    border-radius: var(--chrome-side-island-corner) var(--chrome-side-island-radius)
+      var(--chrome-side-island-radius) var(--chrome-side-island-corner);
   }
 
   [data-chrome-side-stack="phone"][data-side="left"] .jl-map-island,
   [data-chrome-nav-stack="phone"][data-side="left"] .jl-map-island {
-    border-radius: var(--chrome-side-island-radius)
-      var(--chrome-side-island-corner) var(--chrome-side-island-corner)
-      var(--chrome-side-island-radius);
+    border-radius: var(--chrome-side-island-radius) var(--chrome-side-island-corner)
+      var(--chrome-side-island-corner) var(--chrome-side-island-radius);
   }
 
   [data-chrome-side-stack="phone"][data-dragging="true"],
@@ -157,13 +179,17 @@
   @media (height <= 430px) and (orientation: landscape) {
     [data-chrome-side-stack="phone"] {
       bottom: calc(
-        var(--dock-island-height) + var(--chrome-side-stack-gap) +
-          var(--chrome-side-stack-lift-landscape)
+        var(--dock-island-height) +
+        var(--chrome-side-stack-gap) +
+        var(--chrome-side-stack-lift-landscape)
       );
       max-height: calc(
-        100dvh - var(--safe-area-top) - var(--chrome-side-stack-lift) -
-          var(--dock-island-height) - var(--chrome-side-stack-gap) -
-          var(--chrome-side-stack-lift-landscape)
+        100dvh -
+        var(--safe-area-top) -
+        var(--chrome-side-stack-lift) -
+        var(--dock-island-height) -
+        var(--chrome-side-stack-gap) -
+        var(--chrome-side-stack-lift-landscape)
       );
       overflow: hidden;
     }
@@ -182,8 +208,10 @@
     right: calc(var(--map-chrome-side-width, 3.25rem) + 0.5rem);
     left: auto;
     bottom: calc(
-      var(--dock-island-height) + var(--safe-area-bottom) +
-        var(--chrome-side-stack-gap) + var(--chrome-side-stack-lift)
+      var(--dock-island-height) +
+      var(--safe-area-bottom) +
+      var(--chrome-side-stack-gap) +
+      var(--chrome-side-stack-lift)
     );
     z-index: calc(var(--z-panel) + 1);
     pointer-events: auto;
@@ -228,8 +256,9 @@
 
 .map-zoom-control--chrome-hidden {
   bottom: calc(
-    var(--map-left-stack-base-chrome-hidden) + var(--map-style-control-size) +
-      var(--map-left-chrome-gap)
+    var(--map-left-stack-base-chrome-hidden) +
+    var(--map-style-control-size) +
+    var(--map-left-chrome-gap)
   );
 }
 
@@ -239,8 +268,9 @@
 
 .map-zoom-control--safe-area {
   bottom: calc(
-    var(--map-left-stack-base-safe-area) + var(--map-style-control-size) +
-      var(--map-left-chrome-gap)
+    var(--map-left-stack-base-safe-area) +
+    var(--map-style-control-size) +
+    var(--map-left-chrome-gap)
   );
 }
 
@@ -250,8 +280,9 @@
 
 .map-zoom-control--container {
   bottom: calc(
-    var(--map-left-stack-base-container) + var(--map-style-control-size) +
-      var(--map-left-chrome-gap)
+    var(--map-left-stack-base-container) +
+    var(--map-style-control-size) +
+    var(--map-left-chrome-gap)
   );
 }
 
@@ -261,29 +292,25 @@
 
 .map-zoom-control--hider-actions {
   bottom: calc(
-    var(--map-left-stack-base-hider-actions) + var(--map-style-control-size) +
-      var(--map-left-chrome-gap)
+    var(--map-left-stack-base-hider-actions) +
+    var(--map-style-control-size) +
+    var(--map-left-chrome-gap)
   );
 }
 
 .map-style-control--admin-rail {
   bottom: var(--map-left-stack-base-admin-rail);
-  right: calc(
-    max(0.75rem, env(safe-area-inset-right)) +
-      var(--admin-map-control-inset-right, 0px)
-  );
+  right: calc(max(0.75rem, env(safe-area-inset-right)) + var(--admin-map-control-inset-right, 0px));
   left: auto;
 }
 
 .map-zoom-control--admin-rail {
   bottom: calc(
-    var(--map-left-stack-base-admin-rail) + var(--map-style-control-size) +
-      var(--map-left-chrome-gap)
+    var(--map-left-stack-base-admin-rail) +
+    var(--map-style-control-size) +
+    var(--map-left-chrome-gap)
   );
-  right: calc(
-    max(0.75rem, env(safe-area-inset-right)) +
-      var(--admin-map-control-inset-right, 0px)
-  );
+  right: calc(max(0.75rem, env(safe-area-inset-right)) + var(--admin-map-control-inset-right, 0px));
   left: auto;
 }
 
@@ -297,12 +324,14 @@
   :root {
     --map-left-tier-sat-bottom-dock: var(--map-left-stack-base-dock-narrow);
     --map-left-tier-zoom-bottom-dock: calc(
-      var(--map-left-stack-base-dock-narrow) + var(--map-style-control-size) +
-        var(--map-left-chrome-gap)
+      var(--map-left-stack-base-dock-narrow) +
+      var(--map-style-control-size) +
+      var(--map-left-chrome-gap)
     );
     --map-left-tier-compass-bottom-dock: calc(
-      var(--map-left-tier-zoom-bottom-dock) + var(--map-zoom-control-height) +
-        var(--map-left-chrome-gap)
+      var(--map-left-tier-zoom-bottom-dock) +
+      var(--map-zoom-control-height) +
+      var(--map-left-chrome-gap)
     );
   }
 }
@@ -328,9 +357,7 @@ html[data-map-side-dock="left"] .map-zoom-control--admin-rail,
 html[data-map-side-dock="bottom-left"] .map-zoom-control--admin-rail,
 html[data-map-side-dock="mid-left"] .map-zoom-control--admin-rail,
 html[data-map-side-dock="top-left"] .map-zoom-control--admin-rail {
-  right: calc(
-    var(--map-right-chrome-inset) + var(--admin-map-control-inset-right, 0px)
-  );
+  right: calc(var(--map-right-chrome-inset) + var(--admin-map-control-inset-right, 0px));
   left: auto;
 }
 
@@ -348,13 +375,12 @@ html[data-map-side-dock="top-left"] .map-zoom-control--admin-rail {
   gap: 0.5rem;
   border-radius: 1.5rem;
   border: 0.5px solid oklch(from var(--color-field-ink) l c h / 12%);
-  background:
-    linear-gradient(
-      165deg,
-      oklch(from var(--color-canvas) calc(l + 0.1) c h / 18%) 0%,
-      oklch(from var(--color-canvas) l c h / 9%) 55%,
-      oklch(from var(--color-canvas) calc(l - 0.02) c h / 6%) 100%
-    );
+  background: linear-gradient(
+    165deg,
+    oklch(from var(--color-canvas) calc(l + 0.1) c h / 18%) 0%,
+    oklch(from var(--color-canvas) l c h / 9%) 55%,
+    oklch(from var(--color-canvas) calc(l - 0.02) c h / 6%) 100%
+  );
   backdrop-filter: blur(4px) saturate(1.15);
   box-shadow:
     inset 0 1px 0 oklch(100% 0 0deg / 28%),

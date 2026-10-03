@@ -78,10 +78,7 @@
 .jl-support-msg--player {
   margin-left: 1.5rem;
   border-color: oklch(from var(--color-highlight) l c h / 35%);
-  background: var(
-    --color-highlight-soft,
-    oklch(from var(--color-highlight) l c h / 12%)
-  );
+  background: var(--color-highlight-soft, oklch(from var(--color-highlight) l c h / 12%));
 }
 
 .jl-support-msg--admin {

@@ -45,10 +45,7 @@
 
 .map-compass-control--admin-rail {
   bottom: var(--map-left-tier-compass-bottom-admin-rail);
-  right: calc(
-    max(0.75rem, env(safe-area-inset-right)) +
-      var(--admin-map-control-inset-right, 0px)
-  );
+  right: calc(max(0.75rem, env(safe-area-inset-right)) + var(--admin-map-control-inset-right, 0px));
   left: auto;
 }
 

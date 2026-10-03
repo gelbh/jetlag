@@ -371,18 +371,17 @@
 }
 
 .jl-route-fallback-enter-forward {
-  animation: jl-route-fallback-enter-forward var(--motion-route-reveal)
-    var(--ease-ios-emphasized) both;
+  animation: jl-route-fallback-enter-forward var(--motion-route-reveal) var(--ease-ios-emphasized)
+    both;
 }
 
 .jl-route-fallback-enter-back {
-  animation: jl-route-fallback-enter-back var(--motion-route-reveal)
-    var(--ease-ios-emphasized) both;
+  animation: jl-route-fallback-enter-back var(--motion-route-reveal) var(--ease-ios-emphasized) both;
 }
 
 .jl-route-fallback-enter-neutral {
-  animation: jl-route-fallback-enter-neutral var(--motion-route-reveal)
-    var(--ease-ios-emphasized) both;
+  animation: jl-route-fallback-enter-neutral var(--motion-route-reveal) var(--ease-ios-emphasized)
+    both;
 }
 
 ::view-transition-old(root),
@@ -391,33 +390,27 @@
 }
 
 html[data-nav-direction="forward"]::view-transition-old(root) {
-  animation: vt-crossfade-out-forward var(--motion-route-reveal)
-    var(--ease-ios-emphasized) both;
+  animation: vt-crossfade-out-forward var(--motion-route-reveal) var(--ease-ios-emphasized) both;
 }
 
 html[data-nav-direction="forward"]::view-transition-new(root) {
-  animation: vt-crossfade-in-forward var(--motion-route-reveal)
-    var(--ease-ios-emphasized) both;
+  animation: vt-crossfade-in-forward var(--motion-route-reveal) var(--ease-ios-emphasized) both;
 }
 
 html[data-nav-direction="back"]::view-transition-old(root) {
-  animation: vt-crossfade-out-back var(--motion-route-reveal)
-    var(--ease-ios-emphasized) both;
+  animation: vt-crossfade-out-back var(--motion-route-reveal) var(--ease-ios-emphasized) both;
 }
 
 html[data-nav-direction="back"]::view-transition-new(root) {
-  animation: vt-crossfade-in-back var(--motion-route-reveal)
-    var(--ease-ios-emphasized) both;
+  animation: vt-crossfade-in-back var(--motion-route-reveal) var(--ease-ios-emphasized) both;
 }
 
 html[data-nav-direction="neutral"]::view-transition-old(root) {
-  animation: vt-crossfade-out var(--motion-route-reveal) var(--ease-ios-emphasized)
-    both;
+  animation: vt-crossfade-out var(--motion-route-reveal) var(--ease-ios-emphasized) both;
 }
 
 html[data-nav-direction="neutral"]::view-transition-new(root) {
-  animation: vt-crossfade-in var(--motion-route-reveal) var(--ease-ios-emphasized)
-    both;
+  animation: vt-crossfade-in var(--motion-route-reveal) var(--ease-ios-emphasized) both;
 }
 
 ::view-transition-group(jl-session-code) {
@@ -507,12 +500,16 @@ html[data-motion="reduced"] .home-enter-actions,
 html[data-motion="reduced"] .home-resume-action[aria-busy="true"] .home-resume-cta,
 html[data-motion="reduced"] .jl-ticker-active,
 html[data-motion="reduced"] .jl-unread-badge-pulse,
-html:is([data-motion="static"], [data-motion="reduced"]) .jl-sync-beacon--saving .jl-sync-beacon__lamp,
+html:is([data-motion="static"], [data-motion="reduced"])
+  .jl-sync-beacon--saving
+  .jl-sync-beacon__lamp,
 html:is([data-motion="static"], [data-motion="reduced"]) .annotation-pulse,
 html:is([data-motion="static"], [data-motion="reduced"]) .draft-seeker-pulse,
 html:is([data-motion="static"], [data-motion="reduced"]) .loading-spinner,
 html:is([data-motion="static"], [data-motion="reduced"]) .home-enter-actions,
-html:is([data-motion="static"], [data-motion="reduced"]) .home-resume-action[aria-busy="true"] .home-resume-cta,
+html:is([data-motion="static"], [data-motion="reduced"])
+  .home-resume-action[aria-busy="true"]
+  .home-resume-cta,
 html:is([data-motion="static"], [data-motion="reduced"]) .jl-ticker-active,
 html:is([data-motion="static"], [data-motion="reduced"]) .jl-unread-badge-pulse,
 html:is([data-motion="static"], [data-motion="reduced"]) .hud-sheet-enter,
@@ -642,7 +639,6 @@ html:is([data-motion="static"], [data-motion="reduced"]) .jl-map-chrome-press {
     opacity: 1;
   }
 }
-
 
 /* W5-C: wizard place-phase attention ring (MapAttentionRing). */
 @keyframes map-attention-pulse {

@@ -94,11 +94,8 @@
 
   .jl-status-rail-float {
     /* Clear notch/Dynamic Island via --safe-area-top, then match bottom float gap. */
-    padding: calc(
-        var(--safe-area-top, 0px) + var(--dock-float-gap, 0.75rem)
-      )
-      max(var(--dock-float-gap, 0.75rem), env(safe-area-inset-right, 0px))
-      0.25rem
+    padding: calc(var(--safe-area-top, 0px) + var(--dock-float-gap, 0.75rem))
+      max(var(--dock-float-gap, 0.75rem), env(safe-area-inset-right, 0px)) 0.25rem
       max(var(--dock-float-gap, 0.75rem), env(safe-area-inset-left, 0px));
   }
 
@@ -282,9 +279,7 @@
     min-height: 0;
   }
 
-  .jl-status-header-col--timer
-    .jl-timer-cluster:has(> .jl-ticker:only-child)
-    > .jl-ticker {
+  .jl-status-header-col--timer .jl-timer-cluster:has(> .jl-ticker:only-child) > .jl-ticker {
     flex: 1 1 auto;
     align-items: center;
     justify-content: center;
@@ -419,22 +414,15 @@
     outline-offset: 2px;
   }
 
-
-
   .jl-sync-detail-panel {
     width: min(12.5rem, calc(100vw - 2rem));
     transform-origin: top right;
   }
 
-
   .jl-preload-detail-panel {
     width: min(14rem, calc(100vw - 2rem));
     transform-origin: top left;
   }
-
-
-
-
 
   .jl-status-bar-timer {
     margin-left: auto;
@@ -700,7 +688,9 @@
     letter-spacing: 0.04em;
     text-transform: uppercase;
     color: var(--color-ink-muted);
-    transition: background-color 150ms ease, color 150ms ease;
+    transition:
+      background-color 150ms ease,
+      color 150ms ease;
   }
 
   html[data-motion="reduced"] .admin-monitor-rail__tab,
@@ -792,19 +782,18 @@
     font-weight: 700;
     color: var(--color-ink);
   }
-
 }
 
-  .admin-monitor-pane--nested-wm {
-    position: relative;
-  }
+.admin-monitor-pane--nested-wm {
+  position: relative;
+}
 
-  .admin-monitor-grid-workspace {
-    height: 100%;
-    min-height: 0;
-    overflow-x: hidden;
-  }
+.admin-monitor-grid-workspace {
+  height: 100%;
+  min-height: 0;
+  overflow-x: hidden;
+}
 
-  .admin-monitor-stack-body {
-    min-height: 0;
-  }
+.admin-monitor-stack-body {
+  min-height: 0;
+}

@@ -1,9 +1,8 @@
 :root {
   /* iOS Mantine Operate: system stack matches jetlagTheme fontFamily */
-  --font-display: -apple-system, blinkmacsystemfont, "SF Pro Text", "Segoe UI",
-    system-ui, sans-serif;
-  --font-body: -apple-system, blinkmacsystemfont, "SF Pro Text", "Segoe UI",
-    system-ui, sans-serif;
+  --font-display:
+    -apple-system, blinkmacsystemfont, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
+  --font-body: -apple-system, blinkmacsystemfont, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
   --font-mono: ui-monospace, sfmono-regular, menlo, monaco, consolas, monospace;
 
   color-scheme: dark;
@@ -24,15 +23,15 @@
   /* Float inset so hunt dock corners track the device rounded rect. */
   --dock-float-gap: 0.75rem;
   --map-panel-bottom: calc(
-    var(--dock-total-height) + var(--chrome-gap-above-dock) +
-      var(--safe-area-bottom)
+    var(--dock-total-height) +
+    var(--chrome-gap-above-dock) +
+    var(--safe-area-bottom)
   );
-  --map-panel-bottom-chrome-hidden: calc(
-    var(--chrome-gap-bottom) + var(--safe-area-bottom)
-  );
+  --map-panel-bottom-chrome-hidden: calc(var(--chrome-gap-bottom) + var(--safe-area-bottom));
   --hider-wizard-bottom: calc(
-    var(--dock-total-height) + var(--chrome-gap-above-dock) +
-      var(--safe-area-bottom)
+    var(--dock-total-height) +
+    var(--chrome-gap-above-dock) +
+    var(--safe-area-bottom)
   );
   --z-dock: 1000;
   --z-banner: 1001;
@@ -52,9 +51,7 @@
   --ease-spring-subtle: cubic-bezier(0.32, 1.28, 0.54, 1);
   --ease-ios-standard: cubic-bezier(0.32, 0.72, 0, 1);
   --ease-ios-emphasized: cubic-bezier(0.2, 0.9, 0.2, 1);
-  --map-banner-top: calc(
-    var(--safe-area-top) + var(--status-bar-height) + 1.25rem
-  );
+  --map-banner-top: calc(var(--safe-area-top) + var(--status-bar-height) + 1.25rem);
   --jl-sync-beacon-inset: max(0.625rem, env(safe-area-inset-right, 0px));
   --jl-sync-beacon-inset-left: max(0.625rem, env(safe-area-inset-left, 0px));
 }

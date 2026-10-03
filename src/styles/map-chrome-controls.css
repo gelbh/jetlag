@@ -46,8 +46,10 @@
 .map-zoom-control--dock,
 .map-style-control--dock {
   bottom: calc(
-    var(--dock-total-height) + var(--chrome-gap-above-dock) +
-      var(--safe-area-bottom) + 0.5rem
+    var(--dock-total-height) +
+    var(--chrome-gap-above-dock) +
+    var(--safe-area-bottom) +
+    0.5rem
   );
 }
 
@@ -69,18 +71,13 @@
 
 .map-zoom-control--hider-actions,
 .map-style-control--hider-actions {
-  bottom: calc(
-    var(--hider-action-bar-height) + var(--chrome-gap-above-dock) + 0.5rem
-  );
+  bottom: calc(var(--hider-action-bar-height) + var(--chrome-gap-above-dock) + 0.5rem);
 }
 
 .map-zoom-control--admin-rail,
 .map-style-control--admin-rail {
   bottom: calc(var(--chrome-gap-bottom) + var(--safe-area-bottom) + 0.5rem);
-  right: calc(
-    max(0.75rem, env(safe-area-inset-right)) +
-      var(--admin-map-control-inset-right, 0px)
-  );
+  right: calc(max(0.75rem, env(safe-area-inset-right)) + var(--admin-map-control-inset-right, 0px));
 }
 
 @media (width >= 40rem) {
@@ -93,8 +90,10 @@
   .map-zoom-control--dock,
   .map-style-control--dock {
     bottom: calc(
-      var(--dock-total-height) + var(--chrome-gap-above-dock) +
-        var(--safe-area-bottom) + 2.5rem
+      var(--dock-total-height) +
+      var(--chrome-gap-above-dock) +
+      var(--safe-area-bottom) +
+      2.5rem
     );
   }
 }
@@ -121,8 +120,7 @@ html:not([data-motion="reduced"], [data-motion="static"]) .map-style-control {
   display: none;
 }
 
-.map-chrome-hud[data-landscape-chrome="revealed"]
-  [data-survey-priority="secondary"] {
+.map-chrome-hud[data-landscape-chrome="revealed"] [data-survey-priority="secondary"] {
   display: none !important;
 }
 
