@@ -54,8 +54,8 @@ pub fn build_coastline_near_region_distance_threshold(
 
     let mut grid = vec![vec![CellClass::Skip; divisions]; divisions];
 
-    for row in 0..divisions {
-        for col in 0..divisions {
+    for (row, grid_row) in grid.iter_mut().enumerate() {
+        for (col, cell) in grid_row.iter_mut().enumerate() {
             let cell_south = bbox.south + row as f64 * lat_step;
             let cell_north = bbox.south + (row + 1) as f64 * lat_step;
             let cell_west = bbox.west + col as f64 * lng_step;
@@ -73,7 +73,7 @@ pub fn build_coastline_near_region_distance_threshold(
             }
 
             let distance = nearest_distance_to_segments(center, segments);
-            grid[row][col] = if distance <= radius_meters {
+            *cell = if distance <= radius_meters {
                 CellClass::Near
             } else {
                 CellClass::Far
@@ -93,15 +93,11 @@ fn resolve_game_area_cell_divisions(bbox: &BoundingBox) -> u32 {
         let target = (MAX_SEA_LEVEL_SAMPLE_CELLS / area_ratio.max(0.01))
             .sqrt()
             .floor() as u32;
-        return target
-            .max(DEFAULT_SEA_LEVEL_DIVISIONS)
-            .min(MAX_SMALL_AREA_DIVISIONS);
+        return target.clamp(DEFAULT_SEA_LEVEL_DIVISIONS, MAX_SMALL_AREA_DIVISIONS);
     }
 
     let target = (MAX_SEA_LEVEL_SAMPLE_CELLS / area_ratio).sqrt().floor() as u32;
-    target
-        .max(MIN_GAME_AREA_DIVISIONS)
-        .min(DEFAULT_SEA_LEVEL_DIVISIONS)
+    target.clamp(MIN_GAME_AREA_DIVISIONS, DEFAULT_SEA_LEVEL_DIVISIONS)
 }
 
 fn game_area_bounding_box_raw(game_area: &GameArea) -> BoundingBox {
@@ -243,9 +239,8 @@ fn merge_near_cell_rects(grid: &[Vec<CellClass>]) -> Vec<MergedRect> {
         let mut runs = Vec::new();
         let mut run_start: Option<usize> = None;
 
-        for col in 0..=width {
-            let is_near = col < width && row[col] == CellClass::Near;
-            match (is_near, run_start) {
+        for (col, cell) in row.iter().enumerate() {
+            match (*cell == CellClass::Near, run_start) {
                 (true, None) => run_start = Some(col),
                 (false, Some(start)) => {
                     runs.push((start, col));
@@ -253,6 +248,9 @@ fn merge_near_cell_rects(grid: &[Vec<CellClass>]) -> Vec<MergedRect> {
                 }
                 _ => {}
             }
+        }
+        if let Some(start) = run_start {
+            runs.push((start, width));
         }
         row_runs.push(runs);
     }
@@ -384,7 +382,7 @@ mod tests {
         let radius_meters = 2_000.0;
 
         let near = build_coastline_near_region_distance_threshold(
-            &[segment.clone()],
+            std::slice::from_ref(&segment),
             radius_meters,
             &area,
             Some(32),
