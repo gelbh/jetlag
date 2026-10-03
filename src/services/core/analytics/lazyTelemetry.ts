@@ -6,6 +6,7 @@
 import { writeAnalyticsConsent } from "@/domain/device/consent/analyticsConsent";
 import type { syncAnalyticsIdentity, trackPageView } from "./analytics";
 import type {
+  addRecoverableErrorBreadcrumb,
   captureAuthBootstrapFailure,
   captureAuthPersistenceFallback,
   captureErrorBoundaryException,
@@ -86,6 +87,14 @@ export function captureErrorBoundaryExceptionLazy(
 ): void {
   void loadSentry()
     .then((m) => m.captureErrorBoundaryException(...args))
+    .catch(() => {});
+}
+
+export function addRecoverableErrorBreadcrumbLazy(
+  ...args: Parameters<typeof addRecoverableErrorBreadcrumb>
+): void {
+  void loadSentry()
+    .then((m) => m.addRecoverableErrorBreadcrumb(...args))
     .catch(() => {});
 }
 
