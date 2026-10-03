@@ -14,8 +14,8 @@ import { HidingZoneStationsLayer } from "../components/map/layers/HidingZoneStat
 import { HidingZonesLayer } from "../components/map/layers/HidingZonesLayer";
 import { LiveHiderLocationsLayer } from "../components/map/layers/LiveHiderLocationsLayer";
 import { LiveSeekerLocationsLayer } from "../components/map/layers/LiveSeekerLocationsLayer";
-import { UserLocationLayer } from "../components/map/layers/UserLocationLayer";
 import { PendingQuestionLayer } from "../components/map/layers/PendingQuestionLayer";
+import { UserLocationLayer } from "../components/map/layers/UserLocationLayer";
 import { MapViewWithLandscapeInset } from "../components/map/MapViewWithLandscapeInset";
 import type { HiderTruthRevealState } from "../components/session/banners/HiderTruthRevealBanner";
 import { MapLandscapeChromeShell } from "../components/session/mapChrome/MapLandscapeChromeShell";
