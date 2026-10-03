@@ -1,4 +1,5 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
+import { isEffectivelyOfflineNow } from "@/hooks/sync/isEffectivelyOfflineNow";
 import { commitWrite } from "@/services/firestore/commitWrite";
 import { enqueueMoveTimerIntent } from "@/services/session/sessionIntents";
 import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
@@ -18,7 +19,6 @@ import { isFirestorePermissionDenied } from "../../services/firestore/firestoreA
 import { writeHidingZone } from "../../services/firestore/firestoreSessionExtras";
 import { fetchTransitStationsForHidingZoneViewport } from "../../services/geo/matching";
 import { useLatestRequest } from "../forms/useLatestRequest";
-import { isEffectivelyOfflineNow } from "../sync/isEffectivelyOfflineNow";
 
 const MOVE_MIN_DISTANCE_METERS = 50;
 const MOVE_PLAYED_MESSAGE =
@@ -79,6 +79,8 @@ export function useHiderZoneTool({
   const [moveMode, setMoveMode] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  /** Bumped per Play Move and cleared on confirm, so a late rejection only rolls back the live attempt. */
+  const moveAttemptRef = useRef(0);
 
   const resetWizardDraft = useCallback(() => {
     setSelectedStation(null);
@@ -207,20 +209,38 @@ export function useHiderZoneTool({
     }
 
     // Fire-and-track: each write commits to the local cache now and replays on
-    // reconnect, so Play Move works in a dead zone. No rollback path: server
-    // rejections land in the write ledger (WriteFailureNotifier).
+    // reconnect, so Play Move works in a dead zone. Nothing awaits server acks;
+    // rejections also land in the write ledger (WriteFailureNotifier).
+    const attempt = moveAttemptRef.current + 1;
+    moveAttemptRef.current = attempt;
     pauseTimerForMove();
     commitWrite("system.message", () => postSystemMessage(MOVE_PLAYED_MESSAGE));
-    commitWrite("zone.write", () =>
+    const { acknowledged: zoneAcked } = commitWrite("zone.write", () =>
       writeHidingZone(sessionId, {
         ...existingZone,
         hiderUid,
         moveInProgress: true,
       }),
     );
-    if (consumeMoveCard) {
-      commitWrite("economy.update", consumeMoveCard);
-    }
+    zoneAcked.then(
+      () => {
+        // Discard the Move card only once the relocate is accepted (as before).
+        if (consumeMoveCard) {
+          commitWrite("economy.update", consumeMoveCard);
+        }
+      },
+      (nextError: unknown) => {
+        if (moveAttemptRef.current !== attempt) {
+          return;
+        }
+        // Compensate the pause so a rejected Move cannot leave the timer stopped.
+        moveAttemptRef.current = 0;
+        resumeTimerForMove();
+        setMoveMode(false);
+        setWizardOpen(false);
+        setError(zoneWriteErrorMessage(nextError));
+      },
+    );
   }, [
     consumeMoveCard,
     ensureWriteAccessIfOnline,
@@ -230,6 +250,7 @@ export function useHiderZoneTool({
     pauseTimerForMove,
     postSystemMessage,
     resetWizardDraft,
+    resumeTimerForMove,
     sessionId,
     writesEnabled,
   ]);
@@ -348,6 +369,7 @@ export function useHiderZoneTool({
       };
 
       commitWrite("zone.write", () => writeHidingZone(sessionId, zone));
+      moveAttemptRef.current = 0;
 
       setMoveMode(false);
       setWizardOpen(false);

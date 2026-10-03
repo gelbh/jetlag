@@ -2,4 +2,4 @@
 "jetlag": patch
 ---
 
-fix: Play Move works in a dead zone and pauses the timer at the moment the card was played, syncing when you reconnect
+fix: Play Move works without signal — the timer pauses from when you played the card and syncs when you reconnect

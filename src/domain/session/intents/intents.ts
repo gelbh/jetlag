@@ -10,7 +10,7 @@ export type MoveTimerAction = "pause" | "resume";
 
 /** Client-authored fields; `createdAt` (server timestamp) is added at write time. */
 export type MoveTimerIntentInput = {
-  type: "moveTimer";
+  type: Extract<SessionIntentType, "moveTimer">;
   action: MoveTimerAction;
   uid: string;
   /** Skew-corrected play time; the server clamps it before applying a pause. */

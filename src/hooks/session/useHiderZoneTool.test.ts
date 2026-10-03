@@ -31,7 +31,7 @@ vi.mock("@/services/firestore/commitWrite", () => ({
   commitWrite,
 }));
 
-vi.mock("../sync/isEffectivelyOfflineNow", () => ({
+vi.mock("@/hooks/sync/isEffectivelyOfflineNow", () => ({
   isEffectivelyOfflineNow,
 }));
 
@@ -112,33 +112,88 @@ describe("useHiderZoneTool", () => {
 
     expect(props.pauseTimer).not.toHaveBeenCalled();
     expect(enqueueMoveTimerIntent).toHaveBeenCalledWith("session-1", "hider-1", "pause");
+    expect(labels()).toEqual(["system.message", "zone.write"]);
     expect(result.current.moveMode).toBe(true);
   });
 
-  it("keeps the wizard open when a queued write is rejected later", async () => {
+  it("rolls back the pause when the queued Move zone write is rejected", async () => {
     writeHidingZone.mockRejectedValueOnce(new Error("write failed"));
-    const { props, result } = renderZoneTool();
+    const consumeMoveCard = vi.fn(async () => undefined);
+    const { props, result } = renderZoneTool({ consumeMoveCard, hasMoveCard: () => true });
 
     await act(async () => {
       await result.current.startMove();
     });
 
-    expect(props.resumeTimer).not.toHaveBeenCalled();
-    expect(result.current.moveMode).toBe(true);
-    expect(result.current.wizardOpen).toBe(true);
-    expect(result.current.error).toBeNull();
+    expect(props.pauseTimer).toHaveBeenCalledTimes(1);
+    expect(props.resumeTimer).toHaveBeenCalledTimes(1);
+    expect(consumeMoveCard).not.toHaveBeenCalled();
+    expect(result.current.moveMode).toBe(false);
+    expect(result.current.wizardOpen).toBe(false);
+    expect(result.current.error).toMatch(/write failed/i);
   });
 
-  it("tracks the Move card discard as an economy write", async () => {
+  it("non-host rejection queues a compensating resume intent", async () => {
+    writeHidingZone.mockRejectedValueOnce(new Error("write failed"));
+    const { result } = renderZoneTool({ canControlTimer: false });
+
+    await act(async () => {
+      await result.current.startMove();
+    });
+
+    expect(enqueueMoveTimerIntent.mock.calls.map(([, , action]) => action)).toEqual([
+      "pause",
+      "resume",
+    ]);
+  });
+
+  it("discards the Move card only after the zone write is acknowledged", async () => {
+    let ackZone: () => void = () => {};
+    writeHidingZone.mockReturnValueOnce(
+      new Promise<void>((resolve) => {
+        ackZone = resolve;
+      }),
+    );
     const consumeMoveCard = vi.fn(async () => undefined);
     const { result } = renderZoneTool({ consumeMoveCard, hasMoveCard: () => true });
 
     await act(async () => {
       await result.current.startMove();
     });
+    expect(consumeMoveCard).not.toHaveBeenCalled();
+
+    await act(async () => {
+      ackZone();
+    });
 
     expect(consumeMoveCard).toHaveBeenCalledTimes(1);
     expect(labels()).toContain("economy.update");
+  });
+
+  it("ignores a late Move rejection after the new zone was confirmed", async () => {
+    let rejectMove: (error: Error) => void = () => {};
+    writeHidingZone.mockReturnValueOnce(
+      new Promise<void>((_resolve, reject) => {
+        rejectMove = reject;
+      }),
+    );
+    const { props, result } = renderZoneTool();
+
+    await act(async () => {
+      await result.current.startMove();
+    });
+    act(() => {
+      result.current.setSelectedStation({ id: "station-2", name: "Other", lat: 53.4, lng: -6.3 });
+    });
+    await act(async () => {
+      await result.current.confirmZone();
+    });
+    await act(async () => {
+      rejectMove(new Error("late"));
+    });
+
+    expect(props.resumeTimer).toHaveBeenCalledTimes(1);
+    expect(result.current.error).toBeNull();
   });
 
   it("skips the server membership check while offline", async () => {
@@ -202,5 +257,48 @@ describe("useHiderZoneTool", () => {
     expect(result.current.saving).toBe(false);
     expect(result.current.wizardOpen).toBe(false);
     expect(result.current.moveMode).toBe(false);
+  });
+
+  it("initial zone confirm offline skips the access check and queues no timer intent", async () => {
+    isEffectivelyOfflineNow.mockReturnValue(true);
+    const ensureWriteAccess = vi.fn(async () => undefined);
+    const { result } = renderZoneTool({
+      existingZone: null,
+      ensureWriteAccess,
+      canControlTimer: false,
+    });
+
+    act(() => {
+      result.current.openWizard();
+      result.current.setSelectedStation({ id: "station-2", name: "Other", lat: 53.4, lng: -6.3 });
+    });
+    await act(async () => {
+      await result.current.confirmZone();
+    });
+
+    expect(ensureWriteAccess).not.toHaveBeenCalled();
+    expect(labels()).toEqual(["zone.write"]);
+    expect(enqueueMoveTimerIntent).not.toHaveBeenCalled();
+    expect(result.current.wizardOpen).toBe(false);
+  });
+
+  it("zone confirm stops before writing when the online access check fails", async () => {
+    const ensureWriteAccess = vi.fn(async () => {
+      throw new Error("No access to that session.");
+    });
+    const { result } = renderZoneTool({ existingZone: null, ensureWriteAccess });
+
+    act(() => {
+      result.current.openWizard();
+      result.current.setSelectedStation({ id: "station-2", name: "Other", lat: 53.4, lng: -6.3 });
+    });
+    await act(async () => {
+      await result.current.confirmZone();
+    });
+
+    expect(commitWrite).not.toHaveBeenCalled();
+    expect(enqueueMoveTimerIntent).not.toHaveBeenCalled();
+    expect(result.current.error).toMatch(/No access/);
+    expect(result.current.saving).toBe(false);
   });
 });

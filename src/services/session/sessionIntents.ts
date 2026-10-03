@@ -6,7 +6,7 @@ import { commitWrite } from "@/services/firestore/commitWrite";
 
 /**
  * Offline-queued replacement for the `controlSessionTimerForMove` callable
- * (kept server-side for older clients). The intent lands in Firestore's
+ * (the callable stays deployed for older clients). The intent lands in Firestore's
  * persisted write queue immediately; the `processSessionIntent` trigger applies
  * it once it reaches the server. Never await `acknowledged` in UI flows.
  */
