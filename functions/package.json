@@ -2,7 +2,7 @@
   "name": "jetlag-functions",
   "description": "Jet Lag Cloud Functions",
   "private": true,
-  "version": "1.0.1",
+  "version": "1.0.2",
   "type": "module",
   "main": "index.mjs",
   "scripts": {
