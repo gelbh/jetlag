@@ -12,6 +12,45 @@ import {
 const STRIPE_SIGNATURE_MISMATCH = /No signatures found matching the expected signature/i;
 
 /**
+ * Capture once per subscription id when status first reaches active/trialing
+ * (created or updated). Stable uuidSeed dedupes Stripe retries / incomplete→active.
+ * @param {Stripe.Subscription} subscription
+ * @param {{
+ *   posthogApiKey?: string,
+ *   captureAnalyticsEvent?: typeof captureAnalyticsEvent,
+ *   captureImpl?: { capture: Function, shutdown: Function },
+ * }} options
+ */
+export async function captureSubscriptionPurchaseIfEligible(subscription, options = {}) {
+  const uid = subscription.metadata?.firebaseUid;
+  const plan = subscription.metadata?.plan;
+  const analyticsPlan = plan === "monthly" || plan === "yearly" ? plan : undefined;
+  const subscriptionId = typeof subscription.id === "string" ? subscription.id : "";
+  if (
+    !uid ||
+    !analyticsPlan ||
+    !subscriptionId ||
+    (subscription.status !== "active" && subscription.status !== "trialing")
+  ) {
+    return;
+  }
+
+  const captureEvent = options.captureAnalyticsEvent ?? captureAnalyticsEvent;
+  try {
+    await captureEvent({
+      apiKey: options.posthogApiKey ?? "",
+      distinctId: uid,
+      event: "premium_purchase_completed",
+      uuidSeed: `premium_purchase_completed:sub:${subscriptionId}`,
+      properties: { productKey: analyticsPlan, source: "stripe_webhook" },
+      captureImpl: options.captureImpl,
+    });
+  } catch {
+    // Soft-fail: entitlements already synced; do not fail the webhook.
+  }
+}
+
+/**
  * @param {import('firebase-admin/firestore').Firestore} db
  * @param {string} webhookSecret
  * @param {import("firebase-functions/v2/https").Request} req
@@ -25,6 +64,11 @@ const STRIPE_SIGNATURE_MISMATCH = /No signatures found matching the expected sig
 export async function handleStripeWebhook(db, webhookSecret, req, res, options) {
   const posthogApiKey = options?.posthogApiKey ?? "";
   const captureEvent = options?.captureAnalyticsEvent ?? captureAnalyticsEvent;
+  const purchaseCaptureOptions = {
+    posthogApiKey,
+    captureAnalyticsEvent: captureEvent,
+    captureImpl: options?.captureImpl,
+  };
   setCors(res, req);
 
   if (req.method === "OPTIONS") {
@@ -101,34 +145,13 @@ export async function handleStripeWebhook(db, webhookSecret, req, res, options) 
         }
         break;
       }
-      case "customer.subscription.created": {
+      case "customer.subscription.created":
+      case "customer.subscription.updated": {
         const subscription = /** @type {Stripe.Subscription} */ (event.data.object);
         await syncSubscriptionEntitlements(db, subscription);
-        const uid = subscription.metadata?.firebaseUid;
-        const plan = subscription.metadata?.plan;
-        const analyticsPlan =
-          plan === "monthly" || plan === "yearly" ? plan : undefined;
-        if (
-          uid &&
-          analyticsPlan &&
-          (subscription.status === "active" || subscription.status === "trialing")
-        ) {
-          try {
-            await captureEvent({
-              apiKey: posthogApiKey,
-              distinctId: uid,
-              event: "premium_purchase_completed",
-              uuidSeed: `premium_purchase_completed:${event.id}`,
-              properties: { productKey: analyticsPlan, source: "stripe_webhook" },
-              captureImpl: options?.captureImpl,
-            });
-          } catch {
-            // Soft-fail: entitlements already synced; do not fail the webhook.
-          }
-        }
+        await captureSubscriptionPurchaseIfEligible(subscription, purchaseCaptureOptions);
         break;
       }
-      case "customer.subscription.updated":
       case "customer.subscription.deleted": {
         const subscription = /** @type {Stripe.Subscription} */ (event.data.object);
         await syncSubscriptionEntitlements(db, subscription);

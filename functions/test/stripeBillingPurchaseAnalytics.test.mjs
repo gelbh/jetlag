@@ -241,12 +241,78 @@ describe("stripe billing purchase analytics", () => {
     assert.equal(res.statusCode, 200);
     assert.equal(captureCalls.length, 1);
     assert.equal(captureCalls[0].distinctId, "uid-sub");
-    assert.equal(captureCalls[0].uuidSeed, "premium_purchase_completed:evt_sub_created");
+    assert.equal(captureCalls[0].uuidSeed, "premium_purchase_completed:sub:sub_1");
     assert.deepEqual(captureCalls[0].properties, {
       productKey: "yearly",
       source: "stripe_webhook",
     });
     assert.equal(db.documents["users/uid-sub"]?.subscription?.plan, "yearly");
+  });
+
+  it("captures on subscription.updated when incomplete becomes active", async () => {
+    const db = createMockDb();
+    const res = mockResponse();
+    const captureCalls = [];
+
+    await handleStripeWebhook(
+      db,
+      WEBHOOK_SECRET,
+      signedWebhookRequest({
+        id: "evt_sub_incomplete",
+        type: "customer.subscription.created",
+        object: {
+          id: "sub_later",
+          object: "subscription",
+          customer: "cus_sub",
+          status: "incomplete",
+          current_period_end: 1_700_000_000,
+          metadata: { firebaseUid: "uid-later", plan: "monthly" },
+        },
+      }),
+      res,
+      {
+        posthogApiKey: "phc_test",
+        captureAnalyticsEvent: async (input) => {
+          captureCalls.push(input);
+        },
+      },
+    );
+
+    assert.equal(res.statusCode, 200);
+    assert.equal(captureCalls.length, 0);
+
+    const res2 = mockResponse();
+    await handleStripeWebhook(
+      db,
+      WEBHOOK_SECRET,
+      signedWebhookRequest({
+        id: "evt_sub_now_active",
+        type: "customer.subscription.updated",
+        object: {
+          id: "sub_later",
+          object: "subscription",
+          customer: "cus_sub",
+          status: "active",
+          current_period_end: 1_700_000_000,
+          metadata: { firebaseUid: "uid-later", plan: "monthly" },
+        },
+      }),
+      res2,
+      {
+        posthogApiKey: "phc_test",
+        captureAnalyticsEvent: async (input) => {
+          captureCalls.push(input);
+        },
+      },
+    );
+
+    assert.equal(res2.statusCode, 200);
+    assert.equal(captureCalls.length, 1);
+    assert.equal(captureCalls[0].uuidSeed, "premium_purchase_completed:sub:sub_later");
+    assert.deepEqual(captureCalls[0].properties, {
+      productKey: "monthly",
+      source: "stripe_webhook",
+    });
   });
 
   it("returns 200 when subscription.created capture throws", async () => {
@@ -321,7 +387,7 @@ describe("stripe billing purchase analytics", () => {
     }
   });
 
-  it("does not capture on subscription.updated", async () => {
+  it("does not capture on subscription.deleted", async () => {
     const db = createMockDb({
       "users/uid-sub": {
         subscription: { status: "active", plan: "monthly" },
@@ -334,13 +400,13 @@ describe("stripe billing purchase analytics", () => {
       db,
       WEBHOOK_SECRET,
       signedWebhookRequest({
-        id: "evt_sub_updated",
-        type: "customer.subscription.updated",
+        id: "evt_sub_deleted",
+        type: "customer.subscription.deleted",
         object: {
           id: "sub_1",
           object: "subscription",
           customer: "cus_sub",
-          status: "active",
+          status: "canceled",
           current_period_end: 1_700_000_000,
           metadata: { firebaseUid: "uid-sub", plan: "monthly" },
         },
