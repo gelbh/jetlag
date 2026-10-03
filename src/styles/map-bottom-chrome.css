@@ -1,11 +1,11 @@
-/* map-bottom-chrome.css — dock clearance tokens + left MapView chrome tiers.
- * Island / ToolDeck / OverlayHost layout lives on Tailwind + data attributes (D7). */
+/* map-bottom-chrome.css — dock clearance tokens + OverlayHost / nav-dock layout.
+ * Island / ToolDeck / OverlayHost layout lives on Tailwind + data attributes (D7).
+ * Absolute left-stack zoom/style/compass portals retired; MapNavControlStack owns nav. */
 
 :root {
   /*
    * Island clearance: bottom hunt band + right side stack.
-   * MapView portals (zoom / sat / compass) live on the LEFT — no right MapView
-   * chrome. Session sits directly above the dock.
+   * MapView nav chrome lives in jl-map-nav-dock (draggable), not absolute portals.
    */
   --dock-island-height: 3.25rem;
   --dock-island-gap: 0.5rem;
@@ -27,75 +27,6 @@
   --dock-secondary-height: 0px;
   --dock-row-gap: 0px;
   --dock-primary-content-height: var(--dock-island-height);
-
-  /* Left map chrome stack (sat → zoom → compass) — single token owner */
-  --map-left-chrome-inset: max(0.75rem, env(safe-area-inset-left));
-  --map-right-chrome-inset: max(0.75rem, env(safe-area-inset-right));
-  --map-left-chrome-gap: 0.5rem;
-  --map-style-control-size: 2.75rem;
-  --map-compass-control-size: var(--map-zoom-btn-size, 2.75rem);
-  --map-zoom-control-height: calc(
-    (2 * var(--map-zoom-btn-size, 2.75rem)) + var(--map-zoom-stack-gap, 0.375rem)
-  );
-  --map-left-stack-base-dock: calc(
-    var(--dock-total-height) + var(--chrome-gap-above-dock) +
-      var(--safe-area-bottom) + 0.5rem
-  );
-  --map-left-stack-base-dock-narrow: calc(
-    var(--dock-total-height) + var(--chrome-gap-above-dock) +
-      var(--safe-area-bottom) + 2.5rem
-  );
-  --map-left-stack-base-chrome-hidden: calc(
-    var(--chrome-gap-bottom) + var(--safe-area-bottom) + 0.5rem
-  );
-  --map-left-stack-base-safe-area: max(0.75rem, var(--safe-area-bottom));
-  --map-left-stack-base-container: 4.25rem;
-  --map-left-stack-base-hider-actions: calc(
-    var(--hider-action-bar-height) + var(--chrome-gap-above-dock) + 0.5rem
-  );
-  --map-left-stack-base-admin-rail: calc(
-    var(--chrome-gap-bottom) + var(--safe-area-bottom) + 0.5rem
-  );
-  --map-left-tier-sat-bottom-dock: var(--map-left-stack-base-dock);
-  --map-left-tier-zoom-bottom-dock: calc(
-    var(--map-left-stack-base-dock) + var(--map-style-control-size) +
-      var(--map-left-chrome-gap)
-  );
-  --map-left-tier-compass-bottom-dock: calc(
-    var(--map-left-tier-zoom-bottom-dock) + var(--map-zoom-control-height) +
-      var(--map-left-chrome-gap)
-  );
-  --map-left-tier-compass-bottom-chrome-hidden: calc(
-    var(--map-left-stack-base-chrome-hidden) + var(--map-style-control-size) +
-      var(--map-left-chrome-gap) + var(--map-zoom-control-height) +
-      var(--map-left-chrome-gap)
-  );
-  --map-left-tier-compass-bottom-safe-area: calc(
-    var(--map-left-stack-base-safe-area) + var(--map-style-control-size) +
-      var(--map-left-chrome-gap) + var(--map-zoom-control-height) +
-      var(--map-left-chrome-gap)
-  );
-  --map-left-tier-compass-bottom-container: calc(
-    var(--map-left-stack-base-container) + var(--map-style-control-size) +
-      var(--map-left-chrome-gap) + var(--map-zoom-control-height) +
-      var(--map-left-chrome-gap)
-  );
-  --map-left-tier-compass-bottom-hider-actions: calc(
-    var(--map-left-stack-base-hider-actions) + var(--map-style-control-size) +
-      var(--map-left-chrome-gap) + var(--map-zoom-control-height) +
-      var(--map-left-chrome-gap)
-  );
-  --map-left-tier-compass-bottom-admin-rail: calc(
-    var(--map-left-stack-base-admin-rail) + var(--map-style-control-size) +
-      var(--map-left-chrome-gap) + var(--map-zoom-control-height) +
-      var(--map-left-chrome-gap)
-  );
-}
-
-@media (width >= 40rem) {
-  :root {
-    --map-compass-control-size: var(--map-zoom-btn-size, 3rem);
-  }
 }
 
 @media (width >= 28.01rem) {
@@ -204,136 +135,6 @@
   }
 }
 
-/* Zoom left above satellite layout (tokens live in :root above). */
-.map-zoom-control {
-  left: var(--map-left-chrome-inset);
-  right: auto;
-}
-
-.map-style-control {
-  left: var(--map-left-chrome-inset);
-}
-
-.map-style-control--dock {
-  bottom: var(--map-left-tier-sat-bottom-dock);
-}
-
-.map-zoom-control--dock {
-  bottom: var(--map-left-tier-zoom-bottom-dock);
-}
-
-.map-style-control--chrome-hidden {
-  bottom: var(--map-left-stack-base-chrome-hidden);
-}
-
-.map-zoom-control--chrome-hidden {
-  bottom: calc(
-    var(--map-left-stack-base-chrome-hidden) + var(--map-style-control-size) +
-      var(--map-left-chrome-gap)
-  );
-}
-
-.map-style-control--safe-area {
-  bottom: var(--map-left-stack-base-safe-area);
-}
-
-.map-zoom-control--safe-area {
-  bottom: calc(
-    var(--map-left-stack-base-safe-area) + var(--map-style-control-size) +
-      var(--map-left-chrome-gap)
-  );
-}
-
-.map-style-control--container {
-  bottom: var(--map-left-stack-base-container);
-}
-
-.map-zoom-control--container {
-  bottom: calc(
-    var(--map-left-stack-base-container) + var(--map-style-control-size) +
-      var(--map-left-chrome-gap)
-  );
-}
-
-.map-style-control--hider-actions {
-  bottom: var(--map-left-stack-base-hider-actions);
-}
-
-.map-zoom-control--hider-actions {
-  bottom: calc(
-    var(--map-left-stack-base-hider-actions) + var(--map-style-control-size) +
-      var(--map-left-chrome-gap)
-  );
-}
-
-.map-style-control--admin-rail {
-  bottom: var(--map-left-stack-base-admin-rail);
-  right: calc(
-    max(0.75rem, env(safe-area-inset-right)) +
-      var(--admin-map-control-inset-right, 0px)
-  );
-  left: auto;
-}
-
-.map-zoom-control--admin-rail {
-  bottom: calc(
-    var(--map-left-stack-base-admin-rail) + var(--map-style-control-size) +
-      var(--map-left-chrome-gap)
-  );
-  right: calc(
-    max(0.75rem, env(safe-area-inset-right)) +
-      var(--admin-map-control-inset-right, 0px)
-  );
-  left: auto;
-}
-
-@media (width >= 40rem) {
-  :root {
-    --map-style-control-size: 3rem;
-  }
-}
-
-@media (width <= 28rem) {
-  :root {
-    --map-left-tier-sat-bottom-dock: var(--map-left-stack-base-dock-narrow);
-    --map-left-tier-zoom-bottom-dock: calc(
-      var(--map-left-stack-base-dock-narrow) + var(--map-style-control-size) +
-        var(--map-left-chrome-gap)
-    );
-    --map-left-tier-compass-bottom-dock: calc(
-      var(--map-left-tier-zoom-bottom-dock) + var(--map-zoom-control-height) +
-        var(--map-left-chrome-gap)
-    );
-  }
-}
-
-/* Side dock on left corners → MapView chrome flips to the right edge. */
-html[data-map-side-dock="left"] .map-zoom-control,
-html[data-map-side-dock="left"] .map-style-control,
-html[data-map-side-dock="left"] .map-compass-control,
-html[data-map-side-dock="bottom-left"] .map-zoom-control,
-html[data-map-side-dock="bottom-left"] .map-style-control,
-html[data-map-side-dock="bottom-left"] .map-compass-control,
-html[data-map-side-dock="mid-left"] .map-zoom-control,
-html[data-map-side-dock="mid-left"] .map-style-control,
-html[data-map-side-dock="mid-left"] .map-compass-control,
-html[data-map-side-dock="top-left"] .map-zoom-control,
-html[data-map-side-dock="top-left"] .map-style-control,
-html[data-map-side-dock="top-left"] .map-compass-control {
-  left: auto;
-  right: var(--map-right-chrome-inset);
-}
-
-html[data-map-side-dock="left"] .map-zoom-control--admin-rail,
-html[data-map-side-dock="bottom-left"] .map-zoom-control--admin-rail,
-html[data-map-side-dock="mid-left"] .map-zoom-control--admin-rail,
-html[data-map-side-dock="top-left"] .map-zoom-control--admin-rail {
-  right: calc(
-    var(--map-right-chrome-inset) + var(--admin-map-control-inset-right, 0px)
-  );
-  left: auto;
-}
-
 [data-chrome-side-stack="phone"][data-dragging="true"],
 [data-chrome-nav-stack="phone"][data-dragging="true"] {
   transition:
@@ -416,6 +217,41 @@ html[data-map-side-dock="top-left"] .map-zoom-control--admin-rail {
 }
 
 .jl-map-nav-dock .map-style-control__preview {
+  position: relative;
+  display: block;
   height: 100%;
   width: 100%;
+}
+
+.jl-map-nav-dock .map-style-control__tiles {
+  display: grid;
+  height: 100%;
+  width: 100%;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  background: var(--color-map-canvas);
+}
+
+.jl-map-nav-dock .map-style-control__tile {
+  display: block;
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+}
+
+.jl-map-nav-dock .map-style-control__label {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: oklch(from var(--color-surface-deep) l c h / 78%);
+  padding: 0.125rem 0.2rem;
+  text-align: center;
+  font-family: "Barlow Semi Condensed", "Source Sans 3", system-ui, sans-serif;
+  font-size: 0.5rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  line-height: 1.1;
+  text-transform: uppercase;
+  color: var(--color-ink);
 }

@@ -982,6 +982,22 @@ service cloud.firestore {
           && request.resource.data.payload is map;
         allow update, delete: if false;
       }
+
+      // Server-trusted actions queued offline (Move timer pause/resume). The
+      // processSessionIntent trigger validates membership and applies them;
+      // clients may only create their own and read them back.
+      match /intents/{intentId} {
+        allow get: if isSignedIn() && resource.data.uid == request.auth.uid;
+        allow list: if false;
+        allow create: if isHiderMember(sessionId)
+          && request.resource.data.keys().hasOnly(['type', 'action', 'uid', 'requestedAtMs', 'createdAt'])
+          && request.resource.data.type == 'moveTimer'
+          && request.resource.data.action in ['pause', 'resume']
+          && request.resource.data.uid == request.auth.uid
+          && request.resource.data.requestedAtMs is number
+          && request.resource.data.createdAt == request.time;
+        allow update, delete: if false;
+      }
     }
 
     match /sessionCodes/{code} {

@@ -10,6 +10,7 @@ import {
   useState,
 } from "react";
 import { EntryAsyncButton } from "@/components/ui/entry/EntryAsyncButton";
+import { useHydrated } from "@/hooks/app/useHydrated";
 import { usePermanentAuthUser } from "../../hooks/billing/usePermanentAuthUser";
 import {
   completeOAuthRedirectIfPending,
@@ -47,6 +48,9 @@ export function AccountSignInGate({
   extraSignInProviders,
 }: AccountSignInGateProps) {
   const { user, isPermanent, authReady } = usePermanentAuthUser();
+  // Prerendered /premium can't know the visitor's sign-in state: show the checking state in
+  // the snapshot and the hydration render alike.
+  const hydrated = useHydrated();
   const hasAuthUser = Boolean(user);
   const [email, setEmail] = useState("");
   const [busyAction, setBusyAction] = useState<"email" | null>(null);
@@ -144,7 +148,7 @@ export function AccountSignInGate({
     }
   };
 
-  if (!authReady) {
+  if (!hydrated || !authReady) {
     return (
       <Text size="sm" c="var(--color-field-ink-muted)">
         Checking sign-in…
