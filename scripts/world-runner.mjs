@@ -10,11 +10,7 @@ import { createServer } from "vite";
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
 /** localStorage keys used by scenario session/map/annotations seeds. */
-export const LOCAL_STORAGE_SEED_KEYS = [
-  "jetlag-session",
-  "jetlag-map",
-  "jetlag-annotations",
-];
+export const LOCAL_STORAGE_SEED_KEYS = ["jetlag-session", "jetlag-map", "jetlag-annotations"];
 
 /** sessionStorage key for timerStore (not localStorage). */
 export const SESSION_STORAGE_SEED_KEYS = ["jetlag-timer"];
@@ -30,9 +26,7 @@ async function loadCatalogModules() {
     resolve: { alias: { "@": path.resolve(root, "src") } },
   });
   try {
-    const catalog = await server.ssrLoadModule(
-      path.resolve(root, "src/test/scenarios/catalog.ts"),
-    );
+    const catalog = await server.ssrLoadModule(path.resolve(root, "src/test/scenarios/catalog.ts"));
     const seedMod = await server.ssrLoadModule(
       path.resolve(root, "src/test/scenarios/adapters/toLocalStorageSeed.ts"),
     );

@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
+import { runWorld } from "../../../scripts/world-runner.mjs";
 import { LOCAL_SESSION_ID } from "../../domain/map/annotations";
 import { DUBLIN_CITY_GAME_AREA } from "../fixtures/dublinGameArea";
 import { toLocalStorageSeed } from "./adapters/toLocalStorageSeed";
 import { getScenario } from "./catalog";
-import { runWorld } from "../../../scripts/world-runner.mjs";
 
 async function captureWorld(...argv: string[]) {
   const chunks: string[] = [];
