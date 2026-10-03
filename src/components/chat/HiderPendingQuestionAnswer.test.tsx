@@ -79,7 +79,7 @@ describe("HiderPendingQuestionAnswer", () => {
         onAnswerQuestion={vi.fn()}
       />,
     );
-    expect(screen.getByRole("button", { name: /Send answer: Yes/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^Yes$/i })).toBeInTheDocument();
   });
 
   it("hides answer controls while walking", () => {
@@ -96,7 +96,7 @@ describe("HiderPendingQuestionAnswer", () => {
         onAnswerQuestion={vi.fn()}
       />,
     );
-    expect(screen.queryByRole("button", { name: /Send answer/i })).toBeNull();
+    expect(screen.queryByRole("button", { name: /^Yes$/i })).toBeNull();
     expect(screen.getByText(/Seeker is walking/i)).toBeInTheDocument();
   });
 });
