@@ -11,6 +11,8 @@ export type NearRegionBatchParams = {
   distanceMeters: number;
   disks: readonly DiskSpec[];
   gameArea: GameAreaGeometry;
+  mode?: NearRegionBatchInput["mode"];
+  divisions?: number;
 };
 
 export async function dispatchNearRegionBatch(
@@ -21,6 +23,8 @@ export async function dispatchNearRegionBatch(
     distanceMeters: params.distanceMeters,
     disks: params.disks,
     gameArea: params.gameArea,
+    mode: params.mode,
+    divisions: params.divisions,
   };
 
   return dispatchKernel({

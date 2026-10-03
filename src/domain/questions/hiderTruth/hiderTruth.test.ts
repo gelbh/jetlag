@@ -1,4 +1,10 @@
+import type { Feature, LineString } from "geojson";
 import { describe, expect, it, vi } from "vitest";
+import {
+  nearestPointToCoastlines,
+  prepareMeasuringLineSegments,
+} from "../../geometry/measuring/geometryMeasuring";
+import type { GameArea } from "../../map/annotations";
 import { milesToMeters } from "../../map/distance";
 import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
 import { computeHiderTruthReply, computeHiderTruthReplyAsync } from "./index";
@@ -6,6 +12,19 @@ import { computeHiderTruthReply, computeHiderTruthReplyAsync } from "./index";
 vi.mock("@/services/geo/elevation", () => ({
   fetchElevations: vi.fn(async (points: [number, number][]) => points.map(() => 10)),
 }));
+
+const dublinCoastTruthGameArea: GameArea = {
+  type: "Polygon",
+  coordinates: [
+    [
+      [-6.35, 53.34],
+      [-6.15, 53.34],
+      [-6.15, 53.38],
+      [-6.35, 53.38],
+      [-6.35, 53.34],
+    ],
+  ],
+};
 
 const stationInside: [number, number] = [51.45, -0.15];
 const stationOutside: [number, number] = [51.42, -0.18];
@@ -270,6 +289,176 @@ describe("computeHiderTruthReply", () => {
 
     const result = computeHiderTruthReply(pending, stationInside);
     expect(result?.replyId).toBe("yes");
+  });
+
+  it("coastline measuring picks closer on equal nearest-coast distances (tie-break)", () => {
+    const coastSegment = {
+      type: "Feature" as const,
+      properties: {},
+      geometry: {
+        type: "LineString" as const,
+        coordinates: [
+          [-6.3, 53.35],
+          [-6.2, 53.35],
+        ],
+      },
+    };
+    const equidistantPoint: [number, number] = [53.36, -6.25];
+    const pending = basePending({
+      toolType: "measuring",
+      replyOptions: [
+        { id: "closer", label: "Closer" },
+        { id: "further", label: "Further" },
+      ],
+      placement: {
+        geometryJson: JSON.stringify({
+          type: "Feature",
+          properties: {},
+          geometry: { type: "Point", coordinates: [-6.25, 53.36] },
+        }),
+        metadata: {
+          measuringAnchor: { lat: equidistantPoint[0], lng: equidistantPoint[1] },
+          measuringRegionInputJson: JSON.stringify({
+            gameArea: dublinCoastTruthGameArea,
+            measuringSubject: "coastline",
+            measuringDistanceMeters: 4567,
+            measuringTargetPoint: null,
+            measuringPlaces: [],
+            measuringCoastSegments: [coastSegment],
+            measuringSeaLevelNearRegion: null,
+            usesAllPlacesInArea: false,
+          }),
+        },
+      },
+    });
+
+    const result = computeHiderTruthReply(pending, equidistantPoint, dublinCoastTruthGameArea);
+    expect(result?.replyId).toBe("closer");
+  });
+
+  it("coastline truth at hiding-zone center is closer than seeker anchor", () => {
+    const coastSegment = {
+      type: "Feature" as const,
+      properties: {},
+      geometry: {
+        type: "LineString" as const,
+        coordinates: [
+          [-6.3, 53.35],
+          [-6.2, 53.35],
+        ],
+      },
+    };
+    const zoneCenter: [number, number] = [53.36, -6.25];
+    const pending = basePending({
+      toolType: "measuring",
+      replyOptions: [
+        { id: "closer", label: "Closer" },
+        { id: "further", label: "Further" },
+      ],
+      placement: {
+        geometryJson: JSON.stringify({
+          type: "Feature",
+          properties: {},
+          geometry: { type: "Point", coordinates: [-6.25, 53.33] },
+        }),
+        metadata: {
+          measuringAnchor: { lat: 53.33, lng: -6.25 },
+          measuringRegionInputJson: JSON.stringify({
+            gameArea: dublinCoastTruthGameArea,
+            measuringSubject: "coastline",
+            measuringDistanceMeters: 4567,
+            measuringTargetPoint: null,
+            measuringPlaces: [],
+            measuringCoastSegments: [coastSegment],
+            measuringSeaLevelNearRegion: null,
+            usesAllPlacesInArea: false,
+          }),
+        },
+      },
+    });
+
+    expect(computeHiderTruthReply(pending, zoneCenter, dublinCoastTruthGameArea)?.replyId).toBe(
+      "closer",
+    );
+    expect(computeHiderTruthReply(pending, [53.32, -6.25], dublinCoastTruthGameArea)?.replyId).toBe(
+      "further",
+    );
+  });
+
+  it("coastline truth ignores segments outside session game area (prepared set)", () => {
+    const coastInPlayArea: Feature<LineString> = {
+      type: "Feature",
+      properties: {},
+      geometry: {
+        type: "LineString",
+        coordinates: [
+          [-6.3, 53.35],
+          [-6.2, 53.35],
+        ],
+      },
+    };
+    const coastOutsidePlayArea: Feature<LineString> = {
+      type: "Feature",
+      properties: {},
+      geometry: {
+        type: "LineString",
+        coordinates: [
+          [-0.5, 51.2],
+          [-0.4, 51.2],
+        ],
+      },
+    };
+    const segments = [coastInPlayArea, coastOutsidePlayArea];
+    const prepared = prepareMeasuringLineSegments(segments, dublinCoastTruthGameArea);
+    expect(prepared.segments).toHaveLength(1);
+
+    const station: [number, number] = [53.36, -6.25];
+    const seeker: [number, number] = [53.33, -6.25];
+    const preparedStationDistance = nearestPointToCoastlines(
+      station,
+      prepared.segments,
+      prepared,
+    )?.distanceMeters;
+    const preparedSeekerDistance = nearestPointToCoastlines(
+      seeker,
+      prepared.segments,
+      prepared,
+    )?.distanceMeters;
+    expect(preparedStationDistance).toBeDefined();
+    expect(preparedSeekerDistance).toBeDefined();
+    expect(preparedStationDistance!).toBeLessThan(preparedSeekerDistance!);
+
+    const pending = basePending({
+      toolType: "measuring",
+      replyOptions: [
+        { id: "closer", label: "Closer" },
+        { id: "further", label: "Further" },
+      ],
+      placement: {
+        geometryJson: JSON.stringify({
+          type: "Feature",
+          properties: {},
+          geometry: { type: "Point", coordinates: [-6.25, 53.33] },
+        }),
+        metadata: {
+          measuringAnchor: { lat: seeker[0], lng: seeker[1] },
+          measuringRegionInputJson: JSON.stringify({
+            gameArea: dublinCoastTruthGameArea,
+            measuringSubject: "coastline",
+            measuringDistanceMeters: 4567,
+            measuringTargetPoint: null,
+            measuringPlaces: [],
+            measuringCoastSegments: segments,
+            measuringSeaLevelNearRegion: null,
+            usesAllPlacesInArea: false,
+          }),
+        },
+      },
+    });
+
+    expect(computeHiderTruthReply(pending, station, dublinCoastTruthGameArea)?.replyId).toBe(
+      "closer",
+    );
   });
 
   it("measuring compares distance to a point target", () => {

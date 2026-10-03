@@ -1,5 +1,6 @@
 //! Geometry kernel (Rust / WASM) — mask + half-plane + geodesic + voronoi + near-region.
 
+pub mod coastline_near_region;
 pub mod geodesic;
 pub mod geodesic_buffer;
 pub mod half_plane;
@@ -19,6 +20,7 @@ pub use mask::{
 };
 pub use types::{GameAreaGeometry, PolygonFeature};
 
+use coastline_near_region::build_coastline_near_region_distance_threshold;
 use geodesic_buffer::geodesic_line_buffer as geodesic_line_buffer_native;
 use half_plane::{
     build_half_plane_polygon as build_half_plane_native,
@@ -185,7 +187,7 @@ pub fn geodesic_line_buffer_json(
     ))
 }
 
-/// WASM export: batch near-region (buffer lines + union disks + clip).
+/// WASM export: near-region batch (distance-threshold coastline default; buffer union for disks / tests).
 #[wasm_bindgen]
 pub fn build_near_region_json(input_json: &str) -> Result<JsValue, JsValue> {
     let parsed: NearRegionInputJson =
@@ -201,12 +203,26 @@ pub fn build_near_region_json(input_json: &str) -> Result<JsValue, JsValue> {
         })
         .collect();
     let distance = parsed.distance_meters.unwrap_or(0.0);
-    feature_to_js(build_near_region_native(
-        &parsed.segments,
-        distance,
-        &disks,
-        &game_area,
-    ))
+    let use_distance_threshold = parsed.mode.as_deref() == Some("distanceThreshold")
+        || (disks.is_empty()
+            && !parsed.segments.is_empty()
+            && parsed.mode.as_deref() != Some("bufferUnion"));
+
+    if use_distance_threshold {
+        feature_to_js(build_coastline_near_region_distance_threshold(
+            &parsed.segments,
+            distance,
+            &game_area,
+            parsed.divisions,
+        ))
+    } else {
+        feature_to_js(build_near_region_native(
+            &parsed.segments,
+            distance,
+            &disks,
+            &game_area,
+        ))
+    }
 }
 
 /// WASM export: packed Voronoi rings for `coords = [lng0,lat0,…]` (unique sites).

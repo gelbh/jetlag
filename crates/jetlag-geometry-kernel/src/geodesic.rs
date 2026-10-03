@@ -12,7 +12,7 @@ pub(crate) fn midpoint(a: LatLng, b: LatLng) -> LatLng {
     ((a.0 + b.0) / 2.0, (a.1 + b.1) / 2.0)
 }
 
-pub(crate) fn bearing_degrees(a: LatLng, b: LatLng) -> f64 {
+pub fn bearing_degrees(a: LatLng, b: LatLng) -> f64 {
     let lat1 = a.0.to_radians();
     let lat2 = b.0.to_radians();
     let d_lng = (b.1 - a.1).to_radians();
@@ -21,7 +21,7 @@ pub(crate) fn bearing_degrees(a: LatLng, b: LatLng) -> f64 {
     (y.atan2(x).to_degrees() + 360.0) % 360.0
 }
 
-pub(crate) fn destination_point(origin: LatLng, distance_m: f64, bearing_deg: f64) -> LatLng {
+pub fn destination_point(origin: LatLng, distance_m: f64, bearing_deg: f64) -> LatLng {
     let δ = distance_m / EARTH_RADIUS_M;
     let θ = bearing_deg.to_radians();
     let φ1 = origin.0.to_radians();
