@@ -14,6 +14,7 @@ export function computeHiderTruthReply(
   pending: PendingQuestionRecord,
   /** Resolved truth reference: zone center until end-game freeze. */
   stationCenter: LatLngTuple | null,
+  gameArea?: GameArea,
 ): HiderTruthResult | null {
   if (!stationCenter) {
     return truthUnavailable(UNAVAILABLE_NO_ZONE);
@@ -27,7 +28,7 @@ export function computeHiderTruthReply(
     case "matching":
       return truthMatching(pending, stationCenter);
     case "measuring":
-      return truthMeasuringSync(pending, stationCenter);
+      return truthMeasuringSync(pending, stationCenter, gameArea);
     case "tentacle":
       return truthTentacle(pending, stationCenter);
     default:
@@ -55,5 +56,5 @@ export async function computeHiderTruthReplyAsync(
     return truthMatchingAsync(pending, stationCenter, gameArea);
   }
 
-  return computeHiderTruthReply(pending, stationCenter);
+  return computeHiderTruthReply(pending, stationCenter, gameArea);
 }

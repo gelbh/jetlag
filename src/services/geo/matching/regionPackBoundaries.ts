@@ -11,6 +11,10 @@ import type {
   CustomMatchingAreasByLevel,
   MatchingAdminLevel,
 } from "@/domain/session/catalog/sessionCustomContent";
+import {
+  fetchAndReadWithTimeout,
+  GEO_FETCH_TIMEOUT_MS,
+} from "@/services/core/network/fetchWithTimeout";
 
 const regionPackGeoCache = new Map<string, string>();
 
@@ -31,12 +35,17 @@ async function fetchGeoJsonText(path: string): Promise<string> {
     return cached;
   }
 
-  const response = await fetch(resolveGeoAssetUrl(path));
-  if (!response.ok) {
-    throw new Error(`Couldn't load region boundary data (${response.status}).`);
-  }
-
-  const text = await response.text();
+  const text = await fetchAndReadWithTimeout(
+    resolveGeoAssetUrl(path),
+    undefined,
+    GEO_FETCH_TIMEOUT_MS,
+    async (response) => {
+      if (!response.ok) {
+        throw new Error(`Couldn't load region boundary data (${response.status}).`);
+      }
+      return response.text();
+    },
+  );
   regionPackGeoCache.set(path, text);
   return text;
 }

@@ -482,6 +482,14 @@ function mergeNearCellRects(grid: CellClass[][]): MergedRect[] {
   return allRects;
 }
 
+export function buildMeasuringNearRegionFromCellGrid(
+  grid: Array<Array<"near" | "far" | "skip">>,
+  gameArea: GameArea,
+  divisions: number,
+): Feature<Polygon | MultiPolygon> | null {
+  return buildNearRegionFromGrid(grid as CellClass[][], gameArea, divisions);
+}
+
 function buildNearRegionFromGrid(
   grid: CellClass[][],
   gameArea: GameArea,
