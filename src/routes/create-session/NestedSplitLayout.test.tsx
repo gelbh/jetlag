@@ -1,18 +1,16 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { MobileSheet } from "./MobileSheet";
+import { NestedSplitLayout } from "./NestedSplitLayout";
 
-describe("MobileSheet split footer", () => {
+describe("NestedSplitLayout", () => {
   it("renders footer outside the sheet-owned scroll body", () => {
     render(
-      <MobileSheet
-        variant="nested"
-        layout="split"
+      <NestedSplitLayout
         maxHeightClassName="max-h-[200px]"
         footer={<div data-testid="footer">footer</div>}
       >
         <div data-testid="body">body</div>
-      </MobileSheet>,
+      </NestedSplitLayout>,
     );
 
     const body = screen.getByTestId("body");
@@ -27,14 +25,12 @@ describe("MobileSheet split footer", () => {
 
   it("keeps pinned header outside the scroll body", () => {
     render(
-      <MobileSheet
-        variant="nested"
-        layout="split"
+      <NestedSplitLayout
         pinned={<div data-testid="pinned">pinned</div>}
         maxHeightClassName="max-h-[200px]"
       >
         <div data-testid="body">body</div>
-      </MobileSheet>,
+      </NestedSplitLayout>,
     );
 
     const body = screen.getByTestId("body");
@@ -42,5 +38,20 @@ describe("MobileSheet split footer", () => {
     const scroller = body.parentElement;
     expect(scroller?.className).toMatch(/overflow-y-auto/);
     expect(scroller?.contains(pinned)).toBe(false);
+  });
+
+  it("keeps nested chassis in-flow (not a fixed bottom overlay)", () => {
+    const { container } = render(
+      <NestedSplitLayout maxHeightClassName="max-h-[200px]">
+        <div data-testid="body">body</div>
+      </NestedSplitLayout>,
+    );
+
+    const chassis = container.firstElementChild;
+    expect(chassis?.className).toMatch(/\brelative\b/);
+    expect(chassis?.className).toMatch(/\bmin-h-0\b/);
+    expect(chassis?.className).not.toMatch(/\bfixed\b/);
+    expect(chassis?.className).not.toMatch(/\binset-x-0\b/);
+    expect(chassis?.className).not.toMatch(/\bbottom-0\b/);
   });
 });
