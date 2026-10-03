@@ -62,7 +62,6 @@ const WORDMARK_CLASSES: Record<MarkSize, string> = {
 };
 
 export function AppLogo({ variant = "mark", size = "md", className, ...props }: AppLogoProps) {
-  "use memo";
   const markPx = MARK_SIZES[size];
 
   if (variant === "mark") {
