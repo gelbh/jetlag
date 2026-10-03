@@ -8,7 +8,11 @@ import {
 } from "./documentCsp";
 import worker, { isSpaFallbackForAssetRequest } from "./index";
 import { handlePosthogProxyRequest, shouldHandlePosthogProxy } from "./posthogProxy";
-import { handleSentryTunnelRequest, parseSentryEnvelopeTarget } from "./sentryTunnel";
+import {
+  handleSentryTunnelRequest,
+  parseSentryEnvelopeTarget,
+  SENTRY_TUNNEL_PATH,
+} from "./sentryTunnel";
 
 describe("isSpaFallbackForAssetRequest", () => {
   it("detects SPA index.html served for a missing asset", () => {
@@ -603,25 +607,34 @@ describe("parseSentryEnvelopeTarget", () => {
   });
 });
 
+const ALLOWLISTED = {
+  hosts: ["o123.ingest.de.sentry.io"],
+  projectIds: ["456789"],
+} as const;
+
+function envelopeBody(dsn: string): string {
+  return [
+    JSON.stringify({ dsn }),
+    JSON.stringify({ type: "event" }),
+    JSON.stringify({ message: "test" }),
+  ].join("\n");
+}
+
 describe("handleSentryTunnelRequest", () => {
   it("rejects non-POST requests", async () => {
     const response = await handleSentryTunnelRequest(
-      new Request("https://jetlag.gelbhart.dev/api/sentry-tunnel", {
+      new Request("https://jetlag.gelbhart.dev/api/envelope-tunnel", {
         method: "GET",
       }),
+      fetch,
+      ALLOWLISTED,
     );
 
     expect(response.status).toBe(405);
   });
 
-  it("forwards valid envelopes to Sentry ingest", async () => {
-    const body = [
-      JSON.stringify({
-        dsn: "https://abc123@o123.ingest.de.sentry.io/456789",
-      }),
-      JSON.stringify({ type: "event" }),
-      JSON.stringify({ message: "test" }),
-    ].join("\n");
+  it("forwards allowlisted envelopes to Sentry ingest", async () => {
+    const body = envelopeBody("https://abc123@o123.ingest.de.sentry.io/456789");
 
     const fetchImpl = vi.fn().mockResolvedValueOnce(
       new Response("{}", {
@@ -631,12 +644,13 @@ describe("handleSentryTunnelRequest", () => {
     );
 
     const response = await handleSentryTunnelRequest(
-      new Request("https://jetlag.gelbhart.dev/api/sentry-tunnel", {
+      new Request("https://jetlag.gelbhart.dev/api/envelope-tunnel", {
         method: "POST",
         headers: { "Content-Type": "application/x-sentry-envelope" },
         body,
       }),
       fetchImpl,
+      ALLOWLISTED,
     );
 
     expect(response.status).toBe(200);
@@ -648,6 +662,60 @@ describe("handleSentryTunnelRequest", () => {
       }),
     );
   });
+
+  it("rejects unknown project with 403", async () => {
+    const fetchImpl = vi.fn();
+    const response = await handleSentryTunnelRequest(
+      new Request("https://jetlag.gelbhart.dev/api/envelope-tunnel", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-sentry-envelope" },
+        body: envelopeBody("https://abc123@o123.ingest.de.sentry.io/999999"),
+      }),
+      fetchImpl,
+      ALLOWLISTED,
+    );
+
+    expect(response.status).toBe(403);
+    expect(fetchImpl).not.toHaveBeenCalled();
+  });
+
+  it("rejects wrong host with 403", async () => {
+    const fetchImpl = vi.fn();
+    const response = await handleSentryTunnelRequest(
+      new Request("https://jetlag.gelbhart.dev/api/envelope-tunnel", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-sentry-envelope" },
+        body: envelopeBody("https://abc123@evil.example/456789"),
+      }),
+      fetchImpl,
+      ALLOWLISTED,
+    );
+
+    expect(response.status).toBe(403);
+    expect(fetchImpl).not.toHaveBeenCalled();
+  });
+
+  it("rejects when allowlist is empty (fail closed)", async () => {
+    const fetchImpl = vi.fn();
+    const response = await handleSentryTunnelRequest(
+      new Request("https://jetlag.gelbhart.dev/api/envelope-tunnel", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-sentry-envelope" },
+        body: envelopeBody("https://abc123@o123.ingest.de.sentry.io/456789"),
+      }),
+      fetchImpl,
+      { hosts: [], projectIds: [] },
+    );
+
+    expect(response.status).toBe(403);
+    expect(fetchImpl).not.toHaveBeenCalled();
+  });
+});
+
+describe("SENTRY_TUNNEL_PATH", () => {
+  it("is /api/envelope-tunnel", () => {
+    expect(SENTRY_TUNNEL_PATH).toBe("/api/envelope-tunnel");
+  });
 });
 
 describe("posthogProxy", () => {
@@ -655,6 +723,7 @@ describe("posthogProxy", () => {
     expect(shouldHandlePosthogProxy("/ph")).toBe(true);
     expect(shouldHandlePosthogProxy("/ph/e/")).toBe(true);
     expect(shouldHandlePosthogProxy("/ph/static/foo.js")).toBe(true);
+    expect(shouldHandlePosthogProxy("/api/envelope-tunnel")).toBe(false);
     expect(shouldHandlePosthogProxy("/api/sentry-tunnel")).toBe(false);
   });
 

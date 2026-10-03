@@ -5,6 +5,7 @@ import test from "node:test";
 import { fileURLToPath } from "node:url";
 import { HttpsError } from "firebase-functions/v2/https";
 import {
+  FUNCTIONS_SENTRY_DATA_COLLECTION,
   isAbortErrorEvent,
   isAbortErrorNoise,
   isExpectedFunctionsError,
@@ -12,6 +13,7 @@ import {
   isOverpassTransportNoiseEvent,
   readAppVersion,
   resolveDeployedFunctionName,
+  resolveFunctionsSentryEnvironment,
 } from "../lib/sentry.mjs";
 import { EXPECTED_SESSION_UX_HTTPS_ERROR_KEYS } from "../session/expectedSessionUxHttpsErrors.mjs";
 
@@ -344,4 +346,25 @@ test("isExpectedFunctionsError ignores unrelated HttpsErrors and plain Errors", 
   assert.equal(isExpectedFunctionsError(new Error("LEAVE_NOT_HOST")), false);
   assert.equal(isExpectedFunctionsError(new Error("SESSION_OPS_AGENT_FAILED")), false);
   assert.equal(isExpectedFunctionsError(null), false);
+});
+
+test("resolveFunctionsSentryEnvironment prefers emulator then SENTRY_ENVIRONMENT", () => {
+  assert.equal(
+    resolveFunctionsSentryEnvironment({
+      FUNCTIONS_EMULATOR: "true",
+      SENTRY_ENVIRONMENT: "staging",
+    }),
+    "emulator",
+  );
+  assert.equal(resolveFunctionsSentryEnvironment({ SENTRY_ENVIRONMENT: " staging " }), "staging");
+  assert.equal(resolveFunctionsSentryEnvironment({}), "production");
+  assert.equal(resolveFunctionsSentryEnvironment({ SENTRY_ENVIRONMENT: "  " }), "production");
+});
+
+test("FUNCTIONS_SENTRY_DATA_COLLECTION keeps v10-equivalent privacy baseline", () => {
+  assert.equal(FUNCTIONS_SENTRY_DATA_COLLECTION.userInfo, false);
+  assert.equal(FUNCTIONS_SENTRY_DATA_COLLECTION.cookies, false);
+  assert.deepEqual(FUNCTIONS_SENTRY_DATA_COLLECTION.httpBodies, []);
+  assert.equal(FUNCTIONS_SENTRY_DATA_COLLECTION.databaseQueryData, false);
+  assert.deepEqual(FUNCTIONS_SENTRY_DATA_COLLECTION.genAI, { inputs: false, outputs: false });
 });

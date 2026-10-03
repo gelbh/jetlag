@@ -212,6 +212,15 @@ describe("classifyClientSentryEvent", () => {
       classifyClientSentryEvent(exc("TypeError", "Failed to fetch dynamically imported module")),
     ).toBe("send");
   });
+
+  it("does not special-case transaction-type Overpass events (stream mode)", () => {
+    expect(
+      classifyClientSentryEvent({
+        type: "transaction",
+        spans: [{ description: "POST /proxy/overpass" }],
+      }),
+    ).toBe("send"); // errors path; span drop is ignoreSpans, not classify
+  });
 });
 
 describe("applyClientSentryDisposition", () => {

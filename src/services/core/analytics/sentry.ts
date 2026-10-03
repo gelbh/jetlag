@@ -3,12 +3,14 @@ import { getClientEnv } from "@/config/env";
 import { APP_VERSION } from "@/domain/device/changelog";
 import { scheduleIdleBootWork } from "@/domain/device/perf/scheduleAfterFirstPaint";
 import type { StorageEstimateSnapshot } from "@/domain/device/pwa/pwaStorageBudget";
+import { CLIENT_SENTRY_DATA_COLLECTION } from "./sentryDataCollection";
 import {
   applyClientSentryDisposition,
   CLIENT_SENTRY_IGNORE_ERRORS,
   classifyClientSentryEvent,
   isFirestorePermissionDeniedEvent,
 } from "./sentryEventPolicy";
+import { CLIENT_SENTRY_IGNORE_SPANS } from "./sentryIgnoreSpans";
 
 const SESSION_CODE_PATTERN = /\b[A-Z0-9]{4}\b/g;
 const REACT_REFRESH_FRAME = /@react-refresh/i;
@@ -129,12 +131,14 @@ export function initSentry(): void {
   // ignoreErrors belt shares CLIENT_SENTRY_IGNORE_ERRORS with drop matchers (not canaries).
   Sentry.init({
     dsn,
-    tunnel: "/api/sentry-tunnel",
+    tunnel: "/api/envelope-tunnel",
     environment: env.VITE_SENTRY_ENVIRONMENT || import.meta.env.MODE,
     release: `jetlag@${APP_VERSION}`,
     dist: env.VITE_SENTRY_RELEASE_DIST || undefined,
     tracesSampleRate: import.meta.env.PROD ? 0.1 : 0,
     ignoreErrors: CLIENT_SENTRY_IGNORE_ERRORS,
+    ignoreSpans: CLIENT_SENTRY_IGNORE_SPANS,
+    dataCollection: CLIENT_SENTRY_DATA_COLLECTION,
     integrations: [
       Sentry.browserTracingIntegration({
         enableInp: true,
