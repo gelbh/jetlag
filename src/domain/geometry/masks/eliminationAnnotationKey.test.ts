@@ -1,10 +1,7 @@
 import type { Feature, Polygon } from "geojson";
 import { describe, expect, it } from "vitest";
 import type { AnnotationRecord } from "../../map/annotations";
-import {
-  eliminationAnnotationsContentKey,
-  isAddOnly,
-} from "./eliminationAnnotationKey";
+import { eliminationAnnotationsContentKey, isAddOnly } from "./eliminationAnnotationKey";
 
 function polygonFeature(west: number): Feature<Polygon> {
   return {
@@ -47,9 +44,7 @@ describe("eliminationAnnotationsContentKey", () => {
     const a = matchingAnnotation("a", -0.19);
     const b = matchingAnnotation("b", -0.16);
 
-    expect(eliminationAnnotationsContentKey([a, b])).toBe(
-      eliminationAnnotationsContentKey([b, a]),
-    );
+    expect(eliminationAnnotationsContentKey([a, b])).toBe(eliminationAnnotationsContentKey([b, a]));
   });
 
   it("changes when an annotation id is added", () => {

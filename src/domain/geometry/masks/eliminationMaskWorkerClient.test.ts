@@ -31,10 +31,7 @@ const computeEliminationUnionInput = vi.fn(
     _gameArea: unknown,
     draftFeatures: readonly unknown[] = [],
   ) => ({
-    polygons: [
-      ...draftFeatures,
-      ...annotations.map((annotation) => annotation.geometry),
-    ],
+    polygons: [...draftFeatures, ...annotations.map((annotation) => annotation.geometry)],
     disks: [],
   }),
 );
@@ -299,9 +296,7 @@ describe("eliminationMaskWorkerClient", () => {
     computeEliminationUnionInput.mockClear();
     buildMaskFromUnionInput.mockClear();
 
-    buildMaskFromUnionInput
-      .mockResolvedValueOnce(null)
-      .mockResolvedValueOnce(rebuiltFeature);
+    buildMaskFromUnionInput.mockResolvedValueOnce(null).mockResolvedValueOnce(rebuiltFeature);
 
     const result = await workerClient.requestCombinedEliminationMask([a, b], gameArea, [], []);
 

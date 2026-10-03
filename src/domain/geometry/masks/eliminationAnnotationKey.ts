@@ -2,9 +2,7 @@ import type { Feature, MultiPolygon, Polygon, Position } from "geojson";
 import type { AnnotationRecord } from "../../map/annotations";
 import { previewGeometryFingerprint } from "../measuring/previewGeometryFingerprint";
 
-export type EliminationAddOnlyResult =
-  | { addOnly: true; newIds: string[] }
-  | { addOnly: false };
+export type EliminationAddOnlyResult = { addOnly: true; newIds: string[] } | { addOnly: false };
 
 const ENTRY_SEPARATOR = "|";
 
@@ -144,9 +142,7 @@ function parseContentKey(key: string): Map<string, string> {
  * Includes Feature geometry plus mask-shaping metadata (radar / tentacle / measuring / thermometer).
  * Pass the same active annotation set the mask path uses.
  */
-export function eliminationAnnotationsContentKey(
-  annotations: readonly AnnotationRecord[],
-): string {
+export function eliminationAnnotationsContentKey(annotations: readonly AnnotationRecord[]): string {
   return annotations
     .filter((annotation) => annotation.status === "active")
     .map((annotation) => `${annotation.id}:${annotationGeometryFingerprint(annotation)}`)
