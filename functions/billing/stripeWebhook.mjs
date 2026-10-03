@@ -67,9 +67,7 @@ export async function handleStripeWebhook(db, webhookSecret, req, res) {
         return;
       }
 
-      const customer = /** @type {Stripe.Customer | Stripe.DeletedCustomer} */ (
-        event.data.object
-      );
+      const customer = /** @type {Stripe.Customer | Stripe.DeletedCustomer} */ (event.data.object);
       await clearStripeCustomerIdForDeletedCustomer(db, customer);
       await markStripeEventProcessed(db, event.id);
       res.status(200).json({ received: true });
