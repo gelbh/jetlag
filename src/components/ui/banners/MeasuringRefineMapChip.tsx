@@ -2,6 +2,8 @@ import { jetlagBrand } from "@/theme/theme";
 import { HudBanner } from "../hud/HudBanner";
 import { MapFloatSurface } from "./MapFloatSurface";
 
+const MAP_STATUS_CHIP_CLASS = "pointer-events-auto mx-3 mt-1.5 z-[var(--z-panel)]";
+
 const DEFAULT_TITLE = "Refining measure";
 const DEFAULT_BODY = "Adding detail to the shaded area…";
 
@@ -15,10 +17,7 @@ export function MeasuringRefineMapChip({
   body?: string;
 }) {
   return (
-    <HudBanner
-      visible={visible}
-      className="jl-app-update-chip jl-measuring-refine-chip pointer-events-auto fixed inset-x-0 z-[var(--z-panel)] px-3"
-    >
+    <HudBanner visible={visible} className={MAP_STATUS_CHIP_CLASS}>
       <MapFloatSurface
         tone="info"
         data-testid="measuring-refine-chip"

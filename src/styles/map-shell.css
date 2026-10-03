@@ -555,13 +555,9 @@
     }
   }
 
-  .jl-app-update-chip {
-    bottom: calc(var(--dock-height) + max(0.5rem, var(--safe-area-bottom)));
-  }
-
-  /* Narrow phones: stack update chip copy above action (replaces Survey float stack). */
+  /* Narrow phones: stack action-row map status chip copy above action. */
   @media (width <= 380px) {
-    .jl-app-update-chip [data-map-float-surface="true"] {
+    .jl-map-status-chip [data-map-float-surface="true"] {
       flex-direction: column;
       align-items: stretch;
     }
