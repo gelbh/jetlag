@@ -117,15 +117,11 @@ describe("MapBottomChrome", () => {
     expect(container.querySelector(".jl-map-chrome-bottom-band")).not.toBeNull();
   });
 
-  it("keeps Session above the dock with shared left-stack tokens (no right portal)", () => {
+  it("keeps Session above the dock without orphan left-stack portal tokens", () => {
     expect(chromeCss).not.toMatch(/--map-chrome-zoom-stack-height/);
-    expect(chromeCss).toMatch(/--map-left-tier-compass-bottom-dock/);
-    expect(chromeCss).toMatch(
-      /\.map-zoom-control\s*\{[^}]*left:\s*var\(--map-left-chrome-inset\)/s,
-    );
-    expect(chromeCss).toMatch(
-      /\.map-zoom-control--dock\s*\{[^}]*--map-left-tier-zoom-bottom-dock/s,
-    );
+    expect(chromeCss).not.toMatch(/--map-left-tier-compass-bottom-dock/);
+    expect(chromeCss).not.toMatch(/\.map-zoom-control\s*\{/);
+    expect(chromeCss).toMatch(/\.jl-map-nav-dock/);
   });
 
   it("defaults hunt density to tools and omits sparse modifiers", () => {
@@ -173,7 +169,7 @@ describe("MapBottomChrome", () => {
     expect(hunt?.className).toMatch(/min-h-11/);
   });
 
-  it("uses a draggable L/R side stack under Mantine and flips map chrome CSS", () => {
+  it("uses a draggable L/R side stack under Mantine", () => {
     const { container } = renderChrome(
       <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
         <MapBottomChrome
@@ -187,8 +183,7 @@ describe("MapBottomChrome", () => {
     expect(side?.getAttribute("data-side")).toBe("right");
     expect(side?.getAttribute("data-anchor")).toBe("bottom-right");
     expect(side?.getAttribute("data-chrome-side-stack")).toBe("phone");
-    expect(chromeCss).toMatch(/html\[data-map-side-dock="bottom-left"\]\s*\.map-zoom-control/);
-    expect(chromeCss).toMatch(/--map-right-chrome-inset/);
+    expect(chromeCss).not.toMatch(/html\[data-map-side-dock="bottom-left"\]\s*\.map-zoom-control/);
     expect(chromeCss).toMatch(/\[data-side="left"\]/);
   });
 
@@ -216,12 +211,10 @@ describe("MapBottomChrome", () => {
     expect(group?.className).toMatch(/justify-evenly/);
   });
 
-  it("anchors container-inset map controls to --dock-height token", () => {
-    expect(controlsCss).toMatch(
-      /\.map-zoom-control--container,\s*\.map-style-control--container\s*\{[^}]*bottom:\s*var\(--dock-height\)/s,
-    );
+  it("keeps nav-dock style preview rules and drops orphan portal inset CSS", () => {
+    expect(controlsCss).not.toMatch(/\.map-zoom-control--container/);
     expect(controlsCss).not.toMatch(/map-recenter-control/);
-    expect(controlsCss).not.toMatch(/\.map-zoom-control--container[^}]*bottom:\s*4\.25rem/s);
+    expect(chromeCss).toMatch(/\.jl-map-nav-dock \.map-style-control__preview/);
   });
 });
 

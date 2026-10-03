@@ -7,7 +7,6 @@ import {
   type MapLandscapeChromeMode,
   useMapLandscapeChromeReveal,
 } from "@/hooks/chrome/useMapLandscapeChromeReveal";
-import type { MapChromeControlInset } from "../../map/helpers/mapChromeControlInset";
 import { MapLandscapeChromeChip } from "./MapLandscapeChromeChip";
 
 type MapLandscapeChromeContextValue = {
@@ -15,7 +14,6 @@ type MapLandscapeChromeContextValue = {
   collapsed: boolean;
   active: boolean;
   toggle: () => void;
-  mapControlInset: MapChromeControlInset;
   chip: ReactNode | null;
 };
 
@@ -45,8 +43,6 @@ export function MapLandscapeChromeProvider({
   "use memo";
   const { mode, collapsed, active, toggle } = useMapLandscapeChromeReveal();
 
-  const mapControlInset: MapChromeControlInset = active && collapsed ? "chrome-hidden" : "dock";
-
   const chip = active ? (
     <MapLandscapeChromeChip
       collapsed={collapsed}
@@ -68,7 +64,6 @@ export function MapLandscapeChromeProvider({
         collapsed,
         active,
         toggle,
-        mapControlInset,
         chip,
       }}
     >
@@ -85,7 +80,6 @@ export function useMapLandscapeChrome(): MapLandscapeChromeContextValue {
       collapsed: false,
       active: false,
       toggle: () => undefined,
-      mapControlInset: "dock",
       chip: null,
     };
   }

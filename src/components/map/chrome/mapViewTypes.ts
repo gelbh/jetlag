@@ -1,7 +1,6 @@
 import type { RefObject } from "react";
 import type { MapStyle, StreetBasemap } from "@/domain/map/mapBasemaps";
 import type { MapBounds, MapBoundsExpression, MapLatLng } from "@/domain/map/mapBounds";
-import type { MapZoomControlInset } from "./MapZoomControl";
 
 /** MapLibre map surface props. */
 export interface MapViewCoreProps {
@@ -31,10 +30,8 @@ export interface MapViewMapLibreChromeProps {
   focusPreferFly?: boolean;
   recenterToken?: number;
   showZoomControl?: boolean;
-  zoomControlInset?: MapZoomControlInset;
   onMapStyleChange?: (style: MapStyle) => void;
   showMapStyleToggle?: boolean;
-  mapStyleControlInset?: MapZoomControlInset;
   /** Left-stack compass — opt-in (`false` when omitted). Play maps pass true. */
   showCompassControl?: boolean;
   /** Bump recenterToken / play-area home after compass tap. */

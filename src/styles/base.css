@@ -239,6 +239,26 @@ html.jl-standalone-shell .entry-screen-layout-flow {
   min-height: 100lvh;
 }
 
+/*
+ * Compose viewport L/R safe-area with phone-shell letterbox.
+ * env(safe-area-inset-*) is viewport-relative; the centered column already
+ * clears notches when letterbox > inset. Full-bleed shell (100% ≈ 100vw)
+ * keeps raw env. Sync beacon inherits these under the shell.
+ */
+[data-player-phone-shell] {
+  --jl-shell-letterbox-x: max(0px, (100vw - 100%) / 2);
+  --jl-shell-safe-left: max(
+    0px,
+    env(safe-area-inset-left, 0px) - var(--jl-shell-letterbox-x)
+  );
+  --jl-shell-safe-right: max(
+    0px,
+    env(safe-area-inset-right, 0px) - var(--jl-shell-letterbox-x)
+  );
+  --jl-sync-beacon-inset: max(0.625rem, var(--jl-shell-safe-right));
+  --jl-sync-beacon-inset-left: max(0.625rem, var(--jl-shell-safe-left));
+}
+
 [data-player-phone-shell] .home-poster-viewport {
   flex: 1 1 auto;
   min-height: 0;
