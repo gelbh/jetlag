@@ -24,6 +24,7 @@ import {
 } from "../kernel";
 import { unionPolygonFeaturesInSlices } from "../progressive/unionSlices";
 import { dispatchGeodesicLineBuffer } from "./geodesicLineBuffer";
+import { resolveGameAreaCellDivisions } from "./seaLevel";
 
 type SegmentBoundingBox = {
   south: number;
@@ -173,13 +174,27 @@ export function nearestPointToCoastlines(
 const COASTLINE_NEAR_REGION_CACHE_MAX = 32;
 const coastlineNearRegionCache = new Map<string, Feature<Polygon | MultiPolygon>>();
 
+/** Content fingerprint so same-count different polylines cannot collide in cache. */
+export function coastlineSegmentsFingerprint(segments: readonly Feature<LineString>[]): string {
+  let hash = segments.length >>> 0;
+  for (const segment of segments) {
+    const coordinates = segment.geometry.coordinates;
+    hash = (Math.imul(hash, 31) + coordinates.length) >>> 0;
+    for (const coordinate of coordinates) {
+      hash = (Math.imul(hash, 31) + Math.round((coordinate[0] ?? 0) * 1e7)) >>> 0;
+      hash = (Math.imul(hash, 31) + Math.round((coordinate[1] ?? 0) * 1e7)) >>> 0;
+    }
+  }
+  return hash.toString(36);
+}
+
 function coastlineNearRegionCacheKey(
   gameArea: GameArea,
   distanceMeters: number,
-  segmentCount: number,
+  segments: readonly Feature<LineString>[],
   kernelMode: string = "sync",
 ): string {
-  return `${gameAreaFingerprint(gameArea)}:${distanceMeters}:${segmentCount}:${kernelMode}`;
+  return `${gameAreaFingerprint(gameArea)}:${distanceMeters}:${coastlineSegmentsFingerprint(segments)}:${kernelMode}`;
 }
 
 export function clearCoastlineNearRegionCacheForTests(): void {
@@ -216,6 +231,10 @@ function yieldToEventLoop(): Promise<void> {
   return new Promise((resolve) => {
     setTimeout(resolve, 0);
   });
+}
+
+export function yieldCoastlineNearRegionBuild(): Promise<void> {
+  return yieldToEventLoop();
 }
 
 export function setCoastlineNearRegionYieldHookForTests(hook: (() => Promise<void>) | null): void {
@@ -347,6 +366,17 @@ function clipBufferedSegmentsToGameArea(
   return combinePolygonFeatures(clippedParts);
 }
 
+/** Oracle negative control: legacy per-segment buffer union (not production coastline). */
+export async function buildCoastlineNearRegionUnionBufferForTests(
+  segments: Feature<LineString>[],
+  distanceMeters: number,
+  gameArea: GameArea,
+): Promise<Feature<Polygon | MultiPolygon> | null> {
+  return buildCoastlineNearRegionWithBuffer(segments, distanceMeters, gameArea, (segment, meters) =>
+    dispatchGeodesicLineBuffer(segment, meters, undefined),
+  );
+}
+
 async function buildCoastlineNearRegionWithBuffer(
   segments: Feature<LineString>[],
   distanceMeters: number,
@@ -360,7 +390,7 @@ async function buildCoastlineNearRegionWithBuffer(
     return null;
   }
 
-  const cacheKey = coastlineNearRegionCacheKey(gameArea, distanceMeters, segments.length, "async");
+  const cacheKey = coastlineNearRegionCacheKey(gameArea, distanceMeters, segments, "async");
   const cached = getCachedCoastlineNearRegion(cacheKey);
   if (cached) {
     return cached;
@@ -414,33 +444,61 @@ export async function buildCoastlineNearRegion(
   gameArea: GameArea,
 ): Promise<Feature<Polygon | MultiPolygon> | null> {
   if (shouldUseWasm("nearRegionBatch")) {
-    const cacheKey = coastlineNearRegionCacheKey(
-      gameArea,
-      distanceMeters,
-      segments.length,
-      "batch:wasm",
-    );
+    const cacheKey = coastlineNearRegionCacheKey(gameArea, distanceMeters, segments, "batch:wasm");
     const cached = getCachedCoastlineNearRegion(cacheKey);
     if (cached) {
       return cached;
     }
 
-    const result = await dispatchNearRegionBatch({
-      segments,
-      distanceMeters,
-      disks: [],
-      gameArea: featureToGameAreaGeometry(gameAreaToFeature(gameArea)),
-    });
+    try {
+      const prepared = prepareMeasuringLineSegments(segments, gameArea);
+      if (prepared.segments.length === 0) {
+        return null;
+      }
 
-    if (result) {
-      setCachedCoastlineNearRegion(cacheKey, result);
+      const result = await dispatchNearRegionBatch({
+        segments: prepared.segments,
+        distanceMeters,
+        disks: [],
+        gameArea: featureToGameAreaGeometry(gameAreaToFeature(gameArea)),
+        mode: "distanceThreshold",
+        divisions: resolveGameAreaCellDivisions(gameArea),
+      });
+
+      if (result) {
+        setCachedCoastlineNearRegion(cacheKey, result);
+      }
+      return result;
+    } catch (error) {
+      // Fall back to TS distance-threshold (local missing pkg / transient wasm errors).
+      console.warn(
+        "[geometry] coastline near-region wasm failed; falling back to TS distance-threshold",
+        error,
+      );
     }
-    return result;
   }
 
-  return buildCoastlineNearRegionWithBuffer(segments, distanceMeters, gameArea, (segment, meters) =>
-    dispatchGeodesicLineBuffer(segment, meters, undefined),
+  const { buildCoastlineNearRegionDistanceThreshold } = await import("./coastlineNearRegion");
+  const cacheKey = coastlineNearRegionCacheKey(
+    gameArea,
+    distanceMeters,
+    segments,
+    "distanceThreshold",
   );
+  const cached = getCachedCoastlineNearRegion(cacheKey);
+  if (cached) {
+    return cached;
+  }
+
+  const result = await buildCoastlineNearRegionDistanceThreshold(
+    segments,
+    distanceMeters,
+    gameArea,
+  );
+  if (result) {
+    setCachedCoastlineNearRegion(cacheKey, result);
+  }
+  return result;
 }
 
 export { distanceBetweenPoints } from "../gameArea/distance";
