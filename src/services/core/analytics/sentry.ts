@@ -288,10 +288,7 @@ function recoverableErrorMessage(error: unknown): string {
  * scope directly because it fires before `initSentry`, and `Sentry.addBreadcrumb` drops
  * breadcrumbs while no client exists.
  */
-export function addRecoverableErrorBreadcrumb(
-  error: unknown,
-  componentStack?: string,
-): void {
+export function addRecoverableErrorBreadcrumb(error: unknown, componentStack?: string): void {
   if (import.meta.env.MODE === "test") {
     return;
   }

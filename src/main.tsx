@@ -3,12 +3,12 @@ import "@fontsource/source-sans-3/500.css";
 import "@fontsource/source-sans-3/600.css";
 import "@fontsource/barlow-semi-condensed/600.css";
 import "@fontsource/barlow-semi-condensed/700.css";
-import { type ComponentType, type ErrorInfo, type ReactNode, StrictMode } from "react";
-import { createRoot, hydrateRoot } from "react-dom/client";
+import { type ComponentType, type ReactNode, StrictMode } from "react";
+import { createRoot, type ErrorInfo, hydrateRoot } from "react-dom/client";
 import { markEmbedShellAttribute } from "./domain/device/embed/embedMode";
 import { markPlayDay, PWA_MARK_NAV } from "./domain/device/perf/playDayMarks.ts";
-import { countRecoverableError } from "./domain/device/perf/recoverableErrors.ts";
 import { isPublicShellPath } from "./domain/device/perf/publicShellPaths.ts";
+import { countRecoverableError } from "./domain/device/perf/recoverableErrors.ts";
 import { scheduleAfterFirstPaint } from "./domain/device/perf/scheduleAfterFirstPaint.ts";
 import { scheduleWhenIdleAfterLoad } from "./domain/device/perf/scheduleWhenIdleAfterLoad.ts";
 import { markStandaloneShellClass } from "./domain/device/pwa/markStandaloneShellClass";
@@ -74,9 +74,7 @@ function renderApp(): Promise<void> {
   // re-render then client-renders it, discarding the prerendered DOM. Load it alongside App;
   // a failed load hydrates anyway and the lazy route's own chunk retry takes over.
   const routeReady = import("./navigation/routePreloaders.ts")
-    .then(({ preloadLazyRouteComponent }) =>
-      preloadLazyRouteComponent(window.location.pathname),
-    )
+    .then(({ preloadLazyRouteComponent }) => preloadLazyRouteComponent(window.location.pathname))
     .catch(() => {});
   return Promise.all([import("./App.tsx"), routeReady]).then(([{ default: App }]) => {
     hydrateRoot(rootEl, appTree(App), { onRecoverableError });

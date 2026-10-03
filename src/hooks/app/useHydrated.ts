@@ -17,9 +17,5 @@ const getServerSnapshot = () => false;
  * the snapshot that hydration has to match.
  */
 export function useHydrated(): boolean {
-  return useSyncExternalStore(
-    subscribe,
-    getClientSnapshot,
-    getServerSnapshot,
-  );
+  return useSyncExternalStore(subscribe, getClientSnapshot, getServerSnapshot);
 }

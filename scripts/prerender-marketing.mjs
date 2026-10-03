@@ -5,6 +5,7 @@ import { createServer } from "node:net";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { chromium } from "playwright";
+import { finalizePrerenderDom } from "./prerender-hydration-markers.mjs";
 import {
   distHtmlPath,
   loadCrawlPolicy,
@@ -14,7 +15,6 @@ import {
   rewritePrerenderPreviewUrls,
   spaShellPath,
 } from "./seo-build-lib.mjs";
-import { finalizePrerenderDom } from "./prerender-hydration-markers.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const targets = prerenderTargets(loadCrawlPolicy(root));
@@ -147,10 +147,7 @@ try {
       timeout: 30_000,
     });
     const snapshot = await finalizeWhenSettled(page, urlPath);
-    const html = restoreTemplateHeadAssets(
-      rewritePrerenderPreviewUrls(snapshot, BASE),
-      shellHtml,
-    );
+    const html = restoreTemplateHeadAssets(rewritePrerenderPreviewUrls(snapshot, BASE), shellHtml);
     const out = distHtmlPath(root, urlPath);
     mkdirSync(dirname(out), { recursive: true });
     writeFileSync(out, html);

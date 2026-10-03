@@ -1,4 +1,4 @@
-import { act, lazy, Suspense, type ReactNode } from "react";
+import { act, lazy, type ReactNode, Suspense } from "react";
 import { createPortal } from "react-dom";
 import { createRoot, hydrateRoot } from "react-dom/client";
 import { afterEach, describe, expect, it } from "vitest";

@@ -49,9 +49,7 @@ describe("lazyWithChunkRetry preload", () => {
 
   it("shares one import between a preload and the first render", async () => {
     let resolve: (value: { default: typeof Route }) => void = () => {};
-    const importFn = vi.fn(
-      () => new Promise<{ default: typeof Route }>((r) => (resolve = r)),
-    );
+    const importFn = vi.fn(() => new Promise<{ default: typeof Route }>((r) => (resolve = r)));
     const Lazy = lazyWithChunkRetry(importFn);
 
     const preloaded = Lazy.preload();

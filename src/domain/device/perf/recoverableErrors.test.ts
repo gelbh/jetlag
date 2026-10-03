@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  countRecoverableError,
-  getRecoverableErrorCount,
-} from "./recoverableErrors";
+import { countRecoverableError, getRecoverableErrorCount } from "./recoverableErrors";
 
 describe("recoverableErrors", () => {
   it("counts each recoverable error", () => {

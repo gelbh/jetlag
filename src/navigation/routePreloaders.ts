@@ -1,13 +1,9 @@
 import type { To } from "react-router-dom";
 import {
-  lazyWithChunkRetry,
   type LazyRouteComponent,
+  lazyWithChunkRetry,
 } from "../domain/device/updates/lazyWithChunkRetry";
-import {
-  lazyRouteLoaderKey,
-  normalizeRoutePath,
-  type LazyRouteLoaderKey,
-} from "./routeMetadata";
+import { type LazyRouteLoaderKey, lazyRouteLoaderKey, normalizeRoutePath } from "./routeMetadata";
 import { markRouteImportWarm } from "./routeWarmState";
 
 export const importMapScreen = () =>

@@ -94,7 +94,9 @@ for (const { path: urlPath, indexable } of targets) {
   }
 
   if (!hasPrerenderedRootMarker(html)) {
-    console.error(`${urlPath}: #root is missing data-prerendered="true" (src/main.tsx hydrate switch)`);
+    console.error(
+      `${urlPath}: #root is missing data-prerendered="true" (src/main.tsx hydrate switch)`,
+    );
     failed = true;
   }
 

@@ -414,9 +414,9 @@ describe("worker fetch", () => {
     expect(`${second.pathname}${second.search}`).toBe("/join/?code=ABCD");
 
     const body = await response.text();
-    const headerNonce = (
-      response.headers.get("Content-Security-Policy") ?? ""
-    ).match(/'nonce-([^']+)'/)?.[1];
+    const headerNonce = (response.headers.get("Content-Security-Policy") ?? "").match(
+      /'nonce-([^']+)'/,
+    )?.[1];
     expect(headerNonce).toBeTruthy();
     expect(body).toContain(`nonce="${headerNonce}"`);
     expect(body).toContain('<meta name="robots" content="noindex,nofollow">');

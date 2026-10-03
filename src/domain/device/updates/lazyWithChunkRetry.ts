@@ -40,6 +40,7 @@ type LazyModule = { default: ComponentType<any> };
  */
 function resolvedThenable(module: LazyModule): Promise<LazyModule> {
   return {
+    // biome-ignore lint/suspicious/noThenProperty: React.lazy must see a sync thenable here.
     then(onFulfilled: (value: LazyModule) => unknown) {
       onFulfilled(module);
     },
@@ -66,27 +67,29 @@ export function lazyWithChunkRetry(
     ));
 
   const component = lazy(() =>
-    loaded ? resolvedThenable(loaded) : load().catch((error) => {
-      if (isChunkLoadError(error)) {
-        const context = getReloadContext?.() ?? chunkReloadContextGetter?.();
-        if (
-          attemptChunkReload(
-            context
-              ? {
-                  session: context.session,
-                  pathname: context.pathname,
-                  onNeedRefresh: context.onNeedRefresh,
-                  registration: context.registration,
-                  applyUpdate: context.applyUpdate,
-                }
-              : undefined,
-          )
-        ) {
-          return new Promise<never>(() => {});
-        }
-      }
-      throw error;
-    }),
+    loaded
+      ? resolvedThenable(loaded)
+      : load().catch((error) => {
+          if (isChunkLoadError(error)) {
+            const context = getReloadContext?.() ?? chunkReloadContextGetter?.();
+            if (
+              attemptChunkReload(
+                context
+                  ? {
+                      session: context.session,
+                      pathname: context.pathname,
+                      onNeedRefresh: context.onNeedRefresh,
+                      registration: context.registration,
+                      applyUpdate: context.applyUpdate,
+                    }
+                  : undefined,
+              )
+            ) {
+              return new Promise<never>(() => {});
+            }
+          }
+          throw error;
+        }),
   );
 
   /** Load the module so the first render of `component` does not suspend. */

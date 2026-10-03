@@ -167,10 +167,7 @@ test("prerenderTargets rejects a perf path that is indexable or crawlable", () =
     () => prerenderTargets(policy, ["/premium"]),
     /both indexablePaths and PERF_PRERENDER_PATHS/,
   );
-  assert.throws(
-    () => prerenderTargets(policy, ["/stats"]),
-    /must be in disallowPaths/,
-  );
+  assert.throws(() => prerenderTargets(policy, ["/stats"]), /must be in disallowPaths/);
 });
 
 test("hasPrerenderedRootMarker reads the #root opening tag only", () => {
@@ -178,10 +175,7 @@ test("hasPrerenderedRootMarker reads the #root opening tag only", () => {
     hasPrerenderedRootMarker('<div id="root" data-prerendered="true"><p>x</p></div>'),
     true,
   );
-  assert.equal(
-    hasPrerenderedRootMarker('<div data-prerendered="true" id="root"></div>'),
-    true,
-  );
+  assert.equal(hasPrerenderedRootMarker('<div data-prerendered="true" id="root"></div>'), true);
   assert.equal(hasPrerenderedRootMarker('<div id="root"></div>'), false);
   assert.equal(
     hasPrerenderedRootMarker(
@@ -199,7 +193,9 @@ test("hasBootSplashElement ignores inert markup", () => {
   assert.equal(hasBootSplashElement('<div id="boot-splash" role="status"></div>'), true);
   assert.equal(hasBootSplashElement("<section class='x' id='boot-splash'>"), true);
   assert.equal(
-    hasBootSplashElement('<link rel="stylesheet" href="/boot-splash.css"><div id="boot-splash-mark">'),
+    hasBootSplashElement(
+      '<link rel="stylesheet" href="/boot-splash.css"><div id="boot-splash-mark">',
+    ),
     false,
   );
   assert.equal(hasBootSplashElement('<!-- <div id="boot-splash"> -->'), false);
@@ -211,7 +207,9 @@ test("robotsMetaContent finds the robots meta regardless of attribute order", ()
     "noindex,nofollow",
   );
   assert.equal(
-    robotsMetaContent('<meta name="description" content="x"><meta name="ROBOTS" content="index,follow">'),
+    robotsMetaContent(
+      '<meta name="description" content="x"><meta name="ROBOTS" content="index,follow">',
+    ),
     "index,follow",
   );
   assert.equal(robotsMetaContent('<meta name="description" content="x">'), undefined);

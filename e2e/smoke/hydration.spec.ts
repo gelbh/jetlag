@@ -1,5 +1,5 @@
 import type { Page } from "@playwright/test";
-import { test, expect, prepareE2EPage, seedLocalSession } from "../fixtures";
+import { expect, prepareE2EPage, seedLocalSession, test } from "../fixtures";
 
 /**
  * Prod Worker serves exact `/` from dist/prerender/home/ and `/join` from dist/join/; plain
@@ -60,10 +60,8 @@ async function openPrerendered(page: Page, path: string): Promise<void> {
   await watchHydrationSignals(page);
   await servePrerenderedDocuments(page);
   await page.goto(path);
-  const prerendered = await page
-    .locator("#root")
-    .getAttribute("data-prerendered");
-  // eslint-disable-next-line playwright/no-skipped-test -- `npm run dev` has no prerendered output; CI runs on `npm run build`.
+  const prerendered = await page.locator("#root").getAttribute("data-prerendered");
+  // `npm run dev` has no prerendered output; CI runs on `npm run build`.
   test.skip(prerendered !== "true", "No prerendered build output (dev server)");
 }
 
@@ -86,8 +84,7 @@ async function expectCleanHydration(
     return {
       recoverableErrors: window.__JETLAG_E2E__!.recoverableErrorCount(),
       prerendered: w.__prerenderedNodes.length,
-      discarded: w.__prerenderedNodes.filter((node) => !node.isConnected)
-        .length,
+      discarded: w.__prerenderedNodes.filter((node) => !node.isConnected).length,
       cls: w.__cls,
     };
   });
@@ -99,9 +96,7 @@ async function expectCleanHydration(
   expect(signals.cls).toBeLessThan(0.01);
 }
 
-test("@smoke prerendered home hydrates without recoverable errors", async ({
-  page,
-}) => {
+test("@smoke prerendered home hydrates without recoverable errors", async ({ page }) => {
   await prepareE2EPage(page);
   await openPrerendered(page, "/");
   await expectCleanHydration(page);
@@ -116,15 +111,11 @@ test("@smoke prerendered home hydrates without recoverable errors", async ({
   });
   await page.getByRole("link", { name: "Join session" }).click();
   await expect(page).toHaveURL(/\/join$/);
-  await expect(
-    page.getByRole("button", { name: "Join session" }),
-  ).toBeVisible();
+  await expect(page.getByRole("button", { name: "Join session" })).toBeVisible();
   expect(documents).toEqual([]);
 });
 
-test("@smoke prerendered join hydrates without recoverable errors", async ({
-  page,
-}) => {
+test("@smoke prerendered join hydrates without recoverable errors", async ({ page }) => {
   await prepareE2EPage(page);
   await openPrerendered(page, "/join");
   await expectCleanHydration(page);
@@ -140,9 +131,7 @@ test("@smoke prerendered join hydrates without recoverable errors", async ({
   await expect(seeker).toHaveAttribute("data-active", "true");
 });
 
-test("@smoke prerendered join fills the invite code after hydrating", async ({
-  page,
-}) => {
+test("@smoke prerendered join fills the invite code after hydrating", async ({ page }) => {
   await prepareE2EPage(page);
   await openPrerendered(page, "/join?code=WXYZ");
 
@@ -151,9 +140,7 @@ test("@smoke prerendered join fills the invite code after hydrating", async ({
 });
 
 for (const path of ["/premium", "/privacy", "/terms"]) {
-  test(`@smoke prerendered ${path} hydrates without recoverable errors`, async ({
-    page,
-  }) => {
+  test(`@smoke prerendered ${path} hydrates without recoverable errors`, async ({ page }) => {
     await prepareE2EPage(page);
     await openPrerendered(page, path);
     await expect(page.getByRole("heading", { level: 1 }).first()).toBeVisible();
@@ -161,17 +148,13 @@ for (const path of ["/premium", "/privacy", "/terms"]) {
   });
 }
 
-test("@smoke prerendered home hydrates with a saved local session", async ({
-  page,
-}) => {
+test("@smoke prerendered home hydrates with a saved local session", async ({ page }) => {
   await prepareE2EPage(page);
   await seedLocalSession(page, { code: "ABCD" });
   await openPrerendered(page, "/");
 
   // Saved-session UI is client-only state; it must arrive after hydration, not break it.
-  await expect(
-    page.getByRole("button", { name: /Return to map/i }),
-  ).toBeVisible();
+  await expect(page.getByRole("button", { name: /Return to map/i })).toBeVisible();
 
   await expectCleanHydration(page, { keepsPrerenderedNodes: false });
 });

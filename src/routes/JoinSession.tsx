@@ -15,10 +15,10 @@ import {
   type JoinSessionFormValues,
   joinSessionFormSchema,
 } from "@/domain/session/join/joinSessionForm";
-import { useHydrated } from "@/hooks/app/useHydrated";
 import type { PlayerRole } from "@/domain/session/players/playerRole";
 import { playerRoleLabel } from "@/domain/session/players/playerRole";
 import { normalizeRolePasscode } from "@/domain/session/players/rolePasscode";
+import { useHydrated } from "@/hooks/app/useHydrated";
 import { ANALYTICS_EVENTS, track } from "@/services/core/analytics/analytics";
 import {
   normalizeSessionCode,
