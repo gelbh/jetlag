@@ -249,6 +249,8 @@ export function AppUpdateProvider({ children }: { children: ReactNode }) {
     });
   }, [needsRefresh, updateSW, location.pathname, session]);
 
+  const dismissDeferred = useCallback(() => setDismissed(true), []);
+
   const value = useMemo<AppUpdateContextValue>(() => {
     const showMapChip = needsRefresh && inActiveMapSession && !dismissed && !safeToReload;
     const showGlobalBanner = needsRefresh && !showMapChip && !(inActiveMapSession && dismissed);
@@ -258,7 +260,7 @@ export function AppUpdateProvider({ children }: { children: ReactNode }) {
       safeToReload,
       showMapChip,
       showGlobalBanner,
-      dismissDeferred: () => setDismissed(true),
+      dismissDeferred,
       applyUpdate: () => {
         void applyServiceWorkerUpdate(registrationRef.current, updateSW ?? undefined);
       },
@@ -267,6 +269,7 @@ export function AppUpdateProvider({ children }: { children: ReactNode }) {
       hotfixRequiredMinAppVersion: hotfixGrace.requiredMinAppVersion,
     };
   }, [
+    dismissDeferred,
     dismissed,
     hotfixGrace.active,
     hotfixGrace.requiredMinAppVersion,

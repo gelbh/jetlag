@@ -1,17 +1,23 @@
 import { Button } from "@mantine/core";
 import { appUpdateCopy } from "@/domain/device/updates/appUpdateCopy";
+import { MAP_NOTICE_DURATION_MS } from "@/domain/ui/mapNoticeLifetime";
 import { useAppUpdateState } from "@/hooks/app/useAppUpdateState";
+import { useTimedDismiss } from "@/hooks/ui/useTimedDismiss";
 import { HudBanner } from "../hud/HudBanner";
 import { MapFloatSurface } from "./MapFloatSurface";
 
+const MAP_STATUS_CHIP_CLASS = "pointer-events-auto mx-3 mt-1.5 z-[var(--z-panel)]";
+
 export function AppUpdateMapChip() {
   const { showMapChip, dismissDeferred } = useAppUpdateState();
+  useTimedDismiss({
+    active: showMapChip,
+    ms: MAP_NOTICE_DURATION_MS.updateWaiting,
+    onDismiss: dismissDeferred,
+  });
 
   return (
-    <HudBanner
-      visible={showMapChip}
-      className="jl-app-update-chip pointer-events-auto fixed inset-x-0 z-[var(--z-panel)] px-3"
-    >
+    <HudBanner visible={showMapChip} className={`jl-map-status-chip ${MAP_STATUS_CHIP_CLASS}`}>
       <MapFloatSurface
         tone="default"
         role="status"
