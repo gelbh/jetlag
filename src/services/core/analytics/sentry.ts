@@ -12,6 +12,7 @@ import {
   isFirestorePermissionDeniedEvent,
 } from "./sentryEventPolicy";
 import { CLIENT_SENTRY_IGNORE_SPANS } from "./sentryIgnoreSpans";
+import { createSentryReactRouterIntegration } from "./sentryReactRouter";
 
 const SESSION_CODE_PATTERN = /\b[A-Z0-9]{4}\b/g;
 const REACT_REFRESH_FRAME = /@react-refresh/i;
@@ -145,11 +146,7 @@ export function initSentry(): void {
     ignoreErrors: CLIENT_SENTRY_IGNORE_ERRORS,
     ignoreSpans: CLIENT_SENTRY_IGNORE_SPANS,
     dataCollection: CLIENT_SENTRY_DATA_COLLECTION,
-    integrations: [
-      Sentry.browserTracingIntegration({
-        beforeStartSpan: (options) => ({ ...options, name: parameterizedRoutePath(options.name) }),
-      }),
-    ],
+    integrations: [createSentryReactRouterIntegration()],
     beforeSend: scrubEvent,
     replaysSessionSampleRate: import.meta.env.PROD ? 0.1 : 0,
     replaysOnErrorSampleRate: 1.0,
@@ -188,6 +185,10 @@ function withSentryScope(run: (scope: Sentry.Scope) => void): void {
   }
 
   Sentry.withScope(run);
+}
+
+export function syncSentryUser(user: { uid: string } | null): void {
+  Sentry.setUser(user ? { id: user.uid } : null);
 }
 
 export function setBootstrapTag(phase: string): void {

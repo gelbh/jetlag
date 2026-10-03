@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 const addBreadcrumb = vi.hoisted(() => vi.fn());
 const captureMessage = vi.hoisted(() => vi.fn());
+const setUser = vi.hoisted(() => vi.fn());
 const withScope = vi.hoisted(() =>
   vi.fn(
     (
@@ -18,7 +19,9 @@ const withScope = vi.hoisted(() =>
 const init = vi.hoisted(() => vi.fn());
 const captureReactException = vi.hoisted(() => vi.fn());
 const addIntegration = vi.hoisted(() => vi.fn());
-const browserTracingIntegration = vi.hoisted(() => vi.fn(() => ({ name: "BrowserTracing" })));
+const createSentryReactRouterIntegration = vi.hoisted(() =>
+  vi.fn(() => ({ name: "ReactRouterTracing" })),
+);
 const replayIntegration = vi.hoisted(() => vi.fn(() => ({ name: "Replay" })));
 const getClientEnv = vi.hoisted(() => vi.fn((): Record<string, string> => ({})));
 const idleCallbacks = vi.hoisted((): Array<() => void> => []);
@@ -28,15 +31,19 @@ const scopeSetTransactionName = vi.hoisted(() => vi.fn());
 vi.mock("@sentry/react", () => ({
   addBreadcrumb,
   captureMessage,
+  setUser,
   withScope,
   captureException: vi.fn(),
   captureReactException,
   init,
   addIntegration,
-  browserTracingIntegration,
   replayIntegration,
   getIsolationScope: () => ({ addBreadcrumb: isolationScopeAddBreadcrumb }),
   getCurrentScope: () => ({ setTransactionName: scopeSetTransactionName }),
+}));
+
+vi.mock("./sentryReactRouter", () => ({
+  createSentryReactRouterIntegration,
 }));
 
 vi.mock("../../../config/env", () => ({
@@ -57,6 +64,7 @@ import {
   reportFirestoreListenPermissionDenied,
   reportJoinPermissionDenied,
   setTransactionName,
+  syncSentryUser,
 } from "./sentry";
 import { CLIENT_SENTRY_DATA_COLLECTION } from "./sentryDataCollection";
 import { CLIENT_SENTRY_IGNORE_SPANS } from "./sentryIgnoreSpans";
@@ -108,7 +116,8 @@ describe("initSentry", () => {
       tunnel: string;
       ignoreSpans: unknown;
     };
-    expect(options.integrations).toEqual([{ name: "BrowserTracing" }]);
+    expect(options.integrations).toEqual([{ name: "ReactRouterTracing" }]);
+    expect(createSentryReactRouterIntegration).toHaveBeenCalledOnce();
     expect(replayIntegration).not.toHaveBeenCalled();
     expect(options.replaysOnErrorSampleRate).toBe(1.0);
     expect(options).toHaveProperty("replaysSessionSampleRate");
@@ -313,5 +322,27 @@ describe("captureErrorBoundaryException", () => {
         },
       },
     );
+  });
+});
+
+describe("syncSentryUser", () => {
+  afterEach(() => {
+    setUser.mockClear();
+  });
+
+  it("sets Sentry user id from firebase uid only", () => {
+    syncSentryUser({ uid: "firebase-uid-1" });
+
+    expect(setUser).toHaveBeenCalledExactlyOnceWith({ id: "firebase-uid-1" });
+    const payload = setUser.mock.calls[0]?.[0] as Record<string, unknown>;
+    expect(payload).not.toHaveProperty("email");
+    expect(payload).not.toHaveProperty("username");
+    expect(payload).not.toHaveProperty("uid");
+  });
+
+  it("clears Sentry user when identity is null", () => {
+    syncSentryUser(null);
+
+    expect(setUser).toHaveBeenCalledExactlyOnceWith(null);
   });
 });
