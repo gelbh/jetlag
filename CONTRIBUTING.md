@@ -80,7 +80,7 @@ just e2e-smoke
 
 ## Release notes
 
-Player-visible changes need a changeset. See [`.changeset/README.md`](.changeset/README.md).
+Player-visible changes need a changeset. See [`.changeset/README.md`](.changeset/README.md). Merge into `main` requires the `changeset-status` check (or an allowed skip / empty changeset). Husky does not enforce this.
 
 ```bash
 npx changeset
