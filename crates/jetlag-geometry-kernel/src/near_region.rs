@@ -1,4 +1,7 @@
-//! Near-region batch: buffer lines + union disks + clip to game area.
+//! Buffer-union near region: geodesic line buffers + disk unions, clipped to game area.
+//!
+//! Production coastline uses `coastline_near_region::build_coastline_near_region_distance_threshold`.
+//! This module stays for multi-place disk batches and explicit `bufferUnion` / Rust tests.
 
 use crate::geodesic_buffer::geodesic_line_buffer;
 use crate::mask::{
@@ -8,11 +11,11 @@ use crate::mask::{
 use crate::types::PolygonFeature;
 use geo::{BooleanOps, MultiPolygon};
 
-/// Buffer all geodesic line segments at `distance_meters`, union with disks,
-/// then clip to `game_area`. Coordinates on each segment are `[lng, lat]`.
+/// Legacy buffer-union path (not production coastline). Buffers geodesic line segments at
+/// `distance_meters`, unions with disks, then clips to `game_area`. Segment coords are `[lng, lat]`.
 ///
-/// Skips failed individual line buffers. When union-then-clip is empty, falls
-/// back to clipping each part then unioning (matches TS `clipBufferedSegmentsToGameArea`).
+/// Skips failed individual line buffers. When union-then-clip is empty, falls back to clipping
+/// each part then unioning (matches TS `clipBufferedSegmentsToGameArea`).
 /// Returns `None` when nothing unions or both clip strategies yield empty.
 pub fn build_near_region(
     segments: &[Vec<[f64; 2]>],

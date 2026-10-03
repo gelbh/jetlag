@@ -45,7 +45,8 @@ export function createPwaPlugin() {
       ],
     },
     injectManifest: {
-      globPatterns: ["**/*.{js,css,html,ico,svg,png,woff2}"],
+      // wasm: the geometry kernel has no TS fallback, so question tools need it offline.
+      globPatterns: ["**/*.{js,css,html,ico,svg,png,woff2,wasm}"],
     },
   });
 }

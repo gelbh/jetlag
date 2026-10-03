@@ -83,6 +83,43 @@ describe("regionPackPoi", () => {
     clearBundledPoiCacheForTests();
   });
 
+  it("does not cache a miss when the bundle fetch fails transiently", async () => {
+    const { fetchBundledMeasuringPlaces, clearBundledPoiCacheForTests } = await import(
+      "./regionPackPoi"
+    );
+
+    clearBundledPoiCacheForTests();
+
+    const fetchMock = vi
+      .fn()
+      .mockRejectedValueOnce(new TypeError("Failed to fetch"))
+      .mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          category: "museum",
+          source: "wikidata",
+          places: [
+            {
+              id: "Q160236",
+              name: "Metropolitan Museum of Art",
+              lat: 40.7794,
+              lng: -73.9632,
+            },
+          ],
+        }),
+      });
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(fetchBundledMeasuringPlaces(sampleGameArea, "museum", "nyc")).resolves.toEqual([]);
+    await expect(
+      fetchBundledMeasuringPlaces(sampleGameArea, "museum", "nyc"),
+    ).resolves.toHaveLength(1);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+
+    vi.unstubAllGlobals();
+    clearBundledPoiCacheForTests();
+  });
+
   it("merges bundled tentacle pois without duplicating overpass names", () => {
     const overpass: TentaclePoi[] = [
       {
