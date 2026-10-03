@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { formatFreshnessAge } from "../../domain/admin/formatAdminFreshness";
 import type { IncidentMessageRecord, IncidentRecord } from "../../domain/incident/incidentTypes";
 import { useIncidentThread } from "../../hooks/incident/useIncidentThread";
+import { useStickScrollToBottom } from "../../hooks/ui/useStickScrollToBottom";
 import {
   incidentStatusChipLabel,
   incidentStatusChipTone,
@@ -103,13 +104,7 @@ function AdminIncidentDetailBody({
   const [tab, setTab] = useState<AdminIncidentDetailTab>("chat");
   const [draft, setDraft] = useState("");
   const [sendError, setSendError] = useState<string | null>(null);
-  const bottomRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (tab === "chat") {
-      bottomRef.current?.scrollIntoView?.({ block: "end" });
-    }
-  }, [messages.length, tab]);
+  const bottomRef = useStickScrollToBottom(`${tab}:${messages.length}`);
 
   const chatMessages = useMemo(
     () =>

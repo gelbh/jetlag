@@ -157,7 +157,9 @@
   background: var(--color-surface-deep);
   padding: 0.5rem 0.625rem;
   text-align: left;
-  transition: border-color 120ms ease, background-color 120ms ease;
+  transition:
+    border-color 120ms ease,
+    background-color 120ms ease;
 }
 
 .jl-incident-queue-filter {
@@ -334,7 +336,9 @@ html[data-motion="static"] .jl-incident-queue-row {
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--color-ink-muted);
-  transition: background-color 150ms ease, color 150ms ease;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease;
 }
 
 html[data-motion="reduced"] .jl-incident-tab,
