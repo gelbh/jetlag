@@ -1,8 +1,6 @@
 import { Suspense } from "react";
 import { MapAttentionRing } from "../components/map/chrome/MapAttentionRing";
-import { useMapLandscapeChrome } from "../components/session/mapChrome/MapLandscapeChromeContext";
 import { MapLandscapeChromeShell } from "../components/session/mapChrome/MapLandscapeChromeShell";
-import { resolveLandscapeMapControlInset } from "../components/session/mapChrome/resolveLandscapeMapControlInset";
 import { isTerminalSessionSyncMessage } from "../domain/device/sync/terminalSessionMessage";
 import { HeavyToolHost } from "./map-screen/lazyImports";
 import { MapScreenChrome } from "./map-screen/MapScreenChrome";
@@ -20,19 +18,7 @@ function SeekerMapScreenBody({
   inactiveChrome: boolean;
 }) {
   "use memo";
-  const landscape = useMapLandscapeChrome();
-  const mapChromeControlInset = resolveLandscapeMapControlInset(
-    controller.mapChromeControlInset,
-    false,
-    landscape,
-  ) as typeof controller.mapChromeControlInset;
-
-  const layersController: MapScreenController = {
-    ...controller,
-    mapChromeControlInset,
-  };
-
-  const mapLayers = <MapScreenMapLayers controller={layersController} />;
+  const mapLayers = <MapScreenMapLayers controller={controller} />;
 
   const mapLayersContent = inactiveChrome ? (
     <div className="h-full w-full saturate-50 brightness-95">{mapLayers}</div>

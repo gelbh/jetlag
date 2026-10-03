@@ -123,7 +123,7 @@ export function SupportAgentChat({
     bottomRef.current?.scrollIntoView?.({ block: "end" });
   }, [messages.length]);
 
-  const waitingOnHost = useMemo(() => isWaitingOnHost(messages), [messages]);
+  const waitingOnHost = isWaitingOnHost(messages);
   const agentWorking = useMemo(() => {
     const runStatus = incident?.supportAgentRun?.status;
     if (runStatus === "working" || runStatus === "running") {

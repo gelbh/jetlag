@@ -121,7 +121,6 @@ export function AdminMapScreen({ embeddedMonitor = false }: { embeddedMonitor?: 
   const syncStatusLabel = controller.syncStatus.lastSyncError
     ? `Error: ${controller.syncStatus.lastSyncError}`
     : controller.syncStatus.status;
-  const mapControlInset = isWide ? "admin-rail" : "dock";
 
   const mapLayers = (
     <MapView
@@ -130,8 +129,6 @@ export function AdminMapScreen({ embeddedMonitor = false }: { embeddedMonitor?: 
         mapKey: controller.session.id,
         mapStyle: controller.effectiveBasemapStyle,
         onMapStyleChange: controller.handleMapStyleChange,
-        mapStyleControlInset: mapControlInset,
-        zoomControlInset: mapControlInset,
         center: controller.center,
         zoom: 12,
         focusBounds: controller.mapFocusBounds,
