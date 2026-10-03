@@ -19,7 +19,6 @@ export type MapScreenMapLayersProps = {
 };
 
 export function MapScreenMapLayers({ controller }: MapScreenMapLayersProps) {
-  "use memo";
   const {
     session,
     gameArea,

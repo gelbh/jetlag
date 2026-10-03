@@ -19,7 +19,6 @@ function SeekerMapScreenBody({
   controller: MapScreenController;
   inactiveChrome: boolean;
 }) {
-  "use memo";
   const landscape = useMapLandscapeChrome();
   const mapChromeControlInset = resolveLandscapeMapControlInset(
     controller.mapChromeControlInset,
@@ -64,7 +63,6 @@ function SeekerMapScreenBody({
 }
 
 export function SeekerMapScreen() {
-  "use memo";
   const controller = useMapScreenController();
   const syncMessage =
     controller.syncStatus.remoteUpdateNotice ??
