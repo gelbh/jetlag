@@ -221,6 +221,40 @@ describe("stripeWebhook", () => {
     });
   });
 
+  it("keeps newer stripeCustomerId when delayed customer.deleted targets an older id", async () => {
+    const db = createWebhookMockDb({
+      "users/host-1": {
+        stripeCustomerId: "cus_new",
+        subscription: { status: "active", plan: "monthly" },
+      },
+    });
+    const res = mockResponse();
+
+    await handleStripeWebhook(
+      db,
+      WEBHOOK_SECRET,
+      signedWebhookRequest({
+        id: "evt_customer_deleted_stale_meta",
+        type: "customer.deleted",
+        object: {
+          id: "cus_old",
+          object: "customer",
+          metadata: { firebaseUid: "host-1" },
+        },
+      }),
+      res,
+    );
+
+    assert.equal(res.statusCode, 200);
+    assert.deepEqual(res.body, { received: true });
+    assert.equal(db.documents["users/host-1"]?.stripeCustomerId, "cus_new");
+    assert.deepEqual(db.documents["users/host-1"]?.subscription, {
+      status: "active",
+      plan: "monthly",
+    });
+    assert.equal(db.writes.filter((write) => write.path === "users/host-1").length, 0);
+  });
+
   it("clears stripeCustomerId via Firestore query when metadata is absent", async () => {
     const db = createWebhookMockDb({
       "users/host-2": {

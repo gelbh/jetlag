@@ -110,21 +110,23 @@ async function findStripeCustomerIdByFirebaseUid(stripe, uid) {
 /**
  * Clears users/{uid}.stripeCustomerId after Stripe emits customer.deleted.
  * Resolves uid from metadata.firebaseUid, else Firestore query by customer id.
+ * Only clears when stored id is missing or equals the deleted customer.id
+ * (avoids wiping a newer live id after delayed orphan deletes).
  *
  * @param {import('firebase-admin/firestore').Firestore} db
  * @param {Pick<Stripe.Customer | Stripe.DeletedCustomer, "id" | "metadata">} customer
  */
 export async function clearStripeCustomerIdForDeletedCustomer(db, customer) {
+  const customerId = typeof customer?.id === "string" ? customer.id : null;
+  if (!customerId) {
+    return;
+  }
+
   const metadataUid = customer?.metadata?.firebaseUid;
   let uid =
     typeof metadataUid === "string" && metadataUid.trim().length > 0 ? metadataUid.trim() : null;
 
   if (!uid) {
-    const customerId = typeof customer?.id === "string" ? customer.id : null;
-    if (!customerId) {
-      return;
-    }
-
     const snapshot = await db
       .collection("users")
       .where("stripeCustomerId", "==", customerId)
@@ -136,6 +138,19 @@ export async function clearStripeCustomerIdForDeletedCustomer(db, customer) {
     }
 
     uid = snapshot.docs[0].id;
+  }
+
+  const userSnapshot = await userEntitlementsRef(db, uid).get();
+  const storedCustomerId =
+    typeof userSnapshot.data()?.stripeCustomerId === "string"
+      ? userSnapshot.data().stripeCustomerId
+      : null;
+
+  if (storedCustomerId && storedCustomerId !== customerId) {
+    console.warn(
+      `Skipping stripeCustomerId clear for uid ${uid}: stored ${storedCustomerId} != deleted ${customerId}`,
+    );
+    return;
   }
 
   await mergeUserEntitlements(db, uid, {
