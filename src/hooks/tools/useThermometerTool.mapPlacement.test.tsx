@@ -97,4 +97,52 @@ describe("useThermometerTool map-first", () => {
     });
     expect(result.current.hud.modeBody).not.toBeNull();
   });
+
+  it("threads GPS/commit errors into the map overlay while suppressSheet", async () => {
+    const mocks = createToolHookMocks();
+    const { result, rerender } = renderHook(
+      ({ gpsError }: { gpsError: string | null }) =>
+        useThermometerTool({
+          active: true,
+          annotations: mocks.annotations,
+          sessionRules: { gameSize: "large" },
+          createAnnotation: mocks.createAnnotation,
+          distanceUnit: mocks.distanceUnit,
+          finishPlacement: mocks.finishPlacement,
+          setMapError: mocks.setMapError,
+          awaitHiderAnswer: false,
+          gpsError,
+        }),
+      { initialProps: { gpsError: null as string | null } },
+    );
+
+    act(() => {
+      (() => {
+        const panel = result.current.panel;
+        if (!isValidElement(panel)) throw new Error("expected panel element");
+        (panel.props as { onDistanceChange: (n: number) => void }).onDistanceChange(1609.344);
+      })();
+    });
+    await waitFor(() => {
+      expect(result.current.hud.suppressSheet).toBe(true);
+    });
+
+    expect(result.current.hud.error).toBeNull();
+    expect(
+      (result.current.hud.mapOverlay as { props: { error?: string | null } } | null)?.props.error ??
+        null,
+    ).toBeNull();
+
+    rerender({ gpsError: "Current location is unavailable." });
+
+    await waitFor(() => {
+      expect(result.current.hud.suppressSheet).toBe(true);
+      expect(result.current.hud.error).toBeNull();
+      const overlay = result.current.hud.mapOverlay;
+      if (!isValidElement(overlay)) throw new Error("expected overlay");
+      expect((overlay.props as { error?: string | null }).error).toBe(
+        "Current location is unavailable.",
+      );
+    });
+  });
 });
