@@ -139,7 +139,7 @@ export function AdminOpsDesk() {
   } = useAdminJoinSession({ onRefresh: refresh });
 
   const [query, setQuery] = useState("");
-  const [liveOnly, setLiveOnly] = useState(false);
+  const [liveOnly, setLiveOnly] = useState(true);
   const [annotatedOnly, setAnnotatedOnly] = useState(false);
   const [modeFilter, setModeFilter] = useState<AdminSessionModeFilter>("all");
   const [stateFilter, setStateFilter] = useState<AdminSessionStateChip>(null);
@@ -533,7 +533,9 @@ export function AdminOpsDesk() {
             <AdminSessionSkeletonRows />
           ) : sessions.length === 0 ? (
             <div className="jl-ops-empty">
-              <p className="jl-ops-empty-title">No live sessions</p>
+              <p className="jl-ops-empty-title">
+                {liveOnly ? "No live sessions" : "No sessions"}
+              </p>
               <p className="jl-ops-empty-body">Games appear here while a host session is active.</p>
             </div>
           ) : filteredSessions.length === 0 ? (
@@ -576,6 +578,7 @@ export function AdminOpsDesk() {
           active={monitorActive}
           sessionCode={activeSession?.code ?? null}
           errorMessage={monitorRoleError}
+          sessionsUnavailable={Boolean(sessionsError)}
           monitorLayout={monitorLayout}
           onMonitorLayoutChange={handleMonitorLayoutChange}
         />

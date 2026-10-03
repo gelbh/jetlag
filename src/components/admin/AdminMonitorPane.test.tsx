@@ -79,6 +79,23 @@ describe("AdminMonitorPane", () => {
     mockedUseAdminMapWideLayout.mockReturnValue(false);
   });
 
+  it("shows viewport-neutral idle copy without on-desktop wording", () => {
+    render(<AdminMonitorPane active={false} />);
+
+    expect(screen.getByText("Monitor pane")).toBeInTheDocument();
+    expect(screen.getByText("Select a live session to watch the map here.")).toBeInTheDocument();
+    expect(screen.queryByText(/on desktop/i)).not.toBeInTheDocument();
+  });
+
+  it("shows sessions unavailable idle copy when the sessions list failed", () => {
+    render(<AdminMonitorPane active={false} sessionsUnavailable />);
+
+    expect(
+      screen.getByText("Sessions unavailable. Retry from the Sessions panel."),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("Select a live session to watch the map here.")).not.toBeInTheDocument();
+  });
+
   it("uses compact embed path without nested grid when container is narrow", () => {
     render(
       <AdminMonitorPane

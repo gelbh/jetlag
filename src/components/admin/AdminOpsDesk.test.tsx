@@ -146,7 +146,7 @@ describe("AdminOpsDesk", () => {
     expect(screen.getByRole("heading", { name: "Access denied" })).toBeInTheDocument();
   });
 
-  it("shows an empty state for admin users with no live sessions", () => {
+  it("defaults Live on and shows no-live empty title when the list is empty", () => {
     authState.state = "admin";
     authState.authReady = true;
     authState.user = { email: "admin@example.com", emailVerified: true };
@@ -156,8 +156,25 @@ describe("AdminOpsDesk", () => {
 
     renderOpsDesk();
 
+    expect(screen.getByRole("button", { name: "Live" })).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByText("No live sessions")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Live" })).toBeInTheDocument();
+  });
+
+  it("shows No sessions when Live is off and the list is empty", () => {
+    authState.state = "admin";
+    authState.authReady = true;
+    authState.user = { email: "admin@example.com", emailVerified: true };
+    sessionListState.loading = false;
+    sessionListState.error = null;
+    sessionListState.sessions = [];
+
+    renderOpsDesk();
+
+    fireEvent.click(screen.getByRole("button", { name: "Live" }));
+
+    expect(screen.getByRole("button", { name: "Live" })).toHaveAttribute("aria-pressed", "false");
+    expect(screen.getByText("No sessions")).toBeInTheDocument();
+    expect(screen.queryByText("No live sessions")).not.toBeInTheDocument();
   });
 
   it("shows actionable sessions failure without the calm empty state", () => {
@@ -451,8 +468,8 @@ describe("AdminOpsDesk", () => {
 
     renderOpsDesk();
 
-    fireEvent.click(screen.getByRole("button", { name: "Live" }));
-
+    // Default Live filter hides the non-live row; keep Load more for the filter miss.
+    expect(screen.getByRole("button", { name: "Live" })).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByText("No matching sessions")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Load more sessions" })).toBeInTheDocument();
   });
