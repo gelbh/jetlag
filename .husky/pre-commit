@@ -37,6 +37,14 @@ while IFS= read -r -d '' path; do
   fi
 done <"$staged"
 
+# Format + lint staged files (Biome owns JS/TS/JSON; CSS still Stylelint until migration).
+# --write fixes land in the worktree; update-index restages them into the commit.
+if ! npx --no biome check --staged --write --files-ignore-unknown=true --no-errors-on-unmatched; then
+  echo "pre-commit: biome check --staged failed" >&2
+  exit 1
+fi
+git update-index --again
+
 while IFS= read -r -d '' path; do
   case "$path" in
     *.css)
