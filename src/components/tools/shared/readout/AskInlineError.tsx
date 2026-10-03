@@ -11,9 +11,20 @@ type ErrorCopy = {
   detail: string;
 };
 
+/** `FetchTimeoutError` copy; must not fall into the GPS "timed out" branch. */
+function isNetworkTimeoutMessage(lower: string): boolean {
+  return lower.startsWith("request timed out after");
+}
+
 /** Friendlier titles for common GPS / ask failures shown in sheets. */
 export function askInlineErrorCopy(message: string): ErrorCopy {
   const lower = message.toLowerCase();
+  if (isNetworkTimeoutMessage(lower)) {
+    return {
+      title: "Connection timed out",
+      detail: "Map data took too long to load. Check your connection and try again.",
+    };
+  }
   if (lower.includes("timed out") || lower.includes("waiting for your location")) {
     return {
       title: "Location timed out",
@@ -46,6 +57,9 @@ export function askInlineErrorCopy(message: string): ErrorCopy {
 /** True when the message should get GPS-style title + detail treatment. */
 export function isLocationInlineError(message: string): boolean {
   const lower = message.toLowerCase();
+  if (isNetworkTimeoutMessage(lower)) {
+    return false;
+  }
   return (
     lower.includes("timed out") ||
     lower.includes("waiting for your location") ||

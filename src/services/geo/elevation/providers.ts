@@ -1,5 +1,10 @@
 import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
 import {
+  FetchTimeoutError,
+  fetchWithTimeout,
+  GEO_FETCH_TIMEOUT_MS,
+} from "@/services/core/network/fetchWithTimeout";
+import {
   ELEVATION_MIN_429_BACKOFF_MS,
   type ElevationFetchProfile,
   OPEN_METEO_ELEVATION_ENDPOINT,
@@ -55,9 +60,24 @@ async function fetchOpenMeteoElevationBatch(
   let lastError: Error | null = null;
 
   for (let attempt = 0; attempt <= maxRetries; attempt += 1) {
-    const response = await fetch(url.toString(), {
-      headers: { Accept: "application/json" },
-    });
+    let response: Response;
+    try {
+      response = await fetchWithTimeout(
+        url.toString(),
+        { headers: { Accept: "application/json" } },
+        GEO_FETCH_TIMEOUT_MS,
+      );
+    } catch (error) {
+      if (!(error instanceof FetchTimeoutError)) {
+        throw error;
+      }
+      lastError = error;
+      if (attempt >= maxRetries) {
+        throw error;
+      }
+      await sleep(retryDelayMs(attempt, null));
+      continue;
+    }
 
     if (response.ok) {
       recordSuccessfulElevationResponse();
@@ -104,9 +124,24 @@ async function fetchUsgsElevation(
   let lastError: Error | null = null;
 
   for (let attempt = 0; attempt <= maxRetries; attempt += 1) {
-    const response = await fetch(url.toString(), {
-      headers: { Accept: "application/json" },
-    });
+    let response: Response;
+    try {
+      response = await fetchWithTimeout(
+        url.toString(),
+        { headers: { Accept: "application/json" } },
+        GEO_FETCH_TIMEOUT_MS,
+      );
+    } catch (error) {
+      if (!(error instanceof FetchTimeoutError)) {
+        throw error;
+      }
+      lastError = error;
+      if (attempt >= maxRetries) {
+        throw error;
+      }
+      await sleep(retryDelayMs(attempt, null));
+      continue;
+    }
 
     if (response.ok) {
       recordSuccessfulElevationResponse();

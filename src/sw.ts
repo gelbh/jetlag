@@ -72,6 +72,19 @@ registerRoute(
   }),
 );
 
+registerRoute(
+  ({ url }) => url.pathname.startsWith("/geo/gtfs/") && url.pathname.endsWith(".json"),
+  new StaleWhileRevalidate({
+    cacheName: "jetlag-geo-gtfs",
+    plugins: [
+      new ExpirationPlugin({
+        maxEntries: 32,
+        maxAgeSeconds: 30 * 24 * 60 * 60,
+      }),
+    ],
+  }),
+);
+
 self.addEventListener("activate", (event: ExtendableEvent) => {
   event.waitUntil(reportStoragePressureIfHigh({ source: "sw" }));
 });

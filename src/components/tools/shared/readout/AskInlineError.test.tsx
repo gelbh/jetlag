@@ -2,7 +2,7 @@ import { MantineProvider } from "@mantine/core";
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { jetlagTheme } from "@/theme/theme";
-import { AskInlineError, askInlineErrorCopy } from "./AskInlineError";
+import { AskInlineError, askInlineErrorCopy, isLocationInlineError } from "./AskInlineError";
 
 beforeEach(() => {
   vi.stubGlobal("matchMedia", (query: string) => ({
@@ -22,6 +22,14 @@ describe("askInlineErrorCopy", () => {
     const copy = askInlineErrorCopy("Timed out while waiting for your location.");
     expect(copy.title).toBe("Location timed out");
     expect(copy.detail.toLowerCase()).toContain("tap the map");
+  });
+
+  it("does not blame GPS for network request timeouts", () => {
+    const message = "Request timed out after 15000ms.";
+    const copy = askInlineErrorCopy(message);
+    expect(copy.title).toBe("Connection timed out");
+    expect(copy.detail.toLowerCase()).toContain("connection");
+    expect(isLocationInlineError(message)).toBe(false);
   });
 });
 

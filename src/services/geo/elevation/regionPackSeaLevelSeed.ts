@@ -7,6 +7,11 @@ import {
 import type { GameArea } from "@/domain/map/annotations";
 import { isPackGeoSupported, packGeoSeaLevelSeedUrl } from "@/domain/regions/packGeoManifest";
 import type { RegionPackId } from "@/domain/regions/regionPack";
+import {
+  fetchAndReadWithTimeout,
+  GEO_FETCH_TIMEOUT_MS,
+  isTransientFetchError,
+} from "@/services/core/network/fetchWithTimeout";
 import type { CachedSeaLevelSampling } from "../cache";
 
 /** Require most session cells to resolve from the pack seed before dual-phase. */
@@ -67,22 +72,25 @@ export async function loadBundledSeaLevelSeed(
   }
 
   try {
-    const response = await fetch(resolveGeoAssetUrl(packGeoSeaLevelSeedUrl(regionPackId)));
-    if (!response.ok) {
-      seedCache.set(regionPackId, null);
-      return null;
-    }
-
-    const payload = (await response.json()) as {
-      source?: string;
-      bbox?: BundledSeaLevelSeed["bbox"];
-      divisions?: number;
-      cells?: unknown[];
-      cellElevations?: unknown[];
-      complete?: boolean;
-    };
+    const payload = await fetchAndReadWithTimeout(
+      resolveGeoAssetUrl(packGeoSeaLevelSeedUrl(regionPackId)),
+      undefined,
+      GEO_FETCH_TIMEOUT_MS,
+      async (response) =>
+        response.ok
+          ? ((await response.json()) as {
+              source?: string;
+              bbox?: BundledSeaLevelSeed["bbox"];
+              divisions?: number;
+              cells?: unknown[];
+              cellElevations?: unknown[];
+              complete?: boolean;
+            })
+          : null,
+    );
 
     if (
+      !payload ||
       typeof payload.source !== "string" ||
       typeof payload.divisions !== "number" ||
       !Array.isArray(payload.cells) ||
@@ -120,8 +128,11 @@ export async function loadBundledSeaLevelSeed(
     };
     seedCache.set(regionPackId, seed);
     return seed;
-  } catch {
-    seedCache.set(regionPackId, null);
+  } catch (error) {
+    // Timeouts / offline say nothing about the asset; leave uncached so the next call retries.
+    if (!isTransientFetchError(error)) {
+      seedCache.set(regionPackId, null);
+    }
     return null;
   }
 }
