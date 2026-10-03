@@ -12,6 +12,11 @@ import {
   packGeoPoiUrl,
 } from "@/domain/regions/packGeoManifest";
 import type { RegionPackId } from "@/domain/regions/regionPack";
+import {
+  fetchAndReadWithTimeout,
+  GEO_FETCH_TIMEOUT_MS,
+  isTransientFetchError,
+} from "@/services/core/network/fetchWithTimeout";
 import { sanitizeBundledPoiPlaces } from "./bundledPoiHygiene";
 import type { MeasuringPlace } from "./measuringPlaces";
 
@@ -52,14 +57,13 @@ async function loadBundledPoiCategory(
   const url = packGeoPoiUrl(regionPackId, category);
 
   try {
-    const response = await fetch(url);
-    if (!response.ok) {
-      bundleCache.set(cacheKey, null);
-      return null;
-    }
-
-    const payload = (await response.json()) as BundledPoiCategory;
-    if (!Array.isArray(payload.places)) {
+    const payload = await fetchAndReadWithTimeout(
+      url,
+      undefined,
+      GEO_FETCH_TIMEOUT_MS,
+      async (response) => (response.ok ? ((await response.json()) as BundledPoiCategory) : null),
+    );
+    if (!payload || !Array.isArray(payload.places)) {
       bundleCache.set(cacheKey, null);
       return null;
     }
@@ -71,8 +75,11 @@ async function loadBundledPoiCategory(
 
     bundleCache.set(cacheKey, sanitized);
     return sanitized;
-  } catch {
-    bundleCache.set(cacheKey, null);
+  } catch (error) {
+    // Timeouts / offline say nothing about the asset; leave uncached so the next call retries.
+    if (!isTransientFetchError(error)) {
+      bundleCache.set(cacheKey, null);
+    }
     return null;
   }
 }
