@@ -34,6 +34,29 @@ function mockResponse() {
 /**
  * @param {Record<string, Record<string, unknown>>} [initialData]
  */
+function applyWebhookMockWrite(documents, writes, path, data, options) {
+  writes.push({ path, data });
+  if (options?.merge && documents[path]) {
+    const merged = { ...documents[path] };
+    for (const [key, value] of Object.entries(data)) {
+      if (value === FieldValue.delete()) {
+        delete merged[key];
+      } else {
+        merged[key] = value;
+      }
+    }
+    documents[path] = merged;
+  } else {
+    const next = { ...(options?.merge ? documents[path] : {}), ...data };
+    for (const [key, value] of Object.entries(next)) {
+      if (value === FieldValue.delete()) {
+        delete next[key];
+      }
+    }
+    documents[path] = next;
+  }
+}
+
 function createWebhookMockDb(initialData = {}) {
   /** @type {Record<string, Record<string, unknown>>} */
   const documents = { ...initialData };
@@ -47,6 +70,7 @@ function createWebhookMockDb(initialData = {}) {
           const path = `${name}/${id}`;
           return {
             id,
+            path,
             async get() {
               const data = documents[path];
               return {
@@ -55,26 +79,7 @@ function createWebhookMockDb(initialData = {}) {
               };
             },
             set(data, options) {
-              writes.push({ path, data });
-              if (options?.merge && documents[path]) {
-                const merged = { ...documents[path] };
-                for (const [key, value] of Object.entries(data)) {
-                  if (value === FieldValue.delete()) {
-                    delete merged[key];
-                  } else {
-                    merged[key] = value;
-                  }
-                }
-                documents[path] = merged;
-              } else {
-                const next = { ...(options?.merge ? documents[path] : {}), ...data };
-                for (const [key, value] of Object.entries(next)) {
-                  if (value === FieldValue.delete()) {
-                    delete next[key];
-                  }
-                }
-                documents[path] = next;
-              }
+              applyWebhookMockWrite(documents, writes, path, data, options);
               return Promise.resolve();
             },
           };
@@ -109,6 +114,22 @@ function createWebhookMockDb(initialData = {}) {
           return chain;
         },
       };
+    },
+    async runTransaction(callback) {
+      const transaction = {
+        async get(ref) {
+          const path = ref.path;
+          const data = documents[path];
+          return {
+            exists: data !== undefined,
+            data: () => data,
+          };
+        },
+        set(ref, data, options) {
+          applyWebhookMockWrite(documents, writes, ref.path, data, options);
+        },
+      };
+      return callback(transaction);
     },
     writes,
     documents,
@@ -334,6 +355,7 @@ describe("stripeWebhook", () => {
     assert.equal(first.statusCode, 200);
     assert.deepEqual(first.body, { received: true });
     assert.equal(db.documents["users/host-1"]?.stripeCustomerId, undefined);
+    assert.ok(db.documents["stripeEvents/evt_customer_deleted_dup"]);
 
     const userWritesAfterFirst = db.writes.filter((write) => write.path === "users/host-1").length;
 
@@ -345,5 +367,45 @@ describe("stripeWebhook", () => {
       db.writes.filter((write) => write.path === "users/host-1").length,
       userWritesAfterFirst,
     );
+  });
+
+  it("retries customer.deleted clear when the first attempt fails before mark", async () => {
+    const db = createWebhookMockDb({
+      "users/host-1": {
+        stripeCustomerId: "cus_deleted",
+      },
+    });
+    const request = signedWebhookRequest({
+      id: "evt_customer_deleted_retry",
+      type: "customer.deleted",
+      object: {
+        id: "cus_deleted",
+        object: "customer",
+        metadata: { firebaseUid: "host-1" },
+      },
+    });
+
+    let attempts = 0;
+    const originalRunTransaction = db.runTransaction.bind(db);
+    db.runTransaction = async (callback) => {
+      attempts += 1;
+      if (attempts === 1) {
+        throw new Error("transient firestore failure");
+      }
+      return originalRunTransaction(callback);
+    };
+
+    const failed = mockResponse();
+    await handleStripeWebhook(db, WEBHOOK_SECRET, request, failed);
+    assert.equal(failed.statusCode, 500);
+    assert.equal(db.documents["stripeEvents/evt_customer_deleted_retry"], undefined);
+    assert.equal(db.documents["users/host-1"]?.stripeCustomerId, "cus_deleted");
+
+    const retried = mockResponse();
+    await handleStripeWebhook(db, WEBHOOK_SECRET, request, retried);
+    assert.equal(retried.statusCode, 200);
+    assert.deepEqual(retried.body, { received: true });
+    assert.equal(db.documents["users/host-1"]?.stripeCustomerId, undefined);
+    assert.ok(db.documents["stripeEvents/evt_customer_deleted_retry"]);
   });
 });
