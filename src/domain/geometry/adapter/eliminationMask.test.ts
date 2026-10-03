@@ -1,6 +1,7 @@
 import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
 import { point as turfPoint } from "@turf/helpers";
 import { describe, expect, it } from "vitest";
+import { serializeMatchingFeatures } from "@/domain/geo/matchingAdapters";
 import type { AnnotationRecord, GameArea } from "../../map/annotations";
 import { MAP_ANNOTATION_COLORS } from "../../map/mapAnnotationColors";
 import {
@@ -160,5 +161,41 @@ describe("adapter/eliminationMask", () => {
     const shade = await eliminationFeatureForAnnotation(annotation, gameArea);
     expect(shade?.geometry.type).toMatch(/Polygon/);
     expect(booleanPointInPolygon(turfPoint([-0.14, 51.44]), shade!)).toBe(true);
+  });
+
+  it("rebuilds matching shade from stored features when geometry is a point", async () => {
+    const annotation: AnnotationRecord = {
+      id: "matching-deferred",
+      sessionId: "session",
+      status: "active",
+      type: "matching",
+      geometry: {
+        type: "Feature",
+        properties: {},
+        geometry: { type: "Point", coordinates: [-0.15, 51.45] },
+      },
+      metadata: {
+        createdAt: "2026-01-01T00:00:00.000Z",
+        matchingAnswer: "yes",
+        matchingNearestFeatureId: "museum-a",
+        matchingFeaturesJson: serializeMatchingFeatures([
+          {
+            id: "museum-a",
+            name: "Near Museum",
+            point: [51.45, -0.16],
+            inPlayArea: true,
+          },
+          {
+            id: "museum-b",
+            name: "Far Museum",
+            point: [51.42, -0.19],
+            inPlayArea: true,
+          },
+        ]),
+      },
+    };
+
+    const shade = await eliminationFeatureForAnnotation(annotation, gameArea);
+    expect(shade?.geometry.type).toMatch(/Polygon|MultiPolygon/);
   });
 });
