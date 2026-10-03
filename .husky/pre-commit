@@ -36,24 +36,8 @@ while IFS= read -r -d '' path; do
   fi
 done <"$staged"
 
-# Format + lint staged files (Biome owns JS/TS/JSON/CSS).
-# --write fixes land in the worktree; update-index restages them into the commit.
-if ! npx --no biome check --staged --write --files-ignore-unknown=true --no-errors-on-unmatched; then
-  echo "pre-commit: biome check --staged failed" >&2
-  exit 1
-fi
-git update-index --again
-
-while IFS= read -r -d '' path; do
-  case "$path" in
-    src/*.ts | src/*.tsx)
-      printf '%s\0' "$path" >>"$related"
-      ;;
-  esac
-done <"$staged"
-
-# Reject partial staging: tools read the working tree, so unstaged
-# edits on selected paths would mask or falsely fail the commit snapshot.
+# Reject partial staging before Biome --write: tools read the working tree, and
+# restaging Biome fixes must not absorb unrelated unstaged hunks on the same paths.
 reject_partial() {
   local list="$1"
   [ -s "$list" ] || return 0
@@ -70,7 +54,24 @@ reject_partial() {
   done <"$list"
 }
 
-reject_partial "$related"
+reject_partial "$staged"
+
+# Format + lint staged files (Biome owns JS/TS/JSON/CSS).
+# --write fixes land in the worktree; re-add only the original staged paths
+# (never `git update-index --again`, which can absorb unrelated unstaged hunks).
+if ! npx --no biome check --staged --write --files-ignore-unknown=true --no-errors-on-unmatched; then
+  echo "pre-commit: biome check --staged failed" >&2
+  exit 1
+fi
+xargs -0 git add -- <"$staged"
+
+while IFS= read -r -d '' path; do
+  case "$path" in
+    src/*.ts | src/*.tsx)
+      printf '%s\0' "$path" >>"$related"
+      ;;
+  esac
+done <"$staged"
 
 if [ ! -s "$related" ]; then
   exit 0
