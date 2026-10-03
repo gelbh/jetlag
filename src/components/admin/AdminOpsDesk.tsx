@@ -495,52 +495,62 @@ export function AdminOpsDesk() {
 
   const sessionsBody = (
     <div className="jl-scroll jl-ops-panel-scroll" data-testid="admin-ops-sessions">
-      {sessionsError ? <InlineError>{sessionsError}</InlineError> : null}
       {observeError ? <InlineError>{observeError}</InlineError> : null}
-      <div className="mb-3">
-        <AdminSessionFilters
-          query={query}
-          liveOnly={liveOnly}
-          annotatedOnly={annotatedOnly}
-          mode={modeFilter}
-          state={stateFilter}
-          sort={sort}
-          onQueryChange={setQuery}
-          onLiveOnlyChange={setLiveOnly}
-          onAnnotatedOnlyChange={setAnnotatedOnly}
-          onModeChange={setModeFilter}
-          onStateChange={setStateFilter}
-          onSortChange={setSort}
-        />
-      </div>
-      {sessionsLoading ? (
-        <AdminSessionSkeletonRows />
-      ) : sessions.length === 0 ? (
-        <div className="jl-ops-empty">
-          <p className="jl-ops-empty-title">No live sessions</p>
-          <p className="jl-ops-empty-body">Games appear here while a host session is active.</p>
-        </div>
-      ) : filteredSessions.length === 0 ? (
-        <div className="space-y-2.5">
-          <div className="jl-ops-empty">
-            <p className="jl-ops-empty-title">No matching sessions</p>
-            <p className="jl-ops-empty-body">Try another code, area name, or phase filter.</p>
-          </div>
-          {loadMoreButton}
-        </div>
+      {sessionsError ? (
+        <Stack gap="sm">
+          <InlineError>{sessionsError}</InlineError>
+          <Button type="button" variant="default" w="fit-content" onClick={() => void refresh()}>
+            Retry
+          </Button>
+        </Stack>
       ) : (
-        <div className="jl-scroll admin-dashboard-list-scroll space-y-2.5">
-          {filteredSessions.map((summary) => (
-            <AdminSessionRow
-              key={summary.sessionId}
-              summary={summary}
-              observingCode={observingCode}
-              selected={selectedSessionId === summary.sessionId}
-              onMonitor={(nextSummary) => void handleMonitor(nextSummary)}
+        <>
+          <div className="mb-3">
+            <AdminSessionFilters
+              query={query}
+              liveOnly={liveOnly}
+              annotatedOnly={annotatedOnly}
+              mode={modeFilter}
+              state={stateFilter}
+              sort={sort}
+              onQueryChange={setQuery}
+              onLiveOnlyChange={setLiveOnly}
+              onAnnotatedOnlyChange={setAnnotatedOnly}
+              onModeChange={setModeFilter}
+              onStateChange={setStateFilter}
+              onSortChange={setSort}
             />
-          ))}
-          {loadMoreButton}
-        </div>
+          </div>
+          {sessionsLoading ? (
+            <AdminSessionSkeletonRows />
+          ) : sessions.length === 0 ? (
+            <div className="jl-ops-empty">
+              <p className="jl-ops-empty-title">No live sessions</p>
+              <p className="jl-ops-empty-body">Games appear here while a host session is active.</p>
+            </div>
+          ) : filteredSessions.length === 0 ? (
+            <div className="space-y-2.5">
+              <div className="jl-ops-empty">
+                <p className="jl-ops-empty-title">No matching sessions</p>
+                <p className="jl-ops-empty-body">Try another code, area name, or phase filter.</p>
+              </div>
+              {loadMoreButton}
+            </div>
+          ) : (
+            <div className="jl-scroll admin-dashboard-list-scroll space-y-2.5">
+              {filteredSessions.map((summary) => (
+                <AdminSessionRow
+                  key={summary.sessionId}
+                  summary={summary}
+                  observingCode={observingCode}
+                  selected={selectedSessionId === summary.sessionId}
+                  onMonitor={(nextSummary) => void handleMonitor(nextSummary)}
+                />
+              ))}
+              {loadMoreButton}
+            </div>
+          )}
+        </>
       )}
     </div>
   );

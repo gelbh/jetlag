@@ -105,6 +105,14 @@ describe("AdminOpsDesk", () => {
       writable: true,
       value: originalMatchMedia,
     });
+    sessionListState.sessions = [];
+    sessionListState.loading = false;
+    sessionListState.refreshing = false;
+    sessionListState.loadingMore = false;
+    sessionListState.hasMore = false;
+    sessionListState.error = null;
+    sessionListState.refresh.mockClear();
+    sessionListState.loadMore.mockClear();
   });
 
   it("shows skeleton rows while auth is loading", () => {
@@ -143,11 +151,45 @@ describe("AdminOpsDesk", () => {
     authState.authReady = true;
     authState.user = { email: "admin@example.com", emailVerified: true };
     sessionListState.loading = false;
+    sessionListState.error = null;
     sessionListState.sessions = [];
 
     renderOpsDesk();
 
     expect(screen.getByText("No live sessions")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Live" })).toBeInTheDocument();
+  });
+
+  it("shows actionable sessions failure without the calm empty state", () => {
+    authState.state = "admin";
+    authState.authReady = true;
+    authState.user = { email: "admin@example.com", emailVerified: true };
+    sessionListState.loading = false;
+    sessionListState.sessions = [];
+    sessionListState.error = "Couldn't load live sessions.";
+
+    renderOpsDesk();
+
+    expect(screen.getByText("Couldn't load live sessions.")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Retry" })).toBeInTheDocument();
+    expect(screen.queryByText("No live sessions")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Live" })).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Search")).not.toBeInTheDocument();
+  });
+
+  it("retries the session list from the sessions failure UI", () => {
+    authState.state = "admin";
+    authState.authReady = true;
+    authState.user = { email: "admin@example.com", emailVerified: true };
+    sessionListState.loading = false;
+    sessionListState.sessions = [];
+    sessionListState.error = "Couldn't load live sessions.";
+    sessionListState.refresh.mockClear();
+
+    renderOpsDesk();
+
+    fireEvent.click(screen.getByRole("button", { name: "Retry" }));
+    expect(sessionListState.refresh).toHaveBeenCalledTimes(1);
   });
 
   it("renders session phase labels for admin users", () => {
