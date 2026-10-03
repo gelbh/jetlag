@@ -31,7 +31,7 @@ type SeekerEffectsInput = Pick<
     uid: string,
     role: "seeker",
     text: string,
-  ) => Promise<void>;
+  ) => void | Promise<void>;
   cancelThermometerWalk: (args: {
     sessionId: string;
     pendingQuestionId: string;

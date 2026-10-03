@@ -9,7 +9,11 @@ import type {
 import { hidingPeriodMs } from "@/domain/session/size/gameSizeRules";
 import { pendingQuestionDocumentSchema } from "../schemas/firestoreDocuments";
 import { parseFirestoreDocument } from "../zodConverter";
-import { assertNoNestedArrays, stripUndefinedValues } from "./shared";
+import {
+  assertNoNestedArrays,
+  deserializeFirestoreTimestamp,
+  stripUndefinedValues,
+} from "./shared";
 
 export function buildPlayerLocationDocument(
   location: PlayerLocationRecord,
@@ -155,6 +159,11 @@ export function deserializePendingQuestionFromFirestore(
     promptText: String(document.promptText ?? ""),
     answer: document.answer,
     answerableAt: typeof document.answerableAt === "string" ? document.answerableAt : undefined,
+    // Server-owned: read-only here (rules pin it to request.time); never written by the builder.
+    receivedAt:
+      document.receivedAt != null && typeof document.receivedAt === "object"
+        ? deserializeFirestoreTimestamp(document.receivedAt)
+        : undefined,
     deadlineExpiredAt:
       typeof document.deadlineExpiredAt === "string" ? document.deadlineExpiredAt : undefined,
     answeredLate: typeof document.answeredLate === "boolean" ? document.answeredLate : undefined,

@@ -1,29 +1,26 @@
 import type { Feature, LineString } from "geojson";
 import { useCallback, useRef } from "react";
-import type { LatLngTuple } from "../../domain/geometry/gameArea/geometry";
-import { buildThermometerLineGeometry } from "../../domain/questions";
-import type {
-  GameReplyOption,
-  PendingQuestionToolType,
-} from "../../domain/session/activity/sessionChat";
+import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
+import { buildThermometerLineGeometry } from "@/domain/questions";
 import {
   createMessageId,
   createPendingQuestionId,
+  type GameReplyOption,
   type PendingQuestionPlacement,
-} from "../../domain/session/activity/sessionChat";
-import type { PlayerRole } from "../../domain/session/players/playerRole";
+  type PendingQuestionToolType,
+  type SessionMessageRecord,
+} from "@/domain/session/activity/sessionChat";
+import type { PlayerRole } from "@/domain/session/players/playerRole";
+import { serverNowIso } from "@/services/core/time/serverClock";
+import { commitWrite } from "@/services/firestore/commitWrite";
 import {
-  deletePendingQuestion,
   getPendingQuestionStatus,
   postGameSystemMessage,
   THERMOMETER_WALK_CANCEL_TEXT,
   type ThermometerWalkCancelReason,
-  updateGameMessageAnswer,
-  updateGameMessageStatus,
-  updatePendingQuestion,
-  writePendingQuestion,
-  writeSessionMessage,
-} from "../../services/firestore/firestoreSessionExtras";
+  writeAskedQuestionBatch,
+  writePendingQuestionUpdateBatch,
+} from "@/services/firestore/firestoreSessionExtras";
 import {
   emitPhotoAskedActivity,
   emitQuestionAskedActivity,
@@ -31,7 +28,25 @@ import {
   emitThermometerWalkSeparatedActivity,
   emitThermometerWalkStartedActivity,
   isAnnotationQuestionTool,
-} from "../../services/session/emitSessionActivity";
+} from "@/services/session/emitSessionActivity";
+
+function gameSystemMessage(
+  sessionId: string,
+  senderUid: string,
+  senderRole: PlayerRole,
+  text: string,
+): SessionMessageRecord {
+  return {
+    id: createMessageId(),
+    sessionId,
+    channel: "game",
+    senderUid,
+    senderRole,
+    createdAt: serverNowIso(),
+    kind: "system",
+    text,
+  };
+}
 
 export interface SubmitPendingQuestionInput {
   sessionId: string;
@@ -46,11 +61,17 @@ export interface SubmitPendingQuestionInput {
   cardKeep?: number;
 }
 
+/**
+ * Question writes are fire-and-track (`commitWrite`): each lands in the local
+ * Firestore cache at once and syncs when signal returns. Nothing here awaits a
+ * server ack, so the UI never hangs in a dead zone; rejections surface via the
+ * write ledger instead of throwing to the caller.
+ */
 export function usePendingQuestionActions() {
   const submitInFlightRef = useRef(false);
 
   const submitPendingQuestion = useCallback(
-    async ({
+    ({
       sessionId,
       senderUid,
       senderRole,
@@ -61,67 +82,73 @@ export function usePendingQuestionActions() {
       status = "pending",
       cardDraw,
       cardKeep,
-    }: SubmitPendingQuestionInput) => {
+    }: SubmitPendingQuestionInput): string | undefined => {
+      // Double-tap guard only: the body is synchronous now that writes are not awaited.
       if (submitInFlightRef.current) {
-        return;
+        return undefined;
       }
 
       submitInFlightRef.current = true;
-      const pendingQuestionId = createPendingQuestionId();
-      const messageId = createMessageId();
-      const createdAt = new Date().toISOString();
-
       try {
-        await writePendingQuestion(sessionId, {
-          id: pendingQuestionId,
-          sessionId,
-          toolType,
-          createdByUid: senderUid,
-          createdAt,
-          status,
-          placement,
-          replyOptions,
-          promptText,
-          cardDraw,
-          cardKeep,
-        });
+        const pendingQuestionId = createPendingQuestionId();
+        const messageId = createMessageId();
+        const createdAt = serverNowIso();
+        const walking = status === "walking";
 
-        if (status === "walking") {
-          await postGameSystemMessage(sessionId, senderUid, senderRole, promptText, messageId);
+        commitWrite("question.ask", () =>
+          writeAskedQuestionBatch(
+            sessionId,
+            {
+              id: pendingQuestionId,
+              sessionId,
+              toolType,
+              createdByUid: senderUid,
+              createdAt,
+              status,
+              placement,
+              replyOptions,
+              promptText,
+              cardDraw,
+              cardKeep,
+              // Walking asks open their answer window when the walk completes.
+              ...(walking ? {} : { answerableAt: createdAt }),
+            },
+            walking
+              ? {
+                  id: messageId,
+                  sessionId,
+                  channel: "game",
+                  senderUid,
+                  senderRole,
+                  createdAt,
+                  kind: "system",
+                  text: promptText,
+                }
+              : {
+                  id: messageId,
+                  sessionId,
+                  channel: "game",
+                  senderUid,
+                  senderRole,
+                  createdAt,
+                  kind: "question",
+                  pendingQuestionId,
+                  toolType,
+                  promptText,
+                  replyOptions,
+                  status: "pending",
+                },
+          ),
+        );
+
+        if (walking) {
           emitThermometerWalkStartedActivity({
             sessionId,
             pendingQuestionId,
             promptText,
             createdByUid: senderUid,
           });
-          return pendingQuestionId;
-        }
-
-        try {
-          await writeSessionMessage(sessionId, {
-            id: messageId,
-            sessionId,
-            channel: "game",
-            senderUid,
-            senderRole,
-            createdAt,
-            kind: "question",
-            pendingQuestionId,
-            toolType,
-            promptText,
-            replyOptions,
-            status: "pending",
-          });
-        } catch (messageError) {
-          await deletePendingQuestion(sessionId, pendingQuestionId);
-          throw messageError;
-        }
-
-        await updatePendingQuestion(sessionId, pendingQuestionId, {
-          answerableAt: createdAt,
-        });
-
-        if (toolType === "photo") {
+        } else if (toolType === "photo") {
           emitPhotoAskedActivity({
             sessionId,
             pendingQuestionId,
@@ -147,7 +174,7 @@ export function usePendingQuestionActions() {
   );
 
   const completeThermometerWalk = useCallback(
-    async ({
+    ({
       sessionId,
       pendingQuestionId,
       senderUid,
@@ -171,40 +198,43 @@ export function usePendingQuestionActions() {
       replyOptions: GameReplyOption[];
       cardDraw?: number;
       cardKeep?: number;
-    }) => {
+    }): void => {
       const geometry: Feature<LineString> = buildThermometerLineGeometry(startPoint, endPoint);
-      const answerableAt = new Date().toISOString();
-      const messageId = createMessageId();
+      const answerableAt = serverNowIso();
 
-      await updatePendingQuestion(sessionId, pendingQuestionId, {
-        status: "pending",
-        placement: {
-          geometryJson: JSON.stringify(geometry),
-          metadata: {
-            thermometerDistanceMeters: distanceMeters,
+      commitWrite("question.ask", () =>
+        writePendingQuestionUpdateBatch(sessionId, {
+          questionId: pendingQuestionId,
+          questionPatch: {
+            status: "pending",
+            placement: {
+              geometryJson: JSON.stringify(geometry),
+              metadata: {
+                thermometerDistanceMeters: distanceMeters,
+              },
+            },
+            promptText,
+            replyOptions,
+            answerableAt,
+            cardDraw,
+            cardKeep,
           },
-        },
-        promptText,
-        replyOptions,
-        answerableAt,
-        cardDraw,
-        cardKeep,
-      });
-
-      await writeSessionMessage(sessionId, {
-        id: messageId,
-        sessionId,
-        channel: "game",
-        senderUid,
-        senderRole,
-        createdAt: answerableAt,
-        kind: "question",
-        pendingQuestionId,
-        toolType: "thermometer",
-        promptText,
-        replyOptions,
-        status: "pending",
-      });
+          newMessage: {
+            id: createMessageId(),
+            sessionId,
+            channel: "game",
+            senderUid,
+            senderRole,
+            createdAt: answerableAt,
+            kind: "question",
+            pendingQuestionId,
+            toolType: "thermometer",
+            promptText,
+            replyOptions,
+            status: "pending",
+          },
+        }),
+      );
 
       emitThermometerWalkSeparatedActivity({
         sessionId,
@@ -217,7 +247,7 @@ export function usePendingQuestionActions() {
   );
 
   const answerPendingQuestion = useCallback(
-    async (
+    (
       sessionId: string,
       pendingQuestionId: string,
       messageId: string,
@@ -228,30 +258,38 @@ export function usePendingQuestionActions() {
         senderUid?: string;
         senderRole?: PlayerRole;
       },
-    ) => {
-      await updatePendingQuestion(sessionId, pendingQuestionId, {
-        answer,
-        status: "answered",
-        ...(options?.deadlineExpired ? { answeredLate: true } : {}),
-      });
-      await updateGameMessageAnswer(sessionId, messageId, selectedReply);
+    ): void => {
+      const lateNotice =
+        options?.deadlineExpired && options.senderUid && options.senderRole
+          ? gameSystemMessage(
+              sessionId,
+              options.senderUid,
+              options.senderRole,
+              "Answer received late. Hider forfeits card draw for this question.",
+            )
+          : undefined;
 
-      if (options?.deadlineExpired && options.senderUid && options.senderRole) {
-        await postGameSystemMessage(
-          sessionId,
-          options.senderUid,
-          options.senderRole,
-          "Answer received late. Hider forfeits card draw for this question.",
-          createMessageId(),
-        );
-      }
+      commitWrite("question.answer", () =>
+        writePendingQuestionUpdateBatch(sessionId, {
+          questionId: pendingQuestionId,
+          questionPatch: {
+            answer,
+            status: "answered",
+            ...(options?.deadlineExpired ? { answeredLate: true } : {}),
+          },
+          gameMessage: { id: messageId, patch: { selectedReply, status: "answered" } },
+          newMessage: lateNotice,
+        }),
+      );
     },
     [],
   );
 
   const postSystemMessage = useCallback(
-    async (sessionId: string, senderUid: string, senderRole: PlayerRole, text: string) => {
-      await postGameSystemMessage(sessionId, senderUid, senderRole, text, createMessageId());
+    (sessionId: string, senderUid: string, senderRole: PlayerRole, text: string): void => {
+      commitWrite("system.message", () =>
+        postGameSystemMessage(sessionId, senderUid, senderRole, text, createMessageId()),
+      );
     },
     [],
   );
@@ -275,16 +313,17 @@ export function usePendingQuestionActions() {
         return;
       }
 
-      await updatePendingQuestion(sessionId, pendingQuestionId, {
-        status: "cancelled",
-      });
-
-      await postGameSystemMessage(
-        sessionId,
-        senderUid,
-        senderRole,
-        THERMOMETER_WALK_CANCEL_TEXT[reason],
-        createMessageId(),
+      commitWrite("question.cancel", () =>
+        writePendingQuestionUpdateBatch(sessionId, {
+          questionId: pendingQuestionId,
+          questionPatch: { status: "cancelled" },
+          newMessage: gameSystemMessage(
+            sessionId,
+            senderUid,
+            senderRole,
+            THERMOMETER_WALK_CANCEL_TEXT[reason],
+          ),
+        }),
       );
 
       emitQuestionCancelledActivity({
@@ -313,16 +352,18 @@ export function usePendingQuestionActions() {
         return;
       }
 
-      await updatePendingQuestion(options.sessionId, options.pendingQuestionId, {
-        status: "cancelled",
-      });
-      await updateGameMessageStatus(options.sessionId, options.messageId, "cancelled");
-      await postGameSystemMessage(
-        options.sessionId,
-        options.senderUid,
-        options.senderRole,
-        "Expired question dismissed. You can ask again.",
-        createMessageId(),
+      commitWrite("question.cancel", () =>
+        writePendingQuestionUpdateBatch(options.sessionId, {
+          questionId: options.pendingQuestionId,
+          questionPatch: { status: "cancelled" },
+          gameMessage: { id: options.messageId, patch: { status: "cancelled" } },
+          newMessage: gameSystemMessage(
+            options.sessionId,
+            options.senderUid,
+            options.senderRole,
+            "Expired question dismissed. You can ask again.",
+          ),
+        }),
       );
       emitQuestionCancelledActivity({
         sessionId: options.sessionId,

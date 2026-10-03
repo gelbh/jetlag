@@ -3,7 +3,11 @@ import type { PendingQuestionRecord } from "../session/activity/sessionChat";
 import type { SessionRulesInput } from "../session/rules";
 import { formatShortCountdownFromMs } from "../time/formatClockDuration";
 import type { QuestionToolType } from "./questionRules";
-import { questionAnswerDeadlineMs } from "./questionRules";
+import {
+  isAwaitingServerReceipt,
+  questionAnswerDeadlineMs,
+  resolveDeadlineAnchor,
+} from "./questionRules";
 
 export interface ActiveQuestionTimer {
   pendingQuestionId: string;
@@ -16,6 +20,7 @@ function toolLabelForQuestion(question: PendingQuestionRecord): string {
   return mapToolDockShortLabel(question.toolType as QuestionToolType);
 }
 
+/** Pass `nowMs` from the server clock: anchors are server-stamped. */
 export function selectPrimaryQuestionTimer(
   pendingQuestions: readonly PendingQuestionRecord[],
   sessionRules: SessionRulesInput,
@@ -44,12 +49,13 @@ export function selectPrimaryQuestionTimer(
       continue;
     }
 
-    if (!question.answerableAt) {
+    const anchor = resolveDeadlineAnchor(question);
+    if (!anchor || isAwaitingServerReceipt(question)) {
       continue;
     }
 
     const deadlineMs = questionAnswerDeadlineMs(question.toolType, sessionRules);
-    const elapsed = nowMs - Date.parse(question.answerableAt);
+    const elapsed = nowMs - Date.parse(anchor);
     const remainingMs = deadlineMs - elapsed;
 
     const countdownLabel =
