@@ -136,8 +136,9 @@ describe("buildCoastlineNearRegion fail-closed", () => {
       }),
     }));
 
-    const { buildCoastlineNearRegion, clearCoastlineNearRegionCacheForTests } =
-      await import("./nearRegions");
+    const { buildCoastlineNearRegion, clearCoastlineNearRegionCacheForTests } = await import(
+      "./nearRegions"
+    );
     clearCoastlineNearRegionCacheForTests();
 
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
@@ -171,8 +172,9 @@ describe("buildCoastlineNearRegion fail-closed", () => {
       };
     });
 
-    const { buildCoastlineNearRegion, clearCoastlineNearRegionCacheForTests } =
-      await import("./nearRegions");
+    const { buildCoastlineNearRegion, clearCoastlineNearRegionCacheForTests } = await import(
+      "./nearRegions"
+    );
     clearCoastlineNearRegionCacheForTests();
 
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
