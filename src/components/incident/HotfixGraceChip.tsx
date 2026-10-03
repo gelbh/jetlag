@@ -2,16 +2,15 @@ import { useAppUpdateState } from "../../hooks/app/useAppUpdateState";
 import { MapFloatSurface } from "../ui/banners/MapFloatSurface";
 import { HudBanner } from "../ui/hud/HudBanner";
 
+const MAP_STATUS_CHIP_CLASS = "pointer-events-auto mx-3 mt-1.5 z-[var(--z-panel)]";
+
 export function HotfixGraceChip() {
   const { hotfixGraceActive, hotfixGraceSecondsRemaining } = useAppUpdateState();
   const seconds =
     typeof hotfixGraceSecondsRemaining === "number" ? hotfixGraceSecondsRemaining : null;
 
   return (
-    <HudBanner
-      visible={hotfixGraceActive && seconds !== null}
-      className="jl-hotfix-grace-chip pointer-events-auto fixed inset-x-0 z-[var(--z-panel)] px-3"
-    >
+    <HudBanner visible={hotfixGraceActive && seconds !== null} className={MAP_STATUS_CHIP_CLASS}>
       <MapFloatSurface
         tone="halt"
         role="status"
