@@ -3,8 +3,7 @@
   .jl-stamp-code,
   .admin-diag-row,
   .admin-monitor-code-badge,
-  .jl-game-chat-scroll,
-  .jl-sync-detail-panel__detail {
+  .jl-game-chat-scroll {
     user-select: text;
     -webkit-touch-callout: default;
   }
@@ -68,22 +67,6 @@
     transition: opacity var(--motion-base) var(--ease-out-quint);
   }
 
-  .dock-waiting-host {
-    display: flex;
-    min-height: 2.75rem;
-    align-items: center;
-    justify-content: center;
-    border-radius: var(--radius-hud-md);
-    border: 2px dashed oklch(from var(--color-border) l c h / 85%);
-    background: oklch(from var(--color-surface-base) l c h / 65%);
-    padding-inline: 0.75rem;
-    font-size: 0.8125rem;
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    color: var(--color-ink-muted);
-  }
-
   /*
    * Float inset must live in real CSS (Tailwind v4 omits env()-collapse utilities).
    * Phone status island mirrors bottom --dock-float-gap; map full-bleeds under notch.
@@ -111,23 +94,6 @@
     box-shadow: 0 4px 24px oklch(6% 0.04 265deg / 65%);
   }
 
-  .jl-status-header {
-    box-sizing: border-box;
-    display: grid;
-
-    /* Probe B ticker band: compress OPERATION/PHASE, hero timer column */
-    grid-template-columns: minmax(0, 1fr) minmax(0, 0.7fr) minmax(0, 0.65fr) minmax(0, 1.65fr);
-    align-items: stretch;
-    gap: 0;
-    height: var(--status-bar-height);
-    min-height: var(--status-bar-height);
-    max-height: var(--status-bar-height);
-    width: 100%;
-    padding: 0.25rem 0.375rem;
-    padding-left: max(0.375rem, env(safe-area-inset-left));
-    padding-right: max(0.375rem, env(safe-area-inset-right));
-  }
-
   .jl-status-header-brand {
     display: flex;
     align-items: center;
@@ -140,227 +106,6 @@
 
   .jl-status-header-brand > nav {
     flex-shrink: 0;
-  }
-
-  .jl-status-header-brand-text {
-    display: flex;
-    min-width: 0;
-    flex: 1 1 auto;
-    flex-direction: column;
-    justify-content: center;
-    gap: 0.05rem;
-    overflow: hidden;
-  }
-
-  .jl-status-header-brand-name {
-    font-family: var(--font-display);
-    font-size: clamp(0.62rem, 2.4vw, 0.85rem);
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    line-height: 1.05;
-    text-transform: uppercase;
-    color: var(--color-ink);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .jl-status-header-brand-role {
-    font-family: var(--font-display);
-    font-size: clamp(0.5rem, 2vw, 0.65rem);
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    line-height: 1.05;
-    text-transform: uppercase;
-    color: var(--color-action);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .jl-status-header-col {
-    display: flex;
-    min-width: 0;
-    max-width: 100%;
-    flex-direction: column;
-    align-items: flex-start;
-    justify-content: center;
-    gap: 0.08rem;
-    padding-inline: 0.22rem;
-    overflow: hidden;
-    border-left: 1px solid oklch(from var(--color-border) l c h / 85%);
-  }
-
-  .jl-status-header-col--timer {
-    align-items: flex-start;
-    padding-inline: 0.35rem;
-  }
-
-  .jl-status-header-label {
-    font-family: var(--font-display);
-    font-size: clamp(0.42rem, 1.6vw, 0.5rem);
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    line-height: 1;
-    text-transform: uppercase;
-    color: var(--color-ink-muted);
-  }
-
-  .jl-status-header-value {
-    font-family: var(--font-mono);
-    font-size: clamp(0.8125rem, 2.1vw, 0.8125rem);
-    font-weight: 700;
-    font-variant-numeric: tabular-nums;
-    letter-spacing: 0.04em;
-    line-height: 1.1;
-    color: var(--color-ink);
-    overflow: visible;
-    text-overflow: clip;
-    white-space: nowrap;
-  }
-
-  .jl-status-header-col:not(.jl-status-header-col--timer)
-    .jl-status-header-value:not(.jl-stamp-code) {
-    font-family: var(--font-display);
-    letter-spacing: 0.06em;
-  }
-
-  .jl-status-header .jl-stamp-code {
-    font-size: clamp(0.8125rem, 2.1vw, 0.8125rem);
-    letter-spacing: 0.12em;
-    line-height: 1.1;
-    overflow: visible;
-    text-overflow: clip;
-    white-space: nowrap;
-  }
-
-  /*
-   * Start needs a ≥44px hit target inside the fixed bar. Hide the TIME LEFT
-   * label while Start is showing so min-h-11 fits without growing the rail.
-   */
-  .jl-status-header-col--timer:has(.jl-status-header-start) .jl-status-header-label {
-    display: none;
-  }
-
-  .jl-status-header-start {
-    width: 100%;
-    max-width: 100%;
-    min-height: 2.75rem;
-    padding-block: 0;
-  }
-
-  .jl-status-header-value--action {
-    color: var(--color-action);
-  }
-
-  .jl-status-header-waiting {
-    font-family: var(--font-display);
-    font-size: clamp(0.58rem, 2.2vw, 0.72rem);
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--color-ink-muted);
-  }
-
-  .jl-timer-cluster {
-    display: inline-flex;
-    flex-shrink: 1;
-    flex-direction: column;
-    align-items: flex-start;
-    justify-content: center;
-    gap: 0.04rem;
-    max-width: 100%;
-    min-height: 0;
-    min-width: 0;
-  }
-
-  /* Seek-only: stretch the open-timer control into remaining cell space. */
-  .jl-status-header-col--timer .jl-timer-cluster:has(> .jl-ticker:only-child) {
-    align-self: stretch;
-    flex: 1 1 auto;
-    width: 100%;
-    min-height: 0;
-  }
-
-  .jl-status-header-col--timer
-    .jl-timer-cluster:has(> .jl-ticker:only-child)
-    > .jl-ticker {
-    flex: 1 1 auto;
-    align-items: center;
-    justify-content: center;
-    min-height: 0;
-    width: 100%;
-  }
-
-  .jl-timer-cancel {
-    pointer-events: auto;
-    position: absolute;
-    top: calc(100% + var(--jl-sync-beacon-inset, 0.375rem));
-    right: max(3.75rem, calc(env(safe-area-inset-right, 0px) + 3.5rem));
-    z-index: calc(var(--z-banner) + 1);
-    min-height: 2.75rem;
-    padding-inline: 0.75rem;
-    border: 1px solid oklch(from var(--color-highlight) l c h / 55%);
-    background: var(--color-surface-panel);
-    font-family: var(--font-display);
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--color-highlight);
-  }
-
-  .jl-timer-cancel:focus-visible {
-    outline: 2px solid var(--color-action);
-    outline-offset: 2px;
-  }
-
-  .jl-status-header-col--timer .jl-ticker {
-    display: inline-flex;
-    flex-direction: row;
-    align-items: baseline;
-    gap: 0.25rem;
-    min-height: auto;
-    max-width: 100%;
-    border: none;
-    background: transparent;
-    padding: 0;
-    font-size: clamp(0.8125rem, 3.2vw, 1.125rem);
-    line-height: 1.02;
-    color: var(--color-ink);
-    animation: none;
-  }
-
-  .jl-status-header-col--timer .jl-ticker-phase {
-    font-size: 0.8125rem;
-    letter-spacing: 0.06em;
-  }
-
-  .jl-status-header-col--timer .jl-ticker-secondary {
-    min-height: auto;
-    font-size: clamp(0.48rem, 1.8vw, 0.58rem);
-    line-height: 1;
-    color: var(--color-ink-muted);
-  }
-
-  .jl-status-header-col--timer .jl-ticker-question {
-    color: var(--color-status-warning);
-  }
-
-  .jl-status-header-col--timer .jl-ticker-hiding {
-    color: var(--color-ink);
-  }
-
-  .jl-status-header-col--timer .jl-ticker-idle {
-    color: var(--color-ink-muted);
-  }
-
-  .jl-status-bar-inner {
-    display: flex;
-    min-height: var(--status-bar-height);
-    align-items: center;
-    gap: 0.625rem;
-    padding: 0.375rem 0.625rem;
   }
 
   .jl-sync-map-indicator,
@@ -419,49 +164,9 @@
     outline-offset: 2px;
   }
 
-
-
-  .jl-sync-detail-panel {
-    width: min(12.5rem, calc(100vw - 2rem));
-    transform-origin: top right;
-  }
-
-
   .jl-preload-detail-panel {
     width: min(14rem, calc(100vw - 2rem));
     transform-origin: top left;
-  }
-
-
-
-
-
-  .jl-status-bar-timer {
-    margin-left: auto;
-    display: flex;
-    flex-shrink: 0;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  .jl-stamp {
-    display: flex;
-    flex-shrink: 0;
-    flex-direction: column;
-    justify-content: center;
-    border: 2px solid var(--color-brand-blue);
-    background: oklch(from var(--color-brand-blue) l c h / 12%);
-    padding: 0.125rem 0.5rem;
-    line-height: 1.1;
-  }
-
-  .jl-stamp-label {
-    font-family: var(--font-display);
-    font-size: 0.5625rem;
-    font-weight: 600;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--color-brand-blue);
   }
 
   .jl-stamp-code {
@@ -473,85 +178,15 @@
     color: var(--color-ink);
   }
 
-  .jl-mode-ticker {
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    font-family: var(--font-display);
-    font-size: 0.875rem;
-    font-weight: 600;
-    letter-spacing: 0.03em;
-    text-transform: uppercase;
+  .jl-app-update-chip {
+    bottom: calc(var(--dock-height) + max(0.5rem, var(--safe-area-bottom)));
   }
 
-  .jl-ticker {
-    display: inline-flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 0.375rem;
-    flex-shrink: 0;
-    justify-content: center;
-    min-height: 2.5rem;
-    border: 2px solid oklch(from var(--color-highlight) l c h / 65%);
-    background: var(--color-highlight);
-    padding-inline: 0.625rem;
-    font-family: var(--font-mono);
-    font-size: 1rem;
-    font-weight: 700;
-    font-variant-numeric: tabular-nums;
-    letter-spacing: 0.06em;
-    color: var(--color-surface-deep);
-    transition: filter var(--motion-fast) ease-out;
-  }
-
-  .jl-ticker-phase {
-    font-family: var(--font-display);
-    font-size: 0.625rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    opacity: 0.85;
-  }
-
-  .jl-ticker-value {
-    font-size: inherit;
-  }
-
-  .jl-ticker-secondary {
-    min-height: 1.75rem;
-    padding-inline: 0.5rem;
-    font-size: 0.75rem;
-    border-width: 1px;
-  }
-
-  .jl-ticker-hiding {
-    border-color: oklch(from var(--color-highlight) l c h / 85%);
-    background: oklch(from var(--color-highlight) l c h / 92%);
-  }
-
-  .jl-ticker-question {
-    border-color: oklch(from var(--color-status-warning) l c h / 65%);
-    background: var(--color-status-warning);
-    color: var(--color-surface-deep);
-  }
-
-  .jl-ticker:hover:not(:disabled) {
-    filter: brightness(1.05);
-  }
-
-  .jl-ticker-idle {
-    background: var(--color-surface-raised);
-    border-color: var(--color-border);
-    color: var(--color-ink-muted);
-  }
-
-  .jl-ticker-active {
-    animation: none;
-  }
-
-  @media (prefers-reduced-motion: no-preference) {
-    html:not([data-motion="reduced"], [data-motion="static"]) .jl-ticker-active {
-      animation: jl-ticker-glow 2s ease-in-out infinite;
+  /* Narrow phones: stack update chip copy above action (replaces Survey float stack). */
+  @media (width <= 380px) {
+    .jl-app-update-chip [data-map-float-surface="true"] {
+      flex-direction: column;
+      align-items: stretch;
     }
   }
 

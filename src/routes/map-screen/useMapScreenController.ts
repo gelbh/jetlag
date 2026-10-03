@@ -1,5 +1,4 @@
 import { useCallback, useDeferredValue, useEffect, useMemo, useState } from "react";
-import type { MapChromeControlInset } from "../../components/map/helpers/mapChromeControlInset";
 import {
   askHudCameraPaddingPx,
   isAskHudOwnedTool,
@@ -330,9 +329,6 @@ export function useMapScreenController() {
   } = useToolPanelChrome(activeTool, {
     sheetSnap: activeTool !== "none" && isQuestionDockTool(activeTool) ? sheetSnap : "mid",
   });
-  const mapChromeControlInset: MapChromeControlInset =
-    panelMinimized || mapPanning ? "chrome-hidden" : "dock";
-
   const placementCameraDraft = useMemo(
     () =>
       buildPlacementCameraDraft({
@@ -523,7 +519,6 @@ export function useMapScreenController() {
     placementFocusMaxZoom,
     placementFocusPreferFly,
     requestPlacementRecenter,
-    mapChromeControlInset,
     placementCrosshair: tools.placementCrosshair,
     mapAttentionActive,
     handleMapClick,
