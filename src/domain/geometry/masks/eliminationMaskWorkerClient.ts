@@ -12,9 +12,7 @@ import type { DiskSpec, EliminationUnionInput, PolygonFeature } from "../kernel/
 import { eliminationAnnotationsContentKey, isAddOnly } from "./eliminationAnnotationKey";
 
 /** Full draft geometry identity for mask cache (preview fingerprints are lossy). */
-function draftFeaturesContentKey(
-  features: readonly Feature<GeoPolygon | MultiPolygon>[],
-): string {
+function draftFeaturesContentKey(features: readonly Feature<GeoPolygon | MultiPolygon>[]): string {
   return features
     .map((feature) => {
       const id =

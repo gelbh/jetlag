@@ -68,9 +68,7 @@ function annotationGeometryFingerprint(annotation: AnnotationRecord): string {
   const geometry = annotation.geometry.geometry;
   let geometryKey: string;
   if (geometry.type === "Polygon" || geometry.type === "MultiPolygon") {
-    geometryKey = polygonFeatureIdentity(
-      annotation.geometry as Feature<Polygon | MultiPolygon>,
-    );
+    geometryKey = polygonFeatureIdentity(annotation.geometry as Feature<Polygon | MultiPolygon>);
   } else if (geometry.type === "Point") {
     const [lng, lat] = geometry.coordinates;
     geometryKey = `Point:${roundCoord(lng)}:${roundCoord(lat)}`;
