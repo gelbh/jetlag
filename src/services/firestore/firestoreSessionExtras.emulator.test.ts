@@ -1,3 +1,4 @@
+import { collection, doc, getDocs, setDoc } from "firebase/firestore";
 import { beforeEach, describe, expect, it } from "vitest";
 import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
 import {
@@ -5,8 +6,10 @@ import {
   teardownEmulatorsForTests,
 } from "../../test/emulator/connectEmulators";
 import { DUBLIN_CITY_GAME_AREA } from "../../test/fixtures/dublinGameArea";
+import { getFirestoreDb } from "../core/firebase/firebase";
 import { createRemoteSession } from "./firestoreAnnotations";
 import {
+  appendPlayerTrailPoint,
   subscribeToPendingQuestions,
   updatePendingQuestion,
   writePendingQuestion,
@@ -102,5 +105,37 @@ describe("firestoreSessionExtras emulator", () => {
     });
 
     unsubscribe();
+  });
+
+  it("appends trail points as create-only documents", async () => {
+    const { uid } = await connectEmulatorsForTests();
+    const session = await createRemoteSession(DUBLIN_CITY_GAME_AREA, uid);
+    const pointsRef = collection(
+      getFirestoreDb(),
+      "sessions",
+      session.id,
+      "playerTrailPoints",
+      uid,
+      "points",
+    );
+
+    await appendPlayerTrailPoint(session.id, {
+      uid,
+      sessionId: session.id,
+      lat: 53.35,
+      lng: -6.26,
+      role: "seeker",
+      recordedAt: "2026-01-01T00:00:00.000Z",
+    });
+    expect((await getDocs(pointsRef)).size).toBe(1);
+
+    // A deterministic-id set replayed onto an existing point is an update,
+    // which rules deny; this is why trail appends keep auto ids (addDoc).
+    const fixed = doc(pointsRef, "replay-probe");
+    const data = { lat: 53.35, lng: -6.26, recordedAt: "2026-01-01T00:01:00.000Z" };
+    await setDoc(fixed, data);
+    await expect(setDoc(fixed, data)).rejects.toMatchObject({
+      code: "permission-denied",
+    });
   });
 });
