@@ -9,7 +9,11 @@ const authMocks = vi.hoisted(() => {
     auth,
     getAuth: vi.fn(() => auth),
     setPersistence: vi.fn(async () => undefined),
-    onAuthStateChanged: vi.fn(() => () => undefined),
+    onAuthStateChanged: vi.fn(
+      (_auth: unknown, _callback: (user: { uid: string; isAnonymous: boolean } | null) => void) =>
+        () =>
+          undefined,
+    ),
     signInAnonymously: vi.fn(async () => ({ user: { uid: "anon-1" } })),
   };
 });
