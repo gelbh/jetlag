@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 const addBreadcrumb = vi.hoisted(() => vi.fn());
 const captureMessage = vi.hoisted(() => vi.fn());
+const setUser = vi.hoisted(() => vi.fn());
 const withScope = vi.hoisted(() =>
   vi.fn(
     (
@@ -27,6 +28,7 @@ const isolationScopeAddBreadcrumb = vi.hoisted(() => vi.fn());
 vi.mock("@sentry/react", () => ({
   addBreadcrumb,
   captureMessage,
+  setUser,
   withScope,
   captureException: vi.fn(),
   captureReactException,
@@ -54,6 +56,7 @@ import {
   initSentry,
   reportFirestoreListenPermissionDenied,
   reportJoinPermissionDenied,
+  syncSentryUser,
 } from "./sentry";
 import { CLIENT_SENTRY_DATA_COLLECTION } from "./sentryDataCollection";
 import { CLIENT_SENTRY_IGNORE_SPANS } from "./sentryIgnoreSpans";
@@ -259,5 +262,27 @@ describe("captureErrorBoundaryException", () => {
         },
       },
     );
+  });
+});
+
+describe("syncSentryUser", () => {
+  afterEach(() => {
+    setUser.mockClear();
+  });
+
+  it("sets Sentry user id from firebase uid only", () => {
+    syncSentryUser({ uid: "firebase-uid-1" });
+
+    expect(setUser).toHaveBeenCalledExactlyOnceWith({ id: "firebase-uid-1" });
+    const payload = setUser.mock.calls[0]?.[0] as Record<string, unknown>;
+    expect(payload).not.toHaveProperty("email");
+    expect(payload).not.toHaveProperty("username");
+    expect(payload).not.toHaveProperty("uid");
+  });
+
+  it("clears Sentry user when identity is null", () => {
+    syncSentryUser(null);
+
+    expect(setUser).toHaveBeenCalledExactlyOnceWith(null);
   });
 });

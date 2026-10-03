@@ -184,6 +184,10 @@ function withSentryScope(run: (scope: Sentry.Scope) => void): void {
   Sentry.withScope(run);
 }
 
+export function syncSentryUser(user: { uid: string } | null): void {
+  Sentry.setUser(user ? { id: user.uid } : null);
+}
+
 export function setBootstrapTag(phase: string): void {
   withSentryScope((scope) => {
     scope.setTag("bootstrap_phase", phase);
