@@ -9,6 +9,9 @@ import { loadPolygonGolden } from "./loadPolygonGolden";
 import { assertPolygonTopologyParity } from "./parity";
 import type { GameAreaGeometry } from "./types";
 
+/** Measuring APIs take annotations GameArea; kernel forbids that import. */
+type MeasuringGameArea = Parameters<typeof prepareMeasuringLineSegments>[1];
+
 const pkgEntry = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   "../../../../crates/jetlag-geometry-kernel/pkg/jetlag_geometry_kernel.js",
@@ -56,7 +59,7 @@ describe.skipIf(!wasmPkgReady)("near-region batch wasm parity", () => {
   beforeAll(async () => {
     const wasm = await import("./nearRegionWasm");
     wasmBuildNearRegion = wasm.wasmBuildNearRegion;
-    const prepared = prepareMeasuringLineSegments([segment], sampleGameArea as GameArea);
+    const prepared = prepareMeasuringLineSegments([segment], sampleGameArea as MeasuringGameArea);
     await wasmBuildNearRegion({
       segments: prepared.segments,
       distanceMeters: 200,
@@ -69,7 +72,7 @@ describe.skipIf(!wasmPkgReady)("near-region batch wasm parity", () => {
 
   it("matches golden coastline topology on short segment + 200m", async () => {
     const golden = loadPolygonGolden("nearRegion", "coastline-200m.json");
-    const prepared = prepareMeasuringLineSegments([segment], sampleGameArea as GameArea);
+    const prepared = prepareMeasuringLineSegments([segment], sampleGameArea as MeasuringGameArea);
     const wasm = await wasmBuildNearRegion({
       segments: prepared.segments,
       distanceMeters: 200,
@@ -82,11 +85,11 @@ describe.skipIf(!wasmPkgReady)("near-region batch wasm parity", () => {
   });
 
   it("wasm distance-threshold matches TypeScript on short segment + 200m", async () => {
-    const prepared = prepareMeasuringLineSegments([segment], sampleGameArea as GameArea);
+    const prepared = prepareMeasuringLineSegments([segment], sampleGameArea as MeasuringGameArea);
     const ts = await buildCoastlineNearRegionDistanceThreshold(
       prepared.segments,
       200,
-      sampleGameArea as GameArea,
+      sampleGameArea as MeasuringGameArea,
       { divisions: coastlineParityDivisions },
     );
     const wasm = await wasmBuildNearRegion({

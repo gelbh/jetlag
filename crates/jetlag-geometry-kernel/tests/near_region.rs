@@ -80,13 +80,9 @@ fn distance_threshold_excludes_point_at_radius_plus_500m() {
     let area = london_box();
     let segment = vec![[-0.12, 51.5], [-0.119, 51.501]];
     let radius_meters = 2_000.0;
-    let near = build_coastline_near_region_distance_threshold(
-        &[segment],
-        radius_meters,
-        &area,
-        Some(32),
-    )
-    .expect("near region");
+    let near =
+        build_coastline_near_region_distance_threshold(&[segment], radius_meters, &area, Some(32))
+            .expect("near region");
 
     let coast_mid = (51.5005, -0.1195);
     let bearing = bearing_degrees(coast_mid, (51.51, -0.1195));

@@ -60,9 +60,15 @@ pub fn build_coastline_near_region_distance_threshold(
             let cell_north = bbox.south + (row + 1) as f64 * lat_step;
             let cell_west = bbox.west + col as f64 * lng_step;
             let cell_east = bbox.west + (col + 1) as f64 * lng_step;
-            let center: LatLng = ((cell_south + cell_north) / 2.0, (cell_west + cell_east) / 2.0);
+            let center: LatLng = (
+                (cell_south + cell_north) / 2.0,
+                (cell_west + cell_east) / 2.0,
+            );
 
-            if !game_area.multipolygon.contains(&Point::new(center.1, center.0)) {
+            if !game_area
+                .multipolygon
+                .contains(&Point::new(center.1, center.0))
+            {
                 continue;
             }
 
@@ -81,11 +87,12 @@ pub fn build_coastline_near_region_distance_threshold(
 fn resolve_game_area_cell_divisions(bbox: &BoundingBox) -> u32 {
     let lat_span = bbox.north - bbox.south;
     let lng_span = bbox.east - bbox.west;
-    let area_ratio =
-        (lat_span * lng_span) / (MIN_GAME_AREA_LAT_SPAN * MIN_GAME_AREA_LNG_SPAN);
+    let area_ratio = (lat_span * lng_span) / (MIN_GAME_AREA_LAT_SPAN * MIN_GAME_AREA_LNG_SPAN);
 
     if area_ratio <= 1.0 {
-        let target = (MAX_SEA_LEVEL_SAMPLE_CELLS / area_ratio.max(0.01)).sqrt().floor() as u32;
+        let target = (MAX_SEA_LEVEL_SAMPLE_CELLS / area_ratio.max(0.01))
+            .sqrt()
+            .floor() as u32;
         return target
             .max(DEFAULT_SEA_LEVEL_DIVISIONS)
             .min(MAX_SMALL_AREA_DIVISIONS);
@@ -348,7 +355,12 @@ fn build_near_region_from_grid(
 
     let polys: Vec<Polygon<f64>> = rects
         .iter()
-        .map(|rect| Polygon::new(cell_ring(rect, bbox.south, bbox.west, lat_step, lng_step), vec![]))
+        .map(|rect| {
+            Polygon::new(
+                cell_ring(rect, bbox.south, bbox.west, lat_step, lng_step),
+                vec![],
+            )
+        })
         .collect();
 
     let near_mp = MultiPolygon(polys);

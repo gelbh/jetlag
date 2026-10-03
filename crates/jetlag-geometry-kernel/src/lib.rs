@@ -20,6 +20,7 @@ pub use mask::{
 };
 pub use types::{GameAreaGeometry, PolygonFeature};
 
+use coastline_near_region::build_coastline_near_region_distance_threshold;
 use geodesic_buffer::geodesic_line_buffer as geodesic_line_buffer_native;
 use half_plane::{
     build_half_plane_polygon as build_half_plane_native,
@@ -29,7 +30,6 @@ use mask::{
     build_end_game_mask_from_disks as build_end_game_native,
     build_mask_from_union_input as build_mask_native,
 };
-use coastline_near_region::build_coastline_near_region_distance_threshold;
 use near_region::build_near_region as build_near_region_native;
 use tentacle::{
     build_tentacle_elimination_region as build_tentacle_elimination_native,
