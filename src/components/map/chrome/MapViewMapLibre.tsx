@@ -289,8 +289,6 @@ export function MapViewMapLibre({ model, children }: MapViewMapLibreProps) {
     showCompassControl,
     onRecenter,
   } = model;
-  // zoomControlInset / mapStyleControlInset stay on MapViewModel for call-site
-  // parity; MapNavControlStack owns nav layout now.
   const mapRef = useRef<MapRef>(null);
   const onBoundsChangeRef = useRef(onBoundsChange);
   const onUserViewportFramedRef = useRef(onUserViewportFramed);

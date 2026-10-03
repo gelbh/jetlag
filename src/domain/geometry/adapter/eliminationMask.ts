@@ -1,5 +1,6 @@
 import turfCircle from "@turf/circle";
 import { point as turfPoint } from "@turf/helpers";
+import { deserializeMatchingFeatures } from "@/domain/geo/matchingAdapters";
 import { isActive } from "../../map/annotationActive";
 import type { AnnotationRecord, GameArea } from "../../map/annotations";
 import { DEFAULT_RADIUS_METERS } from "../../map/distance";
@@ -9,6 +10,7 @@ import { thermometerShadedSide } from "../../questions/thermometerQuestions";
 import type { HidingZoneRecord } from "../../session/hiding/hidingZone";
 import { dispatchHalfPlane, dispatchRadarShadedRegion } from "../core/radarHalfPlane";
 import type { DiskSpec, EliminationUnionInput, LatLngTuple, PolygonFeature } from "../kernel/types";
+import { buildMatchingEliminationRegion } from "../measuring/matchingGeometry";
 import {
   buildMeasuringEliminationPreview,
   type MeasuringRegionInput,
@@ -97,6 +99,38 @@ async function measuringEliminationFromStoredMetadata(
   return null;
 }
 
+async function matchingEliminationFromStoredMetadata(
+  annotation: AnnotationRecord,
+  gameArea: GameArea,
+): Promise<PolygonFeature | null> {
+  const answer = annotation.metadata.matchingAnswer;
+  const featuresJson = annotation.metadata.matchingFeaturesJson;
+  const seekerFeatureId = annotation.metadata.matchingNearestFeatureId;
+  if (!answer || typeof featuresJson !== "string" || typeof seekerFeatureId !== "string") {
+    return null;
+  }
+
+  try {
+    const features = deserializeMatchingFeatures(featuresJson);
+    const feature = await buildMatchingEliminationRegion(
+      features,
+      seekerFeatureId,
+      gameArea,
+      answer,
+    );
+    if (
+      feature &&
+      (feature.geometry.type === "Polygon" || feature.geometry.type === "MultiPolygon")
+    ) {
+      return feature as PolygonFeature;
+    }
+  } catch {
+    return null;
+  }
+
+  return null;
+}
+
 function eliminationFeatureFromNonKernel(annotation: AnnotationRecord): PolygonFeature | null {
   if (!isActive(annotation)) {
     return null;
@@ -171,6 +205,10 @@ export async function eliminationFeatureForAnnotation(
 
   if (annotation.type === "measuring") {
     return measuringEliminationFromStoredMetadata(annotation, gameArea);
+  }
+
+  if (annotation.type === "matching") {
+    return matchingEliminationFromStoredMetadata(annotation, gameArea);
   }
 
   if (
@@ -282,9 +320,21 @@ function annotationLikelyHasEliminationFeature(annotation: AnnotationRecord): bo
     return false;
   }
 
-  if (annotation.type === "matching" || annotation.type === "zone") {
+  if (annotation.type === "zone") {
     const geometry = annotation.geometry.geometry;
     return geometry.type === "Polygon" || geometry.type === "MultiPolygon";
+  }
+
+  if (annotation.type === "matching") {
+    const geometry = annotation.geometry.geometry;
+    if (geometry.type === "Polygon" || geometry.type === "MultiPolygon") {
+      return true;
+    }
+    return (
+      Boolean(annotation.metadata.matchingAnswer) &&
+      typeof annotation.metadata.matchingFeaturesJson === "string" &&
+      typeof annotation.metadata.matchingNearestFeatureId === "string"
+    );
   }
 
   if (annotation.type === "measuring") {
