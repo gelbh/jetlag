@@ -1,5 +1,5 @@
 import { initializeTestEnvironment, type RulesTestEnvironment } from "@firebase/rules-unit-testing";
-import { normalizeUsername } from "../../../domain/game/playerProfile";
+import { normalizeUsername } from "../../src/domain/game/playerProfile";
 
 const PROJECT_ID = "demo-jetlag";
 
