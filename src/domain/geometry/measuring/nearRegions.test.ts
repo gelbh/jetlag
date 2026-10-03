@@ -3,7 +3,7 @@ import turfCircle from "@turf/circle";
 import turfDestination from "@turf/destination";
 import { point as turfPoint } from "@turf/helpers";
 import type { Feature, LineString } from "geojson";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import type { GameArea } from "../../map/annotations";
 import {
   buildLocationNearRegion,
@@ -88,5 +88,105 @@ describe("coastlineSegmentsFingerprint", () => {
 
     expect(left).toHaveLength(right.length);
     expect(coastlineSegmentsFingerprint(left)).not.toBe(coastlineSegmentsFingerprint(right));
+  });
+});
+
+describe("buildCoastlineNearRegion fail-closed", () => {
+  afterEach(() => {
+    vi.resetModules();
+    vi.doUnmock("../kernel/kernelWasmReady");
+    vi.doUnmock("../kernel/nearRegionKernelRunner");
+    vi.doUnmock("./coastlineNearRegion");
+  });
+
+  const coastSegment: Feature<LineString> = {
+    type: "Feature",
+    properties: {},
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [-0.2, 51.4],
+        [-0.1, 51.4],
+      ],
+    },
+  };
+
+  it("returns null when wasm nearRegionBatch throws (no TS distance-threshold)", async () => {
+    vi.resetModules();
+    vi.doMock("../kernel/kernelWasmReady", async () => {
+      const actual = await vi.importActual<typeof import("../kernel/kernelWasmReady")>(
+        "../kernel/kernelWasmReady",
+      );
+      return {
+        ...actual,
+        KERNEL_WASM_READY: {
+          ...actual.KERNEL_WASM_READY,
+          nearRegionBatch: true,
+        },
+        shouldUseWasm: (entrypoint: string) => {
+          if (entrypoint === "nearRegionBatch") {
+            return true;
+          }
+          return actual.shouldUseWasm(entrypoint as never);
+        },
+      };
+    });
+    const distanceThreshold = vi.fn();
+    vi.doMock("./coastlineNearRegion", () => ({
+      buildCoastlineNearRegionDistanceThreshold: distanceThreshold,
+    }));
+    vi.doMock("../kernel/nearRegionKernelRunner", () => ({
+      dispatchNearRegionBatch: vi.fn(async () => {
+        throw new Error("wasm boom");
+      }),
+    }));
+
+    const { buildCoastlineNearRegion, clearCoastlineNearRegionCacheForTests } =
+      await import("./nearRegions");
+    clearCoastlineNearRegionCacheForTests();
+
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const result = await buildCoastlineNearRegion([coastSegment], 1_000, sampleGameArea);
+    warn.mockRestore();
+
+    expect(result).toBeNull();
+    expect(distanceThreshold).not.toHaveBeenCalled();
+  });
+
+  it("returns null when nearRegionBatch wasm is disabled (no TS path)", async () => {
+    vi.resetModules();
+    vi.doMock("../kernel/kernelWasmReady", async () => {
+      const actual = await vi.importActual<typeof import("../kernel/kernelWasmReady")>(
+        "../kernel/kernelWasmReady",
+      );
+      return {
+        ...actual,
+        KERNEL_WASM_READY: {
+          ...actual.KERNEL_WASM_READY,
+          nearRegionBatch: false,
+        },
+        shouldUseWasm: (entrypoint: string) => {
+          if (entrypoint === "nearRegionBatch") {
+            return false;
+          }
+          return actual.shouldUseWasm(entrypoint as never);
+        },
+      };
+    });
+    const distanceThreshold = vi.fn();
+    vi.doMock("./coastlineNearRegion", () => ({
+      buildCoastlineNearRegionDistanceThreshold: distanceThreshold,
+    }));
+
+    const { buildCoastlineNearRegion, clearCoastlineNearRegionCacheForTests } =
+      await import("./nearRegions");
+    clearCoastlineNearRegionCacheForTests();
+
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const result = await buildCoastlineNearRegion([coastSegment], 1_000, sampleGameArea);
+    warn.mockRestore();
+
+    expect(result).toBeNull();
+    expect(distanceThreshold).not.toHaveBeenCalled();
   });
 });
