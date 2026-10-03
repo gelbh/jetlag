@@ -29,7 +29,7 @@ test.describe("hider chat scroll", () => {
 
       const scrollRegion = gameChatScroll(guestPage);
       const secondAnswerButton = scrollRegion.getByRole("button", {
-        name: "Send answer: Yes",
+        name: "Yes",
       });
       await expect.poll(async () => secondAnswerButton.isVisible(), { timeout: 30_000 }).toBe(true);
 

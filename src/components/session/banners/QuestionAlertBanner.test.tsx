@@ -70,7 +70,7 @@ describe("QuestionAlertBanner", () => {
     );
 
     expect(screen.getByText(radarPending.promptText)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Send answer: Yes/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^Yes$/i })).toBeInTheDocument();
     expect(screen.getByTestId("question-alert-banner").className).not.toMatch(/map-float-alert/);
     expect(screen.getByTestId("question-alert-banner").className).not.toMatch(/border-highlight/);
   });
@@ -116,7 +116,7 @@ describe("QuestionAlertBanner", () => {
     );
 
     expect(screen.queryByText(radarPending.promptText)).toBeNull();
-    expect(screen.queryByRole("button", { name: /Send answer/i })).toBeNull();
+    expect(screen.queryByRole("button", { name: /^Yes$/i })).toBeNull();
   });
 
   it("shows walking status without answer buttons", () => {
@@ -131,6 +131,6 @@ describe("QuestionAlertBanner", () => {
     );
 
     expect(screen.getByText(/Seeker is walking/i)).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /Send answer/i })).toBeNull();
+    expect(screen.queryByRole("button", { name: /^Yes$/i })).toBeNull();
   });
 });
