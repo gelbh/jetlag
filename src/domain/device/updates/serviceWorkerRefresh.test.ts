@@ -130,7 +130,6 @@ describe("serviceWorkerRefresh", () => {
     expect(
       shouldAutoApplyServiceWorkerUpdate({
         session: { id: "session-1" },
-        pathname: "/map",
       }),
     ).toBe(false);
   });
@@ -139,41 +138,30 @@ describe("serviceWorkerRefresh", () => {
     expect(
       shouldAutoApplyServiceWorkerUpdate({
         session: null,
-        pathname: "/map",
       }),
     ).toBe(true);
   });
 
-  it("allows auto apply off the map with an active session", () => {
+  it("defers auto apply on home while a session is still active", () => {
     expect(
       shouldAutoApplyServiceWorkerUpdate({
         session: { id: "session-1" },
-        pathname: "/",
       }),
-    ).toBe(true);
+    ).toBe(false);
   });
 
   it("treats a safe window as reloadable", () => {
     expect(
       isSafeToReloadApp({
         session: null,
-        pathname: "/map",
-      }),
-    ).toBe(true);
-
-    expect(
-      isSafeToReloadApp({
-        session: { id: "session-1" },
-        pathname: "/",
       }),
     ).toBe(true);
   });
 
-  it("treats an active map session as unsafe to reload", () => {
+  it("treats an active session as unsafe to reload", () => {
     expect(
       isSafeToReloadApp({
         session: { id: "session-1" },
-        pathname: "/map",
       }),
     ).toBe(false);
   });
@@ -187,7 +175,6 @@ describe("serviceWorkerRefresh", () => {
     await maybeApplyPendingUpdate({
       needsRefresh: true,
       session: { id: "session-1" },
-      pathname: "/map",
       registration,
       applyUpdate,
     });
@@ -196,7 +183,6 @@ describe("serviceWorkerRefresh", () => {
     await maybeApplyPendingUpdate({
       needsRefresh: true,
       session: null,
-      pathname: "/map",
       registration,
       applyUpdate,
     });
@@ -209,7 +195,6 @@ describe("serviceWorkerRefresh", () => {
     await maybeApplyPendingUpdate({
       needsRefresh: false,
       session: null,
-      pathname: "/",
       registration: undefined,
       applyUpdate,
     });
