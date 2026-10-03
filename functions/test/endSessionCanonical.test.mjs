@@ -42,7 +42,10 @@ test("endSessionCanonical writes outcome and deletes code", async () => {
   });
   const sessionDoc = { ref: db._sessionRef, data: () => ({ code: "ABCD" }) };
 
-  assert.equal(await endSessionCanonical(db, sessionDoc, { gameOutcome: "abandoned" }), "abandoned");
+  assert.equal(
+    await endSessionCanonical(db, sessionDoc, { gameOutcome: "abandoned" }),
+    "abandoned",
+  );
   assert.equal(updates[0].status, "ended");
   assert.equal(updates[0].gameOutcome, "abandoned");
   assert.deepEqual(deleted, [{ name: "sessionCodes", id: "ABCD" }]);
