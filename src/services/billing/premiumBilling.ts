@@ -59,6 +59,8 @@ export async function startPremiumCheckout(productKey: PremiumProductKey): Promi
     "createCheckoutSession",
   );
 
+  track(ANALYTICS_EVENTS.premium_checkout_started, { productKey });
+
   try {
     const result = await callable({
       productKey,
@@ -66,7 +68,6 @@ export async function startPremiumCheckout(productKey: PremiumProductKey): Promi
     if (!result.data.url) {
       throw new Error("Checkout URL missing.");
     }
-    track(ANALYTICS_EVENTS.premium_checkout_started, { productKey });
     return result.data.url;
   } catch (error) {
     const mapped = mapCallableError(error, "Could not start checkout.");
