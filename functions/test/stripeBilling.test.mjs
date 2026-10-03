@@ -71,6 +71,11 @@ function createMockStripe(overrides = {}) {
     customers: {
       retrieve: overrides.retrieve ?? (async (customerId) => ({ id: customerId })),
       create: overrides.create ?? (async () => ({ id: "cus_live_new" })),
+      search:
+        overrides.search ??
+        (async () => ({
+          data: [],
+        })),
     },
     checkout: {
       sessions: {
@@ -265,5 +270,66 @@ describe("stripeBilling", () => {
 
     assert.equal(result.url, "https://billing.stripe.test/portal");
     assert.equal(db.documents["users/host-1"]?.stripeCustomerId, "cus_live_replacement");
+  });
+
+  it("reuses a searched Stripe customer when Firestore has no customer id", async () => {
+    const db = createMockDb({
+      "users/host-1": {},
+    });
+    let created = false;
+    let searchQuery = "";
+    const stripe = createMockStripe({
+      search: async ({ query }) => {
+        searchQuery = query;
+        return {
+          data: [{ id: "cus_search_hit", metadata: { firebaseUid: "host-1" } }],
+        };
+      },
+      create: async () => {
+        created = true;
+        return { id: "cus_should_not_create" };
+      },
+    });
+
+    const customerId = await ensureStripeCustomer(stripe, db, "host-1", "host@example.com");
+
+    assert.equal(customerId, "cus_search_hit");
+    assert.equal(created, false);
+    assert.equal(searchQuery, "metadata['firebaseUid']:'host-1'");
+    assert.equal(db.documents["users/host-1"]?.stripeCustomerId, "cus_search_hit");
+  });
+
+  it("creates a Stripe customer when search returns no live match", async () => {
+    const db = createMockDb({
+      "users/host-1": {},
+    });
+    const stripe = createMockStripe({
+      search: async () => ({
+        data: [{ id: "cus_deleted_orphan", deleted: true }],
+      }),
+      create: async () => ({ id: "cus_created_after_miss" }),
+    });
+
+    const customerId = await ensureStripeCustomer(stripe, db, "host-1", "host@example.com");
+
+    assert.equal(customerId, "cus_created_after_miss");
+    assert.equal(db.documents["users/host-1"]?.stripeCustomerId, "cus_created_after_miss");
+  });
+
+  it("creates a Stripe customer when search throws", async () => {
+    const db = createMockDb({
+      "users/host-1": {},
+    });
+    const stripe = createMockStripe({
+      search: async () => {
+        throw new Error("Search unavailable");
+      },
+      create: async () => ({ id: "cus_created_after_search_error" }),
+    });
+
+    const customerId = await ensureStripeCustomer(stripe, db, "host-1", "host@example.com");
+
+    assert.equal(customerId, "cus_created_after_search_error");
+    assert.equal(db.documents["users/host-1"]?.stripeCustomerId, "cus_created_after_search_error");
   });
 });

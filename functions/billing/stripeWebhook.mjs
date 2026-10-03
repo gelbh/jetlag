@@ -2,7 +2,11 @@ import Stripe from "stripe";
 import { setCors } from "../lib/cors.mjs";
 import { captureFunctionsException } from "../lib/sentry.mjs";
 import { markStripeEventProcessed } from "./premiumEntitlements.mjs";
-import { applyCheckoutSessionCompleted, syncSubscriptionEntitlements } from "./stripeBilling.mjs";
+import {
+  applyCheckoutSessionCompleted,
+  clearStripeCustomerIdForDeletedCustomer,
+  syncSubscriptionEntitlements,
+} from "./stripeBilling.mjs";
 
 const STRIPE_SIGNATURE_MISMATCH = /No signatures found matching the expected signature/i;
 
@@ -74,6 +78,13 @@ export async function handleStripeWebhook(db, webhookSecret, req, res) {
       case "customer.subscription.deleted": {
         const subscription = /** @type {Stripe.Subscription} */ (event.data.object);
         await syncSubscriptionEntitlements(db, subscription);
+        break;
+      }
+      case "customer.deleted": {
+        const customer = /** @type {Stripe.Customer | Stripe.DeletedCustomer} */ (
+          event.data.object
+        );
+        await clearStripeCustomerIdForDeletedCustomer(db, customer);
         break;
       }
       default:

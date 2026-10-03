@@ -85,6 +85,66 @@ export function createStripeClient(secret) {
 
 /**
  * @param {Stripe} stripe
+ * @param {string} uid
+ * @returns {Promise<string | null>}
+ */
+async function findStripeCustomerIdByFirebaseUid(stripe, uid) {
+  try {
+    const result = await stripe.customers.search({
+      query: `metadata['firebaseUid']:'${uid}'`,
+    });
+    const match = (result?.data ?? []).find(
+      (customer) =>
+        customer &&
+        typeof customer === "object" &&
+        typeof customer.id === "string" &&
+        !("deleted" in customer && customer.deleted === true),
+    );
+    return match?.id ?? null;
+  } catch (error) {
+    console.warn(`Stripe customer search failed for uid ${uid}:`, error);
+    return null;
+  }
+}
+
+/**
+ * Clears users/{uid}.stripeCustomerId after Stripe emits customer.deleted.
+ * Resolves uid from metadata.firebaseUid, else Firestore query by customer id.
+ *
+ * @param {import('firebase-admin/firestore').Firestore} db
+ * @param {Pick<Stripe.Customer | Stripe.DeletedCustomer, "id" | "metadata">} customer
+ */
+export async function clearStripeCustomerIdForDeletedCustomer(db, customer) {
+  const metadataUid = customer?.metadata?.firebaseUid;
+  let uid =
+    typeof metadataUid === "string" && metadataUid.trim().length > 0 ? metadataUid.trim() : null;
+
+  if (!uid) {
+    const customerId = typeof customer?.id === "string" ? customer.id : null;
+    if (!customerId) {
+      return;
+    }
+
+    const snapshot = await db
+      .collection("users")
+      .where("stripeCustomerId", "==", customerId)
+      .limit(5)
+      .get();
+
+    if (snapshot.empty || snapshot.docs.length === 0) {
+      return;
+    }
+
+    uid = snapshot.docs[0].id;
+  }
+
+  await mergeUserEntitlements(db, uid, {
+    stripeCustomerId: FieldValue.delete(),
+  });
+}
+
+/**
+ * @param {Stripe} stripe
  * @param {import('firebase-admin/firestore').Firestore} db
  * @param {string} uid
  * @param {string | null | undefined} email
@@ -115,6 +175,14 @@ export async function ensureStripeCustomer(stripe, db, uid, email) {
 
       console.warn(`Replacing stale Stripe customer ${existingCustomerId} for uid ${uid}.`);
     }
+  }
+
+  const searchedCustomerId = await findStripeCustomerIdByFirebaseUid(stripe, uid);
+  if (searchedCustomerId) {
+    await mergeUserEntitlements(db, uid, {
+      stripeCustomerId: searchedCustomerId,
+    });
+    return searchedCustomerId;
   }
 
   let customer;
