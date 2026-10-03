@@ -3,10 +3,12 @@ import { cn } from "@/lib/cn";
 
 /**
  * Map-safe overlay chassis: fixed phone band.
- * Horizontal padding = max(token, safe-area-inset-*) so hunt/ask share one content box.
+ * Horizontal padding = max(token, shell-composed L/R safe) so hunt/ask share one
+ * content box. `--jl-shell-safe-*` subtracts letterbox under PlayerPhoneShell;
+ * env() fallback covers chrome outside the shell.
  */
 export const OVERLAY_SAFE_PAD_X =
-  "ps-[max(0.75rem,env(safe-area-inset-left))] pe-[max(0.75rem,env(safe-area-inset-right))]";
+  "ps-[max(0.75rem,var(--jl-shell-safe-left,env(safe-area-inset-left)))] pe-[max(0.75rem,var(--jl-shell-safe-right,env(safe-area-inset-right)))]";
 
 export interface OverlayHostProps {
   className?: string;

@@ -76,13 +76,20 @@
   }
 
   .jl-status-rail-float {
-    /* Clear notch/Dynamic Island via --safe-area-top, then match bottom float gap. */
+    /* Clear notch/Dynamic Island via --safe-area-top, then match bottom float gap.
+     * L/R: shell-composed safe (letterbox-aware) with viewport env fallback. */
     padding: calc(
         var(--safe-area-top, 0px) + var(--dock-float-gap, 0.75rem)
       )
-      max(var(--dock-float-gap, 0.75rem), env(safe-area-inset-right, 0px))
+      max(
+        var(--dock-float-gap, 0.75rem),
+        var(--jl-shell-safe-right, env(safe-area-inset-right, 0px))
+      )
       0.25rem
-      max(var(--dock-float-gap, 0.75rem), env(safe-area-inset-left, 0px));
+      max(
+        var(--dock-float-gap, 0.75rem),
+        var(--jl-shell-safe-left, env(safe-area-inset-left, 0px))
+      );
   }
 
   .jl-status-bar {
