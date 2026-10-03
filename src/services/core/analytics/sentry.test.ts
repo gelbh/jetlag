@@ -19,7 +19,9 @@ const withScope = vi.hoisted(() =>
 const init = vi.hoisted(() => vi.fn());
 const captureReactException = vi.hoisted(() => vi.fn());
 const addIntegration = vi.hoisted(() => vi.fn());
-const browserTracingIntegration = vi.hoisted(() => vi.fn(() => ({ name: "BrowserTracing" })));
+const createSentryReactRouterIntegration = vi.hoisted(() =>
+  vi.fn(() => ({ name: "ReactRouterTracing" })),
+);
 const replayIntegration = vi.hoisted(() => vi.fn(() => ({ name: "Replay" })));
 const getClientEnv = vi.hoisted(() => vi.fn((): Record<string, string> => ({})));
 const idleCallbacks = vi.hoisted((): Array<() => void> => []);
@@ -34,9 +36,12 @@ vi.mock("@sentry/react", () => ({
   captureReactException,
   init,
   addIntegration,
-  browserTracingIntegration,
   replayIntegration,
   getIsolationScope: () => ({ addBreadcrumb: isolationScopeAddBreadcrumb }),
+}));
+
+vi.mock("./sentryReactRouter", () => ({
+  createSentryReactRouterIntegration,
 }));
 
 vi.mock("../../../config/env", () => ({
@@ -104,8 +109,8 @@ describe("initSentry", () => {
       tunnel: string;
       ignoreSpans: unknown;
     };
-    expect(options.integrations).toEqual([{ name: "BrowserTracing" }]);
-    expect(browserTracingIntegration).toHaveBeenCalledWith({ enableInp: true });
+    expect(options.integrations).toEqual([{ name: "ReactRouterTracing" }]);
+    expect(createSentryReactRouterIntegration).toHaveBeenCalledOnce();
     expect(replayIntegration).not.toHaveBeenCalled();
     expect(options.replaysOnErrorSampleRate).toBe(1.0);
     expect(options).toHaveProperty("replaysSessionSampleRate");
