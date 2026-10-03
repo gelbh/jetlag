@@ -442,6 +442,8 @@ export function useThermometerTool({
     !session.isBusy &&
     (awaitHiderAnswer || config.answer !== null);
 
+  const placementError = config.panelError ?? session.error ?? gpsError ?? walkTracker.gpsError;
+
   const reopenSetup = () => {
     setEditingSetup(true);
     patchConfig({ localThermoA: null, thermoB: null, answer: null });
@@ -459,9 +461,7 @@ export function useThermometerTool({
   const hud: AskToolHudBundle = {
     readiness,
     costLabel,
-    error: mapPlacementActive
-      ? null
-      : (config.panelError ?? session.error ?? gpsError ?? walkTracker.gpsError),
+    error: mapPlacementActive ? null : placementError,
     onCommit: onHudCommit,
     commitKind: walkingActive ? "endWalk" : awaitHiderAnswer ? "send" : "ask",
     suppressSheet: mapPlacementActive,
@@ -478,6 +478,7 @@ export function useThermometerTool({
         canStartWalk={distanceAvailable && canSubmitQuestion && !session.isBusy}
         travelLabel={travelLabel}
         travelTooShort={travelTooShort}
+        error={placementError}
         awaitHiderAnswer={awaitHiderAnswer}
         answer={config.answer}
         onAnswerChange={(answer) => patchConfig({ answer })}
@@ -503,7 +504,7 @@ export function useThermometerTool({
         gpsLoading={gpsLoading}
         canSubmitQuestion={canSubmitQuestion}
         isSubmitting={session.isBusy}
-        error={config.panelError ?? session.error ?? gpsError ?? walkTracker.gpsError}
+        error={placementError}
         onPlacementModeChange={setPlacementMode}
         onDistanceChange={setDistanceMeters}
         onAnswerChange={(answer) => patchConfig({ answer })}
@@ -551,7 +552,7 @@ export function useThermometerTool({
         canSubmitQuestion={canSubmitQuestion}
         isSubmitting={session.isBusy}
         gpsLoading={gpsLoading}
-        error={config.panelError ?? session.error ?? gpsError ?? walkTracker.gpsError}
+        error={placementError}
         wizardStepRef={wizardStepRef}
       />
     ),

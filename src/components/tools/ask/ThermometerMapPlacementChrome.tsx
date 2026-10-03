@@ -39,6 +39,7 @@ export type ThermometerMapPlacementChromeProps = {
   canStartWalk?: boolean;
   travelLabel?: string | null;
   travelTooShort?: boolean;
+  error?: string | null;
   awaitHiderAnswer?: boolean;
   answer?: ThermometerAnswer | null;
   onAnswerChange?: (answer: ThermometerAnswer) => void;
@@ -95,6 +96,7 @@ export function ThermometerMapPlacementChrome({
   canStartWalk = false,
   travelLabel = null,
   travelTooShort = false,
+  error = null,
   awaitHiderAnswer = false,
   answer = null,
   onAnswerChange,
@@ -221,6 +223,15 @@ export function ThermometerMapPlacementChrome({
         {travelTooShort ? (
           <p className="m-0 px-1 text-xs leading-snug" style={{ color: "var(--color-halt)" }}>
             Movement is shorter than the selected distance.
+          </p>
+        ) : null}
+        {error ? (
+          <p
+            data-testid="thermometer-map-placement-error"
+            className="m-0 px-1 text-xs leading-snug"
+            style={{ color: "var(--color-halt)" }}
+          >
+            {error}
           </p>
         ) : null}
         {pinsReady && awaitHiderAnswer ? (
