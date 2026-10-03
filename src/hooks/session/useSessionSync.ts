@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { trackRestoredWrites } from "@/services/firestore/commitWrite";
 import { getPowerProfile } from "../../domain/device/power/powerProfile";
 import { reportStoragePressureIfHigh } from "../../domain/device/pwa/pwaStorageBudget";
 import { LOCAL_SESSION_ID, migrateAnnotations } from "../../domain/map/annotations";
@@ -20,6 +21,9 @@ import { flushOfflineQueue } from "../../services/session/flushOfflineQueue";
 import { readOfflineQueueForSession } from "../../services/session/offlineQueue";
 import { bindOfflineQueueResumeFlush } from "../../services/session/sessionResumeFlush";
 import { useAnnotationStore, useMapStore, useSessionStore } from "../../state/sessionStore";
+
+/** How long a cache-served session doc may stand before the rail says "last known state". */
+export const SESSION_STALE_GRACE_MS = 1500;
 
 export interface UseSessionSyncOptions {
   syncEnabled?: boolean;
@@ -46,6 +50,8 @@ export function useSessionSync({ syncEnabled = true }: UseSessionSyncOptions = {
       return;
     }
 
+    const setSessionFromCache = useSessionStore.getState().setSessionFromCache;
+    let staleTimer: ReturnType<typeof setTimeout> | undefined;
     const unsubscribe = subscribeToSession(
       session.id,
       (remoteSession) => {
@@ -67,9 +73,25 @@ export function useSessionSync({ syncEnabled = true }: UseSessionSyncOptions = {
       (error) => {
         setLastSyncError(error instanceof Error ? error.message : "Session sync failed.");
       },
+      (metadata) => {
+        // Cold start / resume always serves the cache first; only call it
+        // stale if the server snapshot hasn't replaced it within the grace.
+        if (!metadata.fromCache) {
+          clearTimeout(staleTimer);
+          staleTimer = undefined;
+          setSessionFromCache(false);
+        } else if (staleTimer === undefined) {
+          staleTimer = setTimeout(() => setSessionFromCache(true), SESSION_STALE_GRACE_MS);
+        }
+      },
     );
 
-    return unsubscribe;
+    return () => {
+      clearTimeout(staleTimer);
+      unsubscribe();
+      setSessionFromCache(false);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- resubscribe on session id only
   }, [myUid, session?.id, setLastSyncError, setSession, syncEnabled]);
 
   const endGameSessionId = session?.id;
@@ -127,7 +149,7 @@ export function useSessionSync({ syncEnabled = true }: UseSessionSyncOptions = {
 
     replaceAnnotations([]);
 
-    getFirestoreDb();
+    trackRestoredWrites(getFirestoreDb());
     if (isFirestorePersistenceUnavailable()) {
       setLastSyncError(
         "Offline cache unavailable in this browser tab. Sync may be less reliable until you reload.",

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { selectPendingCount, useWriteLedgerStore } from "@/state/writeLedgerStore";
 import { getPowerProfile } from "../../domain/device/power/powerProfile";
 import { resolveSyncStatus, type SyncStatus } from "../../domain/device/sync/sync";
 import { LOCAL_SESSION_ID } from "../../domain/map/annotations";
@@ -16,6 +17,8 @@ export function useSyncStatus(): {
   const pendingWrites = useSessionStore((state) => state.pendingWrites);
   const syncInFlight = useSessionStore((state) => state.syncInFlight);
   const lastSyncError = useSessionStore((state) => state.lastSyncError);
+  const fromCache = useSessionStore((state) => state.sessionFromCache);
+  const ledgerPending = useWriteLedgerStore(selectPendingCount);
   const remoteUpdateNotice = useSessionStore((state) => state.remoteUpdateNotice);
   const [online, setOnline] = useState(typeof navigator === "undefined" ? true : navigator.onLine);
   const reachabilityEnabled = Boolean(session) && session?.id !== LOCAL_SESSION_ID;
@@ -45,9 +48,12 @@ export function useSyncStatus(): {
       reachable,
       inFlightWrites: syncInFlight,
       queuedWrites: pendingWrites,
+      ledgerPending,
+      fromCache,
       lastSyncError,
     }),
-    queuedWrites: pendingWrites,
+    // "Offline · N queued" counts every un-acked action, not just annotations.
+    queuedWrites: pendingWrites + ledgerPending,
     lastSyncError,
     remoteUpdateNotice,
   };

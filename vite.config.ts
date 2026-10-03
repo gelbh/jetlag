@@ -61,8 +61,8 @@ export default defineConfig(({ mode }) => ({
     optionalKernelWasmPkg(),
     wasm(),
     ...createSentryPlugins({ appVersion }),
-    // React Compiler annotation mode; policy in CONTRIBUTING.md
-    react({ compiler: { compilationMode: "annotation" } }),
+    // React Compiler full compile; exclude violators with "use no memo" (CONTRIBUTING.md)
+    react({ compiler: true }),
     tailwindcss(),
     createPwaPlugin(),
     timeEndpointPlugin(),

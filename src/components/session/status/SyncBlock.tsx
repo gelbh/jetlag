@@ -4,6 +4,7 @@ import { surveySyncSegmentLabel, surveySyncShortLabel } from "@/domain/device/su
 import type { SyncStatus } from "@/domain/device/sync/sync";
 import { useMinWidth } from "@/hooks/layout/useMinWidth";
 import { SyncStatusBeacon } from "../syncUi/SyncStatusDot";
+import { syncToneForStatus } from "../syncUi/syncStatusDetailContent";
 import { SYNC_TONE_CLASSES, type SyncTone, syncBeaconAriaLabel } from "./syncRailDisplay";
 
 interface SyncBlockProps {
@@ -27,21 +28,7 @@ interface SyncBlockProps {
 }
 
 function surveyShortLabelTone(status: SyncStatus): SyncTone | null {
-  switch (status) {
-    case "error":
-      return "error";
-    case "offline":
-    case "degraded":
-      return "warning";
-    case "saving":
-      return "info";
-    case "synced":
-      return null;
-    default: {
-      const exhaustive: never = status;
-      return exhaustive;
-    }
-  }
+  return status === "synced" ? null : syncToneForStatus(status);
 }
 
 /** Live sync beacon in the status rail (display only; no detail modal). */
