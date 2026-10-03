@@ -674,8 +674,8 @@ export function AdminOpsDesk() {
   return (
     <AppShell
       mode="static"
-      header={{ height: 56 }}
-      padding="sm"
+      header={{ height: "auto" }}
+      padding={0}
       className="jl-ops-desk"
       data-testid="admin-ops-desk"
       data-admin-shell="mantine-static"
