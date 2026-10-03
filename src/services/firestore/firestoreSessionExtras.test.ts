@@ -15,6 +15,9 @@ const firestoreMocks = vi.hoisted(() => {
     updateDoc: vi.fn(async () => undefined),
     deleteDoc: vi.fn(async () => undefined),
     addDoc: vi.fn(async () => undefined),
+    getDocFromCache: vi.fn(async () => {
+      throw new Error("not cached");
+    }),
     getDoc: vi.fn(async () => ({
       exists: () => true,
       data: () => ({ status: "walking" }),
@@ -47,6 +50,7 @@ vi.mock("firebase/firestore", () => ({
   deleteDoc: firestoreMocks.deleteDoc,
   doc: firestoreMocks.doc,
   getDoc: firestoreMocks.getDoc,
+  getDocFromCache: firestoreMocks.getDocFromCache,
   getDocs: firestoreMocks.getDocs,
   onSnapshot: vi.fn(),
   orderBy: vi.fn(),
@@ -77,7 +81,6 @@ import {
   subscribeToSessionMessages,
   updatePendingQuestion,
   writeAskedQuestionBatch,
-  writePendingQuestion,
   writePendingQuestionUpdateBatch,
   writePlayerLocation,
 } from "./firestoreSessionExtras";
@@ -113,17 +116,6 @@ function samplePendingQuestion(
 describe("firestoreSessionExtras writes", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-  });
-
-  it("writes pending questions with serialized documents", async () => {
-    const question = samplePendingQuestion();
-
-    await writePendingQuestion("session-1", question);
-
-    expect(firestoreMocks.setDoc).toHaveBeenCalledWith(
-      expect.objectContaining({ path: expect.stringContaining("pq-1") }),
-      buildPendingQuestionDocument(question),
-    );
   });
 
   it("patches pending question fields without undefined values", async () => {

@@ -7,10 +7,9 @@ import {
   mapToolDockShortLabel,
 } from "../../domain/map/mapTools";
 import {
+  activeDeadlineAnchor,
   formatExpiredAnswerCountdown,
-  isAwaitingServerReceipt,
   questionAnswerDeadlineMs,
-  resolveDeadlineAnchor,
 } from "../../domain/questions";
 import type { HiderTruthReferenceMode } from "../../domain/questions/hiderTruth/resolveHiderTruthReference";
 import type { HiderTruthResult } from "../../domain/questions/ui";
@@ -212,9 +211,9 @@ export function GameChatTab({
             ? questionAnswerDeadlineMs(pending.toolType, sessionRules)
             : questionAnswerDeadlineMs("matching", sessionRules);
           const countdown =
-            !walking && !closed && pending && !isAwaitingServerReceipt(pending)
+            !walking && !closed && pending && activeDeadlineAnchor(pending)
               ? formatExpiredAnswerCountdown(
-                  resolveDeadlineAnchor(pending),
+                  activeDeadlineAnchor(pending),
                   deadlineMs,
                   pending.deadlineExpiredAt,
                   nowMs,

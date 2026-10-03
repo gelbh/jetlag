@@ -50,7 +50,7 @@ export interface PendingQuestionRecord {
   promptText: string;
   answer?: unknown;
   answerableAt?: string;
-  /** Server receipt time (ISO), stamped by the batched ask; absent on walking asks and pre-batch docs. */
+  /** Server receipt time (ISO): stamped when the hider can first answer (ask, or walk completion). Absent on older docs. */
   receivedAt?: string;
   deadlineExpiredAt?: string;
   answeredLate?: boolean;

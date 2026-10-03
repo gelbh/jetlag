@@ -357,6 +357,18 @@ export function HiderMapScreen() {
       }
 
       const messageBeforeAnswer = messages.find((entry) => entry.id === messageId);
+      const rollBackOptimisticAnswer = (error: unknown) => {
+        setOptimisticAnswers((previous) => {
+          const next = new Map(previous);
+          if (next.get(pendingQuestionId) === selectedReply) {
+            next.delete(pendingQuestionId);
+          }
+          return next;
+        });
+        setChatAnswerError(
+          error instanceof Error ? error.message : "Could not save your answer. Try again.",
+        );
+      };
 
       try {
         setOptimisticAnswers((previous) => {
@@ -366,7 +378,8 @@ export function HiderMapScreen() {
         });
 
         const user = await ensureAnonymousUser();
-        await answerPendingQuestion(
+        // Not awaited: the answer is queued locally; only a server rejection undoes it.
+        const { acknowledged } = answerPendingQuestion(
           sessionId,
           pendingQuestionId,
           messageId,
@@ -380,6 +393,25 @@ export function HiderMapScreen() {
               }
             : undefined,
         );
+        // Cards only once the server accepts the answer: a rejected answer
+        // (e.g. the seeker cancelled meanwhile) must not leave a reward behind.
+        acknowledged.then(async () => {
+          if (deadlineExpired || !boardEconomyEnabled) {
+            return;
+          }
+          try {
+            const reward = await boardEconomy.applyAnswerReward(
+              pending.toolType,
+              pending.cardDraw,
+              pending.cardKeep,
+            );
+            if (reward && !reward.needsPick) {
+              setHandSheetOpen(true);
+            }
+          } catch {
+            // Best-effort: the answer itself is saved.
+          }
+        }, rollBackOptimisticAnswer);
 
         acknowledgeFingerprints([
           messageFingerprint(
@@ -396,17 +428,6 @@ export function HiderMapScreen() {
         ]);
 
         try {
-          if (!deadlineExpired && boardEconomyEnabled) {
-            const reward = await boardEconomy.applyAnswerReward(
-              pending.toolType,
-              pending.cardDraw,
-              pending.cardKeep,
-            );
-            if (reward && !reward.needsPick) {
-              setHandSheetOpen(true);
-            }
-          }
-
           const answerTruthReference = truthContext
             ? resolvePendingQuestionTruthReference(pending, truthContext)
             : { point: null as LatLngTuple | null };
@@ -427,19 +448,10 @@ export function HiderMapScreen() {
             setTruthReveal({ truth, selectedReply, selectedLabel });
           }
         } catch {
-          // Answer already saved; board/truth side effects are best-effort.
+          // Answer already queued; the truth reveal is best-effort.
         }
       } catch (error) {
-        setOptimisticAnswers((previous) => {
-          const next = new Map(previous);
-          if (next.get(pendingQuestionId) === selectedReply) {
-            next.delete(pendingQuestionId);
-          }
-          return next;
-        });
-        setChatAnswerError(
-          error instanceof Error ? error.message : "Could not save your answer. Try again.",
-        );
+        rollBackOptimisticAnswer(error);
       } finally {
         answerInFlightRef.current = false;
         setAnswerSubmitting(false);

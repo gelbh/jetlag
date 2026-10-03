@@ -875,9 +875,12 @@ service cloud.firestore {
           && resource.data.status == 'walking'
           && request.resource.data.status == 'pending'
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-            'status', 'placement', 'promptText', 'replyOptions', 'answerableAt', 'cardDraw', 'cardKeep'
+            'status', 'placement', 'promptText', 'replyOptions', 'answerableAt', 'cardDraw', 'cardKeep',
+            'receivedAt'
           ])
           && request.resource.data.answerableAt is string
+          && (!('receivedAt' in request.resource.data)
+            || request.resource.data.receivedAt == request.time)
         ) || (
           isSeekerMember(sessionId)
           && resource.data.status == 'answered'

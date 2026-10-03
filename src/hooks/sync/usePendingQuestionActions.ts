@@ -8,12 +8,12 @@ import {
   type GameReplyOption,
   type PendingQuestionPlacement,
   type PendingQuestionToolType,
-  type SessionMessageRecord,
 } from "@/domain/session/activity/sessionChat";
 import type { PlayerRole } from "@/domain/session/players/playerRole";
 import { serverNowIso } from "@/services/core/time/serverClock";
 import { commitWrite } from "@/services/firestore/commitWrite";
 import {
+  buildGameSystemMessage,
   getPendingQuestionStatus,
   postGameSystemMessage,
   THERMOMETER_WALK_CANCEL_TEXT,
@@ -29,24 +29,6 @@ import {
   emitThermometerWalkStartedActivity,
   isAnnotationQuestionTool,
 } from "@/services/session/emitSessionActivity";
-
-function gameSystemMessage(
-  sessionId: string,
-  senderUid: string,
-  senderRole: PlayerRole,
-  text: string,
-): SessionMessageRecord {
-  return {
-    id: createMessageId(),
-    sessionId,
-    channel: "game",
-    senderUid,
-    senderRole,
-    createdAt: serverNowIso(),
-    kind: "system",
-    text,
-  };
-}
 
 export interface SubmitPendingQuestionInput {
   sessionId: string;
@@ -67,8 +49,10 @@ export interface SubmitPendingQuestionInput {
  * server ack, so the UI never hangs in a dead zone; rejections surface via the
  * write ledger instead of throwing to the caller.
  */
+export const SUBMIT_DOUBLE_TAP_COOLDOWN_MS = 750;
+
 export function usePendingQuestionActions() {
-  const submitInFlightRef = useRef(false);
+  const lastSubmitAtRef = useRef(Number.NEGATIVE_INFINITY);
 
   const submitPendingQuestion = useCallback(
     ({
@@ -83,92 +67,89 @@ export function usePendingQuestionActions() {
       cardDraw,
       cardKeep,
     }: SubmitPendingQuestionInput): string | undefined => {
-      // Double-tap guard only: the body is synchronous now that writes are not awaited.
-      if (submitInFlightRef.current) {
+      // The body no longer spans network time, so an in-flight flag would clear
+      // before a second tap lands; a short cooldown absorbs the double tap
+      // until the optimistic pending question re-renders the tool as busy.
+      const nowMs = Date.now();
+      if (nowMs - lastSubmitAtRef.current < SUBMIT_DOUBLE_TAP_COOLDOWN_MS) {
         return undefined;
       }
+      lastSubmitAtRef.current = nowMs;
 
-      submitInFlightRef.current = true;
-      try {
-        const pendingQuestionId = createPendingQuestionId();
-        const messageId = createMessageId();
-        const createdAt = serverNowIso();
-        const walking = status === "walking";
+      const pendingQuestionId = createPendingQuestionId();
+      const messageId = createMessageId();
+      const createdAt = serverNowIso();
+      const walking = status === "walking";
 
-        commitWrite("question.ask", () =>
-          writeAskedQuestionBatch(
-            sessionId,
-            {
-              id: pendingQuestionId,
-              sessionId,
-              toolType,
-              createdByUid: senderUid,
-              createdAt,
-              status,
-              placement,
-              replyOptions,
-              promptText,
-              cardDraw,
-              cardKeep,
-              // Walking asks open their answer window when the walk completes.
-              ...(walking ? {} : { answerableAt: createdAt }),
-            },
-            walking
-              ? {
-                  id: messageId,
-                  sessionId,
-                  channel: "game",
-                  senderUid,
-                  senderRole,
-                  createdAt,
-                  kind: "system",
-                  text: promptText,
-                }
-              : {
-                  id: messageId,
-                  sessionId,
-                  channel: "game",
-                  senderUid,
-                  senderRole,
-                  createdAt,
-                  kind: "question",
-                  pendingQuestionId,
-                  toolType,
-                  promptText,
-                  replyOptions,
-                  status: "pending",
-                },
-          ),
-        );
-
-        if (walking) {
-          emitThermometerWalkStartedActivity({
-            sessionId,
-            pendingQuestionId,
-            promptText,
-            createdByUid: senderUid,
-          });
-        } else if (toolType === "photo") {
-          emitPhotoAskedActivity({
-            sessionId,
-            pendingQuestionId,
-            promptText,
-            createdByUid: senderUid,
-          });
-        } else if (isAnnotationQuestionTool(toolType)) {
-          emitQuestionAskedActivity({
+      commitWrite("question.ask", () =>
+        writeAskedQuestionBatch(
+          sessionId,
+          {
+            id: pendingQuestionId,
             sessionId,
             toolType,
-            promptText,
-            pendingQuestionId,
             createdByUid: senderUid,
-          });
-        }
+            createdAt,
+            status,
+            placement,
+            replyOptions,
+            promptText,
+            cardDraw,
+            cardKeep,
+            // Walking asks open their answer window when the walk completes.
+            ...(walking ? {} : { answerableAt: createdAt }),
+          },
+          walking
+            ? buildGameSystemMessage(
+                sessionId,
+                senderUid,
+                senderRole,
+                promptText,
+                messageId,
+                createdAt,
+              )
+            : {
+                id: messageId,
+                sessionId,
+                channel: "game",
+                senderUid,
+                senderRole,
+                createdAt,
+                kind: "question",
+                pendingQuestionId,
+                toolType,
+                promptText,
+                replyOptions,
+                status: "pending",
+              },
+        ),
+      );
 
-        return pendingQuestionId;
-      } finally {
-        submitInFlightRef.current = false;
+      if (walking) {
+        emitThermometerWalkStartedActivity({
+          sessionId,
+          pendingQuestionId,
+          promptText,
+          createdByUid: senderUid,
+        });
+      } else if (toolType === "photo") {
+        emitPhotoAskedActivity({
+          sessionId,
+          pendingQuestionId,
+          promptText,
+          createdByUid: senderUid,
+        });
+      } else if (isAnnotationQuestionTool(toolType)) {
+        emitQuestionAskedActivity({
+          sessionId,
+          toolType,
+          promptText,
+          pendingQuestionId,
+          createdByUid: senderUid,
+        });
       }
+
+      return pendingQuestionId;
     },
     [],
   );
@@ -219,6 +200,8 @@ export function usePendingQuestionActions() {
             cardDraw,
             cardKeep,
           },
+          // The hider can only answer once this lands: anchor their window on arrival.
+          stampReceivedAt: true,
           newMessage: {
             id: createMessageId(),
             sessionId,
@@ -258,18 +241,20 @@ export function usePendingQuestionActions() {
         senderUid?: string;
         senderRole?: PlayerRole;
       },
-    ): void => {
+    ): { acknowledged: Promise<void> } => {
       const lateNotice =
         options?.deadlineExpired && options.senderUid && options.senderRole
-          ? gameSystemMessage(
+          ? buildGameSystemMessage(
               sessionId,
               options.senderUid,
               options.senderRole,
               "Answer received late. Hider forfeits card draw for this question.",
+              createMessageId(),
+              serverNowIso(),
             )
           : undefined;
 
-      commitWrite("question.answer", () =>
+      return commitWrite("question.answer", () =>
         writePendingQuestionUpdateBatch(sessionId, {
           questionId: pendingQuestionId,
           questionPatch: {
@@ -288,7 +273,14 @@ export function usePendingQuestionActions() {
   const postSystemMessage = useCallback(
     (sessionId: string, senderUid: string, senderRole: PlayerRole, text: string): void => {
       commitWrite("system.message", () =>
-        postGameSystemMessage(sessionId, senderUid, senderRole, text, createMessageId()),
+        postGameSystemMessage(
+          sessionId,
+          senderUid,
+          senderRole,
+          text,
+          createMessageId(),
+          serverNowIso(),
+        ),
       );
     },
     [],
@@ -317,11 +309,13 @@ export function usePendingQuestionActions() {
         writePendingQuestionUpdateBatch(sessionId, {
           questionId: pendingQuestionId,
           questionPatch: { status: "cancelled" },
-          newMessage: gameSystemMessage(
+          newMessage: buildGameSystemMessage(
             sessionId,
             senderUid,
             senderRole,
             THERMOMETER_WALK_CANCEL_TEXT[reason],
+            createMessageId(),
+            serverNowIso(),
           ),
         }),
       );
@@ -357,11 +351,13 @@ export function usePendingQuestionActions() {
           questionId: options.pendingQuestionId,
           questionPatch: { status: "cancelled" },
           gameMessage: { id: options.messageId, patch: { status: "cancelled" } },
-          newMessage: gameSystemMessage(
+          newMessage: buildGameSystemMessage(
             options.sessionId,
             options.senderUid,
             options.senderRole,
             "Expired question dismissed. You can ask again.",
+            createMessageId(),
+            serverNowIso(),
           ),
         }),
       );

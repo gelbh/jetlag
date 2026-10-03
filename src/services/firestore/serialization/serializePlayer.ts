@@ -160,10 +160,7 @@ export function deserializePendingQuestionFromFirestore(
     answer: document.answer,
     answerableAt: typeof document.answerableAt === "string" ? document.answerableAt : undefined,
     // Server-owned: read-only here (rules pin it to request.time); never written by the builder.
-    receivedAt:
-      document.receivedAt != null && typeof document.receivedAt === "object"
-        ? deserializeFirestoreTimestamp(document.receivedAt)
-        : undefined,
+    receivedAt: deserializeFirestoreTimestamp(document.receivedAt),
     deadlineExpiredAt:
       typeof document.deadlineExpiredAt === "string" ? document.deadlineExpiredAt : undefined,
     answeredLate: typeof document.answeredLate === "boolean" ? document.answeredLate : undefined,
