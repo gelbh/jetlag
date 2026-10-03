@@ -4,8 +4,8 @@ import {
   PANEL_LABELS,
   type PanelId,
 } from "../../../domain/admin/opsDeskLayout";
-import { AdminDeskTopbar } from "./AdminDeskTopbar";
 import { type AdminPanelBodies, AdminPanelBody } from "../shared/AdminPanelBody";
+import { AdminDeskTopbar } from "./AdminDeskTopbar";
 
 interface AdminMobileDeskProps {
   activePanelId: PanelId;

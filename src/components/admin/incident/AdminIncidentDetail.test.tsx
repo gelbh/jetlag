@@ -7,9 +7,9 @@ import type {
   IncidentRecord,
 } from "../../../domain/incident/incidentTypes";
 import { renderWithRouter } from "../../../test/renderWithRouter";
+import { AdminOpsDesk } from "../ops/AdminOpsDesk";
 import { AdminIncidentActions } from "./AdminIncidentActions";
 import { AdminIncidentDetail } from "./AdminIncidentDetail";
-import { AdminOpsDesk } from "../ops/AdminOpsDesk";
 
 function renderDesk(route: string) {
   return renderWithRouter(
