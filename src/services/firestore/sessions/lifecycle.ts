@@ -1,16 +1,9 @@
-import {
-  deleteDoc,
-  deleteField,
-  doc,
-  getDocs,
-  setDoc,
-  updateDoc,
-  writeBatch,
-} from "firebase/firestore";
+import { deleteField, doc, getDocs, setDoc, updateDoc, writeBatch } from "firebase/firestore";
 import type { PlayerRole } from "@/domain/session/players/playerRole";
 import { type TimerState, timerStateToRemote } from "@/domain/session/timer/timer";
 import type { SessionRulesPatch } from "@/domain/session/tools/advancedSessionSettings";
 import { getFirestoreDb } from "@/services/core/firebase/firebase";
+import { serverNowIso } from "@/services/core/time/serverClock";
 import { emitGameEndedActivity } from "@/services/session/emitSessionActivity";
 import { cancelOpenPendingQuestions, postGameSystemMessage } from "../firestoreSessionExtras";
 import { sessionRulesPatchToFirestore } from "../serialization/serializeSession";
@@ -24,17 +17,23 @@ import {
   sessionsCollection,
 } from "./shared";
 
+/**
+ * Client end write (fallback when the end callable is unavailable). The session
+ * read is cache-capable and the update + code delete share one batch, so the
+ * end applies locally and replays on reconnect instead of hanging offline.
+ */
 export async function endRemoteSession(sessionId: string): Promise<void> {
   const session = await getRemoteSessionById(sessionId);
-  await updateDoc(doc(sessionsCollection(), sessionId), {
-    endedAt: new Date().toISOString(),
+  const batch = writeBatch(getFirestoreDb());
+  batch.update(doc(sessionsCollection(), sessionId), {
+    endedAt: serverNowIso(),
     status: "ended",
     code: deleteField(),
   });
-
   if (session?.code) {
-    await deleteDoc(sessionCodeDoc(session.code));
+    batch.delete(sessionCodeDoc(session.code));
   }
+  await batch.commit();
 }
 
 export async function updateSessionTimer(sessionId: string, state: TimerState): Promise<void> {
@@ -64,27 +63,31 @@ export async function startEndGameSession(
   anchors: Record<string, { lat: number; lng: number; frozenAt: string }>,
   endGameStartedAt: string = new Date().toISOString(),
 ): Promise<void> {
-  // Sequential create-then-update: session start rules require the freeze doc to
-  // already exist. Same-batch exists()+get() against large session docs has denied
-  // the write in e2e (optimistic local banner, then permission error).
-  const anchorsRef = endGameTruthAnchorsDoc(sessionId);
-  let anchorsWritten = false;
+  // Two separate commits, not one batch: session start rules require the freeze
+  // doc to already exist, and same-batch exists()+get() against large session docs
+  // has denied the write in e2e. Both are issued without waiting for the first ack
+  // — the SDK commits queued writes in order, so the rules still see the anchors —
+  // which lets End Game apply locally while offline.
+  const anchorsWrite = setDoc(endGameTruthAnchorsDoc(sessionId), { anchors });
+  const sessionWrite = updateDoc(doc(sessionsCollection(), sessionId), {
+    endGameStartedAt,
+    endGameStartedByUid: startedByUid,
+    // Strip any legacy session-doc anchors (coords belong in endGameTruth/anchors).
+    endGameTruthAnchors: deleteField(),
+    endGameRequestedAt: deleteField(),
+    endGameRequestedByUid: deleteField(),
+  });
   try {
-    await setDoc(anchorsRef, { anchors });
-    anchorsWritten = true;
-    await updateDoc(doc(sessionsCollection(), sessionId), {
-      endGameStartedAt,
-      endGameStartedByUid: startedByUid,
-      // Strip any legacy session-doc anchors (coords belong in endGameTruth/anchors).
-      endGameTruthAnchors: deleteField(),
-      endGameRequestedAt: deleteField(),
-      endGameRequestedByUid: deleteField(),
-    });
+    await anchorsWrite;
+  } catch (error) {
+    sessionWrite.catch(() => {});
+    throw error;
+  }
+  try {
+    await sessionWrite;
   } catch (error) {
     // Only roll back an anchors doc this call created — do not delete a prior freeze.
-    if (anchorsWritten) {
-      await clearEndGameTruthAnchorsDoc(sessionId);
-    }
+    await clearEndGameTruthAnchorsDoc(sessionId);
     throw error;
   }
 }
