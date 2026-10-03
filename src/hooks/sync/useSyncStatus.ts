@@ -6,6 +6,7 @@ import { LOCAL_SESSION_ID } from "../../domain/map/annotations";
 import { useMapStore } from "../../state/mapStore";
 import { useSessionStore } from "../../state/sessionStore";
 import { useReachability } from "../location/useReachability";
+import { useConnectionRecovery } from "./useConnectionRecovery";
 
 export function useSyncStatus(): {
   status: SyncStatus;
@@ -25,7 +26,8 @@ export function useSyncStatus(): {
   const lowPowerMode = useMapStore((state) => state.lowPowerMode);
   const setNetworkReachable = useSessionStore((state) => state.setNetworkReachable);
   const reachabilityProbeMs = getPowerProfile(lowPowerMode).reachabilityProbeMs;
-  const { reachable } = useReachability(reachabilityEnabled, reachabilityProbeMs);
+  const { reachable, probeNow } = useReachability(reachabilityEnabled, reachabilityProbeMs);
+  useConnectionRecovery(reachabilityEnabled, reachable, probeNow);
 
   useEffect(() => {
     setNetworkReachable(reachabilityEnabled ? reachable : null);
