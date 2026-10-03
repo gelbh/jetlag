@@ -1,3 +1,4 @@
+import { Button, Group, NativeSelect, Stack, TextInput } from "@mantine/core";
 import type {
   AdminSessionModeFilter,
   AdminSessionSort,
@@ -19,11 +20,13 @@ interface AdminSessionFiltersProps {
   onSortChange: (sort: AdminSessionSort) => void;
 }
 
-function chipClassName(selected: boolean): string {
-  return selected
-    ? "border-brand-blue/40 bg-brand-blue/10 text-brand-blue"
-    : "border-border bg-surface-raised text-ink-muted";
-}
+const SORT_OPTIONS: { value: AdminSessionSort; label: string }[] = [
+  { value: "lastActivity", label: "Last activity" },
+  { value: "lastLocation", label: "Last location" },
+  { value: "lastAnnotation", label: "Last annotation" },
+  { value: "annotationCount", label: "Annotation count" },
+  { value: "created", label: "Created" },
+];
 
 export function AdminSessionFilters({
   query,
@@ -40,41 +43,50 @@ export function AdminSessionFilters({
   onSortChange,
 }: AdminSessionFiltersProps) {
   return (
-    <div className="space-y-2.5">
-      <div className="flex flex-wrap items-center gap-2">
-        <button
+    <Stack gap="sm">
+      <Group gap="xs" wrap="wrap">
+        <Button
           type="button"
+          size="compact-xs"
+          radius="xl"
+          variant={liveOnly ? "light" : "default"}
           aria-pressed={liveOnly}
           onClick={() => onLiveOnlyChange(!liveOnly)}
-          className={`rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-wide ${chipClassName(liveOnly)}`}
+          tt="uppercase"
         >
           Live
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
+          size="compact-xs"
+          radius="xl"
+          variant={annotatedOnly ? "light" : "default"}
           aria-pressed={annotatedOnly}
           onClick={() => onAnnotatedOnlyChange(!annotatedOnly)}
-          className={`rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-wide ${chipClassName(annotatedOnly)}`}
+          tt="uppercase"
         >
           Annotated
-        </button>
-        <div className="flex flex-wrap gap-1.5" role="group" aria-label="Session mode">
+        </Button>
+        <Group gap={6} wrap="wrap" role="group" aria-label="Session mode">
           {(["singleplayer", "multiplayer"] as const).map((option) => {
             const selected = mode === option;
             return (
-              <button
+              <Button
                 key={option}
                 type="button"
+                size="compact-xs"
+                radius="xl"
+                variant={selected ? "light" : "default"}
                 aria-pressed={selected}
                 onClick={() => onModeChange(selected ? "all" : option)}
-                className={`rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-wide ${chipClassName(selected)}`}
+                tt="uppercase"
               >
                 {option === "singleplayer" ? "Singleplayer" : "Multiplayer"}
-              </button>
+              </Button>
             );
           })}
-        </div>
-        <div className="flex flex-wrap gap-1.5" role="group" aria-label="Session state">
+        </Group>
+        <Group gap={6} wrap="wrap" role="group" aria-label="Session state">
           {(
             [
               ["hiding", "Hiding"],
@@ -84,48 +96,42 @@ export function AdminSessionFilters({
           ).map(([option, label]) => {
             const selected = state === option;
             return (
-              <button
+              <Button
                 key={option}
                 type="button"
+                size="compact-xs"
+                radius="xl"
+                variant={selected ? "light" : "default"}
                 aria-pressed={selected}
                 onClick={() => onStateChange(selected ? null : option)}
-                className={`rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-wide ${chipClassName(selected)}`}
+                tt="uppercase"
               >
                 {label}
-              </button>
+              </Button>
             );
           })}
-        </div>
-      </div>
+        </Group>
+      </Group>
 
-      <div className="flex flex-wrap items-end gap-2">
-        <label className="field-label min-w-[12rem] flex-1">
-          Search
-          <input
-            type="search"
-            value={query}
-            onChange={(event) => onQueryChange(event.target.value)}
-            placeholder="Code, area, or host version"
-            className="field-input"
-            autoComplete="off"
-            spellCheck={false}
-          />
-        </label>
-        <label className="field-label w-44">
-          Sort
-          <select
-            value={sort}
-            onChange={(event) => onSortChange(event.target.value as AdminSessionSort)}
-            className="field-input"
-          >
-            <option value="lastActivity">Last activity</option>
-            <option value="lastLocation">Last location</option>
-            <option value="lastAnnotation">Last annotation</option>
-            <option value="annotationCount">Annotation count</option>
-            <option value="created">Created</option>
-          </select>
-        </label>
-      </div>
-    </div>
+      <Group gap="sm" align="flex-end" wrap="wrap">
+        <TextInput
+          label="Search"
+          type="search"
+          value={query}
+          onChange={(event) => onQueryChange(event.currentTarget.value)}
+          placeholder="Code, area, or host version"
+          autoComplete="off"
+          spellCheck={false}
+          style={{ flex: 1, minWidth: "12rem" }}
+        />
+        <NativeSelect
+          label="Sort"
+          value={sort}
+          onChange={(event) => onSortChange(event.currentTarget.value as AdminSessionSort)}
+          data={SORT_OPTIONS}
+          w={176}
+        />
+      </Group>
+    </Stack>
   );
 }

@@ -1,6 +1,9 @@
+import { MantineProvider } from "@mantine/core";
 import { fireEvent, render, screen } from "@testing-library/react";
+import type { ReactElement } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { CUSTOM_PRESET_ID, type DeskPreset } from "../../domain/admin/opsDeskLayout";
+import { jetlagTheme } from "../../theme/theme";
 import { AdminPresetMenu } from "./AdminPresetMenu";
 
 const userPresets: DeskPreset[] = [
@@ -31,9 +34,17 @@ const baseProps = {
   onOverwriteUserPreset: vi.fn(),
 };
 
+function renderMenu(ui: ReactElement) {
+  return render(
+    <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
+      {ui}
+    </MantineProvider>,
+  );
+}
+
 describe("AdminPresetMenu", () => {
-  it("shows Scratch and user chips only — no stock catalog", () => {
-    render(<AdminPresetMenu {...baseProps} />);
+  it("shows Scratch and user chips only, no stock catalog", () => {
+    renderMenu(<AdminPresetMenu {...baseProps} />);
     expect(screen.getByRole("button", { name: "Scratch" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "Night shift" })).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Session watch" })).toBeNull();
@@ -44,7 +55,7 @@ describe("AdminPresetMenu", () => {
   it("selects via label without calling setDefault", () => {
     const onSelectPreset = vi.fn();
     const onSetDefault = vi.fn();
-    render(
+    renderMenu(
       <AdminPresetMenu
         {...baseProps}
         onSelectPreset={onSelectPreset}
@@ -60,7 +71,7 @@ describe("AdminPresetMenu", () => {
   it("sets default via star without calling select", () => {
     const onSelectPreset = vi.fn();
     const onSetDefault = vi.fn();
-    render(
+    renderMenu(
       <AdminPresetMenu
         {...baseProps}
         onSelectPreset={onSelectPreset}
@@ -74,7 +85,7 @@ describe("AdminPresetMenu", () => {
   });
 
   it("does not render always-on move chevrons in the idle strip", () => {
-    render(<AdminPresetMenu {...baseProps} />);
+    renderMenu(<AdminPresetMenu {...baseProps} />);
     expect(screen.queryByRole("button", { name: /move .* earlier/i })).toBeNull();
     expect(screen.queryByRole("button", { name: /move .* later/i })).toBeNull();
     expect(screen.queryByText("‹")).toBeNull();
@@ -83,7 +94,7 @@ describe("AdminPresetMenu", () => {
 
   it("Manage move earlier calls onReorderPresets with swapped order", () => {
     const onReorderPresets = vi.fn();
-    render(<AdminPresetMenu {...baseProps} onReorderPresets={onReorderPresets} />);
+    renderMenu(<AdminPresetMenu {...baseProps} onReorderPresets={onReorderPresets} />);
 
     fireEvent.click(screen.getByRole("button", { name: "Manage" }));
     fireEvent.click(screen.getByRole("button", { name: "Move Night shift earlier" }));
@@ -92,7 +103,7 @@ describe("AdminPresetMenu", () => {
   });
 
   it("closes Manage on Escape", () => {
-    render(<AdminPresetMenu {...baseProps} />);
+    renderMenu(<AdminPresetMenu {...baseProps} />);
     fireEvent.click(screen.getByRole("button", { name: "Manage" }));
     expect(screen.getByTestId("admin-ops-preset-manage")).toBeTruthy();
     fireEvent.keyDown(window, { key: "Escape" });

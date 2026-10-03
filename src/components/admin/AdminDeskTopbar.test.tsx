@@ -1,12 +1,14 @@
+import { MantineProvider } from "@mantine/core";
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
 import { RouteTransitionProvider } from "../../navigation/RouteTransitionContext";
+import { jetlagTheme } from "../../theme/theme";
 import { AdminDeskTopbar } from "./AdminDeskTopbar";
 
-describe("AdminDeskTopbar", () => {
-  it("exposes a Home link to /", () => {
-    render(
+function renderTopbar() {
+  return render(
+    <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
       <MemoryRouter>
         <RouteTransitionProvider>
           <AdminDeskTopbar
@@ -26,8 +28,14 @@ describe("AdminDeskTopbar", () => {
             onOverwriteUserPreset={vi.fn()}
           />
         </RouteTransitionProvider>
-      </MemoryRouter>,
-    );
+      </MemoryRouter>
+    </MantineProvider>,
+  );
+}
+
+describe("AdminDeskTopbar", () => {
+  it("exposes a Home link to /", () => {
+    renderTopbar();
 
     const home = screen.getByRole("link", { name: /^home$/i });
     expect(home.getAttribute("href")).toBe("/");

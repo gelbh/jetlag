@@ -1,3 +1,4 @@
+import { Button, Group, Text } from "@mantine/core";
 import type { DeskPreset } from "../../domain/admin/opsDeskLayout";
 import { APP_VERSION } from "../../domain/device/changelog";
 import { AppLink } from "../navigation/AppLink";
@@ -51,8 +52,12 @@ export function AdminDeskTopbar({
         <AppLink to="/" className="jl-ops-home" aria-label="Home">
           <HudHomeIcon className="size-4" aria-hidden="true" />
         </AppLink>
-        <span className="jl-ops-brand-mark">Jetlag</span>
-        <span className="jl-ops-brand-title">{`Broadcast HUD // Admin ops desk v${APP_VERSION}`}</span>
+        <Text component="span" className="jl-ops-brand-mark">
+          Jetlag
+        </Text>
+        <Text component="span" className="jl-ops-brand-title">
+          {`Broadcast HUD // Admin ops desk v${APP_VERSION}`}
+        </Text>
       </div>
       <AdminPresetMenu
         activePresetId={activePresetId}
@@ -67,7 +72,7 @@ export function AdminDeskTopbar({
         onRenameUserPreset={onRenameUserPreset}
         onOverwriteUserPreset={onOverwriteUserPreset}
       />
-      <div className="jl-ops-topbar-actions">
+      <Group className="jl-ops-topbar-actions" gap="xs" wrap="wrap">
         <dl className="jl-ops-top-stats">
           <div className="jl-ops-stat">
             <dt>Open incidents</dt>
@@ -82,20 +87,28 @@ export function AdminDeskTopbar({
             <dd>{formatUtcClock(now)}</dd>
           </div>
         </dl>
-        <AppLink to="/admin/preload-requests" className="jl-ops-preset-chip">
+        <Button
+          component={AppLink}
+          to="/admin/preload-requests"
+          variant="default"
+          size="compact-sm"
+          className="jl-ops-preset-chip"
+        >
           Preload requests
-        </AppLink>
+        </Button>
         {onRefreshSessions ? (
-          <button
+          <Button
             type="button"
+            variant="default"
+            size="compact-sm"
             className="jl-ops-preset-chip"
             onClick={onRefreshSessions}
             aria-label="Refresh live sessions"
           >
             {refreshing ? "Refreshing…" : "Refresh"}
-          </button>
+          </Button>
         ) : null}
-      </div>
+      </Group>
     </div>
   );
 }
