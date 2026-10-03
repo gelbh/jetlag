@@ -6,6 +6,7 @@ import {
   acknowledgeSoftReload,
   shouldHonorSoftReload,
 } from "@/domain/device/updates/reloadAcknowledgements";
+import { shouldShowOptionalAppUpdateBanner } from "@/domain/device/updates/optionalAppUpdateUi";
 import {
   applyServiceWorkerUpdate,
   isSafeToReloadApp,
@@ -41,7 +42,6 @@ function pickHigherVersion(left: string | undefined, right: string | undefined):
 
 export function AppUpdateProvider({ children }: { children: ReactNode }) {
   const [needsRefresh, setNeedsRefresh] = useState(false);
-  const [dismissed, setDismissed] = useState(false);
   const [updateSW, setUpdateSW] = useState<ServiceWorkerReloader | null>(null);
   const [runtimeConfig, setRuntimeConfig] = useState<AppConfigRuntime | null>(null);
   const registrationRef = useRef<ServiceWorkerRegistration | undefined>(undefined);
@@ -157,7 +157,6 @@ export function AppUpdateProvider({ children }: { children: ReactNode }) {
             return;
           }
           setNeedsRefresh(true);
-          setDismissed(false);
         },
         onRegistered(nextRegistration) {
           if (cancelled) {
@@ -169,14 +168,12 @@ export function AppUpdateProvider({ children }: { children: ReactNode }) {
               return;
             }
             setNeedsRefresh(true);
-            setDismissed(false);
           });
           stopScheduledChecks = scheduleServiceWorkerUpdateChecks(nextRegistration, () => {
             if (cancelled) {
               return;
             }
             setNeedsRefresh(true);
-            setDismissed(false);
           });
         },
         onRegisterError() {
@@ -193,7 +190,6 @@ export function AppUpdateProvider({ children }: { children: ReactNode }) {
         tryUpdateServiceWorker(registrationRef.current);
         promptIfWaiting(registrationRef.current, () => {
           setNeedsRefresh(true);
-          setDismissed(false);
         });
       }
     };
@@ -214,14 +210,12 @@ export function AppUpdateProvider({ children }: { children: ReactNode }) {
     tryUpdateServiceWorker(registrationRef.current);
     promptIfWaiting(registrationRef.current, () => {
       setNeedsRefresh(true);
-      setDismissed(false);
     });
   }, [location.pathname]);
 
   useEffect(() => {
     return registerAppNeedRefreshHandler(() => {
       setNeedsRefresh(true);
-      setDismissed(false);
     });
   }, []);
 
@@ -245,18 +239,16 @@ export function AppUpdateProvider({ children }: { children: ReactNode }) {
     });
   }, [needsRefresh, updateSW, session]);
 
-  const dismissDeferred = useCallback(() => setDismissed(true), []);
-
   const value = useMemo<AppUpdateContextValue>(() => {
-    const showMapChip = needsRefresh && inActiveMapSession && !dismissed && !safeToReload;
-    const showGlobalBanner = needsRefresh && !showMapChip && !(inActiveMapSession && dismissed);
+    const showGlobalBanner = shouldShowOptionalAppUpdateBanner({
+      needsRefresh,
+      safeToReload,
+    });
 
     return {
       inActiveMapSession,
       safeToReload,
-      showMapChip,
       showGlobalBanner,
-      dismissDeferred,
       applyUpdate: () => {
         void applyServiceWorkerUpdate(registrationRef.current, updateSW ?? undefined);
       },
@@ -265,8 +257,6 @@ export function AppUpdateProvider({ children }: { children: ReactNode }) {
       hotfixRequiredMinAppVersion: hotfixGrace.requiredMinAppVersion,
     };
   }, [
-    dismissDeferred,
-    dismissed,
     hotfixGrace.active,
     hotfixGrace.requiredMinAppVersion,
     hotfixGrace.secondsRemaining,
