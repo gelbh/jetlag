@@ -97,7 +97,7 @@ function createEndSessionDb(sessionData) {
           deletedCodes.push(ref);
         },
       };
-      await fn(tx);
+      return fn(tx);
     },
     collection: (name) => ({
       doc: (id) => ({ name, id }),
@@ -164,6 +164,37 @@ test("autoEndIdleSession captures session_ended abandoned for host", async () =>
     captureCalls[0].uuid,
     uuidFromSeed("session_ended:abandoned:sess_1"),
   );
+});
+
+test("autoEndIdleSession skips capture when session already ended", async () => {
+  const sessionData = {
+    code: "ABCD",
+    status: "ended",
+    endedAt: "2026-01-01T00:00:00.000Z",
+    gameOutcome: "found",
+    hostUid: "host_1",
+  };
+  const { db, updates } = createEndSessionDb(sessionData);
+  const sessionDoc = {
+    id: "sess_already",
+    data: () => sessionData,
+    ref: {},
+  };
+  const captureCalls = [];
+  const captureImpl = {
+    capture: async (payload) => {
+      captureCalls.push(payload);
+    },
+    shutdown: async () => {},
+  };
+
+  await autoEndIdleSession(db, sessionDoc, {
+    posthogApiKey: "phk_test",
+    captureImpl,
+  });
+
+  assert.equal(updates.length, 0);
+  assert.equal(captureCalls.length, 0);
 });
 
 test("autoEndIdleSession does not reject when capture throws", async () => {
