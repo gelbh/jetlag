@@ -6,7 +6,9 @@ Jetlag is a private web app. Changesets drive semver bumps and player-facing rel
 
 Add one on any PR that should show up in What’s new or bump the app version (player-visible fixes/features, ops-relevant version stories).
 
-CI runs `changeset status --since` on same-repo PRs (skips `changeset-release/*`). Skip with the `skip-changeset` PR label, or add an empty changeset (`npx changeset --empty`), for deps-only, docs-only, CI-only, or pure refactors with no version story.
+**Enforcement:** GitHub Actions job `changeset-status` runs `changeset status --since` on same-repo PRs (skips `changeset-release/*`). That job is a **required status check** for merge into `main`. Skip with the `skip-changeset` PR label, or add an empty changeset (`npx changeset --empty`), for deps-only, docs-only, CI-only, or pure refactors with no version story.
+
+Do **not** add a husky pre-commit or pre-push check for missing changesets. A changeset is a PR / release-story unit; local hooks cannot honor PR labels and punish WIP commits. Optional local preview (`npx changeset status --since=origin/main` after fetching) is fine; it must not be wired into husky as a hard fail.
 
 ## How to add
 
