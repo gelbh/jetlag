@@ -372,37 +372,37 @@
     var(--ease-ios-emphasized) both;
 }
 
-::view-transition-old(root),
-::view-transition-new(root) {
+::view-transition-old(.jl-route-reveal),
+::view-transition-new(.jl-route-reveal) {
   animation-duration: var(--motion-route-reveal);
 }
 
-html[data-nav-direction="forward"]::view-transition-old(root) {
+html[data-nav-direction="forward"]::view-transition-old(.jl-route-reveal) {
   animation: vt-crossfade-out-forward var(--motion-route-reveal)
     var(--ease-ios-emphasized) both;
 }
 
-html[data-nav-direction="forward"]::view-transition-new(root) {
+html[data-nav-direction="forward"]::view-transition-new(.jl-route-reveal) {
   animation: vt-crossfade-in-forward var(--motion-route-reveal)
     var(--ease-ios-emphasized) both;
 }
 
-html[data-nav-direction="back"]::view-transition-old(root) {
+html[data-nav-direction="back"]::view-transition-old(.jl-route-reveal) {
   animation: vt-crossfade-out-back var(--motion-route-reveal)
     var(--ease-ios-emphasized) both;
 }
 
-html[data-nav-direction="back"]::view-transition-new(root) {
+html[data-nav-direction="back"]::view-transition-new(.jl-route-reveal) {
   animation: vt-crossfade-in-back var(--motion-route-reveal)
     var(--ease-ios-emphasized) both;
 }
 
-html[data-nav-direction="neutral"]::view-transition-old(root) {
+html[data-nav-direction="neutral"]::view-transition-old(.jl-route-reveal) {
   animation: vt-crossfade-out var(--motion-route-reveal) var(--ease-ios-emphasized)
     both;
 }
 
-html[data-nav-direction="neutral"]::view-transition-new(root) {
+html[data-nav-direction="neutral"]::view-transition-new(.jl-route-reveal) {
   animation: vt-crossfade-in var(--motion-route-reveal) var(--ease-ios-emphasized)
     both;
 }

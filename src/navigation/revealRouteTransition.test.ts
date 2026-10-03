@@ -149,7 +149,7 @@ describe("revealRouteTransition", () => {
       /\.jl-route-fallback-enter-forward\s*\{[^}]*var\(--motion-route-reveal\)/s,
     );
     expect(motionCss).toMatch(
-      /::view-transition-old\(root\)[^;{]*\{[^}]*var\(--motion-route-reveal\)/s,
+      /::view-transition-old\(\.jl-route-reveal\)[^;{]*\{[^}]*var\(--motion-route-reveal\)/s,
     );
     expect(routeTransitionCss).toMatch(/var\(--motion-route-overlay-exit/);
     expect(motionCss).not.toMatch(/\.jl-route-fallback-enter-\w+\s*\{[^}]*animation:[^;]*\d+ms/s);
