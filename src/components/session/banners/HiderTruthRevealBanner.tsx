@@ -1,5 +1,6 @@
-import { useEffect } from "react";
 import type { HiderTruthResult } from "@/domain/questions/ui";
+import { MAP_NOTICE_DURATION_MS } from "@/domain/ui/mapNoticeLifetime";
+import { useTimedDismiss } from "@/hooks/ui/useTimedDismiss";
 import { MapFloatSurface } from "../../ui/banners/MapFloatSurface";
 import { HudBanner } from "../../ui/hud/HudBanner";
 
@@ -14,17 +15,13 @@ interface HiderTruthRevealBannerProps {
   onDismiss: () => void;
 }
 
-const AUTO_DISMISS_MS = 4000;
-
 export function HiderTruthRevealBanner({ reveal, onDismiss }: HiderTruthRevealBannerProps) {
-  useEffect(() => {
-    if (!reveal) {
-      return;
-    }
-
-    const timeoutId = window.setTimeout(onDismiss, AUTO_DISMISS_MS);
-    return () => window.clearTimeout(timeoutId);
-  }, [reveal, onDismiss]);
+  useTimedDismiss({
+    active: Boolean(reveal),
+    ms: MAP_NOTICE_DURATION_MS.truthReveal,
+    onDismiss,
+    restartKey: reveal,
+  });
 
   return (
     <HudBanner
