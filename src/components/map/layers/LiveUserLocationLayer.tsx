@@ -51,10 +51,7 @@ function ExternalReadingUserLocationLayer({
   return <UserLocationLayer reading={reading} />;
 }
 
-export function LiveUserLocationLayer({
-  reading,
-  ...rest
-}: LiveUserLocationLayerProps) {
+export function LiveUserLocationLayer({ reading, ...rest }: LiveUserLocationLayerProps) {
   if (reading !== undefined) {
     return <ExternalReadingUserLocationLayer enabled={rest.enabled} reading={reading} />;
   }

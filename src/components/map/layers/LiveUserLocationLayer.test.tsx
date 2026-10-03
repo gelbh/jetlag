@@ -16,7 +16,9 @@ vi.mock("@/hooks/location/useLiveLocation", () => ({
 
 vi.mock("./UserLocationLayer", () => ({
   UserLocationLayer: ({ reading }: { reading: GeolocationReading | null }) => (
-    <div data-testid="user-location-layer">{reading ? `${reading.lat},${reading.lng}` : "null"}</div>
+    <div data-testid="user-location-layer">
+      {reading ? `${reading.lat},${reading.lng}` : "null"}
+    </div>
   ),
 }));
 
