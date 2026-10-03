@@ -118,8 +118,6 @@ export function GameAreaFramingModal({
             focusBounds: effectiveFocusBounds,
             fitBoundsPadding: [56, 56],
             showZoomControl: true,
-            zoomControlInset: "safe-area",
-            mapStyleControlInset: "safe-area",
             onBoundsChange: framing.handleBoundsChange,
             onUserViewportFramed: framing.handleUserViewportFramed,
             onMapClick: framing.handleMapClick,
