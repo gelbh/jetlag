@@ -393,7 +393,6 @@ html[data-map-side-dock="top-left"] .map-zoom-control--admin-rail {
 
 [data-chrome-side-stack="phone"][data-dragging="true"] .jl-map-island,
 [data-chrome-nav-stack="phone"][data-dragging="true"] .jl-map-nav-dock__zoom,
-/* stylelint-disable-next-line selector-class-pattern -- Mantine ActionIcon root class */
 [data-chrome-nav-stack="phone"][data-dragging="true"] .mantine-ActionIcon-root {
   box-shadow: none;
   background-color: oklch(from var(--color-canvas) l c h / 38%);

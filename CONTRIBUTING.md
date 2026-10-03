@@ -17,7 +17,7 @@
 
 CI and husky call `npm run <script>` contracts in `package.json`. Day-to-day recipes live in the root `justfile` (`just --list`).
 
-JS/TS lint and format use Biome (`npm run lint` / `npm run format`); CSS remains Stylelint (`npm run lint:css`) until the Biome CSS migration lands.
+JS/TS/CSS lint and format use Biome (`npm run lint` / `npm run format`).
 
 ## Setup
 

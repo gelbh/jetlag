@@ -6,7 +6,6 @@ fi
 set -euo pipefail
 
 npm run lint
-npm run lint:css
 npm run typecheck
 
 # Skip when origin/main is missing or not an ancestor (e.g. after history rewrite).
