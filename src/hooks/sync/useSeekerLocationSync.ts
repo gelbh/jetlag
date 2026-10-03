@@ -1,14 +1,7 @@
-import { useEffect } from "react";
-import { getPowerProfile } from "../../domain/device/power/powerProfile";
-import { LOCAL_SESSION_ID } from "../../domain/map/annotations";
-import type { PlayerLocationRecord } from "../../domain/session/activity/sessionChat";
-import { isFirebaseConfigured } from "../../services/core/firebase/firebase";
-import { isFirestorePermissionDenied } from "../../services/firestore/firestoreAnnotations";
-import { writePlayerLocation } from "../../services/firestore/firestoreSessionExtras";
-import { arePlayerLocationPublishesBlocked } from "../../services/session/playerLocationPublishGate";
-import { useMapStore } from "../../state/mapStore";
-import { useLiveLocation } from "../location/useLiveLocation";
-import { maybeAppendPlayerTrailPoint } from "./appendPlayerTrailPoint";
+import { getPowerProfile } from "@/domain/device/power/powerProfile";
+import { useLiveLocation } from "@/hooks/location/useLiveLocation";
+import { useMapStore } from "@/state/mapStore";
+import { usePlayerLocationPublish } from "./usePlayerLocationPublish";
 
 interface UseSeekerLocationSyncParams {
   sessionId: string | undefined;
@@ -21,48 +14,7 @@ export function useSeekerLocationSync({ sessionId, uid, enabled }: UseSeekerLoca
   const profile = getPowerProfile(lowPowerMode).seekerLocationSync;
   const { reading, error } = useLiveLocation(enabled, profile);
 
-  useEffect(() => {
-    if (
-      !enabled ||
-      !reading ||
-      !sessionId ||
-      !uid ||
-      !isFirebaseConfigured() ||
-      sessionId === LOCAL_SESSION_ID ||
-      arePlayerLocationPublishesBlocked()
-    ) {
-      return;
-    }
-
-    const location: PlayerLocationRecord = {
-      uid,
-      sessionId,
-      lat: reading.lat,
-      lng: reading.lng,
-      accuracyMeters: reading.accuracy ?? undefined,
-      updatedAt: new Date().toISOString(),
-      role: "seeker",
-    };
-
-    void writePlayerLocation(sessionId, location)
-      .then(() =>
-        maybeAppendPlayerTrailPoint({
-          sessionId,
-          uid,
-          role: "seeker",
-          reading: {
-            lat: reading.lat,
-            lng: reading.lng,
-            accuracyMeters: reading.accuracy ?? undefined,
-          },
-        }),
-      )
-      .catch((error: unknown) => {
-        if (!isFirestorePermissionDenied(error)) {
-          throw error;
-        }
-      });
-  }, [enabled, reading, sessionId, uid]);
+  usePlayerLocationPublish({ sessionId, uid, enabled, role: "seeker", reading });
 
   return { error };
 }
