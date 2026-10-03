@@ -1,5 +1,10 @@
 import * as geokdbush from "geokdbush";
 import KDBush from "kdbush";
+import {
+  fetchAndReadWithTimeout,
+  GEO_FETCH_TIMEOUT_MS,
+  isTransientFetchError,
+} from "@/services/core/network/fetchWithTimeout";
 import type { BoundingBox } from "../../domain/geometry/gameArea/gameAreaBounds";
 import {
   distanceBetweenPoints,
@@ -185,15 +190,21 @@ async function loadManifest(): Promise<Map<string, string>> {
     return manifestCache;
   }
 
-  const response = await fetch(GTFS_BUNDLE_MANIFEST_PATH);
-  if (!response.ok) {
+  const payload = await fetchAndReadWithTimeout(
+    GTFS_BUNDLE_MANIFEST_PATH,
+    undefined,
+    GEO_FETCH_TIMEOUT_MS,
+    async (response) =>
+      response.ok
+        ? ((await response.json()) as {
+            metros?: Array<{ id: string; bundlePath: string }>;
+          })
+        : null,
+  );
+  if (!payload) {
     manifestCache = new Map();
     return manifestCache;
   }
-
-  const payload = (await response.json()) as {
-    metros?: Array<{ id: string; bundlePath: string }>;
-  };
 
   manifestCache = new Map((payload.metros ?? []).map((entry) => [entry.id, entry.bundlePath]));
   return manifestCache;
@@ -205,18 +216,31 @@ export async function loadGtfsBundle(metroId: string): Promise<GtfsStaticBundle 
     return cached;
   }
 
-  const manifest = await loadManifest();
-  const bundlePath = manifest.get(metroId);
-  if (!bundlePath) {
+  let bundle: GtfsStaticBundle | null;
+  try {
+    const manifest = await loadManifest();
+    const bundlePath = manifest.get(metroId);
+    if (!bundlePath) {
+      return null;
+    }
+
+    bundle = await fetchAndReadWithTimeout(
+      bundlePath,
+      undefined,
+      GEO_FETCH_TIMEOUT_MS,
+      async (response) => (response.ok ? ((await response.json()) as GtfsStaticBundle) : null),
+    );
+  } catch (error) {
+    // Timeout / offline: return null uncached so callers fall back to Overpass
+    // and the next call retries the bundle.
+    if (isTransientFetchError(error)) {
+      return null;
+    }
+    throw error;
+  }
+  if (!bundle) {
     return null;
   }
-
-  const response = await fetch(bundlePath);
-  if (!response.ok) {
-    return null;
-  }
-
-  const bundle = (await response.json()) as GtfsStaticBundle;
   bundleCache.set(metroId, bundle);
   getStopsById(bundle);
   return bundle;
