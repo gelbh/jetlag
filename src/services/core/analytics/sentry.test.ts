@@ -58,6 +58,17 @@ import {
   reportJoinPermissionDenied,
   setTransactionName,
 } from "./sentry";
+import { CLIENT_SENTRY_DATA_COLLECTION } from "./sentryDataCollection";
+import { CLIENT_SENTRY_IGNORE_SPANS } from "./sentryIgnoreSpans";
+
+describe("CLIENT_SENTRY_IGNORE_SPANS", () => {
+  it("includes a matcher that references proxy/overpass", () => {
+    const serialized = JSON.stringify(CLIENT_SENTRY_IGNORE_SPANS, (_key, value: unknown) =>
+      value instanceof RegExp ? value.source : value,
+    );
+    expect(serialized).toMatch(/proxy\/overpass/);
+  });
+});
 
 function stubProdWithDsn(): void {
   vi.stubEnv("MODE", "production");
@@ -93,11 +104,17 @@ describe("initSentry", () => {
       integrations: unknown[];
       replaysSessionSampleRate: number;
       replaysOnErrorSampleRate: number;
+      dataCollection: unknown;
+      tunnel: string;
+      ignoreSpans: unknown;
     };
     expect(options.integrations).toEqual([{ name: "BrowserTracing" }]);
     expect(replayIntegration).not.toHaveBeenCalled();
     expect(options.replaysOnErrorSampleRate).toBe(1.0);
     expect(options).toHaveProperty("replaysSessionSampleRate");
+    expect(options.dataCollection).toBe(CLIENT_SENTRY_DATA_COLLECTION);
+    expect(options.tunnel).toBe("/api/envelope-tunnel");
+    expect(options.ignoreSpans).toBe(CLIENT_SENTRY_IGNORE_SPANS);
     expect(addIntegration).not.toHaveBeenCalled();
     expect(idleCallbacks).toHaveLength(1);
 
