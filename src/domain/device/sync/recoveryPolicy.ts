@@ -1,11 +1,13 @@
 /** A write unacked this long while `navigator.onLine` says online is treated as lie-fi. */
 export const LIE_FI_UNACKED_MS = 8_000;
+/** How often the lie-fi check looks at the write ledger. */
+export const LIE_FI_CHECK_INTERVAL_MS = 4_000;
 /** How long the session listener may serve cache (while reachable) before we cycle. */
 export const STUCK_CACHE_MS = 5_000;
 /** Minimum gap between two Firestore network cycles. */
 export const CYCLE_THROTTLE_MS = 30_000;
 
-export type FirestoreCycleInput = {
+type FirestoreCycleInput = {
   reachable: boolean;
   fromCacheSinceMs: number | null;
   lastCycleAtMs: number | null;

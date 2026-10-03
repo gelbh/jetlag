@@ -139,4 +139,41 @@ describe("useReachability", () => {
     await vi.advanceTimersByTimeAsync(0);
     expect(fetch).not.toHaveBeenCalled();
   });
+  it("re-probes after a pre-resume in-flight probe and ignores its stale result", async () => {
+    vi.useFakeTimers();
+    const pending: Array<(value: Response) => void> = [];
+    const rejecters: Array<(error: Error) => void> = [];
+    const fetchMock = vi.fn(
+      () =>
+        new Promise<Response>((resolve, reject) => {
+          pending.push(resolve);
+          rejecters.push(reject);
+        }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    const { result } = renderHook(() => useReachability(true, 60_000));
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+
+    act(() => {
+      window.dispatchEvent(new Event("pageshow"));
+    });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+
+    // Stale pre-resume probe fails: ignored, then the resume probe runs.
+    await act(async () => {
+      rejecters[0]?.(new TypeError("Failed to fetch"));
+      await vi.advanceTimersByTimeAsync(0);
+    });
+    expect(result.current.lastProbeAt).toBeNull();
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+
+    await act(async () => {
+      pending[1]?.(
+        new Response(null, { status: 204, headers: { "x-server-time": String(Date.now()) } }),
+      );
+      await vi.advanceTimersByTimeAsync(0);
+    });
+    expect(result.current.reachable).toBe(true);
+  });
 });

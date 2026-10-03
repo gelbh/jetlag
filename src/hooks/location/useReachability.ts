@@ -26,6 +26,7 @@ export function useReachability(
   const [reachable, setReachable] = useState<boolean | null>(null);
   const [lastProbeAt, setLastProbeAt] = useState<number | null>(null);
   const probeRef = useRef<() => void>(noop);
+  // Identity must never change: consumers key interval effects on it.
   const [probeNow] = useState(() => () => probeRef.current());
 
   useEffect(() => {
@@ -36,15 +37,21 @@ export function useReachability(
     let cancelled = false;
     let consecutiveFailures = 0;
     let inFlight = false;
+    // Bumped on resume / online so a probe started before the OS froze the page
+    // can't count against the fresh window, and so its in-flight guard doesn't
+    // swallow the post-resume probe.
+    let generation = 0;
+    let rerunAfterFlight = false;
 
     const runProbe = async () => {
       if (inFlight) {
         return;
       }
       inFlight = true;
+      const probeGeneration = generation;
       try {
         const { ok } = await probeServerTime(PROBE_TIMEOUT_MS);
-        if (cancelled) {
+        if (cancelled || probeGeneration !== generation) {
           return;
         }
 
@@ -61,11 +68,15 @@ export function useReachability(
         setLastProbeAt(Date.now());
       } finally {
         inFlight = false;
+        if (rerunAfterFlight && !cancelled) {
+          rerunAfterFlight = false;
+          void runProbe();
+        }
       }
     };
 
-    // Lie-fi callers must not reset the failure count, or two failed probes
-    // would never accumulate into `reachable: false`.
+    // Unlike handleResume, lie-fi callers must not reset the failure count, or
+    // two failed probes would never accumulate into `reachable: false`.
     probeRef.current = () => {
       void runProbe();
     };
@@ -76,7 +87,12 @@ export function useReachability(
     }, probeIntervalMs);
 
     const handleResume = () => {
+      generation += 1;
       consecutiveFailures = 0;
+      if (inFlight) {
+        rerunAfterFlight = true;
+        return;
+      }
       void runProbe();
     };
     const handleVisibilityChange = () => {

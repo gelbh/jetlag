@@ -1,21 +1,20 @@
 import { act, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { CYCLE_THROTTLE_MS, STUCK_CACHE_MS } from "@/domain/device/sync/recoveryPolicy";
+import {
+  CYCLE_THROTTLE_MS,
+  LIE_FI_CHECK_INTERVAL_MS,
+  LIE_FI_UNACKED_MS,
+  STUCK_CACHE_MS,
+} from "@/domain/device/sync/recoveryPolicy";
 import { useSessionStore } from "@/state/sessionStore";
 import { useWriteLedgerStore } from "@/state/writeLedgerStore";
-import { LIE_FI_CHECK_INTERVAL_MS, useConnectionRecovery } from "./useConnectionRecovery";
+import { useConnectionRecovery } from "./useConnectionRecovery";
 
-const firestoreMocks = vi.hoisted(() => ({
-  disableNetwork: vi.fn(() => Promise.resolve()),
-  enableNetwork: vi.fn(() => Promise.resolve()),
+const { cycleFirestoreNetwork } = vi.hoisted(() => ({
+  cycleFirestoreNetwork: vi.fn(() => Promise.resolve(true)),
 }));
 
-vi.mock("firebase/firestore", () => firestoreMocks);
-vi.mock("@/services/core/firebase/firebase", () => ({
-  getFirestoreDb: () => ({ fake: "db" }),
-}));
-
-const { disableNetwork, enableNetwork } = firestoreMocks;
+vi.mock("@/services/firestore/networkCycle", () => ({ cycleFirestoreNetwork }));
 
 type Props = { enabled: boolean; reachable: boolean | null; probeNow: () => void };
 
@@ -38,8 +37,8 @@ describe("useConnectionRecovery — Firestore network cycle", () => {
   beforeEach(() => {
     vi.useFakeTimers();
     vi.setSystemTime(1_000_000);
-    disableNetwork.mockClear();
-    enableNetwork.mockClear();
+    cycleFirestoreNetwork.mockClear();
+    vi.stubGlobal("navigator", { ...navigator, onLine: true });
     useSessionStore.setState({ sessionFromCache: false });
     useWriteLedgerStore.setState({ entries: {} });
   });
@@ -49,23 +48,19 @@ describe("useConnectionRecovery — Firestore network cycle", () => {
     vi.unstubAllGlobals();
   });
 
-  it("cycles once after the session listener stays cached for 5 s while reachable", async () => {
+  it("cycles once after the session listener stays cached past the threshold while reachable", async () => {
     render();
     setFromCache(true);
 
     await act(() => vi.advanceTimersByTimeAsync(STUCK_CACHE_MS - 1));
-    expect(disableNetwork).not.toHaveBeenCalled();
+    expect(cycleFirestoreNetwork).not.toHaveBeenCalled();
 
     await act(() => vi.advanceTimersByTimeAsync(1));
-    expect(disableNetwork).toHaveBeenCalledTimes(1);
-    expect(enableNetwork).toHaveBeenCalledTimes(1);
-    expect(disableNetwork.mock.invocationCallOrder[0]).toBeLessThan(
-      enableNetwork.mock.invocationCallOrder[0] ?? 0,
-    );
+    expect(cycleFirestoreNetwork).toHaveBeenCalledTimes(1);
 
     // Still stuck: no further cycle without a new transition.
     await act(() => vi.advanceTimersByTimeAsync(CYCLE_THROTTLE_MS * 3));
-    expect(disableNetwork).toHaveBeenCalledTimes(1);
+    expect(cycleFirestoreNetwork).toHaveBeenCalledTimes(1);
   });
 
   it("does not cycle when the listener goes live before the threshold", async () => {
@@ -74,7 +69,7 @@ describe("useConnectionRecovery — Firestore network cycle", () => {
     await act(() => vi.advanceTimersByTimeAsync(STUCK_CACHE_MS - 1_000));
     setFromCache(false);
     await act(() => vi.advanceTimersByTimeAsync(STUCK_CACHE_MS * 4));
-    expect(disableNetwork).not.toHaveBeenCalled();
+    expect(cycleFirestoreNetwork).not.toHaveBeenCalled();
   });
 
   it("never cycles while unreachable or unknown", async () => {
@@ -83,49 +78,41 @@ describe("useConnectionRecovery — Firestore network cycle", () => {
     await act(() => vi.advanceTimersByTimeAsync(STUCK_CACHE_MS * 4));
     rerender({ ...props, reachable: null });
     await act(() => vi.advanceTimersByTimeAsync(STUCK_CACHE_MS * 4));
-    expect(disableNetwork).not.toHaveBeenCalled();
+    expect(cycleFirestoreNetwork).not.toHaveBeenCalled();
   });
 
   it("never cycles while disabled", async () => {
     render({ enabled: false });
     setFromCache(true);
     await act(() => vi.advanceTimersByTimeAsync(STUCK_CACHE_MS * 4));
-    expect(disableNetwork).not.toHaveBeenCalled();
+    expect(cycleFirestoreNetwork).not.toHaveBeenCalled();
   });
 
   it("cycles as soon as reachability returns for an already-stuck listener", async () => {
     const { rerender, props } = render({ reachable: false });
     setFromCache(true);
     await act(() => vi.advanceTimersByTimeAsync(STUCK_CACHE_MS * 2));
-    expect(disableNetwork).not.toHaveBeenCalled();
+    expect(cycleFirestoreNetwork).not.toHaveBeenCalled();
 
     rerender({ ...props, reachable: true });
     await act(() => vi.advanceTimersByTimeAsync(0));
-    expect(disableNetwork).toHaveBeenCalledTimes(1);
+    expect(cycleFirestoreNetwork).toHaveBeenCalledTimes(1);
   });
 
-  it("throttles repeat cycles to once per 30 s across stuck episodes", async () => {
+  it("throttles repeat cycles across stuck episodes", async () => {
     const { rerender, props } = render();
     setFromCache(true);
     await act(() => vi.advanceTimersByTimeAsync(STUCK_CACHE_MS));
-    expect(disableNetwork).toHaveBeenCalledTimes(1);
+    expect(cycleFirestoreNetwork).toHaveBeenCalledTimes(1);
 
     // Flap reachability: new episode, but inside the throttle window.
     rerender({ ...props, reachable: false });
     rerender({ ...props, reachable: true });
     await act(() => vi.advanceTimersByTimeAsync(CYCLE_THROTTLE_MS - 1));
-    expect(disableNetwork).toHaveBeenCalledTimes(1);
+    expect(cycleFirestoreNetwork).toHaveBeenCalledTimes(1);
 
     await act(() => vi.advanceTimersByTimeAsync(1));
-    expect(disableNetwork).toHaveBeenCalledTimes(2);
-  });
-
-  it("re-enables the network if disableNetwork rejects", async () => {
-    disableNetwork.mockImplementationOnce(() => Promise.reject(new Error("boom")));
-    render();
-    setFromCache(true);
-    await act(() => vi.advanceTimersByTimeAsync(STUCK_CACHE_MS));
-    expect(enableNetwork).toHaveBeenCalledTimes(1);
+    expect(cycleFirestoreNetwork).toHaveBeenCalledTimes(2);
   });
 });
 
@@ -143,13 +130,13 @@ describe("useConnectionRecovery — lie-fi probe", () => {
     vi.unstubAllGlobals();
   });
 
-  it("probes once a write has been unacked for more than 8 s", async () => {
+  it("probes once a write has been unacked past the lie-fi threshold", async () => {
     const { probeNow } = render();
     act(() => {
       useWriteLedgerStore.getState().begin("chat.send");
     });
 
-    await act(() => vi.advanceTimersByTimeAsync(LIE_FI_CHECK_INTERVAL_MS * 2));
+    await act(() => vi.advanceTimersByTimeAsync(LIE_FI_UNACKED_MS));
     expect(probeNow).not.toHaveBeenCalled();
 
     await act(() => vi.advanceTimersByTimeAsync(LIE_FI_CHECK_INTERVAL_MS));
