@@ -1,4 +1,4 @@
-export const APP_VERSION = "1.0.1";
+export const APP_VERSION = "1.0.2";
 
 export interface ChangelogEntry {
   version: string;
@@ -10,6 +10,49 @@ export interface ChangelogEntry {
 }
 
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: "1.0.2",
+    date: "2026-10-03",
+    sections: [
+      {
+        title: "Fixes",
+        items: [
+          "Ask tool sheets slide open like Settings instead of popping in",
+          "Coastline measuring shade uses true distance to the coast (no inflated buffer bands)",
+          "Hider truth tips use the hiding-zone center until end game, with coastline ties counting as Closer",
+          "Landmass answers still paint elimination shade when the region is too large to store",
+          "Play Move works without signal — the timer pauses from when you played the card and syncs when you reconnect",
+          "Thermometer map errors show on the map chrome when the sheet is hidden",
+          "Region data, transit, and elevation requests now time out after 15 seconds each on a bad connection instead of hanging",
+          "A slow connection now shows a connection message instead of blaming GPS",
+          "Opening chat or the session log no longer jumps the screen",
+          "Clear deleted Stripe customer ids from Firestore and reuse live customers by firebaseUid before create",
+        ],
+      },
+      {
+        title: "Improvements",
+        items: [
+          "Pins and zones save faster on a weak signal by skipping a redundant membership check",
+          "Map status notices sit under the status rail instead of over the tool dock",
+          "Update waiting auto-dismisses after a few seconds",
+          "Question map shading keeps working offline after you've opened the app online once",
+          "Transit data you have loaded once stays available offline",
+          "The join screen shows up right away on first visit instead of after the app finishes loading.",
+          'Chat messages and questions show "Waiting to send" until the game confirms them, the sync chip says "Last known state" instead of "Synced" when you\'re looking at cached data, and rejected actions now tell you they didn\'t sync',
+        ],
+      },
+      {
+        title: "Technical",
+        items: [
+          "perf: Elimination shade unions new annotations onto the prior mask when only adding",
+          "Enable React Compiler full compile mode",
+          "Drop redundant overlay-open useCallback wrappers under React Compiler",
+          "Drop redundant waitingOnHost useMemo under React Compiler",
+          'Session actions that need signal (join, leave, end, role codes, rematch) now say "Needs a connection" right away instead of hanging, and retry safe ones automatically on a flaky network.',
+        ],
+      },
+    ],
+  },
   {
     version: "1.0.1",
     date: "2026-10-02",
