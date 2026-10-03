@@ -22,6 +22,7 @@ import {
 } from "../billing/stripeConfig.mjs";
 import { handleStripeWebhook } from "../billing/stripeWebhook.mjs";
 import { consumeRateLimit } from "../lib/firestoreRateLimit.mjs";
+import { posthogProjectApiKey } from "../lib/posthog.mjs";
 import {
   getSentryDsnSecret,
   withSentryEventHandler,
@@ -147,9 +148,11 @@ export const recoverPremiumByStripeEmail = onCall(
 // Stripe webhooks authenticate via signature verification only — App Check is not applicable.
 export const stripeWebhook = onRequest(
   {
-    secrets: [stripeWebhookSecret, sentryDsnSecret],
+    secrets: [stripeWebhookSecret, sentryDsnSecret, posthogProjectApiKey],
   },
   withSentryHttpHandler(async (req, res) => {
-    await handleStripeWebhook(adminDb(), stripeWebhookSecret.value(), req, res);
+    await handleStripeWebhook(adminDb(), stripeWebhookSecret.value(), req, res, {
+      posthogApiKey: posthogProjectApiKey.value(),
+    });
   }),
 );

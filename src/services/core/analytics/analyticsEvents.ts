@@ -49,7 +49,10 @@ export type AnalyticsEventProps = {
     productKey?: PremiumProductKey;
     message?: string;
   };
-  premium_purchase_completed: Record<string, never>;
+  premium_purchase_completed: {
+    productKey: PremiumProductKey;
+    source: "stripe_webhook";
+  };
   map_tool_used: {
     tool: Exclude<MapTool, "none">;
   };
