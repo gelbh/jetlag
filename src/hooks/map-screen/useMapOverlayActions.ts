@@ -44,10 +44,10 @@ export function useMapOverlayActions({
     ],
   );
 
-  const handleOpenChat = useCallback(() => openOverlay("chat"), [openOverlay]);
-  const handleOpenSettings = useCallback(() => openOverlay("settings"), [openOverlay]);
-  const handleOpenLog = useCallback(() => openOverlay("log"), [openOverlay]);
-  const handleOpenCodes = useCallback(() => openOverlay("codes"), [openOverlay]);
+  const handleOpenChat = () => openOverlay("chat");
+  const handleOpenSettings = () => openOverlay("settings");
+  const handleOpenLog = () => openOverlay("log");
+  const handleOpenCodes = () => openOverlay("codes");
 
   return {
     openOverlay,
