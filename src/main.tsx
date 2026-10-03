@@ -3,11 +3,12 @@ import "@fontsource/source-sans-3/500.css";
 import "@fontsource/source-sans-3/600.css";
 import "@fontsource/barlow-semi-condensed/600.css";
 import "@fontsource/barlow-semi-condensed/700.css";
-import { StrictMode } from "react";
-import { createRoot } from "react-dom/client";
+import { type ComponentType, type ReactNode, StrictMode } from "react";
+import { createRoot, type ErrorInfo, hydrateRoot } from "react-dom/client";
 import { markEmbedShellAttribute } from "./domain/device/embed/embedMode";
 import { markPlayDay, PWA_MARK_NAV } from "./domain/device/perf/playDayMarks.ts";
 import { isPublicShellPath } from "./domain/device/perf/publicShellPaths.ts";
+import { countRecoverableError } from "./domain/device/perf/recoverableErrors.ts";
 import { scheduleAfterFirstPaint } from "./domain/device/perf/scheduleAfterFirstPaint.ts";
 import { scheduleWhenIdleAfterLoad } from "./domain/device/perf/scheduleWhenIdleAfterLoad.ts";
 import { markStandaloneShellClass } from "./domain/device/pwa/markStandaloneShellClass";
@@ -38,14 +39,45 @@ function scheduleDeferredObservability(): void {
   });
 }
 
+/** Hydration mismatch: React already re-rendered on the client, so only leave a trace. */
+function onRecoverableError(error: unknown, errorInfo: ErrorInfo): void {
+  countRecoverableError();
+  if (import.meta.env.DEV) {
+    console.error("Recoverable React error", error, errorInfo.componentStack);
+  }
+  void import("./services/core/analytics/lazyTelemetry.ts")
+    .then(({ addRecoverableErrorBreadcrumbLazy }) => {
+      addRecoverableErrorBreadcrumbLazy(error, errorInfo.componentStack);
+    })
+    .catch(() => {});
+}
+
+function appTree(App: ComponentType): ReactNode {
+  return (
+    <StrictMode>
+      <App />
+    </StrictMode>
+  );
+}
+
 function renderApp(): Promise<void> {
   markPlayDay(PWA_MARK_NAV);
-  return import("./App.tsx").then(({ default: App }) => {
-    createRoot(document.getElementById("root")!).render(
-      <StrictMode>
-        <App />
-      </StrictMode>,
-    );
+  const rootEl = document.getElementById("root")!;
+  // scripts/prerender-marketing.mjs marks real-HTML shells; hydrating keeps that first paint
+  // (and its LCP element) instead of replacing it. The SPA shell has no marker.
+  if (rootEl.dataset.prerendered !== "true") {
+    return import("./App.tsx").then(({ default: App }) => {
+      createRoot(rootEl).render(appTree(App));
+    });
+  }
+  // A lazy route still loading when hydration starts stays dehydrated, and the first ancestor
+  // re-render then client-renders it, discarding the prerendered DOM. Load it alongside App;
+  // a failed load hydrates anyway and the lazy route's own chunk retry takes over.
+  const routeReady = import("./navigation/routePreloaders.ts")
+    .then(({ preloadLazyRouteComponent }) => preloadLazyRouteComponent(window.location.pathname))
+    .catch(() => {});
+  return Promise.all([import("./App.tsx"), routeReady]).then(([{ default: App }]) => {
+    hydrateRoot(rootEl, appTree(App), { onRecoverableError });
   });
 }
 

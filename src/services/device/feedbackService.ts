@@ -41,10 +41,6 @@ export function bindDelegatedTapFeedback(root: ParentNode = document): () => voi
       return;
     }
 
-    if (interactive.closest(".hud-pressable-css")) {
-      return;
-    }
-
     if (interactive.getAttribute("data-feedback") === "off") {
       return;
     }

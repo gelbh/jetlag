@@ -226,11 +226,7 @@ export function MapStatusRail({ model, headerLeading }: MapStatusRailProps) {
 
   const railClassName = `jl-status-rail pointer-events-none z-[var(--z-banner)]${
     expanded ? "" : " absolute inset-x-0 top-0"
-  }${
-    inactiveChrome
-      ? " [&_.jl-status-header-col--timer_.jl-ticker]:pointer-events-none [&_.jl-status-header-col--timer_.jl-ticker]:opacity-55 [&_.jl-status-header-col--timer_button]:pointer-events-none [&_.jl-status-header-col--timer_button]:opacity-55"
-      : ""
-  }`;
+  }${inactiveChrome ? " [&_button]:pointer-events-none [&_button]:opacity-55" : ""}`;
 
   return (
     <div

@@ -1,33 +1,11 @@
 /* On-map MapLibre (i) control is removed; credits live in Map settings.
- * Ask/matching placement tokens below still lift left chrome above map-first HUD. */
+ * Ask/matching placement tokens lift the side stack above map-first HUD. */
 
-/* Lift left map controls + side stack above map-first bottom chrome */
+/* Lift side stack above map-first bottom chrome */
 html[data-ask-map-placement="1"],
 html[data-matching-map-placement="1"] {
   --ask-map-placement-bottom-clearance: 11.5rem;
   --matching-map-bottom-clearance: var(--ask-map-placement-bottom-clearance);
-  --map-left-stack-base-dock: calc(
-    var(--dock-total-height) +
-    var(--chrome-gap-above-dock) +
-    var(--safe-area-bottom) +
-    var(--ask-map-placement-bottom-clearance)
-  );
-  --map-left-stack-base-dock-narrow: calc(
-    var(--dock-total-height) +
-    var(--chrome-gap-above-dock) +
-    var(--safe-area-bottom) +
-    var(--ask-map-placement-bottom-clearance) +
-    1.5rem
-  );
-  --map-left-stack-base-chrome-hidden: calc(
-    var(--chrome-gap-bottom) +
-    var(--safe-area-bottom) +
-    var(--ask-map-placement-bottom-clearance)
-  );
-  --map-left-stack-base-safe-area: calc(
-    max(0.75rem, var(--safe-area-bottom)) +
-    var(--ask-map-placement-bottom-clearance)
-  );
 }
 
 html[data-ask-map-placement="1"] [data-chrome-side-stack="phone"],

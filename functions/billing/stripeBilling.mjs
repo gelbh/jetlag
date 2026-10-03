@@ -85,6 +85,110 @@ export function createStripeClient(secret) {
 
 /**
  * @param {Stripe} stripe
+ * @param {string} uid
+ * @returns {Promise<string | null>}
+ */
+async function findStripeCustomerIdByFirebaseUid(stripe, uid) {
+  try {
+    const result = await stripe.customers.search({
+      query: `metadata['firebaseUid']:'${uid}'`,
+    });
+    const match = (result?.data ?? []).find(
+      (customer) =>
+        customer &&
+        typeof customer === "object" &&
+        typeof customer.id === "string" &&
+        !("deleted" in customer && customer.deleted === true),
+    );
+    return match?.id ?? null;
+  } catch (error) {
+    console.warn(`Stripe customer search failed for uid ${uid}:`, error);
+    return null;
+  }
+}
+
+/**
+ * Transactionally clear stripeCustomerId for one user when it still equals
+ * the deleted Stripe customer id. No-op when absent or a newer id is stored.
+ *
+ * @param {import('firebase-admin/firestore').Firestore} db
+ * @param {string} uid
+ * @param {string} customerId
+ */
+async function clearMatchingStripeCustomerId(db, uid, customerId) {
+  const userRef = userEntitlementsRef(db, uid);
+
+  await db.runTransaction(async (transaction) => {
+    const snapshot = await transaction.get(userRef);
+    const storedCustomerId =
+      typeof snapshot.data()?.stripeCustomerId === "string"
+        ? snapshot.data().stripeCustomerId
+        : null;
+
+    if (storedCustomerId === null) {
+      return;
+    }
+
+    if (storedCustomerId !== customerId) {
+      console.warn(
+        `Skipping stripeCustomerId clear for uid ${uid}: stored ${storedCustomerId} != deleted ${customerId}`,
+      );
+      return;
+    }
+
+    transaction.set(
+      userRef,
+      {
+        stripeCustomerId: FieldValue.delete(),
+        updatedAt: FieldValue.serverTimestamp(),
+      },
+      { merge: true },
+    );
+  });
+}
+
+/**
+ * Clears users/{uid}.stripeCustomerId after Stripe emits customer.deleted.
+ * Resolves uid from metadata.firebaseUid, else Firestore query by customer id.
+ * Clears every matching user doc whose stored id still equals the deleted id
+ * (transactional re-read; does not wipe a newer live id).
+ *
+ * @param {import('firebase-admin/firestore').Firestore} db
+ * @param {Pick<Stripe.Customer | Stripe.DeletedCustomer, "id" | "metadata">} customer
+ */
+export async function clearStripeCustomerIdForDeletedCustomer(db, customer) {
+  const customerId = typeof customer?.id === "string" ? customer.id : null;
+  if (!customerId) {
+    return;
+  }
+
+  const metadataUid = customer?.metadata?.firebaseUid;
+  /** @type {string[]} */
+  let uids = [];
+
+  if (typeof metadataUid === "string" && metadataUid.trim().length > 0) {
+    uids = [metadataUid.trim()];
+  } else {
+    const snapshot = await db
+      .collection("users")
+      .where("stripeCustomerId", "==", customerId)
+      .limit(25)
+      .get();
+
+    if (snapshot.empty) {
+      return;
+    }
+
+    uids = snapshot.docs.map((doc) => doc.id);
+  }
+
+  for (const uid of uids) {
+    await clearMatchingStripeCustomerId(db, uid, customerId);
+  }
+}
+
+/**
+ * @param {Stripe} stripe
  * @param {import('firebase-admin/firestore').Firestore} db
  * @param {string} uid
  * @param {string | null | undefined} email
@@ -94,6 +198,7 @@ export async function ensureStripeCustomer(stripe, db, uid, email) {
   const snapshot = await userRef.get();
   const existingCustomerId =
     typeof snapshot.data()?.stripeCustomerId === "string" ? snapshot.data().stripeCustomerId : null;
+  let replacingStaleOrDeleted = false;
 
   if (existingCustomerId) {
     try {
@@ -104,6 +209,7 @@ export async function ensureStripeCustomer(stripe, db, uid, email) {
         "deleted" in existing &&
         existing.deleted === true
       ) {
+        replacingStaleOrDeleted = true;
         console.warn(`Replacing deleted Stripe customer ${existingCustomerId} for uid ${uid}.`);
       } else {
         return existingCustomerId;
@@ -113,8 +219,22 @@ export async function ensureStripeCustomer(stripe, db, uid, email) {
         throw mapStripeBillingError(error, "checkout");
       }
 
+      replacingStaleOrDeleted = true;
       console.warn(`Replacing stale Stripe customer ${existingCustomerId} for uid ${uid}.`);
     }
+  }
+
+  const searchedCustomerId = await findStripeCustomerIdByFirebaseUid(stripe, uid);
+  if (searchedCustomerId) {
+    /** @type {Record<string, unknown>} */
+    const patch = {
+      stripeCustomerId: searchedCustomerId,
+    };
+    if (replacingStaleOrDeleted) {
+      patch.subscription = FieldValue.delete();
+    }
+    await mergeUserEntitlements(db, uid, patch);
+    return searchedCustomerId;
   }
 
   let customer;
@@ -362,28 +482,35 @@ export async function syncSubscriptionEntitlements(db, subscription) {
 
   const plan = subscription.metadata?.plan === "yearly" ? "yearly" : "monthly";
   const status = subscription.status;
+  const periodEnd = stripeTimestampToFirestore(subscription.current_period_end);
+  const isTerminal = status === "canceled" || status === "incomplete_expired";
+
+  /** @type {Record<string, unknown>} */
   const patch = {
-    stripeCustomerId: typeof subscription.customer === "string" ? subscription.customer : undefined,
-    subscription: {
-      status,
-      plan,
-      stripeSubscriptionId: subscription.id,
-      currentPeriodEnd: stripeTimestampToFirestore(subscription.current_period_end),
-    },
+    subscription: isTerminal
+      ? {
+          status: "canceled",
+          plan,
+          stripeSubscriptionId: subscription.id,
+          currentPeriodEnd: periodEnd,
+        }
+      : {
+          status,
+          plan,
+          stripeSubscriptionId: subscription.id,
+          currentPeriodEnd: periodEnd,
+        },
     updatedAt: FieldValue.serverTimestamp(),
   };
 
-  if (status === "trialing") {
-    patch.trialUsedAt = FieldValue.serverTimestamp();
+  // Terminal subscription events must not re-plant a deleted Stripe customer id
+  // after customer.deleted cleared users/{uid}.stripeCustomerId.
+  if (!isTerminal && typeof subscription.customer === "string") {
+    patch.stripeCustomerId = subscription.customer;
   }
 
-  if (status === "canceled" || status === "incomplete_expired") {
-    patch.subscription = {
-      status: "canceled",
-      plan,
-      stripeSubscriptionId: subscription.id,
-      currentPeriodEnd: stripeTimestampToFirestore(subscription.current_period_end),
-    };
+  if (status === "trialing") {
+    patch.trialUsedAt = FieldValue.serverTimestamp();
   }
 
   await mergeUserEntitlements(db, uid, patch);
