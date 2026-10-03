@@ -19,6 +19,7 @@
     "lint:pr-title": "bash scripts/lint-pr-title.sh",
     "typecheck": "tsc -b --noEmit",
     "flags:sync": "node scripts/sync-region-flags.mjs",
+    "world": "node scripts/world-runner.mjs",
     "test": "vitest run --project unit",
     "test:coverage": "vitest run --coverage --project unit",
     "test:changed": "vitest run --changed origin/main --passWithNoTests --project unit",

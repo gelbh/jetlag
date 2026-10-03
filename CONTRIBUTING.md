@@ -72,6 +72,8 @@ npm test
 just e2e-smoke
 ```
 
+Named scenario worlds (`npm run world -- list|apply|reset`): see [docs/dev-testing.md](docs/dev-testing.md).
+
 ## Release notes
 
 Player-visible changes need a changeset. See [`.changeset/README.md`](.changeset/README.md).
