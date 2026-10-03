@@ -1,3 +1,8 @@
+import {
+  isNeedsConnectionError,
+  NEEDS_CONNECTION_MESSAGE,
+} from "@/domain/device/network/needsConnectionError";
+
 export type UserErrorAction = "retry" | "rejoin" | "settings" | "copy_debug";
 
 export interface UserErrorDisplay {
@@ -22,6 +27,13 @@ export function formatUserError(code: string, fallbackMessage?: string | null): 
       return {
         title: "Sync failed",
         message: fallbackMessage ?? "Could not sync with the session.",
+        action: "retry",
+        actionLabel: "Retry",
+      };
+    case "needs_connection":
+      return {
+        title: "No connection",
+        message: fallbackMessage ?? NEEDS_CONNECTION_MESSAGE,
         action: "retry",
         actionLabel: "Retry",
       };
@@ -84,4 +96,23 @@ export function userErrorFromTerminalSessionMessage(message: string): UserErrorD
     secondaryAction: "rejoin",
     secondaryActionLabel: "Return to join",
   };
+}
+
+/**
+ * Server-only actions (callables): offline fail-fast gets connection copy;
+ * anything else gets the caller's fallback so raw server text never leaks.
+ */
+export function userErrorFromCallableError(
+  error: unknown,
+  fallbackMessage?: string | null,
+): UserErrorDisplay {
+  if (isNeedsConnectionError(error)) {
+    return formatUserError("needs_connection", error.message);
+  }
+
+  return formatUserError("unknown", fallbackMessage ?? null);
+}
+
+export function callableErrorMessage(error: unknown, fallbackMessage: string): string {
+  return userErrorFromCallableError(error, fallbackMessage).message;
 }
