@@ -16,6 +16,7 @@ import {
   buildPremiumSessionFirestoreDocument,
   parseCreatePremiumSessionInput,
 } from "./premiumSessionDocument.mjs";
+import { captureAnalyticsEvent } from "../lib/posthog.mjs";
 import {
   PREMIUM_PRODUCT_KEYS,
   PREMIUM_PRODUCTS,
@@ -427,8 +428,14 @@ export async function createPremiumSessionHandler(db, uid, rawInput) {
 /**
  * @param {import('firebase-admin/firestore').Firestore} db
  * @param {Stripe.Checkout.Session} session
+ * @param {{
+ *   stripeEventId?: string,
+ *   posthogApiKey?: string,
+ *   captureImpl?: { capture: Function, shutdown: Function },
+ *   captureAnalyticsEvent?: typeof captureAnalyticsEvent,
+ * } | undefined} [options]
  */
-export async function applyCheckoutSessionCompleted(db, session) {
+export async function applyCheckoutSessionCompleted(db, session, options) {
   const uid = session.metadata?.firebaseUid ?? session.client_reference_id ?? null;
   const productKey = session.metadata?.productKey;
 
@@ -446,10 +453,7 @@ export async function applyCheckoutSessionCompleted(db, session) {
       lifetimePremium: true,
       stripeCustomerId: typeof session.customer === "string" ? session.customer : undefined,
     });
-    return;
-  }
-
-  if (typeof product.credits === "number" && product.credits > 0) {
+  } else if (typeof product.credits === "number" && product.credits > 0) {
     const userRef = userEntitlementsRef(db, uid);
     await db.runTransaction(async (transaction) => {
       const snapshot = await transaction.get(userRef);
@@ -467,6 +471,22 @@ export async function applyCheckoutSessionCompleted(db, session) {
         { merge: true },
       );
     });
+  } else {
+    return;
+  }
+
+  const captureEvent = options?.captureAnalyticsEvent ?? captureAnalyticsEvent;
+  try {
+    await captureEvent({
+      apiKey: options?.posthogApiKey ?? "",
+      distinctId: uid,
+      event: "premium_purchase_completed",
+      uuidSeed: `premium_purchase_completed:${options?.stripeEventId ?? session.id}`,
+      properties: { productKey, source: "stripe_webhook" },
+      captureImpl: options?.captureImpl,
+    });
+  } catch {
+    // Soft-fail: analytics must never block entitlement writes.
   }
 }
 
