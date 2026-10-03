@@ -4,7 +4,7 @@ const TERMINAL_OUTCOMES = new Set(["found", "ended_early", "abandoned"]);
 
 /**
  * Apply end writes inside an existing transaction (reads already done).
- * Returns true when a session update was applied.
+ * Returns the applied gameOutcome string, or false when no session update was applied.
  */
 export function applyEndSessionInTx(tx, db, sessionRef, data, gameOutcome) {
   if (data.status === "ended" || typeof data.endedAt === "string") {
@@ -29,13 +29,14 @@ export function applyEndSessionInTx(tx, db, sessionRef, data, gameOutcome) {
     tx.delete(db.collection("sessionCodes").doc(code));
   }
 
-  return true;
+  return outcome;
 }
 
 /**
  * Shared session end write: status/endedAt/gameOutcome + delete code field + delete sessionCodes doc.
  * Re-reads in a transaction so a concurrent `found` / other terminal outcome is not clobbered.
  * Code doc delete runs in the same transaction as the session update.
+ * @returns {Promise<false | string>} applied gameOutcome, or false when no update applied
  */
 export async function endSessionCanonical(db, sessionDoc, { gameOutcome }) {
   const sessionRef = sessionDoc.ref;
