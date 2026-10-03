@@ -24,7 +24,8 @@ export type SessionEndedReason =
   | "fallback_client_end"
   | "expected_already_ended"
   | "game_over"
-  | "local";
+  | "local"
+  | "abandoned";
 
 export type AnalyticsEventProps = {
   session_created: {
