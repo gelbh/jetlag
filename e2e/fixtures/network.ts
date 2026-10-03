@@ -46,8 +46,11 @@ function isMapTileHost(hostname: string): boolean {
 
 /**
  * E2E runs auth/firestore/storage only, not the functions emulator.
- * Non-host Play Move pauses the timer via `controlSessionTimerForMove`; stub
- * the callable so startMove does not roll back the wizard when :5001 is down.
+ * Current clients queue Move pause/resume as `sessions/{id}/intents` docs
+ * (rules-checked by the Firestore emulator); the `processSessionIntent` trigger
+ * never runs here, so specs assert the Move flow, not a server-side timer pause.
+ * This stub only covers the legacy `controlSessionTimerForMove` callable so a
+ * stray call cannot hang on :5001.
  */
 async function fulfillMoveTimerCallableIfMatched(route: Route, parsed: URL): Promise<boolean> {
   const isFunctionsEmulator =
