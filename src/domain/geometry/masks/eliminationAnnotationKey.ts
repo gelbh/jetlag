@@ -1,6 +1,5 @@
 import type { Feature, MultiPolygon, Polygon, Position } from "geojson";
 import type { AnnotationRecord } from "../../map/annotations";
-import { previewGeometryFingerprint } from "../measuring/previewGeometryFingerprint";
 
 export type EliminationAddOnlyResult = { addOnly: true; newIds: string[] } | { addOnly: false };
 
@@ -10,56 +9,20 @@ function roundCoord(value: number): string {
   return value.toFixed(6);
 }
 
+/** Full coordinate identity for mask cache / add-only (lossy preview fingerprints are not safe here). */
+function polygonFeatureIdentity(feature: Feature<Polygon | MultiPolygon>): string {
+  return `${feature.geometry.type}:${JSON.stringify(feature.geometry.coordinates)}`;
+}
+
 function lineStringFingerprint(coordinates: Position[]): string {
-  if (coordinates.length === 0) {
-    return "LineString:0";
-  }
-
-  let minLng = Infinity;
-  let maxLng = -Infinity;
-  let minLat = Infinity;
-  let maxLat = -Infinity;
-  for (const position of coordinates) {
-    const lng = position[0];
-    const lat = position[1];
-    if (lng < minLng) minLng = lng;
-    if (lng > maxLng) maxLng = lng;
-    if (lat < minLat) minLat = lat;
-    if (lat > maxLat) maxLat = lat;
-  }
-
-  const first = coordinates[0];
-  const last = coordinates[coordinates.length - 1];
-  return [
-    "LineString",
-    roundCoord(minLng),
-    roundCoord(minLat),
-    roundCoord(maxLng),
-    roundCoord(maxLat),
-    coordinates.length,
-    roundCoord(first[0]),
-    roundCoord(first[1]),
-    roundCoord(last[0]),
-    roundCoord(last[1]),
-  ].join(":");
+  return `LineString:${JSON.stringify(coordinates)}`;
 }
 
 function polygonJsonFingerprint(json: string | undefined): string {
   if (!json) {
     return "";
   }
-  try {
-    const parsed = JSON.parse(json) as Feature<Polygon | MultiPolygon>;
-    if (
-      parsed?.type === "Feature" &&
-      (parsed.geometry?.type === "Polygon" || parsed.geometry?.type === "MultiPolygon")
-    ) {
-      return previewGeometryFingerprint(parsed) ?? "null";
-    }
-  } catch {
-    // fall through to raw digest
-  }
-  return `raw:${json.length}:${json.slice(0, 24)}:${json.slice(-24)}`;
+  return `json:${json}`;
 }
 
 /** Mask-shaping metadata that can change elimination without moving Feature geometry. */
@@ -105,8 +68,9 @@ function annotationGeometryFingerprint(annotation: AnnotationRecord): string {
   const geometry = annotation.geometry.geometry;
   let geometryKey: string;
   if (geometry.type === "Polygon" || geometry.type === "MultiPolygon") {
-    geometryKey =
-      previewGeometryFingerprint(annotation.geometry as Feature<Polygon | MultiPolygon>) ?? "null";
+    geometryKey = polygonFeatureIdentity(
+      annotation.geometry as Feature<Polygon | MultiPolygon>,
+    );
   } else if (geometry.type === "Point") {
     const [lng, lat] = geometry.coordinates;
     geometryKey = `Point:${roundCoord(lng)}:${roundCoord(lat)}`;

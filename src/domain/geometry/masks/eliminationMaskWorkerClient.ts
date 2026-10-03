@@ -2,7 +2,6 @@ import type { Remote } from "comlink";
 import { wrap } from "comlink";
 import type { Feature, Polygon as GeoPolygon, MultiPolygon } from "geojson";
 import type { AnnotationRecord, GameArea } from "../../map/annotations";
-import { previewEliminationFeaturesFingerprint } from "../../questions/overlays/previewEliminationFeaturesFingerprint";
 import type { HidingZoneRecord } from "../../session/hiding/hidingZone";
 import {
   annotationsToEndGameDisks,
@@ -11,6 +10,19 @@ import {
 import { gameAreaFingerprint } from "../core/gameAreaConvert";
 import type { DiskSpec, EliminationUnionInput, PolygonFeature } from "../kernel/types";
 import { eliminationAnnotationsContentKey, isAddOnly } from "./eliminationAnnotationKey";
+
+/** Full draft geometry identity for mask cache (preview fingerprints are lossy). */
+function draftFeaturesContentKey(
+  features: readonly Feature<GeoPolygon | MultiPolygon>[],
+): string {
+  return features
+    .map((feature) => {
+      const id =
+        typeof feature.id === "string" || typeof feature.id === "number" ? String(feature.id) : "";
+      return `${id}:${feature.geometry.type}:${JSON.stringify(feature.geometry.coordinates)}`;
+    })
+    .join("|");
+}
 
 type EliminationMaskWorkerApi = {
   buildMaskFromUnionInput: (
@@ -137,7 +149,7 @@ export async function requestCombinedEliminationMask(
   });
 
   const gameAreaKey = gameAreaFingerprint(gameArea);
-  const draftKey = previewEliminationFeaturesFingerprint(draftFeatures);
+  const draftKey = draftFeaturesContentKey(draftFeatures);
   const endGameKey = endGameContentKey(endGameHidingZones);
   const annotationKey = eliminationAnnotationsContentKey(annotations);
 

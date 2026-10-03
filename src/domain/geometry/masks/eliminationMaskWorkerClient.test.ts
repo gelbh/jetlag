@@ -240,6 +240,53 @@ describe("eliminationMaskWorkerClient", () => {
     expect(buildMaskFromUnionInput).not.toHaveBeenCalled();
   });
 
+  it("misses cache when draft geometry changes under a lossy preview fingerprint collision", async () => {
+    // Same bbox, vertex count, first, and last as previewGeometryFingerprint; middle differs.
+    const draftA = {
+      type: "Feature" as const,
+      id: "draft",
+      properties: {},
+      geometry: {
+        type: "Polygon" as const,
+        coordinates: [
+          [
+            [0, 0],
+            [1, 0],
+            [1, 1],
+            [0, 1],
+            [0, 0],
+          ],
+        ],
+      },
+    };
+    const draftB = {
+      type: "Feature" as const,
+      id: "draft",
+      properties: {},
+      geometry: {
+        type: "Polygon" as const,
+        coordinates: [
+          [
+            [0, 0],
+            [1, 0],
+            [0.25, 0.75],
+            [0, 1],
+            [0, 0],
+          ],
+        ],
+      },
+    };
+
+    await workerClient.requestCombinedEliminationMask([], gameArea, [draftA], []);
+    computeEliminationUnionInput.mockClear();
+    buildMaskFromUnionInput.mockClear();
+
+    await workerClient.requestCombinedEliminationMask([], gameArea, [draftB], []);
+
+    expect(computeEliminationUnionInput).toHaveBeenCalledTimes(1);
+    expect(buildMaskFromUnionInput).toHaveBeenCalledTimes(1);
+  });
+
   it("full-rebuilds when an annotation is removed (not add-only)", async () => {
     const a = matchingAnnotation("a", 0);
     const b = matchingAnnotation("b", 0.2);
