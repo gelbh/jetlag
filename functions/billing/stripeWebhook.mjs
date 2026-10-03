@@ -2,7 +2,11 @@ import Stripe from "stripe";
 import { setCors } from "../lib/cors.mjs";
 import { captureFunctionsException } from "../lib/sentry.mjs";
 import { markStripeEventProcessed } from "./premiumEntitlements.mjs";
-import { applyCheckoutSessionCompleted, syncSubscriptionEntitlements } from "./stripeBilling.mjs";
+import {
+  applyCheckoutSessionCompleted,
+  clearStripeCustomerIdForDeletedCustomer,
+  syncSubscriptionEntitlements,
+} from "./stripeBilling.mjs";
 
 const STRIPE_SIGNATURE_MISMATCH = /No signatures found matching the expected signature/i;
 
@@ -55,6 +59,21 @@ export async function handleStripeWebhook(db, webhookSecret, req, res) {
   }
 
   try {
+    // customer.deleted: clear first, then mark processed so a failed clear can retry.
+    if (event.type === "customer.deleted") {
+      const existing = await db.collection("stripeEvents").doc(event.id).get();
+      if (existing.exists) {
+        res.status(200).json({ received: true, duplicate: true });
+        return;
+      }
+
+      const customer = /** @type {Stripe.Customer | Stripe.DeletedCustomer} */ (event.data.object);
+      await clearStripeCustomerIdForDeletedCustomer(db, customer);
+      await markStripeEventProcessed(db, event.id);
+      res.status(200).json({ received: true });
+      return;
+    }
+
     const shouldProcess = await markStripeEventProcessed(db, event.id);
     if (!shouldProcess) {
       res.status(200).json({ received: true, duplicate: true });
