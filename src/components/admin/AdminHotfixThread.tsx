@@ -1,5 +1,5 @@
-import { useEffect, useRef } from "react";
 import { useHotfixThread } from "../../hooks/incident/useHotfixThread";
+import { useStickScrollToBottom } from "../../hooks/ui/useStickScrollToBottom";
 import type { IncidentThreadMessageRecord } from "../../services/firestore/firestoreIncidentThreads";
 
 export interface AdminHotfixThreadProps {
@@ -54,11 +54,7 @@ export function AdminHotfixThread({
   const live = useHotfixThread(messagesOverride !== undefined ? null : incidentId);
   const messages = messagesOverride !== undefined ? messagesOverride : live.messages;
   const error = errorOverride !== undefined ? errorOverride : live.error;
-  const bottomRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView?.({ block: "end" });
-  }, [messages.length]);
+  const bottomRef = useStickScrollToBottom(messages.length);
 
   return (
     <div className={`jl-incident-chat ${className}`.trim()} data-testid="admin-hotfix-thread">
