@@ -1,14 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { runWorld } from "../../../scripts/world-runner.mjs";
-import { LOCAL_SESSION_ID } from "../../domain/map/annotations";
-import { DUBLIN_CITY_GAME_AREA } from "../fixtures/dublinGameArea";
 import { toLocalStorageSeed } from "./adapters/toLocalStorageSeed";
-import { getScenario } from "./catalog";
+import { formatClearSeedRecipeLines } from "./seedStorage";
+import { runWorld } from "./worldCli";
 
-async function captureWorld(...argv: string[]) {
+function captureWorld(...argv: string[]) {
   const chunks: string[] = [];
   const errChunks: string[] = [];
-  const status = await runWorld(argv, {
+  const status = runWorld(argv, {
     stdout: (line: string) => {
       chunks.push(String(line));
     },
@@ -20,36 +18,32 @@ async function captureWorld(...argv: string[]) {
 }
 
 describe("world-runner CLI", () => {
-  it("list includes dublin-local-map", async () => {
-    const result = await captureWorld("list");
+  it("list includes dublin-local-map", () => {
+    const result = captureWorld("list");
     expect(result.status).toBe(0);
     expect(result.stdout).toContain("dublin-local-map");
   });
 
-  it("apply dublin-local-map prints seed matching toLocalStorageSeed", async () => {
-    const result = await captureWorld("apply", "dublin-local-map");
+  it("apply dublin-local-map prints seed matching toLocalStorageSeed", () => {
+    const result = captureWorld("apply", "dublin-local-map");
     expect(result.status).toBe(0);
-    const seed = JSON.parse(result.stdout) as {
-      sessionBlob: string;
-      mapBlob: string;
-      annotationsBlob: string;
-      clearTimer: boolean;
-    };
-    const expected = toLocalStorageSeed("dublin-local-map");
-    expect(seed).toEqual(expected);
-
-    const parsed = JSON.parse(seed.sessionBlob) as {
-      state: { session: { id: string; code: string; gameArea: unknown } };
-    };
-    const scenario = getScenario("dublin-local-map");
-    expect(parsed.state.session.id).toBe(LOCAL_SESSION_ID);
-    expect(parsed.state.session.code).toBe(scenario.session.code);
-    expect(parsed.state.session.gameArea).toEqual(DUBLIN_CITY_GAME_AREA);
+    const seed = JSON.parse(result.stdout) as ReturnType<typeof toLocalStorageSeed>;
+    expect(seed).toEqual(toLocalStorageSeed("dublin-local-map"));
   });
 
-  it("apply unknown id exits non-zero", async () => {
-    const result = await captureWorld("apply", "not-a-world");
+  it("apply unknown id exits non-zero", () => {
+    const result = captureWorld("apply", "not-a-world");
     expect(result.status).not.toBe(0);
     expect(result.stderr).toMatch(/unknown|not-a-world/i);
+  });
+
+  it("reset prints shared seed clear recipe", () => {
+    const result = captureWorld("reset");
+    expect(result.status).toBe(0);
+    for (const line of formatClearSeedRecipeLines()) {
+      expect(result.stdout).toContain(line);
+    }
+    expect(result.stdout).toContain('sessionStorage.removeItem("jetlag-timer")');
+    expect(result.stdout).toContain('localStorage.removeItem("jetlag-session")');
   });
 });

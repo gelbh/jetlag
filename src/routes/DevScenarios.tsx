@@ -7,6 +7,7 @@ import { toEmulatorSeed } from "@/test/scenarios/adapters/toEmulatorSeed";
 import { toLocalStorageSeed } from "@/test/scenarios/adapters/toLocalStorageSeed";
 import { getScenario, listScenarios } from "@/test/scenarios/catalog";
 import { isDevScenariosEnabled } from "@/test/scenarios/devGate";
+import { applyLocalStorageSeed } from "@/test/scenarios/seedStorage";
 import type { ScenarioId } from "@/test/scenarios/types";
 
 export function DevScenarios() {
@@ -20,12 +21,7 @@ export function DevScenarios() {
     async (id: ScenarioId) => {
       const scenario = getScenario(id);
       const seed = toLocalStorageSeed(id);
-      localStorage.setItem("jetlag-session", seed.sessionBlob);
-      localStorage.setItem("jetlag-map", seed.mapBlob);
-      localStorage.setItem("jetlag-annotations", seed.annotationsBlob);
-      if (seed.clearTimer) {
-        sessionStorage.removeItem("jetlag-timer");
-      }
+      applyLocalStorageSeed(seed, { localStorage, sessionStorage });
       if (scenario.tags.includes("emulator") && clientEnvUsesFirebaseEmulator()) {
         await toEmulatorSeed(id);
       }

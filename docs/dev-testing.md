@@ -25,6 +25,8 @@ Ingest options:
 - Paste into the browser console with the key recipe below (same keys `/dev/scenarios` uses).
 - Pipe JSON into a local helper, or copy fields into Playwright `addInitScript` / e2e session fixtures that already call `toLocalStorageSeed`.
 
+Key ownership lives in `src/test/scenarios/seedStorage.ts` (`applyLocalStorageSeed` / `formatClearSeedRecipeLines`). `/dev/scenarios`, e2e session seeding, and `npm run world -- reset` share that contract.
+
 Example console apply after `npm run world -- apply dublin-local-map`:
 
 ```js
@@ -43,4 +45,4 @@ Prints a clear recipe for seed keys only (no silent wipe of unrelated storage):
 - localStorage: `jetlag-session`, `jetlag-map`, `jetlag-annotations`
 - sessionStorage: `jetlag-timer` (`timerStore`)
 
-`npm run world -- reset` prints the matching `removeItem` lines. Reset with no prior apply is a no-op success.
+`npm run world -- reset` prints the `formatClearSeedRecipeLines()` recipe. Reset with no prior apply is a no-op success.

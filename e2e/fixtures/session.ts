@@ -1,5 +1,9 @@
 import { type Browser, expect, type Page } from "@playwright/test";
 import { toLocalStorageSeed } from "../../src/test/scenarios/adapters/toLocalStorageSeed";
+import {
+  LOCAL_STORAGE_SEED_KEYS,
+  SESSION_STORAGE_SEED_KEYS,
+} from "../../src/test/scenarios/seedStorage";
 import { E2E_GEOLOCATION, MAP_CONTAINER_SELECTOR } from "./map";
 import type { BlockExternalAssetsOptions } from "./network";
 import { dismissMapOnboarding, prepareE2EPage } from "./page-init";
@@ -28,14 +32,23 @@ export async function seedLocalSession(page: Page, options: LocalSessionSeedOpti
     memberRoles,
   });
 
-  await page.addInitScript(({ sessionBlob, mapBlob, annotationsBlob, clearTimer }) => {
-    localStorage.setItem("jetlag-session", sessionBlob);
-    localStorage.setItem("jetlag-map", mapBlob);
-    localStorage.setItem("jetlag-annotations", annotationsBlob);
-    if (clearTimer) {
-      sessionStorage.removeItem("jetlag-timer");
-    }
-  }, seed);
+  await page.addInitScript(
+    ({ sessionBlob, mapBlob, annotationsBlob, clearTimer, localKeys, sessionKeys }) => {
+      localStorage.setItem(localKeys[0], sessionBlob);
+      localStorage.setItem(localKeys[1], mapBlob);
+      localStorage.setItem(localKeys[2], annotationsBlob);
+      if (clearTimer) {
+        for (const key of sessionKeys) {
+          sessionStorage.removeItem(key);
+        }
+      }
+    },
+    {
+      ...seed,
+      localKeys: [...LOCAL_STORAGE_SEED_KEYS],
+      sessionKeys: [...SESSION_STORAGE_SEED_KEYS],
+    },
+  );
 }
 
 export async function openMapWithLocalSession(page: Page, options: LocalSessionSeedOptions = {}) {
