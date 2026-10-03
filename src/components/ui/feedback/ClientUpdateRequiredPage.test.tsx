@@ -9,7 +9,6 @@ const applyUpdate = vi.fn();
 vi.mock("@/hooks/app/useAppUpdateState", () => ({
   useAppUpdateState: () => ({
     applyUpdate,
-    inActiveMapSession: false,
     safeToReload: true,
     showGlobalBanner: false,
     hotfixGraceActive: false,

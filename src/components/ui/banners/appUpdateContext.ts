@@ -1,7 +1,6 @@
 import { createContext } from "react";
 
 export interface AppUpdateContextValue {
-  inActiveMapSession: boolean;
   safeToReload: boolean;
   showGlobalBanner: boolean;
   applyUpdate: () => void;

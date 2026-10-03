@@ -2,11 +2,11 @@ import type { ReactNode } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { setServiceWorkerChunkReloadContext } from "@/domain/device/updates/lazyWithChunkRetry";
+import { shouldShowOptionalAppUpdateBanner } from "@/domain/device/updates/optionalAppUpdateUi";
 import {
   acknowledgeSoftReload,
   shouldHonorSoftReload,
 } from "@/domain/device/updates/reloadAcknowledgements";
-import { shouldShowOptionalAppUpdateBanner } from "@/domain/device/updates/optionalAppUpdateUi";
 import {
   applyServiceWorkerUpdate,
   isSafeToReloadApp,
@@ -49,7 +49,6 @@ export function AppUpdateProvider({ children }: { children: ReactNode }) {
   const location = useLocation();
   const session = useSessionStore((state) => state.session);
 
-  const inActiveMapSession = Boolean(session) && location.pathname === "/map";
   const safeToReload = isSafeToReloadApp({ session });
 
   // Wait for auth bootstrap: a restored user is attached before the appConfig
@@ -246,7 +245,6 @@ export function AppUpdateProvider({ children }: { children: ReactNode }) {
     });
 
     return {
-      inActiveMapSession,
       safeToReload,
       showGlobalBanner,
       applyUpdate: () => {
@@ -260,7 +258,6 @@ export function AppUpdateProvider({ children }: { children: ReactNode }) {
     hotfixGrace.active,
     hotfixGrace.requiredMinAppVersion,
     hotfixGrace.secondsRemaining,
-    inActiveMapSession,
     needsRefresh,
     safeToReload,
     updateSW,
