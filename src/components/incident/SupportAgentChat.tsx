@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import type { IncidentRecord } from "../../domain/incident/incidentTypes";
 import {
   getSessionOpsCaps,
@@ -7,6 +7,7 @@ import {
 } from "../../domain/incident/sessionOpsCaps";
 import { usePendingHostConfirm } from "../../hooks/incident/usePendingHostConfirm";
 import { useSupportThread } from "../../hooks/incident/useSupportThread";
+import { useStickScrollToBottom } from "../../hooks/ui/useStickScrollToBottom";
 import type { IncidentThreadMessageRecord } from "../../services/firestore/firestoreIncidentThreads";
 import { usePremiumEntitlementsStore } from "../../state/premiumEntitlementsStore";
 import { useSessionStore } from "../../state/sessionStore";
@@ -117,11 +118,7 @@ export function SupportAgentChat({
 
   const [draft, setDraft] = useState("");
   const [sendError, setSendError] = useState<string | null>(null);
-  const bottomRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView?.({ block: "end" });
-  }, [messages.length]);
+  const bottomRef = useStickScrollToBottom(messages.length);
 
   const waitingOnHost = isWaitingOnHost(messages);
   const agentWorking = useMemo(() => {
