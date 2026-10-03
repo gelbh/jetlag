@@ -39,26 +39,29 @@ export async function captureAnalyticsEvent(input) {
     return;
   }
 
-  const client =
-    input.captureImpl ??
-    new PostHog(apiKey, {
-      host,
-      flushAt: 1,
-      flushInterval: 0,
-    });
-
+  let client;
   try {
-    client.capture({
-      distinctId,
-      event,
-      uuid: uuidFromSeed(uuidSeed),
-      properties,
-    });
+    client =
+      input.captureImpl ??
+      new PostHog(apiKey, {
+        host,
+        flushAt: 1,
+        flushInterval: 0,
+      });
+
+    await Promise.resolve(
+      client.capture({
+        distinctId,
+        event,
+        uuid: uuidFromSeed(uuidSeed),
+        properties,
+      }),
+    );
     await client.shutdown();
   } catch {
     // Soft-fail: analytics must never break Stripe / idle jobs.
     try {
-      await client.shutdown?.();
+      await client?.shutdown?.();
     } catch {
       // ignore
     }
