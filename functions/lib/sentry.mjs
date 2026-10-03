@@ -187,6 +187,39 @@ export function getSentryDsnSecret() {
   return sentryDsnSecret;
 }
 
+/**
+ * Explicit v10-equivalent dataCollection baseline for SDK 11 (duplicated from client;
+ * Functions cannot import src/).
+ * @see https://docs.sentry.io/platforms/javascript/guides/node/migration/v10-to-v11/
+ */
+export const FUNCTIONS_SENTRY_DATA_COLLECTION = {
+  userInfo: false,
+  cookies: false,
+  httpHeaders: {
+    request: { deny: ["forwarded", "-ip", "remote-", "via", "-user"] },
+    response: { deny: ["forwarded", "-ip", "remote-", "via", "-user"] },
+  },
+  httpBodies: [],
+  urlQueryParams: { deny: ["forwarded", "-ip", "remote-", "via", "-user"] },
+  genAI: { inputs: false, outputs: false },
+  databaseQueryData: false,
+  graphQL: { document: false, variables: false },
+};
+
+/**
+ * @param {NodeJS.ProcessEnv} [env]
+ * @returns {string}
+ */
+export function resolveFunctionsSentryEnvironment(env = process.env) {
+  if (env.FUNCTIONS_EMULATOR === "true") {
+    return "emulator";
+  }
+  if (typeof env.SENTRY_ENVIRONMENT === "string" && env.SENTRY_ENVIRONMENT.trim()) {
+    return env.SENTRY_ENVIRONMENT.trim();
+  }
+  return "production";
+}
+
 export function initFunctionsSentry() {
   if (initialized) {
     return;
@@ -199,9 +232,10 @@ export function initFunctionsSentry() {
 
   Sentry.init({
     dsn,
-    environment: "production",
+    environment: resolveFunctionsSentryEnvironment(),
     release: `jetlag@${readAppVersion()}`,
     tracesSampleRate: 0.1,
+    dataCollection: FUNCTIONS_SENTRY_DATA_COLLECTION,
     beforeSend(event) {
       if (isAbortErrorEvent(event) || isOverpassTransportNoiseEvent(event)) {
         return null;
