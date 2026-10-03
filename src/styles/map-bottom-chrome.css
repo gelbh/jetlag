@@ -49,8 +49,9 @@
 
   [data-chrome-side-stack="phone"] {
     bottom: calc(
-      var(--dock-island-height) + var(--chrome-side-stack-gap) +
-        var(--chrome-side-stack-lift)
+      var(--dock-island-height) +
+      var(--chrome-side-stack-gap) +
+      var(--chrome-side-stack-lift)
     );
   }
 
@@ -66,16 +67,14 @@
 
   [data-chrome-side-stack="phone"][data-side="right"] .jl-map-island,
   [data-chrome-nav-stack="phone"][data-side="right"] .jl-map-island {
-    border-radius: var(--chrome-side-island-corner)
-      var(--chrome-side-island-radius) var(--chrome-side-island-radius)
-      var(--chrome-side-island-corner);
+    border-radius: var(--chrome-side-island-corner) var(--chrome-side-island-radius)
+      var(--chrome-side-island-radius) var(--chrome-side-island-corner);
   }
 
   [data-chrome-side-stack="phone"][data-side="left"] .jl-map-island,
   [data-chrome-nav-stack="phone"][data-side="left"] .jl-map-island {
-    border-radius: var(--chrome-side-island-radius)
-      var(--chrome-side-island-corner) var(--chrome-side-island-corner)
-      var(--chrome-side-island-radius);
+    border-radius: var(--chrome-side-island-radius) var(--chrome-side-island-corner)
+      var(--chrome-side-island-corner) var(--chrome-side-island-radius);
   }
 
   [data-chrome-side-stack="phone"][data-dragging="true"],
@@ -88,13 +87,17 @@
   @media (height <= 430px) and (orientation: landscape) {
     [data-chrome-side-stack="phone"] {
       bottom: calc(
-        var(--dock-island-height) + var(--chrome-side-stack-gap) +
-          var(--chrome-side-stack-lift-landscape)
+        var(--dock-island-height) +
+        var(--chrome-side-stack-gap) +
+        var(--chrome-side-stack-lift-landscape)
       );
       max-height: calc(
-        100dvh - var(--safe-area-top) - var(--chrome-side-stack-lift) -
-          var(--dock-island-height) - var(--chrome-side-stack-gap) -
-          var(--chrome-side-stack-lift-landscape)
+        100dvh -
+        var(--safe-area-top) -
+        var(--chrome-side-stack-lift) -
+        var(--dock-island-height) -
+        var(--chrome-side-stack-gap) -
+        var(--chrome-side-stack-lift-landscape)
       );
       overflow: hidden;
     }
@@ -113,8 +116,10 @@
     right: calc(var(--map-chrome-side-width, 3.25rem) + 0.5rem);
     left: auto;
     bottom: calc(
-      var(--dock-island-height) + var(--safe-area-bottom) +
-        var(--chrome-side-stack-gap) + var(--chrome-side-stack-lift)
+      var(--dock-island-height) +
+      var(--safe-area-bottom) +
+      var(--chrome-side-stack-gap) +
+      var(--chrome-side-stack-lift)
     );
     z-index: calc(var(--z-panel) + 1);
     pointer-events: auto;
@@ -149,13 +154,12 @@
   gap: 0.5rem;
   border-radius: 1.5rem;
   border: 0.5px solid oklch(from var(--color-field-ink) l c h / 12%);
-  background:
-    linear-gradient(
-      165deg,
-      oklch(from var(--color-canvas) calc(l + 0.1) c h / 18%) 0%,
-      oklch(from var(--color-canvas) l c h / 9%) 55%,
-      oklch(from var(--color-canvas) calc(l - 0.02) c h / 6%) 100%
-    );
+  background: linear-gradient(
+    165deg,
+    oklch(from var(--color-canvas) calc(l + 0.1) c h / 18%) 0%,
+    oklch(from var(--color-canvas) l c h / 9%) 55%,
+    oklch(from var(--color-canvas) calc(l - 0.02) c h / 6%) 100%
+  );
   backdrop-filter: blur(4px) saturate(1.15);
   box-shadow:
     inset 0 1px 0 oklch(100% 0 0deg / 28%),
