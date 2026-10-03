@@ -5,13 +5,13 @@ import { EntryHeader } from "@/components/ui/entry/EntryHeader";
 import { filledStyles } from "@/components/ui/entry/entryStyles";
 import { CreateSessionMapPane } from "../../components/session/framing/CreateSessionMapPane";
 import { GameAreaFramingModal } from "../../components/session/framing/GameAreaFramingModal";
-import { MobileSheet } from "../../components/ui/sheets/MobileSheet";
 import {
   buildCreateSessionPresetDraft,
   createSessionDraftToGamePreset,
 } from "../../domain/session/presets/gamePreset";
 import { useGamePresetStore } from "../../state/gamePresetStore";
 import { GameAreaSection } from "./GameAreaSection";
+import { NestedSplitLayout } from "./NestedSplitLayout";
 import { PremiumGateSection } from "./PremiumGateSection";
 import { SessionSettingsSection } from "./SessionSettingsSection";
 import { useCreateSession } from "./useCreateSession";
@@ -93,9 +93,7 @@ export function CreateSession() {
           onConfirm={session.handleFramingModalConfirm}
         />
 
-        <MobileSheet
-          variant="nested"
-          layout="split"
+        <NestedSplitLayout
           maxHeightClassName="max-h-[min(58dvh,640px)]"
           className="flex min-h-0 flex-1 flex-col"
           footer={
@@ -208,7 +206,7 @@ export function CreateSession() {
             onAccessCodeExpandedChange={session.setAccessCodeExpanded}
             onPremiumSignedIn={session.handlePremiumSignedIn}
           />
-        </MobileSheet>
+        </NestedSplitLayout>
       </Stack>
     </Box>
   );
