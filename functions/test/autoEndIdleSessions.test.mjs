@@ -197,6 +197,38 @@ test("autoEndIdleSession skips capture when session already ended", async () => 
   assert.equal(captureCalls.length, 0);
 });
 
+test("autoEndIdleSession ends found-active session without abandoned capture", async () => {
+  const sessionData = {
+    code: "FOUND",
+    status: "active",
+    gameOutcome: "found",
+    hostUid: "host_1",
+  };
+  const { db, updates } = createEndSessionDb(sessionData);
+  const sessionDoc = {
+    id: "sess_found",
+    data: () => sessionData,
+    ref: {},
+  };
+  const captureCalls = [];
+  const captureImpl = {
+    capture: async (payload) => {
+      captureCalls.push(payload);
+    },
+    shutdown: async () => {},
+  };
+
+  await autoEndIdleSession(db, sessionDoc, {
+    posthogApiKey: "phk_test",
+    captureImpl,
+  });
+
+  assert.equal(updates.length, 1);
+  assert.equal(updates[0].status, "ended");
+  assert.equal(updates[0].gameOutcome, "found");
+  assert.equal(captureCalls.length, 0);
+});
+
 test("autoEndIdleSession does not reject when capture throws", async () => {
   const sessionData = { code: "WXYZ", status: "active", hostUid: "host_1" };
   const { db } = createEndSessionDb(sessionData);

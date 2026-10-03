@@ -59,8 +59,9 @@ export function selectIdleActiveSessions(
 }
 
 export async function autoEndIdleSession(db, sessionDoc, options = {}) {
-  const applied = await endSessionCanonical(db, sessionDoc, { gameOutcome: "abandoned" });
-  if (!applied) {
+  const outcome = await endSessionCanonical(db, sessionDoc, { gameOutcome: "abandoned" });
+  // Preserve terminal outcomes (e.g. found while status still active); only attribute abandoned.
+  if (outcome !== "abandoned") {
     return;
   }
   const data = sessionDoc.data();
