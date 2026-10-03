@@ -46,18 +46,78 @@ function lineStringFingerprint(coordinates: Position[]): string {
   ].join(":");
 }
 
+function polygonJsonFingerprint(json: string | undefined): string {
+  if (!json) {
+    return "";
+  }
+  try {
+    const parsed = JSON.parse(json) as Feature<Polygon | MultiPolygon>;
+    if (
+      parsed?.type === "Feature" &&
+      (parsed.geometry?.type === "Polygon" || parsed.geometry?.type === "MultiPolygon")
+    ) {
+      return previewGeometryFingerprint(parsed) ?? "null";
+    }
+  } catch {
+    // fall through to raw digest
+  }
+  return `raw:${json.length}:${json.slice(0, 24)}:${json.slice(-24)}`;
+}
+
+/** Mask-shaping metadata that can change elimination without moving Feature geometry. */
+function maskShapingMetadataFingerprint(annotation: AnnotationRecord): string {
+  const metadata = annotation.metadata;
+  switch (annotation.type) {
+    case "radar":
+      return [
+        "radar",
+        metadata.inside === true ? "1" : metadata.inside === false ? "0" : "u",
+        metadata.radiusMeters ?? "",
+      ].join(":");
+    case "tentacle":
+      return [
+        "tentacle",
+        metadata.tentacleOutOfReach ? "1" : "0",
+        metadata.tentacleAnswerRadiusMeters ?? "",
+        metadata.radiusMeters ?? "",
+        polygonJsonFingerprint(metadata.tentacleEliminationJson),
+      ].join(":");
+    case "measuring":
+      return [
+        "measuring",
+        metadata.measuringAnswer ?? "",
+        metadata.measuringRegionInputJson ?? "",
+        metadata.measuringPlacesJson ?? "",
+      ].join(":");
+    case "thermometer":
+      return ["thermometer", metadata.thermometerAnswer ?? ""].join(":");
+    case "matching":
+    case "zone":
+    case "pin":
+    case "draw":
+      return "";
+    default: {
+      const _exhaustive: never = annotation.type;
+      return _exhaustive;
+    }
+  }
+}
+
 function annotationGeometryFingerprint(annotation: AnnotationRecord): string {
   const geometry = annotation.geometry.geometry;
+  let geometryKey: string;
   if (geometry.type === "Polygon" || geometry.type === "MultiPolygon") {
-    return (
-      previewGeometryFingerprint(annotation.geometry as Feature<Polygon | MultiPolygon>) ?? "null"
-    );
-  }
-  if (geometry.type === "Point") {
+    geometryKey =
+      previewGeometryFingerprint(annotation.geometry as Feature<Polygon | MultiPolygon>) ?? "null";
+  } else if (geometry.type === "Point") {
     const [lng, lat] = geometry.coordinates;
-    return `Point:${roundCoord(lng)}:${roundCoord(lat)}`;
+    geometryKey = `Point:${roundCoord(lng)}:${roundCoord(lat)}`;
+  } else {
+    geometryKey = lineStringFingerprint(geometry.coordinates);
   }
-  return lineStringFingerprint(geometry.coordinates);
+
+  const metadataKey = maskShapingMetadataFingerprint(annotation);
+  return metadataKey ? `${geometryKey}@${metadataKey}` : geometryKey;
 }
 
 function parseContentKey(key: string): Map<string, string> {
@@ -79,7 +139,11 @@ function parseContentKey(key: string): Map<string, string> {
   return entries;
 }
 
-/** Stable content key for committed annotation geometries used by elimination mask delta. */
+/**
+ * Stable content key for committed annotations used by elimination mask delta.
+ * Includes Feature geometry plus mask-shaping metadata (radar / tentacle / measuring / thermometer).
+ * Pass the same active annotation set the mask path uses.
+ */
 export function eliminationAnnotationsContentKey(
   annotations: readonly AnnotationRecord[],
 ): string {
