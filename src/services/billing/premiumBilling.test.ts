@@ -86,10 +86,12 @@ describe("premiumBilling", () => {
     callable.mockRejectedValueOnce(new FirebaseError("functions/internal", "INTERNAL"));
 
     await expect(startPremiumCheckout("pack_1")).rejects.toThrow("Could not start checkout.");
+    expect(track).toHaveBeenCalledWith("premium_checkout_started", { productKey: "pack_1" });
     expect(track).toHaveBeenCalledWith("premium_checkout_failed", {
       productKey: "pack_1",
       message: "Could not start checkout.",
     });
+    expect(track.mock.invocationCallOrder[0]).toBeLessThan(callable.mock.invocationCallOrder[0]);
   });
 
   it("starts checkout and returns the redirect URL", async () => {
@@ -102,16 +104,20 @@ describe("premiumBilling", () => {
     expect(track).toHaveBeenCalledWith("premium_checkout_started", {
       productKey: "pack_3",
     });
+    expect(track).toHaveBeenCalledTimes(1);
+    expect(track.mock.invocationCallOrder[0]).toBeLessThan(callable.mock.invocationCallOrder[0]);
   });
 
   it("tracks checkout failure when redirect URL is missing", async () => {
     callable.mockResolvedValueOnce({ data: {} });
 
     await expect(startPremiumCheckout("monthly")).rejects.toThrow("Checkout URL missing.");
+    expect(track).toHaveBeenCalledWith("premium_checkout_started", { productKey: "monthly" });
     expect(track).toHaveBeenCalledWith("premium_checkout_failed", {
       productKey: "monthly",
       message: "Checkout URL missing.",
     });
+    expect(track.mock.invocationCallOrder[0]).toBeLessThan(callable.mock.invocationCallOrder[0]);
   });
 
   it("starts the app-managed free trial", async () => {
