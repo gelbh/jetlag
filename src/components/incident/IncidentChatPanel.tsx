@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { useIncidentThread } from "../../hooks/incident/useIncidentThread";
+import { useStickScrollToBottom } from "../../hooks/ui/useStickScrollToBottom";
 
 export interface IncidentChatPanelProps {
   incidentId: string;
@@ -27,11 +28,6 @@ export function IncidentChatPanel({ incidentId, onClose, className = "" }: Incid
   const { messages, error, sending, sendMessage } = useIncidentThread(incidentId);
   const [draft, setDraft] = useState("");
   const [sendError, setSendError] = useState<string | null>(null);
-  const bottomRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView?.({ block: "end" });
-  }, [messages.length]);
 
   const send = async () => {
     const text = draft.trim();
@@ -48,6 +44,7 @@ export function IncidentChatPanel({ incidentId, onClose, className = "" }: Incid
   };
 
   const visibleMessages = messages.filter((message) => message.kind !== "prompt");
+  const bottomRef = useStickScrollToBottom(visibleMessages.length);
 
   return (
     <div className={`flex min-h-0 flex-1 flex-col gap-3 ${className}`.trim()}>
