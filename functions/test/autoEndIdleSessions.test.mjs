@@ -7,6 +7,7 @@ import {
   isIdleActiveSession,
   selectIdleActiveSessions,
 } from "../session/autoEndIdleSessions.mjs";
+import { uuidFromSeed } from "../lib/posthog.mjs";
 
 function fakeSnapshot(id, data) {
   return {
@@ -82,11 +83,9 @@ test("selectIdleActiveSessions deduplicates indexed and legacy candidates", () =
   );
 });
 
-test("autoEndIdleSession ends session and deletes session code", async () => {
+function createEndSessionDb(sessionData) {
   const updates = [];
   const deletedCodes = [];
-  const sessionData = { code: "ABCD", status: "active" };
-  const sessionRef = {};
   const db = {
     runTransaction: async (fn) => {
       const tx = {
@@ -104,16 +103,88 @@ test("autoEndIdleSession ends session and deletes session code", async () => {
       doc: (id) => ({ name, id }),
     }),
   };
+  return { db, updates, deletedCodes };
+}
+
+test("autoEndIdleSession ends session and deletes session code", async () => {
+  const sessionData = { code: "ABCD", status: "active" };
+  const { db, updates, deletedCodes } = createEndSessionDb(sessionData);
   const sessionDoc = {
     data: () => sessionData,
-    ref: sessionRef,
+    ref: {},
+  };
+  const captures = [];
+  const captureImpl = {
+    capture: async (payload) => {
+      captures.push(payload);
+    },
+    shutdown: async () => {},
   };
 
-  await autoEndIdleSession(db, sessionDoc);
+  await autoEndIdleSession(db, sessionDoc, {
+    posthogApiKey: "phk_test",
+    captureImpl,
+  });
 
   assert.equal(updates.length, 1);
   assert.equal(updates[0].status, "ended");
   assert.equal(updates[0].gameOutcome, "abandoned");
   assert.equal(typeof updates[0].endedAt, "string");
   assert.deepEqual(deletedCodes, [{ name: "sessionCodes", id: "ABCD" }]);
+  assert.equal(captures.length, 0, "missing hostUid skips capture");
+});
+
+test("autoEndIdleSession captures session_ended abandoned for host", async () => {
+  const sessionData = { code: "WXYZ", status: "active", hostUid: "host_1" };
+  const { db } = createEndSessionDb(sessionData);
+  const sessionDoc = {
+    id: "sess_1",
+    data: () => sessionData,
+    ref: {},
+  };
+  /** @type {Array<Record<string, unknown>>} */
+  const captureCalls = [];
+  const captureImpl = {
+    capture: async (payload) => {
+      captureCalls.push(payload);
+    },
+    shutdown: async () => {},
+  };
+
+  await autoEndIdleSession(db, sessionDoc, {
+    posthogApiKey: "phk_test",
+    captureImpl,
+  });
+
+  assert.equal(captureCalls.length, 1);
+  assert.equal(captureCalls[0].distinctId, "host_1");
+  assert.equal(captureCalls[0].event, "session_ended");
+  assert.deepEqual(captureCalls[0].properties, { reason: "abandoned" });
+  assert.equal(
+    captureCalls[0].uuid,
+    uuidFromSeed("session_ended:abandoned:sess_1"),
+  );
+});
+
+test("autoEndIdleSession does not reject when capture throws", async () => {
+  const sessionData = { code: "WXYZ", status: "active", hostUid: "host_1" };
+  const { db } = createEndSessionDb(sessionData);
+  const sessionDoc = {
+    id: "sess_1",
+    data: () => sessionData,
+    ref: {},
+  };
+  const captureImpl = {
+    capture: async () => {
+      throw new Error("posthog down");
+    },
+    shutdown: async () => {},
+  };
+
+  await assert.doesNotReject(() =>
+    autoEndIdleSession(db, sessionDoc, {
+      posthogApiKey: "phk_test",
+      captureImpl,
+    }),
+  );
 });
