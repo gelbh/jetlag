@@ -6,7 +6,12 @@ import {
   isQuestionDockTool,
   mapToolDockShortLabel,
 } from "../../domain/map/mapTools";
-import { formatExpiredAnswerCountdown, questionAnswerDeadlineMs } from "../../domain/questions";
+import {
+  formatExpiredAnswerCountdown,
+  isAwaitingServerReceipt,
+  questionAnswerDeadlineMs,
+  resolveDeadlineAnchor,
+} from "../../domain/questions";
 import type { HiderTruthReferenceMode } from "../../domain/questions/hiderTruth/resolveHiderTruthReference";
 import type { HiderTruthResult } from "../../domain/questions/ui";
 import type {
@@ -15,6 +20,7 @@ import type {
 } from "../../domain/session/activity/sessionChat";
 import type { SessionRulesInput } from "../../domain/session/rules";
 import { useStickScrollToBottom } from "../../hooks/ui/useStickScrollToBottom";
+import { serverNow } from "../../services/core/time/serverClock";
 import { HudToolIcon } from "../map/icons/ToolIcons";
 import { InlineError } from "../ui/banners/InlineError";
 import { EmptyState } from "../ui/feedback/EmptyState";
@@ -156,9 +162,9 @@ export function GameChatTab({
   const bottomRef = useStickScrollToBottom(gameMessages.length);
 
   useEffect(() => {
-    setNowMs(Date.now());
+    setNowMs(serverNow());
     const interval = window.setInterval(() => {
-      setNowMs(Date.now());
+      setNowMs(serverNow());
     }, 1000);
 
     return () => window.clearInterval(interval);
@@ -206,9 +212,9 @@ export function GameChatTab({
             ? questionAnswerDeadlineMs(pending.toolType, sessionRules)
             : questionAnswerDeadlineMs("matching", sessionRules);
           const countdown =
-            !walking && !closed && pending?.answerableAt
+            !walking && !closed && pending && !isAwaitingServerReceipt(pending)
               ? formatExpiredAnswerCountdown(
-                  pending.answerableAt,
+                  resolveDeadlineAnchor(pending),
                   deadlineMs,
                   pending.deadlineExpiredAt,
                   nowMs,

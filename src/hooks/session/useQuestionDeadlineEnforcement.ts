@@ -1,8 +1,15 @@
 import { useEffect, useRef } from "react";
-import { isQuestionAnswerDeadlineExpired, questionAnswerDeadlineMs } from "../../domain/questions";
+import {
+  isAwaitingServerReceipt,
+  isQuestionAnswerDeadlineExpired,
+  questionAnswerDeadlineMs,
+  resolveDeadlineAnchor,
+} from "../../domain/questions";
 import type { PendingQuestionRecord } from "../../domain/session/activity/sessionChat";
 import type { HidingZoneRecord } from "../../domain/session/hiding/hidingZone";
 import type { SessionRulesInput } from "../../domain/session/rules";
+import { serverNow, serverNowIso } from "../../services/core/time/serverClock";
+import { commitWrite } from "../../services/firestore/commitWrite";
 import { updatePendingQuestion } from "../../services/firestore/firestoreSessionExtras";
 
 const DEADLINE_EXPIRED_MESSAGE =
@@ -57,16 +64,20 @@ export function useQuestionDeadlineEnforcement({
     }
 
     const checkDeadlines = () => {
-      const nowMs = Date.now();
+      const nowMs = serverNow();
+      // A still-queued ask has not reached the hider: its window has not opened.
       const openQuestions = pendingQuestions.filter(
-        (question) => question.status === "pending" && question.answerableAt,
+        (question) =>
+          question.status === "pending" &&
+          resolveDeadlineAnchor(question) !== undefined &&
+          !isAwaitingServerReceipt(question),
       );
 
       for (const question of openQuestions) {
         const deadlineMs = questionAnswerDeadlineMs(question.toolType, sessionRules);
         const expired =
           question.deadlineExpiredAt !== undefined ||
-          isQuestionAnswerDeadlineExpired(question.answerableAt, deadlineMs, nowMs);
+          isQuestionAnswerDeadlineExpired(resolveDeadlineAnchor(question), deadlineMs, nowMs);
 
         if (!expired || expiryHandledRef.current.has(question.id)) {
           continue;
@@ -76,9 +87,11 @@ export function useQuestionDeadlineEnforcement({
 
         void (async () => {
           if (!question.deadlineExpiredAt) {
-            await updatePendingQuestion(sessionId, question.id, {
-              deadlineExpiredAt: new Date().toISOString(),
-            });
+            commitWrite("system.message", () =>
+              updatePendingQuestion(sessionId, question.id, {
+                deadlineExpiredAt: serverNowIso(),
+              }),
+            );
           }
 
           await postSystemMessage(DEADLINE_EXPIRED_MESSAGE);

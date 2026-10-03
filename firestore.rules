@@ -854,7 +854,11 @@ service cloud.firestore {
           && request.resource.data.status in ['pending', 'walking']
           && request.resource.data.placement is map
           && request.resource.data.replyOptions is list
-          && request.resource.data.promptText is string;
+          && request.resource.data.promptText is string
+          && (!('receivedAt' in request.resource.data)
+            || request.resource.data.receivedAt == request.time)
+          && (!('answerableAt' in request.resource.data)
+            || request.resource.data.answerableAt is string);
         allow update: if (
           isHiderMember(sessionId)
           && resource.data.status == 'pending'

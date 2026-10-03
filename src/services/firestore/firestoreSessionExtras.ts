@@ -310,29 +310,85 @@ export async function writePendingQuestion(
   );
 }
 
-export async function deletePendingQuestion(sessionId: string, questionId: string): Promise<void> {
-  await deleteDoc(doc(pendingQuestionsCollection(sessionId), questionId));
+/**
+ * Question + its chat row in one atomic batch: queued offline as a unit, so
+ * there is no half-asked state to compensate. Pending asks get `receivedAt`
+ * stamped by the server so the hider's answer window starts on arrival;
+ * walking asks skip it (their window opens when the walk completes).
+ */
+export async function writeAskedQuestionBatch(
+  sessionId: string,
+  question: PendingQuestionRecord,
+  message: SessionMessageRecord,
+): Promise<void> {
+  const batch = writeBatch(getFirestoreDb());
+  batch.set(doc(pendingQuestionsCollection(sessionId), question.id), {
+    ...buildPendingQuestionDocument(question),
+    ...(question.status === "pending" ? { receivedAt: serverTimestamp() } : {}),
+  });
+  batch.set(doc(messagesCollection(sessionId), message.id), buildSessionMessageDocument(message));
+  await batch.commit();
+}
+
+export type PendingQuestionPatch = Partial<
+  Pick<
+    PendingQuestionRecord,
+    | "status"
+    | "answer"
+    | "resolvedAnnotationId"
+    | "placement"
+    | "promptText"
+    | "replyOptions"
+    | "answerableAt"
+    | "deadlineExpiredAt"
+    | "answeredLate"
+    | "cardDraw"
+    | "cardKeep"
+  >
+>;
+
+/** A question transition plus the chat writes that announce it. */
+export interface PendingQuestionBatchWrites {
+  questionId: string;
+  questionPatch: PendingQuestionPatch;
+  /** Patch to the question's existing chat row. */
+  gameMessage?: {
+    id: string;
+    patch: { status: "answered" | "cancelled"; selectedReply?: string };
+  };
+  /** New chat row (system notice, or the question row when a walk completes). */
+  newMessage?: SessionMessageRecord;
+}
+
+/** Applied atomically so an offline queue never replays half a transition. */
+export async function writePendingQuestionUpdateBatch(
+  sessionId: string,
+  writes: PendingQuestionBatchWrites,
+): Promise<void> {
+  const batch = writeBatch(getFirestoreDb());
+  batch.update(
+    doc(pendingQuestionsCollection(sessionId), writes.questionId),
+    stripUndefinedValues(writes.questionPatch) as Record<string, unknown>,
+  );
+  if (writes.gameMessage) {
+    batch.update(
+      doc(messagesCollection(sessionId), writes.gameMessage.id),
+      stripUndefinedValues(writes.gameMessage.patch) as Record<string, unknown>,
+    );
+  }
+  if (writes.newMessage) {
+    batch.set(
+      doc(messagesCollection(sessionId), writes.newMessage.id),
+      buildSessionMessageDocument(writes.newMessage),
+    );
+  }
+  await batch.commit();
 }
 
 export async function updatePendingQuestion(
   sessionId: string,
   questionId: string,
-  patch: Partial<
-    Pick<
-      PendingQuestionRecord,
-      | "status"
-      | "answer"
-      | "resolvedAnnotationId"
-      | "placement"
-      | "promptText"
-      | "replyOptions"
-      | "answerableAt"
-      | "deadlineExpiredAt"
-      | "answeredLate"
-      | "cardDraw"
-      | "cardKeep"
-    >
-  >,
+  patch: PendingQuestionPatch,
 ): Promise<void> {
   await updateDoc(
     doc(pendingQuestionsCollection(sessionId), questionId),
@@ -445,25 +501,6 @@ export async function cancelWalkingThermometersAfterIdentityHeal(
   } catch (error) {
     captureException(error);
   }
-}
-
-export async function updateGameMessageAnswer(
-  sessionId: string,
-  messageId: string,
-  selectedReply: string,
-): Promise<void> {
-  await updateDoc(doc(messagesCollection(sessionId), messageId), {
-    selectedReply,
-    status: "answered",
-  });
-}
-
-export async function updateGameMessageStatus(
-  sessionId: string,
-  messageId: string,
-  status: "cancelled",
-): Promise<void> {
-  await updateDoc(doc(messagesCollection(sessionId), messageId), { status });
 }
 
 export function subscribeToPendingQuestions(
