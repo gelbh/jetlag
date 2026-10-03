@@ -105,19 +105,26 @@ export async function handleStripeWebhook(db, webhookSecret, req, res, options) 
         const subscription = /** @type {Stripe.Subscription} */ (event.data.object);
         await syncSubscriptionEntitlements(db, subscription);
         const uid = subscription.metadata?.firebaseUid;
-        const plan = subscription.metadata?.plan === "yearly" ? "yearly" : "monthly";
+        const plan = subscription.metadata?.plan;
+        const analyticsPlan =
+          plan === "monthly" || plan === "yearly" ? plan : undefined;
         if (
           uid &&
+          analyticsPlan &&
           (subscription.status === "active" || subscription.status === "trialing")
         ) {
-          await captureEvent({
-            apiKey: posthogApiKey,
-            distinctId: uid,
-            event: "premium_purchase_completed",
-            uuidSeed: `premium_purchase_completed:${event.id}`,
-            properties: { productKey: plan, source: "stripe_webhook" },
-            captureImpl: options?.captureImpl,
-          });
+          try {
+            await captureEvent({
+              apiKey: posthogApiKey,
+              distinctId: uid,
+              event: "premium_purchase_completed",
+              uuidSeed: `premium_purchase_completed:${event.id}`,
+              properties: { productKey: analyticsPlan, source: "stripe_webhook" },
+              captureImpl: options?.captureImpl,
+            });
+          } catch {
+            // Soft-fail: entitlements already synced; do not fail the webhook.
+          }
         }
         break;
       }

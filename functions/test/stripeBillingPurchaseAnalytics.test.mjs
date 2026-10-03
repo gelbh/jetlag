@@ -249,6 +249,78 @@ describe("stripe billing purchase analytics", () => {
     assert.equal(db.documents["users/uid-sub"]?.subscription?.plan, "yearly");
   });
 
+  it("returns 200 when subscription.created capture throws", async () => {
+    const db = createMockDb();
+    const res = mockResponse();
+
+    await handleStripeWebhook(
+      db,
+      WEBHOOK_SECRET,
+      signedWebhookRequest({
+        id: "evt_sub_capture_fail",
+        type: "customer.subscription.created",
+        object: {
+          id: "sub_fail",
+          object: "subscription",
+          customer: "cus_sub",
+          status: "active",
+          current_period_end: 1_700_000_000,
+          metadata: { firebaseUid: "uid-capture-fail", plan: "monthly" },
+        },
+      }),
+      res,
+      {
+        posthogApiKey: "phc_test",
+        captureAnalyticsEvent: async () => {
+          throw new Error("posthog down");
+        },
+      },
+    );
+
+    assert.equal(res.statusCode, 200);
+    assert.equal(db.documents["users/uid-capture-fail"]?.subscription?.plan, "monthly");
+  });
+
+  it("does not capture on subscription.created when plan metadata is missing or invalid", async () => {
+    for (const plan of [undefined, "lifetime", ""]) {
+      const db = createMockDb();
+      const res = mockResponse();
+      let captureCalls = 0;
+      /** @type {Record<string, unknown>} */
+      const metadata = { firebaseUid: "uid-no-plan" };
+      if (plan !== undefined) {
+        metadata.plan = plan;
+      }
+
+      await handleStripeWebhook(
+        db,
+        WEBHOOK_SECRET,
+        signedWebhookRequest({
+          id: `evt_sub_bad_plan_${String(plan)}`,
+          type: "customer.subscription.created",
+          object: {
+            id: "sub_bad_plan",
+            object: "subscription",
+            customer: "cus_sub",
+            status: "active",
+            current_period_end: 1_700_000_000,
+            metadata,
+          },
+        }),
+        res,
+        {
+          posthogApiKey: "phc_test",
+          captureAnalyticsEvent: async () => {
+            captureCalls += 1;
+          },
+        },
+      );
+
+      assert.equal(res.statusCode, 200);
+      assert.equal(captureCalls, 0, `plan=${String(plan)}`);
+    }
+  });
+
   it("does not capture on subscription.updated", async () => {
     const db = createMockDb({
       "users/uid-sub": {
