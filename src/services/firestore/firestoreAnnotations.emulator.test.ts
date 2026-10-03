@@ -133,6 +133,23 @@ describe("firestoreAnnotations emulator", () => {
     unsubscribe();
   });
 
+  it("denies a replayed annotation write from a non-member", async () => {
+    const { uid: hostUid } = await connectEmulatorsForTests();
+    const session = await createRemoteSession(DUBLIN_CITY_GAME_AREA, hostUid);
+
+    await teardownEmulatorsForTests();
+    await connectEmulatorsForTests();
+
+    // Mirrors an offline-queue replay: the client skipped the membership read,
+    // so the rules are the only gate.
+    await expect(
+      writeRemoteAnnotation(
+        session.id,
+        createTestPinAnnotation({ id: "ann-non-member", sessionId: session.id }),
+      ),
+    ).rejects.toMatchObject({ code: "permission-denied" });
+  });
+
   it("deletes join code when ending a session", async () => {
     const { uid } = await connectEmulatorsForTests();
     const session = await createRemoteSession(DUBLIN_CITY_GAME_AREA, uid);
