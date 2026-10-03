@@ -2,6 +2,8 @@ import { describe, expect, it, vi } from "vitest";
 import { serializeMatchingFeatures } from "@/domain/geo/matchingAdapters";
 import * as measuringGeometryBudgets from "../../geometry/measuring/measuringGeometryBudgets";
 import { MEASURING_PERSIST_OVER_BUDGET_MESSAGE } from "../../geometry/measuring/measuringGeometryBudgets";
+import * as persistSlim from "../../geometry/progressive/persistSlim";
+import { POLYGON_PERSIST_OVER_BUDGET_MESSAGE } from "../../geometry/progressive/persistSlim";
 import exysHospitalTentacle from "../../geometry/tentacle/fixtures/exysHospitalTentacle.json";
 import { TENTACLE_POI_MAX } from "../../geometry/tentacle/tentacleGeometryBudgets";
 import type { GameArea, TentaclePoi } from "../../map/annotations";
@@ -202,6 +204,52 @@ describe("resolveMatchingPendingQuestion", () => {
 
     expect(resolved?.metadata.matchingAnswer).toBe("no");
     expect(resolved?.metadata.matchingBoundaryJson).toBeUndefined();
+  });
+
+  it("keeps a rebuildable matching annotation when elim persist slim fails", async () => {
+    const slimSpy = vi.spyOn(persistSlim, "persistSlimPolygonFeature").mockReturnValue({
+      ok: false,
+      message: POLYGON_PERSIST_OVER_BUDGET_MESSAGE,
+    });
+
+    const features = serializeMatchingFeatures([
+      {
+        id: "museum-a",
+        name: "Near Museum",
+        point: [51.45, -0.16],
+        inPlayArea: true,
+      },
+      {
+        id: "museum-b",
+        name: "Far Museum",
+        point: [51.42, -0.19],
+        inPlayArea: true,
+      },
+    ]);
+
+    const pending = basePending({
+      toolType: "matching",
+      placement: {
+        geometryJson: JSON.stringify({
+          type: "Feature",
+          properties: {},
+          geometry: { type: "Point", coordinates: [-0.15, 51.45] },
+        }),
+        metadata: {
+          matchingFeaturesJson: features,
+          matchingNearestFeatureId: "museum-a",
+        },
+      },
+    });
+
+    const resolved = await resolveMatchingPendingQuestion(pending, "yes", gameArea);
+
+    expect(resolved).not.toBeNull();
+    expect(resolved?.geometry.geometry.type).toBe("Point");
+    expect(resolved?.metadata.matchingAnswer).toBe("yes");
+    expect(typeof resolved?.metadata.matchingFeaturesJson).toBe("string");
+
+    slimSpy.mockRestore();
   });
 });
 
