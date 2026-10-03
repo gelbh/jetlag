@@ -1,3 +1,4 @@
+import { Alert, Button, Checkbox, Group, UnstyledButton } from "@mantine/core";
 import { useMemo, useState } from "react";
 import { formatFreshnessAge } from "../../domain/admin/formatAdminFreshness";
 import type { IncidentRecord, IncidentStatus } from "../../domain/incident/incidentTypes";
@@ -60,26 +61,23 @@ export function AdminIncidentInbox({
         <span className="jl-incident-pane-meta">{openCount} open</span>
       </div>
 
-      <label className="jl-incident-queue-filter">
-        <input
-          type="checkbox"
-          checked={showClosed}
-          onChange={(event) => setShowClosed(event.target.checked)}
-        />
-        Show closed
-      </label>
+      <Checkbox
+        className="jl-incident-queue-filter"
+        label="Show closed"
+        checked={showClosed}
+        onChange={(event) => setShowClosed(event.currentTarget.checked)}
+      />
 
       {error ? (
-        <div className="jl-incident-empty" role="alert">
-          <p className="jl-incident-empty-title">Queue error</p>
-          <p className="jl-incident-empty-body">{error}</p>
-        </div>
+        <Alert className="jl-incident-empty" color="red" title="Queue error" role="alert">
+          {error}
+        </Alert>
       ) : null}
 
       {rowError ? (
-        <p className="px-3 text-sm font-semibold text-status-error" role="alert">
+        <Alert mx="sm" color="red" role="alert">
           {rowError}
-        </p>
+        </Alert>
       ) : null}
 
       {loading && incidents.length === 0 && !error ? (
@@ -111,11 +109,12 @@ export function AdminIncidentInbox({
                 key={incident.id}
                 className={`jl-incident-queue-row${active ? " jl-incident-queue-row--active" : ""}`}
               >
-                <button
+                <UnstyledButton
                   type="button"
                   className="jl-incident-queue-row-main"
                   aria-current={active ? "true" : undefined}
                   onClick={() => onSelect(incident.id)}
+                  style={{ display: "block", width: "100%", textAlign: "left" }}
                 >
                   <div className="jl-incident-queue-row-top">
                     <span className="jl-incident-queue-id">
@@ -130,16 +129,17 @@ export function AdminIncidentInbox({
                       Session{" "}
                       {incident.sessionCode?.trim()
                         ? incident.sessionCode.trim().toUpperCase()
-                        : "—"}
+                        : "-"}
                     </span>
                     <span>{formatFreshnessAge(incident.updatedAt || incident.createdAt)}</span>
                   </div>
-                </button>
+                </UnstyledButton>
                 {canClose ? (
-                  <div className="jl-incident-queue-row-actions">
-                    <button
+                  <Group className="jl-incident-queue-row-actions" gap={6} wrap="wrap">
+                    <Button
                       type="button"
-                      className="jl-ops-icon-btn"
+                      size="compact-xs"
+                      variant="default"
                       disabled={busyId === incident.id}
                       onClick={(event) => {
                         event.stopPropagation();
@@ -147,10 +147,11 @@ export function AdminIncidentInbox({
                       }}
                     >
                       Resolve
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       type="button"
-                      className="jl-ops-icon-btn"
+                      size="compact-xs"
+                      variant="default"
                       disabled={busyId === incident.id}
                       onClick={(event) => {
                         event.stopPropagation();
@@ -158,8 +159,8 @@ export function AdminIncidentInbox({
                       }}
                     >
                       Dismiss
-                    </button>
-                  </div>
+                    </Button>
+                  </Group>
                 ) : null}
               </div>
             );

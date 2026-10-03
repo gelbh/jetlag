@@ -1,3 +1,4 @@
+import { Alert, Button, Group, NativeSelect, Stack, Text, TextInput } from "@mantine/core";
 import { useState } from "react";
 import { APP_VERSION } from "../../domain/device/changelog";
 import type {
@@ -136,84 +137,88 @@ export function AdminIncidentActions({
         <h2 className="jl-incident-pane-title">Actions</h2>
       </div>
 
-      <div className="jl-incident-module">
+      <Stack className="jl-incident-module" gap="sm">
         <h3 className="jl-incident-module-title">0 · Queue</h3>
         {statusError ? (
-          <p className="text-sm font-semibold text-status-error" role="alert">
+          <Alert color="red" role="alert">
             {statusError}
-          </p>
+          </Alert>
         ) : null}
-        {statusOk ? <p className="text-sm text-status-success">{statusOk}</p> : null}
+        {statusOk ? (
+          <Text size="sm" c="green">
+            {statusOk}
+          </Text>
+        ) : null}
         {canClose ? (
-          <div className="flex flex-wrap gap-2">
-            <button
+          <Group gap="xs" wrap="wrap">
+            <Button
               type="button"
-              className="btn-primary uppercase"
+              tt="uppercase"
               disabled={actionsDisabled || statusBusy}
               onClick={() => void onUpdateStatus("resolved")}
             >
               {statusBusy ? "Updating…" : "Resolve"}
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
-              className="btn-secondary uppercase"
+              variant="default"
+              tt="uppercase"
               disabled={actionsDisabled || statusBusy}
               onClick={() => void onUpdateStatus("dismissed")}
             >
               Dismiss
-            </button>
-          </div>
+            </Button>
+          </Group>
         ) : null}
         {canReopen ? (
-          <button
+          <Button
             type="button"
-            className="btn-primary uppercase"
+            tt="uppercase"
             disabled={actionsDisabled || statusBusy}
             onClick={() => void onUpdateStatus("chatting")}
           >
             {statusBusy ? "Updating…" : "Reopen"}
-          </button>
+          </Button>
         ) : null}
         {!canClose && !canReopen ? (
           <p className="jl-incident-module-hint">
             Select an incident to resolve, dismiss, or reopen.
           </p>
         ) : null}
-      </div>
+      </Stack>
 
-      <div className="jl-incident-module">
+      <Stack className="jl-incident-module" gap="sm">
         <h3 className="jl-incident-module-title">1 · Apply mitigation</h3>
-        <div>
-          <p className="jl-incident-module-label">Mitigation</p>
-          <select
-            className="field-input"
-            value={mitigationType}
-            disabled={actionsDisabled || mitigationBusy}
-            onChange={(event) => setMitigationType(event.target.value as IncidentMitigationType)}
-            aria-label="Mitigation type"
-          >
-            {INCIDENT_MITIGATION_OPTIONS.map((option) => (
-              <option key={option.type} value={option.type}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </div>
+        <NativeSelect
+          label="Mitigation"
+          aria-label="Mitigation type"
+          value={mitigationType}
+          disabled={actionsDisabled || mitigationBusy}
+          onChange={(event) => setMitigationType(event.currentTarget.value as IncidentMitigationType)}
+          data={INCIDENT_MITIGATION_OPTIONS.map((option) => ({
+            value: option.type,
+            label: option.label,
+          }))}
+        />
         {mitigationError ? (
-          <p className="text-sm font-semibold text-status-error" role="alert">
+          <Alert color="red" role="alert">
             {mitigationError}
-          </p>
+          </Alert>
         ) : null}
-        {mitigationOk ? <p className="text-sm text-status-success">{mitigationOk}</p> : null}
-        <button
+        {mitigationOk ? (
+          <Text size="sm" c="green">
+            {mitigationOk}
+          </Text>
+        ) : null}
+        <Button
           type="button"
-          className="btn-primary uppercase"
+          tt="uppercase"
           disabled={actionsDisabled || mitigationBusy}
           onClick={() => void onApplyMitigation()}
         >
           {mitigationBusy ? "Applying…" : "Apply mitigation"}
-        </button>
-      </div>
+        </Button>
+      </Stack>
 
       <AdminIncidentCursorLaunch
         key={incidentId ?? "none"}
@@ -224,48 +229,44 @@ export function AdminIncidentActions({
         openExternalUrlFn={openExternalUrlFn}
       />
 
-      <div className="jl-incident-module">
+      <Stack className="jl-incident-module" gap="sm">
         <h3 className="jl-incident-module-title">3 · Publish hotfix</h3>
-        <div>
-          <p className="jl-incident-module-label">Target version</p>
-          <input
-            className="field-input"
-            value={toVersion}
-            disabled={actionsDisabled || hotfixBusy}
-            onChange={(event) => setToVersion(event.target.value)}
-            placeholder={`e.g. ${APP_VERSION}.1`}
-            aria-label="Hotfix target version"
-            autoComplete="off"
-          />
-        </div>
-        <div>
-          <p className="jl-incident-module-label">Grace seconds</p>
-          <input
-            className="field-input"
-            type="number"
-            min={5}
-            max={300}
-            value={graceSeconds}
-            disabled={actionsDisabled || hotfixBusy}
-            onChange={(event) => setGraceSeconds(event.target.value)}
-            aria-label="Hotfix grace seconds"
-          />
-        </div>
+        <TextInput
+          label="Hotfix target version"
+          value={toVersion}
+          disabled={actionsDisabled || hotfixBusy}
+          onChange={(event) => setToVersion(event.currentTarget.value)}
+          placeholder={`e.g. ${APP_VERSION}.1`}
+          autoComplete="off"
+        />
+        <TextInput
+          label="Hotfix grace seconds"
+          type="number"
+          min={5}
+          max={300}
+          value={graceSeconds}
+          disabled={actionsDisabled || hotfixBusy}
+          onChange={(event) => setGraceSeconds(event.currentTarget.value)}
+        />
         {hotfixError ? (
-          <p className="text-sm font-semibold text-status-error" role="alert">
+          <Alert color="red" role="alert">
             {hotfixError}
-          </p>
+          </Alert>
         ) : null}
-        {hotfixOk ? <p className="text-sm text-status-success">{hotfixOk}</p> : null}
-        <button
+        {hotfixOk ? (
+          <Text size="sm" c="green">
+            {hotfixOk}
+          </Text>
+        ) : null}
+        <Button
           type="button"
-          className="btn-primary uppercase"
+          tt="uppercase"
           disabled={actionsDisabled || hotfixBusy}
           onClick={() => void onPublishHotfix()}
         >
           {hotfixBusy ? "Publishing…" : "Publish hotfix"}
-        </button>
-      </div>
+        </Button>
+      </Stack>
     </aside>
   );
 }

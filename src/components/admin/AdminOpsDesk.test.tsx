@@ -113,7 +113,7 @@ describe("AdminOpsDesk", () => {
     authState.user = null;
     renderOpsDesk();
 
-    expect(document.querySelector(".animate-pulse")).toBeInTheDocument();
+    expect(document.querySelector(".mantine-Skeleton-root")).toBeInTheDocument();
   });
 
   it("shows the sign-in gate for signed-out users", () => {

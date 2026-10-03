@@ -1,8 +1,7 @@
-import { AppShell } from "@mantine/core";
+import { Alert, AppShell, Button, Group, Skeleton, Stack, Text, Title } from "@mantine/core";
 import { signOut } from "firebase/auth";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
-import { homeCardBtnStyle } from "@/components/ui/entry/entryStyles";
 import type {
   AdminSessionModeFilter,
   AdminSessionSort,
@@ -51,8 +50,6 @@ import { useSessionStore } from "../../state/sessionStore";
 import { PremiumSignInGate } from "../billing/PremiumSignInGate";
 import { AppLink } from "../navigation/AppLink";
 import { InlineError } from "../ui/banners/InlineError";
-import { EntryScreenLayout } from "../ui/layout/EntryScreenLayout";
-import { ScreenHeader, screenHeaderOffsetClassName } from "../ui/layout/ScreenHeader";
 import { AdminDeskTopbar } from "./AdminDeskTopbar";
 import { AdminGridWorkspace } from "./AdminGridWorkspace";
 import { AdminIncidentActions } from "./AdminIncidentActions";
@@ -73,15 +70,11 @@ const EMPTY_INCIDENTS: IncidentRecord[] = [];
 
 function AdminSessionSkeletonRows() {
   return (
-    <div className="space-y-2.5" aria-hidden="true">
+    <Stack gap="sm" aria-hidden="true">
       {[0, 1, 2].map((index) => (
-        <div
-          key={index}
-          className="h-[6.5rem] animate-pulse bg-surface-raised/40"
-          style={homeCardBtnStyle("secondary")}
-        />
+        <Skeleton key={index} height={104} radius="md" />
       ))}
-    </div>
+    </Stack>
   );
 }
 
@@ -489,14 +482,15 @@ export function AdminOpsDesk() {
         : "sessions";
 
   const loadMoreButton = hasMore ? (
-    <button
+    <Button
       type="button"
-      className="btn-secondary min-h-10 w-full"
+      variant="default"
+      fullWidth
       disabled={loadingMore}
       onClick={() => void loadMore()}
     >
       {loadingMore ? "Loading…" : "Load more sessions"}
-    </button>
+    </Button>
   ) : null;
 
   const sessionsBody = (
@@ -601,62 +595,58 @@ export function AdminOpsDesk() {
 
   if (accessState === "loading" || !authReady) {
     return (
-      <EntryScreenLayout justify="start">
-        <ScreenHeader backTo="/" backLabel="Back" />
-        <div className={screenHeaderOffsetClassName}>
-          <AdminSessionSkeletonRows />
-        </div>
-      </EntryScreenLayout>
+      <Stack gap="md" p="md">
+        <Button component={AppLink} to="/" variant="default" size="compact-sm" w="fit-content">
+          Back
+        </Button>
+        <AdminSessionSkeletonRows />
+      </Stack>
     );
   }
 
   if (accessState === "unsigned") {
     return (
-      <EntryScreenLayout justify="start">
-        <ScreenHeader backTo="/" backLabel="Back" />
-        <div className={`space-y-4 ${screenHeaderOffsetClassName}`}>
-          <div className="space-y-2">
-            <h1 className="font-display text-3xl font-bold uppercase tracking-tight text-ink">
-              Admin ops desk
-            </h1>
-            <p className="text-sm text-ink-muted">
-              Sign in with your Google account to open the admin panel.
-            </p>
-          </div>
-          <PremiumSignInGate
-            continuePath={continuePathForRoute(location.pathname, selectedIncidentId)}
-          />
-        </div>
-      </EntryScreenLayout>
+      <Stack gap="md" p="md" maw={480}>
+        <Button component={AppLink} to="/" variant="default" size="compact-sm" w="fit-content">
+          Back
+        </Button>
+        <Stack gap="xs">
+          <Title order={1} tt="uppercase">
+            Admin ops desk
+          </Title>
+          <Text size="sm" c="dimmed">
+            Sign in with your Google account to open the admin panel.
+          </Text>
+        </Stack>
+        <PremiumSignInGate
+          continuePath={continuePathForRoute(location.pathname, selectedIncidentId)}
+        />
+      </Stack>
     );
   }
 
   if (accessState === "denied") {
     return (
-      <EntryScreenLayout justify="start">
-        <ScreenHeader backTo="/" backLabel="Back" />
-        <div className={`space-y-4 ${screenHeaderOffsetClassName}`}>
-          <h1 className="font-display text-3xl font-bold uppercase tracking-tight text-ink">
-            Access denied
-          </h1>
-          <p className="text-sm text-ink-muted">
-            Signed in as {user?.email ?? "unknown"}. This panel is restricted to the app owner.
-          </p>
-          {signOutError ? <InlineError>{signOutError}</InlineError> : null}
-          <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
-              className="btn-primary min-h-11 px-4"
-              onClick={() => void handleSignOut()}
-            >
-              Sign out
-            </button>
-            <AppLink to="/" className="btn-secondary inline-flex min-h-11 items-center px-4">
-              Back home
-            </AppLink>
-          </div>
-        </div>
-      </EntryScreenLayout>
+      <Stack gap="md" p="md" maw={480}>
+        <Button component={AppLink} to="/" variant="default" size="compact-sm" w="fit-content">
+          Back
+        </Button>
+        <Title order={1} tt="uppercase">
+          Access denied
+        </Title>
+        <Alert color="red" title="Restricted panel">
+          Signed in as {user?.email ?? "unknown"}. This panel is restricted to the app owner.
+        </Alert>
+        {signOutError ? <InlineError>{signOutError}</InlineError> : null}
+        <Group gap="xs" wrap="wrap">
+          <Button type="button" onClick={() => void handleSignOut()}>
+            Sign out
+          </Button>
+          <Button component={AppLink} to="/" variant="default">
+            Back home
+          </Button>
+        </Group>
+      </Stack>
     );
   }
 

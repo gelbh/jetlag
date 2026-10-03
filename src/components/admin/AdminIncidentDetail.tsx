@@ -1,3 +1,4 @@
+import { Alert, Button, Group, Tabs, TextInput } from "@mantine/core";
 import { useMemo, useState } from "react";
 import { formatFreshnessAge } from "../../domain/admin/formatAdminFreshness";
 import type { IncidentMessageRecord, IncidentRecord } from "../../domain/incident/incidentTypes";
@@ -11,6 +12,14 @@ import { SupportAgentChat } from "../incident/SupportAgentChat";
 import { AdminHotfixThread } from "./AdminHotfixThread";
 
 export type AdminIncidentDetailTab = "chat" | "support" | "hotfix" | "diagnostics" | "timeline";
+
+const DETAIL_TABS: { value: AdminIncidentDetailTab; label: string }[] = [
+  { value: "chat", label: "Chat" },
+  { value: "support", label: "Support" },
+  { value: "hotfix", label: "Hotfix" },
+  { value: "diagnostics", label: "Diagnostics" },
+  { value: "timeline", label: "Timeline" },
+];
 
 export interface AdminIncidentDetailProps {
   incidentId: string | null;
@@ -42,7 +51,7 @@ function senderLabel(sender: IncidentMessageRecord["sender"]): string {
 function formatClock(iso: string): string {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) {
-    return iso || "—";
+    return iso || "-";
   }
   return date.toLocaleTimeString([], {
     hour: "2-digit",
@@ -126,7 +135,7 @@ function AdminIncidentDetailBody({
     const fromMitigations = (incident?.mitigations ?? []).map((mitigation) => ({
       id: `mitigation-${mitigation.id}`,
       createdAt: mitigation.appliedAt,
-      text: `Mitigation applied: ${mitigation.type}${mitigation.note ? ` — ${mitigation.note}` : ""}`,
+      text: `Mitigation applied: ${mitigation.type}${mitigation.note ? ` - ${mitigation.note}` : ""}`,
     }));
     const hotfix = incident?.hotfix
       ? [
@@ -152,10 +161,9 @@ function AdminIncidentDetailBody({
   if (error && !incident) {
     return (
       <div className="jl-incident-detail" data-testid="admin-incident-detail">
-        <div className="jl-incident-empty" role="alert">
-          <p className="jl-incident-empty-title">Incident error</p>
-          <p className="jl-incident-empty-body">{error.message}</p>
-        </div>
+        <Alert className="jl-incident-empty" color="red" title="Incident error" role="alert">
+          {error.message}
+        </Alert>
       </div>
     );
   }
@@ -193,7 +201,7 @@ function AdminIncidentDetailBody({
         <div>
           <h2 className="jl-incident-detail-id">{incident.id}</h2>
           <p className="jl-incident-detail-meta">
-            Session {incident.sessionCode?.trim() ? incident.sessionCode.trim().toUpperCase() : "—"}{" "}
+            Session {incident.sessionCode?.trim() ? incident.sessionCode.trim().toUpperCase() : "-"}{" "}
             · {formatFreshnessAge(incident.updatedAt || incident.createdAt)}
           </p>
         </div>
@@ -202,46 +210,51 @@ function AdminIncidentDetailBody({
         </span>
       </header>
 
-      <div className="jl-scroll jl-incident-tabs" role="tablist" aria-label="Incident views">
-        {(
-          [
-            ["chat", "Chat"],
-            ["support", "Support"],
-            ["hotfix", "Hotfix"],
-            ["diagnostics", "Diagnostics"],
-            ["timeline", "Timeline"],
-          ] as const
-        ).map(([id, label]) => (
-          <button
-            key={id}
-            type="button"
-            role="tab"
-            aria-selected={tab === id}
-            className={`jl-incident-tab${tab === id ? " jl-incident-tab--active" : ""}`}
-            onClick={() => setTab(id)}
-          >
-            {label}
-          </button>
-        ))}
-      </div>
+      <Tabs
+        value={tab}
+        onChange={(value) => {
+          if (
+            value === "chat" ||
+            value === "support" ||
+            value === "hotfix" ||
+            value === "diagnostics" ||
+            value === "timeline"
+          ) {
+            setTab(value);
+          }
+        }}
+      >
+        <Tabs.List
+          className="jl-scroll jl-incident-tabs"
+          aria-label="Incident views"
+          style={{ flexWrap: "nowrap", overflowX: "auto" }}
+        >
+          {DETAIL_TABS.map(({ value, label }) => (
+            <Tabs.Tab
+              key={value}
+              value={value}
+              className={`jl-incident-tab${tab === value ? " jl-incident-tab--active" : ""}`}
+            >
+              {label}
+            </Tabs.Tab>
+          ))}
+        </Tabs.List>
+      </Tabs>
 
       <div className="jl-incident-detail-body">
         {tab === "chat" ? (
           <>
             {incident.adminPrompt.trim() ? (
               <section className="jl-scroll jl-incident-prompt" aria-label="Admin prompt">
-                <p className="jl-incident-prompt-label">System (pinned) — admin prompt</p>
+                <p className="jl-incident-prompt-label">System (pinned) - admin prompt</p>
                 <pre className="jl-incident-prompt-body">{incident.adminPrompt}</pre>
               </section>
             ) : null}
 
             {error ? (
-              <p
-                className="border border-status-error/40 bg-status-error-surface px-2 py-1.5 text-sm font-semibold text-status-error"
-                role="alert"
-              >
+              <Alert color="red" role="alert">
                 {error.message}
-              </p>
+              </Alert>
             ) : null}
 
             <div className="jl-incident-chat">
@@ -265,16 +278,16 @@ function AdminIncidentDetailBody({
               </div>
 
               {sendError ? (
-                <p className="text-sm font-semibold text-status-error" role="alert">
+                <Alert color="red" role="alert">
                   {sendError}
-                </p>
+                </Alert>
               ) : null}
 
-              <div className="jl-incident-composer">
-                <input
-                  className="field-input"
+              <Group className="jl-incident-composer" gap="xs" wrap="nowrap" align="flex-end">
+                <TextInput
+                  style={{ flex: 1 }}
                   value={draft}
-                  onChange={(event) => setDraft(event.target.value)}
+                  onChange={(event) => setDraft(event.currentTarget.value)}
                   onKeyDown={(event) => {
                     if (event.key === "Enter") {
                       event.preventDefault();
@@ -285,15 +298,15 @@ function AdminIncidentDetailBody({
                   aria-label="Incident message"
                   disabled={sending}
                 />
-                <button
+                <Button
                   type="button"
-                  className="btn-primary uppercase"
+                  tt="uppercase"
                   disabled={sending || draft.trim().length === 0}
                   onClick={() => void send()}
                 >
                   Send
-                </button>
-              </div>
+                </Button>
+              </Group>
             </div>
           </>
         ) : null}
@@ -311,9 +324,9 @@ function AdminIncidentDetailBody({
                 ["Platform", incident.diagnostics.platform],
                 ["Online", incident.diagnostics.online ? "yes" : "no"],
                 ["Visibility", incident.diagnostics.visibilityState],
-                ["Player role", incident.diagnostics.playerRole ?? "—"],
-                ["Session id", incident.diagnostics.sessionId ?? "—"],
-                ["Reporter uid", incident.diagnostics.uid ?? "—"],
+                ["Player role", incident.diagnostics.playerRole ?? "-"],
+                ["Session id", incident.diagnostics.sessionId ?? "-"],
+                ["Reporter uid", incident.diagnostics.uid ?? "-"],
                 ["Reported at", incident.diagnostics.reportedAt],
                 [
                   "Last error",
@@ -323,16 +336,16 @@ function AdminIncidentDetailBody({
                           ? `: ${incident.diagnostics.lastClientErrors[0].message}`
                           : ""
                       }`
-                    : "—",
+                    : "-",
                 ],
                 [
                   "Recent ops",
                   incident.diagnostics.recentOps.length > 0
                     ? incident.diagnostics.recentOps.join(", ")
-                    : "—",
+                    : "-",
                 ],
-                ["User agent", incident.diagnostics.userAgent || "—"],
-                ["Player note", incident.playerNote?.trim() || "—"],
+                ["User agent", incident.diagnostics.userAgent || "-"],
+                ["Player note", incident.playerNote?.trim() || "-"],
               ] as const
             ).map(([label, value]) => (
               <div key={label} className="admin-diag-row">

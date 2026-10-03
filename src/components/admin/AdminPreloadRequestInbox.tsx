@@ -1,3 +1,4 @@
+import { Alert, Button, Checkbox, Group, Stack, UnstyledButton } from "@mantine/core";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { formatFreshnessAge } from "../../domain/admin/formatAdminFreshness";
 import { canTransitionPreloadRequestStatus } from "../../domain/preloadRequest/preloadRequestAdmin";
@@ -100,18 +101,22 @@ export function AdminPreloadRequestInbox() {
 
   if (accessLoading) {
     return (
-      <div className="jl-incident-desk" data-testid="admin-preload-inbox">
-        <p className="jl-incident-empty">Checking admin access…</p>
-      </div>
+      <Stack className="jl-incident-desk" gap="md" p="md" data-testid="admin-preload-inbox">
+        <Alert title="Checking admin access…">Please wait.</Alert>
+      </Stack>
     );
   }
 
   if (!enabled) {
     return (
-      <div className="jl-incident-desk" data-testid="admin-preload-inbox">
-        <p className="jl-incident-empty">Admin access required.</p>
-        <AppLink to="/">Back home</AppLink>
-      </div>
+      <Stack className="jl-incident-desk" gap="md" p="md" data-testid="admin-preload-inbox">
+        <Alert color="red" title="Admin access required">
+          Sign in with an admin account to manage preload requests.
+        </Alert>
+        <Button component={AppLink} to="/" variant="default">
+          Back home
+        </Button>
+      </Stack>
     );
   }
 
@@ -130,9 +135,9 @@ export function AdminPreloadRequestInbox() {
             <dd>{openCount}</dd>
           </div>
         </dl>
-        <AppLink to="/admin" className="jl-ops-preset-chip">
+        <Button component={AppLink} to="/admin" variant="default" size="compact-sm">
           Ops desk
-        </AppLink>
+        </Button>
       </header>
 
       <div className="jl-incident-panes">
@@ -142,14 +147,12 @@ export function AdminPreloadRequestInbox() {
             <span className="jl-incident-pane-meta">{openCount} open</span>
           </div>
 
-          <label className="jl-incident-queue-filter">
-            <input
-              type="checkbox"
-              checked={showClosed}
-              onChange={(event) => setShowClosed(event.target.checked)}
-            />
-            Show closed
-          </label>
+          <Checkbox
+            className="jl-incident-queue-filter"
+            label="Show closed"
+            checked={showClosed}
+            onChange={(event) => setShowClosed(event.currentTarget.checked)}
+          />
 
           {listError && enabled ? <InlineError>{listError}</InlineError> : null}
           {enabled && listLoading ? (
@@ -163,13 +166,14 @@ export function AdminPreloadRequestInbox() {
                 const selectedRow = request.id === selectedId;
                 return (
                   <li key={request.id}>
-                    <button
+                    <UnstyledButton
                       type="button"
                       aria-current={selectedRow ? "true" : undefined}
                       className={
                         selectedRow ? "jl-incident-queue-row is-selected" : "jl-incident-queue-row"
                       }
                       onClick={() => setSelectedId(request.id)}
+                      style={{ display: "block", width: "100%", textAlign: "left" }}
                     >
                       <span className="jl-incident-queue-id">
                         {request.id.slice(0, 10).toUpperCase()}
@@ -181,7 +185,7 @@ export function AdminPreloadRequestInbox() {
                       <span className="jl-incident-queue-age">
                         {formatFreshnessAge(request.updatedAt)}
                       </span>
-                    </button>
+                    </UnstyledButton>
                   </li>
                 );
               })}
@@ -206,7 +210,7 @@ export function AdminPreloadRequestInbox() {
               <dl className="jl-incident-detail-fields">
                 <div>
                   <dt>Place</dt>
-                  <dd>{selected.presetSnapshot.placeLabel ?? "—"}</dd>
+                  <dd>{selected.presetSnapshot.placeLabel ?? "-"}</dd>
                 </div>
                 <div>
                   <dt>Size / units</dt>
@@ -216,15 +220,15 @@ export function AdminPreloadRequestInbox() {
                 </div>
                 <div>
                   <dt>Region pack</dt>
-                  <dd>{selected.presetSnapshot.regionPackId ?? "—"}</dd>
+                  <dd>{selected.presetSnapshot.regionPackId ?? "-"}</dd>
                 </div>
                 <div>
                   <dt>Preset id</dt>
-                  <dd>{selected.presetSnapshot.presetId ?? "—"}</dd>
+                  <dd>{selected.presetSnapshot.presetId ?? "-"}</dd>
                 </div>
                 <div>
                   <dt>Game area bytes</dt>
-                  <dd>{selected.presetSnapshot.gameAreaBytes ?? "—"}</dd>
+                  <dd>{selected.presetSnapshot.gameAreaBytes ?? "-"}</dd>
                 </div>
                 <div>
                   <dt>Reporter</dt>
@@ -234,7 +238,7 @@ export function AdminPreloadRequestInbox() {
                 </div>
                 <div>
                   <dt>Note</dt>
-                  <dd>{selected.note?.trim() || "—"}</dd>
+                  <dd>{selected.note?.trim() || "-"}</dd>
                 </div>
                 <div>
                   <dt>Email</dt>
@@ -243,7 +247,7 @@ export function AdminPreloadRequestInbox() {
                       ? `sent (${selected.email.messageId})`
                       : selected.email?.error
                         ? `failed: ${selected.email.error}`
-                        : "—"}
+                        : "-"}
                   </dd>
                 </div>
                 {selected.presetSnapshot.focusBounds ? (
@@ -258,21 +262,22 @@ export function AdminPreloadRequestInbox() {
 
               {actionError ? <InlineError>{actionError}</InlineError> : null}
 
-              <div className="jl-incident-actions">
+              <Group className="jl-incident-actions" gap="xs" wrap="wrap">
                 {ACTION_STATUSES.filter((status) =>
                   canTransitionPreloadRequestStatus(selected.status, status),
                 ).map((status) => (
-                  <button
+                  <Button
                     key={status}
                     type="button"
-                    className="jl-ops-preset-chip"
+                    variant="default"
+                    size="compact-sm"
                     disabled={busyId !== null}
                     onClick={() => void onStatus(selected.id, status)}
                   >
                     Mark {status}
-                  </button>
+                  </Button>
                 ))}
-              </div>
+              </Group>
             </>
           )}
         </section>
