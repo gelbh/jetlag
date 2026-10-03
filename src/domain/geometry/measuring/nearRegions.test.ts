@@ -2,9 +2,14 @@ import booleanPointInPolygon from "@turf/boolean-point-in-polygon";
 import turfCircle from "@turf/circle";
 import turfDestination from "@turf/destination";
 import { point as turfPoint } from "@turf/helpers";
+import type { Feature, LineString } from "geojson";
 import { describe, expect, it } from "vitest";
 import type { GameArea } from "../../map/annotations";
-import { buildLocationNearRegion, distanceBetweenPoints } from "./nearRegions";
+import {
+  buildLocationNearRegion,
+  coastlineSegmentsFingerprint,
+  distanceBetweenPoints,
+} from "./nearRegions";
 
 const sampleGameArea: GameArea = {
   type: "Polygon",
@@ -49,5 +54,39 @@ describe("buildLocationNearRegion disk steps", () => {
     const nearRegion = buildLocationNearRegion(target, distanceMeters, sampleGameArea);
     expect(nearRegion).not.toBeNull();
     expect(booleanPointInPolygon(probe, nearRegion!)).toBe(true);
+  });
+});
+
+describe("coastlineSegmentsFingerprint", () => {
+  it("differs for same-count polylines with different geometry", () => {
+    const left: Feature<LineString>[] = [
+      {
+        type: "Feature",
+        properties: {},
+        geometry: {
+          type: "LineString",
+          coordinates: [
+            [-0.2, 51.4],
+            [-0.1, 51.4],
+          ],
+        },
+      },
+    ];
+    const right: Feature<LineString>[] = [
+      {
+        type: "Feature",
+        properties: {},
+        geometry: {
+          type: "LineString",
+          coordinates: [
+            [-0.2, 51.5],
+            [-0.1, 51.5],
+          ],
+        },
+      },
+    ];
+
+    expect(left).toHaveLength(right.length);
+    expect(coastlineSegmentsFingerprint(left)).not.toBe(coastlineSegmentsFingerprint(right));
   });
 });

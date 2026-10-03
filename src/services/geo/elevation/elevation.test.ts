@@ -1,5 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { LatLngTuple } from "@/domain/geometry/gameArea/geometry";
+import { GEO_FETCH_TIMEOUT_MS } from "@/services/core/network/fetchWithTimeout";
+import { ELEVATION_MAX_RETRIES_FOREGROUND } from "./constants";
 import {
   clearElevationCacheForTests,
   fetchElevations,
@@ -143,6 +145,55 @@ describe("elevation", () => {
 
     await expect(fetchSingleElevation(dublinPoint)).resolves.toBe(18);
     expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("retries elevation lookups that time out", async () => {
+    vi.useFakeTimers();
+    const fetchMock = vi
+      .fn()
+      .mockImplementationOnce(
+        (_input: RequestInfo | URL, init?: RequestInit) =>
+          new Promise((_resolve, reject) => {
+            init?.signal?.addEventListener("abort", () => {
+              reject(new DOMException("aborted", "AbortError"));
+            });
+          }),
+      )
+      .mockResolvedValue(mockElevationResponse([27]));
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = fetchSingleElevation(dublinPoint);
+    await vi.advanceTimersByTimeAsync(GEO_FETCH_TIMEOUT_MS - 1);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    await vi.runAllTimersAsync();
+
+    await expect(result).resolves.toBe(27);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    const init = fetchMock.mock.calls[0]?.[1] as RequestInit | undefined;
+    expect(init?.signal).toBeInstanceOf(AbortSignal);
+  });
+
+  it("gives up after the last timed-out attempt", async () => {
+    vi.useFakeTimers();
+    const fetchMock = vi.fn(
+      (_input: RequestInfo | URL, init?: RequestInit) =>
+        new Promise<Response>((_resolve, reject) => {
+          init?.signal?.addEventListener("abort", () => {
+            reject(new DOMException("aborted", "AbortError"));
+          });
+        }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = fetchSingleElevation(dublinPoint);
+    const settled = result.then(
+      () => "resolved",
+      () => "rejected",
+    );
+    await vi.runAllTimersAsync();
+
+    await expect(settled).resolves.toBe("rejected");
+    expect(fetchMock).toHaveBeenCalledTimes(ELEVATION_MAX_RETRIES_FOREGROUND + 1);
   });
 
   it("opens a circuit breaker after repeated rate limits in background mode", async () => {

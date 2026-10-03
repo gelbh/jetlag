@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { PendingQuestionRecord } from "../../session/activity/sessionChat";
 import {
-  isAskOriginInsideHidingZone,
   resolveHiderTruthReference,
   resolvePendingQuestionTruthReference,
 } from "./resolveHiderTruthReference";
@@ -27,7 +26,7 @@ describe("resolveHiderTruthReference", () => {
     expect(result.point).toEqual(zoneCenter);
   });
 
-  it("returns hiding place before end game when ask origin is inside the zone", () => {
+  it("returns zone center before end game when ask origin is inside the zone", () => {
     const result = resolveHiderTruthReference({
       hiderUid: "hider-1",
       zoneCenter,
@@ -37,11 +36,11 @@ describe("resolveHiderTruthReference", () => {
       session: null,
     });
 
-    expect(result.mode).toBe("hidingPlace");
-    expect(result.point).toEqual(liveGps);
+    expect(result.mode).toBe("hidingZoneCenter");
+    expect(result.point).toEqual(zoneCenter);
   });
 
-  it("falls back to zone center when inside zone but hiding place missing", () => {
+  it("returns zone center when hiding place is missing", () => {
     const result = resolveHiderTruthReference({
       hiderUid: "hider-1",
       zoneCenter,
@@ -131,19 +130,6 @@ describe("resolveHiderTruthReference", () => {
   });
 });
 
-describe("isAskOriginInsideHidingZone", () => {
-  it("detects ask origins inside the radius", () => {
-    expect(isAskOriginInsideHidingZone(insideAsk, zoneCenter, zoneRadiusMeters)).toBe(true);
-    expect(isAskOriginInsideHidingZone(outsideAsk, zoneCenter, zoneRadiusMeters)).toBe(false);
-    expect(isAskOriginInsideHidingZone(zoneCenter, zoneCenter, 0)).toBe(true);
-  });
-
-  it("rejects invalid zone radii", () => {
-    expect(isAskOriginInsideHidingZone(insideAsk, zoneCenter, -1)).toBe(false);
-    expect(isAskOriginInsideHidingZone(insideAsk, zoneCenter, Number.NaN)).toBe(false);
-  });
-});
-
 describe("resolvePendingQuestionTruthReference", () => {
   function pendingAt(
     origin: [number, number],
@@ -167,7 +153,7 @@ describe("resolvePendingQuestionTruthReference", () => {
     } as PendingQuestionRecord;
   }
 
-  it("uses hiding place for in-zone asks and zone center outside", () => {
+  it("uses zone center for in-zone and out-of-zone asks before end game", () => {
     const context = {
       hiderUid: "hider-1",
       zoneCenter,
@@ -177,8 +163,8 @@ describe("resolvePendingQuestionTruthReference", () => {
     };
 
     expect(resolvePendingQuestionTruthReference(pendingAt(insideAsk), context)).toEqual({
-      point: liveGps,
-      mode: "hidingPlace",
+      point: zoneCenter,
+      mode: "hidingZoneCenter",
     });
     expect(resolvePendingQuestionTruthReference(pendingAt(outsideAsk), context)).toEqual({
       point: zoneCenter,
@@ -186,7 +172,7 @@ describe("resolvePendingQuestionTruthReference", () => {
     });
   });
 
-  it("falls back to zone center for empty photo geometryJson", () => {
+  it("returns zone center for empty photo geometryJson", () => {
     const photoPending = {
       id: "q-photo",
       status: "pending",
@@ -223,7 +209,7 @@ describe("resolvePendingQuestionTruthReference", () => {
   );
 
   it.each(["tentacle", "matching", "measuring", "thermometer"] as const)(
-    "uses hiding place for %s when the seeker is inside the zone",
+    "uses zone center for %s when the seeker is inside the zone",
     (toolType) => {
       const context = {
         hiderUid: "hider-1",
@@ -236,7 +222,7 @@ describe("resolvePendingQuestionTruthReference", () => {
 
       expect(
         resolvePendingQuestionTruthReference(pendingAt(outsideAsk, { toolType }), context),
-      ).toEqual({ point: liveGps, mode: "hidingPlace" });
+      ).toEqual({ point: zoneCenter, mode: "hidingZoneCenter" });
     },
   );
 
@@ -271,7 +257,7 @@ describe("resolvePendingQuestionTruthReference", () => {
     ).toEqual({ point: zoneCenter, mode: "hidingZoneCenter" });
   });
 
-  it("still uses radar placement as the in-zone origin", () => {
+  it("uses zone center for radar when ask placement is inside the zone", () => {
     const context = {
       hiderUid: "hider-1",
       zoneCenter,
@@ -283,6 +269,6 @@ describe("resolvePendingQuestionTruthReference", () => {
 
     expect(
       resolvePendingQuestionTruthReference(pendingAt(insideAsk, { toolType: "radar" }), context),
-    ).toEqual({ point: liveGps, mode: "hidingPlace" });
+    ).toEqual({ point: zoneCenter, mode: "hidingZoneCenter" });
   });
 });
