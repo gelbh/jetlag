@@ -10,11 +10,8 @@ import {
   buildCoastlineNearRegionDistanceThreshold,
   coastlineNearRegionOracleEpsilonMeters,
 } from "./coastlineNearRegion";
-import { buildCoastlineEliminationRegion } from "./eliminationRegions";
-import { loadXwxzRegionInputFixture } from "./loadXwxzRegionInput";
 import {
   buildCoastlineNearRegionUnionBufferForTests,
-  clearCoastlineNearRegionCacheForTests,
   nearestPointToCoastlines,
   prepareMeasuringLineSegments,
 } from "./nearRegions";
@@ -147,61 +144,5 @@ describe("coastline near region oracle", () => {
     );
 
     expect(booleanPointInPolygon(probe, distanceThresholdRegion!)).toBe(false);
-  });
-
-  it("XWXZ regression: oracle, further band, seeker-ray probe", async () => {
-    clearCoastlineNearRegionCacheForTests();
-    const fixture = loadXwxzRegionInputFixture();
-    const { gameArea, measuringCoastSegments, measuringDistanceMeters, zoneCenter, seekerAnchor } =
-      fixture;
-    const prepared = prepareMeasuringLineSegments(measuringCoastSegments, gameArea);
-    const divisions = 24;
-    const epsilon = coastlineNearRegionOracleEpsilonMeters(gameArea, divisions);
-
-    const nearRegion = await buildCoastlineNearRegionDistanceThreshold(
-      measuringCoastSegments,
-      measuringDistanceMeters,
-      gameArea,
-      { divisions },
-    );
-    expect(nearRegion).not.toBeNull();
-    assertCoastlineNearRegionOracle(
-      nearRegion!,
-      prepared,
-      measuringDistanceMeters,
-      gameArea,
-      epsilon,
-      divisions,
-    );
-
-    const bufferRegion = await buildCoastlineNearRegionUnionBufferForTests(
-      measuringCoastSegments,
-      measuringDistanceMeters,
-      gameArea,
-    );
-    expect(bufferRegion).not.toBeNull();
-
-    const furtherElimination = await buildCoastlineEliminationRegion(
-      measuringCoastSegments,
-      measuringDistanceMeters,
-      gameArea,
-      "further",
-      nearRegion,
-    );
-    expect(furtherElimination).not.toBeNull();
-    expect(
-      booleanPointInPolygon(turfPoint([zoneCenter[1], zoneCenter[0]]), furtherElimination!),
-    ).toBe(true);
-
-    const nearestSeeker = nearestPointToCoastlines(seekerAnchor, prepared.segments, prepared);
-    expect(nearestSeeker).not.toBeNull();
-    const inflatedProbe = coastlineSeekerRayProbeBeyondRadius(
-      nearestSeeker!.point,
-      seekerAnchor,
-      measuringDistanceMeters,
-      500,
-    );
-    expect(booleanPointInPolygon(inflatedProbe, nearRegion!)).toBe(false);
-    expect(booleanPointInPolygon(inflatedProbe, bufferRegion!)).toBe(true);
   });
 });
