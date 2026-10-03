@@ -527,6 +527,7 @@ export function AdminOpsDesk() {
               onModeChange={setModeFilter}
               onStateChange={setStateFilter}
               onSortChange={setSort}
+              forceCollapsed={sessions.length === 0 && !sessionsError}
             />
           </div>
           {sessionsLoading ? (

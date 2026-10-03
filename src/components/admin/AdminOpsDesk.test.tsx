@@ -158,6 +158,12 @@ describe("AdminOpsDesk", () => {
 
     expect(screen.getByRole("button", { name: "Live" })).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByText("No live sessions")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "More filters" })).toHaveAttribute(
+      "aria-expanded",
+      "false",
+    );
+    expect(screen.queryByRole("button", { name: "Singleplayer" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Hiding" })).not.toBeInTheDocument();
   });
 
   it("shows No sessions when Live is off and the list is empty", () => {
@@ -253,6 +259,11 @@ describe("AdminOpsDesk", () => {
     expect(screen.getByText("ABCD")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Live" })).toBeInTheDocument();
     expect(screen.queryByText("No live sessions")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "More filters" })).toHaveAttribute(
+      "aria-expanded",
+      "false",
+    );
+    expect(screen.queryByRole("button", { name: "Singleplayer" })).not.toBeInTheDocument();
   });
 
   it("renders session phase labels for admin users", () => {

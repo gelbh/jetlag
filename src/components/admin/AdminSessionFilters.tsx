@@ -1,4 +1,5 @@
 import { Button, Group, NativeSelect, Stack, TextInput } from "@mantine/core";
+import { useState } from "react";
 import type {
   AdminSessionModeFilter,
   AdminSessionSort,
@@ -18,6 +19,8 @@ interface AdminSessionFiltersProps {
   onModeChange: (mode: AdminSessionModeFilter) => void;
   onStateChange: (state: AdminSessionStateChip) => void;
   onSortChange: (sort: AdminSessionSort) => void;
+  /** When true, collapse mode/phase chips (fail/empty chrome distill). */
+  forceCollapsed?: boolean;
 }
 
 const SORT_OPTIONS: { value: AdminSessionSort; label: string }[] = [
@@ -41,10 +44,21 @@ export function AdminSessionFilters({
   onModeChange,
   onStateChange,
   onSortChange,
+  forceCollapsed = false,
 }: AdminSessionFiltersProps) {
+  const [moreOpen, setMoreOpen] = useState(false);
+  const [wasForceCollapsed, setWasForceCollapsed] = useState(forceCollapsed);
+
+  if (forceCollapsed !== wasForceCollapsed) {
+    setWasForceCollapsed(forceCollapsed);
+    if (forceCollapsed) {
+      setMoreOpen(false);
+    }
+  }
+
   return (
     <Stack gap="sm">
-      <Group gap="xs" wrap="wrap">
+      <Group gap="xs" wrap="wrap" align="flex-end">
         <Button
           type="button"
           size="compact-xs"
@@ -67,53 +81,6 @@ export function AdminSessionFilters({
         >
           Annotated
         </Button>
-        <Group gap={6} wrap="wrap" role="group" aria-label="Session mode">
-          {(["singleplayer", "multiplayer"] as const).map((option) => {
-            const selected = mode === option;
-            return (
-              <Button
-                key={option}
-                type="button"
-                size="compact-xs"
-                radius="xl"
-                variant={selected ? "light" : "default"}
-                aria-pressed={selected}
-                onClick={() => onModeChange(selected ? "all" : option)}
-                tt="uppercase"
-              >
-                {option === "singleplayer" ? "Singleplayer" : "Multiplayer"}
-              </Button>
-            );
-          })}
-        </Group>
-        <Group gap={6} wrap="wrap" role="group" aria-label="Session state">
-          {(
-            [
-              ["hiding", "Hiding"],
-              ["seek", "Seeking"],
-              ["end-game", "End game"],
-            ] as const
-          ).map(([option, label]) => {
-            const selected = state === option;
-            return (
-              <Button
-                key={option}
-                type="button"
-                size="compact-xs"
-                radius="xl"
-                variant={selected ? "light" : "default"}
-                aria-pressed={selected}
-                onClick={() => onStateChange(selected ? null : option)}
-                tt="uppercase"
-              >
-                {label}
-              </Button>
-            );
-          })}
-        </Group>
-      </Group>
-
-      <Group gap="sm" align="flex-end" wrap="wrap">
         <TextInput
           label="Search"
           type="search"
@@ -131,7 +98,66 @@ export function AdminSessionFilters({
           data={SORT_OPTIONS}
           w={176}
         />
+        <Button
+          type="button"
+          size="compact-xs"
+          variant="subtle"
+          aria-expanded={moreOpen}
+          aria-controls="admin-session-more-filters"
+          onClick={() => setMoreOpen((open) => !open)}
+        >
+          More filters
+        </Button>
       </Group>
+
+      {moreOpen ? (
+        <Group gap="xs" wrap="wrap" id="admin-session-more-filters">
+          <Group gap={6} wrap="wrap" role="group" aria-label="Session mode">
+            {(["singleplayer", "multiplayer"] as const).map((option) => {
+              const selected = mode === option;
+              return (
+                <Button
+                  key={option}
+                  type="button"
+                  size="compact-xs"
+                  radius="xl"
+                  variant={selected ? "light" : "default"}
+                  aria-pressed={selected}
+                  onClick={() => onModeChange(selected ? "all" : option)}
+                  tt="uppercase"
+                >
+                  {option === "singleplayer" ? "Singleplayer" : "Multiplayer"}
+                </Button>
+              );
+            })}
+          </Group>
+          <Group gap={6} wrap="wrap" role="group" aria-label="Session state">
+            {(
+              [
+                ["hiding", "Hiding"],
+                ["seek", "Seeking"],
+                ["end-game", "End game"],
+              ] as const
+            ).map(([option, label]) => {
+              const selected = state === option;
+              return (
+                <Button
+                  key={option}
+                  type="button"
+                  size="compact-xs"
+                  radius="xl"
+                  variant={selected ? "light" : "default"}
+                  aria-pressed={selected}
+                  onClick={() => onStateChange(selected ? null : option)}
+                  tt="uppercase"
+                >
+                  {label}
+                </Button>
+              );
+            })}
+          </Group>
+        </Group>
+      ) : null}
     </Stack>
   );
 }
