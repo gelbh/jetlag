@@ -9,16 +9,22 @@
 
 - Node.js `>=24` (see `package.json` `engines`)
 - npm (repo pins `packageManager`)
+- On Apple Silicon, Node must be native arm64 (`node -p "process.arch"` → `arm64`). A Rosetta/x64 Node installs the wrong Biome/native optional deps and breaks `npm run lint`.
+- Git worktrees: run `npm ci` **inside each worktree**. Never copy or symlink `node_modules` between the main tree and a worktree.
+- Prefer `npm run lint` / `npx biome` over a global `biome` so the repo-pinned `@biomejs/biome@2.5.15` binary is used.
 - [Doppler CLI](https://docs.doppler.com/docs/install-cli) for secrets
 - Optional: [`just`](https://github.com/casey/just) (`brew install just`) for maintainer recipes
 
 CI and husky call `npm run <script>` contracts in `package.json`. Day-to-day recipes live in the root `justfile` (`just --list`).
 
-JS/TS lint and format use Biome (`npm run lint` / `npm run format`); CSS remains Stylelint (`npm run lint:css`).
+JS/TS lint and format use Biome (`npm run lint` / `npm run format`); CSS remains Stylelint (`npm run lint:css`) until the Biome CSS migration lands.
 
 ## Setup
 
 ```bash
+# confirm arch first on Apple Silicon
+node -p "process.arch"   # expect: arm64
+
 npm ci
 just env-pull
 # or: doppler secrets download --no-file --format env > .env.local
