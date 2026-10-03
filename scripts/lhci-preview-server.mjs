@@ -34,3 +34,6 @@ const server = await preview({
   preview: { host: "127.0.0.1", port: 4173, strictPort: true },
 });
 server.printUrls();
+// Vite 8 bold-colors "Local", so LHCI's default /Local:/i never matches stdout.
+// Plain ready line keeps startServerReadyPattern stable across Vite logger changes.
+console.log("LHCI preview ready");
