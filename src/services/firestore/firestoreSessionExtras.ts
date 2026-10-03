@@ -126,6 +126,8 @@ export async function appendPlayerTrailPoint(
   point: PlayerTrailPointRecord,
 ): Promise<void> {
   try {
+    // Auto ids on purpose: rules make points create-only, so a deterministic-id
+    // set replayed onto an existing point is an update and is denied anyway.
     await addDoc(playerTrailPointsCollection(sessionId, point.uid), {
       lat: point.lat,
       lng: point.lng,
