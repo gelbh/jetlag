@@ -1,6 +1,7 @@
 import { deleteDoc, doc, getDoc, serverTimestamp, writeBatch } from "firebase/firestore";
 import { clientEnvUsesFirebaseEmulator } from "@/config/env";
 import { APP_VERSION } from "@/domain/device/changelog";
+import { isEffectivelyOffline } from "@/domain/device/sync/sync";
 import type { GameArea, SessionRecord, SessionTier } from "@/domain/map/annotations";
 import { type PlayerRole, resolvePlayerRole } from "@/domain/session/players/playerRole";
 import { buildRoleGatesForHost } from "@/domain/session/players/roleGates";
@@ -9,13 +10,9 @@ import type { SessionRulesPatch } from "@/domain/session/tools/advancedSessionSe
 import { getFirestoreDb } from "@/services/core/firebase/firebase";
 import { initSessionRoleGates } from "@/services/session/rolePasscodeLifecycle";
 import { generateSessionCode } from "@/services/session/sessionCodes";
+import { useSessionStore } from "@/state/sessionStore";
 import { buildSessionDocument } from "../serialization/serializeSession";
-import {
-  getRemoteSessionByIdFromServer,
-  joinRemoteSessionByCode,
-  lookupRemoteSessionByCode,
-  mapJoinFailureToError,
-} from "./join";
+import * as sessionJoin from "./join";
 import {
   isFirestorePermissionDenied,
   rollbackCreatedRemoteSession,
@@ -28,6 +25,23 @@ export type EnsureRemoteSessionMembershipOptions = {
   returningMemberUid?: string | null;
   persistedMyUid?: string | null;
 };
+
+/**
+ * While effectively offline a server read cannot succeed (or stalls on weak
+ * signal), so a write-access check trusts the caller's cached session when it
+ * already lists `uid`. Firestore rules still enforce membership when any
+ * queued write replays. Heals never take this path: they must hit the server.
+ */
+function isTrustedCachedMemberWhileOffline(session: SessionRecord, uid: string): boolean {
+  if (session.endedAt || !session.memberUids.includes(uid)) {
+    return false;
+  }
+
+  const online = typeof navigator === "undefined" ? true : navigator.onLine;
+  const { networkReachable } = useSessionStore.getState();
+  return isEffectivelyOffline({ online, reachable: networkReachable });
+}
+
 export async function ensureRemoteSessionMembership(
   session: Pick<SessionRecord, "id" | "code" | "memberUids" | "memberRoles">,
   uid: string,
@@ -36,7 +50,7 @@ export async function ensureRemoteSessionMembership(
 ): Promise<SessionRecord> {
   let serverSession: SessionRecord | null = null;
   try {
-    serverSession = await getRemoteSessionByIdFromServer(session.id);
+    serverSession = await sessionJoin.getRemoteSessionByIdFromServer(session.id);
   } catch (error) {
     if (!isFirestorePermissionDenied(error)) {
       throw error;
@@ -44,7 +58,7 @@ export async function ensureRemoteSessionMembership(
   }
 
   if (!serverSession) {
-    const lookup = await lookupRemoteSessionByCode(session.code);
+    const lookup = await sessionJoin.lookupRemoteSessionByCode(session.code);
     if (lookup.status === "missing") {
       throw new Error("That session no longer exists.");
     }
@@ -62,16 +76,22 @@ export async function ensureRemoteSessionMembership(
     return serverSession;
   }
 
-  const result = await joinRemoteSessionByCode(serverSession.code, uid, role, APP_VERSION, {
-    returningMemberUid: options?.returningMemberUid ?? undefined,
-    persistedMyUid: options?.persistedMyUid ?? options?.returningMemberUid ?? undefined,
-  });
+  const result = await sessionJoin.joinRemoteSessionByCode(
+    serverSession.code,
+    uid,
+    role,
+    APP_VERSION,
+    {
+      returningMemberUid: options?.returningMemberUid ?? undefined,
+      persistedMyUid: options?.persistedMyUid ?? options?.returningMemberUid ?? undefined,
+    },
+  );
 
   if (result.status === "joined") {
     return result.session;
   }
 
-  throw mapJoinFailureToError(
+  throw sessionJoin.mapJoinFailureToError(
     result,
     "You are not a member of this session. Rejoin with the session code.",
   );
@@ -83,6 +103,10 @@ export async function ensureRemoteSessionWriteAccess(
   role: PlayerRole = resolvePlayerRole(session.memberRoles, uid),
   options?: EnsureRemoteSessionMembershipOptions,
 ): Promise<SessionRecord> {
+  if (isTrustedCachedMemberWhileOffline(session, uid)) {
+    return session;
+  }
+
   try {
     return await ensureRemoteSessionMembership(session, uid, role, options);
   } catch (error) {

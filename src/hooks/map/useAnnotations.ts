@@ -3,18 +3,12 @@ import { isRetriableSyncError } from "../../domain/device/sync/syncRetry";
 import type { AnnotationRecord } from "../../domain/map/annotations";
 import { LOCAL_SESSION_ID, migrateAnnotations } from "../../domain/map/annotations";
 import { findLastRedoableAnnotation, findLastUndoableAnnotation } from "../../domain/map/mapTools";
-import { resolvePlayerRole } from "../../domain/session/players/playerRole";
 import { ensureAnonymousUser, isFirebaseConfigured } from "../../services/core/firebase/firebase";
 import {
-  ensureRemoteSessionWriteAccess,
-  isFirestorePermissionDenied,
   writeRemoteAnnotation,
   writeRemoteAnnotationsBatch,
 } from "../../services/firestore/firestoreAnnotations";
-import {
-  healSessionMembership,
-  sessionMembershipChanged,
-} from "../../services/firestore/sessionMembershipHeal";
+import { withSessionWriteAccess } from "../../services/firestore/sessionMembershipHeal";
 import { registerAnnotationBackgroundSync } from "../../services/session/backgroundSync";
 import {
   countOfflineQueueForSession,
@@ -75,38 +69,13 @@ export function useAnnotations() {
           return;
         }
 
-        const activeSession = await ensureRemoteSessionWriteAccess(
+        await withSessionWriteAccess({
           session,
-          user.uid,
-          resolvePlayerRole(session.memberRoles, user.uid),
-          { returningMemberUid: myUid, persistedMyUid: myUid },
-        );
-
-        if (sessionMembershipChanged(session, activeSession, user.uid, myUid)) {
-          setSession(activeSession, user.uid);
-        }
-
-        const writeAnnotation = async () => {
-          await writeRemoteAnnotation(activeSession.id, stampedAnnotation);
-        };
-
-        try {
-          await writeAnnotation();
-        } catch (error) {
-          if (!isFirestorePermissionDenied(error)) {
-            throw error;
-          }
-
-          const healedSession = await healSessionMembership(
-            activeSession,
-            user.uid,
-            resolvePlayerRole(activeSession.memberRoles, user.uid),
-            { returningMemberUid: myUid, persistedMyUid: myUid },
-          );
-
-          setSession(healedSession, user.uid);
-          await writeRemoteAnnotation(healedSession.id, stampedAnnotation);
-        }
+          uid: user.uid,
+          myUid,
+          onSessionChange: (next) => setSession(next, user.uid),
+          write: (sessionId) => writeRemoteAnnotation(sessionId, stampedAnnotation),
+        });
       } catch (error) {
         if (isRetriableSyncError(error)) {
           await queueAnnotationWrite(session.id, stampedAnnotation);
@@ -291,9 +260,13 @@ export function useAnnotations() {
         return;
       }
 
-      const activeSession = await ensureRemoteSessionWriteAccess(session, user.uid);
-
-      await writeRemoteAnnotationsBatch(activeSession.id, deleted);
+      await withSessionWriteAccess({
+        session,
+        uid: user.uid,
+        myUid,
+        onSessionChange: (next) => setSession(next, user.uid),
+        write: (sessionId) => writeRemoteAnnotationsBatch(sessionId, deleted),
+      });
     } catch (error) {
       if (isRetriableSyncError(error)) {
         const deleted = active.map(
@@ -324,8 +297,10 @@ export function useAnnotations() {
     incrementPendingWrites,
     incrementSyncInFlight,
     queueAnnotationWrite,
+    myUid,
     session,
     setLastSyncError,
+    setSession,
     softDeleteAllForSession,
   ]);
 
