@@ -173,14 +173,14 @@ export async function requestCombinedEliminationMask(
     }
 
     const addOnly =
-      maskCache &&
-      maskCache.mask &&
+      maskCache?.mask &&
       maskCache.gameAreaKey === gameAreaKey &&
       maskCache.draftKey === draftKey &&
-      maskCache.endGameKey === "" &&
-      isAddOnly(maskCache.annotationKey, annotations);
+      maskCache.endGameKey === ""
+        ? isAddOnly(maskCache.annotationKey, annotations)
+        : ({ addOnly: false } as const);
 
-    if (addOnly?.addOnly) {
+    if (addOnly.addOnly) {
       const newIdSet = new Set(addOnly.newIds);
       const newAnnotations = annotations.filter((annotation) => newIdSet.has(annotation.id));
       try {

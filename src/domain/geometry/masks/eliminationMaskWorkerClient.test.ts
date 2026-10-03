@@ -17,8 +17,14 @@ const sampleFeature = {
   },
 };
 
-const buildMaskFromUnionInput = vi.fn(async () => sampleFeature);
-const buildEndGameMaskFromDisks = vi.fn(async () => sampleFeature);
+const buildMaskFromUnionInput = vi.fn(
+  async (_input: unknown, _gameArea?: unknown): Promise<typeof sampleFeature | null> =>
+    sampleFeature,
+);
+const buildEndGameMaskFromDisks = vi.fn(
+  async (_gameArea?: unknown, _disks?: unknown): Promise<typeof sampleFeature | null> =>
+    sampleFeature,
+);
 const computeEliminationUnionInput = vi.fn(
   async (
     annotations: readonly AnnotationRecord[],
