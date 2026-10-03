@@ -10,7 +10,7 @@
       "!target",
       "!**/node_modules",
       "!crates/*/pkg",
-      "!**/*.css",
+      "!src/styles/tokens.css",
       "!public/geo/gtfs/chicago.json",
       "!.worktrees",
       "!worker-configuration.d.ts"
@@ -70,14 +70,29 @@
       "!crates/*/pkg/**",
       "!target/**",
       "!**/node_modules",
-      "!**/*.css",
+      "!src/styles/tokens.css",
       "!public/geo/gtfs/chicago.json",
       "!**/yqrd-*.test.ts",
       "!.worktrees/**"
     ]
   },
+  "css": {
+    "parser": {
+      "tailwindDirectives": true
+    }
+  },
   "javascript": { "formatter": { "quoteStyle": "double" } },
   "overrides": [
+    {
+      "includes": ["**/*.css"],
+      "linter": {
+        "rules": {
+          "complexity": { "noImportantStyles": "off" },
+          "style": { "noDescendingSpecificity": "off" },
+          "suspicious": { "noDuplicateProperties": "off" }
+        }
+      }
+    },
     {
       "includes": ["scripts/**/*.mjs"],
       "javascript": { "globals": ["exports"] }

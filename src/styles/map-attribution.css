@@ -11,7 +11,9 @@ html[data-matching-map-placement="1"] {
 html[data-ask-map-placement="1"] [data-chrome-side-stack="phone"],
 html[data-matching-map-placement="1"] [data-chrome-side-stack="phone"] {
   bottom: calc(
-    var(--dock-island-height) + var(--chrome-side-stack-gap) +
-      var(--chrome-side-stack-lift) + var(--ask-map-placement-bottom-clearance)
+    var(--dock-island-height) +
+    var(--chrome-side-stack-gap) +
+    var(--chrome-side-stack-lift) +
+    var(--ask-map-placement-bottom-clearance)
   );
 }

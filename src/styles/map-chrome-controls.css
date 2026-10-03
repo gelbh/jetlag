@@ -49,8 +49,7 @@
   display: none;
 }
 
-.map-chrome-hud[data-landscape-chrome="revealed"]
-  [data-survey-priority="secondary"] {
+.map-chrome-hud[data-landscape-chrome="revealed"] [data-survey-priority="secondary"] {
   display: none !important;
 }
 

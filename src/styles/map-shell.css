@@ -78,18 +78,13 @@
   .jl-status-rail-float {
     /* Clear notch/Dynamic Island via --safe-area-top, then match bottom float gap.
      * L/R: shell-composed safe (letterbox-aware) with viewport env fallback. */
-    padding: calc(
-        var(--safe-area-top, 0px) + var(--dock-float-gap, 0.75rem)
-      )
+    padding: calc(var(--safe-area-top, 0px) + var(--dock-float-gap, 0.75rem))
       max(
         var(--dock-float-gap, 0.75rem),
         var(--jl-shell-safe-right, env(safe-area-inset-right, 0px))
       )
       0.25rem
-      max(
-        var(--dock-float-gap, 0.75rem),
-        var(--jl-shell-safe-left, env(safe-area-inset-left, 0px))
-      );
+      max(var(--dock-float-gap, 0.75rem), var(--jl-shell-safe-left, env(safe-area-inset-left, 0px)));
   }
 
   .jl-status-bar {
@@ -342,7 +337,9 @@
     letter-spacing: 0.04em;
     text-transform: uppercase;
     color: var(--color-ink-muted);
-    transition: background-color 150ms ease, color 150ms ease;
+    transition:
+      background-color 150ms ease,
+      color 150ms ease;
   }
 
   html[data-motion="reduced"] .admin-monitor-rail__tab,
@@ -434,19 +431,18 @@
     font-weight: 700;
     color: var(--color-ink);
   }
-
 }
 
-  .admin-monitor-pane--nested-wm {
-    position: relative;
-  }
+.admin-monitor-pane--nested-wm {
+  position: relative;
+}
 
-  .admin-monitor-grid-workspace {
-    height: 100%;
-    min-height: 0;
-    overflow-x: hidden;
-  }
+.admin-monitor-grid-workspace {
+  height: 100%;
+  min-height: 0;
+  overflow-x: hidden;
+}
 
-  .admin-monitor-stack-body {
-    min-height: 0;
-  }
+.admin-monitor-stack-body {
+  min-height: 0;
+}

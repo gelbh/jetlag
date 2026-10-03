@@ -38,7 +38,8 @@
     border: none;
   }
 
-  html:not([data-motion="reduced"], [data-motion="static"]) .jl-panel-above-dock.jl-panel-chrome-hidden {
+  html:not([data-motion="reduced"], [data-motion="static"])
+    .jl-panel-above-dock.jl-panel-chrome-hidden {
     transition: none;
   }
 

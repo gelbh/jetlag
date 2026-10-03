@@ -120,7 +120,10 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--color-ink-muted);
-  transition: border-color 150ms ease, background-color 150ms ease, color 150ms ease;
+  transition:
+    border-color 150ms ease,
+    background-color 150ms ease,
+    color 150ms ease;
 }
 
 .jl-ops-preset-chip:hover {
@@ -226,7 +229,10 @@
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--color-ink-muted);
-  transition: border-color 150ms ease, color 150ms ease, background-color 150ms ease;
+  transition:
+    border-color 150ms ease,
+    color 150ms ease,
+    background-color 150ms ease;
 }
 
 .jl-ops-icon-btn:hover {
@@ -265,7 +271,10 @@
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--color-ink-muted);
-  transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease,
+    border-color 150ms ease;
 }
 
 .jl-ops-tab--active {
