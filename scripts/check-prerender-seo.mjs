@@ -105,7 +105,7 @@ for (const { path: urlPath, indexable } of targets) {
     failed = true;
   }
 
-  if (html.includes("fire_app_check_") || html.includes("grecaptcha")) {
+  if (html.includes('id="fire_app_check_') || html.includes('class="grecaptcha')) {
     console.error(
       `${urlPath}: prerender HTML contains the App Check reCAPTCHA container (see finalizePrerenderDom)`,
     );

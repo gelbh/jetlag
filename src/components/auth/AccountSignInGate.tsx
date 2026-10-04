@@ -7,11 +7,11 @@ import {
   type ReactNode,
   useCallback,
   useEffect,
-  useMemo,
   useState,
 } from "react";
 import { EntryAsyncButton } from "@/components/ui/entry/EntryAsyncButton";
 import { useHydrated } from "@/hooks/app/useHydrated";
+import { expectsPermanentSignIn } from "@/services/core/auth/persistedAuthHint";
 import { usePermanentAuthUser } from "../../hooks/billing/usePermanentAuthUser";
 import {
   completeOAuthRedirectIfPending,
@@ -21,7 +21,6 @@ import {
   sendPremiumEmailSignInLink,
   signOutToAnonymous,
 } from "../../services/core/auth/accountAuth";
-import { hasPersistedPermanentUserHint } from "../../services/core/auth/persistedAuthHint";
 import {
   ensureAnonymousUser,
   getFirebaseAuth,
@@ -53,10 +52,12 @@ export function AccountSignInGate({
   // Until auth restores, show the signed-out prompt with its controls disabled, so prerendered
   // /premium paints its sign-in copy from HTML instead of waiting on Firebase (the snapshot and
   // the hydration render can't know the visitor's state). Once hydrated, a stored account
-  // sign-in shows the checking line instead of a sign-in prompt that would vanish.
+  // sign-in shows the checking line instead of a sign-in prompt that would vanish. The hint is
+  // read on mount, before the effect below consumes the OAuth redirect flag it checks.
   const hydrated = useHydrated();
   const checking = !hydrated || !authReady;
-  const expectPermanent = useMemo(() => hydrated && hasPersistedPermanentUserHint(), [hydrated]);
+  const [permanentSignInHint] = useState(expectsPermanentSignIn);
+  const expectPermanent = hydrated && permanentSignInHint;
   const hasAuthUser = Boolean(user);
   const [email, setEmail] = useState("");
   const [busyAction, setBusyAction] = useState<"email" | null>(null);
@@ -282,7 +283,8 @@ export function AccountSignInGate({
         )}
       </Stack>
 
-      {error ? <ErrorCallout>{error}</ErrorCallout> : null}
+      {/* A prerender-capture error must not reach the snapshot. */}
+      {hydrated && error ? <ErrorCallout>{error}</ErrorCallout> : null}
     </Stack>
   );
 }

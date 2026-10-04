@@ -1,8 +1,12 @@
 import { MantineProvider } from "@mantine/core";
 import { fireEvent, screen, waitFor } from "@testing-library/react";
-import type { ReactElement } from "react";
+import { act, type ReactElement } from "react";
+import { hydrateRoot } from "react-dom/client";
+import { renderToString } from "react-dom/server";
+import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { jetlagTheme } from "@/theme/theme";
+import { RouteTransitionTestProvider } from "../../test/RouteTransitionTestProvider";
 import { renderWithRouter } from "../../test/renderWithRouter";
 import { PremiumSignInGate } from "./PremiumSignInGate";
 
@@ -22,8 +26,8 @@ let mockUser: {
 let mockAuthReady = true;
 let mockPermanentHint = false;
 
-vi.mock("../../services/core/auth/persistedAuthHint", () => ({
-  hasPersistedPermanentUserHint: () => mockPermanentHint,
+vi.mock("@/services/core/auth/persistedAuthHint", () => ({
+  expectsPermanentSignIn: () => mockPermanentHint,
 }));
 
 vi.mock("../../services/core/auth/accountAuth", async (importOriginal) => {
@@ -130,6 +134,37 @@ describe("PremiumSignInGate", () => {
     expect(screen.getByText("Checking sign-in…")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /Continue with Google/i })).not.toBeInTheDocument();
     expect(screen.queryByText("Premium content")).not.toBeInTheDocument();
+  });
+
+  it("hydrates the prerendered prompt, then shows the checking line for a stored sign-in", async () => {
+    mockAuthReady = false;
+    mockUser = null;
+    mockPermanentHint = true;
+    const tree = (
+      <MemoryRouter>
+        <RouteTransitionTestProvider>
+          <MantineProvider theme={jetlagTheme} forceColorScheme="dark">
+            <PremiumSignInGate />
+          </MantineProvider>
+        </RouteTransitionTestProvider>
+      </MemoryRouter>
+    );
+
+    const container = document.body.appendChild(document.createElement("div"));
+    container.innerHTML = renderToString(tree);
+    expect(container.textContent).toMatch(/premium purchases and session credits follow/i);
+    expect(container.textContent).not.toContain("Checking sign-in…");
+
+    const errors: unknown[] = [];
+    let root: ReturnType<typeof hydrateRoot> | undefined;
+    await act(async () => {
+      root = hydrateRoot(container, tree, { onRecoverableError: (error) => errors.push(error) });
+    });
+
+    expect(errors).toEqual([]);
+    expect(container.textContent).toContain("Checking sign-in…");
+    root?.unmount();
+    container.remove();
   });
 
   it("shows the signed-in account strip and children for permanent users", () => {
