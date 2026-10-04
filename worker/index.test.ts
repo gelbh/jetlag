@@ -6,7 +6,7 @@ import {
   isHtmlDocumentResponse,
   shouldApplyDocumentCsp,
 } from "./documentCsp";
-import worker, { isSpaFallbackForAssetRequest } from "./index";
+import worker, { isSpaFallbackForAssetRequest, isUnknownAppDocument } from "./index";
 import { handlePosthogProxyRequest, shouldHandlePosthogProxy } from "./posthogProxy";
 
 describe("isSpaFallbackForAssetRequest", () => {
@@ -467,9 +467,125 @@ describe("worker fetch", () => {
     expect(env.ASSETS.fetch).toHaveBeenCalledTimes(1);
     const assetRequest = env.ASSETS.fetch.mock.calls[0][0] as Request;
     expect(new URL(assetRequest.url).pathname).toBe("/how-to-play");
+    // No app route renders /how-to-play: the shell is still nonced, but as a 404.
+    expect(response.status).toBe(404);
     expect(headerNonce).toBeTruthy();
     expect(bodyNonce).toBe(headerNonce);
     expect(body).toContain(`nonce="${headerNonce}"`);
+  });
+
+  it("returns 404 with the CSP-nonced SPA shell for unknown navigation paths", async () => {
+    const shell =
+      '<!doctype html><html><head><meta name="robots" content="noindex,nofollow">' +
+      '<script type="module" src="/assets/index.js"></script></head><body><div id="root"></div></body></html>';
+    const env = {
+      ASSETS: {
+        fetch: vi.fn().mockResolvedValue(
+          new Response(shell, {
+            headers: {
+              "Content-Type": "text/html; charset=utf-8",
+              "Content-Security-Policy": "default-src 'self'; script-src 'self'",
+              ETag: '"shell"',
+            },
+          }),
+        ),
+      },
+    } as Env;
+
+    const response = await worker.fetch(
+      new Request("https://jetlag.gelbhart.dev/this-does-not-exist"),
+      env,
+    );
+
+    expect(response.status).toBe(404);
+    expect(response.headers.get("ETag")).toBeNull();
+    expect(response.headers.get("Cache-Control")).toBe("no-cache");
+    const body = await response.text();
+    const headerNonce = (response.headers.get("Content-Security-Policy") ?? "").match(
+      /'nonce-([^']+)'/,
+    )?.[1];
+    expect(headerNonce).toBeTruthy();
+    expect(body).toContain(`<script nonce="${headerNonce}" type="module"`);
+    expect(body).toContain('<meta name="robots" content="noindex,nofollow">');
+  });
+
+  it("keeps unknown html under /geo/ uncached as a 404", async () => {
+    const env = {
+      ASSETS: {
+        fetch: vi.fn().mockResolvedValue(
+          new Response("<!doctype html>", {
+            headers: { "Content-Type": "text/html; charset=utf-8" },
+          }),
+        ),
+      },
+    } as Env;
+
+    const response = await worker.fetch(new Request("https://jetlag.gelbhart.dev/geo/nope"), env);
+
+    expect(response.status).toBe(404);
+    expect(response.headers.get("Cache-Control")).toBe("no-cache");
+  });
+
+  it("returns 404 without a body for HEAD on unknown paths", async () => {
+    const env = {
+      ASSETS: {
+        fetch: vi
+          .fn()
+          .mockResolvedValue(
+            new Response(null, { headers: { "Content-Type": "text/html; charset=utf-8" } }),
+          ),
+      },
+    } as Env;
+
+    const response = await worker.fetch(
+      new Request("https://jetlag.gelbhart.dev/nope", { method: "HEAD" }),
+      env,
+    );
+
+    expect(response.status).toBe(404);
+  });
+
+  it.each([
+    "/presets/abc123/edit",
+    "/admin/incidents/inc-1",
+    "/map",
+    "/tutorial",
+    "/join/",
+    "/index.html",
+    "/prerender/home/index.html",
+  ])("keeps 200 for known app route or real html file %s", async (path) => {
+    const env = {
+      ASSETS: {
+        fetch: vi.fn().mockResolvedValue(
+          new Response("<!doctype html><div id=root></div>", {
+            headers: { "Content-Type": "text/html; charset=utf-8" },
+          }),
+        ),
+      },
+    } as Env;
+
+    const response = await worker.fetch(new Request(`https://jetlag.gelbhart.dev${path}`), env);
+
+    expect(response.status).toBe(200);
+  });
+
+  it("only flags 200 html documents at unknown paths", () => {
+    const html = (status = 200) =>
+      new Response(status === 304 ? null : "<!doctype html>", {
+        status,
+        headers: { "Content-Type": "text/html" },
+      });
+    expect(isUnknownAppDocument("/nope", html())).toBe(true);
+    expect(isUnknownAppDocument("/api/unknown", html())).toBe(true);
+    expect(isUnknownAppDocument("/premium", html())).toBe(false);
+    expect(isUnknownAppDocument("/offline.html", html())).toBe(false);
+    expect(isUnknownAppDocument("/nope", html(304))).toBe(false);
+    expect(
+      isUnknownAppDocument(
+        "/favicon.svg",
+        new Response("<svg/>", { headers: { "Content-Type": "image/svg+xml" } }),
+      ),
+    ).toBe(false);
   });
 
   it("returns non-html asset responses unchanged", async () => {
