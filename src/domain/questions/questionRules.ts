@@ -137,6 +137,37 @@ export function questionAnswerDeadlineMs(
   return resolveAnswerDeadlineMs(sessionOrGameSize, toolType);
 }
 
+/** Offline seekers must not eat the hider's answer window: count from server receipt when later. */
+export function resolveDeadlineAnchor(q: {
+  answerableAt?: string;
+  receivedAt?: string;
+}): string | undefined {
+  if (!q.answerableAt) return q.receivedAt;
+  if (!q.receivedAt) return q.answerableAt;
+  return Date.parse(q.receivedAt) > Date.parse(q.answerableAt) ? q.receivedAt : q.answerableAt;
+}
+
+/**
+ * The ask is still queued on the seeker's device: the hider has not seen it,
+ * so no answer clock runs yet. `receivedAt` only exists once the server has
+ * stamped the create (local snapshots read the pending serverTimestamp as null).
+ */
+export function isAwaitingServerReceipt(q: {
+  pendingSync?: boolean;
+  receivedAt?: string;
+}): boolean {
+  return q.pendingSync === true && !q.receivedAt;
+}
+
+/** Anchor for a running answer clock; undefined while the ask is still queued locally. */
+export function activeDeadlineAnchor(q: {
+  answerableAt?: string;
+  receivedAt?: string;
+  pendingSync?: boolean;
+}): string | undefined {
+  return isAwaitingServerReceipt(q) ? undefined : resolveDeadlineAnchor(q);
+}
+
 export function formatAnswerCountdown(
   answerableAt: string | undefined,
   deadlineMs: number,
